@@ -15,7 +15,7 @@ public:
     const std::string& findQuery,
     List<JSData>& output,
     int maxOutputItems = - 1,
-    long long* totalItems = 0,
+    long long* totalItems = nullptr,
     std::stringstream* commentsOnFailure = nullptr
   );
   static bool FindFromJSON(
@@ -23,7 +23,7 @@ public:
     const JSData& findQuery,
     List<JSData>& output,
     int maxOutputItems = - 1,
-    long long* totalItems = 0,
+    long long* totalItems = nullptr,
     std::stringstream* commentsOnFailure = nullptr
   );
   static bool FindFromJSONWithProjection(
@@ -32,7 +32,7 @@ public:
     List<JSData>& output,
     List<std::string>& fieldsToProjectTo,
     int maxOutputItems = - 1,
-    long long* totalItems = 0,
+    long long* totalItems = nullptr,
     std::stringstream* commentsOnFailure = nullptr
   );
   static bool FindFromJSONWithOptions(
@@ -41,9 +41,9 @@ public:
     List<JSData>& output,
     const JSData& options,
     int maxOutputItems = - 1,
-    long long* totalItems = 0,
+    long long* totalItems = nullptr,
     std::stringstream* commentsOnFailure = nullptr,
-    std::stringstream* commentsGeneralNonSensitive = 0
+    std::stringstream* commentsGeneralNonSensitive = nullptr
   );
   static bool FindOneFromQueryString(
     const std::string& collectionName,
@@ -65,7 +65,7 @@ public:
     const JSData& options,
     JSData& output,
     std::stringstream* commentsOnFailure = nullptr,
-    std::stringstream* commentsGeneralNonSensitive = 0
+    std::stringstream* commentsGeneralNonSensitive = nullptr
   );
   static bool FindOneFromJSONWithProjection(
     const std::string& collectionName,
@@ -125,7 +125,7 @@ public:
     const std::string& tableName,
     List<std::string>& outputLabels,
     List<List<std::string> >& outputRows,
-    long long* totalItems = 0,
+    long long* totalItems = nullptr,
     std::stringstream* commentsOnFailure = nullptr
   );
   static bool DeleteOneEntry(const JSData& theEntry, std::stringstream* commentsOnFailure);

@@ -1646,6 +1646,15 @@ char MathRoutines::ConvertHumanReadableHexToCharValue(char input) {
   }
 }
 
+unsigned int MathRoutines::HashListUnsignedChars(const List<unsigned char> &input) {
+  unsigned int result = 0;
+  int numCycles = MathRoutines::Minimum(input.size, SomeRandomPrimesSize);
+  for (int i = 0; i < numCycles; i ++) {
+    result += SomeRandomPrimes[i] * static_cast<unsigned>(input[i]);
+  }
+  return result;
+}
+
 unsigned int MathRoutines::HashListStrings(const List<std::string>& input) {
   unsigned int result = 0;
   int numCycles = MathRoutines::Minimum(input.size, SomeRandomPrimesSize);
@@ -1862,14 +1871,14 @@ void StringRoutines::Differ::ExtractResult(
     int stringStart = starts[i];
     std::string nonCommon = input.substr(
       static_cast<unsigned>(previousEnd),
-      static_cast<unsigned>(stringStart - previousEnd)
+      static_cast<unsigned>(stringStart) - previousEnd
     );
     output.AddOnTop(nonCommon);
     std::string common = input.substr(
       static_cast<unsigned>(stringStart),
       static_cast<unsigned>(stringSize)
     );
-    previousEnd = stringStart + stringSize;
+    previousEnd = static_cast<unsigned>(stringStart + stringSize);
     output.AddOnTop(common);
   }
   if (previousEnd < input.size()) {

@@ -779,7 +779,7 @@ bool WeylGroupAutomorphisms::GenerateOuterOrbit(
   output.SetExpectedSize(numElementsToReserve);
   ProgressReport theReport;
   simpleReflectionOrOuterAutomorphism theGen;
-  if (outputSubset != 0) {
+  if (outputSubset != nullptr) {
     currentElt.MakeID(*this);
     outputSubset->SetExpectedSize(numElementsToReserve);
     outputSubset->Clear();
@@ -796,7 +796,7 @@ bool WeylGroupAutomorphisms::GenerateOuterOrbit(
         theOuterGens[j - this->theWeyl->GetDim()].ActOnVectorColumn(output[i], currentRoot);
       }
       if (output.AddOnTopNoRepetition(currentRoot)) {
-        if (outputSubset != 0) {
+        if (outputSubset != nullptr) {
           currentElt.MakeID(*this);
           theGen.MakeSimpleReflection(j);
           currentElt.generatorsLastAppliedFirst.AddOnTop(theGen);
@@ -829,16 +829,16 @@ void WeylGroupData::RaiseToDominantWeight(
   Vector<coefficient>& theWeight, int* sign, bool* stabilizerFound, ElementWeylGroup* raisingElt
 ) {
   MacroRegisterFunctionWithName("WeylGroup::RaiseToDominantWeight");
-  if (sign != 0) {
+  if (sign != nullptr) {
     *sign = 1;
   }
-  if (stabilizerFound != 0) {
+  if (stabilizerFound != nullptr) {
     *stabilizerFound = false;
   }
   coefficient theScalarProd;
   int theDim = this->GetDim();
   simpleReflection theGen;
-  if (raisingElt != 0) {
+  if (raisingElt != nullptr) {
     raisingElt->MakeID(*this);
   }
   for (bool found = true; found; ) {
@@ -850,22 +850,22 @@ void WeylGroupData::RaiseToDominantWeight(
         theScalarProd *= 2;
         theScalarProd /= this->CartanSymmetric.elements[i][i];
         theWeight[i] -= theScalarProd;
-        if (sign != 0) {
+        if (sign != nullptr) {
           *sign *= - 1;
         }
         theGen.MakeSimpleReflection(i);
-        if (raisingElt != 0) {
+        if (raisingElt != nullptr) {
           raisingElt->generatorsLastAppliedFirst.AddOnTop(theGen);//warning order of raising element is reversed, must reverse back
         }
       }
-      if (stabilizerFound != 0) {
+      if (stabilizerFound != nullptr) {
         if (theScalarProd.IsEqualToZero()) {
           *stabilizerFound = true;
         }
       }
     }
   }
-  if (raisingElt != 0) {
+  if (raisingElt != nullptr) {
     raisingElt->generatorsLastAppliedFirst.ReverseOrderElements();
     raisingElt->MakeCanonical();
   }
@@ -915,7 +915,7 @@ bool WeylGroupData::GenerateOrbit(
     expectedOrbitSize = 10000000;
   }
   output.SetExpectedSize(expectedOrbitSize);
-  if (outputSubset != 0) {
+  if (outputSubset != nullptr) {
     if (UpperLimitNumElements > 0) {
       expectedOrbitSize = MathRoutines::Minimum(UpperLimitNumElements, expectedOrbitSize);
     }
@@ -943,7 +943,7 @@ bool WeylGroupData::GenerateOrbit(
         this->SimpleReflectionMinusRhoModified(j, currentRoot);
       }
       if (output.AddOnTopNoRepetition(currentRoot)) {
-        if (outputSubset != 0) {
+        if (outputSubset != nullptr) {
           currentElt.generatorsLastAppliedFirst.SetSize(1);
           theGen.MakeSimpleReflection(j);
           currentElt.generatorsLastAppliedFirst[0] = theGen;
@@ -1095,7 +1095,7 @@ bool WeylGroupData::FreudenthalEval(
   MacroRegisterFunctionWithName("WeylGroup::FreudenthalEval");
   for (int i = 0; i < inputHWfundamentalCoords.size; i ++) {
     if (inputHWfundamentalCoords[i] < 0) {
-      if (outputDetails != 0) {
+      if (outputDetails != nullptr) {
         *outputDetails = "The highest weight is not dominant and I cannot apply the Freudenthal formula.";
       }
       return false;
@@ -1137,11 +1137,11 @@ bool WeylGroupData::FreudenthalEval(
           break;
         }
         if (!Explored[theIndex]) {
-          if (outputDetails != 0) {
+          if (outputDetails != nullptr) {
             std::stringstream errorLog;
             errorLog << "This is an internal error check. "
             << "If you see it, that means that the Freudenthal algorithm implementation is "
-            << " wrong (because the author of the implementation "
+            << "wrong (because the author of the implementation "
             << "tried to write less code than what is suggested by LiE).";
             *outputDetails = errorLog.str();
           }
@@ -1185,7 +1185,7 @@ bool WeylGroupData::GetAlLDominantWeightsHWFDIM(
   this->RaiseToDominantWeight(highestWeightTrue);
   Vector<coefficient> highestWeightFundCoords = this->GetFundamentalCoordinatesFromSimple(highestWeightTrue);
   if (!highestWeightFundCoords.SumCoords().IsSmallInteger()) {
-    if (outputDetails != 0) {
+    if (outputDetails != nullptr) {
       out << "<hr> The highest weight you gave in simple coordinates: " << highestWeightSimpleCoords.ToString()
       << " which equals " << highestWeightFundCoords.ToString()
       << "  in fundamental coordinates is not integral dominant.<br>";
@@ -1193,7 +1193,7 @@ bool WeylGroupData::GetAlLDominantWeightsHWFDIM(
     }
     return false;
   }
-  int theTopHeightSimpleCoords = (int) highestWeightSimpleCoords.GetVectorRational().SumCoords().GetDoubleValue() + 1;
+  int theTopHeightSimpleCoords = static_cast<int>(highestWeightSimpleCoords.GetVectorRational().SumCoords().GetDoubleValue()) + 1;
   if (theTopHeightSimpleCoords < 0) {
     theTopHeightSimpleCoords = 0;
   }
@@ -1243,7 +1243,7 @@ bool WeylGroupData::GetAlLDominantWeightsHWFDIM(
       return false;
     }
   }
-  if (outputDetails != 0) {
+  if (outputDetails != nullptr) {
     out << " Total number of dominant weights: " << outputWeightsSimpleCoords.size;
     *outputDetails = out.str();
   }
@@ -1620,7 +1620,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
   basisEi.MakeEiBasis(theDim);
   this->RaiseToDominantWeightInner(highestWeightTrue);
   Vector<coefficient> highestWeightFundCoords = this->AmbientWeyl->GetFundamentalCoordinatesFromSimple(highestWeightTrue);
-  int theTopHeightSimpleCoords = (int) highestWeightSimpleCoords.GetVectorRational().SumCoords().GetDoubleValue() + 1;
+  int theTopHeightSimpleCoords = static_cast<int>(highestWeightSimpleCoords.GetVectorRational().SumCoords().GetDoubleValue()) + 1;
   if (theTopHeightSimpleCoords < 0) {
     theTopHeightSimpleCoords = 0;
   }
@@ -1680,10 +1680,10 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::R
   Vector<coefficient>& theWeight, int* sign, bool* stabilizerFound
 ) {
   MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::RaiseToDominantWeightInner");
-  if (sign != 0) {
+  if (sign != nullptr) {
     *sign = 1;
   }
-  if (stabilizerFound != 0) {
+  if (stabilizerFound != nullptr) {
     *stabilizerFound = false;
   }
   Rational theScalarProd;
@@ -1694,11 +1694,11 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::R
       if (!this->IsDominantWRTgenerator(theWeight, i)) {
         found = true;
         this->AmbientWeyl->ReflectBetaWRTAlpha(this->simpleRootsInner[i], theWeight, false, theWeight);
-        if (sign != 0) {
+        if (sign != nullptr) {
           *sign *= - 1;
         }
       }
-      if (stabilizerFound != 0) {
+      if (stabilizerFound != nullptr) {
         if (theScalarProd.IsEqualToZero()) {
           *stabilizerFound = true;
         }
@@ -2432,4 +2432,57 @@ coefficient GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::GetNu
   return X.Norm();
 }
 
+template <class coefficient>
+void WeylGroupAutomorphisms::RaiseToMaximallyDominant(List<Vector<coefficient> >& theWeights) {
+  MacroRegisterFunctionWithName("WeylGroupAutomorphisms::RaiseToMaximallyDominant");
+  this->checkInitialization();
+  bool found;
+  Vectors<coefficient> theWeightsCopy;
+  this->ComputeOuterAutos();
+  for (int i = 0; i < theWeights.size; i ++) {
+    do {
+      found = false;
+      for (int j = 0; j < this->theWeyl->RootsOfBorel.size; j ++) {
+        if (this->theWeyl->RootScalarCartanRoot(this->theWeyl->RootsOfBorel[j], theWeights[i]) < 0) {
+          bool isGood = true;
+          for (int k = 0; k < i; k ++) {
+            if (this->theWeyl->RootScalarCartanRoot(this->theWeyl->RootsOfBorel[j], theWeights[k]) > 0) {
+              isGood = false;
+              break;
+            }
+          }
+          if (!isGood) {
+            continue;
+          }
+          for (int k = 0; k < theWeights.size; k ++) {
+            this->theWeyl->ReflectBetaWRTAlpha(this->theWeyl->RootsOfBorel[j], theWeights[k], false, theWeights[k]);
+          }
+          found = true;
+        }
+      }
+      Vector<Rational> zeroWeight;
+      zeroWeight.MakeZero(this->theWeyl->GetDim());
+      HashedList<MatrixTensor<Rational> >& outerAutos = this->theOuterAutos.theElements;
+      for (int j = 0; j < outerAutos.size; j ++) {
+        theWeightsCopy = theWeights;
+        outerAutos[j].ActOnVectorsColumn(theWeightsCopy);
+        bool isGood = true;
+        for (int k = 0; k < i; k ++) {
+          if (!(theWeightsCopy[k] - theWeights[k]).IsPositiveOrZero()) {
+            isGood = false;
+            break;
+          }
+        }
+        if (!isGood) {
+          continue;
+        }
+        if (!(theWeightsCopy[i] - theWeights[i]).IsGreaterThanLexicographic(zeroWeight)) {
+          continue;
+        }
+        found = true;
+        theWeights = theWeightsCopy;
+      }
+    } while (found);
+  }
+}
 #endif

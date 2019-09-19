@@ -114,8 +114,18 @@ AbstractSyntaxOne.prototype.appendAnnotation = function(
     var elementHex = document.createElement("SPAN");
     elementHex.innerHTML = currentInterpretation.body;
     elementHex.classList.add("abstractSyntaxOneContent");
+    var tooltipBody = "";
     if (currentInterpretation.value !== undefined) {
-      attachTooltip(elementHex, `Value: ${currentInterpretation.value}`);
+      tooltipBody += `Value: ${currentInterpretation.value}`;
+    }
+    if (currentInterpretation.interpretation !== undefined) {
+      if (tooltipBody !== "") {
+        tooltipBody += "<br>";
+      }
+      tooltipBody += `Interpretation: ${currentInterpretation.interpretation}`;
+    }
+    if (tooltipBody !== "") {
+      attachTooltip(elementHex, tooltipBody);
     }
     currentElement.appendChild(elementHex);
     foundContent = true;

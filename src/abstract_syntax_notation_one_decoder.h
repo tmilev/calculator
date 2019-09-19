@@ -1,8 +1,42 @@
+#ifndef ABSTRACT_SYNTAX_NOTATION_ONE_HEADER_ALREADY_INCLUDED
+#define ABSTRACT_SYNTAX_NOTATION_ONE_HEADER_ALREADY_INCLUDED
 //The current file is licensed under the license terms found in the main header file "calculator.h".
 //For additional information refer to the file "calculator.h".
 #include "json.h"
 
 static ProjectInformationInstance ProjectInfoAbstractSyntaxNotationOneDecoderHeader(__FILE__, "Abstract syntax notation one (ASN-1) header file. ");
+
+class ASNObject {
+private:
+  // the map below records samples for each known objectId
+  static MapList<std::string, ASNObject, MathRoutines::HashString> objectIdSamples;
+public:
+  std::string name;
+  unsigned char contentTag;
+  List<unsigned char> content;
+  List<unsigned char> objectId;
+  void MakeLookupId(const std::string& inputName, List<unsigned char>& inputContent);
+  void Make(List<unsigned char>& inputObjectId, List<unsigned char>& inputContent);
+  static void initializeAddSample(
+    MapList<std::string, ASNObject, MathRoutines::HashString>& container,
+    const std::string& inputName,
+    const std::string& inputObjectIdHex,
+    unsigned char inputContentTag
+  );
+  // static initialization order fiasco guard:
+  static MapList<std::string, ASNObject, MathRoutines::HashString>& NamesToObjectIdsNonThreadSafe();
+  static MapList<List<unsigned char>, ASNObject, MathRoutines::HashListUnsignedChars>& ObjectIdsToNames();
+  static void initializeNonThreadSafe();
+  bool LoadFromJSON(
+    const JSData& input,
+    std::stringstream* commentsOnFailure
+  );
+  static bool LoadFieldsFromJSArray(
+    JSData& jsonArray,
+    MapList<std::string, ASNObject, MathRoutines::HashString>& output,
+    std::stringstream* commentsOnFailure
+  );
+};
 
 // The following class (is supposed to) implement a sufficiently
 // large subset of the ASN-1 so as to serve our cryptographic needs.
@@ -180,3 +214,5 @@ public:
   //    be fully suppported yet
   //    [say, by your favorite compiler on your favorite out-of-date linux distro].
 };
+
+#endif // ABSTRACT_SYNTAX_NOTATION_ONE_HEADER_ALREADY_INCLUDED

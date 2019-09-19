@@ -22,7 +22,7 @@ class ModuleSSalgebra {
     MonomialTensor<int, MathRoutines::IntUnsignIdentity> >& thePair,
     ProgressReport* theProgressReport = nullptr
   );
-  void CheckConsistency(GlobalVariables& theGlobalVariables);
+  void CheckConsistency();
 public:
   SemisimpleLieAlgebra* owner;
   HashedList<MonomialUniversalEnveloping<coefficient> > theGeneratingWordsNonReduced;

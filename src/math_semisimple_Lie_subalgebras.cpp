@@ -1050,14 +1050,14 @@ bool SemisimpleSubalgebras::FindTheSSSubalgebrasFromScratch(
   const DynkinType* targetType
 ) {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::FindTheSSSubalgebrasFromScratch");
-  if (this->theSubalgebrasNonEmbedded == 0 || this->owner == nullptr) {
+  if (this->theSubalgebrasNonEmbedded == nullptr || this->owner == nullptr) {
     this->initHookUpPointers(newOwner, &ownerField, &containerSubalgebras, &containerSl2Subalgebras);
   }
 
   this->CheckInitialization();
   this->owner->ComputeChevalleyConstants();
   this->targetDynkinType.MakeZero();
-  if (targetType != 0) {
+  if (targetType != nullptr) {
     this->targetDynkinType = *targetType;
   }
   this->FindTheSSSubalgebrasInit();
@@ -1089,7 +1089,7 @@ bool SemisimpleSubalgebras::GrowDynkinType(
     theLengths.AddOnTopNoRepetition(this->theOrbitHelementLengths[i] / 2);
   }
   output.SetSize(0);
-  if (outputImagesSimpleRoots != 0) {
+  if (outputImagesSimpleRoots != nullptr) {
     outputImagesSimpleRoots->SetSize(0);
   }
   return input.Grow(theLengths, this->owner->GetRank(), output, outputImagesSimpleRoots);
@@ -1148,7 +1148,7 @@ void CandidateSSSubalgebra::SetUpInjectionHs(
   this->CheckCandidateInitialization();
   this->theHsScaledToActByTwoInOrderOfCreation.Reserve(baseSubalgebra.theHsScaledToActByTwoInOrderOfCreation.size + 1);
   this->theHsScaledToActByTwoInOrderOfCreation = baseSubalgebra.theHsScaledToActByTwoInOrderOfCreation;
-  if (newHScaledToActByTwo != 0) {
+  if (newHScaledToActByTwo != nullptr) {
     this->theHsScaledToActByTwoInOrderOfCreation.AddOnTop(*newHScaledToActByTwo);
   }
   DynkinSimpleType newComponent = this->theWeylNonEmbedded->theDynkinType.GetSmallestSimpleType();
@@ -1160,7 +1160,7 @@ void CandidateSSSubalgebra::SetUpInjectionHs(
   if (newComponent.theRank == 1) {
     this->CartanSAsByComponentScaledToActByTwo.SetSize(this->CartanSAsByComponentScaledToActByTwo.size + 1);
     this->CartanSAsByComponentScaledToActByTwo.LastObject()->SetSize(1);
-    if (newHScaledToActByTwo != 0) {
+    if (newHScaledToActByTwo != nullptr) {
       (*this->CartanSAsByComponentScaledToActByTwo.LastObject())[0] = *newHScaledToActByTwo;
     } else {
       (*this->CartanSAsByComponentScaledToActByTwo.LastObject())[0].SetSize(0);
@@ -1172,7 +1172,7 @@ void CandidateSSSubalgebra::SetUpInjectionHs(
     for (int i = 0; i < newComponent.theRank - 1; i ++) {
       currentHsScaledToActByTwo[theRootInjection[indexOffset + i] - indexOffset] = oldComponentHs[i];
     }
-    if (newHScaledToActByTwo != 0) {
+    if (newHScaledToActByTwo != nullptr) {
       currentHsScaledToActByTwo[newIndexInNewComponent] = *newHScaledToActByTwo;
     } else {
       currentHsScaledToActByTwo[newIndexInNewComponent].SetSize(0);
@@ -2017,7 +2017,7 @@ std::string SemisimpleSubalgebras::ToStringProgressReport(FormatExpressions* the
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::ToStringProgressReport");
   std::stringstream out;
   out << this->ToStringState(theFormat);
-  if (this->ToStringExpressionString != 0) {
+  if (this->ToStringExpressionString != nullptr) {
     out << "\n<hr>\n" << "SetOutputFile(\"subalgebras_"
     << HtmlRoutines::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) << "\");\n<br>\n"
     << "LoadSemisimpleSubalgebras {}" << this->ToStringExpressionString(*this);
@@ -2257,7 +2257,7 @@ bool CandidateSSSubalgebra::CheckBasicInitialization() const {
 
 bool CandidateSSSubalgebra::CheckCandidateInitialization() const {
   this->CheckBasicInitialization();
-  if (this->theWeylNonEmbedded == 0) {
+  if (this->theWeylNonEmbedded == nullptr) {
     crash << "Weyl group data not initialized for "
     << "a semisimple subalgebra candidate. " << crash;
   }
@@ -2266,7 +2266,7 @@ bool CandidateSSSubalgebra::CheckCandidateInitialization() const {
 
 bool CandidateSSSubalgebra::CheckFullInitializatioN() const {
   this->CheckCandidateInitialization();
-  if (this->theSubalgebraNonEmbeddedDefaultScale == 0) {
+  if (this->theSubalgebraNonEmbeddedDefaultScale == nullptr) {
     crash << "The semisimple default scale subalgebra is not initialized. "
     << crash;
   }
@@ -2646,7 +2646,7 @@ void CandidateSSSubalgebra::ExtendToModule(List<ElementSemisimpleLieAlgebra<Alge
       theReport.Report(reportStream.str());
       this->GetAmbientSS().LieBracket(this->theNegGens[j], inputOutput[i], tempElt);
       theVectorSpace.AddOnTop(tempElt);
-      tempElt.GaussianEliminationByRowsDeleteZeroRows(theVectorSpace, 0, &bufferList);
+      tempElt.GaussianEliminationByRowsDeleteZeroRows(theVectorSpace, nullptr, &bufferList);
       if (theVectorSpace.size >inputOutput.size) {
         inputOutput.AddOnTop(tempElt);
       }
@@ -2665,14 +2665,14 @@ void MonomialCollection<templateMonomial, coefficient>::IntersectVectorSpaces(
   MacroRegisterFunctionWithName("MonomialCollection::IntersectVectorSpaces");
   List<MonomialCollectionTemplate> theVspaces =vectorSpace1;
   List<MonomialCollectionTemplate> vectorSpace2eliminated =vectorSpace2;
-  MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRowsDeleteZeroRows(vectorSpace2eliminated, 0, seedMonomials);
-  MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRowsDeleteZeroRows(theVspaces, 0, seedMonomials);
+  MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRowsDeleteZeroRows(vectorSpace2eliminated, nullptr, seedMonomials);
+  MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRowsDeleteZeroRows(theVspaces, nullptr, seedMonomials);
   Matrix<coefficient> theLinCombiMat;
   int firstSpaceDim = theVspaces.size;
   theLinCombiMat.MakeIdMatrix(theVspaces.size +vectorSpace2eliminated.size);
   theVspaces.AddListOnTop(vectorSpace2eliminated);
   vectorSpace2eliminated = theVspaces;
-  MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRows(theVspaces, 0, seedMonomials, &theLinCombiMat);
+  MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRows(theVspaces, nullptr, seedMonomials, &theLinCombiMat);
   int dimResult = 0;
   for (int i = theVspaces.size - 1; i >= 0; i --) {
     if (theVspaces[i].IsEqualToZero()) {
@@ -2867,13 +2867,13 @@ void CandidateSSSubalgebra::reset(SemisimpleSubalgebras* inputOwner) {
   this->NumBadParabolics = 0;
   this->NumCentralizerConditionFailsConeConditionHolds = 0;
   this->centralizerRank = - 1;
-  this->theWeylNonEmbedded = 0;
-  this->theSubalgebraNonEmbeddedDefaultScale = 0;
+  this->theWeylNonEmbedded = nullptr;
+  this->theSubalgebraNonEmbeddedDefaultScale = nullptr;
 }
 
 CandidateSSSubalgebra::CandidateSSSubalgebra() {
   this->flagDeallocated = false;
-  this->reset(0);
+  this->reset(nullptr);
 }
 
 void CandidateSSSubalgebra::ComputePairKweightElementAndModule(
@@ -3075,7 +3075,7 @@ bool CandidateSSSubalgebra::ComputeKsl2tripleSetUpAndSolveSystem(
     tempElt *= tempP;
     theF += tempElt;
   }
-  if (!this->GetAmbientSS().AttempTFindingHEF(theH, Ecopy, theF, 0)) {
+  if (!this->GetAmbientSS().AttempTFindingHEF(theH, Ecopy, theF, nullptr)) {
     return false;
   }
   outputF = theF;
@@ -3293,7 +3293,7 @@ bool NilradicalCandidate::TryFindingLInfiniteRels() {
       if (this->IsCommutingSelectionNilradicalElements(this->theNilradSubsel)) {
         this->theNilradicalWeights.SubSelection(this->theNilradSubsel, this->theNilradicalSubsetWeights);
         if (this->theNilradicalSubsetWeights.ConesIntersect(
-          this->theNilradicalSubsetWeights, this->theNonFKhwsStronglyTwoSided, &betterIntersection, 0
+          this->theNilradicalSubsetWeights, this->theNonFKhwsStronglyTwoSided, &betterIntersection, nullptr
         )) {
           betterIntersection.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
           this->ConeStrongIntersection.MakeZero(this->theNilradicalWeights.size +this->theNonFKhwsStronglyTwoSided.size);
@@ -3336,7 +3336,7 @@ bool NilradicalCandidate::TryFindingLInfiniteRels() {
           this->theNilradicalSubsetWeights,
           this->theNonFKhwVectorsStrongRelativeToSubsetWeights,
           &this->ConeRelativelyStrongIntersection,
-          0
+          nullptr
         )) {
           this->ConeRelativelyStrongIntersection.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
           return true;
@@ -3602,7 +3602,7 @@ void NilradicalCandidate::ProcessMe() {
     return;
   }
   this->flagNilradicalConesStronglyIntersect = this->theNilradicalWeights.ConesIntersect(
-    this->theNilradicalWeights, this->theNonFKhwsStronglyTwoSided, &this->ConeStrongIntersection, 0
+    this->theNilradicalWeights, this->theNonFKhwsStronglyTwoSided, &this->ConeStrongIntersection, nullptr
   );
   if (this->flagNilradicalConesStronglyIntersect) {
     this->flagLinfiniteRelFound = this->TryFindingLInfiniteRels();
@@ -3635,7 +3635,7 @@ bool CandidateSSSubalgebra::IsPossibleNilradicalCarryOutSelectionImplications(
   List<int>& theSelection, std::stringstream* logStream
 ) {
   if (this->FKNilradicalCandidates.size > 100) {
-    if (logStream != 0) {
+    if (logStream != nullptr) {
       std::string tempS = logStream->str();
       if (tempS.size() > 2) {
         if (tempS[tempS.size() - 1] != '.' || tempS[tempS.size() - 2] != '.') {
@@ -3643,9 +3643,9 @@ bool CandidateSSSubalgebra::IsPossibleNilradicalCarryOutSelectionImplications(
         }
       }
     }
-    logStream = 0;
+    logStream = nullptr;
   }
-  if (logStream != 0) {
+  if (logStream != nullptr) {
     *logStream << "<br>********Considering selection " << this->ToStringNilradicalSelection(theSelection) << "********";
   }
   HashedList<int, MathRoutines::IntUnsignIdentity> selectedIndices;
@@ -3655,13 +3655,13 @@ bool CandidateSSSubalgebra::IsPossibleNilradicalCarryOutSelectionImplications(
     }
   }
   MemorySaving<List<int> > oldSelection;
-  if (logStream != 0) {
+  if (logStream != nullptr) {
     oldSelection.GetElement() = theSelection;
   }
   this->ExtendNilradicalSelectionToMultFreeOverSSpartSubalgebra(selectedIndices);
   for (int i = 0; i < theSelection.size; i ++) {
     if (theSelection[i] == 0 && selectedIndices.Contains(i)) {
-      if (logStream != 0) {
+      if (logStream != nullptr) {
         *logStream << " <br>The selection " << this->ToStringNilradicalSelection(theSelection)
         << " is contradictory, as the only way to extend it to a subalgebra "
         << "(i.e., closed under Lie bracket) is by requesting that module V_{"
@@ -3674,7 +3674,7 @@ bool CandidateSSSubalgebra::IsPossibleNilradicalCarryOutSelectionImplications(
   for (int i = 0; i <selectedIndices.size; i ++) {
     theSelection[selectedIndices[i]] = 1;
   }
-  if (logStream != 0) {
+  if (logStream != nullptr) {
     if (oldSelection.GetElement() != theSelection) {
       *logStream << "<br>In order to be closed w.r.t. the Lie bracket, I extend the nilradical selection "
       << this->ToStringNilradicalSelection(oldSelection.GetElement()) << " to the following. "
@@ -3684,7 +3684,7 @@ bool CandidateSSSubalgebra::IsPossibleNilradicalCarryOutSelectionImplications(
   for (int i = 0; i <selectedIndices.size; i ++) {
     for (int j = 0; j < this->OppositeModulesByStructure[selectedIndices[i]].size; j ++) {
       if (theSelection[this->OppositeModulesByStructure[selectedIndices[i]][j]] == 1) {
-        if (logStream != 0) {
+        if (logStream != nullptr) {
           *logStream << "<br>The subalgebra selection " << this->ToStringNilradicalSelection(theSelection)
           << " contains opposite modules and is therefore not allowed. ";
         }
@@ -4022,7 +4022,7 @@ bool SemisimpleSubalgebras::CheckInitialization() const {
   if (this->owner == nullptr) {
     crash << "No owner semisimple Lie algebra. " << crash;
   }
-  if (this->theSubalgebrasNonEmbedded == 0) {
+  if (this->theSubalgebrasNonEmbedded == nullptr) {
     crash << "No container for non-embedded subalgebras. " << crash;
   }
   return true;
@@ -4467,7 +4467,7 @@ std::string slTwoSubalgebra::ToString(FormatExpressions* theFormat) const {
 
 void slTwoSubalgebra::init() {
   this->owner = nullptr;
-  this->container = 0;
+  this->container = nullptr;
   this->indexInContainer = - 1;
   this->flagCentralizerTypeComputed = false;
   this->flagCentralizerIsRegular = false;
@@ -4976,7 +4976,7 @@ std::string SltwoSubalgebras::descriptionModuleDecompositionOverSl2 =
 std::string SltwoSubalgebras::ToStringSummary(FormatExpressions* theFormat) {
   MacroRegisterFunctionWithName("SltwoSubalgebras::ToStringSummary");
   std::stringstream out;
-  bool useHtml = theFormat == 0 ? true : theFormat->flagUseHTML;
+  bool useHtml = theFormat == nullptr ? true : theFormat->flagUseHTML;
   std::string displayPathAlgebra;
   displayPathAlgebra = "../";
   out << "Number of sl(2) subalgebras: " << this->size << ".\n";
@@ -5476,7 +5476,7 @@ std::string CandidateSSSubalgebra::ToStringModuleDecomposition(FormatExpressions
   if (this->Modules.size <= 0) {
     return "";
   }
-  bool useMouseHover = theFormat == 0 ? true : !theFormat->flagUseMathSpanPureVsMouseHover;
+  bool useMouseHover = theFormat == nullptr ? true : !theFormat->flagUseMathSpanPureVsMouseHover;
   std::stringstream out;
   out << "Isotypic module decomposition over primal subalgebra (total " << this->Modules.size << " isotypic components). ";
   out << "<table class = 'tableStandard'>";
@@ -6556,11 +6556,11 @@ bool CandidateSSSubalgebra::AmRegularSA() const {
 std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat) const {
   MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToString");
   std::stringstream out;
-  bool useLaTeX = theFormat == 0 ? true : theFormat->flagUseLatex;
-  bool useHtml = theFormat == 0 ? true : theFormat->flagUseHTML;
-  bool writingToHD = theFormat == 0 ? false : theFormat->flagUseHtmlAndStoreToHD;
-  bool shortReportOnly = theFormat == 0 ? true : theFormat->flagCandidateSubalgebraShortReportOnly;
-  bool useMouseHover = theFormat == 0 ? true : !theFormat->flagUseMathSpanPureVsMouseHover;
+  bool useLaTeX = theFormat == nullptr ? true : theFormat->flagUseLatex;
+  bool useHtml = theFormat == nullptr ? true : theFormat->flagUseHTML;
+  bool writingToHD = theFormat == nullptr ? false : theFormat->flagUseHtmlAndStoreToHD;
+  bool shortReportOnly = theFormat == nullptr ? true : theFormat->flagCandidateSubalgebraShortReportOnly;
+  bool useMouseHover = theFormat == nullptr ? true : !theFormat->flagUseMathSpanPureVsMouseHover;
   out << "Subalgebra type: " << this->owner->ToStringAlgebraLink(this->indexInOwner, theFormat)
   << " (click on type for detailed printout).\n";
   out << this->comments;
@@ -6785,60 +6785,6 @@ void CandidateSSSubalgebra::GetHsScaledToActByTwoByType(
   }
 }
 
-template <class coefficient>
-void WeylGroupAutomorphisms::RaiseToMaximallyDominant(List<Vector<coefficient> >& theWeights) {
-  MacroRegisterFunctionWithName("WeylGroupAutomorphisms::RaiseToMaximallyDominant");
-  this->checkInitialization();
-  bool found;
-  Vectors<coefficient> theWeightsCopy;
-  this->ComputeOuterAutos();
-  for (int i = 0; i < theWeights.size; i ++) {
-    do {
-      found = false;
-      for (int j = 0; j < this->theWeyl->RootsOfBorel.size; j ++) {
-        if (this->theWeyl->RootScalarCartanRoot(this->theWeyl->RootsOfBorel[j], theWeights[i]) < 0) {
-          bool isGood = true;
-          for (int k = 0; k < i; k ++) {
-            if (this->theWeyl->RootScalarCartanRoot(this->theWeyl->RootsOfBorel[j], theWeights[k]) > 0) {
-              isGood = false;
-              break;
-            }
-          }
-          if (!isGood) {
-            continue;
-          }
-          for (int k = 0; k < theWeights.size; k ++) {
-            this->theWeyl->ReflectBetaWRTAlpha(this->theWeyl->RootsOfBorel[j], theWeights[k], false, theWeights[k]);
-          }
-          found = true;
-        }
-      }
-      Vector<Rational> zeroWeight;
-      zeroWeight.MakeZero(this->theWeyl->GetDim());
-      HashedList<MatrixTensor<Rational> >& outerAutos = this->theOuterAutos.theElements;
-      for (int j = 0; j < outerAutos.size; j ++) {
-        theWeightsCopy = theWeights;
-        outerAutos[j].ActOnVectorsColumn(theWeightsCopy);
-        bool isGood = true;
-        for (int k = 0; k < i; k ++) {
-          if (!(theWeightsCopy[k] - theWeights[k]).IsPositiveOrZero()) {
-            isGood = false;
-            break;
-          }
-        }
-        if (!isGood) {
-          continue;
-        }
-        if (!(theWeightsCopy[i] - theWeights[i]).IsGreaterThanLexicographic(zeroWeight)) {
-          continue;
-        }
-        found = true;
-        theWeights = theWeightsCopy;
-      }
-    } while (found);
-  }
-}
-
 bool CandidateSSSubalgebra::HasHsScaledByTwoConjugateTo(List<Vector<Rational> >& input) const {
   MacroRegisterFunctionWithName("CandidateSSSubalgebra::HasConjugateHsTo");
   if (input.size != this->theHsScaledToActByTwo.size) {
@@ -7024,7 +6970,7 @@ void SemisimpleSubalgebras::HookUpCentralizers(bool allowNonPolynomialSystemFail
     theCandidatePermutation[i] = i;
   }
 
-  this->theSubalgebras.theValues.QuickSortAscending(0, &theCandidatePermutation);
+  this->theSubalgebras.theValues.QuickSortAscending(nullptr, &theCandidatePermutation);
   List<Vectors<Rational> > hsCopy;
   hsCopy.SetSize(theCandidatePermutation.size);
   for (int i = 0; i < theCandidatePermutation.size; i ++) {

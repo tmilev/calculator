@@ -73,7 +73,7 @@ Rational ModuleSSalgebra<coefficient>::hwTrace(
     this->cachedPairs.AddOnTop(thePair);
     this->cachedTraces.AddOnTop(result);
   }
-  if (theProgressReport != 0 && this->cachedPairs.size < 500000) {
+  if (theProgressReport != nullptr && this->cachedPairs.size < 500000) {
     std::stringstream tempStream;
     tempStream << "Number of cached pairs: " << this->cachedPairs.size
     << " at recursion depth " << theGlobalVariables.CustomStackTrace.size;
@@ -110,7 +110,7 @@ Rational ModuleSSalgebra<coefficient>::hwtaabfSimpleGensOnly(
   //stOutput << "<br>Computing " << thePair.Object1 << " times " << thePair.Object2 << "<br>";
   this->ApplyTAA(thePair.Object1);
   Rational result = this->hwTrace(thePair, theProgressReport);
-  if (theProgressReport != 0) {
+  if (theProgressReport != nullptr) {
     std::stringstream tempStream;
     tempStream << this->cachedPairs.size << " total cached pairs";
     theProgressReport->Report(tempStream.str());
@@ -292,7 +292,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight(
     if (!theFDWeyl.FreudenthalEvalIrrepIsWRTLeviPart(
       currentMon.weightFundamentalCoordS, tempHashedRoots, tempMults, tempS, 10000
     )) {
-      if (Report != 0) {
+      if (Report != nullptr) {
         *Report = tempS;
       }
       return false;
@@ -315,7 +315,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight(
     )) {
       out << "failed to generate the complement-sub-Weyl-orbit of weight "
       << this->GetOwner()->theWeyl.GetSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoordS).ToString();
-      if (Report != 0) {
+      if (Report != nullptr) {
         *Report = out.str();
       }
       return false;
@@ -349,7 +349,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight(
     if (!outputWeylSub.FreudenthalEvalIrrepIsWRTLeviPart(
       localHighest.weightFundamentalCoordS, tempHashedRoots, tempMults, tempS, 10000
     )) {
-      if (Report != 0) {
+      if (Report != nullptr) {
         *Report = tempS;
       }
       return false;
@@ -363,7 +363,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight(
     }
   }
   out << "<br>Character w.r.t Levi part: " << HtmlRoutines::GetMathMouseHover(output.ToString());
-  if (Report != 0) {
+  if (Report != nullptr) {
     DrawingVariables theDV;
     std::string tempS;
     this->DrawMeNoMults(tempS, theDV, 10000);
@@ -395,7 +395,7 @@ void ModuleSSalgebra<coefficient>::SplitOverLevi(
   MacroRegisterFunctionWithName("ModuleSSalgebra<coefficient>::SplitOverLevi");
   this->CheckInitialization();
   if (this->theChaR.size() != 1) {
-    if (Report != 0) {
+    if (Report != nullptr) {
       std::stringstream out;
       out << "I have been instructed only to split modules that are irreducible over the ambient Lie algebra";
       out << " Instead I got the character " << this->theChaR.ToString() << " (" << this->theChaR.size() << " monomials)";
@@ -416,7 +416,7 @@ void ModuleSSalgebra<coefficient>::SplitOverLevi(
     Report, charWRTsubalgebra, splittingParSel, this->parabolicSelectionNonSelectedAreElementsLevi, subWeyl
   );
   std::stringstream out;
-  if (Report != 0) {
+  if (Report != nullptr) {
     out << *Report;
   }
   Selection splittingParSelectedInLevi;
@@ -427,7 +427,7 @@ void ModuleSSalgebra<coefficient>::SplitOverLevi(
     << " The parabolic has root of Levi given by " << splittingParSel.ToString()
     << " while the ambient parabolic subalgebra has root of Levi given by "
     << this->parabolicSelectionNonSelectedAreElementsLevi.ToString();
-    if (Report != 0) {
+    if (Report != nullptr) {
       *Report = out.str();
     }
     return;
@@ -504,7 +504,7 @@ void ModuleSSalgebra<coefficient>::SplitOverLevi(
   readyForLatexComsumption << "\\hline \n<br> \\end{tabular}";
   out << "<br>Your ready for LaTeX consumption text follows.<br>";
   out << readyForLatexComsumption.str();
-  if (Report != 0) {
+  if (Report != nullptr) {
     *Report = out.str();
   }
 }
@@ -596,7 +596,7 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW(
     if (this->parabolicSelectionSelectedAreElementsLevi.selected[i]) {
       int theCoord;
       if (!this->theHWFundamentalCoordsBaseField[i].IsSmallInteger(&theCoord)) {
-        if (outputReport != 0) {
+        if (outputReport != nullptr) {
           *outputReport = "The given module over the Levi part is not finite dimensional";
         }
         return false;
@@ -623,7 +623,7 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW(
   if (!startingPath.GenerateOrbit(
     this->thePaths, generatorsIndices, 1000, &this->parabolicSelectionNonSelectedAreElementsLevi
   )) {
-    if (outputReport != 0) {
+    if (outputReport != nullptr) {
       *outputReport = "Error: number of Littelmann paths exceeded allowed limit of 1000.";
     }
     return false;
@@ -665,8 +665,8 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW(
     int theIndex = this->theModuleWeightsSimpleCoords.GetIndex(hwCurrent);
     if (theIndex == - 1) {
       out2 << "Error: could not generate all weights in the weight support. Maybe they are too many? Allowed "
-      << " # of weights is 10000";
-      if (outputReport != 0) {
+      << "# of weights is 10000";
+      if (outputReport != nullptr) {
         *outputReport = out2.str();
       }
       return false;
@@ -710,7 +710,7 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW(
     }
   }
   if (isBad) {
-    if (outputReport != 0) {
+    if (outputReport != nullptr) {
       out2 << "<br>Error: the Littelmann-path induced monomials do not give a monomial basis. ";
       *outputReport = out2.str();
     }
@@ -726,7 +726,7 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW(
             theIndex = this->GetOwner().GetNumPosRoots() + this->GetOwner().GetRank() + j;
           }
           tempSSElt.MakeGenerator(theIndex, this->GetOwner());
-          if (outputReport != 0) {
+          if (outputReport != nullptr) {
             out2 << "<hr>Simple generator: " << tempSSElt.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
           }
           MatrixTensor<coefficient>& theMatrix = this->GetActionGeneratorIndeX(theIndex);
@@ -735,7 +735,7 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW(
           theReport.Report(tempStream.str());
           tempStream << " done!";
           theReport.Report(tempStream.str());
-          if (outputReport != 0) {
+          if (outputReport != nullptr) {
             if (this->GetDim() < 50) {
               out2 << "<br>Matrix of elemenent in the m_i basis:<br>" << HtmlRoutines::GetMathMouseHover(theMatrix.ToString(), 5000);
             } else {
@@ -757,7 +757,7 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW(
       }
     }
   }
-  if (outputReport != 0) {
+  if (outputReport != nullptr) {
     *outputReport = out2.str();
   }
   this->flagIsInitialized = true;
@@ -833,7 +833,7 @@ void ModuleSSalgebra<coefficient>::GetElementsNilradical(
 
   int theBeginning = useNegativeNilradical ? 0: ownerSS.GetNumPosRoots() +ownerSS.GetRank();
   MemorySaving<List<int> > tempList;
-  if (outputListOfGenerators == 0) {
+  if (outputListOfGenerators == nullptr) {
     outputListOfGenerators = &tempList.GetElement();
   }
   outputListOfGenerators->SetSize(0);
@@ -861,7 +861,7 @@ void ModuleSSalgebra<coefficient>::GetElementsNilradical(
 }
 
 template<class coefficient>
-void ModuleSSalgebra<coefficient>::CheckConsistency(GlobalVariables& theGlobalVariables) {
+void ModuleSSalgebra<coefficient>::CheckConsistency() {
   MacroRegisterFunctionWithName("ModuleSSalgebra<coefficient>::TestConsistency");
   ProgressReport theReport;
   MatrixTensor<coefficient> left, right, output, otherOutput, tempMat, diffMat;

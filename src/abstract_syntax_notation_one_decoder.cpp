@@ -319,6 +319,9 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeObjectIdentifier(
   }
   if (interpretation != nullptr) {
     (*interpretation)["value"] = resultStream.str();
+    if (ASNObject::ObjectIdsToNames().Contains(data)) {
+      (*interpretation)["interpretation"] = ASNObject::ObjectIdsToNames().GetValueCreateNoInit(data).name;
+    }
   }
   output["objectIdentifier"] = resultStream.str();
   return true;
@@ -350,7 +353,6 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeIntegerContent(
       reinterpret_cast<char *>(this->rawDatA->TheObjects + startIndex),
       static_cast<unsigned>(desiredLengthInBytes)
     );
-    (*interpretation)["body"] = Crypto::ConvertStringToHex(theSource, 0, false);
   }
   return true;
 }
@@ -716,7 +718,7 @@ void X509Certificate::WriteBytesTBSCertificate(List<unsigned char>& output) {
 
 }
 
-void X509Certificate::WriteBytesTBSCertificateField(TBSCertificateField& input, List<unsigned char>& output) {
+void X509Certificate::WriteBytesASNObject(ASNObject& input, List<unsigned char>& output) {
   if (input.name == "") {
     // field is empty, do nothing
     return;
@@ -728,26 +730,133 @@ void X509Certificate::WriteBytesTBSCertificateField(TBSCertificateField& input, 
   output.AddListOnTop(input.content);
 }
 
-MapList<std::string, TBSCertificateField, MathRoutines::HashString>& TBSCertificateField::GetSamplesNonThreadSafe() {
-  static MapList<std::string, TBSCertificateField, MathRoutines::HashString> container;
-  if (container.size() == 0) {
-
+void ASNObject::initializeAddSample(
+  MapList<std::string, ASNObject, MathRoutines::HashString>& container,
+  const std::string& inputName,
+  const std::string& inputObjectIdHex,
+  unsigned char inputContentTag
+) {
+  ASNObject incoming;
+  incoming.name = inputName;
+  incoming.contentTag = inputContentTag;
+  std::stringstream commentsOnFailure;
+  if (!Crypto::ConvertHexToListUnsignedChar(inputObjectIdHex, incoming.objectId, &commentsOnFailure)) {
+    crash << "Failure in certificate field initialization is not allowed. " << crash;
   }
+  container.SetKeyValue(incoming.name, incoming);
 }
 
-void TBSCertificateField::initializeNonThreadSafe() {
-  TBSCertificateField::GetSamplesNonThreadSafe();
+MapList<List<unsigned char>, ASNObject, MathRoutines::HashListUnsignedChars> &ASNObject::ObjectIdsToNames() {
+  static MapList<List<unsigned char>, ASNObject, MathRoutines::HashListUnsignedChars> result;
+  return result;
+}
+
+MapList<std::string, ASNObject, MathRoutines::HashString>& ASNObject::NamesToObjectIdsNonThreadSafe() {
+  static MapList<std::string, ASNObject, MathRoutines::HashString> container;
+  if (container.size() == 0) {
+    ASNObject::initializeAddSample(container, "sha256WithRSAEncryption", "2a864886f70d01010b", AbstractSyntaxNotationOneSubsetDecoder::tags::null0x05);
+    ASNObject::initializeAddSample(container, "countryName", "550406", AbstractSyntaxNotationOneSubsetDecoder::tags::printableString0x13);
+    ASNObject::initializeAddSample(container, "stateOrProvinceName", "550408", AbstractSyntaxNotationOneSubsetDecoder::tags::utf8String0x0c);
+    ASNObject::initializeAddSample(container, "localityName", "550407", AbstractSyntaxNotationOneSubsetDecoder::tags::utf8String0x0c);
+    ASNObject::initializeAddSample(container, "organizationName", "55040a", AbstractSyntaxNotationOneSubsetDecoder::tags::utf8String0x0c);
+    ASNObject::initializeAddSample(container, "organizationalUnitName", "55040b", AbstractSyntaxNotationOneSubsetDecoder::tags::utf8String0x0c);
+    ASNObject::initializeAddSample(container, "commonName", "550403", AbstractSyntaxNotationOneSubsetDecoder::tags::utf8String0x0c);
+    ASNObject::initializeAddSample(container, "emailAddress", "2a864886f70d010901", AbstractSyntaxNotationOneSubsetDecoder::tags::utf8String0x0c);
+    static MapList<List<unsigned char>, ASNObject, MathRoutines::HashListUnsignedChars>& reverseMap = ASNObject::ObjectIdsToNames();
+    for (int i = 0; i < container.theValues.size; i ++) {
+      ASNObject& current = container.theValues[i];
+      reverseMap.SetKeyValue(current.objectId, current);
+    }
+  }
+  return container;
+}
+
+bool ASNObject::LoadFieldsFromJSArray(
+  JSData& jsonArray,
+  MapList<std::string, ASNObject, MathRoutines::HashString>& output,
+  std::stringstream *commentsOnFailure
+) {
+  output.Clear();
+  if (jsonArray.theType != JSData::token::tokenArray) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Input is not array. ";
+    }
+    return false;
+  }
+  for (int i = 0; i < jsonArray.theList.size; i ++) {
+    ASNObject current;
+    if (!current.LoadFromJSON(jsonArray[i], commentsOnFailure)) {
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure << "Failed to load entry index: " << i;
+      }
+      return false;
+    }
+  }
+  return true;
+
+}
+
+bool ASNObject::LoadFromJSON(
+  const JSData& input,
+  std::stringstream* commentsOnFailure
+) {
+  if (input.theType != JSData::token::tokenArray || input.theList.size != 2) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "ASNObject JSON representation must be a two-element array. ";
+    }
+    return false;
+  }
+  JSData& first = input.theList[0];
+  if (!first.HasKey("objectIdentifierBytes")) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Missing objectIdentifierBytes key. ";
+    }
+    return false;
+  }
+  JSData& desiredContent = first;
+  if (desiredContent.theType != JSData::token::tokenString) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "objectIdentifierBytes key required to have a string value. ";
+    }
+    return false;
+  }
+  this->objectId = desiredContent.theString;
+  if (!ASNObject::ObjectIdsToNames().Contains(this->objectId)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Unrecognized object id. ";
+    }
+    return false;
+  }
+  *this = ASNObject::ObjectIdsToNames().GetValueCreateNoInit(this->objectId);
+  this->content.SetSize(0);
+  JSData& second = input.theList[1];
+  if (second.theType == JSData::token::tokenNull) {
+    return true;
+  }
+  if (second.theType != JSData::token::tokenString) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Object id was OK but I failed to extract field value. ";
+    }
+    return false;
+  }
+  this->content = second.theString;
+  return true;
+}
+
+void ASNObject::initializeNonThreadSafe() {
+  MacroRegisterFunctionWithName("ASNObject::initializeNonThreadSafe");
+  ASNObject::NamesToObjectIdsNonThreadSafe();
 }
 
 void X509Certificate::WriteBytesTBSCertificateInformation(List<unsigned char> &output) {
   AbstractSyntaxNotationOneSubsetDecoder::WriterSequence writeTBSCertificateContent(200, output);
-  this->WriteBytesTBSCertificateField(this->information.countryName, output);
-  this->WriteBytesTBSCertificateField(this->information.stateOrProviceName, output);
-  this->WriteBytesTBSCertificateField(this->information.localityName, output);
-  this->WriteBytesTBSCertificateField(this->information.organizationName, output);
-  this->WriteBytesTBSCertificateField(this->information.organizationUnitName, output);
-  this->WriteBytesTBSCertificateField(this->information.commonName, output);
-  this->WriteBytesTBSCertificateField(this->information.emailAddress, output);
+  this->WriteBytesASNObject(this->information.countryName, output);
+  this->WriteBytesASNObject(this->information.stateOrProviceName, output);
+  this->WriteBytesASNObject(this->information.localityName, output);
+  this->WriteBytesASNObject(this->information.organizationName, output);
+  this->WriteBytesASNObject(this->information.organizationUnitName, output);
+  this->WriteBytesASNObject(this->information.commonName, output);
+  this->WriteBytesASNObject(this->information.emailAddress, output);
 }
 
 void X509Certificate::WriteBytesASN1(List<unsigned char>& output) {
@@ -967,6 +1076,22 @@ bool X509Certificate::LoadFromASNEncoded(
     }
     return false;
   }
+  JSData certificateFieldsJSON;
+  if (!this->sourceJSON.HasCompositeKey("[0][2][3]", &certificateFieldsJSON, commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to get sequence of certificate fields. ";
+    }
+    return false;
+  }
+  MapList<std::string, ASNObject, MathRoutines::HashString> fields;
+  if (!ASNObject::LoadFieldsFromJSArray(certificateFieldsJSON, fields, commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to read certificate fields. JSON decoded: "
+      << this->sourceJSON.ToString(false, true, true, true);
+    }
+    return false;
+  }
+  int continueHere;
   if (!this->sourceJSON.HasCompositeKeyOfType(
     "[0][6][1].bitStringDecoded[1]", this->theRSA.theModuluS, commentsOnFailure
   )) {

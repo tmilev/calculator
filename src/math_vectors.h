@@ -528,7 +528,7 @@ public:
   }
   template <class otherType>
   void operator=(const Vector<otherType>& other) {
-    if (this == (Vector<coefficient>*) &other) {
+    if (this == reinterpret_cast<const Vector<coefficient>*>(&other)) {
       return;
     }
     this->SetSize(other.size);
@@ -562,7 +562,6 @@ public:
     result -= other;
     return result;
   }
-  void ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables){this->ReadFromFile(input);}
   void ReadFromFile(std::fstream& input) {
     std::string tempS;
     input >> tempS;
@@ -575,9 +574,6 @@ public:
     for (int i = 0; i < this->size; i ++) {
       this->TheObjects[i].ReadFromFile(input);
     }
-  }
-  inline void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables) {
-    this->WriteToFile(output);
   }
   void WriteToFile(std::fstream& output) {
     output << "root_dim: " << this->size << " ";
@@ -1022,11 +1018,11 @@ bool Vector<coefficient>::AssignString(const std::string& input) {
   this->SetSize(0);
   int currentDigit = - 1;
   int sign = 1;
-  for (int i = 0; i < (signed) input.size(); i ++) {
+  for (unsigned i = 0; i < input.size(); i ++) {
     char previous = (i == 0) ? '(' : input[i - 1];
     if (MathRoutines::isADigit(input[i], &currentDigit)) {
       if (!MathRoutines::isADigit(previous)) {
-        this->AddOnTop( (coefficient) 0);
+        this->AddOnTop(coefficient(0));
       }
       *this->LastObject() *= 10;
       *this->LastObject() += currentDigit * sign;
@@ -1076,8 +1072,8 @@ void Vectors<coefficient>::GetLinearDependenceRunTheLinearAlgebra(
   if (this->size == 0) {
     return;
   }
-  int Dimension = (int) (*this)[0].size;
-  outputTheSystem.init(Dimension, (int)this->size);
+  int Dimension = (*this)[0].size;
+  outputTheSystem.init(Dimension, this->size);
   for (int i = 0; i < this->size; i ++) {
     for (int j = 0; j < Dimension; j ++) {
       outputTheSystem(j, i) = (*this)[i][j];
@@ -1169,7 +1165,7 @@ void Vectors<coefficient>::GetGramMatrix(Matrix<coefficient>& output, const Matr
   output.Resize(this->size, this->size, false);
   for (int i = 0; i < this->size; i ++) {
     for (int j = i; j < this->size; j ++) {
-      if (theBilinearForm != 0) {
+      if (theBilinearForm != nullptr) {
         Vector<coefficient>::ScalarProduct(this->TheObjects[i], this->TheObjects[j], *theBilinearForm, output.elements[i][j]);
       } else {
         output(i, j) = (*this)[i].ScalarEuclidean((*this)[j]);

@@ -53,11 +53,11 @@ TransportLayerSecurity::~TransportLayerSecurity() {
 bool TransportLayerSecurity::flagBuiltInTLSAvailable = false;
 
 void TransportLayerSecurity::initializeNonThreadSafePartsCommon() {
-  TBSCertificateField::initializeNonThreadSafe();
+  ASNObject::initializeNonThreadSafe();
 }
 
 void TransportLayerSecurity::initializeNonThreadSafeOnFirstCall(bool IamServer) {
-  MacroRegisterFunctionWithName("TransportLayerSecurity::initialize");
+  MacroRegisterFunctionWithName("TransportLayerSecurity::initializeNonThreadSafeOnFirstCall");
   if (this->flagInitialized) {
     return;
   }

@@ -350,7 +350,7 @@ template<typename scalar, typename templateVector>
 Matrix<Rational>& AnotherWeylGroup<scalar, templateVector>::GetClassMatrix(int cc) {
   if (this->classMatrices.size == 0) {
     if (this->ConjugacyClassCount() == 0) {
-      this.ComputeCC();
+      this->ComputeCC();
     }
     this->classMatrices.SetSize(this->ConjugacyClassCount());
   }
@@ -461,7 +461,7 @@ List<ClassFunction<somegroup, Rational> > ComputeCharacterTable(somegroup &G) {
       spaces.AddOnTop(xspi);
       allchars.AddVector(G.characterTable[i].data);
     }
-    spaces.AddOnTop(allchars.OrthogonalComplement(0, &form));
+    spaces.AddOnTop(allchars.OrthogonalComplement(nullptr, &form));
   } else {
     Vector<Rational> X1;
     X1.SetSize(G.ConjugacyClassCount());
@@ -471,7 +471,7 @@ List<ClassFunction<somegroup, Rational> > ComputeCharacterTable(somegroup &G) {
     VectorSpace<Rational> sp1;
     sp1.AddVector(X1);
     spaces.AddOnTop(sp1);
-    spaces.AddOnTop(sp1.OrthogonalComplement(0, &form));
+    spaces.AddOnTop(sp1.OrthogonalComplement(nullptr, &form));
   }
   bool foundEmAll = false;
   for (int i = 0; !foundEmAll && i < G.ConjugacyClassCount(); i ++) {
@@ -514,7 +514,7 @@ List<ClassFunction<somegroup, Rational> > ComputeCharacterTable(somegroup &G) {
   for (int i = 0; i < spaces.size; i ++) {
     Rational x = chars[i].InnerProduct(chars[i]);
     int x2 = x.GetDenominator().GetUnsignedIntValueTruncated();
-    x2 = FloatingPoint::sqrt(x2);
+    x2 = static_cast<int>(FloatingPoint::sqrt(x2));
     chars[i] *= x2;
     if (chars[i][0] < 0) {
       chars[i] *= - 1;
@@ -541,7 +541,7 @@ List<ClassFunction<somegroup, Rational> > ComputeCharacterTable(somegroup &G) {
 }
 
 template <typename somegroup>
-Matrix<Rational> GetClassMatrix(const somegroup &G, int cci, List<int>* classmap = 0) {
+Matrix<Rational> GetClassMatrix(const somegroup &G, int cci, List<int>* classmap = nullptr) {
   List<int> invl;
   int classSize = - 1;
   G.conjugacyClasseS[cci].size.IsIntegerFittingInInt(&classSize);

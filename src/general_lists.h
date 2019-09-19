@@ -301,6 +301,7 @@ public:
   static unsigned int HashVectorDoubles(const Vector<double>& input);
   static unsigned int HashListDoubles(const List<double>& input);
   static unsigned int HashListInts(const List<int>& input);
+  static unsigned int HashListUnsignedChars(const List<unsigned char>& input);
   static unsigned int HashListStrings(const List<std::string>& input);
   inline static unsigned int IntUnsignIdentity(const int& input) {
     return static_cast<unsigned>(input);

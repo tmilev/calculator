@@ -42,7 +42,7 @@ public:
     return input.HashFunction();
   }
   unsigned int HashFunction() const {
-    return vStart + vEnd * SomeRandomPrimes[0];
+    return static_cast<unsigned>(this->vStart) + static_cast<unsigned>(this->vEnd) * SomeRandomPrimes[0];
   }
   static bool IsMonEqualToZero() {
     return false;

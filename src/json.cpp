@@ -79,7 +79,7 @@ bool JSData::HasCompositeKeyOfType(const std::string& key, LargeIntUnsigned& out
     return false;
   }
   if (container.theInteger.GetElement() < 0) {
-    if (commentsOnFailure != 0) {
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Error: integer is negative. ";
     }
     return false;
@@ -108,6 +108,10 @@ bool JSData::HasCompositeKeyOfType(
   }
   output = container.theString;
   return true;
+}
+
+bool JSData::HasCompositeKeyValueNull(const std::string &key, std::stringstream *commentsOnFailure) const {
+  return this->HasCompositeKeyOfTokeN(key, nullptr, JSData::token::tokenNull, commentsOnFailure);
 }
 
 bool JSData::HasCompositeKeyOfTokeN(
@@ -213,7 +217,7 @@ void JSData::operator=(const List<JSData>& other) {
 
 void JSData::operator=(int64_t input) {
   this->theType = JSData::token::tokenLargeInteger;
-  this->theInteger.GetElement() = input;
+  this->theInteger.GetElement().AssignInt64(input);
 }
 
 bool JSData::isIntegerFittingInInt(int* whichInteger) {
@@ -221,12 +225,12 @@ bool JSData::isIntegerFittingInInt(int* whichInteger) {
     return this->theInteger.GetElement().IsIntegerFittingInInt(whichInteger);
   }
   if (this->theType == JSData::token::tokenFloat) {
-    double floatRounded = (double)((int) this->theFloat);
-    if (floatRounded != this->theFloat) {
+    double floatRounded = static_cast<double>(static_cast<int>(this->theFloat));
+    if (floatRounded - this->theFloat != 0.0) {
       return false;
     }
-    if (whichInteger != 0) {
-      *whichInteger = (int) this->theFloat;
+    if (whichInteger != nullptr) {
+      *whichInteger = static_cast<int>(this->theFloat);
     }
     return true;
   }
@@ -252,7 +256,7 @@ bool JSData::isListOfStrings(List<std::string>* whichStrings) {
       return false;
     }
   }
-  if (whichStrings != 0) {
+  if (whichStrings != nullptr) {
     whichStrings->SetSize(this->theList.size);
     for (int i = 0; i < this->theList.size; i ++) {
       (*whichStrings)[i] = this->theList[i].theString;
@@ -321,7 +325,7 @@ void JSData::TryToComputeType() {
 
 bool JSData::Tokenize(const std::string& input, List<JSData>& output) {
   output.SetSize(0);
-  output.SetExpectedSize(input.size());
+  output.SetExpectedSize(static_cast<int>(input.size()));
   JSData currentElt;
   bool inQuotes = false;
   bool previousIsBackSlash = false;
@@ -516,7 +520,7 @@ std::string JSData::EncodeKeyForMongo(const std::string& input) {
       out << input[i];
     } else {
       out << "%";
-      int x = (char) input[i];
+      int x = static_cast<signed>(input[i]);
       out << std::hex << ((x / 16) % 16) << (x % 16) << std::dec;
     }
   }

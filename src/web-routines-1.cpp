@@ -17,6 +17,7 @@
 
 #include "database.h"
 
+extern ProjectInformationInstance ProjectInfoVpf6_5calculatorWebRoutines;
 ProjectInformationInstance ProjectInfoVpf6_5calculatorWebRoutines(__FILE__, "Calculator web routines. ");
 
 class WebCrawler {
@@ -65,7 +66,7 @@ public:
   double timeAtLastBackup;
   int pidServer;
   void Monitor(int pidServer);
-  void Restart();
+  [[noreturn]] void Restart();
   WebServerMonitor();
 };
 
@@ -194,7 +195,7 @@ void WebCrawler::FreeAddressInfo() {
   if (this->serverInfo != nullptr) {
     freeaddrinfo(this->serverInfo);
   }
-  this->serverInfo = 0;
+  this->serverInfo = nullptr;
 }
 
 void WebCrawler::init() {
@@ -228,7 +229,7 @@ void WebCrawler::PingCalculatorStatus() {
   this->hints.ai_family = AF_UNSPEC;     // don't care IPv4 or IPv6
   this->hints.ai_socktype = SOCK_STREAM; // TCP stream sockets
   this->hints.ai_flags = AI_PASSIVE;     // fill in my IP for me
-  this->serverInfo = 0;
+  this->serverInfo = nullptr;
   int status = getaddrinfo(this->addressToConnectTo.c_str(), this->portOrService.c_str(), &hints, &this->serverInfo);
   if (status != 0) {
     this->lastTransactionErrors = "Could not find address: getaddrinfo error: ";
@@ -236,27 +237,27 @@ void WebCrawler::PingCalculatorStatus() {
     this->FreeAddressInfo();
     return;
   }
-  if (this->serverInfo == 0) {
+  if (this->serverInfo == nullptr) {
     this->lastTransactionErrors = "Server info is zero";
     return;
   }
-  struct addrinfo *p = 0;  // will point to the results
+  struct addrinfo *p = nullptr;  // will point to the results
   this->theSocket = - 1;
   char ipString[INET6_ADDRSTRLEN];
   int numBytesWritten = - 1;
-  for (p = this->serverInfo; p != 0; p = p->ai_next, close(this->theSocket)) {
-    void *theAddress = 0;
+  for (p = this->serverInfo; p != nullptr; p = p->ai_next, close(this->theSocket)) {
+    void* theAddress = nullptr;
     this->theSocket = - 1;
     // get the pointer to the address itself,
     // different fields in IPv4 and IPv6:
     if (p->ai_family == AF_INET) {
       // IPv4
-      struct sockaddr_in *ipv4 = (struct sockaddr_in *) p->ai_addr;
+      struct sockaddr_in *ipv4 = reinterpret_cast<struct sockaddr_in *>(p->ai_addr);
       theAddress = &(ipv4->sin_addr);
       reportStream << "IPv4: ";
     } else {
       // IPv6
-      struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *) p->ai_addr;
+      struct sockaddr_in6 *ipv6 = reinterpret_cast<struct sockaddr_in6 *>(p->ai_addr);
       theAddress = &(ipv6->sin6_addr);
       reportStream << "IPv6: ";
     }
@@ -282,7 +283,7 @@ void WebCrawler::PingCalculatorStatus() {
         if (numPingFails > 10) {
           break;
         }
-        numSelected = select(this->theSocket + 1, &fdConnectSockets, 0, 0, &timeOut);
+        numSelected = select(this->theSocket + 1, &fdConnectSockets, nullptr, nullptr, &timeOut);
         failStream << "While pinging, select failed. Error message: "
         << strerror(errno) << ". \n";
         numPingFails ++;
@@ -308,7 +309,7 @@ void WebCrawler::PingCalculatorStatus() {
     std::string getMessage = "GET /cgi-bin/calculator?request=statusPublic";
     std::stringstream errorStream1;
     numBytesWritten = Pipe::WriteWithTimeoutViaSelect(this->theSocket, getMessage, 1, 10, &errorStream1);
-    if ((unsigned) numBytesWritten != getMessage.size()) {
+    if (static_cast<unsigned>(numBytesWritten) != getMessage.size()) {
       this->lastTransactionErrors += "\nERROR writing to socket. " + errorStream1.str();
       close(this->theSocket);
       continue;
@@ -321,7 +322,7 @@ void WebCrawler::PingCalculatorStatus() {
       continue;
     }
     std::string readString;
-    readString.assign(buffer.TheObjects, this->lastNumBytesRead);
+    readString.assign(buffer.TheObjects, static_cast<unsigned>(this->lastNumBytesRead));
     reportStream << "Wrote " << numBytesWritten  << ", read "
     << this->lastNumBytesRead << " bytes: " << readString << ". ";
     this->lastTransaction = reportStream.str();
@@ -344,7 +345,7 @@ void WebCrawler::FetchWebPage(std::stringstream* commentsOnFailure, std::strings
   this->hints.ai_family   = AF_UNSPEC  ;       // don't care IPv4 or IPv6
   this->hints.ai_socktype = SOCK_STREAM;       // TCP stream sockets
   this->hints.ai_flags    = AI_PASSIVE ;       // fill in my IP for me
-  this->serverInfo = 0;
+  this->serverInfo = nullptr;
   int status = getaddrinfo(this->serverToConnectTo.c_str(), this->portOrService.c_str(), &hints, &this->serverInfo);
   if (status != 0) {
     this->lastTransactionErrors =  "Error calling getaddrinfo: ";
@@ -356,31 +357,31 @@ void WebCrawler::FetchWebPage(std::stringstream* commentsOnFailure, std::strings
     this->FreeAddressInfo();
     return;
   }
-  if (this->serverInfo == 0) {
+  if (this->serverInfo == nullptr) {
     this->lastTransactionErrors = "Server info is zero";
     return;
   }
-  struct addrinfo *p = 0;// will point to the results
+  struct addrinfo *p = nullptr;// will point to the results
   this->theSocket = - 1;
   char ipString[INET6_ADDRSTRLEN];
   timeval timeOut;
-  for (p = this->serverInfo; p != 0; p = p->ai_next, close(this->theSocket)) {
-    void *theAddress = 0;
+  for (p = this->serverInfo; p != nullptr; p = p->ai_next, close(this->theSocket)) {
+    void *theAddress = nullptr;
     this->theSocket = - 1;
     // get the pointer to the address itself,
     // different fields in IPv4 and IPv6:
     if (p->ai_family == AF_INET) {
       // IPv4
-      struct sockaddr_in *ipv4 = (struct sockaddr_in *) p->ai_addr;
+      struct sockaddr_in *ipv4 = reinterpret_cast<struct sockaddr_in *>(p->ai_addr);
       theAddress = &(ipv4->sin_addr);
       if (commentsGeneral != nullptr) {
         *commentsGeneral << "IPv4: ";
       }
     } else {
       // IPv6
-      struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *) p->ai_addr;
+      struct sockaddr_in6 *ipv6 = reinterpret_cast<struct sockaddr_in6 *> (p->ai_addr);
       theAddress = &(ipv6->sin6_addr);
-      if (commentsGeneral!= 0) {
+      if (commentsGeneral != nullptr) {
         *commentsGeneral << "IPv6: ";
       }
     }
@@ -408,7 +409,7 @@ void WebCrawler::FetchWebPage(std::stringstream* commentsOnFailure, std::strings
         if (numPingFails > 10) {
           break;
         }
-        numSelected = select(this->theSocket + 1, &fdConnectSockets, 0, 0, &timeOut);
+        numSelected = select(this->theSocket + 1, &fdConnectSockets, nullptr, nullptr, &timeOut);
         failStream << "While pinging, select failed. Error message: "
         << strerror(errno) << ". \n";
         numPingFails ++;
@@ -425,7 +426,7 @@ void WebCrawler::FetchWebPage(std::stringstream* commentsOnFailure, std::strings
       }
       timeOut.tv_sec = 3;  // 5 Secs Timeout
       timeOut.tv_usec = 0;  // Not init'ing this can cause strange errors
-      setsockopt(connectionResult, SOL_SOCKET, SO_RCVTIMEO, (void*)(&timeOut), sizeof(timeval));
+      setsockopt(connectionResult, SOL_SOCKET, SO_RCVTIMEO, static_cast<void*>(&timeOut), sizeof(timeval));
     }
     if (connectionResult == - 1) {
       std::stringstream errorStream;
@@ -580,9 +581,9 @@ void WebCrawler::FetchWebPagePart2(
   this->bodyReceiveD = this->bodyReceivedWithHeader + secondPart;
   int theSize = 0;
   this->expectedLength.IsIntegerFittingInInt(&theSize);
-  if ((unsigned) theSize < this->bodyReceiveD.size()) {
-    this->bodyReceivedOutsideOfExpectedLength = this->bodyReceiveD.substr(theSize);
-    this->bodyReceiveD = this->bodyReceiveD.substr(0, theSize);
+  if (static_cast<unsigned>(theSize) < this->bodyReceiveD.size()) {
+    this->bodyReceivedOutsideOfExpectedLength = this->bodyReceiveD.substr(static_cast<unsigned>(theSize));
+    this->bodyReceiveD = this->bodyReceiveD.substr(0, static_cast<unsigned>(theSize));
   }
   //if (!theWebServer.theSSLdata.SSLreadLoop
   //    (10,theWebServer.theSSLdata.sslClient, secondPart, comments, comments, true))
@@ -608,7 +609,7 @@ void WebCrawler::FetchWebPagePart2(
 bool CalculatorFunctionsGeneral::innerFetchWebPageGET(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerFetchWebPageGET");
   if (!theGlobalVariables.UserDefaultHasAdminRights()) {
-    return output.AssignValue((std::string) "Fetching web pages available only for logged-in admins. ", theCommands);
+    return output.AssignValue(std::string("Fetching web pages available only for logged-in admins. "), theCommands);
   }
   WebCrawler theCrawler;
   if (input.size() != 4) {
@@ -638,7 +639,7 @@ bool CalculatorFunctionsGeneral::innerFetchWebPageGET(Calculator& theCommands, c
 bool CalculatorFunctionsGeneral::innerFetchWebPagePOST(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerFetchWebPagePOST");
   if (!theGlobalVariables.UserDefaultHasAdminRights()) {
-    return output.AssignValue((std::string) "Fetching web pages available only for logged-in admins. ", theCommands);
+    return output.AssignValue(std::string("Fetching web pages available only for logged-in admins. "), theCommands);
   }
   WebCrawler theCrawler;
   if (input.size() != 5) {
@@ -841,7 +842,7 @@ bool WebCrawler::VerifyRecaptcha(
   std::stringstream messageToSendStream;
   std::string secret;
   std::stringstream notUsed;
-  if (commentsOnFailure == 0) {
+  if (commentsOnFailure == nullptr) {
     commentsOnFailure = &notUsed;
   }
   if (!FileOperations::LoadFileToStringVirtual(
@@ -855,7 +856,7 @@ bool WebCrawler::VerifyRecaptcha(
     return false;
   }
   std::string recaptchaURLencoded = theGlobalVariables.GetWebInput("recaptchaToken");
-  if (commentsGeneralSensitive != 0) {
+  if (commentsGeneralSensitive != nullptr) {
     *commentsGeneralSensitive << "Recaptcha: " << recaptchaURLencoded;
   }
   if (recaptchaURLencoded == "") {
@@ -945,7 +946,7 @@ std::string WebWorker::GetSignUpRequestResult() {
   generalCommentsStream
   << "<b>Please excuse our technical messages, they will be removed soon.</b>";
   WebCrawler theCrawler;
-  if (!theCrawler.VerifyRecaptcha(&errorStream, &generalCommentsStream, 0)) {
+  if (!theCrawler.VerifyRecaptcha(&errorStream, &generalCommentsStream, nullptr)) {
     result["error"] = errorStream.str();
     result["comments"] = generalCommentsStream.str();
     return result.ToString(false);
@@ -987,7 +988,7 @@ std::string WebWorker::GetSignUpRequestResult() {
     result["result"] = outputStream.str();
     return result.ToString(false);
   }
-  std::stringstream* adminOutputStream = 0;
+  std::stringstream* adminOutputStream = nullptr;
   if (theGlobalVariables.UserDefaultHasAdminRights()) {
     adminOutputStream = &generalCommentsStream;
   }
@@ -1026,7 +1027,7 @@ int WebWorker::ProcessForgotLogin() {
   << "<br><b>We are still testing our system; "
   << "we will remove the technical garbage as soon as we are done. "
   << "</b><br>\n";
-  if (!theCrawler.VerifyRecaptcha(&out, &out, 0)) {
+  if (!theCrawler.VerifyRecaptcha(&out, &out, nullptr)) {
     stOutput << out.str();
     return 0;
   }
@@ -1048,7 +1049,7 @@ int WebWorker::ProcessForgotLogin() {
   << "Your email is on record. "
   << "</b>";
   if (!theGlobalVariables.UserDefaultHasAdminRights()) {
-    this->DoSetEmail(theUser, &out, &out, 0);
+    this->DoSetEmail(theUser, &out, &out, nullptr);
   } else {
     this->DoSetEmail(theUser, &out, &out, &out);
   }

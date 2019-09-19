@@ -3,6 +3,7 @@
 #include "math_general_polynomial_computations_advanced_implementation.h"
 #include "math_extra_symmetric_groups_and_generalizations.h"
 
+extern ProjectInformationInstance ProjectInfoVpf2Math3_SymmetricGroupsAndGeneralizations;
 ProjectInformationInstance ProjectInfoVpf2Math3_SymmetricGroupsAndGeneralizations(
   __FILE__, "Symmetric groups and generalizations, work in progress by Thomas. "
 );
@@ -58,7 +59,7 @@ void Partition::FromListInt(const List<int> &in, int lastElement) {
   if (lastElement == - 1) {
     lastElement = in.size;
   }
-  bool needsSorting;
+  bool needsSorting = false;
   for (; i <lastElement; i ++) {
     if (in[i] < 0) {
       crash << "Partitions should not have negative numbers in them. " << crash;
@@ -630,32 +631,28 @@ void PermutationR2::MakeFromActionDescription(const List<int>& actionDescription
 
 void PermutationR2::MakeFromString(const std::string& cppin) {
   const char* in = cppin.c_str();
-  int insize = cppin.length();
+  unsigned insize = static_cast<unsigned>(cppin.length());
   List<List<int> > cycles;
-  int curintstart = - 1;
-  for (int i = 0; i < insize; i ++) {
+  unsigned curintstart = 0;
+  for (unsigned i = 0; i < insize; i ++) {
     switch(in[i]) {
-
-    case '(': {
+    case '(':
       cycles.SetSize(cycles.size + 1);
       curintstart = i + 1;
-      continue;
-    }
-    case ')': {
+      break;
+    case ')':
       if (curintstart != i) {
         std::string ss = cppin.substr(curintstart, i);
         cycles.LastObject()->AddOnTop(atoi(ss.c_str()));
       } else {
         cycles.SetSize(cycles.size - 1);
       }
-      continue;
-    }
-    case ',': {
+      break;
+    case ',':
       std::string ss = cppin.substr(curintstart, i);
       cycles.LastObject()->AddOnTop(atoi(ss.c_str()));
       curintstart = i + 1;
-      continue;
-    }
+      break;
     }
   }
   this->MakeFromListOfCycles(cycles);
@@ -710,9 +707,9 @@ unsigned int PermutationR2::HashFunction() const {
   unsigned int n = 0;
   for (int i = 0; i < this->cycles.size; i ++) {
     for (int j = 0; j < this->cycles[i].size; j ++) {
-      acc += SomeRandomPrimes[n] * this->cycles[i][j];
+      acc += SomeRandomPrimes[n] * static_cast<unsigned>(this->cycles[i][j]);
       n ++;
-      if (n >= (unsigned) SomeRandomPrimesSize) {
+      if (n >= static_cast<unsigned>(SomeRandomPrimesSize)) {
         n = 0;
       }
     }
@@ -723,7 +720,7 @@ unsigned int PermutationR2::HashFunction() const {
 
 std::string PermutationR2::ToString(FormatExpressions* format) const {
   std::stringstream out;
-  if (format != 0) {
+  if (format != nullptr) {
     out << "(";
     for (int i = 0; i < this->cycles.size; i ++) {
       out << "(";
@@ -842,7 +839,7 @@ void PermutationGroupData::MakeSymmetricGroupGeneratorsjjPlus1(int n) {
 }*/
 
 LargeInt PermutationGroupData::GetSizeByFormulaImplementation(FiniteGroup<PermutationR2>& G) {
-  PermutationGroupData* PD = (PermutationGroupData*) G.specificDataPointer;
+  PermutationGroupData* PD = static_cast<PermutationGroupData*>(G.specificDataPointer);
   if (!PD || !PD->flagIsSymmetricGroup) {
     crash << "This method should not have been called. " << crash;
     // control reaches end of non-void function
@@ -852,7 +849,7 @@ LargeInt PermutationGroupData::GetSizeByFormulaImplementation(FiniteGroup<Permut
 }
 
 void PermutationGroupData::ComputeCCSizesAndRepresentativesByFormulaImplementation(FiniteGroup<PermutationR2>& G) {
-  PermutationGroupData* PD = (PermutationGroupData*) G.specificDataPointer;
+  PermutationGroupData* PD = static_cast<PermutationGroupData*>(G.specificDataPointer);
   if (!PD || !PD->flagIsSymmetricGroup) {
     crash << "This should not have been called. " << crash;
   }
@@ -1433,7 +1430,7 @@ int HyperoctahedralGroup::GetN() {
 */
 
 LargeInt HyperoctahedralGroupData::GetSizeByFormulaImplementation(FiniteGroup<ElementHyperoctahedralGroupR2>& G) {
-  HyperoctahedralGroupData* HD = (HyperoctahedralGroupData*) G.specificDataPointer;
+  HyperoctahedralGroupData* HD = static_cast<HyperoctahedralGroupData*>(G.specificDataPointer);
   //stOutput << "HyperoctahedralGroup::GetSize() called.  N =" << HD->N << '\n';
   if (!HD) {
     crash << "Consistency error. " << crash;
@@ -1468,7 +1465,7 @@ bool HyperoctahedralGroupData::GetWordByFormulaImplementation(
   const ElementHyperoctahedralGroupR2& g,
   List<int>& word
 ) {
-  HyperoctahedralGroupData* HD = (HyperoctahedralGroupData*) G.specificDataPointer;
+  HyperoctahedralGroupData* HD = static_cast<HyperoctahedralGroupData*>(G.specificDataPointer);
   if (HD->flagIsEntireHyperoctahedralGroup) {
     g.h.GetWordjjPlus1(word);
     for (int i = 0; i < g.k.bits.size; i ++) {
@@ -1546,11 +1543,11 @@ bool FiniteGroup<ElementHyperoctahedralGroup>::AreConjugate
 
 template <>
 void ElementHyperoctahedralGroupR2::MakeFromString(const std::string& in) {
-  int sep = in.find_last_of(',');
+  unsigned sep = static_cast<unsigned>(in.find_last_of(','));
   stOutput << in.substr(1, sep) << '\n';
-  stOutput << in.substr(sep,in.size() - 1) << '\n';
+  stOutput << in.substr(sep, in.size() - 1) << '\n';
   this->h.MakeFromString(in.substr(1, sep));
-  this->k.MakeFromString(in.substr(sep,in.size() - 1));
+  this->k.MakeFromString(in.substr(sep, in.size() - 1));
 }
 
 ElementHyperoctahedralGroupR2 operator"" _EHOG(const char *in, size_t insize) {

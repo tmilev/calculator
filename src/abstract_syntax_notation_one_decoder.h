@@ -11,6 +11,17 @@ private:
   // the map below records samples for each known objectId
   static MapList<std::string, ASNObject, MathRoutines::HashString> objectIdSamples;
 public:
+  class names {
+  public:
+    static std::string sha256WithRSAEncryption;
+    static std::string countryName            ;
+    static std::string stateOrProvinceName    ;
+    static std::string localityName           ;
+    static std::string organizationName       ;
+    static std::string organizationalUnitName ;
+    static std::string commonName             ;
+    static std::string emailAddress           ;
+  };
   std::string name;
   unsigned char contentTag;
   List<unsigned char> content;
@@ -32,10 +43,16 @@ public:
     std::stringstream* commentsOnFailure
   );
   static bool LoadFieldsFromJSArray(
-    JSData& jsonArray,
+    const JSData &jsonArray,
     MapList<std::string, ASNObject, MathRoutines::HashString>& output,
     std::stringstream* commentsOnFailure
   );
+  // Returns 1 if field was found, 0 otherwise.
+  int LoadField(
+    const MapList<std::string, ASNObject, MathRoutines::HashString> &inputFields,
+    const std::string& fieldName
+  );
+  void WriteBytesASNObject(List<unsigned char>& output);
 };
 
 // The following class (is supposed to) implement a sufficiently

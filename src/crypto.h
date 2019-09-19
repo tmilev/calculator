@@ -75,12 +75,21 @@ public:
 class TBSCertificateInfo {
 public:
   ASNObject countryName;
-  ASNObject stateOrProviceName;
+  ASNObject stateOrProvinceName;
   ASNObject localityName;
   ASNObject organizationName;
-  ASNObject organizationUnitName;
+  ASNObject organizationalUnitName;
   ASNObject commonName;
   ASNObject emailAddress;
+  bool LoadFromJSON(
+    const JSData& input,
+    std::stringstream* commentsOnFailure
+  );
+  bool LoadFields(
+    const MapList<std::string, ASNObject, MathRoutines::HashString>& fields,
+    std::stringstream* commentsOnFailure
+  );
+  void WriteBytesASN1(List<unsigned char>& output);
 };
 
 class X509Certificate {
@@ -111,16 +120,20 @@ public:
   };
   bool LoadFromPEMFile(const std::string& input, std::stringstream* commentsOnFailure);
   bool LoadFromPEM(const std::string& input, std::stringstream* commentsOnFailure);
-  bool LoadFromASNEncoded(const List<unsigned char>& input, std::stringstream* commentsOnFailure);
-
-  bool LoadFromJSON(JSData& input, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
+  bool LoadFromASNEncoded(
+    const List<unsigned char>& input,
+    std::stringstream* commentsOnFailure
+  );
+  bool LoadFromJSON(
+    JSData& input,
+    std::stringstream* commentsOnFailure,
+    std::stringstream* commentsGeneral
+  );
   std::string ToString();
   std::string ToStringTestEncode();
   void WriteBytesASN1(List<unsigned char>& output);
   void WriteBytesTBSCertificate(List<unsigned char>& output);
   void WriteBytesAlgorithmIdentifier(List<unsigned char>& output);
-  void WriteBytesTBSCertificateInformation(List<unsigned char>& output);
-  void WriteBytesASNObject(ASNObject& input, List<unsigned char>& output);
   void WriteVersion(List<unsigned char>& output);
 };
 

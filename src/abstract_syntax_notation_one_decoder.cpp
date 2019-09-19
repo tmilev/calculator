@@ -714,20 +714,19 @@ void X509Certificate::WriteBytesTBSCertificate(List<unsigned char>& output) {
   AbstractSyntaxNotationOneSubsetDecoder::WriteUnsignedIntegerObject(2, output);
   AbstractSyntaxNotationOneSubsetDecoder::WriteUnsignedIntegerObject(this->serialNumber, output);
   this->WriteBytesAlgorithmIdentifier(output);
-  this->WriteBytesTBSCertificateInformation(output);
-
+  this->information.WriteBytesASN1(output);
 }
 
-void X509Certificate::WriteBytesASNObject(ASNObject& input, List<unsigned char>& output) {
-  if (input.name == "") {
-    // field is empty, do nothing
+void ASNObject::WriteBytesASNObject(List<unsigned char>& output) {
+  if (this->objectId.size == 0) {
+    // object id empty, field not initialized, do nothing
     return;
   }
   AbstractSyntaxNotationOneSubsetDecoder::WriterSet writeSet(100, output);
   AbstractSyntaxNotationOneSubsetDecoder::WriterSequence writeSequence(100, output);
-  AbstractSyntaxNotationOneSubsetDecoder::WriteObjectId(input.objectId, output);
-  AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength contentWriter(input.contentTag, input.content.size, output, false);
-  output.AddListOnTop(input.content);
+  AbstractSyntaxNotationOneSubsetDecoder::WriteObjectId(this->objectId, output);
+  AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength contentWriter(this->contentTag, this->content.size, output, false);
+  output.AddListOnTop(this->content);
 }
 
 void ASNObject::initializeAddSample(
@@ -751,17 +750,66 @@ MapList<List<unsigned char>, ASNObject, MathRoutines::HashListUnsignedChars> &AS
   return result;
 }
 
+std::string ASNObject::names::sha256WithRSAEncryption = "sha256WithRSAEncryption";
+std::string ASNObject::names::countryName             = "countryName"            ;
+std::string ASNObject::names::stateOrProvinceName     = "stateOrProvinceName"    ;
+std::string ASNObject::names::localityName            = "localityName"           ;
+std::string ASNObject::names::organizationName        = "organizationName"       ;
+std::string ASNObject::names::organizationalUnitName  = "organizationalUnitName" ;
+std::string ASNObject::names::commonName              = "commonName"             ;
+std::string ASNObject::names::emailAddress            = "emailAddress"           ;
+
 MapList<std::string, ASNObject, MathRoutines::HashString>& ASNObject::NamesToObjectIdsNonThreadSafe() {
   static MapList<std::string, ASNObject, MathRoutines::HashString> container;
   if (container.size() == 0) {
-    ASNObject::initializeAddSample(container, "sha256WithRSAEncryption", "2a864886f70d01010b", AbstractSyntaxNotationOneSubsetDecoder::tags::null0x05);
-    ASNObject::initializeAddSample(container, "countryName", "550406", AbstractSyntaxNotationOneSubsetDecoder::tags::printableString0x13);
-    ASNObject::initializeAddSample(container, "stateOrProvinceName", "550408", AbstractSyntaxNotationOneSubsetDecoder::tags::utf8String0x0c);
-    ASNObject::initializeAddSample(container, "localityName", "550407", AbstractSyntaxNotationOneSubsetDecoder::tags::utf8String0x0c);
-    ASNObject::initializeAddSample(container, "organizationName", "55040a", AbstractSyntaxNotationOneSubsetDecoder::tags::utf8String0x0c);
-    ASNObject::initializeAddSample(container, "organizationalUnitName", "55040b", AbstractSyntaxNotationOneSubsetDecoder::tags::utf8String0x0c);
-    ASNObject::initializeAddSample(container, "commonName", "550403", AbstractSyntaxNotationOneSubsetDecoder::tags::utf8String0x0c);
-    ASNObject::initializeAddSample(container, "emailAddress", "2a864886f70d010901", AbstractSyntaxNotationOneSubsetDecoder::tags::utf8String0x0c);
+    ASNObject::initializeAddSample(
+      container,
+      ASNObject::names::sha256WithRSAEncryption ,
+      "2a864886f70d01010b",
+      AbstractSyntaxNotationOneSubsetDecoder::tags::null0x05
+    );
+    ASNObject::initializeAddSample(
+      container,
+      ASNObject::names::countryName,
+      "550406",
+      AbstractSyntaxNotationOneSubsetDecoder::tags::printableString0x13
+    );
+    ASNObject::initializeAddSample(
+      container,
+      ASNObject::names::stateOrProvinceName,
+      "550408",
+      AbstractSyntaxNotationOneSubsetDecoder::tags::utf8String0x0c
+    );
+    ASNObject::initializeAddSample(
+      container,
+      ASNObject::names::localityName,
+      "550407",
+      AbstractSyntaxNotationOneSubsetDecoder::tags::utf8String0x0c
+    );
+    ASNObject::initializeAddSample(
+      container,
+      ASNObject::names::organizationName,
+      "55040a",
+      AbstractSyntaxNotationOneSubsetDecoder::tags::utf8String0x0c
+    );
+    ASNObject::initializeAddSample(
+      container,
+      ASNObject::names::organizationalUnitName,
+      "55040b",
+      AbstractSyntaxNotationOneSubsetDecoder::tags::utf8String0x0c
+    );
+    ASNObject::initializeAddSample(
+      container,
+      ASNObject::names::commonName,
+      "550403",
+      AbstractSyntaxNotationOneSubsetDecoder::tags::utf8String0x0c
+    );
+    ASNObject::initializeAddSample(
+      container,
+      ASNObject::names::emailAddress,
+      "2a864886f70d010901",
+      AbstractSyntaxNotationOneSubsetDecoder::tags::utf8String0x0c
+    );
     static MapList<List<unsigned char>, ASNObject, MathRoutines::HashListUnsignedChars>& reverseMap = ASNObject::ObjectIdsToNames();
     for (int i = 0; i < container.theValues.size; i ++) {
       ASNObject& current = container.theValues[i];
@@ -771,8 +819,21 @@ MapList<std::string, ASNObject, MathRoutines::HashString>& ASNObject::NamesToObj
   return container;
 }
 
+int ASNObject::LoadField(const MapList<std::string, ASNObject, MathRoutines::HashString>& inputFields, const std::string& fieldName) {
+  if (!ASNObject::NamesToObjectIdsNonThreadSafe().Contains(fieldName)) {
+    crash << "Field " << fieldName << " is hard-coded but is yet unknown. " << crash;
+  }
+  if (!inputFields.Contains(fieldName)) {
+    this->name = fieldName;
+    this->objectId.SetSize(0);
+    return 0;
+  }
+  *this = inputFields.GetValueConstCrashIfNotPresent(fieldName);
+  return 1;
+}
+
 bool ASNObject::LoadFieldsFromJSArray(
-  JSData& jsonArray,
+  const JSData& jsonArray,
   MapList<std::string, ASNObject, MathRoutines::HashString>& output,
   std::stringstream *commentsOnFailure
 ) {
@@ -785,7 +846,7 @@ bool ASNObject::LoadFieldsFromJSArray(
   }
   for (int i = 0; i < jsonArray.theList.size; i ++) {
     ASNObject current;
-    if (!current.LoadFromJSON(jsonArray[i], commentsOnFailure)) {
+    if (!current.LoadFromJSON(jsonArray.theList[i], commentsOnFailure)) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Failed to load entry index: " << i;
       }
@@ -848,21 +909,10 @@ void ASNObject::initializeNonThreadSafe() {
   ASNObject::NamesToObjectIdsNonThreadSafe();
 }
 
-void X509Certificate::WriteBytesTBSCertificateInformation(List<unsigned char> &output) {
-  AbstractSyntaxNotationOneSubsetDecoder::WriterSequence writeTBSCertificateContent(200, output);
-  this->WriteBytesASNObject(this->information.countryName, output);
-  this->WriteBytesASNObject(this->information.stateOrProviceName, output);
-  this->WriteBytesASNObject(this->information.localityName, output);
-  this->WriteBytesASNObject(this->information.organizationName, output);
-  this->WriteBytesASNObject(this->information.organizationUnitName, output);
-  this->WriteBytesASNObject(this->information.commonName, output);
-  this->WriteBytesASNObject(this->information.emailAddress, output);
-}
-
 void X509Certificate::WriteBytesASN1(List<unsigned char>& output) {
   MacroRegisterFunctionWithName("X509Certificate::WriteBytesASN1");
   AbstractSyntaxNotationOneSubsetDecoder::WriterSequence writeTotalLength(2000, output);
-  this->WriteBytesTBSCertificate(output);
+  this->information.WriteBytesASN1(output);
 }
 
 std::string X509Certificate::ToStringTestEncode() {
@@ -932,7 +982,6 @@ bool PrivateKeyRSA::LoadFromPEMFile(const std::string& input, std::stringstream*
   }
   return this->LoadFromPEM(certificateContent, commentsOnFailure);
 }
-
 
 bool PrivateKeyRSA::LoadFromPEM(const std::string& input, std::stringstream* commentsOnFailure){
   MacroRegisterFunctionWithName("PrivateKeyRSA::LoadFromPEM");
@@ -1051,6 +1100,68 @@ bool X509Certificate::LoadFromPEMFile(const std::string& input, std::stringstrea
   return this->LoadFromPEM(certificateContent, commentsOnFailure);
 }
 
+void TBSCertificateInfo::WriteBytesASN1(List<unsigned char>& output) {
+  AbstractSyntaxNotationOneSubsetDecoder::WriterSequence writeTBSCertificateContent(200, output);
+  this->countryName           .WriteBytesASNObject(output);
+  this->stateOrProvinceName   .WriteBytesASNObject(output);
+  this->localityName          .WriteBytesASNObject(output);
+  this->organizationName      .WriteBytesASNObject(output);
+  this->organizationalUnitName.WriteBytesASNObject(output);
+  this->commonName            .WriteBytesASNObject(output);
+  this->emailAddress          .WriteBytesASNObject(output);
+}
+
+bool TBSCertificateInfo::LoadFromJSON(const JSData& input, std::stringstream* commentsOnFailure) {
+  MacroRegisterFunctionWithName("TBSCertificateInfo::LoadFromJSON");
+  MapList<std::string, ASNObject, MathRoutines::HashString> fields;
+  if (!ASNObject::LoadFieldsFromJSArray(input, fields, commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to read certificate fields. Certificate fields decoded: "
+      << input.ToString(false, true, true, true);
+    }
+    return false;
+  }
+  return this->LoadFields(fields, commentsOnFailure);
+}
+
+bool TBSCertificateInfo::LoadFields(
+  const MapList<std::string, ASNObject, MathRoutines::HashString>& fields,
+  std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("TBSCertificateInfo::LoadFields");
+  int numberOfLoadedFields = 0;
+  numberOfLoadedFields += this->commonName.LoadField(
+    fields, ASNObject::names::commonName
+  );
+  numberOfLoadedFields += this->commonName.LoadField(
+    fields, ASNObject::names::countryName
+  );
+  numberOfLoadedFields += this->emailAddress.LoadField(
+    fields, ASNObject::names::emailAddress
+  );
+  numberOfLoadedFields += this->localityName.LoadField(
+    fields, ASNObject::names::localityName
+  );
+  numberOfLoadedFields += this->organizationalUnitName. LoadField(
+    fields, ASNObject::names::organizationalUnitName
+  );
+  numberOfLoadedFields += this->organizationName.LoadField(
+    fields, ASNObject::names::organizationName
+  );
+  numberOfLoadedFields += this->stateOrProvinceName.LoadField(
+    fields, ASNObject::names::stateOrProvinceName
+  );
+  if (numberOfLoadedFields < fields.size()) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to recognize "
+      << (fields.size() - numberOfLoadedFields)
+      << " fields in your certificate. ";
+    }
+    return false;
+  }
+  return true;
+}
+
 bool X509Certificate::LoadFromASNEncoded(
   const List<unsigned char>& input, std::stringstream* commentsOnFailure
 ) {
@@ -1083,15 +1194,13 @@ bool X509Certificate::LoadFromASNEncoded(
     }
     return false;
   }
-  MapList<std::string, ASNObject, MathRoutines::HashString> fields;
-  if (!ASNObject::LoadFieldsFromJSArray(certificateFieldsJSON, fields, commentsOnFailure)) {
+  if (!this->information.LoadFromJSON(certificateFieldsJSON, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to read certificate fields. JSON decoded: "
       << this->sourceJSON.ToString(false, true, true, true);
     }
     return false;
   }
-  int continueHere;
   if (!this->sourceJSON.HasCompositeKeyOfType(
     "[0][6][1].bitStringDecoded[1]", this->theRSA.theModuluS, commentsOnFailure
   )) {

@@ -931,34 +931,6 @@ void SubgroupDataRootReflections::ComputeDynkinType() {
   this->theDynkinType = tempGroup.theDynkinType;
 }
 
-template <class elementSomeGroup>
-bool FiniteGroup<elementSomeGroup>::CheckOrthogonalityCharTable() {
-  MacroRegisterFunctionWithName("FiniteGroup::CheckOrthogonalityCharTable");
-  for (int i = 0; i < this->characterTable.size; i ++) {
-    for (int j = i; j < this->characterTable.size; j ++) {
-      ClassFunction<FiniteGroup, Rational>& leftChar = this->characterTable[i];
-      ClassFunction<FiniteGroup, Rational>& rightChar = this->characterTable[j];
-      Rational theScalarProd = this->GetHermitianProduct(leftChar.data, rightChar.data);
-      if (j != i) {
-        if (theScalarProd != 0) {
-          crash << "Error: the character table is not orthonormal: char number " << i + 1 << " = "
-          << leftChar.ToString() << " is not orthogonal to char number "
-          << j+ 1 << " = " << rightChar.ToString() << ". <br>The entire char table is: "
-          << this->PrettyPrintCharacterTable() << crash;
-        }
-      }
-      if (j == i) {
-        if (theScalarProd != 1) {
-          crash << "Error: the character table is not orthonormal: char number " << i + 1 << " = "
-          << leftChar.ToString() << " is not of norm 1. "
-          << "<br>The entire char table is: " << this->PrettyPrintCharacterTable() << crash;
-        }
-      }
-    }
-  }
-  return true;
-}
-
 SubgroupDataWeylGroup::SubgroupDataWeylGroup() {
   this->theWeylData = nullptr;
 }

@@ -4,6 +4,7 @@
 #define HEADER_GENERAL_STRINGS_ALREADY_INCLUDED
 
 #include "general_lists.h"
+#include "general_memory_saving.h"
 
 static ProjectInformationInstance headerGeneralStringsProjectInformation(__FILE__, "Header, string operations. ");
 
@@ -37,8 +38,6 @@ public:
   static std::string StringTrimWhiteSpace(const std::string& inputString);
   static void SplitStringInTwo(const std::string& inputString, int firstStringSize, std::string& outputFirst, std::string& outputSecond);
   static std::string StringShortenInsertDots(const std::string& inputString, int maxNumChars);
-
-
   class Differ {
   public:
     MemorySaving<Matrix<int> > matrixLongestCommonSubsequence;

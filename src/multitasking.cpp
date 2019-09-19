@@ -6,6 +6,7 @@
 #include <assert.h>
 #include <mutex>
 
+extern ProjectInformationInstance vpfGeneral2Mutexes;
 ProjectInformationInstance vpfGeneral2Mutexes(__FILE__, "Multitasking implementation.");
 
 void ParallelComputing::CheckPointerCounters() {
@@ -24,7 +25,7 @@ void ParallelComputing::CheckPointerCounters() {
     << ParallelComputing::cgiLimitRAMuseNumPointersInList
     << ".</b>" << crash;
   }
-  if (ParallelComputing::PointerCounterPeakRamUse<ParallelComputing::GlobalPointerCounter) {
+  if (ParallelComputing::PointerCounterPeakRamUse < ParallelComputing::GlobalPointerCounter) {
     ParallelComputing::PointerCounterPeakRamUse = ParallelComputing::GlobalPointerCounter;
   }
 }
@@ -46,7 +47,7 @@ void MutexRecursiveWrapper::initConstructorCallOnly() {
   this->flagDeallocated = false;
   this->flagInitialized = false;
   this->flagUnsafeFlagForDebuggingIsLocked = false;
-  this->theMutexImplementation = 0;
+  this->theMutexImplementation = nullptr;
   this->lastLockerThread = - 1;
 #ifdef AllocationLimitsSafeguard
 ParallelComputing::GlobalPointerCounter ++;
@@ -66,8 +67,8 @@ bool MutexRecursiveWrapper::InitializeIfNeeded() {
 }
 
 MutexRecursiveWrapper::~MutexRecursiveWrapper() {
-  delete (std::mutex*)(this->theMutexImplementation);
-  this->theMutexImplementation = 0;
+  delete static_cast<std::mutex*>(this->theMutexImplementation);
+  this->theMutexImplementation = nullptr;
   this->flagDeallocated = true;
   this->flagInitialized = false;
 }
@@ -94,9 +95,9 @@ void MutexRecursiveWrapper::LockMe() {
         << theGlobalVariables.ToStringProgressReportConsole() << logger::endL;
       }
     }
-    ((std::mutex*)this->theMutexImplementation)->lock();
-  } catch (int theException) {
-    crash << "Fatal error: mutex lock failed." << crash;
+    static_cast<std::mutex*>(this->theMutexImplementation)->lock();
+  } catch (...) {
+    crash << "Fatal error: mutex lock failed. " << crash;
   }
   this->flagUnsafeFlagForDebuggingIsLocked = true;
   this->lastLockerThread = ThreadData::getCurrentThreadId();
@@ -109,7 +110,7 @@ void MutexRecursiveWrapper::UnlockMe() {
   }
   this->flagUnsafeFlagForDebuggingIsLocked = false;
   this->lastLockerThread = - 1;
-  ((std::mutex*) this->theMutexImplementation)->unlock();
+  static_cast<std::mutex*>(this->theMutexImplementation)->unlock();
 }
 
 void PauseThread::SafePointDontCallMeFromDestructors() {
@@ -170,7 +171,7 @@ ThreadData::ThreadData() {
 }
 
 ThreadData::~ThreadData() {
- 
+
 }
 
 GlobalVariables::~GlobalVariables() {

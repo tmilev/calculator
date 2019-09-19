@@ -14,7 +14,7 @@ bool CodeFormatter::initializeFileNames(
   MacroRegisterFunctionWithName("SourceCodeFormatter::initializeFileNames");
   this->inputFileName = fileName;
   if (!FileOperations::LoadFileToStringVirtual(this->inputFileName, this->inputCode, false, false, comments)) {
-    if (comments != 0) {
+    if (comments != nullptr) {
       *comments << "Failed to load file. ";
     }
     return false;
@@ -47,7 +47,7 @@ bool CodeFormatter::FormatCPPDirectory(const std::string& inputDirectory, std::s
   MacroRegisterFunctionWithName("SourceCodeFormatter::FormatCPPDirectory");
   std::string directory = inputDirectory;
   if (directory == "") {
-    if (comments != 0) {
+    if (comments != nullptr) {
       *comments << "Format cpp directory: empty directory name not allowed. ";
     }
     return false;
@@ -94,7 +94,7 @@ bool CodeFormatter::FormatCPPSourceCode(
   if (!this->WriteFormatedCode(comments)) {
     return false;
   }
-  if (comments != 0) {
+  if (comments != nullptr) {
     (*comments) << this->ToStringLinks();
   }
   return true;
@@ -124,7 +124,7 @@ bool CodeFormatter::AddWordToOriginals(const std::string& incomingString) {
 }
 
 bool CodeFormatter::isSeparatorCharacter(char input) {
-  unsigned char inputUnsigned = input;
+  unsigned char inputUnsigned = static_cast<unsigned char>(input);
   return this->separatorCharactersMap[inputUnsigned];
 }
 
@@ -171,7 +171,7 @@ void CodeFormatter::SetContentComputeType(const std::string& input, CodeElement&
 bool CodeFormatter::ExtractCodeElements(std::stringstream* comments) {
   MacroRegisterFunctionWithName("SourceCodeFormatter::ExtractCodeElements");
   (void) comments;
-  this->originalElements.SetExpectedSize(this->inputCode.size());
+  this->originalElements.SetExpectedSize(static_cast<signed>(this->inputCode.size()));
   this->flagInQuotes = false;
   this->flagPreviousIsStandaloneBackSlash = false;
   for (unsigned i = 0; i < this->inputCode.size(); i ++) {
@@ -263,8 +263,8 @@ bool CodeFormatter::ApplyOneRule(std::stringstream* comments) {
     this->SetContentComputeType("\n", secondToLast);
     this->previousLineIndent = this->currentLineIndent;
     last.type = "whiteSpace";
-    last.content.resize(this->currentLineIndent);
-    for (int i = 0; i < this->currentLineIndent; i ++) {
+    last.content.resize(static_cast<unsigned>(this->currentLineIndent));
+    for (unsigned i = 0; i < static_cast<unsigned>(this->currentLineIndent); i ++) {
       last.content[i] = ' ';
     }
     return this->AddWordToTransformed(")");
@@ -283,14 +283,14 @@ bool CodeFormatter::ApplyOneRule(std::stringstream* comments) {
     this->SetContentComputeType("\n", fourthToLast);
     this->previousLineIndent = this->currentLineIndent;
     thirdToLast.type = "whiteSpace";
-    thirdToLast.content.resize(this->currentLineIndent);
-    for (int i = 0; i < this->currentLineIndent; i ++) {
+    thirdToLast.content.resize(static_cast<unsigned>(this->currentLineIndent));
+    for (unsigned i = 0; i < static_cast<unsigned>(this->currentLineIndent); i ++) {
       thirdToLast.content[i] = ' ';
     }
     this->SetContentComputeType(")", secondToLast);
     this->SetContentComputeType(" ", last);
     this->AddWordToTransformed("{");
-    this->previousLineLength = thirdToLast.content.size() + 3;
+    this->previousLineLength = static_cast<int>(thirdToLast.content.size() + 3);
     this->currentLineLength = 0;
     this->currentLineIndent = 0;
     return this->AddWordToTransformed("\n");
@@ -420,7 +420,7 @@ bool CodeFormatter::ApplyFormattingRules(std::stringstream* comments) {
       this->ComputeState(200);
       tooManyRulesCounter ++;
       if (tooManyRulesCounter > maximumRules) {
-        if (comments != 0) {
+        if (comments != nullptr) {
           *comments << "Too many rules, this must be a programming error. ";
         }
         //return true;
@@ -444,7 +444,7 @@ CodeFormatter::CodeFormatter() {
   this->previousLineLength = 0;
   this->maximumDesiredLineLength = 120;
   for (unsigned i = 0; i < this->separatorCharacters.size(); i ++) {
-    this->separatorCharactersMap[(unsigned) this->separatorCharacters[i]] = true;
+    this->separatorCharactersMap[static_cast<signed>(this->separatorCharacters[i])] = true;
   }
   this->builtInTypes.SetKeyValue(" ", "whiteSpace");
   this->builtInTypes.SetKeyValue("\t", "whiteSpace");
@@ -456,7 +456,7 @@ bool CodeFormatter::WriteFormatedCode(std::stringstream* comments) {
   if (!FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(
     fileOut, this->outputFileName, false, true, false
   )) {
-    if (comments != 0) {
+    if (comments != nullptr) {
       *comments << "Failed to open source code formatting output file. ";
     }
     return false;

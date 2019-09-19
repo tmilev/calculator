@@ -2524,7 +2524,7 @@ std::string slTwoInSlN::PairTwoIndices(List<int>& output, int leftIndex, int rig
 void RationalFunctionOld::AddHonestRF(const RationalFunctionOld& other) {
   MacroRegisterFunctionWithName("RationalFunctionOld::AddHonestRF");
   Rational tempRat;
-  if (!this->Denominator.GetElement().IsProportionalTo(other.Denominator.GetElementConst(), tempRat, (Rational) 1)) {
+  if (!this->Denominator.GetElement().IsProportionalTo(other.Denominator.GetElementConst(), tempRat, Rational(1))) {
     Polynomial<Rational> buffer;
 //    RationalFunctionOld debugger;
 //    debugger = other;
@@ -2732,7 +2732,7 @@ bool Cone::IsInCone(const Vector<Rational>& point) const {
 std::string MonomialP::ToString(FormatExpressions* theFormat) const {
   std::stringstream out;
   MemorySaving<FormatExpressions> tempFormat;
-  if (theFormat == 0) {
+  if (theFormat == nullptr) {
     theFormat = &tempFormat.GetElement();
   }
   if (this->IsConstant()) {

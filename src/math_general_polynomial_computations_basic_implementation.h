@@ -68,6 +68,35 @@ bool Polynomial<coefficient>::IsOneVariablePoly(int* whichVariable) const {
 }
 
 template <class coefficient>
+bool Polynomial<coefficient>::FactorMe(List<Polynomial<Rational> >& outputFactors, std::stringstream* comments) const {
+  MacroRegisterFunctionWithName("Polynomial::FactorMe");
+  outputFactors.SetSize(0);
+  if (this->IsEqualToZero() || this->IsConstant()) {
+    outputFactors.AddOnTop(*this);
+    return true;
+  }
+  List<Polynomial<Rational> > factorsToBeProcessed;
+  factorsToBeProcessed.AddOnTop(*this);
+  Polynomial<Rational> currentFactor, divisor;
+  while (factorsToBeProcessed.size > 0) {
+    currentFactor = factorsToBeProcessed.PopLastObject();
+    if (!currentFactor.FactorMeOutputIsADivisor(divisor, comments)) {
+      return false;
+    }
+    if (currentFactor.IsEqualToOne()) {
+      outputFactors.AddOnTop(divisor);
+      continue;
+    }
+    Rational tempRat = divisor.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
+    currentFactor /= tempRat;
+    factorsToBeProcessed.AddOnTop(divisor);
+    factorsToBeProcessed.AddOnTop(currentFactor);
+  }
+  outputFactors.QuickSortAscending();
+  return true;
+}
+
+template <class coefficient>
 void Polynomial<coefficient>::MakeDeterminantFromSquareMatrix(const Matrix<Polynomial<coefficient> >& theMat) {
   if (theMat.NumCols != theMat.NumRows) {
     crash << "Cannot compute determinant: matrix has "
@@ -608,6 +637,132 @@ bool Polynomial<coefficient>::FindOneVarRatRoots(List<Rational>& output) {
 }
 
 template <class coefficient>
+bool Polynomial<coefficient>::
+FactorMeOutputIsADivisor(Polynomial<Rational>& output, std::stringstream* comments) {
+  MacroRegisterFunctionWithName("Polynomial_CoefficientType::FactorMeOutputIsADivisor");
+  if (this->GetMinNumVars() > 1) {
+    return false;
+  }
+  if (this->GetMinNumVars() == 0) {
+    return true;
+  }
+  Polynomial<Rational> thePoly = *this;
+  thePoly.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
+  int degree = 0;
+  if (!thePoly.TotalDegree().IsSmallInteger(&degree)) {
+    return false;
+  }
+  int degreeLeft = degree / 2;
+  Vector<Rational> AllPointsOfEvaluation;
+  List<List<LargeInt> > thePrimeFactorsAtPoints;
+  List<List<int> > thePrimeFactorsMults;
+  Vector<Rational> theValuesAtPoints, theValuesAtPointsLeft;
+  AllPointsOfEvaluation.SetSize(degree + 1);
+  thePrimeFactorsAtPoints.SetSize(degreeLeft + 1);
+  thePrimeFactorsMults.SetSize(degreeLeft + 1);
+  AllPointsOfEvaluation[0] = 0;
+  for (int i = 1; i < AllPointsOfEvaluation.size; i ++) {
+    AllPointsOfEvaluation[i] = (i % 2 == 1) ? i / 2 + 1 : - (i / 2);
+  }
+  Vector<Rational> theArgument;
+  theArgument.SetSize(1);
+  theValuesAtPoints.SetSize(AllPointsOfEvaluation.size);
+  LargeInt tempLI;
+  for (int i = 0; i < AllPointsOfEvaluation.size; i ++) {
+    theArgument[0] = AllPointsOfEvaluation[i];
+    theValuesAtPoints[i] = thePoly.Evaluate(theArgument);
+    if (theValuesAtPoints[i].IsEqualToZero()) {
+      output.MakeDegreeOne(1, 0, 1, - theArgument[0]);
+      *this /= output;
+      return true;
+    }
+    if (i < degreeLeft + 1) {
+      theValuesAtPoints[i].IsInteger(&tempLI);
+      if (!tempLI.value.FactorReturnFalseIfFactorizationIncomplete(
+        thePrimeFactorsAtPoints[i], thePrimeFactorsMults[i], 0, comments
+      )) {
+        if (comments != nullptr) {
+          *comments << "<br>Aborting polynomial factorization: failed to factor the integer "
+          << theValuesAtPoints[i].ToString() << " (most probably the integer is too large).";
+        }
+        return false;
+      }
+    }
+  }
+  Incrementable<Incrementable<SelectionOneItem> > theDivisorSel;
+  Incrementable<SelectionOneItem> signSel;
+  Polynomial<Rational> quotient, remainder;
+  Vectors<Rational> valuesLeftInterpolands;
+  Vector<Rational> PointsOfInterpolationLeft;
+  PointsOfInterpolationLeft.Reserve(degreeLeft + 1);
+  Rational currentPrimePowerContribution, currentPointContribution;
+  for (int i = 0; i <= degreeLeft; i ++) {
+    PointsOfInterpolationLeft.AddOnTop(AllPointsOfEvaluation[i]);
+  }
+  theDivisorSel.initFromMults(thePrimeFactorsMults);
+  signSel.initFromMults(1, degreeLeft + 1);
+  valuesLeftInterpolands.SetSize(degreeLeft + 1);
+  this->GetValuesLagrangeInterpolandsAtConsecutivePoints(
+    PointsOfInterpolationLeft, AllPointsOfEvaluation, valuesLeftInterpolands
+  );
+  do {
+    do {
+      theValuesAtPointsLeft.MakeZero(theValuesAtPoints.size);
+      Rational firstValue;
+      bool isGood = false;//<-we shall first check if the divisor is constant.
+      for (int j = 0; j < theDivisorSel.theElements.size; j ++) {
+        currentPointContribution = 1;
+        for (int k = 0; k < theDivisorSel[j].theElements.size; k ++) {
+          currentPrimePowerContribution = thePrimeFactorsAtPoints[j][k];
+          currentPrimePowerContribution.RaiseToPower(theDivisorSel[j][k].SelectedMult);
+          currentPointContribution *= currentPrimePowerContribution;
+        }
+        if (signSel[j].SelectedMult == 1) {
+          currentPointContribution *= - 1;
+        }
+        if (!isGood) {
+          if (j == 0) {
+            firstValue = currentPointContribution;
+          } else {
+            if (firstValue != currentPointContribution) {
+              isGood = true; //<- the divisor has takes two different values, hence is non-constant.
+            }
+          }
+        }
+        theValuesAtPointsLeft += valuesLeftInterpolands[j]*currentPointContribution;
+      }
+      if (!isGood) {
+        continue;
+      }
+      for (int j = 0; j < AllPointsOfEvaluation.size; j ++) {
+        if (theValuesAtPointsLeft[j].IsEqualToZero()) {
+          isGood = false;
+          break;
+        }
+        currentPointContribution = (theValuesAtPoints[j]) / theValuesAtPointsLeft[j];
+        if (!currentPointContribution.IsInteger()) {
+          isGood = false;
+          break;
+        }
+      }
+      if (!isGood) {
+        continue;
+      }
+      output.Interpolate(Vector<Rational>(PointsOfInterpolationLeft), Vector<Rational>(theValuesAtPointsLeft));
+      this->DivideBy(output, quotient, remainder);
+      if (!remainder.IsEqualToZero()) {
+        continue;
+      }
+      *this = quotient;
+      return true;
+    } while (theDivisorSel.IncrementReturnFalseIfPastLast());
+  } while (signSel.IncrementReturnFalseIfPastLast());
+  output = *this;
+  this->MakeOne(1);
+  return true;
+}
+
+template <class coefficient>
 bool PolynomialOrder<coefficient>::CompareLeftGreaterThanRight(
   const Polynomial<coefficient>& left, const Polynomial<coefficient>& right
 ) const {
@@ -621,5 +776,141 @@ bool PolynomialOrder<coefficient>::CompareLeftGreaterThanRight(
     return true;
   }
   return false;
+}
+
+template <class coefficient>
+std::string GroebnerBasisComputation<coefficient>::GetDivisionStringLaTeX() {
+  MacroRegisterFunctionWithName("GroebnerBasisComputation::GetDivisionStringLaTeX");
+  std::stringstream out;
+  List<Polynomial<Rational> >& theRemainders = this->intermediateRemainders.GetElement();
+  List<Polynomial<Rational> >& theSubtracands = this->intermediateSubtractands.GetElement();
+  this->theFormat.thePolyMonOrder = this->thePolynomialOrder.theMonOrder;
+  std::string HighlightedColor = "red";
+  this->allMonomials.AddOnTopNoRepetition(this->startingPoly.GetElement().theMonomials);
+  for (int i = 0; i < theRemainders.size; i ++) {
+    this->allMonomials.AddOnTopNoRepetition(theRemainders[i].theMonomials);
+  }
+  for (int i = 0; i < theSubtracands.size; i ++) {
+    this->allMonomials.AddOnTopNoRepetition(theSubtracands[i].theMonomials);
+  }
+  //List<std::string> basisColorStyles;
+  //basisColorStyles.SetSize(this->theBasiS.size);
+  this->allMonomials.QuickSortDescending(this->thePolynomialOrder.theMonOrder);
+  this->theFormat.flagUseLatex = true;
+  out << this->ToStringLetterOrder(true);
+  out << theRemainders.size << " division steps total.";
+  out << "\\renewcommand{\\arraystretch}{1.2}";
+  out << "\\begin{longtable}{|c";
+  for (int i = 0; i < this->allMonomials.size; i ++) {
+    out << "c";
+  }
+  out << "|} \\hline";
+  out << "&" <<  "\\multicolumn{" << this->allMonomials.size
+  << "}{|c|}{\\textbf{Remainder}}" << "\\\\";
+  out << "\\multicolumn{1}{|c|}{} & ";
+  out << this->GetPolynomialStringSpacedMonomialsLaTeX(
+    this->remainderDivision, &HighlightedColor, &this->remainderDivision.theMonomials
+  ) << "\\\\\\hline";
+  out << "\\textbf{Divisor(s)} &" << "\\multicolumn{"
+  << this->allMonomials.size << "}{|c|}{\\textbf{Quotient(s)}}"
+  << "\\\\";
+  for (int i = 0; i < this->theBasiS.size; i ++) {
+    out << "$";
+    out << this->theBasiS[i].ToString(&this->theFormat);
+    out << "$";
+    out << "& \\multicolumn{" << this->allMonomials.size << "}{|l|}{";
+    out << "$" << this->theQuotients[i].ToString(&this->theFormat) << "$" << "}\\\\\\hline\\hline";
+  }
+  for (int i = 0; i < theRemainders.size; i ++) {
+    if (i < theRemainders.size - 1) {
+      out << "$\\underline{~}$";
+    }
+    out << "&"
+    << this->GetPolynomialStringSpacedMonomialsLaTeX
+    (theRemainders[i], &HighlightedColor, &this->intermediateHighlightedMons.GetElement()[i])
+    << "\\\\\n";
+    if (i < theSubtracands.size) {
+      out << "&";
+      out << this->GetPolynomialStringSpacedMonomialsLaTeX
+      (theSubtracands[i], &HighlightedColor)
+      << "\\\\\\cline{2-" << this->allMonomials.size + 1 << "}";
+    }
+  }
+  out << "\\hline";
+  out << "\\end{longtable}";
+  return out.str();
+}
+
+template <class coefficient>
+std::string GroebnerBasisComputation<coefficient>::GetDivisionStringHtml() {
+  MacroRegisterFunctionWithName("GroebnerBasisComputation::GetDivisionStringHtml");
+  std::stringstream out;
+  List<Polynomial<Rational> >& theRemainders = this->intermediateRemainders.GetElement();
+  List<Polynomial<Rational> >& theSubtracands = this->intermediateSubtractands.GetElement();
+  this->theFormat.thePolyMonOrder = this->thePolynomialOrder.theMonOrder;
+  std::string underlineStyle = " style =\"white-space: nowrap; border-bottom:1px solid black;\"";
+  this->allMonomials.Clear();
+  this->allMonomials.AddOnTopNoRepetition(this->startingPoly.GetElement().theMonomials);
+  for (int i = 0; i < theRemainders.size; i ++) {
+    this->allMonomials.AddOnTopNoRepetition(theRemainders[i].theMonomials);
+    if (i < theSubtracands.size) {
+      this->allMonomials.AddOnTopNoRepetition(theSubtracands[i].theMonomials);
+    }
+  }
+  //List<std::string> basisColorStyles;
+  //basisColorStyles.SetSize(this->theBasiS.size);
+  this->allMonomials.QuickSortDescending(this->thePolynomialOrder.theMonOrder);
+  //  stOutput << "<hr>The monomials in play ordered: " << totalMonCollection.ToString(theFormat);
+  //  int numVars = this->GetNumVars();
+  out << this->ToStringLetterOrder(false);
+  out << "<br>";
+  out << theRemainders.size << " division steps total.<br>";
+  out << "<table style =\"white-space: nowrap; border:1px solid black;\">";
+  out << "<tr><td " << underlineStyle << "><b>Remainder:</b></td>";
+  out << this->GetPolynomialStringSpacedMonomialsHtml(
+    this->remainderDivision, underlineStyle, &this->remainderDivision.theMonomials
+  )
+  << "</td></tr>";
+  out << "<tr><td style =\"border-right:1px solid black;\"><b>Divisor(s)</b></td><td colspan =\""
+  << this->allMonomials.size + 1 << "\"><b>Quotient(s) </b></td>"
+  << "</tr>";
+  for (int i = 0; i < this->theBasiS.size; i ++) {
+    //if (i == this->theBasiS.size- 1)
+//    else
+    out << "<tr>";
+    out << "<td style =\"border-right:1px solid black; border-bottom: 1px solid gray;\">";
+    if (this->theFormat.flagUseLatex) {
+      out << HtmlRoutines::GetMathSpanPure(this->theBasiS[i].ToString(&this->theFormat), - 1);
+    } else {
+      out << this->theBasiS[i].ToString(&this->theFormat);
+    }
+    out << "</td>";
+    out << "<td style =\"border-bottom:1px solid gray;\" colspan =\""
+    << this->allMonomials.size + 1 << "\">";
+    out << HtmlRoutines::GetMathSpanPure(this->theQuotients[i].ToString(&this->theFormat));
+    out << "</td></tr>";
+  }
+  out << "</tr>";
+  if (theRemainders.size != this->intermediateHighlightedMons.GetElement().size) {
+    crash << "Should have as many remainders: " << theRemainders.size
+    << " as intermediate highlighted mons: "
+    << this->intermediateHighlightedMons.GetElement().size << crash;
+  }
+  if (theRemainders.size != theSubtracands.size + 1) {
+    crash << "Remainders should equal subtracands plus one. " << crash;
+  }
+  for (int i = 0; i < theRemainders.size; i ++) {
+    out << "<tr><td></td>"
+    << this->GetPolynomialStringSpacedMonomialsHtml(
+      theRemainders[i], "", &this->intermediateHighlightedMons.GetElement()[i]
+    ) << "</tr>";
+    if (i < theSubtracands.size) {
+      out << "<tr><td>-</td></tr>";
+      out << "<tr><td></td>" << this->GetPolynomialStringSpacedMonomialsHtml(theSubtracands[i], underlineStyle)
+      << "</tr>";
+    }
+  }
+  out << "</table>";
+  return out.str();
 }
 #endif

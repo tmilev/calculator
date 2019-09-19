@@ -5,6 +5,7 @@
 #include "calculator_inner_typed_functions.h"
 #include "calculator_html_functions.h"
 
+extern ProjectInformationInstance ProjectInfoVpf6_36pp;
 ProjectInformationInstance ProjectInfoVpf6_36pp(__FILE__, "Calculator html functions implementation. ");
 
 bool CalculatorHtmlFunctions::innerUserInputBox(

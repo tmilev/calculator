@@ -8,7 +8,6 @@
 extern ProjectInformationInstance ProjectInfoAbstractSyntaxNotationOneDecoderImplementationTest;
 ProjectInformationInstance ProjectInfoAbstractSyntaxNotationOneDecoderImplementationTest(__FILE__, "Test routines for abstract syntax notation one (ASN-1).");
 
-
 bool PrivateKeyRSA::Test::All() {
   PrivateKeyRSA::Test::LoadFromPEMFile();
   PrivateKeyRSA::Test::LoadFromPEM();

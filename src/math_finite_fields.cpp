@@ -46,7 +46,7 @@ void f65521::Invert() {
   int x = 0;
   int y = 1;
   int a = 65521;
-  int b = n;
+  int b = static_cast<signed>(this->n);
   int l = 1;
   int m = 0;
   while (b != 0) {
@@ -63,9 +63,9 @@ void f65521::Invert() {
   }
 
   if (m>= 0) {
-    n = m;
+    n = static_cast<unsigned>(m);
   } else {
-    n = m + 65521;
+    n = static_cast<unsigned>(m) + 65521;
   }
 }
 
@@ -102,11 +102,11 @@ void f65521::operator=(const int rhs) {
   if (tmp < 0) {
     tmp += 65521;
   }
-  n = tmp;
+  n = static_cast<unsigned>(tmp);
 }
 
 void f65521::operator=(const Rational rhs) {
-  n = rhs.GetNumerator() % 65521;
+  n = static_cast<unsigned>(rhs.GetNumerator() % 65521);
   f65521 den = rhs.GetDenominator() % 65521;
   *this /= den;
 }
@@ -126,7 +126,7 @@ f211 f211::operator+(const f211 right) const {
   int tmp = n;
   tmp += right.n;
   tmp %= 211;
-  out.n = tmp;
+  out.n = static_cast<char>(tmp);
   return out;
 }
 
@@ -134,7 +134,7 @@ void f211::operator+=(const f211 right) {
   int tmp = n;
   tmp += right.n;
   tmp %= 211;
-  n = tmp;
+  n = static_cast<char>(tmp);
 }
 
 void f211::Minus() {
@@ -155,7 +155,7 @@ void f211::operator-=(const f211 right) {
   int tmp = n;
   tmp += (- right).n;
   tmp %= 211;
-  n = tmp;
+  n = static_cast<char>(tmp);
 }
 
 f211 f211::operator*(const f211 right) const {
@@ -164,7 +164,7 @@ f211 f211::operator*(const f211 right) const {
   tmp = n;
   tmp *= right.n;
   tmp %= 211;
-  out.n = tmp;
+  out.n = static_cast<char>(tmp);
   return out;
 }
 
@@ -173,7 +173,7 @@ void f211::operator*=(const f211 right) {
   tmp = n;
   tmp *= right.n;
   tmp %= 211;
-  n = tmp;
+  n = static_cast<char>(tmp);
 }
 
 void f211::Invert() {
@@ -188,18 +188,18 @@ void f211::Invert() {
     int r = a % b;
     a = b;
     b = r;
-    int s = l - q*x;
-    int t = m - q*y;
+    int s = l - q * x;
+    int t = m - q * y;
     l = x;
     m = y;
     x = s;
     y = t;
   }
 
-  if (m>= 0) {
-    n = m;
+  if (m >= 0) {
+    n = static_cast<char>(m);
   } else {
-    n = m + 211;
+    n = static_cast<char>(m) + 211;
   }
 }
 
@@ -236,11 +236,11 @@ void f211::operator=(const int rhs) {
   if (tmp < 0) {
     tmp += 211;
   }
-  n = tmp;
+  n = static_cast<char>(tmp);
 }
 
 void f211::operator=(const Rational rhs) {
-  n = rhs.GetNumerator() % 211;
+  n = static_cast<char>(rhs.GetNumerator() % 211);
   f211 den = rhs.GetDenominator() % 211;
   *this /= den;
 }
@@ -282,7 +282,7 @@ bool f211::operator<(f211 rhs) const {
 }
 
 unsigned int f211::HashFunction() const {
-  return (unsigned int) this->n;
+  return static_cast<unsigned int>(this->n);
 }
 
 std::string f211::ToString(FormatExpressions* f) const {

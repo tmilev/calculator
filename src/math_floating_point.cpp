@@ -3,6 +3,8 @@
 
 #include "math_general.h"
 #include <math.h>
+
+extern ProjectInformationInstance projectInfoInstanceFloatingPoint;
 ProjectInformationInstance projectInfoInstanceFloatingPoint(__FILE__, "Built in c++ floating point routines wrapper.");
 
 double FloatingPoint::sqrt(double argument) {
@@ -19,8 +21,8 @@ std::string FloatingPoint::DoubleToString(double input) {
   out << std::fixed << input;
   std::string result = out.str();
   bool hasDot = false;
-  for (int i = result.size() - 1; i >= 0; i --) {
-    if (result[i] == '.') {
+  for (int i = static_cast<signed>(result.size()) - 1; i >= 0; i --) {
+    if (result[static_cast<unsigned>(i)] == '.') {
       hasDot = true;
       break;
     }
@@ -29,16 +31,16 @@ std::string FloatingPoint::DoubleToString(double input) {
     return result;
   }
   int firstNonZeroIndex = 0;
-  for (firstNonZeroIndex = result.size() - 1; firstNonZeroIndex >= 0; firstNonZeroIndex --) {
-    if (result[firstNonZeroIndex] == '.') {
-      result.resize(firstNonZeroIndex);
+  for (firstNonZeroIndex = static_cast<signed>(result.size()) - 1; firstNonZeroIndex >= 0; firstNonZeroIndex --) {
+    if (result[static_cast<unsigned>(firstNonZeroIndex)] == '.') {
+      result.resize(static_cast<unsigned>(firstNonZeroIndex));
       return result;
     }
-    if (result[firstNonZeroIndex] != '0') {
+    if (result[static_cast<unsigned>(firstNonZeroIndex)] != '0') {
       break;
     }
   }
-  result.resize(firstNonZeroIndex + 1);
+  result.resize(static_cast<unsigned>(firstNonZeroIndex) + 1);
   return result;
 }
 

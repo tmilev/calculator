@@ -2584,6 +2584,19 @@ bool Calculator::GetVectoR(
   return true;
 }
 
+template <class coefficient>
+bool CalculatorConversions::innerExpressionFromPoly(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromPoly");
+  if (!input.IsOfType<Polynomial<coefficient> >()) {
+    return false;
+  }
+  const Polynomial<coefficient>& thePoly = input.GetValue<Polynomial<coefficient> >();
+  Expression theContext = input.GetContext();
+  return CalculatorConversions::innerExpressionFromPoly(theCommands, thePoly, output, &theContext);
+}
+
 template <class theType>
 bool Calculator::GetMatrix(
   const Expression& input,
@@ -2894,4 +2907,52 @@ bool Expression::IsMatrixGivenType(int* outputNumRows, int* outputNumCols, Matri
   this->owner->GetMatrix(*this, *outputMat);
   return true;
 }
+
+template <class coefficient>
+bool CalculatorConversions::innerExpressionFromPoly(
+  Calculator& theCommands, const Polynomial<coefficient>& input, Expression& output, Expression* inputContext
+) {
+  MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromPoly");
+  MonomialCollection<Expression, coefficient> theTerms;
+  Expression currentBase, currentPower, currentTerm, currentMultTermE;
+  if (!input.IsConstant() && inputContext == 0) {
+    theCommands << "While converting polynomial to expression, I was given no variable names. Using the "
+    << "default variable names x_1, x_2, ... "
+    << "Please make sure you are not using those variables for other purposes.";
+  }
+  for (int i = 0; i < input.size(); i ++) {
+    if (input[i].IsConstant()) {
+      currentTerm.AssignValue(1, theCommands);
+      theTerms.AddMonomial(currentTerm, input.theCoeffs[i]);
+      continue;
+    }
+    bool found = false;
+    for (int j = 0; j < input[i].GetMinNumVars(); j ++) {
+      if (input[i](j) != 0) {
+        if (inputContext != 0) {
+          currentBase = inputContext->ContextGetContextVariable(j);
+        } else {
+          currentBase.reset(theCommands);
+          currentBase.AddChildAtomOnTop("x");
+          currentBase.AddChildValueOnTop((Rational) j);
+        }
+        if (input[i](j) == 1) {
+          currentMultTermE = currentBase;
+        } else {
+          currentPower.AssignValue(input[i](j), theCommands);
+          currentMultTermE.MakeXOX(theCommands, theCommands.opThePower(), currentBase, currentPower);
+        }
+        if (!found) {
+          currentTerm = currentMultTermE;
+        } else {
+          currentTerm *= currentMultTermE;
+        }
+        found = true;
+      }
+    }
+    theTerms.AddMonomial(currentTerm, input.theCoeffs[i]);
+  }
+  return output.MakeSum(theCommands, theTerms);
+}
+
 #endif

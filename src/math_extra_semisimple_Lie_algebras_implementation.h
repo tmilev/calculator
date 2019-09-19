@@ -13,7 +13,7 @@ static ProjectInformationInstance ProjectInfovpfImplementationHeaderSemisimpleLi
 template <class coefficient>
 std::string Weight<coefficient>::ToString(FormatExpressions* theFormat) const {
   std::stringstream out;
-  bool formatWeightAsIndexVectorSpace = theFormat == 0 ? true : theFormat->flagFormatWeightAsVectorSpaceIndex;
+  bool formatWeightAsIndexVectorSpace = theFormat == nullptr ? true : theFormat->flagFormatWeightAsVectorSpaceIndex;
   if (!formatWeightAsIndexVectorSpace) {
     if (this->owner == nullptr) {
       return this->weightFundamentalCoordS.ToStringLetterFormat("\\psi", theFormat);
@@ -26,7 +26,7 @@ std::string Weight<coefficient>::ToString(FormatExpressions* theFormat) const {
   bool useOmega = true;
   std::string oldCustomPlus;
   std::string VectorSpaceLetter = "V";
-  if (theFormat != 0) {
+  if (theFormat != nullptr) {
     useOmega = (theFormat->fundamentalWeightLetter == "");
     oldCustomPlus = theFormat->CustomPlusSign;
     theFormat->CustomPlusSign = "";
@@ -38,7 +38,7 @@ std::string Weight<coefficient>::ToString(FormatExpressions* theFormat) const {
     out << VectorSpaceLetter << "_{"
     << this->weightFundamentalCoordS.ToStringLetterFormat(theFormat->fundamentalWeightLetter, theFormat) << "}";
   }
-  if (theFormat != 0) {
+  if (theFormat != nullptr) {
     theFormat->CustomPlusSign = oldCustomPlus;
   }
   return out.str();
@@ -107,13 +107,13 @@ std::string Weight<coefficient>::TensorAndDecompose(
     MathRoutines::swap(leftTotalDim, rightTotalDim);
     MathRoutines::swap(leftHWFundCoords, rightHWFundCoords);
   }
-  HashedList<Vector<Rational> > weightsLeftSimpleCoords;
+  HashedList<Vector<coefficient> > weightsLeftSimpleCoords;
   List<Rational> multsLeft;
   if (!theWeyl.FreudenthalEval(leftHWFundCoords, weightsLeftSimpleCoords, multsLeft, &tempS, 1000000)) {
     errorLog << "Freudenthal formula generated error: " << tempS;
     return errorLog.str();
   }
-  HashedList<Vector<Rational> > currentOrbit;
+  HashedList<Vector<coefficient> > currentOrbit;
   const int OrbitSizeHardLimit = 10000000;
   Vector<Rational> rightHWSimpleCoords = theWeyl.GetSimpleCoordinatesFromFundamental(rightHWFundCoords);
   Vectors<Rational> tempRoots;
@@ -144,19 +144,20 @@ bool charSSAlgMod<coefficient>::FreudenthalEvalMeFullCharacter(
   }
   outputCharOwnerSetToZero.MakeZero();
   Vectors<Rational> theVect;
-  HashedList<Vector<Rational> > theOrbit;
+  HashedList<Vector<coefficient> > theOrbit;
   theVect.SetSize(1);
   Weight<coefficient> tempMon;
   tempMon.owner = nullptr;
   for (int i = 0; i < domChar.size(); i ++) {
     theVect[0] = this->GetOwner()->theWeyl.GetSimpleCoordinatesFromFundamental(domChar[i].weightFundamentalCoordS);
     if (!(this->GetOwner()->theWeyl.GenerateOrbit(theVect, false, theOrbit, false, - 1, 0, upperBoundNumDominantWeights))) {
-      if (outputDetails != 0) {
+      if (outputDetails != nullptr) {
         *outputDetails = "failed to generate orbit (possibly too large?)";
       }
       return false;
     }
-    for (int j = 0; j < theOrbit.size; j ++) {
+    int orbitSize = theOrbit.size;
+    for (int j = 0; j < orbitSize; j ++) {
       tempMon.weightFundamentalCoordS = this->GetOwner()->theWeyl.GetFundamentalCoordinatesFromSimple(theOrbit[j]);
       outputCharOwnerSetToZero.AddMonomial(tempMon, domChar.theCoeffs[i]);
     }
@@ -222,7 +223,7 @@ bool charSSAlgMod<coefficient>::FreudenthalEvalMeDominantWeightsOnly(
     if (!this->GetOwner()->theWeyl.FreudenthalEval(
       currentWeightFundCoords, currentWeights, currentMults, &localDetail, upperBoundNumDominantWeights
     )) {
-      if (outputDetails != 0) {
+      if (outputDetails != nullptr) {
         localErrors << "Encountered error while evaluating freudenthal formula. Error details: " << localDetail
         << "<br> Further computation detail: " << localDetails.str();
         *outputDetails = localErrors.str();
@@ -239,7 +240,7 @@ bool charSSAlgMod<coefficient>::FreudenthalEvalMeDominantWeightsOnly(
       outputCharOwnerSetToZero.AddMonomial(tempMon, bufferCoeff);
     }
   }
-  if (outputDetails != 0) {
+  if (outputDetails != nullptr) {
     *outputDetails = localDetails.str();
   }
   return true;
@@ -322,17 +323,6 @@ void ElementSemisimpleLieAlgebra<coefficient>::ActOnMe(
   const ElementSemisimpleLieAlgebra<coefficient>& theElt,
   ElementSemisimpleLieAlgebra<coefficient>& output,
   SemisimpleLieAlgebra& owner
-) {
-  owner.LieBracket(theElt, *this, output);
-}
-
-template <class coefficient>
-void ElementSemisimpleLieAlgebra<coefficient>::ActOnMe(
-  const ElementSemisimpleLieAlgebra<coefficient>& theElt,
-  ElementSemisimpleLieAlgebra<coefficient>& output,
-  SemisimpleLieAlgebra& owner,
-  const RationalFunctionOld& theRingUnit,
-  const RationalFunctionOld& theRingZero
 ) {
   owner.LieBracket(theElt, *this, output);
 }
@@ -475,7 +465,7 @@ void charSSAlgMod<coefficient>::DrawMeAssumeCharIsOverCartan(
   Vector<coefficient> actualWeight;
   Vector<Rational> actualWeightRationalPart;
 
-  actualAmbientWeyl.DrawRootSystem(theDrawingVars, true, false, 0, false);
+  actualAmbientWeyl.DrawRootSystem(theDrawingVars, true, false, nullptr, false);
   for (int j = 0; j < this->size(); j ++) {
     actualWeight = actualAmbientWeyl.GetSimpleCoordinatesFromFundamental((*this)[j].weightFundamentalCoordS);
     actualWeightRationalPart = actualWeight.GetVectorRational(); // <-type conversion here!
@@ -553,7 +543,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
     if (!inputData.WeylFD.FreudenthalEvalIrrepIsWRTLeviPart(
       currentMon.weightFundamentalCoordS, tempHashedRoots, tempMults, tempS, 10000
     )) {
-      if (Report != 0) {
+      if (Report != nullptr) {
         *Report = tempS;
       }
       return false;
@@ -574,7 +564,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
     )) {
       out << "failed to generate the complement-sub-Weyl-orbit of weight "
       << theWeyL.GetSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoordS).ToString();
-      if (Report != 0) {
+      if (Report != nullptr) {
         *Report = out.str();
       }
       return false;
@@ -629,7 +619,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
     if (!WeylFDSmall.FreudenthalEvalIrrepIsWRTLeviPart(
       localHighest.weightFundamentalCoordS, tempHashedRoots, tempMults, tempS, 10000
     )) {
-      if (Report != 0) {
+      if (Report != nullptr) {
         *Report = tempS;
       }
       return false;
@@ -646,7 +636,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
   theFormat.fundamentalWeightLetter = "\\psi";
   out << "<br>Character w.r.t the Levi part of the parabolic of the small algebra: "
   << HtmlRoutines::GetMathSpanPure(output.ToString(&theFormat));
-  if (Report != 0) {
+  if (Report != nullptr) {
     DrawingVariables theDV1;
     std::string tempS;
     output.DrawMeNoMults(tempS, theDV1, 10000);
@@ -671,6 +661,5 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
   }
   return true;
 }
-
 
 #endif

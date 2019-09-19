@@ -1,5 +1,6 @@
 //The current file is licensed under the license terms found in the main header file "calculator.h".
 //For additional information refer to the file "calculator.h".
+#include "math_extra_finite_groups_implementation.h"
 #include "general_lists.h"
 #include "math_general.h"
 #include "math_extra_universal_enveloping.h"
@@ -352,7 +353,7 @@ bool LittelmannPath::GenerateOrbit(
   bool result = true;
   Selection parabolicSelectionSelectedAreInLeviPart;
   parabolicSelectionSelectedAreInLeviPart.init(theDim);
-  if (parabolicNonSelectedAreInLeviPart != 0) {
+  if (parabolicNonSelectedAreInLeviPart != nullptr) {
     parabolicSelectionSelectedAreInLeviPart = *parabolicNonSelectedAreInLeviPart;
     parabolicSelectionSelectedAreInLeviPart.InvertSelection();
   } else {
@@ -632,14 +633,14 @@ bool ElementUniversalEnveloping<coefficient>::HWMTAbilinearForm(
   Accum.MakeZero(*this->owners, this->indexInOwners);
   MonomialUniversalEnveloping<coefficient> constMon;
   constMon.MakeConst();
-  if (logStream != 0) {
+  if (logStream != nullptr) {
     *logStream << "backtraced elt: " << MTright.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
     *logStream << "this element: " << this->ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
   }
   for (int j = 0; j < right.size; j ++) {
     intermediateAccum = *this;
     intermediateAccum.Simplify(theGlobalVariables, theRingUnit, theRingZero);
-    if (logStream != 0) {
+    if (logStream != nullptr) {
       *logStream << "intermediate after simplification: "
       << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
     }
@@ -652,23 +653,23 @@ bool ElementUniversalEnveloping<coefficient>::HWMTAbilinearForm(
         for (int k = 0; k < thePower; k ++) {
           tempElt.MakeOneGenerator(rightMon.generatorsIndices[i], *this->owners, this->indexInOwners, theRingUnit);
           MathRoutines::swap(tempElt, intermediateAccum);
-          if (logStream != 0) {
+          if (logStream != nullptr) {
             *logStream << "tempElt before mult: " << tempElt.ToString(&theGlobalVariables.theDefaultFormat) << "<br>";
             *logStream << "intermediate before mult: "
             << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
           }
           intermediateAccum *= (tempElt);
-          if (logStream != 0) {
+          if (logStream != nullptr) {
             *logStream << "intermediate before simplification: "
             << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
           }
           intermediateAccum.Simplify(theRingUnit);
-          if (logStream != 0) {
+          if (logStream != nullptr) {
             *logStream << "intermediate after simplification: "
             << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
           }
           intermediateAccum.ModOutVermaRelations(subHiGoesToIthElement, theRingUnit, theRingZero);
-          if (logStream != 0) {
+          if (logStream != nullptr) {
             *logStream << "intermediate after Verma rels: "
             << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
           }
@@ -684,7 +685,7 @@ bool ElementUniversalEnveloping<coefficient>::HWMTAbilinearForm(
       output += intermediateAccum.theCoeffs[theIndex];
     }
   }
-  if (logStream != 0) {
+  if (logStream != nullptr) {
     *logStream << "final UE element: " << Accum.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
   }
   return true;

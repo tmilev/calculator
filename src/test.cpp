@@ -301,7 +301,7 @@ unsigned int Vector<int>::HashFunction() const {
   unsigned int result = 0;
   int theSize = MathRoutines::Minimum(this->size, SomeRandomPrimesSize);
   for (int i = 0; i < theSize; i ++) {
-    result += (unsigned int) this->TheObjects[i] * SomeRandomPrimes[i];
+    result += static_cast<unsigned int>(this->TheObjects[i]) * SomeRandomPrimes[i];
   }
   return result;
 }
@@ -357,7 +357,7 @@ void ListListInt::SetSize(int newsz) {
       int oldos = this->things.size;
       int newos = this->things.size + deltas;
       this->things.SetSize(this->things.size + deltas);
-      memmove(this->things.TheObjects + newsz, this->things.TheObjects + size, oldos - size);
+      memmove(this->things.TheObjects + newsz, this->things.TheObjects + size, static_cast<unsigned>(oldos - size));
       for (int i = 0; i < size; i ++) {
         this->things[i] += deltas;
       }
@@ -396,11 +396,11 @@ void SubListListInt::SetSize(int newsz) {
     return;
   }
   if (deltas < 0) {
-    memmove(viewed->things.TheObjects + nslp + deltas, viewed->things.TheObjects + nslp, viewed->things.size - nslp);
+    memmove(viewed->things.TheObjects + nslp + deltas, viewed->things.TheObjects + nslp, static_cast<unsigned>(viewed->things.size - nslp));
     viewed->things.SetSize(viewed->things.size + deltas);
   } else {
     viewed->things.SetSize(viewed->things.size + deltas);
-    memmove(viewed->things.TheObjects + nslp + deltas, viewed->things.TheObjects + nslp, viewed->things.size - nslp);
+    memmove(viewed->things.TheObjects + nslp + deltas, viewed->things.TheObjects + nslp, static_cast<unsigned>(viewed->things.size - nslp));
   }
 }
 
@@ -1495,19 +1495,6 @@ void BSTest() {
   stOutput << "\n";
 }
 
-int chartable[10][10] =
-{ {1,  1,  1,  1,  1,  1,  1,  1,  1,  1},
-  {1, - 1, - 1,  1,  1, - 1,  1,  1, - 1, - 1},
-  {3,  1,  1, - 1,  1,  0,  0, - 1, - 1, -3},
-  {3, - 1, - 1, - 1,  1,  0,  0, - 1,  1,  3},
-  {2,  0, -2,  0,  0,  1, - 1,  2,  0, -2},
-  {2,  0,  2,  0,  0, - 1, - 1,  2,  0,  2},
-  {1,  1, - 1, - 1, - 1, - 1,  1,  1,  1, - 1},
-  {1, - 1,  1, - 1, - 1,  1,  1,  1, - 1,  1},
-  {3, - 1,  1,  1, - 1,  0,  0, - 1,  1, -3},
-  {3,  1, - 1,  1, - 1,  0,  0, - 1, - 1,  3}
-};
-
 void make_macdonald_polynomial(
   const WeylGroupData& G, const List<Vector<Rational> > roots, Polynomial<Rational>& macdonaldPoly
 ) {
@@ -1694,8 +1681,8 @@ get_macdonald_representation(WeylGroupData& W, const List<Vector<Rational> >& ro
   List<Vector<Rational> > monomial;
   List<List<Vector<Rational> > > monomials;
   Matrix<Rational> m;
-  for (int i = 0; (Rational) i < W.theGroup.GetSize(); i ++) {
-    W.GetStandardRepresentationMatrix(i,m);
+  for (int i = 0; Rational(i) < W.theGroup.GetSize(); i ++) {
+    W.GetStandardRepresentationMatrix(i, m);
     monomial.SetSize(roots.size);
     for (int j = 0; j < roots.size; j ++) {
       monomial[j] = m * roots[j];
@@ -1785,7 +1772,7 @@ get_macdonald_representation(WeylGroupData& W, const List<Vector<Rational> >& ro
   return rep;
 }
 
-int maxpoints;
+static int maxpoints;
 
 // balanced ternary
 Vector<int> pointi(int d, int i) {

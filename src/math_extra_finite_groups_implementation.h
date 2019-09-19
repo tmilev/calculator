@@ -337,20 +337,6 @@ coefficient FiniteGroup<elementSomeGroup>::GetHermitianProduct(
 }
 
 template <class elementSomeGroup>
-LargeInt FiniteGroup<elementSomeGroup>::GetSize() {
-  this->CheckConsistency();
-  if (this->sizePrivate > 0) {
-    return sizePrivate;
-  }
-  if (this->GetSizeByFormula != 0) {
-    this->sizePrivate = this->GetSizeByFormula(*this);
-    return sizePrivate;
-  }
-  this->ComputeAllElements(false);
-  return this->sizePrivate;
-}
-
-template <class elementSomeGroup>
 int FiniteGroup<elementSomeGroup>::ConjugacyClassCount() const {
   if (!this->flagCCRepresentativesComputed) {
     crash << "Requesting conjugacy class count but conjugacy class representatives are not computed." << crash;
@@ -476,6 +462,34 @@ bool FiniteGroup<elementSomeGroup>::CheckInitialization() const {
   if (this->generators.size == 0) {
     crash << "Error: group has 0 generators, which is not allowed. If you want to use the trivial "
     << "group, you are still supposed to put the identity element in the group generators. " << crash;
+  }
+  return true;
+}
+
+template <class elementSomeGroup>
+bool FiniteGroup<elementSomeGroup>::CheckOrthogonalityCharTable() {
+  MacroRegisterFunctionWithName("FiniteGroup::CheckOrthogonalityCharTable");
+  for (int i = 0; i < this->characterTable.size; i ++) {
+    for (int j = i; j < this->characterTable.size; j ++) {
+      ClassFunction<FiniteGroup, Rational>& leftChar = this->characterTable[i];
+      ClassFunction<FiniteGroup, Rational>& rightChar = this->characterTable[j];
+      Rational theScalarProd = this->GetHermitianProduct(leftChar.data, rightChar.data);
+      if (j != i) {
+        if (theScalarProd != 0) {
+          crash << "Error: the character table is not orthonormal: char number " << i + 1 << " = "
+          << leftChar.ToString() << " is not orthogonal to char number "
+          << j+ 1 << " = " << rightChar.ToString() << ". <br>The entire char table is: "
+          << this->PrettyPrintCharacterTable() << crash;
+        }
+      }
+      if (j == i) {
+        if (theScalarProd != 1) {
+          crash << "Error: the character table is not orthonormal: char number " << i + 1 << " = "
+          << leftChar.ToString() << " is not of norm 1. "
+          << "<br>The entire char table is: " << this->PrettyPrintCharacterTable() << crash;
+        }
+      }
+    }
   }
   return true;
 }

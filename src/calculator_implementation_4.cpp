@@ -2906,6 +2906,9 @@ void ObjectContainer::reset() {
   srand (static_cast<unsigned>(this->CurrentRandomSeed));
 }
 
+template <>
+bool CalculatorConversions::innerPolynomial<Rational>(Calculator& theCommands, const Expression& input, Expression& output);
+
 bool Calculator::innerWriteGenVermaModAsDiffOperators(
   Calculator& theCommands, const Expression& input, Expression& output, bool AllGenerators,
   bool useNilWeight, bool ascending

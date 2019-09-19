@@ -150,65 +150,8 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
   return true;
 }
 
-template <class coefficient>
-bool Vectors<coefficient>::ConesIntersect(
-  List<Vector<Rational> >& StrictCone,
-  List<Vector<Rational> >& NonStrictCone,
-  Vector<Rational>* outputLinearCombo,
-  Vector<Rational>* outputSplittingNormal
-) {
-  Matrix<Rational> matA;
-  Matrix<Rational> matb;
-  if (StrictCone.size == 0) {
-    if (outputSplittingNormal != nullptr) {
-      if (NonStrictCone.size > 0) {
-        outputSplittingNormal->MakeZero(NonStrictCone[0].size);
-      }
-    }
-    return false;
-  }
-  int theDimension = StrictCone[0].size;
-  int numCols = StrictCone.size + NonStrictCone.size;
-  matA.init(theDimension + 1, numCols);
-  matb.init(theDimension + 1, 1);
-  matb.MakeZero(); matb.elements[theDimension][0].MakeOne();
-  for (int i = 0; i < StrictCone.size; i ++) {
-    for (int k = 0; k < theDimension; k ++) {
-      matA.elements[k][i].Assign(StrictCone[i][k]);
-    }
-    matA.elements[theDimension][i].MakeOne();
-  }
-  for (int i = 0; i < NonStrictCone.size; i ++) {
-    int currentCol = i + StrictCone.size;
-    for (int k = 0; k < theDimension; k ++) {
-      matA.elements[k][currentCol].Assign(NonStrictCone[i][k]);
-      matA.elements[k][currentCol].Minus();
-    }
-    matA.elements[theDimension][currentCol].MakeZero();
-  }
-  if (!Matrix<Rational>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(
-    matA, matb, outputLinearCombo
-  )) {
-    if (outputSplittingNormal != nullptr) {
-      bool tempBool = Vectors<coefficient>::GetNormalSeparatingCones(StrictCone, NonStrictCone, *outputSplittingNormal);
-      if (!tempBool) {
-        crash << "This is an algorithmic/mathematical (hence also programming) error: "
-        << "I get that two cones do not intersect, yet there exists no plane separating them. "
-        << "Something is wrong with the implementation of the simplex algorithm. "
-        << "The input which manifested the problem was: <br>StrictCone: <br>"
-        << StrictCone.ToString() << "<br>Non-strict cone: <br>"
-        << NonStrictCone.ToString() << "<br>" << crash;
-      }
-    }
-    return false;
-  }
-  if (outputLinearCombo != nullptr) {
-    for (int i = StrictCone.size; i < outputLinearCombo->size; i ++) {
-      (*outputLinearCombo)[i] *= - 1;
-    }
-  }
-  return true;
-}
+template <>
+bool CalculatorConversions::innerPolynomial<Rational>(Calculator& theCommands, const Expression& input, Expression& output);
 
 bool Calculator::innerGCDOrLCMPoly(Calculator& theCommands, const Expression& input, Expression& output, bool doGCD) {
   MacroRegisterFunctionWithName("Calculator::innerGCDOrLCMPoly");
@@ -2224,6 +2167,13 @@ bool Calculator::innerRootSubsystem(Calculator& theCommands, const Expression& i
   << ". Simple basis: " << theDiagram.SimpleBasesConnectedComponents.ToString();
   return output.AssignValue(out.str(), theCommands);
 }
+
+template <>
+void Vector<Rational>::PerturbNormalRelativeToVectorsInGeneralPosition(
+  const Vectors<Rational>& NonStrictConeNonPositiveScalar,
+  const List<Vector<Rational> >& VectorsToBeInGeneralPosition
+);
+
 
 bool Calculator::innerPerturbSplittingNormal(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerPerturbSplittingNormal");

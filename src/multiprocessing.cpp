@@ -8,6 +8,7 @@
 
 extern WebServer theWebServer;
 
+extern ProjectInformationInstance projectInfoInstanceWebServerInterProcessLogisticsImplementation;
 ProjectInformationInstance projectInfoInstanceWebServerInterProcessLogisticsImplementation(
   __FILE__, "Web server interprocess communication implementation."
 );
@@ -77,7 +78,7 @@ PauseProcess::~PauseProcess() {
 
 std::string PipePrimitive::GetLastRead() {
   MacroRegisterFunctionWithName("PipePrimitive::GetLastRead");
-  std::string result(this->lastRead.TheObjects, this->lastRead.size);
+  std::string result(this->lastRead.TheObjects, static_cast<unsigned>(this->lastRead.size));
   return result;
 }
 
@@ -100,7 +101,7 @@ bool PipePrimitive::CreateMe(
     logServer << logger::red << "FAILED to create pipe: " << this->name << ". " << logger::endL;
     this->Release();
     theWebServer.StopKillAll(false);
-    return false;
+    // return false;
   }
   if (!readEndBlocks) {
     if (!this->SetPipeReadNonBlockingIfFailThenCrash(restartServerOnFail, dontCrashOnFail)) {
@@ -253,7 +254,7 @@ int Pipe::WriteWithTimeoutViaSelect(
       failStream << maxNumTries << " failed or timed-out select attempts on file descriptor: " << theFD;
       break;
     }
-    numSelected = select(theFD + 1, 0, &theFDcontainer, 0, &timeOut);
+    numSelected = select(theFD + 1, nullptr, &theFDcontainer, nullptr, &timeOut);
     failStream << "While select-writing on file descriptor: " << theFD << ", select failed. Error message: "
     << strerror(errno) << ". \n";
     numFails ++;
@@ -291,7 +292,7 @@ int Pipe::ReadWithTimeOutViaSelect(
       failStream << maxNumTries << " failed or timed-out select attempts on file descriptor: " << theFD;
       break;
     }
-    numSelected = select(theFD + 1, &theFDcontainer, 0, 0, &timeOut);
+    numSelected = select(theFD + 1, &theFDcontainer, nullptr, nullptr, &timeOut);
     failStream << "While select-reading from file descriptor: " << theFD << ", select failed. Error message: "
     << strerror(errno) << ". \n";
     numFails ++;
@@ -307,7 +308,11 @@ int Pipe::ReadWithTimeOutViaSelect(
 
   failStream << "DEBUG: select-readings successful so far, numSelected = " << numSelected << ". ";
   do {
-    bytesRead = read(theFD, output.TheObjects, output.size - 1);
+    bytesRead = static_cast<int>(read(
+      theFD,
+      output.TheObjects,
+      static_cast<unsigned>(output.size - 1)
+    ));
     if (bytesRead > 0) {
       return bytesRead;
     }
@@ -386,7 +391,7 @@ bool PipePrimitive::SetPipeWriteBlockingIfFailThenCrash(bool restartServerOnFail
 int Pipe::WriteNoInterrupts(int theFD, const std::string& input) {
   int numAttempts = 0;
   for (;;) {
-    int result = write(theFD, input.c_str(), input.size());
+    int result = static_cast<int>(write(theFD, input.c_str(), input.size()));
     if (result >= 0) {
       return result;
     }
@@ -405,7 +410,7 @@ int Pipe::WriteNoInterrupts(int theFD, const std::string& input) {
     }
     return result;
   }
-  return - 1;
+  //  return - 1;
 }
 
 void Pipe::WriteOnceAfterEmptying(const std::string& toBeSent, bool restartServerOnFail, bool dontCrashOnFail) {
@@ -475,7 +480,7 @@ bool PipePrimitive::WriteOnceIfFailThenCrash(const std::string& toBeSent, bool r
   this->numberOfBytesLastWrite = 0;
   int numBadAttempts = 0;
   for (;;) {
-    this->numberOfBytesLastWrite = write(this->pipeEnds[1], toBeSent.c_str(), toBeSent.size());
+    this->numberOfBytesLastWrite = static_cast<int>(write(this->pipeEnds[1], toBeSent.c_str(), toBeSent.size()));
     if (this->numberOfBytesLastWrite < 0) {
       if (
         errno == EAI_AGAIN || errno == EWOULDBLOCK || errno == EINTR || errno == EIO
@@ -492,7 +497,7 @@ bool PipePrimitive::WriteOnceIfFailThenCrash(const std::string& toBeSent, bool r
   if (this->numberOfBytesLastWrite < 0) {
     return false;
   }
-  if ((unsigned) this->numberOfBytesLastWrite < toBeSent.size()) {
+  if (static_cast<unsigned>(this->numberOfBytesLastWrite) < toBeSent.size()) {
     if (theGlobalVariables.processType == ProcessTypes::worker) {
       logIO << logger::red << this->ToString() << ": wrote only "
       << this->numberOfBytesLastWrite << " bytes out of " << toBeSent.size() << " total. " << logger::endL;
@@ -575,7 +580,7 @@ bool PipePrimitive::ReadOnceIfFailThenCrash(bool restartServerOnFail, bool dontC
   int numReadBytes = 0;
   for (;;) {
     //logWorker << logger::blue << theWebServer.ToStringActiveWorker() << " pipe, " << this->ToString() << " calling read." << logger::endL;
-    numReadBytes = read(this->pipeEnds[0], this->buffer.TheObjects, bufferSize);
+    numReadBytes = static_cast<int>(read(this->pipeEnds[0], this->buffer.TheObjects, bufferSize));
     if (numReadBytes >= 0) {
       break;
     }
@@ -677,7 +682,7 @@ void logger::reset() {
   if (! this->theFile.is_open()) {
     this->currentColor = logger::red;
     std::string computedFileName;
-    FileOperations::GetPhysicalFileNameFromVirtual(this->theFileName, computedFileName, true, false, 0);
+    FileOperations::GetPhysicalFileNameFromVirtual(this->theFileName, computedFileName, true, false, nullptr);
     std::cout << this->openTagConsole() << "Could not open log file with virtual name: "
     << this->theFileName << " and computed name: "
     << computedFileName << this->closeTagConsole()
@@ -899,7 +904,7 @@ logger::StringHighligher::StringHighligher(const std::string& input) {
 }
 
 void MathRoutines::ParseListIntCrashOnFailure(const std::string& input, List<int>& result) {
-  bool success = MathRoutines::ParseListInt(input, result, 0);
+  bool success = MathRoutines::ParseListInt(input, result, nullptr);
   if (!success) {
     crash << "Failed to parse list int with a function that does not allow failure. " << crash;
   }
@@ -947,22 +952,29 @@ logger& logger::operator<<(const std::string& input) {
   }
   int indexLastNonShownByte = 0;
   List<std::string> chunks;
-  for (int i = 0; i < this->nextHighlighter.sections.size && indexLastNonShownByte < (signed) input.size(); i ++) {
+  for (
+    int i = 0;
+    i < this->nextHighlighter.sections.size && indexLastNonShownByte < static_cast<signed>(input.size());
+    i ++
+  ) {
     logger::StringHighligher::Section& currentSection = this->nextHighlighter.sections[i];
     if (currentSection.theType != "") {
       chunks.AddOnTop(currentSection.theType);
       continue;
     }
     int nextSectionLength = currentSection.length;
-    if (indexLastNonShownByte + nextSectionLength > (signed) input.size()) {
-      nextSectionLength = input.size() - indexLastNonShownByte;
+    if (indexLastNonShownByte + nextSectionLength > static_cast<signed>(input.size())) {
+      nextSectionLength = static_cast<int>(input.size()) - indexLastNonShownByte;
     }
-    std::string current = input.substr(indexLastNonShownByte, nextSectionLength);
+    std::string current = input.substr(
+      static_cast<unsigned>(indexLastNonShownByte),
+      static_cast<unsigned>(nextSectionLength)
+    );
     chunks.AddOnTop(current);
     indexLastNonShownByte += nextSectionLength;
   }
-  if (indexLastNonShownByte < (signed) input.size()) {
-    chunks.AddOnTop(input.substr(indexLastNonShownByte));
+  if (indexLastNonShownByte < static_cast<signed>(input.size())) {
+    chunks.AddOnTop(input.substr(static_cast<unsigned>(indexLastNonShownByte)));
   }
   for (int i = 0; i < chunks.size; i ++) {
     int colorIndex = i % 3;

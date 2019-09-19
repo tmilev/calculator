@@ -5,6 +5,7 @@
 #include "math_extra_semisimple_Lie_algebras_implementation.h"
 #include "math_extra_finite_groups_implementation.h"
 
+extern ProjectInformationInstance ProjectInfoVpf9_5RootSAsSl2sas;
 ProjectInformationInstance ProjectInfoVpf9_5RootSAsSl2sas(__FILE__, "Root and sl(2) subalgebras of semisimple Lie algebras. ");
 
 void rootSubalgebra::GetCoxeterElement(Matrix<Rational>& output) {
@@ -29,7 +30,7 @@ void rootSubalgebra::GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double
     } else {
       outputBasis1.MakeEi(theDimension, 0);
     }
-    if (outputBasis1[0] == 0) {
+    if (outputBasis1[0] == 0.0) {
       outputBasis2.MakeEi(theDimension, 0);
     } else {
       outputBasis2.MakeEi(theDimension, 1);
@@ -722,7 +723,7 @@ bool rootSubalgebra::ConeConditionHolds(
   bool doExtractRelations
 ) {
   Matrix<Rational> tempA, tempB;
-  if (Vectors<Rational>::ConesIntersect(NilradicalRoots, Ksingular, 0, 0)) {
+  if (Vectors<Rational>::ConesIntersect(NilradicalRoots, Ksingular, nullptr, nullptr)) {
     if (doExtractRelations) {
       this->ExtractRelations(tempA, tempB, NilradicalRoots, owner, indexInOwner, Ksingular);
     }
@@ -879,7 +880,7 @@ void rootSubalgebra::ExtractRelations(
     theRel.FixRightHandSide(*this, NilradicalRoots);
     theRel.MakeLookCivilized(*this);
     theRel.ComputeDebugString(owner, true, true);
-    if (false) {
+    if ((false)) {
       if (theRel.theDiagram.ToString() == "C^{2}_3") {
         Selection tempSel;
         tempSel.init(Ksingular.size);
@@ -1096,7 +1097,7 @@ bool rootSubalgebra::attemptExtensionToIsomorphismNoCentralizer(
   if (CurrentRank != Range.GetRankOfSpanOfElements()) {
     crash << "Ranks do not coincide. " << crash;
   }
-  if (abortKmodule != 0) {
+  if (abortKmodule != nullptr) {
     *abortKmodule = false;
   }
   if (CurrentRank == this->GetAmbientWeyl().CartanSymmetric.NumRows) {
@@ -1130,7 +1131,7 @@ bool rootSubalgebra::attemptExtensionToIsomorphismNoCentralizer(
       leftSA.theCentralizerDiagram.ToString() != rightSA.theCentralizerDiagram.ToString() ||
       rightSA.Modules.size != leftSA.Modules.size
     ) {
-      if (abortKmodule != 0) {
+      if (abortKmodule != nullptr) {
         *abortKmodule = true;
       }
       return false;
@@ -1227,7 +1228,7 @@ bool rootSubalgebra::IsAnIsomorphism(
     }
   }
   Vector<Rational> tempRoot;
-  if (additionalDomain != 0) {
+  if (additionalDomain != nullptr) {
     for (int i = 0; i < additionalDomain->size; i ++) {
       additionalDomain->TheObjects[i].GetCoordsInBasiS(tempRoots, tempRoot);
       if (!(tempRoot == additionalRange->TheObjects[i])) {
@@ -1241,7 +1242,7 @@ bool rootSubalgebra::IsAnIsomorphism(
       return false;
     }
   }
-  if (outputAutomorphisms != 0) {
+  if (outputAutomorphisms != nullptr) {
     outputAutomorphisms->ExternalAutomorphisms.AddOnTop(tempRoots);
   }
   return true;
@@ -1841,10 +1842,10 @@ bool rootSubalgebra::attemptExtensionToIsomorphism(Vectors<Rational>& Domain,
   rootSubalgebras& inputOwner,
   bool* DomainAndRangeGenerateNonIsoSAs
 ) {
-  if (outputAutomorphisms != 0) {
+  if (outputAutomorphisms != nullptr) {
     outputAutomorphisms->ExternalAutomorphisms.size = 0;
   }
-  if (DomainAndRangeGenerateNonIsoSAs != 0) {
+  if (DomainAndRangeGenerateNonIsoSAs != nullptr) {
     *DomainAndRangeGenerateNonIsoSAs = false;
   }
   rootSubalgebra theDomainRootSA;
@@ -1859,7 +1860,7 @@ bool rootSubalgebra::attemptExtensionToIsomorphism(Vectors<Rational>& Domain,
     theDomainRootSA.theDynkinDiagram.ToString() != theRangeRootSA.theDynkinDiagram.ToString() ||
     theDomainRootSA.theCentralizerDiagram.ToString() != theRangeRootSA.theCentralizerDiagram.ToString()
   ) {
-    if (DomainAndRangeGenerateNonIsoSAs != 0) {
+    if (DomainAndRangeGenerateNonIsoSAs != nullptr) {
       *DomainAndRangeGenerateNonIsoSAs = true;
     }
     return false;
@@ -1912,13 +1913,13 @@ bool rootSubalgebra::attemptExtensionToIsomorphism(Vectors<Rational>& Domain,
         theRangeRootSA.theCentralizerDiagram
       );
       if (theDomainRootSA.attemptExtensionToIsomorphismNoCentralizer(
-        isoDomain, isoRange, 0, outputAutomorphisms, false, 0, &Domain, &Range
+        isoDomain, isoRange, 0, outputAutomorphisms, false, nullptr, &Domain, &Range
       )) {
-        if (outputAutomorphisms == 0) {
+        if (outputAutomorphisms == nullptr) {
           return true;
         }
       }
-      if (outputAutomorphisms != 0) {
+      if (outputAutomorphisms != nullptr) {
         theDomainRootSA.MakeProgressReportGenAutos(
           l + NumAutosCentralizer * j, tempI2 * NumAutosCentralizer, outputAutomorphisms->ExternalAutomorphisms.size
         );
@@ -1939,7 +1940,7 @@ bool rootSubalgebra::GenerateIsomorphismsPreservingBorel(
   if (this->theCentralizerDiagram.ToString() != right.theCentralizerDiagram.ToString()) {
     return false;
   }
-  if (outputAutomorphisms != 0) {
+  if (outputAutomorphisms != nullptr) {
     outputAutomorphisms->ExternalAutomorphisms.size = 0;
     outputAutomorphisms->simpleRootsInner.size = 0;
     outputAutomorphisms->simpleRootsInner = this->SimpleBasisCentralizerRoots;
@@ -1998,13 +1999,13 @@ bool rootSubalgebra::GenerateIsomorphismsPreservingBorel(
             right.theCentralizerDiagram
           );
           if (this->attemptExtensionToIsomorphismNoCentralizer(
-            isoDomain, isoRange, 0, outputAutomorphisms, false, 0, 0, 0
+            isoDomain, isoRange, 0, outputAutomorphisms, false, nullptr, nullptr, nullptr
           )) {
-            if (outputAutomorphisms == 0) {
+            if (outputAutomorphisms == nullptr) {
               return true;
             }
           }
-          if (outputAutomorphisms != 0) {
+          if (outputAutomorphisms != nullptr) {
             this->MakeProgressReportGenAutos(
               l + NumAutosCentralizer * (k + NumAutos * (j + i * tempI2)),
               tempI1 * tempI2 * NumAutos * NumAutosCentralizer,
@@ -2053,7 +2054,7 @@ void rootSubalgebra::KEnumerationsToLinComb() {
   int theDimension = this->GetAmbientWeyl().CartanSymmetric.NumRows;
   Matrix<Rational> tempMat;
   Selection tempSelection;
-  tempMat.init((int)theDimension, (int)theDimension);
+  tempMat.init(theDimension, theDimension);
   int counter = 0;
   for (int i = 0; i < this->PosRootsKConnectedComponents.size; i ++) {
     this->PosRootsKConnectedComponents[i].SelectionToMatrixAppend(
@@ -2193,7 +2194,7 @@ bool rootSubalgebras::GrowDynkinType(
     }
     if (!isGood) {
       output.RemoveIndexSwapWithLast(i);
-      if (outputPermutationSimpleRoots != 0) {
+      if (outputPermutationSimpleRoots != nullptr) {
         outputPermutationSimpleRoots->RemoveIndexSwapWithLast(i);
       }
     }
@@ -2690,7 +2691,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(
         << " which is supposed to equal 2. " << crash;
       }
     }
-    this->GetAmbientWeyl().RaiseToDominantWeight(characteristicH, 0, 0, &raisingElt);
+    this->GetAmbientWeyl().RaiseToDominantWeight(characteristicH, nullptr, nullptr, &raisingElt);
     reflectedSimpleBasisK = this->SimpleBasisK;
     for (int k = 0; k < reflectedSimpleBasisK.size; k ++) {
       this->GetAmbientWeyl().ActOn(raisingElt, reflectedSimpleBasisK[k]);
@@ -3364,7 +3365,7 @@ std::string rootSubalgebras::ToStringDynkinTableFormat2LaTeX(FormatExpressions* 
   MacroRegisterFunctionWithName("rootSubalgebras::ToStringDynkinTableFormat2LaTeX");
   std::stringstream out;
   std::string endline = "\n<br>";
-  if (theFormat != 0) {
+  if (theFormat != nullptr) {
     theFormat->flagSupressDynkinIndexOne = true;
   }
   out << "\\documentclass{article}" << endline
@@ -3520,7 +3521,7 @@ void rootSubalgebras::ComputeActionNormalizerOfCentralizerIntersectNilradical(
       int tempI = theRootSA.GetIndexKmoduleContainingRoot(tempRoot);
       this->ActionsNormalizerCentralizerNilradical[i][j] = tempI;
     }
-    if (theGlobalVariables.IndicatorStringOutputFunction != 0) {
+    if (theGlobalVariables.IndicatorStringOutputFunction != nullptr) {
       std::stringstream out;
       out << "Computing action of element " << i + 1 << " out of " << theSubgroup.allElements.size;
       theReport.Report(out.str());
@@ -3941,7 +3942,7 @@ int rootSubalgebras::IndexSubalgebra(rootSubalgebra& input) {
         return j;
       } else {
         input.ComputeEssentialS();
-        if (input.GenerateIsomorphismsPreservingBorel(right, 0)) {
+        if (input.GenerateIsomorphismsPreservingBorel(right, nullptr)) {
           return j;
         }
       }
@@ -4471,7 +4472,7 @@ bool coneRelation::GenerateAutomorphisms(coneRelation& right) {
 
 void coneRelations::AddRelationNoRepetition(coneRelation& input, rootSubalgebras& owners) {
   input.ComputeDebugString(owners, true, true);
-  int i = this->GetHash(input);
+  int i = static_cast<signed>(this->GetHash(input));
   List<int>& theIndices = this->TheHashedArrays[i];
   for (int j = 0; j < theIndices.size; j ++) {
     if (this->TheObjects[theIndices[j]].GenerateAutomorphisms(input)) {

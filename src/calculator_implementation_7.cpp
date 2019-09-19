@@ -2,6 +2,7 @@
 //For additional information refer to the file "calculator.h".
 #include "calculator.h"
 #include "calculator_inner_functions.h"
+#include "calculator_inner_typed_functions.h"
 #include "math_general_implementation.h"
 #include "math_extra_Weyl_algebras_implementation.h"
 #include "math_general_polynomial_computations_basic_implementation.h"
@@ -59,6 +60,10 @@ bool MathRoutines::GenerateVectorSpaceClosedWRTOperation(
   inputOutputElts[0].GaussianEliminationByRowsDeleteZeroRows(inputOutputElts);
   return true;
 }
+
+template <>
+bool Expression::ConvertsToType<ElementSemisimpleLieAlgebra<AlgebraicNumber> >(ElementSemisimpleLieAlgebra<AlgebraicNumber>* whichElement) const;
+
 
 bool CalculatorFunctionsGeneral::innerConstructCartanSA(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerConstructCartanSA");
@@ -346,6 +351,11 @@ bool CalculatorFunctionsGeneral::innerNISTEllipticCurveOrder(Calculator& theComm
   }
   return output.AssignValue(result, theCommands);
 }
+
+template < >
+bool ElementEllipticCurve<ElementZmodP>::MakeGeneratorNISTCurve(
+  const std::string& input, std::stringstream* commentsOnFailure
+);
 
 bool CalculatorFunctionsGeneral::innerNISTEllipticCurveGenerator(
   Calculator& theCommands, const Expression& input, Expression& output
@@ -1958,6 +1968,11 @@ bool CalculatorFunctionsGeneral::innerCompositeConstTimesAnyActOn(
   theCommands.CheckInputNotSameAsOutput(input, output);
   return output.MakeXOX(theCommands, theCommands.opTimes(), input[0][1], functionActsOnE);
 }
+
+template <>
+bool Expression::ConvertToType<ElementWeylAlgebra<Rational> >(Expression& output) const;
+template <>
+bool Expression::ConvertToType<Polynomial<Rational> >(Expression& output) const;
 
 bool CalculatorFunctionsGeneral::innerCompositeEWAactOnPoly(
   Calculator& theCommands, const Expression& input, Expression& output
@@ -6417,12 +6432,16 @@ bool CalculatorFunctionsGeneral::innerPlotParametricCurve(
   return output.AssignValue(outputPlot, theCommands);
 }
 
+template < >
+SemisimpleSubalgebras& Expression::GetValueNonConst() const;
+
 bool CalculatorFunctionsGeneral::innerComputePairingTablesAndFKFTsubalgebras(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerComputePairingTablesAndFKFTsubalgebras");
-  if (!input.IsOfType<SemisimpleSubalgebras>())
+  if (!input.IsOfType<SemisimpleSubalgebras>()) {
     return theCommands << "<hr>Input of ComputeFKFT must be of type semisimple subalgebras. ";
+  }
   SemisimpleSubalgebras& theSAs = input.GetValueNonConst<SemisimpleSubalgebras>();
   theSAs.flagComputePairingTable = true;
   theSAs.flagComputeNilradicals = true;

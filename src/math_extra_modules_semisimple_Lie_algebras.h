@@ -321,5 +321,6 @@ public:
     return input.HashFunction();
   }
 };
+
 #endif
 

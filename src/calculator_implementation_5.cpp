@@ -9,6 +9,8 @@
 #include "html_snippets.h"
 #include "math_general_polynomial_computations_advanced_implementation.h"
 #include <cmath>
+
+extern ProjectInformationInstance ProjectInfoVpf6_35cpp;
 ProjectInformationInstance ProjectInfoVpf6_35cpp(__FILE__, "More calculator built-in functions. ");
 
 class MeshTriangles {
@@ -96,7 +98,7 @@ double MeshTriangles::GetValueAtPoint(const Vector<double>& thePoint) {
     this->numGoodEvaluations ++;
   } else {
     this->numBadEvaluations ++;
-    functionValue = NAN;
+    functionValue = std::nan("");
   }
   this->theEvaluatedPoints.SetKeyValue(thePoint, functionValue);
   return functionValue;
@@ -139,7 +141,7 @@ void MeshTriangles::AddPointFromVerticesValues(
 ) {
   //MacroRegisterFunctionWithName("MeshTriangles::AddPointFromVerticesValues");
   double Delta = leftVal - rightVal;
-  if (Delta == 0) {
+  if (Delta == 0.0) {
     outputAppend.AddOnTop(left);
     return;
   }
@@ -229,7 +231,7 @@ void MeshTriangles::ComputeImplicitPlotPart2() {
   }
   double minSide = MathRoutines::Minimum(this->Height, this->Width) * this->minTriangleSideAsPercentOfWidthPlusHeight;
   PlotObject currentPlot;
-  currentPlot.colorRGB = HtmlRoutines::RedGreenBlue(255, 0, 0);
+  currentPlot.colorRGB = static_cast<int>(HtmlRoutines::RedGreenBlue(255, 0, 0));
   Vectors<double>& theSegment = currentPlot.thePointsDouble;
   List<Vector<double> > currentTriangle;
   for (int i = 0; i < this->theTriangles.size; i ++) {
@@ -239,7 +241,7 @@ void MeshTriangles::ComputeImplicitPlotPart2() {
     }
     bool isGood = true;
     for (int j = 0; j < currentTriangle.size; j ++) {
-      if (this->GetValueAtPoint(currentTriangle[j]) == NAN) {
+      if (this->GetValueAtPoint(currentTriangle[j]) == std::nan("")) {
         isGood = false;
         break;
       }
@@ -308,12 +310,12 @@ void MeshTriangles::ComputeImplicitPlot() {
     }
   }
   if (this->flagShowGrid) {
-    this->PlotGrid(HtmlRoutines::RedGreenBlue(240, 240, 0));
+    this->PlotGrid(static_cast<int>(HtmlRoutines::RedGreenBlue(240, 240, 0)));
     this->thePlot.thePlots.AddListOnTop(this->theGrid.thePlots);
   }
   this->ComputeImplicitPlotPart2();
   if (this->flagShowGrid) {
-    this->PlotGrid(HtmlRoutines::RedGreenBlue(100, 100, 100));
+    this->PlotGrid(static_cast<int>(HtmlRoutines::RedGreenBlue(100, 100, 100)));
     this->thePlot.thePlots.AddListOnTop(this->theGrid.thePlots);
   }
 //  this->theCurve.colorRGB=HtmlRoutines::RedGreenBlue(255,0,0);
@@ -323,20 +325,20 @@ void MeshTriangles::ComputeImplicitPlot() {
 
 bool Calculator::GetMatrixDoubles(const Expression& input, Matrix<double>& output, int DesiredNumcols) {
   return this->GetMatrix<double>(
-    input, output, 0, DesiredNumcols, CalculatorFunctionsGeneral::innerEvaluateToDouble
+    input, output, nullptr, DesiredNumcols, CalculatorFunctionsGeneral::innerEvaluateToDouble
   );
 }
 
 
 bool Calculator::GetVectorDoubles(const Expression& input, Vector<double>& output, int DesiredDimensionNonMandatory) {
-  return this->GetVectoR(input, output, 0, DesiredDimensionNonMandatory, CalculatorFunctionsGeneral::innerEvaluateToDouble);
+  return this->GetVectoR(input, output, nullptr, DesiredDimensionNonMandatory, CalculatorFunctionsGeneral::innerEvaluateToDouble);
 }
 
 bool Calculator::GetVectorDoublesFromFunctionArguments(
   const Expression& input, Vector<double>& output, int DesiredDimensionNonMandatory
 ) {
   return this->GetVectorFromFunctionArguments(
-    input, output, 0, DesiredDimensionNonMandatory, CalculatorFunctionsGeneral::innerEvaluateToDouble
+    input, output, nullptr, DesiredDimensionNonMandatory, CalculatorFunctionsGeneral::innerEvaluateToDouble
   );
 }
 
@@ -455,7 +457,7 @@ bool CalculatorFunctionsGeneral::innerPlotImplicitFunctionFull(
 bool CalculatorConversions::innerMatrixDouble(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerMatrixDouble");
   Matrix<double> theMat;
-  if (!theCommands.GetMatrix(input, theMat, 0, 0, CalculatorFunctionsGeneral::innerEvaluateToDouble)) {
+  if (!theCommands.GetMatrix(input, theMat, nullptr, 0, CalculatorFunctionsGeneral::innerEvaluateToDouble)) {
     return theCommands << "<br>Failed to get matrix of algebraic numbers. ";
   }
   return output.AssignMatrix(theMat, theCommands);
@@ -742,7 +744,7 @@ bool CalculatorFunctionsGeneral::innerNumerator(Calculator& theCommands, const E
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerNumerator");
   Rational theRat;
   if (input.IsRational(&theRat)) {
-    return output.AssignValue((Rational) theRat.GetNumerator(), theCommands);
+    return output.AssignValue(Rational(theRat.GetNumerator()), theCommands);
   }
   if (input.StartsWith(theCommands.opDivide())) {
     if (input.size() > 1) {
@@ -1146,8 +1148,8 @@ bool CalculatorFunctionsGeneral::innerPlotRectangle(
   thePlot.colorJS = "blue";
   thePlot.thePointsDouble.AddOnTop(currentCorner);
   thePlot.theRectangles.AddOnTop(theRectangle);
-  thePlot.colorRGB = HtmlRoutines::RedGreenBlue(0, 0, 255);
-  thePlot.colorFillRGB = HtmlRoutines::RedGreenBlue(0, 255, 255);
+  thePlot.colorRGB = static_cast<int>(HtmlRoutines::RedGreenBlue(0, 0, 255));
+  thePlot.colorFillRGB = static_cast<int>(HtmlRoutines::RedGreenBlue(0, 255, 255));
   return output.AssignValue(thePlot, theCommands);
 }
 
@@ -1392,7 +1394,7 @@ bool CalculatorFunctionsGeneral::innerFloor(Calculator& theCommands, const Expre
   }
   double theDouble = 0;
   if (input.EvaluatesToDouble(&theDouble)) {
-    return output.AssignValue((int) std::floor(theDouble), theCommands);
+    return output.AssignValue(static_cast<int>(std::floor(theDouble)), theCommands);
   }
   return false;
 }
@@ -1410,7 +1412,7 @@ bool CalculatorFunctionsGeneral::innerRound(Calculator& theCommands, const Expre
   }
   double theDouble = 0;
   if (input.EvaluatesToDouble(&theDouble)) {
-    return output.AssignValue((int) std::round(theDouble), theCommands);
+    return output.AssignValue(static_cast<int>(std::round(theDouble)), theCommands);
   }
   return false;
 }
@@ -1431,7 +1433,7 @@ bool CalculatorFunctionsGeneral::innerPlotPath(Calculator& theCommands, const Ex
   PlotObject theSegment;
   if (input.size() >= 3) {
     theSegment.colorJS = "black";
-    theSegment.colorRGB = HtmlRoutines::RedGreenBlue(0, 0, 0);
+    theSegment.colorRGB = static_cast<int>(HtmlRoutines::RedGreenBlue(0, 0, 0));
     const Expression& colorE = input[2];
     if (!colorE.IsOfType<std::string>(&theSegment.colorJS)) {
       theSegment.colorJS = colorE.ToString();
@@ -1530,7 +1532,7 @@ bool CalculatorFunctionsGeneral::innerPlotSegment(Calculator& theCommands, const
   PlotObject theSegment;
   if (input.size() >= 4) {
     theSegment.colorJS = "black";
-    theSegment.colorRGB = HtmlRoutines::RedGreenBlue(0, 0, 0);
+    theSegment.colorRGB = static_cast<int>(HtmlRoutines::RedGreenBlue(0, 0, 0));
     const Expression& colorE = input[3];
     if (!colorE.IsOfType<std::string>(&theSegment.colorJS)) {
       theSegment.colorJS = colorE.ToString();
@@ -1697,7 +1699,7 @@ bool CalculatorFunctionsGeneral::innerLogBaseSimpleCases(Calculator& theCommands
   bool isPower = false;
   if (baseInt.TryToFindWhetherIsPower(isPower, simplerBase, simplerPower)) {
     if (isPower) {
-      newBaseE.AssignValue((Rational) simplerBase, theCommands);
+      newBaseE.AssignValue(Rational(simplerBase), theCommands);
       output.MakeXOX(theCommands, theCommands.opLogBase(), newBaseE, newArgE);
       output /= simplerPower;
       return true;
@@ -1969,7 +1971,7 @@ bool CalculatorFunctionsGeneral::innerPlotCoordinateSystem(Calculator& theComman
     plotLabels.thePointsDouble[0].MakeZero(3);
     plotLabels.thePointsDouble[0][i] = corner2[i];
     std::stringstream out;
-    out << (char) ('x' + i);
+    out << static_cast<char>('x' + i);
     plotLabels.thePlotString = out.str();
     resultPlot += plotLabels;
   }
@@ -2160,7 +2162,7 @@ std::string GroebnerBasisComputation<coefficient>::GetPolynomialStringSpacedMono
     }
     countMons ++;
     bool useHighlightStyle = false;
-    if (theHighLightedMons != 0) {
+    if (theHighLightedMons != nullptr) {
       if (theHighLightedMons->Contains(this->allMonomials[i])) {
         useHighlightStyle = true;
       }
@@ -2185,79 +2187,6 @@ std::string GroebnerBasisComputation<coefficient>::GetPolynomialStringSpacedMono
   if (countMons != thePoly.size()) {
     out << "<td><b>Programming ERROR!</b></td>";
   }
-  return out.str();
-}
-
-template <class coefficient>
-std::string GroebnerBasisComputation<coefficient>::GetDivisionStringHtml() {
-  MacroRegisterFunctionWithName("GroebnerBasisComputation::GetDivisionStringHtml");
-  std::stringstream out;
-  List<Polynomial<Rational> >& theRemainders = this->intermediateRemainders.GetElement();
-  List<Polynomial<Rational> >& theSubtracands = this->intermediateSubtractands.GetElement();
-  this->theFormat.thePolyMonOrder = this->thePolynomialOrder.theMonOrder;
-  std::string underlineStyle = " style =\"white-space: nowrap; border-bottom:1px solid black;\"";
-  this->allMonomials.Clear();
-  this->allMonomials.AddOnTopNoRepetition(this->startingPoly.GetElement().theMonomials);
-  for (int i = 0; i < theRemainders.size; i ++) {
-    this->allMonomials.AddOnTopNoRepetition(theRemainders[i].theMonomials);
-    if (i < theSubtracands.size) {
-      this->allMonomials.AddOnTopNoRepetition(theSubtracands[i].theMonomials);
-    }
-  }
-  //List<std::string> basisColorStyles;
-  //basisColorStyles.SetSize(this->theBasiS.size);
-  this->allMonomials.QuickSortDescending(this->thePolynomialOrder.theMonOrder);
-  //  stOutput << "<hr>The monomials in play ordered: " << totalMonCollection.ToString(theFormat);
-  //  int numVars = this->GetNumVars();
-  out << this->ToStringLetterOrder(false);
-  out << "<br>";
-  out << theRemainders.size << " division steps total.<br>";
-  out << "<table style =\"white-space: nowrap; border:1px solid black;\">";
-  out << "<tr><td " << underlineStyle << "><b>Remainder:</b></td>";
-  out << this->GetPolynomialStringSpacedMonomialsHtml(
-    this->remainderDivision, underlineStyle, &this->remainderDivision.theMonomials
-  )
-  << "</td></tr>";
-  out << "<tr><td style =\"border-right:1px solid black;\"><b>Divisor(s)</b></td><td colspan =\""
-  << this->allMonomials.size + 1 << "\"><b>Quotient(s) </b></td>"
-  << "</tr>";
-  for (int i = 0; i < this->theBasiS.size; i ++) {
-    //if (i == this->theBasiS.size- 1)
-//    else
-    out << "<tr>";
-    out << "<td style =\"border-right:1px solid black; border-bottom: 1px solid gray;\">";
-    if (this->theFormat.flagUseLatex) {
-      out << HtmlRoutines::GetMathSpanPure(this->theBasiS[i].ToString(&this->theFormat), - 1);
-    } else {
-      out << this->theBasiS[i].ToString(&this->theFormat);
-    }
-    out << "</td>";
-    out << "<td style =\"border-bottom:1px solid gray;\" colspan =\""
-    << this->allMonomials.size + 1 << "\">";
-    out << HtmlRoutines::GetMathSpanPure(this->theQuotients[i].ToString(&this->theFormat));
-    out << "</td></tr>";
-  }
-  out << "</tr>";
-  if (theRemainders.size != this->intermediateHighlightedMons.GetElement().size) {
-    crash << "Should have as many remainders: " << theRemainders.size
-    << " as intermediate highlighted mons: "
-    << this->intermediateHighlightedMons.GetElement().size << crash;
-  }
-  if (theRemainders.size != theSubtracands.size + 1) {
-    crash << "Remainders should equal subtracands plus one. " << crash;
-  }
-  for (int i = 0; i < theRemainders.size; i ++) {
-    out << "<tr><td></td>"
-    << this->GetPolynomialStringSpacedMonomialsHtml(
-      theRemainders[i], "", &this->intermediateHighlightedMons.GetElement()[i]
-    ) << "</tr>";
-    if (i < theSubtracands.size) {
-      out << "<tr><td>-</td></tr>";
-      out << "<tr><td></td>" << this->GetPolynomialStringSpacedMonomialsHtml(theSubtracands[i], underlineStyle)
-      << "</tr>";
-    }
-  }
-  out << "</table>";
   return out.str();
 }
 
@@ -2370,7 +2299,7 @@ std::string GroebnerBasisComputation<coefficient>::GetPolynomialStringSpacedMono
   std::stringstream out;
   bool found = false;
   int countMons = 0;
-  if (firstNonZeroIndex != 0) {
+  if (firstNonZeroIndex != nullptr) {
     *firstNonZeroIndex = - 1;
   }
   for (int i = 0; i < this->allMonomials.size; i ++) {
@@ -2381,15 +2310,15 @@ std::string GroebnerBasisComputation<coefficient>::GetPolynomialStringSpacedMono
       }
       continue;
     }
-    if (firstNonZeroIndex != 0) {
+    if (firstNonZeroIndex != nullptr) {
       if (*firstNonZeroIndex == - 1) {
         *firstNonZeroIndex = i;
       }
     }
     countMons ++;
     bool useHighlightStyle = false;
-    if (highlightColor != 0) {
-      if (theHighLightedMons != 0) {
+    if (highlightColor != nullptr) {
+      if (theHighLightedMons != nullptr) {
         if (theHighLightedMons->Contains(this->allMonomials[i])) {
           useHighlightStyle = true;
         }
@@ -2412,69 +2341,6 @@ std::string GroebnerBasisComputation<coefficient>::GetPolynomialStringSpacedMono
   if (countMons != thePoly.size()) {
     out << " Programming ERROR!";
   }
-  return out.str();
-}
-
-template <class coefficient>
-std::string GroebnerBasisComputation<coefficient>::GetDivisionStringLaTeX() {
-  MacroRegisterFunctionWithName("GroebnerBasisComputation::GetDivisionStringLaTeX");
-  std::stringstream out;
-  List<Polynomial<Rational> >& theRemainders = this->intermediateRemainders.GetElement();
-  List<Polynomial<Rational> >& theSubtracands = this->intermediateSubtractands.GetElement();
-  this->theFormat.thePolyMonOrder = this->thePolynomialOrder.theMonOrder;
-  std::string HighlightedColor = "red";
-  this->allMonomials.AddOnTopNoRepetition(this->startingPoly.GetElement().theMonomials);
-  for (int i = 0; i < theRemainders.size; i ++) {
-    this->allMonomials.AddOnTopNoRepetition(theRemainders[i].theMonomials);
-  }
-  for (int i = 0; i < theSubtracands.size; i ++) {
-    this->allMonomials.AddOnTopNoRepetition(theSubtracands[i].theMonomials);
-  }
-  //List<std::string> basisColorStyles;
-  //basisColorStyles.SetSize(this->theBasiS.size);
-  this->allMonomials.QuickSortDescending(this->thePolynomialOrder.theMonOrder);
-  this->theFormat.flagUseLatex = true;
-  out << this->ToStringLetterOrder(true);
-  out << theRemainders.size << " division steps total.";
-  out << "\\renewcommand{\\arraystretch}{1.2}";
-  out << "\\begin{longtable}{|c";
-  for (int i = 0; i < this->allMonomials.size; i ++) {
-    out << "c";
-  }
-  out << "|} \\hline";
-  out << "&" <<  "\\multicolumn{" << this->allMonomials.size
-  << "}{|c|}{\\textbf{Remainder}}" << "\\\\";
-  out << "\\multicolumn{1}{|c|}{} & ";
-  out << this->GetPolynomialStringSpacedMonomialsLaTeX(
-    this->remainderDivision, &HighlightedColor, &this->remainderDivision.theMonomials
-  ) << "\\\\\\hline";
-  out << "\\textbf{Divisor(s)} &" << "\\multicolumn{"
-  << this->allMonomials.size << "}{|c|}{\\textbf{Quotient(s)}}"
-  << "\\\\";
-  for (int i = 0; i < this->theBasiS.size; i ++) {
-    out << "$";
-    out << this->theBasiS[i].ToString(&this->theFormat);
-    out << "$";
-    out << "& \\multicolumn{" << this->allMonomials.size << "}{|l|}{";
-    out << "$" << this->theQuotients[i].ToString(&this->theFormat) << "$" << "}\\\\\\hline\\hline";
-  }
-  for (int i = 0; i < theRemainders.size; i ++) {
-    if (i < theRemainders.size - 1) {
-      out << "$\\underline{~}$";
-    }
-    out << "&"
-    << this->GetPolynomialStringSpacedMonomialsLaTeX
-    (theRemainders[i], &HighlightedColor, &this->intermediateHighlightedMons.GetElement()[i])
-    << "\\\\\n";
-    if (i < theSubtracands.size) {
-      out << "&";
-      out << this->GetPolynomialStringSpacedMonomialsLaTeX
-      (theSubtracands[i], &HighlightedColor)
-      << "\\\\\\cline{2-" << this->allMonomials.size + 1 << "}";
-    }
-  }
-  out << "\\hline";
-  out << "\\end{longtable}";
   return out.str();
 }
 
@@ -2504,7 +2370,7 @@ std::string GroebnerBasisComputation<coefficient>::GetSpacedMonomialsWithHighlig
     MonomialP tempM;
     tempM.MakeOne();
     int monIndex = this->allMonomials.GetIndex(tempM);
-    if (slidesAdditionalHighlight != 0 && monIndex != - 1) {
+    if (slidesAdditionalHighlight != nullptr && monIndex != - 1) {
       if ((*slidesAdditionalHighlight)[monIndex] > 0) {
         highlightHeadStream << "{ \\only<"
         << (*slidesAdditionalHighlight)[monIndex]
@@ -2512,7 +2378,7 @@ std::string GroebnerBasisComputation<coefficient>::GetSpacedMonomialsWithHighlig
         highlightTailStream << "}";
       }
     }
-    if (slidesToFcAnswer != 0 && monIndex != - 1) {
+    if (slidesToFcAnswer != nullptr && monIndex != - 1) {
       if ((*slidesToFcAnswer)[monIndex] > 1) {
         highlightHeadStream << "\\fcAnswer{" << (*slidesToFcAnswer)[monIndex] << "}{";
         highlightTailStream << "}";
@@ -2535,17 +2401,17 @@ std::string GroebnerBasisComputation<coefficient>::GetSpacedMonomialsWithHighlig
     std::string highlightHead;
     std::string highlightTail;
     int fcAnswerSlide = - 1;
-    if (slidesToFcAnswer != 0) {
+    if (slidesToFcAnswer != nullptr) {
       if (i < (*slidesToFcAnswer).size) {
         if ((*slidesToFcAnswer)[i] > 1) {
           fcAnswerSlide = (*slidesToFcAnswer)[i];
-          if (slidesToHighlightMon != 0) {
+          if (slidesToHighlightMon != nullptr) {
             (*slidesToHighlightMon)[i].AddOnTop(fcAnswerSlide);
           }
         }
       }
     }
-    if (slidesToUncover != 0) {
+    if (slidesToUncover != nullptr) {
       if ((*slidesToUncover)[i] > 1) {
         std::stringstream highlightStream;
         highlightStream << "\\uncover<" << (*slidesToUncover)[i] << "->{";
@@ -2553,13 +2419,13 @@ std::string GroebnerBasisComputation<coefficient>::GetSpacedMonomialsWithHighlig
         highlightTail = "}" + highlightTail;
       }
     }
-    if (slidesToHighlightMon != 0) {
+    if (slidesToHighlightMon != nullptr) {
       if ((*slidesToHighlightMon)[i].size > 0) {
         highlightHead += "\\alertNoH{" + (*slidesToHighlightMon)[i].ToStringCommaDelimited() + "}{";
         highlightTail = "}" + highlightTail;
       }
     }
-    if (slidesAdditionalHighlight != 0) {
+    if (slidesAdditionalHighlight != nullptr) {
       if ((*slidesAdditionalHighlight)[i] > 0) {
         std::stringstream highlightStream;
         highlightStream << "{\\only<" << (*slidesAdditionalHighlight)[i] << "->{\\color{orange}}";
@@ -2860,8 +2726,8 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionLaTeXSlide() {
     out << "{\\color{orange}\\textbf{Remainder:} }&"
     << this->GetSpacedMonomialsWithHighlightLaTeX(
       this->remainderDivision,
-      0,
-      0,
+      nullptr,
+      nullptr,
       &this->uncoverMonsFinalRemainder,
       &this->additionalHighlightFinalRemainder,
       - 1,
@@ -2884,8 +2750,8 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionLaTeXSlide() {
         this->theBasiS[i],
         &this->highlightMonsDivisors[i],
         &this->fcAnswerMonsDivisors[i],
-        0,
-        0,
+        nullptr,
+        nullptr,
         this->uncoverAllMonsDivisors[i],
         false
       );
@@ -2902,8 +2768,8 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionLaTeXSlide() {
       this->theQuotients[i],
       &this->highlightMonsQuotients[i],
       &this->fcAnswerMonsQuotients[i],
-      0,
-      0,
+      nullptr,
+      nullptr,
       this->uncoverAllMonsQuotients[i],
       false
     );
@@ -2923,8 +2789,8 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionLaTeXSlide() {
           this->theBasiS[0],
           &this->highlightMonsDivisors[0],
           &this->fcAnswerMonsDivisors[i],
-          0,
-          0,
+          nullptr,
+          nullptr,
           0,
           false
         )
@@ -2943,7 +2809,7 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionLaTeXSlide() {
       theRemainders[i],
       &this->highlightMonsRemainders[i],
       &this->fcAnswerMonsRemainders[i],
-      0,
+      nullptr,
       &this->additionalHighlightRemainders[i],
       this->uncoverAllMonsRemainders[i],
       true
@@ -2962,8 +2828,8 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionLaTeXSlide() {
         theSubtracands[i],
         &this->highlightMonsSubtracands[i],
         &this->fcAnswerMonsSubtracands[i],
-        0,
-        0,
+        nullptr,
+        nullptr,
         this->uncoverAllMonsSubtracands[i],
         true
       );

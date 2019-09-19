@@ -2475,6 +2475,20 @@ bool FiniteGroup<elementSomeGroup>::RegisterCCclass(
   return true;
 }
 
+template <class elementSomeGroup>
+LargeInt FiniteGroup<elementSomeGroup>::GetSize() {
+  this->CheckConsistency();
+  if (this->sizePrivate > 0) {
+    return sizePrivate;
+  }
+  if (this->GetSizeByFormula != 0) {
+    this->sizePrivate = this->GetSizeByFormula(*this);
+    return sizePrivate;
+  }
+  this->ComputeAllElements(false);
+  return this->sizePrivate;
+}
+
 template <typename elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::CheckInitializationConjugacyClasses() const {
   if (this->ConjugacyClassCount() == 0) {

@@ -45,9 +45,9 @@ std::string ProcessTypes::worker = "worker";
 std::string ProcessTypes::server = "server";
 std::string ProcessTypes::serverMonitor = "serverMonitor";
 
-logger logWorker("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logCommon.html", 0, true, ProcessTypes::worker);
-logger logServerMonitor("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logServerMonitor.html", 0, false, ProcessTypes::serverMonitor);
-logger logServer("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logServer.html", 0, false, ProcessTypes::server);
+logger logWorker("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logCommon.html", nullptr, true, ProcessTypes::worker);
+logger logServerMonitor("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logServerMonitor.html", nullptr, false, ProcessTypes::serverMonitor);
+logger logServer("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logServer.html", nullptr, false, ProcessTypes::server);
 
 logger logHttpErrors("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogHttpErrors.html", &logWorker, false, ProcessTypes::worker);
 logger logBlock("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogBlockingEvents.html", &logWorker, false, ProcessTypes::worker);

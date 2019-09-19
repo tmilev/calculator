@@ -5,6 +5,7 @@
 #include "math_extra_symmetric_groups_and_generalizations.h"
 #include "math_extra_graph.h"
 #include "calculator_Weyl_group_characters.h"
+#include "math_extra_universal_enveloping_implementation.h"
 
 static ProjectInformationInstance ProjectInfoVpfCharactersCalculatorInterfaceCPP(__FILE__, "Weyl group calculator interface. Work in progress by Thomas & Todor. ");
 
@@ -470,6 +471,10 @@ bool CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(
   return output.AssignValue(out.str(), theCommands);
 }
 
+
+template <>
+bool CalculatorConversions::innerPolynomial<Rational>(Calculator& theCommands, const Expression& input, Expression& output);
+
 bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
@@ -715,6 +720,10 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
   return output.AssignValue(out.str(), theCommands);
 }
 
+
+template < >
+WeylGroupData& Expression::GetValueNonConst() const;
+
 bool CalculatorFunctionsWeylGroup::innerWeylGroupLoadOrComputeCharTable(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
@@ -724,7 +733,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupLoadOrComputeCharTable(
   }
   WeylGroupData& theGroup = output.GetValueNonConst<WeylGroupData>();
   if (theGroup.GetDim() > 8) {
-    theCommands << "Computing character table disabled for rank>=8, modify file " << __FILE__
+    theCommands << "Computing character table disabled for rank >= 8, modify file " << __FILE__
     << " line "  << __LINE__ << " to change that. ";
     return false;
   }
@@ -1902,6 +1911,10 @@ bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems(
   out << theWeyl.ToStringSignSignatureRootSubsystem(finalSubGroups);
   return output.AssignValue(out.str(), theCommands);
 }
+
+template < >
+GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& Expression::GetValueNonConst() const;
+
 
 bool CalculatorFunctionsWeylGroup::innerDecomposeWeylRep(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerDecomposeWeylRep");

@@ -4,10 +4,12 @@
 #include "math_extra_algebraic_numbers.h"
 #include "math_subsets_selections.h"
 #include "math_general_implementation.h"
+
+extern ProjectInformationInstance ProjectInfoVpf9_3cpp;
 ProjectInformationInstance ProjectInfoVpf9_3cpp(__FILE__, "Algebraic numbers. ");
 
 std::string MonomialVector::ToString(FormatExpressions* theFormat) const {
-  if (theFormat != 0) {
+  if (theFormat != nullptr) {
     if (this->theIndex < theFormat->vectorSpaceEiBasisNames.size && this->theIndex >= 0) {
       return theFormat->vectorSpaceEiBasisNames[this->theIndex];
     }
@@ -137,12 +139,12 @@ bool AlgebraicClosureRationals::MergeRadicals(const List<LargeInt>& theRadicals)
           radicalsNew.RemoveIndexSwapWithLast(j);
           radicalsNew.RemoveIndexSwapWithLast(i);
           if (leftQuotient > 1) {
-            radicalsNew.AddOnTopNoRepetition((LargeInt) leftQuotient);
+            radicalsNew.AddOnTopNoRepetition(LargeInt(leftQuotient));
           }
           if (rightQuotient > 1) {
-            radicalsNew.AddOnTopNoRepetition((LargeInt) rightQuotient);
+            radicalsNew.AddOnTopNoRepetition(LargeInt(rightQuotient));
           }
-          radicalsNew.AddOnTopNoRepetition((LargeInt) candidateGCD);
+          radicalsNew.AddOnTopNoRepetition(LargeInt(candidateGCD));
           found = true;
         }
       }
@@ -256,7 +258,7 @@ bool AlgebraicClosureRationals::ReduceMe() {
   theMinPoly.AssignMinPoly(this->GeneratingElementMatForm);
   int theDim = this->theBasisMultiplicative.size;
   List<Polynomial<Rational> > theFactors;
-  bool mustBeTrue = theMinPoly.FactorMe(theFactors, 0);
+  bool mustBeTrue = theMinPoly.FactorMe(theFactors, nullptr);
   if (!mustBeTrue) {
     crash << "This is a programming error: failed to factor polynomial " << theMinPoly.ToString() << crash;
   }
@@ -956,7 +958,7 @@ bool AlgebraicNumber::EvaluatesToDouble(double* outputWhichDouble) const {
   }
   Rational ratValue;
   if (this->IsRational(&ratValue)) {
-    if (outputWhichDouble != 0) {
+    if (outputWhichDouble != nullptr) {
       *outputWhichDouble = ratValue.GetDoubleValue();
     }
     return true;
@@ -967,28 +969,28 @@ bool AlgebraicNumber::EvaluatesToDouble(double* outputWhichDouble) const {
   if (!this->owner->flagIsQuadraticRadicalExtensionRationals) {
     return false;
   }
-  if (outputWhichDouble != 0) {
+  if (outputWhichDouble != nullptr) {
     *outputWhichDouble = 0;
   }
   Selection currentRadicalSelection;
   double currentMultiplicand = 0;
   for (int i = 0; i < this->theElT.size(); i ++) {
     this->owner->GetRadicalSelectionFromIndex(this->theElT[i].theIndex, currentRadicalSelection);
-    if (outputWhichDouble != 0) {
+    if (outputWhichDouble != nullptr) {
       currentMultiplicand = this->theElT.theCoeffs[i].GetDoubleValue();
     }
     for (int j = 0; j < currentRadicalSelection.CardinalitySelection; j ++) {
       if (this->owner->theQuadraticRadicals[currentRadicalSelection.elements[j]] < 0) {
         return false;
       } else {
-        if (outputWhichDouble != 0) {
+        if (outputWhichDouble != nullptr) {
           currentMultiplicand *= FloatingPoint::sqrt(
             this->owner->theQuadraticRadicals[currentRadicalSelection.elements[j]].GetDoubleValue()
           );
         }
       }
     }
-    if (outputWhichDouble != 0) {
+    if (outputWhichDouble != nullptr) {
       *outputWhichDouble += currentMultiplicand;
     }
   }
@@ -1021,7 +1023,7 @@ bool AlgebraicNumber::AssignRationalQuadraticRadical(const Rational& inpuT, Alge
   squareFreeInput *= absoluteInput.GetDenominator();
   List<LargeInt> primeFactors;
   List<int> theMults;
-  if (!squareFreeInput.value.FactorReturnFalseIfFactorizationIncomplete(primeFactors, theMults, 0, 0)) {
+  if (!squareFreeInput.value.FactorReturnFalseIfFactorizationIncomplete(primeFactors, theMults, 0, nullptr)) {
     return false;
   }
   squareFreeInput.value = 1;
@@ -1144,7 +1146,7 @@ std::string AlgebraicClosureRationals::ToString(FormatExpressions* theFormat) co
 
 bool AlgebraicNumber::IsRational(Rational* whichRational) const {
   if (this->IsEqualToZero()) {
-    if (whichRational != 0) {
+    if (whichRational != nullptr) {
       *whichRational = 0;
     }
     return true;
@@ -1152,7 +1154,7 @@ bool AlgebraicNumber::IsRational(Rational* whichRational) const {
   for (int i = 0; i < this->theElT.size(); i ++) {
     if (this->theElT[i].theIndex != 0) {
       return false;
-    } else if (whichRational != 0) {
+    } else if (whichRational != nullptr) {
       *whichRational = this->theElT.theCoeffs[i];
     }
   }
@@ -1173,7 +1175,7 @@ std::string AlgebraicNumber::ToString(FormatExpressions* theFormat) const {
   std::stringstream out;
   FormatExpressions tempFormat;
   tempFormat.vectorSpaceEiBasisNames = this->owner->DisplayNamesBasisElements;
-  if (theFormat != 0) {
+  if (theFormat != nullptr) {
     tempFormat.flagUseFrac = theFormat->flagUseFrac;
   }
   VectorSparse<Rational> theAdditiveVector;
@@ -1422,7 +1424,7 @@ bool ElementZmodP::AssignRational(const Rational& other) {
 bool ElementZmodP::operator/=(const LargeInt& other) {
   ElementZmodP divisor;
   divisor.theModulo = this->theModulo;
-  if (!divisor.AssignRational((Rational) other)) {
+  if (!divisor.AssignRational(Rational(other))) {
     return false;
   }
   bool result = ((*this) /= divisor);

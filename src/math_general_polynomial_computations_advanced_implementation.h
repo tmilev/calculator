@@ -325,7 +325,7 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasisImpro
   MonomialP leftShift, rightShift, monLCM;
   Polynomial<Rational> leftBuf, rightBuf;
   Polynomial<Rational>& outputRemainder = rightBuf; //to save some RAM
-  ProgressReport reportOuter(theGlobalVariables);
+  ProgressReport reportOuter;
   while (indexPairs.size > 0) {
     PairInts& lastPair = *indexPairs.LastObject();
     int currentPairIndex = indexPairs.size - 1;

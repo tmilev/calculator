@@ -33,7 +33,7 @@ void GlobalVariables::FallAsleep(int microseconds) {
   usleep(static_cast<useconds_t>(microseconds));
 }
 
-class TimerThreadData{
+class TimerThreadData {
 public:
   int64_t elapsedTimeInMilliseconds;
   int64_t elapsedComputationTimeInMilliseconds;

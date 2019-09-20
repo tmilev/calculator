@@ -17,7 +17,7 @@ TimeWrapper::TimeWrapper() {
   this->timeGM.tm_wday = 0;
   this->timeGM.tm_yday = 0;
   this->timeGM.tm_year = 0;
-  this->timeGM.tm_zone = 0;
+  this->timeGM.tm_zone = nullptr;
 
   this->timeLocal.tm_gmtoff = 0;
   this->timeLocal.tm_hour = 0;
@@ -29,7 +29,7 @@ TimeWrapper::TimeWrapper() {
   this->timeLocal.tm_wday = 0;
   this->timeLocal.tm_yday = 0;
   this->timeLocal.tm_year = 0;
-  this->timeLocal.tm_zone = 0;
+  this->timeLocal.tm_zone = nullptr;
 }
 
 bool TimeWrapper::AssignMonthDayYear(const std::string& input, std::stringstream& commentsOnFailure) {
@@ -85,7 +85,7 @@ std::string TimeWrapper::ToStringSecondsToDaysHoursSecondsString(double input, b
   if (!isPositive) {
     input *= - 1;
   }
-  int days = (int) FloatingPoint::floor(input / (24 * 3600));
+  int days = static_cast<int>(FloatingPoint::floor(input / (24 * 3600)));
   if (beShort && days > 0) {
     double daysfloat = input / (24 * 3600);
     out << "~" << daysfloat << " day(s)";
@@ -103,7 +103,8 @@ std::string TimeWrapper::ToStringSecondsToDaysHoursSecondsString(double input, b
     out << std::fixed << input / 3600 << " hour(s)";
   }
   if (includeSeconds && !beShort) {
-    out << std::fixed << (((int) input) / 60) << " minute(s) " << (((int) input) % 60) << " second(s).";
+    out << std::fixed << static_cast<int>(static_cast<int>(input) / 60)
+    << " minute(s) " << static_cast<int>(static_cast<int>(input) % 60) << " second(s).";
   }
   if (!isPositive) {
     out << ")";

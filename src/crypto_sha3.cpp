@@ -131,7 +131,7 @@ static void keccakf(uint64_t s[25]) {
     // Rho Pi
     t = s[1];
     for (i = 0; i < 24; i ++) {
-      j = keccakf_piln[i];
+      j = static_cast<int>(keccakf_piln[i]);
       bc[0] = s[j];
       s[j] = Sha3::rotl64(t, keccakf_rotc[i]);
       t = bc[0];
@@ -199,7 +199,7 @@ void Sha3::sha3_Update(void const* bufIn, size_t len) {
     // Have no complete word or haven't started the word yet.
     // Endian-independent code follows:
     while (len --) {
-      this->saved |= (uint64_t) (*(buf ++)) << ((this->byteIndex ++) * 8);
+      this->saved |= static_cast<uint64_t>(*(buf ++)) << ((this->byteIndex ++) * 8);
     }
     if (this->byteIndex >= 8) {
       crash << "Internal sha3 computation error. " << crash;
@@ -211,7 +211,7 @@ void Sha3::sha3_Update(void const* bufIn, size_t len) {
     // endian-independent code follows:
     len -= old_tail;
     while (old_tail --) {
-      this->saved |= (uint64_t) (*(buf ++)) << ((this->byteIndex ++) * 8);
+      this->saved |= static_cast<uint64_t>(*(buf ++)) << ((this->byteIndex ++) * 8);
     }
 
     // now ready to add saved to the sponge
@@ -231,17 +231,17 @@ void Sha3::sha3_Update(void const* bufIn, size_t len) {
     crash << "Internal sha3 computation error. " << crash;
   }
   words = len / sizeof(uint64_t);
-  tail = len - words * sizeof(uint64_t);
+  tail = static_cast<unsigned>(len - words * sizeof(uint64_t));
   for (i = 0; i < words; i ++, buf += sizeof(uint64_t)) {
     const uint64_t t =
-    (uint64_t) (buf[0]) |
-    ((uint64_t) (buf[1]) << 8 * 1) |
-    ((uint64_t) (buf[2]) << 8 * 2) |
-    ((uint64_t) (buf[3]) << 8 * 3) |
-    ((uint64_t) (buf[4]) << 8 * 4) |
-    ((uint64_t) (buf[5]) << 8 * 5) |
-    ((uint64_t) (buf[6]) << 8 * 6) |
-    ((uint64_t) (buf[7]) << 8 * 7);
+     static_cast<uint64_t>(buf[0]) |
+    (static_cast<uint64_t>(buf[1]) << 8 * 1) |
+    (static_cast<uint64_t>(buf[2]) << 8 * 2) |
+    (static_cast<uint64_t>(buf[3]) << 8 * 3) |
+    (static_cast<uint64_t>(buf[4]) << 8 * 4) |
+    (static_cast<uint64_t>(buf[5]) << 8 * 5) |
+    (static_cast<uint64_t>(buf[6]) << 8 * 6) |
+    (static_cast<uint64_t>(buf[7]) << 8 * 7);
     this->s[this->wordIndex] ^= t;
     if (++ this->wordIndex == (Sha3::numberOfSpongeWords - this->capacityWords)) {
       keccakf(this->s);
@@ -253,7 +253,7 @@ void Sha3::sha3_Update(void const* bufIn, size_t len) {
     crash << "Internal sha3 computation error. " << crash;
   }
   while (tail --) {
-    this->saved |= (uint64_t) (*(buf ++)) << ((this->byteIndex ++) * 8);
+    this->saved |= static_cast<uint64_t>(*(buf ++)) << ((this->byteIndex ++) * 8);
   }
   if (this->byteIndex >= 8) {
     crash << "Internal sha3 computation error. " << crash;
@@ -264,17 +264,17 @@ void Sha3::sha3_Update(void const* bufIn, size_t len) {
 // The padding block is 0x01 || 0x00* || 0x80. First 0x01 and last 0x80
 // bytes are always present, but they can be the same byte.
 void const * Sha3::sha3_Finalize(void *priv) {
-  Sha3 *ctx = (Sha3 *) priv;
+  Sha3 *ctx = static_cast<Sha3*>(priv);
   // Append 2-bit suffix 01, per SHA-3 spec. Instead of 1 for padding we
   // use 1 << 2 below. The 0x02 below corresponds to the suffix 01.
   // Overall, we feed 0, then 1, and finally 1 to start padding. Without
   // M || 01, we would simply use 1 to start padding.
   if (!ctx->flagUseKeccak) {
     // SHA3 version
-    ctx->s[ctx->wordIndex] ^= (ctx->saved ^ ((uint64_t) ((uint64_t) (0x02 | (1 << 2)) << ((ctx->byteIndex) * 8))));
+    ctx->s[ctx->wordIndex] ^= (ctx->saved ^ (static_cast<uint64_t>(static_cast<uint64_t>(0x02 | (1 << 2)) << ((ctx->byteIndex) * 8))));
   } else {
     // For testing the "pure" Keccak version
-    ctx->s[ctx->wordIndex] ^= (ctx->saved ^ ((uint64_t) ((uint64_t) 1 << (ctx->byteIndex * 8))));
+    ctx->s[ctx->wordIndex] ^= (ctx->saved ^ (static_cast<uint64_t>(static_cast<uint64_t>(1) << (ctx->byteIndex * 8))));
   }
   ctx->s[Sha3::numberOfSpongeWords - ctx->capacityWords - 1] ^= 0x8000000000000000UL;
   keccakf(ctx->s);
@@ -286,16 +286,16 @@ void const * Sha3::sha3_Finalize(void *priv) {
   {
     unsigned i;
     for (i = 0; i < Sha3::numberOfSpongeWords; i ++) {
-      const unsigned t1 = (uint32_t) ctx->s[i];
-      const unsigned t2 = (uint32_t) ((ctx->s[i] >> 16) >> 16);
-      ctx->sb[i * 8 + 0] = (uint8_t) (t1);
-      ctx->sb[i * 8 + 1] = (uint8_t) (t1 >> 8);
-      ctx->sb[i * 8 + 2] = (uint8_t) (t1 >> 16);
-      ctx->sb[i * 8 + 3] = (uint8_t) (t1 >> 24);
-      ctx->sb[i * 8 + 4] = (uint8_t) (t2);
-      ctx->sb[i * 8 + 5] = (uint8_t) (t2 >> 8);
-      ctx->sb[i * 8 + 6] = (uint8_t) (t2 >> 16);
-      ctx->sb[i * 8 + 7] = (uint8_t) (t2 >> 24);
+      const unsigned t1  = static_cast<uint32_t>(ctx->s[i]);
+      const unsigned t2  = static_cast<uint32_t>((ctx->s[i] >> 16) >> 16);
+      ctx->sb[i * 8 + 0] = static_cast<uint8_t>(t1);
+      ctx->sb[i * 8 + 1] = static_cast<uint8_t>(t1 >> 8);
+      ctx->sb[i * 8 + 2] = static_cast<uint8_t>(t1 >> 16);
+      ctx->sb[i * 8 + 3] = static_cast<uint8_t>(t1 >> 24);
+      ctx->sb[i * 8 + 4] = static_cast<uint8_t>(t2);
+      ctx->sb[i * 8 + 5] = static_cast<uint8_t>(t2 >> 8);
+      ctx->sb[i * 8 + 6] = static_cast<uint8_t>(t2 >> 16);
+      ctx->sb[i * 8 + 7] = static_cast<uint8_t>(t2 >> 24);
     }
   }
   return (ctx->sb);
@@ -310,7 +310,7 @@ void Sha3::update(const std::string& input) {
 }
 
 void Sha3::update(List<unsigned char>& input) {
-  this->update(input.TheObjects, input.size);
+  this->update(input.TheObjects, static_cast<unsigned>(input.size));
 }
 
 void Sha3::update(const void* inputBuffer, size_t length) {
@@ -332,8 +332,8 @@ std::string Sha3::computeSha3_256(const std::string& input) {
 std::string Sha3::getResultString() {
   std::string result;
   result.resize(32);
-  for (int i = 0; i < 32; i ++) {
-    result[i] = this->sb[i];
+  for (unsigned i = 0; i < 32; i ++) {
+    result[i] = static_cast<char>(this->sb[i]);
   }
   return result;
 }

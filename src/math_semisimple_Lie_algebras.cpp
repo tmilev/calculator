@@ -83,7 +83,7 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat) {
   }
   out << "<br><b> The Lie bracket table is too large to be rendered in LaTeX, displaying in"
   << " html format instead.</b> ";
-  if (theFormat != 0) {
+  if (theFormat != nullptr) {
     if (theFormat->flagLatexDetailsInHtml) {
       out << " Below you can find the same table in pure LaTeX, "
       << " which you can render in a separate LaTeX session, should "
@@ -91,7 +91,7 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat) {
     }
   }
   out << theHtmlStream.str();
-  if (theFormat != 0) {
+  if (theFormat != nullptr) {
     if (theFormat->flagLatexDetailsInHtml) {
       out << "The above table in LaTex format follows. <hr>"
       << theTableLateXStream.str() << "<hr>";
@@ -179,7 +179,7 @@ std::string SemisimpleLieAlgebra::ToHTMLCalculator(bool Verbose, bool writeToHD,
     out << HtmlRoutines::GetCalculatorComputationAnchor(tempStream.str()) << "<br>";
   } else {
     DrawingVariables theDV;
-    theWeyl.DrawRootSystem(theDV, true, true, 0, true, 0);
+    theWeyl.DrawRootSystem(theDV, true, true, nullptr, true, nullptr);
     out << "A drawing of the root system in its corresponding Coxeter plane. "
     << "A basis of the plane was computed as explained by the website of John Stembridge. "
     << "<br>The darker red dots can be dragged with the mouse to rotate the picture."
@@ -773,7 +773,7 @@ bool SemisimpleLieAlgebra::GetConstantOrHElement(
 }
 
 void SemisimpleLieAlgebra::MakeChevalleyTestReport(int i, int j, int k, int Total) {
-  if (theGlobalVariables.IndicatorStringOutputFunction == 0) {
+  if (theGlobalVariables.IndicatorStringOutputFunction == nullptr) {
     return;
   }
   std::stringstream out2, out3;

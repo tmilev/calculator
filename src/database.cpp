@@ -190,11 +190,11 @@ bool ProblemData::CheckConsistencyMQids() const {
       errorStream << "This is not supposed to happen: empty idMQfield. The answer id is: "
       << this->theAnswers.theValues[i].answerId << "<br>" << this->ToString() << "<hr>Answer information: "
       << this->ToString() << "<br>";
-      if (true) {
-        stOutput << errorStream.str();
-      } else {
-        crash << errorStream.str() << crash;
-      }
+      //if (true) {
+      //  stOutput << errorStream.str();
+      //} else {
+      crash << errorStream.str() << crash;
+      //}
     }
   }
   return true;
@@ -580,7 +580,7 @@ bool UserCalculator::IsAcceptableDatabaseInpuT(const std::string& input, std::st
   MacroRegisterFunctionWithName("UserCalculator::IsAcceptableDatabaseInput");
   for (unsigned i = 0; i < input.size(); i ++) {
     if (!UserCalculator::IsAcceptableCharDatabaseInpuT(input[i])) {
-      if (comments != 0) {
+      if (comments != nullptr) {
         *comments << "Input: " << input << " contains at least one invalid character: " << input[i] << ".";
       }
       return false;
@@ -636,7 +636,7 @@ bool DatabaseRoutineS::SendActivationEmail(
   if (commentsGeneral != nullptr && commentsOnFailure != commentsGeneral) {
     logEmail << commentsGeneral->str();
   }
-  if (commentsGeneralSensitive != 0 && commentsGeneralSensitive != commentsOnFailure) {
+  if (commentsGeneralSensitive != nullptr && commentsGeneralSensitive != commentsOnFailure) {
     logEmail << commentsGeneralSensitive->str();
   }
   return result;
@@ -659,7 +659,7 @@ bool ProblemData::LoadFroM(const std::string& inputData, std::stringstream& comm
   this->flagRandomSeedGiven = false;
   if (theGlobalVariables.UserRequestRequiresLoadingRealExamData()) {
     if (theMap.Contains("randomSeed")) {
-      this->randomSeed = (unsigned) atoi(theMap.GetValueCreate("randomSeed").c_str());
+      this->randomSeed = static_cast<unsigned>(atoi(theMap.GetValueCreate("randomSeed").c_str()));
       this->flagRandomSeedGiven = true;
     }
   }
@@ -707,7 +707,9 @@ bool ProblemData::LoadFromJSON(const JSData& inputData, std::stringstream& comme
   this->flagRandomSeedGiven = false;
   if (theGlobalVariables.UserRequestRequiresLoadingRealExamData()) {
     if (inputData.objects.Contains("randomSeed")) {
-      this->randomSeed = atoi(inputData.objects.GetValueConstCrashIfNotPresent("randomSeed").theString.c_str());
+      this->randomSeed = static_cast<unsigned>(atoi(
+        inputData.objects.GetValueConstCrashIfNotPresent("randomSeed").theString.c_str()
+      ));
       this->flagRandomSeedGiven = true;
       //stOutput << "<br>DEBUG: random seed found. <br>";
     } //else
@@ -813,7 +815,7 @@ bool UserCalculator::ComputeAndStoreActivationToken(std::stringstream* commentsO
   findUserQuery[DatabaseStrings::labelUsername] = this->username;
   setUserQuery[DatabaseStrings::labelActivationToken] = this->actualActivationToken;
   if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(
-    DatabaseStrings::tableUsers, findUserQuery, setUserQuery, 0, commentsOnFailure
+    DatabaseStrings::tableUsers, findUserQuery, setUserQuery, nullptr, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Setting activation token failed.";
@@ -894,7 +896,7 @@ bool UserCalculator::ComputeAndStoreActivationStats(
   }
   if (
     !DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(
-      DatabaseStrings::tableUsers, findQueryInUsers, setQueryInUsers, 0, commentsOnFailure
+      DatabaseStrings::tableUsers, findQueryInUsers, setQueryInUsers, nullptr, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to set activationTokenCreationTime. ";
@@ -906,7 +908,7 @@ bool UserCalculator::ComputeAndStoreActivationStats(
   emailStatQuery[DatabaseStrings::labelActivationToken] = this->actualActivationToken;
   emailStatQuery[DatabaseStrings::labelUsernameAssociatedWithToken] = this->username;
   if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(
-    DatabaseStrings::tableEmailInfo, findQuery, emailStatQuery, 0, commentsOnFailure
+    DatabaseStrings::tableEmailInfo, findQuery, emailStatQuery, nullptr, commentsOnFailure
   )) {
     return false;
   }
@@ -1073,7 +1075,7 @@ bool DatabaseRoutineS::AddUsersFromEmails(
     comments << "<br>Failed to create all users. ";
   }
   if (doSendEmails) {
-    std::stringstream* commentsGeneralSensitive = 0;
+    std::stringstream* commentsGeneralSensitive = nullptr;
     if (theGlobalVariables.UserDefaultHasAdminRights()) {
       commentsGeneralSensitive = &comments;
     }
@@ -1257,7 +1259,9 @@ bool EmailRoutines::SendEmailWithMailGun(
     }
     return false;
   }
-  if (!FileOperations::LoadFileToStringVirtual("certificates/mailgun-hostname.txt", hostnameToSendEmailFrom, true, true, 0)) {
+  if (!FileOperations::LoadFileToStringVirtual(
+    "certificates/mailgun-hostname.txt", hostnameToSendEmailFrom, true, true, nullptr
+  )) {
     hostnameToSendEmailFrom = theGlobalVariables.hostNoPort;
     if (theGlobalVariables.UserDefaultHasAdminRights() && commentsGeneral != nullptr) {
       *commentsGeneral << "Did not find the mailgun hostname file: certificates/mailgun-hostname.txt. Using the "
@@ -1312,7 +1316,7 @@ bool EmailRoutines::SendEmailWithMailGun(
   << HtmlRoutines::ConvertStringEscapeQuotesAndBackslashes(this->emailContent)
   << "\"";
   std::string commandResult = theGlobalVariables.CallSystemWithOutput(commandToExecute.str());
-  if (commentsGeneralSensitive != 0) {
+  if (commentsGeneralSensitive != nullptr) {
     *commentsGeneralSensitive << "Command: " << HtmlRoutines::ConvertStringToHtmlString(commandToExecute.str(), true);
     bool isBad = false;
     if (commandResult.find("Forbidden") != std::string::npos) {
@@ -1339,7 +1343,7 @@ List<bool>& EmailRoutines::GetRecognizedEmailChars() {
     theChars += "@";
     theChars += "!#$%&'*+-/=?.";
     for (unsigned i = 0; i < theChars.size(); i ++) {
-      recognizedEmailCharacters[((unsigned char)theChars[i])] = true;
+      recognizedEmailCharacters[static_cast<unsigned char>(theChars[i])] = true;
     }
   }
   return EmailRoutines::recognizedEmailCharacters;
@@ -1348,15 +1352,15 @@ List<bool>& EmailRoutines::GetRecognizedEmailChars() {
 bool EmailRoutines::IsOKEmail(const std::string& input, std::stringstream* commentsOnError) {
   MacroRegisterFunctionWithName("EmailRoutines::IsOKEmail");
   if (input.size() == 0) {
-    if (commentsOnError != 0) {
+    if (commentsOnError != nullptr) {
       *commentsOnError << "Empty email not allowed. ";
     }
     return false;
   }
   int numAts = 0;
   for (unsigned i = 0; i < input.size(); i ++) {
-    if (!EmailRoutines::GetRecognizedEmailChars()[((unsigned char) input[i])]) {
-      if (commentsOnError != 0) {
+    if (!EmailRoutines::GetRecognizedEmailChars()[static_cast<unsigned char>(input[i])]) {
+      if (commentsOnError != nullptr) {
         *commentsOnError << "Email: " << input << " contains the unrecognized character "
         << input[i] << ". ";
       }
@@ -1366,7 +1370,7 @@ bool EmailRoutines::IsOKEmail(const std::string& input, std::stringstream* comme
       numAts ++;
     }
   }
-  if (numAts != 1 && commentsOnError != 0) {
+  if (numAts != 1 && commentsOnError != nullptr) {
     *commentsOnError << "Email: "
     << input << " is required to have exactly one @ character. ";
   }
@@ -1523,7 +1527,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(
     }
   }
   if (userWrapper.username == "admin" && userWrapper.enteredPassword != "") {
-    if (!userWrapper.Iexist(0)) {
+    if (!userWrapper.Iexist(nullptr)) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "First login of user admin: setting admin password. ";
       }
@@ -1551,11 +1555,11 @@ void UserCalculator::ComputeHashedSaltedPassword() {
   //<-careful copying entered password around. We want to avoid leaving
   //passwords in non-zeroed memory, even if properly freed (to the extent possible and practical).
   for (unsigned i = 0; i < Crypto::LengthSha3DefaultInBytes; i ++) {
-    this->usernameHashedPlusPassWordHashed[i + Crypto::LengthSha3DefaultInBytes] = hasher[i];
+    this->usernameHashedPlusPassWordHashed[i + Crypto::LengthSha3DefaultInBytes] = static_cast<char>(hasher[i]);
   }
   Crypto::computeSha3_256(this->username, hasher);
   for (unsigned i = 0; i < Crypto::LengthSha3DefaultInBytes; i ++) {
-    this->usernameHashedPlusPassWordHashed[i] = hasher[i];
+    this->usernameHashedPlusPassWordHashed[i] = static_cast<char>(hasher[i]);
   }
   this->enteredHashedSaltedPassword = Crypto::computeSha3_256OutputBase64URL(this->usernameHashedPlusPassWordHashed);
 }
@@ -1571,7 +1575,7 @@ bool UserCalculator::StoreToDB(bool doSetPassword, std::stringstream* commentsOn
   JSData setUser = this->ToJSON();
 
   return DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(
-    DatabaseStrings::tableUsers, findUser, setUser, 0, commentsOnFailure
+    DatabaseStrings::tableUsers, findUser, setUser, nullptr, commentsOnFailure
   );
 }
 

@@ -1122,6 +1122,10 @@ public:
     }
     return true;
   }
+  inline Object& operator[](unsigned i) const {
+    int static_cast_i = static_cast<signed>(i);
+    return (*this)[static_cast_i];
+  }
   Object& operator[](int i) const {
     this->CheckConsistency();
     if ((i >= this->size) || i < 0) {

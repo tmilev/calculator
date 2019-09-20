@@ -91,7 +91,7 @@ public:
 };
 
 MongoCollection::MongoCollection(const std::string& collectionName) {
-  if (!databaseMongo.initialize(0)) {
+  if (!databaseMongo.initialize(nullptr)) {
     crash << "Mongo DB not initialized when it should be" << crash;
     return;
   }
@@ -138,7 +138,7 @@ public:
 };
 
 MongoQuery::MongoQuery() {
-  if (!databaseMongo.initialize(0)) {
+  if (!databaseMongo.initialize(nullptr)) {
     crash << "Mongo DB did not start correctly. " << crash;
   }
   this->query = nullptr;
@@ -189,7 +189,7 @@ bool MongoQuery::RemoveOne(std::stringstream* commentsOnFailure) {
     crash << "At this point of code, query is supposed to be 0. " << crash;
   }
   this->query = bson_new_from_json
-  ((const uint8_t*) this->findQuery.c_str(), this->findQuery.size(), &this->theError);
+  (reinterpret_cast<const uint8_t*>(this->findQuery.c_str()), this->findQuery.size(), &this->theError);
   bool result = mongoc_collection_remove(theCollection.collection, MONGOC_REMOVE_SINGLE_REMOVE, this->query, NULL, &this->theError);
   if (!result) {
     if (commentsOnFailure != nullptr) {
@@ -220,7 +220,9 @@ bool MongoQuery::InsertOne(const JSData& incoming, std::stringstream* commentsOn
   }
   std::string incomingJSONString = incoming.ToString(true, false);
   this->update = bson_new_from_json(
-    (const uint8_t*) incomingJSONString.c_str(), incomingJSONString.size(), &this->theError
+    reinterpret_cast<const uint8_t*>(incomingJSONString.c_str()),
+    incomingJSONString.size(),
+    &this->theError
   );
   if (this->update == NULL) {
     if (commentsOnFailure != nullptr) {
@@ -260,15 +262,21 @@ bool MongoQuery::UpdateOne(std::stringstream* commentsOnFailure, bool doUpsert) 
     crash << "At this point of code, query is supposed to be 0. " << crash;
   }
   this->query = bson_new_from_json(
-    (const uint8_t*) this->findQuery.c_str(), this->findQuery.size(), &this->theError
+    reinterpret_cast<const uint8_t*>( this->findQuery.c_str()),
+    this->findQuery.size(),
+    &this->theError
   );
   this->update = bson_new_from_json(
-    (const uint8_t*) this->updateQuery.c_str(), this->updateQuery.size(), &this->theError
+    reinterpret_cast<const uint8_t*>(this->updateQuery.c_str()),
+    this->updateQuery.size(),
+    &this->theError
   );
   if (doUpsert) {
     this->optionsQuery = "{\"upsert\": true}";
     this->options = bson_new_from_json(
-      (const uint8_t*) this->optionsQuery.c_str(), this->optionsQuery.size(), &this->theError
+      reinterpret_cast<const uint8_t*>(this->optionsQuery.c_str()),
+      this->optionsQuery.size(),
+      &this->theError
     );
   }
   this->updateResult = bson_new();
@@ -326,7 +334,11 @@ bool MongoQuery::FindMultiple(
   if (this->query != nullptr) {
     crash << "At this point of code, query is supposed to be 0. " << crash;
   }
-  this->query = bson_new_from_json((const uint8_t*) this->findQuery.c_str(), this->findQuery.size(), &this->theError);
+  this->query = bson_new_from_json(
+    reinterpret_cast<const uint8_t*>(this->findQuery.c_str()),
+    this->findQuery.size(),
+    &this->theError
+  );
   if (this->query == NULL) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << this->theError.message;
@@ -343,7 +355,11 @@ bool MongoQuery::FindMultiple(
   }
   if (inputOptions.theType != JSData::token::tokenUndefined) {
     std::string optionsString = inputOptions.ToString(false, false);
-    this->options = bson_new_from_json((const uint8_t*) optionsString.c_str(), optionsString.size(), &this->theError);
+    this->options = bson_new_from_json(
+      reinterpret_cast<const uint8_t*>(optionsString.c_str()),
+      optionsString.size(),
+      &this->theError
+    );
     if (this->options == NULL) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << this->theError.message;
@@ -403,7 +419,9 @@ void DatabaseRoutinesGlobalFunctionsMongo::CreateHashIndex(
   theCommand << "{\"createIndexes\":\"" << collectionName << "\", \"indexes\": [{\"key\":{\""
   << theKey << "\": \"hashed\"}, \"name\": \"" << collectionName  << "_" << theKey << "_hash\"" << "}]} ";
   query.command = bson_new_from_json(
-    (const uint8_t*) theCommand.str().c_str(), theCommand.str().size(), &query.theError
+    reinterpret_cast<const uint8_t*>(theCommand.str().c_str()),
+    theCommand.str().size(),
+    &query.theError
   );
   mongoc_database_write_command_with_opts(database, query.command, NULL, query.updateResult, &query.theError);
 }
@@ -508,7 +526,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithOptions(
   query.findQuery = findQuery.ToString(true);
   query.maxOutputItems = maxOutputItems;
   bool result = query.FindMultiple(output, options, commentsOnFailure, commentsGeneralNonSensitive);
-  if (totalItems != 0) {
+  if (totalItems != nullptr) {
     *totalItems = query.totalItems;
   }
   return result;
@@ -1015,7 +1033,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromSomeJSON(
     return false;
   }
   return DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromQueryString(
-    collectionName, queryString, updateQuery, 0, commentsOnFailure
+    collectionName, queryString, updateQuery, nullptr, commentsOnFailure
   );
 }
 
@@ -1079,13 +1097,13 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FetchCollectionNames(
   char **theCollectionChars = mongoc_database_get_collection_names_with_opts(database, &opts, &error);
   bool result = true;
   output.SetSize(0);
-  if (theCollectionChars != NULL) {
+  if (theCollectionChars != nullptr) {
     for (int i = 0; theCollectionChars[i]; i ++) {
       std::string currentCollection(theCollectionChars[i]);
       output.AddOnTop(currentCollection);
     }
     bson_strfreev(theCollectionChars);
-    theCollectionChars = 0;
+    theCollectionChars = nullptr;
   } else {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to fetch all collections";
@@ -1203,7 +1221,7 @@ JSData DatabaseRoutinesGlobalFunctionsMongo::ToJSONFetchItem(const List<std::str
     result["findQuery"] = findQuery;
   }
   result["rows"] = theRows;
-  result["totalRows"] = (int) totalItems;
+  result["totalRows"] = static_cast<int>(totalItems);
   return result;
 }
 
@@ -1262,7 +1280,7 @@ JSData DatabaseRoutinesGlobalFunctionsMongo::ToJSONDatabaseCollection(const std:
   theRows.theType = JSData::token::tokenArray;
   theRows.theList = rowsJSON;
   result["rows"] = theRows;
-  result["totalRows"] = (int) totalItems;
+  result["totalRows"] = static_cast<int>(totalItems);
   return result;
 }
 

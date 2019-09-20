@@ -1,5 +1,7 @@
 #include "calculator_database_mongo.h"
 #include "database_mongo.h"
+
+extern ProjectInformationInstance ProjectInfoVpfMongoCalculatorInterface;
 ProjectInformationInstance ProjectInfoVpfMongoCalculatorInterface(__FILE__, "Database mongo<->calculator interface.");
 
 extern logger logWorker;
@@ -9,7 +11,7 @@ bool CalculatorDatabaseFunctions::innerExecuteMongoQuery(
 ) {
   MacroRegisterFunctionWithName("CalculatorDatabaseFunctions::innerExecuteMongoQuery");
   if (!theGlobalVariables.UserDefaultHasAdminRights()) {
-    return output.AssignValue((std::string) "Admin rights needed for mongoDB queries. ", theCommands);
+    return output.AssignValue(std::string("Admin rights needed for mongoDB queries. "), theCommands);
   }
   if (input.size() < 3) {
     return theCommands << "Expected at least 2 arguments: collection name and query. ";
@@ -27,7 +29,9 @@ bool CalculatorDatabaseFunctions::innerExecuteMongoQuery(
   }
   List<JSData> outputList;
   std::stringstream commentsOnFailure;
-  if (!DatabaseRoutinesGlobalFunctionsMongo::FindFromString(inputCollection, inputQuery, outputList, - 1, 0, &commentsOnFailure)) {
+  if (!DatabaseRoutinesGlobalFunctionsMongo::FindFromString(
+    inputCollection, inputQuery, outputList, - 1, nullptr, &commentsOnFailure
+  )) {
     return output.AssignValue(commentsOnFailure.str(), theCommands);
   }
   JSData finalOutput;

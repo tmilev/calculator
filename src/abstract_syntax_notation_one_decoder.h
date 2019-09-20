@@ -54,6 +54,7 @@ public:
   );
   static std::string ToStringAllRecognizedObjectIds();
   void WriteBytesASNObject(List<unsigned char>& output);
+  std::string ToString();
 };
 
 // The following class (is supposed to) implement a sufficiently

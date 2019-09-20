@@ -90,6 +90,7 @@ public:
     std::stringstream* commentsOnFailure
   );
   void WriteBytesASN1(List<unsigned char>& output);
+  std::string ToString();
 };
 
 class X509Certificate {

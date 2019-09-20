@@ -6,7 +6,7 @@
 #include "math_extra_algebraic_numbers.h"
 #include "serialization_basic.h"
 
-extern logger logWorker;
+extern logger logWorker, logServer;
 
 extern ProjectInformationInstance ProjectInfoAbstractSyntaxNotationOneDecoderImplementation;
 
@@ -830,6 +830,14 @@ int ASNObject::LoadField(const MapList<std::string, ASNObject, MathRoutines::Has
   return 1;
 }
 
+std::string ASNObject::ToString() {
+  std::stringstream out;
+  out << "objectId: " << Crypto::ConvertListUnsignedCharsToHex(this->objectId, 0, false)
+  << ", name: " << Crypto::ConvertListUnsignedCharsToHex(this->name, 0, false)
+  << ", content: " << this->content;
+  return out.str();
+}
+
 std::string ASNObject::ToStringAllRecognizedObjectIds() {
   std::stringstream out;
   out << "There are: " << ASNObject::ObjectIdsToNames().size() << " known fields. ";
@@ -892,12 +900,6 @@ bool ASNObject::LoadFromJSON(const JSData& inputShell,
     }
     return false;
   }
-  if (!first.HasKey("objectIdentifierBytes")) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "objectIdentifierBytes key missing. ";
-    }
-    return false;
-  }
   JSData objectIdJSON = first.GetValue("objectIdentifierBytes");
   if (objectIdJSON.theType != JSData::token::tokenString) {
     if (commentsOnFailure != nullptr) {
@@ -928,6 +930,7 @@ bool ASNObject::LoadFromJSON(const JSData& inputShell,
     return false;
   }
   this->content = second.theString;
+  logServer << "DEBUG: loaded built-in asn: " << this->ToString() << logger::endL;
   return true;
 }
 
@@ -963,6 +966,7 @@ std::string X509Certificate::ToString() {
   out << "Certificate RSA:<br>"
   << this->theRSA.ToString();
   out << "<br>Source binary: " << this->sourceBinary.size << " bytes.<br>";
+  out << this->information.ToString();
   AbstractSyntaxNotationOneSubsetDecoder theDecoder;
   theDecoder.dataInterpretation = &this->sourceInterpretation;
   theDecoder.decodedData = &this->sourceJSON;
@@ -1132,8 +1136,24 @@ bool X509Certificate::LoadFromPEMFile(const std::string& input, std::stringstrea
   return this->LoadFromPEM(certificateContent, commentsOnFailure);
 }
 
+std::string TBSCertificateInfo::ToString() {
+  std::stringstream out;
+  out << "Country name: " << this->countryName.content << "\n<br>\n";
+  out << "Common name: " << this->commonName.content << "\n<br>\n";
+
+  out << "Email address: " << this->emailAddress.content << "\n<br>\n";
+  out << "Locality name: " << this->localityName.content << "\n<br>\n";
+  out << "Organizational unit name: " << this->organizationalUnitName.content << "\n<br>\n";
+  out << "Organization name: " << this->organizationName.content << "\n<br>\n";
+  out << "State or province name: " << this->stateOrProvinceName.content << "\n<br>\n";
+  return out.str();
+}
+
 void TBSCertificateInfo::WriteBytesASN1(List<unsigned char>& output) {
   AbstractSyntaxNotationOneSubsetDecoder::WriterSequence writeTBSCertificateContent(200, output);
+  logWorker << "DEBUG: country name: " << this->countryName.ToString() << logger::endL;
+  logWorker << "DEBUG: state or province: " << this->stateOrProvinceName.ToString() << logger::endL;
+
   this->countryName           .WriteBytesASNObject(output);
   this->stateOrProvinceName   .WriteBytesASNObject(output);
   this->localityName          .WriteBytesASNObject(output);
@@ -1153,6 +1173,7 @@ bool TBSCertificateInfo::LoadFromJSON(const JSData& input, std::stringstream* co
     }
     return false;
   }
+  logWorker << "DEBUG: fields size: " << fields.size() << logger::endL;
   return this->LoadFields(fields, commentsOnFailure);
 }
 
@@ -1226,6 +1247,7 @@ bool X509Certificate::LoadFromASNEncoded(
     }
     return false;
   }
+  logServer << "DEBUG: Loading info from json: " << certificateFieldsJSON.ToString(false, true, false, true);
   if (!this->information.LoadFromJSON(certificateFieldsJSON, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to read certificate fields. JSON decoded: "

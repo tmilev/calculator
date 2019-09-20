@@ -458,19 +458,19 @@ bool ElementUniversalEnveloping<coefficient>::HWTAAbilinearForm(
   Accum.MakeZero(this->GetOwner());
   MonomialUniversalEnveloping<coefficient> constMon;
   constMon.MakeOne(this->GetOwner());
-  if (logStream != 0) {
+  if (logStream != nullptr) {
     *logStream << "left eltement transposed: "
     << TAleft.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
     *logStream << "right element: " << right.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
   }
   startingElt = right;
   startingElt.Simplify(theRingUnit);
-  if (logStream != 0) {
+  if (logStream != nullptr) {
     *logStream << "right element after simplification: "
     << startingElt.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
   }
   startingElt.ModOutVermaRelations(subHiGoesToIthElement, theRingUnit);
-  if (logStream != 0) {
+  if (logStream != nullptr) {
     *logStream << "right element after Verma rels: "
     << startingElt.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
   }
@@ -485,23 +485,23 @@ bool ElementUniversalEnveloping<coefficient>::HWTAAbilinearForm(
         for (int k = 0; k < thePower; k ++) {
           tempElt.MakeOneGenerator(leftMon.generatorsIndices[i], this->GetOwner(), theRingUnit);
           MathRoutines::swap(tempElt, intermediateAccum);
-          if (logStream != 0) {
+          if (logStream != nullptr) {
             //*logStream << "tempElt before mult: " << tempElt.ToString(theGlobalVariables, tempFormat) << "<br>";
             *logStream << "intermediate before mult: "
             << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
           }
           intermediateAccum *= tempElt;
-          if (logStream != 0) {
+          if (logStream != nullptr) {
             *logStream << "intermediate before simplification: "
             << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
           }
           intermediateAccum.Simplify(theRingUnit);
-          if (logStream != 0) {
+          if (logStream != nullptr) {
             *logStream << "intermediate after simplification: "
             << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
           }
           intermediateAccum.ModOutVermaRelations(subHiGoesToIthElement, theRingUnit, theRingZero);
-          if (logStream != 0) {
+          if (logStream != nullptr) {
             *logStream << "intermediate after Verma rels: "
             << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
           }
@@ -518,7 +518,7 @@ bool ElementUniversalEnveloping<coefficient>::HWTAAbilinearForm(
       output += intermediateAccum.theCoeffs[theIndex];
     }
   }
-  if (logStream != 0) {
+  if (logStream != nullptr) {
     *logStream << "final UE element: " << Accum.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
   }
   this->GetOwner().UEGeneratorOrderIncludingCartanElts = oldOrder;
@@ -981,7 +981,6 @@ bool ElementUniversalEnvelopingOrdered<coefficient>::GetCoordsInBasis(
 
 template <class coefficient>
 void ElementUniversalEnvelopingOrdered<coefficient>::GetCoordinateFormOfSpanOfElements(
-  int numVars,
   List<ElementUniversalEnvelopingOrdered>& theElements,
   Vectors<Polynomial<coefficient> >& outputCoordinates,
   ElementUniversalEnvelopingOrdered& outputCorrespondingMonomials
@@ -1028,19 +1027,6 @@ void ElementUniversalEnvelopingOrdered<coefficient>::SubstitutionCoefficients(Po
   }
 //  endResult.Simplify(theContext);
   this->operator=(endResult);
-}
-
-template <class coefficient>
-void ElementUniversalEnveloping<coefficient>::MakeConst(const Rational& coeff, int numVars, SemisimpleLieAlgebra& inputOwner) {
-  MonomialUniversalEnveloping<coefficient> tempMon;
-  this->MakeZero(inputOwner);
-  if (coeff.IsEqualToZero()) {
-    return;
-  }
-  coefficient tempP;
-  tempP = coeff;
-  tempMon.MakeConst(inputOwner);
-  this->AddMonomial(tempMon, tempP);
 }
 
 template <class coefficient>
@@ -1198,7 +1184,6 @@ template<class coefficient>
 void ElementVermaModuleOrdered<coefficient>::ActOnMe(
   const ElementSemisimpleLieAlgebra<Rational>& actingElt,
   ElementVermaModuleOrdered<coefficient>& output,
-  SemisimpleLieAlgebra& owner,
   const coefficient& theRingUnit,
   const coefficient& theRingZero
 ) const {
@@ -1753,7 +1738,7 @@ void MonomialUniversalEnvelopingOrdered<coefficient>::MakeZero(
 template <class coefficient>
 unsigned int MonomialUniversalEnvelopingOrdered<coefficient>::HashFunction() const {
   int top = MathRoutines::Minimum(SomeRandomPrimesSize, this->generatorsIndices.size);
-  int result = 0;
+  unsigned int result = 0;
   for (int i = 0; i < top; i ++) {
     result += SomeRandomPrimes[i] * this->generatorsIndices.TheObjects[i];
   }

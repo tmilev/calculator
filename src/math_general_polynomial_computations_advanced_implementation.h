@@ -302,7 +302,8 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasisImpro
   List<Polynomial<coefficient> >& inputOutpuT, int upperComputationBound
 ) {
   MacroRegisterFunctionWithName("RationalFunction_CoefficientType::TransformToReducedGroebnerBasisImprovedAlgorithm");
-   //This is an implementation of the algorithm on page 106, Cox, Little, O'Shea,
+  (void) upperComputationBound;
+  //This is an implementation of the algorithm on page 106, Cox, Little, O'Shea,
   //Ideals, Varieties, algorithms
   this->initForGroebnerComputation(inputOutpuT, theGlobalVariables);
   this->theBasiS = inputOutpuT;

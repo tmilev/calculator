@@ -862,6 +862,8 @@ bool ASNObject::LoadFieldsFromJSArray(
     }
     return false;
   }
+  logServer << "DEBUG: About to load " << jsonArray.theList.size
+  << " fields from: " << jsonArray.ToString(false, true, false, true) << logger::endL;
   for (int i = 0; i < jsonArray.theList.size; i ++) {
     ASNObject current;
     if (!current.LoadFromJSON(jsonArray.theList[i], commentsOnFailure)) {
@@ -870,6 +872,7 @@ bool ASNObject::LoadFieldsFromJSArray(
       }
       return false;
     }
+    output.SetKeyValue(current.name, current);
   }
   return true;
 
@@ -1276,6 +1279,7 @@ bool X509Certificate::LoadFromASNEncoded(
     }
     return false;
   }
+  logServer << "Final certificate loaded: " << this->ToString();
   return true;
 }
 

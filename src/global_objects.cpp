@@ -61,7 +61,7 @@ logger logPlumbing("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogS
 logger logProcessKills("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogMultiprocessing.html", &logServer, false, ProcessTypes::server);
 logger logSuccessfulForks("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogForkSuccess.html", &logServer, false, ProcessTypes::server);
 
-Calculator* theParser = 0;
+Calculator* theParser = nullptr;
 FormatExpressions consoleFormat;
 Crasher crash;
 StdoutClass stOutput;

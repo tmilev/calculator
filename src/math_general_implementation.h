@@ -501,17 +501,17 @@ void Matrix<coefficient>::GaussianEliminationByRows(
   int NumFoundPivots = 0;
   int MaxRankMat = MathRoutines::Minimum(this->NumRows, this->NumCols);
   coefficient tempElement;
-  if (outputNonPivotColumns != 0) {
+  if (outputNonPivotColumns != nullptr) {
     outputNonPivotColumns->init(this->NumCols);
   }
-  if (outputPivotColumns != 0) {
+  if (outputPivotColumns != nullptr) {
     outputPivotColumns->init(this->NumCols);
   }
   bool doProgressReport = theGlobalVariables.flagReportGaussianElimination || theGlobalVariables.flagReportEverything;
-  bool formatAsLinearSystem = theFormat == 0 ? false : theFormat->flagFormatMatrixAsLinearSystem;
-  bool useHtmlInReport = theFormat == 0 ? true : theFormat->flagUseHTML;
+  bool formatAsLinearSystem = theFormat == nullptr ? false : theFormat->flagFormatMatrixAsLinearSystem;
+  bool useHtmlInReport = theFormat == nullptr ? true : theFormat->flagUseHTML;
   ProgressReport theReport;
-  if (humanReadableReport != 0) {
+  if (humanReadableReport != nullptr) {
     if (useHtmlInReport) {
       *humanReadableReport << "\n\n\n\n<table><tr><td style =\"border-bottom:3pt solid black;\">System status</td>"
       << "<td style =\"border-bottom:3pt solid black;\">action</td></tr>";
@@ -522,7 +522,7 @@ void Matrix<coefficient>::GaussianEliminationByRows(
   //Initialization done! Time to do actual work:
   for (int i = 0; i < this->NumCols; i ++) {
     if (NumFoundPivots == MaxRankMat) {
-      if (outputNonPivotColumns != 0) {
+      if (outputNonPivotColumns != nullptr) {
         for (int j = i; j < this->NumCols; j ++) {
           outputNonPivotColumns->AddSelectionAppendNewIndex(j);
         }
@@ -531,12 +531,12 @@ void Matrix<coefficient>::GaussianEliminationByRows(
     }
     tempI = this->FindPivot(i, NumFoundPivots);
     if (tempI == - 1) {
-      if (outputNonPivotColumns != 0) {
+      if (outputNonPivotColumns != nullptr) {
         outputNonPivotColumns->AddSelectionAppendNewIndex(i);
       }
       continue;
     }
-    if (humanReadableReport != 0) {
+    if (humanReadableReport != nullptr) {
       if (useHtmlInReport) {
         *humanReadableReport << "<tr><td style =\"border-bottom:1pt solid black;\">";
         if (formatAsLinearSystem) {
@@ -561,7 +561,7 @@ void Matrix<coefficient>::GaussianEliminationByRows(
         }
       }
     }
-    if (outputPivotColumns != 0) {
+    if (outputPivotColumns != nullptr) {
       outputPivotColumns->AddSelectionAppendNewIndex(i);
     }
     this->SwitchTwoRows(NumFoundPivots, tempI);
@@ -593,7 +593,7 @@ void Matrix<coefficient>::GaussianEliminationByRows(
         }
       }
     }
-    if (humanReadableReport != 0) {
+    if (humanReadableReport != nullptr) {
       if (useHtmlInReport) {
         *humanReadableReport << "Eliminated the non-zero entries in the pivot column</td></tr>";
       } else {
@@ -602,10 +602,10 @@ void Matrix<coefficient>::GaussianEliminationByRows(
     }
     NumFoundPivots ++;
   }
-  if (humanReadableReport != 0) {
+  if (humanReadableReport != nullptr) {
     if (useHtmlInReport) {
       if (formatAsLinearSystem) {
-        *humanReadableReport << "<tr><td>" << HtmlRoutines::GetMathSpanPure(this->ToStringSystemLatex(carbonCopyMat, theFormat),- 1)
+        *humanReadableReport << "<tr><td>" << HtmlRoutines::GetMathSpanPure(this->ToStringSystemLatex(carbonCopyMat, theFormat), - 1)
         << "</td><td> Final result.</td></tr></table>\n\n\n\n";
       } else {
         *humanReadableReport << "<tr><td>" << HtmlRoutines::GetMathSpanPure(this->ToStringLatex(theFormat))

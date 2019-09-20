@@ -1,7 +1,7 @@
-//Copyright (c) 2018 Todor Milev.
-//Copyright (c) 2015. Andrey Jivsov. crypto@brainhub.org
-//Distributed under the MIT software license, see
-//http://www.opensource.org/licenses/mit-license.php.
+// Copyright (c) 2018 Todor Milev.
+// Copyright (c) 2015. Andrey Jivsov. crypto@brainhub.org
+// Distributed under the MIT software license, see
+// http://www.opensource.org/licenses/mit-license.php.
 //
 // -------------------------------------------------------------------------
 // Works when compiled for either 32-bit or 64-bit targets, optimized for
@@ -130,7 +130,7 @@ static void keccakf(uint64_t s[25]) {
     }
     // Rho Pi
     t = s[1];
-    for(i = 0; i < 24; i ++) {
+    for (i = 0; i < 24; i ++) {
       j = keccakf_piln[i];
       bc[0] = s[j];
       s[j] = Sha3::rotl64(t, keccakf_rotc[i]);
@@ -188,11 +188,13 @@ void Sha3::sha3_Update(void const* bufIn, size_t len) {
   size_t words;
   unsigned tail;
   size_t i;
-  const uint8_t* buf = (const uint8_t *) bufIn;
-  if (this->byteIndex >= 8)
-    crash << "Internal sha3 computation error: byteIndex too large: " << (int) this->byteIndex << crash;
-  if (this->wordIndex >= (sizeof(this->s) / sizeof(this->s[0])))
-    crash << "Internal sha3 computation error: wordIndex too large: " << (int) this->wordIndex << crash;
+  const uint8_t* buf = static_cast<const uint8_t *>(bufIn);
+  if (this->byteIndex >= 8) {
+    crash << "Internal sha3 computation error: byteIndex too large: " << this->byteIndex << crash;
+  }
+  if (this->wordIndex >= (sizeof(this->s) / sizeof(this->s[0]))) {
+    crash << "Internal sha3 computation error: wordIndex too large: " << this->wordIndex << crash;
+  }
   if (len < old_tail) {
     // Have no complete word or haven't started the word yet.
     // Endian-independent code follows:

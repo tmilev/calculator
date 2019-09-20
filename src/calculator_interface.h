@@ -2915,7 +2915,7 @@ bool CalculatorConversions::innerExpressionFromPoly(
   MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromPoly");
   MonomialCollection<Expression, coefficient> theTerms;
   Expression currentBase, currentPower, currentTerm, currentMultTermE;
-  if (!input.IsConstant() && inputContext == 0) {
+  if (!input.IsConstant() && inputContext == nullptr) {
     theCommands << "While converting polynomial to expression, I was given no variable names. Using the "
     << "default variable names x_1, x_2, ... "
     << "Please make sure you are not using those variables for other purposes.";
@@ -2929,12 +2929,12 @@ bool CalculatorConversions::innerExpressionFromPoly(
     bool found = false;
     for (int j = 0; j < input[i].GetMinNumVars(); j ++) {
       if (input[i](j) != 0) {
-        if (inputContext != 0) {
+        if (inputContext != nullptr) {
           currentBase = inputContext->ContextGetContextVariable(j);
         } else {
           currentBase.reset(theCommands);
           currentBase.AddChildAtomOnTop("x");
-          currentBase.AddChildValueOnTop((Rational) j);
+          currentBase.AddChildValueOnTop(Rational(j));
         }
         if (input[i](j) == 1) {
           currentMultTermE = currentBase;

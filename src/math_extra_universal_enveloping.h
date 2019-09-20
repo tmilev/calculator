@@ -193,7 +193,6 @@ public:
   coefficient GetKillingFormProduct(const ElementUniversalEnveloping<coefficient>& right) const;
   void MakeZero(SemisimpleLieAlgebra& inputOwner);
   bool GetLieAlgebraElementIfPossible(ElementSemisimpleLieAlgebra<Rational>& output) const;
-  void MakeConst(const Rational& coeff, int numVars, SemisimpleLieAlgebra& inputOwner);
   void MakeConst(const coefficient& coeff, SemisimpleLieAlgebra& inputOwner) {
     this->MakeZero(inputOwner);
     MonomialUniversalEnveloping<coefficient> tempMon;

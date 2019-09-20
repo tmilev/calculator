@@ -7489,6 +7489,9 @@ bool CalculatorFunctionsGeneral::innerSplitGenericGenVermaTensorFD(
   return output.AssignValue(out.str(), theCommands);
 }
 
+template <>
+bool Expression::ConvertToType<ElementUniversalEnveloping<RationalFunctionOld> >(Expression& output) const;
+
 bool CalculatorFunctionsGeneral::innerHWTAABF(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerHWTAABF");
   RecursionDepthCounter theRecursionCounter(&theCommands.RecursionDeptH);

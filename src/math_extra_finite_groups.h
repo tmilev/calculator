@@ -2475,6 +2475,22 @@ bool FiniteGroup<elementSomeGroup>::RegisterCCclass(
   return true;
 }
 
+template <typename elementSomeGroup>
+bool FiniteGroup<elementSomeGroup>::GetWord(const elementSomeGroup& g, List<int>& word) {
+  if (this->GetWordByFormula != nullptr) {
+    return this->GetWordByFormula(*this, g, word);
+  }
+  if (!this->flagWordsComputed) {
+    this->ComputeAllElementsLargeGroup(true);
+  }
+  int index = this->theElements.GetIndex(g);
+  if (index == - 1) {
+    return false;
+  }
+  word = this->theWords[index];
+  return true;
+}
+
 template <class elementSomeGroup>
 LargeInt FiniteGroup<elementSomeGroup>::GetSize() {
   this->CheckConsistency();

@@ -19,9 +19,9 @@ template<class Element>
 bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(
   Matrix<Element>& matA, Matrix<Element>& matb, Vector<Element>* outputSolution
 ) {
-//this function return true if Ax = b >= 0 has a solution with x >= 0 and records a solution x at outputPoint
-//else returns false, where b is a given nonnegative column vector, A is an n by m matrix
-//and x is a column vector with m entries
+  // this function return true if Ax = b >= 0 has a solution with x >= 0 and records a solution x at outputPoint
+  // else returns false, where b is a given nonnegative column vector, A is an n by m matrix
+  // and x is a column vector with m entries
   Matrix<Rational> tempMatA;
   Vector<Rational> matX;
   Selection BaseVariables;

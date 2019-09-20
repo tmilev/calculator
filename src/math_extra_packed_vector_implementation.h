@@ -4,6 +4,7 @@
 #define vpfImplementationHeaderPackedVectorIncluded
 
 #include "math_extra_packed_vector.h"
+#include "assert.h"
 static ProjectInformationInstance ProjectInfovpfImplementationHeaderPackedVector(__FILE__, "Implementation header, packed vector. ");
 
 template <typename scalar>
@@ -113,6 +114,7 @@ bool PackedVector<scalar>::operator>(const PackedVector<scalar>&w) const {
 
 template <typename scalar>
 void PackedVector<scalar>::MakeZero(int n) {
+  (void) n;
   for (int i = 0; i < this->size; i ++) {
     this->data[i] = 0;
   }
@@ -120,6 +122,7 @@ void PackedVector<scalar>::MakeZero(int n) {
 
 template <typename scalar>
 void PackedVector<scalar>::MakeEi(int d, int ei) {
+  (void) d;
   for (int i = 0; i < this->size; i ++) {
     this->data[i] = 0;
   }

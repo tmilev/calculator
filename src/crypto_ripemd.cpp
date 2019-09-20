@@ -46,6 +46,8 @@
 #include <stdint.h>
 #include <string.h>
 
+extern ProjectInformationInstance project_RIPEMD160_implementation;
+
 ProjectInformationInstance project_RIPEMD160_implementation(__FILE__, "Ripemd160 implementation");
 
 bool Crypto::flagRIPEMDBigEndian = false;
@@ -72,7 +74,7 @@ public:
   static const uint32_t KR[5];
 
   /* cyclic left-shift the 32-bit word n left by s bits */
-  inline static uint32_t ROL(int8_t s, uint32_t n) {
+  inline static uint32_t ROL(uint8_t s, uint32_t n) {
     return (((n) << (s)) | ((n) >> (32 - (s))));
   }
 
@@ -369,7 +371,7 @@ void ripemd160_process(Ripemd160State* self, const unsigned char* p, unsigned lo
   while (length > 0) {
     /* Figure out how many bytes we need to fill the internal buffer. */
     bytes_needed = 64 - self->bufpos;
-    if ((unsigned long) length >= bytes_needed) {
+    if (static_cast<unsigned long>(length) >= bytes_needed) {
       /* We have enough bytes, so copy them into the internal buffer and run
        * the compression function. */
       memcpy(&self->buf.b[self->bufpos], p, bytes_needed);
@@ -398,8 +400,8 @@ void ripemd160_done(Ripemd160State* self, unsigned char *out) {
     ripemd160_compress(self);
   }
   /* Append the length */
-  self->buf.w[14] = (uint32_t) (self->length & 0xFFFFffffu);
-  self->buf.w[15] = (uint32_t) ((self->length >> 32) & 0xFFFFffffu);
+  self->buf.w[14] = static_cast<uint32_t>(self->length & 0xFFFFffffu);
+  self->buf.w[15] = static_cast<uint32_t>((self->length >> 32) & 0xFFFFffffu);
   if (Crypto::flagRIPEMDBigEndian) {
     byteswap32(&self->buf.w[14]);
     byteswap32(&self->buf.w[15]);
@@ -419,6 +421,6 @@ void Crypto::computeRIPEMD160(const std::string& input, List<unsigned char>& out
   Ripemd160State md;
   ripemd160_init(&md);
   output.SetSize(20);
-  ripemd160_process(&md, (unsigned char*) input.c_str(), input.size());
+  ripemd160_process(&md, reinterpret_cast<const unsigned char*>(input.c_str()), input.size());
   ripemd160_done(&md, output.TheObjects);
 }

@@ -1,6 +1,8 @@
 //The current file is licensed under the license terms found in the main header file "calculator.h".
 //For additional information refer to the file "calculator.h".
 #include "calculator.h"
+
+extern ProjectInformationInstance ProjectInfoVpf6_0cpp;
 ProjectInformationInstance ProjectInfoVpf6_0cpp(__FILE__, "Calculator input parsing routines. ");
 
 SyntacticElement Calculator::GetEmptySyntacticElement() {
@@ -24,9 +26,9 @@ std::string SyntacticElement::ToStringHumanReadable(Calculator& theBoss, bool in
     return controlString;
   }
   std::stringstream out;
-  out << "<table style =\"vertical-align:top;border-spacing= 0px 0px\">";
-  out << "<tr><td style =\"text-align:center\">" << this->theData.ToString(0) << "</td></tr>";
-  out << "<tr><td style =\"color:#AAAAAA\">" << controlString << "</td></tr>";
+  out << "<table style = \"vertical-align:top;border-spacing= 0px 0px\">";
+  out << "<tr><td style = \"text-align:center\">" << this->theData.ToString(nullptr) << "</td></tr>";
+  out << "<tr><td style = \"color:#AAAAAA\">" << controlString << "</td></tr>";
   if (includeLispifiedExpressions) {
     out <<  "<tr><td style =\"color:#AAAAAA\">" << this->theData.ToStringFull() << "</td></tr>";
   }
@@ -630,7 +632,7 @@ bool Calculator::ReplaceOEXByE() {
 bool Calculator::ReplaceXXByEmptyString() {
   SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
   Expression newExpr;
-  left.theData.AssignValue((std::string)"", *this);
+  left.theData.AssignValue(std::string(""), *this);
   left.controlIndex = this->conExpression();
   return this->DecreaseStackSetCharacterRangeS(1);
 }
@@ -743,7 +745,7 @@ bool Calculator::isInterpretedAsEmptySpace(const std::string& input) {
   if (input.size() != 1) {
     return false;
   }
-  return this->isInterpretedAsEmptySpace(input[0]);
+  return this->isInterpretedAsEmptySpace(static_cast<unsigned char>(input[0]));
 }
 
 bool Calculator::isInterpretedAsEmptySpace(unsigned char input) {
@@ -757,7 +759,7 @@ bool Calculator::isInterpretedAsEmptySpace(unsigned char input) {
     return true;
   default: return false;
   }
-  return false;
+  // return false;
 }
 
 void Calculator::ParseFillDictionary(const std::string& input) {
@@ -772,7 +774,7 @@ void Calculator::ParseFillDictionary(const std::string& input) {
 void Calculator::ParseFillDictionary(const std::string& input, List<SyntacticElement>& output) {
   MacroRegisterFunctionWithName("Calculator::ParseFillDictionary");
   std::string current;
-  output.Reserve(input.size());
+  output.Reserve(static_cast<signed>(input.size()));
   output.SetSize(0);
   char LookAheadChar;
   SyntacticElement currentElement;
@@ -805,7 +807,9 @@ void Calculator::ParseFillDictionary(const std::string& input, List<SyntacticEle
     bool shouldSplit = false;
     if (!inQuotes) {
       shouldSplit =(
-        this->isLeftSeparator(current[0]) || this->isRightSeparator(LookAheadChar) || current == " "
+        this->isLeftSeparator(static_cast<unsigned char>(current[0])) ||
+        this->isRightSeparator(static_cast<unsigned char>(LookAheadChar)) ||
+        current == " "
       );
       if (MathRoutines::isADigit(LookAheadChar)) {
         if (current[current.size() - 1] == '\\' || this->stringsThatSplitIfFollowedByDigit.Contains(current)) {
@@ -1131,7 +1135,7 @@ std::string Calculator::ToStringIsCorrectAsciiCalculatorString(const std::string
   std::stringstream out;
   HashedList<char, MathRoutines::HashChar> theBadChars;
   for (unsigned i = 0; i < input.size(); i ++) {
-    if (!this->isStandardCalculatorCharacter(input[i])) {
+    if (!this->isStandardCalculatorCharacter(static_cast<unsigned char>(input[i]))) {
       theBadChars.AddOnTopNoRepetition(input[i]);
     }
   }
@@ -1813,7 +1817,7 @@ bool Calculator::ExtractExpressions(Expression& outputExpression, std::string* o
     errorLog << "Syntax error: your command does not simplify to a single syntactic element. <br>";
     errorLog << "Instead it simplifies to:<br> " << this->ToStringSyntacticStackHTMLTable(false);
   }
-  if (outputErrors != 0) {
+  if (outputErrors != nullptr) {
     *outputErrors = errorLog.str();
   }
   return success;
@@ -1965,7 +1969,7 @@ bool Calculator::ApplyOneRule() {
   }
   if (secondToLastS == "%" && lastS == "NoLogarithmExponentShortcut") {
     this->atomsWhoseExponentsAreInterpretedAsFunctions.
-    RemoveFirstOccurenceSwapWithLast((std::string) "\\log");
+    RemoveFirstOccurenceSwapWithLast(std::string("\\log"));
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }

@@ -8,30 +8,30 @@ static ProjectInformationInstance ProjectInfoVpfHeader3(
   __FILE__, "Header, ListReferences and HashedListReferences implementation. "
 );
 
-//class ListReferences is to be used in the same way as class List.
-//The essential difference between ListReferences and List is in the way the objects are
-//stored in memory. A copy of each object of ListReferences
-//is allocated with an individual copy constructor (call of new Object; rather than new Object[size];),
-//and a pointer to the so allocated memory is stored.
-//Motivation for this class: when a pointer/reference to an object is requested,
-//the class returns a pointer to the individually allocated object.
-//This piece of memory is allocated exactly once,
-//i.e. the individual piece of memory never moves, and is thus completely safe
-//to pass a reference of the object around. This reference will not expire,
-//should the list be resized.
+// class ListReferences is to be used in the same way as class List.
+// The essential difference between ListReferences and List is in the way the objects are
+// stored in memory. A copy of each object of ListReferences
+// is allocated with an individual copy constructor (call of new Object; rather than new Object[size];),
+// and a pointer to the so allocated memory is stored.
+// Motivation for this class: when a pointer/reference to an object is requested,
+// the class returns a pointer to the individually allocated object.
+// This piece of memory is allocated exactly once,
+// i.e. the individual piece of memory never moves, and is thus completely safe
+// to pass a reference of the object around. This reference will not expire,
+// should the list be resized.
 //
-//Use guideline.
-//ListReferences is slower, but pointers
-//to data stored in ListReferences are safe to share.
-//You should use ListReferences/HashedListReferences
-//for objects that will be shared and passed accross functions.
-//Those include mostly large
-//objects and objects contained in the Object container of the calulator.
-//Data that is not meant to be shared
-//or that is otherwise small (lists of ints, monomials, Rationals, etc.)
-//should be kept in simple Lists and copied around when needed.
-//So long as a List is const, it is safe to pass references to data from the List.
-//Whenever in doubt, use ListReferences.
+// Use guideline.
+// ListReferences is slower, but pointers
+// to data stored in ListReferences are safe to share.
+// You should use ListReferences/HashedListReferences
+// for objects that will be shared and passed accross functions.
+// Those include mostly large
+// objects and objects contained in the Object container of the calulator.
+// Data that is not meant to be shared
+// or that is otherwise small (lists of ints, monomials, Rationals, etc.)
+// should be kept in simple Lists and copied around when needed.
+// So long as a List is const, it is safe to pass references to data from the List.
+// Whenever in doubt, use ListReferences.
 
 template <class Object>
 class ListReferences {

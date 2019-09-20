@@ -1,5 +1,5 @@
-//The current file is licensed under the license terms found in the main header file "calculator.h".
-//For additional information refer to the file "calculator.h".
+// The current file is licensed under the license terms found in the main header file "calculator.h".
+// For additional information refer to the file "calculator.h".
 #ifndef vpfHeaderSemisimpleLieAlgebrasRootSubalgebras
 #define vpfHeaderSemisimpleLieAlgebrasRootSubalgebras
 
@@ -73,10 +73,12 @@ public:
     return this->DebugString == right.DebugString;
   }
   unsigned int HashFunction() const {
-    int tempI = ::MathRoutines::Minimum((int) this->DebugString.length(), ::SomeRandomPrimesSize);
+    int tempI = ::MathRoutines::Minimum(static_cast<int>(this->DebugString.length()), ::SomeRandomPrimesSize);
     unsigned int result = 0;
     for (int i = 0; i < tempI; i ++) {
-      result += this->DebugString[i] * ::SomeRandomPrimes[i];
+      result += static_cast<unsigned>(
+        this->DebugString[static_cast<unsigned>(i)]
+      ) * ::SomeRandomPrimes[i];
     }
     return result;
   }
@@ -490,7 +492,7 @@ public:
   bool CheckConsistency() const;
 
   SltwoSubalgebras& GetContainerSl2s() {
-    if (this->container == 0) {
+    if (this->container == nullptr) {
       crash << "This is a programming error: attempting to "
       << "access the container list of a non-initialized sl(2)-subalgebra. " << crash;
     }
@@ -553,9 +555,9 @@ public:
   bool operator>(const slTwoSubalgebra& right) const;
   unsigned int HashFunction() const {
     int tempI = MathRoutines::Minimum(SomeRandomPrimesSize, this->hCharacteristic.size);
-    int result = 0;
+    unsigned int result = 0;
     for (int i = 0; i < tempI; i ++) {
-      result += this->hCharacteristic[i].NumShort*SomeRandomPrimes[i];
+      result += static_cast<unsigned>(this->hCharacteristic[i].NumShort) * SomeRandomPrimes[i];
     }
     return result;
   }
@@ -578,13 +580,13 @@ public:
   Vectors<Rational> BadHCharacteristics;
   int IndexZeroWeight;
   rootSubalgebras theRootSAs;
-  bool flagDeallocated;
+  // bool flagDeallocated;
   ~SltwoSubalgebras() {
-    this->flagDeallocated = true;
+    // this->flagDeallocated = true;
   }
-  SltwoSubalgebras(): owner(0), flagDeallocated(false) {
+  SltwoSubalgebras(): owner(nullptr) /*, flagDeallocated(false)*/ {
   }
-  SltwoSubalgebras(SemisimpleLieAlgebra& inputOwner): owner(&inputOwner), flagDeallocated(false) {
+  SltwoSubalgebras(SemisimpleLieAlgebra& inputOwner): owner(&inputOwner)/*, flagDeallocated(false)*/ {
    
   }
   bool operator==(const SltwoSubalgebras& other) const {

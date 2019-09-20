@@ -10,9 +10,9 @@ static ProjectInformationInstance projectInfoInstanceWebServerInterProcessLogist
   __FILE__, "Web server: inter-process communication/logistics."
 );
 
-//this class is similar to the controller class but coordinates across different processes,
-//rather than across different threads.
-//inter-process communication is achieved via pipes.
+// this class is similar to the controller class but coordinates across different processes,
+// rather than across different threads.
+// inter-process communication is achieved via pipes.
 
 // This is a basic wrapper around linux unnamed pipes.
 class PipePrimitive {

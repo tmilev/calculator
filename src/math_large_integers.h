@@ -11,28 +11,28 @@ static ProjectInformationInstance vpfHeader2Math_01LargeIntegersInstance(
 class LargeIntUnsigned {
   void AddNoFitSize(const LargeIntUnsigned& x);
 public:
-  //The zero element is assumed to have length one array with a zero entry.
+  // The zero element is assumed to have length one array with a zero entry.
   //
-  //CarryOverBound is the "base" over which we work.
-  //Requirements on the CarryOverBound:
-  //1.  +/-(CarryOverBound*2)- 1 must fit inside an (int)
-  //    on the system
-  //2. (CarryOverBound*2)^2- 1 must fit inside (long long)
-  //    on the system.
+  // CarryOverBound is the "base" over which we work.
+  // Requirements on the CarryOverBound:
+  // 1.  +/-(CarryOverBound*2)- 1 must fit inside an (int)
+  //     on the system
+  // 2. (CarryOverBound*2)^2- 1 must fit inside (long long)
+  //     on the system.
   ////////////////////////////////////////////////////////
-  //On a 32 bit machine any number smaller than or equal to 2^30 will work.
-  //If you got no clue what to put just leave CarryOverBound as it is below.
+  // On a 32 bit machine any number smaller than or equal to 2^30 will work.
+  // If you got no clue what to put just leave CarryOverBound as it is below.
   List<int32_t> theDigits;
-  //static const int CarryOverBound =10; //<-for extreme "corner case" testing
+  // static const int CarryOverBound =10; //<-for extreme "corner case" testing
   static const int CarryOverBound = 1000000000;
-  //the above choice of CarryOverBound facilitates very quick conversions of Large integers into decimal, with
-  //relatively small loss of speed and RAM memory.
-  //static const unsigned int CarryOverBound =2147483648UL; //=2^31
-  //The following must be less than or equal to the square root of CarryOverBound.
-  //It is used for quick multiplication of Rational-s.
-  //static const int SquareRootOfCarryOverBound =3;//<-for extreme "corner case" testing
+  // the above choice of CarryOverBound facilitates very quick conversions of Large integers into decimal, with
+  // relatively small loss of speed and RAM memory.
+  // static const unsigned int CarryOverBound =2147483648UL; //=2^31
+  // The following must be less than or equal to the square root of CarryOverBound.
+  // It is used for quick multiplication of Rational-s.
+  // static const int SquareRootOfCarryOverBound =3;//<-for extreme "corner case" testing
   static const int SquareRootOfCarryOverBound = 31000; //31000*31000=961000000<1000000000
-  //static const int SquareRootOfCarryOverBound =32768; //=2^15
+  // static const int SquareRootOfCarryOverBound =32768; //=2^15
   friend bool operator<(int left, const LargeIntUnsigned& right) {
     return right > left;
   }
@@ -120,10 +120,10 @@ public:
   LargeIntUnsigned operator*(const LargeIntUnsigned& x) const;
   LargeIntUnsigned(unsigned int x);
   LargeIntUnsigned(const LargeIntUnsigned& x);
-  //  LargeIntUnsigned(LargeIntUnsigned x);
+  // LargeIntUnsigned(LargeIntUnsigned x);
   LargeIntUnsigned();
-  //  LargeIntUnsigned(unsigned int value){this->operator=(value); }
-  //  LargeIntUnsigned(unsigned int x) {this->AssignShiftedUInt(x,0);}
+  // LargeIntUnsigned(unsigned int value){this->operator=(value); }
+  // LargeIntUnsigned(unsigned int x) {this->AssignShiftedUInt(x,0);}
   static LargeIntUnsigned GetOne();
   bool operator<(int other) const;
   bool operator>(int other) const;

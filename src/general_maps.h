@@ -82,6 +82,9 @@ public:
     out << "}";
     return out.str();
   }
+  inline value& operator[](const key& index) {
+    return this->GetValueCreate(index);
+  }
 };
 
 //using C++ 11, not sure if that is a good idea:

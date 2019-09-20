@@ -424,7 +424,7 @@ public:
     const coefficient& theRingZero
   ) const;
   static void GetCoordinateFormOfSpanOfElements(
-    int numVars, List<ElementUniversalEnvelopingOrdered>& theElements,
+    List<ElementUniversalEnvelopingOrdered>& theElements,
     Vectors<Polynomial<coefficient> >& outputCoordinates,
     ElementUniversalEnvelopingOrdered& outputCorrespondingMonomials
   );
@@ -529,7 +529,6 @@ public:
   void ActOnMe(
     const ElementSemisimpleLieAlgebra<Rational>& actingElt,
     ElementVermaModuleOrdered<coefficient>& output,
-    SemisimpleLieAlgebra& owner,
     const coefficient& theRingUnit,
     const coefficient& theRingZero
   ) const;

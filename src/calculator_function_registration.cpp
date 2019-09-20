@@ -12,7 +12,7 @@
 
 extern ProjectInformationInstance ProjectInfoVpf4cpp;
 ProjectInformationInstance ProjectInfoVpf4cpp(__FILE__, "List of calculator functions. ");
-//This file lists calculator functions and various hard-coded rules. Please do not use for any other purposes.
+// This file lists calculator functions and various hard-coded rules. Please do not use for any other purposes.
 
 void Calculator::initAdminFunctions() {
   this->AddOperationInnerHandler(

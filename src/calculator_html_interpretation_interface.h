@@ -15,7 +15,7 @@ public:
   std::string htmlRaw;
   std::string htmlJSbuild;
   List<std::string> currentWords;
-  //List<bool> charIsSplitting;
+  // List<bool> charIsSplitting;
   List<std::string> jsFileNames;
   List<std::string> jsFileContents;
 

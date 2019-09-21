@@ -1056,6 +1056,7 @@ logger& logger::operator<<(const loggerSpecialSymbols& input) {
       theFile << this->closeTagHtml();
       return *this;
     // default:
-    //   return *this;
+    //   ;
   }
+  return *this;
 }

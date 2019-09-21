@@ -14,7 +14,15 @@ class TopicElement {
 public:
   static int scoreButtonCounter;
   int type;
-  enum topicType {tChapter = 1, tSection = 2, tSubSection = 3, tProblem = 4, tError, tTexHeader, tUndefined};
+  enum topicType {
+    tChapter = 1,
+    tSection = 2,
+    tSubSection = 3,
+    tProblem = 4,
+    tError,
+    tTexHeader,
+    tUndefined
+  };
   bool flagContainsProblemsNotInSubsection;
   bool flagSubproblemHasNoWeight;
   bool flagHasLectureTag;

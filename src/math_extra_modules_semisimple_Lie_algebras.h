@@ -26,37 +26,37 @@ class ModuleSSalgebra {
 public:
   SemisimpleLieAlgebra* owner;
   HashedList<MonomialUniversalEnveloping<coefficient> > theGeneratingWordsNonReduced;
-  //Note: for some reason, the linker fails to resolve without the explicit template
-  //specialization below.
-  //[Update:] made a bug report on this in the gcc bug tracker.
-  //This issue has officially been recognized as a gcc bug. Hope to get a fix soon.
+  // Note: for some reason, the linker fails to resolve without the explicit template
+  // specialization below.
+  // [Update:] made a bug report on this in the gcc bug tracker.
+  // This issue has officially been recognized as a gcc bug. Hope to get a fix soon.
   HashedListSpecialized<MonomialTensor<int, MathRoutines::IntUnsignIdentity> > theGeneratingWordsNonReducedInt;
   Vectors<Rational> theGeneratingWordsWeightsPlusWeightFDpart;
   List<LittelmannPath> thePaths;
   List<List<MonomialUniversalEnveloping<coefficient> > > theGeneratingWordsGrouppedByWeight;
   List<List<MonomialTensor<int, MathRoutines::IntUnsignIdentity> > > theGeneratingWordsIntGrouppedByWeight;
-//  List<ElementUniversalEnveloping<coefficient> > theSimpleGens;
-//  List<List<List<ElementUniversalEnveloping<coefficient> > > > actionsSimpleGens;
-//  List<Matrix<coefficient> > actionsSimpleGensMatrixForM;
+  // List<ElementUniversalEnveloping<coefficient> > theSimpleGens;
+  // List<List<List<ElementUniversalEnveloping<coefficient> > > > actionsSimpleGens;
+  // List<Matrix<coefficient> > actionsSimpleGensMatrixForM;
   List<Matrix<coefficient> > theBilinearFormsAtEachWeightLevel;
   List<Matrix<coefficient> > theBilinearFormsInverted;
-//  Vectors<Rational> weightsSimpleGens;
+  // Vectors<Rational> weightsSimpleGens;
   Vector<coefficient> theHWDualCoordsBaseFielD;
   Vector<coefficient> theHWSimpleCoordSBaseField;
   Vector<coefficient> theHWFundamentalCoordsBaseField;
   Vector<Rational> theHWFDpartDualCoords;
   Vector<Rational> theHWFDpartSimpleCoordS;
   Vector<Rational> theHWFDpartFundamentalCoordS;
-//  List<List<Matrix<coefficient> > >
+  // List<List<Matrix<coefficient> > >
   HashedList<Vector<Rational> > theModuleWeightsSimpleCoords;
   charSSAlgMod<coefficient> theCharOverH;
   charSSAlgMod<coefficient> theChaR;
   Selection parabolicSelectionNonSelectedAreElementsLevi;
   Selection parabolicSelectionSelectedAreElementsLevi;
   std::string highestWeightVectorNotation;
-  //Note: for some reason, the linker fails to resolve without the
-  //explicit template specialization below.
-  //[Update:] This is now a recognized gcc bug.
+  // Note: for some reason, the linker fails to resolve without the
+  // explicit template specialization below.
+  // [Update:] This is now a recognized gcc bug.
   HashedListSpecialized<
     Pair<MonomialTensor<int, MathRoutines::IntUnsignIdentity>,
     MonomialTensor<int, MathRoutines::IntUnsignIdentity> >
@@ -72,8 +72,9 @@ public:
   void reset();
   bool operator==(const ModuleSSalgebra<coefficient>& other) {
     return
-    this->owner == other.owner && this->theHWFundamentalCoordsBaseField == other.theHWFundamentalCoordsBaseField
-    && this->parabolicSelectionNonSelectedAreElementsLevi == other.parabolicSelectionNonSelectedAreElementsLevi;
+    this->owner == other.owner &&
+    this->theHWFundamentalCoordsBaseField == other.theHWFundamentalCoordsBaseField &&
+    this->parabolicSelectionNonSelectedAreElementsLevi == other.parabolicSelectionNonSelectedAreElementsLevi;
   }
   bool HasFreeAction(int generatorIndex) const {
     Vector<Rational> theWeight = this->GetOwner().GetWeightOfGenerator(generatorIndex);
@@ -182,8 +183,8 @@ public:
     out << "v_{" << this->theHWFundamentalCoordsBaseField.ToString(theFormat)
     << ", " << this->parabolicSelectionNonSelectedAreElementsLevi.ToString() << "}";
     return out.str();
-//    return "hwv{}("+ this->GetOwner().ToStringLieAlgebraName(false) + "," + this->theHWFundamentalCoordsBaseField.ToString(theFormat) + ","
-//    + Vector<Rational> (this->parabolicSelectionNonSelectedAreElementsLevi).ToString(theFormat) + ")";
+    //    return "hwv{}("+ this->GetOwner().ToStringLieAlgebraName(false) + "," + this->theHWFundamentalCoordsBaseField.ToString(theFormat) + ","
+    //    + Vector<Rational> (this->parabolicSelectionNonSelectedAreElementsLevi).ToString(theFormat) + ")";
   }
   void SplitOverLevi(
     std::string* Report,
@@ -223,9 +224,9 @@ public:
     bool useNilWeight,
     bool ascending
   );
-  //The input of the following function is supposed to be an honest element of the
-  //Universal enveloping,
-  //i.e. inputElt is not allowed to have non-small integer exponents.
+  // The input of the following function is supposed to be an honest element of the
+  // Universal enveloping,
+  // i.e. inputElt is not allowed to have non-small integer exponents.
   bool GetActionGenVermaModuleAsDiffOperator(
     ElementSemisimpleLieAlgebra<Rational>& inputElt,
     quasiDiffOp<Rational>& output,
@@ -287,13 +288,16 @@ public:
   }
   ModuleSSalgebra<coefficient>& GetOwnerModule() const {
     if (this->size() <= 0) {
-      crash << "This is a programming error: calling GetOwnerModule() on a tensor element which has no monomials."
-      << " This is not allowed as the index of the owner modules are stored in the monomials. " << crash;
+      crash << "This is a programming error: "
+      << "calling GetOwnerModule() on a tensor element which has no monomials. "
+      << "This is not allowed as the index of "
+      << "the owner modules are stored in the monomials. " << crash;
     }
     const MonomialTensorGeneralizedVermas<coefficient>& theMon = (*this)[0];
     if (theMon.theMons.size <= 0) {
-      crash << "This is a programming error: calling GetOwnerModule() on a tensor element which has a constant monomial."
-      << " This is not allowed: constant monomials do not have owners. " << crash;
+      crash << "This is a programming error: calling GetOwnerModule() "
+      << "on a tensor element which has a constant monomial. "
+      << "This is not allowed: constant monomials do not have owners. " << crash;
     }
     MonomialGeneralizedVerma<coefficient>& theGmon = theMon.theMons[0];
     return *theGmon.owner;

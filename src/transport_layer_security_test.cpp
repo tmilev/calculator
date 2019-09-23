@@ -38,12 +38,9 @@ bool SSLRecord::Test::Serialization() {
   if (!Crypto::ConvertHexToListUnsignedChar(inputHex, theRecord.body, &comments)) {
     crash << "Bad hard-coded test hex string!" << crash;
   }
-  logServer << "DEBUG: got to here!! " << logger::endL;
-
   if (!theRecord.Decode(&comments)) {
     crash << "Failed to decode built-in message." << crash;
   }
-  logServer << "DEBUG: got to ehre 2!! " << logger::endL;
   List<unsigned char> encoded;
   theRecord.WriteBytes(encoded);
   if (encoded != theRecord.body) {

@@ -750,21 +750,29 @@ public:
   bool flagDeallocated;
   Object* TheObjects;
   int size;
+  List() {
+    this->initConstructorCallOnly();
+  }
+  List(const std::string& input) {
+    this->initConstructorCallOnly();
+    *this = input;
+  }
+  List(const std::initializer_list<Object>& input) {
+    this->initConstructorCallOnly();
+    *this = input;
+  }
   List(const List<Object>& other) {
     this->initConstructorCallOnly();
     *this = other;
   }
-  //List(List<Object>&& other)
-  //{ this->initConstructorCallOnly();
-  //  this->size = other.size;
-  //  this->TheObjects = other.TheObjects;
-  //  other.size = 0;
-  //  other.TheObjects = 0;
-  //}
   List(const ListLight<Object>& other) {
     this->initConstructorCallOnly();
     this->AssignLight(other);
   }
+  List<Object> SliceCopy(int StartingIndex, int SizeOfSlice) const;
+  void SliceInPlace(int StartingIndex, int SizeOfSlice);
+  void Slice(int StartingIndex, int SizeOfSlice, List<Object>& output) const;
+  ~List();
   bool CheckConsistency() const {
     if (this->flagDeallocated) {
       crash << "This is a programming error: use after free of List. " << crash;
@@ -907,6 +915,7 @@ public:
   void SwapTwoIndices(int index1, int index2);
   void CycleIndices(const List<int>& cycle);
   void PermuteIndices(const List<List<int> >& cycles);
+  std::string ToStringConcatenate() const;
   std::string ToString(FormatExpressions* theFormat) const;
   std::string ToString() const;
   std::string ToStringCommaDelimited(FormatExpressions* theFormat) const;
@@ -1081,17 +1090,23 @@ public:
     return input.HashFunction();
   }
   void IntersectWith(const List<Object>& other, List<Object>& output) const;
-  //void operator=(List<Object>&& right)
-  //{ if (this == &right)
-  //    return;
-  //  this->ReleaseMemory();
-  //  this->TheObjects =right.TheObjects;
-  //  this->size =right.size;
-  //  this->ActualSize =right.ActualSize;
-  //  right.TheObjects = 0;
-  //  right.size = 0;
-  //  right.ActualSize = 0;
-  //}
+  void operator=(const std::string& right) {
+    this->SetSize(right.size());
+    for (int i = 0; i < this->size; i ++) {
+      this->TheObjects[i] = right[static_cast<unsigned>(i)];
+    }
+  }
+  void operator=(const std::initializer_list<Object>& other) {
+    this->SetSize(other.size());
+    int counter = 0;
+    for (
+      auto otherIterator = other.begin();
+      otherIterator != other.end();
+      otherIterator ++, counter ++
+    ) {
+      this->TheObjects[counter] = *otherIterator;
+    }
+  }
   void operator=(const List<Object>& right) {
     if (this == &right) {
       return;
@@ -1155,22 +1170,6 @@ public:
   bool operator<(const List<Object>& other) const;
   void ShiftUpExpandOnTop(int StartingIndex);
   void ShiftUpExpandOnTopRepeated(int StartingIndex, int numberOfNewElements);
-
-  List<Object> SliceCopy(int StartingIndex, int SizeOfSlice) const;
-  void SliceInPlace(int StartingIndex, int SizeOfSlice);
-  void Slice(int StartingIndex, int SizeOfSlice, List<Object>& output) const;
-  List(int StartingSize);
-  List(int StartingSize, const Object& fillInValue);
-  List(const std::string& input) {
-    this->initConstructorCallOnly();
-    this->SetSize(static_cast<signed>(input.size()));
-    for (int i = 0; i < this->size; i ++) {
-      this->TheObjects[i] = input[i];
-    }
-  }
-  List();//<-newly constructed lists start with size = 0;
-  //This default is used in critical places in HashedList and other classes, do not change!
-  ~List();
   void AssignListList(const List<List<Object> >& input) {
     int count = 0;
     for (int i = 0; i < input.size; i ++) {
@@ -2105,6 +2104,15 @@ std::string List<Object>::ToStringCommaDelimited() const {
 }
 
 template <class Object>
+std::string List<Object>::ToStringConcatenate() const {
+  std::stringstream out;
+  for (int i = 0; i < this->size; i ++) {
+    out << this->TheObjects[i];
+  }
+  return out.str();
+}
+
+template <class Object>
 std::string List<Object>::ToString(FormatExpressions* theFormat) const {
   std::stringstream out;
   for (int i = 0; i < this->size; i ++) {
@@ -2154,23 +2162,6 @@ Object List<Object>::PopLastObject() {
   }
   this->size --;
   return this->TheObjects[size];
-}
-
-template <class Object>
-List<Object>::List() {
-  this->initConstructorCallOnly();
-}
-
-template <class Object>
-List<Object>::List(int StartingSize) {
-  this->initConstructorCallOnly();
-  this->SetSize(StartingSize);
-}
-
-template <class Object>
-List<Object>::List(int StartingSize, const Object& fillInObject) {
-  this->initConstructorCallOnly();
-  this->initializeFillInObject(StartingSize, fillInObject);
 }
 
 template <class Object>

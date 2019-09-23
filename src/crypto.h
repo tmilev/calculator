@@ -32,8 +32,8 @@ public:
   LargeIntUnsigned exponentTwo;
   CertificateRSA theCertificate;
   List<unsigned char> sourceBinary;
-  JSData sourceJSONOuter;
-  JSData sourceJSONInner;
+  ASNElement sourceASNOuter;
+  ASNElement sourceASNInner;
   class Test {
     public:
     static bool All();
@@ -47,31 +47,6 @@ public:
   std::string ToString() const;
 };
 
-//openSSL version for reference:
-//class X509Certificate {
-//public:
-//  X509_CINF *cert_info;
-//  X509_ALGOR *sig_alg;
-//  ASN1_BIT_STRING *signature;
-//  std::string name;
-//  CRYPTO_EX_DATA ex_data;
-//  /* These contain copies of various extension values */
-//  long ex_pathlen;
-//  long ex_pcpathlen;
-//  unsigned long ex_flags;
-//  unsigned long ex_kusage;
-//  unsigned long ex_xkusage;
-//  unsigned long ex_nscert;
-//  ASN1_OCTET_STRING *skid;
-//  AUTHORITY_KEYID *akid;
-//  X509_POLICY_CACHE *policy_cache;
-//  STACK_OF(DIST_POINT) *crldp;
-//  STACK_OF(GENERAL_NAME) *altname;
-//  NAME_CONSTRAINTS *nc;
-//  unsigned char sha1_hash[SHA_DIGEST_LENGTH];
-//  X509_CERT_AUX *aux;
-//};
-
 class TBSCertificateInfo {
 public:
   ASNObject countryName;
@@ -81,18 +56,27 @@ public:
   ASNObject organizationalUnitName;
   ASNObject commonName;
   ASNObject emailAddress;
-  bool LoadFromJSON(
-    const JSData& input,
+  ASNElement validityNotBefore;
+  ASNElement validityNotAfter;
+  bool LoadValidityFromASN(
+    const ASNElement& input,
+    std::stringstream* commentsOnFailure
+  );
+  bool LoadFieldsFromASN(
+    const ASNElement &input,
     std::stringstream* commentsOnFailure
   );
   bool LoadFields(
     const MapList<std::string, ASNObject, MathRoutines::HashString>& fields,
     std::stringstream* commentsOnFailure
   );
-  void WriteBytesASN1(List<unsigned char>& output);
+  void WriteBytesContentAndExpiry(List<unsigned char>& output);
+  void WriteBytesContent(List<unsigned char>& output);
+  void WriteBytesExpiry(List<unsigned char>& output);
   std::string ToString();
 };
 
+// For definition, google RFC 5280
 class X509Certificate {
 public:
   int version;
@@ -100,8 +84,6 @@ public:
   List<unsigned char> signatureAlgorithmId;
   TBSCertificateInfo information;
   std::string issuerName;
-  std::string validityNotBefore;
-  std::string validityNotAfter;
   std::string subjectName;
   std::string publicKeyAlgorithm;
   std::string subjectPublicKey;
@@ -110,7 +92,7 @@ public:
   std::string certificateSignatureAlgorithm;
   std::string certificateSignature;
   List<unsigned char> sourceBinary;
-  JSData sourceJSON;
+  ASNElement sourceASN;
   JSData sourceInterpretation;
   CertificateRSA theRSA;
   class Test {
@@ -133,7 +115,6 @@ public:
   std::string ToString();
   std::string ToStringTestEncode();
   void WriteBytesASN1(List<unsigned char>& output);
-  void WriteBytesTBSCertificate(List<unsigned char>& output);
   void WriteBytesAlgorithmIdentifier(List<unsigned char>& output);
   void WriteVersion(List<unsigned char>& output);
 };

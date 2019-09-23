@@ -247,7 +247,7 @@ void MeshTriangles::ComputeImplicitPlotPart2() {
       }
     }
     if (!isGood) {
-      this->trianglesUsed = false;
+      this->trianglesUsed[i] = false;
       continue;
     }
     double val0 = this->GetValueAtPoint(currentTriangle[0]);

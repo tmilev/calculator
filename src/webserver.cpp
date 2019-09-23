@@ -4406,7 +4406,6 @@ int WebServer::Run() {
     return 1;
   }
   logServer << logger::purple << "waiting for connections..." << logger::endL;
-  logServer << logger::purple << "DEBUG: listening sockets: " << this->theListeningSockets << logger::endL;
   this->initSSL();
   this->NumSuccessfulSelectsSoFar = 0;
   this->NumFailedSelectsSoFar = 0;

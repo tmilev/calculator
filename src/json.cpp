@@ -209,6 +209,13 @@ JSData& JSData::operator[](const std::string& key) {
   return this->objects.GetValueCreate(key);
 }
 
+void JSData::operator=(const List<unsigned char>& other) {
+  this->theType = JSData::token::tokenString;
+  this->theString = other.ToStringConcatenate();
+  this->theList.SetSize(0); ;
+  this->objects.Clear();
+}
+
 void JSData::operator=(const List<JSData>& other) {
   this->theType = JSData::token::tokenArray;
   this->theList = other;

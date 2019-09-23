@@ -2090,7 +2090,7 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsTodorsVersi
   ProgressReport theReport1;
 //  int indexFirstPredefinedRep =1; //<-this should be the index of the sign rep.
 //  int indexLastPredefinedrep =2; //<-this should be the index of the standard rep.
-  for (int i = 0; i < appendOnlyIrrepsList.size && this->irreps != NumClasses; i ++) {
+  for (int i = 0; i < appendOnlyIrrepsList.size && this->irreps.size != NumClasses; i ++) {
     for (int j = 0; j < initialcount; j ++) {
       if (theGlobalVariables.flagReportEverything) {
         std::stringstream reportStream;

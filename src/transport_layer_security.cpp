@@ -15,13 +15,13 @@
 extern ProjectInformationInstance projectInfoInstanceTransportLayerSecurityImplementation;
 ProjectInformationInstance projectInfoInstanceTransportLayerSecurityImplementation(__FILE__, "TSL/ssl implementation.");
 
-//http://stackoverflow.com/questions/10175812/how-to-create-a-self-signed-certificate-with-openssl
-//openssl req -x509 -keyalg RSA -newkey rsa:2048 -nodes -keyout key.pem -out cert.pem -days 3001
-//Alternatively:
-//certificate with certificate signing request:
-//openssl req -out CSR.csr -new -newkey rsa:2048 -nodes -keyout calculator-algebra.key
-//then get the CSR.csr file to a signing authority,
-//from where you get the signedFileCertificate1 and signedFileCertificate3
+// http://stackoverflow.com/questions/10175812/how-to-create-a-self-signed-certificate-with-openssl
+// openssl req -x509 -keyalg RSA -newkey rsa:2048 -nodes -keyout key.pem -out cert.pem -days 3001
+// Alternatively:
+// certificate with certificate signing request:
+// openssl req -out CSR.csr -new -newkey rsa:2048 -nodes -keyout calculator-algebra.key
+// then get the CSR.csr file to a signing authority,
+// from where you get the signedFileCertificate1 and signedFileCertificate3
 const std::string TransportLayerSecurity::fileCertificate = "certificates/cert.pem";
 const std::string TransportLayerSecurity::fileKey = "certificates/key.pem";
 const std::string TransportLayerSecurity::signedFileCertificate1 = "certificates/calculator-algebra.crt";
@@ -65,7 +65,6 @@ void TransportLayerSecurity::initializeNonThreadSafeOnFirstCall(bool IamServer) 
   if (IamServer) {
     this->openSSLData.initSSLServer();
     if (this->flagBuiltInTLSAvailable) {
-      logServer << "DEBUG: Initializing built-in TLS ..." << logger::endL;
       this->theServer.initialize();
       if (theGlobalVariables.flagAutoUnitTest) {
         logServer << logger::yellow
@@ -102,8 +101,6 @@ bool TransportLayerSecurity::initSSLKeyFiles(std::stringstream* commentsOnFailur
     }
     crash << "Failed to initialize ssl keys of built-in tls server. " << crash;
   }
-  logServer << logger::green << "DEBUG: success with init ssl certificate!!!" << logger::endL;
-  logServer << "DEBUG: source binary length: " << this->theServer.certificate.sourceBinary.size;
   return true;
 }
 
@@ -215,19 +212,39 @@ void TransportLayerSecurityOpenSSL::initSSLServer() {
   singedFileCertificate1Physical, signedFileCertificate3Physical,
   signedFileKeyPhysical;
   FileOperations::GetPhysicalFileNameFromVirtual(
-    TransportLayerSecurity::signedFileCertificate1, singedFileCertificate1Physical, true, true, nullptr
+    TransportLayerSecurity::signedFileCertificate1,
+    singedFileCertificate1Physical,
+    true,
+    true,
+    nullptr
   );
   FileOperations::GetPhysicalFileNameFromVirtual(
-    TransportLayerSecurity::signedFileCertificate3, signedFileCertificate3Physical, true, true, nullptr
+    TransportLayerSecurity::signedFileCertificate3,
+    signedFileCertificate3Physical,
+    true,
+    true,
+    nullptr
   );
   FileOperations::GetPhysicalFileNameFromVirtual(
-    TransportLayerSecurity::fileCertificate, fileCertificatePhysical, true, true, nullptr
+    TransportLayerSecurity::fileCertificate,
+    fileCertificatePhysical,
+    true,
+    true,
+    nullptr
   );
   FileOperations::GetPhysicalFileNameFromVirtual(
-    TransportLayerSecurity::fileKey, fileKeyPhysical, true, true, nullptr
+    TransportLayerSecurity::fileKey,
+    fileKeyPhysical,
+    true,
+    true,
+    nullptr
   );
   FileOperations::GetPhysicalFileNameFromVirtual(
-    TransportLayerSecurity::signedFileKey, signedFileKeyPhysical, true, true, nullptr
+    TransportLayerSecurity::signedFileKey,
+    signedFileKeyPhysical,
+    true,
+    true,
+    nullptr
   );
   //////////////////////////////////////////////////////////
   if (!this->initSSLKeyFiles()) {
@@ -805,14 +822,10 @@ bool CipherSuiteSpecification::ComputeName() {
 
 void SSLRecord::WriteBytes(List<unsigned char>& output) const {
   MacroRegisterFunctionWithName("SSLRecord::WriteBytes");
-  logServer << "DEBUG: GOt to here pt -1!!!" << logger::endL;
   output.AddOnTop(static_cast<unsigned char>(SSLRecord::tokens::handshake));
   Serialization::WriteTwoByteInt(this->version, output);
-  logServer << "DEBUG: GOt to here!!!" << logger::endL;
   Serialization::LengthWriterTwoBytes writeLength(output);
-  logServer << "DEBUG: GOt to here pt 2!!!" << logger::endL;
   this->content.WriteBytes(output);
-  logServer << "DEBUG: GOt to here pt 3!!!" << logger::endL;
 }
 
 void SSLContent::WriteBytes(List<unsigned char>& output) const {
@@ -1551,14 +1564,14 @@ bool TransportLayerSecurityServer::ReplyToClientHello(int inputSocketID, std::st
   //logWorker << "Incoming message:\n" << this->lastRead.hello.getStringHighlighter()
   //<< Crypto::ConvertListUnsignedCharsToHex(this->lastRead.body, 0, false)
   //<< logger::endL;
-  logWorker << "DEBUG: Bytes written:\n"
-  << this->serverHelloStart.content.getStringHighlighter()
-  << Crypto::ConvertListUnsignedCharsToHex(this->nextServerMessage, 0, false) << logger::endL;
-  logWorker << "DEBUG: Record written:\n" << this->serverHelloStart.ToString() << logger::endL;
+  // logWorker << "DEBUG: Bytes written:\n"
+  // << this->serverHelloStart.content.getStringHighlighter()
+  // << Crypto::ConvertListUnsignedCharsToHex(this->nextServerMessage, 0, false) << logger::endL;
+  // logWorker << "DEBUG: Record written:\n" << this->serverHelloStart.ToString() << logger::endL;
   if (!this->WriteBytesOnce(commentsOnFailure)) {
     logWorker << "Error replying to client hello. ";
     if (commentsOnFailure != nullptr) {
-      logWorker << "DEBUG: commentsOnFailure: " << commentsOnFailure->str();
+      // logWorker << "DEBUG: commentsOnFailure: " << commentsOnFailure->str();
     }
     return false;
   }

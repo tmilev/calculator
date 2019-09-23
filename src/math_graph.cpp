@@ -6,7 +6,7 @@ GraphOLD::GraphOLD(int max_vertices, int max_edges) {
   this->vertices = max_vertices;
   this->edges = 0;
   this->max_edges = max_edges;
-  this->data = List<int>(max_vertices * max_edges, - 1);
+  this->data.initializeFillInObject(max_vertices * max_edges, - 1);
 }
 
 void GraphOLD::AddEdge(int v1, int v2) {

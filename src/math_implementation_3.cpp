@@ -1733,9 +1733,13 @@ std::string StringRoutines::Differ::DifferenceHTML() {
       }
     }
   }
-  leftOut << "<br>";
-  leftOut << rightOut.str();
-  return leftOut.str();
+  std::stringstream out;
+  out << "<span class = 'abstractSyntaxOneAnnotation'>";
+  out << leftOut.str();
+  out << "<br>";
+  out << rightOut.str();
+  out << "</span>";
+  return out.str();
 }
 
 StringRoutines::Differ::Differ() {

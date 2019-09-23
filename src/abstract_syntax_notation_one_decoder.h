@@ -6,6 +6,69 @@
 
 static ProjectInformationInstance ProjectInfoAbstractSyntaxNotationOneDecoderHeader(__FILE__, "Abstract syntax notation one (ASN-1) header file. ");
 
+// ASNElements can be either composites or atoms.
+//
+// 1) The composites are:
+// -- pure: all sequences and sets;
+// -- non-pure: bitStrings and reserved (tag = 0) objects
+//    whose byte content is a valid encoding.
+// 2) Atoms: all non-composite elements.
+//
+// Pure composite elements have empty ASNAtoms,
+// and their children ASNElements are recorded
+// in theElements array.
+//
+// Non-pure composite elements have both non-empty
+// ASNAtom and their children ASNElements are recorded
+// in theElements array.
+//
+// Finally, non-composite elements have their
+// theElemetns array of length zero and have their
+// ASNAtom filled-in.
+//
+class ASNElement {
+public:
+  friend std::ostream& operator<<(std::ostream& output, const ASNElement& element) {
+    output << element.ToString();
+    return output;
+  }
+  unsigned char startByte;
+  unsigned char tag;
+  bool flagIsConstructed;
+  List<unsigned char> ASNAtom;
+  List<ASNElement> theElements;
+  void reset();
+  LargeInt InterpretAsLargeInteger() const;
+  std::string InterpretAsObjectIdentifier() const;
+  void ToJSON(JSData& output) const;
+  JSData ToJSON() const;
+  std::string ToString() const;
+  bool isComposite() const;
+  bool isPureComposite() const;
+  bool isNonPureComposite() const;
+  bool isTime() const;
+  bool HasSubElement(
+    const List<int>& desiredIndices,
+    const List<unsigned char>& desiredTypes,
+    const ASNElement** whichElement,
+    std::stringstream* commentsOnFailure
+  ) const;
+  bool HasSubElementGetCopy(
+    const List<int>& desiredIndices,
+    const List<unsigned char>& desiredTypes,
+    ASNElement& output,
+    std::stringstream* commentsOnFailure
+  ) const;
+  template <typename desiredType>
+  bool HasSubElementOfType(
+    const List<int>& desiredIndices,
+    const List<unsigned char>& desiredTypes,
+    desiredType& output,
+    std::stringstream* commentsOnFailure
+  ) const;
+  const ASNElement& operator[](int index) const;
+};
+
 class ASNObject {
 private:
   // the map below records samples for each known objectId
@@ -22,9 +85,12 @@ public:
     static std::string commonName             ;
     static std::string emailAddress           ;
   };
+  friend std::ostream& operator<<(std::ostream& output, const ASNObject& element) {
+    output << element.ToString();
+    return output;
+  }
   std::string name;
-  unsigned char contentTag;
-  List<unsigned char> content;
+  ASNElement content;
   List<unsigned char> objectId;
   void MakeLookupId(const std::string& inputName, List<unsigned char>& inputContent);
   void Make(List<unsigned char>& inputObjectId, List<unsigned char>& inputContent);
@@ -38,12 +104,12 @@ public:
   static MapList<std::string, ASNObject, MathRoutines::HashString>& NamesToObjectIdsNonThreadSafe();
   static MapList<List<unsigned char>, ASNObject, MathRoutines::HashListUnsignedChars>& ObjectIdsToNames();
   static void initializeNonThreadSafe();
-  bool LoadFromJSON(
-    const JSData& inputShell,
+  bool LoadFromASN(
+    const ASNElement& input,
     std::stringstream* commentsOnFailure
   );
-  static bool LoadFieldsFromJSArray(
-    const JSData &jsonArray,
+  static bool LoadFieldsFromASNSequence(
+    const ASNElement& input,
     MapList<std::string, ASNObject, MathRoutines::HashString>& output,
     std::stringstream* commentsOnFailure
   );
@@ -54,7 +120,7 @@ public:
   );
   static std::string ToStringAllRecognizedObjectIds();
   void WriteBytesASNObject(List<unsigned char>& output);
-  std::string ToString();
+  std::string ToString() const;
 };
 
 // The following class (is supposed to) implement a sufficiently
@@ -64,7 +130,6 @@ public:
 // http://luca.ntop.org/Teaching/Appunti/asn1.html [long technical discussion and tables, no proper explanations, use for reference]
 // https://en.wikipedia.org/wiki/Abstract_Syntax_Notation_One
 // https://lapo.it/asn1js [decodes messages and highlights and annotates individual bytes.]
-
 class AbstractSyntaxNotationOneSubsetDecoder {
   // BER (basic encoding rules) concepts.
   // A piece of data is identified via a tag-length-value encoding.
@@ -86,9 +151,9 @@ public:
     static const unsigned char bitString0x03 = 3;
     static const unsigned char octetString0x04 = 4;
     static const unsigned char objectIdentifier0x06 = 6;
-    static const unsigned char utf8String0x0c = 12; // 0x0c
-    static const unsigned char sequence0x10 = 16; //0x10
-    static const unsigned char set0x11 = 17; //0x11
+    static const unsigned char utf8String0x0c = 12;
+    static const unsigned char sequence0x10 = 16;
+    static const unsigned char set0x11 = 17;
     static const unsigned char printableString0x13 = 19;
     static const unsigned char IA5String0x16 = 22;
     static const unsigned char UTCTime0x17 = 23;
@@ -96,7 +161,8 @@ public:
     static const unsigned char timeOfDay0x20 = 32;
     static const unsigned char dateTime0x21 = 33;
     static const unsigned char duration0x22 = 34;
-    static const unsigned char null0x05; //0x05
+    static const unsigned char null0x05;
+    static const unsigned char anyType0xff = 255; // Used exclusively for type matching.
   };
   // writes fixed lenght encodings.
   class WriterObjectFixedLength {
@@ -127,18 +193,6 @@ public:
       true
       ) {}
   };
-  class WriterInteger: public WriterObjectFixedLength {
-  public:
-    WriterInteger(
-      int expectedTotalElementByteLength,
-      List<unsigned char>& output
-    ) : WriterObjectFixedLength(
-      AbstractSyntaxNotationOneSubsetDecoder::tags::integer0x02,
-      expectedTotalElementByteLength,
-      output,
-      false
-      ) {}
-  };
   class WriterBitString: public WriterObjectFixedLength {
   public:
     WriterBitString(
@@ -146,18 +200,6 @@ public:
       List<unsigned char>& output
     ) : WriterObjectFixedLength(
       AbstractSyntaxNotationOneSubsetDecoder::tags::bitString0x03,
-      expectedTotalElementByteLength,
-      output,
-      false
-      ) {}
-  };
-  class WriterObjectId: public WriterObjectFixedLength {
-  public:
-    WriterObjectId(
-      int expectedTotalElementByteLength,
-      List<unsigned char>& output
-    ) : WriterObjectFixedLength(
-      AbstractSyntaxNotationOneSubsetDecoder::tags::objectIdentifier0x06,
       expectedTotalElementByteLength,
       output,
       false
@@ -178,8 +220,9 @@ public:
   int recursionDepthGuarD;
   int maxRecursionDepth;
   int dataPointer;
+  bool flagMustDecodeAll;
   const List<unsigned char>* rawDatA;
-  JSData* decodedData;
+  ASNElement* decodedData;
   JSData* dataInterpretation;
   bool flagLogByteInterpretation;
   List<std::string> byteInterpretationNotes;
@@ -188,27 +231,35 @@ public:
   List<typeDecoder> decodersByByteValue;
   bool Decode(
     const List<unsigned char>& inputRawData,
-    JSData& outputDecodedData,
+    int inputOffset,
+    ASNElement& output,
     JSData* outputInterpretation,
     std::stringstream* commentsOnError
   );
   std::string GetType(unsigned char startByte);
   bool PointerIsBad(JSData* interpretation);
-  bool DecodeCurrent(JSData& output, JSData *interpretation);
-  bool DecodeSequenceLikeContent(int desiredLengthInBytes, JSData& output, JSData* interpretation);
-  bool DecodePrintableString(int desiredLengthInBytes, JSData& output, JSData* interpretation);
-  bool DecodeBitString(int desiredLengthInBytes, JSData& output, JSData* interpretation);
-  bool DecodeUTF8String(int desiredLengthInBytes, JSData& output, JSData* interpretation);
-  bool DecodeIA5String(int desiredLengthInBytes, JSData& output, JSData* interpretation);
-  bool DecodeUTCString(int desiredLengthInBytes, JSData& output, JSData* interpretation);
-  bool DecodeIntegerContent(int desiredLengthInBytes, JSData& output, JSData* interpretation);
+  bool DecodeCurrent(ASNElement& output, JSData *interpretation);
+  bool DecodeSequenceLikeContent(int desiredLengthInBytes, ASNElement &output, JSData* interpretation);
+  bool DecodeBitString(int desiredLengthInBytes, ASNElement& output, JSData* interpretation);
+  bool DecodeIntegerContent(int desiredLengthInBytes, ASNElement& output, JSData* interpretation);
   static LargeInt VariableLengthQuantityDecode(const List<unsigned char> &input, int& inputOutputDataPointer);
-  bool DecodeOctetString(int desiredLengthInBytes, JSData& output, JSData* interpretation);
-  bool DecodeObjectIdentifier(int desiredLengthInBytes, JSData& output, JSData* interpretation);
-  bool DecodeNull(int desiredLengthInBytes, JSData& output, JSData* interpretation);
+  void DecodeASNAtomContent(
+    int desiredLengthInBytes,
+    ASNElement &output,
+    JSData* interpretation
+  );
+  bool DecodeObjectIdentifier(int desiredLengthInBytes, ASNElement& output, JSData* interpretation);
+  bool DecodeNull(int desiredLengthInBytes, ASNElement& output, JSData* interpretation);
   bool DecodeCurrentBuiltInType(std::stringstream* commentsOnError);
   bool DecodeLengthIncrementDataPointer(int& outputLengthNegativeOneForVariable, JSData* interpretation);
 
+  static void WriteASNAtom(const ASNElement& input, List<unsigned char>& output);
+  static void WriteListUnsignedCharsWithTag(
+    const List<unsigned char>& input,
+    unsigned char theTag,
+    List<unsigned char>& output,
+    bool constructed
+  );
   static void WriteUnsignedIntegerObject(const LargeIntUnsigned& input, List<unsigned char>& output);
   static void WriteObjectId(const List<unsigned char>& input, List<unsigned char>& output);
   static void WriteNull(List<unsigned char>& output);
@@ -222,16 +273,6 @@ public:
   static bool isCostructedByte(unsigned char input);
   static bool hasBit7Set(unsigned char input);
   static bool hasBit8Set(unsigned char input);
-  // Pointers to the following functions will be used.
-  // These functions would suitably be member functions, however
-  // I chose to make them static members for the following reasons.
-  // Taking pointers of member functions has either
-  // 1. confusing syntax - as of 2019, something along the lines of:
-  //    (this->(*handler))(commentsOnError)
-  //    - or,
-  // 2. requires use of std::invoke, which in turn requires C++17 standard, which may not
-  //    be fully suppported yet
-  //    [say, by your favorite compiler on your favorite out-of-date linux distro].
 };
 
 #endif // ABSTRACT_SYNTAX_NOTATION_ONE_HEADER_ALREADY_INCLUDED

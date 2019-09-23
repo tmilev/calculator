@@ -124,7 +124,7 @@ public:
 // https://tls.ulfheim.net
 // https://serializethoughts.com/2014/07/27/dissecting-tls-client-hello-message/
 // https://idea.popcount.org/2012-06-16-dissecting-ssl-handshake/
-//
+
 class SSLContent {
 public:
   SSLRecord* owner;

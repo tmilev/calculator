@@ -70,6 +70,8 @@ public:
   JSData(const char* other);
   void operator=(const JSData& other);
   void operator=(const List<JSData>& other);
+  void operator=(const List<int>& other);
+  void operator=(const List<unsigned char>& other);
   template <typename any>
   void operator=(const List<any>& other) {
     this->reset();
@@ -80,7 +82,6 @@ public:
     }
   }
   void operator=(const LargeInt& input);
-  void operator=(const List<int>& other);
   template <typename coefficient>
   void operator=(const Vector<coefficient>& other);
   template <typename coefficient>

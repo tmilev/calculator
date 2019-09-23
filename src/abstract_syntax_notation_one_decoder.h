@@ -28,6 +28,16 @@ static ProjectInformationInstance ProjectInfoAbstractSyntaxNotationOneDecoderHea
 //
 class ASNElement {
 public:
+  class JSLabels{
+  public:
+    static std::string offset;
+    static std::string tag;
+    static std::string startByteOriginal;
+    static std::string value;
+    static std::string error;
+    static std::string isConstructed;
+  };
+
   friend std::ostream& operator<<(std::ostream& output, const ASNElement& element) {
     output << element.ToString();
     return output;

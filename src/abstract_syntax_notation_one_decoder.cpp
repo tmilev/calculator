@@ -336,7 +336,6 @@ bool ASNElement::HasSubElementOfType<LargeIntUnsigned>(
     return false;
   }
   return element->isIntegerUnsigned(&output, commentsOnFailure);
-
 }
 
 template < >
@@ -346,7 +345,11 @@ bool ASNElement::HasSubElementOfType<LargeInt>(
   LargeInt& output,
   std::stringstream* commentsOnFailure
 ) const {
-  crash << "LargeIntUnsigned -> Not imlemented yet" << crash;
+  const ASNElement* element = nullptr;
+  if (!ASNElement::HasSubElement(desiredIndices, desiredTypes, &element, commentsOnFailure)) {
+    return false;
+  }
+  return element->isInteger(&output, commentsOnFailure);
 }
 
 template < >
@@ -356,7 +359,18 @@ bool ASNElement::HasSubElementOfType<List<unsigned char> >(
   List<unsigned char>& output,
   std::stringstream* commentsOnFailure
 ) const {
-  crash << "... Not imlemented yet" << crash;
+  const ASNElement* element = nullptr;
+  if (!ASNElement::HasSubElement(desiredIndices, desiredTypes, &element, commentsOnFailure)) {
+    return false;
+  }
+  if (!element->isComposite()) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Element is composite. ";
+    }
+    return false;
+  }
+  output = element->ASNAtom;
+  return true;
 }
 
 bool ASNElement::isTime() const {
@@ -366,7 +380,7 @@ bool ASNElement::isTime() const {
 }
 
 std::string ASNElement::ToString() const {
-  crash << "ASNElement::ToString not implemented yet. " << crash;
+  return this->ToJSON().ToString(false, false, false, true);
 }
 
 JSData ASNElement::ToJSON() const {
@@ -375,10 +389,21 @@ JSData ASNElement::ToJSON() const {
   return result;
 }
 
+std::string ASNElement::JSLabels::tag = "startByte";
+std::string ASNElement::JSLabels::startByteOriginal = "startByteOriginal";
+std::string ASNElement::JSLabels::value = "value";
+// std::string ASNElement::JSLabels:: = "";
+// std::string ASNElement::JSLabels:: = "";
+// std::string ASNElement::JSLabels:: = "";
+// std::string ASNElement::JSLabels:: = "";
+// std::string ASNElement::JSLabels:: = "";
+
 void ASNElement::ToJSON(JSData& output) const {
-  crash << "ASNElement::ToJSON: Not implemented yet. " << crash;
   output.reset();
+  int toBeContinued;
   if (this->isComposite()) {
+    output[ASNElement::JSLabels::tag] = static_cast<int>(this->tag);
+    output[ASNElement::JSLabels::startByteOriginal] = static_cast<int>(this->tag);
 
   }
 }
@@ -426,7 +451,6 @@ bool ASNElement::isInteger(LargeInt *whichInteger, std::stringstream *commentsOn
   }
   *whichInteger = 0;
   int currentContribution = 0;
-  bool isPositive = true;
   for (int i = 0; i < this->ASNAtom.size; i ++) {
     unsigned char unsignedContribution = this->ASNAtom[i];
     currentContribution = unsignedContribution;
@@ -434,7 +458,6 @@ bool ASNElement::isInteger(LargeInt *whichInteger, std::stringstream *commentsOn
       if (currentContribution >= 128) {
         currentContribution -= 255;
       }
-      isPositive = false;
     }
     *whichInteger *= 256;
     *whichInteger += currentContribution;
@@ -1405,7 +1428,7 @@ bool X509Certificate::LoadFromASNEncoded(
     }
     return false;
   }
-  const ASNElement* certificateFieldsASN = 0;
+  const ASNElement* certificateFieldsASN = nullptr;
   if (!this->sourceASN.HasSubElement({0, 3}, {}, &certificateFieldsASN, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to get sequence of certificate fields. ";
@@ -1418,7 +1441,7 @@ bool X509Certificate::LoadFromASNEncoded(
     }
     return false;
   }
-  const ASNElement* validityASN = 0;
+  const ASNElement* validityASN = nullptr;
   if (!this->sourceASN.HasSubElement({0, 4}, {}, &validityASN, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to extract certificate validity. ";

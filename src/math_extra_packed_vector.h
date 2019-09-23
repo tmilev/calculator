@@ -35,10 +35,10 @@ public:
   static unsigned int HashFunction(const PackedVector<scalar>& in);
 };
 
-// in particular, scalar likes to be int
-//Note by Todor: we have to think of a technical way to merge your code with WeylGroup.
-//I think adding a templateVector like you did should be straightforward.
-//For the time being I will not proceed with a merge.
+// In particular, scalar likes to be int
+// Note by Todor: we have to think of a technical way to merge your code with WeylGroup.
+// I think adding a templateVector like you did should be straightforward.
+// For the time being I will not proceed with a merge.
 template <typename scalar, typename templateVector>
 class AnotherWeylGroup {
   // compat WeylGroup

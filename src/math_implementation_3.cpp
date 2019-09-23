@@ -2290,14 +2290,10 @@ void Selection::AddSelectionAppendNewIndex(int index) {
 
 Selection::Selection() {
   this->MaxSize = - 1;
-  this->selected = 0;
-  this->elements = 0;
   this->CardinalitySelection = 0;
 }
 
 Selection::Selection(int m) {
-  this->selected = 0;
-  this->elements = 0;
   this->CardinalitySelection = 0;
   this->init(m);
 }

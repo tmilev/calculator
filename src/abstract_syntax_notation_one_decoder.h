@@ -38,7 +38,8 @@ public:
   List<unsigned char> ASNAtom;
   List<ASNElement> theElements;
   void reset();
-  LargeInt InterpretAsLargeInteger() const;
+  bool isIntegerUnsigned(LargeIntUnsigned* whichInteger, std::stringstream* commentsOnFalse) const;
+  bool isInteger(LargeInt* whichInteger, std::stringstream* commentsOnFalse) const;
   std::string InterpretAsObjectIdentifier() const;
   void ToJSON(JSData& output) const;
   JSData ToJSON() const;

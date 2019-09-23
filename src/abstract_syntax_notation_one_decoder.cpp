@@ -293,7 +293,35 @@ bool ASNElement::HasSubElement(
   const ASNElement** whichElement,
   std::stringstream* commentsOnFailure
 ) const {
-  crash << "ASNElement::HasSubElement Not implemented yet" << crash;
+  const ASNElement* current = this;
+  for (int i = 0; i < desiredIndices.size; i ++) {
+    int currentIndex = desiredIndices[i];
+    if (currentIndex >= current->theElements.size) {
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure << "ASN element is missing composite index: "
+        << desiredIndices.SliceCopy(0, i + 1).ToStringCommaDelimited() << ". ";
+      }
+      return false;
+    }
+    current = &current->theElements[currentIndex];
+    if (i < desiredTypes.size) {
+      unsigned char desiredTag = desiredTypes[i];
+      if (
+        current->tag != desiredTag &&
+        desiredTag != AbstractSyntaxNotationOneSubsetDecoder::tags::anyType0xff
+      ) {
+        if (commentsOnFailure != nullptr) {
+          *commentsOnFailure << "ASN element with composite index: "
+          << desiredIndices.SliceCopy(0, i + 1).ToStringCommaDelimited() << ". "
+          << " is not of the needed type " << static_cast<int>(desiredTag) << ". ";
+        }
+      }
+    }
+  }
+  if (whichElement != nullptr) {
+    *whichElement = current;
+  }
+  return true;
 }
 
 template < >
@@ -303,7 +331,12 @@ bool ASNElement::HasSubElementOfType<LargeIntUnsigned>(
   LargeIntUnsigned& output,
   std::stringstream* commentsOnFailure
 ) const {
-  crash << "LargeIntUnsigned -> Not imlemented yet" << crash;
+  const ASNElement* element = nullptr;
+  if (!ASNElement::HasSubElement(desiredIndices, desiredTypes, &element, commentsOnFailure)) {
+    return false;
+  }
+  return element->isIntegerUnsigned(&output, commentsOnFailure);
+
 }
 
 template < >
@@ -350,10 +383,50 @@ void ASNElement::ToJSON(JSData& output) const {
   }
 }
 
-LargeInt ASNElement::InterpretAsLargeInteger() const {
-  MacroRegisterFunctionWithName("ASNElement::InterpretAsLargeInteger");
-  LargeInt result = 0;
+bool ASNElement::isIntegerUnsigned(
+  LargeIntUnsigned* whichInteger,
+  std::stringstream* commentsOnFalse
+) const {
+  MacroRegisterFunctionWithName("ASNElement::isIntegerUnsigned");
+  if (this->tag != AbstractSyntaxNotationOneSubsetDecoder::tags::integer0x02) {
+    if (commentsOnFalse != nullptr) {
+      *commentsOnFalse << "Element is not an integer. ";
+    }
+    return false;
+  }
+  if (this->ASNAtom.size > 0) {
+    if (this->ASNAtom[0] >= 128) {
+      if (commentsOnFalse != nullptr) {
+        *commentsOnFalse << "Integer is negative. ";
+      }
+      return false;
+    }
+  }
+  if (whichInteger == nullptr) {
+    return true;
+  }
+  LargeInt result;
+  if (!this->isInteger(&result, commentsOnFalse)) {
+    crash << "ASNElement must be an integer at this point. " << crash;
+  }
+  *whichInteger = result.value;
+  return true;
+}
+
+bool ASNElement::isInteger(LargeInt *whichInteger, std::stringstream *commentsOnFalse) const {
+  MacroRegisterFunctionWithName("ASNElement::isInteger");
+  if (this->tag != AbstractSyntaxNotationOneSubsetDecoder::tags::integer0x02) {
+    if (commentsOnFalse != nullptr) {
+      *commentsOnFalse << "Element is not an integer. ";
+    }
+    return false;
+  }
+  if (whichInteger == nullptr) {
+    return true;
+  }
+  *whichInteger = 0;
   int currentContribution = 0;
+  bool isPositive = true;
   for (int i = 0; i < this->ASNAtom.size; i ++) {
     unsigned char unsignedContribution = this->ASNAtom[i];
     currentContribution = unsignedContribution;
@@ -361,11 +434,12 @@ LargeInt ASNElement::InterpretAsLargeInteger() const {
       if (currentContribution >= 128) {
         currentContribution -= 255;
       }
+      isPositive = false;
     }
-    result *= 256;
-    result += currentContribution;
+    *whichInteger *= 256;
+    *whichInteger += currentContribution;
   }
-  return result;
+  return true;
 }
 
 bool AbstractSyntaxNotationOneSubsetDecoder::DecodeIntegerContent(
@@ -373,7 +447,13 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeIntegerContent(
 ) {
   this->DecodeASNAtomContent(desiredLengthInBytes, output, interpretation);
   if (interpretation != nullptr) {
-    (*interpretation)["value"] = output.InterpretAsLargeInteger().ToString();
+    LargeInt content;
+    std::stringstream comments;
+    if (!output.isInteger(&content, &comments)) {
+      (*interpretation)["error"] = comments.str();
+    } else {
+      (*interpretation)["value"] = content.ToString();
+    }
   }
   return true;
 }

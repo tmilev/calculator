@@ -41,6 +41,7 @@ public:
     static std::string type;
     static std::string children;
     static std::string body;
+    static std::string numberOfChildren;
   };
 
   friend std::ostream& operator<<(std::ostream& output, const ASNElement& element) {

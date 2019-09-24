@@ -144,11 +144,15 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeBitString(
   int offsetAtStart = this->dataPointer;
   this->DecodeASNAtomContent(output);
   AbstractSyntaxNotationOneSubsetDecoder subDecoder;
+  subDecoder.flagMustDecodeAll = false;
   ASNElement subDecoderResult;
   subDecoder.recursionDepthGuarD = this->recursionDepthGuarD + 1;
   if (subDecoder.Decode(*this->rawDatA, offsetAtStart, subDecoderResult, nullptr)) {
     output.theElements.SetSize(0);
     output.theElements.AddOnTop(subDecoderResult);
+    std::cout << "\n\nDEBUG: SUBDECODER success!!!\n\n";
+  } else {
+    std::cout << "\n\nDEBUG: SUBDECODER FAAAAIL!!!\n\n";
   }
   return true;
 }
@@ -234,6 +238,7 @@ bool ASNElement::HasSubElement(
   std::stringstream* commentsOnFailure
 ) const {
   const ASNElement* current = this;
+  std::cout << "DEBUG: input indices: " << desiredIndices << "\n";
   for (int i = 0; i < desiredIndices.size; i ++) {
     int currentIndex = desiredIndices[i];
     if (currentIndex >= current->theElements.size) {
@@ -243,7 +248,8 @@ bool ASNElement::HasSubElement(
       }
       return false;
     }
-    current = &current->theElements[currentIndex];
+    current = &(current->theElements[currentIndex]);
+    std::cout << "DEBUG: current has: " << current->theElements.size << " children. " << std::endl;
     if (i < desiredTypes.size) {
       unsigned char desiredTag = desiredTypes[i];
       if (
@@ -261,6 +267,7 @@ bool ASNElement::HasSubElement(
   if (whichElement != nullptr) {
     *whichElement = current;
   }
+  //std::cout << "DEBUG: about ot return: element with: " << current->theElements.size << " children. " << std::endl;
   return true;
 }
 
@@ -340,7 +347,7 @@ std::string ASNElement::JSLabels::startByteOriginal = "startByteOriginal";
 std::string ASNElement::JSLabels::tag = "startByte";
 std::string ASNElement::JSLabels::type = "type";
 std::string ASNElement::JSLabels::value = "value";
-// std::string ASNElement::JSLabels:: = "";
+std::string ASNElement::JSLabels::numberOfChildren = "numberOfChildren";
 
 void ASNElement::ToJSON(JSData& output) const {
   output.reset();
@@ -354,6 +361,7 @@ void ASNElement::ToJSON(JSData& output) const {
   );
   output[ASNElement::JSLabels::lengthBytes] = Crypto::ConvertListUnsignedCharsToHex(lengthEncoding, 0, false);
   output[ASNElement::JSLabels::isConstructed] = this->flagIsConstructed;
+  output[ASNElement::JSLabels::numberOfChildren] = this->theElements.size;
   if (this->isComposite()) {
     JSData children;
     children.theType = JSData::token::tokenArray;
@@ -473,6 +481,7 @@ ASNElement::ASNElement() {
 void ASNElement::reset() {
   this->flagIsConstructed = false;
   this->ASNAtom.SetSize(0);
+  this->theElements.SetSize(0);
   this->lengthPromised = 0;
   this->tag = 0;
   this->startByte = 0;
@@ -931,6 +940,7 @@ bool ASNObject::LoadFieldsFromASNSequence(
   MapList<std::string, ASNObject, MathRoutines::HashString>& output,
   std::stringstream *commentsOnFailure
 ) {
+  MacroRegisterFunctionWithName("ASNObject::LoadFieldsFromASNSequence");
   output.Clear();
   if (input.tag != AbstractSyntaxNotationOneSubsetDecoder::tags::sequence0x10) {
     if (commentsOnFailure != nullptr) {
@@ -939,7 +949,6 @@ bool ASNObject::LoadFieldsFromASNSequence(
     return false;
   }
   for (int i = 0; i < input.theElements.size; i ++) {
-    std::cout << "DEBUG: attempt to load: " << input.theElements[i].ToString() << "\n";
     ASNObject current;
     if (!current.LoadFromASN(input.theElements[i], commentsOnFailure)) {
       if (commentsOnFailure != nullptr) {
@@ -961,13 +970,14 @@ bool ASNObject::LoadFromASN(
   const ASNElement& input,
   std::stringstream* commentsOnFailure
 ) {
+  MacroRegisterFunctionWithName("ASNObject::LoadFromASN");
   if (
-    input.tag != AbstractSyntaxNotationOneSubsetDecoder::tags::sequence0x10 ||
+    input.tag != AbstractSyntaxNotationOneSubsetDecoder::tags::set0x11 ||
     input.theElements.size != 1
   ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
-      << "ASNObject outer layer must be a one-element sequence, instead is of type: "
+      << "ASNObject outer layer must be a one-element set, instead is of type: "
       << input.GetType() << " and has " << input.theElements.size << " elements. ";
     }
     return false;
@@ -975,11 +985,11 @@ bool ASNObject::LoadFromASN(
   const ASNElement& internal = input[0];
 
   if (
-    internal.tag == AbstractSyntaxNotationOneSubsetDecoder::tags::set0x11 ||
+    internal.tag != AbstractSyntaxNotationOneSubsetDecoder::tags::sequence0x10 ||
     internal.theElements.size != 2
   ) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "ASNObject JSON representation must be a two-element set. ";
+      *commentsOnFailure << "ASNObject JSON representation must be a two-element sequence. ";
     }
     return false;
   }
@@ -998,8 +1008,8 @@ bool ASNObject::LoadFromASN(
     return false;
   }
   *this = ASNObject::ObjectIdsToNames().GetValueCreateNoInit(this->objectId);
-  const ASNElement& second = input[1];
-  if (!second.isComposite()) {
+  const ASNElement& second = internal[1];
+  if (second.isComposite()) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "ASN object content is required to be non-composite. ";
     }
@@ -1278,8 +1288,7 @@ bool TBSCertificateInfo::LoadValidityFromASN(
 }
 
 bool TBSCertificateInfo::LoadFieldsFromASN(const ASNElement& input, std::stringstream* commentsOnFailure) {
-  MacroRegisterFunctionWithName("TBSCertificateInfo::LoadFromJSON");
-  std::cout << "DEBUG: about ot load from: " << input.ToString() << "\n";
+  MacroRegisterFunctionWithName("TBSCertificateInfo::LoadFieldsFromASN");
   MapList<std::string, ASNObject, MathRoutines::HashString> fields;
   if (!ASNObject::LoadFieldsFromASNSequence(input, fields, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
@@ -1385,8 +1394,7 @@ bool X509Certificate::LoadFromASNEncoded(
     {0, 6, 1, 0, 1}, {}, this->theRSA.theModuluS, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to read RSA modulus. JSON decoded: "
-      << this->sourceASN.ToString();
+      *commentsOnFailure << "Failed to read RSA modulus. ";
     }
     return false;
   }

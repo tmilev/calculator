@@ -52,7 +52,7 @@ bool TransportLayerSecurity::initSSLKeyFilesInternal(std::stringstream* comments
   }
   if (!this->LoadPEMPrivateKey(commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to load pem certificate. ";
+      *commentsOnFailure << "Failed to load pem private key. ";
     }
   }
   return true;

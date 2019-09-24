@@ -93,7 +93,6 @@ public:
   std::string certificateSignature;
   List<unsigned char> sourceBinary;
   ASNElement sourceASN;
-  JSData sourceInterpretation;
   CertificateRSA theRSA;
   class Test {
   public:

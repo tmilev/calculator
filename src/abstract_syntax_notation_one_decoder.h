@@ -32,10 +32,15 @@ public:
   public:
     static std::string offset;
     static std::string tag;
+    static std::string lengthPromised;
+    static std::string lengthBytes;
     static std::string startByteOriginal;
     static std::string value;
     static std::string error;
     static std::string isConstructed;
+    static std::string type;
+    static std::string children;
+    static std::string body;
   };
 
   friend std::ostream& operator<<(std::ostream& output, const ASNElement& element) {
@@ -44,9 +49,17 @@ public:
   }
   unsigned char startByte;
   unsigned char tag;
+  int lengthPromised;
+  int offset;
   bool flagIsConstructed;
+  std::string error;
   List<unsigned char> ASNAtom;
   List<ASNElement> theElements;
+  ASNElement();
+  void ComputeTag();
+  bool hasBit7Set() const;
+  bool hasBit8Set() const;
+  bool hasCostructedStartByte() const;
   void reset();
   bool isIntegerUnsigned(LargeIntUnsigned* whichInteger, std::stringstream* commentsOnFalse) const;
   bool isInteger(LargeInt* whichInteger, std::stringstream* commentsOnFalse) const;
@@ -234,35 +247,24 @@ public:
   bool flagMustDecodeAll;
   const List<unsigned char>* rawDatA;
   ASNElement* decodedData;
-  JSData* dataInterpretation;
-  bool flagLogByteInterpretation;
-  List<std::string> byteInterpretationNotes;
-  List<int> byteInterpretationDepth;
   typedef bool (*typeDecoder)(AbstractSyntaxNotationOneSubsetDecoder& thisPointer, std::stringstream* commentsOnError);
   List<typeDecoder> decodersByByteValue;
   bool Decode(
     const List<unsigned char>& inputRawData,
     int inputOffset,
     ASNElement& output,
-    JSData* outputInterpretation,
     std::stringstream* commentsOnError
   );
-  std::string GetType(unsigned char startByte);
-  bool PointerIsBad(JSData* interpretation);
-  bool DecodeCurrent(ASNElement& output, JSData *interpretation);
-  bool DecodeSequenceLikeContent(int desiredLengthInBytes, ASNElement &output, JSData* interpretation);
-  bool DecodeBitString(int desiredLengthInBytes, ASNElement& output, JSData* interpretation);
-  bool DecodeIntegerContent(int desiredLengthInBytes, ASNElement& output, JSData* interpretation);
-  static LargeInt VariableLengthQuantityDecode(const List<unsigned char> &input, int& inputOutputDataPointer);
-  void DecodeASNAtomContent(
-    int desiredLengthInBytes,
-    ASNElement &output,
-    JSData* interpretation
-  );
-  bool DecodeObjectIdentifier(int desiredLengthInBytes, ASNElement& output, JSData* interpretation);
-  bool DecodeNull(int desiredLengthInBytes, ASNElement& output, JSData* interpretation);
+  static std::string GetType(unsigned char startByte);
+  bool PointerIsBad(ASNElement& outputError);
+  bool DecodeCurrent(ASNElement& output);
+  bool DecodeSequenceLikeContent(ASNElement& output);
+  bool DecodeBitString(ASNElement& output);
+  static LargeInt VariableLengthQuantityDecode(const List<unsigned char>& input, int& inputOutputDataPointer);
+  void DecodeASNAtomContent(ASNElement& output);
+  bool DecodeNull(ASNElement& output);
   bool DecodeCurrentBuiltInType(std::stringstream* commentsOnError);
-  bool DecodeLengthIncrementDataPointer(int& outputLengthNegativeOneForVariable, JSData* interpretation);
+  bool DecodeLengthIncrementDataPointer(ASNElement& output);
 
   static void WriteASNAtom(const ASNElement& input, List<unsigned char>& output);
   static void WriteListUnsignedCharsWithTag(
@@ -277,13 +279,10 @@ public:
 
   std::string ToStringAnnotateBinary();
   std::string ToStringDebug() const;
-  void reset();
   bool CheckInitialization() const;
+  void reset();
   AbstractSyntaxNotationOneSubsetDecoder();
   ~AbstractSyntaxNotationOneSubsetDecoder();
-  static bool isCostructedByte(unsigned char input);
-  static bool hasBit7Set(unsigned char input);
-  static bool hasBit8Set(unsigned char input);
 };
 
 #endif // ABSTRACT_SYNTAX_NOTATION_ONE_HEADER_ALREADY_INCLUDED

@@ -2221,7 +2221,7 @@ bool CalculatorFunctionsGeneral::innerTestASN1Decode(Calculator& theCommands, co
   std::stringstream out;
   JSData interpretation;
   ASNElement result;
-  if (!theDecoder.Decode(dataList, 0, result, &interpretation, &commentsOnError)) {
+  if (!theDecoder.Decode(dataList, 0, result, &commentsOnError)) {
     out << "Failed to decode.<br>" << commentsOnError.str();
   }
   out << theDecoder.ToStringDebug();

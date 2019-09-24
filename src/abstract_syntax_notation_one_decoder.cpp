@@ -303,9 +303,9 @@ bool ASNElement::HasSubElementOfType<List<unsigned char> >(
   if (!ASNElement::HasSubElement(desiredIndices, desiredTypes, &element, commentsOnFailure)) {
     return false;
   }
-  if (!element->isComposite()) {
+  if (element->isComposite()) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Element is composite. ";
+      *commentsOnFailure << "Element with key: " << desiredIndices << " is not atomic. ";
     }
     return false;
   }
@@ -350,7 +350,7 @@ void ASNElement::ToJSON(JSData& output) const {
   output[ASNElement::JSLabels::type] = AbstractSyntaxNotationOneSubsetDecoder::GetType(this->tag);
   List<unsigned char> lengthEncoding;
   AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::WriteLength(
-    this->lengthPromised, lengthEncoding, 0
+    static_cast<unsigned>(this->lengthPromised), lengthEncoding, 0
   );
   output[ASNElement::JSLabels::lengthBytes] = Crypto::ConvertListUnsignedCharsToHex(lengthEncoding, 0, false);
   output[ASNElement::JSLabels::isConstructed] = this->flagIsConstructed;
@@ -609,6 +609,13 @@ bool AbstractSyntaxNotationOneSubsetDecoder::Decode(
 void AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::WriteLength(
   unsigned int input, List<unsigned char>& output, int offset
 ) {
+  if (offset >= output.size) {
+    int oldSize = output.size;
+    output.SetSize(offset + 1);
+    for (int i = oldSize; i < offset; i ++) {
+      output[i] = 0;
+    }
+  }
  if (input < 128) {
     unsigned char length = static_cast<unsigned char>(input);
     output[offset] = length;
@@ -932,6 +939,7 @@ bool ASNObject::LoadFieldsFromASNSequence(
     return false;
   }
   for (int i = 0; i < input.theElements.size; i ++) {
+    std::cout << "DEBUG: attempt to load: " << input.theElements[i].ToString() << "\n";
     ASNObject current;
     if (!current.LoadFromASN(input.theElements[i], commentsOnFailure)) {
       if (commentsOnFailure != nullptr) {
@@ -945,6 +953,10 @@ bool ASNObject::LoadFieldsFromASNSequence(
 
 }
 
+std::string ASNElement::GetType() const {
+  return AbstractSyntaxNotationOneSubsetDecoder::GetType(this->tag);
+}
+
 bool ASNObject::LoadFromASN(
   const ASNElement& input,
   std::stringstream* commentsOnFailure
@@ -955,7 +967,8 @@ bool ASNObject::LoadFromASN(
   ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
-      << "ASNObject JSON outer layer must be a one-element sequence. ";
+      << "ASNObject outer layer must be a one-element sequence, instead is of type: "
+      << input.GetType() << " and has " << input.theElements.size << " elements. ";
     }
     return false;
   }
@@ -1266,11 +1279,12 @@ bool TBSCertificateInfo::LoadValidityFromASN(
 
 bool TBSCertificateInfo::LoadFieldsFromASN(const ASNElement& input, std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("TBSCertificateInfo::LoadFromJSON");
+  std::cout << "DEBUG: about ot load from: " << input.ToString() << "\n";
   MapList<std::string, ASNObject, MathRoutines::HashString> fields;
   if (!ASNObject::LoadFieldsFromASNSequence(input, fields, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to read certificate fields. Certificate fields decoded: "
-      << fields.ToStringHtml();
+      << fields.ToStringHtml() << ". ";
     }
     return false;
   }

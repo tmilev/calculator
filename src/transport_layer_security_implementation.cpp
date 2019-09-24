@@ -16,7 +16,9 @@ extern logger logServer   ;
 
 bool TransportLayerSecurity::LoadPEMCertificate(std::stringstream* commentsOnFailure) {
   std::string certificateContent;
-  if (!FileOperations::LoadFileToStringVirtual(TransportLayerSecurity::fileCertificate, certificateContent, true, true, commentsOnFailure)) {
+  if (!FileOperations::LoadFileToStringVirtual(
+    TransportLayerSecurity::fileCertificate, certificateContent, true, true, commentsOnFailure
+  )) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to load certificate file. ";
     }
@@ -27,7 +29,9 @@ bool TransportLayerSecurity::LoadPEMCertificate(std::stringstream* commentsOnFai
 
 bool TransportLayerSecurity::LoadPEMPrivateKey(std::stringstream *commentsOnFailure) {
   std::string certificateContent, certificateContentStripped;
-  if (!FileOperations::LoadFileToStringVirtual(TransportLayerSecurity::fileKey, certificateContent, true, true, commentsOnFailure)) {
+  if (!FileOperations::LoadFileToStringVirtual(
+    TransportLayerSecurity::fileKey, certificateContent, true, true, commentsOnFailure
+  )) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to load key file. ";
     }

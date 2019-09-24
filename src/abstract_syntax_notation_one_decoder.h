@@ -70,6 +70,7 @@ public:
   bool isComposite() const;
   bool isPureComposite() const;
   bool isNonPureComposite() const;
+  std::string GetType() const;
   bool isTime() const;
   bool HasSubElement(
     const List<int>& desiredIndices,

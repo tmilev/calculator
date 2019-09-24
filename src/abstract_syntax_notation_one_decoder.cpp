@@ -150,9 +150,6 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeBitString(
   if (subDecoder.Decode(*this->rawDatA, offsetAtStart, subDecoderResult, nullptr)) {
     output.theElements.SetSize(0);
     output.theElements.AddOnTop(subDecoderResult);
-    std::cout << "\n\nDEBUG: SUBDECODER success!!!\n\n";
-  } else {
-    std::cout << "\n\nDEBUG: SUBDECODER FAAAAIL!!!\n\n";
   }
   return true;
 }
@@ -238,7 +235,6 @@ bool ASNElement::HasSubElement(
   std::stringstream* commentsOnFailure
 ) const {
   const ASNElement* current = this;
-  std::cout << "DEBUG: input indices: " << desiredIndices << "\n";
   for (int i = 0; i < desiredIndices.size; i ++) {
     int currentIndex = desiredIndices[i];
     if (currentIndex >= current->theElements.size) {
@@ -249,7 +245,6 @@ bool ASNElement::HasSubElement(
       return false;
     }
     current = &(current->theElements[currentIndex]);
-    std::cout << "DEBUG: current has: " << current->theElements.size << " children. " << std::endl;
     if (i < desiredTypes.size) {
       unsigned char desiredTag = desiredTypes[i];
       if (
@@ -267,7 +262,6 @@ bool ASNElement::HasSubElement(
   if (whichElement != nullptr) {
     *whichElement = current;
   }
-  //std::cout << "DEBUG: about ot return: element with: " << current->theElements.size << " children. " << std::endl;
   return true;
 }
 

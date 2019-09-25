@@ -42,6 +42,7 @@ public:
     static std::string children;
     static std::string body;
     static std::string numberOfChildren;
+    static std::string comment;
   };
 
   friend std::ostream& operator<<(std::ostream& output, const ASNElement& element) {
@@ -54,6 +55,7 @@ public:
   int offset;
   bool flagIsConstructed;
   std::string error;
+  std::string comment;
   List<unsigned char> ASNAtom;
   List<ASNElement> theElements;
   ASNElement();
@@ -74,12 +76,26 @@ public:
   bool isNonPureComposite() const;
   std::string GetType() const;
   bool isTime() const;
-  bool HasSubElement(
+  template <typename thisPointerType>
+  static bool HasSubElementTemplate(
+    thisPointerType* thisPointer,
+    const List<int>& desiredIndices,
+    const List<unsigned char>& desiredTypes,
+    thisPointerType** whichElement,
+    std::stringstream* commentsOnFailure
+  );
+  bool HasSubElementConst(
     const List<int>& desiredIndices,
     const List<unsigned char>& desiredTypes,
     const ASNElement** whichElement,
     std::stringstream* commentsOnFailure
   ) const;
+  bool HasSubElementNonConst(
+    const List<int>& desiredIndices,
+    const List<unsigned char>& desiredTypes,
+    ASNElement** whichElement,
+    std::stringstream* commentsOnFailure
+  );
   bool HasSubElementGetCopy(
     const List<int>& desiredIndices,
     const List<unsigned char>& desiredTypes,
@@ -99,7 +115,7 @@ public:
     const List<unsigned char>& content,
     List<unsigned char>& output
   );
-  const ASNElement& operator[](int index) const;
+  ASNElement& operator[](int index);
 };
 
 class ASNObject {

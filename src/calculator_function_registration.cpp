@@ -811,15 +811,15 @@ void Calculator::initPredefinedInnerFunctions() {
     "TestASN1Decode"
   );
   this->AddOperationInnerHandler(
-    "X509CertificateServer",
+    "X509CertificateServerBase64",
     CalculatorFunctionsGeneral::innerX509CertificateServer,
     "",
-    "Returns the bytes of the X509 certificate of this server. ",
-    "ConvertStringToHex X509CertificateServer 0; ",
+    "Returns the base 64 encoding of the X509 certificate of this server. ",
+    "X509CertificateServerBase64 0; ",
     true,
     false,
     "CalculatorFunctionsGeneral::innerX509certificateCrunch",
-    "X509CertificateServer"
+    "X509CertificateServerBase64"
   );
   this->AddOperationInnerHandler(
     "X509CertificateDecode",

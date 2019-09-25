@@ -14,10 +14,10 @@ bool CalculatorFunctionsGeneral::innerX509CertificateServer(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerX509CertificateServer");
   (void) input;
-  List<unsigned char> outputChars;
-  theWebServer.theTLS.theServer.certificate.WriteBytesASN1(outputChars);
-  outputChars = theWebServer.theTLS.theServer.certificate.sourceBinary;
-  std::string result(reinterpret_cast<char*>(outputChars.TheObjects), static_cast<unsigned>(outputChars.size));
+  //List<unsigned char> outputChars;
+  //theWebServer.theTLS.theServer.certificate.WriteBytesASN1(outputChars);
+  //outputChars = theWebServer.theTLS.theServer.certificate.sourceBinary;
+  std::string result = Crypto::ConvertStringToBase64(theWebServer.theTLS.theServer.certificate.sourceBinary, false);
   return output.AssignValue(result, theCommands);
 }
 

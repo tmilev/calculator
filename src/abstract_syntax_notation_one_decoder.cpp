@@ -148,11 +148,6 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeBitString(
   ASNElement subDecoderResult;
   subDecoder.recursionDepthGuarD = this->recursionDepthGuarD + 1;
   if (subDecoder.Decode(*this->rawDatA, offsetAtStart + 1, subDecoderResult, nullptr)) {
-    std::cout << "DEBUG: sub-decoder data pointer: "
-    << subDecoder.dataPointer << " and this->datapointer: "
-    << this->dataPointer << std::endl;
-    std::cout << "DEBUG: sub-decoder result: "
-    << subDecoderResult.ToString() << std::endl;
     if (subDecoder.dataPointer == this->dataPointer) {
       output.theElements.SetSize(0);
       output.theElements.AddOnTop(subDecoderResult);
@@ -203,8 +198,8 @@ LargeInt AbstractSyntaxNotationOneSubsetDecoder::VariableLengthQuantityDecode(
 
 std::string ASNElement::InterpretAsObjectIdentifierGetNameAndId() const {
   std::stringstream out;
-  out << "objectId: " << this->InterpretAsObjectIdentifier();
-  out << " meaning: ";
+  out << "[" << this->InterpretAsObjectIdentifier();
+  out << "]: ";
   if (!ASNObject::ObjectIdsToNames().Contains(this->ASNAtom)) {
     out << "[unknown]";
   } else {
@@ -267,17 +262,28 @@ bool ASNElement::isNonPureComposite() const {
   return this->theElements.size > 0 && this->ASNAtom.size > 0;
 }
 
-const ASNElement& ASNElement::operator[](int index) const {
+ASNElement& ASNElement::operator[](int index) {
   return this->theElements[index];
 }
 
-bool ASNElement::HasSubElement(
+bool ASNElement::HasSubElementConst(
   const List<int>& desiredIndices,
   const List<unsigned char>& desiredTypes,
   const ASNElement** whichElement,
   std::stringstream* commentsOnFailure
 ) const {
-  const ASNElement* current = this;
+  return ASNElement::HasSubElementTemplate(this, desiredIndices, desiredTypes, whichElement, commentsOnFailure);
+}
+
+template <typename thisPointerType>
+bool ASNElement::HasSubElementTemplate(
+  thisPointerType* thisPointer,
+  const List<int>& desiredIndices,
+  const List<unsigned char>& desiredTypes,
+  thisPointerType **whichElement,
+  std::stringstream* commentsOnFailure
+) {
+  thisPointerType* current = thisPointer;
   for (int i = 0; i < desiredIndices.size; i ++) {
     int currentIndex = desiredIndices[i];
     if (currentIndex >= current->theElements.size) {
@@ -316,7 +322,7 @@ bool ASNElement::HasSubElementOfType<LargeIntUnsigned>(
   std::stringstream* commentsOnFailure
 ) const {
   const ASNElement* element = nullptr;
-  if (!ASNElement::HasSubElement(desiredIndices, desiredTypes, &element, commentsOnFailure)) {
+  if (!ASNElement::HasSubElementConst(desiredIndices, desiredTypes, &element, commentsOnFailure)) {
     return false;
   }
   return element->isIntegerUnsigned(&output, commentsOnFailure);
@@ -330,7 +336,7 @@ bool ASNElement::HasSubElementOfType<LargeInt>(
   std::stringstream* commentsOnFailure
 ) const {
   const ASNElement* element = nullptr;
-  if (!ASNElement::HasSubElement(desiredIndices, desiredTypes, &element, commentsOnFailure)) {
+  if (!ASNElement::HasSubElementConst(desiredIndices, desiredTypes, &element, commentsOnFailure)) {
     return false;
   }
   return element->isInteger(&output, commentsOnFailure);
@@ -344,7 +350,7 @@ bool ASNElement::HasSubElementOfType<List<unsigned char> >(
   std::stringstream* commentsOnFailure
 ) const {
   const ASNElement* element = nullptr;
-  if (!ASNElement::HasSubElement(desiredIndices, desiredTypes, &element, commentsOnFailure)) {
+  if (!ASNElement::HasSubElementConst(desiredIndices, desiredTypes, &element, commentsOnFailure)) {
     return false;
   }
   if (element->isComposite()) {
@@ -385,6 +391,7 @@ std::string ASNElement::JSLabels::tag = "tag";
 std::string ASNElement::JSLabels::type = "type";
 std::string ASNElement::JSLabels::interpretation = "interpretation";
 std::string ASNElement::JSLabels::numberOfChildren = "numberOfChildren";
+std::string ASNElement::JSLabels::comment = "comment";
 
 void ASNElement::ToJSON(JSData& output) const {
   output.reset();
@@ -400,6 +407,9 @@ void ASNElement::ToJSON(JSData& output) const {
   output[ASNElement::JSLabels::lengthEncoding] = Crypto::ConvertListUnsignedCharsToHex(lengthEncoding, 0, false);
   output[ASNElement::JSLabels::isConstructed] = this->flagIsConstructed;
   output[ASNElement::JSLabels::numberOfChildren] = this->theElements.size;
+  if (this->comment != "") {
+    output[ASNElement::JSLabels::comment] = this->comment;
+  }
   if (this->isComposite()) {
     JSData children;
     children.theType = JSData::token::tokenArray;
@@ -410,10 +420,6 @@ void ASNElement::ToJSON(JSData& output) const {
       children.theList.AddOnTop(incoming);
     }
     output[ASNElement::JSLabels::children] = children;
-    ASNObject attemptToLoad;
-    if (attemptToLoad.LoadFromASN(*this, nullptr)) {
-      output[ASNElement::JSLabels::interpretation] = attemptToLoad.ToString();
-    }
   }
   if (this->ASNAtom.size > 0 || !this->isComposite()) {
     output[ASNElement::JSLabels::body] = Crypto::ConvertListUnsignedCharsToHex(this->ASNAtom, 0, false);
@@ -998,7 +1004,7 @@ bool ASNObject::LoadFromASN(
     }
     return false;
   }
-  const ASNElement& internal = input[0];
+  const ASNElement& internal = input.theElements[0];
 
   if (
     internal.tag != AbstractSyntaxNotationOneSubsetDecoder::tags::sequence0x10 ||
@@ -1009,7 +1015,7 @@ bool ASNObject::LoadFromASN(
     }
     return false;
   }
-  this->objectId = internal[0];
+  this->objectId = internal.theElements[0];
   if (this->objectId.tag != AbstractSyntaxNotationOneSubsetDecoder::tags::objectIdentifier0x06) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Missing objectIdentifierBytes key. ";
@@ -1023,7 +1029,7 @@ bool ASNObject::LoadFromASN(
     return false;
   }
   *this = ASNObject::ObjectIdsToNames().GetValueCreateNoInit(this->objectId.ASNAtom);
-  const ASNElement& second = internal[1];
+  const ASNElement& second = internal.theElements[1];
   if (second.isComposite()) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "ASN object content is required to be non-composite. ";
@@ -1156,7 +1162,7 @@ bool PrivateKeyRSA::LoadFromASNEncoded(
     return false;
   }
   const ASNElement* innerData;
-  if (!this->sourceASNOuter.HasSubElement(
+  if (!this->sourceASNOuter.HasSubElementConst(
     {2}, {}, &innerData, commentsOnFailure
   )) {
     return false;
@@ -1293,14 +1299,14 @@ bool TBSCertificateInfo::LoadValidityFromASN(
     }
     return false;
   }
-  if (!input[0].isTime() || !input[1].isTime()) {
+  if (!input.theElements[0].isTime() || !input.theElements[1].isTime()) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Validity elements must be of type time. ";
     }
     return false;
   }
-  this->validityNotAfter = input[0];
-  this->validityNotBefore = input[1];
+  this->validityNotAfter = input.theElements[0];
+  this->validityNotBefore = input.theElements[1];
   return true;
 }
 
@@ -1372,7 +1378,7 @@ bool X509Certificate::LoadFromASNEncoded(
       *commentsOnFailure << "Failed to read serial number. ";
     }
     return false;
-  }
+  }  
   if (!this->sourceASN.HasSubElementOfType(
     {0, 2, 0}, {}, this->signatureAlgorithmId, commentsOnFailure
   )) {
@@ -1382,7 +1388,7 @@ bool X509Certificate::LoadFromASNEncoded(
     return false;
   }
   const ASNElement* certificateFieldsASN = nullptr;
-  if (!this->sourceASN.HasSubElement({0, 3}, {}, &certificateFieldsASN, commentsOnFailure)) {
+  if (!this->sourceASN.HasSubElementConst({0, 3}, {}, &certificateFieldsASN, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to get sequence of certificate fields. ";
     }
@@ -1395,7 +1401,7 @@ bool X509Certificate::LoadFromASNEncoded(
     return false;
   }
   const ASNElement* validityASN = nullptr;
-  if (!this->sourceASN.HasSubElement({0, 4}, {}, &validityASN, commentsOnFailure)) {
+  if (!this->sourceASN.HasSubElementConst({0, 4}, {}, &validityASN, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to extract certificate validity. ";
     }

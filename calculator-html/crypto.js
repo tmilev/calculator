@@ -122,6 +122,12 @@ AbstractSyntaxOne.prototype.appendAnnotation = function(
     if (currentInterpretation.interpretation !== undefined) {
       tooltipBody += `Interpretation: ${currentInterpretation.interpretation}`;
     }
+    if (currentInterpretation.comment !== undefined) {
+      if (tooltipBody !== "") {
+        tooltipBody += "<br>";
+      }
+      tooltipBody += `Comment: ${currentInterpretation.interpretation}`;
+    }
     if (tooltipBody !== "") {
       attachTooltip(elementHex, tooltipBody);
     }

@@ -201,6 +201,18 @@ LargeInt AbstractSyntaxNotationOneSubsetDecoder::VariableLengthQuantityDecode(
   return result;
 }
 
+std::string ASNElement::InterpretAsObjectIdentifierGetNameAndId() const {
+  std::stringstream out;
+  out << "objectId: " << this->InterpretAsObjectIdentifier();
+  out << " meaning: ";
+  if (!ASNObject::ObjectIdsToNames().Contains(this->ASNAtom)) {
+    out << "[unknown]";
+  } else {
+    out << ASNObject::ObjectIdsToNames().GetValueCreate(this->ASNAtom).name;
+  }
+  return out.str();
+}
+
 std::string ASNElement::InterpretAsObjectIdentifier() const {
   MacroRegisterFunctionWithName("ASNElement::InterpretAsObjectIdentifier");
   if (this->ASNAtom.size <= 0) {
@@ -371,7 +383,7 @@ std::string ASNElement::JSLabels::offset = "offset";
 std::string ASNElement::JSLabels::startByteOriginal = "startByteOriginal";
 std::string ASNElement::JSLabels::tag = "tag";
 std::string ASNElement::JSLabels::type = "type";
-std::string ASNElement::JSLabels::value = "value";
+std::string ASNElement::JSLabels::interpretation = "interpretation";
 std::string ASNElement::JSLabels::numberOfChildren = "numberOfChildren";
 
 void ASNElement::ToJSON(JSData& output) const {
@@ -398,9 +410,22 @@ void ASNElement::ToJSON(JSData& output) const {
       children.theList.AddOnTop(incoming);
     }
     output[ASNElement::JSLabels::children] = children;
+    ASNObject attemptToLoad;
+    if (attemptToLoad.LoadFromASN(*this, nullptr)) {
+      output[ASNElement::JSLabels::interpretation] = attemptToLoad.ToString();
+    }
   }
-  if (this->ASNAtom.size > 0 || ! this->isComposite()) {
+  if (this->ASNAtom.size > 0 || !this->isComposite()) {
     output[ASNElement::JSLabels::body] = Crypto::ConvertListUnsignedCharsToHex(this->ASNAtom, 0, false);
+    if (
+      this->tag == AbstractSyntaxNotationOneSubsetDecoder::tags::utf8String0x0c ||
+      this->tag == AbstractSyntaxNotationOneSubsetDecoder::tags::printableString0x13
+    ) {
+      output[ASNElement::JSLabels::interpretation] = this->ASNAtom.ToStringConcatenate();
+    }
+    if (this->tag == AbstractSyntaxNotationOneSubsetDecoder::tags::objectIdentifier0x06) {
+      output[ASNElement::JSLabels::interpretation] = this->InterpretAsObjectIdentifierGetNameAndId();
+    }
   }
 }
 
@@ -766,7 +791,8 @@ void TBSCertificateInfo::WriteBytesContentAndExpiry(List<unsigned char>& output)
 }
 
 void TBSCertificateInfo::WriteBytesExpiry(List<unsigned char>& output) {
-  AbstractSyntaxNotationOneSubsetDecoder::WriterSequence(100, output);
+  // Anonymity breaks destructor generation in gcc!
+  AbstractSyntaxNotationOneSubsetDecoder::WriterSequence notAnonymous(100, output);
   this->validityNotBefore.WriteBytes(output);
   this->validityNotAfter.WriteBytes(output);
 }
@@ -782,7 +808,8 @@ void AbstractSyntaxNotationOneSubsetDecoder::WriteObjectId(
 }
 
 void X509Certificate::WriteBytesAlgorithmIdentifier(List<unsigned char>& output) {
-  AbstractSyntaxNotationOneSubsetDecoder::WriterSequence(100, output);
+  // Anonymity breaks destructor generation in gcc!
+  AbstractSyntaxNotationOneSubsetDecoder::WriterSequence notAnonymous(100, output);
   AbstractSyntaxNotationOneSubsetDecoder::WriteObjectId(this->signatureAlgorithmId, output);
   AbstractSyntaxNotationOneSubsetDecoder::WriteNull(output);
 }
@@ -792,8 +819,9 @@ void ASNObject::WriteBytesASNObject(List<unsigned char>& output) {
     // object id empty, field not initialized, do nothing
     return;
   }
-  AbstractSyntaxNotationOneSubsetDecoder::WriterSet(100, output);
-  AbstractSyntaxNotationOneSubsetDecoder::WriterSequence(100, output);
+  // Anonymity breaks destructor generation in gcc!
+  AbstractSyntaxNotationOneSubsetDecoder::WriterSet notAnonymous1(100, output);
+  AbstractSyntaxNotationOneSubsetDecoder::WriterSequence notAnonymous2(100, output);
   this->objectId.WriteBytes(output);
   this->content.WriteBytes(output);
 }
@@ -906,15 +934,15 @@ int ASNObject::LoadField(const MapList<std::string, ASNObject, MathRoutines::Has
 std::string ASNObject::ToString() const {
   std::stringstream out;
   out << "objectId: " << Crypto::ConvertListUnsignedCharsToHex(this->objectId.ASNAtom, 0, false)
-  << ", name: " << Crypto::ConvertStringToHex(this->name, 0, false)
-  << ", content: " << this->content.ToJSON().ToString(false, false, false, true);
+  << ", name: " << Crypto::ConvertStringToHex(this->name, 0, false);
+  std::string content = this->content.ASNAtom.ToStringConcatenate();
+  out << ", content: " << StringRoutines::ConvertStringToHexIfNonReadable(content, 0, false);
   return out.str();
 }
 
 std::string ASNObject::ToStringAllRecognizedObjectIds() {
   std::stringstream out;
   out << "There are: " << ASNObject::ObjectIdsToNames().size() << " known fields. ";
-  out << "DEBUG: There are: " << ASNObject::NamesToObjectIdsNonThreadSafe().size() << " known fields. ";
   for (int i = 0; i < ASNObject::ObjectIdsToNames().size(); i ++) {
     ASNObject& current = ASNObject::ObjectIdsToNames().theValues[i];
     const List<unsigned char>& currentId = ASNObject::ObjectIdsToNames().theKeys[i];
@@ -1013,6 +1041,7 @@ void ASNObject::initializeNonThreadSafe() {
 
 void X509Certificate::WriteBytesASN1(List<unsigned char>& output) {
   MacroRegisterFunctionWithName("X509Certificate::WriteBytesASN1");
+  // Anonymity breaks destructor generation in gcc!
   AbstractSyntaxNotationOneSubsetDecoder::WriterSequence writeTotalLength(2000, output);
   AbstractSyntaxNotationOneSubsetDecoder::WriterSequence writeMetadata(2000, output);
   this->WriteVersion(output);
@@ -1241,6 +1270,7 @@ std::string TBSCertificateInfo::ToString() {
 }
 
 void TBSCertificateInfo::WriteBytesContent(List<unsigned char>& output) {
+  // Anonymity breaks destructor generation in gcc!
   AbstractSyntaxNotationOneSubsetDecoder::WriterSequence writeTBSCertificateContent(200, output);
   this->countryName           .WriteBytesASNObject(output);
   this->stateOrProvinceName   .WriteBytesASNObject(output);

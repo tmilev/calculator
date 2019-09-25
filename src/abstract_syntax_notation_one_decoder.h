@@ -35,7 +35,7 @@ public:
     static std::string lengthPromised;
     static std::string lengthEncoding;
     static std::string startByteOriginal;
-    static std::string value;
+    static std::string interpretation;
     static std::string error;
     static std::string isConstructed;
     static std::string type;
@@ -65,6 +65,7 @@ public:
   bool isIntegerUnsigned(LargeIntUnsigned* whichInteger, std::stringstream* commentsOnFalse) const;
   bool isInteger(LargeInt* whichInteger, std::stringstream* commentsOnFalse) const;
   std::string InterpretAsObjectIdentifier() const;
+  std::string InterpretAsObjectIdentifierGetNameAndId() const;
   void ToJSON(JSData& output) const;
   JSData ToJSON() const;
   std::string ToString() const;

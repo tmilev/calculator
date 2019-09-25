@@ -87,6 +87,9 @@ AbstractSyntaxOne.prototype.appendAnnotation = function(
   if (currentInterpretation.numberOfChildren) {
     tooltipLeadingByte += `<br># of sub-elements: ${currentInterpretation.numberOfChildren}`;
   }
+  if (currentInterpretation.value !== undefined) {
+    tooltipLeadingByte += `<br>Value: ${currentInterpretation.value}`;
+  }
   attachTooltip(
     elementLeadingByte, 
     tooltipLeadingByte,
@@ -116,13 +119,7 @@ AbstractSyntaxOne.prototype.appendAnnotation = function(
     elementHex.innerHTML = currentInterpretation.body;
     elementHex.classList.add("abstractSyntaxOneContent");
     var tooltipBody = "";
-    if (currentInterpretation.value !== undefined) {
-      tooltipBody += `Value: ${currentInterpretation.value}`;
-    }
     if (currentInterpretation.interpretation !== undefined) {
-      if (tooltipBody !== "") {
-        tooltipBody += "<br>";
-      }
       tooltipBody += `Interpretation: ${currentInterpretation.interpretation}`;
     }
     if (tooltipBody !== "") {

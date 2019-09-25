@@ -147,9 +147,16 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeBitString(
   subDecoder.flagMustDecodeAll = false;
   ASNElement subDecoderResult;
   subDecoder.recursionDepthGuarD = this->recursionDepthGuarD + 1;
-  if (subDecoder.Decode(*this->rawDatA, offsetAtStart, subDecoderResult, nullptr)) {
-    output.theElements.SetSize(0);
-    output.theElements.AddOnTop(subDecoderResult);
+  if (subDecoder.Decode(*this->rawDatA, offsetAtStart + 1, subDecoderResult, nullptr)) {
+    std::cout << "DEBUG: sub-decoder data pointer: "
+    << subDecoder.dataPointer << " and this->datapointer: "
+    << this->dataPointer << std::endl;
+    std::cout << "DEBUG: sub-decoder result: "
+    << subDecoderResult.ToString() << std::endl;
+    if (subDecoder.dataPointer == this->dataPointer) {
+      output.theElements.SetSize(0);
+      output.theElements.AddOnTop(subDecoderResult);
+    }
   }
   return true;
 }
@@ -210,6 +217,30 @@ std::string ASNElement::InterpretAsObjectIdentifier() const {
     resultStream << "." << nextInt.ToString();
   }
   return resultStream.str();
+}
+
+void ASNElement::WriteBytes(List<unsigned char>& output) const {
+  // WARNING: writer needs to be a named object to avoid
+  // gcc immediately calling the object's destructor.
+  AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength
+  notAnonymous(this->startByte, this->lengthPromised, output);
+  if (this->ASNAtom.size > 0) {
+    output.AddListOnTop(this->ASNAtom);
+  } else {
+    for (int i = 0; i < this->theElements.size; i ++) {
+      this->theElements[i].WriteBytes(output);
+    }
+  }
+}
+
+void ASNElement::WriteBytesASNAtom(
+  unsigned char inputStartByte,
+  const List<unsigned char> &atomContent,
+  List<unsigned char>& output
+) {
+  AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength
+  notAnonymous(inputStartByte, atomContent.size, output);
+  output.AddListOnTop(atomContent);
 }
 
 bool ASNElement::isComposite() const {
@@ -334,26 +365,27 @@ std::string ASNElement::JSLabels::body = "body";
 std::string ASNElement::JSLabels::children = "children";
 std::string ASNElement::JSLabels::error = "error";
 std::string ASNElement::JSLabels::isConstructed = "isConstructed";
-std::string ASNElement::JSLabels::lengthBytes = "lengthBytes";
+std::string ASNElement::JSLabels::lengthEncoding = "lengthEncoding";
 std::string ASNElement::JSLabels::lengthPromised = "lengthPromised";
 std::string ASNElement::JSLabels::offset = "offset";
 std::string ASNElement::JSLabels::startByteOriginal = "startByteOriginal";
-std::string ASNElement::JSLabels::tag = "startByte";
+std::string ASNElement::JSLabels::tag = "tag";
 std::string ASNElement::JSLabels::type = "type";
 std::string ASNElement::JSLabels::value = "value";
 std::string ASNElement::JSLabels::numberOfChildren = "numberOfChildren";
 
 void ASNElement::ToJSON(JSData& output) const {
   output.reset();
-  output[ASNElement::JSLabels::tag] = static_cast<int>(this->tag);
-  output[ASNElement::JSLabels::startByteOriginal] = static_cast<int>(this->tag);
+  output[ASNElement::JSLabels::tag] = StringRoutines::ConvertByteToHex(this->tag);
+  output[ASNElement::JSLabels::startByteOriginal] = StringRoutines::ConvertByteToHex(this->startByte);
   output[ASNElement::JSLabels::lengthPromised] = this->lengthPromised;
   output[ASNElement::JSLabels::type] = AbstractSyntaxNotationOneSubsetDecoder::GetType(this->tag);
+  output[ASNElement::JSLabels::offset] = this->offset;
   List<unsigned char> lengthEncoding;
   AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::WriteLength(
     static_cast<unsigned>(this->lengthPromised), lengthEncoding, 0
   );
-  output[ASNElement::JSLabels::lengthBytes] = Crypto::ConvertListUnsignedCharsToHex(lengthEncoding, 0, false);
+  output[ASNElement::JSLabels::lengthEncoding] = Crypto::ConvertListUnsignedCharsToHex(lengthEncoding, 0, false);
   output[ASNElement::JSLabels::isConstructed] = this->flagIsConstructed;
   output[ASNElement::JSLabels::numberOfChildren] = this->theElements.size;
   if (this->isComposite()) {
@@ -367,7 +399,7 @@ void ASNElement::ToJSON(JSData& output) const {
     }
     output[ASNElement::JSLabels::children] = children;
   }
-  if (this->ASNAtom.size > 0) {
+  if (this->ASNAtom.size > 0 || ! this->isComposite()) {
     output[ASNElement::JSLabels::body] = Crypto::ConvertListUnsignedCharsToHex(this->ASNAtom, 0, false);
   }
 }
@@ -594,10 +626,10 @@ bool AbstractSyntaxNotationOneSubsetDecoder::Decode(
   this->rawDatA = &inputRawData;
   this->CheckInitialization();
   this->decodedData->reset();
-  this->DecodeCurrent(*this->decodedData);
-  if (commentsOnError != nullptr) {
-    *commentsOnError << "DEBUG: So far: decoded data pointer, raw size: "
-    << this->dataPointer << ", " << this->rawDatA->size << ". ";
+  if (!this->DecodeCurrent(*this->decodedData)) {
+    if (commentsOnError != nullptr) {
+      *commentsOnError << "Failed to decode data with error: " << this->decodedData->error;
+    }
   }
   if (this->dataPointer < this->rawDatA->size && this->flagMustDecodeAll) {
     if (commentsOnError != nullptr) {
@@ -624,7 +656,7 @@ void AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::WriteLengt
     output[offset] = length;
     return;
   }
-  int numBytes = AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::GetReservedBytesForLength(static_cast<signed>(input));
+  int numBytes = AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::GetReservedBytesForLength(static_cast<signed>(input)) - 1;
   unsigned char lengthPlus128 = 128 + static_cast<unsigned char>(numBytes);
   output[offset] = lengthPlus128;
   offset ++;
@@ -657,19 +689,6 @@ std::string AbstractSyntaxNotationOneSubsetDecoder::ToStringAnnotateBinary() {
   return out.str();
 }
 
-std::string AbstractSyntaxNotationOneSubsetDecoder::ToStringDebug() const {
-  MacroRegisterFunctionWithName("AbstractSyntaxNotationOneSubsetDecoder::ToStringDebug");
-  this->CheckInitialization();
-  std::stringstream out;
-  out << "Decoded so far:<br>\n"
-  << this->decodedData->ToJSON().ToString(false, false, true, true);
-  out << "<br>Data: ";
-  out << StringRoutines::StringShortenInsertDots(
-    Crypto::ConvertListUnsignedCharsToHex(*this->rawDatA, 70, true), 4000
-  );
-  return out.str();
-}
-
 int AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::GetReservedBytesForLength(int length) {
   int result = 1;
   if (length < 128) {
@@ -685,17 +704,12 @@ int AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::GetReserved
 AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::WriterObjectFixedLength(
   unsigned char startByte,
   int expectedTotalElementByteLength,
-  List<unsigned char>& output,
-  bool isConstructed
-) {
+  List<unsigned char>& output) {
   if (expectedTotalElementByteLength < 0) {
     expectedTotalElementByteLength = 0;
   }
   this->outputPointer = &output;
   this->offset = output.size;
-  if (isConstructed) {
-    startByte += 32;
-  }
   this->outputPointer->AddOnTop(startByte);
   this->totalByteLength = expectedTotalElementByteLength;
   this->reservedBytesForLength = this->GetReservedBytesForLength(expectedTotalElementByteLength);
@@ -729,36 +743,15 @@ AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::~WriterObjectFi
   );
 }
 
-void AbstractSyntaxNotationOneSubsetDecoder::WriteASNAtom(
-  const ASNElement& input, List<unsigned char>& output
-) {
-  AbstractSyntaxNotationOneSubsetDecoder::WriteListUnsignedCharsWithTag(
-    input.ASNAtom, input.tag, output, input.flagIsConstructed
-  );
-}
-
-void AbstractSyntaxNotationOneSubsetDecoder::WriteListUnsignedCharsWithTag(
-  const List<unsigned char>& input,
-  unsigned char theTag,
-  List<unsigned char>& output,
-  bool constructed
-) {
-  AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength header(
-    theTag, output.size, output, constructed
-  );
-  output.AddListOnTop(input);
-}
-
 void AbstractSyntaxNotationOneSubsetDecoder::WriteUnsignedIntegerObject(
   const LargeIntUnsigned& input, List<unsigned char>& output
 ) {
-  List<unsigned char> serializedInput;
-  input.WriteBigEndianBytes(serializedInput);
-  AbstractSyntaxNotationOneSubsetDecoder::WriteListUnsignedCharsWithTag(
-    serializedInput,
+  List<unsigned char> serialized;
+  input.WriteBigEndianBytes(serialized);
+  ASNElement::WriteBytesASNAtom(
     AbstractSyntaxNotationOneSubsetDecoder::tags::integer0x02,
-    output,
-    false
+    serialized,
+    output
   );
 }
 
@@ -774,18 +767,17 @@ void TBSCertificateInfo::WriteBytesContentAndExpiry(List<unsigned char>& output)
 
 void TBSCertificateInfo::WriteBytesExpiry(List<unsigned char>& output) {
   AbstractSyntaxNotationOneSubsetDecoder::WriterSequence(100, output);
-  AbstractSyntaxNotationOneSubsetDecoder::WriteASNAtom(this->validityNotBefore, output);
-  AbstractSyntaxNotationOneSubsetDecoder::WriteASNAtom(this->validityNotAfter, output);
+  this->validityNotBefore.WriteBytes(output);
+  this->validityNotAfter.WriteBytes(output);
 }
 
 void AbstractSyntaxNotationOneSubsetDecoder::WriteObjectId(
   const List<unsigned char>& input, List<unsigned char>& output
 ) {
-  AbstractSyntaxNotationOneSubsetDecoder::WriteListUnsignedCharsWithTag(
-    input,
+  ASNElement::WriteBytesASNAtom(
     AbstractSyntaxNotationOneSubsetDecoder::tags::objectIdentifier0x06,
-    output,
-    false
+    input,
+    output
   );
 }
 
@@ -796,14 +788,14 @@ void X509Certificate::WriteBytesAlgorithmIdentifier(List<unsigned char>& output)
 }
 
 void ASNObject::WriteBytesASNObject(List<unsigned char>& output) {
-  if (this->objectId.size == 0) {
+  if (this->objectId.ASNAtom.size == 0) {
     // object id empty, field not initialized, do nothing
     return;
   }
   AbstractSyntaxNotationOneSubsetDecoder::WriterSet(100, output);
   AbstractSyntaxNotationOneSubsetDecoder::WriterSequence(100, output);
-  AbstractSyntaxNotationOneSubsetDecoder::WriteObjectId(this->objectId, output);
-  AbstractSyntaxNotationOneSubsetDecoder::WriteASNAtom(this->content, output);
+  this->objectId.WriteBytes(output);
+  this->content.WriteBytes(output);
 }
 
 void ASNObject::initializeAddSample(
@@ -816,7 +808,9 @@ void ASNObject::initializeAddSample(
   incoming.name = inputName;
   incoming.content.tag = inputContentTag;
   std::stringstream commentsOnFailure;
-  if (!Crypto::ConvertHexToListUnsignedChar(inputObjectIdHex, incoming.objectId, &commentsOnFailure)) {
+  if (!Crypto::ConvertHexToListUnsignedChar(
+    inputObjectIdHex, incoming.objectId.ASNAtom, &commentsOnFailure
+  )) {
     crash << "Failure in certificate field initialization is not allowed. " << crash;
   }
   container.SetKeyValue(incoming.name, incoming);
@@ -890,7 +884,7 @@ MapList<std::string, ASNObject, MathRoutines::HashString>& ASNObject::NamesToObj
     MapList<List<unsigned char>, ASNObject, MathRoutines::HashListUnsignedChars>& reverseMap = ASNObject::ObjectIdsToNames();
     for (int i = 0; i < container.theValues.size; i ++) {
       ASNObject& current = container.theValues[i];
-      reverseMap.SetKeyValue(current.objectId, current);
+      reverseMap.SetKeyValue(current.objectId.ASNAtom, current);
     }
   }
   return container;
@@ -902,7 +896,7 @@ int ASNObject::LoadField(const MapList<std::string, ASNObject, MathRoutines::Has
   }
   if (!inputFields.Contains(fieldName)) {
     this->name = fieldName;
-    this->objectId.SetSize(0);
+    this->objectId.ASNAtom.SetSize(0);
     return 0;
   }
   *this = inputFields.GetValueConstCrashIfNotPresent(fieldName);
@@ -911,7 +905,7 @@ int ASNObject::LoadField(const MapList<std::string, ASNObject, MathRoutines::Has
 
 std::string ASNObject::ToString() const {
   std::stringstream out;
-  out << "objectId: " << Crypto::ConvertListUnsignedCharsToHex(this->objectId, 0, false)
+  out << "objectId: " << Crypto::ConvertListUnsignedCharsToHex(this->objectId.ASNAtom, 0, false)
   << ", name: " << Crypto::ConvertStringToHex(this->name, 0, false)
   << ", content: " << this->content.ToJSON().ToString(false, false, false, true);
   return out.str();
@@ -987,21 +981,20 @@ bool ASNObject::LoadFromASN(
     }
     return false;
   }
-  const ASNElement& first = internal[0];
-  if (first.tag != AbstractSyntaxNotationOneSubsetDecoder::tags::objectIdentifier0x06) {
+  this->objectId = internal[0];
+  if (this->objectId.tag != AbstractSyntaxNotationOneSubsetDecoder::tags::objectIdentifier0x06) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Missing objectIdentifierBytes key. ";
     }
     return false;
   }
-  this->objectId = first.ASNAtom;
-  if (!ASNObject::ObjectIdsToNames().Contains(this->objectId)) {
+  if (!ASNObject::ObjectIdsToNames().Contains(this->objectId.ASNAtom)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Unrecognized object id. ";
     }
     return false;
   }
-  *this = ASNObject::ObjectIdsToNames().GetValueCreateNoInit(this->objectId);
+  *this = ASNObject::ObjectIdsToNames().GetValueCreateNoInit(this->objectId.ASNAtom);
   const ASNElement& second = internal[1];
   if (second.isComposite()) {
     if (commentsOnFailure != nullptr) {

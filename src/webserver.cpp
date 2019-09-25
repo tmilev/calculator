@@ -1881,7 +1881,6 @@ void WebWorker::WrapUpConnection() {
   }
   if (theGlobalVariables.flagStopNeeded) {
     this->resultWork["stopNeeded"] = "true";
-    logWorker << "DEBUG: stop needed is true";
   }
   this->pipeWorkerToServerControls.WriteOnceAfterEmptying(this->resultWork.ToString(false, false), false, false);
   if (theGlobalVariables.flagServerDetailedLog) {
@@ -3772,6 +3771,7 @@ void WebServer::StopKillAll[[noreturn]](bool attemptToRestart) {
   theCommand << "killall " << theGlobalVariables.PhysicalNameExecutableNoPath;
   if (attemptToRestart) {
     *currentLog << logger::yellow << "Proceeding to restart server. " << logger::endL;
+    *currentLog << "Current folder: " << FileOperations::GetCurrentFolder() << logger::endL;
     long timeLimitSeconds = theGlobalVariables.millisecondsMaxComputation / 1000;
     *currentLog << logger::red << "Restart with time limit " << timeLimitSeconds << logger::endL;
     theCommand << " && ";

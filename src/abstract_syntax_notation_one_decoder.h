@@ -33,7 +33,7 @@ public:
     static std::string offset;
     static std::string tag;
     static std::string lengthPromised;
-    static std::string lengthBytes;
+    static std::string lengthEncoding;
     static std::string startByteOriginal;
     static std::string value;
     static std::string error;
@@ -92,6 +92,12 @@ public:
     desiredType& output,
     std::stringstream* commentsOnFailure
   ) const;
+  void WriteBytes(List<unsigned char>& output) const;
+  static void WriteBytesASNAtom(
+    unsigned char startByte,
+    const List<unsigned char>& content,
+    List<unsigned char>& output
+  );
   const ASNElement& operator[](int index) const;
 };
 
@@ -116,8 +122,8 @@ public:
     return output;
   }
   std::string name;
+  ASNElement objectId;
   ASNElement content;
-  List<unsigned char> objectId;
   void MakeLookupId(const std::string& inputName, List<unsigned char>& inputContent);
   void Make(List<unsigned char>& inputObjectId, List<unsigned char>& inputContent);
   static void initializeAddSample(
@@ -141,7 +147,7 @@ public:
   );
   // Returns 1 if field was found, 0 otherwise.
   int LoadField(
-    const MapList<std::string, ASNObject, MathRoutines::HashString> &inputFields,
+    const MapList<std::string, ASNObject, MathRoutines::HashString>& inputFields,
     const std::string& fieldName
   );
   static std::string ToStringAllRecognizedObjectIds();
@@ -192,6 +198,9 @@ public:
   };
   // writes fixed lenght encodings.
   class WriterObjectFixedLength {
+  private:
+    // forbidden:
+    void operator=(WriterObjectFixedLength&);
   public:
     List<unsigned char>* outputPointer;
     int offset;
@@ -202,8 +211,7 @@ public:
     WriterObjectFixedLength(
       unsigned char startByte,
       int expectedTotalElementByteLength,
-      List<unsigned char>& output,
-      bool isConstructed
+      List<unsigned char>& output
     );
     ~WriterObjectFixedLength();
   };
@@ -213,10 +221,9 @@ public:
       int expectedTotalElementByteLength,
       List<unsigned char>& output
     ) : WriterObjectFixedLength(
-      AbstractSyntaxNotationOneSubsetDecoder::tags::sequence0x10,
+      AbstractSyntaxNotationOneSubsetDecoder::tags::sequence0x10 + 32,
       expectedTotalElementByteLength,
-      output,
-      true
+      output
       ) {}
   };
   class WriterBitString: public WriterObjectFixedLength {
@@ -227,8 +234,7 @@ public:
     ) : WriterObjectFixedLength(
       AbstractSyntaxNotationOneSubsetDecoder::tags::bitString0x03,
       expectedTotalElementByteLength,
-      output,
-      false
+      output
       ) {}
   };
   class WriterSet: public WriterObjectFixedLength {
@@ -237,10 +243,9 @@ public:
       int expectedTotalElementByteLength,
       List<unsigned char>& output
     ) : WriterObjectFixedLength(
-      AbstractSyntaxNotationOneSubsetDecoder::tags::set0x11,
+      AbstractSyntaxNotationOneSubsetDecoder::tags::set0x11 + 32,
       expectedTotalElementByteLength,
-      output,
-      true
+      output
       ) {}
   };
   int recursionDepthGuarD;
@@ -268,19 +273,11 @@ public:
   bool DecodeCurrentBuiltInType(std::stringstream* commentsOnError);
   bool DecodeLengthIncrementDataPointer(ASNElement& output);
 
-  static void WriteASNAtom(const ASNElement& input, List<unsigned char>& output);
-  static void WriteListUnsignedCharsWithTag(
-    const List<unsigned char>& input,
-    unsigned char theTag,
-    List<unsigned char>& output,
-    bool constructed
-  );
   static void WriteUnsignedIntegerObject(const LargeIntUnsigned& input, List<unsigned char>& output);
   static void WriteObjectId(const List<unsigned char>& input, List<unsigned char>& output);
   static void WriteNull(List<unsigned char>& output);
 
   std::string ToStringAnnotateBinary();
-  std::string ToStringDebug() const;
   bool CheckInitialization() const;
   void reset();
   AbstractSyntaxNotationOneSubsetDecoder();

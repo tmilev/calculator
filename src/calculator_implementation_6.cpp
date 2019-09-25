@@ -2219,12 +2219,17 @@ bool CalculatorFunctionsGeneral::innerTestASN1Decode(Calculator& theCommands, co
   dataList = data;
   std::stringstream commentsOnError;
   std::stringstream out;
-  JSData interpretation;
   ASNElement result;
   if (!theDecoder.Decode(dataList, 0, result, &commentsOnError)) {
     out << "Failed to decode.<br>" << commentsOnError.str();
+  } else {
+    List<unsigned char> recoded;
+    result.WriteBytes(recoded);
+    std::string originalHex = Crypto::ConvertStringToHex(data, 0, false);
+    std::string recodedHex = Crypto::ConvertListUnsignedCharsToHex(recoded, 0, false);
+    out << StringRoutines::Differ::DifferenceHTMLStatic(originalHex, recodedHex);
+    out << theDecoder.ToStringAnnotateBinary();
   }
-  out << theDecoder.ToStringDebug();
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -2242,7 +2247,7 @@ std::string StringRoutines::ConvertStringToCalculatorDisplay(
 
 std::string StringRoutines::ConvertByteToHex(unsigned char byte) {
   std::stringstream out;
-  out << std::hex << std::setfill('0') << std::setw(2) << static_cast<unsigned>(byte);
+  out << std::setfill('0') << std::setw(2) << std::hex << static_cast<unsigned>(byte);
   return out.str();
 }
 

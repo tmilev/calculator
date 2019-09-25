@@ -9,22 +9,18 @@ function AbstractSyntaxOne() {
   this.binaryHex = "";
   /**@type {Object} */
   this.interpretation = null;
-  /**@type {parsed} */
-  this.parsed = null;
   this.positionInBinary = 0;
 }
 
 AbstractSyntaxOne.prototype.initializeAnnotation = function(
   inputBinaryHex, 
   inputInterpretation, 
-  inputParsed, 
   /**@type {string} */ 
   inputIdAnnotation,
 ) {
   this.idAnnotation = inputIdAnnotation;
   this.binaryHex = inputBinaryHex;
   this.interpretation = inputInterpretation;
-  this.parsed = inputParsed;
   this.DOMElementAnnotation = document.getElementById(inputIdAnnotation);
   if (this.DOMElementAnnotation === null) {
     throw(`Element of id ${inputIdAnnotation} is missing. `);
@@ -59,24 +55,37 @@ function hideToolTip(
   tooltipElement.style.visibility = "hidden";  
 }
 
+/**
+ * @typedef {{
+ *  body: string, 
+ *  children: Array, 
+ *  error: string, 
+ *  lengthEncoding: string, 
+ *  lengthPromised: number, 
+ *  type: string,
+ *  tag: string,
+ *  startByteOriginal: string,
+ *  numberOfChildren: number,
+ *  offset: number}} ASNElement
+*/
+
 AbstractSyntaxOne.prototype.appendAnnotation = function(
   /**@type {HTMLElement} */ 
   container, 
+  /**@type  {ASNElement}*/
   currentInterpretation,
 ) {
-  var offset = currentInterpretation.offset;
   var currentElement = document.createElement("SPAN");
   currentElement.classList.add("abstractSyntaxOneElement");
 
   var elementLeadingByte = document.createElement("SPAN");
   elementLeadingByte.classList.add("abstractSyntaxOneLeadingByte"); 
   elementLeadingByte.innerHTML = currentInterpretation.startByteOriginal;
-  var tooltipLeadingByte =     `Type: ${currentInterpretation.type}`;
+  var tooltipLeadingByte = `Type: ${currentInterpretation.type}`;
   tooltipLeadingByte += `<br>Leading byte: ${currentInterpretation.startByteOriginal}`;
-  tooltipLeadingByte += `<br>Leading bits: ${currentInterpretation.leadingBits}`;
-  tooltipLeadingByte += `<br>Offset: ${offset}`;
-  if (currentInterpretation.numberOfElements) {
-    tooltipLeadingByte += `<br># of sub-elements: ${currentInterpretation.numberOfElements}`;
+  tooltipLeadingByte += `<br>Offset: ${currentInterpretation.offset}`;
+  if (currentInterpretation.numberOfChildren) {
+    tooltipLeadingByte += `<br># of sub-elements: ${currentInterpretation.numberOfChildren}`;
   }
   attachTooltip(
     elementLeadingByte, 
@@ -86,7 +95,7 @@ AbstractSyntaxOne.prototype.appendAnnotation = function(
   var elementLength = document.createElement("SPAN");
   elementLength.classList.add("abstractSyntaxOneLength");
   elementLength.innerHTML = currentInterpretation.lengthEncoding;
-  var lengthTooltipContent = `Length: ${currentInterpretation.length}`;
+  var lengthTooltipContent = `Length: ${currentInterpretation.lengthPromised}`;
   attachTooltip(elementLength, lengthTooltipContent);
 
   var elementHeader = document.createElement("SPAN");
@@ -94,20 +103,12 @@ AbstractSyntaxOne.prototype.appendAnnotation = function(
   elementHeader.appendChild(elementLeadingByte);
   elementHeader.appendChild(elementLength);
 
-  currentElement.appendChild(elementHeader);
-  /**@type {Array} */
-  var subList = null;
-  if (Array.isArray(currentInterpretation.value)) {
-    subList = currentInterpretation.value;
-  } else if (Array.isArray(currentInterpretation.set)) {
-    subList = currentInterpretation.set;
-  }
-  
+  currentElement.appendChild(elementHeader);  
   var foundContent = false;
-  if (subList !== null) {
+  if (currentInterpretation.children !== undefined) {
     foundContent = true;
-    for (var i = 0; i < subList.length; i ++) {
-      var interpretation = subList[i];
+    for (var i = 0; i < currentInterpretation.children.length; i ++) {
+      var interpretation = currentInterpretation.children[i];
       this.appendAnnotation(currentElement, interpretation);
     }  
   } else if (currentInterpretation.body !== undefined && currentInterpretation.body !== null) {
@@ -130,9 +131,18 @@ AbstractSyntaxOne.prototype.appendAnnotation = function(
     currentElement.appendChild(elementHex);
     foundContent = true;
   } 
+  if (
+    currentInterpretation.error !== null && 
+    currentInterpretation.error !== undefined
+  ) {
+    var errorElement = document.createElement("SPAN");
+    errorElement.style.color = "red";
+    errorElement.innerHTML = currentInterpretation.error;
+    currentElement.appendChild(noContent);
+  }
   if (!foundContent) {
-    var noContent = document.createElement("SPAN");
-    noContent.innerHTML = `[no content] ${JSON.stringify(currentInterpretation)}`;
+    var errorElement = document.createElement("SPAN");
+    errorElement.innerHTML = `[no content] ${JSON.stringify(currentInterpretation)}`;
     currentElement.appendChild(noContent);
   }
   container.appendChild(currentElement);
@@ -144,13 +154,12 @@ AbstractSyntaxOne.prototype.annotate = function() {
   this.positionInBinary = 0;
   this.appendAnnotation(this.DOMElementAnnotation, this.interpretation);
   var debugElement = document.createElement("SPAN");
-  // debugElement.innerHTML = JSON.stringify(this.parsed);
   this.DOMElementAnnotation.appendChild(debugElement);
 }
 
-function abstractSyntaxNotationAnnotate(binaryHex, interpretation, parsed, id) {
+function abstractSyntaxNotationAnnotate(binaryHex, interpretation, id) {
   var annotation = new AbstractSyntaxOne();
-  annotation.initializeAnnotation(binaryHex, interpretation, parsed, id); 
+  annotation.initializeAnnotation(binaryHex, interpretation, id); 
   annotation.annotate();
 }
 

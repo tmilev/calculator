@@ -2828,12 +2828,14 @@ void Calculator::initPredefinedInnerFunctions() {
     "DegreesToRadians"
   );
   this->AddOperationInnerHandler(
-    "ModP", this->innerZmodP,
+    "ModP",
+    this->innerZmodP,
     "",
     "Number modulo P. First argument = number, second argument = modulo.",
     "ModP{}(7, 3)",
     true,
-    false);
+    false
+  );
   this->AddOperationInnerHandler(
     "AdCommonEigenspace",
     Calculator::innerAdCommonEigenSpaces,
@@ -2892,7 +2894,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "LCM(91, 1001)",
     true,
     false,
-    "CalculatorFunctionsGeneral::innerLCM", "LCM"
+    "CalculatorFunctionsGeneral::innerLCM",
+    "LCM"
   );
   this->AddOperationInnerHandler(
     "GCDPoly",
@@ -2916,7 +2919,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "GCDPoly"
   );
   this->AddOperationInnerHandler(
-    "LCMPoly", Calculator::innerLCMPoly,
+    "LCMPoly",
+    Calculator::innerLCMPoly,
     "",
     "Least common multiple of two polynomials. "
     "The output is scaled so that all coefficients are relatively prime integers, "
@@ -2935,7 +2939,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "Calculator::innerLCMPoly", "LCMPoly"
   );
   this->AddOperationInnerHandler(
-    "Interpolate", Calculator::innerInterpolatePoly,
+    "Interpolate",
+    Calculator::innerInterpolatePoly,
     "",
     "Constructs the one-variable polynomial of minimal degree that passes through "
     "the points. Points are given in the form "
@@ -4908,7 +4913,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "IsNilpotent"
   );
   this->AddOperationInnerHandler(
-    "InvertMatrixVerbose", Calculator::innerInvertMatrixVerbose,
+    "InvertMatrixVerbose",
+    Calculator::innerInvertMatrixVerbose,
     "",
     "<b>Calculus teaching function.</b> "
     "Inverts a matrix of rationals if invertible, "
@@ -4961,7 +4967,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "Calculator::innerReverseBytes", "ReverseBytes"
   );
   this->AddOperationInnerHandler(
-    "Reverse", Calculator::innerReverseOrdeR,
+    "Reverse",
+    Calculator::innerReverseOrdeR,
     "",
     "Reverses order of elements. This operation will reverse products, lists, etc. "
     "More precisely, the command leaves the fist child in "
@@ -4973,7 +4980,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "Calculator::innerReverseOrdeR", "Reverse"
   );
   this->AddOperationInnerHandler(
-    "ReverseRecursively", this->innerReverseOrderRecursively,
+    "ReverseRecursively",
+    this->innerReverseOrderRecursively,
     "",
     "Same as Reverse but will apply recursively to the children expressions as well.",
     "ReverseRecursively{}(s_1 s_2 s_3s_4s_2s_3s_1s_2s_3s_4s_1s_2s_3s_2s_1)",
@@ -5115,7 +5123,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit"
   );
   this->AddOperationInnerHandler(
-    "GroebnerLexUpperLimit", Calculator::innerGroebnerLex,
+    "GroebnerLexUpperLimit",
+    Calculator::innerGroebnerLex,
     "",
     "Transforms to a reduced Groebner basis using the "
     "lexicographic order. The lexicographic order is "
@@ -5202,7 +5211,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "PolynomialRelationsUpperLimit"
   );
   this->AddOperationInnerHandler(
-    "GroebnerRevLexUpperLimit", Calculator::innerGroebnerRevLex,
+    "GroebnerRevLexUpperLimit",
+    Calculator::innerGroebnerRevLex,
     "",
     "Same as GroebnerLexUpperLimit but uses reverse order on the variables (z<x).",
     "GroebnerRevLexUpperLimit{}(10000, s^2+c^2+ 1, a-s^4, b-c^4 );"
@@ -5408,7 +5418,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "FactorOutNumberContent"
   );
   this->AddOperationInnerHandler(
-    "FactorOneVarPolyOverRationals", Calculator::innerFactorPoly,
+    "FactorOneVarPolyOverRationals",
+    Calculator::innerFactorPoly,
     "",
     "Factors a one variable polynomial over the rationals "
     "using Kroenecker's method. After clearing denominators, "
@@ -5438,7 +5449,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "FactorInteger"
   );
   this->AddOperationInnerHandler(
-    "Freudenthal", Calculator::innerFreudenthalEval,
+    "Freudenthal",
+    Calculator::innerFreudenthalEval,
     "",
     "Computes the dominant weights with multiplicities of a "
     "finite dimensional module of a highest weight "
@@ -5452,7 +5464,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "Freudenthal"
   );
   this->AddOperationInnerHandler(
-    "Killing", Calculator::innerKillingForm,
+    "Killing",
+    Calculator::innerKillingForm,
     "",
     "Computes the Killing form product of two elements of semisimple Lie algebra. ",
     "h_{{i}}= GetCartanGenerator{}(F_1, i);"
@@ -5577,7 +5590,8 @@ void Calculator::initPredefinedStandardOperations() {
   //A combination of these two was indeed the original design approach,
   //and gradually evolved to what is used now.
   this->AddOperationOuterHandler(
-    ";", Calculator::outerMeltBrackets,
+    ";",
+    Calculator::outerMeltBrackets,
     "",
     "Melts down a layer of parenthesis around a list of "
     "commands prepended with the Melt operation.\n "
@@ -5591,7 +5605,8 @@ void Calculator::initPredefinedStandardOperations() {
     true
   );
   this->AddOperationOuterHandler(
-    "=", Calculator::outerCheckRule,
+    "=",
+    Calculator::outerCheckRule,
     "",
     "Checks whether the rule is of the form A =A, and substitutes "
     "the expression with an error if that is the case. "
@@ -5605,7 +5620,10 @@ void Calculator::initPredefinedStandardOperations() {
   );
 
   this->AddOperationBinaryInnerHandlerWithTypes(
-    "+", CalculatorFunctionsBinaryOps::innerAddStringToString, this->opString(), this->opString(),
+    "+",
+    CalculatorFunctionsBinaryOps::innerAddStringToString,
+    this->opString(),
+    this->opString(),
     "Concatenates strings. ",
     "\"hello \"+ \"world\"",
     true,
@@ -5614,7 +5632,10 @@ void Calculator::initPredefinedStandardOperations() {
     "AddStrings"
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
-    "+", CalculatorFunctionsBinaryOps::innerAddRatToRat, this->opRational(), this->opRational(),
+    "+",
+    CalculatorFunctionsBinaryOps::innerAddRatToRat,
+    this->opRational(),
+    this->opRational(),
     "Adds two rational numbers. ",
     "2+3",
     true,
@@ -5623,28 +5644,43 @@ void Calculator::initPredefinedStandardOperations() {
     "AddRationals"
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
-    "+", CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat, this->opRational(), this->opEltZmodP(),
+    "+",
+    CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat,
+    this->opRational(),
+    this->opEltZmodP(),
     "Adds elements of Z_p. ",
     " (2 mod  7) +3",
     true,
-    false, "CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat"
+    false,
+    "CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat"
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
-    "+", CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat, this->opEltZmodP(), this->opRational(),
+    "+",
+    CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat,
+    this->opEltZmodP(),
+    this->opRational(),
     "Adds elements of Z_p. ",
     " (2 mod  7) +3",
     true,
-    false, "CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat"
+    false,
+    "CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat"
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
-    "+", CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat, this->opEltZmodP(), this->opEltZmodP(),
+    "+",
+    CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat,
+    this->opEltZmodP(),
+    this->opEltZmodP(),
     "Adds elements of Z_p. ",
     " (2 mod  7) +3",
     true,
-    false, "CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat"
+    false,
+    "CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat"
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
-    "+", CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber, this->opAlgNumber(), this->opAlgNumber(),
+    "+",
+    CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber,
+    this->opAlgNumber(),
+    this->opAlgNumber(),
     "Adds two algebraic numbers. ",
     "\\sqrt {2}+ \\sqrt {3} + \\sqrt{6}",
     true,
@@ -5652,14 +5688,21 @@ void Calculator::initPredefinedStandardOperations() {
     "CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber"
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
-    "+", CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber, this->opAlgNumber(), this->opRational(),
+    "+",
+    CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber,
+    this->opAlgNumber(),
+    this->opRational(),
     "Adds algebraic number to rational. ",
     "1/(\\sqrt {2}+ 1+\\sqrt{3}+\\sqrt{6})",
     true,
-    false, "CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber"
+    false,
+    "CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber"
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
-    "+", CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber, this->opRational(), this->opAlgNumber(),
+    "+",
+    CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber,
+    this->opRational(),
+    this->opAlgNumber(),
     "Adds rational to algebraic number. ",
     "1/(1+\\sqrt {2}+\\sqrt{}6)",
     true,
@@ -5667,8 +5710,10 @@ void Calculator::initPredefinedStandardOperations() {
     "CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber"
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
-    "+", CalculatorFunctionsBinaryOps::innerAddDoubleOrRatToDoubleOrRat,
-    this->opDouble(), this->opRational(),
+    "+",
+    CalculatorFunctionsBinaryOps::innerAddDoubleOrRatToDoubleOrRat,
+    this->opDouble(),
+    this->opRational(),
     "Adds double or rational to a double or rational approximately "
     "using the built-in cpp addition, returning double. ",
     "DoubleValue{}(3.14159265358979323846) + 1",
@@ -5678,13 +5723,16 @@ void Calculator::initPredefinedStandardOperations() {
     "AddDoubleToRational"
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
-    "+", CalculatorFunctionsBinaryOps::innerAddPlotToPlot,
-    this->opCalculusPlot(), this->opCalculusPlot(),
+    "+",
+    CalculatorFunctionsBinaryOps::innerAddPlotToPlot,
+    this->opCalculusPlot(),
+    this->opCalculusPlot(),
     "Superimposes two plots. ",
     "Plot2D{}(sin{}(x), -5, 5) + Plot2D{}(1/sin{}(x ), 0.1, 3.041592654)",
     true,
     false,
-    "CalculatorFunctionsBinaryOps::innerAddPlotToPlot", "AddPlots"
+    "CalculatorFunctionsBinaryOps::innerAddPlotToPlot",
+    "AddPlots"
   );//must come before outer plus.
   this->AddOperationInnerHandler(
     "ScaleToLeadingUnit",
@@ -5694,7 +5742,8 @@ void Calculator::initPredefinedStandardOperations() {
     "ScaleToLeadingUnit(1/2 x + 1/3 y+ 1/7 a b)",
     true,
     false,
-    "Calculator::innerScaleToLeadingUnit", "ScaleToLeadingUnit"
+    "Calculator::innerScaleToLeadingUnit",
+    "ScaleToLeadingUnit"
   );
   this->AddOperationOuterHandler(
     "+",
@@ -6987,8 +7036,10 @@ void Calculator::initPredefinedStandardOperations() {
     "LeibnizDifferentialOperatorNotation"
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
-    "/", CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat,
-    this->opAlgNumber(), this->opAlgNumber(),
+    "/",
+    CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat,
+    this->opAlgNumber(),
+    this->opAlgNumber(),
     "Divides algebraic numbers. ",
     "1/(1+\\sqrt{}2+\\sqrt{}3+\\sqrt{}5+\\sqrt{}7)",
     true,
@@ -7620,7 +7671,8 @@ void Calculator::initPredefinedStandardOperations() {
     "LieBracketSemisimpleLieAlgebras"
   );
   this->AddOperationInnerHandler(
-    "[]", CalculatorFunctionsBinaryOps::innerLieBracketSwapTermsIfNeeded,
+    "[]",
+    CalculatorFunctionsBinaryOps::innerLieBracketSwapTermsIfNeeded,
     "",
     "Swaps terms in Lie brackets if needed. ",
     "[b,a] ",
@@ -7630,7 +7682,8 @@ void Calculator::initPredefinedStandardOperations() {
     "LieBracketSwapTermsIfNeeded"
   );
   this->AddOperationInnerHandler(
-    "[]", CalculatorFunctionsBinaryOps::innerLieBracketJacobiIdentityIfNeeded,
+    "[]",
+    CalculatorFunctionsBinaryOps::innerLieBracketJacobiIdentityIfNeeded,
     "",
     "Extracts constants from Lie brackets. ",
     "[2a,3b] ",
@@ -7641,16 +7694,20 @@ void Calculator::initPredefinedStandardOperations() {
   );
 
   this->AddOperationBinaryInnerHandlerWithTypes(
-    "\\otimes", CalculatorFunctionsWeylGroup::innerTensorWeylReps,
-    this->opWeylGroupRep(), this->opWeylGroupRep(),
+    "\\otimes",
+    CalculatorFunctionsWeylGroup::innerTensorWeylReps,
+    this->opWeylGroupRep(),
+    this->opWeylGroupRep(),
     "Tensor product of two Weyl group reps. Does not decompose the tensor product. "
     "If you want decomposition, use V*V instead. ",
     "V = WeylGroupNaturalRep{}(B_3); V \\otimes V; V * V",
     true
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
-    "\\otimes", CalculatorFunctionsBinaryOps::innerTensorMatByMatTensor,
-    this->opMatTensorRat(), this->opMatTensorRat(),
+    "\\otimes",
+    CalculatorFunctionsBinaryOps::innerTensorMatByMatTensor,
+    this->opMatTensorRat(),
+    this->opMatTensorRat(),
     "Same as tensor product of matrices but uses class MatrixTensor instead of class Matrix.",
     "P = ((0 , 2 ),(1 , 0)); Q= ((0 , 3 ),(1 , 0));\n"
     "X =MakeMatrix{}P; Y =MakeMatrix{}Q;\n"
@@ -7659,7 +7716,8 @@ void Calculator::initPredefinedStandardOperations() {
     true
   );
   this->AddOperationOuterHandler(
-    "\\otimes", Calculator::outerTensor,
+    "\\otimes",
+    Calculator::outerTensor,
     "",
     "Please do note use (or use at your own risk): this is work-in-progress. "
     "Will be documented when implemented and tested. Tensor product of "
@@ -7672,7 +7730,8 @@ void Calculator::initPredefinedStandardOperations() {
     true
   );
   this->AddOperationOuterHandler(
-    "=:", Calculator::StandardIsDenotedBy,
+    "=:",
+    Calculator::StandardIsDenotedBy,
     "",
     "The operation =: is the \"is denoted by\" operation. "
     "The expression a =:b always reduces to a =b. "
@@ -7936,7 +7995,8 @@ void Calculator::initPredefinedOperationsComposite() {
     "SumAsOperator"
   );
   this->AddOperationComposite(
-    "Matrix", CalculatorConversions::outerMatrixExpressionsToMatrixOfType,
+    "Matrix",
+    CalculatorConversions::outerMatrixExpressionsToMatrixOfType,
     "",
     "If A is a non-typed matrix of expressions that can "
     "be converted to a typed matrix, carries out the type specialization. ",
@@ -8060,7 +8120,8 @@ void Calculator::initPredefinedOperationsComposite() {
     "\\tan^2 x; (f^-2) {}x ; (f^- 1){}x ",
     true,
     true,
-    false, "CalculatorFunctionsGeneral::innerCompositeApowerBevaluatedAtC",
+    false,
+    "CalculatorFunctionsGeneral::innerCompositeApowerBevaluatedAtC",
     "ApowerBevaluatedAtC"
   );
   this->AddOperationComposite(
@@ -8071,7 +8132,8 @@ void Calculator::initPredefinedOperationsComposite() {
     "d/dx (\\log x)",
     true,
     true,
-    false, "CalculatorFunctionsGeneral::innerCompositeDifferentiateLog",
+    false,
+    "CalculatorFunctionsGeneral::innerCompositeDifferentiateLog",
     "DifferentiateLog"
   );
 }

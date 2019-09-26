@@ -1475,8 +1475,8 @@ input:checked + .slider:before {
 span.abstractSyntaxOneAnnotation {
   position: relative;
   display: inline-block;
-  width: 900px;
-  max-width: 900px;
+  width: 500px;
+  max-width: 500px;
   word-break: break-all;
   font-family: 'Courier New', Courier, monospace;
   transition: 1s all;

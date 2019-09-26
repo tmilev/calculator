@@ -170,6 +170,7 @@ AbstractSyntaxOne.prototype.mouseOverAbstractSyntaxOneElement = function(
   annotation.leadingByte.style.backgroundColor = "gray";
   annotation.length.style.backgroundColor = "lightskyblue";
   annotation.body.style.backgroundColor = "lightgreen";
+  annotationTreeElement.style.backgroundColor = "lightgray";
 }
 
 AbstractSyntaxOne.prototype.mouseOutAbstractSyntaxOneElement = function(
@@ -180,6 +181,7 @@ AbstractSyntaxOne.prototype.mouseOutAbstractSyntaxOneElement = function(
   annotation.leadingByte.style.backgroundColor = "";
   annotation.length.style.backgroundColor = "";
   annotation.body.style.backgroundColor = "";
+  annotationTreeElement.style.backgroundColor = "";
 }
 
 AbstractSyntaxOne.prototype.appendAnnotationTree = function(  
@@ -208,22 +210,26 @@ AbstractSyntaxOne.prototype.appendAnnotationTree = function(
     }
   }
   var annotationElementPeer = currentInterpretation.dom;
-  currentHead.addEventListener(
-    'mouseover', 
-    this.mouseOverAbstractSyntaxOneElement.bind(
-      this, 
-      annotationElementPeer, 
-      currentElement,
-    ) 
-  );
-  currentHead.addEventListener(
-    'mouseout', 
-    this.mouseOutAbstractSyntaxOneElement.bind(
-      this, 
-      annotationElementPeer, 
-      currentElement,
-    ) 
-  );
+  var elementsToAttachTo = [currentHead, annotationElementPeer.header];
+  for (var counter = 0; counter < elementsToAttachTo.length; counter ++) {
+    var theElement = elementsToAttachTo[counter];
+    theElement.addEventListener(
+      'mouseover', 
+      this.mouseOverAbstractSyntaxOneElement.bind(
+        this, 
+        annotationElementPeer, 
+        currentElement,
+      ) 
+    );
+    theElement.addEventListener(
+      'mouseout', 
+      this.mouseOutAbstractSyntaxOneElement.bind(
+        this, 
+        annotationElementPeer, 
+        currentElement,
+      ) 
+    );
+  }
   container.appendChild(currentElement);
 }
 

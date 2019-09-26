@@ -826,7 +826,7 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctionsGeneral::innerX509CertificateDecode,
     "",
     "Decodes raw X509 certificate to a string. ",
-    "X509CertificateDecode X509CertificateServer 0; ",
+    "X509CertificateDecode ConvertBase64ToString X509CertificateServerBase64 0; ",
     true,
     false,
     "CalculatorFunctionsGeneral::innerX509CertificateDecode",

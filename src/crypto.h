@@ -49,6 +49,10 @@ public:
 
 class TBSCertificateInfo {
 public:
+  unsigned int version;
+  LargeIntUnsigned serialNumber;
+  CertificateRSA theRSA;
+  ASNElement signatureAlgorithmIdentifier;
   ASNObject countryName;
   ASNObject stateOrProvinceName;
   ASNObject localityName;
@@ -70,30 +74,24 @@ public:
     const MapList<std::string, ASNObject, MathRoutines::HashString>& fields,
     std::stringstream* commentsOnFailure
   );
+  bool LoadFromASNEncoded(const ASNElement& input, std::stringstream* commentsOnFailure);
   void WriteBytesContentAndExpiry(List<unsigned char>& output);
   void WriteBytesContent(List<unsigned char>& output);
   void WriteBytesExpiry(List<unsigned char>& output);
   std::string ToString();
+  void ComputeASN(ASNElement& output);
+  void ComputeASNVersionWrapper(ASNElement& output);
 };
 
 // For definition, google RFC 5280
 class X509Certificate {
 public:
-  int version;
-  LargeIntUnsigned serialNumber;
-  List<unsigned char> signatureAlgorithmId;
+  ASNElement signatureAlgorithmId;
   TBSCertificateInfo information;
-  std::string issuerName;
-  std::string subjectName;
-  std::string publicKeyAlgorithm;
-  std::string subjectPublicKey;
-  std::string issuerUniqueId;
-  std::string subjectUniqueId;
-  std::string certificateSignatureAlgorithm;
-  std::string certificateSignature;
+  ASNElement signatureValue;
   List<unsigned char> sourceBinary;
   ASNElement sourceASN;
-  CertificateRSA theRSA;
+  ASNElement recodedASN;
   class Test {
   public:
     static bool All();
@@ -113,9 +111,9 @@ public:
   );
   std::string ToString();
   std::string ToStringTestEncode();
+  void ComputeASN(ASNElement& output);
+  void ComputeASNSignatureAlgorithm(ASNElement& output);
   void WriteBytesASN1(List<unsigned char>& output);
-  void WriteBytesAlgorithmIdentifier(List<unsigned char>& output);
-  void WriteVersion(List<unsigned char>& output);
 };
 
 class Crypto {

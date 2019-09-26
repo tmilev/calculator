@@ -76,6 +76,9 @@ public:
   bool isNonPureComposite() const;
   std::string GetType() const;
   bool isTime() const;
+  void MakeSequence(int numberOfEmptyElements);
+  void MakeNull();
+  void MakeInteger(const LargeIntUnsigned& input);
   template <typename thisPointerType>
   static bool HasSubElementTemplate(
     thisPointerType* thisPointer,

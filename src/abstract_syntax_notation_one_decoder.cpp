@@ -266,13 +266,31 @@ ASNElement& ASNElement::operator[](int index) {
   return this->theElements[index];
 }
 
+bool ASNElement::HasSubElementGetCopy(
+  const List<int>& desiredIndices,
+  const List<unsigned char>& desiredTypes,
+  ASNElement& output,
+  std::stringstream* commentsOnFailure
+) const {
+  const ASNElement* element = nullptr;
+  if (!this->HasSubElementConst(
+    desiredIndices, desiredTypes, &element, commentsOnFailure
+  )) {
+    return false;
+  }
+  output = *element;
+  return true;
+}
+
 bool ASNElement::HasSubElementConst(
   const List<int>& desiredIndices,
   const List<unsigned char>& desiredTypes,
   const ASNElement** whichElement,
   std::stringstream* commentsOnFailure
 ) const {
-  return ASNElement::HasSubElementTemplate(this, desiredIndices, desiredTypes, whichElement, commentsOnFailure);
+  return ASNElement::HasSubElementTemplate(
+    this, desiredIndices, desiredTypes, whichElement, commentsOnFailure
+  );
 }
 
 template <typename thisPointerType>
@@ -315,6 +333,20 @@ bool ASNElement::HasSubElementTemplate(
 }
 
 template < >
+bool ASNElement::HasSubElementOfType<ASNObject>(
+  const List<int>& desiredIndices,
+  const List<unsigned char>& desiredTypes,
+  ASNObject& output,
+  std::stringstream* commentsOnFailure
+) const {
+  const ASNElement* element = nullptr;
+  if (!ASNElement::HasSubElementConst(desiredIndices, desiredTypes, &element, commentsOnFailure)) {
+    return false;
+  }
+  return output.LoadFromASN(*element, commentsOnFailure);
+}
+
+template < >
 bool ASNElement::HasSubElementOfType<LargeIntUnsigned>(
   const List<int>& desiredIndices,
   const List<unsigned char>& desiredTypes,
@@ -340,6 +372,47 @@ bool ASNElement::HasSubElementOfType<LargeInt>(
     return false;
   }
   return element->isInteger(&output, commentsOnFailure);
+}
+
+template < >
+bool ASNElement::HasSubElementOfType<int>(
+  const List<int>& desiredIndices,
+  const List<unsigned char>& desiredTypes,
+  int& output,
+  std::stringstream* commentsOnFailure
+) const {
+  LargeInt outputLarge;
+  if (!this->HasSubElementOfType(desiredIndices, desiredTypes, outputLarge, commentsOnFailure)) {
+    return false;
+  }
+  if (!outputLarge.IsIntegerFittingInInt(&output)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "ASN is not a small integer because it is too large. ";
+    }
+    return false;
+  }
+  return true;
+}
+
+template < >
+bool ASNElement::HasSubElementOfType<unsigned int>(
+  const List<int>& desiredIndices,
+  const List<unsigned char>& desiredTypes,
+  unsigned int& output,
+  std::stringstream* commentsOnFailure
+) const {
+  int outputSigned = 0;
+  if (!this->HasSubElementOfType(desiredIndices, desiredTypes, outputSigned, commentsOnFailure)) {
+    return false;
+  }
+  if (outputSigned < 0) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "ASN is a negative integer, where a non-negative one is requested. ";
+    }
+    return false;
+  }
+  output = static_cast<unsigned int>(outputSigned);
+  return true;
 }
 
 template < >
@@ -442,7 +515,7 @@ bool ASNElement::isIntegerUnsigned(
   MacroRegisterFunctionWithName("ASNElement::isIntegerUnsigned");
   if (this->tag != AbstractSyntaxNotationOneSubsetDecoder::tags::integer0x02) {
     if (commentsOnFalse != nullptr) {
-      *commentsOnFalse << "Element is not an integer. ";
+      *commentsOnFalse << "Element is not an unsigned integer but is of type: " << this->GetType() << ". ";
     }
     return false;
   }
@@ -469,7 +542,7 @@ bool ASNElement::isInteger(LargeInt *whichInteger, std::stringstream *commentsOn
   MacroRegisterFunctionWithName("ASNElement::isInteger");
   if (this->tag != AbstractSyntaxNotationOneSubsetDecoder::tags::integer0x02) {
     if (commentsOnFalse != nullptr) {
-      *commentsOnFalse << "Element is not an integer. ";
+      *commentsOnFalse << "Element is not an integer but is of type: " << this->GetType() << ". ";
     }
     return false;
   }
@@ -786,11 +859,6 @@ void AbstractSyntaxNotationOneSubsetDecoder::WriteUnsignedIntegerObject(
   );
 }
 
-void X509Certificate::WriteVersion(List<unsigned char>& output) {
-  output.AddOnTop(0xa0);
-  output.AddOnTop(0x03);
-}
-
 void TBSCertificateInfo::WriteBytesContentAndExpiry(List<unsigned char>& output) {
   this->WriteBytesContent(output);
   this->WriteBytesExpiry(output);
@@ -811,13 +879,6 @@ void AbstractSyntaxNotationOneSubsetDecoder::WriteObjectId(
     input,
     output
   );
-}
-
-void X509Certificate::WriteBytesAlgorithmIdentifier(List<unsigned char>& output) {
-  // Anonymity breaks destructor generation in gcc!
-  AbstractSyntaxNotationOneSubsetDecoder::WriterSequence notAnonymous(100, output);
-  AbstractSyntaxNotationOneSubsetDecoder::WriteObjectId(this->signatureAlgorithmId, output);
-  AbstractSyntaxNotationOneSubsetDecoder::WriteNull(output);
 }
 
 void ASNObject::WriteBytesASNObject(List<unsigned char>& output) {
@@ -1045,16 +1106,59 @@ void ASNObject::initializeNonThreadSafe() {
   ASNObject::NamesToObjectIdsNonThreadSafe();
 }
 
+void ASNElement::MakeInteger(const LargeIntUnsigned& input) {
+  this->reset();
+  this->tag = AbstractSyntaxNotationOneSubsetDecoder::tags::integer0x02;
+  this->startByte = AbstractSyntaxNotationOneSubsetDecoder::tags::integer0x02;
+  input.WriteBigEndianBytes(this->ASNAtom);
+}
+
+void ASNElement::MakeNull() {
+  this->reset();
+  this->tag = AbstractSyntaxNotationOneSubsetDecoder::tags::null0x05;
+  this->startByte = AbstractSyntaxNotationOneSubsetDecoder::tags::null0x05;
+}
+
+void ASNElement::MakeSequence(int numberOfEmptyElements) {
+  this->reset();
+  this->tag = AbstractSyntaxNotationOneSubsetDecoder::tags::sequence0x10;
+  this->startByte = this->tag + 32;
+  this->theElements.SetSize(numberOfEmptyElements);
+}
+
+void TBSCertificateInfo::ComputeASNVersionWrapper(ASNElement& output) {
+  output.reset();
+  output.tag = 0;
+  output.startByte = 160;
+  ASNElement versionInteger;
+  versionInteger.MakeInteger(this->version);
+  output.theElements.AddOnTop(versionInteger);
+}
+
+void TBSCertificateInfo::ComputeASN(ASNElement& output) {
+  output.MakeSequence(8);
+  this->ComputeASNVersionWrapper(output[0]);
+  output[1].MakeInteger(this->serialNumber);
+}
+
+void X509Certificate::ComputeASN(ASNElement& output) {
+  output.reset();
+  output.MakeSequence(3);
+  this->information.ComputeASN(output[0]);
+  this->ComputeASNSignatureAlgorithm(output[1]);
+  output[2] = this->signatureValue;
+}
+
+void X509Certificate::ComputeASNSignatureAlgorithm(ASNElement& output) {
+  output.MakeSequence(2);
+  output[0] = this->signatureAlgorithmId;
+  output[1].MakeNull();
+}
+
 void X509Certificate::WriteBytesASN1(List<unsigned char>& output) {
   MacroRegisterFunctionWithName("X509Certificate::WriteBytesASN1");
-  // Anonymity breaks destructor generation in gcc!
-  AbstractSyntaxNotationOneSubsetDecoder::WriterSequence writeTotalLength(2000, output);
-  AbstractSyntaxNotationOneSubsetDecoder::WriterSequence writeMetadata(2000, output);
-  this->WriteVersion(output);
-  AbstractSyntaxNotationOneSubsetDecoder::WriteUnsignedIntegerObject(2, output);
-  AbstractSyntaxNotationOneSubsetDecoder::WriteUnsignedIntegerObject(this->serialNumber, output);
-  this->WriteBytesAlgorithmIdentifier(output);
-  this->information.WriteBytesContentAndExpiry(output);
+  this->ComputeASN(this->recodedASN);
+  this->recodedASN.WriteBytes(output);
 }
 
 std::string X509Certificate::ToStringTestEncode() {
@@ -1071,7 +1175,7 @@ std::string X509Certificate::ToStringTestEncode() {
 std::string X509Certificate::ToString() {
   std::stringstream out;
   out << "Certificate RSA:<br>"
-  << this->theRSA.ToString();
+  << this->information.theRSA.ToString();
   out << "<br>Source binary: " << this->sourceBinary.size << " bytes.<br>";
   out << this->information.ToString();
   AbstractSyntaxNotationOneSubsetDecoder theDecoder;
@@ -1361,6 +1465,83 @@ bool TBSCertificateInfo::LoadFields(
   return true;
 }
 
+bool TBSCertificateInfo::LoadFromASNEncoded(const ASNElement& input, std::stringstream* commentsOnFailure) {
+  MacroRegisterFunctionWithName("TBSCertificateInfo::LoadFromASNEncoded");
+  if (!input.HasSubElementOfType(
+    {0, 0}, {}, this->version, commentsOnFailure
+  )) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to load version. ";
+    }
+    return false;
+  }
+
+  if (!input.HasSubElementOfType(
+    {1}, {}, this->serialNumber, commentsOnFailure
+  )) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to read serial number. ";
+    }
+    return false;
+  }
+  if (!input.HasSubElementGetCopy(
+    {2, 0}, {
+      AbstractSyntaxNotationOneSubsetDecoder::tags::sequence0x10,
+      AbstractSyntaxNotationOneSubsetDecoder::tags::objectIdentifier0x06
+    },
+    this->signatureAlgorithmIdentifier,
+    commentsOnFailure
+  )) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to get signature algorithm id. ";
+    }
+    return false;
+  }
+  const ASNElement* certificateFieldsASN = nullptr;
+  if (!input.HasSubElementConst({3}, {}, &certificateFieldsASN, commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to get sequence of certificate fields. ";
+    }
+    return false;
+  }
+  if (!this->LoadFieldsFromASN(*certificateFieldsASN, commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to read certificate fields. ";
+    }
+    return false;
+  }
+  const ASNElement* validityASN = nullptr;
+  if (!input.HasSubElementConst({4}, {}, &validityASN, commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to extract certificate validity. ";
+    }
+    return false;
+  }
+  if (!this->LoadValidityFromASN(*validityASN, commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to load validity. ";
+    }
+    return false;
+  }
+  if (!input.HasSubElementOfType(
+    {6, 1, 0, 1}, {}, this->theRSA.theModuluS, commentsOnFailure
+  )) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to read RSA modulus. ";
+    }
+    return false;
+  }
+  if (!input.HasSubElementOfType(
+    {6, 1, 0, 0}, {}, this->theRSA.theExponenT, commentsOnFailure
+  )) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to read public key. ";
+    }
+    return false;
+  }
+  return true;
+}
+
 bool X509Certificate::LoadFromASNEncoded(
   const List<unsigned char>& input, std::stringstream* commentsOnFailure
 ) {
@@ -1371,65 +1552,17 @@ bool X509Certificate::LoadFromASNEncoded(
     }
     return false;
   }
-  if (!this->sourceASN.HasSubElementOfType(
-    {0, 1}, {}, this->serialNumber, commentsOnFailure
-  )) {
+  const ASNElement* certificate = nullptr;
+  if (!this->sourceASN.HasSubElementConst({0}, {}, &certificate, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to read serial number. ";
-    }
-    return false;
-  }  
-  if (!this->sourceASN.HasSubElementOfType(
-    {0, 2, 0}, {}, this->signatureAlgorithmId, commentsOnFailure
-  )) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to get signature algorithm id. ";
+      *commentsOnFailure << "Failed to get certificate ASN. ";
     }
     return false;
   }
-  const ASNElement* certificateFieldsASN = nullptr;
-  if (!this->sourceASN.HasSubElementConst({0, 3}, {}, &certificateFieldsASN, commentsOnFailure)) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to get sequence of certificate fields. ";
-    }
+  if (!this->information.LoadFromASNEncoded(*certificate, commentsOnFailure)) {
     return false;
   }
-  if (!this->information.LoadFieldsFromASN(*certificateFieldsASN, commentsOnFailure)) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to read certificate fields. ";
-    }
-    return false;
-  }
-  const ASNElement* validityASN = nullptr;
-  if (!this->sourceASN.HasSubElementConst({0, 4}, {}, &validityASN, commentsOnFailure)) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to extract certificate validity. ";
-    }
-    return false;
-  }
-  if (!this->information.LoadValidityFromASN(*validityASN, commentsOnFailure)) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to load validity. ";
-    }
-    return false;
-  }
-  if (!this->sourceASN.HasSubElementOfType(
-    {0, 6, 1, 0, 1}, {}, this->theRSA.theModuluS, commentsOnFailure
-  )) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to read RSA modulus. ";
-    }
-    return false;
-  }
-  if (!this->sourceASN.HasSubElementOfType(
-    {0, 6, 1, 0, 0}, {}, this->theRSA.theExponenT, commentsOnFailure
-  )) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to read public key. ";
-    }
-    return false;
-  }
-  if (this->theRSA.theModuluS == 0 || this->theRSA.theExponenT == 0) {
+  if (this->information.theRSA.theModuluS == 0 || this->information.theRSA.theExponenT == 0) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Invalid RSA modulus or exponent. ";
     }

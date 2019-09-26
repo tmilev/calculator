@@ -505,6 +505,11 @@ void ASNElement::ToJSON(JSData& output) const {
     if (this->tag == AbstractSyntaxNotationOneSubsetDecoder::tags::objectIdentifier0x06) {
       output[ASNElement::JSLabels::interpretation] = this->InterpretAsObjectIdentifierGetNameAndId();
     }
+    if (this->tag == AbstractSyntaxNotationOneSubsetDecoder::tags::integer0x02) {
+      LargeInt theInt;
+      this->isInteger(&theInt, nullptr);
+      output[ASNElement::JSLabels::interpretation] = theInt.ToString();
+    }
   }
 }
 
@@ -1106,6 +1111,13 @@ void ASNObject::initializeNonThreadSafe() {
   ASNObject::NamesToObjectIdsNonThreadSafe();
 }
 
+void ASNElement::MakeObjectId(const List<unsigned char>& input) {
+  this->reset();
+  this->tag = AbstractSyntaxNotationOneSubsetDecoder::tags::objectIdentifier0x06;
+  this->startByte = this->tag;
+  this->ASNAtom = input;
+}
+
 void ASNElement::MakeInteger(const LargeIntUnsigned& input) {
   this->reset();
   this->tag = AbstractSyntaxNotationOneSubsetDecoder::tags::integer0x02;
@@ -1126,6 +1138,12 @@ void ASNElement::MakeSequence(int numberOfEmptyElements) {
   this->theElements.SetSize(numberOfEmptyElements);
 }
 
+void TBSCertificateInfo::ComputeASNSignatureAlgorithmIdentifier(ASNElement& output) {
+  output.MakeSequence(2);
+  output[0] = this->signatureAlgorithmIdentifier;
+  output[1].MakeNull();
+}
+
 void TBSCertificateInfo::ComputeASNVersionWrapper(ASNElement& output) {
   output.reset();
   output.tag = 0;
@@ -1139,6 +1157,7 @@ void TBSCertificateInfo::ComputeASN(ASNElement& output) {
   output.MakeSequence(8);
   this->ComputeASNVersionWrapper(output[0]);
   output[1].MakeInteger(this->serialNumber);
+  this->ComputeASNSignatureAlgorithmIdentifier(output[2]);
 }
 
 void X509Certificate::ComputeASN(ASNElement& output) {

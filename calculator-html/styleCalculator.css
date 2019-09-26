@@ -1479,6 +1479,7 @@ span.abstractSyntaxOneAnnotation {
   max-width: 900px;
   word-break: break-all;
   font-family: 'Courier New', Courier, monospace;
+  transition: 1s all;
 }
 
 span.abstractSyntaxOneHeader:hover {
@@ -1497,6 +1498,12 @@ span.abstractSyntaxOneElement {
   border-style: solid;
   border-width: 1px;
   word-break: break-all;
+}
+
+div.abstractSyntaxOneElementTree {
+  border-left: solid 1px black;
+  word-break: break-all;
+  padding-left: 5px
 }
 
 /*span.abstractSyntaxOneElement:hover {

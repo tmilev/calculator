@@ -81,9 +81,11 @@ public:
   std::string ToString();
   void ComputeASN(ASNElement& output);
   void ComputeASNVersionWrapper(ASNElement& output);
+  void ComputeASNSignatureAlgorithmIdentifier(ASNElement& output);
 };
 
 // For definition, google RFC 5280
+// https://lapo.it/asn1js [decodes messages and highlights and annotates individual bytes.]
 class X509Certificate {
 public:
   ASNElement signatureAlgorithmId;

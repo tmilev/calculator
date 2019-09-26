@@ -79,6 +79,7 @@ public:
   void MakeSequence(int numberOfEmptyElements);
   void MakeNull();
   void MakeInteger(const LargeIntUnsigned& input);
+  void MakeObjectId(const List<unsigned char>& input);
   template <typename thisPointerType>
   static bool HasSubElementTemplate(
     thisPointerType* thisPointer,

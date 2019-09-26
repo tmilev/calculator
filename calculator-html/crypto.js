@@ -1,10 +1,15 @@
 "use strict";
+const miscellaneous = require('./miscellaneous');
 
 function AbstractSyntaxOne() {
   /**@type {string} */
   this.idAnnotation = null;
   /**@type {HTMLElement} */
+  this.DOMElementAnnotationContainer = null;
+  /**@type {HTMLElement} */
   this.DOMElementAnnotation = null;
+  /**@type {HTMLElement} */
+  this.DOMElementAnnotationTree = null;
   /**@type {string} */
   this.binaryHex = "";
   /**@type {Object} */
@@ -21,8 +26,8 @@ AbstractSyntaxOne.prototype.initializeAnnotation = function(
   this.idAnnotation = inputIdAnnotation;
   this.binaryHex = inputBinaryHex;
   this.interpretation = inputInterpretation;
-  this.DOMElementAnnotation = document.getElementById(inputIdAnnotation);
-  if (this.DOMElementAnnotation === null) {
+  this.DOMElementAnnotationContainer = document.getElementById(inputIdAnnotation);
+  if (this.DOMElementAnnotationContainer === null) {
     throw(`Element of id ${inputIdAnnotation} is missing. `);
   }
 }
@@ -76,9 +81,11 @@ AbstractSyntaxOne.prototype.appendAnnotation = function(
   currentInterpretation,
 ) {
   var currentElement = document.createElement("SPAN");
+  currentInterpretation.dom = {};
+  currentInterpretation.dom.element = currentElement;
   currentElement.classList.add("abstractSyntaxOneElement");
-
   var elementLeadingByte = document.createElement("SPAN");
+  currentInterpretation.dom.leadingByte = elementLeadingByte;
   elementLeadingByte.classList.add("abstractSyntaxOneLeadingByte"); 
   elementLeadingByte.innerHTML = currentInterpretation.startByteOriginal;
   var tooltipLeadingByte = `Type: ${currentInterpretation.type}`;
@@ -96,23 +103,26 @@ AbstractSyntaxOne.prototype.appendAnnotation = function(
   );
 
   var elementLength = document.createElement("SPAN");
+  currentInterpretation.dom.length = elementLength;
   elementLength.classList.add("abstractSyntaxOneLength");
   elementLength.innerHTML = currentInterpretation.lengthEncoding;
   var lengthTooltipContent = `Length: ${currentInterpretation.lengthPromised}`;
   attachTooltip(elementLength, lengthTooltipContent);
 
   var elementHeader = document.createElement("SPAN");
+  currentInterpretation.dom.header = elementHeader;
   elementHeader.classList.add("abstractSyntaxOneHeader");
   elementHeader.appendChild(elementLeadingByte);
   elementHeader.appendChild(elementLength);
-
-  currentElement.appendChild(elementHeader);  
+  currentElement.appendChild(elementHeader);
+  var elementBody = document.createElement("SPAN");
+  currentInterpretation.dom.body = elementBody;
   var foundContent = false;
   if (currentInterpretation.children !== undefined) {
     foundContent = true;
     for (var i = 0; i < currentInterpretation.children.length; i ++) {
       var interpretation = currentInterpretation.children[i];
-      this.appendAnnotation(currentElement, interpretation);
+      this.appendAnnotation(elementBody, interpretation);
     }  
   } else if (currentInterpretation.body !== undefined && currentInterpretation.body !== null) {
     var elementHex = document.createElement("SPAN");
@@ -131,7 +141,7 @@ AbstractSyntaxOne.prototype.appendAnnotation = function(
     if (tooltipBody !== "") {
       attachTooltip(elementHex, tooltipBody);
     }
-    currentElement.appendChild(elementHex);
+    elementBody.appendChild(elementHex);
     foundContent = true;
   } 
   if (
@@ -141,23 +151,106 @@ AbstractSyntaxOne.prototype.appendAnnotation = function(
     var errorElement = document.createElement("SPAN");
     errorElement.style.color = "red";
     errorElement.innerHTML = currentInterpretation.error;
-    currentElement.appendChild(noContent);
+    elementBody.appendChild(noContent);
   }
   if (!foundContent) {
     var errorElement = document.createElement("SPAN");
     errorElement.innerHTML = `[no content] ${JSON.stringify(currentInterpretation)}`;
-    currentElement.appendChild(noContent);
+    elementBody.appendChild(noContent);
   }
+  currentElement.appendChild(elementBody);  
+  container.appendChild(currentElement);
+}
+
+AbstractSyntaxOne.prototype.mouseOverAbstractSyntaxOneElement = function(
+  annotation,
+  /**@type {HTMLElement} */ 
+  annotationTreeElement,
+) {
+  annotation.leadingByte.style.backgroundColor = "gray";
+  annotation.length.style.backgroundColor = "lightskyblue";
+  annotation.body.style.backgroundColor = "lightgreen";
+}
+
+AbstractSyntaxOne.prototype.mouseOutAbstractSyntaxOneElement = function(
+  annotation,
+  /**@type {HTMLElement} */ 
+  annotationTreeElement,
+) {
+  annotation.leadingByte.style.backgroundColor = "";
+  annotation.length.style.backgroundColor = "";
+  annotation.body.style.backgroundColor = "";
+}
+
+AbstractSyntaxOne.prototype.appendAnnotationTree = function(  
+  /**@type {HTMLElement} */ 
+  container, 
+  /**@type  {ASNElement}*/
+  currentInterpretation,
+) {
+  var currentElement = document.createElement("DIV");
+  currentElement.classList.add("abstractSyntaxOneElementTree");
+  var currentHead = document.createElement("SPAN");
+  var headHTML = `<b>${currentInterpretation.type}</b>`;
+  if (currentInterpretation.numberOfChildren !== undefined) {
+    headHTML += ` [${currentInterpretation.numberOfChildren} elements]`;
+  } else {
+    headHTML += " [atom]";
+  }
+  if (currentInterpretation.interpretation !== undefined) {
+    headHTML += " " + miscellaneous.shortenString(15, currentInterpretation.interpretation);
+  }
+  currentHead.innerHTML = headHTML;
+  currentElement.appendChild(currentHead);
+  if (currentInterpretation.children !== undefined) {
+    for (var counter = 0; counter < currentInterpretation.children.length; counter ++) {
+      this.appendAnnotationTree(currentElement, currentInterpretation.children[counter]);
+    }
+  }
+  var annotationElementPeer = currentInterpretation.dom;
+  currentHead.addEventListener(
+    'mouseover', 
+    this.mouseOverAbstractSyntaxOneElement.bind(
+      this, 
+      annotationElementPeer, 
+      currentElement,
+    ) 
+  );
+  currentHead.addEventListener(
+    'mouseout', 
+    this.mouseOutAbstractSyntaxOneElement.bind(
+      this, 
+      annotationElementPeer, 
+      currentElement,
+    ) 
+  );
   container.appendChild(currentElement);
 }
 
 AbstractSyntaxOne.prototype.annotate = function() {
+  this.DOMElementAnnotationContainer.innerHTML = "";
+  this.DOMElementAnnotation = document.createElement("SPAN");
   this.DOMElementAnnotation.classList.add("abstractSyntaxOneAnnotation");
   this.DOMElementAnnotation.innerHTML = "";
+  this.DOMElementAnnotationTree = document.createElement("SPAN");
+  this.DOMElementAnnotation.classList.add("abstractSyntaxOneAnnotationTree");
+  this.DOMElementAnnotation.innerHTML = "";
+  var theTable = document.createElement("TABLE");
+  var row = theTable.insertRow(0);
+  var cellLeft = row.insertCell(- 1);
+  var cellRight = row.insertCell(- 1);
+  cellLeft.appendChild(this.DOMElementAnnotationTree);
+  cellRight.appendChild(this.DOMElementAnnotation);
+  this.DOMElementAnnotationContainer.appendChild(theTable);
   this.positionInBinary = 0;
-  this.appendAnnotation(this.DOMElementAnnotation, this.interpretation);
-  var debugElement = document.createElement("SPAN");
-  this.DOMElementAnnotation.appendChild(debugElement);
+  this.appendAnnotation(
+    this.DOMElementAnnotation, 
+    this.interpretation
+  );
+  this.appendAnnotationTree(    
+    this.DOMElementAnnotationTree, 
+    this.interpretation
+  );
 }
 
 function abstractSyntaxNotationAnnotate(binaryHex, interpretation, id) {

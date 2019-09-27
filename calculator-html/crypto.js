@@ -199,11 +199,12 @@ AbstractSyntaxOne.prototype.appendAnnotationTree = function(
   currentElement.classList.add("abstractSyntaxOneElementTree");
   var currentHead = document.createElement("SPAN");
   var headHTML = `<b>${currentInterpretation.type}</b>`;
-  if (currentInterpretation.numberOfChildren !== undefined) {
+  if (
+    currentInterpretation.numberOfChildren !== undefined && 
+    currentInterpretation.numberOfChildren !== 0
+  ) {
     headHTML += ` [${currentInterpretation.numberOfChildren} elements]`;
-  } else {
-    headHTML += " [atom]";
-  }
+  } 
   if (currentInterpretation.interpretation !== undefined) {
     headHTML += " " + miscellaneous.shortenString(15, currentInterpretation.interpretation);
   }

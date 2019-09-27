@@ -2224,7 +2224,7 @@ bool CalculatorFunctionsGeneral::innerTestASN1Decode(Calculator& theCommands, co
     out << "Failed to decode.<br>" << commentsOnError.str();
   } else {
     List<unsigned char> recoded;
-    result.WriteBytes(recoded);
+    result.WriteBytesUpdatePromisedLength(recoded);
     std::string originalHex = Crypto::ConvertStringToHex(data, 0, false);
     std::string recodedHex = Crypto::ConvertListUnsignedCharsToHex(recoded, 0, false);
     out << StringRoutines::Differ::DifferenceHTMLStatic(originalHex, recodedHex);

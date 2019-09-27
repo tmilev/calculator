@@ -226,16 +226,30 @@ std::string ASNElement::InterpretAsObjectIdentifier() const {
   return resultStream.str();
 }
 
-void ASNElement::WriteBytes(List<unsigned char>& output) const {
+void ASNElement::WriteBytesConst(List<unsigned char>& output) const {
   // WARNING: writer needs to be a named object to avoid
   // gcc immediately calling the object's destructor.
   AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength
-  notAnonymous(this->startByte, this->lengthPromised, output);
+  notAnonymous(this->startByte, this->lengthPromised, output, nullptr);
   if (this->ASNAtom.size > 0) {
     output.AddListOnTop(this->ASNAtom);
   } else {
     for (int i = 0; i < this->theElements.size; i ++) {
-      this->theElements[i].WriteBytes(output);
+      this->theElements[i].WriteBytesConst(output);
+    }
+  }
+}
+
+void ASNElement::WriteBytesUpdatePromisedLength(List<unsigned char>& output) {
+  // WARNING: writer needs to be a named object to avoid
+  // gcc immediately calling the object's destructor.
+  AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength
+  notAnonymous(this->startByte, this->lengthPromised, output, &this->lengthPromised);
+  if (this->ASNAtom.size > 0) {
+    output.AddListOnTop(this->ASNAtom);
+  } else {
+    for (int i = 0; i < this->theElements.size; i ++) {
+      this->theElements[i].WriteBytesUpdatePromisedLength(output);
     }
   }
 }
@@ -246,7 +260,7 @@ void ASNElement::WriteBytesASNAtom(
   List<unsigned char>& output
 ) {
   AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength
-  notAnonymous(inputStartByte, atomContent.size, output);
+  notAnonymous(inputStartByte, atomContent.size, output, nullptr);
   output.AddListOnTop(atomContent);
 }
 
@@ -777,6 +791,16 @@ void AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::WriteLengt
   );
 }
 
+bool ASNElement::isEmpty() const {
+  return
+    this->startByte == AbstractSyntaxNotationOneSubsetDecoder::tags::reserved0 &&
+    this->ASNAtom.size == 0;
+}
+
+bool ASNObject::isEmpty() const {
+  return this->objectId.isEmpty() && this->content.isEmpty();
+}
+
 std::string AbstractSyntaxNotationOneSubsetDecoder::ToStringAnnotateBinary() {
   if (!this->CheckInitialization()) {
     return "ASN1 not initialized properly. ";
@@ -813,11 +837,14 @@ int AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::GetReserved
 AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::WriterObjectFixedLength(
   unsigned char startByte,
   int expectedTotalElementByteLength,
-  List<unsigned char>& output) {
+  List<unsigned char>& output,
+  int* outputTotalElementByteLength
+) {
   if (expectedTotalElementByteLength < 0) {
     expectedTotalElementByteLength = 0;
   }
   this->outputPointer = &output;
+  this->outputTotalByteLength = outputTotalElementByteLength;
   this->offset = output.size;
   this->outputPointer->AddOnTop(startByte);
   this->totalByteLength = expectedTotalElementByteLength;
@@ -825,10 +852,14 @@ AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::WriterObjectFix
   for (int i = 0; i < this->reservedBytesForLength; i ++) {
     this->outputPointer->AddOnTop(0);
   }
+
 }
 
 AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::~WriterObjectFixedLength() {
   this->totalByteLength = this->outputPointer->size - this->offset - 1 - this->reservedBytesForLength;
+  if (this->outputTotalByteLength != nullptr) {
+    *this->outputTotalByteLength = this->totalByteLength;
+  }
   int actualBytesNeededForLength = this->GetReservedBytesForLength(this->totalByteLength);
   if (actualBytesNeededForLength > this->reservedBytesForLength) {
     logWorker << logger::red << "Wrong number of reserved bytes for sequence writer. "
@@ -845,7 +876,8 @@ AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::~WriterObjectFi
     );
   }
   this->reservedBytesForLength = actualBytesNeededForLength;
-  AbstractSyntaxNotationOneSubsetDecoder::WriterSequence::WriteLength(
+  std::cout << "DEBUG: Writer of length wrote: " << this->totalByteLength << " bytes.\n";
+  AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::WriteLength(
     static_cast<unsigned>(this->totalByteLength),
     *this->outputPointer,
     this->offset + 1
@@ -874,18 +906,6 @@ void AbstractSyntaxNotationOneSubsetDecoder::WriteObjectId(
   );
 }
 
-void ASNObject::WriteBytesASNObject(List<unsigned char>& output) {
-  if (this->objectId.ASNAtom.size == 0) {
-    // object id empty, field not initialized, do nothing
-    return;
-  }
-  // Anonymity breaks destructor generation in gcc!
-  AbstractSyntaxNotationOneSubsetDecoder::WriterSet notAnonymous1(100, output);
-  AbstractSyntaxNotationOneSubsetDecoder::WriterSequence notAnonymous2(100, output);
-  this->objectId.WriteBytes(output);
-  this->content.WriteBytes(output);
-}
-
 void ASNObject::initializeAddSample(
   MapList<std::string, ASNObject, MathRoutines::HashString>& container,
   const std::string& inputName,
@@ -894,8 +914,11 @@ void ASNObject::initializeAddSample(
 ) {
   ASNObject incoming;
   incoming.name = inputName;
-  incoming.content.tag = inputContentTag;
+  incoming.content.startByte = inputContentTag;
+  incoming.content.ComputeTag();
   std::stringstream commentsOnFailure;
+  incoming.objectId.startByte = AbstractSyntaxNotationOneSubsetDecoder::tags::objectIdentifier0x06;
+  incoming.objectId.ComputeTag();
   if (!Crypto::ConvertHexToListUnsignedChar(
     inputObjectIdHex, incoming.objectId.ASNAtom, &commentsOnFailure
   )) {
@@ -1160,7 +1183,9 @@ void TBSCertificateInfo::ComputeASN(ASNElement& output) {
   output.MakeSequence(8);
   this->ComputeASNVersionWrapper(output[0]);
   output[1].MakeInteger(this->serialNumber);
+  output[1].comment = "serial number";
   this->ComputeASNSignatureAlgorithmIdentifier(output[2]);
+  output[2].comment = "algorithm identifier";
   this->issuer.ComputeASN(output[3]);
   output[3].comment = "Issuer [entity that signed this certificate]";
   this->ComputeASNValidityWrapper(output[4]);
@@ -1174,17 +1199,32 @@ void ASNObject::ComputeASN(ASNElement& output) {
   output[0].MakeSequence(2);
   output[0][0] = this->objectId;
   output[0][1] = this->content;
+  std::stringstream comment;
+  comment << "Object: " << this->name << ", interpretation: " << this->content.ASNAtom.ToStringConcatenate();
+  output[0][0].comment = comment.str();
+  output[0][1].comment = comment.str();
 }
 
 void TBSCertificateInfo::Organization::ComputeASN(ASNElement& output) {
-  output.MakeSequence(7);
-  this->countryName.ComputeASN(output[0]);
-  this->stateOrProvinceName.ComputeASN(output[1]);
-  this->localityName.ComputeASN(output[2]);
-  this->organizationName.ComputeASN(output[3]);
-  this->organizationalUnitName.ComputeASN(output[4]);
-  this->commonName.ComputeASN(output[5]);
-  this->emailAddress.ComputeASN(output[6]);
+  output.MakeSequence(0);
+  List<ASNObject*> serializationOrder({
+    &this->countryName,
+    &this->stateOrProvinceName,
+    &this->localityName,
+    &this->organizationName,
+    &this->organizationalUnitName,
+    &this->commonName,
+    &this->emailAddress
+  });
+  ASNElement next;
+  for (int i = 0; i < serializationOrder.size; i ++) {
+    ASNObject* current = serializationOrder[i];
+    if (current->isEmpty()) {
+      continue;
+    }
+    current->ComputeASN(next);
+    output.theElements.AddOnTop(next);
+  }
 }
 
 void X509Certificate::ComputeASN(ASNElement& output) {
@@ -1205,7 +1245,7 @@ void X509Certificate::ComputeASNSignatureAlgorithm(ASNElement& output) {
 void X509Certificate::WriteBytesASN1(List<unsigned char>& output) {
   MacroRegisterFunctionWithName("X509Certificate::WriteBytesASN1");
   this->ComputeASN(this->recodedASN);
-  this->recodedASN.WriteBytes(output);
+  this->recodedASN.WriteBytesUpdatePromisedLength(output);
 }
 
 std::string X509Certificate::ToStringTestEncode() {
@@ -1227,7 +1267,7 @@ std::string X509Certificate::ToString() {
   AbstractSyntaxNotationOneSubsetDecoder decoderRecoded;
   decoderRecoded.decodedData = &this->recodedASN;
   List<unsigned char> recodedBytes;
-  this->recodedASN.WriteBytes(recodedBytes);
+  this->recodedASN.WriteBytesUpdatePromisedLength(recodedBytes);
   decoderRecoded.rawDatA = &recodedBytes;
   out << "<br><b>Recoded (" << recodedBytes.size << " bytes).</b><br>";
   out << decoderRecoded.ToStringAnnotateBinary();

@@ -1495,6 +1495,7 @@ span.abstractSyntaxOneLength:hover {
 }
 
 span.abstractSyntaxOneElement {
+  position: relative;
   border-style: solid;
   border-width: 1px;
   word-break: break-all;
@@ -1515,6 +1516,7 @@ span.abstractSyntaxOneContent:hover {
 }
 
 .tooltiptext {
+  display: block;
   visibility: hidden;
   max-width: 800px;
   background-color: black;
@@ -1524,7 +1526,8 @@ span.abstractSyntaxOneContent:hover {
   border-radius: 6px;
    /* Position the tooltip text - see examples below! */
   position: absolute;
-  top: 20px;
+  top: 40px;
+  left: 0px;
   z-index: 1;
   word-break: normal;
 }

@@ -114,12 +114,14 @@ public:
     desiredType& output,
     std::stringstream* commentsOnFailure
   ) const;
-  void WriteBytes(List<unsigned char>& output) const;
+  void WriteBytesConst(List<unsigned char>& output) const;
+  void WriteBytesUpdatePromisedLength(List<unsigned char>& output);
   static void WriteBytesASNAtom(
     unsigned char startByte,
     const List<unsigned char>& content,
     List<unsigned char>& output
   );
+  bool isEmpty() const;
   ASNElement& operator[](int index);
 };
 
@@ -174,8 +176,8 @@ public:
   );
   static std::string ToStringAllRecognizedObjectIds();
   void ComputeASN(ASNElement& output);
-  void WriteBytesASNObject(List<unsigned char>& output);
   std::string ToString() const;
+  bool isEmpty() const;
 };
 
 // The following class (is supposed to) implement a sufficiently
@@ -226,6 +228,7 @@ public:
     void operator=(WriterObjectFixedLength&);
   public:
     List<unsigned char>* outputPointer;
+    int* outputTotalByteLength;
     int offset;
     int totalByteLength;
     int reservedBytesForLength;
@@ -234,42 +237,10 @@ public:
     WriterObjectFixedLength(
       unsigned char startByte,
       int expectedTotalElementByteLength,
-      List<unsigned char>& output
+      List<unsigned char>& output,
+      int* outputTotalElementByteLength
     );
     ~WriterObjectFixedLength();
-  };
-  class WriterSequence : public WriterObjectFixedLength {
-  public:
-    WriterSequence(
-      int expectedTotalElementByteLength,
-      List<unsigned char>& output
-    ) : WriterObjectFixedLength(
-      AbstractSyntaxNotationOneSubsetDecoder::tags::sequence0x10 + 32,
-      expectedTotalElementByteLength,
-      output
-      ) {}
-  };
-  class WriterBitString: public WriterObjectFixedLength {
-  public:
-    WriterBitString(
-      int expectedTotalElementByteLength,
-      List<unsigned char>& output
-    ) : WriterObjectFixedLength(
-      AbstractSyntaxNotationOneSubsetDecoder::tags::bitString0x03,
-      expectedTotalElementByteLength,
-      output
-      ) {}
-  };
-  class WriterSet: public WriterObjectFixedLength {
-  public:
-    WriterSet(
-      int expectedTotalElementByteLength,
-      List<unsigned char>& output
-    ) : WriterObjectFixedLength(
-      AbstractSyntaxNotationOneSubsetDecoder::tags::set0x11 + 32,
-      expectedTotalElementByteLength,
-      output
-      ) {}
   };
   int recursionDepthGuarD;
   int maxRecursionDepth;

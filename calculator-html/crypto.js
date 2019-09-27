@@ -97,6 +97,10 @@ AbstractSyntaxOne.prototype.appendAnnotation = function(
   if (currentInterpretation.value !== undefined) {
     tooltipLeadingByte += `<br>Value: ${currentInterpretation.value}`;
   }
+  if (currentInterpretation.comment !== undefined) {
+    tooltipLeadingByte += "<br>";
+    tooltipLeadingByte += `Comment: ${currentInterpretation.comment}`;
+  }
   attachTooltip(
     elementLeadingByte, 
     tooltipLeadingByte,
@@ -128,6 +132,8 @@ AbstractSyntaxOne.prototype.appendAnnotation = function(
     var elementHex = document.createElement("SPAN");
     elementHex.innerHTML = currentInterpretation.body;
     elementHex.classList.add("abstractSyntaxOneContent");
+    elementBody.appendChild(elementHex);
+    foundContent = true;
     var tooltipBody = "";
     if (currentInterpretation.interpretation !== undefined) {
       tooltipBody += `Interpretation: ${currentInterpretation.interpretation}`;
@@ -136,13 +142,12 @@ AbstractSyntaxOne.prototype.appendAnnotation = function(
       if (tooltipBody !== "") {
         tooltipBody += "<br>";
       }
-      tooltipBody += `Comment: ${currentInterpretation.interpretation}`;
+      tooltipBody += `Comment: ${currentInterpretation.comment}`;
     }
+  
     if (tooltipBody !== "") {
-      attachTooltip(elementHex, tooltipBody);
+      attachTooltip(elementBody, tooltipBody);
     }
-    elementBody.appendChild(elementHex);
-    foundContent = true;
   } 
   if (
     currentInterpretation.error !== null && 

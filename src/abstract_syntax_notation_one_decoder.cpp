@@ -1142,7 +1142,9 @@ void TBSCertificateInfo::ComputeASNSignatureAlgorithmIdentifier(ASNElement& outp
 void TBSCertificateInfo::ComputeASNValidityWrapper(ASNElement& output) {
   output.MakeSequence(2);
   output[0] = this->validityNotBefore;
+  output[0].comment = "Validity not before";
   output[1] = this->validityNotAfter;
+  output[1].comment = "Validity not after";
 }
 
 void TBSCertificateInfo::ComputeASNVersionWrapper(ASNElement& output) {
@@ -1160,8 +1162,11 @@ void TBSCertificateInfo::ComputeASN(ASNElement& output) {
   output[1].MakeInteger(this->serialNumber);
   this->ComputeASNSignatureAlgorithmIdentifier(output[2]);
   this->issuer.ComputeASN(output[3]);
+  output[3].comment = "Issuer [entity that signed this certificate]";
   this->ComputeASNValidityWrapper(output[4]);
+  output[4].comment = "Validity";
   this->subject.ComputeASN(output[5]);
+  output[5].comment = "Subject [entity advertising its public key identity]";
 }
 
 void ASNObject::ComputeASN(ASNElement& output) {
@@ -1185,6 +1190,7 @@ void TBSCertificateInfo::Organization::ComputeASN(ASNElement& output) {
 void X509Certificate::ComputeASN(ASNElement& output) {
   output.reset();
   output.MakeSequence(3);
+  output.comment = "X509 certificate";
   this->information.ComputeASN(output[0]);
   this->ComputeASNSignatureAlgorithm(output[1]);
   output[2] = this->signatureValue;
@@ -1217,12 +1223,20 @@ std::string X509Certificate::ToString() {
   std::stringstream out;
   out << "Certificate pub key:<br>"
   << this->information.subjectPublicKey.ToString();
-  out << "<br>Source binary: " << this->sourceBinary.size << " bytes.<br>";
   out << this->information.ToString();
-  AbstractSyntaxNotationOneSubsetDecoder theDecoder;
-  theDecoder.decodedData = &this->sourceASN;
-  theDecoder.rawDatA = &this->sourceBinary;
-  out << theDecoder.ToStringAnnotateBinary();
+  AbstractSyntaxNotationOneSubsetDecoder decoderRecoded;
+  decoderRecoded.decodedData = &this->recodedASN;
+  List<unsigned char> recodedBytes;
+  this->recodedASN.WriteBytes(recodedBytes);
+  decoderRecoded.rawDatA = &recodedBytes;
+  out << "<br><b>Recoded (" << recodedBytes.size << " bytes).</b><br>";
+  out << decoderRecoded.ToStringAnnotateBinary();
+
+  out << "<br><b>Source (" << this->sourceBinary.size << " bytes).</b><br>";
+  AbstractSyntaxNotationOneSubsetDecoder decoderSource;
+  decoderSource.decodedData = &this->sourceASN;
+  decoderSource.rawDatA = &this->sourceBinary;
+  out << decoderSource.ToStringAnnotateBinary();
   return out.str();
 }
 
@@ -1575,6 +1589,16 @@ bool TBSCertificateInfo::LoadFromASNEncoded(const ASNElement& input, std::string
     }
     return false;
   }
+  if (
+    this->subjectPublicKey.theModuluS == 0 ||
+    this->subjectPublicKey.theExponenT == 0
+  ) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Invalid RSA modulus or exponent. ";
+    }
+    return false;
+  }
+
   return true;
 }
 
@@ -1596,15 +1620,6 @@ bool X509Certificate::LoadFromASNEncoded(
     return false;
   }
   if (!this->information.LoadFromASNEncoded(*certificate, commentsOnFailure)) {
-    return false;
-  }
-  if (
-    this->information.subjectPublicKey.theModuluS == 0 ||
-    this->information.subjectPublicKey.theExponenT == 0
-  ) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Invalid RSA modulus or exponent. ";
-    }
     return false;
   }
   return true;

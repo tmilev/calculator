@@ -49,39 +49,58 @@ public:
 
 class TBSCertificateInfo {
 public:
+  class Organization {
+  public:
+    ASNObject countryName;
+    ASNObject stateOrProvinceName;
+    ASNObject localityName;
+    ASNObject organizationName;
+    ASNObject organizationalUnitName;
+    ASNObject commonName;
+    ASNObject emailAddress;
+    void ComputeASN(ASNElement& output);
+    std::string ToString();
+    bool LoadFields(
+      const MapList<std::string, ASNObject, MathRoutines::HashString>& fields,
+      std::stringstream* commentsOnFailure
+    );
+    bool LoadFromASN(
+      const ASNElement &input,
+      std::stringstream* commentsOnFailure
+    );
+  };
   unsigned int version;
   LargeIntUnsigned serialNumber;
-  CertificateRSA theRSA;
+
+  // Public key advertised by the certificate:
+  // signature type:
+  ASNElement subjectPublicKeyAlgorithmId;
+  // public key bytes:
+  ASNElement subjectPublicKeyASN;
+  CertificateRSA subjectPublicKey;
+  // The authority that signed the certificate,
+  // usually a large institution with a
+  // well-known public key:
+  TBSCertificateInfo::Organization issuer;
+
+  // The holder of the public key
+  // advertised by this certificate:
+  TBSCertificateInfo::Organization subject;
   ASNElement signatureAlgorithmIdentifier;
-  ASNObject countryName;
-  ASNObject stateOrProvinceName;
-  ASNObject localityName;
-  ASNObject organizationName;
-  ASNObject organizationalUnitName;
-  ASNObject commonName;
-  ASNObject emailAddress;
+  ASNElement signature;
   ASNElement validityNotBefore;
   ASNElement validityNotAfter;
   bool LoadValidityFromASN(
     const ASNElement& input,
     std::stringstream* commentsOnFailure
   );
-  bool LoadFieldsFromASN(
-    const ASNElement &input,
-    std::stringstream* commentsOnFailure
-  );
-  bool LoadFields(
-    const MapList<std::string, ASNObject, MathRoutines::HashString>& fields,
-    std::stringstream* commentsOnFailure
-  );
   bool LoadFromASNEncoded(const ASNElement& input, std::stringstream* commentsOnFailure);
-  void WriteBytesContentAndExpiry(List<unsigned char>& output);
-  void WriteBytesContent(List<unsigned char>& output);
-  void WriteBytesExpiry(List<unsigned char>& output);
   std::string ToString();
   void ComputeASN(ASNElement& output);
   void ComputeASNVersionWrapper(ASNElement& output);
+  void ComputeASNValidityWrapper(ASNElement& output);
   void ComputeASNSignatureAlgorithmIdentifier(ASNElement& output);
+  void ComputeASNSignature(ASNElement& output);
 };
 
 // For definition, google RFC 5280

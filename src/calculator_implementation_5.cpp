@@ -161,9 +161,11 @@ int MeshTriangles::CleanUpTrianglesReturnUpdatedCurrentIndex(int currentIndex) {
   if (this->flagTriangleLimitReached || this->theTriangles.size< this->maxNumTriangles * 2) {
     return currentIndex;
   }
-  //clean up carried out only when we have twice exceeded the triangle limit
-  //this way clean up will be carried only after we have generated at least maxNumTriangles since the last cleanup
-  //(which leaves no more than maxNumTriangles alive).
+  // clean up carried out only when we have twice
+  // exceeded the triangle limit
+  // this way clean up will be carried only after
+  // we have generated at least maxNumTriangles since the last cleanup
+  // (which leaves no more than maxNumTriangles alive).
   if (this->theTriangles.size != this->trianglesUsed.size) {
     crash << "this->theTriangles.size is not equal to this->trianglesUsed.size: the values are: "
     << this->theTriangles.size << " and " << this->trianglesUsed.size << ". " << crash;
@@ -318,9 +320,9 @@ void MeshTriangles::ComputeImplicitPlot() {
     this->PlotGrid(static_cast<int>(HtmlRoutines::RedGreenBlue(100, 100, 100)));
     this->thePlot.thePlots.AddListOnTop(this->theGrid.thePlots);
   }
-//  this->theCurve.colorRGB=HtmlRoutines::RedGreenBlue(255,0,0);
+  // this->theCurve.colorRGB=HtmlRoutines::RedGreenBlue(255,0,0);
   this->thePlot.thePlots.AddListOnTop(this->theCurve.thePlots);
-//  stOutput << "ze lines: " << this->theCurve.theLines;
+  // stOutput << "ze lines: " << this->theCurve.theLines;
 }
 
 bool Calculator::GetMatrixDoubles(const Expression& input, Matrix<double>& output, int DesiredNumcols) {
@@ -328,7 +330,6 @@ bool Calculator::GetMatrixDoubles(const Expression& input, Matrix<double>& outpu
     input, output, nullptr, DesiredNumcols, CalculatorFunctionsGeneral::innerEvaluateToDouble
   );
 }
-
 
 bool Calculator::GetVectorDoubles(const Expression& input, Vector<double>& output, int DesiredDimensionNonMandatory) {
   return this->GetVectoR(input, output, nullptr, DesiredDimensionNonMandatory, CalculatorFunctionsGeneral::innerEvaluateToDouble);
@@ -915,7 +916,7 @@ bool CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnStandard(
   if (!allowedFreeVars.Contains(presentFreeVars)) {
     out << "<hr>";
     out << "Your expression:<br>\\(" << input[1].ToString() << "\\)"
-    << "<br><span style ='color:red'><b>contains the unexpected variable(s):</b></span><br><b>";
+    << "<br><b style ='color:red'>contains the unexpected variable(s):</b><br><b>";
     bool found = false;
     for (int i = 0; i < presentFreeVars.size; i ++) {
       if (!allowedFreeVars.Contains(presentFreeVars[i])) {
@@ -1031,7 +1032,7 @@ bool CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVari
   if (!presentFreeVars.Contains(mandatoryFreeVars)) {
     out << "<hr>";
     out << "Your expression:<br>\\(" << input[1].ToString() << "\\)"
-    << "<br><span style ='color:red'><b>is required to contain the variables:</b></span><br><b>";
+    << "<br><b style ='color:red'>is required to contain the variables:</b><br><b>";
     bool found = false;
     for (int i = 0; i < mandatoryFreeVars.size; i ++) {
       if (!presentFreeVars.Contains(mandatoryFreeVars[i])) {
@@ -1048,7 +1049,7 @@ bool CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVari
   if (!allowedFreeVars.Contains(presentFreeVars)) {
     out << "<hr>";
     out << "Your expression:<br>\\(" << input[1].ToString() << "\\)"
-    << "<br><span style ='color:red'><b>contains the unexpected variable(s):</b></span><br><b>";
+    << "<br><b style ='color:red'>contains the unexpected variable(s):</b><br><b>";
     bool found = false;
     for (int i = 0; i < presentFreeVars.size; i ++) {
       if (!allowedFreeVars.Contains(presentFreeVars[i])) {
@@ -1194,7 +1195,8 @@ bool CalculatorFunctionsGeneral::innerSolveUnivariatePolynomialWithRadicalsWRT(
   }
   if (thePowers.size() == 2) {
     return theCommands << "Cannot solve: " << modifiedInput[2].ToString()
-    << ". The expression does not depend on " << modifiedInput[1].ToString() << ". The coefficients of "
+    << ". The expression does not depend on " << modifiedInput[1].ToString()
+    << ". The coefficients of "
     << modifiedInput[1].ToString() << " are: " << thePowers.ToString();
   }
   if (thePowers.size() == 3) {
@@ -1222,11 +1224,13 @@ bool CalculatorFunctionsGeneral::innerSolveUnivariatePolynomialWithRadicalsWRT(
   return false;
 }
 
-bool CalculatorFunctionsGeneral::innerOperatorBounds(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsGeneral::innerOperatorBounds(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPowerIntToAny");
   if (
     !input.StartsWith(theCommands.opUnderscore(), 3) &&
-    !input.StartsWith(theCommands.opThePower(), 3 )
+    !input.StartsWith(theCommands.opThePower(), 3)
   ) {
     return false;
   }
@@ -1246,7 +1250,8 @@ bool CalculatorFunctionsGeneral::innerOperatorBounds(Calculator& theCommands, co
     return true;
   }
   if (
-    !baseE.StartsWith(theCommands.opIntegral(), 2) && !baseE.StartsWith(theCommands.opSum(), 2)
+    !baseE.StartsWith(theCommands.opIntegral(), 2) &&
+    !baseE.StartsWith(theCommands.opSum(), 2)
   ) {
     return false;
   }
@@ -1268,7 +1273,9 @@ bool CalculatorFunctionsGeneral::innerOperatorBounds(Calculator& theCommands, co
   return output.SetChilD(1, theLimitsE);
 }
 
-bool CalculatorFunctionsGeneral::innerPowerExponentToLog(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsGeneral::innerPowerExponentToLog(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPowerExponentToLog");
   if (!input.StartsWith(theCommands.opThePower(), 3)) {
     return false;
@@ -1284,7 +1291,9 @@ bool CalculatorFunctionsGeneral::innerPowerExponentToLog(Calculator& theCommands
   return false;
 }
 
-bool CalculatorFunctionsGeneral::innerDistributeExponent(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsGeneral::innerDistributeExponent(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("Calculator::innerDistributeExponent");
   if (!input.StartsWith(theCommands.opThePower(), 3)) {
     return false;
@@ -1379,13 +1388,17 @@ bool CalculatorFunctionsGeneral::innerSqrt(Calculator& theCommands, const Expres
     return false;
   }
   AlgebraicNumber theNumber;
-  if (!theNumber.AssignRationalQuadraticRadical(rationalValue, theCommands.theObjectContainer.theAlgebraicClosure)) {
+  if (!theNumber.AssignRationalQuadraticRadical(
+    rationalValue, theCommands.theObjectContainer.theAlgebraicClosure
+  )) {
     return false;
   }
   return output.AssignValue(theNumber, theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerFloor(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsGeneral::innerFloor(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerFloor");
   Rational theRat;
   if (input.IsOfType<Rational>(&theRat)) {
@@ -1399,7 +1412,9 @@ bool CalculatorFunctionsGeneral::innerFloor(Calculator& theCommands, const Expre
   return false;
 }
 
-bool CalculatorFunctionsGeneral::innerRound(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsGeneral::innerRound(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerRound");
   Rational theRat;
   if (input.IsOfType<Rational>(&theRat)) {
@@ -1649,13 +1664,18 @@ bool CalculatorFunctionsGeneral::innerLogBaseNaturalToLn(Calculator& theCommands
   return output.MakeOX(theCommands, theCommands.opLog(), input[2]);
 }
 
-bool CalculatorFunctionsGeneral::innerLogBaseSimpleCases(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsGeneral::innerLogBaseSimpleCases(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerLogBaseSimpleCases");
   if (!input.StartsWith(theCommands.opLogBase(), 3)) {
     return false;
   }
   Rational theBase, theArg;
-  if (!input[1].IsOfType<Rational>(&theBase) || !input[2].IsOfType<Rational>(&theArg)) {
+  if (
+    !input[1].IsOfType<Rational>(&theBase) ||
+    !input[2].IsOfType<Rational>(&theArg)
+  ) {
     return false;
   }
   if (theBase < 0 || theArg < 0) {
@@ -2251,7 +2271,10 @@ bool CalculatorFunctionsGeneral::innerPolynomialDivisionVerboseLexRev(
 }
 
 bool CalculatorFunctionsGeneral::innerPolynomialDivisionVerbose(
-  Calculator& theCommands, const Expression& input, Expression& output, List<MonomialP>::OrderLeftGreaterThanRight theMonOrder
+  Calculator& theCommands,
+  const Expression& input,
+  Expression& output,
+  List<MonomialP>::OrderLeftGreaterThanRight theMonOrder
 ) {
   MacroRegisterFunctionWithName("Calculator::innerPolynomialDivisionVerbose");
   Expression theContext;
@@ -2328,7 +2351,9 @@ std::string GroebnerBasisComputation<coefficient>::GetPolynomialStringSpacedMono
     if (useHighlightStyle) {
       out << "\\color{" << *highlightColor << "}{";
     }
-    out << Polynomial<Rational>::GetBlendCoeffAndMon(thePoly[theIndex], thePoly.theCoeffs[theIndex], found, &this->theFormat);
+    out << Polynomial<Rational>::GetBlendCoeffAndMon(
+      thePoly[theIndex], thePoly.theCoeffs[theIndex], found, &this->theFormat
+    );
     found = true;
     if (useHighlightStyle) {
       out << "}\\color{black}";

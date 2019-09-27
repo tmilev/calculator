@@ -864,18 +864,6 @@ void AbstractSyntaxNotationOneSubsetDecoder::WriteUnsignedIntegerObject(
   );
 }
 
-void TBSCertificateInfo::WriteBytesContentAndExpiry(List<unsigned char>& output) {
-  this->WriteBytesContent(output);
-  this->WriteBytesExpiry(output);
-}
-
-void TBSCertificateInfo::WriteBytesExpiry(List<unsigned char>& output) {
-  // Anonymity breaks destructor generation in gcc!
-  AbstractSyntaxNotationOneSubsetDecoder::WriterSequence notAnonymous(100, output);
-  this->validityNotBefore.WriteBytes(output);
-  this->validityNotAfter.WriteBytes(output);
-}
-
 void AbstractSyntaxNotationOneSubsetDecoder::WriteObjectId(
   const List<unsigned char>& input, List<unsigned char>& output
 ) {
@@ -1131,6 +1119,13 @@ void ASNElement::MakeNull() {
   this->startByte = AbstractSyntaxNotationOneSubsetDecoder::tags::null0x05;
 }
 
+void ASNElement::MakeSet(int numberOfEmptyElements) {
+  this->reset();
+  this->tag = AbstractSyntaxNotationOneSubsetDecoder::tags::set0x11;
+  this->startByte = this->tag;
+  this->theElements.SetSize(numberOfEmptyElements);
+}
+
 void ASNElement::MakeSequence(int numberOfEmptyElements) {
   this->reset();
   this->tag = AbstractSyntaxNotationOneSubsetDecoder::tags::sequence0x10;
@@ -1142,6 +1137,12 @@ void TBSCertificateInfo::ComputeASNSignatureAlgorithmIdentifier(ASNElement& outp
   output.MakeSequence(2);
   output[0] = this->signatureAlgorithmIdentifier;
   output[1].MakeNull();
+}
+
+void TBSCertificateInfo::ComputeASNValidityWrapper(ASNElement& output) {
+  output.MakeSequence(2);
+  output[0] = this->validityNotBefore;
+  output[1] = this->validityNotAfter;
 }
 
 void TBSCertificateInfo::ComputeASNVersionWrapper(ASNElement& output) {
@@ -1158,6 +1159,27 @@ void TBSCertificateInfo::ComputeASN(ASNElement& output) {
   this->ComputeASNVersionWrapper(output[0]);
   output[1].MakeInteger(this->serialNumber);
   this->ComputeASNSignatureAlgorithmIdentifier(output[2]);
+  this->issuer.ComputeASN(output[3]);
+  this->ComputeASNValidityWrapper(output[4]);
+  this->subject.ComputeASN(output[5]);
+}
+
+void ASNObject::ComputeASN(ASNElement& output) {
+  output.MakeSet(1);
+  output[0].MakeSequence(2);
+  output[0][0] = this->objectId;
+  output[0][1] = this->content;
+}
+
+void TBSCertificateInfo::Organization::ComputeASN(ASNElement& output) {
+  output.MakeSequence(7);
+  this->countryName.ComputeASN(output[0]);
+  this->stateOrProvinceName.ComputeASN(output[1]);
+  this->localityName.ComputeASN(output[2]);
+  this->organizationName.ComputeASN(output[3]);
+  this->organizationalUnitName.ComputeASN(output[4]);
+  this->commonName.ComputeASN(output[5]);
+  this->emailAddress.ComputeASN(output[6]);
 }
 
 void X509Certificate::ComputeASN(ASNElement& output) {
@@ -1193,8 +1215,8 @@ std::string X509Certificate::ToStringTestEncode() {
 
 std::string X509Certificate::ToString() {
   std::stringstream out;
-  out << "Certificate RSA:<br>"
-  << this->information.theRSA.ToString();
+  out << "Certificate pub key:<br>"
+  << this->information.subjectPublicKey.ToString();
   out << "<br>Source binary: " << this->sourceBinary.size << " bytes.<br>";
   out << this->information.ToString();
   AbstractSyntaxNotationOneSubsetDecoder theDecoder;
@@ -1386,7 +1408,7 @@ bool X509Certificate::LoadFromPEMFile(const std::string& input, std::stringstrea
   return this->LoadFromPEM(certificateContent, commentsOnFailure);
 }
 
-std::string TBSCertificateInfo::ToString() {
+std::string TBSCertificateInfo::Organization::ToString() {
   std::stringstream out;
   out << "Country name: " << this->countryName.content.ToString() << "\n<br>\n";
   out << "Common name: " << this->commonName.content.ToString() << "\n<br>\n";
@@ -1398,16 +1420,13 @@ std::string TBSCertificateInfo::ToString() {
   return out.str();
 }
 
-void TBSCertificateInfo::WriteBytesContent(List<unsigned char>& output) {
-  // Anonymity breaks destructor generation in gcc!
-  AbstractSyntaxNotationOneSubsetDecoder::WriterSequence writeTBSCertificateContent(200, output);
-  this->countryName           .WriteBytesASNObject(output);
-  this->stateOrProvinceName   .WriteBytesASNObject(output);
-  this->localityName          .WriteBytesASNObject(output);
-  this->organizationName      .WriteBytesASNObject(output);
-  this->organizationalUnitName.WriteBytesASNObject(output);
-  this->commonName            .WriteBytesASNObject(output);
-  this->emailAddress          .WriteBytesASNObject(output);
+std::string TBSCertificateInfo::ToString() {
+  std::stringstream out;
+  out << "<b>Issuer:</b><br>";
+  out << this->issuer.ToString();
+  out << "<b>Subject (holder of the advertised public key):</b><br>";
+  out << this->subject.ToString();
+  return out.str();
 }
 
 bool TBSCertificateInfo::LoadValidityFromASN(
@@ -1433,7 +1452,7 @@ bool TBSCertificateInfo::LoadValidityFromASN(
   return true;
 }
 
-bool TBSCertificateInfo::LoadFieldsFromASN(const ASNElement& input, std::stringstream* commentsOnFailure) {
+bool TBSCertificateInfo::Organization::LoadFromASN(const ASNElement& input, std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("TBSCertificateInfo::LoadFieldsFromASN");
   MapList<std::string, ASNObject, MathRoutines::HashString> fields;
   if (!ASNObject::LoadFieldsFromASNSequence(input, fields, commentsOnFailure)) {
@@ -1446,7 +1465,7 @@ bool TBSCertificateInfo::LoadFieldsFromASN(const ASNElement& input, std::strings
   return this->LoadFields(fields, commentsOnFailure);
 }
 
-bool TBSCertificateInfo::LoadFields(
+bool TBSCertificateInfo::Organization::LoadFields(
   const MapList<std::string, ASNObject, MathRoutines::HashString>& fields,
   std::stringstream* commentsOnFailure
 ) {
@@ -1486,6 +1505,12 @@ bool TBSCertificateInfo::LoadFields(
 
 bool TBSCertificateInfo::LoadFromASNEncoded(const ASNElement& input, std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("TBSCertificateInfo::LoadFromASNEncoded");
+  if (input.theElements.size < 7) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Certificate ASN element needs at least 7 fields. ";
+    }
+    return false;
+  }
   if (!input.HasSubElementOfType(
     {0, 0}, {}, this->version, commentsOnFailure
   )) {
@@ -1494,7 +1519,6 @@ bool TBSCertificateInfo::LoadFromASNEncoded(const ASNElement& input, std::string
     }
     return false;
   }
-
   if (!input.HasSubElementOfType(
     {1}, {}, this->serialNumber, commentsOnFailure
   )) {
@@ -1516,34 +1540,27 @@ bool TBSCertificateInfo::LoadFromASNEncoded(const ASNElement& input, std::string
     }
     return false;
   }
-  const ASNElement* certificateFieldsASN = nullptr;
-  if (!input.HasSubElementConst({3}, {}, &certificateFieldsASN, commentsOnFailure)) {
+  if (!this->issuer.LoadFromASN(input.theElements[3], commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to get sequence of certificate fields. ";
+      *commentsOnFailure << "Failed to load issuer (authority that signed the certificate). ";
     }
     return false;
   }
-  if (!this->LoadFieldsFromASN(*certificateFieldsASN, commentsOnFailure)) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to read certificate fields. ";
-    }
-    return false;
-  }
-  const ASNElement* validityASN = nullptr;
-  if (!input.HasSubElementConst({4}, {}, &validityASN, commentsOnFailure)) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to extract certificate validity. ";
-    }
-    return false;
-  }
-  if (!this->LoadValidityFromASN(*validityASN, commentsOnFailure)) {
+  if (!this->LoadValidityFromASN(input.theElements[4], commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to load validity. ";
     }
     return false;
   }
+  if (!this->subject.LoadFromASN(input.theElements[5], commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to load subject (owner of advertised public key). ";
+    }
+    return false;
+  }
+
   if (!input.HasSubElementOfType(
-    {6, 1, 0, 1}, {}, this->theRSA.theModuluS, commentsOnFailure
+    {6, 1, 0, 1}, {}, this->subjectPublicKey.theModuluS, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to read RSA modulus. ";
@@ -1551,7 +1568,7 @@ bool TBSCertificateInfo::LoadFromASNEncoded(const ASNElement& input, std::string
     return false;
   }
   if (!input.HasSubElementOfType(
-    {6, 1, 0, 0}, {}, this->theRSA.theExponenT, commentsOnFailure
+    {6, 1, 0, 0}, {}, this->subjectPublicKey.theExponenT, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to read public key. ";
@@ -1581,7 +1598,10 @@ bool X509Certificate::LoadFromASNEncoded(
   if (!this->information.LoadFromASNEncoded(*certificate, commentsOnFailure)) {
     return false;
   }
-  if (this->information.theRSA.theModuluS == 0 || this->information.theRSA.theExponenT == 0) {
+  if (
+    this->information.subjectPublicKey.theModuluS == 0 ||
+    this->information.subjectPublicKey.theExponenT == 0
+  ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Invalid RSA modulus or exponent. ";
     }

@@ -77,6 +77,7 @@ public:
   std::string GetType() const;
   bool isTime() const;
   void MakeSequence(int numberOfEmptyElements);
+  void MakeSet(int numberOfEmptyElements);
   void MakeNull();
   void MakeInteger(const LargeIntUnsigned& input);
   void MakeObjectId(const List<unsigned char>& input);
@@ -172,6 +173,7 @@ public:
     const std::string& fieldName
   );
   static std::string ToStringAllRecognizedObjectIds();
+  void ComputeASN(ASNElement& output);
   void WriteBytesASNObject(List<unsigned char>& output);
   std::string ToString() const;
 };

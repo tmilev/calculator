@@ -87,7 +87,9 @@ bool CalculatorHtmlFunctions::innerSetInputBox(
 ) {
   MacroRegisterFunctionWithName("CalculatorHtmlFunctions::innerUserInputBox");
   MapList<std::string, Expression, MathRoutines::HashString> theArguments;
-  if (!CalculatorConversions::innerLoadKeysFromStatementList(theCommands, input, theArguments, &theCommands.Comments)) {
+  if (!CalculatorConversions::innerLoadKeysFromStatementList(
+    theCommands, input, theArguments, &theCommands.Comments
+  )) {
     return false;
   }
   if (!theArguments.Contains("name")) {

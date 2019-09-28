@@ -512,7 +512,9 @@ void ASNElement::ToJSON(JSData& output) const {
     output[ASNElement::JSLabels::body] = Crypto::ConvertListUnsignedCharsToHex(this->ASNAtom, 0, false);
     if (
       this->tag == AbstractSyntaxNotationOneSubsetDecoder::tags::utf8String0x0c ||
-      this->tag == AbstractSyntaxNotationOneSubsetDecoder::tags::printableString0x13
+      this->tag == AbstractSyntaxNotationOneSubsetDecoder::tags::printableString0x13 ||
+      this->tag == AbstractSyntaxNotationOneSubsetDecoder::tags::UTCTime0x17 ||
+      this->tag == AbstractSyntaxNotationOneSubsetDecoder::tags::dateTime0x21
     ) {
       output[ASNElement::JSLabels::interpretation] = this->ASNAtom.ToStringConcatenate();
     }
@@ -1034,6 +1036,10 @@ std::string ASNObject::ToStringAllRecognizedObjectIds() {
   return out.str();
 }
 
+const List<unsigned char>& ASNObject::ObjectIdFromNameNoFail(const std::string& input) {
+  return ASNObject::NamesToObjectIdsNonThreadSafe().GetValueConstCrashIfNotPresent(input).objectId.ASNAtom;
+}
+
 bool ASNObject::LoadFieldsFromASNSequence(
   const ASNElement& input,
   MapList<std::string, ASNObject, MathRoutines::HashString>& output,
@@ -1179,6 +1185,29 @@ void TBSCertificateInfo::ComputeASNVersionWrapper(ASNElement& output) {
   output.theElements.AddOnTop(versionInteger);
 }
 
+void ASNElement::MakeBitString(const List<unsigned char>& input) {
+  this->reset();
+  this->startByte = AbstractSyntaxNotationOneSubsetDecoder::tags::bitString0x03;
+  this->tag = this->startByte;
+  this->ASNAtom = input;
+}
+
+void TBSCertificateInfo::ComputeASNSignature(ASNElement& output) {
+  output.MakeSequence(2);
+  std::cout << "DEBUG: here I am !!!!!!!!!!!!!!!!!!!!";
+  output.comment = "signature";
+  output[0].MakeSequence(2);
+  output[0][0].MakeObjectId(ASNObject::ObjectIdFromNameNoFail(ASNObject::names::sha256WithRSAEncryption));
+  output[0][1].MakeNull();
+  ASNElement signatureSerializer;
+  signatureSerializer.MakeSequence(2);
+  signatureSerializer[0].MakeInteger(this->subjectPublicKey.theExponenT);
+  signatureSerializer[1].MakeInteger(this->subjectPublicKey.theModuluS);
+  List<unsigned char> serializedSignature;
+  signatureSerializer.WriteBytesConst(serializedSignature);
+  output[1].MakeBitString(serializedSignature);
+}
+
 void TBSCertificateInfo::ComputeASN(ASNElement& output) {
   output.MakeSequence(8);
   this->ComputeASNVersionWrapper(output[0]);
@@ -1192,6 +1221,7 @@ void TBSCertificateInfo::ComputeASN(ASNElement& output) {
   output[4].comment = "Validity";
   this->subject.ComputeASN(output[5]);
   output[5].comment = "Subject [entity advertising its public key identity]";
+  this->ComputeASNSignature(output[6]);
 }
 
 void ASNObject::ComputeASN(ASNElement& output) {

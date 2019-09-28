@@ -80,6 +80,7 @@ public:
   void MakeSet(int numberOfEmptyElements);
   void MakeNull();
   void MakeInteger(const LargeIntUnsigned& input);
+  void MakeBitString(const List<unsigned char>& input);
   void MakeObjectId(const List<unsigned char>& input);
   template <typename thisPointerType>
   static bool HasSubElementTemplate(
@@ -174,6 +175,7 @@ public:
     const MapList<std::string, ASNObject, MathRoutines::HashString>& inputFields,
     const std::string& fieldName
   );
+  static const List<unsigned char>& ObjectIdFromNameNoFail(const std::string& input);
   static std::string ToStringAllRecognizedObjectIds();
   void ComputeASN(ASNElement& output);
   std::string ToString() const;

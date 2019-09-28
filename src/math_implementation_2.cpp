@@ -110,7 +110,7 @@ void LargeIntUnsigned::GetHexBigEndian(
   output.assign(result.TheObjects, static_cast<unsigned>(result.size));
 }
 
-void LargeIntUnsigned::WriteBigEndianBytes(List<unsigned char>& output) const {
+void LargeIntUnsigned::WriteBigEndianBytes(List<unsigned char>& outputAppend, bool leadingZeroPad) const {
   LargeIntUnsigned remainder = *this;
   List<unsigned char> digitsReveredOrder;
   while (remainder > 0) {
@@ -118,9 +118,21 @@ void LargeIntUnsigned::WriteBigEndianBytes(List<unsigned char>& output) const {
     digitsReveredOrder.AddOnTop(static_cast<unsigned char>(nextDigit));
     remainder /= 256;
   }
-  output.Reserve(output.size + digitsReveredOrder.size);
+  int padWithZero = 0;
+  if (leadingZeroPad) {
+    if (digitsReveredOrder.size > 0) {
+      if (digitsReveredOrder[digitsReveredOrder.size - 1] >= 128) {
+        padWithZero = 1;
+
+      }
+    }
+  }
+  outputAppend.Reserve(outputAppend.size + digitsReveredOrder.size + padWithZero);
+  if (padWithZero == 1) {
+    outputAppend.AddOnTop(0);
+  }
   for (int i = digitsReveredOrder.size - 1; i >= 0; i --) {
-    output.AddOnTop(digitsReveredOrder[i]);
+    outputAppend.AddOnTop(digitsReveredOrder[i]);
   }
 }
 

@@ -54,6 +54,7 @@ public:
   int lengthPromised;
   int offset;
   bool flagIsConstructed;
+  bool flagHeaderPadded;
   std::string error;
   std::string comment;
   List<unsigned char> ASNAtom;
@@ -63,6 +64,7 @@ public:
   bool hasBit7Set() const;
   bool hasBit8Set() const;
   bool hasCostructedStartByte() const;
+  void resetExceptContent();
   void reset();
   bool isIntegerUnsigned(LargeIntUnsigned* whichInteger, std::stringstream* commentsOnFalse) const;
   bool isInteger(LargeInt* whichInteger, std::stringstream* commentsOnFalse) const;
@@ -77,10 +79,12 @@ public:
   std::string GetType() const;
   bool isTime() const;
   void MakeSequence(int numberOfEmptyElements);
+  void MakeSequence(const List<ASNElement>& input);
   void MakeSet(int numberOfEmptyElements);
   void MakeNull();
   void MakeInteger(const LargeIntUnsigned& input);
-  void MakeBitString(const List<unsigned char>& input);
+  void MakeBitStrinG(const List<unsigned char>& input);
+  void MakeBitStringEmpty(bool setLeadingBit, bool setSecondMostSignificantBit, bool setConstructed);
   void MakeObjectId(const List<unsigned char>& input);
   template <typename thisPointerType>
   static bool HasSubElementTemplate(
@@ -134,6 +138,9 @@ public:
   class names {
   public:
     static std::string sha256WithRSAEncryption;
+    static std::string subjectKeyIdentifier   ;
+    static std::string authorityKeyIdentifier ;
+    static std::string basicConstraints       ;
     static std::string countryName            ;
     static std::string stateOrProvinceName    ;
     static std::string localityName           ;
@@ -206,9 +213,11 @@ class AbstractSyntaxNotationOneSubsetDecoder {
 public:
   struct tags {
     static const unsigned char reserved0 = 0;
+    static const unsigned char boolean0x01 = 1;
     static const unsigned char integer0x02 = 2;
     static const unsigned char bitString0x03 = 3;
     static const unsigned char octetString0x04 = 4;
+    static const unsigned char null0x05; // cannot initialize here: gcc linker bug?
     static const unsigned char objectIdentifier0x06 = 6;
     static const unsigned char utf8String0x0c = 12;
     static const unsigned char sequence0x10 = 16;
@@ -220,7 +229,6 @@ public:
     static const unsigned char timeOfDay0x20 = 32;
     static const unsigned char dateTime0x21 = 33;
     static const unsigned char duration0x22 = 34;
-    static const unsigned char null0x05;
     static const unsigned char anyType0xff = 255; // Used exclusively for type matching.
   };
   // writes fixed lenght encodings.

@@ -548,7 +548,7 @@ bool LargeIntUnsigned::Test::SerializationToHex(const LargeIntUnsigned& input) {
     crash << "Function Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst is not supposed to return false. " << crash;
   }
   List<unsigned char> serialization;
-  input.WriteBigEndianBytes(serialization);
+  input.WriteBigEndianBytes(serialization, true);
   resultByteSerializationHex = Crypto::ConvertListUnsignedCharsToHex(serialization, 0, false);
   if (resultByteSerializationHex != resultCryptoHex) {
     crash << "Byte serialization hex: " << resultByteSerializationHex

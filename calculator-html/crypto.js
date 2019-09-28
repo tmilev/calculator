@@ -210,13 +210,15 @@ AbstractSyntaxOne.prototype.appendAnnotationTree = function(
   }
   currentHead.innerHTML = headHTML;
   currentElement.appendChild(currentHead);
+  var annotationElementPeer = currentInterpretation.dom;
+  var elementsToAttachTo = [currentHead, annotationElementPeer.header];
   if (currentInterpretation.children !== undefined) {
     for (var counter = 0; counter < currentInterpretation.children.length; counter ++) {
       this.appendAnnotationTree(currentElement, currentInterpretation.children[counter]);
     }
+  } else {
+    elementsToAttachTo.push(annotationElementPeer.body);
   }
-  var annotationElementPeer = currentInterpretation.dom;
-  var elementsToAttachTo = [currentHead, annotationElementPeer.header];
   for (var counter = 0; counter < elementsToAttachTo.length; counter ++) {
     var theElement = elementsToAttachTo[counter];
     theElement.addEventListener(

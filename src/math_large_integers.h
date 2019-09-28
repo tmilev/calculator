@@ -130,7 +130,7 @@ public:
   bool operator<(const LargeIntUnsigned& other) const;
   bool operator>=(const LargeIntUnsigned& other) const;
   bool operator>(const LargeIntUnsigned& other) const;
-  void WriteBigEndianBytes(List<unsigned char>& output) const;
+  void WriteBigEndianBytes(List<unsigned char>& outputAppend, bool leadingZeroPad) const;
   void GetHexBigEndian(int numberOfLeadingZeroesToPadWith, std::string& output) const;
   //must be rewritten:
   double GetDoubleValue() const;

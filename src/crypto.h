@@ -90,17 +90,23 @@ public:
   ASNElement signature;
   ASNElement validityNotBefore;
   ASNElement validityNotAfter;
-  bool LoadValidityFromASN(
+  List<ASNElement> extensions;
+  bool LoadValidity(
     const ASNElement& input,
     std::stringstream* commentsOnFailure
   );
-  bool LoadFromASNEncoded(const ASNElement& input, std::stringstream* commentsOnFailure);
+  bool Load(const ASNElement& input, std::stringstream* commentsOnFailure);
+  bool LoadExtensions(
+    const ASNElement& input,
+    std::stringstream* commentsOnFailure
+  );
   std::string ToString();
   void ComputeASN(ASNElement& output);
   void ComputeASNVersionWrapper(ASNElement& output);
   void ComputeASNValidityWrapper(ASNElement& output);
   void ComputeASNSignatureAlgorithmIdentifier(ASNElement& output);
   void ComputeASNSignature(ASNElement& output);
+  void ComputeASNExtensions(ASNElement& output);
 };
 
 // For definition, google RFC 5280

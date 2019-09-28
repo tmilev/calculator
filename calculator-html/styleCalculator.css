@@ -1501,7 +1501,7 @@ span.abstractSyntaxOneElement {
   word-break: break-all;
 }
 
-div.abstractSyntaxOneElementTree {
+div.abstractSyntaxOneElementTree div.abstractSyntaxOneElementTree  {
   border-left: solid 1px black;
   word-break: break-all;
   padding-left: 5px

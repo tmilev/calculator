@@ -667,8 +667,16 @@ TransportLayerSecurityServer::TransportLayerSecurityServer() {
   this->spoofer.owner = this;
 }
 
+bool TransportLayerSecurityServer::NetworkSpoofer::WriteBytesOnce() {
+  this->outgoingMessages.AddOnTop(this->owner->nextServerMessage);
+  return true;
+}
+
 bool TransportLayerSecurityServer::WriteBytesOnce(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("TransportLayerSecurityServer::WriteBytesOnce");
+  if (this->spoofer.flagDoSpoof) {
+    return this->spoofer.WriteBytesOnce();
+  }
   struct timeval tv; //<- code involving tv taken from stackexchange
   tv.tv_sec = 5;  // 5 Secs Timeout
   tv.tv_usec = 0;  // Not init'ing this can cause strange errors
@@ -692,13 +700,13 @@ bool TransportLayerSecurityServer::NetworkSpoofer::ReadBytesOnce(
 ) {
   logWorker << logger::red
   << "Transport layer security server is spoofing the network. " << logger::endL;
-  if (this->currentMessageIndex < 0 || this->currentMessageIndex >= this->messages.size) {
+  if (this->currentMessageIndex < 0 || this->currentMessageIndex >= this->incomingMessages.size) {
     if (commentsOnError != nullptr) {
       *commentsOnError << "No available spoofed messages. ";
     }
     return false;
   }
-  this->owner->lastRead.body = this->messages[this->currentMessageIndex];
+  this->owner->lastRead.body = this->incomingMessages[this->currentMessageIndex];
   return true;
 }
 
@@ -1618,7 +1626,7 @@ bool TransportLayerSecurityServer::HandShakeIamServer(int inputSocketID, std::st
   if (!success) {
     logWorker << logger::red << commentsOnFailure->str() << logger::endL;
   }
-  crash << "Handshake i am server not implemented yet. " << crash;
+  //crash << "Handshake i am server not implemented yet. " << crash;
   return false;
 }
 

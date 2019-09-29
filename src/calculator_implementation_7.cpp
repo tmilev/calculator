@@ -16,6 +16,7 @@
 #include "math_extra_latex_routines.h"
 #include "source_code_formatter.h"
 #include <cmath>
+#include "transport_layer_security.h"
 
 extern ProjectInformationInstance ProjectInfoVpf6_3cpp;
 ProjectInformationInstance ProjectInfoVpf6_3cpp(__FILE__, "Calculator built-in functions. ");
@@ -202,11 +203,30 @@ bool CalculatorFunctionsGeneral::innerTestTLSMessageSequence(
   if (!theCommands.GetVectoR(input, inputMessages)) {
     return theCommands << "Failed to extract inputs vector of strings. ";
   }
+  TransportLayerSecurityServer spoofServer;
+  spoofServer.spoofer.flagDoSpoof = true;
+  spoofServer.spoofer.incomingMessages = inputMessages;
+  spoofServer.spoofer.currentMessageIndex = 0;
+  std::stringstream errorStream;
+  spoofServer.HandShakeIamServer(- 1, &errorStream);
+
   std::stringstream out;
-  out << "Input strings: ";
-  for (int i = 0; i < inputMessages.size; i ++) {
-    out << "<br>" << Crypto::ConvertStringToHex(inputMessages[i], 40, true);
+  out << errorStream.str();
+  out << "<hr>Result strings: ";
+  for (int i = 0; i < spoofServer.spoofer.outgoingMessages.size; i ++) {
+    out << "<br>String " << i + 1 << "<br>"
+    << Crypto::ConvertListUnsignedCharsToHex(
+      spoofServer.spoofer.outgoingMessages[i], 40, true
+    );
   }
+
+  out << "<hr>Input strings: ";
+  for (int i = 0; i < inputMessages.size; i ++) {
+    out << "<br>String " << i + 1 << "<br>"
+    << Crypto::ConvertStringToHex(inputMessages[i], 40, true);
+  }
+
+
   return output.AssignValue(out.str(), theCommands);
 }
 

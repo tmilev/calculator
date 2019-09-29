@@ -246,10 +246,12 @@ public:
   public:
     TransportLayerSecurityServer* owner;
     bool flagDoSpoof;
-    List<List<unsigned char> > messages;
+    List<List<unsigned char> > incomingMessages;
+    List<List<unsigned char> > outgoingMessages;
     int currentMessageIndex;
     NetworkSpoofer();
     bool ReadBytesOnce(std::stringstream* commentsOnError);
+    bool WriteBytesOnce();
   };
   NetworkSpoofer spoofer;
   X509Certificate certificate;
@@ -277,7 +279,7 @@ public:
   bool DecodeSSLRecord(std::stringstream* commentsOnFailure);
   bool ReplyToClientHello(int inputSocketID, std::stringstream* commentsOnFailure);
   bool ReadBytesDecodeOnce(std::stringstream* commentsOnFailure);
-  bool WriteBytesOnce(std::stringstream *commentsOnFailure);
+  bool WriteBytesOnce(std::stringstream* commentsOnFailure);
 };
 
 class TransportLayerSecurity {

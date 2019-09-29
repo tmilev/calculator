@@ -63,6 +63,7 @@ public:
   static bool innerLoadKnownCertificates(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTestLoadPEMCertificates(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTestLoadPEMPrivateKey(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerTestTLSMessageSequence(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerJWTverifyAgainstKnownKeys(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerJWTverifyAgainstRSA256(Calculator& theCommands, const Expression& input, Expression& output);

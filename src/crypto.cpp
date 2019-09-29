@@ -554,7 +554,7 @@ bool Crypto::ConvertHexToString(const std::string& input, std::string& output, s
     // characters appearing at even positions:
     if (input[i] == '\n' || input[i] == ' ') {
       i ++;
-      if (i > input.size()) {
+      if (i >= input.size()) {
         break;
       }
     }

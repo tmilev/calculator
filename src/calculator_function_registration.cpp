@@ -803,6 +803,23 @@ void Calculator::initPredefinedInnerFunctions() {
     "TestLoadPEMPrivateKey"
   );
   this->AddOperationInnerHandler(
+    "TestTLSMessageSequence",
+    CalculatorFunctionsGeneral::innerTestTLSMessageSequence,
+    "",
+    "Creates a TLS server and test-sends "
+    "messages to it starting with the client hello. "
+    "The first message sent will be the client hello. "
+    "The second message will be the reply to server messages, "
+    "and so on. ",
+    "TestTLSMessageSequence(ConvertHexToString("
+    "LoadFileIntoString(\"test/message_client_ssl_0.hex\")"
+    "));\n",
+    true,
+    true,
+    "CalculatorFunctionsGeneral::innerTestTLSMessageSequence",
+    "TestTLSMessageSequence"
+  );
+  this->AddOperationInnerHandler(
     "TestASN1Decode",
     CalculatorFunctionsGeneral::innerTestASN1Decode,
     "",
@@ -1408,7 +1425,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "",
     "This is a calculator testing function. Grows a Dynkin "
     "type inside an ambient Dynkin type. ",
-    "GrowDynkinType(A^30_1+d^30_4, e_6); GrowDynkinType(g^35_2+B^30_2, e_6);",
+    "GrowDynkinType(A^30_1+d^30_4, e_6);\n"
+    "GrowDynkinType(g^35_2+B^30_2, e_6);",
     true,
     false,
     "CalculatorFunctionsGeneral::innerGrowDynkinType",
@@ -1433,8 +1451,10 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctionsGeneral::outerPolynomialize,
     "",
     "Polynomialize(a) is equivalent to MakeExpression(Polynomial(a)).",
-    "C= (c a + a b +b c + 1 )^3;\n"
-    "A = Polynomialize(C);B=MakeExpression(Polynomial(C)); A-B",
+    "C = (c a + a b +b c + 1 )^3;\n"
+    "A = Polynomialize(C); "
+    "B=MakeExpression(Polynomial(C)); "
+    "A-B",
     true,
     false,
     "CalculatorFunctionsGeneral::outerPolynomialize",
@@ -1504,7 +1524,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "\\int",
     CalculatorFunctionsGeneral::innerIntegrateXnDiffX,
     "",
-    "Integrates x^n dx.  ",
+    "Integrates x^n dx. ",
     "\\int x dx ",
     true,
     false,
@@ -1515,7 +1535,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "\\int",
     CalculatorFunctionsGeneral::innerIntegrateEpowerAxDiffX,
     "",
-    "If a is a number, integrates e^{a x} dx.  ",
+    "If a is a number, integrates e^{a x} dx. ",
     "\\int x dx ",
     true,
     false,
@@ -1548,7 +1568,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "\\int",
     CalculatorFunctionsGeneral::innerIntegrateSqrtXsquaredMinusOne,
     "",
-    "Integrates \\int \\sqrt{x^2-a}dx, a>0.  ",
+    "Integrates \\int \\sqrt{x^2-a}dx, a > 0.  ",
     "\\int 2\\sqrt{3x^2-5} dx ",
     true,
     false,
@@ -1847,7 +1867,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "Differentiation - division rule, commutative. "
     "For the time being differentiation is assumed to be over commutative rings. "
     "This might change in the future. "
-    "The commutative division rule is d/dx (f/g^n)= ((d/dx f) g- n f (d/dx g))/g^{n + 1}. ",
+    "The commutative division rule is "
+    "d/dx (f/g^n) = ((d/dx f) g- n f (d/dx g))/g^{n + 1}. ",
     "Differentiate(x, f/g ); Differentiate(x, f/g^5 ); Differentiate(x, f/g^n )",
     true,
     false,
@@ -1976,8 +1997,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "MakeMatrixTensorForm",
     CalculatorConversions::innerMatrixRationalTensorForm,
     "",
-    "Same as MakeMatrix but uses different c++ implementation (class MatrixTensor instead of class Matrix). ",
-    "s_1=MakeMatrixTensorForm{}((- 1,- 1,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)); ",
+    "Same as MakeMatrix but uses different c++ implementation "
+    "(class MatrixTensor instead of class Matrix). ",
+    "s_1 = MakeMatrixTensorForm{}("
+    "(- 1,- 1, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1)"
+    "); ",
     true,
     false,
     "CalculatorConversions::innerMatrixRationalTensorForm",
@@ -1998,12 +2022,14 @@ void Calculator::initPredefinedInnerFunctions() {
     "FourierTransformDO",
     CalculatorFunctionsGeneral::innerFourierTransformEWA,
     "",
-    "Fourier-transforms an element of a Weyl algebra. Multiplies each monomial "
+    "Fourier-transforms an element of a Weyl algebra. "
+    "Multiplies each monomial "
     "term of odd total degree by - 1 "
-    "(total degree = sum of degrees in the polynomial variables plus the degrees of the differential variables. ",
+    "(total degree = sum of degrees in the polynomial "
+    "variables plus the degrees of the differential variables. ",
     "x = ElementWeylAlgebraPoly{}(\\partial, x);\n"
     "\\partial = ElementWeylAlgebraDO{}(\\partial, x);\n"
-    "a =x^3+x\\partial; b=\\partial x +\\partial^3+\\partial;\n"
+    "a =x^3 + x\\partial; b = \\partial x + \\partial^3 + \\partial;\n"
     "[FourierTransformDO{}a,FourierTransformDO{}b]"
     "-FourierTransformDO{}[a,b]",
     true,
@@ -2020,17 +2046,28 @@ void Calculator::initPredefinedInnerFunctions() {
     "one side of the normal and so that the general vectors "
     "have as little zero scalar products with the normal as possible. ",
     "PerturbSplittingNormal{}((0,0,0,0), ("
-    "(- 1, -2, -2, -2), (- 1, - 1, -2, -2), (0, - 1, -2, -2), (- 1, - 1, - 1, - 1), (0, - 1, - 1, - 1),"
-    "(0, 0, - 1, - 1), (- 1, - 1, 0, 0), (0, - 1, 0, 0), (- 1, 0, 0, 0), (1, 0, 0, 0), (0, 1, 0, 0), (1, 1, 0, 0),"
-    "(0, 0, 1, 1), (0, 1, 1, 1), (1, 1, 1, 1), (0, 1, 2, 2), (1, 1, 2, 2), (1, 2, 2, 2)),"
+    "(- 1, -2, -2, -2), (- 1, - 1, -2, -2), (0, - 1, -2, -2), "
+    "(- 1, - 1, - 1, - 1), (0, - 1, - 1, - 1),"
+    "(0, 0, - 1, - 1), (- 1, - 1, 0, 0), (0, - 1, 0, 0), "
+    "(- 1, 0, 0, 0), (1, 0, 0, 0), (0, 1, 0, 0), (1, 1, 0, 0),"
+    "(0, 0, 1, 1), (0, 1, 1, 1), (1, 1, 1, 1), "
+    "(0, 1, 2, 2), (1, 1, 2, 2), (1, 2, 2, 2)),"
     "("
-    "(-2, -3, -4, -2), (- 1, -3, -4, -2), (- 1, -2, -4, -2), (- 1, -2, -3, -2), (- 1, -2, -2, -2), (- 1, -2, -3, - 1),"
-    "(- 1, - 1, -2, -2), (- 1, -2, -2, - 1), (0, - 1, -2, -2), (- 1, - 1, -2, - 1), (- 1, -2, -2, 0),"
-    "(0, - 1, -2, - 1), (- 1, - 1, - 1, - 1), (- 1, - 1, -2, 0), (0, - 1, - 1, - 1), (0, - 1, -2, 0), (- 1, - 1, - 1, 0),"
-    "(0, 0, - 1, - 1), (0, - 1, - 1, 0), (- 1, - 1, 0, 0), (0, 0, 0, - 1), (0, 0, - 1, 0), (0, - 1, 0, 0), (- 1, 0, 0, 0),"
-    "(1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1), (1, 1, 0, 0), (0, 1, 1, 0), (0, 0, 1, 1), (1, 1, 1, 0),"
-    "(0, 1, 2, 0), (0, 1, 1, 1), (1, 1, 2, 0), (1, 1, 1, 1), (0, 1, 2, 1), (1, 2, 2, 0), (1, 1, 2, 1), (0, 1, 2, 2), (1, 2, 2, 1),"
-    "(1, 1, 2, 2), (1, 2, 3, 1), (1, 2, 2, 2), (1, 2, 3, 2), (1, 2, 4, 2), (1, 3, 4, 2), (2, 3, 4, 2)))",
+    "(-2, -3, -4, -2), (- 1, -3, -4, -2), (- 1, -2, -4, -2), "
+    "(- 1, -2, -3, -2), (- 1, -2, -2, -2), (- 1, -2, -3, - 1),"
+    "(- 1, - 1, -2, -2), (- 1, -2, -2, - 1), (0, - 1, -2, -2), "
+    "(- 1, - 1, -2, - 1), (- 1, -2, -2, 0),"
+    "(0, - 1, -2, - 1), (- 1, - 1, - 1, - 1), (- 1, - 1, -2, 0), "
+    "(0, - 1, - 1, - 1), (0, - 1, -2, 0), (- 1, - 1, - 1, 0),"
+    "(0, 0, - 1, - 1), (0, - 1, - 1, 0), (- 1, - 1, 0, 0), "
+    "(0, 0, 0, - 1), (0, 0, - 1, 0), (0, - 1, 0, 0), (- 1, 0, 0, 0),"
+    "(1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1), "
+    "(1, 1, 0, 0), (0, 1, 1, 0), (0, 0, 1, 1), (1, 1, 1, 0),"
+    "(0, 1, 2, 0), (0, 1, 1, 1), (1, 1, 2, 0), (1, 1, 1, 1), "
+    "(0, 1, 2, 1), (1, 2, 2, 0), (1, 1, 2, 1), (0, 1, 2, 2), "
+    "(1, 2, 2, 1),"
+    "(1, 1, 2, 2), (1, 2, 3, 1), (1, 2, 2, 2), (1, 2, 3, 2), "
+    "(1, 2, 4, 2), (1, 3, 4, 2), (2, 3, 4, 2)))",
     true,
     false,
     "Calculator::innerPerturbSplittingNormal",
@@ -2131,7 +2168,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "WeylGroupOuterConjugacyClassesFromAllElements",
     CalculatorFunctionsWeylGroup::innerWeylGroupOuterConjugacyClassesFromAllElements,
     "",
-    "Computes conjugacy classes, identifying classes that are conjugate using outer automorphisms.",
+    "Computes conjugacy classes, identifying classes that "
+    "are conjugate using outer automorphisms. ",
     "WeylGroupOuterConjugacyClassesFromAllElements{}(D_4);",
     true,
     true,
@@ -2167,7 +2205,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "WeylGroupCharTable",
     CalculatorFunctionsWeylGroup::innerWeylGroupLoadOrComputeCharTable,
     "",
-    "Loads the character table of a Weyl group. The character tables are hard-coded.",
+    "Loads the character table of a Weyl group. "
+    "The character tables are hard-coded.",
     "WeylGroupCharTable{}(b_3);",
     true,
     false,
@@ -2179,7 +2218,8 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctionsWeylGroup::innerWeylGroupIrrepsAndCharTableComputeFromScratch,
     "",
     "<b>Work in progress. Please do not use.</b> "
-    "Computes from scratch the irreducible representations and the character table of a Weyl group.",
+    "Computes from scratch the irreducible representations "
+    "and the character table of a Weyl group.",
     "WeylGroupIrrepsAndCharTableComputeFromScratch{}(b_3);",
     true,
     true,
@@ -2214,7 +2254,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "WeylGroupOrbitOuterSimple",
     CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple,
     "",
-    "Generates a Weyl outer orbit printout from simple coords. The outer orbit is the orbit "
+    "Generates a Weyl outer orbit printout from simple coords. "
+    "The outer orbit is the orbit "
     "under the Weyl group extended with the outer automoprhisms of the Weyl group. "
     "First argument = type. Second argument = weight in simple coords. "
     "The orbit size is cut off at 1921*2 elements. ",
@@ -2270,7 +2311,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "MakeWeight",
     CalculatorFunctionsWeylGroup::innerLieAlgebraWeight,
     "",
-    "Makes a weight. First argument = type. Second argument = coordinate. "
+    "Makes a weight. First argument = type. "
+    "Second argument = coordinate. "
     "Third argument = one of the keywords epsilon, simple, "
     "fundamental, standing for the coordinate system. ",
     "\\varepsilon_{{a}}=MakeWeight{}(B_3, a, epsilon);\n"
@@ -2957,7 +2999,8 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctionsGeneral::innerPolynomialDivisionRemainder,
     "",
     "Returns the remainder after taking quotient of a "
-    "polynomial divided by a set of polynomials using the default monomial order (lexicographic).",
+    "polynomial divided by a set of polynomials "
+    "using the default monomial order (lexicographic).",
     "PolyDivRemainder{}(x^7+6x y+5x y^8+y^5, x +y^2- 1, y^3-x y) ;",
     true,
     false,
@@ -2980,7 +3023,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "PolyDivSlidesGrLex",
     CalculatorFunctionsGeneral::innerPolynomialDivisionSlidesGrLex,
     "",
-    "Creates a slide with the polynomial disivion algorithm. First element = starting slide number.",
+    "Creates a slide with the polynomial disivion algorithm. "
+    "First element = starting slide number.",
     "PolyDivSlidesGrLex{}(1,x^3+x + 10, x +2) ; PolyDivSlidesGrLex{}(1,x +y+ 10, x + 1,y- 1) ",
     true,
     false,
@@ -3126,7 +3170,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "First argument = recepient email, "
     "second argument = content, "
     "third argument = subject. ",
-    "SendEmailWithMailGun(\"todor.milev@gmail.com\",\"A testing email. \", \"[Do not reply] Test email. \")",
+    "SendEmailWithMailGun("
+    "\"todor.milev@gmail.com\","
+    "\"A testing email. \", "
+    "\"[Do not reply] Test email. \""
+    ")",
     true,
     false,
     "CalculatorFunctionsGeneral::innerSendEmailWithMailGun",
@@ -3265,7 +3313,8 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctionsGeneral::innerPlotImplicitFunction,
     "",
     "Plots implicitly a curve given by the zeros of an expression in the letters "
-    "x and y. The relation between x and y is assumed continuous at the points where it is defined. "
+    "x and y. The relation between x and y is "
+    "assumed continuous at the points where it is defined. "
     "The function has not been optimized for speed, please use with care. "
     "The first argument gives the relation between x and y, the next two arguments give "
     "the lower left and upper right corners of the viewing screen in the format "
@@ -3331,8 +3380,12 @@ void Calculator::initPredefinedInnerFunctions() {
     "r =MakeInputBox (name =radiusSmall, value = 0.6, min = 0.2, max =1, step = 0.2);"
     "uSegments = MakeInputBox(name = uSegments, value = 22, min = 8, max =40);"
     "vSegments = MakeInputBox(name = vSegments, value = 4, min = 2, max =10);"
-    "PlotSurface((x, y, z), u\\in(0, 2\\pi), v\\in(-r,r), color1=blue, color2= cyan, numSegments1=uSegments, numSegments2=vSegments) + "
-    "PlotSurface(( x + 2, z, y),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2= pink, numSegments1=uSegments, numSegments2=vSegments); ",
+    "PlotSurface("
+    "(x, y, z), u\\in(0, 2\\pi), v\\in(-r,r), "
+    "color1=blue, color2= cyan, numSegments1=uSegments, numSegments2=vSegments"
+    ") + "
+    "PlotSurface(( x + 2, z, y), u\\in(0, 2\\pi), v\\in(-r,r), "
+    "color1=red, color2= pink, numSegments1=uSegments, numSegments2=vSegments); ",
     true,
     false,
     "CalculatorFunctionsGeneral::innerPlotSurface",
@@ -3343,7 +3396,8 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctionsGeneral::innerPlotParametricCurve,
     "",
     "Plots a curve sitting in 2-dimensional space. "
-    "The first and second argument give the x and y coordinate functions; the curve parameter must be t."
+    "The first and second argument give the x and y "
+    "coordinate functions; the curve parameter must be t."
     "The third and fourth argument give the start/finish range for t. "
     "The next argument gives the curve color. "
     "The next argument gives the curve width. "

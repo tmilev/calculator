@@ -649,6 +649,12 @@ void TransportLayerSecurityServer::initialize() {
   this->initializeCipherSuites();
 }
 
+TransportLayerSecurityServer::NetworkSpoofer::NetworkSpoofer() {
+  this->flagDoSpoof = false;
+  this->currentMessageIndex = - 1;
+  this->owner = nullptr;
+}
+
 TransportLayerSecurityServer::TransportLayerSecurityServer() {
   this->socketId = - 1;
   this->millisecondsDefaultTimeOut = 5000;
@@ -658,6 +664,7 @@ TransportLayerSecurityServer::TransportLayerSecurityServer() {
   this->serverHelloCertificate.owner = this;
   this->serverHelloKeyExchange.owner = this;
   this->serverHelloStart.owner = this;
+  this->spoofer.owner = this;
 }
 
 bool TransportLayerSecurityServer::WriteBytesOnce(std::stringstream* commentsOnFailure) {
@@ -680,8 +687,26 @@ bool TransportLayerSecurityServer::WriteBytesOnce(std::stringstream* commentsOnF
   return numBytesSent >= 0;
 }
 
-bool TransportLayerSecurityServer::ReadBytesOnce() {
+bool TransportLayerSecurityServer::NetworkSpoofer::ReadBytesOnce(
+  std::stringstream* commentsOnError
+) {
+  logWorker << logger::red
+  << "Transport layer security server is spoofing the network. " << logger::endL;
+  if (this->currentMessageIndex < 0 || this->currentMessageIndex >= this->messages.size) {
+    if (commentsOnError != nullptr) {
+      *commentsOnError << "No available spoofed messages. ";
+    }
+    return false;
+  }
+  this->owner->lastRead.body = this->messages[this->currentMessageIndex];
+  return true;
+}
+
+bool TransportLayerSecurityServer::ReadBytesOnce(std::stringstream* commentsOnError) {
   MacroRegisterFunctionWithName("TransportLayerSecurityServer::ReadBytesOnce");
+  if (this->spoofer.flagDoSpoof) {
+    return this->spoofer.ReadBytesOnce(commentsOnError);
+  }
   struct timeval tv; //<- code involving tv taken from stackexchange
   tv.tv_sec = 5;  // 5 Secs Timeout
   tv.tv_usec = 0;  // Not init'ing this can cause strange errors
@@ -696,6 +721,7 @@ bool TransportLayerSecurityServer::ReadBytesOnce() {
   if (numBytesInBuffer >= 0) {
     this->lastRead.body.SetSize(numBytesInBuffer);
   }
+  logWorker << "Read bytes:\n" << Crypto::ConvertListUnsignedCharsToHex(this->lastRead.body, 40, false) << logger::endL;
   return numBytesInBuffer > 0;
 }
 
@@ -1454,7 +1480,7 @@ bool TransportLayerSecurityServer::DecodeSSLRecord(std::stringstream* commentsOn
 
 bool TransportLayerSecurityServer::ReadBytesDecodeOnce(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("TransportLayerSecurityServer::ReadBytesDecodeOnce");
-  if (!this->ReadBytesOnce()) {
+  if (!this->ReadBytesOnce(commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to read bytes. ";
     }

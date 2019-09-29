@@ -194,6 +194,22 @@ bool CalculatorFunctionsGeneral::innerTestLoadPEMCertificates(Calculator& theCom
   return output.AssignValue(resultStream.str(), theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerTestTLSMessageSequence(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestTLSMessageSequence");
+  Vector<std::string> inputMessages;
+  if (!theCommands.GetVectoR(input, inputMessages)) {
+    return theCommands << "Failed to extract inputs vector of strings. ";
+  }
+  std::stringstream out;
+  out << "Input strings: ";
+  for (int i = 0; i < inputMessages.size; i ++) {
+    out << "<br>" << Crypto::ConvertStringToHex(inputMessages[i], 40, true);
+  }
+  return output.AssignValue(out.str(), theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerTestLoadPEMPrivateKey(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestLoadPEMPrivateKey");
   std::string privateKeyString;

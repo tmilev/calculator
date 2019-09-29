@@ -242,6 +242,16 @@ public:
 
 class TransportLayerSecurityServer {
 public:
+  class NetworkSpoofer {
+  public:
+    TransportLayerSecurityServer* owner;
+    bool flagDoSpoof;
+    List<List<unsigned char> > messages;
+    int currentMessageIndex;
+    NetworkSpoofer();
+    bool ReadBytesOnce(std::stringstream* commentsOnError);
+  };
+  NetworkSpoofer spoofer;
   X509Certificate certificate;
   PrivateKeyRSA privateKey;
   // Ordered by preference (lower index = more preferred):
@@ -263,10 +273,10 @@ public:
   void initializeCipherSuites();
   TransportLayerSecurityServer();
   bool HandShakeIamServer(int inputSocketID, std::stringstream* commentsOnFailure);
-  bool ReadBytesOnce();
+  bool ReadBytesOnce(std::stringstream* commentsOnError);
   bool DecodeSSLRecord(std::stringstream* commentsOnFailure);
   bool ReplyToClientHello(int inputSocketID, std::stringstream* commentsOnFailure);
-  bool ReadBytesDecodeOnce(std::stringstream *commentsOnFailure);
+  bool ReadBytesDecodeOnce(std::stringstream* commentsOnFailure);
   bool WriteBytesOnce(std::stringstream *commentsOnFailure);
 };
 

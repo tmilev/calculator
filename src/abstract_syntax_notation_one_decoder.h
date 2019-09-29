@@ -80,10 +80,18 @@ public:
   bool isTime() const;
   void MakeSequence(int numberOfEmptyElements);
   void MakeSequence(const List<ASNElement>& input);
-  void MakeSet(int numberOfEmptyElements);
+  // The following method
+  // serialize an object like a sequence but
+  // changes the tag to a bitstring.
+  // While this is awkward,
+  // it is in fact used for public key and
+  // certificate extension serializations.
+  void MakeBitStringSequence(const List<ASNElement>& input);
+  void MakeSet(int numberOfEmptyElements, bool setLeadingBit, bool setSecondMostSignificantBit, bool constructed);
   void MakeNull();
   void MakeInteger(const LargeIntUnsigned& input);
   void MakeBitStrinG(const List<unsigned char>& input);
+  void SetStartByteFlags(bool setLeadingBit, bool setSecondMostSignificantBit, bool setConstructed);
   void MakeBitStringEmpty(bool setLeadingBit, bool setSecondMostSignificantBit, bool setConstructed);
   void MakeObjectId(const List<unsigned char>& input);
   template <typename thisPointerType>
@@ -138,6 +146,7 @@ public:
   class names {
   public:
     static std::string sha256WithRSAEncryption;
+    static std::string RSAEncryption          ;
     static std::string subjectKeyIdentifier   ;
     static std::string authorityKeyIdentifier ;
     static std::string basicConstraints       ;

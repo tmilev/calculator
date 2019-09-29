@@ -973,6 +973,7 @@ MapList<List<unsigned char>, ASNObject, MathRoutines::HashListUnsignedChars>& AS
 }
 
 std::string ASNObject::names::sha256WithRSAEncryption = "sha256WithRSAEncryption";
+std::string ASNObject::names::RSAEncryption           = "RSAEncryption"          ;
 std::string ASNObject::names::countryName             = "countryName"            ;
 std::string ASNObject::names::stateOrProvinceName     = "stateOrProvinceName"    ;
 std::string ASNObject::names::localityName            = "localityName"           ;
@@ -991,6 +992,12 @@ MapList<std::string, ASNObject, MathRoutines::HashString>& ASNObject::NamesToObj
       container,
       ASNObject::names::sha256WithRSAEncryption ,
       "2a864886f70d01010b",
+      AbstractSyntaxNotationOneSubsetDecoder::tags::null0x05
+    );
+    ASNObject::initializeAddSample(
+      container,
+      ASNObject::names::RSAEncryption ,
+      "2a864886f70d010101",
       AbstractSyntaxNotationOneSubsetDecoder::tags::null0x05
     );
     ASNObject::initializeAddSample(
@@ -1207,10 +1214,11 @@ void ASNElement::MakeNull() {
   this->startByte = AbstractSyntaxNotationOneSubsetDecoder::tags::null0x05;
 }
 
-void ASNElement::MakeSet(int numberOfEmptyElements) {
+void ASNElement::MakeSet(int numberOfEmptyElements, bool setLeadingBit, bool setSecondMostSignificantBit, bool constructed) {
   this->reset();
   this->tag = AbstractSyntaxNotationOneSubsetDecoder::tags::set0x11;
   this->startByte = this->tag;
+  this->SetStartByteFlags(setLeadingBit, setSecondMostSignificantBit, constructed);
   this->theElements.SetSize(numberOfEmptyElements);
 }
 
@@ -1249,10 +1257,7 @@ void TBSCertificateInfo::ComputeASNVersionWrapper(ASNElement& output) {
   output.theElements.AddOnTop(versionInteger);
 }
 
-void ASNElement::MakeBitStringEmpty(bool setLeadingBit, bool setSecondMostSignificantBit, bool setConstructed) {
-  this->reset();
-  this->tag = AbstractSyntaxNotationOneSubsetDecoder::tags::bitString0x03;
-  this->startByte = this->tag;
+void ASNElement::SetStartByteFlags(bool setLeadingBit, bool setSecondMostSignificantBit, bool setConstructed) {
   if (setLeadingBit) {
     this->startByte += 128;
   }
@@ -1262,6 +1267,13 @@ void ASNElement::MakeBitStringEmpty(bool setLeadingBit, bool setSecondMostSignif
   if (setConstructed) {
     this->startByte += 32;
   }
+}
+
+void ASNElement::MakeBitStringEmpty(bool setLeadingBit, bool setSecondMostSignificantBit, bool setConstructed) {
+  this->reset();
+  this->tag = AbstractSyntaxNotationOneSubsetDecoder::tags::bitString0x03;
+  this->startByte = this->tag;
+  this->SetStartByteFlags(setLeadingBit, setSecondMostSignificantBit, setConstructed);
   this->ASNAtom.SetSize(0);
   this->theElements.SetSize(0);
 }
@@ -1277,7 +1289,7 @@ void TBSCertificateInfo::ComputeASNSignature(ASNElement& output) {
   output.MakeSequence(2);
   output.comment = "signature";
   output[0].MakeSequence(2);
-  output[0][0].MakeObjectId(ASNObject::ObjectIdFromNameNoFail(ASNObject::names::sha256WithRSAEncryption));
+  output[0][0].MakeObjectId(ASNObject::ObjectIdFromNameNoFail(ASNObject::names::RSAEncryption));
   output[0][1].MakeNull();
   output[1].MakeBitStringEmpty(false, false, false);
   output[1].theElements.SetSize(1);
@@ -1307,18 +1319,22 @@ void TBSCertificateInfo::ComputeASN(ASNElement& output) {
   this->ComputeASNExtensions(output[7]);
 }
 
+void ASNElement::MakeBitStringSequence(const List<ASNElement>& input) {
+  this->MakeSequence(input);
+  this->tag = AbstractSyntaxNotationOneSubsetDecoder::tags::bitString0x03;
+  this->startByte = this->tag + 128 + 32;
+  for (int i = 0; i < this->theElements.size; i ++) {
+    this->theElements[i].WriteBytesUpdatePromisedLength(this->ASNAtom);
+  }
+  this->lengthPromised = this->ASNAtom.size;
+}
+
 void TBSCertificateInfo::ComputeASNExtensions(ASNElement& output) {
-  output.reset();
-  output.MakeBitStringEmpty(true, false, true);
-  output.theElements.SetSize(1);
-  ASNElement& serializer = output[0];
-  serializer.MakeSequence(this->extensions);
-  serializer.WriteBytesUpdatePromisedLength(output.ASNAtom);
-  output.lengthPromised = output.ASNAtom.size;
+  output.MakeBitStringSequence(this->extensions);
 }
 
 void ASNObject::ComputeASN(ASNElement& output) {
-  output.MakeSet(1);
+  output.MakeSet(1, false, false, true);
   output[0].MakeSequence(2);
   output[0][0] = this->objectId;
   output[0][1] = this->content;
@@ -1652,8 +1668,8 @@ bool TBSCertificateInfo::LoadValidity(
     }
     return false;
   }
-  this->validityNotAfter = input.theElements[0];
-  this->validityNotBefore = input.theElements[1];
+  this->validityNotBefore = input.theElements[0];
+  this->validityNotAfter = input.theElements[1];
   return true;
 }
 
@@ -1679,7 +1695,7 @@ bool TBSCertificateInfo::Organization::LoadFields(
   numberOfLoadedFields += this->commonName.LoadField(
     fields, ASNObject::names::commonName
   );
-  numberOfLoadedFields += this->commonName.LoadField(
+  numberOfLoadedFields += this->countryName.LoadField(
     fields, ASNObject::names::countryName
   );
   numberOfLoadedFields += this->emailAddress.LoadField(
@@ -1702,6 +1718,47 @@ bool TBSCertificateInfo::Organization::LoadFields(
       *commentsOnFailure << "Failed to recognize "
       << (fields.size() - numberOfLoadedFields)
       << " fields in your certificate. ";
+    }
+    return false;
+  }
+  return true;
+}
+
+bool TBSCertificateInfo::LoadASNAlgorithmIdentifier(
+  const ASNElement &input,
+  ASNElement& output,
+  std::stringstream* commentsOnFailure
+) {
+  if (
+    input.tag != AbstractSyntaxNotationOneSubsetDecoder::tags::sequence0x10 ||
+    input.theElements.size != 2
+  ) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Algorithm identifier outer layer must be a sequence of two elements. ";
+    }
+    return false;
+  }
+  if (!input.HasSubElementGetCopy(
+    {0}, {
+      AbstractSyntaxNotationOneSubsetDecoder::tags::objectIdentifier0x06
+    },
+    output,
+    commentsOnFailure
+  )) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to get signature algorithm id. ";
+    }
+    return false;
+  }
+  if (!input.HasSubElementConst(
+    {1}, {
+      AbstractSyntaxNotationOneSubsetDecoder::tags::null0x05
+    },
+    nullptr,
+    commentsOnFailure
+  )) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Signature algorithm id must end in null. ";
     }
     return false;
   }
@@ -1732,16 +1789,11 @@ bool TBSCertificateInfo::Load(const ASNElement& input, std::stringstream* commen
     }
     return false;
   }
-  if (!input.HasSubElementGetCopy(
-    {2, 0}, {
-      AbstractSyntaxNotationOneSubsetDecoder::tags::sequence0x10,
-      AbstractSyntaxNotationOneSubsetDecoder::tags::objectIdentifier0x06
-    },
-    this->signatureAlgorithmIdentifier,
-    commentsOnFailure
+  if (!this->LoadASNAlgorithmIdentifier(
+    input.theElements[2], this->signatureAlgorithmIdentifier, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to get signature algorithm id. ";
+      *commentsOnFailure << "Failed to load certificate signature algorithm identifier. ";
     }
     return false;
   }
@@ -1805,16 +1857,30 @@ bool X509Certificate::LoadFromASNEncoded(
     }
     return false;
   }
-  const ASNElement* certificate = nullptr;
-  if (!this->sourceASN.HasSubElementConst({0}, {}, &certificate, commentsOnFailure)) {
+  if (this->sourceASN.theElements.size != 3) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to get certificate ASN. ";
+      *commentsOnFailure << "Certificate ASN needs exactly three elements. ";
     }
     return false;
   }
-  if (!this->information.Load(*certificate, commentsOnFailure)) {
+  if (!this->information.Load(this->sourceASN[0], commentsOnFailure)) {
     return false;
   }
+  if (this->sourceASN[2].tag != AbstractSyntaxNotationOneSubsetDecoder::tags::bitString0x03) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Third element of certificate is required to be a bit string. ";
+    }
+    return false;
+  }
+  if (!this->information.LoadASNAlgorithmIdentifier(
+    this->sourceASN[1], this->signatureAlgorithmId, commentsOnFailure
+  )) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to load signature algorithm id. ";
+    }
+    return false;
+  }
+  this->signatureValue = this->sourceASN[2];
   return true;
 }
 

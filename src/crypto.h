@@ -100,6 +100,9 @@ public:
     const ASNElement& input,
     std::stringstream* commentsOnFailure
   );
+  static bool LoadASNAlgorithmIdentifier(
+    const ASNElement& input, ASNElement& output, std::stringstream* commentsOnFailure
+  );
   std::string ToString();
   void ComputeASN(ASNElement& output);
   void ComputeASNVersionWrapper(ASNElement& output);

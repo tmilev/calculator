@@ -213,20 +213,22 @@ bool CalculatorFunctionsGeneral::innerTestTLSMessageSequence(
   std::stringstream out;
   out << errorStream.str();
   out << "<hr>Result strings: ";
+  out << "<span class = 'hexContainerStandard'>";
   for (int i = 0; i < spoofServer.spoofer.outgoingMessages.size; i ++) {
     out << "<br>String " << i + 1 << "<br>"
     << Crypto::ConvertListUnsignedCharsToHex(
       spoofServer.spoofer.outgoingMessages[i], 40, true
     );
   }
+  out << "</span>";
 
   out << "<hr>Input strings: ";
+  out << "<span class = 'hexContainerStandard'>";
   for (int i = 0; i < inputMessages.size; i ++) {
     out << "<br>String " << i + 1 << "<br>"
     << Crypto::ConvertStringToHex(inputMessages[i], 40, true);
   }
-
-
+  out << "</span>";
   return output.AssignValue(out.str(), theCommands);
 }
 

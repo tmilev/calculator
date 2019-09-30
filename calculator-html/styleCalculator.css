@@ -1472,6 +1472,10 @@ input:checked + .slider:before {
   background: white;
 }
 
+span.hexContainerStandard {
+  font-family: 'Courier New', Courier, monospace;
+}
+
 span.abstractSyntaxOneAnnotation {
   position: relative;
   display: inline-block;

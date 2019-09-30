@@ -811,7 +811,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "The first message sent will be the client hello. "
     "The second message will be the reply to server messages, "
     "and so on. ",
-    "TestTLSMessageSequence(ConvertHexToString("
+    "%HideLHS\nTestTLSMessageSequence(ConvertHexToString("
     "LoadFileIntoString(\"test/message_client_ssl_0.hex\")"
     "));\n",
     true,

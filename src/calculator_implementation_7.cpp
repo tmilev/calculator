@@ -205,22 +205,18 @@ bool CalculatorFunctionsGeneral::innerTestTLSMessageSequence(
   }
   TransportLayerSecurityServer spoofServer;
   spoofServer.spoofer.flagDoSpoof = true;
-  spoofServer.spoofer.incomingMessages = inputMessages;
-  spoofServer.spoofer.currentMessageIndex = 0;
+  spoofServer.spoofer.incomingBytes = inputMessages;
+  spoofServer.spoofer.currentInputMessageIndex = 0;
   std::stringstream errorStream;
   spoofServer.HandShakeIamServer(- 1, &errorStream);
 
   std::stringstream out;
   out << errorStream.str();
   out << "<hr>Result strings: ";
-  out << "<span class = 'hexContainerStandard'>";
-  for (int i = 0; i < spoofServer.spoofer.outgoingMessages.size; i ++) {
-    out << "<br>String " << i + 1 << "<br>"
-    << Crypto::ConvertListUnsignedCharsToHex(
-      spoofServer.spoofer.outgoingMessages[i], 40, true
-    );
-  }
-  out << "</span>";
+  std::stringstream spanId;
+  spanId << "spanServerSpoofer_" << "_" << theGlobalVariables.GetElapsedMilliseconds();
+  out << "<span class = '" << spanId.str() << "'></span>";
+  out << "<script> </script>";
 
   out << "<hr>Input strings: ";
   out << "<span class = 'hexContainerStandard'>";

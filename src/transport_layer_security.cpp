@@ -651,7 +651,7 @@ void TransportLayerSecurityServer::initialize() {
 
 TransportLayerSecurityServer::NetworkSpoofer::NetworkSpoofer() {
   this->flagDoSpoof = false;
-  this->currentMessageIndex = - 1;
+  this->currentInputMessageIndex = - 1;
   this->owner = nullptr;
 }
 
@@ -667,24 +667,32 @@ TransportLayerSecurityServer::TransportLayerSecurityServer() {
   this->spoofer.owner = this;
 }
 
-bool TransportLayerSecurityServer::NetworkSpoofer::WriteBytesOnce() {
-  this->outgoingMessages.AddOnTop(this->owner->nextServerMessage);
+bool TransportLayerSecurityServer::NetworkSpoofer::WriteSSLRecords(List<SSLRecord>& input) {
+  this->outgoingMessages.AddOnTop(input);
   return true;
 }
 
-bool TransportLayerSecurityServer::WriteBytesOnce(std::stringstream* commentsOnFailure) {
-  MacroRegisterFunctionWithName("TransportLayerSecurityServer::WriteBytesOnce");
+bool TransportLayerSecurityServer::WriteSSLRecords(List<SSLRecord> &input, std::stringstream *commentsOnFailure) {
   if (this->spoofer.flagDoSpoof) {
-    return this->spoofer.WriteBytesOnce();
+    return this->spoofer.WriteSSLRecords(input);
   }
+  this->nextOutgoingBytes.SetSize(0);
+  for (int i = 0; i < input.size; i ++) {
+    input[i].WriteBytes(this->nextOutgoingBytes);
+  }
+  return this->WriteBytesOnce(this->nextOutgoingBytes, commentsOnFailure);
+}
+
+bool TransportLayerSecurityServer::WriteBytesOnce(List<unsigned char>& input, std::stringstream* commentsOnFailure) {
+  MacroRegisterFunctionWithName("TransportLayerSecurityServer::WriteBytesOnce");
   struct timeval tv; //<- code involving tv taken from stackexchange
   tv.tv_sec = 5;  // 5 Secs Timeout
   tv.tv_usec = 0;  // Not init'ing this can cause strange errors
   setsockopt(this->socketId, SOL_SOCKET, SO_RCVTIMEO, static_cast<void*>(&tv), sizeof(timeval));
   ssize_t numBytesSent = send(
     this->socketId,
-    this->nextServerMessage.TheObjects,
-    static_cast<size_t>(this->nextServerMessage.size),
+    input.TheObjects,
+    static_cast<size_t>(input.size),
     0
   );
   if (numBytesSent < 0) {
@@ -700,13 +708,14 @@ bool TransportLayerSecurityServer::NetworkSpoofer::ReadBytesOnce(
 ) {
   logWorker << logger::red
   << "Transport layer security server is spoofing the network. " << logger::endL;
-  if (this->currentMessageIndex < 0 || this->currentMessageIndex >= this->incomingMessages.size) {
+  if (this->currentInputMessageIndex < 0 || this->currentInputMessageIndex >= this->incomingBytes.size) {
     if (commentsOnError != nullptr) {
       *commentsOnError << "No available spoofed messages. ";
     }
     return false;
   }
-  this->owner->lastRead.body = this->incomingMessages[this->currentMessageIndex];
+  this->owner->lastIncomingBytes = this->incomingBytes[this->currentInputMessageIndex];
+  this->currentInputMessageIndex ++;
   return true;
 }
 
@@ -1585,24 +1594,21 @@ void SSLRecord::PrepareServerHello2Certificate() {
 bool TransportLayerSecurityServer::ReplyToClientHello(int inputSocketID, std::stringstream *commentsOnFailure) {
   (void) commentsOnFailure;
   (void) inputSocketID;
-  this->nextServerMessage.SetSize(0);
+  this->nextOutgoingBytes.SetSize(0);
 
   this->serverHelloStart.PrepareServerHello1Start(this->lastRead);
   if (this->serverHelloStart.content.theType != SSLContent::tokens::serverHello) {
     crash << "DEBUG: this should be so" << crash;
   }
-  this->serverHelloStart.WriteBytes(this->nextServerMessage);
   this->serverHelloCertificate.PrepareServerHello2Certificate();
-  this->serverHelloCertificate.WriteBytes(this->nextServerMessage);
+  this->serverHelloStart.WriteBytes(this->nextOutgoingBytes);
+  this->serverHelloCertificate.WriteBytes(this->nextOutgoingBytes);
+  if (this->spoofer.flagDoSpoof) {
+    logWorker << "Spoofed network write of " << this->nextOutgoingBytes.size << " bytes. ";
+    return true;
+  }
 
-  //logWorker << "Incoming message:\n" << this->lastRead.hello.getStringHighlighter()
-  //<< Crypto::ConvertListUnsignedCharsToHex(this->lastRead.body, 0, false)
-  //<< logger::endL;
-  // logWorker << "DEBUG: Bytes written:\n"
-  // << this->serverHelloStart.content.getStringHighlighter()
-  // << Crypto::ConvertListUnsignedCharsToHex(this->nextServerMessage, 0, false) << logger::endL;
-  // logWorker << "DEBUG: Record written:\n" << this->serverHelloStart.ToString() << logger::endL;
-  if (!this->WriteBytesOnce(commentsOnFailure)) {
+  if (!this->WriteBytesOnce(this->nextOutgoingBytes, commentsOnFailure)) {
     logWorker << "Error replying to client hello. ";
     if (commentsOnFailure != nullptr) {
       // logWorker << "DEBUG: commentsOnFailure: " << commentsOnFailure->str();

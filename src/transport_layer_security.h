@@ -233,7 +233,7 @@ public:
   std::string ToBytes() const;
   std::string ToString() const;
   std::string ToStringType() const;
-
+  std::string ToJSON() const;
 
   void PrepareServerHello1Start(SSLRecord& clientHello);
   void PrepareServerHello2Certificate();
@@ -246,12 +246,12 @@ public:
   public:
     TransportLayerSecurityServer* owner;
     bool flagDoSpoof;
-    List<List<unsigned char> > incomingMessages;
-    List<List<unsigned char> > outgoingMessages;
-    int currentMessageIndex;
+    List<List<SSLRecord> > outgoingMessages;
+    List<List<unsigned char> > incomingBytes;
+    int currentInputMessageIndex;
     NetworkSpoofer();
     bool ReadBytesOnce(std::stringstream* commentsOnError);
-    bool WriteBytesOnce();
+    bool WriteSSLRecords(List<SSLRecord>& input);
   };
   NetworkSpoofer spoofer;
   X509Certificate certificate;
@@ -268,10 +268,14 @@ public:
   SSLRecord serverHelloStart;
   SSLRecord serverHelloCertificate;
   SSLRecord serverHelloKeyExchange;
-  List<unsigned char> nextServerMessage;
+
+  List<unsigned char> lastIncomingBytes;
+  List<unsigned char> nextOutgoingBytes;
+  List<SSLRecord> outgoingRecords;
+
   CipherSuiteSpecification GetCipherCrashIfUnknown(int inputId);
   void AddSupportedCipher(int inputId);
-  void initialize();
+    void initialize();
   void initializeCipherSuites();
   TransportLayerSecurityServer();
   bool HandShakeIamServer(int inputSocketID, std::stringstream* commentsOnFailure);
@@ -279,7 +283,8 @@ public:
   bool DecodeSSLRecord(std::stringstream* commentsOnFailure);
   bool ReplyToClientHello(int inputSocketID, std::stringstream* commentsOnFailure);
   bool ReadBytesDecodeOnce(std::stringstream* commentsOnFailure);
-  bool WriteBytesOnce(std::stringstream* commentsOnFailure);
+  bool WriteBytesOnce(List<unsigned char>& input, std::stringstream* commentsOnFailure);
+  bool WriteSSLRecords(List<SSLRecord>& input, std::stringstream* commentsOnFailure);
 };
 
 class TransportLayerSecurity {

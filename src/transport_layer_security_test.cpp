@@ -42,7 +42,7 @@ bool SSLRecord::Test::Serialization() {
     crash << "Failed to decode built-in message." << crash;
   }
   List<unsigned char> encoded;
-  theRecord.WriteBytes(encoded);
+  theRecord.WriteBytes(encoded, nullptr);
   if (encoded != theRecord.body) {
     logServer << "Decoded:\n" << theRecord.content.getStringHighlighter()
     << Crypto::ConvertListUnsignedCharsToHex(theRecord.body, 0, false) << logger::endL;

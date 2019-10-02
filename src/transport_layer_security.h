@@ -191,12 +191,12 @@ public:
   std::string ToStringVersion() const;
   // As the name suggests, this will append the output bytes, without
   // wiping the already existing contents of output.
-  void WriteBytes(List<unsigned char>& output) const;
+  void WriteBytes(List<unsigned char>& output, JSData* annotation) const;
   // Writes the message header, using zeroes instead of the message length
   void WriteType(List<unsigned char>& output) const;
   void WriteVersion(List<unsigned char>& output) const;
-  void WriteBytesHandshakeClientHello(List<unsigned char>& output) const;
-  void WriteBytesHandshakeServerHello(List<unsigned char>& output) const;
+  void WriteBytesHandshakeClientHello(List<unsigned char>& output, JSData* annotation) const;
+  void WriteBytesHandshakeServerHello(List<unsigned char>& output, JSData* annotation) const;
   void WriteBytesHandshakeCertificate(List<unsigned char>& output) const;
   void WriteBytesRandomAndSessionId(List<unsigned char>& output) const;
   void WriteBytesSupportedCiphers(List<unsigned char>& output) const;
@@ -210,6 +210,7 @@ public:
   class JSLabels {
   public:
     static std::string body;
+    static std::string children;
   };
   class tokens {
   public:
@@ -237,11 +238,11 @@ public:
   std::string ToBytes() const;
   std::string ToString() const;
   std::string ToStringType() const;
-  JSData ToJSON() const;
+  JSData ToJSON();
 
   void PrepareServerHello1Start(SSLRecord& clientHello);
   void PrepareServerHello2Certificate();
-  void WriteBytes(List<unsigned char>& output) const;
+  void WriteBytes(List<unsigned char>& output, JSData* annotation) const;
 };
 
 class TransportLayerSecurityServer {

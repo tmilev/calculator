@@ -2978,7 +2978,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}  )",
     true,
     false,
-    "Calculator::innerLCMPoly", "LCMPoly"
+    "Calculator::innerLCMPoly",
+    "LCMPoly"
   );
   this->AddOperationInnerHandler(
     "Interpolate",
@@ -5310,7 +5311,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "to the most experimental, latest and greatest algorithm. "
     "Argument must be of type semisimple Lie subalgebras. ",
     "ComputeFKFT( ComputeSemisimpleSubalgebras(c_3))",
-    false, false,
+    false,
+    false,
     "CalculatorFunctionsGeneral::innerComputePairingTablesAndFKFTsubalgebras",
     "ComputeFKFT"
   );
@@ -5321,7 +5323,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "Computes the semisimple subalgebras of a semisimple "
     "Lie algebra and creates a data structure containing them. ",
     "ComputeSemisimpleSubalgebras(A_2)",
-    false, false,
+    false,
+    false,
     "CalculatorFunctionsGeneral::innerComputeSemisimpleSubalgebras",
     "ComputeSemisimpleSubalgebras"
   );
@@ -5360,7 +5363,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "<b>This function is being developed and is not implemented fully yet.</b> "
     "Prints the semisimple subalgebras of a semisimple Lie algebra. ",
     "PrintSemisimpleSubalgebrasRecompute(C_3)",
-    false, false,
+    false,
+    false,
     "Calculator::innerPrintSSsubalgebrasRecompute",
     "PrintSemisimpleSubalgebrasRecompute"
   );
@@ -5371,7 +5375,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "<b>This function is being developed and is not implemented fully yet.</b> "
     "Prints the semisimple subalgebra candidates of a Lie algebra. ",
     "PrintSemisimpleSubalgebrasNoCentralizers(A_3)",
-    false, false,
+    false,
+    false,
     "Calculator::innerPrintSSsubalgebrasNoCentralizers",
     "PrintSemisimpleSubalgebrasNoCentralizers"
   );
@@ -5382,7 +5387,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "<b>This function is being developed and is not implemented fully yet.</b>"
     "Prints the semisimple subalgebras of a semisimple Lie algebra. ",
     "PrintSemisimpleSubalgebrasFull{}(A_2)",
-    false, false,
+    false,
+    false,
     "Calculator::innerPrintSSsubalgebrasNilradicals",
     "PrintSemisimpleSubalgebrasFull"
   );
@@ -5484,7 +5490,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "the value of poly at the k points. This gives a "
     "finite set of possibilities for the divisors, "
     "as interpolated by Lagrange polynomials.",
-    "FactorOneVarPolyOverRationals{}(x^{8}-44x^{6}+438x^{4}- 1292x^{2}+529);"
+    "FactorOneVarPolyOverRationals{}(x^{8}-44x^{6}+438x^{4}- 1292x^{2}+529);\n"
     "FactorOneVarPolyOverRationals{}(x^{8}+2x^{7}-3x^{6}-4x^{5}+6x^{4}+2x^{3}- 13x^{2}+ 1)",
     true,
     false,
@@ -5496,7 +5502,10 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctionsGeneral::innerFactorInteger,
     "",
     "Factors an integer, assuming the integer is small enough. ",
-    "FactorInteger(10001011); FactorInteger(1); FactorInteger(- 10); FactorInteger(0);",
+    "FactorInteger(10001011);\n"
+    "FactorInteger(1);\n"
+    "FactorInteger(- 10);\n"
+    "FactorInteger(0);",
     true,
     false,
     "Calculator::innerFactorInteger",
@@ -5655,7 +5664,16 @@ void Calculator::initPredefinedStandardOperations() {
     "If the second child Y of X is a list starting with EndStatement(;), "
     "then X is replaced with the second, third, ... children of Y. "
     "If Y is not a list starting with EndStatement, X is replaced with Y.",
-    "c = (a =b);\na;\nc;\na;\nd = (e = f; g=h);\nd;\ne;\nMelt{}d;\ne;\ng;  ",
+    "c = (a =b);\n"
+    "a;\n"
+    "c;\n"
+    "a;\n"
+    "d = (e = f; g=h);\n"
+    "d;\n"
+    "e;\n"
+    "Melt{}d;\n"
+    "e;\n"
+    "g;",
     true
   );
   this->AddOperationOuterHandler(
@@ -5691,7 +5709,7 @@ void Calculator::initPredefinedStandardOperations() {
     this->opRational(),
     this->opRational(),
     "Adds two rational numbers. ",
-    "2+3",
+    "2 + 3",
     true,
     false,
     "CalculatorFunctionsBinaryOps::innerAddRatToRat",
@@ -5703,7 +5721,7 @@ void Calculator::initPredefinedStandardOperations() {
     this->opRational(),
     this->opEltZmodP(),
     "Adds elements of Z_p. ",
-    " (2 mod  7) +3",
+    "(2 mod 7) + 3",
     true,
     false,
     "CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat"
@@ -5714,7 +5732,7 @@ void Calculator::initPredefinedStandardOperations() {
     this->opEltZmodP(),
     this->opRational(),
     "Adds elements of Z_p. ",
-    " (2 mod  7) +3",
+    "(2 mod 7) + 3",
     true,
     false,
     "CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat"
@@ -5725,7 +5743,7 @@ void Calculator::initPredefinedStandardOperations() {
     this->opEltZmodP(),
     this->opEltZmodP(),
     "Adds elements of Z_p. ",
-    " (2 mod  7) +3",
+    "(2 mod 7) + 3",
     true,
     false,
     "CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat"
@@ -6249,7 +6267,7 @@ void Calculator::initPredefinedStandardOperations() {
     "*",
     CalculatorFunctionsGeneral::outerDifferentiateWRTxTimesAny,
     "",
-    "Replaces Differentiate{}(x)*a by  Differentiate{}(x,a).",
+    "Replaces Differentiate{}(x)*a by Differentiate{}(x,a).",
     "d/dx (1/x) ",
     true,
     false,
@@ -6358,7 +6376,7 @@ void Calculator::initPredefinedStandardOperations() {
     "hardware double multiplication routine. ",
     "DoubleValue{}(1/3)*3;\n"
     "DoubleValue{}((101)^{20});\n"
-    "DoubleValue{}(DoubleValue{}((101)^{20}) +DoubleValue{}(1))-DoubleValue{}(101^{20})",
+    "DoubleValue{}(DoubleValue{}((101)^{20}) + DoubleValue{}(1)) - DoubleValue{}(101^{20})",
     true,
     false,
     "CalculatorFunctionsBinaryOps::innerMultiplyDoubleOrRatByDoubleOrRat"
@@ -6397,8 +6415,8 @@ void Calculator::initPredefinedStandardOperations() {
     "Multiplies two semisimple Lie algebra finite dimensional characters and decomposes using the "
     "Brauer-Klimyk formula, Humphreys J. Introduction to Lie algebras and representation theory, "
     "page 142, exercise 9. ",
-    "x =MakeCharacterLieAlg{}(G_2, (1,0));\n"
-    "y =MakeCharacterLieAlg{}(G_2, (0,1));\n"
+    "x = MakeCharacterLieAlg{}(G_2, (1,0));\n"
+    "y = MakeCharacterLieAlg{}(G_2, (0,1));\n"
     "x*y",
     true,
     false,
@@ -6410,7 +6428,9 @@ void Calculator::initPredefinedStandardOperations() {
     this->opRational(),
     this->opElementWeylAlgebra(),
     "Multiplies rational or polynomial or element Weyl algebra by rational or polynomial or element Weyl algebra. ",
-    "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}= Polynomial{}x_i; 3\\partial_i",
+    "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n"
+    "x_{{i}}= Polynomial{}x_i;\n"
+    "3\\partial_i",
     true,
     false,
     "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA"
@@ -6461,7 +6481,9 @@ void Calculator::initPredefinedStandardOperations() {
     this->opPoly(),
     this->opRational(),
     "Multiplies polynomial by a rational (polynomial comes first). ",
-    "2*Polynomial{}(a +b);\nPolynomial{}(a +b)/2;\nPolynomial{}((a +b)^3)*Polynomial{}((a +c)^3);",
+    "2*Polynomial{}(a +b);\n"
+    "Polynomial{}(a +b)/2;\n"
+    "Polynomial{}((a +b)^3)*Polynomial{}((a +c)^3);",
     true,
     false,
     "CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly"
@@ -6472,7 +6494,9 @@ void Calculator::initPredefinedStandardOperations() {
     this->opRational(),
     this->opPoly(),
     "Multiplies rational by a polynomial (rational comes first). ",
-    "2*Polynomial{}(a +b);\nPolynomial{}(a +b)/2;\nPolynomial{}((a +b)^3)*Polynomial{}((a +c)^3);",
+    "2*Polynomial{}(a + b);\n"
+    "Polynomial{}(a + b)/2;\n"
+    "Polynomial{}((a + b)^3) * Polynomial{}((a + c)^3);",
     true,
     false,
     "CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly"
@@ -6483,7 +6507,9 @@ void Calculator::initPredefinedStandardOperations() {
     this->opPoly(),
     this->opPoly(),
     "Multiplies two polynomials. ",
-    "2*Polynomial{}(a +b);\nPolynomial{}(a +b)/2;\nPolynomial{}((a +b)^3)*Polynomial{}((a +c)^3);",
+    "2*Polynomial{}(a +b);\n"
+    "Polynomial{}(a +b)/2;\n"
+    "Polynomial{}((a +b)^3) * Polynomial{}((a +c)^3);",
     true,
     false,
     "CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly"
@@ -6560,7 +6586,12 @@ void Calculator::initPredefinedStandardOperations() {
     this->opMatTensorRat(),
     this->opMatTensorRat(),
     "Multiplies matrix rational by matrix tensor. ",
-    "M=MakeMatrixTensorForm{}((1,1), (0,1)); M; M*M; M*M*M; M*M*M*M; 2*M ",
+    "M=MakeMatrixTensorForm{}((1,1), (0,1));\n"
+    "M;\n"
+    "M*M;\n"
+    "M*M*M;\n"
+    "M*M*M*M;\n"
+    "2*M",
     true,
     false,
     "CalculatorFunctionsBinaryOps::innerMultiplyMatrixTensorOrRationalByMatrixTensor"
@@ -6571,7 +6602,12 @@ void Calculator::initPredefinedStandardOperations() {
     this->opRational(),
     this->opMatTensorRat(),
     "Multiplies rational by matrix tensor form. ",
-    "M=MakeMatrixTensorForm{}((1,1), (0,1)); M; M*M; M*M*M; M*M*M*M; 2*M ",
+    "M=MakeMatrixTensorForm{}((1,1), (0,1));\n"
+    "M;\n"
+    "M*M;\n"
+    "M*M*M;\n"
+    "M*M*M*M;\n"
+    "2*M ",
     true,
     false,
     "CalculatorFunctionsBinaryOps::innerMultiplyMatrixTensorOrRationalByMatrixTensor",
@@ -6583,9 +6619,9 @@ void Calculator::initPredefinedStandardOperations() {
     this->opWeylGroupVirtualRep(),
     this->opWeylGroupVirtualRep(),
     "Tensor and decompose two virtual Weyl group representations. ",
-    "W = WeylGroupNaturalRep{}(B_3); "
-    "V=MakeVirtualWeylGroupRepresentation{}W; "
-    "W\\otimes W; "
+    "W = WeylGroupNaturalRep{}(B_3);\n"
+    "V=MakeVirtualWeylGroupRepresentation{}W;\n"
+    "W\\otimes W;\n"
     "V*V",
     true,
     true,
@@ -6597,7 +6633,11 @@ void Calculator::initPredefinedStandardOperations() {
     Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY,
     "",
     "Collects multiplicand exponents. ",
-    "x*(x*y)*x*(x*x^3*x);  x^{2/3}x^{1/2}; (x>0)=1; x^{2/3}x^{1/2}; (x^{1/2})^2;",
+    "x*(x*y)*x*(x*x^3*x);\n"
+    "x^{2/3}x^{1/2};\n"
+    "(x>0)=1;\n"
+    "x^{2/3}x^{1/2};\n"
+    "(x^{1/2})^2;",
     true,
     false,
     "Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY",

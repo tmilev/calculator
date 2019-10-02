@@ -267,12 +267,80 @@ AbstractSyntaxOne.prototype.annotate = function() {
   );
 }
 
+function TransportLayerSecurityServer() {
+}
+
+TransportLayerSecurityServer.prototype.displayMessages = function(
+  /**@type {string} */
+  outputId, 
+  input,
+) {
+  var outputElement = document.getElementById(outputId);
+  outputElement.className = "hexContainerStandardWidth";
+  var inputHeader = document.createElement("span");
+  inputHeader.innerHTML = "Input bytes hex:"
+  outputElement.appendChild(inputHeader);
+  for (var i = 0; i < input.inputMessages.length; i ++) {
+    var currentStringHeader = document.createElement("SPAN");
+    currentStringHeader.innerHTML = `<br><b>Input ${i + 1}:</b><br>`;
+    outputElement.appendChild(currentStringHeader);
+    var nextInput = document.createElement("span");
+    nextInput.innerHTML = input.inputMessages[i];
+    outputElement.appendChild(nextInput);
+  }
+  if (input.errorsOnInput.length > 0) {
+    var inputErrors = document.createElement("span");
+    var errorHTML = "<br><b style = 'color:red'>Input errors:</b>";
+    for (var i = 0; i < input.errorsOnInput.length; i ++) {
+      errorHTML += "<br>" + input.errorsOnInput[i];
+    }
+    inputErrors.innerHTML = errorHTML;
+    outputElement.appendChild(inputErrors);
+  }
+  var outputHeader = document.createElement("span");
+  outputHeader.innerHTML = "<br>Output bytes hex:<br>"
+  outputElement.appendChild(outputHeader);
+  for (var i = 0; i < input.outputMessages.length; i ++) {
+    var nextInput = document.createElement("span");
+    nextInput.innerHTML = JSON.stringify(input.outputMessages[i]);
+    outputElement.appendChild(nextInput);
+  }
+  if (input.errorsOnOutput.length > 0) {
+    var outputErrors = document.createElement("span");
+    var errorHTML = "Output errors:<br>";
+    for (var i = 0; i < input.errorsOnOutput.length; i ++) {
+      errorHTML += input.errorsOnOutput[i] + "<br>";
+    }
+    outputErrors.innerHTML = errorHTML;
+    outputElement.appendChild(outputErrors);
+  }
+  if (input.errorsOnOutput.length > 0) {
+    var inputErrors = document.createElement("span");
+    var errorHTML = "<br><b style = 'color:red'>Output errors:</b><br>";
+    for (var i = 0; i < input.errorsOnOutput.length; i ++) {
+      errorHTML += "<br>" + input.errorsOnOutput[i];
+    }
+    inputErrors.innerHTML = errorHTML;
+    outputElement.appendChild(inputErrors);
+  }
+}
+
 function abstractSyntaxNotationAnnotate(binaryHex, interpretation, id) {
   var annotation = new AbstractSyntaxOne();
   annotation.initializeAnnotation(binaryHex, interpretation, id); 
   annotation.annotate();
 }
 
+function displayTransportLayerSecurity(  
+  /**@type {string} */
+  outputId, 
+  input,
+) {
+  var theServer = new TransportLayerSecurityServer();
+  theServer.displayMessages(outputId, input);
+}
+
 module.exports =  {
   abstractSyntaxNotationAnnotate,
+  displayTransportLayerSecurity,
 };

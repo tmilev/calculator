@@ -660,7 +660,7 @@ TransportLayerSecurityServer::TransportLayerSecurityServer() {
   this->millisecondsDefaultTimeOut = 5000;
   this->millisecondsTimeOut = this->millisecondsDefaultTimeOut;
   this->defaultBufferCapacity = 1000000;
-  this->lastRead.owner = this;
+  this->lastReaD.owner = this;
   this->serverHelloCertificate.owner = this;
   this->serverHelloKeyExchange.owner = this;
   this->serverHelloStart.owner = this;
@@ -672,15 +672,15 @@ bool TransportLayerSecurityServer::NetworkSpoofer::WriteSSLRecords(List<SSLRecor
   return true;
 }
 
-bool TransportLayerSecurityServer::WriteSSLRecords(List<SSLRecord> &input, std::stringstream *commentsOnFailure) {
+bool TransportLayerSecurityServer::WriteSSLRecords(List<SSLRecord>& input, std::stringstream *commentsOnFailure) {
   if (this->spoofer.flagDoSpoof) {
     return this->spoofer.WriteSSLRecords(input);
   }
-  this->nextOutgoingBytes.SetSize(0);
+  this->outgoingBytes.SetSize(0);
   for (int i = 0; i < input.size; i ++) {
-    input[i].WriteBytes(this->nextOutgoingBytes);
+    input[i].WriteBytes(this->outgoingBytes);
   }
-  return this->WriteBytesOnce(this->nextOutgoingBytes, commentsOnFailure);
+  return this->WriteBytesOnce(this->outgoingBytes, commentsOnFailure);
 }
 
 bool TransportLayerSecurityServer::WriteBytesOnce(List<unsigned char>& input, std::stringstream* commentsOnFailure) {
@@ -703,6 +703,39 @@ bool TransportLayerSecurityServer::WriteBytesOnce(List<unsigned char>& input, st
   return numBytesSent >= 0;
 }
 
+std::string TransportLayerSecurityServer::NetworkSpoofer::JSLabels::inputMessages = "inputMessages";
+std::string TransportLayerSecurityServer::NetworkSpoofer::JSLabels::outputMessages = "outputMessages";
+
+std::string TransportLayerSecurityServer::NetworkSpoofer::JSLabels::errorsOnInput = "errorsOnInput";
+std::string TransportLayerSecurityServer::NetworkSpoofer::JSLabels::errorsOnOutput = "errorsOnOutput";
+
+JSData TransportLayerSecurityServer::NetworkSpoofer::ToJSON() {
+  JSData result, inputMessage, outputMessages, inErrors, outErrors;
+  result.theType = JSData::token::tokenArray;
+  inputMessage.theType = JSData::token::tokenArray;
+  outputMessages.theType = JSData::token::tokenArray;
+  inErrors.theType = JSData::token::tokenArray;
+  outErrors.theType = JSData::token::tokenArray;
+  for (int i = 0; i < this->incomingBytes.size; i ++) {
+    inputMessage[i] = Crypto::ConvertListUnsignedCharsToHex(this->incomingBytes[i], 0, false);
+  }
+  inErrors = this->errorsOnIncoming;
+  outErrors = this->errorsOnOutgoing;
+  for (int i = 0; i < this->outgoingMessages.size; i ++) {
+    JSData currentOutputMessages;
+    currentOutputMessages.theType = JSData::token::tokenArray;
+    for (int j = 0; j < this->outgoingMessages[i].size; j ++) {
+      currentOutputMessages[j] = this->outgoingMessages[i][j].ToJSON();
+    }
+    outputMessages[i] = currentOutputMessages;
+  }
+  result[TransportLayerSecurityServer::NetworkSpoofer::JSLabels::errorsOnInput] = inErrors;
+  result[TransportLayerSecurityServer::NetworkSpoofer::JSLabels::errorsOnOutput] = outErrors;
+  result[TransportLayerSecurityServer::NetworkSpoofer::JSLabels::inputMessages] = inputMessage;
+  result[TransportLayerSecurityServer::NetworkSpoofer::JSLabels::outputMessages] = outputMessages;
+  return result;
+}
+
 bool TransportLayerSecurityServer::NetworkSpoofer::ReadBytesOnce(
   std::stringstream* commentsOnError
 ) {
@@ -714,7 +747,7 @@ bool TransportLayerSecurityServer::NetworkSpoofer::ReadBytesOnce(
     }
     return false;
   }
-  this->owner->lastIncomingBytes = this->incomingBytes[this->currentInputMessageIndex];
+  this->owner->incomingBytes = this->incomingBytes[this->currentInputMessageIndex];
   this->currentInputMessageIndex ++;
   return true;
 }
@@ -728,17 +761,17 @@ bool TransportLayerSecurityServer::ReadBytesOnce(std::stringstream* commentsOnEr
   tv.tv_sec = 5;  // 5 Secs Timeout
   tv.tv_usec = 0;  // Not init'ing this can cause strange errors
   setsockopt(this->socketId, SOL_SOCKET, SO_RCVTIMEO, static_cast<void*>(&tv), sizeof(timeval));
-  this->lastRead.body.SetSize(this->defaultBufferCapacity);
+  this->incomingBytes.SetSize(this->defaultBufferCapacity);
   int numBytesInBuffer = static_cast<int>(recv(
     this->socketId,
-    this->lastRead.body.TheObjects,
-    static_cast<unsigned>(this->lastRead.body.size - 1),
+    this->incomingBytes.TheObjects,
+    static_cast<unsigned>(this->incomingBytes.size - 1),
     0
   ));
   if (numBytesInBuffer >= 0) {
-    this->lastRead.body.SetSize(numBytesInBuffer);
+    this->incomingBytes.SetSize(numBytesInBuffer);
   }
-  logWorker << "Read bytes:\n" << Crypto::ConvertListUnsignedCharsToHex(this->lastRead.body, 40, false) << logger::endL;
+  logWorker << "Read bytes:\n" << Crypto::ConvertListUnsignedCharsToHex(this->incomingBytes, 40, false) << logger::endL;
   return numBytesInBuffer > 0;
 }
 
@@ -1396,6 +1429,14 @@ SSLRecord::SSLRecord() {
   this->owner = nullptr;
 }
 
+std::string SSLRecord::JSLabels::body = "body";
+
+JSData SSLRecord::ToJSON() const {
+  JSData result;
+  result[SSLRecord::JSLabels::body] = Crypto::ConvertListUnsignedCharsToHex(this->body, 0, false);
+  return result;
+}
+
 std::string SSLRecord::ToStringType() const {
   switch (this->theType) {
   case SSLRecord::tokens::alert:
@@ -1437,7 +1478,7 @@ bool SSLRecord::Decode(std::stringstream *commentsOnFailure) {
   this->CheckInitialization();
   if (this->body.size < 5 + this->offsetDecoded) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "SSL record needs to have at least 5 bytes, yours has: " << this->body.size << ".";
+      *commentsOnFailure << "SSL record needs to have at least 5 bytes, yours has: " << this->body.size << ". ";
     }
     return false;
   }
@@ -1488,8 +1529,8 @@ bool SSLRecord::DecodeBody(std::stringstream *commentsOnFailure) {
 
 bool TransportLayerSecurityServer::DecodeSSLRecord(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("TransportLayerSecurityServer::DecodeSSLRecord");
-  if (!this->lastRead.Decode(commentsOnFailure)) {
-    logWorker << "DEBUG: one record decode error.\n" << this->lastRead.ToString() << logger::endL;
+  if (!this->lastReaD.Decode(commentsOnFailure)) {
+    logWorker << "DEBUG: one record decode error.\n" << this->lastReaD.ToString() << logger::endL;
     return false;
   }
   return true;
@@ -1503,6 +1544,7 @@ bool TransportLayerSecurityServer::ReadBytesDecodeOnce(std::stringstream* commen
     }
     return false;
   }
+  this->lastReaD.body = this->incomingBytes;
   if (!this->DecodeSSLRecord(commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to decode ssl record. ";
@@ -1594,28 +1636,23 @@ void SSLRecord::PrepareServerHello2Certificate() {
 bool TransportLayerSecurityServer::ReplyToClientHello(int inputSocketID, std::stringstream *commentsOnFailure) {
   (void) commentsOnFailure;
   (void) inputSocketID;
-  this->nextOutgoingBytes.SetSize(0);
-
-  this->serverHelloStart.PrepareServerHello1Start(this->lastRead);
+  this->serverHelloStart.PrepareServerHello1Start(this->lastReaD);
   if (this->serverHelloStart.content.theType != SSLContent::tokens::serverHello) {
     crash << "DEBUG: this should be so" << crash;
   }
   this->serverHelloCertificate.PrepareServerHello2Certificate();
-  this->serverHelloStart.WriteBytes(this->nextOutgoingBytes);
-  this->serverHelloCertificate.WriteBytes(this->nextOutgoingBytes);
-  if (this->spoofer.flagDoSpoof) {
-    logWorker << "Spoofed network write of " << this->nextOutgoingBytes.size << " bytes. ";
-    return true;
-  }
-
-  if (!this->WriteBytesOnce(this->nextOutgoingBytes, commentsOnFailure)) {
+  this->outgoingRecords.SetSize(0);
+  this->outgoingRecords.AddOnTop(this->serverHelloStart);
+  this->outgoingRecords.AddOnTop(this->serverHelloCertificate);
+  this->outgoingBytes.SetSize(0);
+  if (!this->WriteSSLRecords(this->outgoingRecords, commentsOnFailure)) {
     logWorker << "Error replying to client hello. ";
     if (commentsOnFailure != nullptr) {
-      // logWorker << "DEBUG: commentsOnFailure: " << commentsOnFailure->str();
+      *commentsOnFailure  << "Error replying to client hello. ";
     }
     return false;
   }
-  logWorker << "Wrote bytes successfully. " << logger::endL;
+  logWorker << "Wrote ssl records successfully. " << logger::endL;
   return true;
 }
 
@@ -1626,11 +1663,18 @@ bool TransportLayerSecurityServer::HandShakeIamServer(int inputSocketID, std::st
   bool success = this->ReadBytesDecodeOnce(commentsOnFailure);
   if (!success) {
     logWorker << logger::red << commentsOnFailure->str() << logger::endL;
+    if (this->spoofer.flagDoSpoof) {
+      this->spoofer.errorsOnIncoming.AddOnTop(commentsOnFailure->str());
+    }
     return false;
   }
   success = TransportLayerSecurityServer::ReplyToClientHello(inputSocketID, commentsOnFailure);
   if (!success) {
     logWorker << logger::red << commentsOnFailure->str() << logger::endL;
+    if (this->spoofer.flagDoSpoof) {
+      this->spoofer.errorsOnOutgoing.AddOnTop(commentsOnFailure->str());
+    }
+    return false;
   }
   //crash << "Handshake i am server not implemented yet. " << crash;
   return false;

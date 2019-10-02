@@ -211,20 +211,11 @@ bool CalculatorFunctionsGeneral::innerTestTLSMessageSequence(
   spoofServer.HandShakeIamServer(- 1, &errorStream);
 
   std::stringstream out;
-  out << errorStream.str();
-  out << "<hr>Result strings: ";
   std::stringstream spanId;
   spanId << "spanServerSpoofer_" << "_" << theGlobalVariables.GetElapsedMilliseconds();
-  out << "<span class = '" << spanId.str() << "'></span>";
-  out << "<script> </script>";
-
-  out << "<hr>Input strings: ";
-  out << "<span class = 'hexContainerStandard'>";
-  for (int i = 0; i < inputMessages.size; i ++) {
-    out << "<br>String " << i + 1 << "<br>"
-    << Crypto::ConvertStringToHex(inputMessages[i], 40, true);
-  }
-  out << "</span>";
+  out << "<span id = '" << spanId.str() << "'></span>";
+  out << "<script>window.calculator.crypto.displayTransportLayerSecurity('"
+  << spanId.str() << "', " << spoofServer.spoofer.ToJSON() << ");</script>";
   return output.AssignValue(out.str(), theCommands);
 }
 

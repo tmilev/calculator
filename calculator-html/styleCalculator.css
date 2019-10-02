@@ -1476,6 +1476,13 @@ span.hexContainerStandard {
   font-family: 'Courier New', Courier, monospace;
 }
 
+span.hexContainerStandardWidth {
+  display: inline-block;
+  width: 500px;
+  max-width: 500px;
+  font-family: 'Courier New', Courier, monospace;
+}
+
 span.abstractSyntaxOneAnnotation {
   position: relative;
   display: inline-block;

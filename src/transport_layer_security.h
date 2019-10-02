@@ -207,6 +207,10 @@ public:
 // https://www.cisco.com/c/en/us/support/docs/security-vpn/secure-socket-layer-ssl/116181-technote-product-00.html
 class SSLRecord {
 public:
+  class JSLabels {
+  public:
+    static std::string body;
+  };
   class tokens {
   public:
     static const unsigned char handshake = 22; // 0x16
@@ -233,7 +237,7 @@ public:
   std::string ToBytes() const;
   std::string ToString() const;
   std::string ToStringType() const;
-  std::string ToJSON() const;
+  JSData ToJSON() const;
 
   void PrepareServerHello1Start(SSLRecord& clientHello);
   void PrepareServerHello2Certificate();
@@ -244,14 +248,24 @@ class TransportLayerSecurityServer {
 public:
   class NetworkSpoofer {
   public:
+    class JSLabels {
+    public:
+      static std::string inputMessages;
+      static std::string outputMessages;
+      static std::string errorsOnInput;
+      static std::string errorsOnOutput;
+    };
     TransportLayerSecurityServer* owner;
     bool flagDoSpoof;
     List<List<SSLRecord> > outgoingMessages;
     List<List<unsigned char> > incomingBytes;
+    List<std::string> errorsOnOutgoing;
+    List<std::string> errorsOnIncoming;
     int currentInputMessageIndex;
     NetworkSpoofer();
     bool ReadBytesOnce(std::stringstream* commentsOnError);
     bool WriteSSLRecords(List<SSLRecord>& input);
+    JSData ToJSON();
   };
   NetworkSpoofer spoofer;
   X509Certificate certificate;
@@ -264,18 +278,18 @@ public:
   int64_t millisecondsTimeOut;
   int64_t millisecondsDefaultTimeOut;
   int defaultBufferCapacity;
-  SSLRecord lastRead;
+  SSLRecord lastReaD;
   SSLRecord serverHelloStart;
   SSLRecord serverHelloCertificate;
   SSLRecord serverHelloKeyExchange;
 
-  List<unsigned char> lastIncomingBytes;
-  List<unsigned char> nextOutgoingBytes;
+  List<unsigned char> incomingBytes;
+  List<unsigned char> outgoingBytes;
   List<SSLRecord> outgoingRecords;
 
   CipherSuiteSpecification GetCipherCrashIfUnknown(int inputId);
   void AddSupportedCipher(int inputId);
-    void initialize();
+  void initialize();
   void initializeCipherSuites();
   TransportLayerSecurityServer();
   bool HandShakeIamServer(int inputSocketID, std::stringstream* commentsOnFailure);

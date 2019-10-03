@@ -259,6 +259,7 @@ public:
   WebServer();
   ~WebServer();
   static void FigureOutOperatingSystem();
+  static void CheckInstallation();
   static void CheckSystemInstallationMongoDB();
   static void CheckSystemInstallationOpenSSL();
   static void CheckMongoDBSetup();

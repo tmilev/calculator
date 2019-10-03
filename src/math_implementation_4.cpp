@@ -227,7 +227,7 @@ std::string GlobalVariables::ToStringFolderInfo() const {
   std::stringstream out;
   out << "<br>Physical path server base: " << this->PhysicalPathServerBasE;
   out << "<br>Diplay name executable: " << this->DisplayNameExecutable;
-  out << "<br>Physical name folder below executable: " << this->PhysicalNameFolderBelowExecutable;
+  out << "<br>Physical name folder below executable: " << this->PhysicalNameFolderExecutable;
   out << "<br>Physical path output folder: " << this->PhysicalPathHtmlFolder;
   out << "<br>Display path output folder: " << this->DisplayPathOutputFolder;
   return out.str();
@@ -339,23 +339,15 @@ void GlobalVariables::InitThreadsExecutableStart() {
 }
 
 void GlobalVariables::initDefaultFolderAndFileNames(
-  const std::string& inputPhysicalExecutableWithPathServerBaseIsFolderBelow
+  const std::string& inputPhysicalExecutable
 ) {
-  this->PhysicalNameFolderBelowExecutable = "";
   this->PhysicalNameExecutableNoPath = "";
   this->PhysicalPathProjectBase = "";
-  for (unsigned i = 0; i < inputPhysicalExecutableWithPathServerBaseIsFolderBelow.size(); i ++) {
-    this->PhysicalNameExecutableNoPath.push_back(inputPhysicalExecutableWithPathServerBaseIsFolderBelow[i]);
-    if (inputPhysicalExecutableWithPathServerBaseIsFolderBelow[i] == '/') {
-      this->PhysicalPathProjectBase += this->PhysicalNameFolderBelowExecutable;
-      //this->DisplayPathServerBasE= this->PhysicalNameFolderBelowExecutable;
-      this->PhysicalNameFolderBelowExecutable = this->PhysicalNameExecutableNoPath;
-      this->PhysicalNameExecutableNoPath = "";
-    }
-  }
-  this->PhysicalNameExecutableWithPath = this->PhysicalNameFolderBelowExecutable + this->PhysicalNameExecutableNoPath;
+  this->PhysicalNameFolderExecutable = FileOperations::GetPathFromFileNameWithPath(inputPhysicalExecutable);
+  this->PhysicalNameExecutableNoPath = FileOperations::GetFileNameFromFileNameWithPath(inputPhysicalExecutable);
+  this->PhysicalNameExecutableWithPath = this->PhysicalNameFolderExecutable + this->PhysicalNameExecutableNoPath;
   if (this->PhysicalPathProjectBase == "") {
-    this->PhysicalPathProjectBase = "./../";
+    this->PhysicalPathProjectBase = this->PhysicalNameFolderExecutable + "./../";
   }
   this->PhysicalPathHtmlFolder = this->PhysicalPathProjectBase + "../public_html/";
   this->PhysicalPathServerBasE = this->PhysicalPathHtmlFolder;

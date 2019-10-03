@@ -343,6 +343,13 @@ StackElement.prototype.flushBody = function() {
   }
   var bodyElement = document.createElement("SPAN");
   bodyElement.innerHTML = this.currentBody.join("");
+  bodyElement.className = "byteAnnotationBody";
+  var tooltipContent = "";
+  tooltipContent += `Offset: ${this.offset}, length: ${this.length}`
+  if (this.label !== "" && this.label !== undefined) {
+    tooltipContent += `<br>label: ${this.label}`;
+  }
+  attachTooltip(bodyElement, tooltipContent);
   this.dom.appendChild(bodyElement);
 }
 
@@ -399,6 +406,7 @@ TransportLayerSecurityServer.prototype.displayMessages = function(
     currentStringHeader.innerHTML = `<br><b>Input ${i + 1}:</b><br>`;
     outputElement.appendChild(currentStringHeader);
     var nextInput = document.createElement("span");
+    nextInput.className = "hexContainerStandard";
     var annotation = new AnnotatedBytes();
     annotation.writeMessageToDOM(input.inputMessages[i], nextInput);
     outputElement.appendChild(nextInput);

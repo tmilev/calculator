@@ -3775,7 +3775,7 @@ void WebServer::StopKillAll[[noreturn]](bool attemptToRestart) {
     long timeLimitSeconds = theGlobalVariables.millisecondsMaxComputation / 1000;
     *currentLog << logger::red << "Restart with time limit " << timeLimitSeconds << logger::endL;
     theCommand << " && ";
-    theCommand << theGlobalVariables.PhysicalNameExecutableWithPath;
+    theCommand << "./" << theGlobalVariables.PhysicalNameExecutableWithPath;
     theCommand << " server " << timeLimitSeconds;
     *currentLog << logger::red << "Restart command: " << logger::blue << theCommand.str() << logger::endL;
   } else {
@@ -5327,6 +5327,14 @@ void GlobalVariables::ConfigurationProcess() {
   }
 }
 
+void WebServer::CheckInstallation() {
+  theWebServer.CheckSystemInstallationOpenSSL();
+  theWebServer.CheckSystemInstallationMongoDB();
+  theWebServer.CheckMongoDBSetup();
+  theWebServer.CheckMathJaxSetup();
+  theWebServer.CheckFreecalcSetup();
+}
+
 int WebServer::main(int argc, char **argv) {
   theGlobalVariables.InitThreadsExecutableStart();
   //use of loggers forbidden before calling   theWebServer.AnalyzeMainArguments(...):
@@ -5336,7 +5344,10 @@ int WebServer::main(int argc, char **argv) {
     InitializeGlobalObjects();
     theWebServer.AnalyzeMainArguments(argc, argv);
     // load and parse configuration json
-    logServer << logger::green << "Project base folder: " << logger::blue << theGlobalVariables.PhysicalPathProjectBase << logger::endL;
+    logServer << logger::green << "Project base folder: "
+    << logger::red << FileOperations::GetCurrentFolder() << "/"
+    << logger::blue << theGlobalVariables.PhysicalPathProjectBase
+    << logger::endL;
     theGlobalVariables.ConfigurationLoad();
     if (theGlobalVariables.millisecondsMaxComputation > 0) {
       theGlobalVariables.millisecondsNoPingBeforeChildIsPresumedDead =
@@ -5351,12 +5362,9 @@ int WebServer::main(int argc, char **argv) {
     // Store back the config file if it changed.
     theGlobalVariables.ConfigurationStore();
 
-    theWebServer.CheckSystemInstallationOpenSSL();
-    theWebServer.CheckSystemInstallationMongoDB();
-    theWebServer.CheckMongoDBSetup();
-    theWebServer.CheckMathJaxSetup();
-    theWebServer.CheckFreecalcSetup();
-
+    if ((false)) {
+      theWebServer.CheckInstallation();
+    }
     bool mathJaxPresent = FileOperations::FileExistsVirtual("/MathJax-2.7-latest/", false);
     if (!mathJaxPresent && theGlobalVariables.flagRunningBuiltInWebServer) {
       logServer << logger::red << "MathJax not available. " << logger::endL;

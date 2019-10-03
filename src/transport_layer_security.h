@@ -6,10 +6,10 @@
 
 static ProjectInformationInstance projectInfoInstanceTransportLayerSecurityHeader(__FILE__, "TLS/ssl header.");
 
-//installation of these headers in ubuntu:
-//sudo apt-get install libssl-dev
-//on opensuse:
-//sudo yast -i libopenssl-devel
+// installation of these headers in ubuntu:
+// sudo apt-get install libssl-dev
+// on opensuse:
+// sudo yast -i libopenssl-devel
 
 #include <openssl/rsa.h>
 #include <openssl/crypto.h>
@@ -112,7 +112,7 @@ public:
   JSData ToJSON();
   bool CheckInitialization();
   bool ProcessMe(std::stringstream* commentsOnError);
-  void WriteBytes(List<unsigned char>& output);
+  void WriteBytes(List<unsigned char>& output, List<Serialization::Marker>* annotations);
   void MakeEllipticCurvePointFormat(SSLContent* inputOwner);
   void MakeExtendedMasterSecret(SSLContent* inputOwner);
   void MakeGrease(SSLContent* inputOwner);
@@ -195,13 +195,13 @@ public:
   void WriteBytes(List<unsigned char>& output, List<Serialization::Marker>* annotations) const;
   // Writes the message header, using zeroes instead of the message length
   void WriteType(List<unsigned char>& output) const;
-  void WriteVersion(List<unsigned char>& output) const;
+  void WriteVersion(List<unsigned char>& output, List<Serialization::Marker>* annotations) const;
   void WriteBytesHandshakeClientHello(List<unsigned char>& output, List<Serialization::Marker>* annotations) const;
   void WriteBytesHandshakeServerHello(List<unsigned char>& output, List<Serialization::Marker>* annotations) const;
   void WriteBytesHandshakeCertificate(List<unsigned char>& output, List<Serialization::Marker>* annotations) const;
-  void WriteBytesRandomAndSessionId(List<unsigned char>& output) const;
-  void WriteBytesSupportedCiphers(List<unsigned char>& output) const;
-  void WriteBytesExtensionsOnly(List<unsigned char>& output) const;
+  void WriteBytesRandomAndSessionId(List<unsigned char>& output, List<Serialization::Marker>* annotations) const;
+  void WriteBytesSupportedCiphers(List<unsigned char>& output, List<Serialization::Marker>* annotations) const;
+  void WriteBytesExtensionsOnly(List<unsigned char>& output, List<Serialization::Marker>* annotations) const;
 };
 
 // A basic explanation of ssl records:

@@ -738,7 +738,7 @@ private:
     int BottomIndex, int TopIndex, compareClass& theCompareror, List<carbonCopyType>* carbonCopy
   );
   void QuickSortDescending(int BottomIndex, int TopIndex);
-  void initConstructorCallOnly() {
+  inline void initConstructorCallOnly() {
     this->TheObjects = 0;
     this->ActualSize = 0;
     this->size = 0;
@@ -784,7 +784,6 @@ public:
     result.append(Object::GetXMLClassName());
     return result;
   }
-//  void AddOnTop(Object o);
   int GetNewSizeRelativeToExpectedSize(int expectedSize) const {
     // <-Registering stack trace forbidden! Multithreading deadlock alert.
     if (expectedSize == 1) {

@@ -2,6 +2,7 @@
 #define vpfHeaderTransportLayerSecurity_already_included
 
 #include "general_lists.h"
+#include "serialization_basic.h"
 
 static ProjectInformationInstance projectInfoInstanceTransportLayerSecurityHeader(__FILE__, "TLS/ssl header.");
 
@@ -191,13 +192,13 @@ public:
   std::string ToStringVersion() const;
   // As the name suggests, this will append the output bytes, without
   // wiping the already existing contents of output.
-  void WriteBytes(List<unsigned char>& output, JSData* annotation) const;
+  void WriteBytes(List<unsigned char>& output, List<Serialization::Marker>* annotations) const;
   // Writes the message header, using zeroes instead of the message length
   void WriteType(List<unsigned char>& output) const;
   void WriteVersion(List<unsigned char>& output) const;
-  void WriteBytesHandshakeClientHello(List<unsigned char>& output, JSData* annotation) const;
-  void WriteBytesHandshakeServerHello(List<unsigned char>& output, JSData* annotation) const;
-  void WriteBytesHandshakeCertificate(List<unsigned char>& output) const;
+  void WriteBytesHandshakeClientHello(List<unsigned char>& output, List<Serialization::Marker>* annotations) const;
+  void WriteBytesHandshakeServerHello(List<unsigned char>& output, List<Serialization::Marker>* annotations) const;
+  void WriteBytesHandshakeCertificate(List<unsigned char>& output, List<Serialization::Marker>* annotations) const;
   void WriteBytesRandomAndSessionId(List<unsigned char>& output) const;
   void WriteBytesSupportedCiphers(List<unsigned char>& output) const;
   void WriteBytesExtensionsOnly(List<unsigned char>& output) const;
@@ -207,11 +208,6 @@ public:
 // https://www.cisco.com/c/en/us/support/docs/security-vpn/secure-socket-layer-ssl/116181-technote-product-00.html
 class SSLRecord {
 public:
-  class JSLabels {
-  public:
-    static std::string body;
-    static std::string children;
-  };
   class tokens {
   public:
     static const unsigned char handshake = 22; // 0x16
@@ -242,7 +238,7 @@ public:
 
   void PrepareServerHello1Start(SSLRecord& clientHello);
   void PrepareServerHello2Certificate();
-  void WriteBytes(List<unsigned char>& output, JSData* annotation) const;
+  void WriteBytes(List<unsigned char>& output, List<Serialization::Marker>* annotations) const;
 };
 
 class TransportLayerSecurityServer {
@@ -259,7 +255,7 @@ public:
     TransportLayerSecurityServer* owner;
     bool flagDoSpoof;
     List<List<SSLRecord> > outgoingMessages;
-    List<List<unsigned char> > incomingBytes;
+    List<SSLRecord> incomingMessages;
     List<std::string> errorsOnOutgoing;
     List<std::string> errorsOnIncoming;
     int currentInputMessageIndex;

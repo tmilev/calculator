@@ -270,6 +270,120 @@ AbstractSyntaxOne.prototype.annotate = function() {
 function TransportLayerSecurityServer() {
 }
 
+function AnnotatedBytes() {
+
+}
+
+AnnotatedBytes.prototype.getStackTop = function() {
+  while (true) {
+    if (this.stack.length == 0) {
+      this.top = null;
+      return;
+    }
+    this.top = this.stack[this.stack.length - 1];
+    if (this.nextByteOffset < this.top.offset + this.top.length) {
+      return;
+    }
+    this.top.flushBody();
+    this.stack.pop();
+  }
+  // return null;
+}
+
+AnnotatedBytes.prototype.stackOnTop = function() {
+  while (this.nextMarkerOffset < this.markers.length) {
+    var nextMarker = this.markers[this.nextMarkerOffset];
+    if (nextMarker.offset > this.nextByteOffset) {
+      break;
+    }
+    if (nextMarker.offset == this.nextByteOffset) {
+      this.top.flushBody();
+      var newElement = document.createElement("SPAN");
+      this.top.dom.appendChild(newElement);
+      this.stack.push(
+        new StackElement(
+          this.nextByteOffset,
+          nextMarker.length,
+          nextMarker.label,
+          newElement,
+          [],
+        )
+      );
+      this.top = this.stack[this.stack.length - 1];
+    }
+    this.nextMarkerOffset ++;
+  }
+}
+
+function StackElement(
+  /** @type {number} */
+  offset, 
+  /** @type {number} */
+  length, 
+  /** @type {string} */
+  label, 
+  /** @type {HTMLElement} */
+  dom, 
+  /** @type {Array<string>} */
+  currentBody
+) {
+  this.offset = offset;
+  this.length = length;
+  this.label = label;
+  this.dom = dom;
+  this.currentBody = currentBody;
+}
+
+StackElement.prototype.flushBody = function() {
+  if (this.currentBody === null) {
+    return;
+  }
+  if (this.currentBody.length <= 0) {
+    return;
+  }
+  var bodyElement = document.createElement("SPAN");
+  bodyElement.innerHTML = this.currentBody.join("");
+  this.dom.appendChild(bodyElement);
+}
+
+AnnotatedBytes.prototype.writeMessageToDOM = function(
+  input,
+  /**@type {HTMLElement} */
+  outputComponent,
+) {
+  this.bodyHex = input.body;
+  this.byteLength = this.bodyHex.length / 2;
+  this.stack = [new StackElement(
+    0,
+    this.byteLength,
+    "allMessages",
+    outputComponent,
+    [],
+  )];
+  this.nextByteOffset = 0;
+  this.nextMarkerOffset = 0;
+  this.markers = input.markers;
+  this.top = this.stack[0];
+  while (this.nextByteOffset < this.byteLength) {
+    this.getStackTop();
+    if (this.top == null) {
+      break;
+    }
+    this.stackOnTop();
+    if (this.top == null) {
+      break;
+    }
+    this.top.currentBody.push(this.bodyHex.slice(this.nextByteOffset * 2, this.nextByteOffset * 2 + 2));
+    this.nextByteOffset ++;
+  }
+  if (this.top.currentBody.length > 0) {
+    this.top.flushBody();
+  }
+  var inputStringifiedElement = document.createElement("SPAN");
+  inputStringifiedElement.innerHTML = "<br>" + JSON.stringify(input);
+  outputComponent.appendChild(inputStringifiedElement);
+}
+
 TransportLayerSecurityServer.prototype.displayMessages = function(
   /**@type {string} */
   outputId, 
@@ -278,14 +392,15 @@ TransportLayerSecurityServer.prototype.displayMessages = function(
   var outputElement = document.getElementById(outputId);
   outputElement.className = "hexContainerStandardWidth";
   var inputHeader = document.createElement("span");
-  inputHeader.innerHTML = "Input bytes hex:"
+  inputHeader.innerHTML = "Input:";
   outputElement.appendChild(inputHeader);
   for (var i = 0; i < input.inputMessages.length; i ++) {
     var currentStringHeader = document.createElement("SPAN");
     currentStringHeader.innerHTML = `<br><b>Input ${i + 1}:</b><br>`;
     outputElement.appendChild(currentStringHeader);
     var nextInput = document.createElement("span");
-    nextInput.innerHTML = input.inputMessages[i];
+    var annotation = new AnnotatedBytes();
+    annotation.writeMessageToDOM(input.inputMessages[i], nextInput);
     outputElement.appendChild(nextInput);
   }
   if (input.errorsOnInput.length > 0) {
@@ -298,7 +413,7 @@ TransportLayerSecurityServer.prototype.displayMessages = function(
     outputElement.appendChild(inputErrors);
   }
   var outputHeader = document.createElement("span");
-  outputHeader.innerHTML = "<br>Output bytes hex:<br>"
+  outputHeader.innerHTML = "<br>Output:<br>";
   outputElement.appendChild(outputHeader);
   for (var i = 0; i < input.outputMessages.length; i ++) {
     var nextInput = document.createElement("span");

@@ -716,8 +716,8 @@ JSData TransportLayerSecurityServer::NetworkSpoofer::ToJSON() {
   outputMessages.theType = JSData::token::tokenArray;
   inErrors.theType = JSData::token::tokenArray;
   outErrors.theType = JSData::token::tokenArray;
-  for (int i = 0; i < this->incomingBytes.size; i ++) {
-    inputMessage[i] = Crypto::ConvertListUnsignedCharsToHex(this->incomingBytes[i], 0, false);
+  for (int i = 0; i < this->incomingMessages.size; i ++) {
+    inputMessage[i] = this->incomingMessages[i].ToJSON();
   }
   inErrors = this->errorsOnIncoming;
   outErrors = this->errorsOnOutgoing;
@@ -741,13 +741,13 @@ bool TransportLayerSecurityServer::NetworkSpoofer::ReadBytesOnce(
 ) {
   logWorker << logger::red
   << "Transport layer security server is spoofing the network. " << logger::endL;
-  if (this->currentInputMessageIndex < 0 || this->currentInputMessageIndex >= this->incomingBytes.size) {
+  if (this->currentInputMessageIndex < 0 || this->currentInputMessageIndex >= this->incomingMessages.size) {
     if (commentsOnError != nullptr) {
       *commentsOnError << "No available spoofed messages. ";
     }
     return false;
   }
-  this->owner->incomingBytes = this->incomingBytes[this->currentInputMessageIndex];
+  this->owner->incomingBytes = this->incomingMessages[this->currentInputMessageIndex].body;
   this->currentInputMessageIndex ++;
   return true;
 }
@@ -896,38 +896,33 @@ bool CipherSuiteSpecification::ComputeName() {
   return true;
 }
 
-std::string Serialization::JSLabels::length = "length";
-
-void SSLRecord::WriteBytes(List<unsigned char>& output, JSData* annotation) const {
+void SSLRecord::WriteBytes(List<unsigned char>& output, List<Serialization::Marker>* annotations) const {
   MacroRegisterFunctionWithName("SSLRecord::WriteBytes");
-  output.AddOnTop(static_cast<unsigned char>(SSLRecord::tokens::handshake));
+  Serialization::WriterUnsignedIntegerWithMarker recordTypeWriter(
+    1, SSLRecord::tokens::handshake, output, annotations, "recordTag"
+  );
   Serialization::WriteTwoByteInt(this->version, output);
-  Serialization::LengthWriterTwoBytes writeLength(output);
-  JSData* subAnnotation = nullptr;
-  if (annotation != nullptr) {
-    subAnnotation = &((*annotation)[SSLRecord::JSLabels::children]);
-  }
-  this->content.WriteBytes(output, subAnnotation);
+  Serialization::LengthWriterTwoBytes writeLength(output, annotations, "recordBody");
+  this->content.WriteBytes(output, annotations);
 }
 
-void SSLContent::WriteBytes(List<unsigned char>& output, JSData* annotation) const {
+void SSLContent::WriteBytes(List<unsigned char>& output, List<Serialization::Marker>* annotations) const {
   if (this->theType == SSLContent::tokens::clientHello) {
-    return SSLContent::WriteBytesHandshakeClientHello(output, annotation);
+    return SSLContent::WriteBytesHandshakeClientHello(output, annotations);
   } else if (this->theType == SSLContent::tokens::serverHello) {
-    return SSLContent::WriteBytesHandshakeServerHello(output, annotation);
+    return SSLContent::WriteBytesHandshakeServerHello(output, annotations);
   }
 }
 
 void SSLContent::WriteBytesHandshakeServerHello(
-  List<unsigned char>& output, JSData* annotation
+  List<unsigned char>& output, List<Serialization::Marker>* annotations
 ) const {
   MacroRegisterFunctionWithName("SSLHello::WriteBytesHandshakeServerHello");
   if (this->theType != SSLContent::tokens::serverHello) {
     crash << "Not allowed to serialize non server-hello content as server hello. " << crash;
   }
   this->WriteType(output);
-  Serialization::LengthWriterThreeBytes writeLength(output);
-  writeLength.annotation = annotation;
+  Serialization::LengthWriterThreeBytes writeLength(output, annotations, "sslContentBody");
   this->WriteVersion(output);
   this->WriteBytesRandomAndSessionId(output);
   //256 = 0x0100 = no compression:
@@ -943,28 +938,28 @@ void SSLContent::WriteVersion(List<unsigned char>& output) const {
   Serialization::WriteTwoByteInt(this->version, output);
 }
 
-void SSLContent::WriteBytesHandshakeCertificate(List<unsigned char> &output) const {
+void SSLContent::WriteBytesHandshakeCertificate(List<unsigned char>& output, List<Serialization::Marker>* annotations) const {
   MacroRegisterFunctionWithName("SSLHello::WriteBytesHandshakeCertificate");
   if (this->theType != SSLContent::tokens::certificate) {
     crash << "Not allowed to serialize non-certificate content as certificate. " << crash;
   }
   this->WriteType(output);
-  Serialization::LengthWriterThreeBytes writeLength(output);
-  Serialization::LengthWriterThreeBytes writeLengthFirstCertificate(output);
+  Serialization::LengthWriterThreeBytes writeLength(output, annotations, "certificateCollection");
+  Serialization::LengthWriterThreeBytes writeLengthFirstCertificate(output, annotations, "certificateBody");
   this->GetServer().certificate.WriteBytesASN1(output);
 }
 
-void SSLContent::WriteBytesHandshakeClientHello(List<unsigned char>& output, JSData* annotation) const {
+void SSLContent::WriteBytesHandshakeClientHello(List<unsigned char>& output, List<Serialization::Marker>* annotations) const {
   MacroRegisterFunctionWithName("SSLHello::WriteBytesHandshakeClientHello");
   if (this->theType != SSLContent::tokens::clientHello) {
     crash << "Not allowed to serialize non client-hello content as client hello. " << crash;
   }
   this->WriteType(output);
-  Serialization::LengthWriterThreeBytes writeLength(output);
+  Serialization::LengthWriterThreeBytes writeLength(output, annotations, "handshakeClientHelloBody");
   this->WriteVersion(output);
   this->WriteBytesRandomAndSessionId(output);
   this->WriteBytesSupportedCiphers(output);
-  //256 = 0x0100 = no compression:
+  // 256 = 0x0100 = no compression:
   Serialization::WriteTwoByteInt(256, output);
   this->WriteBytesExtensionsOnly(output);
 }
@@ -1406,6 +1401,10 @@ void Serialization::WriteTwoByteLengthFollowedByBytes(
   Serialization::WriteNByteLengthFollowedByBytes(2, input, output, inputOutputOffset);
 }
 
+std::string Serialization::ConvertListUnsignedCharsToHex(const List<unsigned char>& input) {
+  return Crypto::ConvertListUnsignedCharsToHex(input, 0, false);
+}
+
 void Serialization::WriteNByteLengthFollowedByBytes(
   int byteCountOfLength,
   const List<unsigned char>& input,
@@ -1438,14 +1437,33 @@ SSLRecord::SSLRecord() {
   this->owner = nullptr;
 }
 
-std::string SSLRecord::JSLabels::body = "body";
-std::string SSLRecord::JSLabels::children = "children";
+std::string Serialization::JSLabels::markers = "markers";
+std::string Serialization::JSLabels::body = "body";
+std::string Serialization::JSLabels::length = "length";
+std::string Serialization::JSLabels::offset = "offset";
+std::string Serialization::JSLabels::label = "label";
+
+JSData Serialization::Marker::ToJSON() {
+  JSData result;
+  result.theType = JSData::token::tokenObject;
+  result[Serialization::JSLabels::offset] = this->offset;
+  result[Serialization::JSLabels::length] = this->length;
+  result[Serialization::JSLabels::label] = this->label;
+  return result;
+}
 
 JSData SSLRecord::ToJSON() {
   JSData result;
   List<unsigned char> serialization;
-  this->WriteBytes(serialization, &result);
-  result[SSLRecord::JSLabels::body] = Crypto::ConvertListUnsignedCharsToHex(serialization, 0, false);
+  List<Serialization::Marker> markers;
+  this->WriteBytes(serialization, &markers);
+  JSData jsMarkers;
+  jsMarkers.theType = JSData::token::tokenArray;
+  for (int i = 0; i < markers.size; i ++) {
+    jsMarkers.theList.AddOnTop(markers[i].ToJSON());
+  }
+  result[Serialization::JSLabels::markers] = jsMarkers;
+  result[Serialization::JSLabels::body] = Crypto::ConvertListUnsignedCharsToHex(serialization, 0, false);
   return result;
 }
 
@@ -1673,6 +1691,11 @@ bool TransportLayerSecurityServer::HandShakeIamServer(int inputSocketID, std::st
   logWorker << logger::red << "DEBUG: handshaking ...\n" << logger::endL;
   this->socketId = inputSocketID;
   bool success = this->ReadBytesDecodeOnce(commentsOnFailure);
+  if (this->spoofer.flagDoSpoof && this->spoofer.currentInputMessageIndex > 0) {
+    this->spoofer.incomingMessages[
+      this->spoofer.currentInputMessageIndex - 1
+    ] = this->lastReaD;
+  }
   if (!success) {
     logWorker << logger::red << commentsOnFailure->str() << logger::endL;
     if (this->spoofer.flagDoSpoof) {

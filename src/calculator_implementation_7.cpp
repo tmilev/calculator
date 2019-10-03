@@ -205,7 +205,10 @@ bool CalculatorFunctionsGeneral::innerTestTLSMessageSequence(
   }
   TransportLayerSecurityServer spoofServer;
   spoofServer.spoofer.flagDoSpoof = true;
-  spoofServer.spoofer.incomingBytes = inputMessages;
+  for (int i = 0; i < inputMessages.size; i ++) {
+    spoofServer.spoofer.incomingMessages.AddOnTop(SSLRecord());
+    spoofServer.spoofer.incomingMessages.LastObject()->body = inputMessages[i];
+  }
   spoofServer.spoofer.currentInputMessageIndex = 0;
   std::stringstream errorStream;
   spoofServer.HandShakeIamServer(- 1, &errorStream);

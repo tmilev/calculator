@@ -901,10 +901,10 @@ bool CipherSuiteSpecification::ComputeName() {
 void SSLRecord::WriteBytes(List<unsigned char>& output, List<Serialization::Marker>* annotations) const {
   MacroRegisterFunctionWithName("SSLRecord::WriteBytes");
   Serialization::WriterOneByteInteger recordTypeWriter(
-    SSLRecord::tokens::handshake, output, annotations, "recordTag"
+    SSLRecord::tokens::handshake, output, annotations, "SSL handshake tag"
   );
-  Serialization::WriterTwoByteInteger writerVersion(this->version, output, annotations, "version");
-  Serialization::LengthWriterTwoBytes writerLength(output, annotations, "recordBody");
+  Serialization::WriterTwoByteInteger writerVersion(this->version, output, annotations, "SSL record version");
+  Serialization::LengthWriterTwoBytes writerLength(output, annotations, "SSL handshake body");
   this->content.WriteBytes(output, annotations);
 }
 
@@ -1670,13 +1670,10 @@ void SSLRecord::PrepareServerHello2Certificate() {
   this->content.PrepareServerHello2Certificate();
 }
 
-bool TransportLayerSecurityServer::ReplyToClientHello(int inputSocketID, std::stringstream *commentsOnFailure) {
+bool TransportLayerSecurityServer::ReplyToClientHello(int inputSocketID, std::stringstream* commentsOnFailure) {
   (void) commentsOnFailure;
   (void) inputSocketID;
   this->serverHelloStart.PrepareServerHello1Start(this->lastReaD);
-  if (this->serverHelloStart.content.theType != SSLContent::tokens::serverHello) {
-    crash << "DEBUG: this should be so" << crash;
-  }
   this->serverHelloCertificate.PrepareServerHello2Certificate();
   this->outgoingRecords.SetSize(0);
   this->outgoingRecords.AddOnTop(this->serverHelloStart);

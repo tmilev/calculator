@@ -387,7 +387,7 @@ AnnotatedBytes.prototype.writeMessageToDOM = function(
     this.top.flushBody();
   }
   var inputStringifiedElement = document.createElement("SPAN");
-  inputStringifiedElement.innerHTML = "<br>" + JSON.stringify(input);
+  // inputStringifiedElement.innerHTML = "<br>" + JSON.stringify(input);
   outputComponent.appendChild(inputStringifiedElement);
 }
 
@@ -424,9 +424,23 @@ TransportLayerSecurityServer.prototype.displayMessages = function(
   outputHeader.innerHTML = "<br>Output:<br>";
   outputElement.appendChild(outputHeader);
   for (var i = 0; i < input.outputMessages.length; i ++) {
-    var nextInput = document.createElement("span");
-    nextInput.innerHTML = JSON.stringify(input.outputMessages[i]);
-    outputElement.appendChild(nextInput);
+    var outputHeader = document.createElement("span");
+    outputHeader.innerHTML = `<br><b>Output ${i+1}:</b><br>`;
+    outputElement.appendChild(outputHeader);
+    var currentOutputContainer = document.createElement("span");
+    currentOutputContainer.className = "hexContainerStandard";
+    for (var j = 0; j < input.outputMessages[i].length; j ++) {
+      var nextOutput = document.createElement("span");
+      var annotation = new AnnotatedBytes();
+      annotation.writeMessageToDOM(input.outputMessages[i][j], nextOutput);
+      currentOutputContainer.appendChild(nextOutput);
+      if (j < input.outputMessages[i].length - 1) {
+        var separator = document.createElement("span");
+        separator.innerHTML = "<span style = 'background-color:red;display:inline-block;'>&nbsp;</span>";
+        currentOutputContainer.appendChild(separator);
+      }
+    }
+    outputElement.appendChild(currentOutputContainer);
   }
   if (input.errorsOnOutput.length > 0) {
     var outputErrors = document.createElement("span");
@@ -445,6 +459,12 @@ TransportLayerSecurityServer.prototype.displayMessages = function(
     }
     inputErrors.innerHTML = errorHTML;
     outputElement.appendChild(inputErrors);
+  }
+  if (outputElement.style.height < 800) {
+    outputElement.style.height = 800;
+  }
+  if (outputElement.style.width < 1000) {
+    outputElement.style.width = 1000;
   }
 }
 

@@ -216,7 +216,7 @@ bool CalculatorFunctionsGeneral::innerTestTLSMessageSequence(
   std::stringstream out;
   std::stringstream spanId;
   spanId << "spanServerSpoofer_" << "_" << theGlobalVariables.GetElapsedMilliseconds();
-  out << "<span id = '" << spanId.str() << "'></span>";
+  out << "<div id = '" << spanId.str() << "'></div>";
   out << "<script>"
   << "window.calculator.crypto.displayTransportLayerSecurity('"
   << spanId.str() << "', " << spoofServer.spoofer.ToJSON() << ");"

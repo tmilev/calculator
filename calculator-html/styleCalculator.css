@@ -1479,11 +1479,15 @@ span.hexContainerStandard {
   position: relative;
 }
 
-span.hexContainerStandardWidth {
+div.hexContainerStandardWidth {
   display: inline-block;
-  width: 500px;
-  max-width: 500px;
+  max-height:1000px;
+  max-width: 1000px;
+  padding: 0px;
   font-family: 'Courier New', Courier, monospace;
+}
+
+span.byteAnnotationBody {
   position: relative;
 }
 

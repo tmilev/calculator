@@ -3,6 +3,7 @@
 //The current file is licensed under the license terms found in the main header file "calculator.h".
 //For additional information refer to the file "calculator.h".
 #include "json.h"
+#include "serialization_basic.h"
 
 static ProjectInformationInstance ProjectInfoAbstractSyntaxNotationOneDecoderHeader(__FILE__, "Abstract syntax notation one (ASN-1) header file. ");
 
@@ -30,7 +31,8 @@ class ASNElement {
 public:
   class JSLabels{
   public:
-    static std::string offset;
+    static std::string offsetLastRead;
+    static std::string offsetLastWrite;
     static std::string tag;
     static std::string lengthPromised;
     static std::string lengthEncoding;
@@ -52,7 +54,10 @@ public:
   unsigned char startByte;
   unsigned char tag;
   int lengthPromised;
-  int offset;
+  // Offset relative to start of deserialization byte stream.
+  int offsetLastRead;
+  // Offset relative to start of serialization byte stream.
+  int offsetLastWrite;
   bool flagIsConstructed;
   bool flagHeaderPadded;
   std::string error;
@@ -72,12 +77,14 @@ public:
   std::string InterpretAsObjectIdentifierGetNameAndId() const;
   void ToJSON(JSData& output) const;
   JSData ToJSON() const;
+  void WriteAnnotations(List<Serialization::Marker>& output);
   std::string ToString() const;
   bool isComposite() const;
   bool isPureComposite() const;
   bool isNonPureComposite() const;
   std::string GetType() const;
   bool isTime() const;
+  int GetLengthLengthEncoding();
   void MakeSequence(int numberOfEmptyElements);
   void MakeSequence(const List<ASNElement>& input);
   // The following method

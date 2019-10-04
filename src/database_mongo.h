@@ -58,7 +58,10 @@ public:
     JSData& output,
     std::stringstream* commentsOnFailure = nullptr
   );
-  static JSData GetProjectionFromFieldNames(const List<std::string>& fieldsToProjectTo, int offset);
+  static JSData GetProjectionFromFieldNames(
+    const List<std::string>& fieldsToProjectTo,
+    int offset
+  );
   static bool FindOneFromQueryStringWithOptions(
     const std::string& collectionName,
     const std::string& findQuery,
@@ -75,7 +78,11 @@ public:
     std::stringstream* commentsOnFailure,
     bool doEncodeFindFields
   );
-  static bool GetOrFindQuery(const List<JSData>& input, std::string& output, std::stringstream* commentsOnFailure = nullptr);
+  static bool GetOrFindQuery(
+    const List<JSData>& input,
+    std::string& output,
+    std::stringstream* commentsOnFailure = nullptr
+  );
   static bool FindOneFromJSON(
     const std::string& collectionName,
     const JSData& findQuery,
@@ -89,9 +96,14 @@ public:
     JSData& output,
     std::stringstream* commentsOnFailure = nullptr
   );
-  static bool IsValidJSONMongoUpdateQuery(const JSData& updateQuery, std::stringstream* commentsOnFailure = nullptr);
+  static bool IsValidJSONMongoUpdateQuery(
+    const JSData& updateQuery,
+    std::stringstream* commentsOnFailure = nullptr
+  );
   static bool IsValidJSONMongoFindQuery(
-    const JSData& findQuery, std::stringstream* commentsOnFailure = nullptr, bool mustBeObject = true
+    const JSData& findQuery,
+    std::stringstream* commentsOnFailure = nullptr,
+    bool mustBeObject = true
   );
   static bool UpdateOneFromJSON(
     const std::string& collectionName,
@@ -129,20 +141,37 @@ public:
     std::stringstream* commentsOnFailure = nullptr
   );
   static bool DeleteOneEntry(const JSData& theEntry, std::stringstream* commentsOnFailure);
-  static bool DeleteOneEntryById(const std::string& tableName, const JSData& findQuery, std::stringstream* commentsOnFailure);
+  static bool DeleteOneEntryById(
+    const std::string& tableName,
+    const JSData& findQuery,
+    std::stringstream* commentsOnFailure
+  );
   static bool DeleteOneEntryUnsetUnsecure(
-    const std::string& tableName, const JSData& findQuery, List<std::string>& selector, std::stringstream* commentsOnFailure
+    const std::string& tableName,
+    const JSData& findQuery,
+    List<std::string>& selector,
+    std::stringstream* commentsOnFailure
   );
   static std::string ToHtmlDatabaseCollection(const std::string& currentTable);
   static JSData ToJSONFetchItem(const List<std::string>& labelStrings);
   static JSData ToJSONDatabaseCollection(const std::string& currentTable);
   static JSData ToJSONDatabaseFetch(const std::string& incomingLabels);
   void CreateHashIndex(const std::string& collectionName, const std::string& theKey);
-  static bool getLabels(const JSData& fieldEntries, List<std::string>& theLabels, std::stringstream* commentsOnFailure);
-  static bool isDeleteable(
-    const List<std::string>& theLabels, List<std::string>** outputPattern, std::stringstream* commentsOnFailure
+  static bool getLabels(
+    const JSData& fieldEntries,
+    List<std::string>& theLabels,
+    std::stringstream* commentsOnFailure
   );
-  static bool isDeleteable(const JSData& theEntry, List<std::string>** outputPattern, std::stringstream* commentsOnFailure);
+  static bool isDeleteable(
+    const List<std::string>& theLabels,
+    List<std::string>** outputPattern,
+    std::stringstream* commentsOnFailure
+  );
+  static bool isDeleteable(
+    const JSData& theEntry,
+    List<std::string>** outputPattern,
+    std::stringstream* commentsOnFailure
+  );
   static bool matchesPattern(const List<std::string>& fieldLabel, const List<std::string>& pattern);
   static JSData GetStandardProjectors();
   DatabaseRoutinesGlobalFunctionsMongo();

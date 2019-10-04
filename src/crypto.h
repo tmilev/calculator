@@ -140,10 +140,11 @@ public:
     std::stringstream* commentsGeneral
   );
   std::string ToString();
+  std::string ToHex();
   std::string ToStringTestEncode();
   void ComputeASN(ASNElement& output);
   void ComputeASNSignatureAlgorithm(ASNElement& output);
-  void WriteBytesASN1(List<unsigned char>& output);
+  void WriteBytesASN1(List<unsigned char>& output, List<Serialization::Marker> *annotations);
 };
 
 class Crypto {

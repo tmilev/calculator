@@ -16,6 +16,10 @@ public:
   };
   class Marker {
   public:
+    friend std::ostream& operator << (std::ostream& output, const Serialization::Marker& theMarker) {
+      output << theMarker.ToString();
+      return output;
+    }
     int offset;
     int length;
     std::string label;
@@ -27,6 +31,7 @@ public:
     Marker(): offset(- 1), length(- 1) {
     }
     JSData ToJSON();
+    std::string ToString() const;
   };
   class WriterIntegerWithMarker {
   public:

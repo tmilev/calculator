@@ -254,6 +254,7 @@ void ASNElement::WriteBytesConst(List<unsigned char>& output) const {
 }
 
 void ASNElement::WriteBytesUpdatePromisedLength(List<unsigned char>& output) {
+  this->offsetLastWrite = output.size;
   // WARNING: writer needs to be a named object to avoid
   // gcc immediately calling the object's destructor.
   AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength
@@ -476,6 +477,21 @@ std::string ASNElement::ToString() const {
   return this->ToJSON().ToString(false, false, false, true);
 }
 
+void ASNElement::WriteAnnotations(List<Serialization::Marker>& output) {
+  std::stringstream bodyStream, tagStream, lengthStream;
+  tagStream << "Type: " << AbstractSyntaxNotationOneSubsetDecoder::GetType(this->tag);
+  lengthStream << "Content length: " << this->lengthPromised;
+  bodyStream << tagStream.str() << "<br>" << lengthStream.str();
+  if (this->comment != "") {
+    bodyStream << "<br>" << comment;
+  }
+  int lengthOfLengthEncoding = this->GetLengthLengthEncoding();
+  output.AddOnTop(Serialization::Marker(this->offsetLastWrite, this->lengthPromised + lengthOfLengthEncoding + 1, bodyStream.str()));
+  output.AddOnTop(Serialization::Marker(this->offsetLastWrite, 1, tagStream.str()));
+  output.AddOnTop(Serialization::Marker(this->offsetLastWrite + 1, lengthOfLengthEncoding, lengthStream.str()));
+  output.AddOnTop(Serialization::Marker(this->offsetLastWrite + 1 + lengthOfLengthEncoding, this->lengthPromised, bodyStream.str()));
+}
+
 JSData ASNElement::ToJSON() const {
   JSData result;
   this->ToJSON(result);
@@ -488,7 +504,8 @@ std::string ASNElement::JSLabels::error = "error";
 std::string ASNElement::JSLabels::isConstructed = "isConstructed";
 std::string ASNElement::JSLabels::lengthEncoding = "lengthEncoding";
 std::string ASNElement::JSLabels::lengthPromised = "lengthPromised";
-std::string ASNElement::JSLabels::offset = "offset";
+std::string ASNElement::JSLabels::offsetLastRead = "offsetLastRead";
+std::string ASNElement::JSLabels::offsetLastWrite = "offsetLastWrite";
 std::string ASNElement::JSLabels::startByteOriginal = "startByteOriginal";
 std::string ASNElement::JSLabels::tag = "tag";
 std::string ASNElement::JSLabels::type = "type";
@@ -496,13 +513,26 @@ std::string ASNElement::JSLabels::interpretation = "interpretation";
 std::string ASNElement::JSLabels::numberOfChildren = "numberOfChildren";
 std::string ASNElement::JSLabels::comment = "comment";
 
+int ASNElement::GetLengthLengthEncoding() {
+  List<unsigned char> lengthEncoding;
+  AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::WriteLength(
+    static_cast<unsigned>(this->lengthPromised), lengthEncoding, 0
+  );
+  return lengthEncoding.size;
+}
+
 void ASNElement::ToJSON(JSData& output) const {
   output.reset();
   output[ASNElement::JSLabels::tag] = StringRoutines::ConvertByteToHex(this->tag);
   output[ASNElement::JSLabels::startByteOriginal] = StringRoutines::ConvertByteToHex(this->startByte);
   output[ASNElement::JSLabels::lengthPromised] = this->lengthPromised;
   output[ASNElement::JSLabels::type] = AbstractSyntaxNotationOneSubsetDecoder::GetType(this->tag);
-  output[ASNElement::JSLabels::offset] = this->offset;
+  if (this->offsetLastRead >= 0) {
+    output[ASNElement::JSLabels::offsetLastRead] = this->offsetLastRead;
+  }
+  if (this->offsetLastWrite >= 0) {
+    output[ASNElement::JSLabels::offsetLastWrite] = this->offsetLastWrite;
+  }
   List<unsigned char> lengthEncoding;
   AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::WriteLength(
     static_cast<unsigned>(this->lengthPromised), lengthEncoding, 0
@@ -674,7 +704,8 @@ void ASNElement::resetExceptContent() {
   this->tag = 0;
   this->startByte = 0;
   this->error = "";
-  this->offset = 0;
+  this->offsetLastRead = - 1;
+  this->offsetLastWrite = - 1;
   this->flagHeaderPadded = false;
 }
 
@@ -718,7 +749,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeCurrent(
     return false;
   }
   output.reset();
-  output.offset = this->dataPointer;
+  output.offsetLastRead = this->dataPointer;
   if (this->PointerIsBad(output)) {
     return false;
   }
@@ -756,7 +787,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeCurrent(
     return true;
   default:
     errorStream << "Unknown object tag: " << static_cast<int>(output.tag) << ", byte: "
-    << static_cast<int>(output.startByte) << " at position: " << output.offset
+    << static_cast<int>(output.startByte) << " at position: " << output.offsetLastRead
     << ". Length: " << output.lengthPromised << ". ";
     output.error = errorStream.str();
     return false;
@@ -1381,21 +1412,30 @@ void X509Certificate::ComputeASNSignatureAlgorithm(ASNElement& output) {
   output[1].MakeNull();
 }
 
-void X509Certificate::WriteBytesASN1(List<unsigned char>& output) {
+void X509Certificate::WriteBytesASN1(List<unsigned char>& output, List<Serialization::Marker>* annotations) {
   MacroRegisterFunctionWithName("X509Certificate::WriteBytesASN1");
   this->ComputeASN(this->recodedASN);
   this->recodedASN.WriteBytesUpdatePromisedLength(output);
+  if (annotations != nullptr) {
+    this->recodedASN.WriteAnnotations(*annotations);
+  }
 }
 
 std::string X509Certificate::ToStringTestEncode() {
   std::stringstream out;
   std::string sourceHex = Crypto::ConvertListUnsignedCharsToHex(this->sourceBinary, 0, false);
   List<unsigned char> recoded;
-  this->WriteBytesASN1(recoded);
+  this->WriteBytesASN1(recoded, nullptr);
   std::string recodedHex = Crypto::ConvertListUnsignedCharsToHex(recoded, 0, false);
   out << "Original, recoded binary source:<br>"
   << StringRoutines::Differ::DifferenceHTMLStatic(sourceHex, recodedHex);
   return out.str();
+}
+
+std::string X509Certificate::ToHex() {
+  List<unsigned char> bytes;
+  this->WriteBytesASN1(bytes, nullptr);
+  return Crypto::ConvertListUnsignedCharsToHex(bytes, 0, false);
 }
 
 std::string X509Certificate::ToString() {

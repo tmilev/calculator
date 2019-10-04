@@ -286,6 +286,10 @@ public:
 
   CipherSuiteSpecification GetCipherCrashIfUnknown(int inputId);
   void AddSupportedCipher(int inputId);
+  bool initializeAll(
+    List<unsigned char>& inputServerCertificate,
+    std::stringstream* commentsOnError
+  );
   void initialize();
   void initializeCipherSuites();
   TransportLayerSecurityServer();
@@ -311,6 +315,7 @@ public:
   List<char> writeBuffer;
   int readBufferStandardSize;
 
+  static TransportLayerSecurity& DefaultTLS_DO_NOT_MODIFY();
   static const std::string fileCertificate;
   static const std::string fileKey;
   static const std::string signedFileCertificate1;

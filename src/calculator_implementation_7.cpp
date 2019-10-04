@@ -204,6 +204,13 @@ bool CalculatorFunctionsGeneral::innerTestTLSMessageSequence(
     return theCommands << "Failed to extract inputs vector of strings. ";
   }
   TransportLayerSecurityServer spoofServer;
+  std::stringstream commentsOnFailure;
+  if (!spoofServer.initializeAll(
+    TransportLayerSecurity::DefaultTLS_DO_NOT_MODIFY().theServer.certificate.sourceBinary, &commentsOnFailure
+  )) {
+    commentsOnFailure << "Unexpected failure while initializing TLS server. ";
+    return output.AssignValue(commentsOnFailure.str(), theCommands);
+  }
   spoofServer.spoofer.flagDoSpoof = true;
   for (int i = 0; i < inputMessages.size; i ++) {
     spoofServer.spoofer.incomingMessages.AddOnTop(SSLRecord());

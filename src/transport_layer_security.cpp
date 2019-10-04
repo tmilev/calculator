@@ -645,6 +645,14 @@ void TransportLayerSecurityServer::initializeCipherSuites() {
   this->extensionNames.SetKeyValue(SSLContent::tokensExtension::extendedMasterSecret, "extended master secret");
 }
 
+bool TransportLayerSecurityServer::initializeAll(
+  List<unsigned char>& inputServerCertificate,
+  std::stringstream* commentsOnError
+) {
+  this->initialize();
+  return this->certificate.LoadFromASNEncoded(inputServerCertificate, commentsOnError);
+}
+
 void TransportLayerSecurityServer::initialize() {
   this->initializeCipherSuites();
 }
@@ -909,10 +917,13 @@ void SSLRecord::WriteBytes(List<unsigned char>& output, List<Serialization::Mark
 }
 
 void SSLContent::WriteBytes(List<unsigned char>& output, List<Serialization::Marker>* annotations) const {
-  if (this->theType == SSLContent::tokens::clientHello) {
-    return SSLContent::WriteBytesHandshakeClientHello(output, annotations);
-  } else if (this->theType == SSLContent::tokens::serverHello) {
-    return SSLContent::WriteBytesHandshakeServerHello(output, annotations);
+  switch (this->theType) {
+    case SSLContent::tokens::clientHello:
+      return SSLContent::WriteBytesHandshakeClientHello(output, annotations);
+    case SSLContent::tokens::serverHello:
+      return SSLContent::WriteBytesHandshakeServerHello(output, annotations);
+    case SSLContent::tokens::certificate:
+      return SSLContent::WriteBytesHandshakeCertificate(output, annotations);
   }
 }
 
@@ -948,7 +959,11 @@ void SSLContent::WriteBytesHandshakeCertificate(List<unsigned char>& output, Lis
   this->WriteType(output);
   Serialization::LengthWriterThreeBytes writeLength(output, annotations, "certificateCollection");
   Serialization::LengthWriterThreeBytes writeLengthFirstCertificate(output, annotations, "certificateBody");
-  this->GetServer().certificate.WriteBytesASN1(output);
+  logWorker << "DEBUG: And the temp bytes are: " << this->GetServer().certificate.ToHex();
+  this->GetServer().certificate.WriteBytesASN1(output, annotations);
+  if (annotations != nullptr) {
+    logWorker << "DEBUG: And the annotations: " << annotations->ToStringCommaDelimited();
+  }
 }
 
 void SSLContent::WriteBytesHandshakeClientHello(List<unsigned char>& output, List<Serialization::Marker>* annotations) const {
@@ -1449,6 +1464,12 @@ std::string Serialization::JSLabels::body = "body";
 std::string Serialization::JSLabels::length = "length";
 std::string Serialization::JSLabels::offset = "offset";
 std::string Serialization::JSLabels::label = "label";
+
+std::string Serialization::Marker::ToString() const {
+  std::stringstream out;
+  out << "[" << this->offset << ", " << this->length << ", '" << this->label << "']";
+  return out.str();
+}
 
 JSData Serialization::Marker::ToJSON() {
   JSData result;

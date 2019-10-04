@@ -1132,7 +1132,9 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FetchTable(
   JSData findQuery;
   findQuery.theType = JSData::token::tokenObject;
   List<JSData> rowsJSON;
-  DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON(tableName, findQuery, rowsJSON, 200, totalItems, commentsOnFailure);
+  DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON(
+    tableName, findQuery, rowsJSON, 200, totalItems, commentsOnFailure
+  );
   HashedList<std::string, MathRoutines::HashString> theLabels;
   for (int i = 0; i < rowsJSON.size; i ++) {
     for (int j = 0; j < rowsJSON[i].objects.size(); j ++) {
@@ -1160,7 +1162,8 @@ JSData DatabaseRoutinesGlobalFunctionsMongo::ToJSONDatabaseFetch(const std::stri
   JSData labels;
   std::stringstream commentsOnFailure;
   if (!labels.readstring(incomingLabels, false, &commentsOnFailure)) {
-    commentsOnFailure << "Failed to parse labels from: " << StringRoutines::StringTrimToLengthForDisplay(incomingLabels, 100);
+    commentsOnFailure << "Failed to parse labels from: "
+    << StringRoutines::StringTrimToLengthForDisplay(incomingLabels, 100);
     result["error"] = commentsOnFailure.str();
     return result;
   }

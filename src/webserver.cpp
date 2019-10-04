@@ -5173,12 +5173,17 @@ bool GlobalVariables::ConfigurationLoad() {
   )) {
     logServer << logger::yellow << "Failed to read configuration file. " << out.str() << logger::endL;
     std::string computedPhysicalFileName;
-    if (FileOperations::GetPhysicalFileNameFromVirtual(configurationFileName, computedPhysicalFileName, true, false, nullptr)) {
-      logServer << logger::yellow << "Computed configuration file name: " << logger::blue << computedPhysicalFileName << logger::endL;
+    if (FileOperations::GetPhysicalFileNameFromVirtual(
+      configurationFileName, computedPhysicalFileName, true, false, nullptr
+    )) {
+      logServer << logger::yellow << "Computed configuration file name: "
+      << logger::blue << computedPhysicalFileName << logger::endL;
     }
     return false;
   }
-  if (!theGlobalVariables.configuration.readstring(theGlobalVariables.configurationFileContent, false, &out)) {
+  if (!theGlobalVariables.configuration.readstring(
+    theGlobalVariables.configurationFileContent, false, &out
+  )) {
     logServer << logger::red << "Failed to read configuration. " << out.str() << logger::endL;
     return false;
   }
@@ -5198,9 +5203,13 @@ bool GlobalVariables::ConfigurationStore() {
   )) {
     logServer << logger::red << "Could not open file: " << configFileNameVirtual << logger::endL;
     std::string configFileNamePhysical;
-    if (FileOperations::GetPhysicalFileNameFromVirtual(configFileNameVirtual, configFileNamePhysical, true, false, nullptr)) {
-      logServer << logger::red << "Physical file name configuration: " << logger::blue << configFileNamePhysical << logger::endL;
-      logServer << logger::red << "Server base: " << logger::blue << theGlobalVariables.PhysicalPathProjectBase << logger::endL;
+    if (FileOperations::GetPhysicalFileNameFromVirtual(
+      configFileNameVirtual, configFileNamePhysical, true, false, nullptr
+    )) {
+      logServer << logger::red << "Physical file name configuration: "
+      << logger::blue << configFileNamePhysical << logger::endL;
+      logServer << logger::red << "Server base: " << logger::blue
+      << theGlobalVariables.PhysicalPathProjectBase << logger::endL;
     }
     return false;
   }

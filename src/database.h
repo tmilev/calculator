@@ -157,7 +157,11 @@ class ProblemDataAdministrative {
 public:
   MapList<std::string, std::string, MathRoutines::HashString> problemWeightsPerCoursE;
   MapList<std::string, std::string, MathRoutines::HashString> deadlinesPerSection;
-  bool GetWeightFromCoursE(const std::string& theCourseNonURLed, Rational& output, std::string* outputAsGivenByInstructor = nullptr);
+  bool GetWeightFromCoursE(
+    const std::string& theCourseNonURLed,
+    Rational& output,
+    std::string* outputAsGivenByInstructor = nullptr
+  );
   std::string ToString() const;
 };
 
@@ -211,7 +215,9 @@ public:
   //bool IsValidForMailgunCommand(std::stringstream* commentsOnFailure);
   static bool IsOKEmail(const std::string& input, std::stringstream* commentsOnError);
   bool SendEmailWithMailGun(
-    std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral, std::stringstream* commentsGeneralSensitive
+    std::stringstream* commentsOnFailure,
+    std::stringstream* commentsGeneral,
+    std::stringstream* commentsGeneralSensitive
   );
 };
 

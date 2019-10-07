@@ -120,7 +120,7 @@ bool LargeIntegerUnsigned::WriteBigEndianFixedNumberOfBytes(
   this->WriteBigEndianBytes(outputAppend, 0);
   int zeroesToPad = desiredNumberOfBytes - outputAppend.size - startOffset;
   if (zeroesToPad > 0) {
-    outputAppend.ShiftUpExpandOnTopRepeated(startOffset, desiredNumberOfBytes);
+    outputAppend.ShiftUpExpandOnTopRepeated(startOffset, zeroesToPad);
     for (int i = 0; i < zeroesToPad; i ++) {
       outputAppend[startOffset + i] = 0;
     }

@@ -167,9 +167,14 @@ public:
   public:
     static bool Sha256();
   };
-  static bool LoadKnownCertificates(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
+  static bool LoadKnownCertificates(
+    std::stringstream* commentsOnFailure,
+    std::stringstream* commentsGeneral
+  );
   static bool LoadOneKnownCertificate(
-    const std::string& input, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
+    const std::string& input,
+    std::stringstream* commentsOnFailure,
+    std::stringstream* commentsGeneral
   );
 
   static std::string ConvertStringToBase64(const List<unsigned char>& input, bool useBase64URL);

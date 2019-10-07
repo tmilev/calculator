@@ -982,12 +982,13 @@ void SSLContent::WriteNamedCurveAndPublicKey(
   std::cout << "DEBUG: got to here now!\n";
   Serialization::WriterOneByteInteger curveName(3, output, annotations, "named curve");
   Serialization::WriteTwoByteUnsignedAnnotated(30, output, annotations, "curve25519");
-  Serialization::WriterOneByteInteger publicKeySize(32, output, annotations, "public key length");
   std::stringstream shouldNotBeNeeded;
+  List<unsigned char> publicKeyBytes;
   bool mustBeTrue =
   this->owner->owner->session.ephemerealPublicKey.xCoordinate.theValue.WriteBigEndianFixedNumberOfBytes(
-    output, 32, &shouldNotBeNeeded
+    publicKeyBytes, 32, &shouldNotBeNeeded
   );
+  Serialization::WriteOneByteLengthFollowedByBytes(publicKeyBytes, output, annotations, "public key");
   if (!mustBeTrue) {
     crash << "Internally generated public key does not serialize properly. "
     << shouldNotBeNeeded.str()
@@ -1074,7 +1075,9 @@ void SSLContent::WriteBytesIncomingRandomAndSessionId(
   List<unsigned char>& output, List<Serialization::Marker>* annotations
 ) const {
   MacroRegisterFunctionWithName("SSLHello::WriteBytesIncomingRandomAndSessionId");
-  Serialization::WriteBytesAnnotated(this->owner->owner->session.incomingRandomBytes, output, annotations, "client random");
+  Serialization::WriteBytesAnnotated(
+    this->owner->owner->session.incomingRandomBytes, output, annotations, "client random"
+  );
   Serialization::WriteOneByteLengthFollowedByBytes(this->sessionId, output, annotations, "session id");
 }
 
@@ -2127,7 +2130,13 @@ int TransportLayerSecurity::SSLWrite(
   bool includeNoErrorInComments
 ) {
   if (!this->flagUseBuiltInTlS) {
-    return this->openSSLData.SSLWrite(writeBuffer, outputError, commentsGeneral, commentsOnError, includeNoErrorInComments);
+    return this->openSSLData.SSLWrite(
+      writeBuffer,
+      outputError,
+      commentsGeneral,
+      commentsOnError,
+      includeNoErrorInComments
+    );
   } else {
     crash << "Not imeplemented yet. " << crash;
     return - 1;

@@ -128,6 +128,8 @@ public:
 // https://serializethoughts.com/2014/07/27/dissecting-tls-client-hello-message/
 // https://idea.popcount.org/2012-06-16-dissecting-ssl-handshake/
 
+// TLS Protocol Version 1.0:
+// RFC2246
 class SSLContent {
 public:
   SSLRecord* owner;

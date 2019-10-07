@@ -533,7 +533,7 @@ private:
   bool CheckConsistencyRecursively() const;
   bool IsIntegerFittingInInt(int* whichInteger = nullptr) const;
   bool IsSmallInteger(int* whichInteger = nullptr) const;
-  bool IsInteger(LargeInt* whichInteger = nullptr) const;
+  bool IsInteger(LargeInteger* whichInteger = nullptr) const;
   bool IsRational(Rational* whichRational = nullptr) const;
   bool IsAlgebraicRadical() const;
   bool IsConstantNumber() const;
@@ -2076,7 +2076,7 @@ public:
   bool GetVectorExpressions(const Expression& input, List<Expression>& output, int targetDimNonMandatory = - 1);
   bool ConvertExpressionsToCommonContext(List<Expression>& inputOutputEs, Expression* inputOutputStartingContext = nullptr);
   bool GetVectoRInt(const Expression& input, List<int>& output);
-  bool GetVectorLargeIntFromFunctionArguments(const Expression& input, List<LargeInt>& output);
+  bool GetVectorLargeIntFromFunctionArguments(const Expression& input, List<LargeInteger>& output);
   bool GetMatrixDoubles(const Expression& input, Matrix<double>& output, int DesiredNumcols = - 1);
 
   bool GetVectorDoubles(const Expression& input, Vector<double>& output, int DesiredDimensionNonMandatory = - 1);

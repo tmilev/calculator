@@ -71,7 +71,7 @@ public:
       this->outputMarkers = theOutputMarkers;
       this->outputPointer = nullptr;
       int notUsed = output.size;
-      Serialization::WriteNByteUnsignedInt(this->numberOfBytes, input, output, notUsed);
+      Serialization::WriteNByteUnsigned(this->numberOfBytes, input, output, notUsed);
       if (this->outputMarkers == nullptr) {
         return;
       }
@@ -135,7 +135,7 @@ public:
       this->markerOffset = - 1;
       this->offset = output.size;
       int theSize = output.size;
-      Serialization::WriteNByteUnsignedInt(numberOfBytes, 0, output, theSize);
+      Serialization::WriteNByteUnsigned(numberOfBytes, 0, output, theSize);
       if (this->outputMarkers != nullptr) {
         this->markerOffset = this->outputMarkers->size;
         this->outputMarkers->AddOnTop(Serialization::Marker(this->offset, - 1, Serialization::JSLabels::length));
@@ -144,7 +144,7 @@ public:
     }
     ~LengthWriterNBytes() {
       int totalLength = this->outputPointer->size - this->offset - numberOfBytes;
-      Serialization::WriteNByteUnsignedInt(
+      Serialization::WriteNByteUnsigned(
         this->numberOfBytes,
         static_cast<unsigned int>(totalLength),
         *this->outputPointer,
@@ -182,6 +182,12 @@ public:
     int& result,
     std::stringstream* commentsOnFailure
   );
+  static void WriteBytesAnnotated(
+    const List<unsigned char>& input,
+    List<unsigned char>& output,
+    List<Serialization::Marker>* annotations,
+    const std::string& label
+  );
   static bool ReadTwoByteLengthFollowedByBytesDontOutputOffset(
     const List<unsigned char>& input,
     int Offset,
@@ -194,6 +200,13 @@ public:
     int& outputOffset,
     int* resultLength,
     List<unsigned char>* output,
+    std::stringstream* commentsOnError
+  );
+  static bool ReadBytesFixedLength(
+    const List<unsigned char>& input,
+    int desiredNumberOfBytes,
+    int& inputOutputOffset,
+    List<unsigned char>& output,
     std::stringstream* commentsOnError
   );
   static bool ReadOneByteLengthFollowedByBytes(
@@ -210,7 +223,7 @@ public:
     List<unsigned char>* output,
     std::stringstream* commentsOnError
   );
-  static void WriteNByteUnsignedInt(// how many bytes are used to record the length
+  static void WriteNByteUnsigned(// how many bytes are used to record the length
     int byteCountOfLength,
     unsigned int input,
     List<unsigned char>& output,
@@ -224,11 +237,17 @@ public:
     int input,
     List<unsigned char>& output
   );
-  static void WriteTwoByteUnsignedInt(
+  static void WriteTwoByteUnsignedAnnotated(
+    unsigned int input,
+    List<unsigned char>& output,
+    List<Serialization::Marker>* annotations,
+    const std::string &label
+  );
+  static void WriteTwoByteUnsigned(
     unsigned int input,
     List<unsigned char>& output
   );
-  static void WriteThreeByteUnsignedInt(
+  static void WriteThreeByteUnsigned(
     unsigned int input,
     List<unsigned char>& output
   );

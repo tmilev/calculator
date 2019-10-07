@@ -146,7 +146,7 @@ int Expression::GetTypeOperation<int>() const {
 }
 
 template < >
-int Expression::GetTypeOperation<LargeIntUnsigned>() const {
+int Expression::GetTypeOperation<LargeIntegerUnsigned>() const {
   this->CheckInitialization();
   return this->owner->opRational();
 }
@@ -419,7 +419,7 @@ int
 
 template < >
 int Expression::AddObjectReturnIndex(const
-LargeIntUnsigned
+LargeIntegerUnsigned
 & inputValue) const {
   this->CheckInitialization();
   return this->owner->theObjectContainer.theRationals
@@ -2105,7 +2105,7 @@ bool Expression::IsAlgebraicRadical() const {
   return false;
 }
 
-bool Expression::IsInteger(LargeInt* whichInteger) const {
+bool Expression::IsInteger(LargeInteger* whichInteger) const {
   Rational theRat;
   if (!this->IsOfType<Rational>(&theRat)) {
     return false;
@@ -2769,7 +2769,7 @@ bool Expression::NeedsParenthesisForBaseOfExponent() const {
     return this->GetValue<double>() < 0;
   }
   if (this->IsOfType<AlgebraicNumber>()) {
-    LargeInt tempI;
+    LargeInteger tempI;
     if (!this->GetValue<AlgebraicNumber>().IsInteger(&tempI)) {
       return true;
     }

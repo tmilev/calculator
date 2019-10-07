@@ -8,7 +8,7 @@
 extern ProjectInformationInstance ProjectInfoVpf8cpp;
 ProjectInformationInstance ProjectInfoVpf8cpp(__FILE__, "Math routines implementation. ");
 
-void LargeIntUnsigned::AssignString(const std::string& input) {
+void LargeIntegerUnsigned::AssignString(const std::string& input) {
   if (input.size() < 10) {
     unsigned int x = static_cast<unsigned>(std::atoi(input.c_str()));
     this->AssignShiftedUInt(x, 0);
@@ -31,7 +31,7 @@ void LargeIntUnsigned::AssignString(const std::string& input) {
   }
 }
 
-bool LargeIntUnsigned::AssignStringFailureAllowed(const std::string& input, bool ignoreNonDigits) {
+bool LargeIntegerUnsigned::AssignStringFailureAllowed(const std::string& input, bool ignoreNonDigits) {
   MacroRegisterFunctionWithName("LargeIntUnsigned::AssignStringFailureAllowed");
   if (input.size() > 10000000) {
     //<- sorry folks, no more than 10 million digits.
@@ -57,32 +57,32 @@ bool LargeIntUnsigned::AssignStringFailureAllowed(const std::string& input, bool
   return true;
 }
 
-LargeIntUnsigned LargeIntUnsigned::operator*(const LargeIntUnsigned& x) const {
-  LargeIntUnsigned result;
+LargeIntegerUnsigned LargeIntegerUnsigned::operator*(const LargeIntegerUnsigned& x) const {
+  LargeIntegerUnsigned result;
   this->MultiplyBy(x, result);
   return result;
 }
 
-LargeIntUnsigned LargeIntUnsigned::operator/(unsigned int x) const {
-  LargeIntUnsigned result;
-  LargeIntUnsigned remainder;
-  LargeIntUnsigned tempX;
+LargeIntegerUnsigned LargeIntegerUnsigned::operator/(unsigned int x) const {
+  LargeIntegerUnsigned result;
+  LargeIntegerUnsigned remainder;
+  LargeIntegerUnsigned tempX;
   tempX.AssignShiftedUInt(x, 0);
   this->DivPositive(tempX, result, remainder);
   return result;
 }
 
-LargeIntUnsigned LargeIntUnsigned::operator/(const LargeIntUnsigned& x) const {
-  LargeIntUnsigned result;
-  LargeIntUnsigned remainder;
+LargeIntegerUnsigned LargeIntegerUnsigned::operator/(const LargeIntegerUnsigned& x) const {
+  LargeIntegerUnsigned result;
+  LargeIntegerUnsigned remainder;
   this->DivPositive(x, result, remainder);
   return result;
 }
 
-int LargeIntUnsigned::operator%(unsigned int x) {
-  LargeIntUnsigned quotient;
-  LargeIntUnsigned remainder;
-  LargeIntUnsigned divisor;
+int LargeIntegerUnsigned::operator%(unsigned int x) {
+  LargeIntegerUnsigned quotient;
+  LargeIntegerUnsigned remainder;
+  LargeIntegerUnsigned divisor;
   divisor.AssignShiftedUInt(x, 0);
   this->DivPositive(divisor, quotient, remainder);
   int result = 0;
@@ -90,11 +90,11 @@ int LargeIntUnsigned::operator%(unsigned int x) {
   return result;
 }
 
-void LargeIntUnsigned::GetHexBigEndian(
+void LargeIntegerUnsigned::GetHexBigEndian(
   int numberOfLeadingZeroesToPadWith, std::string& output
 ) const {
   List<char> result;
-  LargeIntUnsigned digit, inputCopy = *this;
+  LargeIntegerUnsigned digit, inputCopy = *this;
   while (inputCopy > 0) {
     digit = static_cast<unsigned char>(inputCopy % 256);
     inputCopy /= 256;
@@ -110,8 +110,35 @@ void LargeIntUnsigned::GetHexBigEndian(
   output.assign(result.TheObjects, static_cast<unsigned>(result.size));
 }
 
-void LargeIntUnsigned::WriteBigEndianBytes(List<unsigned char>& outputAppend, bool leadingZeroPad) const {
-  LargeIntUnsigned remainder = *this;
+bool LargeIntegerUnsigned::WriteBigEndianFixedNumberOfBytes(
+  List<unsigned char>& outputAppend,
+  int desiredNumberOfBytes,
+  std::stringstream* commentsOnFailure
+) const {
+  int startOffset = outputAppend.size;
+  std::cout << "DEBUG: Here am I ...";
+  this->WriteBigEndianBytes(outputAppend, 0);
+  int zeroesToPad = desiredNumberOfBytes - outputAppend.size - startOffset;
+  if (zeroesToPad > 0) {
+    outputAppend.ShiftUpExpandOnTopRepeated(startOffset, desiredNumberOfBytes);
+    for (int i = 0; i < zeroesToPad; i ++) {
+      outputAppend[startOffset + i] = 0;
+    }
+  }
+  int bytesTotal = outputAppend.size - startOffset;
+  if (bytesTotal != desiredNumberOfBytes) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Large integer ";
+      *commentsOnFailure << "generated " << bytesTotal << " bytes instead of "
+      << "the desired " << desiredNumberOfBytes << " bytes. ";
+    }
+    return false;
+  }
+  return true;
+}
+
+void LargeIntegerUnsigned::WriteBigEndianBytes(List<unsigned char>& outputAppend, bool leadingZeroPad) const {
+  LargeIntegerUnsigned remainder = *this;
   List<unsigned char> digitsReveredOrder;
   while (remainder > 0) {
     int nextDigit = remainder % 256;
@@ -123,7 +150,6 @@ void LargeIntUnsigned::WriteBigEndianBytes(List<unsigned char>& outputAppend, bo
     if (digitsReveredOrder.size > 0) {
       if (digitsReveredOrder[digitsReveredOrder.size - 1] >= 128) {
         padWithZero = 1;
-
       }
     }
   }
@@ -136,59 +162,59 @@ void LargeIntUnsigned::WriteBigEndianBytes(List<unsigned char>& outputAppend, bo
   }
 }
 
-void LargeIntUnsigned::MakeOne() {
+void LargeIntegerUnsigned::MakeOne() {
   this->theDigits.SetSize(1);
   this->theDigits[0] = 1;
 }
 
-void LargeIntUnsigned::MakeZero() {
+void LargeIntegerUnsigned::MakeZero() {
   this->theDigits.SetSize(1);
   this->theDigits[0] = 0;
 }
 
-void LargeIntUnsigned::MultiplyByUInt(unsigned int x) {
-  LargeIntUnsigned tempLI;
+void LargeIntegerUnsigned::MultiplyByUInt(unsigned int x) {
+  LargeIntegerUnsigned tempLI;
   tempLI.AssignShiftedUInt(x, 0);
   this->MultiplyBy(tempLI);
 }
 
-void LargeIntUnsigned::MultiplyBy(const LargeIntUnsigned& x) {
-  LargeIntUnsigned tempInt;
+void LargeIntegerUnsigned::MultiplyBy(const LargeIntegerUnsigned& x) {
+  LargeIntegerUnsigned tempInt;
   this->MultiplyBy(x, tempInt);
   *this = tempInt;
 }
 
-void LargeIntUnsigned::AddUInt(unsigned int x) {
-  LargeIntUnsigned tempI;
+void LargeIntegerUnsigned::AddUInt(unsigned int x) {
+  LargeIntegerUnsigned tempI;
   tempI.AssignShiftedUInt(x, 0);
   (*this) += tempI;
 }
 
-void LargeIntUnsigned::operator*=(const LargeIntUnsigned& right) {
+void LargeIntegerUnsigned::operator*=(const LargeIntegerUnsigned& right) {
   this->MultiplyBy(right);
 }
 
-void LargeIntUnsigned::operator*=(unsigned int x) {
+void LargeIntegerUnsigned::operator*=(unsigned int x) {
   this->MultiplyByUInt(x);
 }
 
-void LargeIntUnsigned::operator+=(unsigned int x) {
+void LargeIntegerUnsigned::operator+=(unsigned int x) {
   this->AddUInt(x);
 }
 
-LargeIntUnsigned LargeIntUnsigned::operator+(const LargeIntUnsigned& other) {
-  LargeIntUnsigned result = *this;
+LargeIntegerUnsigned LargeIntegerUnsigned::operator+(const LargeIntegerUnsigned& other) {
+  LargeIntegerUnsigned result = *this;
   result += other;
   return result;
 }
 
-void LargeIntUnsigned::operator++(int) {
+void LargeIntegerUnsigned::operator++(int) {
   this->AddUInt(1);
 }
 
-bool LargeIntUnsigned::IsIntegerFittingInInt(int* whichInt) {
-  LargeIntUnsigned twoToThe31 = 2;
-  MathRoutines::RaiseToPower(twoToThe31, 31, LargeIntUnsigned(1));
+bool LargeIntegerUnsigned::IsIntegerFittingInInt(int* whichInt) {
+  LargeIntegerUnsigned twoToThe31 = 2;
+  MathRoutines::RaiseToPower(twoToThe31, 31, LargeIntegerUnsigned(1));
   if (*this >= twoToThe31) {
     return false;
   }
@@ -197,13 +223,13 @@ bool LargeIntUnsigned::IsIntegerFittingInInt(int* whichInt) {
   }
   *whichInt = 0;
   for (int i = this->theDigits.size - 1; i >= 0; i --) {
-    *whichInt *= LargeIntUnsigned::CarryOverBound;
+    *whichInt *= LargeIntegerUnsigned::CarryOverBound;
     *whichInt += this->theDigits[i];
   }
   return true;
 }
 
-bool LargeIntUnsigned::IsGEQ(const LargeIntUnsigned& x) const {
+bool LargeIntegerUnsigned::IsGEQ(const LargeIntegerUnsigned& x) const {
   if (this->theDigits.size > x.theDigits.size) {
     return true;
   }
@@ -221,7 +247,7 @@ bool LargeIntUnsigned::IsGEQ(const LargeIntUnsigned& x) const {
   return true;
 }
 
-void LargeIntUnsigned::GetAllPrimesSmallerThanOrEqualToUseEratosthenesSieve(unsigned int n, List<unsigned int>& output) {
+void LargeIntegerUnsigned::GetAllPrimesSmallerThanOrEqualToUseEratosthenesSieve(unsigned int n, List<unsigned int>& output) {
   List<int> theSieve;
   theSieve.initializeFillInObject(static_cast<signed>(n) + 1, 1);
   output.Reserve(n / 2);
@@ -236,59 +262,59 @@ void LargeIntUnsigned::GetAllPrimesSmallerThanOrEqualToUseEratosthenesSieve(unsi
   }
 }
 
-LargeIntUnsigned LargeIntUnsigned::GetOne() {
-  LargeIntUnsigned tempI;
+LargeIntegerUnsigned LargeIntegerUnsigned::GetOne() {
+  LargeIntegerUnsigned tempI;
   tempI.MakeOne();
   return tempI;
 }
 
-bool LargeIntUnsigned::operator<(int other) const {
+bool LargeIntegerUnsigned::operator<(int other) const {
   if (other < 0) {
     return false;
   }
-  LargeIntUnsigned tempUI;
+  LargeIntegerUnsigned tempUI;
   tempUI = static_cast<unsigned>(other);
   return *this < tempUI;
 }
 
-bool LargeIntUnsigned::operator>(int other) const {
+bool LargeIntegerUnsigned::operator>(int other) const {
   if (other < 0) {
     return true;
   }
-  LargeIntUnsigned tempUI;
+  LargeIntegerUnsigned tempUI;
   tempUI = static_cast<unsigned>(other);
   return *this > tempUI;
 }
 
-bool LargeIntUnsigned::operator<(const LargeIntUnsigned& other) const {
+bool LargeIntegerUnsigned::operator<(const LargeIntegerUnsigned& other) const {
   return !this->IsGEQ(other);
 }
 
-bool LargeIntUnsigned::operator>=(const LargeIntUnsigned& other) const {
+bool LargeIntegerUnsigned::operator>=(const LargeIntegerUnsigned& other) const {
   return this->IsGEQ(other);
 }
 
-bool LargeIntUnsigned::operator>(const LargeIntUnsigned& other) const {
+bool LargeIntegerUnsigned::operator>(const LargeIntegerUnsigned& other) const {
   return other < *this;
 }
 
-bool LargeIntUnsigned::IsEven() const {
-  if (LargeIntUnsigned::CarryOverBound % 2 == 0) {
+bool LargeIntegerUnsigned::IsEven() const {
+  if (LargeIntegerUnsigned::CarryOverBound % 2 == 0) {
     bool result = (this->theDigits[0] % 2) == 0;
     return result;
   }
   return ((*this) % 2) == 0;
 }
 
-bool LargeIntUnsigned::operator==(const LargeIntUnsigned& other) const {
+bool LargeIntegerUnsigned::operator==(const LargeIntegerUnsigned& other) const {
   return this->theDigits == other.theDigits;
 }
 
-bool LargeIntUnsigned::operator!=(const LargeIntUnsigned& other) const {
+bool LargeIntegerUnsigned::operator!=(const LargeIntegerUnsigned& other) const {
   return ! ((*this) == other);
 }
 
-void LargeIntUnsigned::operator--(int) {
+void LargeIntegerUnsigned::operator--(int) {
   if (this->IsEqualToZero()) {
     crash << "This is a programming error: attempting to subtract "
     << "1 from a large unsigned integer with value 0. " << crash;
@@ -296,27 +322,27 @@ void LargeIntUnsigned::operator--(int) {
   this->SubtractSmallerPositive(1);
 }
 
-void LargeIntUnsigned::operator%=(const LargeIntUnsigned& other) {
+void LargeIntegerUnsigned::operator%=(const LargeIntegerUnsigned& other) {
   if (&other == this) {
     this->MakeZero();
     return;
   }
-  LargeIntUnsigned copyMe = *this;
-  LargeIntUnsigned temp1;
+  LargeIntegerUnsigned copyMe = *this;
+  LargeIntegerUnsigned temp1;
   copyMe.DivPositive(other, temp1, *this);
 }
 
-void LargeIntUnsigned::operator/=(const LargeIntUnsigned& other) {
+void LargeIntegerUnsigned::operator/=(const LargeIntegerUnsigned& other) {
   if (&other == this) {
     this->MakeOne();
     return;
   }
-  LargeIntUnsigned copyMe = *this;
-  LargeIntUnsigned temp1;
+  LargeIntegerUnsigned copyMe = *this;
+  LargeIntegerUnsigned temp1;
   copyMe.DivPositive(other, *this, temp1);
 }
 
-void LargeIntUnsigned::ToString(std::string& output) const {
+void LargeIntegerUnsigned::ToString(std::string& output) const {
   if (this->IsEqualToZero()) {
     output = "0";
     return;
@@ -330,8 +356,8 @@ void LargeIntUnsigned::ToString(std::string& output) const {
   output = out.str();
 }
 
-void LargeIntUnsigned::DivPositive(
-  const LargeIntUnsigned& divisor, LargeIntUnsigned& quotientOutput, LargeIntUnsigned& remainderOutput
+void LargeIntegerUnsigned::DivPositive(
+  const LargeIntegerUnsigned& divisor, LargeIntegerUnsigned& quotientOutput, LargeIntegerUnsigned& remainderOutput
 ) const {
   if (divisor.IsEqualToZero()) {
     crash << "Division by zero. " << crash;
@@ -349,8 +375,8 @@ void LargeIntUnsigned::DivPositive(
     &remainderOutput == &divisor ||
     &remainderOutput == this
   ) {
-    LargeIntUnsigned divisorCopy = divisor;
-    LargeIntUnsigned thisCopy = *this;
+    LargeIntegerUnsigned divisorCopy = divisor;
+    LargeIntegerUnsigned thisCopy = *this;
     thisCopy.DivPositive(divisorCopy, quotientOutput, remainderOutput);
     return;
   }
@@ -360,7 +386,7 @@ void LargeIntUnsigned::DivPositive(
   int divisorLeadingDigit = *divisor.theDigits.LastObject();
   int lastRemainderSize = - 1;
   int numRunsNoDigitImprovement = 0;
-  LargeIntUnsigned remainderBackup;
+  LargeIntegerUnsigned remainderBackup;
   int upperlimitNoImprovementRounds = this->SquareRootOfCarryOverBound * 2;
   while (remainderOutput.IsGEQ(divisor)) {
     int quotientDigitIndex = remainderOutput.theDigits.size - divisor.theDigits.size;
@@ -369,7 +395,7 @@ void LargeIntUnsigned::DivPositive(
     for (;;) {
       if (remainderLeadingDigit < divisorLeadingDigitPlusSlack) {
         quotientDigitIndex --;
-        remainderLeadingDigit *= LargeIntUnsigned::CarryOverBound;
+        remainderLeadingDigit *= LargeIntegerUnsigned::CarryOverBound;
         if (remainderOutput.theDigits.size > 1) {
           remainderLeadingDigit += remainderOutput.theDigits[remainderOutput.theDigits.size - 2];
         }
@@ -404,14 +430,14 @@ void LargeIntUnsigned::DivPositive(
   }
 }
 
-std::string LargeIntUnsigned::ToString(FormatExpressions* theFormat) const {
+std::string LargeIntegerUnsigned::ToString(FormatExpressions* theFormat) const {
   (void) theFormat; //to avoid unused paramater warning
   std::string tempS;
   this->ToString(tempS);
   return tempS;
 }
 
-void LargeIntUnsigned::ElementToStringLargeElementDecimal(std::string& output) const {
+void LargeIntegerUnsigned::ElementToStringLargeElementDecimal(std::string& output) const {
   std::stringstream out;
   if (this->CarryOverBound == 1000000000  || this->CarryOverBound == 10) {
     std::string tempS;
@@ -447,12 +473,12 @@ void LargeIntUnsigned::ElementToStringLargeElementDecimal(std::string& output) c
   }
   unsigned int base = 10;
   int MaxNumIntegersPerCarryOverBound = 11;
-  List<LargeIntUnsigned> bufferPowersOfBase;
+  List<LargeIntegerUnsigned> bufferPowersOfBase;
   int initialNumDigitsEstimate = MaxNumIntegersPerCarryOverBound*this->theDigits.size;
   int sizeBufferPowersOfBase = MathRoutines::Minimum(initialNumDigitsEstimate, 10000);
   bufferPowersOfBase.SetSize(sizeBufferPowersOfBase);
-  LargeIntUnsigned currentPower;
-  LargeIntUnsigned Remainder = *this;
+  LargeIntegerUnsigned currentPower;
+  LargeIntegerUnsigned Remainder = *this;
   int numRemainingDigits;
   while (!Remainder.IsEqualToZero()) {
     currentPower.MakeOne();
@@ -499,21 +525,21 @@ void LargeIntUnsigned::ElementToStringLargeElementDecimal(std::string& output) c
   output = out.str();
 }
 
-LargeIntUnsigned::LargeIntUnsigned() {
+LargeIntegerUnsigned::LargeIntegerUnsigned() {
   this->theDigits.SetSize(1);
   this->theDigits[0] = 0;
 }
 
-LargeIntUnsigned::LargeIntUnsigned(unsigned int x) {
+LargeIntegerUnsigned::LargeIntegerUnsigned(unsigned int x) {
   this->AssignShiftedUInt(x, 0);
 }
 
-LargeIntUnsigned::LargeIntUnsigned(const LargeIntUnsigned& x) {
+LargeIntegerUnsigned::LargeIntegerUnsigned(const LargeIntegerUnsigned& x) {
   (*this) = x;
 }
 
-void LargeIntUnsigned::AddShiftedUIntSmallerThanCarryOverBound(unsigned int x, int shift) {
-  if (!(x < LargeIntUnsigned::CarryOverBound)) {
+void LargeIntegerUnsigned::AddShiftedUIntSmallerThanCarryOverBound(unsigned int x, int shift) {
+  if (!(x < LargeIntegerUnsigned::CarryOverBound)) {
     crash << "Digit too large. " << crash;
   }
   while (x > 0) {
@@ -525,8 +551,8 @@ void LargeIntUnsigned::AddShiftedUIntSmallerThanCarryOverBound(unsigned int x, i
       }
     }
     this->theDigits[shift] += x;
-    if (this->theDigits[shift] >= LargeIntUnsigned::CarryOverBound) {
-      this->theDigits[shift] -= LargeIntUnsigned::CarryOverBound;
+    if (this->theDigits[shift] >= LargeIntegerUnsigned::CarryOverBound) {
+      this->theDigits[shift] -= LargeIntegerUnsigned::CarryOverBound;
       x = 1;
       shift ++;
     } else {
@@ -535,29 +561,29 @@ void LargeIntUnsigned::AddShiftedUIntSmallerThanCarryOverBound(unsigned int x, i
   }
 }
 
-void LargeIntUnsigned::AssignUInt64(uint64_t x) {
+void LargeIntegerUnsigned::AssignUInt64(uint64_t x) {
   this->theDigits.SetSize(0);
   while (x > 0) {
-    uint64_t nextDigit = x % LargeIntUnsigned::CarryOverBound;
+    uint64_t nextDigit = x % LargeIntegerUnsigned::CarryOverBound;
     this->theDigits.AddOnTop(static_cast<int>(nextDigit));
-    x /= LargeIntUnsigned::CarryOverBound;
+    x /= LargeIntegerUnsigned::CarryOverBound;
   }
 }
 
-void LargeIntUnsigned::AssignShiftedUInt(unsigned int x, int shift) {
+void LargeIntegerUnsigned::AssignShiftedUInt(unsigned int x, int shift) {
   if (x == 0) {
     this->MakeZero();
     return;
   }
   this->theDigits.initializeFillInObject(shift, 0);
   while (x != 0) {
-    unsigned int tempX = x % LargeIntUnsigned::CarryOverBound;
+    unsigned int tempX = x % LargeIntegerUnsigned::CarryOverBound;
     this->theDigits.AddOnTop(static_cast<int>(tempX));
-    x = x / LargeIntUnsigned::CarryOverBound;
+    x = x / LargeIntegerUnsigned::CarryOverBound;
   }
 }
 
-void LargeIntUnsigned::AddNoFitSize(const LargeIntUnsigned& x) {
+void LargeIntegerUnsigned::AddNoFitSize(const LargeIntegerUnsigned& x) {
   MacroIncrementCounter(Rational::TotalLargeAdditions);
   int oldsize = this->theDigits.size;
   this->theDigits.SetSize(MathRoutines::Maximum(this->theDigits.size, x.theDigits.size) + 1);
@@ -567,8 +593,8 @@ void LargeIntUnsigned::AddNoFitSize(const LargeIntUnsigned& x) {
   int CarryOver = 0;
   for (int i = 0; i < x.theDigits.size; i ++) {
     this->theDigits[i] += x.theDigits[i] + CarryOver;
-    if (this->theDigits[i] >= LargeIntUnsigned::CarryOverBound) {
-      this->theDigits[i] -= LargeIntUnsigned::CarryOverBound;
+    if (this->theDigits[i] >= LargeIntegerUnsigned::CarryOverBound) {
+      this->theDigits[i] -= LargeIntegerUnsigned::CarryOverBound;
       CarryOver = 1;
     } else {
       CarryOver = 0;
@@ -577,8 +603,8 @@ void LargeIntUnsigned::AddNoFitSize(const LargeIntUnsigned& x) {
   if (CarryOver != 0) {
     for (int i = x.theDigits.size; i < this->theDigits.size; i ++) {
       this->theDigits[i] += 1;
-      if (this->theDigits[i] >= LargeIntUnsigned::CarryOverBound) {
-        this->theDigits[i] -= LargeIntUnsigned::CarryOverBound;
+      if (this->theDigits[i] >= LargeIntegerUnsigned::CarryOverBound) {
+        this->theDigits[i] -= LargeIntegerUnsigned::CarryOverBound;
       } else {
         break;
       }
@@ -586,19 +612,19 @@ void LargeIntUnsigned::AddNoFitSize(const LargeIntUnsigned& x) {
   }
 }
 
-void LargeIntUnsigned::operator+=(const LargeIntUnsigned& x) {
+void LargeIntegerUnsigned::operator+=(const LargeIntegerUnsigned& x) {
   this->AddNoFitSize(x);
   this->FitSize();
 }
 
-LargeIntUnsigned LargeIntUnsigned::operator-(const LargeIntUnsigned& other) const {
-  LargeIntUnsigned result;
+LargeIntegerUnsigned LargeIntegerUnsigned::operator-(const LargeIntegerUnsigned& other) const {
+  LargeIntegerUnsigned result;
   result = *this;
   result.SubtractSmallerPositive(other);
   return result;
 }
 
-std::string LargeIntUnsigned::ToStringAbbreviate(FormatExpressions *theFormat) const {
+std::string LargeIntegerUnsigned::ToStringAbbreviate(FormatExpressions *theFormat) const {
   (void) theFormat;
   std::string result = this->ToString(theFormat);
   if (result.size() > 90) {
@@ -611,7 +637,7 @@ std::string LargeIntUnsigned::ToStringAbbreviate(FormatExpressions *theFormat) c
   return result;
 }
 
-void LargeIntUnsigned::PadWithZeroesToAtLeastNDigits(int desiredMinNumDigits) {
+void LargeIntegerUnsigned::PadWithZeroesToAtLeastNDigits(int desiredMinNumDigits) {
   if (this->theDigits.size >= desiredMinNumDigits) {
     return;
   }
@@ -622,7 +648,7 @@ void LargeIntUnsigned::PadWithZeroesToAtLeastNDigits(int desiredMinNumDigits) {
   }
 }
 
-void LargeIntUnsigned::AddLargeIntUnsignedShiftedTimesDigit(const LargeIntUnsigned& other, int digitShift, int theConst) {
+void LargeIntegerUnsigned::AddLargeIntUnsignedShiftedTimesDigit(const LargeIntegerUnsigned& other, int digitShift, int theConst) {
   if (theConst >= this->CarryOverBound || (- theConst) <= (- this->CarryOverBound)) {
     crash << "Digit: " << theConst << " is too large" << crash;
   }
@@ -652,12 +678,12 @@ void LargeIntUnsigned::AddLargeIntUnsignedShiftedTimesDigit(const LargeIntUnsign
   }
 }
 
-void LargeIntUnsigned::SubtractSmallerPositive(const LargeIntUnsigned& x) {
+void LargeIntegerUnsigned::SubtractSmallerPositive(const LargeIntegerUnsigned& x) {
   int CarryOver = 0;
   for (int i = 0; i < x.theDigits.size; i ++) {
     int nextDigit = x.theDigits[i] + CarryOver;
     if (this->theDigits[i] < nextDigit) {
-      this->theDigits[i] += LargeIntUnsigned::CarryOverBound;
+      this->theDigits[i] += LargeIntegerUnsigned::CarryOverBound;
       this->theDigits[i] -= nextDigit;
       CarryOver = 1;
     } else {
@@ -671,17 +697,17 @@ void LargeIntUnsigned::SubtractSmallerPositive(const LargeIntUnsigned& x) {
         this->theDigits[i] --;
         break;
       } else {
-        this->theDigits[i] = LargeIntUnsigned::CarryOverBound - 1;
+        this->theDigits[i] = LargeIntegerUnsigned::CarryOverBound - 1;
       }
     }
   }
   this->FitSize();
 }
 
-void LargeIntUnsigned::MultiplyBy(const LargeIntUnsigned& x, LargeIntUnsigned& output) const {
+void LargeIntegerUnsigned::MultiplyBy(const LargeIntegerUnsigned& x, LargeIntegerUnsigned& output) const {
   if (this == &output || &x == &output) {
-    LargeIntUnsigned thisCopy = *this;
-    LargeIntUnsigned xCopy = x;
+    LargeIntegerUnsigned thisCopy = *this;
+    LargeIntegerUnsigned xCopy = x;
     return thisCopy.MultiplyBy(xCopy, output);
   }
   MacroIncrementCounter(Rational::TotalLargeMultiplications);
@@ -710,8 +736,8 @@ void LargeIntUnsigned::MultiplyBy(const LargeIntUnsigned& x, LargeIntUnsigned& o
       unsigned long long tempLong = static_cast<unsigned>(this->theDigits[i]);
       unsigned long long tempLong2 = static_cast<unsigned>(x.theDigits[j]);
       tempLong = tempLong * tempLong2;
-      unsigned long long lowPart = tempLong % LargeIntUnsigned::CarryOverBound;
-      unsigned long long highPart = tempLong / LargeIntUnsigned::CarryOverBound;
+      unsigned long long lowPart = tempLong % LargeIntegerUnsigned::CarryOverBound;
+      unsigned long long highPart = tempLong / LargeIntegerUnsigned::CarryOverBound;
       output.AddShiftedUIntSmallerThanCarryOverBound(static_cast<unsigned int>(lowPart), i + j);
       output.AddShiftedUIntSmallerThanCarryOverBound(static_cast<unsigned int>(highPart), i + j + 1);
       if (doProgressReporT) {
@@ -721,7 +747,7 @@ void LargeIntUnsigned::MultiplyBy(const LargeIntUnsigned& x, LargeIntUnsigned& o
           out << "<br>Crunching " << numCycles << " out of " << totalCycles
           << " pairs of large integer ``digits'' = "
           << this->theDigits.size << " x " << x.theDigits.size
-          << " digits (base " << LargeIntUnsigned::CarryOverBound << ").";
+          << " digits (base " << LargeIntegerUnsigned::CarryOverBound << ").";
           theReport2.Report(out.str());
         }
       }
@@ -730,39 +756,39 @@ void LargeIntUnsigned::MultiplyBy(const LargeIntUnsigned& x, LargeIntUnsigned& o
   output.FitSize();
 }
 
-LargeIntUnsigned LargeIntUnsigned::operator%(const LargeIntUnsigned& other) const {
-  LargeIntUnsigned result, temp;
+LargeIntegerUnsigned LargeIntegerUnsigned::operator%(const LargeIntegerUnsigned& other) const {
+  LargeIntegerUnsigned result, temp;
   this->DivPositive(other, temp, result);
   return result;
 }
 
-int LargeIntUnsigned::GetUnsignedIntValueTruncated() {
+int LargeIntegerUnsigned::GetUnsignedIntValueTruncated() {
   return this->theDigits[0];
 }
 
-double LargeIntUnsigned::GetDoubleValue() const {
+double LargeIntegerUnsigned::GetDoubleValue() const {
   double result = 0;
   for (int i = this->theDigits.size - 1; i >= 0; i --) {
-    result = result * LargeIntUnsigned::CarryOverBound + this->theDigits[i];
+    result = result * LargeIntegerUnsigned::CarryOverBound + this->theDigits[i];
   }
   return result;
 }
 
-LargeIntUnsigned LargeIntUnsigned::lcm(const LargeIntUnsigned& a, const LargeIntUnsigned& b) {
-  LargeIntUnsigned output;
-  LargeIntUnsigned::lcm(a, b, output);
+LargeIntegerUnsigned LargeIntegerUnsigned::lcm(const LargeIntegerUnsigned& a, const LargeIntegerUnsigned& b) {
+  LargeIntegerUnsigned output;
+  LargeIntegerUnsigned::lcm(a, b, output);
   return output;
 }
 
-LargeIntUnsigned LargeIntUnsigned::gcd(const LargeIntUnsigned& a, const LargeIntUnsigned& b) {
-  LargeIntUnsigned output;
-  LargeIntUnsigned::gcd(a, b, output);
+LargeIntegerUnsigned LargeIntegerUnsigned::gcd(const LargeIntegerUnsigned& a, const LargeIntegerUnsigned& b) {
+  LargeIntegerUnsigned output;
+  LargeIntegerUnsigned::gcd(a, b, output);
   return output;
 }
 
-void LargeIntUnsigned::gcd(const LargeIntUnsigned& a, const LargeIntUnsigned& b, LargeIntUnsigned& output) {
+void LargeIntegerUnsigned::gcd(const LargeIntegerUnsigned& a, const LargeIntegerUnsigned& b, LargeIntegerUnsigned& output) {
   MacroIncrementCounter(Rational::TotalLargeGCDcalls);
-  LargeIntUnsigned p, q, r, temp;
+  LargeIntegerUnsigned p, q, r, temp;
   p = a;
   q = b;
   while (!q.IsEqualToZero()) {
@@ -773,7 +799,7 @@ void LargeIntUnsigned::gcd(const LargeIntUnsigned& a, const LargeIntUnsigned& b,
   output = p;
 }
 
-void LargeIntUnsigned::FitSize() {
+void LargeIntegerUnsigned::FitSize() {
   int newSize = this->theDigits.size;
   for (int i = this->theDigits.size - 1; i >= 1; i --) {
     if (this->theDigits[i] == 0) {
@@ -785,8 +811,8 @@ void LargeIntUnsigned::FitSize() {
   this->theDigits.SetSize(newSize);
 }
 
-void LargeIntUnsigned::AccountFactor(
-  const LargeInt& theP, List<LargeInt>& outputPrimeFactors, List<int>& outputMultiplicities
+void LargeIntegerUnsigned::AccountFactor(
+  const LargeInteger& theP, List<LargeInteger>& outputPrimeFactors, List<int>& outputMultiplicities
 ) const {
   if (outputPrimeFactors.size == 0) {
     outputPrimeFactors.AddOnTop(theP);
@@ -801,8 +827,8 @@ void LargeIntUnsigned::AccountFactor(
   }
 }
 
-bool LargeIntUnsigned::FactorLargeReturnFalseIfFactorizationIncomplete(
-  List<LargeInt>& outputFactors,
+bool LargeIntegerUnsigned::FactorLargeReturnFalseIfFactorizationIncomplete(
+  List<LargeInteger>& outputFactors,
   List<int>& outputMultiplicites,
   int dontSearchForDivisorsLargerThan,
   std::stringstream* commentsOnFailure
@@ -819,7 +845,7 @@ bool LargeIntUnsigned::FactorLargeReturnFalseIfFactorizationIncomplete(
   if (this->IsEqualToZero()) {
     crash << "This is a programming error: it was requested that I factor 0, which is forbidden. " << crash;
   }
-  LargeIntUnsigned toBeFactored = *this;
+  LargeIntegerUnsigned toBeFactored = *this;
   outputFactors.SetSize(0);
   outputMultiplicites.SetSize(0);
   if (dontSearchForDivisorsLargerThan <= 0) {
@@ -857,8 +883,8 @@ bool LargeIntUnsigned::FactorLargeReturnFalseIfFactorizationIncomplete(
   return true;
 }
 
-bool LargeIntUnsigned::FactorReturnFalseIfFactorizationIncomplete(
-  List<LargeInt>& outputFactors,
+bool LargeIntegerUnsigned::FactorReturnFalseIfFactorizationIncomplete(
+  List<LargeInteger>& outputFactors,
   List<int>& outputMultiplicites,
   int dontSearchForDivisorsLargerThan,
   std::stringstream* commentsOnFailure
@@ -898,12 +924,12 @@ bool LargeIntUnsigned::FactorReturnFalseIfFactorizationIncomplete(
   return true;
 }
 
-void LargeIntUnsigned::lcm(const LargeIntUnsigned& a, const LargeIntUnsigned& b, LargeIntUnsigned& output) {
-  LargeIntUnsigned tempUI, tempUI2;
+void LargeIntegerUnsigned::lcm(const LargeIntegerUnsigned& a, const LargeIntegerUnsigned& b, LargeIntegerUnsigned& output) {
+  LargeIntegerUnsigned tempUI, tempUI2;
   if (a.IsEqualToZero() || b.IsEqualToZero()) {
     crash << "This is a programming error: calling lcm on zero elements is not allowed. " << crash;
   }
-  LargeIntUnsigned::gcd(a, b, tempUI);
+  LargeIntegerUnsigned::gcd(a, b, tempUI);
   a.MultiplyBy(b, tempUI2);
   output = tempUI2;
   output.DivPositive(tempUI, output, tempUI2);
@@ -912,15 +938,15 @@ void LargeIntUnsigned::lcm(const LargeIntUnsigned& a, const LargeIntUnsigned& b,
   }
 }
 
-void LargeIntUnsigned::operator=(const LargeIntUnsigned& x) {
+void LargeIntegerUnsigned::operator=(const LargeIntegerUnsigned& x) {
   this->theDigits = x.theDigits;
 }
 
-void LargeIntUnsigned::operator=(unsigned int x) {
+void LargeIntegerUnsigned::operator=(unsigned int x) {
   this->AssignShiftedUInt(x, 0);
 }
 
-unsigned int LargeIntUnsigned::HashFunction() const {
+unsigned int LargeIntegerUnsigned::HashFunction() const {
   int numCycles = MathRoutines::Minimum(this->theDigits.size, SomeRandomPrimesSize);
   unsigned int result = 0;
   for (int i = 0; i < numCycles; i ++) {
@@ -929,23 +955,23 @@ unsigned int LargeIntUnsigned::HashFunction() const {
   return result;
 }
 
-bool LargeIntUnsigned::IsPositive() const {
+bool LargeIntegerUnsigned::IsPositive() const {
   return this->theDigits.size > 1 || this->theDigits[0] > 0;
 }
 
-bool LargeIntUnsigned::IsEqualToOne() const {
+bool LargeIntegerUnsigned::IsEqualToOne() const {
   return this->theDigits.size == 1 && this->theDigits[0] == 1;
 }
 
-bool LargeIntUnsigned::IsEqualToZero() const {
+bool LargeIntegerUnsigned::IsEqualToZero() const {
   return this->theDigits.size == 1 && this->theDigits[0] == 0;
 }
 
-void LargeIntUnsigned::AssignFactorial(unsigned int x) {
+void LargeIntegerUnsigned::AssignFactorial(unsigned int x) {
   this->MakeOne();
   List<unsigned int> primesBelowX;
-  LargeIntUnsigned::GetAllPrimesSmallerThanOrEqualToUseEratosthenesSieve(x, primesBelowX);
-  LargeIntUnsigned tempInt, tempOne;
+  LargeIntegerUnsigned::GetAllPrimesSmallerThanOrEqualToUseEratosthenesSieve(x, primesBelowX);
+  LargeIntegerUnsigned tempInt, tempOne;
   tempOne.MakeOne();
   for (int i = 0; i < primesBelowX.size; i ++) {
     unsigned int thePrime = primesBelowX.TheObjects[i];
@@ -962,30 +988,30 @@ void LargeIntUnsigned::AssignFactorial(unsigned int x) {
   }
 }
 
-bool LargeInt::IsEven() const {
+bool LargeInteger::IsEven() const {
   return this->value.IsEven();
 }
 
-void LargeInt::WriteToFile(std::fstream& output) {
+void LargeInteger::WriteToFile(std::fstream& output) {
   std::string tempS;
   this->ToString(tempS);
   output << tempS;
 }
 
-void LargeInt::ReadFromFile(std::fstream& input) {
+void LargeInteger::ReadFromFile(std::fstream& input) {
   std::string tempS;
   input >> tempS;
   this->AssignString(tempS);
 }
 
-void LargeInt::AssignString(const std::string& input) {
+void LargeInteger::AssignString(const std::string& input) {
   bool success = this->AssignStringFailureAllowed(input, nullptr);
   if (!success) {
     crash << "LargeInt::AssignString is not allowed to fail." << crash;
   }
 }
 
-bool LargeInt::AssignStringFailureAllowed(const std::string& input, std::stringstream* commentsOnFailure) {
+bool LargeInteger::AssignStringFailureAllowed(const std::string& input, std::stringstream* commentsOnFailure) {
   if (input.size() == 0) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Empty string is not interpretted as zero. ";
@@ -1018,11 +1044,11 @@ bool LargeInt::AssignStringFailureAllowed(const std::string& input, std::strings
   return true;
 }
 
-void LargeInt::RaiseToPower(int thePower) {
-  MathRoutines::RaiseToPower(*this, thePower, LargeInt(1));
+void LargeInteger::RaiseToPower(int thePower) {
+  MathRoutines::RaiseToPower(*this, thePower, LargeInteger(1));
 }
 
-bool LargeInt::IsIntegerFittingInInt(int* whichInt) {
+bool LargeInteger::IsIntegerFittingInInt(int* whichInt) {
   if (!this->value.IsIntegerFittingInInt(whichInt)) {
     return false;
   }
@@ -1032,20 +1058,20 @@ bool LargeInt::IsIntegerFittingInInt(int* whichInt) {
   return true;
 }
 
-void LargeInt::MultiplyByInt(int x) {
-  LargeInt tempI;
+void LargeInteger::MultiplyByInt(int x) {
+  LargeInteger tempI;
   tempI.AssignInt(x);
   *this *= tempI;
 }
 
-bool LargeInt::TryToFindWhetherIsPower(bool& outputIsPower, LargeInt& outputBase, int& outputPower) const {
+bool LargeInteger::TryToFindWhetherIsPower(bool& outputIsPower, LargeInteger& outputBase, int& outputPower) const {
   if (this->sign == - 1) {
     return false;
   }
   return this->value.TryToFindWhetherIsPower(outputIsPower, outputBase, outputPower);
 }
 
-bool LargeInt::operator==(const LargeInt& x) const {
+bool LargeInteger::operator==(const LargeInteger& x) const {
   if (x.sign != this->sign) {
     if (x.IsEqualToZero() && this->IsEqualToZero()) {
       return true;
@@ -1056,23 +1082,23 @@ bool LargeInt::operator==(const LargeInt& x) const {
   return this->value == x.value;
 }
 
-bool LargeInt::CheckForConsistensy() {
+bool LargeInteger::CheckForConsistensy() {
   if (this->sign != - 1 && this->sign != 1) {
     return false;
   }
   for (int i = 0; i < this->value.theDigits.size; i ++) {
-    if (this->value.theDigits[i] >= LargeIntUnsigned::CarryOverBound) {
+    if (this->value.theDigits[i] >= LargeIntegerUnsigned::CarryOverBound) {
       return false;
     }
   }
   return true;
 }
 
-double LargeInt::GetDoubleValue() const {
+double LargeInteger::GetDoubleValue() const {
   return this->sign * this->value.GetDoubleValue();
 }
 
-void LargeInt::ToString(std::string& output) const {
+void LargeInteger::ToString(std::string& output) const {
   std::stringstream out;
   if (this->IsEqualToZero()) {
     output.assign("0");
@@ -1087,12 +1113,12 @@ void LargeInt::ToString(std::string& output) const {
   output = out.str();
 }
 
-void LargeInt::AssignUInt64(uint64_t x) {
+void LargeInteger::AssignUInt64(uint64_t x) {
   this->sign = 1;
   this->value.AssignUInt64(x);
 }
 
-void LargeInt::AssignInt64(int64_t x) {
+void LargeInteger::AssignInt64(int64_t x) {
   this->sign = 1;
   if (x < 0) {
     this->sign = - 1;
@@ -1101,7 +1127,7 @@ void LargeInt::AssignInt64(int64_t x) {
   this->value.AssignUInt64(static_cast<uint64_t>(x));
 }
 
-void LargeInt::AssignInt(int x) {
+void LargeInteger::AssignInt(int x) {
   if (x == 0) {
     this->MakeZero();
     return;
@@ -1114,7 +1140,7 @@ void LargeInt::AssignInt(int x) {
   this->value.AssignShiftedUInt(static_cast<unsigned int>(x), 0);
 }
 
-bool LargeInt::GetDivisors(List<int>& output, bool includeNegative) {
+bool LargeInteger::GetDivisors(List<int>& output, bool includeNegative) {
   if (this->value.theDigits.size > 1) {
     return false;
   }
@@ -1134,7 +1160,7 @@ bool LargeInt::GetDivisors(List<int>& output, bool includeNegative) {
   return true;
 }
 
-void LargeInt::AddLargeIntUnsigned(const LargeIntUnsigned& x) {
+void LargeInteger::AddLargeIntUnsigned(const LargeIntegerUnsigned& x) {
   if (this->sign == 1) {
     this->value += x;
     return;
@@ -1142,21 +1168,21 @@ void LargeInt::AddLargeIntUnsigned(const LargeIntUnsigned& x) {
   if (this->value.IsGEQ(x)) {
     this->value.SubtractSmallerPositive(x);
   } else {
-    LargeIntUnsigned tempI = x;
+    LargeIntegerUnsigned tempI = x;
     tempI.SubtractSmallerPositive(this->value);
     this->value = tempI;
     this->sign = 1;
   }
 }
 
-void LargeInt::operator+=(const LargeInt& x) {
+void LargeInteger::operator+=(const LargeInteger& x) {
   if (this->sign == x.sign) {
     this->value += x.value;
   } else {
     if (this->value.IsGEQ(x.value)) {
       this->value.SubtractSmallerPositive(x.value);
     } else {
-      LargeIntUnsigned tempI = this->value;
+      LargeIntegerUnsigned tempI = this->value;
       this->value = x.value;
       this->value.SubtractSmallerPositive(tempI);
       this->sign = x.sign;
@@ -1164,27 +1190,27 @@ void LargeInt::operator+=(const LargeInt& x) {
   }
 }
 
-void LargeInt::MakeZero() {
+void LargeInteger::MakeZero() {
   this->value.MakeZero();
   this->sign = 1;
 }
 
-void LargeInt::operator=(const Rational& other) {
+void LargeInteger::operator=(const Rational& other) {
   if (!other.IsInteger(this)) {
     crash << "This is a programming error: converting implicitly rational number " << other.ToString()
     << " to integer is not possible as the Rational number is not integral. " << crash;
   }
 }
 
-void LargeInt::operator=(const LargeInt& x) {
+void LargeInteger::operator=(const LargeInteger& x) {
   this->sign = x.sign;
   this->value = x.value;
 }
 
-LargeInt LargeInt::operator/(int x) const {
-  LargeInt result;
-  LargeIntUnsigned remainder;
-  LargeIntUnsigned tempX;
+LargeInteger LargeInteger::operator/(int x) const {
+  LargeInteger result;
+  LargeIntegerUnsigned remainder;
+  LargeIntegerUnsigned tempX;
   int absX = x;
   signed char signX = 1;
   if (x < 0) {
@@ -1197,9 +1223,9 @@ LargeInt LargeInt::operator/(int x) const {
   return result;
 }
 
-LargeInt LargeInt::operator/(LargeInt& x) const {
-  LargeInt result;
-  LargeInt remainder;
+LargeInteger LargeInteger::operator/(LargeInteger& x) const {
+  LargeInteger result;
+  LargeInteger remainder;
   this->value.DivPositive(x.value, result.value, remainder.value);
   result.sign = this->sign * x.sign;
   if (!result.CheckForConsistensy()) {
@@ -1208,13 +1234,13 @@ LargeInt LargeInt::operator/(LargeInt& x) const {
   return result;
 }
 
-int LargeInt::operator%(int x) {
+int LargeInteger::operator%(int x) {
   if (x <= 0) {
     crash << "Bad mod operator output. " << crash;
   }
-  LargeIntUnsigned result;
-  LargeIntUnsigned remainder;
-  LargeIntUnsigned tempX;
+  LargeIntegerUnsigned result;
+  LargeIntegerUnsigned remainder;
+  LargeIntegerUnsigned tempX;
   if (x < 0) {
     x = - x;
   }
@@ -1242,11 +1268,11 @@ void Rational::RaiseToPower(int x) {
     x = - x;
     this->Invert();
   }
-  LargeInt tempNum = this->GetNumerator();
-  LargeIntUnsigned oneLI;
+  LargeInteger tempNum = this->GetNumerator();
+  LargeIntegerUnsigned oneLI;
   oneLI.MakeOne();
   MathRoutines::RaiseToPower(tempNum.value, x, oneLI);
-  LargeIntUnsigned tempDen = this->GetDenominator();
+  LargeIntegerUnsigned tempDen = this->GetDenominator();
   MathRoutines::RaiseToPower(tempDen, x, oneLI);
   char theSign = (this->IsPositive() || x % 2 == 0) ? 1 :- 1;
   this->AllocateExtended();
@@ -1316,13 +1342,13 @@ Rational operator-(const Rational& argument) {
   return tempRat;
 }
 
-void Rational::MultiplyByLargeInt(LargeInt& x) {
+void Rational::MultiplyByLargeInt(LargeInteger& x) {
   this->InitExtendedFromShortIfNeeded();
   this->Extended->num *= x;
   this->Simplify();
 }
 
-void Rational::MultiplyByLargeIntUnsigned(LargeIntUnsigned& x) {
+void Rational::MultiplyByLargeIntUnsigned(LargeIntegerUnsigned& x) {
   this->InitExtendedFromShortIfNeeded();
   this->Extended->num.value.MultiplyBy(x);
   this->Simplify();
@@ -1404,7 +1430,7 @@ void Rational::AssignFracValue() {
     this->MakeZero();
     return;
   }
-  LargeIntUnsigned newNum, tempI;
+  LargeIntegerUnsigned newNum, tempI;
   this->Extended->num.value.DivPositive(this->Extended->den, tempI, newNum);
   this->Extended->num.value = newNum;
   if (this->Extended->num.IsNegative()) {
@@ -1440,9 +1466,9 @@ bool Rational::GetSquareRootIfRational(Rational& output) const {
   if (*this < 0) {
     return false;
   }
-  LargeInt theNum = this->GetNumerator();
-  LargeIntUnsigned theDen = this->GetDenominator();
-  List<LargeInt> primeFactorsNum, primeFactorsDen;
+  LargeInteger theNum = this->GetNumerator();
+  LargeIntegerUnsigned theDen = this->GetDenominator();
+  List<LargeInteger> primeFactorsNum, primeFactorsDen;
   List<int> multsNum, multsDen;
   if (!theNum.value.FactorReturnFalseIfFactorizationIncomplete(primeFactorsNum, multsNum, 0, nullptr)) {
     return false;
@@ -1474,9 +1500,9 @@ bool Rational::GetSquareRootIfRational(Rational& output) const {
 }
 
 bool Rational::GetPrimeFactorsAbsoluteValue(
-  List<LargeInt>& numeratorPrimeFactors,
+  List<LargeInteger>& numeratorPrimeFactors,
   List<int>& numeratorMultiplicities,
-  List<LargeInt>& denominatorPrimeFactors,
+  List<LargeInteger>& denominatorPrimeFactors,
   List<int>& denominatorMultiplicities
 ) {
   MacroRegisterFunctionWithName("Rational::GetPrimeFactorsAbsoluteValue");
@@ -1503,8 +1529,8 @@ bool Rational::ShrinkExtendedPartIfPossible() {
   if (
     this->Extended->num.value.theDigits.size > 1 ||
     this->Extended->den.theDigits.size > 1 ||
-    this->Extended->num.value.theDigits[0] >= LargeIntUnsigned::SquareRootOfCarryOverBound ||
-    this->Extended->den.theDigits[0] >= LargeIntUnsigned::SquareRootOfCarryOverBound
+    this->Extended->num.value.theDigits[0] >= LargeIntegerUnsigned::SquareRootOfCarryOverBound ||
+    this->Extended->den.theDigits[0] >= LargeIntegerUnsigned::SquareRootOfCarryOverBound
   ) {
     return false;
   }
@@ -1519,7 +1545,7 @@ Rational Rational::Factorial(int n) {
     crash << "This is a programming error: taking factorial of the negative number " << n << ". " << crash;
     return 0;
   }
-  LargeIntUnsigned result;
+  LargeIntegerUnsigned result;
   result.AssignFactorial(static_cast<unsigned int>(n));
   Rational answer;
   answer = result;
@@ -1556,7 +1582,7 @@ Rational Rational::NtoTheKth(int n, int k) {
   return result;
 }
 
-bool Rational::IsInteger(LargeInt* whichInteger) const {
+bool Rational::IsInteger(LargeInteger* whichInteger) const {
   bool result = false;
   if (this->Extended == nullptr) {
     result = (this->DenShort == 1);
@@ -1610,14 +1636,14 @@ void Rational::Simplify() {
     return;
   }
   if (!this->Extended->den.IsEqualToOne()) {
-    LargeIntUnsigned tempI;
-    LargeIntUnsigned::gcd(this->Extended->den, this->Extended->num.value, tempI);
+    LargeIntegerUnsigned tempI;
+    LargeIntegerUnsigned::gcd(this->Extended->den, this->Extended->num.value, tempI);
     /*if (Rational::flagAnErrorHasOccurredTimeToPanic) {
       std::string tempS1, tempS2, tempS3;
       tempI.ToString(tempS1);
       this->ToString(tempS2);
     }*/
-    LargeIntUnsigned tempI2;
+    LargeIntegerUnsigned tempI2;
     this->Extended->den.DivPositive(tempI, this->Extended->den, tempI2);
     this->Extended->num.value.DivPositive(tempI, this->Extended->num.value, tempI2);
   }
@@ -1701,7 +1727,7 @@ std::string Rational::ToStringForFileOperations(FormatExpressions* notUsed) cons
     }
     return out.str();
   }
-  LargeInt numAbsVal = this->Extended->num;
+  LargeInteger numAbsVal = this->Extended->num;
   if (numAbsVal < 0) {
     out << "-";
     numAbsVal.sign = 1;
@@ -1728,7 +1754,7 @@ std::string Rational::ToStringFrac() const {
     }
     return out.str();
   }
-  LargeInt numAbsVal = this->Extended->num;
+  LargeInteger numAbsVal = this->Extended->num;
   if (numAbsVal < 0) {
     out << "-";
     numAbsVal.sign = 1;

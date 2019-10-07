@@ -238,7 +238,7 @@ public:
   bool flagReapingChildren;
   TransportLayerSecurity theTLS;
   PointerObjectDestroyer<Calculator> theCalculator;
-  MonomialCollection<MonomialWrapper<std::string, MathRoutines::HashString>, LargeInt> currentlyConnectedAddresses;
+  MonomialCollection<MonomialWrapper<std::string, MathRoutines::HashString>, LargeInteger> currentlyConnectedAddresses;
   std::string portHTTP;
   std::string portHTTPSOpenSSL;
   std::string portHTTPSBuiltIn;

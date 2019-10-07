@@ -69,7 +69,7 @@ void AlgebraicClosureRationals::ComputeDisplayStringsFromRadicals() {
     //{ const LargeInt& theRad = this->theQuadraticRadicals[theSel.elements[i]];
     //  out << "\\sqrt{" << theRad.ToString() << "}";
     //}
-    LargeInt theRad = 1;
+    LargeInteger theRad = 1;
     for (int i = 0; i < theSel.CardinalitySelection; i ++) {
       theRad *= this->theQuadraticRadicals[theSel.elements[i]];
     }
@@ -113,7 +113,7 @@ int AlgebraicClosureRationals::GetIndexFromRadicalSelection(const Selection& the
   return result;
 }
 
-bool AlgebraicClosureRationals::MergeRadicals(const List<LargeInt>& theRadicals) {
+bool AlgebraicClosureRationals::MergeRadicals(const List<LargeInteger>& theRadicals) {
   MacroRegisterFunctionWithName("AlgebraicClosureRationals::MergeTwoQuadraticRadicalExtensions");
   if (!this->flagIsQuadraticRadicalExtensionRationals) {
     crash << "This is a programming error: AlgebraicClosureRationals::MergeTwoQuadraticRadicalExtensions "
@@ -121,10 +121,10 @@ bool AlgebraicClosureRationals::MergeRadicals(const List<LargeInt>& theRadicals)
     << crash;
   }
   //refine factors:
-  HashedList<LargeInt> radicalsNew = this->theQuadraticRadicals;
+  HashedList<LargeInteger> radicalsNew = this->theQuadraticRadicals;
   radicalsNew.AddOnTopNoRepetition(theRadicals);
   bool found = true;
-  LargeIntUnsigned candidateGCD, leftQuotient, rightQuotient;
+  LargeIntegerUnsigned candidateGCD, leftQuotient, rightQuotient;
   while (found) {
     found = false;
     for (int i = 0; i < radicalsNew.size; i ++) {
@@ -132,19 +132,19 @@ bool AlgebraicClosureRationals::MergeRadicals(const List<LargeInt>& theRadicals)
         if (radicalsNew[i] == - 1 || radicalsNew[j] == - 1) {
           continue;
         }
-        LargeIntUnsigned::gcd(radicalsNew[i].value, radicalsNew[j].value, candidateGCD);
+        LargeIntegerUnsigned::gcd(radicalsNew[i].value, radicalsNew[j].value, candidateGCD);
         if (candidateGCD > 1) {
           leftQuotient = radicalsNew[i].value / candidateGCD;
           rightQuotient = radicalsNew[j].value / candidateGCD;
           radicalsNew.RemoveIndexSwapWithLast(j);
           radicalsNew.RemoveIndexSwapWithLast(i);
           if (leftQuotient > 1) {
-            radicalsNew.AddOnTopNoRepetition(LargeInt(leftQuotient));
+            radicalsNew.AddOnTopNoRepetition(LargeInteger(leftQuotient));
           }
           if (rightQuotient > 1) {
-            radicalsNew.AddOnTopNoRepetition(LargeInt(rightQuotient));
+            radicalsNew.AddOnTopNoRepetition(LargeInteger(rightQuotient));
           }
-          radicalsNew.AddOnTopNoRepetition(LargeInt(candidateGCD));
+          radicalsNew.AddOnTopNoRepetition(LargeInteger(candidateGCD));
           found = true;
         }
       }
@@ -380,9 +380,9 @@ Rational AlgebraicNumber::GetDenominatorRationalPart() const {
   }
   VectorSparse<Rational> theEltAdditive;
   this->owner->GetAdditionTo(*this, theEltAdditive);
-  LargeIntUnsigned resultLCM = 1;
+  LargeIntegerUnsigned resultLCM = 1;
   for (int i = 0; i < theEltAdditive.size(); i ++) {
-    resultLCM = LargeIntUnsigned::lcm(resultLCM, theEltAdditive.theCoeffs[i].GetDenominator());
+    resultLCM = LargeIntegerUnsigned::lcm(resultLCM, theEltAdditive.theCoeffs[i].GetDenominator());
   }
   return resultLCM;
 }
@@ -393,7 +393,7 @@ bool AlgebraicNumber::AssignCosRationalTimesPi(const Rational& input, AlgebraicC
   fracPart.AssignFracValue();
   Rational halfIntegerPart = input * 2;
   halfIntegerPart.AssignFloor();
-  LargeInt halfIntegerPartTimesTwo;
+  LargeInteger halfIntegerPartTimesTwo;
   if (!halfIntegerPart.IsInteger(&halfIntegerPartTimesTwo)) {
     crash << "something went wrong: floor function returns non-integer" << crash;
   }
@@ -464,14 +464,14 @@ Rational AlgebraicNumber::GetNumeratorRationalPart() const {
   }
   VectorSparse<Rational> theEltAdditive;
   this->owner->GetAdditionTo(*this, theEltAdditive);
-  LargeInt resultGCD = 1;
-  LargeIntUnsigned tempR;
+  LargeInteger resultGCD = 1;
+  LargeIntegerUnsigned tempR;
   if (theEltAdditive.size() > 0) {
     resultGCD = theEltAdditive.theCoeffs[0].GetNumerator();
   }
   for (int i = 1; i < theEltAdditive.size(); i ++) {
     tempR = resultGCD.value;
-    LargeIntUnsigned::gcd(tempR, theEltAdditive.theCoeffs[i].GetNumerator().value, resultGCD.value);
+    LargeIntegerUnsigned::gcd(tempR, theEltAdditive.theCoeffs[i].GetNumerator().value, resultGCD.value);
   }
   return resultGCD;
 }
@@ -1013,15 +1013,15 @@ bool AlgebraicNumber::AssignRationalQuadraticRadical(const Rational& inpuT, Alge
     }
     return result;
   }
-  List<LargeInt> theFactors;
+  List<LargeInteger> theFactors;
   Rational absoluteInput = inpuT;
   if (absoluteInput < 0) {
     theFactors.AddOnTop(- 1);
     absoluteInput *= - 1;
   }
-  LargeInt squareFreeInput = absoluteInput.GetNumerator();
+  LargeInteger squareFreeInput = absoluteInput.GetNumerator();
   squareFreeInput *= absoluteInput.GetDenominator();
-  List<LargeInt> primeFactors;
+  List<LargeInteger> primeFactors;
   List<int> theMults;
   if (!squareFreeInput.value.FactorReturnFalseIfFactorizationIncomplete(primeFactors, theMults, 0, nullptr)) {
     return false;
@@ -1259,7 +1259,7 @@ void ElementZmodP::CheckIamInitialized() const {
   }
 }
 
-void ElementZmodP::operator=(const LargeInt& other) {
+void ElementZmodP::operator=(const LargeInteger& other) {
   this->CheckIamInitialized();
   this->theValue = other.value;
   this->theValue %= this->theModulo;
@@ -1271,7 +1271,7 @@ void ElementZmodP::operator=(const LargeInt& other) {
 }
 
 void ElementZmodP::ScaleToIntegralMinHeightAndGetPoly(
-  const Polynomial<Rational>& input, Polynomial<ElementZmodP>& output, const LargeIntUnsigned& newModulo
+  const Polynomial<Rational>& input, Polynomial<ElementZmodP>& output, const LargeIntegerUnsigned& newModulo
 ) {
   Polynomial<Rational> rescaled;
   rescaled = input;
@@ -1291,18 +1291,18 @@ void ElementZmodP::operator=(const ElementZmodP& other) {
   this->theValue = other.theValue;
 }
 
-void ElementZmodP::operator=(const LargeIntUnsigned& other) {
+void ElementZmodP::operator=(const LargeIntegerUnsigned& other) {
   this->CheckIamInitialized();
   this->theValue = other;
   this->theValue %= this->theModulo;
 }
 
-void ElementZmodP::MakeOne(const LargeIntUnsigned& newModulo) {
+void ElementZmodP::MakeOne(const LargeIntegerUnsigned& newModulo) {
   this->theModulo = newModulo;
   this->theValue = 1;
 }
 
-void ElementZmodP::MakeMOne(const LargeIntUnsigned& newModulo) {
+void ElementZmodP::MakeMOne(const LargeIntegerUnsigned& newModulo) {
   this->theModulo = newModulo;
   this->theValue = newModulo;
   this->theValue --;
@@ -1347,7 +1347,7 @@ ElementZmodP operator*(int left, const ElementZmodP& right) {
   return result;
 }
 
-void ElementZmodP::operator*=(const LargeInt& other) {
+void ElementZmodP::operator*=(const LargeInteger& other) {
   this->theValue *= other.value;
   if (other.IsNegative()) {
     this->theValue *= this->theModulo - 1;
@@ -1397,11 +1397,11 @@ void ElementZmodP::operator=(const Rational& other) {
 }
 
 void ElementZmodP::operator=(const int other) {
-  LargeInt otherLI = other;
+  LargeInteger otherLI = other;
   *this = otherLI;
 }
 
-void ElementZmodP::operator-=(const LargeIntUnsigned& other) {
+void ElementZmodP::operator-=(const LargeIntegerUnsigned& other) {
   ElementZmodP otherElt;
   otherElt.theModulo = this->theModulo;
   otherElt = other;
@@ -1421,7 +1421,7 @@ bool ElementZmodP::AssignRational(const Rational& other) {
   return true;
 }
 
-bool ElementZmodP::operator/=(const LargeInt& other) {
+bool ElementZmodP::operator/=(const LargeInteger& other) {
   ElementZmodP divisor;
   divisor.theModulo = this->theModulo;
   if (!divisor.AssignRational(Rational(other))) {
@@ -1434,7 +1434,7 @@ bool ElementZmodP::operator/=(const LargeInt& other) {
 bool ElementZmodP::operator/=(const ElementZmodP& other) {
   this->CheckIamInitialized();
   this->CheckEqualModuli(other);
-  LargeInt theInverted, otherValue, theMod;
+  LargeInteger theInverted, otherValue, theMod;
   theMod = this->theModulo;
   otherValue = other.theValue;
   if (!MathRoutines::InvertXModN(otherValue, theMod, theInverted)) {

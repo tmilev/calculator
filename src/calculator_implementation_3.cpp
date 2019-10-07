@@ -1435,15 +1435,15 @@ bool Calculator::innerZmodP(Calculator& theCommands, const Expression& input, Ex
   if (!input[1].IsRational(&left) || !input[2].IsRational(&right)) {
     return false;
   }
-  LargeInt base;
+  LargeInteger base;
   if (!right.IsInteger(&base)) {
     return false;
   }
   if (base.IsEqualToZero()) {
     return false;
   }
-  LargeIntUnsigned theGCD;
-  LargeIntUnsigned::gcd(left.GetDenominator(), base.value, theGCD);
+  LargeIntegerUnsigned theGCD;
+  LargeIntegerUnsigned::gcd(left.GetDenominator(), base.value, theGCD);
   if (theGCD > 1) {
     return false;
   }
@@ -1484,7 +1484,7 @@ bool Calculator::innerPrintZnEnumeration(Calculator& theCommands, const Expressi
   SelectionPositiveIntegers theSel;
   theSel.init(dimension);
   std::stringstream out2, out;
-  LargeIntUnsigned gradeLarge = static_cast<unsigned>(grade);
+  LargeIntegerUnsigned gradeLarge = static_cast<unsigned>(grade);
   int counter = 0;
   for (theSel.SetFirstInGradeLevel(gradeLarge); theSel.GetGrading() == gradeLarge; theSel.IncrementReturnFalseIfPastLast()) {
     out2 << theSel.ToString() << "<br>";

@@ -137,8 +137,8 @@ void Polynomial<coefficient>::ScaleToIntegralNoGCDCoeffs() {
     return;
   }
   int indexHighestMon = 0;
-  LargeIntUnsigned tempInt1, accumNum, accumDen;
-  LargeInt tempInt2;
+  LargeIntegerUnsigned tempInt1, accumNum, accumDen;
+  LargeInteger tempInt2;
   accumDen.MakeOne();
   accumNum = this->theCoeffs[0].GetNumerator().value;
   for (int i = 0; i < this->size(); i ++) {
@@ -148,8 +148,8 @@ void Polynomial<coefficient>::ScaleToIntegralNoGCDCoeffs() {
     Rational& tempRat = this->theCoeffs[i];
     tempInt1 = tempRat.GetDenominator();
     tempInt2 = tempRat.GetNumerator();
-    LargeIntUnsigned::lcm(tempInt1, accumDen, accumDen);
-    LargeIntUnsigned::gcd(tempInt2.value, accumNum, accumNum);
+    LargeIntegerUnsigned::lcm(tempInt1, accumDen, accumDen);
+    LargeIntegerUnsigned::gcd(tempInt2.value, accumNum, accumNum);
   }
   Rational theMultiple;
   theMultiple.MakeOne();
@@ -158,7 +158,7 @@ void Polynomial<coefficient>::ScaleToIntegralNoGCDCoeffs() {
   }
   theMultiple.MultiplyByLargeIntUnsigned(accumDen);
   Rational tempRat2;
-  LargeInt tempInt3;
+  LargeInteger tempInt3;
   tempInt3.AssignLargeIntUnsigned(accumNum);
   tempRat2.AssignLargeInteger(tempInt3);
   theMultiple.DivideBy(tempRat2);
@@ -611,7 +611,7 @@ bool Polynomial<coefficient>::FindOneVarRatRoots(List<Rational>& output) {
   Rational val;
   tempV.SetSize(1);
   List<int> divisorsH, divisorsS;
-  LargeInt hT, lT;
+  LargeInteger hT, lT;
   hT = highestTerm.GetNumerator();
   lT = lowestTerm.GetNumerator();
   if (!hT.GetDivisors(divisorsH, false) || !lT.GetDivisors(divisorsS, true)) {
@@ -654,7 +654,7 @@ FactorMeOutputIsADivisor(Polynomial<Rational>& output, std::stringstream* commen
   }
   int degreeLeft = degree / 2;
   Vector<Rational> AllPointsOfEvaluation;
-  List<List<LargeInt> > thePrimeFactorsAtPoints;
+  List<List<LargeInteger> > thePrimeFactorsAtPoints;
   List<List<int> > thePrimeFactorsMults;
   Vector<Rational> theValuesAtPoints, theValuesAtPointsLeft;
   AllPointsOfEvaluation.SetSize(degree + 1);
@@ -667,7 +667,7 @@ FactorMeOutputIsADivisor(Polynomial<Rational>& output, std::stringstream* commen
   Vector<Rational> theArgument;
   theArgument.SetSize(1);
   theValuesAtPoints.SetSize(AllPointsOfEvaluation.size);
-  LargeInt tempLI;
+  LargeInteger tempLI;
   for (int i = 0; i < AllPointsOfEvaluation.size; i ++) {
     theArgument[0] = AllPointsOfEvaluation[i];
     theValuesAtPoints[i] = thePoly.Evaluate(theArgument);

@@ -16,7 +16,7 @@ template <typename coefficient>
 class Matrix;
 template <typename coefficient>
 class Vector;
-class LargeInt;
+class LargeInteger;
 
 class JSData {
 public:
@@ -42,7 +42,7 @@ public:
   bool theBoolean;
   double theFloat;
   std::string theString;
-  MemorySaving<LargeInt> theInteger;
+  MemorySaving<LargeInteger> theInteger;
   List<JSData> theList;
   MapReferenceS<std::string, JSData, MathRoutines::HashString> objects;
   void operator=(const bool other);
@@ -58,7 +58,7 @@ public:
   bool HasCompositeKey(const std::string& key, JSData* whichValue, std::stringstream* commentsOnFailure) const;
   bool HasCompositeKeyOfTokeN(const std::string& key, JSData* whichValue, char targetType, std::stringstream* commentsOnFailure) const;
   bool HasCompositeKeyOfType(const std::string& key, std::string& output, std::stringstream* commentsOnFailure) const;
-  bool HasCompositeKeyOfType(const std::string& key, LargeIntUnsigned& output, std::stringstream* commentsOnFailure) const;
+  bool HasCompositeKeyOfType(const std::string& key, LargeIntegerUnsigned& output, std::stringstream* commentsOnFailure) const;
   bool HasCompositeKeyOfType(const std::string& key, List<unsigned char>& output, std::stringstream* commentsOnFailure) const;
   bool HasCompositeKeyValueNull(const std::string& key, std::stringstream* commentsOnFailure) const;
 
@@ -81,7 +81,7 @@ public:
       this->theList[i] = other[i];
     }
   }
-  void operator=(const LargeInt& input);
+  void operator=(const LargeInteger& input);
   template <typename coefficient>
   void operator=(const Vector<coefficient>& other);
   template <typename coefficient>

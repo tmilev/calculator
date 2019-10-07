@@ -333,7 +333,7 @@ void ElementWeylAlgebra<coefficient>::FourierTransform(ElementWeylAlgebra<coeffi
     thisCopy.FourierTransform(output);
     return;
   }
-  LargeInt totalDeg;
+  LargeInteger totalDeg;
   coefficient theCoeff;
   output.MakeZero();
   MonomialWeylAlgebra theMon;

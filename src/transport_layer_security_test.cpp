@@ -34,8 +34,12 @@ bool SSLRecord::Test::Serialization() {
   TransportLayerSecurityServer server;
   SSLRecord theRecord;
   theRecord.owner = &server;
+  server.initialize();
+  server.session.initialize();
   std::stringstream comments;
-  if (!Crypto::ConvertHexToListUnsignedChar(inputHex, theRecord.body, &comments)) {
+  if (!Crypto::ConvertHexToListUnsignedChar(
+    inputHex, theRecord.incomingBytes, &comments
+  )) {
     crash << "Bad hard-coded test hex string!" << crash;
   }
   if (!theRecord.Decode(&comments)) {
@@ -43,9 +47,9 @@ bool SSLRecord::Test::Serialization() {
   }
   List<unsigned char> encoded;
   theRecord.WriteBytes(encoded, nullptr);
-  if (encoded != theRecord.body) {
+  if (encoded != theRecord.incomingBytes) {
     logServer << "Decoded:\n" << theRecord.content.getStringHighlighter()
-    << Crypto::ConvertListUnsignedCharsToHex(theRecord.body, 0, false) << logger::endL;
+    << Crypto::ConvertListUnsignedCharsToHex(theRecord.incomingBytes, 0, false) << logger::endL;
     logServer << "Encoded:\n" << theRecord.content.getStringHighlighter()
     << Crypto::ConvertListUnsignedCharsToHex(encoded, 0, false) << logger::endL;
     crash << "Decode->Encode did not reproduce the original input. " << crash;

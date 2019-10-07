@@ -837,7 +837,7 @@ bool Calculator::innerFunctionToMatrix(Calculator& theCommands, const Expression
   if (numRows <= 0 || numCols <= 0) {
     return false;
   }
-  LargeInt numRowsTimesCols = numRows;
+  LargeInteger numRowsTimesCols = numRows;
   numRowsTimesCols *= numCols ;
   if (numRowsTimesCols > 10000) {
     theCommands << "Max number of matrix entries is 10000. You requested " << numRows
@@ -1321,7 +1321,7 @@ bool Calculator::innerMultiplyByOne(Calculator& theCommands, const Expression& i
   return true;
 }
 
-bool Calculator::GetVectorLargeIntFromFunctionArguments(const Expression& input, List<LargeInt>& output) {
+bool Calculator::GetVectorLargeIntFromFunctionArguments(const Expression& input, List<LargeInteger>& output) {
   MacroRegisterFunctionWithName("Calculator::GetVectorLargeIntFromFunctionArguments");
   Vector<Rational> theRats;
   if (!this->GetVectorFromFunctionArguments(input, theRats)) {

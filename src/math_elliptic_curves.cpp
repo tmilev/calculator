@@ -8,7 +8,7 @@ unsigned int EllipticCurveWeierstrassNormalForm::HashFunction(const EllipticCurv
 }
 
 bool EllipticCurveWeierstrassNormalForm::GetOrderNISTCurve(
-  const std::string& curveName, LargeIntUnsigned &output, std::stringstream* commentsOnFailure
+  const std::string& curveName, LargeIntegerUnsigned &output, std::stringstream* commentsOnFailure
 ) {
   if (curveName == "secp256k1") {
     output.AssignString("115792089237316195423570985008687907852837564279074904382605163141518161494337");
@@ -27,7 +27,7 @@ bool EllipticCurveWeierstrassNormalForm::operator==(const EllipticCurveWeierstra
 
 template < >
 void ElementEllipticCurve<ElementZmodP>::MakeGeneratorSecp256k1() {
-  LargeIntUnsigned theModulo;
+  LargeIntegerUnsigned theModulo;
   theModulo.AssignString  ("115792089237316195423570985008687907853269984665640564039457584007908834671663");
   this->xCoordinate.theModulo = theModulo;
   this->yCoordinate.theModulo = theModulo;

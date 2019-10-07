@@ -80,7 +80,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeLengthIncrementDataPointer(
     return true;
   }
   int numberOfLengthBytes = currentByte - 128;
-  LargeInt length = 0;
+  LargeInteger length = 0;
   this->dataPointer ++;
   for (int i = 0; i < numberOfLengthBytes; i ++) {
     length *= 256;
@@ -187,10 +187,10 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeNull(
   return true;
 }
 
-LargeInt AbstractSyntaxNotationOneSubsetDecoder::VariableLengthQuantityDecode(
+LargeInteger AbstractSyntaxNotationOneSubsetDecoder::VariableLengthQuantityDecode(
   const List<unsigned char>& input, int& inputOutputDataPointer
 ) {
-  LargeInt result = 0;
+  LargeInteger result = 0;
   for (; inputOutputDataPointer < input.size ; inputOutputDataPointer ++) {
     unsigned char currentByte = input[inputOutputDataPointer];
     result *= 128;
@@ -230,7 +230,7 @@ std::string ASNElement::InterpretAsObjectIdentifier() const {
   unsigned char secondEntry = firstByte % 40;
   resultStream << static_cast<int>(firstEntry) << "." << static_cast<int>(secondEntry);
   for (int i = 0; i < this->ASNAtom.size; i ++) {
-    LargeInt nextInt = AbstractSyntaxNotationOneSubsetDecoder::VariableLengthQuantityDecode(this->ASNAtom, i);
+    LargeInteger nextInt = AbstractSyntaxNotationOneSubsetDecoder::VariableLengthQuantityDecode(this->ASNAtom, i);
     resultStream << "." << nextInt.ToString();
   }
   return resultStream.str();
@@ -378,10 +378,10 @@ bool ASNElement::HasSubElementOfType<ASNObject>(
 }
 
 template < >
-bool ASNElement::HasSubElementOfType<LargeIntUnsigned>(
+bool ASNElement::HasSubElementOfType<LargeIntegerUnsigned>(
   const List<int>& desiredIndices,
   const List<unsigned char>& desiredTypes,
-  LargeIntUnsigned& output,
+  LargeIntegerUnsigned& output,
   std::stringstream* commentsOnFailure
 ) const {
   const ASNElement* element = nullptr;
@@ -392,10 +392,10 @@ bool ASNElement::HasSubElementOfType<LargeIntUnsigned>(
 }
 
 template < >
-bool ASNElement::HasSubElementOfType<LargeInt>(
+bool ASNElement::HasSubElementOfType<LargeInteger>(
   const List<int>& desiredIndices,
   const List<unsigned char>& desiredTypes,
-  LargeInt& output,
+  LargeInteger& output,
   std::stringstream* commentsOnFailure
 ) const {
   const ASNElement* element = nullptr;
@@ -412,7 +412,7 @@ bool ASNElement::HasSubElementOfType<int>(
   int& output,
   std::stringstream* commentsOnFailure
 ) const {
-  LargeInt outputLarge;
+  LargeInteger outputLarge;
   if (!this->HasSubElementOfType(desiredIndices, desiredTypes, outputLarge, commentsOnFailure)) {
     return false;
   }
@@ -486,10 +486,21 @@ void ASNElement::WriteAnnotations(List<Serialization::Marker>& output) {
     bodyStream << "<br>" << comment;
   }
   int lengthOfLengthEncoding = this->GetLengthLengthEncoding();
-  output.AddOnTop(Serialization::Marker(this->offsetLastWrite, this->lengthPromised + lengthOfLengthEncoding + 1, bodyStream.str()));
-  output.AddOnTop(Serialization::Marker(this->offsetLastWrite, 1, tagStream.str()));
-  output.AddOnTop(Serialization::Marker(this->offsetLastWrite + 1, lengthOfLengthEncoding, lengthStream.str()));
-  output.AddOnTop(Serialization::Marker(this->offsetLastWrite + 1 + lengthOfLengthEncoding, this->lengthPromised, bodyStream.str()));
+  output.AddOnTop(Serialization::Marker(
+    this->offsetLastWrite, this->lengthPromised + lengthOfLengthEncoding + 1, bodyStream.str()
+  ));
+  output.AddOnTop(Serialization::Marker(
+    this->offsetLastWrite, 1, tagStream.str()
+  ));
+  output.AddOnTop(Serialization::Marker(
+    this->offsetLastWrite + 1, lengthOfLengthEncoding, lengthStream.str()
+  ));
+  output.AddOnTop(Serialization::Marker(
+    this->offsetLastWrite + 1 + lengthOfLengthEncoding, this->lengthPromised, bodyStream.str()
+  ));
+  for (int i = 0; i < this->theElements.size; i ++) {
+    this->theElements[i].WriteAnnotations(output);
+  }
 }
 
 JSData ASNElement::ToJSON() const {
@@ -583,7 +594,7 @@ void ASNElement::ToJSON(JSData& output) const {
       }
     }
     if (this->tag == AbstractSyntaxNotationOneSubsetDecoder::tags::integer0x02) {
-      LargeInt theInt;
+      LargeInteger theInt;
       this->isInteger(&theInt, nullptr);
       output[ASNElement::JSLabels::interpretation] = theInt.ToString();
     }
@@ -591,7 +602,7 @@ void ASNElement::ToJSON(JSData& output) const {
 }
 
 bool ASNElement::isIntegerUnsigned(
-  LargeIntUnsigned* whichInteger,
+  LargeIntegerUnsigned* whichInteger,
   std::stringstream* commentsOnFalse
 ) const {
   MacroRegisterFunctionWithName("ASNElement::isIntegerUnsigned");
@@ -612,7 +623,7 @@ bool ASNElement::isIntegerUnsigned(
   if (whichInteger == nullptr) {
     return true;
   }
-  LargeInt result;
+  LargeInteger result;
   if (!this->isInteger(&result, commentsOnFalse)) {
     crash << "ASNElement must be an integer at this point. " << crash;
   }
@@ -620,7 +631,7 @@ bool ASNElement::isIntegerUnsigned(
   return true;
 }
 
-bool ASNElement::isInteger(LargeInt *whichInteger, std::stringstream *commentsOnFalse) const {
+bool ASNElement::isInteger(LargeInteger *whichInteger, std::stringstream *commentsOnFalse) const {
   MacroRegisterFunctionWithName("ASNElement::isInteger");
   if (this->tag != AbstractSyntaxNotationOneSubsetDecoder::tags::integer0x02) {
     if (commentsOnFalse != nullptr) {
@@ -851,11 +862,12 @@ void AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::WriteLengt
     output[offset] = length;
     return;
   }
-  int numBytes = AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::GetReservedBytesForLength(static_cast<signed>(input)) - 1;
+  int numBytes = AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength
+  ::GetReservedBytesForLength(static_cast<signed>(input)) - 1;
   unsigned char lengthPlus128 = 128 + static_cast<unsigned char>(numBytes);
   output[offset] = lengthPlus128;
   offset ++;
-  Serialization::WriteNByteUnsignedInt(
+  Serialization::WriteNByteUnsigned(
     numBytes,
     static_cast<unsigned int>(input),
     output,
@@ -956,7 +968,7 @@ AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::~WriterObjectFi
 }
 
 void AbstractSyntaxNotationOneSubsetDecoder::WriteUnsignedIntegerObject(
-  const LargeIntUnsigned& input, List<unsigned char>& output
+  const LargeIntegerUnsigned& input, List<unsigned char>& output
 ) {
   List<unsigned char> serialized;
   input.WriteBigEndianBytes(serialized, true);
@@ -1091,7 +1103,8 @@ MapList<std::string, ASNObject, MathRoutines::HashString>& ASNObject::NamesToObj
       "551d13",
       AbstractSyntaxNotationOneSubsetDecoder::tags::boolean0x01
     );
-    MapList<List<unsigned char>, ASNObject, MathRoutines::HashListUnsignedChars>& reverseMap = ASNObject::ObjectIdsToNames();
+    MapList<List<unsigned char>, ASNObject, MathRoutines::HashListUnsignedChars>& reverseMap =
+    ASNObject::ObjectIdsToNames();
     for (int i = 0; i < container.theValues.size; i ++) {
       ASNObject& current = container.theValues[i];
       reverseMap.SetKeyValue(current.objectId.ASNAtom, current);
@@ -1100,7 +1113,9 @@ MapList<std::string, ASNObject, MathRoutines::HashString>& ASNObject::NamesToObj
   return container;
 }
 
-int ASNObject::LoadField(const MapList<std::string, ASNObject, MathRoutines::HashString>& inputFields, const std::string& fieldName) {
+int ASNObject::LoadField(
+  const MapList<std::string, ASNObject, MathRoutines::HashString>& inputFields, const std::string& fieldName
+) {
   if (!ASNObject::NamesToObjectIdsNonThreadSafe().Contains(fieldName)) {
     crash << "Field " << fieldName << " is hard-coded but is yet unknown. " << crash;
   }
@@ -1232,7 +1247,7 @@ void ASNElement::MakeObjectId(const List<unsigned char>& input) {
   this->ASNAtom = input;
 }
 
-void ASNElement::MakeInteger(const LargeIntUnsigned& input) {
+void ASNElement::MakeInteger(const LargeIntegerUnsigned& input) {
   this->reset();
   this->tag = AbstractSyntaxNotationOneSubsetDecoder::tags::integer0x02;
   this->startByte = AbstractSyntaxNotationOneSubsetDecoder::tags::integer0x02;
@@ -1245,7 +1260,9 @@ void ASNElement::MakeNull() {
   this->startByte = AbstractSyntaxNotationOneSubsetDecoder::tags::null0x05;
 }
 
-void ASNElement::MakeSet(int numberOfEmptyElements, bool setLeadingBit, bool setSecondMostSignificantBit, bool constructed) {
+void ASNElement::MakeSet(
+  int numberOfEmptyElements, bool setLeadingBit, bool setSecondMostSignificantBit, bool constructed
+) {
   this->reset();
   this->tag = AbstractSyntaxNotationOneSubsetDecoder::tags::set0x11;
   this->startByte = this->tag;
@@ -1288,7 +1305,9 @@ void TBSCertificateInfo::ComputeASNVersionWrapper(ASNElement& output) {
   output.theElements.AddOnTop(versionInteger);
 }
 
-void ASNElement::SetStartByteFlags(bool setLeadingBit, bool setSecondMostSignificantBit, bool setConstructed) {
+void ASNElement::SetStartByteFlags(
+  bool setLeadingBit, bool setSecondMostSignificantBit, bool setConstructed
+) {
   if (setLeadingBit) {
     this->startByte += 128;
   }
@@ -1300,7 +1319,9 @@ void ASNElement::SetStartByteFlags(bool setLeadingBit, bool setSecondMostSignifi
   }
 }
 
-void ASNElement::MakeBitStringEmpty(bool setLeadingBit, bool setSecondMostSignificantBit, bool setConstructed) {
+void ASNElement::MakeBitStringEmpty(
+  bool setLeadingBit, bool setSecondMostSignificantBit, bool setConstructed
+) {
   this->reset();
   this->tag = AbstractSyntaxNotationOneSubsetDecoder::tags::bitString0x03;
   this->startByte = this->tag;
@@ -1412,7 +1433,9 @@ void X509Certificate::ComputeASNSignatureAlgorithm(ASNElement& output) {
   output[1].MakeNull();
 }
 
-void X509Certificate::WriteBytesASN1(List<unsigned char>& output, List<Serialization::Marker>* annotations) {
+void X509Certificate::WriteBytesASN1(
+  List<unsigned char>& output, List<Serialization::Marker>* annotations
+) {
   MacroRegisterFunctionWithName("X509Certificate::WriteBytesASN1");
   this->ComputeASN(this->recodedASN);
   this->recodedASN.WriteBytesUpdatePromisedLength(output);
@@ -1452,10 +1475,14 @@ std::string X509Certificate::ToString() {
   out << decoderRecoded.ToStringAnnotateBinary();
 
   out << "<br><b>Source (" << this->sourceBinary.size << " bytes).</b><br>";
-  AbstractSyntaxNotationOneSubsetDecoder decoderSource;
-  decoderSource.decodedData = &this->sourceASN;
-  decoderSource.rawDatA = &this->sourceBinary;
-  out << decoderSource.ToStringAnnotateBinary();
+  if (this->sourceBinary == recodedBytes) {
+    out << "<b style = 'color:green'>Recoded and original source coincide. </b>";
+  } else {
+    AbstractSyntaxNotationOneSubsetDecoder decoderSource;
+    decoderSource.decodedData = &this->sourceASN;
+    decoderSource.rawDatA = &this->sourceBinary;
+    out << decoderSource.ToStringAnnotateBinary();
+  }
   return out.str();
 }
 
@@ -1471,14 +1498,14 @@ bool PrivateKeyRSA::BasicChecks(std::stringstream* comments) {
   if (comments == nullptr) {
     comments = &commentsContainer;
   }
-  LargeInt mustBeZero;
-  LargeInt primeOneLI = this->primeOne;
-  LargeInt primeTwoLI = this->primeTwo;
+  LargeInteger mustBeZero;
+  LargeInteger primeOneLI = this->primeOne;
+  LargeInteger primeTwoLI = this->primeTwo;
   mustBeZero = this->primeOne;
   mustBeZero *= this->primeTwo;
   mustBeZero -= this->modulus;
   *comments << "Must be zero: " << mustBeZero.ToString();
-  LargeInt EulerPhi = (primeOneLI - 1) * (primeTwoLI - 1);
+  LargeInteger EulerPhi = (primeOneLI - 1) * (primeTwoLI - 1);
   ElementZmodP mustBeZeroModP;
   //theExponent.theModulo = EulerPhi.value;
   //theExponent.theValue = this->exponent;
@@ -1589,7 +1616,7 @@ bool PrivateKeyRSA::LoadFromASNEncoded(
   )) {
     return false;
   }
-  LargeInt exponent1, exponent2, coefficient;
+  LargeInteger exponent1, exponent2, coefficient;
   if (!this->sourceASNInner.HasSubElementOfType(
     {6}, {}, exponent1, commentsOnFailure
   )) {
@@ -1713,7 +1740,9 @@ bool TBSCertificateInfo::LoadValidity(
   return true;
 }
 
-bool TBSCertificateInfo::Organization::LoadFromASN(const ASNElement& input, std::stringstream* commentsOnFailure) {
+bool TBSCertificateInfo::Organization::LoadFromASN(
+  const ASNElement& input, std::stringstream* commentsOnFailure
+) {
   MacroRegisterFunctionWithName("TBSCertificateInfo::LoadFieldsFromASN");
   MapList<std::string, ASNObject, MathRoutines::HashString> fields;
   if (!ASNObject::LoadFieldsFromASNSequence(input, fields, commentsOnFailure)) {

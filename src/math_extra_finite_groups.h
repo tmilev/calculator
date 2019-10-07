@@ -141,7 +141,7 @@ template <typename elementSomeGroup>
 class FiniteGroup {
 public:
   // sizePrivate was protected, but, WeylGroupData needs access
-  LargeInt sizePrivate;
+  LargeInteger sizePrivate;
 
   // certain methods, such as the Get*ByFormula methods, need access to special
   // data not found in FiniteGroup, but in WeylData, PermutationGroupData,
@@ -170,7 +170,7 @@ public:
       this->flagRepresentativeComputed = false;
       this->flagElementsComputed = false;
     }
-    LargeInt size;
+    LargeInteger size;
     List<int> indicesEltsInOwner;
     int representativeIndex;
     List<elementSomeGroup> theElements;
@@ -249,7 +249,7 @@ public:
   // WARNING:  This recalculates conjugacy classes, screwing up their order for other methods
   bool CheckConjugacyClassRepsMatchCCsizes();
   bool CheckOrthogonalityCharTable();
-  void SetSizE(const LargeInt& inputSize) {
+  void SetSizE(const LargeInteger& inputSize) {
     this->sizePrivate = inputSize;
   }
   void init();
@@ -264,8 +264,8 @@ public:
   std::string ToStringElements(FormatExpressions* theFormat = nullptr) const;
   std::string ToStringConjugacyClasses(FormatExpressions* theFormat = nullptr);
   int ConjugacyClassCount() const;
-  LargeInt GetSize();
-  LargeInt SizeByFormulaOrNeg1() {
+  LargeInteger GetSize();
+  LargeInteger SizeByFormulaOrNeg1() {
     this->CheckConsistency();
     if (this->GetSizeByFormula != 0) {
       return GetSizeByFormula(*this);
@@ -275,7 +275,7 @@ public:
 
   bool (*AreConjugateByFormula)(const elementSomeGroup& x, const elementSomeGroup& y);
   void (*ComputeCCSizesAndRepresentativesByFormula)(FiniteGroup<elementSomeGroup>& G);
-  LargeInt (*GetSizeByFormula)(FiniteGroup<elementSomeGroup>& G);
+  LargeInteger (*GetSizeByFormula)(FiniteGroup<elementSomeGroup>& G);
   bool AreConjugate(const elementSomeGroup& left, const elementSomeGroup& right);
   bool AreConjugate_OLD_Deprecated_Version_By_Todor(const elementSomeGroup& left, const elementSomeGroup& right);
   bool ComputeAllElements(bool andWords, int MaxElements = 1000000);
@@ -652,7 +652,7 @@ public:
   void MakeFinalSteps();
   void InitGenerators();
   template <class coefficient>
-  LargeInt GetOrbitSize(Vector<coefficient>& theWeight);
+  LargeInteger GetOrbitSize(Vector<coefficient>& theWeight);
   void MakeMeFromMyCartanSymmetric();
   void MakeFromDynkinTypeDefaultLengthKeepComponentOrder(const DynkinType& inputType);
   void ComputeCoCartanSymmetricFromCartanSymmetric();
@@ -837,8 +837,8 @@ public:
   }
   void ComputeWeylGroupAndRootsOfBorel(Vectors<Rational>& output);
   void ComputeRootsOfBorel(Vectors<Rational>& output);
-  static LargeInt GetSizeByFormulaImplementation(FiniteGroup<ElementWeylGroup>& G);
-  static LargeInt SizeByFormulaOrNeg1(char weylLetter, int theDim);
+  static LargeInteger GetSizeByFormulaImplementation(FiniteGroup<ElementWeylGroup>& G);
+  static LargeInteger SizeByFormulaOrNeg1(char weylLetter, int theDim);
   bool IsARoot(const Vector<Rational>& input) const {
     return this->RootSystem.Contains(input);
   }
@@ -1088,7 +1088,7 @@ public:
     HashedList<ElementWeylGroupAutomorphisms>* outputSubset = nullptr,
     int UpperLimitNumElements = - 1
   );
-  LargeInt GetOrbitSize(Vector<Rational>& theWeight);
+  LargeInteger GetOrbitSize(Vector<Rational>& theWeight);
   bool IsElementWeylGroupOrOuterAuto(const MatrixTensor<Rational>& theMat);
   bool AreMaximallyDominantGroupOuter(List<Vector<Rational> >& theWeights);
   bool checkInitialization() const;
@@ -1441,7 +1441,7 @@ public:
     const GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& other,
     GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& output
   ) const;
-  void GetLargestDenominatorSimpleGens(LargeIntUnsigned& outputLCM, LargeIntUnsigned& outputDen) const;
+  void GetLargestDenominatorSimpleGens(LargeIntegerUnsigned& outputLCM, LargeIntegerUnsigned& outputDen) const;
 
   void reset();
   void init(somegroup& inputOwner);
@@ -1573,7 +1573,7 @@ class OrbitIteratorRootActionWeylGroupAutomorphisms {
   int maxOrbitBufferSize;
 public:
   int orbitSize;
-  LargeInt computedSize;
+  LargeInteger computedSize;
   int currentIndexInBuffer;
   bool flagOrbitIsBuffered;
   bool flagOrbitEnumeratedOnce;
@@ -1635,7 +1635,7 @@ public:
     this->theGroup = &G;
     this->theSubgroup = &this->theSubgroupMayBeHere;
   }
-  LargeInt SizeByFormulaOrNeg1() const {
+  LargeInteger SizeByFormulaOrNeg1() const {
     return - 1;
   }
   void initFromGroupAndGenerators(someGroup& inputGroup, const List<elementSomeGroup>& inputGenerators);
@@ -1923,7 +1923,7 @@ public:
   void InitGenerators();
   void MakeParabolicSubgroup(WeylGroupData& G, const Selection& inputGeneratingSimpleRoots);
   void MakeFromRoots(WeylGroupData& G, const Vectors<Rational>& inputRootReflections);
-  LargeInt SizeByFormulaOrNeg1() const {
+  LargeInteger SizeByFormulaOrNeg1() const {
     return this->theDynkinType.GetWeylGroupSizeByFormula();
   }
   void MakeFromHardCodedStrings(
@@ -2492,7 +2492,7 @@ bool FiniteGroup<elementSomeGroup>::GetWord(const elementSomeGroup& g, List<int>
 }
 
 template <class elementSomeGroup>
-LargeInt FiniteGroup<elementSomeGroup>::GetSize() {
+LargeInteger FiniteGroup<elementSomeGroup>::GetSize() {
   this->CheckConsistency();
   if (this->sizePrivate > 0) {
     return sizePrivate;

@@ -988,7 +988,7 @@ void WebWorker::ParseMessageHead() {
       i + 1 < this->theMessageHeaderStrings.size
     ) {
       if (this->theMessageHeaderStrings[i + 1].size() < 10000) {
-        LargeIntUnsigned theLI;
+        LargeIntegerUnsigned theLI;
         if (theLI.AssignStringFailureAllowed(this->theMessageHeaderStrings[i + 1], true)) {
           if (!theLI.IsIntegerFittingInInt(&this->ContentLength)) {
             this->ContentLength = - 1;
@@ -4351,7 +4351,7 @@ void Listener::ComputeUserAddress() {
   this->userAddress = this->userAddressBuffer;
 }
 
-TransportLayerSecurity& TransportLayerSecurity::DefaultTLS_DO_NOT_MODIFY() {
+TransportLayerSecurity& TransportLayerSecurity::DefaultTLS_READ_ONLY() {
   return theWebServer.theTLS;
 }
 
@@ -5317,11 +5317,11 @@ void GlobalVariables::ConfigurationProcess() {
       Configuration::processMonitoringAllowedByDefault
     ].isTrueRepresentationInJSON()
   ) {
-    logServer << logger::blue << "Process monitoring turned on from configuration.json." << logger::endL;
+    logServer << logger::blue << "Process monitoring turned on from configuration.json. " << logger::endL;
     WebServer::TurnProcessMonitoringOn();
   }
   if (theGlobalVariables.configuration[Configuration::builtInTLSAvailable].isTrueRepresentationInJSON()) {
-    logServer << logger::red << "Experimental: " << logger::blue << "using built-in TLS library." << logger::endL;
+    logServer << logger::red << "Experimental: " << logger::blue << "using built-in TLS library. " << logger::endL;
     TransportLayerSecurity::flagBuiltInTLSAvailable = true;
   }
   if (theGlobalVariables.configuration[Configuration::monitorPingTime].isIntegerFittingInInt(
@@ -5350,8 +5350,8 @@ void WebServer::CheckInstallation() {
 
 int WebServer::main(int argc, char **argv) {
   theGlobalVariables.InitThreadsExecutableStart();
-  //use of loggers forbidden before calling   theWebServer.AnalyzeMainArguments(...):
-  //we need to initialize first the folder locations relative to the executable.
+  // use of loggers forbidden before calling   theWebServer.AnalyzeMainArguments(...):
+  // we need to initialize first the folder locations relative to the executable.
   MacroRegisterFunctionWithName("main");
   try {
     InitializeGlobalObjects();
@@ -5472,7 +5472,7 @@ int WebServer::mainApache() {
   theLimit.rlim_max = 60;
   setrlimit(RLIMIT_CPU, &theLimit);
   stOutput.theOutputFunction = nullptr;
-  //stOutput << "Content-Type: text/html\r\nSet-cookie: test =1;\r\n\r\nThe output bytes start here:\n";
+  // stOutput << "Content-Type: text/html\r\nSet-cookie: test =1;\r\n\r\nThe output bytes start here:\n";
   theGlobalVariables.IndicatorStringOutputFunction = nullptr;
   theGlobalVariables.flagServerForkedIntoWorker = true;
   theGlobalVariables.flagComputationStarted = true;

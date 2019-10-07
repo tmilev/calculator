@@ -2239,7 +2239,7 @@ void GeneralizedVermaModuleCharacters::GetProjection(
 }
 
 void GeneralizedVermaModuleCharacters::GetSubFromIndex(
-  PolynomialSubstitution<Rational>& outputSub, Matrix<LargeInt>& outputMat, LargeIntUnsigned& outputDen, int theIndex
+  PolynomialSubstitution<Rational>& outputSub, Matrix<LargeInteger>& outputMat, LargeIntegerUnsigned& outputDen, int theIndex
 ) {
   Matrix<Rational>& theOperator = this->theLinearOperators[theIndex];
   int dimLargerAlgebra = theOperator.NumCols;

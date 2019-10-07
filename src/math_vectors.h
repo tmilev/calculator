@@ -313,7 +313,7 @@ public:
     return this->IsProportionalTo(other, TimesMeEqualsOther);
   }
   int FindLCMDenominatorsTruncateToInt();
-  void FindLCMDenominators(LargeIntUnsigned& output);
+  void FindLCMDenominators(LargeIntegerUnsigned& output);
   inline Vector<coefficient> GetShiftToTheLeftOnePosition() {
     return this->GetShiftToTheLeft(1);
   }
@@ -586,14 +586,14 @@ public:
 
 template <class coefficient>
 void Vector<coefficient>::ScaleByPositiveRationalToIntegralMinHeight() {
-  LargeInt numGCD, tempUI;
+  LargeInteger numGCD, tempUI;
   bool foundNonZero = false;
   for (int i = 0; i < this->size; i ++) {
     if (!this->TheObjects[i].IsEqualToZero()) {
       if (foundNonZero) {
         if (!numGCD.IsEqualToOne()) {
           tempUI = (*this)[i].GetNumerator();
-          LargeIntUnsigned::gcd(numGCD.value, tempUI.value, numGCD.value);
+          LargeIntegerUnsigned::gcd(numGCD.value, tempUI.value, numGCD.value);
         }
       } else {
         numGCD = (*this)[i].GetNumerator();
@@ -655,12 +655,12 @@ bool Vector<coefficient>::IsProportionalTo(
 }
 
 template <class coefficient>
-void Vector<coefficient>::FindLCMDenominators(LargeIntUnsigned& output) {
-  LargeIntUnsigned tempI, tempI2;
+void Vector<coefficient>::FindLCMDenominators(LargeIntegerUnsigned& output) {
+  LargeIntegerUnsigned tempI, tempI2;
   output.MakeOne();
   for (int i = 0; i < this->size; i ++) {
     this->TheObjects[i].GetDenominator(tempI2);
-    LargeIntUnsigned::gcd(output, tempI2, tempI);
+    LargeIntegerUnsigned::gcd(output, tempI2, tempI);
     output.MultiplyBy(tempI2);
     output.DivPositive(tempI, output, tempI2);
   }

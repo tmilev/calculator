@@ -618,7 +618,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
   }
   out << "</tr>";
   MonomialUniversalEnveloping<Polynomial<Rational> > standardElt;
-  LargeInt tempInt;
+  LargeInteger tempInt;
   bool useMathTag = outputOrbit.size < 150;
   Matrix<Rational> epsCoordMat;
   theWeyl.theDynkinType.GetEpsilonMatrix(epsCoordMat);
@@ -1347,7 +1347,7 @@ public:
   int sumTuple;
   int sumPartition;
   int MaxNumCachedKostkaNumbers;
-  LargeInt value;
+  LargeInteger value;
 //  bool IncrementReturnFalseIfPastLast();
   bool initTableaux(std::stringstream* comments = nullptr);
   bool operator==(const KostkaNumber& other) const;

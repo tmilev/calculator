@@ -1607,7 +1607,7 @@ bool CalculatorFunctionsGeneral::innerLCM(Calculator& theCommands, const Express
   if (input.size() < 3) {
     return false;
   }
-  Vector<LargeInt> theInts;
+  Vector<LargeInteger> theInts;
   if (!theCommands.GetVectorLargeIntFromFunctionArguments(input, theInts)) {
     return false;
   }
@@ -1615,7 +1615,7 @@ bool CalculatorFunctionsGeneral::innerLCM(Calculator& theCommands, const Express
     //<-this shouldn't happen if GetVectorLargeIntFromFunctionArguments works as intended.
     return false;
   }
-  LargeIntUnsigned theResult = theInts[0].value;
+  LargeIntegerUnsigned theResult = theInts[0].value;
   if (theResult == 0) {
     return false;
   }
@@ -1623,7 +1623,7 @@ bool CalculatorFunctionsGeneral::innerLCM(Calculator& theCommands, const Express
     if (theInts[i].value == 0) {
       return false;
     }
-    theResult = LargeIntUnsigned::lcm(theResult, theInts[i].value);
+    theResult = LargeIntegerUnsigned::lcm(theResult, theInts[i].value);
   }
   return output.AssignValue(theResult, theCommands);
 }
@@ -1633,7 +1633,7 @@ bool CalculatorFunctionsGeneral::innerGCD(Calculator& theCommands, const Express
   if (input.size() < 3) {
     return false;
   }
-  Vector<LargeInt> theInts;
+  Vector<LargeInteger> theInts;
   if (!theCommands.GetVectorLargeIntFromFunctionArguments(input, theInts)) {
     return false;
   }
@@ -1641,7 +1641,7 @@ bool CalculatorFunctionsGeneral::innerGCD(Calculator& theCommands, const Express
     //<-this shouldn't happen if GetVectorLargeIntFromFunctionArguments works as intended.
     return false;
   }
-  LargeIntUnsigned theResult = theInts[0].value;
+  LargeIntegerUnsigned theResult = theInts[0].value;
   if (theResult == 0) {
     return false;
   }
@@ -1649,7 +1649,7 @@ bool CalculatorFunctionsGeneral::innerGCD(Calculator& theCommands, const Express
     if (theInts[i].value == 0) {
       return false;
     }
-    theResult = LargeIntUnsigned::gcd(theResult, theInts[i].value);
+    theResult = LargeIntegerUnsigned::gcd(theResult, theInts[i].value);
   }
   return output.AssignValue(theResult, theCommands);
 }
@@ -1710,11 +1710,11 @@ bool CalculatorFunctionsGeneral::innerLogBaseSimpleCases(
     output *= - 1;
     return true;
   }
-  LargeInt baseInt, argNum;
+  LargeInteger baseInt, argNum;
   if (!theBase.IsInteger(&baseInt)) {
     return false;
   }
-  LargeInt simplerBase;
+  LargeInteger simplerBase;
   int simplerPower = - 1;
   bool isPower = false;
   if (baseInt.TryToFindWhetherIsPower(isPower, simplerBase, simplerPower)) {
@@ -1726,7 +1726,7 @@ bool CalculatorFunctionsGeneral::innerLogBaseSimpleCases(
     }
   }
   argNum = theArg.GetNumerator();
-  LargeInt argDen = theArg.GetDenominator();
+  LargeInteger argDen = theArg.GetDenominator();
   double doubleBase = baseInt.GetDoubleValue();
   double doubleArgNum = argNum.GetDoubleValue();
   if (FloatingPoint::log(doubleArgNum) / FloatingPoint::log(doubleBase) > 1000) {

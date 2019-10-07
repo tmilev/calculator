@@ -71,8 +71,8 @@ public:
   bool hasCostructedStartByte() const;
   void resetExceptContent();
   void reset();
-  bool isIntegerUnsigned(LargeIntUnsigned* whichInteger, std::stringstream* commentsOnFalse) const;
-  bool isInteger(LargeInt* whichInteger, std::stringstream* commentsOnFalse) const;
+  bool isIntegerUnsigned(LargeIntegerUnsigned* whichInteger, std::stringstream* commentsOnFalse) const;
+  bool isInteger(LargeInteger* whichInteger, std::stringstream* commentsOnFalse) const;
   std::string InterpretAsObjectIdentifier() const;
   std::string InterpretAsObjectIdentifierGetNameAndId() const;
   void ToJSON(JSData& output) const;
@@ -96,7 +96,7 @@ public:
   void MakeBitStringSequence(const List<ASNElement>& input);
   void MakeSet(int numberOfEmptyElements, bool setLeadingBit, bool setSecondMostSignificantBit, bool constructed);
   void MakeNull();
-  void MakeInteger(const LargeIntUnsigned& input);
+  void MakeInteger(const LargeIntegerUnsigned& input);
   void MakeBitStrinG(const List<unsigned char>& input);
   void SetStartByteFlags(bool setLeadingBit, bool setSecondMostSignificantBit, bool setConstructed);
   void MakeBitStringEmpty(bool setLeadingBit, bool setSecondMostSignificantBit, bool setConstructed);
@@ -274,7 +274,9 @@ public:
   bool flagMustDecodeAll;
   const List<unsigned char>* rawDatA;
   ASNElement* decodedData;
-  typedef bool (*typeDecoder)(AbstractSyntaxNotationOneSubsetDecoder& thisPointer, std::stringstream* commentsOnError);
+  typedef bool (*typeDecoder)(
+    AbstractSyntaxNotationOneSubsetDecoder& thisPointer, std::stringstream* commentsOnError
+  );
   List<typeDecoder> decodersByByteValue;
   bool Decode(
     const List<unsigned char>& inputRawData,
@@ -287,13 +289,13 @@ public:
   bool DecodeCurrent(ASNElement& output);
   bool DecodeSequenceLikeContent(ASNElement& output);
   bool DecodeBitString(ASNElement& output);
-  static LargeInt VariableLengthQuantityDecode(const List<unsigned char>& input, int& inputOutputDataPointer);
+  static LargeInteger VariableLengthQuantityDecode(const List<unsigned char>& input, int& inputOutputDataPointer);
   void DecodeASNAtomContent(ASNElement& output);
   bool DecodeNull(ASNElement& output);
   bool DecodeCurrentBuiltInType(std::stringstream* commentsOnError);
   bool DecodeLengthIncrementDataPointer(ASNElement& output);
 
-  static void WriteUnsignedIntegerObject(const LargeIntUnsigned& input, List<unsigned char>& output);
+  static void WriteUnsignedIntegerObject(const LargeIntegerUnsigned& input, List<unsigned char>& output);
   static void WriteObjectId(const List<unsigned char>& input, List<unsigned char>& output);
   static void WriteNull(List<unsigned char>& output);
 

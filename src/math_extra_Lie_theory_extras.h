@@ -182,8 +182,8 @@ public:
   void ComputeQPsFromChamberComplex();
   void GetSubFromIndex(
     PolynomialSubstitution<Rational>& outputSub,
-    Matrix<LargeInt>& outputMat,
-    LargeIntUnsigned& ouputDen,
+    Matrix<LargeInteger>& outputMat,
+    LargeIntegerUnsigned& ouputDen,
     int theIndex
   );
   void SortMultiplicities();

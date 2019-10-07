@@ -473,7 +473,7 @@ bool CalculatorFunctionsGeneral::innerJWTverifyAgainstRSA256(Calculator& theComm
     << " to base64 strings";
   }
   JSONWebToken theToken;
-  LargeIntUnsigned theMod, theExp;
+  LargeIntegerUnsigned theMod, theExp;
   if (!theToken.AssignString(theTokenString, &out)) {
     return output.AssignValue(out.str(), theCommands);
   }
@@ -523,7 +523,7 @@ bool CalculatorFunctionsGeneral::innerHexToString(Calculator& theCommands, const
 
 bool CalculatorFunctionsGeneral::innerIntegerToHex(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegerToHex");
-  LargeInt theLI;
+  LargeInteger theLI;
   if (!input.IsInteger(&theLI)) {
     return false;
   }
@@ -536,12 +536,12 @@ bool CalculatorFunctionsGeneral::innerIntegerToHex(Calculator& theCommands, cons
     << " to a hex string. ";
   }
   if (theGlobalVariables.flagAutoUnitTest) {
-    LargeIntUnsigned::Test::SerializationToHex(theLI.value);
+    LargeIntegerUnsigned::Test::SerializationToHex(theLI.value);
   }
   return output.AssignValue(result, theCommands);
 }
 
-bool LargeIntUnsigned::Test::SerializationToHex(const LargeIntUnsigned& input) {
+bool LargeIntegerUnsigned::Test::SerializationToHex(const LargeIntegerUnsigned& input) {
   MacroRegisterFunctionWithName("LargeIntUnsigned::Test::SerializationToHex");
   std::string resultCryptoHex, resultByteSerializationHex;
   if (!Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst(input, 0, resultCryptoHex)) {
@@ -565,7 +565,7 @@ bool CalculatorFunctionsGeneral::innerHexToInteger(Calculator& theCommands, cons
   if (!input.IsOfType(&inputString)) {
     return false;
   }
-  LargeIntUnsigned result;
+  LargeIntegerUnsigned result;
   int notUsedNumberOfLeadingZeroes = 0;
   if (!Crypto::ConvertHexToInteger(inputString, result, notUsedNumberOfLeadingZeroes)) {
     return theCommands << "Failed to interpret " << inputString
@@ -610,7 +610,7 @@ bool CalculatorFunctionsGeneral::innerRSAencrypt(Calculator& theCommands, const 
   if (input.size() != 4) {
     return false;
   }
-  LargeInt theExponent, theModulus, theMessage, result;
+  LargeInteger theExponent, theModulus, theMessage, result;
   if (
     !input[1].IsInteger(& theModulus) ||
     !input[2].IsInteger(&theExponent) ||
@@ -663,7 +663,7 @@ bool CalculatorFunctionsGeneral::innerSendEmailWithMailGun(
 
 bool CalculatorFunctionsGeneral::innerIsSquare(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIsSquare");
-  LargeInt theLI;
+  LargeInteger theLI;
   if (!input.IsInteger(&theLI)) {
     return false;
   }
@@ -674,7 +674,7 @@ bool CalculatorFunctionsGeneral::innerIsSquare(Calculator& theCommands, const Ex
     return output.AssignValue(1, theCommands);
   }
   List<int> theMults;
-  List<LargeInt> theFactors;
+  List<LargeInteger> theFactors;
   if (!theLI.value.FactorReturnFalseIfFactorizationIncomplete(theFactors, theMults, 0, nullptr)) {
     return theCommands << "Failed to factor: " << theLI.ToString() << " (may be too large?).";
   }
@@ -690,12 +690,12 @@ bool CalculatorFunctionsGeneral::innerIsSquare(Calculator& theCommands, const Ex
 
 bool CalculatorFunctionsGeneral::innerIsSquareFree(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIsSquareFree");
-  LargeInt theLI;
+  LargeInteger theLI;
   if (!input.IsInteger(&theLI)) {
     return false;
   }
   List<int> theMults;
-  List<LargeInt> theFactors;
+  List<LargeInteger> theFactors;
   if (!theLI.value.FactorReturnFalseIfFactorizationIncomplete(theFactors, theMults, 0, &theCommands.Comments)) {
     return theCommands << "Failed to factor: " << theLI.ToString() << " (may be too large?).";
   }
@@ -711,7 +711,7 @@ bool CalculatorFunctionsGeneral::innerIsSquareFree(Calculator& theCommands, cons
 
 bool CalculatorFunctionsGeneral::innerIsPower(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIsPower");
-  LargeInt theLI;
+  LargeInteger theLI;
   if (!input.IsInteger(&theLI)) {
     return false;
   }
@@ -719,7 +719,7 @@ bool CalculatorFunctionsGeneral::innerIsPower(Calculator& theCommands, const Exp
     return false;
   }
   List<int> theMults;
-  List<LargeInt> theFactors;
+  List<LargeInteger> theFactors;
   if (!theLI.value.FactorReturnFalseIfFactorizationIncomplete(theFactors, theMults, 0, &theCommands.Comments)) {
     return theCommands << "Failed to factor: " << theLI.ToString() << " (may be too large?).";
   }
@@ -738,7 +738,7 @@ bool CalculatorFunctionsGeneral::innerIsPower(Calculator& theCommands, const Exp
 
 bool CalculatorFunctionsGeneral::innerFactorInteger(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerFactorInteger");
-  LargeInt theLI;
+  LargeInteger theLI;
   int upperBound = 30000;
   int opFactorInteger = theCommands.theAtoms.GetIndexIMustContainTheObject("FactorInteger");
 
@@ -755,7 +755,7 @@ bool CalculatorFunctionsGeneral::innerFactorInteger(Calculator& theCommands, con
   if (theLI.IsEqualToZero()) {
     return false;
   }
-  List<LargeInt> primeFactors;
+  List<LargeInteger> primeFactors;
   List<int> multiplicities;
   bool complete = theLI.value.FactorReturnFalseIfFactorizationIncomplete(
     primeFactors, multiplicities, upperBound, &theCommands.Comments
@@ -1862,7 +1862,7 @@ bool CalculatorFunctionsGeneral::innerIsProductTermsUpToPower(
   }
   Expression theBase;
   theBase = input[1];
-  LargeInt desiredMaxPower = 1;
+  LargeInteger desiredMaxPower = 1;
   if (theBase.StartsWith(theCommands.opThePower(), 3)) {
     if (theBase[2].IsInteger(&desiredMaxPower)) {
       if (desiredMaxPower > 0) {
@@ -1887,7 +1887,7 @@ bool CalculatorFunctionsGeneral::innerIsProductTermsUpToPower(
       << theMultiplicands[k].ToString();
     }
     for (int i = 0; i < theSummands.size; i ++) {
-      LargeInt foundPower = 0;
+      LargeInteger foundPower = 0;
       for (int j = 0; j < theSummands[i].size; j ++) {
         if (theSummands[i][j] == theBase) {
           foundPower ++;
@@ -1895,7 +1895,7 @@ bool CalculatorFunctionsGeneral::innerIsProductTermsUpToPower(
         }
         if (theSummands[i][j].StartsWith(theCommands.opThePower(), 3)) {
           if (theSummands[i][j][1] == theBase) {
-            LargeInt localPower;
+            LargeInteger localPower;
             if (theSummands[i][j][2].IsInteger(&localPower)) {
               foundPower += localPower;
               continue;

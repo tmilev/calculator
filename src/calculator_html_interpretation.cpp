@@ -2134,9 +2134,9 @@ public:
   List<Rational> userScores;
   List<std::string> userInfos;
   List<std::string> userNames;
-  List<LargeInt> numStudentsSolvedEntireTopic;
-  List<LargeInt> numStudentsSolvedPartOfTopic;
-  List<LargeInt> numStudentsSolvedNothingInTopic;
+  List<LargeInteger> numStudentsSolvedEntireTopic;
+  List<LargeInteger> numStudentsSolvedPartOfTopic;
+  List<LargeInteger> numStudentsSolvedNothingInTopic;
   bool ComputeScoresAndStats(std::stringstream& comments);
 };
 

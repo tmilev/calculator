@@ -854,7 +854,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatNumbersByLargeIntegerIfPossible(
   if (!input.StartsWith(theCommands.opThePower(), 3)) {
     return false;
   }
-  LargeInt largePower;
+  LargeInteger largePower;
   if (!input[2].IsInteger(&largePower)) {
     return false;
   }
@@ -1238,7 +1238,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatExpressionsBySmallInteger(
   if (!theMat.IsSquare()) {
     return output.MakeError("Attempting to raise non-square matrix to power", theCommands);
   }
-  LargeInt expectedNumTerms;
+  LargeInteger expectedNumTerms;
   expectedNumTerms = theMat.NumCols;
   expectedNumTerms.RaiseToPower(thePower);
   if (expectedNumTerms > 10000) {
@@ -1286,14 +1286,14 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
   if (exponentWorking.GetDenominator() == 2) {
     return false;
   }
-  LargeIntUnsigned exponentDenominator = exponentWorking.GetDenominator();
-  LargeIntUnsigned exponentNumeratorNoSign = exponentWorking.GetNumerator().value;
-  List<LargeInt> numeratorFactors, denominatorFactors;
+  LargeIntegerUnsigned exponentDenominator = exponentWorking.GetDenominator();
+  LargeIntegerUnsigned exponentNumeratorNoSign = exponentWorking.GetNumerator().value;
+  List<LargeInteger> numeratorFactors, denominatorFactors;
   List<int> numeratorPowersInt, denominatorPowersInt;
   if (!base.GetPrimeFactorsAbsoluteValue(numeratorFactors, numeratorPowersInt, denominatorFactors, denominatorPowersInt)) {
     return false;
   }
-  List<LargeIntUnsigned> numeratorPowerS, denominatorPowerS;
+  List<LargeIntegerUnsigned> numeratorPowerS, denominatorPowerS;
   numeratorPowerS = numeratorPowersInt;
   denominatorPowerS = denominatorPowersInt;
   for (int i = 0; i < numeratorFactors.size; i ++) {
@@ -1304,12 +1304,12 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
   }
   exponentWorking /= exponentNumeratorNoSign;
   Rational outsideOfTheRadical = 1;
-  LargeInt currentInsidePower, currentOutsidePower, currentOutside;
-  LargeIntUnsigned currentPower;
+  LargeInteger currentInsidePower, currentOutsidePower, currentOutside;
+  LargeIntegerUnsigned currentPower;
   int currentInsidePowerInt = - 1, currentOutsidePowerInt = - 1;
   for (int k = 0; k < 2; k ++) {
-    List<LargeIntUnsigned>& currentPowers = (k == 0) ? numeratorPowerS : denominatorPowerS;
-    List<LargeInt>& currentFactors = (k == 0) ? numeratorFactors : denominatorFactors;
+    List<LargeIntegerUnsigned>& currentPowers = (k == 0) ? numeratorPowerS : denominatorPowerS;
+    List<LargeInteger>& currentFactors = (k == 0) ? numeratorFactors : denominatorFactors;
     for (int i = 0; i < currentFactors.size; i ++) {
       currentPower = currentPowers[i];
       currentInsidePower = currentPower % exponentDenominator;
@@ -1338,7 +1338,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
       }
     }
   }
-  LargeIntUnsigned theGCD = 1;
+  LargeIntegerUnsigned theGCD = 1;
   if (numeratorPowerS.size > 0) {
     theGCD = numeratorPowerS[0];
   } else if (denominatorPowerS.size > 0) {
@@ -1361,7 +1361,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
     exponentDenominator = exponentWorking.GetDenominator();
   }
   Rational insideTheRadical = 1;
-  LargeInt currentContribution, currentNumerator = 1, currentDenominator = 1;
+  LargeInteger currentContribution, currentNumerator = 1, currentDenominator = 1;
   int currentExpSmallInt = - 1;
   for (int i = 0; i < numeratorPowerS.size; i ++) {
     currentContribution = numeratorFactors[i];
@@ -2337,7 +2337,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerElementZmodPByInteger(
   if (!leftE.IsOfType(&theElt)) {
     return false;
   }
-  LargeInt thePower = 0;
+  LargeInteger thePower = 0;
   if (!rightE.IsInteger(&thePower)) {
     return false;
   }
@@ -2393,7 +2393,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerEllipticCurveZmodPElementByInteger(
   if (!leftE.IsOfType(&theElt)) {
     return false;
   }
-  LargeInt thePower = 0;
+  LargeInteger thePower = 0;
   if (!rightE.IsInteger(& thePower)) {
     return false;
   }

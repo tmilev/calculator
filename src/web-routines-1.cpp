@@ -38,7 +38,7 @@ public:
   bool flagInitialized;
   bool flagContinueWasNeeded;
   bool flagDoUseGET;
-  LargeInt expectedLength;
+  LargeInteger expectedLength;
   List<char> buffer;
   int lastNumBytesRead;
   struct sockaddr_in serverAddress;

@@ -858,7 +858,7 @@ bool UserCalculator::ComputeAndStoreActivationStats(
   lastEmailTime = emailStatQuery[DatabaseStrings::labelLastActivationEmailTime].theString;
   emailCountForThisEmail = emailStatQuery[DatabaseStrings::labelNumActivationEmails].theString;
 
-  LargeInt numActivationsThisEmail = 0;
+  LargeInteger numActivationsThisEmail = 0;
   if (emailCountForThisEmail != "") {
     numActivationsThisEmail.AssignString(emailCountForThisEmail);
   }

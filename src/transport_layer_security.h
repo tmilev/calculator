@@ -3,6 +3,8 @@
 
 #include "general_lists.h"
 #include "serialization_basic.h"
+#include "math_extra_elliptic_curves.h"
+#include "math_extra_algebraic_numbers.h"
 
 static ProjectInformationInstance projectInfoInstanceTransportLayerSecurityHeader(__FILE__, "TLS/ssl header.");
 
@@ -142,7 +144,6 @@ public:
   bool flagRequestSignedCertificateTimestamp;
   static const int LengthRandomBytesInSSLHello = 32;
   List<unsigned char> renegotiationCharacters;
-  List<unsigned char> RandomBytes;
   List<CipherSuiteSpecification> declaredCiphers;
   List<SSLHelloExtension> extensions;
   List<unsigned char> sessionId;
@@ -171,6 +172,7 @@ public:
   };
 
   SSLContent();
+  static std::string GetType(unsigned char theToken);
   void resetExceptOwner();
   TransportLayerSecurityServer& GetServer() const;
   bool CheckInitialization() const;
@@ -185,7 +187,7 @@ public:
   // https://commandlinefanatic.com/cgi-bin/showarticle.cgi?article=art061
   void PrepareServerHello2Certificate();
   // https://commandlinefanatic.com/cgi-bin/showarticle.cgi?article=art060
-  void PrepareServerHello3SecretNegotiation(SSLContent& clientHello);
+  void PrepareServerHello3ServerKeyExchange();
 
   JSData ToJSON() const;
 
@@ -193,15 +195,36 @@ public:
   // As the name suggests, this will append the output bytes, without
   // wiping the already existing contents of output.
   void WriteBytes(List<unsigned char>& output, List<Serialization::Marker>* annotations) const;
-  // Writes the message header, using zeroes instead of the message length
-  void WriteType(List<unsigned char>& output) const;
+  void WriteType(List<unsigned char>& output, List<Serialization::Marker>* annotations) const;
+  void WriteNamedCurveAndPublicKey(
+    List<unsigned char>& output, List<Serialization::Marker>* annotations
+  ) const;
   void WriteVersion(List<unsigned char>& output, List<Serialization::Marker>* annotations) const;
-  void WriteBytesHandshakeClientHello(List<unsigned char>& output, List<Serialization::Marker>* annotations) const;
-  void WriteBytesHandshakeServerHello(List<unsigned char>& output, List<Serialization::Marker>* annotations) const;
-  void WriteBytesHandshakeCertificate(List<unsigned char>& output, List<Serialization::Marker>* annotations) const;
-  void WriteBytesRandomAndSessionId(List<unsigned char>& output, List<Serialization::Marker>* annotations) const;
-  void WriteBytesSupportedCiphers(List<unsigned char>& output, List<Serialization::Marker>* annotations) const;
-  void WriteBytesExtensionsOnly(List<unsigned char>& output, List<Serialization::Marker>* annotations) const;
+  void WriteBytesHandshakeClientHello(
+    List<unsigned char>& output, List<Serialization::Marker>* annotations
+  ) const;
+  void WriteBytesHandshakeServerHello(
+    List<unsigned char>& output, List<Serialization::Marker>* annotations
+  ) const;
+  void WriteBytesHandshakeCertificate(
+    List<unsigned char>& output, List<Serialization::Marker>* annotations
+  ) const;
+  void WriteBytesHandshakeSecretExchange(
+    List<unsigned char>& output, List<Serialization::Marker>* annotations
+  ) const;
+  List<unsigned char>& GetMyRandomBytes() const;
+  void WriteBytesIncomingRandomAndSessionId(
+    List<unsigned char>& output, List<Serialization::Marker>* annotations
+  ) const;
+  void WriteBytesMyRandomAndSessionId(
+    List<unsigned char>& output, List<Serialization::Marker>* annotations
+  ) const;
+  void WriteBytesSupportedCiphers(
+    List<unsigned char>& output, List<Serialization::Marker>* annotations
+  ) const;
+  void WriteBytesExtensionsOnly(
+    List<unsigned char>& output, List<Serialization::Marker>* annotations
+  ) const;
 };
 
 // A basic explanation of ssl records:
@@ -224,10 +247,11 @@ public:
   unsigned char theType;
   int version;
   int length;
-  List<unsigned char> body;
+  List<unsigned char> incomingBytes;
   SSLContent content;
   TransportLayerSecurityServer* owner;
   SSLRecord();
+  void resetExceptOwner();
   bool CheckInitialization() const;
   bool Decode(std::stringstream* commentsOnFailure);
   bool DecodeBody(std::stringstream* commentsOnFailure);
@@ -235,9 +259,9 @@ public:
   std::string ToString() const;
   std::string ToStringType() const;
   JSData ToJSON();
-
   void PrepareServerHello1Start(SSLRecord& clientHello);
   void PrepareServerHello2Certificate();
+  void PrepareServerHello3SecretExchange();
   void WriteBytes(List<unsigned char>& output, List<Serialization::Marker>* annotations) const;
 };
 
@@ -265,13 +289,27 @@ public:
     JSData ToJSON();
   };
   NetworkSpoofer spoofer;
+  class Session {
+    public:
+    int socketId;
+    TransportLayerSecurityServer* owner;
+    List<unsigned char> incomingRandomBytes;
+    ListZeroAfterUse<unsigned char> myRandomBytes;
+    LargeIntegerUnsigned ephemerealPrivateKey;
+    ElementEllipticCurve<ElementZmodP> ephemerealPublicKey;
+    Session();
+    void initialize();
+    bool SetIncomingRandomBytes(
+      List<unsigned char>& input, std::stringstream* commentsOnFailure
+    );
+  };
+  Session session;
   X509Certificate certificate;
   PrivateKeyRSA privateKey;
   // Ordered by preference (lower index = more preferred):
   MapList<int, std::string, MathRoutines::IntUnsignIdentity> cipherSuiteNames;
   MapList<int, CipherSuiteSpecification, MathRoutines::IntUnsignIdentity> supportedCiphers;
   MapList<int, std::string, MathRoutines::IntUnsignIdentity> extensionNames;
-  int socketId;
   int64_t millisecondsTimeOut;
   int64_t millisecondsDefaultTimeOut;
   int defaultBufferCapacity;
@@ -315,7 +353,7 @@ public:
   List<char> writeBuffer;
   int readBufferStandardSize;
 
-  static TransportLayerSecurity& DefaultTLS_DO_NOT_MODIFY();
+  static TransportLayerSecurity& DefaultTLS_READ_ONLY();
   static const std::string fileCertificate;
   static const std::string fileKey;
   static const std::string signedFileCertificate1;
@@ -333,7 +371,7 @@ public:
   bool SSLReadLoop(
     int numTries,
     std::string& output,
-    const LargeInt& expectedLength,
+    const LargeInteger& expectedLength,
     std::string* commentsOnFailure,
     std::stringstream* commentsGeneral,
     bool includeNoErrorInComments

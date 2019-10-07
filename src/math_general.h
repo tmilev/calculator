@@ -1107,7 +1107,7 @@ public:
       }
     }
   }
-  LargeIntUnsigned FindPositiveLCMCoefficientDenominators();
+  LargeIntegerUnsigned FindPositiveLCMCoefficientDenominators();
   void operator-=(const Matrix<coefficient>& right) {
     if (this->NumRows != right.NumRows || this->NumCols != right.NumCols) {
       crash << "This is a programming error: attempting to subtract from matrix with "
@@ -1188,9 +1188,9 @@ public:
   );
   coefficient GetDeterminant();
   coefficient GetTrace() const;
-  void AssignMatrixIntWithDen(Matrix<LargeInt>& theMat, const LargeIntUnsigned& Den);
+  void AssignMatrixIntWithDen(Matrix<LargeInteger>& theMat, const LargeIntegerUnsigned& Den);
   void ScaleToIntegralForMinRationalHeightNoSignChange();
-  void GetMatrixIntWithDen(Matrix<LargeInt>& outputMat, LargeIntUnsigned& outputDen);
+  void GetMatrixIntWithDen(Matrix<LargeInteger>& outputMat, LargeIntegerUnsigned& outputDen);
   void LieBracketWith(const Matrix<coefficient>& right);
   void ApproximateLargestEigenSpace(
     Vectors<Rational>& outputBasis,
@@ -2324,21 +2324,21 @@ public:
     if (this->size() == 0) {
       return 1;
     }
-    LargeInt result, tempUI;
+    LargeInteger result, tempUI;
     result = this->theCoeffs[0].GetNumeratorRationalPart();
     result.sign = 1;
     for (int i = 1; i < this->size(); i ++) {
       tempUI = this->theCoeffs[i].GetNumeratorRationalPart();
-      LargeIntUnsigned::gcd(result.value, tempUI.value, result.value);
+      LargeIntegerUnsigned::gcd(result.value, tempUI.value, result.value);
     }
     return result;
   }
   Rational FindLCMCoefficientDenominatorsOverRationals() const {
-    LargeInt result, tempUI;
+    LargeInteger result, tempUI;
     result = 1;
     for (int i = 0; i < this->size(); i ++) {
       tempUI = this->theCoeffs[i].GetDenominator();
-      LargeIntUnsigned::lcm(result.value, tempUI.value, result.value);
+      LargeIntegerUnsigned::lcm(result.value, tempUI.value, result.value);
     }
     return result;
   }
@@ -2361,12 +2361,12 @@ public:
       *this *= tempRat;
       result *= tempRat;
     }
-    LargeInt theGCD, tempUI;
+    LargeInteger theGCD, tempUI;
     theGCD = this->theCoeffs[0].GetNumeratorRationalPart().GetNumerator();
     theGCD.sign = 1;
     for (int i = 0; i < this->size(); i ++) {
       tempUI = this->theCoeffs[i].GetNumeratorRationalPart().GetNumerator();
-      LargeIntUnsigned::gcd(theGCD.value, tempUI.value, theGCD.value);
+      LargeIntegerUnsigned::gcd(theGCD.value, tempUI.value, theGCD.value);
     }
     tempRat = theGCD;
     *this /= tempRat;
@@ -2398,7 +2398,7 @@ public:
     return result;
   }
   bool IsSmallInteger(int* whichInteger = nullptr) const;
-  bool IsInteger(LargeInt* whichInteger = nullptr) const;
+  bool IsInteger(LargeInteger* whichInteger = nullptr) const;
   void SetExpectedSize(int theSize) {
     this->theMonomials.SetExpectedSize(theSize);
     this->theCoeffs.SetExpectedSize(theSize);
@@ -3116,7 +3116,7 @@ class PolynomialSubstitution: public List<Polynomial<coefficient> > {
   //The first row denotes the constant term in the substitution of the respective variable!
   //An element in the x-th row and y-th column
   //is defined as element [x][y] !
-  void MakeExponentSubstitution(Matrix<LargeInt>& theSub);
+  void MakeExponentSubstitution(Matrix<LargeInteger>& theSub);
   void PrintPolys(std::string& output);
   void MakeSubstitutionLastVariableToEndPoint(int numVars, Polynomial<coefficient>& EndPoint);
   void AddConstant(coefficient& theConst);
@@ -3160,7 +3160,7 @@ class PolynomialSubstitution: public List<Polynomial<coefficient> > {
       this->TheObjects[i].AddMonomial(tempM,direction.TheObjects[i]);
     }
   }
-  void MakeSubFromMatrixIntAndDen(Matrix<LargeInt>& theMat, LargeIntUnsigned& Den) {
+  void MakeSubFromMatrixIntAndDen(Matrix<LargeInteger>& theMat, LargeIntegerUnsigned& Den) {
     Matrix<Rational> tempMat;
     tempMat.AssignMatrixIntWithDen(theMat, Den);
     this->MakeLinearSubConstTermsLastRow(tempMat);
@@ -3778,7 +3778,7 @@ bool MonomialCollection<templateMonomial, coefficient>::IsEqualToZero() const {
 }
 
 template <class templateMonomial, class coefficient>
-bool MonomialCollection<templateMonomial, coefficient>::IsInteger(LargeInt* whichInteger) const {
+bool MonomialCollection<templateMonomial, coefficient>::IsInteger(LargeInteger* whichInteger) const {
   if (this->size() > 1) {
     return false;
   }
@@ -4155,7 +4155,7 @@ void PolynomialSubstitution<coefficient>::MakeIdLikeInjectionSub(
 }
 
 template <class coefficient>
-void PolynomialSubstitution<coefficient>::MakeExponentSubstitution(Matrix<LargeInt>& theSub) {
+void PolynomialSubstitution<coefficient>::MakeExponentSubstitution(Matrix<LargeInteger>& theSub) {
   Polynomial<coefficient> tempP;
   MonomialP tempM;
   tempM.MakeOne(theSub.NumRows);
@@ -4191,7 +4191,7 @@ public:
   void AddMultiplicity(int MultiplicityIncrement, int Elongation);
   int IndexLargestElongation();
   int GetLargestElongation();
-  void GetPolyDenominator(Polynomial<LargeInt>& output, int MultiplicityIndex, Vector<Rational>& theExponent);
+  void GetPolyDenominator(Polynomial<LargeInteger>& output, int MultiplicityIndex, Vector<Rational>& theExponent);
   int GetMultiplicityLargestElongation();
   int GetLCMElongations();
   int GetTotalMultiplicity() const;
@@ -4210,7 +4210,7 @@ public:
   void OneFracToStringBasisChange(
     PartFractions& owner,
     int indexElongation,
-    Matrix<LargeInt>& VarChange,
+    Matrix<LargeInteger>& VarChange,
     bool UsingVarChange,
     std::string& output,
     bool LatexFormat,
@@ -4497,18 +4497,18 @@ int Matrix<coefficient>::FindPositiveLCMCoefficientDenominatorsTruncated() {
 }
 
 template <class coefficient>
-LargeIntUnsigned Matrix<coefficient>::FindPositiveLCMCoefficientDenominators() {
-  LargeIntUnsigned result = 1;
+LargeIntegerUnsigned Matrix<coefficient>::FindPositiveLCMCoefficientDenominators() {
+  LargeIntegerUnsigned result = 1;
   for (int i = 0; i < this->NumRows; i ++) {
     for (int j = 0; j < this->NumCols; j ++) {
-      result = LargeIntUnsigned::lcm(result, (*this)(i, j).GetDenominator());
+      result = LargeIntegerUnsigned::lcm(result, (*this)(i, j).GetDenominator());
     }
   }
   return result;
 }
 
 template <class coefficient>
-void Matrix<coefficient>::GetMatrixIntWithDen(Matrix<LargeInt>& outputMat, LargeIntUnsigned& outputDen) {
+void Matrix<coefficient>::GetMatrixIntWithDen(Matrix<LargeInteger>& outputMat, LargeIntegerUnsigned& outputDen) {
   outputDen = this->FindPositiveLCMCoefficientDenominators();
   outputMat.init(this->NumRows, this->NumCols);
   Rational tempRat;
@@ -4597,7 +4597,7 @@ Vector<coefficient> Matrix<coefficient>::operator*(const Vector<coefficient>& v)
 }
 
 template <class coefficient>
-void Matrix<coefficient>::AssignMatrixIntWithDen(Matrix<LargeInt>& theMat, const LargeIntUnsigned& Den) {
+void Matrix<coefficient>::AssignMatrixIntWithDen(Matrix<LargeInteger>& theMat, const LargeIntegerUnsigned& Den) {
   this->init(theMat.NumRows, theMat.NumCols);
   for (int i = 0; i < this->NumRows; i ++) {
     for (int j = 0; j < this->NumCols; j ++) {
@@ -5378,8 +5378,8 @@ public:
     return "Lattice";
   }
   Matrix<Rational> basisRationalForm;
-  Matrix<LargeInt> basis;
-  LargeIntUnsigned Den;
+  Matrix<LargeInteger> basis;
+  LargeIntegerUnsigned Den;
   int GetDim() const {
     return this->basis.NumCols;
   }
@@ -5569,7 +5569,7 @@ public:
     return false;
   }
   bool RemoveRedundantShortRootsClassicalRootSystem(
-    PartFractions& owner, Vector<Rational>* Indicator, Polynomial<LargeInt>& buffer1, int theDimension
+    PartFractions& owner, Vector<Rational>* Indicator, Polynomial<LargeInteger>& buffer1, int theDimension
   );
   bool RemoveRedundantShortRoots(PartFractions& owner, Vector<Rational>* Indicator, int theDimension);
   bool AlreadyAccountedForInGUIDisplay;
@@ -5587,7 +5587,7 @@ public:
     Lattice& theLattice
   ) const;
   static void EvaluateIntPoly(
-    const Polynomial<LargeInt>& input, const Vector<Rational>& values, Rational& output
+    const Polynomial<LargeInteger>& input, const Vector<Rational>& values, Rational& output
   );
   static void MakePolynomialFromOneNormal(
     Vector<Rational>& normal,
@@ -5605,9 +5605,9 @@ public:
     PartFractions& owner, Vectors<Rational>& output
   ) const;
   void GetVectorPartitionFunction(
-    PartFractions& owner, Polynomial<LargeInt>& theCoeff, QuasiPolynomial& output
+    PartFractions& owner, Polynomial<LargeInteger>& theCoeff, QuasiPolynomial& output
   ) const;
-  LargeInt EvaluateIntPolyAtOne(Polynomial<LargeInt>& input);
+  LargeInteger EvaluateIntPolyAtOne(Polynomial<LargeInteger>& input);
   //void InsertNewRootIndex(int index);
   //void MultiplyMinusShiftBy (int* theRoot, int Multiplicity);
   void MultiplyCoeffBy(Rational& r);
@@ -5616,12 +5616,12 @@ public:
     int indexB,
     int n,
     int indexAminusNB,
-    MonomialCollection<PartFraction, Polynomial<LargeInt> >& output,
+    MonomialCollection<PartFraction, Polynomial<LargeInteger> >& output,
     PartFractions& owner
   );
   bool DecomposeFromLinRelation(
     Matrix<Rational>& theLinearRelation,
-    MonomialCollection<PartFraction, Polynomial<LargeInt> >& output,
+    MonomialCollection<PartFraction, Polynomial<LargeInteger> >& output,
     bool flagUsingOSbasis,
     List<Vector<Rational> >& startingVectors
   );
@@ -5629,8 +5629,8 @@ public:
     PartFractions& owner, Rational& output, int theDimension
   ) const;
   bool ReduceMeOnce(
-    const Polynomial<LargeInt>& myCoeff,
-    Polynomial<LargeInt>& outputCoeff,
+    const Polynomial<LargeInteger>& myCoeff,
+    Polynomial<LargeInteger>& outputCoeff,
     Vectors<Rational>& startingVectors
   );
   void ReduceMonomialByMonomial(PartFractions& owner, int myIndex, Vector<Rational>* Indicator);
@@ -5640,7 +5640,7 @@ public:
     List<int>& theElongations,
     int GainingMultiplicityIndex,
     int ElongationGainingMultiplicityIndex,
-    MonomialCollection<PartFraction, Polynomial<LargeInt> >& output
+    MonomialCollection<PartFraction, Polynomial<LargeInteger> >& output
   );
   void ApplyGeneralizedSzenesVergneFormulA(
     List<int>& theSelectedIndices,
@@ -5649,24 +5649,24 @@ public:
     int GainingMultiplicityIndex,
     int ElongationGainingMultiplicityIndex,
     MonomialCollection<PartFraction,
-    Polynomial<LargeInt> >& output,
+    Polynomial<LargeInteger> >& output,
     List<Vector<Rational> >& startingVectors
   );
   bool CheckForOrlikSolomonAdmissibility(List<int>& theSelectedIndices);
   bool reduceOnceTotalOrderMethod(
-    MonomialCollection<PartFraction, Polynomial<LargeInt> >& output, PartFractions& owner
+    MonomialCollection<PartFraction, Polynomial<LargeInteger> >& output, PartFractions& owner
   );
   bool reduceOnceGeneralMethodNoOSBasis(
     PartFractions& owner,
     MonomialCollection<PartFraction,
-    Polynomial<LargeInt> >& output,
+    Polynomial<LargeInteger> >& output,
     Vectors<Rational>& bufferVectors,
     Matrix<Rational>& bufferMat
   );
   bool ReduceOnceGeneralMethod(
     PartFractions& owner,
     MonomialCollection<PartFraction,
-    Polynomial<LargeInt> >& output,
+    Polynomial<LargeInteger> >& output,
     Vectors<Rational>& bufferVectors,
     Matrix<Rational>& bufferMat
   );
@@ -5686,8 +5686,8 @@ public:
     int AminusNBindex,
     bool indexAisNullified,
     PartFraction& output,
-    Polynomial<LargeInt>& AminusNbetaPoly,
-    Polynomial<LargeInt>& outputCommonCoeff
+    Polynomial<LargeInteger>& AminusNbetaPoly,
+    Polynomial<LargeInteger>& outputCommonCoeff
   );
   void Assign(const PartFraction& p);
   void AssignDenominatorOnly(const PartFraction& p);
@@ -5704,23 +5704,23 @@ public:
     int StartMonomialPower,
     int DenPowerReduction,
     int startDenominatorPower,
-    Polynomial<LargeInt>& output
+    Polynomial<LargeInteger>& output
   );
   void ReduceMonomialByMonomialModifyOneMonomial(
     PartFractions& Accum,
     SelectionWithDifferentMaxMultiplicities& thePowers,
     List<int>& thePowersSigned,
     MonomialP& input,
-    LargeInt& inputCoeff
+    LargeInteger& inputCoeff
   );
-  void GetAlphaMinusNBetaPoly(PartFractions& owner, int indexA, int indexB, int n, Polynomial<LargeInt>& output);
+  void GetAlphaMinusNBetaPoly(PartFractions& owner, int indexA, int indexB, int n, Polynomial<LargeInteger>& output);
   void GetNElongationPolyWithMonomialContribution(
     List<Vector<Rational> >& startingVectors,
     List<int>& theSelectedIndices,
     List<int>& theCoefficients,
     List<int>& theGreatestElongations,
     int theIndex,
-    Polynomial<LargeInt>& output,
+    Polynomial<LargeInteger>& output,
     int theDimension
   );
   void GetNElongationPoly(
@@ -5728,10 +5728,10 @@ public:
     int index,
     int baseElongation,
     int LengthOfGeometricSeries,
-    Polynomial<LargeInt>& output,
+    Polynomial<LargeInteger>& output,
     int theDimension
   );
-  static void GetNElongationPoly(Vector<Rational>& exponent, int n, Polynomial<LargeInt>& output, int theDimension);
+  static void GetNElongationPoly(Vector<Rational>& exponent, int n, Polynomial<LargeInteger>& output, int theDimension);
   int GetNumProportionalVectorsClassicalRootSystems(PartFractions& owner);
   bool operator==(const PartFraction& right) const;
   void operator=(const PartFraction& right);
@@ -6024,7 +6024,7 @@ public:
   }
 };
 
-class PartFractions: public MonomialCollection<PartFraction, Polynomial<LargeInt> > {
+class PartFractions: public MonomialCollection<PartFraction, Polynomial<LargeInteger> > {
   bool splitPartial();
   void initCommon();
   PartFractions(const PartFractions& other);
@@ -6315,7 +6315,7 @@ public:
   static void GetPrecomputedDynkinTypes(List<DynkinType>& output);
   DynkinSimpleType GetGreatestSimpleType() const;
   DynkinSimpleType GetSmallestSimpleType() const;
-  LargeInt GetWeylGroupSizeByFormula() const;
+  LargeInteger GetWeylGroupSizeByFormula() const;
   std::string ToString(FormatExpressions* theFormat = nullptr) const;
   void ScaleFirstCoRootSquaredLength(const Rational& multiplyCoRootSquaredLengthBy);
   int GetMult(int SimpleTypeIdentifier) const {

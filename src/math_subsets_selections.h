@@ -138,7 +138,7 @@ public:
   int MaxMultiplicity;
   void initMaxMultiplicity(int NumElements, int MaxMult);
   int NumCombinationsOfCardinality(int cardinality);
-  LargeInt GetNumTotalCombinations() const;
+  LargeInteger GetNumTotalCombinations() const;
   int NumSelectionsTotal() {
     return MathRoutines::KToTheNth(MaxMultiplicity, this->Multiplicities.size);
   }
@@ -164,7 +164,7 @@ public:
   void initPart1(int NumElements);
   void clearNoMaxMultiplicitiesChange();
   bool IncrementReturnFalseIfPastLast();
-  LargeInt TotalNumSubsets();
+  LargeInteger TotalNumSubsets();
   int TotalNumSubsetsMustBeSmalInt();
   int TotalMultiplicity();
   int MaxTotalMultiplicity();
@@ -215,8 +215,8 @@ public:
   Base& operator[](int i) {
     return this->theElements[i];
   }
-  LargeInt GetNumTotalCombinations() {
-    LargeInt result = 1;
+  LargeInteger GetNumTotalCombinations() {
+    LargeInteger result = 1;
     for (int i = 0; i < this->theElements.size; i ++) {
       result *= this->theElements[i].GetNumTotalCombinations();
     }
@@ -265,8 +265,8 @@ class SelectionFixedRank {
 public:
   Selection theSelection;
   int DesiredSubsetSize;
-  LargeInt GetNumTotalCombinations() {
-    LargeInt result;
+  LargeInteger GetNumTotalCombinations() {
+    LargeInteger result;
     MathRoutines::NChooseK(theSelection.MaxSize, DesiredSubsetSize, result);
     return result;
   }
@@ -298,18 +298,18 @@ public:
 
 class SelectionPositiveIntegers {
   public:
-  Vector<LargeIntUnsigned> theInts;
+  Vector<LargeIntegerUnsigned> theInts;
   std::string ToString(FormatExpressions* theFormat = nullptr) {
     (void) theFormat;//avoid unused parameter warning, portable
     return this->theInts.ToString();
   }
-  LargeIntUnsigned GetGrading() {
+  LargeIntegerUnsigned GetGrading() {
     return this->theInts.SumCoords();
   }
   void init(int numIntegers) {
     this->theInts.MakeZero(numIntegers);
   }
-  void SetFirstInGradeLevel(const LargeIntUnsigned& inputGradingLevel) {
+  void SetFirstInGradeLevel(const LargeIntegerUnsigned& inputGradingLevel) {
     this->theInts[0] = inputGradingLevel;
     for (int i = 1; i < this->theInts.size; i ++) {
       this->theInts[i] = 0;

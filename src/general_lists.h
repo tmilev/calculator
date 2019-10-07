@@ -46,8 +46,8 @@ class GlobalVariables;
 class MathRoutines;
 
 //Rationals and integers:
-class LargeIntUnsigned;
-class LargeInt;
+class LargeIntegerUnsigned;
+class LargeInteger;
 class Rational;
 
 //More involved mathematical types
@@ -228,7 +228,7 @@ public:
   );
 
   static char ConvertHumanReadableHexToCharValue(char input);
-  static void NChooseK(int n, int k, LargeInt& result);
+  static void NChooseK(int n, int k, LargeInteger& result);
   static int NChooseK(int n, int k);
   static int Factorial(int n);
   static inline double E() {
@@ -240,7 +240,7 @@ public:
   // the MS compiler refuses to compile the following, hence the above line.
   //static const double Pi =(double)3.141592653589793238462643383279;
   static int KToTheNth(int k, int n);
-  static void KToTheNth(int k, int n, LargeInt& output);
+  static void KToTheNth(int k, int n, LargeInteger& output);
   inline static int parity(int n);
   static int BinomialCoefficientMultivariate(int N, List<int>& theChoices);
   static bool IsPrime(int theInt);

@@ -8,14 +8,14 @@ static ProjectInformationInstance ProjectInfovpfHeader_HeaderEllipticCurves(__FI
 
 class EllipticCurveWeierstrassNormalForm {
 public:
-  LargeInt linearCoefficient;
-  LargeInt constantTerm;
+  LargeInteger linearCoefficient;
+  LargeInteger constantTerm;
   std::string name;
-  LargeIntUnsigned order;
-  LargeIntUnsigned modulo;
+  LargeIntegerUnsigned order;
+  LargeIntegerUnsigned modulo;
   void MakeSecp256k1();
   static bool GetOrderNISTCurve(
-    const std::string& curveName, LargeIntUnsigned& output, std::stringstream *commentsOnFailure
+    const std::string& curveName, LargeIntegerUnsigned& output, std::stringstream *commentsOnFailure
   );
   static unsigned int HashFunction(const EllipticCurveWeierstrassNormalForm& input);
   bool operator==(const EllipticCurveWeierstrassNormalForm& other) const;

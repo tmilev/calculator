@@ -893,7 +893,7 @@ logger::StringHighligher::StringHighligher(const std::string& input) {
       continue;
     }
     incoming.theType = "";
-    LargeInt theLI;
+    LargeInteger theLI;
     theLI.AssignString(current);
     if (!theLI.IsIntegerFittingInInt(&incoming.length)) {
       crash << "StringHighligher is not allowed to fail: this is an internal function, "
@@ -922,7 +922,7 @@ bool MathRoutines::ParseListInt(const std::string& input, List<int>& result, std
   StringRoutines::StringSplitExcludeDelimiters(input, delimiters, theNumbers);
   result.SetSize(theNumbers.size);
   for (int i = 0; i < theNumbers.size; i ++) {
-    LargeInt theInt;
+    LargeInteger theInt;
     bool success = theInt.AssignStringFailureAllowed(theNumbers[i], commentsOnFailure);
     if (!success) {
       return false;

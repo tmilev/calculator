@@ -6,7 +6,7 @@
 
 static ProjectInformationInstance ProjectInfoVpfJSON(__FILE__, "Implementation JSON.");
 
-void JSData::operator=(const LargeInt& other) {
+void JSData::operator=(const LargeInteger& other) {
   this->reset();
   this->theType = JSData::token::tokenLargeInteger;
   this->theInteger.GetElement() = other;
@@ -73,7 +73,7 @@ bool JSData::HasKey(const std::string& key) const {
   return this->GetKeyIndex(key) != - 1;
 }
 
-bool JSData::HasCompositeKeyOfType(const std::string& key, LargeIntUnsigned& output, std::stringstream* commentsOnFailure) const {
+bool JSData::HasCompositeKeyOfType(const std::string& key, LargeIntegerUnsigned& output, std::stringstream* commentsOnFailure) const {
   JSData container;
   if (!this->HasCompositeKeyOfTokeN(key, &container, JSData::token::tokenLargeInteger, commentsOnFailure)) {
     return false;
@@ -313,7 +313,7 @@ void JSData::TryToComputeType() {
       this->theType = JSData::token::tokenUndefined;
       Rational parser;
       if (parser.AssignStringFailureAllowed(this->theString)) {
-        LargeInt theInt;
+        LargeInteger theInt;
         if (parser.IsInteger(&theInt)) {
           this->theType = JSData::token::tokenLargeInteger;
           this->theInteger.GetElement() = theInt;

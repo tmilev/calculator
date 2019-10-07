@@ -676,7 +676,7 @@ public:
   static bool GetWordByFormulaImplementation(
     FiniteGroup<ElementHyperoctahedralGroupR2>& G, const ElementHyperoctahedralGroupR2& g, List<int>& out
   );
-  static LargeInt GetSizeByFormulaImplementation(FiniteGroup<ElementHyperoctahedralGroupR2>& G);
+  static LargeInteger GetSizeByFormulaImplementation(FiniteGroup<ElementHyperoctahedralGroupR2>& G);
   void AllSpechtModules();
   void SpechtModuleOfPartititons(
     const Partition& positive,
@@ -1277,7 +1277,7 @@ public:
   //bool AreConjugate(const PermutationR2& x, const PermutationR2& y);
 
   static void ComputeCCSizesAndRepresentativesByFormulaImplementation(FiniteGroup<PermutationR2>& G);
-  static LargeInt GetSizeByFormulaImplementation(FiniteGroup<PermutationR2>& G);
+  static LargeInteger GetSizeByFormulaImplementation(FiniteGroup<PermutationR2>& G);
   static bool GetWordjjPlus1Implementation(FiniteGroup<PermutationR2>& G, const PermutationR2& g, List<int>& word);
 
   PermutationGroupData() {
@@ -2092,8 +2092,8 @@ bool GroupRepresentation<someGroup, coefficient>::VerifyRepresentation() {
   if (badrep) {
     FiniteGroup<Matrix<Rational> > RG;
     RG.generators = this->generatorS;
-    LargeInt GS = this->ownerGroup->GetSize();
-    LargeInt RGS = RG.GetSize();
+    LargeInteger GS = this->ownerGroup->GetSize();
+    LargeInteger RGS = RG.GetSize();
     if ((GS % RGS) != 0) {
       stOutput << "Violation of Lagrange's theorem (" << RGS << "∤" << GS << ")\n";
     }

@@ -838,7 +838,7 @@ void PermutationGroupData::MakeSymmetricGroupGeneratorsjjPlus1(int n) {
   return this->SimpleFiniteGroup<PermutationR2>::AreConjugate(x,y);
 }*/
 
-LargeInt PermutationGroupData::GetSizeByFormulaImplementation(FiniteGroup<PermutationR2>& G) {
+LargeInteger PermutationGroupData::GetSizeByFormulaImplementation(FiniteGroup<PermutationR2>& G) {
   PermutationGroupData* PD = static_cast<PermutationGroupData*>(G.specificDataPointer);
   if (!PD || !PD->flagIsSymmetricGroup) {
     crash << "This method should not have been called. " << crash;
@@ -1429,7 +1429,7 @@ int HyperoctahedralGroup::GetN() {
 }
 */
 
-LargeInt HyperoctahedralGroupData::GetSizeByFormulaImplementation(FiniteGroup<ElementHyperoctahedralGroupR2>& G) {
+LargeInteger HyperoctahedralGroupData::GetSizeByFormulaImplementation(FiniteGroup<ElementHyperoctahedralGroupR2>& G) {
   HyperoctahedralGroupData* HD = static_cast<HyperoctahedralGroupData*>(G.specificDataPointer);
   //stOutput << "HyperoctahedralGroup::GetSize() called.  N =" << HD->N << '\n';
   if (!HD) {

@@ -206,7 +206,7 @@ bool CalculatorFunctionsGeneral::innerTestTLSMessageSequence(
   TransportLayerSecurityServer spoofServer;
   std::stringstream commentsOnFailure;
   if (!spoofServer.initializeAll(
-    TransportLayerSecurity::DefaultTLS_DO_NOT_MODIFY().theServer.certificate.sourceBinary, &commentsOnFailure
+    TransportLayerSecurity::DefaultTLS_READ_ONLY().theServer.certificate.sourceBinary, &commentsOnFailure
   )) {
     commentsOnFailure << "Unexpected failure while initializing TLS server. ";
     return output.AssignValue(commentsOnFailure.str(), theCommands);
@@ -214,7 +214,7 @@ bool CalculatorFunctionsGeneral::innerTestTLSMessageSequence(
   spoofServer.spoofer.flagDoSpoof = true;
   for (int i = 0; i < inputMessages.size; i ++) {
     spoofServer.spoofer.incomingMessages.AddOnTop(SSLRecord());
-    spoofServer.spoofer.incomingMessages.LastObject()->body = inputMessages[i];
+    spoofServer.spoofer.incomingMessages.LastObject()->incomingBytes = inputMessages[i];
   }
   spoofServer.spoofer.currentInputMessageIndex = 0;
   std::stringstream errorStream;
@@ -382,7 +382,7 @@ bool CalculatorFunctionsGeneral::innerNISTEllipticCurveOrder(Calculator& theComm
     << "Function NISTEllipticCurveGenerator takes as input a string with an EC curve name. "
     << "Available curve names: secp256k1";
   }
-  LargeIntUnsigned result;
+  LargeIntegerUnsigned result;
   if (!EllipticCurveWeierstrassNormalForm::GetOrderNISTCurve(input.GetValue<std::string>(), result, &theCommands.Comments)) {
     return false;
   }
@@ -471,7 +471,7 @@ bool CalculatorFunctionsGeneral::innerConvertIntegerUnsignedToBase58(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerConvertIntegerUnsignedToBase58");
-  LargeInt theInt;
+  LargeInteger theInt;
   if (!input.IsInteger(&theInt)) {
     return false;
   }
@@ -556,7 +556,7 @@ bool CalculatorFunctionsGeneral::innerConvertHexToBase58(Calculator& theCommands
     return false;
   }
   const std::string& inputString = input.GetValue<std::string>();
-  LargeIntUnsigned outputInteger;
+  LargeIntegerUnsigned outputInteger;
   std::string outputString;
   int numLeadingZeroBytes = 0;
   if (!Crypto::ConvertHexToInteger(inputString, outputInteger, numLeadingZeroBytes)) {
@@ -3192,7 +3192,7 @@ bool CalculatorFunctionsGeneral::innerIsEven(Calculator& theCommands, const Expr
   if (input.HasBoundVariables()) {
     return false;
   }
-  LargeInt theInt;
+  LargeInteger theInt;
   if (!input.IsInteger(&theInt)) {
     return output.AssignValue(0, theCommands);
   }
@@ -4571,7 +4571,7 @@ bool CalculatorFunctionsGeneral::innerPowerImaginaryUnit(Calculator& theCommands
   if (!input[1].IsAtomGivenData(theCommands.opImaginaryUnit())) {
     return false;
   }
-  LargeInt thePower;
+  LargeInteger thePower;
   if (!input[2].IsInteger(&thePower)) {
     return false;
   }
@@ -5294,7 +5294,7 @@ bool ElementZmodP::operator==(int other) const {
   this->CheckIamInitialized();
   ElementZmodP tempElt;
   tempElt.theModulo = this->theModulo;
-  tempElt = LargeInt(other);
+  tempElt = LargeInteger(other);
   return *this == tempElt;
 }
 
@@ -5315,10 +5315,10 @@ void ElementZmodP::operator*=(const ElementZmodP& other) {
   this->theValue %= this->theModulo;
 }
 
-bool LargeIntUnsigned::IsPossiblyPrimeMillerRabinOnce(
+bool LargeIntegerUnsigned::IsPossiblyPrimeMillerRabinOnce(
   unsigned int theBase,
   int theExponentOfThePowerTwoFactorOfNminusOne,
-  const LargeIntUnsigned& theOddFactorOfNminusOne,
+  const LargeIntegerUnsigned& theOddFactorOfNminusOne,
   std::stringstream* comments
 ) {
   MacroRegisterFunctionWithName("LargeIntUnsigned::IsPossiblyPrimeMillerRabin");
@@ -5364,9 +5364,9 @@ bool LargeIntUnsigned::IsPossiblyPrimeMillerRabinOnce(
   return false;
 }
 
-bool LargeIntUnsigned::TryToFindWhetherIsPower(bool& outputIsPower, LargeInt& outputBase, int& outputPower) const {
+bool LargeIntegerUnsigned::TryToFindWhetherIsPower(bool& outputIsPower, LargeInteger& outputBase, int& outputPower) const {
   MacroRegisterFunctionWithName("LargeIntUnsigned::TryToFindWhetherIsPower");
-  List<LargeInt> theFactors;
+  List<LargeInteger> theFactors;
   List<int> theMults;
   if (!this->FactorReturnFalseIfFactorizationIncomplete(theFactors, theMults, 0, nullptr)) {
     return false;
@@ -5396,17 +5396,17 @@ bool LargeIntUnsigned::TryToFindWhetherIsPower(bool& outputIsPower, LargeInt& ou
   return true;
 }
 
-bool LargeIntUnsigned::IsPossiblyPrimeMillerRabin(int numTimesToRun, std::stringstream* comments) {
+bool LargeIntegerUnsigned::IsPossiblyPrimeMillerRabin(int numTimesToRun, std::stringstream* comments) {
   MacroRegisterFunctionWithName("LargeIntUnsigned::IsPossiblyPrimeMillerRabin");
   if (this->IsEven()) {
     return *this == 2;
   }
   List<unsigned int> aFewPrimes;
-  LargeIntUnsigned::GetAllPrimesSmallerThanOrEqualToUseEratosthenesSieve(100000, aFewPrimes);
+  LargeIntegerUnsigned::GetAllPrimesSmallerThanOrEqualToUseEratosthenesSieve(100000, aFewPrimes);
   if (numTimesToRun > aFewPrimes.size) {
     numTimesToRun = aFewPrimes.size;
   }
-  LargeIntUnsigned theOddFactorOfNminusOne = *this;
+  LargeIntegerUnsigned theOddFactorOfNminusOne = *this;
   int theExponentOfThePowerTwoFactorOfNminusOne = 0;
   theOddFactorOfNminusOne --;
   while (theOddFactorOfNminusOne.IsEven()) {
@@ -5432,7 +5432,7 @@ bool LargeIntUnsigned::IsPossiblyPrimeMillerRabin(int numTimesToRun, std::string
 
 bool CalculatorFunctionsGeneral::innerIsPrimeMillerRabin(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIsPrimeMillerRabin");
-  LargeInt theInt;
+  LargeInteger theInt;
   if (!input.IsInteger(&theInt)) {
     return false;
   }
@@ -8338,11 +8338,11 @@ bool CalculatorFunctionsGeneral::innerFindProductDistanceModN(
     }
     theIntsReduced[i] = theInts[i] % theSize;
   }
-  List<LargeIntUnsigned> theList;
+  List<LargeIntegerUnsigned> theList;
   List<int> theIndexStack;
   theList.initializeFillInObject(theSize, 0);
   theIndexStack.Reserve(theSize);
-  LargeIntUnsigned theMod;
+  LargeIntegerUnsigned theMod;
   theMod = static_cast<unsigned>(theSize);
   int numElementsCovered = 0;
   for (int i = 0; i < theInts.size; i ++) {
@@ -8352,7 +8352,7 @@ bool CalculatorFunctionsGeneral::innerFindProductDistanceModN(
     theList[theIntsReduced[i]] = static_cast<unsigned>(theInts[i]);
     theIndexStack.AddOnTop(theIntsReduced[i]);
   }
-  LargeIntUnsigned currentIndexLarge, currentDistance, maxDistanceGenerated;
+  LargeIntegerUnsigned currentIndexLarge, currentDistance, maxDistanceGenerated;
   int currentIndex;
   ProgressReport theReport;
   std::stringstream reportstream;
@@ -8450,7 +8450,7 @@ bool CalculatorFunctionsGeneral::innerSolveProductSumEquationOverSetModN(
   if (!CalculatorConversions::innerLoadKey(theCommands, input, "theProduct", theProductE)) {
     return theCommands << "<hr>Value theProduct not found. ";
   }
-  LargeInt goalProduct;
+  LargeInteger goalProduct;
   if (!theProductE.IsInteger(&goalProduct)) {
     return theCommands << "<hr>Failed to extract integer from " << theProductE.ToString();
   }
@@ -8476,15 +8476,15 @@ bool CalculatorFunctionsGeneral::innerSolveProductSumEquationOverSetModN(
   if (!thePartition.init(theOneDimVectors, thePartition.goalVector)) {
     return theCommands << "Failed to initialize the computation. ";
   }
-  LargeIntUnsigned theModLarge;
+  LargeIntegerUnsigned theModLarge;
   theModLarge = static_cast<unsigned>(theMod);
   int numTestedSoFar = 0;
   ProgressReport theReport;
-  LargeIntUnsigned oneUI = 1;
+  LargeIntegerUnsigned oneUI = 1;
   while (thePartition.IncrementReturnFalseIfPastLast()) {
-    LargeIntUnsigned theProduct = 1;
+    LargeIntegerUnsigned theProduct = 1;
     for (int i = 0; i < thePartition.currentPartition.size; i ++) {
-      LargeIntUnsigned theNumber = static_cast<unsigned>(theInts[i]);
+      LargeIntegerUnsigned theNumber = static_cast<unsigned>(theInts[i]);
       MathRoutines::RaiseToPower(theNumber, thePartition.currentPartition[i], oneUI);
       theProduct *= theNumber;
       theProduct %= theModLarge;

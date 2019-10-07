@@ -51,10 +51,10 @@ class AlgebraicNumber {
   static unsigned int HashFunction(const AlgebraicNumber& input) {
     return input.HashFunction();
   }
-  LargeIntUnsigned GetNumerator() const {
+  LargeIntegerUnsigned GetNumerator() const {
     return this->theElT.FindGCDCoefficientNumeratorsOverRationals().GetNumerator().value;
   }
-  LargeIntUnsigned GetDenominator() const {
+  LargeIntegerUnsigned GetDenominator() const {
     return this->GetDenominatorRationalPart().GetDenominator();
   }
   bool IsPositive() {
@@ -103,7 +103,7 @@ class AlgebraicNumber {
     }
     return theRat.IsSmallInteger(whichInteger);
   }
-  bool IsInteger(LargeInt* whichInteger) const {
+  bool IsInteger(LargeInteger* whichInteger) const {
     Rational theRat;
     if (!this->IsRational(&theRat)) {
       return false;
@@ -161,7 +161,7 @@ class AlgebraicNumber {
   void operator-= (const AlgebraicNumber& other);
   void operator*= (const AlgebraicNumber& other);
   void operator*= (const Rational& other);
-  void operator*= (LargeInt other) {
+  void operator*= (LargeInteger other) {
     this->operator*=(Rational(other));
   }
   void operator*= (int other) {
@@ -182,7 +182,7 @@ public:
   Vectors<Rational> theGeneratingElementPowersBasis;
 
   bool flagIsQuadraticRadicalExtensionRationals;
-  HashedList<LargeInt> theQuadraticRadicals;
+  HashedList<LargeInteger> theQuadraticRadicals;
   List<std::string> DisplayNamesBasisElements;
   void AddNewBasis();
 
@@ -192,7 +192,7 @@ public:
   AlgebraicClosureRationals() {
     this->reset();
   }
-  bool MergeRadicals(const List<LargeInt>& theRadicals);
+  bool MergeRadicals(const List<LargeInteger>& theRadicals);
   void ChooseGeneratingElement();
   bool ReduceMe();
   void ComputeDisplayStringsFromRadicals();
@@ -220,8 +220,8 @@ public:
 
 class ElementZmodP {
 public:
-  LargeIntUnsigned theModulo;
-  LargeIntUnsigned theValue;
+  LargeIntegerUnsigned theModulo;
+  LargeIntegerUnsigned theValue;
   bool flagDeallocated;
   friend ElementZmodP operator*(int left, const ElementZmodP& right);
   unsigned int HashFunction() const;
@@ -244,17 +244,17 @@ public:
     return this->theValue.IsEqualToZero();
   }
   void operator=(const ElementZmodP& other);
-  void operator=(const LargeIntUnsigned& other);
-  void MakeOne(const LargeIntUnsigned& newModulo);
-  void MakeMOne(const LargeIntUnsigned& newModulo);
+  void operator=(const LargeIntegerUnsigned& other);
+  void MakeOne(const LargeIntegerUnsigned& newModulo);
+  void MakeMOne(const LargeIntegerUnsigned& newModulo);
   void CheckEqualModuli(const ElementZmodP& other);
   bool operator==(int other) const;
   bool operator==(const ElementZmodP& other) const;
   void operator*=(const ElementZmodP& other);
-  void operator*=(const LargeInt& other);
+  void operator*=(const LargeInteger& other);
   void operator+=(const ElementZmodP& other);
   void operator-=(const ElementZmodP& other);
-  void operator-=(const LargeIntUnsigned& other);
+  void operator-=(const LargeIntegerUnsigned& other);
   bool operator+=(const Rational& other);
   void operator=(const int other);
   ElementZmodP operator+(const Rational& other) const;
@@ -263,13 +263,13 @@ public:
   ElementZmodP operator/(const ElementZmodP& other) const;
   ElementZmodP operator*(const Rational& other) const;
   ElementZmodP operator*(const ElementZmodP& other) const;
-  void operator=(const LargeInt& other);
+  void operator=(const LargeInteger& other);
   bool AssignRational(const Rational& other);
   void operator=(const Rational& other);
   bool operator/=(const ElementZmodP& den);
-  bool operator/=(const LargeInt& den);
+  bool operator/=(const LargeInteger& den);
   void ScaleToIntegralMinHeightAndGetPoly(
-    const Polynomial<Rational>& input, Polynomial<ElementZmodP>& output, const LargeIntUnsigned& newModulo
+    const Polynomial<Rational>& input, Polynomial<ElementZmodP>& output, const LargeIntegerUnsigned& newModulo
   );
 };
 #endif

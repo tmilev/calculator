@@ -7849,11 +7849,11 @@ void Calculator::initPredefinedStandardOperations() {
   << "arbitrary integer sizes (within the system's address space limits). If the pointer is zero, we call  "
   << "such a rational number small. In this case its denominator and numerator are stored in "
   << "the other 8 bytes, and should both be smaller than LargeIntUnsigned::CarryOverBound = "
-  << LargeIntUnsigned::CarryOverBound
+  << LargeIntegerUnsigned::CarryOverBound
   << ". When requesting an arithmetic operation, if both rationals are small, (i.e. their pointer zero)"
   << " a check is performed whether the denominator and numerator are smaller in absolute value than "
   << "LargeIntUnsigned::SquareRootOfCarryOverBound = "
-  << LargeIntUnsigned::SquareRootOfCarryOverBound
+  << LargeIntegerUnsigned::SquareRootOfCarryOverBound
   << ". If that check passes, the two rationals are multiplied using the "
   << "built-in processor instructions for operations with integers. "
   << "If any of the check fails, both rationals are converted to the larger dynamically "
@@ -7869,7 +7869,7 @@ void Calculator::initPredefinedStandardOperations() {
   << "If successful, substitutes the expression with the obtained atom. "
   << "A small integer is defined at compile time in the "
   << "variable LargeIntUnsigned::SquareRootOfCarryOverBound (currently equal to "
-  << LargeIntUnsigned::SquareRootOfCarryOverBound << "). "
+  << LargeIntegerUnsigned::SquareRootOfCarryOverBound << "). "
   << HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(moreInfoOnIntegers.str());
 
   this->AddOperationOuterHandler(

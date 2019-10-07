@@ -1895,8 +1895,8 @@ void StringRoutines::Differ::ExtractResult(
 // https://en.wikipedia.org/wiki/Longest_common_subsequence_problem
 bool StringRoutines::Differ::ComputeDifference(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("StringRoutines::Differ::ComputeDifference");
-  LargeInt leftSize = left.size();
-  LargeInt rightSize = right.size();
+  LargeInteger leftSize = left.size();
+  LargeInteger rightSize = right.size();
   if (leftSize * rightSize > this->MaxMatrixSize) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
@@ -2078,7 +2078,7 @@ void StringRoutines::SplitStringInTwo(
   }
 }
 
-void MathRoutines::NChooseK(int n, int k, LargeInt& result) {
+void MathRoutines::NChooseK(int n, int k, LargeInteger& result) {
   result = 1;
   for (int i = 0; i < k; i ++) {
     result *= n - i;
@@ -2234,7 +2234,7 @@ int MathRoutines::KToTheNth(int k, int n) {
   return result;
 }
 
-void MathRoutines::KToTheNth(int k, int n, LargeInt& output) {
+void MathRoutines::KToTheNth(int k, int n, LargeInteger& output) {
   output = 1;
   for (int i = 0; i < n; i ++) {
     output *= k;
@@ -2612,7 +2612,7 @@ std::string FormatExpressions::GetPolyLetter(int index) const {
 }
 
 bool PartFraction::reduceOnceTotalOrderMethod(
-  MonomialCollection<PartFraction, Polynomial<LargeInt> >& output, PartFractions& owner
+  MonomialCollection<PartFraction, Polynomial<LargeInteger> >& output, PartFractions& owner
 ) {
   for (int i = 0; i < this->IndicesNonZeroMults.size; i ++) {
     for (int j = 0; j < this->IndicesNonZeroMults.size; j ++) {
@@ -2637,7 +2637,7 @@ bool PartFraction::reduceOnceTotalOrderMethod(
 
 bool PartFraction::reduceOnceGeneralMethodNoOSBasis(
   PartFractions& owner,
-  MonomialCollection<PartFraction, Polynomial<LargeInt> >& output,
+  MonomialCollection<PartFraction, Polynomial<LargeInteger> >& output,
   Vectors<Rational>& bufferVectors,
   Matrix<Rational>& bufferMat
 ) {
@@ -2677,7 +2677,7 @@ bool PartFraction::reduceOnceGeneralMethodNoOSBasis(
 
 bool PartFraction::ReduceOnceGeneralMethod(
   PartFractions& owner,
-  MonomialCollection<PartFraction, Polynomial<LargeInt> >& output,
+  MonomialCollection<PartFraction, Polynomial<LargeInteger> >& output,
   Vectors<Rational>& bufferVectors,
   Matrix<Rational>& bufferMat
 ) {
@@ -2836,8 +2836,8 @@ void PartFraction::PrepareFraction(
   int AminusNBindex,
   bool indexAisNullified,
   PartFraction& output,
-  Polynomial<LargeInt>& AminusNbetaPoly,
-  Polynomial<LargeInt>& outputCommonCoeff
+  Polynomial<LargeInteger>& AminusNbetaPoly,
+  Polynomial<LargeInteger>& outputCommonCoeff
 ) {
   output.AssignNoIndicesNonZeroMults(*this);
   int powerDropA = this->TheObjects[indexA].Multiplicities[0];
@@ -2917,7 +2917,7 @@ int PartFraction::ComputeGainingMultiplicityIndexInLinearRelation(
 
 bool PartFraction::DecomposeFromLinRelation(
   Matrix<Rational>& theLinearRelation,
-  MonomialCollection<PartFraction, Polynomial<LargeInt> >& output,
+  MonomialCollection<PartFraction, Polynomial<LargeInteger> >& output,
   bool flagUsingOSbasis,
   List<Vector<Rational> >& startingVectors
 ) {
@@ -2988,12 +2988,12 @@ bool PartFraction::DecomposeFromLinRelation(
 }
 
 bool PartFraction::ReduceMeOnce(
-  const Polynomial<LargeInt>& myCoeff, Polynomial<LargeInt>& outputCoeff, Vectors<Rational>& startingVectors
+  const Polynomial<LargeInteger>& myCoeff, Polynomial<LargeInteger>& outputCoeff, Vectors<Rational>& startingVectors
 ) {
   bool hasImprovement = true;
   bool improvedAtLeastOnce = false;
   outputCoeff = myCoeff;
-  Polynomial<LargeInt> denominator, quotient, remainderDivision;
+  Polynomial<LargeInteger> denominator, quotient, remainderDivision;
   while (hasImprovement) {
     hasImprovement = false;
     for (int i = 0; i < this->IndicesNonZeroMults.size; i ++) {
@@ -3018,7 +3018,7 @@ void PartFraction::GetNElongationPolyWithMonomialContribution(
   List<int>& theCoefficients,
   List<int>& theGreatestElongations,
   int theIndex,
-  Polynomial<LargeInt>& output,
+  Polynomial<LargeInteger>& output,
   int theDimension
 ) {
   MonomialP tempM;
@@ -3046,13 +3046,13 @@ void PartFraction::ApplyGeneralizedSzenesVergneFormulA(
   List<int>& theCoefficients,
   int GainingMultiplicityIndex,
   int ElongationGainingMultiplicityIndex,
-  MonomialCollection<PartFraction, Polynomial<LargeInt> >& output,
+  MonomialCollection<PartFraction, Polynomial<LargeInteger> >& output,
   List<Vector<Rational> >& startingVectors
 ) {
   PartFraction tempFrac;
   tempFrac.RelevanceIsComputed = false;
-  Polynomial<LargeInt> tempP;
-  Polynomial<LargeInt> ComputationalBufferCoefficient;
+  Polynomial<LargeInteger> tempP;
+  Polynomial<LargeInteger> ComputationalBufferCoefficient;
   output.MakeZero();
   int theDim = startingVectors[0].size;
   SelectionWithDifferentMaxMultiplicities TheBigBadIndexingSet;
@@ -3086,7 +3086,7 @@ void PartFraction::ApplyGeneralizedSzenesVergneFormulA(
         );
         tempP.RaiseToPower(multiplicityChange);
         ComputationalBufferCoefficient *= (tempP);
-        LargeInt tempInt;
+        LargeInteger tempInt;
         int tempI;
         if (k == i) {
           tempI = oldMaxMultiplicity;
@@ -3115,11 +3115,11 @@ void PartFraction::ApplySzenesVergneFormulA(
   List<int>& theElongations,
   int GainingMultiplicityIndex,
   int ElongationGainingMultiplicityIndex,
-  MonomialCollection<PartFraction, Polynomial<LargeInt> >& output
+  MonomialCollection<PartFraction, Polynomial<LargeInteger> >& output
 ) {
   PartFraction tempFrac;
   tempFrac.RelevanceIsComputed = false;
-  Polynomial<LargeInt> tempP, CoefficientBuffer;
+  Polynomial<LargeInteger> tempP, CoefficientBuffer;
   MonomialP tempM;
   output.MakeZero();
   int theDim = startingVectors[0].size;
@@ -3152,19 +3152,19 @@ void PartFraction::decomposeAMinusNB(
   int indexB,
   int n,
   int indexAminusNB,
-  MonomialCollection<PartFraction, Polynomial<LargeInt> >& output,
+  MonomialCollection<PartFraction, Polynomial<LargeInteger> >& output,
   PartFractions& owner
 ) {
   PartFraction tempFrac;
   tempFrac.RelevanceIsComputed = false;
-  Polynomial<LargeInt> AminusNbetaPoly, commonPoly;
+  Polynomial<LargeInteger> AminusNbetaPoly, commonPoly;
   this->GetAlphaMinusNBetaPoly(owner, indexA, indexB, n, AminusNbetaPoly);
   int powerA = (*this)[indexA].Multiplicities[0];
   int powerB = (*this)[indexB].Multiplicities[0];
   output.MakeZero();
   this->PrepareFraction(indexA, indexB, indexAminusNB, true, tempFrac, AminusNbetaPoly, commonPoly);
   for (int i = powerB; i >= 1; i --) {
-    LargeInt tempInt = MathRoutines::NChooseK(powerA + powerB - i - 1, powerA - 1);
+    LargeInteger tempInt = MathRoutines::NChooseK(powerA + powerB - i - 1, powerA - 1);
     commonPoly *= tempInt;
     output.AddMonomial(tempFrac, commonPoly);
     commonPoly /= tempInt;
@@ -3176,7 +3176,7 @@ void PartFraction::decomposeAMinusNB(
   }
   this->PrepareFraction(indexA, indexB, indexAminusNB, false, tempFrac, AminusNbetaPoly, commonPoly);
   for (int i = powerA; i >= 1; i --) {
-    LargeInt tempInt = MathRoutines::NChooseK(powerA + powerB - i - 1, powerB - 1);
+    LargeInteger tempInt = MathRoutines::NChooseK(powerA + powerB - i - 1, powerB - 1);
     commonPoly *= tempInt;
     output.AddMonomial(tempFrac, commonPoly);
     commonPoly /= tempInt;
@@ -3202,7 +3202,7 @@ void PartFraction::ComputeIndicesNonZeroMults() {
   }
 }
 
-void PartFraction::GetAlphaMinusNBetaPoly(PartFractions& owner, int indexA, int indexB, int n, Polynomial<LargeInt>& output) {
+void PartFraction::GetAlphaMinusNBetaPoly(PartFractions& owner, int indexA, int indexB, int n, Polynomial<LargeInteger>& output) {
   output.MakeZero();
   MonomialP tempM;
   tempM.MakeOne(owner.AmbientDimension);
@@ -3219,7 +3219,7 @@ void PartFraction::GetNElongationPoly(
   int index,
   int baseElongation,
   int LengthOfGeometricSeries,
-  Polynomial<LargeInt>& output,
+  Polynomial<LargeInteger>& output,
   int theDimension
 ) {
   output.MakeZero();
@@ -3418,9 +3418,9 @@ bool PartFractions::splitPartial() {
   std::stringstream out;
   std::string tempS;
   PartFraction currentFrac;
-  MonomialCollection<PartFraction, Polynomial<LargeInt> > buffer;
+  MonomialCollection<PartFraction, Polynomial<LargeInteger> > buffer;
   PartFractions reducedForGood;
-  Polynomial<LargeInt> currentCoeff;
+  Polynomial<LargeInteger> currentCoeff;
   reducedForGood.MakeZero();
   if (this->flagUsingCheckSum) {
     this->ComputeOneCheckSum(this->CheckSum);
@@ -3705,7 +3705,7 @@ void PartFraction::ReduceMonomialByMonomialModifyOneMonomial(
   SelectionWithDifferentMaxMultiplicities& thePowers,
   List<int>& thePowersSigned,
   MonomialP& input,
-  LargeInt& inputCoeff
+  LargeInteger& inputCoeff
 ) {
   (void) Accum; (void) thePowers; (void) thePowersSigned; (void) input; (void) inputCoeff;
   /*Polynomial<LargeInt>& theNumerator = theGlobalVariables.PolyLargeIntPartFracBuffer5.GetElement();
@@ -3748,7 +3748,7 @@ void PartFraction::GetPolyReduceMonomialByMonomial(
   int StartMonomialPower,
   int DenPowerReduction,
   int startDenominatorPower,
-  Polynomial<LargeInt>& output
+  Polynomial<LargeInteger>& output
 ) {
   if (StartMonomialPower == 0) {
     output.MakeOne(owner.AmbientDimension);
@@ -3757,7 +3757,7 @@ void PartFraction::GetPolyReduceMonomialByMonomial(
   MonomialP tempMon;
   tempMon.MakeOne(owner.AmbientDimension);
   output.MakeZero();
-  LargeInt theCoeff = 1;
+  LargeInteger theCoeff = 1;
   if (StartMonomialPower > 0) {
     if (DenPowerReduction != startDenominatorPower) {
       theCoeff = MathRoutines::NChooseK(StartMonomialPower, DenPowerReduction);
@@ -4006,7 +4006,7 @@ bool PartFractions::initFromRoots(Vectors<Rational>& input) {
   PartFraction f;
   this->AmbientDimension = input[0].size;
   bool tempBool = f.initFromRoots(*this, input);
-  Polynomial<LargeInt> tempOne;
+  Polynomial<LargeInteger> tempOne;
   tempOne.MakeOne(this->AmbientDimension);
   this->AddMonomial(f, tempOne);
   return tempBool;
@@ -4231,7 +4231,7 @@ unsigned int oneFracWithMultiplicitiesAndElongations::HashFunction() const {
 }
 
 void oneFracWithMultiplicitiesAndElongations::GetPolyDenominator(
-  Polynomial<LargeInt>& output, int MultiplicityIndex, Vector<Rational>& theExponent
+  Polynomial<LargeInteger>& output, int MultiplicityIndex, Vector<Rational>& theExponent
 ) {
   if (MultiplicityIndex >= this->Multiplicities.size) {
     crash << "Bad multiplicity. " << crash;
@@ -4370,7 +4370,7 @@ void oneFracWithMultiplicitiesAndElongations::AddMultiplicity(int MultiplicityIn
 void oneFracWithMultiplicitiesAndElongations::OneFracToStringBasisChange(
   PartFractions& owner,
   int indexElongation,
-  Matrix<LargeInt>& VarChange,
+  Matrix<LargeInteger>& VarChange,
   bool UsingVarChange,
   std::string& output,
   bool LatexFormat,
@@ -4636,10 +4636,10 @@ int ::SelectionWithMaxMultiplicity::NumCombinationsOfCardinality(int cardinality
   return ::MathRoutines::NChooseK(this->Multiplicities.size + cardinality - 1, cardinality);
 }
 
-LargeInt SelectionWithMaxMultiplicity::GetNumTotalCombinations() const {
+LargeInteger SelectionWithMaxMultiplicity::GetNumTotalCombinations() const {
   //if (this->MaxMultiplicity == 0)
   //  return 1;
-  LargeInt result;
+  LargeInteger result;
   MathRoutines::KToTheNth(this->MaxMultiplicity + 1, this->Multiplicities.size, result);
   return result;
 }
@@ -4694,8 +4694,8 @@ int SelectionWithDifferentMaxMultiplicities::TotalNumSubsetsMustBeSmalInt() {
   return result;
 }
 
-LargeInt SelectionWithDifferentMaxMultiplicities::TotalNumSubsets() {
-  LargeInt result = 1;
+LargeInteger SelectionWithDifferentMaxMultiplicities::TotalNumSubsets() {
+  LargeInteger result = 1;
   for (int i = 0; i < this->MaxMultiplicities.size; i ++) {
     result *= (this->MaxMultiplicities[i] + 1);
   }
@@ -5203,11 +5203,11 @@ int DynkinType::GetCoxeterEdgeWeight(int v, int w) {
   return - 1;
 }
 
-LargeInt DynkinType::GetWeylGroupSizeByFormula() const {
+LargeInteger DynkinType::GetWeylGroupSizeByFormula() const {
   MacroRegisterFunctionWithName("DynkinType::GetWeylGroupSizeByFormula");
   this->CheckFlagDeallocated();
-  LargeInt result = 1;
-  LargeInt tempLI;
+  LargeInteger result = 1;
+  LargeInteger tempLI;
   for (int i = 0; i < this->size(); i ++) {
     tempLI = WeylGroupData::SizeByFormulaOrNeg1((*this)[i].theLetter, (*this)[i].theRank);
     tempLI.RaiseToPower(this->GetMult(i));
@@ -6508,7 +6508,7 @@ bool WeylGroupData::IsRegular(Vector<Rational>& input, int* indexFirstPerpendicu
   return true;
 }
 
-LargeInt WeylGroupData::SizeByFormulaOrNeg1(char weylLetter, int theDim) {
+LargeInteger WeylGroupData::SizeByFormulaOrNeg1(char weylLetter, int theDim) {
   //Humphreys, Introduction to Lie algebras and representation theory(1980), page 66, Table 1
   if (
     weylLetter != 'A' &&
@@ -6521,7 +6521,7 @@ LargeInt WeylGroupData::SizeByFormulaOrNeg1(char weylLetter, int theDim) {
   ) {
     crash << "WeylGroupData::SizeByFormulaOrNeg1 called with impossible Weyl type: " << weylLetter << crash;
   }
-  LargeInt theOutput = 1;
+  LargeInteger theOutput = 1;
   if (weylLetter == 'A') {
     theOutput = Rational::Factorial(theDim + 1);
   }
@@ -6996,7 +6996,7 @@ void WeylGroupData::GetEpsilonCoords(const List<Vector<Rational> >& input, Vecto
   }
 }
 
-LargeInt WeylGroupData::GetSizeByFormulaImplementation(FiniteGroup<ElementWeylGroup>& G) {
+LargeInteger WeylGroupData::GetSizeByFormulaImplementation(FiniteGroup<ElementWeylGroup>& G) {
   WeylGroupData* W = static_cast<WeylGroupData*>(G.specificDataPointer);
   W->CheckConsistency();
   return W->theDynkinType.GetWeylGroupSizeByFormula();
@@ -7114,7 +7114,7 @@ void WeylGroupData::GetExtremeElementInOrbit(
   }
 }
 
-LargeInt WeylGroupAutomorphisms::GetOrbitSize(Vector<Rational>& theWeight) {
+LargeInteger WeylGroupAutomorphisms::GetOrbitSize(Vector<Rational>& theWeight) {
   MacroRegisterFunctionWithName("WeylGroupAutomorphisms::GetOrbitSize");
   this->checkInitialization();
   HashedList<Vector<Rational> > highestWeights;
@@ -8378,8 +8378,8 @@ std::string KLpolys::RPolysToString(FormatExpressions* theFormat) {
   return out.str();
 }
 
-LargeInt PartFraction::EvaluateIntPolyAtOne(Polynomial<LargeInt>& input) {
-  LargeInt result;
+LargeInteger PartFraction::EvaluateIntPolyAtOne(Polynomial<LargeInteger>& input) {
+  LargeInteger result;
   result.MakeZero();
   for (int i = 0; i < input.size(); i ++) {
     result += input.theCoeffs[i];
@@ -8387,7 +8387,7 @@ LargeInt PartFraction::EvaluateIntPolyAtOne(Polynomial<LargeInt>& input) {
   return result;
 }
 
-void PartFraction::EvaluateIntPoly(const Polynomial<LargeInt>& input, const Vector<Rational>& values, Rational& output) {
+void PartFraction::EvaluateIntPoly(const Polynomial<LargeInteger>& input, const Vector<Rational>& values, Rational& output) {
   output.MakeZero();
   Polynomial<Rational> tempInput;
   tempInput = input; //<-implicit type conversion here!
@@ -8705,7 +8705,7 @@ bool Lattice::GetAllRepresentatives(const Lattice& rougherLattice, Vectors<Ratio
   int col = 0;
   int theDim = this->GetDim();
   Rational currentPeriod;
-  LargeInt currentPeriodInt;
+  LargeInteger currentPeriodInt;
   for (int i = 0; i < this->basis.NumRows; i ++) {
     while (this->basisRationalForm.elements[i][col].IsEqualToZero()) {
       col ++;
@@ -9075,7 +9075,7 @@ bool Lattice::ReduceVector(Vector<Rational>& theVector) const {
 
 void Lattice::MakeZn(int theDim) {
   this->basisRationalForm.MakeIdMatrix(theDim);
-  this->basis.MakeIdMatrix(theDim, LargeInt(1), LargeInt(0));
+  this->basis.MakeIdMatrix(theDim, LargeInteger(1), LargeInteger(0));
   this->Den.MakeOne();
 }
 
@@ -9120,7 +9120,7 @@ void PartFraction::ComputePolyCorrespondingToOneMonomial(
 
 
 void PartFraction::GetVectorPartitionFunction(
-  PartFractions& owner, Polynomial<LargeInt>& theCoeff, QuasiPolynomial& output
+  PartFractions& owner, Polynomial<LargeInteger>& theCoeff, QuasiPolynomial& output
 ) const {
   QuasiPolynomial shiftedPoly;
   Vectors<Rational> theNormals, theLatticeGenerators;
@@ -10049,7 +10049,7 @@ bool PartFractions::RemoveRedundantShortRootsIndex(int theIndex, Vector<Rational
   PartFraction thePF;
   Rational localStartCheckSum, localEndCheckSum;
   std::string tempS;
-  Polynomial<LargeInt> tempIP, currentCoeff;
+  Polynomial<LargeInteger> tempIP, currentCoeff;
   this->PopMonomial(theIndex, thePF, currentCoeff);
   for (int k = 0; k < thePF.IndicesNonZeroMults.size; k ++) {
     int currentIndex = thePF.IndicesNonZeroMults[k];
@@ -12827,13 +12827,13 @@ void Lattice::RefineByOtherLattice(const Lattice& other) {
     crash << "Dimension mismatch. " << crash;
   }
   int theDim = this->GetDim();
-  LargeIntUnsigned oldDen = this->Den;
-  LargeIntUnsigned::lcm(other.Den, oldDen, this->Den);
-  LargeIntUnsigned scaleThis, scaleOther;
+  LargeIntegerUnsigned oldDen = this->Den;
+  LargeIntegerUnsigned::lcm(other.Den, oldDen, this->Den);
+  LargeIntegerUnsigned scaleThis, scaleOther;
   scaleThis = this->Den / oldDen;
   scaleOther = this->Den / other.Den;
   int oldNumRows = this->basis.NumRows;
-  LargeInt tempI;
+  LargeInteger tempI;
   tempI = scaleThis;
   this->basis *= tempI;
   this->basis.Resize(this->basis.NumRows+other.basis.NumRows, theDim, true);

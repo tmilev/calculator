@@ -130,6 +130,7 @@ public:
 
 // TLS Protocol Version 1.0:
 // RFC2246
+// https://tools.ietf.org/search/rfc2246
 class SSLContent {
 public:
   SSLRecord* owner;
@@ -233,6 +234,7 @@ public:
 // https://www.cisco.com/c/en/us/support/docs/security-vpn/secure-socket-layer-ssl/116181-technote-product-00.html
 // TLS Protocol Version 1.0:
 // RFC2246
+// https://tools.ietf.org/search/rfc2246
 class SSLRecord {
 public:
   class tokens {

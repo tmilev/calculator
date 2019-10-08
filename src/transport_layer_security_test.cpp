@@ -66,4 +66,5 @@ bool SSLRecord::Test::Serialization() {
   if (!SSLRecord::Test::SerializationClientHello(server)) {
     crash << "Failed serialization of client hello. " << crash;
   }
+  return true;
 }

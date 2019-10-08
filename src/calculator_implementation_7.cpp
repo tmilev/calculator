@@ -214,7 +214,7 @@ bool CalculatorFunctionsGeneral::innerTestTLSDecodeSSLRecord(
   bool success = testServer.DecodeSSLRecord(&commentsOnFailure);
   std::stringstream out;
   if (!success) {
-    out << "<b style = 'color red'>Failed to decode the record. </b>";
+    out << "<b style = 'color:red'>Failed to decode the record. </b>";
   }
   out << testServer.lastReaD.ToHtml();
 

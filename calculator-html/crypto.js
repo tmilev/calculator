@@ -483,7 +483,19 @@ function displayTransportLayerSecurity(
   theServer.displayMessages(outputId, input);
 }
 
+function displaySSLRecord(
+  /**@type {string} */
+  outputId, 
+  input,
+) {
+  var outputElement = document.getElementById(outputId);
+  var annotation = new AnnotatedBytes();
+  annotation.writeMessageToDOM(input, outputElement);
+  outputElement.innerHTML += "<br>" + JSON.stringify(input);
+}
+
 module.exports =  {
   abstractSyntaxNotationAnnotate,
   displayTransportLayerSecurity,
+  displaySSLRecord,
 };

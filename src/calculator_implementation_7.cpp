@@ -195,10 +195,30 @@ bool CalculatorFunctionsGeneral::innerTestLoadPEMCertificates(Calculator& theCom
   return output.AssignValue(resultStream.str(), theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerTestTLSDecodeClientHello (
+bool CalculatorFunctionsGeneral::innerTestTLSDecodeSSLRecord(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  crash << "not implemented yet. " << crash;
+  MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestTLSDecodeClientHello");
+  std::string inputString;
+  if (!input.IsOfType(&inputString)) {
+    return false;
+  }
+  SSLRecord clientHello;
+  std::stringstream commentsOnFailure;
+  if (!Crypto::ConvertHexToListUnsignedChar(inputString, clientHello.incomingBytes, &commentsOnFailure)) {
+    return theCommands << commentsOnFailure.str();
+  }
+  TransportLayerSecurityServer testServer;
+  testServer.initialize();
+  clientHello.owner = &testServer;
+  bool success = testServer.DecodeSSLRecord(&commentsOnFailure);
+  std::stringstream out;
+  if (!success) {
+    out << "<b style = 'color red'>Failed to decode the record. </b>";
+  }
+  out << testServer.lastReaD.ToHtml();
+
+  return output.AssignValue(out.str(), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerTestTLSMessageSequence(

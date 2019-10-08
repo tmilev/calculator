@@ -821,17 +821,17 @@ void Calculator::initPredefinedInnerFunctions() {
     "TestTLSMessageSequence"
   );
   this->AddOperationInnerHandler(
-    "TestTLSDecodeClientHello",
-    CalculatorFunctionsGeneral::innerTestTLSDecodeClientHello,
+    "TestTLSDecodeSSLRecord",
+    CalculatorFunctionsGeneral::innerTestTLSDecodeSSLRecord,
     "",
     "Decodes a client hello. ",
-    "%HideLHS\nTestTLSDecodeClientHello(ConvertHexToString("
+    "%HideLHS\nTestTLSDecodeSSLRecord("
     "LoadFileIntoString(\"test/message_client_ssl_0.hex\")"
-    "));\n",
+    ");\n",
     true,
     true,
-    "CalculatorFunctionsGeneral::innerTestTLSDecodeClientHello",
-    "TestTLSDecodeClientHello"
+    "CalculatorFunctionsGeneral::innerTestTLSDecodeSSLRecord",
+    "TestTLSDecodeSSLRecord"
   );
   this->AddOperationInnerHandler(
     "TestASN1Decode",

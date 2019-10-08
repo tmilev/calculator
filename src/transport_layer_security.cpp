@@ -1685,6 +1685,17 @@ JSData Serialization::Marker::ToJSON() {
   return result;
 }
 
+std::string SSLRecord::ToHtml() {
+  std::stringstream out, spanId;
+  spanId << "spanSSLRecord_" << "_" << theGlobalVariables.GetElapsedMilliseconds();
+  out << "<div id = '" << spanId.str() << "'></div>";
+  out << "<script>"
+  << "window.calculator.crypto.displaySSLRecord('"
+  << spanId.str() << "', " << this->ToJSON() << ");"
+  << "</script>";
+  return out.str();
+}
+
 JSData SSLRecord::ToJSON() {
   JSData result;
   List<unsigned char> serialization;

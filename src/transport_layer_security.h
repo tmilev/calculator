@@ -231,6 +231,8 @@ public:
 
 // A basic explanation of ssl records:
 // https://www.cisco.com/c/en/us/support/docs/security-vpn/secure-socket-layer-ssl/116181-technote-product-00.html
+// TLS Protocol Version 1.0:
+// RFC2246
 class SSLRecord {
 public:
   class tokens {

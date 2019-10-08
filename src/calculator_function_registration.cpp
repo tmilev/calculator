@@ -179,7 +179,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "x = 5; left = a; EvaluateSymbols(\"x^x +ax +a x +\\left(left \\right)\")",
     true,
     false,
-    "CalculatorConversions::innerTurnOnRules", "TurnOnRules"
+    "CalculatorConversions::innerEvaluateSymbols",
+    "EvaluateSymbols"
   );
   this->AddOperationInnerHandler(
     "or",
@@ -204,7 +205,7 @@ void Calculator::initPredefinedInnerFunctions() {
     true,
     false,
     "CalculatorConversions::innerOrIdentical",
-    "or"
+    "orIdentical"
   );
   this->AddOperationInnerHandler(
     "if",
@@ -820,6 +821,19 @@ void Calculator::initPredefinedInnerFunctions() {
     "TestTLSMessageSequence"
   );
   this->AddOperationInnerHandler(
+    "TestTLSDecodeClientHello",
+    CalculatorFunctionsGeneral::innerTestTLSDecodeClientHello,
+    "",
+    "Decodes a client hello. ",
+    "%HideLHS\nTestTLSDecodeClientHello(ConvertHexToString("
+    "LoadFileIntoString(\"test/message_client_ssl_0.hex\")"
+    "));\n",
+    true,
+    true,
+    "CalculatorFunctionsGeneral::innerTestTLSDecodeClientHello",
+    "TestTLSDecodeClientHello"
+  );
+  this->AddOperationInnerHandler(
     "TestASN1Decode",
     CalculatorFunctionsGeneral::innerTestASN1Decode,
     "",
@@ -905,7 +919,7 @@ void Calculator::initPredefinedInnerFunctions() {
     true,
     false,
     "CalculatorFunctionsGeneral::innerSha224OfString",
-    "Sha1"
+    "Sha224"
   );
   this->AddOperationInnerHandler(
     "RSAencrypt",
@@ -2083,17 +2097,6 @@ void Calculator::initPredefinedInnerFunctions() {
     false,
     "CalculatorFunctionsWeylGroup::innerTestSpechtModules",
     "TestSpechtModules"
-  );
-  this->AddOperationInnerHandler(
-    "MakeElementWeylGroup",
-    CalculatorFunctionsWeylGroup::innerWeylGroupElement,
-    "",
-    "Needs a group name and a list of generators",
-    "s_{{i}}=MakeElementWeylGroup{}(A_2, i);\n(s_1+s_2)(2s_1+s_2)(3s_1+s_2)",
-    true,
-    false,
-    "CalculatorFunctionsWeylGroup::innerWeylGroupElement",
-    "MakeElementWeylGroup"
   );
   this->AddOperationInnerHandler(
     "MakeElementWeylGroup",
@@ -5986,7 +5989,7 @@ void Calculator::initPredefinedStandardOperations() {
     true,
     false,
     "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly",
-    "AddNumberOrPolyToPoly"
+    "AddNumberOrPolyOverAlgebraicNumbersToPoly"
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
@@ -5998,7 +6001,7 @@ void Calculator::initPredefinedStandardOperations() {
     true,
     false,
     "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly",
-    "AddNumberOrPolyToPoly"
+    "AddAlgebraicNumberToPoly"
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
@@ -6215,7 +6218,7 @@ void Calculator::initPredefinedStandardOperations() {
     true,
     false,
     "CalculatorFunctionsGeneral::innerIntegralOperator",
-    "IntegralOperator"
+    "IntegralOperatorFromProduct"
   );
   this->AddOperationInnerHandler(
     "*",
@@ -6250,7 +6253,7 @@ void Calculator::initPredefinedStandardOperations() {
     true,
     false,
     "CalculatorFunctionsGeneral::innerHandleUnderscorePowerLimits",
-    "LimitBoundaryNotation"
+    "LimitBoundaryNotationPower"
   );
   this->AddOperationInnerHandler(
     "_",
@@ -6261,7 +6264,7 @@ void Calculator::initPredefinedStandardOperations() {
     true,
     false,
     "CalculatorFunctionsGeneral::innerHandleUnderscorePowerLimits",
-    "LimitBoundaryNotation"
+    "LimitBoundaryNotationUnderscore"
   );
   this->AddOperationOuterHandler(
     "*",
@@ -6319,7 +6322,7 @@ void Calculator::initPredefinedStandardOperations() {
     true,
     false,
     "CalculatorFunctionsBinaryOps::innerMultiplyAlgebraicNumberByAlgebraicNumber",
-    "MultiplyAlgebraicNumbers"
+    "MultiplyAlgebraicByAlgebraic"
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -6331,7 +6334,7 @@ void Calculator::initPredefinedStandardOperations() {
     true,
     false,
     "CalculatorFunctionsBinaryOps::innerMultiplyAlgebraicNumberByAlgebraicNumber",
-    "MultiplyAlgebraicNumbers"
+    "MultiplyRationalByAlgebraic"
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -6801,7 +6804,7 @@ void Calculator::initPredefinedStandardOperations() {
     true,
     false,
     "CalculatorFunctionsBinaryOps::innerMultiplyAnyByUE",
-    "MultiplyAnyByUE"
+    "MultiplyRationalByUE"
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -6815,7 +6818,7 @@ void Calculator::initPredefinedStandardOperations() {
     true,
     false,
     "CalculatorFunctionsBinaryOps::innerMultiplyAnyByUE",
-    "MultiplyAnyByUE"
+    "MultiplyUEByUE"
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -6875,7 +6878,7 @@ void Calculator::initPredefinedStandardOperations() {
     true,
     false,
     "CalculatorFunctionsBinaryOps::innerMultiplyEllipticCurveElements",
-    "MultiplyEllipticCurveElements"
+    "MultiplyEllipticCurveElementsRational"
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -6889,7 +6892,7 @@ void Calculator::initPredefinedStandardOperations() {
     true,
     false,
     "CalculatorFunctionsBinaryOps::innerMultiplyEllipticCurveElements",
-    "MultiplyEllipticCurveElements"
+    "MultiplyEllipticCurveElementsOverZmodP"
   );
 
   this->AddOperationBinaryInnerHandlerWithTypes(
@@ -7092,7 +7095,7 @@ void Calculator::initPredefinedStandardOperations() {
     true,
     false,
     "CalculatorFunctionsGeneral::innerIntegralOperator",
-    "IntegralOperator"
+    "IntegralOperatorFromQuotient"
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "/",
@@ -7139,7 +7142,7 @@ void Calculator::initPredefinedStandardOperations() {
     true,
     false,
     "CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat",
-    "DivideAlgebraicNumbers"
+    "DivideAlgebraicByAlgebraic"
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "/",
@@ -7151,7 +7154,7 @@ void Calculator::initPredefinedStandardOperations() {
     true,
     false,
     "CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat",
-    "DivideAlgebraicNumbers"
+    "DivideRationalByAlgebraic"
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "/",
@@ -7163,7 +7166,7 @@ void Calculator::initPredefinedStandardOperations() {
     true,
     false,
     "CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat",
-    "DivideAlgebraicNumbers"
+    "DivideAlgebraicByRational"
   );
   this->AddOperationOuterHandler(
     "/",
@@ -7393,7 +7396,7 @@ void Calculator::initPredefinedStandardOperations() {
     true,
     false,
     "CalculatorFunctionsBinaryOps::innerPowerMatExpressionsBySmallInteger",
-    "PowerMatrixNumbersByLargeIntegerIfPossible"
+    "PowerMatrixNumbersBySmallIntegerIfPossible"
   );
   this->AddOperationInnerHandler(
     "^",
@@ -7464,7 +7467,7 @@ void Calculator::initPredefinedStandardOperations() {
     true,
     false,
     "CalculatorFunctionsBinaryOps::innerPowerEllipticCuveElementByInteger",
-    "PowerEllipticCurveElementByInteger"
+    "PowerEllipticCurveElementRationalByInteger"
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "^",
@@ -7477,7 +7480,7 @@ void Calculator::initPredefinedStandardOperations() {
     true,
     false,
     "CalculatorFunctionsBinaryOps::innerPowerEllipticCuveElementByInteger",
-    "PowerEllipticCurveElementByInteger"
+    "PowerEllipticCurveElementZmodPByInteger"
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "^",
@@ -7935,8 +7938,8 @@ void Calculator::initPredefinedStandardOperations() {
     "a \\leq b",
     true,
     false,
-    "Calculator::innerGreaterThanOrEqualTo",
-    "greaterThanOrEqualTo"
+    "Calculator::innerLessThanOrEqualTo",
+    "lessThanOrEqualTo"
   );
   this->AddOperationOuterHandler(
     "==",

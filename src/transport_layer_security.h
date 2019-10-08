@@ -245,7 +245,9 @@ public:
   };
   class Test {
   public:
+    static std::string sampleClientHelloHex;
     static bool Serialization();
+    static bool SerializationClientHello(TransportLayerSecurityServer& testServer);
   };
   int offsetDecoded;
   unsigned char theType;

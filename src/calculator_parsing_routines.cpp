@@ -331,6 +331,27 @@ void Calculator::initialize() {
   this->RuleStackCacheIndex = 0;
   this->cachedRuleStacks.AddOnTop(this->RuleStack);
   this->NumPredefinedAtoms = this->theAtoms.size; //<-operations added up to this point are called ``operations''
+  if (theGlobalVariables.flagAutoUnitTest) {
+    this->CheckPredefinedFunctions();
+  }
+}
+
+bool Calculator::CheckPredefinedFunctions() {
+  MacroRegisterFunctionWithName("Calculator::CheckPredefinedFunctions");
+  HashedList<std::string, MathRoutines::HashString> ruleIds;
+  for (int i = 0; i < this->FunctionHandlers.size; i ++) {
+    for (int j = 0; j < this->FunctionHandlers[i].size; j ++) {
+      std::string& currentName = this->FunctionHandlers[i][j].calculatorIdentifier;
+      if (currentName == "") {
+        continue;
+      }
+      if (ruleIds.Contains(currentName)) {
+        crash << "Calculator identifier: " << currentName << " is not unique. ";
+      }
+      ruleIds.AddOnTopNoRepetitionMustBeNewCrashIfNot(currentName);
+    }
+  }
+  return true;
 }
 
 bool Calculator::ReplaceOXEXEXEXByE() {

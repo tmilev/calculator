@@ -195,6 +195,12 @@ bool CalculatorFunctionsGeneral::innerTestLoadPEMCertificates(Calculator& theCom
   return output.AssignValue(resultStream.str(), theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerTestTLSDecodeClientHello (
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  crash << "not implemented yet. " << crash;
+}
+
 bool CalculatorFunctionsGeneral::innerTestTLSMessageSequence(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {

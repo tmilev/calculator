@@ -64,16 +64,16 @@ struct branchingData {
 class SemisimpleLieAlgebraOrdered {
 public:
   SemisimpleLieAlgebra* theOwner;
-  //the format of the order is arbitrary except for the following requirements:
-  //-All elements of the order must be either 1) nilpotent or 2) elements of the Cartan
-  //-Let the number of positive roots be N and the rank be K. Then the indices N,..., N+K- 1 must
-  //   correspond to the elements of the Cartan.
+  // the format of the order is arbitrary except for the following requirements:
+  // -All elements of the order must be either 1) nilpotent or 2) elements of the Cartan
+  // -Let the number of positive roots be N and the rank be K. Then the indices N,..., N+K- 1 must
+  //  correspond to the elements of the Cartan.
   List<ElementSemisimpleLieAlgebra<Rational> > theOrder;
-  //The order of chevalley generators is as follows. First come negative roots,
-  //then elements of cartan, then positive Vectors<Rational>
-  //The weights are in increasing order
-  //The i^th column of the matrix gives the coordinates of the i^th Chevalley generator
-  //in the current coordinates
+  // The order of chevalley generators is as follows. First come negative roots,
+  // then elements of cartan, then positive Vectors<Rational>
+  // The weights are in increasing order
+  // The i^th column of the matrix gives the coordinates of the i^th Chevalley generator
+  // in the current coordinates
   Matrix<Rational> ChevalleyGeneratorsInCurrentCoords;
   void AssignGeneratorCoeffOne(int theIndex, ElementSemisimpleLieAlgebra<Rational>& output) {
     output.operator=(this->theOrder[theIndex]);
@@ -106,9 +106,9 @@ public:
   }
   PauseThread thePauseControlleR;
   List<Matrix<Rational> > theLinearOperators;
-  //the first k variables correspond to the Cartan of the smaller Lie algebra
-  //the next l variables correspond to the Cartan of the larger Lie algebra
-  //the last variable is the projectivization
+  // the first k variables correspond to the Cartan of the smaller Lie algebra
+  // the next l variables correspond to the Cartan of the larger Lie algebra
+  // the last variable is the projectivization
   List<Matrix<Rational> > theLinearOperatorsExtended;
   Vector<Rational>  NonIntegralOriginModificationBasisChanged;
   std::fstream theMultiplicitiesMaxOutput;
@@ -126,7 +126,7 @@ public:
   List<List<QuasiPolynomial> > theQPsSubstituted;
   List<QuasiPolynomial> theMultiplicities;
   HomomorphismSemisimpleLieAlgebra theHmm;
-//  List<QuasiPolynomial> theMultiplicitiesExtremaCandidates;
+  // List<QuasiPolynomial> theMultiplicitiesExtremaCandidates;
   int UpperLimitChambersForDebugPurposes;
   int numNonZeroMults;
   Selection ParabolicLeviPartRootSpacesZeroStandsForSelected;
@@ -135,7 +135,7 @@ public:
   Vectors<Rational> theTranslationS;
   Vectors<Rational> theTranslationsProjectedBasisChanged;
   PartFractions thePfs;
-//  List<Cone> allParamSubChambersRepetitionsAllowedConeForm;
+  // List<Cone> allParamSubChambersRepetitionsAllowedConeForm;
   ConeComplex projectivizedParamComplex;
   ConeLatticeAndShiftMaxComputation theMaxComputation;
   ConeComplex smallerAlgebraChamber;
@@ -374,7 +374,9 @@ public:
   bool IsEqualToZero() const {
     return this->size == 0;
   }
-  bool GetElementUniversalEnveloping(ElementUniversalEnveloping<coefficient>& output, SemisimpleLieAlgebra& inputOwner);
+  bool GetElementUniversalEnveloping(
+    ElementUniversalEnveloping<coefficient>& output, SemisimpleLieAlgebra& inputOwner
+  );
   bool GetLieAlgebraElementIfPossible(ElementSemisimpleLieAlgebra<Rational>& output) const;
   void SubstitutionCoefficients(PolynomialSubstitution<Rational>& theSub);
   void MakeConst(const coefficient& coeff, SemisimpleLieAlgebraOrdered& theOwner) {

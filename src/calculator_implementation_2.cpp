@@ -97,6 +97,24 @@ const Expression& Calculator::EMInfinity() {
   return this->frequentEMInfinity;
 }
 
+std::string Calculator::ToStringRuleStatusUser() {
+  MacroRegisterFunctionWithName("Calculator::ToStringRuleStatusUser");
+  std::stringstream out;
+  for (int i = 0; i < this->FunctionHandlers.size; i ++) {
+    for (int j = 0; j < this->FunctionHandlers[i].size; j ++) {
+      Function& currentHandler = this->FunctionHandlers[i][j];
+      if (currentHandler.flagDisabledByUser != currentHandler.flagDisabledByUserDefaultValue) {
+        if (currentHandler.flagDisabledByUser) {
+          out << currentHandler.calculatorIdentifier << " is <b>off</b>. ";
+        } else {
+          out << currentHandler.calculatorIdentifier << " is <b>on</b>. ";
+        }
+      }
+    }
+  }
+  return out.str();
+}
+
 void Calculator::DoLogEvaluationIfNeedBe(Function& inputF) {
   if (this->historyStack.size > 0) {
     this->historyRuleNames.LastObject().LastObject() = inputF.calculatorIdentifier;
@@ -105,7 +123,7 @@ void Calculator::DoLogEvaluationIfNeedBe(Function& inputF) {
     return;
   }
   *this << "<hr>Built-in substitution: " << inputF.ToStringSummary()
-  << "<br>" << theGlobalVariables.GetElapsedSeconds()-this->LastLogEvaluationTime
+  << "<br>" << theGlobalVariables.GetElapsedSeconds() - this->LastLogEvaluationTime
   << " second(s) since last log entry. "
   << "Rule stack id: "
   << this->RuleStackCacheIndex << ", stack size: " << this->RuleStack.size();
@@ -139,36 +157,32 @@ bool Calculator::outerStandardFunction(
     return false;
   }
   for (int i = 0; i < theCommands.FunctionHandlers[functionNameNode.theData].size; i ++) {
-    if (!theCommands.FunctionHandlers[functionNameNode.theData][i].flagIsInner) {
-      Function& outerFun = theCommands.FunctionHandlers[functionNameNode.theData][i];
-      if (!outerFun.ShouldBeApplied(opIndexParentIfAvailable)) {
-        continue;
-      }
-      if (outerFun.theFunction(theCommands, input, output)) {
+    Function& currentFunction = theCommands.FunctionHandlers[functionNameNode.theData][i];
+    if (!currentFunction.ShouldBeApplied(opIndexParentIfAvailable)) {
+      continue;
+    }
+    if (!currentFunction.flagIsInner) {
+      if (currentFunction.theFunction(theCommands, input, output)) {
         if (output != input) {
           output.CheckConsistency();
-          theCommands.DoLogEvaluationIfNeedBe(outerFun);
+          theCommands.DoLogEvaluationIfNeedBe(currentFunction);
           return true;
         }
       }
     } else {
-      Function& innerFun = theCommands.FunctionHandlers[functionNameNode.theData][i];
-      if (!innerFun.ShouldBeApplied(opIndexParentIfAvailable)) {
-        continue;
-      }
       if (input.children.size > 2) {
-        if (innerFun.inputFitsMyInnerType(input)) {
-          if (innerFun.theFunction(theCommands, input, output)) {
+        if (currentFunction.inputFitsMyInnerType(input)) {
+          if (currentFunction.theFunction(theCommands, input, output)) {
             output.CheckConsistency();
-            theCommands.DoLogEvaluationIfNeedBe(innerFun);
+            theCommands.DoLogEvaluationIfNeedBe(currentFunction);
             return true;
           }
         }
       } else if (input.children.size == 2) {
-        if (innerFun.inputFitsMyInnerType(input[1])) {
-          if (innerFun.theFunction(theCommands, input[1], output)) {
+        if (currentFunction.inputFitsMyInnerType(input[1])) {
+          if (currentFunction.theFunction(theCommands, input[1], output)) {
             output.CheckConsistency();
-            theCommands.DoLogEvaluationIfNeedBe(innerFun);
+            theCommands.DoLogEvaluationIfNeedBe(currentFunction);
             return true;
           }
         }
@@ -278,7 +292,7 @@ void StateMaintainerCalculator::AddRule(const Expression& theRule) {
   }
   this->owner->RuleStackCacheIndex = this->owner->cachedRuleStacks.GetIndex(this->owner->RuleStack);
   if (this->owner->RuleStackCacheIndex == - 1) {
-    if (this->owner->cachedRuleStacks.size< this->owner->MaxCachedExpressionPerRuleStack) {
+    if (this->owner->cachedRuleStacks.size < this->owner->MaxCachedExpressionPerRuleStack) {
       this->owner->RuleStackCacheIndex = this->owner->cachedRuleStacks.size;
       this->owner->cachedRuleStacks.AddOnTop(this->owner->RuleStack);
     }

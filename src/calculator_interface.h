@@ -1167,6 +1167,7 @@ public:
   std::stringstream Comments;
   std::stringstream errorsPublic;
   FormatExpressions formatVisibleStrings;
+  std::string ToStringRuleStatusUser();
   std::string ToString();
   std::string ToStringPerformance();
   Expression GetNewBoundVar();
@@ -1197,6 +1198,7 @@ public:
   bool IsBoundVarInContext(int inputOp);
   bool IsNonBoundVarInContext(int inputOp);
   Function& GetFunctionHandlerFromNamedRule(const std::string& inputRuleName);
+  bool CheckPredefinedFunctions();
   bool CheckConsistencyAfterInitializationExpressionStackEmpty();
   //to make operations read only, we make operations private and return const pointer to it.
   const HashedList<std::string, MathRoutines::HashString>& GetOperations() {

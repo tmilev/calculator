@@ -495,8 +495,38 @@ function displaySSLRecord(
   outputElement.className = styles.classNames.containers.hexStandardWidth;
   annotation.writeMessageToDOM(input, outputElement);
   var extraAnnotation = "";
-  extraAnnotation += "<br>";
-  extraAnnotation += JSON.stringify(input.content);
+  var content = input.content;
+  extraAnnotation += `<br>Session id: ${content.sessionId}`;
+  extraAnnotation += `<br>Cipher spec length: ${content.cipherSpecLength}`;
+  extraAnnotation += `<br>Renegotiation characters: ${content.renegotiationCharacters}`;
+  var flagNames = ["renegotiate", "OCSPrequest", "signedCertificateTimestampRequest"];
+  for (var counter = 0; counter < flagNames.length; counter ++) {
+    var flagName = flagNames[counter];
+    if (content[flagName] !== undefined) {
+      extraAnnotation += `<br>${flagName}: ${content[flagName]}`;
+    }
+  }
+  extraAnnotation += `<table class = '${styles.classNames.table.borderStandard}'><tr><th>id</th><th>interpretation</th></tr>`;
+  for (var label in content.cipherSuites) {
+    extraAnnotation += `<tr>`;
+    extraAnnotation += `<td>${label}</td>`;
+    extraAnnotation += `<td>${content.cipherSuites[label]}</td>`;
+    extraAnnotation += `</tr>`;
+  }
+  extraAnnotation += "</table>";
+  extraAnnotation += `<table class = '${styles.classNames.table.borderStandard}'><tr><th>type</th><th>name</th><th width = '50%'>data</th></tr>`;
+  for (var counter = 0; counter < content.extensions.length; counter ++) {
+    var label = content.extensions[counter].name;
+    var type = content.extensions[counter].type;
+    var data = content.extensions[counter].data;
+    extraAnnotation += `<tr>`;
+    extraAnnotation += `<td>${type}</td>`;
+    extraAnnotation += `<td>${label}</td>`;
+    extraAnnotation += `<td>${data}</td>`;
+    extraAnnotation += `</tr>`;
+  }
+  extraAnnotation += "</table>";
+  // extraAnnotation += JSON.stringify(content);
   var annotationAnnotation = document.createElement("SPAN");
   annotationAnnotation.innerHTML += extraAnnotation;
   outputElement.appendChild(annotationAnnotation);

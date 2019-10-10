@@ -80,7 +80,7 @@ public:
   void DoSetSocket(int theSocket);
   void SetSocketAddToStack(int theSocket);
   void RemoveLastSocket();
-  bool HandShakeIamServer(int inputSocketID);
+  bool HandShakeIamServer(int inputSocketID, std::stringstream*ccommentsOnFailure);
   bool InspectCertificates(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   static bool initSSLKeyFiles();
   static bool initSSLKeyFilesCreateOnDemand();

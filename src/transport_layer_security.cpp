@@ -998,7 +998,6 @@ void SSLContent::WriteNamedCurveAndPublicKey(
   List<unsigned char>& output, List<Serialization::Marker>* annotations
 ) const {
   MacroRegisterFunctionWithName("SSLContent::WriteNamedCurveAndPublicKey");
-  std::cout << "DEBUG: got to here now!\n";
   Serialization::WriterOneByteInteger curveName(3, output, annotations, "named curve");
   Serialization::WriteTwoByteUnsignedAnnotated(30, output, annotations, "curve25519");
   std::stringstream shouldNotBeNeeded;
@@ -1052,10 +1051,8 @@ void SSLContent::WriteBytesHandshakeSecretExchange(
     crash << "Not allowed to serialize non-server key exchange as such. " << crash;
   }
   this->WriteType(output, annotations);
-  std::cout << "DEBUG: got to here!\n";
   Serialization::LengthWriterThreeBytes writeLength(output, annotations, "server key exchange");
   this->WriteNamedCurveAndPublicKey(output, annotations);
-  std::cout << "DEBUG: got to here more!\n";
 }
 
 void SSLContent::WriteBytesHandshakeClientHello(
@@ -1065,19 +1062,14 @@ void SSLContent::WriteBytesHandshakeClientHello(
   if (this->theType != SSLContent::tokens::clientHello) {
     crash << "Not allowed to serialize non client-hello content as client hello. " << crash;
   }
-  std::cout << "DEBUG: got to here";
   this->WriteType(output, annotations);
-  std::cout << "DEBUG: got to here 3";
   Serialization::LengthWriterThreeBytes writeLength(output, annotations, "Handshake clientHello body");
-  std::cout << "DEBUG: got to here 2";
   this->WriteVersion(output, annotations);
   this->WriteBytesIncomingRandomAndSessionId(output, annotations);
   this->WriteBytesSupportedCiphers(output, annotations);
   // 256 = 0x0100 = no compression:
-  std::cout << "DEBUG: got to herept 3";
   Serialization::WriterTwoByteInteger noCompression(256, output, annotations, "compression: none");
   this->WriteBytesExtensionsOnly(output, annotations);
-  std::cout << "DEBUG: got to herept 4";
 }
 
 List<unsigned char>& SSLContent::GetMyRandomBytes() const {
@@ -2006,7 +1998,6 @@ bool TransportLayerSecurityServer::Session::SetIncomingRandomBytes(
     }
     return false;
   }
-  std::cout << "DEBUG: Setting incoming random bytes ...\n" << Crypto::ConvertListUnsignedCharsToHex(input) << "\n";
   this->incomingRandomBytes = input;
   return true;
 }
@@ -2048,7 +2039,7 @@ bool TransportLayerSecurityServer::HandShakeIamServer(int inputSocketID, std::st
 
 bool TransportLayerSecurity::HandShakeIamServer(int inputSocketID, std::stringstream* commentsOnFailure) {
   if (!this->flagUseBuiltInTlS) {
-    return this->openSSLData.HandShakeIamServer(inputSocketID);
+    return this->openSSLData.HandShakeIamServer(inputSocketID, commentsOnFailure);
   }
   return this->theServer.HandShakeIamServer(inputSocketID, commentsOnFailure);
 }
@@ -2188,82 +2179,94 @@ int TransportLayerSecurity::SSLWrite(
   }
 }
 
-bool TransportLayerSecurityOpenSSL::HandShakeIamServer(int inputSocketID) {
+bool TransportLayerSecurityOpenSSL::HandShakeIamServer(int inputSocketID, std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("WebServer::HandShakeIamServer");
-  std::stringstream commentsOnSSLNew;
   if (this->sslData != nullptr) {
     crash << "SSL data expected to be zero. " << crash;
   }
   this->sslData = SSL_new(this->context);
   SSL_set_verify(this->sslData, SSL_VERIFY_NONE, nullptr);
   if (this->sslData == nullptr) {
-    logOpenSSL << logger::red << "Failed to allocate ssl: " << commentsOnSSLNew.str() << logger::endL;
-    crash << "Failed to allocate ssl: not supposed to happen" << crash;
+    crash << "Failed to allocate ssl: not supposed to happen. " << crash;
   }
   this->SetSocketAddToStack(inputSocketID);
   int maxNumHandshakeTries = 3;
   this->flagSSLHandshakeSuccessful = false;
   for (int i = 0; i < maxNumHandshakeTries; i ++) {
-    std::stringstream commentsOnError;
     this->errorCode = SSL_accept(this->sslData);
     if (this->errorCode <= 0) {
 
       this->flagSSLHandshakeSuccessful = false;
-      if (this->errorCode == 0) {
-        logOpenSSL << "OpenSSL handshake not successful in a controlled manner. ";
-      } else {
-        logOpenSSL << "OpenSSL handshake not successful with a fatal error. ";
+      if (commentsOnFailure != nullptr) {
+        if (this->errorCode == 0) {
+          *commentsOnFailure << "OpenSSL handshake not successful in a controlled manner. ";
+        } else {
+          *commentsOnFailure << "OpenSSL handshake not successful with a fatal error. ";
+        }
+        *commentsOnFailure << "Attempt " << i + 1 << " out of " << maxNumHandshakeTries << " failed. ";
       }
-      logOpenSSL << commentsOnError.str() << logger::endL;
-      logOpenSSL << "Attempt " << i + 1 << " out of " << maxNumHandshakeTries << " failed. Details (not logged in a file): ";
       ERR_print_errors_fp(stderr);
 
       switch(SSL_get_error(this->sslData, this->errorCode)) {
         case SSL_ERROR_NONE:
-          logOpenSSL << logger::red << "No error reported, this shouldn't happen. " << logger::endL;
+          if (commentsOnFailure != nullptr) {
+            *commentsOnFailure << "No error reported, this shouldn't happen. ";
+          }
           maxNumHandshakeTries = 1;
           break;
         case SSL_ERROR_ZERO_RETURN:
-          logOpenSSL << logger::red << "The TLS/SSL connection has been closed (possibly cleanly). " << logger::endL;
+          if (commentsOnFailure != nullptr) {
+            *commentsOnFailure << "The TLS/SSL connection has been closed (possibly cleanly). ";
+          }
           maxNumHandshakeTries = 1;
           break;
         case SSL_ERROR_WANT_READ:
         case SSL_ERROR_WANT_WRITE:
-          logOpenSSL << logger::red << " During regular I/O: repeat needed (not implemented). " << logger::endL;
+          if (commentsOnFailure != nullptr) {
+            *commentsOnFailure << " During regular I/O: repeat needed (not implemented). ";
+          }
           break;
         case SSL_ERROR_WANT_CONNECT:
         case SSL_ERROR_WANT_ACCEPT:
-          logOpenSSL << logger::red << " During handshake negotiations: repeat needed (not implemented). "
-          << logger::endL;
+          if (commentsOnFailure != nullptr) {
+            *commentsOnFailure << " During handshake negotiations: repeat needed (not implemented). ";
+          }
           break;
         case SSL_ERROR_WANT_X509_LOOKUP:
-          logOpenSSL << logger::red << " Application callback set by SSL_CTX_set_client_cert_cb(): "
-          << "repeat needed (not implemented). "
-          << logger::endL;
+          if (commentsOnFailure != nullptr) {
+            *commentsOnFailure << "Application callback set by SSL_CTX_set_client_cert_cb(): "
+            << "repeat needed (not implemented). ";
+          }
           maxNumHandshakeTries = 1;
           break;
-        //case SSL_ERROR_WANT_ASYNC:
+        // case SSL_ERROR_WANT_ASYNC:
         //  logOpenSSL << logger::red << "Asynchronous engine is still processing data. "
         //  << logger::endL;
         //  break;
         case SSL_ERROR_SYSCALL:
-          logOpenSSL << logger::red << "Error: some I/O error occurred. "
-          << logger::endL;
+          if (commentsOnFailure != nullptr) {
+            *commentsOnFailure << "Error: some I/O error occurred. ";
+          }
           maxNumHandshakeTries = 1;
           break;
         case SSL_ERROR_SSL:
-          logOpenSSL << logger::red << "A failure in the SSL library occurred. "
-          << logger::endL;
-        //theError = ERR_get_error(3ssl);
-        //if (theError!=SSL_ERROR_WANT_READ && theError!=SSL_ERROR_WANT_WRITE)
-        //  maxNumHandshakeTries =1;
+          if (commentsOnFailure != nullptr) {
+            *commentsOnFailure << "A failure in the SSL library occurred. ";
+          }
+        // theError = ERR_get_error(3ssl);
+        // if (theError!=SSL_ERROR_WANT_READ && theError!=SSL_ERROR_WANT_WRITE)
+        //   maxNumHandshakeTries =1;
           break;
         default:
-          logOpenSSL << logger::red << "Unknown error. " << logger::endL;
+          if (commentsOnFailure != nullptr) {
+            *commentsOnFailure << "Unknown error. ";
+          }
           maxNumHandshakeTries = 1;
           break;
       }
-      logOpenSSL << "Retrying connection in 0.5 seconds... ";
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure << "Retrying connection in 0.5 seconds... ";
+      }
       theGlobalVariables.FallAsleep(500000);
     } else {
       this->flagSSLHandshakeSuccessful = true;

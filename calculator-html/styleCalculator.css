@@ -1567,3 +1567,8 @@ span.spanStringDifferent {
   font-family: 'Courier New', Courier, monospace;
   color: red
 }
+
+table.tableBorderStandard, table.tableBorderStandard td{
+  border-collapse: collapse;
+  border: 1px solid;
+}

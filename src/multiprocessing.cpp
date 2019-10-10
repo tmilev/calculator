@@ -822,6 +822,7 @@ std::string logger::openTagHtml() {
 std::string logger::getStampShort() {
   std::stringstream out;
   out << "[" << theGlobalVariables.processType << ", ";
+  // out << "||DEBUG: " << this->theFileName << "||";
   if (theWebServer.activeWorker != - 1) {
     out << "w: " << theWebServer.activeWorker << ", ";
   }

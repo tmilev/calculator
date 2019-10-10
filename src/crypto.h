@@ -232,11 +232,14 @@ public:
     int& outputNumLeadingZeroPairs
   );
   static std::string ConvertListUnsignedCharsToHex(
+    const List<unsigned char>& input
+  );
+  static std::string ConvertListUnsignedCharsToHexFormat(
     const List<unsigned char>& input,
     int byteWidthLineBreakZeroForNone,
     bool useHtml
   );
-  static bool ConvertListUnsignedCharsToHex(
+  static bool ConvertListUnsignedCharsToHexFormat(
     const List<unsigned char>& input,
     std::string& output,
     int byteWidthLineBreakZeroForNone,

@@ -13,6 +13,7 @@ public:
     static std::string label;
     static std::string offset;
     static std::string markers;
+    static std::string serialization;
   };
   class Marker {
   public:

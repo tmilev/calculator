@@ -1,5 +1,6 @@
 "use strict";
 const miscellaneous = require('./miscellaneous');
+const styles = require('./styles');
 
 function AbstractSyntaxOne() {
   /**@type {string} */
@@ -358,7 +359,8 @@ AnnotatedBytes.prototype.writeMessageToDOM = function(
   /**@type {HTMLElement} */
   outputComponent,
 ) {
-  this.bodyHex = input.body;
+  var serialization = input.serialization;
+  this.bodyHex = serialization.body;
   this.byteLength = this.bodyHex.length / 2;
   this.stack = [new StackElement(
     0,
@@ -369,7 +371,7 @@ AnnotatedBytes.prototype.writeMessageToDOM = function(
   )];
   this.nextByteOffset = 0;
   this.nextMarkerOffset = 0;
-  this.markers = input.markers;
+  this.markers = serialization.markers;
   this.top = this.stack[0];
   while (this.nextByteOffset < this.byteLength) {
     this.getStackTop();
@@ -490,8 +492,14 @@ function displaySSLRecord(
 ) {
   var outputElement = document.getElementById(outputId);
   var annotation = new AnnotatedBytes();
+  outputElement.className = styles.classNames.containers.hexStandardWidth;
   annotation.writeMessageToDOM(input, outputElement);
-  outputElement.innerHTML += "<br>" + JSON.stringify(input);
+  var extraAnnotation = "";
+  extraAnnotation += "<br>";
+  extraAnnotation += JSON.stringify(input.content);
+  var annotationAnnotation = document.createElement("SPAN");
+  annotationAnnotation.innerHTML += extraAnnotation;
+  outputElement.appendChild(annotationAnnotation);
 }
 
 module.exports =  {

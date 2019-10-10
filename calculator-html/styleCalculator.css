@@ -1481,6 +1481,7 @@ span.hexContainerStandard {
 
 div.hexContainerStandardWidth {
   display: inline-block;
+  word-break: break-all;
   max-height:1000px;
   max-width: 1000px;
   padding: 0px;

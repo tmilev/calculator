@@ -549,7 +549,7 @@ bool LargeIntegerUnsigned::Test::SerializationToHex(const LargeIntegerUnsigned& 
   }
   List<unsigned char> serialization;
   input.WriteBigEndianBytes(serialization, true);
-  resultByteSerializationHex = Crypto::ConvertListUnsignedCharsToHex(serialization, 0, false);
+  resultByteSerializationHex = Crypto::ConvertListUnsignedCharsToHex(serialization);
   if (resultByteSerializationHex != resultCryptoHex) {
     crash << "Byte serialization hex: " << resultByteSerializationHex
     << " not equal to crypto hex conversion: "
@@ -2226,7 +2226,7 @@ bool CalculatorFunctionsGeneral::innerTestASN1Decode(Calculator& theCommands, co
     List<unsigned char> recoded;
     result.WriteBytesUpdatePromisedLength(recoded);
     std::string originalHex = Crypto::ConvertStringToHex(data, 0, false);
-    std::string recodedHex = Crypto::ConvertListUnsignedCharsToHex(recoded, 0, false);
+    std::string recodedHex = Crypto::ConvertListUnsignedCharsToHex(recoded);
     out << StringRoutines::Differ::DifferenceHTMLStatic(originalHex, recodedHex);
     out << theDecoder.ToStringAnnotateBinary();
   }

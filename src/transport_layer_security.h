@@ -145,12 +145,31 @@ public:
   bool flagRenegotiate;
   bool flagRequestOnlineCertificateStatusProtocol;
   bool flagRequestSignedCertificateTimestamp;
+  bool flagIncomingRandomIncluded;
+  bool flagOutgoingRandomIncluded;
   static const int LengthRandomBytesInSSLHello = 32;
   List<unsigned char> renegotiationCharacters;
   List<CipherSuiteSpecification> declaredCiphers;
   List<SSLHelloExtension> extensions;
   List<unsigned char> sessionId;
   List<unsigned char> challenge;
+  class JSLabels {
+  public:
+    static std::string incomingRandom                   ;
+    static std::string outgoingRandom                   ;
+    static std::string version                          ;
+    static std::string length                           ;
+    static std::string cipherSpecLength                 ;
+    static std::string sessionId                        ;
+    static std::string cipherSuites                     ;
+    static std::string extensionsLength                 ;
+    static std::string compressionMethod                ;
+    static std::string extensions                       ;
+    static std::string renegotiationCharacters          ;
+    static std::string renegotiate                      ;
+    static std::string OCSPrequest                      ;
+    static std::string signedCertificateTimestampRequest;
+  };
   class tokens {
   public:
     static const unsigned char helloRequest = 0; //0x00
@@ -245,6 +264,11 @@ public:
     static const unsigned char applicationData = 23; //0x17
     static const unsigned char unknown = 0;
   };
+  class JSLabels {
+   public:
+    static std::string type;
+    static std::string content;
+  };
   class Test {
   public:
     static std::string sampleClientHelloHex;
@@ -267,6 +291,7 @@ public:
   std::string ToHtml();
   std::string ToString() const;
   std::string ToStringType() const;
+  JSData ToJSONSerialization();
   JSData ToJSON();
   void PrepareServerHello1Start(SSLRecord& clientHello);
   void PrepareServerHello2Certificate();

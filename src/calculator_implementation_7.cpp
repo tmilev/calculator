@@ -203,18 +203,17 @@ bool CalculatorFunctionsGeneral::innerTestTLSDecodeSSLRecord(
   if (!input.IsOfType(&inputString)) {
     return false;
   }
-  SSLRecord clientHello;
+  TransportLayerSecurityServer testServer;
   std::stringstream commentsOnFailure;
-  if (!Crypto::ConvertHexToListUnsignedChar(inputString, clientHello.incomingBytes, &commentsOnFailure)) {
+  if (!Crypto::ConvertHexToListUnsignedChar(inputString, testServer.lastReaD.incomingBytes, &commentsOnFailure)) {
     return theCommands << commentsOnFailure.str();
   }
-  TransportLayerSecurityServer testServer;
   testServer.initialize();
-  clientHello.owner = &testServer;
   bool success = testServer.DecodeSSLRecord(&commentsOnFailure);
   std::stringstream out;
   if (!success) {
-    out << "<b style = 'color:red'>Failed to decode the record. </b>";
+    out << "<b style = 'color:red'>Failed to decode the record.</b> "
+    << commentsOnFailure.str();
   }
   out << testServer.lastReaD.ToHtml();
 

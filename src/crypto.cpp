@@ -664,14 +664,18 @@ bool Crypto::ConvertListCharsToHex(
   return Crypto::ConvertStringToHex(inputString, output, byteWidthLineBreakZeroForNone, useHtml);
 }
 
-std::string Crypto::ConvertListUnsignedCharsToHex(
+std::string Crypto::ConvertListUnsignedCharsToHex(const List<unsigned char>& input) {
+  return Crypto::ConvertListUnsignedCharsToHexFormat(input, 0, false);
+}
+
+std::string Crypto::ConvertListUnsignedCharsToHexFormat(
   const List<unsigned char>& input, int byteWidthLineBreakZeroForNone, bool useHtml
 ) {
   std::string inputString(reinterpret_cast<char*>(input.TheObjects), static_cast<unsigned>(input.size));
   return Crypto::ConvertStringToHex(inputString, byteWidthLineBreakZeroForNone, useHtml);
 }
 
-bool Crypto::ConvertListUnsignedCharsToHex(
+bool Crypto::ConvertListUnsignedCharsToHexFormat(
   const List<unsigned char>& input, std::string& output, int byteWidthLineBreakZeroForNone, bool useHtml
 ) {
   std::string inputString(reinterpret_cast<const char*>(input.TheObjects), static_cast<unsigned>(input.size));

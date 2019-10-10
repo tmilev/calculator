@@ -799,7 +799,7 @@ bool TransportLayerSecurityServer::ReadBytesOnce(std::stringstream* commentsOnEr
     this->incomingBytes.SetSize(numBytesInBuffer);
   }
   logWorker << "Read bytes:\n"
-  << Crypto::ConvertListUnsignedCharsToHex(this->incomingBytes, 40, false) << logger::endL;
+  << Crypto::ConvertListUnsignedCharsToHexFormat(this->incomingBytes, 40, false) << logger::endL;
   return numBytesInBuffer > 0;
 }
 
@@ -818,6 +818,8 @@ void SSLContent::resetExceptOwner() {
   this->flagRenegotiate                            = false;
   this->flagRequestOnlineCertificateStatusProtocol = false;
   this->flagRequestSignedCertificateTimestamp      = false;
+  this->flagIncomingRandomIncluded = false;
+  this->flagOutgoingRandomIncluded = false;
   this->renegotiationCharacters.SetSize(0);
   this->declaredCiphers        .SetSize(0);
   this->extensions             .SetSize(0);
@@ -859,13 +861,30 @@ std::string SSLContent::ToStringVersion() const {
   return out.str();
 }
 
+
+std::string SSLContent::JSLabels::incomingRandom                    = "incomingRandom"                   ;
+std::string SSLContent::JSLabels::outgoingRandom                    = "outgoingRandom"                   ;
+std::string SSLContent::JSLabels::version                           = "version"                          ;
+std::string SSLContent::JSLabels::length                            = "length"                           ;
+std::string SSLContent::JSLabels::cipherSpecLength                  = "cipherSpecLength"                 ;
+std::string SSLContent::JSLabels::sessionId                         = "sessionId"                        ;
+std::string SSLContent::JSLabels::cipherSuites                      = "cipherSuites"                     ;
+std::string SSLContent::JSLabels::extensionsLength                  = "extensionsLength"                 ;
+std::string SSLContent::JSLabels::compressionMethod                 = "compressionMethod"                ;
+std::string SSLContent::JSLabels::extensions                        = "extensions"                       ;
+std::string SSLContent::JSLabels::renegotiationCharacters           = "renegotiationCharacters"          ;
+std::string SSLContent::JSLabels::renegotiate                       = "renegotiate"                      ;
+std::string SSLContent::JSLabels::OCSPrequest                       = "OCSPrequest"                      ;
+std::string SSLContent::JSLabels::signedCertificateTimestampRequest = "signedCertificateTimestampRequest";
+
+
 JSData SSLContent::ToJSON() const {
   MacroRegisterFunctionWithName("SSLHello::ToJSON");
   JSData result;
-  result["version"] = this->ToStringVersion();
-  result["length"] = this->length;
-  result["cipherSpecLength"] = this->cipherSpecLength;
-  result["sessionId"] = Crypto::ConvertListUnsignedCharsToHex(this->sessionId, 0, false);
+  result[SSLContent::JSLabels::version] = this->ToStringVersion();
+  result[SSLContent::JSLabels::length] = this->length;
+  result[SSLContent::JSLabels::cipherSpecLength] = this->cipherSpecLength;
+  result[SSLContent::JSLabels::sessionId] = Crypto::ConvertListUnsignedCharsToHex(this->sessionId);
   JSData ciphers;
   ciphers.theType = JSData::token::tokenObject;
   ciphers.theList.SetSize(this->declaredCiphers.size);
@@ -873,23 +892,23 @@ JSData SSLContent::ToJSON() const {
     CipherSuiteSpecification& current = this->declaredCiphers[i];
     ciphers[Crypto::ConvertIntToHex(current.id, 2)] = current.name;
   }
-  result["cipherSuites"] = ciphers;
-  result["extensionsLength"] = this->extensionsLength;
-  result["compressionMethod"] = Crypto::ConvertIntToHex(this->compressionMethod, 2);
+  result[SSLContent::JSLabels::cipherSuites     ] = ciphers;
+  result[SSLContent::JSLabels::extensionsLength ] = this->extensionsLength;
+  result[SSLContent::JSLabels::compressionMethod] = Crypto::ConvertIntToHex(this->compressionMethod, 2);
   JSData extensionsObject;
   extensionsObject.theType = JSData::token::tokenArray;
   for (int i = 0; i < this->extensions.size; i ++) {
     extensionsObject.theList.AddOnTop(this->extensions[i].ToJSON());
   }
-  result["extensions"] = extensionsObject;
+  result[SSLContent::JSLabels::extensions] = extensionsObject;
   if (this->renegotiationCharacters.size > 0) {
-    result["renegotiationCharacters"] = Crypto::ConvertListUnsignedCharsToHex(
-      this->renegotiationCharacters, 0, false
+    result[SSLContent::JSLabels::renegotiationCharacters] = Crypto::ConvertListUnsignedCharsToHex(
+      this->renegotiationCharacters
     );
   }
-  result["renegotiate"] = this->flagRenegotiate;
-  result["OCSPrequest"] = this->flagRequestOnlineCertificateStatusProtocol;
-  result["SignedCertificateTimestampRequest"] = this->flagRequestSignedCertificateTimestamp;
+  result[SSLContent::JSLabels::renegotiate                      ] = this->flagRenegotiate;
+  result[SSLContent::JSLabels::OCSPrequest                      ] = this->flagRequestOnlineCertificateStatusProtocol;
+  result[SSLContent::JSLabels::signedCertificateTimestampRequest] = this->flagRequestSignedCertificateTimestamp;
   return result;
 }
 
@@ -1213,6 +1232,7 @@ bool SSLContent::Decode(std::stringstream* commentsOnFailure) {
   )) {
     return false;
   }
+  this->flagIncomingRandomIncluded = true;
 
   if (!Serialization::ReadOneByteLengthFollowedByBytes(
     this->owner->incomingBytes,
@@ -1340,7 +1360,7 @@ JSData SSLHelloExtension::ToJSON() {
   std::stringstream hex;
   hex << std::hex << std::setfill('0') << std::setw(4) << this->theType;
   result["type"] = hex.str();
-  result["data"] = Crypto::ConvertListUnsignedCharsToHex(this->content, 0, false);
+  result["data"] = Crypto::ConvertListUnsignedCharsToHex(this->content);
   return result;
 }
 
@@ -1389,7 +1409,7 @@ bool SSLContent::ProcessExtensions(std::stringstream* commentsOnFailure) {
   for (int i = 0; i < this->extensions.size; i ++) {
     if (!this->extensions[i].ProcessMe(commentsOnFailure)) {
       logWorker << logger::blue << "DEBUG: Input: " << this->getStringHighlighter()
-      << Crypto::ConvertListUnsignedCharsToHex(this->owner->incomingBytes, 0, false) << logger::endL;
+      << Crypto::ConvertListUnsignedCharsToHex(this->owner->incomingBytes) << logger::endL;
       logWorker << "DEBUG: decoded so far: " << this->ToJSON().ToString(false, true, false, false) << logger::endL;
       return false;
     }
@@ -1620,7 +1640,7 @@ void Serialization::WriteTwoByteLengthFollowedByBytes(
 }
 
 std::string Serialization::ConvertListUnsignedCharsToHex(const List<unsigned char>& input) {
-  return Crypto::ConvertListUnsignedCharsToHex(input, 0, false);
+  return Crypto::ConvertListUnsignedCharsToHexFormat(input, 0, false);
 }
 
 void Serialization::WriteBytesAnnotated(
@@ -1669,6 +1689,7 @@ std::string Serialization::JSLabels::body = "body";
 std::string Serialization::JSLabels::length = "length";
 std::string Serialization::JSLabels::offset = "offset";
 std::string Serialization::JSLabels::label = "label";
+std::string Serialization::JSLabels::serialization = "serialization";
 
 std::string Serialization::Marker::ToString() const {
   std::stringstream out;
@@ -1696,7 +1717,20 @@ std::string SSLRecord::ToHtml() {
   return out.str();
 }
 
+std::string SSLRecord::JSLabels::type = "type";
+std::string SSLRecord::JSLabels::content = "content";
+
 JSData SSLRecord::ToJSON() {
+  MacroRegisterFunctionWithName("SSLRecord::ToJSON");
+  JSData result;
+  result[Serialization::JSLabels::serialization] = this->ToJSONSerialization();
+  result[SSLRecord::JSLabels::type] = this->ToStringType();
+  result[SSLRecord::JSLabels::content] = this->content.ToJSON();
+  return result;
+}
+
+JSData SSLRecord::ToJSONSerialization() {
+  MacroRegisterFunctionWithName("SSLRecord::ToJSONSerialization");
   JSData result;
   List<unsigned char> serialization;
   List<Serialization::Marker> markers;
@@ -1707,7 +1741,7 @@ JSData SSLRecord::ToJSON() {
     jsMarkers.theList.AddOnTop(markers[i].ToJSON());
   }
   result[Serialization::JSLabels::markers] = jsMarkers;
-  result[Serialization::JSLabels::body] = Crypto::ConvertListUnsignedCharsToHex(serialization, 0, false);
+  result[Serialization::JSLabels::body] = Crypto::ConvertListUnsignedCharsToHex(serialization);
   return result;
 }
 
@@ -1727,14 +1761,14 @@ std::string SSLRecord::ToStringType() const {
     break;
   }
   std::stringstream out;
-  out << "malformed_type_" << static_cast<int>(this->theType);
+  out << "unknown type: " << static_cast<int>(this->theType);
   return out.str();
 }
 
 std::string SSLRecord::ToString() const {
   JSData result;
   result["length"] = this->length;
-  result["incomingBytes"] = Crypto::ConvertListUnsignedCharsToHex(this->incomingBytes, 50, false);
+  result["incomingBytes"] = Crypto::ConvertListUnsignedCharsToHexFormat(this->incomingBytes, 50, false);
   result["type"] = this->ToStringType();
   if (this->theType == SSLRecord::tokens::handshake) {
     result["hello"] = this->content.ToJSON();
@@ -1972,7 +2006,7 @@ bool TransportLayerSecurityServer::Session::SetIncomingRandomBytes(
     }
     return false;
   }
-  std::cout << "DEBUG: Setting incoming random bytes ...\n" << Crypto::ConvertListUnsignedCharsToHex(input, 0, false) << "\n";
+  std::cout << "DEBUG: Setting incoming random bytes ...\n" << Crypto::ConvertListUnsignedCharsToHex(input) << "\n";
   this->incomingRandomBytes = input;
   return true;
 }

@@ -548,7 +548,7 @@ void ASNElement::ToJSON(JSData& output) const {
   AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::WriteLength(
     static_cast<unsigned>(this->lengthPromised), lengthEncoding, 0
   );
-  output[ASNElement::JSLabels::lengthEncoding] = Crypto::ConvertListUnsignedCharsToHex(lengthEncoding, 0, false);
+  output[ASNElement::JSLabels::lengthEncoding] = Crypto::ConvertListUnsignedCharsToHex(lengthEncoding);
   if (this->flagHeaderPadded) {
     output[ASNElement::JSLabels::lengthEncoding] = output[ASNElement::JSLabels::lengthEncoding].theString + "00";
   }
@@ -569,7 +569,7 @@ void ASNElement::ToJSON(JSData& output) const {
     output[ASNElement::JSLabels::children] = children;
   }
   if (this->ASNAtom.size > 0 || !this->isComposite()) {
-    output[ASNElement::JSLabels::body] = Crypto::ConvertListUnsignedCharsToHex(this->ASNAtom, 0, false);
+    output[ASNElement::JSLabels::body] = Crypto::ConvertListUnsignedCharsToHex(this->ASNAtom);
     if (
       this->tag == AbstractSyntaxNotationOneSubsetDecoder::tags::utf8String0x0c ||
       this->tag == AbstractSyntaxNotationOneSubsetDecoder::tags::printableString0x13 ||
@@ -582,7 +582,7 @@ void ASNElement::ToJSON(JSData& output) const {
       output[ASNElement::JSLabels::interpretation] = this->InterpretAsObjectIdentifierGetNameAndId();
     }
     if (this->tag == AbstractSyntaxNotationOneSubsetDecoder::tags::octetString0x04) {
-      output[ASNElement::JSLabels::interpretation] = Crypto::ConvertListUnsignedCharsToHex(this->ASNAtom, 0, false);
+      output[ASNElement::JSLabels::interpretation] = Crypto::ConvertListUnsignedCharsToHex(this->ASNAtom);
     }
     if (this->tag == AbstractSyntaxNotationOneSubsetDecoder::tags::boolean0x01) {
       if (this->ASNAtom.size > 0) {
@@ -892,13 +892,13 @@ std::string AbstractSyntaxNotationOneSubsetDecoder::ToStringAnnotateBinary() {
   std::stringstream out;
   out << "<script>";
   out << "window.calculator.crypto.abstractSyntaxNotationAnnotate(";
-  out << "\"" << Crypto::ConvertListUnsignedCharsToHex(*this->rawDatA, 0, false) << "\"";
+  out << "\"" << Crypto::ConvertListUnsignedCharsToHex(*this->rawDatA) << "\"";
   out << ", ";
   out << this->decodedData->ToString();
   out << ", ";
   List<unsigned char> idNonHexed;
   Crypto::computeSha256(*this->rawDatA, idNonHexed);
-  std::string theID = Crypto::ConvertListUnsignedCharsToHex(idNonHexed, 0, false);
+  std::string theID = Crypto::ConvertListUnsignedCharsToHex(idNonHexed);
   out << "\"" << theID << "\"";
   out << ");";
   out << "</script>";
@@ -1130,7 +1130,7 @@ int ASNObject::LoadField(
 
 std::string ASNObject::ToString() const {
   std::stringstream out;
-  out << "objectId: " << Crypto::ConvertListUnsignedCharsToHex(this->objectId.ASNAtom, 0, false)
+  out << "objectId: " << Crypto::ConvertListUnsignedCharsToHex(this->objectId.ASNAtom)
   << ", name: " << Crypto::ConvertStringToHex(this->name, 0, false);
   std::string content = this->content.ASNAtom.ToStringConcatenate();
   out << ", content: " << StringRoutines::ConvertStringToHexIfNonReadable(content, 0, false);
@@ -1143,7 +1143,7 @@ std::string ASNObject::ToStringAllRecognizedObjectIds() {
   for (int i = 0; i < ASNObject::ObjectIdsToNames().size(); i ++) {
     ASNObject& current = ASNObject::ObjectIdsToNames().theValues[i];
     const List<unsigned char>& currentId = ASNObject::ObjectIdsToNames().theKeys[i];
-    out << Crypto::ConvertListUnsignedCharsToHex(currentId, 50, false) << ": " << current.name << "\n";
+    out << Crypto::ConvertListUnsignedCharsToHexFormat(currentId, 50, false) << ": " << current.name << "\n";
   }
   return out.str();
 }
@@ -1446,10 +1446,10 @@ void X509Certificate::WriteBytesASN1(
 
 std::string X509Certificate::ToStringTestEncode() {
   std::stringstream out;
-  std::string sourceHex = Crypto::ConvertListUnsignedCharsToHex(this->sourceBinary, 0, false);
+  std::string sourceHex = Crypto::ConvertListUnsignedCharsToHex(this->sourceBinary);
   List<unsigned char> recoded;
   this->WriteBytesASN1(recoded, nullptr);
-  std::string recodedHex = Crypto::ConvertListUnsignedCharsToHex(recoded, 0, false);
+  std::string recodedHex = Crypto::ConvertListUnsignedCharsToHex(recoded);
   out << "Original, recoded binary source:<br>"
   << StringRoutines::Differ::DifferenceHTMLStatic(sourceHex, recodedHex);
   return out.str();
@@ -1458,7 +1458,7 @@ std::string X509Certificate::ToStringTestEncode() {
 std::string X509Certificate::ToHex() {
   List<unsigned char> bytes;
   this->WriteBytesASN1(bytes, nullptr);
-  return Crypto::ConvertListUnsignedCharsToHex(bytes, 0, false);
+  return Crypto::ConvertListUnsignedCharsToHex(bytes);
 }
 
 std::string X509Certificate::ToString() {

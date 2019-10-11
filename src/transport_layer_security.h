@@ -81,7 +81,9 @@ public:
   void SetSocketAddToStack(int theSocket);
   void RemoveLastSocket();
   bool HandShakeIamServer(int inputSocketID, std::stringstream*ccommentsOnFailure);
-  bool InspectCertificates(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
+  bool InspectCertificates(
+    std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
+  );
   static bool initSSLKeyFiles();
   static bool initSSLKeyFilesCreateOnDemand();
 };
@@ -141,7 +143,6 @@ public:
   int challengeLength;
   int extensionsLength;
   int compressionMethod;
-  int chosenCipher;
   bool flagRenegotiate;
   bool flagRequestOnlineCertificateStatusProtocol;
   bool flagRequestSignedCertificateTimestamp;
@@ -268,6 +269,7 @@ public:
    public:
     static std::string type;
     static std::string content;
+    static std::string session;
   };
   class Test {
   public:
@@ -324,6 +326,11 @@ public:
   };
   NetworkSpoofer spoofer;
   class Session {
+    class JSLabels {
+    public:
+      static std::string chosenCipher;
+      static std::string chosenCipherName;
+    };
     public:
     int socketId;
     TransportLayerSecurityServer* owner;
@@ -331,6 +338,9 @@ public:
     ListZeroAfterUse<unsigned char> myRandomBytes;
     LargeIntegerUnsigned ephemerealPrivateKey;
     ElementEllipticCurve<ElementZmodP> ephemerealPublicKey;
+    int chosenCipher;
+    std::string ToStringChosenCipher();
+    JSData ToJSON();
     Session();
     void initialize();
     bool SetIncomingRandomBytes(

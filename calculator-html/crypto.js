@@ -499,6 +499,8 @@ function displaySSLRecord(
   extraAnnotation += `<br>Session id: ${content.sessionId}`;
   extraAnnotation += `<br>Cipher spec length: ${content.cipherSpecLength}`;
   extraAnnotation += `<br>Renegotiation characters: ${content.renegotiationCharacters}`;
+  var session = input.session; 
+  extraAnnotation += `<br>Chosen cipher: ${session.chosenCipher}, name: ${session.chosenCipherName}`;
   var flagNames = ["renegotiate", "OCSPrequest", "signedCertificateTimestampRequest"];
   for (var counter = 0; counter < flagNames.length; counter ++) {
     var flagName = flagNames[counter];

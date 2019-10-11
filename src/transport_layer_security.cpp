@@ -814,7 +814,6 @@ void SSLContent::resetExceptOwner() {
   this->cipherSpecLength  = 0;
   this->challengeLength   = 0;
   this->compressionMethod = 0;
-  this->chosenCipher      = 0;
   this->flagRenegotiate                            = false;
   this->flagRequestOnlineCertificateStatusProtocol = false;
   this->flagRequestSignedCertificateTimestamp      = false;
@@ -1711,6 +1710,7 @@ std::string SSLRecord::ToHtml() {
 
 std::string SSLRecord::JSLabels::type = "type";
 std::string SSLRecord::JSLabels::content = "content";
+std::string SSLRecord::JSLabels::session = "session";
 
 JSData SSLRecord::ToJSON() {
   MacroRegisterFunctionWithName("SSLRecord::ToJSON");
@@ -1718,6 +1718,25 @@ JSData SSLRecord::ToJSON() {
   result[Serialization::JSLabels::serialization] = this->ToJSONSerialization();
   result[SSLRecord::JSLabels::type] = this->ToStringType();
   result[SSLRecord::JSLabels::content] = this->content.ToJSON();
+  result[SSLRecord::JSLabels::session] = this->owner->session.ToJSON();
+  return result;
+}
+
+std::string TransportLayerSecurityServer::Session::JSLabels::chosenCipher = "chosenCipher";
+std::string TransportLayerSecurityServer::Session::JSLabels::chosenCipherName = "chosenCipherName";
+
+std::string TransportLayerSecurityServer::Session::ToStringChosenCipher() {
+  if (this->chosenCipher == 0) {
+    return "unknown";
+  }
+  return this->owner->cipherSuiteNames.GetValueConstCrashIfNotPresent(this->chosenCipher);
+}
+
+JSData TransportLayerSecurityServer::Session::ToJSON() {
+  JSData result;
+  result.theType = JSData::token::tokenArray;
+  result[TransportLayerSecurityServer::Session::JSLabels::chosenCipher] = Crypto::ConvertIntToHex(this->chosenCipher, 2);
+  result[TransportLayerSecurityServer::Session::JSLabels::chosenCipherName] = this->ToStringChosenCipher();
   return result;
 }
 
@@ -1924,13 +1943,13 @@ void SSLContent::PrepareServerHello1Start(SSLContent& clientHello) {
     }
     bestIndex = candidateIndex;
   }
-  logWorker << logger::cyan << "DEBUG: suites: " << suites.size() << logger::endL;
-  logWorker << logger::cyan << "About to add supported cipher. BestIndex = " << bestIndex << logger::endL;
-  this->chosenCipher = 0;
+  // logWorker << logger::cyan << "DEBUG: suites: " << suites.size() << logger::endL;
+  // logWorker << logger::cyan << "About to add supported cipher. BestIndex = " << bestIndex << logger::endL;
+  this->owner->owner->session.chosenCipher = 0;
   if (bestIndex < suites.size()) {
-    this->chosenCipher = suites.theKeys[bestIndex];
-    logWorker << "DEBUG: Chose cipher: " << suites.theValues[bestIndex].ToString() << logger::endL;
-    //this->declaredCiphers.AddOnTop(suites.theValues[bestIndex]);
+    this->owner->owner->session.chosenCipher = suites.theKeys[bestIndex];
+    // logWorker << "DEBUG: Chose cipher: " << suites.theValues[bestIndex].ToString() << logger::endL;
+    // this->declaredCiphers.AddOnTop(suites.theValues[bestIndex]);
   }
 }
 
@@ -1987,6 +2006,7 @@ bool TransportLayerSecurityServer::ReplyToClientHello(int inputSocketID, std::st
 TransportLayerSecurityServer::Session::Session() {
   this->socketId = - 1;
   this->owner = nullptr;
+  this->chosenCipher = 0;
 }
 
 bool TransportLayerSecurityServer::Session::SetIncomingRandomBytes(
@@ -2005,6 +2025,7 @@ bool TransportLayerSecurityServer::Session::SetIncomingRandomBytes(
 void TransportLayerSecurityServer::Session::initialize() {
   this->socketId = - 1;
   this->incomingRandomBytes.SetSize(0);
+  this->chosenCipher = 0;
   Crypto::GetRandomBytesSecure(this->myRandomBytes, SSLContent::LengthRandomBytesInSSLHello);
 }
 

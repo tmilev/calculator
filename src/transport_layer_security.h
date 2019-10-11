@@ -303,6 +303,11 @@ public:
 
 class TransportLayerSecurityServer {
 public:
+  class JSLabels {
+  public:
+    static std::string spoofer;
+    static std::string session;
+  };
   class NetworkSpoofer {
   public:
     class JSLabels {
@@ -330,12 +335,14 @@ public:
     public:
       static std::string chosenCipher;
       static std::string chosenCipherName;
+      static std::string incomingRandomBytes;
+      static std::string myRandomBytes;
     };
     public:
     int socketId;
     TransportLayerSecurityServer* owner;
     List<unsigned char> incomingRandomBytes;
-    ListZeroAfterUse<unsigned char> myRandomBytes;
+    List<unsigned char> myRandomBytes;
     LargeIntegerUnsigned ephemerealPrivateKey;
     ElementEllipticCurve<ElementZmodP> ephemerealPublicKey;
     int chosenCipher;
@@ -382,6 +389,7 @@ public:
   bool ReadBytesDecodeOnce(std::stringstream* commentsOnFailure);
   bool WriteBytesOnce(List<unsigned char>& input, std::stringstream* commentsOnFailure);
   bool WriteSSLRecords(List<SSLRecord>& input, std::stringstream* commentsOnFailure);
+  JSData ToJSON();
 };
 
 class TransportLayerSecurity {

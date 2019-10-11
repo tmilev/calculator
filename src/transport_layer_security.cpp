@@ -727,9 +727,20 @@ bool TransportLayerSecurityServer::WriteBytesOnce(
 
 std::string TransportLayerSecurityServer::NetworkSpoofer::JSLabels::inputMessages = "inputMessages";
 std::string TransportLayerSecurityServer::NetworkSpoofer::JSLabels::outputMessages = "outputMessages";
-
 std::string TransportLayerSecurityServer::NetworkSpoofer::JSLabels::errorsOnInput = "errorsOnInput";
 std::string TransportLayerSecurityServer::NetworkSpoofer::JSLabels::errorsOnOutput = "errorsOnOutput";
+
+std::string TransportLayerSecurityServer::JSLabels::spoofer = "spoofer";
+std::string TransportLayerSecurityServer::JSLabels::session = "session";
+
+JSData TransportLayerSecurityServer::ToJSON() {
+  JSData result;
+  if (this->spoofer.flagDoSpoof) {
+    result[TransportLayerSecurityServer::JSLabels::spoofer] = this->spoofer.ToJSON();
+  }
+  result[TransportLayerSecurityServer::JSLabels::session] = this->session.ToJSON();
+  return result;
+}
 
 JSData TransportLayerSecurityServer::NetworkSpoofer::ToJSON() {
   JSData result, inputMessage, outputMessages, inErrors, outErrors;
@@ -1073,12 +1084,12 @@ void SSLContent::WriteBytesHandshakeClientHello(
 
 List<unsigned char>& SSLContent::GetMyRandomBytes() const {
   if (
-    this->owner->owner->session.myRandomBytes.data.size !=
+    this->owner->owner->session.myRandomBytes.size !=
     this->LengthRandomBytesInSSLHello
   ) {
     crash << "Writing non-initialized SSL hello forbidden. " << crash;
   }
-  return this->owner->owner->session.myRandomBytes.data;
+  return this->owner->owner->session.myRandomBytes;
 }
 
 void SSLContent::WriteBytesIncomingRandomAndSessionId(
@@ -1724,6 +1735,8 @@ JSData SSLRecord::ToJSON() {
 
 std::string TransportLayerSecurityServer::Session::JSLabels::chosenCipher = "chosenCipher";
 std::string TransportLayerSecurityServer::Session::JSLabels::chosenCipherName = "chosenCipherName";
+std::string TransportLayerSecurityServer::Session::JSLabels::incomingRandomBytes = "incomingRandomBytes";
+std::string TransportLayerSecurityServer::Session::JSLabels::myRandomBytes = "myRandomBytes";
 
 std::string TransportLayerSecurityServer::Session::ToStringChosenCipher() {
   if (this->chosenCipher == 0) {
@@ -1737,6 +1750,8 @@ JSData TransportLayerSecurityServer::Session::ToJSON() {
   result.theType = JSData::token::tokenArray;
   result[TransportLayerSecurityServer::Session::JSLabels::chosenCipher] = Crypto::ConvertIntToHex(this->chosenCipher, 2);
   result[TransportLayerSecurityServer::Session::JSLabels::chosenCipherName] = this->ToStringChosenCipher();
+  result[TransportLayerSecurityServer::Session::JSLabels::incomingRandomBytes] = Crypto::ConvertListUnsignedCharsToHex(this->incomingRandomBytes);
+  result[TransportLayerSecurityServer::Session::JSLabels::myRandomBytes] = Crypto::ConvertListUnsignedCharsToHex(this->myRandomBytes);
   return result;
 }
 
@@ -1919,7 +1934,7 @@ void SSLContent::PrepareServerHello1Start(SSLContent& clientHello) {
   this->theType = SSLContent::tokens::serverHello;
   this->compressionMethod = clientHello.compressionMethod;
   Crypto::computeSha256(
-    this->owner->owner->session.myRandomBytes.data, this->sessionId
+    this->owner->owner->session.myRandomBytes, this->sessionId
   );
   MapList<int, CipherSuiteSpecification, MathRoutines::IntUnsignIdentity>& suites =
   this->owner->owner->supportedCiphers;
@@ -2026,7 +2041,9 @@ void TransportLayerSecurityServer::Session::initialize() {
   this->socketId = - 1;
   this->incomingRandomBytes.SetSize(0);
   this->chosenCipher = 0;
-  Crypto::GetRandomBytesSecure(this->myRandomBytes, SSLContent::LengthRandomBytesInSSLHello);
+  Crypto::GetRandomBytesSecureOutputMayLeaveTraceInFreedMemory(
+    this->myRandomBytes, SSLContent::LengthRandomBytesInSSLHello
+  );
 }
 
 bool TransportLayerSecurityServer::HandShakeIamServer(int inputSocketID, std::stringstream* commentsOnFailure) {

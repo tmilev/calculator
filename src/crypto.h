@@ -349,6 +349,7 @@ public:
     std::stringstream* commentsOnFailure
   );
   static void GetRandomBytesSecure(ListZeroAfterUse<unsigned char>& output, int numBytes);
+  static void GetRandomBytesSecureOutputMayLeaveTraceInFreedMemory(List<unsigned char>& output, int numBytes);
   static void GetRandomLargeIntegerSecure(LargeIntegerUnsigned& output, int numBytes);
 };
 

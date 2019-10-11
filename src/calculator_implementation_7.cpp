@@ -251,7 +251,7 @@ bool CalculatorFunctionsGeneral::innerTestTLSMessageSequence(
   out << "<div id = '" << spanId.str() << "'></div>";
   out << "<script>"
   << "window.calculator.crypto.displayTransportLayerSecurity('"
-  << spanId.str() << "', " << spoofServer.spoofer.ToJSON() << ");"
+  << spanId.str() << "', " << spoofServer.ToJSON() << ");"
   << "</script>";
   return output.AssignValue(out.str(), theCommands);
 }

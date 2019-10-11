@@ -400,43 +400,44 @@ TransportLayerSecurityServer.prototype.displayMessages = function(
 ) {
   var outputElement = document.getElementById(outputId);
   outputElement.className = "hexContainerStandardWidth";
+  writeSessionToDOM(input.session, outputElement);
   var inputHeader = document.createElement("span");
-  inputHeader.innerHTML = "Input:";
+  inputHeader.innerHTML = "<br>";
   outputElement.appendChild(inputHeader);
-  for (var i = 0; i < input.inputMessages.length; i ++) {
+  for (var i = 0; i < input.spoofer.inputMessages.length; i ++) {
     var currentStringHeader = document.createElement("SPAN");
     currentStringHeader.innerHTML = `<br><b>Input ${i + 1}:</b><br>`;
     outputElement.appendChild(currentStringHeader);
     var nextInput = document.createElement("span");
     nextInput.className = "hexContainerStandard";
     var annotation = new AnnotatedBytes();
-    annotation.writeMessageToDOM(input.inputMessages[i], nextInput);
+    annotation.writeMessageToDOM(input.spoofer.inputMessages[i], nextInput);
     outputElement.appendChild(nextInput);
   }
-  if (input.errorsOnInput.length > 0) {
+  if (input.spoofer.errorsOnInput.length > 0) {
     var inputErrors = document.createElement("span");
     var errorHTML = "<br><b style = 'color:red'>Input errors:</b>";
-    for (var i = 0; i < input.errorsOnInput.length; i ++) {
-      errorHTML += "<br>" + input.errorsOnInput[i];
+    for (var i = 0; i < input.spoofer.errorsOnInput.length; i ++) {
+      errorHTML += "<br>" + input.spoofer.errorsOnInput[i];
     }
     inputErrors.innerHTML = errorHTML;
     outputElement.appendChild(inputErrors);
   }
   var outputHeader = document.createElement("span");
-  outputHeader.innerHTML = "<br>Output:<br>";
+  outputHeader.innerHTML = "<br>";
   outputElement.appendChild(outputHeader);
-  for (var i = 0; i < input.outputMessages.length; i ++) {
+  for (var i = 0; i < input.spoofer.outputMessages.length; i ++) {
     var outputHeader = document.createElement("span");
     outputHeader.innerHTML = `<br><b>Output ${i+1}:</b><br>`;
     outputElement.appendChild(outputHeader);
     var currentOutputContainer = document.createElement("span");
     currentOutputContainer.className = "hexContainerStandard";
-    for (var j = 0; j < input.outputMessages[i].length; j ++) {
+    for (var j = 0; j < input.spoofer.outputMessages[i].length; j ++) {
       var nextOutput = document.createElement("span");
       var annotation = new AnnotatedBytes();
-      annotation.writeMessageToDOM(input.outputMessages[i][j], nextOutput);
+      annotation.writeMessageToDOM(input.spoofer.outputMessages[i][j], nextOutput);
       currentOutputContainer.appendChild(nextOutput);
-      if (j < input.outputMessages[i].length - 1) {
+      if (j < input.spoofer.outputMessages[i].length - 1) {
         var separator = document.createElement("span");
         separator.innerHTML = "<span style = 'background-color:red;display:inline-block;'>&nbsp;</span>";
         currentOutputContainer.appendChild(separator);
@@ -444,24 +445,25 @@ TransportLayerSecurityServer.prototype.displayMessages = function(
     }
     outputElement.appendChild(currentOutputContainer);
   }
-  if (input.errorsOnOutput.length > 0) {
+  if (input.spoofer.errorsOnOutput.length > 0) {
     var outputErrors = document.createElement("span");
     var errorHTML = "Output errors:<br>";
-    for (var i = 0; i < input.errorsOnOutput.length; i ++) {
-      errorHTML += input.errorsOnOutput[i] + "<br>";
+    for (var i = 0; i < input.spoofer.errorsOnOutput.length; i ++) {
+      errorHTML += input.spoofer.errorsOnOutput[i] + "<br>";
     }
     outputErrors.innerHTML = errorHTML;
     outputElement.appendChild(outputErrors);
   }
-  if (input.errorsOnOutput.length > 0) {
+  if (input.spoofer.errorsOnOutput.length > 0) {
     var inputErrors = document.createElement("span");
     var errorHTML = "<br><b style = 'color:red'>Output errors:</b><br>";
-    for (var i = 0; i < input.errorsOnOutput.length; i ++) {
-      errorHTML += "<br>" + input.errorsOnOutput[i];
+    for (var i = 0; i < input.spoofer.errorsOnOutput.length; i ++) {
+      errorHTML += "<br>" + input.spoofer.errorsOnOutput[i];
     }
     inputErrors.innerHTML = errorHTML;
     outputElement.appendChild(inputErrors);
   }
+  var sessionStatusElement = document.createElement("SPAN");
   if (outputElement.style.height < 800) {
     outputElement.style.height = 800;
   }
@@ -485,6 +487,20 @@ function displayTransportLayerSecurity(
   theServer.displayMessages(outputId, input);
 }
 
+function writeSessionToDOM( 
+  session,
+  /**@type {HTMLElement} */
+  outputElement,
+) {
+  var htmlContent = "";
+  htmlContent += `<br>Chosen cipher: ${session.chosenCipher}, name: ${session.chosenCipherName}`;
+  htmlContent += `<br>Incoming random bytes: ${session.incomingRandomBytes}`;
+  htmlContent += `<br>My random bytes: ${session.myRandomBytes}`;
+  var newChild = document.createElement("SPAN");
+  newChild.innerHTML = htmlContent;
+  outputElement.appendChild(newChild);
+}
+
 function displaySSLRecord(
   /**@type {string} */
   outputId, 
@@ -496,18 +512,17 @@ function displaySSLRecord(
   annotation.writeMessageToDOM(input, outputElement);
   var extraAnnotation = "";
   var content = input.content;
-  extraAnnotation += `<br>Session id: ${content.sessionId}`;
-  extraAnnotation += `<br>Cipher spec length: ${content.cipherSpecLength}`;
-  extraAnnotation += `<br>Renegotiation characters: ${content.renegotiationCharacters}`;
-  var session = input.session; 
-  extraAnnotation += `<br>Chosen cipher: ${session.chosenCipher}, name: ${session.chosenCipherName}`;
+  writeSessionToDOM(input.session, outputElement);
   var flagNames = ["renegotiate", "OCSPrequest", "signedCertificateTimestampRequest"];
   for (var counter = 0; counter < flagNames.length; counter ++) {
     var flagName = flagNames[counter];
     if (content[flagName] !== undefined) {
-      extraAnnotation += `<br>${flagName}: ${content[flagName]}`;
+      htmlContent += `<br>${flagName}: ${content[flagName]}`;
     }
   }
+  extraAnnotation += `<br>Session id: ${content.sessionId}`;
+  extraAnnotation += `<br>Cipher spec length: ${content.cipherSpecLength}`;
+  extraAnnotation += `<br>Renegotiation characters: ${content.renegotiationCharacters}`;
   extraAnnotation += `<table class = '${styles.classNames.table.borderStandard}'><tr><th>id</th><th>interpretation</th></tr>`;
   for (var label in content.cipherSuites) {
     extraAnnotation += `<tr>`;

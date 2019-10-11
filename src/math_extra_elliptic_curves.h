@@ -36,6 +36,8 @@ public:
   bool operator==(const ElementEllipticCurve& other) const;
   bool operator*=(const ElementEllipticCurve& other);
   std::string ToString(FormatExpressions* theFormat = nullptr) const;
-  ElementEllipticCurve();
+  ElementEllipticCurve() {
+    this->flagInfinity = true;
+  }
 };
 #endif

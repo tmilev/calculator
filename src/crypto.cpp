@@ -17,7 +17,13 @@ extern ProjectInformationInstance projectInfoCryptoFile1;
 ProjectInformationInstance projectInfoCryptoFile1(__FILE__, "SHA- 1 and base64 implementation.");
 
 void Crypto::GetRandomBytesSecure(ListZeroAfterUse<unsigned char>& output, int numBytes) {
-  output.data.SetSize(numBytes);
+  return Crypto::GetRandomBytesSecureOutputMayLeaveTraceInFreedMemory(output.data, numBytes);
+}
+
+void Crypto::GetRandomBytesSecureOutputMayLeaveTraceInFreedMemory(
+  List<unsigned char>& output, int numBytes
+) {
+  output.SetSize(numBytes);
   if (numBytes > 256) {
     crash << "Getting more than 256 random bytes can block "
     << "(google getrandom(2)) and so we do not allow it here."
@@ -26,11 +32,11 @@ void Crypto::GetRandomBytesSecure(ListZeroAfterUse<unsigned char>& output, int n
   // Must not block or return fewer than requested bytes in Linux according to the
   // documentation of getrandom.
   int generatedBytes = static_cast<int>(
-    syscall(SYS_getrandom, output.data.TheObjects, static_cast<unsigned>(output.data.size), GRND_NONBLOCK)
+    syscall(SYS_getrandom, output.TheObjects, static_cast<unsigned>(output.size), GRND_NONBLOCK)
     // Does not compile on older linux systems:
     // getrandom(output.TheObjects, static_cast<unsigned>(output.size), 0)
   );
-  if (generatedBytes != output.data.size) {
+  if (generatedBytes != output.size) {
     crash << "Failed to get the necessary number of random bytes. " << crash;
   }
 }

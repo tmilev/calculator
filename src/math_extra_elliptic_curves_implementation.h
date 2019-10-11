@@ -86,11 +86,6 @@ bool ElementEllipticCurve<coefficient>::operator*=(const ElementEllipticCurve& o
 }
 
 template <typename coefficient>
-ElementEllipticCurve<coefficient>::ElementEllipticCurve() {
-  this->flagInfinity = true;
-}
-
-template <typename coefficient>
 std::string ElementEllipticCurve<coefficient>::ToString(FormatExpressions* theFormat) const {
   std::stringstream out;
   Polynomial<Rational> leftHandSide, rightHandSide;

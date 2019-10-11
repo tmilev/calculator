@@ -106,6 +106,9 @@ public:
   unsigned int HashFunction() const;
 };
 
+// At the time of writing, a list of extensions **should** be available here:
+// https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml
+// Please DO update the documentation if that stops being the case.
 class SSLHelloExtension {
 public:
   SSLContent* owner;
@@ -133,6 +136,9 @@ public:
 // TLS Protocol Version 1.0:
 // RFC2246
 // https://tools.ietf.org/search/rfc2246
+// TLS Protocol Version 2.0:
+// RFC5246
+// https://tools.ietf.org/search/rfc5246
 class SSLContent {
 public:
   SSLRecord* owner;
@@ -144,8 +150,6 @@ public:
   int extensionsLength;
   int compressionMethod;
   bool flagRenegotiate;
-  bool flagRequestOnlineCertificateStatusProtocol;
-  bool flagRequestSignedCertificateTimestamp;
   bool flagIncomingRandomIncluded;
   bool flagOutgoingRandomIncluded;
   static const int LengthRandomBytesInSSLHello = 32;
@@ -210,7 +214,7 @@ public:
   // https://commandlinefanatic.com/cgi-bin/showarticle.cgi?article=art061
   void PrepareServerHello2Certificate();
   // https://commandlinefanatic.com/cgi-bin/showarticle.cgi?article=art060
-  void PrepareServerHello3ServerKeyExchange();
+  bool PrepareServerHello3ServerKeyExchange(std::stringstream* commentsOnError);
 
   JSData ToJSON() const;
 
@@ -297,7 +301,7 @@ public:
   JSData ToJSON();
   void PrepareServerHello1Start(SSLRecord& clientHello);
   void PrepareServerHello2Certificate();
-  void PrepareServerHello3SecretExchange();
+  bool PrepareServerHello3SecretExchange(std::stringstream* commentsOnFailure);
   void WriteBytes(List<unsigned char>& output, List<Serialization::Marker>* annotations) const;
 };
 
@@ -337,9 +341,13 @@ public:
       static std::string chosenCipherName;
       static std::string incomingRandomBytes;
       static std::string myRandomBytes;
+      static std::string OCSPrequest;
+      static std::string signedCertificateTimestampRequest;
     };
     public:
     int socketId;
+    bool flagRequestOnlineCertificateStatusProtocol;
+    bool flagRequestSignedCertificateTimestamp;
     TransportLayerSecurityServer* owner;
     List<unsigned char> incomingRandomBytes;
     List<unsigned char> myRandomBytes;
@@ -354,7 +362,7 @@ public:
       List<unsigned char>& input, std::stringstream* commentsOnFailure
     );
   };
-  Session session;
+  TransportLayerSecurityServer::Session session;
   X509Certificate certificate;
   PrivateKeyRSA privateKey;
   // Ordered by preference (lower index = more preferred):

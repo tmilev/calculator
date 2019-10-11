@@ -825,9 +825,7 @@ void SSLContent::resetExceptOwner() {
   this->cipherSpecLength  = 0;
   this->challengeLength   = 0;
   this->compressionMethod = 0;
-  this->flagRenegotiate                            = false;
-  this->flagRequestOnlineCertificateStatusProtocol = false;
-  this->flagRequestSignedCertificateTimestamp      = false;
+  this->flagRenegotiate            = false;
   this->flagIncomingRandomIncluded = false;
   this->flagOutgoingRandomIncluded = false;
   this->renegotiationCharacters.SetSize(0);
@@ -917,8 +915,6 @@ JSData SSLContent::ToJSON() const {
     );
   }
   result[SSLContent::JSLabels::renegotiate                      ] = this->flagRenegotiate;
-  result[SSLContent::JSLabels::OCSPrequest                      ] = this->flagRequestOnlineCertificateStatusProtocol;
-  result[SSLContent::JSLabels::signedCertificateTimestampRequest] = this->flagRequestSignedCertificateTimestamp;
   return result;
 }
 
@@ -1395,11 +1391,11 @@ bool SSLHelloExtension::ProcessMe(std::stringstream* commentsOnError) {
     return true;
   }
   if (this->theType == SSLContent::tokensExtension::requestOnlineCertificateStatus) {
-    this->owner->flagRequestOnlineCertificateStatusProtocol = true;
+    this->owner->owner->owner->session.flagRequestOnlineCertificateStatusProtocol = true;
     return true;
   }
   if (this->theType == SSLContent::tokensExtension::requestSignedCertificateTimestamp) {
-    this->owner->flagRequestSignedCertificateTimestamp = true;
+    this->owner->owner->owner->session.flagRequestSignedCertificateTimestamp = true;
     return true;
   }
   return true;
@@ -1733,10 +1729,12 @@ JSData SSLRecord::ToJSON() {
   return result;
 }
 
-std::string TransportLayerSecurityServer::Session::JSLabels::chosenCipher = "chosenCipher";
-std::string TransportLayerSecurityServer::Session::JSLabels::chosenCipherName = "chosenCipherName";
-std::string TransportLayerSecurityServer::Session::JSLabels::incomingRandomBytes = "incomingRandomBytes";
-std::string TransportLayerSecurityServer::Session::JSLabels::myRandomBytes = "myRandomBytes";
+std::string TransportLayerSecurityServer::Session::JSLabels::chosenCipher                      = "chosenCipher";
+std::string TransportLayerSecurityServer::Session::JSLabels::chosenCipherName                  = "chosenCipherName";
+std::string TransportLayerSecurityServer::Session::JSLabels::incomingRandomBytes               = "incomingRandomBytes";
+std::string TransportLayerSecurityServer::Session::JSLabels::myRandomBytes                     = "myRandomBytes";
+std::string TransportLayerSecurityServer::Session::JSLabels::OCSPrequest                       = "OnlineCertificateStatusProtocol";
+std::string TransportLayerSecurityServer::Session::JSLabels::signedCertificateTimestampRequest = "RequestSignedCertificateTimestamp";
 
 std::string TransportLayerSecurityServer::Session::ToStringChosenCipher() {
   if (this->chosenCipher == 0) {
@@ -1748,10 +1746,12 @@ std::string TransportLayerSecurityServer::Session::ToStringChosenCipher() {
 JSData TransportLayerSecurityServer::Session::ToJSON() {
   JSData result;
   result.theType = JSData::token::tokenArray;
-  result[TransportLayerSecurityServer::Session::JSLabels::chosenCipher] = Crypto::ConvertIntToHex(this->chosenCipher, 2);
-  result[TransportLayerSecurityServer::Session::JSLabels::chosenCipherName] = this->ToStringChosenCipher();
-  result[TransportLayerSecurityServer::Session::JSLabels::incomingRandomBytes] = Crypto::ConvertListUnsignedCharsToHex(this->incomingRandomBytes);
-  result[TransportLayerSecurityServer::Session::JSLabels::myRandomBytes] = Crypto::ConvertListUnsignedCharsToHex(this->myRandomBytes);
+  result[TransportLayerSecurityServer::Session::JSLabels::chosenCipher                     ] = Crypto::ConvertIntToHex(this->chosenCipher, 2);
+  result[TransportLayerSecurityServer::Session::JSLabels::chosenCipherName                 ] = this->ToStringChosenCipher();
+  result[TransportLayerSecurityServer::Session::JSLabels::incomingRandomBytes              ] = Crypto::ConvertListUnsignedCharsToHex(this->incomingRandomBytes);
+  result[TransportLayerSecurityServer::Session::JSLabels::myRandomBytes                    ] = Crypto::ConvertListUnsignedCharsToHex(this->myRandomBytes);
+  result[TransportLayerSecurityServer::Session::JSLabels::OCSPrequest                      ] = this->flagRequestOnlineCertificateStatusProtocol;
+  result[TransportLayerSecurityServer::Session::JSLabels::signedCertificateTimestampRequest] = this->flagRequestSignedCertificateTimestamp;
   return result;
 }
 
@@ -1921,10 +1921,19 @@ void SSLContent::PrepareServerHello2Certificate() {
 }
 
 // https://commandlinefanatic.com/cgi-bin/showarticle.cgi?article=art060
-void SSLContent::PrepareServerHello3ServerKeyExchange() {
+bool SSLContent::PrepareServerHello3ServerKeyExchange(std::stringstream* commentsOnError) {
   MacroRegisterFunctionWithName("SSLContent::PrepareServerHello3SecretNegotiation");
   this->theType = SSLContent::tokens::serverKeyExchange;
-
+  if (this->owner->owner->session.ephemerealPrivateKey != 0) {
+    if (commentsOnError != nullptr) {
+      *commentsOnError << "Private key already generated for this session. "
+      << "No further modifications allowed in this session. ";
+    }
+    return false;
+  }
+  Crypto::GetRandomLargeIntegerSecure(this->owner->owner->session.ephemerealPrivateKey, 32);
+  // this->owner->owner->session.ephemerealPublicKey.
+  return true;
 }
 
 void SSLContent::PrepareServerHello1Start(SSLContent& clientHello) {
@@ -1991,12 +2000,13 @@ void SSLRecord::PrepareServerHello2Certificate() {
   this->owner->outgoingRecords.AddOnTop(*this);
 }
 
-void SSLRecord::PrepareServerHello3SecretExchange() {
+bool SSLRecord::PrepareServerHello3SecretExchange(std::stringstream* commentsOnFailure) {
   this->resetExceptOwner();
   this->theType = SSLRecord::tokens::handshake;
   this->version = 3 * 256 + 1;
-  this->content.PrepareServerHello3ServerKeyExchange();
+  bool success = this->content.PrepareServerHello3ServerKeyExchange(commentsOnFailure);
   this->owner->outgoingRecords.AddOnTop(*this);
+  return success;
 }
 
 bool TransportLayerSecurityServer::ReplyToClientHello(int inputSocketID, std::stringstream* commentsOnFailure) {
@@ -2005,7 +2015,12 @@ bool TransportLayerSecurityServer::ReplyToClientHello(int inputSocketID, std::st
   this->outgoingRecords.SetSize(0);
   this->serverHelloStart.PrepareServerHello1Start(this->lastReaD);
   this->serverHelloCertificate.PrepareServerHello2Certificate();
-  this->serverHelloKeyExchange.PrepareServerHello3SecretExchange();
+  if (!this->serverHelloKeyExchange.PrepareServerHello3SecretExchange(commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to prepare server secret exchange message. ";
+    }
+    return false;
+  }
   this->outgoingBytes.SetSize(0);
   if (!this->WriteSSLRecords(this->outgoingRecords, commentsOnFailure)) {
     logWorker << "Error replying to client hello. ";
@@ -2022,6 +2037,8 @@ TransportLayerSecurityServer::Session::Session() {
   this->socketId = - 1;
   this->owner = nullptr;
   this->chosenCipher = 0;
+  this->flagRequestOnlineCertificateStatusProtocol = false;
+  this->flagRequestSignedCertificateTimestamp = false;
 }
 
 bool TransportLayerSecurityServer::Session::SetIncomingRandomBytes(
@@ -2044,6 +2061,7 @@ void TransportLayerSecurityServer::Session::initialize() {
   Crypto::GetRandomBytesSecureOutputMayLeaveTraceInFreedMemory(
     this->myRandomBytes, SSLContent::LengthRandomBytesInSSLHello
   );
+  this->ephemerealPrivateKey = 0;
 }
 
 bool TransportLayerSecurityServer::HandShakeIamServer(int inputSocketID, std::stringstream* commentsOnFailure) {

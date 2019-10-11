@@ -493,9 +493,11 @@ function writeSessionToDOM(
   outputElement,
 ) {
   var htmlContent = "";
-  htmlContent += `<br>Chosen cipher: ${session.chosenCipher}, name: ${session.chosenCipherName}`;
-  htmlContent += `<br>Incoming random bytes: ${session.incomingRandomBytes}`;
-  htmlContent += `<br>My random bytes: ${session.myRandomBytes}`;
+  htmlContent += `<table class = '${styles.classNames.table.borderStandard}'>`;
+  for (var label in session) {
+    htmlContent += `<tr><td>${label}</td><td>${session[label]}</td></tr>`;
+  }
+  htmlContent += "</table>";
   var newChild = document.createElement("SPAN");
   newChild.innerHTML = htmlContent;
   outputElement.appendChild(newChild);

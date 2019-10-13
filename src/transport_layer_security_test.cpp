@@ -43,7 +43,7 @@ bool SSLRecord::Test::SerializationClientHello(TransportLayerSecurityServer& tes
     crash << "Bad hard-coded test hex string!" << crash;
   }
   if (!theRecord.Decode(&comments)) {
-    crash << "Failed to decode built-in message." << crash;
+    crash << "Failed to decode built-in message. " << comments.str() << crash;
   }
   List<unsigned char> encoded;
   theRecord.WriteBytes(encoded, nullptr);

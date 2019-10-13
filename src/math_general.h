@@ -316,7 +316,7 @@ public:
   }
   Rational operator()(int i) const {
     if (i < 0) {
-      crash << "This is a programming error: requested exponent of monomial variable "
+      crash << "This is a programming error: requested exponent of monomial variable"
       << " with index " << i << " which is negative. " << crash;
     }
     if (i >= this->monBody.size) {
@@ -342,8 +342,8 @@ public:
     return false;
   }
   void ExponentMeBy(const Rational& theExp);
-  //Warning: HashFunction must return the same result
-  //for equal monomials represented by different monBodies.
+  // Warning: HashFunction must return the same result
+  // for equal monomials represented by different monBodies.
   // Two such different representation may differ by extra entries filled in with zeroes.
   static unsigned int HashFunction(const MonomialP& input) {
     unsigned int result = 0;
@@ -515,7 +515,7 @@ std::ostream& operator<<  (std::ostream& output, const Matrix<coefficient>& theM
 template <typename coefficient>
 class Matrix {
   //friend std::iostream& operator<< <coefficient>(std::iostream& output, const Matrix<coefficient>& theMat);
-  friend std::ostream& operator<<  <coefficient>(std::ostream& output, const Matrix<coefficient>& theMat);
+  friend std::ostream& operator<< <coefficient>(std::ostream& output, const Matrix<coefficient>& theMat);
   //friend std::iostream& operator>> <coefficient>(std::iostream& input, Matrix<coefficient>& theMat);
 public:
   int NumRows; int ActualNumRows;
@@ -616,7 +616,8 @@ public:
       theZero = 0;
       this->Resize(this->NumRows, standsBelow.NumCols, true, &theZero);
     }
-    //So far, we have guaranteed that this and &standsBelow have the same number of columns and
+    // So far, we have guaranteed that this and
+    // &standsBelow have the same number of columns and
     // are different objects.
     int oldNumRows = this->NumRows;
     this->Resize(this->NumRows + standsBelow.NumRows, this->NumCols, true);
@@ -748,7 +749,9 @@ public:
   }
   template <class otherType>
   void ActOnVectorsColumn(
-    const Vectors<otherType>& input, Vectors<otherType>& output, const otherType& TheRingZero = 0
+    const Vectors<otherType>& input,
+    Vectors<otherType>& output,
+    const otherType& TheRingZero = 0
   ) const {
     if (&input == &output) {
       crash << "In ActOnVectorsColumn: input not allowed to equal output. " << crash;
@@ -768,20 +771,29 @@ public:
     }
   }
   template <class otherType>
-  void ActOnVectorColumn(Vector<otherType>& inputOutput, const otherType& TheRingZero = static_cast<otherType>(0)) const {
+  void ActOnVectorColumn(
+    Vector<otherType>& inputOutput,
+    const otherType& TheRingZero = static_cast<otherType>(0)
+  ) const {
     Vector<otherType> buffer;
     this->ActOnVectorColumn(inputOutput, buffer, TheRingZero);
     inputOutput = buffer;
   }
   template <class otherType>
-  void ActOnVectorsColumn(Vectors<otherType>& inputOutput, const otherType& TheRingZero = static_cast<otherType>(0)) const {
+  void ActOnVectorsColumn(
+    Vectors<otherType>& inputOutput,
+    const otherType& TheRingZero = static_cast<otherType>(0)
+  ) const {
     for (int i = 0; i < inputOutput.size; i ++) {
       this->ActOnVectorColumn(inputOutput[i], TheRingZero);
     }
   }
   std::string ToString(FormatExpressions* theFormat = nullptr) const;
   std::string ToStringLatex(FormatExpressions* theFormat = nullptr) const;
-  std::string ToStringSystemLatex(Matrix<coefficient>* constTerms = 0, FormatExpressions* theFormat = nullptr) const;
+  std::string ToStringSystemLatex(
+    Matrix<coefficient>* constTerms = 0,
+    FormatExpressions* theFormat = nullptr
+  ) const;
   std::string ToStringPlainText(bool jsonFormat = false) const;
   std::string ToStringOneLine(bool jsonFormat = false) const;
   std::string ElementToStringWithBlocks(List<int>& theBlocks);
@@ -931,7 +943,9 @@ public:
     }
   }
   void MultiplyOnTheLeft(
-    const Matrix<coefficient>& standsOnTheLeft, Matrix<coefficient>& output, const coefficient& theRingZero = 0
+    const Matrix<coefficient>& standsOnTheLeft,
+    Matrix<coefficient>& output,
+    const coefficient& theRingZero = 0
   ) const;
   void MultiplyOnTheLeft(const Matrix<coefficient>& standsOnTheLeft, const coefficient& theRingZero = 0);
   void MultiplyOnTheRight(const Matrix<coefficient>& standsOnTheRight) {
@@ -965,14 +979,20 @@ public:
   }
   Matrix<coefficient> operator^(const Matrix<coefficient>& right) const;
   static void ConjugationAction(
-    const Matrix<coefficient>& conjugateMe, const Matrix<coefficient>& conjugateBy, Matrix<coefficient>& out
+    const Matrix<coefficient>& conjugateMe,
+    const Matrix<coefficient>& conjugateBy,
+    Matrix<coefficient>& out
   );
   void MakeZero(const coefficient& theRingZero = 0);
-  void MakeID(const Matrix<coefficient>& prototype, const coefficient& theRingZero = 0, const coefficient& theRingOne = 1);
-  //if m1 corresponds to a linear operator from V1 to V2 and
+  void MakeID(
+    const Matrix<coefficient>& prototype,
+    const coefficient& theRingZero = 0,
+    const coefficient& theRingOne = 1
+  );
+  // if m1 corresponds to a linear operator from V1 to V2 and
   // m2 to a linear operator from W1 to W2, then the result of the below function
-  //corresponds to the linear operator from V1+W1 to V2+W2 (direct sum)
-  //this means you write the matrix m1 in the upper left corner m2 in the lower right
+  // corresponds to the linear operator from V1+W1 to V2+W2 (direct sum)
+  // this means you write the matrix m1 in the upper left corner m2 in the lower right
   // and everything else you fill with zeros
   void AssignDirectSum(Matrix<coefficient>& m1,  Matrix<coefficient>& m2);
   // if S and T are endomorphisms of V and W, build the matrix of SⓧT that acts on
@@ -1156,12 +1176,12 @@ public:
     tempPlus -= (tempMinus);
     output = tempPlus;
   }
-  //The Gaussian elimination below brings the matrix to a row-echelon form,
-  //that is, makes the matrix be something like (example is 4x5):
-  //1 0 3 0 0
-  //0 1 0 0 0
-  //0 0 0 1 0
-  //0 0 0 0 0
+  // The Gaussian elimination below brings the matrix to a row-echelon form,
+  // that is, makes the matrix be something like (example is 4x5):
+  // 1 0 3 0 0
+  // 0 1 0 0 0
+  // 0 0 0 1 0
+  // 0 0 0 0 0
   //In the Gaussian elimination below, we define non-pivot points to be indices of the columns
   // that do not have a pivot 1 in them.
   // In the above example, the third (index 2) and fifth (index 4) columns do not have a pivot 1 in them.
@@ -1685,10 +1705,13 @@ void Matrix<Element>::AssignTensorProduct(const Matrix<Element>& left, const Mat
   this->Resize(left.NumRows*right.NumRows, left.NumCols*right.NumCols, false);
   int sr = right.NumRows;
   int sc = right.NumCols;
-  //The basis of the tensor product vector space  MUST be in the SAME order as the one used by MatrixTensor::AssignTensorProduct.
-  //indexing. Let the first vector space have basis v_1, ..., v_k, the second: w_1, ..., w_m.
-  //Then the basis of the tensor product is given in the order: v_1\otimes w_1, ..., v_1\otimes w_m,
-  //..., v_k\otimes w_1, ..., v_k\otimes w_m
+  // The basis of the tensor product vector space MUST be
+  // in the SAME order as the one used by MatrixTensor::AssignTensorProduct.
+  // indexing. Let the first vector space have basis
+  // v_1, ..., v_k, the second: w_1, ..., w_m.
+  // Then the basis of the tensor product is given
+  // in the order: v_1\otimes w_1, ..., v_1\otimes w_m,
+  // ..., v_k\otimes w_1, ..., v_k\otimes w_m
   for (int iv = 0; iv < left.NumRows; iv ++) {
     for (int iw = 0; iw < right.NumRows; iw ++) {
       for (int jv = 0; jv < left.NumCols; jv ++) {
@@ -2082,7 +2105,8 @@ public:
   }
   void GetMinMonomial(templateMonomial& outputMon, coefficient& outputCF) const {
     if (this->IsEqualToZero()) {
-      crash << "This is a programming error: calling GetMinMon on a zero monomial collection is forbidden. " << crash;
+      crash << "This is a programming error: calling GetMinMon "
+      << "on a zero monomial collection is forbidden. " << crash;
     }
     outputMon = (*this)[0];
     outputCF = this->theCoeffs[0];
@@ -2095,7 +2119,8 @@ public:
   }
   void GetMaxMonomial(templateMonomial& outputMon, coefficient& outputCF) const {
     if (this->IsEqualToZero()) {
-      crash << "This is a programming error: calling GetMinMon on a zero monomial collection is forbidden. " << crash;
+      crash << "This is a programming error: calling GetMinMon "
+      << "on a zero monomial collection is forbidden. " << crash;
     }
     outputMon = (*this)[0];
     outputCF = this->theCoeffs[0];
@@ -2174,10 +2199,14 @@ public:
     HashedList<templateMonomial>* seedMonomials = nullptr
   ) {
     List<MonomialCollectionTemplate> listCopy = theList;
-    MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRowsDeleteZeroRows(listCopy, 0, seedMonomials);
+    MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRowsDeleteZeroRows(
+      listCopy, 0, seedMonomials
+    );
     int startSpanSize = listCopy.size;
     listCopy.AddOnTop(input);
-    MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRowsDeleteZeroRows(listCopy, 0, seedMonomials);
+    MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRowsDeleteZeroRows(
+      listCopy, 0, seedMonomials
+    );
     return listCopy.size == startSpanSize;
   }
   template <class MonomialCollectionTemplate>
@@ -2487,13 +2516,16 @@ public:
   void operator-=(const MonomialCollection<templateMonomial, coefficient>& other) {
     this->SubtractOtherTimesCoeff(other);
   }
-  void SubtractOtherTimesCoeff(const MonomialCollection<templateMonomial, coefficient>& other, coefficient* inputcf = nullptr);
+  void SubtractOtherTimesCoeff(
+    const MonomialCollection<templateMonomial, coefficient>& other,
+    coefficient* inputcf = nullptr
+  );
   template <class otherType>
   void operator/=(const otherType& other) {
     if (other == 0) {
       crash << "This is a programming error. A MonomialCollection division "
-      << "by zero has been requested: division by zero error should"
-      << " be handled before calling operator/=. " << crash;
+      << "by zero has been requested: division by zero error should "
+      << "be handled before calling operator/=. " << crash;
       return;
     }
     for (int i = 0; i < this->theCoeffs.size; i ++) {
@@ -2613,7 +2645,11 @@ class ElementMonomialAlgebra: public MonomialCollection<templateMonomial, coeffi
   void operator*=(const coefficient& other) {
     this->::MonomialCollection<templateMonomial, coefficient>::operator*=(other);
   }
-  void RaiseToPower(int d, ElementMonomialAlgebra<templateMonomial, coefficient>& output, const coefficient& theRingUniT);
+  void RaiseToPower(
+    int d,
+    ElementMonomialAlgebra<templateMonomial, coefficient>& output,
+    const coefficient& theRingUniT
+  );
   void RaiseToPower(int d) {
     if (d == 1) {
       return;
@@ -2953,7 +2989,7 @@ public:
     if (!this->IsConstant(&constME)) {
       crash << "This may or may not be a programming error: "
       << "attempting to compare a non-constant polynomial to "
-      << " a constant. I cannot judge at the moment whether allowing "
+      << "a constant. I cannot judge at the moment whether allowing "
       << "that is a good decision. In any case, crashing to let you know. "
       << crash;
       return false;
@@ -3108,14 +3144,14 @@ class PolynomialSubstitution: public List<Polynomial<coefficient> > {
   // to produce a polynomial in three variables
   void MakeIdSubstitution(int numVars, const coefficient& theRingUnit = 1);
   void MakeIdLikeInjectionSub(int numStartingVars, int numTargetVarsMustBeLargerOrEqual, const coefficient& theRingUnit);
-  //In the following function we have that:
-  //the format of the linear substitution is:
-  //theSub is a  whose number of rows minus 1 must equal the # number of
-  //target variables and whose number of columns must equal the number of variables in
-  //the current polynomial (this->NumVariables).
-  //The first row denotes the constant term in the substitution of the respective variable!
-  //An element in the x-th row and y-th column
-  //is defined as element [x][y] !
+  // In the following function we have that:
+  // the format of the linear substitution is:
+  // theSub is a  whose number of rows minus 1 must equal the # number of
+  // target variables and whose number of columns must equal the number of variables in
+  // the current polynomial (this->NumVariables).
+  // The first row denotes the constant term in the substitution of the respective variable!
+  // An element in the x-th row and y-th column
+  // is defined as element [x][y] !
   void MakeExponentSubstitution(Matrix<LargeInteger>& theSub);
   void PrintPolys(std::string& output);
   void MakeSubstitutionLastVariableToEndPoint(int numVars, Polynomial<coefficient>& EndPoint);
@@ -3448,7 +3484,12 @@ public:
   MemorySaving<Polynomial<Rational> > Denominator;
   Rational ratValue;
   int expressionType;
-  enum typeExpression{ typeRational = 0, typePoly = 1, typeRationalFunction = 2, typeError = 3};
+  enum typeExpression {
+    typeRational = 0,
+    typePoly = 1,
+    typeRationalFunction = 2,
+    typeError = 3
+  };
   std::string ToString(FormatExpressions* theFormat = nullptr) const;
   bool NeedsParenthesisForMultiplication() const {
     switch(this->expressionType) {
@@ -3622,7 +3663,12 @@ public:
   void Invert();
   void MakeOne();
   void MakeZero();
-  void MakeMonomiaL(int LetterIndex, const Rational& Power, const Rational& Coeff=1, int ExpectedNumVars = 0);
+  void MakeMonomiaL(
+    int LetterIndex,
+    const Rational& Power,
+    const Rational& Coeff = 1,
+    int ExpectedNumVars = 0
+  );
   void MakeConst(const Rational& theCoeff) {
     this->MakeZero();
     this->ratValue = theCoeff;
@@ -3843,7 +3889,8 @@ void Polynomial<coefficient>::MakeLinPolyFromRootNoConstantTerm(const Vector<Rat
   for (int i = 0; i < r.size; i ++) {
     tempM.MakeEi(i);
     if (!r[i].IsInteger()) {
-      crash << "This may or may not be a programming error: requesting a monomial with non-integer exponent. "
+      crash << "This may or may not be a programming error: "
+      << "requesting a monomial with non-integer exponent. "
       << "It appears this operation should be allowed, however "
       << "this requires further consideration. I am crashing just in case. "
       << crash;
@@ -3925,7 +3972,9 @@ bool MonomialCollection<templateMonomial, coefficient>::LinSpanContainsGetFirstL
   List<MonomialCollectionTemplate> listCopy = theList;
   Matrix<coefficient> theRowOperations;
   theRowOperations.MakeIdMatrix(theList.size);
-  MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRows(listCopy, 0, seedMonomials, &theRowOperations);
+  MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRows(
+    listCopy, 0, seedMonomials, &theRowOperations
+  );
   MonomialCollectionTemplate remainderFromInput = input;
   templateMonomial currentMon;
   coefficient CFminMon, CFinRemainder;
@@ -4449,7 +4498,11 @@ public:
     List<ElementSemisimpleLieAlgebra>& theElements,
     List<ElementSemisimpleLieAlgebra>& outputTheBasis
   );
-  void ActOnMe(const ElementSemisimpleLieAlgebra& theElt, ElementSemisimpleLieAlgebra& output, SemisimpleLieAlgebra& owner);
+  void ActOnMe(
+    const ElementSemisimpleLieAlgebra& theElt,
+    ElementSemisimpleLieAlgebra& output,
+    SemisimpleLieAlgebra& owner
+  );
   void ActOnMe(
     const ElementSemisimpleLieAlgebra& theElt,
     ElementSemisimpleLieAlgebra& output,
@@ -4543,7 +4596,8 @@ template <class coefficient>
 void Matrix<coefficient>::ScaleToIntegralForMinRationalHeightNoSignChange() {
   Rational tempRat;
   tempRat.AssignNumeratorAndDenominator(
-    this->FindPositiveLCMCoefficientDenominatorsTruncated(), this->FindPositiveGCDCoefficientNumeratorsTruncated()
+    this->FindPositiveLCMCoefficientDenominatorsTruncated(),
+    this->FindPositiveGCDCoefficientNumeratorsTruncated()
   );
   *this *= tempRat;
 }
@@ -4583,8 +4637,8 @@ Matrix<coefficient> Matrix<coefficient>::operator*(const Matrix<coefficient>& ri
 template <class coefficient>
 Vector<coefficient> Matrix<coefficient>::operator*(const Vector<coefficient>& v) const {
   if (v.size != NumCols) {
-    crash << "matrix application mismatch: matrix with" << NumCols
-    << "columns attempted to multiply vector of length" << v.size << crash;
+    crash << "matrix application mismatch: matrix with " << NumCols
+    << " columns attempted to multiply vector of length " << v.size << crash;
   }
   Vector<coefficient> out;
   out.MakeZero(NumRows);
@@ -4597,7 +4651,9 @@ Vector<coefficient> Matrix<coefficient>::operator*(const Vector<coefficient>& v)
 }
 
 template <class coefficient>
-void Matrix<coefficient>::AssignMatrixIntWithDen(Matrix<LargeInteger>& theMat, const LargeIntegerUnsigned& Den) {
+void Matrix<coefficient>::AssignMatrixIntWithDen(
+  Matrix<LargeInteger>& theMat, const LargeIntegerUnsigned& Den
+) {
   this->init(theMat.NumRows, theMat.NumCols);
   for (int i = 0; i < this->NumRows; i ++) {
     for (int j = 0; j < this->NumCols; j ++) {
@@ -5265,14 +5321,14 @@ std::string MonomialCollection<templateMonomial, coefficient>::ToString(FormatEx
   std::string tempS1, tempS2;
   List<templateMonomial> sortedMons;
   sortedMons = this->theMonomials;
-  //If this line fails to link, you must do the following.
-  //You need to implement FormatExpressions::GetMonOrder<templateMonomial>()
+  // If this line fails to link, you must do the following.
+  // You need to implement FormatExpressions::GetMonOrder<templateMonomial>()
   // and make it return 0 (or a pointer to a monomial order, should you
-  //wish to use a custom one.
+  // wish to use a custom one.
   typename List<templateMonomial>::OrderLeftGreaterThanRight
   theOrder = (theFormat == nullptr) ? 0 : theFormat->GetMonOrder<templateMonomial>();
   sortedMons.QuickSortDescending(theOrder);
-//  out << "(hash: " << this->HashFunction() << ")";
+  // out << "(hash: " << this->HashFunction() << ")";
   int cutOffCounter = 0;
   bool useCustomPlus = false;
   bool useCustomTimes = false;
@@ -5426,24 +5482,26 @@ public:
     }
     return tempVect.IsEqualToZero();
   }
-  //returns false if the vector is not in the vector space spanned by the lattice
+  // returns false if the vector is not in the vector space spanned by the lattice
   bool ReduceVector(Vector<Rational>& theVector) const;
-  //In the following two functions, the format of the matrix theSub of the substitution is as follows.
-  //Let the ambient dimension be n, and the coordinates be x_1,..., x_n.
-  //Let the new vector space be of dimension m, with coordinates y_1,..., y_m.
-  //Then theSub is an n by m matrix, where the i^th row of the matrix gives the expression of x_i via the y_j's.
-  //In addition, we require that n>=m (otherwise, in general, we do not expect to get a lattice).
-  //For example, if we want to carry out the substitution
-  //x_1=y_1+y_2, x_2=y_1-y_2, x_3=y_1, then
-  //theSub should be initialized as:
-  //1  1
-  //1 - 1
-  //1  0
+  // In the following two functions, the format of the matrix theSub of the substitution is as follows.
+  // Let the ambient dimension be n, and the coordinates be x_1,..., x_n.
+  // Let the new vector space be of dimension m, with coordinates y_1,..., y_m.
+  // Then theSub is an n by m matrix, where the i^th row of the matrix gives the expression of x_i via the y_j's.
+  // In addition, we require that n>=m (otherwise, in general, we do not expect to get a lattice).
+  // For example, if we want to carry out the substitution
+  // x_1=y_1+y_2, x_2=y_1-y_2, x_3=y_1, then
+  // theSub should be initialized as:
+  // 1  1
+  // 1 - 1
+  // 1  0
   bool SubstitutionHomogeneous(const Matrix<Rational>& theSub);
   bool SubstitutionHomogeneous(const PolynomialSubstitution<Rational>& theSub);
-  //the following function follows the same convention as the preceding except that we allow n<m. However,
+  // the following function follows the same convention
+  // as the preceding except that we allow n < m. However,
   // in order to assure that the preimage of the lattice is a lattice,
-  //we provide as input an ambient lattice in the new vector space of dimension m
+  // we provide as input an ambient lattice
+  // in the new vector space of dimension m.
   bool SubstitutionHomogeneous(const Matrix<Rational>& theSub, Lattice& resultIsSubsetOf);
   void Reduce();
   void IntersectWithLinearSubspaceSpannedBy(const Vectors<Rational>& theSubspaceBasis);
@@ -5452,8 +5510,9 @@ public:
   static bool GetHomogeneousSubMatFromSubIgnoreConstantTerms(
     const PolynomialSubstitution<Rational>& theSub, Matrix<Rational>& output
   );
-  //returning false means that the lattice given as rougher is not actually rougher than the current lattice
-  //or that there are too many representatives
+  // Returning false means that the lattice given as rougher
+  // is not actually rougher than the current lattice
+  // or that there are too many representatives.
   bool GetAllRepresentatives(const Lattice& rougherLattice, Vectors<Rational>& output) const;
   bool GetAllRepresentativesProjectingDownTo(
     const Lattice& rougherLattice, Vectors<Rational>& startingShifts, Vectors<Rational>& output

@@ -74,7 +74,8 @@ class NilradicalCandidate {
   void ProcessMe();
   std::string ToString(FormatExpressions* theFormat = nullptr) const;
   std::string ToStringTableElementWithWeights(
-    const List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& theElts, const Vectors<Rational>& theWeights
+    const List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& theElts,
+    const Vectors<Rational>& theWeights
   ) const;
   void ComputeTheTwoCones();
   void ComputeTheTwoConesRelativeToNilradicalSubset();
@@ -212,17 +213,25 @@ public:
   int GetRank() const;
   int GetSSpartCentralizerOfSSPartCentralizer() const;
   void GetHsScaledToActByTwoByType(
-    List<List<Vectors<Rational> > >& outputHsByType, List<DynkinSimpleType>& outputTypeList
+    List<List<Vectors<Rational> > >& outputHsByType,
+    List<DynkinSimpleType>& outputTypeList
   ) const;
   bool HasHsScaledByTwoConjugateTo(List<Vector<Rational> >& other) const;
   bool ComputeCentralizerTypeFailureAllowed();
   bool IsDirectSummandOf(const CandidateSSSubalgebra& other);
   void GetGenericCartanCentralizerLinearCombination(
-    int indexCartanCentralizerGen, ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output
+    int indexCartanCentralizerGen,
+    ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output
   );
-  void GetGenericPosGenLinearCombination(int indexPosGens, ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output);
+  void GetGenericPosGenLinearCombination(
+    int indexPosGens,
+    ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output
+  );
   bool IsExtremeWeight(int moduleIndex, int indexInIsoComponent) const;
-  void GetGenericNegGenLinearCombination(int indexNegGens, ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output);
+  void GetGenericNegGenLinearCombination(
+    int indexNegGens,
+    ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output
+  );
   bool AmRegularSA() const;
   bool CompareLeftGreaterThanRight(const Vector<Rational>& left, const Vector<Rational>& right);
   void GetGenericLinearCombination(
@@ -237,7 +246,9 @@ public:
   void ComputeCentralizerIsWellChosen();
   void AdjustCentralizerAndRecompute(bool allowNonPolynomialSystemFailure);
   void ComputeRatioKillingsByComponent();
-  void AddToSystem(const ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& elementThatMustVanish);
+  void AddToSystem(
+    const ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& elementThatMustVanish
+  );
   bool CreateAndAddExtendBaseSubalgebra(
     const CandidateSSSubalgebra& baseSubalgebra,
     Vector<Rational>& newHrescaledToActByTwo,
@@ -255,11 +266,17 @@ public:
   );
   void EnumerateAllNilradicals();
   std::string ToStringNilradicalSelection(const List<int>& theSelection);
-  void EnumerateNilradicalsRecursively(List<int>& theSelection, std::stringstream* logStream = nullptr);
+  void EnumerateNilradicalsRecursively(
+    List<int>& theSelection,
+    std::stringstream* logStream = nullptr
+  );
   void ExtendNilradicalSelectionToMultFreeOverSSpartSubalgebra(
     HashedList<int, MathRoutines::IntUnsignIdentity>& inputOutput
   );
-  bool IsPossibleNilradicalCarryOutSelectionImplications(List<int>& theSelection, std::stringstream* logStream = nullptr);
+  bool IsPossibleNilradicalCarryOutSelectionImplications(
+    List<int>& theSelection,
+    std::stringstream* logStream = nullptr
+  );
   void ExtendToModule(List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& inputOutput);
   Vector<Rational> GetPrimalWeightFirstGen(const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input) const;
   Vector<Rational> GetNonPrimalWeightFirstGen(const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input) const;
@@ -270,7 +287,8 @@ public:
     List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputElts
   );
   void ComputeKsl2triplesGetOppositeEltsAll(
-    const Vector<Rational>& theElementWeight, List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputElts
+    const Vector<Rational>& theElementWeight,
+    List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputElts
   );
   bool ComputeKsl2tripleSetUpAndSolveSystem(
     const ElementSemisimpleLieAlgebra<AlgebraicNumber>& theE,
@@ -282,7 +300,9 @@ public:
   void ComputeSinglePair(int leftIndex, int rightIndex, List<int>& output);
   int GetNumModules() const;
   void ComputePairKweightElementAndModule(
-    const ElementSemisimpleLieAlgebra<AlgebraicNumber>& leftKweightElt, int rightIndex, List<int>& output
+    const ElementSemisimpleLieAlgebra<AlgebraicNumber>& leftKweightElt,
+    int rightIndex,
+    List<int>& output
   );
   bool IsWeightSystemSpaceIndex(int theIndex, const Vector<Rational>& AmbientRootTestedForWeightSpace);
   void AddHincomplete(const Vector<Rational>& theH);
@@ -299,15 +319,27 @@ public:
   void ComputePrimalModuleDecompositionHWVsOnly(HashedList<Vector<Rational> >& inputHws);
   void ComputePrimalModuleDecompositionHighestWeightsOnly(HashedList<Vector<Rational> >& outputHWsCoords);
   void ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart();
-  void GetPrimalWeightProjectionFundCoords(const Vector<Rational>& inputAmbientWeight, Vector<Rational>& output) const;
+  void GetPrimalWeightProjectionFundCoords(
+    const Vector<Rational>& inputAmbientWeight,
+    Vector<Rational>& output
+  ) const;
   bool CheckGensBracketToHs();
-  void GetWeightProjectionFundCoords(const Vector<Rational>& inputAmbientweight, Vector<Rational>& output) const;
+  void GetWeightProjectionFundCoords(
+    const Vector<Rational>& inputAmbientweight,
+    Vector<Rational>& output
+  ) const;
   bool ComputeSystem(bool AttemptToChooseCentalizer, bool allowNonPolynomialSystemFailure);
   bool ComputeSystemPart2(bool AttemptToChooseCentalizer, bool allowNonPolynomialSystemFailure);
   bool ComputeChar(bool allowBadCharacter);
   bool AttemptToSolveSystem();
-  bool IsGoodHnewActingByTwo(const Vector<Rational>& HNewActingByTwo, const List<int>& theRootInjections) const;
-  Rational GetScalarSA(const Vector<Rational>& primalWeightLeft, const Vector<Rational>& primalWeightRight) const;
+  bool IsGoodHnewActingByTwo(
+    const Vector<Rational>& HNewActingByTwo,
+    const List<int>& theRootInjections
+  ) const;
+  Rational GetScalarSA(
+    const Vector<Rational>& primalWeightLeft,
+    const Vector<Rational>& primalWeightRight
+  ) const;
   std::string ToStringType(FormatExpressions* theFormat = nullptr) const;
   std::string ToStringTypeAndHs(FormatExpressions* theFormat = nullptr) const;
   std::string ToStringGenerators(FormatExpressions* theFormat = nullptr) const;
@@ -344,8 +376,8 @@ public:
   List<OrbitIteratorRootActionWeylGroupAutomorphisms> theOrbiTs;
   HashedList<Rational> theOrbitHelementLengths;
   HashedList<DynkinSimpleType> theOrbitDynkinIndices;
-//  List<HashedList<ElementWeylGroup<WeylGroup> > > theOrbitGeneratingElts;
-  //if an entry in orbit sizes is - 1 this means the corresponding orbit size has not been computed yet.
+  // List<HashedList<ElementWeylGroup<WeylGroup> > > theOrbitGeneratingElts;
+  // if an entry in orbit sizes is - 1 this means the corresponding orbit size has not been computed yet.
   int maxStoredOrbitSize;
   std::string comments;
   std::string fileNameToLogComments;
@@ -394,12 +426,22 @@ public:
   void ComputeFolderNames(FormatExpressions& outputFormat);
   void CheckFileWritePermissions();
   void WriteReportToFiles();
-  std::string ToStringAlgebraLink(int ActualIndexSubalgebra, FormatExpressions* theFormat) const;
+  std::string ToStringAlgebraLink(
+    int ActualIndexSubalgebra, FormatExpressions* theFormat
+  ) const;
   std::string GetRelativePhysicalFileNameSubalgebra(int ActualIndexSubalgebra) const;
-  std::string GetDisplayFileNameSubalgebraRelative(int ActualIndexSubalgebra, FormatExpressions* theFormat) const;
-  std::string GetDisplayFileNameSubalgebraAbsolute(int ActualIndexSubalgebra, FormatExpressions* theFormat) const;
-  std::string GetRelativePhysicalFileNameFKFTNilradicals(int ActualIndexSubalgebra) const;
-  std::string GetDisplayFileNameFKFTNilradicals(int ActualIndexSubalgebra, FormatExpressions* theFormat) const;
+  std::string GetDisplayFileNameSubalgebraRelative(
+    int ActualIndexSubalgebra, FormatExpressions* theFormat
+  ) const;
+  std::string GetDisplayFileNameSubalgebraAbsolute(
+    int ActualIndexSubalgebra, FormatExpressions* theFormat
+  ) const;
+  std::string GetRelativePhysicalFileNameFKFTNilradicals(
+    int ActualIndexSubalgebra
+  ) const;
+  std::string GetDisplayFileNameFKFTNilradicals(
+    int ActualIndexSubalgebra, FormatExpressions* theFormat
+  ) const;
   const CandidateSSSubalgebra& baseSubalgebra();
   bool operator==(const SemisimpleSubalgebras& other) {
     MacroRegisterFunctionWithName("SemisimpleSubalgebras::operator==");
@@ -413,7 +455,8 @@ public:
   }
   SemisimpleLieAlgebra& GetSSowner() const {
     if (this->owner == nullptr) {
-      crash << "This is a programming error: attempted to access non-initialized semisimple Lie subalgerbas. " << crash;
+      crash << "This is a programming error: attempted to "
+      << "access non-initialized semisimple Lie subalgerbas. " << crash;
     }
     return *this->owner;
   }
@@ -442,7 +485,9 @@ public:
   }
   void AddSubalgebraIfNewSetToStackTop(CandidateSSSubalgebra& input);
   void AddSubalgebraToStack(
-    CandidateSSSubalgebra& input, int inputNumLargerTypesExplored, int inputNumHcandidatesExplored
+    CandidateSSSubalgebra& input,
+    int inputNumLargerTypesExplored,
+    int inputNumHcandidatesExplored
   );
   bool SetUpParabolicInductionDataPrecomputedSA(CandidateSSSubalgebra& theCandidate);
   bool CheckConsistencyHs() const;
@@ -465,7 +510,11 @@ public:
   void GetCentralizerChains(List<List<int> >& outputChains);
   int GetIndexFullSubalgebra() const;
   bool RanksAndIndicesFit(const DynkinType& input) const;
-  bool GrowDynkinType(const DynkinType& input, List<DynkinType>& output, List<List<int> >* outputImagesSimpleRoots) const;
+  bool GrowDynkinType(
+    const DynkinType& input,
+    List<DynkinType>& output,
+    List<List<int> >* outputImagesSimpleRoots
+  ) const;
   Vector<Rational>
   GetHighestWeightFundNewComponentFromImagesOldSimpleRootsAndNewRoot(
     const DynkinType& input,

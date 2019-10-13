@@ -519,17 +519,17 @@ function displaySSLRecord(
   for (var counter = 0; counter < flagNames.length; counter ++) {
     var flagName = flagNames[counter];
     if (content[flagName] !== undefined) {
-      htmlContent += `<br>${flagName}: ${content[flagName]}`;
+      extraAnnotation += `<br>${flagName}: ${content[flagName]}`;
     }
   }
   extraAnnotation += `<br>Session id: ${content.sessionId}`;
   extraAnnotation += `<br>Cipher spec length: ${content.cipherSpecLength}`;
   extraAnnotation += `<br>Renegotiation characters: ${content.renegotiationCharacters}`;
   extraAnnotation += `<table class = '${styles.classNames.table.borderStandard}'><tr><th>id</th><th>interpretation</th></tr>`;
-  for (var label in content.cipherSuites) {
+  for (var label in input.session.cipherSuites) {
     extraAnnotation += `<tr>`;
     extraAnnotation += `<td>${label}</td>`;
-    extraAnnotation += `<td>${content.cipherSuites[label]}</td>`;
+    extraAnnotation += `<td>${input.session.cipherSuites[label]}</td>`;
     extraAnnotation += `</tr>`;
   }
   extraAnnotation += "</table>";

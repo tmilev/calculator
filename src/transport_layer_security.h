@@ -106,6 +106,31 @@ public:
   unsigned int HashFunction() const;
 };
 
+class SignatureAlgorithmSpecification {
+public:
+  class HashAlgorithm {
+  public:
+    static const unsigned char none = 0;
+    static const unsigned char md5 = 1;
+    static const unsigned char sha1 = 2;
+    static const unsigned char sha224 = 3;
+    static const unsigned char sha256 = 4;
+    static const unsigned char sha384 = 5;
+    static const unsigned char sha512 = 6;
+  };
+  class SignatureAlgorithm {
+  public:
+    static const unsigned char anonymous = 0;
+    static const unsigned char RSA = 1;
+    static const unsigned char DSA = 2;
+    static const unsigned char ECDSA = 3;
+  };
+  TransportLayerSecurityServer* ownerServer;
+  unsigned int hash;
+  unsigned int signatureAlgorithm;
+  SignatureAlgorithmSpecification();
+};
+
 // At the time of writing, a list of extensions **should** be available here:
 // https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml
 // Please DO update the documentation if that stops being the case.
@@ -119,6 +144,11 @@ public:
   JSData ToJSON();
   bool CheckInitialization();
   bool ProcessMe(std::stringstream* commentsOnError);
+  bool ProcessRenegotiateConnection(std::stringstream* commentsOnError);
+  bool ProcessServerName(std::stringstream* commentsOnError);
+  bool ProcessRequestOnlineCertificateStatus(std::stringstream* commentsOnError);
+  bool ProcessRequestSignedCertificateTimestamp(std::stringstream* commentsOnError);
+  bool ProcessSignatureAlgorithms(std::stringstream* commentsOnError);
   void WriteBytes(List<unsigned char>& output, List<Serialization::Marker>* annotations);
   void MakeEllipticCurvePointFormat(SSLContent* inputOwner);
   void MakeExtendedMasterSecret(SSLContent* inputOwner);
@@ -153,8 +183,6 @@ public:
   bool flagIncomingRandomIncluded;
   bool flagOutgoingRandomIncluded;
   static const int LengthRandomBytesInSSLHello = 32;
-  List<unsigned char> renegotiationCharacters;
-  List<CipherSuiteSpecification> declaredCiphers;
   List<SSLHelloExtension> extensions;
   List<unsigned char> sessionId;
   List<unsigned char> challenge;
@@ -166,11 +194,9 @@ public:
     static std::string length                           ;
     static std::string cipherSpecLength                 ;
     static std::string sessionId                        ;
-    static std::string cipherSuites                     ;
     static std::string extensionsLength                 ;
     static std::string compressionMethod                ;
     static std::string extensions                       ;
-    static std::string renegotiationCharacters          ;
     static std::string renegotiate                      ;
     static std::string OCSPrequest                      ;
     static std::string signedCertificateTimestampRequest;
@@ -188,14 +214,19 @@ public:
     static const unsigned char clientKeyExchange = 16; //0x10
     static const unsigned char finished = 20; //0x14
   };
+  // Extensions should be available at:
+  // https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml
   class tokensExtension {
   public:
-    static const unsigned int renegotiateConnection = 255 * 256 + 1; // 0xff01
-    static const unsigned int ellipticCurvePointFormat = 11; // 0x000b
+    static const unsigned int serverName = 0; // 0x0000
     static const unsigned int requestOnlineCertificateStatus = 5; //0x0005
     static const unsigned int requestSignedCertificateTimestamp = 18; // 0x0012
-    static const unsigned int serverName = 0; // 0x0000
+    static const unsigned int ellipticCurvePointFormat = 11; // 0x000b
+    // used in server key exchange message, critical.
+    static const unsigned int signatureAlgorithms = 13; // 0x00d
     static const unsigned int extendedMasterSecret = 23; // 0x0017
+    static const unsigned int renegotiateConnection = 255 * 256 + 1; // 0xff01
+
   };
 
   SSLContent();
@@ -337,12 +368,14 @@ public:
   class Session {
     class JSLabels {
     public:
-      static std::string chosenCipher;
-      static std::string chosenCipherName;
-      static std::string incomingRandomBytes;
-      static std::string myRandomBytes;
-      static std::string OCSPrequest;
+      static std::string chosenCipher                     ;
+      static std::string chosenCipherName                 ;
+      static std::string incomingRandomBytes              ;
+      static std::string myRandomBytes                    ;
+      static std::string OCSPrequest                      ;
       static std::string signedCertificateTimestampRequest;
+      static std::string cipherSuites                     ;
+      static std::string serverName                       ;
     };
     public:
     int socketId;
@@ -351,12 +384,16 @@ public:
     TransportLayerSecurityServer* owner;
     List<unsigned char> incomingRandomBytes;
     List<unsigned char> myRandomBytes;
+    List<SignatureAlgorithmSpecification> incomingRecognizedAlgorithmSpecifications;
     LargeIntegerUnsigned ephemerealPrivateKey;
     ElementEllipticCurve<ElementZmodP> ephemerealPublicKey;
+    List<unsigned char> serverName;
+    List<CipherSuiteSpecification> incomingCiphers;
     int chosenCipher;
     std::string ToStringChosenCipher();
     JSData ToJSON();
     Session();
+    bool ChooseCipher(std::stringstream* commentsOnFailure);
     void initialize();
     bool SetIncomingRandomBytes(
       List<unsigned char>& input, std::stringstream* commentsOnFailure
@@ -389,6 +426,7 @@ public:
   );
   void initialize();
   void initializeCipherSuites();
+  void initializeExtensions();
   TransportLayerSecurityServer();
   bool HandShakeIamServer(int inputSocketID, std::stringstream* commentsOnFailure);
   bool ReadBytesOnce(std::stringstream* commentsOnError);

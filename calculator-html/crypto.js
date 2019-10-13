@@ -494,8 +494,22 @@ function writeSessionToDOM(
 ) {
   var htmlContent = "";
   htmlContent += `<table class = '${styles.classNames.table.borderStandard}'>`;
+  var labelsToIgnore = {
+    "cipherSuites" : true,
+  };
   for (var label in session) {
+    if (label in labelsToIgnore) {
+      continue;
+    }
     htmlContent += `<tr><td>${label}</td><td>${session[label]}</td></tr>`;
+  }
+  htmlContent += "</table>";
+  htmlContent += `<table class = '${styles.classNames.table.borderStandard}'><tr><th>id</th><th>interpretation</th></tr>`;
+  for (var label in session.cipherSuites) {
+    htmlContent += `<tr>`;
+    htmlContent += `<td>${label}</td>`;
+    htmlContent += `<td>${session.cipherSuites[label]}</td>`;
+    htmlContent += `</tr>`;
   }
   htmlContent += "</table>";
   var newChild = document.createElement("SPAN");
@@ -525,14 +539,6 @@ function displaySSLRecord(
   extraAnnotation += `<br>Session id: ${content.sessionId}`;
   extraAnnotation += `<br>Cipher spec length: ${content.cipherSpecLength}`;
   extraAnnotation += `<br>Renegotiation characters: ${content.renegotiationCharacters}`;
-  extraAnnotation += `<table class = '${styles.classNames.table.borderStandard}'><tr><th>id</th><th>interpretation</th></tr>`;
-  for (var label in input.session.cipherSuites) {
-    extraAnnotation += `<tr>`;
-    extraAnnotation += `<td>${label}</td>`;
-    extraAnnotation += `<td>${input.session.cipherSuites[label]}</td>`;
-    extraAnnotation += `</tr>`;
-  }
-  extraAnnotation += "</table>";
   extraAnnotation += `<table class = '${styles.classNames.table.borderStandard}'><tr><th>type</th><th>name</th><th width = '50%'>data</th></tr>`;
   for (var counter = 0; counter < content.extensions.length; counter ++) {
     var label = content.extensions[counter].name;

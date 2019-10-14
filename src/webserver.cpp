@@ -4557,11 +4557,9 @@ int WebWorker::Run() {
 
   if (theWebServer.lastListeningSocket == theWebServer.listeningSocketHTTPSBuiltIn) {
     theGlobalVariables.flagUsingSSLinCurrentConnection = true;
-    logWorker << "DEBUG: BUILT IN: " << this->connectedSocketID << logger::endL;
     theWebServer.theTLS.flagUseBuiltInTlS = true;
   } else {
     theGlobalVariables.flagUsingSSLinCurrentConnection = true;
-    logWorker << "DEBUG: openssl :((" << this->connectedSocketID << logger::endL;
     theWebServer.theTLS.flagUseBuiltInTlS = false;
   }
 

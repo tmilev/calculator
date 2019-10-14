@@ -108,6 +108,10 @@ public:
 
 class SignatureAlgorithmSpecification {
 public:
+  // Older RFCs requested that algorithm
+  // specifications be specified through two bytes.
+  // The first byte would specify the hash algorithm,
+  // and the second byte - the signature algorithm.
   class HashAlgorithm {
   public:
     static const unsigned char none = 0;
@@ -125,10 +129,57 @@ public:
     static const unsigned char DSA = 2;
     static const unsigned char ECDSA = 3;
   };
+  // Newer RFCs fix the allowed two-byte combinations.
+  // Page 41, RFC 8446
+  // https://tools.ietf.org/html/rfc8446#page-41
+  class Algorithms {
+  public:
+    // RSASSA-PKCS1-v1_5 algorithms
+    static const unsigned int rsa_pkcs1_sha256 = 0x0401;
+    static const unsigned int rsa_pkcs1_sha384 = 0x0501;
+    static const unsigned int rsa_pkcs1_sha512 = 0x0601;
+
+    // ECDSA algorithms
+    static const unsigned int ecdsa_secp256r1_sha256 = 0x0403;
+    static const unsigned int ecdsa_secp384r1_sha384 = 0x0503;
+    static const unsigned int ecdsa_secp521r1_sha512 = 0x0603;
+
+    // RSASSA-PSS algorithms with public key OID rsaEncryption
+    static const unsigned int rsa_pss_rsae_sha256 = 0x0804;
+    static const unsigned int rsa_pss_rsae_sha384 = 0x0805;
+    static const unsigned int rsa_pss_rsae_sha512 = 0x0806;
+
+    // EdDSA algorithms
+    static const unsigned int ed25519 = 0x0807;
+    static const unsigned int ed448   = 0x0808;
+
+    // RSASSA-PSS algorithms with public key OID RSASSA-PSS
+    static const unsigned int rsa_pss_pss_sha256 = 0x0809;
+    static const unsigned int rsa_pss_pss_sha384 = 0x080a;
+    static const unsigned int rsa_pss_pss_sha512 = 0x080b;
+
+    // Legacy algorithms
+    static const unsigned int rsa_pkcs1_sha1 = 0x0201;
+    static const unsigned int ecdsa_sha1     = 0x0203;
+  };
+  class JSLabels {
+  public:
+    static std::string valueHex;
+    static std::string hash;
+    static std::string hashName;
+    static std::string signatureAlgorithm;
+    static std::string signatureAlgorithmName;
+    static std::string interpretation;
+  };
   TransportLayerSecurityServer* ownerServer;
+  unsigned int value;
   unsigned int hash;
   unsigned int signatureAlgorithm;
   SignatureAlgorithmSpecification();
+  JSData ToJSON();
+  std::string ToHex();
+  std::string GetHashName();
+  std::string GetSignatureAlgorithmName();
 };
 
 // At the time of writing, a list of extensions **should** be available here:
@@ -376,6 +427,7 @@ public:
       static std::string signedCertificateTimestampRequest;
       static std::string cipherSuites                     ;
       static std::string serverName                       ;
+      static std::string algorithmSpecifications          ;
     };
     public:
     int socketId;
@@ -384,7 +436,7 @@ public:
     TransportLayerSecurityServer* owner;
     List<unsigned char> incomingRandomBytes;
     List<unsigned char> myRandomBytes;
-    List<SignatureAlgorithmSpecification> incomingRecognizedAlgorithmSpecifications;
+    List<SignatureAlgorithmSpecification> incomingAlgorithmSpecifications;
     LargeIntegerUnsigned ephemerealPrivateKey;
     ElementEllipticCurve<ElementZmodP> ephemerealPublicKey;
     List<unsigned char> serverName;

@@ -1,6 +1,7 @@
 "use strict";
 const miscellaneous = require('./miscellaneous');
 const styles = require('./styles');
+const jsonToHtml = require('./json_to_html');
 
 function AbstractSyntaxOne() {
   /**@type {string} */
@@ -496,6 +497,7 @@ function writeSessionToDOM(
   htmlContent += `<table class = '${styles.classNames.table.borderStandard}'>`;
   var labelsToIgnore = {
     "cipherSuites" : true,
+    "algorithmSpecifications": true,
   };
   for (var label in session) {
     if (label in labelsToIgnore) {
@@ -515,6 +517,9 @@ function writeSessionToDOM(
   var newChild = document.createElement("SPAN");
   newChild.innerHTML = htmlContent;
   outputElement.appendChild(newChild);
+  var algorithmSpecs = document.createElement("SPAN");
+  jsonToHtml.writeJSONtoDOMComponent(session.algorithmSpecifications, algorithmSpecs);  
+  outputElement.appendChild(algorithmSpecs);  
 }
 
 function displaySSLRecord(

@@ -1426,6 +1426,7 @@ SignatureAlgorithmSpecification::SignatureAlgorithmSpecification() {
   this->ownerServer = nullptr;
   this->signatureAlgorithm = 0;
   this->hash = 0;
+  this->value = 0;
 }
 
 bool SSLHelloExtension::ProcessSignatureAlgorithms(std::stringstream* commentsOnError) {
@@ -1444,28 +1445,10 @@ bool SSLHelloExtension::ProcessSignatureAlgorithms(std::stringstream* commentsOn
     incoming.ownerServer = this->owner->owner->owner;
     incoming.hash = specifications[i * 2];
     incoming.signatureAlgorithm = specifications[i * 2 + 1];
-    if (
-      incoming.signatureAlgorithm != SignatureAlgorithmSpecification::SignatureAlgorithm::anonymous &&
-      incoming.signatureAlgorithm != SignatureAlgorithmSpecification::SignatureAlgorithm::DSA &&
-      incoming.signatureAlgorithm != SignatureAlgorithmSpecification::SignatureAlgorithm::ECDSA &&
-      incoming.signatureAlgorithm != SignatureAlgorithmSpecification::SignatureAlgorithm::RSA
-    ) {
-      continue;
-    }
-    if (
-      incoming.hash != SignatureAlgorithmSpecification::HashAlgorithm::md5 &&
-      incoming.hash != SignatureAlgorithmSpecification::HashAlgorithm::none &&
-      incoming.hash != SignatureAlgorithmSpecification::HashAlgorithm::sha1 &&
-      incoming.hash != SignatureAlgorithmSpecification::HashAlgorithm::sha224 &&
-      incoming.hash != SignatureAlgorithmSpecification::HashAlgorithm::sha256 &&
-      incoming.hash != SignatureAlgorithmSpecification::HashAlgorithm::sha384 &&
-      incoming.hash != SignatureAlgorithmSpecification::HashAlgorithm::sha512
-    ) {
-      continue;
-    }
-    session.incomingRecognizedAlgorithmSpecifications.AddOnTop(incoming);
+    incoming.value = incoming.hash * 256 + incoming.signatureAlgorithm;
+    session.incomingAlgorithmSpecifications.AddOnTop(incoming);
   }
-  if (session.incomingRecognizedAlgorithmSpecifications.size == 0) {
+  if (session.incomingAlgorithmSpecifications.size == 0) {
     if (commentsOnError != nullptr) {
       *commentsOnError << "Failed to recognize any hash / algorithm pair supported by the client. ";
     }
@@ -1824,12 +1807,67 @@ std::string TransportLayerSecurityServer::Session::JSLabels::OCSPrequest        
 std::string TransportLayerSecurityServer::Session::JSLabels::signedCertificateTimestampRequest = "RequestSignedCertificateTimestamp";
 std::string TransportLayerSecurityServer::Session::JSLabels::cipherSuites                      = "cipherSuites"                     ;
 std::string TransportLayerSecurityServer::Session::JSLabels::serverName                        = "serverName"                       ;
+std::string TransportLayerSecurityServer::Session::JSLabels::algorithmSpecifications           = "algorithmSpecifications"          ;
 
 std::string TransportLayerSecurityServer::Session::ToStringChosenCipher() {
   if (this->chosenCipher == 0) {
     return "unknown";
   }
   return this->owner->cipherSuiteNames.GetValueConstCrashIfNotPresent(this->chosenCipher);
+}
+
+std::string SignatureAlgorithmSpecification::JSLabels::hash = "hash";
+std::string SignatureAlgorithmSpecification::JSLabels::hashName = "hashName";
+std::string SignatureAlgorithmSpecification::JSLabels::signatureAlgorithm = "signatureAlgorithm";
+std::string SignatureAlgorithmSpecification::JSLabels::signatureAlgorithmName = "signatureAlgorithmName";
+std::string SignatureAlgorithmSpecification::JSLabels::valueHex = "valueHex";
+
+std::string SignatureAlgorithmSpecification::GetSignatureAlgorithmName() {
+  switch (this->signatureAlgorithm) {
+  case SignatureAlgorithmSpecification::SignatureAlgorithm::anonymous:
+    return "anonymous";
+  case SignatureAlgorithmSpecification::SignatureAlgorithm::DSA:
+    return "DSA";
+  case SignatureAlgorithmSpecification::SignatureAlgorithm::ECDSA:
+    return "ECDSA";
+  case SignatureAlgorithmSpecification::SignatureAlgorithm::RSA:
+    return "RSA";
+  }
+  return "unknown";
+}
+
+std::string SignatureAlgorithmSpecification::GetHashName() {
+  switch (this->hash) {
+  case SignatureAlgorithmSpecification::HashAlgorithm::md5:
+    return "md5";
+  case SignatureAlgorithmSpecification::HashAlgorithm::none:
+    return "none";
+  case SignatureAlgorithmSpecification::HashAlgorithm::sha1:
+    return "sha1";
+  case SignatureAlgorithmSpecification::HashAlgorithm::sha224:
+    return "sha224";
+  case SignatureAlgorithmSpecification::HashAlgorithm::sha256:
+    return "sha256";
+  case SignatureAlgorithmSpecification::HashAlgorithm::sha384:
+    return "sha384";
+  case SignatureAlgorithmSpecification::HashAlgorithm::sha512:
+    return "sha512";
+  }
+  return "unknown";
+}
+
+std::string SignatureAlgorithmSpecification::ToHex() {
+  return Crypto::ConvertIntToHex(this->value, 2);
+}
+
+JSData SignatureAlgorithmSpecification::ToJSON() {
+  JSData result;
+  result[SignatureAlgorithmSpecification::JSLabels::valueHex] = this->ToHex();
+  result[SignatureAlgorithmSpecification::JSLabels::hash] = static_cast<int>(this->hash);
+  result[SignatureAlgorithmSpecification::JSLabels::hashName] = this->GetHashName();
+  result[SignatureAlgorithmSpecification::JSLabels::signatureAlgorithm] = static_cast<int>(this->signatureAlgorithm);
+  result[SignatureAlgorithmSpecification::JSLabels::signatureAlgorithmName] = this->GetSignatureAlgorithmName();
+  return result;
 }
 
 JSData TransportLayerSecurityServer::Session::ToJSON() {
@@ -1848,6 +1886,12 @@ JSData TransportLayerSecurityServer::Session::ToJSON() {
     CipherSuiteSpecification& current = this->incomingCiphers[i];
     ciphers[Crypto::ConvertIntToHex(current.id, 2)] = current.name;
   }
+  JSData algorithmSpecifications;
+  algorithmSpecifications.theType = JSData::token::tokenArray;
+  for (int i = 0; i < this->incomingAlgorithmSpecifications.size; i ++) {
+    algorithmSpecifications.theList.AddOnTop(this->incomingAlgorithmSpecifications[i].ToJSON());
+  }
+  result[TransportLayerSecurityServer::Session::JSLabels::algorithmSpecifications] = algorithmSpecifications;
   result[TransportLayerSecurityServer::Session::JSLabels::cipherSuites] = ciphers;
   if (this->serverName.size > 0) {
     result[
@@ -2162,7 +2206,7 @@ bool TransportLayerSecurityServer::Session::SetIncomingRandomBytes(
 void TransportLayerSecurityServer::Session::initialize() {
   this->socketId = - 1;
   this->incomingRandomBytes.SetSize(0);
-  this->incomingRecognizedAlgorithmSpecifications.SetSize(0);
+  this->incomingAlgorithmSpecifications.SetSize(0);
   this->chosenCipher = 0;
   Crypto::GetRandomBytesSecureOutputMayLeaveTraceInFreedMemory(
     this->myRandomBytes, SSLContent::LengthRandomBytesInSSLHello
@@ -2273,7 +2317,10 @@ bool TransportLayerSecurityOpenSSL::InspectCertificates(
 }
 
 int TransportLayerSecurityOpenSSL::SSLRead(
-  List<char>& readBuffer, std::string* outputError, std::stringstream* commentsGeneral, bool includeNoErrorInComments
+  List<char>& readBuffer,
+  std::string* outputError,
+  std::stringstream* commentsGeneral,
+  bool includeNoErrorInComments
 ) {
   ERR_clear_error();
   int result = SSL_read(this->sslData, readBuffer.TheObjects, readBuffer.size);

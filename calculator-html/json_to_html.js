@@ -37,7 +37,8 @@ function writeJSONtoDOMComponent(inputJSON, theDomComponent) {
   if (typeof theDomComponent === "string") {
     theDomComponent = document.getElementById(theDomComponent);
   }
-  theDomComponent.innerHTML = jsonToHtml.getTableFromObject(inputJSON);
+  var transformer = new JSONToHTML();
+  theDomComponent.innerHTML = transformer.getTableFromObject(inputJSON, null, {forceRowLayout: true});
 }
 
 var counterToggleButtons = 0;
@@ -117,7 +118,7 @@ JSONToHTML.prototype.getSingleEntry = function(
 ) {
   var currentOption = this.getOptionFromLabel(currentLabelsGeneralized);
   if (currentOption === null || currentOption === undefined) {
-    return input;
+    return `${input}`;
   }
   var inputTransformed = input;
   if (typeof currentOption.transformer === "function") {
@@ -126,10 +127,12 @@ JSONToHTML.prototype.getSingleEntry = function(
   counterToggleButtons ++;
   var panelId = `panelFromJSONFormatter${counterToggleButtons}`;
   if (typeof currentOption.clickHandler === "function") {
-    inputTransformed = this.getButtonFromLabels(input, panelId, inputTransformed, currentLabels, currentOption.clickHandler);
+    inputTransformed = this.getButtonFromLabels(  
+      input, panelId, inputTransformed, currentLabels, currentOption.clickHandler
+    );
   }
   if (inputTransformed === input) {
-    return input;
+    return `${input}`;
   }
   return getToggleButton(this, panelId, input, inputTransformed);
 }
@@ -225,9 +228,9 @@ JSONToHTML.prototype.getTableHorizontallyLaidFromObject = function(
       var tableLabel = `databaseItem${counterDatabaseTables}`;
       output.write(`<tr id='${tableLabel}'>`);
     } else {
-      output.write(`<tr>`)
+      output.write(`<tr>`);
     }
-    output.write(`<td>${item}</td><td>`)
+    output.write(`<td>${item}</td><td>`);
     this.getTableHorizontallyLaidFromJSON(input[item], newLabels, newLabelsGeneralized, output);
     output.write(`</td>`);
     if (flagIsDeleteable) {
@@ -318,10 +321,10 @@ JSONToHTML.prototype.getTableFromObject = function(
 ) {
   this.inputParsed = input;
   this.optionsConstant = {};
-  if ((typeof optionsConstant) === "object") {
+  if ((typeof optionsConstant) === "object" && optionsConstant !== null) {
     this.optionsConstant = optionsConstant;
   } 
-  if (typeof optionsModified !== "object") {
+  if (optionsModified === null || typeof optionsModified !== "object") {
     optionsModified = {};
   }
   if (typeof optionsModified.table === "string") {
@@ -407,6 +410,7 @@ JSONToHTML.prototype.getHtmlFromArray = function(
 
 module.exports = {
   JSONToHTML,
+  writeJSONtoDOMComponent,
   getToggleButton,
   transformersStandard,
 };

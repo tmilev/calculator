@@ -48,6 +48,7 @@ public:
   bool LoadFromPEMFile(const std::string& input, std::stringstream* commentsOnFailure);
   bool LoadFromPEM(const std::string& input, std::stringstream* commentsOnFailure);
   bool LoadFromASNEncoded(List<unsigned char>& input, std::stringstream* commentsOnFailure);
+  void SignBytes(List<unsigned char>& input, List<unsigned char>& output);
   std::string ToString() const;
 };
 

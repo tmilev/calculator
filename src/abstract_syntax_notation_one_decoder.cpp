@@ -1566,6 +1566,10 @@ bool PrivateKeyRSA::LoadFromPEM(const std::string& input, std::stringstream* com
   return this->LoadFromASNEncoded(this->sourceBinary, commentsOnFailure);
 }
 
+void PrivateKeyRSA::SignBytes(List<unsigned char>& input, List<unsigned char>& output) {
+  int pleaseImplementSignBytes;
+}
+
 bool PrivateKeyRSA::LoadFromASNEncoded(
   List<unsigned char>& input, std::stringstream* commentsOnFailure
 ) {

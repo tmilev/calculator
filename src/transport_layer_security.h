@@ -80,7 +80,7 @@ public:
   void DoSetSocket(int theSocket);
   void SetSocketAddToStack(int theSocket);
   void RemoveLastSocket();
-  bool HandShakeIamServer(int inputSocketID, std::stringstream*ccommentsOnFailure);
+  bool HandShakeIamServer(int inputSocketID, std::stringstream* commentsOnFailure);
   bool InspectCertificates(
     std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
   );
@@ -94,6 +94,35 @@ class SSLContent;
 
 class CipherSuiteSpecification {
 public:
+  class EllipticCurveSpecification {
+  public:
+    static const unsigned int sect163k1 = 1 ;
+    static const unsigned int sect163r1 = 2 ;
+    static const unsigned int sect163r2 = 3 ;
+    static const unsigned int sect193r1 = 4 ;
+    static const unsigned int sect193r2 = 5 ;
+    static const unsigned int sect233k1 = 6 ;
+    static const unsigned int sect233r1 = 7 ;
+    static const unsigned int sect239k1 = 8 ;
+    static const unsigned int sect283k1 = 9 ;
+    static const unsigned int sect283r1 = 10;
+    static const unsigned int sect409k1 = 11;
+    static const unsigned int sect409r1 = 12;
+    static const unsigned int sect571k1 = 13;
+    static const unsigned int sect571r1 = 14;
+    static const unsigned int secp160k1 = 15;
+    static const unsigned int secp160r1 = 16;
+    static const unsigned int secp160r2 = 17;
+    static const unsigned int secp192k1 = 18;
+    static const unsigned int secp192r1 = 19;
+    static const unsigned int secp224k1 = 20;
+    static const unsigned int secp224r1 = 21;
+    static const unsigned int secp256k1 = 22;
+    static const unsigned int secp256r1 = 23;
+    static const unsigned int secp384r1 = 24;
+    static const unsigned int secp521r1 = 25;
+    static const unsigned int curve25519 = 30;
+  };
   int id;
   std::string name;
   TransportLayerSecurityServer* owner;
@@ -108,7 +137,8 @@ public:
 
 class SignatureAlgorithmSpecification {
 public:
-  // Older RFCs requested that algorithm
+  // The older RFC (RFC 5246, page 45)
+  // requests that algorithm
   // specifications be specified through two bytes.
   // The first byte would specify the hash algorithm,
   // and the second byte - the signature algorithm.
@@ -129,10 +159,11 @@ public:
     static const unsigned char DSA = 2;
     static const unsigned char ECDSA = 3;
   };
-  // Newer RFCs fix the allowed two-byte combinations.
+  // Newer RFC 8446
+  // fixes the allowed two-byte combinations.
   // Page 41, RFC 8446
   // https://tools.ietf.org/html/rfc8446#page-41
-  class Algorithms {
+  class AlgorithmPacks {
   public:
     // RSASSA-PKCS1-v1_5 algorithms
     static const unsigned int rsa_pkcs1_sha256 = 0x0401;
@@ -177,6 +208,7 @@ public:
   unsigned int signatureAlgorithm;
   SignatureAlgorithmSpecification();
   JSData ToJSON();
+  void processValue();
   std::string ToHex();
   std::string GetHashName();
   std::string GetSignatureAlgorithmName();
@@ -279,7 +311,7 @@ public:
     static const unsigned int renegotiateConnection = 255 * 256 + 1; // 0xff01
 
   };
-
+  static const unsigned char namedCurve = 3;
   SSLContent();
   static std::string GetType(unsigned char theToken);
   void resetExceptOwner();
@@ -305,9 +337,6 @@ public:
   // wiping the already existing contents of output.
   void WriteBytes(List<unsigned char>& output, List<Serialization::Marker>* annotations) const;
   void WriteType(List<unsigned char>& output, List<Serialization::Marker>* annotations) const;
-  void WriteNamedCurveAndPublicKey(
-    List<unsigned char>& output, List<Serialization::Marker>* annotations
-  ) const;
   void WriteVersion(List<unsigned char>& output, List<Serialization::Marker>* annotations) const;
   void WriteBytesHandshakeClientHello(
     List<unsigned char>& output, List<Serialization::Marker>* annotations
@@ -428,28 +457,40 @@ public:
       static std::string cipherSuites                     ;
       static std::string serverName                       ;
       static std::string algorithmSpecifications          ;
+      static std::string ellipticCurveId                  ;
+      static std::string ellipticCurveName                ;
+      static std::string bytesToSign                      ;
     };
     public:
     int socketId;
+    int chosenCipher;
+    int chosenSignatureAlgorithm;
+    int chosenEllipticCurve;
+    std::string chosenEllipticCurveName;
     bool flagRequestOnlineCertificateStatusProtocol;
     bool flagRequestSignedCertificateTimestamp;
     TransportLayerSecurityServer* owner;
     List<unsigned char> incomingRandomBytes;
     List<unsigned char> myRandomBytes;
+    List<unsigned char> bytesToSign;
+    List<unsigned char> signature;
     List<SignatureAlgorithmSpecification> incomingAlgorithmSpecifications;
     LargeIntegerUnsigned ephemerealPrivateKey;
     ElementEllipticCurve<ElementZmodP> ephemerealPublicKey;
     List<unsigned char> serverName;
     List<CipherSuiteSpecification> incomingCiphers;
-    int chosenCipher;
     std::string ToStringChosenCipher();
     JSData ToJSON();
     Session();
+    bool ComputeAndSignEphemerealKey(std::stringstream* commentOnError);
     bool ChooseCipher(std::stringstream* commentsOnFailure);
     void initialize();
     bool SetIncomingRandomBytes(
       List<unsigned char>& input, std::stringstream* commentsOnFailure
     );
+    void WriteNamedCurveAndPublicKey(
+      List<unsigned char>& output, List<Serialization::Marker>* annotations
+    ) const;
   };
   TransportLayerSecurityServer::Session session;
   X509Certificate certificate;

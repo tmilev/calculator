@@ -116,7 +116,6 @@ bool LargeIntegerUnsigned::WriteBigEndianFixedNumberOfBytes(
   std::stringstream* commentsOnFailure
 ) const {
   int startOffset = outputAppend.size;
-  std::cout << "DEBUG: Here am I ...";
   this->WriteBigEndianBytes(outputAppend, 0);
   int zeroesToPad = desiredNumberOfBytes - outputAppend.size - startOffset;
   if (zeroesToPad > 0) {
@@ -247,7 +246,9 @@ bool LargeIntegerUnsigned::IsGEQ(const LargeIntegerUnsigned& x) const {
   return true;
 }
 
-void LargeIntegerUnsigned::GetAllPrimesSmallerThanOrEqualToUseEratosthenesSieve(unsigned int n, List<unsigned int>& output) {
+void LargeIntegerUnsigned::GetAllPrimesSmallerThanOrEqualToUseEratosthenesSieve(
+  unsigned int n, List<unsigned int>& output
+) {
   List<int> theSieve;
   theSieve.initializeFillInObject(static_cast<signed>(n) + 1, 1);
   output.Reserve(n / 2);
@@ -357,7 +358,9 @@ void LargeIntegerUnsigned::ToString(std::string& output) const {
 }
 
 void LargeIntegerUnsigned::DivPositive(
-  const LargeIntegerUnsigned& divisor, LargeIntegerUnsigned& quotientOutput, LargeIntegerUnsigned& remainderOutput
+  const LargeIntegerUnsigned& divisor,
+  LargeIntegerUnsigned& quotientOutput,
+  LargeIntegerUnsigned& remainderOutput
 ) const {
   if (divisor.IsEqualToZero()) {
     crash << "Division by zero. " << crash;
@@ -786,7 +789,11 @@ LargeIntegerUnsigned LargeIntegerUnsigned::gcd(const LargeIntegerUnsigned& a, co
   return output;
 }
 
-void LargeIntegerUnsigned::gcd(const LargeIntegerUnsigned& a, const LargeIntegerUnsigned& b, LargeIntegerUnsigned& output) {
+void LargeIntegerUnsigned::gcd(
+  const LargeIntegerUnsigned& a,
+  const LargeIntegerUnsigned& b,
+  LargeIntegerUnsigned& output
+) {
   MacroIncrementCounter(Rational::TotalLargeGCDcalls);
   LargeIntegerUnsigned p, q, r, temp;
   p = a;

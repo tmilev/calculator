@@ -991,16 +991,21 @@ std::string SSLContent::GetType(unsigned char theToken) {
   }
 }
 
-void SSLContent::WriteNamedCurveAndPublicKey(
+void TransportLayerSecurityServer::Session::WriteNamedCurveAndPublicKey(
   List<unsigned char>& output, List<Serialization::Marker>* annotations
 ) const {
   MacroRegisterFunctionWithName("SSLContent::WriteNamedCurveAndPublicKey");
-  Serialization::WriterOneByteInteger curveName(3, output, annotations, "named curve");
-  Serialization::WriteTwoByteUnsignedAnnotated(30, output, annotations, "curve25519");
+  Serialization::WriterOneByteInteger curveName(SSLContent::namedCurve, output, annotations, "named curve");
+  Serialization::WriteTwoByteUnsignedAnnotated(
+    this->chosenEllipticCurve,
+    output,
+    annotations,
+    this->chosenEllipticCurveName
+  );
   std::stringstream shouldNotBeNeeded;
   List<unsigned char> publicKeyBytes;
   bool mustBeTrue =
-  this->owner->owner->session.ephemerealPublicKey.xCoordinate.theValue.WriteBigEndianFixedNumberOfBytes(
+  this->ephemerealPublicKey.xCoordinate.theValue.WriteBigEndianFixedNumberOfBytes(
     publicKeyBytes, 32, &shouldNotBeNeeded
   );
   Serialization::WriteOneByteLengthFollowedByBytes(publicKeyBytes, output, annotations, "public key");
@@ -1049,7 +1054,7 @@ void SSLContent::WriteBytesHandshakeSecretExchange(
   }
   this->WriteType(output, annotations);
   Serialization::LengthWriterThreeBytes writeLength(output, annotations, "server key exchange");
-  this->WriteNamedCurveAndPublicKey(output, annotations);
+  this->owner->owner->session.WriteNamedCurveAndPublicKey(output, annotations);
 }
 
 void SSLContent::WriteBytesHandshakeClientHello(
@@ -1429,8 +1434,16 @@ SignatureAlgorithmSpecification::SignatureAlgorithmSpecification() {
   this->value = 0;
 }
 
+void SignatureAlgorithmSpecification::processValue() {
+  // Works for all RSA and ECDSA-based algorithms:
+  this->hash = this->value / 256;
+  this->signatureAlgorithm = this->value % 256;
+}
+
 bool SSLHelloExtension::ProcessSignatureAlgorithms(std::stringstream* commentsOnError) {
-  // See: [7.4.1.4.1., RFC5246]
+  // See:
+  // 1. [7.4.1.4.1., RFC5246]
+  // 2. [page 41, RFC 8446].
   TransportLayerSecurityServer::Session& session = this->owner->owner->owner->session;
   int offset = 0;
   List<unsigned char> specifications;
@@ -1443,9 +1456,8 @@ bool SSLHelloExtension::ProcessSignatureAlgorithms(std::stringstream* commentsOn
   for (int i = 0; i < numberOfPairs; i ++) {
     SignatureAlgorithmSpecification incoming;
     incoming.ownerServer = this->owner->owner->owner;
-    incoming.hash = specifications[i * 2];
-    incoming.signatureAlgorithm = specifications[i * 2 + 1];
-    incoming.value = incoming.hash * 256 + incoming.signatureAlgorithm;
+    incoming.value = specifications[i * 2] * 256 + specifications[i * 2 + 1];
+    incoming.processValue();
     session.incomingAlgorithmSpecifications.AddOnTop(incoming);
   }
   if (session.incomingAlgorithmSpecifications.size == 0) {
@@ -1498,7 +1510,11 @@ bool Serialization::ReadThreeByteInt(
 }
 
 bool Serialization::ReadNByteInt(
-  int numBytes, const List<unsigned char>& input, int& inputOutputOffset, int& result, std::stringstream* commentsOnFailure
+  int numBytes,
+  const List<unsigned char>& input,
+  int& inputOutputOffset,
+  int& result,
+  std::stringstream* commentsOnFailure
 ) {
   if (numBytes > 4) {
     crash << "Not allowed to read more than 4 bytes into an integer. " << crash;
@@ -1799,16 +1815,6 @@ JSData SSLRecord::ToJSON() {
   return result;
 }
 
-std::string TransportLayerSecurityServer::Session::JSLabels::chosenCipher                      = "chosenCipher"                     ;
-std::string TransportLayerSecurityServer::Session::JSLabels::chosenCipherName                  = "chosenCipherName"                 ;
-std::string TransportLayerSecurityServer::Session::JSLabels::incomingRandomBytes               = "incomingRandomBytes"              ;
-std::string TransportLayerSecurityServer::Session::JSLabels::myRandomBytes                     = "myRandomBytes"                    ;
-std::string TransportLayerSecurityServer::Session::JSLabels::OCSPrequest                       = "OnlineCertificateStatusProtocol"  ;
-std::string TransportLayerSecurityServer::Session::JSLabels::signedCertificateTimestampRequest = "RequestSignedCertificateTimestamp";
-std::string TransportLayerSecurityServer::Session::JSLabels::cipherSuites                      = "cipherSuites"                     ;
-std::string TransportLayerSecurityServer::Session::JSLabels::serverName                        = "serverName"                       ;
-std::string TransportLayerSecurityServer::Session::JSLabels::algorithmSpecifications           = "algorithmSpecifications"          ;
-
 std::string TransportLayerSecurityServer::Session::ToStringChosenCipher() {
   if (this->chosenCipher == 0) {
     return "unknown";
@@ -1870,6 +1876,19 @@ JSData SignatureAlgorithmSpecification::ToJSON() {
   return result;
 }
 
+std::string TransportLayerSecurityServer::Session::JSLabels::chosenCipher                      = "chosenCipher"                     ;
+std::string TransportLayerSecurityServer::Session::JSLabels::chosenCipherName                  = "chosenCipherName"                 ;
+std::string TransportLayerSecurityServer::Session::JSLabels::incomingRandomBytes               = "incomingRandomBytes"              ;
+std::string TransportLayerSecurityServer::Session::JSLabels::myRandomBytes                     = "myRandomBytes"                    ;
+std::string TransportLayerSecurityServer::Session::JSLabels::OCSPrequest                       = "OnlineCertificateStatusProtocol"  ;
+std::string TransportLayerSecurityServer::Session::JSLabels::signedCertificateTimestampRequest = "RequestSignedCertificateTimestamp";
+std::string TransportLayerSecurityServer::Session::JSLabels::cipherSuites                      = "cipherSuites"                     ;
+std::string TransportLayerSecurityServer::Session::JSLabels::serverName                        = "serverName"                       ;
+std::string TransportLayerSecurityServer::Session::JSLabels::algorithmSpecifications           = "algorithmSpecifications"          ;
+std::string TransportLayerSecurityServer::Session::JSLabels::ellipticCurveId                   = "ellipticCurveId"                  ;
+std::string TransportLayerSecurityServer::Session::JSLabels::ellipticCurveName                 = "ellipticCurveName"                ;
+std::string TransportLayerSecurityServer::Session::JSLabels::bytesToSign                       = "bytesToSign"                      ;
+
 JSData TransportLayerSecurityServer::Session::ToJSON() {
   JSData result;
   result.theType = JSData::token::tokenArray;
@@ -1879,6 +1898,9 @@ JSData TransportLayerSecurityServer::Session::ToJSON() {
   result[TransportLayerSecurityServer::Session::JSLabels::myRandomBytes                    ] = Crypto::ConvertListUnsignedCharsToHex(this->myRandomBytes);
   result[TransportLayerSecurityServer::Session::JSLabels::OCSPrequest                      ] = this->flagRequestOnlineCertificateStatusProtocol;
   result[TransportLayerSecurityServer::Session::JSLabels::signedCertificateTimestampRequest] = this->flagRequestSignedCertificateTimestamp;
+  result[TransportLayerSecurityServer::Session::JSLabels::ellipticCurveId                  ] = this->chosenEllipticCurve;
+  result[TransportLayerSecurityServer::Session::JSLabels::ellipticCurveName                ] = this->chosenEllipticCurveName;
+  result[TransportLayerSecurityServer::Session::JSLabels::bytesToSign                      ] = Crypto::ConvertListUnsignedCharsToHex(this->bytesToSign);
   JSData ciphers;
   ciphers.theType = JSData::token::tokenObject;
   ciphers.theList.SetSize(this->incomingCiphers.size);
@@ -2068,6 +2090,20 @@ void SSLContent::PrepareServerHello2Certificate() {
   this->theType = SSLContent::tokens::certificate;
 }
 
+bool TransportLayerSecurityServer::Session::ComputeAndSignEphemerealKey(std::stringstream* commentOnError) {
+  MacroRegisterFunctionWithName("TransportLayerSecurityServer::Session::ComputeAndSignEphemerealKey");
+  Crypto::GetRandomLargeIntegerSecure(this->ephemerealPrivateKey, 32);
+  this->chosenEllipticCurve = CipherSuiteSpecification::EllipticCurveSpecification::secp256k1;
+  this->chosenEllipticCurveName = "secp256k1";
+  this->bytesToSign.SetSize(0);
+  this->bytesToSign.AddListOnTop(this->incomingRandomBytes);
+  this->bytesToSign.AddListOnTop(this->myRandomBytes);
+  //
+  this->WriteNamedCurveAndPublicKey(this->bytesToSign, nullptr);
+  this->owner->privateKey.SignBytes(this->bytesToSign, this->signature);
+  return true;
+}
+
 // https://commandlinefanatic.com/cgi-bin/showarticle.cgi?article=art060
 bool SSLContent::PrepareServerHello3ServerKeyExchange(std::stringstream* commentsOnError) {
   MacroRegisterFunctionWithName("SSLContent::PrepareServerHello3SecretNegotiation");
@@ -2079,12 +2115,15 @@ bool SSLContent::PrepareServerHello3ServerKeyExchange(std::stringstream* comment
     }
     return false;
   }
-  Crypto::GetRandomLargeIntegerSecure(this->owner->owner->session.ephemerealPrivateKey, 32);
+  if (!this->owner->owner->session.ComputeAndSignEphemerealKey(commentsOnError)) {
+    return false;
+  }
   // this->owner->owner->session.ephemerealPublicKey.
   return true;
 }
 
 bool TransportLayerSecurityServer::Session::ChooseCipher(std::stringstream* commentsOnFailure) {
+  (void) commentsOnFailure;
   MapList<int, CipherSuiteSpecification, MathRoutines::IntUnsignIdentity>& suites =
   this->owner->supportedCiphers;
   int bestIndex = suites.size();
@@ -2208,15 +2247,22 @@ void TransportLayerSecurityServer::Session::initialize() {
   this->incomingRandomBytes.SetSize(0);
   this->incomingAlgorithmSpecifications.SetSize(0);
   this->chosenCipher = 0;
+  this->chosenSignatureAlgorithm = 0;
+  this->chosenEllipticCurve = 0;
+  this->chosenEllipticCurveName = "";
   Crypto::GetRandomBytesSecureOutputMayLeaveTraceInFreedMemory(
     this->myRandomBytes, SSLContent::LengthRandomBytesInSSLHello
   );
   this->ephemerealPrivateKey = 0;
   this->serverName.SetSize(0);
+  this->bytesToSign.SetSize(0);
+  this->signature.SetSize(0);
   this->incomingCiphers.SetSize(0);
 }
 
-bool TransportLayerSecurityServer::HandShakeIamServer(int inputSocketID, std::stringstream* commentsOnFailure) {
+bool TransportLayerSecurityServer::HandShakeIamServer(
+  int inputSocketID, std::stringstream* commentsOnFailure
+) {
   MacroRegisterFunctionWithName("TransportLayerSecurityServer::HandShakeIamServer");
   this->session.initialize();
   this->session.socketId = inputSocketID;
@@ -2385,7 +2431,7 @@ int TransportLayerSecurity::SSLWrite(
       includeNoErrorInComments
     );
   } else {
-    crash << "Not imeplemented yet. " << crash;
+    crash << "Not implemented yet. " << crash;
     return - 1;
   }
 }

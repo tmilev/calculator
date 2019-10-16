@@ -605,11 +605,6 @@ bool CalculatorFunctionsGeneral::innerBase64ToHex(Calculator& theCommands, const
   return output.AssignValue(result, theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerRSAVerifySignature(Calculator &theCommands, const Expression &input, Expression &output) {
-  bool continueHere;
-  crash << "Not implemented yet." << crash;
-}
-
 bool CalculatorFunctionsGeneral::innerRSAEncrypt(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerRSAEncrypt");
   if (input.size() != 4) {
@@ -2213,7 +2208,17 @@ bool CalculatorFunctionsGeneral::innerPrecomputeSemisimpleLieAlgebraStructure(
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerTestASN1Decode(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsGeneral::innerShowKnownObjectIds(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerShowKnownObjectIds");
+  (void) input;
+  return output.AssignValue(ASNObject::ToStringAllRecognizedObjectIds(), theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerTestASN1Decode(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestASN1Decode");
   std::string data;
   if (!input.IsOfType<std::string>(&data)) {

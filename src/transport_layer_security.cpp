@@ -2100,7 +2100,11 @@ bool TransportLayerSecurityServer::Session::ComputeAndSignEphemerealKey(std::str
   this->bytesToSign.AddListOnTop(this->myRandomBytes);
   //
   this->WriteNamedCurveAndPublicKey(this->bytesToSign, nullptr);
-  this->owner->privateKey.SignBytes(this->bytesToSign, this->signature);
+  this->owner->privateKey.SignBytesPadPKCS1(
+    this->bytesToSign,
+    SignatureAlgorithmSpecification::HashAlgorithm::sha256,
+    this->signature
+  );
   return true;
 }
 

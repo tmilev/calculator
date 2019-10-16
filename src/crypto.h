@@ -24,6 +24,8 @@ public:
   std::string ToString();
 };
 
+// Reference:
+// https://en.wikipedia.org/wiki/RSA_(cryptosystem)
 class PrivateKeyRSA {
 public:
   LargeIntegerUnsigned primeOne;
@@ -48,7 +50,8 @@ public:
   bool LoadFromPEMFile(const std::string& input, std::stringstream* commentsOnFailure);
   bool LoadFromPEM(const std::string& input, std::stringstream* commentsOnFailure);
   bool LoadFromASNEncoded(List<unsigned char>& input, std::stringstream* commentsOnFailure);
-  void SignBytes(List<unsigned char>& input, List<unsigned char>& output);
+  void SignBytesPadPKCS1(List<unsigned char>& input, int hash, List<unsigned char>& output);
+  void HashAndPadPKCS1(List<unsigned char>& input, int hash, List<unsigned char>& output);
   std::string ToString() const;
 };
 
@@ -350,7 +353,9 @@ public:
     std::stringstream* commentsOnFailure
   );
   static void GetRandomBytesSecure(ListZeroAfterUse<unsigned char>& output, int numBytes);
-  static void GetRandomBytesSecureOutputMayLeaveTraceInFreedMemory(List<unsigned char>& output, int numBytes);
+  static void GetRandomBytesSecureOutputMayLeaveTraceInFreedMemory(
+    List<unsigned char>& output, int numBytes
+  );
   static void GetRandomLargeIntegerSecure(LargeIntegerUnsigned& output, int numBytes);
 };
 

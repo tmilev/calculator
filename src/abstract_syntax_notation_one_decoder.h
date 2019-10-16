@@ -98,6 +98,7 @@ public:
   void MakeNull();
   void MakeInteger(const LargeIntegerUnsigned& input);
   void MakeBitStrinG(const List<unsigned char>& input);
+  void MakeOctetString(const List<unsigned char>& input);
   void SetStartByteFlags(bool setLeadingBit, bool setSecondMostSignificantBit, bool setConstructed);
   void MakeBitStringEmpty(bool setLeadingBit, bool setSecondMostSignificantBit, bool setConstructed);
   void MakeObjectId(const List<unsigned char>& input);
@@ -152,6 +153,10 @@ private:
 public:
   class names {
   public:
+    static std::string sha1;
+    static std::string sha256;
+    static std::string sha384;
+    static std::string sha512;
     static std::string sha256WithRSAEncryption;
     static std::string RSAEncryption          ;
     static std::string subjectKeyIdentifier   ;
@@ -293,6 +298,7 @@ public:
   void DecodeASNAtomContent(ASNElement& output);
   bool DecodeNull(ASNElement& output);
   bool DecodeCurrentBuiltInType(std::stringstream* commentsOnError);
+  bool DecodeLengthIncrementDataPointerNoCheck(ASNElement& output);
   bool DecodeLengthIncrementDataPointer(ASNElement& output);
 
   static void WriteUnsignedIntegerObject(const LargeIntegerUnsigned& input, List<unsigned char>& output);

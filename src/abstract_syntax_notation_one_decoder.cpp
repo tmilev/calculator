@@ -5,6 +5,7 @@
 #include "crypto.h"
 #include "math_extra_algebraic_numbers.h"
 #include "serialization_basic.h"
+#include "transport_layer_security.h"
 
 extern logger logWorker, logServer;
 
@@ -63,7 +64,27 @@ bool AbstractSyntaxNotationOneSubsetDecoder::CheckInitialization() const {
   return true;
 }
 
+
 bool AbstractSyntaxNotationOneSubsetDecoder::DecodeLengthIncrementDataPointer(
+  ASNElement& output
+) {
+  if (!this->DecodeLengthIncrementDataPointerNoCheck(output)) {
+    return false;
+  }
+  if (output.lengthPromised + this->dataPointer > this->rawDatA->size) {
+    std::stringstream errorStream;
+    errorStream << "Element length: " << output.lengthPromised << " plus element body offset: "
+    << this->dataPointer << " exceeds the total byte length: " << this->rawDatA->size << ". ";
+    output.error = errorStream.str();
+    return false;
+  }
+  //std::cout << "DEBUG: length promised: " << output.lengthPromised
+  //<< "; data pointer: " << this->dataPointer
+  //<< " raw size: " << this->rawDatA->size << "\n";
+  return true;
+}
+
+bool AbstractSyntaxNotationOneSubsetDecoder::DecodeLengthIncrementDataPointerNoCheck(
   ASNElement& output
 ) {
   output.lengthPromised = 0;
@@ -764,12 +785,17 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeCurrent(
   if (this->PointerIsBad(output)) {
     return false;
   }
-  output.startByte= (*this->rawDatA)[this->dataPointer];
+  output.startByte = (*this->rawDatA)[this->dataPointer];
   output.ComputeTag();
   this->dataPointer ++;
+  if (this->PointerIsBad(output)) {
+    return false;
+  }
+  std::cout << "DEBUG: got to here pt -1!!!";
   if (!this->DecodeLengthIncrementDataPointer(output)) {
     return false;
   }
+  std::cout << "DEBUG: got to here!!!";
   std::stringstream errorStream;
   switch (output.tag) {
   // pure composite elements:
@@ -836,6 +862,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::Decode(
     if (commentsOnError != nullptr) {
       *commentsOnError << "Failed to decode data with error: " << this->decodedData->error;
     }
+    return false;
   }
   if (this->dataPointer < this->rawDatA->size && this->flagMustDecodeAll) {
     if (commentsOnError != nullptr) {
@@ -1015,6 +1042,10 @@ MapList<List<unsigned char>, ASNObject, MathRoutines::HashListUnsignedChars>& AS
   return result;
 }
 
+std::string ASNObject::names::sha1                    = "sha1"                   ;
+std::string ASNObject::names::sha256                  = "sha256"                 ;
+std::string ASNObject::names::sha384                  = "sha384"                 ;
+std::string ASNObject::names::sha512                  = "sha512"                 ;
 std::string ASNObject::names::sha256WithRSAEncryption = "sha256WithRSAEncryption";
 std::string ASNObject::names::RSAEncryption           = "RSAEncryption"          ;
 std::string ASNObject::names::countryName             = "countryName"            ;
@@ -1030,7 +1061,35 @@ std::string ASNObject::names::authorityKeyIdentifier  = "authorityKeyIdentifier"
 
 MapList<std::string, ASNObject, MathRoutines::HashString>& ASNObject::NamesToObjectIdsNonThreadSafe() {
   static MapList<std::string, ASNObject, MathRoutines::HashString> container;
+  // Object ids of some hash functions are given in RFC4055.
+  // Object ids of hash functions may be deduced from [Page 42, RFC 3447]
   if (container.size() == 0) {
+    ASNObject::initializeAddSample(
+      container,
+      ASNObject::names::sha1,
+      "2b0e03021a",
+      AbstractSyntaxNotationOneSubsetDecoder::tags::null0x05
+    );
+    ASNObject::initializeAddSample(
+      container,
+      ASNObject::names::sha256,
+      "608648016503040201",
+      AbstractSyntaxNotationOneSubsetDecoder::tags::null0x05
+    );
+    ASNObject::initializeAddSample(
+      container,
+      ASNObject::names::sha384,
+      "608648016503040202",
+      AbstractSyntaxNotationOneSubsetDecoder::tags::null0x05
+    );
+    ASNObject::initializeAddSample(
+      container,
+      ASNObject::names::sha512,
+      "608648016503040203",
+      AbstractSyntaxNotationOneSubsetDecoder::tags::null0x05
+    );
+
+
     ASNObject::initializeAddSample(
       container,
       ASNObject::names::sha256WithRSAEncryption ,
@@ -1337,6 +1396,13 @@ void ASNElement::MakeBitStrinG(const List<unsigned char>& input) {
   this->ASNAtom = input;
 }
 
+void ASNElement::MakeOctetString(const List<unsigned char>& input) {
+  this->reset();
+  this->startByte = AbstractSyntaxNotationOneSubsetDecoder::tags::octetString0x04;
+  this->tag = this->startByte;
+  this->ASNAtom = input;
+}
+
 void TBSCertificateInfo::ComputeASNSignature(ASNElement& output) {
   output.MakeSequence(2);
   output.comment = "signature";
@@ -1566,8 +1632,31 @@ bool PrivateKeyRSA::LoadFromPEM(const std::string& input, std::stringstream* com
   return this->LoadFromASNEncoded(this->sourceBinary, commentsOnFailure);
 }
 
-void PrivateKeyRSA::SignBytes(List<unsigned char>& input, List<unsigned char>& output) {
-  int pleaseImplementSignBytes;
+// Notes:
+// https://tools.ietf.org/html/rfc3447#page-23
+// Algorithm:
+// https://tools.ietf.org/html/rfc3447#page-29
+void PrivateKeyRSA::SignBytesPadPKCS1(
+  List<unsigned char>& input,
+  int hash,
+  List<unsigned char>& output
+) {
+
+
+}
+
+void PrivateKeyRSA::HashAndPadPKCS1(List<unsigned char>& input, int hash, List<unsigned char>& output) {
+  List<unsigned char> inputHashed;
+  switch (hash) {
+  case SignatureAlgorithmSpecification::HashAlgorithm::sha256:
+    Crypto::computeSha256(input, inputHashed);
+    break;
+  default:
+    crash << "Non-allowed or non-implemented value for the hash algorithm. " << crash;
+  }
+  ASNElement encoder;
+  ASNElement theHash;
+  theHash.MakeOctetString(inputHashed);
 }
 
 bool PrivateKeyRSA::LoadFromASNEncoded(

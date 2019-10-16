@@ -869,15 +869,15 @@ void Calculator::initPredefinedInnerFunctions() {
     "X509CertificateDecode"
   );
   this->AddOperationInnerHandler(
-    "VerifyRSASignature",
-    CalculatorFunctionsGeneral::innerRSAVerifySignature,
+    "ShowKnownASNObjectIds",
+    CalculatorFunctionsGeneral::innerShowKnownObjectIds,
     "",
-    "Tries to verify a Json Web Token.",
-    "%HideLHS JWTverifyAgainstKnownKeys(\"\"); ",
+    "Lists all abstract syntax one object ids hard-coded in the calculator.",
+    "ShowKnownASNObjectIds 0",
     true,
     false,
-    "CalculatorFunctionsGeneral::innerJWTverifyAgainstKnownKeys",
-    "VerifyRSASignature"
+    "CalculatorFunctionsGeneral::innerShowKnownObjectIds",
+    "ShowKnownASNObjectIds"
   );
   this->AddOperationInnerHandler(
     "JWTverifyAgainstKnownKeys",

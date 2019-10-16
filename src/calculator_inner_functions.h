@@ -69,7 +69,8 @@ public:
   static bool innerJWTVerifyAgainstKnownKeys(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerJWTVerifyAgainstRSA256(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerRSAEncrypt(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerRSAVerifySignature(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerRSASign(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerShowKnownObjectIds(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSha224OfString(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSha256OfString(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerRIPEMD160OfString(Calculator& theCommands, const Expression& input, Expression& output);

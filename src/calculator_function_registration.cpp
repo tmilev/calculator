@@ -869,8 +869,19 @@ void Calculator::initPredefinedInnerFunctions() {
     "X509CertificateDecode"
   );
   this->AddOperationInnerHandler(
+    "VerifyRSASignature",
+    CalculatorFunctionsGeneral::innerRSAVerifySignature,
+    "",
+    "Tries to verify a Json Web Token.",
+    "%HideLHS JWTverifyAgainstKnownKeys(\"\"); ",
+    true,
+    false,
+    "CalculatorFunctionsGeneral::innerJWTverifyAgainstKnownKeys",
+    "VerifyRSASignature"
+  );
+  this->AddOperationInnerHandler(
     "JWTverifyAgainstKnownKeys",
-    CalculatorFunctionsGeneral::innerJWTverifyAgainstKnownKeys,
+    CalculatorFunctionsGeneral::innerJWTVerifyAgainstKnownKeys,
     "",
     "Tries to verify a Json Web Token.",
     "%HideLHS JWTverifyAgainstKnownKeys(\"\"); ",
@@ -880,8 +891,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "JWTverifyAgainstKnownKeys"
   );
   this->AddOperationInnerHandler(
-    "JWTverifyRSA256",
-    CalculatorFunctionsGeneral::innerJWTverifyAgainstRSA256,
+    "JWTVerifyRSA256",
+    CalculatorFunctionsGeneral::innerJWTVerifyAgainstRSA256,
     "",
     "Tries to verify a Json Web Token with respect to a given rsa modulus and exponent. "
     "The reference JWT token was taken from: https://tools.ietf.org/html/rfc7515#page-38, "
@@ -890,11 +901,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "token =\"eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ.cC4hiUPoj9Eetdgtv3hF80EGrhuB__dzERat0XF9g2VtQgr9PJbu3XOiZj5RZmh7AAuHIm4Bh-0Qc_lF5YKt_O8W2Fp5jujGbds9uJdbF9CUAr7t1dnZcAcQjbKBYNX4BAynRFdiuB--f_nZLgrnbyTyWzO75vRK5h6xBArLIARNPvkSjtQBMHlb1L07Qe7K0GarZRmB_eSN9383LcOLn6_dO--xi12jzDwusC-eOkHWEsqtFZESc6BfI7noOPqvhJ1phCnvWh6IeYI2w9QOYEUipUTI8np6LbgGY9Fs98rqVt5AXLIhWkWywlVmtVrBp0igcN_IoypGlUPQGe77Rw\";\n"
     "modulus = \"ofgWCuLjybRlzo0tZWJjNiuSfb4p4fAkd_wWJcyQoTbji9k0l8W26mPddxHmfHQp-Vaw-4qPCJrcS2mJPMEzP1Pt0Bm4d4QlL-yRT-SFd2lZS-pCgNMsD1W_YpRPEwOWvG6b32690r2jZ47soMZo9wGzjb_7OMg0LOL-bSf63kpaSHSXndS5z5rexMdbBYUsLA9e-KXBdQOS-UTo7WTBEMa2R2CapHg665xsmtdVMTBQY4uDZlxvb3qCo5ZwKh9kG4LT6_I5IhlJH7aGhyxXFvUK-DWNmoudF8NAco9_h9iaGNj8q2ethFkMLs91kzk2PAcDTW9gb54h4FRWyuXpoQ\";\n"
     "exponent =\"AQAB\";\n"
-    "JWTverifyRSA256(token,modulus,exponent);",
+    "JWTVerifyRSA256(token,modulus,exponent);",
     true,
     false,
-    "CalculatorFunctionsGeneral::innerJWTverifyAgainstRSA256",
-    "JWTverifyRSA256"
+    "CalculatorFunctionsGeneral::innerJWTVerifyAgainstRSA256",
+    "JWTVerifyRSA256"
   );
   this->AddOperationInnerHandler(
     "Sha1",
@@ -922,16 +933,16 @@ void Calculator::initPredefinedInnerFunctions() {
     "Sha224"
   );
   this->AddOperationInnerHandler(
-    "RSAencrypt",
-    CalculatorFunctionsGeneral::innerRSAencrypt,
+    "RSAEncrypt",
+    CalculatorFunctionsGeneral::innerRSAEncrypt,
     "",
     "Encrypts with RSA. First argument: modulus. Second argument: (public) exponent. "
     "Third argument: message given as a large integer.",
-    "RSAencrypt(3233, 17, 65)",
+    "RSAEncrypt(3233, 17, 65)",
     true,
     false,
-    "CalculatorFunctionsGeneral::innerRSAencrypt",
-    "RSAencrypt"
+    "CalculatorFunctionsGeneral::innerRSAEncrypt",
+    "RSAEncrypt"
   );
   this->AddOperationInnerHandler(
     "Ripemd160",

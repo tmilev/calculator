@@ -453,7 +453,7 @@ bool CalculatorFunctionsGeneral::innerPlotDirectionOrVectorField(
   return output.AssignValue(thePlot, theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerJWTverifyAgainstRSA256(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsGeneral::innerJWTVerifyAgainstRSA256(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerJWTverifyAgainstRSA256");
   if (input.size() != 4) {
     return theCommands << "The JWT verify command expects 3 arguments:"
@@ -491,7 +491,7 @@ bool CalculatorFunctionsGeneral::innerJWTverifyAgainstRSA256(Calculator& theComm
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerJWTverifyAgainstKnownKeys(
+bool CalculatorFunctionsGeneral::innerJWTVerifyAgainstKnownKeys(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerJWTverifyAgainstKnownKeys");
@@ -605,8 +605,13 @@ bool CalculatorFunctionsGeneral::innerBase64ToHex(Calculator& theCommands, const
   return output.AssignValue(result, theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerRSAencrypt(Calculator& theCommands, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerRSAencrypt");
+bool CalculatorFunctionsGeneral::innerRSAVerifySignature(Calculator &theCommands, const Expression &input, Expression &output) {
+  bool continueHere;
+  crash << "Not implemented yet." << crash;
+}
+
+bool CalculatorFunctionsGeneral::innerRSAEncrypt(Calculator& theCommands, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerRSAEncrypt");
   if (input.size() != 4) {
     return false;
   }

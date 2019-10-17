@@ -12,8 +12,9 @@
 extern ProjectInformationInstance ProjectInfoVpf9cpp;
 ProjectInformationInstance ProjectInfoVpf9cpp(__FILE__, "Math routines implementation. ");
 
-//the below gives upper limit to the amount of pointers that are allowed to be allocated by the program. Can be changed dynamically.
-//used to guard the web server from abuse.
+// The below gives upper limit to the amount of pointers
+// that are allowed to be allocated by the program. Can be changed dynamically.
+// Used to guard the web server from abuse.
 #ifdef AllocationLimitsSafeguard
 long long ParallelComputing::cgiLimitRAMuseNumPointersInList = 2000000000;
 #endif

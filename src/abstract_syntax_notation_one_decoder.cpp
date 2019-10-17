@@ -791,11 +791,9 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeCurrent(
   if (this->PointerIsBad(output)) {
     return false;
   }
-  std::cout << "DEBUG: got to here pt -1!!!";
   if (!this->DecodeLengthIncrementDataPointer(output)) {
     return false;
   }
-  std::cout << "DEBUG: got to here!!!";
   std::stringstream errorStream;
   switch (output.tag) {
   // pure composite elements:
@@ -1198,12 +1196,17 @@ std::string ASNObject::ToString() const {
 
 std::string ASNObject::ToStringAllRecognizedObjectIds() {
   std::stringstream out;
-  out << "There are: " << ASNObject::ObjectIdsToNames().size() << " known fields. ";
+  out << "<table>";
   for (int i = 0; i < ASNObject::ObjectIdsToNames().size(); i ++) {
     ASNObject& current = ASNObject::ObjectIdsToNames().theValues[i];
     const List<unsigned char>& currentId = ASNObject::ObjectIdsToNames().theKeys[i];
-    out << Crypto::ConvertListUnsignedCharsToHexFormat(currentId, 50, false) << ": " << current.name << "\n";
+    out << "<tr>"
+    << "<td><small>" << i + 1 << "</small></td>"
+    << "<td>" << Crypto::ConvertListUnsignedCharsToHexFormat(currentId, 50, false) << "</td>"
+    << "<td>" << current.name << "</td>"
+    << "</tr>";
   }
+  out << "</table>";
   return out.str();
 }
 

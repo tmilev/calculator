@@ -606,7 +606,28 @@ bool CalculatorFunctionsGeneral::innerBase64ToHex(Calculator& theCommands, const
   return output.AssignValue(result, theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerTestRSASign(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsGeneral::innerGenerateRandomPrime(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGenerateRandomPrime");
+  int numberOfBytes = 0;
+  if (!input.IsSmallInteger(&numberOfBytes)) {
+    return false;
+  }
+  int maxNumberOfBytes = 128;
+  int minNumberOfBytes = 1;
+  if (numberOfBytes > maxNumberOfBytes || numberOfBytes < minNumberOfBytes) {
+    return theCommands << "Max number of bytes: " << maxNumberOfBytes << ", min number of bytes: "
+    << minNumberOfBytes << ", you requested: " << numberOfBytes << ". ";
+  }
+  LargeIntegerUnsigned result;
+  Crypto::GetRandomLargePrime(result, numberOfBytes);
+  return output.AssignValue(result, theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerTestRSASign(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestRSASign");
   std::stringstream out, errorStream;
   std::string messageString;
@@ -614,7 +635,7 @@ bool CalculatorFunctionsGeneral::innerTestRSASign(Calculator& theCommands, const
     return false;
   }
   PrivateKeyRSA theKey;
-  if (!theKey.GenerateRandom(&errorStream)) {
+  if (!theKey.GenerateRandom(&errorStream, 10)) {
     return theCommands << "Failed to generate random key. " << errorStream.str();
   }
   List<unsigned char> message, paddedMessage, signature;

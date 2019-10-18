@@ -50,7 +50,7 @@ public:
   bool LoadFromPEMFile(const std::string& input, std::stringstream* commentsOnFailure);
   bool LoadFromPEM(const std::string& input, std::stringstream* commentsOnFailure);
   bool LoadFromASNEncoded(List<unsigned char>& input, std::stringstream* commentsOnFailure);
-  bool GenerateRandom(std::stringstream* commentsOnFailure);
+  bool GenerateRandom(std::stringstream* commentsOnFailure, int numberOfBytes);
   void SignBytesPadPKCS1(List<unsigned char>& input, int hash, List<unsigned char>& output);
   void HashAndPadPKCS1(List<unsigned char>& input, int hash, List<unsigned char>& output);
   std::string ToString() const;
@@ -358,6 +358,7 @@ public:
     List<unsigned char>& output, int numBytes
   );
   static void GetRandomLargeIntegerSecure(LargeIntegerUnsigned& output, int numBytes);
+  static void GetRandomLargePrime(LargeIntegerUnsigned& output, int numBytes);
 };
 
 class JSONWebToken {

@@ -1648,22 +1648,43 @@ void PrivateKeyRSA::SignBytesPadPKCS1(
 
 }
 
-bool PrivateKeyRSA::GenerateRandom(std::stringstream* commentsOnFailure) {
-
+bool PrivateKeyRSA::GenerateRandom(std::stringstream* commentsOnFailure, int numberOfBytes) {
+  if (numberOfBytes < 1 || numberOfBytes > 1000) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Number of bytes must be "
+      << "between 1 and 1000; you requested: " << numberOfBytes << ". ";
+    }
+    return false;
+  }
+  Crypto::GetRandomLargeIntegerSecure(this->primeOne, 128);
+  Crypto::GetRandomLargeIntegerSecure(this->primeTwo, 128);
+  if (this->primeOne.IsEven()) {
+    this->primeOne ++;
+  }
+  if (commentsOnFailure != nullptr) {
+    *commentsOnFailure << "Private key generate random not implemented yet. ";
+  }
+  return false;
 }
 
-void PrivateKeyRSA::HashAndPadPKCS1(List<unsigned char>& input, int hash, List<unsigned char>& output) {
+void PrivateKeyRSA::HashAndPadPKCS1(
+  List<unsigned char>& input, int hash, List<unsigned char>& output
+) {
   List<unsigned char> inputHashed;
+  ASNElement encoder;
+  encoder.MakeSequence(2);
+  ASNObject hashObject;
   switch (hash) {
   case SignatureAlgorithmSpecification::HashAlgorithm::sha256:
     Crypto::computeSha256(input, inputHashed);
+    hashObject = ASNObject::NamesToObjectIdsNonThreadSafe().GetValueConstCrashIfNotPresent(ASNObject::names::sha256);
     break;
   default:
     crash << "Non-allowed or non-implemented value for the hash algorithm. " << crash;
   }
-  ASNElement encoder;
-  ASNElement theHash;
-  theHash.MakeOctetString(inputHashed);
+  encoder.theElements[1].MakeOctetString(inputHashed);
+  hashObject.ComputeASN(encoder.theElements[0]);
+  encoder.WriteBytesUpdatePromisedLength(output);
 }
 
 bool PrivateKeyRSA::LoadFromASNEncoded(

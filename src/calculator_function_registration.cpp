@@ -947,6 +947,17 @@ void Calculator::initPredefinedInnerFunctions() {
     "CalculatorFunctionsGeneral::innerTestRSASign",
     "RSASign"
   );
+  this->AddOperationInnerHandler(
+    "GenerateRandomPrime",
+    CalculatorFunctionsGeneral::innerGenerateRandomPrime,
+    "",
+    "Generate random prime. Argument = desired number of bytes, max 128. ",
+    "GenerateRandomPrime(10)",
+    true,
+    false,
+    "CalculatorFunctionsGeneral::innerGenerateRandomPrime",
+    "GenerateRandomPrime"
+  );
 
   this->AddOperationInnerHandler(
     "RSAEncrypt",

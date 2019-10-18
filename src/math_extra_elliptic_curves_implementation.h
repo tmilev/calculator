@@ -58,17 +58,18 @@ bool ElementEllipticCurve<coefficient>::operator*=(const ElementEllipticCurve& o
   if (other.flagInfinity) {
     return true;
   }
-  //We use the formulas:
-  //slope will be determined later (it is the slope of the line or tangent through the two points).
-  //x_C = s^2 - x_A - x_B
-  //y_C = -s(x_C - x_A)-y_A
+  // We use the formulas:
+  // s = slope will be determined later
+  // (it is the slope of the line or tangent through the two points).
+  // x_C = s^2 - x_A - x_B
+  // y_C = -s(x_C - x_A)-y_A
   coefficient slope;
   if (this->xCoordinate == other.xCoordinate) {
     if (this->yCoordinate == other.yCoordinate * (- 1)) {
       this->flagInfinity = true;
       this->xCoordinate = 0;
       this->yCoordinate = 0;
-      stOutput << " DEBUG: product is: infinity";
+      // stOutput << " DEBUG: product is: infinity";
       return true;
     }
     //at this point of code, the two points must be equal.

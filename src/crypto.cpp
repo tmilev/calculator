@@ -24,8 +24,9 @@ void Crypto::GetRandomBytesSecureOutputMayLeaveTraceInFreedMemory(
   List<unsigned char>& output, int numBytes
 ) {
   output.SetSize(numBytes);
-  if (numBytes > 256) {
-    crash << "Getting more than 256 random bytes can block "
+  if (numBytes > 256 || numBytes < 1) {
+    crash << "Request of " << numBytes << " random bytes not allowed. "
+    << "Getting more than 256 random bytes can block "
     << "(google getrandom(2)) and so we do not allow it here."
     << crash;
   }
@@ -38,6 +39,19 @@ void Crypto::GetRandomBytesSecureOutputMayLeaveTraceInFreedMemory(
   );
   if (generatedBytes != output.size) {
     crash << "Failed to get the necessary number of random bytes. " << crash;
+  }
+}
+
+void Crypto::GetRandomLargePrime(LargeIntegerUnsigned& output, int numBytes) {
+  Crypto::GetRandomLargeIntegerSecure(output, numBytes);
+  if (output.IsEven()) {
+    output ++;
+  }
+  while (true) {
+    if (output.IsPossiblyPrimeMillerRabin(15, nullptr)) {
+      break;
+    }
+    output += 2;
   }
 }
 

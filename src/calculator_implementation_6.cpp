@@ -12,6 +12,7 @@
 #include "crypto.h"
 #include "abstract_syntax_notation_one_decoder.h"
 #include "math_extra_elliptic_curves_implementation.h"
+#include "transport_layer_security.h"
 #include <iomanip>
 
 extern ProjectInformationInstance ProjectInfoVpf6_37cpp;
@@ -603,6 +604,26 @@ bool CalculatorFunctionsGeneral::innerBase64ToHex(Calculator& theCommands, const
   }
   Crypto::ConvertStringToHex(bitStream, result, 0, false);
   return output.AssignValue(result, theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerTestRSASign(Calculator& theCommands, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestRSASign");
+  std::stringstream out, errorStream;
+  std::string messageString;
+  if (!input.IsOfType(&messageString)) {
+    return false;
+  }
+  PrivateKeyRSA theKey;
+  if (!theKey.GenerateRandom(&errorStream)) {
+    return theCommands << "Failed to generate random key. " << errorStream.str();
+  }
+  List<unsigned char> message, paddedMessage, signature;
+  message = messageString;
+  theKey.HashAndPadPKCS1(message, SignatureAlgorithmSpecification::HashAlgorithm::sha256, paddedMessage);
+  //theKey.SignBytesPadPKCS1(message, SignatureAlgorithmSpecification::HashAlgorithm::sha256, signature);
+  out << "Message:<br>" << Crypto::ConvertListUnsignedCharsToHex(message);
+  out << "<br>Padded message digest:<br>" << Crypto::ConvertListUnsignedCharsToHex(paddedMessage);
+  return output.AssignValue(out.str(), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerRSAEncrypt(Calculator& theCommands, const Expression& input, Expression& output) {

@@ -72,6 +72,7 @@ public:
   static bool innerRSASign(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerShowKnownObjectIds(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSha224OfString(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerTestRSASign(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSha256OfString(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerRIPEMD160OfString(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSha3_256OfString(Calculator& theCommands, const Expression& input, Expression& output);

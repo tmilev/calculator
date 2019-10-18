@@ -933,6 +933,22 @@ void Calculator::initPredefinedInnerFunctions() {
     "Sha224"
   );
   this->AddOperationInnerHandler(
+    "TestRSASign",
+    CalculatorFunctionsGeneral::innerTestRSASign,
+    "",
+    "Tests the RSA signature function. "
+    "Input: message to sign. "
+    "Auto-generates a one-time use private key. "
+    "At the time of writing, this will set hard-coded defaults "
+    "for all parameters. ",
+    "TestRSASign(\"asdf\")",
+    true,
+    false,
+    "CalculatorFunctionsGeneral::innerTestRSASign",
+    "RSASign"
+  );
+
+  this->AddOperationInnerHandler(
     "RSAEncrypt",
     CalculatorFunctionsGeneral::innerRSAEncrypt,
     "",

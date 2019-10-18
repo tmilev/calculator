@@ -1648,6 +1648,10 @@ void PrivateKeyRSA::SignBytesPadPKCS1(
 
 }
 
+bool PrivateKeyRSA::GenerateRandom(std::stringstream* commentsOnFailure) {
+
+}
+
 void PrivateKeyRSA::HashAndPadPKCS1(List<unsigned char>& input, int hash, List<unsigned char>& output) {
   List<unsigned char> inputHashed;
   switch (hash) {

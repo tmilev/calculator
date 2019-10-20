@@ -635,12 +635,13 @@ bool CalculatorFunctionsGeneral::innerTestRSASign(
     return false;
   }
   PrivateKeyRSA theKey;
-  if (!theKey.GenerateRandom(&errorStream, 10)) {
+  if (!theKey.GenerateRandom(&errorStream, 100)) {
     return theCommands << "Failed to generate random key. " << errorStream.str();
   }
   List<unsigned char> message, paddedMessage, signature;
   message = messageString;
   theKey.HashAndPadPKCS1(message, SignatureAlgorithmSpecification::HashAlgorithm::sha256, paddedMessage);
+  out << "Temporary private key:<br>" << theKey.ToString() << "<br>";
   //theKey.SignBytesPadPKCS1(message, SignatureAlgorithmSpecification::HashAlgorithm::sha256, signature);
   out << "Message:<br>" << Crypto::ConvertListUnsignedCharsToHex(message);
   out << "<br>Padded message digest:<br>" << Crypto::ConvertListUnsignedCharsToHex(paddedMessage);

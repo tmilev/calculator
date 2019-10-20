@@ -1416,8 +1416,8 @@ void TBSCertificateInfo::ComputeASNSignature(ASNElement& output) {
   output[1].theElements.SetSize(1);
   ASNElement& signatureSerializer = output[1][0];
   signatureSerializer.MakeSequence(2);
-  signatureSerializer[0].MakeInteger(this->subjectPublicKey.theExponenT);
-  signatureSerializer[1].MakeInteger(this->subjectPublicKey.theModuluS);
+  signatureSerializer[0].MakeInteger(this->subjectPublicKey.theExponent);
+  signatureSerializer[1].MakeInteger(this->subjectPublicKey.theModulus);
   signatureSerializer.WriteBytesUpdatePromisedLength(output[1].ASNAtom);
   output[1].lengthPromised = output[1].ASNAtom.size;
   output[1].flagHeaderPadded = true;
@@ -1557,7 +1557,7 @@ std::string X509Certificate::ToString() {
 
 std::string PrivateKeyRSA::ToString() const {
   std::stringstream out;
-  out << "Exponent: " << this->exponent << "<br>Prime 1: "
+  out << "Exponent: " << this->thePublicKey.theExponent << "<br>Prime 1: "
   << this->primeOne << "<br>Prime 2: " << this->primeTwo;
   return out.str();
 }
@@ -1572,7 +1572,7 @@ bool PrivateKeyRSA::BasicChecks(std::stringstream* comments) {
   LargeInteger primeTwoLI = this->primeTwo;
   mustBeZero = this->primeOne;
   mustBeZero *= this->primeTwo;
-  mustBeZero -= this->modulus;
+  mustBeZero -= this->thePublicKey.theModulus;
   *comments << "Must be zero: " << mustBeZero.ToString();
   LargeInteger EulerPhi = (primeOneLI - 1) * (primeTwoLI - 1);
   ElementZmodP mustBeZeroModP;
@@ -1580,7 +1580,7 @@ bool PrivateKeyRSA::BasicChecks(std::stringstream* comments) {
   //theExponent.theValue = this->exponent;
   mustBeZeroModP.theModulo = EulerPhi.value;
   mustBeZeroModP.theValue = 1;
-  mustBeZeroModP /= this->exponent;
+  mustBeZeroModP /= this->thePublicKey.theExponent;
   mustBeZeroModP -= this->privateExponent;
   *comments << "<br>Difference between private exponent and computed one: " << mustBeZeroModP.theValue.ToString();
   return true;
@@ -1648,6 +1648,24 @@ void PrivateKeyRSA::SignBytesPadPKCS1(
 
 }
 
+bool PrivateKeyRSA::ComputeFromTwoPrimes(
+  LargeIntegerUnsigned& inputPrimeOne,
+  LargeIntegerUnsigned& inputPrimeTwo,
+  std::stringstream* commentsOnFailure
+) {
+  this->primeOne = inputPrimeOne;
+  this->primeTwo = inputPrimeTwo;
+  if (!this->primeOne.IsPossiblyPrimeMillerRabin(10, nullptr)) {
+    return false;
+  }
+  if (!this->primeTwo.IsPossiblyPrimeMillerRabin(10, nullptr)) {
+    return false;
+  }
+  this->thePublicKey.theExponent.AssignUnsignedInt(this->thePublicKey.defaultExponent);
+  this->thePublicKey.theModulus = this->primeOne * this->primeTwo;
+  return true;
+}
+
 bool PrivateKeyRSA::GenerateRandom(std::stringstream* commentsOnFailure, int numberOfBytes) {
   if (numberOfBytes < 1 || numberOfBytes > 1000) {
     if (commentsOnFailure != nullptr) {
@@ -1656,15 +1674,9 @@ bool PrivateKeyRSA::GenerateRandom(std::stringstream* commentsOnFailure, int num
     }
     return false;
   }
-  Crypto::GetRandomLargeIntegerSecure(this->primeOne, 128);
-  Crypto::GetRandomLargeIntegerSecure(this->primeTwo, 128);
-  if (this->primeOne.IsEven()) {
-    this->primeOne ++;
-  }
-  if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "Private key generate random not implemented yet. ";
-  }
-  return false;
+  Crypto::GetRandomLargePrime(this->primeOne, numberOfBytes);
+  Crypto::GetRandomLargePrime(this->primeTwo, numberOfBytes);
+  return this->ComputeFromTwoPrimes(this->primeOne, this->primeTwo, commentsOnFailure);
 }
 
 void PrivateKeyRSA::HashAndPadPKCS1(
@@ -1713,12 +1725,12 @@ bool PrivateKeyRSA::LoadFromASNEncoded(
     return false;
   }
   if (!this->sourceASNInner.HasSubElementOfType(
-    {1}, {}, this->modulus, commentsOnFailure
+    {1}, {}, this->thePublicKey.theModulus, commentsOnFailure
   )) {
     return false;
   }
   if (!this->sourceASNInner.HasSubElementOfType(
-    {2}, {}, this->exponent, commentsOnFailure
+    {2}, {}, this->thePublicKey.theExponent, commentsOnFailure
   )) {
     return false;
   }
@@ -2007,7 +2019,7 @@ bool TBSCertificateInfo::Load(const ASNElement& input, std::stringstream* commen
   }
 
   if (!input.HasSubElementOfType(
-    {6, 1, 0, 1}, {}, this->subjectPublicKey.theModuluS, commentsOnFailure
+    {6, 1, 0, 1}, {}, this->subjectPublicKey.theModulus, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to read RSA modulus. ";
@@ -2015,7 +2027,7 @@ bool TBSCertificateInfo::Load(const ASNElement& input, std::stringstream* commen
     return false;
   }
   if (!input.HasSubElementOfType(
-    {6, 1, 0, 0}, {}, this->subjectPublicKey.theExponenT, commentsOnFailure
+    {6, 1, 0, 0}, {}, this->subjectPublicKey.theExponent, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to read public key. ";
@@ -2023,8 +2035,8 @@ bool TBSCertificateInfo::Load(const ASNElement& input, std::stringstream* commen
     return false;
   }
   if (
-    this->subjectPublicKey.theModuluS == 0 ||
-    this->subjectPublicKey.theExponenT == 0
+    this->subjectPublicKey.theModulus == 0 ||
+    this->subjectPublicKey.theExponent == 0
   ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Invalid RSA modulus or exponent. ";

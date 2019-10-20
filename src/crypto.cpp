@@ -1255,7 +1255,7 @@ void Crypto::computeSha2xx(const List<unsigned char>& input, List<uint32_t>& out
   }
 }
 
-bool CertificateRSA::LoadFromJSON(JSData& input, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
+bool PublicKeyRSA::LoadFromJSON(JSData& input, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
   MacroRegisterFunctionWithName("Certificate::LoadFromJSON");
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "<hr>Loading certificate from: "
@@ -1286,18 +1286,18 @@ bool CertificateRSA::LoadFromJSON(JSData& input, std::stringstream* commentsOnFa
   return this->LoadFromModulusAndExponentStrings(commentsOnFailure);
 }
 
-bool CertificateRSA::LoadFromModulusAndExponentStrings(std::stringstream *commentsOnFailure) {
+bool PublicKeyRSA::LoadFromModulusAndExponentStrings(std::stringstream *commentsOnFailure) {
   MacroRegisterFunctionWithName("CertificateRSA::LoadFromModulusAndExponentStrings");
-  if (!Crypto::ConvertBase64ToLargeUnsignedInt(this->theModulusString, this->theModuluS, commentsOnFailure)) {
+  if (!Crypto::ConvertBase64ToLargeUnsignedInt(this->theModulusString, this->theModulus, commentsOnFailure)) {
     return false;
   }
-  if (!Crypto::ConvertBase64ToLargeUnsignedInt(this->theExponentString, this->theExponenT, commentsOnFailure)) {
+  if (!Crypto::ConvertBase64ToLargeUnsignedInt(this->theExponentString, this->theExponent, commentsOnFailure)) {
     return false;
   }
   return true;
 }
 
-List<CertificateRSA> Crypto::knownCertificates;
+List<PublicKeyRSA> Crypto::knownCertificates;
 
 bool Crypto::LoadOneKnownCertificate(
   const std::string& input, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
@@ -1310,7 +1310,7 @@ bool Crypto::LoadOneKnownCertificate(
   if (!certificateJSON.readstring(input, false, commentsOnFailure)) {
     return false;
   }
-  CertificateRSA currentCert;
+  PublicKeyRSA currentCert;
   bool isGood = false;
   if (certificateJSON.theType == JSData::token::tokenObject) {
     if (certificateJSON.HasKey("keys")) {
@@ -1337,15 +1337,15 @@ bool Crypto::LoadOneKnownCertificate(
   return true;
 }
 
-std::string CertificateRSA::ToString() {
+std::string PublicKeyRSA::ToString() {
   std::stringstream out;
   out << "Algorithm: " << this->algorithm << "\n<br>\n";
   out << "Keyid: "     << this->keyid << "\n<br>\n";
   out << "Modulus [string, math]: [" << this->theModulusString
-  << ", " << this->theModuluS.ToString() << "]" << "\n<br>\n";
+  << ", " << this->theModulus.ToString() << "]" << "\n<br>\n";
   out << "Exponent [string, math]: " << "["
   << this->theExponentString << ", "
-  << this->theExponenT.ToString()
+  << this->theExponent.ToString()
   << "]\n\n";
   return out.str();
 }

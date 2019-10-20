@@ -827,9 +827,9 @@ bool Crypto::VerifyJWTagainstKnownKeys(
     *commentsGeneral << "<b style =\"color:green\">Found key id: "
     << keyIDstring << ".</b>";
   }
-  CertificateRSA& currentCert = Crypto::knownCertificates[theIndex];
+  PublicKeyRSA& currentCert = Crypto::knownCertificates[theIndex];
   return theToken.VerifyRSA256(
-    currentCert.theModuluS, currentCert.theExponenT, commentsOnFailure, commentsGeneral
+    currentCert.theModulus, currentCert.theExponent, commentsOnFailure, commentsGeneral
   );
 }
 

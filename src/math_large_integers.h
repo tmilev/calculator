@@ -85,6 +85,7 @@ public:
   void MultiplyByUInt(unsigned int x);
   void AddShiftedUIntSmallerThanCarryOverBound(unsigned int x, int shift);
   void AssignShiftedUInt(unsigned int x, int shift);
+  void AssignUnsignedInt(unsigned int x);
   void AssignUInt64(uint64_t x);
   void AccountFactor(const LargeInteger& theP, List<LargeInteger>& outputPrimeFactors, List<int>& outputMultiplicities) const;
   bool FactorReturnFalseIfFactorizationIncomplete(

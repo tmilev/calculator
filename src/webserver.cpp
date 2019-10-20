@@ -1543,7 +1543,7 @@ int WebWorker::ProcessComputationIndicator() {
     stOutput << result.ToString(false);
     return 0;
   }
-  if (this->flagUsingSSLInWorkerProcess != true) {
+  if (!this->flagUsingSSLInWorkerProcess) {
     out << "Monitoring allowed only over https. ";
     result[WebAPI::result::error] = out.str();
     stOutput << result.ToString(false);
@@ -4472,7 +4472,7 @@ int WebServer::Run() {
     }
     /////////////
     this->GetActiveWorker().connectedSocketID = newConnectedSocket;
-    this->GetActiveWorker().flagUsingSSLInWorkerProcess = theGlobalVariables.flagUsingSSLinCurrentConnection;
+    this->ComputeSSLFlags();
     this->GetActiveWorker().connectedSocketIDLastValueBeforeRelease = newConnectedSocket;
     this->GetActiveWorker().millisecondsServerAtWorkerStart = theGlobalVariables.GetElapsedMilliseconds();
     this->GetActiveWorker().millisecondsLastPingServerSideOnly = this->GetActiveWorker().millisecondsServerAtWorkerStart;
@@ -4551,17 +4551,21 @@ int WebServer::Run() {
   // return 0;
 }
 
-int WebWorker::Run() {
-  MacroRegisterFunctionWithName("WebWorker::Run");
+void WebServer::ComputeSSLFlags() {
   theGlobalVariables.flagUsingSSLinCurrentConnection = false;
 
-  if (theWebServer.lastListeningSocket == theWebServer.listeningSocketHTTPSBuiltIn) {
+  if (this->lastListeningSocket == this->listeningSocketHTTPSBuiltIn) {
     theGlobalVariables.flagUsingSSLinCurrentConnection = true;
-    theWebServer.theTLS.flagUseBuiltInTlS = true;
-  } else {
+    this->theTLS.flagUseBuiltInTlS = true;
+  } else if (this->lastListeningSocket == this->listeningSocketHTTPSOpenSSL){
     theGlobalVariables.flagUsingSSLinCurrentConnection = true;
-    theWebServer.theTLS.flagUseBuiltInTlS = false;
+    this->theTLS.flagUseBuiltInTlS = false;
   }
+  this->GetActiveWorker().flagUsingSSLInWorkerProcess = theGlobalVariables.flagUsingSSLinCurrentConnection;
+}
+
+int WebWorker::Run() {
+  MacroRegisterFunctionWithName("WebWorker::Run");
 
   theGlobalVariables.millisecondOffset = this->millisecondsAfterSelect;
   this->CheckConsistency();

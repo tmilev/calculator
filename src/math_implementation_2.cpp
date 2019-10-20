@@ -573,6 +573,10 @@ void LargeIntegerUnsigned::AssignUInt64(uint64_t x) {
   }
 }
 
+void LargeIntegerUnsigned::AssignUnsignedInt(unsigned int x) {
+  this->AssignShiftedUInt(x, 0);
+}
+
 void LargeIntegerUnsigned::AssignShiftedUInt(unsigned int x, int shift) {
   if (x == 0) {
     this->MakeZero();

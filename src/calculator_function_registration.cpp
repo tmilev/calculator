@@ -937,11 +937,20 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctionsGeneral::innerTestRSASign,
     "",
     "Tests the RSA signature function. "
-    "Input: message to sign. "
-    "Auto-generates a one-time use private key. "
-    "At the time of writing, this will set hard-coded defaults "
-    "for all parameters. ",
-    "TestRSASign(\"asdf\")",
+    "Input has three arguments: 1) message to sign "
+    "2) private key first prime, "
+    "3) private key second prime. "
+    "Will set hard-coded defaults "
+    "for all non-specified parameters. ",
+    "TestRSASign(\"asdf\", "
+    "426783863749219482096610996314660012394857818566077035"
+    "178241209143920182457158933390658353396537264757052464"
+    "334913365120085767481521352901499860151171619220023060"
+    "480464866565560676440226021303, "
+    "352815577859200421265693524055335110516168016791939066"
+    "619744890606270245172389068191436591061733904616135797"
+    "438741188808884326847918800555526459128765065042606467"
+    "292598531117932066982164093023)",
     true,
     false,
     "CalculatorFunctionsGeneral::innerTestRSASign",

@@ -7,14 +7,15 @@
 
 static ProjectInformationInstance projectInfoCryptoHeader(__FILE__, "Crypto class declaration.");
 
-class CertificateRSA {
+class PublicKeyRSA {
 public:
+  static const unsigned int defaultExponent = 65537;
   std::string algorithm;
   std::string keyid;
   std::string theModulusString;
   std::string theExponentString;
-  LargeIntegerUnsigned theModuluS;
-  LargeIntegerUnsigned theExponenT;
+  LargeIntegerUnsigned theModulus;
+  LargeIntegerUnsigned theExponent;
   bool LoadFromJSON(
     JSData& input,
     std::stringstream* commentsOnFailure,
@@ -30,13 +31,11 @@ class PrivateKeyRSA {
 public:
   LargeIntegerUnsigned primeOne;
   LargeIntegerUnsigned primeTwo;
-  LargeIntegerUnsigned modulus;
-  LargeIntegerUnsigned exponent;
   LargeIntegerUnsigned privateExponent;
   LargeIntegerUnsigned coefficient;
   LargeIntegerUnsigned exponentOne;
   LargeIntegerUnsigned exponentTwo;
-  CertificateRSA theCertificate;
+  PublicKeyRSA thePublicKey;
   List<unsigned char> sourceBinary;
   ASNElement sourceASNOuter;
   ASNElement sourceASNInner;
@@ -51,6 +50,11 @@ public:
   bool LoadFromPEM(const std::string& input, std::stringstream* commentsOnFailure);
   bool LoadFromASNEncoded(List<unsigned char>& input, std::stringstream* commentsOnFailure);
   bool GenerateRandom(std::stringstream* commentsOnFailure, int numberOfBytes);
+  bool ComputeFromTwoPrimes(
+    LargeIntegerUnsigned& inputPrimeOne,
+    LargeIntegerUnsigned& inputPrimeTwo,
+    std::stringstream* commentsOnFailure
+  );
   void SignBytesPadPKCS1(List<unsigned char>& input, int hash, List<unsigned char>& output);
   void HashAndPadPKCS1(List<unsigned char>& input, int hash, List<unsigned char>& output);
   std::string ToString() const;
@@ -86,7 +90,7 @@ public:
   ASNElement subjectPublicKeyAlgorithmId;
   // public key bytes:
   ASNElement subjectPublicKeyASN;
-  CertificateRSA subjectPublicKey;
+  PublicKeyRSA subjectPublicKey;
   // The authority that signed the certificate,
   // usually a large institution with a
   // well-known public key:
@@ -166,7 +170,7 @@ public:
   static const int LengthSha3DefaultInBytes = 32;
   static bool flagRIPEMDBigEndian;
 
-  static List<CertificateRSA> knownCertificates;
+  static List<PublicKeyRSA> knownCertificates;
   static List<uint32_t> kArraySha2xx;
   class Test {
   public:

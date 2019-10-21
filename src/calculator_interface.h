@@ -534,6 +534,7 @@ private:
   bool IsIntegerFittingInInt(int* whichInteger = nullptr) const;
   bool IsSmallInteger(int* whichInteger = nullptr) const;
   bool IsInteger(LargeInteger* whichInteger = nullptr) const;
+  bool IsIntegerNonNegative(LargeIntegerUnsigned* whichInteger = nullptr) const;
   bool IsRational(Rational* whichRational = nullptr) const;
   bool IsAlgebraicRadical() const;
   bool IsConstantNumber() const;

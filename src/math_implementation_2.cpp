@@ -357,6 +357,15 @@ void LargeIntegerUnsigned::ToString(std::string& output) const {
   output = out.str();
 }
 
+bool LargeIntegerUnsigned::isDivisibleBy(const LargeIntegerUnsigned& divisor) {
+  if (divisor > *this || this->IsEqualToZero()) {
+    return false;
+  }
+  LargeIntegerUnsigned quotient, remainder;
+  this->DivPositive(divisor, quotient, remainder);
+  return remainder.IsEqualToZero();
+}
+
 void LargeIntegerUnsigned::DivPositive(
   const LargeIntegerUnsigned& divisor,
   LargeIntegerUnsigned& quotientOutput,
@@ -564,6 +573,41 @@ void LargeIntegerUnsigned::AddShiftedUIntSmallerThanCarryOverBound(unsigned int 
   }
 }
 
+unsigned int LargeIntegerUnsigned::LogarithmBaseNCeiling(unsigned int theBase) const {
+  if (this->IsEqualToZero()) {
+    return 0;
+  }
+  if (theBase <= 1) {
+    crash << "Base of logarithm needs to be larger than one. " << crash;
+  }
+  LargeIntegerUnsigned current;
+  List<LargeIntegerUnsigned> baseRaisedTo2ToPowerIndex;
+  List<unsigned int> powersOfTwo;
+  current = theBase;
+  baseRaisedTo2ToPowerIndex.AddOnTop(current);
+  powersOfTwo.AddOnTop(1);
+  while(true) {
+    current *= current;
+    if (current > *this) {
+      break;
+    }
+    baseRaisedTo2ToPowerIndex.AddOnTop(current);
+    powersOfTwo.AddOnTop(*powersOfTwo.LastObject() * 2);
+  }
+  unsigned int result = *powersOfTwo.LastObject();
+  current = *baseRaisedTo2ToPowerIndex.LastObject();
+  LargeIntegerUnsigned next;
+  for (int i = baseRaisedTo2ToPowerIndex.size - 2; i >= 0; i --) {
+    next = current * baseRaisedTo2ToPowerIndex[i];
+    if (next > *this) {
+      continue;
+    }
+    result += powersOfTwo[i];
+    current = next;
+  }
+  return result;
+}
+
 void LargeIntegerUnsigned::AssignUInt64(uint64_t x) {
   this->theDigits.SetSize(0);
   while (x > 0) {
@@ -634,10 +678,10 @@ LargeIntegerUnsigned LargeIntegerUnsigned::operator-(const LargeIntegerUnsigned&
 std::string LargeIntegerUnsigned::ToStringAbbreviate(FormatExpressions *theFormat) const {
   (void) theFormat;
   std::string result = this->ToString(theFormat);
-  if (result.size() > 90) {
+  if (result.size() > 100) {
     std::stringstream out;
     out << result.substr(0, 40)
-    << "...(" << (result.size() - 80) << " omitted)"
+    << "...(" << (result.size() - 80) << " omitted)..."
     << result.substr(result.size() - 40);
     result = out.str();
   }
@@ -880,7 +924,7 @@ bool LargeIntegerUnsigned::FactorLargeReturnFalseIfFactorizationIncomplete(
   }
   if (toBeFactored > 1) {
     this->AccountFactor(toBeFactored, outputFactors, outputMultiplicites);
-    if (!toBeFactored.IsPossiblyPrimeMillerRabin(10, nullptr)) {
+    if (!toBeFactored.IsPossiblyPrimeMillerRabiN(10, nullptr)) {
       *commentsOnFailure
       << "The largest remaining factor "
       << toBeFactored

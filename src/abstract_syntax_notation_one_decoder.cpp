@@ -1648,21 +1648,44 @@ void PrivateKeyRSA::SignBytesPadPKCS1(
 
 }
 
+PrivateKeyRSA::PrivateKeyRSA() {
+  this->bitSize = 0;
+  this->byteSize = 0;
+}
+
+void PrivateKeyRSA::ComputeBitSize() {
+  this->bitSize = this->thePublicKey.theModulus.LogarithmBaseNCeiling(2);
+  this->byteSize = this->bitSize / 8;
+  if (this->byteSize * 8 < this->bitSize) {
+    this->byteSize ++;
+  }
+}
+
 bool PrivateKeyRSA::ComputeFromTwoPrimes(
   LargeIntegerUnsigned& inputPrimeOne,
   LargeIntegerUnsigned& inputPrimeTwo,
+  bool verifyInputsArePrime,
   std::stringstream* commentsOnFailure
 ) {
   this->primeOne = inputPrimeOne;
   this->primeTwo = inputPrimeTwo;
-  if (!this->primeOne.IsPossiblyPrimeMillerRabin(10, nullptr)) {
-    return false;
-  }
-  if (!this->primeTwo.IsPossiblyPrimeMillerRabin(10, nullptr)) {
-    return false;
+  if (verifyInputsArePrime) {
+    if (!this->primeOne.IsPossiblyPrime(10, true, commentsOnFailure)) {
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure << "First input: " << this->primeTwo.ToString() << " is not prime. ";
+      }
+      return false;
+    }
+    if (!this->primeTwo.IsPossiblyPrime(10, true, commentsOnFailure)) {
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure << "Second input: " << this->primeTwo.ToString() << " is not prime. ";
+      }
+      return false;
+    }
   }
   this->thePublicKey.theExponent.AssignUnsignedInt(this->thePublicKey.defaultExponent);
   this->thePublicKey.theModulus = this->primeOne * this->primeTwo;
+  this->ComputeBitSize();
   return true;
 }
 
@@ -1676,7 +1699,7 @@ bool PrivateKeyRSA::GenerateRandom(std::stringstream* commentsOnFailure, int num
   }
   Crypto::GetRandomLargePrime(this->primeOne, numberOfBytes);
   Crypto::GetRandomLargePrime(this->primeTwo, numberOfBytes);
-  return this->ComputeFromTwoPrimes(this->primeOne, this->primeTwo, commentsOnFailure);
+  return this->ComputeFromTwoPrimes(this->primeOne, this->primeTwo, false, commentsOnFailure);
 }
 
 void PrivateKeyRSA::HashAndPadPKCS1(

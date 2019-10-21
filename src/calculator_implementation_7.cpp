@@ -5209,14 +5209,14 @@ bool CalculatorFunctionsGeneral::innerTrace(Calculator& theCommands, const Expre
   Matrix<Rational> theMat;
   if (input.IsMatrixGivenType<Rational>(nullptr, nullptr, &theMat)) {
     if (!theMat.IsSquare()) {
-      return output.MakeError("Error: attempting to get trace of non-square matrix.", theCommands, true);
+      return output.MakeError("Error: attempting to get trace of non-square matrix. ", theCommands, true);
     }
     return output.AssignValue(theMat.GetTrace(), theCommands);
   }
   Matrix<RationalFunctionOld> theMatRF;
   if (input.IsMatrixGivenType<RationalFunctionOld>(nullptr, nullptr, &theMatRF)) {
     if (!theMatRF.IsSquare()) {
-      return output.MakeError("Error: attempting to get trace of non-square matrix.", theCommands, true);
+      return output.MakeError("Error: attempting to get trace of non-square matrix. ", theCommands, true);
     }
     return output.AssignValue(theMatRF.GetTrace(), theCommands);
   }
@@ -5225,7 +5225,7 @@ bool CalculatorFunctionsGeneral::innerTrace(Calculator& theCommands, const Expre
     return false;
   }
   if (!theMat.IsSquare()) {
-    return output.MakeError("Error: attempting to get trace of non-square matrix.", theCommands, true);
+    return output.MakeError("Error: attempting to get trace of non-square matrix. ", theCommands, true);
   }
   if (theMat.NumRows == 1) {
     theCommands << "Requested trace of 1x1 matrix: possible interpretation of a scalar as a 1x1 matrix. Trace not taken. ";
@@ -5296,9 +5296,9 @@ bool CalculatorFunctionsGeneral::innerRemoveLastElement(Calculator& theCommands,
   if (input.IsAtom() || input.size() == 1) {
     std::stringstream out;
     if (input.IsAtom()) {
-      out << "Error: requesting to remove the last element of the atom " << input.ToString();
+      out << "Error: requesting to remove the last element of the atom " << input.ToString() << ". ";
     } else {
-      out << "Error: requesting to remove the last element of the zero-element list " << input.ToString();
+      out << "Error: requesting to remove the last element of the zero-element list " << input.ToString() << ". ";
     }
     return output.MakeError(out.str(), theCommands, true);
   }
@@ -5421,15 +5421,29 @@ bool LargeIntegerUnsigned::TryToFindWhetherIsPower(bool& outputIsPower, LargeInt
   return true;
 }
 
-bool LargeIntegerUnsigned::IsPossiblyPrimeMillerRabin(int numTimesToRun, std::stringstream* comments) {
+bool LargeIntegerUnsigned::IsPossiblyPrimeMillerRabiN(int numberOfTries, std::stringstream* comments) {
+  return this->IsPossiblyPrime(numberOfTries, false, comments);
+}
+
+bool LargeIntegerUnsigned::IsPossiblyPrime(int timesToRunMillerRabin, bool tryDivisionSetTrueFaster, std::stringstream* comments) {
   MacroRegisterFunctionWithName("LargeIntUnsigned::IsPossiblyPrimeMillerRabin");
   if (this->IsEven()) {
     return *this == 2;
   }
   List<unsigned int> aFewPrimes;
   LargeIntegerUnsigned::GetAllPrimesSmallerThanOrEqualToUseEratosthenesSieve(100000, aFewPrimes);
-  if (numTimesToRun > aFewPrimes.size) {
-    numTimesToRun = aFewPrimes.size;
+  if (timesToRunMillerRabin > aFewPrimes.size) {
+    timesToRunMillerRabin = aFewPrimes.size;
+  }
+  if (tryDivisionSetTrueFaster) {
+    for (int i = 0; i < aFewPrimes.size; i ++) {
+      if (this->isDivisibleBy(aFewPrimes[i])) {
+        if (comments != nullptr) {
+          *comments << "Number not prime as it is divisible by " << aFewPrimes[i] << ". ";
+        }
+        return false;
+      }
+    }
   }
   LargeIntegerUnsigned theOddFactorOfNminusOne = *this;
   int theExponentOfThePowerTwoFactorOfNminusOne = 0;
@@ -5439,11 +5453,12 @@ bool LargeIntegerUnsigned::IsPossiblyPrimeMillerRabin(int numTimesToRun, std::st
     theExponentOfThePowerTwoFactorOfNminusOne ++;
   }
   ProgressReport theReport;
-  for (int i = 0; i < numTimesToRun; i ++) {
+  for (int i = 0; i < timesToRunMillerRabin; i ++) {
     if (theGlobalVariables.flagReportEverything) {
       std::stringstream reportStream;
-      reportStream << "Miller-Rabin test " << i + 1 << " out of "
-      << numTimesToRun;
+      reportStream << "Testing whether " << this->ToStringAbbreviate()
+      << " is prime using Miller-Rabin test " << i + 1 << " out of "
+      << timesToRunMillerRabin << ". ";
       theReport.Report(reportStream.str());
     }
     if (!this->IsPossiblyPrimeMillerRabinOnce(
@@ -5455,13 +5470,27 @@ bool LargeIntegerUnsigned::IsPossiblyPrimeMillerRabin(int numTimesToRun, std::st
   return true;
 }
 
+bool CalculatorFunctionsGeneral::innerIsPossiblyPrime(Calculator& theCommands, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIsPossiblyPrime");
+  LargeInteger theInt;
+  if (!input.IsInteger(&theInt)) {
+    return false;
+  }
+  bool resultBool = theInt.value.IsPossiblyPrime(10, true, &theCommands.Comments);
+  Rational result = 1;
+  if (!resultBool) {
+    result = 0;
+  }
+  return output.AssignValue(result, theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerIsPrimeMillerRabin(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIsPrimeMillerRabin");
   LargeInteger theInt;
   if (!input.IsInteger(&theInt)) {
     return false;
   }
-  bool resultBool = theInt.value.IsPossiblyPrimeMillerRabin(10, &theCommands.Comments);
+  bool resultBool = theInt.value.IsPossiblyPrimeMillerRabiN(10, &theCommands.Comments);
   Rational result = 1;
   if (!resultBool) {
     result = 0;

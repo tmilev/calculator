@@ -48,7 +48,7 @@ void Crypto::GetRandomLargePrime(LargeIntegerUnsigned& output, int numBytes) {
     output ++;
   }
   while (true) {
-    if (output.IsPossiblyPrimeMillerRabin(15, nullptr)) {
+    if (output.IsPossiblyPrime(15, true, nullptr)) {
       break;
     }
     output += 2;

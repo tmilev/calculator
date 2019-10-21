@@ -1412,6 +1412,28 @@ bool CalculatorFunctionsGeneral::innerFloor(
   return false;
 }
 
+bool CalculatorFunctionsGeneral::innerLogarithmBaseNCeiling(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerLogarithmBaseNCeiling");
+  if (input.size() != 3) {
+    return theCommands << "Logarithm ceiling function expects exactly two arguments. ";
+  }
+  int smallInt = 0;
+  if (!input[1].IsSmallInteger(&smallInt)) {
+    return theCommands << "First argument expected to be a small integer. ";
+  }
+  if (smallInt <= 1) {
+    return theCommands << "First argument must be larger than one. ";
+  }
+  LargeIntegerUnsigned argument;
+  if (!input[2].IsIntegerNonNegative(&argument)) {
+    return theCommands << "Failed to extract positive intger from second argument. ";
+  }
+  int result = argument.LogarithmBaseNCeiling(smallInt);
+  return output.AssignValue(result, theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerRound(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {

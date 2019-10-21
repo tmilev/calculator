@@ -629,14 +629,25 @@ bool CalculatorFunctionsGeneral::innerTestRSASign(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestRSASign");
+  if (input.size() != 4) {
+    return theCommands << "RSA signature takes as input 3 arguments: message and two primes. ";
+  }
   std::stringstream out, errorStream;
   std::string messageString;
-  if (!input.IsOfType(&messageString)) {
+  if (!input[1].IsOfType(&messageString)) {
     return false;
   }
   PrivateKeyRSA theKey;
-  if (!theKey.GenerateRandom(&errorStream, 100)) {
-    return theCommands << "Failed to generate random key. " << errorStream.str();
+  if (
+    !input[2].IsIntegerNonNegative(&theKey.primeOne) ||
+    !input[3].IsIntegerNonNegative(&theKey.primeTwo)
+  ) {
+    return theCommands << "Failed to extract positive integers from the second and third argument. ";
+  }
+  if (
+    !theKey.ComputeFromTwoPrimes(theKey.primeOne, theKey.primeTwo, true, &errorStream)
+  ) {
+    return theCommands << "Inputs do not appear to be prime. " << errorStream.str();
   }
   List<unsigned char> message, paddedMessage, signature;
   message = messageString;

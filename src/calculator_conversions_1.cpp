@@ -466,7 +466,7 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(
   outputSubalgebra.owner = &owner;
   DynkinType theNonEmbeddedDynkinType;
   if (!CalculatorConversions::innerDynkinType(theCommands, DynkinTypeE, theNonEmbeddedDynkinType)) {
-    return theCommands << "<hr> Failed to load dynkin type of candidate subalgebra from "
+    return theCommands << "<hr>Failed to load dynkin type of candidate subalgebra from "
     << DynkinTypeE.ToString() << "<hr>";
   }
   outputSubalgebra.theWeylNonEmbedded = &

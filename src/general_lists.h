@@ -1389,7 +1389,7 @@ public:
       std::stringstream crashStream;
       crashStream << "This is a programming error: the programmer requested to add the object "
       << o << " without repetition "
-      << " to the hashed list with a function that does not allow repetition, "
+      << "to the hashed list with a function that does not allow repetition, "
       << "but the hashed list already contains the object. ";
       crash << crashStream.str() << crash;
     }

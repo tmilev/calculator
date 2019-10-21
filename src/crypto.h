@@ -36,9 +36,13 @@ public:
   LargeIntegerUnsigned exponentOne;
   LargeIntegerUnsigned exponentTwo;
   PublicKeyRSA thePublicKey;
+  int bitSize; // = ceiling(log_2 (pimeOne * primeTwo))
+  int byteSize; // = ceiling (bitSize / 8)
   List<unsigned char> sourceBinary;
   ASNElement sourceASNOuter;
   ASNElement sourceASNInner;
+  PrivateKeyRSA();
+  void ComputeBitSize();
   class Test {
     public:
     static bool All();
@@ -53,6 +57,7 @@ public:
   bool ComputeFromTwoPrimes(
     LargeIntegerUnsigned& inputPrimeOne,
     LargeIntegerUnsigned& inputPrimeTwo,
+    bool verifyInputsArePrime,
     std::stringstream* commentsOnFailure
   );
   void SignBytesPadPKCS1(List<unsigned char>& input, int hash, List<unsigned char>& output);

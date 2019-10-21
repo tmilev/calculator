@@ -52,6 +52,7 @@ public:
   std::string ToString(FormatExpressions* theFormat = nullptr) const;
   std::string ToStringAbbreviate(FormatExpressions* theFormat = nullptr) const;
   void DivPositive(const LargeIntegerUnsigned& divisor, LargeIntegerUnsigned& quotientOutput, LargeIntegerUnsigned& remainderOutput) const;
+  bool isDivisibleBy(const LargeIntegerUnsigned& divisor);
   void MakeOne();
   void AddUInt(unsigned int x);
   void MakeZero();
@@ -59,7 +60,8 @@ public:
   bool IsEven() const;
   bool IsPositive() const;
   bool TryToFindWhetherIsPower(bool& outputIsPower, LargeInteger& outputBase, int& outputPower) const;
-  bool IsPossiblyPrimeMillerRabin(int numTimesToRun = 1, std::stringstream* comments = nullptr);
+  bool IsPossiblyPrime(int MmillerRabinTries, bool tryDivisionSetTrueFaster = true, std::stringstream* comments = nullptr);
+  bool IsPossiblyPrimeMillerRabiN(int numTimesToRun = 1, std::stringstream* comments = nullptr);
   bool IsPossiblyPrimeMillerRabinOnce(
     unsigned int theBase,
     int theExponentOfThePowerTwoFactorOfNminusOne,
@@ -87,6 +89,9 @@ public:
   void AssignShiftedUInt(unsigned int x, int shift);
   void AssignUnsignedInt(unsigned int x);
   void AssignUInt64(uint64_t x);
+  // returns ceiling of the logarithm base two of the number,
+  // i.e., the smallest x such that this <= 2^x.
+  unsigned int LogarithmBaseNCeiling(unsigned int theBase) const;
   void AccountFactor(const LargeInteger& theP, List<LargeInteger>& outputPrimeFactors, List<int>& outputMultiplicities) const;
   bool FactorReturnFalseIfFactorizationIncomplete(
     List<LargeInteger>& outputFactors,

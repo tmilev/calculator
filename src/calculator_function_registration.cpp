@@ -933,6 +933,29 @@ void Calculator::initPredefinedInnerFunctions() {
     "Sha224"
   );
   this->AddOperationInnerHandler(
+  "LogarithmBaseNCeiling",
+  CalculatorFunctionsGeneral::innerLogarithmBaseNCeiling,
+  "",
+  "Returns ceiling(log_N (input)), i.e., the smallest integer "
+  "X for which input <= N^X. First argument = N = base, "
+  "second argument = input.",
+  "LogarithmBaseNCeiling(2, 951891382051282682454493);\n"
+  "log_2 951891382051282682454493;\n"
+  "x = LogarithmBaseNCeiling(2, 100! + 1);\n"
+  "2^x - (100!+1);\n"
+  "2^{x+1} - (100!+1);\n"
+  "y=LogarithmBaseNCeiling(10, 1000! + 1);\n"
+  "10^y - 1000! - 1; 10^{y+1} - 1000! - 1;\n"
+  "DoubleValue(log_2(1000!+1)) + 1;\n"
+  "LogarithmBaseNCeiling(2, 1);\n"
+  "LogarithmBaseNCeiling(-2, 1);\n"
+  "LogarithmBaseNCeiling(2, -1);\n",
+  true,
+  false,
+  "CalculatorFunctionsGeneral::innerLogarithmBaseNCeiling",
+  "LogarithmBaseNCeiling"
+);
+  this->AddOperationInnerHandler(
     "TestRSASign",
     CalculatorFunctionsGeneral::innerTestRSASign,
     "",
@@ -954,7 +977,7 @@ void Calculator::initPredefinedInnerFunctions() {
     true,
     false,
     "CalculatorFunctionsGeneral::innerTestRSASign",
-    "RSASign"
+    "TestRSASign"
   );
   this->AddOperationInnerHandler(
     "GenerateRandomPrime",
@@ -2391,7 +2414,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "IsOuterAuto",
     CalculatorFunctionsWeylGroup::innerIsOuterAutoWeylGroup,
     "",
-    "Checks if element is outer automorphism of a root system. "
+    "Checks whether the element is outer automorphism of a root system. "
     "First argument = type. "
     "Second argument = matrix linear operator corresponding written in simple basis. ",
     "A = MakeMatrix"
@@ -2957,15 +2980,31 @@ void Calculator::initPredefinedInnerFunctions() {
     "IsPrimeMillerRabin",
     CalculatorFunctionsGeneral::innerIsPrimeMillerRabin,
     "",
-    "Checks if the number is prime by the Miller-Rabin test.",
+    "Checks whether the number is prime by the Miller-Rabin test. ",
     "A =100!+ 1; IsPrimeMillerRabin(A);\n"
-    "IsPrimeMillerRabin( 4256233);\n"
+    "IsPrimeMillerRabin(4256233);\n"
     "IsPrimeMillerRabin(49979687);\n"
-    "IsPrimeMillerRabin( 4256233*49979687)",
+    "IsPrimeMillerRabin(4256233 * 49979687)",
     true,
     false,
     "CalculatorFunctionsGeneral::innerIsPrimeMillerRabin",
     "IsPrimeMillerRabin"
+  );
+  this->AddOperationInnerHandler(
+    "IsPossiblyPrime",
+    CalculatorFunctionsGeneral::innerIsPossiblyPrime,
+    "",
+    "Checks whether the number is "
+    "prime by trial division first "
+    "and by the Miller-Rabin test next.",
+    "A =100!+ 1; IsPrimeMillerRabin(A);\n"
+    "IsPossiblyPrime(4256233);\n"
+    "IsPossiblyPrime(49979687);\n"
+    "IsPossiblyPrime(4256233 * 49979687)",
+    true,
+    false,
+    "CalculatorFunctionsGeneral::innerIsPossiblyPrime",
+    "IsPossiblyPrime"
   );
   this->AddOperationInnerHandler(
     "GCD",
@@ -3052,7 +3091,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Returns the remainder after taking quotient of a "
     "polynomial divided by a set of polynomials "
     "using the default monomial order (lexicographic).",
-    "PolyDivRemainder{}(x^7+6x y+5x y^8+y^5, x +y^2- 1, y^3-x y) ;",
+    "PolyDivRemainder{}(x^7+6x y+5x y^8+y^5, x +y^2- 1, y^3-x y);",
     true,
     false,
     "CalculatorFunctionsGeneral::innerPolynomialDivisionRemainder",
@@ -3076,7 +3115,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "",
     "Creates a slide with the polynomial disivion algorithm. "
     "First element = starting slide number.",
-    "PolyDivSlidesGrLex{}(1,x^3+x + 10, x +2) ; PolyDivSlidesGrLex{}(1,x +y+ 10, x + 1,y- 1) ",
+    "PolyDivSlidesGrLex{}(1, x^3 + x + 10, x +2) ; PolyDivSlidesGrLex{}(1,x + y + 10, x + 1, y - 1) ",
     true,
     false,
     "Calculator::innerPolynomialDivisionSlidesGrLex",
@@ -3114,7 +3153,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "",
     "Prints a string representing division of "
     "a polynomial by a set of polynomials using the lex order, for example, x^2 y^4 > x y^1000 > x y^2. ",
-    "PolyDivStringLex{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3- 1) ;",
+    "PolyDivStringLex{}(x^7 + 6 x y + 5x y^8 + y^5, x^2 + 2, y^3 - 1);",
     true,
     false,
     "CalculatorFunctionsGeneral::innerPolynomialDivisionVerboseLex",
@@ -3128,7 +3167,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "a polynomial by a set of polynomials using the lex "
     "order with reversed order of variables, "
     "for example, y^2 > x^1000 y > x y. ",
-    "PolyDivStringLexRev{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3- 1) ;",
+    "PolyDivStringLexRev{}(x^7 + 6x y + 5x y^8 + y^5, x^2 + 2, y^3- 1) ;",
     true,
     false,
     "CalculatorFunctionsGeneral::innerPolynomialDivisionVerboseLexRev",
@@ -3167,7 +3206,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "second and third argument = x and y initial values, "
     "fourth argument = number of approximating points, "
     "fifth and sixth argument = left and right endpoints.",
-    "DFQEuler(x^2 + y^2 - 1, 0, 0, 1000, -2.5, 2.5)",
+    "DFQEuler(x^2 + y^2 - 1, 0, 0, 1000, - 2.5, 2.5)",
     true,
     false,
     "CalculatorFunctionsGeneral::innerDFQsEulersMethod",
@@ -3181,8 +3220,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "The first argument gives the function whose zeroes we are trying to find. "
     "The second argument gives the starting point. "
     "The last argument gives the number of iterations of the method. ",
-    "NewtonsMethod(e^x-( 200 sin{} x  +x^7), 0, 10);\n"
-    "NewtonsMethod(e^x = ( 200 sin{} x  +x^7), 0, 10);",
+    "NewtonsMethod(e^x - ( 200 sin{} x + x^7), 0, 10);\n"
+    "NewtonsMethod(e^x = ( 200 sin{} x + x^7), 0, 10);",
     true,
     false,
     "CalculatorFunctionsGeneral::innerNewtonsMethod",

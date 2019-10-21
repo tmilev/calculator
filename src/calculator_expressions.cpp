@@ -2113,6 +2113,25 @@ bool Expression::IsInteger(LargeInteger* whichInteger) const {
   return theRat.IsInteger(whichInteger);
 }
 
+bool Expression::IsIntegerNonNegative(LargeIntegerUnsigned* whichInteger) const {
+  Rational theRat;
+  if (!this->IsOfType<Rational>(&theRat)) {
+    return false;
+  }
+  if (theRat.IsNonPositive()) {
+    return false;
+  }
+  if (whichInteger == nullptr) {
+    return theRat.IsInteger();
+  }
+  LargeInteger container;
+  if (!theRat.IsInteger(&container)) {
+    return false;
+  }
+  *whichInteger = container.value;
+  return true;
+}
+
 bool Expression::IsIntegerFittingInInt(int* whichInteger) const {
   Rational theRat;
   if (!this->IsOfType<Rational>(&theRat)) {

@@ -659,7 +659,9 @@ bool CalculatorFunctionsGeneral::innerTestRSASign(
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerRSAEncrypt(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsGeneral::innerRSAEncrypt(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerRSAEncrypt");
   if (input.size() != 4) {
     return false;

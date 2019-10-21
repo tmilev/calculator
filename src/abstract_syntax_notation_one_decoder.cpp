@@ -1719,7 +1719,20 @@ void PrivateKeyRSA::HashAndPadPKCS1(
   }
   encoder.theElements[1].MakeOctetString(inputHashed);
   hashObject.ComputeASN(encoder.theElements[0]);
-  encoder.WriteBytesUpdatePromisedLength(output);
+  List<unsigned char> payload;
+  encoder.WriteBytesUpdatePromisedLength(payload);
+  int numberOfFFs = this->byteSize - payload.size - 3;
+  if (numberOfFFs < 0) {
+    numberOfFFs = 0;
+  }
+  output.SetSize(0);
+  output.AddOnTop(0x00);
+  output.AddOnTop(0x01);
+  for (int i = 0; i < numberOfFFs; i ++) {
+    output.AddOnTop(0xff);
+  }
+  output.AddOnTop(0x00);
+  output.AddListOnTop(payload);
 }
 
 bool PrivateKeyRSA::LoadFromASNEncoded(

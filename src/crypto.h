@@ -31,10 +31,8 @@ class PrivateKeyRSA {
 public:
   LargeIntegerUnsigned primeOne;
   LargeIntegerUnsigned primeTwo;
+  LargeIntegerUnsigned CarmichaelTotientOfModulus;
   LargeIntegerUnsigned privateExponent;
-  LargeIntegerUnsigned coefficient;
-  LargeIntegerUnsigned exponentOne;
-  LargeIntegerUnsigned exponentTwo;
   PublicKeyRSA thePublicKey;
   int bitSize; // = ceiling(log_2 (pimeOne * primeTwo))
   int byteSize; // = ceiling (bitSize / 8)
@@ -226,7 +224,7 @@ public:
   static bool ConvertBase58SignificantDigitsFIRSTToLargeIntUnsigned(
     const std::string& inputSignificantDigitsFirst,
     LargeIntegerUnsigned& output,
-    int &numberOfLeadingZeroes,
+    int& numberOfLeadingZeroes,
     std::stringstream *commentsOnFailure
   );
   static bool ConvertBase58ToHexSignificantDigitsFirst(
@@ -298,11 +296,11 @@ public:
   static void computeSha256(const List<unsigned char>& input, List<uint32_t>& output);
   static void computeSha256(const List<unsigned char>& input, List<unsigned char>& output);
   static void computeSha256(const std::string& input, std::string& output);
-  static void ConvertListUintToLargeUInt(List<uint32_t>& input, LargeIntegerUnsigned& output);
+  static void ConvertListUint32ToLargeIntegerUnsignedLittleEndian(List<uint32_t>& input, LargeIntegerUnsigned& output);
   static LargeIntegerUnsigned RSAencrypt(
     const LargeIntegerUnsigned& theModulus, const LargeInteger& theExponent, const LargeInteger& theMessage
   );
-  static void ConvertBitStreamToLargeUnsignedInt(
+  static void ConvertListUnsignedCharsToLargeUnsignedIntegerBigEndian(
     const List<unsigned char>& input,
     LargeIntegerUnsigned& output
   );

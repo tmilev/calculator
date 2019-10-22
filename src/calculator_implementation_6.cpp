@@ -2112,7 +2112,7 @@ bool CalculatorFunctionsGeneral::innerElementEllipticCurveNormalForm(
     << xDefE[2].ToString() << ", " << yDefE[2].ToString();
   }
   if (isElementZmodP) {
-    if (eltZmodP.xCoordinate.theModulo != eltZmodP.yCoordinate.theModulo) {
+    if (eltZmodP.xCoordinate.theModulus != eltZmodP.yCoordinate.theModulus) {
       return theCommands << "The two base coordinates have different moduli. ";
     }
   }

@@ -1448,7 +1448,7 @@ bool Calculator::innerZmodP(Calculator& theCommands, const Expression& input, Ex
     return false;
   }
   ElementZmodP outputElt;
-  outputElt.theModulo = base.value;
+  outputElt.theModulus = base.value;
   outputElt = left.GetNumerator();
   return output.AssignValue(outputElt, theCommands);
 }

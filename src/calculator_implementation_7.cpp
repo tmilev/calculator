@@ -5318,7 +5318,7 @@ bool CalculatorFunctionsGeneral::innerRemoveLastElement(Calculator& theCommands,
 bool ElementZmodP::operator==(int other) const {
   this->CheckIamInitialized();
   ElementZmodP tempElt;
-  tempElt.theModulo = this->theModulo;
+  tempElt.theModulus = this->theModulus;
   tempElt = LargeInteger(other);
   return *this == tempElt;
 }
@@ -5326,7 +5326,7 @@ bool ElementZmodP::operator==(int other) const {
 bool ElementZmodP::operator==(const ElementZmodP& other) const {
   this->CheckIamInitialized();
   other.CheckIamInitialized();
-  return this->theModulo == other.theModulo && this->theValue == other.theValue;
+  return this->theModulus == other.theModulus && this->theValue == other.theValue;
 }
 
 void ElementZmodP::operator*=(const ElementZmodP& other) {
@@ -5337,7 +5337,7 @@ void ElementZmodP::operator*=(const ElementZmodP& other) {
   }
   this->CheckEqualModuli(other);
   this->theValue *= other.theValue;
-  this->theValue %= this->theModulo;
+  this->theValue %= this->theModulus;
 }
 
 bool LargeIntegerUnsigned::IsPossiblyPrimeMillerRabinOnce(
@@ -5348,9 +5348,9 @@ bool LargeIntegerUnsigned::IsPossiblyPrimeMillerRabinOnce(
 ) {
   MacroRegisterFunctionWithName("LargeIntUnsigned::IsPossiblyPrimeMillerRabin");
   ElementZmodP thePower, theOne;
-  thePower.theModulo = *this;
+  thePower.theModulus = *this;
   thePower.theValue = theBase;
-  theOne.theModulo = *this;
+  theOne.theModulus = *this;
   theOne.theValue = 1;
   MathRoutines::RaiseToPower(thePower, theOddFactorOfNminusOne, theOne);
   if (thePower == 1) {

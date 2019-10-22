@@ -1228,13 +1228,13 @@ void AlgebraicNumber::operator=(const Rational& other) {
 std::string ElementZmodP::ToString(FormatExpressions* theFormat) const {
   (void) theFormat; //remove unused parameter warnign portable.
   std::stringstream out;
-  out << "(" << this->theValue.ToString() << " ~mod~ " << this->theModulo.ToString() << ")";
+  out << "(" << this->theValue.ToString() << " ~mod~ " << this->theModulus.ToString() << ")";
   return out.str();
 }
 
 ElementZmodP ElementZmodP::operator*(const Rational& other) const {
   ElementZmodP otherElt;
-  otherElt.theModulo = this->theModulo;
+  otherElt.theModulus = this->theModulus;
   otherElt.AssignRational(other);
   ElementZmodP result = *this;
   result *= otherElt;
@@ -1245,11 +1245,11 @@ unsigned int ElementZmodP::HashFunction() const {
   if (this->theValue.IsEqualToZero()) {
     return 0;
   }
-  return this->theValue.HashFunction() * SomeRandomPrimes[0] + this->theModulo.HashFunction() * SomeRandomPrimes[1];
+  return this->theValue.HashFunction() * SomeRandomPrimes[0] + this->theModulus.HashFunction() * SomeRandomPrimes[1];
 }
 
 void ElementZmodP::CheckIamInitialized() const {
-  if (this->theModulo.IsEqualToZero()) {
+  if (this->theModulus.IsEqualToZero()) {
     crash << "This is a programming error: computing with non-initialized "
     << "element the ring Z mod p (the number p has not been initialized!)."
     << crash;
@@ -1262,10 +1262,10 @@ void ElementZmodP::CheckIamInitialized() const {
 void ElementZmodP::operator=(const LargeInteger& other) {
   this->CheckIamInitialized();
   this->theValue = other.value;
-  this->theValue %= this->theModulo;
+  this->theValue %= this->theModulus;
   if (other.sign == - 1) {
     ElementZmodP mOne;
-    mOne.MakeMOne(this->theModulo);
+    mOne.MakeMOne(this->theModulus);
     *this *= mOne;
   }
 }
@@ -1278,7 +1278,7 @@ void ElementZmodP::ScaleToIntegralMinHeightAndGetPoly(
   rescaled.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
   output.SetExpectedSize(input.size());
   ElementZmodP theCF;
-  theCF.theModulo = newModulo;
+  theCF.theModulus = newModulo;
   output.MakeZero();
   for (int i = 0; i < input.size(); i ++) {
     theCF = input.theCoeffs[i];
@@ -1287,32 +1287,32 @@ void ElementZmodP::ScaleToIntegralMinHeightAndGetPoly(
 }
 
 void ElementZmodP::operator=(const ElementZmodP& other) {
-  this->theModulo = other.theModulo;
+  this->theModulus = other.theModulus;
   this->theValue = other.theValue;
 }
 
 void ElementZmodP::operator=(const LargeIntegerUnsigned& other) {
   this->CheckIamInitialized();
   this->theValue = other;
-  this->theValue %= this->theModulo;
+  this->theValue %= this->theModulus;
 }
 
 void ElementZmodP::MakeOne(const LargeIntegerUnsigned& newModulo) {
-  this->theModulo = newModulo;
+  this->theModulus = newModulo;
   this->theValue = 1;
 }
 
 void ElementZmodP::MakeMOne(const LargeIntegerUnsigned& newModulo) {
-  this->theModulo = newModulo;
+  this->theModulus = newModulo;
   this->theValue = newModulo;
   this->theValue --;
 }
 
 void ElementZmodP::CheckEqualModuli(const ElementZmodP& other) {
-  if (this->theModulo != other.theModulo) {
+  if (this->theModulus != other.theModulus) {
     crash << "This is a programming error: attempting to make an operation "
     << "with two elemetns of Z mod P with different moduli, "
-    << this->theModulo.ToString() << " and " << other.theModulo.ToString() << ". " << crash;
+    << this->theModulus.ToString() << " and " << other.theModulus.ToString() << ". " << crash;
   }
 }
 
@@ -1350,14 +1350,14 @@ ElementZmodP operator*(int left, const ElementZmodP& right) {
 void ElementZmodP::operator*=(const LargeInteger& other) {
   this->theValue *= other.value;
   if (other.IsNegative()) {
-    this->theValue *= this->theModulo - 1;
-    this->theValue %= this->theModulo;
+    this->theValue *= this->theModulus - 1;
+    this->theValue %= this->theModulus;
   }
 }
 
 bool ElementZmodP::operator+=(const Rational& other) {
   ElementZmodP otherElt;
-  otherElt.theModulo = this->theModulo;
+  otherElt.theModulus = this->theModulus;
   if (!otherElt.AssignRational(other)) {
     return false;
   }
@@ -1373,7 +1373,7 @@ void ElementZmodP::operator+=(const ElementZmodP& other) {
   }
   this->CheckEqualModuli(other);
   this->theValue += other.theValue;
-  this->theValue %= this->theModulo;
+  this->theValue %= this->theModulus;
 }
 
 void ElementZmodP::operator-=(const ElementZmodP& other) {
@@ -1403,7 +1403,7 @@ void ElementZmodP::operator=(const int other) {
 
 void ElementZmodP::operator-=(const LargeIntegerUnsigned& other) {
   ElementZmodP otherElt;
-  otherElt.theModulo = this->theModulo;
+  otherElt.theModulus = this->theModulus;
   otherElt = other;
   (*this) -= otherElt;
 }
@@ -1412,18 +1412,17 @@ bool ElementZmodP::AssignRational(const Rational& other) {
   this->CheckIamInitialized();
   *this = other.GetNumerator();
   ElementZmodP den;
-  den.theModulo = this->theModulo;
+  den.theModulus = this->theModulus;
   den = other.GetDenominator();
   if (den.IsEqualToZero()) {
     return false;
   }
-  *this /= den;
-  return true;
+  return (*this /= den);
 }
 
 bool ElementZmodP::operator/=(const LargeInteger& other) {
   ElementZmodP divisor;
-  divisor.theModulo = this->theModulo;
+  divisor.theModulus = this->theModulus;
   if (!divisor.AssignRational(Rational(other))) {
     return false;
   }
@@ -1435,7 +1434,7 @@ bool ElementZmodP::operator/=(const ElementZmodP& other) {
   this->CheckIamInitialized();
   this->CheckEqualModuli(other);
   LargeInteger theInverted, otherValue, theMod;
-  theMod = this->theModulo;
+  theMod = this->theModulus;
   otherValue = other.theValue;
   if (!MathRoutines::InvertXModN(otherValue, theMod, theInverted)) {
     return false;

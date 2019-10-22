@@ -83,7 +83,7 @@ bool CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat(
   for (int i = 0; i < 2; i ++, MathRoutines::swap(leftE, rightE)) {
     if (leftE->IsOfType<ElementZmodP>(&theElt1)) {
       if (rightE->IsOfType<ElementZmodP>(&theElt2)) {
-        if (theElt1.theModulo != theElt2.theModulo) {
+        if (theElt1.theModulus != theElt2.theModulus) {
           return false;
         }
       } else {
@@ -91,7 +91,7 @@ bool CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat(
         if (!rightE->IsOfType<Rational>(&tempRat)) {
           return false;
         }
-        theElt2.theModulo = theElt1.theModulo;
+        theElt2.theModulus = theElt1.theModulus;
         if (!theElt2.AssignRational(tempRat)) {
           return false;
         }
@@ -118,7 +118,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyEltZmodPorRatByEltZmodPorRat(
   for (int i = 0; i < 2; i ++, MathRoutines::swap(leftE, rightE)) {
     if (leftE->IsOfType<ElementZmodP>(&theElt1)) {
       if (rightE->IsOfType<ElementZmodP>(&theElt2)) {
-        if (theElt1.theModulo != theElt2.theModulo) {
+        if (theElt1.theModulus != theElt2.theModulus) {
           return false;
         }
       } else {
@@ -126,7 +126,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyEltZmodPorRatByEltZmodPorRat(
         if (!rightE->IsOfType<Rational>(&tempRat)) {
           return false;
         }
-        theElt2.theModulo = theElt1.theModulo;
+        theElt2.theModulus = theElt1.theModulus;
         if (!theElt2.AssignRational(tempRat)) {
           return false;
         }
@@ -153,7 +153,7 @@ bool CalculatorFunctionsBinaryOps::innerDivideEltZmodPorRatByEltZmodPorRat(
   for (int i = 0; i < 2; i ++, MathRoutines::swap(leftE, rightE)) {
     if (leftE->IsOfType<ElementZmodP>(&theElt1)) {
       if (rightE->IsOfType<ElementZmodP>(&theElt2)) {
-        if (theElt1.theModulo != theElt2.theModulo) {
+        if (theElt1.theModulus != theElt2.theModulus) {
           return false;
         }
       } else {
@@ -161,7 +161,7 @@ bool CalculatorFunctionsBinaryOps::innerDivideEltZmodPorRatByEltZmodPorRat(
         if (!rightE->IsOfType<Rational>(&tempRat)) {
           return false;
         }
-        theElt2.theModulo = theElt1.theModulo;
+        theElt2.theModulus = theElt1.theModulus;
         if (!theElt2.AssignRational(tempRat)) {
           return false;
         }
@@ -510,7 +510,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyEllipticCurveElementsZmodP(
     return false;
   }
   if (!left.flagInfinity && !right.flagInfinity) {
-    if (left.xCoordinate.theModulo != right.xCoordinate.theModulo) {
+    if (left.xCoordinate.theModulus != right.xCoordinate.theModulus) {
       return theCommands << "Attempt to multiply elliptic curve elements over Z mod p "
       << "for different moduli p. Possible bad user input?";
     }
@@ -2343,12 +2343,12 @@ bool CalculatorFunctionsBinaryOps::innerPowerElementZmodPByInteger(
   }
   if (thePower < 0) {
     ElementZmodP copy = theElt;
-    theElt.MakeOne(theElt.theModulo);
+    theElt.MakeOne(theElt.theModulus);
     theElt /= copy;
     thePower *= - 1;
   }
   ElementZmodP unit;
-  unit.MakeOne(theElt.theModulo);
+  unit.MakeOne(theElt.theModulus);
   MathRoutines::RaiseToPower(theElt, thePower, unit);
   return output.AssignValue(theElt, theCommands);
 }

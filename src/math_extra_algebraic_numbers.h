@@ -220,7 +220,7 @@ public:
 
 class ElementZmodP {
 public:
-  LargeIntegerUnsigned theModulo;
+  LargeIntegerUnsigned theModulus;
   LargeIntegerUnsigned theValue;
   bool flagDeallocated;
   friend ElementZmodP operator*(int left, const ElementZmodP& right);

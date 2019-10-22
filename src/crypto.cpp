@@ -58,7 +58,7 @@ void Crypto::GetRandomLargePrime(LargeIntegerUnsigned& output, int numBytes) {
 void Crypto::GetRandomLargeIntegerSecure(LargeIntegerUnsigned& output, int numBytes) {
   ListZeroAfterUse<unsigned char> randomBytes;
   Crypto::GetRandomBytesSecure(randomBytes, numBytes);
-  Crypto::ConvertBitStreamToLargeUnsignedInt(randomBytes.data, output);
+  Crypto::ConvertListUnsignedCharsToLargeUnsignedIntegerBigEndian(randomBytes.data, output);
 }
 
 char Crypto::GetCharFrom6bit(uint32_t input, bool useBase64URL) {
@@ -991,11 +991,13 @@ bool Crypto::ConvertBase64ToLargeUnsignedInt(
   if (!Crypto::ConvertBase64ToBitStream(inputBase64, theBitStream, commentsOnFailure)) {
     return false;
   }
-  Crypto::ConvertBitStreamToLargeUnsignedInt(theBitStream, output);
+  Crypto::ConvertListUnsignedCharsToLargeUnsignedIntegerBigEndian(theBitStream, output);
   return true;
 }
 
-void Crypto::ConvertListUintToLargeUInt(List<uint32_t>& input, LargeIntegerUnsigned& output) {
+void Crypto::ConvertListUint32ToLargeIntegerUnsignedLittleEndian(
+  List<uint32_t>& input, LargeIntegerUnsigned& output
+) {
   output = 0;
   LargeIntegerUnsigned twoPower32;
   twoPower32 = 65536;
@@ -1006,7 +1008,9 @@ void Crypto::ConvertListUintToLargeUInt(List<uint32_t>& input, LargeIntegerUnsig
   }
 }
 
-void Crypto::ConvertBitStreamToLargeUnsignedInt(const List<unsigned char>& input, LargeIntegerUnsigned& output) {
+void Crypto::ConvertListUnsignedCharsToLargeUnsignedIntegerBigEndian(
+  const List<unsigned char>& input, LargeIntegerUnsigned& output
+) {
   output = 0;
   for (int i = 0; i < input.size; i ++) {
     output *= 256;
@@ -1403,9 +1407,9 @@ LargeIntegerUnsigned Crypto::RSAencrypt(
     << "The modulus: " << theModulus.ToString() << "; the exponent: " << theExponent.ToString() << crash;
   }
   ElementZmodP theElt, theOne;
-  theElt.theModulo = theModulus;
+  theElt.theModulus = theModulus;
   theOne.theValue = 1;
-  theOne.theModulo = theModulus;
+  theOne.theModulus = theModulus;
   theElt.AssignRational(theMessage);
   MathRoutines::RaiseToPower(theElt, theExponent, theOne);
   return theElt.theValue;
@@ -1434,7 +1438,7 @@ bool JSONWebToken::VerifyRSA256(
   Crypto::computeSha256(payload, outputSha);
   if (commentsGeneral != nullptr) {
     LargeIntegerUnsigned theSha;
-    Crypto::ConvertListUintToLargeUInt(outputSha, theSha);
+    Crypto::ConvertListUint32ToLargeIntegerUnsignedLittleEndian(outputSha, theSha);
     *commentsGeneral << "<br>Sha256 of payload: " << theSha.ToString();
   }
   LargeIntegerUnsigned theSignatureInt;
@@ -1471,7 +1475,9 @@ bool JSONWebToken::VerifyRSA256(
   if ((!result && commentsOnFailure != nullptr) || commentsGeneral != nullptr) {
     std::string RSAresultTrimmedHex, theShaHex, RSAresultHex, RSAresultBase64;
     LargeIntegerUnsigned theShaUI;
-    Crypto::ConvertListUintToLargeUInt(outputSha, theShaUI);
+    Crypto::ConvertListUint32ToLargeIntegerUnsignedLittleEndian(
+      outputSha, theShaUI
+    );
     RSAresultBase64 = Crypto::ConvertStringToBase64Standard(RSAresultBitstream);
     Crypto::ConvertStringToHex(RSAresultBitstream, RSAresultHex, 0, false);
     Crypto::ConvertStringToHex(RSAresultLast32bytes, RSAresultTrimmedHex, 0, false);

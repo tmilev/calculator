@@ -136,7 +136,9 @@ bool LargeIntegerUnsigned::WriteBigEndianFixedNumberOfBytes(
   return true;
 }
 
-void LargeIntegerUnsigned::WriteBigEndianBytes(List<unsigned char>& outputAppend, bool leadingZeroPad) const {
+void LargeIntegerUnsigned::WriteBigEndianBytes(
+  List<unsigned char>& outputAppend, bool leadingZeroPad
+) const {
   LargeIntegerUnsigned remainder = *this;
   List<unsigned char> digitsReveredOrder;
   while (remainder > 0) {

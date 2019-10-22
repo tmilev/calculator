@@ -1578,7 +1578,7 @@ bool PrivateKeyRSA::BasicChecks(std::stringstream* comments) {
   ElementZmodP mustBeZeroModP;
   //theExponent.theModulo = EulerPhi.value;
   //theExponent.theValue = this->exponent;
-  mustBeZeroModP.theModulo = EulerPhi.value;
+  mustBeZeroModP.theModulus = EulerPhi.value;
   mustBeZeroModP.theValue = 1;
   mustBeZeroModP /= this->thePublicKey.theExponent;
   mustBeZeroModP -= this->privateExponent;
@@ -1644,8 +1644,17 @@ void PrivateKeyRSA::SignBytesPadPKCS1(
   int hash,
   List<unsigned char>& output
 ) {
-
-
+  List<unsigned char> inputHashedPadded;
+  this->HashAndPadPKCS1(input, hash, inputHashedPadded);
+  ElementZmodP theElement, theOne;
+  theElement.theModulus = this->thePublicKey.theModulus;
+  theOne.MakeOne(this->thePublicKey.theModulus);
+  Crypto::ConvertListUnsignedCharsToLargeUnsignedIntegerBigEndian(
+    input, theElement.theValue
+  );
+  MathRoutines::RaiseToPower(theElement, this->privateExponent, theOne);
+  output.SetSize(0);
+  theElement.theValue.WriteBigEndianBytes(output, false);
 }
 
 PrivateKeyRSA::PrivateKeyRSA() {
@@ -1685,6 +1694,12 @@ bool PrivateKeyRSA::ComputeFromTwoPrimes(
   }
   this->thePublicKey.theExponent.AssignUnsignedInt(this->thePublicKey.defaultExponent);
   this->thePublicKey.theModulus = this->primeOne * this->primeTwo;
+  this->CarmichaelTotientOfModulus = MathRoutines::lcm(this->primeOne - 1, this->primeTwo - 1);
+  ElementZmodP inverter;
+  inverter.theModulus = this->CarmichaelTotientOfModulus;
+  inverter.theValue = 1;
+  inverter /= this->thePublicKey.theExponent;
+  this->privateExponent = inverter.theValue;
   this->ComputeBitSize();
   return true;
 }

@@ -653,9 +653,23 @@ bool CalculatorFunctionsGeneral::innerTestRSASign(
   message = messageString;
   theKey.HashAndPadPKCS1(message, SignatureAlgorithmSpecification::HashAlgorithm::sha256, paddedMessage);
   out << "Temporary private key:<br>" << theKey.ToString() << "<br>";
-  //theKey.SignBytesPadPKCS1(message, SignatureAlgorithmSpecification::HashAlgorithm::sha256, signature);
+  theKey.SignBytesPadPKCS1(message, SignatureAlgorithmSpecification::HashAlgorithm::sha256, signature);
   out << "Message:<br>" << Crypto::ConvertListUnsignedCharsToHex(message);
   out << "<br>Padded message digest:<br>" << Crypto::ConvertListUnsignedCharsToHex(paddedMessage);
+  out << "<br>Signature:<br>" << Crypto::ConvertListUnsignedCharsToHex(signature);
+  ElementZmodP theElement, theOne;
+  theElement.theModulus = theKey.thePublicKey.theModulus;
+  theOne.MakeOne(theElement.theModulus);
+  Crypto::ConvertListUnsignedCharsToLargeUnsignedIntegerBigEndian(signature, theElement.theValue);
+  out << "<br>Signature integer:<br>" << theElement.theValue.ToString();
+  MathRoutines::RaiseToPower(theElement, theKey.thePublicKey.theExponent, theOne);
+  out << "<br>Signature power e mod n [e = "
+  << theKey.thePublicKey.theExponent << ", n = "
+  << theKey.thePublicKey.theModulus << "]"
+  << ":<br>" << theElement.theValue.ToString();
+  std::string theHex;
+  Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst(theElement.theValue, 0, theHex);
+  out << "<br>Converted to hex:<br>" << theHex;
   return output.AssignValue(out.str(), theCommands);
 }
 

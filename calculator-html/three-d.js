@@ -55,10 +55,16 @@ function calculatorError(x) {
   }
 }
 
+/**
+ * Scalar product of two vectors.
+ * @param {number[]} s 
+ * @param {number[]} t 
+ * @returns{number}
+ */
 function vectorScalarVector(s, t) { 
   var result = 0;
   if (s.length !== t.length) {
-    calculatorError("Scalar product of vectors of different length: " + s + " and " + t + ".");
+    calculatorError(`Scalar product of vectors of different length: ${s} and ${t}.`);
   }
   for (var i = 0; i < s.length; i ++) {
     result += s[i] * t[i];
@@ -114,6 +120,23 @@ function vectorRound(vector) {
 
 function vectorNormalize(vector) { 
   vectorTimesScalar(vector, 1 / vectorLength(vector));
+}
+
+/**
+ * Returns true if the vector is the zero vector, 
+ * false otherwise. 
+ * @returns {boolean} 
+ * */
+function vectorIsZero(
+  /**@type{number[]} */
+  vector,
+) {
+  for (var i = 0; i < vector.length; i ++) {
+    if (vector[i] !== 0) {
+      return false;
+    }
+  }
+  return true;
 }
 
 function getPosXPosYObject(theObject, cx, cy) { 
@@ -1246,6 +1269,13 @@ function Canvas(inputCanvas) {
   };
   this.screenXY = [0, 0];
   this.flagShowPerformance = true;
+  this.rotationModesAvailable = {
+    "rotateAfterCursorDefaultGreatNormalCircle": this.rotateAfterCursorDefaultGreatNormalCircle,
+    "rotateAfterCursorDefaultCartesian": this.rotateAfterCursorDefaultCartesian,
+  };
+  //this.rotationMode = "rotateAfterCursorDefaultGreatNormalCircle";
+  this.rotationMode = "rotateAfterCursorDefaultCartesian";
+
   this.thePatchOrder = [];
   this.numAccountedPatches = 0;
   this.numCyclicallyOverlappingPatchTieBreaks = 0;
@@ -1267,7 +1297,7 @@ function Canvas(inputCanvas) {
   this.bufferDeltaY = 0;
   this.colorDepthFactor = 0.4;
   this.boundingBoxMathScreen = [[- 0.01, - 0.01], [0.01, 0.01]];
-  this.boundingBoxMath = [[- 0.01, - 0.01, - 0.01],[0.01, 0.01, 0.01]];
+  this.boundingBoxMath = [[- 0.01, - 0.01, - 0.01], [0.01, 0.01, 0.01]];
   this.boundingSegmentZ = [ -0.01, 0.01];
   this.lastCenterScreen = [0, 0];
   this.width = inputCanvas.width;
@@ -1279,8 +1309,10 @@ function Canvas(inputCanvas) {
   this.scaleDefault = 50;
   this.scale = this.scaleDefault;
   this.mousePosition = [];
+  // position in math coordinates, 3d.
   this.clickedPosition = [];
   this.unitRay = [];
+  this.zUnit = [];
   this.rayComponent = [];
   this.positionDelta = [];
   this.spanMessages = undefined;
@@ -1295,7 +1327,7 @@ function Canvas(inputCanvas) {
   this.anglePolar = 0;
   this.selectedElement = "";
   this.selectedVector = [];
-  this.selectedScreenBasis = [];
+  this.selectedScreenBasisOrthonormal = [];
   this.selectedScreenProjectionNormalized = [];
   this.selectedScreenNormal = [];
   this.selectedPolarAngleChange = 0;
@@ -1385,7 +1417,7 @@ Canvas.prototype.computeContour = function(theContour) {
     theContour.thePointsMathScreen = new Array(theContour.thePoints.length);
   }
   for (var i = 0; i < theContour.thePoints.length; i ++) {
-    theContour.thePointsMathScreen[i] = this.coordsMathToMathScreen(theContour.thePoints[i]);
+    theContour.thePointsMathScreen[i] = this.coordsProjectMathToMathScreen2d(theContour.thePoints[i]);
   }
 }
 
@@ -1710,7 +1742,7 @@ Canvas.prototype.accountOnePointMathCoordsInBufferStrip = function(row, thePoint
   if (row < 0 || row >= this.zBufferIndexStrip.length) {
     return;
   }
-  var bufferCoords = this.coordsMathScreenToBufferIndices(this.coordsMathToMathScreen(thePoint));
+  var bufferCoords = this.coordsMathScreenToBufferIndices(this.coordsProjectMathToMathScreen2d(thePoint));
   //If there were no rounding errors, row would be equal
   //to bufferCoords[0]. However since there will be rounding errors,
   //the row is passed instead as an argument.
@@ -1729,8 +1761,8 @@ Canvas.prototype.accountOnePointMathCoordsInBufferStrip = function(row, thePoint
 
 Canvas.prototype.accountEdgeInBufferStrip = function(base, edgeVector, patchIndex) { 
   var end = vectorPlusVector(base, edgeVector);
-  var lowFloat = this.coordsMathScreenToBufferIndicesROWSFloat(this.coordsMathToMathScreen(base)[1]);
-  var highFloat = this.coordsMathScreenToBufferIndicesROWSFloat(this.coordsMathToMathScreen(end)[1]);
+  var lowFloat = this.coordsMathScreenToBufferIndicesROWSFloat(this.coordsProjectMathToMathScreen2d(base)[1]);
+  var highFloat = this.coordsMathScreenToBufferIndicesROWSFloat(this.coordsProjectMathToMathScreen2d(end)[1]);
   if (lowFloat > highFloat) { 
     var minusEdge = edgeVector.slice();
     vectorTimesScalar(minusEdge, - 1);
@@ -1753,10 +1785,10 @@ Canvas.prototype.accountEdgeInBufferStrip = function(base, edgeVector, patchInde
 
 Canvas.prototype.accountOnePatch = function(patchIndex) { 
   var thePatch = this.theIIIdObjects.thePatches[patchIndex];
-  var pt1 = this.coordsMathToMathScreen(thePatch.base);
-  var pt2 = this.coordsMathToMathScreen(thePatch.v1);
-  var pt3 = this.coordsMathToMathScreen(thePatch.v2);
-  var pt4 = this.coordsMathToMathScreen(thePatch.vEnd);
+  var pt1 = this.coordsProjectMathToMathScreen2d(thePatch.base);
+  var pt2 = this.coordsProjectMathToMathScreen2d(thePatch.v1);
+  var pt3 = this.coordsProjectMathToMathScreen2d(thePatch.v2);
+  var pt4 = this.coordsProjectMathToMathScreen2d(thePatch.vEnd);
   var lowFloat = this.getExtremePoint(1, 0, pt1, pt2, pt3, pt4);
   var highFloat = this.getExtremePoint(1, 1, pt1, pt2, pt3, pt4);
   var low = this.coordsMathScreenToBufferIndicesROWS(lowFloat);
@@ -1780,7 +1812,7 @@ Canvas.prototype.accountOnePatch = function(patchIndex) {
 }
 
 Canvas.prototype.computeBoundingBoxAccountPoint = function(input) { 
-  var theV = this.coordsMathToMathScreen(input);
+  var theV = this.coordsProjectMathToMathScreen2d(input);
   for (var i = 0; i < 2; i ++) {
     if (theV[i] < this.boundingBoxMathScreen[0][i]) {
       this.boundingBoxMathScreen[0][i] = theV[i];
@@ -2044,8 +2076,8 @@ Canvas.prototype.infoProjectionCompute = function () {
   this.textProjectionInfo += `<br>screen normal: ${this.screenNormal}`;
   this.textProjectionInfo += `<br>e1: ${this.screenBasisOrthonormal[0]}`;
   this.textProjectionInfo += `<br>e2: ${this.screenBasisOrthonormal[1]}`;
-  this.textProjectionInfo += `<br>selected e1: ${this.selectedScreenBasis[0]}`;
-  this.textProjectionInfo += `<br>selected e2: ${this.selectedScreenBasis[1]}`;
+  this.textProjectionInfo += `<br>selected e1: ${this.selectedScreenBasisOrthonormal[0]}`;
+  this.textProjectionInfo += `<br>selected e2: ${this.selectedScreenBasisOrthonormal[1]}`;
 }
 
 Canvas.prototype.computeBasis = function () { 
@@ -2110,11 +2142,15 @@ Canvas.prototype.resetViewNoRedraw = function() {
 }
 
 Canvas.prototype.constructControls = function() { 
-  var incomingButton = "";
-  incomingButton += `<button style ="border:none; background:none; color:blue; padding:0; text-decoration: underline; cursor:pointer"`;
-  incomingButton += `onclick = "window.calculator.drawing.getCanvas('${this.canvasId}').resetView();">reset view</button>`;
-  incomingButton += `<small> shift + drag to rotate</small>`;
-  this.spanControls.innerHTML = incomingButton;
+  this.spanControls.innerHTML = '';
+  var buttonElement = document.createElement("BUTTON");
+  buttonElement.style = "border:none; background:none; color:blue; padding:0; text-decoration: underline; cursor:pointer";
+  buttonElement.innerHTML = "reset view";
+  buttonElement.addEventListener("click", this.resetView.bind(this));
+  var hintElement = document.createElement("SPAN");
+  hintElement.innerHTML = `<small> shift + drag to rotate</small>`; 
+  this.spanControls.appendChild(buttonElement);
+  this.spanControls.appendChild(hintElement);
 }
 
 Canvas.prototype.init = function(inputCanvasId) { 
@@ -2137,31 +2173,53 @@ Canvas.prototype.init = function(inputCanvasId) {
   }
 }
 
-Canvas.prototype.coordsMathScreenToMath = function(theCoords) { 
+Canvas.prototype.coordsInjectMathScreen2dToMath3d = function(theCoords) { 
   var output = this.screenBasisOrthonormal[0].slice();
   vectorTimesScalar(output, theCoords[0]);
   vectorAddVectorTimesScalar(output, this.screenBasisOrthonormal[1], theCoords[1]);
   return output;
 }
 
-Canvas.prototype.coordsMathToMathScreen = function(vector) { 
+Canvas.prototype.coordsProjectMathToMathSelectedScreen2d = function(vector) { 
+  return [
+    vectorScalarVector(vector, this.selectedScreenBasisOrthonormal[0]),
+    vectorScalarVector(vector, this.selectedScreenBasisOrthonormal[1])
+  ];
+}
+
+Canvas.prototype.coordsProjectMathToMathScreen2d = function(vector) { 
   return [
     vectorScalarVector(vector, this.screenBasisOrthonormal[0]),
     vectorScalarVector(vector, this.screenBasisOrthonormal[1])
   ];
 }
 
-Canvas.prototype.projectToMathScreen = function(vector) { 
+/**
+ * Returns a projection in 3d of 
+ * of the input vector 
+ * to the current screen.`
+ * @returns{number[]}
+ */
+Canvas.prototype.coordsProjectToMathScreen3d = function(vector) { 
   var output = this.screenBasisOrthonormal[0].slice();
   vectorTimesScalar(output, vectorScalarVector(vector, this.screenBasisOrthonormal[0]));
   vectorAddVectorTimesScalar(output, this.screenBasisOrthonormal[1], vectorScalarVector(vector, this.screenBasisOrthonormal[1]));
   return output;
 }
 
-Canvas.prototype.projectToSelectedMathScreen = function(vector) { 
-  var output = this.selectedScreenBasis[0].slice();
-  vectorTimesScalar(output, vectorScalarVector(vector, this.selectedScreenBasis[0]));
-  vectorAddVectorTimesScalar(output, this.selectedScreenBasis[1], vectorScalarVector(vector, this.selectedScreenBasis[1]));
+/**
+ * Returns a projection in 3d 
+ * of the input vector 
+ * to the selected screen.`
+ * @returns{number[]}
+ */
+Canvas.prototype.coordsProjectToSelectedMathScreen3d = function(
+  /**@type{number[]} */
+  vector,
+) { 
+  var output = this.selectedScreenBasisOrthonormal[0].slice();
+  vectorTimesScalar(output, vectorScalarVector(vector, this.selectedScreenBasisOrthonormal[0]));
+  vectorAddVectorTimesScalar(output, this.selectedScreenBasisOrthonormal[1], vectorScalarVector(vector, this.selectedScreenBasisOrthonormal[1]));
   return output;
 }
 
@@ -2174,10 +2232,11 @@ Canvas.prototype.coordsMathToScreen = function(vector) {
 
 Canvas.prototype.coordsMathToSelectedScreen = function(vector) { 
   return [
-    this.scale * vectorScalarVector(vector, this.selectedScreenBasis[0]) + this.centerX,
-    (- 1) * this.scale * vectorScalarVector(vector, this.selectedScreenBasis[1]) + this.centerY
+    this.scale * vectorScalarVector(vector, this.selectedScreenBasisOrthonormal[0]) + this.centerX,
+    (- 1) * this.scale * vectorScalarVector(vector, this.selectedScreenBasisOrthonormal[1]) + this.centerY
   ];
 }
+
 Canvas.prototype.coordsScreenToMathScreen = function(screenPos) { 
   return [(screenPos[0] - this.centerX) / this.scale, (this.centerY - screenPos[1]) / this.scale];
 }
@@ -2208,45 +2267,35 @@ Canvas.prototype.rotateOutOfPlane = function (input, orthoBasis1, orthoBasis2, t
   return vectorPlusVector(vComponent, projection);
 }
 
-//please use only with doRotateRadially = false
-//the option creates confusing user interface, needs to be fixed/reworked
-Canvas.prototype.rotateAfterCursorDefaultGreatNormalCircle = function(doRotateRadially) { 
-  if (this.mousePosition.length == 0) {
-    return;
-  }
-  if (doRotateRadially) {
-    /* this.selectedPolarAngleChange = -getAngleChangeMathScreen(newX, newY, oldX, oldY);
-    vectorTimesScalar(newE1, Math.cos(this.selectedPolarAngleChange));
-    vectorAddVectorTimesScalar(newE1, oldE2, Math.sin(this.selectedPolarAngleChange));
-    vectorTimesScalar(newE2, Math.cos(this.selectedPolarAngleChange));
-    vectorAddVectorTimesScalar(newE2, oldE1, -Math.sin(this.selectedPolarAngleChange));
-    this.screenBasisOrthonormal[0] = newE1;
-    this.screenBasisOrthonormal[1] = newE2;*/
-  }
+Canvas.prototype.computePositionDelta = function() {
   var oldX = this.clickedPosition[0];
   var oldY = this.clickedPosition[1];
   var newX = this.mousePosition[0];
   var newY = this.mousePosition[1];
   this.positionDelta = [newX - oldX, newY - oldY];
+}
+
+Canvas.prototype.rotateAfterCursorDefaultGreatNormalCircle = function() { 
+  if (this.mousePosition.length == 0) {
+    return;
+  }
+  this.computePositionDelta();
   this.unitRay = this.clickedPosition.slice();
   vectorNormalize(this.unitRay);
   this.rayComponent = this.unitRay.slice();
   vectorTimesScalar(this.rayComponent, vectorScalarVector(this.mousePosition, this.unitRay));
   var osculatingOldX = vectorLength(this.clickedPosition);
-  var osculatingOldCos = osculatingOldX/vectorLength(this.selectedVector);
-//    var osculatingOldSin =1-osculatingOldCos*osculatingOldCos;
+  var osculatingOldCos = osculatingOldX / vectorLength(this.selectedVector);
   var osculatingNewX = vectorScalarVector(this.mousePosition, this.unitRay);
   var osculatingNewCos = osculatingNewX / vectorLength(this.selectedVector);
-//    var osculatingNewSin =1-osculatingNewCos*osculatingNewCos;
-//    var osculatingOldY =vectorScalarVector(this.selectedVector, selectedOrthogonal);
   this.newAngleNormal = Math.acos(osculatingNewCos);
   this.oldAngleNormal = Math.acos(osculatingOldCos);
   this.angleNormal = this.oldAngleNormal - this.newAngleNormal;
   if (isNaN(this.angleNormal)) {
     return;
   }
-  var newE1 = this.selectedScreenBasis[0].slice();
-  var newE2 = this.selectedScreenBasis[1].slice();
+  var newE1 = this.selectedScreenBasisOrthonormal[0].slice();
+  var newE2 = this.selectedScreenBasisOrthonormal[1].slice();
   newE1 = this.rotateOutOfPlane(newE1, this.selectedScreenProjectionNormalized, this.selectedScreenNormal, this.angleNormal);
   newE2 = this.rotateOutOfPlane(newE2, this.selectedScreenProjectionNormalized, this.selectedScreenNormal, this.angleNormal);
   this.screenBasisUser[0] = newE1.slice();
@@ -2259,20 +2308,45 @@ Canvas.prototype.rotateAfterCursorDefaultCartesian = function() {
   if (this.mousePosition.length === 0) {
     return;
   }
-  this.positionDelta = [this.mousePosition[0] - this.clickedPosition[0], this.mousePosition[1] - this.clickedPosition[1]];
-  var xyThreshhold = 5;
-  if (this.positionDelta[0] > xyThreshhold) {
-    this.positionDelta[0] = xyThreshhold;
-  }
-  if (this.positionDelta[1] > xyThreshhold) {
-    this.positionDelta[1] = xyThreshhold;
-  }
-  if (this.positionDelta[0] < - xyThreshhold) {
-    this.positionDelta[0] = - xyThreshhold;
-  }
-  if (this.positionDelta[1] < - xyThreshhold) {
-    this.positionDelta[1] = - xyThreshhold;
-  }
+  this.computePositionDelta();
+  var projection = this.coordsProjectToSelectedMathScreen3d(this.selectedVector);
+  var zVector = vectorMinusVector(this.selectedVector, projection);
+  if (vectorIsZero(zVector)) {
+    zVector = vectorCrossVector(this.selectedScreenBasisOrthonormal[0], this.selectedScreenBasisOrthonormal[1]);
+  } 
+  vectorNormalize(zVector);
+  var relativeXYOld = this.coordsProjectMathToMathSelectedScreen2d(this.selectedVector);
+  var relativeXOld = relativeXYOld[0];
+  var relativeYOld = relativeXYOld[1];
+  var relativeZOld = vectorScalarVector(this.selectedVector, this.selectedVector);
+  var relativeXYRadius = Math.sqrt(relativeXOld * relativeXOld + relativeZOld * relativeZOld);
+  var relativeZYRadius = Math.sqrt(relativeYOld * relativeYOld + relativeZOld * relativeZOld);
+
+  var relativeXNew = relativeXOld + this.positionDelta[0];
+  var relativeYNew = relativeYOld + this.positionDelta[1];
+  
+  // Rotate in the x,z-plane to match the x-coordinate change of the cursor,
+  // then rotate in the y,z-plane to match the y-coordinate change of the cursor.
+  // The two rotations do not commute, so we arbitrarily choose to do the 
+  // x,z-rotation first.
+  var angleDeltaXZ = Math.acos(relativeXNew / relativeXYRadius) - Math.acos(relativeXOld / relativeXYRadius);
+  var angleDeltaYZ = Math.acos(relativeYNew/ relativeZYRadius) - Math.acos(relativeYOld / relativeZYRadius);
+  var newE1 = this.selectedScreenBasisOrthonormal[0].slice();
+  var newE2 = this.selectedScreenBasisOrthonormal[1].slice();
+  vectorTimesScalar(newE1, Math.cos(angleDeltaXZ));
+  vectorAddVectorTimesScalar(newE1, zVector, Math.sin(angleDeltaXZ));
+
+  // var relativeYIntermediate = 0;
+  var relativeZIntermediate = vectorScalarVector(zVector, newE1);
+
+  vectorTimesScalar(newE2, Math.cos(angleDeltaYZ));
+  vectorAddVectorTimesScalar(newE2, zVector, Math.sin(angleDeltaYZ));
+
+  vectorAddVectorTimesScalar(newE1, this.selectedScreenBasisOrthonormal[1], - relativeZIntermediate * Math.sin(angleDeltaYZ));
+  vectorAddVectorTimesScalar(newE1, zVector, - relativeZIntermediate * Math.cos(angleDeltaYZ));
+
+  this.screenBasisUser[0] = newE1.slice();
+  this.screenBasisUser[1] = newE2.slice();
   this.computeBasis();
   this.redraw();
 }
@@ -2281,11 +2355,11 @@ Canvas.prototype.rotateAfterCursorDefault = function() {
   if (this.mousePosition.length === 0) {
     return;
   }
-  this.rotateAfterCursorDefaultGreatNormalCircle(false);
+  this.rotationModesAvailable[this.rotationMode].bind(this)();
 }
 
-Canvas.prototype.mouseWheel = function(wheelDelta, screenX, screenY)
-{ var screenPos = this.coordsScreenAbsoluteToScreen(screenX, screenY);
+Canvas.prototype.mouseWheel = function(wheelDelta, screenX, screenY) { 
+  var screenPos = this.coordsScreenAbsoluteToScreen(screenX, screenY);
   var mathScreenPos = this.coordsScreenToMathScreen(screenPos);
   this.scale += wheelDelta;
   if (this.scale <= 0) {
@@ -2361,14 +2435,14 @@ Canvas.prototype.canvasClick = function (screenX, screenY, event) {
 
 Canvas.prototype.selectEmpty = function() { 
   this.selectedElement = "";
-  this.selectedScreenBasis = [];
+  this.selectedScreenBasisOrthonormal = [];
   this.selectedVector = [];
   this.selectedPolarAngleChange = 0;
   this.angleNormal = 0;
 }
 
 Canvas.prototype.computeSelectedVector = function() { 
-  this.selectedScreenProjectionNormalized = this.coordsMathScreenToMath(this.clickedPosition);
+  this.selectedScreenProjectionNormalized = this.coordsInjectMathScreen2dToMath3d(this.clickedPosition);
   this.selectedVector = this.selectedScreenProjectionNormalized.slice();
   vectorNormalize(this.selectedScreenProjectionNormalized);
   this.selectedScreenNormal = this.screenNormal;
@@ -2377,7 +2451,7 @@ Canvas.prototype.computeSelectedVector = function() {
   if (lengthSelectedVector < 0.5) {
     vectorTimesScalar(this.selectedVector, 1 / Math.sqrt(lengthSelectedVector));
   }
-  this.selectedScreenBasis = [this.screenBasisOrthonormal[0].slice(), this.screenBasisOrthonormal[1].slice()];
+  this.selectedScreenBasisOrthonormal = [this.screenBasisOrthonormal[0].slice(), this.screenBasisOrthonormal[1].slice()];
 }
 
 Canvas.prototype.showMessages = function() { 
@@ -2478,7 +2552,6 @@ Canvas.prototype.infoMouseCompute = function() {
     this.textMouseInfo += `<span style ='color:red'><b>Error: only ${this.numAccountedPatches} out of `;
     this.textMouseInfo += `${this.theIIIdObjects.thePatches.length} patches accounted. </b></span><br>`;
   }
-  console.log("HEre be i ... mouse position?");
   this.textMouseInfo += `time last redraw: ${this.redrawTime} ms `; 
   this.textMouseInfo += `(~${(1000 / this.redrawTime).toFixed(1)} f.p.s.)`;
   this.textMouseInfo += `<br>selected element: ${this.selectedElement}`;

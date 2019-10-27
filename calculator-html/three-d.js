@@ -1273,8 +1273,8 @@ function Canvas(inputCanvas) {
     "rotateAfterCursorDefaultGreatNormalCircle": this.rotateAfterCursorDefaultGreatNormalCircle,
     "rotateAfterCursorDefaultCartesian": this.rotateAfterCursorDefaultCartesian,
   };
-  //this.rotationMode = "rotateAfterCursorDefaultGreatNormalCircle";
-  this.rotationMode = "rotateAfterCursorDefaultCartesian";
+  this.rotationMode = "rotateAfterCursorDefaultGreatNormalCircle";
+  // this.rotationMode = "rotateAfterCursorDefaultCartesian";
 
   this.thePatchOrder = [];
   this.numAccountedPatches = 0;
@@ -2304,21 +2304,39 @@ Canvas.prototype.rotateAfterCursorDefaultGreatNormalCircle = function() {
   this.redraw();
 }
 
+Canvas.prototype.makeValidCosine = function(
+  /** @type{number}*/
+  input,
+) {
+  if (input > 1) {
+    return 1;
+  }
+  if (input < - 1) {
+    return - 1;
+  }
+  return input;
+}
+
 Canvas.prototype.rotateAfterCursorDefaultCartesian = function() { 
   if (this.mousePosition.length === 0) {
     return;
   }
+  console.log("Not complete yet. ");
+  return;
   this.computePositionDelta();
   var projection = this.coordsProjectToSelectedMathScreen3d(this.selectedVector);
   var zVector = vectorMinusVector(this.selectedVector, projection);
   if (vectorIsZero(zVector)) {
-    zVector = vectorCrossVector(this.selectedScreenBasisOrthonormal[0], this.selectedScreenBasisOrthonormal[1]);
+    zVector = vectorCrossVector(
+      this.selectedScreenBasisOrthonormal[0], 
+      this.selectedScreenBasisOrthonormal[1],
+    );
   } 
   vectorNormalize(zVector);
   var relativeXYOld = this.coordsProjectMathToMathSelectedScreen2d(this.selectedVector);
   var relativeXOld = relativeXYOld[0];
   var relativeYOld = relativeXYOld[1];
-  var relativeZOld = vectorScalarVector(this.selectedVector, this.selectedVector);
+  var relativeZOld = vectorScalarVector(this.selectedVector, zVector);
   var relativeXYRadius = Math.sqrt(relativeXOld * relativeXOld + relativeZOld * relativeZOld);
   var relativeZYRadius = Math.sqrt(relativeYOld * relativeYOld + relativeZOld * relativeZOld);
 
@@ -2329,21 +2347,25 @@ Canvas.prototype.rotateAfterCursorDefaultCartesian = function() {
   // then rotate in the y,z-plane to match the y-coordinate change of the cursor.
   // The two rotations do not commute, so we arbitrarily choose to do the 
   // x,z-rotation first.
-  var angleDeltaXZ = Math.acos(relativeXNew / relativeXYRadius) - Math.acos(relativeXOld / relativeXYRadius);
-  var angleDeltaYZ = Math.acos(relativeYNew/ relativeZYRadius) - Math.acos(relativeYOld / relativeZYRadius);
+  var relativeXZcosOld = relativeXOld / relativeXYRadius;
+  var relativeXZcosNew = this.makeValidCosine(relativeXNew / relativeXYRadius);
+  var angleDeltaXZ = Math.acos(relativeXZcosNew) - Math.acos(relativeXZcosOld);
+  var relativeYZcosOld = relativeYOld / relativeZYRadius;
+  var relativeYZcosNew = this.makeValidCosine(relativeYNew / relativeZYRadius);
+  var angleDeltaYZ = Math.acos(relativeYZcosNew) - Math.acos(relativeYZcosOld);
   var newE1 = this.selectedScreenBasisOrthonormal[0].slice();
   var newE2 = this.selectedScreenBasisOrthonormal[1].slice();
   vectorTimesScalar(newE1, Math.cos(angleDeltaXZ));
   vectorAddVectorTimesScalar(newE1, zVector, Math.sin(angleDeltaXZ));
 
   // var relativeYIntermediate = 0;
-  var relativeZIntermediate = vectorScalarVector(zVector, newE1);
+  // var relativeZIntermediate = vectorScalarVector(zVector, newE1);
 
-  vectorTimesScalar(newE2, Math.cos(angleDeltaYZ));
-  vectorAddVectorTimesScalar(newE2, zVector, Math.sin(angleDeltaYZ));
+  // vectorTimesScalar(newE2, Math.cos(angleDeltaYZ));
+  // vectorAddVectorTimesScalar(newE2, zVector, Math.sin(angleDeltaYZ));
 
-  vectorAddVectorTimesScalar(newE1, this.selectedScreenBasisOrthonormal[1], - relativeZIntermediate * Math.sin(angleDeltaYZ));
-  vectorAddVectorTimesScalar(newE1, zVector, - relativeZIntermediate * Math.cos(angleDeltaYZ));
+  // vectorAddVectorTimesScalar(newE1, this.selectedScreenBasisOrthonormal[1], - relativeZIntermediate * Math.sin(angleDeltaYZ));
+  // vectorAddVectorTimesScalar(newE1, zVector, - relativeZIntermediate * Math.cos(angleDeltaYZ));
 
   this.screenBasisUser[0] = newE1.slice();
   this.screenBasisUser[1] = newE2.slice();

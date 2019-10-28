@@ -1459,12 +1459,12 @@ bool DatabaseRoutinesGlobalFunctions::LoginNoDatabaseSupport(
   if (!theGlobalVariables.flagDisableDatabaseLogEveryoneAsAdmin) {
     return false;
   }
-  //When the database is disabled, we assume the user is an admin.
-  //The purpose of this is that
-  //users who do not have a mongoDB installed
-  //(or have troubles accessing it for some reason)
-  //can still use the admin functions of the calculator, for example,
-  //modify problem files from the one-page app.
+  // When the database is disabled, we assume the user is an admin.
+  // The purpose of this is that
+  // users who do not have a mongoDB installed
+  // (or have troubles accessing it for some reason)
+  // can still use the admin functions of the calculator, for example,
+  // modify problem files from the one-page app.
   theUser.userRole = UserCalculatorData::Roles::admin;
   theUser.actualAuthenticationToken = "compiledWithoutDatabaseSupport";
   if (commentsGeneral != nullptr) {

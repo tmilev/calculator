@@ -679,12 +679,18 @@ bool WebWorker::ExtractArgumentsFromMessage(
   return true;
 }
 
-//Returns false if something unexpected happens during the login procedure.
-//Returning true does not necessarily mean the login information was accepted.
-//Returning false guarantees the login information was not accepted.
+// Returns false if something unexpected happens during the login procedure.
+// Returning true does not necessarily mean the login information was accepted.
+// Returning false guarantees the login information was not accepted.
 bool WebWorker::LoginProcedure(std::stringstream& argumentProcessingFailureComments, std::stringstream* comments) {
-  MacroRegisterFunctionWithName("WebWorker::Login");
+  MacroRegisterFunctionWithName("WebWorker::LoginProcedure");
   theGlobalVariables.flagLoggedIn = false;
+  if (theGlobalVariables.flagDisableDatabaseLogEveryoneAsAdmin) {
+    theGlobalVariables.flagLoggedIn = true;
+    theGlobalVariables.flagDatabaseCompiled = false;
+    return true;
+  }
+
   MapList<std::string, std::string, MathRoutines::HashString>& theArgs = theGlobalVariables.webArguments;
   UserCalculatorData& theUser = theGlobalVariables.userDefault;
   theUser.username = HtmlRoutines::ConvertURLStringToNormal(
@@ -1464,7 +1470,12 @@ int WebWorker::ProcessMonitor() {
     stOutput << result.ToString(false);
     return 0;
   }
+  bool allowed = false;
+
   if (theGlobalVariables.flagAllowProcessMonitoring && theGlobalVariables.UserDefaultHasAdminRights()) {
+    allowed = true;
+  }
+  if (allowed) {
     result["webWorkerNumber"] = atoi(theMainInput.c_str());
     result["authenticated"] = "true";
   } else {

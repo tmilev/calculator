@@ -225,8 +225,8 @@ bool CalculatorFunctionsGeneral::innerTestTLSMessageSequence(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestTLSMessageSequence");
   Vector<std::string> inputMessages;
-  if (!theCommands.GetVectoR(input, inputMessages)) {
-    return theCommands << "Failed to extract inputs vector of strings. ";
+  if (!theCommands.GetVectorFromFunctionArguments(input, inputMessages)) {
+    return theCommands << "Failed to extract input vector of strings. ";
   }
   if (inputMessages.size < 3) {
     return theCommands << "At least 3 inputs required: "
@@ -234,14 +234,9 @@ bool CalculatorFunctionsGeneral::innerTestTLSMessageSequence(
   }
   std::stringstream commentsOnFailure;
   TransportLayerSecurityServer spoofServer;
-  if (!spoofServer.privateKey.LoadFromPEM(inputMessages[0], &commentsOnFailure)) {
-    commentsOnFailure << "Failed to load private key. ";
-    return output.AssignValue(commentsOnFailure.str(), theCommands);
-  }
-  List<unsigned char> certificateBinary;
-  certificateBinary = inputMessages[1];
   if (!spoofServer.initializeAll(
-    certificateBinary,
+    inputMessages[0],
+    inputMessages[1],
     // TransportLayerSecurity::DefaultTLS_READ_ONLY().theServer.certificate.sourceBinary,
     &commentsOnFailure
   )) {

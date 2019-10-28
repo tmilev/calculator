@@ -141,6 +141,7 @@ function loginWithServerCallback(incomingString, result) {
   ) {
     parsedAuthentication[pathnames.urlFields.username] = "anonymous"; 
     document.getElementById(ids.domElements.divLoginPanelExtraInfo).innerHTML = "<b style = 'color:red'>DB inactive,<br>everyone is admin.</b>";
+    parsedAuthentication[pathnames.urlFields.userRole] = "admin";
     success = true;
   } else {
     document.getElementById(ids.domElements.divLoginPanelExtraInfo).innerHTML = "";

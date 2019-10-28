@@ -564,6 +564,7 @@ a.linkProgressReport {
 
 table.tableCalculatorOutput {
   border-collapse: collapse;
+  word-break: break-all;
 }
 
 td.cellCalculatorInput {

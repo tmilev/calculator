@@ -664,21 +664,28 @@ void TransportLayerSecurityServer::initializeCipherSuites() {
 }
 
 bool TransportLayerSecurityServer::initializeAll(
-  List<unsigned char>& inputServerCertificate,
+  const std::string& privateKeyPEMEncoded,
+  const std::string& serverCertificatePEMEncoded,
   std::stringstream* commentsOnError
 ) {
   MacroRegisterFunctionWithName("TransportLayerSecurityServer::initializeAll");
   this->initialize();
-  if (
-    this->privateKey.primeOne.IsEqualToZero() ||
-    this->privateKey.primeTwo.IsEqualToZero()
-  ) {
-    crash << "Private key not initialized. " << crash;
+  if (!this->privateKey.LoadFromPEM(privateKeyPEMEncoded, commentsOnError)) {
+    if (commentsOnError != nullptr) {
+      *commentsOnError << "Failed to load private key. ";
+    }
+    return false;
   }
   this->privateKey.ComputeFromTwoPrimes(
     this->privateKey.primeOne, this->privateKey.primeTwo, false, commentsOnError
   );
-  return this->certificate.LoadFromASNEncoded(inputServerCertificate, commentsOnError);
+  if (!this->certificate.LoadFromPEM(serverCertificatePEMEncoded, commentsOnError)) {
+    if (commentsOnError != nullptr) {
+      *commentsOnError << "Failed to load server certificate. ";
+    }
+    return false;
+  }
+  return true;
 }
 
 void TransportLayerSecurityServer::initialize() {
@@ -1009,7 +1016,7 @@ void TransportLayerSecurityServer::Session::WriteNamedCurveAndPublicKey(
     SSLContent::namedCurve, output, annotations, "named curve"
   );
   Serialization::WriteTwoByteUnsignedAnnotated(
-    this->chosenEllipticCurve,
+    static_cast<unsigned int>(this->chosenEllipticCurve),
     output,
     annotations,
     this->chosenEllipticCurveName
@@ -1474,7 +1481,7 @@ bool SSLHelloExtension::ProcessSignatureAlgorithms(std::stringstream* commentsOn
   int offset = 0;
   List<unsigned char> specifications;
   if (!Serialization::ReadTwoByteLengthFollowedByBytes(
-    this->content, offset, 0, &specifications, commentsOnError
+    this->content, offset, nullptr, &specifications, commentsOnError
   )) {
     return false;
   }
@@ -1889,7 +1896,7 @@ std::string SignatureAlgorithmSpecification::GetHashName() {
 }
 
 std::string SignatureAlgorithmSpecification::ToHex() {
-  return Crypto::ConvertIntToHex(this->value, 2);
+  return Crypto::ConvertUintToHex(this->value, 2);
 }
 
 JSData SignatureAlgorithmSpecification::ToJSON() {

@@ -812,12 +812,12 @@ void Calculator::initPredefinedInnerFunctions() {
     "The first argument will be the server's private key. "
     "The second argument will be the server's certificate. "
     "The next argument will be the client hello. ",
-    "%HideLHS\nTestTLSMessageSequence("
-    "LoadFileIntoString(\"test/private_key.pem\"),"
-    "LoadFileIntoString(\"certificate_self_signed.pem\"),"
+    "%HideLHS\nTestTLSMessageSequence(\n"
+    "LoadFileIntoString(\"test/private_key.pem\"),\n"
+    "LoadFileIntoString(\"test/certificate_self_signed.pem\"),\n"
     "ConvertHexToString("
     "LoadFileIntoString(\"test/message_client_ssl_0.hex\")"
-    "));\n",
+    ")\n);\n",
     true,
     true,
     "CalculatorFunctionsGeneral::innerTestTLSMessageSequence",

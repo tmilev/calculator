@@ -513,8 +513,8 @@ public:
 
   CipherSuiteSpecification GetCipherCrashIfUnknown(int inputId);
   void AddSupportedCipher(int inputId);
-  bool initializeAll(
-    List<unsigned char>& inputServerCertificate,
+  bool initializeAll(const std::string &privateKeyPEMEncoded,
+    const std::string &serverCertificatePEMEncoded,
     std::stringstream* commentsOnError
   );
   void initialize();

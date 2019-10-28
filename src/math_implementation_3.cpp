@@ -419,6 +419,44 @@ std::string HtmlRoutines::ConvertStringEscapeQuotesAndBackslashes(const std::str
   return out.str();
 }
 
+std::string StringRoutines::ConvertStringForJSOn(const std::string& input) {
+  MacroRegisterFunctionWithName("StringRoutines::ConvertStringForJSON");
+  std::stringstream out;
+  for (unsigned i = 0; i < input.size(); i ++) {
+    if (input[i] == '"') {
+      out << "\\\"";
+    } else if (input[i] == '\\') {
+      out << "\\\\";
+    } else if (input[i] == '\n') {
+      out << "\\n";
+    } else if (StringRoutines::isASCIICharacterVisible(input[i])) {
+      out << input[i];
+    } else {
+      out << "\\u00" << StringRoutines::ConvertByteToHex(static_cast<unsigned char>(input[i]));
+    }
+  }
+  return out.str();
+}
+
+std::string StringRoutines::ConvertStringForJavascript(const std::string &input) {
+  MacroRegisterFunctionWithName("StringRoutines::ConvertStringForJavascript");
+  std::stringstream out;
+  for (unsigned i = 0; i < input.size(); i ++) {
+    if (input[i] == '"') {
+      out << "\\\"";
+    } else if (input[i] == '\\') {
+      out << "\\\\";
+    } else if (input[i] == '\n') {
+      out << "\\n";
+    } else if (StringRoutines::isASCIICharacterVisible(input[i])) {
+      out << input[i];
+    } else {
+      out << "\\x" << StringRoutines::ConvertByteToHex(static_cast<unsigned char>(input[i]));
+    }
+  }
+  return out.str();
+}
+
 std::string HtmlRoutines::ConvertStringEscapeNewLinesQuotesBackslashes(const std::string& input) {
   MacroRegisterFunctionWithName("HtmlRoutines::ConvertStringEscapeNewLinesQuotesBackslashes");
   std::stringstream out;
@@ -1920,6 +1958,10 @@ bool StringRoutines::Differ::ComputeDifference(std::stringstream* commentsOnFail
   );
   this->ExtractDifferences();
   return true;
+}
+
+bool StringRoutines::isASCIICharacterVisible(char input) {
+  return input >= 32 && input <= 126;
 }
 
 std::string StringRoutines::StringShortenInsertDots(const std::string& inputString, int maxNumChars) {

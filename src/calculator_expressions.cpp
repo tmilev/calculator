@@ -3750,7 +3750,7 @@ std::string Expression::ToString(
           if (i < (*startingExpression).size()) {
             currentInput = HtmlRoutines::GetMathSpanPure((*startingExpression)[i].ToString(theFormat));
           } else {
-            currentInput = "No matching starting expression- possible use of the Melt keyword.";
+            currentInput = "No matching starting expression - possible use of the Melt keyword.";
           }
         } else {
           currentInput = "...";

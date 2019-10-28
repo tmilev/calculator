@@ -667,7 +667,17 @@ bool TransportLayerSecurityServer::initializeAll(
   List<unsigned char>& inputServerCertificate,
   std::stringstream* commentsOnError
 ) {
+  MacroRegisterFunctionWithName("TransportLayerSecurityServer::initializeAll");
   this->initialize();
+  if (
+    this->privateKey.primeOne.IsEqualToZero() ||
+    this->privateKey.primeTwo.IsEqualToZero()
+  ) {
+    crash << "Private key not initialized. " << crash;
+  }
+  this->privateKey.ComputeFromTwoPrimes(
+    this->privateKey.primeOne, this->privateKey.primeTwo, false, commentsOnError
+  );
   return this->certificate.LoadFromASNEncoded(inputServerCertificate, commentsOnError);
 }
 
@@ -995,7 +1005,9 @@ void TransportLayerSecurityServer::Session::WriteNamedCurveAndPublicKey(
   List<unsigned char>& output, List<Serialization::Marker>* annotations
 ) const {
   MacroRegisterFunctionWithName("SSLContent::WriteNamedCurveAndPublicKey");
-  Serialization::WriterOneByteInteger curveName(SSLContent::namedCurve, output, annotations, "named curve");
+  Serialization::WriterOneByteInteger curveName(
+    SSLContent::namedCurve, output, annotations, "named curve"
+  );
   Serialization::WriteTwoByteUnsignedAnnotated(
     this->chosenEllipticCurve,
     output,
@@ -1014,6 +1026,20 @@ void TransportLayerSecurityServer::Session::WriteNamedCurveAndPublicKey(
     << shouldNotBeNeeded.str()
     << crash;
   }
+  Serialization::WriterOneByteInteger(
+    SignatureAlgorithmSpecification::HashAlgorithm::sha256,
+    output,
+    annotations,
+    "hash label"
+  );
+  Serialization::WriterOneByteInteger(
+    SignatureAlgorithmSpecification::SignatureAlgorithm::RSA,
+    output,
+    annotations,
+    "RSA"
+  );
+  // stOutput << "<br>DEBUG: Signature size: " << this->signature.size;
+  output.AddListOnTop(this->signature);
 }
 
 void SSLContent::WriteType(
@@ -2166,7 +2192,6 @@ void SSLContent::PrepareServerHello1Start(SSLContent& clientHello) {
   this->extensions.AddOnTop(newExtension);
   newExtension.MakeEllipticCurvePointFormat(this);
   this->extensions.AddOnTop(newExtension);
-
 }
 
 void SSLRecord::resetExceptOwner() {
@@ -2193,6 +2218,17 @@ void SSLRecord::PrepareServerHello2Certificate() {
 }
 
 bool SSLRecord::PrepareServerHello3SecretExchange(std::stringstream* commentsOnFailure) {
+  MacroRegisterFunctionWithName("SSLRecord::PrepareServerHello3SecretExchange");
+  if (this->owner->privateKey.thePublicKey.theModulus.IsEqualToZero()) {
+    if (!this->owner->privateKey.ComputeFromTwoPrimes(
+      this->owner->privateKey.primeOne,
+      this->owner->privateKey.primeTwo,
+      false,
+      commentsOnFailure
+    )) {
+      crash << "Failed to compute public key. " << crash;
+    }
+  }
   this->resetExceptOwner();
   this->theType = SSLRecord::tokens::handshake;
   this->version = 3 * 256 + 1;
@@ -2201,13 +2237,17 @@ bool SSLRecord::PrepareServerHello3SecretExchange(std::stringstream* commentsOnF
   return success;
 }
 
-bool TransportLayerSecurityServer::ReplyToClientHello(int inputSocketID, std::stringstream* commentsOnFailure) {
+bool TransportLayerSecurityServer::ReplyToClientHello(
+  int inputSocketID, std::stringstream* commentsOnFailure
+) {
   (void) commentsOnFailure;
   (void) inputSocketID;
   this->outgoingRecords.SetSize(0);
   this->serverHelloStart.PrepareServerHello1Start(this->lastReaD);
   this->serverHelloCertificate.PrepareServerHello2Certificate();
-  if (!this->serverHelloKeyExchange.PrepareServerHello3SecretExchange(commentsOnFailure)) {
+  if (!this->serverHelloKeyExchange.PrepareServerHello3SecretExchange(
+    commentsOnFailure
+  )) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to prepare server secret exchange message. ";
     }

@@ -809,10 +809,13 @@ void Calculator::initPredefinedInnerFunctions() {
     "",
     "Creates a TLS server and test-sends "
     "messages to it starting with the client hello. "
-    "The first message sent will be the client hello. "
-    "The second message will be the reply to server messages, "
-    "and so on. ",
-    "%HideLHS\nTestTLSMessageSequence(ConvertHexToString("
+    "The first argument will be the server's private key. "
+    "The second argument will be the server's certificate. "
+    "The next argument will be the client hello. ",
+    "%HideLHS\nTestTLSMessageSequence("
+    "LoadFileIntoString(\"test/private_key.pem\"),"
+    "LoadFileIntoString(\"certificate_self_signed.pem\"),"
+    "ConvertHexToString("
     "LoadFileIntoString(\"test/message_client_ssl_0.hex\")"
     "));\n",
     true,

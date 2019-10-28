@@ -228,16 +228,28 @@ bool CalculatorFunctionsGeneral::innerTestTLSMessageSequence(
   if (!theCommands.GetVectoR(input, inputMessages)) {
     return theCommands << "Failed to extract inputs vector of strings. ";
   }
-  TransportLayerSecurityServer spoofServer;
+  if (inputMessages.size < 3) {
+    return theCommands << "At least 3 inputs required: "
+    << "private key, public key, and client hello message. ";
+  }
   std::stringstream commentsOnFailure;
+  TransportLayerSecurityServer spoofServer;
+  if (!spoofServer.privateKey.LoadFromPEM(inputMessages[0], &commentsOnFailure)) {
+    commentsOnFailure << "Failed to load private key. ";
+    return output.AssignValue(commentsOnFailure.str(), theCommands);
+  }
+  List<unsigned char> certificateBinary;
+  certificateBinary = inputMessages[1];
   if (!spoofServer.initializeAll(
-    TransportLayerSecurity::DefaultTLS_READ_ONLY().theServer.certificate.sourceBinary, &commentsOnFailure
+    certificateBinary,
+    // TransportLayerSecurity::DefaultTLS_READ_ONLY().theServer.certificate.sourceBinary,
+    &commentsOnFailure
   )) {
     commentsOnFailure << "Unexpected failure while initializing TLS server. ";
     return output.AssignValue(commentsOnFailure.str(), theCommands);
   }
   spoofServer.spoofer.flagDoSpoof = true;
-  for (int i = 0; i < inputMessages.size; i ++) {
+  for (int i = 2; i < inputMessages.size; i ++) {
     spoofServer.spoofer.incomingMessages.AddOnTop(SSLRecord());
     spoofServer.spoofer.incomingMessages.LastObject()->incomingBytes = inputMessages[i];
   }
@@ -256,7 +268,9 @@ bool CalculatorFunctionsGeneral::innerTestTLSMessageSequence(
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerTestLoadPEMPrivateKey(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsGeneral::innerTestLoadPEMPrivateKey(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestLoadPEMPrivateKey");
   std::string privateKeyString;
   if (!input.IsOfType(&privateKeyString)) {
@@ -279,7 +293,9 @@ bool CalculatorFunctionsGeneral::innerTestLoadPEMPrivateKey(Calculator& theComma
   return output.AssignValue(resultStream.str(), theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerLoadKnownCertificates(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsGeneral::innerLoadKnownCertificates(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerLoadKnownCertificates");
   (void) input;
   std::stringstream out;

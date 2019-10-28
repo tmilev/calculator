@@ -1601,7 +1601,7 @@ bool PrivateKeyRSA::LoadFromPEMFile(const std::string& input, std::stringstream*
   return this->LoadFromPEM(certificateContent, commentsOnFailure);
 }
 
-bool PrivateKeyRSA::LoadFromPEM(const std::string& input, std::stringstream* commentsOnFailure){
+bool PrivateKeyRSA::LoadFromPEM(const std::string& input, std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("PrivateKeyRSA::LoadFromPEM");
   std::string certificateContentStripped = StringRoutines::StringTrimWhiteSpace(input);
   if (!StringRoutines::StringBeginsWith(
@@ -1645,17 +1645,23 @@ void PrivateKeyRSA::SignBytesPadPKCS1(
   int hash,
   List<unsigned char>& output
 ) {
+  MacroRegisterFunctionWithName("PrivateKeyRSA::SignBytesPadPKCS1");
   List<unsigned char> inputHashedPadded;
   this->HashAndPadPKCS1(input, hash, inputHashedPadded);
   ElementZmodP theElement, theOne;
+  if (this->thePublicKey.theModulus.IsEqualToZero()) {
+    crash << "Public key modulus is zero. " << crash;
+  }
   theElement.theModulus = this->thePublicKey.theModulus;
   theOne.MakeOne(this->thePublicKey.theModulus);
   Crypto::ConvertListUnsignedCharsToLargeUnsignedIntegerBigEndian(
     inputHashedPadded, theElement.theValue
   );
+  stOutput << "DEBUG: About to sign element: " << theElement.ToString();
   MathRoutines::RaiseToPower(theElement, this->privateExponent, theOne);
   output.SetSize(0);
   theElement.theValue.WriteBigEndianBytes(output, false);
+  stOutput << "DEBUG: Output bytes: " << Crypto::ConvertListUnsignedCharsToHex(output);
 }
 
 PrivateKeyRSA::PrivateKeyRSA() {

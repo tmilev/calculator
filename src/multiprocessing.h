@@ -46,6 +46,7 @@ public:
   bool SetPipeWriteFlagsIfFailThenCrash(int inputFlags, int whichEnd, bool restartServerOnFail, bool dontCrashOnFail);
   bool WriteOnceIfFailThenCrash(const std::string& input, bool restartServerOnFail, bool dontCrashOnFail);
   bool ReadOnceIfFailThenCrash(bool restartServerOnFail, bool dontCrashOnFail);
+  bool ReadOnceWithTimeout();
   bool WriteOnceAfterEmptying(const std::string& input, bool restartServerOnFail, bool dontCrashOnFail);
 
   bool ReadOnceWithoutEmptying(bool restartServerOnFail, bool dontCrashOnFail);
@@ -105,13 +106,24 @@ public:
   bool ReadNoLocksIfFailThenCrash(bool restartServerOnFail, bool dontCrashOnFail);
   static void WriteIfFailThenCrash(int theFD, const List<char>& input, bool restartServerOnFail, bool dontCrashOnFail);
   void ReadOnce(bool restartServerOnFail, bool dontCrashOnFail);
+  void ReadWithLength(List<unsigned char>& output);
+  bool ReadWithLengthNoLocks(List<unsigned char>& output);
   void ReadOnceWithoutEmptying(bool restartServerOnFail, bool dontCrashOnFail);
+  bool ReadOnceWithLength();
   static int WriteNoInterrupts(int theFD, const std::string& input);
   static int WriteWithTimeoutViaSelect(
-    int theFD, const std::string& input, int timeOutInSeconds, int maxNumTries = 10, std::stringstream* commentsOnFailure = nullptr
+    int theFD,
+    const std::string& input,
+    int timeOutInSeconds,
+    int maxNumTries = 10,
+    std::stringstream* commentsOnFailure = nullptr
   );
   static int ReadWithTimeOutViaSelect(
-    int theFD, List<char>& output, int timeOutInSeconds, int maxNumTries = 10, std::stringstream* commentsOnFailure = nullptr
+    int theFD,
+    List<char>& output,
+    int timeOutInSeconds,
+    int maxNumTries = 10,
+    std::stringstream* commentsOnFailure = nullptr
   );
   void WriteOnceAfterEmptying(const std::string& toBeSent, bool restartServerOnFail, bool dontCrashOnFail);
 

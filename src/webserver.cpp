@@ -1417,7 +1417,8 @@ int WebWorker::ProcessPauseWorker() {
   std::stringstream out;
   JSData result;
   if (theMainInput == "") {
-    result[WebAPI::result::error] = "To pause a worker please 1) turn on monitoring and 2) provide the worker number in the mainInput field. ";
+    result[WebAPI::result::error] = "To pause a worker please 1) turn on monitoring and "
+    "2) provide the worker number in the mainInput field. ";
     stOutput << result.ToString(false);
     return 0;
   }
@@ -1466,13 +1467,17 @@ int WebWorker::ProcessMonitor() {
   HtmlInterpretation::GetJSDataUserInfo(result, "");
   std::string theMainInput = theGlobalVariables.GetWebInput("mainInput");
   if (theMainInput == "") {
-    result["error"] = "<b>Monitor takes as argument the number of the child process that is running the computation.</b>";
+    result["error"] = "<b>Monitor takes as argument the number of the "
+    "child process that is running the computation.</b>";
     stOutput << result.ToString(false);
     return 0;
   }
   bool allowed = false;
 
-  if (theGlobalVariables.flagAllowProcessMonitoring && theGlobalVariables.UserDefaultHasAdminRights()) {
+  if (
+    theGlobalVariables.flagAllowProcessMonitoring &&
+    theGlobalVariables.UserDefaultHasAdminRights()
+  ) {
     allowed = true;
   }
   if (allowed) {
@@ -1481,8 +1486,10 @@ int WebWorker::ProcessMonitor() {
   } else {
     result["authenticated"] = "false";
     std::stringstream commentStream;
-    commentStream << "Process monitoring is allowed only for logged-in admins with process monitoring turned on. "
-    << "There must be a link/button to turn on process monitoring in the calculator app. ";
+    commentStream << "Process monitoring is allowed only for "
+    << "logged-in admins with process monitoring turned on. "
+    << "There must be a link/button to turn on "
+    << "process monitoring in the calculator app. ";
     result[WebAPI::result::comments] = commentStream.str();
   }
   stOutput << result.ToString(false);
@@ -1521,7 +1528,7 @@ int WebWorker::ProcessComputationIndicator() {
   }
   comments
   << "The maximum number of "
-  << " connections/computations you can run is: "
+  << "connections/computations you can run is: "
   << theWebServer.MaxNumWorkersPerIPAdress << ". "
   << "The most recent error message reported by the "
   << "worker you want to monitor is: "
@@ -1529,7 +1536,7 @@ int WebWorker::ProcessComputationIndicator() {
   if (!this->parent->theWorkers[inputWebWorkerIndex].flagInUsE) {
     out << "Indicator error. Worker number "
     << inputWebWorkerNumber << " is not in use. "
-    << " Total number of workers: "
+    << "Total number of workers: "
     << this->parent->theWorkers.size << ". ";
     result[WebAPI::result::error] = out.str();
     result[WebAPI::result::comments] = comments.str();
@@ -1539,7 +1546,7 @@ int WebWorker::ProcessComputationIndicator() {
   if (inputWebWorkerIndex == this->indexInParent) {
     out << "Indicator error. Worker number "
     << inputWebWorkerNumber << " requested to monitor itself. "
-    << " This is not allowed. ";
+    << "This is not allowed. ";
     result[WebAPI::result::error] = out.str();
     result[WebAPI::result::comments] = comments.str();
     stOutput << result.ToString(false);
@@ -1566,7 +1573,7 @@ int WebWorker::ProcessComputationIndicator() {
     std::string outputString;
     outputString.assign(
       otherWorker.pipeWorkerToWorkerIndicatorData.thePipe.lastRead.TheObjects,
-      static_cast<unsigned>( otherWorker.pipeWorkerToWorkerIndicatorData.thePipe.lastRead.size)
+      static_cast<unsigned>(otherWorker.pipeWorkerToWorkerIndicatorData.thePipe.lastRead.size)
     );
     if (outputString != "finished") {
       result[WebAPI::result::resultStringified] = outputString;

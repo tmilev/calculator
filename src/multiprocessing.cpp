@@ -269,7 +269,11 @@ int Pipe::WriteWithTimeoutViaSelect(
 }
 
 int Pipe::ReadWithTimeOutViaSelect(
-  int theFD, List<char>& output, int timeOutInSeconds, int maxNumTries, std::stringstream* commentsOnFailure
+  int theFD,
+  List<char>& output,
+  int timeOutInSeconds,
+  int maxNumTries,
+  std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("Pipe::ReadWithTimeOutViaSelect");
   if (theFD < 0) {
@@ -305,8 +309,6 @@ int Pipe::ReadWithTimeOutViaSelect(
     return - 1;
   }
   int bytesRead = - 1;
-
-  failStream << "DEBUG: select-readings successful so far, numSelected = " << numSelected << ". ";
   do {
     bytesRead = static_cast<int>(read(
       theFD,
@@ -567,6 +569,10 @@ void Pipe::Release() {
   this->thePipe.Release();
 }
 
+bool PipePrimitive::ReadOnceWithTimeout() {
+  MacroRegisterFunctionWithName("PipePrimitive::ReadOnceWithTimeout");
+}
+
 bool PipePrimitive::ReadOnceIfFailThenCrash(bool restartServerOnFail, bool dontCrashOnFail) {
   MacroRegisterFunctionWithName("PipePrimitive::ReadOnceIfFailThenCrash");
   this->CheckConsistency();
@@ -579,7 +585,6 @@ bool PipePrimitive::ReadOnceIfFailThenCrash(bool restartServerOnFail, bool dontC
   this->buffer.SetSize(bufferSize); // <-once the buffer is resized, this operation does no memory allocation and is fast.
   int numReadBytes = 0;
   for (;;) {
-    //logWorker << logger::blue << theWebServer.ToStringActiveWorker() << " pipe, " << this->ToString() << " calling read." << logger::endL;
     numReadBytes = static_cast<int>(read(this->pipeEnds[0], this->buffer.TheObjects, bufferSize));
     if (numReadBytes >= 0) {
       break;
@@ -612,7 +617,7 @@ bool PipePrimitive::ReadOnceIfFailThenCrash(bool restartServerOnFail, bool dontC
 }
 
 void Pipe::ReadOnceWithoutEmptying(bool restartServerOnFail, bool dontCrashOnFail) {
-  MacroRegisterFunctionWithName("Pipe::ReadWithoutEmptying");
+  MacroRegisterFunctionWithName("Pipe::ReadOnceWithoutEmptying");
   MutexRecursiveWrapper& safetyFirst = theGlobalVariables.MutexWebWorkerPipeReadLock;
   safetyFirst.LockMe(); //preventing threads from locking one another
   this->theMutexPipe.RequestPausePauseIfLocked(restartServerOnFail, dontCrashOnFail);
@@ -626,8 +631,28 @@ void Pipe::ReadOnceWithoutEmptying(bool restartServerOnFail, bool dontCrashOnFai
   safetyFirst.UnlockMe();
 }
 
+bool Pipe::ReadWithLengthNoLocks(List<unsigned char>& output) {
+  output.SetSize(0);
+  if (!this->thePipe.ReadOnceIfFailThenCrash(false, true)) {
+    return false;
+  }
+
+}
+
+void Pipe::ReadWithLength(List<unsigned char>& output) {
+  MacroRegisterFunctionWithName("Pipe::ReadWithLength");
+  this->CheckConsistency();
+  MutexRecursiveWrapper& safetyFirst = theGlobalVariables.MutexWebWorkerPipeReadLock;
+  safetyFirst.LockMe(); //preventing threads from locking one another
+  this->theMutexPipe.RequestPausePauseIfLocked(false, true);
+  this->ReadWithLengthNoLocks(output);
+  this->theMutexPipe.ResumePausedProcessesIfAny(false, true);
+  safetyFirst.UnlockMe(); //preventing threads from locking one another
+
+}
+
 void Pipe::ReadOnce(bool restartServerOnFail, bool dontCrashOnFail) {
-  MacroRegisterFunctionWithName("Pipe::Read");
+  MacroRegisterFunctionWithName("Pipe::ReadOnce");
   this->CheckConsistency();
   MutexRecursiveWrapper& safetyFirst = theGlobalVariables.MutexWebWorkerPipeReadLock;
   safetyFirst.LockMe(); //preventing threads from locking one another
@@ -679,10 +704,12 @@ void logger::reset() {
   FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(
     this->theFile, this->theFileName, false, true, false, true
   );
-  if (! this->theFile.is_open()) {
+  if (!this->theFile.is_open()) {
     this->currentColor = logger::red;
     std::string computedFileName;
-    FileOperations::GetPhysicalFileNameFromVirtual(this->theFileName, computedFileName, true, false, nullptr);
+    FileOperations::GetPhysicalFileNameFromVirtual(
+      this->theFileName, computedFileName, true, false, nullptr
+    );
     std::cout << this->openTagConsole() << "Could not open log file with virtual name: "
     << this->theFileName << " and computed name: "
     << computedFileName << this->closeTagConsole()
@@ -911,7 +938,9 @@ void MathRoutines::ParseListIntCrashOnFailure(const std::string& input, List<int
   }
 }
 
-bool MathRoutines::ParseListInt(const std::string& input, List<int>& result, std::stringstream *commentsOnFailure) {
+bool MathRoutines::ParseListInt(
+  const std::string& input, List<int>& result, std::stringstream* commentsOnFailure
+) {
   List<char> delimiters;
   delimiters.AddOnTopNoRepetition('\n');
   delimiters.AddOnTopNoRepetition(',');

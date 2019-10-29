@@ -177,7 +177,9 @@ bool CalculatorFunctionsGeneral::innerGenerateVectorSpaceClosedWRTLieBracket(
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerTestLoadPEMCertificates(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsGeneral::innerTestLoadPEMCertificates(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestLoadPEMCertificates");
   std::string binaryString;
   if (!input.IsOfType(&binaryString)) {
@@ -348,7 +350,11 @@ bool CalculatorFunctionsGeneral::innerKeccak256OfString(
 }
 
 bool CalculatorFunctionsGeneral::innerHashString(
-  Calculator& theCommands, const Expression& input, Expression& output, const std::string& hashId, bool verbose
+  Calculator& theCommands,
+  const Expression& input,
+  Expression& output,
+  const std::string& hashId,
+  bool verbose
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerHashString");
   std::string inputString;
@@ -399,7 +405,9 @@ bool CalculatorFunctionsGeneral::innerHashString(
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerConvertBase64ToString(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsGeneral::innerConvertBase64ToString(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerConvertBase64ToString");
   std::string theString, result;
   if (!input.IsOfType<std::string>(&theString)) {
@@ -411,7 +419,9 @@ bool CalculatorFunctionsGeneral::innerConvertBase64ToString(Calculator& theComma
   return output.AssignValue(result, theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerNISTEllipticCurveOrder(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsGeneral::innerNISTEllipticCurveOrder(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerNISTEllipticCurveGenerator");
   if (!input.IsOfType<std::string>()) {
     return theCommands
@@ -419,7 +429,9 @@ bool CalculatorFunctionsGeneral::innerNISTEllipticCurveOrder(Calculator& theComm
     << "Available curve names: secp256k1";
   }
   LargeIntegerUnsigned result;
-  if (!EllipticCurveWeierstrassNormalForm::GetOrderNISTCurve(input.GetValue<std::string>(), result, &theCommands.Comments)) {
+  if (!EllipticCurveWeierstrassNormalForm::GetOrderNISTCurve(
+    input.GetValue<std::string>(), result, &theCommands.Comments
+  )) {
     return false;
   }
   return output.AssignValue(result, theCommands);
@@ -500,7 +512,10 @@ bool CalculatorFunctionsGeneral::innerSliceString(Calculator& theCommands, const
   if (size <= 0) {
     return output.AssignValue(std::string(""), theCommands);
   }
-  return output.AssignValue(inputString.substr(static_cast<unsigned>(leftIndex), static_cast<unsigned>(size)), theCommands);
+  return output.AssignValue(
+    inputString.substr(static_cast<unsigned>(leftIndex), static_cast<unsigned>(size)),
+    theCommands
+  );
 }
 
 bool CalculatorFunctionsGeneral::innerConvertIntegerUnsignedToBase58(
@@ -519,7 +534,9 @@ bool CalculatorFunctionsGeneral::innerConvertIntegerUnsignedToBase58(
   return output.AssignValue(result, theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerAppendDoubleSha256Check(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsGeneral::innerAppendDoubleSha256Check(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerAppendSha256Check");
   std::string inputString;
   if (!input.IsOfType(&inputString)) {
@@ -530,7 +547,9 @@ bool CalculatorFunctionsGeneral::innerAppendDoubleSha256Check(Calculator& theCom
   return output.AssignValue(outputString, theCommands);
 }
 
-bool CalculatorFunctionsCrypto::innerAES_CBC_256_Decrypt(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsCrypto::innerAES_CBC_256_Decrypt(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctionsCrypto::innerAES_CBC_256_Decrypt");
   if (input.size() != 3) {
     return theCommands << "AES decrypt function expects two arguments: key and plain text. ";
@@ -552,7 +571,9 @@ bool CalculatorFunctionsCrypto::innerAES_CBC_256_Decrypt(Calculator& theCommands
 
 }
 
-bool CalculatorFunctionsCrypto::innerAES_CBC_256_Encrypt(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsCrypto::innerAES_CBC_256_Encrypt(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctionsCrypto::innerAES_CBC_256_Encrypt");
   if (input.size() != 3) {
     return theCommands << "AES function expects two arguments: key and plain text. ";
@@ -573,7 +594,9 @@ bool CalculatorFunctionsCrypto::innerAES_CBC_256_Encrypt(Calculator& theCommands
   return output.AssignValue(cipherText, theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerConvertBase58ToHex(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsGeneral::innerConvertBase58ToHex(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerConvertBase58ToHex");
   if (!input.IsOfType<std::string>()) {
     return false;
@@ -586,8 +609,10 @@ bool CalculatorFunctionsGeneral::innerConvertBase58ToHex(Calculator& theCommands
   return output.AssignValue(outputString, theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerConvertHexToBase58(Calculator& theCommands, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerConvertBase58ToHex");
+bool CalculatorFunctionsGeneral::innerConvertHexToBase58(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerConvertHexToBase58");
   if (!input.IsOfType<std::string>()) {
     return false;
   }
@@ -602,7 +627,9 @@ bool CalculatorFunctionsGeneral::innerConvertHexToBase58(Calculator& theCommands
   return output.AssignValue(outputString, theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerConvertStringToHex(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsGeneral::innerConvertStringToHex(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerConvertStringToHex");
   if (!input.IsOfType<std::string>()) {
     return false;
@@ -610,7 +637,9 @@ bool CalculatorFunctionsGeneral::innerConvertStringToHex(Calculator& theCommands
   return output.AssignValue(Crypto::ConvertStringToHex(input.GetValue<std::string>(), 0, false), theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerCharToBase64(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsGeneral::innerCharToBase64(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCharToBase64");
   if (!input.IsOfType<std::string>()) {
     return false;
@@ -705,8 +734,8 @@ bool CalculatorFunctionsGeneral::innerQuoteToString(Calculator& theCommands, con
     return output.AssignValue(atomString, theCommands);
   }
   theCommands << "<b>Warning: this shouldn't happen: quote operation is applied to the non-atomic expression: "
-  << input.ToString() << "."
-  << " This may be a bug with the function Calculator::ParseFillDictionary. </b>";
+  << input.ToString() << ". "
+  << "This may be a bug with the function Calculator::ParseFillDictionary. </b>";
   return output.AssignValue(input.ToString(), theCommands);
 }
 

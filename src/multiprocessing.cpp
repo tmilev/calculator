@@ -489,7 +489,9 @@ bool PipePrimitive::WriteOnceIfFailThenCrash(const std::string& toBeSent, bool r
       ) {
         numBadAttempts ++;
         if (numBadAttempts > maximumBadAttempts) {
-          return this->HandleFailedWriteReturnFalse(toBeSent, restartServerOnFail, dontCrashOnFail, numBadAttempts);
+          return this->HandleFailedWriteReturnFalse(
+            toBeSent, restartServerOnFail, dontCrashOnFail, numBadAttempts
+          );
         }
         continue;
       }

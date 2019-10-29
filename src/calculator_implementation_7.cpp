@@ -8216,18 +8216,28 @@ bool CalculatorFunctionsGeneral::innerTestTopCommand(
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestTopCommand");
   (void) input;
   (void) theCommands;//portable way of avoiding unused parameter warning
+  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
+    return theCommands << "Test top command available only to logged-in admins. ";
+  }
   return output.AssignValue(theGlobalVariables.ToStringHTMLTopCommandLinuxSystem(), theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerTestIndicator(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsGeneral::innerTestIndicator(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestIndicator");
   if (!theGlobalVariables.flagAllowProcessMonitoring) {
     std::stringstream out;
     out << "Process monitoring not allowed (can be turned on by admin). ";
     return output.AssignValue(out.str(), theCommands);
   }
+  if (input.size() < 3) {
+    return theCommands
+    << "Testing indicator requires two arguments: "
+    << "number of iterations and size of dummy comment. ";
+  }
   int numRuns = - 1;
-  if (!input.IsIntegerFittingInInt(&numRuns)) {
+  if (!input[1].IsIntegerFittingInInt(&numRuns)) {
     return theCommands << "Argument of CalculatorFunctionsGeneral::innerTestIndicator "
     << "is not a small integer, instead it equals: " << numRuns << ".";
   }
@@ -8238,6 +8248,22 @@ bool CalculatorFunctionsGeneral::innerTestIndicator(Calculator& theCommands, con
   }
   if (numRuns < 0) {
     numRuns = 0;
+  }
+  int dummyCommentSize = 0;
+  if (!input[2].IsIntegerFittingInInt(&dummyCommentSize)) {
+    return theCommands << "Second argument needs to be an integer. ";
+  }
+  if (dummyCommentSize > 200000) {
+    theCommands << "Dummy comment size of " << dummyCommentSize << " reduced to 200000.";
+    dummyCommentSize = 200000;
+  }
+  if (dummyCommentSize < 0) {
+    dummyCommentSize = 0;
+  }
+  std::string dummyComment;
+  dummyComment.resize(static_cast<unsigned>(dummyCommentSize));
+  for (unsigned i = 0; i < static_cast<unsigned>(dummyCommentSize); i ++) {
+    dummyComment[i] = 'a';
   }
   if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection != nullptr) {
     theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection();
@@ -8253,6 +8279,9 @@ bool CalculatorFunctionsGeneral::innerTestIndicator(Calculator& theCommands, con
   }
   std::stringstream out;
   out << numRuns << " iterations of the indicator test executed. ";
+  if (dummyCommentSize > 0) {
+    theCommands << "Dummy comment:<br>" << dummyComment;
+  }
   return output.AssignValue(out.str(), theCommands);
 }
 

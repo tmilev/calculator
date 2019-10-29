@@ -225,7 +225,7 @@ public:
     const std::string& inputSignificantDigitsFirst,
     LargeIntegerUnsigned& output,
     int& numberOfLeadingZeroes,
-    std::stringstream *commentsOnFailure
+    std::stringstream* commentsOnFailure
   );
   static bool ConvertBase58ToHexSignificantDigitsFirst(
     const std::string& input, std::string& output, std::stringstream* commentsOnFailure

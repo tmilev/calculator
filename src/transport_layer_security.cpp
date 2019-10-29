@@ -1712,6 +1712,14 @@ void Serialization::WriteThreeByteUnsigned(
   return Serialization::WriteNByteUnsigned(3, input, output, inputOutputOffset);
 }
 
+void Serialization::WriteFourByteUnsigned(
+  unsigned int input,
+  List<unsigned char>& output
+) {
+  int inputOutputOffset = output.size;
+  return Serialization::WriteNByteUnsigned(4, input, output, inputOutputOffset);
+}
+
 void Serialization::WriteNByteUnsigned(
   int byteCountOfLength,
   unsigned int input,
@@ -1758,6 +1766,15 @@ void Serialization::WriteTwoByteLengthFollowedByBytes(
 
 std::string Serialization::ConvertListUnsignedCharsToHex(const List<unsigned char>& input) {
   return Crypto::ConvertListUnsignedCharsToHexFormat(input, 0, false);
+}
+
+std::string Serialization::ConvertListUnsignedCharsToString(const List<unsigned char>& input) {
+  std::string result;
+  result.resize(static_cast<unsigned>(input.size));
+  for (unsigned i = 0; i < result.size(); i ++) {
+    input[i] = static_cast<unsigned char>(input[i]);
+  }
+  return result;
 }
 
 void Serialization::WriteBytesAnnotated(

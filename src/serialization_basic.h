@@ -252,6 +252,10 @@ public:
     unsigned int input,
     List<unsigned char>& output
   );
+  static void WriteFourByteUnsigned(
+    unsigned int input,
+    List<unsigned char>& output
+  );
   static void WriteOneByteLengthFollowedByBytes(
     const List<unsigned char>& input,
     List<unsigned char>& output,
@@ -271,6 +275,7 @@ public:
     const std::string &label
   );
   static std::string ConvertListUnsignedCharsToHex(const List<unsigned char>& input);
+  static std::string ConvertListUnsignedCharsToString(const List<unsigned char>& input);
 };
 
 #endif // SERIALIZATION_BASIC_ALREADY_DEFINED

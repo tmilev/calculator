@@ -370,8 +370,12 @@ void Calculator::initPredefinedInnerFunctions() {
     "TestCalculatorIndicator",
     CalculatorFunctionsGeneral::innerTestIndicator,
     "",
-    "(This is not a mathematical function). Tests the calculator indicator mechanism.",
-    "TestCalculatorIndicator(1000)",
+    "(This is not a mathematical function). Tests the calculator indicator mechanism."
+    "First argument times number of iterations. "
+    "Second argument = length of dummy comment appended to the calculator comments. "
+    "Use a large dummy comment to test that large outputs are piped correctly to the "
+    "monitoring process. ",
+    "TestCalculatorIndicator(1000, 200000)",
     true,
     false,
     "CalculatorFunctionsGeneral::innerTestIndicator",

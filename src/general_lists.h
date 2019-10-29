@@ -133,13 +133,13 @@ class DrawOperations;
 class XML;
 struct CGI;
 
-//The calculator parsing routines:
+// The calculator parsing routines:
 class Calculator;
 class Function;
 class Expression;
 
-//this class is used as a custom completely portable
-//stack trace log.
+// this class is used as a custom completely portable
+// stack trace log.
 class RegisterFunctionCall {
 public:
   int threadIndex;

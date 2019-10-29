@@ -137,8 +137,8 @@ bool PauseProcess::CreateMe(
 
 bool PauseProcess::ResetNoAllocation() {
   if (
-    this->thePausePipe.WriteOnceIfFailThenCrash("!", false, true) &&
-    this->mutexPipe.WriteOnceIfFailThenCrash("!", false, true)
+    this->thePausePipe.WriteOnceIfFailThenCrash("!", 0, false, true) &&
+    this->mutexPipe.WriteOnceIfFailThenCrash("!", 0, false, true)
   ) {
     return true;
   }
@@ -153,7 +153,7 @@ void PauseProcess::PauseIfRequested(bool restartServerOnFail, bool dontCrashOnFa
   }
   bool pauseWasRequested = !this->thePausePipe.ReadOnceIfFailThenCrash(restartServerOnFail, dontCrashOnFail);
   if (!pauseWasRequested) {
-    this->thePausePipe.WriteOnceIfFailThenCrash("!", restartServerOnFail, dontCrashOnFail);
+    this->thePausePipe.WriteOnceIfFailThenCrash("!", 0, restartServerOnFail, dontCrashOnFail);
   }
 }
 
@@ -177,20 +177,20 @@ bool PauseProcess::PauseIfRequestedWithTimeOut(bool restartServerOnFail, bool do
   }
   this->thePausePipe.ReadOnceIfFailThenCrash(restartServerOnFail, dontCrashOnFail);
   if (this->thePausePipe.lastRead.size > 0) {
-    this->thePausePipe.WriteOnceIfFailThenCrash("!", restartServerOnFail, dontCrashOnFail);
+    this->thePausePipe.WriteOnceIfFailThenCrash("!", 0, restartServerOnFail, dontCrashOnFail);
   }
   return true;
 }
 
 void PauseProcess::RequestPausePauseIfLocked(bool restartServerOnFail, bool dontCrashOnFail) {
   this->CheckConsistency();
-  this->mutexForProcessBlocking.GetElement().LockMe();//<- make sure the pause controller is not locking itself
-  //through competing threads
+  this->lockThreads.GetElement().LockMe(); // <- make sure the pause controller is not locking itself
+  // through competing threads
   if (this->CheckPauseIsRequested(restartServerOnFail, dontCrashOnFail, false)) {
     logBlock << logger::blue << this->currentProcessName << "Blocking on " << this->ToString() << logger::endL;
   }
   this->thePausePipe.ReadOnceIfFailThenCrash(restartServerOnFail, dontCrashOnFail);
-  this->mutexForProcessBlocking.GetElement().UnlockMe();
+  this->lockThreads.GetElement().UnlockMe();
 }
 
 bool PauseProcess::CheckPauseIsRequested(bool restartServerOnFail, bool dontCrashOnFail, bool dontLockImServer) {
@@ -208,14 +208,14 @@ bool PauseProcess::CheckPauseIsRequested(bool restartServerOnFail, bool dontCras
   }
   bool result = (this->thePausePipe.lastRead.size == 0);
   if (!result) {
-    if (!this->thePausePipe.WriteOnceIfFailThenCrash("!", restartServerOnFail, dontCrashOnFail)) {
+    if (!this->thePausePipe.WriteOnceIfFailThenCrash("!", 0, restartServerOnFail, dontCrashOnFail)) {
       return false;
     }
   }
   if (!this->thePausePipe.SetPipeReadBlockingModeIfFailThenCrash(restartServerOnFail, dontCrashOnFail)) {
     return false;
   }
-  if (!this->mutexPipe.WriteOnceIfFailThenCrash("!", restartServerOnFail, dontCrashOnFail)) {
+  if (!this->mutexPipe.WriteOnceIfFailThenCrash("!", 0, restartServerOnFail, dontCrashOnFail)) {
     return false;
   }
   return result;
@@ -223,7 +223,7 @@ bool PauseProcess::CheckPauseIsRequested(bool restartServerOnFail, bool dontCras
 
 void PauseProcess::ResumePausedProcessesIfAny(bool restartServerOnFail, bool dontCrashOnFail) {
   MacroRegisterFunctionWithName("PauseController::ResumePausedProcessesIfAny");
-  this->thePausePipe.WriteOnceIfFailThenCrash("!", restartServerOnFail, dontCrashOnFail);
+  this->thePausePipe.WriteOnceIfFailThenCrash("!", 0, restartServerOnFail, dontCrashOnFail);
 }
 
 std::string PauseProcess::ToString() const {
@@ -297,7 +297,8 @@ int Pipe::ReadWithTimeOutViaSelect(
       break;
     }
     numSelected = select(theFD + 1, &theFDcontainer, nullptr, nullptr, &timeOut);
-    failStream << "While select-reading from file descriptor: " << theFD << ", select failed. Error message: "
+    failStream << "While select-reading from file descriptor: "
+    << theFD << ", select failed. Error message: "
     << strerror(errno) << ". \n";
     numFails ++;
   } while (numSelected < 0);
@@ -415,13 +416,43 @@ int Pipe::WriteNoInterrupts(int theFD, const std::string& input) {
   //  return - 1;
 }
 
+void Pipe::ReadLoop() {
+  int implementReadLoop;
+}
+
+void Pipe::WriteLoopAfterEmptyingBlocking(const std::string& toBeSent) {
+  MacroRegisterFunctionWithName("Pipe::WriteLoopAfterEmptyingBlocking");
+  if (
+    !this->thePipe.flagReadEndBlocks || !this->thePipe.flagWriteEndBlocks
+  ) {
+    crash
+    << "Pipe write loop requires that both read and write end be blocking. "
+    << crash;
+  }
+  MutexLockGuard safety(theGlobalVariables.MutexWebWorkerPipeWriteLock);
+  this->theMutexPipe.RequestPausePauseIfLocked(false, true);
+  List<unsigned char> sizeFourBytes;
+  Serialization::WriteFourByteUnsigned(static_cast<unsigned>(toBeSent.size()), sizeFourBytes);
+  std::string toBeSentString = Serialization::ConvertListUnsignedCharsToString(toBeSent);
+  this->metaData.WriteOnceAfterEmptying(toBeSentString, false, true);
+  unsigned totalSent = 0;
+  while (totalSent < toBeSent.size()) {
+    if (!this->thePipe.WriteOnceIfFailThenCrash(toBeSent, static_cast<signed>(totalSent), false, true)) {
+      logIO << logger::red << "Failed to write on pipe: " << this->ToString();
+      break;
+    }
+    totalSent += static_cast<unsigned>(this->thePipe.numberOfBytesLastWrite);
+  }
+  this->theMutexPipe.ResumePausedProcessesIfAny(false, true);
+}
+
 void Pipe::WriteOnceAfterEmptying(const std::string& toBeSent, bool restartServerOnFail, bool dontCrashOnFail) {
   MacroRegisterFunctionWithName("Pipe::WriteOnceAfterEmptying");
   MutexLockGuard safety(theGlobalVariables.MutexWebWorkerPipeWriteLock);
   this->theMutexPipe.RequestPausePauseIfLocked(restartServerOnFail, dontCrashOnFail);
   this->thePipe.ReadOnceIfFailThenCrash(restartServerOnFail, dontCrashOnFail);
   this->thePipe.lastRead.SetSize(0);
-  this->thePipe.WriteOnceIfFailThenCrash(toBeSent, restartServerOnFail, dontCrashOnFail);
+  this->thePipe.WriteOnceIfFailThenCrash(toBeSent, 0, restartServerOnFail, dontCrashOnFail);
   this->theMutexPipe.ResumePausedProcessesIfAny(restartServerOnFail, dontCrashOnFail);
 }
 
@@ -432,7 +463,7 @@ bool PipePrimitive::ReadOnceWithoutEmptying(bool restartServerOnFail, bool dontC
   if (!this->ReadOnceIfFailThenCrash(restartServerOnFail, dontCrashOnFail)) {
     return false;
   }
-  return this->WriteOnceIfFailThenCrash(this->GetLastRead(), restartServerOnFail, dontCrashOnFail);
+  return this->WriteOnceIfFailThenCrash(this->GetLastRead(), 0, restartServerOnFail, dontCrashOnFail);
 }
 
 bool PipePrimitive::WriteOnceAfterEmptying(const std::string& input, bool restartServerOnFail, bool dontCrashOnFail) {
@@ -442,7 +473,7 @@ bool PipePrimitive::WriteOnceAfterEmptying(const std::string& input, bool restar
   if (!this->ReadOnceIfFailThenCrash(restartServerOnFail, dontCrashOnFail)) {
     return false;
   }
-  return this->WriteOnceIfFailThenCrash(input, restartServerOnFail, dontCrashOnFail);
+  return this->WriteOnceIfFailThenCrash(input, 0, restartServerOnFail, dontCrashOnFail);
 }
 
 bool PipePrimitive::HandleFailedWriteReturnFalse(
@@ -468,21 +499,34 @@ bool PipePrimitive::HandleFailedWriteReturnFalse(
   return false;
 }
 
-bool PipePrimitive::WriteOnceIfFailThenCrash(const std::string& toBeSent, bool restartServerOnFail, bool dontCrashOnFail) {
+bool PipePrimitive::WriteOnceIfFailThenCrash(
+  const std::string& toBeSent,
+  int offset,
+  bool restartServerOnFail,
+  bool dontCrashOnFail
+) {
   MacroRegisterFunctionWithName("PipePrimitive::WriteIfFailThenCrash");
   if (this->pipeEnds[1] == - 1) {
     logIO << logger::yellow << "WARNING: " << this->ToString()
     << " writing on non-initialized pipe. ";
     return false;
   }
-  if (toBeSent.size() == 0) {
+  if (static_cast<unsigned>(offset) >= toBeSent.size() || offset < 0) {
+    crash << "Invalid offset: " << offset << "; toBeSent string has size: " << toBeSent.size() << ". ";
+  }
+  unsigned remaining = static_cast<unsigned>(toBeSent.size() - static_cast<unsigned>(offset));
+  if (remaining == 0) {
     return true;
   }
   int maximumBadAttempts = 30;
   this->numberOfBytesLastWrite = 0;
   int numBadAttempts = 0;
   for (;;) {
-    this->numberOfBytesLastWrite = static_cast<int>(write(this->pipeEnds[1], toBeSent.c_str(), toBeSent.size()));
+    this->numberOfBytesLastWrite = static_cast<int>(write(
+      this->pipeEnds[1],
+      &toBeSent[static_cast<unsigned>(offset)],
+      remaining
+    ));
     if (this->numberOfBytesLastWrite < 0) {
       if (
         errno == EAI_AGAIN || errno == EWOULDBLOCK || errno == EINTR || errno == EIO
@@ -501,14 +545,14 @@ bool PipePrimitive::WriteOnceIfFailThenCrash(const std::string& toBeSent, bool r
   if (this->numberOfBytesLastWrite < 0) {
     return false;
   }
-  if (static_cast<unsigned>(this->numberOfBytesLastWrite) < toBeSent.size()) {
+  if (static_cast<unsigned>(this->numberOfBytesLastWrite) < remaining) {
     if (theGlobalVariables.processType == ProcessTypes::worker) {
       logIO << logger::red << this->ToString() << ": wrote only "
-      << this->numberOfBytesLastWrite << " bytes out of " << toBeSent.size() << " total. " << logger::endL;
+      << this->numberOfBytesLastWrite << " bytes out of " << remaining << " total. " << logger::endL;
     }
     if (theGlobalVariables.processType == ProcessTypes::server) {
       logServer << logger::red << this->ToString() << ": wrote only "
-      << this->numberOfBytesLastWrite << " bytes out of " << toBeSent.size() << " total. " << logger::endL;
+      << this->numberOfBytesLastWrite << " bytes out of " << remaining << " total. " << logger::endL;
     }
   }
   return true;
@@ -544,6 +588,10 @@ bool Pipe::CreateMe(const std::string& inputPipeName) {
     this->Release();
     return false;
   }
+  if (!this->metaData.CreateMe("metaData[" + inputPipeName + "]", true, false, false, true)) {
+    this->Release();
+    return false;
+  }
   return true;
 }
 
@@ -556,8 +604,8 @@ bool Pipe::CheckConsistency() {
 }
 
 Pipe::~Pipe() {
-  //Pipes are not allowed to release resources in the destructor:
-  //a pipe's destructor is called when expanding List<Pipe>.
+  // Pipes are not allowed to release resources in the destructor:
+  // a pipe's destructor is called when expanding List<Pipe>.
   this->flagDeallocated = true;
 }
 
@@ -569,6 +617,7 @@ void Pipe::Release() {
   this->CheckConsistency();
   this->theMutexPipe.Release();
   this->thePipe.Release();
+  this->metaData.Release();
 }
 
 bool PipePrimitive::ReadOnceIfFailThenCrash(bool restartServerOnFail, bool dontCrashOnFail) {
@@ -617,13 +666,13 @@ bool PipePrimitive::ReadOnceIfFailThenCrash(bool restartServerOnFail, bool dontC
 void Pipe::ReadOnceWithoutEmptying(bool restartServerOnFail, bool dontCrashOnFail) {
   MacroRegisterFunctionWithName("Pipe::ReadOnceWithoutEmptying");
   MutexRecursiveWrapper& safetyFirst = theGlobalVariables.MutexWebWorkerPipeReadLock;
-  safetyFirst.LockMe(); //preventing threads from locking one another
+  safetyFirst.LockMe(); // Prevent threads from locking one another
   this->theMutexPipe.RequestPausePauseIfLocked(restartServerOnFail, dontCrashOnFail);
   this->thePipe.ReadOnceIfFailThenCrash(restartServerOnFail, dontCrashOnFail);
   if (this->thePipe.lastRead.size > 0) {
     std::string tempS;
     tempS = this->GetLastRead();
-    this->thePipe.WriteOnceIfFailThenCrash(tempS, restartServerOnFail, dontCrashOnFail);
+    this->thePipe.WriteOnceIfFailThenCrash(tempS, 0, restartServerOnFail, dontCrashOnFail);
   }
   this->theMutexPipe.ResumePausedProcessesIfAny(restartServerOnFail, dontCrashOnFail);
   safetyFirst.UnlockMe();
@@ -633,11 +682,11 @@ void Pipe::ReadOnce(bool restartServerOnFail, bool dontCrashOnFail) {
   MacroRegisterFunctionWithName("Pipe::ReadOnce");
   this->CheckConsistency();
   MutexRecursiveWrapper& safetyFirst = theGlobalVariables.MutexWebWorkerPipeReadLock;
-  safetyFirst.LockMe(); //preventing threads from locking one another
+  safetyFirst.LockMe(); // Prevent threads from locking one another.
   this->theMutexPipe.RequestPausePauseIfLocked(restartServerOnFail, dontCrashOnFail);
   this->thePipe.ReadOnceIfFailThenCrash(restartServerOnFail, dontCrashOnFail);
   this->theMutexPipe.ResumePausedProcessesIfAny(restartServerOnFail, dontCrashOnFail);
-  safetyFirst.UnlockMe(); //preventing threads from locking one another
+  safetyFirst.UnlockMe(); // Prevent threads from locking one another.
 }
 
 logger::logger(

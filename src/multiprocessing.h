@@ -44,7 +44,7 @@ public:
   bool SetPipeWriteNonBlockingIfFailThenCrash(bool restartServerOnFail, bool dontCrashOnFail);
 
   bool SetPipeWriteFlagsIfFailThenCrash(int inputFlags, int whichEnd, bool restartServerOnFail, bool dontCrashOnFail);
-  bool WriteOnceIfFailThenCrash(const std::string& input, bool restartServerOnFail, bool dontCrashOnFail);
+  bool WriteOnceIfFailThenCrash(const std::string& input, int offset, bool restartServerOnFail, bool dontCrashOnFail);
   bool ReadOnceIfFailThenCrash(bool restartServerOnFail, bool dontCrashOnFail);
   bool WriteOnceAfterEmptying(const std::string& input, bool restartServerOnFail, bool dontCrashOnFail);
 
@@ -62,7 +62,7 @@ public:
   PipePrimitive thePausePipe;
   PipePrimitive mutexPipe;
   std::string name;
-  MemorySaving<MutexRecursiveWrapper> mutexForProcessBlocking; //<- to avoid two threads from the same process blocking the process.
+  MemorySaving<MutexRecursiveWrapper> lockThreads; //<- to avoid two threads from the same process blocking the process.
   bool flagDeallocated;
   std::string ToString() const;
   void Release();
@@ -84,15 +84,16 @@ public:
   ~PauseProcess();
 };
 
-// This is an unnamed pipe with which may be shared by more than two processes
+// This is an unnamed pipe with which may be shared by two or more processes
 // and by more than one thread in each process.
-// (multiple processes may try to send bytes through the pipe).
+// Multiple processes may try to send bytes through the pipe.
 // A writer to the pipe may lock access to the pipe via theMutexPipe lock.
 // TheMutexPipe lock has a (pipe-based) mechanism for locking out other processes and
 // a mutex-based mechanism for locking out other threads within the same process.
 class Pipe {
 public:
   PipePrimitive thePipe;
+  PipePrimitive metaData;
   PauseProcess theMutexPipe;
   bool flagDeallocated;
   std::string name;
@@ -122,6 +123,8 @@ public:
     int maxNumTries = 10,
     std::stringstream* commentsOnFailure = nullptr
   );
+  void ReadLoop();
+  void WriteLoopAfterEmptyingBlocking(const std::string& toBeSent);
   void WriteOnceAfterEmptying(const std::string& toBeSent, bool restartServerOnFail, bool dontCrashOnFail);
 
   std::string ToString() const;

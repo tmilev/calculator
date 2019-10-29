@@ -898,7 +898,8 @@ void WebWorker::OutputSendAfterTimeout(const std::string& input) {
   //requesting pause which will be cleared by the receiver of pipeWorkerToWorkerIndicatorData
   theWebServer.GetActiveWorker().PauseComputationReportReceived.RequestPausePauseIfLocked(false, false);
   logWorker << logger::blue << "Sending result through indicator pipe." << logger::endL;
-  theWebServer.GetActiveWorker().pipeWorkerToWorkerIndicatorData.WriteOnceAfterEmptying(input, false, false);
+
+  theWebServer.GetActiveWorker().pipeWorkerToWorkerIndicatorData.WriteLoopAfterEmptyingBlocking(input);
   logBlock << logger::blue << "Final output written to indicator, blocking until data "
   << "is received on the other end." << logger::endL;
   if (!theWebServer.GetActiveWorker().PauseComputationReportReceived.PauseIfRequestedWithTimeOut(false, false)) {
@@ -1568,7 +1569,7 @@ int WebWorker::ProcessComputationIndicator() {
     return 0;
   }
   otherWorker.pipeWorkerToWorkerRequestIndicator.WriteOnceAfterEmptying("!", false, false);
-  otherWorker.pipeWorkerToWorkerIndicatorData.ReadOnce(false, false);
+  otherWorker.pipeWorkerToWorkerIndicatorData.ReadLoop();
   if (otherWorker.pipeWorkerToWorkerIndicatorData.thePipe.lastRead.size > 0) {
     std::string outputString;
     outputString.assign(
@@ -3203,7 +3204,7 @@ void WebWorker::Release() {
 
 void WebWorker::OutputShowIndicatorOnTimeout() {
   MacroRegisterFunctionWithName("WebWorker::OutputShowIndicatorOnTimeout");
-  MutexLockGuard theLock(this->PauseIndicatorPipeInUse.mutexForProcessBlocking.GetElement());
+  MutexLockGuard theLock(this->PauseIndicatorPipeInUse.lockThreads.GetElement());
   //this->PauseIndicatorPipeInUse.RequestPausePauseIfLocked();
   theGlobalVariables.flagOutputTimedOut = true;
   theGlobalVariables.flagTimedOutComputationIsDone = false;
@@ -3245,7 +3246,7 @@ void WebWorker::OutputShowIndicatorOnTimeout() {
   crash.CleanUpFunction = WebWorker::OutputCrashAfterTimeout;
   //note that standard output cannot be rewired in the beginning of the function as we use the old stOutput
   stOutput.theOutputFunction = WebWorker::StandardOutputAfterTimeOut;
-  this->PauseIndicatorPipeInUse.mutexForProcessBlocking.GetElement().UnlockMe();
+  this->PauseIndicatorPipeInUse.lockThreads.GetElement().UnlockMe();
 }
 
 std::string WebWorker::ToStringAddressRequest() const {

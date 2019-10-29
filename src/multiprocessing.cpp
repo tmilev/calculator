@@ -569,10 +569,6 @@ void Pipe::Release() {
   this->thePipe.Release();
 }
 
-bool PipePrimitive::ReadOnceWithTimeout() {
-  MacroRegisterFunctionWithName("PipePrimitive::ReadOnceWithTimeout");
-}
-
 bool PipePrimitive::ReadOnceIfFailThenCrash(bool restartServerOnFail, bool dontCrashOnFail) {
   MacroRegisterFunctionWithName("PipePrimitive::ReadOnceIfFailThenCrash");
   this->CheckConsistency();
@@ -629,26 +625,6 @@ void Pipe::ReadOnceWithoutEmptying(bool restartServerOnFail, bool dontCrashOnFai
   }
   this->theMutexPipe.ResumePausedProcessesIfAny(restartServerOnFail, dontCrashOnFail);
   safetyFirst.UnlockMe();
-}
-
-bool Pipe::ReadWithLengthNoLocks(List<unsigned char>& output) {
-  output.SetSize(0);
-  if (!this->thePipe.ReadOnceIfFailThenCrash(false, true)) {
-    return false;
-  }
-
-}
-
-void Pipe::ReadWithLength(List<unsigned char>& output) {
-  MacroRegisterFunctionWithName("Pipe::ReadWithLength");
-  this->CheckConsistency();
-  MutexRecursiveWrapper& safetyFirst = theGlobalVariables.MutexWebWorkerPipeReadLock;
-  safetyFirst.LockMe(); //preventing threads from locking one another
-  this->theMutexPipe.RequestPausePauseIfLocked(false, true);
-  this->ReadWithLengthNoLocks(output);
-  this->theMutexPipe.ResumePausedProcessesIfAny(false, true);
-  safetyFirst.UnlockMe(); //preventing threads from locking one another
-
 }
 
 void Pipe::ReadOnce(bool restartServerOnFail, bool dontCrashOnFail) {

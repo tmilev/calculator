@@ -899,7 +899,9 @@ void WebWorker::OutputSendAfterTimeout(const std::string& input) {
   theWebServer.GetActiveWorker().PauseComputationReportReceived.RequestPausePauseIfLocked(false, false);
   logWorker << logger::blue << "Sending result through indicator pipe." << logger::endL;
 
+  std::cout << "DEBUG: before write loop. \n";
   theWebServer.GetActiveWorker().pipeWorkerToWorkerIndicatorData.WriteLoopAfterEmptyingBlocking(input);
+  std::cout << "DEBUG: AFTER write loop. \n";
   logBlock << logger::blue << "Final output written to indicator, blocking until data "
   << "is received on the other end." << logger::endL;
   if (!theWebServer.GetActiveWorker().PauseComputationReportReceived.PauseIfRequestedWithTimeOut(false, false)) {
@@ -907,7 +909,9 @@ void WebWorker::OutputSendAfterTimeout(const std::string& input) {
     //requesting pause which will be cleared by the receiver of pipeWorkerToWorkerIndicatorData
     theWebServer.GetActiveWorker().PauseComputationReportReceived.RequestPausePauseIfLocked(false, false);
   }
+  std::cout << "DEBUG: before finished write. \n";
   theWebServer.GetActiveWorker().pipeWorkerToWorkerIndicatorData.WriteOnceAfterEmptying("finished", false, false);
+  std::cout << "DEBUG: AFTER finished write. \n";
   logWorker << logger::red << "\"finished\" sent through indicator pipe, waiting." << logger::endL;
   theWebServer.GetActiveWorker().PauseComputationReportReceived.PauseIfRequestedWithTimeOut(false, false);
 }
@@ -1569,7 +1573,9 @@ int WebWorker::ProcessComputationIndicator() {
     return 0;
   }
   otherWorker.pipeWorkerToWorkerRequestIndicator.WriteOnceAfterEmptying("!", false, false);
+  std::cout << "DEBUG: before read loop. \n";
   otherWorker.pipeWorkerToWorkerIndicatorData.ReadLoop();
+  std::cout << "DEBUG: after read loop. \n";
   if (otherWorker.pipeWorkerToWorkerIndicatorData.thePipe.lastRead.size > 0) {
     std::string outputString;
     outputString.assign(
@@ -1622,8 +1628,10 @@ void WebWorker::PipeProgressReport(const std::string& input) {
     logBlock << ": pausing as requested ..." << logger::endL;
     this->WriteProgressReportToFile(input);
   }
-  this->PauseWorker.PauseIfRequested(false, false);     //if pause was requested, here we block
+  this->PauseWorker.PauseIfRequested(false, false); // if pause was requested, here we block
+  std::cout << "DEBUG: before work to worker request indicator. \n";
   this->pipeWorkerToWorkerRequestIndicator.ReadOnce(false, false);
+  std::cout << "DEBUG: AFTER work to worker request indicator. \n";
   if (this->pipeWorkerToWorkerRequestIndicator.thePipe.lastRead.size == 0) {
     this->PauseIndicatorPipeInUse.ResumePausedProcessesIfAny(false, false);
     return;
@@ -1654,7 +1662,7 @@ int WebWorker::ProcessFolder() {
   if (this->flagFileNameSanitized) {
     out << "<hr>The virtual file name I extracted was: " << this->VirtualFileName
     << "<br>However, I do not allow folder names that contain dots. "
-    << " Therefore I have sanitized the main address to: " << this->RelativePhysicalFileNamE;
+    << "Therefore I have sanitized the main address to: " << this->RelativePhysicalFileNamE;
   }
   List<std::string> theFileNames, theFileTypes;
   if (!FileOperations::GetFolderFileNamesUnsecure(this->RelativePhysicalFileNamE, theFileNames, &theFileTypes)) {
@@ -1724,7 +1732,7 @@ int WebWorker::ProcessFile() {
     << HtmlRoutines::ConvertStringToHtmlString(this->VirtualFileName, true)
     << "<br><b>Computed relative physical file name:</b> "
     << HtmlRoutines::ConvertStringToHtmlString(this->RelativePhysicalFileNamE, true);
-    stOutput << "<br><b> Request:</b> " << theGlobalVariables.userCalculatorRequestType;
+    stOutput << "<br><b>Request:</b> " << theGlobalVariables.userCalculatorRequestType;
     stOutput << "<hr><hr><hr>Message details:<br>"
     << this->ToStringMessageUnsafe()
     << this->ToStringMessageFullUnsafe();
@@ -1741,9 +1749,9 @@ int WebWorker::ProcessFile() {
     if (this->flagFileNameSanitized) {
       stOutput << "<hr>You requested virtual file: " << this->VirtualFileName
       << "<br>However, I do not allow addresses that contain dots. "
-      << " Therefore I have sanitized the address to a relative physical address: " << this->RelativePhysicalFileNamE;
+      << "Therefore I have sanitized the address to a relative physical address: " << this->RelativePhysicalFileNamE;
     }
-    stOutput << "<br><b> File display name: </b>"
+    stOutput << "<br><b>File display name: </b>"
     << this->addressGetOrPost << "<br><b>Virtual file name: </b>"
     << this->VirtualFileName << "</body></html>";
     return 0;
@@ -2038,7 +2046,7 @@ std::string WebWorker::GetChangePasswordPagePartOne(bool& outputDoShowPasswordCh
   }
   std::string actualEmailActivationToken, usernameAssociatedWithToken;
   if (theGlobalVariables.userDefault.email == claimedEmail) {
-    out << "\n<b><span style =\"color:green\">Email " << claimedEmail << " updated. </span></b>";
+    out << "\n<b style =\"color:green\">Email " << claimedEmail << " updated. </b>";
     return out.str();
   }
   JSData findEmail, emailInfo, findUser, userInfo;
@@ -2046,25 +2054,25 @@ std::string WebWorker::GetChangePasswordPagePartOne(bool& outputDoShowPasswordCh
   if (!DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON(
     DatabaseStrings::tableEmailInfo, findEmail, emailInfo, &out, true
   )) {
-    out << "\n<span style =\"color:red\"><b>Failed to fetch email activation token for email: "
-    << claimedEmail << " </b></span>";
+    out << "\n<b style =\"color:red\">Failed to fetch email activation token for email: "
+    << claimedEmail << " </b>";
     return out.str();
   }
   usernameAssociatedWithToken = emailInfo[DatabaseStrings::labelUsernameAssociatedWithToken].theString;
   actualEmailActivationToken = emailInfo[DatabaseStrings::labelActivationToken].theString;
   if (actualEmailActivationToken != claimedActivationToken) {
-    out << "\n<span style =\"color:red\"><b>Bad activation token. Could not activate your email. </b></span>";
+    out << "\n<b style =\"color:red\">Bad activation token. Could not activate your email. </b>";
     return out.str();
   }
   if (usernameAssociatedWithToken != theGlobalVariables.userDefault.username) {
-    out << "\n<span style =\"color:red\"><b>Activation token was issued for another user. </b></span>";
+    out << "\n<b style =\"color:red\">Activation token was issued for another user. </b>";
     return out.str();
   }
   emailInfo[DatabaseStrings::labelActivationToken] = "";
   if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(
     DatabaseStrings::tableEmailInfo, findEmail, emailInfo, nullptr, &out
   )) {
-    out << "\n<span style =\"color:red\"><b>Could not reset the activation token (database is down?). </b></span>";
+    out << "\n<b style =\"color:red\">Could not reset the activation token (database is down?). </b>";
     return out.str();
   }
   userInfo[DatabaseStrings::labelEmail] = claimedEmail;
@@ -2672,8 +2680,8 @@ std::string HtmlInterpretation::GetCaptchaDiv() {
   std::stringstream out;
   std::string recaptchaPublic;
   if (!FileOperations::LoadFileToStringVirtual("certificates/recaptcha-public.txt", recaptchaPublic, true, true, &out)) {
-    out << "<span style =\"color:red\"><b>Couldn't find the recaptcha key in file: "
-    << "certificates/recaptcha-public.txt</b></span>";
+    out << "<b style =\"color:red\">Couldn't find the recaptcha key in file: "
+    << "certificates/recaptcha-public.txt</b>";
   } else {
     out << "<div class =\"g-recaptcha\" data-sitekey =\"" << recaptchaPublic << "\"></div>";
   }
@@ -2866,6 +2874,7 @@ int WebWorker::ServeClient() {
   theGlobalVariables.userDefault.flagStopIfNoLogin = true;
   UserCalculatorData& theUser = theGlobalVariables.userDefault;
   theGlobalVariables.IndicatorStringOutputFunction = WebServer::PipeProgressReport;
+  std::cout << "DEBUG: about to serve client.\n";
   if (
     this->requestTypE != this->requestGet &&
     this->requestTypE != this->requestPost &&
@@ -3415,11 +3424,11 @@ void WebServer::Signal_SIGCHLD_handler(int s) {
 }
 
 void WebServer::ReapChildren() {
-  //Attention: this function is executed simultaneously with the
-  //main execution path. Any non-standard operations here may be racy.
-  //Please avoid allocating RAM memory outside of the stack.
-  //Do not use anything that is not thread-safe here.
-  //In particular, do not use any loggers.
+  // Attention: this function is executed simultaneously with the
+  // main execution path. Any non-standard operations here may be racy.
+  // Please avoid allocating RAM memory outside of the stack.
+  // Do not use anything that is not thread-safe here.
+  // In particular, do not use any loggers.
   int waitResult = 0;
   int exitFlags = WNOHANG| WEXITED;
   do {
@@ -3438,9 +3447,9 @@ void WebServer::ReapChildren() {
 WebWorker& WebServer::GetActiveWorker() {
   MacroRegisterFunctionWithName("WebServer::GetActiveWorker");
   void (*oldOutputFunction)(const std::string& stringToOutput) = stOutput.theOutputFunction;
-  stOutput.theOutputFunction = nullptr; //<- We are checking if the web server is in order.
-  //Before that we prevent the crashing mechanism from trying to use (the eventually corrupt) web server
-  //to report the error over the Internet.
+  stOutput.theOutputFunction = nullptr; // <- We are checking if the web server is in order.
+  // Before that we prevent the crashing mechanism from trying to use (the eventually corrupt) web server
+  // to report the error over the Internet.
   if (this->activeWorker < 0 || this->activeWorker >= this->theWorkers.size) {
     crash << "Active worker index is " << this->activeWorker << " however I have " << this->theWorkers.size
     << " workers. " << crash;
@@ -3540,44 +3549,60 @@ bool WebServer::CreateNewActiveWorker() {
   std::string stow = stowstream.str();
   std::string wtos = wtosStream.str();
   std::string wtow = wtowStream.str();
-  if (!this->GetActiveWorker().PauseComputationReportReceived.CreateMe(stow + "report received", false, true)) {
+  std::cout << "DEBUG: got to here\n";
+  WebWorker& worker = this->GetActiveWorker();
+  if (!worker.PauseComputationReportReceived.CreateMe(stow + "report received", false, true)) {
     logPlumbing << "Failed to create pipe: "
-    << this->GetActiveWorker().PauseComputationReportReceived.name << "\n";
+    << worker.PauseComputationReportReceived.name << "\n";
     return this->EmergencyRemoval_LastCreatedWorker();
   }
-  if (!this->GetActiveWorker().PauseWorker.CreateMe(stow + "pause", false, true)) {
+  std::cout << "DEBUG: got to here pt 2.\n";
+  if (!worker.PauseWorker.CreateMe(stow + "pause", false, true)) {
     logPlumbing << "Failed to create pipe: "
-    << this->GetActiveWorker().PauseWorker.name << "\n";
+    << worker.PauseWorker.name << "\n";
     return this->EmergencyRemoval_LastCreatedWorker();
   }
-  if (!this->GetActiveWorker().PauseIndicatorPipeInUse.CreateMe(stow + "ind. pipe busy", false, true)) {
+  if (!worker.PauseIndicatorPipeInUse.CreateMe(stow + "ind. pipe busy", false, true)) {
     logPlumbing << "Failed to create pipe: "
-    << this->GetActiveWorker().PauseIndicatorPipeInUse.name << "\n";
+    << worker.PauseIndicatorPipeInUse.name << "\n";
     return this->EmergencyRemoval_LastCreatedWorker();
   }
-  if (!this->GetActiveWorker().pipeWorkerToWorkerRequestIndicator.CreateMe(wtow + "request-indicator")) {
+  if (!worker.pipeWorkerToWorkerRequestIndicator.CreateMe(wtow + "request-indicator")) {
     logPlumbing << "Failed to create pipe: "
-    << this->GetActiveWorker().pipeWorkerToWorkerRequestIndicator.name << "\n";
+    << worker.pipeWorkerToWorkerRequestIndicator.name << "\n";
     return this->EmergencyRemoval_LastCreatedWorker();
   }
-  if (!this->GetActiveWorker().pipeWorkerToServerTimerPing.CreateMe(wtos + "ping", false, false, false, true)) {
+  if (!worker.pipeWorkerToServerTimerPing.CreateMe(wtos + "ping", false, false, false, true)) {
     logPlumbing << "Failed to create pipe: "
-    << this->GetActiveWorker().pipeWorkerToServerTimerPing.name << "\n";
+    << worker.pipeWorkerToServerTimerPing.name << "\n";
     return this->EmergencyRemoval_LastCreatedWorker();
   }
-  if (!this->GetActiveWorker().pipeWorkerToServerControls.CreateMe(wtos + "controls", false, false, false, true)) {
+  if (!worker.pipeWorkerToServerControls.CreateMe(wtos + "controls", false, false, false, true)) {
     logPlumbing << "Failed to create pipe: "
-    << this->GetActiveWorker().pipeWorkerToServerControls.name << "\n";
+    << worker.pipeWorkerToServerControls.name << "\n";
     return this->EmergencyRemoval_LastCreatedWorker();
   }
-  if (!this->GetActiveWorker().pipeWorkerToWorkerIndicatorData.CreateMe(wtow + "indicator-data")) {
+  std::cout << "DEBUG: got to creating worker indicator pipe.\n";
+  Pipe& workerIndicatorPipe = worker.pipeWorkerToWorkerIndicatorData;
+  if (!workerIndicatorPipe.CreateMe(wtow + "indicator-data")) {
     logPlumbing << "Failed to create pipe: "
-    << this->GetActiveWorker().pipeWorkerToWorkerIndicatorData.name << "\n";
+    << worker.pipeWorkerToWorkerIndicatorData.name << "\n";
     return this->EmergencyRemoval_LastCreatedWorker();
   }
-  if (!this->GetActiveWorker().pipeWorkerToWorkerStatus.CreateMe(wtos + "worker status", false, false, false, true)) {
+  std::cout << "DEBUG: After creating indicator-data.\n";
+  if (
+    !workerIndicatorPipe.thePipe.SetReadBlocking(false, false) ||
+    !workerIndicatorPipe.thePipe.SetWriteBlocking(false, false)
+  ) {
+    logPlumbing << logger::red << "Failed to set blocking to pipe: "
+    << workerIndicatorPipe.name << logger::endL;
+    std::cout << "DEBUG: set blocking NOT OK.\n";
+    return this->EmergencyRemoval_LastCreatedWorker();
+  }
+  std::cout << "DEBUG: set blocking OK.\n";
+  if (!worker.pipeWorkerToWorkerStatus.CreateMe(wtos + "worker status", false, false, false, true)) {
     logPlumbing << "Failed to create pipe: "
-    << this->GetActiveWorker().pipeWorkerToWorkerStatus.name << "\n";
+    << worker.pipeWorkerToWorkerStatus.name << "\n";
     return this->EmergencyRemoval_LastCreatedWorker();
   }
   logPlumbing << logger::green
@@ -3666,7 +3691,8 @@ std::string WebServer::ToStringStatusForLogFile() {
     }
   }
   out << "<hr>Currently, there are " << numInUse
-  << " worker(s) in use. The peak number of worker(s)/concurrent connections was " << this->theWorkers.size << ". ";
+  << " worker(s) in use. The peak number of worker(s)/concurrent connections was "
+  << this->theWorkers.size << ". ";
   out
   << "<br>kill commands: " << this->NumProcessAssassinated
   << ", processes reaped: " << this->NumProcessesReaped
@@ -4098,9 +4124,9 @@ void WebServer::HandleTooManyWorkers(int& numInUse) {
 }
 
 void WebServer::RecycleChildrenIfPossible() {
-  //Listen for children who have exited properly.
-  //This might need to be rewritten: I wasn't able to make this work with any
-  //mechanism other than pipes.
+  // Listen for children who have exited properly.
+  // This might need to be rewritten: I wasn't able to make this work with any
+  // mechanism other than pipes.
   MacroRegisterFunctionWithName("WebServer::RecycleChildrenIfPossible");
   if (theGlobalVariables.flagIsChildProcess) {
     return;
@@ -4216,8 +4242,8 @@ void SignalsInfrastructure::initializeSignals() {
   this->SignalSEGV.sa_sigaction = &segfault_sigaction;
   this->SignalSEGV.sa_flags = SA_SIGINFO;
   if (sigaction(SIGSEGV, &SignalSEGV, nullptr) == - 1) {
-    crash << "Failed to register SIGSEGV handler (segmentation fault (attempt to write memory without permission))."
-    << " Crashing to let you know. " << crash;
+    crash << "Failed to register SIGSEGV handler (segmentation fault (attempt to write memory without permission)). "
+    << "Crashing to let you know. " << crash;
   }
   ///////////////////////
   //catch floating point exceptions
@@ -4407,7 +4433,7 @@ int WebServer::Run() {
     if (pidServer > 0) {
       theGlobalVariables.processType = "serverMonitor";
       theGlobalVariables.flagIsChildProcess = true;
-      MonitorWebServer(pidServer);//<-this attempts to connect to the server over the internet and restarts if it can't.
+      MonitorWebServer(pidServer); //<-this attempts to connect to the server over the internet and restarts if it can't.
       return 0;
     }
   }
@@ -4416,11 +4442,11 @@ int WebServer::Run() {
   this->theCalculator.theObjectPointer = &theParser;
   this->theCalculator.RenewObject();
   theParser->initialize();
-  //cannot call initializeMutex here: not before we execute fork();
+  // cannot call initializeMutex here: not before we execute fork();
   theParser->ComputeAutoCompleteKeyWords();
   theParser->WriteAutoCompleteKeyWordsToFile();
   this->WriteVersionJSFile();
-  //theGlobalVariables.WriteSourceCodeFilesJS();
+  // theGlobalVariables.WriteSourceCodeFilesJS();
   theGlobalVariables.initModifiableDatabaseFields();
   HtmlRoutines::LoadStrings();
   this->theTLS.initializeNonThreadSafeOnFirstCall(true);
@@ -4513,12 +4539,12 @@ int WebServer::Run() {
     }
     this->theTLS.AddMoreEntropyFromTimer();
 
-    int incomingPID = fork(); //creates an almost identical copy of this process.
-    //<- Please don't assign directly to this->GetActiveWorker().ProcessPID.
-    //<- There may be a race condition around this line of code and I
-    //want as little code as possible between the fork and the logFile.
-    //The original process is the parent, the almost identical copy is the child.
-    //logWorker << "\r\nChildPID: " << this->childPID;
+    int incomingPID = fork(); // creates an almost identical copy of this process.
+    // <- Please don't assign directly to this->GetActiveWorker().ProcessPID.
+    // <- There may be a race condition around this line of code and I
+    // want as little code as possible between the fork and the logFile.
+    // The original process is the parent, the almost identical copy is the child.
+    // logWorker << "\r\nChildPID: " << this->childPID;
     if (incomingPID == 0) {
       theGlobalVariables.processType = "worker";
     }
@@ -4591,17 +4617,23 @@ int WebWorker::Run() {
   if (this->connectedSocketID == - 1) {
     crash << "Worker::Run() started on a connecting with ID equal to - 1. " << crash;
   }
+  std::cout << "DEBUG: got to web worker::run\n";
   this->ResetPipesNoAllocation();
+  std::cout << "DEBUG: pipes were reset.\n";
   std::stringstream processNameStream;
   processNameStream << "W" << this->indexInParent + 1 << ": ";
   PauseProcess::currentProcessName = processNameStream.str();
   theGlobalVariables.flagServerForkedIntoWorker = true;
   crash.CleanUpFunction = WebServer::SignalActiveWorkerDoneReleaseEverything;
+  std::cout << "DEBUG: about to create timer thread\n";
   CreateTimerThread();
+  std::cout << "DEBUG: timer thread created\n";
   // Check web worker indices are initialized properly:
   theWebServer.GetActiveWorker();
+  std::cout << "DEBUG: about to fire up ssl handshake.\n";
   if (theGlobalVariables.flagUsingSSLinCurrentConnection) {
     std::stringstream commentsOnFailure;
+    std::cout << "DEBUG: about to handshake. \n";
     if (!theWebServer.SSLServerSideHandShake(&commentsOnFailure)) {
       theGlobalVariables.flagUsingSSLinCurrentConnection = false;
       this->parent->SignalActiveWorkerDoneReleaseEverything();
@@ -4611,6 +4643,7 @@ int WebWorker::Run() {
       return - 1;
     }
   }
+  std::cout << "DEBUG: after handshake. \n";
   if (theGlobalVariables.flagSSLIsAvailable && theGlobalVariables.flagUsingSSLinCurrentConnection) {
     logOpenSSL << logger::green << "ssl success #: " << this->parent->NumConnectionsSoFar << ". " << logger::endL;
   }
@@ -4618,6 +4651,7 @@ int WebWorker::Run() {
   stOutput.theOutputFunction = WebServer::SendStringThroughActiveWorker;
   int result = 0;
   this->numberOfReceivesCurrentConnection = 0;
+  std::cout << "DEBUG: about to enter worker loop. \n";
   while (true) {
     StateMaintainerCurrentFolder preserveCurrentFolder;
     this->flagAllBytesSentUsingFile = false;
@@ -4646,6 +4680,7 @@ int WebWorker::Run() {
     if (this->messageHead.size() == 0) {
       break;
     }
+    std::cout << "DEBUG: about to serve client. \n";
     result = this->ServeClient();
     if (this->connectedSocketID == - 1) {
       break;
@@ -4664,7 +4699,7 @@ int WebWorker::Run() {
     ) {
       break;
     }
-    //The function call needs security audit.
+    // The function call needs security audit.
     this->resetConnection();
     logWorker << logger::blue << "Received " << this->numberOfReceivesCurrentConnection
     << " times on this connection, waiting for more. "
@@ -5493,7 +5528,7 @@ int WebServer::mainApache() {
   theLimit.rlim_max = 60;
   setrlimit(RLIMIT_CPU, &theLimit);
   stOutput.theOutputFunction = nullptr;
-  // stOutput << "Content-Type: text/html\r\nSet-cookie: test =1;\r\n\r\nThe output bytes start here:\n";
+  // stOutput << "Content-Type: text/html\r\nSet-cookie: test=1;\r\n\r\nThe output bytes start here:\n";
   theGlobalVariables.IndicatorStringOutputFunction = nullptr;
   theGlobalVariables.flagServerForkedIntoWorker = true;
   theGlobalVariables.flagComputationStarted = true;
@@ -5674,7 +5709,7 @@ void WebWorker::SendAllBytesHttp() {
     }
     if (numTimesRunWithoutSending > 3) {
       logWorker << "WebWorker::SendAllBytes failed: send function went through 3 cycles without "
-      << " sending any bytes. "
+      << "sending any bytes. "
       << logger::endL;
       return;
     }

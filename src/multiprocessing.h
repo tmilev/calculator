@@ -37,10 +37,10 @@ public:
   bool CheckConsistency();
   bool SetPipeFlagsIfFailThenCrash(int inputFlags, int whichEnd, bool restartServerOnFail, bool dontCrashOnFail);
 
-  bool SetPipeReadNonBlockingIfFailThenCrash (bool restartServerOnFail, bool dontCrashOnFail);
-  bool SetPipeReadBlockingModeIfFailThenCrash(bool restartServerOnFail, bool dontCrashOnFail);
+  bool SetReadNonBlocking (bool restartServerOnFail, bool dontCrashOnFail);
+  bool SetReadBlocking(bool restartServerOnFail, bool dontCrashOnFail);
 
-  bool SetPipeWriteBlockingIfFailThenCrash(bool restartServerOnFail, bool dontCrashOnFail);
+  bool SetWriteBlocking(bool restartServerOnFail, bool dontCrashOnFail);
   bool SetPipeWriteNonBlockingIfFailThenCrash(bool restartServerOnFail, bool dontCrashOnFail);
 
   bool SetPipeWriteFlagsIfFailThenCrash(int inputFlags, int whichEnd, bool restartServerOnFail, bool dontCrashOnFail);
@@ -101,13 +101,12 @@ public:
   std::string GetLastRead() {
     return this->thePipe.GetLastRead();
   }
-  static bool SetPipeNonBlockingIfFailThenCrash(int inputPipe, bool restartServerOnFail, bool dontCrashOnFail);
-  static bool SetPipeBlockingModeIfFailThenCrash(int inputPipe, bool restartServerOnFail, bool dontCrashOnFail);
-  bool ReadNoLocksIfFailThenCrash(bool restartServerOnFail, bool dontCrashOnFail);
-  static void WriteIfFailThenCrash(int theFD, const List<char>& input, bool restartServerOnFail, bool dontCrashOnFail);
+  static void WriteIfFailThenCrash(
+    int theFD, const List<char>& input, bool restartServerOnFail, bool dontCrashOnFail
+  );
   void ReadOnce(bool restartServerOnFail, bool dontCrashOnFail);
   void ReadOnceWithoutEmptying(bool restartServerOnFail, bool dontCrashOnFail);
-  bool ReadOnceWithLength();
+  void ReadLoop();
   static int WriteNoInterrupts(int theFD, const std::string& input);
   static int WriteWithTimeoutViaSelect(
     int theFD,
@@ -123,9 +122,10 @@ public:
     int maxNumTries = 10,
     std::stringstream* commentsOnFailure = nullptr
   );
-  void ReadLoop();
   void WriteLoopAfterEmptyingBlocking(const std::string& toBeSent);
-  void WriteOnceAfterEmptying(const std::string& toBeSent, bool restartServerOnFail, bool dontCrashOnFail);
+  void WriteOnceAfterEmptying(
+    const std::string& toBeSent, bool restartServerOnFail, bool dontCrashOnFail
+  );
 
   std::string ToString() const;
   void Release();

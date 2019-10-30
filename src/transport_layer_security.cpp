@@ -1542,6 +1542,12 @@ bool Serialization::ReadThreeByteInt(
   return Serialization::ReadNByteInt(3, input, inputOutputOffset, result, commentsOnFailure);
 }
 
+bool Serialization::ReadFourByteInt(
+  const List<unsigned char>& input, int& inputOutputOffset, int& result, std::stringstream* commentsOnFailure
+) {
+  return Serialization::ReadNByteInt(4, input, inputOutputOffset, result, commentsOnFailure);
+}
+
 bool Serialization::ReadNByteInt(
   int numBytes,
   const List<unsigned char>& input,

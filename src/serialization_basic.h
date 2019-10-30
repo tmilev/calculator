@@ -177,6 +177,9 @@ public:
   static bool ReadThreeByteInt(
     const List<unsigned char>& input, int& inputOutputOffset, int& result, std::stringstream* commentsOnFailure
   );
+  static bool ReadFourByteInt(
+    const List<unsigned char>& input, int& inputOutputOffset, int& result, std::stringstream* commentsOnFailure
+  );
   static bool ReadNByteInt(int numBytes,
     const List<unsigned char>& input,
     int& inputOutputOffset,

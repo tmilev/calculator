@@ -416,7 +416,7 @@ int Pipe::WriteNoInterrupts(int theFD, const std::string& input) {
   //  return - 1;
 }
 
-void Pipe::ReadLoop() {
+void Pipe::ReadLoop(List<char>& output) {
   MacroRegisterFunctionWithName("Pipe::ReadLoop");
   this->CheckConsistency();
   MutexRecursiveWrapper& safetyFirst = theGlobalVariables.MutexWebWorkerPipeReadLock;
@@ -430,10 +430,10 @@ void Pipe::ReadLoop() {
   Serialization::ReadFourByteInt(
     metaDataBuffer, offset, expectedBytes, nullptr
   );
-  List<char> result;
-  while (result.size < expectedBytes) {
+  output.SetSize(0);
+  while (output.size < expectedBytes) {
     this->thePipe.ReadOnceIfFailThenCrash(false, true);
-    result.AddListOnTop(this->thePipe.lastRead);
+    output.AddListOnTop(this->thePipe.lastRead);
   }
   // this->theMutexPipe.ResumePausedProcessesIfAny(restartServerOnFail, dontCrashOnFail);
   safetyFirst.UnlockMe(); // Prevent threads from locking one another.
@@ -451,13 +451,20 @@ void Pipe::WriteLoopAfterEmptyingBlocking(const std::string& toBeSent) {
     << ". Pipe name: " << this->name
     << crash;
   }
+  std::cout << "DEBUG: inside write loop\n";
+
   MutexLockGuard safety(theGlobalVariables.MutexWebWorkerPipeWriteLock);
+  std::cout << "DEBUG: safety locked\n";
   this->theMutexPipe.RequestPausePauseIfLocked(false, true);
+  std::cout << "DEBUG: pause requested\n";
   List<unsigned char> sizeFourBytes;
   Serialization::WriteFourByteUnsigned(static_cast<unsigned>(toBeSent.size()), sizeFourBytes);
-  std::string toBeSentString = Serialization::ConvertListUnsignedCharsToString(toBeSent);
-  this->metaData.WriteOnceAfterEmptying(toBeSentString, false, true);
+  std::string toBeSentSize = Serialization::ConvertListUnsignedCharsToString(sizeFourBytes);
+  std::cout << "DEBUG: about to write metadata\n";
+  this->metaData.WriteOnceAfterEmptying(toBeSentSize, false, true);
+  std::cout << "DEBUG: wrote metadata: " << std::hex << toBeSentSize << "\n";
   unsigned totalSent = 0;
+  std::cout << "DEBUG: wrote metadata: " << std::hex << toBeSentSize << "\n";
   while (totalSent < toBeSent.size()) {
     if (!this->thePipe.WriteOnceIfFailThenCrash(
       toBeSent, static_cast<signed>(totalSent), false, true

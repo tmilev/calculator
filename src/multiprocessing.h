@@ -106,7 +106,7 @@ public:
   );
   void ReadOnce(bool restartServerOnFail, bool dontCrashOnFail);
   void ReadOnceWithoutEmptying(bool restartServerOnFail, bool dontCrashOnFail);
-  void ReadLoop();
+  void ReadLoop(List<char>& output);
   static int WriteNoInterrupts(int theFD, const std::string& input);
   static int WriteWithTimeoutViaSelect(
     int theFD,

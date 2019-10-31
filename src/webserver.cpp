@@ -1574,14 +1574,13 @@ int WebWorker::ProcessComputationIndicator() {
   }
   otherWorker.pipeWorkerToWorkerRequestIndicator.WriteOnceAfterEmptying("!", false, false);
   std::cout << "DEBUG: before read loop. \n";
-  otherWorker.pipeWorkerToWorkerIndicatorData.ReadLoop();
+  Pipe& dataPipe = otherWorker.pipeWorkerToWorkerIndicatorData;
+  List<char> message;
+  dataPipe.ReadLoop(message);
   std::cout << "DEBUG: after read loop. \n";
-  if (otherWorker.pipeWorkerToWorkerIndicatorData.thePipe.lastRead.size > 0) {
+  if (message.size > 0) {
     std::string outputString;
-    outputString.assign(
-      otherWorker.pipeWorkerToWorkerIndicatorData.thePipe.lastRead.TheObjects,
-      static_cast<unsigned>(otherWorker.pipeWorkerToWorkerIndicatorData.thePipe.lastRead.size)
-    );
+    outputString.assign(message.TheObjects, static_cast<unsigned>(message.size));
     if (outputString != "finished") {
       result[WebAPI::result::resultStringified] = outputString;
       result[WebAPI::result::status] = "running";

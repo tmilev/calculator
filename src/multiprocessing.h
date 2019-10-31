@@ -10,10 +10,6 @@ static ProjectInformationInstance projectInfoInstanceWebServerInterProcessLogist
   __FILE__, "Web server: inter-process communication/logistics."
 );
 
-// this class is similar to the controller class but coordinates across different processes,
-// rather than across different threads.
-// inter-process communication is achieved via pipes.
-
 // This is a basic wrapper around linux unnamed pipes.
 class PipePrimitive {
 public:
@@ -35,7 +31,12 @@ public:
   );
   std::string GetLastRead();
   bool CheckConsistency();
-  bool SetPipeFlagsIfFailThenCrash(int inputFlags, int whichEnd, bool restartServerOnFail, bool dontCrashOnFail);
+  bool SetPipeFlagsIfFailThenCrash(
+    int inputFlags,
+    int whichEnd,
+    bool restartServerOnFail,
+    bool dontCrashOnFail
+  );
 
   bool SetReadNonBlocking (bool restartServerOnFail, bool dontCrashOnFail);
   bool SetReadBlocking(bool restartServerOnFail, bool dontCrashOnFail);
@@ -43,17 +44,36 @@ public:
   bool SetWriteBlocking(bool restartServerOnFail, bool dontCrashOnFail);
   bool SetPipeWriteNonBlockingIfFailThenCrash(bool restartServerOnFail, bool dontCrashOnFail);
 
-  bool SetPipeWriteFlagsIfFailThenCrash(int inputFlags, int whichEnd, bool restartServerOnFail, bool dontCrashOnFail);
-  bool WriteOnceIfFailThenCrash(const std::string& input, int offset, bool restartServerOnFail, bool dontCrashOnFail);
+  bool SetPipeWriteFlagsIfFailThenCrash(
+    int inputFlags,
+    int whichEnd,
+    bool restartServerOnFail,
+    bool dontCrashOnFail
+  );
+  bool WriteOnceIfFailThenCrash(
+    const std::string& input,
+    int offset,
+    bool restartServerOnFail,
+    bool dontCrashOnFail
+  );
   bool ReadOnceIfFailThenCrash(bool restartServerOnFail, bool dontCrashOnFail);
   bool WriteOnceAfterEmptying(const std::string& input, bool restartServerOnFail, bool dontCrashOnFail);
 
   bool ReadOnceWithoutEmptying(bool restartServerOnFail, bool dontCrashOnFail);
-  bool HandleFailedWriteReturnFalse(const std::string& toBeSent, bool restartServerOnFail, bool dontCrashOnFail, int numBadAttempts);
+  bool HandleFailedWriteReturnFalse(
+    const std::string& toBeSent,
+    bool restartServerOnFail,
+    bool dontCrashOnFail,
+    int numBadAttempts
+  );
   std::string ToString() const;
   PipePrimitive();
   ~PipePrimitive();
 };
+
+// This class is similar to the controller class but coordinates across different processes,
+// rather than across different threads.
+// inter-process communication is achieved via pipes.
 
 class PauseProcess {
 public:
@@ -124,7 +144,9 @@ public:
   );
   void WriteLoopAfterEmptyingBlocking(const std::string& toBeSent);
   void WriteOnceAfterEmptying(
-    const std::string& toBeSent, bool restartServerOnFail, bool dontCrashOnFail
+    const std::string& toBeSent,
+    bool restartServerOnFail,
+    bool dontCrashOnFail
   );
 
   std::string ToString() const;

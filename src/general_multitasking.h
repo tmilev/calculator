@@ -41,12 +41,12 @@ public:
   bool InitializeIfNeeded();
   std::string mutexName;
   void* theMutexImplementation;
-  //note: the mutex implementation is not a named type for system portability.
+  // note: the mutex implementation is not a named type for system portability.
   bool isLockedUnsafeUseForWINguiOnly();
-  //locks the mutex if the mutex is free. If not it suspends calling thread until
-  //mutex becomes free and then locks it.
+  // locks the mutex if the mutex is free. If not it suspends calling thread until
+  // mutex becomes free and then locks it.
   void LockMe();
-  //unlocks the mutex.
+  // unlocks the mutex.
   void UnlockMe();
   void CheckConsistency();
   void initConstructorCallOnly();

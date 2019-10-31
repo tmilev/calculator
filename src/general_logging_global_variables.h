@@ -136,6 +136,7 @@ public:
   bool flagReportProductsMonomialAlgebras;
 
   MutexRecursiveWrapper infoIsInitialized;
+  MutexRecursiveWrapper outputAfterTimeout;
   ListReferences<std::thread>theThreads;
   ListReferences<ThreadData> theThreadData;
   ListReferences<ListReferences<stackInfo> > CustomStackTrace;

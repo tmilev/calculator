@@ -68,8 +68,8 @@ public:
   PauseProcess PauseComputationReportReceived;
   PauseProcess PauseWorker;
   PauseProcess PauseIndicatorPipeInUse;
-  Pipe pipeWorkerToWorkerRequestIndicator;
-  Pipe pipeWorkerToWorkerIndicatorData;
+  PipePrimitive workerToWorkerRequestIndicator;
+  PipePrimitive workerToWorkerReturnIndicator;
   PipePrimitive pipeWorkerToWorkerStatus;
   PipePrimitive pipeWorkerToServerControls;
   PipePrimitive pipeWorkerToServerTimerPing;
@@ -145,13 +145,18 @@ public:
   bool IsFileServedRaw();
 
   static bool IsAllowedAsRequestCookie(const std::string& input);
-  bool LoginProcedure(std::stringstream& argumentProcessingFailureComments, std::stringstream *comments);
+  bool LoginProcedure(
+    std::stringstream& argumentProcessingFailureComments,
+    std::stringstream* comments
+  );
   bool CorrectRequestsBEFORELoginReturnFalseIfModified();
   bool CorrectRequestsAFTERLoginReturnFalseIfModified();
   bool RedirectIfNeeded(std::stringstream& argumentProcessingFailureComments);
 
   bool ExtractArgumentsFromMessage(
-    const std::string& input, std::stringstream& argumentProcessingFailureComments, int recursionDepth = 0
+    const std::string& input,
+    std::stringstream& argumentProcessingFailureComments,
+    int recursionDepth = 0
   );
   bool ExtractArgumentsFromCookies(std::stringstream& argumentProcessingFailureComments);
   static void OutputSendAfterTimeout(const std::string& input);

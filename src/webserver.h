@@ -19,6 +19,7 @@ public:
   int64_t millisecondsAfterSelect;
 
   std::string displayUserInput;
+  std::string outputId;
 
   std::string messageHead;
   std::string messageBody;
@@ -53,6 +54,7 @@ public:
   bool flagToggleMonitoring;
   bool flagAllBytesSentUsingFile;
   bool flagEncounteredErrorWhileServingFile;
+  bool flagIsPaused;
   List<std::string> theMessageHeaderStrings;
   MapList<std::string, std::string, MathRoutines::HashString> requestHeaders;
   int ContentLength;
@@ -65,9 +67,8 @@ public:
   List<char> remainingHeaderToSend;
   List<char> remainingBodyToSend;
   List<char> bufferFileIO;
-  PauseProcess PauseComputationReportReceived;
-  PauseProcess PauseWorker;
-  PauseProcess PauseIndicatorPipeInUse;
+  MutexProcess PauseWorker;
+  MutexProcess writingReportFile;
   PipePrimitive workerToWorkerRequestIndicator;
   PipePrimitive workerToWorkerReturnIndicator;
   PipePrimitive pipeWorkerToWorkerStatus;
@@ -137,9 +138,6 @@ public:
   int ProcessUnknown();
   int Run();
   bool CheckConsistency();
-  void PipeProgressReport(const std::string& input);
-  void WriteProgressReportToFile(const std::string& input);
-
   static void StandardOutputAfterTimeOut(const std::string& input);
 
   bool IsFileServedRaw();
@@ -159,9 +157,12 @@ public:
     int recursionDepth = 0
   );
   bool ExtractArgumentsFromCookies(std::stringstream& argumentProcessingFailureComments);
-  static void OutputSendAfterTimeout(const std::string& input);
-  void OutputResultAfterTimeout();
-  static void OutputCrashAfterTimeout();
+  void WriteAfterTimeoutProgress(const std::string& input);
+  static void WriteAfterTimeoutProgressStatic(const std::string& input);
+  void PauseIfRequested() ;
+  void WriteAfterTimeoutResult();
+  static void WriteAfterTimeout(const std::string& input, const std::string& status);
+  static void WriteAfterTimeoutCrash();
   void OutputShowIndicatorOnTimeout();
   void QueueStringForSendingWithHeadeR(const std::string& stringToSend, bool MustSendAll = false);
   void QueueStringForSendingNoHeadeR(const std::string& stringToSend, bool MustSendAll = false);
@@ -169,7 +170,7 @@ public:
   bool ShouldDisplayLoginPage();
   void SendAllAndWrapUp();
   void WrapUpConnection();
-  void ResetPipesNoAllocation();
+  void ResetMutexProcessesNoAllocation();
   void reset();
   void resetMessageComponentsExceptRawMessage();
   void resetConnection();
@@ -293,7 +294,6 @@ public:
   static void FlushActiveWorker();
   static void ReturnActiveIndicatorAlthoughComputationIsNotDone();
   static void SendStringThroughActiveWorker(const std::string& input);
-  static void PipeProgressReport(const std::string& input);
   static void fperror_sigaction[[noreturn]](int signal);
   void ReapOneChild();
   void ReapChildren();

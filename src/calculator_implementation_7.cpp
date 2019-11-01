@@ -2151,57 +2151,6 @@ bool CalculatorFunctionsGeneral::innerFormatCPPDirectory(
   return output.AssignValue(report.str(), theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerMakeMakeFile(
-  Calculator& theCommands, const Expression& input, Expression& output
-) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerMakeMakeFile");
-  (void) input;
-  List<std::string> cppFilesNoExtension;
-  for (int i = 0; i < theGlobalVariables.theSourceCodeFiles().size; i ++) {
-    std::string theFileNameWithPath = theGlobalVariables.theSourceCodeFiles()[i].FileName;
-    if (theFileNameWithPath[theFileNameWithPath.size() - 1] == 'h') {
-      continue;
-    }
-    theFileNameWithPath.resize(theFileNameWithPath.size() - 4);
-    std::string theFileNameNoPathNoExtensionReversed, theFileNameNoPathNoExtension;
-    for (int j = static_cast<signed>(theFileNameWithPath.size()) - 1; j >= 0; j --) {
-      unsigned k = static_cast<unsigned>(j);
-      if (theFileNameWithPath[k] == '/') {
-        break;
-      } else {
-        theFileNameNoPathNoExtensionReversed.push_back(theFileNameWithPath[k]);
-      }
-    }
-    for (int j = static_cast<signed>(theFileNameNoPathNoExtensionReversed.size()) - 1; j >= 0; j --) {
-      theFileNameNoPathNoExtension.push_back(
-        theFileNameNoPathNoExtensionReversed[static_cast<unsigned>(j)]
-      );
-    }
-    cppFilesNoExtension.AddOnTop(theFileNameNoPathNoExtension);
-  }
-  std::fstream theFileStream;
-  FileOperations::OpenFileCreateIfNotPresentVirtual(theFileStream, "output/makefile", false, true, false);
-  std::stringstream outHtml;
-  theFileStream << "all: directories calculator\n\n";
-  theFileStream << "directories: bin\n";
-  theFileStream << "bin:\n" << "\tmkdir ./bin\n";
-  theFileStream << "calculator: ";
-  for (int i = 0; i < cppFilesNoExtension.size; i ++) {
-    theFileStream << cppFilesNoExtension[i] << ".o ";
-  }
-  theFileStream << "\n\tg++ -std = c++ 11 -pthread ";
-  for (int i = 0; i < cppFilesNoExtension.size; i ++) {
-    theFileStream << cppFilesNoExtension[i] << ".o ";
-  }
-  theFileStream << "-o ./bin/calculator\n\n";
-  for (int i = 0; i < cppFilesNoExtension.size; i ++) {
-    theFileStream << cppFilesNoExtension[i] << ".o: " << cppFilesNoExtension[i]
-    << ".cpp\n\tg++ -std = c++ 0x -pthread -c " << cppFilesNoExtension[i] << ".cpp\n\n";
-  }
-  outHtml << "<a href=\" " << theGlobalVariables.DisplayPathOutputFolder << "makefile" << "\"> makefile </a>";
-  return output.AssignValue(outHtml.str(), theCommands);
-}
-
 bool CalculatorFunctionsGeneral::innerIntersection(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntersection");
   if (!input.StartsWith(theCommands.opIntersection())) {

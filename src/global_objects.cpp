@@ -71,7 +71,7 @@ void InitializeGlobalObjects() {
   theGlobalVariables.processType = ProcessTypes::server;
   theGlobalVariables.flagIsChildProcess = false;
   InitializeTimeR();
-  theGlobalVariables.IndicatorStringOutputFunction = &HtmlRoutines::MakeReportIndicatorFile;
+  theGlobalVariables.IndicatorStringOutputFunction = nullptr;
   theGlobalVariables.pointerCallSystemNoOutput = &CallSystemWrapperNoOutput;
   theGlobalVariables.pointerCallSystemWithOutput = &CallSystemWrapperReturnStandardOutput;
   theGlobalVariables.pointerCallChDir = &CallChDirWrapper;
@@ -90,7 +90,7 @@ void HtmlRoutines::MakeReportIndicatorFile(const std::string& input) {
   //std::cout << "Making report " << counter << " in file " << theGlobalVariables.PhysicalNameIndicatorWithPath << "<br>";
   std::fstream theFile;
   FileOperations::OpenFileCreateIfNotPresentVirtual(
-    theFile, "output/" + theGlobalVariables.RelativePhysicalNameProgressReport, false, true, false
+    theFile, "result/output.html", false, true, false
   );
   theFile << " Elapsed calculator time: " << theGlobalVariables.GetElapsedSeconds() << " second(s).";
   theFile << input;

@@ -1152,17 +1152,6 @@ void Calculator::initPredefinedInnerFunctions() {
     "ConvertHexToString"
   );
   this->AddOperationInnerHandler(
-    "MakeMakefile",
-    CalculatorFunctionsGeneral::innerMakeMakeFile,
-    "",
-    "Makes a makefile. ",
-    "MakeMakefile(0)",
-    false,
-    false,
-    "CalculatorFunctionsGeneral::innerMakeMakeFile",
-    "MakeMakefile"
-  );
-  this->AddOperationInnerHandler(
     "FormatCPPCode",
     CalculatorFunctionsGeneral::innerFormatCPPSourceCode,
     "",

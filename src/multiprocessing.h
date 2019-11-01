@@ -71,16 +71,14 @@ public:
   ~PipePrimitive();
 };
 
-// This class is similar to the controller class but coordinates across different processes,
-// rather than across different threads.
-// inter-process communication is achieved via pipes.
-
-class PauseProcess {
+// Inter-process mutex.
+// Every inter-process mutex operation can fail.
+class MutexProcess {
 public:
   static std::string currentProcessName;
 
-  PipePrimitive thePausePipe;
-  PipePrimitive mutexPipe;
+  PipePrimitive lockPipe;
+  bool flagLockCurrentlyHeld;
   std::string name;
   MemorySaving<MutexRecursiveWrapper> lockThreads; //<- to avoid two threads from the same process blocking the process.
   bool flagDeallocated;
@@ -90,18 +88,33 @@ public:
   bool ResetNoAllocation();
 
   bool CheckConsistency();
-  bool CheckPauseIsRequested(bool restartServerOnFail, bool dontCrashOnFail, bool dontLockImServer);
-  void PauseIfRequested(bool restartServerOnFail, bool dontCrashOnFail);
-  bool PauseIfRequestedWithTimeOut(bool restartServerOnFail, bool dontCrashOnFail);
+  // Acts in a similar fashion to single-process mutex lock.
+  // If the lock is held in another process or another thread,
+  // the current thread in the current process
+  // falls asleep until the lock is released.
+  // When released, the lock is acquired and true is returned.
+  //
+  // MutexProcess::Lock() returns false on
+  // critical pipe read/write errors.
+  // When false is returned, the lock was not
+  // successfully acquired.
+  // The lock may or may not be currently held by
+  // another process.
+  //
+  // A false return from MutexProcess::Lock()
+  // usually indicates a fatal error,
+  // but we may choose to handle it gracefully
+  // for stability reasons.
+  bool Lock();
 
-  void RequestPausePauseIfLocked(bool restartServerOnFail, bool dontCrashOnFail);
-
-  void ResumePausedProcessesIfAny(bool restartServerOnFail, bool dontCrashOnFail);
-  void LoCkMe();
-  void UnloCkMe();
+  // Unlock the mutex.
+  // False return indicates a i/o failure.
+  // False result should normally be a fatal error but
+  // may be handled gracefully for stability reasons.
+  bool Unlock();
   static void Release(int& theDescriptor);
-  PauseProcess();
-  ~PauseProcess();
+  MutexProcess();
+  ~MutexProcess();
 };
 
 // This is an unnamed pipe with which may be shared by two or more processes
@@ -114,7 +127,7 @@ class Pipe {
 public:
   PipePrimitive thePipe;
   PipePrimitive metaData;
-  PauseProcess theMutexPipe;
+  MutexProcess theMutexPipe;
   bool flagDeallocated;
   std::string name;
   //  static int ConnectWithTimeoutViaSelect(int theFD, const std::string& input);
@@ -142,7 +155,6 @@ public:
     int maxNumTries = 10,
     std::stringstream* commentsOnFailure = nullptr
   );
-  void WriteLoopAfterEmptyingBlocking(const std::string& toBeSent);
   void WriteOnceAfterEmptying(
     const std::string& toBeSent,
     bool restartServerOnFail,

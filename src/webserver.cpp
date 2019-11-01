@@ -865,57 +865,43 @@ std::string WebWorker::GetHtmlHiddenInputs(bool includeUserName, bool includeAut
   return out.str();
 }
 
-void WebWorker::OutputResultAfterTimeout() {
-  MacroRegisterFunctionWithName("WebWorker::OutputResultAfterTimeout");
-  //out << theParser.ToStringOutputSpecials();
-  std::string theFileName = "output/" + theGlobalVariables.RelativePhysicalNameOutpuT;
-  std::string theLink = "output/" + HtmlRoutines::ConvertStringToURLString(
-    theGlobalVariables.RelativePhysicalNameOutpuT, false
-  );
-  JSData output = theParser->ToJSONOutputAndSpecials();
-  output["outputFile"] = theLink;
-  std::fstream outputTimeOutFile;
-  FileOperations::OpenFileCreateIfNotPresentVirtual(
-    outputTimeOutFile, theFileName, false, true, false
-  );
-  outputTimeOutFile << "<html><body>" << theParser->ToStringOutputAndSpecials() << "</body></html>";
-  outputTimeOutFile.close();
-  WebWorker::OutputSendAfterTimeout(output.ToString(false));
+void WebWorker::WriteAfterTimeoutProgressStatic(const std::string& input) {
+  return theWebServer.GetActiveWorker().WriteAfterTimeoutProgress(input);
 }
 
-void WebWorker::OutputCrashAfterTimeout() {
-  MacroRegisterFunctionWithName("WebWorker::OutputCrashAfterTimeout");
-  logWorker << logger::red << "Crashing AFTER timeout!" << logger::endL;
-  WebWorker::OutputSendAfterTimeout(standardOutputStreamAfterTimeout.str());
-  theWebServer.SignalActiveWorkerDoneReleaseEverything();
-}
-
-void WebWorker::OutputSendAfterTimeout(const std::string& input) {
-  MacroRegisterFunctionWithName("WebWorker::OutputSendAfterTimeout");
-  int implementMe;
-  /*
-  theGlobalVariables.flagTimedOutComputationIsDone = true;
-  logWorker << "WebWorker::StandardOutputPart2ComputationTimeout called with worker number "
-  << theWebServer.GetActiveWorker().indexInParent + 1 << "." << logger::endL;
-  //requesting pause which will be cleared by the receiver of pipeWorkerToWorkerIndicatorData
-  theWebServer.GetActiveWorker().PauseComputationReportReceived.RequestPausePauseIfLocked(false, false);
-  logWorker << logger::blue << "Sending result through indicator pipe." << logger::endL;
-
-  std::cout << "DEBUG: before write loop. \n";
-  theWebServer.GetActiveWorker().workerToWorkerRequestIndicator.WriteOnceAfterEmptying(input, false, false);
-  std::cout << "DEBUG: AFTER write loop. \n";
-  logBlock << logger::blue << "Final output written to indicator, blocking until data "
-  << "is received on the other end." << logger::endL;
-  if (!theWebServer.GetActiveWorker().PauseComputationReportReceived.PauseIfRequestedWithTimeOut(false, false)) {
-  } else {
-    //requesting pause which will be cleared by the receiver of pipeWorkerToWorkerIndicatorData
-    theWebServer.GetActiveWorker().PauseComputationReportReceived.RequestPausePauseIfLocked(false, false);
+void WebWorker::WriteAfterTimeoutProgress(const std::string& input) {
+  if (!this->flagProgressReportAllowed) {
+    return;
   }
-  std::cout << "DEBUG: before finished write. \n";
-  theWebServer.GetActiveWorker().pipeWorkerToWorkerIndicatorData.WriteOnceAfterEmptying("finished", false, false);
-  std::cout << "DEBUG: AFTER finished write. \n";
-  logWorker << logger::red << "\"finished\" sent through indicator pipe, waiting." << logger::endL;
-  theWebServer.GetActiveWorker().PauseComputationReportReceived.PauseIfRequestedWithTimeOut(false, false);*/
+  logWorker << "DEBUG: and the progress is allowed!!!!!" << logger::endL;
+  this->PauseIfRequested();
+  MacroRegisterFunctionWithName("WebWorker::WriteAfterTimeoutProgress");
+  if (!this->workerToWorkerRequestIndicator.ReadOnceIfFailThenCrash(false, true)) {
+    logIO << logger::red << "Failed to read non-blocking worker-to-worker pipe. " << logger::endL;
+    return;
+  }
+  if (this->workerToWorkerRequestIndicator.lastRead.size == 0) {
+    return;
+  }
+  this->WriteAfterTimeout(input, "running");
+  this->workerToWorkerReturnIndicator.WriteOnceAfterEmptying(theWebServer.GetActiveWorker().outputId, false, true);
+}
+
+void WebWorker::WriteAfterTimeoutResult() {
+  MacroRegisterFunctionWithName("WebWorker::WriteComputationResult");
+  WebWorker::WriteAfterTimeout(
+    theParser->ToJSONOutputAndSpecials().ToString(
+      false, false, false, false
+    ),
+    "finished"
+  );
+}
+
+void WebWorker::WriteAfterTimeoutCrash() {
+  MacroRegisterFunctionWithName("WebWorker::WriteAfterTimeoutCrash");
+  logWorker << logger::red << "Crashing AFTER timeout!" << logger::endL;
+  theWebServer.GetActiveWorker().WriteAfterTimeout(standardOutputStreamAfterTimeout.str(), "crash");
+  theWebServer.SignalActiveWorkerDoneReleaseEverything();
 }
 
 void WebWorker::ParseMessageHead() {
@@ -1454,15 +1440,23 @@ int WebWorker::ProcessPauseWorker() {
   }
   logWorker << "Proceeding to toggle worker pause." << logger::endL;
   WebWorker& otherWorker = this->parent->theWorkers[inputWebWorkerIndex];
-  if (!otherWorker.PauseWorker.CheckPauseIsRequested(false, false, false)) {
-    otherWorker.PauseWorker.RequestPausePauseIfLocked(false, false);
-    result[WebAPI::result::status] = "paused";
+  if (!otherWorker.flagIsPaused) {
+    if (otherWorker.PauseWorker.Lock()) {
+      result[WebAPI::result::status] = "paused";
+      otherWorker.flagIsPaused = true;
+    } else {
+      result[WebAPI::result::error] = "Failed to pause process. ";
+    }
     stOutput << result.ToString(false);
     return 0;
   }
-  result[WebAPI::result::status] = "unpaused";
+  if (!otherWorker.PauseWorker.Unlock()) {
+    result[WebAPI::result::error] = "Failed to unpause process";
+  } else {
+    otherWorker.flagIsPaused = false;
+    result[WebAPI::result::status] = "unpaused";
+  }
   stOutput << result.ToString(false);
-  otherWorker.PauseWorker.ResumePausedProcessesIfAny(false, false);
   return 0;
 }
 
@@ -1574,79 +1568,60 @@ int WebWorker::ProcessComputationIndicator() {
     stOutput << result.ToString(false);
     return 0;
   }
-  int implementMe;
-  /*
-  otherWorker.workerToWorkerRequestIndicator.WriteOnceAfterEmptying("!", false, false);
-  std::cout << "DEBUG: before read loop. \n";
-  PipePrimitive& dataPipe = otherWorker.pipeWorkerToWorkerIndicatorData;
-  List<char> message;
-  dataPipe.ReadLoop(message);
-  std::cout << "DEBUG: after read loop. \n";
-  if (message.size > 0) {
-    std::string outputString;
-    outputString.assign(message.TheObjects, static_cast<unsigned>(message.size));
-    if (outputString != "finished") {
-      result[WebAPI::result::resultStringified] = outputString;
-      result[WebAPI::result::status] = "running";
-    } else {
-      result[WebAPI::result::status] = "finished";
-    }
+  if (! otherWorker.workerToWorkerRequestIndicator.WriteOnceAfterEmptying("!", false, true)) {
+    out << "Failed to request progress report. ";
+    result[WebAPI::result::error] = out.str();
     stOutput << result.ToString(false);
-    otherWorker.PauseComputationReportReceived.ResumePausedProcessesIfAny(false, false);
-  } else {
+    return 0;
+  }
+  if (!otherWorker.workerToWorkerReturnIndicator.ReadOnceIfFailThenCrash(false, true)) {
+    out << "Failed to read worker status. ";
+    result[WebAPI::result::error] = out.str();
+    stOutput << result.ToString(false);
+    return 0;
+  }
+  if (otherWorker.workerToWorkerReturnIndicator.lastRead.size == 0) {
     result[WebAPI::result::status] = "noReport";
     stOutput << result.ToString(false);
-  }*/
+    return 0;
+  }
+  otherWorker.writingReportFile.Lock();
+  std::string computationResult;
+  bool success = FileOperations::LoadFileToStringVirtual(
+    "results_timed_out/" + otherWorker.outputId,
+    computationResult,
+    true,
+    false,
+    &comments
+  );
+  otherWorker.writingReportFile.Unlock();
+  if (!success) {
+    out << "Failed to load your output with id: " << otherWorker.outputId << ". " << comments.str();
+    result[WebAPI::result::error] = out.str();
+    stOutput << result.ToString(false);
+    return 0;
+  }
+  stOutput << computationResult;
   return 0;
 }
 
-void WebWorker::WriteProgressReportToFile(const std::string& input) {
-  MacroRegisterFunctionWithName("WebWorker::WriteProgressReportToFile");
-  logWorker << logger::green << "Progress report written to file: "
-  << theGlobalVariables.RelativePhysicalNameProgressReport << logger::endL;
-  std::fstream theFile;
-  if (!FileOperations::OpenFileCreateIfNotPresentVirtual(
-    theFile, "output/" + theGlobalVariables.RelativePhysicalNameProgressReport, false, true, false
-  )) {
-    FileOperations::OpenFileCreateIfNotPresentVirtual(
-      theFile,
-      "output/progressReport_failed_to_create_file.html",
-      false,
-      true,
-      false
-    );
+void WebWorker::WriteAfterTimeout(const std::string& input, const std::string& status) {
+  MacroRegisterFunctionWithName("WebWorker::WriteAfterTimeout");
+  std::stringstream commentsOnError;
+  JSData result;
+  result[WebAPI::result::status] = status;
+  result[WebAPI::result::resultStringified] = input;
+  std::string toWrite = result.ToString(false, false, false, false);
+  WebWorker& currentWorker = theWebServer.GetActiveWorker();
+  currentWorker.writingReportFile.Lock();
+  bool success = FileOperations::WriteFileVirual("results_timed_out/" + currentWorker.outputId, toWrite, &commentsOnError);
+  currentWorker.writingReportFile.Unlock();
+  if (success) {
+    logWorker << logger::green << "Data written to file: "
+    << currentWorker.outputId << logger::endL;
+  } else {
+    logIO << "Failed to write computation data. " << commentsOnError.str();
   }
-  theFile << standardOutputStreamAfterTimeout.str() << "<hr>" << input;
-  theFile.flush();
-  theFile.close();
-}
-
-void WebWorker::PipeProgressReport(const std::string& input) {
-  if (!this->flagProgressReportAllowed) {
-    return;
-  }
-  int implementMe;
-  /*
-  MacroRegisterFunctionWithName("WebWorker::PipeProgressReport");
-  this->PauseIndicatorPipeInUse.RequestPausePauseIfLocked(false, false);
-  if (this->PauseWorker.CheckPauseIsRequested(false, false, false)) {
-    logBlock << ": pausing as requested ..." << logger::endL;
-    this->WriteProgressReportToFile(input);
-  }
-  this->PauseWorker.PauseIfRequested(false, false); // if pause was requested, here we block
-  std::cout << "DEBUG: before work to worker request indicator. \n";
-  this->pipeWorkerToWorkerRequestIndicator.ReadOnce(false, false);
-  std::cout << "DEBUG: AFTER work to worker request indicator. \n";
-  if (this->pipeWorkerToWorkerRequestIndicator.thePipe.lastRead.size == 0) {
-    this->PauseIndicatorPipeInUse.ResumePausedProcessesIfAny(false, false);
-    return;
-  }
-  this->pipeWorkerToWorkerIndicatorData.WriteOnceAfterEmptying(input, false, true);
-  if (theGlobalVariables.flagTimedOutComputationIsDone) {
-    this->PauseIndicatorPipeInUse.ResumePausedProcessesIfAny(false, false);
-    return;
-  }
-  this->PauseIndicatorPipeInUse.ResumePausedProcessesIfAny(false, false);*/
 }
 
 int WebWorker::ProcessFolder() {
@@ -1839,6 +1814,7 @@ int WebWorker::ProcessFile() {
 }
 
 void WebWorker::reset() {
+  this->flagIsPaused = false;
   this->connectedSocketID = - 1;
   this->ProcessPID = - 1;
   this->connectedSocketIDLastValueBeforeRelease = - 1;
@@ -2285,7 +2261,7 @@ int WebWorker::ProcessCompute() {
   this->flagProgressReportAllowed = false;
   if (theGlobalVariables.flagRunningBuiltInWebServer) {
     if (theGlobalVariables.flagOutputTimedOut) {
-      this->OutputResultAfterTimeout();
+      this->WriteAfterTimeoutResult();
       return 0;
     }
   }
@@ -2878,7 +2854,7 @@ int WebWorker::ServeClient() {
   theGlobalVariables.userDefault.flagMustLogin = true;
   theGlobalVariables.userDefault.flagStopIfNoLogin = true;
   UserCalculatorData& theUser = theGlobalVariables.userDefault;
-  theGlobalVariables.IndicatorStringOutputFunction = WebServer::PipeProgressReport;
+  theGlobalVariables.IndicatorStringOutputFunction = WebWorker::WriteAfterTimeoutProgressStatic;
   std::cout << "DEBUG: about to serve client.\n";
   if (
     this->requestTypE != this->requestGet &&
@@ -3188,11 +3164,16 @@ int WebWorker::ProcessFolderOrFile() {
   return this->ProcessFile();
 }
 
-void WebWorker::ResetPipesNoAllocation() {
-  MacroRegisterFunctionWithName("WebWorker::ResetPipesNoAllocation");
-  this->PauseComputationReportReceived.ResetNoAllocation();
+void WebWorker::PauseIfRequested() {
+  this->PauseWorker.Lock(); // if pause was requested, here we block
+  this->PauseWorker.Unlock();
+}
+
+
+void WebWorker::ResetMutexProcessesNoAllocation() {
+  MacroRegisterFunctionWithName("WebWorker::ResetMutexProcessesNoAllocation");
   this->PauseWorker.ResetNoAllocation();
-  this->PauseIndicatorPipeInUse.ResetNoAllocation();
+  this->writingReportFile.ResetNoAllocation();
 }
 
 void WebWorker::ReleaseKeepInUseFlag() {
@@ -3202,9 +3183,8 @@ void WebWorker::ReleaseKeepInUseFlag() {
   this->workerToWorkerRequestIndicator.Release();
   this->workerToWorkerReturnIndicator.Release();
   this->pipeWorkerToWorkerStatus.Release();
-  this->PauseComputationReportReceived.Release();
   this->PauseWorker.Release();
-  this->PauseIndicatorPipeInUse.Release();
+  this->writingReportFile.Release();
   this->millisecondsLastPingServerSideOnly = - 1;
   WebServer::Release(this->connectedSocketID);
 }
@@ -3216,8 +3196,7 @@ void WebWorker::Release() {
 
 void WebWorker::OutputShowIndicatorOnTimeout() {
   MacroRegisterFunctionWithName("WebWorker::OutputShowIndicatorOnTimeout");
-  int implementMe;
-  /*  MutexLockGuard theLock(this->PauseIndicatorPipeInUse.lockThreads.GetElement());
+  MutexLockGuard theLock(this->PauseWorker.lockThreads.GetElement());
 
   //this->PauseIndicatorPipeInUse.RequestPausePauseIfLocked();
   theGlobalVariables.flagOutputTimedOut = true;
@@ -3257,10 +3236,9 @@ void WebWorker::OutputShowIndicatorOnTimeout() {
   this->parent->Release(this->connectedSocketID);
   // set flags properly:
   // we need to rewire the standard output and the crashing mechanism:
-  crash.CleanUpFunction = WebWorker::OutputCrashAfterTimeout;
+  crash.CleanUpFunction = WebWorker::WriteAfterTimeoutCrash;
   // note that standard output cannot be rewired in the beginning of the function as we use the old stOutput
   stOutput.theOutputFunction = WebWorker::StandardOutputAfterTimeOut;
-  this->PauseIndicatorPipeInUse.lockThreads.GetElement().UnlockMe();*/
 }
 
 std::string WebWorker::ToStringAddressRequest() const {
@@ -3325,10 +3303,9 @@ std::string WebWorker::ToStringStatus() const {
   << ", " << this->pipeWorkerToServerTimerPing.ToString()
   << ", " << this->workerToWorkerRequestIndicator.ToString()
   << ", " << this->workerToWorkerReturnIndicator.ToString()
-  << ", " << this->pipeWorkerToWorkerStatus.ToString()
-  << ", " << this->PauseWorker.ToString()
-  << ", " << this->PauseComputationReportReceived.ToString()
-  << ", " << this->PauseIndicatorPipeInUse.ToString();
+  << ", " << this->pipeWorkerToWorkerStatus.ToString();
+  out << ". MutexProcesses: " << this->PauseWorker.ToString()
+  << ", " << this->writingReportFile.ToString();
   out << ", user address: " << this->userAddress << ".";
   return out.str();
 }
@@ -3383,13 +3360,6 @@ void WebServer::FlushActiveWorker() {
 
 void WebServer::SendStringThroughActiveWorker(const std::string& theString) {
   theWebServer.GetActiveWorker().QueueStringForSendingWithHeadeR(theString, false);
-}
-
-void WebServer::PipeProgressReport(const std::string& theString) {
-  if (theWebServer.activeWorker == - 1) {
-    return;
-  }
-  theWebServer.GetActiveWorker().PipeProgressReport(theString);
 }
 
 WebServer::WebServer() {
@@ -3556,20 +3526,15 @@ bool WebServer::CreateNewActiveWorker() {
   std::string wtow = wtowStream.str();
   std::cout << "DEBUG: got to here\n";
   WebWorker& worker = this->GetActiveWorker();
-  if (!worker.PauseComputationReportReceived.CreateMe(stow + "report received", false, true)) {
-    logPlumbing << "Failed to create pipe: "
-    << worker.PauseComputationReportReceived.name << "\n";
+  if (!worker.writingReportFile.CreateMe(stow + "output file mutex", false, true)) {
+    logPlumbing << "Failed to create process mutex: "
+    << worker.writingReportFile.name << "\n";
     return this->EmergencyRemoval_LastCreatedWorker();
   }
   std::cout << "DEBUG: got to here pt 2.\n";
-  if (!worker.PauseWorker.CreateMe(stow + "pause", false, true)) {
-    logPlumbing << "Failed to create pipe: "
+  if (!worker.PauseWorker.CreateMe(stow + "pause mutex", false, true)) {
+    logPlumbing << "Failed to create process mutex: "
     << worker.PauseWorker.name << "\n";
-    return this->EmergencyRemoval_LastCreatedWorker();
-  }
-  if (!worker.PauseIndicatorPipeInUse.CreateMe(stow + "ind. pipe busy", false, true)) {
-    logPlumbing << "Failed to create pipe: "
-    << worker.PauseIndicatorPipeInUse.name << "\n";
     return this->EmergencyRemoval_LastCreatedWorker();
   }
   if (!worker.workerToWorkerRequestIndicator.CreateMe(wtow + "request-indicator", false, false, false, true)) {
@@ -3604,8 +3569,12 @@ bool WebServer::CreateNewActiveWorker() {
   << "Allocated new worker & plumbing data structures. Total worker data structures: "
   << this->theWorkers.size << ". "
   << logger::endL;
+  std::stringstream outputId;
+  outputId << "connection_" << this->NumConnectionsSoFar;
+  this->theWorkers[this->activeWorker].outputId = outputId.str();
   this->theWorkers[this->activeWorker].flagInUsE = true;
   this->theWorkers[this->activeWorker].flagExited = false;
+
   return true;
 }
 
@@ -3933,7 +3902,6 @@ void WebServer::TerminateChildSystemCall(int i) {
     this->TerminateProcessId(this->theWorkers[i].ProcessPID);
     this->theWorkers[i].ProcessPID = - 1;
   }
-  this->theWorkers[i].ResetPipesNoAllocation();
 }
 
 void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress) {
@@ -4057,11 +4025,6 @@ void WebServer::RecycleOneChild(int childIndex, int& numberInUse) {
       logServer << logger::blue << "Worker " << childIndex + 1 << " ping: "
       << currentWorker.pingMessage << ". " << logger::endL;
     }
-    return;
-  }
-  if (currentWorker.PauseWorker.CheckPauseIsRequested(false, true, true)) {
-    currentWorker.pingMessage = "worker paused, no pings.";
-    currentWorker.millisecondsLastPingServerSideOnly = theGlobalVariables.GetElapsedMilliseconds();
     return;
   }
   if (theGlobalVariables.millisecondsNoPingBeforeChildIsPresumedDead <= 0) {
@@ -4613,11 +4576,11 @@ int WebWorker::Run() {
     crash << "Worker::Run() started on a connecting with ID equal to - 1. " << crash;
   }
   std::cout << "DEBUG: got to web worker::run\n";
-  this->ResetPipesNoAllocation();
+  this->ResetMutexProcessesNoAllocation();
   std::cout << "DEBUG: pipes were reset.\n";
   std::stringstream processNameStream;
   processNameStream << "W" << this->indexInParent + 1 << ": ";
-  PauseProcess::currentProcessName = processNameStream.str();
+  MutexProcess::currentProcessName = processNameStream.str();
   theGlobalVariables.flagServerForkedIntoWorker = true;
   crash.CleanUpFunction = WebServer::SignalActiveWorkerDoneReleaseEverything;
   std::cout << "DEBUG: about to create timer thread\n";
@@ -4707,7 +4670,7 @@ int WebWorker::Run() {
 }
 
 void WebServer::Release(int& theDescriptor) {
-  PauseProcess::Release(theDescriptor);
+  MutexProcess::Release(theDescriptor);
 }
 
 extern int mainTest(List<std::string>& remainingArgs);

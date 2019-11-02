@@ -121,7 +121,8 @@ Calculator.prototype.processOneFunctionAtom = function(handlers, isComposite) {
     var encodedAtom = encodeURIComponent(handlers[counterHandlers].atom);
     currentId += `${encodedAtom}_${counterHandlers}_${handlers.length}`;
     resultString += `<a href = '#' class = 'linkInfo' onclick = "window.calculator.miscellaneousFrontend.switchMenu('${currentId}')">info</a>`;
-    resultString += `<calculatorExampleInfo id = "${currentId}" class = "hiddenClass">${currentDescription}<br><b>Example:</b><br>${currentExample}</calculatorExampleInfo>`;
+    resultString += `<calculatorExampleInfo id = "${currentId}" class = "hiddenClass">${currentDescription}`;
+    resultString += `<br><b>Example:</b><br>${currentExample}</calculatorExampleInfo>`;
 
     var theLink = this.getComputationLink(currentExample);
     resultString += `<a href = '#${theLink}' class = "linkInfo"> Example</a>`;
@@ -271,7 +272,7 @@ Calculator.prototype.writeResult = function(
     buffer.write(`</tr>`);    
   }
   buffer.write(`</table>`);  
-  buffer.write(`</td><td>`);
+  buffer.write(`</td><td><div class = "containerComments">`);
   if (inputParsed.performance !== undefined) {
     buffer.write(inputParsed.performance);
     buffer.write("<br>");
@@ -279,7 +280,7 @@ Calculator.prototype.writeResult = function(
   if (inputParsed.comments !== undefined ) {
     buffer.write(inputParsed.comments);
   }
-  buffer.write(`</td>`);
+  buffer.write(`</div></td>`);
   var mainPage = window.calculator.mainPage;
   if (mainPage.storage.variables.flagDebug.isTrue() && inputParsed.debug !== undefined) {
     buffer.write(`<td>`);

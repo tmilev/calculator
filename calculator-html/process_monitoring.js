@@ -26,7 +26,7 @@ Monitor.prototype.start = function(inputWorkerNumber) {
 }
 
 Monitor.prototype.progressReport = function() { 
-  //Process monitor is started by 
+  // Process monitor is started by 
   if (this.isFinished) {
     return;
   }
@@ -76,18 +76,18 @@ Monitor.prototype.callbackPauseRequest = function(input, output) {
       progReportTimer.innerHTML += "No report on last ping."; 
     } else {
       doUpdateCalculatorPage = true;
-    }  
-    if (doUpdateCalculatorPage) {
-      this.ownerCalculator.panelIdPairs = [];
-      var buffer = new BufferCalculator();
-      this.ownerCalculator.writeResult(buffer, this.ownerCalculator.parsedComputation, this.ownerCalculator.panelIdPairs);
-      var resultComponent = document.getElementById(ids.domElements.spanCalculatorMainOutput);
-      resultComponent.innerHTML = buffer.toString();
-      this.ownerCalculator.afterWriteOutput();
     }
     this.isPaused = false;
     indicatorButton.innerHTML = "Pause";
     this.currentTimeOutHandler = setTimeout(this.progressReport.bind(this), this.timeIncrement * 1000);
+  }  
+  if (doUpdateCalculatorPage) {
+    this.ownerCalculator.panelIdPairs = [];
+    var buffer = new BufferCalculator();
+    this.ownerCalculator.writeResult(buffer, this.ownerCalculator.parsedComputation, this.ownerCalculator.panelIdPairs);
+    var resultComponent = document.getElementById(ids.domElements.spanCalculatorMainOutput);
+    resultComponent.innerHTML = buffer.toString();
+    this.ownerCalculator.afterWriteOutput();
   }
 }
 

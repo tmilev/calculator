@@ -1657,7 +1657,8 @@ int WebWorker::ProcessFolder() {
   for (int i = 0; i < theFileNames.size; i ++) {
     std::stringstream currentStream;
     bool isDir = (theFileTypes[i] == ".d");
-    currentStream << "<a href=\"" << this->addressGetOrPost << HtmlRoutines::ConvertStringToURLString(theFileNames[i], false);
+    currentStream << "<a href=\"" << this->addressGetOrPost
+    << HtmlRoutines::ConvertStringToURLString(theFileNames[i], false);
     if (isDir) {
       currentStream << "/";
     }
@@ -3632,7 +3633,7 @@ std::string WebServer::ToStringConnectionSummary() {
 
   out
   << "The number tends to be high as many browsers open more than one connection per page visit. <br>"
-  << "<b>The following policies are quite strict and will be relaxed in the future. </b><br>"
+  << "<b>The following policies are quite strict and will be relaxed in the future.</b><br>"
   << this->MaxTotalUsedWorkers << " global maximum of simultaneous non-closed connections allowed. "
   << "When the limit is exceeded, all connections except a randomly chosen one will be terminated. "
   << "<br> " << this->MaxNumWorkersPerIPAdress
@@ -3992,8 +3993,8 @@ void WebServer::ProcessOneChildMessage(int childIndex, int& outputNumInUse) {
     this->StopKillAll(false);
   }
   if (workerMessage["restartNeeded"].isTrueRepresentationInJSON()) {
-    //A worker has returned request to restart.
-    //This is likely a user-triggered event; restart is desired.
+    // A worker has returned request to restart.
+    // This is likely a user-triggered event; restart is desired.
     this->StopKillAll(true);
   }
 }
@@ -4200,7 +4201,8 @@ void SignalsInfrastructure::initializeSignals() {
   this->SignalSEGV.sa_sigaction = &segfault_sigaction;
   this->SignalSEGV.sa_flags = SA_SIGINFO;
   if (sigaction(SIGSEGV, &SignalSEGV, nullptr) == - 1) {
-    crash << "Failed to register SIGSEGV handler (segmentation fault (attempt to write memory without permission)). "
+    crash << "Failed to register SIGSEGV handler "
+    << "(segmentation fault (attempt to write memory without permission)). "
     << "Crashing to let you know. " << crash;
   }
   ///////////////////////

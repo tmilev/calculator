@@ -577,6 +577,7 @@ td.cellCalculatorInput {
   margin-top: 5px;
   margin-right: 20px;
   margin-left:  5px;
+  min-width: 200px;
   vertical-align: top;
 }
 
@@ -590,6 +591,7 @@ td.cellCalculatorResult {
   margin-top: 5px;
   margin-right: 5px;
   margin-left:  20px;
+  min-width: 200px;
   vertical-align: top;
 }
 
@@ -1471,6 +1473,11 @@ input:checked + .slider:before {
   height: 7px;
   border-radius: 50%;
   background: white;
+}
+
+div.containerComments {
+  word-break: break-all;
+  width: 30%;
 }
 
 span.hexContainerStandard {

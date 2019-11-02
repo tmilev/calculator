@@ -194,51 +194,6 @@ function submitPOST(
   ////////////////////////////////////////////
 }
 
-var isPaused = false;
-var isFinished = false;
-var timeIncrementInTenthsOfSecond = 20; //measured in tenths of a second\n";
-var timeOutCounter = 0; //measured in tenths of a second\n";
-var currentWorkerNumber = - 1;
-function progressReport() { 
-  if (isFinished) {
-    return;
-  }
-  clearTimeout(this.timeoutID);
-  var progReport = document.getElementById("idProgressReport");
-  var requestStatus = document.getElementById("idProgressReportRequestStatus");
-  var progressReportTimer = document.getElementById("idProgressReportTimer");
-  if (isPaused) {
-    return;
-  }
-  var progressReportContent = "";
-  progressReportContent += `<hr>Refreshing every ${timeIncrementInTenthsOfSecond / 10}`;
-  progressReportContent += ` second(s). Client time: ~ ${Math.floor(timeOutCounter / 10)} second(s)<br>`;
-  progressReportTimer.innerHTML = progressReportContent;
-  timeOutCounter += timeIncrementInTenthsOfSecond;
-  var sURL  = `${pathnames.urls.calculatorAPI}?request=indicator&mainInput=${currentWorkerNumber}`;
-  var https = new XMLHttpRequest();
-  https.open("GET", sURL, true);
-  https.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-  https.onload = function() {
-    newReportString = https.responseText;
-    if (https.responseText === "finished") { 
-      isFinished = true;
-      requestStatus.innerHTML = "<b style ='color:green'>Computation finished.</b>";
-      return;
-    }
-    if (https.responseText !== "") { 
-      progReport.innerHTML = `${newReportString}<hr>`;
-      requestStatus.innerHTML = '';
-    } else {
-      requestStatus.innerHTML = "<b style ='color:red'>Empty response</b>";
-    }
-  }
-  ////////////////////////////////////////////
-  requestStatus.innerHTML = "<b style ='color:orange'>Request sent</b>";
-  https.send(null);
-  this.timeoutID = window.setTimeout("progressReport()", timeIncrementInTenthsOfSecond * 100);
-}
-
 module.exports = {
   submitGET,
   submitPOST,

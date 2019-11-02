@@ -62,10 +62,12 @@ Monitor.prototype.callbackPauseRequest = function(input, output) {
   var indicatorButton = document.getElementById(ids.domElements.monitoring.buttonTogglePauseRequest);
   this.ownerCalculator.parsedComputation = JSON.parse(input);
   var status = this.ownerCalculator.parsedComputation.status;
+  var doUpdateCalculatorPage = false;
   if (status === "finished") {
     this.isFinished = true;
     this.isPaused = false;
     indicatorButton.innerHTML = "Finished";
+    doUpdateCalculatorPage = true;
   } else if (status === "paused") {
     this.isPaused = true;
     indicatorButton.innerHTML = "Continue";
@@ -73,13 +75,16 @@ Monitor.prototype.callbackPauseRequest = function(input, output) {
     if (status === "noReport") {
       progReportTimer.innerHTML += "No report on last ping."; 
     } else {
+      doUpdateCalculatorPage = true;
+    }  
+    if (doUpdateCalculatorPage) {
       this.ownerCalculator.panelIdPairs = [];
       var buffer = new BufferCalculator();
       this.ownerCalculator.writeResult(buffer, this.ownerCalculator.parsedComputation, this.ownerCalculator.panelIdPairs);
       var resultComponent = document.getElementById(ids.domElements.spanCalculatorMainOutput);
       resultComponent.innerHTML = buffer.toString();
       this.ownerCalculator.afterWriteOutput();
-    }  
+    }
     this.isPaused = false;
     indicatorButton.innerHTML = "Pause";
     this.currentTimeOutHandler = setTimeout(this.progressReport.bind(this), this.timeIncrement * 1000);

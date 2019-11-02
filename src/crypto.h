@@ -175,6 +175,7 @@ public:
 
   static List<PublicKeyRSA> knownCertificates;
   static List<uint32_t> kArraySha2xx;
+  static List<uint64_t> kArraySha512;
   class Test {
   public:
     static bool Sha256();
@@ -284,18 +285,29 @@ public:
   static void ConvertUint64toBigendianListUnsignedCharAppendResult(
     uint64_t input, List<unsigned char>& outputAppend
   );
+  static void ConvertUint128toBigendianListUnsignedCharAppendResult(
+    uint64_t input, List<unsigned char>& outputAppend
+  );
   static uint32_t leftRotateAsIfBigEndian(uint32_t input, int numBitsToRotate);
   static uint32_t rightRotateAsIfBigEndian(uint32_t input, int numBitsToRotate);
   static uint32_t rightShiftAsIfBigEndian(uint32_t input, int numBitsToShift);
   static uint32_t leftShiftAsIfBigEndian(uint32_t input, int numBitsToShift);
 
+  static uint64_t leftRotateAsIfBigEndian64(uint64_t input, int numBitsToRotate);
+  static uint64_t rightRotateAsIfBigEndian64(uint64_t input, int numBitsToRotate);
+  static uint64_t rightShiftAsIfBigEndian64(uint64_t input, int numBitsToShift);
+  static uint64_t leftShiftAsIfBigEndian64(uint64_t input, int numBitsToShift);
+
   static void initSha256();
+  static void initSha512();
   static void computeSha1(const std::string& inputString, List<uint32_t>& output);
   static void computeSha224(const List<unsigned char>& input, List<uint32_t>& output);
   static void computeSha2xx(const List<unsigned char>& input, List<uint32_t>& output, bool is224);
   static void computeSha256(const List<unsigned char>& input, List<uint32_t>& output);
   static void computeSha256(const List<unsigned char>& input, List<unsigned char>& output);
   static void computeSha256(const std::string& input, std::string& output);
+  static void computeSha512(const List<unsigned char>& input, List<uint64_t>& output);
+  static void computeSha512(const List<unsigned char>& input, List<unsigned char>& output);
   static void ConvertListUint32ToLargeIntegerUnsignedLittleEndian(List<uint32_t>& input, LargeIntegerUnsigned& output);
   static LargeIntegerUnsigned RSAencrypt(
     const LargeIntegerUnsigned& theModulus, const LargeInteger& theExponent, const LargeInteger& theMessage

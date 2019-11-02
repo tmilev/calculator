@@ -482,7 +482,7 @@ public:
     std::string ToStringChosenCipher();
     JSData ToJSON();
     Session();
-    bool ComputeAndSignEphemerealKey(std::stringstream* commentOnError);
+    bool ComputeAndSignEphemerealKey(std::stringstream* commentsOnError);
     bool ChooseCipher(std::stringstream* commentsOnFailure);
     void initialize();
     bool SetIncomingRandomBytes(

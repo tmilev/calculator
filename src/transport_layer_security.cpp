@@ -2146,8 +2146,9 @@ void SSLContent::PrepareServerHello2Certificate() {
   this->theType = SSLContent::tokens::certificate;
 }
 
-bool TransportLayerSecurityServer::Session::ComputeAndSignEphemerealKey(std::stringstream* commentOnError) {
+bool TransportLayerSecurityServer::Session::ComputeAndSignEphemerealKey(std::stringstream* commentsOnError) {
   MacroRegisterFunctionWithName("TransportLayerSecurityServer::Session::ComputeAndSignEphemerealKey");
+  (void) commentsOnError;
   Crypto::GetRandomLargeIntegerSecure(this->ephemerealPrivateKey, 32);
   this->chosenEllipticCurve = CipherSuiteSpecification::EllipticCurveSpecification::secp256k1;
   this->chosenEllipticCurveName = "secp256k1";

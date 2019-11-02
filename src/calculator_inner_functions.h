@@ -75,6 +75,7 @@ public:
   static bool innerGenerateRandomPrime(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTestRSASign(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSha256OfString(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerSha512(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerRIPEMD160OfString(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSha3_256OfString(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerKeccak256OfString(Calculator& theCommands, const Expression& input, Expression& output);

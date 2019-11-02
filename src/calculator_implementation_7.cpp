@@ -314,6 +314,13 @@ bool CalculatorFunctionsGeneral::innerSha256OfString(
   return CalculatorFunctionsGeneral::innerHashString(theCommands, input, output, "SHA256", false);
 }
 
+bool CalculatorFunctionsGeneral::innerSha512(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSha512String");
+  return CalculatorFunctionsGeneral::innerHashString(theCommands, input, output, "SHA512", false);
+}
+
 bool CalculatorFunctionsGeneral::innerSha256OfStringVerbose(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
@@ -386,6 +393,8 @@ bool CalculatorFunctionsGeneral::innerHashString(
     Crypto::computeSha3_256(inputString, hashUChar);
   } else if (hashId == "KECCAK256") {
     Crypto::computeKeccak3_256(inputString, hashUChar);
+  } else if (hashId == "SHA512") {
+    Crypto::computeSha512(inputString, hashUChar);
   }
   if (verbose) {
     std::string theSha1base64string, theSha1base64URLstring;

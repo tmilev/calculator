@@ -23,6 +23,8 @@ bin/*
 
 output/*
 
+results/*
+
 src/calculator.pro.user
 
 node_modules

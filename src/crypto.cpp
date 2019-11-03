@@ -6,40 +6,33 @@
 #include "math_extra_algebraic_numbers.h"
 #include <iomanip>
 
-// sys/random.h is missing from older distros/kernels.
-// #include <sys/random.h>
-// Used in place of sys/random.h:
-#include <syscall.h> // <- SYS_getrandom defined here.
-#include <linux/random.h> // <- GRND_NONBLOCK defined here.
-#include <unistd.h> // <- syycall defined here.
-
 extern ProjectInformationInstance projectInfoCryptoFile1;
 ProjectInformationInstance projectInfoCryptoFile1(__FILE__, "SHA- 1 and base64 implementation.");
 
-void Crypto::GetRandomBytesSecure(ListZeroAfterUse<unsigned char>& output, int numBytes) {
-  return Crypto::GetRandomBytesSecureOutputMayLeaveTraceInFreedMemory(output.data, numBytes);
+void Crypto::GetRandomBytesSecureInternal(ListZeroAfterUse<unsigned char>& output, int numberOfBytesMax32) {
+  return Crypto::GetRandomBytesSecureInternalMayLeaveTracesInMemory(output.data, numberOfBytesMax32);
 }
 
-void Crypto::GetRandomBytesSecureOutputMayLeaveTraceInFreedMemory(
-  List<unsigned char>& output, int numBytes
-) {
-  output.SetSize(numBytes);
-  if (numBytes > 256 || numBytes < 1) {
-    crash << "Request of " << numBytes << " random bytes not allowed. "
-    << "Getting more than 256 random bytes can block "
-    << "(google getrandom(2)) and so we do not allow it here."
-    << crash;
+void Crypto::acquireAdditionalRandomness(int64_t additionalRandomness) {
+  if (
+    static_cast<unsigned>(theGlobalVariables.randomBytesCurrent.size) <
+    theGlobalVariables.maximumExtractedRandomBytes
+  ) {
+    crash << "Current random bytes have not been initialized. ";
   }
-  // Must not block or return fewer than requested bytes in Linux according to the
-  // documentation of getrandom.
-  int generatedBytes = static_cast<int>(
-    syscall(SYS_getrandom, output.TheObjects, static_cast<unsigned>(output.size), GRND_NONBLOCK)
-    // Does not compile on older linux systems:
-    // getrandom(output.TheObjects, static_cast<unsigned>(output.size), 0)
+  Crypto::ConvertUint64toBigendianListUnsignedCharAppendResult(
+    static_cast<uint64_t>(additionalRandomness), theGlobalVariables.randomBytesCurrent
   );
-  if (generatedBytes != output.size) {
-    crash << "Failed to get the necessary number of random bytes. " << crash;
+  Crypto::computeSha512(theGlobalVariables.randomBytesCurrent, theGlobalVariables.randomBytesCurrent);
+}
+
+
+void Crypto::GetRandomBytesSecureInternalMayLeaveTracesInMemory(List<unsigned char>& output, int numberOfBytesMax32) {
+  Crypto::acquireAdditionalRandomness(theGlobalVariables.GetElapsedMilliseconds());
+  if (static_cast<unsigned>(numberOfBytesMax32) > theGlobalVariables.maximumExtractedRandomBytes) {
+    crash << "Not allowed to extract more than 256 bytes of randomness. ";
   }
+  theGlobalVariables.randomBytesCurrent.Slice(0, numberOfBytesMax32, output);
 }
 
 void Crypto::GetRandomLargePrime(LargeIntegerUnsigned& output, int numBytes) {
@@ -57,7 +50,7 @@ void Crypto::GetRandomLargePrime(LargeIntegerUnsigned& output, int numBytes) {
 
 void Crypto::GetRandomLargeIntegerSecure(LargeIntegerUnsigned& output, int numBytes) {
   ListZeroAfterUse<unsigned char> randomBytes;
-  Crypto::GetRandomBytesSecure(randomBytes, numBytes);
+  Crypto::GetRandomBytesSecureInternal(randomBytes, numBytes);
   Crypto::ConvertListUnsignedCharsToLargeUnsignedIntegerBigEndian(randomBytes.data, output);
 }
 
@@ -435,17 +428,17 @@ void Crypto::ConvertStringToListBytesSigned(const std::string& input, List<char>
 std::string Crypto::ConvertStringToBase64Standard(const std::string& input) {
   List<unsigned char> inputChar;
   inputChar = input;
-  return Crypto::ConvertStringToBase64(inputChar, false);
+  return Crypto::ConvertListUnsignedCharsToBase64(inputChar, false);
 }
 
 std::string Crypto::ConvertStringToBase64URL(const std::string& input) {
   List<unsigned char> inputChar;
   inputChar = input;
-  return Crypto::ConvertStringToBase64(inputChar, true);
+  return Crypto::ConvertListUnsignedCharsToBase64(inputChar, true);
 }
 
-std::string Crypto::ConvertStringToBase64(const List<unsigned char>& input, bool useBase64URL) {
-  MacroRegisterFunctionWithName("Crypto::ConvertStringToBase64");
+std::string Crypto::ConvertListUnsignedCharsToBase64(const List<unsigned char>& input, bool useBase64URL) {
+  MacroRegisterFunctionWithName("Crypto::ConvertListUnsignedCharsToBase64");
   uint32_t theStack = 0;
   int numBitsInTheStack = 0;
   std::string result;
@@ -1041,7 +1034,7 @@ bool Crypto::ConvertLargeUnsignedIntToBase64SignificantDigitsFirst(
 ) {
   std::string theString;
   Crypto::ConvertLargeUnsignedIntToStringSignificantDigitsFirst(input, 0, theString);
-  outputBase64 = Crypto::ConvertStringToBase64(theString, false);
+  outputBase64 = Crypto::ConvertListUnsignedCharsToBase64(theString, false);
   return true;
 }
 

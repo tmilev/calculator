@@ -17,7 +17,7 @@ bool CalculatorFunctionsGeneral::innerX509CertificateServer(
   //List<unsigned char> outputChars;
   //theWebServer.theTLS.theServer.certificate.WriteBytesASN1(outputChars);
   //outputChars = theWebServer.theTLS.theServer.certificate.sourceBinary;
-  std::string result = Crypto::ConvertStringToBase64(theWebServer.theTLS.theServer.certificate.sourceBinary, false);
+  std::string result = Crypto::ConvertListUnsignedCharsToBase64(theWebServer.theTLS.theServer.certificate.sourceBinary, false);
   return output.AssignValue(result, theCommands);
 }
 

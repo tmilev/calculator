@@ -117,22 +117,17 @@ public:
   bool flagServerForkedIntoWorker;
   bool flagNotAllocated;
 
-  const unsigned int numberOfSeedRandomBytes = 512;
   // Used for cryptographic purposes.
-  // Must be initialized once, securely, in the
+  // Initialized once, securely, in the
   // parent process.
-  // Contains numberOfSeedRandomBytes = 512 bytes.
-  //
-  // In the following discussion, we use the hash function SHA512.
-  //
-  // Whenever a Webserver::fork() is executed, the following happens.
-  //
-  // - Bytes from from the current clock reading
-  // are appended to add additional entropy.
-  // - The entire expression is rehashed to 512 bytes.
-  // -
-  //
+  // When running as a web server, this happens inside
+  // WebServer::Run.
+  // When not initialized, contains 0 bytes.
   List<unsigned char> randomBytesCurrent;
+  // Random bytes to keep as internal state.
+  const unsigned int numberOfRandomBytes = 64; // = 512 bits
+  // Not allowed to extract more than this many random bytes at once.
+  const unsigned int maximumExtractedRandomBytes = 32; // = 256 bits
 
   MemorySaving<FormatExpressions> theDefaultFormat;
   MemorySaving<FormatExpressions> thePolyFormat;

@@ -373,8 +373,8 @@ bool CalculatorFunctionsGeneral::innerHashString(
   std::stringstream out;
   if (verbose) {
     out << "<br>Input: " << inputString;
-    out << "<br>Base64 conversion: " << Crypto::ConvertStringToBase64(theBitStream, false);
-    out << "<br>Base64url conversion: " << Crypto::ConvertStringToBase64(theBitStream, true);
+    out << "<br>Base64 conversion: " << Crypto::ConvertListUnsignedCharsToBase64(theBitStream, false);
+    out << "<br>Base64url conversion: " << Crypto::ConvertListUnsignedCharsToBase64(theBitStream, true);
   }
   List<unsigned char> hashUChar;
   List<uint32_t> theSha1Uint;
@@ -398,8 +398,8 @@ bool CalculatorFunctionsGeneral::innerHashString(
   }
   if (verbose) {
     std::string theSha1base64string, theSha1base64URLstring;
-    theSha1base64string = Crypto::ConvertStringToBase64(hashUChar, true);
-    theSha1base64URLstring = Crypto::ConvertStringToBase64(hashUChar, false);
+    theSha1base64string = Crypto::ConvertListUnsignedCharsToBase64(hashUChar, true);
+    theSha1base64URLstring = Crypto::ConvertListUnsignedCharsToBase64(hashUChar, false);
     out << "<br>" << hashId << " in base64: " << theSha1base64string;
     out << "<br>" << hashId << " in base64url: " << theSha1base64URLstring;
     out << "<br>" << hashId << " hex: ";
@@ -656,7 +656,7 @@ bool CalculatorFunctionsGeneral::innerCharToBase64(
   List<unsigned char> theBitStream;
   const std::string& inputString = input.GetValue<std::string>();
   theBitStream = inputString;
-  return output.AssignValue(Crypto::ConvertStringToBase64(theBitStream, false), theCommands);
+  return output.AssignValue(Crypto::ConvertListUnsignedCharsToBase64(theBitStream, false), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerBase64ToCharToBase64Test(
@@ -671,7 +671,7 @@ bool CalculatorFunctionsGeneral::innerBase64ToCharToBase64Test(
     return false;
   }
   std::stringstream out;
-  std::string theConvertedBack = Crypto::ConvertStringToBase64(theBitStream, false);
+  std::string theConvertedBack = Crypto::ConvertListUnsignedCharsToBase64(theBitStream, false);
   out << "Original string: " << input.GetValue<std::string>()
   << "<br>Converted to bitstream and back: " << theConvertedBack;
   if (theConvertedBack != input.GetValue<std::string>()) {
@@ -8650,12 +8650,17 @@ bool CalculatorFunctionsGeneral::innerPrintRuleStack(
   return output.AssignValue(theCommands.RuleStack.ToString(), theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerCrash(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsGeneral::innerCrash(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCrash");
   (void) input;//portable way of avoiding unused parameter warning
   crash << "This is a test of the crashing mechanism. "
-  << "If you're admin, check out the <a href=\"/LogFiles/crashes/\" target=\"_blank\">"
-  << "crash report folder<a> [requires admin access]." << crash;
+  << "A file report must have been written. "
+  << "The crash file report is not accessible through the calculator's webserver. "
+  << "It can be reached locally in the results/crashes folder of the calculator or, "
+  << "if running remotely, through an administrator ssh connection. "
+  << crash;
   return output.AssignValue(std::string("Crashed succesfully"), theCommands);
 }
 

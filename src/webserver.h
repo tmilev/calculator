@@ -13,13 +13,13 @@ public:
   WebServer* parent;
   int indexInParent;
   int ProcessPID;
+  std::string processUniqueRandomId;
   int numberOfReceivesCurrentConnection;
   int64_t millisecondsServerAtWorkerStart;
   int64_t millisecondsLastPingServerSideOnly;
   int64_t millisecondsAfterSelect;
 
   std::string displayUserInput;
-  std::string outputId;
 
   std::string messageHead;
   std::string messageBody;
@@ -258,6 +258,8 @@ public:
   List<std::string> addressStartsSentWithCacheMaxAge;
   HashedList<std::string, MathRoutines::HashString> addressStartsInterpretedAsCalculatorRequest;
 
+  List<unsigned char> idLastWorker;
+
   int activeWorker;
   int64_t timeLastExecutableModification;
   ListReferences<std::string> theProgressReports;
@@ -286,6 +288,13 @@ public:
   bool EmergencyRemoval_LastCreatedWorker();
   bool CheckConsistency();
   int Run();
+  // Wraps the system level fork() call.
+  // Addionally computes a
+  // unique [with probability ~1] process id and
+  // unique [with probability ~1] non-openSSL random bytes
+  // for the child and parent processes.
+  int Fork();
+  void initializeRandomBytes();
   void WriteVersionJSFile();
   WebWorker& GetActiveWorker();
   static void WorkerTimerPing(int64_t pingTime);

@@ -1476,6 +1476,7 @@ input:checked + .slider:before {
 }
 
 div.containerComments {
+  min-width: 100px;
   word-break: break-all;
   width: 30%;
 }

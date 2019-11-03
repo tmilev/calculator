@@ -2325,7 +2325,7 @@ void TransportLayerSecurityServer::Session::initialize() {
   this->chosenSignatureAlgorithm = 0;
   this->chosenEllipticCurve = 0;
   this->chosenEllipticCurveName = "";
-  Crypto::GetRandomBytesSecureOutputMayLeaveTraceInFreedMemory(
+  Crypto::GetRandomBytesSecureInternalMayLeaveTracesInMemory(
     this->myRandomBytes, SSLContent::LengthRandomBytesInSSLHello
   );
   this->ephemerealPrivateKey = 0;
@@ -2618,8 +2618,4 @@ TransportLayerSecurityOpenSSL::TransportLayerSecurityOpenSSL() {
   this->flagSSLHandshakeSuccessful = false;
   this->flagContextInitialized = false;
   this->flagIsServer = true;
-}
-
-void TransportLayerSecurity::AddMoreEntropyFromTimer() {
-  int fixMeAcquireEntropy;
 }

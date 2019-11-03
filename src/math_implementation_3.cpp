@@ -886,7 +886,6 @@ FileOperations::FolderVirtualLinksSensitive() {
     result.SetKeyValue("/LogFiles/", "LogFiles/");
     result.SetKeyValue("configuration/", "configuration/");
     result.SetKeyValue("/configuration/", "configuration/");
-    result.SetKeyValue("crashes/", "LogFiles/crashes/");
   }
   return result;
 }
@@ -898,6 +897,9 @@ FileOperations::FolderVirtualLinksULTRASensitive() {
   if (!firstRun) {
     firstRun = true;
     result.SetKeyValue("certificates/", "certificates/");
+    result.SetKeyValue("/results/", "results/");
+    result.SetKeyValue("results/", "results/");
+    result.SetKeyValue("crashes/", "results/crashes/");
   }
   return result;
 }
@@ -1164,6 +1166,7 @@ bool FileOperations::GetPhysicalFileNameFromVirtual(
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("FileOperations::GetPhysicalFileNameFromVirtual");
+  // Using loggers forbidden here: function is used by the loggers themselves.
   if (!FileOperations::IsOKfileNameVirtual(inputFileNamE, accessSensitiveFolders)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "File name: " << inputFileNamE << " not allowed. ";
@@ -1261,18 +1264,18 @@ bool FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(
   );
 }
 
-bool FileOperations::OpenFileCreateIfNotPresentVirtual(
-  std::fstream& theFile,
+bool FileOperations::OpenFileCreateIfNotPresentVirtual(std::fstream& theFile,
   const std::string& theFileName,
   bool OpenInAppendMode,
   bool truncate,
   bool openAsBinary,
-  bool accessSensitiveFolders
+  bool accessSensitiveFolders,
+  bool accessUltraSensitiveFolders
 ) {
   std::string computedFileName;
-  //USING loggers FORBIDDEN here! Loggers call this function themselves in their constructors.
+  // USING loggers FORBIDDEN here! Loggers call this function themselves in their constructors.
   if (!FileOperations::GetPhysicalFileNameFromVirtual(
-    theFileName, computedFileName, accessSensitiveFolders, false, nullptr
+    theFileName, computedFileName, accessSensitiveFolders, accessUltraSensitiveFolders, nullptr
   )) {
     return false;
   }

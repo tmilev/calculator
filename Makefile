@@ -175,7 +175,8 @@ SOURCES_RELATIVE_PATH=\
     transport_layer_security_openssl.cpp \
     transport_layer_security_test.cpp \
     web-routines-1.cpp \
-    webserver.cpp
+    webserver.cpp \
+    webserver_fork.cpp
 
 SOURCES_RELATIVE_PATH_C=\
 # boringssl/crypto/cipher_extra/cipher_extra.c \

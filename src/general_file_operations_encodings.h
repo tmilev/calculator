@@ -115,13 +115,13 @@ public:
     bool truncate,
     bool openAsBinary
   );
-  static bool OpenFileCreateIfNotPresentVirtual(
-    std::fstream& theFile,
+  static bool OpenFileCreateIfNotPresentVirtual(std::fstream& theFile,
     const std::string& theFileName,
     bool OpenInAppendMode,
     bool truncate,
     bool openAsBinary,
-    bool accessSensitiveFolders = false
+    bool accessSensitiveFolders = false,
+    bool accessUltraSensitiveFolders = false
   );
   static bool OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(
     std::fstream& theFile,

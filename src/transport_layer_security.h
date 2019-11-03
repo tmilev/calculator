@@ -584,7 +584,6 @@ public:
   TransportLayerSecurity();
   ~TransportLayerSecurity();
   void RemoveLastSocket();
-  void AddMoreEntropyFromTimer();
   bool HandShakeIamServer(int inputSocketID, std::stringstream* commentsOnFailure);
   bool HandShakeIamClientNoSocketCleanup(
     int inputSocketID, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral

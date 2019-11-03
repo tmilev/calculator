@@ -63,7 +63,7 @@ Monitor.prototype.callbackPauseRequest = function(input, output) {
   this.ownerCalculator.parsedComputation = JSON.parse(input);
   var status = this.ownerCalculator.parsedComputation.status;
   var doUpdateCalculatorPage = false;
-  if (status === "finished") {
+  if (status === "finished" || status === "crash") {
     this.isFinished = true;
     this.isPaused = false;
     indicatorButton.innerHTML = "Finished";
@@ -74,6 +74,8 @@ Monitor.prototype.callbackPauseRequest = function(input, output) {
   } else {
     if (status === "noReport") {
       progReportTimer.innerHTML += "No report on last ping."; 
+    } else if (status === "unpaused") {
+      progReportTimer.innerHTML += "Recently unpaused.";       
     } else {
       doUpdateCalculatorPage = true;
     }

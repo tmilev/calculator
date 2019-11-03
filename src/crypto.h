@@ -189,8 +189,6 @@ public:
     std::stringstream* commentsOnFailure,
     std::stringstream* commentsGeneral
   );
-
-  static std::string ConvertStringToBase64(const List<unsigned char>& input, bool useBase64URL);
   static std::string ConvertStringToBase64Standard(const std::string& input);
   static std::string ConvertStringToBase64URL(const std::string& input);
   static uint32_t GetUInt32FromCharBigendian(const List<unsigned char>& input);
@@ -243,6 +241,9 @@ public:
     const std::string& input,
     LargeIntegerUnsigned& output,
     int& outputNumLeadingZeroPairs
+  );
+  static std::string ConvertListUnsignedCharsToBase64(
+    const List<unsigned char>& input, bool useBase64URL
   );
   static std::string ConvertListUnsignedCharsToHex(
     const List<unsigned char>& input
@@ -372,10 +373,15 @@ public:
     std::string& output,
     std::stringstream* commentsOnFailure
   );
-  static void GetRandomBytesSecure(ListZeroAfterUse<unsigned char>& output, int numBytes);
-  static void GetRandomBytesSecureOutputMayLeaveTraceInFreedMemory(
-    List<unsigned char>& output, int numBytes
-  );
+  // Every call of this function acquires additional randomness from the system's timer.
+  static void GetRandomBytesSecureInternal(ListZeroAfterUse<unsigned char>& output, int numberOfBytesMax32);
+  static void GetRandomBytesSecureInternalMayLeaveTracesInMemory(List<unsigned char>& output, int numberOfBytesMax32);
+  // Forget previous random bytes and the entropy of additionalRandomness.
+  // We expect the extra entropy from sources such as the system timer, so
+  // additionalRandomness is expected to contain considerably less
+  // entropy than 64 bits.
+  static void acquireAdditionalRandomness(int64_t additionalRandomness);
+
   static void GetRandomLargeIntegerSecure(LargeIntegerUnsigned& output, int numBytes);
   static void GetRandomLargePrime(LargeIntegerUnsigned& output, int numBytes);
 };

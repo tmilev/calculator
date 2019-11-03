@@ -34,6 +34,9 @@ var urlFields = {
     content: "content",
     debugInformation: "debugInformation",
   },
+  queryParameters: {
+    processId: "processId",
+  },
   teachersAndSections: "teachersAndSections",
   fileName: "fileName",
   mainInput: "mainInput",

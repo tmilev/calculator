@@ -93,16 +93,20 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash) {
     }
     std::fstream theFile;
     bool openSuccess = FileOperations::OpenFileCreateIfNotPresentVirtual(
-      theFile, "crashes/" + theGlobalVariables.RelativePhysicalNameCrashLog, false, true, false, true
+      theFile,
+      "crashes/" + theGlobalVariables.RelativePhysicalNameCrashLog,
+      false,
+      true,
+      false,
+      true,
+      true
     );
     if (openSuccess) {
-      this->crashReportHtml << "<hr>Crash dumped in file "
-      << "<a href=\"/LogFiles/crashes/"
-      << HtmlRoutines::ConvertStringToURLString(theGlobalVariables.RelativePhysicalNameCrashLog, false)
-      << "\" target=\"_blank\">"
-      << theGlobalVariables.RelativePhysicalNameCrashLog
-      << "</a>"
-      << ". May require admin access to view online. ";
+      this->crashReportHtml << "<hr>Crash dumped in folder "
+      << "results/crashes/. Not visible through the web server. "
+      << "If running locally, simply open the results/crashes "
+      << "folder within your calculator folder. "
+      << "If running remotely, you will need an ssh connection. ";
       this->crashReportConsolE << "Crash dumped in file: " << logger::consoleGreen()
       << theGlobalVariables.RelativePhysicalNameCrashLog << logger::consoleNormal() << "\n";
     } else {

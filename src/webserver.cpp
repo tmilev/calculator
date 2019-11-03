@@ -873,7 +873,6 @@ void WebWorker::WriteAfterTimeoutProgress(const std::string& input) {
   if (!this->flagProgressReportAllowed) {
     return;
   }
-  logWorker << "DEBUG: and the progress is allowed!!!!!" << logger::endL;
   this->PauseIfRequested();
   MacroRegisterFunctionWithName("WebWorker::WriteAfterTimeoutProgress");
   if (!this->workerToWorkerRequestIndicator.ReadOnceIfFailThenCrash(false, true)) {
@@ -884,7 +883,9 @@ void WebWorker::WriteAfterTimeoutProgress(const std::string& input) {
     return;
   }
   this->WriteAfterTimeout(input, "running");
-  this->workerToWorkerReturnIndicator.WriteOnceAfterEmptying(theWebServer.GetActiveWorker().outputId, false, true);
+  this->workerToWorkerReturnIndicator.WriteOnceAfterEmptying(
+    theWebServer.GetActiveWorker().processUniqueRandomId, false, true
+  );
 }
 
 void WebWorker::WriteAfterTimeoutResult() {
@@ -1588,7 +1589,7 @@ int WebWorker::ProcessComputationIndicator() {
   otherWorker.writingReportFile.Lock();
   std::string computationResult;
   bool success = FileOperations::LoadFileToStringVirtual(
-    "results_timed_out/" + otherWorker.outputId,
+    "results_timed_out/" + otherWorker.processUniqueRandomId,
     computationResult,
     true,
     false,
@@ -1596,7 +1597,7 @@ int WebWorker::ProcessComputationIndicator() {
   );
   otherWorker.writingReportFile.Unlock();
   if (!success) {
-    out << "Failed to load your output with id: " << otherWorker.outputId << ". " << comments.str();
+    out << "Failed to load your output with id: " << otherWorker.processUniqueRandomId << ". " << comments.str();
     result[WebAPI::result::error] = out.str();
     stOutput << result.ToString(false);
     return 0;
@@ -1614,11 +1615,11 @@ void WebWorker::WriteAfterTimeout(const std::string& input, const std::string& s
   std::string toWrite = result.ToString(false, false, false, false);
   WebWorker& currentWorker = theWebServer.GetActiveWorker();
   currentWorker.writingReportFile.Lock();
-  bool success = FileOperations::WriteFileVirual("results_timed_out/" + currentWorker.outputId, toWrite, &commentsOnError);
+  bool success = FileOperations::WriteFileVirual("results/" + currentWorker.processUniqueRandomId, toWrite, &commentsOnError);
   currentWorker.writingReportFile.Unlock();
   if (success) {
     logWorker << logger::green << "Data written to file: "
-    << currentWorker.outputId << logger::endL;
+    << currentWorker.processUniqueRandomId << logger::endL;
   } else {
     logIO << "Failed to write computation data. " << commentsOnError.str();
   }
@@ -2856,7 +2857,6 @@ int WebWorker::ServeClient() {
   theGlobalVariables.userDefault.flagStopIfNoLogin = true;
   UserCalculatorData& theUser = theGlobalVariables.userDefault;
   theGlobalVariables.IndicatorStringOutputFunction = WebWorker::WriteAfterTimeoutProgressStatic;
-  std::cout << "DEBUG: about to serve client.\n";
   if (
     this->requestTypE != this->requestGet &&
     this->requestTypE != this->requestPost &&
@@ -3431,7 +3431,7 @@ WebWorker& WebServer::GetActiveWorker() {
     << " workers. " << crash;
   }
   stOutput.theOutputFunction = oldOutputFunction;//<-the web server is in order,
-  //therefore we restore the ability to report crashes over the internet.
+  // therefore we restore the ability to report crashing over the internet.
   return this->theWorkers[this->activeWorker];
 }
 
@@ -3572,7 +3572,7 @@ bool WebServer::CreateNewActiveWorker() {
   << logger::endL;
   std::stringstream outputId;
   outputId << "connection_" << this->NumConnectionsSoFar;
-  this->theWorkers[this->activeWorker].outputId = outputId.str();
+  this->theWorkers[this->activeWorker].processUniqueRandomId = outputId.str();
   this->theWorkers[this->activeWorker].flagInUsE = true;
   this->theWorkers[this->activeWorker].flagExited = false;
 
@@ -4363,6 +4363,8 @@ TransportLayerSecurity& TransportLayerSecurity::DefaultTLS_READ_ONLY() {
 int WebServer::Run() {
   MacroRegisterFunctionWithName("WebServer::Run");
   theGlobalVariables.RelativePhysicalNameCrashLog = "crash_WebServerRun.html";
+  WebServer::initializeRandomBytes();
+
   //<-worker log resets are needed, else forked processes reset their common log.
   //<-resets of the server logs are not needed, but I put them here nonetheless.
   if (theGlobalVariables.flagSSLIsAvailable) {
@@ -4386,7 +4388,7 @@ int WebServer::Run() {
   logSuccessfulForks.reset();
   logSuccessfulForks.flagWriteImmediately = true;
   if (theGlobalVariables.flagServerAutoMonitor) {
-    int pidServer = fork();
+    int pidServer = this->Fork();
     if (pidServer < 0) {
       crash << "Failed to create server process. " << crash;
     }
@@ -4402,7 +4404,7 @@ int WebServer::Run() {
   this->theCalculator.theObjectPointer = &theParser;
   this->theCalculator.RenewObject();
   theParser->initialize();
-  // cannot call initializeMutex here: not before we execute fork();
+  // cannot call initializeMutex here: not before we execute Fork();
   theParser->ComputeAutoCompleteKeyWords();
   theParser->WriteAutoCompleteKeyWordsToFile();
   this->WriteVersionJSFile();
@@ -4497,9 +4499,7 @@ int WebServer::Run() {
       << "Time elapsed: " << theGlobalVariables.GetElapsedSeconds() << " second(s). <br>"
       << logger::endL;
     }
-    this->theTLS.AddMoreEntropyFromTimer();
-
-    int incomingPID = fork(); // creates an almost identical copy of this process.
+    int incomingPID = this->Fork(); // creates an almost identical copy of this process.
     // <- Please don't assign directly to this->GetActiveWorker().ProcessPID.
     // <- There may be a race condition around this line of code and I
     // want as little code as possible between the fork and the logFile.
@@ -4509,15 +4509,17 @@ int WebServer::Run() {
       theGlobalVariables.processType = "worker";
     }
     if (theGlobalVariables.flagServerDetailedLog && incomingPID == 0) {
-      logWorker << "Detail: fork() successful in worker; elapsed ms @ fork(): "
+      logWorker << "Detail: Fork() successful in worker; elapsed ms @ Fork(): "
       << theGlobalVariables.GetElapsedMilliseconds() << logger::endL;
     }
     if (theGlobalVariables.flagServerDetailedLog && incomingPID > 0) {
-      logSuccessfulForks << "Detail: fork() successful; elapsed ms @ fork(): "
+      logSuccessfulForks << "Detail: Fork() successful; elapsed ms @ Fork(): "
       << theGlobalVariables.GetElapsedMilliseconds() << logger::endL;
     }
     if (incomingPID < 0) {
       logProcessKills << logger::red << " FAILED to spawn a child process. " << logger::endL;
+    } else {
+      this->GetActiveWorker().processUniqueRandomId = Crypto::ConvertListUnsignedCharsToHex(this->idLastWorker);
     }
     this->GetActiveWorker().ProcessPID = incomingPID;
     if (this->GetActiveWorker().ProcessPID == 0) {
@@ -5123,13 +5125,11 @@ void WebServer::InitializeGlobalVariables() {
   folderSubstitutionsNonSensitive.SetKeyValue("test/", "test/");
 
   folderSubstitutionsSensitive.Clear();
+
   folderSubstitutionsSensitive.SetKeyValue("LogFiles/", "LogFiles/");
   folderSubstitutionsSensitive.SetKeyValue("/LogFiles/", "LogFiles/");
   folderSubstitutionsSensitive.SetKeyValue("configuration/", "configuration/");
   folderSubstitutionsSensitive.SetKeyValue("/configuration/", "configuration/");
-
-  folderSubstitutionsSensitive.SetKeyValue("/crashes/", "LogFiles/crashes/");
-  folderSubstitutionsSensitive.SetKeyValue("crashes/", "LogFiles/crashes/");
 
   FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("favicon.ico");
   FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("/favicon.ico");

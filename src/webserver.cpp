@@ -414,8 +414,6 @@ void *get_in_addr(struct sockaddr* sa) {
 }
 
 std::string WebWorker::ToStringMessageShortUnsafe(FormatExpressions* theFormat) const {
-  //if (theGlobalVariables.flagUsingSSLinCurrentConnection)
-  //  return "Message cannot be viewed when using SSL";
   std::stringstream out;
   bool useHtml = theFormat == nullptr ? false: theFormat->flagUseHTML;
   std::string lineBreak = useHtml ? "<br>\n" : "\r\n";
@@ -430,15 +428,24 @@ std::string WebWorker::ToStringMessageShortUnsafe(FormatExpressions* theFormat) 
   } else {
     out << "Request type undefined.";
   }
-  out << "<hr>Address get or post:\n" << HtmlRoutines::ConvertStringToHtmlString(this->addressGetOrPost, true);
-  out << lineBreak << "\nAddress computed:\n" << HtmlRoutines::ConvertStringToHtmlString(this->addressComputed, true);
-  out << lineBreak << "\nArgument computed:\n" << HtmlRoutines::ConvertStringToHtmlString(this->argumentComputed, true);
-  out << lineBreak << "\nVirtual file/directory name:\n" << HtmlRoutines::ConvertStringToHtmlString(this->VirtualFileName, true);
-  out << lineBreak << "\nRelative physical file/directory name:\n" << HtmlRoutines::ConvertStringToHtmlString(this->RelativePhysicalFileNamE, true);
-  out << lineBreak << "\nExecutable url:\n" << theGlobalVariables.DisplayNameExecutable;
-  out << lineBreak << "\nPhysical address project base:\n" << theGlobalVariables.PhysicalPathProjectBase;
-  out << lineBreak << "\nPhysical address server base:\n" << theGlobalVariables.PhysicalPathServerBasE;
-  out << lineBreak << "\nPhysical address output folder:\n" << theGlobalVariables.PhysicalPathHtmlFolder;
+  out << "<hr>Address get or post:\n"
+  << HtmlRoutines::ConvertStringToHtmlString(this->addressGetOrPost, true);
+  out << lineBreak << "\nAddress computed:\n"
+  << HtmlRoutines::ConvertStringToHtmlString(this->addressComputed, true);
+  out << lineBreak << "\nArgument computed:\n"
+  << HtmlRoutines::ConvertStringToHtmlString(this->argumentComputed, true);
+  out << lineBreak << "\nVirtual file/directory name:\n"
+  << HtmlRoutines::ConvertStringToHtmlString(this->VirtualFileName, true);
+  out << lineBreak << "\nRelative physical file/directory name:\n"
+  << HtmlRoutines::ConvertStringToHtmlString(this->RelativePhysicalFileNamE, true);
+  out << lineBreak << "\nExecutable url:\n"
+  << HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.DisplayNameExecutable, false);
+  out << lineBreak << "\nPhysical address project base:\n"
+  << HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.PhysicalPathProjectBase, false);
+  out << lineBreak << "\nPhysical address server base:\n"
+  << HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.PhysicalPathServerBasE, false);
+  out << lineBreak << "\nPhysical address output folder:\n"
+  << HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.PhysicalPathHtmlFolder, false);
   return out.str();
 }
 
@@ -450,7 +457,7 @@ std::string WebWorker::ToStringMessageFullUnsafe(bool useHTML) const {
   if (this->theMessageHeaderStrings.size > 0) {
     out << "<hr>\nStrings extracted from message: ";
     for (int i = 0; i < this->theMessageHeaderStrings.size; i ++) {
-      out << "<br>" << this->theMessageHeaderStrings[i];
+      out << "<br>" << HtmlRoutines::ConvertStringToHtmlString(this->theMessageHeaderStrings[i], false);
     }
   }
   return out.str();
@@ -481,7 +488,7 @@ std::string WebWorker::ToStringMessageUnsafe(bool useHTML) const {
   }
   out << "<br>Cookies (" << this->cookies.size << " total):";
   for (int i = 0; i < this->cookies.size; i ++) {
-    out << "<br>" << this->cookies[i];
+    out << "<br>" << HtmlRoutines::ConvertStringToHtmlString(this->cookies[i], false);
   }
   if (useHTML) {
     out << "\n<hr>\nHost with port:<br>\n" << HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.hostWithPort, false);
@@ -489,9 +496,9 @@ std::string WebWorker::ToStringMessageUnsafe(bool useHTML) const {
     out << "\n<hr>\nFull message body:<br>\n" << HtmlRoutines::ConvertStringToHtmlString(this->messageBody, true);
   } else {
     out << "\nFull message head (length " << this->messageHead.size()
-    << "):\n" << this->messageHead;
+    << "):\n" << HtmlRoutines::ConvertStringToHtmlString(this->messageHead, false);
     out << "\nFull message body (length " << this->messageBody.size()
-    << "):\n" << this->messageBody;
+    << "):\n" << HtmlRoutines::ConvertStringToHtmlString(this->messageBody, false);
   }
   return out.str();
 }

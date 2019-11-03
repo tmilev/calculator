@@ -812,14 +812,19 @@ std::string HtmlInterpretation::GetTopicTableJSON() {
 void HtmlInterpretation::GetJSDataUserInfo(JSData& outputAppend, const std::string& comments) {
   MacroRegisterFunctionWithName("HtmlInterpretation::GetJSDataUserInfo");
   std::stringstream outLinkApp, outLinkAppNoCache;
+  // The calculator name should not contain dangerous symbols,
+  // but let's sanitize in case of a programmer error.
+  std::string sanitizedCalculatorApp = HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.DisplayNameExecutableApp, false);
+  std::string sanitizedCalculatorAppNoCache = HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.DisplayNameExecutableAppNoCache, false);
+
   outLinkApp << "You've reached the calculator's backend. The app can be accessed here: <a href = '"
-  << theGlobalVariables.DisplayNameExecutableApp << "'>app</a>";
+  << sanitizedCalculatorApp << "'>app</a>";
   outputAppend["linkApp"] = outLinkApp.str();
-  outLinkAppNoCache << "<a href = '" << theGlobalVariables.DisplayNameExecutableAppNoCache << "'>app no browser cache</a>";
+  outLinkAppNoCache << "<a href = '" << sanitizedCalculatorAppNoCache << "'>app no browser cache</a>";
   outputAppend["linkAppNoCache"] = outLinkAppNoCache.str();
   outputAppend[WebAPI::result::loginDisabledEveryoneIsAdmin] = theGlobalVariables.flagDisableDatabaseLogEveryoneAsAdmin;
   if (comments != "") {
-    outputAppend["comments"] = comments;
+    outputAppend["comments"] = HtmlRoutines::ConvertStringToHtmlString(comments, false);
   }
   if (theGlobalVariables.flagAllowProcessMonitoring) {
     outputAppend[WebAPI::UserInfo::processMonitoring] = "true";
@@ -828,21 +833,28 @@ void HtmlInterpretation::GetJSDataUserInfo(JSData& outputAppend, const std::stri
     outputAppend[WebAPI::UserInfo::processMonitoring] = "false";
   }
   if (theGlobalVariables.GetWebInput("error") != "") {
-    outputAppend["error"] = theGlobalVariables.GetWebInput("error");
+    outputAppend["error"] = HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.GetWebInput("error"), false);
   }
   if (!theGlobalVariables.flagLoggedIn) {
     outputAppend["status"] = "not logged in";
     return;
   }
   outputAppend["status"] = "logged in";
-  outputAppend[DatabaseStrings::labelUsername] = theGlobalVariables.userDefault.username;
-  outputAppend[DatabaseStrings::labelAuthenticationToken] = theGlobalVariables.userDefault.actualAuthenticationToken;
-  outputAppend[DatabaseStrings::labelUserRole] = theGlobalVariables.userDefault.userRole;
-  outputAppend[DatabaseStrings::labelInstructor] = theGlobalVariables.userDefault.instructorInDB;
-  outputAppend[DatabaseStrings::labelSection] = theGlobalVariables.userDefault.sectionInDB;
-  outputAppend[DatabaseStrings::labelCurrentCourses] = theGlobalVariables.userDefault.courseInDB;
-  outputAppend[DatabaseStrings::labelSectionsTaught] = theGlobalVariables.userDefault.sectionsTaught;
-  outputAppend[DatabaseStrings::labelDeadlinesSchema] = theGlobalVariables.userDefault.deadlineSchema;
+  outputAppend[DatabaseStrings::labelUsername]            = HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.userDefault.username                 , false);
+  outputAppend[DatabaseStrings::labelAuthenticationToken] = HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.userDefault.actualAuthenticationToken, false);
+  outputAppend[DatabaseStrings::labelUserRole]            = HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.userDefault.userRole                 , false);
+  outputAppend[DatabaseStrings::labelInstructor]          = HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.userDefault.instructorInDB           , false);
+  outputAppend[DatabaseStrings::labelSection]             = HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.userDefault.sectionInDB              , false);
+  outputAppend[DatabaseStrings::labelCurrentCourses]      = HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.userDefault.courseInDB               , false);
+  outputAppend[DatabaseStrings::labelDeadlinesSchema]     = HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.userDefault.deadlineSchema           , false);
+  JSData sectionsTaught;
+  sectionsTaught.theType = JSData::token::tokenArray;
+  for (int i = 0; i < theGlobalVariables.userDefault.sectionsTaught.size; i ++) {
+    JSData nextSection;
+    nextSection = HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.userDefault.sectionsTaught[i], false);
+    sectionsTaught.theList.AddOnTop(nextSection);
+  }
+  outputAppend[DatabaseStrings::labelSectionsTaught] = sectionsTaught;
 }
 
 std::string HtmlInterpretation::GetJSONUserInfo(const std::string& comments) {

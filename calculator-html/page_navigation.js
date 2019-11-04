@@ -290,6 +290,13 @@ function StorageCalculator() {
         nameURL: "calculatorRequest", 
         nameLocalStorage: "calculatorRequest",
       }),
+      monitoring: new StorageVariable({
+        name: "monitoring",
+        nameLocalStorage: "monitoring",
+        nameURL: "monitoring", 
+        callbackOnValueChange: mainPage().setMonitoringComponent.bind(mainPage()),
+        showInURLByDefault: true,
+      }),
     },
     user: {
       activationToken: new StorageVariable({
@@ -793,6 +800,32 @@ Page.prototype.cleanUpLoginSpan = function(componentToCleanUp) {
   }
 }
 
+Page.prototype.toggleMonitoring = function () {
+  var monitoring = this.storage.variables.calculator.monitoring;
+  if (monitoring.value !== "false") {
+    monitoring.setAndStore("false")
+  } else {
+    monitoring.setAndStore("true")
+  }
+}
+
+Page.prototype.setMonitoringComponent = function () {
+  var monitoring = this.storage.variables.calculator.monitoring.value;
+  if (monitoring !== "false") {
+    monitoring = "true";
+  } 
+  var monitorResult = document.getElementById(ids.domElements.monitoring.spanStatus);
+  if (monitoring === "true") {
+    monitorResult.innerHTML = "Monitor <b style = 'color:red'>on</b>";
+    document.getElementById(ids.domElements.switch.monitoring).checked = true;
+    document.getElementById(ids.domElements.monitoring.buttonTogglePauseRequest).style.display = "";
+  } else {
+    document.getElementById(ids.domElements.switch.monitoring).checked = false;
+    monitorResult.innerHTML = "Monitor <b style = 'color:green'>off</b>";
+    document.getElementById(ids.domElements.monitoring.buttonTogglePauseRequest).style.display = "none";
+  }
+
+}
 /**
  * @returns {Page} 
  * */

@@ -33,6 +33,8 @@ public:
     static std::string workerId;
     static std::string forgotLogin;
     static std::string compute;
+    static std::string monitoring;
+    static std::string calculatorInput;
   };
   struct result {
     static std::string resultHtml;

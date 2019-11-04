@@ -17,6 +17,7 @@
 #include "source_code_formatter.h"
 #include <cmath>
 #include "transport_layer_security.h"
+#include "string_constants.h"
 
 extern ProjectInformationInstance ProjectInfoVpf6_3cpp;
 ProjectInformationInstance ProjectInfoVpf6_3cpp(__FILE__, "Calculator built-in functions. ");
@@ -8186,9 +8187,15 @@ bool CalculatorFunctionsGeneral::innerTestIndicator(
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestIndicator");
   if (theGlobalVariables.flagBanProcessMonitoring) {
     std::stringstream out;
-    out << "Process monitoring not allowed. "
-    << "This is not the default behavior; "
-    << "the server's admins have explicitly banned monitoring. ";
+    if (
+      theGlobalVariables.configuration.GetValue(
+        Configuration::processMonitoringBanned
+      ).isTrueRepresentationInJSON()
+    ) {
+      out << "The server's admins have explicitly banned monitoring. ";
+    } else {
+      out << "Process monitoring turned off by user. ";
+    }
     return output.AssignValue(out.str(), theCommands);
   }
   if (input.size() < 3) {

@@ -27,6 +27,8 @@ var urlFields = {
     database: "database",
     serverStatusJSON: "serverStatusJSON",
     workerId: "workerId",
+    monitoring: "monitoring",
+    calculatorInput: "calculatorInput",
   },
   problem: {
     failedToLoadProblem: "Failed to load problem.",

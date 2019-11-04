@@ -2176,8 +2176,16 @@ int WebWorker::ProcessChangePassword(const std::string& reasonForNoAuthenticatio
 int WebWorker::ProcessCompute() {
   MacroRegisterFunctionWithName("WebWorker::ProcessCompute");
   this->SetHeaderOKNoContentLength("");
-  //theParser.initComputationStats();
-  theParser->inputString = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false);
+  std::string monitoring = theGlobalVariables.GetWebInput(WebAPI::request::monitoring);
+  if (monitoring == "false") {
+    theGlobalVariables.flagBanProcessMonitoring = true;
+    theGlobalVariables.flagReportEverything = false;
+  }
+
+  theParser->inputString = HtmlRoutines::ConvertURLStringToNormal(
+    theGlobalVariables.GetWebInput(WebAPI::request::calculatorInput),
+    false
+  );
   theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection = WebServer::ReturnActiveIndicatorAlthoughComputationIsNotDone;
   theGlobalVariables.initOutputReportAndCrashFileNames(
     HtmlRoutines::ConvertStringToURLString(theParser->inputString, false), theParser->inputString

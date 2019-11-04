@@ -51,6 +51,8 @@ std::string WebAPI::request::activateAccountJSON = "activateAccountJSON";
 std::string WebAPI::request::serverStatusJSON = "serverStatusJSON";
 std::string WebAPI::request::selectCourseJSON = "selectCourseJSON";
 std::string WebAPI::request::compute = "compute";
+std::string WebAPI::request::monitoring = "monitoring";
+std::string WebAPI::request::calculatorInput = "calculatorInput";
 std::string WebAPI::request::forgotLogin = "forgotLogin";
 
 std::string WebAPI::request::submitExercise = "submitExercise";

@@ -372,52 +372,16 @@ Calculator.prototype.submitComputationPartTwo = function(input) {
   });
 }
 
-Calculator.prototype.callbackToggleStatus = function (input, output) {
-  var monitorResult = document.getElementById(ids.domElements.monitoring.spanStatus);
-  var parsedInput = JSON.parse(input);
-  var monitoring = parsedInput["processMonitoring"];
-  if (monitoring !== false && monitoring !== "false") {
-    monitoring = true;
-  } else {
-    monitoring = false;
-  }
-  if (monitoring === "true" || monitoring === true) {
-    monitorResult.innerHTML = "Monitor <b style = 'color:red'>on</b>";
-    document.getElementById(ids.domElements.switch.monitoring).checked = true;
-    document.getElementById(ids.domElements.monitoring.buttonTogglePauseRequest).style.display = "";
-  } else {
-    document.getElementById(ids.domElements.switch.monitoring).checked = false;
-    monitorResult.innerHTML = "Monitor <b style = 'color:green'>off</b>";
-    document.getElementById(ids.domElements.monitoring.buttonTogglePauseRequest).style.display = "none";
-  }
-}
-
-Calculator.prototype.callbackToggleMonitoring = function (input, output) {
-  var url = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.userInfoJSON}`;
-  submitRequests.submitGET({
-    url: url,
-    result: ids.domElements.monitoring.spanStatus,
-    progress: ids.domElements.spanProgressReportGeneral,
-    callback: this.callbackToggleStatus.bind(this)
-  });
-}
-
-Calculator.prototype.toggleMonitoring = function () {
-  var url = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.toggleMonitoring}`;
-  submitRequests.submitGET({
-    url: url,
-    callback: this.callbackToggleMonitoring.bind(this),
-    progress: ids.domElements.spanProgressReportGeneral,
-  });
-}
-
 Calculator.prototype.getQueryStringSubmitStringAsMainInput = function(theString, requestType) {
   var inputParams = '';
   var thePage = window.calculator.mainPage;
   inputParams += `${pathnames.urlFields.request}=${requestType}&`;
-  inputParams += `${pathnames.urlFields.mainInput}=${encodeURIComponent(theString)}&`;
+  inputParams += `${pathnames.urlFields.requests.calculatorInput}=${encodeURIComponent(theString)}&`;
   if (thePage.storage.variables.flagDebug.isTrue()) {
     inputParams += `${pathnames.urlFields.debugFlag}=true&`;
+  }
+  if (thePage.storage.variables.calculator.monitoring.value === "false") {
+    inputParams += `${pathnames.urlFields.requests.monitoring}=false&`
   }
   return inputParams;
 }

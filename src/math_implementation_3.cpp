@@ -104,7 +104,7 @@ void GlobalVariables::ChDir(const std::string& systemCommand) {
 GlobalVariables::GlobalVariables() {
   this->flagAutoUnitTest = false;
   this->flagNotAllocated = false;
-  this->flagAllowProcessMonitoring = false;
+  this->flagBanProcessMonitoring = false;
   this->flagCertificatesAreOfficiallySigned = false;
   this->flagIsChildProcess = false;
   this->flagRestartNeeded = false;
@@ -1248,10 +1248,34 @@ bool FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(
   bool openAsBinary,
   bool accessSensitiveFolders
 ) {
+  return FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded_UltraSensitiveOptions(
+    theFile,
+    theFileName,
+    OpenInAppendMode,
+    truncate,
+    openAsBinary,
+    accessSensitiveFolders,
+    false
+  );
+}
+
+bool FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded_UltraSensitiveOptions(
+  std::fstream& theFile,
+  const std::string& theFileName,
+  bool OpenInAppendMode,
+  bool truncate,
+  bool openAsBinary,
+  bool accessSensitiveFolders,
+  bool accessUltraSensitiveFolders
+) {
   std::string computedFileName;
-  //USING loggers FORBIDDEN here! Loggers call this function themselves in their constructors.
+  // USING loggers FORBIDDEN here! Loggers call this function themselves in their constructors.
   if (!FileOperations::GetPhysicalFileNameFromVirtual(
-    theFileName, computedFileName, accessSensitiveFolders, false, nullptr
+    theFileName,
+    computedFileName,
+    accessSensitiveFolders,
+    accessUltraSensitiveFolders,
+    nullptr
   )) {
     return false;
   }

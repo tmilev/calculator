@@ -138,8 +138,7 @@ public:
   bool flagTimedOutComputationIsDone;
   bool flagOutputTimedOut;
   bool flagComputationFinishedAllOutputSentClosing;
-  // experimental flags:
-  bool flagAllowProcessMonitoring;
+  bool flagBanProcessMonitoring;
   // progress report flags:
   bool flagReportEverything;
   bool flagReportFileIO;
@@ -239,7 +238,6 @@ public:
   bool UserRequestMustBePromptedToLogInIfNotLoggedIn();
   void FallAsleep(int microseconds);
 
-  std::string ToStringNavigation();
   std::string ToStringCalcArgsNoNavigation(List<std::string>* tagsToExclude);
 
   static std::string GetDateForLogFiles();

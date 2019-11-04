@@ -891,7 +891,7 @@ void WebWorker::WriteAfterTimeoutProgress(const std::string& input) {
   }
   this->WriteAfterTimeout(input, "running");
   this->workerToWorkerReturnIndicator.WriteOnceAfterEmptying(
-    theWebServer.GetActiveWorker().processUniqueRandomId, false, true
+    theWebServer.GetActiveWorker().workerId, false, true
   );
 }
 
@@ -1385,18 +1385,6 @@ int WebWorker::ProcessCalculatorExamplesJSON() {
   return 0;
 }
 
-int WebWorker::ProcessToggleMonitoring() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessToggleMonitoring");
-  this->SetHeaderOKNoContentLength("");
-  if (theGlobalVariables.UserDefaultHasAdminRights()) {
-    this->flagToggleMonitoring = true;
-  }
-  JSData result;
-  HtmlInterpretation::GetJSDataUserInfo(result, "Attempt to toggle monitoring. ");
-  stOutput << result.ToString(false);
-  return 0;
-}
-
 int WebWorker::ProcessServerStatusJSON() {
   MacroRegisterFunctionWithName("WebWorker::ProcessServerStatusJSON");
   this->SetHeaderOKNoContentLength("");
@@ -1414,40 +1402,17 @@ int WebWorker::ProcessServerStatusJSON() {
 int WebWorker::ProcessPauseWorker() {
   MacroRegisterFunctionWithName("WebWorker::ProcessPauseWorker");
   this->SetHeaderOKNoContentLength("");
-  std::string theMainInput = theGlobalVariables.GetWebInput("mainInput");
+  std::string workerId = theGlobalVariables.GetWebInput(WebAPI::request::workerId);
   std::stringstream out;
   JSData result;
-  if (theMainInput == "") {
-    result[WebAPI::result::error] = "To pause a worker please 1) turn on monitoring and "
-    "2) provide the worker number in the mainInput field. ";
-    stOutput << result.ToString(false);
-    return 0;
-  }
-  int inputWebWorkerNumber = atoi(theMainInput.c_str());
-  int inputWebWorkerIndex = inputWebWorkerNumber - 1;
-  if (inputWebWorkerIndex < 0 || inputWebWorkerIndex >= this->parent->theWorkers.size) {
-    out << "<b>User requested worker number " << inputWebWorkerNumber
-    << " out of " << this->parent->theWorkers.size << " which is out of range. </b>";
-    result[WebAPI::result::error] = out.str();
-    stOutput << result.ToString(false);
-    return 0;
-  }
-  if (!this->parent->theWorkers[inputWebWorkerIndex].flagInUsE) {
-    out << "<b>Requested worker number " << inputWebWorkerNumber << " is not in use. Total number of workers: "
-    << this->parent->theWorkers.size << ". </b>";
-    result[WebAPI::result::error] = out.str();
-    stOutput << result.ToString(false);
-    return 0;
-  }
-  if (inputWebWorkerIndex == this->indexInParent) {
-    out << "Worker " << inputWebWorkerIndex
-    << " attempts to pause itself, this is not allowed.";
-    result[WebAPI::result::error] = out.str();
+  int indexWorker = this->parent->GetWorkerIndexFromId(workerId, &out);
+  if (indexWorker < 0) {
+    result[WebAPI::result::error] = HtmlRoutines::ConvertStringToHtmlString(out.str(), false);
     stOutput << result.ToString(false);
     return 0;
   }
   logWorker << "Proceeding to toggle worker pause." << logger::endL;
-  WebWorker& otherWorker = this->parent->theWorkers[inputWebWorkerIndex];
+  WebWorker& otherWorker = this->parent->theWorkers[indexWorker];
   if (!otherWorker.flagIsPaused) {
     if (otherWorker.PauseWorker.Lock()) {
       result[WebAPI::result::status] = "paused";
@@ -1468,72 +1433,67 @@ int WebWorker::ProcessPauseWorker() {
   return 0;
 }
 
-int WebWorker::ProcessMonitor() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessMonitor");
-  this->SetHeaderOKNoContentLength("");
-  logWorker << "Processing get monitor." << logger::endL;
-  JSData result;
-  HtmlInterpretation::GetJSDataUserInfo(result, "");
-  std::string theMainInput = theGlobalVariables.GetWebInput("mainInput");
-  if (theMainInput == "") {
-    result["error"] = "<b>Monitor takes as argument the number of the "
-    "child process that is running the computation.</b>";
-    stOutput << result.ToString(false);
-    return 0;
-  }
-  bool allowed = false;
-
-  if (
-    theGlobalVariables.flagAllowProcessMonitoring &&
-    theGlobalVariables.UserDefaultHasAdminRights()
-  ) {
-    allowed = true;
-  }
-  if (allowed) {
-    result["webWorkerNumber"] = atoi(theMainInput.c_str());
-    result["authenticated"] = "true";
-  } else {
-    result["authenticated"] = "false";
-    std::stringstream commentStream;
-    commentStream << "Process monitoring is allowed only for "
-    << "logged-in admins with process monitoring turned on. "
-    << "There must be a link/button to turn on "
-    << "process monitoring in the calculator app. ";
-    result[WebAPI::result::comments] = commentStream.str();
-  }
+int WebWorker::ProcessComputationIndicator() {
+  MacroRegisterFunctionWithName("WebWorker::ProcessComputationIndicator");
+  this->SetHeaderOKNoContentLength("");  
+  logWorker << "Processing get request indicator." << logger::endL;
+  JSData result = this->ProcessComputationIndicatorJSData();
   stOutput << result.ToString(false);
   return 0;
 }
 
-int WebWorker::ProcessComputationIndicator() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessComputationIndicator");
-  this->SetHeaderOKNoContentLength("");
-  logWorker << "Processing get request indicator." << logger::endL;
-  std::string theMainInput = theGlobalVariables.GetWebInput("mainInput");
+int WebServer::GetWorkerIndexFromId(std::string& inputId, std::stringstream* commentsOnError) {
+  MacroRegisterFunctionWithName("WebServer::GetWorkerIndexFromId");
+  if (inputId == "") {
+    if (commentsOnError != nullptr) {
+      *commentsOnError << "To get a computation indicator, provide the workerId through the "
+      << WebAPI::request::workerId << " query parameter. ";
+    }
+    return - 1;
+  }
+  int result = 0;
+  int todoLookupWorkerIdUsingAMap;
+  for (; result < this->theWorkers.size; result ++) {
+    if (inputId == this->theWorkers[result].workerId) {
+      break;
+    }
+  }
+  if (result >= this->theWorkers.size) {
+    if (commentsOnError != nullptr) {
+      *commentsOnError << "Worker id "
+      << HtmlRoutines::ConvertStringToHtmlString(inputId, false)
+      << " not found. ";
+    }
+    return - 1;
+  }
+  if (!this->theWorkers[result].flagInUsE) {
+    if (commentsOnError != nullptr) {
+      *commentsOnError << "Worker number "
+      << result << " is not in use. "
+      << "Total number of workers: "
+      << this->theWorkers.size << ". ";
+    }
+    return - 1;
+  }
+  if (result == this->GetActiveWorker().indexInParent) {
+    if (commentsOnError != nullptr) {
+      *commentsOnError << "Indicator error. Worker number "
+      << result << " not allowed to monitor/manipulate itself. ";
+
+    }
+    return - 1;
+  }
+  return result;
+}
+
+JSData WebWorker::ProcessComputationIndicatorJSData() {
+  MacroRegisterFunctionWithName("WebWorker::ProcessComputationIndicatorJSData");
+  std::string workerId = theGlobalVariables.GetWebInput(WebAPI::request::workerId);
   JSData result;
   std::stringstream out, comments;
-  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
-    result[WebAPI::result::error] = "Process monitoring only allowed to logged-in admins. ";
-    stOutput << result.ToString(false);
-    return 0;
-  }
-  if (theMainInput == "") {
-    out << "To get a computation indicator you need to supply the number of "
-    << "the child process in the mainInput field.";
-    result[WebAPI::result::error] = out.str();
-    stOutput << result.ToString(false);
-    return 0;
-  }
-  int inputWebWorkerNumber = atoi(theMainInput.c_str());
-  int inputWebWorkerIndex = inputWebWorkerNumber - 1;
-  if (inputWebWorkerIndex < 0 || inputWebWorkerIndex >= this->parent->theWorkers.size) {
-    out << "Indicator error. Worker number "
-    << inputWebWorkerNumber << " is out of range: there are "
-    << this->parent->theWorkers.size
-    << " workers. ";
-    result[WebAPI::result::error] = out.str();
-    stOutput << result.ToString(false);
-    return 0;
+  int inputWebWorkerIndex = this->parent->GetWorkerIndexFromId(workerId, &comments);
+  if (inputWebWorkerIndex < 0) {
+    result[WebAPI::result::error] = HtmlRoutines::ConvertStringToHtmlString(comments.str(), false);
   }
   comments
   << "The maximum number of "
@@ -1542,61 +1502,40 @@ int WebWorker::ProcessComputationIndicator() {
   << "The most recent error message reported by the "
   << "worker you want to monitor is: "
   << this->parent->theWorkers[inputWebWorkerIndex].pingMessage;
-  if (!this->parent->theWorkers[inputWebWorkerIndex].flagInUsE) {
-    out << "Indicator error. Worker number "
-    << inputWebWorkerNumber << " is not in use. "
-    << "Total number of workers: "
-    << this->parent->theWorkers.size << ". ";
-    result[WebAPI::result::error] = out.str();
-    result[WebAPI::result::comments] = comments.str();
-    stOutput << result.ToString(false);
-    return 0;
-  }
-  if (inputWebWorkerIndex == this->indexInParent) {
-    out << "Indicator error. Worker number "
-    << inputWebWorkerNumber << " requested to monitor itself. "
-    << "This is not allowed. ";
-    result[WebAPI::result::error] = out.str();
-    result[WebAPI::result::comments] = comments.str();
-    stOutput << result.ToString(false);
-    return 0;
-  }
   WebWorker& otherWorker = this->parent->theWorkers[inputWebWorkerIndex];
   if (otherWorker.userAddress.theObject != this->userAddress.theObject) {
-    out << "User ip address: " << this->userAddress.theObject
-    << " does not coincide with address that "
+    out << "User ip address does not coincide with address that "
     << "initiated the process. This is not allowed. ";
     result[WebAPI::result::error] = out.str();
-    stOutput << result.ToString(false);
-    return 0;
+    return result;
   }
   if (!this->flagUsingSSLInWorkerProcess) {
     out << "Monitoring allowed only over https. ";
     result[WebAPI::result::error] = out.str();
-    stOutput << result.ToString(false);
-    return 0;
+    return result;
   }
   if (! otherWorker.workerToWorkerRequestIndicator.WriteOnceAfterEmptying("!", false, true)) {
     out << "Failed to request progress report. ";
     result[WebAPI::result::error] = out.str();
-    stOutput << result.ToString(false);
-    return 0;
+    return result;
   }
   if (!otherWorker.workerToWorkerReturnIndicator.ReadOnceIfFailThenCrash(false, true)) {
     out << "Failed to read worker status. ";
     result[WebAPI::result::error] = out.str();
-    stOutput << result.ToString(false);
-    return 0;
+    return result;
   }
   if (otherWorker.workerToWorkerReturnIndicator.lastRead.size == 0) {
     result[WebAPI::result::status] = "noReport";
-    stOutput << result.ToString(false);
-    return 0;
+    return result;
   }
   otherWorker.writingReportFile.Lock();
   std::string computationResult;
+  if (!FileOperations::IsFileNameWithoutDotsAndSlashes(otherWorker.workerId)) {
+    result[WebAPI::result::status] = "noReport";
+    return result;
+  }
   bool success = FileOperations::LoadFileToStringVirtual(
-    "results_timed_out/" + otherWorker.processUniqueRandomId,
+    "results/" + otherWorker.workerId,
     computationResult,
     true,
     false,
@@ -1604,13 +1543,17 @@ int WebWorker::ProcessComputationIndicator() {
   );
   otherWorker.writingReportFile.Unlock();
   if (!success) {
-    out << "Failed to load your output with id: " << otherWorker.processUniqueRandomId << ". " << comments.str();
+    out << "Failed to load your output with id: " << otherWorker.workerId << ". " << comments.str();
     result[WebAPI::result::error] = out.str();
-    stOutput << result.ToString(false);
-    return 0;
+    return result;
   }
-  stOutput << computationResult;
-  return 0;
+  JSData parsed;
+  if (!parsed.readstring(computationResult, false, nullptr)) {
+    out << "I found your worker id: " << otherWorker.workerId << " but I could not parse it's JSON status. ";
+    result[WebAPI::result::error] = out.str();
+    return result;
+  }
+  return parsed;
 }
 
 void WebWorker::WriteAfterTimeout(const std::string& input, const std::string& status) {
@@ -1622,11 +1565,11 @@ void WebWorker::WriteAfterTimeout(const std::string& input, const std::string& s
   std::string toWrite = result.ToString(false, false, false, false);
   WebWorker& currentWorker = theWebServer.GetActiveWorker();
   currentWorker.writingReportFile.Lock();
-  bool success = FileOperations::WriteFileVirual("results/" + currentWorker.processUniqueRandomId, toWrite, &commentsOnError);
+  bool success = FileOperations::WriteFileVirual("results/" + currentWorker.workerId, toWrite, &commentsOnError);
   currentWorker.writingReportFile.Unlock();
   if (success) {
     logWorker << logger::green << "Data written to file: "
-    << currentWorker.processUniqueRandomId << logger::endL;
+    << currentWorker.workerId << logger::endL;
   } else {
     logIO << "Failed to write computation data. " << commentsOnError.str();
   }
@@ -1834,7 +1777,6 @@ void WebWorker::reset() {
   this->indentationLevelHTML = 0;
   this->displayUserInput = "";
   this->requestTypE = this->requestUnknown;
-  this->flagToggleMonitoring = false;
   this->flagDoAddContentLength = false;
   this->flagFileNameSanitized = false;
   this->millisecondsLastPingServerSideOnly = - 1;
@@ -1888,11 +1830,7 @@ void WebWorker::WrapUpConnection() {
     logIO << "Detail: wrapping up connection. " << logger::endL;
   }
   this->resultWork["connectionsServed"] = this->numberOfReceivesCurrentConnection;
-  if (this->flagToggleMonitoring) {
-    this->resultWork["result"] = "toggleMonitoring";
-  } else {
-    this->resultWork["result"] = "close";
-  }
+  this->resultWork["result"] = "close";
   if (theGlobalVariables.flagRestartNeeded) {
     this->resultWork["restartNeeded"] = "true";
   }
@@ -1971,24 +1909,7 @@ std::string WebWorker::GetMIMEtypeFromFileExtension(const std::string& fileExten
 int WebWorker::ProcessUnknown() {
   MacroRegisterFunctionWithName("WebWorker::ProcessUnknown");
   this->SetHeadeR("HTTP/1.0 501 Method Not Implemented", "Content-Type: text/html");
-  stOutput << "<html><head>"
-  << HtmlRoutines::GetCSSLinkCalculator("/")
-  << "</head>";
-  stOutput << "<body>";
-  stOutput << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
-  << "</calculatorNavigation>\n";
-  stOutput << "<b>Requested method is not implemented. </b> "
-  << "<hr>The original message received from the server follows."
-  << "<hr>\n" << this->ToStringMessageUnsafe();
-
-  if (this->requestTypE == this->requestChunked) {
-    logHttpErrors << logger::red << "Chunked messaging not implemented. Message follows. " << logger::endL
-    << this->ToStringMessageFullUnsafe() << logger::endL;
-  } else {
-    logHttpErrors << logger::red << "Method not implemented. Message follows. " << logger::endL
-    << this->ToStringMessageFullUnsafe(false) << logger::endL;
-  }
-  stOutput << "</body></html>";
+  stOutput << HtmlInterpretation::GetJSONUserInfo("Unknown request");
   return 0;
 }
 
@@ -2334,13 +2255,6 @@ int WebWorker::ProcessApp(bool appendBuildHash) {
   return 0;
 }
 
-int WebWorker::ProcessAbout() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessAbout");
-  this->SetHeaderOKNoContentLength("");
-  stOutput << HtmlInterpretation::GetAboutPage();
-  return 0;
-}
-
 int WebWorker::ProcessTemplate() {
   MacroRegisterFunctionWithName("WebWorker::ProcessTemplate");
   this->SetHeaderOKNoContentLength("");
@@ -2463,13 +2377,6 @@ int WebWorker::ProcessDatabaseModifyEntry() {
   return 0;
 }
 
-int WebWorker::ProcessBrowseProblems() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessBrowseProblems");
-  this->SetHeaderOKNoContentLength("");
-  stOutput << HtmlInterpretation::GetBrowseProblems();
-  return 0;
-}
-
 int WebWorker::ProcessEditPageJSON() {
   MacroRegisterFunctionWithName("WebWorker::ProcessEditPageJSON");
   this->SetHeaderOKNoContentLength("");
@@ -2564,17 +2471,8 @@ int WebWorker::ProcessSlidesSource() {
   theCrawler.flagCrawlTexSourcesRecursively = true;
   if (!theCrawler.BuildOrFetchFromCachePDF(&comments, &comments)) {
     this->flagDoAddContentLength = true;
-    stOutput << "<!DOCTYPE html>"
-    << "<html>"
-    << "<head>"
-    << HtmlRoutines::GetCSSLinkCalculator("/")
-    << "</head>"
-    << "<body>"
-    << "<calculatorNavigation>"
-    << HtmlInterpretation::ToStringNavigation()
-    << "</calculatorNavigation>";
-    stOutput << comments.str();
-    stOutput << "</body></html>";
+    comments << "Failed to build your slides. ";
+    stOutput << HtmlInterpretation::GetJSONUserInfo(HtmlRoutines::ConvertStringToHtmlString(comments.str(), false));
     return 0;
   }
   this->SetHeadeR("HTTP/1.0 200 OK", "Content-Type: application/x-latex; Access-Control-Allow-Origin: *");
@@ -3006,18 +2904,17 @@ int WebWorker::ServeClient() {
     return this->ProcessNavigation();
   } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::examplesJSON) {
     return this->ProcessCalculatorExamplesJSON();
-  } else if (theGlobalVariables.userCalculatorRequestType == "toggleMonitoring") {
-    return this->ProcessToggleMonitoring();
   } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::serverStatusJSON) {
     return this->ProcessServerStatusJSON();
   }
-  if (theGlobalVariables.userCalculatorRequestType == "monitor") {
-    return this->ProcessMonitor();
-  } else if (theGlobalVariables.userCalculatorRequestType == "pause" && theGlobalVariables.flagAllowProcessMonitoring) {
+  if (
+    theGlobalVariables.userCalculatorRequestType == WebAPI::request::pause &&
+    (!theGlobalVariables.flagBanProcessMonitoring)
+  ) {
     return this->ProcessPauseWorker();
   } else if (
     theGlobalVariables.userCalculatorRequestType == WebAPI::request::indicator &&
-    theGlobalVariables.flagAllowProcessMonitoring
+    (!theGlobalVariables.flagBanProcessMonitoring)
   ) {
     return this->ProcessComputationIndicator();
   } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::setProblemData) {
@@ -3028,7 +2925,7 @@ int WebWorker::ServeClient() {
     return this->ProcessActivateAccount();
   } else if (theGlobalVariables.userCalculatorRequestType == "signUp") {
     return this->ProcessSignUP();
-  } else if (theGlobalVariables.userCalculatorRequestType == "forgotLogin") {
+  } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::forgotLogin) {
     return this->ProcessForgotLogin();
   } else if (theGlobalVariables.userCalculatorRequestType == "login") {
     return this->ProcessLoginUserInfo(comments.str());
@@ -3121,12 +3018,10 @@ int WebWorker::ServeClient() {
     return this->ProcessSlidesSource();
   } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::clonePage) {
     return this->ProcessClonePage();
-  } else if (theGlobalVariables.userCalculatorRequestType == "compute") {
+  } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::compute) {
     return this->ProcessCompute();
   } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::selectCourseJSON) {
     return this->ProcessSelectCourseJSON();
-  } else if (theGlobalVariables.userCalculatorRequestType == "about") {
-    return this->ProcessAbout();
   } else if (
     theGlobalVariables.userCalculatorRequestType == "topicListJSON" ||
     theGlobalVariables.userCalculatorRequestType == "topicListJSONNoLogin"
@@ -3219,17 +3114,14 @@ void WebWorker::OutputShowIndicatorOnTimeout() {
     << theGlobalVariables.millisecondsReplyAfterComputation
     << " ms. ";
   }
-  if (!theGlobalVariables.flagAllowProcessMonitoring) {
+  if (theGlobalVariables.flagBanProcessMonitoring) {
     timeOutComments << "Monitoring computations is not allowed on this server.<br> "
-    << "If you want to carry out a long computation you will "
-    << "need to install the calculator on your own machine.<br> "
-    << "At the moment, the only way to do that is by setting the variable "
-    << "theGlobalVariables.flagAllowProcessMonitoring to true, "
-    << "achieved through manually compiling the calculator from source.<br> ";
+    << "Please note that monitoring computations is the default behavior, so the "
+    << "owners of the server must have explicitly banned monitoring. ";
     result[WebAPI::result::timeOutComments] = timeOutComments.str();
     return;
   }
-  result[WebAPI::result::workerId] = this->indexInParent + 1;
+  result[WebAPI::result::workerId] = this->workerId;
   result[WebAPI::result::timeOutComments] = timeOutComments.str();
   if (this->indexInParent < 0) {
     crash << "Index of worker is smaller than 0, this shouldn't happen. " << crash;
@@ -3560,14 +3452,11 @@ bool WebServer::CreateNewActiveWorker() {
     << worker.pipeWorkerToServerControls.name << "\n";
     return this->EmergencyRemoval_LastCreatedWorker();
   }
-  std::cout << "DEBUG: got to creating worker indicator pipe.\n";
   if (!worker.workerToWorkerReturnIndicator.CreateMe(wtow + "indicator-data", false, false, false, true)) {
     logPlumbing << "Failed to create pipe: "
     << worker.workerToWorkerReturnIndicator.name << "\n";
     return this->EmergencyRemoval_LastCreatedWorker();
   }
-  std::cout << "DEBUG: After creating indicator-data.\n";
-  std::cout << "DEBUG: set blocking OK.\n";
   if (!worker.pipeWorkerToWorkerStatus.CreateMe(wtos + "worker status", false, false, false, true)) {
     logPlumbing << "Failed to create pipe: "
     << worker.pipeWorkerToWorkerStatus.name << "\n";
@@ -3577,9 +3466,7 @@ bool WebServer::CreateNewActiveWorker() {
   << "Allocated new worker & plumbing data structures. Total worker data structures: "
   << this->theWorkers.size << ". "
   << logger::endL;
-  std::stringstream outputId;
-  outputId << "connection_" << this->NumConnectionsSoFar;
-  this->theWorkers[this->activeWorker].processUniqueRandomId = outputId.str();
+  this->theWorkers[this->activeWorker].workerId = "";
   this->theWorkers[this->activeWorker].flagInUsE = true;
   this->theWorkers[this->activeWorker].flagExited = false;
 
@@ -3988,9 +3875,6 @@ void WebServer::ProcessOneChildMessage(int childIndex, int& outputNumInUse) {
   }
   outputNumInUse --;
   this->NumWorkersNormallyExited ++;
-  if (workerMessage["result"].theString == "toggleMonitoring") {
-    this->ToggleProcessMonitoring();
-  }
   if (workerMessage["connectionsServed"].theType == JSData::token::tokenLargeInteger) {
     this->NumberOfServerRequestsWithinAllConnections +=
     workerMessage["connectionsServed"].theInteger.GetElement().GetIntValueTruncated()
@@ -4526,7 +4410,7 @@ int WebServer::Run() {
     if (incomingPID < 0) {
       logProcessKills << logger::red << " FAILED to spawn a child process. " << logger::endL;
     } else {
-      this->GetActiveWorker().processUniqueRandomId = Crypto::ConvertListUnsignedCharsToHex(this->idLastWorker);
+      this->GetActiveWorker().workerId = Crypto::ConvertListUnsignedCharsToHex(this->idLastWorker);
     }
     this->GetActiveWorker().ProcessPID = incomingPID;
     if (this->GetActiveWorker().ProcessPID == 0) {
@@ -4586,23 +4470,17 @@ int WebWorker::Run() {
   if (this->connectedSocketID == - 1) {
     crash << "Worker::Run() started on a connecting with ID equal to - 1. " << crash;
   }
-  std::cout << "DEBUG: got to web worker::run\n";
   this->ResetMutexProcessesNoAllocation();
-  std::cout << "DEBUG: pipes were reset.\n";
   std::stringstream processNameStream;
   processNameStream << "W" << this->indexInParent + 1 << ": ";
   MutexProcess::currentProcessName = processNameStream.str();
   theGlobalVariables.flagServerForkedIntoWorker = true;
   crash.CleanUpFunction = WebServer::SignalActiveWorkerDoneReleaseEverything;
-  std::cout << "DEBUG: about to create timer thread\n";
   CreateTimerThread();
-  std::cout << "DEBUG: timer thread created\n";
   // Check web worker indices are initialized properly:
   theWebServer.GetActiveWorker();
-  std::cout << "DEBUG: about to fire up ssl handshake.\n";
   if (theGlobalVariables.flagUsingSSLinCurrentConnection) {
     std::stringstream commentsOnFailure;
-    std::cout << "DEBUG: about to handshake. \n";
     if (!theWebServer.SSLServerSideHandShake(&commentsOnFailure)) {
       theGlobalVariables.flagUsingSSLinCurrentConnection = false;
       this->parent->SignalActiveWorkerDoneReleaseEverything();
@@ -4612,7 +4490,6 @@ int WebWorker::Run() {
       return - 1;
     }
   }
-  std::cout << "DEBUG: after handshake. \n";
   if (theGlobalVariables.flagSSLIsAvailable && theGlobalVariables.flagUsingSSLinCurrentConnection) {
     logOpenSSL << logger::green << "ssl success #: " << this->parent->NumConnectionsSoFar << ". " << logger::endL;
   }
@@ -4620,7 +4497,6 @@ int WebWorker::Run() {
   stOutput.theOutputFunction = WebServer::SendStringThroughActiveWorker;
   int result = 0;
   this->numberOfReceivesCurrentConnection = 0;
-  std::cout << "DEBUG: about to enter worker loop. \n";
   while (true) {
     StateMaintainerCurrentFolder preserveCurrentFolder;
     this->flagAllBytesSentUsingFile = false;
@@ -4649,7 +4525,6 @@ int WebWorker::Run() {
     if (this->messageHead.size() == 0) {
       break;
     }
-    std::cout << "DEBUG: about to serve client. \n";
     result = this->ServeClient();
     if (this->connectedSocketID == - 1) {
       break;
@@ -4658,11 +4533,9 @@ int WebWorker::Run() {
       this->SendAllBytesWithHeaders();
     }
     this->numberOfReceivesCurrentConnection ++;
-    // We break the connection if we need to turn on monitoring as that concerns other processes.
     if (
-      !this->flagKeepAlive ||
+      (!this->flagKeepAlive) ||
       this->flagEncounteredErrorWhileServingFile ||
-      this->flagToggleMonitoring ||
       theGlobalVariables.flagRestartNeeded ||
       theGlobalVariables.flagStopNeeded
     ) {
@@ -5017,11 +4890,12 @@ void WebServer::InitializeGlobalVariables() {
   this->requestsNotNeedingLogin.AddOnTop("about");
   this->requestsNotNeedingLogin.AddOnTop("signUp");
   this->requestsNotNeedingLogin.AddOnTop("signUpPage");
-  this->requestsNotNeedingLogin.AddOnTop("forgotLogin");
-  this->requestsNotNeedingLogin.AddOnTop("forgotLoginPage");
-  this->requestsNotNeedingLogin.AddOnTop("compute");
-  this->requestsNotNeedingLogin.AddOnTop("calculator");
+  this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::forgotLogin);
+  this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::compute);
+  this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::calculatorPage);
   this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::examplesJSON);
+  this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::indicator);
+  this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::pause);
   this->requestsNotNeedingLogin.AddOnTop("exerciseNoLogin");
   this->requestsNotNeedingLogin.AddOnTop("exerciseJSON");
   this->requestsNotNeedingLogin.AddOnTop("templateNoLogin");
@@ -5157,38 +5031,26 @@ int main(int argc, char **argv) {
 
 extern int mainTest(List<std::string>& remainingArgs);
 
-void WebServer::ToggleProcessMonitoring() {
-  MacroRegisterFunctionWithName("WebServer::ToggleProcessMonitoring");
-  if (theGlobalVariables.flagAllowProcessMonitoring) {
-    WebServer::TurnProcessMonitoringOff();
-  } else {
-    WebServer::TurnProcessMonitoringOn();
-  }
-}
-
 void WebServer::TurnProcessMonitoringOn() {
   MacroRegisterFunctionWithName("WebServer::TurnProcessMonitoringOn");
   logServer
   << logger::purple << "************************" << logger::endL
-  << logger::red << "WARNING: process monitoring IS ON. " << logger::endL
+  << logger::yellow << "Process monitoring IS ON. " << logger::endL
   << logger::purple << "************************" << logger::endL;
-  theGlobalVariables.flagAllowProcessMonitoring = true;
+  theGlobalVariables.flagBanProcessMonitoring = false;
   theGlobalVariables.millisecondsReplyAfterComputation = theGlobalVariables.millisecondsReplyAfterComputationDefault;
-  theGlobalVariables.configuration[Configuration::processMonitoringAllowedByDefault] = true;
-
-  theGlobalVariables.ConfigurationStore();
+  theGlobalVariables.configuration[Configuration::processMonitoringBanned] = false;
 }
 
 void WebServer::TurnProcessMonitoringOff() {
   MacroRegisterFunctionWithName("WebServer::TurnProcessMonitoringOn");
   logServer
   << logger::green << "************************" << logger::endL
-  << logger::green << "Process monitoring is now off. " << logger::endL
+  << logger::red << "Process monitoring is now off. " << logger::endL
   << logger::green << "************************" << logger::endL;
-  theGlobalVariables.flagAllowProcessMonitoring = false;
+  theGlobalVariables.flagBanProcessMonitoring = true;
   theGlobalVariables.millisecondsReplyAfterComputation = 0;
-  theGlobalVariables.configuration[Configuration::processMonitoringAllowedByDefault] = false;
-  theGlobalVariables.ConfigurationStore();
+  theGlobalVariables.configuration[Configuration::processMonitoringBanned] = true;
 }
 
 bool GlobalVariables::ConfigurationLoad() {
@@ -5337,10 +5199,12 @@ void GlobalVariables::ConfigurationProcess() {
   }
   if (
     theGlobalVariables.configuration[
-      Configuration::processMonitoringAllowedByDefault
+      Configuration::processMonitoringBanned
     ].isTrueRepresentationInJSON()
   ) {
-    logServer << logger::blue << "Process monitoring turned on from configuration.json. " << logger::endL;
+    logServer << logger::blue << "Process monitoring banned from configuration.json. " << logger::endL;
+    WebServer::TurnProcessMonitoringOff();
+  } else {
     WebServer::TurnProcessMonitoringOn();
   }
   if (theGlobalVariables.configuration[Configuration::builtInTLSAvailable].isTrueRepresentationInJSON()) {

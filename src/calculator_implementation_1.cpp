@@ -400,7 +400,7 @@ bool Calculator::innerPrintSSSubalgebras(
       return theCommands << "Only logged-in admins allowed to force-recompute semisimple subalgebras. ";
     }
   }
-  if (theGlobalVariables.flagAllowProcessMonitoring) {
+  if (!theGlobalVariables.flagBanProcessMonitoring) {
     if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection != nullptr) {
       theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection();
     }

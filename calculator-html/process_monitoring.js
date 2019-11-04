@@ -10,17 +10,21 @@ function Monitor() {
   this.timeIncrement = 2;
   this.timeOutOldCounter = 0;
   this.timeOutCounter = 0;
-  this.currentWorkerNumber = - 1; 
+  /**@type{string} */
+  this.currentWorkerId = ""; 
   this.currentTimeOutHandler = null;
   this.ownerCalculator = null;
 }
 
-Monitor.prototype.start = function(inputWorkerNumber) {
+Monitor.prototype.start = function(
+  /**@type{String} */
+  workerId
+) {
   this.isFinished = false;
   this.isPaused = false;
   this.timeOutCounter = 0;
   this.timeOutOldCounter = 0;
-  this.currentWorkerNumber = Number(inputWorkerNumber);
+  this.currentWorkerId = workerId;
   document.getElementById(ids.domElements.monitoring.buttonTogglePauseRequest).innerHTML = "Pause";
   this.progressReport();
 }
@@ -38,7 +42,7 @@ Monitor.prototype.progressReport = function() {
   this.timeOutCounter += this.timeIncrement;
   var sURL = "";
   sURL += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.indicator}`;
-  sURL += `&${pathnames.urlFields.mainInput}=${this.currentWorkerNumber}`;
+  sURL += `&${pathnames.urlFields.requests.workerId}=${this.currentWorkerId}`;
   submitRequests.submitGET({
     url: sURL,
     progress: ids.domElements.spanProgressCalculatorInput,
@@ -48,8 +52,12 @@ Monitor.prototype.progressReport = function() {
   this.currentTimeOutHandler = setTimeout(this.progressReport.bind(this), this.timeIncrement * 1000);
 }
 
-Monitor.prototype.callbackPauseRequest = function(input, output) {
+Monitor.prototype.clearTimeout = function() {
   clearTimeout(this.currentTimeOutHandler);
+}
+
+Monitor.prototype.callbackPauseRequest = function(input, output) {
+  this.clearTimeout();
   var progressReportContent = "";
   progressReportContent += `Refreshing every ${this.timeIncrement} second(s). `;
   progressReportContent += `Client time: ~${Math.floor(this.timeOutOldCounter)} second(s)<br>`;
@@ -100,7 +108,7 @@ Monitor.prototype.togglePause = function() {
   var pauseURL = "";
   pauseURL += `${pathnames.urls.calculatorAPI}?`
   pauseURL += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.pause}&`;
-  pauseURL += `${pathnames.urlFields.mainInput}=${this.currentWorkerNumber}&`;
+  pauseURL += `${pathnames.urlFields.requests.workerId}=${this.currentWorkerId}&`;
   submitRequests.submitGET({
     url: pauseURL,
     callback: this.callbackPauseRequest.bind(this),

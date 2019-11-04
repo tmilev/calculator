@@ -459,37 +459,6 @@ std::string HtmlInterpretation::ClonePageResult() {
   return result.ToString(false);
 }
 
-std::string HtmlInterpretation::GetAboutPage() {
-  MacroRegisterFunctionWithName("HtmlInterpretation::GetAboutPage");
-  std::stringstream out;
-  out << "<!DOCTYPE html>";
-  out << "<html>";
-  out << "<head>"
-  << HtmlRoutines::GetCSSLinkCalculator("/")
-  << "</head>";
-  out << "<body>";
-  out << "<calculatorNavigation>"
-  << HtmlInterpretation::ToStringNavigation()
-  << "</calculatorNavigation>";
-  std::string theFile;
-  std::stringstream commentsOnFailure;
-  bool isGood = FileOperations::LoadFileToStringVirtual(
-    "/calculator-html/about.html", theFile, false, false, &commentsOnFailure
-  );
-  if (!isGood) {
-    isGood = FileOperations::LoadFileToStringVirtual("/html/about.html", theFile, false, false, &commentsOnFailure);
-  }
-  if (!isGood) {
-    out << "<span style =\"color:red\"><b>"
-    << commentsOnFailure.str()
-    << "</b></span>";
-  } else {
-    out << theFile;
-  }
-  out << "</body></html>";
-  return out.str();
-}
-
 void HtmlInterpretation::BuildHtmlJSpage(bool appendBuildHash) {
   MacroRegisterFunctionWithName("HtmlInterpretation::BuildHtmlJSpage");
   std::stringstream outFirstPart, outSecondPart;
@@ -742,7 +711,7 @@ std::string HtmlInterpretation::GetPageFromTemplate() {
     out << "<html>"
     << "<head>" << HtmlRoutines::GetCSSLinkCalculator("/") << "</head>"
     << "<body>";
-    out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation() << " </calculatorNavigation>"
+    out
     << "<b>Failed to load file: "
     << theGlobalVariables.GetWebInput("courseHome") << ". </b>"
     << "<br>Comments:<br> " << comments.str();
@@ -755,7 +724,7 @@ std::string HtmlInterpretation::GetPageFromTemplate() {
     << HtmlRoutines::GetCSSLinkCalculator("/")
     << "</head>"
     << "<body>";
-    out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation() << " </calculatorNavigation>"
+    out
     << "<b>Failed to interpret as template the following file: "
     << theGlobalVariables.GetWebInput("courseHome") << ". </b>"
     << "<br>Comments:<br> " << comments.str();
@@ -826,7 +795,7 @@ void HtmlInterpretation::GetJSDataUserInfo(JSData& outputAppend, const std::stri
   if (comments != "") {
     outputAppend["comments"] = HtmlRoutines::ConvertStringToHtmlString(comments, false);
   }
-  if (theGlobalVariables.flagAllowProcessMonitoring) {
+  if (!theGlobalVariables.flagBanProcessMonitoring) {
     outputAppend[WebAPI::UserInfo::processMonitoring] = "true";
     outputAppend[Configuration::millisecondsReplyAfterComputation] = static_cast<double>(theGlobalVariables.millisecondsReplyAfterComputation);
   } else {
@@ -945,23 +914,6 @@ std::string HtmlInterpretation::GetExamPageJSON() {
     }
   }
   return output.ToString(false, false);
-}
-
-std::string HtmlInterpretation::GetBrowseProblems() {
-  MacroRegisterFunctionWithName("HtmlInterpretation::GetBrowseProblems");
-  std::stringstream out;
-  out << "<!DOCTYPE html>";
-  out << "<html>";
-  out << "<head>"
-  << HtmlRoutines::GetCSSLinkCalculator("/")
-  << "</head>";
-  out << "<body>";
-  out << "<calculatorNavigation>"
-  << HtmlInterpretation::ToStringNavigation()
-  << "</calculatorNavigation>";
-  out << "Not implemented yet.";
-  out << "</body></html>";
-  return out.str();
 }
 
 std::string HtmlInterpretation::GetEditPageJSON() {
@@ -1732,16 +1684,6 @@ std::string HtmlInterpretation::GetAccountsPageBody(const std::string& hostWebAd
   return out.str();
 }
 
-std::string HtmlInterpretation::GetNavigationPanelWithGenerationTime() {
-  MacroRegisterFunctionWithName("HtmlInterpretation::GetNavigationPanelWithGenerationTime");
-  std::stringstream out;
-  out.precision(3);
-  out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
-  << "Generated in " << theGlobalVariables.GetElapsedSeconds() << " second(s)"
-  << "</calculatorNavigation>\n";
-  return out.str();
-}
-
 std::string HtmlInterpretation::GetScoresPage() {
   MacroRegisterFunctionWithName("WebWorker::GetScoresPage");
   std::stringstream out;
@@ -1755,7 +1697,6 @@ std::string HtmlInterpretation::GetScoresPage() {
   thePage.LoadDatabaseInfo(out);
   std::string theScoresHtml = HtmlInterpretation::ToStringUserScores();
   std::string theDebugHtml = HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
-  out << HtmlInterpretation::GetNavigationPanelWithGenerationTime();
   out << "<problemNavigation>" << thePage.ToStringProblemNavigation() << "</problemNavigation>";
   out << theScoresHtml;
   out << theDebugHtml;
@@ -1779,7 +1720,6 @@ std::string HtmlInterpretation::GetAccountsPage(const std::string& hostWebAddres
   }
   CalculatorHTML thePage;
   thePage.LoadDatabaseInfo(out);
-  out << HtmlInterpretation::GetNavigationPanelWithGenerationTime();
   out << "<problemNavigation>" << thePage.ToStringProblemNavigation() << "</problemNavigation>";
   if (!isOK) {
     out << "<b>Viewing accounts is allowed for logged-in admins only</b>"
@@ -2456,144 +2396,5 @@ std::string HtmlInterpretation::ToStringUserDetails(
   out << "<br><span id =\"" << idOutput << "\">\n";
   out << HtmlInterpretation::ToStringUserDetailsTable(adminsOnly, theUsers, hostWebAddressWithPort);
   out << "</span>";
-  return out.str();
-}
-
-std::string GlobalVariables::ToStringNavigation() {
-  return HtmlInterpretation::ToStringNavigation();
-}
-
-std::string HtmlInterpretation::ToStringNavigation() {
-  MacroRegisterFunctionWithName("HtmlInterpretation::ToStringNavigation");
-  std::stringstream out;
-  std::string linkSeparator = " | ";
-  std::string linkBigSeparator = " || ";
-  if (
-    theGlobalVariables.userCalculatorRequestType == "template" ||
-    theGlobalVariables.userCalculatorRequestType == "templateNoLogin"
-  ) {
-    out << "<b>Home</b>" << linkSeparator;
-  } else {
-    std::string topicList = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("topicList"), false);
-    std::string courseHome = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
-    if (topicList != "" && courseHome != "") {
-      std::string studentView = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("studentView"), false);
-      std::string section = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("studentSection"), false);
-      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable;
-      if (theGlobalVariables.userCalculatorRequestType == "exerciseNoLogin") {
-        out << "?request=templateNoLogin";
-      } else {
-        out << "?request=template";
-      }
-      out << "&" << theGlobalVariables.ToStringCalcArgsNoNavigation(nullptr)
-      << "studentView=" << studentView << "&";
-      if (section != "") {
-        out << "studentSection="
-        << theGlobalVariables.GetWebInput("studentSection") << "&";
-      }
-      out << "topicList=" << topicList << "&";
-      out << "courseHome=" << courseHome << "&";
-      out << "fileName=" << courseHome << "&\">Home</a>"
-      << linkSeparator;
-    }
-  }
-  if (theGlobalVariables.userCalculatorRequestType == "selectCourse") {
-    out << "<b>Select course</b>" << linkBigSeparator;
-  } else {
-    out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-    << "?request=selectCourse\">Select course</a>" << linkBigSeparator;
-  }
-  if (theGlobalVariables.flagLoggedIn) {
-    out << "User";
-    if (theGlobalVariables.UserDefaultHasAdminRights()) {
-      out << " <b>(admin)</b>";
-    }
-    out << ": " << theGlobalVariables.userDefault.username << linkSeparator;
-    out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=logout&";
-    out << theGlobalVariables.ToStringCalcArgsNoNavigation(nullptr) << " \">Log out</a>" << linkSeparator;
-    if (theGlobalVariables.userCalculatorRequestType == "changePasswordPage") {
-      out << "<b>Account";
-      out << "</b>" << linkSeparator;
-    } else {
-      if (theGlobalVariables.flagUsingSSLinCurrentConnection) {
-        out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=changePasswordPage&"
-        << theGlobalVariables.ToStringCalcArgsNoNavigation(nullptr) << "\">Account</a>" << linkSeparator;
-      } else {
-        out << "<b>Account settings: requires secure connection</b>" << linkSeparator;
-      }
-    }
-    if (theGlobalVariables.userDefault.sectionComputed != "") {
-      out << "Section: " << theGlobalVariables.userDefault.sectionComputed
-      << linkSeparator;
-    }
-  } else {
-    out << "<b style ='color:red'>logged out</b>" << linkSeparator;
-  }
-  if (theGlobalVariables.UserDefaultHasAdminRights()) {
-    if (theGlobalVariables.userCalculatorRequestType != "accounts") {
-      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-      << "?request=accounts&"
-      << theGlobalVariables.ToStringCalcArgsNoNavigation(nullptr)
-      << "&filterAccounts=true"
-      << "\">Accounts</a>" << linkSeparator;
-    } else {
-      out << "<b>Accounts</b>" << linkSeparator;
-    }
-    if (theGlobalVariables.userCalculatorRequestType != "scores") {
-      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=scores&"
-      << theGlobalVariables.ToStringCalcArgsNoNavigation(nullptr)
-      << "\">Scores</a>" << linkSeparator;
-    } else {
-      out << "<b>Scores</b>" << linkSeparator;
-    }
-    if (theGlobalVariables.userCalculatorRequestType != "status") {
-      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=status&"
-      << theGlobalVariables.ToStringCalcArgsNoNavigation(nullptr)
-      << "\">Server</a>" << linkSeparator;
-    } else {
-      out << "<b>Server</b>" << linkBigSeparator;
-    }
-    if (theGlobalVariables.userCalculatorRequestType != "database") {
-      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=database&"
-      << theGlobalVariables.ToStringCalcArgsNoNavigation(nullptr)
-      << "\">Database</a>" << linkBigSeparator;
-    } else {
-      out << "<b>Database</b>" << linkBigSeparator;
-    }
-  }
-  if (theGlobalVariables.userCalculatorRequestType != "calculator") {
-    out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=calculator&"
-    << theGlobalVariables.ToStringCalcArgsNoNavigation(nullptr) << " \">Calculator</a>" << linkBigSeparator;
-  } else {
-    out << "<b>Calculator</b> " << linkBigSeparator;
-  }
-  if (theGlobalVariables.userCalculatorRequestType != "about") {
-    out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=about&"
-    << theGlobalVariables.ToStringCalcArgsNoNavigation(nullptr) << " \">About</a>" << linkBigSeparator;
-  } else {
-    out << "<b>About</b> " << linkBigSeparator;
-  }
-  out << "<a href=\"" << HtmlRoutines::gitRepository << "/issues\" target =\"_blank\">Feedback, bugs</a>"
-  << linkBigSeparator;
-
-  if (!theGlobalVariables.flagRunningApache) {
-    if (theGlobalVariables.flagAllowProcessMonitoring) {
-      if (!theGlobalVariables.UserDefaultHasAdminRights()) {
-        out << "<b style =\"color:red\">Monitoring on</b>" << linkSeparator;
-      } else {
-        out << "<a style =\"color:red\" href=\""
-        << theGlobalVariables.DisplayNameExecutable
-        << "?request=toggleMonitoring\""
-        << "><b>Monitoring on</b></a>" << linkSeparator;
-      }
-    } else {
-      if (theGlobalVariables.UserDefaultHasAdminRights()) {
-        out << "<a style =\"color:green\" href=\""
-        << theGlobalVariables.DisplayNameExecutable
-        << "?request=toggleMonitoring\""
-        << "><b>Monitoring off</b></a>" << linkSeparator;
-      }
-    }
-  }
   return out.str();
 }

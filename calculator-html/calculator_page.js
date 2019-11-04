@@ -182,13 +182,14 @@ Calculator.prototype.toggleExamples = function(theButton) {
 }
 
 Calculator.prototype.submitComputation = function() {
+  processMonitoring.monitor.clearTimeout();
   var thePage = window.calculator.mainPage;
   var calculatorInput = document.getElementById(ids.domElements.inputMain).value;
   if (calculatorInput === this.lastSubmittedInput) {
     return;
   }
   this.lastSubmittedInput = calculatorInput;
-  //submitComputationPartTwo is called by a callback in the function below:
+  // submitComputationPartTwo is called by a callback in the function below:
   thePage.storage.variables.calculator.input.setAndStore(this.lastSubmittedInput);
 }
 
@@ -375,6 +376,11 @@ Calculator.prototype.callbackToggleStatus = function (input, output) {
   var monitorResult = document.getElementById(ids.domElements.monitoring.spanStatus);
   var parsedInput = JSON.parse(input);
   var monitoring = parsedInput["processMonitoring"];
+  if (monitoring !== false && monitoring !== "false") {
+    monitoring = true;
+  } else {
+    monitoring = false;
+  }
   if (monitoring === "true" || monitoring === true) {
     monitorResult.innerHTML = "Monitor <b style = 'color:red'>on</b>";
     document.getElementById(ids.domElements.switch.monitoring).checked = true;

@@ -13,7 +13,7 @@ public:
   WebServer* parent;
   int indexInParent;
   int ProcessPID;
-  std::string processUniqueRandomId;
+  std::string workerId;
   int numberOfReceivesCurrentConnection;
   int64_t millisecondsServerAtWorkerStart;
   int64_t millisecondsLastPingServerSideOnly;
@@ -51,7 +51,6 @@ public:
   bool flagDoAddContentLength;
   bool flagUsingSSLInWorkerProcess;
   bool flagDidSendAll;
-  bool flagToggleMonitoring;
   bool flagAllBytesSentUsingFile;
   bool flagEncounteredErrorWhileServingFile;
   bool flagIsPaused;
@@ -85,10 +84,9 @@ public:
   int ProcessClonePage();
   int ProcessModifyPage();
   int ProcessAddUserEmails();
-  int ProcessToggleMonitoring();
   int ProcessServerStatusJSON();
   int ProcessComputationIndicator();
-  int ProcessBrowseProblems();
+  JSData ProcessComputationIndicatorJSData();
   int ProcessEditPageJSON();
   int ProcessFolderOrFile();
   int ProcessFolder();
@@ -108,7 +106,6 @@ public:
   int ProcessAccountsJSON();
   int ProcessActivateAccount();
   int ProcessScores();
-  int ProcessAbout();
   int ProcessApp(bool appendBuildHash);
   int ProcessCalculatorOnePageJS(bool appendBuildHash);
   int ProcessTopicListJSON();
@@ -134,7 +131,6 @@ public:
   int ProcessProblemGiveUp();
   int ProcessProblemSolution();
   int ProcessPauseWorker();
-  int ProcessMonitor();
   int ProcessUnknown();
   int Run();
   bool CheckConsistency();
@@ -325,6 +321,7 @@ public:
   void StopKillAll[[noreturn]](bool attemptToRestart);
   bool RestartIsNeeded();
   void initDates();
+  int GetWorkerIndexFromId(std::string& inputId, std::stringstream* commentsOnError);
   std::string ToStringLastErrorDescription();
   std::string ToStringStatusActive();
   std::string ToStringStatusAll();
@@ -332,7 +329,6 @@ public:
   std::string ToStringConnectionSummary();
   static void TurnProcessMonitoringOn();
   static void TurnProcessMonitoringOff();
-  static void ToggleProcessMonitoring();
   static std::string GetEnvironment(const std::string& envVarName);
   static int main(int argc, char** argv);
   static int mainApache();

@@ -11,7 +11,6 @@ var urlFields = {
   request: "request",
   requests: {
     forgotLogin: "forgotLogin",
-    monitor: "monitor",
     toggleMonitoring: "toggleMonitoring",
     userInfoJSON: "userInfoJSON",
     loginDisabledEveryoneIsAdmin: "loginDisabledEveryoneIsAdmin",
@@ -27,15 +26,13 @@ var urlFields = {
     setTeacher: "setTeacher",
     database: "database",
     serverStatusJSON: "serverStatusJSON",
+    workerId: "workerId",
   },
   problem: {
     failedToLoadProblem: "Failed to load problem.",
     problemLabel: "problemLabel",
     content: "content",
     debugInformation: "debugInformation",
-  },
-  queryParameters: {
-    processId: "processId",
   },
   teachersAndSections: "teachersAndSections",
   fileName: "fileName",

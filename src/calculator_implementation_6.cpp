@@ -2220,7 +2220,7 @@ bool CalculatorFunctionsGeneral::innerPrecomputeSemisimpleLieAlgebraStructure(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPrecomputeSemisimpleLieAlgebraStructure");
-  if (theGlobalVariables.flagAllowProcessMonitoring) {
+  if (!theGlobalVariables.flagBanProcessMonitoring) {
     if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection != nullptr) {
       theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection();
     }

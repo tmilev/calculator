@@ -23,12 +23,16 @@ public:
     static std::string serverStatusJSON;
     static std::string clonePage;
     static std::string indicator;
+    static std::string pause;
     static std::string submitExerciseNoLogin;
     static std::string submitExercisePreviewNoLogin;
     static std::string submitExercise;
     static std::string submitAnswers;
     static std::string problemGiveUp;
     static std::string problemGiveUpNoLogin;
+    static std::string workerId;
+    static std::string forgotLogin;
+    static std::string compute;
   };
   struct result {
     static std::string resultHtml;
@@ -71,7 +75,7 @@ public:
 
 class Configuration {
 public:
-  static std::string processMonitoringAllowedByDefault;
+  static std::string processMonitoringBanned;
   static std::string processMonitoringTriggerTime;
   static std::string millisecondsReplyAfterComputationDefault;
   static std::string millisecondsReplyAfterComputation;
@@ -86,11 +90,11 @@ public:
 
 class DatabaseStrings {
 public:
-///credentials of calculator to use database
+  // calculator credentials for database use
   static std::string theDatabaseUser;
   static std::string theDatabaseName;
   static std::string theDatabaseNameMongo;
-///user column names
+  // user column names
   static std::string labelUserId;
   static std::string labelUsername;
   static std::string labelEmail;
@@ -105,13 +109,13 @@ public:
   static std::string labelTimeOfAuthenticationTokenCreation;
 
   static std::string tableUsers;
-///email info
+  // email info
   static std::string tableEmailInfo;
   static std::string labelLastActivationEmailTime;
   static std::string labelNumActivationEmails;
   static std::string labelUsernameAssociatedWithToken;
 
-///course info column names
+  // course info column names
   static std::string labelCurrentCourses;
   static std::string labelSection;
   static std::string labelDeadlinesSchema;
@@ -119,26 +123,26 @@ public:
   static std::string labelSectionsTaught;
   static std::string labelInstructor;
   static std::string labelSemester;
-///deadlines info
+  // deadlines info
   static std::string labelDeadlines;
   static std::string tableDeadlines;
-///problem weights info
+  // problem weights info
   static std::string tableProblemWeights;
   static std::string labelProblemWeights;
-///problem information
+  // problem information
   static std::string tableProblemInformation;
   static std::string labelProblemTotalQuestions;
   static std::string labelProblemName;
-///deleted fields
+  // deleted fields
   static std::string anyFielD;
   static std::string labelFields;
   static std::string labelTable;
   static std::string objectSelectoR;
   static std::string objectSelectorMongo;
   static std::string labelIdMongo;
-///deleted info
+  // deleted info
   static std::string tableDeleted;
-///app info
+  // app info
   static std::string labelCurrentPage;
   static std::string labelPageSignUp;
   static std::string labelPageAccount;

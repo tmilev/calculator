@@ -31,14 +31,13 @@ public:
   static std::string GetProblemSolutionString();
   static JSData GetProblemSolutionJSON();
   static std::string GetEditPageJSON();
-  static std::string GetBrowseProblems();
   static std::string GetJavascriptCaptcha();
   static std::string GetCaptchaDiv();
   static std::string GetExamPageJSON();
   static std::string GetPageFromTemplate();
   static std::string GetJSONFromTemplate();
-  static std::string GetJSONUserInfo(const std::string &comments);
-  static void GetJSDataUserInfo(JSData& outputAppend, const std::string &comments);
+  static std::string GetJSONUserInfo(const std::string& comments);
+  static void GetJSDataUserInfo(JSData& outputAppend, const std::string& comments);
   static std::string GetTopicTableJSON();
   static std::string GetAnswerOnGiveUp();
   static std::string GetAnswerOnGiveUp(
@@ -46,12 +45,10 @@ public:
   );
   static std::string GetSelectCourseJSON();
   static std::string GetScoresPage();
-  static std::string GetAboutPage();
   static std::string GetApp(bool appendBuildHash);
   static std::string GetOnePageJS(bool appendBuildHash);
   std::string GetOnePageJSBrowserify();
   static std::string GetScoresInCoursePage();
-  static std::string GetNavigationPanelWithGenerationTime();
   static JSData submitAnswersPreviewJSON();
   static std::string submitAnswersPreviewString();
   static std::string GetSetProblemDatabaseInfoHtml();
@@ -73,7 +70,6 @@ public:
   static std::string GetCommentsInterpretation(
     Calculator& theInterpreterWithAdvice, int indexShift, FormatExpressions& theFormat
   );
-  static std::string ToStringNavigation();
 };
 
 

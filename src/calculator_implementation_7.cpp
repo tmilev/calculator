@@ -8184,9 +8184,11 @@ bool CalculatorFunctionsGeneral::innerTestIndicator(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestIndicator");
-  if (!theGlobalVariables.flagAllowProcessMonitoring) {
+  if (theGlobalVariables.flagBanProcessMonitoring) {
     std::stringstream out;
-    out << "Process monitoring not allowed (can be turned on by admin). ";
+    out << "Process monitoring not allowed. "
+    << "This is not the default behavior; "
+    << "the server's admins have explicitly banned monitoring. ";
     return output.AssignValue(out.str(), theCommands);
   }
   if (input.size() < 3) {

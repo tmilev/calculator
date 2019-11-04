@@ -546,25 +546,6 @@ void WebWorker::StandardOutputAfterTimeOut(const std::string& input) {
   standardOutputStreamAfterTimeout << input;
 }
 
-std::string WebWorker::GetNavigationPage() {
-  MacroRegisterFunctionWithName("WebWorker::GetNavigationPage");
-  std::stringstream out;
-  out << "<html><body>";
-  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=accounts" << "\">Accounts</a>";
-  out << "<br>";
-  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=logout" << "\">Log out</a>";
-  out << "<br>";
-  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=database" << "\">Database</a>";
-  out << "<br>";
-  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=changePasswordPage" << "\">Change password</a>";
-  out << "<br>";
-  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=statusPublic" << "\">Server status</a>";
-  out << "<br>";
-  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=calculator" << "\">Calculator</a>";
-  out << "</body></html>";
-  return out.str();
-}
-
 std::string WebWorker::GetDatabaseJSON() {
   MacroRegisterFunctionWithName("WebWorker::GetDatabaseJSON");
   if (!theGlobalVariables.UserDefaultHasAdminRights()) {
@@ -2295,13 +2276,6 @@ int WebWorker::ProcessExamPageJSON() {
   return 0;
 }
 
-int WebWorker::ProcessNavigation() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessNavigation");
-  this->SetHeaderOKNoContentLength("");
-  stOutput << this->GetNavigationPage();
-  return 0;
-}
-
 int WebWorker::ProcessGetAuthenticationToken(const std::string& reasonForNoAuthentication) {
   MacroRegisterFunctionWithName("WebWorker::ProcessGetAuthenticationToken");
   this->SetHeaderOKNoContentLength("");
@@ -2906,11 +2880,6 @@ int WebWorker::ServeClient() {
     return this->ProcessAccounts();
   } else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.userCalculatorRequestType == "accountsJSON") {
     return this->ProcessAccountsJSON();
-  } else if (
-    theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
-    theGlobalVariables.userCalculatorRequestType == "navigation"
-  ) {
-    return this->ProcessNavigation();
   } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::examplesJSON) {
     return this->ProcessCalculatorExamplesJSON();
   } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::serverStatusJSON) {

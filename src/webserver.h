@@ -123,7 +123,6 @@ public:
   int ProcessLogout();
   int ProcessSignUP();
   int ProcessForgotLogin();
-  int ProcessNavigation();
   int ProcessCompute();
   int ProcessCalculatorExamplesJSON();
   int ProcessSubmitAnswers();
@@ -186,7 +185,6 @@ public:
   std::string GetBrowseProblems();
   std::string GetDatabaseJSON();
   std::string GetDatabaseDeleteOneItem();
-  std::string GetNavigationPage();
   std::string GetAddUserEmails();
   std::string GetHtmlHiddenInputs(bool includeUserName, bool includeAuthenticationToken);
   void SetHeaderOKNoContentLength(const std::string& extraHeader, const std::string& contentType = "text/html");

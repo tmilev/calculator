@@ -46,6 +46,19 @@ public:
     const std::string& fileContent,
     std::stringstream *commentsOnError
   );
+  static bool WriteFileVirualWithPermissions(
+    const std::string& fileNameVirtual,
+    const std::string& fileContent,
+    bool accessSensitiveFolders,
+    std::stringstream *commentsOnError
+  );
+  static bool WriteFileVirualWithPermissions_AccessUltraSensitiveFoldersIfNeeded(
+    const std::string& fileNameVirtual,
+    const std::string& fileContent,
+    bool accessSensitiveFolders,
+    bool accessUltraSensitiveFolders,
+    std::stringstream *commentsOnError
+  );
   static std::string WriteFileReturnHTMLLink(
     const std::string& fileContent, const std::string& fileNameVirtual, const std::string& linkText
   );
@@ -132,8 +145,7 @@ public:
     bool accessSensitiveFolders = false,
     bool accessUltraSensitiveFolders = false
   );
-  static bool OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(
-    std::fstream& theFile,
+  static bool OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(std::fstream& theFile,
     const std::string& theFileName,
     bool OpenInAppendMode,
     bool truncate,

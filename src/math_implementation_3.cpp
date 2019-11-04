@@ -768,10 +768,41 @@ bool FileOperations::LoadFileToStringVirtualCustomizedReadOnly(
 }
 
 bool FileOperations::WriteFileVirual(
-  const std::string& fileNameVirtual, const std::string& fileContent, std::stringstream* commentsOnError
+  const std::string& fileNameVirtual,
+  const std::string& fileContent,
+  std::stringstream* commentsOnError
+) {
+  return FileOperations::WriteFileVirualWithPermissions(fileNameVirtual, fileContent, false, commentsOnError);
+}
+
+bool FileOperations::WriteFileVirualWithPermissions(
+  const std::string& fileNameVirtual,
+  const std::string& fileContent,
+  bool accessSensitiveFolders,
+  std::stringstream* commentsOnError
+) {
+  return FileOperations::WriteFileVirualWithPermissions_AccessUltraSensitiveFoldersIfNeeded(
+    fileNameVirtual, fileContent, accessSensitiveFolders, false, commentsOnError
+  );
+}
+
+bool FileOperations::WriteFileVirualWithPermissions_AccessUltraSensitiveFoldersIfNeeded(
+  const std::string& fileNameVirtual,
+  const std::string& fileContent,
+  bool accessSensitiveFolders,
+  bool accessUltraSensistiveFolders,
+  std::stringstream* commentsOnError
 ) {
   std::fstream theFile;
-  if (!FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(theFile, fileNameVirtual, false, true, false)) {
+  if (!FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded_UltraSensitiveOptions(
+    theFile,
+    fileNameVirtual,
+    false,
+    true,
+    false,
+    accessSensitiveFolders,
+    accessUltraSensistiveFolders
+  )) {
     if (commentsOnError != nullptr) {
       *commentsOnError << "Filed to open file. ";
     }
@@ -1254,8 +1285,7 @@ bool FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(
     OpenInAppendMode,
     truncate,
     openAsBinary,
-    accessSensitiveFolders,
-    false
+    accessSensitiveFolders
   );
 }
 

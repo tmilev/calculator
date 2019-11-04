@@ -1496,7 +1496,7 @@ JSData WebWorker::ProcessComputationIndicatorJSData() {
     result[WebAPI::result::error] = out.str();
     return result;
   }
-  if (! otherWorker.workerToWorkerRequestIndicator.WriteOnceAfterEmptying("!", false, true)) {
+  if (!otherWorker.workerToWorkerRequestIndicator.WriteOnceAfterEmptying("!", false, true)) {
     out << "Failed to request progress report. ";
     result[WebAPI::result::error] = out.str();
     return result;
@@ -1520,7 +1520,7 @@ JSData WebWorker::ProcessComputationIndicatorJSData() {
     "results/" + otherWorker.workerId,
     computationResult,
     true,
-    false,
+    true,
     &comments
   );
   otherWorker.writingReportFile.Unlock();
@@ -1547,7 +1547,13 @@ void WebWorker::WriteAfterTimeout(const std::string& input, const std::string& s
   std::string toWrite = result.ToString(false, false, false, false);
   WebWorker& currentWorker = theWebServer.GetActiveWorker();
   currentWorker.writingReportFile.Lock();
-  bool success = FileOperations::WriteFileVirual("results/" + currentWorker.workerId, toWrite, &commentsOnError);
+  bool success = FileOperations::WriteFileVirualWithPermissions_AccessUltraSensitiveFoldersIfNeeded(
+    "results/" + currentWorker.workerId,
+    toWrite,
+    true,
+    true,
+    &commentsOnError
+  );
   currentWorker.writingReportFile.Unlock();
   if (success) {
     logWorker << logger::green << "Data written to file: "

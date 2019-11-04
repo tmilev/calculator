@@ -1494,6 +1494,7 @@ JSData WebWorker::ProcessComputationIndicatorJSData() {
   int inputWebWorkerIndex = this->parent->GetWorkerIndexFromId(workerId, &comments);
   if (inputWebWorkerIndex < 0) {
     result[WebAPI::result::error] = HtmlRoutines::ConvertStringToHtmlString(comments.str(), false);
+    return result;
   }
   comments
   << "The maximum number of "

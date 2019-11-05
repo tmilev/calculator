@@ -707,6 +707,7 @@ class SyntacticElement {
     this->numNonBoundVariablesInherited = - 1; // - 1 stands for unknown
     this->numBoundVariablesInherited = - 1; // - 1 stands for unknown
   }
+  Rational GetRationalCrashIfNot(Calculator& owner);
 };
 
 class PlotObject {
@@ -1124,7 +1125,6 @@ public:
   int numEmptyTokensStart;
   Expression theProgramExpression;
   //  std::vector<std::stringstream> theLogs;
-  int registerPositionAfterDecimalPoint;
   int counterInSyntacticSoup;
   List<SyntacticElement> syntacticSouP;
   List<SyntacticElement> syntacticStacK;
@@ -1409,6 +1409,8 @@ public:
   bool ReplaceXEXByE();
   bool ReplaceVbyVdotsVAccordingToPredefinedWordSplits();
   bool ReplaceAXbyEX();
+  bool ReplaceIntegerXbyEX();
+  bool ReplaceIntegerDotIntegerByE();
   bool ReplaceXXByEEmptySequence();
   bool ReplaCeOXdotsXbyEXdotsX(int numXs);
   bool ReplaCeOXbyEX();
@@ -1418,7 +1420,6 @@ public:
   bool ReplaceXXByEmptyString();
   bool ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence();
   bool ReplaceXXbyE();
-  bool ReplaceIntIntBy10IntPlusInt();
   bool GetMatrixExpressions(const Expression& input, Matrix<Expression>& output, int desiredNumRows = - 1, int desiredNumCols = - 1);
   bool GetMatrixExpressionsFromArguments(
     const Expression& input, Matrix<Expression>& output, int desiredNumRows = - 1, int desiredNumCols = - 1
@@ -2417,6 +2418,7 @@ public:
   );
   bool isLeftSeparator(unsigned char c);
   bool isRightSeparator(unsigned char c);
+  bool ShouldSplitOutsideQuotes(const std::string& left, char right);
   void ParseFillDictionary(const std::string& input, List<SyntacticElement>& output);
   void ParseFillDictionary(const std::string& input);
 };

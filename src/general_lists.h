@@ -211,6 +211,7 @@ public:
   static int TwoToTheNth(int n);
   static bool isALatinLetter(char input);
   static bool isADigit(const std::string& input, int* whichDigit = nullptr);
+  static bool hasDecimalDigitsOnly(const std::string& input);
   static bool IsAHexDigit(char digitCandidate);
   static bool isADigit(char theChar, int* whichDigit = nullptr);
   template <class theType>

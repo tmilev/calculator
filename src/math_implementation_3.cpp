@@ -2279,6 +2279,15 @@ bool MathRoutines::isALatinLetter(char input) {
   return false;
 }
 
+bool MathRoutines::hasDecimalDigitsOnly(const std::string& input) {
+  for (unsigned i = 0; i < input.size(); i ++) {
+    if (!MathRoutines::isADigit(input[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
 bool MathRoutines::isADigit(char theChar, int* whichDigit) {
   int theDigit = theChar - '0';
   bool result = (theDigit < 10 && theDigit >= 0);

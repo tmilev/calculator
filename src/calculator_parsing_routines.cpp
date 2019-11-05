@@ -792,6 +792,31 @@ void Calculator::ParseFillDictionary(const std::string& input) {
   (*this->CurrrentSyntacticSouP).AddOnTop(currentElement);
 }
 
+bool Calculator::ShouldSplitOutsideQuotes(const std::string& left, char right) {
+  if (left.size() == 0) {
+    return false;
+  }
+  char leftLastChar = left[left.size() - 1];
+  bool rightIsDigit = MathRoutines::isADigit(right);
+  bool leftIsDigit = MathRoutines::isADigit(leftLastChar);
+  if (leftIsDigit && rightIsDigit) {
+    return false;
+  }
+  if  (
+    this->isLeftSeparator(static_cast<unsigned char>(left[0])) ||
+    this->isRightSeparator(static_cast<unsigned char>(right)) ||
+    left == " "
+  ) {
+    return true;
+  }
+  if (rightIsDigit) {
+    if (leftLastChar == '\\' || this->stringsThatSplitIfFollowedByDigit.Contains(left)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 void Calculator::ParseFillDictionary(const std::string& input, List<SyntacticElement>& output) {
   MacroRegisterFunctionWithName("Calculator::ParseFillDictionary");
   std::string current;
@@ -799,7 +824,6 @@ void Calculator::ParseFillDictionary(const std::string& input, List<SyntacticEle
   output.SetSize(0);
   char LookAheadChar;
   SyntacticElement currentElement;
-  int currentDigit;
   bool inQuotes = false;
   bool escapedInQuotes = false;
   bool escapingAllowed = true;
@@ -815,7 +839,7 @@ void Calculator::ParseFillDictionary(const std::string& input, List<SyntacticEle
     if (i + 1 < input.size()) {
       LookAheadChar = input[i + 1];
     } else {
-      LookAheadChar =' ';
+      LookAheadChar = ' ';
       if (inQuotes) {
         LookAheadChar = '"';
       }
@@ -827,18 +851,8 @@ void Calculator::ParseFillDictionary(const std::string& input, List<SyntacticEle
     }
     bool shouldSplit = false;
     if (!inQuotes) {
-      shouldSplit =(
-        this->isLeftSeparator(static_cast<unsigned char>(current[0])) ||
-        this->isRightSeparator(static_cast<unsigned char>(LookAheadChar)) ||
-        current == " "
-      );
-      if (MathRoutines::isADigit(LookAheadChar)) {
-        if (current[current.size() - 1] == '\\' || this->stringsThatSplitIfFollowedByDigit.Contains(current)) {
-          shouldSplit = true;
-        }
-      }
-    }
-    if (inQuotes) {
+      shouldSplit = this->ShouldSplitOutsideQuotes(current, LookAheadChar);
+    } else {
       if (escapingAllowed) {
         if (current.size() >= 1) {
           if (current[current.size() - 1] == '\\') {
@@ -868,8 +882,8 @@ void Calculator::ParseFillDictionary(const std::string& input, List<SyntacticEle
       currentElement.controlIndex = this->controlSequences.GetIndex(current);
       currentElement.theData.reset(*this);
       output.AddOnTop(currentElement);
-    } else if (MathRoutines::isADigit(current, &currentDigit) && !mustInterpretAsVariable) {
-      currentElement.theData.AssignValue<Rational>(currentDigit, *this);
+    } else if (MathRoutines::hasDecimalDigitsOnly(current) && !mustInterpretAsVariable) {
+      currentElement.theData.AssignValue(current, *this);
       currentElement.controlIndex = this->conInteger();
       output.AddOnTop(currentElement);
     } else {
@@ -877,7 +891,7 @@ void Calculator::ParseFillDictionary(const std::string& input, List<SyntacticEle
       currentElement.theData.MakeAtom(this->AddOperationNoRepetitionOrReturnIndexFirst(current), *this);
       output.AddOnTop(currentElement);
     }
-    current ="";
+    current = "";
   }
 }
 
@@ -1152,6 +1166,43 @@ bool Calculator::ReplaceAXbyEX() {
   return true;
 }
 
+Rational SyntacticElement::GetRationalCrashIfNot(Calculator& owner) {
+  if (this->controlIndex != owner.conInteger()) {
+    crash << "Request to get rational from a non-rational element. " << crash;
+  }
+  std::string integerString = this->theData.GetValue<std::string>();
+  Rational result;
+  result.AssignString(integerString);
+  return result;
+}
+
+bool Calculator::ReplaceIntegerDotIntegerByE() {
+  SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3];
+  SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1];
+
+  Rational fractionalPart = right.GetRationalCrashIfNot(*this);
+  int numberOfDigitsFractionalPart = fractionalPart.ToString().size();
+  Rational denominator = 10;
+  denominator.RaiseToPower(numberOfDigitsFractionalPart);
+  Rational result = left.GetRationalCrashIfNot(*this);
+  result *= denominator;
+  result += fractionalPart;
+  result /= denominator;
+  left.controlIndex = this->conExpression();
+  left.theData.AssignValue(result, *this);
+  this->DecreaseStackSetCharacterRangeS(2);
+  return true;
+}
+
+bool Calculator::ReplaceIntegerXbyEX() {
+  SyntacticElement& theElt = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
+  theElt.controlIndex = this->conExpression();
+  Rational value;
+  value.AssignString(theElt.theData.GetValue<std::string>());
+  theElt.theData.AssignValue(value, *this);
+  return true;
+}
+
 std::string Calculator::ToStringIsCorrectAsciiCalculatorString(const std::string& input) {
   std::stringstream out;
   HashedList<char, MathRoutines::HashChar> theBadChars;
@@ -1374,7 +1425,7 @@ bool Calculator::ReplaceEXXEXEXByEXusingO(int theControlIndex) {
 }
 
 bool Calculator::ReplaceUnderscoreEPowerEbyLimits() {
-  SyntacticElement& bottom=
+  SyntacticElement& bottom =
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3];
   SyntacticElement& top =
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1];
@@ -1401,29 +1452,6 @@ bool Calculator::ReplacePowerEUnderScoreEbyLimits() {
     this->parsingLog += "[Rule: Calculator::ReplacePowerEUnderScoreEbyLimits]";
   }
   return this->ReplaceUnderscoreEPowerEbyLimits();
-}
-
-bool Calculator::ReplaceIntIntBy10IntPlusInt() {
-  SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
-  SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1];
-  Rational tempRat = left.theData.GetValue<Rational>();
-  if (this->registerPositionAfterDecimalPoint == 0) {
-    tempRat *= 10;
-    tempRat += right.theData.GetValue<Rational>();
-  } else {
-    Rational afterDecimal = right.theData.GetValue<Rational>();
-    for (int i = 0; i < this->registerPositionAfterDecimalPoint; i ++) {
-      afterDecimal /= 10;
-    }
-    tempRat += afterDecimal;
-    this->registerPositionAfterDecimalPoint ++;
-  }
-  left.theData.AssignValue(tempRat, *this);
-  this->DecreaseStackSetCharacterRangeS(1);
-  if (this->flagLogSyntaxRules) {
-    this->parsingLog += "[Rule: Calculator::ReplaceIntIntBy10IntPlusInt]";
-  }
-  return true;
 }
 
 bool Calculator::ReplaceXEXEXByEusingO(int theControlIndex) {
@@ -1786,7 +1814,6 @@ bool Calculator::ExtractExpressions(Expression& outputExpression, std::string* o
   std::stringstream errorLog;
   (*this->CurrentSyntacticStacK).Reserve((*this->CurrrentSyntacticSouP).size +this->numEmptyTokensStart);
   (*this->CurrentSyntacticStacK).SetSize(this->numEmptyTokensStart);
-  this->registerPositionAfterDecimalPoint = 0;
   for (int i = 0; i < this->numEmptyTokensStart; i ++) {
     (*this->CurrentSyntacticStacK)[i] = this->GetEmptySyntacticElement();
   }
@@ -1794,11 +1821,28 @@ bool Calculator::ExtractExpressions(Expression& outputExpression, std::string* o
   this->NonBoundVariablesInContext.Clear();
   this->BoundVariablesInContext.Clear();
   const int maxNumTimesOneRuleCanBeCalled = 1000;
+  int counterReport = 0;
+  int symbolsToIssueReport = 100;
+  int minMillisecondsPerReport = 200;
+  int64_t lastMilliseconds = theGlobalVariables.GetElapsedMilliseconds();
+  ProgressReport theReport;
   for (
     this->counterInSyntacticSoup = 0;
     this->counterInSyntacticSoup < (*this->CurrrentSyntacticSouP).size;
     this->counterInSyntacticSoup ++
   ) {
+    counterReport ++;
+    if (counterReport >= symbolsToIssueReport) {
+      counterReport = 0;
+      int64_t currentMilliseconds = theGlobalVariables.GetElapsedMilliseconds();
+      if (currentMilliseconds - lastMilliseconds > minMillisecondsPerReport) {
+        currentMilliseconds = lastMilliseconds;
+        std::stringstream reportStream;
+        reportStream << "Processed " << this->counterInSyntacticSoup << " out of " << (*this->CurrrentSyntacticSouP).size
+        << " syntactic elements. ";
+        theReport.Report(reportStream.str());
+      }
+    }
     (*this->CurrentSyntacticStacK).AddOnTop((*this->CurrrentSyntacticSouP)[this->counterInSyntacticSoup]);
     int numTimesRulesCanBeAppliedWithoutStackDecrease = 0;
     int minStackSize = this->CurrentSyntacticStacK->size ;
@@ -1813,8 +1857,8 @@ bool Calculator::ExtractExpressions(Expression& outputExpression, std::string* o
         crash << "This may be a programming error: Calculator::ApplyOneRule called more than "
         << maxNumTimesOneRuleCanBeCalled
         << " times without advancing to the next syntactic element in the syntactic soup. "
-        << "If this is indeed an expression which requires that"
-        << " many application of a single parsing rule, "
+        << "If this is indeed an expression which requires that "
+        << "many application of a single parsing rule, "
         << "then you should modify function Calculator::ExtractExpressions"
         << crash;
       }
@@ -1854,11 +1898,10 @@ bool Calculator::ApplyOneRule() {
   const SyntacticElement& secondToLastE = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
   const std::string& secondToLastS = this->controlSequences[secondToLastE.controlIndex];
   if (secondToLastS == "Integer" && lastS != "Integer" && lastS != ".") {
-    this->registerPositionAfterDecimalPoint = 0;
     if (this->flagLogSyntaxRules) {
       this->parsingLog += "[Rule: digit to number]";
     }
-    return this->ReplaceAXbyEX();
+    return this->ReplaceIntegerXbyEX();
   }
   if (
     lastS == " " &&
@@ -1899,13 +1942,13 @@ bool Calculator::ApplyOneRule() {
   if (secondToLastS == "%" && lastS == "LogParsing") {
     this->parsingLog += "<hr>" + this->ToStringSyntacticStackHTMLTable(false);
     this->flagLogSyntaxRules = true;
+    this->parsingLog += "[Rule: remove white space]";
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }
   if (secondToLastS == "%" && lastS == "LogFull") {
     stOutput
-    << "<hr>You are requesting a full log of the evaluation process. <br><b>WARNING requesting  a full log of the evaluation process is very slow, "
-    << " and might produce a HUGE printout. </b><br><b>You have been warned. </b><hr>";
+    << "<hr>Requested a full log of the evaluation process.<hr>";
     this->flagLogFullTreeCrunching = true;
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
@@ -2054,15 +2097,11 @@ bool Calculator::ApplyOneRule() {
   if (lastS == "=" && secondToLastS == "=") {
     return this->ReplaceXXByCon(this->conEqualEqual());
   }
-  if (lastS == "Integer" && secondToLastS == "Integer") {
-    return this->ReplaceIntIntBy10IntPlusInt();
-  }
   if (secondToLastS == "(" && lastS == ")") {
     return this->ReplaceXXByEEmptySequence();
   }
-  if (thirdToLastS == "Integer" && secondToLastS == "." && lastS == "Integer" && this->registerPositionAfterDecimalPoint == 0) {
-    this->registerPositionAfterDecimalPoint = 1;
-    return this->ReplaceXYByY();
+  if (thirdToLastS == "Integer" && secondToLastS == "." && lastS == "Integer") {
+    return this->ReplaceIntegerDotIntegerByE();
   }
   //there is an ambiguity on how should function application be associated
   //Which is better: x{}y{}z= x{} (y{}z), or x{}y{}z= (x{}y){}z ?

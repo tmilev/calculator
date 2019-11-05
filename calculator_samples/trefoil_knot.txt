@@ -1,0 +1,7 @@
+R = MakeInputBox( name = R, value = 2);
+r=  MakeInputBox( name = r, value = 0.5);
+smallRadiusSpin = MakeInputBox( name = smallRadiusSpin, value = 3);
+largeRadiusSpin = MakeInputBox( name = largeRadiusSpin, value = 2);
+p = smallRadiusSpin t;
+q = largeRadiusSpin t;
+PlotSurface ( ( (R+r cos p) cos q,(R+r cos p) sin q, r sin (p) + z), t\in (0, 2\pi), z\in (-0.1,0.1), color1=red, color2= pink, numSegments1=50, numSegments2=3)

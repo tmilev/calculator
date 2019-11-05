@@ -3486,18 +3486,19 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctionsGeneral::innerPlotSurface,
     "",
     " Plots a surface. ",
-    "%HideLHS x = (R+v*cos(u/2))*cos(u);"
-    "y = (R+v*cos(u/2))*sin(u);"
-    "z=v*sin(u/2);"
-    "R=MakeInputBox (name =radiusBig, value =2, min =2, max =5);"
-    "r =MakeInputBox (name =radiusSmall, value = 0.6, min = 0.2, max =1, step = 0.2);"
-    "uSegments = MakeInputBox(name = uSegments, value = 22, min = 8, max =40);"
-    "vSegments = MakeInputBox(name = vSegments, value = 4, min = 2, max =10);"
-    "PlotSurface("
-    "(x, y, z), u\\in(0, 2\\pi), v\\in(-r,r), "
-    "color1=blue, color2= cyan, numSegments1=uSegments, numSegments2=vSegments"
+    "%HideLHS x = (R+v*cos(u/2))*cos(u);\n"
+    "y = (R+v*cos(u/2))*sin(u);\n"
+    "z = v*sin(u/2);\n"
+    "R = MakeInputBox (name = radiusBig, value = 2, min = 2, max = 5);\n"
+    "r = MakeInputBox (name = radiusSmall, value = 0.6, min = 0.2, max = 1, step = 0.2);\n"
+    "uSegments = MakeInputBox(name = uSegments, value = 22, min = 8, max = 40);\n"
+    "vSegments = MakeInputBox(name = vSegments, value = 4, min = 2, max = 10);\n"
+    "PlotSurface(\n"
+    "(x, y, z), u\\in(0, 2\\pi), v\\in(-r,r), \n"
+    "color1=blue, color2= cyan, numSegments1=uSegments, numSegments2=vSegments\n"
     ") + "
-    "PlotSurface(( x + 2, z, y), u\\in(0, 2\\pi), v\\in(-r,r), "
+    "PlotSurface(\n"
+    "( x + 2, z, y), u\\in(0, 2\\pi), v\\in(-r,r), \n"
     "color1=red, color2= pink, numSegments1=uSegments, numSegments2=vSegments); ",
     true,
     false,

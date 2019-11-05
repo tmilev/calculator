@@ -1278,7 +1278,7 @@ std::string WebWorker::GetHeaderSetCookie() {
     out << "Set-Cookie: " << theGlobalVariables.CookiesToSetUsingHeaders.theKeys[i]
     << "="
     << theGlobalVariables.CookiesToSetUsingHeaders.theValues[i]
-    << "; Path=/; Expires=Sat, 01 Jan 2030 20:00:00 GMT; Secure";
+    << "; Path=/; Expires=Sat, 01 Jan 2030 20:00:00 GMT;Secure;SameSite=Strict;";
     if (i != theGlobalVariables.CookiesToSetUsingHeaders.size() - 1) {
       out << "\r\n";
     }

@@ -28,6 +28,7 @@ function setCookie(theName, theValue, expiryDays, secure) {
   if (secure) {
     cookieValue += "; Secure";
   }
+  cookieValue += "; SameSite=Strict";
   document.cookie = `${theName}=${cookieValue}; Path=/;`;
 }
 

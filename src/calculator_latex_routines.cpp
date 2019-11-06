@@ -298,7 +298,7 @@ void LaTeXcrawler::BuildFreecalC() {
       << LectureContentNoDocumentClassNoCurrentLecture.str();
     }
     workingFile.close();
-    currentSysCommand = "pdflatex -shell-escape " + this->theFileNameWorkingCopy;
+    currentSysCommand = "pdflatex --shell-escape " + this->theFileNameWorkingCopy;
     executedCommands << "<br>" << currentSysCommand;
     reportStream << currentSysCommand;
     theReport.Report(reportStream.str());
@@ -350,7 +350,7 @@ void LaTeXcrawler::BuildFreecalC() {
     << theLectureNumbers[i] << "}\n";
     workingFile << LectureContentNoDocumentClassNoCurrentLecture.str();
     workingFile.close();
-    currentSysCommand = "pdflatex -shell-escape " + this->theFileNameWorkingCopy;
+    currentSysCommand = "pdflatex --shell-escape " + this->theFileNameWorkingCopy;
     executedCommands << "<br>" << currentSysCommand;
     reportStream << currentSysCommand;
     theReport.Report(reportStream.str());
@@ -401,7 +401,7 @@ void LaTeXcrawler::BuildFreecalC() {
       << "\n"
       << "\\end{document}";
       workingFile.close();
-      currentSysCommand = "pdflatex -shell-escape " + this->theFileNameWorkingCopy;
+      currentSysCommand = "pdflatex --shell-escape " + this->theFileNameWorkingCopy;
       executedCommands << "<br>" << currentSysCommand;
       reportStream << currentSysCommand;
       theReport.Report(reportStream.str());
@@ -731,7 +731,6 @@ std::string LaTeXcrawler::AdjustDisplayTitle(const std::string& input, bool isHo
 
 bool LaTeXcrawler::BuildOrFetchFromCachePDF(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
   MacroRegisterFunctionWithName("LaTeXcrawler::BuildOrFetchFromCachePDF");
-  StateMaintainerCurrentFolder preserveCurrentFolder;
   this->desiredPresentationTitle = this->AdjustDisplayTitle(this->desiredPresentationTitle, this->flagHomeworkRatherThanSlides);
   if (!this->ExtractPresentationFileNames(commentsOnFailure, commentsGeneral)) {
     if (commentsOnFailure != nullptr) {
@@ -788,7 +787,7 @@ bool LaTeXcrawler::BuildOrFetchFromCachePDF(std::stringstream* commentsOnFailure
   }
   if (this->flagCrawlTexSourcesRecursively) {
     crawlingResult << "%file automatically generated from file: " << this->headerFileNameNoPath
-    << "\n%This file compiles with pdflatex -shell-escape\n";
+    << "\n%This file compiles with pdflatex --shell-escape\n";
     if (!this->flagHomeworkRatherThanSlides) {
       crawlingResult << "\n%Comment out/in the [handout] line to get the slide in projector/handout mode.\n";
     } else {
@@ -856,13 +855,13 @@ bool LaTeXcrawler::BuildOrFetchFromCachePDF(std::stringstream* commentsOnFailure
     *commentsGeneral << "FAILED to store file: " << this->workingFileNameNoPathTex << "<br>";
   }
   theFile.close();
-  std::string currentSysCommand = "pdflatex -shell-escape " + this->workingFileNameNoPathTex;
+  std::string currentSysCommand = "pdflatex --shell-escape " + this->workingFileNameNoPathTex;
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "Executing command: " << currentSysCommand << " ... ";
   }
   int fixTemporaryWorkaround;
   *commentsGeneral << "DEBUG: not calling sys command!!!!!!!!!!!!!!!" << currentSysCommand;
-  //theGlobalVariables.CallSystemNoOutput(currentSysCommand, &logWorker);
+  theGlobalVariables.CallSystemNoOutput(currentSysCommand, &logWorker);
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "done!<br>";
   }
@@ -881,9 +880,9 @@ bool LaTeXcrawler::BuildOrFetchFromCachePDF(std::stringstream* commentsOnFailure
   }
   int fixMeTemporaryWorkaround;
   // good code:
-  // currentSysCommand = "mv " + this->workingFileNameNoPathPDF + " " + this->targetPDFFileNameWithLatexPath;
+   currentSysCommand = "mv " + this->workingFileNameNoPathPDF + " " + this->targetPDFFileNameWithLatexPath;
   // bad code:
-  currentSysCommand = "mv " + this->workingFileNameNoPathTex + " " + this->targetPDFFileNameWithLatexPath;
+  // currentSysCommand = "mv " + this->workingFileNameNoPathTex + " " + this->targetPDFFileNameWithLatexPath;
   commandResult = theGlobalVariables.CallSystemWithOutput(currentSysCommand);
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "Executed command: " << currentSysCommand
@@ -981,7 +980,7 @@ bool LaTeXcrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
   numProcessed = 0;
   this->slideFileNamesVirtualWithPatH.AddListOnTop(topicParser.slidesSourcesHeaders);
   for (int i = 0; i < topicParser.theTopicS.size()
-        && numProcessed < 2
+//        && numProcessed < 2
         ; i ++) {
     TopicElement& currentElt = topicParser.theTopicS.theValues[i];
     if (currentElt.sourceSlides.size == 0) {

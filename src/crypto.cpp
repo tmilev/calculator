@@ -18,14 +18,13 @@ void Crypto::acquireAdditionalRandomness(int64_t additionalRandomness) {
     static_cast<unsigned>(theGlobalVariables.randomBytesCurrent.size) <
     theGlobalVariables.maximumExtractedRandomBytes
   ) {
-    crash << "Current random bytes have not been initialized. ";
+    crash << "Current random bytes have not been initialized. " << crash;
   }
   Crypto::ConvertUint64toBigendianListUnsignedCharAppendResult(
     static_cast<uint64_t>(additionalRandomness), theGlobalVariables.randomBytesCurrent
   );
   Crypto::computeSha512(theGlobalVariables.randomBytesCurrent, theGlobalVariables.randomBytesCurrent);
 }
-
 
 void Crypto::GetRandomBytesSecureInternalMayLeaveTracesInMemory(List<unsigned char>& output, int numberOfBytesMax32) {
   Crypto::acquireAdditionalRandomness(theGlobalVariables.GetElapsedMilliseconds());

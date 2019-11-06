@@ -2540,6 +2540,9 @@ std::string HtmlInterpretation::ModifyProblemReport() {
   std::stringstream commentsOnFailure;
   bool fileExists = FileOperations::FileExistsVirtualCustomizedReadOnly(fileName, &commentsOnFailure);
   std::fstream theFile;
+  if (theGlobalVariables.flagDisableDatabaseLogEveryoneAsAdmin) {
+    theGlobalVariables.userDefault.instructorComputed = "default";
+  }
   if (!FileOperations::OpenFileVirtualCustomizedWriteOnly(theFile, fileName, false, true, false, &commentsOnFailure)) {
     commentsOnFailure << "<b style =\"color:red\">Failed to open/create file: " << fileName << ". </b>";
     return commentsOnFailure.str();

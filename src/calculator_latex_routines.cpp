@@ -321,12 +321,7 @@ void LaTeXcrawler::BuildFreecalC() {
       }
       thePdfFileNameHandout << ".pdf";
     }
-    int fixTemporaryWorkaround;
-    executedCommands << "DEBUG: <b>Temporary workaround, fix  </b><br>";
-    // good code:
-    // currentSysCommand = "mv " + theFileNameWorkingCopyPDF + " " + thePdfFileNameHandout.str();
-    // bad code:
-    currentSysCommand = "mv " + theFileNameWorkingCopy + ".tex " + thePdfFileNameHandout.str();
+    currentSysCommand = "mv " + theFileNameWorkingCopyPDF + " " + thePdfFileNameHandout.str();
 
     executedCommands << "<br>" << currentSysCommand;
     reportStream << "<br>Lecture/Homework " << i + 1 << " handout compiled, renaming file ... ";
@@ -354,9 +349,7 @@ void LaTeXcrawler::BuildFreecalC() {
     executedCommands << "<br>" << currentSysCommand;
     reportStream << currentSysCommand;
     theReport.Report(reportStream.str());
-    int temporaryWorkaroundFixASAP;
-    executedCommands << "<br>DEBUG: NOT RUNNING COMMAND, fix asap!!!";
-    // theGlobalVariables.CallSystemNoOutput(currentSysCommand, &logWorker);
+    theGlobalVariables.CallSystemNoOutput(currentSysCommand, &logWorker);
     std::stringstream thePdfFileNameNormal;
     thePdfFileNameNormal << "./" << lectureProjectorFolder << "Lecture"
     << theLectureNumbers[i] << "_" << theLectureDesiredNames[i] << "_"
@@ -405,9 +398,7 @@ void LaTeXcrawler::BuildFreecalC() {
       executedCommands << "<br>" << currentSysCommand;
       reportStream << currentSysCommand;
       theReport.Report(reportStream.str());
-      int temporaryWorkaroundFixASAP;
-      executedCommands << "<br>DEBUG: NOT RUNNING COMMAND, fix asap!!!";
-     // theGlobalVariables.CallSystemNoOutput(currentSysCommand, &logWorker);
+      theGlobalVariables.CallSystemNoOutput(currentSysCommand, &logWorker);
       std::stringstream thePdfFileNameNormal;
       thePdfFileNameNormal << "./";
       if (k == 0) {
@@ -417,14 +408,7 @@ void LaTeXcrawler::BuildFreecalC() {
       }
       thePdfFileNameNormal << "Slide_"
       << this->slideFileNamesVirtualNoPathNoExtensioN[i] << ".pdf";
-    int fixTemporaryWorkaround;
-    executedCommands << "DEBUG: <b>Temporary workaround, fix  </b><br>";
-    // good code:
-    // currentSysCommand = "mv " + theFileNameWorkingCopyPDF + " " + thePdfFileNameNormal.str();
-
-    // bad code:
-    currentSysCommand = "mv " + theFileNameWorkingCopy + ".tex " + thePdfFileNameNormal.str();
-
+      currentSysCommand = "mv " + theFileNameWorkingCopyPDF + " " + thePdfFileNameNormal.str();
       executedCommands << "<br>" << currentSysCommand;
       reportStream << "<br>Slide " << i + 1 << ", run " << k << " compiled, renaming file ... ";
       theReport.Report(reportStream.str());
@@ -859,8 +843,6 @@ bool LaTeXcrawler::BuildOrFetchFromCachePDF(std::stringstream* commentsOnFailure
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "Executing command: " << currentSysCommand << " ... ";
   }
-  int fixTemporaryWorkaround;
-  *commentsGeneral << "DEBUG: not calling sys command!!!!!!!!!!!!!!!" << currentSysCommand;
   theGlobalVariables.CallSystemNoOutput(currentSysCommand, &logWorker);
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "done!<br>";
@@ -878,11 +860,7 @@ bool LaTeXcrawler::BuildOrFetchFromCachePDF(std::stringstream* commentsOnFailure
       *commentsGeneral << "Executed command: " << currentSysCommand << " ... to get result: " << commandResult << "<br>";
     }
   }
-  int fixMeTemporaryWorkaround;
-  // good code:
-   currentSysCommand = "mv " + this->workingFileNameNoPathPDF + " " + this->targetPDFFileNameWithLatexPath;
-  // bad code:
-  // currentSysCommand = "mv " + this->workingFileNameNoPathTex + " " + this->targetPDFFileNameWithLatexPath;
+  currentSysCommand = "mv " + this->workingFileNameNoPathPDF + " " + this->targetPDFFileNameWithLatexPath;
   commandResult = theGlobalVariables.CallSystemWithOutput(currentSysCommand);
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "Executed command: " << currentSysCommand
@@ -930,7 +908,7 @@ bool LaTeXcrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
   this->slideFileNamesVirtualWithPatH.AddListOnTop(topicParser.sourcesHomeworkHeaders);
   this->slideFilesExtraFlags.initializeFillInObject(this->slideFileNamesVirtualWithPatH.size, "");
   for (int i = 0; i < topicParser.theTopicS.size()
-        && numProcessed < 0
+//        && numProcessed < 0
         ; i ++) {
     TopicElement& currentElt = topicParser.theTopicS.theValues[i];
     if (currentElt.sourceHomework.size == 0) {
@@ -1017,7 +995,6 @@ bool LaTeXcrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
     this->flagProjectorMode = true;
     if (!this->BuildOrFetchFromCachePDF(commentsOnFailure, commentsGeneral)) {
       result = false;
-      int fixEarlyBreak;
       break;
     }
   }

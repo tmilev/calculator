@@ -1156,7 +1156,9 @@ bool FileOperations::GetPhysicalFileNameFromVirtualCustomizedWriteOnly(
     std::string inputDefault = inputStart + "default/" + fileEnd;
     if (FileOperations::LoadFileToStringVirtual(inputDefault, fileContent, false, commentsOnFailure)) {
       std::fstream theFile;
-      if (FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(theFile, inputCopy, false, true, false, false)) {
+      if (FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(
+        theFile, inputCopy, false, true, false, false
+      )) {
         theFile << fileContent;
         result = true;
       }
@@ -1254,7 +1256,9 @@ bool FileOperations::GetPhysicalFileNameFromVirtual(
     }
   }
   for (int i = 0; i < FileOperations::FolderVirtualLinksNonSensitive().size(); i ++) {
-    if (StringRoutines::StringBeginsWith(inputCopy, FileOperations::FolderVirtualLinksNonSensitive().theKeys[i], &folderEnd)) {
+    if (StringRoutines::StringBeginsWith(
+      inputCopy, FileOperations::FolderVirtualLinksNonSensitive().theKeys[i], &folderEnd
+    )) {
       output = theGlobalVariables.PhysicalPathProjectBase +
       FileOperations::FolderVirtualLinksNonSensitive().theValues[i] + folderEnd;
       return true;
@@ -1262,7 +1266,9 @@ bool FileOperations::GetPhysicalFileNameFromVirtual(
   }
   if (accessSensitiveFolders) {
     for (int i = 0; i < FileOperations::FolderVirtualLinksSensitive().size(); i ++) {
-      if (StringRoutines::StringBeginsWith(inputCopy, FileOperations::FolderVirtualLinksSensitive().theKeys[i], &folderEnd)) {
+      if (StringRoutines::StringBeginsWith(
+        inputCopy, FileOperations::FolderVirtualLinksSensitive().theKeys[i], &folderEnd
+      )) {
         output = theGlobalVariables.PhysicalPathProjectBase +
         FileOperations::FolderVirtualLinksSensitive().theValues[i] + folderEnd;
         return true;
@@ -1271,7 +1277,9 @@ bool FileOperations::GetPhysicalFileNameFromVirtual(
   }
   if (accessULTRASensitiveFolders) {
     for (int i = 0; i < FileOperations::FolderVirtualLinksULTRASensitive().size(); i ++) {
-      if (StringRoutines::StringBeginsWith(inputCopy, FileOperations::FolderVirtualLinksULTRASensitive().theKeys[i], &folderEnd)) {
+      if (StringRoutines::StringBeginsWith(
+        inputCopy, FileOperations::FolderVirtualLinksULTRASensitive().theKeys[i], &folderEnd
+      )) {
         output = theGlobalVariables.PhysicalPathProjectBase +
         FileOperations::FolderVirtualLinksULTRASensitive().theValues[i] + folderEnd;
         return true;

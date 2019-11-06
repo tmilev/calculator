@@ -734,11 +734,11 @@ bool WebWorker::LoginProcedure(std::stringstream& argumentProcessingFailureComme
     theGlobalVariables.flagLogInAttempted = true;
   }
   /////////////////////////////////////////////
-  //this may need a security audit: the URLStringToNormal and GetWebInput
-  //functions may leave traces of (freed) memory
-  //of the old password. Could only be used
-  //if the attacker has control of the server executable - which probably means we
-  //already are in big trouble - so this really shouldn't be such a big deal.
+  // this may need a security audit: the URLStringToNormal and GetWebInput
+  // functions may leave traces of (freed) memory
+  // of the old password. Could only be used
+  // if the attacker has control of the server executable - which probably means we
+  // already are in big trouble - so this really shouldn't be such a big deal.
   /////////////////////////////////////////////
   if (
     !theUser.flagEnteredPassword &&

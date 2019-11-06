@@ -342,17 +342,20 @@ void GlobalVariables::InitThreadsExecutableStart() {
   ThreadData::RegisterFirstThread("main");
 }
 
+void GlobalVariables::initFoldersProjectBase(const std::string& inputPhysicalExecutable) {
+  StateMaintainerCurrentFolder preserveCurrentFolder;
+  this->PhysicalPathProjectBase = FileOperations::GetPathFromFileNameWithPath(inputPhysicalExecutable) + "./../";
+  this->ChDir(this->PhysicalPathProjectBase);
+  this->PhysicalPathProjectBase = FileOperations::GetCurrentFolder() + "/";
+}
+
 void GlobalVariables::initDefaultFolderAndFileNames(
   const std::string& inputPhysicalExecutable
 ) {
-  this->PhysicalNameExecutableNoPath = "";
-  this->PhysicalPathProjectBase = "";
-  this->PhysicalNameFolderExecutable = FileOperations::GetPathFromFileNameWithPath(inputPhysicalExecutable);
+  this->initFoldersProjectBase(inputPhysicalExecutable);
+  this->PhysicalNameFolderExecutable = this->PhysicalPathProjectBase + "bin/";
   this->PhysicalNameExecutableNoPath = FileOperations::GetFileNameFromFileNameWithPath(inputPhysicalExecutable);
   this->PhysicalNameExecutableWithPath = this->PhysicalNameFolderExecutable + this->PhysicalNameExecutableNoPath;
-  if (this->PhysicalPathProjectBase == "") {
-    this->PhysicalPathProjectBase = this->PhysicalNameFolderExecutable + "./../";
-  }
   this->PhysicalPathHtmlFolder = this->PhysicalPathProjectBase + "../public_html/";
   this->PhysicalPathServerBasE = this->PhysicalPathHtmlFolder;
   this->DisplayPathOutputFolder = "/output/";

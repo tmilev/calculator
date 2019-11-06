@@ -762,12 +762,12 @@ bool LaTeXcrawler::BuildOrFetchFromCachePDF(std::stringstream* commentsOnFailure
     } while (!theFile.eof());
     theFile.close();
   }
-  if (commentsGeneral != nullptr) {
-    *commentsGeneral << "About to change dir to: " << this->workingFilePathPhysical << "<br>";
-  }
   bool addExtraTex = (this->slideFileNamesVirtualWithPatH.size > 1);
   if (this->flagDoChangeDirs) {
     theGlobalVariables.ChDir(this->workingFilePathPhysical);
+    if (commentsGeneral != nullptr) {
+      *commentsGeneral << "Changed directory. Current: <b style = 'color:blue'>" << FileOperations::GetCurrentFolder() << "</b><br>";
+    }
   }
   if (this->flagCrawlTexSourcesRecursively) {
     crawlingResult << "%file automatically generated from file: " << this->headerFileNameNoPath
@@ -916,7 +916,7 @@ bool LaTeXcrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
   this->slideFileNamesVirtualWithPatH.AddListOnTop(topicParser.sourcesHomeworkHeaders);
   this->slideFilesExtraFlags.initializeFillInObject(this->slideFileNamesVirtualWithPatH.size, "");
   for (int i = 0; i < topicParser.theTopicS.size()
-//        && numProcessed < 2
+        && numProcessed < 0
         ; i ++) {
     TopicElement& currentElt = topicParser.theTopicS.theValues[i];
     if (currentElt.sourceHomework.size == 0) {
@@ -966,7 +966,7 @@ bool LaTeXcrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
   numProcessed = 0;
   this->slideFileNamesVirtualWithPatH.AddListOnTop(topicParser.slidesSourcesHeaders);
   for (int i = 0; i < topicParser.theTopicS.size()
-//        && numProcessed < 2
+        && numProcessed < 1
         ; i ++) {
     TopicElement& currentElt = topicParser.theTopicS.theValues[i];
     if (currentElt.sourceSlides.size == 0) {
@@ -1001,6 +1001,8 @@ bool LaTeXcrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
     this->flagProjectorMode = true;
     if (!this->BuildOrFetchFromCachePDF(commentsOnFailure, commentsGeneral)) {
       result = false;
+      int fixEarlyBreak;
+      break;
     }
   }
   return result;

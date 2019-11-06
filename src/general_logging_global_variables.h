@@ -247,6 +247,7 @@ public:
   std::string GetWebInput(const std::string& inputName);
   void initModifiableDatabaseFields();
   void initDefaultFolderAndFileNames(const std::string& inputPhysicalExecutable);
+  void initFoldersProjectBase(const std::string& inputPhysicalExecutable);
   void initOutputReportAndCrashFileNames(
     const std::string& inputUserStringRAW,
     const std::string& inputUserStringCivilized

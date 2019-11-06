@@ -224,6 +224,10 @@ Calculator.prototype.writeResultUndefined = function(
     }
     return;
   }
+  if (inputParsed.error !== undefined && inputParsed.error !== null) {
+    buffer.write("<b style = 'color:red'>Error.</b>");
+    buffer.write(JSON.error);
+  }
   if (inputParsed.crashReport === undefined || inputParsed.crashReport === null) {
     buffer.write("Unexpected input. <br>");
     buffer.write(JSON.stringify(inputParsed));

@@ -2276,7 +2276,7 @@ int WebWorker::ProcessTemplate() {
 }
 
 int WebWorker::ProcessLoginUserInfo(const std::string& comments) {
-  MacroRegisterFunctionWithName("WebWorker::ProcessUserInfoJSON");
+  MacroRegisterFunctionWithName("WebWorker::ProcessLoginUserInfo");
   this->SetHeaderOKNoContentLength("");
   if (theWebServer.RestartIsNeeded()) {
     return 0;

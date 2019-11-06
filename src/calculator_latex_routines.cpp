@@ -873,22 +873,13 @@ bool LaTeXcrawler::BuildOrFetchFromCachePDF(std::stringstream* commentsOnFailure
   if (!FileOperations::IsFileNameSafeForSystemCommands(this->targetPDFFileNameWithLatexPath, commentsOnFailure)) {
     return true;
   }
-  //  std::stringstream svnAddFileCommand, svnAddDirCommand, svnResult;
-  //Old code to add pdf files to svn repo:
-  //svnAddDirCommand << "svn add " << this->targetPDFLatexPath << " --depth=empty";
-  //svnResult << "<br>Command: " << svnAddDirCommand.str() << "<br>Result: ";
-  //svnResult << theGlobalVariables.CallSystemWithOutput(svnAddDirCommand.str());
-  //svnAddFileCommand << "svn add " << this->targetPDFFileNameWithLatexPath;
-  //svnResult << "<br>Command: " << svnAddFileCommand.str() << "<br>Result: ";
-  //svnResult << theGlobalVariables.CallSystemWithOutput(svnAddFileCommand.str());
-  //if (commentsGeneral != nullptr)
-  //  *commentsGeneral << svnResult.str();
   return true;
 }
 
 #include "calculator_html_interpretation.h"
 bool LaTeXcrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
   MacroRegisterFunctionWithName("LaTeXcrawler::BuildTopicList");
+  StateMaintainerCurrentFolder preserveCurrentFolder;
   //stOutput << "DEBUG: Here we are. ";
   ProgressReport theReport;
   CalculatorHTML topicParser;
@@ -966,7 +957,7 @@ bool LaTeXcrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
   numProcessed = 0;
   this->slideFileNamesVirtualWithPatH.AddListOnTop(topicParser.slidesSourcesHeaders);
   for (int i = 0; i < topicParser.theTopicS.size()
-        && numProcessed < 1
+        //&& numProcessed < 1
         ; i ++) {
     TopicElement& currentElt = topicParser.theTopicS.theValues[i];
     if (currentElt.sourceSlides.size == 0) {
@@ -975,6 +966,8 @@ bool LaTeXcrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
     std::stringstream reportStream;
     numProcessed ++;
     reportStream << "Processing lecture slides: " << numProcessed << " out of " << numSlidePairsToBuild << ". ";
+    reportStream << "<br>DEBUG: base folder: " << this->baseFolderStartFilePhysical;
+    reportStream << "<br>DEBUG: base folders allowed " << this->baseFoldersCrawlableFilesPhysical.ToStringCommaDelimited();
     reportStream << "<br>Slide file names: " << this->slideFileNamesVirtualWithPatH.ToStringCommaDelimited();
     theReport.Report(reportStream.str());
 

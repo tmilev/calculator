@@ -87,6 +87,7 @@ public:
   int ProcessServerStatusJSON();
   int ProcessComputationIndicator();
   JSData ProcessComputationIndicatorJSData();
+  void GetJSONResultFromFile(const std::string &workerId, JSData& outputContent);
   int ProcessEditPageJSON();
   int ProcessFolderOrFile();
   int ProcessFolder();

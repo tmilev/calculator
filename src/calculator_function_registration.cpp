@@ -3516,9 +3516,9 @@ void Calculator::initPredefinedInnerFunctions() {
     "The next argument gives the curve color. "
     "The next argument gives the curve width. "
     "The next argument gives the number of points used to draw the curve. ",
-    "a =MakeInputBox(name =\"a\", value =12, min =1, max =25);\n"
-    "b=MakeInputBox(name =\"b\", value =13, min =1, max =25);\n"
-    "PlotFill(PlotCurve((sin(a t),cos(b t)), 0, 2\\pi, blue, 2, 2000), pink) ",
+    "a = MakeInputBox(name = \"a\", value = 12, min = 1, max = 25);\n"
+    "b = MakeInputBox(name = \"b\", value = 13, min = 1, max = 25);\n"
+    "PlotFill(PlotCurve((sin(a t), cos(b t)), 0, 2\\pi, blue, 2, 2000), pink) ",
     true,
     false,
     "CalculatorFunctionsGeneral::innerPlotParametricCurve",

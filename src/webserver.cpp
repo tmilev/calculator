@@ -1467,6 +1467,35 @@ int WebServer::GetWorkerIndexFromId(std::string& inputId, std::stringstream* com
   return result;
 }
 
+void WebWorker::GetJSONResultFromFile(const std::string& workerId, JSData& outputContent) {
+  MacroRegisterFunctionWithName("WebWorker::GetJSONResultFromFile");
+  for (unsigned i = 0; i < workerId.size(); i ++) {
+    if (!MathRoutines::IsAHexDigit(workerId[i])) {
+      outputContent[WebAPI::result::error] = "Worker ids are only allowed to contain the hex digits 0-9, a-f. ";
+      return;
+    }
+  }
+  std::string computationResult;
+  std::stringstream commentsOnError;
+  bool success = FileOperations::LoadFileToStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
+    "results/" + workerId,
+    computationResult,
+    true,
+    true,
+    &commentsOnError
+  );
+  if (!success) {
+    commentsOnError << "Failed to load your output with id: " << workerId << ". ";
+    outputContent[WebAPI::result::error] = commentsOnError.str();
+    return;
+  }
+  if (!outputContent.readstring(computationResult, false, nullptr)) {
+    commentsOnError << "I found your worker id: "
+    << workerId << " but I could not parse it's JSON status. This is likely an internal server error. ";
+    outputContent[WebAPI::result::error] = commentsOnError.str();
+  }
+}
+
 JSData WebWorker::ProcessComputationIndicatorJSData() {
   MacroRegisterFunctionWithName("WebWorker::ProcessComputationIndicatorJSData");
   std::string workerId = theGlobalVariables.GetWebInput(WebAPI::request::workerId);
@@ -1474,9 +1503,13 @@ JSData WebWorker::ProcessComputationIndicatorJSData() {
   std::stringstream out, comments;
   int inputWebWorkerIndex = this->parent->GetWorkerIndexFromId(workerId, &comments);
   if (inputWebWorkerIndex < 0) {
-    result[WebAPI::result::error] = HtmlRoutines::ConvertStringToHtmlString(comments.str(), false);
+    // Worker is no longer running.
+    // This may be a very old computation request.
+    // In this case, let us attempt to read it from hd.
+    this->GetJSONResultFromFile(workerId, result);
     return result;
   }
+  // Worker is still running.
   comments
   << "The maximum number of "
   << "connections/computations you can run is: "
@@ -1496,46 +1529,30 @@ JSData WebWorker::ProcessComputationIndicatorJSData() {
     result[WebAPI::result::error] = out.str();
     return result;
   }
+  // Request a progress report from the running worker, non-blocking.
   if (!otherWorker.workerToWorkerRequestIndicator.WriteOnceAfterEmptying("!", false, true)) {
     out << "Failed to request progress report. ";
     result[WebAPI::result::error] = out.str();
     return result;
   }
+  // Check for a progress report from the running worker, non-blocking.
   if (!otherWorker.workerToWorkerReturnIndicator.ReadOnceIfFailThenCrash(false, true)) {
     out << "Failed to read worker status. ";
     result[WebAPI::result::error] = out.str();
     return result;
   }
   if (otherWorker.workerToWorkerReturnIndicator.lastRead.size == 0) {
+    // Other worker left us no report since last time we checked.
     result[WebAPI::result::status] = "noReport";
     return result;
   }
+  // There must be a report waiting for us.
+  // Lock the report file.
   otherWorker.writingReportFile.Lock();
-  std::string computationResult;
-  if (!FileOperations::IsFileNameWithoutDotsAndSlashes(otherWorker.workerId)) {
-    result[WebAPI::result::status] = "noReport";
-    return result;
-  }
-  bool success = FileOperations::LoadFileToStringVirtual(
-    "results/" + otherWorker.workerId,
-    computationResult,
-    true,
-    true,
-    &comments
-  );
+  this->GetJSONResultFromFile(workerId, result);
+  // Unlock the report file.
   otherWorker.writingReportFile.Unlock();
-  if (!success) {
-    out << "Failed to load your output with id: " << otherWorker.workerId << ". " << comments.str();
-    result[WebAPI::result::error] = out.str();
-    return result;
-  }
-  JSData parsed;
-  if (!parsed.readstring(computationResult, false, nullptr)) {
-    out << "I found your worker id: " << otherWorker.workerId << " but I could not parse it's JSON status. ";
-    result[WebAPI::result::error] = out.str();
-    return result;
-  }
-  return parsed;
+  return result;
 }
 
 void WebWorker::WriteAfterTimeout(const std::string& input, const std::string& status) {
@@ -2556,7 +2573,9 @@ std::string HtmlInterpretation::GetCaptchaDiv() {
   MacroRegisterFunctionWithName("HtmlInterpretation::GetCaptchaDiv");
   std::stringstream out;
   std::string recaptchaPublic;
-  if (!FileOperations::LoadFileToStringVirtual("certificates/recaptcha-public.txt", recaptchaPublic, true, true, &out)) {
+  if (!FileOperations::LoadFileToStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
+    "certificates/recaptcha-public.txt", recaptchaPublic, true, true, &out
+  )) {
     out << "<b style =\"color:red\">Couldn't find the recaptcha key in file: "
     << "certificates/recaptcha-public.txt</b>";
   } else {
@@ -5042,7 +5061,7 @@ bool GlobalVariables::ConfigurationLoad() {
   std::stringstream out;
   std::string configurationFileName = "/configuration/configuration.json";
   if (!FileOperations::LoadFileToStringVirtual(
-    configurationFileName, theGlobalVariables.configurationFileContent, true, false, &out
+    configurationFileName, theGlobalVariables.configurationFileContent, true, &out
   )) {
     logServer << logger::yellow << "Failed to read configuration file. " << out.str() << logger::endL;
     std::string computedPhysicalFileName;

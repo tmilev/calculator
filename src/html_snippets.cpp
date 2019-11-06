@@ -110,7 +110,7 @@ const std::string& HtmlRoutines::GetFile(
   }
   std::stringstream out, commentsOnFailure;
   std::string fileReader;
-  if (FileOperations::LoadFileToStringVirtual(fileNameVirtual, fileReader, false, false, &commentsOnFailure)) {
+  if (FileOperations::LoadFileToStringVirtual(fileNameVirtual, fileReader, false, &commentsOnFailure)) {
     out << additionalBeginTag << fileReader << additionalEndTag;
   } else {
     if (theGlobalVariables.processType == ProcessTypes::worker) {

@@ -16,7 +16,7 @@ extern logger logServer   ;
 
 bool TransportLayerSecurity::LoadPEMCertificate(std::stringstream* commentsOnFailure) {
   std::string certificateContent;
-  if (!FileOperations::LoadFileToStringVirtual(
+  if (!FileOperations::LoadFileToStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
     TransportLayerSecurity::fileCertificate, certificateContent, true, true, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
@@ -27,16 +27,27 @@ bool TransportLayerSecurity::LoadPEMCertificate(std::stringstream* commentsOnFai
   return this->theServer.certificate.LoadFromPEM(certificateContent, commentsOnFailure);
 }
 
-bool TransportLayerSecurity::LoadPEMPrivateKey(std::stringstream *commentsOnFailure) {
+bool TransportLayerSecurity::LoadPEMPrivateKey(
+  std::stringstream* commentsOnFailure
+) {
   std::string certificateContent, certificateContentStripped;
-  if (!FileOperations::LoadFileToStringVirtual(
-    TransportLayerSecurity::fileKey, certificateContent, true, true, commentsOnFailure
+  static bool accessULTRASensitiveFoldersAllowed = true;
+  // Access to ultra sensitive folders is allowed only once, at the start of the program.
+  // No further attempts to load allowed.
+  if (!FileOperations::LoadFileToStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
+    TransportLayerSecurity::fileKey,
+    certificateContent,
+    true,
+    accessULTRASensitiveFoldersAllowed,
+    commentsOnFailure
   )) {
+    accessULTRASensitiveFoldersAllowed = false;
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to load key file. ";
     }
     return false;
   }
+  accessULTRASensitiveFoldersAllowed = false;
   return this->theServer.privateKey.LoadFromPEM(certificateContent, commentsOnFailure);
 }
 

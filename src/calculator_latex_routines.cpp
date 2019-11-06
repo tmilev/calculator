@@ -725,7 +725,7 @@ bool LaTeXcrawler::BuildOrFetchFromCachePDF(std::stringstream* commentsOnFailure
   bool pdfExists = FileOperations::FileExistsVirtual(this->targetPDFFileNameWithPathVirtual, false, false, commentsOnFailure);
   if (!this->flagForceSlideRebuild && pdfExists && !this->flagSourceOnly) {
     return FileOperations::LoadFileToStringVirtual(
-      this->targetPDFFileNameWithPathVirtual, this->targetPDFbinaryContent, false, false, commentsOnFailure
+      this->targetPDFFileNameWithPathVirtual, this->targetPDFbinaryContent, false, commentsOnFailure
     );
   }
   if (!theGlobalVariables.UserDefaultHasAdminRights()) {

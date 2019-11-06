@@ -395,16 +395,19 @@ bool Calculator::innerPrintSSSubalgebras(
   bool doAdjustCentralizers
 ) {
   MacroRegisterFunctionWithName("Calculator::innerPrintSSsubalgebras");
+  std::cout << "DEBUG: Here I am. ";
   if (doForceRecompute) {
     if (!theGlobalVariables.UserDefaultHasAdminRights()) {
       return theCommands << "Only logged-in admins allowed to force-recompute semisimple subalgebras. ";
     }
   }
+  std::cout << "DEBUG: Here I am pt2 ";
   if (!theGlobalVariables.flagBanProcessMonitoring) {
     if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection != nullptr) {
       theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection();
     }
   }
+  std::cout << "DEBUG: Here I am pt3 ";
   std::stringstream out;
   SemisimpleLieAlgebra* ownerSSPointer = nullptr;
   bool isAlreadySubalgebrasObject = input.IsOfType<SemisimpleSubalgebras>();
@@ -429,8 +432,10 @@ bool Calculator::innerPrintSSSubalgebras(
     crash << "Zero pointer to semisimple Lie algebra: this shouldn't happen. " << crash;
   }
   SemisimpleLieAlgebra& ownerLieAlgebra = *ownerSSPointer;
+  std::cout << "DEBUG: Here I am pt4!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ";
   SemisimpleSubalgebras& theSubalgebras =
   theCommands.theObjectContainer.GetSemisimpleSubalgebrasCreateIfNotPresent(ownerLieAlgebra.theWeyl.theDynkinType);
+  std::cout << "DEBUG: Here I am pt5!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ";
   theSubalgebras.ComputeStructureWriteFiles(
     ownerLieAlgebra,
     theCommands.theObjectContainer.theAlgebraicClosure,
@@ -445,6 +450,7 @@ bool Calculator::innerPrintSSSubalgebras(
     doComputePairingTable,
     doAdjustCentralizers
   );
+  std::cout << "DEBUG: Here I am pt123213321!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! " << std::endl;
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -467,6 +473,7 @@ bool SemisimpleSubalgebras::ComputeStructureWriteFiles(
   this->owner = &newOwner;
   this->ComputeFolderNames(this->currentFormat);
   if (!FileOperations::FileExistsVirtual(this->VirtualNameMainFile1) || forceRecompute) {
+
     if (doFullInit) {
       this->millisecondsComputationStart = theGlobalVariables.GetElapsedMilliseconds();
     }
@@ -485,11 +492,13 @@ bool SemisimpleSubalgebras::ComputeStructureWriteFiles(
       *outputStream << "Files precomputed, serving from HD. ";
     }
   }
+  std::cout << "DEBUG: HERE I AM! " << std::endl;
   if (outputStream != nullptr) {
     *outputStream << "<br>Output file: <a href = \""
     << this->DisplayNameMainFile1WithPath << "\" target = \"_blank\">"
     << this->DisplayNameMainFile1NoPath << "</a>";
   }
+  std::cout << "DEBUG: I AM DONE DONE DONE! " << std::endl;
   return true;
 }
 

@@ -968,11 +968,13 @@ bool SemisimpleSubalgebras::LoadState(
 
 bool SemisimpleSubalgebras::FindTheSSSubalgebrasContinue() {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::FindTheSSSubalgebrasContinue");
+  std::cout << "DEBUG: Here I am. ";
   ProgressReport theReport;
   std::stringstream reportstream;
   reportstream << "State at beginning of computation: " << this->ToStringProgressReport();
   theReport.Report(reportstream.str());
   while (this->IncrementReturnFalseIfPastLast()) {
+    std::cout << "DEBUG: Here I am. ";
     theReport.Report(this->ToStringProgressReport());
     if (!this->flagRealizedAllCandidates) {
       this->comments = this->comments + "Failed to realize all candidates, aborting computation.";

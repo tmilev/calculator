@@ -521,7 +521,7 @@ std::string HtmlInterpretation::GetOnePageJS(bool appendBuildHash) {
   std::stringstream out;
   std::stringstream errorStream;
   if (!FileOperations::LoadFileToStringVirtual(
-    "/calculator-html/index.html", theInterpretation.htmlRaw, false, false, &errorStream
+    "/calculator-html/index.html", theInterpretation.htmlRaw, false, &errorStream
   )) {
     out << "<html><body><b>Failed to load the application file. "
     << "Further comments follow. " << errorStream.str() << "</body></html>";
@@ -531,7 +531,10 @@ std::string HtmlInterpretation::GetOnePageJS(bool appendBuildHash) {
   theInterpretation.jsFileContents.SetSize(theInterpretation.jsFileNames.size);
   for (int i = 0; i < theInterpretation.jsFileNames.size; i ++) {
     if (!FileOperations::LoadFileToStringVirtual(
-      theInterpretation.jsFileNames[i], theInterpretation.jsFileContents[i], false, false, &errorStream
+      theInterpretation.jsFileNames[i],
+      theInterpretation.jsFileContents[i],
+      false,
+      &errorStream
     )) {
       return errorStream.str();
     }
@@ -562,7 +565,10 @@ std::string HtmlInterpretation::GetApp(bool appendBuildHash) {
   std::stringstream out;
   std::stringstream errorStream;
   if (!FileOperations::LoadFileToStringVirtual(
-    "/calculator-html/index.html", theInterpretation.htmlRaw, false, false, &errorStream
+    "/calculator-html/index.html",
+    theInterpretation.htmlRaw,
+    false,
+    &errorStream
   )) {
     out << "<html><body><b>Failed to load the application file. "
     << "Further comments follow. " << errorStream.str() << "</body></html>";

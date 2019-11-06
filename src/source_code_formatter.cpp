@@ -13,7 +13,7 @@ bool CodeFormatter::initializeFileNames(
 ) {
   MacroRegisterFunctionWithName("SourceCodeFormatter::initializeFileNames");
   this->inputFileName = fileName;
-  if (!FileOperations::LoadFileToStringVirtual(this->inputFileName, this->inputCode, false, false, comments)) {
+  if (!FileOperations::LoadFileToStringVirtual(this->inputFileName, this->inputCode, false, comments)) {
     if (comments != nullptr) {
       *comments << "Failed to load file. ";
     }

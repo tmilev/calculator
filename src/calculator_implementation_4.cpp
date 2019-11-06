@@ -2684,6 +2684,7 @@ std::string Calculator::ToStringSyntacticStackHTMLTable(bool ignoreCommandEnclos
 SemisimpleSubalgebras& ObjectContainer::GetSemisimpleSubalgebrasCreateIfNotPresent(const DynkinType& input) {
   MacroRegisterFunctionWithName("ObjectContainer::GetSemisimpleSubalgebrasCreateIfNotPresent");
   SemisimpleSubalgebras& currentSAs = this->theSSSubalgebraS.GetValueCreateNoInit(input);
+  std::cout << "DEBUG: Got to here pt 6.!!!" << std::endl;
   return currentSAs;
 }
 

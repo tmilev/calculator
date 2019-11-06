@@ -66,6 +66,31 @@ public:
     const std::string& fileName,
     std::string& output,
     bool accessSensitiveFolders,
+    std::stringstream* commentsOnFailure
+  );
+  // This function can access ultra sensitive folders.
+  // Please do not use outside of critical functions.
+  // At the time of writing, there are only
+  // a few use cases that qualify.
+  // 1. Load the server's private key and server certificate.
+  //    The certificate is not a secret but we keep it next to
+  //    the private key for ease of management.
+  // 2. Load other server secrets:
+  //    - recaptcha credentials
+  //    - email credentials.
+  // 3. Load private user computation reports from the results/ folder.
+  //    These are not expected to contain secret information
+  //    or pose security risks. However since they contain personal user
+  //    data we treat them as ultra sensitive.
+  // Ultra sensitive data is only available through administrator ssh
+  // connection, or, in the case of the results/ folder, only with a
+  // 256 bit secure one-time use token (= filename of the actual report).
+  // The available tokens are only relayed to the party that initiated the computation.
+  // They available tokens can only be browsed with an ssh admin connection.
+  static bool LoadFileToStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
+    const std::string& fileName,
+    std::string& output,
+    bool accessSensitiveFolders,
     bool accessULTRASensitiveFolders,
     std::stringstream* commentsOnFailure
   );

@@ -830,6 +830,17 @@ bool FileOperations::LoadFileToStringVirtual(
   const std::string& theFileName,
   std::string& output,
   bool accessSensitiveFolders,
+  std::stringstream* commentsOnFailure
+) {
+  return FileOperations::LoadFileToStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
+    theFileName, output, accessSensitiveFolders, false, commentsOnFailure
+  );
+}
+
+bool FileOperations::LoadFileToStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
+  const std::string& theFileName,
+  std::string& output,
+  bool accessSensitiveFolders,
   bool accessULTRASensitiveFolders,
   std::stringstream* commentsOnFailure
 ) {
@@ -1143,7 +1154,7 @@ bool FileOperations::GetPhysicalFileNameFromVirtualCustomizedWriteOnly(
   if (!FileOperations::FileExistsVirtual(outputCandidate, false, false)) {
     std::string fileContent;
     std::string inputDefault = inputStart + "default/" + fileEnd;
-    if (FileOperations::LoadFileToStringVirtual(inputDefault, fileContent, false, false, commentsOnFailure)) {
+    if (FileOperations::LoadFileToStringVirtual(inputDefault, fileContent, false, commentsOnFailure)) {
       std::fstream theFile;
       if (FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(theFile, inputCopy, false, true, false, false)) {
         theFile << fileContent;

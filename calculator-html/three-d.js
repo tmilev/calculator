@@ -269,9 +269,10 @@ CurveThreeD.prototype.drawNoFinish = function(theCanvas, startByMoving) {
     theY = this.coordinateFunctions[1](theT);
     if (!isFinite(theY) || !isFinite(theX))
       console.log('Failed to evaluate: ' + this.theFunction + ' at x = ' + theX);
-    if (Math.abs(theY)>100000 || Math.abs(theX) > 100000) { 
-      if (!skippedValues)
+    if (Math.abs(theY) > 100000 || Math.abs(theX) > 100000) { 
+      if (!skippedValues) {
         console.log('Curve point: ' + [theX, theY] + " is too large, skipping. Further errors suppressed.");
+      }
       skippedValues = true;
       continue;
     }
@@ -295,10 +296,10 @@ function Surface(inputxyzFun, inputUVBox, inputPatchDimensions, inputColors, inp
   this.contourWidth = inputContourWidth;
   this.colors.colorUV= colorToHex(this.colors.colorUV);
   this.colors.colorVU= colorToHex(this.colors.colorVU);
-  this.deltaU= (inputUVBox[1][0]-inputUVBox[0][0])/this.patchDimensions[0];
-  this.deltaV= (inputUVBox[1][1]-inputUVBox[0][1])/this.patchDimensions[1];
-  this.numSamplesUSegment =10;
-  this.numSamplesVSegment =10;
+  this.deltaU = (inputUVBox[1][0] - inputUVBox[0][0]) / this.patchDimensions[0];
+  this.deltaV = (inputUVBox[1][1] - inputUVBox[0][1]) / this.patchDimensions[1];
+  this.numSamplesUSegment = 10;
+  this.numSamplesVSegment = 10;
 }
 
 function Point(inputLocation, inputColor) { 
@@ -310,19 +311,19 @@ function Patch(inputBase, inputEdge1, inputEdge2, inputColorUV, inputColorVU) {
   this.base = inputBase.slice();
   this.edge1 = inputEdge1.slice();
   this.edge2 = inputEdge2.slice();
-  this.colorUV= colorToRGB(inputColorUV);
-  this.colorVU= colorToRGB(inputColorVU);
-  this.v1=vectorPlusVector(this.base, this.edge1);
-  this.v2=vectorPlusVector(this.base, this.edge2);
-  this.vEnd =vectorPlusVector(this.v1, this.edge2);
+  this.colorUV = colorToRGB(inputColorUV);
+  this.colorVU = colorToRGB(inputColorVU);
+  this.v1 = vectorPlusVector(this.base, this.edge1);
+  this.v2 = vectorPlusVector(this.base, this.edge2);
+  this.vEnd = vectorPlusVector(this.v1, this.edge2);
   this.internalPoint = this.base.slice();
   vectorAddVectorTimesScalar(this.internalPoint, this.edge1, 0.5);
   vectorAddVectorTimesScalar(this.internalPoint, this.edge2, 0.5);
-  this.normalVector =vectorCrossVector(inputEdge1, inputEdge2);
-  this.adjacentContours =[];
-  this.traversalOrder =[];
-  this.patchesBelowMe =[];
-  this.patchesAboveMe =[];
+  this.normalVector = vectorCrossVector(inputEdge1, inputEdge2);
+  this.adjacentContours = [];
+  this.traversalOrder = [];
+  this.patchesBelowMe = [];
+  this.patchesAboveMe = [];
   this.index = - 1;
 }
 
@@ -362,7 +363,7 @@ function colorToRGB(input) {
     return input;
   }
   var hex = colorToHex(input);
-  return [parseInt(hex.slice(1,3), 16), parseInt(hex.slice(3,5), 16), parseInt(hex.slice(5,7), 16)];
+  return [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)];
 }
 
 function colorToHex(color) { 
@@ -454,8 +455,12 @@ function accountBoundingBox(inputPoint, outputBox) {
 }
 
 function CurveTwoD(
-  inputCoordinateFunctions, inputLeftPt, inputRightPt,
-  inputNumSegments, inputColor, inputLineWidth
+  inputCoordinateFunctions, 
+  inputLeftPt, 
+  inputRightPt,
+  inputNumSegments, 
+  inputColor, 
+  inputLineWidth
 ) { 
   this.coordinateFunctions = inputCoordinateFunctions;
   this.leftPt = inputLeftPt;
@@ -531,8 +536,8 @@ CurveTwoD.prototype.drawNoFinish = function(theCanvas, startByMoving) {
   }
 }
 
-function PathTwoD(inputPath, inputColor, inputFillColor, inputLineWidth)
-{ this.path = inputPath;
+function PathTwoD(inputPath, inputColor, inputFillColor, inputLineWidth) { 
+  this.path = inputPath;
   this.color = colorToRGB(inputColor);
   this.colorFill = colorToRGB(inputFillColor);
   this.isFilled = false;
@@ -1078,7 +1083,7 @@ CanvasTwoD.prototype.setViewWindow = function(leftLowPt, rightUpPt) {
 }
 
 CanvasTwoD.prototype.redraw = function() { 
-  this.textPerformance ="";
+  this.textPerformance = "";
   this.redrawStart = new Date().getTime();
   var theSurface = this.surface;
   theSurface.clearRect(0, 0, this.width, this.height);
@@ -2671,10 +2676,10 @@ Canvas.prototype.drawSurface = function(theSurface) {
       var currentU = theSurface.uvBox[0][0] + i * deltaU;
       var currentV = theSurface.uvBox[0][1] + j * deltaV;
       var base = theSurface.xyzFun(currentU, currentV);
-      var v1= theSurface.xyzFun(currentU + deltaU, currentV);
-      var v2= theSurface.xyzFun(currentU, currentV + deltaV);
-      var edge1=vectorMinusVector(v1, base);
-      var edge2=vectorMinusVector(v2, base);
+      var v1 = theSurface.xyzFun(currentU + deltaU, currentV);
+      var v2 = theSurface.xyzFun(currentU, currentV + deltaV);
+      var edge1 = vectorMinusVector(v1, base);
+      var edge2 = vectorMinusVector(v2, base);
       var incomingPatch = new Patch(base, edge1, edge2, theSurface.colors.colorUV, theSurface.colors.colorVU);
       incomingPatch.adjacentContours = new Array(4);
       incomingPatch.traversalOrder = [1, 1, 1, 1];

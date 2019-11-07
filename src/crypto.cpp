@@ -34,6 +34,13 @@ void Crypto::GetRandomBytesSecureInternalMayLeaveTracesInMemory(List<unsigned ch
   theGlobalVariables.randomBytesCurrent.Slice(0, numberOfBytesMax32, output);
 }
 
+bool Crypto::HaveEqualHashes(const std::string& left, const std::string& right) {
+  List<uint32_t> leftSHA, rightSHA;
+  Crypto::computeSha256(left, leftSHA);
+  Crypto::computeSha256(right, rightSHA);
+  return leftSHA == rightSHA;
+}
+
 void Crypto::GetRandomLargePrime(LargeIntegerUnsigned& output, int numBytes) {
   Crypto::GetRandomLargeIntegerSecure(output, numBytes);
   if (output.IsEven()) {

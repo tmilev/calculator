@@ -881,7 +881,6 @@ bool LaTeXcrawler::BuildOrFetchFromCachePDF(std::stringstream* commentsOnFailure
 bool LaTeXcrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
   MacroRegisterFunctionWithName("LaTeXcrawler::BuildTopicList");
   StateMaintainerCurrentFolder preserveCurrentFolder;
-  //stOutput << "DEBUG: Here we are. ";
   ProgressReport theReport;
   CalculatorHTML topicParser;
   std::stringstream temp;

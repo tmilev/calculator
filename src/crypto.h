@@ -384,6 +384,9 @@ public:
 
   static void GetRandomLargeIntegerSecure(LargeIntegerUnsigned& output, int numBytes);
   static void GetRandomLargePrime(LargeIntegerUnsigned& output, int numBytes);
+  // Shorter strings should hash faster, so
+  // timing attacks on this should reveal differences in string lengths.
+  static bool HaveEqualHashes(const std::string& left, const std::string& right);
 };
 
 class JSONWebToken {

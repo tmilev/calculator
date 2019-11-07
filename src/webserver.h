@@ -62,7 +62,7 @@ public:
   int connectedSocketIDLastValueBeforeRelease;
   int connectionID;
   int indentationLevelHTML;
-  int numberOfConsecutiveNoReports;
+  int numberOfConsecutiveNoReportsBeforeDisconnect;
   const int maxNumberOfConsecutiveNoReports = 2;
   List<char> remainingBytesToSenD;
   List<char> remainingHeaderToSend;
@@ -323,7 +323,7 @@ public:
   void StopKillAll[[noreturn]](bool attemptToRestart);
   bool RestartIsNeeded();
   void initDates();
-  int GetWorkerIndexFromId(std::string& inputId, std::stringstream* commentsOnError);
+  int GetWorkerIndexFromId(const std::string &workerNumber, std::string& inputId, std::stringstream* commentsOnError);
   std::string ToStringLastErrorDescription();
   std::string ToStringStatusActive();
   std::string ToStringStatusAll();

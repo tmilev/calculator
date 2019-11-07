@@ -27,6 +27,7 @@ std::string WebAPI::result::comments = "comments";
 std::string WebAPI::result::timeOut = "timeOut";
 std::string WebAPI::result::timeOutComments = "timeOutComments";
 std::string WebAPI::result::workerId = "workerId";
+std::string WebAPI::result::workerIndex = "workerIndex";
 std::string WebAPI::result::crashReport = "crashReport";
 std::string WebAPI::result::millisecondsComputation = "timeComputation";
 std::string WebAPI::result::loginDisabledEveryoneIsAdmin = "loginDisabledEveryoneIsAdmin";
@@ -65,6 +66,7 @@ std::string WebAPI::request::clonePage = "clonePageJSON";
 std::string WebAPI::request::problemGiveUp = "problemGiveUp";
 std::string WebAPI::request::problemGiveUpNoLogin = "problemGiveUpNoLogin";
 std::string WebAPI::request::workerId = WebAPI::result::workerId;
+std::string WebAPI::request::workerIndex = WebAPI::result::workerIndex;
 
 std::string WebAPI::UserInfo::processMonitoring = "processMonitoring";
 

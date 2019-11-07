@@ -1381,9 +1381,10 @@ int WebWorker::ProcessPauseWorker() {
   MacroRegisterFunctionWithName("WebWorker::ProcessPauseWorker");
   this->SetHeaderOKNoContentLength("");
   std::string workerId = theGlobalVariables.GetWebInput(WebAPI::request::workerId);
+  std::string workerIndex = theGlobalVariables.GetWebInput(WebAPI::request::workerIndex);
   std::stringstream out;
   JSData result;
-  int indexWorker = this->parent->GetWorkerIndexFromId(workerId, &out);
+  int indexWorker = this->parent->GetWorkerIndexFromId(workerIndex, workerId, &out);
   if (indexWorker < 0) {
     result[WebAPI::result::error] = HtmlRoutines::ConvertStringToHtmlString(out.str(), false);
     stOutput << result.ToString(false);
@@ -1420,7 +1421,7 @@ int WebWorker::ProcessComputationIndicator() {
   return 0;
 }
 
-int WebServer::GetWorkerIndexFromId(std::string& inputId, std::stringstream* commentsOnError) {
+int WebServer::GetWorkerIndexFromId(const std::string& workerNumber, std::string& inputId, std::stringstream* commentsOnError) {
   MacroRegisterFunctionWithName("WebServer::GetWorkerIndexFromId");
   if (inputId == "") {
     if (commentsOnError != nullptr) {
@@ -1429,12 +1430,17 @@ int WebServer::GetWorkerIndexFromId(std::string& inputId, std::stringstream* com
     }
     return - 1;
   }
-  int result = this->workerIds.GetIndex(inputId);
-  if (result == - 1) {
+  int result = std::atoi(workerNumber.c_str());
+
+  if (result >= this->theWorkers.size || result < 0) {
     if (commentsOnError != nullptr) {
-      *commentsOnError << "Worker id "
-      << HtmlRoutines::ConvertStringToHtmlString(inputId, false)
-      << " not found. ";
+      *commentsOnError << "Your worker index " << result << " is out of range. ";
+    }
+    return - 1;
+  }
+  if (!Crypto::HaveEqualHashes(this->theWorkers[result].workerId, inputId)) {
+    if (commentsOnError != nullptr) {
+      *commentsOnError << "The worker id you provided is out-of-date or incorrect. " ;
     }
     return - 1;
   }
@@ -1491,9 +1497,10 @@ void WebWorker::GetJSONResultFromFile(const std::string& workerId, JSData& outpu
 JSData WebWorker::ProcessComputationIndicatorJSData() {
   MacroRegisterFunctionWithName("WebWorker::ProcessComputationIndicatorJSData");
   std::string workerId = theGlobalVariables.GetWebInput(WebAPI::request::workerId);
+  std::string workerIndex = theGlobalVariables.GetWebInput(WebAPI::request::workerIndex);
   JSData result;
   std::stringstream out, comments;
-  int inputWebWorkerIndex = this->parent->GetWorkerIndexFromId(workerId, &comments);
+  int inputWebWorkerIndex = this->parent->GetWorkerIndexFromId(workerIndex, workerId, &comments);
   if (inputWebWorkerIndex < 0) {
     // Worker is no longer running.
     // This may be a very old computation request.
@@ -1536,11 +1543,11 @@ JSData WebWorker::ProcessComputationIndicatorJSData() {
   if (otherWorker.workerToWorkerReturnIndicator.lastRead.size == 0) {
     // Other worker left us no report since last time we checked.
     result[WebAPI::result::status] = "noReport";
-    this->numberOfConsecutiveNoReports ++;
-    if (this->numberOfConsecutiveNoReports > this->maxNumberOfConsecutiveNoReports) {
+    this->numberOfConsecutiveNoReportsBeforeDisconnect ++;
+    if (this->numberOfConsecutiveNoReportsBeforeDisconnect > this->maxNumberOfConsecutiveNoReports) {
       this->flagKeepAlive = false;
       logWorker << logger::yellow << "No reports for "
-      << this->numberOfConsecutiveNoReports
+      << this->numberOfConsecutiveNoReportsBeforeDisconnect
       << " consecutive calls, setting keep alive to false. "
       << logger::endL;
     }
@@ -1801,7 +1808,7 @@ void WebWorker::reset() {
   theGlobalVariables.userDefault.reset();
   this->RelativePhysicalFileNamE = "";
   this->numberOfReceivesCurrentConnection = 0;
-  this->numberOfConsecutiveNoReports = 0;
+  this->numberOfConsecutiveNoReportsBeforeDisconnect = 0;
   this->Release();
 }
 

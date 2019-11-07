@@ -59,10 +59,6 @@ Monitor.prototype.clearTimeout = function() {
 Monitor.prototype.callbackPauseRequest = function(input, output) {
   this.clearTimeout();
   var progressReportContent = "";
-  progressReportContent += `Refreshing every ${this.timeIncrement} second(s). `;
-  progressReportContent += `Client time: ~${Math.floor(this.timeOutOldCounter)} second(s)<br>`;
-  var progReportTimer = document.getElementById(ids.domElements.monitoring.progressTimer);
-  progReportTimer.innerHTML = progressReportContent;
   if (input === "") {
     this.currentTimeOutHandler = setTimeout(this.progressReport.bind(this), this.timeIncrement * 1000);
     return;
@@ -71,19 +67,25 @@ Monitor.prototype.callbackPauseRequest = function(input, output) {
   this.ownerCalculator.parsedComputation = JSON.parse(input);
   var status = this.ownerCalculator.parsedComputation.status;
   var doUpdateCalculatorPage = false;
-  if (status === "finished" || status === "crash") {
+  if (status === undefined || status === null) {
+    if (this.ownerCalculator.parsedComputation.error !== null && this.ownerCalculator.parsedComputation.error !== undefined) {
+      status = "error";
+    }
+  }
+  if (status === "finished" || status === "crash" || status === "error") {
     this.isFinished = true;
     this.isPaused = false;
-    indicatorButton.innerHTML = "Finished";
+    indicatorButton.innerHTML = "finished";
     doUpdateCalculatorPage = true;
+    progressReportContent += `<b>${status}</b><br>`;
   } else if (status === "paused") {
     this.isPaused = true;
     indicatorButton.innerHTML = "Continue";
   } else {
     if (status === "noReport") {
-      progReportTimer.innerHTML += "No report on last ping."; 
+      progressReportContent += "No report on last ping. "; 
     } else if (status === "unpaused") {
-      progReportTimer.innerHTML += "Recently unpaused.";       
+      progressReportContent += "Recently unpaused.";       
     } else {
       doUpdateCalculatorPage = true;
     }
@@ -91,6 +93,11 @@ Monitor.prototype.callbackPauseRequest = function(input, output) {
     indicatorButton.innerHTML = "Pause";
     this.currentTimeOutHandler = setTimeout(this.progressReport.bind(this), this.timeIncrement * 1000);
   }  
+  progressReportContent += `Refreshing every ${this.timeIncrement} second(s). `;
+  progressReportContent += `Client time: ~${Math.floor(this.timeOutOldCounter)} second(s)<br>`;
+  var progReportTimer = document.getElementById(ids.domElements.monitoring.progressTimer);
+  progReportTimer.innerHTML = progressReportContent;
+
   if (doUpdateCalculatorPage) {
     this.ownerCalculator.panelIdPairs = [];
     var buffer = new BufferCalculator();

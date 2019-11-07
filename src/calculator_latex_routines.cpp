@@ -967,8 +967,6 @@ bool LaTeXcrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
     std::stringstream reportStream;
     numProcessed ++;
     reportStream << "Processing lecture slides: " << numProcessed << " out of " << numSlidePairsToBuild << ". ";
-    reportStream << "<br>DEBUG: base folder: " << this->baseFolderStartFilePhysical;
-    reportStream << "<br>DEBUG: base folders allowed " << this->baseFoldersCrawlableFilesPhysical.ToStringCommaDelimited();
     reportStream << "<br>Slide file names: " << this->slideFileNamesVirtualWithPatH.ToStringCommaDelimited();
     theReport.Report(reportStream.str());
 

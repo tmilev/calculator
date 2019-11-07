@@ -62,6 +62,8 @@ public:
   int connectedSocketIDLastValueBeforeRelease;
   int connectionID;
   int indentationLevelHTML;
+  int numberOfConsecutiveNoReports;
+  const int maxNumberOfConsecutiveNoReports = 2;
   List<char> remainingBytesToSenD;
   List<char> remainingHeaderToSend;
   List<char> remainingBodyToSend;
@@ -247,6 +249,7 @@ public:
   List<int> theListeningSockets;
   //List<int> theListeningSocketsReadyToAccept;
   ListReferences<WebWorker> theWorkers;
+  MapList<std::string, int, MathRoutines::HashString> workerIds;
 
   HashedList<std::string, MathRoutines::HashString> requestsNotNeedingLogin;
   List<std::string> addressStartsNotNeedingLogin;
@@ -273,6 +276,7 @@ public:
   static void AnalyzeMainArgumentsTimeString(const std::string& timeLimitString);
   void InitializeGlobalVariables();
   void InitializeGlobalVariablesHashes();
+  void MarkChildNotInUse(int childIndex);
   bool RequiresLogin(const std::string& inputRequest, const std::string& inputAddress);
   void ReleaseWorkerSideResources();
   void ReleaseActiveWorker();
@@ -299,7 +303,6 @@ public:
   static void ReturnActiveIndicatorAlthoughComputationIsNotDone();
   static void SendStringThroughActiveWorker(const std::string& input);
   static void fperror_sigaction[[noreturn]](int signal);
-  void ReapOneChild();
   void ReapChildren();
   static void Signal_SIGCHLD_handler(int s);
   bool initPrepareWebServerALL();

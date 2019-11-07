@@ -871,9 +871,6 @@ void WebWorker::WriteAfterTimeoutProgress(const std::string& input) {
     return;
   }
   this->WriteAfterTimeout(input, "running");
-  this->workerToWorkerReturnIndicator.WriteOnceAfterEmptying(
-    theWebServer.GetActiveWorker().workerId, false, true
-  );
 }
 
 void WebWorker::WriteAfterTimeoutResult() {
@@ -1432,14 +1429,8 @@ int WebServer::GetWorkerIndexFromId(std::string& inputId, std::stringstream* com
     }
     return - 1;
   }
-  int result = 0;
-  int todoLookupWorkerIdUsingAMap;
-  for (; result < this->theWorkers.size; result ++) {
-    if (inputId == this->theWorkers[result].workerId) {
-      break;
-    }
-  }
-  if (result >= this->theWorkers.size) {
+  int result = this->workerIds.GetIndex(inputId);
+  if (result == - 1) {
     if (commentsOnError != nullptr) {
       *commentsOnError << "Worker id "
       << HtmlRoutines::ConvertStringToHtmlString(inputId, false)
@@ -1491,7 +1482,8 @@ void WebWorker::GetJSONResultFromFile(const std::string& workerId, JSData& outpu
   }
   if (!outputContent.readstring(computationResult, false, nullptr)) {
     commentsOnError << "I found your worker id: "
-    << workerId << " but I could not parse it's JSON status. This is likely an internal server error. ";
+    << workerId << " but I could not parse it's JSON status. "
+    << "This is likely an internal server error. ";
     outputContent[WebAPI::result::error] = commentsOnError.str();
   }
 }
@@ -1544,6 +1536,14 @@ JSData WebWorker::ProcessComputationIndicatorJSData() {
   if (otherWorker.workerToWorkerReturnIndicator.lastRead.size == 0) {
     // Other worker left us no report since last time we checked.
     result[WebAPI::result::status] = "noReport";
+    this->numberOfConsecutiveNoReports ++;
+    if (this->numberOfConsecutiveNoReports > this->maxNumberOfConsecutiveNoReports) {
+      this->flagKeepAlive = false;
+      logWorker << logger::yellow << "No reports for "
+      << this->numberOfConsecutiveNoReports
+      << " consecutive calls, setting keep alive to false. "
+      << logger::endL;
+    }
     return result;
   }
   // There must be a report waiting for us.
@@ -1572,12 +1572,15 @@ void WebWorker::WriteAfterTimeout(const std::string& input, const std::string& s
     &commentsOnError
   );
   currentWorker.writingReportFile.Unlock();
+  currentWorker.workerToWorkerReturnIndicator.WriteOnceAfterEmptying(
+    currentWorker.workerId, false, true
+  );
   if (success) {
     logWorker << logger::green << "Data written to file: "
     << currentWorker.workerId << logger::endL;
   } else {
     logIO << "Failed to write computation data. " << commentsOnError.str();
-  }
+  }  
 }
 
 int WebWorker::ProcessFolder() {
@@ -1798,6 +1801,7 @@ void WebWorker::reset() {
   theGlobalVariables.userDefault.reset();
   this->RelativePhysicalFileNamE = "";
   this->numberOfReceivesCurrentConnection = 0;
+  this->numberOfConsecutiveNoReports = 0;
   this->Release();
 }
 
@@ -3430,14 +3434,12 @@ bool WebServer::CreateNewActiveWorker() {
   std::string stow = stowstream.str();
   std::string wtos = wtosStream.str();
   std::string wtow = wtowStream.str();
-  std::cout << "DEBUG: got to here\n";
   WebWorker& worker = this->GetActiveWorker();
   if (!worker.writingReportFile.CreateMe(stow + "output file mutex", false, true)) {
     logPlumbing << "Failed to create process mutex: "
     << worker.writingReportFile.name << "\n";
     return this->EmergencyRemoval_LastCreatedWorker();
   }
-  std::cout << "DEBUG: got to here pt 2.\n";
   if (!worker.PauseWorker.CreateMe(stow + "pause mutex", false, true)) {
     logPlumbing << "Failed to create process mutex: "
     << worker.PauseWorker.name << "\n";
@@ -3794,8 +3796,7 @@ void WebServer::TerminateChildSystemCall(int i) {
   if (!this->theWorkers[i].flagInUsE || this->theWorkers[i].flagExited) {
     return;
   }
-  this->theWorkers[i].flagInUsE = false;
-  this->currentlyConnectedAddresses.SubtractMonomial(this->theWorkers[i].userAddress, 1);
+  this->MarkChildNotInUse(i);
   if (this->theWorkers[i].ProcessPID > 0) {
     if (theGlobalVariables.flagServerDetailedLog) {
       logProcessKills << "Detail: " << " killing child index: " << i << "." << logger::endL;
@@ -3863,10 +3864,17 @@ void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress)
   }
 }
 
+void WebServer::MarkChildNotInUse(int childIndex) {
+  this->theWorkers[childIndex].flagInUsE = false;
+  this->currentlyConnectedAddresses.SubtractMonomial(
+    this->theWorkers[childIndex].userAddress, 1
+  );
+  this->workerIds.RemoveKey(this->theWorkers[childIndex].workerId);
+}
+
 void WebServer::ProcessOneChildMessage(int childIndex, int& outputNumInUse) {
   std::string messageString = this->theWorkers[childIndex].pipeWorkerToServerControls.GetLastRead();
-  this->theWorkers[childIndex].flagInUsE = false;
-  this->currentlyConnectedAddresses.SubtractMonomial(this->theWorkers[childIndex].userAddress, 1);
+  this->MarkChildNotInUse(childIndex);
   std::stringstream commentsOnFailure;
   JSData workerMessage;
   if (!workerMessage.readstring(messageString, false, &commentsOnFailure)) {
@@ -4417,6 +4425,12 @@ int WebServer::Run() {
       logProcessKills << logger::red << " FAILED to spawn a child process. " << logger::endL;
     } else {
       this->GetActiveWorker().workerId = Crypto::ConvertListUnsignedCharsToHex(this->idLastWorker);
+      this->workerIds.SetKeyValue(this->GetActiveWorker().workerId, this->activeWorker);
+      if (this->workerIds.size() > 2 * this->theWorkers.size) {
+        logServer << logger::red
+        << "Warning: worker ids exceeds twice the number of workers. "
+        << "This may be a memory leak. " << logger::endL;
+      }
     }
     this->GetActiveWorker().ProcessPID = incomingPID;
     if (this->GetActiveWorker().ProcessPID == 0) {
@@ -4709,7 +4723,7 @@ void WebServer::CheckMongoDBSetup() {
   << logger::red << "sudo make install" << logger::endL;
   theGlobalVariables.CallSystemNoOutput("sudo make install", &logServer);
   theGlobalVariables.ChDir("../../bin");
-  logServer  << "Need sudo access for command to configure linker to use local usr/local/lib path (needed by mongo): "
+  logServer << "Need sudo access for command to configure linker to use local usr/local/lib path (needed by mongo): "
   << logger::red << "sudo cp ../external-source/usr_local_lib_for_mongo.conf /etc/ld.so.conf.d/" << logger::endL;
   theGlobalVariables.CallSystemNoOutput("sudo cp ../external-source/usr_local_lib_for_mongo.conf /etc/ld.so.conf.d/", &logServer);
   logServer << "Need sudo access for command: " << logger::red << "sudo ldconfig" << logger::endL;
@@ -4811,7 +4825,11 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv) {
   }
   theGlobalVariables.initDefaultFolderAndFileNames(theGlobalVariables.programArguments[0]);
   std::string envRequestMethodApache = WebServer::GetEnvironment("REQUEST_METHOD");
-  if (envRequestMethodApache == "GET" || envRequestMethodApache == "POST" || envRequestMethodApache == "HEAD") {
+  if (
+    envRequestMethodApache == "GET" ||
+    envRequestMethodApache == "POST" ||
+    envRequestMethodApache == "HEAD"
+  ) {
     theGlobalVariables.flagRunningApache = true;
     return;
   }

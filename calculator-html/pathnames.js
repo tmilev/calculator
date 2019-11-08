@@ -27,6 +27,7 @@ var urlFields = {
     database: "database",
     serverStatusJSON: "serverStatusJSON",
     workerId: "workerId",
+    workerIndex: "workerIndex",
     monitoring: "monitoring",
     calculatorInput: "calculatorInput",
   },

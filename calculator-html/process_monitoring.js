@@ -12,6 +12,8 @@ function Monitor() {
   this.timeOutCounter = 0;
   /**@type{string} */
   this.currentWorkerId = ""; 
+  /**@type{string} */
+  this.currentWorkerIndex = "";
   this.currentTimeOutHandler = null;
   this.ownerCalculator = null;
 }
@@ -43,6 +45,7 @@ Monitor.prototype.progressReport = function() {
   var sURL = "";
   sURL += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.indicator}`;
   sURL += `&${pathnames.urlFields.requests.workerId}=${this.currentWorkerId}`;
+  sURL += `&${pathnames.urlFields.requests.workerIndex}=${this.currentWorkerIndex}`;
   submitRequests.submitGET({
     url: sURL,
     progress: ids.domElements.spanProgressCalculatorInput,
@@ -70,6 +73,8 @@ Monitor.prototype.callbackPauseRequest = function(input, output) {
   if (status === undefined || status === null) {
     if (this.ownerCalculator.parsedComputation.error !== null && this.ownerCalculator.parsedComputation.error !== undefined) {
       status = "error";
+      progressReportContent += `<b>Error.</b> ${this.ownerCalculator.parsedComputation.error}`;
+      progressReportContent += `<br>`;
     }
   }
   if (status === "finished" || status === "crash" || status === "error") {
@@ -77,7 +82,6 @@ Monitor.prototype.callbackPauseRequest = function(input, output) {
     this.isPaused = false;
     indicatorButton.innerHTML = "finished";
     doUpdateCalculatorPage = true;
-    progressReportContent += `<b>${status}</b><br>`;
   } else if (status === "paused") {
     this.isPaused = true;
     indicatorButton.innerHTML = "Continue";
@@ -92,7 +96,7 @@ Monitor.prototype.callbackPauseRequest = function(input, output) {
     this.isPaused = false;
     indicatorButton.innerHTML = "Pause";
     this.currentTimeOutHandler = setTimeout(this.progressReport.bind(this), this.timeIncrement * 1000);
-  }  
+  }
   progressReportContent += `Refreshing every ${this.timeIncrement} second(s). `;
   progressReportContent += `Client time: ~${Math.floor(this.timeOutOldCounter)} second(s)<br>`;
   var progReportTimer = document.getElementById(ids.domElements.monitoring.progressTimer);
@@ -116,6 +120,7 @@ Monitor.prototype.togglePause = function() {
   pauseURL += `${pathnames.urls.calculatorAPI}?`
   pauseURL += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.pause}&`;
   pauseURL += `${pathnames.urlFields.requests.workerId}=${this.currentWorkerId}&`;
+  pauseURL += `${pathnames.urlFields.requests.workerIndex}=${this.currentWorkerIndex}&`;
   submitRequests.submitGET({
     url: pauseURL,
     callback: this.callbackPauseRequest.bind(this),

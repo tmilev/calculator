@@ -244,6 +244,13 @@ bool JSData::isIntegerFittingInInt(int* whichInteger) {
   return false;
 }
 
+bool JSData::isEqualTo(const std::string& other) {
+  if (this->theType != JSData::token::tokenString) {
+    return false;
+  }
+  return this->theString == other;
+}
+
 bool JSData::isTrueRepresentationInJSON() {
   if (this->theType == JSData::token::tokenBool) {
     return this->theBoolean;

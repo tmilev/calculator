@@ -125,7 +125,7 @@ bool MutexProcess::CreateMe(
 ) {
   this->Release();
   this->name = inputName;
-  if (!this->lockPipe.CreateMe(inputName + "lockPipe", false, false, restartServerOnFail, dontCrashOnFail)) {
+  if (!this->lockPipe.CreateMe(inputName + "lockPipe", true, false, restartServerOnFail, dontCrashOnFail)) {
     return false;
   }
   this->ResetNoAllocation();

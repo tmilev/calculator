@@ -16,6 +16,7 @@ var urlFields = {
     loginDisabledEveryoneIsAdmin: "loginDisabledEveryoneIsAdmin",
     indicator: "indicator",
     pause: "pause",
+    unpause: "unpause",
     slidesFromSource: "slidesFromSource",
     homeworkFromSource: "homeworkFromSource",
     sourceSlides: "slidesSource",

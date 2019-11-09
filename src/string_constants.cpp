@@ -18,6 +18,7 @@ std::string WebAPI::databaseParameters::fetch = "databaseFetch";
 
 std::string WebAPI::result::error = "error";
 std::string WebAPI::result::status = "status";
+std::string WebAPI::result::running = "running";
 std::string WebAPI::result::resultStringified = "resultStringified";
 std::string WebAPI::result::resultHtml = "resultHtml";
 std::string WebAPI::result::syntaxErrors = "syntaxErrors";
@@ -62,6 +63,7 @@ std::string WebAPI::request::submitAnswers = "submitAnswers";
 std::string WebAPI::request::submitExercisePreviewNoLogin = "submitExercisePreviewNoLogin";
 std::string WebAPI::request::indicator = "indicator";
 std::string WebAPI::request::pause = "pause";
+std::string WebAPI::request::unpause = "unpause";
 std::string WebAPI::request::clonePage = "clonePageJSON";
 std::string WebAPI::request::problemGiveUp = "problemGiveUp";
 std::string WebAPI::request::problemGiveUpNoLogin = "problemGiveUpNoLogin";

@@ -24,6 +24,7 @@ public:
     static std::string clonePage;
     static std::string indicator;
     static std::string pause;
+    static std::string unpause;
     static std::string submitExerciseNoLogin;
     static std::string submitExercisePreviewNoLogin;
     static std::string submitExercise;
@@ -50,6 +51,7 @@ public:
     static std::string workerIndex;
     static std::string error;
     static std::string status;
+    static std::string running;
     static std::string crashReport;
     static std::string millisecondsComputation;
     static std::string loginDisabledEveryoneIsAdmin;

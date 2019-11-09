@@ -53,7 +53,6 @@ public:
   bool flagDidSendAll;
   bool flagAllBytesSentUsingFile;
   bool flagEncounteredErrorWhileServingFile;
-  bool flagIsPaused;
   List<std::string> theMessageHeaderStrings;
   MapList<std::string, std::string, MathRoutines::HashString> requestHeaders;
   int ContentLength;
@@ -71,7 +70,6 @@ public:
   MutexProcess PauseWorker;
   MutexProcess writingReportFile;
   PipePrimitive workerToWorkerRequestIndicator;
-  PipePrimitive workerToWorkerReturnIndicator;
   PipePrimitive pipeWorkerToWorkerStatus;
   PipePrimitive pipeWorkerToServerControls;
   PipePrimitive pipeWorkerToServerTimerPing;
@@ -89,7 +87,7 @@ public:
   int ProcessServerStatusJSON();
   int ProcessComputationIndicator();
   JSData ProcessComputationIndicatorJSData();
-  bool GetJSONResultFromFile(const std::string &workerId, JSData& outputContent);
+  int GetIndexIfRunningWorkerId(JSData& outputComputationStatus);
   int ProcessEditPageJSON();
   int ProcessFolderOrFile();
   int ProcessFolder();
@@ -133,6 +131,7 @@ public:
   int ProcessProblemGiveUp();
   int ProcessProblemSolution();
   int ProcessPauseWorker();
+  int ProcessUnpauseWorker();
   int ProcessUnknown();
   int Run();
   bool CheckConsistency();
@@ -324,7 +323,6 @@ public:
   void StopKillAll[[noreturn]](bool attemptToRestart);
   bool RestartIsNeeded();
   void initDates();
-  int GetWorkerIndexFromId(const std::string &workerNumber, std::string& inputId, std::stringstream* commentsOnError);
   std::string ToStringLastErrorDescription();
   std::string ToStringStatusActive();
   std::string ToStringStatusAll();

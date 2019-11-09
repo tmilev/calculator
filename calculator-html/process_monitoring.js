@@ -68,6 +68,12 @@ Monitor.prototype.callbackPauseRequest = function(input, output) {
   }
   var indicatorButton = document.getElementById(ids.domElements.monitoring.buttonTogglePauseRequest);
   this.ownerCalculator.parsedComputation = JSON.parse(input);
+  if (
+    this.ownerCalculator.parsedComputation.workerIndex !== undefined && 
+    this.ownerCalculator.parsedComputation.workerIndex !== null
+  ) {
+  this.currentWorkerIndex = this.ownerCalculator.parsedComputation.workerIndex;
+  }
   var status = this.ownerCalculator.parsedComputation.status;
   var doUpdateCalculatorPage = false;
   if (status === undefined || status === null) {
@@ -117,8 +123,12 @@ Monitor.prototype.togglePause = function() {
     return;
   }
   var pauseURL = "";
-  pauseURL += `${pathnames.urls.calculatorAPI}?`
-  pauseURL += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.pause}&`;
+  pauseURL += `${pathnames.urls.calculatorAPI}?`;
+  if (!this.isPaused) {
+    pauseURL += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.pause}&`;
+  } else {
+    pauseURL += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.unpause}&`;
+  }
   pauseURL += `${pathnames.urlFields.requests.workerId}=${this.currentWorkerId}&`;
   pauseURL += `${pathnames.urlFields.requests.workerIndex}=${this.currentWorkerIndex}&`;
   submitRequests.submitGET({

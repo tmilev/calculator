@@ -868,7 +868,6 @@ void WebWorker::WriteAfterTimeoutProgress(const std::string& input, bool forceFi
     return;
   }
   if (this->workerToWorkerRequestIndicator.lastRead.size == 0 && !forceFileWrite) {
-    std::cout << "DEBUG: no indicator requested ...\n";
     return;
   }
   this->WriteAfterTimeout(input, WebAPI::result::running);

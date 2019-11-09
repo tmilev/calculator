@@ -89,7 +89,7 @@ public:
   int ProcessServerStatusJSON();
   int ProcessComputationIndicator();
   JSData ProcessComputationIndicatorJSData();
-  void GetJSONResultFromFile(const std::string &workerId, JSData& outputContent);
+  bool GetJSONResultFromFile(const std::string &workerId, JSData& outputContent);
   int ProcessEditPageJSON();
   int ProcessFolderOrFile();
   int ProcessFolder();
@@ -155,13 +155,14 @@ public:
     int recursionDepth = 0
   );
   bool ExtractArgumentsFromCookies(std::stringstream& argumentProcessingFailureComments);
-  void WriteAfterTimeoutProgress(const std::string& input);
+  void WriteAfterTimeoutProgress(const std::string& input, bool forceFileWrite);
   static void WriteAfterTimeoutProgressStatic(const std::string& input);
   void PauseIfRequested() ;
   void WriteAfterTimeoutResult();
   static void WriteAfterTimeout(const std::string& input, const std::string& status);
   static void WriteAfterTimeoutCrash();
-  void OutputShowIndicatorOnTimeout();
+  void OutputShowIndicatorOnTimeout(const std::string& message);
+  void GetIndicatorOnTimeout(JSData &output, const std::string& message);
   void QueueStringForSendingWithHeadeR(const std::string& stringToSend, bool MustSendAll = false);
   void QueueStringForSendingNoHeadeR(const std::string& stringToSend, bool MustSendAll = false);
   void QueueBytesForSendingNoHeadeR(const List<char>& bytesToSend, bool MustSendAll = false);
@@ -300,7 +301,7 @@ public:
   static void Release(int& theDescriptor);
   static void SignalActiveWorkerDoneReleaseEverything();
   static void FlushActiveWorker();
-  static void ReturnActiveIndicatorAlthoughComputationIsNotDone();
+  static void OutputShowIndicatorOnTimeoutStatic(const std::string &message);
   static void SendStringThroughActiveWorker(const std::string& input);
   static void fperror_sigaction[[noreturn]](int signal);
   void ReapChildren();

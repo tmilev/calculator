@@ -157,7 +157,7 @@ bool TimerThreadData::HandleComputationTimeout() {
   }
   theGlobalVariables.flagTimeOutExplanationAlreadyDisplayed = true;
   //theReport2.SetStatus("Starting timer cycle displaying time out explanation.");
-  theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection();
+  theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection("Triggered by timer thread.");
   //theReport2.SetStatus("Starting timer cycle displaying time out indicator done, continuing timer cycle.");
   return false;
 }

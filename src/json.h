@@ -68,6 +68,7 @@ public:
   ~JSData();
   JSData(const JSData& other);
   JSData(const char* other);
+  bool operator==(const std::string& other);
   void operator=(const JSData& other);
   void operator=(const List<JSData>& other);
   void operator=(const List<int>& other);

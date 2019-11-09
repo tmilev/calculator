@@ -60,15 +60,13 @@ public:
   int (*pointerCallSystemNoOutput)(const std::string& theSystemCommand);
   std::string (*pointerCallSystemWithOutput)(const std::string& theSystemCommand);
   void (*pointerCallChDir)(const std::string& theDirectoryName);
+  // Possible non-null values:
+  // WebWorker::WriteAfterTimeoutProgressStatic
   void (*IndicatorStringOutputFunction)(const std::string& input);
-  void (*WebServerReturnDisplayIndicatorCloseConnection)();
+  // Possible non-null values:
+  // WebServer::OutputShowIndicatorOnTimeoutStatic
+  void (*WebServerReturnDisplayIndicatorCloseConnection)(const std::string& message);
   void (*WebServerTimerPing)(int64_t pingTime);
-  void (*PauseUponUserRequest)();
-  void Pause() {
-    if (this->PauseUponUserRequest != nullptr) {
-      this->PauseUponUserRequest();
-    }
-  }
   //  double MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit;
   int64_t millisecondOffset;
   int64_t millisecondsMaxComputation;
@@ -256,10 +254,6 @@ public:
   bool UserGuestMode();
   bool UserDebugFlagOn();
   bool UserStudentVieWOn();
-  //void operator=(const GlobalVariables& other)
-  //{ this->IndicatorStringOutputFunction = other.IndicatorStringOutputFunction;
-  //  this->theDrawingVariables = other.theDrawingVariables;
-  //}
   int CallSystemNoOutput(const std::string& systemCommand, logger* theLog);
   std::string CallSystemWithOutput(const std::string& systemCommand);
   void ChDir(const std::string& systemCommand);

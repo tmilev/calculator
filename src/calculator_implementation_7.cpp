@@ -8233,7 +8233,7 @@ bool CalculatorFunctionsGeneral::innerTestIndicator(
     dummyComment[i] = 'a';
   }
   if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection != nullptr) {
-    theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection();
+    theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection("Triggered by test indicator. ");
   } else {
     theCommands << "WebServerReturnDisplayIndicatorCloseConnection is zero. ";
   }

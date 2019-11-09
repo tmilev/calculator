@@ -395,19 +395,16 @@ bool Calculator::innerPrintSSSubalgebras(
   bool doAdjustCentralizers
 ) {
   MacroRegisterFunctionWithName("Calculator::innerPrintSSsubalgebras");
-  std::cout << "DEBUG: Here I am. ";
   if (doForceRecompute) {
     if (!theGlobalVariables.UserDefaultHasAdminRights()) {
       return theCommands << "Only logged-in admins allowed to force-recompute semisimple subalgebras. ";
     }
   }
-  std::cout << "DEBUG: Here I am pt2 ";
   if (!theGlobalVariables.flagBanProcessMonitoring) {
     if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection != nullptr) {
-      theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection();
+      theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection("Triggered by printSemisimpleSubalgebras.");
     }
   }
-  std::cout << "DEBUG: Here I am pt3 ";
   std::stringstream out;
   SemisimpleLieAlgebra* ownerSSPointer = nullptr;
   bool isAlreadySubalgebrasObject = input.IsOfType<SemisimpleSubalgebras>();

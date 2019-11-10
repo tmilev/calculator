@@ -191,7 +191,7 @@ public:
   std::string GetAddUserEmails();
   std::string GetHtmlHiddenInputs(bool includeUserName, bool includeAuthenticationToken);
   void SetHeaderOKNoContentLength(const std::string& extraHeader, const std::string& contentType = "text/html");
-  void SetHeadeR(const std::string& httpResponseNoTermination, const std::string& remainingHeaderNoTermination);
+  void SetHeader(const std::string& httpResponseNoTermination, const std::string& remainingHeaderNoTermination);
   std::string GetHeaderConnectionClose();
   std::string GetHeaderConnectionKeepAlive();
   std::string GetHeaderSetCookie();

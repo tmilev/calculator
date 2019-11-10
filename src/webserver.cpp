@@ -1283,7 +1283,10 @@ std::string WebWorker::GetHeaderSetCookie() {
   return out.str();
 }
 
-void WebWorker::SetHeadeR(const std::string& httpResponseNoTermination, const std::string& remainingHeaderNoTermination) {
+void WebWorker::SetHeader(
+  const std::string& httpResponseNoTermination,
+  const std::string& remainingHeaderNoTermination
+) {
   MacroRegisterFunctionWithName("WebWorker::SetHeader");
   if (theGlobalVariables.flagRunningApache) {
     if (remainingHeaderNoTermination != "") {
@@ -1325,7 +1328,7 @@ void WebWorker::SetHeaderOKNoContentLength(const std::string& extraHeader, const
   if (extraHeader != "") {
     header += "\r\n" + extraHeader;
   }
-  this->SetHeadeR("HTTP/1.0 200 OK", header);
+  this->SetHeader("HTTP/1.0 200 OK", header);
   this->flagDoAddContentLength = true;
 }
 
@@ -1446,10 +1449,10 @@ int WebWorker::GetIndexIfRunningWorkerId(
   std::string computationResult;
   // 1. Warning: timing attacks on the speed of looking up file names
   // may be used to guess an old worker id.
-  // No need to wory as user computations should not contain any authentication
+  // No need to worry as user computations should not contain any authentication
   // or other critical information. User computations are considered
   // ultra-sensitive only because they are private, so there is no reason
-  // to overdo the cryptographic protections beyond the common-sense protection
+  // to overdo the cryptographic protections beyond the common-sense one
   // of requesting a unique id.
   //
   // 2. Variable resultCandidate is a hint to which process is writing the file.
@@ -1604,7 +1607,7 @@ int WebWorker::ProcessFolder() {
 int WebWorker::ProcessFile() {
   MacroRegisterFunctionWithName("WebWorker::ProcessFile");
   if (!FileOperations::FileExistsUnsecure(this->RelativePhysicalFileNamE)) {
-    this->SetHeadeR("HTTP/1.0 404 Object not found", "Content-Type: text/html");
+    this->SetHeader("HTTP/1.0 404 Object not found", "Content-Type: text/html");
     stOutput << "<html>"
     << HtmlRoutines::GetCSSLinkCalculator("/")
     << "<body>";
@@ -1655,7 +1658,7 @@ int WebWorker::ProcessFile() {
   theFile.seekp(0, std::ifstream::end);
   long fileSize = theFile.tellp();
   if (fileSize > 100000000) {
-    this->SetHeadeR("HTTP/1.0 413 Payload Too Large", "");
+    this->SetHeader("HTTP/1.0 413 Payload Too Large", "");
     stOutput << "<html><body><b>Error: user requested file: "
     << this->VirtualFileName
     << " but it is too large, namely, " << fileSize
@@ -1872,7 +1875,7 @@ std::string WebWorker::GetMIMEtypeFromFileExtension(const std::string& fileExten
 
 int WebWorker::ProcessUnknown() {
   MacroRegisterFunctionWithName("WebWorker::ProcessUnknown");
-  this->SetHeadeR("HTTP/1.0 501 Method Not Implemented", "Content-Type: text/html");
+  this->SetHeader("HTTP/1.0 501 Method Not Implemented", "Content-Type: text/html");
   stOutput << HtmlInterpretation::GetJSONUserInfo("Unknown request");
   return 0;
 }
@@ -2396,7 +2399,7 @@ int WebWorker::ProcessSlidesOrHomeworkFromSource() {
     stOutput << result.ToString(false);
     return 0;
   }
-  this->SetHeadeR("HTTP/1.0 200 OK", "Content-Type: application/pdf; Access-Control-Allow-Origin: *");
+  this->SetHeader("HTTP/1.0 200 OK", "Content-Type: application/pdf; Access-Control-Allow-Origin: *");
   this->flagDoAddContentLength = true;
   stOutput << theCrawler.targetPDFbinaryContent;
   return 0;
@@ -2440,7 +2443,7 @@ int WebWorker::ProcessSlidesSource() {
     stOutput << HtmlInterpretation::GetJSONUserInfo(HtmlRoutines::ConvertStringToHtmlString(comments.str(), false));
     return 0;
   }
-  this->SetHeadeR("HTTP/1.0 200 OK", "Content-Type: application/x-latex; Access-Control-Allow-Origin: *");
+  this->SetHeader("HTTP/1.0 200 OK", "Content-Type: application/x-latex; Access-Control-Allow-Origin: *");
   this->flagDoAddContentLength = true;
   stOutput << theCrawler.targetLaTeX;
   return 0;
@@ -2606,7 +2609,7 @@ bool WebWorker::RedirectIfNeeded(std::stringstream& argumentProcessingFailureCom
   }
   std::stringstream headerStream;
   headerStream << "Location: " << redirectedAddress.str();
-  this->SetHeadeR("HTTP/1.0 303 See other", headerStream.str());
+  this->SetHeader("HTTP/1.0 303 See other", headerStream.str());
   stOutput << "<html><head>"
   << "<meta http-equiv=\"refresh\" content =\"0; url ='" << redirectedAddress.str()
   << "'\" />"
@@ -2672,7 +2675,7 @@ bool WebWorker::ProcessRedirectAwayFromWWW() {
     redirectHeaderStream << "Content-Type: text/html\r\n";
   }
   redirectHeaderStream << "Location: " << newAddressStream.str();
-  this->SetHeadeR("HTTP/1.0 301 Moved Permanently", redirectHeaderStream.str());
+  this->SetHeader("HTTP/1.0 301 Moved Permanently", redirectHeaderStream.str());
   //this->SetHeaderOKNoContentLength();
   stOutput << "<html><body>Please remove the www. from the address, it creates issues with authentication services. "
   << "Click <a href=\"" << newAddressStream.str() << "\">here</a> if not redirected automatically. ";
@@ -2699,7 +2702,7 @@ int WebWorker::ProcessLoginNeededOverUnsecureConnection() {
   }
   if (this->hostNoPort != "") {
     redirectStream << "Location: " << newAddressStream.str();
-    this->SetHeadeR("HTTP/1.0 301 Moved Permanently", redirectStream.str());
+    this->SetHeader("HTTP/1.0 301 Moved Permanently", redirectStream.str());
     stOutput << "<html><body>Address available through secure (SSL) connection only. "
     << "Click <a href=\"" << newAddressStream.str() << "\">here</a> if not redirected automatically. ";
   } else {
@@ -3022,7 +3025,7 @@ int WebWorker::ProcessFolderOrFile() {
       false,
       &commentsOnFailure
   )) {
-    this->SetHeadeR("HTTP/1.0 404 Object not found", "Content-Type: text/html");
+    this->SetHeader("HTTP/1.0 404 Object not found", "Content-Type: text/html");
     stOutput << "<html><body>File name: "
     << HtmlRoutines::ConvertStringToHtmlStringRestrictSize(this->VirtualFileName, false, 1000)
     << " <b style = 'color:red'>deemed unsafe</b>. "
@@ -3069,7 +3072,6 @@ void WebWorker::GetIndicatorOnTimeout(JSData& output, const std::string& message
   MacroRegisterFunctionWithName("WebWorker::OutputShowIndicatorOnTimeout");
   MutexLockGuard theLock(this->PauseWorker.lockThreads.GetElement());
   theGlobalVariables.flagOutputTimedOut = true;
-  theGlobalVariables.flagTimedOutComputationIsDone = false;
   logWorker << logger::blue << "Computation timeout, sending progress indicator instead of output. " << logger::endL;
   std::stringstream timeOutComments;
   output[WebAPI::result::timeOut] = true;
@@ -3724,9 +3726,9 @@ bool WebServer::RequiresLogin(const std::string& inputRequest, const std::string
 }
 
 void segfault_sigaction[[noreturn]](int signal, siginfo_t* si, void* arg) {
-//<- this signal should never happen in
-//<- server, so even if racy, we take the risk of a hang.
-//<- racy-ness in child process does not bother us: hanged children are still fine.
+  // <- this signal should never happen in
+  // <- server, so even if racy, we take the risk of a hang.
+  // <- racy-ness in child process does not bother us: hanged children are still fine.
   (void) signal; //avoid unused parameter warning, portable.
   (void) arg;
   crash << "Caught segfault at address: " << si->si_addr << crash;
@@ -4222,8 +4224,8 @@ int WebServer::Run() {
   theGlobalVariables.RelativePhysicalNameCrashLog = "crash_WebServerRun.html";
   WebServer::initializeRandomBytes();
 
-  //<-worker log resets are needed, else forked processes reset their common log.
-  //<-resets of the server logs are not needed, but I put them here nonetheless.
+  // <-worker log resets are needed, else forked processes reset their common log.
+  // <-resets of the server logs are not needed, but I put them here nonetheless.
   if (theGlobalVariables.flagSSLIsAvailable) {
     // creates key files if absent. Does not call any openssl functions.
     std::stringstream commentsOnFailure;
@@ -4509,7 +4511,8 @@ int WebWorker::Run() {
       (!this->flagKeepAlive) ||
       this->flagEncounteredErrorWhileServingFile ||
       theGlobalVariables.flagRestartNeeded ||
-      theGlobalVariables.flagStopNeeded
+      theGlobalVariables.flagStopNeeded ||
+      theGlobalVariables.flagOutputTimedOut
     ) {
       break;
     }

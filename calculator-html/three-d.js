@@ -1270,7 +1270,7 @@ function Canvas(inputCanvas) {
     thePatches: [],
     theContours: [],
     thePoints: [],
-    theLabels: []
+    theLabels: [],
   };
   this.screenXY = [0, 0];
   this.flagShowPerformance = true;
@@ -1684,8 +1684,8 @@ Canvas.prototype.paintOnePoint = function(thePoint) {
   }
 }
 
-Canvas.prototype.getExtremePoint = function(indexToCompareBy, getLarger, pt1, pt2, pt3, pt4)
-{ var result = pt1[indexToCompareBy];
+Canvas.prototype.getExtremePoint = function(indexToCompareBy, getLarger, pt1, pt2, pt3, pt4) { 
+  var result = pt1[indexToCompareBy];
   if (getLarger === 1) { 
     if (result < pt2[indexToCompareBy]) {
       result = pt2[indexToCompareBy];
@@ -2188,14 +2188,14 @@ Canvas.prototype.coordsInjectMathScreen2dToMath3d = function(theCoords) {
 Canvas.prototype.coordsProjectMathToMathSelectedScreen2d = function(vector) { 
   return [
     vectorScalarVector(vector, this.selectedScreenBasisOrthonormal[0]),
-    vectorScalarVector(vector, this.selectedScreenBasisOrthonormal[1])
+    vectorScalarVector(vector, this.selectedScreenBasisOrthonormal[1]),
   ];
 }
 
 Canvas.prototype.coordsProjectMathToMathScreen2d = function(vector) { 
   return [
     vectorScalarVector(vector, this.screenBasisOrthonormal[0]),
-    vectorScalarVector(vector, this.screenBasisOrthonormal[1])
+    vectorScalarVector(vector, this.screenBasisOrthonormal[1]),
   ];
 }
 
@@ -2208,7 +2208,11 @@ Canvas.prototype.coordsProjectMathToMathScreen2d = function(vector) {
 Canvas.prototype.coordsProjectToMathScreen3d = function(vector) { 
   var output = this.screenBasisOrthonormal[0].slice();
   vectorTimesScalar(output, vectorScalarVector(vector, this.screenBasisOrthonormal[0]));
-  vectorAddVectorTimesScalar(output, this.screenBasisOrthonormal[1], vectorScalarVector(vector, this.screenBasisOrthonormal[1]));
+  vectorAddVectorTimesScalar(
+    output, 
+    this.screenBasisOrthonormal[1], 
+    vectorScalarVector(vector, this.screenBasisOrthonormal[1]),
+  );
   return output;
 }
 
@@ -2224,7 +2228,11 @@ Canvas.prototype.coordsProjectToSelectedMathScreen3d = function(
 ) { 
   var output = this.selectedScreenBasisOrthonormal[0].slice();
   vectorTimesScalar(output, vectorScalarVector(vector, this.selectedScreenBasisOrthonormal[0]));
-  vectorAddVectorTimesScalar(output, this.selectedScreenBasisOrthonormal[1], vectorScalarVector(vector, this.selectedScreenBasisOrthonormal[1]));
+  vectorAddVectorTimesScalar(
+    output, 
+    this.selectedScreenBasisOrthonormal[1], 
+    vectorScalarVector(vector, this.selectedScreenBasisOrthonormal[1]),
+  );
   return output;
 }
 

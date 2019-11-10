@@ -132,8 +132,6 @@ public:
   //status flags:
   bool flagComputationCompletE;
   bool flagComputationStarted;
-  bool flagTimeOutExplanationAlreadyDisplayed;
-  bool flagTimedOutComputationIsDone;
   bool flagOutputTimedOut;
   bool flagComputationFinishedAllOutputSentClosing;
   bool flagBanProcessMonitoring;

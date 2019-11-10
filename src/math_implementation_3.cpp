@@ -125,9 +125,7 @@ GlobalVariables::GlobalVariables() {
   this->flagReportLargeIntArithmetic = false;
   this->flagReportProductsMonomialAlgebras = false;
   this->flagReportFileIO = true;
-  this->flagTimeOutExplanationAlreadyDisplayed = false;
   this->flagOutputTimedOut = false;
-  this->flagTimedOutComputationIsDone = false;
   this->flagServerForkedIntoWorker = false;
   this->flagComputationCompletE = false;
   this->flagComputationFinishedAllOutputSentClosing = false;

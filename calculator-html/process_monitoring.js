@@ -72,7 +72,7 @@ Monitor.prototype.callbackPauseRequest = function(input, output) {
     this.ownerCalculator.parsedComputation.workerIndex !== undefined && 
     this.ownerCalculator.parsedComputation.workerIndex !== null
   ) {
-  this.currentWorkerIndex = this.ownerCalculator.parsedComputation.workerIndex;
+    this.currentWorkerIndex = this.ownerCalculator.parsedComputation.workerIndex;
   }
   var status = this.ownerCalculator.parsedComputation.status;
   var doUpdateCalculatorPage = false;
@@ -83,10 +83,16 @@ Monitor.prototype.callbackPauseRequest = function(input, output) {
       progressReportContent += `<br>`;
     }
   }
-  if (status === "finished" || status === "crash" || status === "error") {
+  if (status === "error") {
     this.isFinished = true;
     this.isPaused = false;
     indicatorButton.innerHTML = "finished";
+    this.currentWorkerIndex = null;
+  } else if (status === "finished" || status === "crash") {
+    this.isFinished = true;
+    this.isPaused = false;
+    indicatorButton.innerHTML = "finished";
+    this.currentWorkerIndex = null;
     doUpdateCalculatorPage = true;
   } else if (status === "paused") {
     this.isPaused = true;

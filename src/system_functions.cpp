@@ -129,7 +129,7 @@ bool TimerThreadData::HandleMaxComputationTime() {
   << "by modifying the source code directly, increasing the variable: "
   << "theGlobalVariables.MaxComputationTimeMillisecondsNonPositiveForNoLimit. "
   << "<br>This may be a lot of work but will allow you to alter "
-  << "time limits dynamically. "
+  << "time limits dynamically. You will need to modify file: "
   << __FILE__ << "<br>";
   crash << out.str() << crash;
   return true;
@@ -155,7 +155,7 @@ bool TimerThreadData::HandleComputationTimeout() {
   if (theGlobalVariables.flagOutputTimedOut) {
     return false;
   }
-  theGlobalVariables.flagTimeOutExplanationAlreadyDisplayed = true;
+  theGlobalVariables.flagOutputTimedOut = true;
   //theReport2.SetStatus("Starting timer cycle displaying time out explanation.");
   theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection("Triggered by timer thread.");
   //theReport2.SetStatus("Starting timer cycle displaying time out indicator done, continuing timer cycle.");

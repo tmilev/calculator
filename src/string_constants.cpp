@@ -36,6 +36,7 @@ std::string WebAPI::result::loginDisabledEveryoneIsAdmin = "loginDisabledEveryon
 std::string WebAPI::problem::fileContent = "fileContent";
 std::string WebAPI::problem::title = "title";
 std::string WebAPI::problem::fileName = "fileName";
+std::string WebAPI::problem::fileNameTarget = "fileNameTarget";
 std::string WebAPI::problem::idProblem = "id";
 std::string WebAPI::problem::deadlineSingle = "deadline";
 std::string WebAPI::problem::failedToLoadProblem = "Failed to load problem. ";

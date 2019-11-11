@@ -421,7 +421,7 @@ std::string HtmlInterpretation::ClonePageResult() {
   ) {
     return "<b>Cloning problems allowed only for logged-in admins under ssl connection. </b>";
   }
-  std::string fileNameResulT = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput(WebAPI::problem::fileContent), false);
+  std::string fileNameTarget = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput(WebAPI::problem::fileNameTarget), false);
   std::string fileNameToBeCloned = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput(WebAPI::problem::fileName), false);
   std::stringstream out;
   std::string startingFileString;
@@ -432,15 +432,15 @@ std::string HtmlInterpretation::ClonePageResult() {
     return result.ToString(false);
   }
   std::fstream theFile;
-  if (FileOperations::FileExistsVirtualCustomizedReadOnly(fileNameResulT, nullptr)) {
-    out << "Output file: " << fileNameResulT << " already exists. ";
+  if (FileOperations::FileExistsVirtualCustomizedReadOnly(fileNameTarget, nullptr)) {
+    out << "Output file: " << fileNameTarget << " already exists. ";
     result[WebAPI::result::error] = out.str();
     return out.str();
   }
   if (!FileOperations::OpenFileVirtualCustomizedWriteOnlyCreateIfNeeded(
-    theFile, fileNameResulT, false, false, false, &out
+    theFile, fileNameTarget, false, false, false, &out
   )) {
-    out << "Failed to open output file: " << fileNameResulT << ".";
+    out << "Failed to open output file: " << fileNameTarget << ".";
     result[WebAPI::result::error] = out.str();
     return out.str();
   }
@@ -449,11 +449,11 @@ std::string HtmlInterpretation::ClonePageResult() {
   std::string fileNameNonVirtual;
   std::stringstream comments;
   if (!FileOperations::GetPhysicalFileNameFromVirtualCustomizedReadOnly(
-    fileNameResulT, fileNameNonVirtual, &comments
+    fileNameTarget, fileNameNonVirtual, &comments
   )) {
     out << "Could not get physical file name from virtual. " << comments.str();
   } else {
-    out << "Wrote " << startingFileString.size() << " bytes to file: " << fileNameResulT;
+    out << "Wrote " << startingFileString.size() << " bytes to file: " << fileNameTarget;
   }
   result[WebAPI::result::resultHtml] = out.str();
   return result.ToString(false);

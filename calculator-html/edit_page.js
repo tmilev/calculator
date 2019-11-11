@@ -108,8 +108,9 @@ function handleClone(fileName, idCloneInput, idSpanClonePageReport) {
   var newFileName = document.getElementById(idCloneInput).value;
   var theURL = "";
   theURL += `${pathnames.urls.calculatorAPI}?`;
-  theURL += calculatorPage.calculator.getQueryStringSubmitStringAsMainInput(newFileName, pathnames.urlFields.requests.clonePage);
-  theURL += `${pathnames.urlFields.fileName}=${fileName}&`;
+  theURL += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.clonePage}`;
+  theURL += `&${pathnames.urlFields.problem.fileNameTarget}=${newFileName}`;
+  theURL += `&${pathnames.urlFields.problem.fileName}=${fileName}&`;
   submitRequests.submitGET({
     url: theURL,
     result: idSpanClonePageReport,
@@ -125,7 +126,7 @@ function storeEditedPage() {
   var queryParameters = "";
   queryParameters += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.modifyPage}`;
   queryParameters += `&${pathnames.urlFields.requests.fileContent}=${editor.getValue()}`;
-  queryParameters += `&${pathnames.urlFields.fileName}=${thePage.storage.variables.editor.currentlyEditedPage.getValue()}`;
+  queryParameters += `&${pathnames.urlFields.problem.fileName}=${thePage.storage.variables.editor.currentlyEditedPage.getValue()}`;
   thePage.pages.problemPage.flagLoaded = false;
   submitRequests.submitPOST({
     url: theURL,

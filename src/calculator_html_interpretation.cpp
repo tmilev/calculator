@@ -421,8 +421,8 @@ std::string HtmlInterpretation::ClonePageResult() {
   ) {
     return "<b>Cloning problems allowed only for logged-in admins under ssl connection. </b>";
   }
-  std::string fileNameResulT = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false);
-  std::string fileNameToBeCloned = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("fileName"), false);
+  std::string fileNameResulT = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput(WebAPI::problem::fileContent), false);
+  std::string fileNameToBeCloned = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput(WebAPI::problem::fileName), false);
   std::stringstream out;
   std::string startingFileString;
   JSData result;
@@ -453,7 +453,7 @@ std::string HtmlInterpretation::ClonePageResult() {
   )) {
     out << "Could not get physical file name from virtual. " << comments.str();
   } else {
-    out << "Written content to file: " << fileNameResulT;
+    out << "Wrote " << startingFileString.size() << " bytes to file: " << fileNameResulT;
   }
   result[WebAPI::result::resultHtml] = out.str();
   return result.ToString(false);
@@ -739,7 +739,7 @@ std::string HtmlInterpretation::GetPageFromTemplate() {
   }
   out << HtmlInterpretation::GetHtmlTagWithManifest();
   out << "<!-- File automatically generated from template: "
-  << theGlobalVariables.GetWebInput("fileName")
+  << theGlobalVariables.GetWebInput(WebAPI::problem::fileName)
   << ".-->\n";
   out << "<head><!-- tag added automatically; user-specified head tag ignored-->\n";
   out << thePage.outputHtmlHeadNoTag;
@@ -859,7 +859,7 @@ std::string HtmlInterpretation::GetJSONFromTemplate() {
     return out.str();
   }
   out << "<!-- File automatically generated from template: "
-  << theGlobalVariables.GetWebInput("fileName")
+  << theGlobalVariables.GetWebInput(WebAPI::problem::fileName)
   << ".-->\n";
   out << thePage.outputHtmlBodyNoTag;
   out << "<small>Generated in " << theGlobalVariables.GetElapsedMilliseconds() << " ms. </small>";

@@ -13,6 +13,7 @@
 #include "abstract_syntax_notation_one_decoder.h"
 #include "math_extra_elliptic_curves_implementation.h"
 #include "transport_layer_security.h"
+#include "string_constants.h"
 #include <iomanip>
 
 extern ProjectInformationInstance ProjectInfoVpf6_37cpp;
@@ -147,7 +148,7 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation(
       std::string currentKey = "calculatorAnswer" +
       theProblem.theProblemData.theAnswers.theValues[j].answerId;
       theGlobalVariables.SetWebInpuT(currentKey, "1");
-      theGlobalVariables.SetWebInpuT("fileName", theProblem.fileName);
+      theGlobalVariables.SetWebInpuT(WebAPI::problem::fileName, theProblem.fileName);
       answerGeneration += HtmlInterpretation::GetAnswerOnGiveUp(
         randomSeedCurrent, &currentAnswer, &answerGenerated
       ) + "<hr>";

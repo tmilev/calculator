@@ -503,7 +503,7 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON(
 }
 
 void CalculatorHTML::LoadFileNames() {
-  this->fileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("fileName"), false);
+  this->fileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput(WebAPI::problem::fileName), false);
   this->courseHome = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
   this->topicListFileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("topicList"), false);
 }
@@ -3286,9 +3286,9 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem(
   out << theGlobalVariables.ToStringCalcArgsNoNavigation(&excludedTags)
   << "courseHome=" << theGlobalVariables.GetWebInput("courseHome") << "&";
   if (!theGlobalVariables.flagRunningApache && this->fileName != "") {
-    out << "fileName=" << HtmlRoutines::ConvertStringToURLString(this->fileName, false) << "&";
+    out << WebAPI::problem::fileName << "=" << HtmlRoutines::ConvertStringToURLString(this->fileName, false) << "&";
   } else {
-    out << "fileName=" << HtmlRoutines::ConvertStringToURLString(theGlobalVariables.GetWebInput("fileName"), false)
+    out << WebAPI::problem::fileName << "=" << HtmlRoutines::ConvertStringToURLString(theGlobalVariables.GetWebInput(WebAPI::problem::fileName), false)
     << "&";
   }
   out << "topicList=" << theGlobalVariables.GetWebInput("topicList") << "&";

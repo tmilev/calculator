@@ -444,7 +444,7 @@ std::string GlobalVariables::ToStringCalcArgsNoNavigation(List<std::string>* tag
     if (
       currentName == "request" ||
       currentName == "password" ||
-      currentName == "fileName" ||
+      currentName == WebAPI::problem::fileName ||
       currentName == "courseHome" ||
       currentName == "topicList" ||
       currentName == "currentDatabaseTable" ||

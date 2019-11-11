@@ -2359,7 +2359,7 @@ int WebWorker::ProcessSlidesOrHomeworkFromSource() {
   LaTeXcrawler theCrawler;
   for (int i = 0; i < theGlobalVariables.webArguments.size(); i ++) {
     std::string theKey = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.webArguments.theKeys[i], false);
-    if (theKey != "fileName" && StringRoutines::StringBeginsWith(theKey, "file")) {
+    if (theKey != WebAPI::problem::fileName && StringRoutines::StringBeginsWith(theKey, "file")) {
       theCrawler.slideFileNamesVirtualWithPatH.AddOnTop(StringRoutines::StringTrimWhiteSpace(
         HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.webArguments.theValues[i], false)
       ));
@@ -2412,7 +2412,7 @@ int WebWorker::ProcessSlidesSource() {
   for (int i = 0; i < theGlobalVariables.webArguments.size(); i ++) {
     std::string theKey = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.webArguments.theKeys[i], false);
     if (
-      theKey != "fileName" && StringRoutines::StringBeginsWith(theKey, "file")
+      theKey != WebAPI::problem::fileName && StringRoutines::StringBeginsWith(theKey, "file")
     ) {
       theCrawler.slideFileNamesVirtualWithPatH.AddOnTop(StringRoutines::StringTrimWhiteSpace(
         HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.webArguments.theValues[i], false)
@@ -2497,8 +2497,8 @@ std::string HtmlInterpretation::ModifyProblemReport() {
   if (!shouldProceed) {
     return "<b>Modifying problems allowed only for logged-in admins under ssl connection. </b>";
   }
-  std::string mainInput = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false);
-  std::string fileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("fileName"), false);
+  std::string mainInput = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput(WebAPI::problem::fileContent), false);
+  std::string fileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput(WebAPI::problem::fileName), false);
   std::stringstream commentsOnFailure;
   bool fileExists = FileOperations::FileExistsVirtualCustomizedReadOnly(fileName, &commentsOnFailure);
   std::fstream theFile;
@@ -2515,7 +2515,7 @@ std::string HtmlInterpretation::ModifyProblemReport() {
   if (!fileExists) {
     out << "File " << fileName << " didn't previously exist: just created it for you. ";
   }
-  out << "<b style =\"color:green\"> Written content to file: "
+  out << "<b style =\"color:green\">Wrote " << mainInput.size() << " bytes to file: "
   << fileName << ". </b>";
   return out.str();
 }

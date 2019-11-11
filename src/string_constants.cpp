@@ -33,6 +33,7 @@ std::string WebAPI::result::crashReport = "crashReport";
 std::string WebAPI::result::millisecondsComputation = "timeComputation";
 std::string WebAPI::result::loginDisabledEveryoneIsAdmin = "loginDisabledEveryoneIsAdmin";
 
+std::string WebAPI::problem::fileContent = "fileContent";
 std::string WebAPI::problem::title = "title";
 std::string WebAPI::problem::fileName = "fileName";
 std::string WebAPI::problem::idProblem = "id";

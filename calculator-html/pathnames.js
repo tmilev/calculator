@@ -31,6 +31,7 @@ var urlFields = {
     workerIndex: "workerIndex",
     monitoring: "monitoring",
     calculatorInput: "calculatorInput",
+    fileContent: "fileContent",
   },
   problem: {
     failedToLoadProblem: "Failed to load problem.",

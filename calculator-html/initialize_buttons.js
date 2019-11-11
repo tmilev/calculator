@@ -387,7 +387,7 @@ function isForRealProblem(problem) {
 InputPanelData.prototype.showSolution = function() {
   var theRequest = "";
   var thePage = window.calculator.mainPage;
-  var currentProblem = thePage.problems[this.problemId];
+  var currentProblem = thePage.getProblemById(this.problemId);
   if (!isForRealProblem(currentProblem)) {
     if (thePage.user.flagLoggedIn) {
       theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.problemSolution}&`;
@@ -402,7 +402,7 @@ InputPanelData.prototype.showSolution = function() {
 InputPanelData.prototype.submitAnswers = function() {
   var theRequest = "";
   var thePage = window.calculator.mainPage;
-  var currentProblem = thePage.problems[this.problemId];
+  var currentProblem = thePage.getProblemById(this.problemId);
   if (thePage.user.flagLoggedIn) {
     if (isForRealProblem(currentProblem)) {
       theRequest = `${pathnames.urlFields.request}=${pathnames.urlFields.submitAnswers}`;
@@ -419,7 +419,7 @@ InputPanelData.prototype.submitAnswers = function() {
 
 InputPanelData.prototype.submitGiveUp = function() {
   var thePage = window.calculator.mainPage;
-  var currentProblem = thePage.problems[this.problemId];
+  var currentProblem = thePage.getProblemById(this.problemId);
   var theRequest = "";
   if (thePage.user.flagLoggedIn) {
     theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.problemGiveUp}&`;
@@ -433,7 +433,7 @@ InputPanelData.prototype.submitGiveUp = function() {
 InputPanelData.prototype.submitPreview = function() {
   var thePage = window.calculator.mainPage;
   var theRequest = "";
-  var currentProblem = thePage.problems[this.problemId];
+  var currentProblem = thePage.getProblemById(this.problemId);
   if (thePage.user.flagLoggedIn) {
     if (isForRealProblem(currentProblem)) {
       theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.submitAnswersPreview}&`;

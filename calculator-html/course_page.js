@@ -37,9 +37,8 @@ function modifyDeadlines(incomingId) {
 var problemWeightsVisible = false;
 
 function toggleDeadline(deadlineId, panelId, button) {
-  var thePage = window.calculator.mainPage;
   var thePanel = document.getElementById(deadlineId);
-  var theProblem = thePage.problems[panelId];
+  var theProblem = problemPage.allProblems.getProblemById(panelId);
   if (thePanel.style.maxHeight === '200px') {
     thePanel.style.opacity = '0';
     thePanel.style.maxHeight = '0';
@@ -52,7 +51,6 @@ function toggleDeadline(deadlineId, panelId, button) {
 }
 
 function toggleProblemWeights() { 
-  var thePage = window.calculator.mainPage;
   var theWeights = document.getElementsByClassName('panelProblemWeights');
   var theButtons = document.getElementsByClassName('accordionLikeProblemWeight');
   for (var i = 0; i < theWeights.length; i ++) { 
@@ -65,7 +63,7 @@ function toggleProblemWeights() {
     }
   }
   for (var i = 0; i < theButtons.length; i ++) {
-    var currentProblem = thePage.problems[theButtons[i].name];
+    var currentProblem = problemPage.allProblems.getProblemById(theButtons[i].name);
     if (!problemWeightsVisible) { 
       theButtons[i].innerHTML = `${currentProblem.toStringProblemWeight()} &#9660;`;
     } else {
@@ -117,7 +115,10 @@ function selectCurrentCoursePage() {
   if (incomingCourse === null || incomingCourse === "" || incomingCourse === undefined) {
     var courseBody = document.getElementById(ids.domElements.divCurrentCourseBody); 
     var temporarySelectCourseId = "buttonTemporarySelectCourse";
-    courseBody.innerHTML = `<button id = '${temporarySelectCourseId}' class = "buttonSelectPage buttonSlowTransition buttonFlash" style = "width:150px" onclick = "window.calculator.mainPage.selectPage('selectCourse')">Please select course</button>`;
+    var courseBodyHTML = `<button id = '${temporarySelectCourseId}' `;
+    courseBodyHTML += `class = "buttonSelectPage buttonSlowTransition buttonFlash" style = "width:150px" `;
+    courseBodyHTML += `onclick = "window.calculator.mainPage.selectPage('selectCourse')">Please select course</button>`;
+    courseBody.innerHTML = courseBodyHTML;
     setTimeout(() => {
       document.getElementById(temporarySelectCourseId).classList.remove("buttonFlash");
     }, 100);

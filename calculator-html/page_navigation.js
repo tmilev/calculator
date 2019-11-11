@@ -558,16 +558,12 @@ function Page() {
   //Initialize global variables
   //////////////////////////////////////
   //////////////////////////////////////
-  this.theTopics = {};
   this.theCourses = {}; 
   this.scriptsInjected = {};
   this.logoutRequestFromUrl = null;
   this.locationRequestFromUrl = null;
   this.storage.loadSettings(); 
   this.hashHistory = []; 
-  this.previousProblemId = null;
-  this.problems = {};
-  this.theChapterIds = {};
   this.lastKnownGoodProblemFileName = "";
   this.user = new User();
   this.aceEditorAutoCompletionWordList = [];
@@ -620,9 +616,8 @@ Page.prototype.initMenuBar = function() {
   }
 }
 
-Page.prototype.resetProblems = function() {
-  this.problems = {};
-  this.theChapterIds = {};
+Page.prototype.resetTopicProblems = function() {
+  problemPage.allProblems.resetTopicProblems();
 }
 
 Page.prototype.showProfilePicture = function() {
@@ -662,13 +657,11 @@ Page.prototype.sectionSelect = function(sectionNumber) {
   for (var counterDeadlines = 0; counterDeadlines < deadlineSpans.length; counterDeadlines ++) {
     var currentDeadlineSpan = deadlineSpans[counterDeadlines];
     var currentDeadlineId = currentDeadlineSpan.id.substr(ids.stringResources.prefixDeadlineContainer.length);
-    var currentProblem = this.problems[currentDeadlineId];
+    var currentProblem = problemPage.allProblems[currentDeadlineId];
     if (currentProblem === undefined) {
       continue;
     }
     currentDeadlineSpan.innerHTML = currentProblem.toStringDeadlinePanel();
-    //console.log(`DEBUG: current id: ${currentDeadlineId}`);
-    //console.log(`DEBUG: counter deadlines ${currentProblem.problemId}`);
   }
 }
 
@@ -788,7 +781,12 @@ Page.prototype.selectPage = function(inputPage) {
 
 Page.prototype.getCurrentProblem = function() {
   var label = this.storage.variables.currentCourse.currentProblemId.getValue();
-  return this.problems[label];
+  var fileName = this.storage.variables.currentCourse.fileName.getValue();
+  return problemPage.allProblems.getProblemByIdOrRegisterEmpty(label, fileName);
+}
+
+Page.prototype.getProblemById = function(label) {
+  return problemPage.allProblems.getProblemByIdOrRegisterEmpty(label);
 }
 
 Page.prototype.cleanUpLoginSpan = function(componentToCleanUp) {

@@ -57,6 +57,7 @@ var domElements = {
   calculatorBuildVersion: "anchorCalculatorBuildVersion",
   divDatabaseOutput: "divDatabaseOutput",
   problemPageContentContainer: "divProblemPageContentContainer",
+  divProblemInfoBar: "divProblemInfoBar",
 };
 
 module.exports = {

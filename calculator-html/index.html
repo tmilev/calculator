@@ -33,9 +33,7 @@ function errorLoadingScript(e) {
   } catch (e) {
     console.log(`Failed to parse your url hash ${currentHash} obtained from ${window.location.hash}. ${e}`);
   }
-
 }
-
 </script> 
   
 <link type = "text/css" rel = "stylesheet" href = "/calculator-html/styleCalculator.css" onerror = "errorLoadingScript(this);">
@@ -141,10 +139,7 @@ function browserify() {
   window.browserifier.browserify();
 }
 </script>
-
-
 <script src ='https://www.google.com/recaptcha/api.js'></script>
-
 <title>Calculator</title>
 </head>
 <body onload = "browserify();">
@@ -171,12 +166,6 @@ function browserify() {
     <div id = "divGoogleLoginButton">Google unavailable (did page fully load? Internet?).</div>
   </div><!--divCenteredItem-->
   <div class = "divCenteredItem">
-    <!--small> We do not have (and do not wish to have) access 
-      <br> to your google password or other sensitive information. 
-      <br> We only store your email for registration, password recovery,
-      <br> and for use as username if you don't want to select one.
-      <br> You are most welcome to use the site without login/account.
-    </small-->
   </div><!--divCenteredItem-->
   <div class = "divCenteredItem">
     <div id = "spanLoginStatus" style = "height: 15px; width: 190px; text-align: center"></div>
@@ -214,6 +203,7 @@ function browserify() {
 </div><!--divForgotLogin-->
   
 <div id = "divProblemPage" class = "divPage">
+  <div id = 'divProblemInfoBar' class = 'problemInfoBar'></div>
   <div id = "divProblemPageContentContainer">
   </div><!--divProblemPageContentContainer-->
 </div><!--divProblemPage-->

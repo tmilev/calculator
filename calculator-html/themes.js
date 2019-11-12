@@ -12,6 +12,7 @@ function Theme() {
     "--box-shadow-tableCalculatorOutputs": "none",
     "--box-shadow-buttonPreview": "none",
     "--box-shadow-buttonDefault": "none",
+    "--box-shadow-buttonMQ": "none",
   };
   this.themes[themeIds.radioThemeExperimental] = {
     "--main-border-radius": "0px",
@@ -20,6 +21,7 @@ function Theme() {
     "--box-shadow-tableCalculatorOutputs": "none",
     "--box-shadow-buttonPreview": "5px 5px 5px grey",
     "--box-shadow-buttonDefault": "5px 5px 5px grey",
+    "--box-shadow-buttonMQ": "3px 3px 3px grey",
   };
 }
 

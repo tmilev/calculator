@@ -5,6 +5,7 @@
   --box-shadow-tableCalculatorOutputs: none;
   --box-shadow-buttonPreview: none;
   --box-shadow-buttonDefault: none;
+  --box-shadow-buttonMQ: none;
 }
 
 /*styleCalculator.css*/
@@ -1270,7 +1271,7 @@ button.buttonMQ {
   width: 25px; 
   height: 21.2px; 
   padding: 0;
-  box-shadow: none;
+  box-shadow: var(--box-shadow-buttonMQ);
   border: none;
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;

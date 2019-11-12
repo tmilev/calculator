@@ -10,6 +10,14 @@ var domElements = {
       div: "divPrivacyPolicy",
       button: "buttonPrivacyPolicy",
     },
+    themes: {
+      div: "divThemes",
+      button: "buttonThemes",
+    },
+  },
+  themeRadioButtons: {
+    radioThemeExperimental: "radioThemeExperimental",
+    radioThemeDefault: "radioThemeDefault",
   },
   inputMain: "mainInputID",
   spanOldEmail: "spanOldEmail",

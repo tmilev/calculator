@@ -1,3 +1,9 @@
+:root {
+  --main-background-color: white;
+  --main-border-radius: 3px;
+  --box-shadow-buttonSelectPage: none;
+}
+
 /*styleCalculator.css*/
 calculatorExampleInfo {
   display: block;
@@ -37,9 +43,7 @@ tiny {
   display: flex;
   align-items: center;
   background-color: #fafafa;
-  -moz-border-radius: 3px;
-  -webkit-border-radius: 3px;
-  border-radius: 3px;  
+  border-radius: var(--main-border-radius);
   width: 100%;
   margin-bottom: 10px;
 }
@@ -1225,9 +1229,9 @@ button.buttonSignUp:hover {
 }
 
 button.buttonSelectPage {
-  border-radius: 3px;
+  border-radius: var(--main-border-radius);
   background-color: lightblue;
-  box-shadow: none;
+  box-shadow: var(--box-shadow-buttonSelectPage);
   border: none;
   font-weight: bold;
   padding: 8px;
@@ -1417,6 +1421,7 @@ input:checked + .slider:before {
 
 /* Customize the label (the container) */
 .containerRadioButton {
+  display: block;
   position: relative;
   padding-left: 20px;
   cursor: pointer;
@@ -1430,6 +1435,8 @@ input:checked + .slider:before {
 .containerRadioButton input {
   position: absolute;
   opacity: 0;
+  height: 0;
+  width: 0;
 }
 
 /* Create a custom radio button */

@@ -16,6 +16,7 @@ const initializeButtons = require('./initialize_buttons');
 const calculatorPage = require('./calculator_page');
 const signUp = require('./signup').signUp;
 const mathjax = require('./mathjax-calculator-setup');
+const themes = require('./themes');
 
 function User() {
   this.flagLoggedIn = false;
@@ -324,8 +325,13 @@ function StorageCalculator() {
       email: new StorageVariable({
         name: "email",
         nameURL: "email",
-      })
-    }
+      }),
+    },
+    theme: new StorageVariable({
+      name: "theme",
+      nameLocalStorage: "theme",
+      callbackOnValueChange: themes.theme.doChangeTheme.bind(themes.theme),
+    }),
   };
   this.oldHash = "";
   this.currentHash = "";
@@ -511,6 +517,12 @@ function Page() {
       name: "privacyPolicy",
       id: ids.domElements.pages.privacyPolicy.div,
       menuButtonId: ids.domElements.pages.privacyPolicy.button,
+    },
+    themes: {
+      name: "themes",
+      id: ids.domElements.pages.themes.div,
+      menuButtonId: ids.domElements.pages.themes.button,
+      container: null,
     },
     database: {
       name: "database",

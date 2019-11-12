@@ -72,6 +72,7 @@ var MathQuillHasMatrixSupport = true;
 <script type = "text/javascript" src = "/calculator-html/crypto.js"></script>
 <script type = "text/javascript" src = "/calculator-html/submit_requests.js"></script>
 <script type = "text/javascript" src = "/calculator-html/autocomplete_keywords.js"></script>
+<script type = "text/javascript" src = "/calculator-html/themes.js"></script>
 <script type = "text/javascript" src = "/calculator-html/autocomplete.js"></script>
 <script type = "text/javascript" src = "/calculator-html/panels.js"></script>
 <script type = "text/javascript" src = "/calculator-html/initialize_buttons.js"></script>
@@ -470,6 +471,17 @@ function browserify() {
   <button class = "buttonStandard" onclick = "window.calculator.database.updateDatabasePageResetCurrentTable();">Tables</button><span id = "spanDatabaseComments"></span>
 <div id = "divDatabaseOutput"> </div>
 </div>
+<div id = "divThemes" class = "divPage" >
+  <label class="containerRadioButton">
+    Default
+    <input type="radio" checked="checked" name = "theme" id = "radioThemeDefault" onchange="window.calculator.themes.theme.setFromRadioButton()"></input>
+    <span class="radioMark"></span>
+  </label>
+  <label class="containerRadioButton">Experimental
+    <input type="radio" name = "theme" id = "radioThemeExperimental" onchange="window.calculator.themes.theme.setFromRadioButton()"></input>
+    <span class="radioMark"></span>
+  </label>
+</div>
 <div id = "divAccount" class = "divPage">
   <form>
   <table> <!--Password change table, to avoid password not in a form warning-->
@@ -607,6 +619,7 @@ function browserify() {
 <div><button class = "buttonSelectPage" id = "buttonSelectCalculator">Calculator</button></div>
 <div><button class = "buttonSelectPage" id = "buttonAboutPage">About</button></div>
 <div><button class = "buttonSelectPage" id = "buttonPrivacyPolicy">Privacy</button></div>
+<div><button class = "buttonSelectPage" id = "buttonThemes">Themes</button></div>
 <div class = "divMenuSeparator divAccountPanel divInvisible">Account</div>
 <div class = "divAccountPanel divInvisible"><button class = "buttonSelectPage" id = "buttonSelectAccount">Account</button></div>
 

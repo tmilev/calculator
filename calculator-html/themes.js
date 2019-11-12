@@ -9,11 +9,17 @@ function Theme() {
     "--main-border-radius": "3px",
     "--main-background-color": "white",
     "--box-shadow-buttonSelectPage": "none",
+    "--box-shadow-tableCalculatorOutputs": "none",
+    "--box-shadow-buttonPreview": "none",
+    "--box-shadow-buttonDefault": "none",
   };
   this.themes[themeIds.radioThemeExperimental] = {
     "--main-border-radius": "0px",
     "--main-background-color": "white",
     "--box-shadow-buttonSelectPage": "5px 5px 5px grey",
+    "--box-shadow-tableCalculatorOutputs": "none",
+    "--box-shadow-buttonPreview": "5px 5px 5px grey",
+    "--box-shadow-buttonDefault": "5px 5px 5px grey",
   };
 }
 
@@ -36,8 +42,6 @@ Theme.prototype.setFromRadioButton = function() {
   variables.theme.setAndStore(value);
 }
 
-
-
 Theme.prototype.doChangeTheme = function(themeId) {
   if (themeId === this.currentTheme) {
     return;
@@ -48,6 +52,7 @@ Theme.prototype.doChangeTheme = function(themeId) {
   for (var label in currentSpec) {
     root.style.setProperty(label, currentSpec[label]);
   }
+  document.getElementById(this.currentTheme).checked = true;
 }
 
 var theme = new Theme();

@@ -2,6 +2,9 @@
   --main-background-color: white;
   --main-border-radius: 3px;
   --box-shadow-buttonSelectPage: none;
+  --box-shadow-tableCalculatorOutputs: none;
+  --box-shadow-buttonPreview: none;
+  --box-shadow-buttonDefault: none;
 }
 
 /*styleCalculator.css*/
@@ -128,7 +131,7 @@ sectionSelection {
   padding:3px;
   margin: 3px;
   transition: all 2s;
-  box-shadow: none;
+  box-shadow: var(--box-shadow-buttonDefault);
   border: none;
   color:red;
   width:60px;
@@ -155,10 +158,10 @@ sectionSelection {
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
   border-radius: 3px;
+  box-shadow: var(--box-shadow-buttonPreview);
   transition: all 2s;
   padding:3px;
   margin: 3px;
-  box-shadow: none;
   border: none;
   color:green;
   width:60px;
@@ -569,6 +572,7 @@ a.linkProgressReport {
 table.tableCalculatorOutput {
   border-collapse: collapse;
   word-break: break-all;
+  box-shadow: var(--box-shadow-tableCalculatorOutputs)
 }
 
 td.cellCalculatorInput {

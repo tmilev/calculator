@@ -93,6 +93,10 @@ Problem.prototype.initializeBasic = function(problemData) {
   /**@type {InputPanelData[]} */
   this.answers = [];  
   this.title = problemData.title;
+  this.fileName = problemData.fileName;
+  if (this.fileName === undefined || this.fileName === null) {
+    this.fileName = "";
+  }
 }
 
 Problem.prototype.initializeInfo = function(problemData, inputParentIdURLed) {
@@ -566,8 +570,8 @@ ProblemNavigation.prototype.writeToHTML = function() {
     this.currentProblem.links !== undefined && 
     this.currentProblem.links !== null
   ) {
-    panelContent += this.links.slides;
-    panelContent += this.links.video;
+    panelContent += this.currentProblem.links.slides;
+    panelContent += this.currentProblem.links.video;
   }
   //topPart += "<br>"
   panelContent += this.currentProblem.getEditPanel();

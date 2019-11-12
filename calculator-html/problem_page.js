@@ -576,6 +576,7 @@ ProblemNavigation.prototype.writeToHTML = function() {
   //topPart += "<br>"
   panelContent += this.currentProblem.getEditPanel();
   document.getElementById(ids.domElements.divProblemInfoBar).innerHTML = panelContent;
+  mathjax.typeSetSoft(ids.domElements.divProblemInfoBar);
 }
 
 

@@ -1653,7 +1653,7 @@ void RationalFunctionOld::operator*=(const Polynomial<Rational>& other) {
   }
   Polynomial<Rational> theGCD, theResult, tempP;
   ProgressReport theReport;
-  if (theGlobalVariables.flagReportEverything) {
+  if (theGlobalVariables.theProgress.flagReportEverything) {
     std::stringstream out;
     out << "Multiplying " << this->ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << " by "
     << other.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
@@ -1673,7 +1673,7 @@ void RationalFunctionOld::operator*=(const Polynomial<Rational>& other) {
   this->Denominator.GetElement() = theResult;
   this->ReduceMemory();
   this->SimplifyLeadingCoefficientOnly();
-  if (theGlobalVariables.flagReportEverything) {
+  if (theGlobalVariables.theProgress.flagReportEverything) {
     std::stringstream out;
     out << "Multiplying " << this->ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << " by "
     << other.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
@@ -1756,7 +1756,7 @@ void RationalFunctionOld::operator*=(const RationalFunctionOld& other) {
   //  tempde_Bugger = other;
   //  tempde_Bugger.ComputeDebugString();
   ProgressReport theReport;
-  if (theGlobalVariables.flagReportEverything) {
+  if (theGlobalVariables.theProgress.flagReportEverything) {
     std::stringstream out;
     out << "Multiplying " << this->ToString() << " by " << other.ToString();
     theReport.Report(out.str());
@@ -1785,7 +1785,7 @@ void RationalFunctionOld::operator*=(const RationalFunctionOld& other) {
   this->Numerator.GetElement() *= tempP1;
   this->ReduceMemory();
   this->SimplifyLeadingCoefficientOnly();
-  if (theGlobalVariables.flagReportEverything) {
+  if (theGlobalVariables.theProgress.flagReportEverything) {
     std::stringstream out;
     out << "Multiplying " << this->ToString() << " by " << other.ToString();
     out << " and the result is:\n" << this->ToString();

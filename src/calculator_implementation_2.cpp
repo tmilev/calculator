@@ -538,7 +538,7 @@ bool Calculator::EvaluateExpression(
   //if (logEvaluationStepsRequested)
   //  logStream << "\\(" << output.ToString() << "\\)";
   bool doReportEvalRules =
-  theGlobalVariables.flagReportEverything &&
+  theGlobalVariables.theProgress.flagReportEverything &&
   !theGlobalVariables.flagRunningCommandLine &&
   !theGlobalVariables.flagRunningApache;
 

@@ -73,7 +73,7 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash) {
   this->crashReportHtml << Crasher::GetStackTraceEtcErrorMessageHTML();
   this->crashReportFile << Crasher::GetStackTraceEtcErrorMessageHTML();
   if (!theGlobalVariables.flagNotAllocated) {
-    if (theGlobalVariables.ProgressReportStringS.size > 0) {
+    if (theGlobalVariables.progressReportStrings.size > 0) {
       this->crashReportHtml
       << "<hr><b>Computation progress report strings:</b><br>"
       << theGlobalVariables.ToStringProgressReportNoThreadData(true);
@@ -245,7 +245,7 @@ JSData GlobalVariables::ToStringProgressReportJSData() {
 
 std::string GlobalVariables::ToStringThreadData(bool useHTML) {
   std::stringstream out;
-  for (int threadIndex = 0; threadIndex < this->ProgressReportStringS.size; threadIndex ++) {
+  for (int threadIndex = 0; threadIndex < this->progressReportStrings.size; threadIndex ++) {
     if (useHTML) {
       out << "<hr><b>";
     }
@@ -269,7 +269,7 @@ std::string GlobalVariables::ToStringProgressReportWithThreadData(bool useHTML) 
 std::string GlobalVariables::ToStringProgressReportNoThreadData(bool useHTML) {
   MacroRegisterFunctionWithName("GlobalVariables::ToStringProgressReportHtmlNoThreadData");
   std::stringstream reportStream;
-  for (int threadIndex = 0; threadIndex < this->ProgressReportStringS.size; threadIndex ++) {
+  for (int threadIndex = 0; threadIndex < this->progressReportStrings.size; threadIndex ++) {
     int currentThreadID = ThreadData::getCurrentThreadId();
     if (currentThreadID != threadIndex) {
       //<-to avoid coordinating threads
@@ -282,13 +282,13 @@ std::string GlobalVariables::ToStringProgressReportNoThreadData(bool useHTML) {
     } else {
       reportStream << "Thread id: " << logger::consoleBlue() << currentThreadID << logger::consoleNormal() << "\n";
     }
-    for (int i = 0; i < this->ProgressReportStringS[threadIndex].size; i ++) {
-      if (this->ProgressReportStringS[threadIndex][i] != "") {
+    for (int i = 0; i < this->progressReportStrings[threadIndex].size; i ++) {
+      if (this->progressReportStrings[threadIndex][i] != "") {
         if (useHTML) {
           reportStream << "\n<div id = \"divProgressReport" << i << "\">"
-          << this->ProgressReportStringS[threadIndex][i] << "\n</div>\n<hr>";
+          << this->progressReportStrings[threadIndex][i] << "\n</div>\n<hr>";
         } else {
-          reportStream << this->ProgressReportStringS[threadIndex][i] << "\n";
+          reportStream << this->progressReportStrings[threadIndex][i] << "\n";
         }
       }
     }
@@ -322,15 +322,15 @@ std::string GlobalVariables::ToStringProgressReportNoThreadData(bool useHTML) {
 std::string GlobalVariables::ToStringProgressReportConsole() {
   MacroRegisterFunctionWithName("GlobalVariables::ToStringProgressReportConsole");
   std::stringstream reportStream;
-  for (int threadIndex = 0; threadIndex < this->ProgressReportStringS.size; threadIndex ++) {
+  for (int threadIndex = 0; threadIndex < this->progressReportStrings.size; threadIndex ++) {
     if (ThreadData::getCurrentThreadId() != threadIndex) {
       reportStream << "Progress report available only for current thread.<br>";
       //<-to avoid coordinating threads
       continue;
     }
     reportStream << this->theThreadData[threadIndex].ToStringConsole();
-    for (int i = 0; i < this->ProgressReportStringS[threadIndex].size; i ++) {
-      reportStream << this->ProgressReportStringS[threadIndex][i];
+    for (int i = 0; i < this->progressReportStrings[threadIndex].size; i ++) {
+      reportStream << this->progressReportStrings[threadIndex][i];
     }
   }
   reportStream << "\n";
@@ -1632,7 +1632,7 @@ void GeneralizedVermaModuleCharacters::WriteToFile(std::fstream& output) {
   this->preferredBasisChangeInversE.WriteToFile(output);
   this->theExtendedIntegralLatticeMatForM.WriteToFile(output);
   ProgressReport theReport;
-  if (theGlobalVariables.flagReportFileIO) {
+  if (theGlobalVariables.theProgress.flagReportFileIO) {
     theReport.Report("Writing small data... ");
   }
   this->theMaxComputation.WriteToFile(output);
@@ -1643,17 +1643,17 @@ void GeneralizedVermaModuleCharacters::WriteToFile(std::fstream& output) {
   this->PreimageWeylChamberLargerAlgebra.WriteToFile(output);
   this->PreimageWeylChamberSmallerAlgebra.WriteToFile(output);
   this->WeylChamberSmallerAlgebra.WriteToFile(output);
-  if (theGlobalVariables.flagReportFileIO) {
+  if (theGlobalVariables.theProgress.flagReportFileIO) {
     theReport.Report("Writing QP's non-subbed... ");
   }
   this->theQPsNonSubstituted.WriteToFile(output);
-  if (theGlobalVariables.flagReportFileIO) {
+  if (theGlobalVariables.theProgress.flagReportFileIO) {
     theReport.Report("Writing QP's subbed... ");
   }
   output << XML::GetOpenTagNoInputCheckAppendSpacE("QPsSubbed");
   this->theQPsSubstituted.WriteToFile(output);
   output << XML::GetCloseTagNoInputCheckAppendSpacE("QPsSubbed");
-  if (theGlobalVariables.flagReportFileIO) {
+  if (theGlobalVariables.theProgress.flagReportFileIO) {
     theReport.Report("Writing small data... ");
   }
   output << XML::GetOpenTagNoInputCheckAppendSpacE("theMultiplicities");
@@ -1666,16 +1666,16 @@ void GeneralizedVermaModuleCharacters::WriteToFile(std::fstream& output) {
   this->thePfs.WriteToFile(output);
 //  this->paramSubChambers.WriteToFile(output);
 //  this->nonParamVertices.WriteToFile(output);
-  if (theGlobalVariables.flagReportFileIO) {
+  if (theGlobalVariables.theProgress.flagReportFileIO) {
     theReport.Report("Writing param chamber complex... ");
   }
   this->projectivizedParamComplex.WriteToFile(output);
-  if (theGlobalVariables.flagReportFileIO) {
+  if (theGlobalVariables.theProgress.flagReportFileIO) {
     theReport.Report("Writing projectivized chamber complex... ");
   }
   this->smallerAlgebraChamber.WriteToFile(output, this->UpperLimitChambersForDebugPurposes);
   this->projectivizedChambeR.WriteToFile(output, this->UpperLimitChambersForDebugPurposes);
-  if (theGlobalVariables.flagReportFileIO) {
+  if (theGlobalVariables.theProgress.flagReportFileIO) {
     theReport.Report("Writing to file done...");
   }
   output << XML::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName());

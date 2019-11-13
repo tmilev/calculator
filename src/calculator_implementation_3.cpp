@@ -1821,7 +1821,7 @@ bool Calculator::innerAutomatedTest(Calculator& theCommands, const Expression& i
     if (!knownCommands.Contains(commandStrings[i])) {
       newCommands.AddOnTop(commandStrings[i]);
       if (knownCommands[i] == commandStrings[i]) {
-        crash << "Known command result not match current. " << crash;
+        crash << "Known command result does not match current. " << crash;
       }
       continue;
     }

@@ -108,10 +108,6 @@ public:
   static std::string clearSlashes(const std::string& theString);
   static std::string CleanUpForFileNameUse(const std::string& inputString);
   static std::string CleanUpForLaTeXLabelUse(const std::string& inputString);
-  static std::string GetCalculatorLinkUnclosedPostArguments(const std::string& inputArguments);
-  static std::string GetCalculatorLinkUnclosedPostArguments(
-    const std::string& DisplayNameCalculator, const std::string& inputArguments
-  );
   static bool IsRepresentedByItselfInURLs(char input);
   static void clearDollarSigns(std::string& theString, std::string& output);
   static void subEqualitiesWithSimeq(std::string& theString, std::string& output);

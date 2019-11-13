@@ -407,7 +407,7 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstants() {
   std::stringstream out;
   ProgressReport theReport;
   double startTimer = - 1;
-  if (theGlobalVariables.flagReportEverything) {
+  if (theGlobalVariables.theProgress.flagReportEverything) {
     out << "Initializing matrix for structure constant computation of " << this->ToStringLieAlgebraName() << "... ";
     startTimer = theGlobalVariables.GetElapsedSeconds();
     theReport.Report(out.str());
@@ -426,7 +426,7 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstants() {
     }
   }
   double startStructureConstantComputation = - 1;
-  if (theGlobalVariables.flagReportEverything) {
+  if (theGlobalVariables.theProgress.flagReportEverything) {
     out << "done in " << theGlobalVariables.GetElapsedSeconds() - startTimer
     << " seconds.<br> " << "Computing structure constants...";
     theReport.Report(out.str());
@@ -481,14 +481,14 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstants() {
     nonExploredRoots.ComputeIndicesFromSelection();
   }
   double startMultTable = - 1;
-  if (theGlobalVariables.flagReportEverything) {
+  if (theGlobalVariables.theProgress.flagReportEverything) {
     out << "done in " << theGlobalVariables.GetElapsedSeconds() - startStructureConstantComputation
     << " seconds.<br> Computing Lie bracket pairing (``multiplication'') table...";
     theReport.Report(out.str());
     startMultTable = theGlobalVariables.GetElapsedSeconds();
   }
   this->ComputeMultTable();
-  if (theGlobalVariables.flagReportEverything) {
+  if (theGlobalVariables.theProgress.flagReportEverything) {
     out << " done in " << theGlobalVariables.GetElapsedSeconds() - startMultTable
     << " seconds. Total structure constant computation time: "
     << theGlobalVariables.GetElapsedSeconds() - startTimer << " seconds. ";

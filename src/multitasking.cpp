@@ -194,11 +194,11 @@ ThreadData& ThreadData::RegisterNewThread(const std::string& inputName) {
   theThreadData.AddOnTop(newThreadData);
   theGlobalVariables.theThreads.SetSize(theThreadData.size);
   theGlobalVariables.CustomStackTrace.Reserve(2);
-  theGlobalVariables.ProgressReportStringS.Reserve(2);
+  theGlobalVariables.progressReportStrings.Reserve(2);
   theGlobalVariables.CustomStackTrace.SetSize(theThreadData.size);
-  theGlobalVariables.ProgressReportStringS.SetSize(theThreadData.size);
+  theGlobalVariables.progressReportStrings.SetSize(theThreadData.size);
   theGlobalVariables.CustomStackTrace.LastObject().Reserve(30);
-  theGlobalVariables.ProgressReportStringS.LastObject().Reserve(30);
+  theGlobalVariables.progressReportStrings.LastObject().Reserve(30);
   return theGlobalVariables.theThreadData.LastObject();
 }
 

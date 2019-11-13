@@ -46,7 +46,6 @@ public:
   bool flagKeepAlive;
   bool flagFileNameSanitized;
   bool flagFoundMalformedFormInput;
-  bool flagProgressReportAllowed;
   bool flagArgumentsAreOK;
   bool flagDoAddContentLength;
   bool flagUsingSSLInWorkerProcess;

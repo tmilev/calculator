@@ -657,13 +657,6 @@ bool WebWorker::ExtractArgumentsFromMessage(
       this->addressComputed = theGlobalVariables.GetWebInput("request");
     }
   }
-  if (theArgs.Contains("doubleURLencodedInput")) {
-    std::string newInput = theGlobalVariables.GetWebInput("doubleURLencodedInput");
-    theArgs.Clear();
-    return this->ExtractArgumentsFromMessage(
-      newInput, argumentProcessingFailureComments, recursionDepth + 1
-    );
-  }
   return true;
 }
 
@@ -858,7 +851,10 @@ void WebWorker::WriteAfterTimeoutProgressStatic(const std::string& input) {
 }
 
 void WebWorker::WriteAfterTimeoutProgress(const std::string& input, bool forceFileWrite) {
-  if (!this->flagProgressReportAllowed) {
+  if (
+    !theGlobalVariables.theProgress.flagReportAllowed ||
+    !theGlobalVariables.theProgress.flagTimedOut
+  ) {
     return;
   }
   this->PauseIfRequested();
@@ -1748,7 +1744,6 @@ void WebWorker::reset() {
   this->millisecondsLastPingServerSideOnly = - 1;
   this->millisecondsServerAtWorkerStart = - 1;
   this->flagFoundMalformedFormInput = false;
-  this->flagProgressReportAllowed = false;
   this->flagKeepAlive = false;
   this->flagDidSendAll = false;
   this->flagUsingSSLInWorkerProcess = false;
@@ -2145,8 +2140,8 @@ int WebWorker::ProcessCompute() {
   this->SetHeaderOKNoContentLength("");
   std::string monitoring = theGlobalVariables.GetWebInput(WebAPI::request::monitoring);
   if (monitoring == "false") {
-    theGlobalVariables.flagBanProcessMonitoring = true;
-    theGlobalVariables.flagReportEverything = false;
+    theGlobalVariables.theProgress.flagBanProcessMonitoring = true;
+    theGlobalVariables.theProgress.flagReportEverything = false;
   }
 
   theParser->inputString = HtmlRoutines::ConvertURLStringToNormal(
@@ -2161,11 +2156,11 @@ int WebWorker::ProcessCompute() {
   //  the initialization below moved to the start of the web server!
   //  theParser.init();
   ////////////////////////////////////////////////
-  this->flagProgressReportAllowed = true;
+  theGlobalVariables.theProgress.flagReportAllowed = true;
   theParser->Evaluate(theParser->inputString);
-  this->flagProgressReportAllowed = false;
+  theGlobalVariables.theProgress.flagReportAllowed = false;
   if (theGlobalVariables.flagRunningBuiltInWebServer) {
-    if (theGlobalVariables.flagOutputTimedOut) {
+    if (theGlobalVariables.theProgress.flagTimedOut) {
       this->WriteAfterTimeoutResult();
       return 0;
     }
@@ -2877,17 +2872,17 @@ int WebWorker::ServeClient() {
   }
   if (
     theGlobalVariables.userCalculatorRequestType == WebAPI::request::pause &&
-    (!theGlobalVariables.flagBanProcessMonitoring)
+    (!theGlobalVariables.theProgress.flagBanProcessMonitoring)
   ) {
     return this->ProcessPauseWorker();
   } else if (
     theGlobalVariables.userCalculatorRequestType == WebAPI::request::unpause &&
-    (!theGlobalVariables.flagBanProcessMonitoring)
+    (!theGlobalVariables.theProgress.flagBanProcessMonitoring)
   ) {
     return this->ProcessUnpauseWorker();
   } else if (
     theGlobalVariables.userCalculatorRequestType == WebAPI::request::indicator &&
-    (!theGlobalVariables.flagBanProcessMonitoring)
+    (!theGlobalVariables.theProgress.flagBanProcessMonitoring)
   ) {
     return this->ProcessComputationIndicator();
   } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::setProblemData) {
@@ -3071,13 +3066,13 @@ void WebWorker::Release() {
 void WebWorker::GetIndicatorOnTimeout(JSData& output, const std::string& message) {
   MacroRegisterFunctionWithName("WebWorker::OutputShowIndicatorOnTimeout");
   MutexLockGuard theLock(this->PauseWorker.lockThreads.GetElement());
-  theGlobalVariables.flagOutputTimedOut = true;
+  theGlobalVariables.theProgress.flagTimedOut = true;
   logWorker << logger::blue << "Computation timeout, sending progress indicator instead of output. " << logger::endL;
   std::stringstream timeOutComments;
   output[WebAPI::result::timeOut] = true;
 
   timeOutComments << message;
-  if (theGlobalVariables.flagBanProcessMonitoring) {
+  if (theGlobalVariables.theProgress.flagBanProcessMonitoring) {
     timeOutComments << "Monitoring computations is not allowed on this server.<br> "
     << "Please note that monitoring computations is the default behavior, so the "
     << "owners of the server must have explicitly banned monitoring. ";
@@ -3090,7 +3085,7 @@ void WebWorker::GetIndicatorOnTimeout(JSData& output, const std::string& message
 
 void WebWorker::OutputShowIndicatorOnTimeout(const std::string& message) {
   MacroRegisterFunctionWithName("WebWorker::OutputShowIndicatorOnTimeout");
-  theGlobalVariables.flagOutputTimedOut = true;
+  theGlobalVariables.theProgress.flagTimedOut = true;
   JSData result;
   this->GetIndicatorOnTimeout(result, message);
   if (this->indexInParent < 0) {
@@ -4512,7 +4507,7 @@ int WebWorker::Run() {
       this->flagEncounteredErrorWhileServingFile ||
       theGlobalVariables.flagRestartNeeded ||
       theGlobalVariables.flagStopNeeded ||
-      theGlobalVariables.flagOutputTimedOut
+      theGlobalVariables.theProgress.flagTimedOut
     ) {
       break;
     }
@@ -4863,7 +4858,7 @@ void WebServer::InitializeGlobalVariablesHashes() {
 
 void WebServer::InitializeGlobalVariables() {
   theGlobalVariables.millisecondsReplyAfterComputation = 0;
-  theGlobalVariables.flagReportEverything = true;
+  theGlobalVariables.theProgress.flagReportEverything = true;
   ParallelComputing::cgiLimitRAMuseNumPointersInList = 4000000000;
   this->InitializeGlobalVariablesHashes();
   this->requestsNotNeedingLogin.AddOnTop("about");
@@ -5016,7 +5011,7 @@ void WebServer::TurnProcessMonitoringOn() {
   << logger::purple << "************************" << logger::endL
   << logger::yellow << "Process monitoring IS ON. " << logger::endL
   << logger::purple << "************************" << logger::endL;
-  theGlobalVariables.flagBanProcessMonitoring = false;
+  theGlobalVariables.theProgress.flagBanProcessMonitoring = false;
   theGlobalVariables.millisecondsReplyAfterComputation = theGlobalVariables.millisecondsReplyAfterComputationDefault;
   theGlobalVariables.configuration[Configuration::processMonitoringBanned] = false;
 }
@@ -5027,7 +5022,7 @@ void WebServer::TurnProcessMonitoringOff() {
   << logger::green << "************************" << logger::endL
   << logger::red << "Process monitoring is now off. " << logger::endL
   << logger::green << "************************" << logger::endL;
-  theGlobalVariables.flagBanProcessMonitoring = true;
+  theGlobalVariables.theProgress.flagBanProcessMonitoring = true;
   theGlobalVariables.millisecondsReplyAfterComputation = 0;
   theGlobalVariables.configuration[Configuration::processMonitoringBanned] = true;
 }

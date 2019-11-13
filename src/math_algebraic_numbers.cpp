@@ -883,7 +883,7 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other) {
     return;
   }
   bool doReport = false;
-  if (theGlobalVariables.flagReportEverything) {
+  if (theGlobalVariables.theProgress.flagReportEverything) {
     if (this->theElT.size() * other.theElT.size() > 100) {
       doReport = true;
     }

@@ -72,7 +72,7 @@ bool FiniteGroup<elementSomeGroup>::ComputeAllElementsLargeGroup(bool andWords, 
           this->GetWordByFormula(*this, currentElement, *this->theWords.LastObject());
         }
       }
-      if (theGlobalVariables.flagReportEverything) {
+      if (theGlobalVariables.theProgress.flagReportEverything) {
         if (this->theElements.size % 100 == 0) {
           std::stringstream reportStream;
           LargeInteger sizeByFla = this->SizeByFormulaOrNeg1();
@@ -91,7 +91,7 @@ bool FiniteGroup<elementSomeGroup>::ComputeAllElementsLargeGroup(bool andWords, 
       }
     }
   }
-  if (theGlobalVariables.flagReportEverything) {
+  if (theGlobalVariables.theProgress.flagReportEverything) {
     std::stringstream reportStream;
     reportStream << "Generated group with a total of " << this->theElements.size << " elements. ";
     theReport.Report(reportStream.str());
@@ -597,7 +597,7 @@ bool FiniteGroup<elementSomeGroup>::ComputeCCRepresentatives() {
     //in case there are two non-conjugate elements with the same char poly.
     for (int i = 0; i < this->conjugacyClasseS.size; i ++) {
       for (int j = 0; j < this->unionGeneratorsCC.size; j ++) {
-        if (theGlobalVariables.flagReportEverything) {
+        if (theGlobalVariables.theProgress.flagReportEverything) {
           std::stringstream reportStream;
           reportStream << "Exploring conjugacy class " << i + 1
           << " out of " << this->conjugacyClasseS.size
@@ -823,7 +823,7 @@ bool WeylGroupAutomorphisms::GenerateOuterOrbit(
           return false;
         }
       }
-      if (theGlobalVariables.flagReportEverything) {
+      if (theGlobalVariables.theProgress.flagReportEverything) {
         if (output.size / 10000 > orbitSizeDiv10000) {
           std::stringstream reportStream;
           reportStream << "Generating outer orbit, " << output.size
@@ -943,7 +943,7 @@ bool WeylGroupData::GenerateOrbit(
   for (int i = 0; i < output.size; i ++) {
     for (int j = 0; j < this->CartanSymmetric.NumRows; j ++) {
       currentRoot = output[i];
-      if (theGlobalVariables.flagReportEverything && i % 100 == 0) {
+      if (theGlobalVariables.theProgress.flagReportEverything && i % 100 == 0) {
         std::stringstream reportStream;
         reportStream << "So far found " << i + 1 << " elements in the orbit(s) of the starting weight(s) "
         << theWeights.ToString() << ". ";
@@ -1449,7 +1449,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::GetClassFunc
             this->ComputeAllElementImages();
           }
           this->classFunctionMatrices[cci] += this->theElementImageS[currentCC.indicesEltsInOwner[i]];
-          if (theGlobalVariables.flagReportEverything) {
+          if (theGlobalVariables.theProgress.flagReportEverything) {
             std::stringstream reportstream;
             reportstream << " Computing conjugacy class " << currentCC.indicesEltsInOwner[i] + 1
             << " (total num classes is " << numClasses << ").";
@@ -1457,7 +1457,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::GetClassFunc
           }
         }
       }
-      if (theGlobalVariables.flagReportEverything) {
+      if (theGlobalVariables.theProgress.flagReportEverything) {
         std::stringstream reportstream;
         reportstream << "<br>Class function matrix of conjugacy class " << cci + 1
         << " (total num classes is " << numClasses << ") computed to be: "
@@ -2092,7 +2092,7 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsTodorsVersi
 //  int indexLastPredefinedrep =2; //<-this should be the index of the standard rep.
   for (int i = 0; i < appendOnlyIrrepsList.size && this->irreps.size != NumClasses; i ++) {
     for (int j = 0; j < initialcount; j ++) {
-      if (theGlobalVariables.flagReportEverything) {
+      if (theGlobalVariables.theProgress.flagReportEverything) {
         std::stringstream reportStream;
         reportStream << this->irreps.size << " irreducible representations found so far. ";
         reportStream << "<br>Decomposing " << appendOnlyIrrepsList[j].theCharacteR
@@ -2107,7 +2107,7 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsTodorsVersi
       }
     }
   }
-  if (theGlobalVariables.flagReportEverything) {
+  if (theGlobalVariables.theProgress.flagReportEverything) {
     std::stringstream reportStream;
     reportStream << "Irrep table:";
     for (int i = 0; i < this->irreps.size; i ++) {

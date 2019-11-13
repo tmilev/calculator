@@ -769,7 +769,7 @@ void LargeIntegerUnsigned::MultiplyBy(const LargeIntegerUnsigned& x, LargeIntege
     output.theDigits[i] = 0;
   }
   unsigned long long numCycles = 0;
-  bool doProgressReporT = theGlobalVariables.flagReportEverything || theGlobalVariables.flagReportLargeIntArithmetic;
+  bool doProgressReporT = theGlobalVariables.theProgress.flagReportEverything || theGlobalVariables.theProgress.flagReportLargeIntArithmetic;
   ProgressReport theReport1, theReport2;
   unsigned long long totalCycles = 0;
   if (doProgressReporT) {

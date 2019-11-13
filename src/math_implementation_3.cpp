@@ -101,10 +101,20 @@ void GlobalVariables::ChDir(const std::string& systemCommand) {
   }
 }
 
+GlobalVariables::Progress::Progress() {
+  this->flagTimedOut = false;
+  this->flagBanProcessMonitoring = false;
+  this->flagReportEverything = false;
+  this->flagReportGaussianElimination = false;
+  this->flagReportLargeIntArithmetic = false;
+  this->flagReportProductsMonomialAlgebras = false;
+  this->flagReportFileIO = true;
+  this->flagReportAllowed = false;
+}
+
 GlobalVariables::GlobalVariables() {
   this->flagAutoUnitTest = false;
   this->flagNotAllocated = false;
-  this->flagBanProcessMonitoring = false;
   this->flagCertificatesAreOfficiallySigned = false;
   this->flagIsChildProcess = false;
   this->flagRestartNeeded = false;
@@ -120,12 +130,6 @@ GlobalVariables::GlobalVariables() {
   this->pointerCallSystemWithOutput = nullptr;
   this->pointerCallSystemNoOutput = nullptr;
   this->pointerCallChDir = nullptr;
-  this->flagReportEverything = false;
-  this->flagReportGaussianElimination = false;
-  this->flagReportLargeIntArithmetic = false;
-  this->flagReportProductsMonomialAlgebras = false;
-  this->flagReportFileIO = true;
-  this->flagOutputTimedOut = false;
   this->flagServerForkedIntoWorker = false;
   this->flagComputationCompletE = false;
   this->flagComputationFinishedAllOutputSentClosing = false;
@@ -177,8 +181,8 @@ void ProgressReport::Report(const std::string& theReport) {
   if (this->threadIndex == - 1) {
     return;
   }
-  if (theGlobalVariables.ProgressReportStringS[this->threadIndex].size > this->currentLevel) {
-    theGlobalVariables.ProgressReportStringS[this->threadIndex][this->currentLevel] = theReport;
+  if (theGlobalVariables.progressReportStrings[this->threadIndex].size > this->currentLevel) {
+    theGlobalVariables.progressReportStrings[this->threadIndex][this->currentLevel] = theReport;
     theGlobalVariables.MakeReport();
   }
 }
@@ -192,8 +196,8 @@ void ProgressReport::init() {
   if (this->threadIndex == - 1) {
     return;
   }
-  this->currentLevel = theGlobalVariables.ProgressReportStringS[this->threadIndex].size;
-  theGlobalVariables.ProgressReportStringS[this->threadIndex].AddOnTop(std::string(""));
+  this->currentLevel = theGlobalVariables.progressReportStrings[this->threadIndex].size;
+  theGlobalVariables.progressReportStrings[this->threadIndex].AddOnTop(std::string(""));
 }
 
 ProgressReport::~ProgressReport() {
@@ -207,7 +211,7 @@ ProgressReport::~ProgressReport() {
   if (crash.flagCrashInitiateD) {
     return;
   }
-  theGlobalVariables.ProgressReportStringS[this->threadIndex].size --;
+  theGlobalVariables.progressReportStrings[this->threadIndex].size --;
 }
 
 ProjectInformationInstance::ProjectInformationInstance(const char* fileName, const std::string& fileDescription) {

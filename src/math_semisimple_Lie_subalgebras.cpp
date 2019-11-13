@@ -34,7 +34,7 @@ void SemisimpleLieAlgebra::GenerateLieSubalgebra(
   inputOutputGenerators = inputLinIndep;
   for (int i = 0; i < inputOutputGenerators.size; i ++) {
     for (int j = i + 1; j < inputOutputGenerators.size; j ++) {
-      if (theGlobalVariables.flagReportEverything) {
+      if (theGlobalVariables.theProgress.flagReportEverything) {
         std::stringstream reportStream;
         reportStream << "Generating Lie subalgebra of a semisimple Lie algebra. "
         << "I am taking the Lie bracket of elements "
@@ -1001,7 +1001,7 @@ void SemisimpleSubalgebras::FindTheSSSubalgebrasInit() {
   if (this->owner == nullptr) {
     crash << "<hr>Owner of semisimple subalgebras is zero" << crash;
   }
-  if (theGlobalVariables.flagReportEverything) {
+  if (theGlobalVariables.theProgress.flagReportEverything) {
     this->fileNameToLogComments = "LogFileComments_" +
     HtmlRoutines::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) +
     ".html";
@@ -1249,14 +1249,14 @@ bool CandidateSSSubalgebra::CreateAndAddExtendBaseSubalgebra(
   }
   ProgressReport theReport;
   if (!this->ComputeChar(false)) {
-    if (theGlobalVariables.flagReportEverything) {
+    if (theGlobalVariables.theProgress.flagReportEverything) {
       theReport.Report("Candidate " + this->theWeylNonEmbedded->theDynkinType.ToString() + " doesn't have fitting chars.");
     }
     return false;
   }
   this->ComputeSystem(false, false);
   if (this->flagSystemProvedToHaveNoSolution) {
-    if (theGlobalVariables.flagReportEverything) {
+    if (theGlobalVariables.theProgress.flagReportEverything) {
       theReport.Report("Candidate " + this->theWeylNonEmbedded->theDynkinType.ToString() + " -> no system solution.");
     }
   }
@@ -1471,7 +1471,7 @@ void SemisimpleSubalgebras::GetHCandidates(
   ProgressReport theReport3;
   int baseRank = currentType.GetRank() - 1;
   DynkinSimpleType theSmallType = currentType.GetSmallestSimpleType();
-  if (theGlobalVariables.flagReportEverything) {
+  if (theGlobalVariables.theProgress.flagReportEverything) {
     std::stringstream reportStream;
     reportStream << "the latest root of the candidate simple component " << theSmallType.ToString();
     theReport1.Report(reportStream.str());
@@ -1482,7 +1482,7 @@ void SemisimpleSubalgebras::GetHCandidates(
   theSmallType.GetDefaultRootLengthSquared(indexNewRootInSmallType);
   outputHCandidatesScaledToActByTwo.SetSize(0);
   for (int j = 0; j < this->theSl2s.size; j ++) {
-    if (theGlobalVariables.flagReportEverything) {
+    if (theGlobalVariables.theProgress.flagReportEverything) {
       std::stringstream reportStreamX;
       reportStreamX << "Trying to realize via orbit number " << j + 1 << ".";
       if (this->theSl2s[j].LengthHsquared != desiredHScaledToActByTwoLengthSquared) {
@@ -1500,7 +1500,7 @@ void SemisimpleSubalgebras::GetHCandidates(
     }
     if (baseRank == 0) {
       outputHCandidatesScaledToActByTwo.AddOnTop(this->theSl2s[j].theH.GetCartanPart());
-      if (theGlobalVariables.flagReportEverything) {
+      if (theGlobalVariables.theProgress.flagReportEverything) {
         std::stringstream out;
         out << "Orbit of " << this->theSl2s[j].theH.GetCartanPart().ToString()
         << " not generated because that is the very first H element selected.";
@@ -1513,7 +1513,7 @@ void SemisimpleSubalgebras::GetHCandidates(
     do {
       currentCandidate = currentOrbit.GetCurrentElement();
       if (newCandidate.IsGoodHnewActingByTwo(currentCandidate, currentRootInjection)) {
-        if (theGlobalVariables.flagReportEverything) {
+        if (theGlobalVariables.theProgress.flagReportEverything) {
           std::stringstream out2, out3;
           out3 << "So far, found " << outputHCandidatesScaledToActByTwo.size + 1 << " good candidates. ";
           theReport2.Report(out3.str());
@@ -1523,7 +1523,7 @@ void SemisimpleSubalgebras::GetHCandidates(
         }
         outputHCandidatesScaledToActByTwo.AddOnTop(currentOrbit.GetCurrentElement());
       } else {
-        if (theGlobalVariables.flagReportEverything) {
+        if (theGlobalVariables.theProgress.flagReportEverything) {
           std::stringstream out2;
           out2 << "sl(2) orbit " << j + 1 << ". " << currentOrbit.ToString()
           << "\n<br>Current element is not a valid candidate. ";
@@ -1852,7 +1852,7 @@ bool SemisimpleSubalgebras::ComputeCurrentHCandidates() {
     return true;
   }
   ProgressReport theReport0, theReport1;
-  if (theGlobalVariables.flagReportEverything) {
+  if (theGlobalVariables.theProgress.flagReportEverything) {
     std::stringstream reportStream;
     reportStream << " Finding h-candidates for extension of "
     << this->baseSubalgebra().theWeylNonEmbedded->theDynkinType.ToString()
@@ -1879,7 +1879,7 @@ bool SemisimpleSubalgebras::ComputeCurrentHCandidates() {
       }
     }
     if (indicesModulesNewComponentExtensionMod.size == 0) {
-      if (theGlobalVariables.flagReportEverything) {
+      if (theGlobalVariables.theProgress.flagReportEverything) {
         std::stringstream reportStream;
         reportStream << " Extension " << typeIndex + 1
         << " out of " << this->currentPossibleLargerDynkinTypes[stackIndex].size
@@ -2892,7 +2892,7 @@ void CandidateSSSubalgebra::ComputePairKweightElementAndModule(
   }
   for (int j = 0; j < rightModule.size; j ++) {
     this->GetAmbientSS().LieBracket(leftKweightElt, rightModule[j], theLieBracket);
-    if (theGlobalVariables.flagReportEverything) {
+    if (theGlobalVariables.theProgress.flagReportEverything) {
       std::stringstream reportStream;
       reportStream << "Bracketing index " << j + 1 << " with input element. ";
       theReport.Report(reportStream.str());
@@ -2918,7 +2918,7 @@ void CandidateSSSubalgebra::ComputeSinglePair(int leftIndex, int rightIndex, Lis
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& leftModule = this->ModulesIsotypicallyMerged[leftIndex];
   ProgressReport theReport;
   for (int i = 0; i < leftModule.size; i ++) {
-    if (theGlobalVariables.flagReportEverything) {
+    if (theGlobalVariables.theProgress.flagReportEverything) {
       std::stringstream reportStream;
       reportStream << "Bracketing element number " << i + 1 << " out of " << leftModule.size << " with other module. ";
       theReport.Report(reportStream.str());
@@ -2939,7 +2939,7 @@ void CandidateSSSubalgebra::ComputePairingTable() {
   }
   for (int i = 0; i < this->NilradicalPairingTable.size; i ++) {
     for (int j = i; j < this->NilradicalPairingTable[i].size; j ++) {
-      if (theGlobalVariables.flagReportEverything) {
+      if (theGlobalVariables.theProgress.flagReportEverything) {
         std::stringstream reportStream;
         reportStream << "Pairing indices " << i + 1 << " and " << j + 1 << " out of "
         << this->NilradicalPairingTable.size << ".";
@@ -3719,7 +3719,7 @@ void CandidateSSSubalgebra::EnumerateNilradicalsRecursively(List<int>& theSelect
     << crash;
   }
   ProgressReport theReport;
-  if (theGlobalVariables.flagReportEverything) {
+  if (theGlobalVariables.theProgress.flagReportEverything) {
     std::stringstream out;
     out << "Enumerating nilradicals: " << this->FKNilradicalCandidates.size << " found so far. ";
     theReport.Report(out.str());
@@ -4558,7 +4558,7 @@ void SltwoSubalgebras::reset(SemisimpleLieAlgebra& inputOwner) {
 void SemisimpleLieAlgebra::FindSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, SltwoSubalgebras& output) {
   MacroRegisterFunctionWithName("SemisimpleLieAlgebra::FindSl2Subalgebras");
   ProgressReport theReport0;
-  if (theGlobalVariables.flagReportEverything) {
+  if (theGlobalVariables.theProgress.flagReportEverything) {
     std::stringstream reportStream0;
     reportStream0 << "Finding sl(2)-subalgebras (and thus a full list of the nilpotent orbits) of "
     << inputOwner.theWeyl.theDynkinType.ToString();
@@ -6331,7 +6331,7 @@ void CandidateSSSubalgebra::ComputeCentralizerIsWellChosen() {
   if (this->indexMaxSSContainer != - 1) {
     centralizerTypeAlternative = this->owner->theSubalgebras.theValues[this->indexMaxSSContainer].theWeylNonEmbedded->theDynkinType;
     centralizerTypeAlternative -= this->theWeylNonEmbedded->theDynkinType;
-    if (theGlobalVariables.flagReportEverything) {
+    if (theGlobalVariables.theProgress.flagReportEverything) {
       std::stringstream reportStream;
       reportStream << "<hr>The centralizer of subalgebra of type "
       << this->theWeylNonEmbedded->theDynkinType.ToString() << " is of type "
@@ -6867,7 +6867,7 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other
   List<Vector<Rational> > conjugationCandidates;
   Vectors<Rational> currentComponent;
   ProgressReport theReport;
-  if (theGlobalVariables.flagReportEverything) {
+  if (theGlobalVariables.theProgress.flagReportEverything) {
     std::stringstream reportStream;
     reportStream << "Computing whether "
     << this->theWeylNonEmbedded->theDynkinType << " is direct summand of "
@@ -6939,7 +6939,7 @@ void SemisimpleSubalgebras::ComputePairingTablesAndFKFTtypes() {
     if (!this->flagComputePairingTable) {
       continue;
     }
-    if (theGlobalVariables.flagReportEverything) {
+    if (theGlobalVariables.theProgress.flagReportEverything) {
       std::stringstream reportStream2;
       reportStream2 << "Computing pairing table of subalgebra number " << i + 1
       << " out of " << this->theSubalgebras.theValues.size
@@ -6950,7 +6950,7 @@ void SemisimpleSubalgebras::ComputePairingTablesAndFKFTtypes() {
       continue;
     }
     currentSA.ComputePairingTable();
-    if (theGlobalVariables.flagReportEverything) {
+    if (theGlobalVariables.theProgress.flagReportEverything) {
       std::stringstream reportStream2;
       reportStream2 << "Computing pairing table of subalgebra number " << i + 1
       << " out of " << this->theSubalgebras.theValues.size

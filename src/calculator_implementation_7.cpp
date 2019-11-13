@@ -34,7 +34,7 @@ bool MathRoutines::GenerateVectorSpaceClosedWRTOperation(
   inputOutputElts[0].GaussianEliminationByRowsDeleteZeroRows(inputOutputElts);
   theType theOpResult;
   ProgressReport theReport1, theReport2;
-  bool flagDoReport = theGlobalVariables.flagReportEverything || theGlobalVariables.flagReportGaussianElimination;
+  bool flagDoReport = theGlobalVariables.theProgress.flagReportEverything || theGlobalVariables.theProgress.flagReportGaussianElimination;
   if (flagDoReport) {
     theReport1.Report("Extending vector space to closed with respect to binary operation. ");
   }
@@ -5453,7 +5453,7 @@ bool LargeIntegerUnsigned::IsPossiblyPrime(int timesToRunMillerRabin, bool tryDi
   }
   ProgressReport theReport;
   for (int i = 0; i < timesToRunMillerRabin; i ++) {
-    if (theGlobalVariables.flagReportEverything) {
+    if (theGlobalVariables.theProgress.flagReportEverything) {
       std::stringstream reportStream;
       reportStream << "Testing whether " << this->ToStringAbbreviate()
       << " is prime using Miller-Rabin test " << i + 1 << " out of "
@@ -8185,7 +8185,7 @@ bool CalculatorFunctionsGeneral::innerTestIndicator(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestIndicator");
-  if (theGlobalVariables.flagBanProcessMonitoring) {
+  if (theGlobalVariables.theProgress.flagBanProcessMonitoring) {
     std::stringstream out;
     if (
       theGlobalVariables.configuration.GetValue(

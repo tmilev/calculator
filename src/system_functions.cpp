@@ -92,8 +92,6 @@ bool TimerThreadData::HandleMaxComputationTime() {
     return false;
   }
   if (theGlobalVariables.flagComputationCompletE) {
-    //theReport2.SetStatus((std::string)"The allowed clock time has ran out, but it seems the computation is already done. "+
-    //                     (std::string)"Continuing to run (in order to wrap it up)...");
     return false;
   }
   //theReport2.SetStatus("Starting timer cycle break: computation time too long.");
@@ -152,11 +150,14 @@ bool TimerThreadData::HandleComputationTimeout() {
   if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection == nullptr) {
     return false;
   }
-  if (theGlobalVariables.flagOutputTimedOut) {
+  if (theGlobalVariables.theProgress.flagTimedOut) {
     return false;
   }
-  theGlobalVariables.flagOutputTimedOut = true;
+  theGlobalVariables.theProgress.flagTimedOut = true;
   //theReport2.SetStatus("Starting timer cycle displaying time out explanation.");
+  // Possible values for theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection:
+  // 1) nullptr
+  // 2) WebServer::OutputShowIndicatorOnTimeoutStatic
   theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection("Triggered by timer thread.");
   //theReport2.SetStatus("Starting timer cycle displaying time out indicator done, continuing timer cycle.");
   return false;

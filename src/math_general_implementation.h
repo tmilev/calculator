@@ -11,7 +11,10 @@ void Matrix<coefficient>::ComputeDeterminantOverwriteMatrix(
 ) {
   MacroRegisterFunctionWithName("Matrix::ComputeDeterminantOverwriteMatrix");
   bool doReport = false;
-  if (theGlobalVariables.flagReportEverything || theGlobalVariables.flagReportGaussianElimination) {
+  if (
+    theGlobalVariables.theProgress.flagReportEverything ||
+    theGlobalVariables.theProgress.flagReportGaussianElimination
+  ) {
     doReport = this->NumCols > 10 && this->NumRows > 10 && this->NumCols * this->NumRows >= 400;
   }
   ProgressReport theReport, theReport2;
@@ -139,7 +142,7 @@ void MathRoutines::RaiseToPower(
     }
     return;
   }
-  if (theGlobalVariables.flagReportEverything) {
+  if (theGlobalVariables.theProgress.flagReportEverything) {
     reportStream << "Raising " << theElement.ToString()
     << " to power: " << thePowerCopy;
     theReport.Report(reportStream.str());
@@ -149,7 +152,7 @@ void MathRoutines::RaiseToPower(
   while (thePowerCopy > 0) {
     counter ++;
     bool doReport = false;
-    if (theGlobalVariables.flagReportEverything) {
+    if (theGlobalVariables.theProgress.flagReportEverything) {
       if (counter > 3) {
         doReport = true;
       }
@@ -201,7 +204,8 @@ void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy(
   int totalMonPairs = 0;
   ProgressReport theReport1, theReport2;
   if (
-    theGlobalVariables.flagReportEverything || theGlobalVariables.flagReportProductsMonomialAlgebras
+    theGlobalVariables.theProgress.flagReportEverything ||
+    theGlobalVariables.theProgress.flagReportProductsMonomialAlgebras
   ) {
     totalMonPairs = other.size() * this->size();
     shouldReport = totalMonPairs > 2000 && other.size() > 10 && this->size() > 10;
@@ -274,7 +278,7 @@ void Matrix<coefficient>::GaussianEliminationEuclideanDomain(
       }
       int ExploringRow = row + 1;
       while (ExploringRow< this->NumRows) {
-        if (theGlobalVariables.flagReportEverything || theGlobalVariables.flagReportGaussianElimination) {
+        if (theGlobalVariables.theProgress.flagReportEverything || theGlobalVariables.theProgress.flagReportGaussianElimination) {
           std::stringstream out;
           out << "Pivotting on row of index " << row + 1 << " with exploring row of index "
           << ExploringRow + 1 << "; total rows: " << this->NumRows;
@@ -379,7 +383,7 @@ void Vectors<coefficient>::SelectABasisInSubspace(
   MacroRegisterFunctionWithName("Vectors::SelectABasisInSubspace");
   ProgressReport theReport;
   int theDim = input[0].size;
-  bool doProgressReport = theGlobalVariables.flagReportEverything || theGlobalVariables.flagReportGaussianElimination;
+  bool doProgressReport = theGlobalVariables.theProgress.flagReportEverything || theGlobalVariables.theProgress.flagReportGaussianElimination;
   if (doProgressReport) {
     std::stringstream reportStream;
     reportStream << "Selecting a basis of a vector space with " << input.size
@@ -438,7 +442,7 @@ bool List<Object>::ReadFromFile(std::fstream& input, int UpperLimitForDebugPurpo
   for (int i = 0; i < CappedListSize; i ++) {
     this->TheObjects[i].ReadFromFile(input);
     //<reporting_and_safepoint_duties>
-    if (theGlobalVariables.flagReportFileIO) {
+    if (theGlobalVariables.theProgress.flagReportFileIO) {
       if (ActualListSize > 30) {
         std::stringstream report;
         report << "Reading object number " << i + 1 << " out of " << ActualListSize;
@@ -462,7 +466,7 @@ template <typename coefficient>
 void Matrix<coefficient>::AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, const coefficient& scalar) {
   ProgressReport theReport;
   bool doProgressReport = false;
-  doProgressReport = theGlobalVariables.flagReportGaussianElimination || theGlobalVariables.flagReportEverything;
+  doProgressReport = theGlobalVariables.theProgress.flagReportGaussianElimination || theGlobalVariables.theProgress.flagReportEverything;
   coefficient tempElement;
   for (int i = StartColIndex; i < this->NumCols; i ++) {
     tempElement = this->elements[fromRowIndex][i];
@@ -507,7 +511,7 @@ void Matrix<coefficient>::GaussianEliminationByRows(
   if (outputPivotColumns != nullptr) {
     outputPivotColumns->init(this->NumCols);
   }
-  bool doProgressReport = theGlobalVariables.flagReportGaussianElimination || theGlobalVariables.flagReportEverything;
+  bool doProgressReport = theGlobalVariables.theProgress.flagReportGaussianElimination || theGlobalVariables.theProgress.flagReportEverything;
   bool formatAsLinearSystem = theFormat == nullptr ? false : theFormat->flagFormatMatrixAsLinearSystem;
   bool useHtmlInReport = theFormat == nullptr ? true : theFormat->flagUseHTML;
   ProgressReport theReport;

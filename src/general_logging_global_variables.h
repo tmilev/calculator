@@ -132,22 +132,27 @@ public:
   //status flags:
   bool flagComputationCompletE;
   bool flagComputationStarted;
-  bool flagOutputTimedOut;
   bool flagComputationFinishedAllOutputSentClosing;
-  bool flagBanProcessMonitoring;
   // progress report flags:
-  bool flagReportEverything;
-  bool flagReportFileIO;
-  bool flagReportLargeIntArithmetic;
-  bool flagReportGaussianElimination;
-  bool flagReportProductsMonomialAlgebras;
-
+  class Progress {
+  public:
+    bool flagBanProcessMonitoring;
+    bool flagTimedOut;
+    bool flagReportAllowed;
+    bool flagReportEverything;
+    bool flagReportFileIO;
+    bool flagReportLargeIntArithmetic;
+    bool flagReportGaussianElimination;
+    bool flagReportProductsMonomialAlgebras;
+    Progress();
+  };
+  Progress theProgress;
   MutexRecursiveWrapper infoIsInitialized;
   MutexRecursiveWrapper outputAfterTimeout;
   ListReferences<std::thread>theThreads;
   ListReferences<ThreadData> theThreadData;
   ListReferences<ListReferences<stackInfo> > CustomStackTrace;
-  ListReferences<ListReferences<std::string> > ProgressReportStringS;
+  ListReferences<ListReferences<std::string> > progressReportStrings;
   List<std::string> programArguments;
 
   MapList<std::string, std::string, MathRoutines::HashString> webArguments;

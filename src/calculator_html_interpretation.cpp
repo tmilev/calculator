@@ -801,7 +801,7 @@ void HtmlInterpretation::GetJSDataUserInfo(JSData& outputAppend, const std::stri
   if (comments != "") {
     outputAppend["comments"] = HtmlRoutines::ConvertStringToHtmlString(comments, false);
   }
-  if (!theGlobalVariables.flagBanProcessMonitoring) {
+  if (!theGlobalVariables.theProgress.flagBanProcessMonitoring) {
     outputAppend[WebAPI::UserInfo::processMonitoring] = "true";
     outputAppend[Configuration::millisecondsReplyAfterComputation] = static_cast<double>(theGlobalVariables.millisecondsReplyAfterComputation);
   } else {
@@ -995,7 +995,7 @@ JSData HtmlInterpretation::SubmitAnswersJSON(
   const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake
 ) {
   MacroRegisterFunctionWithName("HtmlInterpretation::submitAnswers");
-  theGlobalVariables.flagBanProcessMonitoring = true;
+  theGlobalVariables.theProgress.flagBanProcessMonitoring = true;
   std::stringstream output, errorStream, comments;
   JSData result;
   double startTime = theGlobalVariables.GetElapsedSeconds();
@@ -1420,7 +1420,7 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp(
   const std::string& inputRandomSeed, std::string* outputNakedAnswer, bool* outputDidSucceed
 ) {
   MacroRegisterFunctionWithName("CalculatorHTML::GetAnswerOnGiveUp");
-  theGlobalVariables.flagBanProcessMonitoring = true;
+  theGlobalVariables.theProgress.flagBanProcessMonitoring = true;
   if (outputNakedAnswer != nullptr) {
     *outputNakedAnswer = "";
   }

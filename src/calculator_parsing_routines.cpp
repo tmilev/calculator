@@ -57,7 +57,9 @@ void Calculator::reset() {
   this->NumLargeGCDcallsStart       = - 1;
   this->LastLogEvaluationTime = theGlobalVariables.GetElapsedSeconds();
   this->DepthRecursionReached = 0;
-  this->NumCallsEvaluateExpression = 0;
+  this->NumberOfEvaluateExpression = 0;
+  this->NumberOfCallsBeforeReportIsGenerated = 5000;
+  this->NumberOfCallsSinceReport = 0;
   this->flagWriteLatexPlots = false;
   this->flagLogSyntaxRules = false;
   this->flagLogEvaluatioN = false;

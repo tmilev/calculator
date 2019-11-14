@@ -470,7 +470,15 @@ bool Calculator::EvaluateExpression(
 ) {
   RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("Calculator::EvaluateExpression");
-  theCommands.NumCallsEvaluateExpression ++;
+  ProgressReport theReport;
+  theCommands.NumberOfEvaluateExpression ++;
+  theCommands.NumberOfCallsSinceReport ++;
+  if (theCommands.NumberOfCallsSinceReport >= theCommands.NumberOfCallsBeforeReportIsGenerated) {
+    theCommands.NumberOfCallsSinceReport = 0;
+    std::stringstream reportStream;
+    reportStream << "Evaluating: " << input.ToString();
+    theReport.Report(reportStream.str());
+  }
   if (theCommands.flagLogFullTreeCrunching && theCommands.RecursionDeptH < 3) {
     theCommands << "<br>";
     for (int i = 0; i < theCommands.RecursionDeptH; i ++) {
@@ -594,7 +602,6 @@ bool Calculator::EvaluateExpression(
     //////------End of handling naughty expressions------
     //bool foundError = false;
     /////-------Children evaluation-------
-    ProgressReport theReport;
     bool HistoryShouldBeRecorded = false;
     int historyStackSizeAtStart = - 1;
     if (doExpressionHistory) {
@@ -608,7 +615,7 @@ bool Calculator::EvaluateExpression(
         }
       }
       for (int i = 0; i < output.size() && !theCommands.flagAbortComputationASAP; i ++) {
-        if (i > 0 && output.StartsWith(theCommands.opEndStatement())) {
+        if (i > 0) {
           if (doReportEvalRules) {
             std::stringstream reportStream;
             reportStream << "Substitution rules so far:";

@@ -1072,7 +1072,9 @@ public:
   int MaxRuleStacksCached;
   int NumErrors;
   int RuleStackCacheIndex;
-  int NumCallsEvaluateExpression;
+  int NumberOfEvaluateExpression;
+  int NumberOfCallsSinceReport;
+  int NumberOfCallsBeforeReportIsGenerated;
   ///////////////////////////////////////////////////////////////////////////
   bool flagAbortComputationASAP;
   bool flagTimeLimitErrorDetected;

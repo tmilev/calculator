@@ -40,7 +40,7 @@ ProblemCollection.prototype.resetTopicProblems = function() {
 
 /** @returns{Problem} */
 ProblemCollection.prototype.CreateOrUpdateProblem = function(problemData) {
-  /**ProblemId is percent encoded, safe to embed in html. */
+  // theProblemId is percent encoded, safe to embed in html.
   var theProblemId = encodeURIComponent(problemData.id);
   var currentProblem = this.getProblemByIdOrRegisterEmpty(theProblemId, "");
   currentProblem.initializeInfo(problemData, null);
@@ -52,19 +52,13 @@ ProblemCollection.prototype.getProblemByIdOrRegisterEmpty = function(
 ) {
   if (!(label in this.allProblems)) {
     var incoming = new Problem();
-    incoming.problemId = label;
-    incoming.fileName = fileName;
-    if (incoming.fileName === null || incoming.fileName === undefined) {
-      incoming.fileName = "";
-    }  
+    incoming.initializeBasic({
+      id: label,
+      fileName: fileName
+    }); 
     this.allProblems[label] = incoming;
   }
   return this.allProblems[label];
-}
-
-ProblemCollection.prototype.registerProblemInCurrentTopicList = function(input) {
-  this.CreateOrUpdateProblem(input);
-  console.log("implement me");
 }
 
 function selectCurrentProblem(problemIdURLed, exerciseType) {
@@ -99,6 +93,9 @@ Problem.prototype.initializeBasic = function(problemData) {
   if (this.fileName === undefined || this.fileName === null) {
     this.fileName = "";
   }
+  var currentCourse = window.calculator.mainPage.storage.variables.currentCourse;
+  this.flagForReal = (currentCourse.exerciseType.getValue() !== pathnames.urlFields.exerciseJSON);
+  this.randomSeed = currentCourse.randomSeed.getValue();  
 }
 
 Problem.prototype.initializeInfo = function(problemData, inputParentIdURLed) {
@@ -106,9 +103,8 @@ Problem.prototype.initializeInfo = function(problemData, inputParentIdURLed) {
   this.decodedProblem = "";
   this.commentsProblem = "";
   this.parentIdURLed = inputParentIdURLed;
-  this.randomSeed = null;
+  
   this.problemLabel = "";
-  this.flagForReal = true;
   this.previousProblemId = null;
   this.nextProblemId = null;
   this.scriptIds = null;
@@ -228,10 +224,6 @@ Problem.prototype.initializeProblemContent = function(problemData) {
     });
   }
   this.writeToHTML(ids.domElements.problemPageContentContainer);
-  var problemLinkWithRandomSeed = document.getElementById(ids.domElements.spanProblemLinkWithRandomSeed);
-  if (problemLinkWithRandomSeed !== null) {
-    problemLinkWithRandomSeed.innerHTML = `<a href = '#${this.getAppAnchorRequestFileCourseTopics()}'>#${this.randomSeed}</a>`;
-  }
   this.scriptIds = [];
   for (var scriptLabel in problemData.scripts) {
     var newLabel = encodeURIComponent(this.problemId + "_" + scriptLabel);
@@ -290,7 +282,7 @@ Problem.prototype.getCalculatorURLFileCourseTopics = function() {
   var result = "";
   result += `fileName=${this.fileName}&`;
   result += `courseHome=${thePage.storage.variables.currentCourse.courseHome.getValue()}&`;
-  result += `topicList=${thePage.storage.variables.currentCourse.topicList.getValue()}&`;
+  result += `topicList=${thePage.storage.variables.currentCourse.topicList.getValue()}`;
   return result;
 }
 
@@ -304,8 +296,11 @@ Problem.prototype.getCalculatorURLRequestFileCourseTopics = function(isScoredQui
     result += pathnames.urlFields.scoredQuizJSON;
   } else {
     result += pathnames.urlFields.exerciseJSON;
+    if (this.randomSeed !== null && this.randomSeed !== "" && this.randomSeed !== undefined) {
+      result += `&${pathnames.urlFields.randomSeed}=${this.randomSeed}`;
+    }
   }
-  result += `&${this.getCalculatorURLFileCourseTopics()}`;
+  result += `&${this.getCalculatorURLFileCourseTopics()}&`;
   return result;
 }
 
@@ -352,9 +347,9 @@ Problem.prototype.getProblemNavigationContent = function() {
     var nextURL = nextProblem.getAppAnchorRequestFileCourseTopics();
     result += `<a class = '${linkType}' href = '#${nextURL}' onclick = "window.calculator.problemPage.selectCurrentProblem('${this.nextProblemId}', '${defaultRequest}')">&#8594;</a>`;
   }
-  
   if (this.flagForReal !== true && this.flagForReal !== "true") {
-    result += `<b style = 'color:green'>Scores not recorded. </b> <span id = "${ids.domElements.spanProblemLinkWithRandomSeed}"></span>`;
+    result += `<b style = 'color:green'>Scores not recorded. </b>`;
+    result += ` <span id = "${ids.domElements.spanProblemLinkWithRandomSeed}"><a href = '#${this.getAppAnchorRequestFileCourseTopics()}'>#${this.randomSeed}</a></span>`;
   } else {
     result += `<b style = 'color:brown'>Scores are recorded. </b>`;
   }
@@ -1106,7 +1101,7 @@ function updateProblemPage() {
   }
   var theURL;
   if (theProblem !== undefined && theProblem !== null) { 
-    theURL = `${pathnames.urls.calculatorAPI}?${theProblem.getCalculatorURLRequestFileCourseTopics()}`;
+    theURL = `${pathnames.urls.calculatorAPI}?${theProblem.getCalculatorURLRequestFileCourseTopics(theProblem.flagForReal)}`;
   } else {
     var fileName = thePage.storage.variables.currentCourse.fileName.getValue();
     if (fileName === "" || fileName === undefined || fileName === null) {

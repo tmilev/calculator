@@ -263,7 +263,11 @@ function StorageCalculator() {
       randomSeed: new StorageVariable({
         name: "randomSeed",
         nameURL: "randomSeed",
-      })
+        // Since this variable has no local storage outside of the URL, 
+        // to avoid wiping the variable while normalizing the URL, 
+        // we need to keep it displayed there by default.
+        showInURLOnPages: pageNamesOnWhichToShowProblemURLs,
+      }),
     },
     flagDebug: new StorageVariable({
       name: "debugFlag", 

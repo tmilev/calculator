@@ -41,7 +41,7 @@ JSData HtmlInterpretation::GetProblemSolutionJSON() {
     return result;
   }
   if (theGlobalVariables.GetWebInput("randomSeed") == "") {
-    out << " <b>I could not figure out the exercise problem (missing random seed). </b>";
+    out << "<b>I could not figure out the exercise problem (missing random seed). </b>";
     result[WebAPI::result::resultHtml] = out.str();
     return result;
   }
@@ -1445,7 +1445,7 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp(
     return result.ToString(false);
   }
   if (inputRandomSeed == "") {
-    result[WebAPI::result::error] = " <b>I could not figure out the exercise problem (missing random seed). </b>";
+    result[WebAPI::result::error] = "<b>I could not figure out the exercise problem (missing random seed). </b>";
     return result.ToString(false);
   }
   if (!theProblem.ParseHTMLPrepareCommands(&errorStream)) {

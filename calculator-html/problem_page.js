@@ -273,6 +273,7 @@ Problem.prototype.getAppAnchorRequestFileCourseTopics = function(isScoredQuiz) {
     currentPage: thePage.pages.problemPage.name,
     exerciseType: theExerciseType,
     fileName: this.fileName,
+    currentProblemId: this.problemId,
     courseHome: thePage.storage.variables.currentCourse.courseHome.getValue(),
     topicList: thePage.storage.variables.currentCourse.topicList.getValue(),
   };

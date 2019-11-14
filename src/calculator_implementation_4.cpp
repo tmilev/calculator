@@ -2489,8 +2489,8 @@ std::string Calculator::ToStringPerformance() {
   << waitingMilliseconds << " ms (~"
   << ( static_cast<double>(waitingMilliseconds) / 1000)
   << " s).";
-  moreDetails << "<br>Total expressions: " << this->theExpressionContainer.size << ". ";
-  moreDetails << "<br>Total evaluations: " << this->NumberOfEvaluateExpression << ". ";
+  moreDetails << "<br>Expressions generated: " << this->theExpressionContainer.size << ". ";
+  moreDetails << "<br>Expressions evaluated: " << this->stats.expressionEvaluated << ". ";
   moreDetails << "<br>Total number of pattern matches performed: "
   << this->TotalNumPatternMatchedPerformed << "";
   if (this->DepthRecursionReached > 0) {

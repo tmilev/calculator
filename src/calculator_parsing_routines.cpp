@@ -39,6 +39,12 @@ std::string SyntacticElement::ToStringHumanReadable(Calculator& theBoss, bool in
   return out.str();
 }
 
+Calculator::EvaluationStats::EvaluationStats() {
+  this->expressionEvaluated = 0;
+  this->maximumCallsBeforeReportGeneration = 5000;
+  this->callsSinceReport = 0;
+}
+
 void Calculator::reset() {
   this->MaxAlgTransformationsPerExpression = 100;
   this->MaxRuleStacksCached = 500;
@@ -57,9 +63,6 @@ void Calculator::reset() {
   this->NumLargeGCDcallsStart       = - 1;
   this->LastLogEvaluationTime = theGlobalVariables.GetElapsedSeconds();
   this->DepthRecursionReached = 0;
-  this->NumberOfEvaluateExpression = 0;
-  this->NumberOfCallsBeforeReportIsGenerated = 5000;
-  this->NumberOfCallsSinceReport = 0;
   this->flagWriteLatexPlots = false;
   this->flagLogSyntaxRules = false;
   this->flagLogEvaluatioN = false;

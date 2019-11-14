@@ -471,10 +471,10 @@ bool Calculator::EvaluateExpression(
   RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("Calculator::EvaluateExpression");
   ProgressReport theReport;
-  theCommands.NumberOfEvaluateExpression ++;
-  theCommands.NumberOfCallsSinceReport ++;
-  if (theCommands.NumberOfCallsSinceReport >= theCommands.NumberOfCallsBeforeReportIsGenerated) {
-    theCommands.NumberOfCallsSinceReport = 0;
+  theCommands.stats.expressionEvaluated ++;
+  theCommands.stats.callsSinceReport ++;
+  if (theCommands.stats.callsSinceReport >= theCommands.stats.maximumCallsBeforeReportGeneration) {
+    theCommands.stats.callsSinceReport = 0;
     std::stringstream reportStream;
     reportStream << "Evaluating: " << input.ToString();
     theReport.Report(reportStream.str());

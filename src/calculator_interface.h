@@ -1072,9 +1072,14 @@ public:
   int MaxRuleStacksCached;
   int NumErrors;
   int RuleStackCacheIndex;
-  int NumberOfEvaluateExpression;
-  int NumberOfCallsSinceReport;
-  int NumberOfCallsBeforeReportIsGenerated;
+  class EvaluationStats {
+  public:
+    int expressionEvaluated;
+    int callsSinceReport;
+    int maximumCallsBeforeReportGeneration;
+    EvaluationStats();
+  };
+  EvaluationStats stats;
   ///////////////////////////////////////////////////////////////////////////
   bool flagAbortComputationASAP;
   bool flagTimeLimitErrorDetected;

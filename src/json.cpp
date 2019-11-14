@@ -588,7 +588,7 @@ somestream& JSData::IntoStream(
       if (convertNonASCIIStringsToHex) {
         out << '"' << StringRoutines::ConvertStringToHexIfNonReadable(this->theString, 0, useHTML) << '"';
       } else if (!percentEncodeStrings) {
-        out << '"' << StringRoutines::ConvertStringForJSOn(this->theString) << '"';
+        out << '"' << StringRoutines::ConvertStringToJSONString(this->theString) << '"';
       } else {
         out << '"' << HtmlRoutines::ConvertStringToURLString(this->theString, false) << '"';
       }
@@ -619,7 +619,7 @@ somestream& JSData::IntoStream(
       for (int i = 0; i < this->objects.size(); i ++) {
         out << whiteSpaceInner << whiteSpaceOuter;
         if (!percentEncodeStrings) {
-          out << '"' << StringRoutines::ConvertStringForJSOn(this->objects.theKeys[i]) << '"';
+          out << '"' << StringRoutines::ConvertStringToJSONString(this->objects.theKeys[i]) << '"';
         } else {
           out << '"' << JSData::EncodeKeyForMongo(this->objects.theKeys[i]) << '"';
         }

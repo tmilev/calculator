@@ -798,6 +798,8 @@ public:
 
 //the following class is meant to use to draw plots for calculus students.
 class Plot {
+private:
+  std::string canvasNamE;
 public:
   List<PlotObject> thePlots;
   HashedList<std::string, MathRoutines::HashString> boxesThatUpdateMe;
@@ -814,16 +816,19 @@ public:
   bool flagIncludeCoordinateSystem;
   int dimension;
   static int canvasCounteR;
-  std::string canvasName;
   int priorityViewRectangle; // 0 or less: compute the view Window. If this quantity is greater than zero,
   int priorityWindow; // 0 or less: compute the view Window. If this quantity is greater than zero,
   // the user-given bounding box will overwrite any computations.
   // When adding two plots with positive viewing window priorities, the window with the larger priority is used.
   // If the priorities are equal, the windows are combined to the smallest window that fits both.
   int priorityCanvasName; // same as priorityViewWindow but with respect to canvas names.
+  void SetCanvasName(const std::string& inputName);
+  std::string GetCanvasName() const;
+
   std::string ToStringDebug();
   std::string GetPlotHtml(Calculator& owner);
   void ComputeCanvasNameIfNecessary();
+  std::string commonCanvasSetup();
   std::string GetPlotHtml3d_New(Calculator& owner);
   std::string GetPlotHtml2d_New(Calculator& owner);
   std::string GetPlotStringAddLatexCommands(bool useHtml);

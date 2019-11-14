@@ -252,7 +252,8 @@ function StorageCalculator() {
       currentProblemId: new StorageVariable({
         name: "currentProblemId",
         nameLocalStorage: "currentProblemId",
-        nameURL: "currentProblemId"
+        nameURL: "currentProblemId",
+        showInURLOnPages: pageNamesOnWhichToShowProblemURLs,
       }),
       exerciseType: new StorageVariable({
         name: "exerciseType",

@@ -751,16 +751,16 @@ bool Calculator::innerTranspose(Calculator& theCommands, const Expression& input
 
 void Plot::operator+=(const Plot& other) {
   MacroRegisterFunctionWithName("Plot::operator+=");
-  if (other.priorityCanvasName>this->priorityCanvasName) {
-    this->canvasName = other.canvasName;
-  } else if (this->canvasName == "" && this->priorityCanvasName == other.priorityCanvasName) {
-    this->canvasName = other.canvasName;
+  if (other.priorityCanvasName > this->priorityCanvasName) {
+    this->SetCanvasName(other.GetCanvasName());
+  } else if (this->GetCanvasName() == "" && this->priorityCanvasName == other.priorityCanvasName) {
+    this->SetCanvasName(other.GetCanvasName());
   }
   if (other.priorityCanvasName > this->priorityCanvasName) {
     this->priorityCanvasName = other.priorityCanvasName;
   }
   if (this->priorityCanvasName == 0) {
-    this->canvasName = "";
+    this->SetCanvasName("");
   }
   if (this->dimension == - 1) {
     this->dimension = other.dimension;
@@ -810,7 +810,7 @@ bool Plot::operator==(const Plot& other) const {
   ((this->theUpperBoundAxes - other.theUpperBoundAxes) == 0.0) &&
   this->thePlots == other.thePlots &&
   this->boxesThatUpdateMe == other.boxesThatUpdateMe &&
-  this->canvasName == other.canvasName &&
+  this->GetCanvasName() == other.GetCanvasName() &&
   this->dimension == other.dimension &&
   this->flagIncludeCoordinateSystem == other.flagIncludeCoordinateSystem;
 }
@@ -825,7 +825,7 @@ void Plot::operator+=(const PlotObject& other) {
     this->dimension = other.dimension;
   }
   this->thePlots.AddOnTop(other);
-  this->canvasName = "";
+  this->SetCanvasName("");
 }
 
 bool PlotObject::operator==(const PlotObject& other) const {
@@ -1019,6 +1019,17 @@ bool Plot::IsOKVector(const Vector<double>& input) {
   return true;
 }
 
+std::string Plot::commonCanvasSetup() {
+  std::stringstream out;
+  out
+  << "var theDrawer = window.calculator.drawing;\n"
+  << "if (document.getElementById('" << this->GetCanvasName() << "') === null) {\n"
+  << "  return;\n"
+  << "}\n"
+  << "theDrawer.deleteCanvas('" << this->GetCanvasName() << "');\n";
+  return out.str();
+}
+
 std::string Plot::GetPlotHtml3d_New(Calculator& owner) {
   MacroRegisterFunctionWithName("Plot::GetPlotHtml3d_New");
   owner.flagHasGraphics = true;
@@ -1030,7 +1041,7 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner) {
     outContent << "<canvas width =\"" << this->DesiredHtmlWidthInPixels
     << "\" height =\"" << this->DesiredHtmlHeightInPixels << "\" "
     << "style =\"border:solid 1px\" id =\""
-    << this->canvasName
+    << this->GetCanvasName()
     << "\" "
     << "onmousedown =\"window.calculator.drawing.canvasClick(this, event);\" "
     << "onmouseup =\"window.calculator.drawing.mouseUp(this);\" "
@@ -1040,12 +1051,12 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner) {
     << " onDOMMouseScroll =\"window.calculator.drawing.mouseWheel(event);\""
     << ">"
     << "Your browser does not support the HTML5 canvas tag.</canvas><br>"
-    << "<span id =\"" << this->canvasName << "Controls\"></span>"
-    << "<span id =\"" << this->canvasName << "Messages\"></span>";
+    << "<span id =\"" << this->GetCanvasName() << "Controls\"></span>"
+    << "<span id =\"" << this->GetCanvasName() << "Messages\"></span>";
   }
   outContent << "<script language =\"javascript\">\n";
-  std::string canvasFunctionName = "functionMake" + this->canvasName;
-  std::string canvasResetFunctionName = "functionReset" + this->canvasName;
+  std::string canvasFunctionName = "functionMake" + this->GetCanvasName();
+  std::string canvasResetFunctionName = "functionReset" + this->GetCanvasName();
   outScript
   << "function " << canvasResetFunctionName << "() {\n"
   << canvasFunctionName << "();\n"
@@ -1054,7 +1065,7 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner) {
   for (int i = 0; i < this->boxesThatUpdateMe.size; i ++) {
     InputBox& currentBox = owner.theObjectContainer.theUserInputTextBoxesWithValues.GetValueCreate(this->boxesThatUpdateMe[i]);
     outScript << " window.calculator.drawing.plotUpdaters['"
-    << currentBox.GetSliderName() << "'] =" << "'" << this->canvasName << "'"
+    << currentBox.GetSliderName() << "'] =" << "'" << this->GetCanvasName() << "'"
     << ";\n";
   }
   List<std::string> the3dObjects;
@@ -1063,16 +1074,15 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner) {
   for (int i = 0; i < this->thePlots.size; i ++) {
     PlotObject& currentO = this->thePlots[i];
     if (currentO.thePlotType == "surface") {
-      outScript << currentO.GetJavascriptSurfaceImmersion(the3dObjects[i], this->canvasName, funCounter) << "\n ";
+      outScript << currentO.GetJavascriptSurfaceImmersion(the3dObjects[i], this->GetCanvasName(), funCounter) << "\n ";
     }
     if (currentO.thePlotType == "parametricCurve") {
-      outScript << currentO.GetJavascriptCurveImmersionIn3d(the3dObjects[i], this->canvasName, funCounter) << "\n ";
+      outScript << currentO.GetJavascriptCurveImmersionIn3d(the3dObjects[i], this->GetCanvasName(), funCounter) << "\n ";
     }
   }
-  outScript << "var theDrawer = window.calculator.drawing;\n";
-  outScript << "theDrawer.deleteCanvas('" << this->canvasName << "');\n";
-  outScript << "var theCanvas = theDrawer.getCanvas('" << this->canvasName << "');\n"
-  << "theCanvas.init('" << this->canvasName << "');\n";
+  outScript << this->commonCanvasSetup();
+  outScript << "var theCanvas = theDrawer.getCanvas('" << this->GetCanvasName() << "');\n"
+  << "theCanvas.init('" << this->GetCanvasName() << "');\n";
   outScript << "theCanvas.canvasResetFunction = " << canvasResetFunctionName << ";\n";
   for (int i = 0; i < this->thePlots.size; i ++) {
     PlotObject& currentPlot = this->thePlots[i];
@@ -1139,8 +1149,16 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner) {
   outScript << canvasFunctionName << "();\n";
   outContent << outScript.str();
   outContent << "</script>";
-  owner.theObjectContainer.graphicsScripts.SetKeyValue(this->canvasName, outScript.str());
+  owner.theObjectContainer.graphicsScripts.SetKeyValue(this->GetCanvasName(), outScript.str());
   return outContent.str();
+}
+
+void Plot::SetCanvasName(const std::string& input) {
+  this->canvasNamE = StringRoutines::ConvertStringToJavascriptVariable(input);
+}
+
+std::string Plot::GetCanvasName() const {
+  return this->canvasNamE;
 }
 
 std::string Plot::ToStringDebug() {
@@ -1475,13 +1493,13 @@ std::string PlotObject::ToStringPointsList() {
 }
 
 void Plot::ComputeCanvasNameIfNecessary() {
-  if (this->canvasName != "") {
+  if (this->GetCanvasName() != "") {
     return;
   }
   this->canvasCounteR ++;
   std::stringstream canvasNameStream;
   canvasNameStream << "theCanvas" << this->canvasCounteR;
-  this->canvasName = canvasNameStream.str();
+  this->SetCanvasName(canvasNameStream.str());
 }
 
 std::string Plot::GetPlotHtml2d_New(Calculator& owner) {
@@ -1500,7 +1518,7 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner) {
     out << "<canvas width =\"" << this->DesiredHtmlWidthInPixels
     << "\" height =\"" << this->DesiredHtmlHeightInPixels << "\" "
     << "style =\"border:solid 1px\" id =\""
-    << this->canvasName
+    << this->GetCanvasName()
     << "\" "
     << "onmousedown =\"window.calculator.drawing.canvasClick(this, event);\" "
     << "onmouseup =\"window.calculator.drawing.mouseUp(this);\" "
@@ -1510,15 +1528,15 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner) {
     << " onDOMMouseScroll =\"window.calculator.drawing.mouseWheel(event);\""
     << ">"
     << "Your browser does not support the HTML5 canvas tag.</canvas><br>"
-    << "<span id =\"" << this->canvasName << "Controls\"></span>";
+    << "<span id =\"" << this->GetCanvasName() << "Controls\"></span>";
     if (!owner.flagPlotNoControls) {
       out << "<br>";
     }
-    out << "<span id =\"" << this->canvasName << "Messages\"></span>";
+    out << "<span id =\"" << this->GetCanvasName() << "Messages\"></span>";
   }
   std::stringstream outScript;
-  std::string canvasFunctionName = "functionMake" + this->canvasName;
-  std::string canvasResetFunctionName = "functionReset" + this->canvasName;
+  std::string canvasFunctionName = "functionMake" + this->GetCanvasName();
+  std::string canvasResetFunctionName = "functionReset" + this->GetCanvasName();
   outScript
   << "function " << canvasResetFunctionName << "() {\n"
   << canvasFunctionName << "();\n"
@@ -1529,7 +1547,7 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner) {
     InputBox& currentBox = owner.theObjectContainer.theUserInputTextBoxesWithValues.GetValueCreate(this->boxesThatUpdateMe[i]);
     outScript << "  window.calculator.drawing.plotUpdaters['"
     << currentBox.GetSliderName() << "'] ="
-    << "'" << this->canvasName << "'"
+    << "'" << this->GetCanvasName() << "'"
     << ";\n";
   }
   int funCounter = 0;
@@ -1538,22 +1556,21 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner) {
   for (int i = 0; i < this->thePlots.size; i ++) {
     PlotObject& currentPlot = this->thePlots[i];
     if (currentPlot.thePlotType == "plotFunction") {
-      outScript << currentPlot.GetJavascript2dPlot(theFnPlots[i], this->canvasName, funCounter) << "\n ";
+      outScript << currentPlot.GetJavascript2dPlot(theFnPlots[i], this->GetCanvasName(), funCounter) << "\n ";
     }
     if (currentPlot.thePlotType == "parametricCurve") {
-      outScript << currentPlot.GetJavascriptParametricCurve2D(theFnPlots[i], this->canvasName, funCounter) << "\n ";
+      outScript << currentPlot.GetJavascriptParametricCurve2D(theFnPlots[i], this->GetCanvasName(), funCounter) << "\n ";
     }
     if (currentPlot.thePlotType == "plotDirectionField") {
-      outScript << currentPlot.GetJavascriptDirectionField(theFnPlots[i], this->canvasName, funCounter) << "\n ";
+      outScript << currentPlot.GetJavascriptDirectionField(theFnPlots[i], this->GetCanvasName(), funCounter) << "\n ";
     }
     if (currentPlot.thePlotType == "points") {
-      currentPlot.GetJavascriptPoints(theFnPlots[i], this->canvasName, funCounter);
+      currentPlot.GetJavascriptPoints(theFnPlots[i], this->GetCanvasName(), funCounter);
     }
   }
-  outScript << "var drawing = window.calculator.drawing;\n";
-  outScript << "drawing.deleteCanvas('" << this->canvasName << "');\n";
-  outScript << "var theCanvas = drawing.getCanvasTwoD('" << this->canvasName << "');\n"
-  << "theCanvas.init('" << this->canvasName << "');\n";
+  outScript << this->commonCanvasSetup();
+  outScript << "var theCanvas = theDrawer.getCanvasTwoD('" << this->GetCanvasName() << "');\n"
+  << "theCanvas.init('" << this->GetCanvasName() << "');\n";
   outScript << "theCanvas.canvasResetFunction = " << canvasResetFunctionName << ";\n";
   if (owner.flagPlotNoControls) {
     outScript << "theCanvas.flagShowPerformance = false;\n";
@@ -1650,14 +1667,14 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner) {
   outScript
   << "theCanvas.redraw();\n"
   << "}\n"
-  << " var currentCanvas = window.calculator.drawing.getCanvasTwoDNullOnFailure('" << this->canvasName << "');\n"
+  << " var currentCanvas = window.calculator.drawing.getCanvasTwoDNullOnFailure('" << this->GetCanvasName() << "');\n"
   << "if (currentCanvas !== null) {\n"
   << "currentCanvas.canvasResetFunction = "
   << canvasFunctionName << ";\n"
   << canvasFunctionName << "();\n"
   << "}\n";
   //<< "console.log(\"DEBUG: Set canvas reset function to \" + "<< canvasFunctionName << ");\n"
-  owner.theObjectContainer.graphicsScripts.SetKeyValue(this->canvasName, outScript.str());
+  owner.theObjectContainer.graphicsScripts.SetKeyValue(this->GetCanvasName(), outScript.str());
   out << "<script language =\"javascript\">\n" << outScript.str() << "</script>";
   return out.str();
 }

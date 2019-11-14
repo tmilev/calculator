@@ -2473,7 +2473,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
         out << HtmlRoutines::ConvertStringToHtmlString(this->GetValue<std::string>(), false);
       }
     } else {
-      out << "\"" << StringRoutines::ConvertStringForJavascript(this->GetValue<std::string>()) << "\"";
+      out << "\"" << StringRoutines::ConvertStringToJavascriptString(this->GetValue<std::string>()) << "\"";
     }
     result = true;
   } else if (this->IsOfType<Rational>()) {

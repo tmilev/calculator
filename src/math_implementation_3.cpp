@@ -421,8 +421,8 @@ std::string HtmlRoutines::ConvertStringEscapeQuotesAndBackslashes(const std::str
   return out.str();
 }
 
-std::string StringRoutines::ConvertStringForJSOn(const std::string& input) {
-  MacroRegisterFunctionWithName("StringRoutines::ConvertStringForJSON");
+std::string StringRoutines::ConvertStringToJSONString(const std::string &input) {
+  MacroRegisterFunctionWithName("StringRoutines::ConvertStringToJSONString");
   std::stringstream out;
   for (unsigned i = 0; i < input.size(); i ++) {
     if (input[i] == '"') {
@@ -440,7 +440,21 @@ std::string StringRoutines::ConvertStringForJSOn(const std::string& input) {
   return out.str();
 }
 
-std::string StringRoutines::ConvertStringForJavascript(const std::string &input) {
+std::string StringRoutines::ConvertStringToJavascriptVariable(const std::string& input) {
+  MacroRegisterFunctionWithName("StringRoutines::ConvertStringForJavascript");
+  std::stringstream out;
+  for (unsigned i = 0; i < input.size(); i ++) {
+    if (MathRoutines::isADigit(input[i]) || MathRoutines::isALatinLetter(input[i])) {
+      out << input[i];
+    } else {
+      out << "_" << StringRoutines::ConvertByteToHex(static_cast<unsigned char>(input[i]));
+    }
+  }
+  return out.str();
+
+}
+
+std::string StringRoutines::ConvertStringToJavascriptString(const std::string& input) {
   MacroRegisterFunctionWithName("StringRoutines::ConvertStringForJavascript");
   std::stringstream out;
   for (unsigned i = 0; i < input.size(); i ++) {

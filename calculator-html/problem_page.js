@@ -86,6 +86,8 @@ function Problem() {
 }
 
 Problem.prototype.initializeBasic = function(problemData) {
+  /**ProblemId is percent encoded, safe to embed in html. */
+  this.problemId = encodeURIComponent(problemData.id);
   /**@type {string}  
    * This id is for problem navigation only, does not include the entire panel. 
   */
@@ -232,7 +234,7 @@ Problem.prototype.initializeProblemContent = function(problemData) {
   }
   this.scriptIds = [];
   for (var scriptLabel in problemData.scripts) {
-    var newLabel = encodeURIComponent(this.problemId + scriptLabel);
+    var newLabel = encodeURIComponent(this.problemId + "_" + scriptLabel);
     this.scriptIds.push(newLabel); 
     var scriptContent = decodeURIComponent(problemData.scripts[scriptLabel]);
     thePage.injectScript(newLabel, scriptContent);

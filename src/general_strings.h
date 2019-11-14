@@ -35,8 +35,9 @@ public:
   );
   static std::string ConvertByteToHex(unsigned char byte);
 
-  static std::string ConvertStringForJSOn(const std::string& input);
-  static std::string ConvertStringForJavascript(const std::string& input);
+  static std::string ConvertStringToJSONString(const std::string& input);
+  static std::string ConvertStringToJavascriptString(const std::string& input);
+  static std::string ConvertStringToJavascriptVariable(const std::string& input);
   static std::string StringTrimWhiteSpace(const std::string& inputString);
   static void SplitStringInTwo(const std::string& inputString, int firstStringSize, std::string& outputFirst, std::string& outputSecond);
   static std::string StringShortenInsertDots(const std::string& inputString, int maxNumChars);

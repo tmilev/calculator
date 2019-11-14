@@ -5770,9 +5770,11 @@ bool CalculatorFunctionsGeneral::innerPlotSetId(
   emptyPlot.priorityCanvasName = 1;
   emptyPlot.DesiredHtmlHeightInPixels = 100;
   emptyPlot.DesiredHtmlWidthInPixels = 100;
-  if (!input.IsOfType(&emptyPlot.canvasName)) {
-    emptyPlot.canvasName = input.ToString();
+  std::string incomingName;
+  if (!input.IsOfType(&incomingName)) {
+   incomingName = input.ToString();
   }
+  emptyPlot.SetCanvasName(incomingName);
   return output.AssignValue(emptyPlot, theCommands);
 }
 

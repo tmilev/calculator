@@ -9,6 +9,7 @@ const BufferCalculator = require('./buffer').BufferCalculator;
 const PanelExpandable = require('./panels').PanelExpandable;
 const mathjax = require('./mathjax-calculator-setup');
 const processMonitoring = require('./process_monitoring');
+const initializeButtons = require('./initialize_buttons');
 
 function Calculator() {
   this.parsedComputation = {};
@@ -363,9 +364,14 @@ Calculator.prototype.submitComputationPartTwo = function(input) {
   //<- this function is called by a callback trigerred when calling 
   //thePage.storage.variables.calculator.input.setAndStore(...)
   var thePage = window.calculator.mainPage;
-  var stringifiedHash = thePage.storage.getCleanedUpURL(thePage.storage.urlObject);
+  var urlCopy = Object.assign({}, thePage.storage.urlObject);
+  urlCopy.inputFocus = true;
+  var stringifiedHash = thePage.storage.getCleanedUpURL(urlCopy);
   document.getElementById("spanComputationLink").innerHTML = `<a href = '#${stringifiedHash}'>Link to your input</a>`;
-
+  setTimeout(() => {
+    console.log("DEBUG: executing mq help calculator. ");
+    initializeButtons.calculatorPanel.mQHelpCalculator();
+  }, 0);
   var url = pathnames.urls.calculatorAPI;
   var parameters = this.getQueryStringSubmitStringAsMainInput(input, pathnames.urlFields.calculatorCompute);
   submitRequests.submitPOST ({

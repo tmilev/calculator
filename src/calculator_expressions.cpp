@@ -1054,8 +1054,9 @@ bool Expression::CheckConsistency() const {
   // warning: do not use ToString method from here: ToString itself calls CheckConosistency,
   // so that causes an "infinite" recursion call cycle,
   // i.e., stack overflow.
-  if (this->flagDeallocated)
+  if (this->flagDeallocated) {
     crash << "Use after free of Expression. " << crash;
+  }
   this->CheckInitialization();
   if (this->children.size == 0) {
     return false;

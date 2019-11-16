@@ -179,6 +179,7 @@ public:
   class Test {
   public:
     static bool Sha256();
+    static bool All();
   };
   static bool LoadKnownCertificates(
     std::stringstream* commentsOnFailure,

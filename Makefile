@@ -157,6 +157,7 @@ SOURCES_RELATIVE_PATH=\
     math_graph.cpp \
     math_hard_coded_data.cpp \
     math_implementation_1.cpp \
+    math_implementation_1_test.cpp \
     math_implementation_2.cpp \
     math_implementation_3.cpp \
     math_implementation_4.cpp \
@@ -171,6 +172,7 @@ SOURCES_RELATIVE_PATH=\
     symmetric_groups_and_generalizations.cpp \
     system_functions.cpp \
     test.cpp \
+    test_old.cpp \
     transport_layer_security.cpp \
     transport_layer_security_implementation.cpp \
     transport_layer_security_openssl.cpp \

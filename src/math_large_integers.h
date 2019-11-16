@@ -42,7 +42,9 @@ public:
   }
   class Test {
     public:
+    static bool All();
     static bool SerializationToHex(const LargeIntegerUnsigned& input);
+    static bool SerializationToHex();
   };
   void PadWithZeroesToAtLeastNDigits(int desiredMinNumDigits);
   void AddLargeIntUnsignedShiftedTimesDigit(const LargeIntegerUnsigned& other, int digitShift, int theConst);

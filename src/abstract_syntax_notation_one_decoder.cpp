@@ -1062,111 +1062,112 @@ MapList<std::string, ASNObject, MathRoutines::HashString>& ASNObject::NamesToObj
   static MapList<std::string, ASNObject, MathRoutines::HashString> container;
   // Object ids of some hash functions are given in RFC4055.
   // Object ids of hash functions may be deduced from [Page 42, RFC 3447]
-  if (container.size() == 0) {
-    ASNObject::initializeAddSample(
-      container,
-      ASNObject::names::sha1,
-      "2b0e03021a",
-      AbstractSyntaxNotationOneSubsetDecoder::tags::null0x05
-    );
-    ASNObject::initializeAddSample(
-      container,
-      ASNObject::names::sha256,
-      "608648016503040201",
-      AbstractSyntaxNotationOneSubsetDecoder::tags::null0x05
-    );
-    ASNObject::initializeAddSample(
-      container,
-      ASNObject::names::sha384,
-      "608648016503040202",
-      AbstractSyntaxNotationOneSubsetDecoder::tags::null0x05
-    );
-    ASNObject::initializeAddSample(
-      container,
-      ASNObject::names::sha512,
-      "608648016503040203",
-      AbstractSyntaxNotationOneSubsetDecoder::tags::null0x05
-    );
+  if (container.size() != 0) {
+    return container;
+  }
+  ASNObject::initializeAddSample(
+    container,
+    ASNObject::names::sha1,
+    "2b0e03021a",
+    AbstractSyntaxNotationOneSubsetDecoder::tags::null0x05
+  );
+  ASNObject::initializeAddSample(
+    container,
+    ASNObject::names::sha256,
+    "608648016503040201",
+    AbstractSyntaxNotationOneSubsetDecoder::tags::null0x05
+  );
+  ASNObject::initializeAddSample(
+    container,
+    ASNObject::names::sha384,
+    "608648016503040202",
+    AbstractSyntaxNotationOneSubsetDecoder::tags::null0x05
+  );
+  ASNObject::initializeAddSample(
+    container,
+    ASNObject::names::sha512,
+    "608648016503040203",
+    AbstractSyntaxNotationOneSubsetDecoder::tags::null0x05
+  );
 
 
-    ASNObject::initializeAddSample(
-      container,
-      ASNObject::names::sha256WithRSAEncryption ,
-      "2a864886f70d01010b",
-      AbstractSyntaxNotationOneSubsetDecoder::tags::null0x05
-    );
-    ASNObject::initializeAddSample(
-      container,
-      ASNObject::names::RSAEncryption ,
-      "2a864886f70d010101",
-      AbstractSyntaxNotationOneSubsetDecoder::tags::null0x05
-    );
-    ASNObject::initializeAddSample(
-      container,
-      ASNObject::names::countryName,
-      "550406",
-      AbstractSyntaxNotationOneSubsetDecoder::tags::printableString0x13
-    );
-    ASNObject::initializeAddSample(
-      container,
-      ASNObject::names::stateOrProvinceName,
-      "550408",
-      AbstractSyntaxNotationOneSubsetDecoder::tags::utf8String0x0c
-    );
-    ASNObject::initializeAddSample(
-      container,
-      ASNObject::names::localityName,
-      "550407",
-      AbstractSyntaxNotationOneSubsetDecoder::tags::utf8String0x0c
-    );
-    ASNObject::initializeAddSample(
-      container,
-      ASNObject::names::organizationName,
-      "55040a",
-      AbstractSyntaxNotationOneSubsetDecoder::tags::utf8String0x0c
-    );
-    ASNObject::initializeAddSample(
-      container,
-      ASNObject::names::organizationalUnitName,
-      "55040b",
-      AbstractSyntaxNotationOneSubsetDecoder::tags::utf8String0x0c
-    );
-    ASNObject::initializeAddSample(
-      container,
-      ASNObject::names::commonName,
-      "550403",
-      AbstractSyntaxNotationOneSubsetDecoder::tags::utf8String0x0c
-    );
-    ASNObject::initializeAddSample(
-      container,
-      ASNObject::names::emailAddress,
-      "2a864886f70d010901",
-      AbstractSyntaxNotationOneSubsetDecoder::tags::utf8String0x0c
-    );
-    ASNObject::initializeAddSample(
-      container,
-      ASNObject::names::subjectKeyIdentifier,
-      "551d0e",
-      AbstractSyntaxNotationOneSubsetDecoder::tags::octetString0x04
-    );
-    ASNObject::initializeAddSample(
-      container,
-      ASNObject::names::authorityKeyIdentifier,
-      "551d23",
-      AbstractSyntaxNotationOneSubsetDecoder::tags::octetString0x04
-    );
-    ASNObject::initializeAddSample(
-      container,
-      ASNObject::names::basicConstraints,
-      "551d13",
-      AbstractSyntaxNotationOneSubsetDecoder::tags::boolean0x01
-    );
-    MapList<List<unsigned char>, ASNObject, MathRoutines::HashListUnsignedChars>& reverseMap =
-    ASNObject::ObjectIdsToNames();
-    for (int i = 0; i < container.theValues.size; i ++) {
-      ASNObject& current = container.theValues[i];
-      reverseMap.SetKeyValue(current.objectId.ASNAtom, current);
-    }
+  ASNObject::initializeAddSample(
+    container,
+    ASNObject::names::sha256WithRSAEncryption ,
+    "2a864886f70d01010b",
+    AbstractSyntaxNotationOneSubsetDecoder::tags::null0x05
+  );
+  ASNObject::initializeAddSample(
+    container,
+    ASNObject::names::RSAEncryption ,
+    "2a864886f70d010101",
+    AbstractSyntaxNotationOneSubsetDecoder::tags::null0x05
+  );
+  ASNObject::initializeAddSample(
+    container,
+    ASNObject::names::countryName,
+    "550406",
+    AbstractSyntaxNotationOneSubsetDecoder::tags::printableString0x13
+  );
+  ASNObject::initializeAddSample(
+    container,
+    ASNObject::names::stateOrProvinceName,
+    "550408",
+    AbstractSyntaxNotationOneSubsetDecoder::tags::utf8String0x0c
+  );
+  ASNObject::initializeAddSample(
+    container,
+    ASNObject::names::localityName,
+    "550407",
+    AbstractSyntaxNotationOneSubsetDecoder::tags::utf8String0x0c
+  );
+  ASNObject::initializeAddSample(
+    container,
+    ASNObject::names::organizationName,
+    "55040a",
+    AbstractSyntaxNotationOneSubsetDecoder::tags::utf8String0x0c
+  );
+  ASNObject::initializeAddSample(
+    container,
+    ASNObject::names::organizationalUnitName,
+    "55040b",
+    AbstractSyntaxNotationOneSubsetDecoder::tags::utf8String0x0c
+  );
+  ASNObject::initializeAddSample(
+    container,
+    ASNObject::names::commonName,
+    "550403",
+    AbstractSyntaxNotationOneSubsetDecoder::tags::utf8String0x0c
+  );
+  ASNObject::initializeAddSample(
+    container,
+    ASNObject::names::emailAddress,
+    "2a864886f70d010901",
+    AbstractSyntaxNotationOneSubsetDecoder::tags::utf8String0x0c
+  );
+  ASNObject::initializeAddSample(
+    container,
+    ASNObject::names::subjectKeyIdentifier,
+    "551d0e",
+    AbstractSyntaxNotationOneSubsetDecoder::tags::octetString0x04
+  );
+  ASNObject::initializeAddSample(
+    container,
+    ASNObject::names::authorityKeyIdentifier,
+    "551d23",
+    AbstractSyntaxNotationOneSubsetDecoder::tags::octetString0x04
+  );
+  ASNObject::initializeAddSample(
+    container,
+    ASNObject::names::basicConstraints,
+    "551d13",
+    AbstractSyntaxNotationOneSubsetDecoder::tags::boolean0x01
+  );
+  MapList<List<unsigned char>, ASNObject, MathRoutines::HashListUnsignedChars>& reverseMap =
+  ASNObject::ObjectIdsToNames();
+  for (int i = 0; i < container.theValues.size; i ++) {
+    ASNObject& current = container.theValues[i];
+    reverseMap.SetKeyValue(current.objectId.ASNAtom, current);
   }
   return container;
 }
@@ -1282,7 +1283,7 @@ bool ASNObject::LoadFromASN(
   }
   if (!ASNObject::ObjectIdsToNames().Contains(this->objectId.ASNAtom)) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Unrecognized object id. ";
+      *commentsOnFailure << "Unrecognized object id. " << "Total known ids: " << ASNObject::ObjectIdsToNames().theKeys.size;
     }
     return false;
   }
@@ -1867,6 +1868,7 @@ bool X509Certificate::LoadFromPEMFile(const std::string& input, std::stringstrea
     }
     return false;
   }
+  std::cout << "DEBUG: Loaded pem file, " << certificateContent.size() << " bytes.";
   return this->LoadFromPEM(certificateContent, commentsOnFailure);
 }
 
@@ -2108,6 +2110,7 @@ bool TBSCertificateInfo::Load(const ASNElement& input, std::stringstream* commen
 bool X509Certificate::LoadFromASNEncoded(
   const List<unsigned char>& input, std::stringstream* commentsOnFailure
 ) {
+  MacroRegisterFunctionWithName("X509Certificate::LoadFromASNEncoded");
   AbstractSyntaxNotationOneSubsetDecoder theDecoder;
   if (!theDecoder.Decode(input, 0, this->sourceASN, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {

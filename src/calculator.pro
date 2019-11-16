@@ -872,5 +872,7 @@ SOURCES += \
     web-routines-1.cpp \
     webserver.cpp \
     webserver_fork.cpp \
-    calculator_expressions_test.cpp
+    calculator_expressions_test.cpp \
+    test_old.cpp \
+    math_implementation_1_test.cpp
 

@@ -110,7 +110,8 @@ bool X509Certificate::Test::LoadFromPEMFile() {
   std::stringstream commentsOnFailure;
   X509Certificate theCertificate;
   if (!theCertificate.LoadFromPEMFile(fileName, &commentsOnFailure)) {
-    crash << "Failed to load built-in test certificate file. " << crash;
+    crash << "Failed to load built-in test certificate file. "
+    << commentsOnFailure.str() << crash;
   }
   return true;
 }

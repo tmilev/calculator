@@ -389,6 +389,7 @@ public:
   class Test {
   public:
     static std::string sampleClientHelloHex;
+    static bool RunAll();
     static bool Serialization();
     static bool SerializationClientHello(TransportLayerSecurityServer& testServer);
   };

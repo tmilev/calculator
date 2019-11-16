@@ -537,28 +537,7 @@ bool CalculatorFunctionsGeneral::innerIntegerToHex(Calculator& theCommands, cons
     return theCommands << "Failed to convert " << theLI
     << " to a hex string. ";
   }
-  if (theGlobalVariables.flagAutoUnitTest) {
-    LargeIntegerUnsigned::Test::SerializationToHex(theLI.value);
-  }
   return output.AssignValue(result, theCommands);
-}
-
-bool LargeIntegerUnsigned::Test::SerializationToHex(const LargeIntegerUnsigned& input) {
-  MacroRegisterFunctionWithName("LargeIntUnsigned::Test::SerializationToHex");
-  std::string resultCryptoHex, resultByteSerializationHex;
-  if (!Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst(input, 0, resultCryptoHex)) {
-    crash << "Function Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst is not supposed to return false. " << crash;
-  }
-  List<unsigned char> serialization;
-  input.WriteBigEndianBytes(serialization, true);
-  resultByteSerializationHex = Crypto::ConvertListUnsignedCharsToHex(serialization);
-  if (resultByteSerializationHex != resultCryptoHex) {
-    crash << "Byte serialization hex: " << resultByteSerializationHex
-    << " not equal to crypto hex conversion: "
-    << resultCryptoHex << ". "
-    << crash;
-  }
-  return true;
 }
 
 bool CalculatorFunctionsGeneral::innerHexToInteger(Calculator& theCommands, const Expression& input, Expression& output) {

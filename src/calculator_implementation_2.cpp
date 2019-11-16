@@ -843,9 +843,14 @@ bool Calculator::ProcessOneExpressionOnePatternOneSub(
   return true;
 }
 
+bool Calculator::Parse(const std::string& input, Expression& output) {
+  List<SyntacticElement> syntacticSoup, syntacticStack;
+  return this->ParseAndExtractExpressions(input, output, syntacticSoup, syntacticStack, 0);
+}
+
 bool Calculator::ParseAndExtractExpressions(
-  const std::string& theInputString,
-  Expression& outputExp,
+  const std::string& input,
+  Expression& output,
   List<SyntacticElement>& outputSynSoup,
   List<SyntacticElement>& outputSynStack,
   std::string* outputSynErrors
@@ -853,8 +858,8 @@ bool Calculator::ParseAndExtractExpressions(
   MacroRegisterFunctionWithName("Calculator::ParseAndExtractExpressions");
   this->CurrentSyntacticStacK = &outputSynStack;
   this->CurrrentSyntacticSouP = &outputSynSoup;
-  this->ParseFillDictionary(theInputString);
-  bool result = this->ExtractExpressions(outputExp, outputSynErrors);
+  this->ParseFillDictionary(input);
+  bool result = this->ExtractExpressions(output, outputSynErrors);
   this->CurrentSyntacticStacK = &this->syntacticStacK;
   this->CurrrentSyntacticSouP = &this->syntacticSouP;
   return result;

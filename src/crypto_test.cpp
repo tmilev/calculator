@@ -3,6 +3,11 @@
 extern ProjectInformationInstance projectInfoCryptoFile2;
 ProjectInformationInstance projectInfoCryptoFile2(__FILE__, "Tests for crypto functions.");
 
+bool Crypto::Test::All() {
+  Crypto::Test::Sha256();
+  return true;
+}
+
 bool Crypto::Test::Sha256() {
   List<std::string> inputs;
   List<std::string> outputs;

@@ -609,8 +609,9 @@ private:
   void SubstituteRecursivelyInChildren(MapList<Expression, Expression>& theSubs);
   class Test {
   public:
-    bool innerTestExpressionToString(Calculator& theCommands, const Expression& input, Expression& output);
-    std::string testToString();
+    static bool All();
+    static bool ToStringTest();
+    static bool ToStringTestRecode(const std::string& inputHardCodedMustParse, Calculator& owner);
   };
 };
 
@@ -2432,11 +2433,15 @@ public:
   );
   void Evaluate(const std::string& theInput);
   bool ParseAndExtractExpressions(
-    const std::string& theInputString,
-    Expression& outputExp,
+    const std::string& input,
+    Expression& output,
     List<SyntacticElement>& outputSynSoup,
     List<SyntacticElement>& outputSynStack,
     std::string* outputSynErrors
+  );
+  bool Parse(
+    const std::string& input,
+    Expression& output
   );
   bool isLeftSeparator(unsigned char c);
   bool isRightSeparator(unsigned char c);

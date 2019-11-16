@@ -6,8 +6,8 @@
 #include "html_snippets.h"
 #include "general_strings.h"
 
-extern ProjectInformationInstance ProjectInfoVpf6_38LaTeXRoutines;
-ProjectInformationInstance ProjectInfoVpf6_38LaTeXRoutines(__FILE__, "LaTeX routines. ");
+extern ProjectInformationInstance ProjectInfoCalculatorLaTeXRoutines;
+ProjectInformationInstance ProjectInfoCalculatorLaTeXRoutines(__FILE__, "LaTeX routines. ");
 
 extern logger logWorker;
 

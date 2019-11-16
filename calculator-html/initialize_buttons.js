@@ -9,7 +9,26 @@ const mathjax = require('./mathjax-calculator-setup');
 var calculatorLeftPosition = 0;
 var calculatorRightPosition = 0;
 
-var keyWordsKnownToMathQuill = ['sqrt', 'frac', 'cdot', 'left', 'right', 'infty', 'otimes', 'times', 'oplus', 'pmatrix','int', 'begin', 'end'];
+var keyWordsKnownToMathQuill = [
+  'sqrt', 
+  'frac', 
+  'cdot', 
+  'left', 
+  'right', 
+  'infty', 
+  'otimes', 
+  'times', 
+  'oplus', 
+  'pmatrix',
+  'int', 
+  'begin', 
+  'end', 
+  'alpha', 
+  'pi', 
+  'beta',
+  'cup',
+  'cap',
+];
 
 var studentScoresInHomePage = [];
 var charsToSplit = ['x','y'];
@@ -531,8 +550,7 @@ InputPanelData.prototype.chopStrings = function() {
   mqCommentsSpan.innerHTML = "Equation assistant";
   document.getElementById(this.idMQSpan).style.visibility = "visible";
   var calculatorInput = document.getElementById(this.idPureLatex);
-  this.theLaTeXString = calculatorInput.value.
-  substring(calculatorLeftPosition, calculatorRightPosition + 1);
+  this.theLaTeXString = calculatorInput.value.substring(calculatorLeftPosition, calculatorRightPosition + 1);
   this.calculatorLeftString = calculatorInput.value.substring(0, calculatorLeftPosition);
   this.calculatorRightString = calculatorInput.value.substring(calculatorRightPosition + 1);
 }

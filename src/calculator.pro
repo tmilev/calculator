@@ -871,5 +871,6 @@ SOURCES += \
     transport_layer_security_test.cpp \
     web-routines-1.cpp \
     webserver.cpp \
-    webserver_fork.cpp
+    webserver_fork.cpp \
+    calculator_expressions_test.cpp
 

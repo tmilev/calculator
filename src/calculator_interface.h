@@ -607,6 +607,11 @@ private:
   bool GreaterThanNoCoeff(const Expression& other) const;
   void SubstituteRecursively(MapList<Expression, Expression>& theSubs);
   void SubstituteRecursivelyInChildren(MapList<Expression, Expression>& theSubs);
+  class Test {
+  public:
+    bool innerTestExpressionToString(Calculator& theCommands, const Expression& input, Expression& output);
+    std::string testToString();
+  };
 };
 
 class Function {

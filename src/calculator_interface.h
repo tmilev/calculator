@@ -201,6 +201,7 @@ private:
   bool StartsWithFunctionWithComplexRange() const;
   bool StartsWithArithmeticOperation() const;
   bool StartsWith(int theOp = - 1, int N = - 1) const;
+
   bool StartsWithGivenAtom(const std::string& theAtom, int desiredChildren = - 1) const;
   bool IsListStartingWithAtom(int theOp = - 1) const {
     if (!this->IsLisT()) {
@@ -474,6 +475,10 @@ private:
   std::string ToUTF8String(FormatExpressions* theFormat = nullptr) const;
   bool GetListExpressionsFromExpressionHistoryRecursiveNested(Expression& outputAppend) const;
   std::string ToStringExpressionHistoryRecursiveNested();
+
+  void ToStringOpTimes(std::stringstream& out, FormatExpressions* theFormat) const;
+  void ToStringOpMultiplicative(std::stringstream& out, const std::string& operation, FormatExpressions* theFormat) const;
+
   std::string ToString(
     FormatExpressions* theFormat = nullptr,
     Expression* startingExpression = nullptr,

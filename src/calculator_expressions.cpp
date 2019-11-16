@@ -3092,6 +3092,95 @@ JSData Expression::ToJSData(FormatExpressions* theFormat, const Expression& star
   return result;
 }
 
+void Expression::ToStringOpTimes(
+  std::stringstream& out, FormatExpressions *theFormat
+) const {
+  if (!this->StartsWith(this->owner->opTimes(), 3)) {
+    crash << "Bad call of tostring function. " << crash;
+  }
+  std::string secondE = (*this)[2].ToString(theFormat);
+  if ((*this)[1].IsAtomGivenData(this->owner->opSqrt())) {
+    // A malformed expression such as: "\sqrt 3" will be parsed as "sqrt * 3"
+    // and later corrected to "\sqrt{3}".
+    out << "\\sqrt{" << secondE << "}";
+    return;
+  }
+  std::string firstE = (*this)[1].ToString(theFormat);
+  bool firstNeedsBrackets = (*this)[1].NeedsParenthesisForMultiplication();
+  bool secondNeedsBrackets = (*this)[2].NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost(&((*this)[1]));
+  if (secondE.size() > 0) {
+    if (secondE[0] == '-') {
+      secondNeedsBrackets = true;
+    }
+  }
+  bool mustHaveTimes = false;
+  if (firstE == "-1" || firstE == "- 1") {
+    firstE = "-";
+    firstNeedsBrackets = false;
+  }
+  if (firstE == "1") {
+    firstE = "";
+  }
+  if (firstNeedsBrackets) {
+    out << "\\left(" << firstE << "\\right)";
+  } else {
+    out << firstE;
+  }
+  bool mustHaveSpace = true;
+  if (!firstNeedsBrackets && !secondNeedsBrackets && firstE != "" && firstE != "-") {
+    if (MathRoutines::isADigit(secondE[0])) {
+      mustHaveTimes = true;
+    }
+    if (MathRoutines::isADigit(firstE[firstE.size() - 1]) ) {
+      if (StringRoutines::StringBeginsWith(secondE, "\\frac")) {
+        mustHaveTimes = true;
+      }
+    }
+  }
+  if (firstNeedsBrackets || mustHaveTimes || firstE == "" || firstE == "-") {
+    mustHaveSpace = false;
+  }
+  if (mustHaveTimes) {
+    out << "\\cdot ";
+  } else if (mustHaveSpace) {
+    out << " ";
+  }
+  if (secondNeedsBrackets) {
+    out << "\\left(" << secondE << "\\right)";
+  } else {
+    out << secondE;
+  }
+}
+
+void Expression::ToStringOpMultiplicative(
+  std::stringstream& out,
+  const std::string& operation,
+  FormatExpressions* theFormat
+) const {
+  std::string secondE = (*this)[2].ToString(theFormat);
+  std::string firstE = (*this)[1].ToString(theFormat);
+  bool firstNeedsBrackets = (*this)[1].NeedsParenthesisForMultiplication();
+  bool secondNeedsBrackets = (*this)[2].NeedsParenthesisForMultiplication();
+  if (firstE == "- 1" || firstE == "-1") {
+    firstE = "-";
+    firstNeedsBrackets = false;
+  }
+  if (firstE == "1") {
+    firstE = "";
+  }
+  if (firstNeedsBrackets) {
+    out << "\\left(" << firstE << "\\right)";
+  } else {
+    out << firstE;
+  }
+  out << operation << " ";
+  if (secondNeedsBrackets) {
+    out << "\\left(" << secondE << "\\right)";
+  } else {
+    out << secondE;
+  }
+}
+
 std::string Expression::ToString(
   FormatExpressions* theFormat, Expression* startingExpression, bool unfoldCommandEnclosures, JSData* outputJS
 ) const {
@@ -3277,8 +3366,7 @@ std::string Expression::ToString(
       }
     }
   } else if (this->StartsWith(this->owner->opTensor(), 3)) {
-    out << (*this)[1].ToString(theFormat) << "\\otimes "
-    << (*this)[2].ToString(theFormat);
+    this->ToStringOpMultiplicative(out, "\\otimes", theFormat);
   } else if (this->StartsWith(this->owner->opIn(), 3)) {
     out << (*this)[1].ToString(theFormat) << "\\in "
     << (*this)[2].ToString(theFormat);
@@ -3312,79 +3400,9 @@ std::string Expression::ToString(
     << (*this)[2].ToString(theFormat)
     << "}";
   } else if (this->StartsWith(this->owner->opTimes(), 3)) {
-    std::string secondE = (*this)[2].ToString(theFormat);
-    if ((*this)[1].IsAtomGivenData(this->owner->opSqrt())) {
-      out << "\\sqrt{" << secondE << "}";
-    } else {
-      std::string firstE = (*this)[1].ToString(theFormat);
-      bool firstNeedsBrackets = (*this)[1].NeedsParenthesisForMultiplication();
-      bool secondNeedsBrackets = (*this)[2].NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost(&((*this)[1]));
-      if (secondE.size() > 0) {
-        if (secondE[0] == '-') {
-          secondNeedsBrackets = true;
-        }
-      }
-      bool mustHaveTimes = false;
-      if (firstE == "-1" || firstE == "- 1") {
-        firstE = "-";
-        firstNeedsBrackets = false;
-      }
-      if (firstE == "1") {
-        firstE = "";
-      }
-      if (firstNeedsBrackets) {
-        out << "\\left(" << firstE << "\\right)";
-      } else {
-        out << firstE;
-      }
-      bool mustHaveSpace = true;
-      if (!firstNeedsBrackets && !secondNeedsBrackets && firstE != "" && firstE != "-") {
-        if (MathRoutines::isADigit(secondE[0])) {
-          mustHaveTimes = true;
-        }
-        if (MathRoutines::isADigit(firstE[firstE.size() - 1]) ) {
-          if (StringRoutines::StringBeginsWith(secondE, "\\frac")) {
-            mustHaveTimes = true;
-          }
-        }
-      }
-      if (firstNeedsBrackets || mustHaveTimes || firstE == "" || firstE == "-") {
-        mustHaveSpace = false;
-      }
-      if (mustHaveTimes) {
-        out << "\\cdot ";
-      } else if (mustHaveSpace) {
-        out << " ";
-      }
-      if (secondNeedsBrackets) {
-        out << "\\left(" << secondE << "\\right)";
-      } else {
-        out << secondE;
-      }
-    }
+    this->ToStringOpTimes(out, theFormat);
   } else if (this->StartsWith(this->owner->opCrossProduct())) {
-    std::string secondE = (*this)[2].ToString(theFormat);
-    std::string firstE = (*this)[1].ToString(theFormat);
-    bool firstNeedsBrackets = (*this)[1].NeedsParenthesisForMultiplication();
-    bool secondNeedsBrackets = (*this)[2].NeedsParenthesisForMultiplication();
-    if (firstE == "- 1" || firstE == "-1") {
-      firstE = "-";
-      firstNeedsBrackets = false;
-    }
-    if (firstE == "1") {
-      firstE = "";
-    }
-    if (firstNeedsBrackets) {
-      out << "\\left(" << firstE << "\\right)";
-    } else {
-      out << firstE;
-    }
-    out << "\\times ";
-    if (secondNeedsBrackets) {
-      out << "\\left(" << secondE << "\\right)";
-    } else {
-      out << secondE;
-    }
+    this->ToStringOpMultiplicative(out, "\\times", theFormat);
   } else if (this->StartsWith(this->owner->opSqrt(), 3)) {
     int thePower = 0;
     bool hasPowerTwo = (*this)[1].IsSmallInteger(&thePower);

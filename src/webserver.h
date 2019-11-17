@@ -235,6 +235,7 @@ public:
   int WebServerPingIntervalInSeconds;
   int previousServerStatReport;
   int previousServerStatDetailedReport;
+  int processIdServer;
   long long NumFailedSelectsSoFar;
   long long NumSuccessfulSelectsSoFar;
   bool flagReapingChildren;

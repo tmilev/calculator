@@ -3248,6 +3248,7 @@ WebServer::WebServer() {
   this->NumberOfServerRequestsWithinAllConnections = 0;
   this->previousServerStatReport = 0;
   this->previousServerStatDetailedReport = 0;
+  this->processIdServer = - 1;
 }
 
 void WebServer::Signal_SIGCHLD_handler(int s) {
@@ -4241,15 +4242,16 @@ int WebServer::Run() {
   logServer         .reset();
   logSuccessfulForks.reset();
   logSuccessfulForks.flagWriteImmediately = true;
+  this->processIdServer = getpid();
   if (theGlobalVariables.flagServerAutoMonitor) {
-    int pidServer = this->Fork();
-    if (pidServer < 0) {
+    this->processIdServer = this->Fork();
+    if (this->processIdServer < 0) {
       crash << "Failed to create server process. " << crash;
     }
-    if (pidServer > 0) {
+    if (this->processIdServer > 0) {
       theGlobalVariables.processType = "serverMonitor";
       theGlobalVariables.flagIsChildProcess = true;
-      MonitorWebServer(pidServer); //<-this attempts to connect to the server over the internet and restarts if it can't.
+      MonitorWebServer(this->processIdServer); //<-this attempts to connect to the server over the internet and restarts if it can't.
       return 0;
     }
   }

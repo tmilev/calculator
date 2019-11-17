@@ -9,6 +9,8 @@
 #include <syscall.h> // <- SYS_getrandom defined here.
 #include <linux/random.h> // <- GRND_NONBLOCK defined here.
 #include <unistd.h> // <- syscall defined here.
+#include <sys/prctl.h> //<- prctl here
+#include <signal.h> // <-signals here
 
 static ProjectInformationInstance projectInfoInstanceWebServer(__FILE__, "Web server fork.");
 extern WebServer theWebServer;
@@ -70,6 +72,15 @@ int WebServer::Fork() {
     theGlobalVariables.randomBytesCurrent.SetSize(theGlobalVariables.maximumExtractedRandomBytes);
     // Forget previous random bytes, and gain a little extra entropy:
     Crypto::acquireAdditionalRandomness(millisecondsAtFork);
+
+    // Set death signal of the parent trigger death signal of the child.
+    // If the parent process was killed before the prctl executed,
+    // this will not work.
+    int success = prctl(PR_SET_PDEATHSIG, SIGKILL);
+    if (success == -1) {
+      logWorker << logger::red << "Failed to set parent death signal. " << logger::endL;
+      exit(1);
+    }
   }
   // if the result is negative, this is an error.
   return result;

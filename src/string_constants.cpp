@@ -58,6 +58,9 @@ std::string WebAPI::request::compute = "compute";
 std::string WebAPI::request::monitoring = "monitoring";
 std::string WebAPI::request::calculatorInput = "calculatorInput";
 std::string WebAPI::request::forgotLogin = "forgotLogin";
+std::string WebAPI::request::login = "login";
+std::string WebAPI::request::logout = "logout";
+std::string WebAPI::request::signUp = "signUp";
 
 std::string WebAPI::request::submitExercise = "submitExercise";
 std::string WebAPI::request::submitExerciseNoLogin = "submitExerciseNoLogin";

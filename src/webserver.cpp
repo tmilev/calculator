@@ -2573,7 +2573,7 @@ bool WebWorker::RedirectIfNeeded(std::stringstream& argumentProcessingFailureCom
     return false;
   }
   if (
-    theGlobalVariables.userCalculatorRequestType == "changePassword" ||
+    theGlobalVariables.userCalculatorRequestType == WebAPI::request::changePassword ||
     theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccountJSON
   ) {
     return false;
@@ -2812,14 +2812,14 @@ int WebWorker::ServeClient() {
     theUser.flagMustLogin
   );
   if (theUser.flagStopIfNoLogin) {
-    if (theGlobalVariables.userCalculatorRequestType == "changePassword") {
+    if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::changePassword) {
       theUser.flagStopIfNoLogin = false;
     }
   }
   if (theUser.flagStopIfNoLogin) {
     if (
-      theGlobalVariables.userCalculatorRequestType != "logout" &&
-      theGlobalVariables.userCalculatorRequestType != "login"
+      theGlobalVariables.userCalculatorRequestType != WebAPI::request::logout &&
+      theGlobalVariables.userCalculatorRequestType != WebAPI::request::login
     ) {
       argumentProcessingFailureComments << this->ToStringAddressRequest() << " requires login. ";
     }
@@ -2891,13 +2891,13 @@ int WebWorker::ServeClient() {
     return this->ProcessChangePassword(argumentProcessingFailureComments.str());
   } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccountJSON) {
     return this->ProcessActivateAccount();
-  } else if (theGlobalVariables.userCalculatorRequestType == "signUp") {
+  } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::signUp) {
     return this->ProcessSignUP();
   } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::forgotLogin) {
     return this->ProcessForgotLogin();
-  } else if (theGlobalVariables.userCalculatorRequestType == "login") {
+  } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::login) {
     return this->ProcessLoginUserInfo(comments.str());
-  } else if (theGlobalVariables.userCalculatorRequestType == "logout") {
+  } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::logout) {
     return this->ProcessLogout();
   } else if ((
       theGlobalVariables.userCalculatorRequestType == "addEmails"||

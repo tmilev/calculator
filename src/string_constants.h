@@ -37,6 +37,9 @@ public:
     static std::string compute;
     static std::string monitoring;
     static std::string calculatorInput;
+    static std::string login;
+    static std::string logout;
+    static std::string signUp;
   };
   struct result {
     static std::string resultHtml;

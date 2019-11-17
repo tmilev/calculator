@@ -12,6 +12,7 @@ function Theme() {
     "--box-shadow-tableCalculatorOutputs": "none",
     "--box-shadow-buttonPreview": "none",
     "--box-shadow-buttonDefault": "none",
+    "--box-shadow-buttonAnswer": "none",
     "--box-shadow-buttonMQ": "none",
   };
   this.themes[themeIds.radioThemeExperimental] = {
@@ -21,6 +22,7 @@ function Theme() {
     "--box-shadow-tableCalculatorOutputs": "none",
     "--box-shadow-buttonPreview": "5px 5px 5px grey",
     "--box-shadow-buttonDefault": "5px 5px 5px grey",
+    "--box-shadow-buttonAnswer": "5px 5px 5px grey",
     "--box-shadow-buttonMQ": "3px 3px 3px grey",
   };
 }

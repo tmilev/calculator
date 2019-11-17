@@ -4,6 +4,7 @@
   --box-shadow-buttonSelectPage: none;
   --box-shadow-tableCalculatorOutputs: none;
   --box-shadow-buttonPreview: none;
+  --box-shadow-buttonAnswer: none;
   --box-shadow-buttonDefault: none;
   --box-shadow-buttonMQ: none;
 }
@@ -173,13 +174,12 @@ sectionSelection {
 }
 
 .buttonAnswer {
-  -moz-border-radius: 3px;
-  -webkit-border-radius: 3px;
   border-radius: 3px;
   transition: all 2s;
   padding:3px;
   margin: 3px;
   box-shadow: none;
+  box-shadow: var(--box-shadow-buttonAnswer);
   border: none;
   color:green;
   width:60px;
@@ -191,8 +191,6 @@ sectionSelection {
 
 button.accordionLikeIndividual {
   display: inline;
-  -moz-border-radius: 3px;
-  -webkit-border-radius: 3px;
   border-radius: 3px;
   background-color: #efefef;
   padding: 2px;
@@ -418,7 +416,6 @@ span.panel.show {
 
 button.buttonToggleTopics {
   margin-top: 0px;
-  margin-bottom: 0px;
   margin-left: 5px;
   width: 20px;
   height: 23px;
@@ -427,10 +424,9 @@ button.buttonToggleTopics {
   background-color: Transparent;
   padding: 2px;
   background-color: #efefef;
-  -moz-border-radius: 3px;
-  -webkit-border-radius: 3px;
   border-radius: 3px;
   background-repeat:no-repeat;
+  box-shadow: var(--box-shadow-buttonDefault);
   border: none;
   cursor:pointer;
   overflow: hidden;

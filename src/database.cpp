@@ -1498,7 +1498,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(
   }
   if (userWrapper.enteredActivationToken != "") {
     if (
-      theGlobalVariables.userCalculatorRequestType == "changePassword" ||
+      theGlobalVariables.userCalculatorRequestType == WebAPI::request::changePassword ||
       theGlobalVariables.userCalculatorRequestType == "changePasswordPage" ||
       theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccountJSON
     ) {

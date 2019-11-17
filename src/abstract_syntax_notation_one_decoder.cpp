@@ -1868,7 +1868,6 @@ bool X509Certificate::LoadFromPEMFile(const std::string& input, std::stringstrea
     }
     return false;
   }
-  std::cout << "DEBUG: Loaded pem file, " << certificateContent.size() << " bytes.";
   return this->LoadFromPEM(certificateContent, commentsOnFailure);
 }
 

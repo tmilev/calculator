@@ -118,6 +118,7 @@ public:
     List<std::string>& outputFileNamesNoPath,
     List<std::string>* outputFileTypesWithDot = nullptr
   );
+  static std::string CleanUpForFileNameUse(const std::string& inputString);
   static std::string GetCurrentFolder();
   static std::string GetWouldBeFolderAfterHypotheticalChdirNonThreadSafe(const std::string& wouldBePath);
   static bool GetFolderFileNamesVirtual(

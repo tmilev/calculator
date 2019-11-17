@@ -322,7 +322,7 @@ int SemisimpleSubalgebras::GetDisplayIndexFromActual(int ActualIndexSubalgebra) 
 std::string SemisimpleSubalgebras::GetRelativePhysicalFileNameSubalgebra(int ActualIndexSubalgebra) const {
   std::stringstream out;
   out << this->owner->ToStringVirtualFolderName();
-  out << HtmlRoutines::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString())
+  out << FileOperations::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString())
   << "_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << ".html";
   return out.str();
 }
@@ -330,7 +330,7 @@ std::string SemisimpleSubalgebras::GetRelativePhysicalFileNameSubalgebra(int Act
 std::string SemisimpleSubalgebras::GetRelativePhysicalFileNameFKFTNilradicals(int ActualIndexSubalgebra) const {
   std::stringstream out;
   out << this->owner->ToStringVirtualFolderName();
-  out << HtmlRoutines::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString())
+  out << FileOperations::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString())
   << "_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << "_FKFTnilradicals.html";
   return out.str();
 }
@@ -339,7 +339,7 @@ std::string SemisimpleSubalgebras::GetDisplayFileNameSubalgebraAbsolute(int Actu
   std::stringstream out;
   (void) theFormat;//avoid unused parameter warning in a portable way
   out << this->owner->ToStringVirtualFolderName();
-  out << HtmlRoutines::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString())
+  out << FileOperations::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString())
   << "_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << ".html";
   return out.str();
 }
@@ -348,7 +348,7 @@ std::string SemisimpleSubalgebras::GetDisplayFileNameSubalgebraRelative(int Actu
   std::stringstream out;
   (void) theFormat;//avoid unused parameter warning in a portable way
   //out << "./";
-  out << HtmlRoutines::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString())
+  out << FileOperations::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString())
   << "_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << ".html";
   return out.str();
 }
@@ -357,7 +357,7 @@ std::string SemisimpleSubalgebras::GetDisplayFileNameFKFTNilradicals(int ActualI
   std::stringstream out;
   (void) theFormat;//avoid unused parameter warning in a portable way
   //out << this->owner->ToStringVirtualFolderName();
-  out << HtmlRoutines::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) << "_subalgebra_"
+  out << FileOperations::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) << "_subalgebra_"
   << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << "_FKFTnilradicals.html";
   return out.str();
 }
@@ -819,9 +819,9 @@ std::string SemisimpleSubalgebras::ToStringPart3(FormatExpressions* theFormat) {
     << this->ToStringProgressReport(theFormat);
   } else {
     std::string sl2SubalgebraReports = "orbit_computation_information_" +
-    HtmlRoutines::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) + ".html";
+    FileOperations::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) + ".html";
     std::string loadSubalgebrasFile = "load_algebra_" +
-    HtmlRoutines::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) + ".html";
+    FileOperations::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) + ".html";
 
     out << "<a href = '" << sl2SubalgebraReports  << "'>Nilpotent orbit computation summary</a>.";
     out << "<hr><a href = '" << loadSubalgebrasFile  << "'>Calculator input for subalgebras load</a>.";
@@ -968,13 +968,11 @@ bool SemisimpleSubalgebras::LoadState(
 
 bool SemisimpleSubalgebras::FindTheSSSubalgebrasContinue() {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::FindTheSSSubalgebrasContinue");
-  std::cout << "DEBUG: Here I am. ";
   ProgressReport theReport;
   std::stringstream reportstream;
   reportstream << "State at beginning of computation: " << this->ToStringProgressReport();
   theReport.Report(reportstream.str());
   while (this->IncrementReturnFalseIfPastLast()) {
-    std::cout << "DEBUG: Here I am. ";
     theReport.Report(this->ToStringProgressReport());
     if (!this->flagRealizedAllCandidates) {
       this->comments = this->comments + "Failed to realize all candidates, aborting computation.";
@@ -1003,7 +1001,7 @@ void SemisimpleSubalgebras::FindTheSSSubalgebrasInit() {
   }
   if (theGlobalVariables.theProgress.flagReportAlloweD) {
     this->fileNameToLogComments = "LogFileComments_" +
-    HtmlRoutines::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) +
+    FileOperations::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) +
     ".html";
     std::fstream LogFile;
     if (!FileOperations::OpenFileCreateIfNotPresentVirtual(
@@ -2017,7 +2015,7 @@ std::string SemisimpleSubalgebras::ToStringProgressReport(FormatExpressions* the
   out << this->ToStringState(theFormat);
   if (this->ToStringExpressionString != nullptr) {
     out << "\n<hr>\n" << "SetOutputFile(\"subalgebras_"
-    << HtmlRoutines::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) << "\");\n<br>\n"
+    << FileOperations::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) << "\");\n<br>\n"
     << "LoadSemisimpleSubalgebras {}" << this->ToStringExpressionString(*this);
   }
   out << "\n\n<hr>";

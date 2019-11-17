@@ -8379,24 +8379,6 @@ bool CalculatorFunctionsGeneral::innerBuildFreecalc(
   return output.AssignValue(theCrawler.displayResult.str(), theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerSetOutputFile(Calculator& theCommands, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSetOutputFile");
-  std::string theFileName;
-  std::stringstream out;
-  if (!input.IsOfType<std::string>(&theFileName)) {
-    return theCommands << "<hr>Input " << input.ToString() << " is not of type string. ";
-  }
-  for (unsigned i = 0; i < theFileName.size(); i ++) {
-    if (theFileName[i] == '.' || theFileName[i] == '\\' || theFileName[i] == '/') {
-      out << theFileName << " rejected as a file name as it contains one of the three characters .\\/  ";
-      return output.AssignValue(out.str(), theCommands);
-    }
-  }
-  theGlobalVariables.initOutputReportAndCrashFileNames(theFileName, theCommands.inputString);
-  out << "The default output filename has been changed to " << theFileName << ".";
-  return output.AssignValue(out.str(), theCommands);
-}
-
 bool CalculatorFunctionsGeneral::innerFindProductDistanceModN(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {

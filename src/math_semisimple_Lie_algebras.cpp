@@ -326,14 +326,14 @@ bool DynkinType::HasPrecomputedSubalgebras() const {
 std::string DynkinType::ToStringVirtualNameFolder() const {
   std::stringstream out;
   out << "/output/semisimple_lie_algebras/"
-  << HtmlRoutines::CleanUpForFileNameUse(this->ToString()) << "/";
+  << FileOperations::CleanUpForFileNameUse(this->ToString()) << "/";
   return out.str();
 }
 
 std::string SemisimpleLieAlgebra::ToStringFileNameRelativePathSlTwoSubalgebras() const {
   std::stringstream out;
   out << "sl2s/sl2s_"
-  << HtmlRoutines::CleanUpForFileNameUse(this->theWeyl.theDynkinType.ToString())
+  << FileOperations::CleanUpForFileNameUse(this->theWeyl.theDynkinType.ToString())
   << ".html";
   return out.str();
 }
@@ -341,7 +341,7 @@ std::string SemisimpleLieAlgebra::ToStringFileNameRelativePathSlTwoSubalgebras()
 std::string SemisimpleLieAlgebra::ToStringFileNameNoPathSemisimpleSubalgebras() const {
   std::stringstream theFileName;
   theFileName << "semisimple_subalgebras_"
-  << HtmlRoutines::CleanUpForFileNameUse(this->theWeyl.theDynkinType.ToString())
+  << FileOperations::CleanUpForFileNameUse(this->theWeyl.theDynkinType.ToString())
   << ".html";
   return theFileName.str();
 }
@@ -349,7 +349,7 @@ std::string SemisimpleLieAlgebra::ToStringFileNameNoPathSemisimpleSubalgebras() 
 std::string SemisimpleLieAlgebra::ToStringFileNameNoPathRootSubalgebras() const {
   std::stringstream theFileName;
   theFileName << "rootSubalgebras_"
-  << HtmlRoutines::CleanUpForFileNameUse(this->theWeyl.theDynkinType.ToString())
+  << FileOperations::CleanUpForFileNameUse(this->theWeyl.theDynkinType.ToString())
   << ".html";
   return theFileName.str();
 }
@@ -371,7 +371,7 @@ std::string SemisimpleLieAlgebra::ToStringVirtualFileNameWithPathStructureConsta
 std::string SemisimpleLieAlgebra::ToStringDisplayFolderName(const std::string& baseFolder) const {
   std::stringstream out;
   out << baseFolder << "output/semisimple_lie_algebras/"
-  << HtmlRoutines::CleanUpForFileNameUse(this->theWeyl.theDynkinType.ToString())
+  << FileOperations::CleanUpForFileNameUse(this->theWeyl.theDynkinType.ToString())
   << "/";
   return out.str();
 }
@@ -380,7 +380,7 @@ std::string SemisimpleLieAlgebra::ToStringFileNameNoPathStructureConstants() con
   std::stringstream theFileName;
   theFileName
   << "structure_constants_notation_"
-  << HtmlRoutines::CleanUpForFileNameUse(this->theWeyl.theDynkinType.ToString())
+  << FileOperations::CleanUpForFileNameUse(this->theWeyl.theDynkinType.ToString())
   << ".html";
   return theFileName.str();
 }

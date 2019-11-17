@@ -2691,19 +2691,6 @@ void Calculator::initPredefinedInnerFunctions() {
     "BuildSlidesInTopicList"
   );
   this->AddOperationInnerHandler(
-    "SetOutputFile",
-    CalculatorFunctionsGeneral::innerSetOutputFile,
-    "",
-    "Sets an output/progress report file different from the default one. "
-    "No dots, forward slashes, back slashes or file extensions allowed. "
-    "A .html will be appended to the output file name.",
-    "SetOutputFile(\"E7_subalgebras\"); SetOutputFile(\"/root/output.html\")",
-    true,
-    false,
-    "CalculatorFunctionsGeneral::innerSetOutputFile",
-    "SetOutputFile"
-  );
-  this->AddOperationInnerHandler(
     "EnsureExpressionDependsOnlyOn",
     CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnStandard,
     "",

@@ -234,7 +234,6 @@ public:
   static bool innerBuildFreecalcSingleSlides(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerBuildFreecalcSlidesOnTopic(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCrawlTexFile(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerSetOutputFile(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerCompareIntervalsNumerically(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntersectUnion(Calculator& theCommands, const Expression& input, Expression& output);

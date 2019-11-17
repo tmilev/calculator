@@ -182,23 +182,19 @@ public:
   std::string userInputStringRAWIfAvailable;
   std::string userInputStringIfAvailable;
 
-  std::string RelativePhysicalNameProgressReport;
-  std::string RelativePhysicalNameCrashLog;
-  std::string RelativePhysicalNameOutpuT;
+  std::string RelativePhysicalNameCrashReport;
+  std::string RelativePhysicalNameOptionalProgressReport;
+  std::string RelativePhysicalNameOptionalResult;
 
   std::string PhysicalPathProjectBase;
   std::string PhysicalPathServerBasE;
   std::string PhysicalPathHtmlFolder;
-  std::string PhysicalNameExtraOutputNoPatH;
-  std::string RelativePhysicalNameExtraOutputWithPath;
   std::string PhysicalNameFolderExecutable;
   std::string PhysicalNameExecutableNoPath;
   std::string PhysicalNameExecutableWithPath;
 
   std::string DisplayPathExecutable;
   std::string DisplayPathOutputFolder;
-  std::string DisplayNameExtraOutputNoPath;
-  std::string DisplayNameExtraOutputWithPath;
   //To contain the url of the executable.
   // Example:
   // DisplayNameExecutable ="/cgi-bin/calculator";

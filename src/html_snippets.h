@@ -106,7 +106,6 @@ public:
   static std::string clearNewLines(const std::string& theString);
   static std::string backslashQuotes(const std::string& theString);
   static std::string clearSlashes(const std::string& theString);
-  static std::string CleanUpForFileNameUse(const std::string& inputString);
   static std::string CleanUpForLaTeXLabelUse(const std::string& inputString);
   static bool IsRepresentedByItselfInURLs(char input);
   static void clearDollarSigns(std::string& theString, std::string& output);

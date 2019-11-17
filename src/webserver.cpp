@@ -853,7 +853,8 @@ void WebWorker::WriteAfterTimeoutProgressStatic(const std::string& input) {
 void WebWorker::WriteAfterTimeoutProgress(const std::string& input, bool forceFileWrite) {
   if (
     !theGlobalVariables.theProgress.flagReportAlloweD ||
-    !theGlobalVariables.theProgress.flagTimedOut
+    !theGlobalVariables.theProgress.flagTimedOut ||
+    theGlobalVariables.theProgress.flagBanProcessMonitoring
   ) {
     return;
   }
@@ -866,7 +867,7 @@ void WebWorker::WriteAfterTimeoutProgress(const std::string& input, bool forceFi
   if (this->workerToWorkerRequestIndicator.lastRead.size == 0 && !forceFileWrite) {
     return;
   }
-  this->WriteAfterTimeout(input, WebAPI::result::running);
+  this->WriteAfterTimeout(input, WebAPI::result::running, theGlobalVariables.RelativePhysicalNameOptionalProgressReport);
 }
 
 void WebWorker::WriteAfterTimeoutResult() {
@@ -875,14 +876,15 @@ void WebWorker::WriteAfterTimeoutResult() {
     theParser->ToJSONOutputAndSpecials().ToString(
       false, false, false, false
     ),
-    "finished"
+    "finished",
+    theGlobalVariables.RelativePhysicalNameOptionalResult
   );
 }
 
 void WebWorker::WriteAfterTimeoutCrash() {
   MacroRegisterFunctionWithName("WebWorker::WriteAfterTimeoutCrash");
   logWorker << logger::red << "Crashing AFTER timeout!" << logger::endL;
-  theWebServer.GetActiveWorker().WriteAfterTimeout(standardOutputStreamAfterTimeout.str(), "crash");
+  theWebServer.GetActiveWorker().WriteAfterTimeout(standardOutputStreamAfterTimeout.str(), "crash", "");
   theWebServer.SignalActiveWorkerDoneReleaseEverything();
 }
 
@@ -1512,7 +1514,11 @@ JSData WebWorker::ProcessComputationIndicatorJSData() {
   return result;
 }
 
-void WebWorker::WriteAfterTimeout(const std::string& input, const std::string& status) {
+void WebWorker::WriteAfterTimeout(
+  const std::string& input,
+  const std::string& status,
+  const std::string& fileNameCarbonCopy
+) {
   MacroRegisterFunctionWithName("WebWorker::WriteAfterTimeout");
   std::stringstream commentsOnError;
   JSData result;
@@ -1529,6 +1535,16 @@ void WebWorker::WriteAfterTimeout(const std::string& input, const std::string& s
     true,
     &commentsOnError
   );
+  if (fileNameCarbonCopy != "") {
+    std::string extraFilename = "output/";
+    extraFilename += FileOperations::CleanUpForFileNameUse(
+      fileNameCarbonCopy
+    );
+    success = FileOperations::WriteFileVirual(extraFilename, input, &commentsOnError);
+    if (!success) {
+      logWorker << logger::red << "Error writing optional file. " << commentsOnError.str() << logger::endL;
+    }
+  }
   currentWorker.writingReportFile.Unlock();
   if (success) {
     logWorker << logger::green << "Data written to file: "
@@ -4217,7 +4233,7 @@ TransportLayerSecurity& TransportLayerSecurity::DefaultTLS_READ_ONLY() {
 
 int WebServer::Run() {
   MacroRegisterFunctionWithName("WebServer::Run");
-  theGlobalVariables.RelativePhysicalNameCrashLog = "crash_WebServerRun.html";
+  theGlobalVariables.RelativePhysicalNameCrashReport = "crash_WebServerRun.html";
   WebServer::initializeRandomBytes();
 
   // <-worker log resets are needed, else forked processes reset their common log.

@@ -486,7 +486,6 @@ bool SemisimpleSubalgebras::ComputeStructureWriteFiles(
       *outputStream << "Files precomputed, serving from HD. ";
     }
   }
-  std::cout << "DEBUG: HERE I AM! " << std::endl;
   if (outputStream != nullptr) {
     *outputStream << "<br>Output file: <a href = \""
     << this->DisplayNameMainFile1WithPath << "\" target = \"_blank\">"

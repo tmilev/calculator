@@ -338,18 +338,6 @@ int HtmlRoutines::numDottedLines = 0;
 int HtmlRoutines::shiftY = - 200;
 int HtmlRoutines::scale = 100;
 
-std::string HtmlRoutines::CleanUpForFileNameUse(const std::string& inputString) {
-  std::stringstream out;
-  for (unsigned i = 0; i < inputString.size(); i ++) {
-    if (inputString[i] == '/') {
-      out << "_div_";
-    } else {
-      out << inputString[i];
-    }
-  }
-  return out.str();
-}
-
 std::string HtmlRoutines::CleanUpForLaTeXLabelUse(const std::string& inputString) {
   std::stringstream out;
   for (unsigned i = 0; i < inputString.size(); i ++) {
@@ -692,6 +680,20 @@ List<bool>& FileOperations::GetSafeFileChars() {
     }
   }
   return FileOperations::safeFileCharacters;
+}
+
+std::string FileOperations::CleanUpForFileNameUse(const std::string& inputString) {
+  std::stringstream out;
+  for (unsigned i = 0; i < inputString.size(); i ++) {
+    if (inputString[i] == '/') {
+      out << "_slash_";
+    } else if (inputString[i] == '.') {
+      out << "_dot_";
+    } else {
+      out << inputString[i];
+    }
+  }
+  return out.str();
 }
 
 bool FileOperations::IsFileNameSafeForSystemCommands(const std::string& theFileName, std::stringstream* commentsOnFailure) {

@@ -94,7 +94,7 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash) {
     std::fstream theFile;
     bool openSuccess = FileOperations::OpenFileCreateIfNotPresentVirtual(
       theFile,
-      "crashes/" + theGlobalVariables.RelativePhysicalNameCrashLog,
+      "crashes/" + theGlobalVariables.RelativePhysicalNameCrashReport,
       false,
       true,
       false,
@@ -108,13 +108,15 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash) {
       << "folder within your calculator folder. "
       << "If running remotely, you will need an ssh connection. ";
       this->crashReportConsolE << "Crash dumped in file: " << logger::consoleGreen()
-      << theGlobalVariables.RelativePhysicalNameCrashLog << logger::consoleNormal() << "\n";
+      << theGlobalVariables.RelativePhysicalNameCrashReport << logger::consoleNormal() << "\n";
     } else {
-      this->crashReportHtml << "<hr>Failed to open crash report file: " << theGlobalVariables.RelativePhysicalNameCrashLog
+      this->crashReportHtml << "<hr>Failed to open crash report file: "
+      << theGlobalVariables.RelativePhysicalNameCrashReport
       << ". Check file permissions. ";
       this->crashReportConsolE << "Failed to open crash report file: "
       << logger::consoleRed()
-      << theGlobalVariables.RelativePhysicalNameCrashLog << logger::consoleNormal() << "\n";
+      << theGlobalVariables.RelativePhysicalNameCrashReport
+      << logger::consoleNormal() << "\n";
     }
     theFile << this->crashReportFile.str();
     theFile.flush();
@@ -360,11 +362,6 @@ void GlobalVariables::initDefaultFolderAndFileNames(
   this->PhysicalPathServerBasE = this->PhysicalPathHtmlFolder;
   this->DisplayPathOutputFolder = "/output/";
 
-  this->PhysicalNameExtraOutputNoPatH = "defaultoutput";
-  this->RelativePhysicalNameExtraOutputWithPath = this->PhysicalNameExtraOutputNoPatH;
-  this->DisplayNameExtraOutputNoPath = "defaultoutput";
-  this->DisplayNameExtraOutputWithPath = this->DisplayPathOutputFolder + this->DisplayNameExtraOutputNoPath;
-
   this->DisplayNameExecutable = "/cgi-bin/" + this->PhysicalNameExecutableNoPath;
   this->DisplayNameExecutableApp = "/" + WebAPI::app;
   this->DisplayNameExecutableAppNoCache = "/" + WebAPI::appNoCache;
@@ -495,8 +492,8 @@ void GlobalVariables::initOutputReportAndCrashFileNames(
 ) {
   std::string inputAbbreviated;
   this->userInputStringIfAvailable =
-  HtmlRoutines::CleanUpForFileNameUse(
-    HtmlRoutines::ConvertStringToURLString(inputUserStringCivilized, false)
+  FileOperations::CleanUpForFileNameUse(
+    inputUserStringCivilized
   );
   if (!theGlobalVariables.flagUsingSSLinCurrentConnection) {
     this->userInputStringRAWIfAvailable = inputUserStringRAW;
@@ -506,9 +503,7 @@ void GlobalVariables::initOutputReportAndCrashFileNames(
     inputAbbreviated = this->userInputStringIfAvailable;
   }
   StringRoutines::StringTrimToLengthWithHash(inputAbbreviated, 150);
-  this->RelativePhysicalNameCrashLog = "crash_" + inputAbbreviated + ".html";
-  this->RelativePhysicalNameProgressReport = "progressReport_" + inputAbbreviated + ".html";
-  this->RelativePhysicalNameOutpuT = "output_" + inputAbbreviated + ".html";
+  this->RelativePhysicalNameCrashReport = "crash_" + inputAbbreviated + ".html";
 }
 
 void FileInformation::AddProjectInfo(const std::string& fileName, const std::string& fileDescription) {

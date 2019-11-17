@@ -836,8 +836,8 @@ std::string SemisimpleSubalgebras::ToStringPart3(FormatExpressions* theFormat) {
     << "<body>"
     << this->ToStringProgressReport(theFormat)
     << "</body></html>";
-    FileOperations::WriteFileVirual(this->owner->ToStringVirtualFolderName() + sl2SubalgebraReports, fileSl2Content.str(), nullptr);
-    FileOperations::WriteFileVirual(this->owner->ToStringVirtualFolderName() + loadSubalgebrasFile, fileLoadContent.str(), nullptr);
+    FileOperations::WriteFileVirual("output/" + sl2SubalgebraReports, fileSl2Content.str(), nullptr);
+    FileOperations::WriteFileVirual("output/" + loadSubalgebrasFile, fileLoadContent.str(), nullptr);
   }
   return out.str();
 }

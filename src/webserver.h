@@ -157,7 +157,11 @@ public:
   static void WriteAfterTimeoutProgressStatic(const std::string& input);
   void PauseIfRequested() ;
   void WriteAfterTimeoutResult();
-  static void WriteAfterTimeout(const std::string& input, const std::string& status, const std::string& fileNameCarbonCopy);
+  static void WriteAfterTimeout(
+    const std::string& input,
+    const std::string& status,
+    const std::string& fileNameCarbonCopy
+  );
   static void WriteAfterTimeoutCrash();
   void OutputShowIndicatorOnTimeout(const std::string& message);
   void GetIndicatorOnTimeout(JSData &output, const std::string& message);

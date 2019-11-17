@@ -429,6 +429,9 @@ bool Calculator::innerPrintSSSubalgebras(
     crash << "Zero pointer to semisimple Lie algebra: this shouldn't happen. " << crash;
   }
   SemisimpleLieAlgebra& ownerLieAlgebra = *ownerSSPointer;
+  std::string dynkinString = ownerSSPointer->theWeyl.theDynkinType.ToString();;
+  theGlobalVariables.RelativePhysicalNameOptionalProgressReport = "progress_subalgebras_" + dynkinString;
+  theGlobalVariables.RelativePhysicalNameOptionalResult = "result_subalgebras_" + dynkinString;
   SemisimpleSubalgebras& theSubalgebras =
   theCommands.theObjectContainer.GetSemisimpleSubalgebrasCreateIfNotPresent(ownerLieAlgebra.theWeyl.theDynkinType);
   theSubalgebras.ComputeStructureWriteFiles(

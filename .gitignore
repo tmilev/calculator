@@ -21,7 +21,7 @@ database-backups*
 
 bin/*
 
-output/*
+testFileWritePermissionsSSsas.txt
 
 results/*
 

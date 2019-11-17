@@ -8260,7 +8260,9 @@ bool CalculatorFunctionsGeneral::innerRootSAsAndSltwos(
   MacroRegisterFunctionWithName("Calculator::innerRootSAsAndSltwos");
   //bool showIndicator = true;
   SemisimpleLieAlgebra* ownerSS;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input, ownerSS)) {
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
+    CalculatorConversions::innerSSLieAlgebra, input, ownerSS
+  )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
   FormatExpressions theFormat;

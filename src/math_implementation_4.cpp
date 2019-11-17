@@ -1631,10 +1631,7 @@ void GeneralizedVermaModuleCharacters::WriteToFile(std::fstream& output) {
   this->preferredBasisChangE.WriteToFile(output);
   this->preferredBasisChangeInversE.WriteToFile(output);
   this->theExtendedIntegralLatticeMatForM.WriteToFile(output);
-  ProgressReport theReport;
-  if (theGlobalVariables.theProgress.flagReportFileIO) {
-    theReport.Report("Writing small data... ");
-  }
+  ProgressReport theReport(1, GlobalVariables::Progress::ReportType::fileInputOutput);
   this->theMaxComputation.WriteToFile(output);
   this->GmodKnegativeWeightS.WriteToFile(output);
   this->GmodKNegWeightsBasisChanged.WriteToFile(output);
@@ -1643,39 +1640,39 @@ void GeneralizedVermaModuleCharacters::WriteToFile(std::fstream& output) {
   this->PreimageWeylChamberLargerAlgebra.WriteToFile(output);
   this->PreimageWeylChamberSmallerAlgebra.WriteToFile(output);
   this->WeylChamberSmallerAlgebra.WriteToFile(output);
-  if (theGlobalVariables.theProgress.flagReportFileIO) {
+  if (theReport.TickAndWantReport()) {
     theReport.Report("Writing QP's non-subbed... ");
   }
   this->theQPsNonSubstituted.WriteToFile(output);
-  if (theGlobalVariables.theProgress.flagReportFileIO) {
+  if (theReport.TickAndWantReport()) {
     theReport.Report("Writing QP's subbed... ");
   }
   output << XML::GetOpenTagNoInputCheckAppendSpacE("QPsSubbed");
   this->theQPsSubstituted.WriteToFile(output);
   output << XML::GetCloseTagNoInputCheckAppendSpacE("QPsSubbed");
-  if (theGlobalVariables.theProgress.flagReportFileIO) {
+  if (theReport.TickAndWantReport()) {
     theReport.Report("Writing small data... ");
   }
   output << XML::GetOpenTagNoInputCheckAppendSpacE("theMultiplicities");
   this->theMultiplicities.WriteToFile(output, this->UpperLimitChambersForDebugPurposes);
   output << XML::GetCloseTagNoInputCheckAppendSpacE("theMultiplicities");
-//  this->theMultiplicitiesExtremaCandidates.WriteToFile(output);
+  //  this->theMultiplicitiesExtremaCandidates.WriteToFile(output);
   this->theCoeffs.WriteToFile(output);
   this->theTranslationS.WriteToFile(output);
   this->theTranslationsProjectedBasisChanged.WriteToFile(output);
   this->thePfs.WriteToFile(output);
-//  this->paramSubChambers.WriteToFile(output);
-//  this->nonParamVertices.WriteToFile(output);
-  if (theGlobalVariables.theProgress.flagReportFileIO) {
+  //  this->paramSubChambers.WriteToFile(output);
+  //  this->nonParamVertices.WriteToFile(output);
+  if (theReport.TickAndWantReport()) {
     theReport.Report("Writing param chamber complex... ");
   }
   this->projectivizedParamComplex.WriteToFile(output);
-  if (theGlobalVariables.theProgress.flagReportFileIO) {
+  if (theReport.TickAndWantReport()) {
     theReport.Report("Writing projectivized chamber complex... ");
   }
   this->smallerAlgebraChamber.WriteToFile(output, this->UpperLimitChambersForDebugPurposes);
   this->projectivizedChambeR.WriteToFile(output, this->UpperLimitChambersForDebugPurposes);
-  if (theGlobalVariables.theProgress.flagReportFileIO) {
+  if (theReport.TickAndWantReport()) {
     theReport.Report("Writing to file done...");
   }
   output << XML::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName());

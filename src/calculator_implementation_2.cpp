@@ -542,13 +542,6 @@ bool Calculator::EvaluateExpression(
   std::string inputIfAtom;
   outputIsNonCacheable = false;
   //////////////////////////////////
-  //std::stringstream logStream;
-  //if (logEvaluationStepsRequested)
-  //  logStream << "\\(" << output.ToString() << "\\)";
-  bool doReportEvalRules =
-  theGlobalVariables.theProgress.flagReportEverything &&
-  !theGlobalVariables.flagRunningCommandLine &&
-  !theGlobalVariables.flagRunningApache;
 
   MemorySaving<Expression> oldChild;
   bool doExpressionHistory = (theCommands.historyStack.size > 0);
@@ -616,7 +609,7 @@ bool Calculator::EvaluateExpression(
       }
       for (int i = 0; i < output.size() && !theCommands.flagAbortComputationASAP; i ++) {
         if (i > 0) {
-          if (doReportEvalRules) {
+          if (theReport.TickAndWantReport()) {
             std::stringstream reportStream;
             reportStream << "Substitution rules so far:";
             for (int j = 1; j < i; j ++) {

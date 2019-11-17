@@ -136,14 +136,19 @@ public:
   // progress report flags:
   class Progress {
   public:
+    class ReportType {
+    public:
+      static const int general = 0;
+      static const int gaussianElimination = 1;
+      static const int monomialAlgebraProduct = 2;
+      static const int fileInputOutput = 3;
+      static const int largeIntegerArithmetic = 4;
+    };
+    bool ReportAlloweD(int type = Progress::ReportType::general);
+    bool ReportBanneD();
     bool flagBanProcessMonitoring;
     bool flagTimedOut;
-    bool flagReportAllowed;
-    bool flagReportEverything;
-    bool flagReportFileIO;
-    bool flagReportLargeIntArithmetic;
-    bool flagReportGaussianElimination;
-    bool flagReportProductsMonomialAlgebras;
+    bool flagReportAlloweD;
     Progress();
   };
   Progress theProgress;

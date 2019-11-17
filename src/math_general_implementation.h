@@ -10,14 +10,9 @@ void Matrix<coefficient>::ComputeDeterminantOverwriteMatrix(
   coefficient& output, const coefficient& theRingOne, const coefficient& theRingZero
 ) {
   MacroRegisterFunctionWithName("Matrix::ComputeDeterminantOverwriteMatrix");
-  bool doReport = false;
-  if (
-    theGlobalVariables.theProgress.flagReportEverything ||
-    theGlobalVariables.theProgress.flagReportGaussianElimination
-  ) {
-    doReport = this->NumCols > 10 && this->NumRows > 10 && this->NumCols * this->NumRows >= 400;
-  }
-  ProgressReport theReport, theReport2;
+  bool doReport = this->NumCols > 10 && this->NumRows > 10 && this->NumCols * this->NumRows >= 400;
+  ProgressReport theReport(1, GlobalVariables::Progress::ReportType::gaussianElimination);
+  ProgressReport theReport2(400, GlobalVariables::Progress::ReportType::gaussianElimination);
   int tempI;
   output = theRingOne;
   coefficient tempRat;
@@ -40,15 +35,17 @@ void Matrix<coefficient>::ComputeDeterminantOverwriteMatrix(
     tempRat.Invert();
     this->RowTimesScalar(i, tempRat);
     if (doReport) {
-      std::stringstream reportStream;
-      reportStream << "Pivot row " << i + 1 << " out of " << dim << ": ";
-      for (int colCounter = 0; colCounter < this->NumCols; colCounter ++) {
-        reportStream << (*this)(i, colCounter).ToString();
-        if (colCounter != this->NumCols - 1) {
-          reportStream << ", ";
+      if (theReport.TickAndWantReport()) {
+        std::stringstream reportStream;
+        reportStream << "Pivot row " << i + 1 << " out of " << dim << ": ";
+        for (int colCounter = 0; colCounter < this->NumCols; colCounter ++) {
+          reportStream << (*this)(i, colCounter).ToString();
+          if (colCounter != this->NumCols - 1) {
+            reportStream << ", ";
+          }
         }
+        theReport.Report(reportStream.str());
       }
-      theReport.Report(reportStream.str());
     }
     for (int j = i + 1; j < dim; j ++) {
       if (!this->elements[j][i].IsEqualToZero()) {
@@ -56,10 +53,12 @@ void Matrix<coefficient>::ComputeDeterminantOverwriteMatrix(
         tempRat.Minus();
         this->AddTwoRows (i, j, i, tempRat);
         if (doReport) {
-          std::stringstream reportStream;
-          reportStream << "Computing large determinant: pivot " << i + 1 << ", row " << j << " out of "
-          << dim <<  " times  " << dim << " total.";
-          theReport2.Report(reportStream.str());
+          if (theReport2.TickAndWantReport()) {
+            std::stringstream reportStream;
+            reportStream << "Computing large determinant: pivot " << i + 1 << ", row " << j << " out of "
+            << dim <<  " times  " << dim << " total.";
+            theReport2.Report(reportStream.str());
+          }
         }
       }
     }
@@ -132,8 +131,8 @@ void MathRoutines::RaiseToPower(
     theElement = theRingUnit;
     return;
   }
-  ProgressReport theReport;
-  std::stringstream reportStream;
+  ProgressReport reportOne;
+  ProgressReport reportTwo(32, GlobalVariables::Progress::ReportType::general);
   coefficient squares;
   squares = theElement;
   if (thePowerCopy < 4) {
@@ -142,38 +141,31 @@ void MathRoutines::RaiseToPower(
     }
     return;
   }
-  if (theGlobalVariables.theProgress.flagReportEverything) {
+  if (reportOne.TickAndWantReport()) {
+    std::stringstream reportStream;
     reportStream << "Raising " << theElement.ToString()
     << " to power: " << thePowerCopy;
-    theReport.Report(reportStream.str());
+    reportOne.Report(reportStream.str());
   }
   theElement = theRingUnit;
-  int counter = 0;
   while (thePowerCopy > 0) {
-    counter ++;
-    bool doReport = false;
-    if (theGlobalVariables.theProgress.flagReportEverything) {
-      if (counter > 3) {
-        doReport = true;
-      }
-    }
     if (thePowerCopy % 2 == 1) {
-      if (doReport) {
+      if (reportTwo.TickAndWantReport()) {
         std::stringstream reportStream2;
         reportStream2 << "Remaining exponent: " << thePowerCopy << "<br>";
         reportStream2 << "Multiplying " << theElement.ToString()
         << " by " << squares.ToString();
-        theReport.Report(reportStream2.str());
+        reportTwo.Report(reportStream2.str());
       }
       theElement *= squares;
     }
     thePowerCopy /= 2;
     if (thePowerCopy > 0) {
-      if (doReport) {
+      if (reportTwo.TickAndWantReport()) {
         std::stringstream reportStream2;
         reportStream2 << "Remaining exponent: " << thePowerCopy << "<br>";
         reportStream2 << "Squaring: " << squares.ToString();
-        theReport.Report(reportStream2.str());
+        reportTwo.Report(reportStream2.str());
       }
       squares *= squares;
     }
@@ -200,17 +192,11 @@ void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy(
   int maxNumMonsFinal = this->size() * other.size();
   if (maxNumMonsFinal > 2000000)
     maxNumMonsFinal = 2000000;
-  bool shouldReport = false;
   int totalMonPairs = 0;
-  ProgressReport theReport1, theReport2;
-  if (
-    theGlobalVariables.theProgress.flagReportEverything ||
-    theGlobalVariables.theProgress.flagReportProductsMonomialAlgebras
-  ) {
+  ProgressReport theReport1;
+  ProgressReport theReport2(400, GlobalVariables::Progress::ReportType::monomialAlgebraProduct);
+  if (theReport1.TickAndWantReport()) {
     totalMonPairs = other.size() * this->size();
-    shouldReport = totalMonPairs > 2000 && other.size() > 10 && this->size() > 10;
-  }
-  if (shouldReport) {
     std::stringstream reportStream;
     reportStream << "Large polynomial computation: " << this->size() << " x "
     << other.size() << "=" << totalMonPairs << " monomials:\n<br>\n"
@@ -222,18 +208,14 @@ void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy(
   bufferPoly.CheckConsistency();
   bufferMon.CheckConsistency();
   coefficient theCoeff;
-  int counter = 0;
   for (int i = 0; i < other.size(); i ++) {
     for (int j = 0; j < this->size(); j ++) {
-      if (shouldReport) {
-        counter ++;
-        if (counter % 400 == 0) {
-          std::stringstream reportStream2;
-          reportStream2 << "Multiplying monomials: "
-          << i + 1 << " out of " << other.size() << " by " << j + 1
-          << " out of " << this->size() << ". ";
-          theReport2.Report(reportStream2.str());
-        }
+      if (theReport2.TickAndWantReport()) {
+        std::stringstream reportStream2;
+        reportStream2 << "Multiplying monomials: "
+        << i + 1 << " out of " << other.size() << " by " << j + 1
+        << " out of " << this->size() << ". ";
+        theReport2.Report(reportStream2.str());
       }
       bufferMon = (*this)[j];
       bufferMon *= other[i];
@@ -254,7 +236,7 @@ void Matrix<coefficient>::GaussianEliminationEuclideanDomain(
   bool (*comparisonGEQFunction) (const coefficient& left, const coefficient& right)
 ) {
   MacroRegisterFunctionWithName("Matrix_Element::GaussianEliminationEuclideanDomain");
-  ProgressReport theReport;
+  ProgressReport theReport(1, GlobalVariables::Progress::ReportType::gaussianElimination);
   if (otherMatrix == this) {
     crash << "This is a programming error: the Carbon copy in the Gaussian elimination "
     << "coincides with the matrix which we are row-reducing "
@@ -277,8 +259,8 @@ void Matrix<coefficient>::GaussianEliminationEuclideanDomain(
         this->RowTimesScalarWithCarbonCopy(row, theRingMinusUnit, otherMatrix);
       }
       int ExploringRow = row + 1;
-      while (ExploringRow< this->NumRows) {
-        if (theGlobalVariables.theProgress.flagReportEverything || theGlobalVariables.theProgress.flagReportGaussianElimination) {
+      while (ExploringRow < this->NumRows) {
+        if (theReport.TickAndWantReport()) {
           std::stringstream out;
           out << "Pivotting on row of index " << row + 1 << " with exploring row of index "
           << ExploringRow + 1 << "; total rows: " << this->NumRows;
@@ -381,14 +363,14 @@ void Vectors<coefficient>::SelectABasisInSubspace(
     return;
   }
   MacroRegisterFunctionWithName("Vectors::SelectABasisInSubspace");
-  ProgressReport theReport;
+  ProgressReport reportTask(1, GlobalVariables::Progress::ReportType::gaussianElimination);
+  ProgressReport reportProgress(200, GlobalVariables::Progress::ReportType::gaussianElimination);
   int theDim = input[0].size;
-  bool doProgressReport = theGlobalVariables.theProgress.flagReportEverything || theGlobalVariables.theProgress.flagReportGaussianElimination;
-  if (doProgressReport) {
+  if (reportTask.TickAndWantReport()) {
     std::stringstream reportStream;
     reportStream << "Selecting a basis of a vector space with " << input.size
     << " generators in dimension " << theDim << "... " ;
-    theReport.Report(reportStream.str());
+    reportTask.Report(reportStream.str());
   }
   Matrix<coefficient> theMat;
   int MaxNumRows = MathRoutines::Minimum(input.size, theDim);
@@ -411,11 +393,11 @@ void Vectors<coefficient>::SelectABasisInSubspace(
   for (int i = 0; i < output.size; i ++) {
     theMat.GetVectorFromRow(i, output[i]);
   }
-  if (doProgressReport) {
+  if (reportProgress.TickAndWantReport()) {
     std::stringstream reportStream;
     reportStream << "Selecting a basis of a vector space with " << input.size
     << " generators in dimension " << theDim << "... done. " ;
-    theReport.Report(reportStream.str());
+    reportProgress.Report(reportStream.str());
   }
 }
 
@@ -439,21 +421,17 @@ bool List<Object>::ReadFromFile(std::fstream& input, int UpperLimitForDebugPurpo
     CappedListSize = UpperLimitForDebugPurposes;
   }
   this->SetSize(CappedListSize);
+  ProgressReport theReport(30, GlobalVariables::Progress::ReportType::fileInputOutput);
   for (int i = 0; i < CappedListSize; i ++) {
     this->TheObjects[i].ReadFromFile(input);
-    //<reporting_and_safepoint_duties>
-    if (theGlobalVariables.theProgress.flagReportFileIO) {
-      if (ActualListSize > 30) {
-        std::stringstream report;
-        report << "Reading object number " << i + 1 << " out of " << ActualListSize;
-        if (CappedListSize < ActualListSize) {
-          report << " capped at " << CappedListSize;
-        }
-        ProgressReport tempReport(report.str());
+    if (theReport.TickAndWantReport()) {
+      std::stringstream report;
+      report << "Reading object number " << i + 1 << " out of " << ActualListSize;
+      if (CappedListSize < ActualListSize) {
+        report << " capped at " << CappedListSize;
       }
-      theGlobalVariables.theLocalPauseController.SafePointDontCallMeFromDestructors();
+      theReport.Report(report.str());
     }
-    //</reporting_and_safepoint_duties>
   }
   bool tempBool = XML::ReadEverythingPassedTagOpenUntilTagClose(input, NumWordsBeforeTag, this->GetXMLClassName());
   if (!tempBool) {
@@ -464,14 +442,12 @@ bool List<Object>::ReadFromFile(std::fstream& input, int UpperLimitForDebugPurpo
 
 template <typename coefficient>
 void Matrix<coefficient>::AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, const coefficient& scalar) {
-  ProgressReport theReport;
-  bool doProgressReport = false;
-  doProgressReport = theGlobalVariables.theProgress.flagReportGaussianElimination || theGlobalVariables.theProgress.flagReportEverything;
+  ProgressReport theReport (10, GlobalVariables::Progress::ReportType::gaussianElimination);
   coefficient tempElement;
   for (int i = StartColIndex; i < this->NumCols; i ++) {
     tempElement = this->elements[fromRowIndex][i];
     tempElement *= scalar;
-    if (doProgressReport) {
+    if (theReport.TickAndWantReport()) {
       std::stringstream out;
       out << "Processing row, element " << i + 1 << " out of " << this->NumCols;
       theReport.Report(out.str());
@@ -489,15 +465,16 @@ void Matrix<coefficient>::GaussianEliminationByRows(
   FormatExpressions* theFormat
 ) {
   MacroRegisterFunctionWithName("Matrix::GaussianEliminationByRows");
-  //Checking for bees
   if (this->NumRows == 0) {
     crash << "This is a programming error: requesting to do Gaussian elimination on a matrix with "
     << " zero rows. " << crash;
   }
   if (carbonCopyMat != 0) {
     if (carbonCopyMat->NumRows != this->NumRows) {
-      crash << "This is a programming error: requesting to do Gaussian elimination with carbon copy, however the matrix has "
-      << this->NumRows << " rows, while the carbon copy has " << carbonCopyMat->NumRows << " rows. " << crash;
+      crash << "This is a programming error: requesting to do "
+      << "Gaussian elimination with carbon copy, however the matrix has "
+      << this->NumRows << " rows, while the carbon copy has "
+      << carbonCopyMat->NumRows << " rows. " << crash;
     }
   }
   ///////////////////
@@ -511,10 +488,9 @@ void Matrix<coefficient>::GaussianEliminationByRows(
   if (outputPivotColumns != nullptr) {
     outputPivotColumns->init(this->NumCols);
   }
-  bool doProgressReport = theGlobalVariables.theProgress.flagReportGaussianElimination || theGlobalVariables.theProgress.flagReportEverything;
   bool formatAsLinearSystem = theFormat == nullptr ? false : theFormat->flagFormatMatrixAsLinearSystem;
   bool useHtmlInReport = theFormat == nullptr ? true : theFormat->flagUseHTML;
-  ProgressReport theReport;
+  ProgressReport theReport(100, GlobalVariables::Progress::ReportType::gaussianElimination);
   if (humanReadableReport != nullptr) {
     if (useHtmlInReport) {
       *humanReadableReport << "\n\n\n\n<table><tr><td style =\"border-bottom:3pt solid black;\">System status</td>"
@@ -583,7 +559,7 @@ void Matrix<coefficient>::GaussianEliminationByRows(
         if (!this->elements[j][i].IsEqualToZero()) {
           tempElement = this->elements[j][i];
           tempElement.Minus();
-          if (doProgressReport) {
+          if (theReport.TickAndWantReport()) {
             std::stringstream reportStream;
             reportStream << "Gaussian elimination (" << this->NumRows << "x" << this->NumCols
             << "): column " << i + 1 << " out of " << this->NumCols

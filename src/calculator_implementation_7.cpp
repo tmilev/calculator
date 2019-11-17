@@ -33,9 +33,9 @@ bool MathRoutines::GenerateVectorSpaceClosedWRTOperation(
   MacroRegisterFunctionWithName("MathRoutines::GenerateVectorSpaceClosedWRTOperation");
   inputOutputElts[0].GaussianEliminationByRowsDeleteZeroRows(inputOutputElts);
   theType theOpResult;
-  ProgressReport theReport1, theReport2;
-  bool flagDoReport = theGlobalVariables.theProgress.flagReportEverything || theGlobalVariables.theProgress.flagReportGaussianElimination;
-  if (flagDoReport) {
+  ProgressReport theReport1(1, GlobalVariables::Progress::ReportType::gaussianElimination);
+  ProgressReport theReport2(20, GlobalVariables::Progress::ReportType::gaussianElimination);
+  if (theReport1.TickAndWantReport()) {
     theReport1.Report("Extending vector space to closed with respect to binary operation. ");
   }
   List<theType> theEltsForGaussianElimination = inputOutputElts;
@@ -51,7 +51,7 @@ bool MathRoutines::GenerateVectorSpaceClosedWRTOperation(
       if (upperDimensionBound > 0 && inputOutputElts.size > upperDimensionBound) {
         return false;
       }
-      if (flagDoReport) {
+      if (theReport2.TickAndWantReport()) {
         std::stringstream reportStream;
         reportStream << "Accounted operation between elements " << i + 1
         << " and " << j + 1 << " out of " << inputOutputElts.size;
@@ -5453,7 +5453,7 @@ bool LargeIntegerUnsigned::IsPossiblyPrime(int timesToRunMillerRabin, bool tryDi
   }
   ProgressReport theReport;
   for (int i = 0; i < timesToRunMillerRabin; i ++) {
-    if (theGlobalVariables.theProgress.flagReportEverything) {
+    if (theReport.TickAndWantReport()) {
       std::stringstream reportStream;
       reportStream << "Testing whether " << this->ToStringAbbreviate()
       << " is prime using Miller-Rabin test " << i + 1 << " out of "

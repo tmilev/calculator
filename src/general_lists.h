@@ -1747,10 +1747,25 @@ class ProgressReport {
 public:
   int currentLevel;
   int threadIndex;
+  int ticks;
+  int ticksPerReport;
+  int reportType;
+  bool flagInitialized;
+  // Call TickAndWantReport before generating report.
+  // If a report is not wanted, it is wise to not generate one:
+  // the string operations required to generate a progress report
+  // would are expected to cost more than the mathematical computations
+  // they are reporting.
   void Report(const std::string& theReport);
+  bool TickAndWantReport();
   void init();
   ProgressReport() {
     this->init();
+  }
+  ProgressReport(int inputTicksPerReport, int inputReportType) {
+    this->init();
+    this->ticksPerReport = inputTicksPerReport;
+    this->reportType = inputReportType;
   }
   ProgressReport(const std::string& theReport) {
     this->init();

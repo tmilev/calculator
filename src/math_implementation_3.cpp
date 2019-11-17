@@ -101,16 +101,22 @@ void GlobalVariables::ChDir(const std::string& systemCommand) {
   }
 }
 
+bool GlobalVariables::Progress::ReportBanneD() {
+  return this->flagBanProcessMonitoring;
+}
+
+bool GlobalVariables::Progress::ReportAlloweD(int type) {
+  (void) type;
+  return !this->flagBanProcessMonitoring && this->flagReportAlloweD;
+}
+
 GlobalVariables::Progress::Progress() {
   this->flagTimedOut = false;
   this->flagBanProcessMonitoring = false;
-  this->flagReportEverything = false;
-  this->flagReportGaussianElimination = false;
-  this->flagReportLargeIntArithmetic = false;
-  this->flagReportProductsMonomialAlgebras = false;
-  this->flagReportFileIO = true;
-  this->flagReportAllowed = false;
-}
+  this->flagBanProcessMonitoring = false;
+  this->flagTimedOut = false;
+  this->flagReportAlloweD = false;
+ }
 
 GlobalVariables::GlobalVariables() {
   this->flagAutoUnitTest = false;
@@ -173,7 +179,27 @@ HashedList<FileInformation>& GlobalVariables::theSourceCodeFiles() {
   return avoidingTheStaticInitializationOrderFiasco;
 }
 
+bool ProgressReport::TickAndWantReport() {
+  if (!this->flagInitialized) {
+    return false;
+  }
+  // Increments and internal counter and returns
+  // desire [true/false] to display a progress report.
+  //
+  // Note: this function will not generate a
+  // report on first run when
+  // this->ticksPerReport is larger than 1.
+  this->ticks ++;
+  if (this->ticks >= this->ticksPerReport) {
+    this->ticks = 0;
+  }
+  return this->ticks == 0;
+}
+
 void ProgressReport::Report(const std::string& theReport) {
+  if (!this->flagInitialized) {
+    return;
+  }
   if (crash.flagCrashInitiateD) {
     this->threadIndex = - 1;
     return;
@@ -188,6 +214,13 @@ void ProgressReport::Report(const std::string& theReport) {
 }
 
 void ProgressReport::init() {
+  this->flagInitialized = false;
+  if (theGlobalVariables.theProgress.ReportBanneD()) {
+    return;
+  }
+  if (!theGlobalVariables.theProgress.ReportAlloweD()) {
+    return;
+  }
   if (crash.flagCrashInitiateD) {
     this->threadIndex = - 1;
     return;
@@ -196,11 +229,18 @@ void ProgressReport::init() {
   if (this->threadIndex == - 1) {
     return;
   }
+  this->flagInitialized = true;
   this->currentLevel = theGlobalVariables.progressReportStrings[this->threadIndex].size;
   theGlobalVariables.progressReportStrings[this->threadIndex].AddOnTop(std::string(""));
+  this->ticks = 0;
+  this->ticksPerReport = 1;
+  this->reportType = GlobalVariables::Progress::ReportType::general;
 }
 
 ProgressReport::~ProgressReport() {
+  if (!this->flagInitialized) {
+    return;
+  }
   if (crash.flagCrashInitiateD) {
     this->threadIndex = - 1;
     return;

@@ -429,10 +429,8 @@ bool Calculator::innerPrintSSSubalgebras(
     crash << "Zero pointer to semisimple Lie algebra: this shouldn't happen. " << crash;
   }
   SemisimpleLieAlgebra& ownerLieAlgebra = *ownerSSPointer;
-  std::cout << "DEBUG: Here I am pt4!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ";
   SemisimpleSubalgebras& theSubalgebras =
   theCommands.theObjectContainer.GetSemisimpleSubalgebrasCreateIfNotPresent(ownerLieAlgebra.theWeyl.theDynkinType);
-  std::cout << "DEBUG: Here I am pt5!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ";
   theSubalgebras.ComputeStructureWriteFiles(
     ownerLieAlgebra,
     theCommands.theObjectContainer.theAlgebraicClosure,
@@ -447,7 +445,6 @@ bool Calculator::innerPrintSSSubalgebras(
     doComputePairingTable,
     doAdjustCentralizers
   );
-  std::cout << "DEBUG: Here I am pt123213321!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! " << std::endl;
   return output.AssignValue(out.str(), theCommands);
 }
 

@@ -407,7 +407,7 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstants() {
   std::stringstream out;
   ProgressReport theReport;
   double startTimer = - 1;
-  if (theGlobalVariables.theProgress.flagReportEverything) {
+  if (theReport.TickAndWantReport()) {
     out << "Initializing matrix for structure constant computation of " << this->ToStringLieAlgebraName() << "... ";
     startTimer = theGlobalVariables.GetElapsedSeconds();
     theReport.Report(out.str());
@@ -426,7 +426,7 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstants() {
     }
   }
   double startStructureConstantComputation = - 1;
-  if (theGlobalVariables.theProgress.flagReportEverything) {
+  if (theReport.TickAndWantReport()) {
     out << "done in " << theGlobalVariables.GetElapsedSeconds() - startTimer
     << " seconds.<br> " << "Computing structure constants...";
     theReport.Report(out.str());
@@ -434,8 +434,6 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstants() {
   }
   Rational tempRat;
   while (nonExploredRoots.CardinalitySelection > 0) {
-    //this->ComputeDebugString();
-    //nonExploredRoots.ComputeDebugString();
     int theBorelIndex = nonExploredRoots.elements[0];
     Rational theHeight = posRoots[theBorelIndex].SumCoords();
     for (int i = 1; i < nonExploredRoots.CardinalitySelection; i ++) {
@@ -481,14 +479,14 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstants() {
     nonExploredRoots.ComputeIndicesFromSelection();
   }
   double startMultTable = - 1;
-  if (theGlobalVariables.theProgress.flagReportEverything) {
-    out << "done in " << theGlobalVariables.GetElapsedSeconds() - startStructureConstantComputation
+  if (theReport.TickAndWantReport()) {
+    out << " done in " << theGlobalVariables.GetElapsedSeconds() - startStructureConstantComputation
     << " seconds.<br> Computing Lie bracket pairing (``multiplication'') table...";
     theReport.Report(out.str());
     startMultTable = theGlobalVariables.GetElapsedSeconds();
   }
   this->ComputeMultTable();
-  if (theGlobalVariables.theProgress.flagReportEverything) {
+  if (theReport.TickAndWantReport()) {
     out << " done in " << theGlobalVariables.GetElapsedSeconds() - startMultTable
     << " seconds. Total structure constant computation time: "
     << theGlobalVariables.GetElapsedSeconds() - startTimer << " seconds. ";

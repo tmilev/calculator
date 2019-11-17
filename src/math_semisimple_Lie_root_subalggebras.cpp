@@ -434,7 +434,7 @@ void rootSubalgebra::MakeProgressReportGenAutos(int progress, int outOf, int fou
 
 void rootSubalgebra::MakeProgressReportPossibleNilradicalComputation(rootSubalgebras& owner) {
   MacroRegisterFunctionWithName("rootSubalgebra::MakeProgressReportPossibleNilradicalComputation");
-  if (!theGlobalVariables.theProgress.flagReportEverything) {
+  if (theGlobalVariables.theProgress.ReportBanneD()) {
     return;
   }
   ProgressReport report1, report2, report3, report4, report5;
@@ -471,12 +471,12 @@ void rootSubalgebra::GenerateKmodMultTable(List<List<List<int> > >& output, List
   << "\n<br>\nwith centralizer " << this->theCentralizerDiagram.ToString();
   ProgressReport theReport;
   theReport.Report(out.str());
-  ProgressReport theReport2;
+  ProgressReport theReport2(10, GlobalVariables::Progress::ReportType::general);
   for (int i = 0; i < this->Modules.size; i ++) {
     output[i].SetSize(this->Modules.size);
     for (int j = 0; j < this->Modules.size; j ++) {
       this->KmodTimesKmod(i, j, oppositeKmods, output[i][j]);
-      if (theGlobalVariables.theProgress.flagReportEverything) {
+      if (theReport2.TickAndWantReport()) {
         std::stringstream out5;
         out5 << "Computing pairing table: " << i * this->Modules.size + j + 1 << " out of " << numTotal;
         theReport2.Report(out5.str());
@@ -2294,7 +2294,7 @@ bool rootSubalgebra::ComputeEssentialsIfNew() {
       this->SimpleBasisK[i], this->SimpleBasisK[i]
     );
   }
-  if (theGlobalVariables.theProgress.flagReportEverything) {
+  if (theReport.TickAndWantReport()) {
     reportStream << "Computing root subalgebra... ";
     theReport.Report(reportStream.str());
   }
@@ -2330,7 +2330,7 @@ bool rootSubalgebra::ComputeEssentialsIfNew() {
   } else {
     this->SimpleBasisK.GetGramMatrix(this->scalarProdMatrixOrdered, &this->GetAmbientWeyl().CartanSymmetric);
   }
-  if (theGlobalVariables.theProgress.flagReportEverything) {
+  if (theReport.TickAndWantReport()) {
     reportStream << "...found a candidate type... ";
     theReport.Report(reportStream.str());
   }
@@ -2349,7 +2349,7 @@ bool rootSubalgebra::ComputeEssentialsIfNew() {
     }
     return false;
   }
-  if (theGlobalVariables.theProgress.flagReportEverything) {
+  if (theReport.TickAndWantReport()) {
     reportStream << "...the candidate's roots are maximally dominant... ";
     theReport.Report(reportStream.str());
   }
@@ -2373,7 +2373,7 @@ bool rootSubalgebra::ComputeEssentialsIfNew() {
       return false;
     }
   }
-  if (theGlobalVariables.theProgress.flagReportEverything) {
+  if (theReport.TickAndWantReport()) {
     reportStream << "...module decomposition computed, subalgebra type: " << this->theDynkinType.ToString()
     << ", centralizer type: " << this->theCentralizerDynkinType.ToString() << ". Computing outer automorphisms that "
     << "have zero action on centralizer and extend to ambient automorphisms... ";
@@ -2791,7 +2791,7 @@ void rootSubalgebras::ComputeParabolicPseudoParabolicNeitherOrder() {
     currentList.SetSize(0);
     int counter = 0;
     do {
-      if (theGlobalVariables.theProgress.flagReportEverything) {
+      if (theReport.TickAndWantReport()) {
         std::stringstream reportStream;
         if (i == 0) {
           reportStream << "Exploring which of the subalgebras are parabolic. ";
@@ -2860,7 +2860,7 @@ void rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism() {
   this->theSubalgebras.AddOnTop(currentSA);
   std::string reportString;
   for (int i = 0; i < this->theSubalgebras.size; i ++) {
-    if (theGlobalVariables.theProgress.flagReportEverything) {
+    if (theReport2.TickAndWantReport()) {
       std::stringstream reportStream;
       for (int j = 0; j < this->theSubalgebras[i].potentialExtensionDynkinTypes.size; j ++) {
         reportStream << this->theSubalgebras[i].potentialExtensionDynkinTypes[j].ToString();
@@ -2874,7 +2874,7 @@ void rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism() {
       if (this->theSubalgebras[i].HighestWeightsPrimalSimple[j].IsEqualToZero()) {
         continue;
       }
-      if (theGlobalVariables.theProgress.flagReportEverything) {
+      if (theReport2.TickAndWantReport()) {
         std::stringstream out;
         out << "Exploring extensions of subalgebra " << i + 1
         << " out of " << this->theSubalgebras.size << ". Type current SA: "
@@ -2900,34 +2900,34 @@ void rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism() {
     }
   }
   std::stringstream reportStream;
-  if (theGlobalVariables.theProgress.flagReportEverything) {
+  if (theReport2.TickAndWantReport()) {
     reportStream << "Reductive root subalgebra computation done: total " << this->theSubalgebras.size
     << " subalgebras. Proceeding to sort the subalgebras...";
     theReport2.Report(reportStream.str());
   }
   this->SortDescendingOrderBySSRank();
-  if (theGlobalVariables.theProgress.flagReportEverything) {
+  if (theReport2.TickAndWantReport()) {
     reportStream << "done. ";
     theReport2.Report(reportStream.str());
   }
   if (this->flagComputeConeCondition) {
-    if (theGlobalVariables.theProgress.flagReportEverything) {
+    if (theReport2.TickAndWantReport()) {
       reportStream << "Proceeding to compute the module pairing tables ... ";
       theReport2.Report(reportStream.str());
     }
     this->ComputeKmodMultTables();
-    if (theGlobalVariables.theProgress.flagReportEverything) {
+    if (theReport2.TickAndWantReport()) {
       reportStream << " done. ";
       theReport2.Report(reportStream.str());
     }
   }
   if (this->flagPrintParabolicPseudoParabolicInfo) {
-    if (theGlobalVariables.theProgress.flagReportEverything) {
+    if (theReport2.TickAndWantReport()) {
       reportStream << "Computing which subalgebras are pseudo parabolic/parabolic/neither... ";
       theReport2.Report(reportStream.str());
     }
     this->ComputeParabolicPseudoParabolicNeitherOrder();
-    if (theGlobalVariables.theProgress.flagReportEverything) {
+    if (theReport2.TickAndWantReport()) {
       reportStream << " done. ";
       theReport2.Report(reportStream.str());
     }

@@ -769,20 +769,19 @@ void LargeIntegerUnsigned::MultiplyBy(const LargeIntegerUnsigned& x, LargeIntege
     output.theDigits[i] = 0;
   }
   unsigned long long numCycles = 0;
-  bool doProgressReporT = theGlobalVariables.theProgress.flagReportEverything || theGlobalVariables.theProgress.flagReportLargeIntArithmetic;
-  ProgressReport theReport1, theReport2;
-  unsigned long long totalCycles = 0;
-  if (doProgressReporT) {
-    totalCycles = static_cast<unsigned long long>(this->theDigits.size) * static_cast<unsigned long long>(x.theDigits.size);
-    doProgressReporT = totalCycles > 2000;
-  }
-  if (doProgressReporT) {
+  bool doReport = false;
+  unsigned ticksPerReport = 1024;
+  unsigned long long totalCycles = static_cast<unsigned long long>(this->theDigits.size) * static_cast<unsigned long long>(x.theDigits.size);
+  MemorySaving<ProgressReport> report1, report2;
+  if (totalCycles >= static_cast<unsigned>(ticksPerReport)) {
+    doReport = true;
     std::stringstream reportStream;
     reportStream
     << "<br>Large integer multiplication: product of integers:<br>\n"
     << this->ToStringAbbreviate()
     << "<br>\n" << x.ToStringAbbreviate();
-    theReport1.Report(reportStream.str());
+    report1.GetElement().Report(reportStream.str());
+    report2.GetElement().ticksPerReport = ticksPerReport;
   }
   for (int i = 0; i < this->theDigits.size; i ++) {
     for (int j = 0; j < x.theDigits.size; j ++) {
@@ -793,15 +792,14 @@ void LargeIntegerUnsigned::MultiplyBy(const LargeIntegerUnsigned& x, LargeIntege
       unsigned long long highPart = tempLong / LargeIntegerUnsigned::CarryOverBound;
       output.AddShiftedUIntSmallerThanCarryOverBound(static_cast<unsigned int>(lowPart), i + j);
       output.AddShiftedUIntSmallerThanCarryOverBound(static_cast<unsigned int>(highPart), i + j + 1);
-      if (doProgressReporT) {
-        numCycles ++;
-        if ((numCycles % 1024) == 0) {
+      if (doReport) {
+        if (report2.GetElement().TickAndWantReport()) {
           std::stringstream out;
           out << "<br>Crunching " << numCycles << " out of " << totalCycles
           << " pairs of large integer ``digits'' = "
           << this->theDigits.size << " x " << x.theDigits.size
           << " digits (base " << LargeIntegerUnsigned::CarryOverBound << ").";
-          theReport2.Report(out.str());
+          report2.GetElement().Report(out.str());
         }
       }
     }

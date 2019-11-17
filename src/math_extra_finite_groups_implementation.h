@@ -58,7 +58,7 @@ bool FiniteGroup<elementSomeGroup>::ComputeAllElementsLargeGroup(bool andWords, 
     this->theWords.SetSize(1);
     this->theWords.LastObject()->SetSize(0);
   }
-  ProgressReport theReport;
+  ProgressReport theReport(1000, GlobalVariables::Progress::ReportType::general);
   //Warning: not checking whether the generators have repetitions.
   for (int j = 0; j < this->theElements.size; j ++) {
     for (int i = 0; i < this->generators.size; i ++) {
@@ -72,17 +72,15 @@ bool FiniteGroup<elementSomeGroup>::ComputeAllElementsLargeGroup(bool andWords, 
           this->GetWordByFormula(*this, currentElement, *this->theWords.LastObject());
         }
       }
-      if (theGlobalVariables.theProgress.flagReportEverything) {
-        if (this->theElements.size % 100 == 0) {
-          std::stringstream reportStream;
-          LargeInteger sizeByFla = this->SizeByFormulaOrNeg1();
-          reportStream << "So far, generated " << this->theElements.size << " elements";
-          if (sizeByFla > 0) {
-            reportStream << " out of " << sizeByFla.ToString();
-          }
-          reportStream << ".";
-          theReport.Report(reportStream.str());
+      if (theReport.TickAndWantReport()) {
+        std::stringstream reportStream;
+        LargeInteger sizeByFla = this->SizeByFormulaOrNeg1();
+        reportStream << "So far, generated " << this->theElements.size << " elements";
+        if (sizeByFla > 0) {
+          reportStream << " out of " << sizeByFla.ToString();
         }
+        reportStream << ".";
+        theReport.Report(reportStream.str());
       }
       if (MaxElements > 0) {
         if (this->theElements.size > MaxElements) {
@@ -91,7 +89,8 @@ bool FiniteGroup<elementSomeGroup>::ComputeAllElementsLargeGroup(bool andWords, 
       }
     }
   }
-  if (theGlobalVariables.theProgress.flagReportEverything) {
+  theReport.ticksPerReport = 1;
+  if (theReport.TickAndWantReport()) {
     std::stringstream reportStream;
     reportStream << "Generated group with a total of " << this->theElements.size << " elements. ";
     theReport.Report(reportStream.str());
@@ -569,22 +568,22 @@ bool FiniteGroup<elementSomeGroup>::CheckConjugacyClassRepsMatchCCsizes() {
 template <class elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::ComputeCCRepresentatives() {
   MacroRegisterFunctionWithName("FiniteGroup::ComputeCCRepresentatives");
-  //This algorithm is effective if the sum of the sizes of the conjugacy classes
-  //of the generators is small.
-  //The algorithm "hops" from conjugacy class representative to conjugacy representative
-  //by multiplying the representatives by the each element of each conjugacy class of the generators.
-  //We prove this algorithm is guaranteed to generate all conjugacy classes.
-  //Let g be a generator, H a conjugacy class, and h \in H an arbitrary element of H.
-  //Suppose gH intersects a conjugacy class F. We claim there exists a generator g and an
-  //element x such that x g x^{- 1} h\in F. Indeed, as gH intersects F, g x^{- 1} h x\in F for some
-  //element x, and therefore x g x^{- 1} h =x(g x^{- 1} h x) x^{- 1}\in F, which proves our claim.
-  //The preceding considerations show that
-  //a representative of each conjugacy class containing an element from g H can be obtained
-  //by applying the entire conjugacy class of g onto an arbitrary representative of H.
-  //As we are using the conjugacy classes of a set of generators, this shows that the following
-  //algorithm will generate a representative of each conjugacy class.
+  // This algorithm is effective if the sum of the sizes of the conjugacy classes
+  // of the generators is small.
+  // The algorithm "hops" from conjugacy class representative to conjugacy representative
+  // by multiplying the representatives by the each element of each conjugacy class of the generators.
+  // We prove this algorithm is guaranteed to generate all conjugacy classes.
+  // Let g be a generator, H a conjugacy class, and h \in H an arbitrary element of H.
+  // Suppose gH intersects a conjugacy class F. We claim there exists a generator g and an
+  // element x such that x g x^{- 1} h\in F. Indeed, as gH intersects F, g x^{- 1} h x\in F for some
+  // element x, and therefore x g x^{- 1} h =x(g x^{- 1} h x) x^{- 1}\in F, which proves our claim.
+  // The preceding considerations show that
+  // a representative of each conjugacy class containing an element from g H can be obtained
+  // by applying the entire conjugacy class of g onto an arbitrary representative of H.
+  // As we are using the conjugacy classes of a set of generators, this shows that the following
+  // algorithm will generate a representative of each conjugacy class.
 
-  //First we compute the generator's conjugacy classes:
+  // First we compute the generator's conjugacy classes:
   this->ComputeGeneratorsConjugacyClasses();
 
   ProgressReport theReport;
@@ -597,7 +596,7 @@ bool FiniteGroup<elementSomeGroup>::ComputeCCRepresentatives() {
     //in case there are two non-conjugate elements with the same char poly.
     for (int i = 0; i < this->conjugacyClasseS.size; i ++) {
       for (int j = 0; j < this->unionGeneratorsCC.size; j ++) {
-        if (theGlobalVariables.theProgress.flagReportEverything) {
+        if (theReport.TickAndWantReport()) {
           std::stringstream reportStream;
           reportStream << "Exploring conjugacy class " << i + 1
           << " out of " << this->conjugacyClasseS.size
@@ -791,7 +790,7 @@ bool WeylGroupAutomorphisms::GenerateOuterOrbit(
   ElementWeylGroupAutomorphisms currentElt;
   int numElementsToReserve = MathRoutines::Minimum(UpperLimitNumElements, 1000000);
   output.SetExpectedSize(numElementsToReserve);
-  ProgressReport theReport;
+  ProgressReport theReport(3000, GlobalVariables::Progress::ReportType::general);
   simpleReflectionOrOuterAutomorphism theGen;
   if (outputSubset != nullptr) {
     currentElt.MakeID(*this);
@@ -800,7 +799,6 @@ bool WeylGroupAutomorphisms::GenerateOuterOrbit(
     outputSubset->AddOnTop(currentElt);
   }
   int numGens = this->theWeyl->GetDim() + theOuterGens.size;
-  int orbitSizeDiv10000 = 0;
   for (int i = 0; i < output.size; i ++) {
     for (int j = 0; j < numGens; j ++) {
       if (j < this->theWeyl->GetDim()) {
@@ -823,16 +821,13 @@ bool WeylGroupAutomorphisms::GenerateOuterOrbit(
           return false;
         }
       }
-      if (theGlobalVariables.theProgress.flagReportEverything) {
-        if (output.size / 10000 > orbitSizeDiv10000) {
-          std::stringstream reportStream;
-          reportStream << "Generating outer orbit, " << output.size
-          << " elements found so far, Weyl group type: "
-          << this->theWeyl->theDynkinType.ToString() << ". ";
-          theReport.Report(reportStream.str());
-        }
+      if (theReport.TickAndWantReport()) {
+        std::stringstream reportStream;
+        reportStream << "Generating outer orbit, " << output.size
+        << " elements found so far, Weyl group type: "
+        << this->theWeyl->theDynkinType.ToString() << ". ";
+        theReport.Report(reportStream.str());
       }
-      orbitSizeDiv10000 = output.size / 10000;
     }
   }
   return true;
@@ -938,12 +933,12 @@ bool WeylGroupData::GenerateOrbit(
     outputSubset->Clear();
     outputSubset->AddOnTop(currentElt);
   }
-  ProgressReport theReport;
+  ProgressReport theReport(1000, GlobalVariables::Progress::ReportType::general);
   simpleReflection theGen;
   for (int i = 0; i < output.size; i ++) {
     for (int j = 0; j < this->CartanSymmetric.NumRows; j ++) {
       currentRoot = output[i];
-      if (theGlobalVariables.theProgress.flagReportEverything && i % 100 == 0) {
+      if (theReport.TickAndWantReport()) {
         std::stringstream reportStream;
         reportStream << "So far found " << i + 1 << " elements in the orbit(s) of the starting weight(s) "
         << theWeights.ToString() << ". ";
@@ -1449,7 +1444,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::GetClassFunc
             this->ComputeAllElementImages();
           }
           this->classFunctionMatrices[cci] += this->theElementImageS[currentCC.indicesEltsInOwner[i]];
-          if (theGlobalVariables.theProgress.flagReportEverything) {
+          if (theReport.TickAndWantReport()) {
             std::stringstream reportstream;
             reportstream << " Computing conjugacy class " << currentCC.indicesEltsInOwner[i] + 1
             << " (total num classes is " << numClasses << ").";
@@ -1457,7 +1452,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::GetClassFunc
           }
         }
       }
-      if (theGlobalVariables.theProgress.flagReportEverything) {
+      if (theReport.TickAndWantReport()) {
         std::stringstream reportstream;
         reportstream << "<br>Class function matrix of conjugacy class " << cci + 1
         << " (total num classes is " << numClasses << ") computed to be: "
@@ -2088,11 +2083,11 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsTodorsVersi
   int NumClasses = this->ConjugacyClassCount();
   VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> decompositionNewRep;
   ProgressReport theReport1;
-//  int indexFirstPredefinedRep =1; //<-this should be the index of the sign rep.
-//  int indexLastPredefinedrep =2; //<-this should be the index of the standard rep.
+  //  int indexFirstPredefinedRep = 1; //<-this should be the index of the sign rep.
+  //  int indexLastPredefinedrep = 2; //<-this should be the index of the standard rep.
   for (int i = 0; i < appendOnlyIrrepsList.size && this->irreps.size != NumClasses; i ++) {
     for (int j = 0; j < initialcount; j ++) {
-      if (theGlobalVariables.theProgress.flagReportEverything) {
+      if (theReport1.TickAndWantReport()) {
         std::stringstream reportStream;
         reportStream << this->irreps.size << " irreducible representations found so far. ";
         reportStream << "<br>Decomposing " << appendOnlyIrrepsList[j].theCharacteR
@@ -2107,7 +2102,7 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsTodorsVersi
       }
     }
   }
-  if (theGlobalVariables.theProgress.flagReportEverything) {
+  if (theReport1.TickAndWantReport()) {
     std::stringstream reportStream;
     reportStream << "Irrep table:";
     for (int i = 0; i < this->irreps.size; i ++) {

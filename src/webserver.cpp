@@ -852,7 +852,7 @@ void WebWorker::WriteAfterTimeoutProgressStatic(const std::string& input) {
 
 void WebWorker::WriteAfterTimeoutProgress(const std::string& input, bool forceFileWrite) {
   if (
-    !theGlobalVariables.theProgress.flagReportAllowed ||
+    !theGlobalVariables.theProgress.flagReportAlloweD ||
     !theGlobalVariables.theProgress.flagTimedOut
   ) {
     return;
@@ -2141,7 +2141,7 @@ int WebWorker::ProcessCompute() {
   std::string monitoring = theGlobalVariables.GetWebInput(WebAPI::request::monitoring);
   if (monitoring == "false") {
     theGlobalVariables.theProgress.flagBanProcessMonitoring = true;
-    theGlobalVariables.theProgress.flagReportEverything = false;
+    theGlobalVariables.theProgress.flagReportAlloweD = false;
   }
 
   theParser->inputString = HtmlRoutines::ConvertURLStringToNormal(
@@ -2156,9 +2156,9 @@ int WebWorker::ProcessCompute() {
   //  the initialization below moved to the start of the web server!
   //  theParser.init();
   ////////////////////////////////////////////////
-  theGlobalVariables.theProgress.flagReportAllowed = true;
+  theGlobalVariables.theProgress.flagReportAlloweD = true;
   theParser->Evaluate(theParser->inputString);
-  theGlobalVariables.theProgress.flagReportAllowed = false;
+  theGlobalVariables.theProgress.flagReportAlloweD = false;
   if (theGlobalVariables.flagRunningBuiltInWebServer) {
     if (theGlobalVariables.theProgress.flagTimedOut) {
       this->WriteAfterTimeoutResult();
@@ -4860,7 +4860,6 @@ void WebServer::InitializeGlobalVariablesHashes() {
 
 void WebServer::InitializeGlobalVariables() {
   theGlobalVariables.millisecondsReplyAfterComputation = 0;
-  theGlobalVariables.theProgress.flagReportEverything = true;
   ParallelComputing::cgiLimitRAMuseNumPointersInList = 4000000000;
   this->InitializeGlobalVariablesHashes();
   this->requestsNotNeedingLogin.AddOnTop("about");

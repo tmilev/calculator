@@ -882,16 +882,11 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other) {
     *this *= tempRat;
     return;
   }
-  bool doReport = false;
-  if (theGlobalVariables.theProgress.flagReportEverything) {
-    if (this->theElT.size() * other.theElT.size() > 100) {
-      doReport = true;
-    }
-  }
+  bool doReport = (this->theElT.size() * other.theElT.size() > 100);
   ProgressReport theReport;
-  std::stringstream reportStream;
   if (doReport) {
-    reportStream << "Multiplying "
+    std::stringstream reportStream;
+    reportStream << "Large multiplication:<br>"
     << this->ToString() << "\n<br>by<br>\n" << other.ToString()
     << "\n<br>...";
     theReport.Report(reportStream.str());
@@ -903,10 +898,6 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other) {
   leftMat.CheckConsistencyGrandMaster();
   rightMat.CheckConsistencyGrandMaster();
   leftMat *= rightMat;
-  if (doReport) {
-    reportStream << "<b>DONE</b>.";
-    theReport.Report(reportStream.str());
-  }
   this->basisIndex = this->owner->theBasesAdditive.size - 1;
   this->theElT.MaKeEi(0);
   leftMat.ActOnVectorColumn(this->theElT);

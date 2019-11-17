@@ -238,7 +238,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::Restrict(
   output.theCharacteR = remainingCharacter;
   ProgressReport theReport;
   for (int i = 0; i < this->generatorS.size; i ++) {
-    if (theGlobalVariables.theProgress.flagReportEverything) {
+    if (theReport.TickAndWantReport()) {
       std::stringstream reportStream;
       reportStream << "Restricting the action of generator of index " << i;
       theReport.Report(reportStream.str());

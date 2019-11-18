@@ -81,13 +81,13 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat) {
     out << "<div class =\"math\">" << theTableLateXStream.str() << "</div>";
     return out.str();
   }
-  out << "<br><b> The Lie bracket table is too large to be rendered in LaTeX, displaying in"
-  << " html format instead.</b> ";
+  out << "<br><b> The Lie bracket table is too large to be rendered in LaTeX, displaying in "
+  << "html format instead.</b> ";
   if (theFormat != nullptr) {
     if (theFormat->flagLatexDetailsInHtml) {
-      out << " Below you can find the same table in pure LaTeX, "
-      << " which you can render in a separate LaTeX session, should "
-      << " wish to do so on your own. ";
+      out << "Below you can find the same table in pure LaTeX, "
+      << "which you can render in a separate LaTeX session, should "
+      << "wish to do so on your own. ";
     }
   }
   out << theHtmlStream.str();

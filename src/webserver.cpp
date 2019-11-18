@@ -1514,6 +1514,36 @@ JSData WebWorker::ProcessComputationIndicatorJSData() {
   return result;
 }
 
+void WebWorker::WriteAfterTimeoutCarbonCopy(const std::string &input, const std::string &fileNameCarbonCopy) {
+  if (fileNameCarbonCopy == "") {
+    return;
+  }
+  JSData result;
+  std::stringstream commentsOnError;
+  if (!result.readstring(input, false, &commentsOnError)) {
+    logWorker << logger::red
+    << "Failed to parse input to WriteAfterTimeoutCarbonCopy: "
+    << commentsOnError.str() << logger::endL;
+    return;
+  }
+  if (result[WebAPI::result::resultHtml].theType == JSData::token::tokenUndefined) {
+    logWorker << logger::red
+    << "Input to WriteAfterTimeoutCarbonCopy does not have a resultHtml entry. "
+    << logger::endL;
+    return;
+  }
+  std::string toBeWritten = result[WebAPI::result::resultHtml].theString;
+  toBeWritten = StringRoutines::ReplaceAll(toBeWritten, "\\n", "\n");
+  std::string extraFilename = "output/";
+  extraFilename += FileOperations::CleanUpForFileNameUse(
+    fileNameCarbonCopy
+  ) + ".html";
+  bool success = FileOperations::WriteFileVirual(extraFilename, toBeWritten, &commentsOnError);
+  if (!success) {
+    logWorker << logger::red << "Error writing optional file. " << commentsOnError.str() << logger::endL;
+  }
+}
+
 void WebWorker::WriteAfterTimeout(
   const std::string& input,
   const std::string& status,
@@ -1535,16 +1565,7 @@ void WebWorker::WriteAfterTimeout(
     true,
     &commentsOnError
   );
-  if (fileNameCarbonCopy != "") {
-    std::string extraFilename = "output/";
-    extraFilename += FileOperations::CleanUpForFileNameUse(
-      fileNameCarbonCopy
-    );
-    success = FileOperations::WriteFileVirual(extraFilename, input, &commentsOnError);
-    if (!success) {
-      logWorker << logger::red << "Error writing optional file. " << commentsOnError.str() << logger::endL;
-    }
-  }
+  currentWorker.WriteAfterTimeoutCarbonCopy(input, fileNameCarbonCopy);
   currentWorker.writingReportFile.Unlock();
   if (success) {
     logWorker << logger::green << "Data written to file: "

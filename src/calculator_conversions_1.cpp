@@ -22,9 +22,8 @@ bool CalculatorConversions::innerExpressionFromChevalleyGenerator(
   } else {
     generatorLetterE.MakeAtom(theCommands.AddOperationNoRepetitionOrReturnIndexFirst("g"), theCommands);
   }
-  output.AddChildOnTop(generatorLetterE);
   generatorIndexE.AssignValue(input.owner->GetDisplayIndexFromGenerator(input.theGeneratorIndex), theCommands);
-  return output.AddChildOnTop(generatorIndexE);
+  return output.MakeXOX(theCommands, theCommands.opUnderscore(), generatorLetterE, generatorIndexE);
 }
 
 bool CalculatorConversions::innerSSLieAlgebra(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -211,9 +210,7 @@ bool CalculatorConversions::innerExpressionFromDynkinSimpleType(
   indexE.AssignValue(input.CartanSymmetricInverseScale, theCommands);
   rankE.AssignValue(input.theRank, theCommands);
   letterAndIndexE.MakeXOX(theCommands, theCommands.opThePower(), letterE, indexE);
-  output.reset(theCommands);
-  output.AddChildOnTop(letterAndIndexE);
-  return output.AddChildOnTop(rankE);
+  return output.MakeXOX(theCommands, theCommands.opUnderscore(), letterAndIndexE, rankE);
 }
 
 template < >
@@ -420,8 +417,9 @@ bool CalculatorConversions::innerStoreCandidateSA(
   List<std::string> keys;
   List<Expression> values;
   input.CheckBasicInitialization();
-  CalculatorConversions::innerExpressionFromDynkinType
-  (theCommands, input.theWeylNonEmbedded->theDynkinType, currentE);
+  CalculatorConversions::innerExpressionFromDynkinType(
+    theCommands, input.theWeylNonEmbedded->theDynkinType, currentE
+  );
   keys.AddOnTop("DynkinType");
   values.AddOnTop(currentE);
   Matrix<Rational> conversionMat;
@@ -456,6 +454,11 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(
   SemisimpleSubalgebras& owner
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerCandidateSAPrecomputed");
+  owner.CheckInitialization();
+  ProgressReport theReport;
+  std::stringstream reportStream;
+  reportStream << "Loading precomputed semisimple subalgebra. ";
+  theReport.Report(reportStream.str());
   Expression DynkinTypeE, ElementsCartanE, generatorsE;
   if (
     !CalculatorConversions::innerLoadKey(theCommands, input, "DynkinType", DynkinTypeE) ||
@@ -463,16 +466,24 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(
   ) {
     return false;
   }
+  reportStream << "Extracted types: " << DynkinTypeE.ToString() << ". ";
+  theReport.Report(reportStream.str());
   outputSubalgebra.owner = &owner;
   DynkinType theNonEmbeddedDynkinType;
   if (!CalculatorConversions::innerDynkinType(theCommands, DynkinTypeE, theNonEmbeddedDynkinType)) {
     return theCommands << "<hr>Failed to load dynkin type of candidate subalgebra from "
     << DynkinTypeE.ToString() << "<hr>";
   }
+  reportStream << "Non embedded Dynkin type: " << DynkinTypeE.ToString() << ". ";
+  theReport.Report(reportStream.str());
   outputSubalgebra.theWeylNonEmbedded = &
   theCommands.theObjectContainer.GetWeylGroupDataCreateIfNotPresent(theNonEmbeddedDynkinType);
+  theReport.Report("DEBUG: got to here!!!");
   outputSubalgebra.theWeylNonEmbedded->MakeFromDynkinType(theNonEmbeddedDynkinType);
+  theReport.Report("DEBUG: and to here!!!!");
   int theRank = owner.owner->GetRank();
+  reportStream << "Extracting matrix of Cartan elements. ";
+  theReport.Report(reportStream.str());
   Matrix<Rational> theHs;
   if (!theCommands.GetMatrix(ElementsCartanE, theHs, nullptr, theRank, nullptr)) {
     return theCommands << "<hr>Failed to load Cartan elements for candidate subalgebra of type "
@@ -500,6 +511,8 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(
       }
     }
   }
+  reportStream << "Extracting generators ... ";
+  theReport.Report(reportStream.str());
   outputSubalgebra.thePosGens.SetSize(0);
   outputSubalgebra.theNegGens.SetSize(0);
   if (CalculatorConversions::innerLoadKey(theCommands, input, "generators", generatorsE)) {
@@ -512,7 +525,7 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(
         return theCommands << "<hr>Failed to load semisimple Lie algebra element from expression "
         << generatorsE[i].ToString() << ". ";
       }
-      if (i%2 == 1) {
+      if (i % 2 == 1) {
         outputSubalgebra.theNegGens.AddOnTop(curGenAlgebraic);
       } else {
         outputSubalgebra.thePosGens.AddOnTop(curGenAlgebraic);
@@ -570,33 +583,36 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
   if (!theCommands.GetVectoRInt(numExploredTypesE, numExploredTypes)) {
     return false;
   }
-  SemisimpleLieAlgebra* ownerSS = nullptr;
+  SemisimpleLieAlgebra* ownerSemisimple = nullptr;
   Expression tempE;
   ProgressReport theReport;
   std::stringstream reportStream;
   reportStream << "Extracting semisimple Lie algebra ... ";
   theReport.Report(reportStream.str());
-  if (!CalculatorConversions::innerSSLieAlgebra(theCommands, theAmbientTypeE, tempE, ownerSS)) {
+  if (!CalculatorConversions::innerSSLieAlgebra(theCommands, theAmbientTypeE, tempE, ownerSemisimple)) {
     return theCommands << "<hr>Error loading semisimple subalgebras: "
     << "failed to extract ambient semisimple Lie algebra. ";
   }
-  reportStream << " type: " << ownerSS->theWeyl.theDynkinType.ToString() << ". ";
+  reportStream << " type: " << ownerSemisimple->theWeyl.theDynkinType.ToString() << ". ";
   theReport.Report(reportStream.str());
 
   SemisimpleSubalgebras& theSAs =
-  theCommands.theObjectContainer.GetSemisimpleSubalgebrasCreateIfNotPresent(ownerSS->theWeyl.theDynkinType);
+  theCommands.theObjectContainer.GetSemisimpleSubalgebrasCreateIfNotPresent(ownerSemisimple->theWeyl.theDynkinType);
+  theSAs.theSubalgebrasNonEmbedded = &theCommands.theObjectContainer.theSSLieAlgebras;
+  theSAs.owner = ownerSemisimple;
   reportStream << " Initializing data structures... ";
   theReport.Report(reportStream.str());
   reportStream << " done. Fetching subalgebra list ... ";
   theReport.Report(reportStream.str());
   theSAsE.Sequencefy();
-  theSAs.theSubalgebras.SetExpectedSize(theSAsE.children.size- 1);
+  theSAs.theSubalgebras.SetExpectedSize(theSAsE.children.size - 1);
   theSAs.theSubalgebras.Clear();
-  theSAs.theSubalgebrasNonEmbedded->SetExpectedSize(theSAsE.children.size- 1);
+  theSAs.theSubalgebrasNonEmbedded->SetExpectedSize(theSAsE.children.size - 1);
   theSAs.flagAttemptToSolveSystems = true;
   theSAs.flagComputeModuleDecomposition = true;
   theSAs.flagComputePairingTable = false;
   theSAs.flagComputeNilradicals = false;
+  theReport.Report("Got to here pt 3");
   theSAs.millisecondsComputationStart = theGlobalVariables.GetElapsedMilliseconds();
   reportStream << " done. <br>Total subalgebras: " << theSAsE.children.size - 1 << ". ";
   theReport.Report(reportStream.str());
@@ -615,6 +631,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
       << i << " extracted from expression: "
       << theSAsE[i].ToString() << ". <hr>";
     }
+
     currentCandidate.CheckFullInitializatioN();
     if (theSAs.theSubalgebras.Contains(currentCandidate.theHs)) {
       theCommands << "<hr>Did not load subalgebra of type "

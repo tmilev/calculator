@@ -2231,6 +2231,39 @@ void StringRoutines::StringSplitExcludeDelimiters(
   }
 }
 
+std::string StringRoutines::ReplaceAll(
+  const std::string& input,
+  const std::string& subStringToReplace,
+  const std::string& replaceWith
+) {
+  std::stringstream out;
+  if (subStringToReplace.size() == 0) {
+    crash << "Not allowed to replace the empty string. " << crash;
+  }
+  for (unsigned i = 0; i < input.size(); i ++) {
+    bool found = true;
+    for (unsigned j = 0; j < subStringToReplace.size(); j ++) {
+      unsigned indexInString = i + j;
+      if (indexInString >= input.size()) {
+        found = false;
+        break;
+      }
+      if (input[indexInString] != subStringToReplace[j]) {
+        found = false;
+        break;
+      }
+    }
+    if (!found) {
+      out << input[i];
+    } else {
+      i += subStringToReplace.size();
+      i --;
+      out << replaceWith;
+    }
+  }
+  return out.str();
+}
+
 void StringRoutines::SplitStringInTwo(
   const std::string& inputString, int firstStringSize, std::string& outputFirst, std::string& outputSecond
 ) {
@@ -2886,7 +2919,10 @@ bool PartFraction::ReduceOnceGeneralMethod(
     bufferVectors.AddOnTop(tempRoot);
     bool ShouldDecompose;
     ShouldDecompose = bufferVectors.GetLinearDependence(tempMat);
-    if (ShouldDecompose && (this->LastDistinguishedIndex != - 1 || this->LastDistinguishedIndex == owner.startingVectors.size)) {
+    if (ShouldDecompose && (
+      this->LastDistinguishedIndex != - 1 ||
+      this->LastDistinguishedIndex == owner.startingVectors.size
+    )) {
       if (IndexInLinRelationOfLastGainingMultiplicityIndex == - 1) {
         ShouldDecompose = false;
       } else {
@@ -3174,7 +3210,9 @@ bool PartFraction::DecomposeFromLinRelation(
 }
 
 bool PartFraction::ReduceMeOnce(
-  const Polynomial<LargeInteger>& myCoeff, Polynomial<LargeInteger>& outputCoeff, Vectors<Rational>& startingVectors
+  const Polynomial<LargeInteger>& myCoeff,
+  Polynomial<LargeInteger>& outputCoeff,
+  Vectors<Rational>& startingVectors
 ) {
   bool hasImprovement = true;
   bool improvedAtLeastOnce = false;

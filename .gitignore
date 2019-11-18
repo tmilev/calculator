@@ -36,3 +36,7 @@ configuration
 calculator-html/autocomplete_keywords.js
 calculator-html/server_information.js
 src/.qmake.stash
+
+output/progress_subalgebras_*
+output/progress_subalgebras_*
+output/result_subalgebras_*

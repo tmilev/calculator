@@ -162,6 +162,10 @@ public:
     const std::string& status,
     const std::string& fileNameCarbonCopy
   );
+  static void WriteAfterTimeoutCarbonCopy(
+    const std::string& input,
+    const std::string& fileNameCarbonCopy
+  );
   static void WriteAfterTimeoutCrash();
   void OutputShowIndicatorOnTimeout(const std::string& message);
   void GetIndicatorOnTimeout(JSData &output, const std::string& message);

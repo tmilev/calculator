@@ -14,15 +14,28 @@ class Matrix;
 class StringRoutines {
 public:
   static bool StringBeginsWith(
-    const std::string& theString, const std::string& desiredBeginning, std::string* outputStringEnd = nullptr
+    const std::string& theString,
+    const std::string& desiredBeginning,
+    std::string* outputStringEnd = nullptr
   );
   static bool StringEndsWith(
-    const std::string& theString, const std::string& desiredEnd, std::string* outputStringBeginning = nullptr
+    const std::string& theString,
+    const std::string& desiredEnd,
+    std::string* outputStringBeginning = nullptr
   );
-  static void StringSplitDefaultDelimiters(const std::string& inputString, List<std::string>& output);
-  static void StringSplitExcludeDelimiter(const std::string& inputString, char delimiter, List<std::string>& output);
+  static void StringSplitDefaultDelimiters(
+    const std::string& inputString,
+    List<std::string>& output
+  );
+  static void StringSplitExcludeDelimiter(
+    const std::string& inputString,
+    char delimiter,
+    List<std::string>& output
+  );
   static void StringSplitExcludeDelimiters(
-    const std::string& inputString, const List<char>& delimiters, List<std::string>& output
+    const std::string& inputString,
+    const List<char>& delimiters,
+    List<std::string>& output
   );
   static void StringTrimWhiteSpace(const std::string& inputString, std::string& output);
   static void StringTrimToLengthWithHash(std::string& inputOutput, int desiredLength50AtLeast = 150);
@@ -39,7 +52,17 @@ public:
   static std::string ConvertStringToJavascriptString(const std::string& input);
   static std::string ConvertStringToJavascriptVariable(const std::string& input);
   static std::string StringTrimWhiteSpace(const std::string& inputString);
-  static void SplitStringInTwo(const std::string& inputString, int firstStringSize, std::string& outputFirst, std::string& outputSecond);
+  static void SplitStringInTwo(
+    const std::string& inputString,
+    int firstStringSize,
+    std::string& outputFirst,
+    std::string& outputSecond
+  );
+  static std::string ReplaceAll(
+    const std::string& input,
+    const std::string& subStringToReplace,
+    const std::string& replaceWith
+  );
   static std::string StringShortenInsertDots(const std::string& inputString, int maxNumChars);
   static bool isASCIICharacterVisible(char input);
   class Differ {

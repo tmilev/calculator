@@ -386,8 +386,8 @@ void SemisimpleSubalgebras::CheckFileWritePermissions() {
     << " for output. However, the file failed to create. "
     << "Possible explanations: "
     << "1. Programming error. "
-    << "2. The calculator has no write permission to the"
-    << " folder in which the file is located. "
+    << "2. The calculator has no write permission to the "
+    << "folder in which the file is located. "
     << "3. The folder does not exist for some reason lying outside of the calculator. " << crash;
   }
   FileOperations::OpenFileCreateIfNotPresentVirtual(testFile, testFileNameRelative, false, true, false);
@@ -671,8 +671,9 @@ void SemisimpleSubalgebras::WriteSubalgebraToFile(FormatExpressions *theFormat, 
       << ", I requested to create file "
       << this->GetRelativePhysicalFileNameFKFTNilradicals(subalgebraIndex)
       << " for output. However, the file failed to create. "
-      << " Possible explanations: 1. Programming error. 2. The calculator has no write permission to the"
-      << " folder in which the file is located. "
+      << "Possible explanations: 1. Programming error. "
+      << "2. The calculator has no write permission to the "
+      << "folder in which the file is located. "
       << "3. The folder does not exist for some reason lying outside of the calculator. " << crash;
     }
     outputFileFKFTnilradicals << "<html>"
@@ -789,7 +790,8 @@ std::string SemisimpleSubalgebras::ToStringSl2s(FormatExpressions *theFormat) {
       numComputedOrbits ++;
     }
   }
-  out << "<hr>Of the " << this->theOrbiTs.size << " h element conjugacy classes " << numComputedOrbits
+  out << "<hr>Of the " << this->theOrbiTs.size
+  << " h element conjugacy classes " << numComputedOrbits
   << " had their Weyl group automorphism orbits computed and buffered. "
   << "The h elements and their computed orbit sizes follow. ";
   out << "<table><tr><td>h element</td><td>orbit size</td></tr>";
@@ -818,9 +820,9 @@ std::string SemisimpleSubalgebras::ToStringPart3(FormatExpressions* theFormat) {
     out << "<hr>Calculator input for loading subalgebras directly without recomputation. "
     << this->ToStringProgressReport(theFormat);
   } else {
-    std::string sl2SubalgebraReports = "orbit_computation_information_" +
+    std::string sl2SubalgebraReports = this->owner->ToStringVirtualFolderName() + "orbit_computation_information_" +
     FileOperations::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) + ".html";
-    std::string loadSubalgebrasFile = "load_algebra_" +
+    std::string loadSubalgebrasFile = this->owner->ToStringVirtualFolderName() + "load_algebra_" +
     FileOperations::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) + ".html";
 
     out << "<a href = '" << sl2SubalgebraReports  << "'>Nilpotent orbit computation summary</a>.";
@@ -836,8 +838,8 @@ std::string SemisimpleSubalgebras::ToStringPart3(FormatExpressions* theFormat) {
     << "<body>"
     << this->ToStringProgressReport(theFormat)
     << "</body></html>";
-    FileOperations::WriteFileVirual("output/" + sl2SubalgebraReports, fileSl2Content.str(), nullptr);
-    FileOperations::WriteFileVirual("output/" + loadSubalgebrasFile, fileLoadContent.str(), nullptr);
+    FileOperations::WriteFileVirual(sl2SubalgebraReports, fileSl2Content.str(), nullptr);
+    FileOperations::WriteFileVirual(loadSubalgebrasFile, fileLoadContent.str(), nullptr);
   }
   return out.str();
 }
@@ -1560,7 +1562,7 @@ bool SemisimpleSubalgebras::RemoveLastSubalgebra() {
 
 bool SemisimpleSubalgebras::GetCentralizerTypeIfComputableAndKnown(const DynkinType& input, DynkinType& output) {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::GetCentralizerTypeIfComputableAndKnown");
-  //this function is rudimentary and fails to return a good result in many cases when
+  // This function is rudimentary and fails to return a good result in many cases when
   // a result is actually computable. This needs to be improved.
   if (!input.IsSimple()) {
     return false;
@@ -2014,8 +2016,7 @@ std::string SemisimpleSubalgebras::ToStringProgressReport(FormatExpressions* the
   std::stringstream out;
   out << this->ToStringState(theFormat);
   if (this->ToStringExpressionString != nullptr) {
-    out << "\n<hr>\n" << "SetOutputFile(\"subalgebras_"
-    << FileOperations::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) << "\");\n<br>\n"
+    out << "\n<hr>\n"
     << "LoadSemisimpleSubalgebras {}" << this->ToStringExpressionString(*this);
   }
   out << "\n\n<hr>";
@@ -2060,12 +2061,12 @@ bool SemisimpleSubalgebras::IncrementReturnFalseIfPastLast() {
   );
   this->CheckConsistency();
   if (newSubalgebraCreated) {
-    if (! newCandidate.flagSystemSolved && !newCandidate.flagSystemProvedToHaveNoSolution) {
+    if (!newCandidate.flagSystemSolved && !newCandidate.flagSystemProvedToHaveNoSolution) {
       this->flagRealizedAllCandidates = false;
       std::stringstream out;
       out << "<hr>Failed to realize type " << newCandidate.theWeylNonEmbedded->theDynkinType.ToString()
       << " because I couldn't handle the polynomial system. "
-      << " One poly system that governs the embedding follows.<br>" << newCandidate.ToStringSystemPart2() << "<hr>";
+      << "One poly system that governs the embedding follows.<br>" << newCandidate.ToStringSystemPart2() << "<hr>";
       this->comments = out.str();
       return true;
     }
@@ -3976,7 +3977,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWVsOnly(HashedList<
   allHs.AddListOnTop(this->theHs);
   allHs.AddListOnTop(this->CartanOfCentralizer);
   theAdsOfHs.SetSize(allHs.size);
-  for (int j = 0; j<allHs.size; j ++) {
+  for (int j = 0; j < allHs.size; j ++) {
     tempElt.MakeHgenerator(allHs[j], this->GetAmbientSS());
     this->GetAmbientSS().GetAd(theAdsOfHs[j], tempElt);
   }
@@ -3984,17 +3985,17 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWVsOnly(HashedList<
   this->HighestVectorsNonSorted.SetSize(0);
   for (int i = 0; i < inputHws.size; i ++) {
     adIncludingCartanActions = commonAd;
-    for (int j = 0; j<allHs.size; j ++) {
+    for (int j = 0; j < allHs.size; j ++) {
       tempAd = theAdsOfHs[j];
       temp.MakeIdMatrix(this->GetAmbientSS().GetNumGenerators());
-      temp*= inputHws[i][j];
-      tempAd-= temp;
+      temp *= inputHws[i][j];
+      tempAd -= temp;
       adIncludingCartanActions.AppendMatrixToTheBottom(tempAd);
     }
     adIncludingCartanActions.GetZeroEigenSpace(outputV);
     //  stOutput << "<br>Common ad: " << commonAd.ToString();
     //  stOutput << "<br>Eigenvectors: " << outputV.ToString();
-    for (int j = 0; j<outputV.size; j ++) {
+    for (int j = 0; j < outputV.size; j ++) {
       outputV[j].ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
       tempElt.AssignVectorNegRootSpacesCartanPosRootSpaces(outputV[j], this->GetAmbientSS());
       this->HighestVectorsNonSorted.AddOnTop(tempElt);
@@ -4226,7 +4227,7 @@ bool CandidateSSSubalgebra::ComputeChar(bool allowBadCharacter) {
     for (int i = 0; i < this->CartanSAsByComponentScaledToActByTwo.size; i ++) {
       for (int j = 0; j < this->CartanSAsByComponentScaledToActByTwo[i].size; j ++) {
         counter ++;
-        tempMon.weightFundamentalCoordS[counter] =(
+        tempMon.weightFundamentalCoordS[counter] = (
           this->GetAmbientWeyl().RootScalarCartanRoot(this->GetAmbientWeyl().RootSystem[k], this->theHsScaledToActByTwo[counter])
         );
 //        (this->GetAmbientWeyl().RootScalarCartanRoot(this->GetAmbientWeyl().RootSystem[k], this->CartanSAsByComponent[i][j])

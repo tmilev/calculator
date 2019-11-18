@@ -470,7 +470,6 @@ bool SemisimpleSubalgebras::ComputeStructureWriteFiles(
   this->owner = &newOwner;
   this->ComputeFolderNames(this->currentFormat);
   if (!FileOperations::FileExistsVirtual(this->VirtualNameMainFile1) || forceRecompute) {
-
     if (doFullInit) {
       this->millisecondsComputationStart = theGlobalVariables.GetElapsedMilliseconds();
     }

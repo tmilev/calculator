@@ -39,9 +39,9 @@ public:
    }
    void MakeFullRank(int dim);
    // true if it wasn't already there
-   bool AddVector(const Vector<coefficient> &v);
-   bool AddVectorDestructively(Vector<coefficient> &v);
-   bool AddVectorToBasis(const Vector<coefficient> &v);
+   bool AddVector(const Vector<coefficient>& v);
+   bool AddVectorDestructively(Vector<coefficient>& v);
+   bool AddVectorToBasis(const Vector<coefficient>& v);
    bool GetCoordinatesDestructively(Vector<coefficient>& v, Vector<coefficient>& out) const;
    VectorSpace<coefficient> Intersection(const VectorSpace<coefficient>& other) const;
    VectorSpace<coefficient> Union(const VectorSpace<coefficient>& other) const;

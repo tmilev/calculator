@@ -412,6 +412,9 @@ public:
 
   std::string VirtualNameMainFile1;
 
+  // Possible values:
+  // 1. nulltpr.
+  // 2. CalculatorConversions::innerStringFromSemisimpleSubalgebras.
   std::string (*ToStringExpressionString)(SemisimpleSubalgebras& input);
   bool LoadState(
     List<int>& currentChainInt,

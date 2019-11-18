@@ -146,6 +146,9 @@ bool TimerThreadData::HandleComputationTimeout() {
   if (this->elapsedComputationTimeInMilliseconds <= theGlobalVariables.millisecondsReplyAfterComputation) {
     return false;
   }
+  if (!theGlobalVariables.theProgress.ReportAlloweD()) {
+    return false;
+  }
   MacroRegisterFunctionWithName("TimerThreadData::HandleComputationTimeout");
   if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection == nullptr) {
     return false;

@@ -112,8 +112,7 @@ bool GlobalVariables::Progress::ReportAlloweD(int type) {
 
 GlobalVariables::Progress::Progress() {
   this->flagTimedOut = false;
-  this->flagBanProcessMonitoring = false;
-  this->flagBanProcessMonitoring = false;
+  this->flagBanProcessMonitoring = true;
   this->flagTimedOut = false;
   this->flagReportAlloweD = false;
  }

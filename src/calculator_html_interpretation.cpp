@@ -995,6 +995,7 @@ JSData HtmlInterpretation::SubmitAnswersJSON(
   const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake
 ) {
   MacroRegisterFunctionWithName("HtmlInterpretation::submitAnswers");
+  StateMaintainer<bool> maintain(theGlobalVariables.theProgress.flagBanProcessMonitoring);
   theGlobalVariables.theProgress.flagBanProcessMonitoring = true;
   std::stringstream output, errorStream, comments;
   JSData result;
@@ -1420,6 +1421,7 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp(
   const std::string& inputRandomSeed, std::string* outputNakedAnswer, bool* outputDidSucceed
 ) {
   MacroRegisterFunctionWithName("CalculatorHTML::GetAnswerOnGiveUp");
+  StateMaintainer<bool> maintain(theGlobalVariables.theProgress.flagBanProcessMonitoring);
   theGlobalVariables.theProgress.flagBanProcessMonitoring = true;
   if (outputNakedAnswer != nullptr) {
     *outputNakedAnswer = "";

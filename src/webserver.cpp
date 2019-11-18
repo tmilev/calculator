@@ -1418,7 +1418,7 @@ int WebWorker::ProcessPauseWorker() {
 
 int WebWorker::ProcessComputationIndicator() {
   MacroRegisterFunctionWithName("WebWorker::ProcessComputationIndicator");
-  this->SetHeaderOKNoContentLength("");  
+  this->SetHeaderOKNoContentLength("");
   logWorker << "Processing get request indicator." << logger::endL;
   JSData result = this->ProcessComputationIndicatorJSData();
   stOutput << result.ToString(false);
@@ -1497,6 +1497,11 @@ int WebWorker::GetIndexIfRunningWorkerId(
 
 JSData WebWorker::ProcessComputationIndicatorJSData() {
   MacroRegisterFunctionWithName("WebWorker::ProcessComputationIndicatorJSData");
+  // Timer thread will no longer time us out.
+  StateMaintainer<bool> maintainReport(theGlobalVariables.theProgress.flagReportAlloweD);
+  StateMaintainer<bool> maintainProcess(theGlobalVariables.theProgress.flagBanProcessMonitoring);
+  theGlobalVariables.theProgress.flagReportAlloweD = false;
+  theGlobalVariables.theProgress.flagBanProcessMonitoring = true;
   JSData result;
   std::stringstream commentsOnFailure;
   if (!this->flagUsingSSLInWorkerProcess) {

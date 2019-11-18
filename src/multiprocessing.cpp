@@ -69,7 +69,7 @@ bool MutexProcess::CheckConsistency() {
 
 MutexProcess::MutexProcess() {
   this->flagDeallocated = false;
-  this->flagLockCurrentlyHeld = false;
+  this->flagLockHeldByAnotherThread = false;
 }
 
 MutexProcess::~MutexProcess() {
@@ -144,11 +144,16 @@ bool MutexProcess::ResetNoAllocation() {
 
 bool MutexProcess::Lock() {
   this->CheckConsistency();
+  if (this->flagLockHeldByAnotherThread) {
+    crash << "MutexProcess about to deadlock itself. " << crash;
+  }
   MutexLockGuard guard(this->lockThreads.GetElement()); // <- lock out other threads
+  this->flagLockHeldByAnotherThread = true;
   bool success = this->lockPipe.ReadOnceIfFailThenCrash(false, true);
   if (!success) {
     logBlock << logger::red << "Error: " << this->currentProcessName << " failed to lock pipe " << this->ToString() << logger::endL;
   }
+  this->flagLockHeldByAnotherThread = false;
   return success;
 }
 

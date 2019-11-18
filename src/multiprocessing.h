@@ -78,7 +78,7 @@ public:
   static std::string currentProcessName;
 
   PipePrimitive lockPipe;
-  bool flagLockCurrentlyHeld;
+  bool flagLockHeldByAnotherThread;
   std::string name;
   MemorySaving<MutexRecursiveWrapper> lockThreads; //<- to avoid two threads from the same process blocking the process.
   bool flagDeallocated;

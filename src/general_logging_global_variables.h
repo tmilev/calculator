@@ -36,27 +36,30 @@ public:
 
 class logger;
 
+// Warning: please pay attention to the static initialization order fiasco.
+// The fiasco states that global objects (allocated before main)
+// may be allocated in an unexpected order.
+// In particular an object allocated before main cannot
+// assume that the constructor of theGlobalVariables
+// object has already been called.
+// In particular one should avoid declaring objects at global scope as
+// the constructors of those may rely on the theGlobalVariables object.
+// A possible "horror" scenario: the programmer decides to register a stack trace
+// in the constructor of an object. That runs just fine.
+// One year later, the programmer decides to
+// declare a global object of that type,
+// and again everything runs just fine as theGlobalVariables
+// happens to be initialized before that object.
+// Finally, two years later, the same programmer
+// decides to declare a global object of the same type in
+// a file initialized before the declaration of theGlobalVariables.
+// This causes a nasty and difficult to catch
+// crash before main.
 class GlobalVariables {
-  // Warning: please pay attention to the static initialization order fiasco.
-  // The fiasco states that global objects (allocated before main)
-  // may be allocated in an unexpected order.
-  // In particular an object allocated before main cannot
-  // assume that the constructor of theGlobalVariables
-  // object has already been called.
-  // In particular one should avoid declaring objects at global scope as
-  // the constructors of those may rely on the theGlobalVariables object.
-  // A possible "horror" scenario: the programmer decides to register a stack trace
-  // in the constructor of an object. That runs just fine.
-  // One year later, the programmer decides to
-  // declare a global object of that type,
-  // and again everything runs just fine as theGlobalVariables
-  // happens to be initialized before that object.
-  // Finally, two years later, the same programmer
-  // decides to declare a global object of the same type in
-  // a file initialized before the declaration of theGlobalVariables.
-  // This causes a nasty and difficult to catch
-  // crash before main.
 public:
+  GlobalVariables();
+  ~GlobalVariables();
+
   int (*pointerCallSystemNoOutput)(const std::string& theSystemCommand);
   std::string (*pointerCallSystemWithOutput)(const std::string& theSystemCommand);
   void (*pointerCallChDir)(const std::string& theDirectoryName);
@@ -223,8 +226,6 @@ public:
   bool ConfigurationStore();
   bool ConfigurationLoad();
   void ConfigurationProcess();
-  GlobalVariables();
-  ~GlobalVariables();
   static HashedList<FileInformation>& theSourceCodeFiles();
   void WriteSourceCodeFilesJS();
   int GetGlobalTimeInSeconds();

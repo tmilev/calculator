@@ -520,6 +520,24 @@ class PointerObjectDestroyer {
   }
 };
 
+template <typename basicType>
+class StateMaintainer {
+public:
+  basicType *toMaintain;
+  basicType contentAtStart;
+  StateMaintainer(basicType& inputToMaintain) {
+    this->toMaintain = &inputToMaintain;
+    this->contentAtStart = inputToMaintain;
+  }
+  ~StateMaintainer() {
+    if (this->toMaintain == nullptr) {
+      crash << "Non-initialized state maintainer. " << crash;
+    }
+    *(this->toMaintain) = this->contentAtStart;
+    this->toMaintain = nullptr;
+  }
+};
+
 class RecursionDepthCounter {
 public:
   int* theCounter;

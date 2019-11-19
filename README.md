@@ -21,6 +21,7 @@ git clone https://github.com/tmilev/calculator.git
 Please note that **the files you create with the calculator will be placed in baseFolder**, i.e., inside the first folder you created and where you checked out the calculator trunk, but outside of that calculator trunk. In this way, the files you create via the calculator are kept outside of the calculator folder, and so, you can put **baseFolder** in a repository of your own. 
 
 3. Compile the calculator.
+
 3.1 Default build.
 - This build assumes you have openssl and mongoDB installed on your system. 
 - However, if you don't have these installed, the build should auto-detect, turn off mongoDB and openSSL and not fail. If, contrary to promised, the build does fail, please file a bug.

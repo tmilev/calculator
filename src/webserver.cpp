@@ -240,7 +240,7 @@ bool WebWorker::ReceiveAllHttpSSL() {
   this->SendAllBytesNoHeaders();
   this->remainingBytesToSenD.SetSize(0);
   std::string bufferString;
-  while ( static_cast<signed>(this->messageBody.size()) < this->ContentLength) {
+  while (static_cast<signed>(this->messageBody.size()) < this->ContentLength) {
     if (theGlobalVariables.GetElapsedSeconds() - numSecondsAtStart > 180) {
       this->error = "Receiving bytes timed out (180 seconds).";
       logIO << this->error << logger::endL;
@@ -268,7 +268,6 @@ bool WebWorker::ReceiveAllHttpSSL() {
         continue;
       }
       this->error = "Error fetching message body: " + this->parent->ToStringLastErrorDescription();
-      ERR_print_errors_fp(stderr);
       logIO << this->error << logger::endL;
       this->displayUserInput = this->error;
       return false;

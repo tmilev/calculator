@@ -13,27 +13,31 @@ static ProjectInformationInstance projectInfoInstanceTransportLayerSecurityHeade
 // on opensuse:
 // sudo yast -i libopenssl-devel
 
-#include <openssl/rsa.h>
-#include <openssl/crypto.h>
-#include <openssl/x509.h>
-#include <openssl/pem.h>
-#include <openssl/ssl.h>
-#include <openssl/err.h>
 
 #include "crypto.h"
 #include "general_logging_global_variables.h"
 class TransportLayerSecurity;
+
+//Forward-declare openssl dependencies
+class SSL;
+class X509;
+class SSL_CTX;
+struct SSL_METHOD;
+
 class TransportLayerSecurityOpenSSL {
 public:
+  SSL* sslData;
+  X509* peer_certificate;
+  SSL_CTX* context;
+  const SSL_METHOD* theSSLMethod;
+
+
+
   std::string name;
   TransportLayerSecurity* owner;
   int errorCode;
   static bool flagSSLlibraryInitialized;
-  SSL* sslData;
-  X509* peer_certificate;
-  SSL_CTX* context;
   bool flagSSLHandshakeSuccessful;
-  const SSL_METHOD* theSSLMethod;
   bool flagContextInitialized;
   bool flagIsServer;
   List<int> socketStack;

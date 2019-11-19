@@ -5,6 +5,15 @@
 
 #include <unistd.h> //<- close, open defined here
 
+#ifdef MACRO_use_open_ssl
+#include <openssl/rsa.h>
+#include <openssl/crypto.h>
+#include <openssl/x509.h>
+#include <openssl/pem.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+#endif
+
 extern ProjectInformationInstance projectInfoInstanceTransportLayerSecurityOpenSSLImplementation;
 ProjectInformationInstance projectInfoInstanceTransportLayerSecurityOpenSSLImplementation(__FILE__, "Contains all openSSL-related implementation.");
 
@@ -20,8 +29,10 @@ TransportLayerSecurityOpenSSL::~TransportLayerSecurityOpenSSL() {
 }
 
 void TransportLayerSecurityOpenSSL::FreeSSL() {
+#ifdef MACRO_use_open_ssl
   SSL_free(this->sslData);
   this->sslData = nullptr;
+#endif
 }
 
 void TransportLayerSecurityOpenSSL::FreeEverythingShutdownSSL() {
@@ -34,12 +45,13 @@ void TransportLayerSecurityOpenSSL::FreeEverythingShutdownSSL() {
 }
 
 void TransportLayerSecurityOpenSSL::FreeContext() {
-  //SSL_CTX_free (this->contextClient);
+#ifdef  MACRO_use_open_ssl
+
   if (this->context != nullptr && this->name != "") {
     logOpenSSL << logger::blue << "DEBUG: Freeing openSSL context: " << this->name << ". " << logger::endL;
   }
   SSL_CTX_free (this->context);
-  //this->contextClient = 0;
+#endif // MACRO_use_open_ssl
   this->context = nullptr;
 }
 
@@ -51,6 +63,7 @@ void TransportLayerSecurityOpenSSL::initSSLLibrary() {
   this->flagSSLlibraryInitialized = true;
   std::stringstream commentsOnError;
   // this command loads error strings and initializes openSSL.
+#ifdef MACRO_use_open_ssl
   SSL_load_error_strings();
   int loadedSuccessfully = OpenSSL_add_ssl_algorithms();
   if (!loadedSuccessfully) {
@@ -60,5 +73,5 @@ void TransportLayerSecurityOpenSSL::initSSLLibrary() {
   if (commentsOnError.str() != "") {
     logServer << logger::red << "OpenSSL initialization comments: " << logger::blue << commentsOnError.str() << logger::endL;
   }
+#endif // MACRO_use_open_ssl
 }
-

@@ -12,6 +12,8 @@
 #include <netdb.h> //<-addrinfo and related data structures defined here
 #include <iomanip>
 
+
+
 extern ProjectInformationInstance projectInfoInstanceTransportLayerSecurityImplementation;
 ProjectInformationInstance projectInfoInstanceTransportLayerSecurityImplementation(__FILE__, "TSL/ssl implementation.");
 
@@ -106,6 +108,9 @@ bool TransportLayerSecurity::initSSLKeyFiles(std::stringstream* commentsOnFailur
 
 bool TransportLayerSecurityOpenSSL::initSSLKeyFilesCreateOnDemand() {
   MacroRegisterFunctionWithName("TransportLayerSecurityOpenSSL::initSSLKeyFilesCreateOnDemand");
+  if (!theGlobalVariables.flagSSLIsAvailable) {
+    return false;
+  }
   if (
     FileOperations::FileExistsVirtual(TransportLayerSecurity::fileCertificate, true, true) &&
     FileOperations::FileExistsVirtual(TransportLayerSecurity::fileKey, true, true)
@@ -184,6 +189,8 @@ void TransportLayerSecurityOpenSSL::initSSLCommon(bool isServer) {
   this->flagIsServer = isServer;
   this->initSSLLibrary();
   std::stringstream commentsOnError;
+
+#ifdef MACRO_use_open_ssl
   if (isServer) {
     this->theSSLMethod = SSLv23_server_method();
   } else {
@@ -196,6 +203,7 @@ void TransportLayerSecurityOpenSSL::initSSLCommon(bool isServer) {
     ERR_print_errors_fp(stderr);
     crash << "Openssl context error.\n" << commentsOnError.str() << crash;
   }
+#endif // MACRO_use_open_ssl
   this->flagContextInitialized = true;
   // Server does not verify client certificate:
   //SSL_CTX_set_verify(this->context, SSL_VERIFY_NONE, 0);
@@ -250,6 +258,7 @@ void TransportLayerSecurityOpenSSL::initSSLServer() {
   if (!this->initSSLKeyFiles()) {
     return;
   }
+#ifdef MACRO_use_open_ssl
   logServer << logger::green << "SSL is available." << logger::endL;
   SSL_CTX_set_ecdh_auto(this->context, 1);
   if (SSL_CTX_use_certificate_chain_file(this->context, signedFileCertificate3Physical.c_str()) <= 0) {
@@ -283,6 +292,9 @@ void TransportLayerSecurityOpenSSL::initSSLServer() {
     logServer << "Private key does not match the certificate public key. ";
     crash << "Private key does not match the certificate public key. " << crash;
   }
+#else
+  logServer << logger::red << "Openssl not available." << logger::endL;
+#endif // MACRO_use_open_ssl
 }
 
 bool TransportLayerSecurity::SSLReadLoop(
@@ -368,7 +380,12 @@ void TransportLayerSecurityOpenSSL::ClearErrorQueue(
   bool includeNoErrorInComments
 ) {
   MacroRegisterFunctionWithName("TransportLayerSecurity::ToStringError");
+  (void) errorCode;
+  (void) outputError;
+  (void) commentsGeneral;
+  (void) includeNoErrorInComments;
 
+#ifdef MACRO_use_open_ssl
   int numErrors = 0;
   ERR_print_errors_fp(stderr);
   int theCode = SSL_get_error(this->sslData, errorCode);
@@ -437,12 +454,16 @@ void TransportLayerSecurityOpenSSL::ClearErrorQueue(
     }
     break;
   }
+#endif // MACRO_use_open_ssl
 }
 
 void TransportLayerSecurityOpenSSL::DoSetSocket(int theSocket) {
   MacroRegisterFunctionWithName("TransportLayerSecurity::DoSetSocket");
+  (void) theSocket;
+#ifdef MACRO_use_open_ssl
   int result = 0;
   for (int i = 0; i < 10; i ++) {
+
     result = SSL_set_fd(this->sslData, theSocket);
     if (result != 0) {
       break;
@@ -451,6 +472,7 @@ void TransportLayerSecurityOpenSSL::DoSetSocket(int theSocket) {
   if (result == 0) {
     crash << "Failed to set socket of server. " << crash;
   }
+#endif // MACRO_use_open_ssl
 }
 
 void TransportLayerSecurityOpenSSL::SetSocketAddToStack(int theSocket) {
@@ -485,8 +507,13 @@ bool TransportLayerSecurityOpenSSL::HandShakeIamClientNoSocketCleanup(
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral
 ) {
+  (void) inputSocketID;
+  (void) commentsOnFailure;
+  (void) commentsGeneral;
   this->FreeSSL();
   this->initSSLClient();
+#ifdef MACRO_use_open_ssl
+
   this->sslData = SSL_new(this->context);
   if (this->sslData == nullptr) {
     this->flagSSLHandshakeSuccessful = false;
@@ -595,6 +622,9 @@ bool TransportLayerSecurityOpenSSL::HandShakeIamClientNoSocketCleanup(
     this->InspectCertificates(commentsOnFailure, commentsGeneral);
   }
   return true;
+#else
+  return false;
+#endif // MACRO_use_open_ssl
 }
 
 CipherSuiteSpecification TransportLayerSecurityServer::GetCipherCrashIfUnknown(int inputId) {
@@ -2386,9 +2416,12 @@ bool TransportLayerSecurity::HandShakeIamClientNoSocketCleanup(
 }
 
 bool TransportLayerSecurityOpenSSL::InspectCertificates(
-  std::stringstream *commentsOnFailure, std::stringstream *commentsGeneral
+  std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
 ) {
   MacroRegisterFunctionWithName("TransportLayerSecurity::InspectCertificates");
+  (void) commentsOnFailure;
+  (void) commentsGeneral;
+#ifdef MACRO_use_open_ssl
   this->peer_certificate = SSL_get_peer_certificate(this->sslData);
   if (this->peer_certificate != nullptr) {
     char* tempCharPtr = nullptr;
@@ -2435,6 +2468,9 @@ bool TransportLayerSecurityOpenSSL::InspectCertificates(
     }
     return false;
   }
+#else
+  return false;
+#endif
 }
 
 int TransportLayerSecurityOpenSSL::SSLRead(
@@ -2443,13 +2479,20 @@ int TransportLayerSecurityOpenSSL::SSLRead(
   std::stringstream* commentsGeneral,
   bool includeNoErrorInComments
 ) {
+  (void) readBuffer;
+  (void) outputError;
+  (void) commentsGeneral;
+  (void) includeNoErrorInComments;
+#ifdef MACRO_use_open_ssl
   ERR_clear_error();
   int result = SSL_read(this->sslData, readBuffer.TheObjects, readBuffer.size);
   this->ClearErrorQueue(
     result, outputError, commentsGeneral, includeNoErrorInComments
   );
   return result;
-
+#else
+  return - 1;
+#endif // MACRO_use_open_ssl
 }
 
 int TransportLayerSecurity::SSLRead(
@@ -2474,7 +2517,12 @@ int TransportLayerSecurityOpenSSL::SSLWrite(
   std::stringstream* commentsOnError,
   bool includeNoErrorInComments
 ) {
+  (void) writeBuffer;
+  (void) outputError;
   (void) commentsGeneral;
+  (void) commentsOnError;
+  (void) includeNoErrorInComments;
+#ifdef MACRO_use_open_ssl
   ERR_clear_error();
   if (writeBuffer.size <= 0) {
     crash << "Write buffer size: " << writeBuffer.size
@@ -2488,6 +2536,9 @@ int TransportLayerSecurityOpenSSL::SSLWrite(
     result, outputError, commentsOnError, includeNoErrorInComments
   );
   return result;
+#else
+  return - 1;
+#endif
 }
 
 int TransportLayerSecurity::SSLWrite(
@@ -2513,9 +2564,12 @@ int TransportLayerSecurity::SSLWrite(
 
 bool TransportLayerSecurityOpenSSL::HandShakeIamServer(int inputSocketID, std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("WebServer::HandShakeIamServer");
+  (void) inputSocketID;
+  (void) commentsOnFailure;
   if (this->sslData != nullptr) {
     crash << "SSL data expected to be zero. " << crash;
   }
+#ifdef MACRO_use_open_ssl
   this->sslData = SSL_new(this->context);
   SSL_set_verify(this->sslData, SSL_VERIFY_NONE, nullptr);
   if (this->sslData == nullptr) {
@@ -2605,6 +2659,7 @@ bool TransportLayerSecurityOpenSSL::HandShakeIamServer(int inputSocketID, std::s
       break;
     }
   }
+#endif
   return this->flagSSLHandshakeSuccessful;
 }
 

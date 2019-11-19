@@ -125,7 +125,8 @@ function storeEditedPage() {
   theURL += `${pathnames.urls.calculatorAPI}?`;
   var queryParameters = "";
   queryParameters += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.modifyPage}`;
-  queryParameters += `&${pathnames.urlFields.requests.fileContent}=${editor.getValue()}`;
+  var content = encodeURIComponent(editor.getValue());
+  queryParameters += `&${pathnames.urlFields.requests.fileContent}=${content}`;
   queryParameters += `&${pathnames.urlFields.problem.fileName}=${thePage.storage.variables.editor.currentlyEditedPage.getValue()}`;
   thePage.pages.problemPage.flagLoaded = false;
   submitRequests.submitPOST({

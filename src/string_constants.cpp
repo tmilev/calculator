@@ -69,6 +69,7 @@ std::string WebAPI::request::submitExercisePreviewNoLogin = "submitExercisePrevi
 std::string WebAPI::request::indicator = "indicator";
 std::string WebAPI::request::pause = "pause";
 std::string WebAPI::request::unpause = "unpause";
+std::string WebAPI::request::modifyPage = "modifyPage";
 std::string WebAPI::request::clonePage = "clonePageJSON";
 std::string WebAPI::request::problemGiveUp = "problemGiveUp";
 std::string WebAPI::request::problemGiveUpNoLogin = "problemGiveUpNoLogin";

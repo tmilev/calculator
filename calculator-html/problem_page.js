@@ -95,7 +95,14 @@ Problem.prototype.initializeBasic = function(problemData) {
   }
   var currentCourse = window.calculator.mainPage.storage.variables.currentCourse;
   this.flagForReal = (currentCourse.exerciseType.getValue() !== pathnames.urlFields.exerciseJSON);
-  this.randomSeed = currentCourse.randomSeed.getValue();  
+  var incomingRandomSeed = currentCourse.randomSeed.getValue();
+  if (incomingRandomSeed === "" || incomingRandomSeed === null || incomingRandomSeed === undefined) {
+    if (!this.flagForReal) {
+      return;
+    }
+  } 
+  this.randomSeed = incomingRandomSeed;  
+  currentCourse.randomSeed.value = "";
 }
 
 Problem.prototype.initializeInfo = function(problemData, inputParentIdURLed) {
@@ -252,10 +259,16 @@ function getCalculatorURLRequestFileCourseTopicsFromStorage() {
   if (randomSeed !== null && randomSeed !== "" && randomSeed !== undefined) {
     result += `randomSeed=${randomSeed}&`;
   }
+  currentCourse.randomSeed.value = "";
   return result;
 }
 
-Problem.prototype.getAppAnchorRequestFileCourseTopics = function(isScoredQuiz) {
+Problem.prototype.getAppAnchorRequestFileCourseTopics = function(
+  /**@type {boolean} */
+  isScoredQuiz, 
+  /**@type {boolean} */
+  includeRandomSeed,
+) {
   var thePage = window.calculator.mainPage;
   var theExerciseType = pathnames.urlFields.exerciseJSON;
   if (isScoredQuiz) {
@@ -269,8 +282,14 @@ Problem.prototype.getAppAnchorRequestFileCourseTopics = function(isScoredQuiz) {
     courseHome: thePage.storage.variables.currentCourse.courseHome.getValue(),
     topicList: thePage.storage.variables.currentCourse.topicList.getValue(),
   };
-  if (this.randomSeed !== "" && this.randomSeed !== null && this.randomSeed !== undefined) {
-    requestJSON["randomSeed"] = this.randomSeed;
+  if (includeRandomSeed) {
+    if (
+      this.randomSeed !== "" && 
+      this.randomSeed !== null && 
+      this.randomSeed !== undefined
+    ) {
+      requestJSON["randomSeed"] = this.randomSeed;
+    }
   }
   var thePage = window.calculator.mainPage;
   var stringifiedHash = thePage.storage.getCleanedUpURL(requestJSON);
@@ -319,24 +338,31 @@ Problem.prototype.getProblemNavigationContent = function() {
   var result = "";
   var linkType = "problemLinkPractice";
   var defaultRequest = pathnames.urlFields.exerciseJSON;
+  var isScoredQuiz = false;
   if (this.flagForReal && thePage.user.flagLoggedIn) {
     defaultRequest = pathnames.urlFields.scoredQuizJSON;
-    linkType = "problemLinkQuiz"
+    linkType = "problemLinkQuiz";
+    isScoredQuiz = true;
   }
   if (this.previousProblemId !== null && this.previousProblemId !== "" && this.previousProblemId !== undefined) {
     var previousProblem = allProblems.getProblemById(this.previousProblemId); 
-    var previousURL = previousProblem.getAppAnchorRequestFileCourseTopics();
+    var previousURL = previousProblem.getAppAnchorRequestFileCourseTopics(isScoredQuiz, false);
     result += `<a class = '${linkType}' href = '#${previousURL}' `;
     result += `onclick = "window.calculator.problemPage.selectCurrentProblem('${this.previousProblemId}', '${defaultRequest}')">&#8592;</a>`;
   }
 
   if (this.flagForReal && thePage.user.flagLoggedIn) {
-    result += `<a class = 'problemLinkPractice' href = '#${this.getAppAnchorRequestFileCourseTopics()}' onclick = "window.calculator.problemPage.selectCurrentProblem('${this.problemId}' ,'exerciseJSON')">Practice</a>`;
+    var practiceURL = this.getAppAnchorRequestFileCourseTopics(false, false);
+    result += `<a class = 'problemLinkPractice' href = '#${practiceURL}' `;
+    result += `onclick = "window.calculator.problemPage.selectCurrentProblem('${this.problemId}', `;
+    result += `'exerciseJSON')">Practice</a>`;
   } else {
     result += "<span class = 'problemLinkSelectedPractice' style='color:green'>Practice</span>";
   }
   if (!this.flagForReal && thePage.user.flagLoggedIn) { 
-    result += `<a class = 'problemLinkQuiz' href = '#${this.getAppAnchorRequestFileCourseTopics()}' onclick = "window.calculator.problemPage.selectCurrentProblem('${this.problemId}' ,'scoredQuizJSON')">Quiz</a>`;
+    var quizURL = this.getAppAnchorRequestFileCourseTopics(true, false);
+    result += `<a class = 'problemLinkQuiz' href = '#${quizURL}' `;
+    result += `onclick = "window.calculator.problemPage.selectCurrentProblem('${this.problemId}' ,'scoredQuizJSON')">Quiz</a>`;
   } else {
     if (this.flagForReal) {
       result += "<span class = 'problemLinkSelectedQuiz' style='color:brown'>Quiz</span>";
@@ -344,12 +370,14 @@ Problem.prototype.getProblemNavigationContent = function() {
   }
   if (this.nextProblemId !== null && this.nextProblemId !== "" && this.nextProblemId !== undefined) {
     var nextProblem = allProblems.getProblemById(this.nextProblemId); 
-    var nextURL = nextProblem.getAppAnchorRequestFileCourseTopics();
-    result += `<a class = '${linkType}' href = '#${nextURL}' onclick = "window.calculator.problemPage.selectCurrentProblem('${this.nextProblemId}', '${defaultRequest}')">&#8594;</a>`;
+    var nextURL = nextProblem.getAppAnchorRequestFileCourseTopics(isScoredQuiz, false);
+    result += `<a class = '${linkType}' href = '#${nextURL}' `;
+    result += `onclick = "window.calculator.problemPage.selectCurrentProblem('${this.nextProblemId}', '${defaultRequest}')">&#8594;</a>`;
   }
   if (this.flagForReal !== true && this.flagForReal !== "true") {
-    result += `<b style = 'color:green'>Scores not recorded. </b>`;
-    result += ` <span id = "${ids.domElements.spanProblemLinkWithRandomSeed}"><a href = '#${this.getAppAnchorRequestFileCourseTopics()}'>#${this.randomSeed}</a></span>`;
+    result += `<b style = 'color:green'>Scores not recorded.</b> `;
+    result += `<span id = "${ids.domElements.spanProblemLinkWithRandomSeed}">`;
+    result += `<a href = '#${this.getAppAnchorRequestFileCourseTopics(false, true)}'>#${this.randomSeed}</a></span>`;
   } else {
     result += `<b style = 'color:brown'>Scores are recorded. </b>`;
   }

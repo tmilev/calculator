@@ -3013,7 +3013,7 @@ int WebWorker::ServeClient() {
     return this->ProcessLoginUserInfo(comments.str());
   } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::editPage) {
     return this->ProcessEditPageJSON();
-  } else if (theGlobalVariables.userCalculatorRequestType == "modifyPage") {
+  } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::modifyPage) {
     return this->ProcessModifyPage();
   } else if (
     theGlobalVariables.userCalculatorRequestType == "slidesFromSource" ||

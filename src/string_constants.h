@@ -29,6 +29,7 @@ public:
     static std::string submitExercisePreviewNoLogin;
     static std::string submitExercise;
     static std::string submitAnswers;
+    static std::string modifyPage;
     static std::string problemGiveUp;
     static std::string problemGiveUpNoLogin;
     static std::string workerId;

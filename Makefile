@@ -103,7 +103,7 @@ ifneq ($(mongoLocation),)
   LIBRARIES_INCLUDED_AT_THE_END+= -L/usr/local/lib -lmongoc-1.0 -lbson-1.0
 $(info [1;32mMongo found.[0m) 
 else
-$(info [1;31mNOT FOUND: Mongo.[0m I will attempt to install it once the calculator is compiled.) 
+$(info [1;31mNOT FOUND: Mongo.[0m The calculator will run without a database and proper login.) 
 endif
 endif
 ########################

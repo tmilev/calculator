@@ -25,17 +25,11 @@ Please note that **the files you create with the calculator will be placed in ba
 cd calculator
 make
 ```
-4. Run the calculator for the first time. This may prompt you for further setup (mongoDB, openssl, and initial setup). 
-```
-cd bin
-./calculator
-```
-Follow the prompts. If asked for sudo password, that means the calculator is installing libraries, most likely mongoDB, curl, or another reasonable dependency. 
-Bravely enter your sudo password, it shouldn't break anything on your system.
+
 ### Running the calculator
-5. Once the installation steps are complete start the calculator as a web server:
+5. Start the calculator as a web server:
 ```
-./calculator server 10000
+bin/calculator server 10000
 ```
 Leave the terminal window open if you'd like to monitor what's going on. The calculator will tell you on which port it got bound. The defaults are 8155 (http) and 8166 (https). 
 

@@ -19,10 +19,10 @@ static ProjectInformationInstance projectInfoInstanceTransportLayerSecurityHeade
 class TransportLayerSecurity;
 
 //Forward-declare openssl dependencies
-class SSL;
-class X509;
-class SSL_CTX;
-struct SSL_METHOD;
+typedef struct ssl_st SSL;
+typedef struct x509_st X509;
+typedef struct ssl_ctx_st SSL_CTX;
+typedef struct ssl_method_st SSL_METHOD;
 
 class TransportLayerSecurityOpenSSL {
 public:

@@ -4055,9 +4055,6 @@ bool WebServer::initBindToOnePort(const std::string& thePort, int& outputListeni
     }
     break;
   }
-  if (p != nullptr) {
-    logServer << logger::yellow << "Successfully bound to port " << thePort << logger::endL;
-  }
   freeaddrinfo(servinfo); // all done with this structure
   if (outputListeningSocket == - 1) {
     crash << "Failed to bind to port: " << thePort << ". " << crash;
@@ -4070,6 +4067,7 @@ bool WebServer::initBindToPorts() {
   if (!this->initBindToOnePort(this->portHTTP, this->listeningSocketHTTP)) {
     return false;
   }
+  logServer << logger::yellow << "http://localhost:" << this->portHTTP << logger::endL;
   if (theWebServer.theTLS.flagBuiltInTLSAvailable) {
     if (!this->initBindToOnePort(this->portHTTPSBuiltIn, this->listeningSocketHTTPSBuiltIn)) {
       return false;
@@ -4078,6 +4076,7 @@ bool WebServer::initBindToPorts() {
   if (!this->initBindToOnePort(this->portHTTPSOpenSSL, this->listeningSocketHTTPSOpenSSL)) {
     return false;
   }
+  logServer << logger::yellow << "https://localhost:" << this->portHTTPSOpenSSL << logger::endL;
   return true;
 }
 

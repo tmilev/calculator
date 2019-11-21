@@ -43,7 +43,7 @@ LIBRARIES_INCLUDED_AT_THE_END=
 
 ifeq ($(hsa), 1)
 	CXX=/home/user/gcc/bin/g++
-	LDFLAGS+=-L/home/user/gcc/lib64 -Wl,-rpath,/home/user/gcc/lib64 -L/opt/hsa/lib -L/usr/local/lib -lhsa-runtime64 -lhsakmt
+	LDFLAGS+=-L/home/user/gcc/lib64 -Wl -rpath /home/user/gcc/lib64 -L/opt/hsa/lib -L/usr/local/lib -lhsa-runtime64 -lhsakmt
 else
 	CXX=g++
 endif
@@ -82,7 +82,7 @@ ifneq ($(wildcard /usr/lib/x86_64-linux-gnu/libssl.so),)#location of ssl in Ubun
 endif
 ifneq ($(sslLocation),)
   CFLAGS+= -DMACRO_use_open_ssl 
-  LIBRARIES_INCLUDED_AT_THE_END+= -lssl -lcrypto  #WARNING believe it or not, the libraries must come AFTER the executable name
+  LIBRARIES_INCLUDED_AT_THE_END+=-lssl -lcrypto#WARNING believe it or not, the libraries must come AFTER the executable name
 $(info [1;32mOpenssl found.[0m) 
 else
 $(info [1;31mNOT FOUND: Openssl.[0m I will attempt to install it once the calculator is compiled.) 
@@ -94,13 +94,13 @@ $(info [1;31mNo mongo requested.[0m)
 else
 mongoLocation =
 ifneq ($(wildcard /usr/local/lib/libmongoc-1.0.so),)#location of mongoC in Ubuntu
-  CFLAGS += -I/usr/local/include/libmongoc-1.0 -I/usr/local/include/libbson-1.0
-  mongoLocation = /usr/local/
+  CFLAGS+=-I/usr/local/include/libmongoc-1.0 -I/usr/local/include/libbson-1.0
+  mongoLocation=/usr/local/
 endif
 ifneq ($(mongoLocation),)
-  CFLAGS+= -DMACRO_use_MongoDB
+  CFLAGS+=-DMACRO_use_MongoDB
 #  LDFLAGS+= -L/usr/local/lib
-  LIBRARIES_INCLUDED_AT_THE_END+= -L/usr/local/lib -lmongoc-1.0 -lbson-1.0
+  LIBRARIES_INCLUDED_AT_THE_END+=-L/usr/local/lib -lmongoc-1.0 -lbson-1.0
 $(info [1;32mMongo found.[0m) 
 else
 $(info [1;31mNOT FOUND: Mongo.[0m The calculator will run without a database and proper login.) 
@@ -109,8 +109,8 @@ endif
 ########################
 ########################
 
-$(info [1;33mCompile flags:  $(CFLAGS)[0m)
-$(info [1;34mLinker flags part 1:  $(LDFLAGS))
+$(info [1;33mCompile flags: $(CFLAGS)[0m)
+$(info [1;34mLinker flags part 1: $(LDFLAGS))
 $(info [1;34mLinker flags part 2: $(LIBRARIES_INCLUDED_AT_THE_END)[0m)
 
 #if this is missing something, add it, or, ls | grep cpp | xargs echo
@@ -172,7 +172,6 @@ SOURCES_RELATIVE_PATH=\
     symmetric_groups_and_generalizations.cpp \
     system_functions.cpp \
     test.cpp \
-    test_old.cpp \
     transport_layer_security.cpp \
     transport_layer_security_implementation.cpp \
     transport_layer_security_openssl.cpp \

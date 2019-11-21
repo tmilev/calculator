@@ -22,9 +22,10 @@ Please note that **the files you create with the calculator will be placed in ba
 
 3. Compile the calculator.
 
-3.1 Default build.
+3.1. Default build.
+
 - This build assumes you have openssl and mongoDB installed on your system. 
-- However, if you don't have these installed, the build should auto-detect, turn off mongoDB and openSSL and not fail. If, contrary to promised, the build does fail, please file a bug.
+- However, if you don't have these installed, the build should auto-detect this, turn off mongoDB and openSSL and not fail. If, contrary to promised, the build does fail, please file a bug.
 
 ```
 cd calculator
@@ -32,9 +33,8 @@ make -j10
 ```
 The -j10 flag tells the compiler to use 10 parallel compilation jobs. Adjust the number 10 to whatever is appropriate for your system (-j10 should work on a 4G RAM laptop).
 
-3.2 To explicitly request a build without mongoDB and openSSL, use the following.
+3.2. To explicitly request a build without mongoDB and openSSL, use the following.
 ```
-cd calculator
 make -j10 nossl=1 nomongo=1
 ```
 
@@ -43,7 +43,9 @@ make -j10 nossl=1 nomongo=1
 ```
 bin/calculator server 10000
 ```
-Leave the terminal window open if you'd like to monitor what's going on. The calculator will tell you on which port it got bound. The defaults are 8155 (http) and 8166 (https). 
+The number 10000 gives you computation timeout (computations that take longer than 10000 seconds will crash).
+Leave the terminal window open if you'd like to monitor what's going on. 
+The calculator will try to bind on ports 8155 (http) and 8166 (https). 
 
 6. Open your favorite browser and navigate to 
 
@@ -57,12 +59,9 @@ This completes the setup and your first run.
 - CentOS   (all systems using the yum package manager should work too, but that hasn't been tested).
 - We will add your Linux flavor upon request. We may need your help with your package manager. 
 2. **git**. needed to download the source. 
-3. **sudo**. The initial calculator setup uses the sudo command, make sure that is installed on your system (should be there out of the box on most machines). 
-4. **unzip**. If not already present, the calculator will attempt to install that on first run.
-5. [Optional] **mongoDB development libraries**. If not already present, the calculator will attempt to install them on first run. 
-Without mongoDB, the calculator will not be able to provide any login services, and some "admin-only" functions may be missing.
-6. [Optional] **openssl development libraries**. If not already present, the calculator will attempt to install them on first run.
-Without openSSL, the calculator will not be able to provide any login services.
+3. **unzip**. Used to unzip [Mathjax](https://www.mathjax.org/), a method to display math formulas in the web browser. Without this, math formulas will not display correctly.
+4. [Optional] **mongoDB development libraries**. Without [mongoDB](https://www.mongodb.com/), the calculator will not be able to provide any login services, and some "admin-only" functions may be missing.
+5. [Optional] **openssl development libraries**. Without [openSSL](https://www.openssl.org/), the calculator will not be able to provide any login services, and some "admin-only" functions may be missing.
 
 ### Port redirect with ip tables
 
@@ -91,26 +90,37 @@ exit
 ```
 
 ### Recaptcha secret. 
-Get your recaptcha client secret and public info from:
+The calculator login system uses google's recapcha. 
+To find out more about reCAPTCHA, google `google recaptcha`.
+
+The system should run fine without reCAPTCHA setup, however,
+the `forgot login` button will not work.
+
+
+You can get your recaptcha client secret and public info from:
 
 ```
 https://www.google.com/recaptcha/admin#site/
 ```
 
-Put the secret in a file:
+Put the secret in a file (copy+paste the secret contents into the file):
 
 ```
 certificates/recaptcha-secret.txt
 ```
-and the public info in:
+and the public info in (copy+paste contents):
 
 ```
 certificates/recaptcha-public.txt
 ```
 
-To do that just copy and paste the secrets in plain text into the files.
-
 ### Mailgun setup
+At the time of writing, the calculator sends email through the services of 
+[mailgun](https://www.mailgun.com/).
+
+The system should run fine without any mailgun setup, however, 
+the `signup` and `forgot login` buttons will not work.
+
 
 Put your mailgun secret in file:
 

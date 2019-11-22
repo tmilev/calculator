@@ -33,14 +33,14 @@ void GlobalVariables::FallAsleep(int microseconds) {
   usleep(static_cast<useconds_t>(microseconds));
 }
 
-class TimerThreadData {
+class TimeoutThread {
 public:
   int64_t elapsedTimeInMilliseconds;
   int64_t elapsedComputationTimeInMilliseconds;
   int counter ;
   int intervalBetweenChecksInMilliseconds;
 //  ThreadWrapper theThread;
-  TimerThreadData();
+  TimeoutThread();
   void reset();
   void Run();
   bool HandleComputationTimer();
@@ -52,7 +52,7 @@ public:
   bool HandleComputationTimeout();
 };
 
-bool TimerThreadData::HandleComputationTimer() {
+bool TimeoutThread::HandleComputationTimer() {
   if (theGlobalVariables.flagComputationStarted) {
     if (theGlobalVariables.millisecondsComputationStart < 0) {
       theGlobalVariables.millisecondsComputationStart = theGlobalVariables.GetElapsedMilliseconds();
@@ -65,13 +65,13 @@ bool TimerThreadData::HandleComputationTimer() {
   return false;
 }
 
-bool TimerThreadData::HandleComputationCompleteStandard() {
+bool TimeoutThread::HandleComputationCompleteStandard() {
   //if (theGlobalVariables.flagComputationCompletE)
   //  theReport1.SetStatus("Starting timer cycle break: computation is complete.");
   return false;
 }
 
-bool TimerThreadData::HandleTimerSignalToServer() {
+bool TimeoutThread::HandleTimerSignalToServer() {
   if (this->counter % 20 != 0) {
     return false;
   }
@@ -81,7 +81,7 @@ bool TimerThreadData::HandleTimerSignalToServer() {
   return false;
 }
 
-bool TimerThreadData::HandleMaxComputationTime() {
+bool TimeoutThread::HandleMaxComputationTime() {
   if (theGlobalVariables.millisecondsMaxComputation <= 0) {
     return false;
   }
@@ -133,7 +133,7 @@ bool TimerThreadData::HandleMaxComputationTime() {
   return true;
 }
 
-bool TimerThreadData::HandleComputationTimeout() {
+bool TimeoutThread::HandleComputationTimeout() {
   if (!theGlobalVariables.flagRunningBuiltInWebServer) {
     return false;
   }
@@ -157,7 +157,7 @@ bool TimerThreadData::HandleComputationTimeout() {
     return false;
   }
   theGlobalVariables.theProgress.flagTimedOut = true;
-  //theReport2.SetStatus("Starting timer cycle displaying time out explanation.");
+  // theReport2.SetStatus("Starting timer cycle displaying time out explanation.");
   // Possible values for theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection:
   // 1) nullptr
   // 2) WebServer::OutputShowIndicatorOnTimeoutStatic
@@ -166,11 +166,11 @@ bool TimerThreadData::HandleComputationTimeout() {
   return false;
 }
 
-bool TimerThreadData::HandleEverythingIsDone() {
+bool TimeoutThread::HandleEverythingIsDone() {
   return theGlobalVariables.flagComputationFinishedAllOutputSentClosing;
 }
 
-bool TimerThreadData::HandlePingServerIamAlive() {
+bool TimeoutThread::HandlePingServerIamAlive() {
   if (theGlobalVariables.flagComputationFinishedAllOutputSentClosing) {
     return true;
   }
@@ -181,18 +181,18 @@ bool TimerThreadData::HandlePingServerIamAlive() {
   return false;
 }
 
-TimerThreadData::TimerThreadData() {
+TimeoutThread::TimeoutThread() {
   this->reset();
 }
 
-void TimerThreadData::reset() {
+void TimeoutThread::reset() {
   this->elapsedTimeInMilliseconds = - 1;
   this->elapsedComputationTimeInMilliseconds = - 1;
   this->counter = 0;
   this->intervalBetweenChecksInMilliseconds = 100000;
 }
 
-void TimerThreadData::Run() {
+void TimeoutThread::Run() {
   MacroRegisterFunctionWithName("TimerThreadData::Run");
   this->reset();
   for (;;) {
@@ -213,7 +213,7 @@ void TimerThreadData::Run() {
 void RunTimerThread(int threadIndex) {
   theGlobalVariables.theThreadData[threadIndex].theId = std::this_thread::get_id();
   MacroRegisterFunctionWithName("RunTimerThread");
-  TimerThreadData theThread;
+  TimeoutThread theThread;
   theThread.Run();
 }
 

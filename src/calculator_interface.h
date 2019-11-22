@@ -610,8 +610,8 @@ private:
   class Test {
   public:
     static bool All();
-    static bool ToStringTest();
-    static bool ToStringTestRecode(const std::string& inputHardCodedMustParse, Calculator& owner);
+    static bool ToStringTest(Calculator& ownerInitialized);
+    static bool ToStringTestRecode(const std::string& inputHardCodedMustParse, Calculator& ownerInitialized);
   };
 };
 
@@ -718,7 +718,7 @@ class SyntacticElement {
     this->numNonBoundVariablesInherited = - 1; // - 1 stands for unknown
     this->numBoundVariablesInherited = - 1; // - 1 stands for unknown
   }
-  Rational GetRationalCrashIfNot(Calculator& owner);
+  std::string GetIntegerStringCrashIfNot(Calculator& owner);
 };
 
 class PlotObject {
@@ -2448,6 +2448,11 @@ public:
   bool ShouldSplitOutsideQuotes(const std::string& left, char right);
   void ParseFillDictionary(const std::string& input, List<SyntacticElement>& output);
   void ParseFillDictionary(const std::string& input);
+  class Test {
+  public:
+    static bool All();
+    static bool ParseDecimal(Calculator& ownerInitialized);
+  };
 };
 
 class CalculatorConversions {

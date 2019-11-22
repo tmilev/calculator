@@ -17,6 +17,7 @@ int mainTest(List<std::string>& inputArguments) {
   X509Certificate::Test::All();
   Expression::Test::All();
   LargeIntegerUnsigned::Test::All();
+  Calculator::Test::All();
   std::cout << "!!!!!TEST Success\n";
   return 0;
 }

@@ -6,13 +6,15 @@ extern ProjectInformationInstance ProjectInfoCalculatorExpressionsTest;
 ProjectInformationInstance ProjectInfoCalculatorExpressionsTest(__FILE__, "Calculator expression test. ");
 
 bool Expression::Test::All() {
-  Expression::Test::ToStringTest();
+  Calculator tester;
+  tester.initialize();
+  Expression::Test::ToStringTest(tester);
   return true;
 }
 
-bool Expression::Test::ToStringTestRecode(const std::string& inputHardCodedMustParse, Calculator& owner) {
+bool Expression::Test::ToStringTestRecode(const std::string& inputHardCodedMustParse, Calculator& ownerInitialized) {
   Expression parsed;
-  if (!owner.Parse(inputHardCodedMustParse, parsed)) {
+  if (!ownerInitialized.Parse(inputHardCodedMustParse, parsed)) {
     crash << "Failed to parse hard-coded input string. " << crash;
   }
   std::string recoded = parsed.ToString();
@@ -24,9 +26,7 @@ bool Expression::Test::ToStringTestRecode(const std::string& inputHardCodedMustP
   return true;
 }
 
-bool Expression::Test::ToStringTest() {
-  Calculator tester;
-  tester.initialize();
-  Expression::Test::ToStringTestRecode("1+1", tester);
+bool Expression::Test::ToStringTest(Calculator& ownerInitialized) {
+  Expression::Test::ToStringTestRecode("1+1", ownerInitialized);
   return true;
 }

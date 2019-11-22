@@ -1171,27 +1171,31 @@ bool Calculator::ReplaceAXbyEX() {
   return true;
 }
 
-Rational SyntacticElement::GetRationalCrashIfNot(Calculator& owner) {
+std::string SyntacticElement::GetIntegerStringCrashIfNot(Calculator& owner) {
   if (this->controlIndex != owner.conInteger()) {
     crash << "Request to get rational from a non-rational element. " << crash;
   }
-  std::string integerString = this->theData.GetValue<std::string>();
-  Rational result;
-  result.AssignString(integerString);
+  std::string result = this->theData.GetValue<std::string>();
+  for (unsigned i = 0; i < result.size(); i ++) {
+    if (!MathRoutines::isADigit(result[i])) {
+      crash << "Integer string non-digit entries. " << crash;
+    }
+  }
   return result;
 }
 
 bool Calculator::ReplaceIntegerDotIntegerByE() {
   SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1];
-
-  Rational fractionalPart = right.GetRationalCrashIfNot(*this);
-  int numberOfDigitsFractionalPart = fractionalPart.ToString().size();
+  std::string afterDecimalPoint = right.GetIntegerStringCrashIfNot(*this);
+  std::string beforeDecimalPoint = left.GetIntegerStringCrashIfNot(*this);
+  int powerOfTenToDivideBy = static_cast<int>(afterDecimalPoint.size());
   Rational denominator = 10;
-  denominator.RaiseToPower(numberOfDigitsFractionalPart);
-  Rational result = left.GetRationalCrashIfNot(*this);
+  denominator.RaiseToPower(powerOfTenToDivideBy);
+  Rational result;
+  result.AssignString(beforeDecimalPoint);
   result *= denominator;
-  result += fractionalPart;
+  result += afterDecimalPoint;
   result /= denominator;
   left.controlIndex = this->conExpression();
   left.theData.AssignValue(result, *this);

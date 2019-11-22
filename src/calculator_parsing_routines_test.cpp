@@ -1,0 +1,32 @@
+//The current file is licensed under the license terms found in the main header file "calculator.h".
+//For additional information refer to the file "calculator.h".
+#include "calculator.h"
+
+extern ProjectInformationInstance ProjectCalculatorParsingRoutinesTestCPP;
+ProjectInformationInstance ProjectCalculatorParsingRoutinesTestCPP(__FILE__, "Test of calculator input parsing routines. ");
+
+bool Calculator::Test::All() {
+  Calculator tester;
+  tester.initialize();
+  Calculator::Test::ParseDecimal(tester);
+  return true;
+}
+
+bool Calculator::Test::ParseDecimal(Calculator& ownerInitialized) {
+  std::string mustEvaluateToZero = "2.01 - 201/100";
+  ownerInitialized.Evaluate(mustEvaluateToZero);
+  if (ownerInitialized.theProgramExpression.ToString() != "0") {
+    crash << "Expression: " << mustEvaluateToZero << " evaluates to: "
+    << ownerInitialized.theProgramExpression.ToString() << " instead of 0. " << crash;
+  }
+  std::string mustEvaluateToOne =
+  "100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 - 10^128 + 1";
+  ownerInitialized.Evaluate(mustEvaluateToOne);
+  if (ownerInitialized.theProgramExpression.ToString() != "1") {
+    std::cout << "Must crash!\n";
+    crash << "Expression: " << mustEvaluateToOne << " evaluates to: "
+    << ownerInitialized.theProgramExpression.ToString() << " instead of 1. " << crash;
+  }
+
+  return true;
+}

@@ -143,3 +143,6 @@ std::string Configuration::disableDatabaseLogEveryoneAsAdmin = "disableDatabaseL
 std::string Configuration::serverDetailedLog = "serverDetailedLog";
 std::string Configuration::gitRepository = "gitRepository";
 std::string Configuration::autoUnitTest = "autoUnitTest";
+std::string Configuration::portHTTP = "portHTTP";
+std::string Configuration::portHTTPSOpenSSL = "portHTTPSOpenSSL";
+std::string Configuration::portHTTPSBuiltIn = "portHTTPSBuiltIn";

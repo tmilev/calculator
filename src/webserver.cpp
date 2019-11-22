@@ -3692,12 +3692,12 @@ void WebServer::StopKillAll[[noreturn]](bool attemptToRestart) {
 }
 
 void WebServer::initPortsITry() {
-  this->portHTTP = "8155";
+  this->portHTTP = theGlobalVariables.configuration[Configuration::portHTTP].theString;
   if (!theGlobalVariables.flagSSLIsAvailable) {
     return;
   }
-  this->portHTTPSOpenSSL = "8166";
-  this->portHTTPSBuiltIn = "8177";
+  this->portHTTPSOpenSSL = theGlobalVariables.configuration[Configuration::portHTTPSOpenSSL].theString;
+  this->portHTTPSBuiltIn = theGlobalVariables.configuration[Configuration::portHTTPSBuiltIn].theString;
   this->portHTTPSDefault = this->portHTTPSOpenSSL;
 }
 
@@ -3717,7 +3717,9 @@ void WebServer::initListeningSockets() {
   }
   this->highestSocketNumber = - 1;
   for (int i = 0; i < this->theListeningSockets.size; i ++) {
-    this->highestSocketNumber = MathRoutines::Maximum(this->theListeningSockets[i], this->highestSocketNumber);
+    this->highestSocketNumber = MathRoutines::Maximum(
+      this->theListeningSockets[i], this->highestSocketNumber
+    );
     if (listen(this->theListeningSockets[i], WebServer::maxNumPendingConnections) == - 1) {
       crash << "Listen function failed on socket: " << this->theListeningSockets[i] << crash;
     }
@@ -5239,6 +5241,15 @@ void GlobalVariables::ConfigurationProcess() {
     HtmlRoutines::gitRepository = theGlobalVariables.configuration[Configuration::gitRepository].theString;
   } else {
     theGlobalVariables.configuration[Configuration::gitRepository] = HtmlRoutines::gitRepository;
+  }
+  if (theGlobalVariables.configuration[Configuration::portHTTP].theString == "") {
+    theGlobalVariables.configuration[Configuration::portHTTP] = "8155";
+  }
+  if (theGlobalVariables.configuration[Configuration::portHTTPSOpenSSL].theString == "") {
+    theGlobalVariables.configuration[Configuration::portHTTPSOpenSSL] = "8166";
+  }
+  if (theGlobalVariables.configuration[Configuration::portHTTPSBuiltIn].theString == "") {
+    theGlobalVariables.configuration[Configuration::portHTTPSBuiltIn] = "8177";
   }
 }
 

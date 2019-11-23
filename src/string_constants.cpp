@@ -146,3 +146,5 @@ std::string Configuration::autoUnitTest = "autoUnitTest";
 std::string Configuration::portHTTP = "portHTTP";
 std::string Configuration::portHTTPSOpenSSL = "portHTTPSOpenSSL";
 std::string Configuration::portHTTPSBuiltIn = "portHTTPSBuiltIn";
+std::string Configuration::calculatorHTML = "calculatorHTML";
+std::string Configuration::HTMLCommon = "HTMLCommon";

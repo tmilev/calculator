@@ -4995,14 +4995,17 @@ void WebServer::InitializeGlobalVariables() {
 
   folderSubstitutionsNonSensitive.SetKeyValue("/html/", "../public_html/");
 
-  folderSubstitutionsNonSensitive.SetKeyValue("/calculator-html/", "calculator-html/");
-  folderSubstitutionsNonSensitive.SetKeyValue("/font/", "html-common/fonts/");
-  folderSubstitutionsNonSensitive.SetKeyValue("/fonts/", "html-common/fonts/");
-  folderSubstitutionsNonSensitive.SetKeyValue("/html-common/font/", "html-common/fonts/");
-  folderSubstitutionsNonSensitive.SetKeyValue("/html-common/", "html-common/");
+  std::string HTMLCommonFolder = theGlobalVariables.configuration[Configuration::HTMLCommon].theString;
+  std::string calculatorHTML = theGlobalVariables.configuration[Configuration::calculatorHTML].theString;
+
+  folderSubstitutionsNonSensitive.SetKeyValue("/calculator-html/", calculatorHTML);
+  folderSubstitutionsNonSensitive.SetKeyValue("/font/", HTMLCommonFolder + "fonts/");
+  folderSubstitutionsNonSensitive.SetKeyValue("/fonts/", HTMLCommonFolder + "fonts/");
+  folderSubstitutionsNonSensitive.SetKeyValue("/html-common/font/", HTMLCommonFolder + "fonts/");
+  folderSubstitutionsNonSensitive.SetKeyValue("/html-common/", HTMLCommonFolder);
 
   folderSubstitutionsNonSensitive.SetKeyValue("DefaultProblemLocation/", "../problems/");
-  //referred to by site:
+  // referred to by site:
   folderSubstitutionsNonSensitive.SetKeyValue("coursetemplates/", "../coursetemplates/");
   folderSubstitutionsNonSensitive.SetKeyValue("/coursesavailable/", "../coursesavailable/");
   folderSubstitutionsNonSensitive.SetKeyValue("topiclists/", "../topiclists/");
@@ -5250,6 +5253,12 @@ void GlobalVariables::ConfigurationProcess() {
   }
   if (theGlobalVariables.configuration[Configuration::portHTTPSBuiltIn].theString == "") {
     theGlobalVariables.configuration[Configuration::portHTTPSBuiltIn] = "8177";
+  }
+  if (theGlobalVariables.configuration[Configuration::HTMLCommon].theString == "") {
+    theGlobalVariables.configuration[Configuration::HTMLCommon] = "html-common/";
+  }
+  if (theGlobalVariables.configuration[Configuration::calculatorHTML].theString == "") {
+    theGlobalVariables.configuration[Configuration::calculatorHTML] = "calculator-html/";
   }
 }
 

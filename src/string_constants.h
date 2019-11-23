@@ -101,6 +101,8 @@ public:
   static std::string portHTTP;
   static std::string portHTTPSOpenSSL;
   static std::string portHTTPSBuiltIn;
+  static std::string calculatorHTML;
+  static std::string HTMLCommon;
 };
 
 class DatabaseStrings {

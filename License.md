@@ -18,7 +18,7 @@ limitations under the License.
 Older versions of this software were licensed under the terms of LGPL 3.0.
 As of 2018, April 26, the license has been changed to the Apache License, Version 2.0.
 
-# Educational materials license
+# Educational materials
 The calculator may use optional educational materials that lie outside of this repository.
 
 Such materials are not necessary for the calculator to function.

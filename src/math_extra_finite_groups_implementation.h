@@ -2252,7 +2252,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
         << " but remaining vector space has dim " << remainingVectorSpace.size << crash;
       }
       if (remainingCharacter.IsEqualToZero()) {
-        if (!remainingVectorSpace.size == 0) {
+        if (remainingVectorSpace.size != 0) {
           crash << "This is a programming error: remaining char is zero but remaining space is " << remainingVectorSpace.ToString()
           << ". Starting char: " << this->theCharacteR.ToString() << crash;
         }

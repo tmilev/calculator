@@ -4420,15 +4420,7 @@ class CompleX {
     numerator *= - 1;
     this->Im /= numerator;
   }
-  bool IsEqualToZero() const {
-    if (!CompleX<coefficient>::flagEqualityIsApproximate) {
-      return this->Im == 0 && this->Re == 0;
-    } else {
-      return
-      this->Im<CompleX<coefficient>::EqualityPrecision && - this->Im<CompleX<coefficient>::EqualityPrecision &&
-      this->Re<CompleX<coefficient>::EqualityPrecision && - this->Re<CompleX<coefficient>::EqualityPrecision;
-    }
-  }
+  bool IsEqualToZero() const;
   void Minus() {
     this->Im = - this->Im;
     this->Re = - this->Re;
@@ -4450,6 +4442,20 @@ class CompleX {
     this->operator=(other);
   }
 };
+
+template < > bool CompleX<double>::flagEqualityIsApproximate;
+template < > double CompleX<double>::EqualityPrecision;
+
+template <class coefficient>
+bool CompleX<coefficient>::IsEqualToZero() const {
+  if (!CompleX<coefficient>::flagEqualityIsApproximate) {
+    return this->Im == 0 && this->Re == 0;
+  } else {
+    return
+    this->Im<CompleX<coefficient>::EqualityPrecision && - this->Im<CompleX<coefficient>::EqualityPrecision &&
+    this->Re<CompleX<coefficient>::EqualityPrecision && - this->Re<CompleX<coefficient>::EqualityPrecision;
+  }
+}
 
 template<class coefficient>
 class ElementSemisimpleLieAlgebra : public MonomialCollection<ChevalleyGenerator, coefficient> {

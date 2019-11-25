@@ -1550,16 +1550,6 @@ void ElementHyperoctahedralGroupR2::MakeFromString(const std::string& in) {
   this->k.MakeFromString(in.substr(sep, in.size() - 1));
 }
 
-ElementHyperoctahedralGroupR2 operator"" _EHOG(const char *in, size_t insize) {
-  (void) insize;//avoid unused parameter warning, portable
-  ElementHyperoctahedralGroupR2 out;
-  std::string cooked_in = in;
-  out.MakeFromString(cooked_in);
-  return out;
-}
-
-//"(),0,0,1"_EHOG
-
 std::string HyperoctahedralGroupData::ToString() const {
   std::stringstream out;
   this->IntoStream(out);

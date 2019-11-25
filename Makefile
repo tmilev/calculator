@@ -164,7 +164,7 @@ SOURCES_RELATIVE_PATH=\
     math_implementation_4.cpp \
     math_implementation_5.cpp \
     math_semisimple_Lie_algebras.cpp \
-    math_semisimple_Lie_root_subalggebras.cpp \
+    math_semisimple_Lie_root_subalgebras.cpp \
     math_semisimple_Lie_subalgebras.cpp \
     multiprocessing.cpp \
     multitasking.cpp \

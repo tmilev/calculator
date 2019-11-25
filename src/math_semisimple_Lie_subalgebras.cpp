@@ -2873,6 +2873,10 @@ CandidateSSSubalgebra::CandidateSSSubalgebra() {
   this->reset(nullptr);
 }
 
+CandidateSSSubalgebra::~CandidateSSSubalgebra() {
+  this->flagDeallocated = true;
+}
+
 void CandidateSSSubalgebra::ComputePairKweightElementAndModule(
   const ElementSemisimpleLieAlgebra<AlgebraicNumber>& leftKweightElt, int rightIndex, List<int>& output
 ) {
@@ -3378,6 +3382,13 @@ bool NilradicalCandidate::IsStronglySingularRelativeToSubset(int nonFKweightInde
     }
   }
   return true;
+}
+
+NilradicalCandidate::NilradicalCandidate() {
+  this->owner = nullptr;
+  this->flagRestrictedCentralizerConditionHoldS = false;
+  this->flagParabolicACextendsToParabolicAC = false;
+  this->flagLinfiniteRelFound = false;
 }
 
 void NilradicalCandidate::reset() {

@@ -1439,17 +1439,17 @@ bool CalculatorFunctionsBinaryOps::innerPowerDoubleOrRatToDoubleOrRat(
       if (!exp.IsSmallInteger(&thePower)) {
         return false;
       }
-      return output.AssignValue(FloatingPoint::power(-baseDouble, thePower), theCommands);
+      return output.AssignValue(FloatingPoint::Power(- baseDouble, thePower), theCommands);
     }
     baseDouble *= - 1;
-    return output.AssignValue(-FloatingPoint::power (baseDouble, expDouble), theCommands);
+    return output.AssignValue(-FloatingPoint::Power(baseDouble, expDouble), theCommands);
   }
   if (baseDouble == 0.0) {
     if (expDouble > 0) {
       return output.AssignValue<double>(0, theCommands);
     }
   }
-  return output.AssignValue(FloatingPoint::power(baseDouble, expDouble), theCommands);
+  return output.AssignValue(FloatingPoint::Power(baseDouble, expDouble), theCommands);
 }
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyDoubleOrRatByDoubleOrRat(

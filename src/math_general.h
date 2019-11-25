@@ -16,18 +16,20 @@ static ProjectInformationInstance ProjectInfoVpfHeader1_2(__FILE__, "Header, mat
 // We are wrapping the math.h c++ functions for portability reasons
 // (if for some reason we want to change from math.h to a better floating point
 // library, we only need to change the implementation of the FloatingPoint class.
+// Due to conflicts with namespaces, we use function names different from the
+// built-in ones.
 class FloatingPoint {
 public:
-  static double abs(double argument);
-  static double sin(double argument);
-  static double cos(double argument);
-  static double arccos(double argument);
-  static double arctan(double argument);
-  static double arcsin(double argument);
-  static double sqrt(double argument);
-  static double power(double base, double exponent);
-  static double log(double argument);
-  static double floor(double argument);
+  static double Abs(double argument);
+  static double Sin(double argument);
+  static double Cos(double argument);
+  static double Arccos(double argument);
+  static double Arctan(double argument);
+  static double Arcsin(double argument);
+  static double Sqrt(double argument);
+  static double Power(double base, double exponent);
+  static double Log(double argument);
+  static double Floor(double argument);
   static std::string DoubleToString(double input);
 };
 

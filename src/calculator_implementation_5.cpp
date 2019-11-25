@@ -127,7 +127,7 @@ double MeshTriangles::GetTriangleMaxSideLength(int triangleIndex) {
   double result = 0;
   for (int i = 0; i < theSides.size; i ++) {
     double normSquared = theSides[i][0] * theSides[i][0] + theSides[i][1] * theSides[i][1];
-    result = MathRoutines::Maximum(result, FloatingPoint::sqrt(normSquared));
+    result = MathRoutines::Maximum(result, FloatingPoint::Sqrt(normSquared));
   }
   return result;
 }
@@ -1751,7 +1751,7 @@ bool CalculatorFunctionsGeneral::innerLogBaseSimpleCases(
   LargeInteger argDen = theArg.GetDenominator();
   double doubleBase = baseInt.GetDoubleValue();
   double doubleArgNum = argNum.GetDoubleValue();
-  if (FloatingPoint::log(doubleArgNum) / FloatingPoint::log(doubleBase) > 1000) {
+  if (FloatingPoint::Log(doubleArgNum) / FloatingPoint::Log(doubleBase) > 1000) {
     return false;
   }
   int intPart = 0;

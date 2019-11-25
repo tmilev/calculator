@@ -7,11 +7,11 @@
 extern ProjectInformationInstance projectInfoInstanceFloatingPoint;
 ProjectInformationInstance projectInfoInstanceFloatingPoint(__FILE__, "Built in c++ floating point routines wrapper.");
 
-double FloatingPoint::sqrt(double argument) {
+double FloatingPoint::Sqrt(double argument) {
   return ::sqrt(argument);
 }
 
-double FloatingPoint::sin(double argument) {
+double FloatingPoint::Sin(double argument) {
   return ::sin(argument);
 }
 
@@ -44,34 +44,34 @@ std::string FloatingPoint::DoubleToString(double input) {
   return result;
 }
 
-double FloatingPoint::cos(double argument) {
-  return std::cos(argument);
+double FloatingPoint::Cos(double argument) {
+  return cos(argument);
 }
 
-double FloatingPoint::abs(double argument) {
+double FloatingPoint::Abs(double argument) {
   return argument >= 0 ? argument : - argument;
 }
 
-double FloatingPoint::log(double argument) {
-  return std::log(argument);
+double FloatingPoint::Log(double argument) {
+  return log(argument);
 }
 
-double FloatingPoint::arctan(double argument) {
-  return std::atan(argument);
+double FloatingPoint::Arctan(double argument) {
+  return atan(argument);
 }
 
-double FloatingPoint::arccos(double argument) {
-  return std::acos(argument);
+double FloatingPoint::Arccos(double argument) {
+  return acos(argument);
 }
 
-double FloatingPoint::arcsin(double argument) {
-  return std::asin(argument);
+double FloatingPoint::Arcsin(double argument) {
+  return asin(argument);
 }
 
-double FloatingPoint::floor(double argument) {
-  return std::floor(argument);
+double FloatingPoint::Floor(double argument) {
+  return floor(argument);
 }
 
-double FloatingPoint::power(double base, double exponent) {
-  return std::pow(base, exponent);
+double FloatingPoint::Power(double base, double exponent) {
+  return pow(base, exponent);
 }

@@ -7401,8 +7401,8 @@ void WeylGroupData::GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double>
     tempMat.MultiplyOnTheLeft(matCoxeterElt);
   }
   CompleX<double> theEigenValue;
-  theEigenValue.Re = FloatingPoint::cos(2 * MathRoutines::Pi() / coxeterNumber);
-  theEigenValue.Im = FloatingPoint::sin(2 * MathRoutines::Pi() / coxeterNumber);
+  theEigenValue.Re = FloatingPoint::Cos(2 * MathRoutines::Pi() / coxeterNumber);
+  theEigenValue.Im = FloatingPoint::Sin(2 * MathRoutines::Pi() / coxeterNumber);
   Matrix<CompleX<double> > eigenMat;
   eigenMat.init(matCoxeterElt.NumRows, matCoxeterElt.NumCols);
   for (int i = 0; i < eigenMat.NumRows; i ++) {
@@ -7502,7 +7502,7 @@ void WeylGroupData::DrawRootSystem(
     }
     double Length1 = this->RootScalarCartanRoot(tempRoot, output.BasisProjectionPlane[0]);
     double Length2 = this->RootScalarCartanRoot(tempRoot, output.BasisProjectionPlane[1]);
-    lengths[i] = FloatingPoint::sqrt(Length1 * Length1 + Length2 * Length2);
+    lengths[i] = FloatingPoint::Sqrt(Length1 * Length1 + Length2 * Length2);
   }
   for (int i = 0; i < RootSystemSorted.size; i ++) {
     for (int j = i; j < RootSystemSorted.size; j ++) {
@@ -10492,8 +10492,8 @@ void DrawOperations::MakeMeAStandardBasis(int theDim) {
   if (theDim > 3) {
     this->ProjectionsEiVectors.SetSizeMakeMatrix(theDim, 2);
     for (int i = 0; i < theDim; i ++) {
-      this->ProjectionsEiVectors[i][0] = FloatingPoint::sin(static_cast<double>(i) / static_cast<double>(theDim * MathRoutines::Pi()));
-      this->ProjectionsEiVectors[i][1] = FloatingPoint::cos(static_cast<double>(i) / static_cast<double>(theDim * MathRoutines::Pi()));
+      this->ProjectionsEiVectors[i][0] = FloatingPoint::Sin(static_cast<double>(i) / static_cast<double>(theDim * MathRoutines::Pi()));
+      this->ProjectionsEiVectors[i][1] = FloatingPoint::Cos(static_cast<double>(i) / static_cast<double>(theDim * MathRoutines::Pi()));
     }
   } else if (theDim == 3) {
     this->ProjectionsEiVectors.SetSizeMakeMatrix(3, 2);
@@ -10889,7 +10889,7 @@ void DrawOperations::init() {
 double DrawOperations::getAngleFromXandY(double x, double y) {
   double result;
   if (x != 0.0) {
-    result = FloatingPoint::arctan(y / x);
+    result = FloatingPoint::Arctan(y / x);
   } else {
     if (y > 0) {
       result = MathRoutines::Pi() / 2;
@@ -10937,12 +10937,12 @@ void DrawOperations::RotateOutOfPlane(
   if (oldTanSquared < 0 || newTanSquared < 0) {
     return;
   }
-  double oldAngle = FloatingPoint::arctan(FloatingPoint::sqrt(oldTanSquared));
-  double newAngle = FloatingPoint::arctan(FloatingPoint::sqrt(newTanSquared));
+  double oldAngle = FloatingPoint::Arctan(FloatingPoint::Sqrt(oldTanSquared));
+  double newAngle = FloatingPoint::Arctan(FloatingPoint::Sqrt(newTanSquared));
   double angleChange = - oldAngle + newAngle;
   projection = orthoBasis1;
-  projection *= FloatingPoint::cos(angleChange) * scal1 - FloatingPoint::sin(angleChange) * scal2;
-  projection += orthoBasis2 * (FloatingPoint::sin(angleChange) * scal1 + FloatingPoint::sin(angleChange) * scal2);
+  projection *= FloatingPoint::Cos(angleChange) * scal1 - FloatingPoint::Sin(angleChange) * scal2;
+  projection += orthoBasis2 * (FloatingPoint::Sin(angleChange) * scal1 + FloatingPoint::Sin(angleChange) * scal2);
   output = vComponent;
   output += projection;
 }
@@ -10998,10 +10998,10 @@ void DrawOperations::changeBasisPReserveAngles(double newX, double newY) {
   out << "\nnew angle:  " << newAngle;
   Vector<double> NewVectorE1, NewVectorE2;
   Vectors<double>& currentBasisPlane = this->BasisProjectionPlane;
-  NewVectorE1 = currentBasisPlane[0] * FloatingPoint::cos(AngleChange);
-  NewVectorE1 += currentBasisPlane[1] * FloatingPoint::sin(AngleChange);
-  NewVectorE2 = currentBasisPlane[1] * FloatingPoint::cos(AngleChange);
-  NewVectorE2 += currentBasisPlane[0] * (- FloatingPoint::sin(AngleChange));
+  NewVectorE1 = currentBasisPlane[0] * FloatingPoint::Cos(AngleChange);
+  NewVectorE1 += currentBasisPlane[1] * FloatingPoint::Sin(AngleChange);
+  NewVectorE2 = currentBasisPlane[1] * FloatingPoint::Cos(AngleChange);
+  NewVectorE2 += currentBasisPlane[0] * (- FloatingPoint::Sin(AngleChange));
   currentBasisPlane[0] = NewVectorE1;
   currentBasisPlane[1] = NewVectorE2;
   double RootTimesE1 = this->theBilinearForm.ScalarProduct(selectedRoot, currentBasisPlane[0]);
@@ -11117,7 +11117,7 @@ class ImpreciseDouble {
     return temp.IsPositive();
   }
   void AssignFloor() {
-    this->theValue = FloatingPoint::floor(this->theValue);
+    this->theValue = FloatingPoint::Floor(this->theValue);
   }
   void operator/=(const ImpreciseDouble& other) {
     ImpreciseDouble copyMe;

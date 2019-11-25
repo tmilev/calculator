@@ -975,7 +975,7 @@ bool AlgebraicNumber::EvaluatesToDouble(double* outputWhichDouble) const {
         return false;
       } else {
         if (outputWhichDouble != nullptr) {
-          currentMultiplicand *= FloatingPoint::sqrt(
+          currentMultiplicand *= FloatingPoint::Sqrt(
             this->owner->theQuadraticRadicals[currentRadicalSelection.elements[j]].GetDoubleValue()
           );
         }

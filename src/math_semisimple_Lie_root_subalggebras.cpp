@@ -54,8 +54,8 @@ void rootSubalgebra::GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double
     coxeterNumber = MathRoutines::Maximum(lastRootInSimpleCoords.SumCoords().NumShort, coxeterNumber);
   }
   CompleX<double> theEigenValue;
-  theEigenValue.Re = FloatingPoint:: cos(2 * MathRoutines::Pi() / coxeterNumber);
-  theEigenValue.Im = FloatingPoint:: sin(2 * MathRoutines::Pi() / coxeterNumber);
+  theEigenValue.Re = FloatingPoint::Cos(2 * MathRoutines::Pi() / coxeterNumber);
+  theEigenValue.Im = FloatingPoint::Sin(2 * MathRoutines::Pi() / coxeterNumber);
   Matrix<CompleX<double> > eigenMat;
   eigenMat.init(matCoxeterElt.NumRows, matCoxeterElt.NumCols);
   for (int i = 0; i < eigenMat.NumRows; i ++) {

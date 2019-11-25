@@ -50,12 +50,7 @@ class NilradicalCandidate {
   Vectors<Rational> theNilradicalSubsetWeights;
   Vectors<Rational> theNonFKhwVectorsStrongRelativeToSubsetWeights;
 
-  NilradicalCandidate() :
-    owner(nullptr),
-    flagRestrictedCentralizerConditionHoldS(false),
-    flagParabolicACextendsToParabolicAC(false),
-    flagLinfiniteRelFound(false) {
-  }
+  NilradicalCandidate();
   void reset();
   void CheckInitialization() const;
   bool IsStronglySingular(int moduleIndex);
@@ -201,9 +196,7 @@ public:
 
   bool flagDeallocated;
   CandidateSSSubalgebra();
-  ~CandidateSSSubalgebra() {
-    this->flagDeallocated = true;
-  }
+  ~CandidateSSSubalgebra();
   WeylGroupData& GetWeylNonEmbeddedDefaultScale();
   void reset(SemisimpleSubalgebras* inputOwner = nullptr);
   bool CheckConsistency() const;

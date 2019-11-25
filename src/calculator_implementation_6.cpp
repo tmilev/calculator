@@ -1638,8 +1638,8 @@ bool CalculatorFunctionsGeneral::innerCompareIntervalsNumerically(
       }
     }
     if (
-      FloatingPoint::abs(left1 - right1) > precision ||
-      FloatingPoint::abs(left2 - right2) > precision
+      FloatingPoint::Abs(left1 - right1) > precision ||
+      FloatingPoint::Abs(left2 - right2) > precision
     ) {
       return output.AssignValue(0, theCommands);
     }

@@ -818,14 +818,14 @@ bool CalculatorFunctionsGeneral::innerLog(Calculator& theCommands, const Express
     if (input.IsAtomGivenData(theCommands.opE())) {
       return output.AssignValue(Rational(1), theCommands);
     }
-    return output.AssignValue(FloatingPoint::log(theArgument), theCommands);
+    return output.AssignValue(FloatingPoint::Log(theArgument), theCommands);
   }
   theArgument *= - 1;
   Expression iE, ipiE, piE, lnPart;
   iE.MakeSqrt(theCommands, Rational(- 1), 2);
   piE.MakeAtom(theCommands.opPi(), theCommands);
   ipiE.MakeXOX(theCommands, theCommands.opTimes(), piE, iE);
-  lnPart.AssignValue(FloatingPoint::log(theArgument), theCommands);
+  lnPart.AssignValue(FloatingPoint::Log(theArgument), theCommands);
   return output.MakeXOX(theCommands, theCommands.opPlus(), lnPart, ipiE);
 }
 
@@ -866,7 +866,7 @@ bool CalculatorFunctionsGeneral::innerArctan(Calculator& theCommands, const Expr
   if (!input.EvaluatesToDouble(&theArgument)) {
     return false;
   }
-  return output.AssignValue(FloatingPoint::arctan(theArgument), theCommands);
+  return output.AssignValue(FloatingPoint::Arctan(theArgument), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerArccos(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -878,7 +878,7 @@ bool CalculatorFunctionsGeneral::innerArccos(Calculator& theCommands, const Expr
   if (!input.EvaluatesToDouble(&theArgument)) {
     return false;
   }
-  return output.AssignValue(FloatingPoint::arccos(theArgument), theCommands);
+  return output.AssignValue(FloatingPoint::Arccos(theArgument), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerArcsin(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -890,7 +890,7 @@ bool CalculatorFunctionsGeneral::innerArcsin(Calculator& theCommands, const Expr
   if (!input.EvaluatesToDouble(&theArgument)) {
     return false;
   }
-  return output.AssignValue(FloatingPoint::arcsin(theArgument), theCommands);
+  return output.AssignValue(FloatingPoint::Arcsin(theArgument), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerAbs(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -947,7 +947,7 @@ bool CalculatorFunctionsGeneral::innerSin(Calculator& theCommands, const Express
   if (!input.EvaluatesToDouble(&theArgument)) {
     return false;
   }
-  return output.AssignValue(FloatingPoint::sin(theArgument), theCommands);
+  return output.AssignValue(FloatingPoint::Sin(theArgument), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerCos(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -980,7 +980,7 @@ bool CalculatorFunctionsGeneral::innerCos(Calculator& theCommands, const Express
   if (!input.EvaluatesToDouble(&theArgument)) {
     return false;
   }
-  return output.AssignValue(FloatingPoint::cos(theArgument), theCommands );
+  return output.AssignValue(FloatingPoint::Cos(theArgument), theCommands );
 }
 
 bool CalculatorFunctionsGeneral::innerTan(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -7965,7 +7965,7 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
         return false;
       }
       if (whichDouble != nullptr) {
-        *whichDouble = (FloatingPoint::log(rightD)) / (FloatingPoint::log(leftD));
+        *whichDouble = (FloatingPoint::Log(rightD)) / (FloatingPoint::Log(leftD));
       }
       return true;
     }
@@ -7992,7 +7992,7 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
       if (leftD == 0.0 && rightD > 0) {
         *whichDouble = 0;
       } else {
-        *whichDouble = FloatingPoint::power(leftD, rightD);
+        *whichDouble = FloatingPoint::Power(leftD, rightD);
       }
       if (signChange) {
         *whichDouble *= - 1;
@@ -8022,7 +8022,7 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
       if (rightD == 0.0 && leftD > 0) {
         *whichDouble = 0;
       } else {
-        *whichDouble = FloatingPoint::power(rightD, 1 / leftD);
+        *whichDouble = FloatingPoint::Power(rightD, 1 / leftD);
       }
       if (signChange) {
         *whichDouble *= - 1;
@@ -8068,7 +8068,7 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
         return false;
       }
       if (whichDouble != nullptr) {
-        *whichDouble = FloatingPoint::sqrt(argumentD);
+        *whichDouble = FloatingPoint::Sqrt(argumentD);
       }
     }
     if (this->StartsWith(theCommands.opAbsoluteValue())) {
@@ -8085,7 +8085,7 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
         return false;
       }
       if (whichDouble != nullptr) {
-        *whichDouble = FloatingPoint::arccos(argumentD);
+        *whichDouble = FloatingPoint::Arccos(argumentD);
       }
     }
     if (this->StartsWith(theCommands.opArcSin())) {
@@ -8093,40 +8093,40 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
         return false;
       }
       if (whichDouble != nullptr) {
-        *whichDouble = FloatingPoint::arcsin(argumentD);
+        *whichDouble = FloatingPoint::Arcsin(argumentD);
       }
     }
     if (this->StartsWith(theCommands.opSin())) {
       if (whichDouble != nullptr) {
-        *whichDouble = FloatingPoint::sin(argumentD);
+        *whichDouble = FloatingPoint::Sin(argumentD);
       }
     }
     if (this->StartsWith(theCommands.opCos())) {
       if (whichDouble != nullptr) {
-        *whichDouble = FloatingPoint::cos(argumentD);
+        *whichDouble = FloatingPoint::Cos(argumentD);
       }
     }
     if (this->StartsWith(theCommands.opTan())) {
       if (whichDouble != nullptr) {
-        double denominator = FloatingPoint::cos(argumentD);
+        double denominator = FloatingPoint::Cos(argumentD);
         if (denominator == 0.0) {
           return false;
         }
-        *whichDouble = FloatingPoint::sin(argumentD) / denominator;
+        *whichDouble = FloatingPoint::Sin(argumentD) / denominator;
       }
     }
     if (this->StartsWith(theCommands.opCot())) {
       if (whichDouble != nullptr) {
-        double denominator = FloatingPoint::sin(argumentD);
+        double denominator = FloatingPoint::Sin(argumentD);
         if (denominator == 0.0) {
           return false;
         }
-        *whichDouble = FloatingPoint::cos(argumentD) / denominator;
+        *whichDouble = FloatingPoint::Cos(argumentD) / denominator;
       }
     }
     if (this->StartsWith(theCommands.opCsc())) {
       if (whichDouble != nullptr) {
-        double denominator = FloatingPoint::sin(argumentD);
+        double denominator = FloatingPoint::Sin(argumentD);
         if (denominator == 0.0) {
           return false;
         }
@@ -8135,7 +8135,7 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
     }
     if (this->StartsWith(theCommands.opSec())) {
       if (whichDouble != nullptr) {
-        double denominator = FloatingPoint::cos(argumentD);
+        double denominator = FloatingPoint::Cos(argumentD);
         if (denominator == 0.0) {
           return false;
         }
@@ -8144,7 +8144,7 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
     }
     if (this->StartsWith(theCommands.opArcTan())) {
       if (whichDouble != nullptr) {
-        *whichDouble = FloatingPoint::arctan(argumentD);
+        *whichDouble = FloatingPoint::Arctan(argumentD);
       }
     }
     if (this->StartsWith(theCommands.opLog())) {
@@ -8152,7 +8152,7 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
         return false;
       }
       if (whichDouble != nullptr) {
-        *whichDouble = FloatingPoint::log(argumentD);
+        *whichDouble = FloatingPoint::Log(argumentD);
       }
     }
     return true;

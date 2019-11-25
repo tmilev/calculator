@@ -514,7 +514,7 @@ List<ClassFunction<somegroup, Rational> > ComputeCharacterTable(somegroup &G) {
   for (int i = 0; i < spaces.size; i ++) {
     Rational x = chars[i].InnerProduct(chars[i]);
     int x2 = x.GetDenominator().GetUnsignedIntValueTruncated();
-    x2 = static_cast<int>(FloatingPoint::sqrt(x2));
+    x2 = static_cast<int>(FloatingPoint::Sqrt(x2));
     chars[i] *= x2;
     if (chars[i][0] < 0) {
       chars[i] *= - 1;

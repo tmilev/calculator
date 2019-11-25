@@ -1,6 +1,6 @@
 //The current file is licensed under the license terms found in the main header file "calculator.h".
 //For additional information refer to the file "calculator.h".
-#ifndef vpfJsons_h_already_included
+#ifndef vpfJson_h_already_included
 #define vpfJson_h_already_included
 
 #include "math_large_integers.h"

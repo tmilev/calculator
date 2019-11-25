@@ -956,7 +956,7 @@ bool LargeIntegerUnsigned::FactorReturnFalseIfFactorizationIncomplete(
   unsigned int toBeFactored = static_cast<unsigned>(this->theDigits[0]);
   outputFactors.SetSize(0);
   outputMultiplicites.SetSize(0);
-  int upperboundPrimeDivisors = static_cast<int>(FloatingPoint::sqrt(static_cast<double>(toBeFactored)));
+  int upperboundPrimeDivisors = static_cast<int>(FloatingPoint::Sqrt(static_cast<double>(toBeFactored)));
   List<bool> theSieve;
   theSieve.initializeFillInObject(upperboundPrimeDivisors + 1, true);
   for (int i = 2; i <= upperboundPrimeDivisors; i ++) {
@@ -967,7 +967,7 @@ bool LargeIntegerUnsigned::FactorReturnFalseIfFactorizationIncomplete(
     while (toBeFactored % candidate == 0) {
       this->AccountFactor(i, outputFactors, outputMultiplicites);
       toBeFactored /= candidate;
-      upperboundPrimeDivisors = static_cast<int>(FloatingPoint::sqrt(static_cast<double>(toBeFactored)));
+      upperboundPrimeDivisors = static_cast<int>(FloatingPoint::Sqrt(static_cast<double>(toBeFactored)));
     }
     for (int j = i; j <= upperboundPrimeDivisors; j += i) {
       theSieve[j] = false;

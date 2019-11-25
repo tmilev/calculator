@@ -20,6 +20,7 @@ LogFiles*
 database-backups*
 
 bin/*
+calculator
 
 testFileWritePermissionsSSsas.txt
 

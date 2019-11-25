@@ -442,7 +442,7 @@ std::string WebWorker::ToStringMessageShortUnsafe(FormatExpressions* theFormat) 
   out << lineBreak << "\nPhysical address project base:\n"
   << HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.PhysicalPathProjectBase, false);
   out << lineBreak << "\nPhysical address server base:\n"
-  << HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.PhysicalPathServerBasE, false);
+  << HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.PhysicalPathServerBase, false);
   out << lineBreak << "\nPhysical address output folder:\n"
   << HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.PhysicalPathHtmlFolder, false);
   return out.str();

@@ -205,23 +205,15 @@ DIRECTORIES=$(dir $(OBJECTS))
 all: bin_calculator 
 
 bin_calculator: $(OBJECTS)
-	$(CXX) $(LDFLAGS) $(OBJECTS) -o ./bin/calculator $(LIBRARIES_INCLUDED_AT_THE_END)
+	$(CXX) $(LDFLAGS) $(OBJECTS) -o ./calculator $(LIBRARIES_INCLUDED_AT_THE_END)
 
-testrun: bin/calculator
-	time ./bin/calculator test
+testrun: calculator
+	time ./calculator test
 
 bin/%.o:src/%.cpp
 	mkdir -p $(@D)
 	$(CXX) $(CFLAGS) -MMD -MP $< -o $@
-
-bin/boringssl/%.o:src/boringssl/%.c
-	mkdir -p $(@D)
-	$(CXX) $(CFLAGS) -MMD -MP $< -o $@
-
-bin/boringssl/%.o:src/boringssl/%.cc
-	mkdir -p $(@D)
-	$(CXX) $(CFLAGS) -MMD -MP $< -o $@
-
+	
 clean:
 	rm -f $(OBJECTS) $(DEPENDENCIES)
 

@@ -190,7 +190,7 @@ public:
   std::string RelativePhysicalNameOptionalResult;
 
   std::string PhysicalPathProjectBase;
-  std::string PhysicalPathServerBasE;
+  std::string PhysicalPathServerBase;
   std::string PhysicalPathHtmlFolder;
   std::string PhysicalNameFolderExecutable;
   std::string PhysicalNameExecutableNoPath;

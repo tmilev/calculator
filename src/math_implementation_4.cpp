@@ -231,7 +231,7 @@ std::string GlobalVariables::ToStringHTMLTopCommandLinuxSystem() {
 
 std::string GlobalVariables::ToStringFolderInfo() const {
   std::stringstream out;
-  out << "<br>Physical path server base: " << this->PhysicalPathServerBasE;
+  out << "<br>Physical path server base: " << this->PhysicalPathServerBase;
   out << "<br>Diplay name executable: " << this->DisplayNameExecutable;
   out << "<br>Physical name folder below executable: " << this->PhysicalNameFolderExecutable;
   out << "<br>Physical path output folder: " << this->PhysicalPathHtmlFolder;
@@ -346,7 +346,7 @@ void GlobalVariables::InitThreadsExecutableStart() {
 
 void GlobalVariables::initFoldersProjectBase(const std::string& inputPhysicalExecutable) {
   StateMaintainerCurrentFolder preserveCurrentFolder;
-  this->PhysicalPathProjectBase = FileOperations::GetPathFromFileNameWithPath(inputPhysicalExecutable) + "./../";
+  this->PhysicalPathProjectBase = FileOperations::GetPathFromFileNameWithPath(inputPhysicalExecutable) + "./";
   this->ChDir(this->PhysicalPathProjectBase);
   this->PhysicalPathProjectBase = FileOperations::GetCurrentFolder() + "/";
 }
@@ -359,7 +359,7 @@ void GlobalVariables::initDefaultFolderAndFileNames(
   this->PhysicalNameExecutableNoPath = FileOperations::GetFileNameFromFileNameWithPath(inputPhysicalExecutable);
   this->PhysicalNameExecutableWithPath = this->PhysicalNameFolderExecutable + this->PhysicalNameExecutableNoPath;
   this->PhysicalPathHtmlFolder = this->PhysicalPathProjectBase + "../public_html/";
-  this->PhysicalPathServerBasE = this->PhysicalPathHtmlFolder;
+  this->PhysicalPathServerBase = this->PhysicalPathHtmlFolder;
   this->DisplayPathOutputFolder = "/output/";
 
   this->DisplayNameExecutable = "/cgi-bin/" + this->PhysicalNameExecutableNoPath;

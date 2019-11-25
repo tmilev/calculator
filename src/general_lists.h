@@ -2235,8 +2235,7 @@ void List<Object>::ExpandArrayOnTop(int increase) {
   Object* newArray = 0;
   try {
     newArray = new Object[this->ActualSize + increase];
-  } catch (std::bad_alloc& theBA) {
-    (void) theBA;
+  } catch (std::bad_alloc&) {
     crash << "Memory allocation failure: failed to allocate " << this->ActualSize + increase << " objects. " << crash;
   }
 #ifdef AllocationLimitsSafeguard

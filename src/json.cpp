@@ -251,6 +251,12 @@ bool JSData::isEqualTo(const std::string& other) {
   return this->theString == other;
 }
 
+bool JSData::isNullOrUndefined() {
+  return
+    this->theType == JSData::token::tokenNull ||
+    this->theType == JSData::token::tokenUndefined;
+}
+
 bool JSData::isTrueRepresentationInJSON() {
   if (this->theType == JSData::token::tokenBool) {
     return this->theBoolean;

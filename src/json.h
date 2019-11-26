@@ -87,6 +87,7 @@ public:
   void operator=(const Vector<coefficient>& other);
   template <typename coefficient>
   void operator=(const Matrix<coefficient>& other);
+  bool isNullOrUndefined();
   bool isIntegerFittingInInt(int* whichInteger);
   bool isTrueRepresentationInJSON();
   bool isListOfStrings(List<std::string>* whichStrings);

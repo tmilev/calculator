@@ -2642,7 +2642,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "commands to produce a single latex file. The function was "
     "originally designed for the purposes of the freecalc project "
     "as not been tested on any other projects, please use only for freecalc.",
-    "Crawl(\"freecalc/homework/UMB-All-Problems-By-Course/Calc-I-MasterProblemSheet.tex\")",
+    "Crawl(\"freecalc/homework/referenceallproblemsbycourse/calculusimasterproblemsheet.tex\")",
     true,
     false,
     "CalculatorFunctionsGeneral::innerCrawlTexFile",
@@ -2659,10 +2659,12 @@ void Calculator::initPredefinedInnerFunctions() {
     "parallel to the calculator project folder "
     "(i.e, we have folders /vectorpartition and /freecalc next to one another). "
     "The folders are given relative to the /freecalc base.",
-    "BuildFreecalc (\"freecalc/lectures/UMB-Reference-Lectures/Calculus_I.tex\");\n"
-    "BuildFreecalc(\"freecalc/lectures/UMB-Reference-Lectures/Calculus_II.tex\");\n"
-    "BuildFreecalc(\"freecalc/homework/UMB-All-Problems-By-Course/Homework_Calculus_I.tex\");\n"
-    "BuildFreecalc(\"freecalc/homework/UMB-All-Problems-By-Course/Homework_Calculus_II.tex\");",
+    "BuildFreecalc (\"freecalc/lectures/referencelectures/calculusi.tex\");\n"
+    "BuildFreecalc(\"freecalc/lectures/referencelectures/calculusii.tex\");\n"
+    "BuildFreecalc(\"freecalc/lectures/referencelectures/calculusiiimultivariable.tex\");\n"
+    "BuildFreecalc(\"freecalc/homework/referenceallproblemsbycourse/calculusimasterproblemsheet.tex\");\n"
+    "BuildFreecalc(\"freecalc/homework/referenceallproblemsbycourse/calculusiimasterproblemsheet.tex\");"
+    "BuildFreecalc(\"freecalc/homework/referenceallproblemsbycourse/calculusiiimasterproblemsheet.tex\");",
     true,
     false,
     "CalculatorFunctionsGeneral::innerBuildFreecalc",
@@ -2673,7 +2675,7 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctionsGeneral::innerBuildFreecalcSingleSlides,
     "",
     "Same as BuildFreeCalc but attempts to also build individual slides. ",
-    "BuildFreecalcWithSlides (\"freecalc/lectures/UMB-Reference-Lectures/Calculus_I.tex\");",
+    "BuildFreecalcWithSlides (\"freecalc/lectures/referenceallproblemsbycourse/calculusimasterproblemsheet.tex\");",
     true,
     false,
     "CalculatorFunctionsGeneral::BuildFreecalcWithSlides",

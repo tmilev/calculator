@@ -41,7 +41,7 @@ make -j10 nossl=1 nomongo=1
 ### Running the calculator
 5. Start the calculator as a web server:
 ```
-bin/calculator server 10000
+calculator server 10000
 ```
 The number 10000 gives you computation timeout (computations that take longer than 10000 seconds will crash).
 Leave the terminal window open if you'd like to monitor what's going on. 

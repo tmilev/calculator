@@ -215,6 +215,6 @@ bin/%.o:src/%.cpp
 	$(CXX) $(CFLAGS) -MMD -MP $< -o $@
 	
 clean:
-	rm -f $(OBJECTS) $(DEPENDENCIES)
+	rm -f $(OBJECTS) $(DEPENDENCIES) ./calculator
 
 -include $(DEPENDENCIES)

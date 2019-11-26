@@ -282,8 +282,15 @@ public:
   static void CheckFreecalcSetup();
   static void AnalyzeMainArguments(int argC, char** argv);
   static void AnalyzeMainArgumentsTimeString(const std::string& timeLimitString);
-  void InitializeGlobalVariables();
-  void InitializeGlobalVariablesHashes();
+  void InitializeMainAll();
+  void InitializeMainHashes();
+  void InitializeMainRequests();
+  void InitializeMainAddresses();
+  void InitializeMainFoldersULTRASensitive();
+  void InitializeMainFoldersSensitive();
+  void InitializeMainFoldersNonSensitive();
+  void InitializeMainFoldersInstructorSpecific();
+
   void MarkChildNotInUse(int childIndex);
   bool RequiresLogin(const std::string& inputRequest, const std::string& inputAddress);
   void ReleaseWorkerSideResources();

@@ -4864,10 +4864,8 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv) {
   theGlobalVariables.flagRunningCommandLine = true;
 }
 
-void WebServer::InitializeGlobalVariablesHashes() {
+void WebServer::InitializeMainHashes() {
   StateMaintainerCurrentFolder preserveCurrentFolder;
-  std::string theDir = FileOperations::GetCurrentFolder();
-  theGlobalVariables.ChDir("../");
   if (theGlobalVariables.buildVersionSimple == "") {
     theGlobalVariables.buildVersionSimple =
     StringRoutines::StringTrimWhiteSpace(theGlobalVariables.CallSystemWithOutput("git rev-list --count HEAD"));
@@ -4892,7 +4890,6 @@ void WebServer::InitializeGlobalVariablesHashes() {
   buildHeadHashWithTimeStream << theGlobalVariables.buildHeadHashWithServerTime
   << theGlobalVariables.GetGlobalTimeInSeconds();
   theGlobalVariables.buildHeadHashWithServerTime = buildHeadHashWithTimeStream.str();
-  theGlobalVariables.ChDir(theDir);
 
   FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash().AddOnTopNoRepetitionMustBeNewCrashIfNot(
     WebAPI::request::calculatorHTML
@@ -4900,10 +4897,8 @@ void WebServer::InitializeGlobalVariablesHashes() {
   WebAPI::request::onePageJSWithHash = FileOperations::GetVirtualNameWithHash(WebAPI::request::onePageJS);
 }
 
-void WebServer::InitializeGlobalVariables() {
-  theGlobalVariables.millisecondsReplyAfterComputation = 0;
-  ParallelComputing::cgiLimitRAMuseNumPointersInList = 4000000000;
-  this->InitializeGlobalVariablesHashes();
+void WebServer::InitializeMainRequests() {
+  MacroRegisterFunctionWithName("WebServer::InitializeMainRequests");
   this->requestsNotNeedingLogin.AddOnTop("about");
   this->requestsNotNeedingLogin.AddOnTop("signUp");
   this->requestsNotNeedingLogin.AddOnTop("signUpPage");
@@ -4931,7 +4926,10 @@ void WebServer::InitializeGlobalVariables() {
   this->requestsNotNeedingLogin.AddOnTop(WebAPI::appNoCache);
   this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::userInfoJSON);
   this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::serverStatusJSON);
+}
 
+void WebServer::InitializeMainAddresses() {
+  MacroRegisterFunctionWithName("WebServer::InitializeMainAddresses");
   this->addressStartsNotNeedingLogin.AddOnTop("favicon.ico");
   this->addressStartsNotNeedingLogin.AddOnTop("/favicon.ico");
   this->addressStartsNotNeedingLogin.AddOnTop("/html-common/");
@@ -4946,27 +4944,20 @@ void WebServer::InitializeGlobalVariables() {
   this->addressStartsNotNeedingLogin.AddOnTop("/" + WebAPI::appNoCache);
   this->addressStartsNotNeedingLogin.AddOnTop(WebAPI::request::onePageJS);
 
-
   this->addressStartsInterpretedAsCalculatorRequest.AddOnTop("/" + WebAPI::app);
   this->addressStartsInterpretedAsCalculatorRequest.AddOnTop(WebAPI::app);
   this->addressStartsInterpretedAsCalculatorRequest.AddOnTop("/" + WebAPI::appNoCache);
   this->addressStartsInterpretedAsCalculatorRequest.AddOnTop(WebAPI::appNoCache);
   this->addressStartsInterpretedAsCalculatorRequest.AddOnTop(WebAPI::request::onePageJS);
   this->addressStartsInterpretedAsCalculatorRequest.AddOnTop(WebAPI::request::onePageJSWithHash);
-  // NO! Adding "logout", for example:
+
+  // FORBIDDEN:
   // this->addressStartsNotNeedingLogin.AddOnTop("logout");
-  // is FORBIDDEN! Logging someone out definitely
-  // requires authentication (imagine someone
+  // Logging someone out definitely
+  // requires authentication imagine someone
   // asking for logouts on your account once every second:
   // this would be fatal as proper logout resets
   // the authentication tokens.
-
-  MapList<std::string, std::string, MathRoutines::HashString>&
-  folderSubstitutionsNonSensitive = FileOperations::FolderVirtualLinksNonSensitive();
-  MapList<std::string, std::string, MathRoutines::HashString>&
-  folderSubstitutionsSensitive = FileOperations::FolderVirtualLinksSensitive();
-  FileOperations::FolderVirtualLinksULTRASensitive(); //<- allocates data structure
-  folderSubstitutionsNonSensitive.Clear();
   this->addressStartsNotNeedingLogin.AddListOnTop(
     FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash()
   );
@@ -4979,11 +4970,42 @@ void WebServer::InitializeGlobalVariables() {
       theGlobalVariables.buildHeadHashWithServerTime
     );
   }
+
+}
+
+void WebServer::InitializeMainFoldersULTRASensitive() {
+  MacroRegisterFunctionWithName("WebServer::InitializeMainFoldersULTRASensitive");
+  MapList<std::string, std::string, MathRoutines::HashString>&
+  folderSubstitutionsULTRASensitive = FileOperations::FolderVirtualLinksULTRASensitive(); //<- allocates data structure
+  folderSubstitutionsULTRASensitive.SetKeyValue("certificates/", "certificates/");
+  folderSubstitutionsULTRASensitive.SetKeyValue("/results/", "results/");
+  folderSubstitutionsULTRASensitive.SetKeyValue("results/", "results/");
+  folderSubstitutionsULTRASensitive.SetKeyValue("crashes/", "results/crashes/");
+}
+
+void WebServer::InitializeMainFoldersSensitive() {
+  MacroRegisterFunctionWithName("WebServer::InitializeMainFoldersSensitive");
+  MapList<std::string, std::string, MathRoutines::HashString>&
+  folderSubstitutionsSensitive = FileOperations::FolderVirtualLinksSensitive();
+  folderSubstitutionsSensitive.Clear();
+
+  folderSubstitutionsSensitive.SetKeyValue("LogFiles/", "LogFiles/");
+  folderSubstitutionsSensitive.SetKeyValue("/LogFiles/", "LogFiles/");
+  folderSubstitutionsSensitive.SetKeyValue("configuration/", "configuration/");
+  folderSubstitutionsSensitive.SetKeyValue("/configuration/", "configuration/");
+  folderSubstitutionsSensitive.SetKeyValue("freecalc/", "../freecalc/");
+  folderSubstitutionsSensitive.SetKeyValue("/freecalc/", "../freecalc/");
+}
+
+void WebServer::InitializeMainFoldersNonSensitive() {
+  MacroRegisterFunctionWithName("WebServer::InitializeMainFoldersNonSensitive");
   // Warning: order of substitutions is important.
   // Only the first rule that applies is applied, once.
   // No further rules are applied after that.
-  // Locations that start with "/" are coming from webserver references.
-  // Locations that do not start with "/" are for internal use.
+  // Location keys that start with "/" are coming from webserver references.
+  // Location keys that do not start with "/" are for internal use.
+  MapList<std::string, std::string, MathRoutines::HashString>&
+  folderSubstitutionsNonSensitive = FileOperations::FolderVirtualLinksNonSensitive();
   folderSubstitutionsNonSensitive.SetKeyValue("/output/", "output/");
   folderSubstitutionsNonSensitive.SetKeyValue("output/", "output/");
   folderSubstitutionsNonSensitive.SetKeyValue("/src/", "src/");
@@ -5024,25 +5046,27 @@ void WebServer::InitializeGlobalVariables() {
   folderSubstitutionsNonSensitive.SetKeyValue("slides-video/", "../slides-video/");
   folderSubstitutionsNonSensitive.SetKeyValue("/test/", "test/");
   folderSubstitutionsNonSensitive.SetKeyValue("test/", "test/");
+}
 
-  folderSubstitutionsSensitive.Clear();
-
-  folderSubstitutionsSensitive.SetKeyValue("LogFiles/", "LogFiles/");
-  folderSubstitutionsSensitive.SetKeyValue("/LogFiles/", "LogFiles/");
-  folderSubstitutionsSensitive.SetKeyValue("configuration/", "configuration/");
-  folderSubstitutionsSensitive.SetKeyValue("/configuration/", "configuration/");
-
-  FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("favicon.ico");
-  FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("/favicon.ico");
-  FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("/coursesavailable/default/default.txt");
-  FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("/calculator-html/about.html");
-  FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("/html/about.html");
-
+void WebServer::InitializeMainFoldersInstructorSpecific() {
+  MacroRegisterFunctionWithName("WebServer::InitializeMainFoldersInstructorSpecific");
   FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("topiclists/");
   FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("coursetemplates/");
   FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("/coursesavailable/");
   FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("problems/");
   FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("DefaultProblemLocation/");
+}
+
+void WebServer::InitializeMainAll() {
+  theGlobalVariables.millisecondsReplyAfterComputation = 0;
+  ParallelComputing::cgiLimitRAMuseNumPointersInList = 4000000000;
+  this->InitializeMainHashes();
+  this->InitializeMainFoldersULTRASensitive();
+  this->InitializeMainFoldersSensitive();
+  this->InitializeMainFoldersNonSensitive();
+  this->InitializeMainFoldersInstructorSpecific();
+  this->InitializeMainRequests();
+  this->InitializeMainAddresses();
 }
 
 int main(int argc, char **argv) {
@@ -5264,11 +5288,18 @@ void GlobalVariables::ConfigurationProcess() {
   if (theGlobalVariables.configuration[Configuration::portHTTPSBuiltIn].theString == "") {
     theGlobalVariables.configuration[Configuration::portHTTPSBuiltIn] = "8177";
   }
-  if (theGlobalVariables.configuration[Configuration::HTMLCommon].theString == "") {
-    theGlobalVariables.configuration[Configuration::HTMLCommon] = "html-common/";
-  }
-  if (theGlobalVariables.configuration[Configuration::calculatorHTML].theString == "") {
-    theGlobalVariables.configuration[Configuration::calculatorHTML] = "calculator-html/";
+  List<List<std::string> > folderVirtualLinksDefault = FileOperations::FolderVirtualLinksDefault();
+  folderVirtualLinksDefault = List<List<std::string> >({
+    List<std::string>({Configuration::HTMLCommon, "html-common/"}),
+    List<std::string>({Configuration::calculatorHTML, "calculator-html/"}),
+    List<std::string>({Configuration::calculatorHTML, "public_html/"}),
+  });
+  for (int i = 0; i < folderVirtualLinksDefault.size; i ++) {
+    std::string key = folderVirtualLinksDefault[i][0];
+    std::string value = folderVirtualLinksDefault[i][1];
+    if (theGlobalVariables.configuration[key].theString == "") {
+      theGlobalVariables.configuration[key].theString = value;
+    }
   }
 }
 
@@ -5300,7 +5331,7 @@ int WebServer::main(int argc, char **argv) {
     } else {
       theGlobalVariables.millisecondsNoPingBeforeChildIsPresumedDead = - 1;
     }
-    theWebServer.InitializeGlobalVariables();
+    theWebServer.InitializeMainAll();
     // Compute various flags and settings from the desired configuration.
     // Correct bad configuration settings if any.
     theGlobalVariables.ConfigurationProcess();

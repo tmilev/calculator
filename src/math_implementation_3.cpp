@@ -957,12 +957,6 @@ FileOperations::FolderVirtualLinksNonSensitive() {
 }
 
 HashedList<std::string, MathRoutines::HashString>&
-FileOperations::FilesStartsToWhichWeAppendHostName() {
-  static HashedList<std::string, MathRoutines::HashString> result;
-  return result;
-}
-
-HashedList<std::string, MathRoutines::HashString>&
 FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash() {
   static HashedList<std::string, MathRoutines::HashString> result;
   return result;
@@ -977,29 +971,17 @@ FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash() {
 MapList<std::string, std::string, MathRoutines::HashString>&
 FileOperations::FolderVirtualLinksSensitive() {
   static MapList<std::string, std::string, MathRoutines::HashString> result;
-  static bool firstRun = false;
-  if (!firstRun) {
-    firstRun = true;
-    result.SetKeyValue("freecalc/", "../freecalc/");
-    result.SetKeyValue("LogFiles/", "LogFiles/");
-    result.SetKeyValue("/LogFiles/", "LogFiles/");
-    result.SetKeyValue("configuration/", "configuration/");
-    result.SetKeyValue("/configuration/", "configuration/");
-  }
   return result;
 }
 
 MapList<std::string, std::string, MathRoutines::HashString>&
 FileOperations::FolderVirtualLinksULTRASensitive() {
   static MapList<std::string, std::string, MathRoutines::HashString> result;
-  static bool firstRun = false;
-  if (!firstRun) {
-    firstRun = true;
-    result.SetKeyValue("certificates/", "certificates/");
-    result.SetKeyValue("/results/", "results/");
-    result.SetKeyValue("results/", "results/");
-    result.SetKeyValue("crashes/", "results/crashes/");
-  }
+  return result;
+}
+
+List<List<std::string> >& FileOperations::FolderVirtualLinksDefault() {
+  static List<List<std::string> > result;
   return result;
 }
 
@@ -1286,30 +1268,6 @@ bool FileOperations::GetPhysicalFileNameFromVirtual(
       )) {
         inputCopy = FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash()[i] + folderEnd2;
       }
-    }
-  }
-  for (int i = 0; i < FileOperations::FilesStartsToWhichWeAppendHostName().size; i ++) {
-    if (StringRoutines::StringBeginsWith(inputCopy, FileOperations::FilesStartsToWhichWeAppendHostName()[i])) {
-      if (!FileOperations::IsOKfileNameVirtual(theGlobalVariables.hostNoPort)) {
-        return false;
-      }
-      std::string toAppend = theGlobalVariables.hostNoPort;
-      if (StringRoutines::StringBeginsWith(toAppend, "www.")) {
-        toAppend = toAppend.substr(4);
-      }
-      if (
-        StringRoutines::StringBeginsWith(toAppend, "localhost") ||
-        toAppend == "calculator-algebra.org" ||
-        toAppend == "www.calculator-algebra.org"
-      ) {
-        toAppend = "";
-      }
-      if (toAppend == "") {
-        continue;
-      }
-      std::string fileStart, fileExtension;
-      fileExtension = FileOperations::GetFileExtensionWithDot(inputCopy, &fileStart);
-      inputCopy = fileStart + "-" + toAppend + fileExtension;
     }
   }
   for (int i = 0; i < FileOperations::FolderVirtualLinksNonSensitive().size(); i ++) {

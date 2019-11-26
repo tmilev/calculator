@@ -13,8 +13,6 @@ static ProjectInformationInstance ProjectInfoVpfHeader1General7FileOperations_En
 class FileOperations {
 public:
   static HashedList<std::string, MathRoutines::HashString>&
-  FilesStartsToWhichWeAppendHostName();
-  static HashedList<std::string, MathRoutines::HashString>&
   FolderStartsToWhichWeAppendInstructorUsernameSlash();
   static HashedList<std::string, MathRoutines::HashString>&
   FolderVirtualLinksToWhichWeAppendTimeAndBuildHash();
@@ -25,6 +23,10 @@ public:
   FolderVirtualLinksSensitive(); //<- admin access only
   static MapList<std::string, std::string, MathRoutines::HashString>&
   FolderVirtualLinksULTRASensitive(); //<- no access allowed through web server
+
+  static List<List<std::string> >& FolderVirtualLinksDefault();
+
+  static bool CheckFolderLinks();
 
   static List<bool> safeFileCharacters;
   static List<bool>& GetSafeFileChars();

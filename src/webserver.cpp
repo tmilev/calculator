@@ -4137,14 +4137,7 @@ void SignalsInfrastructure::initializeSignals() {
   //if (sigaddset(&SignalChild.sa_mask, SIGSEGV) == - 1)
   //  crash << "Failed to initialize SignalChild mask. Crashing to let you know. " << crash;
   SignalChild.sa_flags = SA_NOCLDWAIT;
-  bool handleChildExit = true;
-  if (handleChildExit) {
-    logServer << logger::red << "Selected an unstable feature: signal child exit handler. "
-    << "Please use with caution. " << logger::endL;
-    SignalChild.sa_handler = &WebServer::Signal_SIGCHLD_handler; // reap all dead processes
-  } else {
-    SignalChild.sa_handler = nullptr;
-  }
+  SignalChild.sa_handler = &WebServer::Signal_SIGCHLD_handler; // reap all dead processes
   if (sigaction(SIGCHLD, &SignalChild, nullptr) == - 1) {
     crash << "Was not able to register SIGCHLD handler (reaping child processes). Crashing to let you know." << crash;
   }
@@ -5317,27 +5310,32 @@ int WebServer::main(int argc, char **argv) {
   // we need to initialize first the folder locations relative to the executable.
   MacroRegisterFunctionWithName("main");
   try {
+    // Most basic initializations (timer, ...).
     InitializeGlobalObjects();
+    // Process executable arguments.
     theWebServer.AnalyzeMainArguments(argc, argv);
-    // load and parse configuration json
     logServer << logger::green << "Project base folder: "
-    << logger::red << FileOperations::GetCurrentFolder() << "/"
     << logger::blue << theGlobalVariables.PhysicalPathProjectBase
     << logger::endL;
+    // Compute configuration file location.
+    theWebServer.InitializeMainFoldersSensitive();
+    // Load the configuration file.
     theGlobalVariables.ConfigurationLoad();
-    if (theGlobalVariables.millisecondsMaxComputation > 0) {
-      theGlobalVariables.millisecondsNoPingBeforeChildIsPresumedDead =
-      theGlobalVariables.millisecondsMaxComputation + 20000; // + 20 seconds
-    } else {
-      theGlobalVariables.millisecondsNoPingBeforeChildIsPresumedDead = - 1;
-    }
-    theWebServer.InitializeMainAll();
     // Compute various flags and settings from the desired configuration.
     // Correct bad configuration settings if any.
     theGlobalVariables.ConfigurationProcess();
     // Store back the config file if it changed.
     theGlobalVariables.ConfigurationStore();
 
+    if (theGlobalVariables.millisecondsMaxComputation > 0) {
+      theGlobalVariables.millisecondsNoPingBeforeChildIsPresumedDead =
+      theGlobalVariables.millisecondsMaxComputation + 20000; // + 20 seconds
+    } else {
+      theGlobalVariables.millisecondsNoPingBeforeChildIsPresumedDead = - 1;
+    }
+    // Uses the configuration file.
+    // Calls again theWebServer.InitializeMainFoldersSensitive();
+    theWebServer.InitializeMainAll();
     if ((false)) {
       theWebServer.CheckInstallation();
     }
@@ -5360,21 +5358,15 @@ int WebServer::main(int argc, char **argv) {
         << " seconds. " << logger::endL
         << logger::purple << "************************" << logger::endL;
       }
-    }
-    if (theGlobalVariables.flagRunningConsoleTest) {
-      return mainTest(theGlobalVariables.programArguments);
-    }
-    if (theGlobalVariables.flagRunningApache) {
-      return WebServer::mainApache();
-    }
-    if (theGlobalVariables.flagRunningBuiltInWebServer) {
       return theWebServer.Run();
-    }
-    if (theGlobalVariables.flagRunningCommandLine) {
+    } else if (theGlobalVariables.flagRunningConsoleTest) {
+      return mainTest(theGlobalVariables.programArguments);
+    } else if (theGlobalVariables.flagRunningApache) {
+      return WebServer::mainApache();
+    } else if (theGlobalVariables.flagRunningCommandLine) {
       return WebServer::mainCommandLine();
     }
-  }
-  catch (...) {
+  } catch (...) {
     crash << "Exception caught: something very wrong has happened. " << crash;
   }
   crash << "This point of code is not supposed to be reachable. " << crash;

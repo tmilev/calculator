@@ -298,14 +298,24 @@ Problem.prototype.getAppAnchorRequestFileCourseTopics = function(
 
 Problem.prototype.getCalculatorURLFileCourseTopics = function() {
   var thePage = window.calculator.mainPage;
+  return this.getCalculatorURLInput(
+    this.fileName, 
+    thePage.storage.variables.currentCourse.courseHome.getValue(), 
+    thePage.storage.variables.currentCourse.topicList.getValue(),
+  );
+}
+
+Problem.prototype.getCalculatorURLInput = function(
+  inputFileName, inputCourseHome, inputTopicList
+) {
   var result = "";
-  result += `fileName=${this.fileName}&`;
-  result += `courseHome=${thePage.storage.variables.currentCourse.courseHome.getValue()}&`;
-  result += `topicList=${thePage.storage.variables.currentCourse.topicList.getValue()}`;
+  result += `fileName=${inputFileName}&`;
+  result += `courseHome=${inputCourseHome}&`;
+  result += `topicList=${inputTopicList}`;
   return result;
 }
 
-Problem.prototype.getCalculatorURLRequestFileCourseTopics = function(isScoredQuiz) {
+Problem.prototype.getCalculatorURLRequestPartOne = function(isScoredQuiz) {
   var result = "";
   if (isScoredQuiz === undefined) {
     isScoredQuiz = this.flagForReal;
@@ -319,6 +329,25 @@ Problem.prototype.getCalculatorURLRequestFileCourseTopics = function(isScoredQui
       result += `&${pathnames.urlFields.randomSeed}=${this.randomSeed}`;
     }
   }
+  return result;
+}
+
+Problem.prototype.getCalculatorURLRequestInput = function(
+  isScoredQuiz, inputFileName, inputCourseHome, inputTopicList
+) {
+  var result = "";
+  result += this.getCalculatorURLRequestPartOne(isScoredQuiz);
+  result += this.getCalculatorURLInput(
+    inputFileName, 
+    inputCourseHome, 
+    inputTopicList,
+  );
+  return result;
+}
+
+Problem.prototype.getCalculatorURLRequestFileCourseTopics = function(isScoredQuiz) {
+  var result = "";
+  result += this.getCalculatorURLRequestPartOne(isScoredQuiz);
   result += `&${this.getCalculatorURLFileCourseTopics()}&`;
   return result;
 }
@@ -604,7 +633,6 @@ ProblemNavigation.prototype.writeToHTML = function() {
   document.getElementById(ids.domElements.divProblemInfoBar).innerHTML = panelContent;
   mathjax.typeSetSoft(ids.domElements.divProblemInfoBar);
 }
-
 
 Problem.prototype.writeToHTML = function(outputElement) {
   if (typeof outputElement === "string") {
@@ -1161,6 +1189,7 @@ var problemNavigation = new ProblemNavigation();
 var allProblems = new ProblemCollection();
 
 module.exports = {
+  Problem,
   allProblems,
   problemNavigation,
   updateProblemPage,

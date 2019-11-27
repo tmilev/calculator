@@ -33,5 +33,6 @@
   "topiclists/":"../topiclists/",
   "LaTeX-materials/":"../LaTeX-materials/",
   "slides-video/":"../slides-video/",
-  "freecalc/":"../freecalc/"
+  "freecalc/":"../freecalc/",
+  "mathJaxSetup":"Check for mathjax on every boot."
 }

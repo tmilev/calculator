@@ -146,6 +146,7 @@ std::string Configuration::autoUnitTest = "autoUnitTest";
 std::string Configuration::portHTTP = "portHTTP";
 std::string Configuration::portHTTPSOpenSSL = "portHTTPSOpenSSL";
 std::string Configuration::portHTTPSBuiltIn = "portHTTPSBuiltIn";
+std::string Configuration::mathJaxSetup = "mathJaxSetup";
 
 std::string Configuration::HTMLCommon                 = "html-common/"                                         ;
 std::string Configuration::HTMLCommonFonts            = "html-common/fonts"                                    ;

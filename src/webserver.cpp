@@ -4738,31 +4738,87 @@ void WebServer::CheckFreecalcSetup() {
   theGlobalVariables.ConfigurationStore();
 }
 
-void WebServer::CheckMathJaxSetup() {
-  MacroRegisterFunctionWithName("WebServer::CheckMathJaxSetup");
-  if (theGlobalVariables.configuration["MathJax"].theType != JSData::token::tokenUndefined) {
-    return;
-  }
-  theGlobalVariables.configuration["MathJax"] = "Attempting to install";
-  theGlobalVariables.ConfigurationStore();
+void WebServer::CheckUnzipInstall() {
   WebServer::FigureOutOperatingSystem();
-  logServer << logger::yellow << "MathJax setup file missing, proceeding to set it up. " << logger::endL
-  << logger::green << "Enter your the sudo password as prompted please. " << logger::endL;
   if (theGlobalVariables.OperatingSystem == "Ubuntu") {
     theGlobalVariables.CallSystemNoOutput("sudo apt-get install unzip", &logServer);
   } else if (theGlobalVariables.OperatingSystem == "CentOS") {
     theGlobalVariables.CallSystemNoOutput("sudo yum install unzip", &logServer);
   }
-  logServer << "Proceeding to unzip MathJax. ";
-  //std::string currentFolder =FileOperations::GetCurrentFolder();
-  //result << "Changing folder to: " << theGlobalVariables.PhysicalPathProjectBase << logger::endL;
-  //theGlobalVariables.ChDir(theGlobalVariables.PhysicalPathProjectBase);
-  logServer << "Current folder: " << FileOperations::GetCurrentFolder() << logger::endL;
-  theGlobalVariables.CallSystemNoOutput("mkdir -p ../../public_html", &logServer);
-  theGlobalVariables.CallSystemNoOutput("unzip ./../html-common/MathJax-2.7-latest.zip -d ./../../public_html/", &logServer);
-  theGlobalVariables.CallSystemNoOutput("mv ./../../public_html/MathJax-2.7.2 ./../../public_html/MathJax-2.7-latest", &logServer);
-  theGlobalVariables.configuration["MathJax"] = "Unzipped";
+
+}
+
+void WebServer::CheckMathJaxSetup() {
+  MacroRegisterFunctionWithName("WebServer::CheckMathJaxSetup");
+  std::string checkForMathJaxAndAutoInstall = "Check for mathjax on every boot.";
+  if (
+    theGlobalVariables.configuration[Configuration::mathJaxSetup].theString !=
+    checkForMathJaxAndAutoInstall
+  ) {
+    return;
+  }
   theGlobalVariables.ConfigurationStore();
+  if ((false)) {
+    WebServer::CheckUnzipInstall();
+  }
+  std::string mathjaxBase;
+  std::string mathjaxZipSource;
+  std::string publicHtmlFolder;
+  std::stringstream commentsOnFailure;
+  if (!FileOperations::GetPhysicalFileNameFromVirtual(
+    Configuration::mathJaxLatest,
+    mathjaxBase,
+    false,
+    false,
+    &commentsOnFailure
+  )) {
+    logServer << logger::red << "Failed to compute mathjax folder. "
+    << logger::endL << commentsOnFailure.str() << logger::endL;
+    return;
+  }
+  std::string toDisableMathJaxChecks = "change: "
+  "file: configuration/configuration.json "
+  "key: " + Configuration::mathJaxSetup +
+  " to any string different from its current value.";
+
+  if (FileOperations::FileExistsUnsecure(mathjaxBase)) {
+    // Mathjax folder is there.
+    // We assume it is correctly installed.
+    logServer << logger::yellow
+    << "MathJax found. To disable futher checks for mathjax: "
+    << toDisableMathJaxChecks << logger::endL;
+    return;
+  }
+  logServer << logger::red << "MathJax not found. "
+  << logger::green << "Attempting to auto-install it for you. "
+  << logger::endL
+  << "To disable mathjax checks/auto-installation: "
+  << toDisableMathJaxChecks << logger::endL;
+  if (!FileOperations::GetPhysicalFileNameFromVirtual(
+    Configuration::publicHTML, publicHtmlFolder, false, false, & commentsOnFailure
+  )) {
+    logServer << logger::red << "Failed to compute public html folder. "
+    << logger::endL << commentsOnFailure.str() << logger::endL;
+    return;
+  }
+  if (!FileOperations::GetPhysicalFileNameFromVirtual(
+    Configuration::HTMLCommon + "MathJax-2.7-latest.zip",
+    mathjaxZipSource,
+    false,
+    false,
+    &commentsOnFailure
+  )) {
+    logServer << logger::red << "Failed to compute mathjax zip source folder. "
+    << logger::endL << commentsOnFailure.str() << logger::endL;
+    return;
+  }
+  logServer << "Proceeding to unzip MathJax. ";
+  logServer << "Current folder: " << FileOperations::GetCurrentFolder() << logger::endL;
+  std::stringstream unzipCommand, moveCommand;
+  unzipCommand << "unzip " << mathjaxZipSource << " -d " << publicHtmlFolder;
+  moveCommand << "mv " << publicHtmlFolder << "MathJax-2.7.2 " << publicHtmlFolder << "MathJax-2.7-latest";
+  theGlobalVariables.CallSystemNoOutput(unzipCommand.str(), &logServer);
+  theGlobalVariables.CallSystemNoOutput(moveCommand.str(), &logServer);
 }
 
 void WebServer::AnalyzeMainArgumentsTimeString(const std::string& timeLimitString) {
@@ -5259,9 +5315,7 @@ int WebServer::main(int argc, char **argv) {
     // Uses the configuration file.
     // Calls again theWebServer.InitializeMainFoldersSensitive();
     theWebServer.InitializeMainAll();
-    if ((false)) {
-      theWebServer.CheckInstallation();
-    }
+    theWebServer.CheckMathJaxSetup();
     bool mathJaxPresent = FileOperations::FileExistsVirtual("/MathJax-2.7-latest/", false);
     if (!mathJaxPresent && theGlobalVariables.flagRunningBuiltInWebServer) {
       logServer << logger::red << "MathJax not available. " << logger::endL;

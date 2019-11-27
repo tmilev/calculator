@@ -1063,13 +1063,6 @@ void FileOperations::InitializeFoldersNonSensitive() {
     folderSubstitutionsNonSensitive.SetKeyValue(key, value);
     folderSubstitutionsNonSensitive.SetKeyValue("/" + key, value);
   }
-
-
-  folderSubstitutionsNonSensitive.SetKeyValue(
-    "/MathJax-2.7-latest/config/mathjax-calculator-setup.js",
-    "./calculator-html/mathjax-calculator-setup.js"
-  );
-  folderSubstitutionsNonSensitive.SetKeyValue("/MathJax-2.7-latest/", "../public_html/MathJax-2.7-latest/");
 }
 
 bool FileOperations::CheckFolderLinks() {

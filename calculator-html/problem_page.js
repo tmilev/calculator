@@ -336,7 +336,7 @@ Problem.prototype.getCalculatorURLRequestInput = function(
   isScoredQuiz, inputFileName, inputCourseHome, inputTopicList
 ) {
   var result = "";
-  result += this.getCalculatorURLRequestPartOne(isScoredQuiz);
+  result += this.getCalculatorURLRequestPartOne(isScoredQuiz) + "&";
   result += this.getCalculatorURLInput(
     inputFileName, 
     inputCourseHome, 

@@ -61,7 +61,12 @@ Rational ModuleSSalgebra<coefficient>::hwTrace(
       summand += 1;
       summand -= oldRight.Powers[i];
       if (!summand.IsEqualToZero()) {
-        summand *= this->hwTrace(newPair, theProgressReport);
+        summand *= this->hwTrace(
+          static_cast<
+            const Pair<MonomialTensor<int, MathRoutines::IntUnsignIdentity>,
+            MonomialTensor<int, MathRoutines::IntUnsignIdentity> >
+          >(newPair), theProgressReport
+        );
       }
       summand *= oldRight.Powers[i];
       result += summand;

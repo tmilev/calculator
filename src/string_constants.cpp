@@ -146,5 +146,24 @@ std::string Configuration::autoUnitTest = "autoUnitTest";
 std::string Configuration::portHTTP = "portHTTP";
 std::string Configuration::portHTTPSOpenSSL = "portHTTPSOpenSSL";
 std::string Configuration::portHTTPSBuiltIn = "portHTTPSBuiltIn";
-std::string Configuration::calculatorHTML = "calculatorHTML";
-std::string Configuration::HTMLCommon = "HTMLCommon";
+
+std::string Configuration::HTMLCommon                 = "html-common/"                                         ;
+std::string Configuration::HTMLCommonFonts            = "html-common/fonts"                                    ;
+std::string Configuration::HTMLCommonFont             = "html-common/font"                                     ;
+std::string Configuration::calculatorHTML             = "calculator-html/"                                     ;
+std::string Configuration::publicHTML                 = "public_html/"                                         ;
+std::string Configuration::certificatesPublic         = "certificates-public/"                                 ;
+std::string Configuration::sourceCode                 = "src/"                                                 ;
+std::string Configuration::testFolder                 = "test/"                                                ;
+std::string Configuration::outputFolder               = "output/"                                              ;
+std::string Configuration::HTMLGeneral                = "html/"                                                ;
+std::string Configuration::mathJaxLatestConfiguration = "MathJax-2.7-latest/config/mathjax-calculator-setup.js";
+std::string Configuration::mathJaxLatest              = "MathJax-2.7-latest/"                                  ;
+std::string Configuration::problemsFolder             = "problems/"                                            ;
+std::string Configuration::courseTemplates            = "coursetemplates/"                                     ;
+std::string Configuration::coursesAvailable           = "coursesavailable/"                                    ;
+std::string Configuration::topicLists                 = "topiclists/"                                          ;
+std::string Configuration::laTeXMaterials             = "LaTeX-materials/"                                     ;
+std::string Configuration::slidesVideo                = "slides-video/"                                        ;
+std::string Configuration::freecalc                   = "freecalc/"                                            ;
+

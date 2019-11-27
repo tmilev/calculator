@@ -469,8 +469,17 @@ void HtmlInterpretation::BuildHtmlJSpage(bool appendBuildHash) {
   FileOperations::GetVirtualNameWithHash(WebAPI::request::calculatorHTML) :
   WebAPI::request::calculatorHTML;
 
+  const std::string& browserifierScript = HtmlRoutines::GetJavascriptBrowserifier();
+  const std::string& browserifierTag =
+  "<script note = \"This tag has special treatment, do not change please.\" "
+  "type = \"text/javascript\" src = \"/calculator-html/browserifier.js\"></script>";
+
   for (std::string currentLine; std::getline(theReader, currentLine, '\n');) {
-    int startChar = static_cast<int>( currentLine.find(WebAPI::request::calculatorHTML));
+    if (currentLine == browserifierTag) {
+      outSecondPart << browserifierScript << "\n";
+      continue;
+    }
+    int startChar = static_cast<int>(currentLine.find(WebAPI::request::calculatorHTML));
     bool shouldShortCut = false;
     if (startChar == - 1) {
       shouldShortCut = true;

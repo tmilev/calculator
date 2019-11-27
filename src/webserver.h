@@ -286,9 +286,6 @@ public:
   void InitializeMainHashes();
   void InitializeMainRequests();
   void InitializeMainAddresses();
-  void InitializeMainFoldersULTRASensitive();
-  void InitializeMainFoldersSensitive();
-  void InitializeMainFoldersNonSensitive();
   void InitializeMainFoldersInstructorSpecific();
 
   void MarkChildNotInUse(int childIndex);

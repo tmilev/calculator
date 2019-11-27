@@ -80,6 +80,7 @@ void HtmlRoutines::LoadStrings() {
   HtmlRoutines::GetJavascriptAceEditorScriptWithTags();
   HtmlRoutines::GetJavascriptMathQuillDefaulTWithTags();
   HtmlRoutines::GetJavascriptMathQuillMatrixSupporTWithTags();
+  HtmlRoutines::GetJavascriptBrowserifier();
 }
 
 extern logger logWorker;
@@ -99,7 +100,9 @@ const std::string& HtmlRoutines::GetJavascriptAceEditorScriptWithTags() {
 }
 
 const std::string& HtmlRoutines::GetFile(
-  const std::string& fileNameVirtual, const std::string& additionalBeginTag, const std::string& additionalEndTag
+  const std::string& fileNameVirtual,
+  const std::string& additionalBeginTag,
+  const std::string& additionalEndTag
 ) {
   MacroRegisterFunctionWithName("HtmlRoutines::GetFile");
   std::string theID = fileNameVirtual + additionalBeginTag + additionalEndTag;
@@ -218,6 +221,10 @@ std::string HtmlRoutines::GetJavascriptMathQuillDefaultFull() {
   << "var MathQuillHasMatrixSupport = false;"
   << "</script>";
   return out.str();
+}
+
+const std::string& HtmlRoutines::GetJavascriptBrowserifier() {
+  return HtmlRoutines::GetJavascriptAddScriptTags("/calculator-html/browserifier.js");
 }
 
 std::string HtmlRoutines::GetJavascriptMathQuillMatrixSupportFull() {

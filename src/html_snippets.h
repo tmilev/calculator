@@ -83,6 +83,8 @@ public:
   static const std::string GetJavascriptLinkPanels(const std::string& relativeTo);
 
   static std::string GetJavascriptMathjax(const std::string& baseFolder);
+  static const std::string& GetJavascriptBrowserifier();
+
   static const std::string& GetJavascriptMathQuillDefaulTWithTags();
   static const std::string GetJavascriptMathQuillDefaultLink();
   static const std::string& GetJavascriptMathQuillMatrixSupporTWithTags();

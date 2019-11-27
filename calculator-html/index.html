@@ -96,51 +96,9 @@ var MathQuillHasMatrixSupport = true;
 <script type = "text/javascript" src = "/calculator-html/process_monitoring.js"></script>
 <script type = "text/javascript" src = "/calculator-html/external/build/output-min.js"></script>
 
-<script type = "text/javascript">
-"use strict";
-function Browserifier() {
-  this.allModules = {
-  };
-  this.sanitizedFileNameContents = {};
-}
+<script note = "This tag has special treatment, do not change please." type = "text/javascript" src = "/calculator-html/browserifier.js"></script>
 
-Browserifier.prototype.require = function (inputFileName) {
-  var currentSource = this.sanitizedFileNameContents[inputFileName];
-  if (! (inputFileName in this.allModules)) {
-    this.allModules[inputFileName] = {};
-  }
-  var currentModule = this.allModules[inputFileName];
-  if (!currentModule.flagLoaded) {
-    currentModule.flagLoaded = true;
-    currentSource(this.require.bind(this), currentModule);
-  }
-  return currentModule.exports;
-}
-
-Browserifier.prototype.browserify = function() {
-  var expectedStart = "/calculator" + "-html/"; 
-  //<- please keep strings separated; the cpp builder auto-replaces the string /calculator-html
-  //<- To do: fix this.
-  for (var fileName in theJSContent) {
-    var newFileName = "";
-    if (!fileName.startsWith(expectedStart)) {
-      continue;
-    }
-    var fileEnd = fileName.slice(expectedStart.length);
-    newFileName = `./${fileEnd}`;
-    this.sanitizedFileNameContents[newFileName] = theJSContent[fileName];
-  }
-  this.require('./app');
-}
-
-function browserify() {
-  if (window.browserifier === undefined) {
-    window.browserifier = new Browserifier();
-  }
-  window.browserifier.browserify();
-}
-</script>
-<script src ='https://www.google.com/recaptcha/api.js'></script>
+<script src = 'https://www.google.com/recaptcha/api.js'></script>
 <title>Calculator</title>
 </head>
 <body onload = "browserify();">

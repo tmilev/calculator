@@ -87,22 +87,40 @@ public:
 
 class Configuration {
 public:
-  static std::string processMonitoringBanned;
-  static std::string processMonitoringTriggerTime;
+  static std::string processMonitoringBanned                 ;
+  static std::string processMonitoringTriggerTime            ;
   static std::string millisecondsReplyAfterComputationDefault;
-  static std::string millisecondsReplyAfterComputation;
-  static std::string builtInTLSAvailable;
-  static std::string serverAutoMonitor;
-  static std::string monitorPingTime;
-  static std::string disableDatabaseLogEveryoneAsAdmin;
-  static std::string serverDetailedLog;
-  static std::string gitRepository;
-  static std::string autoUnitTest;
-  static std::string portHTTP;
-  static std::string portHTTPSOpenSSL;
-  static std::string portHTTPSBuiltIn;
-  static std::string calculatorHTML;
-  static std::string HTMLCommon;
+  static std::string millisecondsReplyAfterComputation       ;
+  static std::string builtInTLSAvailable                     ;
+  static std::string serverAutoMonitor                       ;
+  static std::string monitorPingTime                         ;
+  static std::string disableDatabaseLogEveryoneAsAdmin       ;
+  static std::string serverDetailedLog                       ;
+  static std::string gitRepository                           ;
+  static std::string autoUnitTest                            ;
+  static std::string portHTTP                                ;
+  static std::string portHTTPSOpenSSL                        ;
+  static std::string portHTTPSBuiltIn                        ;
+  // Folder links follow.
+  static std::string calculatorHTML            ;
+  static std::string HTMLCommon                ;
+  static std::string HTMLCommonFonts           ;
+  static std::string HTMLCommonFont            ;
+  static std::string publicHTML                ;
+  static std::string certificatesPublic        ;
+  static std::string sourceCode                ;
+  static std::string testFolder                ;
+  static std::string outputFolder              ;
+  static std::string HTMLGeneral               ;
+  static std::string mathJaxLatestConfiguration;
+  static std::string mathJaxLatest             ;
+  static std::string problemsFolder            ;
+  static std::string courseTemplates           ;
+  static std::string coursesAvailable          ;
+  static std::string topicLists                ;
+  static std::string laTeXMaterials            ;
+  static std::string slidesVideo               ;
+  static std::string freecalc                  ;
 };
 
 class DatabaseStrings {

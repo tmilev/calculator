@@ -4966,81 +4966,6 @@ void WebServer::InitializeMainAddresses() {
 
 }
 
-void WebServer::InitializeMainFoldersULTRASensitive() {
-  MacroRegisterFunctionWithName("WebServer::InitializeMainFoldersULTRASensitive");
-  MapList<std::string, std::string, MathRoutines::HashString>&
-  folderSubstitutionsULTRASensitive = FileOperations::FolderVirtualLinksULTRASensitive(); //<- allocates data structure
-  folderSubstitutionsULTRASensitive.SetKeyValue("certificates/", "certificates/");
-  folderSubstitutionsULTRASensitive.SetKeyValue("/results/", "results/");
-  folderSubstitutionsULTRASensitive.SetKeyValue("results/", "results/");
-  folderSubstitutionsULTRASensitive.SetKeyValue("crashes/", "results/crashes/");
-}
-
-void WebServer::InitializeMainFoldersSensitive() {
-  MacroRegisterFunctionWithName("WebServer::InitializeMainFoldersSensitive");
-  MapList<std::string, std::string, MathRoutines::HashString>&
-  folderSubstitutionsSensitive = FileOperations::FolderVirtualLinksSensitive();
-  folderSubstitutionsSensitive.Clear();
-
-  folderSubstitutionsSensitive.SetKeyValue("LogFiles/", "LogFiles/");
-  folderSubstitutionsSensitive.SetKeyValue("/LogFiles/", "LogFiles/");
-  folderSubstitutionsSensitive.SetKeyValue("configuration/", "configuration/");
-  folderSubstitutionsSensitive.SetKeyValue("/configuration/", "configuration/");
-  folderSubstitutionsSensitive.SetKeyValue("freecalc/", "../freecalc/");
-  folderSubstitutionsSensitive.SetKeyValue("/freecalc/", "../freecalc/");
-}
-
-void WebServer::InitializeMainFoldersNonSensitive() {
-  MacroRegisterFunctionWithName("WebServer::InitializeMainFoldersNonSensitive");
-  // Warning: order of substitutions is important.
-  // Only the first rule that applies is applied, once.
-  // No further rules are applied after that.
-  // Location keys that start with "/" are coming from webserver references.
-  // Location keys that do not start with "/" are for internal use.
-  MapList<std::string, std::string, MathRoutines::HashString>&
-  folderSubstitutionsNonSensitive = FileOperations::FolderVirtualLinksNonSensitive();
-  folderSubstitutionsNonSensitive.SetKeyValue("/output/", "output/");
-  folderSubstitutionsNonSensitive.SetKeyValue("output/", "output/");
-  folderSubstitutionsNonSensitive.SetKeyValue("/src/", "src/");
-  folderSubstitutionsNonSensitive.SetKeyValue("src/", "src/");
-  folderSubstitutionsNonSensitive.SetKeyValue("/certificates-public/", "certificates-public/");
-  folderSubstitutionsNonSensitive.SetKeyValue("certificates-public/", "certificates-public/");
-  folderSubstitutionsNonSensitive.SetKeyValue("problems/", "../problems/");
-  folderSubstitutionsNonSensitive.SetKeyValue("/problems/", "../problems/");
-
-  folderSubstitutionsNonSensitive.SetKeyValue("/html/", "../public_html/");
-
-  std::string HTMLCommonFolder = theGlobalVariables.configuration[Configuration::HTMLCommon].theString;
-  std::string calculatorHTML = theGlobalVariables.configuration[Configuration::calculatorHTML].theString;
-
-  folderSubstitutionsNonSensitive.SetKeyValue("/calculator-html/", calculatorHTML);
-  folderSubstitutionsNonSensitive.SetKeyValue("/font/", HTMLCommonFolder + "fonts/");
-  folderSubstitutionsNonSensitive.SetKeyValue("/fonts/", HTMLCommonFolder + "fonts/");
-  folderSubstitutionsNonSensitive.SetKeyValue("/html-common/font/", HTMLCommonFolder + "fonts/");
-  folderSubstitutionsNonSensitive.SetKeyValue("/html-common/", HTMLCommonFolder);
-
-  folderSubstitutionsNonSensitive.SetKeyValue("DefaultProblemLocation/", "../problems/");
-  // referred to by site:
-  folderSubstitutionsNonSensitive.SetKeyValue("coursetemplates/", "../coursetemplates/");
-  folderSubstitutionsNonSensitive.SetKeyValue("/coursesavailable/", "../coursesavailable/");
-  folderSubstitutionsNonSensitive.SetKeyValue("topiclists/", "../topiclists/");
-
-  folderSubstitutionsNonSensitive.SetKeyValue(
-    "/MathJax-2.7-latest/config/mathjax-calculator-setup.js",
-    "./calculator-html/mathjax-calculator-setup.js"
-  );
-  folderSubstitutionsNonSensitive.SetKeyValue("/MathJax-2.7-latest/", "../public_html/MathJax-2.7-latest/");
-
-  folderSubstitutionsNonSensitive.SetKeyValue("/LaTeX-materials/", "../LaTeX-materials/");
-  folderSubstitutionsNonSensitive.SetKeyValue("LaTeX-materials/", "../LaTeX-materials/");
-  folderSubstitutionsNonSensitive.SetKeyValue("/freecalc/", "../freecalc/");
-  folderSubstitutionsNonSensitive.SetKeyValue("freecalc/", "../freecalc/");
-  folderSubstitutionsNonSensitive.SetKeyValue("/slides-video/", "../slides-video/");
-  folderSubstitutionsNonSensitive.SetKeyValue("slides-video/", "../slides-video/");
-  folderSubstitutionsNonSensitive.SetKeyValue("/test/", "test/");
-  folderSubstitutionsNonSensitive.SetKeyValue("test/", "test/");
-}
-
 void WebServer::InitializeMainFoldersInstructorSpecific() {
   MacroRegisterFunctionWithName("WebServer::InitializeMainFoldersInstructorSpecific");
   FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("topiclists/");
@@ -5054,9 +4979,10 @@ void WebServer::InitializeMainAll() {
   theGlobalVariables.millisecondsReplyAfterComputation = 0;
   ParallelComputing::cgiLimitRAMuseNumPointersInList = 4000000000;
   this->InitializeMainHashes();
-  this->InitializeMainFoldersULTRASensitive();
-  this->InitializeMainFoldersSensitive();
-  this->InitializeMainFoldersNonSensitive();
+  FileOperations::InitializeFoldersULTRASensitive();
+  FileOperations::InitializeFoldersSensitive();
+  FileOperations::InitializeFoldersNonSensitive();
+  FileOperations::CheckFolderLinks();
   this->InitializeMainFoldersInstructorSpecific();
   this->InitializeMainRequests();
   this->InitializeMainAddresses();
@@ -5281,17 +5207,14 @@ void GlobalVariables::ConfigurationProcess() {
   if (theGlobalVariables.configuration[Configuration::portHTTPSBuiltIn].theString == "") {
     theGlobalVariables.configuration[Configuration::portHTTPSBuiltIn] = "8177";
   }
-  List<List<std::string> > folderVirtualLinksDefault = FileOperations::FolderVirtualLinksDefault();
-  folderVirtualLinksDefault = List<List<std::string> >({
-    List<std::string>({Configuration::HTMLCommon, "html-common/"}),
-    List<std::string>({Configuration::calculatorHTML, "calculator-html/"}),
-    List<std::string>({Configuration::calculatorHTML, "public_html/"}),
-  });
+  List<List<std::string> > folderVirtualLinksDefault = FileOperations::InitializeFolderVirtualLinksDefaults();
   for (int i = 0; i < folderVirtualLinksDefault.size; i ++) {
     std::string key = folderVirtualLinksDefault[i][0];
     std::string value = folderVirtualLinksDefault[i][1];
-    if (theGlobalVariables.configuration[key].theString == "") {
-      theGlobalVariables.configuration[key].theString = value;
+    if (
+      theGlobalVariables.configuration[key].theString == ""
+    ) {
+      theGlobalVariables.configuration[key] = value;
     }
   }
 }
@@ -5318,7 +5241,7 @@ int WebServer::main(int argc, char **argv) {
     << logger::blue << theGlobalVariables.PhysicalPathProjectBase
     << logger::endL;
     // Compute configuration file location.
-    theWebServer.InitializeMainFoldersSensitive();
+    FileOperations::InitializeFoldersSensitive();
     // Load the configuration file.
     theGlobalVariables.ConfigurationLoad();
     // Compute various flags and settings from the desired configuration.

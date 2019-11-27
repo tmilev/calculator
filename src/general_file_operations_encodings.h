@@ -27,6 +27,10 @@ public:
   static List<List<std::string> >& FolderVirtualLinksDefault();
 
   static bool CheckFolderLinks();
+  static void InitializeFoldersNonSensitive();
+  static void InitializeFoldersSensitive();
+  static void InitializeFoldersULTRASensitive();
+  static List<List<std::string> >& InitializeFolderVirtualLinksDefaults();
 
   static List<bool> safeFileCharacters;
   static List<bool>& GetSafeFileChars();

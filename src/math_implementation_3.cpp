@@ -7,6 +7,7 @@
 #include "math_extra_finite_groups_implementation.h"
 #include "math_extra_symmetric_groups_and_generalizations.h"
 #include "math_extra_drawing_variables.h"
+#include "string_constants.h"
 #include <dirent.h>
 
 extern ProjectInformationInstance ProjectInfoVpf9cpp;
@@ -983,6 +984,110 @@ FileOperations::FolderVirtualLinksULTRASensitive() {
 List<List<std::string> >& FileOperations::FolderVirtualLinksDefault() {
   static List<List<std::string> > result;
   return result;
+}
+
+void FileOperations::InitializeFoldersULTRASensitive() {
+  MacroRegisterFunctionWithName("WebServer::InitializeMainFoldersULTRASensitive");
+  MapList<std::string, std::string, MathRoutines::HashString>&
+  folderSubstitutionsULTRASensitive = FileOperations::FolderVirtualLinksULTRASensitive(); //<- allocates data structure
+  folderSubstitutionsULTRASensitive.SetKeyValue("certificates/", "certificates/");
+  folderSubstitutionsULTRASensitive.SetKeyValue("/results/", "results/");
+  folderSubstitutionsULTRASensitive.SetKeyValue("results/", "results/");
+  folderSubstitutionsULTRASensitive.SetKeyValue("crashes/", "results/crashes/");
+}
+
+void FileOperations::InitializeFoldersSensitive() {
+  MacroRegisterFunctionWithName("WebServer::InitializeMainFoldersSensitive");
+  MapList<std::string, std::string, MathRoutines::HashString>&
+  folderSubstitutionsSensitive = FileOperations::FolderVirtualLinksSensitive();
+  folderSubstitutionsSensitive.Clear();
+
+  folderSubstitutionsSensitive.SetKeyValue("LogFiles/", "LogFiles/");
+  folderSubstitutionsSensitive.SetKeyValue("/LogFiles/", "LogFiles/");
+  folderSubstitutionsSensitive.SetKeyValue("configuration/", "configuration/");
+  folderSubstitutionsSensitive.SetKeyValue("/configuration/", "configuration/");
+  folderSubstitutionsSensitive.SetKeyValue("freecalc/", "../freecalc/");
+  folderSubstitutionsSensitive.SetKeyValue("/freecalc/", "../freecalc/");
+}
+
+List<List<std::string> >& FileOperations::InitializeFolderVirtualLinksDefaults() {
+  List<List<std::string> >& result = FileOperations::FolderVirtualLinksDefault();
+  // The default values given here are overridden by file configuration.json.
+  // Substitution order matters, earlier substitutions are processed first.
+  // Once a substitution is found, no more substitutions are carried out.
+  result = List<List<std::string> >({
+    List<std::string>({Configuration::HTMLCommon                , "html-common/"                               }),
+    List<std::string>({Configuration::HTMLCommonFonts           , "html-common/fonts"                          }),
+    List<std::string>({Configuration::HTMLCommonFont            , "html-common/fonts"                          }),
+    List<std::string>({Configuration::calculatorHTML            , "calculator-html/"                           }),
+    List<std::string>({Configuration::publicHTML                , "public_html/"                               }),
+    List<std::string>({Configuration::certificatesPublic        , "certificates-public/"                       }),
+    List<std::string>({Configuration::sourceCode                , "src/"                                       }),
+    List<std::string>({Configuration::testFolder                , "test/"                                      }),
+    List<std::string>({Configuration::outputFolder              , "output/"                                    }),
+    List<std::string>({Configuration::HTMLGeneral               , "public_html/"                               }),
+    List<std::string>({Configuration::mathJaxLatestConfiguration, "calculator-html/mathjax-calculator-setup.js"}),
+    List<std::string>({Configuration::mathJaxLatest             , "public_html/MathJax-2.7-latest/"            }),
+    List<std::string>({Configuration::problemsFolder            , "../problems/"                               }),
+    List<std::string>({Configuration::courseTemplates           , "../coursetemplates/"                        }),
+    List<std::string>({Configuration::coursesAvailable          , "../coursesavailable/"                       }),
+    List<std::string>({Configuration::topicLists                , "../topiclists/"                             }),
+    List<std::string>({Configuration::laTeXMaterials            , "../LaTeX-materials/"                        }),
+    List<std::string>({Configuration::slidesVideo               , "../slides-video/"                           }),
+    List<std::string>({Configuration::freecalc                  , "../freecalc/"                               }),
+  });
+  FileOperations::CheckFolderLinks();
+  return result;
+}
+
+void FileOperations::InitializeFoldersNonSensitive() {
+  MacroRegisterFunctionWithName("WebServer::InitializeMainFoldersNonSensitive");
+  // Warning: order of substitutions is important.
+  // Only the first rule that applies is applied, once.
+  // No further rules are applied after that.
+  // Location keys that start with "/" are coming from webserver references.
+  // Location keys that do not start with "/" are for internal use.
+  MapList<std::string, std::string, MathRoutines::HashString>&
+  folderSubstitutionsNonSensitive = FileOperations::FolderVirtualLinksNonSensitive();
+
+  // InitializeFolderVirtualLinksDefaults() is called in
+  // GlobalVariables::ConfigurationProcess and its contents
+  // are used together with file configuration.json,
+  // to compute the folder locations below.
+
+  std::string HTMLCommonFolder = theGlobalVariables.configuration[Configuration::HTMLCommon].theString;
+  List<List<std::string> > links = FileOperations::FolderVirtualLinksDefault();
+  for (int i = 0; i < links.size; i ++) {
+    std::string& key = links[i][0];
+    std::string& value = links[i][1];
+    folderSubstitutionsNonSensitive.SetKeyValue(key, value);
+    folderSubstitutionsNonSensitive.SetKeyValue("/" + key, value);
+  }
+
+
+  folderSubstitutionsNonSensitive.SetKeyValue(
+    "/MathJax-2.7-latest/config/mathjax-calculator-setup.js",
+    "./calculator-html/mathjax-calculator-setup.js"
+  );
+  folderSubstitutionsNonSensitive.SetKeyValue("/MathJax-2.7-latest/", "../public_html/MathJax-2.7-latest/");
+}
+
+bool FileOperations::CheckFolderLinks() {
+  MacroRegisterFunctionWithName("FileOperations::CheckFolderLinks");
+  List<List<std::string> > links = FileOperations::FolderVirtualLinksDefault();
+  for (int i = 0; i < links.size; i ++) {
+    if (links[i].size != 2) {
+      crash << "Folder links incorrectly initialized. " << crash;
+    }
+    std::string& key = links[i][0];
+    if (key.size() <= 1) {
+      crash << "Folder link key: " << key << " is too short. " << crash;
+    }
+    if (key[0] == '/' || key[0] == '.' || key[0] == ' ') {
+      crash << "Folder link key " << key << " starts with a banned character. " << crash;
+    }
+  }
+  return true;
 }
 
 bool FileOperations::FileExistsVirtualCustomizedReadOnly(const std::string& theFileName, std::stringstream* commentsOnFailure) {

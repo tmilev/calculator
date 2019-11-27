@@ -19,7 +19,7 @@ Browserifier.prototype.require = function (inputFileName) {
   return currentModule.exports;
 }
 
-Browserifier.prototype.browserify = function() {
+Browserifier.prototype.browserifyAndRun = function() {
   createBrowserifier();
   var expectedStart = "/calculator-html/"; 
   for (var fileName in theJSContent) {
@@ -34,6 +34,13 @@ Browserifier.prototype.browserify = function() {
   this.require('./app');
 }
 
+Browserifier.prototype.browserifyRunInId = function(input) {
+  createBrowserifier();
+  window.calculator.flagRunMainPage = false;
+  window.calculator.browserifier.browserifyAndRun(); 
+  window.calculator.standAloneProblem.standAloneProblem.initAndRun(input);
+}
+
 function createBrowserifier() {
   if (window.calculator !== undefined) {
     return;
@@ -43,9 +50,14 @@ function createBrowserifier() {
   };
 }
 
-function browserify() {
+function browserifyRunCalculatorMainPage() {
   createBrowserifier();
-  window.calculator.browserifier.browserify();
+  window.calculator.browserifier.browserifyAndRun();
+}
+
+function browserifyRunInId(input) {
+  createBrowserifier();
+  window.calculator.browserifier.browserifyRunInId(input);
 }
 
 createBrowserifier();

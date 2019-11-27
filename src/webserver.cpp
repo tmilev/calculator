@@ -955,8 +955,8 @@ void WebWorker::ParseMessageHead() {
       if (i < this->theMessageHeaderStrings.size) {
         if (
           this->theMessageHeaderStrings[i] == "chunked" ||
-          this->theMessageHeaderStrings[i] == "chunked;"||
-          this->theMessageHeaderStrings[i] == "Chunked"||
+          this->theMessageHeaderStrings[i] == "chunked;" ||
+          this->theMessageHeaderStrings[i] == "Chunked" ||
           this->theMessageHeaderStrings[i] == "Chunked;"
         ) {
           this->requestTypE = this->requestChunked;
@@ -1518,7 +1518,7 @@ JSData WebWorker::ProcessComputationIndicatorJSData() {
   return result;
 }
 
-void WebWorker::WriteAfterTimeoutCarbonCopy(const std::string &input, const std::string &fileNameCarbonCopy) {
+void WebWorker::WriteAfterTimeoutCarbonCopy(const std::string& input, const std::string& fileNameCarbonCopy) {
   if (fileNameCarbonCopy == "") {
     return;
   }

@@ -3,6 +3,7 @@ function Browserifier() {
   this.allModules = {
   };
   this.sanitizedFileNameContents = {};
+  this.calculatorHtmlBaseFolder = "/calculator-html/";
 }
 
 Browserifier.prototype.require = function (inputFileName) {
@@ -19,9 +20,8 @@ Browserifier.prototype.require = function (inputFileName) {
 }
 
 Browserifier.prototype.browserify = function() {
-  var expectedStart = "/calculator" + "-html/"; 
-  //<- please keep strings separated; the cpp builder auto-replaces the string /calculator-html
-  //<- To do: fix this.
+  createBrowserifier();
+  var expectedStart = "/calculator-html/"; 
   for (var fileName in theJSContent) {
     var newFileName = "";
     if (!fileName.startsWith(expectedStart)) {
@@ -34,12 +34,18 @@ Browserifier.prototype.browserify = function() {
   this.require('./app');
 }
 
+function createBrowserifier() {
+  if (window.calculator !== undefined) {
+    return;
+  }
+  window.calculator = {
+    browserifier: new Browserifier(),
+  };
+}
+
 function browserify() {
-  if (window.calculator === undefined) {
-    window.calculator = {};
-  }
-  if (window.calculator.browserifier === undefined) {
-    window.calculator.browserifier = new Browserifier();
-  }
+  createBrowserifier();
   window.calculator.browserifier.browserify();
 }
+
+createBrowserifier();

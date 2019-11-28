@@ -143,9 +143,9 @@ Problem.prototype.initializeInfo = function(problemData, inputParentIdURLed) {
   this.deadline = null;
   this.weight = problemData.weight;
   this.links = {
-    video: "",
-    slides: "",
-    homework: "",
+    video: null,
+    slides: null,
+    homework: null,
   };
   this.badProblemString = "";
   if (problemData.deadlines !== undefined) {
@@ -375,21 +375,24 @@ Problem.prototype.getCalculatorURLRequestFileCourseTopics = function(isScoredQui
   return result;
 }
 
-/**@returns {string} */
+/**@returns {HTMLElement} */
 Problem.prototype.getProblemNavigation = function() {
-  var result = "";
-  result += `<div id = "${this.idNavigationProblemNotEntirePanel}" class = 'problemNavigation'>`;
+  var result = document.createElement("DIV");
+  result.id = this.idNavigationProblemNotEntirePanel;
+  result.className = 'problemNavigation';
   if (!window.calculator.mainPage.flagProblemPageOnly) {
-    result += this.getProblemNavigationContent();
+    var children = this.getProblemNavigationContent();
+    for (var i = 0; i < children.length; i ++) {
+      result.append(children[i]);
+    }
   }
-  result += "</div>";
   return result;
 }
 
-/**@returns {string} */
+/**@returns {HTMLElement[]} */
 Problem.prototype.getProblemNavigationContent = function() {
   var thePage = window.calculator.mainPage;
-  var result = "";
+  var result = [];
   var linkType = "problemLinkPractice";
   var defaultRequest = pathnames.urlFields.exerciseJSON;
   var isScoredQuiz = false;
@@ -401,39 +404,74 @@ Problem.prototype.getProblemNavigationContent = function() {
   if (this.previousProblemId !== null && this.previousProblemId !== "" && this.previousProblemId !== undefined) {
     var previousProblem = allProblems.getProblemById(this.previousProblemId); 
     var previousURL = previousProblem.getAppAnchorRequestFileCourseTopics(isScoredQuiz, false);
-    result += `<a class = '${linkType}' href = '#${previousURL}' `;
-    result += `onclick = "window.calculator.problemPage.selectCurrentProblem('${this.previousProblemId}', '${defaultRequest}')">&#8592;</a>`;
+    var previousLink = document.createElement("a");
+    previousLink.className = linkType;
+    previousLink.href = `#${previousURL}`;
+    previousLink.addEventListener("click", window.calculator.problemPage.selectCurrentProblem.bind(null, this.previousProblemId, defaultRequest));
+    previousLink.innerHTML = "&#8592;";
+    result.push(previousLink);
   }
 
   if (this.flagForReal && thePage.user.flagLoggedIn) {
     var practiceURL = this.getAppAnchorRequestFileCourseTopics(false, false);
-    result += `<a class = 'problemLinkPractice' href = '#${practiceURL}' `;
-    result += `onclick = "window.calculator.problemPage.selectCurrentProblem('${this.problemId}', `;
-    result += `'exerciseJSON')">Practice</a>`;
+    var practiceTag = document.createElement("a");
+    practiceTag.className = "problemLinkPractice";
+    practiceTag.href = `#${practiceURL}`;
+    practiceTag.addEventListener("click", window.calculator.problemPage.selectCurrentProblem.bind(null, this.problemId, "exerciseJSON"));
+    practiceTag.innerHTML = "Practice";
+    result.push(practiceTag);
   } else {
-    result += "<span class = 'problemLinkSelectedPractice' style='color:green'>Practice</span>";
+    var selectedPracticeTag = document.createElement("span");
+    selectedPracticeTag.className = "problemLinkSelectedPractice";
+    selectedPracticeTag.style.color = "green";
+    selectedPracticeTag.innerHTML = "Practice";
+    result.push(selectedPracticeTag)
   }
   if (!this.flagForReal && thePage.user.flagLoggedIn) { 
     var quizURL = this.getAppAnchorRequestFileCourseTopics(true, false);
-    result += `<a class = 'problemLinkQuiz' href = '#${quizURL}' `;
-    result += `onclick = "window.calculator.problemPage.selectCurrentProblem('${this.problemId}' ,'scoredQuizJSON')">Quiz</a>`;
+    var quizTag = document.createElement("a");
+    quizTag.className = "problemLinkQuiz";
+    quizTag.href = `#${quizURL}`;
+    quizTag.addEventListener("click", window.calculator.problemPage.selectCurrentProblem.bind(null, this.problemId, "scoredQuizJSON"));
+    quizTag.innerHTML = "Quiz";
+    result.push(quizTag);
   } else {
     if (this.flagForReal) {
-      result += "<span class = 'problemLinkSelectedQuiz' style='color:brown'>Quiz</span>";
+      var quizTag = document.createElement("span");
+      quizTag.className = "problemLinkSelectedQuiz";
+      quizTag.style.color = "brown";
+      quizTag.innerHTML = "Quiz";
+      result.push(quizTag);
     }
   }
   if (this.nextProblemId !== null && this.nextProblemId !== "" && this.nextProblemId !== undefined) {
     var nextProblem = allProblems.getProblemById(this.nextProblemId); 
     var nextURL = nextProblem.getAppAnchorRequestFileCourseTopics(isScoredQuiz, false);
-    result += `<a class = '${linkType}' href = '#${nextURL}' `;
-    result += `onclick = "window.calculator.problemPage.selectCurrentProblem('${this.nextProblemId}', '${defaultRequest}')">&#8594;</a>`;
+    var nextProblemTag = document.createElement("a");
+    nextProblemTag.className = linkType;
+    nextProblemTag.href = `#${nextURL}`;
+    nextProblemTag.addEventListener("click", window.calculator.problemPage.selectCurrentProblem.bind(null, this.nextProblemId, defaultRequest));
+    nextProblemTag.innerHTML = "&#8594;";
+    result.push(nextProblemTag);
   }
   if (this.flagForReal !== true && this.flagForReal !== "true") {
-    result += `<b style = 'color:green'>Scores not recorded.</b> `;
-    result += `<span id = "${ids.domElements.spanProblemLinkWithRandomSeed}">`;
-    result += `<a href = '#${this.getAppAnchorRequestFileCourseTopics(false, true)}'>#${this.randomSeed}</a></span>`;
+    var scoresTag = document.createElement("b");
+    scoresTag.style.color = "green";
+    scoresTag.innerHTML = "Scores not recorded.";
+    result.push(scoresTag);
+    result.push(document.createTextNode(" "));
+    var randomSeedElement = document.createElement("SPAN");
+    randomSeedElement.id = ids.domElements.spanProblemLinkWithRandomSeed;
+    var randomSeedAnchor = document.createElement("a");
+    randomSeedAnchor.href = `#${this.getAppAnchorRequestFileCourseTopics(false, true)}`;
+    randomSeedAnchor.innerHTML = this.randomSeed;
+    randomSeedElement.appendChild(randomSeedAnchor);
+    result.push(randomSeedElement);
   } else {
-    result += `<b style = 'color:brown'>Scores are recorded. </b>`;
+    var scoresTag = document.createElement("b");
+    scoresTag.style.color = "brown";
+    scoresTag.innerHTML = "Scores are recorded. ";
+    result.push(scoresTag);
   }
   return result;
 }
@@ -635,28 +673,40 @@ ProblemNavigation.prototype.writeToHTML = function() {
   if (this.currentProblem === null) {
     return;
   }
-  var panelContent = "";
-  panelContent += this.currentProblem.getProblemNavigation();
-  panelContent += `<div class = "problemTitle"><div class = "problemTitleContainer">`;
+
+  var problemTitle = document.createElement("DIV");
+  problemTitle.className = "problemTitle";
+  
+  var problemTitleContainer = document.createElement("DIV");
+  problemTitleContainer.className = "problemTitleContainer";
+  problemTitle.appendChild(problemTitleContainer);
   if (
     this.currentProblem.problemLabel !== undefined && 
     this.currentProblem.problemLabel !== "" && 
     this.currentProblem.problemLabel !== null
   ) {
-    panelContent += `${this.currentProblem.problemLabel} `; 
+    problemTitleContainer.appendChild(document.createTextNode(this.currentProblem.problemLabel));
   }
-  panelContent += `${this.currentProblem.title}</div></div>`;
+  problemTitle.appendChild(document.createTextNode(this.currentProblem.title));
+
+  var infoBar = document.getElementById(ids.domElements.divProblemInfoBar);
+  infoBar.innerHTML = "";
+  infoBar.appendChild(this.currentProblem.getProblemNavigation());
+  infoBar.appendChild(problemTitle);
+
   if (
     this.currentProblem.links !== undefined && 
     this.currentProblem.links !== null
   ) {
-    panelContent += this.currentProblem.links.slides;
-    panelContent += this.currentProblem.links.video;
+    if (this.currentProblem.links.slides !== null) {
+      infoBar.appendChild(this.currentProblem.links.slides);
+    }
+    if (this.currentProblem.links.video !== null) {
+      infoBar.appendChild(this.currentProblem.links.video);
+    }
   }
   //topPart += "<br>"
-  panelContent += this.currentProblem.getEditPanel();
-  var infoBar = document.getElementById(ids.domElements.divProblemInfoBar);
-  infoBar.innerHTML = panelContent;
+  infoBar.appendChild(this.currentProblem.getEditPanel());
   mathjax.typeSetSoft(ids.domElements.divProblemInfoBar);
 }
 
@@ -911,6 +961,7 @@ var linkSpecs = {
   },
 };
 
+/** @returns{HTMLElement} */
 Problem.prototype.getLinkFromSpec = function(
   /**@type {{request: string, name: string, options: string, download: boolean}} */
   linkSpec, 
@@ -920,19 +971,18 @@ Problem.prototype.getLinkFromSpec = function(
   if (linkSpec.adminView === true) {
     var studentView = window.calculator.mainPage.storage.variables.flagStudentView.getValue();
     if (studentView !== false && studentView !== "false") {
-      return "";
+      return null;
     }
   }
-  var href  = "";
+  var href = "";
   href += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${linkSpec.request}&`;
   href += `${query}&${linkSpec.options}`;
-  var result = "";
-  result += `<a class = 'slidesLink' href = '${href}' `;
-  if (linkSpec.download === true) {
-    result += `download = '${convertStringToLaTeXFileName(this.title)}.tex'`; 
-  }
-  result += ``
-  result += `target = '_blank'>${linkSpec.name}</a>`;
+  var result = document.createElement("a");
+  result.className = "slidesLink";
+  result.href = href;
+  result.download = `${convertStringToLaTeXFileName(this.title)}.tex`;
+  result.target = "_blank";
+  result.innerHTML = linkSpec.name;
   return result;
 }
 
@@ -957,12 +1007,12 @@ Problem.prototype.getHTMLOneProblemTr = function () {
   if (this.video !== "" && this.video !== undefined && this.video !== null) {
     result += `<a class = 'videoLink' href = '${this.video}' target = '_blank'>Video</a>`;
   }
-  this.links.slides = "";
-  this.links.video = "";
-  this.links.homework = "";
+  this.links.slides = null;
+  this.links.video = null;
+  this.links.homework = null;
   if (this.querySlides !== "" && this.querySlides !== null && this.querySlides !== undefined) {
     for (var counter in linkSlides) {
-      this.links.slides += this.getLinkFromSpec(linkSpecs[linkSlides[counter]], this.querySlides);
+      this.links.slides = this.getLinkFromSpec(linkSpecs[linkSlides[counter]], this.querySlides);
     }
   } 
   result += this.links.slides;
@@ -1176,11 +1226,11 @@ function updateProblemPage() {
     if (theProblem !== undefined && theProblem !== null) {
       var problemNavigation = document.getElementById(theProblem.idNavigationProblemNotEntirePanel);
       if (problemNavigation !== null) {
-        var oldHtml = problemNavigation.innerHTML;
-        var newHtml = theProblem.getProblemNavigationContent();
-        if (oldHtml != newHtml) {
-          problemNavigation.innerHTML = newHtml;
-        }
+        problemNavigation.innerHTML = "";
+        var updatedContent = theProblem.getProblemNavigationContent();        
+        for (var i = 0; i < updatedContent.length; i ++) {
+          problemNavigation.appendChild(updatedContent[i]);
+        } 
       }
     }
     return;

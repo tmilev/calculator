@@ -62,25 +62,35 @@ function getClonePanel(
   return result;
 }
 
-/**@returns {string} */
+/**@returns {HTMLElement} */
 function getEditPanel(fileName) {
   var thePage = window.calculator.mainPage;
   if (!thePage.flagProblemPageOnly) {
     if (!thePage.user.hasProblemEditRights() || thePage.studentView()) {
-      return "";
+      return document.createTextNode("");
     }
   }
   if (fileName === "" || fileName === undefined || fileName === null) {
-    return "";
+    return document.createTextNode("");
   }
-  var result = "";
-  result += `<div class = 'spanFileInfo'>`;
-  result += `<button class = "buttonSaveEdit" onclick = "window.calculator.editPage.selectEditPage('${fileName}');" style = 'width:50px'>Edit</button> ${fileName} `;
-  result += `<button class = "accordionLike" onclick = "window.calculator.editPage.toggleClonePanel(this)">Clone panel &#9666;</button>`;
-  result += `<span class = "panelDeadlines">`;
-  result += getClonePanel(fileName, fileName);
-  result += "</span>";
-  result += `</div>`;
+  var result = document.createElement("DIV");
+  result.className = "spanFileInfo";
+  var saveEdit = document.createElement("BUTTON");
+  saveEdit.className = "buttonSaveEdit";
+  saveEdit.innerHTML = "Edit";
+  saveEdit.style.width = "50px";
+  saveEdit.addEventListener('click', window.calculator.editPage.selectEditPage.bind(null, fileName));
+  result.appendChild(saveEdit);
+  result.appendChild(document.createTextNode(` ${fileName} `));
+  var clonePanel = document.createElement("BUTTON");
+  clonePanel.className = "accordionLike";
+  clonePanel.innerHTML = "Clone panel &#9666;";
+  clonePanel.addEventListener('click', window.calculator.editPage.toggleClonePanel.bind(clonePanel));
+  result.appendChild(clonePanel);
+  //result += `<span class = "panelDeadlines">`;
+  //result += getClonePanel(fileName, fileName);
+  //result += "</span>";
+  
   return result;
 }
 

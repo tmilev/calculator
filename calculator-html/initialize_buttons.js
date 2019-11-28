@@ -387,7 +387,10 @@ InputPanelData.prototype.submitOrPreviewAnswersCallback = function(outputCompone
 InputPanelData.prototype.submitOrPreviewAnswers = function(requestQuery) {
   clearTimeout(this.timerForPreviewAnswers);
   var studentAnswer = document.getElementById(this.idPureLatex).value;
-  var theURL = `${pathnames.urls.calculatorAPI}?${requestQuery}&calculatorAnswer${this.idPureLatex}=${encodeURIComponent(studentAnswer)}`;  
+  var theURL = "";
+  theURL += `${pathnames.urls.calculatorAPI}?${requestQuery}&`;
+  theURL += `calculatorAnswer${this.idPureLatex}=${encodeURIComponent(studentAnswer)}&`;
+  theURL += `${pathnames.urlFields.problem.fileName}=${this.problemId}&`;  
   submitRequests.submitGET({
     url: theURL,
     progress: ids.domElements.spanProgressReportGeneral,

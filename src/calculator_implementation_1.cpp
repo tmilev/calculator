@@ -1041,12 +1041,6 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner) {
     << "style =\"border:solid 1px\" id =\""
     << this->GetCanvasName()
     << "\" "
-    << "onmousedown =\"window.calculator.drawing.canvasClick(this, event);\" "
-    << "onmouseup =\"window.calculator.drawing.mouseUp(this);\" "
-    << "onmousemove =\"window.calculator.drawing.mouseMoveRedraw"
-    << "(this, event.clientX, event.clientY);\""
-    << " onmousewheel =\"window.calculator.drawing.mouseWheel(event);\""
-    << " onDOMMouseScroll =\"window.calculator.drawing.mouseWheel(event);\""
     << ">"
     << "Your browser does not support the HTML5 canvas tag.</canvas><br>"
     << "<span id =\"" << this->GetCanvasName() << "Controls\"></span>"
@@ -1080,7 +1074,7 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner) {
   }
   outScript << this->commonCanvasSetup();
   outScript << "var theCanvas = theDrawer.getCanvas('" << this->GetCanvasName() << "');\n"
-  << "theCanvas.init('" << this->GetCanvasName() << "');\n";
+  << "theCanvas.initialize('" << this->GetCanvasName() << "');\n";
   outScript << "theCanvas.canvasResetFunction = " << canvasResetFunctionName << ";\n";
   for (int i = 0; i < this->thePlots.size; i ++) {
     PlotObject& currentPlot = this->thePlots[i];
@@ -1518,12 +1512,6 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner) {
     << "style =\"border:solid 1px\" id =\""
     << this->GetCanvasName()
     << "\" "
-    << "onmousedown =\"window.calculator.drawing.canvasClick(this, event);\" "
-    << "onmouseup =\"window.calculator.drawing.mouseUp(this);\" "
-    << "onmousemove =\"window.calculator.drawing.mouseMoveRedraw"
-    << "(this, event.clientX, event.clientY);\""
-    << " onmousewheel =\"window.calculator.drawing.mouseWheel(event);\""
-    << " onDOMMouseScroll =\"window.calculator.drawing.mouseWheel(event);\""
     << ">"
     << "Your browser does not support the HTML5 canvas tag.</canvas><br>"
     << "<span id =\"" << this->GetCanvasName() << "Controls\"></span>";
@@ -1568,7 +1556,7 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner) {
   }
   outScript << this->commonCanvasSetup();
   outScript << "var theCanvas = theDrawer.getCanvasTwoD('" << this->GetCanvasName() << "');\n"
-  << "theCanvas.init('" << this->GetCanvasName() << "');\n";
+  << "theCanvas.initialize('" << this->GetCanvasName() << "');\n";
   outScript << "theCanvas.canvasResetFunction = " << canvasResetFunctionName << ";\n";
   if (owner.flagPlotNoControls) {
     outScript << "theCanvas.flagShowPerformance = false;\n";

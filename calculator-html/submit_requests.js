@@ -118,6 +118,23 @@ function recordResult(resultText, resultSpan) {
   resultSpan.innerHTML = resultText;
 }
 
+function correctAddress(inputURL) {
+  if (
+    inputURL.startsWith("http://") || 
+    inputURL.startsWith("https://")
+  ) {
+    return inputURL;
+  }
+  if (window.calculator.hardCodedServerAddress !== "") {
+    if (window.calculator.hardCodedServerAddress.endsWith("/") && inputURL.startsWith("/")) {
+      return window.calculator.hardCodedServerAddress  + inputURL.slice(1);
+    } else {
+      return window.calculator.hardCodedServerAddress  + inputURL;
+    }
+  }
+  return inputURL;
+}
+
 /**
  * Fires up a get requests.
  * Expected input: an object with the following fields filled in.
@@ -144,7 +161,7 @@ function submitGET(
   /** @type {{url: string, callback: Function, progress: string, result: string}}*/
   inputObject
 ) {
-  var theAddress = inputObject.url;
+  var theAddress = correctAddress(inputObject.url);
   var progress = inputObject.progress;
   var result = inputObject.result;
   var callback = inputObject.callback;
@@ -166,7 +183,7 @@ function submitPOST(
   /** @type {{url: string, parameters: string, callback: Function, progress: string, result: string}}*/
   inputObject
 ) {
-  var theAddress = inputObject.url;
+  var theAddress = correctAddress(inputObject.url);
   var progress = inputObject.progress;
   var result = inputObject.result;
   var callback = inputObject.callback;

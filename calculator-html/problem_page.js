@@ -79,6 +79,11 @@ function Problem() {
 
 }
 
+Problem.prototype.setRandomSeed = function(input) {
+  console.log("Setting random seed to: " + input);
+  this.randomSeed = input;  
+}
+
 Problem.prototype.setRandomSeedFromEnvironment = function() {
   var currentCourse = window.calculator.mainPage.storage.variables.currentCourse; 
   this.flagForReal = (currentCourse.exerciseType.getValue() !== pathnames.urlFields.exerciseJSON);
@@ -88,9 +93,8 @@ Problem.prototype.setRandomSeedFromEnvironment = function() {
       return;
     }
   } 
-  this.randomSeed = incomingRandomSeed;  
+  this.setRandomSeed(incomingRandomSeed);  
   currentCourse.randomSeed.value = "";
-
 } 
 
 Problem.prototype.initializeBasic = function(problemData) {
@@ -221,7 +225,8 @@ Problem.prototype.initializeProblemContent = function(problemData) {
     return;    
   }
   this.flagForReal = problemData["forReal"];
-  this.randomSeed = problemData.randomSeed;
+  console.log("Setting random seed to: " + problemData.randomSeed);
+  this.setRandomSeed(problemData.randomSeed);
   for (var counterAnswers = 0;  counterAnswers < answerVectors.length; counterAnswers ++) {
     var currentVector = answerVectors[counterAnswers];
     this.answers[counterAnswers] = new InputPanelData({
@@ -265,13 +270,17 @@ function getCalculatorURLRequestFileCourseTopicsFromStorage() {
   var fileName = currentCourse.fileName.getValue();
   var topicList = currentCourse.topicList.getValue();
   var courseHome = currentCourse.courseHome.getValue();
-  var randomSeed = currentCourse.randomSeed.getValue();
+  var environmentRandomSeed = currentCourse.randomSeed.getValue();
   var result = "";
   result += `${pathnames.urls.calculatorAPI}?`;
   result += `${pathnames.urlFields.request}=${exerciseType}&fileName=${fileName}&`;
   result += `topicList=${topicList}&courseHome=${courseHome}&`;
-  if (randomSeed !== null && randomSeed !== "" && randomSeed !== undefined) {
-    result += `randomSeed=${randomSeed}&`;
+  if (
+    environmentRandomSeed !== null && 
+    environmentRandomSeed !== "" && 
+    environmentRandomSeed !== undefined
+  ) {
+    result += `randomSeed=${environmentRandomSeed}&`;
   }
   currentCourse.randomSeed.value = "";
   return result;
@@ -658,7 +667,11 @@ Problem.prototype.writeToHTML = function(outputElement) {
   problemNavigation.setCurrentProblemAndUpdate(this);
   var topPart = "";
   topPart += "<br>";
-  outputElement.innerHTML = topPart + this.badProblemString + this.decodedProblem + this.commentsProblem;
+  var contentHTML = "";
+  contentHTML += topPart + this.badProblemString; 
+  contentHTML += "DEBUG: random seed: " + this.randomSeed;
+  contentHTML += this.decodedProblem + this.commentsProblem;
+  outputElement.innerHTML = contentHTML;
   for (var counterAnswers = 0;  counterAnswers < this.answers.length; counterAnswers ++) {
     this.onePanel(this.answers[counterAnswers]);
   }

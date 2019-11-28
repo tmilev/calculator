@@ -283,6 +283,7 @@ function InputPanelData(input) {
 
   this.idPureLatex = input.idPureLatex;
   this.idButtonContainer = input.idButtonContainer;
+  this.idExpandCollapseToggle = input.idButtonContainer + "_expand_collapse_toggle";
   this.idButtonSubmit = input.idButtonSubmit;
   this.idButtonInterpret = input.idButtonInterpret;
   this.idButtonAnswer = input.idButtonAnswer;
@@ -819,16 +820,21 @@ InputPanelData.prototype.initializePartTwo = function(forceShowAll) {
     theContent += "</tr>";
   }
   theContent += "</table>";
-  if (!forceShowAll && !includeAll) {
-    theContent += `<small><a href=\"#\" onclick=\"window.calculator.initializeButtons.panelDataRegistry['${this.idButtonContainer}'].initializePartTwo(true);\">Show all</a></small>`;
-  } else {
-    theContent += `<small><a href=\"#\" onclick=\"window.calculator.initializeButtons.panelDataRegistry['${this.idButtonContainer}'].initializePartTwo(false);\">Show relevant</a></small>`;
-  }
+  theContent += `<small><a href = '#' id = '${this.idExpandCollapseToggle}'>Show all</a></small>`;
   var oldHeight = window.getComputedStyle(currentButtonPanel).height;
   //console.log("oldHeight: " + oldHeight);
   currentButtonPanel.style.maxHeight = "";
   currentButtonPanel.style.height = "";
   currentButtonPanel.innerHTML = theContent;
+  var toggleElement = document.getElementById(this.idExpandCollapseToggle);
+  toggleElement.addEventListener(
+    'click', 
+    clickExpandPanel.bind(
+      null, 
+      this.idButtonContainer, 
+      !forceShowAll && !includeAll,
+    )
+  );
   for (var j = 0; j < buttonBindings.length; j ++) {
     document.getElementById(buttonBindings[j].getButtonId(this)).addEventListener(
       'click', buttonBindings[j].clickFunction.bind(buttonBindings[j], this)
@@ -843,6 +849,10 @@ InputPanelData.prototype.initializePartTwo = function(forceShowAll) {
     }, 0);
   }
   return false;
+}
+
+function clickExpandPanel(panelId, forceShowAll) {
+  window.calculator.initializeButtons.panelDataRegistry[panelId].initializePartTwo(forceShowAll);
 }
 
 var calculatorPanel =  new InputPanelData({

@@ -506,7 +506,7 @@ Drawing.prototype.deleteCanvas = function(canvasId) {
 
 //Drawing.prototype.resetCanvas = function (inputCanvas) { 
 //  if (this.canvases[inputCanvas.id] !== undefined && this.canvases[inputCanvas.id] !== null) { 
-//    this.canvases[inputCanvas.id].init(inputCanvas.id);
+//    this.canvases[inputCanvas.id].initialize(inputCanvas.id);
 //  }
 //}
 
@@ -1208,13 +1208,16 @@ CanvasTwoD.prototype.computeBasis = function () {
   this.textProjectionInfo += `<br>e1: ${this.screenBasisOrthonormal[0]} <br>e2: ${this.screenBasisOrthonormal[1]}`;
 }
 
-CanvasTwoD.prototype.init = function(inputCanvasId) { 
+CanvasTwoD.prototype.initialize = function(inputCanvasId) { 
   this.canvasId = inputCanvasId;
   this.canvasContainer = document.getElementById(inputCanvasId);
   this.surface = this.canvasContainer.getContext("2d");
   this.canvasContainer.addEventListener("DOMMouseScroll", drawing.mouseWheel.bind(drawing), false);
   this.canvasContainer.addEventListener("mousewheel", drawing.mouseWheel.bind(drawing), false);
-//    this.canvasContainer.addEventListener("wheel", drawing.mouseWheel.bind(drawing), true);
+  this.canvasContainer.addEventListener("mousedown", drawing.canvasClick.bind(drawing, this.canvasContainer), true);
+  this.canvasContainer.addEventListener("mouseup", drawing.mouseUp.bind(drawing, this.canvasContainer), true);
+  this.canvasContainer.addEventListener("mousemove", drawing.mouseMoveRedraw.bind(drawing, this.canvasContainer), true);
+
   this.theObjects = [];
   this.spanMessages = document.getElementById(this.canvasId + "Messages");
   this.spanCriticalErrors = document.getElementById(this.canvasId + "CriticalErrors");
@@ -1402,7 +1405,7 @@ function Canvas(inputCanvas) {
   this.zBufferColCount = 20;
   this.zBufferRowCount = 20;
   this.zBuffer = [];
-  this.zBufferIndexStrip =[];
+  this.zBufferIndexStrip = [];
   this.bufferDeltaX = 0;
   this.bufferDeltaY = 0;
   this.colorDepthFactor = 0.4;
@@ -1447,6 +1450,29 @@ function Canvas(inputCanvas) {
   this.defaultNumSegmentsPerContour = 10;
   this.flagRoundContours = false;
   this.flagRoundPatches = true;
+}
+
+Canvas.prototype.initialize = function(inputCanvasId) { 
+  this.canvasId = inputCanvasId;
+  this.canvasContainer = document.getElementById(inputCanvasId);
+  this.surface = this.canvasContainer.getContext("2d");
+  this.canvasContainer.addEventListener("DOMMouseScroll", drawing.mouseWheel.bind(drawing), true);
+  this.canvasContainer.addEventListener("mousewheel", drawing.mouseWheel.bind(drawing), true);
+  this.canvasContainer.addEventListener("mousedown", drawing.canvasClick.bind(drawing, this.canvasContainer), true);
+  this.canvasContainer.addEventListener("mouseup", drawing.mouseUp.bind(drawing, this.canvasContainer), true);
+  this.canvasContainer.addEventListener("mousemove", drawing.mouseMoveRedraw.bind(drawing, this.canvasContainer), true);
+  this.spanMessages = document.getElementById(`${this.canvasId}Messages`);
+  this.spanCriticalErrors = document.getElementById(`${this.canvasId}CriticalErrors`);
+  this.spanControls = document.getElementById(`${this.canvasId}Controls`);
+  this.theIIIdObjects.thePatches = [];
+  this.theIIIdObjects.theContours = [];
+  this.theIIIdObjects.thePoints = [];
+  this.theIIIdObjects.theLabels = [];
+  this.constructControls();
+  this.computeBasis();
+  if (this.zBuffer.length === 0) {
+    this.allocateZbuffer();
+  }
 }
 
 Canvas.prototype.drawText = function(theText) { 
@@ -2263,26 +2289,6 @@ Canvas.prototype.constructControls = function() {
   this.spanControls.appendChild(hintElement);
 }
 
-Canvas.prototype.init = function(inputCanvasId) { 
-  this.canvasId = inputCanvasId;
-  this.canvasContainer = document.getElementById(inputCanvasId);
-  this.surface = this.canvasContainer.getContext("2d");
-  this.canvasContainer.addEventListener("DOMMouseScroll", drawing.mouseWheel.bind(drawing), true);
-  this.canvasContainer.addEventListener("mousewheel", drawing.mouseWheel.bind(drawing), true);
-  this.spanMessages = document.getElementById(`${this.canvasId}Messages`);
-  this.spanCriticalErrors = document.getElementById(`${this.canvasId}CriticalErrors`);
-  this.spanControls = document.getElementById(`${this.canvasId}Controls`);
-  this.theIIIdObjects.thePatches = [];
-  this.theIIIdObjects.theContours = [];
-  this.theIIIdObjects.thePoints = [];
-  this.theIIIdObjects.theLabels = [];
-  this.constructControls();
-  this.computeBasis();
-  if (this.zBuffer.length === 0) {
-    this.allocateZbuffer();
-  }
-}
-
 Canvas.prototype.coordsInjectMathScreen2dToMath3d = function(theCoords) { 
   var output = this.screenBasisOrthonormal[0].slice();
   vectorTimesScalar(output, theCoords[0]);
@@ -2867,6 +2873,7 @@ Drawing.prototype.getCanvas = function(/**@type {string}*/ canvasId) {
   }
   return this.canvases[canvasId];
 }
+
 /**@returns {CanvasTwoD} */
 Drawing.prototype.getCanvasTwoDNullOnFailure = function(canvasId) { 
   return this.getCanvasTwoDInternal(canvasId, false);
@@ -2906,7 +2913,7 @@ Drawing.prototype.testPicture =  function(inputCanvas) {
   var theCanvas = this.getCanvas(document.getElementById(inputCanvas));
   theCanvas.screenBasisUserDefault = [[0.59, 0.78, 0.18], [0.46, - 0.15, - 0.87]];
   theCanvas.screenBasisUser = theCanvas.screenBasisUserDefault.slice();
-  theCanvas.init(inputCanvas, false);
+  theCanvas.initialize(inputCanvas, false);
   theCanvas.drawLine([- 1, 0, 0], [1, 0, 0], 'black', 2);
   theCanvas.drawLine([0, - 1, 0], [0, 1, 0], 'black', 2);
   theCanvas.drawLine([0, 0, - 1], [0, 0, 1], 'black', 2);
@@ -2927,7 +2934,7 @@ Drawing.prototype.testPicture =  function(inputCanvas) {
 
 Drawing.prototype.testPictureTwoD = function(inputCanvas1, inputCanvas2, inputCanvas3) { 
   var theCanvas = this.getCanvasTwoD(document.getElementById(inputCanvas1));
-  theCanvas.init(inputCanvas1);
+  theCanvas.initialize(inputCanvas1);
   theCanvas.drawLine([- 10, 0], [19, 0], 'green');
   theCanvas.drawLine([0, - 1], [0, 1], 'purple');
   theCanvas.drawText([- 1, - 1], '(- 1,- 1)', 'orange');
@@ -2944,7 +2951,7 @@ Drawing.prototype.testPictureTwoD = function(inputCanvas1, inputCanvas2, inputCa
   theCanvas.drawVectorField(testVectorField2d, true, [- 6,- 6], [6, 6], [20, 20], 0.5, "red", 2);
   theCanvas.redraw();
   var theCanvas2 = this.getCanvasTwoD(document.getElementById(inputCanvas2));
-  theCanvas2.init(inputCanvas2);
+  theCanvas2.initialize(inputCanvas2);
   theCanvas2.drawLine([- 10, - 1], [10, 1], 'green');
   theCanvas2.drawLine([0, - 19], [0, 1], 'purple');
   theCanvas2.drawText([- 1,- 1], '(- 1,- 1)', 'orange');
@@ -2959,7 +2966,7 @@ Drawing.prototype.testPictureTwoD = function(inputCanvas1, inputCanvas2, inputCa
   theCanvas2.drawVectorField(testVectorField2d, false, [- 6, - 6], [6, 6], [20, 20], 0.5, "red", 2);
   theCanvas2.redraw();
   var theCanvas3 = this.getCanvasTwoD(document.getElementById(inputCanvas3));
-  theCanvas3.init(inputCanvas3);
+  theCanvas3.initialize(inputCanvas3);
   theCanvas3.drawFunction(testFunctionPlot, - 10, 10, 100, 'red', 2);
   theCanvas3.drawGrid();
   theCanvas3.drawCoordinateAxes();
@@ -2969,7 +2976,9 @@ Drawing.prototype.testPictureTwoD = function(inputCanvas1, inputCanvas2, inputCa
 }
 
 
-Drawing.prototype.mouseMoveRedraw = function(inputCanvas, x, y) { 
+Drawing.prototype.mouseMoveRedraw = function(inputCanvas, event) { 
+  var x = event.clientX;
+  var y = event.clientY;
   var theCanvas = this.getCanvas(inputCanvas);
   if (theCanvas !== null && theCanvas !== undefined) {   
     theCanvas.mouseMove(x, y);

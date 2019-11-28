@@ -1049,7 +1049,7 @@ void ElementHyperoctahedralGroup::GetCharacteristicPolyStandardRepresentation(Po
   { out.MakeConst(1);
     return;
   }
-  M.init(n,n);
+  M.init(n, n);
   M.MakeZero();
   for (int i = 0; i <n; i ++) {
     int a = this->p*i;

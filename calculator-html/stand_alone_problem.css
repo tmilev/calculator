@@ -1,0 +1,1591 @@
+:root {
+  --main-background-color: white;
+  --main-border-radius: 3px;
+  --box-shadow-buttonSelectPage: none;
+  --box-shadow-tableCalculatorOutputs: none;
+  --box-shadow-buttonPreview: none;
+  --box-shadow-buttonAnswer: none;
+  --box-shadow-buttonDefault: none;
+  --box-shadow-buttonMQ: none;
+}
+
+/*styleCalculator.css*/
+calculatorExampleInfo {
+  display: block;
+  transition: all 1s;
+  opacity: 1;
+}
+
+calculatorAtom {
+  font-weight: bold;
+  color: red;
+}
+
+calculatorCompositeAtom {
+  color:green;
+}
+
+calculatorNavigation {
+  background-color: #e8e8e8;
+  display: block;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  margin: 0;
+  text-align: center;
+  white-space: nowrap;
+  width: 100%;
+}
+
+calculatorNavigation:after {
+  clear:both;
+}
+
+tiny {
+  font-size: x-small
+}
+
+.problemInfoBar {
+  display: flex;
+  align-items: center;
+  background-color: #fafafa;
+  border-radius: var(--main-border-radius);
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+div.spanFileInfo {
+  display: inline-block;
+  border-radius: 3px;
+  margin:  3px;
+  padding: 3px;
+  text-align: left;
+  white-space: nowrap;
+  background-color: #f8f8f8;
+}
+
+div.problemTitle {
+  display: flex;
+  align-items: center;
+}
+
+div.problemTitleContainer {
+  display: inline-block;
+  border-radius: 3px;
+  margin:  3px;
+  padding: 3px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+div.problemNavigation {
+  display: inline-block;
+  border-radius: 3px;
+  margin:  3px;
+  padding: 3px;
+  text-align: center;
+  white-space: nowrap;
+/*  border: 1px solid black;*/
+}
+
+textarea.textareaCalculatorMain {
+  white-space:normal;
+  resize: auto;
+  width: 300px;
+  height: 100px;
+}
+
+textarea.textAreaStudentPoints {
+  resize: both
+}
+
+.calculatorHidden {
+  display:none;
+}
+
+.calculatorCommentBeforeSubmission {
+  display:none;
+}
+
+td.tableCellMQfield {
+  vertical-align: center;
+  padding: 5px;
+  /*min-width: 100px;*/
+  text-align: center;
+}
+
+.calculatorMQfieldEnclosure {
+  display:inline-block;
+  background-color:white;
+  padding: 0px;
+}
+
+sectionSelection {
+  position:fixed;
+  background: silver;
+  bottom:0;
+  right:0;
+}
+
+.buttonSubmit {
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  padding:3px;
+  margin: 3px;
+  transition: all 2s;
+  box-shadow: var(--box-shadow-buttonDefault);
+  border: none;
+  color:red;
+  width:60px;
+}
+
+.buttonSolution {
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  transition: all 2s;
+  padding:3px;
+  margin: 3px;
+  box-shadow: none;
+  border: none;
+  color:green;
+  width:60px;
+}
+
+.buttonSubmit:hover {
+  background-color:#878787;
+}
+
+.buttonPreview {
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  box-shadow: var(--box-shadow-buttonPreview);
+  transition: all 2s;
+  padding:3px;
+  margin: 3px;
+  border: none;
+  color:green;
+  width:60px;
+}
+
+.buttonPreview:hover {
+  background-color:#878787;
+}
+
+.buttonAnswer {
+  border-radius: 3px;
+  transition: all 2s;
+  padding:3px;
+  margin: 3px;
+  box-shadow: none;
+  box-shadow: var(--box-shadow-buttonAnswer);
+  border: none;
+  color:green;
+  width:60px;
+}
+
+.buttonAnswer:hover {
+  background-color:#878787;
+}
+
+button.accordionLikeIndividual {
+  display: inline;
+  border-radius: 3px;
+  background-color: #efefef;
+  padding: 2px;
+  color: #444;
+  cursor: pointer;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: medium;
+  transition: 0.6s;
+}
+
+button.accordionLikeIndividual.active, button.accordionLikeIndividual:hover {
+  background-color: #ddd;
+}
+
+button.accordionLikeProblemWeight {
+  display: inline;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  background-color: #efefef;
+  padding: 2px;
+  color: #444;
+  cursor: pointer;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: medium;
+  transition: 0.6s;
+}
+
+button.accordionLikeProblemWeight.active, button.accordionLikeProblemWeight:hover {
+  background-color: #ddd;
+}
+
+button.accordionLike {
+  display: inline;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  background-color: #efefef;
+  padding: 2px;
+  color: #444;
+  cursor: pointer;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: medium;
+  transition: 0.6s;
+}
+
+button.accordionLike.active, button.accordionLike:hover {
+  background-color: #ddd;
+}
+
+button.accordion {
+  border-radius: 3px;
+  padding: 2px;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  display: inline;
+  background-color: #efefef;
+  color: #444;
+  cursor: pointer;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: medium;
+  transition: 0.6s;
+}
+
+button.accordion.active, button.accordion:hover {
+  background-color: #dfdfdf;
+}
+
+button.accordion:after {
+  vertical-align: middle;
+  color: #777;
+  margin-left: 0px;
+}
+
+button.buttonStandard {
+  margin:  3px;
+  padding: 3px;
+  border-radius: 3px;
+  display: inline;
+  background-color: lightblue;
+  cursor: pointer;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: medium;
+  transition: 0.6s; 
+}
+
+button.buttonStandard:hover {
+  background-color: lightskyblue;
+}
+
+button.buttonSaveEdit {
+  margin:  3px;
+  padding: 3px;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 4px;
+  display: inline;
+  background-color: #caff99;
+  color: #444;
+  cursor: pointer;
+  border: none;
+  text-align: center;
+  outline: none;
+  font-size: medium;
+  transition: 0.6s; 
+}
+
+button.buttonSaveEdit:hover {
+  background-color: lightgreen;
+}
+
+button.buttonClone {
+  margin:  3px;
+  padding: 3px;
+  border-radius: 3px;
+  display: inline;
+  background-color: #caff99;
+  color: #444;
+  cursor: pointer;
+  border: none;
+  text-align: center;
+  outline: none;
+  font-size: medium;
+  transition: 0.6s; 
+}
+
+button.buttonClone:hover {
+  background-color: lightgreen;
+}
+
+button.buttonProgress {
+  box-shadow: none;
+  border: none;
+  background: none;
+  padding-left: 6px;
+  padding-right: 7px;
+  transition: 2s;
+}
+
+button.buttonProgress:hover {
+  background: lightgray;
+}
+
+answerCalculatorHighlight {
+  display: inline-block;
+  background-color: #fbfbfb;
+  /*background-color: #bbbbbb;*/
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  font-size: 1em;
+  border-radius: 3px;
+  font-weight: bold;
+  /*max-width: 200px;*/
+}
+
+span.panelAnswer table, tr, td {
+  margin-left: 0px;
+  padding-left: 0px;
+  border-collapse: collapse;
+}
+
+span.panelAnswer tr {
+  margin-left: 0px;
+  padding-left: 0px;
+}
+
+span.panelAnswer {
+  display: inline-block;
+  margin-right: 5px;
+  margin-bottom: 5px;
+  margin-top: 5px;
+  padding-right: 5px;
+  padding-bottom: 5px;
+  padding-top: 5px;
+  background-color: #ffffff;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  font-size: 1em;
+  border-radius: 3px;
+  transition: 0.6s;
+}
+
+span.panelAnswer:hover {
+  background-color: #fbfbfb;
+}
+
+span.panelAnswer:hover .mq-editable-field.mq-math-mode {
+  -webkit-box-shadow: #8bd 0 0 1px 2px, inset #6ae 0 0 2px 0;
+  -moz-box-shadow: #8bd 0 0 1px 2px, inset #6ae 0 0 2px 0;
+  box-shadow: #8bd 0 0 1px 2px, inset #6ae 0 0 2px 0;
+  border-color: #709AC0;
+  border-radius: 1px;
+  transition: 2s;
+}
+
+span.panel {
+  display:none;
+  padding: 0 0px;
+  background-color: white;
+  max-height: 0;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  overflow: hidden;
+  transition: 0.6s linear;
+  opacity: 0;
+}
+
+span.panel.show {
+  transition: 0.6s linear;
+  opacity: 1;
+  max-height: 500px;
+}
+
+button.buttonToggleTopics {
+  margin-top: 0px;
+  margin-left: 5px;
+  width: 20px;
+  height: 23px;
+  font-size: medium;
+  font-weight: normal;
+  background-color: Transparent;
+  padding: 2px;
+  background-color: #efefef;
+  border-radius: 3px;
+  background-repeat:no-repeat;
+  box-shadow: var(--box-shadow-buttonDefault);
+  border: none;
+  cursor:pointer;
+  overflow: hidden;
+  outline:none;
+  transition: 0.6s;
+}
+
+button.buttonToggleTopics.active, button.buttonToggleTopics:hover {
+  background-color: #d0d0d0;
+}
+
+button.studentScoresButton {
+  margin-top: 0;
+  margin-bottom: 0px;
+  font-size: medium;
+  font-weight: normal;
+  background-color: Transparent;
+  padding: 2px;
+  background-color: #efefef;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  background-repeat:no-repeat;
+  border: none;
+  cursor:pointer;
+  overflow: hidden;
+  outline:none;
+  transition: 0.6s;
+}
+
+button.studentScoresButton.active, button.studentScoresButton:hover {
+  background-color: #d0d0d0;
+}
+
+span.studentScoresContent {
+  transition: opacity 1s linear;
+  opacity: 1;
+}
+
+panelStudentScores {
+  display: inline-block;
+  margin:  3px;
+  padding: 3px;
+  background-color: #fafafa;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  font-size: 1em;
+  border-radius: 3px;
+  transition: 0.6s;
+}
+
+panelCourseInfo {
+  display: inline-block;
+  margin:  3px;
+  padding: 3px;
+  background-color: #fafafa;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  font-size: 1em;
+  border-radius: 3px;
+  transition: 0.6s;
+}
+
+span.panelProblemWeights {
+  display: block;
+  max-height: 0;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  overflow: hidden;
+  transition: 2s linear;
+  opacity: 0;
+}
+
+span.panelDeadlines {
+  display: block;
+  max-height: 0;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  overflow: hidden;
+  transition: 1s linear;
+  opacity: 0;
+}
+
+span.studentScoresWrapper {
+  width: 420px;
+  font-size: medium;
+  font-weight: normal;
+  margin-left: 10px;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.PanelExpandable {
+  transition: all 2s;
+  overflow: auto;
+  word-wrap: break-word;
+}
+
+a.linkProgressReport {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  overflow: hidden;
+  font-size: small;
+  max-width: 120px;
+}
+
+.spanProgressReport {
+  max-width: 120px;
+  font-size: small;
+}
+
+#spanCalculatorExamplesContainer {
+  overflow: auto;
+  display: inline-block;
+  vertical-align:top;
+  white-space:nowrap;
+}
+
+#idAutocompletePanel {
+  overflow: none;
+  display: inline-block;
+  max-height: 150px;
+  vertical-align:top;
+  white-space:nowrap;
+}
+
+#idAutocompleteSpan {
+  overflow: auto;
+  max-height: 100px;
+}
+
+.tableCalculatorInputs {
+  display: inline-table;
+}
+
+.tableCalculatorInputs td {
+  vertical-align: top;
+}
+
+table.tableCalculatorOutput {
+  border-collapse: collapse;
+  word-break: break-all;
+  box-shadow: var(--box-shadow-tableCalculatorOutputs)
+}
+
+td.cellCalculatorInput {
+  border: 1px solid grey;
+  padding-left: 5px;
+  padding-right: 20px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  margin-bottom: 5px;
+  margin-top: 5px;
+  margin-right: 20px;
+  margin-left:  5px;
+  min-width: 200px;
+  vertical-align: top;
+}
+
+td.cellCalculatorResult {
+  border: 1px solid grey;
+  padding-left: 20px;
+  padding-right: 5px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  margin-bottom: 5px;
+  margin-top: 5px;
+  margin-right: 5px;
+  margin-left:  20px;
+  min-width: 200px;
+  vertical-align: top;
+}
+
+td.deadlineCell {
+  padding: 8px;
+  margin-left: 10px;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  padding-top: 0px;
+  padding-bottom: 0px;
+  font-weight: normal;
+  width: 300px;
+  font-size: medium;
+  vertical-align: middle;
+}
+
+table.deadlineTable tr td {
+  margin: 0;
+  padding: 0;
+}
+
+table.deadlineTable tr th {
+  margin: 0;
+  padding: 0;
+}
+
+textarea.calculatorAnswer {
+  padding: 0 0px;
+  background-color: white;
+  max-height: 0;
+  overflow: hidden;
+  transition: 0.6s ease-in-out;
+  opacity: 0;
+  word-wrap: break-word;
+  width: 60px
+}
+
+textarea.calculatorAnswer.show {
+  opacity: 1;
+  max-height: 500px;
+}
+
+textarea.currentFileNameArea {
+  height: 25px;
+  margin-bottom: -8px;
+  overflow-x: hidden;
+} 
+
+div.divOnePageApp {
+  /* class assigned to main one page container at run time. */
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 100%;
+  visibility: visible;
+}
+
+div.divPage {
+  width: 90%;
+  height: 100%;
+  overflow: auto;
+}
+
+div.divTheMainMenu {
+  display: flex;
+  flex-direction: column;
+  transition: all 1s;
+  max-width: 120px;
+  width: 10%;
+  position: absolute;
+  right: 0.8%;
+  overflow:none;
+}
+
+div.divMainMenuCollapsed {
+  display: flex;
+  max-width: 20px;
+  width: 20px;
+  flex-direction: column;
+  transition: all 1s;
+}
+
+div.divMenuSeparator {
+  font-size: small;
+  text-align: center;
+  border-bottom: 1px solid black;
+}
+
+#divCalculatorExamples {
+  max-height: 850px;
+}
+
+div.headChapter {
+  padding-bottom: 10px; 
+  padding-left: 0;
+  margin-left: 0;
+  margin-right: 0;
+  padding-bottom: 5px;
+  display: block;
+  font-weight: bold;
+  font-size: 1.3rem;
+}
+
+div.bodyChapter {
+  padding: 0px; 
+  margin: 0px;
+  display: block;
+  width: 100%;
+  -webkit-transition: all 2s ease;
+  -moz-transition: all 2s ease;
+  transition: all 2s ease;
+}
+
+div.headSection {
+  padding-bottom: 10px; 
+  margin-left: 0;
+  margin-right: 0;
+  padding-bottom: 5px;
+  display: block;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+div.bodySection {
+  padding: 0px; 
+  margin: 0px;
+  display: block;
+  width: 100%;
+  -webkit-transition: all 2s ease;
+  -moz-transition: all 2s ease;
+  transition: all 2s ease;
+}
+
+div.headSubsection {
+  padding-bottom: 10px; 
+  margin-left: 0;
+  margin-right: 0;
+  padding-bottom: 5px;
+  display: block;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+div.bodySubsection {
+  padding: 0px; 
+  margin: 0px;
+  width: 100%;
+  display: block;
+  -webkit-transition: all 2s ease;
+  -moz-transition: all 2s ease;
+  transition: all 2s ease;
+}
+
+div.bodyItem {
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: 0;
+  padding-bottom: 5px;
+  display: block;
+  font-size: 1rem;
+  -webkit-transition: all 2s ease;
+  -moz-transition: all 2s ease;
+  transition: all 2s ease;
+}
+
+table.tableDatabase {
+  border-collapse: collapse;
+}
+
+table.tableDatabase td {
+  border: 1px solid;
+}
+
+table.tableDatabase tr:nth-child(odd) {
+  background-color: #eeeeee;
+}
+
+table.tableDatabaseItem {
+  border-collapse: collapse;
+  border: 1px solid;
+}
+
+table.tableDatabaseItem td {
+  border: 1px solid;
+}
+
+table.tableJSON {
+  border-collapse: collapse;
+}
+
+table.tableJSON th {
+  font-size: x-small;
+}
+
+table.tableJSON td {
+  border: 1px solid;
+}
+
+table.tableJSON tr:nth-child(even) {
+  background-color: #f6f6f6;
+}
+
+table.tableJSONItem {
+  border-collapse: collapse;
+  border: 1px solid;
+}
+
+table.tableJSONItem td {
+  border: 1px solid;
+}
+
+table.tableJSONItem tr:nth-child(even) {
+  background-color: #f6f6f6;
+}
+
+table.tableItem {
+  width: 100%;
+}
+
+table.tableItem td, table.tableItem th {
+  text-align: left;
+  padding-left: 0px;
+}
+
+tr.calculatorProblem {
+  counter-increment: rowNumber;
+}
+
+table.tableItem col:nth-child(1) {
+  width: 35%;
+}
+
+table.tableItem col:nth-child(2) {
+  width: 20%;
+}
+
+table.tableItem col:nth-child(3) {
+  width: 12%;
+}
+
+table.tableItem col:nth-child(4) {
+  width: 13%;
+}
+
+table.tableItem col:nth-child(5) {
+  width: 20%;
+}
+
+table.lectureMaterials {
+  border-collapse: collapse;
+  /*  width: 100%;*/
+  font-weight: normal;
+  font-size: 1em;
+  margin-top: 4px;
+  counter-reset: rowNumber;
+}
+
+table.lectureMaterials td, table.lectureMaterials th {
+  border: 1px solid #dfdfdf;
+  text-align: left;
+  padding-left: 8px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+table.lectureMaterials col:nth-child(1) {
+  width: 45%;
+}
+
+table.lectureMaterials col:nth-child(2) {
+  width: 40%;
+}
+
+table.lectureMaterials col:nth-child(3) {
+  width: 15%;
+}
+
+/*table.lectureMaterials tr:nth-child(even){}*/
+table.lectureMaterials tr:nth-child(odd) {
+  background-color: #fafafa;
+}
+table.lectureMaterials th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+topicList {
+  width: 100%;
+}
+
+#divCurrentCourse {
+  width: 90%;
+}
+
+table.topicList {
+  border-collapse: collapse;
+  width: 100%;
+  font-weight: normal;
+  font-size: 1em;
+  margin-top: 4px;
+  counter-reset: rowNumber;
+}
+
+table.topicList td, table.topicList th {
+  border: 1px solid #dfdfdf;
+  text-align: left;
+  padding-left: 8px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+table.topicList col:nth-child(1) {
+  width: 35%;
+}
+
+table.topicList col:nth-child(2) {
+  width: 20%;
+}
+
+table.topicList col:nth-child(3) {
+  width: 12%;
+}
+
+table.topicList col:nth-child(4) {
+  width: 13%;
+}
+
+table.topicList col:nth-child(5) {
+  width: 20%;
+}
+
+/*table.topicList tr:nth-child(even){}*/
+table.topicList tr:nth-child(odd) {
+  background-color: #fafafa;
+}
+
+/*table.topicList tr:hover {background-color: #ddd;}*/
+table.topicList th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+a.linkLogoutInactive {
+  transition: all 1s;
+  opacity: 0;
+}
+
+a.linkLogoutActive {
+  transition: all 1s;
+  opacity: 1;
+}
+
+a.linkInfo {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+a.linkStandardButtonLike {
+  margin:  3px;
+  padding: 3px;
+  background-color: #efefef;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  transition: 0.6s;
+  text-decoration: none;
+}
+
+a.linkStandardButtonLike:hover {
+  background-color: #dfdfdf;
+}
+
+span.problemLinkSelectedPractice {
+  display: inline-block;
+  margin:  3px;
+  padding: 3px;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  text-decoration: none;
+}
+
+span.problemLinkSelectedQuiz {
+  display: inline-block;
+  margin:  3px;
+  padding: 3px;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  font-weight: bold;
+  text-decoration: none;  
+}
+
+a.problemLinkQuiz {
+  margin:  3px;
+  padding: 3px;
+  background-color: #efefef;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  transition: all 1.5s;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+a.problemLinkQuiz:hover { 
+  background-color: Orange;
+}
+
+a.problemLinkPractice {
+  margin:  3px;
+  padding: 3px;
+  background-color: #efefef;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  transition: all 1.5s;
+  text-decoration: none;
+}
+
+a.problemLinkPractice:hover {
+  background-color: PaleGreen;
+}
+
+a.slidesLink {
+  margin:  3px;
+  padding: 3px;
+  background-color: #efefef;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  transition: 0.6s;
+  text-decoration: none;
+}
+
+a.slidesLink:hover {
+  background-color: #dfdfdf;
+}
+
+a.videoLink {
+  display: inline-block;
+  margin:  3px;
+  padding: 3px;
+  background-color: #efefef;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  transition: 0.6s;
+  text-decoration: none;
+}
+
+a.videoLink:hover {
+  background-color: #dfdfdf;
+}
+
+a.linkForgotLoginPass {
+  display: inline-block;
+  margin:  3px;
+  padding: 3px;
+  font-size: 1.25em;
+  text-decoration: none;
+  background-color: #efefef;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  transition: 0.6s;
+}
+
+a.linkForgotLoginPass:hover { 
+  background-color: Orange;
+}
+
+a.linkSignUp {
+  display: inline-block;
+  margin:  3px;
+  padding: 3px;
+  font-size: 1.25em;
+  text-decoration: none;
+  background-color: #efefef;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  transition: 0.6s;
+}
+
+a.linkSignUp:hover { 
+  background-color: LawnGreen;
+}
+
+a.courseLink {
+  display: inline-block;
+  margin:  10px;
+  padding: 3px;
+  background-color: #ccffcc;
+  -moz-border-radius: 7px;
+  -webkit-border-radius: 7px;
+  font-weight: bold;
+  font-size: 2em;
+  border-radius: 7px;
+  transition: 0.6s;
+  text-decoration: none;
+}
+
+a.courseLink:hover {
+  background-color: LawnGreen;
+}
+
+div.divProfilePictureContainerExpanded {
+  max-width: 96px;
+  max-height: 96px;
+  transition: all 1s;
+  margin-left: auto;
+  margin-right: auto;  
+}
+
+div.divProfilePictureContainerCollapsed {
+  max-width: 25px;
+  max-height: 25px;
+  transition: all 1s;
+}
+
+img {
+  transition: all 1;
+  width: 100%; 
+  object-fit: scale-down;
+  /*object-fit: contain;*/
+}
+
+.profilePicture {
+  transition: all 1s;
+  display: block;
+}
+
+div.divLoginPanel {
+  align-items: center;
+  text-align: center;
+  width: 100%;
+}
+
+div.divLogin {
+  text-align: center;
+}
+
+div.divForgotLogin {
+  text-align: center;
+}
+
+div.divSignUp {
+  text-align: center;
+}
+
+div.divExternalLogin {
+  text-align: center;
+}
+
+div.mqButtonPanel {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  -webkit-transition: all 1s ease;
+  -moz-transition: all 1s ease;
+  transition: all 1s ease;
+}
+
+div.centerHorizontallyInPageContainer {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+div.centerVerticallyInPageContainer {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+div.divCenteredItem {
+  margin: 10px;
+  padding: 0px;
+}
+
+div.divVisible {
+  transition: all 1s;
+  opacity: 1;
+}
+
+div.divInvisible {
+  transition: all 1s;
+  opacity: 0;
+}
+
+div.divSmall {
+  font-size: x-small;
+}
+
+form.formLogin > * {
+  font-size: 1.1em;
+}
+
+table.tableLogin {
+  margin: 0 auto;
+}
+
+button.buttonSignUp {
+  display: inline-block;
+  box-shadow: none;
+  border: none;
+  width: 100%;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  text-decoration: none;
+  background-color: #efefef;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  transition: 1.5s;
+}
+
+button.buttonSignUp:hover { 
+  background-color: lightgreen;
+}
+
+button.buttonSelectPage {
+  border-radius: var(--main-border-radius);
+  background-color: lightblue;
+  box-shadow: var(--box-shadow-buttonSelectPage);
+  border: none;
+  font-weight: bold;
+  padding: 8px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  font-size: 14px;
+  transition: 1.5s;
+  width: 100%;
+  white-space: nowrap;
+  cursor:pointer;
+  transition: all 1.5s;
+}
+
+button.buttonSlowTransition {
+  transition: all 10s;
+}
+
+button.buttonFlash {
+  background-color: pink;
+  transition: all 10s;
+}
+
+button.buttonSelectPageSelected {
+  background-color: skyblue;
+}
+
+button.buttonSelectPage:hover {
+  background-color: lightskyblue;
+}
+
+button.buttonMQ {
+  width: 25px; 
+  height: 21.2px; 
+  padding: 0;
+  box-shadow: var(--box-shadow-buttonMQ);
+  border: none;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  transition: all 2s;
+  background-color: #e8e8e8;
+}
+
+button.buttonMQ:hover {
+  background-color: silver;
+}
+
+lectureTag {
+  color: green;
+  font-weight: bold;
+  font-size: 1.25em;
+}
+
+actualExamProblem {
+  font-weight: bold;
+  color: brown;
+  font-size: 1.25em;
+}
+
+advancedTopic {
+  font-weight: bold;
+  color: orange;
+  font-size: 1.25em;
+}
+
+reviewProblem {
+  font-weight: bold;
+  color: LawnGreen;
+  font-size: 1.25em;
+}
+
+panelProblemLinkStyleSelection {
+  display: inline-block;
+  margin:  3px;
+  padding: 3px;
+  background-color: #eaeaea;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  font-size: 1em;
+  border-radius: 3px;
+  transition: 0.6s;
+}
+
+panelProblemLinkStyleSelection:hover {
+  background-color: #dfdfdf;
+}
+
+span.currentCourseIndicator {
+  display: inline-block;
+  margin:  3px;
+  padding: 3px;
+  background-color: #eaeaea;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  font-size: 1.25em;
+  font-weight: bold;
+  border-radius: 3px;
+  transition: 0.6s;
+}
+
+.textInputUsername {
+  font-size: 0.9em;
+  font-weight: bold;
+}
+
+.g-signin2 {
+  width: 100%;
+}
+
+.g-signin2 > div {
+  margin: 0 auto;
+}
+
+.hiddenClass {
+  display: none;
+  max-height: 0px;
+  height: 0px;
+  opacity: 0;
+  transition: all 1s;
+}
+
+#divEditorAce { 
+  height: 85%;
+  font-size: 100%;
+}
+
+/* The switch - the box around the slider */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 32px;
+  height: 18px;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+  display:none;
+}
+
+/* The slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 5;
+  left: 0;
+  right: 0;
+  bottom: -5;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 12px;
+  width: 12px;
+  left: 4px;
+  bottom: 3px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(11px);
+  -ms-transform: translateX(11px);
+  transform: translateX(12px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 10px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+/* Customize the label (the container) */
+.containerRadioButton {
+  display: block;
+  position: relative;
+  padding-left: 20px;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Hide the browser's default radio button */
+.containerRadioButton input {
+  position: absolute;
+  opacity: 0;
+  height: 0;
+  width: 0;
+}
+
+/* Create a custom radio button */
+.radioMark {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  height: 15px;
+  width: 15px;
+  background-color: #eee;
+  border-radius: 50%;
+}
+
+/* On mouse-over, add a grey background color */
+.containerRadioButton:hover input ~ .radioMark {
+  background-color: #ccc;
+}
+
+/* When the radio button is checked, add a blue background */
+.containerRadioButton input:checked ~ .radioMark {
+  background-color: lightskyblue;
+}
+
+/* Create the indicator (the dot/circle - hidden when not checked) */
+.radioMark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+/* Show the indicator (dot/circle) when checked */
+.containerRadioButton input:checked ~ .radioMark:after {
+  display: block;
+}
+
+/* Style the indicator (dot/circle) */
+.containerRadioButton .radioMark:after {
+  top: 4px;
+  left: 4px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: white;
+}
+
+div.containerComments {
+  min-width: 100px;
+  word-break: break-all;
+  width: 30%;
+}
+
+span.hexContainerStandard {
+  font-family: 'Courier New', Courier, monospace;
+  word-break: break-all;
+  display: inline-block;
+  position: relative;
+}
+
+div.hexContainerStandardWidth {
+  display: inline-block;
+  word-break: break-all;
+  max-height:1000px;
+  max-width: 1000px;
+  padding: 0px;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+span.byteAnnotationBody {
+  position: relative;
+}
+
+span.byteAnnotationBody:hover {
+  background-color: lightgray;
+}
+
+span.abstractSyntaxOneAnnotation {
+  position: relative;
+  display: inline-block;
+  width: 500px;
+  max-width: 500px;
+  word-break: break-all;
+  font-family: 'Courier New', Courier, monospace;
+  transition: 1s all;
+}
+
+span.abstractSyntaxOneHeader:hover {
+  background-color:lightgray;
+}
+
+span.abstractSyntaxOneLeadingByte:hover {
+  background-color: gray;
+}
+
+span.abstractSyntaxOneLength:hover {
+  background-color: lightskyblue;
+}
+
+span.abstractSyntaxOneElement {
+  position: relative;
+  border-style: solid;
+  border-width: 1px;
+  word-break: break-all;
+}
+
+div.abstractSyntaxOneElementTree div.abstractSyntaxOneElementTree  {
+  border-left: solid 1px black;
+  word-break: break-all;
+  padding-left: 5px
+}
+
+/*span.abstractSyntaxOneElement:hover {
+  background-color:lightyellow;
+}*/
+
+span.abstractSyntaxOneContent:hover {
+  background-color: lightgreen;
+}
+
+.tooltiptext {
+  display: block;
+  visibility: hidden;
+  max-width: 800px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  padding: 5px 0;
+  border-radius: 6px;
+   /* Position the tooltip text - see examples below! */
+  position: absolute;
+  top: 40px;
+  left: 0px;
+  z-index: 1;
+  word-break: normal;
+}
+
+span.spanStringEqual {
+  font-weight: bold;
+  font-family: 'Courier New', Courier, monospace;
+  color: green
+}
+
+span.spanStringDifferent {
+  font-weight: bold;
+  font-family: 'Courier New', Courier, monospace;
+  color: red
+}
+
+table.tableBorderStandard, table.tableBorderStandard td{
+  border-collapse: collapse;
+  border: 1px solid;
+}

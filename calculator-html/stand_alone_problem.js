@@ -53,7 +53,9 @@ StandAloneProblem.prototype.initAndRun = function (input) {
     return;
   }
   window.calculator.mainPage.flagProblemPageOnly = true;
-  window.calculator.hardCodedServerAddress = input.hardCodedServerAddress;
+  if (input.hardCodedServerAddress !== "" && input.hardCodedServerAddress !== null && input.hardCodedServerAddress !== undefined) {
+    window.calculator.hardCodedServerAddress = input.hardCodedServerAddress;
+  }
   this.containerId = input.id;
   this.containerElement = document.getElementById(this.containerId); 
   if (this.containerElement === null) {
@@ -68,7 +70,9 @@ StandAloneProblem.prototype.initAndRun = function (input) {
   var courseHome = "/coursetemplates/Curriculum-300-Calculus-I.html";
   var topicList = "/topiclists/Curriculum-300-Calculus-I.txt";
   var problemFileName = "/problems/Find-function-inverse-fractional-linear-1.html";
-  this.problem = problemPage.allProblems.CreateOrUpdateProblem(problemFileName); 
+  this.problem = problemPage.allProblems.CreateOrUpdateProblem({
+    id: problemFileName,
+  }); 
   var theURL = `${pathnames.urls.calculatorAPI}?${this.problem.getCalculatorURLRequestInput(false, problemFileName, courseHome, topicList)}`;
   submitRequests.submitGET({
     url: theURL,

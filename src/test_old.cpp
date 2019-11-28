@@ -1364,7 +1364,7 @@ Vector<int> pointi_slow(int d, int i) {
 
 void lie_bracket_relations(Vector<Polynomial<Rational> >& out, int N) {
   Matrix<Vector<Polynomial<Rational> > > brackets;
-  brackets.init(N,N);
+  brackets.init(N, N);
   for (int i = 0; i < N; i ++) {
     for (int j = 0; j < N; j ++) {
       brackets.elements[i][j].SetSize(N);

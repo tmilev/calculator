@@ -32,6 +32,10 @@ function initializeGlobals() {
     processMonitoring: null,
     crypto: null,
     themes: null,
+    pageNavigation: null,
+    globalMQ: MathQuill.getInterface(2),
+    MathQuillHasMatrixSupport: true,
+    hardCodedServerAddress: "",
   };
   if (window.calculator === undefined || window.calculator === null) {
     window.calculator = {};
@@ -39,7 +43,7 @@ function initializeGlobals() {
   window.calculator = Object.assign(window.calculator, incomingGlobals);
   if (window.calculator.flagRunMainPage === undefined) {
     window.calculator.flagRunMainPage = true;
-  }
+  }  
 }
 
 function loadGlobals() {
@@ -66,13 +70,13 @@ function loadGlobals() {
   window.calculator.mathjax = require('./mathjax-calculator-setup');
   window.calculator.graphicsNDimensions = require('./graphics_n_dimensions');
   window.calculator.processMonitoring = require('./process_monitoring');
+  window.calculator.pageNavigation = require('./page_navigation');
   //initialize everything not initilized while loading:
   window.calculator.crypto = require('./crypto');
   require('./external/build/output-min');
+  window.calculator.mainPage = new mainPage.Page();
   if (window.calculator.flagRunMainPage) {
-    window.calculator.mainPage = new mainPage.Page();
     window.calculator.mainPage.initializeCalculatorPage();
-    window.calculator.storageVariables = window.calculator.mainPage.storage.variables;
   }
 }
 

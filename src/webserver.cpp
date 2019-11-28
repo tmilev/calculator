@@ -5024,11 +5024,17 @@ void WebServer::InitializeMainAddresses() {
 
 void WebServer::InitializeMainFoldersInstructorSpecific() {
   MacroRegisterFunctionWithName("WebServer::InitializeMainFoldersInstructorSpecific");
-  FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("topiclists/");
-  FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("coursetemplates/");
-  FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("/coursesavailable/");
-  FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("problems/");
-  FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("DefaultProblemLocation/");
+  List<std::string> incoming = List<std::string>({
+    Configuration::topicLists      ,
+    Configuration::courseTemplates ,
+    Configuration::coursesAvailable,
+    Configuration::problemsFolder  ,
+    "DefaultProblemLocation/"      ,
+  });
+  for (int i = 0; i < incoming.size; i ++) {
+    FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop(incoming[i]);
+    FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("/" + incoming[i]);
+  }
 }
 
 void WebServer::InitializeMainAll() {

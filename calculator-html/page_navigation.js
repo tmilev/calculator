@@ -565,45 +565,14 @@ function Page() {
     },
   };
   this.storage = new StorageCalculator();
-  
-  cookies.setCookie("useJSON", true, 300, false);
-  this.initMenuBar();
-  this.initBuildVersion();
-  this.initHandlers();
-  //////////////////////////////////////
-  //////////////////////////////////////
-  //Initialize global variables
-  //////////////////////////////////////
-  //////////////////////////////////////
-  this.theCourses = {}; 
-  this.scriptsInjected = {};
-  this.logoutRequestFromUrl = null;
-  this.locationRequestFromUrl = null;
-  this.storage.loadSettings(); 
-  this.hashHistory = []; 
-  this.lastKnownGoodProblemFileName = "";
-  this.user = new User();
-  this.aceEditorAutoCompletionWordList = [];
-  this.flagDoSubmitCalculatorComputation = true;
-  //////////////////////////////////////
-  //////////////////////////////////////
-  //Page manipulation functions
-  //////////////////////////////////////
-  //////////////////////////////////////
-  //////////////////////////////////////
-  //////////////////////////////////////
-  //Select page on first load
-  //////////////////////////////////////
-  //////////////////////////////////////
-  this.selectPage(this.storage.variables.currentPage.getValue());
-  if (this.storage.variables.currentPage.getValue() != this.pages.activateAccount.name) {
-    login.loginTry();
-  }
-  document.getElementById("divOnePageApp").style.display = "";
-  document.getElementById("divOnePageApp").className = "divOnePageApp";
+  this.scriptInjector = new AllScripts();
+  this.flagProblemPageOnly = false;
 }
 
 Page.prototype.isLoggedIn = function() {
+  if (this.flagProblemPageOnly) {
+    return false;
+  }
   return this.user.isLoggedIn();
 }
 
@@ -661,6 +630,48 @@ Page.prototype.showProfilePicture = function() {
 }
 
 Page.prototype.initializeCalculatorPage = function() {
+  this.initializeCalculatorPagePartOne();
+  this.initializeCalculatorPagePartTwo();
+}
+
+Page.prototype.initializeCalculatorPagePartOne = function() {
+  cookies.setCookie("useJSON", true, 300, false);
+  this.initMenuBar();
+  this.initBuildVersion();
+  this.initHandlers();
+  //////////////////////////////////////
+  //////////////////////////////////////
+  //Initialize global variables
+  //////////////////////////////////////
+  //////////////////////////////////////
+  this.theCourses = {}; 
+  this.logoutRequestFromUrl = null;
+  this.locationRequestFromUrl = null;
+  this.storage.loadSettings(); 
+  this.hashHistory = []; 
+  this.lastKnownGoodProblemFileName = "";
+  this.user = new User();
+  this.aceEditorAutoCompletionWordList = [];
+  this.flagDoSubmitCalculatorComputation = true;
+  //////////////////////////////////////
+  //////////////////////////////////////
+  //Page manipulation functions
+  //////////////////////////////////////
+  //////////////////////////////////////
+  //////////////////////////////////////
+  //////////////////////////////////////
+  //Select page on first load
+  //////////////////////////////////////
+  //////////////////////////////////////
+  this.selectPage(this.storage.variables.currentPage.getValue());
+  if (this.storage.variables.currentPage.getValue() != this.pages.activateAccount.name) {
+    login.loginTry();
+  }
+  document.getElementById("divOnePageApp").style.display = "";
+  document.getElementById("divOnePageApp").className = "divOnePageApp";
+}
+
+Page.prototype.initializeCalculatorPagePartTwo = function() {
   initializeButtons.initializeButtons();
   initializeButtons.initializeCalculatorPage();
   mathjax.typeSetHard(ids.domElements.divMathjaxProblematicRender);
@@ -744,7 +755,12 @@ function Script() {
   this.content = "";
 } 
 
-Page.prototype.removeOneScript = function(scriptId) {
+function AllScripts() {
+  /**@{Script[]} */
+  this.scriptsInjected = {};
+}
+
+AllScripts.prototype.removeOneScript = function(scriptId) {
   var theScript = document.getElementById(scriptId);
   if (theScript === null) {
     return;
@@ -753,13 +769,13 @@ Page.prototype.removeOneScript = function(scriptId) {
   parent.removeChild(theScript);
 }
 
-Page.prototype.removeScripts = function(scriptIds) {
+AllScripts.prototype.removeScripts = function(scriptIds) {
   for (var counter = 0; counter < scriptIds.length; counter ++) {
     this.removeOneScript(scriptIds[counter]);
   }
 }
 
-Page.prototype.injectScript = function(scriptId, scriptContent) {
+AllScripts.prototype.injectScript = function(scriptId, scriptContent) {
   this.removeOneScript(scriptId);
   if (scriptContent !== undefined && scriptContent !== null) {
     this.scriptsInjected[scriptId] = new Script();
@@ -773,6 +789,18 @@ Page.prototype.injectScript = function(scriptId, scriptContent) {
   scriptChild.innerHTML = theScript.content;
   scriptChild.type = 'text/javascript';
   document.getElementsByTagName('head')[0].appendChild(scriptChild);
+}
+
+Page.prototype.removeOneScript = function(scriptId) {
+  this.scriptInjector.removeOneScript(scriptId);
+}
+
+Page.prototype.removeScripts = function(scriptIds) {
+  this.scriptInjector.removeScripts(scriptIds);
+}
+
+Page.prototype.injectScript = function(scriptId, scriptContent) {
+  this.scriptInjector.injectScript(scriptId, scriptContent);
 }
 
 Page.prototype.selectPage = function(inputPage) {

@@ -79,6 +79,20 @@ function Problem() {
 
 }
 
+Problem.prototype.setRandomSeedFromEnvironment = function() {
+  var currentCourse = window.calculator.mainPage.storage.variables.currentCourse; 
+  this.flagForReal = (currentCourse.exerciseType.getValue() !== pathnames.urlFields.exerciseJSON);
+  var incomingRandomSeed = currentCourse.randomSeed.getValue();
+  if (incomingRandomSeed === "" || incomingRandomSeed === null || incomingRandomSeed === undefined) {
+    if (!this.flagForReal) {
+      return;
+    }
+  } 
+  this.randomSeed = incomingRandomSeed;  
+  currentCourse.randomSeed.value = "";
+
+} 
+
 Problem.prototype.initializeBasic = function(problemData) {
   /**ProblemId is percent encoded, safe to embed in html. */
   this.problemId = encodeURIComponent(problemData.id);
@@ -93,16 +107,11 @@ Problem.prototype.initializeBasic = function(problemData) {
   if (this.fileName === undefined || this.fileName === null) {
     this.fileName = "";
   }
-  var currentCourse = window.calculator.mainPage.storage.variables.currentCourse;
-  this.flagForReal = (currentCourse.exerciseType.getValue() !== pathnames.urlFields.exerciseJSON);
-  var incomingRandomSeed = currentCourse.randomSeed.getValue();
-  if (incomingRandomSeed === "" || incomingRandomSeed === null || incomingRandomSeed === undefined) {
-    if (!this.flagForReal) {
-      return;
-    }
-  } 
-  this.randomSeed = incomingRandomSeed;  
-  currentCourse.randomSeed.value = "";
+  if (window.calculator.mainPage.flagProblemPageOnly) {
+    this.flagForReal = false;       
+  } else {
+    this.setRandomSeedFromEnvironment();
+  }
 }
 
 Problem.prototype.initializeInfo = function(problemData, inputParentIdURLed) {
@@ -176,25 +185,30 @@ Problem.prototype.initializeInfo = function(problemData, inputParentIdURLed) {
 }
 
 Problem.prototype.computeBadProblemString = function() {
+  var userHasInstructorRights = true;
+  var pageLastKnownGoodProblemName = "";
   var thePage = window.calculator.mainPage;
-  if (!this.decodedProblem.includes(pathnames.urlFields.problem.failedToLoadProblem)) {
-    thePage.lastKnownGoodProblemFileName = this.fileName;
-    this.badProblemString = "";
-    return;
+  if (!thePage.flagProblemPageOnly) {
+    userHasInstructorRights = thePage.user.hasInstructorRights();
+    if (!this.decodedProblem.includes(pathnames.urlFields.problem.failedToLoadProblem)) {
+      thePage.lastKnownGoodProblemFileName = this.fileName;
+      this.badProblemString = "";
+      return;
+    }
+    pageLastKnownGoodProblemName = thePage.lastKnownGoodProblemFileName;
   }
   this.badProblemString = "";
   this.badProblemString += "It appears your problem failed to load.<br>";
 
-  if (this.lastKnownGoodProblemFileName !== "" && thePage.user.hasInstructorRights()) {
+  if (this.lastKnownGoodProblemFileName !== "" && userHasInstructorRights) {
     this.badProblemString += "Perhaps you may like to clone the last good known problem.<br>";
   }
-  this.badProblemString += editPage.getClonePanel(thePage.lastKnownGoodProblemFileName, this.fileName);
+  this.badProblemString += editPage.getClonePanel(pageLastKnownGoodProblemName, this.fileName);
   this.badProblemString += "<hr>";
 }
 
 Problem.prototype.initializeProblemContent = function(problemData) {
   this.initializeBasic(problemData)
-  var thePage = window.calculator.mainPage;
   this.decodedProblem = decodeURIComponent(problemData[pathnames.urlFields.problem.content]);
   this.commentsProblem = problemData["commentsProblem"];
   if (this.commentsProblem === undefined) {
@@ -236,7 +250,7 @@ Problem.prototype.initializeProblemContent = function(problemData) {
     var newLabel = encodeURIComponent(this.problemId + "_" + scriptLabel);
     this.scriptIds.push(newLabel); 
     var scriptContent = decodeURIComponent(problemData.scripts[scriptLabel]);
-    thePage.injectScript(newLabel, scriptContent);
+    window.calculator.mainPage.scriptInjector.injectScript(newLabel, scriptContent);
   }
 }
 
@@ -356,7 +370,9 @@ Problem.prototype.getCalculatorURLRequestFileCourseTopics = function(isScoredQui
 Problem.prototype.getProblemNavigation = function() {
   var result = "";
   result += `<div id = "${this.idNavigationProblemNotEntirePanel}" class = 'problemNavigation'>`;
-  result += this.getProblemNavigationContent();
+  if (!window.calculator.mainPage.flagProblemPageOnly) {
+    result += this.getProblemNavigationContent();
+  }
   result += "</div>";
   return result;
 }
@@ -630,7 +646,8 @@ ProblemNavigation.prototype.writeToHTML = function() {
   }
   //topPart += "<br>"
   panelContent += this.currentProblem.getEditPanel();
-  document.getElementById(ids.domElements.divProblemInfoBar).innerHTML = panelContent;
+  var infoBar = document.getElementById(ids.domElements.divProblemInfoBar);
+  infoBar.innerHTML = panelContent;
   mathjax.typeSetSoft(ids.domElements.divProblemInfoBar);
 }
 

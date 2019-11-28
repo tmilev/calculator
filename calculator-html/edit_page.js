@@ -65,8 +65,10 @@ function getClonePanel(
 /**@returns {string} */
 function getEditPanel(fileName) {
   var thePage = window.calculator.mainPage;
-  if (!thePage.user.hasProblemEditRights() || thePage.studentView()) {
-    return "";
+  if (!thePage.flagProblemPageOnly) {
+    if (!thePage.user.hasProblemEditRights() || thePage.studentView()) {
+      return "";
+    }
   }
   if (fileName === "" || fileName === undefined || fileName === null) {
     return "";

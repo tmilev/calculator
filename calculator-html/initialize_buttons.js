@@ -408,7 +408,7 @@ InputPanelData.prototype.showSolution = function() {
   var thePage = window.calculator.mainPage;
   var currentProblem = thePage.getProblemById(this.problemId);
   if (!isForRealProblem(currentProblem)) {
-    if (thePage.user.flagLoggedIn) {
+    if (thePage.isLoggedIn()) {
       theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.problemSolution}&`;
     } else {
       theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.problemSolutionNoLogin}&`;
@@ -422,7 +422,7 @@ InputPanelData.prototype.submitAnswers = function() {
   var theRequest = "";
   var thePage = window.calculator.mainPage;
   var currentProblem = thePage.getProblemById(this.problemId);
-  if (thePage.user.flagLoggedIn) {
+  if (thePage.isLoggedIn()) {
     if (isForRealProblem(currentProblem)) {
       theRequest = `${pathnames.urlFields.request}=${pathnames.urlFields.submitAnswers}`;
     } else {
@@ -440,7 +440,7 @@ InputPanelData.prototype.submitGiveUp = function() {
   var thePage = window.calculator.mainPage;
   var currentProblem = thePage.getProblemById(this.problemId);
   var theRequest = "";
-  if (thePage.user.flagLoggedIn) {
+  if (thePage.isLoggedIn()) {
     theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.problemGiveUp}&`;
   } else {
     theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.problemGiveUpNoLogin}&`;
@@ -453,7 +453,7 @@ InputPanelData.prototype.submitPreview = function() {
   var thePage = window.calculator.mainPage;
   var theRequest = "";
   var currentProblem = thePage.getProblemById(this.problemId);
-  if (thePage.user.flagLoggedIn) {
+  if (thePage.isLoggedIn()) {
     if (isForRealProblem(currentProblem)) {
       theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.submitAnswersPreview}&`;
     } else {
@@ -511,12 +511,12 @@ InputPanelData.prototype.initialize = function() {
     return;
   }
   //var currentSpanVariable = document.getElementById(this.idPureLatex);
-  globalMQ.config({
+  window.calculator.globalMQ.config({
     autoFunctionize: 'sin cos tan sec csc cot log ln'
   });
   var currentMQspan = document.getElementById(this.idMQSpan);
   var editMQFunctionBound = this.editMQFunction.bind(this);
-  this.mqObject = globalMQ.MathField(currentMQspan, {
+  this.mqObject = window.calculator.globalMQ.MathField(currentMQspan, {
     spaceBehavesLikeTab: true, // configurable
     supSubsRequireOperand: true, // configurable
     autoSubscriptNumerals: true, // configurable
@@ -780,7 +780,7 @@ InputPanelData.prototype.initializePartTwo = function(forceShowAll) {
     addCommand("in");
     addCommand("emptyset");
   }
-  if (buttonArray.indexOf("matrix") > - 1 || buttonArray.indexOf("matrices") > - 1 || (includeAll && MathQuillHasMatrixSupport)) { 
+  if (buttonArray.indexOf("matrix") > - 1 || buttonArray.indexOf("matrices") > - 1 || (includeAll && window.calculator.MathQuillHasMatrixSupport)) { 
     addCommand("\\begin{pmatrix} \\\\ \\end{pmatrix}");
     addCommand("\\begin{pmatrix} \\\\ \\\\ \\end{pmatrix}");
     addCommand("\\begin{pmatrix} & \\\\ & \\end{pmatrix}");

@@ -19,7 +19,56 @@ function ProblemCollection() {
   /** @type{Object<string, boolean>} */
   this.theChapterIds = {};
   this.theTopics = {};
+}
 
+function appendHtmlToArray(
+  /** @type{HTMLElement[]}*/
+  targetArray, 
+  /** @type{HTMLElement|HTMLElement[]}*/
+  contentToAppend,
+) {
+  if (contentToAppend === null) {
+    return;
+  }
+  if (!Array.isArray(targetArray)) {
+    throw ("appendHtmlToArray called with non-array target. ");
+  }
+  if (contentToAppend instanceof HTMLElement) {
+    targetArray.push(contentToAppend);
+    return;
+  }
+  if (Array.isArray(contentToAppend)) {
+    for (var i = 0; i < contentToAppend.length; i ++) {
+      appendHtmlToArray(targetArray, contentToAppend[i]);
+    }
+    return;
+  }
+  throw (`Could not recognize the html content ${contentToAppend}`);
+}
+
+function appendHtml(
+  /** @type{HTMLElement}*/
+  targetToAppendTo, 
+  /** @type{HTMLElement|HTMLElement[]}*/
+  contentToAppend,
+) {
+  if (contentToAppend === null) {
+    return;
+  }
+  if (!(targetToAppendTo instanceof HTMLElement)) {
+    throw ("appendHtml called with non-html element target. ");
+  }
+  if (contentToAppend instanceof HTMLElement) {
+    targetToAppendTo.appendChild(contentToAppend);
+    return;
+  }
+  if (Array.isArray(contentToAppend)) {
+    for (var i = 0; i < contentToAppend.length; i ++) {
+      appendHtml(targetToAppendTo, contentToAppend[i]);
+    }
+    return;
+  }
+  throw (`Could not recognize the html content ${contentToAppend}`);
 }
 
 /** @returns{Problem} */
@@ -854,21 +903,20 @@ function modifyWeight(id) {
   theProblemWeight.modifyWeight();
 }
 
-Problem.prototype.toStringProblemWeightCell = function() {
+Problem.prototype.appendProblemWeightCell = function(inputRow) {
   var thePage = window.calculator.mainPage;
-  var result = "";
   if (this.type !== "problem" || this.fileName === "") {
-    return "<td></td>";
+    inputRow.insertCell(- 1);
+    return;
   }
   if (!thePage.user.hasInstructorRights() || thePage.studentView()) {
-    return `<td>${this.toStringProblemWeight()}</td>`;
+    inputRow.insertCell(- 1).innerHTML = this.toStringProblemWeight(); 
   }
   var pointsString = ""; 
   pointsString += `<button class = 'accordionLikeProblemWeight' onclick = "window.calculator.coursePage.toggleProblemWeights()" `;
   pointsString += `name = "${this.problemId}">${this.toStringProblemWeight()} &#9666;</button>`;
   var problemWeightString = this.toHTMLWeights();
-  result += `<td>${pointsString}<br> ${problemWeightString}</td>`;
-  return result;
+  inputRow.insertCell(- 1).innerHTML =`${pointsString}<br> ${problemWeightString}`;
 }
 
 Problem.prototype.isSolvedForSure = function () {
@@ -998,65 +1046,81 @@ var linkHomework = [
   "homeworkTex",
 ];
 
-Problem.prototype.getHTMLOneProblemTr = function () {
+Problem.prototype.getHTMLOneProblemTr = function (
+  outputRow
+) {
   var thePage = window.calculator.mainPage;
-  var result = "";
-  result += "<tr>";
-  result += `<td>${this.problemNumberString} ${this.title}</td>`;
-  result += "<td>";
+  var nextCell = outputRow.insertCell(- 1);
+  nextCell.innerHTML = `${this.problemNumberString} ${this.title}`;
+  nextCell = outputRow.insertCell(- 1);
   if (this.video !== "" && this.video !== undefined && this.video !== null) {
-    result += `<a class = 'videoLink' href = '${this.video}' target = '_blank'>Video</a>`;
+    var linkElement = document.createElement("a");
+    linkElement.classList = "videoLink";
+    linkElement.href = this.video;
+    linkElement.target = "_blank";
+    linkElement.innerHTML = "Video";
+    nextCell.appendChild(linkElement);
   }
   this.links.slides = null;
   this.links.video = null;
-  this.links.homework = null;
+  this.links.homework = [];
   if (this.querySlides !== "" && this.querySlides !== null && this.querySlides !== undefined) {
     for (var counter in linkSlides) {
       this.links.slides = this.getLinkFromSpec(linkSpecs[linkSlides[counter]], this.querySlides);
     }
   } 
-  result += this.links.slides;
+  appendHtml(nextCell, this.links.slides);
   if (this.queryHomework !== "" && this.queryHomework !== null && this.queryHomework !== undefined) {
     for (var counter in linkHomework) {
-      this.links.homework += this.getLinkFromSpec(linkSpecs[linkHomework[counter]], this.queryHomework);
+      appendHtmlToArray(this.links.homework, this.getLinkFromSpec(linkSpecs[linkHomework[counter]], this.queryHomework));
     }
   }
-  result += this.links.homework;
-  result += "</td>";
-  result += "<td>";
+  appendHtml(nextCell, this.links.homework);
+  nextCell = outputRow.insertCell(- 1);
   if (this.fileName !== "") {
     if (thePage.user.flagLoggedIn) {
-      result += `<a class = "problemLinkQuiz" href = '#${this.getAppAnchorRequestFileCourseTopics(true)}' `; 
-      result += `onclick = "window.calculator.problemPage.selectCurrentProblem('${this.problemId}', 'scoredQuizJSON');">Quiz</a>`;
+      var nextElement = document.createElement("a");
+      nextElement.className = "problemLinkQuiz";
+      nextElement.href = `#${this.getAppAnchorRequestFileCourseTopics(true)}`;
+      nextElement.addEventListener("click", window.calculator.problemPage.selectCurrentProblem.bind(null, this.problemId, "scoredQuizJSON"));
+      nextElement.innerHTML = "Quiz";
+      nextCell.appendChild(nextElement);
     }
-    result += `<a class = "problemLinkPractice" href = '#${this.getAppAnchorRequestFileCourseTopics(false)}' `;
-    result += `onclick = "window.calculator.problemPage.selectCurrentProblem('${this.problemId}', 'exerciseJSON');">Practice</a>`;
+    var nextElement = document.createElement("a");
+    nextElement.className = "problemLinkPractice";
+    nextElement.href = `#${this.getAppAnchorRequestFileCourseTopics(false)}`;
+    nextElement.innerHTML = "Practice";
+    nextElement.addEventListener("click", window.calculator.problemPage.selectCurrentProblem.bind(null, this.problemId, "exerciseJSON"));
+    nextCell.appendChild(nextElement);
   }
-  result += "</td>";
-
-  result += this.toStringProblemWeightCell();
-  result += `<td>${this.toStringDeadlineContainer()}</td>`;
-  result += "</tr>";
-  return result;
+  this.appendProblemWeightCell(outputRow);
+  nextCell = outputRow.insertCell(- 1);
+  nextCell.innerHTML = this.toStringDeadlineContainer();
 }
 
+/**@returns{HTMLElement[]} */
 Problem.prototype.getHTMLProblems = function () {
-  var result = "";
-  result += `<div class = "bodySubsection">`;
-  result += `<table class = "topicList"><colgroup><col><col><col><col><col></colgroup>`;
+  var nextElement = document.createElement("div");
+  nextElement.className = "bodySubsection";
+  var table = document.createElement("table");
+  nextElement.appendChild(table);
+  table.className = "topicList";  
   for (var counterSubSection = 0; counterSubSection < this.childrenIds.length; counterSubSection ++) {
     var currentProblem = allProblems.getProblemById(this.childrenIds[counterSubSection]);
-    result += currentProblem.getHTMLOneProblemTr();
+    var row = table.insertRow(- 1);
+    currentProblem.getHTMLOneProblemTr(row);
   }
-  result += "</table>";
-  result += "</div>";
-  return result;
+  return [nextElement];
 }
 
+/**@returns{HTMLElement[]} */
 Problem.prototype.getHTMLSubSection = function() {
-  var result = "";
-  result += `<div class = "headSubsection">${this.problemNumberString} ${this.title} ${this.toStringDeadlineContainer()}</div>`;
-  result += this.getHTMLProblems();
+  var result = [];
+  var nextElement = document.createElement("div");
+  nextElement.className = "headSubsection";
+  nextElement.innerHTML = `${this.problemNumberString} ${this.title} ${this.toStringDeadlineContainer()}`;
+  result.push(nextElement);
+  appendHtmlToArray(result, this.getHTMLProblems());
   return result;  
 }
 
@@ -1072,49 +1136,64 @@ Problem.prototype.isProblemContainer = function() {
   return false;
 }
 
+/** @returns{HTMLElement[]} */
 Problem.prototype.getHTMLSection = function() {
-  var result = "";
+  var result = [];
   if (this.type === "section") {
-    result += `<div class = "headSection">${this.problemNumberString} ${this.title} ${this.toStringDeadlineContainer()}</div>`;    
+    var sectionElement = document.createElement("div");
+    sectionElement.className = "headSection";
+    sectionElement.innerHTML = `${this.problemNumberString} ${this.title} ${this.toStringDeadlineContainer()}`; 
+    result.push(sectionElement);
   }
-  result += `<div class = "bodySection">`;
+  var nextElement = document.createElement("div");
+  nextElement.className = "bodySection";
+  result.push(nextElement);
   if (this.type === "subSection") {
-    result += this.getHTMLSubSection();
+    appendHtml(nextElement, this.getHTMLSubSection());
   } else if (this.isProblemContainer()) {
-    result += this.getHTMLProblems();
+    appendHtml(nextElement, this.getHTMLProblems());
   } else if (this.type === "section") {
     for (var counterSection = 0; counterSection < this.childrenIds.length; counterSection ++) {
       var currentSubSection = allProblems.getProblemById(this.childrenIds[counterSection]);
-      result += currentSubSection.getHTMLSubSection();
+      appendHtml(nextElement, currentSubSection.getHTMLSubSection());
     }
   } else {
-    result += this.getHTMLSubSection();
+    appendHtml(nextElement, this.getHTMLSubSection());
   }
-  result += "</div>";
   return result;  
 }
 
+/**@returns{HTMLElement[]} */
 Problem.prototype.toHTMLChapter =  function() {
-  var result = "";
-  result += `<div class = "headChapter">${this.problemNumberString} ${this.title} ${this.toStringDeadlineContainer()}</div>`;
-  result += `<div class = "bodyChapter">`;
+  var result = [];
+  var headChapterElement = document.createElement("div");
+  headChapterElement.className = "headChapter";
+  headChapterElement.innerHTML = `${this.problemNumberString} ${this.title} ${this.toStringDeadlineContainer()}`
+  result.push(headChapterElement);
+  var bodyChapterElement = document.createElement("div");
+  bodyChapterElement.className = "bodyChapter";
+
   if (this.isProblemContainer()) {
-    result += this.getHTMLProblems();
+    var incomingProblems = this.getHTMLProblems();
+    for (var i = 0; i < incomingProblems.length; i ++) {
+      bodyChapterElement.appendChild(incomingProblems[i]);
+    }
   } else {
     for (var counterSection = 0; counterSection < this.childrenIds.length; counterSection ++) {
       var currentSection = allProblems.getProblemById(this.childrenIds[counterSection]);
-      result += currentSection.getHTMLSection();
+      appendHtml(bodyChapterElement, currentSection.getHTMLSection());
     }
   }
-  result += "</div>";
+  result.push(bodyChapterElement); 
   return result;
 }
 
+/**@returns{HTMLElement[]} */
 function getHTMLfromTopics() {
-  var result = "";
+  var result = [];
   for (var label in allProblems.theChapterIds) {
     var currentProblem = allProblems.getProblemById(label); 
-    result += currentProblem.toHTMLChapter();
+    result.push(currentProblem.toHTMLChapter());
   }
   return result;
 }
@@ -1140,20 +1219,27 @@ function initializeProblemWeightsAndDeadlines() {
 }
 
 function writeEditCoursePagePanel() {
-  var thePanel = "";
   var thePage = window.calculator.mainPage;
-  thePanel += editPage.getEditPanel(thePage.storage.variables.currentCourse.courseHome.getValue());
-  thePanel += editPage.getEditPanel(thePage.storage.variables.currentCourse.topicList.getValue());
+  var panel = document.getElementById(ids.domElements.courseEditPanel);
+  panel.innerHTML = "";
+  var courseHome = thePage.storage.variables.currentCourse.courseHome.getValue()
+  panel.appendChild(editPage.getEditPanel(courseHome));
+  var topicList = thePage.storage.variables.currentCourse.topicList.getValue();
+  panel.appendChild(editPage.getEditPanel(topicList));
   if (
     allProblems.theTopics.topicBundleFile !== undefined && 
     allProblems.theTopics.topicBundleFile !== null &&
     allProblems.theTopics.topicBundleFile !== ""
   ) {
-    for (var counterTopicBundle = 0; counterTopicBundle < allProblems.theTopics.topicBundleFile.length; counterTopicBundle ++) {
-      thePanel += editPage.getEditPanel(allProblems.theTopics.topicBundleFile[counterTopicBundle]);
+    for (
+      var counterTopicBundle = 0; 
+      counterTopicBundle < allProblems.theTopics.topicBundleFile.length; 
+      counterTopicBundle ++
+    ) {
+      var nextToEdit = allProblems.theTopics.topicBundleFile[counterTopicBundle];
+      panel.appendChild(editPage.getEditPanel(nextToEdit));
     }
   }
-  document.getElementById(ids.domElements.courseEditPanel).innerHTML = thePanel;
 }
 
 function afterLoadTopics(incomingTopics, result) {
@@ -1163,16 +1249,15 @@ function afterLoadTopics(incomingTopics, result) {
     return;
   }
   allProblems.previousProblemId = null;
-  var stringHTMLContent = "";
   allProblems.resetTopicProblems();
   allProblems.theTopics = JSON.parse(incomingTopics);
   for (var counterChapter = 0; counterChapter < allProblems.theTopics["children"].length; counterChapter ++) {
     var currentChapter = allProblems.theTopics["children"][counterChapter];
     allProblems.CreateOrUpdateProblem(currentChapter);
   }
-  stringHTMLContent += getHTMLfromTopics();
   writeEditCoursePagePanel();
-  topicsElements[0].innerHTML = stringHTMLContent;
+  var htmlContentElements = getHTMLfromTopics();
+  appendHtml(topicsElements[0], htmlContentElements);
   initializeProblemWeightsAndDeadlines();
   initializeDatePickers();
   allProblems.previousProblemId = null;

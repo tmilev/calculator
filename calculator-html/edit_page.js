@@ -28,7 +28,7 @@ function ctrlSPressAceEditorHandler(event) {
   storeEditedPage();
 }
 
-/**@returns {string} */
+/**@returns {HTMLElement[]} */
 function getClonePanel(
   /**@type{string} */
   fileNameSource, 
@@ -36,29 +36,40 @@ function getClonePanel(
   fileNameTarget
 ) {
   if (fileNameSource === "" || fileNameSource === undefined || fileNameSource === null) {
-    return "";
+    return [];
   }
-  var result = "";
   var idCloneInput = encodeURIComponent(`cloneButton${fileNameSource}`);
   var idSpanClonePageReport = encodeURIComponent(`cloneButtonReport${fileNameSource}`);
-  result += "<table><tr><td>";
-  result += `<button class = 'buttonClone' style = 'width:50px' onclick = `;
-  result += `"window.calculator.editPage.handleClone('${fileNameSource}', '${idCloneInput}', '${idSpanClonePageReport}')">Clone</button>`;
-  result += "</td>";
-  result += "<td>";
+  var result = [];
+  var table = document.createElement("table");
+  var row = table.insertRow(- 1);
+  var cellClone = row.insertCell(- 1);
+  
+  // result += "<table><tr><td>";
+  var buttonClone = document.createElement("button");
+  buttonClone.className = "buttonClone";
+  buttonClone.style.width = "50px";
+  buttonClone.addEventListener("click", window.calculator.editPage.handleClone.bind(null,fileNameSource, idCloneInput, idSpanClonePageReport));
+  buttonClone.innerHTML = "Clone";
+  cellClone.appendChild(buttonClone)
+  var cellFileInfo = row.insertCell(- 1);
+  var cellFileInfoTable = document.createElement("table");
+  var cellFileInfoTableRow = cellFileInfoTable.insertRow(- 1);
+  var nextCell = cellFileInfoTableRow.insertCell(- 1);
+  nextCell.innerHTML = "from:";
+  nextCell = cellFileInfoTableRow.insertCell(- 1);
+  nextCell.innerHTML = `<b style = 'color: green'>${fileNameSource}</b></td>`;
   var sizeFile = fileNameTarget.length;
-  result += "<table><tr>";
-  result += "<td>from:</td>";
-  result += `<td><b style = 'color: green'>${fileNameSource}</b></td>`;
-  result += "</tr>";
-  result += "<tr>";
-  result += "<td>to:</td>";
-  result += `<td><input type = "text" value = '${fileNameTarget}' size = '${sizeFile}' id = '${idCloneInput}'></input></td>`;
-  result += "</tr></table>";
-
-  result += "</td>";
-  result += "</tr></table>";
-  result += `<div id = "${idSpanClonePageReport}"></div>`;
+  cellFileInfoTableRow = cellFileInfoTable.insertRow(- 1);
+  nextCell = cellFileInfoTableRow.insertCell(- 1);
+  nextCell.innerHTML = "to:";
+  nextCell = cellFileInfoTableRow.insertCell( - 1);
+  nextCell.innerHTML = `<input type = "text" value = '${fileNameTarget}' size = '${sizeFile}' id = '${idCloneInput}'></input>`;
+  cellFileInfo.append(cellFileInfoTable);
+  result.push(table);
+  var cloneReport = document.createElement("div");
+  cloneReport.id = idSpanClonePageReport;
+  result.push(cloneReport);
   return result;
 }
 
@@ -85,12 +96,15 @@ function getEditPanel(fileName) {
   var clonePanel = document.createElement("BUTTON");
   clonePanel.className = "accordionLike";
   clonePanel.innerHTML = "Clone panel &#9666;";
-  clonePanel.addEventListener('click', window.calculator.editPage.toggleClonePanel.bind(clonePanel));
+  clonePanel.addEventListener('click', window.calculator.editPage.toggleClonePanel.bind(null, clonePanel));
   result.appendChild(clonePanel);
-  //result += `<span class = "panelDeadlines">`;
-  //result += getClonePanel(fileName, fileName);
-  //result += "</span>";
-  
+  var panelElement = document.createElement("span");
+  panelElement.className = "panelDeadlines";
+  var panelContent = getClonePanel(fileName, fileName);
+  for (var i = 0; i < panelContent.length; i ++) {
+    panelElement.appendChild(panelContent[i]);
+  }
+  result.appendChild(panelElement);
   return result;
 }
 

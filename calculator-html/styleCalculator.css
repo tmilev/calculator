@@ -7,6 +7,7 @@
   --box-shadow-buttonAnswer: none;
   --box-shadow-buttonDefault: none;
   --box-shadow-buttonMQ: none;
+  --box-shadow-default: none;
 }
 
 /*styleCalculator.css*/
@@ -970,6 +971,22 @@ a.linkLogoutActive {
 a.linkInfo {
   margin-left: 10px;
   margin-right: 10px;
+}
+
+button.buttonNavigationStandard {
+  width: 25px; 
+  height: 21.2px; 
+  padding: 0;
+  box-shadow: var(--box-shadow-default);
+  border: none;
+  border-radius: 3px;
+  transition: all 2s;
+  background-color: #e8e8e8;
+  cursor: pointer;
+}
+
+button.buttonNavigationStandard:hover {
+  background-color: silver;
 }
 
 a.linkStandardButtonLike {

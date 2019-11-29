@@ -69,7 +69,6 @@ User.prototype.makeFromUserInfo = function(inputData) {
   this.deadlineSchema = inputData.deadlineSchema;
   document.getElementById(ids.domElements.spanUserIdInAccountsPage).innerHTML = thePage.storage.variables.user.name.value;
   document.getElementById(ids.domElements.inputUsername).value = thePage.storage.variables.user.name.value;
-
 }
 
 function StorageVariable(

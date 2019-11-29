@@ -1,7 +1,7 @@
 "use strict";
 const submitRequests = require('./submit_requests');
 const pathnames = require('./pathnames');
-const calculatorPage = require('./calculator_page');
+// const calculatorPage = require('./calculator_page');
 const ids = require('./ids_dom_elements');
 
 var staticWordCompleter = {
@@ -216,6 +216,52 @@ function selectEditPageCallback(input, outputComponent) {
   }
 }
 
+/**@returns {HTMLElement} */
+function getNextEditButton(problemId) {
+  return getNavigationEditButton(problemId, "&#8594;");
+}
+
+/** @returns {HTMLElement} */
+function getPreviousEditButton(problemId) {
+  return getNavigationEditButton(problemId, "&#8592;");
+}
+
+/** @returns {HTMLElement} */
+function getNavigationEditButton(problemId, contentHTML) {
+  if (
+    problemId === null || 
+    problemId === "" || 
+    problemId === undefined
+  ) {
+    return document.createTextNode("");
+  }
+  var navigationButton = document.createElement("button");
+  navigationButton.addEventListener(
+    "click", selectEditPage.bind(null, problemId)
+  );
+  navigationButton.className = "buttonNavigationStandard";
+  navigationButton.innerHTML = contentHTML; 
+  return navigationButton;
+}
+
+function writeNextPreviousEditButton(currentlyEditedPage) {
+  var thePage = window.calculator.mainPage;
+  if (!(currentlyEditedPage in window.calculator.problemPage.allProblems.allProblems)) {
+    return;
+  }
+  var problem = thePage.getProblemById(currentlyEditedPage);
+  var previousButtonSpan = document.getElementById(ids.domElements.spanButtonPreviousEdit);
+  var nextButtonSpan = document.getElementById(ids.domElements.spanButtonNextEdit);
+  if (previousButtonSpan !== null) {
+    previousButtonSpan.innerHTML = "";
+    previousButtonSpan.appendChild(getPreviousEditButton(problem.previousProblemId));
+  }
+  if (nextButtonSpan !== null) {
+    nextButtonSpan.innerHTML = "";
+    nextButtonSpan.appendChild(getNextEditButton(problem.nextProblemId));
+  }
+} 
+
 function selectEditPage(currentlyEditedPage) {
   var thePage = window.calculator.mainPage;
   if (currentlyEditedPage === undefined || currentlyEditedPage === null) { 
@@ -225,10 +271,13 @@ function selectEditPage(currentlyEditedPage) {
     currentlyEditedPage = "/coursesavailable/default.txt";
   }
   thePage.storage.variables.editor.currentlyEditedPage.setAndStore(currentlyEditedPage);
-  if (thePage.storage.variables.currentPage.getValue() !== thePage.pages.editPage.name) {
-    thePage.selectPage(thePage.pages.editPage.name);
-    return;
+  if (!thePage.flagProblemPageOnly) {
+    if (thePage.storage.variables.currentPage.getValue() !== thePage.pages.editPage.name) {
+      thePage.selectPage(thePage.pages.editPage.name);
+      return;
+    }
   }
+  writeNextPreviousEditButton(currentlyEditedPage);
   var theTopicTextArea = document.getElementById(ids.domElements.textAreaTopicListEntry);
   theTopicTextArea.value = `Title: ${currentlyEditedPage}\nProblem: ${currentlyEditedPage}`;
   theTopicTextArea.cols = currentlyEditedPage.length + 15;

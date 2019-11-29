@@ -73,6 +73,8 @@ var domElements = {
   textAreaTopicListEntry: "textareaTopicListEntry",
   divEditorAce: "divEditorAce",
   buttonSaveEdit: "buttonSaveEdit",
+  spanButtonPreviousEdit: "spanButtonPreviousEdit",
+  spanButtonNextEdit: "spanButtonNextEdit",
 };
 
 module.exports = {

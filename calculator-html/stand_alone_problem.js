@@ -4,6 +4,7 @@ const problemPage = require("./problem_page");
 const pathnames = require("./pathnames");
 const ids = require("./ids_dom_elements");
 const editPage = require("./edit_page");
+const coursePage = require("./course_page");
 
 function StandAloneProblem() {
   /**@type{problemPage.Problem} */
@@ -28,6 +29,10 @@ function StandAloneProblem() {
   this.saveEdit = null;
   /**@type{HTMLElement} */
   this.spanErrorsEditPage = null;
+  /**@type{HTMLElement} */
+  this.spanButtonNextEdit = null;
+  /**@type{HTMLElement} */
+  this.spanButtonPreviousEdit = null;
   /**@type{string} */
   this.courseHome = "";
   /**@type{string} */
@@ -87,7 +92,11 @@ StandAloneProblem.prototype.initCommon = function(input) {
     return;
   }
   window.calculator.mainPage.flagProblemPageOnly = true;
-  if (input.hardCodedServerAddress !== "" && input.hardCodedServerAddress !== null && input.hardCodedServerAddress !== undefined) {
+  if (
+    input.hardCodedServerAddress !== "" && 
+    input.hardCodedServerAddress !== null && 
+    input.hardCodedServerAddress !== undefined
+  ) {
     window.calculator.hardCodedServerAddress = input.hardCodedServerAddress;
   }
   this.containerId = input.id;
@@ -96,18 +105,38 @@ StandAloneProblem.prototype.initCommon = function(input) {
     console.log(`Failed to find the supplied id. ${this.containerId}`);
     return;
   }
+  // tag defaults
   this.courseHome      = "/coursetemplates/Curriculum-300-Calculus-I.html";
-  this.topicList       = "/topiclists/Curriculum-300-Calculus-I.txt";
-  this.problemFileName = "/problems/Find-function-inverse-fractional-linear-1.html";
+  this.topicList       = "/topiclists/classrooms_demo.txt";
+  this.problemFileName = "problems/Find-function-inverse-fractional-linear-1.html";
+  // overrides from input
+  var tags = ["courseHome", "topicList", "problemFileName"];
+  for (var i = 0; i < tags.length; i ++) {
+    var label = tags[i];
+    if (
+      input[label] !== undefined && 
+      input[label] !== "" && 
+      input[label] !== null
+    ) {
+      this[label] = input[label];
+    }
+  }
+  this.problemFileName = encodeURIComponent(this.problemFileName);
 }
 
 StandAloneProblem.prototype.initAndEdit = function (input) {
   this.initCommon(input);
+  this.ensureSpansExist({ 
+    spanButtonPreviousEdit: ids.domElements.spanButtonPreviousEdit,
+  });
   this.ensureButtonsExist({
     saveEdit: ids.domElements.buttonSaveEdit,
   });
   this.ensureTextAreasExist({
     textAreaEditPage: ids.domElements.textAreaTopicListEntry,
+  });
+  this.ensureSpansExist({ 
+    spanButtonNextEdit: ids.domElements.spanButtonNextEdit,
   });
   this.ensureSpansExist({
     spanErrorsEditPage: ids.domElements.spanErrorsEditPage,
@@ -118,7 +147,11 @@ StandAloneProblem.prototype.initAndEdit = function (input) {
   this.ensureSpansExist({
     progressReportGeneral: ids.domElements.spanProgressReportGeneral,
   });
-  editPage.selectEditPage(this.problemFileName);
+  var thePage = window.calculator.mainPage;
+
+  thePage.storage.variables.editor.currentlyEditedPage.setAndStore(this.problemFileName);
+  thePage.storage.variables.currentCourse.topicList.setAndStore(this.topicList);
+  coursePage.loadTopicList(problemPage.processLoadedTopicsWriteToEditPage);
 }
 
 StandAloneProblem.prototype.initAndRun = function (input) {

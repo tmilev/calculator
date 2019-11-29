@@ -40,6 +40,7 @@ var urlFields = {
     debugInformation: "debugInformation",
     fileName: "fileName",
     fileNameTarget: "fileNameTarget",
+    topicList: "topicList",
   },
   teachersAndSections: "teachersAndSections",
   mainInput: "mainInput",

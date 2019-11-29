@@ -438,29 +438,87 @@ Problem.prototype.getProblemNavigation = function() {
   return result;
 }
 
+function ProblemNavigationHints() {
+  this.linkType = "problemLinkPractice";
+  this.defaultRequest = pathnames.urlFields.exerciseJSON;
+  this.isScoredQuiz = false;
+}
+
+/**@returns {HTMLElement} */
+Problem.prototype.getNextProblemButton = function(
+  /** @type{ProblemNavigationHints} */
+  hints
+) {
+  if (
+    this.nextProblemId === null || 
+    this.nextProblemId !== "" || 
+    this.nextProblemId !== undefined
+  ) {
+    return document.createTextNode("");
+  }
+  var nextProblem = allProblems.getProblemById(this.nextProblemId); 
+  var nextURL = nextProblem.getAppAnchorRequestFileCourseTopics(hints.isScoredQuiz, false);
+  var nextProblemTag = document.createElement("a");
+  nextProblemTag.className = hints.linkType;
+  nextProblemTag.href = `#${nextURL}`;
+  nextProblemTag.addEventListener(
+    "click", 
+    window.calculator.problemPage.selectCurrentProblem.bind(
+      null, 
+      this.nextProblemId, 
+      hints.defaultRequest,
+    )
+  );
+  nextProblemTag.innerHTML = "&#8594;";
+  return nextProblemTag;
+}
+
+/** @returns {HTMLElement} */
+Problem.prototype.getPreviousProblemButton = function(
+  /** @type{ProblemNavigationHints} */
+  hints
+) {
+  if (
+    this.previousProblemId === null || 
+    this.previousProblemId === "" || 
+    this.previousProblemId === undefined
+  ) {
+    return document.createTextNode("");
+  }
+  var previousProblem = allProblems.getProblemById(this.previousProblemId); 
+  var previousURL = previousProblem.getAppAnchorRequestFileCourseTopics(hints.isScoredQuiz, false);
+  var previousLink = document.createElement("a");
+  previousLink.className = hints.linkType;
+  previousLink.href = `#${previousURL}`;
+  previousLink.addEventListener(
+    "click", window.calculator.problemPage.selectCurrentProblem.bind(
+      null, 
+      this.previousProblemId, 
+      hints.defaultRequest,
+    )
+  );
+  previousLink.innerHTML = "&#8592;";
+  return previousLink;
+}
+
+/** @returns{ProblemNavigationHints} */
+Problem.prototype.getProblemNavigationHints = function() {
+  var thePage = window.calculator.mainPage;
+  var result = new ProblemNavigationHints();
+  if (this.flagForReal && thePage.user.flagLoggedIn) {
+    result.defaultRequest = pathnames.urlFields.scoredQuizJSON;
+    result.linkType = "problemLinkQuiz";
+    result.isScoredQuiz = true;
+  }
+  return result;
+}
+
 /**@returns {HTMLElement[]} */
 Problem.prototype.getProblemNavigationContent = function() {
   var thePage = window.calculator.mainPage;
   var result = [];
-  var linkType = "problemLinkPractice";
-  var defaultRequest = pathnames.urlFields.exerciseJSON;
-  var isScoredQuiz = false;
-  if (this.flagForReal && thePage.user.flagLoggedIn) {
-    defaultRequest = pathnames.urlFields.scoredQuizJSON;
-    linkType = "problemLinkQuiz";
-    isScoredQuiz = true;
-  }
-  if (this.previousProblemId !== null && this.previousProblemId !== "" && this.previousProblemId !== undefined) {
-    var previousProblem = allProblems.getProblemById(this.previousProblemId); 
-    var previousURL = previousProblem.getAppAnchorRequestFileCourseTopics(isScoredQuiz, false);
-    var previousLink = document.createElement("a");
-    previousLink.className = linkType;
-    previousLink.href = `#${previousURL}`;
-    previousLink.addEventListener("click", window.calculator.problemPage.selectCurrentProblem.bind(null, this.previousProblemId, defaultRequest));
-    previousLink.innerHTML = "&#8592;";
-    result.push(previousLink);
-  }
-
+  var hints = this.getProblemNavigationHints();
+  result.push(this.getPreviousProblemButton(hints));
   if (this.flagForReal && thePage.user.flagLoggedIn) {
     var practiceURL = this.getAppAnchorRequestFileCourseTopics(false, false);
     var practiceTag = document.createElement("a");
@@ -493,16 +551,7 @@ Problem.prototype.getProblemNavigationContent = function() {
       result.push(quizTag);
     }
   }
-  if (this.nextProblemId !== null && this.nextProblemId !== "" && this.nextProblemId !== undefined) {
-    var nextProblem = allProblems.getProblemById(this.nextProblemId); 
-    var nextURL = nextProblem.getAppAnchorRequestFileCourseTopics(isScoredQuiz, false);
-    var nextProblemTag = document.createElement("a");
-    nextProblemTag.className = linkType;
-    nextProblemTag.href = `#${nextURL}`;
-    nextProblemTag.addEventListener("click", window.calculator.problemPage.selectCurrentProblem.bind(null, this.nextProblemId, defaultRequest));
-    nextProblemTag.innerHTML = "&#8594;";
-    result.push(nextProblemTag);
-  }
+  result.push(this.getNextProblemButton(hints));
   if (this.flagForReal !== true && this.flagForReal !== "true") {
     var scoresTag = document.createElement("b");
     scoresTag.style.color = "green";
@@ -1242,12 +1291,7 @@ function writeEditCoursePagePanel() {
   }
 }
 
-function afterLoadTopics(incomingTopics, result) {
-  var thePage = window.calculator.mainPage;
-  var topicsElements = document.getElementsByTagName("topicList");
-  if (topicsElements.length === 0) {
-    return;
-  }
+function processLoadedTopics(incomingTopics, result) {
   allProblems.previousProblemId = null;
   allProblems.resetTopicProblems();
   allProblems.theTopics = JSON.parse(incomingTopics);
@@ -1255,19 +1299,35 @@ function afterLoadTopics(incomingTopics, result) {
     var currentChapter = allProblems.theTopics["children"][counterChapter];
     allProblems.CreateOrUpdateProblem(currentChapter);
   }
+}
+
+function processLoadedTopicsWriteToEditPage(incomingTopics, result) {
+  processLoadedTopics(incomingTopics, result);  
+  editPage.selectEditPage(null);
+}
+
+function processLoadedTopicsWriteToCoursePage(incomingTopics, result) {
+  processLoadedTopics(incomingTopics, result);  
+  writeTopicsToCoursePage();
+}
+
+function writeTopicsToCoursePage() {
+  var thePage = window.calculator.mainPage;
+  var topicsElements = document.getElementsByTagName("topicList");
+  if (topicsElements.length === 0) {
+    return;
+  }
   writeEditCoursePagePanel();
   var htmlContentElements = getHTMLfromTopics();
   appendHtml(topicsElements[0], htmlContentElements);
   initializeProblemWeightsAndDeadlines();
   initializeDatePickers();
-  allProblems.previousProblemId = null;
   //mathjax.typeSetHard(topicsElements[0]);
   if (thePage.pages.problemPage.flagLoaded) {
     problemNavigation.writeToHTML();
   }
   mathjax.typeSetSoft(topicsElements[0]);
-  //MathJax.Hub.queue.pending = 0;
-  //MathJax.Hub.Typeset(ids.domElements.divCurrentCourseBody);
+
 }
 
 function updateProblemPageCallback(input, outputComponent) {
@@ -1358,7 +1418,8 @@ module.exports = {
   allProblems,
   problemNavigation,
   updateProblemPage,
-  afterLoadTopics,
+  processLoadedTopicsWriteToCoursePage,
+  processLoadedTopicsWriteToEditPage,
   writeEditCoursePagePanel,
   selectCurrentProblem,
   modifyWeight,

@@ -74,7 +74,6 @@ function toggleProblemWeights() {
 }
 
 function afterLoadCoursePage(incomingPage, result) {
-  var thePage = window.calculator.mainPage;
   var courseBody = document.getElementById(ids.domElements.divCurrentCourseBody); 
   var coursePage = document.getElementById(ids.domElements.divCurrentCourse);
   courseBody.innerHTML = incomingPage;
@@ -87,17 +86,23 @@ function afterLoadCoursePage(incomingPage, result) {
   //mathjax.typeSetHard(coursePage);
   mathjax.typeSetSoft(coursePage);
   var theTopics = document.getElementsByTagName("topicList");
-  var topicList = "topicListJSONNoLogin";
-  if (thePage.user.flagLoggedIn) {
-    topicList = "topicListJSON";
-  }
   problemPage.writeEditCoursePagePanel();
   if (theTopics.length  === 0) {
     return;
   }
+  loadTopicList(problemPage.processLoadedTopicsWriteToCoursePage);
+}
+
+function loadTopicList(callback) { 
+  var thePage = window.calculator.mainPage;
+  var topicListRequest = "topicListJSONNoLogin";
+  if (thePage.isLoggedIn()) {
+    topicListRequest = "topicListJSON";
+  }
+  var topicName = thePage.storage.variables.currentCourse.topicList.getValue();
   submitRequests.submitGET({
-    url: `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${topicList}`,
-    callback: problemPage.afterLoadTopics,
+    url: `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${topicListRequest}&${pathnames.urlFields.problem.topicList}=${topicName}`,
+    callback: callback,
     progress: ids.domElements.spanProgressReportGeneral
   });
 }
@@ -141,6 +146,7 @@ function selectCurrentCoursePage() {
 }
 
 module.exports =  {
+  loadTopicList,
   lastLoadedCourse,
   modifyDeadlines,
   selectCurrentCoursePage,

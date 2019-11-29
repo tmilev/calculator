@@ -132,6 +132,22 @@ sectionSelection {
   right:0;
 }
 
+button.buttonNavigationStandard {
+  width: 25px; 
+  height: 21.2px; 
+  padding: 0;
+  box-shadow: var(--box-shadow-default);
+  border: none;
+  border-radius: 3px;
+  transition: all 2s;
+  background-color: #e8e8e8;
+  cursor: pointer;
+}
+
+button.buttonNavigationStandard:hover {
+  background-color: silver;
+}
+
 button.buttonShowExpandMQPanel {
   display: inline;
   box-shadow: none;

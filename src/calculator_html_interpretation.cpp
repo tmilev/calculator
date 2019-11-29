@@ -777,18 +777,14 @@ std::string HtmlInterpretation::GetTopicTableJSON() {
     out << "Failed to load and parse topic list.";
     return out.str();
   }
-  if (!thePage.LoadMe(true, theGlobalVariables.GetWebInput("randomSeed"), &comments)) {
-    out << "\"Failed to load file: "
+  if (thePage.LoadMe(true, theGlobalVariables.GetWebInput("randomSeed"), &comments)) {
+    thePage.ComputeTopicListAndPointsEarned(comments);
+  } else {
+    comments << "\"Failed to load file: "
     << theGlobalVariables.GetWebInput("courseHome") << ""
     << "<br>Comments:<br> " << comments.str();
-    out << "\"";
-    return out.str();
+    comments << "\"";
   }
-  //stOutput << "DEBUG: after thePAge.loadme: \n<br>\n"
-  //<< thePage.theProblemData.adminData.ToString()
-  //<< "\n<br>\n";
-
-  thePage.ComputeTopicListAndPointsEarned(comments);
   out << thePage.ToStringTopicListJSON();
   return out.str();
 }

@@ -108,9 +108,15 @@ StandAloneProblem.prototype.initCommon = function(input) {
   // tag defaults
   this.courseHome      = "/coursetemplates/Curriculum-300-Calculus-I.html";
   this.topicList       = "/topiclists/classrooms_demo.txt";
+  this.topicBundles    = "/topiclists/topicBundles.txt";
   this.problemFileName = "problems/Find-function-inverse-fractional-linear-1.html";
   // overrides from input
-  var tags = ["courseHome", "topicList", "problemFileName"];
+  var tags = [
+    "courseHome", 
+    "topicList", 
+    "topicBundles",
+    "problemFileName", 
+  ];
   for (var i = 0; i < tags.length; i ++) {
     var label = tags[i];
     if (

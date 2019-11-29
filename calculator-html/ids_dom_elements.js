@@ -75,6 +75,7 @@ var domElements = {
   buttonSaveEdit: "buttonSaveEdit",
   spanButtonPreviousEdit: "spanButtonPreviousEdit",
   spanButtonNextEdit: "spanButtonNextEdit",
+  spanSubmitEditPageReport: "spanSubmitEditPageReport",
 };
 
 module.exports = {

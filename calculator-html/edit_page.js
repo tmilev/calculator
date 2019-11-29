@@ -163,7 +163,7 @@ function storeEditedPage() {
   submitRequests.submitPOST({
     url: theURL,
     parameters: queryParameters,
-    result: "spanSubmitEditPageReport"
+    result: ids.domElements.spanSubmitEditPageReport,
   });
 }
 

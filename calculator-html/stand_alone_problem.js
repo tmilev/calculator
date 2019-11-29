@@ -138,6 +138,9 @@ StandAloneProblem.prototype.initAndEdit = function (input) {
   this.ensureSpansExist({ 
     spanButtonNextEdit: ids.domElements.spanButtonNextEdit,
   });
+  this.ensureSpansExist({ 
+    spanButtonNextEdit: ids.domElements.spanSubmitEditPageReport,
+  });
   this.ensureSpansExist({
     spanErrorsEditPage: ids.domElements.spanErrorsEditPage,
   });

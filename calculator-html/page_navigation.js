@@ -120,6 +120,9 @@ StorageVariable.prototype.getValue = function() {
 }
 
 StorageVariable.prototype.loadMe = function(hashParsed) {
+  if (this.flagProblemPageOnly) {
+    return;
+  }
   var candidate = "";
   if (Storage !== undefined || localStorage !== undefined && this.nameLocalStorage !== "") {
     var incoming = localStorage.getItem(this.nameLocalStorage);
@@ -144,12 +147,14 @@ StorageVariable.prototype.loadMe = function(hashParsed) {
   this.setAndStore(candidate, false, true);
 }
 
-StorageVariable.prototype.storeMe = function(
+StorageVariable.prototype.storeMePersistent = function(
   /**@type {boolean} */ 
   updateURL, 
-  /**@type {boolean} */ 
-  updateAssociatedInput,
 ) {
+  if (mainPage().flagProblemPageOnly) {
+    // page is embedded, no persistent storage.
+    return;
+  }
   if (Storage !== undefined || localStorage !== undefined) {
     if (this.nameLocalStorage !== "" && this.nameLocalStorage !== null && this.nameLocalStorage !== undefined) {
       localStorage[this.nameLocalStorage] = this.value;
@@ -161,6 +166,15 @@ StorageVariable.prototype.storeMe = function(
   if (updateURL !== false) {
     mainPage().storage.setURL();
   }
+}
+
+StorageVariable.prototype.storeMe = function(
+  /**@type {boolean} */ 
+  updateURL, 
+  /**@type {boolean} */ 
+  updateAssociatedInput,
+) {
+  this.storeMePersistent(updateURL);
   if (updateAssociatedInput === true) {
     if (this.associatedDOMId !== null && this.associatedDOMId !== undefined && this.associatedDOMId !== "") {
       document.getElementById(this.associatedDOMId).value = this.value;
@@ -484,8 +498,8 @@ function Page() {
     },
     editPage : {
       name: "editPage",
-      id: "divEditPage",
-      menuButtonId: "buttonEditPage",
+      id: ids.domElements.pages.editPage.div,
+      menuButtonId: ids.domElements.pages.editPage.button,
       container: null,
       selectFunction: editPage.selectEditPage,
       flagLoaded: false,
@@ -808,15 +822,17 @@ Page.prototype.selectPage = function(inputPage) {
     inputPage = "calculator";
   }
   this.storage.variables.currentPage.setAndStore(inputPage);
-  for (var page in this.pages) {
-    this.pages[page].container.style.display = "none";
-    if (this.pages[page].menuButtonId !== null && this.pages[page].menuButtonId !== undefined) {
-      document.getElementById(this.pages[page].menuButtonId).classList.remove("buttonSelectPageSelected");
+  if (!this.flagProblemPageOnly) {
+    for (var page in this.pages) {
+      this.pages[page].container.style.display = "none";
+      if (this.pages[page].menuButtonId !== null && this.pages[page].menuButtonId !== undefined) {
+        document.getElementById(this.pages[page].menuButtonId).classList.remove("buttonSelectPageSelected");
+      }
     }
-  }
-  this.pages[inputPage].container.style.display = "";
-  if (this.pages[inputPage].menuButtonId !== null && this.pages[inputPage].menuButtonId !== undefined) {
-    document.getElementById(this.pages[inputPage].menuButtonId).classList.add("buttonSelectPageSelected");
+    this.pages[inputPage].container.style.display = "";
+    if (this.pages[inputPage].menuButtonId !== null && this.pages[inputPage].menuButtonId !== undefined) {
+      document.getElementById(this.pages[inputPage].menuButtonId).classList.add("buttonSelectPageSelected");
+    }
   }
   if (this.pages[inputPage].selectFunction !== null && this.pages[inputPage].selectFunction !== undefined) {
     this.pages[inputPage].selectFunction();

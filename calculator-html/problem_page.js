@@ -243,13 +243,13 @@ Problem.prototype.computeBadProblemString = function() {
   var thePage = window.calculator.mainPage;
   if (!thePage.flagProblemPageOnly) {
     userHasInstructorRights = thePage.user.hasInstructorRights();
-    if (!this.decodedProblem.includes(pathnames.urlFields.problem.failedToLoadProblem)) {
-      thePage.lastKnownGoodProblemFileName = this.fileName;
-      this.badProblemString = "";
-      return;
-    }
-    pageLastKnownGoodProblemName = thePage.lastKnownGoodProblemFileName;
   }
+  if (!this.decodedProblem.includes(pathnames.urlFields.problem.failedToLoadProblem)) {
+    thePage.lastKnownGoodProblemFileName = this.fileName;
+    this.badProblemString = "";
+    return;
+  }
+  pageLastKnownGoodProblemName = thePage.lastKnownGoodProblemFileName;
   this.badProblemString = "";
   this.badProblemString += "It appears your problem failed to load.<br>";
 

@@ -76,10 +76,15 @@ function getClonePanel(
 /**@returns {HTMLElement} */
 function getEditPanel(fileName) {
   var thePage = window.calculator.mainPage;
+  var doGenerate = !thePage.flagProblemPageOnly;
+
   if (!thePage.flagProblemPageOnly) {
     if (!thePage.user.hasProblemEditRights() || thePage.studentView()) {
-      return document.createTextNode("");
+      doGenerate = false;
     }
+  }
+  if (!doGenerate) {
+    return document.createTextNode("");
   }
   if (fileName === "" || fileName === undefined || fileName === null) {
     return document.createTextNode("");
@@ -162,13 +167,24 @@ function storeEditedPage() {
   });
 }
 
+function initEditorAce() {
+  var thePage = window.calculator.mainPage;
+  var saveButton = document.getElementById(ids.domElements.buttonSaveEdit);
+  saveButton.className = "buttonSaveEdit";
+  saveButton.addEventListener("click", window.calculator.editPage.storeEditedPage);
+  saveButton.innerHTML = "Save";
+  var editor = document.getElementById(ids.domElements.divEditorAce);
+  editor.addEventListener("keydown", window.calculator.editPage.ctrlSPressAceEditorHandler);
+  thePage.pages.editPage.editor = ace.edit(ids.domElements.divEditorAce);
+}
+
 function selectEditPageCallback(input, outputComponent) {
   var thePage = window.calculator.mainPage;
   try {
     var parsedInput = JSON.parse(input);
     ace.require("ace/ext/language_tools");
     if (thePage.pages.editPage.editor === null) {
-      thePage.pages.editPage.editor = ace.edit("divEditorAce");
+      initEditorAce();
     }
     if (parsedInput.autoComplete !== null && parsedInput.autoComplete !== undefined) {
       thePage.aceEditorAutoCompletionWordList = parsedInput.autoComplete;
@@ -213,7 +229,7 @@ function selectEditPage(currentlyEditedPage) {
     thePage.selectPage(thePage.pages.editPage.name);
     return;
   }
-  var theTopicTextArea = document.getElementById("textareaTopicListEntry");
+  var theTopicTextArea = document.getElementById(ids.domElements.textAreaTopicListEntry);
   theTopicTextArea.value = `Title: ${currentlyEditedPage}\nProblem: ${currentlyEditedPage}`;
   theTopicTextArea.cols = currentlyEditedPage.length + 15;
 

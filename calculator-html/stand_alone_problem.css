@@ -7,6 +7,12 @@
   --box-shadow-buttonAnswer: none;
   --box-shadow-buttonDefault: none;
   --box-shadow-buttonMQ: none;
+  --default-font-family: 'Google Sans',Roboto,Arial,sans-serif;
+  --default-answer-button-width: 80px;
+  --default-button-letter-spacing: 0.25px;
+  --default-button-font-weight: 500;
+  --default-button-padding: 5px;
+  --default-button-margin: 5px;
 }
 
 /*styleCalculator.css*/
@@ -126,17 +132,38 @@ sectionSelection {
   right:0;
 }
 
+button.buttonShowExpandMQPanel {
+  display: inline;
+  box-shadow: none;
+  border: none;
+  text-decoration: underline;
+  background-color: transparent;
+  color: blue;
+  cursor: pointer;
+  text-align: left;
+  outline: none;
+  font-size: medium;
+  transition: 0.6s;
+}
+
+button.buttonShowExpandMQPanel:hover {
+  background-color: #efefef;
+}
+
 .buttonSubmit {
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
   border-radius: 3px;
-  padding:3px;
-  margin: 3px;
   transition: all 2s;
-  box-shadow: var(--box-shadow-buttonDefault);
   border: none;
   color:red;
-  width:60px;
+  box-shadow: var(--box-shadow-buttonDefault);
+  width: var(--default-answer-button-width);
+  font: var(--default-font-family);
+  letter-spacing: var(--default-button-letter-spacing);
+  font-weight: var(--default-button-font-weight);
+  padding: var(--default-button-padding);
+  margin: var(--default-button-margin);
 }
 
 .buttonSolution {
@@ -144,12 +171,16 @@ sectionSelection {
   -webkit-border-radius: 3px;
   border-radius: 3px;
   transition: all 2s;
-  padding:3px;
-  margin: 3px;
   box-shadow: none;
   border: none;
   color:green;
-  width:60px;
+  box-shadow: var(--box-shadow-buttonDefault);
+  width: var(--default-answer-button-width);
+  font: var(--default-font-family);
+  letter-spacing: var(--default-button-letter-spacing);
+  font-weight: var(--default-button-font-weight);
+  padding: var(--default-button-padding);
+  margin: var(--default-button-margin);
 }
 
 .buttonSubmit:hover {
@@ -162,11 +193,15 @@ sectionSelection {
   border-radius: 3px;
   box-shadow: var(--box-shadow-buttonPreview);
   transition: all 2s;
-  padding:3px;
-  margin: 3px;
   border: none;
   color:green;
-  width:60px;
+  box-shadow: var(--box-shadow-buttonDefault);
+  width: var(--default-answer-button-width);
+  font: var(--default-font-family);
+  letter-spacing: var(--default-button-letter-spacing);
+  font-weight: var(--default-button-font-weight);
+  padding: var(--default-button-padding);
+  margin: var(--default-button-margin);
 }
 
 .buttonPreview:hover {
@@ -179,10 +214,15 @@ sectionSelection {
   padding:3px;
   margin: 3px;
   box-shadow: none;
-  box-shadow: var(--box-shadow-buttonAnswer);
   border: none;
   color:green;
-  width:60px;
+  box-shadow: var(--box-shadow-buttonDefault);
+  width: var(--default-answer-button-width);
+  font: var(--default-font-family);
+  letter-spacing: var(--default-button-letter-spacing);
+  font-weight: var(--default-button-font-weight);
+  padding: var(--default-button-padding);
+  margin: var(--default-button-margin);
 }
 
 .buttonAnswer:hover {
@@ -1264,16 +1304,16 @@ button.buttonSelectPage:hover {
 }
 
 button.buttonMQ {
-  width: 25px; 
-  height: 21.2px; 
-  padding: 0;
-  box-shadow: var(--box-shadow-buttonMQ);
+  width: 30px; 
+  height: 30px; 
   border: none;
-  -moz-border-radius: 3px;
-  -webkit-border-radius: 3px;
   border-radius: 3px;
   transition: all 2s;
   background-color: #e8e8e8;
+  padding: 4px;
+  margin: 3px;
+  box-shadow: var(--box-shadow-buttonMQ);
+  font-family: var(--default-font-family);
 }
 
 button.buttonMQ:hover {
@@ -1355,7 +1395,7 @@ span.currentCourseIndicator {
 }
 
 #divEditorAce { 
-  height: 85%;
+  height: 500px;
   font-size: 100%;
 }
 

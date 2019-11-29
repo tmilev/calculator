@@ -41,6 +41,13 @@ Browserifier.prototype.browserifyRunInId = function(input) {
   window.calculator.standAloneProblem.standAloneProblem.initAndRun(input);
 }
 
+Browserifier.prototype.browserifyEditInId = function(input) {
+  createBrowserifier();
+  window.calculator.flagRunMainPage = false;
+  window.calculator.browserifier.browserifyAndRun(); 
+  window.calculator.standAloneProblem.standAloneProblem.initAndEdit(input);
+}
+
 function createBrowserifier() {
   if (window.calculator !== undefined) {
     return;
@@ -58,6 +65,11 @@ function browserifyRunCalculatorMainPage() {
 function browserifyRunInId(input) {
   createBrowserifier();
   window.calculator.browserifier.browserifyRunInId(input);
+}
+
+function browserifyEditInId(input) {
+  createBrowserifier();
+  window.calculator.browserifier.browserifyEditInId(input);
 }
 
 createBrowserifier();

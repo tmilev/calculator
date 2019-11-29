@@ -14,6 +14,10 @@ var domElements = {
       div: "divThemes",
       button: "buttonThemes",
     },
+    editPage: {
+      div: "divEditPage",
+      button: "buttonEditPage",
+    },
   },
   themeRadioButtons: {
     radioThemeExperimental: "radioThemeExperimental",
@@ -66,6 +70,9 @@ var domElements = {
   divDatabaseOutput: "divDatabaseOutput",
   problemPageContentContainer: "divProblemPageContentContainer",
   divProblemInfoBar: "divProblemInfoBar",
+  textAreaTopicListEntry: "textareaTopicListEntry",
+  divEditorAce: "divEditorAce",
+  buttonSaveEdit: "buttonSaveEdit",
 };
 
 module.exports = {

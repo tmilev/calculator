@@ -823,7 +823,7 @@ InputPanelData.prototype.initializePartTwo = function(forceShowAll) {
     theContent += "</tr>";
   }
   theContent += "</table>";
-  theContent += `<small><a href = '#' id = '${this.idExpandCollapseToggle}'>Show all</a></small>`;
+  theContent += `<button href = '#' id = '${this.idExpandCollapseToggle}' class = "buttonShowExpandMQPanel"><small>Show all</small></button>`;
   var oldHeight = window.getComputedStyle(currentButtonPanel).height;
   //console.log("oldHeight: " + oldHeight);
   currentButtonPanel.style.maxHeight = "";

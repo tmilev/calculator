@@ -460,8 +460,8 @@ Problem.prototype.getNextProblemButton = function(
 ) {
   if (
     this.nextProblemId === null || 
-    this.nextProblemId !== "" || 
-    this.nextProblemId !== undefined
+    this.nextProblemId === "" || 
+    this.nextProblemId === undefined
   ) {
     return document.createTextNode("");
   }

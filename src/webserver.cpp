@@ -5029,7 +5029,6 @@ void WebServer::InitializeMainFoldersInstructorSpecific() {
     Configuration::courseTemplates ,
     Configuration::coursesAvailable,
     Configuration::problemsFolder  ,
-    "DefaultProblemLocation/"      ,
   });
   for (int i = 0; i < incoming.size; i ++) {
     FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop(incoming[i]);

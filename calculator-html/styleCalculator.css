@@ -845,7 +845,7 @@ tr.calculatorProblem {
 }
 
 table.tableItem col:nth-child(1) {
-  width: 35%;
+  width: 45%;
 }
 
 table.tableItem col:nth-child(2) {
@@ -857,11 +857,11 @@ table.tableItem col:nth-child(3) {
 }
 
 table.tableItem col:nth-child(4) {
-  width: 13%;
+  width: 10%;
 }
 
 table.tableItem col:nth-child(5) {
-  width: 20%;
+  width: 13%;
 }
 
 table.lectureMaterials {
@@ -927,23 +927,23 @@ table.topicList td, table.topicList th {
   padding-bottom: 8px;
 }
 
-table.topicList col:nth-child(1) {
+.topicListTitle {
   width: 35%;
 }
 
-table.topicList col:nth-child(2) {
+.topicListMaterials {
   width: 20%;
 }
 
-table.topicList col:nth-child(3) {
+.topicListPracticeQuiz {
   width: 12%;
 }
 
-table.topicList col:nth-child(4) {
+.topicListProblemWeight {
   width: 13%;
 }
 
-table.topicList col:nth-child(5) {
+.topicListDeadlines {
   width: 20%;
 }
 

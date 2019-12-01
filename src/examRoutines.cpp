@@ -3803,7 +3803,7 @@ void TopicElement::GetTopicList(
         << "immediately after the data labels. The data entries are terminated by new line. "
         << "Here is a correctly entered example:"
         << "<br>Title: Complex multiplication"
-        << "<br>Problem: DefaultProblemLocation/Complex-multiplication-z-times-w.html"
+        << "<br>Problem: problems/Complex-multiplication-z-times-w.html"
         << "<br>SlidesSource: freecalc/modules/complex-numbers/complex-numbers-addition-multiplication-example-1"
         << "<br>\n";
       }

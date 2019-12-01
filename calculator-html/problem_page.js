@@ -192,9 +192,9 @@ Problem.prototype.initializeInfo = function(problemData, inputParentIdURLed) {
   this.deadline = null;
   this.weight = problemData.weight;
   this.links = {
-    video: null,
-    slides: null,
-    homework: null,
+    video: [],
+    slides: [],
+    homework: [],
   };
   this.badProblemString = "";
   if (problemData.deadlines !== undefined) {
@@ -1095,6 +1095,35 @@ var linkHomework = [
   "homeworkTex",
 ];
 
+/**@returns {HTMLElement[]} */
+Problem.prototype.getProblemMaterialLinks = function() {
+  var result = [];
+  if (this.video !== "" && this.video !== undefined && this.video !== null) {
+    var linkElement = document.createElement("a");
+    linkElement.classList = "videoLink";
+    linkElement.href = this.video;
+    linkElement.target = "_blank";
+    linkElement.innerHTML = "Video";
+    result.push(linkElement);
+  }
+  this.links.slides = [];
+  this.links.video = [];
+  this.links.homework = [];
+  if (this.querySlides !== "" && this.querySlides !== null && this.querySlides !== undefined) {
+    for (var counter in linkSlides) {
+      this.links.slides.push(this.getLinkFromSpec(linkSpecs[linkSlides[counter]], this.querySlides));
+    }
+  } 
+  appendHtmlToArray(result, this.links.slides);
+  if (this.queryHomework !== "" && this.queryHomework !== null && this.queryHomework !== undefined) {
+    for (var counter in linkHomework) {
+      appendHtmlToArray(this.links.homework, this.getLinkFromSpec(linkSpecs[linkHomework[counter]], this.queryHomework));
+    }
+  }
+  appendHtmlToArray(result, this.links.homework);
+  return result;
+}
+
 Problem.prototype.getHTMLOneProblemTr = function (
   outputRow
 ) {
@@ -1102,29 +1131,8 @@ Problem.prototype.getHTMLOneProblemTr = function (
   var nextCell = outputRow.insertCell(- 1);
   nextCell.innerHTML = `${this.problemNumberString} ${this.title}`;
   nextCell = outputRow.insertCell(- 1);
-  if (this.video !== "" && this.video !== undefined && this.video !== null) {
-    var linkElement = document.createElement("a");
-    linkElement.classList = "videoLink";
-    linkElement.href = this.video;
-    linkElement.target = "_blank";
-    linkElement.innerHTML = "Video";
-    nextCell.appendChild(linkElement);
-  }
-  this.links.slides = null;
-  this.links.video = null;
-  this.links.homework = [];
-  if (this.querySlides !== "" && this.querySlides !== null && this.querySlides !== undefined) {
-    for (var counter in linkSlides) {
-      this.links.slides = this.getLinkFromSpec(linkSpecs[linkSlides[counter]], this.querySlides);
-    }
-  } 
-  appendHtml(nextCell, this.links.slides);
-  if (this.queryHomework !== "" && this.queryHomework !== null && this.queryHomework !== undefined) {
-    for (var counter in linkHomework) {
-      appendHtmlToArray(this.links.homework, this.getLinkFromSpec(linkSpecs[linkHomework[counter]], this.queryHomework));
-    }
-  }
-  appendHtml(nextCell, this.links.homework);
+  var materialLinks = this.getProblemMaterialLinks();
+  appendHtml(nextCell, materialLinks);
   nextCell = outputRow.insertCell(- 1);
   if (this.fileName !== "") {
     if (thePage.user.flagLoggedIn) {

@@ -2,7 +2,6 @@
 const submitRequests = require('./submit_requests');
 const pathnames = require('./pathnames');
 const ids = require('./ids_dom_elements');
-const editPage = require('./edit_page');
 const problemPage = require('./problem_page');
 const mathjax = require('./mathjax-calculator-setup');
 
@@ -100,8 +99,11 @@ function loadTopicList(callback) {
     topicListRequest = "topicListJSON";
   }
   var topicName = thePage.storage.variables.currentCourse.topicList.getValue();
+  var theURL = "";
+  theURL += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${topicListRequest}&`;
+  theURL += `${pathnames.urlFields.problem.topicList}=${topicName}&`;
   submitRequests.submitGET({
-    url: `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${topicListRequest}&${pathnames.urlFields.problem.topicList}=${topicName}`,
+    url: theURL,
     callback: callback,
     progress: ids.domElements.spanProgressReportGeneral
   });
@@ -117,7 +119,11 @@ function selectCurrentCoursePage() {
   var storageVariables = thePage.storage.variables;
   var incomingCourse = storageVariables.currentCourse.courseHome.getValue();
   var incomingTopicList = storageVariables.currentCourse.topicList.getValue();
-  if (incomingCourse === null || incomingCourse === "" || incomingCourse === undefined) {
+  if (
+    incomingCourse === null || 
+    incomingCourse === "" || 
+    incomingCourse === undefined
+  ) {
     var courseBody = document.getElementById(ids.domElements.divCurrentCourseBody); 
     var temporarySelectCourseId = "buttonTemporarySelectCourse";
     var courseBodyHTML = `<button id = '${temporarySelectCourseId}' `;

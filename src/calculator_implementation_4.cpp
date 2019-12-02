@@ -23,6 +23,7 @@ Calculator::Calculator() {
   this->flagShowCalculatorExamples = true;
   this->flagWriteLatexPlots = true;
   this->flagUseLnInsteadOfLog = false;
+  this->flagDontUseDiff = false;
   this->flagPlotShowJavascriptOnly = false;
 }
 

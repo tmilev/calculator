@@ -3,7 +3,7 @@
   "calculatorHTML":null,
   "serverDetailedLog":null,
   "autoUnitTest":null,
-  "disableDatabaseLogEveryoneAsAdmin":false,
+  "disableDatabaseLogEveryoneAsAdmin":true,
   "serverAutoMonitor":null,
   "serverRAMCachingOff":null,
   "runServerOnEmptyCommandLine":null,

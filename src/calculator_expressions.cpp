@@ -3592,7 +3592,11 @@ std::string Expression::ToString(
     if (needsParen) {
       out << "\\right)";
     }
-    out << " \\diff ";
+    if (this->owner->flagDontUseDiff) {
+      out << "d ";
+    } else {
+      out << " \\diff ";
+    }
     if (rightNeedsParen) {
       out << "\\left(";
     }
@@ -3602,7 +3606,11 @@ std::string Expression::ToString(
     }
   } else if (this->StartsWith(this->owner->opDifferential(), 2)) {
     bool needsParen = (!(*this)[1].IsAtom()) && (!(*this)[1].IsBuiltInTypE());
-    out << "\\diff{}";
+    if (this->owner->flagDontUseDiff) {
+      out << "d ";
+    } else {
+      out << "\\diff{}";
+    }
     if (needsParen) {
       out << "\\left(";
     }

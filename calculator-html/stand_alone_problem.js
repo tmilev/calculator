@@ -110,8 +110,8 @@ StandAloneProblem.prototype.initCommon = function(input) {
   }
   // tag defaults
   this.courseHome      = "/coursetemplates/Curriculum-300-Calculus-I.html";
-  this.topicList       = "/topiclists/classrooms_demo.txt";
-  this.topicBundles    = "/topiclists/topicBundles.txt";
+  this.topicList       = "topiclists/classrooms_demo.txt";
+  this.topicBundles    = "topiclists/topicBundles.txt";
   this.problemFileName = "problems/Find-function-inverse-fractional-linear-1.html";
   var fileNameCookies = thePage.storage.variables.currentCourse.problemFileName.loadMe();
   if (
@@ -138,7 +138,6 @@ StandAloneProblem.prototype.initCommon = function(input) {
       this[label] = input[label];
     }
   }
-  this.problemFileName = encodeURIComponent(this.problemFileName);
 }
 
 StandAloneProblem.prototype.initAndEdit = function (input) {
@@ -169,7 +168,7 @@ StandAloneProblem.prototype.initAndEdit = function (input) {
   });
   var thePage = window.calculator.mainPage;
 
-  thePage.storage.variables.editor.currentlyEditedPage.setAndStore(this.problemFileName);
+  thePage.storage.variables.editor.currentlyEditedPage.setAndStore(encodeURIComponent(this.problemFileName));
   thePage.storage.variables.currentCourse.topicList.setAndStore(this.topicList);
   coursePage.loadTopicList(problemPage.processLoadedTopicsWriteToEditPage);
 }
@@ -184,7 +183,7 @@ StandAloneProblem.prototype.initAndRun = function (input) {
     progressReportGeneral: ids.domElements.spanProgressReportGeneral,
   });
   this.problem = problemPage.allProblems.CreateOrUpdateProblem({
-    id: this.problemFileName,
+    id: encodeURIComponent(this.problemFileName),
   }); 
   var theURL = `${pathnames.urls.calculatorAPI}?${this.problem.getCalculatorURLRequestInput(false, this.problemFileName, this.courseHome, this.topicList)}`;
   submitRequests.submitGET({

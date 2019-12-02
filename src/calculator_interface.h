@@ -1106,6 +1106,7 @@ public:
 
   bool flagLogSyntaxRules;
   bool flagUseLnInsteadOfLog;
+  bool flagDontUseDiff;
   bool flagUseLnAbsInsteadOfLogForIntegrationNotation;
   bool flagLogEvaluatioN;
   bool flagUseNumberColors;

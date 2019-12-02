@@ -307,6 +307,7 @@ void Calculator::initialize() {
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("PlotShowJavascriptOnly");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("PlotDetails");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("UseLnInsteadOfLog");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("DontUseDiff");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("UseLnAbsInsteadOfLog");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("CalculatorStatus");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("FullTree");
@@ -1999,6 +2000,11 @@ bool Calculator::ApplyOneRule() {
   }
   if (secondToLastS == "%" && lastS == "LogEvaluation") {
     this->flagLogEvaluatioN = true;
+    this->PopTopSyntacticStack();
+    return this->PopTopSyntacticStack();
+  }
+  if (secondToLastS == "%" && lastS == "DontUseDiff") {
+    this->flagDontUseDiff = true;
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }

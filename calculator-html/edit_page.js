@@ -201,6 +201,9 @@ function selectEditPageCallback(input, outputComponent) {
     if (parsedInput.content !== null && parsedInput.content !== undefined) {
       incomingContent = decodeURIComponent(parsedInput.content);
     }
+    var problemIdURLed = thePage.storage.variables.editor.currentlyEditedPage.getValue();
+    thePage.storage.variables.currentCourse.currentProblemId.setAndStore(problemIdURLed);
+    thePage.storage.variables.currentCourse.problemFileName.setAndStore(decodeURIComponent(problemIdURLed));
     editor.getSession().setValue(incomingContent);
     editor.setTheme("ace/theme/chrome");
     editor.getSession().setMode("ace/mode/xml");

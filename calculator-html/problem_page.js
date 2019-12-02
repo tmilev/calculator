@@ -113,7 +113,7 @@ ProblemCollection.prototype.getProblemByIdOrRegisterEmpty = function(
 function selectCurrentProblem(problemIdURLed, exerciseType) {
   var thePage = window.calculator.mainPage;
   thePage.storage.variables.currentCourse.currentProblemId.setAndStore(problemIdURLed);
-  thePage.storage.variables.currentCourse.fileName.setAndStore(decodeURIComponent(problemIdURLed));
+  thePage.storage.variables.currentCourse.problemFileName.setAndStore(decodeURIComponent(problemIdURLed));
   thePage.storage.variables.currentCourse.exerciseType.setAndStore(exerciseType);
   var theProblem = thePage.getCurrentProblem();
   theProblem.flagForReal = false;
@@ -794,26 +794,28 @@ ProblemNavigation.prototype.writeToHTML = function() {
   ) {
     problemTitleContainer.appendChild(document.createTextNode(this.currentProblem.problemLabel));
   }
-  problemTitle.appendChild(document.createTextNode(this.currentProblem.title));
+  problemTitleContainer.appendChild(document.createTextNode(this.currentProblem.title));
 
   var infoBar = document.getElementById(ids.domElements.divProblemInfoBar);
   infoBar.innerHTML = "";
-  infoBar.appendChild(this.currentProblem.getProblemNavigation());
-  infoBar.appendChild(problemTitle);
+  if (!window.calculator.mainPage.flagProblemPageOnly) {
+    infoBar.appendChild(this.currentProblem.getProblemNavigation());
+  }
 
   if (
     this.currentProblem.links !== undefined && 
     this.currentProblem.links !== null
   ) {
     if (this.currentProblem.links.slides !== null) {
-      appendHtml(infoBar, this.currentProblem.links.slides);
+      appendHtml(problemTitle, this.currentProblem.links.slides);
     }
     if (this.currentProblem.links.video !== null) {
-      appendHtml(infoBar, this.currentProblem.links.video);
+      appendHtml(problemTitle, this.currentProblem.links.video);
     }
   }
   //topPart += "<br>"
-  infoBar.appendChild(this.currentProblem.getEditPanel());
+  problemTitle.appendChild(this.currentProblem.getEditPanel());
+  infoBar.appendChild(problemTitle);
   mathjax.typeSetSoft(ids.domElements.divProblemInfoBar);
 }
 

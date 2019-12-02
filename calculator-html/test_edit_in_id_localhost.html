@@ -6,6 +6,7 @@
 <!--The scripts below are assumed to be loaded by the ambient page.-->
 <!--The calculator is assumed to run on http://localhost:8155 and https://localhost:8166-->
 
+<script type = "text/javascript" src = "https://localhost:8166/MathJax-2.7-latest/MathJax.js?config=TeX-AMS_HTML-full"></script>
 <link rel="stylesheet" href="https://localhost:8166/calculator-html/stand_alone_problem.css">
 <link rel="stylesheet" href="https://localhost:8166/html-common/mathquill.css">
 <script src="https://localhost:8166/html-common/jquery.min.js"></script>
@@ -13,11 +14,10 @@
 <script src = "https://localhost:8166/html-common/ace/src-min/ace.js"></script>
 <script src = "https://localhost:8166/html-common/ace/src-min/ext-language_tools.js"></script>
 <script src="https://localhost:8166/calculator-html/javascript_all_in_one.js"></script>
-<script type = "text/javascript" src = "https://localhost:8166/MathJax-2.7-latest/MathJax.js?config=TeX-AMS_HTML-full,https://localhost:8166/calculator-html/mathjax-calculator-setup.js"></script>
 <script src="https://localhost:8166/calculator-html/browserifier.js"></script>
 
 </head>
-<body onload = 'browserifyEditInId({id: "default-calculator-editor-span", topicList: "/topiclists/classrooms_demo.txt", problemFileName: "problems/Volume-solid-of-revolution-parabola-around-x-axis-1.html", topicList: "/topiclists/classrooms_demo.txt"});'>
+<body onload = 'browserifyEditInId({id: "default-calculator-editor-span"});'>
     
 <span id="default-calculator-editor-span"></span>
 </body>

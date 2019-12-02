@@ -33,6 +33,8 @@ function StandAloneProblem() {
   this.spanButtonNextEdit = null;
   /**@type{HTMLElement} */
   this.spanButtonPreviousEdit = null;
+  /**@type{HTMLElement} */
+  this.lineBreakBeforeProblem = null;
   /**@type{string} */
   this.courseHome = "";
   /**@type{string} */
@@ -91,7 +93,8 @@ StandAloneProblem.prototype.initCommon = function(input) {
     console.log("No output component id supplied.");
     return;
   }
-  window.calculator.mainPage.flagProblemPageOnly = true;
+  var thePage = window.calculator.mainPage; 
+  thePage.flagProblemPageOnly = true;
   if (
     input.hardCodedServerAddress !== "" && 
     input.hardCodedServerAddress !== null && 
@@ -110,6 +113,14 @@ StandAloneProblem.prototype.initCommon = function(input) {
   this.topicList       = "/topiclists/classrooms_demo.txt";
   this.topicBundles    = "/topiclists/topicBundles.txt";
   this.problemFileName = "problems/Find-function-inverse-fractional-linear-1.html";
+  var fileNameCookies = thePage.storage.variables.currentCourse.problemFileName.loadMe();
+  if (
+    fileNameCookies !== "" && 
+    fileNameCookies !== undefined && 
+    fileNameCookies !== null
+  ) {
+    this.problemFileName = fileNameCookies;
+  }
   // overrides from input
   var tags = [
     "courseHome", 
@@ -138,11 +149,11 @@ StandAloneProblem.prototype.initAndEdit = function (input) {
   this.ensureButtonsExist({
     saveEdit: ids.domElements.buttonSaveEdit,
   });
-  this.ensureTextAreasExist({
-    textAreaEditPage: ids.domElements.textAreaTopicListEntry,
-  });
   this.ensureSpansExist({ 
     spanButtonNextEdit: ids.domElements.spanButtonNextEdit,
+  });
+  this.ensureTextAreasExist({
+    textAreaEditPage: ids.domElements.textAreaTopicListEntry,
   });
   this.ensureSpansExist({ 
     spanButtonNextEdit: ids.domElements.spanSubmitEditPageReport,
@@ -168,7 +179,6 @@ StandAloneProblem.prototype.initAndRun = function (input) {
   this.ensureDivsExist({
     navigationElement: ids.domElements.divProblemInfoBar,
     problemElement: ids.domElements.problemPageContentContainer,
-    editPageElement: ids.domElements.pages.editPage.div,
   });
   this.ensureSpansExist({
     progressReportGeneral: ids.domElements.spanProgressReportGeneral,

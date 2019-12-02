@@ -76,9 +76,9 @@ div.problemTitle {
 
 div.problemTitleContainer {
   display: inline-block;
-  border-radius: 3px;
+  /* border-radius: 3px;
   margin:  3px;
-  padding: 3px;
+  padding: 3px;*/
   text-align: center;
   white-space: nowrap;
 }

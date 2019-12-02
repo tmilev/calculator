@@ -118,9 +118,12 @@ StorageVariable.prototype.getValue = function() {
   return this.value;
 }
 
+/**@returns{string} */
 StorageVariable.prototype.loadMe = function(hashParsed) {
-  if (this.flagProblemPageOnly) {
-    return;
+  if (mainPage().flagProblemPageOnly) {
+    // TODO: fix this by uncommenting the code below.
+    console.log("Warning: using cookies in standalone mode.")
+    // return "";
   }
   var candidate = "";
   if (Storage !== undefined || localStorage !== undefined && this.nameLocalStorage !== "") {
@@ -135,15 +138,18 @@ StorageVariable.prototype.loadMe = function(hashParsed) {
       candidate = incoming;
     }
   }
-  if (this.nameURL !== "") {
-    if (this.nameURL in hashParsed) {
-      var incoming = hashParsed[this.nameURL];
-      if (incoming !== null && incoming !== undefined) {
-        candidate = incoming;
+  if (hashParsed !== null && hashParsed !== undefined) {
+    if (this.nameURL !== "") {
+      if (this.nameURL in hashParsed) {
+        var incoming = hashParsed[this.nameURL];
+        if (incoming !== null && incoming !== undefined) {
+          candidate = incoming;
+        }
       }
     }
   }
   this.setAndStore(candidate, false, true);
+  return candidate;
 }
 
 StorageVariable.prototype.storeMePersistent = function(
@@ -151,8 +157,10 @@ StorageVariable.prototype.storeMePersistent = function(
   updateURL, 
 ) {
   if (mainPage().flagProblemPageOnly) {
+    console.log("WARNING: Using local storage in stand-alone mode.")
+    // TODO: fix this by uncommenting the code below.
     // page is embedded, no persistent storage.
-    return;
+    // return;
   }
   if (Storage !== undefined || localStorage !== undefined) {
     if (this.nameLocalStorage !== "" && this.nameLocalStorage !== null && this.nameLocalStorage !== undefined) {
@@ -161,6 +169,10 @@ StorageVariable.prototype.storeMePersistent = function(
   }
   if (this.nameCookie !== "") {
     cookies.setCookie(this.nameCookie, this.value, 150, this.secure);
+  }
+  if (mainPage().flagProblemPageOnly) {
+    // TODO: this should be removed when the preceding todo is resolved.
+    return;
   }
   if (updateURL !== false) {
     mainPage().storage.setURL();

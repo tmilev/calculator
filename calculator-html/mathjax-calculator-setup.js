@@ -41,11 +41,11 @@ function showTex(originalTex, item, event) {
   item.parentNode.insertBefore(flaSpan, item.nextSibling);
   item.blur();
   selectElementContents(flaSpan);
-  //MathJax.Menu.ShowSource.Text(originalTex||"No Original Source to Show", event);
+  // MathJax.Menu.ShowSource.Text(originalTex||"No Original Source to Show", event);
 }
 
 function configureMathJaxForCalculator() { 
-  //mathjax configuration comes before loading the mathjax script, as requested by the documentation.
+  // mathjax configuration comes before loading the mathjax script, as requested by the documentation.
   MathJax.Hub.Config({
     extensions: ["tex2jax.js"],
     jax: ["input/TeX", "output/HTML-CSS"],
@@ -168,7 +168,16 @@ function configureMathJaxForCalculator() {
     });
 
   }));
-  MathJax.Ajax.loadComplete(window.calculator.browserifier.calculatorHtmlBaseFolder + "mathjax-calculator-setup.js");
+  var address = "";
+  if (
+    window.calculator.browserifier.hardCodedServerAddress !== undefined &&
+    window.calculator.browserifier.hardCodedServerAddress !== null
+  ) {
+    address += window.calculator.browserifier.hardCodedServerAddress;
+  } 
+  address += window.calculator.browserifier.calculatorHtmlBaseFolder;
+  address += "mathjax-calculator-setup.js";
+  MathJax.Ajax.loadComplete(address);
 }
 
 configureMathJaxForCalculator();

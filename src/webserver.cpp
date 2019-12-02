@@ -5296,13 +5296,14 @@ int WebServer::main(int argc, char **argv) {
   try {
     // Most basic initializations (timer, ...).
     InitializeGlobalObjects();
+    // Initializes folder locations needed by logging facilities.
+    FileOperations::InitializeFoldersSensitive();
     // Process executable arguments.
     theWebServer.AnalyzeMainArguments(argc, argv);
     logServer << logger::green << "Project base folder: "
     << logger::blue << theGlobalVariables.PhysicalPathProjectBase
     << logger::endL;
     // Compute configuration file location.
-    FileOperations::InitializeFoldersSensitive();
     // Load the configuration file.
     theGlobalVariables.ConfigurationLoad();
     // Compute various flags and settings from the desired configuration.

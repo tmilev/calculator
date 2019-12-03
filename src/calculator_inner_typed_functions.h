@@ -1,5 +1,5 @@
-//The current file is licensed under the license terms found in the main header file "calculator.h".
-//For additional information refer to the file "calculator.h".
+// The current file is licensed under the license terms found in the main header file "calculator.h".
+// For additional information refer to the file "calculator.h".
 #ifndef vpfHeader6_1InnerTypedFns_h_already_included
 #define vpfHeader6_1InnerTypedFns_h_already_included
 

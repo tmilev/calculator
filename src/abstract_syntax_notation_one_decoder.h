@@ -1,11 +1,11 @@
 #ifndef ABSTRACT_SYNTAX_NOTATION_ONE_HEADER_ALREADY_INCLUDED
 #define ABSTRACT_SYNTAX_NOTATION_ONE_HEADER_ALREADY_INCLUDED
-//The current file is licensed under the license terms found in the main header file "calculator.h".
-//For additional information refer to the file "calculator.h".
+// The current file is licensed under the license terms found in the main header file "calculator.h".
+// For additional information refer to the file "calculator.h".
 #include "json.h"
 #include "serialization_basic.h"
 
-static ProjectInformationInstance ProjectInfoAbstractSyntaxNotationOneDecoderHeader(__FILE__, "Abstract syntax notation one (ASN-1) header file. ");
+static ProjectInformationInstance projectInfoAbstractSyntaxNotationOneDecoderHeader(__FILE__, "Abstract syntax notation one (ASN-1) header file. ");
 
 // ASNElements can be either composites or atoms.
 //

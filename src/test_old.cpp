@@ -1,5 +1,5 @@
-//The current file is licensed under the license terms found in the main header file "calculator.h".
-//For additional information refer to the file "calculator.h".
+// The current file is licensed under the license terms found in the main header file "calculator.h".
+// For additional information refer to the file "calculator.h".
 #include "calculator.h"
 #include <assert.h>
 
@@ -1593,15 +1593,6 @@ void LegacyTest() {
   TestWeylIrrepsFormulas('A', 4);
   TestWeylIrrepsFormulas('B', 4);
   TestWeylIrrepsFormulas('D', 4);
-}
-
-void TestFiniteFields() {
-  f65521 a;
-  a.n = 2;
-  f65521 b;
-  b.n = 5;
-  stOutput << (a * b).n << "\n";
-  stOutput << (a / b).n << "\n";
 }
 
 int testOld(List<std::string>& inputArguments){

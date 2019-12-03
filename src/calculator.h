@@ -19,8 +19,8 @@
 //*********************************************************************************************************
 //*********************************************************************************************************
 
-#ifndef vpf_h_already_included
-#define vpf_h_already_included
+#ifndef CALCULATOR_HEADER_ALREADY_INCLUDED
+#define CALCULATOR_HEADER_ALREADY_INCLUDED
 // This header file includes the various sub-headers.
 // The splitting into sub-headers is needed to speed up compilation times.
 #include "macros.h"
@@ -30,5 +30,5 @@
 #include "math_extra_semisimple_Lie_algebras.h"
 #include "math_extra_finite_groups.h"
 #include "calculator_interface.h"
-static ProjectInformationInstance ProjectInfoVpfH(__FILE__, "Wrapper header file (includes everything).");
+static ProjectInformationInstance projectInfoCalculatorHeader(__FILE__, "Wrapper header file (includes everything).");
 #endif

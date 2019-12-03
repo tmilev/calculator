@@ -1,5 +1,5 @@
-//The current file is licensed under the license terms found in the main header file "calculator.h".
-//For additional information refer to the file "calculator.h".
+// The current file is licensed under the license terms found in the main header file "calculator.h".
+// For additional information refer to the file "calculator.h".
 #ifndef vpfHeader7_databaseMySQL_already_included
 #define vpfHeader7_databaseMySQL_already_included
 #include "calculator_interface.h"
@@ -14,9 +14,9 @@ public:
   static bool LoginViaDatabase(
     UserCalculatorData& theUseR,
     std::stringstream* commentsOnFailure,
-    std::stringstream *commentsGeneral
+    std::stringstream* commentsGeneral
   );
-  static bool LoginNoDatabaseSupport(UserCalculatorData &theUser, std::stringstream *commentsGeneral);
+  static bool LoginNoDatabaseSupport(UserCalculatorData& theUser, std::stringstream* commentsGeneral);
   static bool LoginViaGoogleTokenCreateNewAccountIfNeeded(
     UserCalculatorData& theUseR,
     std::stringstream* commentsOnFailure,

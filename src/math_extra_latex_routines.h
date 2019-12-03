@@ -1,5 +1,5 @@
-//The current file is licensed under the license terms found in the main header file "calculator.h".
-//For additional information refer to the file "calculator.h".
+// The current file is licensed under the license terms found in the main header file "calculator.h".
+// For additional information refer to the file "calculator.h".
 #ifndef vpfHeader1_HeaderLaTeXRoutines
 #define vpfHeader1_HeaderLaTeXRoutines
 #include "general_list_references.h"

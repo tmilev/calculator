@@ -86,7 +86,8 @@ HEADERS += \
     transport_layer_security.h \
     webserver.h \
     serialization_basic.h \
-    general_strings.h
+    general_strings.h \
+    database_fallback_json.h
 
 
 SOURCES += \
@@ -156,5 +157,6 @@ SOURCES += \
     test_old.cpp \
     math_implementation_1_test.cpp \
     calculator_expressions_test.cpp \
-    calculator_parsing_routines_test.cpp
+    calculator_parsing_routines_test.cpp \
+    database_fallback_json.cpp
 

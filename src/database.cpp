@@ -1,5 +1,5 @@
-//The current file is licensed under the license terms found in the main header file "calculator.h".
-//For additional information refer to the file "calculator.h".
+// The current file is licensed under the license terms found in the main header file "calculator.h".
+// For additional information refer to the file "calculator.h".
 #include "database.h"
 #include "crypto.h"
 #include "webserver.h"
@@ -804,13 +804,14 @@ bool UserCalculator::ComputeAndStoreActivationToken(std::stringstream* commentsO
   MacroRegisterFunctionWithName("UserCalculator::ComputeAndStoreActivationToken");
   TimeWrapper now;
   now.AssignLocalTime();
-  std::stringstream activationTokenStream;
   // activation token randomness strength: rand() has some randomness in it
   // and so does the timer, so the add up (actually, multiply).
   // This is not a very strong protection for the time being, but as activation tokens are supposed to be
   // one-time use this should present no practical danger.
-  activationTokenStream << now.theTimeStringNonReadable << rand();
-  this->actualActivationToken = Crypto::computeSha3_256OutputBase64URL(activationTokenStream.str());
+  List<unsigned char> activationToken;
+
+  Crypto::GetRandomBytesSecureInternalMayLeaveTracesInMemory(activationToken, 16);
+  this->actualActivationToken = Crypto::ConvertListUnsignedCharsToBase64(activationToken, true);
   JSData findUserQuery, setUserQuery;
   findUserQuery[DatabaseStrings::labelUsername] = this->username;
   setUserQuery[DatabaseStrings::labelActivationToken] = this->actualActivationToken;
@@ -894,8 +895,7 @@ bool UserCalculator::ComputeAndStoreActivationStats(
     }
     return false;
   }
-  if (
-    !DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(
+  if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(
       DatabaseStrings::tableUsers, findQueryInUsers, setQueryInUsers, nullptr, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {

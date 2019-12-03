@@ -1,8 +1,8 @@
-#ifndef VPFHEADER3CALCULATOR5database_mongo_h
-#define VPFHEADER3CALCULATOR5database_mongo_h
+#ifndef CALCULATOR_DATABASE_MONGO_HEADER_ALREADY_INCLUDED
+#define CALCULATOR_DATABASE_MONGO_HEADER_ALREADY_INCLUDED
 
 #include "calculator_interface.h"
-static ProjectInformationInstance ProjectInfoVPFHEADER3CALCULATOR5database_mongo_h(
+static ProjectInformationInstance projectInfoCalculatorDatabaseMongoHeader(
   __FILE__, "Header, calculator<->mongoDB interface. "
 );
 

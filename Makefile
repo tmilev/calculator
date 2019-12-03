@@ -144,6 +144,7 @@ SOURCES_RELATIVE_PATH=\
     crypto_test.cpp \
     database.cpp \
     databasemongo.cpp \
+    database_fallback_json.cpp \
     database_mongo_calculator.cpp \
     date_time_wrappers.cpp \
     examRoutines.cpp \

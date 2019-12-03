@@ -5151,16 +5151,6 @@ void GlobalVariables::ConfigurationProcess() {
   theGlobalVariables.flagDisableDatabaseLogEveryoneAsAdmin = theGlobalVariables.configuration[
     Configuration::disableDatabaseLogEveryoneAsAdmin
   ].isTrueRepresentationInJSON();
-  if (
-    !theGlobalVariables.flagDatabaseCompiled &&
-    theGlobalVariables.configuration[
-      Configuration::disableDatabaseLogEveryoneAsAdmin
-    ].isNullOrUndefined()
-      ) {
-    theGlobalVariables.flagDisableDatabaseLogEveryoneAsAdmin = true;
-    theGlobalVariables.configuration[Configuration::disableDatabaseLogEveryoneAsAdmin] = true;
-  }
-
   if (theGlobalVariables.flagDisableDatabaseLogEveryoneAsAdmin) {
     theGlobalVariables.flagDatabaseCompiled = false;
     logServer

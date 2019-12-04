@@ -5293,6 +5293,12 @@ int WebServer::main(int argc, char **argv) {
     logServer << logger::green << "Project base folder: "
     << logger::blue << theGlobalVariables.PhysicalPathProjectBase
     << logger::endL;
+    if (!theGlobalVariables.flagDatabaseCompiled) {
+      theGlobalVariables.flagDatabaseUseFallback = true;
+      logServer << logger::red << "MongoDB missing. "
+      << logger::green << "Using " << logger::red
+      << "**SLOW** " << logger::green << " fall-back JSON storage." << logger::endL;
+    }
     // Compute configuration file location.
     // Load the configuration file.
     theGlobalVariables.ConfigurationLoad();

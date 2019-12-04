@@ -803,6 +803,7 @@ void HtmlInterpretation::GetJSDataUserInfo(JSData& outputAppend, const std::stri
   outLinkAppNoCache << "<a href = '" << sanitizedCalculatorAppNoCache << "'>app no browser cache</a>";
   outputAppend["linkAppNoCache"] = outLinkAppNoCache.str();
   outputAppend[WebAPI::result::loginDisabledEveryoneIsAdmin] = theGlobalVariables.flagDisableDatabaseLogEveryoneAsAdmin;
+  outputAppend[WebAPI::result::useFallbackDatabase] = theGlobalVariables.flagDatabaseUseFallback;
   if (comments != "") {
     outputAppend["comments"] = HtmlRoutines::ConvertStringToHtmlString(comments, false);
   }

@@ -59,6 +59,7 @@ public:
     static std::string crashReport;
     static std::string millisecondsComputation;
     static std::string loginDisabledEveryoneIsAdmin;
+    static std::string useFallbackDatabase;
   };
   struct problem {
     static std::string title;

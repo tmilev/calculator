@@ -32,6 +32,7 @@ std::string WebAPI::result::workerIndex = "workerIndex";
 std::string WebAPI::result::crashReport = "crashReport";
 std::string WebAPI::result::millisecondsComputation = "timeComputation";
 std::string WebAPI::result::loginDisabledEveryoneIsAdmin = "loginDisabledEveryoneIsAdmin";
+std::string WebAPI::result::useFallbackDatabase = "useFallbackDatabase";
 
 std::string WebAPI::problem::fileContent = "fileContent";
 std::string WebAPI::problem::title = "title";

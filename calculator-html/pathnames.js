@@ -14,6 +14,7 @@ var urlFields = {
     toggleMonitoring: "toggleMonitoring",
     userInfoJSON: "userInfoJSON",
     loginDisabledEveryoneIsAdmin: "loginDisabledEveryoneIsAdmin",
+    useFallbackDatabase: "useFallbackDatabase",
     indicator: "indicator",
     pause: "pause",
     unpause: "unpause",

@@ -64,6 +64,7 @@ var domElements = {
   divMathjaxProblematicRender: "divMathjaxProblematicRender",
   divLoginPanelUsernameReport: "divLoginPanelUsernameReport",
   divLoginPanelExtraInfo: "divLoginPanelExtraInfo",
+  divLoginPanelDatabaseInfo: "divLoginPanelDatabaseInfo",
   courseEditPanel: "divCurrentCourseEditPanel",
   classSpanDeadlineContainer: "spanDeadlineContainer",
   calculatorBuildVersion: "anchorCalculatorBuildVersion",

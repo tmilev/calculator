@@ -135,17 +135,25 @@ function loginWithServerCallback(incomingString, result) {
   if (parsedAuthentication["status"] === "logged in") {
     success = true;  
   } 
+  var loginInfo = "";
   if (
     parsedAuthentication[pathnames.urlFields.requests.loginDisabledEveryoneIsAdmin] === "true" || 
     parsedAuthentication[pathnames.urlFields.requests.loginDisabledEveryoneIsAdmin] === true
   ) {
     parsedAuthentication[pathnames.urlFields.username] = "anonymous"; 
-    document.getElementById(ids.domElements.divLoginPanelExtraInfo).innerHTML = "<b style = 'color:red'>DB inactive,<br>everyone is admin.</b>";
     parsedAuthentication[pathnames.urlFields.userRole] = "admin";
+    loginInfo += "<b style = 'color:red'>DB inactive,<br>everyone is admin.</b>"
     success = true;
-  } else {
-    document.getElementById(ids.domElements.divLoginPanelExtraInfo).innerHTML = "";
   } 
+  var loginExtraInfo = document.getElementById(ids.domElements.divLoginPanelExtraInfo);
+  loginExtraInfo.innerHTML = loginInfo;
+  if (
+    parsedAuthentication[pathnames.urlFields.requests.useFallbackDatabase] === "true" ||
+    parsedAuthentication[pathnames.urlFields.requests.useFallbackDatabase] === true
+  ) {
+    var databaseInfo = document.getElementById(ids.domElements.divLoginPanelDatabaseInfo);
+    databaseInfo.innerHTML += "<b style = 'color:red'>Fallback database</b>";
+  }
   if (success) {
     thePage.user.makeFromUserInfo(parsedAuthentication);
     toggleAccountPanels();

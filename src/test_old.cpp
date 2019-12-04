@@ -244,7 +244,7 @@ void WeylElementPermutesRootSystem(const ElementWeylGroup& g, PermutationR2& p) 
     p.cycles[p.cycles.size - 1].size = 0;
     int j = i;
     do {
-      p.cycles[p.cycles.size- 1].AddOnTop(j);
+      p.cycles[p.cycles.size - 1].AddOnTop(j);
       accountedFor[j] = true;
       j = g.owner->RootSystem.GetIndex(g * g.owner->RootSystem[j]);
     } while (j != i);

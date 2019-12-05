@@ -314,12 +314,11 @@ bool UserCalculator::AuthenticateWithToken(std::stringstream* commentsOnFailure)
   return this->enteredAuthenticationToken == this->actualAuthenticationToken;
 }
 
-bool UserCalculator::LoadFromDB(std::stringstream* failureStream, std::stringstream* commentsGeneral) {
+bool UserCalculator::LoadFromDB(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
   MacroRegisterFunctionWithName("UserCalculator::FetchOneUserRow");
-  (void) failureStream;
   (void) commentsGeneral;
   double startTime = theGlobalVariables.GetElapsedSeconds();
-  if (!DatabaseRoutinesGlobalFunctionsMongo::LoadUserInfo(*this)) {
+  if (!DatabaseRoutinesGlobalFunctionsMongo::LoadUserInfo(*this, commentsOnFailure)) {
     return false;
   }
   this->ComputeCourseInfo();
@@ -327,7 +326,11 @@ bool UserCalculator::LoadFromDB(std::stringstream* failureStream, std::stringstr
     JSData findDeadlinesQuery, outDeadlinesQuery;
     findDeadlinesQuery[DatabaseStrings::labelDeadlinesSchema] = this->deadlineSchema;
     if (DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON(
-      DatabaseStrings::tableDeadlines, findDeadlinesQuery, outDeadlinesQuery, failureStream, true
+      DatabaseStrings::tableDeadlines,
+      findDeadlinesQuery,
+      outDeadlinesQuery,
+      commentsGeneral,
+      true
     )) {
       this->deadlines = outDeadlinesQuery[DatabaseStrings::labelDeadlines];
     }
@@ -336,7 +339,7 @@ bool UserCalculator::LoadFromDB(std::stringstream* failureStream, std::stringstr
     JSData findProblemWeightsQuery, outProblemWeightsQuery;
     findProblemWeightsQuery[DatabaseStrings::labelProblemWeightsSchema] = this->problemWeightSchema;
     if (DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON(
-      DatabaseStrings::tableProblemWeights, findProblemWeightsQuery, outProblemWeightsQuery, failureStream, true
+      DatabaseStrings::tableProblemWeights, findProblemWeightsQuery, outProblemWeightsQuery, commentsGeneral, true
     )) {
       this->problemWeights = outProblemWeightsQuery[DatabaseStrings::labelProblemWeights];
     }
@@ -489,18 +492,36 @@ JSData ProblemData::StoreJSON() {
   return result;
 }
 
+bool UserCalculator::ShouldCommentOnMissingUser() {
+  if (this->username.size() < 4) {
+    return true;
+  }
+  return
+  this->username == "default" ||
+  this->username == "admin" ||
+  this->username == "guest" ||
+  this->username == "student" ||
+  this->username == "teacher";
+}
+
+std::string UserCalculator::FirstLoginMessage() {
+  std::stringstream out;
+  if (theGlobalVariables.flagRequestComingLocally) {
+    out << "If this is your first run, set the username to "
+    << "admin and enter the password you desire. "
+    << "The password will then be automatically set. "
+    << "To add further accounts login as admin and go to 'Accounts'. ";
+  }
+  return out.str();
+}
+
 bool UserCalculator::Authenticate(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("UserCalculator::Authenticate");
   std::stringstream secondCommentsStream;
   if (!this->LoadFromDB(&secondCommentsStream)) {
-    if (commentsOnFailure != nullptr) {
+    if (commentsOnFailure != nullptr && this->ShouldCommentOnMissingUser()) {
       *commentsOnFailure << "User " << this->username << " does not exist. ";
-      if (theGlobalVariables.flagRequestComingLocally) {
-        *commentsOnFailure << "If this is your first run, set the username to "
-        << "admin and enter the password you desire. "
-        << "The password will then be automatically set. "
-        << "To add further accounts login as admin and go to 'Accounts'. ";
-      }
+      *commentsOnFailure << this->FirstLoginMessage();
     }
     return false;
   }
@@ -1454,9 +1475,20 @@ bool DatabaseRoutinesGlobalFunctions::LoginNoDatabaseSupport(
   UserCalculatorData& theUser, std::stringstream* commentsGeneral
 ) {
   if (theGlobalVariables.flagDatabaseCompiled) {
+    if (commentsGeneral != nullptr) {
+      *commentsGeneral
+      << "Database support is available, yet you requested no-database login. "
+      << "The command 'make -j10 noMongo=1' compiles the calculator without database support.";
+    }
     return false;
   }
   if (!theGlobalVariables.flagDisableDatabaseLogEveryoneAsAdmin) {
+    if (commentsGeneral != nullptr) {
+      *commentsGeneral << "Logging-in without database is not allowed. "
+      << "To allow, set "
+      << Configuration::disableDatabaseLogEveryoneAsAdmin
+      << " to true in the server's configuration.json file. ";
+    }
     return false;
   }
   // When the database is disabled, we assume the user is an admin.
@@ -1475,11 +1507,10 @@ bool DatabaseRoutinesGlobalFunctions::LoginNoDatabaseSupport(
 
 bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(
   UserCalculatorData& theUseR,
-  std::stringstream* commentsOnFailure,
-  std::stringstream* commentsGeneral
+  std::stringstream* commentsOnFailure
 ) {
-  if (!theGlobalVariables.flagDatabaseCompiled) {
-    return DatabaseRoutinesGlobalFunctions::LoginNoDatabaseSupport(theUseR, commentsGeneral);
+  if (theGlobalVariables.flagDisableDatabaseLogEveryoneAsAdmin) {
+    return DatabaseRoutinesGlobalFunctions::LoginNoDatabaseSupport(theUseR, commentsOnFailure);
   }
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LoginViaDatabase");
   UserCalculator userWrapper;
@@ -1529,7 +1560,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(
   if (userWrapper.username == "admin" && userWrapper.enteredPassword != "") {
     if (!userWrapper.Iexist(nullptr)) {
       if (commentsOnFailure != nullptr) {
-        *commentsOnFailure << "First login of user admin: setting admin password. ";
+        *commentsOnFailure << "<b>First login of user admin: setting admin password.</b> ";
       }
       logWorker << logger::yellow << "First login of user admin: setting admin password." << logger::endL;
       userWrapper.actualActivationToken = "activated";
@@ -1537,6 +1568,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(
       if (!userWrapper.StoreToDB(true, commentsOnFailure)) {
         logWorker << logger::red << "Failed to store admin pass to database. ";
         if (commentsOnFailure != nullptr) {
+          *commentsOnFailure << "Failed to store admin pass to database. ";
           logWorker << commentsOnFailure->str();
         }
       }

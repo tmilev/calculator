@@ -152,7 +152,7 @@ function loginWithServerCallback(incomingString, result) {
     parsedAuthentication[pathnames.urlFields.requests.useFallbackDatabase] === true
   ) {
     var databaseInfo = document.getElementById(ids.domElements.divLoginPanelDatabaseInfo);
-    databaseInfo.innerHTML += "<b style = 'color:red'>Fallback database</b>";
+    databaseInfo.innerHTML = "<b style = 'color:red'>Fallback database</b>";
   }
   if (success) {
     thePage.user.makeFromUserInfo(parsedAuthentication);

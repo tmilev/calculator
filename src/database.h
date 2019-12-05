@@ -13,8 +13,7 @@ public:
   static bool LogoutViaDatabase();
   static bool LoginViaDatabase(
     UserCalculatorData& theUseR,
-    std::stringstream* commentsOnFailure,
-    std::stringstream* commentsGeneral
+    std::stringstream* commentsOnFailure
   );
   static bool LoginNoDatabaseSupport(UserCalculatorData& theUser, std::stringstream* commentsGeneral);
   static bool LoginViaGoogleTokenCreateNewAccountIfNeeded(
@@ -251,7 +250,7 @@ public:
   bool StoreProblemDataToDatabaseJSON(std::stringstream* commentsOnFailure);
   std::string GetSelectedRowEntry(const std::string& theKey);
   std::string GetMySQLclauseIdentifyingUserByEmailOrID();
-  bool LoadFromDB(std::stringstream* failureStream, std::stringstream* commentsGeneral = nullptr);
+  bool LoadFromDB(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral = nullptr);
   bool FetchOneColumn(
     const std::string& columnNameUnsafe, std::string& outputUnsafe, std::stringstream* failureComments = nullptr
   );
@@ -259,6 +258,8 @@ public:
   bool AuthenticateWithUserNameAndPass(std::stringstream* commentsOnFailure);
   bool AuthenticateWithToken(std::stringstream* commentsOnFailure);
   bool Authenticate(std::stringstream* commentsOnFailure);
+  std::string FirstLoginMessage();
+  bool ShouldCommentOnMissingUser();
   bool ResetAuthenticationToken(std::stringstream* commentsOnFailure);
   bool SetPassword(std::stringstream* commentsOnFailure);
   bool Iexist(std::stringstream* comments);

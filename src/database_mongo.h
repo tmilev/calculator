@@ -9,7 +9,7 @@ public:
   bool flagInitialized;
   bool initialize(std::stringstream* commentsOnFailure);
   static int numDatabaseInstancesMustBeOneOrZero;
-  static bool LoadUserInfo(UserCalculatorData& output);
+  static bool LoadUserInfo(UserCalculatorData& output, std::stringstream* commentsOnFailure);
   static bool FindFromString(
     const std::string& collectionName,
     const std::string& findQuery,

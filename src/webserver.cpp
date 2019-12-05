@@ -775,11 +775,12 @@ bool WebWorker::LoginProcedure(std::stringstream& argumentProcessingFailureComme
       *comments << "Your authentication is valid but I have problems with my database records. ";
     }
   } else if (
-    theUser.enteredAuthenticationToken != "" || theUser.enteredPassword != "" ||
+    theUser.enteredAuthenticationToken != "" ||
+    theUser.enteredPassword != "" ||
     theUser.enteredActivationToken != ""
   ) {
     theGlobalVariables.flagLoggedIn = DatabaseRoutinesGlobalFunctions::LoginViaDatabase(
-      theUser, &argumentProcessingFailureComments, comments
+      theUser, &argumentProcessingFailureComments
     );
   }
   theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue(
@@ -3010,6 +3011,8 @@ int WebWorker::ServeClient() {
   ) {
     return this->ProcessTemplateJSON();
   } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::userInfoJSON) {
+    logWorker << "DEBUG: here I am. " << argumentProcessingFailureComments.str() << logger::endL;
+    comments << argumentProcessingFailureComments.str();
     return this->ProcessLoginUserInfo(comments.str());
   } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::editPage) {
     return this->ProcessEditPageJSON();
@@ -5297,7 +5300,7 @@ int WebServer::main(int argc, char **argv) {
       theGlobalVariables.flagDatabaseUseFallback = true;
       logServer << logger::red << "MongoDB missing. "
       << logger::green << "Using " << logger::red
-      << "**SLOW** " << logger::green << " fall-back JSON storage." << logger::endL;
+      << "**SLOW** " << logger::green << "fall-back JSON storage." << logger::endL;
     }
     // Compute configuration file location.
     // Load the configuration file.

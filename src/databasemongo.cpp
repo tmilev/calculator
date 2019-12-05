@@ -1069,14 +1069,19 @@ bool DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(
   );
 }
 
-bool DatabaseRoutinesGlobalFunctionsMongo::LoadUserInfo(UserCalculatorData& output) {
+bool DatabaseRoutinesGlobalFunctionsMongo::LoadUserInfo(
+  UserCalculatorData& output, std::stringstream* commentsOnFailure
+) {
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::LoadUserInfo");
   if (output.username == "" && output.email == "") {
     return false;
   }
   JSData userEntry;
   if (!DatabaseRoutinesGlobalFunctionsMongo::FindOneFromSome(
-    DatabaseStrings::tableUsers, output.GetFindMeFromUserNameQuery(), userEntry
+    DatabaseStrings::tableUsers,
+    output.GetFindMeFromUserNameQuery(),
+    userEntry,
+    commentsOnFailure
   )) {
     return false;
   }

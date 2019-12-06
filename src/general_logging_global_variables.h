@@ -199,11 +199,10 @@ public:
 
   std::string DisplayPathExecutable;
   std::string DisplayPathOutputFolder;
-  //To contain the url of the executable.
-  // Example:
+  // The backend URL, for example
   // DisplayNameExecutable ="/cgi-bin/calculator";
   std::string DisplayNameExecutable;
-  // Example:
+  // The app display name in the web browser,
   // DisplayNameExecutableApp ="/app";
   std::string DisplayNameExecutableApp;
   std::string DisplayNameExecutableAppNoCache;

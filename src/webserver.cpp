@@ -2031,7 +2031,7 @@ bool WebWorker::DoSetEmail(
   (void) commentsGeneralSensitive;
   if (!theGlobalVariables.flagDatabaseCompiled) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Project compiled without database support. ";
+      *commentsOnFailure << "DoSetEmail: project compiled without database support. ";
     }
     return false;
   }
@@ -2096,7 +2096,7 @@ int WebWorker::ProcessChangePassword(const std::string& reasonForNoAuthenticatio
   (void) reasonForNoAuthentication;
   this->SetHeaderOKNoContentLength("");
   if (! theGlobalVariables.flagDatabaseCompiled) {
-    stOutput << "Operation not possible: project compiled without database support.";
+//    stOutput << "ProcessChangePasswordb: project compiled without database support.";
     return 0;
   }
   UserCalculatorData& theUser = theGlobalVariables.userDefault;

@@ -56,7 +56,7 @@ This completes the setup and your first run.
 ### Prerequisites
 1. **OS**. For now, we support **Linux only**. Windows and Mac OS support could be added in the future (depending on resources). We have explicit support for the following distros.
 - Ubuntu   (all systems using the apt package manager should work too, but that hasn't been tested).
-- CentOS   (all systems using the yum package manager should work too, but that hasn't been tested).
+- I no longer support CentOS as I no longer have access to a CentOS system. However, I did run calculator-algebra.org on CentOS for a while, and, last I tested, the system worked on CentOS out-of-the-box.
 - We will add your Linux flavor upon request. We may need your help with your package manager. 
 2. **git**. needed to download the source. 
 3. **unzip**. Used to unzip [Mathjax](https://www.mathjax.org/), a method to display math formulas in the web browser. Without this, math formulas will not display correctly.

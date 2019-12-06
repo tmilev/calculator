@@ -5,6 +5,7 @@ mongoc_client_t* databaseClient = nullptr;
 mongoc_database_t *database = nullptr;
 #endif //MACRO_use_MongoDB
 #include "database_mongo.h"
+#include "database_fallback_json.h"
 #include "json.h"
 #include "general_logging_global_variables.h"
 #include "html_snippets.h"
@@ -538,7 +539,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithOptions(
   (void) maxOutputItems;
   (void) totalItems;
   if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "Project compiled without mongoDB support. ";
+    *commentsOnFailure << "FindFromJSONWithOptions: project compiled without mongoDB support. ";
   }
   return false;
 #endif
@@ -728,7 +729,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryStringWithOptions(
   (void) output;
   (void) options;
   if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "Project compiled without mongoDB support. ";
+    *commentsOnFailure << "FindOneFromQueryStringWithOptions: project compiled without mongoDB support. ";
   }
   return false;
 #endif
@@ -901,7 +902,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryById(
   (void) tableName;
   (void) findQuery;
   if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "Project compiled without mongoDB support. ";
+    *commentsOnFailure << "DeleteOneEntryById: project compiled without mongoDB support. ";
   }
   return false;
 #endif
@@ -964,7 +965,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryUnsetUnsecure(
   (void) findQuery;
   (void) selector;
   if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "Project compiled without mongoDB support. ";
+    *commentsOnFailure << "DeleteOneEntryUnsetUnsecure: project compiled without mongoDB support. ";
   }
   return false;
 #endif
@@ -1003,17 +1004,15 @@ bool DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromQueryString(
     updateQueryStream << "}}";
   }
   query.updateQuery = updateQueryStream.str();
-  //logWorker << logger::blue << "DEBUG: the find query: " << query.findQuery << logger::endL;
-  //logWorker << logger::blue << "DEBUG: the update query: " << query.updateQuery << logger::endL;
   return query.UpdateOneWithOptions(commentsOnFailure);
 #else
-  (void) collectionName;
-  (void) findQuery;
-  (void) updateQuery;
-  if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "Project compiled without mongoDB support. ";
-  }
-  return false;
+  return DatabaseFallback::UpdateOneFromQueryString(
+    collectionName,
+    findQuery,
+    updateQuery,
+    fieldsToSetIfNullUseFirstFieldIfUpdateQuery,
+    commentsOnFailure
+  );
 #endif
 }
 

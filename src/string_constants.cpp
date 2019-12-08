@@ -72,9 +72,19 @@ std::string WebAPI::request::unpause = "unpause";
 std::string WebAPI::request::modifyPage = "modifyPage";
 std::string WebAPI::request::clonePage = "clonePageJSON";
 std::string WebAPI::request::problemGiveUp = "problemGiveUp";
-std::string WebAPI::request::problemGiveUpNoLogin = "problemGiveUpNoLogin";
 std::string WebAPI::request::workerId = WebAPI::result::workerId;
 std::string WebAPI::request::workerIndex = WebAPI::result::workerIndex;
+std::string WebAPI::request::exerciseNoLogin        = "exerciseNoLogin"       ;
+std::string WebAPI::request::exerciseJSON           = "exerciseJSON"          ;
+std::string WebAPI::request::problemGiveUpNoLogin   = "problemGiveUpNoLogin"  ;
+std::string WebAPI::request::templateNoLogin        = "templateNoLogin"       ;
+std::string WebAPI::request::templateJSONNoLogin    = "templateJSONNoLogin"   ;
+std::string WebAPI::request::topicListJSONNoLogin   = "topicListJSONNoLogin"  ;
+std::string WebAPI::request::problemSolutionNoLogin = "problemSolutionNoLogin";
+std::string WebAPI::request::slidesFromSource       = "slidesFromSource"      ;
+std::string WebAPI::request::homeworkFromSource     = "homeworkFromSource"    ;
+std::string WebAPI::request::slidesSource           = "slidesSource"          ;
+std::string WebAPI::request::homeworkSource         = "homeworkSource"        ;
 
 std::string WebAPI::UserInfo::processMonitoring = "processMonitoring";
 

@@ -10,8 +10,7 @@
 #include "math_general_polynomial_computations_advanced_implementation.h"
 #include <cmath>
 
-extern ProjectInformationInstance ProjectInfoVpf6_35cpp;
-ProjectInformationInstance ProjectInfoVpf6_35cpp(__FILE__, "More calculator built-in functions. ");
+static ProjectInformationInstance ProjectInfoCalculatorImplementation5(__FILE__, "More calculator built-in functions. ");
 
 class MeshTriangles {
 public:

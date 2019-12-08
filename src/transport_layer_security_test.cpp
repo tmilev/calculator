@@ -7,8 +7,7 @@
 #include "crypto.h"
 #include "abstract_syntax_notation_one_decoder.h"
 
-extern ProjectInformationInstance projectInfoInstanceTransportLayerSecurityTest;
-ProjectInformationInstance projectInfoInstanceTransportLayerSecurityTest(__FILE__, "TSL/ssl implementation.");
+static ProjectInformationInstance projectInfoInstanceTransportLayerSecurityTest(__FILE__, "TSL/ssl implementation.");
 
 extern logger logServer;
 

@@ -4,8 +4,7 @@
 #include "crypto.h"
 #include "webserver.h"
 
-extern ProjectInformationInstance ProjectInfoTestRoutines;
-ProjectInformationInstance ProjectInfoTestRoutines(__FILE__, "Testing routines. ");
+static ProjectInformationInstance ProjectInfoTestRoutines(__FILE__, "Testing routines. ");
 
 int mainTest(List<std::string>& inputArguments) {
   std::cout << "\n!!!!!Enter main test\n";

@@ -8,8 +8,7 @@
 #include "system_functions_global_objects.h"
 #include "general_logging_global_variables.h"
 
-extern ProjectInformationInstance projectInfoInstanceCalculatorSystem;
-ProjectInformationInstance projectInfoInstanceCalculatorSystem(__FILE__, "System functions, platform dependent code.");
+static ProjectInformationInstance projectInfoInstanceCalculatorSystem(__FILE__, "System functions, platform dependent code.");
 
 
 static timeval ComputationStartGlobal, LastMeasureOfCurrentTime;

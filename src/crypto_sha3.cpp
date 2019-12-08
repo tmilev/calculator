@@ -22,8 +22,7 @@
 // ----------------------------------------------------------------------
 
 #include "crypto.h"
-extern ProjectInformationInstance project_SHA3_implementation;
-ProjectInformationInstance project_SHA3_implementation(__FILE__, "Sha3 implementation");
+static ProjectInformationInstance project_SHA3_implementation(__FILE__, "Sha3 implementation");
 
 // Keccak and sha3 are almost synonyms:
 // keccak was the sha3 version that won the competition for a new sha3 standard.

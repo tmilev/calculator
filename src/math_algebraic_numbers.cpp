@@ -5,8 +5,7 @@
 #include "math_subsets_selections.h"
 #include "math_general_implementation.h"
 
-extern ProjectInformationInstance ProjectInfoVpf9_3cpp;
-ProjectInformationInstance ProjectInfoVpf9_3cpp(__FILE__, "Algebraic numbers. ");
+static ProjectInformationInstance projectInfoAlgebraicNumbersCPP(__FILE__, "Algebraic numbers. ");
 
 std::string MonomialVector::ToString(FormatExpressions* theFormat) const {
   if (theFormat != nullptr) {

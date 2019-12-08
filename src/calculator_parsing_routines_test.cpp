@@ -2,8 +2,7 @@
 // For additional information refer to the file "calculator.h".
 #include "calculator.h"
 
-extern ProjectInformationInstance ProjectCalculatorParsingRoutinesTestCPP;
-ProjectInformationInstance ProjectCalculatorParsingRoutinesTestCPP(__FILE__, "Test of calculator input parsing routines. ");
+static ProjectInformationInstance ProjectCalculatorParsingRoutinesTestCPP(__FILE__, "Test of calculator input parsing routines. ");
 
 bool Calculator::Test::All() {
   Calculator tester;

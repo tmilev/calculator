@@ -117,6 +117,19 @@ public:
   ~MutexProcess();
 };
 
+class MutexProcessLockGuard {
+public:
+  MutexProcess* guarded;
+  MutexProcessLockGuard(MutexProcess& input) {
+    this->guarded = &input;
+    this->guarded->Lock();
+  }
+  ~MutexProcessLockGuard() {
+    this->guarded->Unlock();
+    this->guarded = nullptr;
+  }
+};
+
 // This is an unnamed pipe with which may be shared by two or more processes
 // and by more than one thread in each process.
 // Multiple processes may try to send bytes through the pipe.

@@ -7,8 +7,7 @@
 #include <iomanip>
 #include "string_constants.h"
 
-extern ProjectInformationInstance projectInfoInstanceHtmlInterpretationInterfaceImplementation;
-ProjectInformationInstance projectInfoInstanceHtmlInterpretationInterfaceImplementation(
+static ProjectInformationInstance projectInfoInstanceHtmlInterpretationInterfaceImplementation(
   __FILE__, "Routines for calculus teaching: calculator exam mode."
 );
 
@@ -805,7 +804,7 @@ void HtmlInterpretation::GetJSDataUserInfo(JSData& outputAppend, const std::stri
   outputAppend[WebAPI::result::loginDisabledEveryoneIsAdmin] = theGlobalVariables.flagDisableDatabaseLogEveryoneAsAdmin;
   outputAppend[WebAPI::result::useFallbackDatabase] = theGlobalVariables.flagDatabaseUseFallback;
   if (comments != "") {
-    outputAppend["comments"] = HtmlRoutines::ConvertStringToHtmlString(comments, false);
+    outputAppend[WebAPI::result::comments] = HtmlRoutines::ConvertStringToHtmlString(comments, false);
   }
   if (!theGlobalVariables.theProgress.flagBanProcessMonitoring) {
     outputAppend[WebAPI::UserInfo::processMonitoring] = "true";
@@ -813,14 +812,14 @@ void HtmlInterpretation::GetJSDataUserInfo(JSData& outputAppend, const std::stri
   } else {
     outputAppend[WebAPI::UserInfo::processMonitoring] = "false";
   }
-  if (theGlobalVariables.GetWebInput("error") != "") {
-    outputAppend["error"] = HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.GetWebInput("error"), false);
+  if (theGlobalVariables.GetWebInput(WebAPI::result::error) != "") {
+    outputAppend[WebAPI::result::error] = HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.GetWebInput(WebAPI::result::error), false);
   }
   if (!theGlobalVariables.flagLoggedIn) {
-    outputAppend["status"] = "not logged in";
+    outputAppend[WebAPI::result::status] = "not logged in";
     return;
   }
-  outputAppend["status"] = "logged in";
+  outputAppend[WebAPI::result::status] = "logged in";
   outputAppend[DatabaseStrings::labelUsername]            = HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.userDefault.username                 , false);
   outputAppend[DatabaseStrings::labelAuthenticationToken] = HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.userDefault.actualAuthenticationToken, false);
   outputAppend[DatabaseStrings::labelUserRole]            = HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.userDefault.userRole                 , false);

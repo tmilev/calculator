@@ -1,7 +1,6 @@
 #include "crypto.h"
 
-extern ProjectInformationInstance projectInfoCryptoFile2;
-ProjectInformationInstance projectInfoCryptoFile2(__FILE__, "Tests for crypto functions.");
+static ProjectInformationInstance projectInfoCryptoFile2(__FILE__, "Tests for crypto functions.");
 
 bool Crypto::Test::All() {
   Crypto::Test::Sha256();

@@ -7,8 +7,7 @@
 #include "math_extra_semisimple_Lie_algebras_implementation.h"
 #include "math_extra_finite_groups_implementation.h"
 
-extern ProjectInformationInstance ProjectInfoVpfSemisimpleSubalgebras;
-ProjectInformationInstance ProjectInfoVpfSemisimpleSubalgebras(__FILE__, "Semisimple subalgebras of the semisimple Lie algebras. ");
+static ProjectInformationInstance ProjectInfoVpfSemisimpleSubalgebras(__FILE__, "Semisimple subalgebras of the semisimple Lie algebras. ");
 
 extern logger logWorker;
 template<>

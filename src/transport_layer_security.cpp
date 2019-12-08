@@ -12,8 +12,7 @@
 #include <netdb.h> //<-addrinfo and related data structures defined here
 #include <iomanip>
 
-extern ProjectInformationInstance projectInfoInstanceTransportLayerSecurityImplementation;
-ProjectInformationInstance projectInfoInstanceTransportLayerSecurityImplementation(__FILE__, "TSL/ssl implementation.");
+static ProjectInformationInstance projectInfoInstanceTransportLayerSecurityImplementation(__FILE__, "TSL/ssl implementation.");
 
 // http://stackoverflow.com/questions/10175812/how-to-create-a-self-signed-certificate-with-openssl
 // openssl req -x509 -keyalg RSA -newkey rsa:2048 -nodes -keyout key.pem -out cert.pem -days 3001

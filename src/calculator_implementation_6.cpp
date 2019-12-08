@@ -16,8 +16,7 @@
 #include "string_constants.h"
 #include <iomanip>
 
-extern ProjectInformationInstance ProjectInfoVpf6_37cpp;
-ProjectInformationInstance ProjectInfoVpf6_37cpp(__FILE__, "More calculator built-in functions. ");
+static ProjectInformationInstance ProjectInfoVpf6_37cpp(__FILE__, "More calculator built-in functions. ");
 
 bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation(
   Calculator& theCommands,

@@ -7,9 +7,7 @@
 #include "database_mongo.h"
 #include "string_constants.h"
 
-// Avoid previous extern warning:
-extern ProjectInformationInstance ProjectInfoVpfDatabasecpp;
-ProjectInformationInstance ProjectInfoVpfDatabasecpp(__FILE__, "Database-related code. ");
+static ProjectInformationInstance ProjectInfoVpfDatabasecpp(__FILE__, "Database-related code. ");
 
 bool DatabaseRoutinesGlobalFunctions::SetPassword(
   const std::string& inputUsername,

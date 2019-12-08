@@ -11,8 +11,7 @@
 #include "math_extra_finite_groups_implementation.h"
 #include "math_extra_universal_enveloping_implementation.h" // undefined reference to `ElementUniversalEnveloping<RationalFunctionOld>::MakeZero(SemisimpleLieAlgebra&)'
 
-extern ProjectInformationInstance ProjectInfoVpf9_2cpp;
-ProjectInformationInstance ProjectInfoVpf9_2cpp(__FILE__, "Math routines implementation. ");
+static ProjectInformationInstance projectInfoMathImplementation5CPP(__FILE__, "Math routines implementation. ");
 
 std::string MonomialWeylAlgebra::ToString(FormatExpressions* theFormat) const {
   if (this->IsConstant()) {

@@ -1,8 +1,7 @@
 #include "calculator_database_mongo.h"
 #include "database_mongo.h"
 
-extern ProjectInformationInstance ProjectInfoVpfMongoCalculatorInterface;
-ProjectInformationInstance ProjectInfoVpfMongoCalculatorInterface(__FILE__, "Database mongo<->calculator interface.");
+static ProjectInformationInstance ProjectInfoVpfMongoCalculatorInterface(__FILE__, "Database mongo-calculator interface.");
 
 extern logger logWorker;
 

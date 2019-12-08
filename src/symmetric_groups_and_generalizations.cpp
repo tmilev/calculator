@@ -3,8 +3,7 @@
 #include "math_general_polynomial_computations_advanced_implementation.h"
 #include "math_extra_symmetric_groups_and_generalizations.h"
 
-extern ProjectInformationInstance ProjectInfoVpf2Math3_SymmetricGroupsAndGeneralizations;
-ProjectInformationInstance ProjectInfoVpf2Math3_SymmetricGroupsAndGeneralizations(
+static ProjectInformationInstance projectInfoSymmetricGroupsAndGeneralizations(
   __FILE__, "Symmetric groups and generalizations, work in progress by Thomas. "
 );
 

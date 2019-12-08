@@ -5052,10 +5052,6 @@ void WebServer::InitializeMainAll() {
   this->InitializeMainAddresses();
 }
 
-int main(int argc, char **argv) {
-  return WebServer::main(argc, argv);
-}
-
 extern int mainTest(List<std::string>& remainingArgs);
 
 void WebServer::TurnProcessMonitoringOn() {

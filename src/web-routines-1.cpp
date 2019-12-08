@@ -17,8 +17,7 @@
 
 #include "database.h"
 
-extern ProjectInformationInstance ProjectInfoVpf6_5calculatorWebRoutines;
-ProjectInformationInstance ProjectInfoVpf6_5calculatorWebRoutines(__FILE__, "Calculator web routines. ");
+static ProjectInformationInstance ProjectInfoVpf6_5calculatorWebRoutines(__FILE__, "Calculator web routines. ");
 
 class WebCrawler {
 public:

@@ -13,8 +13,7 @@
 #include <cfloat>
 
 extern logger logWorker;
-extern ProjectInformationInstance ProjectInfoVpf6cpp;
-ProjectInformationInstance ProjectInfoVpf6cpp(__FILE__, "Calculator parser, implementation. ");
+static ProjectInformationInstance ProjectInfoVpf6cpp(__FILE__, "Calculator parser, implementation. ");
 
 Calculator::Calculator() {
   this->numOutputFileS = 0;

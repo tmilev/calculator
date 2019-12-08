@@ -5,8 +5,7 @@
 #include "math_extra_semisimple_Lie_algebras_implementation.h"
 #include "math_extra_finite_groups_implementation.h"
 
-extern ProjectInformationInstance ProjectInfoVpf9_5RootSAsSl2sas;
-ProjectInformationInstance ProjectInfoVpf9_5RootSAsSl2sas(__FILE__, "Root and sl(2) subalgebras of semisimple Lie algebras. ");
+static ProjectInformationInstance ProjectInfoVpf9_5RootSAsSl2sas(__FILE__, "Root and sl(2) subalgebras of semisimple Lie algebras. ");
 
 void rootSubalgebra::GetCoxeterElement(Matrix<Rational>& output) {
   int theDim = this->GetAmbientWeyl().GetDim();

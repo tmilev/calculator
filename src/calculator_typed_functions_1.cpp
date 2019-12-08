@@ -10,8 +10,7 @@
 #include "math_general_polynomial_computations_basic_implementation.h" //undefined reference to Polynomial<AlgebraicNumber>::MakeOne(int)
 #include "math_extra_finite_groups_implementation.h" // undefined reference to `void WeylGroup::RaiseToDominantWeight<Rational>(Vector<Rational>&, int*, bool*, ElementWeylGroup<WeylGroup>*)
 
-extern ProjectInformationInstance ProjectInfoVpf6_1cpp;
-ProjectInformationInstance ProjectInfoVpf6_1cpp(__FILE__, "Calculator inner binary typed functions. ");
+static ProjectInformationInstance ProjectInfoVpf6_1cpp(__FILE__, "Calculator inner binary typed functions. ");
 
 bool Calculator::innerOperationBinary(Calculator& theCommands, const Expression& input, Expression& output, int theOp) {
   for (int i = 0; i < theCommands.FunctionHandlers[theOp].size; i ++) {

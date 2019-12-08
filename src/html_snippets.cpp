@@ -7,8 +7,7 @@
 #include <iomanip>
 #include "string_constants.h"
 
-extern ProjectInformationInstance projectInfoInstanceHtmlSnippets;
-ProjectInformationInstance projectInfoInstanceHtmlSnippets(__FILE__, "Html Snippets.");
+static ProjectInformationInstance projectInfoInstanceHtmlSnippets(__FILE__, "Html Snippets.");
 
 MapList<std::string, std::string, MathRoutines::HashString> HtmlRoutines::preLoadedFiles;
 

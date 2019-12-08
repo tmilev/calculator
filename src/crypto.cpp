@@ -6,8 +6,7 @@
 #include "math_extra_algebraic_numbers.h"
 #include <iomanip>
 
-extern ProjectInformationInstance projectInfoCryptoFile1;
-ProjectInformationInstance projectInfoCryptoFile1(__FILE__, "SHA- 1 and base64 implementation.");
+static ProjectInformationInstance projectInfoCryptoFile1(__FILE__, "SHA- 1 and base64 implementation.");
 
 void Crypto::GetRandomBytesSecureInternal(ListZeroAfterUse<unsigned char>& output, int numberOfBytesMax32) {
   return Crypto::GetRandomBytesSecureInternalMayLeaveTracesInMemory(output.data, numberOfBytesMax32);

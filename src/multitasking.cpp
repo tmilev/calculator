@@ -6,8 +6,7 @@
 #include <assert.h>
 #include <mutex>
 
-extern ProjectInformationInstance vpfGeneral2Mutexes;
-ProjectInformationInstance vpfGeneral2Mutexes(__FILE__, "Multitasking implementation.");
+static ProjectInformationInstance vpfGeneral2Mutexes(__FILE__, "Multitasking implementation.");
 
 void ParallelComputing::CheckPointerCounters() {
   if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList) {

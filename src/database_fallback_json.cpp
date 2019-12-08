@@ -3,11 +3,14 @@
 
 #include "general_logging_global_variables.h"
 #include "database_fallback_json.h"
+#include "string_constants.h"
 // Avoid previous extern warning:
-extern ProjectInformationInstance projectInfoDatabaseFallbackJSON;
-ProjectInformationInstance projectInfoDatabaseFallbackJSON(__FILE__, "No-database fallback using json file.");
+static ProjectInformationInstance projectInfoDatabaseFallbackJSON(__FILE__, "No-database fallback using json file.");
 
-MutexProcess DatabaseFallback::DatabaseAccess;
+DatabaseFallback& DatabaseFallback::theDatabase() {
+  static DatabaseFallback result;
+  return result;
+}
 
 bool DatabaseFallback::UpdateOneFromQueryString(
   const std::string& collectionName,
@@ -24,33 +27,59 @@ bool DatabaseFallback::UpdateOneFromQueryString(
     }
     return false;
   }
-  DatabaseFallback::DatabaseAccess.Lock();
+  MutexProcessLockGuard guardDB(this->access);
   JSData database;
-  if (!DatabaseFallback::ReadDatabase(commentsOnFailure, database)) {
+  if (this->ReadDatabase(database, commentsOnFailure)) {
     return false;
   }
-
-  int pleaseContinueHere;
-
-
-
-
-
-
-
-
-
-
-  DatabaseFallback::DatabaseAccess.Unlock();
+  if (!this->HasCollection(collectionName, commentsOnFailure)) {
+    return false;
+  }
+  if (commentsOnFailure != nullptr) {
+    *commentsOnFailure << "Not implemented yet: findQuery: " << findQuery << " updadeQuery: " << updateQuery.ToString(false);
+  }
   return false;
 }
 
-bool DatabaseFallback::ReadDatabase(std::stringstream* commentsOnFailure, JSData& output) {
+bool DatabaseFallback::HasCollection(const std::string& collection, std::stringstream* commentsOnFailure) {
+  if (!this->reader.HasKey(collection)) {
+    return true;
+  }
+  if (DatabaseFallback::knownCollections.Contains(collection)) {
+    this->reader[collection].theType = JSData::token::tokenArray;
+    return true;
+  }
+  if (commentsOnFailure != nullptr) {
+    *commentsOnFailure << "Database collection not found. ";
+  }
+  return false;
+}
+
+void DatabaseFallback::initialize() {
+  this->access.CreateMe("databaseFallback", true, false);
+  this->knownCollections.AddOnTop({
+    DatabaseStrings::tableDeadlines,
+    DatabaseStrings::tableDeleted,
+    DatabaseStrings::tableEmailInfo,
+    DatabaseStrings::tableProblemInformation,
+    DatabaseStrings::tableProblemWeights,
+    DatabaseStrings::tableUsers
+  });
+}
+
+bool DatabaseFallback::ReadDatabase(JSData& output, std::stringstream* commentsOnFailure) {
   std::string theDatabase;
   if (!FileOperations::LoadFileToStringVirtual(
     "database-fallback/database.json", theDatabase, true, commentsOnFailure
   )) {
-    return false;
+    if (!FileOperations::FileExistsVirtual(
+      "database-fallback/database.json",
+      true,
+      false,
+      commentsOnFailure
+    )) {
+      return false;
+    }
   }
   return output.readstring(theDatabase, false, commentsOnFailure);
 }

@@ -2,8 +2,7 @@
 // For additional information refer to the file "calculator.h".
 #include "calculator.h"
 
-extern ProjectInformationInstance ProjectInfoVpf6_0cpp;
-ProjectInformationInstance ProjectInfoVpf6_0cpp(__FILE__, "Calculator input parsing routines. ");
+static ProjectInformationInstance ProjectInfoVpf6_0cpp(__FILE__, "Calculator input parsing routines. ");
 
 SyntacticElement Calculator::GetEmptySyntacticElement() {
   SyntacticElement result;

@@ -19,8 +19,7 @@
 #include "transport_layer_security.h"
 #include "string_constants.h"
 
-extern ProjectInformationInstance ProjectInfoVpf6_3cpp;
-ProjectInformationInstance ProjectInfoVpf6_3cpp(__FILE__, "Calculator built-in functions. ");
+static ProjectInformationInstance ProjectInfoVpf6_3cpp(__FILE__, "Calculator built-in functions. ");
 
 extern logger logWorker;
 

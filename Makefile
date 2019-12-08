@@ -153,7 +153,6 @@ SOURCES_RELATIVE_PATH=\
     json.cpp \
     math_algebraic_numbers.cpp \
     math_elliptic_curves.cpp \
-    math_finite_fields.cpp \
     math_finite_group_characters.cpp \
     math_floating_point.cpp \
     math_graph.cpp \
@@ -174,6 +173,7 @@ SOURCES_RELATIVE_PATH=\
     symmetric_groups_and_generalizations.cpp \
     system_functions.cpp \
     test.cpp \
+    main.cpp \
     transport_layer_security.cpp \
     transport_layer_security_implementation.cpp \
     transport_layer_security_openssl.cpp \

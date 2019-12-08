@@ -3,8 +3,7 @@
 #include "calculator.h"
 #include "string_constants.h"
 
-extern ProjectInformationInstance ProjectInfoVpf6_05cpp;
-ProjectInformationInstance ProjectInfoVpf6_05cpp(__FILE__, "Calculator core evaluation engine. ");
+static ProjectInformationInstance ProjectInfoVpf6_05cpp(__FILE__, "Calculator core evaluation engine. ");
 
 std::string Calculator::ToStringFunctionHandlersJSON() {
   MacroRegisterFunctionWithName("Calculator::ToStringFunctionHandlersJSON");

@@ -12,8 +12,7 @@
 #include "math_extra_elliptic_curves_implementation.h"
 #include <cmath>
 
-extern ProjectInformationInstance ProjectInfoVpf6_4ExpressionsImplementationcpp;
-ProjectInformationInstance ProjectInfoVpf6_4ExpressionsImplementationcpp(__FILE__, "Calculator expression implementation. ");
+static ProjectInformationInstance ProjectInfoVpf6_4ExpressionsImplementationcpp(__FILE__, "Calculator expression implementation. ");
 
 Expression operator*(const Expression& left, const Expression& right) {
   MacroRegisterFunctionWithName("operator*(Expression, Expression)");

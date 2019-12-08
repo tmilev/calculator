@@ -46,9 +46,7 @@
 #include <stdint.h>
 #include <string.h>
 
-extern ProjectInformationInstance project_RIPEMD160_implementation;
-
-ProjectInformationInstance project_RIPEMD160_implementation(__FILE__, "Ripemd160 implementation");
+static ProjectInformationInstance project_RIPEMD160_implementation(__FILE__, "Ripemd160 implementation");
 
 bool Crypto::flagRIPEMDBigEndian = false;
 

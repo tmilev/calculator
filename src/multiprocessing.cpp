@@ -8,8 +8,7 @@
 
 extern WebServer theWebServer;
 
-extern ProjectInformationInstance projectInfoInstanceWebServerInterProcessLogisticsImplementation;
-ProjectInformationInstance projectInfoInstanceWebServerInterProcessLogisticsImplementation(
+static ProjectInformationInstance projectInfoInstanceWebServerInterProcessLogisticsImplementation(
   __FILE__, "Web server interprocess communication implementation."
 );
 

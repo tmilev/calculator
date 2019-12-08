@@ -52,7 +52,6 @@ HEADERS += \
     math_extra_drawing_variables.h \
     math_extra_elliptic_curves.h \
     math_extra_elliptic_curves_implementation.h \
-    math_extra_finite_fields.h \
     math_extra_finite_groups.h \
     math_extra_finite_groups_implementation.h \
     math_extra_graph.h \
@@ -126,7 +125,6 @@ SOURCES += \
     json.cpp \
     math_algebraic_numbers.cpp \
     math_elliptic_curves.cpp \
-    math_finite_fields.cpp \
     math_finite_group_characters.cpp \
     math_floating_point.cpp \
     math_graph.cpp \
@@ -154,9 +152,9 @@ SOURCES += \
     webserver.cpp \
     webserver_fork.cpp \
     calculator_expressions_test.cpp \
-    test_old.cpp \
     math_implementation_1_test.cpp \
     calculator_expressions_test.cpp \
     calculator_parsing_routines_test.cpp \
-    database_fallback_json.cpp
+    database_fallback_json.cpp \
+    main.cpp
 

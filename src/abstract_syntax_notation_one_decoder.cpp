@@ -10,9 +10,7 @@
 
 extern logger logWorker, logServer;
 
-extern ProjectInformationInstance ProjectInfoAbstractSyntaxNotationOneDecoderImplementation;
-
-ProjectInformationInstance ProjectInfoAbstractSyntaxNotationOneDecoderImplementation(
+static ProjectInformationInstance projectInfoAbstractSyntaxNotationOneDecoderImplementation(
   __FILE__, "Abstract syntax notation one (ASN-1) implementation. "
 );
 

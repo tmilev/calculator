@@ -12,8 +12,7 @@
 #include "database_mongo.h"
 #include "string_constants.h"
 
-extern ProjectInformationInstance projectInfoInstanceWebServerExamAndTeachingRoutinesCustomCode;
-ProjectInformationInstance projectInfoInstanceWebServerExamAndTeachingRoutinesCustomCode(
+static ProjectInformationInstance projectInfoWebServerExamAndTeachingRoutinesCustomCode(
   __FILE__, "Routines for calculus teaching: calculator exam mode. Shared code. "
 );
 

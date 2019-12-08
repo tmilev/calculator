@@ -12,8 +12,7 @@ mongoc_database_t *database = nullptr;
 #include "string_constants.h"
 #include "general_strings.h"
 
-extern ProjectInformationInstance ProjectInfoVpfDatabaseMongo;
-ProjectInformationInstance ProjectInfoVpfDatabaseMongo(__FILE__, "Database mongoDB.");
+static ProjectInformationInstance ProjectInfoVpfDatabaseMongo(__FILE__, "Database mongoDB.");
 
 int DatabaseRoutinesGlobalFunctionsMongo::numDatabaseInstancesMustBeOneOrZero = 0;
 extern DatabaseRoutinesGlobalFunctionsMongo databaseMongo;
@@ -1006,7 +1005,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromQueryString(
   query.updateQuery = updateQueryStream.str();
   return query.UpdateOneWithOptions(commentsOnFailure);
 #else
-  return DatabaseFallback::UpdateOneFromQueryString(
+  return DatabaseFallback::theDatabase().UpdateOneFromQueryString(
     collectionName,
     findQuery,
     updateQuery,

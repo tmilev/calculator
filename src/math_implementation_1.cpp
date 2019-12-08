@@ -5,8 +5,7 @@
 #include "math_general.h"
 #include "math_extra_universal_enveloping.h"
 
-extern ProjectInformationInstance ProjectInfoVpf7cpp;
-ProjectInformationInstance ProjectInfoVpf7cpp(__FILE__, "Math routines implementation. ");
+static ProjectInformationInstance projectInfoMathImplementation1CPP(__FILE__, "Math routines implementation. ");
 
 void SemisimpleLieAlgebra::GetChevalleyGeneratorAsLieBracketsSimpleGens(
   int generatorIndex,

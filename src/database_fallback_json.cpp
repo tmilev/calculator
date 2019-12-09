@@ -2,7 +2,7 @@
 // For additional information refer to the file "calculator.h".
 
 #include "general_logging_global_variables.h"
-#include "database_fallback_json.h"
+#include "database.h"
 #include "string_constants.h"
 // Avoid previous extern warning:
 static ProjectInformationInstance projectInfoDatabaseFallbackJSON(__FILE__, "No-database fallback using json file.");

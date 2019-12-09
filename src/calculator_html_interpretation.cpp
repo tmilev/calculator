@@ -3,7 +3,7 @@
 #include "calculator_html_interpretation.h"
 #include "html_snippets.h"
 #include "calculator_html_interpretation_interface.h"
-#include "database_mongo.h"
+#include "database.h"
 #include <iomanip>
 #include "string_constants.h"
 

@@ -3,21 +3,20 @@
 #include "webserver.h"
 #include "calculator_interface.h"
 #include "database.h"
+#include "calculator_problem_storage.h"
 #include "calculator_html_interpretation_interface.h"
 #include "html_snippets.h"
 #include "string_constants.h"
 #include "crypto.h"
-
-static ProjectInformationInstance projectInfoInstanceWebServer(__FILE__, "Web server implementation.");
-WebServer theWebServer;
-
 #include <sys/wait.h>//<-waitpid f-n here
 #include <netdb.h> //<-addrinfo and related data structures defined here
 #include <arpa/inet.h> // <- inet_ntop declared here (ntop = network to presentation)
 #include <unistd.h>
 #include <sys/stat.h>//<-for file statistics
 #include <fcntl.h>//<-setting flags of file descriptors
-#include "database_mongo.h"
+
+static ProjectInformationInstance projectInfoInstanceWebServer(__FILE__, "Web server implementation.");
+WebServer theWebServer;
 
 class SignalsInfrastructure {
 public:
@@ -3002,16 +3001,15 @@ int WebWorker::ServeClient() {
     return this->ProcessExamPageJSON();
   } else if (
     theGlobalVariables.userCalculatorRequestType == "template" ||
-    theGlobalVariables.userCalculatorRequestType == "templateNoLogin"
+    theGlobalVariables.userCalculatorRequestType == WebAPI::request::templateNoLogin
   ) {
     return this->ProcessTemplate();
   } else if (
     theGlobalVariables.userCalculatorRequestType == "templateJSON" ||
-    theGlobalVariables.userCalculatorRequestType == "templateJSONNoLogin"
+    theGlobalVariables.userCalculatorRequestType == WebAPI::request::templateJSONNoLogin
   ) {
     return this->ProcessTemplateJSON();
   } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::userInfoJSON) {
-    logWorker << "DEBUG: here I am. " << argumentProcessingFailureComments.str() << logger::endL;
     comments << argumentProcessingFailureComments.str();
     return this->ProcessLoginUserInfo(comments.str());
   } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::editPage) {
@@ -5297,6 +5295,7 @@ int WebServer::main(int argc, char **argv) {
       logServer << logger::red << "MongoDB missing. "
       << logger::green << "Using " << logger::red
       << "**SLOW** " << logger::green << "fall-back JSON storage." << logger::endL;
+      DatabaseFallback::theDatabase().initialize();
     }
     // Compute configuration file location.
     // Load the configuration file.

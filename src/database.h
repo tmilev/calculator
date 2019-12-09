@@ -1,12 +1,205 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
-#ifndef vpfHeader7_databaseMySQL_already_included
-#define vpfHeader7_databaseMySQL_already_included
+#ifndef DATABASE_HEADER_ALREADY_INCLUDED
+#define DATABASE_HEADER_ALREADY_INCLUDED
 #include "calculator_interface.h"
 #include "general_time_date.h"
 #include "general_database_system_independent.h"
+#include "multiprocessing.h"
 
-static ProjectInformationInstance ProjectInfoVpf8_1HeaderDatabaseInterface_MySQLx(__FILE__, "Database interface header. ");
+static ProjectInformationInstance projectInfoDatabaseH(__FILE__, "Database interface header. ");
+
+class DatabaseRoutinesGlobalFunctionsMongo {
+public:
+  bool flagInitialized;
+  bool initialize(std::stringstream* commentsOnFailure);
+  static int numDatabaseInstancesMustBeOneOrZero;
+  static bool LoadUserInfo(UserCalculatorData& output, std::stringstream* commentsOnFailure);
+  static bool FindFromString(
+    const std::string& collectionName,
+    const std::string& findQuery,
+    List<JSData>& output,
+    int maxOutputItems = - 1,
+    long long* totalItems = nullptr,
+    std::stringstream* commentsOnFailure = nullptr
+  );
+  static bool FindFromJSON(
+    const std::string& collectionName,
+    const JSData& findQuery,
+    List<JSData>& output,
+    int maxOutputItems = - 1,
+    long long* totalItems = nullptr,
+    std::stringstream* commentsOnFailure = nullptr
+  );
+  static bool FindFromJSONWithProjection(
+    const std::string& collectionName,
+    const JSData& findQuery,
+    List<JSData>& output,
+    List<std::string>& fieldsToProjectTo,
+    int maxOutputItems = - 1,
+    long long* totalItems = nullptr,
+    std::stringstream* commentsOnFailure = nullptr
+  );
+  static bool FindFromJSONWithOptions(
+    const std::string& collectionName,
+    const JSData& findQuery,
+    List<JSData>& output,
+    const JSData& options,
+    int maxOutputItems = - 1,
+    long long* totalItems = nullptr,
+    std::stringstream* commentsOnFailure = nullptr,
+    std::stringstream* commentsGeneralNonSensitive = nullptr
+  );
+  static bool FindOneFromQueryString(
+    const std::string& collectionName,
+    const std::string& findQuery,
+    JSData& output,
+    std::stringstream* commentsOnFailure = nullptr
+  );
+  static bool FindOneFromQueryStringWithProjection(
+    const std::string& collectionName,
+    const std::string& findQuery,
+    const List<std::string>& fieldsToProjectTo,
+    JSData& output,
+    std::stringstream* commentsOnFailure = nullptr
+  );
+  static JSData GetProjectionFromFieldNames(
+    const List<std::string>& fieldsToProjectTo,
+    int offset
+  );
+  static bool FindOneFromQueryStringWithOptions(
+    const std::string& collectionName,
+    const std::string& findQuery,
+    const JSData& options,
+    JSData& output,
+    std::stringstream* commentsOnFailure = nullptr,
+    std::stringstream* commentsGeneralNonSensitive = nullptr
+  );
+  static bool FindOneFromJSONWithProjection(
+    const std::string& collectionName,
+    const JSData& findQuery,
+    const List<std::string>& fieldsToProjectTo,
+    JSData& output,
+    std::stringstream* commentsOnFailure,
+    bool doEncodeFindFields
+  );
+  static bool GetOrFindQuery(
+    const List<JSData>& input,
+    std::string& output,
+    std::stringstream* commentsOnFailure = nullptr
+  );
+  static bool FindOneFromJSON(
+    const std::string& collectionName,
+    const JSData& findQuery,
+    JSData& output,
+    std::stringstream* commentsOnFailure,
+    bool doEncodeFindFields
+  );
+  static bool FindOneFromSome(
+    const std::string& collectionName,
+    const List<JSData>& findOrQueries,
+    JSData& output,
+    std::stringstream* commentsOnFailure = nullptr
+  );
+  static bool IsValidJSONMongoUpdateQuery(
+    const JSData& updateQuery,
+    std::stringstream* commentsOnFailure = nullptr
+  );
+  static bool IsValidJSONMongoFindQuery(
+    const JSData& findQuery,
+    std::stringstream* commentsOnFailure = nullptr,
+    bool mustBeObject = true
+  );
+  static bool UpdateOneFromJSON(
+    const std::string& collectionName,
+    const JSData& findQuery,
+    const JSData& updateQuery,
+    List<std::string>* fieldsToSetIfNullUseFirstFieldIfUpdateQuery,
+    std::stringstream* commentsOnFailure = nullptr
+  );
+  static bool UpdateOneFromJSONSpecifyField(
+    const std::string& collectionName,
+    const JSData& findQuery,
+    const JSData& updateQuery,
+    std::string fieldToSet,
+    std::stringstream* commentsOnFailure = nullptr
+  );
+  static bool UpdateOneFromSomeJSON(
+    const std::string& collectionName,
+    const List<JSData>& findOrQueries,
+    const JSData& updateQuery,
+    std::stringstream* commentsOnFailure = nullptr
+  );
+  static bool UpdateOneFromQueryString(
+    const std::string& collectionName,
+    const std::string& findQuery,
+    const JSData& updateQuery,
+    List<std::string>* fieldsToSetIfNullUseFirstFieldIfUpdateQuery,
+    std::stringstream* commentsOnFailure = nullptr
+  );
+  static bool FetchCollectionNames(List<std::string>& output, std::stringstream* commentsOnFailure);
+  static bool FetchTable(
+    const std::string& tableName,
+    List<std::string>& outputLabels,
+    List<List<std::string> >& outputRows,
+    long long* totalItems = nullptr,
+    std::stringstream* commentsOnFailure = nullptr
+  );
+  static bool DeleteOneEntry(const JSData& theEntry, std::stringstream* commentsOnFailure);
+  static bool DeleteOneEntryById(
+    const std::string& tableName,
+    const JSData& findQuery,
+    std::stringstream* commentsOnFailure
+  );
+  static bool DeleteOneEntryUnsetUnsecure(
+    const std::string& tableName,
+    const JSData& findQuery,
+    List<std::string>& selector,
+    std::stringstream* commentsOnFailure
+  );
+  static std::string ToHtmlDatabaseCollection(const std::string& currentTable);
+  static JSData ToJSONFetchItem(const List<std::string>& labelStrings);
+  static JSData ToJSONDatabaseCollection(const std::string& currentTable);
+  static JSData ToJSONDatabaseFetch(const std::string& incomingLabels);
+  void CreateHashIndex(const std::string& collectionName, const std::string& theKey);
+  static bool getLabels(
+    const JSData& fieldEntries,
+    List<std::string>& theLabels,
+    std::stringstream* commentsOnFailure
+  );
+  static bool isDeleteable(
+    const List<std::string>& theLabels,
+    List<std::string>** outputPattern,
+    std::stringstream* commentsOnFailure
+  );
+  static bool isDeleteable(
+    const JSData& theEntry,
+    List<std::string>** outputPattern,
+    std::stringstream* commentsOnFailure
+  );
+  static bool matchesPattern(const List<std::string>& fieldLabel, const List<std::string>& pattern);
+  static JSData GetStandardProjectors();
+  DatabaseRoutinesGlobalFunctionsMongo();
+  ~DatabaseRoutinesGlobalFunctionsMongo();
+};
+
+class DatabaseFallback {
+public:
+  MutexProcess access;
+  HashedList<std::string, MathRoutines::HashString> knownCollections;
+  JSData reader;
+  static DatabaseFallback& theDatabase();
+  bool UpdateOneFromQueryString(
+    const std::string& collectionName,
+    const std::string& findQuery,
+    const JSData& updateQuery,
+    List<std::string>* fieldsToSetIfNullUseFirstFieldIfUpdateQuery,
+    std::stringstream* commentsOnFailure = nullptr
+  );
+  bool HasCollection(const std::string& collection, std::stringstream* commentsOnFailure);
+  bool ReadDatabase(JSData& output, std::stringstream* commentsOnFailure);
+  void initialize();
+};
 
 class DatabaseRoutinesGlobalFunctions {
 public:
@@ -30,260 +223,6 @@ public:
   );
   static bool UserExists(const std::string& inputUsername, std::stringstream& comments);
   static bool UserDefaultHasInstructorRights();
-};
-
-class SyntacticElementHTML {
-public:
-  int indexInOwner;
-  int commandIndex;
-  std::string syntacticRole;
-  std::string content;
-  std::string tag;
-  MapList<std::string, std::string, MathRoutines::HashString> properties;
-  List<std::string> defaultKeysIfMissing;
-  List<std::string> defaultValuesIfMissing;
-  List<std::string> tagKeysWithoutValue;
-  List<SyntacticElementHTML> children;
-  bool flagUseDisplaystyleInMathMode;
-  bool flagUseMathMode;
-  bool flagUseMathSpan;
-  std::string interpretedCommand;
-  static int ParsingNumDummyElements;
-  bool IsInterpretedByCalculatorDuringProblemGeneration();
-  bool IsInterpretedByCalculatorDuringSubmission();
-  bool IsInterpretedNotByCalculator();
-  bool IsHidden();
-  bool IsCalculatorHidden();
-  bool IsCalculatorCommand();
-  bool IsAnswer();
-  bool IsSolution();
-  bool IsAnswerElement(std::string* desiredAnswerId);
-  bool IsCommentBeforeInterpretation();
-  bool IsCommentBeforeSubmission();
-  bool IsAnswerOnGiveUp();
-  std::string GetKeyValue(const std::string& theKey) const;
-  void SetKeyValue(const std::string& theKey, const std::string& theValue);
-  void resetAllExceptContent();
-  std::string ToStringInterpretedBody();
-  std::string ToStringInterpretedHead();
-  std::string ToStringTagAndContent();
-  std::string ToStringOpenTag(const std::string& overrideTagIfNonEmpty, bool immediatelyClose = false);
-  std::string ToStringCloseTag(const std::string& overrideTagIfNonEmpty);
-  std::string GetTagClass();
-  std::string ToStringDebug();
-  SyntacticElementHTML() {
-    this->flagUseDisplaystyleInMathMode = false;
-    this->indexInOwner = - 1;
-    this->commandIndex = - 1;
-    this->flagUseMathMode = true;
-    this->flagUseMathSpan = true;
-  }
-  SyntacticElementHTML(const std::string& inputContent) {
-    this->flagUseDisplaystyleInMathMode = false;
-    this->flagUseMathMode = true;
-    this->flagUseMathSpan = true;
-    this->content = inputContent;
-    this->indexInOwner = - 1;
-    this->commandIndex = - 1;
-  }
-  bool operator==(const std::string& other) {
-    return this->content == other;
-  }
-  bool operator!=(const std::string& other) {
-    return this->content != other;
-  }
-};
-
-class Answer {
-public:
-  bool flagAutoGenerateSubmitButtons;
-  bool flagAutoGenerateMQButtonPanel;
-  bool flagAutoGenerateMQfield;
-  bool flagAutoGenerateVerificationField;
-  bool flagAutoGenerateButtonSolution;
-  bool flagSolutionFound;
-  int numSubmissions;
-  int numCorrectSubmissions;
-  std::string commandsCommentsBeforeSubmission;
-  std::string commandsCommentsBeforeInterpretatioN;
-  std::string commandsBeforeAnswer;
-  std::string commandsBeforeAnswerNoEnclosuresForDEBUGGING;
-  std::string commandVerificationOnly;
-  std::string commandsSolutionOnly;
-  std::string commandsNoEnclosureAnswerOnGiveUpOnly;
-  List<SyntacticElementHTML> solutionElements;
-  MapList<std::string, std::string, MathRoutines::HashString> properties;
-  std::string answerId;
-  std::string varAnswerId;
-  std::string idVerificationSpan;
-  std::string idAnswerPanel;
-  std::string idButtonSubmit;
-  std::string idButtonInterpret;
-  std::string idButtonAnswer;
-  std::string idButtonSolution;
-  std::string javascriptPreviewAnswer;
-  //std::string htmlMQjavascript;
-  std::string htmlSpanVerifyAnswer;
-  std::string htmlAnswerHighlight;
-  //////////////////////////////////////
-  std::string MQpanelButtonOptions;
-  //////////////////////////////////////
-  std::string varMQfield;
-  std::string MQobject;
-  std::string idSpanSolution;
-  std::string idMQfielD;
-  std::string idMQFieldLocation;
-  std::string idMQButtonPanelLocation;
-  std::string MQUpdateFunction;
-  std::string currentAnswerURLed;
-  std::string currentAnswerClean;
-  std::string firstCorrectAnswerURLed;
-  std::string firstCorrectAnswerClean;
-  Answer() {
-    this->numSubmissions = 0;
-    this->numCorrectSubmissions = 0;
-    this->flagAutoGenerateSubmitButtons = true;
-    this->flagAutoGenerateMQButtonPanel = true;
-    this->flagAutoGenerateMQfield = true;
-    this->flagAutoGenerateVerificationField = true;
-    this->flagAutoGenerateButtonSolution = true;
-    this->flagSolutionFound = false;
-  }
-  std::string ToString();
-};
-
-class ProblemDataAdministrative {
-public:
-  MapList<std::string, std::string, MathRoutines::HashString> problemWeightsPerCoursE;
-  MapList<std::string, std::string, MathRoutines::HashString> deadlinesPerSection;
-  bool GetWeightFromCoursE(
-    const std::string& theCourseNonURLed,
-    Rational& output,
-    std::string* outputAsGivenByInstructor = nullptr
-  );
-  std::string ToString() const;
-};
-
-class ProblemData {
-private:
-  int expectedNumberOfAnswersFromDB;
-  int knownNumberOfAnswersFromHD;
-public:
-  friend std::ostream& operator << (std::ostream& output, const ProblemData& theData) {
-    output << theData.ToString();
-    return output;
-  }
-  bool flagRandomSeedGiven;
-  unsigned int randomSeed;
-  bool flagProblemWeightIsOK;
-  Rational Points;
-  ProblemDataAdministrative adminData;
-  int numCorrectlyAnswered;
-  int totalNumSubmissions;
-  //  int numAnswersSought;
-  std::string commandsGenerateProblem;
-  std::string commandsGenerateProblemNoEnclosures;
-  std::string commandsGenerateProblemLink;
-  MapList<std::string, Answer, MathRoutines::HashString> theAnswers;
-  List<std::string> inputNonAnswerIds;
-  int getExpectedNumberOfAnswers(const std::string& problemName, std::stringstream& commentsOnFailure);
-  void AddEmptyAnswerIdOnTop(const std::string& inputAnswerId);
-  ProblemData();
-  bool CheckConsistency() const;
-  bool CheckConsistencyMQids() const;
-  bool LoadFroM(const std::string& inputData, std::stringstream& commentsOnFailure);
-  bool LoadFromJSON(const JSData& inputData, std::stringstream& commentsOnFailure);
-  std::string StorE();
-  JSData StoreJSON();
-  std::string ToString() const;
-  std::string ToStringAvailableAnswerIds();
-};
-
-class EmailRoutines {
-public:
-  std::string subject;
-  std::string ccEmail;
-  std::string fromEmail;
-  std::string fromEmailAuth;
-  std::string toEmail;
-  std::string emailContent;
-  std::string smtpWithPort;
-  static List<bool> recognizedEmailCharacters;
-  static List<bool>& GetRecognizedEmailChars();
-  EmailRoutines();
-  //bool IsValidForMailgunCommand(std::stringstream* commentsOnFailure);
-  static bool IsOKEmail(const std::string& input, std::stringstream* commentsOnError);
-  bool SendEmailWithMailGun(
-    std::stringstream* commentsOnFailure,
-    std::stringstream* commentsGeneral,
-    std::stringstream* commentsGeneralSensitive
-  );
-};
-
-class TopicElement;
-class UserCalculator : public UserCalculatorData {
-// Unsafe entries may contain arbitrary strings.
-// Safe entries, when enclosed with "" in ANSI mode are guaranteed to be valid safe Database identifiers.
-// In other words, safe entries are guaranteed to not allow bobby-tables-exploits-of-a-mom (https://xkcd.com/327/).
-// Users of this code should not touch any safe entries directly.
-// Instead users should only modify the unsafe entries.
-// Those are internally (and automatically) converted to safe entries (stored in the private variables below), and only then stored in
-// the database.
-public:
-  MapList<std::string, ProblemData, MathRoutines::HashString> theProblemData;
-  TimeWrapper authenticationCreationTime;
-  Rational pointsEarned;
-  Rational pointsMax;
-  void ComputeExpectedNumberOfAnswersPerProblem();
-  void ComputePointsEarned(
-    const HashedList<std::string, MathRoutines::HashString>& gradableProblems,
-    MapList<std::string, TopicElement, MathRoutines::HashString>* theTopics,
-    std::stringstream& commentsOnFailure
-  );
-  ProblemData& HasProblemData(const std::string& problemName);
-  ProblemData& GetProblemDataAddIfNotPresent(const std::string& problemName);
-  void SetProblemData(const std::string& problemName, const ProblemData& inputData);
-  bool flagNewAuthenticationTokenComputedUserNeedsIt;
-  bool InterpretDatabaseProblemDatA(const std::string& theInfo, std::stringstream& commentsOnFailure);
-  bool InterpretDatabaseProblemDataJSON(const JSData& theData, std::stringstream& commentsOnFailure);
-  bool StoreProblemDataToDatabasE(std::stringstream& commentsOnFailure);
-  bool StoreProblemDataToDatabaseJSON(std::stringstream* commentsOnFailure);
-  std::string GetSelectedRowEntry(const std::string& theKey);
-  std::string GetMySQLclauseIdentifyingUserByEmailOrID();
-  bool LoadFromDB(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral = nullptr);
-  bool FetchOneColumn(
-    const std::string& columnNameUnsafe, std::string& outputUnsafe, std::stringstream* failureComments = nullptr
-  );
-  void FetchColumns();
-  bool AuthenticateWithUserNameAndPass(std::stringstream* commentsOnFailure);
-  bool AuthenticateWithToken(std::stringstream* commentsOnFailure);
-  bool Authenticate(std::stringstream* commentsOnFailure);
-  std::string FirstLoginMessage();
-  bool ShouldCommentOnMissingUser();
-  bool ResetAuthenticationToken(std::stringstream* commentsOnFailure);
-  bool SetPassword(std::stringstream* commentsOnFailure);
-  bool Iexist(std::stringstream* comments);
-  bool StoreToDB(bool doSetPassword, std::stringstream* commentsOnFailure);
-  static bool IsAcceptableDatabaseInpuT(const std::string& input, std::stringstream* comments);
-  static bool IsAcceptableCharDatabaseInpuT(char theChar);
-  bool ComputeAndStoreActivationToken(std::stringstream* commentsOnFailure);
-  void ComputeHashedSaltedPassword();
-  bool GetActivationAbsoluteAddress(std::string& output, std::stringstream& comments);
-  bool GetActivationAddress(std::string& output, const std::string& calculatorBase, std::stringstream& comments);
-  static std::string GetActivationAddressFromActivationToken(
-    const std::string& theActivationToken,
-    const std::string& calculatorBase,
-    const std::string& inputUserNameUnsafe,
-    const std::string& inputEmailUnsafe
-  );
-  bool ComputeAndStoreActivationEmailAndTokens(
-    std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
-  );
-  bool ComputeAndStoreActivationStats(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
-  std::string ToString();
-  std::string ToStringSelectedColumns();
-  UserCalculator();
-  ~UserCalculator();
 };
 
 class DatabaseRoutineS {
@@ -316,4 +255,4 @@ public:
   );
 };
 
-#endif // vpfHeader7_databaseMySQL_already_included
+#endif // DATABASE_HEADER_ALREADY_INCLUDED

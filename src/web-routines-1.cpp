@@ -13,9 +13,8 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <arpa/inet.h>
-//#include <libexplain/connect.h>
-
 #include "database.h"
+#include "calculator_problem_storage.h"
 
 static ProjectInformationInstance ProjectInfoVpf6_5calculatorWebRoutines(__FILE__, "Calculator web routines. ");
 

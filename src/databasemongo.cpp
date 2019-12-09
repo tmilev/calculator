@@ -4,8 +4,7 @@
 mongoc_client_t* databaseClient = nullptr;
 mongoc_database_t *database = nullptr;
 #endif //MACRO_use_MongoDB
-#include "database_mongo.h"
-#include "database_fallback_json.h"
+#include "database.h"
 #include "json.h"
 #include "general_logging_global_variables.h"
 #include "html_snippets.h"

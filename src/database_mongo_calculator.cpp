@@ -1,5 +1,5 @@
 #include "calculator_database_mongo.h"
-#include "database_mongo.h"
+#include "database.h"
 
 static ProjectInformationInstance ProjectInfoVpfMongoCalculatorInterface(__FILE__, "Database mongo-calculator interface.");
 

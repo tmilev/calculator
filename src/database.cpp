@@ -4,7 +4,9 @@
 #include "crypto.h"
 #include "webserver.h"
 #include "system_functions_global_objects.h"
-#include "database_mongo.h"
+#include "database.h"
+#include "calculator_database_mongo.h"
+#include "calculator_problem_storage.h"
 #include "string_constants.h"
 
 static ProjectInformationInstance ProjectInfoVpfDatabasecpp(__FILE__, "Database-related code. ");
@@ -1133,9 +1135,6 @@ bool UserCalculator::GetActivationAddress(
   );
   return true;
 }
-
-#include "database_mongo.h"
-#include "calculator_database_mongo.h"
 
 bool CalculatorDatabaseFunctions::innerRepairDatabaseEmailRecords(
   Calculator& theCommands, const Expression& input, Expression& output

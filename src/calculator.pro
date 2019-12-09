@@ -86,7 +86,9 @@ HEADERS += \
     webserver.h \
     serialization_basic.h \
     general_strings.h \
-    database_fallback_json.h
+    database_fallback_json.h \
+    calculator_problem_storage.h \
+    calculator_problem_storage.h
 
 
 SOURCES += \

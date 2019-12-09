@@ -9,7 +9,7 @@
 #include "calculator_html_interpretation_interface.h"
 #include "math_extra_latex_routines.h"
 #include <iomanip>
-#include "database_mongo.h"
+#include "database.h"
 #include "string_constants.h"
 
 static ProjectInformationInstance projectInfoWebServerExamAndTeachingRoutinesCustomCode(

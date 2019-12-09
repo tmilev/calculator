@@ -4,6 +4,7 @@
 #define vpfHeaderHtmlInterpretationAlreadyDefined
 #include "general_lists.h"
 #include "database.h"
+#include "calculator_problem_storage.h"
 #include <ctime>
 
 static ProjectInformationInstance ProjectInfoHeaderHtmlInterpretation(__FILE__, "Html interpretation.");

@@ -5299,7 +5299,7 @@ int WebServer::main(int argc, char **argv) {
     // Store back the config file if it changed.
     theGlobalVariables.ConfigurationStore();
 
-    if (!Database::get().initialize()) {
+    if (!Database::get().initializeServer()) {
       crash << "Failed to initialize database. " << crash;
     }
 

@@ -1,8 +1,6 @@
 #ifdef MACRO_use_MongoDB
 #include <mongoc.h>
 #include <bcon.h>
-mongoc_client_t* databaseClient = nullptr;
-mongoc_database_t *database = nullptr;
 #endif //MACRO_use_MongoDB
 #include "database.h"
 #include "json.h"
@@ -30,8 +28,11 @@ Database& Database::get() {
   return result;
 }
 
+Database::~Database() {
+}
+
 Database::Database() {
-  this->flagInitialized = false;
+  this->flagInitializedServer = false;
   this->numDatabaseInstancesMustBeOneOrZero = 0;
 }
 
@@ -40,64 +41,88 @@ Database::User::User() {
 }
 
 bool Database::CheckInitialization() {
-  if (!this->flagInitialized) {
+  if (!this->flagInitializedServer) {
     crash << "Database not initialized at a place it should be. " << crash;
   }
   return true;
 }
 
-bool Database::initialize() {
-  MacroRegisterFunctionWithName("Database::initialize");
-  this->theUser.owner = this;
-  this->theFallBack.owner = this;
-  this->flagInitialized = true;
-  if (theGlobalVariables.flagDisableDatabaseLogEveryoneAsAdmin) {
-    return true;
-  }
+bool Database::Mongo::initialize() {
 #ifdef MACRO_use_MongoDB
   if (this->flagInitialized) {
     return true;
   }
-  logWorker << logger::blue << "Initializing database. " << logger::endL;
+  logWorker << logger::blue << "Initializing mongoDB. " << logger::endL;
   if (!theGlobalVariables.flagServerForkedIntoWorker) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "MongoDB not allowed to run before server fork. ";
-    }
-    return false;
+    crash << "MongoDB not allowed to run before server fork. " << crash;
   }
   this->flagInitialized = true;
   mongoc_init();
-  databaseClient = mongoc_client_new("mongodb://localhost:27017");
-  database = mongoc_client_get_database(databaseClient, DatabaseStrings::theDatabaseNameMongo.c_str());
-  DatabaseRoutinesGlobalFunctionsMongo::CreateHashIndex(DatabaseStrings::tableUsers, DatabaseStrings::labelUsername);
-  DatabaseRoutinesGlobalFunctionsMongo::CreateHashIndex(DatabaseStrings::tableUsers, DatabaseStrings::labelEmail);
-  DatabaseRoutinesGlobalFunctionsMongo::CreateHashIndex(DatabaseStrings::tableUsers, DatabaseStrings::labelInstructor);
-  DatabaseRoutinesGlobalFunctionsMongo::CreateHashIndex(DatabaseStrings::tableUsers, DatabaseStrings::labelUserRole);
-  DatabaseRoutinesGlobalFunctionsMongo::CreateHashIndex(DatabaseStrings::tableProblemInformation, DatabaseStrings::labelProblemName);
-  DatabaseRoutinesGlobalFunctionsMongo::CreateHashIndex(DatabaseStrings::tableDeleted, DatabaseStrings::labelUsername);
+  this->client = mongoc_client_new("mongodb://localhost:27017");
+  this->database = mongoc_client_get_database(
+    static_cast<mongoc_client_t*>(this->client),
+    DatabaseStrings::theDatabaseNameMongo.c_str()
+  );
+  this->CreateHashIndex(DatabaseStrings::tableUsers, DatabaseStrings::labelUsername);
+  this->CreateHashIndex(DatabaseStrings::tableUsers, DatabaseStrings::labelEmail);
+  this->CreateHashIndex(DatabaseStrings::tableUsers, DatabaseStrings::labelInstructor);
+  this->CreateHashIndex(DatabaseStrings::tableUsers, DatabaseStrings::labelUserRole);
+  this->CreateHashIndex(DatabaseStrings::tableProblemInformation, DatabaseStrings::labelProblemName);
+  this->CreateHashIndex(DatabaseStrings::tableDeleted, DatabaseStrings::labelUsername);
+#endif
   return true;
-#else
+}
+
+bool Database::initializeWorker() {
+  MacroRegisterFunctionWithName("Database::initializeWorker");
+  if (this->flagInitializedWorker) {
+    return true;
+  }
+  this->mongoDB.initialize();
+  this->flagInitializedWorker = true;
+  return true;
+}
+
+bool Database::initializeServer() {
+  MacroRegisterFunctionWithName("Database::initializeServer");
+  this->theUser.owner = this;
+  this->theFallBack.owner = this;
+  this->flagInitializedServer = true;
+  if (theGlobalVariables.flagDisableDatabaseLogEveryoneAsAdmin) {
+    return true;
+  }
+  if (theGlobalVariables.flagDatabaseCompiled) {
+    return true;
+  }
   logServer << logger::red << "Calculator compiled without (mongoDB) database support. "
   << logger::green << "Using " << logger::red
   << "**SLOW** " << logger::green << "fall-back JSON storage." << logger::endL;
   this->theFallBack.initialize();
   return true;
-#endif
-
 }
 
-Database::~Database() {
-#ifdef MACRO_use_MongoDB
-  if (database != nullptr) {
-    mongoc_database_destroy(database);
-    database = nullptr;
+Database::Mongo::Mongo() {
+  this->flagInitialized = false;
+  this->client = nullptr;
+  this->database = nullptr;
+}
+
+void Database::Mongo::shutdown() {
+  if (this->database == nullptr && this->client == nullptr) {
+    return;
   }
-  if (databaseClient != nullptr) {
-    mongoc_client_destroy(databaseClient);
-    databaseClient = nullptr;
+  this->flagInitialized = false;
+  mongoc_database_destroy(static_cast<mongoc_database_t*>(this->database));
+  this->database = nullptr;
+  if (this->client != nullptr) {
+    mongoc_client_destroy(static_cast<mongoc_client_t*>(this->client));
+    this->client = nullptr;
   }
   mongoc_cleanup();
-#endif
+}
+
+Database::Mongo::~Mongo() {
+  this->shutdown();
 }
 
 #ifdef MACRO_use_MongoDB
@@ -110,13 +135,15 @@ public:
 };
 
 MongoCollection::MongoCollection(const std::string& collectionName) {
-  if (!databaseMongo.initialize(nullptr)) {
+  if (!Database::get().mongoDB.initialize()) {
     crash << "Mongo DB not initialized when it should be" << crash;
     return;
   }
   this->name = collectionName;
   this->collection = mongoc_client_get_collection(
-    databaseClient, DatabaseStrings::theDatabaseNameMongo.c_str(), this->name.c_str()
+    static_cast<mongoc_client_t*>(Database::get().mongoDB.client),
+    DatabaseStrings::theDatabaseNameMongo.c_str(),
+    this->name.c_str()
   );
 }
 
@@ -154,10 +181,14 @@ public:
   bool UpdateOne(std::stringstream* commentsOnFailure, bool doUpsert);
   bool InsertOne(const JSData& incoming, std::stringstream* commentsOnFailure);
   bool UpdateOneNoOptions(std::stringstream* commentsOnFailure);
+  // Abbreviation to get the default database.
+  Database::Mongo& getDB() {
+    return Database::get().mongoDB;
+  }
 };
 
 MongoQuery::MongoQuery() {
-  if (!databaseMongo.initialize(nullptr)) {
+  if (!Database::get().mongoDB.initialize()) {
     crash << "Mongo DB did not start correctly. " << crash;
   }
   this->query = nullptr;
@@ -200,7 +231,7 @@ MongoQuery::~MongoQuery() {
 
 bool MongoQuery::RemoveOne(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("MongoQuery::RemoveOne");
-  if (!databaseMongo.initialize(commentsOnFailure)) {
+  if (!Database::get().mongoDB.initialize()) {
     return false;
   }
   MongoCollection theCollection(this->collectionName);
@@ -230,7 +261,7 @@ bool MongoQuery::RemoveOne(std::stringstream* commentsOnFailure) {
 
 bool MongoQuery::InsertOne(const JSData& incoming, std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("MongoQuery::InsertOne");
-  if (!databaseMongo.initialize(commentsOnFailure)) {
+  if (!Database::get().mongoDB.initialize()) {
     return false;
   }
   MongoCollection theCollection(this->collectionName);
@@ -271,7 +302,7 @@ bool MongoQuery::InsertOne(const JSData& incoming, std::stringstream* commentsOn
 
 bool MongoQuery::UpdateOne(std::stringstream* commentsOnFailure, bool doUpsert) {
   MacroRegisterFunctionWithName("MongoQuery::UpdateOne");
-  if (!databaseMongo.initialize(commentsOnFailure)) {
+  if (!Database::get().mongoDB.initialize()) {
     return false;
   }
   MongoCollection theCollection(this->collectionName);
@@ -342,7 +373,7 @@ bool MongoQuery::FindMultiple(
   std::stringstream* commentsGeneralNonSensitive
 ) {
   MacroRegisterFunctionWithName("MongoQuery::FindMultiple");
-  if (!databaseMongo.initialize(commentsOnFailure)) {
+  if (!Database::get().mongoDB.initialize()) {
     return false;
   }
   MongoCollection theCollection(this->collectionName);
@@ -429,7 +460,7 @@ bool MongoQuery::FindMultiple(
   return true;
 }
 
-void DatabaseRoutinesGlobalFunctionsMongo::CreateHashIndex(
+void Database::Mongo::CreateHashIndex(
   const std::string& collectionName, const std::string& theKey
 ) {
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::CreateHashIndex");
@@ -442,10 +473,16 @@ void DatabaseRoutinesGlobalFunctionsMongo::CreateHashIndex(
     theCommand.str().size(),
     &query.theError
   );
-  mongoc_database_write_command_with_opts(database, query.command, NULL, query.updateResult, &query.theError);
+  mongoc_database_write_command_with_opts(
+    static_cast<mongoc_database_t*>(database),
+    query.command,
+    NULL,
+    query.updateResult,
+    &query.theError
+  );
 }
-
 #endif
+
 bool Database::FindFromString(
   const std::string& collectionName,
   const std::string& findQuery,
@@ -461,7 +498,7 @@ bool Database::FindFromString(
   if (!theData.readstring(findQuery, true, commentsOnFailure)) {
     return false;
   }
-  return DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON(
+  return Database::get().FindFromJSON(
     collectionName, theData, output, maxOutputItems, totalItems, commentsOnFailure
   );
 #else
@@ -1109,14 +1146,37 @@ bool Database::FetchCollectionNames(
   List<std::string>& output, std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("Database::FetchCollectionNames");
-  if (!Database::get().initialize()) {
+  if (!Database::get().initializeWorker()) {
     return false;
   }
+  if (theGlobalVariables.flagDisableDatabaseLogEveryoneAsAdmin) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Database disabled. ";
+    }
+    return false;
+  }
+  if (theGlobalVariables.flagDatabaseCompiled) {
+    return Database::get().mongoDB.FetchCollectionNames(output, commentsOnFailure);
+  }
+  (void) output;
+  if (commentsOnFailure != nullptr) {
+    *commentsOnFailure << "MongoDB not installed. ";
+  }
+  return false;
+}
+
+bool Database::Mongo::FetchCollectionNames(
+  List<std::string>& output, std::stringstream* commentsOnFailure
+) {
 #ifdef MACRO_use_MongoDB
   bson_t opts = BSON_INITIALIZER;
   bson_error_t error;
-  mongoc_database_get_collection_names_with_opts(database, &opts, &error);
-  char **theCollectionChars = mongoc_database_get_collection_names_with_opts(database, &opts, &error);
+  mongoc_database_get_collection_names_with_opts(
+    static_cast<mongoc_database_t*>(this->database), &opts, &error
+  );
+  char **theCollectionChars = mongoc_database_get_collection_names_with_opts(
+    static_cast<mongoc_database_t*>(this->database), &opts, &error
+  );
   bool result = true;
   output.SetSize(0);
   if (theCollectionChars != nullptr) {
@@ -1128,20 +1188,20 @@ bool Database::FetchCollectionNames(
     theCollectionChars = nullptr;
   } else {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to fetch all collections";
+      *commentsOnFailure << "Failed to fetch all collections. ";
     }
     result = false;
   }
   bson_destroy(&opts);
   return result;
 #else
-  (void) output;
   if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "MongoDB not installed";
+    *commentsOnFailure << "Database not compiled. ";
   }
   return false;
 #endif
 }
+
 
 bool Database::FetchTable(
   const std::string& tableName,

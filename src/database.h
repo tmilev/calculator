@@ -11,7 +11,8 @@ static ProjectInformationInstance projectInfoDatabaseH(__FILE__, "Database inter
 
 class Database {
 public:
-  bool flagInitialized;
+  bool flagInitializedServer;
+  bool flagInitializedWorker;
   List<std::string> modifyableColumns;
   int numDatabaseInstancesMustBeOneOrZero;
 
@@ -20,7 +21,8 @@ public:
   // avoid the static initalization order fiasco.
   static Database& get();
 
-  bool initialize();
+  bool initializeServer();
+  bool initializeWorker();
   bool CheckInitialization();
   class User {
   public:
@@ -100,8 +102,26 @@ public:
   FallBack theFallBack;
 
   class Mongo{
-
+  public:
+    // The following variable has type mongoc_client_t.
+    // This type is not forward declared due to compiler errors such as:
+    // error: using typedef-name ‘mongoc_client_t’ after ‘struct’.
+    void* client;
+    // The following variable has type mongoc_client_t.
+    // Not declared for reasons similar to the above.
+    void* database;
+    Database* owner;
+    bool flagInitialized;
+    bool initialize();
+    void shutdown();
+    void CreateHashIndex(const std::string& collectionName, const std::string& theKey);
+    bool FetchCollectionNames(
+      List<std::string>& output, std::stringstream* commentsOnFailure
+    );
+    Mongo();
+    ~Mongo();
   };
+  Mongo mongoDB;
   static bool FindFromString(
     const std::string& collectionName,
     const std::string& findQuery,
@@ -248,7 +268,6 @@ public:
   static JSData ToJSONFetchItem(const List<std::string>& labelStrings);
   static JSData ToJSONDatabaseCollection(const std::string& currentTable);
   static JSData ToJSONDatabaseFetch(const std::string& incomingLabels);
-  void CreateHashIndex(const std::string& collectionName, const std::string& theKey);
   static bool getLabels(
     const JSData& fieldEntries,
     List<std::string>& theLabels,

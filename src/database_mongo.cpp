@@ -1158,11 +1158,7 @@ bool Database::FetchCollectionNames(
   if (theGlobalVariables.flagDatabaseCompiled) {
     return Database::get().mongoDB.FetchCollectionNames(output, commentsOnFailure);
   }
-  (void) output;
-  if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "MongoDB not installed. ";
-  }
-  return false;
+  return this->theFallBack.FetchCollectionNames(output, commentsOnFailure);
 }
 
 bool Database::Mongo::FetchCollectionNames(
@@ -1256,10 +1252,10 @@ JSData Database::ToJSONDatabaseFetch(const std::string& incomingLabels) {
     return result;
   }
   if (labelStrings.size == 0) {
-    return Database::ToJSONDatabaseCollection("");
+    return this->ToJSONDatabaseCollection("");
   }
   if (labelStrings.size == 1) {
-    return Database::ToJSONDatabaseCollection(labelStrings[0]);
+    return this->ToJSONDatabaseCollection(labelStrings[0]);
   }
   return Database::ToJSONFetchItem(labelStrings);
 }
@@ -1374,7 +1370,7 @@ std::string Database::ToHtmlDatabaseCollection(const std::string& currentTable) 
   std::stringstream out;
   if (currentTable == "") {
     List<std::string> theCollectionNames;
-    if (Database::FetchCollectionNames(theCollectionNames, &out)) {
+    if (this->FetchCollectionNames(theCollectionNames, &out)) {
       out << "There are " << theCollectionNames.size << " collections. ";
       for (int i = 0; i < theCollectionNames.size; i ++) {
         out << "<br>";

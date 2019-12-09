@@ -36,6 +36,13 @@ bool Database::FallBack::UpdateOneFromQueryString(
   return false;
 }
 
+bool Database::FallBack::FetchCollectionNames(List<std::string>& output, std::stringstream* commentsOnFailure) {
+  if (commentsOnFailure != nullptr) {
+    *commentsOnFailure << "Not implemented yet.";
+  }
+  return false;
+}
+
 bool Database::FallBack::HasCollection(const std::string& collection, std::stringstream* commentsOnFailure) {
   if (!this->reader.HasKey(collection)) {
     return true;

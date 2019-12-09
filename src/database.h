@@ -94,6 +94,9 @@ public:
       List<std::string>* fieldsToSetIfNullUseFirstFieldIfUpdateQuery,
       std::stringstream* commentsOnFailure = nullptr
     );
+    bool FetchCollectionNames(
+      List<std::string>& output, std::stringstream* commentsOnFailure
+    );
     bool HasCollection(const std::string& collection, std::stringstream* commentsOnFailure);
     bool ReadDatabase(JSData& output, std::stringstream* commentsOnFailure);
     void initialize();
@@ -244,7 +247,7 @@ public:
     List<std::string>* fieldsToSetIfNullUseFirstFieldIfUpdateQuery,
     std::stringstream* commentsOnFailure = nullptr
   );
-  static bool FetchCollectionNames(List<std::string>& output, std::stringstream* commentsOnFailure);
+  bool FetchCollectionNames(List<std::string>& output, std::stringstream* commentsOnFailure);
   static bool FetchTable(
     const std::string& tableName,
     List<std::string>& outputLabels,
@@ -264,10 +267,10 @@ public:
     List<std::string>& selector,
     std::stringstream* commentsOnFailure
   );
-  static std::string ToHtmlDatabaseCollection(const std::string& currentTable);
+  std::string ToHtmlDatabaseCollection(const std::string& currentTable);
   static JSData ToJSONFetchItem(const List<std::string>& labelStrings);
-  static JSData ToJSONDatabaseCollection(const std::string& currentTable);
-  static JSData ToJSONDatabaseFetch(const std::string& incomingLabels);
+  JSData ToJSONDatabaseCollection(const std::string& currentTable);
+  JSData ToJSONDatabaseFetch(const std::string& incomingLabels);
   static bool getLabels(
     const JSData& fieldEntries,
     List<std::string>& theLabels,

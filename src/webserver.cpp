@@ -556,9 +556,9 @@ std::string WebWorker::GetDatabaseJSON() {
       theGlobalVariables.GetWebInput(WebAPI::databaseParameters::labels), false
     );
     if (operation == WebAPI::databaseParameters::fetch) {
-      result = Database::ToJSONDatabaseFetch(labels);
+      result = Database::get().ToJSONDatabaseFetch(labels);
     } else {
-      result["error"] = "Uknown database operation: " + operation + ". ";
+      result[WebAPI::result::error] = "Uknown database operation: " + operation + ". ";
     }
     if (theGlobalVariables.UserDebugFlagOn()) {
       result["databaseOperation"] = operation;

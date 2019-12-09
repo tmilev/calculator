@@ -34,7 +34,6 @@ HEADERS += \
     calculator_Weyl_group_characters.h \
     crypto.h \
     database.h \
-    database_mongo.h \
     general_database_system_independent.h \
     general_file_operations_encodings.h \
     general_list_references.h \
@@ -118,7 +117,7 @@ SOURCES += \
     crypto_sha3.cpp \
     crypto_test.cpp \
     database.cpp \
-    databasemongo.cpp \
+    database_mongo.cpp \
     database_mongo_calculator.cpp \
     date_time_wrappers.cpp \
     examRoutines.cpp \

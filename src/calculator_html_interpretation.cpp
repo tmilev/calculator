@@ -1352,7 +1352,7 @@ std::string HtmlInterpretation::AddTeachersSections() {
     JSData findQuery, setQuery;
     findQuery[DatabaseStrings::labelUsername] = currentTeacher.username;
     setQuery[DatabaseStrings::labelSectionsTaught] = desiredSectionsList;
-    if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(
+    if (!Database::UpdateOneFromJSON(
       DatabaseStrings::tableUsers, findQuery, setQuery, nullptr, &out
     )) {
       out << "<span style =\"color:red\">Failed to store course info of instructor: " << theTeachers[i] << ". </span><br>";
@@ -1394,7 +1394,7 @@ std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressW
   bool doSendEmails = theGlobalVariables.userCalculatorRequestType == "sendEmails" ?  true : false;
   int numNewUsers = 0;
   int numUpdatedUsers = 0;
-  bool createdUsers = DatabaseRoutineS::AddUsersFromEmails(
+  bool createdUsers = Database::User::AddUsersFromEmails(
     inputEmails, userPasswords, userRole, userGroup, comments, numNewUsers, numUpdatedUsers
   );
   if (createdUsers) {
@@ -1638,13 +1638,13 @@ std::string HtmlInterpretation::GetAccountsPageJSON(const std::string& hostWebAd
   columnsToRetain.AddOnTop(DatabaseStrings::labelInstructor);
   columnsToRetain.AddOnTop(DatabaseStrings::labelSection);
   columnsToRetain.AddOnTop(DatabaseStrings::labelSemester);
-  if (!DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithProjection(
+  if (!Database::FindFromJSONWithProjection(
     DatabaseStrings::tableUsers, findStudents, students, columnsToRetain, - 1, &totalStudents, &commentsOnFailure
   )) {
     output["error"] = "Failed to load user info. Comments: " + commentsOnFailure.str();
     return output.ToString(false);
   }
-  if (!DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithProjection(
+  if (!Database::FindFromJSONWithProjection(
     DatabaseStrings::tableUsers, findAdmins, admins, columnsToRetain, - 1, nullptr, &commentsOnFailure
   )) {
     output["error"] = "Failed to load user info. Comments: " + commentsOnFailure.str();
@@ -1678,13 +1678,13 @@ std::string HtmlInterpretation::GetAccountsPageBody(const std::string& hostWebAd
   long long totalStudents;
   findStudents[DatabaseStrings::labelInstructor] = theGlobalVariables.userDefault.username;
   findAdmins[DatabaseStrings::labelUserRole] = "admin";
-  if (!DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON(
+  if (!Database::get().FindFromJSON(
     DatabaseStrings::tableUsers, findStudents, students, - 1, &totalStudents, &commentsOnFailure
   )) {
     out << "<b>Failed to load user info.</b> Comments: " << commentsOnFailure.str();
     return out.str();
   }
-  if (!DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON(
+  if (!Database::get().FindFromJSON(
     DatabaseStrings::tableUsers, findAdmins, admins, - 1, nullptr, &commentsOnFailure
   )) {
     out << "<b>Failed to load user info.</b> Comments: " << commentsOnFailure.str();
@@ -1967,7 +1967,7 @@ int ProblemData::getExpectedNumberOfAnswers(const std::string& problemName, std:
     fields.AddOnTop(DatabaseStrings::labelProblemName);
     fields.AddOnTop(DatabaseStrings::labelProblemTotalQuestions);
     //logWorker << logger::yellow << "DEBUG: About to query db to find problem info." << logger::endL;
-    if (DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithProjection(
+    if (Database::FindFromJSONWithProjection(
       DatabaseStrings::tableProblemInformation, findProblemInfo, result, fields, - 1, nullptr, &commentsOnFailure
     )) {
       for (int i = 0; i < result.size; i ++) {
@@ -2018,7 +2018,7 @@ int ProblemData::getExpectedNumberOfAnswers(const std::string& problemName, std:
   std::stringstream stringConverter;
   stringConverter << this->knownNumberOfAnswersFromHD;
   newDBentry[DatabaseStrings::labelProblemTotalQuestions] = stringConverter.str();
-  DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(
+  Database::UpdateOneFromJSON(
     DatabaseStrings::tableProblemInformation, findDBentry, newDBentry, nullptr, &commentsOnFailure
   );
   return this->knownNumberOfAnswersFromHD;

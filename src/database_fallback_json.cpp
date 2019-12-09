@@ -7,12 +7,7 @@
 // Avoid previous extern warning:
 static ProjectInformationInstance projectInfoDatabaseFallbackJSON(__FILE__, "No-database fallback using json file.");
 
-DatabaseFallback& DatabaseFallback::theDatabase() {
-  static DatabaseFallback result;
-  return result;
-}
-
-bool DatabaseFallback::UpdateOneFromQueryString(
+bool Database::FallBack::UpdateOneFromQueryString(
   const std::string& collectionName,
   const std::string& findQuery,
   const JSData& updateQuery,
@@ -41,11 +36,11 @@ bool DatabaseFallback::UpdateOneFromQueryString(
   return false;
 }
 
-bool DatabaseFallback::HasCollection(const std::string& collection, std::stringstream* commentsOnFailure) {
+bool Database::FallBack::HasCollection(const std::string& collection, std::stringstream* commentsOnFailure) {
   if (!this->reader.HasKey(collection)) {
     return true;
   }
-  if (DatabaseFallback::knownCollections.Contains(collection)) {
+  if (Database::FallBack::knownCollections.Contains(collection)) {
     this->reader[collection].theType = JSData::token::tokenArray;
     return true;
   }
@@ -55,7 +50,11 @@ bool DatabaseFallback::HasCollection(const std::string& collection, std::strings
   return false;
 }
 
-void DatabaseFallback::initialize() {
+Database::FallBack::FallBack() {
+  this->owner = nullptr;
+}
+
+void Database::FallBack::initialize() {
   this->access.CreateMe("databaseFallback", true, false);
   this->knownCollections.AddOnTop({
     DatabaseStrings::tableDeadlines,
@@ -67,7 +66,7 @@ void DatabaseFallback::initialize() {
   });
 }
 
-bool DatabaseFallback::ReadDatabase(JSData& output, std::stringstream* commentsOnFailure) {
+bool Database::FallBack::ReadDatabase(JSData& output, std::stringstream* commentsOnFailure) {
   std::string theDatabase;
   if (!FileOperations::LoadFileToStringVirtual(
     "database-fallback/database.json", theDatabase, true, commentsOnFailure

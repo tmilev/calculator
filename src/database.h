@@ -9,12 +9,99 @@
 
 static ProjectInformationInstance projectInfoDatabaseH(__FILE__, "Database interface header. ");
 
-class DatabaseRoutinesGlobalFunctionsMongo {
+class Database {
 public:
   bool flagInitialized;
-  bool initialize(std::stringstream* commentsOnFailure);
-  static int numDatabaseInstancesMustBeOneOrZero;
-  static bool LoadUserInfo(UserCalculatorData& output, std::stringstream* commentsOnFailure);
+  List<std::string> modifyableColumns;
+  int numDatabaseInstancesMustBeOneOrZero;
+
+  // Get global database instance.
+  // Implemented as function rather than static member to
+  // avoid the static initalization order fiasco.
+  static Database& get();
+
+  bool initialize();
+  bool CheckInitialization();
+  class User {
+  public:
+    Database *owner;
+    bool LogoutViaDatabase();
+    bool LoginViaDatabase(
+      UserCalculatorData& theUseR,
+      std::stringstream* commentsOnFailure
+    );
+    bool LoginNoDatabaseSupport(UserCalculatorData& theUser, std::stringstream* commentsGeneral);
+    bool LoginViaGoogleTokenCreateNewAccountIfNeeded(
+      UserCalculatorData& theUseR,
+      std::stringstream* commentsOnFailure,
+      std::stringstream* commentsGeneral,
+      bool& tokenIsGood
+    );
+    bool SetPassword(
+      const std::string& inputUsername,
+      const std::string& inputNewPassword,
+      std::string& outputAuthenticationToken,
+      std::stringstream& comments
+    );
+    bool UserExists(const std::string& inputUsername, std::stringstream& comments);
+    bool UserDefaultHasInstructorRights();
+
+    bool StoreProblemInfoToDatabase(
+      const UserCalculatorData& theUser, bool overwrite, std::stringstream& commentsOnFailure
+    );
+
+    //TODO(tmilev): refactor down to database-only operations.
+    static bool SendActivationEmail(
+      const std::string& emailList,
+      std::stringstream* commentsOnFailure,
+      std::stringstream* commentsGeneral,
+      std::stringstream* commentsGeneralSensitive
+    );
+    //TODO(tmilev): refactor down to database-only operations.
+    static bool SendActivationEmail(
+      const List<std::string>& theEmails,
+      std::stringstream* commentsOnFailure,
+      std::stringstream* commentsGeneral,
+      std::stringstream* commentsGeneralSensitive
+    );
+    //TODO(tmilev): refactor down to database-only operations.
+    static bool AddUsersFromEmails(
+      const std::string& emailList,
+      const std::string& userPasswords,
+      std::string& userRole,
+      std::string& userGroup,
+      std::stringstream& comments,
+      int& outputNumNewUsers,
+      int& outputNumUpdatedUsers
+    );
+    static bool LoadUserInfo(UserCalculatorData& output, std::stringstream* commentsOnFailure);
+    User();
+  };
+  User theUser;
+
+  class FallBack{
+  public:
+    Database* owner;
+    MutexProcess access;
+    HashedList<std::string, MathRoutines::HashString> knownCollections;
+    JSData reader;
+    bool UpdateOneFromQueryString(
+      const std::string& collectionName,
+      const std::string& findQuery,
+      const JSData& updateQuery,
+      List<std::string>* fieldsToSetIfNullUseFirstFieldIfUpdateQuery,
+      std::stringstream* commentsOnFailure = nullptr
+    );
+    bool HasCollection(const std::string& collection, std::stringstream* commentsOnFailure);
+    bool ReadDatabase(JSData& output, std::stringstream* commentsOnFailure);
+    void initialize();
+    FallBack();
+  };
+  FallBack theFallBack;
+
+  class Mongo{
+
+  };
   static bool FindFromString(
     const std::string& collectionName,
     const std::string& findQuery,
@@ -23,7 +110,7 @@ public:
     long long* totalItems = nullptr,
     std::stringstream* commentsOnFailure = nullptr
   );
-  static bool FindFromJSON(
+  bool FindFromJSON(
     const std::string& collectionName,
     const JSData& findQuery,
     List<JSData>& output,
@@ -179,80 +266,8 @@ public:
   );
   static bool matchesPattern(const List<std::string>& fieldLabel, const List<std::string>& pattern);
   static JSData GetStandardProjectors();
-  DatabaseRoutinesGlobalFunctionsMongo();
-  ~DatabaseRoutinesGlobalFunctionsMongo();
-};
-
-class DatabaseFallback {
-public:
-  MutexProcess access;
-  HashedList<std::string, MathRoutines::HashString> knownCollections;
-  JSData reader;
-  static DatabaseFallback& theDatabase();
-  bool UpdateOneFromQueryString(
-    const std::string& collectionName,
-    const std::string& findQuery,
-    const JSData& updateQuery,
-    List<std::string>* fieldsToSetIfNullUseFirstFieldIfUpdateQuery,
-    std::stringstream* commentsOnFailure = nullptr
-  );
-  bool HasCollection(const std::string& collection, std::stringstream* commentsOnFailure);
-  bool ReadDatabase(JSData& output, std::stringstream* commentsOnFailure);
-  void initialize();
-};
-
-class DatabaseRoutinesGlobalFunctions {
-public:
-  static bool LogoutViaDatabase();
-  static bool LoginViaDatabase(
-    UserCalculatorData& theUseR,
-    std::stringstream* commentsOnFailure
-  );
-  static bool LoginNoDatabaseSupport(UserCalculatorData& theUser, std::stringstream* commentsGeneral);
-  static bool LoginViaGoogleTokenCreateNewAccountIfNeeded(
-    UserCalculatorData& theUseR,
-    std::stringstream* commentsOnFailure,
-    std::stringstream* commentsGeneral,
-    bool& tokenIsGood
-  );
-  static bool SetPassword(
-    const std::string& inputUsername,
-    const std::string& inputNewPassword,
-    std::string& outputAuthenticationToken,
-    std::stringstream& comments
-  );
-  static bool UserExists(const std::string& inputUsername, std::stringstream& comments);
-  static bool UserDefaultHasInstructorRights();
-};
-
-class DatabaseRoutineS {
-public:
-  static List<std::string> modifyableColumns;
-
-  static bool StoreProblemInfoToDatabase(
-    const UserCalculatorData& theUser, bool overwrite, std::stringstream& commentsOnFailure
-  );
-  static bool SendActivationEmail(
-    const std::string& emailList,
-    std::stringstream* commentsOnFailure,
-    std::stringstream* commentsGeneral,
-    std::stringstream* commentsGeneralSensitive
-  );
-  static bool SendActivationEmail(
-    const List<std::string>& theEmails,
-    std::stringstream* commentsOnFailure,
-    std::stringstream* commentsGeneral,
-    std::stringstream* commentsGeneralSensitive
-  );
-  static bool AddUsersFromEmails(
-    const std::string& emailList,
-    const std::string& userPasswords,
-    std::string& userRole,
-    std::string& userGroup,
-    std::stringstream& comments,
-    int& outputNumNewUsers,
-    int& outputNumUpdatedUsers
-  );
+  Database();
+  ~Database();
 };
 
 #endif // DATABASE_HEADER_ALREADY_INCLUDED

@@ -935,7 +935,7 @@ std::string WebWorker::GetSignUpRequestResult() {
     result["error"] = "Database not available (cannot sign up). ";
     return result.ToString(false);
   }
-  DatabaseRoutinesGlobalFunctions::LogoutViaDatabase();
+  Database::get().theUser.LogoutViaDatabase();
   UserCalculator theUser;
   theUser.username = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("desiredUsername"), false);
   theUser.email = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("email"), false);
@@ -1015,7 +1015,7 @@ int WebWorker::ProcessForgotLogin() {
   }
   std::stringstream out;
   if (!theGlobalVariables.UserDefaultHasAdminRights()) {
-    DatabaseRoutinesGlobalFunctions::LogoutViaDatabase();
+    Database::get().theUser.LogoutViaDatabase();
   }
   UserCalculator theUser;
   theUser.email = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("email"), false);

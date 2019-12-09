@@ -11,7 +11,7 @@
 
 static ProjectInformationInstance ProjectInfoVpfDatabasecpp(__FILE__, "Database-related code. ");
 
-bool DatabaseRoutinesGlobalFunctions::SetPassword(
+bool Database::User::SetPassword(
   const std::string& inputUsername,
   const std::string& inputNewPassword,
   std::string& outputAuthenticationToken,
@@ -36,7 +36,7 @@ bool DatabaseRoutinesGlobalFunctions::SetPassword(
   return result;
 }
 
-bool DatabaseRoutinesGlobalFunctions::UserExists(
+bool Database::User::UserExists(
   const std::string& inputUsername, std::stringstream& comments
 ) {
   if (!theGlobalVariables.flagDatabaseCompiled) {
@@ -50,13 +50,13 @@ bool DatabaseRoutinesGlobalFunctions::UserExists(
   JSData theUserQuery;
   theUserQuery[DatabaseStrings::labelUsername] = inputUsername;
   List<JSData> theUsers;
-  DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON(
+  this->owner->FindFromJSON(
     DatabaseStrings::tableUsers, theUserQuery, theUsers, - 1, nullptr, &comments
   );
   return theUsers.size > 0;
 }
 
-bool DatabaseRoutinesGlobalFunctions::UserDefaultHasInstructorRights() {
+bool Database::User::UserDefaultHasInstructorRights() {
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::UserDefaultHasInstructorRights");
   if (theGlobalVariables.UserDefaultHasAdminRights())
     return true;
@@ -72,7 +72,7 @@ bool DatabaseRoutinesGlobalFunctions::UserDefaultHasInstructorRights() {
     theGlobalVariables.userDefault.userRole == UserCalculator::Roles::teacher;
 }
 
-bool DatabaseRoutinesGlobalFunctions::LogoutViaDatabase() {
+bool Database::User::LogoutViaDatabase() {
   if (!theGlobalVariables.flagDatabaseCompiled) {
     return true;
   }
@@ -318,14 +318,14 @@ bool UserCalculator::LoadFromDB(std::stringstream* commentsOnFailure, std::strin
   MacroRegisterFunctionWithName("UserCalculator::FetchOneUserRow");
   (void) commentsGeneral;
   double startTime = theGlobalVariables.GetElapsedSeconds();
-  if (!DatabaseRoutinesGlobalFunctionsMongo::LoadUserInfo(*this, commentsOnFailure)) {
+  if (!Database::get().theUser.LoadUserInfo(*this, commentsOnFailure)) {
     return false;
   }
   this->ComputeCourseInfo();
   if (this->deadlineSchema != "") {
     JSData findDeadlinesQuery, outDeadlinesQuery;
     findDeadlinesQuery[DatabaseStrings::labelDeadlinesSchema] = this->deadlineSchema;
-    if (DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON(
+    if (Database::FindOneFromJSON(
       DatabaseStrings::tableDeadlines,
       findDeadlinesQuery,
       outDeadlinesQuery,
@@ -338,7 +338,7 @@ bool UserCalculator::LoadFromDB(std::stringstream* commentsOnFailure, std::strin
   if (this->problemWeightSchema != "") {
     JSData findProblemWeightsQuery, outProblemWeightsQuery;
     findProblemWeightsQuery[DatabaseStrings::labelProblemWeightsSchema] = this->problemWeightSchema;
-    if (DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON(
+    if (Database::FindOneFromJSON(
       DatabaseStrings::tableProblemWeights, findProblemWeightsQuery, outProblemWeightsQuery, commentsGeneral, true
     )) {
       this->problemWeights = outProblemWeightsQuery[DatabaseStrings::labelProblemWeights];
@@ -554,7 +554,7 @@ bool UserCalculator::ResetAuthenticationToken(std::stringstream* commentsOnFailu
   findUser[DatabaseStrings::labelUsername] = this->username;
   setUser[DatabaseStrings::labelAuthenticationToken] = this->actualAuthenticationToken;
   setUser[DatabaseStrings::labelTimeOfAuthenticationTokenCreation] = now.theTimeStringNonReadable;
-  DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(
+  Database::UpdateOneFromJSON(
     DatabaseStrings::tableUsers, findUser, setUser, nullptr, commentsOnFailure
   );
   this->flagNewAuthenticationTokenComputedUserNeedsIt = true;
@@ -573,7 +573,7 @@ bool UserCalculator::SetPassword(std::stringstream* commentsOnFailure) {
   JSData findUser, setUser;
   findUser[DatabaseStrings::labelUsername] = this->username;
   setUser[DatabaseStrings::labelPassword] = this->enteredHashedSaltedPassword;
-  return DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(
+  return Database::UpdateOneFromJSON(
     DatabaseStrings::tableUsers, findUser, setUser, nullptr, commentsOnFailure
   );
 }
@@ -619,7 +619,7 @@ std::string UserCalculator::GetSelectedRowEntry(const std::string& theKey) {
   return this->selectedRowFieldsUnsafe[theIndex];
 }
 
-bool DatabaseRoutineS::SendActivationEmail(
+bool Database::User::SendActivationEmail(
   const std::string& emailList,
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral,
@@ -628,12 +628,12 @@ bool DatabaseRoutineS::SendActivationEmail(
   MacroRegisterFunctionWithName("DatabaseRoutines::SendActivationEmail");
   List<std::string> theEmails;
   StringRoutines::StringSplitDefaultDelimiters(emailList, theEmails);
-  return DatabaseRoutineS::SendActivationEmail(
+  return Database::User::SendActivationEmail(
     theEmails, commentsOnFailure, commentsGeneral, commentsGeneralSensitive
   );
 }
 
-bool DatabaseRoutineS::SendActivationEmail(
+bool Database::User::SendActivationEmail(
   const List<std::string>& theEmails,
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral,
@@ -816,7 +816,7 @@ bool UserCalculator::InterpretDatabaseProblemDataJSON(const JSData& theData, std
 bool UserCalculator::Iexist(std::stringstream* comments) {
   MacroRegisterFunctionWithName("UserCalculator::Iexist");
   JSData notUsed;
-  return DatabaseRoutinesGlobalFunctionsMongo::FindOneFromSome(
+  return Database::FindOneFromSome(
     DatabaseStrings::tableUsers, this->GetFindMeFromUserNameQuery(), notUsed, comments
   );
 }
@@ -836,7 +836,7 @@ bool UserCalculator::ComputeAndStoreActivationToken(std::stringstream* commentsO
   JSData findUserQuery, setUserQuery;
   findUserQuery[DatabaseStrings::labelUsername] = this->username;
   setUserQuery[DatabaseStrings::labelActivationToken] = this->actualActivationToken;
-  if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(
+  if (!Database::UpdateOneFromJSON(
     DatabaseStrings::tableUsers, findUserQuery, setUserQuery, nullptr, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
@@ -873,7 +873,7 @@ bool UserCalculator::ComputeAndStoreActivationStats(
   );
   JSData findQuery, emailStatQuery;
   findQuery[DatabaseStrings::labelEmail] = this->email;
-  DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON(
+  Database::FindOneFromJSON(
     DatabaseStrings::tableEmailInfo, findQuery, emailStatQuery, commentsOnFailure, true
   );
   std::string lastEmailTime, emailCountForThisEmail;
@@ -916,7 +916,7 @@ bool UserCalculator::ComputeAndStoreActivationStats(
     }
     return false;
   }
-  if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(
+  if (!Database::UpdateOneFromJSON(
       DatabaseStrings::tableUsers, findQueryInUsers, setQueryInUsers, nullptr, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
@@ -928,7 +928,7 @@ bool UserCalculator::ComputeAndStoreActivationStats(
   emailStatQuery[DatabaseStrings::labelNumActivationEmails] = numActivationsThisEmail.ToString();
   emailStatQuery[DatabaseStrings::labelActivationToken] = this->actualActivationToken;
   emailStatQuery[DatabaseStrings::labelUsernameAssociatedWithToken] = this->username;
-  if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(
+  if (!Database::UpdateOneFromJSON(
     DatabaseStrings::tableEmailInfo, findQuery, emailStatQuery, nullptr, commentsOnFailure
   )) {
     return false;
@@ -972,7 +972,7 @@ bool UserCalculator::StoreProblemDataToDatabasE(std::stringstream& commentsOnFai
   }
   JSData setQuery;
   setQuery[DatabaseStrings::labelProblemDatA] = problemDataStream.str();
-  return DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromSomeJSON(
+  return Database::UpdateOneFromSomeJSON(
     DatabaseStrings::tableUsers, this->GetFindMeFromUserNameQuery(), setQuery, &commentsOnFailure
   );
 }
@@ -990,13 +990,12 @@ bool UserCalculator::StoreProblemDataToDatabaseJSON(std::stringstream* commentsO
   theGlobalVariables.userDefault.problemDataJSON = problemData;
   JSData setQuery;
   setQuery[DatabaseStrings::labelProblemDataJSON] = problemData;
-  return DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromSomeJSON(
+  return Database::UpdateOneFromSomeJSON(
     DatabaseStrings::tableUsers, this->GetFindMeFromUserNameQuery(), setQuery, commentsOnFailure
   );
 }
 
-
-bool DatabaseRoutineS::AddUsersFromEmails(
+bool Database::User::AddUsersFromEmails(
   const std::string& emailList,
   const std::string& userPasswords,
   std::string& userRole,
@@ -1045,7 +1044,7 @@ bool DatabaseRoutineS::AddUsersFromEmails(
     findUser.SetSize(2);
     findUser[0][DatabaseStrings::labelUsername] = currentUser.username;
     findUser[1][DatabaseStrings::labelEmail] = currentUser.email;
-    if (!DatabaseRoutinesGlobalFunctionsMongo::FindOneFromSome(
+    if (!Database::FindOneFromSome(
       DatabaseStrings::tableUsers, findUser, foundUser, &comments
     )) {
       if (!currentUser.Iexist(&comments)) {
@@ -1058,12 +1057,12 @@ bool DatabaseRoutineS::AddUsersFromEmails(
         }
       }
       if (isEmail) {
-        DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromSomeJSON(DatabaseStrings::tableUsers, findUser, foundUser, &comments);
+        Database::UpdateOneFromSomeJSON(DatabaseStrings::tableUsers, findUser, foundUser, &comments);
       }
     } else {
       outputNumUpdatedUsers ++;
       //currentUser may have its updated entries modified by the functions above.
-      if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromSomeJSON(
+      if (!Database::UpdateOneFromSomeJSON(
         DatabaseStrings::tableUsers, findUser, currentUser.ToJSON(), &comments
       )) {
         result = false;
@@ -1086,7 +1085,7 @@ bool DatabaseRoutineS::AddUsersFromEmails(
         result = false;
       JSData activatedJSON;
       activatedJSON[DatabaseStrings::labelActivationToken] = "activated";
-      DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromSomeJSON(DatabaseStrings::tableUsers, findUser, activatedJSON, &comments);
+      Database::UpdateOneFromSomeJSON(DatabaseStrings::tableUsers, findUser, activatedJSON, &comments);
       if (currentUser.email != "") {
         currentUser.ComputeAndStoreActivationStats(&comments, &comments);
       }
@@ -1100,7 +1099,7 @@ bool DatabaseRoutineS::AddUsersFromEmails(
     if (theGlobalVariables.UserDefaultHasAdminRights()) {
       commentsGeneralSensitive = &comments;
     }
-    if (!DatabaseRoutineS::SendActivationEmail(theEmails, &comments, &comments, commentsGeneralSensitive)) {
+    if (!Database::User::SendActivationEmail(theEmails, &comments, &comments, commentsGeneralSensitive)) {
       result = false;
     }
   }
@@ -1402,7 +1401,7 @@ EmailRoutines::EmailRoutines() {
   this->fromEmailAuth = Crypto::ConvertStringToBase64URL("A good day to use a computer algebra system");
 }
 
-bool DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeeded(
+bool Database::User::LoginViaGoogleTokenCreateNewAccountIfNeeded(
   UserCalculatorData& theUseR,
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral,
@@ -1412,7 +1411,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeede
   (void) theUseR;
   (void) commentsGeneral;
   if (!theGlobalVariables.flagDatabaseCompiled) {
-    return DatabaseRoutinesGlobalFunctions::LoginNoDatabaseSupport(theUseR, commentsGeneral);
+    return Database::User::LoginNoDatabaseSupport(theUseR, commentsGeneral);
   }
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeeded");
   UserCalculator userWrapper;
@@ -1468,7 +1467,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeede
   return true;
 }
 
-bool DatabaseRoutinesGlobalFunctions::LoginNoDatabaseSupport(
+bool Database::User::LoginNoDatabaseSupport(
   UserCalculatorData& theUser, std::stringstream* commentsGeneral
 ) {
   if (theGlobalVariables.flagDatabaseCompiled) {
@@ -1502,12 +1501,12 @@ bool DatabaseRoutinesGlobalFunctions::LoginNoDatabaseSupport(
   return true;
 }
 
-bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(
+bool Database::User::LoginViaDatabase(
   UserCalculatorData& theUseR,
   std::stringstream* commentsOnFailure
 ) {
   if (theGlobalVariables.flagDisableDatabaseLogEveryoneAsAdmin) {
-    return DatabaseRoutinesGlobalFunctions::LoginNoDatabaseSupport(theUseR, commentsOnFailure);
+    return Database::User::LoginNoDatabaseSupport(theUseR, commentsOnFailure);
   }
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LoginViaDatabase");
   UserCalculator userWrapper;
@@ -1603,7 +1602,7 @@ bool UserCalculator::StoreToDB(bool doSetPassword, std::stringstream* commentsOn
   }
   JSData setUser = this->ToJSON();
 
-  return DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(
+  return Database::UpdateOneFromJSON(
     DatabaseStrings::tableUsers, findUser, setUser, nullptr, commentsOnFailure
   );
 }

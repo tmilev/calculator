@@ -556,7 +556,7 @@ std::string WebWorker::GetDatabaseJSON() {
       theGlobalVariables.GetWebInput(WebAPI::databaseParameters::labels), false
     );
     if (operation == WebAPI::databaseParameters::fetch) {
-      result = DatabaseRoutinesGlobalFunctionsMongo::ToJSONDatabaseFetch(labels);
+      result = Database::ToJSONDatabaseFetch(labels);
     } else {
       result["error"] = "Uknown database operation: " + operation + ". ";
     }
@@ -584,7 +584,7 @@ std::string WebWorker::GetDatabaseDeleteOneItem() {
     return commentsStream.str();
   }
   commentsStream << "Parsed input string: " << inputParsed.ToString(false, false) << "\n";
-  if (DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntry(inputParsed, &commentsStream)) {
+  if (Database::DeleteOneEntry(inputParsed, &commentsStream)) {
     return "success";
   }
   if (!theGlobalVariables.flagDatabaseCompiled) {
@@ -767,7 +767,7 @@ bool WebWorker::LoginProcedure(std::stringstream& argumentProcessingFailureComme
   }
   if (doAttemptGoogleTokenLogin) {
     bool tokenIsGood = false;
-    theGlobalVariables.flagLoggedIn = DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeeded(
+    theGlobalVariables.flagLoggedIn = Database().get().theUser.LoginViaGoogleTokenCreateNewAccountIfNeeded(
       theUser, &argumentProcessingFailureComments, nullptr, tokenIsGood
     );
     if (tokenIsGood && !theGlobalVariables.flagLoggedIn && comments != nullptr) {
@@ -778,7 +778,7 @@ bool WebWorker::LoginProcedure(std::stringstream& argumentProcessingFailureComme
     theUser.enteredPassword != "" ||
     theUser.enteredActivationToken != ""
   ) {
-    theGlobalVariables.flagLoggedIn = DatabaseRoutinesGlobalFunctions::LoginViaDatabase(
+    theGlobalVariables.flagLoggedIn = Database().get().theUser.LoginViaDatabase(
       theUser, &argumentProcessingFailureComments
     );
   }
@@ -1965,7 +1965,7 @@ std::string WebWorker::GetChangePasswordPagePartOne(bool& outputDoShowPasswordCh
   }
   JSData findEmail, emailInfo, findUser, userInfo;
   findEmail[DatabaseStrings::labelEmail] = claimedEmail;
-  if (!DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON(
+  if (!Database::FindOneFromJSON(
     DatabaseStrings::tableEmailInfo, findEmail, emailInfo, &out, true
   )) {
     out << "\n<b style =\"color:red\">Failed to fetch email activation token for email: "
@@ -1983,7 +1983,7 @@ std::string WebWorker::GetChangePasswordPagePartOne(bool& outputDoShowPasswordCh
     return out.str();
   }
   emailInfo[DatabaseStrings::labelActivationToken] = "";
-  if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(
+  if (!Database::UpdateOneFromJSON(
     DatabaseStrings::tableEmailInfo, findEmail, emailInfo, nullptr, &out
   )) {
     out << "\n<b style =\"color:red\">Could not reset the activation token (database is down?). </b>";
@@ -1991,7 +1991,7 @@ std::string WebWorker::GetChangePasswordPagePartOne(bool& outputDoShowPasswordCh
   }
   userInfo[DatabaseStrings::labelEmail] = claimedEmail;
   findUser[DatabaseStrings::labelUsername] = theGlobalVariables.userDefault.username;
-  if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(
+  if (!Database::UpdateOneFromJSON(
     DatabaseStrings::tableUsers, findUser, userInfo, nullptr, &out
   )) {
     out << "\n<b style =\"color:red\">Could not store your email (database is down?). </b>";
@@ -2128,7 +2128,7 @@ int WebWorker::ProcessChangePassword(const std::string& reasonForNoAuthenticatio
   if (newEmail != "") {
     JSData queryEmailTaken, notUsed;
     queryEmailTaken[DatabaseStrings::labelEmail] = newEmail;
-    if (DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON(
+    if (Database::FindOneFromJSON(
       DatabaseStrings::tableUsers,
       queryEmailTaken, notUsed, nullptr, true
     )) {
@@ -2145,7 +2145,7 @@ int WebWorker::ProcessChangePassword(const std::string& reasonForNoAuthenticatio
   }
   std::stringstream commentsOnFailure;
   std::string newAuthenticationToken;
-  if (!DatabaseRoutinesGlobalFunctions::SetPassword(
+  if (!Database::get().theUser.SetPassword(
     theUser.username,
     newPassword,
     newAuthenticationToken,
@@ -2157,7 +2157,7 @@ int WebWorker::ProcessChangePassword(const std::string& reasonForNoAuthenticatio
   JSData findQuery, setQuery;
   findQuery[DatabaseStrings::labelUsername] = theUser.username;
   setQuery[DatabaseStrings::labelActivationToken] = "activated";
-  if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(
+  if (!Database::UpdateOneFromJSON(
     DatabaseStrings::tableUsers, findQuery, setQuery, nullptr, &commentsOnFailure
   )) {
     stOutput << "<b style = \"color:red\">Failed to set activationToken: "
@@ -2227,7 +2227,7 @@ int WebWorker::ProcessActivateAccount() {
 int WebWorker::ProcessLogout() {
   MacroRegisterFunctionWithName("WebWorker::ProcessLogout");
   this->SetHeaderOKNoContentLength("");
-  DatabaseRoutinesGlobalFunctions::LogoutViaDatabase();
+  Database::get().theUser.LogoutViaDatabase();
   return this->ProcessLoginUserInfo("Coming from logout");
 }
 
@@ -5290,13 +5290,6 @@ int WebServer::main(int argc, char **argv) {
     logServer << logger::green << "Project base folder: "
     << logger::blue << theGlobalVariables.PhysicalPathProjectBase
     << logger::endL;
-    if (!theGlobalVariables.flagDatabaseCompiled) {
-      theGlobalVariables.flagDatabaseUseFallback = true;
-      logServer << logger::red << "MongoDB missing. "
-      << logger::green << "Using " << logger::red
-      << "**SLOW** " << logger::green << "fall-back JSON storage." << logger::endL;
-      DatabaseFallback::theDatabase().initialize();
-    }
     // Compute configuration file location.
     // Load the configuration file.
     theGlobalVariables.ConfigurationLoad();
@@ -5305,6 +5298,11 @@ int WebServer::main(int argc, char **argv) {
     theGlobalVariables.ConfigurationProcess();
     // Store back the config file if it changed.
     theGlobalVariables.ConfigurationStore();
+
+    if (!Database::get().initialize()) {
+      crash << "Failed to initialize database. " << crash;
+    }
+
 
     if (theGlobalVariables.millisecondsMaxComputation > 0) {
       theGlobalVariables.millisecondsNoPingBeforeChildIsPresumedDead =

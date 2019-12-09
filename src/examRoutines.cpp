@@ -240,7 +240,7 @@ JSData CalculatorHTML::ToJSONProblemWeights(
   return output;
 }
 
-bool DatabaseRoutineS::StoreProblemInfoToDatabase(
+bool Database::User::StoreProblemInfoToDatabase(
   const UserCalculatorData& theUser, bool overwrite, std::stringstream& commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("DatabaseRoutines::StoreProblemDatabaseInfo");
@@ -251,7 +251,7 @@ bool DatabaseRoutineS::StoreProblemInfoToDatabase(
     if (overwrite) {
       JSData setQueryWeights;
       setQueryWeights[DatabaseStrings::labelProblemWeights] = theUser.problemWeights;
-      if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(
+      if (!Database::UpdateOneFromJSON(
         DatabaseStrings::tableProblemWeights,
         findQueryWeights,
         setQueryWeights,
@@ -266,7 +266,7 @@ bool DatabaseRoutineS::StoreProblemInfoToDatabase(
       adjustLabels[0] = DatabaseStrings::labelProblemWeights;
       for (int i = 0; i < theUser.problemWeights.objects.size(); i ++) {
         adjustLabels[1] = theUser.problemWeights.objects.theKeys[i];
-        if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(
+        if (!Database::UpdateOneFromJSON(
           DatabaseStrings::tableProblemWeights,
           findQueryWeights, theUser.problemWeights.objects.theValues[i],
           &adjustLabels,
@@ -281,7 +281,7 @@ bool DatabaseRoutineS::StoreProblemInfoToDatabase(
     if (overwrite) {
       JSData setQueryDeadlines;
       setQueryDeadlines[DatabaseStrings::labelDeadlines] = theUser.deadlines;
-      if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(
+      if (!this->owner->UpdateOneFromJSON(
         DatabaseStrings::tableProblemWeights,
         findQueryDeadlines,
         setQueryDeadlines,
@@ -296,7 +296,7 @@ bool DatabaseRoutineS::StoreProblemInfoToDatabase(
       adjustLabels[0] = DatabaseStrings::labelDeadlines;
       for (int i = 0; i < theUser.deadlines.objects.size(); i ++) {
         adjustLabels[1] = theUser.deadlines.objects.theKeys[i];
-        if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(
+        if (!Database::UpdateOneFromJSON(
           DatabaseStrings::tableDeadlines,
           findQueryDeadlines,
           theUser.deadlines.objects.theValues[i],
@@ -371,7 +371,7 @@ bool CalculatorHTML::MergeProblemInfoInDatabaseJSON(
   }
   theGlobalVariables.userDefault.problemWeights = this->ToJSONProblemWeights(incomingProblems);
   theGlobalVariables.userDefault.deadlines = this->ToJSONDeadlines(incomingProblems);
-  if (!DatabaseRoutineS::StoreProblemInfoToDatabase(theGlobalVariables.userDefault, false, commentsOnFailure)) {
+  if (!Database::get().theUser.StoreProblemInfoToDatabase(theGlobalVariables.userDefault, false, commentsOnFailure)) {
     return false;
   }
   return true;

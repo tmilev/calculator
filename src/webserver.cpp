@@ -1983,7 +1983,7 @@ std::string WebWorker::GetChangePasswordPagePartOne(bool& outputDoShowPasswordCh
     return out.str();
   }
   emailInfo[DatabaseStrings::labelActivationToken] = "";
-  if (!Database::UpdateOneFromJSON(
+  if (!Database::get().UpdateOneFromJSON(
     DatabaseStrings::tableEmailInfo, findEmail, emailInfo, nullptr, &out
   )) {
     out << "\n<b style =\"color:red\">Could not reset the activation token (database is down?). </b>";
@@ -1991,7 +1991,7 @@ std::string WebWorker::GetChangePasswordPagePartOne(bool& outputDoShowPasswordCh
   }
   userInfo[DatabaseStrings::labelEmail] = claimedEmail;
   findUser[DatabaseStrings::labelUsername] = theGlobalVariables.userDefault.username;
-  if (!Database::UpdateOneFromJSON(
+  if (!Database::get().UpdateOneFromJSON(
     DatabaseStrings::tableUsers, findUser, userInfo, nullptr, &out
   )) {
     out << "\n<b style =\"color:red\">Could not store your email (database is down?). </b>";
@@ -2157,7 +2157,7 @@ int WebWorker::ProcessChangePassword(const std::string& reasonForNoAuthenticatio
   JSData findQuery, setQuery;
   findQuery[DatabaseStrings::labelUsername] = theUser.username;
   setQuery[DatabaseStrings::labelActivationToken] = "activated";
-  if (!Database::UpdateOneFromJSON(
+  if (!Database::get().UpdateOneFromJSON(
     DatabaseStrings::tableUsers, findQuery, setQuery, nullptr, &commentsOnFailure
   )) {
     stOutput << "<b style = \"color:red\">Failed to set activationToken: "

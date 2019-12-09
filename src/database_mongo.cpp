@@ -112,6 +112,7 @@ void Database::Mongo::shutdown() {
     return;
   }
   this->flagInitialized = false;
+  #ifdef MACRO_use_MongoDB
   mongoc_database_destroy(static_cast<mongoc_database_t*>(this->database));
   this->database = nullptr;
   if (this->client != nullptr) {
@@ -119,6 +120,7 @@ void Database::Mongo::shutdown() {
     this->client = nullptr;
   }
   mongoc_cleanup();
+  #endif //MACRO_use_MongoDB
 }
 
 Database::Mongo::~Mongo() {

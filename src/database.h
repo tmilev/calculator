@@ -67,7 +67,7 @@ public:
       std::stringstream* commentsGeneralSensitive
     );
     //TODO(tmilev): refactor down to database-only operations.
-    static bool AddUsersFromEmails(
+    bool AddUsersFromEmails(
       const std::string& emailList,
       const std::string& userPasswords,
       std::string& userRole,
@@ -220,27 +220,27 @@ public:
     std::stringstream* commentsOnFailure = nullptr,
     bool mustBeObject = true
   );
-  static bool UpdateOneFromJSON(
+  bool UpdateOneFromJSON(
     const std::string& collectionName,
     const JSData& findQuery,
     const JSData& updateQuery,
     List<std::string>* fieldsToSetIfNullUseFirstFieldIfUpdateQuery,
     std::stringstream* commentsOnFailure = nullptr
   );
-  static bool UpdateOneFromJSONSpecifyField(
+  bool UpdateOneFromJSONSpecifyField(
     const std::string& collectionName,
     const JSData& findQuery,
     const JSData& updateQuery,
     std::string fieldToSet,
     std::stringstream* commentsOnFailure = nullptr
   );
-  static bool UpdateOneFromSomeJSON(
+  bool UpdateOneFromSomeJSON(
     const std::string& collectionName,
     const List<JSData>& findOrQueries,
     const JSData& updateQuery,
     std::stringstream* commentsOnFailure = nullptr
   );
-  static bool UpdateOneFromQueryString(
+  bool UpdateOneFromQueryString(
     const std::string& collectionName,
     const std::string& findQuery,
     const JSData& updateQuery,

@@ -1352,7 +1352,7 @@ std::string HtmlInterpretation::AddTeachersSections() {
     JSData findQuery, setQuery;
     findQuery[DatabaseStrings::labelUsername] = currentTeacher.username;
     setQuery[DatabaseStrings::labelSectionsTaught] = desiredSectionsList;
-    if (!Database::UpdateOneFromJSON(
+    if (!Database::get().UpdateOneFromJSON(
       DatabaseStrings::tableUsers, findQuery, setQuery, nullptr, &out
     )) {
       out << "<span style =\"color:red\">Failed to store course info of instructor: " << theTeachers[i] << ". </span><br>";
@@ -1394,7 +1394,7 @@ std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressW
   bool doSendEmails = theGlobalVariables.userCalculatorRequestType == "sendEmails" ?  true : false;
   int numNewUsers = 0;
   int numUpdatedUsers = 0;
-  bool createdUsers = Database::User::AddUsersFromEmails(
+  bool createdUsers = Database::get().theUser.AddUsersFromEmails(
     inputEmails, userPasswords, userRole, userGroup, comments, numNewUsers, numUpdatedUsers
   );
   if (createdUsers) {
@@ -2018,7 +2018,7 @@ int ProblemData::getExpectedNumberOfAnswers(const std::string& problemName, std:
   std::stringstream stringConverter;
   stringConverter << this->knownNumberOfAnswersFromHD;
   newDBentry[DatabaseStrings::labelProblemTotalQuestions] = stringConverter.str();
-  Database::UpdateOneFromJSON(
+  Database::get().UpdateOneFromJSON(
     DatabaseStrings::tableProblemInformation, findDBentry, newDBentry, nullptr, &commentsOnFailure
   );
   return this->knownNumberOfAnswersFromHD;

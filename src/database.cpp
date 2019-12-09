@@ -554,7 +554,7 @@ bool UserCalculator::ResetAuthenticationToken(std::stringstream* commentsOnFailu
   findUser[DatabaseStrings::labelUsername] = this->username;
   setUser[DatabaseStrings::labelAuthenticationToken] = this->actualAuthenticationToken;
   setUser[DatabaseStrings::labelTimeOfAuthenticationTokenCreation] = now.theTimeStringNonReadable;
-  Database::UpdateOneFromJSON(
+  Database::get().UpdateOneFromJSON(
     DatabaseStrings::tableUsers, findUser, setUser, nullptr, commentsOnFailure
   );
   this->flagNewAuthenticationTokenComputedUserNeedsIt = true;
@@ -573,7 +573,7 @@ bool UserCalculator::SetPassword(std::stringstream* commentsOnFailure) {
   JSData findUser, setUser;
   findUser[DatabaseStrings::labelUsername] = this->username;
   setUser[DatabaseStrings::labelPassword] = this->enteredHashedSaltedPassword;
-  return Database::UpdateOneFromJSON(
+  return Database::get().UpdateOneFromJSON(
     DatabaseStrings::tableUsers, findUser, setUser, nullptr, commentsOnFailure
   );
 }
@@ -836,7 +836,7 @@ bool UserCalculator::ComputeAndStoreActivationToken(std::stringstream* commentsO
   JSData findUserQuery, setUserQuery;
   findUserQuery[DatabaseStrings::labelUsername] = this->username;
   setUserQuery[DatabaseStrings::labelActivationToken] = this->actualActivationToken;
-  if (!Database::UpdateOneFromJSON(
+  if (!Database::get().UpdateOneFromJSON(
     DatabaseStrings::tableUsers, findUserQuery, setUserQuery, nullptr, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
@@ -916,7 +916,7 @@ bool UserCalculator::ComputeAndStoreActivationStats(
     }
     return false;
   }
-  if (!Database::UpdateOneFromJSON(
+  if (!Database::get().UpdateOneFromJSON(
       DatabaseStrings::tableUsers, findQueryInUsers, setQueryInUsers, nullptr, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
@@ -928,7 +928,7 @@ bool UserCalculator::ComputeAndStoreActivationStats(
   emailStatQuery[DatabaseStrings::labelNumActivationEmails] = numActivationsThisEmail.ToString();
   emailStatQuery[DatabaseStrings::labelActivationToken] = this->actualActivationToken;
   emailStatQuery[DatabaseStrings::labelUsernameAssociatedWithToken] = this->username;
-  if (!Database::UpdateOneFromJSON(
+  if (!Database::get().UpdateOneFromJSON(
     DatabaseStrings::tableEmailInfo, findQuery, emailStatQuery, nullptr, commentsOnFailure
   )) {
     return false;
@@ -972,7 +972,7 @@ bool UserCalculator::StoreProblemDataToDatabasE(std::stringstream& commentsOnFai
   }
   JSData setQuery;
   setQuery[DatabaseStrings::labelProblemDatA] = problemDataStream.str();
-  return Database::UpdateOneFromSomeJSON(
+  return Database::get().UpdateOneFromSomeJSON(
     DatabaseStrings::tableUsers, this->GetFindMeFromUserNameQuery(), setQuery, &commentsOnFailure
   );
 }
@@ -990,7 +990,7 @@ bool UserCalculator::StoreProblemDataToDatabaseJSON(std::stringstream* commentsO
   theGlobalVariables.userDefault.problemDataJSON = problemData;
   JSData setQuery;
   setQuery[DatabaseStrings::labelProblemDataJSON] = problemData;
-  return Database::UpdateOneFromSomeJSON(
+  return Database::get().UpdateOneFromSomeJSON(
     DatabaseStrings::tableUsers, this->GetFindMeFromUserNameQuery(), setQuery, commentsOnFailure
   );
 }
@@ -1057,12 +1057,12 @@ bool Database::User::AddUsersFromEmails(
         }
       }
       if (isEmail) {
-        Database::UpdateOneFromSomeJSON(DatabaseStrings::tableUsers, findUser, foundUser, &comments);
+        this->owner->UpdateOneFromSomeJSON(DatabaseStrings::tableUsers, findUser, foundUser, &comments);
       }
     } else {
       outputNumUpdatedUsers ++;
       //currentUser may have its updated entries modified by the functions above.
-      if (!Database::UpdateOneFromSomeJSON(
+      if (!this->owner->UpdateOneFromSomeJSON(
         DatabaseStrings::tableUsers, findUser, currentUser.ToJSON(), &comments
       )) {
         result = false;
@@ -1085,7 +1085,7 @@ bool Database::User::AddUsersFromEmails(
         result = false;
       JSData activatedJSON;
       activatedJSON[DatabaseStrings::labelActivationToken] = "activated";
-      Database::UpdateOneFromSomeJSON(DatabaseStrings::tableUsers, findUser, activatedJSON, &comments);
+      this->owner->UpdateOneFromSomeJSON(DatabaseStrings::tableUsers, findUser, activatedJSON, &comments);
       if (currentUser.email != "") {
         currentUser.ComputeAndStoreActivationStats(&comments, &comments);
       }
@@ -1602,7 +1602,7 @@ bool UserCalculator::StoreToDB(bool doSetPassword, std::stringstream* commentsOn
   }
   JSData setUser = this->ToJSON();
 
-  return Database::UpdateOneFromJSON(
+  return Database::get().UpdateOneFromJSON(
     DatabaseStrings::tableUsers, findUser, setUser, nullptr, commentsOnFailure
   );
 }

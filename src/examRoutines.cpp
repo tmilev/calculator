@@ -251,7 +251,7 @@ bool Database::User::StoreProblemInfoToDatabase(
     if (overwrite) {
       JSData setQueryWeights;
       setQueryWeights[DatabaseStrings::labelProblemWeights] = theUser.problemWeights;
-      if (!Database::UpdateOneFromJSON(
+      if (!this->owner->UpdateOneFromJSON(
         DatabaseStrings::tableProblemWeights,
         findQueryWeights,
         setQueryWeights,
@@ -266,7 +266,7 @@ bool Database::User::StoreProblemInfoToDatabase(
       adjustLabels[0] = DatabaseStrings::labelProblemWeights;
       for (int i = 0; i < theUser.problemWeights.objects.size(); i ++) {
         adjustLabels[1] = theUser.problemWeights.objects.theKeys[i];
-        if (!Database::UpdateOneFromJSON(
+        if (!this->owner->UpdateOneFromJSON(
           DatabaseStrings::tableProblemWeights,
           findQueryWeights, theUser.problemWeights.objects.theValues[i],
           &adjustLabels,
@@ -296,7 +296,7 @@ bool Database::User::StoreProblemInfoToDatabase(
       adjustLabels[0] = DatabaseStrings::labelDeadlines;
       for (int i = 0; i < theUser.deadlines.objects.size(); i ++) {
         adjustLabels[1] = theUser.deadlines.objects.theKeys[i];
-        if (!Database::UpdateOneFromJSON(
+        if (!this->owner->UpdateOneFromJSON(
           DatabaseStrings::tableDeadlines,
           findQueryDeadlines,
           theUser.deadlines.objects.theValues[i],

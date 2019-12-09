@@ -942,18 +942,6 @@ bool FileOperations::LoadFileToStringUnsecure(
 MapList<std::string, std::string, MathRoutines::HashString>&
 FileOperations::FolderVirtualLinksNonSensitive() {
   static MapList<std::string, std::string, MathRoutines::HashString> result;
-  static bool firstRun = false;
-  if (!firstRun) {
-    firstRun = true;
-    static MutexRecursiveWrapper theMutex;
-    MutexLockGuard theGuard(theMutex);
-    result.SetKeyValue("output/", "output/");
-    result.SetKeyValue("problems/", "../problems/");
-    result.SetKeyValue("html/", "../public_html/");
-    result.SetKeyValue("html-common/", "html-common/");
-    result.SetKeyValue("certificates-public/", "certificates-public/");
-    result.SetKeyValue("test/", "test/");
-  }
   return result;
 }
 
@@ -1037,6 +1025,7 @@ List<List<std::string> >& FileOperations::InitializeFolderVirtualLinksDefaults()
     List<std::string>({Configuration::laTeXMaterials            , "../LaTeX-materials/"                        }),
     List<std::string>({Configuration::slidesVideo               , "../slides-video/"                           }),
     List<std::string>({Configuration::freecalc                  , "../freecalc/"                               }),
+    List<std::string>({"favicon.ico"                            , "calculator-html/favicon.ico"                }),
   });
   FileOperations::CheckFolderLinks();
   return result;

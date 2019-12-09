@@ -34,5 +34,6 @@
   "LaTeX-materials/":"../LaTeX-materials/",
   "slides-video/":"../slides-video/",
   "freecalc/":"../freecalc/",
-  "mathJaxSetup":"Check for mathjax on every boot."
+  "mathJaxSetup":"Check for mathjax on every boot.",
+  "favicon.ico":"html-common/favicon.ico"
 }

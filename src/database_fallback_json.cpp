@@ -18,7 +18,8 @@ bool Database::FallBack::UpdateOneFromQueryString(
   if (!theGlobalVariables.flagDatabaseUseFallback) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
-      << "DatabaseFallback::UpdateOneFromQueryString: fallback db disabled and project compiled without mongoDB support. ";
+      << "DatabaseFallback::UpdateOneFromQueryString: "
+      << "fallback db disabled and project compiled without mongoDB support. ";
     }
     return false;
   }
@@ -37,10 +38,14 @@ bool Database::FallBack::UpdateOneFromQueryString(
 }
 
 bool Database::FallBack::FetchCollectionNames(List<std::string>& output, std::stringstream* commentsOnFailure) {
-  if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "Not implemented yet.";
+  MutexProcessLockGuard guardDB(this->access);
+  JSData theDB;
+  if (this->ReadDatabase(theDB, commentsOnFailure)) {
+    return false;
   }
-  return false;
+  output.SetSize(0);
+  output.AddListOnTop(theDB.objects.theKeys);
+  return true;
 }
 
 bool Database::FallBack::HasCollection(const std::string& collection, std::stringstream* commentsOnFailure) {

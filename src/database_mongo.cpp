@@ -206,9 +206,18 @@ bool MongoQuery::RemoveOne(std::stringstream* commentsOnFailure) {
   if (this->query != nullptr) {
     crash << "At this point of code, query is supposed to be 0. " << crash;
   }
-  this->query = bson_new_from_json
-  (reinterpret_cast<const uint8_t*>(this->findQuery.c_str()), this->findQuery.size(), &this->theError);
-  bool result = mongoc_collection_remove(theCollection.collection, MONGOC_REMOVE_SINGLE_REMOVE, this->query, NULL, &this->theError);
+  this->query = bson_new_from_json(
+    reinterpret_cast<const uint8_t*>(this->findQuery.c_str()),
+    static_cast<unsigned>(this->findQuery.size()),
+    &this->theError
+  );
+  bool result = mongoc_collection_remove(
+    theCollection.collection,
+    MONGOC_REMOVE_SINGLE_REMOVE,
+    this->query,
+    nullptr,
+    &this->theError
+  );
   if (!result) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << this->theError.message;
@@ -239,17 +248,19 @@ bool MongoQuery::InsertOne(const JSData& incoming, std::stringstream* commentsOn
   std::string incomingJSONString = incoming.ToString(true, false);
   this->update = bson_new_from_json(
     reinterpret_cast<const uint8_t*>(incomingJSONString.c_str()),
-    incomingJSONString.size(),
+    static_cast<signed>(incomingJSONString.size()),
     &this->theError
   );
-  if (this->update == NULL) {
+  if (this->update == nullptr) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to create insertion bson.";
     }
     return false;
   }
   this->updateResult = bson_new();
-  bool result = mongoc_collection_insert_one(theCollection.collection, this->update, NULL, this->updateResult, &this->theError);
+  bool result = mongoc_collection_insert_one(
+    theCollection.collection, this->update, nullptr, this->updateResult, &this->theError
+  );
   if (!result) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << this->theError.message;
@@ -281,19 +292,19 @@ bool MongoQuery::UpdateOne(std::stringstream* commentsOnFailure, bool doUpsert) 
   }
   this->query = bson_new_from_json(
     reinterpret_cast<const uint8_t*>( this->findQuery.c_str()),
-    this->findQuery.size(),
+    static_cast<signed>(this->findQuery.size()),
     &this->theError
   );
   this->update = bson_new_from_json(
     reinterpret_cast<const uint8_t*>(this->updateQuery.c_str()),
-    this->updateQuery.size(),
+    static_cast<signed>(this->updateQuery.size()),
     &this->theError
   );
   if (doUpsert) {
     this->optionsQuery = "{\"upsert\": true}";
     this->options = bson_new_from_json(
       reinterpret_cast<const uint8_t*>(this->optionsQuery.c_str()),
-      this->optionsQuery.size(),
+      static_cast<signed>(this->optionsQuery.size()),
       &this->theError
     );
   }
@@ -305,7 +316,7 @@ bool MongoQuery::UpdateOne(std::stringstream* commentsOnFailure, bool doUpsert) 
     );
   } else {
     result = mongoc_collection_update_one(
-      theCollection.collection, this->query, this->update, 0, this->updateResult, &this->theError
+      theCollection.collection, this->query, this->update, nullptr, this->updateResult, &this->theError
     );
   }
   if (!result) {
@@ -354,10 +365,10 @@ bool MongoQuery::FindMultiple(
   }
   this->query = bson_new_from_json(
     reinterpret_cast<const uint8_t*>(this->findQuery.c_str()),
-    this->findQuery.size(),
+    static_cast<signed>(this->findQuery.size()),
     &this->theError
   );
-  if (this->query == NULL) {
+  if (this->query == nullptr) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << this->theError.message;
     }
@@ -375,10 +386,10 @@ bool MongoQuery::FindMultiple(
     std::string optionsString = inputOptions.ToString(false, false);
     this->options = bson_new_from_json(
       reinterpret_cast<const uint8_t*>(optionsString.c_str()),
-      optionsString.size(),
+      static_cast<signed>(optionsString.size()),
       &this->theError
     );
-    if (this->options == NULL) {
+    if (this->options == nullptr) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << this->theError.message;
       }
@@ -386,8 +397,8 @@ bool MongoQuery::FindMultiple(
       return false;
     }
   }
-  this->cursor = mongoc_collection_find_with_opts(theCollection.collection, this->query, this->options, NULL);
-  if (this->cursor == NULL) {
+  this->cursor = mongoc_collection_find_with_opts(theCollection.collection, this->query, this->options, nullptr);
+  if (this->cursor == nullptr) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Bad mongoDB cursor. ";
     }
@@ -399,7 +410,7 @@ bool MongoQuery::FindMultiple(
   List<std::string> outputString;
   while (mongoc_cursor_next(this->cursor, &bufferOutput)) {
     char* bufferOutpurStringFormat = nullptr;
-    bufferOutpurStringFormat = bson_as_canonical_extended_json(bufferOutput, NULL);
+    bufferOutpurStringFormat = bson_as_canonical_extended_json(bufferOutput, nullptr);
     std::string current(bufferOutpurStringFormat);
     bson_free(bufferOutpurStringFormat);
     if (this->maxOutputItems <= 0 || this->totalItems < this->maxOutputItems) {
@@ -442,13 +453,13 @@ void Database::Mongo::CreateHashIndex(
   << theKey << "\": \"hashed\"}, \"name\": \"" << collectionName  << "_" << theKey << "_hash\"" << "}]} ";
   query.command = bson_new_from_json(
     reinterpret_cast<const uint8_t*>(theCommand.str().c_str()),
-    theCommand.str().size(),
+    static_cast<signed>(theCommand.str().size()),
     &query.theError
   );
   mongoc_database_write_command_with_opts(
     static_cast<mongoc_database_t*>(database),
     query.command,
-    NULL,
+    nullptr,
     query.updateResult,
     &query.theError
   );
@@ -645,6 +656,7 @@ bool Database::Mongo::GetOrFindQuery(
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("Database::GetOrFindQuery");
+  (void) commentsOnFailure;
   std::stringstream queryStream;
   queryStream << "{\"$or\": [";
   for (int i = 0; i < input.size; i ++) {
@@ -892,7 +904,6 @@ bool Database::DeleteOneEntryById(
   query.collectionName = findQuery.collection;
   return query.RemoveOne(commentsOnFailure);
 #else
-  (void) tableName;
   (void) findQuery;
   if (commentsOnFailure != nullptr) {
     *commentsOnFailure << "DeleteOneEntryById: project compiled without mongoDB support. ";
@@ -957,7 +968,6 @@ bool Database::DeleteOneEntryUnsetUnsecure(
   logWorker << logger::red << "DEBUG: update query: " << logger::blue << query.updateQuery << logger::endL;
   return query.UpdateOneNoOptions(commentsOnFailure);
 #else
-  (void) tableName;
   (void) findQuery;
   (void) selector;
   if (commentsOnFailure != nullptr) {
@@ -986,13 +996,13 @@ bool Database::Mongo::UpdateOneFromQueryString(
   query.updateQuery = updateQueryStream.str();
   return query.UpdateOneWithOptions(commentsOnFailure);
 #else
-  return Database::get().theFallBack.UpdateOneFromQueryString(
-    collectionName,
-    findQuery,
-    updateQuery,
-    fieldsToSetIfNullUseFirstFieldIfUpdateQuery,
-    commentsOnFailure
-  );
+  (void) collectionName;
+  (void) findQuery;
+  (void) updateQuery;
+  if (commentsOnFailure != nullptr) {
+    *commentsOnFailure << "UpdateOneFromQueryString failed: DB not compiled.";
+  }
+  return false;
 #endif
 }
 
@@ -1112,13 +1122,13 @@ bool Database::Mongo::FetchCollectionNames(
   bson_destroy(&opts);
   return result;
 #else
+  (void) output;
   if (commentsOnFailure != nullptr) {
     *commentsOnFailure << "Database not compiled. ";
   }
   return false;
 #endif
 }
-
 
 bool Database::FetchTable(
   const std::string& tableName,

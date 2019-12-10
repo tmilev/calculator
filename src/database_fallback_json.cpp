@@ -40,6 +40,7 @@ bool Database::FallBack::UpdateOne(
   if (!this->HasCollection(findQuery.collection, commentsOnFailure)) {
     return false;
   }
+
   if (commentsOnFailure != nullptr) {
     *commentsOnFailure << "Not implemented yet: findQuery: "
     << findQuery.ToJSON().ToString(false)

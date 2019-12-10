@@ -148,9 +148,12 @@ bool Database::UpdateOne(
 ) {
   if (theGlobalVariables.flagDatabaseCompiled) {
     return this->mongoDB.UpdateOne(findQuery, dataToMerge, commentsOnFailure);
+  } else if (theGlobalVariables.flagDatabaseUseFallback) {
+    return this->theFallBack.UpdateOne(findQuery, dataToMerge, commentsOnFailure);
   }
+
   if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "UpdateOne not implemented yet. ";
+    *commentsOnFailure << "UpdateOne fail: no DB compiled and fallback is disabled. ";
   }
   return false;
 }

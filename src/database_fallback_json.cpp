@@ -7,18 +7,20 @@
 // Avoid previous extern warning:
 static ProjectInformationInstance projectInfoDatabaseFallbackJSON(__FILE__, "No-database fallback using json file.");
 
-bool Database::FallBack::FindOneFromSome(const List<QueryExact> &findOrQueries, JSData &output, std::stringstream *commentsOnFailure) {
+bool Database::FallBack::FindOneFromSome(
+  const List<QueryExact>& findOrQueries,
+  JSData& output,
+  std::stringstream* commentsOnFailure
+) {
   if (commentsOnFailure != nullptr) {
     *commentsOnFailure << "Database::FallBack::FindOneFromSome not implemented yet.";
   }
   return false;
 }
 
-bool Database::FallBack::UpdateOneFromQueryString(
-  const std::string& collectionName,
-  const std::string& findQuery,
+bool Database::FallBack::UpdateOne(
+  const QueryExact& findQuery,
   const JSData& updateQuery,
-  List<std::string>* fieldsToSetIfNullUseFirstFieldIfUpdateQuery,
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("DatabaseFallback::UpdateOneFromQueryString");
@@ -35,11 +37,13 @@ bool Database::FallBack::UpdateOneFromQueryString(
   if (this->ReadAndIndexDatabase(commentsOnFailure)) {
     return false;
   }
-  if (!this->HasCollection(collectionName, commentsOnFailure)) {
+  if (!this->HasCollection(findQuery.collection, commentsOnFailure)) {
     return false;
   }
   if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "Not implemented yet: findQuery: " << findQuery << " updadeQuery: " << updateQuery.ToString(false);
+    *commentsOnFailure << "Not implemented yet: findQuery: "
+    << findQuery.ToJSON().ToString(false)
+    << " updadeQuery: " << updateQuery.ToString(false);
   }
   return false;
 }

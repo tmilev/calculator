@@ -113,11 +113,9 @@ public:
       std::string collectionAndLabel();
     };
     MapReferenceS<std::string, Database::FallBack::Index, MathRoutines::HashString> indices;
-    bool UpdateOneFromQueryString(
-      const std::string& collectionName,
-      const std::string& findQuery,
+    bool UpdateOne(
+      const QueryExact& findQuery,
       const JSData& updateQuery,
-      List<std::string>* fieldsToSetIfNullUseFirstFieldIfUpdateQuery,
       std::stringstream* commentsOnFailure = nullptr
     );
     bool FetchCollectionNames(

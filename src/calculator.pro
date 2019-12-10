@@ -9,7 +9,7 @@ QMAKE_CXXFLAGS+=-std=c++11
 TEMPLATE=app
 
 DEFINES+=MACRO_use_open_ssl
-# DEFINES+=MACRO_use_MongoDB
+DEFINES+=MACRO_use_MongoDB
 
 LIBS+=-lmongoc-1.0
 LIBS+=-lbson-1.0
@@ -19,7 +19,6 @@ LIBS+=-lbson-1.0
 
 INCLUDEPATH+=/usr/local/include/libmongoc-1.0
 INCLUDEPATH+=/usr/local/include/libbson-1.0
-
 HEADERS += \
     abstract_syntax_notation_one_decoder.h \
     calculator.h \

@@ -25,7 +25,7 @@ bool Database::FallBack::UpdateOneFromQueryString(
   }
   MutexProcessLockGuard guardDB(this->access);
   JSData database;
-  if (this->ReadDatabase(database, commentsOnFailure)) {
+  if (this->ReadAndIndexDatabase(commentsOnFailure)) {
     return false;
   }
   if (!this->HasCollection(collectionName, commentsOnFailure)) {
@@ -39,12 +39,11 @@ bool Database::FallBack::UpdateOneFromQueryString(
 
 bool Database::FallBack::FetchCollectionNames(List<std::string>& output, std::stringstream* commentsOnFailure) {
   MutexProcessLockGuard guardDB(this->access);
-  JSData theDB;
-  if (this->ReadDatabase(theDB, commentsOnFailure)) {
+  if (this->ReadDatabase(commentsOnFailure)) {
     return false;
   }
   output.SetSize(0);
-  output.AddListOnTop(theDB.objects.theKeys);
+  output.AddListOnTop(this->reader.objects.theKeys);
   return true;
 }
 
@@ -78,7 +77,59 @@ void Database::FallBack::initialize() {
   });
 }
 
-bool Database::FallBack::ReadDatabase(JSData& output, std::stringstream* commentsOnFailure) {
+void Database::FallBack::CreateHashIndex(const std::string& collectionName, const std::string& theKey) {
+  Database::FallBack::Index newIndex;
+  newIndex.collection = collectionName;
+  newIndex.label = theKey;
+  newIndex.collectionAndLabelCache = newIndex.collectionAndLabel();
+  this->indices.SetKeyValue(newIndex.collectionAndLabelCache, newIndex);
+}
+
+std::string Database::FallBack::Index::collectionAndLabelStatic(
+  const std::string& inputCollection, const std::string& inputLabel
+) {
+  return inputCollection + "." + inputLabel;
+}
+
+std::string Database::FallBack::Index::collectionAndLabel() {
+  return this->collectionAndLabelStatic(this->collection, this->label);
+}
+
+bool Database::FallBack::ReadAndIndexDatabase(std::stringstream* commentsOnFailure) {
+  if (!this->ReadDatabase(commentsOnFailure)) {
+    return false;
+  }
+  for (int i = 0; i < this->reader.objects.size(); i ++) {
+    std::string collection = this->reader.objects.theKeys[i];
+    JSData& currentCollection = this->reader.objects.theValues[i];
+    for (int i = 0; i < currentCollection.theList.size; i ++) {
+
+    }
+  }
+  return true;
+}
+
+void Database::FallBack::IndexOneRecord(
+  const JSData& entry, int64_t row, const std::string& collection
+) {
+  if (entry.theType != JSData::token::tokenObject) {
+    return;
+  }
+  for (int i = 0; i < entry.objects.size(); i ++) {
+    std::string indexLabel = Database::FallBack::Index::collectionAndLabelStatic(collection, entry.objects.theKeys[i]);
+    if (!this->indices.Contains(indexLabel)) {
+      continue;
+    }
+    const JSData& keyToIndexBy = entry.objects.theValues[i];
+    if (keyToIndexBy.theType != JSData::token::tokenString) {
+      continue;
+    }
+    Database::FallBack::Index& currentIndex = this->indices.GetValueCreate(indexLabel);
+    currentIndex.locations.GetValueCreate(keyToIndexBy.theString).AddOnTop(row);
+  }
+}
+
+bool Database::FallBack::ReadDatabase(std::stringstream* commentsOnFailure) {
   std::string theDatabase;
   if (!FileOperations::LoadFileToStringVirtual(
     "database-fallback/database.json", theDatabase, true, commentsOnFailure
@@ -92,5 +143,5 @@ bool Database::FallBack::ReadDatabase(JSData& output, std::stringstream* comment
       return false;
     }
   }
-  return output.readstring(theDatabase, false, commentsOnFailure);
+  return this->reader.readstring(theDatabase, false, commentsOnFailure);
 }

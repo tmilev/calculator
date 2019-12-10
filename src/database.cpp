@@ -88,6 +88,100 @@ bool Database::User::LogoutViaDatabase() {
   return true;
 }
 
+QueryExact::QueryExact() {
+}
+
+QueryExact::QueryExact(
+  const std::string& desiredCollection,
+  const std::string& label,
+  const std::string& desiredValue
+) {
+  this->collection = desiredCollection;
+  this->value = desiredValue;
+  this->nestedLabels.AddOnTop(label);
+}
+
+QueryExact::QueryExact(
+  const std::string& desiredCollection,
+  const List<std::string>& desiredLabels,
+  const std::string& desiredValue
+) {
+  this->collection = desiredCollection;
+  this->value = desiredValue;
+  this->nestedLabels = desiredLabels;
+}
+
+void QueryExact::SetLabelValue(const std::string& label, const std::string& desiredValue) {
+  this->value = desiredValue;
+  this->nestedLabels.SetSize(1);
+  this->nestedLabels[0] = label;
+}
+
+bool Database::FindOneFromSome(
+  const List<QueryExact>& findOrQueries,
+  JSData& output,
+  std::stringstream* commentsOnFailure
+) {
+  if (theGlobalVariables.flagDatabaseCompiled) {
+    return this->mongoDB.FindOneFromSome(findOrQueries, output, commentsOnFailure);
+  } else if (theGlobalVariables.flagDatabaseUseFallback) {
+    return this->theFallBack.FindOneFromSome(findOrQueries, output, commentsOnFailure);
+  } else {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Find one from some failed: fallback database disabled. ";
+    }
+    return false;
+  }
+}
+
+
+void Database::CreateHashIndex(
+  const std::string& collectionName, const std::string& theKey
+) {
+  if (theGlobalVariables.flagDatabaseCompiled) {
+    this->mongoDB.CreateHashIndex(collectionName, theKey);
+  } else if (theGlobalVariables.flagDatabaseUseFallback) {
+    this->theFallBack.CreateHashIndex(collectionName, theKey);
+  }
+}
+
+bool Database::initializeWorker() {
+  MacroRegisterFunctionWithName("Database::initializeWorker");
+  if (this->flagInitializedWorker) {
+    return true;
+  }
+  if (theGlobalVariables.flagDatabaseCompiled) {
+    this->mongoDB.initialize();
+  }
+  this->CreateHashIndex(DatabaseStrings::tableUsers, DatabaseStrings::labelUsername);
+  this->CreateHashIndex(DatabaseStrings::tableUsers, DatabaseStrings::labelEmail);
+  this->CreateHashIndex(DatabaseStrings::tableUsers, DatabaseStrings::labelInstructor);
+  this->CreateHashIndex(DatabaseStrings::tableUsers, DatabaseStrings::labelUserRole);
+  this->CreateHashIndex(DatabaseStrings::tableProblemInformation, DatabaseStrings::labelProblemName);
+  this->CreateHashIndex(DatabaseStrings::tableDeleted, DatabaseStrings::labelUsername);
+  this->flagInitializedWorker = true;
+  return true;
+}
+
+bool Database::initializeServer() {
+  MacroRegisterFunctionWithName("Database::initializeServer");
+  this->theUser.owner = this;
+  this->theFallBack.owner = this;
+  this->flagInitializedServer = true;
+  if (theGlobalVariables.flagDisableDatabaseLogEveryoneAsAdmin) {
+    return true;
+  }
+  if (theGlobalVariables.flagDatabaseCompiled) {
+    return true;
+  }
+  theGlobalVariables.flagDatabaseUseFallback = true;
+  logServer << logger::red << "Calculator compiled without (mongoDB) database support. "
+  << logger::green << "Using " << logger::red
+  << "**SLOW** " << logger::green << "fall-back JSON storage." << logger::endL;
+  this->theFallBack.initialize();
+  return true;
+}
+
 void GlobalVariables::initModifiableDatabaseFields() {
   MacroRegisterFunctionWithName("GlobalVariables::initModifiableDatabaseFields");
   List<List<std::string> >& modifiableData = theGlobalVariables.databaseModifiableFields;
@@ -323,11 +417,10 @@ bool UserCalculator::LoadFromDB(std::stringstream* commentsOnFailure, std::strin
   }
   this->ComputeCourseInfo();
   if (this->deadlineSchema != "") {
-    JSData findDeadlinesQuery, outDeadlinesQuery;
-    findDeadlinesQuery[DatabaseStrings::labelDeadlinesSchema] = this->deadlineSchema;
-    if (Database::FindOneFromJSON(
-      DatabaseStrings::tableDeadlines,
-      findDeadlinesQuery,
+    QueryExact findDeadlines(DatabaseStrings::tableDeadlines, DatabaseStrings::labelDeadlinesSchema, this->deadlineSchema);
+    JSData outDeadlinesQuery;
+    if (Database::FindOne(
+      findDeadlines,
       outDeadlinesQuery,
       commentsGeneral,
       true
@@ -336,10 +429,10 @@ bool UserCalculator::LoadFromDB(std::stringstream* commentsOnFailure, std::strin
     }
   }
   if (this->problemWeightSchema != "") {
-    JSData findProblemWeightsQuery, outProblemWeightsQuery;
-    findProblemWeightsQuery[DatabaseStrings::labelProblemWeightsSchema] = this->problemWeightSchema;
-    if (Database::FindOneFromJSON(
-      DatabaseStrings::tableProblemWeights, findProblemWeightsQuery, outProblemWeightsQuery, commentsGeneral, true
+    QueryExact findProblemWeights(DatabaseStrings::tableProblemWeights, DatabaseStrings::labelProblemWeightsSchema, this->problemWeightSchema);
+    JSData outProblemWeightsQuery;
+    if (Database::FindOne(
+      findProblemWeights, outProblemWeightsQuery, commentsGeneral, true
     )) {
       this->problemWeights = outProblemWeightsQuery[DatabaseStrings::labelProblemWeights];
     }
@@ -871,10 +964,10 @@ bool UserCalculator::ComputeAndStoreActivationStats(
   std::string activationAddress = this->GetActivationAddressFromActivationToken(
     this->actualActivationToken, theGlobalVariables.hostWithPort, this->username, this->email
   );
-  JSData findQuery, emailStatQuery;
-  findQuery[DatabaseStrings::labelEmail] = this->email;
-  Database::FindOneFromJSON(
-    DatabaseStrings::tableEmailInfo, findQuery, emailStatQuery, commentsOnFailure, true
+  JSData emailStatQuery;
+  QueryExact findQuery(DatabaseStrings::tableEmailInfo, DatabaseStrings::labelEmail, this->email);
+  Database::FindOne(
+    findQuery, emailStatQuery, commentsOnFailure, true
   );
   std::string lastEmailTime, emailCountForThisEmail;
   lastEmailTime = emailStatQuery[DatabaseStrings::labelLastActivationEmailTime].theString;
@@ -903,12 +996,16 @@ bool UserCalculator::ComputeAndStoreActivationStats(
     << "<br>Total activations (attempted on) this email: "
     << numActivationsThisEmail.ToString() << ".\n<br>\n";
   }
-  JSData findQueryInUsers, setQueryInUsers;
-  setQueryInUsers[DatabaseStrings::labelTimeOfActivationTokenCreation] = now.ToString();
+  QueryExact findQueryInUsers(DatabaseStrings::tableUsers, "", "");
+  QueryExact setQueryInUsers(
+    DatabaseStrings::tableUsers,
+    DatabaseStrings::labelTimeOfActivationTokenCreation,
+    now.ToString()
+  );
   if (this->userId != "") {
-    findQueryInUsers[DatabaseStrings::labelUserId] = this->userId;
+    findQueryInUsers.SetLabelValue(DatabaseStrings::labelUserId, this->userId);
   } else if (this->username != "") {
-    findQueryInUsers[DatabaseStrings::labelUsername] = this->username;
+    findQueryInUsers.SetLabelValue(DatabaseStrings::labelUsername, this->username);
   } else {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
@@ -916,8 +1013,8 @@ bool UserCalculator::ComputeAndStoreActivationStats(
     }
     return false;
   }
-  if (!Database::get().UpdateOneFromJSON(
-      DatabaseStrings::tableUsers, findQueryInUsers, setQueryInUsers, nullptr, commentsOnFailure
+  if (!Database::get().UpdateOne(
+    findQueryInUsers, setQueryInUsers, nullptr, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to set activationTokenCreationTime. ";

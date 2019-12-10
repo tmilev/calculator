@@ -9,6 +9,17 @@
 
 static ProjectInformationInstance projectInfoDatabaseH(__FILE__, "Database interface header. ");
 
+class QueryExact {
+  public:
+  std::string collection;
+  List<std::string> nestedLabels;
+  std::string value;
+  QueryExact();
+  QueryExact(const std::string& desiredCollection, const std::string& label, const std::string& desiredValue);
+  QueryExact(const std::string& desiredCollection, const List<std::string>& desiredLabels, const std::string& desiredValue);
+  void SetLabelValue(const std::string& label, const std::string& desiredValue);
+};
+
 class Database {
 public:
   bool flagInitializedServer;
@@ -24,6 +35,8 @@ public:
   bool initializeServer();
   bool initializeWorker();
   bool CheckInitialization();
+  void CreateHashIndex(const std::string& collectionName, const std::string& theKey);
+
   class User {
   public:
     Database *owner;
@@ -87,6 +100,18 @@ public:
     MutexProcess access;
     HashedList<std::string, MathRoutines::HashString> knownCollections;
     JSData reader;
+    class Index {
+    public:
+      // Collection A, label B is denoted as A.B.
+      // Dots in the labels and collections are forbidden.
+      std::string collection;
+      std::string label;
+      std::string collectionAndLabelCache;
+      MapList<std::string, List<int64_t>, MathRoutines::HashString> locations;
+      static std::string collectionAndLabelStatic(const std::string& inputCollection, const std::string& inputLabel);
+      std::string collectionAndLabel();
+    };
+    MapReferenceS<std::string, Database::FallBack::Index, MathRoutines::HashString> indices;
     bool UpdateOneFromQueryString(
       const std::string& collectionName,
       const std::string& findQuery,
@@ -97,14 +122,17 @@ public:
     bool FetchCollectionNames(
       List<std::string>& output, std::stringstream* commentsOnFailure
     );
+    void CreateHashIndex(const std::string& collectionName, const std::string& theKey);
     bool HasCollection(const std::string& collection, std::stringstream* commentsOnFailure);
-    bool ReadDatabase(JSData& output, std::stringstream* commentsOnFailure);
+    bool ReadDatabase(std::stringstream* commentsOnFailure);
+    bool ReadAndIndexDatabase(std::stringstream* commentsOnFailure);
+    void IndexOneRecord(const JSData& entry, int64_t row, const std::string& collection);
     void initialize();
     FallBack();
   };
   FallBack theFallBack;
 
-  class Mongo{
+  class Mongo {
   public:
     // The following variable has type mongoc_client_t.
     // This type is not forward declared due to compiler errors such as:
@@ -120,6 +148,17 @@ public:
     void CreateHashIndex(const std::string& collectionName, const std::string& theKey);
     bool FetchCollectionNames(
       List<std::string>& output, std::stringstream* commentsOnFailure
+    );
+    static bool FindOneFromQueryString(
+      const std::string& collectionName,
+      const std::string& findQuery,
+      JSData& output,
+      std::stringstream* commentsOnFailure = nullptr
+    );
+    static bool FindOneFromSome(
+      const List<QueryExact>& findOrQueries,
+      JSData& output,
+      std::stringstream* commentsOnFailure
     );
     Mongo();
     ~Mongo();
@@ -160,12 +199,6 @@ public:
     std::stringstream* commentsOnFailure = nullptr,
     std::stringstream* commentsGeneralNonSensitive = nullptr
   );
-  static bool FindOneFromQueryString(
-    const std::string& collectionName,
-    const std::string& findQuery,
-    JSData& output,
-    std::stringstream* commentsOnFailure = nullptr
-  );
   static bool FindOneFromQueryStringWithProjection(
     const std::string& collectionName,
     const std::string& findQuery,
@@ -198,16 +231,14 @@ public:
     std::string& output,
     std::stringstream* commentsOnFailure = nullptr
   );
-  static bool FindOneFromJSON(
-    const std::string& collectionName,
-    const JSData& findQuery,
+  static bool FindOne(
+    const QueryExact& query,
     JSData& output,
     std::stringstream* commentsOnFailure,
     bool doEncodeFindFields
   );
-  static bool FindOneFromSome(
-    const std::string& collectionName,
-    const List<JSData>& findOrQueries,
+  bool FindOneFromSome(
+    const List<QueryExact>& alternatives,
     JSData& output,
     std::stringstream* commentsOnFailure = nullptr
   );
@@ -220,10 +251,9 @@ public:
     std::stringstream* commentsOnFailure = nullptr,
     bool mustBeObject = true
   );
-  bool UpdateOneFromJSON(
-    const std::string& collectionName,
-    const JSData& findQuery,
-    const JSData& updateQuery,
+  bool UpdateOne(
+    const QueryExact& findQuery,
+    const QueryExact& updateQuery,
     List<std::string>* fieldsToSetIfNullUseFirstFieldIfUpdateQuery,
     std::stringstream* commentsOnFailure = nullptr
   );

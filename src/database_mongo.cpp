@@ -63,41 +63,7 @@ bool Database::Mongo::initialize() {
     static_cast<mongoc_client_t*>(this->client),
     DatabaseStrings::theDatabaseNameMongo.c_str()
   );
-  this->CreateHashIndex(DatabaseStrings::tableUsers, DatabaseStrings::labelUsername);
-  this->CreateHashIndex(DatabaseStrings::tableUsers, DatabaseStrings::labelEmail);
-  this->CreateHashIndex(DatabaseStrings::tableUsers, DatabaseStrings::labelInstructor);
-  this->CreateHashIndex(DatabaseStrings::tableUsers, DatabaseStrings::labelUserRole);
-  this->CreateHashIndex(DatabaseStrings::tableProblemInformation, DatabaseStrings::labelProblemName);
-  this->CreateHashIndex(DatabaseStrings::tableDeleted, DatabaseStrings::labelUsername);
 #endif
-  return true;
-}
-
-bool Database::initializeWorker() {
-  MacroRegisterFunctionWithName("Database::initializeWorker");
-  if (this->flagInitializedWorker) {
-    return true;
-  }
-  this->mongoDB.initialize();
-  this->flagInitializedWorker = true;
-  return true;
-}
-
-bool Database::initializeServer() {
-  MacroRegisterFunctionWithName("Database::initializeServer");
-  this->theUser.owner = this;
-  this->theFallBack.owner = this;
-  this->flagInitializedServer = true;
-  if (theGlobalVariables.flagDisableDatabaseLogEveryoneAsAdmin) {
-    return true;
-  }
-  if (theGlobalVariables.flagDatabaseCompiled) {
-    return true;
-  }
-  logServer << logger::red << "Calculator compiled without (mongoDB) database support. "
-  << logger::green << "Using " << logger::red
-  << "**SLOW** " << logger::green << "fall-back JSON storage." << logger::endL;
-  this->theFallBack.initialize();
   return true;
 }
 
@@ -461,10 +427,14 @@ bool MongoQuery::FindMultiple(
   //<< output.ToStringCommaDelimited() << logger::endL;
   return true;
 }
+#endif
 
 void Database::Mongo::CreateHashIndex(
   const std::string& collectionName, const std::string& theKey
 ) {
+  (void) collectionName;
+  (void) theKey;
+  #ifdef MACRO_use_MongoDB
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::CreateHashIndex");
   MongoQuery query;
   std::stringstream theCommand;
@@ -482,8 +452,8 @@ void Database::Mongo::CreateHashIndex(
     query.updateResult,
     &query.theError
   );
+  #endif
 }
-#endif
 
 bool Database::FindFromString(
   const std::string& collectionName,
@@ -677,9 +647,8 @@ bool Database::IsValidJSONMongoFindQuery(
   return true;
 }
 
-bool Database::FindOneFromSome(
-  const std::string& collectionName,
-  const List<JSData>& findOrQueries,
+bool Database::Mongo::FindOneFromSome(
+  const List<QueryExact>& findOrQueries,
   JSData& output,
   std::stringstream* commentsOnFailure
 ) {
@@ -715,7 +684,7 @@ bool Database::GetOrFindQuery(
   return true;
 }
 
-bool Database::FindOneFromQueryString(
+bool Database::Mongo::FindOneFromQueryString(
   const std::string& collectionName, const std::string& findQuery, JSData& output, std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("Database::FindOneFromQueryString");

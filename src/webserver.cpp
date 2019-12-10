@@ -5302,8 +5302,6 @@ int WebServer::main(int argc, char **argv) {
     if (!Database::get().initializeServer()) {
       crash << "Failed to initialize database. " << crash;
     }
-
-
     if (theGlobalVariables.millisecondsMaxComputation > 0) {
       theGlobalVariables.millisecondsNoPingBeforeChildIsPresumedDead =
       theGlobalVariables.millisecondsMaxComputation + 20000; // + 20 seconds

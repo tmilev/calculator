@@ -7,6 +7,13 @@
 // Avoid previous extern warning:
 static ProjectInformationInstance projectInfoDatabaseFallbackJSON(__FILE__, "No-database fallback using json file.");
 
+bool Database::FallBack::FindOneFromSome(const List<QueryExact> &findOrQueries, JSData &output, std::stringstream *commentsOnFailure) {
+  if (commentsOnFailure != nullptr) {
+    *commentsOnFailure << "Database::FallBack::FindOneFromSome not implemented yet.";
+  }
+  return false;
+}
+
 bool Database::FallBack::UpdateOneFromQueryString(
   const std::string& collectionName,
   const std::string& findQuery,

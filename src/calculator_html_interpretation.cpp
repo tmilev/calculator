@@ -1349,11 +1349,15 @@ std::string HtmlInterpretation::AddTeachersSections() {
       continue;
     }
     currentTeacher.sectionsTaught = desiredSectionsList;
-    JSData findQuery, setQuery;
-    findQuery[DatabaseStrings::labelUsername] = currentTeacher.username;
+    QueryExact findQuery(
+      DatabaseStrings::tableUsers,
+      DatabaseStrings::labelUsername,
+      currentTeacher.username
+    );
+    JSData setQuery;
     setQuery[DatabaseStrings::labelSectionsTaught] = desiredSectionsList;
-    if (!Database::get().UpdateOneFromJSON(
-      DatabaseStrings::tableUsers, findQuery, setQuery, nullptr, &out
+    if (!Database::get().UpdateOne(
+      findQuery, setQuery, &out
     )) {
       out << "<span style =\"color:red\">Failed to store course info of instructor: " << theTeachers[i] << ". </span><br>";
     } else {
@@ -1966,7 +1970,7 @@ int ProblemData::getExpectedNumberOfAnswers(const std::string& problemName, std:
     List<std::string> fields;
     fields.AddOnTop(DatabaseStrings::labelProblemName);
     fields.AddOnTop(DatabaseStrings::labelProblemTotalQuestions);
-    //logWorker << logger::yellow << "DEBUG: About to query db to find problem info." << logger::endL;
+
     if (Database::FindFromJSONWithProjection(
       DatabaseStrings::tableProblemInformation, findProblemInfo, result, fields, - 1, nullptr, &commentsOnFailure
     )) {
@@ -2012,14 +2016,14 @@ int ProblemData::getExpectedNumberOfAnswers(const std::string& problemName, std:
   logWorker << logger::yellow << "Loaded problem: " << problemName
   << "; number of answers: " << this->knownNumberOfAnswersFromHD << logger::endL;
   this->expectedNumberOfAnswersFromDB = this->knownNumberOfAnswersFromHD;
-  JSData newDBentry, findDBentry;
-  findDBentry[DatabaseStrings::labelProblemName] = problemName;
+  JSData newDBentry;
+  QueryExact findEntry(DatabaseStrings::tableProblemInformation, DatabaseStrings::labelProblemName, problemName);
   newDBentry[DatabaseStrings::labelProblemName] = problemName;
   std::stringstream stringConverter;
   stringConverter << this->knownNumberOfAnswersFromHD;
   newDBentry[DatabaseStrings::labelProblemTotalQuestions] = stringConverter.str();
-  Database::get().UpdateOneFromJSON(
-    DatabaseStrings::tableProblemInformation, findDBentry, newDBentry, nullptr, &commentsOnFailure
+  Database::get().UpdateOne(
+    findEntry, newDBentry, &commentsOnFailure
   );
   return this->knownNumberOfAnswersFromHD;
 }

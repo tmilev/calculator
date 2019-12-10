@@ -111,10 +111,48 @@ QueryExact::QueryExact(
   this->nestedLabels = desiredLabels;
 }
 
+JSData QueryExact::ToJSON() const {
+  JSData result;
+  result.theType = JSData::token::tokenObject;
+  std::stringstream out;
+  for (int i = 0; i < this->nestedLabels.size; i ++) {
+    out << JSData::EncodeKeyForMongo(this->nestedLabels[i]);
+    if (i != this->nestedLabels.size - 1) {
+      out << ".";
+    }
+  }
+  result[out.str()] = this->value;
+  return result;
+}
+
 void QueryExact::SetLabelValue(const std::string& label, const std::string& desiredValue) {
   this->value = desiredValue;
   this->nestedLabels.SetSize(1);
   this->nestedLabels[0] = label;
+}
+
+bool Database::FindOne(const QueryExact& query, JSData& output, std::stringstream* commentsOnFailure) {
+  if (theGlobalVariables.flagDatabaseCompiled) {
+    return this->mongoDB.FindOneFromQueryString(query.collection, query.ToJSON().ToString(false), output, commentsOnFailure);
+  }
+  if (commentsOnFailure != nullptr) {
+    *commentsOnFailure << "Database::FindOne not implemented yet.";
+  }
+  return false;
+}
+
+bool Database::UpdateOne(
+  const QueryExact& findQuery,
+  const JSData& dataToMerge,
+  std::stringstream *commentsOnFailure
+) {
+  if (theGlobalVariables.flagDatabaseCompiled) {
+    return this->mongoDB.UpdateOne(findQuery, dataToMerge, commentsOnFailure);
+  }
+  if (commentsOnFailure != nullptr) {
+    *commentsOnFailure << "UpdateOne not implemented yet. ";
+  }
+  return false;
 }
 
 bool Database::FindOneFromSome(
@@ -419,11 +457,10 @@ bool UserCalculator::LoadFromDB(std::stringstream* commentsOnFailure, std::strin
   if (this->deadlineSchema != "") {
     QueryExact findDeadlines(DatabaseStrings::tableDeadlines, DatabaseStrings::labelDeadlinesSchema, this->deadlineSchema);
     JSData outDeadlinesQuery;
-    if (Database::FindOne(
+    if (Database::get().FindOne(
       findDeadlines,
       outDeadlinesQuery,
-      commentsGeneral,
-      true
+      commentsGeneral
     )) {
       this->deadlines = outDeadlinesQuery[DatabaseStrings::labelDeadlines];
     }
@@ -431,8 +468,8 @@ bool UserCalculator::LoadFromDB(std::stringstream* commentsOnFailure, std::strin
   if (this->problemWeightSchema != "") {
     QueryExact findProblemWeights(DatabaseStrings::tableProblemWeights, DatabaseStrings::labelProblemWeightsSchema, this->problemWeightSchema);
     JSData outProblemWeightsQuery;
-    if (Database::FindOne(
-      findProblemWeights, outProblemWeightsQuery, commentsGeneral, true
+    if (Database::get().FindOne(
+      findProblemWeights, outProblemWeightsQuery, commentsGeneral
     )) {
       this->problemWeights = outProblemWeightsQuery[DatabaseStrings::labelProblemWeights];
     }
@@ -643,12 +680,16 @@ bool UserCalculator::ResetAuthenticationToken(std::stringstream* commentsOnFailu
   std::stringstream out;
   out << now.theTimeStringNonReadable << rand();
   this->actualAuthenticationToken = Crypto::computeSha3_256OutputBase64URL(out.str());
-  JSData findUser, setUser;
-  findUser[DatabaseStrings::labelUsername] = this->username;
+  QueryExact findUser(
+    DatabaseStrings::tableUsers,
+    DatabaseStrings::labelUsername,
+    this->username
+  );
+  JSData setUser;
   setUser[DatabaseStrings::labelAuthenticationToken] = this->actualAuthenticationToken;
   setUser[DatabaseStrings::labelTimeOfAuthenticationTokenCreation] = now.theTimeStringNonReadable;
-  Database::get().UpdateOneFromJSON(
-    DatabaseStrings::tableUsers, findUser, setUser, nullptr, commentsOnFailure
+  Database::get().UpdateOne(
+    findUser, setUser, commentsOnFailure
   );
   this->flagNewAuthenticationTokenComputedUserNeedsIt = true;
   return true;
@@ -663,19 +704,25 @@ bool UserCalculator::SetPassword(std::stringstream* commentsOnFailure) {
     return false;
   }
   this->ComputeHashedSaltedPassword();
-  JSData findUser, setUser;
-  findUser[DatabaseStrings::labelUsername] = this->username;
+  QueryExact findUser(
+    DatabaseStrings::tableUsers,
+    DatabaseStrings::labelUsername,
+    this->username
+  );
+  JSData setUser;
   setUser[DatabaseStrings::labelPassword] = this->enteredHashedSaltedPassword;
-  return Database::get().UpdateOneFromJSON(
-    DatabaseStrings::tableUsers, findUser, setUser, nullptr, commentsOnFailure
+  return Database::get().UpdateOne(
+    findUser, setUser, commentsOnFailure
   );
 }
 
 bool UserCalculator::IsAcceptableCharDatabaseInpuT(char theChar) {
-  if (MathRoutines::isADigit(theChar))
+  if (MathRoutines::isADigit(theChar)) {
     return true;
-  if (MathRoutines::isALatinLetter(theChar))
+  }
+  if (MathRoutines::isALatinLetter(theChar)) {
     return true;
+  }
   switch (theChar) {
     case '.':
     case '@':
@@ -909,8 +956,8 @@ bool UserCalculator::InterpretDatabaseProblemDataJSON(const JSData& theData, std
 bool UserCalculator::Iexist(std::stringstream* comments) {
   MacroRegisterFunctionWithName("UserCalculator::Iexist");
   JSData notUsed;
-  return Database::FindOneFromSome(
-    DatabaseStrings::tableUsers, this->GetFindMeFromUserNameQuery(), notUsed, comments
+  return Database::get().FindOneFromSome(
+    this->GetFindMeFromUserNameQuery(), notUsed, comments
   );
 }
 
@@ -926,11 +973,11 @@ bool UserCalculator::ComputeAndStoreActivationToken(std::stringstream* commentsO
 
   Crypto::GetRandomBytesSecureInternalMayLeaveTracesInMemory(activationToken, 16);
   this->actualActivationToken = Crypto::ConvertListUnsignedCharsToBase64(activationToken, true);
-  JSData findUserQuery, setUserQuery;
-  findUserQuery[DatabaseStrings::labelUsername] = this->username;
-  setUserQuery[DatabaseStrings::labelActivationToken] = this->actualActivationToken;
-  if (!Database::get().UpdateOneFromJSON(
-    DatabaseStrings::tableUsers, findUserQuery, setUserQuery, nullptr, commentsOnFailure
+  QueryExact findUserQuery(DatabaseStrings::tableUsers, DatabaseStrings::labelUsername, this->username);
+  JSData updateUser;
+  updateUser[DatabaseStrings::labelActivationToken] = this->actualActivationToken;
+  if (!Database::get().UpdateOne(
+    findUserQuery, updateUser, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Setting activation token failed.";
@@ -965,9 +1012,9 @@ bool UserCalculator::ComputeAndStoreActivationStats(
     this->actualActivationToken, theGlobalVariables.hostWithPort, this->username, this->email
   );
   JSData emailStatQuery;
-  QueryExact findQuery(DatabaseStrings::tableEmailInfo, DatabaseStrings::labelEmail, this->email);
-  Database::FindOne(
-    findQuery, emailStatQuery, commentsOnFailure, true
+  QueryExact findEmail(DatabaseStrings::tableEmailInfo, DatabaseStrings::labelEmail, this->email);
+  Database::get().FindOne(
+    findEmail, emailStatQuery, commentsOnFailure
   );
   std::string lastEmailTime, emailCountForThisEmail;
   lastEmailTime = emailStatQuery[DatabaseStrings::labelLastActivationEmailTime].theString;
@@ -997,11 +1044,8 @@ bool UserCalculator::ComputeAndStoreActivationStats(
     << numActivationsThisEmail.ToString() << ".\n<br>\n";
   }
   QueryExact findQueryInUsers(DatabaseStrings::tableUsers, "", "");
-  QueryExact setQueryInUsers(
-    DatabaseStrings::tableUsers,
-    DatabaseStrings::labelTimeOfActivationTokenCreation,
-    now.ToString()
-  );
+  JSData updateUser;
+  updateUser[DatabaseStrings::labelTimeOfActivationTokenCreation] = now.ToString();
   if (this->userId != "") {
     findQueryInUsers.SetLabelValue(DatabaseStrings::labelUserId, this->userId);
   } else if (this->username != "") {
@@ -1014,7 +1058,7 @@ bool UserCalculator::ComputeAndStoreActivationStats(
     return false;
   }
   if (!Database::get().UpdateOne(
-    findQueryInUsers, setQueryInUsers, nullptr, commentsOnFailure
+    findQueryInUsers, updateUser, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to set activationTokenCreationTime. ";
@@ -1025,8 +1069,8 @@ bool UserCalculator::ComputeAndStoreActivationStats(
   emailStatQuery[DatabaseStrings::labelNumActivationEmails] = numActivationsThisEmail.ToString();
   emailStatQuery[DatabaseStrings::labelActivationToken] = this->actualActivationToken;
   emailStatQuery[DatabaseStrings::labelUsernameAssociatedWithToken] = this->username;
-  if (!Database::get().UpdateOneFromJSON(
-    DatabaseStrings::tableEmailInfo, findQuery, emailStatQuery, nullptr, commentsOnFailure
+  if (!Database::get().UpdateOne(
+    findEmail, emailStatQuery, commentsOnFailure
   )) {
     return false;
   }
@@ -1042,17 +1086,15 @@ bool UserCalculator::ComputeAndStoreActivationStats(
   return true;
 }
 
-List<JSData> UserCalculatorData::GetFindMeFromUserNameQuery() {
-  List<JSData> result;
+List<QueryExact> UserCalculatorData::GetFindMeFromUserNameQuery() {
+  List<QueryExact> result;
   if (this->username != "") {
-    JSData currentJS;
-    currentJS[DatabaseStrings::labelUsername] = this->username;
-    result.AddOnTop(currentJS);
+    QueryExact findByUsername(DatabaseStrings::tableUsers, DatabaseStrings::labelUsername, this->username);
+    result.AddOnTop(findByUsername);
   }
   if (this->email != "") {
-    JSData currentJS;
-    currentJS[DatabaseStrings::labelEmail] = this->email;
-    result.AddOnTop(currentJS);
+    QueryExact findByEmail(DatabaseStrings::tableUsers, DatabaseStrings::labelEmail, this->email);
+    result.AddOnTop(findByEmail);
   }
   if (result.size == 0) {
     crash << "User with find query not allowed to have neither username nor email. " << crash;
@@ -1069,8 +1111,8 @@ bool UserCalculator::StoreProblemDataToDatabasE(std::stringstream& commentsOnFai
   }
   JSData setQuery;
   setQuery[DatabaseStrings::labelProblemDatA] = problemDataStream.str();
-  return Database::get().UpdateOneFromSomeJSON(
-    DatabaseStrings::tableUsers, this->GetFindMeFromUserNameQuery(), setQuery, &commentsOnFailure
+  return Database::get().UpdateOneFromSome(
+    this->GetFindMeFromUserNameQuery(), setQuery, &commentsOnFailure
   );
 }
 
@@ -1085,10 +1127,10 @@ bool UserCalculator::StoreProblemDataToDatabaseJSON(std::stringstream* commentsO
     problemData[HtmlRoutines::ConvertStringToURLString(this->theProblemData.theKeys[i], false)] = nextProblem;
   }
   theGlobalVariables.userDefault.problemDataJSON = problemData;
-  JSData setQuery;
-  setQuery[DatabaseStrings::labelProblemDataJSON] = problemData;
-  return Database::get().UpdateOneFromSomeJSON(
-    DatabaseStrings::tableUsers, this->GetFindMeFromUserNameQuery(), setQuery, commentsOnFailure
+  JSData updateData;
+  updateData[DatabaseStrings::labelProblemDataJSON] = problemData;
+  return Database::get().UpdateOneFromSome(
+    this->GetFindMeFromUserNameQuery(), updateData, commentsOnFailure
   );
 }
 
@@ -1136,13 +1178,12 @@ bool Database::User::AddUsersFromEmails(
     } else {
       currentUser.email = theEmails[i];
     }
-    JSData foundUser;
-    List<JSData> findUser;
-    findUser.SetSize(2);
-    findUser[0][DatabaseStrings::labelUsername] = currentUser.username;
-    findUser[1][DatabaseStrings::labelEmail] = currentUser.email;
-    if (!Database::FindOneFromSome(
-      DatabaseStrings::tableUsers, findUser, foundUser, &comments
+    JSData currentUserData;
+    List<QueryExact> findUser;
+    findUser.AddOnTop(QueryExact(DatabaseStrings::tableUsers, DatabaseStrings::labelUsername, currentUser.username));
+    findUser.AddOnTop(QueryExact(DatabaseStrings::tableUsers, DatabaseStrings::labelEmail, currentUser.email));
+    if (!this->owner->FindOneFromSome(
+      findUser, currentUserData, &comments
     )) {
       if (!currentUser.Iexist(&comments)) {
         if (!currentUser.StoreToDB(false, &comments)) {
@@ -1154,13 +1195,13 @@ bool Database::User::AddUsersFromEmails(
         }
       }
       if (isEmail) {
-        this->owner->UpdateOneFromSomeJSON(DatabaseStrings::tableUsers, findUser, foundUser, &comments);
+        this->owner->UpdateOneFromSome(findUser, currentUserData, &comments);
       }
     } else {
       outputNumUpdatedUsers ++;
       //currentUser may have its updated entries modified by the functions above.
-      if (!this->owner->UpdateOneFromSomeJSON(
-        DatabaseStrings::tableUsers, findUser, currentUser.ToJSON(), &comments
+      if (!this->owner->UpdateOneFromSome(
+        findUser, currentUser.ToJSON(), &comments
       )) {
         result = false;
       }
@@ -1182,7 +1223,7 @@ bool Database::User::AddUsersFromEmails(
         result = false;
       JSData activatedJSON;
       activatedJSON[DatabaseStrings::labelActivationToken] = "activated";
-      this->owner->UpdateOneFromSomeJSON(DatabaseStrings::tableUsers, findUser, activatedJSON, &comments);
+      this->owner->UpdateOneFromSome(findUser, activatedJSON, &comments);
       if (currentUser.email != "") {
         currentUser.ComputeAndStoreActivationStats(&comments, &comments);
       }
@@ -1691,16 +1732,15 @@ void UserCalculator::ComputeHashedSaltedPassword() {
 
 bool UserCalculator::StoreToDB(bool doSetPassword, std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("UserCalculator::StoreToDB");
-  JSData findUser;
-  findUser[DatabaseStrings::labelUsername] = this->username;
+  QueryExact findUser(DatabaseStrings::tableUsers, DatabaseStrings::labelUsername, this->username);
   if (this->enteredPassword != "" && doSetPassword) {
     this->ComputeHashedSaltedPassword();
     this->actualHashedSaltedPassword = this->enteredHashedSaltedPassword;
   }
   JSData setUser = this->ToJSON();
 
-  return Database::get().UpdateOneFromJSON(
-    DatabaseStrings::tableUsers, findUser, setUser, nullptr, commentsOnFailure
+  return Database::get().UpdateOne(
+    findUser, setUser, commentsOnFailure
   );
 }
 

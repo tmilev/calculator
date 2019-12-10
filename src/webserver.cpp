@@ -584,7 +584,7 @@ std::string WebWorker::GetDatabaseDeleteOneItem() {
     return commentsStream.str();
   }
   commentsStream << "Parsed input string: " << inputParsed.ToString(false, false) << "\n";
-  if (Database::DeleteOneEntry(inputParsed, &commentsStream)) {
+  if (Database::get().DeleteOneEntry(inputParsed, &commentsStream)) {
     return "success";
   }
   if (!theGlobalVariables.flagDatabaseCompiled) {
@@ -1963,10 +1963,11 @@ std::string WebWorker::GetChangePasswordPagePartOne(bool& outputDoShowPasswordCh
     out << "\n<b style =\"color:green\">Email " << claimedEmail << " updated. </b>";
     return out.str();
   }
-  JSData findEmail, emailInfo, findUser, userInfo;
-  findEmail[DatabaseStrings::labelEmail] = claimedEmail;
-  if (!Database::FindOneFromJSON(
-    DatabaseStrings::tableEmailInfo, findEmail, emailInfo, &out, true
+  QueryExact findEmail(DatabaseStrings::tableEmailInfo, DatabaseStrings::labelEmail, claimedEmail);
+  JSData emailInfo, userInfo;
+
+  if (!Database::get().FindOne(
+    findEmail, emailInfo, &out
   )) {
     out << "\n<b style =\"color:red\">Failed to fetch email activation token for email: "
     << claimedEmail << " </b>";
@@ -1983,16 +1984,20 @@ std::string WebWorker::GetChangePasswordPagePartOne(bool& outputDoShowPasswordCh
     return out.str();
   }
   emailInfo[DatabaseStrings::labelActivationToken] = "";
-  if (!Database::get().UpdateOneFromJSON(
-    DatabaseStrings::tableEmailInfo, findEmail, emailInfo, nullptr, &out
+  if (!Database::get().UpdateOne(
+    findEmail, emailInfo, &out
   )) {
     out << "\n<b style =\"color:red\">Could not reset the activation token (database is down?). </b>";
     return out.str();
   }
   userInfo[DatabaseStrings::labelEmail] = claimedEmail;
-  findUser[DatabaseStrings::labelUsername] = theGlobalVariables.userDefault.username;
-  if (!Database::get().UpdateOneFromJSON(
-    DatabaseStrings::tableUsers, findUser, userInfo, nullptr, &out
+  QueryExact findUser(
+    DatabaseStrings::tableUsers,
+    DatabaseStrings::labelUsername,
+    theGlobalVariables.userDefault.username
+  );
+  if (!Database::get().UpdateOne(
+    findUser, userInfo, &out
   )) {
     out << "\n<b style =\"color:red\">Could not store your email (database is down?). </b>";
     return out.str();
@@ -2126,11 +2131,10 @@ int WebWorker::ProcessChangePassword(const std::string& reasonForNoAuthenticatio
 
   std::string newEmail = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("email"), false);
   if (newEmail != "") {
-    JSData queryEmailTaken, notUsed;
-    queryEmailTaken[DatabaseStrings::labelEmail] = newEmail;
-    if (Database::FindOneFromJSON(
-      DatabaseStrings::tableUsers,
-      queryEmailTaken, notUsed, nullptr, true
+    JSData notUsed;
+    QueryExact queryEmailTaken(DatabaseStrings::tableUsers, DatabaseStrings::labelEmail, newEmail);
+    if (Database::get().FindOne(
+      queryEmailTaken, notUsed, nullptr
     )) {
       stOutput << "<b style =\"color:red\">It appears the email is already taken. </b>";
       return 0;
@@ -2154,11 +2158,11 @@ int WebWorker::ProcessChangePassword(const std::string& reasonForNoAuthenticatio
     stOutput << "<b style =\"color:red\">" << commentsOnFailure.str() << "</b>";
     return 0;
   }
-  JSData findQuery, setQuery;
-  findQuery[DatabaseStrings::labelUsername] = theUser.username;
+  JSData setQuery;
+  QueryExact findQuery(DatabaseStrings::tableUsers, DatabaseStrings::labelUsername, theUser.username);
   setQuery[DatabaseStrings::labelActivationToken] = "activated";
-  if (!Database::get().UpdateOneFromJSON(
-    DatabaseStrings::tableUsers, findQuery, setQuery, nullptr, &commentsOnFailure
+  if (!Database::get().UpdateOne(
+    findQuery, setQuery, &commentsOnFailure
   )) {
     stOutput << "<b style = \"color:red\">Failed to set activationToken: "
     << commentsOnFailure.str() << "</b>";

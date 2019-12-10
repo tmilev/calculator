@@ -9,6 +9,8 @@ static ProjectInformationInstance ProjectInfoVpfHeader1General8DatabaseSystemInd
 );
 #include "json.h"
 
+class QueryExact;
+
 class UserCalculatorData {
   public:
   struct Roles {
@@ -85,7 +87,7 @@ class UserCalculatorData {
   void clearAuthenticationTokenAndPassword();
   std::string ToStringUnsecure();
   std::string ToStringCourseInfo();
-  List<JSData> GetFindMeFromUserNameQuery();
+  List<QueryExact> GetFindMeFromUserNameQuery();
 };
 
 #endif

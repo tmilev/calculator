@@ -244,32 +244,36 @@ bool Database::User::StoreProblemInfoToDatabase(
   const UserCalculatorData& theUser, bool overwrite, std::stringstream& commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("DatabaseRoutines::StoreProblemDatabaseInfo");
-  JSData findQueryWeights, findQueryDeadlines;
-  findQueryWeights[DatabaseStrings::labelProblemWeightsSchema] = theUser.problemWeightSchema;
-  findQueryDeadlines[DatabaseStrings::labelDeadlinesSchema] = theUser.deadlineSchema;
+  QueryExact findQueryWeights(
+    DatabaseStrings::tableProblemWeights,
+    DatabaseStrings::labelProblemWeightsSchema,
+    theUser.problemWeightSchema
+  );
+  QueryExact findQueryDeadlines(
+    DatabaseStrings::tableProblemWeights,
+    DatabaseStrings::labelDeadlinesSchema,
+    theUser.deadlineSchema
+  );
   if (theUser.problemWeights.theType != JSData::token::tokenUndefined) {
     if (overwrite) {
-      JSData setQueryWeights;
-      setQueryWeights[DatabaseStrings::labelProblemWeights] = theUser.problemWeights;
-      if (!this->owner->UpdateOneFromJSON(
-        DatabaseStrings::tableProblemWeights,
+      JSData queryWeights;
+      queryWeights[DatabaseStrings::labelProblemWeights] = theUser.problemWeights;
+      if (!this->owner->UpdateOne(
         findQueryWeights,
-        setQueryWeights,
-        nullptr,
+        queryWeights,
         &commentsOnFailure
       )) {
         return false;
       }
     } else {
-      List<std::string> adjustLabels;
-      adjustLabels.SetSize(2);
-      adjustLabels[0] = DatabaseStrings::labelProblemWeights;
       for (int i = 0; i < theUser.problemWeights.objects.size(); i ++) {
-        adjustLabels[1] = theUser.problemWeights.objects.theKeys[i];
-        if (!this->owner->UpdateOneFromJSON(
-          DatabaseStrings::tableProblemWeights,
-          findQueryWeights, theUser.problemWeights.objects.theValues[i],
-          &adjustLabels,
+        JSData adjust;
+        adjust[DatabaseStrings::labelProblemWeights][
+          theUser.problemWeights.objects.theKeys[i]
+        ] = theUser.problemWeights.objects.theValues[i];
+        if (!this->owner->UpdateOne(
+          findQueryWeights,
+          adjust,
           &commentsOnFailure
         )) {
           return false;
@@ -281,26 +285,22 @@ bool Database::User::StoreProblemInfoToDatabase(
     if (overwrite) {
       JSData setQueryDeadlines;
       setQueryDeadlines[DatabaseStrings::labelDeadlines] = theUser.deadlines;
-      if (!this->owner->UpdateOneFromJSON(
-        DatabaseStrings::tableProblemWeights,
+      if (!this->owner->UpdateOne(
         findQueryDeadlines,
         setQueryDeadlines,
-        nullptr,
         &commentsOnFailure
       )) {
         return false;
       }
     } else {
-      List<std::string> adjustLabels;
-      adjustLabels.SetSize(2);
-      adjustLabels[0] = DatabaseStrings::labelDeadlines;
       for (int i = 0; i < theUser.deadlines.objects.size(); i ++) {
-        adjustLabels[1] = theUser.deadlines.objects.theKeys[i];
-        if (!this->owner->UpdateOneFromJSON(
-          DatabaseStrings::tableDeadlines,
+        JSData adjustLabels;
+        adjustLabels[DatabaseStrings::labelDeadlines][
+          theUser.deadlines.objects.theKeys[i]
+        ] = theUser.deadlines.objects.theValues[i];
+        if (!this->owner->UpdateOne(
           findQueryDeadlines,
-          theUser.deadlines.objects.theValues[i],
-          &adjustLabels,
+          adjustLabels,
           &commentsOnFailure
         )) {
           return false;

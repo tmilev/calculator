@@ -13,11 +13,12 @@ class QueryExact {
   public:
   std::string collection;
   List<std::string> nestedLabels;
-  std::string value;
+  JSData value;
   QueryExact();
   QueryExact(const std::string& desiredCollection, const std::string& label, const std::string& desiredValue);
   QueryExact(const std::string& desiredCollection, const List<std::string>& desiredLabels, const std::string& desiredValue);
   void SetLabelValue(const std::string& label, const std::string& desiredValue);
+  JSData ToJSON() const;
 };
 
 class Database {
@@ -89,12 +90,12 @@ public:
       int& outputNumNewUsers,
       int& outputNumUpdatedUsers
     );
-    static bool LoadUserInfo(UserCalculatorData& output, std::stringstream* commentsOnFailure);
+    bool LoadUserInfo(UserCalculatorData& output, std::stringstream* commentsOnFailure);
     User();
   };
   User theUser;
 
-  class FallBack{
+  class FallBack {
   public:
     Database* owner;
     MutexProcess access;
@@ -128,6 +129,11 @@ public:
     bool ReadAndIndexDatabase(std::stringstream* commentsOnFailure);
     void IndexOneRecord(const JSData& entry, int64_t row, const std::string& collection);
     void initialize();
+    bool FindOneFromSome(
+      const List<QueryExact>& findOrQueries,
+      JSData& output,
+      std::stringstream* commentsOnFailure
+    );
     FallBack();
   };
   FallBack theFallBack;
@@ -159,6 +165,27 @@ public:
       const List<QueryExact>& findOrQueries,
       JSData& output,
       std::stringstream* commentsOnFailure
+    );
+    static bool GetOrFindQuery(
+      const List<QueryExact>& input,
+      std::string& output,
+      std::stringstream* commentsOnFailure = nullptr
+    );
+    bool UpdateOneFromSome(
+      const List<QueryExact>& findOrQueries,
+      const JSData& updateQuery,
+      std::stringstream* commentsOnFailure = nullptr
+    );
+    bool UpdateOne(
+      const QueryExact& findQuery,
+      const JSData& updateQuery,
+      std::stringstream* commentsOnFailure = nullptr
+    );
+    bool UpdateOneFromQueryString(
+      const std::string& collectionName,
+      const std::string& findQuery,
+      const JSData& updateQuery,
+      std::stringstream* commentsOnFailure = nullptr
     );
     Mongo();
     ~Mongo();
@@ -226,16 +253,10 @@ public:
     std::stringstream* commentsOnFailure,
     bool doEncodeFindFields
   );
-  static bool GetOrFindQuery(
-    const List<JSData>& input,
-    std::string& output,
-    std::stringstream* commentsOnFailure = nullptr
-  );
-  static bool FindOne(
+  bool FindOne(
     const QueryExact& query,
     JSData& output,
-    std::stringstream* commentsOnFailure,
-    bool doEncodeFindFields
+    std::stringstream* commentsOnFailure
   );
   bool FindOneFromSome(
     const List<QueryExact>& alternatives,
@@ -246,35 +267,14 @@ public:
     const JSData& updateQuery,
     std::stringstream* commentsOnFailure = nullptr
   );
-  static bool IsValidJSONMongoFindQuery(
-    const JSData& findQuery,
-    std::stringstream* commentsOnFailure = nullptr,
-    bool mustBeObject = true
-  );
   bool UpdateOne(
     const QueryExact& findQuery,
-    const QueryExact& updateQuery,
-    List<std::string>* fieldsToSetIfNullUseFirstFieldIfUpdateQuery,
+    const JSData& dataToMerge,
     std::stringstream* commentsOnFailure = nullptr
   );
-  bool UpdateOneFromJSONSpecifyField(
-    const std::string& collectionName,
-    const JSData& findQuery,
+  bool UpdateOneFromSome(
+    const List<QueryExact>& findOrQueries,
     const JSData& updateQuery,
-    std::string fieldToSet,
-    std::stringstream* commentsOnFailure = nullptr
-  );
-  bool UpdateOneFromSomeJSON(
-    const std::string& collectionName,
-    const List<JSData>& findOrQueries,
-    const JSData& updateQuery,
-    std::stringstream* commentsOnFailure = nullptr
-  );
-  bool UpdateOneFromQueryString(
-    const std::string& collectionName,
-    const std::string& findQuery,
-    const JSData& updateQuery,
-    List<std::string>* fieldsToSetIfNullUseFirstFieldIfUpdateQuery,
     std::stringstream* commentsOnFailure = nullptr
   );
   bool FetchCollectionNames(List<std::string>& output, std::stringstream* commentsOnFailure);
@@ -285,15 +285,13 @@ public:
     long long* totalItems = nullptr,
     std::stringstream* commentsOnFailure = nullptr
   );
-  static bool DeleteOneEntry(const JSData& theEntry, std::stringstream* commentsOnFailure);
-  static bool DeleteOneEntryById(
-    const std::string& tableName,
-    const JSData& findQuery,
+  bool DeleteOneEntry(const JSData& theEntry, std::stringstream* commentsOnFailure);
+  bool DeleteOneEntryById(
+    const QueryExact& findQuery,
     std::stringstream* commentsOnFailure
   );
   static bool DeleteOneEntryUnsetUnsecure(
-    const std::string& tableName,
-    const JSData& findQuery,
+    const QueryExact& findQuery,
     List<std::string>& selector,
     std::stringstream* commentsOnFailure
   );

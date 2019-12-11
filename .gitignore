@@ -18,6 +18,7 @@ certificates*
 LogFiles*
 
 database-backups*
+database_fallback/*
 
 bin/*
 calculator

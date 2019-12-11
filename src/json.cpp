@@ -218,7 +218,10 @@ void JSData::operator=(const List<unsigned char>& other) {
 
 void JSData::operator=(const List<JSData>& other) {
   this->theType = JSData::token::tokenArray;
-  this->theList = other;
+  this->theList.SetSize(other.size);
+  for (int i = 0; i < other.size; i ++) {
+    this->theList[i] = other[i];
+  }
   this->objects.Clear();
 }
 
@@ -429,6 +432,42 @@ bool JSData::Tokenize(const std::string& input, List<JSData>& output) {
       continue;
     }
     currentElt.theString += input[i];
+  }
+  return true;
+}
+
+bool JSData::MergeInMe(const JSData& input, std::stringstream* commentsOnFailure) {
+  if (
+    this->theType != JSData::token::tokenObject
+  ) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Can only merge in objects. ";
+    }
+    return false;
+  }
+  if (this->theType != input.theType) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Can only merge other objects.";
+    }
+    return false;
+  }
+  for (int i = 0; i < input.objects.size(); i ++) {
+    const std::string& key = input.objects.theKeys[i];
+    const JSData& value = input.objects.theValues[i];
+    if (!this->objects.Contains(key)) {
+      (*this)[key] = value;
+    } else {
+      if (
+        value.theType != JSData::token::tokenObject ||
+        (*this)[key].theType != JSData::token::tokenObject
+      ) {
+        (*this)[key] = value;
+      } else {
+        if (!(*this)[key].MergeInMe(value, commentsOnFailure)) {
+          return false;
+        }
+      }
+    }
   }
   return true;
 }

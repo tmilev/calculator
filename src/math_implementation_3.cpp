@@ -996,8 +996,8 @@ void FileOperations::InitializeFoldersSensitive() {
   folderSubstitutionsSensitive.SetKeyValue("/configuration/", "configuration/");
   folderSubstitutionsSensitive.SetKeyValue("freecalc/", "../freecalc/");
   folderSubstitutionsSensitive.SetKeyValue("/freecalc/", "../freecalc/");
-  folderSubstitutionsSensitive.SetKeyValue("database-fallback/database.json", "database-fallback/database.json");
-  folderSubstitutionsSensitive.SetKeyValue("/database-fallback/database.json", "database-fallback/database.json");
+  folderSubstitutionsSensitive.SetKeyValue("database_fallback/database.json", "database_fallback/database.json");
+  folderSubstitutionsSensitive.SetKeyValue("/database_fallback/database.json", "database_fallback/database.json");
 }
 
 List<List<std::string> >& FileOperations::InitializeFolderVirtualLinksDefaults() {

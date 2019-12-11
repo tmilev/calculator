@@ -1250,7 +1250,10 @@ JSData Database::ToJSONDatabaseCollection(const std::string& currentTable) {
     if (Database::FetchCollectionNames(theCollectionNames, &out)) {
       JSData collectionNames;
       collectionNames.theType = JSData::token::tokenArray;
-      collectionNames.theList = theCollectionNames;
+      collectionNames.theList.SetSize(theCollectionNames.size);
+      for (int i = 0; i < theCollectionNames.size; i ++) {
+        collectionNames[i] = theCollectionNames[i];
+      }
       result["collections"] = collectionNames;
     } else {
       result["error"] = out.str();

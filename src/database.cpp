@@ -97,8 +97,8 @@ QueryExact::QueryExact(
   const std::string& desiredValue
 ) {
   this->collection = desiredCollection;
-  this->value = desiredValue;
   this->nestedLabels.AddOnTop(label);
+  this->value = desiredValue;
 }
 
 QueryExact::QueryExact(
@@ -111,9 +111,24 @@ QueryExact::QueryExact(
   this->nestedLabels = desiredLabels;
 }
 
+bool QueryExact::isEmpty() const {
+  if (this->collection == "") {
+    return true;
+  }
+  if (this->nestedLabels.size == 0) {
+    return true;
+  }
+  return false;
+}
+
 JSData QueryExact::ToJSON() const {
   JSData result;
   result.theType = JSData::token::tokenObject;
+  result[this->getLabel()] = this->value;
+  return result;
+}
+
+std::string QueryExact::getLabel() const {
   std::stringstream out;
   for (int i = 0; i < this->nestedLabels.size; i ++) {
     out << JSData::EncodeKeyForMongo(this->nestedLabels[i]);
@@ -121,8 +136,13 @@ JSData QueryExact::ToJSON() const {
       out << ".";
     }
   }
-  result[out.str()] = this->value;
-  return result;
+  return out.str();
+}
+
+std::string QueryExact::getCollectionAndLabel() const {
+  std::stringstream out;
+  out << this->collection << "." << this->getLabel();
+  return out.str();
 }
 
 void QueryExact::SetLabelValue(const std::string& label, const std::string& desiredValue) {
@@ -144,8 +164,14 @@ bool Database::FindOne(const QueryExact& query, JSData& output, std::stringstrea
 bool Database::UpdateOne(
   const QueryExact& findQuery,
   const JSData& dataToMerge,
-  std::stringstream *commentsOnFailure
+  std::stringstream* commentsOnFailure
 ) {
+  if (findQuery.isEmpty()) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Empty query not allowed";
+    }
+    return false;
+  }
   if (theGlobalVariables.flagDatabaseCompiled) {
     return this->mongoDB.UpdateOne(findQuery, dataToMerge, commentsOnFailure);
   } else if (theGlobalVariables.flagDatabaseUseFallback) {

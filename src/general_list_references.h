@@ -123,6 +123,12 @@ public:
       this->AddOnTop(other[i]);
     }
   }
+  void operator=(const List<Object>& other) {
+    this->SetSize(other.size);
+    for (int i = 0; i < other.size; i ++) {
+      (*this)[i] = other[i];
+    }
+  }
   Object& LastObject() const {
     return (*this)[this->size - 1];
   }

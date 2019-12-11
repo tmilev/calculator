@@ -20,7 +20,7 @@ bool Database::FallBack::FindOneFromSome(
 
 bool Database::FallBack::UpdateOne(
   const QueryExact& findQuery,
-  const JSData& updateQuery,
+  const JSData& dataToMerge,
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("DatabaseFallback::UpdateOneFromQueryString");
@@ -33,20 +33,122 @@ bool Database::FallBack::UpdateOne(
     return false;
   }
   MutexProcessLockGuard guardDB(this->access);
-  JSData database;
-  if (this->ReadAndIndexDatabase(commentsOnFailure)) {
+  if (!this->ReadAndIndexDatabase(commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to read and index database. ";
+    }
     return false;
   }
+  if (!this->UpdateOneNoLocks(findQuery, dataToMerge, commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to update one. ";
+    }
+    return false;
+  }
+  if (commentsOnFailure != nullptr) {
+    *commentsOnFailure << "DEBUG: Got to store db. about to store: " << this->reader.ToString(false);
+  }
+  return this->StoreDatabase(commentsOnFailure);
+}
+
+bool Database::FallBack::UpdateOneNoLocks(
+  const QueryExact& findQuery,
+  const JSData& dataToMerge,
+  std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("Database::FallBack::UpdateOneNoLocks");
   if (!this->HasCollection(findQuery.collection, commentsOnFailure)) {
     return false;
   }
-
-  if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "Not implemented yet: findQuery: "
-    << findQuery.ToJSON().ToString(false)
-    << " updadeQuery: " << updateQuery.ToString(false);
+  int index = - 1;
+  if (!this->FindIndexOneNoLocks(findQuery, index, commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to element index. ";
+    }
+    return false;
   }
-  return false;
+  if (index == - 1) {
+    index = this->reader[findQuery.collection].theList.size;
+    JSData incoming;
+    incoming.theType = JSData::token::tokenObject;
+    this->reader[findQuery.collection].theList.AddOnTop(incoming);
+  }
+  JSData& modified = this->reader[findQuery.collection][index];
+  if (dataToMerge.theType != JSData::token::tokenObject) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "I only know how to merge objects, you gave me: " << dataToMerge.ToString(false);
+    }
+    return false;
+  }
+  if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Got to here. ";
+  }
+  return modified.MergeInMe(dataToMerge, commentsOnFailure);
+}
+
+bool Database::FallBack::FindOne(
+  const QueryExact& query,
+  JSData& output,
+  std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("Database::FallBack::FindOne");
+  MutexProcessLockGuard guardDB(this->access);
+  if (this->ReadAndIndexDatabase(commentsOnFailure)) {
+    return false;
+  }
+  int index = - 1;
+  if (!this->FindIndexOneNoLocks(query, index, commentsOnFailure)) {
+    return false;
+  }
+  if (index < 0) {
+    return false;
+  }
+  output = this->reader[query.collection][index];
+  return true;
+}
+
+std::string Database::FallBack::ToStringIndicesAllowed() const {
+  std::stringstream out;
+  out << "indexed: " << this->indices.theKeys.ToStringCommaDelimited()
+  << ", known: " << this->knownCollections.ToStringCommaDelimited();
+  return out.str();
+}
+
+bool Database::FallBack::FindIndexOneNoLocks(
+  const QueryExact& query,
+  int& output,
+  std::stringstream* commentsOnNotFound
+) {
+  output = - 1;
+  if (!this->HasCollection(query.collection, commentsOnNotFound)) {
+    if (commentsOnNotFound != nullptr) {
+      *commentsOnNotFound << "Collection " << query.collection << " not found. ";
+    }
+    return false;
+  }
+  std::string key = query.getCollectionAndLabel();
+  if (!this->indices.Contains(key)) {
+    if (commentsOnNotFound != nullptr) {
+      *commentsOnNotFound << "Finding by non-indexed key: " << key << " not allowed. Indices allowed: " << this->ToStringIndicesAllowed() << ". ";
+    }
+    return false;
+  }
+  Database::FallBack::Index& currentIndex = indices.GetValueCreate(key);
+  int currentLocationIndex = currentIndex.locations.GetIndex(query.value.ToString(false));
+  if (currentLocationIndex == - 1) {
+    if (commentsOnNotFound != nullptr ) {
+      *commentsOnNotFound << "Element not found. ";
+    }
+    return true;
+  }
+  if (currentIndex.locations.theValues[currentLocationIndex].size == 0) {
+    if (commentsOnNotFound != nullptr ) {
+      *commentsOnNotFound << "Element not found. ";
+    }
+    return true;
+  }
+  output = currentIndex.locations.theValues[currentLocationIndex][0];
+  return true;
 }
 
 bool Database::FallBack::FetchCollectionNames(List<std::string>& output, std::stringstream* commentsOnFailure) {
@@ -60,32 +162,28 @@ bool Database::FallBack::FetchCollectionNames(List<std::string>& output, std::st
 }
 
 bool Database::FallBack::HasCollection(const std::string& collection, std::stringstream* commentsOnFailure) {
-  if (!this->reader.HasKey(collection)) {
-    return true;
-  }
   if (Database::FallBack::knownCollections.Contains(collection)) {
     this->reader[collection].theType = JSData::token::tokenArray;
     return true;
   }
+  if (!this->reader.HasKey(collection)) {
+    return true;
+  }
   if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "Database collection not found. ";
+    *commentsOnFailure << "Database collection " << collection << " not found. ";
   }
   return false;
 }
 
 Database::FallBack::FallBack() {
   this->owner = nullptr;
+  this->flagDatabaseRead = false;
 }
 
 void Database::FallBack::initialize() {
   this->access.CreateMe("databaseFallback", true, false);
   this->knownCollections.AddOnTop({
-    DatabaseStrings::tableDeadlines,
-    DatabaseStrings::tableDeleted,
-    DatabaseStrings::tableEmailInfo,
-    DatabaseStrings::tableProblemInformation,
-    DatabaseStrings::tableProblemWeights,
-    DatabaseStrings::tableUsers
+    DatabaseStrings::tableUsers + "." + DatabaseStrings::labelUsername
   });
 }
 
@@ -108,21 +206,22 @@ std::string Database::FallBack::Index::collectionAndLabel() {
 }
 
 bool Database::FallBack::ReadAndIndexDatabase(std::stringstream* commentsOnFailure) {
-  if (!this->ReadDatabase(commentsOnFailure)) {
-    return false;
+  this->ReadDatabase(commentsOnFailure);
+  for (int i = 0; i < this->knownCollections.size; i ++) {
+    this->indices.GetValueCreate(this->knownCollections[i]);
   }
   for (int i = 0; i < this->reader.objects.size(); i ++) {
     std::string collection = this->reader.objects.theKeys[i];
     JSData& currentCollection = this->reader.objects.theValues[i];
     for (int i = 0; i < currentCollection.theList.size; i ++) {
-
+      this->IndexOneRecord(currentCollection, i, collection);
     }
   }
   return true;
 }
 
 void Database::FallBack::IndexOneRecord(
-  const JSData& entry, int64_t row, const std::string& collection
+  const JSData& entry, int32_t row, const std::string& collection
 ) {
   if (entry.theType != JSData::token::tokenObject) {
     return;
@@ -141,13 +240,17 @@ void Database::FallBack::IndexOneRecord(
   }
 }
 
+bool Database::FallBack::StoreDatabase(std::stringstream* commentsOnFailure) {
+  return FileOperations::WriteFileVirualWithPermissions("database_fallback/database.json", this->reader.ToString(false), true, commentsOnFailure);
+}
+
 bool Database::FallBack::ReadDatabase(std::stringstream* commentsOnFailure) {
   std::string theDatabase;
   if (!FileOperations::LoadFileToStringVirtual(
-    "database-fallback/database.json", theDatabase, true, commentsOnFailure
+    "database_fallback/database.json", theDatabase, true, commentsOnFailure
   )) {
     if (!FileOperations::FileExistsVirtual(
-      "database-fallback/database.json",
+      "database_fallback/database.json",
       true,
       false,
       commentsOnFailure

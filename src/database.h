@@ -18,7 +18,10 @@ class QueryExact {
   QueryExact(const std::string& desiredCollection, const std::string& label, const std::string& desiredValue);
   QueryExact(const std::string& desiredCollection, const List<std::string>& desiredLabels, const std::string& desiredValue);
   void SetLabelValue(const std::string& label, const std::string& desiredValue);
+  std::string getCollectionAndLabel() const;
+  std::string getLabel() const;
   JSData ToJSON() const;
+  bool isEmpty() const;
 };
 
 class Database {
@@ -101,6 +104,7 @@ public:
     MutexProcess access;
     HashedList<std::string, MathRoutines::HashString> knownCollections;
     JSData reader;
+    bool flagDatabaseRead;
     class Index {
     public:
       // Collection A, label B is denoted as A.B.
@@ -108,7 +112,7 @@ public:
       std::string collection;
       std::string label;
       std::string collectionAndLabelCache;
-      MapList<std::string, List<int64_t>, MathRoutines::HashString> locations;
+      MapList<std::string, List<int32_t>, MathRoutines::HashString> locations;
       static std::string collectionAndLabelStatic(const std::string& inputCollection, const std::string& inputLabel);
       std::string collectionAndLabel();
     };
@@ -118,20 +122,38 @@ public:
       const JSData& updateQuery,
       std::stringstream* commentsOnFailure = nullptr
     );
+    bool FindOne(
+      const QueryExact& query,
+      JSData& output,
+      std::stringstream* commentsOnFailure
+    );
+    bool FindIndexOneNoLocks(
+      const QueryExact& query,
+      int& output,
+      std::stringstream* commentsOnNotFound
+    );
+    bool UpdateOneNoLocks(
+      const QueryExact& findQuery,
+      const JSData& updateQuery,
+      std::stringstream* commentsOnFailure = nullptr
+    );
     bool FetchCollectionNames(
       List<std::string>& output, std::stringstream* commentsOnFailure
     );
+    bool CheckDatabaseRead();
     void CreateHashIndex(const std::string& collectionName, const std::string& theKey);
     bool HasCollection(const std::string& collection, std::stringstream* commentsOnFailure);
+    bool StoreDatabase(std::stringstream* commentsOnFailure);
     bool ReadDatabase(std::stringstream* commentsOnFailure);
     bool ReadAndIndexDatabase(std::stringstream* commentsOnFailure);
-    void IndexOneRecord(const JSData& entry, int64_t row, const std::string& collection);
+    void IndexOneRecord(const JSData& entry, int32_t row, const std::string& collection);
     void initialize();
     bool FindOneFromSome(
       const List<QueryExact>& findOrQueries,
       JSData& output,
       std::stringstream* commentsOnFailure
     );
+    std::string ToStringIndicesAllowed() const;
     FallBack();
   };
   FallBack theFallBack;

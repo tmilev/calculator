@@ -490,8 +490,6 @@ uint32_t Crypto::leftRotateAsIfBigEndian(uint32_t input, int numBitsToRotate) {
     result *= 2;
     result += last_bit;
   }
-  //stOutput << "<hr>DEBUG: right rotate: " << numBitsToRotate << " bits maps: "
-  //<< input << " to " << result;
   return result;
 }
 
@@ -655,7 +653,6 @@ bool Crypto::ConvertHexToInteger(const std::string& input, LargeIntegerUnsigned&
     if (theDigit > 0) {
       foundNonZero = true;
     }
-    //stOutput << "DEBUG: got digit: " << theDigit;
     if (theDigit != - 1) {
       output *= 16;
       output += static_cast<unsigned int>(theDigit);
@@ -1209,7 +1206,6 @@ void Crypto::computeSha2xx(const List<unsigned char>& input, List<uint32_t>& out
     h7 = 0xbefa4fa4;
   }
   Crypto::initSha256();
-  //stOutput << "DEBUG: start string length: " << inputString.size();
   uint64_t messageLength = static_cast<unsigned>(input.size) * 8;//*sizeof(char);
   List<unsigned char> inputPreprocessed = input;
   inputPreprocessed.AddOnTop(0x80);
@@ -1230,7 +1226,6 @@ void Crypto::computeSha2xx(const List<unsigned char>& input, List<uint32_t>& out
 //  {
 //    tempSTream << std::hex << inputStringPreprocessed[i];
 //  }
-//  stOutput << "<hr>DEBUG: first stream: " << tempSTream.str();
 ///////////////////////
   List<unsigned char> convertorToUint32;
   List<uint32_t> inputStringUint32;
@@ -1342,7 +1337,6 @@ void Crypto::computeSha512(const List<unsigned char>& input, List<uint64_t>& out
   uint64_t h6 = 0x1f83d9abfb41bd6b;
   uint64_t h7 = 0x5be0cd19137e2179;
   Crypto::initSha512();
-  //stOutput << "DEBUG: start string length: " << inputString.size();
   uint64_t messageBitLength = static_cast<unsigned>(input.size) * 8;
   List<unsigned char> inputPreprocessed = input;
   inputPreprocessed.AddOnTop(0x80);

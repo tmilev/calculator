@@ -328,7 +328,6 @@ void quasiDiffOp<coefficient>::GenerateBasisLieAlgebra(
       }
     }
   }
-  stOutput << "<hr>" << "<b>Num times Gaussian Elimination was called = " << numTimesEliminationWasExecuted << ".</b>";
   theElts.SetSize(theEltsConverted.size);
   for (int i = 0; i < theEltsConverted.size; i ++) {
     theElts[i] = theEltsConverted[i];
@@ -573,7 +572,6 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
   theMods.SetSize(theHws.size);
   Vector<RationalFunctionOld> tempV;
   int numStartingVars = hwContext.ContextGetNumContextVariables();
-  //stOutput << "<br>num starting vars:" << numStartingVars;
   std::stringstream reportFourierTransformedCalculatorCommands, reportCalculatorCommands;
   long long totalAdditions = 0;
   long long currentAdditions = 0;
@@ -1141,7 +1139,6 @@ bool Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY(
   if (*left == *right) {
     constPower.AssignValue(2, theCommands);
     output.MakeXOX(theCommands, theCommands.opThePower(), *left, constPower);
-    //stOutput << "<br>output be at first place: " << output.ToString();
     return true;
   }
   for (int i = 0; i < 2; i ++, MathRoutines::swap(left, right)) {

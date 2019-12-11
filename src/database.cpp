@@ -29,7 +29,6 @@ bool Database::User::SetPassword(
   UserCalculator theUser;
   theUser.username = inputUsername;
   theUser.enteredPassword = inputNewPassword;
-  //stOutput << "DEBUG: setting password: " << inputNewPassword;
   bool result = theUser.SetPassword(&comments);
   theUser.ResetAuthenticationToken(&comments);
   outputAuthenticationToken = theUser.actualAuthenticationToken;
@@ -351,11 +350,7 @@ bool ProblemData::CheckConsistencyMQids() const {
       errorStream << "This is not supposed to happen: empty idMQfield. The answer id is: "
       << this->theAnswers.theValues[i].answerId << "<br>" << this->ToString() << "<hr>Answer information: "
       << this->ToString() << "<br>";
-      //if (true) {
-      //  stOutput << errorStream.str();
-      //} else {
       crash << errorStream.str() << crash;
-      //}
     }
   }
   return true;
@@ -901,9 +896,7 @@ bool ProblemData::LoadFromJSON(const JSData& inputData, std::stringstream& comme
         inputData.objects.GetValueConstCrashIfNotPresent("randomSeed").theString.c_str()
       ));
       this->flagRandomSeedGiven = true;
-      //stOutput << "<br>DEBUG: random seed found. <br>";
-    } //else
-      //stOutput << "<br>DEBUG: random seed  NOT NOT NOT found. <br>";
+    }
   }
   this->theAnswers.Clear();
   bool result = true;
@@ -1246,10 +1239,9 @@ bool Database::User::AddUsersFromEmails(
       //<-Passwords are ONE-LAYER url-encoded
       //<-INCOMING pluses in passwords MUST be decoded as spaces, this is how form.submit() works!
       //<-Incoming pluses must be re-coded as spaces (%20).
-      //stOutput << "Debug: user:<br>" << currentUser.username.value << "<br>password:<br>"
-      //<< HtmlRoutines::ConvertStringToURLString(thePasswords[i]) << "<br>";
-      if (!currentUser.SetPassword(&comments))
+      if (!currentUser.SetPassword(&comments)) {
         result = false;
+      }
       JSData activatedJSON;
       activatedJSON[DatabaseStrings::labelActivationToken] = "activated";
       this->owner->UpdateOneFromSome(findUser, activatedJSON, &comments);
@@ -1610,7 +1602,6 @@ bool Database::User::LoginViaGoogleTokenCreateNewAccountIfNeeded(
     if (commentsGeneral != nullptr) {
       *commentsGeneral << "User with email " << userWrapper.email << " does not exist. ";
     }
-    //stOutput << "\n<br>\nDEBUG: User with email " << userWrapper.email.value << " does not exist. ";
     userWrapper.username = userWrapper.email;
     if (!userWrapper.StoreToDB(false, commentsOnFailure)) {
       return false;

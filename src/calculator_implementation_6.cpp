@@ -150,13 +150,13 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation(
       theGlobalVariables.SetWebInpuT(WebAPI::problem::fileName, theProblem.fileName);
       answerGeneration += HtmlInterpretation::GetAnswerOnGiveUp(
         randomSeedCurrent, &currentAnswer, &answerGenerated
-      ) + "<hr>";
+      ).ToString(false) + "<hr>";
       if (!answerGenerated) {
         break;
       }
       theGlobalVariables.SetWebInpuT(currentKey, HtmlRoutines::ConvertStringToURLString(currentAnswer, false));
       solutionReport +=
-      HtmlInterpretation::SubmitAnswersString(randomSeedCurrent, &answersWork, false) + "<hr>";
+      HtmlInterpretation::SubmitAnswersJSON(randomSeedCurrent, &answersWork, false).ToString(false) + "<hr>";
       if (!answersWork) {
         break;
       }

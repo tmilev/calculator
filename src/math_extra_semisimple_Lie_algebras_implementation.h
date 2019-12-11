@@ -54,8 +54,6 @@ void Weight<coefficient>::AccountSingleWeight(
   //This is the Brauer-Klimyk formula. Reference:
   //Humphreys J., Introduction to Lie algebras and representation theory
   //page 142, exercise 9.
-  //stOutput << "<hr>Accounting " << currentWeightSimpleCoords.ToString()
-  //<< " with coefficient " << finalCoeff.ToString();
   MacroRegisterFunctionWithName("Weight_CoefficientType::AccountSingleWeight");
   this->CheckNonZeroOwner();
   Vector<Rational> dominant = currentWeightSimpleCoords;

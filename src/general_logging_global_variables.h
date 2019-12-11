@@ -80,7 +80,6 @@ public:
 
   //  bool flagLogInterProcessCommunication;
   //flags: what mode are we running in?
-  bool flagRunningApache;
   bool flagRunningCommandLine;
   bool flagRunningConsoleTest;
   bool flagRunningBuiltInWebServer;
@@ -223,6 +222,22 @@ public:
   MemorySaving<DynkinDiagramRootSubalgebra > dynGetEpsCoords;
   MemorySaving<GroebnerBasisComputation<Rational> > theGroebnerBasisComputation;
 
+  class CommentsCurrentConnection {
+  public:
+    template <typename theType>
+    CommentsCurrentConnection& operator<<(const theType& comment) {
+      this->container.GetElement() << comment;
+      return *this;
+    }
+    void resetComments() {
+      this->container.FreeMemory();
+    }
+    MemorySaving<std::stringstream> container;
+
+  };
+  CommentsCurrentConnection Comments;
+  void WriteResponse(const JSData& out);
+
   bool ConfigurationStore();
   bool ConfigurationLoad();
   void ConfigurationProcess();
@@ -345,9 +360,6 @@ class logger {
   }
   template <typename theType>
   logger& doTheLogging(const theType& toBePrinted) {
-    if (theGlobalVariables.flagRunningApache) {
-      return *this;
-    }
     this->initializeIfNeeded();
     std::stringstream out;
     if (this->processType != theGlobalVariables.processType) {

@@ -194,11 +194,11 @@ void SpaceTree<coefficient>::GetLeaves(List<List<Vector<coefficient> > >& leaves
 
 template <typename coefficient>
 void SpaceTree<coefficient>::DisplayTree() const {
-  stOutput << '[' << space.size << ',';
+  theGlobalVariables.Comments << '[' << space.size << ',';
   for (int i = 0; i < subspaces.size; i ++) {
     subspaces[i].DisplayTree();
   }
-  stOutput << ']';
+//  theGlobalVariables.Comments << ']';
 }
 
 template <typename somegroup, typename coefficient>
@@ -321,7 +321,7 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> >
   List<Vector<Rational> > splittingMatrixKernel;
   if (GetNumberOfComponents() == 1) {
     if (this->ownerGroup->characterTable.GetIndex(this->theCharacteR) == - 1) {
-      stOutput << "new irrep found, have " << this->ownerGroup->characterTable.size << "\n";
+      theGlobalVariables.Comments << "new irrep found, have " << this->ownerGroup->characterTable.size << "\n";
       this->ownerGroup->AddIrreducibleRepresentation(*this);
     }
     out.AddOnTop(*this);
@@ -331,7 +331,7 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> >
   List<Vector<coefficient> > tempVectors;
   for (int i = 0; i < this->ownerGroup->characterTable.size; i ++) {
     if (this->theCharacteR.InnerProduct(this->ownerGroup->characterTable[i]) != 0) {
-      stOutput << "contains irrep " << i << "\n";
+      theGlobalVariables.Comments << "contains irrep " << i << "\n";
       this->ClassFunctionMatrix(this->ownerGroup->characterTable[i], splittingOperatorMatrix);
       splittingOperatorMatrix.GetZeroEigenSpaceModifyMe(splittingMatrixKernel);
       intersection(Vb, splittingMatrixKernel, tempVectors);
@@ -339,14 +339,14 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> >
     }
   }
   if ((Vb.size < this->basis.size) && (Vb.size > 0)) {
-    stOutput << "calculating remaining subrep... ";
+    theGlobalVariables.Comments << "calculating remaining subrep... ";
     GroupRepresentationCarriesAllMatrices<somegroup, coefficient> V;
     V.ownerGroup = this->ownerGroup;
     V.generatorS = this->generatorS;
     V.basis = Vb;
     V = V.Reduced();
-    stOutput << "done\n";
-    stOutput << "Decomposing remaining subrep " << V.GetCharacter();
+    theGlobalVariables.Comments << "done\n";
+    theGlobalVariables.Comments << "Decomposing remaining subrep " << V.GetCharacter();
     return V.DecomposeThomasVersion();
   }
   if (Vb.size == 0) {
@@ -359,42 +359,42 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> >
       cf.G = G;
       cf.MakeZero();
       cf[cfi] = 1;
-      stOutput << "getting matrix " << cf << "\n";
+      theGlobalVariables.Comments << "getting matrix " << cf << "\n";
       Matrix<coefficient> A;
       ClassFunctionMatrix(cf, A);
       List<List<Vector<coefficient> > > es = eigenspaces(A);
-      stOutput << "eigenspaces were ";
+      theGlobalVariables.Comments << "eigenspaces were ";
       for (int i = 0; i <es.size; i ++)
-         stOutput << es[i].size << " ";
-      stOutput << "\n";
+         theGlobalVariables.Comments << es[i].size << " ";
+      theGlobalVariables.Comments << "\n";
       for (int i = 0; i <es.size; i ++)
          st.PlaceInTree(es[i]);
-      stOutput << "tree is ";
+      theGlobalVariables.Comments << "tree is ";
       st.DisplayTree();
-      stOutput << "\n";
+      theGlobalVariables.Comments << "\n";
   }
   List<List<Vector<coefficient> > > leaves;
   st.GetLeaves(leaves);
-  stOutput << "leaves are ";
+  theGlobalVariables.Comments << "leaves are ";
   for (int i = 0; i <leaves.size; i ++)
-    stOutput << leaves[i].size << " ";
-  stOutput << "\n";
+    theGlobalVariables.Comments << leaves[i].size << " ";
+  theGlobalVariables.Comments << "\n";
 */
   List<List<Vector<coefficient> > > es;
   for (int cfi = this->ownerGroup->ConjugacyClassCount() - 1; cfi >= 0; cfi --) {
     ClassFunction<somegroup, coefficient> cf;
     cf.MakeZero(*this->ownerGroup);
     cf[cfi] = 1;
-    stOutput << "getting matrix " << cf << "\n";
+    theGlobalVariables.Comments << "getting matrix " << cf << "\n";
     Matrix<coefficient> A;
     ClassFunctionMatrix(cf, A);
     es = eigenspaces(A);
     if (es.size > 1) {
-      stOutput << "eigenspaces were ";
+      theGlobalVariables.Comments << "eigenspaces were ";
       for (int i = 0; i < es.size; i ++) {
-        stOutput << es[i].size << " ";
+        theGlobalVariables.Comments << es[i].size << " ";
       }
-      stOutput << "\n";
+      theGlobalVariables.Comments << "\n";
       break;
     }
   }
@@ -507,9 +507,9 @@ bool UDPolynomial<coefficient>::operator<(const UDPolynomial<coefficient>& right
 
 template <typename coefficient>
 void UDPolynomial<coefficient>::SquareFree() {
-  stOutput << *this << "\n";
+  theGlobalVariables.Comments << *this << "\n";
   UDPolynomial<coefficient> p = FormalDerivative();
-  stOutput << p << "\n";
+  theGlobalVariables.Comments << p << "\n";
   UDPolynomial<coefficient> q = gcd(*this, p);
   if (q.data.size > 1) {
     data = (*this / q).data;
@@ -992,14 +992,14 @@ void SubgroupDataWeylGroup::ComputeTauSignature() {
   this->theSubgroupData.ComputeCCRepresentativesPreimages();
   //if (theGlobalVariables.printOutThisKindaThing)
   //{
-  //stOutput << "here is the character table of the group, the representatives and sizes for "
+  //theGlobalVariables.Comments << "here is the character table of the group, the representatives and sizes for "
   //         << "conjugacy classes of the group and the subgroup, and for your convenience, "
   //         << "a mapping from subgroup conjugacy classes to their preimages in the group. ";
-  //stOutput << this->theSubgroupData.theGroup->PrettyPrintCharacterTable();
-  //stOutput << Xs << " <- subgroup sign character\n";
-  //stOutput << this->theSubgroupData.theGroup->PrettyPrintCCRepsSizes();
-  //stOutput << this->theSubgroupData.theSubgroup->PrettyPrintCCRepsSizes();
-  //stOutput << this->theSubgroupData.ccRepresentativesPreimages.ToStringCommaDelimited() << '\n';
+  //theGlobalVariables.Comments << this->theSubgroupData.theGroup->PrettyPrintCharacterTable();
+  //theGlobalVariables.Comments << Xs << " <- subgroup sign character\n";
+  //theGlobalVariables.Comments << this->theSubgroupData.theGroup->PrettyPrintCCRepsSizes();
+  //theGlobalVariables.Comments << this->theSubgroupData.theSubgroup->PrettyPrintCCRepsSizes();
+  //theGlobalVariables.Comments << this->theSubgroupData.ccRepresentativesPreimages.ToStringCommaDelimited() << '\n';
  //}
 
   this->tauSignature.SetSize(this->theSubgroupData.theGroup->ConjugacyClassCount());
@@ -1009,12 +1009,12 @@ void SubgroupDataWeylGroup::ComputeTauSignature() {
   for (int i = 0; i < this->theSubgroupData.theGroup->conjugacyClasseS.size; i ++) {
     ClassFunction<FiniteGroup<ElementWeylGroup>, Rational>& XiG =
     this->theWeylData->theGroup.characterTable[i];
-    //stOutput << "Restricting character: " << Xip.ToString() << "<br>";
+    //theGlobalVariables.Comments << "Restricting character: " << Xip.ToString() << "<br>";
     for (int j = 0; j < this->theSubgroupData.theSubgroup->conjugacyClasseS.size; j ++) {
       XiS[j] = XiG[this->theSubgroupData.ccRepresentativesPreimages[j]];
     }
     this->tauSignature[i] = this->theSubgroupData.theSubgroup->GetHermitianProduct(Xs, XiS);
-    //stOutput << "<br>Hermitian product of " << Xs.ToString() << " and "
+    //theGlobalVariables.Comments << "<br>Hermitian product of " << Xs.ToString() << " and "
     //<< XiS.ToString() << " = " << this->tauSignature[i];
     if (!this->tauSignature[i].IsSmallInteger()) {
       crash << " Tau signature is not integral, something is wrong. " << crash ;
@@ -1130,7 +1130,7 @@ bool FiniteGroup<elementSomeGroup>::AreConjugate_OLD_Deprecated_Version_By_Todor
   }
   do {
     //if (left.ToString() == "s_{4}")
-    //  stOutput << "<br>" << theIterator.GetCurrentElement().ToString() << "=?=" << right.ToString();
+    //  theGlobalVariables.Comments << "<br>" << theIterator.GetCurrentElement().ToString() << "=?=" << right.ToString();
     if (theIterator.GetCurrentElement() == right) {
       return true;
     }
@@ -1167,15 +1167,15 @@ void WeylGroupData::GetSignSignatureParabolics(List<SubgroupDataRootReflections>
   outputSubgroups.SetSize(numCycles);
   ElementWeylGroup g;
   g.owner = this;
-//  stOutput << "<hr>Meself is: " << this->ToString();
+//  theGlobalVariables.Comments << "<hr>Meself is: " << this->ToString();
   for (int i = 0; i < outputSubgroups.size; i ++, sel.incrementSelection()) {
     SubgroupDataRootReflections& currentParabolic = outputSubgroups[i];
     currentParabolic.MakeParabolicSubgroup(*this, sel);
     currentParabolic.ComputeCCSizesRepresentativesPreimages();
-//    stOutput << "<hr>Current parabolic is: " << currentParabolic.ToString();
+//    theGlobalVariables.Comments << "<hr>Current parabolic is: " << currentParabolic.ToString();
     // ComputeInitialCharacters gets the character of the sign representation
     // as characterTable[1]
-    //stOutput << "<hr>before compute initial irreps";
+    //theGlobalVariables.Comments << "<hr>before compute initial irreps";
   }
   this->theGroup.CheckConjugacyClassRepsMatchCCsizes();
   for (int j = 0; j < outputSubgroups.size; j ++) {

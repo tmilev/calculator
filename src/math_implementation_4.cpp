@@ -25,9 +25,10 @@ Crasher::Crasher() {
 }
 
 void Crasher::FirstRun() {
-  if (!this->flagCrashInitiateD && (
-    theGlobalVariables.flagRunningApache || theGlobalVariables.flagRunningBuiltInWebServer
-  )) {
+  if (
+    !this->flagCrashInitiateD &&
+    theGlobalVariables.flagRunningBuiltInWebServer
+  ) {
     double elapsedSeconds = theGlobalVariables.GetElapsedSeconds();
     this->crashReportHtml << "\n<b style = 'color:red'>Crash</b> "
     << elapsedSeconds << " second(s) from the start.<hr>";
@@ -124,15 +125,10 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash) {
     this->crashReportHtml << "GlobalVariables.flagNotAllocated is true. ";
     this->crashReportConsolE << "GlobalVariables.flagNotAllocated is true. ";
   }
-  if (stOutput.theOutputFunction == nullptr) {
-    std::cout << this->crashReportConsolE.str() << std::endl;
-  } else {
-    JSData output;
-    output[WebAPI::result::crashReport] = this->crashReportHtml.str();
-    stOutput << output.ToString(false);
-    stOutput.Flush();
-    std::cout << this->crashReportConsolE.str() << std::endl;
-  }
+  std::cout << this->crashReportConsolE.str() << std::endl;
+  JSData output;
+  output[WebAPI::result::crashReport] = this->crashReportHtml.str();
+  theGlobalVariables.WriteResponse(output);
   if (this->CleanUpFunction != nullptr) {
     this->CleanUpFunction();
   }
@@ -850,7 +846,6 @@ bool DynkinDiagramRootSubalgebra::CheckInitialization() const {
 void DynkinDiagramRootSubalgebra::ComputeDiagramInputIsSimple(const Vectors<Rational>& simpleBasisInput) {
   MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::ComputeDiagramInputIsSimple");
   this->CheckInitialization();
-  //stOutput << "<br>Computing diagram from " << simpleBasisInput.ToString();
   this->SimpleBasesConnectedComponents.size = 0;
   this->SimpleBasesConnectedComponents.Reserve(simpleBasisInput.size);
   for (int i = 0; i < simpleBasisInput.size; i ++) {

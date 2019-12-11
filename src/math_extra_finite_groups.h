@@ -1227,7 +1227,7 @@ public:
         }
       }
     }
-    stOutput << "Expensive verification complete, this is indeed a representation\n";
+    theGlobalVariables.Comments << "Expensive verification complete, this is indeed a representation\n";
     return true;
   }
   std::string DescribeAsDirectSum();
@@ -1676,7 +1676,7 @@ bool TranslatableWordsSubgroupElementGetWord(FiniteGroup<elementSomeGroup>& H, c
   for (int i = 0; i < superword.size; i ++) {
     if (!H.parentRelationship->superGeneratorSubWordExists[superword[i]]) {
       if (!H.HasElement(g)) {
-        stOutput << "element " << g << " isn't even a member of " << H << '\n';
+        theGlobalVariables.Comments << "element g isn't a member of H\n";
       }
       crash << "element " << g << " is assigned parent word " << superword.ToStringCommaDelimited()
       << " containing generator not found in subgroup " << superword[i]
@@ -1704,7 +1704,7 @@ bool SubgroupData<someGroup, elementSomeGroup>::VerifyNormal() {
       csmt(i, j) = QIDMul(i, j);
     }
   }
-  stOutput << "Coset multiplication table\n" << csmt.ToStringPlainText() << '\n';
+  theGlobalVariables.Comments << "Coset multiplication table\n" << csmt.ToStringPlainText() << '\n';
   for (int i = 0; i < cosets.size; i ++) {
     for (int j = i; j < cosets.size; j ++) {
       for (int k = j; k < cosets.size; k ++) {
@@ -1770,7 +1770,7 @@ void SubgroupData<someGroup, elementSomeGroup>::QuotientGroupPermutationRepresen
   this->ComputeCosets();
   out.ownerGroup = this->theGroup;
   out.identifyingString = "Quotient permutation representation";
-  stOutput << "Subgroup::QuotientGroupPermutationRepresentation: Permuting " << cosets.size << " cosets.\n";
+  theGlobalVariables.Comments << "Subgroup::QuotientGroupPermutationRepresentation: Permuting " << cosets.size << " cosets.\n";
   out.generatorS.SetSize(this->theGroup->generators.size);
   for (int i = 0; i < this->theGroup->generators.size; i ++) {
     out.generatorS[i].init(this->cosets.size, this->cosets.size);
@@ -1780,13 +1780,13 @@ void SubgroupData<someGroup, elementSomeGroup>::QuotientGroupPermutationRepresen
       int j = this->GetCosetId(g);
       out.generatorS[i](j, ci) = 1;
     }
-    stOutput << "Element " << this->theGroup->generators[i] << " of coset " << this->GetCosetId(this->theGroup->generators[i]);
-    stOutput << " permutes the other cosets as\n" << out.generatorS[i].ToStringPlainText() << '\n';
+    theGlobalVariables.Comments << "Element " << this->theGroup->generators[i] << " of coset " << this->GetCosetId(this->theGroup->generators[i]);
+    theGlobalVariables.Comments << " permutes the other cosets as\n" << out.generatorS[i].ToStringPlainText() << '\n';
   }
 }
 
-// G⊗_H V
-// g(w) = h[g](Ⓧv) where [g] rearranges the v's
+// G\otimes_H V
+// g(w) = h[g](\otimes v) where [g] rearranges the v's
 //
 template <typename someGroup, typename elementSomeGroup>
 template <typename coefficient>
@@ -1799,9 +1799,9 @@ GroupRepresentation<someGroup, coefficient> SubgroupData<someGroup, elementSomeG
   sr.ownerGroup = this->theGroup;
   sr.generatorS.SetSize(this->theGroup->generators.size);
   // in TODO: make random FiniteGroups capable of finding their conjugacy classes in less than at least 5 minutes
-  stOutput << "inducing from subgroup representation:\n";
+  theGlobalVariables.Comments << "inducing from subgroup representation:\n";
   for (int i = 0; i < this->theSubgroup->generators.size; i ++) {
-    stOutput << this->theSubgroup->generators[i] << '\n' << in.generatorS[i].ToStringPlainText() << '\n';
+    theGlobalVariables.Comments << this->theSubgroup->generators[i] << '\n' << in.generatorS[i].ToStringPlainText() << '\n';
   }
   for (int i = 0; i < this->theGroup->generators.size; i ++) {
     elementSomeGroup g;
@@ -1813,26 +1813,26 @@ GroupRepresentation<someGroup, coefficient> SubgroupData<someGroup, elementSomeG
       cg.Invert();
       g = cg * this->theGroup->generators[i];
     }
-    stOutput << "element " << this->theGroup->generators[i] << " belongs to coset " << csi;
-    stOutput << " represented by " << cosets[csi].representative << " and corresponds to subgroup element " << g;
-    in.GetMatrixOfElement(g,sr.generatorS[i]);
-    stOutput << " which is assigned matrix\n" << sr.generatorS[i].ToStringPlainText() << '\n';
+    theGlobalVariables.Comments << "element " << this->theGroup->generators[i] << " belongs to coset " << csi;
+    theGlobalVariables.Comments << " represented by " << cosets[csi].representative << " and corresponds to subgroup element " << g;
+    in.GetMatrixOfElement(g, sr.generatorS[i]);
+    theGlobalVariables.Comments << " which is assigned matrix\n" << sr.generatorS[i].ToStringPlainText() << '\n';
   }
   GroupRepresentation<someGroup, coefficient> out;
   out.MakeTensorRepresentation(qr,sr);
-  stOutput << "Subgroup representation: " << sr.ToString() << "\n";
+  theGlobalVariables.Comments << "Subgroup representation: " << sr.ToString() << "\n";
   for (int i = 0; i < this->theGroup->generators.size; i ++) {
-    stOutput << this->theGroup->generators[i] << ' ' << sr.generatorS[i].GetTrace() << '\n'
+    theGlobalVariables.Comments << this->theGroup->generators[i] << ' ' << sr.generatorS[i].GetTrace() << '\n'
     << sr.generatorS[i].ToStringPlainText() << '\n';
   }
-  stOutput << "Quotient representation: " << qr.ToString() << "\n";
+  theGlobalVariables.Comments << "Quotient representation: " << qr.ToString() << "\n";
   for (int i = 0; i < this->theGroup->generators.size; i ++) {
-    stOutput << this->theGroup->generators[i] << ' ' << qr.generatorS[i].GetTrace() << '\n'
+    theGlobalVariables.Comments << this->theGroup->generators[i] << ' ' << qr.generatorS[i].GetTrace() << '\n'
     << qr.generatorS[i].ToStringPlainText() << '\n';
   }
-  stOutput << "Induced representation: " << out.ToString() << '\n';
+  theGlobalVariables.Comments << "Induced representation: " << out.ToString() << '\n';
   for (int i = 0; i <out.generatorS.size; i ++) {
-    stOutput << this->theGroup->generators[i] << ' ' << out.generatorS[i].GetTrace() << '\n'
+    theGlobalVariables.Comments << this->theGroup->generators[i] << ' ' << out.generatorS[i].GetTrace() << '\n'
     << out.generatorS[i].ToStringPlainText() << '\n';
   }
   return out;
@@ -1869,26 +1869,25 @@ GroupRepresentation<someGroup, coefficient> SubgroupData<someGroup, elementSomeG
     }
   }
   out.ownerGroup = this->theGroup;
-  //stOutput << "Induced representation: " << out.ToString() << '\n';
   for (int i = 0; i <out.generatorS.size; i ++) {
-    stOutput << this->theGroup->generators[i] << ' ' << out.generatorS[i].GetTrace() << '\n'
+    theGlobalVariables.Comments << this->theGroup->generators[i] << ' ' << out.generatorS[i].GetTrace() << '\n'
     << out.generatorS[i].ToStringPlainText() << '\n';
   }
   if (!out.VerifyRepresentation()) {
     if (!in.VerifyRepresentationExpensive()) {
-      stOutput << "Well, we weren't given a proper representation either.";
+      theGlobalVariables.Comments << "Well, we weren't given a proper representation either.";
     }
     FiniteGroup<Matrix<coefficient> > ingroup;
     ingroup.generators = in.generatorS;
-    stOutput << "Generator commutation relations for input representation:\n"
+    theGlobalVariables.Comments << "Generator commutation relations for input representation:\n"
     << ingroup.PrettyPrintGeneratorCommutationRelations();
-    stOutput << "a quotient group of\n" << this->theSubgroup->PrettyPrintGeneratorCommutationRelations();
+    theGlobalVariables.Comments << "a quotient group of\n" << this->theSubgroup->PrettyPrintGeneratorCommutationRelations();
     FiniteGroup<Matrix<coefficient> > outgroup;
     outgroup.generators = out.generatorS;
-    stOutput << "Generator commutation relations for 'representation':\n"
+    theGlobalVariables.Comments << "Generator commutation relations for 'representation':\n"
     << outgroup.PrettyPrintGeneratorCommutationRelations();
-    stOutput << "It was supposed to be a quotient group of\n" << this->theGroup->PrettyPrintGeneratorCommutationRelations();
-    crash << crash;
+    theGlobalVariables.Comments << "It was supposed to be a quotient group of\n" << this->theGroup->PrettyPrintGeneratorCommutationRelations();
+    crash << "Error in InduceRepresentation. " << crash;
   }
   return out;
 }

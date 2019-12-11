@@ -15,6 +15,7 @@
 #include <arpa/inet.h>
 #include "database.h"
 #include "calculator_problem_storage.h"
+#include "string_constants.h"
 
 static ProjectInformationInstance ProjectInfoVpf6_5calculatorWebRoutines(__FILE__, "Calculator web routines. ");
 
@@ -587,7 +588,6 @@ void WebCrawler::FetchWebPagePart2(
   //    (10,theWebServer.theSSLdata.sslClient, secondPart, comments, comments, true))
   //  return;
   //this->bodyReceived+=secondPart;
-  //stOutput << tempStream.str();
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "<br>Body (length: "
     << this->bodyReceiveD.size()
@@ -926,14 +926,13 @@ bool WebCrawler::VerifyRecaptcha(
   return true;
 }
 
-std::string WebWorker::GetSignUpRequestResult() {
+JSData WebWorker::GetSignUpRequestResult() {
   MacroRegisterFunctionWithName("WebWorker::GetSignUpRequestResult");
-  //double startTime =theGlobalVariables.GetElapsedSeconds();
   JSData result;
   std::stringstream errorStream;
   if (!theGlobalVariables.flagDatabaseCompiled) {
     result["error"] = "Database not available (cannot sign up). ";
-    return result.ToString(false);
+    return result;
   }
   Database::get().theUser.LogoutViaDatabase();
   UserCalculator theUser;
@@ -947,19 +946,19 @@ std::string WebWorker::GetSignUpRequestResult() {
   if (!theCrawler.VerifyRecaptcha(&errorStream, &generalCommentsStream, nullptr)) {
     result["error"] = errorStream.str();
     result["comments"] = generalCommentsStream.str();
-    return result.ToString(false);
+    return result;
   }
   if (theUser.username == "") {
     errorStream << "Empty username not allowed. ";
     result["error"] = errorStream.str();
     result["comments"] = generalCommentsStream.str();
-    return result.ToString(false);
+    return result;
   }
   if (!EmailRoutines::IsOKEmail(theUser.email, &generalCommentsStream)) {
     errorStream << "Your email address does not appear to be valid. ";
     result["error"] = errorStream.str();
     result["comments"] = generalCommentsStream.str();
-    return result.ToString(false);
+    return result;
   }
   if (theUser.Iexist(&generalCommentsStream)) {
     errorStream
@@ -970,7 +969,7 @@ std::string WebWorker::GetSignUpRequestResult() {
     << ") you requested is already taken.";
     result["error"] = errorStream.str();
     result["comments"] = generalCommentsStream.str();
-    return result.ToString(false);
+    return result;
   } else {
     outputStream << "<span style =\"color:green\"><b>"
     << "Username ("
@@ -984,7 +983,7 @@ std::string WebWorker::GetSignUpRequestResult() {
     result["error"] = errorStream.str();
     result["comments"] = generalCommentsStream.str();
     result["result"] = outputStream.str();
-    return result.ToString(false);
+    return result;
   }
   std::stringstream* adminOutputStream = nullptr;
   if (theGlobalVariables.UserDefaultHasAdminRights()) {
@@ -996,21 +995,32 @@ std::string WebWorker::GetSignUpRequestResult() {
   result["error"] = errorStream.str();
   result["comments"] = generalCommentsStream.str();
   result["result"] = outputStream.str();
-  return result.ToString(false);
+  return result;
+}
+
+int WebWorker::WriteToBodyJSON(const JSData& result) {
+  return this->WriteToBody(result.ToString(false));
 }
 
 int WebWorker::ProcessSignUP() {
   MacroRegisterFunctionWithName("WebWorker::ProcessSignUP");
   this->SetHeaderOKNoContentLength("");
-  stOutput << this->GetSignUpRequestResult();
-  return 0;
+  return this->WriteToBodyJSON(this->GetSignUpRequestResult());
+}
+
+void GlobalVariables::WriteResponse(const JSData& out) {
+  WebWorker& theWorker = theWebServer.GetActiveWorker();
+  theWorker.WriteToBodyJSON(out);
+  theWorker.SendAllBytesWithHeaders();
 }
 
 int WebWorker::ProcessForgotLogin() {
   MacroRegisterFunctionWithName("WebWorker::ProcessForgotLogin");
   this->SetHeaderOKNoContentLength("");
+  JSData result;
   if (!theGlobalVariables.flagDatabaseCompiled) {
-    stOutput << "Error: database not running. ";
+    result[WebAPI::result::error] = "Error: database not running. ";
+    theGlobalVariables.WriteResponse(result);
     return 0;
   }
   std::stringstream out;
@@ -1026,24 +1036,27 @@ int WebWorker::ProcessForgotLogin() {
   << "we will remove the technical garbage as soon as we are done. "
   << "</b><br>\n";
   if (!theCrawler.VerifyRecaptcha(&out, &out, nullptr)) {
-    stOutput << out.str();
+    result[WebAPI::result::comments] = out.str();
+    theGlobalVariables.WriteResponse(result);
     return 0;
   }
   if (!theUser.Iexist(&out)) {
     out << "<br><b style =\"color:red\">"
     << "We failed to find your email: " << theUser.email << " in our records. "
     << "</b>";
-    stOutput << out.str();
+    result[WebAPI::result::comments] = out.str();
+    theGlobalVariables.WriteResponse(result);
     return 0;
   }
   if (!theUser.LoadFromDB(&out, &out)) {
     out << "<br><b style='color:red'>"
     << "Failed to fetch user info for email: " << theUser.email
     << "</b>";
-    stOutput << out.str();
+    result[WebAPI::result::comments] = out.str();
+    theGlobalVariables.WriteResponse(result);
     return 0;
   }
-  stOutput << "<b style =\"color:green\">"
+  out << "<b style =\"color:green\">"
   << "Your email is on record. "
   << "</b>";
   if (!theGlobalVariables.UserDefaultHasAdminRights()) {
@@ -1051,9 +1064,11 @@ int WebWorker::ProcessForgotLogin() {
   } else {
     this->DoSetEmail(theUser, &out, &out, &out);
   }
-  stOutput << out.str();
-  stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() << " second(s); "
+
+  out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() << " second(s); "
   << theGlobalVariables.GetElapsedSeconds() << " second(s) spent creating account. ";
+  result[WebAPI::result::comments] = out.str();
+  theGlobalVariables.WriteResponse(result);
   return 0;
 }
 

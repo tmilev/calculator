@@ -5,7 +5,7 @@
 
 static ProjectInformationInstance ProjectInfoVpf6_05cpp(__FILE__, "Calculator core evaluation engine. ");
 
-std::string Calculator::ToStringFunctionHandlersJSON() {
+JSData Calculator::FunctionHandlersJSON() {
   MacroRegisterFunctionWithName("Calculator::ToStringFunctionHandlersJSON");
   JSData output;
   output.theType = JSData::token::tokenObject;
@@ -37,7 +37,7 @@ std::string Calculator::ToStringFunctionHandlersJSON() {
     currentAtomJSON["composite"] = currentFunctionListComposite;
     output[currentAtom] = currentAtomJSON;
   }
-  return output.ToString(false);
+  return output;
 }
 
 const Expression& Calculator::EZero() {
@@ -350,11 +350,6 @@ StateMaintainerCalculator::~StateMaintainerCalculator() {
         }
         Function& currentRule = this->owner->GetFunctionHandlerFromNamedRule(currentRuleName);
         currentRule.flagDisabledByUser = currentRule.flagDisabledByUserDefaultValue;
-        //stOutput << "<br>DEBUG: resetting rule: " << currentRule.calculatorIdentifier
-        //<< " to value: "
-        //<< currentRule.flagDisabledByUserDefaultValue
-        //<< " with startingrulestacksize: "
-        //<< this->startingRuleStackSize;
         shouldUpdateRules = true;
       }
     }

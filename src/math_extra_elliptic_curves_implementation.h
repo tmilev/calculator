@@ -69,7 +69,6 @@ bool ElementEllipticCurve<coefficient>::operator*=(const ElementEllipticCurve& o
       this->flagInfinity = true;
       this->xCoordinate = 0;
       this->yCoordinate = 0;
-      // stOutput << " DEBUG: product is: infinity";
       return true;
     }
     //at this point of code, the two points must be equal.

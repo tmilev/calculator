@@ -22,38 +22,35 @@ public:
   void BuildHtmlJSpage(bool appendBuildHash);
   static std::string GetHtmlTagWithManifest();
   static std::string ModifyProblemReport();
-  static std::string ClonePageResult();
+  static JSData ClonePageResult();
   static std::string AddTeachersSections();
   static std::string AddUserEmails(const std::string& hostWebAddressWithPort);
   static JSData SubmitAnswersJSON(const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake);
-  static std::string SubmitAnswersString(const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake);
-  static std::string SubmitAnswersString();
-  static std::string GetProblemSolutionString();
+  static JSData SubmitAnswersJSON();
   static JSData GetProblemSolutionJSON();
-  static std::string GetEditPageJSON();
+  static JSData GetEditPageJSON();
   static std::string GetJavascriptCaptcha();
   static std::string GetCaptchaDiv();
-  static std::string GetExamPageJSON();
+  static JSData GetExamPageJSON();
   static std::string GetPageFromTemplate();
   static std::string GetJSONFromTemplate();
-  static std::string GetJSONUserInfo(const std::string& comments);
+  static JSData GetJSONUserInfo(const std::string& comments);
   static void GetJSDataUserInfo(JSData& outputAppend, const std::string& comments);
-  static std::string GetTopicTableJSON();
-  static std::string GetAnswerOnGiveUp();
-  static std::string GetAnswerOnGiveUp(
+  static JSData GetTopicTableJSON();
+  static JSData GetAnswerOnGiveUp();
+  static JSData GetAnswerOnGiveUp(
     const std::string& inputRandomSeed, std::string* outputNakedAnswer = nullptr, bool* outputDidSucceed = nullptr
   );
-  static std::string GetSelectCourseJSON();
+  static JSData GetSelectCourseJSON();
   static std::string GetScoresPage();
   static std::string GetApp(bool appendBuildHash);
   static std::string GetOnePageJS(bool appendBuildHash);
   std::string GetOnePageJSBrowserify();
   static std::string GetScoresInCoursePage();
   static JSData submitAnswersPreviewJSON();
-  static std::string submitAnswersPreviewString();
   static std::string GetSetProblemDatabaseInfoHtml();
   static std::string GetAccountsPage(const std::string& hostWebAddressWithPort);
-  static std::string GetAccountsPageJSON(const std::string& hostWebAddressWithPort);
+  static JSData GetAccountsPageJSON(const std::string& hostWebAddressWithPort);
   static std::string GetAccountsPageBody(const std::string& hostWebAddressWithPort);
   static std::string ToStringAssignSection();
   static std::string ToStringUserDetails(

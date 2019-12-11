@@ -1202,7 +1202,7 @@ public:
   std::string ElementToStringNonBoundVars();
   JSData ToJSONOutputAndSpecials();
   std::string ToStringOutputAndSpecials();
-  std::string ToStringFunctionHandlersJSON();
+  JSData FunctionHandlersJSON();
   //the purpose of the operator below is to save on typing when returning false with a comment.
   operator bool() const {
     return false;

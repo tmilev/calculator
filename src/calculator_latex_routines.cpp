@@ -431,12 +431,9 @@ void LaTeXcrawler::Crawl() {
   std::stringstream crawlingResult;
 
   std::string startingDirectory = FileOperations::GetCurrentFolder();
-  //stOutput << "DEBUG: starting dir: " << startingDirectory << "<br>";
   theGlobalVariables.ChDir(this->baseFolderStartFilePhysical);
-  //stOutput << "DEBUG: after ch dir: " << FileOperations::GetCurrentFolder() << "<br>";
   this->CrawlRecursive(crawlingResult, this->baseFolderStartFilePhysical + this->theFileNameToCrawlPhysicalNoPathName);
   theGlobalVariables.ChDir(startingDirectory);
-  //stOutput << "DEBUG: After crawling, current dir: " << FileOperations::GetCurrentFolder() << "<br>";
   std::fstream outputFile;
   std::string outputFileName = "latexOutput.tex";
   if (!FileOperations::OpenFileCreateIfNotPresentVirtual(

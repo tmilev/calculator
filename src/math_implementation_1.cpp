@@ -142,7 +142,7 @@ void LittelmannPath::ActByEalpha(int indexAlpha) {
   }
   Rational s2 = this->owner->RootScalarCartanRoot(this->Waypoints[precedingIndex], alphaScaled);
   if (!this->MinimaAreIntegral()) {
-    stOutput << "<br>Something is bad: starting path is BAD!";
+    theGlobalVariables.Comments << "<br>Something is wrong: starting path is BAD!";
   }
   if (s2 > theMin + 1) {
     this->Waypoints.SetSize(this->Waypoints.size + 1);
@@ -277,7 +277,7 @@ void LittelmannPath::Simplify() {
 /*  if (leftIndex + 1< this->Waypoints.size) {
     this->Waypoints.SetSize(leftIndex + 1);
     tempStream << " reduced to " << this->ToString();
-    stOutput << tempStream.str();
+    theGlobalVariables.Comments << tempStream.str();
   }*/
   this->Waypoints.SetSize(leftIndex + 1);
 }
@@ -377,8 +377,8 @@ bool LittelmannPath::GenerateOrbit(
               currentSequence.AddOnTop(theIndex);
               outputOperators.AddOnTop(currentSequence);
               if (!currentPath.MinimaAreIntegral()) {
-                stOutput << "<hr>Found a bad path:<br> ";
-                stOutput << " = " << currentPath.ToString();
+                theGlobalVariables.Comments << "<hr>Found a bad path:<br> ";
+                theGlobalVariables.Comments << " = " << currentPath.ToString();
               }
             }
           }
@@ -395,8 +395,8 @@ bool LittelmannPath::GenerateOrbit(
               currentSequence.AddOnTop(- theIndex - 1);
               outputOperators.AddOnTop(currentSequence);
               if (!currentPath.MinimaAreIntegral()) {
-                stOutput << "<hr>Found a bad path:<br> ";
-                stOutput << " = " << currentPath.ToString();
+                theGlobalVariables.Comments << "<hr>Found a bad path:<br> ";
+                theGlobalVariables.Comments << " = " << currentPath.ToString();
               }
             }
           }

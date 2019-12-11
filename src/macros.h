@@ -124,5 +124,4 @@ public:
 };
 
 extern Crasher crash;
-extern StdoutClass stOutput;
 #endif

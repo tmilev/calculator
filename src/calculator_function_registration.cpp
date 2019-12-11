@@ -392,17 +392,6 @@ void Calculator::initPredefinedInnerFunctions() {
     "TestTopCommand"
   );
   this->AddOperationInnerHandler(
-    "TestStandardOutput",
-    CalculatorFunctionsGeneral::innerTestStandardOutput,
-    "",
-    "(This is not a mathematical function). Tests the calculator standard output.",
-    "TestStandardOutput(\"The quick brown fox jumps over the lazy dog\")",
-    true,
-    false,
-    "CalculatorFunctionsGeneral::innerTestStandardOutput",
-    "TestStandardOutput"
-  );
-  this->AddOperationInnerHandler(
     "Crash",
     CalculatorFunctionsGeneral::innerCrash,
     "",

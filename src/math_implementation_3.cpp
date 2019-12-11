@@ -140,7 +140,6 @@ GlobalVariables::GlobalVariables() {
   this->flagComputationFinishedAllOutputSentClosing = false;
   this->flagRunningConsoleTest = false;
   this->flagRunningCommandLine = false;
-  this->flagRunningApache = false;
   this->flagRunningBuiltInWebServer = false;
   this->flagLoggedIn = false;
   this->flagLogInAttempted = false;
@@ -6430,7 +6429,6 @@ bool ElementWeylGroup::HasDifferentConjugacyInvariantsFrom(
     return false;
   }
   this->CheckInitialization();
-  //stOutput << " the sign is the same... ";
   Polynomial<Rational> leftCharPoly, rightCharPoly;
   this->GetCharacteristicPolyStandardRepresentation(leftCharPoly);
   right.GetCharacteristicPolyStandardRepresentation(rightCharPoly);
@@ -6655,8 +6653,7 @@ void WeylGroupData::GetSignCharacter(Vector<Rational>& out) {
 }
 
 /*
-// this is only used in one place.  is there a reason for it not having been
-// implemented this way in the first place?
+// this is only used in one place.
 void SubgroupDataWeylGroup::GetSignCharacter(Vector<Rational>& out) {
   MacroRegisterFunctionWithName("SubgroupRootReflections::GetSignCharacter");
   this->theSubgroupData->theSubgroup->GetSignCharacter(out);
@@ -6665,7 +6662,6 @@ void SubgroupDataWeylGroup::GetSignCharacter(Vector<Rational>& out) {
 //  out.SetSize(this->theSubgroup->ConjugacyClassCount());
 //  for (int i = 0; i < this->theSubgroup->ConjugacyClassCount(); i ++)
 //    out[i] = this->theSubgroup->conjugacyClasseS[i].representative.Sign();
-//  stOutput << "<br>Sign character is: " << out.ToString();
 }
 */
 
@@ -9025,22 +9021,22 @@ bool Lattice::GetClosestPointInDirectionOfTheNormalToAffineWallMovingIntegralSte
     return false;
   }
   Rational theMovement = (theShift - startingPoint.ScalarEuclidean(theNormal)) / theDirection.ScalarEuclidean(theNormal);
-  stOutput << "<br>the movement: " << theMovement.ToString() << ", (" << theShift.ToString()
+  theGlobalVariables.Comments << "<br>the movement: " << theMovement.ToString() << ", (" << theShift.ToString()
   << " - " << startingPoint.ScalarEuclidean(theNormal).ToString() << ")/ "
   << theDirection.ScalarEuclidean(theNormal).ToString() << ", ";
   if (!theMovement.IsInteger()) {
-    stOutput << "the movement aint integral; ";
+    theGlobalVariables.Comments << "the movement is not integral; ";
     theMovement.AssignFloor();
     if (theDirection.ScalarEuclidean(theNormal).IsPositive()) {
       theMovement += 1;
     }
   }
-  stOutput << "the normal: " << theNormal.ToString() << ", the direction: "
+  theGlobalVariables.Comments << "the normal: " << theNormal.ToString() << ", the direction: "
   << theDirection.ToString() << ", the shift: " << theShift.ToString()
   << ", the movement: " << theMovement.ToString() << ", startingPoint: " << startingPoint.ToString();
   outputPoint = startingPoint;
   outputPoint += theDirection * theMovement;
-  stOutput << ", finalPoint: " << outputPoint.ToString();
+  theGlobalVariables.Comments << ", finalPoint: " << outputPoint.ToString();
   return true;
 }
 
@@ -9855,7 +9851,7 @@ bool Cone::ReadFromFile(std::fstream& input) {
   buffer.size = 0;
   Vector<Rational> tempRoot;
   if (tempS != "Cone(") {
-    stOutput << "tempS was instead " << tempS;
+    theGlobalVariables.Comments << "tempS was instead " << tempS;
     XML::ReadEverythingPassedTagOpenUntilTagClose(input, NumWordsRead, this->GetXMLClassName());
     return false;
   }
@@ -11274,14 +11270,14 @@ bool RationalFunctionOld::Substitution(const PolynomialSubstitution<Rational>& t
 //      if (!this->checkConsistency())crash << crash;
       return true;
     case RationalFunctionOld::typePoly:
-//      stOutput << "<hr>subbing in<br>" << this->ToString(tempFormat) << " using " << theSub.ToString()
+//      theGlobalVariables.Comments << "<hr>subbing in<br>" << this->ToString(tempFormat) << " using " << theSub.ToString()
 //      << " to get ";
       if (!this->Numerator.GetElement().Substitution(theSub)) {
         return false;
       }
-//      stOutput << "<br>finally:<br>" << this->Numerator.GetElement().ToString();
+//      theGlobalVariables.Comments << "<br>finally:<br>" << this->Numerator.GetElement().ToString();
       this->Simplify();
-//      stOutput << ", which, simplified, yields<br> " << this->ToString(tempFormat);
+//      theGlobalVariables.Comments << ", which, simplified, yields<br> " << this->ToString(tempFormat);
 //      if (!this->checkConsistency())crash << crash;
       return true;
     case RationalFunctionOld::typeRationalFunction:
@@ -11738,26 +11734,26 @@ Rational PiecewiseQuasipolynomial::EvaluateInputProjectivized(const Vector<Ratio
             break;
           }
           FormatExpressions tempFormat;
-          stOutput << "<hr>Error!!! Failed on chamber " << theIndex + 1 << " and " << i + 1;
-          stOutput << "<br>Evaluating at point " << AffineInput.ToString() << "<br>";
-          stOutput << "<br>Chamber " << theIndex + 1 << ": " << this->theProjectivizedComplex[theIndex].ToString(&tempFormat);
-          stOutput << "<br>QP: " << this->theQPs[theIndex].ToString(true, false);
-          stOutput << "<br>value: " << result.ToString();
-          stOutput << "<br><br>Chamber " << i + 1 << ": " << this->theProjectivizedComplex[i].ToString(&tempFormat);
-          stOutput << "<br>QP: " << this->theQPs[i].ToString(true, false);
-          stOutput << "<br>value: " << altResult.ToString();
+          theGlobalVariables.Comments << "<hr>Error!!! Failed on chamber " << theIndex + 1 << " and " << i + 1;
+          theGlobalVariables.Comments << "<br>Evaluating at point " << AffineInput.ToString() << "<br>";
+          theGlobalVariables.Comments << "<br>Chamber " << theIndex + 1 << ": " << this->theProjectivizedComplex[theIndex].ToString(&tempFormat);
+          theGlobalVariables.Comments << "<br>QP: " << this->theQPs[theIndex].ToString(true, false);
+          theGlobalVariables.Comments << "<br>value: " << result.ToString();
+          theGlobalVariables.Comments << "<br><br>Chamber " << i + 1 << ": " << this->theProjectivizedComplex[i].ToString(&tempFormat);
+          theGlobalVariables.Comments << "<br>QP: " << this->theQPs[i].ToString(true, false);
+          theGlobalVariables.Comments << "<br>value: " << altResult.ToString();
           if (firstFail) {
             DrawingVariables tempDV;
-            stOutput << "<br><b>Point of failure: " << AffineInput.ToString() << "</b>";
+            theGlobalVariables.Comments << "<br><b>Point of failure: " << AffineInput.ToString() << "</b>";
             //this->DrawMe(tempDV);
             this->theProjectivizedComplex.DrawMeLastCoordAffine(true, tempDV, tempFormat);
             tempDV.NumHtmlGraphics = 5;
             tempDV.theBuffer.drawCircleAtVectorBufferRational(AffineInput, "black", 5);
             tempDV.theBuffer.drawCircleAtVectorBufferRational(AffineInput, "black", 10);
             tempDV.theBuffer.drawCircleAtVectorBufferRational(AffineInput, "red", 4);
-            stOutput << "<br> <script src =\"http://ajax.googleapis.com/ajax/libs/dojo/1.6.1/dojo/dojo.xd.js\" "
+            theGlobalVariables.Comments << "<br> <script src =\"http://ajax.googleapis.com/ajax/libs/dojo/1.6.1/dojo/dojo.xd.js\" "
             << "type =\"text/javascript\"></script>\n";
-            stOutput << tempDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->theProjectivizedComplex.GetDim() - 1);
+            theGlobalVariables.Comments << tempDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->theProjectivizedComplex.GetDim() - 1);
           }
           firstFail = false;
         }
@@ -12239,10 +12235,10 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam(
         exitRepresentatives[j], exitNormalAffine, directionSmallerDimOnLattice, exitRepresentatives[j]
       );
     }
-    stOutput << "<hr><hr><hr>" << currentCone.ToString(&theFormat);
-    stOutput << "<br>Entering normal: " << ((foundEnteringNormal) ? enteringNormalAffine.ToString() : "not found");
-    stOutput << "<br>Exit normal: " << ((foundExitNormal) ? exitNormalAffine.ToString() : "not found");
-    stOutput << "<br>The shifted lattice representatives: " << exitRepresentatives.ToString()
+    theGlobalVariables.Comments << "<hr><hr><hr>" << currentCone.ToString(&theFormat);
+    theGlobalVariables.Comments << "<br>Entering normal: " << ((foundEnteringNormal) ? enteringNormalAffine.ToString() : "not found");
+    theGlobalVariables.Comments << "<br>Exit normal: " << ((foundExitNormal) ? exitNormalAffine.ToString() : "not found");
+    theGlobalVariables.Comments << "<br>The shifted lattice representatives: " << exitRepresentatives.ToString()
     << "<br>exitNormalsShiftedAffineProjected";
     if (theNewNormals.size <= 0) {
       crash << "New normals missing. " << crash;
@@ -12251,11 +12247,11 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam(
       tempCLS.theProjectivizedCone.Normals = theNewNormals;
       exitNormalShiftedAffineProjected = exitNormalAffine.GetShiftToTheLeftOnePosition();
       *exitNormalShiftedAffineProjected.LastObject() = - exitNormalLatticeLevel.ScalarEuclidean(exitRepresentatives[j]);
-      stOutput << exitNormalShiftedAffineProjected.ToString() << ", ";
+      theGlobalVariables.Comments << exitNormalShiftedAffineProjected.ToString() << ", ";
       if (foundEnteringNormal) {
         extraEquation = enteringNormalAffine.GetShiftToTheLeftOnePosition();
         extraEquation -= (exitNormalShiftedAffineProjected * enteringNormalAffine[0]) / exitNormalAffine[0];
-        stOutput << "extra equation: " << extraEquation.ToString() << ", ";
+        theGlobalVariables.Comments << "extra equation: " << extraEquation.ToString() << ", ";
         tempCLS.theProjectivizedCone.Normals.AddOnTop(extraEquation);
       }
       tempRoot = theLPToMaximizeAffine.GetShiftToTheLeftOnePosition();
@@ -12288,7 +12284,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam(
         while (true){}
       }*/
       //if (!tempBool)crash << crash;
-      //stOutput << tempCLS.theProjectivizedCone.ToString(false, true, true, true, theFormat);
+      //theGlobalVariables.Comments << tempCLS.theProjectivizedCone.ToString(false, true, true, true, theFormat);
       if (!tempCLS.theProjectivizedCone.flagIsTheZeroCone) {
         theProjectionLatticeLevel.ActOnVectorColumn(exitRepresentatives[j], tempCLS.theShift);
         outputAppend.AddOnTop(tempCLS);
@@ -12590,7 +12586,7 @@ bool Cone::EliminateFakeNormalsUsingVertices(int numAddedFakeWalls) {
     tempMat.GetZeroEigenSpaceModifyMe(NormalsToSubspace);
     if (NormalsToSubspace.size > 0) {
       matNormals.AssignVectorsToRows(NormalsToSubspace);
-//      stOutput << "<br>Normals to the subspace spanned by the vertices: " << NormalsToSubspace.ToString();
+//      theGlobalVariables.Comments << "<br>Normals to the subspace spanned by the vertices: " << NormalsToSubspace.ToString();
       gramMatrixInverted = matNormals;
       gramMatrixInverted.Transpose();
       gramMatrixInverted.MultiplyOnTheLeft(matNormals);
@@ -13000,7 +12996,7 @@ bool ConeComplex::findMaxLFOverConeProjective(
   for (int i = 0; i < inputLinPolys.size; i ++) {
     Polynomial<Rational>& currentPoly = inputLinPolys[i];
     if (currentPoly.TotalDegree() != 1 ) {
-      stOutput << "You messed up the total degree which must be one, instead it is "
+      theGlobalVariables.Comments << "You messed up the total degree which must be one, instead it is "
       << currentPoly.TotalDegree() << ". The dimension of the cone is " << theDim;
       return false;
     }
@@ -13037,7 +13033,7 @@ bool ConeComplex::findMaxLFOverConeProjective(
       }
     }
   }
-  stOutput << this->ToString(true);
+  theGlobalVariables.Comments << this->ToString(true);
   this->Refine();
   outputMaximumOverEeachSubChamber.SetSize(this->size);
   Rational theMax = 0;
@@ -13079,10 +13075,10 @@ void Lattice::Reduce() {
 void Lattice::TestGaussianEliminationEuclideanDomainRationals(Matrix<Rational>& output) {
   output.AssignMatrixIntWithDen(this->basis, this->Den);
   std::stringstream out;
-  stOutput << "Test output: " << output.ToString();
+  theGlobalVariables.Comments << "Test output: " << output.ToString();
   out << "Test output: " << output.ToString();
   output.GaussianEliminationEuclideanDomain();
-  stOutput << "<br>After gaussian elimination:" << output.ToString();
+  theGlobalVariables.Comments << "<br>After gaussian elimination:" << output.ToString();
   out << "<br>After gaussian elimination:" << output.ToString();
 }
 

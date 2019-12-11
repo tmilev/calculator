@@ -429,9 +429,7 @@ void DrawingVariables::drawString(
 }
 
 void WeylGroupData::WriteToFile(std::fstream& output) {
-  output << "Weyl_group: ";
-  stOutput << "This code is not implemented yet (due to a regression).";
-  crash << "Not implemented yet. " << crash;
+  crash << "WeylGroupData::WriteToFile Not implemented yet due to a regression. " << crash;
 //  output << this->WeylLetter << " " << this->CartanSymmetric.NumRows << "\n";
   output << "Long_root_length: ";
 //  this->lengthLongestRootSquared.WriteToFile(output);
@@ -442,8 +440,7 @@ void WeylGroupData::WriteToFile(std::fstream& output) {
 void WeylGroupData::ReadFromFile(std::fstream& input) {
   std::string tempS;
   input >> tempS;
-  stOutput << "This code is not implemented yet (due to a regression).";
-  crash << crash;
+  crash << "WeylGroupData::ReadFromFile is not implemented yet (due to a regression)." << crash;
   //input >> this->WeylLetter >> tempI >> tempS;
   if (tempS != "Long_root_length:") {
     crash << "Failed to read weyl group data from file. " << crash;
@@ -471,7 +468,6 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism(Matrix<Rational>& outputAuto, 
 //  Matrix<Rational>  theDet =mapOnRootSpaces;
 //  Rational tempRat;
 //  theDet.ComputeDeterminantOverwriteMatrix(tempRat);
-//  stOutput << " ... and the det is: " << tempRat.ToString();
   Selection NonExplored;
   int numRoots = this->theWeyl.RootSystem.size;
   NonExplored.init(numRoots);
@@ -2151,7 +2147,7 @@ void slTwoInSlN::ClimbDownFromHighestWeightAlongSl2String(
   Matrix<Rational>::LieBracket(this->theH, input, output);
   bool tempBool = input.IsProportionalTo(output, currentWeight);
   if (!tempBool) {
-    stOutput << "<br>Climbing down does not work as expected!";
+    theGlobalVariables.Comments << "<br>Climbing down does not work as expected!";
   }
   Rational RaiseCoeff;
   RaiseCoeff.MakeZero();
@@ -2308,7 +2304,6 @@ void slTwoInSlN::ExtractHighestWeightVectorsFromVector(
   //remainder.MakeZero();
 //  for (int i = 0; i <outputVectors.size; i ++)
 //    remainder.Add(outputVectors.TheObjects[i]);
-//  stOutput << "<br>sum of all components:<div class =\"math\">" << remainder.ToString(false, true) << "</div>";
 
 }
 
@@ -2495,7 +2490,7 @@ std::string slTwoInSlN::PairTwoIndices(List<int>& output, int leftIndex, int rig
         for (int k = 0; k < HighestWeightsContainingModules.size; k ++) {
           output.AddOnTopNoRepetition(this->GetModuleIndexFromHighestWeightVector(HighestWeightsContainingModules[k]));
           if (this->GetModuleIndexFromHighestWeightVector(HighestWeightsContainingModules[k]) == - 1) {
-            stOutput << newLine << beginMath << "[" << leftElt.ToString(&latexFormat) << ", "
+            theGlobalVariables.Comments << newLine << beginMath << "[" << leftElt.ToString(&latexFormat) << ", "
             << rightElt.ToString(&latexFormat) << "] =" << tempMat.ToString(&latexFormat) << endMath;
           }
         }
@@ -2539,7 +2534,6 @@ void RationalFunctionOld::AddHonestRF(const RationalFunctionOld& other) {
     this->Simplify();
 //    this->ComputeDebugString();
   } else {
-    //stOutput << "Adding " << this->ToString() << " + " << other.ToString();
     this->Numerator.GetElement() *= tempRat;
     this->Denominator.GetElement() *= tempRat;
     this->Numerator.GetElement() += other.Numerator.GetElementConst();

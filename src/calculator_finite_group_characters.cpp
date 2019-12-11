@@ -9,6 +9,8 @@
 
 static ProjectInformationInstance ProjectInfoVpfCharactersCalculatorInterfaceCPP(__FILE__, "Weyl group calculator interface. Work in progress by Thomas & Todor. ");
 
+extern logger logWorker;
+
 template<>
 List<ClassFunction<WeylGroupData::WeylGroupBase, Rational> >::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<ClassFunction<WeylGroupData::WeylGroupBase, Rational> >() {
@@ -107,14 +109,11 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::ComputeAllGe
     }
   }
 //  this->CheckRepIsMultiplicativelyClosed();
-  //stOutput << "<hr>";
   //FormatExpressions tempFormat;
   //tempFormat.flagUseLatex = true;
   //for (int i = 0; i < this->theElementImages.size; i ++)
-  //{ stOutput << "<br>Element  " << i + 1 << ": " << this->theElementImages[i].ToString() << " = "
-  //  << this->theElementImages[i].ToString(& tempFormat);
+  //{
   //}
-  //stOutput << "<hr>";
 }
 */
 
@@ -147,14 +146,10 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::ComputeAllEl
     }
   }
 //  this->CheckRepIsMultiplicativelyClosed();
-  //stOutput << "<hr>";
   //FormatExpressions tempFormat;
   //tempFormat.flagUseLatex = true;
   //for (int i = 0; i < this->theElementImages.size; i ++)
-  //{ stOutput << "<br>Element  " << i + 1 << ": " << this->theElementImages[i].ToString() << " = "
-  //  << this->theElementImages[i].ToString(& tempFormat);
-  //}
-  //stOutput << "<hr>";
+  //{   //}
 }
 
 template <typename somegroup, typename coefficient>
@@ -291,12 +286,9 @@ bool Matrix<Element>::GetEigenspacesProvidedAllAreIntegralWithEigenValueSmallerT
   Matrix<Rational> tempMat;
   for (int ii = 0; ii < upperLimitComputations; ii ++) {
     int i = ((ii + 1) / 2) * (2 * (ii % 2) - 1); // 0, 1, - 1, 2, - 2, 3, - 3,...
-    //    stOutput << "checking " << i << " found " << found << "\n";
     theEigenValueCandidate[0] = i;
     if (theMinPoly.Evaluate(theEigenValueCandidate) == 0) {
       tempMat = *this;
-      //      stOutput << "<hr>The min poly is: " << theMinPoly.ToString() << " and evaluates at "
-      //      << theEigenValueCandidate << " to " << theMinPoly.Evaluate(theEigenValueCandidate).ToString();
       output.SetSize(output.size + 1);
       tempMat.GetEigenspaceModifyMe(theEigenValueCandidate[0], *output.LastObject());
       if (output.LastObject()->size == 0) {
@@ -350,17 +342,17 @@ void WeylGroupData::ComputeIrreducibleRepresentationsWithFormulasImplementation(
     for (int i = 0; i < phi.generatorImages.size - 1; i ++) {
       phi.generatorImages.LastObject()->k.ToggleBit(i);
     }
-    stOutput << "Generator commutation relations of groups\n";
-    stOutput << HOG.theGroup->PrettyPrintGeneratorCommutationRelations();
+    logWorker << "Generator commutation relations of groups\n";
+    logWorker << HOG.theGroup->PrettyPrintGeneratorCommutationRelations();
     FiniteGroup<ElementHyperoctahedralGroupR2> phiG;
     phiG.generators = phi.generatorImages;
-    stOutput << phiG.PrettyPrintGeneratorCommutationRelations();
-    stOutput << G.PrettyPrintGeneratorCommutationRelations();
-    stOutput << "pulling back irreps:\n";
+    logWorker << phiG.PrettyPrintGeneratorCommutationRelations();
+    logWorker << G.PrettyPrintGeneratorCommutationRelations();
+    logWorker << "pulling back irreps:\n";
     for (int i = 0; i < HOG.theGroup->irreps.size; i ++) {
       auto irrep = phi.PullbackRepresentation(HOG.theGroup->irreps[i]);
       irrep.ComputeCharacter();
-      stOutput << HOG.theGroup->irreps[i].theCharacteR << "->" << irrep.theCharacteR << '\n';
+      logWorker << HOG.theGroup->irreps[i].theCharacteR << "->" << irrep.theCharacteR << '\n';
       G.AddIrreducibleRepresentation(irrep);
     }
   } else if ((letters.size == 1) && (letters[0] == 'D')) {
@@ -382,16 +374,16 @@ void WeylGroupData::ComputeIrreducibleRepresentationsWithFormulasImplementation(
 
     FiniteGroup<ElementHyperoctahedralGroupR2> imG;
     imG.generators = inclusionMap.generatorImages;
-    stOutput << HOG.theGroup->PrettyPrintGeneratorCommutationRelations() << '\n';
-    stOutput << imG.PrettyPrintGeneratorCommutationRelations();
-    stOutput << G.PrettyPrintGeneratorCommutationRelations() << '\n';
+    logWorker << HOG.theGroup->PrettyPrintGeneratorCommutationRelations() << '\n';
+    logWorker << imG.PrettyPrintGeneratorCommutationRelations();
+    logWorker << G.PrettyPrintGeneratorCommutationRelations() << '\n';
   }
   // silently fail instead of crashing to support calling into this and if it doesn't
   // work then using brute force
   //  else
   //    crash << "ComputeIrreducibleRepresentationsUsingSpechtModules: Type "
   // << this->theDynkinType << " is unsupported.  If you think it should work, edit " << __FILE__ << ":" << __LINE__ << crash;
-  stOutput << G.PrettyPrintCharacterTable() << '\n';
+  logWorker << G.PrettyPrintCharacterTable() << '\n';
 }
 
 template <class coefficient>
@@ -446,7 +438,6 @@ bool CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(
     }
   }
   if (!isGood && input.children.size == 3) {
-    //stOutput << "here be i";
     Matrix<Rational> theHWsMatForm;
     if (theCommands.GetMatrix(input[2], theHWsMatForm, nullptr, theSSalgebra->GetRank())) {
       theHWsMatForm.GetVectorsFromRows(theHWs);
@@ -1475,9 +1466,7 @@ bool KostkaNumber::Compute(HashedList<KostkaNumber>* KNcache, std::stringstream*
   }
   theSel.rank = *this->tuple.LastObject();
   this->value = 0;
-//  stOutput << "<br>Selection before start: " << theSel.ToStringFull();
   while (theSel.IncrementReturnFalseIfPastLast()) {
-    //stOutput << "<br>current selection: " << theSel.ToStringFull();
     KostkaNumber ancestor;
     ancestor.partition = this->partition;
     ancestor.tuple = this->tuple;
@@ -2442,10 +2431,8 @@ bool Calculator::innerGenerateMultiplicativelyClosedSet(Calculator& theCommands,
       reportStream << "<br>Evaluating: " << theProduct.ToString();
       theReport.Report(reportStream.str());
       theCommands.EvaluateExpression(theCommands, theProduct, evaluatedProduct);
-      //stOutput << " to get " << evaluatedProduct.ToString() << "->" << evaluatedProduct.ToStringFull();
-      //stOutput << " with hash " << evaluatedProduct.HashFunction();
       //if (evaluatedProduct == theSet[0])
-      //{ //stOutput << " and equals the first element. ";
+      //{
       //}
       theSet.AddOnTopNoRepetition(evaluatedProduct);
       if (theSet.size >upperLimit) {

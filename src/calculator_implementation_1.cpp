@@ -1033,8 +1033,6 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner) {
   owner.flagHasGraphics = true;
   std::stringstream outContent, outScript;
   this->ComputeCanvasNameIfNecessary();
-  //stOutput << "DEBUG: width: " << this->DesiredHtmlWidthInPixels
-  //<< " height: " << this->DesiredHtmlHeightInPixels;
   if (!owner.flagPlotShowJavascriptOnly) {
     outContent << "<canvas width =\"" << this->DesiredHtmlWidthInPixels
     << "\" height =\"" << this->DesiredHtmlHeightInPixels << "\" "
@@ -1447,7 +1445,6 @@ std::string PlotObject::GetJavascriptPoints(
   MacroRegisterFunctionWithName("PlotSurfaceIn3d::GetJavascriptPoints");
   (void) (canvasName);
   (void) funCounter;
-  //stOutput << "<hr>DEBUG: Plotting points from: " << this->thePointsJS << "<hr>";
   std::stringstream fnInstStream;
   fnInstStream << "drawPoints([";
   for (int i = 0; i < this->thePointsJS.NumRows; i ++) {
@@ -1640,7 +1637,6 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner) {
     //outScript << "theCanvas.drawText([1,-0.2],'1','black');\n";
     outScript << "theCanvas.drawCoordinateAxes();\n";
   }
-  //stOutput << "DEBUG: this->priorityViewRectangle =" << this->priorityViewRectangle;
   if (this->priorityViewRectangle > 0) {
     outScript << "theCanvas.setViewWindow("
     << "[" << this->theLowerBoundAxes * 1.10 << ", " << this->lowBoundY * 1.10 << "]"
@@ -2066,21 +2062,14 @@ coefficient ElementUniversalEnveloping<coefficient>::GetKillingFormProduct(
   SemisimpleLieAlgebra* theOwner;
   theOwner = &this->GetOwner();
   MonomialUniversalEnveloping<coefficient> baseGen;
-  stOutput << "<hr>";
   for (int i = 0; i < theOwner->GetNumGenerators(); i ++) {
     baseGen.MakeGenerator(i, *theOwner);
     adadAppliedToMon.MakeZero(*theOwner);
     adadAppliedToMon.AddMonomial(baseGen, 1);
     right.AdjointRepresentationAction(adadAppliedToMon, tempElt);
     tempElt.Simplify();
-    stOutput << "<br>acting by " << right.ToString() << " on " << adadAppliedToMon.ToString()
-    << " to get " << tempElt.ToString();
     this->AdjointRepresentationAction(tempElt, adadAppliedToMon);
     adadAppliedToMon.Simplify();
-    stOutput << " acting by " << this->ToString() << " on " << tempElt.ToString() << " to get "
-    << adadAppliedToMon.ToString();
-    stOutput << "; coeff of " << baseGen.ToString() << " = "
-    << adadAppliedToMon.GetMonomialCoefficient(baseGen).ToString();
     result += adadAppliedToMon.GetMonomialCoefficient(baseGen);
   }
   return result;

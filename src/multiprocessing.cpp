@@ -673,7 +673,7 @@ void logger::reset() {
   this->flagStopWritingToFile = false;
   this->MaxLogSize = //10000
   50000000;
-  if (theGlobalVariables.flagRunningApache || this->theFileName == "") {
+  if (this->theFileName == "") {
     this->flagStopWritingToFile = true;
     return;
   }
@@ -1007,9 +1007,6 @@ logger& logger::operator<<(const std::string& input) {
 }
 
 logger& logger::operator<<(const loggerSpecialSymbols& input) {
-  if (theGlobalVariables.flagRunningApache) {
-    return *this;
-  }
   this->initializeIfNeeded();
   this->CheckLogSize();
   bool doUseColors = theGlobalVariables.flagRunningBuiltInWebServer || theGlobalVariables.flagRunningCommandLine;

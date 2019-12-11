@@ -32,7 +32,7 @@ bool MonomialP::SubstitutioN(const List<Polynomial<coefficient> >& TheSubstituti
           output *= tempMon;
           continue;
         }
-        stOutput << "This may or may not be a programming error. "
+        theGlobalVariables.Comments << "This may or may not be a programming error. "
         << "I cannot carry out a substitution in a monomial that has exponent "
         << "which is not a small integer: it is " << this->monBody[i]
         << " instead. " << Crasher::GetStackTraceEtcErrorMessageHTML();
@@ -105,7 +105,6 @@ void Polynomial<coefficient>::MakeDeterminantFromSquareMatrix(const Matrix<Polyn
   permutation thePerm;
   thePerm.initPermutation(theMat.NumRows);
   int numCycles = thePerm.GetNumPermutations();
-  //stOutput << "<hr>" << numCycles << " total cycles";
   List<int> permutationIndices;
   thePerm.GetPermutationLthElementIsTheImageofLthIndex(permutationIndices);
   Polynomial<coefficient> result, theMonomial;
@@ -860,8 +859,6 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionStringHtml() {
   //List<std::string> basisColorStyles;
   //basisColorStyles.SetSize(this->theBasiS.size);
   this->allMonomials.QuickSortDescending(this->thePolynomialOrder.theMonOrder);
-  //  stOutput << "<hr>The monomials in play ordered: " << totalMonCollection.ToString(theFormat);
-  //  int numVars = this->GetNumVars();
   out << this->ToStringLetterOrder(false);
   out << "<br>";
   out << theRemainders.size << " division steps total.<br>";
@@ -875,8 +872,8 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionStringHtml() {
   << this->allMonomials.size + 1 << "\"><b>Quotient(s) </b></td>"
   << "</tr>";
   for (int i = 0; i < this->theBasiS.size; i ++) {
-    //if (i == this->theBasiS.size- 1)
-//    else
+    //if (i == this->theBasiS.size - 1)
+    //    else
     out << "<tr>";
     out << "<td style =\"border-right:1px solid black; border-bottom: 1px solid gray;\">";
     if (this->theFormat.flagUseLatex) {

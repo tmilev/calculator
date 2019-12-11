@@ -321,7 +321,6 @@ void MeshTriangles::ComputeImplicitPlot() {
   }
   // this->theCurve.colorRGB=HtmlRoutines::RedGreenBlue(255,0,0);
   this->thePlot.thePlots.AddListOnTop(this->theCurve.thePlots);
-  // stOutput << "ze lines: " << this->theCurve.theLines;
 }
 
 bool Calculator::GetMatrixDoubles(const Expression& input, Matrix<double>& output, int DesiredNumcols) {

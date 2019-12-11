@@ -112,7 +112,6 @@ Rational ModuleSSalgebra<coefficient>::hwtaabfSimpleGensOnly(
   Pair<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, MonomialTensor<int, MathRoutines::IntUnsignIdentity> > thePair;
   thePair.Object1 = *left;
   thePair.Object2 = *right;
-  //stOutput << "<br>Computing " << thePair.Object1 << " times " << thePair.Object2 << "<br>";
   this->ApplyTAA(thePair.Object1);
   Rational result = this->hwTrace(thePair, theProgressReport);
   if (theProgressReport != nullptr) {
@@ -910,7 +909,7 @@ void ModuleSSalgebra<coefficient>::CheckConsistency() {
     left = this->GetActionGeneratorIndeX(i);
     right.LieBracketOnTheLeft(left);
   }
-  stOutput << "Consistency check passed successfully!";
+  theGlobalVariables.Comments << "Consistency check passed successfully!";
 }
 
 template <class coefficient>
@@ -1025,8 +1024,6 @@ void ModuleSSalgebra<coefficient>::GetAdActionHomogenousElT(
     outputCurrentList.SetSize(currentWordList.size);
     Vector<Rational>& currentWeight = this->theModuleWeightsSimpleCoords[i];
     targetWeight = currentWeight + weightUEEltSimpleCoords;
-    //stOutput << "<br>target weight: " << targetWeight.ToString() << "="
-    //<< currentWeight.ToString() << "+" << inputWeight.ToString();
     int theIndex = this->theModuleWeightsSimpleCoords.GetIndex(targetWeight);
     for (int j = 0; j < currentWordList.size; j ++) {
       std::stringstream progressStream;
@@ -1090,7 +1087,7 @@ bool ElementTensorsGeneralizedVermas<coefficient>::MultiplyOnTheLeft(
   for (int i = 0; i < theUE.size(); i ++) {
     if (!this->MultiplyOnTheLeft(theUE[i], buffer, ownerAlgebra, theRingUnit)) {
       ElementSumGeneralizedVermas<coefficient> tempOutput;
-      stOutput << "<hr>emergency mode!";
+      theGlobalVariables.Comments << "<hr>emergency mode!";
       for (int j = 0; j < this->size(); j ++) {
         const MonomialTensorGeneralizedVermas<coefficient>& currentMon = (*this)[j];
         if (currentMon.theMons.size != 1) {
@@ -1178,8 +1175,6 @@ void ElementTensorsGeneralizedVermas<coefficient>::MultiplyByElementLieAlg(
   ElementSumGeneralizedVermas<coefficient> tempElt;
   ElementUniversalEnveloping<coefficient> theGenerator;
   theGenerator.MakeOneGenerator(indexGenerator, ownerAlgebra, theRingUnit);
-  //FormatExpressions tempFormat;
-  //tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
   coefficient currentCoeff;
   for (int i = 0; i < this->size(); i ++) {
     const MonomialTensorGeneralizedVermas<coefficient>& currentMon = (*this)[i];
@@ -1187,13 +1182,10 @@ void ElementTensorsGeneralizedVermas<coefficient>::MultiplyByElementLieAlg(
     for (int j = 0; j < currentMon.theMons.size; j ++) {
       tempElt.MakeZero();
       tempElt.AddMonomial(currentMon.theMons[j], theRingUnit);
-      //stOutput << "<hr> Acting by " << theGenerator.ToString() << " on " << tempElt.ToString() << "<br>";
       tempElt.MultiplyMeByUEEltOnTheLeft(theGenerator);
       for (int k = 0; k < tempElt.size(); k ++) {
         currentCoeff = this->theCoeffs[i];
-        //stOutput << "<br>coeff: " << currentCoeff.ToString() << " times " << tempElt.theCoeffs[k].ToString() << " equals ";
         currentCoeff *= tempElt.theCoeffs[k];
-        //stOutput << currentCoeff.ToString();
         monActedOn = accumMon;
         monActedOn *= tempElt[k];
         for (int l = j + 1; l < currentMon.theMons.size; l ++) {
@@ -1201,7 +1193,7 @@ void ElementTensorsGeneralizedVermas<coefficient>::MultiplyByElementLieAlg(
         }
         output.AddMonomial(monActedOn, currentCoeff);
       }
-      accumMon*= currentMon.theMons[j];
+      accumMon *= currentMon.theMons[j];
     }
   }
 }
@@ -1287,7 +1279,7 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
   out << "<br>Computed generator actions (" << this->ComputedGeneratorActions.CardinalitySelection << " out of "
   << this->actionsGeneratorsMaT.size << " computed actions) follow. "
   << "Note that generator actions are computed on demand, only the simple "
-  << " Chevalley generators are computed by default. ";
+  << "Chevalley generators are computed by default. ";
   out << "<table><tr><td>Generator </td><td>Action</td></tr>";
   ElementSemisimpleLieAlgebra<Rational> tempSSElt;
   for (int i = 0; i < this->actionsGeneratorsMaT.size; i ++) {
@@ -1299,7 +1291,6 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
       if (this->GetDim() < 28) {
         Matrix<coefficient> outputMat;
         this->actionsGeneratorsMaT[i].GetMatrix(outputMat, this->GetDim());
-        //stOutput << outputMat.ToString(&latexFormat);
         out << HtmlRoutines::GetMathMouseHover(outputMat.ToString(&latexFormat), 5000) << " = ";
         out << this->actionsGeneratorsMaT[i].ToString();
       } else {

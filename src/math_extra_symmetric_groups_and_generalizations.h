@@ -868,9 +868,6 @@ public:
     }
     this->Initialize(ll);
   }
-
-  // get current element, using bizarre cxx syntax because why not
-  // apparently you can't return a reference from a const method?
   List<int>& operator*() {
     return l;
   }
@@ -878,24 +875,24 @@ public:
     return done_iterating;
   }
   void varsout() const {
-    stOutput << "stack: [";
+    theGlobalVariables.Comments << "stack: [";
     for (int i = 0; i < stack.size; i ++) {
-      stOutput << "(";
+      theGlobalVariables.Comments << "(";
       if (i == frame_pointer) {
-        stOutput << "(";
+        theGlobalVariables.Comments << "(";
       }
-      stOutput << "pc =" << stack[i].program_counter;
-      stOutput << ",li =" << stack[i].loop_i;
-      stOutput << ",c =" << stack[i].c;
+      theGlobalVariables.Comments << "pc =" << stack[i].program_counter;
+      theGlobalVariables.Comments << ",li =" << stack[i].loop_i;
+      theGlobalVariables.Comments << ",c =" << stack[i].c;
       if (i == frame_pointer) {
-        stOutput << ")";
+        theGlobalVariables.Comments << ")";
       }
-      stOutput << ")";
+      theGlobalVariables.Comments << ")";
       if (i != stack.size - 1) {
-        stOutput << ", ";
+        theGlobalVariables.Comments << ", ";
       }
     }
-    stOutput << "] l =" << l.ToStringCommaDelimited() << "\n";
+    theGlobalVariables.Comments << "] l =" << l.ToStringCommaDelimited() << "\n";
   }
 };
 
@@ -1368,8 +1365,6 @@ void Partition::SpechtModuleMatrixOfPermutation(List<Matrix<scalar> >& out, cons
 
 template <typename scalar>
 void Partition::SpechtModuleMatricesOfPermutations(List<Matrix<scalar> >& out, const List<PermutationR2>& perms) const {
-  //stOutput << "Debugging Partition::SpechtModuleMatricesOfPermutations: " << *this;
-  //stOutput << " with permutations " << perms.ToStringCommaDelimited() << '\n';
   Tableau initialTableau;
   List<int> stuffing;
   stuffing.SetSize(this->n);
@@ -1387,7 +1382,6 @@ void Partition::SpechtModuleMatricesOfPermutations(List<Matrix<scalar> >& out, c
   ElementMonomialAlgebra<MonomialTensor<int,MathRoutines::IntUnsignIdentity>,scalar> t1, t2;
   t1.AddMonomial(tm1,1);
   initialTableau.YoungSymmetrizerAction(t2, t1);
-  //stOutput << "Young symmetrizer: " << t1 << " projects to " << t2 << '\n';
   List<ElementMonomialAlgebra<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, scalar> > basisvs;
   SparseSubspaceBasis<
     ElementMonomialAlgebra<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, scalar>,
@@ -1395,7 +1389,6 @@ void Partition::SpechtModuleMatricesOfPermutations(List<Matrix<scalar> >& out, c
   > basis;
   List<Tableau> standardTableaux;
   this->GetAllStandardTableaux(standardTableaux);
-  //stOutput << "Standard tableaux are " << standardTableaux.ToStringCommaDelimited() << '\n';
   basisvs.SetSize(standardTableaux.size);
   for (int i = 0; i <standardTableaux.size; i ++) {
     PermutationR2 p;
@@ -1411,7 +1404,7 @@ void Partition::SpechtModuleMatricesOfPermutations(List<Matrix<scalar> >& out, c
       perms[permi].ActOnTensor(sparse,basisvs[bi]);
       Vector<scalar> dense;
       basis.DenseVectorInBasis(dense, sparse);
-      // AssignColumnFromVector?  oh well.
+      // AssignColumnFromVector ?  oh well.
       for (int j = 0; j< basis.rank; j ++) {
         out[permi].elements[j][bi] = dense[j];
       }
@@ -1578,7 +1571,7 @@ void FiniteGroup<elementSomeGroup>::ComputeCCSizesRepresentativesWords() {
     return;
   }
   if (this->AreConjugateByFormula != 0) {
-    stOutput << "This needs a rewrite";
+    theGlobalVariables.Comments << "This needs a rewrite";
   }
   if (!this->flagWordsComputed || !this->flagAllElementsAreComputed) {
     this->ComputeAllElements(true, - 1);
@@ -1641,17 +1634,17 @@ void FiniteGroup<elementSomeGroup>::ComputeGeneratorCommutationRelations() {
         gi = gi * g;
         cr ++;
         if (cr > 1009) {
-          stOutput << "Error: in computing commutation relations, generator";
+          theGlobalVariables.Comments << "Error: in computing commutation relations, generator";
           if (i == j) {
-            stOutput << " " << i << " is found to have gₙ";
+            theGlobalVariables.Comments << " " << i << " is found to have g_n";
           } else {
-            stOutput << "s " << i << "," << j << " are found to have (gₘgₙ)";
+            theGlobalVariables.Comments << "s " << i << "," << j << " are found to have (g_m g_n)";
           }
-          stOutput << "ᵗ≠e for all t<1009. "
-          << "This usually happens if the specified things don't generate a group, "
+          theGlobalVariables.Comments << "^t does not equal e for all t < 1009. "
+          << "This usually happens if the specified expressions don't generate a group, "
           << "let alone a finite group, but, if this was intentional, "
           << "lift the limit near " << __FILE__ << ":" << __LINE__ << "\n";
-          stOutput << "I am recording the exponent as 1009 as an unexpected value\n";
+          theGlobalVariables.Comments << "I am recording the exponent as 1009 as an unexpected value\n";
           cr = 1009;
           break;
         }
@@ -1713,7 +1706,7 @@ std::string FiniteGroup<elementSomeGroup>::PrettyPrintGeneratorCommutationRelati
   }
   std::string outs = out.str();
   if (andPrint) {
-    stOutput << outs << '\n';
+    theGlobalVariables.Comments << outs << '\n';
   }
   return outs;
 }
@@ -1802,7 +1795,7 @@ std::string FiniteGroup<elementSomeGroup>::PrettyPrintCharacterTable(bool andPri
   }
   std::string outs = out.str();
   if (andPrint) {
-    stOutput << outs << '\n';
+    theGlobalVariables.Comments << outs << '\n';
   }
   return outs;
 }
@@ -1856,7 +1849,7 @@ std::string FiniteGroup<elementSomeGroup>::PrettyPrintCCRepsSizes(bool andPrint)
 
   std::string outs = out.str();
   if (andPrint) {
-    stOutput << outs << '\n';
+    theGlobalVariables.Comments << outs << '\n';
   }
   return outs;
 }
@@ -1877,26 +1870,26 @@ void FiniteGroup<elementSomeGroup>::VerifyCCSizesAndRepresentativesFormula() {
   GG.generators = this->generators;
   //GG.AreConjugateByFormula = this->AreConjugateByFormula;
   GG.ComputeCCSizesAndRepresentatives();
-  stOutput << "Conjugacy class sizes by formula: ";
+  theGlobalVariables.Comments << "Conjugacy class sizes by formula: ";
   for (int i = 0; i < this->conjugacyClasseS.size; i ++) {
-    stOutput << this->conjugacyClasseS[i].size << ", ";
+    theGlobalVariables.Comments << this->conjugacyClasseS[i].size << ", ";
   }
-  stOutput << '\n';
+  theGlobalVariables.Comments << '\n';
   for (int i = 0; i < this->conjugacyClasseS.size; i ++) {
-    stOutput << this->conjugacyClasseS[i].representative;
-    stOutput << '\n';
+    theGlobalVariables.Comments << this->conjugacyClasseS[i].representative;
+    theGlobalVariables.Comments << '\n';
   }
-  stOutput << "Conjugacy class sizes by brute force: ";
+  theGlobalVariables.Comments << "Conjugacy class sizes by brute force: ";
   for (int i = 0; i < GG.conjugacyClasseS.size; i ++) {
-    stOutput << GG.conjugacyClasseS[i].size << ", ";
+    theGlobalVariables.Comments << GG.conjugacyClasseS[i].size << ", ";
   }
-  stOutput << '\n';
+  theGlobalVariables.Comments << '\n';
   for (int i = 0; i < GG.conjugacyClasseS.size; i ++) {
-    stOutput << GG.conjugacyClasseS[i].representative << "\n";
+    theGlobalVariables.Comments << GG.conjugacyClasseS[i].representative << "\n";
   }
-  stOutput << '\n';
+  theGlobalVariables.Comments << '\n';
   if (GG.conjugacyClasseS.size != this->conjugacyClasseS.size) {
-    stOutput << "Error: wrong number of conjugacy classes, "
+    theGlobalVariables.Comments << "Error: wrong number of conjugacy classes, "
     << this->conjugacyClasseS.size << " should be " << GG.conjugacyClasseS.size << '\n';
   }
   List<int> classes_found;
@@ -1918,14 +1911,14 @@ void FiniteGroup<elementSomeGroup>::VerifyCCSizesAndRepresentativesFormula() {
         }
       }
     }
-    stOutput << "class " << i << " representative "
+    theGlobalVariables.Comments << "class " << i << " representative "
     << this->conjugacyClasseS[i].representative << " belongs to cc "
     << gcc << " with representative " << GG.conjugacyClasseS[gcc].representative << '\n';
     if (classes_found.BSInsertDontDup(gcc) == - 1) {
-      stOutput << "error\n";
+      theGlobalVariables.Comments << "error\n";
     }
   }
-  stOutput << "classes found are " << classes_found.ToStringCommaDelimited() << '\n';
+  theGlobalVariables.Comments << "classes found are " << classes_found.ToStringCommaDelimited() << '\n';
 }
 
 template <typename elementSomeGroup>
@@ -1942,7 +1935,7 @@ void FiniteGroup<elementSomeGroup>::VerifyWords() {
       g = g * this->generators[word[j]];
     }
     if (!(g == this->theElements[i])) {
-      stOutput << this->theElements[i] << " has word " << word.ToStringCommaDelimited()
+      theGlobalVariables.Comments << this->theElements[i] << " has word " << word.ToStringCommaDelimited()
       << " which corresponds to " << g << "\n";
     }
   }
@@ -2078,12 +2071,12 @@ bool GroupRepresentation<someGroup, coefficient>::VerifyRepresentation() {
           Mi *= M1;
         }
         if (!Mi.IsIdMatrix()) {
-          stOutput << "generators " << i << ", " << j << " i.e. elements ";
-          stOutput << this->ownerGroup->generators[i] << ", " << this->ownerGroup->generators[j];
-          stOutput << " are assigned matrices which fail to have commutation relations ";
-          stOutput << this->ownerGroup->generatorCommutationRelations(i, j) << "\n";
-          stOutput << this->generatorS[i].ToStringPlainText() << ",\n";
-          stOutput << this->generatorS[j].ToStringPlainText() << "\n\n";
+          theGlobalVariables.Comments << "generators " << i << ", " << j << " i.e. elements ";
+          theGlobalVariables.Comments << this->ownerGroup->generators[i] << ", " << this->ownerGroup->generators[j];
+          theGlobalVariables.Comments << " are assigned matrices which fail to have commutation relations ";
+          theGlobalVariables.Comments << this->ownerGroup->generatorCommutationRelations(i, j) << "\n";
+          theGlobalVariables.Comments << this->generatorS[i].ToStringPlainText() << ",\n";
+          theGlobalVariables.Comments << this->generatorS[j].ToStringPlainText() << "\n\n";
           badrep = true;
         }
       }
@@ -2095,14 +2088,14 @@ bool GroupRepresentation<someGroup, coefficient>::VerifyRepresentation() {
     LargeInteger GS = this->ownerGroup->GetSize();
     LargeInteger RGS = RG.GetSize();
     if ((GS % RGS) != 0) {
-      stOutput << "Violation of Lagrange's theorem (" << RGS << "∤" << GS << ")\n";
+      theGlobalVariables.Comments << "Violation of Lagrange's theorem (" << RGS << "∤" << GS << ")\n";
     }
-    stOutput << "Group and \"representation\" generator commutation relations follow" << "\n";
-    stOutput << this->ownerGroup->PrettyPrintGeneratorCommutationRelations() << "\n";
-    stOutput << RG.PrettyPrintGeneratorCommutationRelations() << "\n";
+    theGlobalVariables.Comments << "Group and \"representation\" generator commutation relations follow" << "\n";
+    theGlobalVariables.Comments << this->ownerGroup->PrettyPrintGeneratorCommutationRelations() << "\n";
+    theGlobalVariables.Comments << RG.PrettyPrintGeneratorCommutationRelations() << "\n";
   }
   if (!badrep) {
-    stOutput << "VerifyRepresentation: this has the proper commutation relations\n";
+    theGlobalVariables.Comments << "VerifyRepresentation: this has the proper commutation relations\n";
   }
   return !badrep;
 }

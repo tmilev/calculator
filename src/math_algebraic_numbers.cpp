@@ -151,7 +151,7 @@ bool AlgebraicClosureRationals::MergeRadicals(const List<LargeInteger>& theRadic
   }
   radicalsNew.QuickSortAscending();
   if (radicalsNew.size > 16) {
-    stOutput << "Computing with fields whose dimension over the "
+    theGlobalVariables.Comments << "Computing with fields whose dimension over the "
     << "rationals is greater than 2^16 is not allowed. "
     << "Such computations are too large for the current "
     << "implementation of algberaic extensions of the rationals. "
@@ -331,7 +331,7 @@ void AlgebraicClosureRationals::GetAdditionTo(const AlgebraicNumber& input, Vect
     return;
   }
   if (input.basisIndex < 0 || input.basisIndex >= this->theBasesAdditive.size) {
-    stOutput << "This is a programming error: element has basis index " << input.basisIndex << ". "
+    theGlobalVariables.Comments << "This is a programming error: element has basis index " << input.basisIndex << ". "
     << Crasher::GetStackTraceEtcErrorMessageHTML();
   }
   if (input.basisIndex == this->theBasesAdditive.size - 1) {
@@ -633,7 +633,7 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(const Polynomial<AlgebraicNumb
   int degreeMinPoly = minPoly.TotalDegreeInt();
   int startingDim = this->theBasisMultiplicative.size;
   if (degreeMinPoly * startingDim > 10000 || startingDim > 10000 || degreeMinPoly > 10000) {
-    stOutput << "<hr>Adjoining root of minimial polynomial failed: "
+    theGlobalVariables.Comments << "<hr>Adjoining root of minimial polynomial failed: "
     << "the current field extension dimension over the rationals is "
     << startingDim << ", the degree of the minimial polynomial is " << degreeMinPoly
     << ", yielding expected final dimension "
@@ -844,7 +844,7 @@ bool AlgebraicNumber::CheckConsistency() const {
   if (this->owner == nullptr) {
     if (!this->IsRational()) {
       for (int i = 0; i < this->theElT.size(); i ++) {
-        stOutput << "<br>index: " << this->theElT[i].theIndex << ", coefficient: "
+        theGlobalVariables.Comments << "<br>index: " << this->theElT[i].theIndex << ", coefficient: "
         << this->theElT.theCoeffs[i];
       }
       crash << "Detected non-rational algebraic number with zero owner. " << crash;

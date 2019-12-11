@@ -106,23 +106,23 @@ void AnotherWeylGroup<scalar, templateVector>::MakeArbitrarySimple(char letter, 
 
 template <typename scalar, typename templateVector>
 void AnotherWeylGroup<scalar, templateVector>::SimpleReflection(int i, templateVector& v) const {
-  // next i'll put some printfs in addition
-  //stOutput << "Debugging simple reflections: templateVector " << v << " transformed by reflection " << i;
   scalar x = 0;
-  for (int j = 0; j < this->rank; j ++)
+  for (int j = 0; j < this->rank; j ++) {
     x += this->unrationalCartanSymmetric.elements[i][j] * v[j];
+  }
   // so, under ordinary circumstances, this is just out[i] -= x;
-  // silent corruption occurs if UnrationalCartanSymmetric.elements[i][i] !∈ {1,2}
+  // silent corruption occurs if UnrationalCartanSymmetric.elements[i][i] does not belong to {1, 2}
   // and scalar can't deal with division properly
-  // fortunately this only happens in G₂
+  // fortunately this only happens in G_2
   v[i] -= x * 2 / unrationalCartanSymmetric.elements[i][i];
-  //stOutput << " becomes " << v << "\n";
 }
 
 template <typename scalar, typename templateVector>
-void AnotherWeylGroup<scalar, templateVector>::SimpleReflection(int i, const templateVector& v, templateVector& out) const {
+void AnotherWeylGroup<scalar, templateVector>::SimpleReflection(
+  int i, const templateVector& v, templateVector& out
+) const {
   out = v;
-  this->SimpleReflection(i,out);
+  this->SimpleReflection(i, out);
 }
 
 template <typename scalar, typename templateVector>
@@ -218,12 +218,12 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeRho() {
       }
     }
   }
-  stOutput << "symmetric Cartan matrix is" << "\n";
+  theGlobalVariables.Comments << "symmetric Cartan matrix is" << "\n";
   for (int i = 0; i < unrationalCartanSymmetric.NumRows; i ++) {
     for (int j = 0; j < unrationalCartanSymmetric.NumCols; j ++) {
-      stOutput << unrationalCartanSymmetric.elements[i][j] << '\t';
+      theGlobalVariables.Comments << unrationalCartanSymmetric.elements[i][j] << '\t';
     }
-    stOutput << '\n';
+    theGlobalVariables.Comments << '\n';
   }
   this->rank = this->unrationalCartanSymmetric.NumRows;
   for (int rvi = 0; rvi < rank; rvi ++) {
@@ -248,8 +248,8 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeRho() {
       }
     }
   }
-  stOutput << "root system is" << "\n";
-  stOutput << this->RootSystem << "\n";
+  theGlobalVariables.Comments << "root system is" << "\n";
+  theGlobalVariables.Comments << this->RootSystem << "\n";
   this->RootSystem.QuickSortAscending();
   this->twiceRho.MakeZero(rank);
   for (int i = 0; i < this->RootSystem.size; i ++) {
@@ -268,16 +268,16 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeRho() {
   for (int i = 0; i < this->twiceRho.size; i ++) {
     this->rho[i] = this->twiceRho[i] / 2;
   }
-  stOutput << "half sum of positive roots is " << this->rho << "\n";
+  theGlobalVariables.Comments << "half sum of positive roots is " << this->rho << "\n";
 }
 
 template <typename scalar, typename templateVector>
 void AnotherWeylGroup<scalar, templateVector>::ComputeAllElements() {
-  stOutput << "Getting elements...";
+  theGlobalVariables.Comments << "Getting elements...";
   if (this->RootSystem.size == 0) {
     this->ComputeRho();
   }
-  stOutput << "(twiceRho is " << this->twiceRho << ")" << "\n";
+  theGlobalVariables.Comments << "(twiceRho is " << this->twiceRho << ")" << "\n";
   templateVector w;
   List<int> newelts;
   this->rhoOrbit.AddOnTop(twiceRho);
@@ -294,13 +294,12 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeAllElements() {
     }
   }
   this->sizePrivate = this->rhoOrbit.size;
-  stOutput << this->size() << "\n";
-//  stOutput << rhoOrbit << "\n";
+  theGlobalVariables.Comments << this->size() << "\n";
 }
 
 template <typename scalar, typename templateVector>
 void AnotherWeylGroup<scalar, templateVector>::ComputeCC() {
-  stOutput << "Getting conjugacy classes...";
+  theGlobalVariables.Comments << "Getting conjugacy classes...";
   if (this->rhoOrbit.size == 0) {
     this->ComputeAllElements();
   }
@@ -312,7 +311,7 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeCC() {
   theStack.SetExpectedSize(this->size());
   int theRank = this->GetRank();
   templateVector theRhoImage;
-  stOutput << "number of conjugacy classes... ";
+  theGlobalVariables.Comments << "number of conjugacy classes... ";
   for (int i = 0; i < this->size(); i ++) {
     if (!Accounted[i]) {
       theStack.Clear();
@@ -329,11 +328,11 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeCC() {
         }
       this->conjugacyClasses.AddOnTop(theStack);
       this->conjugacyClasses.LastObject()->QuickSortAscending();
-      stOutput << this->ConjugacyClassCount() << " ";
+      theGlobalVariables.Comments << this->ConjugacyClassCount() << " ";
     }
   }
   this->conjugacyClasses.QuickSortAscending();
-  stOutput << this->ConjugacyClassCount() << "\n";
+  theGlobalVariables.Comments << this->ConjugacyClassCount() << "\n";
 }
 
 template<typename scalar, typename templateVector>
@@ -367,7 +366,7 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeClassMatrices() {
     this->ComputeCC();
   }
   for (int i = 0; i < this->ConjugacyClassCount(); i ++) {
-    stOutput << "//getting class matrix " << i << "\n";
+    theGlobalVariables.Comments << "//getting class matrix " << i << "\n";
     this->GetClassMatrix(i);
   }
 }
@@ -476,7 +475,7 @@ List<ClassFunction<somegroup, Rational> > ComputeCharacterTable(somegroup &G) {
   bool foundEmAll = false;
   for (int i = 0; !foundEmAll && i < G.ConjugacyClassCount(); i ++) {
     Matrix<Rational> M;
-    stOutput << "Getting class matrix " << i << "\n";
+    theGlobalVariables.Comments << "Getting class matrix " << i << "\n";
     M = GetClassMatrix(G,i,&classmap);
     List<VectorSpace<Rational> > es = GetEigenspaces(M);
     for (int esi = 0; !foundEmAll && esi < es.size; esi ++) {
@@ -503,7 +502,7 @@ List<ClassFunction<somegroup, Rational> > ComputeCharacterTable(somegroup &G) {
         nchars += 1;
       }
     }
-    stOutput << "Have " << nchars << " chars" << "\n";
+    theGlobalVariables.Comments << "Have " << nchars << " chars" << "\n";
   }
   List<ClassFunction<somegroup, Rational> > chars;
   chars.SetSize(spaces.size);
@@ -519,23 +518,23 @@ List<ClassFunction<somegroup, Rational> > ComputeCharacterTable(somegroup &G) {
     if (chars[i][0] < 0) {
       chars[i] *= - 1;
     }
-    stOutput << x2 << "\n";
+    theGlobalVariables.Comments << x2 << "\n";
   }
 
   chars.QuickSortAscending(/*&CharacterComparator*/);
   for (int i = 0; i < chars.size; i ++) {
     for (int j = i; j < chars.size; j ++) {
       if (chars[i] > chars[j]) {
-        stOutput << "error: " << i << j << "\n";
+        theGlobalVariables.Comments << "error: " << i << j << "\n";
       }
     }
   }
   for (int i = 0; i < chars.size; i ++) {
-    stOutput << chars[i] << "\n";
+    theGlobalVariables.Comments << chars[i] << "\n";
   }
   G.characterTable = chars;
   for (int i = 0; i < G.characterTable.size; i ++) {
-    stOutput << G.characterTable[i] << "\n";
+    theGlobalVariables.Comments << G.characterTable[i] << "\n";
   }
   return chars;
 }
@@ -650,7 +649,7 @@ void ComputeTauSignatures(WeylGroupData* G, List<List<bool> >& tauSignatures, bo
   tss.AddOnTop(tsg);
 
   if (pseudo) {
-    stOutput << "pseudo-parabolics" << "\n";
+    theGlobalVariables.Comments << "pseudo-parabolics" << "\n";
     ElementWeylGroup hr = G->GetRootReflection(G->RootSystem.size- 1);
     sel.init(G->CartanSymmetric.NumCols);
     for (int i = 0; i < numCycles - 1; i ++) {
@@ -678,11 +677,11 @@ void ComputeTauSignatures(WeylGroupData* G, List<List<bool> >& tauSignatures, bo
     }
   }
   for (int i = 0; i < G->theGroup.characterTable.size; i ++) {
-    stOutput << G->theGroup.characterTable[i] << "\n";
+    theGlobalVariables.Comments << G->theGroup.characterTable[i] << "\n";
     for (int j = 0; j < tauSignatures[i].size; j ++) {
-      stOutput << tauSignatures[i][j] << ' ';
+      theGlobalVariables.Comments << tauSignatures[i][j] << ' ';
     }
-    stOutput << "\n";
+    theGlobalVariables.Comments << "\n";
   }
 }
 

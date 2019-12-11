@@ -295,7 +295,7 @@ public:
   void ComputeDeadlinesAllSections(TopicElement& inputOutput);
   void ComputeDeadlinesAllSectionsNoInheritance(TopicElement& inputOutput);
   void ComputeDeadlineModifyButton(TopicElement& inputOutput, bool problemAlreadySolved, bool isProblemGroup);
-  std::string ToStringTopicListJSON();
+  JSData ToStringTopicListJSON();
   std::string ToStringProblemInfo(const std::string& theFileName, const std::string& stringToDisplay = "");
   std::string ToStringLinkFromFileName(const std::string& theFileName);
   std::string ToStringLinkCurrentAdmin(const std::string& displayString, bool setDebugFlag, bool includeRandomSeed);

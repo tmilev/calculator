@@ -77,7 +77,6 @@ void Graph::AddEdge(int i, int j) {
 
 void Graph::AddEdge(int i, int j, const std::string& inputLabel) {
   GraphEdge theEdge(i, j, inputLabel);
-//  stOutput << " adding edge: " << theEdge.ToString();
   this->theEdges.AddMonomial(theEdge, 1);
 }
 

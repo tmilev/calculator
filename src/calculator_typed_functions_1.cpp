@@ -549,7 +549,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(
   }
   static bool theGhostHasAppeared = false;
   if (!theGhostHasAppeared) {
-    stOutput << "Ere I am J.H. ... The ghost in the machine...<br>";
+    theCommands << "Ere I am J.H. ... The ghost in the machine...<br>";
     theGhostHasAppeared = true;
   }
   const ElementTensorsGeneralizedVermas<RationalFunctionOld>& rightEltETGVM =

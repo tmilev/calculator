@@ -5882,7 +5882,6 @@ bool CalculatorFunctionsGeneral::innerPlot2DoverIntervals(Calculator& theCommand
 
 bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlot2D");
-  //stOutput << input.ToString();
   if (input.size() < 4) {
     return output.MakeError(
       "Plotting coordinates takes at least three arguments: function, lower and upper bound. ",
@@ -7289,7 +7288,6 @@ bool CalculatorFunctionsGeneral::innerWriteGenVermaModAsDiffOperatorUpToLevel(
   }
   FormatExpressions theFormat;
   hwContext.ContextGetFormatExpressions(theFormat);
-//  stOutput << "highest weights you are asking me for: " << theHws.ToString(&theFormat);
   return theCommands.innerWriteGenVermaModAsDiffOperatorInner(
     theCommands,
     input,
@@ -8057,7 +8055,6 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
   this->StartsWith(theCommands.opAbsoluteValue(), 2);
 
   if (isKnownFunctionOneArgument) {
-    //stOutput << "GOT TO HJERE!";
     double argumentD;
     if (!(*this)[1].EvaluatesToDoubleUnderSubstitutions(knownEs, valuesKnownEs, &argumentD)) {
       return false;
@@ -8157,17 +8154,6 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
     return true;
   }
   return false;
-}
-
-bool CalculatorFunctionsGeneral::innerTestStandardOutput(Calculator& theCommands, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestStandardOutput");
-  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
-    return theCommands << "Standard output test allowed to logged-in admins only. ";
-  }
-  FormatExpressions tempFormat;
-  tempFormat.flagExpressionIsFinal = true;
-  stOutput << "<b>Standard output test. Input string bounced back on the following line.</b><br>" << input.ToString(&tempFormat);
-  return output.AssignValue(std::string("Standard output tested, verify your input is displayed correctly. "), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerTestTopCommand(
@@ -9345,9 +9331,6 @@ bool CalculatorFunctionsGeneral::innerRandomInteger(
   int generatedRandomInt = rand() % accum;
   int resultRandomValue = theIntervals[0][0];
   bool found = false;
-  //stOutput << "<br>The intervals: " << theIntervals.ToStringCommaDelimited()
-  //<< "<br>The intervals size: " << theIntervals.size
-  //<< "<br>accum: " << accum << " generatedRandomInt: " << generatedRandomInt;
   accum = 0;
   for (int i = 0; i < theIntervals.size; i ++) {
     int currentContribution = theIntervals[i][1] - theIntervals[i][0];

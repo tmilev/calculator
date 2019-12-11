@@ -14,6 +14,8 @@
 #include <unistd.h>
 #include <sys/stat.h>//<-for file statistics
 #include <fcntl.h>//<-setting flags of file descriptors
+#include "math_extra_latex_routines.h"
+#include <sys/resource.h> //<- for setrlimit(...) function. Restricts the time the executable can run.
 
 static ProjectInformationInstance projectInfoInstanceWebServer(__FILE__, "Web server implementation.");
 WebServer theWebServer;
@@ -82,8 +84,6 @@ void SignalsInfrastructure::blockSignals() {
 }
 
 bool WebWorker::CheckConsistency() {
-  auto oldOutputFn = stOutput.theOutputFunction;
-  stOutput.theOutputFunction = nullptr;
   if (this->flagDeallocated) {
     crash << "Use after free of webworker." << crash;
   }
@@ -96,7 +96,6 @@ bool WebWorker::CheckConsistency() {
   if (this->connectionID == - 1) {
     crash << "Connection id is bad. " << crash;
   }
-  stOutput.theOutputFunction = oldOutputFn;
   return true;
 }
 
@@ -278,11 +277,11 @@ bool WebWorker::ReceiveAllHttpSSL() {
     this->messageHead += this->messageBody;
     this->ParseMessageHead();
   }
-  if ( static_cast<signed>(this->messageBody.size()) != this->ContentLength) {
+  if (static_cast<signed>(this->messageBody.size()) != this->ContentLength) {
     std::stringstream out;
     out << "The message-body received by me had length " << this->messageBody.size()
     << " yet I expected a message of length " << this->ContentLength << ". More details follow. "
-    << this->ToStringMessageFullUnsafe();
+    << this->ToStringMessageFull();
     logIO << out.str() << logger::endL;
   }
   return true;
@@ -411,21 +410,32 @@ void *get_in_addr(struct sockaddr* sa) {
   return &((reinterpret_cast<struct sockaddr_in6*>(sa))->sin6_addr);
 }
 
-std::string WebWorker::ToStringMessageShortUnsafe(FormatExpressions* theFormat) const {
+std::string WebWorker::ToStringMessageFull() const {
+  //if (theGlobalVariables.flagUsingSSLinCurrentConnection)
+  //  return "Message cannot be viewed when using SSL";
   std::stringstream out;
-  bool useHtml = theFormat == nullptr ? false: theFormat->flagUseHTML;
-  std::string lineBreak = useHtml ? "<br>\n" : "\r\n";
-  out << lineBreak;
+  out << this->ToStringMessageShort();
+  if (this->theMessageHeaderStrings.size > 0) {
+    out << "<hr>\nStrings extracted from message: ";
+    for (int i = 0; i < this->theMessageHeaderStrings.size; i ++) {
+      out << "<br>" << HtmlRoutines::ConvertStringToHtmlString(this->theMessageHeaderStrings[i], false);
+    }
+  }
+  return out.str();
+}
+
+std::string WebWorker::ToStringMessageShort() const {
+  std::stringstream out;
   if (this->requestTypE == this->requestGet) {
     out << "GET ";
-  }
-  else if (this->requestTypE == this->requestPost) {
+  } else if (this->requestTypE == this->requestPost) {
     out << "POST ";
   } else if (this->requestTypE == this->requestChunked) {
     out << "GET or POST **chunked** " ;
   } else {
     out << "Request type undefined.";
   }
+  std::string lineBreak = "\n<br>";
   out << "<hr>Address get or post:\n"
   << HtmlRoutines::ConvertStringToHtmlString(this->addressGetOrPost, true);
   out << lineBreak << "\nAddress computed:\n"
@@ -444,41 +454,7 @@ std::string WebWorker::ToStringMessageShortUnsafe(FormatExpressions* theFormat) 
   << HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.PhysicalPathServerBase, false);
   out << lineBreak << "\nPhysical address output folder:\n"
   << HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.PhysicalPathHtmlFolder, false);
-  return out.str();
-}
-
-std::string WebWorker::ToStringMessageFullUnsafe(bool useHTML) const {
-  //if (theGlobalVariables.flagUsingSSLinCurrentConnection)
-  //  return "Message cannot be viewed when using SSL";
-  std::stringstream out;
-  out << this->ToStringMessageUnsafe(useHTML);
-  if (this->theMessageHeaderStrings.size > 0) {
-    out << "<hr>\nStrings extracted from message: ";
-    for (int i = 0; i < this->theMessageHeaderStrings.size; i ++) {
-      out << "<br>" << HtmlRoutines::ConvertStringToHtmlString(this->theMessageHeaderStrings[i], false);
-    }
-  }
-  return out.str();
-}
-
-std::string WebWorker::ToStringMessageUnsafe(bool useHTML) const {
-  //if (theGlobalVariables.flagUsingSSLinCurrentConnection)
-  //  return "Message cannot be viewed when using SSL";
-  std::stringstream out;
-  FormatExpressions tempFormat;
-  tempFormat.flagUseHTML = true;
-  out << this->ToStringMessageShortUnsafe(&tempFormat);
   out << "<hr>";
-  out << "Main address: " << HtmlRoutines::ConvertStringToHtmlString(this->addressGetOrPost, true) << "<br>";
-  if (this->requestTypE == this->requestGet) {
-    out << "GET " << HtmlRoutines::ConvertStringToHtmlString(this->addressGetOrPost, true);
-  }
-  if (this->requestTypE == this->requestPost) {
-    out << "POST " << HtmlRoutines::ConvertStringToHtmlString(this->addressGetOrPost, true);
-  }
-  if (this->requestTypE == this->requestChunked) {
-    out << "POST or GET **chunked** " << HtmlRoutines::ConvertStringToHtmlString(this->addressGetOrPost, true);
-  }
   if (this->flagKeepAlive) {
     out << "<br><b>Keeping alive.</b><br>";
   } else {
@@ -488,16 +464,9 @@ std::string WebWorker::ToStringMessageUnsafe(bool useHTML) const {
   for (int i = 0; i < this->cookies.size; i ++) {
     out << "<br>" << HtmlRoutines::ConvertStringToHtmlString(this->cookies[i], false);
   }
-  if (useHTML) {
-    out << "\n<hr>\nHost with port:<br>\n" << HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.hostWithPort, false);
-    out << "\n<hr>\nFull message head:<br>\n" << HtmlRoutines::ConvertStringToHtmlString(this->messageHead, true);
-    out << "\n<hr>\nFull message body:<br>\n" << HtmlRoutines::ConvertStringToHtmlString(this->messageBody, true);
-  } else {
-    out << "\nFull message head (length " << this->messageHead.size()
-    << "):\n" << HtmlRoutines::ConvertStringToHtmlString(this->messageHead, false);
-    out << "\nFull message body (length " << this->messageBody.size()
-    << "):\n" << HtmlRoutines::ConvertStringToHtmlString(this->messageBody, false);
-  }
+  out << "\n<hr>\nHost with port:<br>\n" << HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.hostWithPort, false);
+  out << "\n<hr>\nFull message head:<br>\n" << HtmlRoutines::ConvertStringToHtmlString(this->messageHead, true);
+  out << "\n<hr>\nFull message body:<br>\n" << HtmlRoutines::ConvertStringToHtmlString(this->messageBody, true);
   return out.str();
 }
 
@@ -544,12 +513,13 @@ void WebWorker::StandardOutputAfterTimeOut(const std::string& input) {
   standardOutputStreamAfterTimeout << input;
 }
 
-std::string WebWorker::GetDatabaseJSON() {
+JSData WebWorker::GetDatabaseJSON() {
   MacroRegisterFunctionWithName("WebWorker::GetDatabaseJSON");
-  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
-    return "Only logged-in admins can access database. ";
-  }
   JSData result;
+  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
+    result[WebAPI::result::error] = "Only logged-in admins can access database. ";
+    return result;
+  }
   if (theGlobalVariables.flagDatabaseCompiled) {
     std::string operation = theGlobalVariables.GetWebInput(WebAPI::databaseParameters::operation);
     std::string labels = HtmlRoutines::ConvertURLStringToNormal(
@@ -567,7 +537,7 @@ std::string WebWorker::GetDatabaseJSON() {
   } else {
     result["error"] = "Database not available (cannot get database info). ";
   }
-  return result.ToString(false);
+  return result;
 }
 
 std::string WebWorker::GetDatabaseDeleteOneItem() {
@@ -648,12 +618,8 @@ bool WebWorker::ExtractArgumentsFromMessage(
   }
   MapList<std::string, std::string, MathRoutines::HashString>& theArgs =
   theGlobalVariables.webArguments;
-  if (!HtmlRoutines::ChopCGIStringAppend(input, theArgs, argumentProcessingFailureComments))
+  if (!HtmlRoutines::ChopCGIStringAppend(input, theArgs, argumentProcessingFailureComments)) {
     return false;
-  if (theGlobalVariables.flagRunningApache) {
-    if (this->addressComputed == "") {
-      this->addressComputed = theGlobalVariables.GetWebInput("request");
-    }
   }
   return true;
 }
@@ -1248,10 +1214,6 @@ void WebWorker::ExtractAddressParts() {
   if (this->messageBody != "") {
     this->argumentComputed = this->messageBody;
   }
-  if (theGlobalVariables.flagRunningApache && this->argumentComputed == "") {
-    this->argumentComputed = this->addressComputed;
-    this->addressComputed = "";
-  }
 }
 
 std::string WebWorker::GetHeaderConnectionClose() {
@@ -1285,16 +1247,6 @@ void WebWorker::SetHeader(
   const std::string& remainingHeaderNoTermination
 ) {
   MacroRegisterFunctionWithName("WebWorker::SetHeader");
-  if (theGlobalVariables.flagRunningApache) {
-    if (remainingHeaderNoTermination != "") {
-      stOutput << remainingHeaderNoTermination << "\r\n";
-    }
-    if (theGlobalVariables.flagLoggedIn && WebWorker::GetHeaderSetCookie() != "") {
-      stOutput << WebWorker::GetHeaderSetCookie() << "\r\n";
-    }
-    stOutput << "\r\n";
-    return;
-  }
   std::stringstream out;
   out << httpResponseNoTermination << "\r\n";
   if (!this->flagKeepAlive) {
@@ -1359,7 +1311,7 @@ void WebWorker::SanitizeVirtualFileName() {
 int WebWorker::ProcessCalculatorExamplesJSON() {
   MacroRegisterFunctionWithName("WebWorker::ProcessCalculatorExamplesJSON");
   this->SetHeaderOKNoContentLength("");
-  stOutput << theParser->ToStringFunctionHandlersJSON();
+  theGlobalVariables.WriteResponse(theParser->FunctionHandlersJSON());
   return 0;
 }
 
@@ -1373,7 +1325,7 @@ int WebWorker::ProcessServerStatusJSON() {
   << "</td></tr></table>";
   JSData outputJS;
   outputJS["result"] = out.str();
-  stOutput << outputJS.ToString(false);
+  theGlobalVariables.WriteResponse(outputJS);
   return 0;
 }
 
@@ -1383,7 +1335,7 @@ int WebWorker::ProcessUnpauseWorker() {
   JSData progressReader, result;
   int indexWorker = this->GetIndexIfRunningWorkerId(progressReader);
   if (indexWorker < 0) {
-    stOutput << progressReader.ToString(false);
+    theGlobalVariables.WriteResponse(progressReader);
     return 0;
   }
   WebWorker& otherWorker = this->parent->theWorkers[indexWorker];
@@ -1392,7 +1344,7 @@ int WebWorker::ProcessUnpauseWorker() {
   } else {
     result[WebAPI::result::status] = "unpaused";
   }
-  stOutput << result.ToString(false);
+  theGlobalVariables.WriteResponse(result);
   return 0;
 }
 
@@ -1402,7 +1354,7 @@ int WebWorker::ProcessPauseWorker() {
   JSData progressReader, result;
   int indexWorker = this->GetIndexIfRunningWorkerId(progressReader);
   if (indexWorker < 0) {
-    stOutput << progressReader.ToString(false);
+    theGlobalVariables.WriteResponse(progressReader);
     return 0;
   }
   WebWorker& otherWorker = this->parent->theWorkers[indexWorker];
@@ -1411,7 +1363,7 @@ int WebWorker::ProcessPauseWorker() {
   } else {
     result[WebAPI::result::error] = "Failed to pause process. ";
   }
-  stOutput << result.ToString(false);
+  theGlobalVariables.WriteResponse(result);
   return 0;
 }
 
@@ -1420,7 +1372,7 @@ int WebWorker::ProcessComputationIndicator() {
   this->SetHeaderOKNoContentLength("");
   logWorker << "Processing get request indicator." << logger::endL;
   JSData result = this->ProcessComputationIndicatorJSData();
-  stOutput << result.ToString(false);
+  theGlobalVariables.WriteResponse(result);
   return 0;
 }
 
@@ -1595,29 +1547,30 @@ int WebWorker::ProcessFolder() {
     }
   }
   if (this->flagFileNameSanitized) {
-    out << "<hr>The virtual file name I extracted was: " << this->VirtualFileName
+    out << "<hr>The virtual file name I extracted was: " << HtmlRoutines::ConvertStringToHtmlString(this->VirtualFileName, false)
     << "<br>However, I do not allow folder names that contain dots. "
-    << "Therefore I have sanitized the main address to: " << this->RelativePhysicalFileNamE;
+    << "Therefore I have sanitized the main address to: " << HtmlRoutines::ConvertStringToHtmlString(this->RelativePhysicalFileNamE, false);
   }
   List<std::string> theFileNames, theFileTypes;
   if (!FileOperations::GetFolderFileNamesUnsecure(this->RelativePhysicalFileNamE, theFileNames, &theFileTypes)) {
     out << "<b>Failed to open directory with physical address "
-    << this->RelativePhysicalFileNamE << " </b></body></html>";
-    stOutput << out.str();
+    << HtmlRoutines::ConvertStringToHtmlString(this->RelativePhysicalFileNamE, false)
+    << " </b></body></html>";
+    this->WriteToBody(out.str());
     return 0;
   }
-  out << "Browsing folder: " << this->addressGetOrPost << "<br>Virtual name: "
-  << this->VirtualFileName << "<hr>";
+  out << "Browsing folder: " << HtmlRoutines::ConvertStringToHtmlString(this->addressGetOrPost, false) << "<br>Virtual name: "
+  << HtmlRoutines::ConvertStringToHtmlString(this->VirtualFileName, false) << "<hr>";
   List<std::string> theFolderNamesHtml, theFileNamesHtml;
   for (int i = 0; i < theFileNames.size; i ++) {
     std::stringstream currentStream;
     bool isDir = (theFileTypes[i] == ".d");
-    currentStream << "<a href=\"" << this->addressGetOrPost
+    currentStream << "<a href=\"" << HtmlRoutines::ConvertStringToHtmlString(this->addressGetOrPost, false)
     << HtmlRoutines::ConvertStringToURLString(theFileNames[i], false);
     if (isDir) {
       currentStream << "/";
     }
-    currentStream << "\">" << theFileNames[i];
+    currentStream << "\">" << HtmlRoutines::ConvertStringToHtmlString(theFileNames[i], false);
     if (isDir) {
       currentStream << "/";
     }
@@ -1631,111 +1584,119 @@ int WebWorker::ProcessFolder() {
   theFolderNamesHtml.QuickSortAscending();
   theFileNamesHtml.QuickSortAscending();
   for (int i = 0; i < theFolderNamesHtml.size; i ++) {
-    out << theFolderNamesHtml[i];
+    out << HtmlRoutines::ConvertStringToHtmlString(theFolderNamesHtml[i], false);
   }
   for (int i = 0; i < theFileNamesHtml.size; i ++) {
-    out << theFileNamesHtml[i];
+    out << HtmlRoutines::ConvertStringToHtmlString(theFileNamesHtml[i], false);
   }
   out << "\n</body></html>";
-  stOutput << out.str();
+  this->WriteToBody(out.str());
+  return 0;
+}
+
+int WebWorker::ProcessFileDoesntExist() {
+  this->SetHeader("HTTP/1.0 404 Object not found", "Content-Type: text/html");
+  std::stringstream out;
+  out << "<html>"
+  << "<body>";
+  out << "One page <a href = \"" << theGlobalVariables.DisplayNameExecutableApp << "\">app</a>. ";
+  out << " Same app without browser cache: <a href = \""
+  << theGlobalVariables.DisplayNameExecutableAppNoCache << "\">app no cache</a>.<hr>";
+  out << "<b>File does not exist.</b>";
+  if (this->flagFileNameSanitized) {
+    out
+    << "<hr>You requested virtual file: "
+    << HtmlRoutines::ConvertStringToHtmlString(this->VirtualFileName, false)
+    << "<br>However, I do not allow addresses that contain dots "
+    << "(to avoid access to folders below the server). "
+    << "Therefore I have sanitized the address to a relative physical address: "
+    << HtmlRoutines::ConvertStringToHtmlString(this->RelativePhysicalFileNamE, false)
+    << ".";
+  }
+  out << "<br><b>Address:</b> "
+  << HtmlRoutines::ConvertStringToHtmlString(this->addressGetOrPost, true)
+  << "<br><b>Virtual file name:</b> "
+  << HtmlRoutines::ConvertStringToHtmlString(this->VirtualFileName, true)
+  << "<br><b>Computed relative physical file name:</b> "
+  << HtmlRoutines::ConvertStringToHtmlString(this->RelativePhysicalFileNamE, true);
+  out << "<br><b>Request:</b> " << theGlobalVariables.userCalculatorRequestType;
+  out << "<hr><hr><hr>Message details:<br>"
+  << this->ToStringMessageFull();
+  out << "</body></html>";
+  this->flagEncounteredErrorWhileServingFile = true;
+  this->WriteToBody(out.str());
+  return 0;
+}
+
+int WebWorker::ProcessFileCantOpen() {
+  this->SetHeaderOKNoContentLength("");
+  std::stringstream out;
+  out << "<html><body><b>Error: file appears to exist but I could not open it.</b> ";
+  if (this->flagFileNameSanitized) {
+    out << "<hr>You requested virtual file: "
+    << HtmlRoutines::ConvertStringToHtmlString(this->VirtualFileName, false)
+    << "<br>However, I do not allow addresses that contain dots. "
+    << "Therefore I have sanitized the address to a relative physical address: "
+    << HtmlRoutines::ConvertStringToHtmlString(this->RelativePhysicalFileNamE, false);
+  }
+  out << "<br><b>File display name: </b>"
+  << HtmlRoutines::ConvertStringToHtmlString(this->addressGetOrPost, false)
+  << "<br><b>Virtual file name: </b>"
+  << HtmlRoutines::ConvertStringToHtmlString(this->VirtualFileName, false)
+  << "</body></html>";
+  this->WriteToBody(out.str());
+  return 0;
+}
+
+int WebWorker::ProcessFileTooLarge(long fileSize) {
+  this->SetHeader("HTTP/1.0 413 Payload Too Large", "");
+  std::stringstream out;
+  out << "<html><body><b>Error: user requested file: "
+  << this->VirtualFileName
+  << " but it is too large, namely, " << fileSize
+  << " bytes.</b></body></html>";
+  this->WriteToBody(out.str());
+  return 0;
+}
+
+int WebWorker::ProcessFileLinkApache() {
+  this->SetHeaderOKNoContentLength("");
+  std::stringstream out;
+  out << "<html><body>"
+  << "<a href=\"" << HtmlRoutines::ConvertStringToURLString(this->VirtualFileName, false) << "\">"
+  << HtmlRoutines::ConvertStringToHtmlString(this->VirtualFileName, false) << "</a>"
+  << "</body></html>";
+  this->WriteToBody(out.str());
   return 0;
 }
 
 int WebWorker::ProcessFile() {
   MacroRegisterFunctionWithName("WebWorker::ProcessFile");
   if (!FileOperations::FileExistsUnsecure(this->RelativePhysicalFileNamE)) {
-    this->SetHeader("HTTP/1.0 404 Object not found", "Content-Type: text/html");
-    stOutput << "<html>"
-    << HtmlRoutines::GetCSSLinkCalculator("/")
-    << "<body>";
-    stOutput << "One page <a href = \"" << theGlobalVariables.DisplayNameExecutableApp << "\">app</a>. ";
-    stOutput << " Same app without browser cache: <a href = \""
-    << theGlobalVariables.DisplayNameExecutableAppNoCache << "\">app no cache</a>.<hr>";
-    stOutput << "<b>File does not exist.</b>";
-    if (this->flagFileNameSanitized) {
-      stOutput
-      << "<hr>You requested virtual file: "
-      << HtmlRoutines::ConvertStringToHtmlString(this->VirtualFileName, false)
-      << "<br>However, I do not allow addresses that contain dots "
-      << "(to avoid access to folders below the server). "
-      << "Therefore I have sanitized the address to a relative physical address: "
-      << HtmlRoutines::ConvertStringToHtmlString(this->RelativePhysicalFileNamE, false)
-      << ".";
-    }
-    stOutput << "<br><b>Address:</b> "
-    << HtmlRoutines::ConvertStringToHtmlString(this->addressGetOrPost, true)
-    << "<br><b>Virtual file name:</b> "
-    << HtmlRoutines::ConvertStringToHtmlString(this->VirtualFileName, true)
-    << "<br><b>Computed relative physical file name:</b> "
-    << HtmlRoutines::ConvertStringToHtmlString(this->RelativePhysicalFileNamE, true);
-    stOutput << "<br><b>Request:</b> " << theGlobalVariables.userCalculatorRequestType;
-    stOutput << "<hr><hr><hr>Message details:<br>"
-    << this->ToStringMessageUnsafe()
-    << this->ToStringMessageFullUnsafe();
-    stOutput << "</body></html>";
-    this->flagEncounteredErrorWhileServingFile = true;
-    return 0;
+    return this->ProcessFileDoesntExist();
   }
   std::string fileExtension = FileOperations::GetFileExtensionWithDot(this->RelativePhysicalFileNamE);
   bool isBinary = this->IsFileExtensionOfBinaryFile(fileExtension);
   std::fstream theFile;
   if (!FileOperations::OpenFileUnsecure(theFile, this->RelativePhysicalFileNamE, false, false, !isBinary)) {
-    this->SetHeaderOKNoContentLength("");
-    stOutput << "<html><body><b>Error: file appears to exist but I could not open it.</b> ";
-    if (this->flagFileNameSanitized) {
-      stOutput << "<hr>You requested virtual file: " << this->VirtualFileName
-      << "<br>However, I do not allow addresses that contain dots. "
-      << "Therefore I have sanitized the address to a relative physical address: " << this->RelativePhysicalFileNamE;
-    }
-    stOutput << "<br><b>File display name: </b>"
-    << this->addressGetOrPost << "<br><b>Virtual file name: </b>"
-    << this->VirtualFileName << "</body></html>";
-    return 0;
+    return this->ProcessFileCantOpen();
   }
   theFile.seekp(0, std::ifstream::end);
   long fileSize = theFile.tellp();
   if (fileSize > 100000000) {
-    this->SetHeader("HTTP/1.0 413 Payload Too Large", "");
-    stOutput << "<html><body><b>Error: user requested file: "
-    << this->VirtualFileName
-    << " but it is too large, namely, " << fileSize
-    << " bytes.</b></body></html>";
-    return 0;
+    return this->ProcessFileTooLarge(fileSize);
   }
   std::stringstream theHeader;
-  bool withCacheHeader = false;
   theHeader << "HTTP/1.0 200 OK\r\n"
   << this->GetMIMEtypeFromFileExtension(fileExtension)
   << "Access-Control-Allow-Origin: *\r\n";
   for (int i = 0; i < this->parent->addressStartsSentWithCacheMaxAge.size; i ++) {
     if (StringRoutines::StringBeginsWith(this->VirtualFileName, this->parent->addressStartsSentWithCacheMaxAge[i])) {
       theHeader << WebAPI::HeaderCacheControl << "\r\n";
-      withCacheHeader = true;
       break;
     }
   }
-  std::stringstream debugBytesStream;
-  if (theGlobalVariables.UserDebugFlagOn() && fileExtension == ".html") {
-    debugBytesStream << "<!-- DEBUG info: ";
-    if (withCacheHeader) {
-      debugBytesStream << "Sent with Cache-Control header.\n ";
-    }
-    debugBytesStream << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
-    << "-->";
-  }
-  if (theGlobalVariables.UserDebugFlagOn() && fileExtension == ".appcache") {
-    debugBytesStream << "#" << this->GetMIMEtypeFromFileExtension(fileExtension);
-  }
-  if (theGlobalVariables.flagRunningApache) {
-    this->SetHeaderOKNoContentLength("");
-    stOutput << "<html><body>"
-    << "<a href=\"" << this->VirtualFileName << "\">" << this->VirtualFileName << "</a>"
-    << "</body></html>";
-    stOutput << debugBytesStream.str();
-    return 0;
-  }
-  long totalLength = fileSize + static_cast<long>(debugBytesStream.str().size());
-  theHeader << "Content-length: " << totalLength << "\r\n";
+  theHeader << "Content-length: " << fileSize << "\r\n";
   if (!this->flagKeepAlive) {
     theHeader << this->GetHeaderConnectionClose() << "\r\n";
   }
@@ -1762,7 +1723,6 @@ int WebWorker::ProcessFile() {
     theFile.read(this->bufferFileIO.TheObjects, this->bufferFileIO.size);
     numBytesRead = theFile.gcount();
   }
-  stOutput << debugBytesStream.str();
   this->SendAllBytesNoHeaders();
   this->flagAllBytesSentUsingFile = true;
   this->flagEncounteredErrorWhileServingFile = false;
@@ -1912,7 +1872,7 @@ std::string WebWorker::GetMIMEtypeFromFileExtension(const std::string& fileExten
 int WebWorker::ProcessUnknown() {
   MacroRegisterFunctionWithName("WebWorker::ProcessUnknown");
   this->SetHeader("HTTP/1.0 501 Method Not Implemented", "Content-Type: text/html");
-  stOutput << HtmlInterpretation::GetJSONUserInfo("Unknown request");
+  theGlobalVariables.WriteResponse(HtmlInterpretation::GetJSONUserInfo("Unknown request"));
   return 0;
 }
 
@@ -2072,11 +2032,13 @@ bool WebWorker::DoSetEmail(
   return true;
 }
 
-int WebWorker::SetEmail(const std::string& input) {
+JSData WebWorker::SetEmail(const std::string& input) {
   MacroRegisterFunctionWithName("WebWorker::SetEmail");
   (void) input;
+  JSData result;
   if (!theGlobalVariables.flagDatabaseCompiled) {
-    stOutput << "Database not available (cannot set email). ";
+    result[WebAPI::result::error] = "Database not available (cannot set email). ";
+    this->WriteToBodyJSON(result);
     return 0;
   }
   std::stringstream out, debugStream;
@@ -2087,11 +2049,12 @@ int WebWorker::SetEmail(const std::string& input) {
     adminOutputStream = &out;
   }
   this->DoSetEmail(theGlobalVariables.userDefault, &out, &out, adminOutputStream);
-  stOutput << out.str();
   if (theGlobalVariables.UserDefaultHasAdminRights()) {
-    stOutput << "<hr><b>Admin view only. </b>" << debugStream.str();
+    out << "<hr><b>Admin view only. </b>" << debugStream.str();
   }
-  stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() << " second(s).";
+  out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() << " second(s).";
+  result[WebAPI::result::comments] = out.str();
+  this->WriteToBodyJSON(result);
   return 0;
 }
 
@@ -2099,19 +2062,21 @@ int WebWorker::ProcessChangePassword(const std::string& reasonForNoAuthenticatio
   MacroRegisterFunctionWithName("WebWorker::ProcessChangePassword");
   (void) reasonForNoAuthentication;
   this->SetHeaderOKNoContentLength("");
-  if (! theGlobalVariables.flagDatabaseCompiled) {
-//    stOutput << "ProcessChangePasswordb: project compiled without database support.";
+  JSData result;
+  if (!theGlobalVariables.flagDatabaseCompiled) {
+    result[WebAPI::result::error] = "Database not compiled";
+    this->WriteToBodyJSON(result);
     return 0;
   }
   UserCalculatorData& theUser = theGlobalVariables.userDefault;
   theUser.enteredAuthenticationToken = "";
   if (!theGlobalVariables.flagUsingSSLinCurrentConnection) {
-    stOutput << "<b style =\"color:red\">Please use secure connection.</b>";
-    return 0;
+    result[WebAPI::result::error] = "Please use secure connection.";
+    return this->WriteToBodyJSON(result);
   }
   if (!theGlobalVariables.flagLoggedIn) {
-    stOutput << "<b style =\"color:red\">Please enter (old) password.</b> " << reasonForNoAuthentication;
-    return 0;
+    result[WebAPI::result::error] = "Please enter (old) password. " + reasonForNoAuthentication;
+    return this->WriteToBodyJSON(result);
   }
   std::string newPassword = HtmlRoutines::ConvertStringToURLString(
     HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("newPassword"), true),
@@ -2136,16 +2101,17 @@ int WebWorker::ProcessChangePassword(const std::string& reasonForNoAuthenticatio
     if (Database::get().FindOne(
       queryEmailTaken, notUsed, nullptr
     )) {
-      stOutput << "<b style =\"color:red\">It appears the email is already taken. </b>";
-      return 0;
+      result[WebAPI::result::error] = "It appears the email is already taken. ";
+      return this->WriteToBodyJSON(result);
     }
   }
   if (newPassword == "" && reenteredPassword == "" && newEmail != "") {
-    return this->SetEmail(newEmail);
+    result = this->SetEmail(newEmail);
+    return this->WriteToBodyJSON(result);
   }
   if (newPassword != reenteredPassword) {
-    stOutput << "<b style =\"color:red\">Passwords don't match. </b>";
-    return 0;
+    result[WebAPI::result::error] = "Passwords don't match. ";
+    return this->WriteToBodyJSON(result);
   }
   std::stringstream commentsOnFailure;
   std::string newAuthenticationToken;
@@ -2155,8 +2121,8 @@ int WebWorker::ProcessChangePassword(const std::string& reasonForNoAuthenticatio
     newAuthenticationToken,
     commentsOnFailure
   )) {
-    stOutput << "<b style =\"color:red\">" << commentsOnFailure.str() << "</b>";
-    return 0;
+    result[WebAPI::result::error] = commentsOnFailure.str();
+    return this->WriteToBodyJSON(result);
   }
   JSData setQuery;
   QueryExact findQuery(DatabaseStrings::tableUsers, DatabaseStrings::labelUsername, theUser.username);
@@ -2164,12 +2130,13 @@ int WebWorker::ProcessChangePassword(const std::string& reasonForNoAuthenticatio
   if (!Database::get().UpdateOne(
     findQuery, setQuery, &commentsOnFailure
   )) {
-    stOutput << "<b style = \"color:red\">Failed to set activationToken: "
-    << commentsOnFailure.str() << "</b>";
+    result[WebAPI::result::error] = "Failed to set activationToken: " +commentsOnFailure.str();
+    return this->WriteToBodyJSON(result);
   }
-  stOutput << "<b style = \"color:green\">Password change successful. </b>";
+  std::stringstream out;
+  out << "<b style = \"color:green\">Password change successful. </b>";
   if (theGlobalVariables.GetWebInput("doReload") != "false") {
-    stOutput
+    out
     << "<meta http-equiv=\"refresh\" content =\"0; url ='"
     << theGlobalVariables.DisplayNameExecutable  << "?request=logout"
     << "&username="
@@ -2177,7 +2144,8 @@ int WebWorker::ProcessChangePassword(const std::string& reasonForNoAuthenticatio
     << "&activationToken = &authenticationToken = &"
     << "'\" />";
   }
-  return 0;
+  result[WebAPI::result::comments] = out.str();
+  return this->WriteToBodyJSON(result);
 }
 
 int WebWorker::ProcessCompute() {
@@ -2212,10 +2180,7 @@ int WebWorker::ProcessCompute() {
   }
   JSData result;
   result = theParser->ToJSONOutputAndSpecials();
-  if (theGlobalVariables.UserDebugFlagOn()) {
-    result["debug"] = this->ToStringMessageFullUnsafe();
-  }
-  stOutput << result.ToString(false);
+  this->WriteToBodyJSON(result);
   theGlobalVariables.flagComputationCompletE = true;
   return 0;
 }
@@ -2223,9 +2188,10 @@ int WebWorker::ProcessCompute() {
 int WebWorker::ProcessActivateAccount() {
   MacroRegisterFunctionWithName("WebWorker::ProcessActivateAccount");
   this->SetHeaderOKNoContentLength("");
-  bool doShowDetails = true;
-  stOutput << WebWorker::GetChangePasswordPagePartOne(doShowDetails);
-  return 0;
+  JSData result;
+  bool notUsed = false;
+  result[WebAPI::result::resultHtml] = WebWorker::GetChangePasswordPagePartOne(notUsed);
+  return this->WriteToBodyJSON(result);
 }
 
 int WebWorker::ProcessLogout() {
@@ -2238,15 +2204,13 @@ int WebWorker::ProcessLogout() {
 int WebWorker::ProcessSelectCourseJSON() {
   MacroRegisterFunctionWithName("WebWorker::ProcessSelectCourseJSON");
   this->SetHeaderOKNoContentLength("");
-  stOutput << HtmlInterpretation::GetSelectCourseJSON();
-  return 0;
+  return this->WriteToBodyJSON(HtmlInterpretation::GetSelectCourseJSON());
 }
 
 int WebWorker::ProcessTopicListJSON() {
   MacroRegisterFunctionWithName("WebWorker::ProcessTopicListJSON");
   this->SetHeaderOKNoContentLength("");
-  stOutput << HtmlInterpretation::GetTopicTableJSON();
-  return 0;
+  return this->WriteToBodyJSON(HtmlInterpretation::GetTopicTableJSON());
 }
 
 int WebWorker::ProcessCalculatorOnePageJS(bool appendBuildHash) {
@@ -2256,8 +2220,7 @@ int WebWorker::ProcessCalculatorOnePageJS(bool appendBuildHash) {
   } else {
     this->SetHeaderOKNoContentLength("", "text/javascript");
   }
-  stOutput << HtmlInterpretation::GetOnePageJS(appendBuildHash);
-  return 0;
+  return this->WriteToBody(HtmlInterpretation::GetOnePageJS(appendBuildHash));
 }
 
 int WebWorker::ProcessApp(bool appendBuildHash) {
@@ -2266,15 +2229,7 @@ int WebWorker::ProcessApp(bool appendBuildHash) {
   if (theWebServer.RestartIsNeeded()) {
     return 0;
   }
-  stOutput << HtmlInterpretation::GetApp(appendBuildHash);
-  return 0;
-}
-
-int WebWorker::ProcessTemplate() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessTemplate");
-  this->SetHeaderOKNoContentLength("");
-  stOutput << HtmlInterpretation::GetPageFromTemplate();
-  return 0;
+  return this->WriteToBody(HtmlInterpretation::GetApp(appendBuildHash));
 }
 
 int WebWorker::ProcessLoginUserInfo(const std::string& comments) {
@@ -2283,116 +2238,111 @@ int WebWorker::ProcessLoginUserInfo(const std::string& comments) {
   if (theWebServer.RestartIsNeeded()) {
     return 0;
   }
-  stOutput << HtmlInterpretation::GetJSONUserInfo(comments);
-  return 0;
+  return this->WriteToBodyJSON(HtmlInterpretation::GetJSONUserInfo(comments));
 }
 
 int WebWorker::ProcessTemplateJSON() {
   MacroRegisterFunctionWithName("WebWorker::ProcessTemplateJSON");
   this->SetHeaderOKNoContentLength("");
-  stOutput << HtmlInterpretation::GetJSONFromTemplate();
-  return 0;
+  JSData result;
+  result[WebAPI::result::resultHtml] = HtmlInterpretation::GetJSONFromTemplate();
+  return this->WriteToBodyJSON(result);
 }
 
 int WebWorker::ProcessExamPageJSON() {
   MacroRegisterFunctionWithName("WebWorker::ProcessExamPageJSON");
   this->SetHeaderOKNoContentLength("");
-  stOutput << HtmlInterpretation::GetExamPageJSON();
-  return 0;
+  return this->WriteToBodyJSON(HtmlInterpretation::GetExamPageJSON());
 }
 
 int WebWorker::ProcessGetAuthenticationToken(const std::string& reasonForNoAuthentication) {
   MacroRegisterFunctionWithName("WebWorker::ProcessGetAuthenticationToken");
   this->SetHeaderOKNoContentLength("");
-  stOutput << this->GetAuthenticationToken(reasonForNoAuthentication);
-  return 0;
+  return this->WriteToBody(this->GetAuthenticationToken(reasonForNoAuthentication));
 }
 
 int WebWorker::ProcessSetProblemDatabaseInfo() {
   MacroRegisterFunctionWithName("WebWorker::ProcessSetProblemDatabaseInfo");
   this->SetHeaderOKNoContentLength("");
-  stOutput << HtmlInterpretation::GetSetProblemDatabaseInfoHtml();
-  return 0;
+  JSData result;
+  result[WebAPI::result::resultHtml] = HtmlInterpretation::GetSetProblemDatabaseInfoHtml();
+  return this->WriteToBodyJSON(result);
 }
 
 int WebWorker::ProcessAddUserEmails() {
   MacroRegisterFunctionWithName("WebWorker::ProcessAddUserEmails");
   this->SetHeaderOKNoContentLength("");
-  stOutput << this->GetAddUserEmails();
-  return 0;
+  JSData result;
+  result[WebAPI::result::resultHtml] = this->GetAddUserEmails();
+  return this->WriteToBodyJSON(result);
 }
 
 int WebWorker::ProcessModifyPage() {
   MacroRegisterFunctionWithName("WebWorker::ProcessModifyPage");
   this->SetHeaderOKNoContentLength("");
-  stOutput << HtmlInterpretation::ModifyProblemReport();
-  return 0;
+  JSData result;
+  result[WebAPI::result::resultHtml] = HtmlInterpretation::ModifyProblemReport();
+  return this->WriteToBodyJSON(result);
 }
 
 int WebWorker::ProcessAssignTeacherToSection() {
   MacroRegisterFunctionWithName("WebWorker::ProcessAssignTeacherToSection");
   this->SetHeaderOKNoContentLength("");
-  stOutput << HtmlInterpretation::AddTeachersSections();
-  return 0;
+  JSData result;
+  result[WebAPI::result::resultHtml] = HtmlInterpretation::AddTeachersSections();
+  return this->WriteToBodyJSON(result);
 }
 
 int WebWorker::ProcessScores() {
   MacroRegisterFunctionWithName("WebWorker::ProcessScores");
   this->SetHeaderOKNoContentLength("");
-  stOutput << HtmlInterpretation::GetScoresPage();
-  return 0;
+  JSData result;
+  result[WebAPI::result::resultHtml] = HtmlInterpretation::GetScoresPage();
+  return this->WriteToBodyJSON(result);
 }
 
 int WebWorker::ProcessScoresInCoursePage() {
   MacroRegisterFunctionWithName("WebWorker::ProcessScoresInCoursePage");
   this->SetHeaderOKNoContentLength("");
-  stOutput << HtmlInterpretation::GetScoresInCoursePage();
-  return 0;
-}
-
-int WebWorker::ProcessAccounts() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessAccounts");
-  this->SetHeaderOKNoContentLength("");
-  stOutput << HtmlInterpretation::GetAccountsPage(this->hostWithPort);
-  return 0;
+  JSData result;
+  result[WebAPI::result::resultHtml] = HtmlInterpretation::GetScoresInCoursePage();
+  return this->WriteToBodyJSON(result);
 }
 
 int WebWorker::ProcessAccountsJSON() {
   MacroRegisterFunctionWithName("WebWorker::ProcessAccountsJSON");
   this->SetHeaderOKNoContentLength("");
-  stOutput << HtmlInterpretation::GetAccountsPageJSON(this->hostWithPort);
-  return 0;
+  return this->WriteToBodyJSON(HtmlInterpretation::GetAccountsPageJSON(this->hostWithPort));
 }
 
 int WebWorker::ProcessDatabaseJSON() {
   MacroRegisterFunctionWithName("WebWorker::ProcessDatabaseJSON");
   this->SetHeaderOKNoContentLength("");
-  stOutput << this->GetDatabaseJSON();
-  return 0;
+  return this->WriteToBodyJSON(this->GetDatabaseJSON());
 }
 
 int WebWorker::ProcessDatabaseDeleteEntry() {
   MacroRegisterFunctionWithName("WebWorker::ProcessDatabaseDeleteEntry");
   this->SetHeaderOKNoContentLength("");
-  stOutput << this->GetDatabaseDeleteOneItem();
-  return 0;
+  JSData result;
+  result[WebAPI::result::resultHtml] = this->GetDatabaseDeleteOneItem();
+  return this->WriteToBodyJSON(this->GetDatabaseJSON());
 }
 
 int WebWorker::ProcessDatabaseModifyEntry() {
   MacroRegisterFunctionWithName("WebWorker::ProcessDatabaseModifyEntry");
   this->SetHeaderOKNoContentLength("");
-  stOutput << "Not implemented yet";
-  return 0;
+  JSData result;
+  result[WebAPI::result::error] = "WebWorker::ProcessDatabaseModifyEntry not implemented yet";
+  return this->WriteToBodyJSON(result);
 }
 
 int WebWorker::ProcessEditPageJSON() {
   MacroRegisterFunctionWithName("WebWorker::ProcessEditPageJSON");
   this->SetHeaderOKNoContentLength("");
-  stOutput << HtmlInterpretation::GetEditPageJSON();
-  return 0;
+  return this->WriteToBodyJSON(HtmlInterpretation::GetEditPageJSON());
 }
 
-#include "math_extra_latex_routines.h"
 int WebWorker::ProcessSlidesOrHomeworkFromSource() {
   MacroRegisterFunctionWithName("WebWorker::ProcessSlidesOrHomeworkFromSource");
   this->SetHeaderOKNoContentLength("");
@@ -2436,13 +2386,12 @@ int WebWorker::ProcessSlidesOrHomeworkFromSource() {
     JSData result;
     HtmlInterpretation::GetJSDataUserInfo(result, comments.str());
     this->flagDoAddContentLength = true;
-    stOutput << result.ToString(false);
+    this->WriteToBodyJSON(result);
     return 0;
   }
   this->SetHeader("HTTP/1.0 200 OK", "Content-Type: application/pdf; Access-Control-Allow-Origin: *");
   this->flagDoAddContentLength = true;
-  stOutput << theCrawler.targetPDFbinaryContent;
-  return 0;
+  return this->WriteToBody(theCrawler.targetPDFbinaryContent);
 }
 
 int WebWorker::ProcessSlidesSource() {
@@ -2480,44 +2429,38 @@ int WebWorker::ProcessSlidesSource() {
   if (!theCrawler.BuildOrFetchFromCachePDF(&comments, &comments)) {
     this->flagDoAddContentLength = true;
     comments << "Failed to build your slides. ";
-    stOutput << HtmlInterpretation::GetJSONUserInfo(HtmlRoutines::ConvertStringToHtmlString(comments.str(), false));
-    return 0;
+    return this->WriteToBodyJSON(HtmlInterpretation::GetJSONUserInfo(comments.str()));
   }
   this->SetHeader("HTTP/1.0 200 OK", "Content-Type: application/x-latex; Access-Control-Allow-Origin: *");
   this->flagDoAddContentLength = true;
-  stOutput << theCrawler.targetLaTeX;
-  return 0;
+  return this->WriteToBody(theCrawler.targetLaTeX);
 }
 
 int WebWorker::ProcessClonePage() {
   MacroRegisterFunctionWithName("WebWorker::ProcessClonePage");
   this->SetHeaderOKNoContentLength("");
-  stOutput << this->GetClonePageResult();
-  return 0;
+  return this->WriteToBodyJSON(this->GetClonePageResult());
 }
 
 int WebWorker::ProcessProblemGiveUp() {
   MacroRegisterFunctionWithName("WebWorker::ProcessProblemGiveUp");
   this->SetHeaderOKNoContentLength("");
-  stOutput << HtmlInterpretation::GetAnswerOnGiveUp();
-  return 0;
+  return this->WriteToBodyJSON(HtmlInterpretation::GetAnswerOnGiveUp());
 }
 
 int WebWorker::ProcessProblemSolution() {
   MacroRegisterFunctionWithName("WebWorker::ProcessProblemSolution");
   this->SetHeaderOKNoContentLength("");
-  stOutput << HtmlInterpretation::GetProblemSolutionString();
-  return 0;
+  return this->WriteToBodyJSON(HtmlInterpretation::GetProblemSolutionJSON());
 }
 
 int WebWorker::ProcessSubmitAnswersPreview() {
   MacroRegisterFunctionWithName("WebWorker::ProcessSubmitAnswersPreview");
   this->SetHeaderOKNoContentLength("");
-  stOutput << HtmlInterpretation::submitAnswersPreviewString();
-  return 0;
+  return this->WriteToBodyJSON(HtmlInterpretation::submitAnswersPreviewJSON());
 }
 
-std::string WebWorker::GetClonePageResult() {
+JSData WebWorker::GetClonePageResult() {
   MacroRegisterFunctionWithName("WebWorker::GetClonePageResult");
   this->SetHeaderOKNoContentLength("");
   return HtmlInterpretation::ClonePageResult();
@@ -2563,8 +2506,7 @@ std::string HtmlInterpretation::ModifyProblemReport() {
 int WebWorker::ProcessSubmitAnswers() {
   MacroRegisterFunctionWithName("WebWorker::ProcessSubmitAnswers");
   this->SetHeaderOKNoContentLength("");
-  stOutput << HtmlInterpretation::SubmitAnswersString();
-  return 0;
+  return this->WriteToBodyJSON(HtmlInterpretation::SubmitAnswersJSON());
 }
 
 std::string HtmlInterpretation::GetJavascriptCaptcha() {
@@ -2650,13 +2592,15 @@ bool WebWorker::RedirectIfNeeded(std::stringstream& argumentProcessingFailureCom
   std::stringstream headerStream;
   headerStream << "Location: " << redirectedAddress.str();
   this->SetHeader("HTTP/1.0 303 See other", headerStream.str());
-  stOutput << "<html><head>"
+  std::stringstream out;
+  out << "<html><head>"
   << "<meta http-equiv=\"refresh\" content =\"0; url ='" << redirectedAddress.str()
   << "'\" />"
   << "</head>";
-  stOutput << "<body>Click <a href=\"" << redirectedAddress.str() << "\">"
+  out << "<body>Click <a href=\"" << redirectedAddress.str() << "\">"
   << " here " << "</a> if your browser does not redirect the page automatically. ";
-  stOutput << "</body></html>";
+  out << "</body></html>";
+  this->WriteToBody(out.str());
   return true;
 }
 
@@ -2711,15 +2655,13 @@ bool WebWorker::ProcessRedirectAwayFromWWW() {
     }
   }
   newAddressStream << this->addressGetOrPost;
-  if (theGlobalVariables.flagRunningApache) {
-    redirectHeaderStream << "Content-Type: text/html\r\n";
-  }
   redirectHeaderStream << "Location: " << newAddressStream.str();
   this->SetHeader("HTTP/1.0 301 Moved Permanently", redirectHeaderStream.str());
-  //this->SetHeaderOKNoContentLength();
-  stOutput << "<html><body>Please remove the www. from the address, it creates issues with authentication services. "
+  std::stringstream out;
+  out << "<html><body>Please remove the www. from the address, it creates issues with authentication services. "
   << "Click <a href=\"" << newAddressStream.str() << "\">here</a> if not redirected automatically. ";
-  stOutput << "</body></html>";
+  out << "</body></html>";
+  this->WriteToBody(out.str());
   return true;
 }
 
@@ -2737,29 +2679,22 @@ int WebWorker::ProcessLoginNeededOverUnsecureConnection() {
     }
   }
   newAddressStream << this->addressGetOrPost;
-  if (theGlobalVariables.flagRunningApache) {
-    redirectStream << "Content-Type: text/html\r\n";
-  }
+  std::stringstream outBody;
   if (this->hostNoPort != "") {
     redirectStream << "Location: " << newAddressStream.str();
     this->SetHeader("HTTP/1.0 301 Moved Permanently", redirectStream.str());
-    stOutput << "<html><body>Address available through secure (SSL) connection only. "
+    outBody << "<html><body>Address available through secure (SSL) connection only. "
     << "Click <a href=\"" << newAddressStream.str() << "\">here</a> if not redirected automatically. ";
   } else {
     this->SetHeaderOKNoContentLength("");
-    stOutput << "<html><body>Address available through secure (SSL) connection only. <br>"
+    outBody << "<html><body>Address available through secure (SSL) connection only. <br>"
     << "<b style ='color:red'>In the web address, please change http to https. </b><br>"
     << "Unfortunately, I can't redirect you automatically as your browser did not tell me "
     << "under what domain name it sees me, and the server responds to multiple domain names. ";
 
   }
-  //stOutput << "<br>" << redirectStream.str();
-  if (theGlobalVariables.flagRunningApache)
-    stOutput << "To avoid seeing this message, <b style = \"color:red\">please use the secure version:</b> "
-    << "<a href=\"https://" << this->hostNoPort << "\">https://" << this->hostNoPort
-    << "</a>. If using bookmarks, don't forget to re-bookmark to the secure site. ";
-  stOutput << "</body></html>";
-  return 0;
+  outBody << "</body></html>";
+  return this->WriteToBody(outBody.str());
 }
 
 bool WebWorker::RequireSSL() {
@@ -2906,8 +2841,6 @@ int WebWorker::ServeClient() {
     theGlobalVariables.userCalculatorRequestType == "databaseModifyEntry"
   ) {
     return this->ProcessDatabaseModifyEntry();
-  } else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.userCalculatorRequestType == "accounts") {
-    return this->ProcessAccounts();
   } else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.userCalculatorRequestType == "accountsJSON") {
     return this->ProcessAccountsJSON();
   } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::examplesJSON) {
@@ -3004,11 +2937,6 @@ int WebWorker::ServeClient() {
   ) {
     return this->ProcessExamPageJSON();
   } else if (
-    theGlobalVariables.userCalculatorRequestType == "template" ||
-    theGlobalVariables.userCalculatorRequestType == WebAPI::request::templateNoLogin
-  ) {
-    return this->ProcessTemplate();
-  } else if (
     theGlobalVariables.userCalculatorRequestType == "templateJSON" ||
     theGlobalVariables.userCalculatorRequestType == WebAPI::request::templateJSONNoLogin
   ) {
@@ -3067,13 +2995,14 @@ int WebWorker::ProcessFolderOrFile() {
       &commentsOnFailure
   )) {
     this->SetHeader("HTTP/1.0 404 Object not found", "Content-Type: text/html");
-    stOutput << "<html><body>File name: "
+    std::stringstream out;
+    out << "<html><body>File name: "
     << HtmlRoutines::ConvertStringToHtmlStringRestrictSize(this->VirtualFileName, false, 1000)
     << " <b style = 'color:red'>deemed unsafe</b>. "
     << "Please note that folder names are not allowed to contain dots and file names "
     << "are not allowed to start with dots. There may be additional restrictions "
     << "on file names added for security reasons.</body></html>";
-    return 0;
+    return this->WriteToBody(out.str());
   }
   if (FileOperations::IsFolderUnsecure(this->RelativePhysicalFileNamE)) {
     return this->ProcessFolder();
@@ -3137,7 +3066,7 @@ void WebWorker::OutputShowIndicatorOnTimeout(const std::string& message) {
   if (this->indexInParent < 0) {
     crash << "Index of worker is smaller than 0, this shouldn't happen. " << crash;
   }
-  stOutput << result.ToString(false);
+  this->WriteToBodyJSON(result);
   this->WriteAfterTimeoutProgress(theGlobalVariables.ToStringProgressReportJSData().ToString(false), true);
   this->SendAllBytesWithHeaders();
   for (int i = 0; i < this->parent->theWorkers.size; i ++) {
@@ -3149,8 +3078,6 @@ void WebWorker::OutputShowIndicatorOnTimeout(const std::string& message) {
   // set flags properly:
   // we need to rewire the standard output and the crashing mechanism:
   crash.CleanUpFunction = WebWorker::WriteAfterTimeoutCrash;
-  // note that standard output cannot be rewired in the beginning of the function as we use the old stOutput
-  stOutput.theOutputFunction = WebWorker::StandardOutputAfterTimeOut;
 }
 
 std::string WebWorker::ToStringAddressRequest() const {
@@ -3268,10 +3195,6 @@ void WebServer::FlushActiveWorker() {
   theWebServer.GetActiveWorker().SendAllBytesWithHeaders();
 }
 
-void WebServer::SendStringThroughActiveWorker(const std::string& theString) {
-  theWebServer.GetActiveWorker().QueueStringForSendingWithHeadeR(theString, false);
-}
-
 WebServer::WebServer() {
   this->flagDeallocated = false;
   this->activeWorker = - 1;
@@ -3332,16 +3255,10 @@ void WebServer::ReapChildren() {
 
 WebWorker& WebServer::GetActiveWorker() {
   MacroRegisterFunctionWithName("WebServer::GetActiveWorker");
-  void (*oldOutputFunction)(const std::string& stringToOutput) = stOutput.theOutputFunction;
-  stOutput.theOutputFunction = nullptr; // <- We are checking if the web server is in order.
-  // Before that we prevent the crashing mechanism from trying to use (the eventually corrupt) web server
-  // to report the error over the Internet.
   if (this->activeWorker < 0 || this->activeWorker >= this->theWorkers.size) {
     crash << "Active worker index is " << this->activeWorker << " however I have " << this->theWorkers.size
     << " workers. " << crash;
   }
-  stOutput.theOutputFunction = oldOutputFunction;//<-the web server is in order,
-  // therefore we restore the ability to report crashing over the internet.
   return this->theWorkers[this->activeWorker];
 }
 
@@ -3498,9 +3415,6 @@ std::string WebServer::ToStringStatusActive() {
 
 std::string WebServer::ToStringConnectionSummary() {
   MacroRegisterFunctionWithName("WebServer::ToStringConnectionSummary");
-  if (theGlobalVariables.flagRunningApache) {
-    return "Running through standard Apache web server, no connection details to display. ";
-  }
   std::stringstream out;
   TimeWrapper now;
   now.AssignLocalTime();
@@ -3542,9 +3456,6 @@ std::string WebServer::ToStringConnectionSummary() {
 
 std::string WebServer::ToStringStatusForLogFile() {
   MacroRegisterFunctionWithName("WebServer::ToStringStatusForLogFile");
-  if (theGlobalVariables.flagRunningApache) {
-    return "Running through standard Apache web server, no connection details to display. ";
-  }
   std::stringstream out;
   out << this->ToStringConnectionSummary();
   int numInUse = 0;
@@ -3566,9 +3477,6 @@ std::string WebServer::ToStringStatusForLogFile() {
 
 std::string WebServer::ToStringStatusAll() {
   MacroRegisterFunctionWithName("WebServer::ToStringStatusAll");
-  if (theGlobalVariables.flagRunningApache) {
-    return "Running through Apache. ";
-  }
   std::stringstream out;
 
   if (!theGlobalVariables.UserDefaultHasAdminRights()) {
@@ -3613,20 +3521,21 @@ bool WebServer::RestartIsNeeded() {
   if (this->timeLastExecutableModification == theFileStat.st_ctime) {
     return false;
   }
-  stOutput << "<html>";
-  stOutput << "<head><script language =\"javascript\">setTimeout(resubmit, 500); "
+  std::stringstream out;
+  out << "<html>";
+  out << "<head><script language =\"javascript\">setTimeout(resubmit, 500); "
   << " function resubmit() { location.reload(true);}</script></head>";
-  stOutput << "<body>";
+  out << "<body>";
 
-  stOutput << "<b>The server executable was updated, but the server has not been restarted yet. "
+  out << "<b>The server executable was updated, but the server has not been restarted yet. "
   << "Restarting in 0.5 seconds...</b>";
-  stOutput << "</body></html>";
+  out << "</body></html>";
   logWorker << "Current process spawned from file with time stamp: "
   << this->timeLastExecutableModification
   << "; latest executable has different time stamp: " << theFileStat.st_ctime
   << ". " << logger::red << "RESTARTING." << logger::endL;
   theGlobalVariables.flagRestartNeeded = true;
-
+  this->GetActiveWorker().WriteToBody(out.str());
   return true;
 }
 
@@ -4505,7 +4414,6 @@ int WebWorker::Run() {
     logOpenSSL << logger::green << "ssl success #: " << this->parent->NumConnectionsSoFar << ". " << logger::endL;
   }
   /////////////////////////////////////////////////////////////////////////
-  stOutput.theOutputFunction = WebServer::SendStringThroughActiveWorker;
   int result = 0;
   this->numberOfReceivesCurrentConnection = 0;
   while (true) {
@@ -4530,6 +4438,7 @@ int WebWorker::Run() {
     if (this->numberOfReceivesCurrentConnection > 0) {
       this->parent->theCalculator.RenewObject();
       theParser->initialize();
+      theGlobalVariables.Comments.resetComments();
       logWorker << logger::blue << "Created new calculator for connection: "
       << this->numberOfReceivesCurrentConnection << logger::endL;
     }
@@ -4604,9 +4513,6 @@ void WebServer::FigureOutOperatingSystem() {
 
 void WebServer::CheckSystemInstallationOpenSSL() {
   MacroRegisterFunctionWithName("WebServer::CheckSystemInstallationOpenSSL");
-  if (theGlobalVariables.flagRunningApache) {
-    return;
-  }
   if (!theGlobalVariables.flagDatabaseCompiled) {
     return;
   }
@@ -4639,9 +4545,6 @@ void WebServer::CheckSystemInstallationOpenSSL() {
 
 void WebServer::CheckSystemInstallationMongoDB() {
   MacroRegisterFunctionWithName("WebServer::CheckSystemInstallationMongoDB");
-  if (theGlobalVariables.flagRunningApache) {
-    return;
-  }
   if (theGlobalVariables.flagDatabaseCompiled) {
     return;
   }
@@ -4858,7 +4761,6 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv) {
   ////////////////////////////////////////////////////
   theGlobalVariables.flagRunningCommandLine = false;
   theGlobalVariables.flagRunningConsoleTest = false;
-  theGlobalVariables.flagRunningApache = false;
   #ifdef MACRO_use_open_ssl
   theGlobalVariables.flagSSLIsAvailable = true;
   #endif
@@ -4872,19 +4774,8 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv) {
     return;
   }
   theGlobalVariables.initDefaultFolderAndFileNames(theGlobalVariables.programArguments[0]);
-  std::string envRequestMethodApache = WebServer::GetEnvironment("REQUEST_METHOD");
-  if (
-    envRequestMethodApache == "GET" ||
-    envRequestMethodApache == "POST" ||
-    envRequestMethodApache == "HEAD"
-  ) {
-    theGlobalVariables.flagRunningApache = true;
-    return;
-  }
   if (argC < 2) {
-    if (!theGlobalVariables.flagRunningApache) {
-      theGlobalVariables.flagRunningCommandLine = true;
-    }
+    theGlobalVariables.flagRunningCommandLine = true;
     return;
   }
   std::string& secondArgument = theGlobalVariables.programArguments[1];
@@ -5213,7 +5104,6 @@ void GlobalVariables::ConfigurationProcess() {
     << logger::endL;
     theGlobalVariables.flagRunningBuiltInWebServer = true;
     theGlobalVariables.flagRunningCommandLine = false;
-    theGlobalVariables.flagRunningApache = false;
     theGlobalVariables.millisecondsMaxComputation = 30000; // 30 seconds, default
   }
   int reader = 0;
@@ -5338,8 +5228,6 @@ int WebServer::main(int argc, char **argv) {
       return theWebServer.Run();
     } else if (theGlobalVariables.flagRunningConsoleTest) {
       return mainTest(theGlobalVariables.programArguments);
-    } else if (theGlobalVariables.flagRunningApache) {
-      return WebServer::mainApache();
     } else if (theGlobalVariables.flagRunningCommandLine) {
       return WebServer::mainCommandLine();
     }
@@ -5396,66 +5284,6 @@ std::string WebServer::GetEnvironment(const std::string& envVarName) {
   return queryStringPtr;
 }
 
-#include <sys/resource.h> //<- for setrlimit(...) function. Restricts the time the executable can run.
-int WebServer::mainApache() {
-  MacroRegisterFunctionWithName("main_apache");
-  rlimit theLimit;
-  theLimit.rlim_cur = 30;
-  theLimit.rlim_max = 60;
-  setrlimit(RLIMIT_CPU, &theLimit);
-  stOutput.theOutputFunction = nullptr;
-  // stOutput << "Content-Type: text/html\r\nSet-cookie: test=1;\r\n\r\nThe output bytes start here:\n";
-  theGlobalVariables.IndicatorStringOutputFunction = nullptr;
-  theGlobalVariables.flagServerForkedIntoWorker = true;
-  theGlobalVariables.flagComputationStarted = true;
-  theGlobalVariables.millisecondsMaxComputation = 30000; //<-30 second computation time restriction!
-  theWebServer.initializeSignals();
-  CreateTimerThread();
-  theWebServer.CreateNewActiveWorker();
-  WebWorker& theWorker = theWebServer.GetActiveWorker();
-  PointerObjectDestroyer<Calculator> theDestroyer(theParser);
-  theDestroyer.RenewObject();
-  theParser->initialize();
-  std::cin >> theWorker.messageBody;
-  theWebServer.portHTTPSOpenSSL = "443";
-  theWebServer.portHTTP = "80";
-  std::string theRequestMethod = WebServer::GetEnvironment("REQUEST_METHOD");
-  theWorker.cookiesApache = WebServer::GetEnvironment("HTTP_COOKIE");
-  std::string thePort = WebServer::GetEnvironment("SERVER_PORT");
-  theGlobalVariables.IPAdressCaller = WebServer::GetEnvironment("REMOTE_ADDR");
-  theWorker.hostWithPort = WebServer::GetEnvironment("SERVER_NAME") + ":" + thePort;
-  theGlobalVariables.hostWithPort = theWorker.hostWithPort;
-  theGlobalVariables.hostNoPort = theWorker.hostNoPort;
-  std::string theURL = WebServer::GetEnvironment("REQUEST_URI");
-  unsigned numBytesBeforeQuestionMark = 0;
-  for (numBytesBeforeQuestionMark = 0; numBytesBeforeQuestionMark < theURL.size(); numBytesBeforeQuestionMark ++) {
-    if (theURL[numBytesBeforeQuestionMark] == '?') {
-      break;
-    }
-  }
-  theGlobalVariables.DisplayNameExecutable = theURL.substr(0, numBytesBeforeQuestionMark);
-  theWorker.addressGetOrPost = theGlobalVariables.DisplayNameExecutable +
-  "?" + WebServer::GetEnvironment("QUERY_STRING");
-  if (thePort == "443") {
-    theGlobalVariables.flagUsingSSLinCurrentConnection = true;
-    theGlobalVariables.flagSSLIsAvailable = true;
-  }
-  if (theRequestMethod == "GET") {
-    theWorker.requestTypE = theWorker.requestGet;
-  }
-  if (theRequestMethod == "POST") {
-    theWorker.requestTypE = theWorker.requestPost;
-  }
-  theGlobalVariables.flagComputationCompletE = true;
-  StringRoutines::StringSplitExcludeDelimiter(theWorker.cookiesApache, ' ', theWorker.cookies);
-  for (int i = 0; i < theWorker.cookies.size; i ++) {
-    theWorker.cookies[i] = StringRoutines::StringTrimWhiteSpace(theWorker.cookies[i]);
-  }
-  theWorker.ServeClient();
-  theGlobalVariables.flagComputationFinishedAllOutputSentClosing = true;
-  return 0;
-}
-
 std::string HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable() {
   MacroRegisterFunctionWithName("WebWorker::ToStringCalculatorArgumentsHumanReadable");
   if (!theGlobalVariables.UserDebugFlagOn()) {
@@ -5492,7 +5320,7 @@ std::string HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable() {
     out << "Sent with max cache: "
     << theWebServer.addressStartsSentWithCacheMaxAge.ToStringCommaDelimited()
     << "<hr>";
-    out << theWebServer.GetActiveWorker().ToStringMessageUnsafe();
+    out << theWebServer.GetActiveWorker().ToStringMessageShort();
   }
   return out.str();
 }
@@ -5602,9 +5430,8 @@ void WebWorker::QueueBytesForSendingNoHeadeR(const List<char>& bytesToSend, bool
 //    this->SendAllBytes();
 }
 
-void WebWorker::QueueStringForSendingWithHeadeR(const std::string& stringToSend, bool MustSendAll) {
-  MacroRegisterFunctionWithName("WebWorker::QueueStringForSendingWithHeadeR");
-  (void) MustSendAll;
+int WebWorker::WriteToBody(const std::string& stringToSend) {
+  MacroRegisterFunctionWithName("WebWorker::WriteToBody");
   int oldSize = this->remainingBodyToSend.size;
   this->remainingBodyToSend.SetSize(
     this->remainingBodyToSend.size + static_cast<signed>(stringToSend.size())
@@ -5612,6 +5439,7 @@ void WebWorker::QueueStringForSendingWithHeadeR(const std::string& stringToSend,
   for (unsigned i = 0; i < stringToSend.size(); i ++) {
     this->remainingBodyToSend[static_cast<signed>(i) + oldSize] = stringToSend[i];
   }
+  return 0;
 }
 
 void WebWorker::QueueStringForSendingNoHeadeR(const std::string& stringToSend, bool MustSendAll) {

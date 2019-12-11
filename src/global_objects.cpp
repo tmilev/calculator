@@ -63,10 +63,8 @@ logger logSuccessfulForks("/LogFiles/" + GlobalVariables::GetDateForLogFiles() +
 Calculator* theParser = nullptr;
 FormatExpressions consoleFormat;
 Crasher crash;
-StdoutClass stOutput;
 
 void InitializeGlobalObjects() {
-  //stOutput << "Content-Type: text/html\n\n";
   theGlobalVariables.processType = ProcessTypes::server;
   theGlobalVariables.flagIsChildProcess = false;
   InitializeTimeR();
@@ -74,19 +72,13 @@ void InitializeGlobalObjects() {
   theGlobalVariables.pointerCallSystemNoOutput = &CallSystemWrapperNoOutput;
   theGlobalVariables.pointerCallSystemWithOutput = &CallSystemWrapperReturnStandardOutput;
   theGlobalVariables.pointerCallChDir = &CallChDirWrapper;
-  //stOutput << "address of get elapsed seconds: " << (int) &GetElapsedTimeInSeconds;
-  //Change the below line to modify the computation time of the calculator.
   consoleFormat.flagUseHTML = false;
   consoleFormat.flagUseLatex = false;
 }
 
 void HtmlRoutines::MakeReportIndicatorFile(const std::string& input) {
-  //calling stOutput forbidden! stOutput itself calls HtmlRoutines::MakeReportIndicatorFile.
   static int counter = - 1;
   counter ++;
-  //  if (counter%10!= 0)
-  //    return;
-  //std::cout << "Making report " << counter << " in file " << theGlobalVariables.PhysicalNameIndicatorWithPath << "<br>";
   std::fstream theFile;
   FileOperations::OpenFileCreateIfNotPresentVirtual(
     theFile, "result/output.html", false, true, false
@@ -98,7 +90,7 @@ void HtmlRoutines::MakeReportIndicatorFile(const std::string& input) {
 }
 
 void HtmlRoutines::MakeStdCoutReport(const std::string& input) {
-  stOutput << input;
+  theGlobalVariables.Comments << input;
   HtmlRoutines::MakeReportIndicatorFile(input);
 }
 

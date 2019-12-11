@@ -11,12 +11,6 @@ static ProjectInformationInstance projectInfoInstanceHtmlInterpretationInterface
   __FILE__, "Routines for calculus teaching: calculator exam mode."
 );
 
-std::string HtmlInterpretation::GetProblemSolutionString() {
-  JSData result;
-  result = HtmlInterpretation::GetProblemSolutionJSON();
-  return result.ToString(false);
-}
-
 JSData HtmlInterpretation::GetProblemSolutionJSON() {
   MacroRegisterFunctionWithName("HtmlInterpretation::GetProblemSolution");
   int64_t startMilliseconds = theGlobalVariables.GetElapsedMilliseconds();
@@ -216,7 +210,6 @@ std::string HtmlInterpretation::GetCommentsInterpretation(
   theFormat.flagIncludeExtraHtmlDescriptionsInPlots = false;
   theInterpreterWithAdvice.theObjectContainer.resetPlots();
   if (indexShift >= theInterpreterWithAdvice.theProgramExpression.size()) {
-    stOutput << "<br>DEBUG: something is very wrong with indexshift in comments!";
     return "";
   }
   const Expression& currentE = theInterpreterWithAdvice.theProgramExpression[indexShift][1];
@@ -237,11 +230,6 @@ std::string HtmlInterpretation::GetCommentsInterpretation(
     }
   }
   return out.str();
-}
-
-std::string HtmlInterpretation::submitAnswersPreviewString() {
-  JSData result = HtmlInterpretation::submitAnswersPreviewJSON();
-  return result.ToString(false);
 }
 
 JSData HtmlInterpretation::submitAnswersPreviewJSON() {
@@ -411,37 +399,38 @@ JSData HtmlInterpretation::submitAnswersPreviewJSON() {
   return result;
 }
 
-std::string HtmlInterpretation::ClonePageResult() {
+JSData HtmlInterpretation::ClonePageResult() {
   MacroRegisterFunctionWithName("HtmlInterpretation::ClonePageResult");
+  JSData result;
   if (
     !theGlobalVariables.flagLoggedIn ||
     !theGlobalVariables.UserDefaultHasAdminRights() ||
     !theGlobalVariables.flagUsingSSLinCurrentConnection
   ) {
-    return "<b>Cloning problems allowed only for logged-in admins under ssl connection. </b>";
+    result[WebAPI::result::error]= "Cloning problems allowed only for logged-in admins under ssl connection.";
+    return result;
   }
   std::string fileNameTarget = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput(WebAPI::problem::fileNameTarget), false);
   std::string fileNameToBeCloned = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput(WebAPI::problem::fileName), false);
   std::stringstream out;
   std::string startingFileString;
-  JSData result;
   if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly(fileNameToBeCloned, startingFileString, &out)) {
     out << "Could not find input file: " << fileNameToBeCloned;
     result[WebAPI::result::error] = out.str();
-    return result.ToString(false);
+    return result;
   }
   std::fstream theFile;
   if (FileOperations::FileExistsVirtualCustomizedReadOnly(fileNameTarget, nullptr)) {
     out << "Output file: " << fileNameTarget << " already exists. ";
     result[WebAPI::result::error] = out.str();
-    return out.str();
+    return result;
   }
   if (!FileOperations::OpenFileVirtualCustomizedWriteOnlyCreateIfNeeded(
     theFile, fileNameTarget, false, false, false, &out
   )) {
     out << "Failed to open output file: " << fileNameTarget << ".";
     result[WebAPI::result::error] = out.str();
-    return out.str();
+    return result;
   }
   theFile << startingFileString;
   theFile.close();
@@ -455,7 +444,7 @@ std::string HtmlInterpretation::ClonePageResult() {
     out << "Wrote " << startingFileString.size() << " bytes to file: " << fileNameTarget;
   }
   result[WebAPI::result::resultHtml] = out.str();
-  return result.ToString(false);
+  return result;
 }
 
 void HtmlInterpretation::BuildHtmlJSpage(bool appendBuildHash) {
@@ -680,7 +669,7 @@ void CourseList::LoadFromString(const std::string& input, std::stringstream* com
   }
 }
 
-std::string HtmlInterpretation::GetSelectCourseJSON() {
+JSData HtmlInterpretation::GetSelectCourseJSON() {
   MacroRegisterFunctionWithName("HtmlInterpretation::GetSelectCourseJSON");
   JSData output;
   std::stringstream comments;
@@ -694,8 +683,8 @@ std::string HtmlInterpretation::GetSelectCourseJSON() {
   )) {
     comments << "Failed to fetch available courses from /coursesavailable/default.txt. "
     << commentsOnFailure.str();
-    output["error"] = comments.str();
-    return output.ToString(false);
+    output[WebAPI::result::error] = comments.str();
+    return output;
   }
   CourseList theCourses;
   theCourses.LoadFromString(theTopicFile, &comments);
@@ -704,7 +693,7 @@ std::string HtmlInterpretation::GetSelectCourseJSON() {
     Course& currentCourse = theCourses.theCourses[i];
     output["courses"].theList.AddOnTop(currentCourse.ToJSON());
   }
-  return output.ToString(false);
+  return output;
 }
 
 std::string HtmlInterpretation::GetHtmlTagWithManifest() {
@@ -765,16 +754,18 @@ std::string HtmlInterpretation::GetPageFromTemplate() {
   return out.str();
 }
 
-std::string HtmlInterpretation::GetTopicTableJSON() {
+JSData HtmlInterpretation::GetTopicTableJSON() {
   MacroRegisterFunctionWithName("HtmlInterpretation::GetTopicTableJSON");
   std::stringstream out;
   CalculatorHTML thePage;
   std::stringstream comments;
   thePage.fileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
   thePage.topicListFileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("topicList"), false);
+  JSData result;
   if (!thePage.LoadAndParseTopicList(out)) {
     out << "Failed to load and parse topic list.";
-    return out.str();
+    result[WebAPI::result::error] = out.str();
+    return result;
   }
   if (thePage.LoadMe(true, theGlobalVariables.GetWebInput("randomSeed"), &comments)) {
     thePage.ComputeTopicListAndPointsEarned(comments);
@@ -784,8 +775,7 @@ std::string HtmlInterpretation::GetTopicTableJSON() {
     << "<br>Comments:<br> " << comments.str();
     comments << "\"";
   }
-  out << thePage.ToStringTopicListJSON();
-  return out.str();
+  return thePage.ToStringTopicListJSON();
 }
 
 void HtmlInterpretation::GetJSDataUserInfo(JSData& outputAppend, const std::string& comments) {
@@ -837,11 +827,11 @@ void HtmlInterpretation::GetJSDataUserInfo(JSData& outputAppend, const std::stri
   outputAppend[DatabaseStrings::labelSectionsTaught] = sectionsTaught;
 }
 
-std::string HtmlInterpretation::GetJSONUserInfo(const std::string& comments) {
+JSData HtmlInterpretation::GetJSONUserInfo(const std::string& comments) {
   MacroRegisterFunctionWithName("HtmlInterpretation::GetJSONUserInfo");
   JSData output;
   HtmlInterpretation::GetJSDataUserInfo(output, comments);
-  return output.ToString(false);
+  return output;
 }
 
 std::string HtmlInterpretation::GetJSONFromTemplate() {
@@ -873,12 +863,13 @@ std::string HtmlInterpretation::GetJSONFromTemplate() {
 
 extern logger logWorker;
 
-std::string HtmlInterpretation::GetExamPageJSON() {
+JSData HtmlInterpretation::GetExamPageJSON() {
   MacroRegisterFunctionWithName("HtmlInterpretation::GetExamPageJSON");
   std::stringstream out;
+  JSData output;
   if (!theGlobalVariables.flagLoggedIn && theGlobalVariables.userCalculatorRequestType == "scoredQuizJSON") {
-    out << "<b style ='color:red'>Scored quiz requires login</b>";
-    return out.str();
+    output[WebAPI::result::error] = "Scored quiz requires login";
+    return output;
   }
   CalculatorHTML theFile;
   theFile.flagDoPrependProblemNavigationBar = false;
@@ -894,7 +885,6 @@ std::string HtmlInterpretation::GetExamPageJSON() {
   out << problemBody;
   std::string commentsWebserver = HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
   std::string commentsProblem = errorAndDebugStream.str();
-  JSData output;
   output[WebAPI::problem::content] = HtmlRoutines::ConvertStringToURLString(out.str(), false);
   if (commentsWebserver != "") {
     output[WebAPI::commentsServer] = commentsWebserver;
@@ -924,18 +914,18 @@ std::string HtmlInterpretation::GetExamPageJSON() {
       output["randomSeed"] = randomSeedStream.str();
     }
   }
-  return output.ToString(false, false);
+  return output;
 }
 
-std::string HtmlInterpretation::GetEditPageJSON() {
+JSData HtmlInterpretation::GetEditPageJSON() {
   MacroRegisterFunctionWithName("HtmlInterpretation::GetEditPageJSON");
   JSData output;
   if (
-    (!theGlobalVariables.flagLoggedIn || !theGlobalVariables.UserDefaultHasAdminRights()) &&
-    !theGlobalVariables.flagRunningApache
+    !theGlobalVariables.flagLoggedIn ||
+    !theGlobalVariables.UserDefaultHasAdminRights()
   ) {
-    output["error"] = "Only logged-in admins are allowed to edit pages.";
-    return output.ToString(false);
+    output[WebAPI::result::error] = "Only logged-in admins are allowed to edit pages.";
+    return output;
   }
   CalculatorHTML theFile;
   theFile.LoadFileNames();
@@ -944,14 +934,14 @@ std::string HtmlInterpretation::GetEditPageJSON() {
     std::stringstream errorStream;
     errorStream << " <b>Failed to load file: " << theFile.fileName << ", perhaps the file does not exist. </b>"
     << failureStream.str();
-    output["error"] = errorStream.str();
-    return output.ToString(false);
+    output[WebAPI::result::error] = errorStream.str();
+    return output;
   }
   if (!theFile.ParseHTML(&failureStream)) {
     std::stringstream errorStream;
     errorStream << "<b>Failed to parse file: " << theFile.fileName
     << ".</b> Details:<br>" << failureStream.str();
-    output["error"] = errorStream.str();
+    output[WebAPI::result::error] = errorStream.str();
     //return output.ToString(false);
   }
   HashedList<std::string, MathRoutines::HashString> theAutocompleteKeyWords;
@@ -979,21 +969,11 @@ std::string HtmlInterpretation::GetEditPageJSON() {
   }
   output["autoComplete"] = theAutoCompleteWordsJS;
   output["content"] = HtmlRoutines::ConvertStringToURLString(theFile.inputHtml, false);
-  return output.ToString(false);
+  return output;
 }
 
-std::string HtmlInterpretation::SubmitAnswersString() {
-  JSData result;
-  result = HtmlInterpretation::SubmitAnswersJSON(theGlobalVariables.GetWebInput("randomSeed"), nullptr, true);
-  return result.ToString(false);
-}
-
-std::string HtmlInterpretation::SubmitAnswersString(
-  const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake
-) {
-  JSData result;
-  result = HtmlInterpretation::SubmitAnswersJSON(inputRandomSeed, outputIsCorrect, timeSafetyBrake);
-  return result.ToString(false);
+JSData HtmlInterpretation::SubmitAnswersJSON() {
+  return HtmlInterpretation::SubmitAnswersJSON(theGlobalVariables.GetWebInput("randomSeed"), nullptr, true);
 }
 
 JSData HtmlInterpretation::SubmitAnswersJSON(
@@ -1239,12 +1219,6 @@ JSData HtmlInterpretation::SubmitAnswersJSON(
     }
     if (theProblem.flagIsForReal) {
       std::stringstream comments;
-      //if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
-      //  stOutput << "<hr>DEBUG: adding prob data for file name: " << theProblem.fileName
-      //  << "<br>"
-      //  << currentProblemData.ToString() << "<br> into:<br> "
-      //  << theUser.theProblemData.GetValueCreateIfNotPresent(theProblem.fileName).ToString()
-      //  << "<hr>";
       theUser.SetProblemData(theProblem.fileName, currentProblemData);
       if (!theUser.StoreProblemDataToDatabaseJSON(&comments)) {
         output << "<tr><td><b>This shouldn't happen and may be a bug: failed to store your answer in the database. "
@@ -1376,8 +1350,6 @@ std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressW
     out << "<b>Only admins may add users, under ssl connection. </b>";
     return out.str();
   }
-  //stOutput << "<br>DEBUG: userlist: " << theGlobalVariables.GetWebInput("userList") << "<br>";
-  //stOutput << "DEBUG: userlist: " << theGlobalVariables.GetWebInput("passwordList") << "<br>";
   std::string inputEmails = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("userList"), false);
   std::string userPasswords = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("passwordList"), false);
   std::string userGroup =
@@ -1422,11 +1394,11 @@ const std::string CalculatorHTML::BugsGenericMessage =
 "Please take a screenshot, copy the link address and send those along "
 "with a short explanation to the administrator of the web site. ";
 
-std::string HtmlInterpretation::GetAnswerOnGiveUp() {
+JSData HtmlInterpretation::GetAnswerOnGiveUp() {
   return HtmlInterpretation::GetAnswerOnGiveUp(theGlobalVariables.GetWebInput("randomSeed"));
 }
 
-std::string HtmlInterpretation::GetAnswerOnGiveUp(
+JSData HtmlInterpretation::GetAnswerOnGiveUp(
   const std::string& inputRandomSeed, std::string* outputNakedAnswer, bool* outputDidSucceed
 ) {
   MacroRegisterFunctionWithName("CalculatorHTML::GetAnswerOnGiveUp");
@@ -1448,21 +1420,21 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp(
     << " <b>Could not load problem, this may be a bug. "
     << CalculatorHTML::BugsGenericMessage << "</b>";
     result[WebAPI::result::error] = errorStream.str();
-    return result.ToString(false);
+    return result;
   }
   if (theProblem.flagIsForReal) {
     errorStream << " <b>Not allowed to show answer of a problem being tested for real. </b>";
     result[WebAPI::result::error] = errorStream.str();
-    return result.ToString(false);
+    return result;
   }
   if (inputRandomSeed == "") {
     result[WebAPI::result::error] = "<b>I could not figure out the exercise problem (missing random seed). </b>";
-    return result.ToString(false);
+    return result;
   }
   if (!theProblem.ParseHTMLPrepareCommands(&errorStream)) {
     errorStream << "<br><b>Problem preparation failed.</b>";
     result[WebAPI::result::error] = errorStream.str();
-    return result.ToString(false);
+    return result;
   }
   std::string lastStudentAnswerID;
   MapList<std::string, std::string, MathRoutines::HashString>& theArgs = theGlobalVariables.webArguments;
@@ -1483,7 +1455,7 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp(
     }
     result[WebAPI::result::millisecondsComputation] = theGlobalVariables.GetElapsedMilliseconds() - startTimeInMilliseconds;
     result[WebAPI::result::error] = errorStream.str();
-    return result.ToString(false);
+    return result;
   }
   Answer& currentA = theProblem.theProblemData.theAnswers.theValues[indexLastAnswerId];
   if (currentA.commandsNoEnclosureAnswerOnGiveUpOnly == "") {
@@ -1492,7 +1464,8 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp(
     if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasProblemComposingRights()) {
       out << "<br>Answer status: " << currentA.ToString();
     }
-    return out.str();
+    result[WebAPI::result::error] = out.str();
+    return result;
   }
   Calculator theInterpreteR;
   theInterpreteR.initialize();
@@ -1519,7 +1492,7 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp(
     result[WebAPI::result::resultHtml] = out.str();
     int64_t ellapsedTime = theGlobalVariables.GetElapsedMilliseconds() - startTimeInMilliseconds;
     result[WebAPI::result::millisecondsComputation] = ellapsedTime;
-    return result.ToString(false);
+    return result;
   }
   if (theInterpreteR.flagAbortComputationASAP) {
     out << "<span style =\"color:red\"><b>Failed to evaluate the default answer. "
@@ -1538,7 +1511,7 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp(
     int64_t ellapsedTime = theGlobalVariables.GetElapsedMilliseconds() - startTimeInMilliseconds;
     result[WebAPI::result::millisecondsComputation] = ellapsedTime;
     result[WebAPI::result::resultHtml] = out.str();
-    return result.ToString(false);
+    return result;
   }
   FormatExpressions theFormat;
   theFormat.flagExpressionIsFinal = true;
@@ -1607,16 +1580,16 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp(
     << "<hr>Raw input: <br>" << theInterpreteR.inputString;
   }
   result[WebAPI::result::resultHtml] = out.str();
-  return result.ToString(false);
+  return result;
 }
 
-std::string HtmlInterpretation::GetAccountsPageJSON(const std::string& hostWebAddressWithPort) {
+JSData HtmlInterpretation::GetAccountsPageJSON(const std::string& hostWebAddressWithPort) {
   MacroRegisterFunctionWithName("HtmlInterpretation::GetAccountsPageJSON");
   (void) hostWebAddressWithPort;
   JSData output;
   if (!theGlobalVariables.flagDatabaseCompiled) {
     output[WebAPI::result::error] = "Database not available (cannot get accounts). ";
-    return output.ToString(false);
+    return output;
   }
   if (
     !theGlobalVariables.UserDefaultHasAdminRights() ||
@@ -1624,7 +1597,7 @@ std::string HtmlInterpretation::GetAccountsPageJSON(const std::string& hostWebAd
     !theGlobalVariables.flagUsingSSLinCurrentConnection
   ) {
     output[WebAPI::result::error] = "Must be logged-in admin over ssl.";
-    return output.ToString(false);
+    return output;
   }
   std::stringstream commentsOnFailure;
   JSData findStudents;
@@ -1646,17 +1619,17 @@ std::string HtmlInterpretation::GetAccountsPageJSON(const std::string& hostWebAd
     DatabaseStrings::tableUsers, findStudents, students, columnsToRetain, - 1, &totalStudents, &commentsOnFailure
   )) {
     output["error"] = "Failed to load user info. Comments: " + commentsOnFailure.str();
-    return output.ToString(false);
+    return output;
   }
   if (!Database::FindFromJSONWithProjection(
     DatabaseStrings::tableUsers, findAdmins, admins, columnsToRetain, - 1, nullptr, &commentsOnFailure
   )) {
     output["error"] = "Failed to load user info. Comments: " + commentsOnFailure.str();
-    return output.ToString(false);
+    return output;
   }
   output["admins"] = admins;
   output["students"] = students;
-  return output.ToString(false);
+  return output;
 }
 
 std::string HtmlInterpretation::GetAccountsPageBody(const std::string& hostWebAddressWithPort) {
@@ -2060,7 +2033,6 @@ void UserCalculator::ComputePointsEarned(
     currentP.adminData.GetWeightFromCoursE(this->courseComputed, currentWeight);
     if (!currentP.flagProblemWeightIsOK) {
       currentWeight = 0;
-      //stOutput << "Debug: weight not ok: " << problemName << "<br>";
     }
     for (int j = 0; j < currentP.theAnswers.size(); j ++) {
       if (currentP.theAnswers.theValues[j].numCorrectSubmissions > 0) {

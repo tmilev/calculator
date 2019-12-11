@@ -139,8 +139,6 @@ bool CalculatorHTML::LoadProblemInfoFromURLedInputAppend(
     if (!HtmlRoutines::ChopCGIString(currentProbString, currentKeyValues, commentsOnFailure)) {
       return false;
     }
-    //stOutput << "<hr>Debug: reading problem info from: " << currentProbString << " resulted in pairs: "
-    //<< currentKeyValues.ToStringHtml();
     std::string deadlineString = HtmlRoutines::ConvertURLStringToNormal(
       currentKeyValues.GetValueCreate(DatabaseStrings::labelDeadlines), false
     );
@@ -1235,7 +1233,6 @@ bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::
   theInterpreter.Evaluate(this->theProblemData.commandsGenerateProblem);
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds() - startTime);
   this->timeIntermediateComments.LastObject()->AddOnTop("calculator evaluation time");
-  //stOutput << "<hr>Fter eval: " << theInterpreter.outputString;
   bool result = !theInterpreter.flagAbortComputationASAP && theInterpreter.syntaxErrors == "";
   if (!result && comments != nullptr) {
     *comments << "<br>Failed to interpret your file. "
@@ -2411,7 +2408,6 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments) {
         }
         secondToLast.resetAllExceptContent();
       }
-      //stOutput << "<hr>Rule 3: processed: " << secondToLast.ToStringDebug() << "<hr>";
       eltsStack.RemoveLastObject();
       continue;
     }
@@ -3284,7 +3280,7 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem(
   excludedTags.AddOnTop("randomSeed");
   out << theGlobalVariables.ToStringCalcArgsNoNavigation(&excludedTags)
   << "courseHome=" << theGlobalVariables.GetWebInput("courseHome") << "&";
-  if (!theGlobalVariables.flagRunningApache && this->fileName != "") {
+  if (this->fileName != "") {
     out << WebAPI::problem::fileName << "=" << HtmlRoutines::ConvertStringToURLString(this->fileName, false) << "&";
   } else {
     out << WebAPI::problem::fileName << "=" << HtmlRoutines::ConvertStringToURLString(theGlobalVariables.GetWebInput(WebAPI::problem::fileName), false)
@@ -3931,13 +3927,14 @@ void CalculatorHTML::InterpretEditPagePanel(SyntacticElementHTML& inputOutput) {
   this->flagDoPrependEditPagePanel = false;
 }
 
-std::string CalculatorHTML::ToStringTopicListJSON() {
+JSData CalculatorHTML::ToStringTopicListJSON() {
   MacroRegisterFunctionWithName("CalculatorHTML::ToStringTopicListJSON");
   std::stringstream out;
-  if (!this->LoadAndParseTopicList(out)) {
-    return "\"" + out.str() + "\"";
-  }
   JSData output, topicBundles;
+  if (!this->LoadAndParseTopicList(out)) {
+    output[WebAPI::result::error] = out.str();
+    return output;
+  }
   topicBundles.theType = JSData::token::tokenArray;
   for (int i = 0; i < this->loadedTopicBundles.size; i ++) {
     topicBundles[i] = this->loadedTopicBundles[i];
@@ -3950,7 +3947,7 @@ std::string CalculatorHTML::ToStringTopicListJSON() {
       output["children"].theList.AddOnTop(currentElt.ToJSON(*this));
     }
   }
-  return output.ToString(false);
+  return output;
 }
 
 void CalculatorHTML::InterpretTableOfContents(SyntacticElementHTML& inputOutput) {

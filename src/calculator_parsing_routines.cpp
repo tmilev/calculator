@@ -1157,8 +1157,6 @@ bool Calculator::ReplaceMatrixEXByMatrixX() {
   SyntacticElement& theMatElt = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3];
   SyntacticElement& theElt = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
   theMatElt.dataList.LastObject()->AddChildOnTop(theElt.theData);
-  //stOutput << "<hr>DEBUG: Calculator::ReplaceMatrixEXByMatrixXXX: "
-  //<< theElt.theData.ToString();
   if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceMatrixEXByMatrixX]";
   }
@@ -1610,7 +1608,6 @@ bool Calculator::ReplaceO_2O_1E_3XbyEX() {
 }
 
 bool Calculator::ReplaceXEEXByEXusingO(int inputOperation) {
-  //stOutput << "<b>Here iam!</b>";
   SyntacticElement& middle = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3];
   SyntacticElement& left  =  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 4];
   SyntacticElement& right =  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
@@ -1629,7 +1626,6 @@ bool Calculator::ReplaceXEEXByEXusingO(int inputOperation) {
 }
 
 bool Calculator::ReplaceXEEByEusingO(int inputOperation) {
-  //stOutput << "<b>Here iam!</b>";
   SyntacticElement& right =  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1];
   SyntacticElement& middle = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
   SyntacticElement& left  =  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3];
@@ -1956,7 +1952,7 @@ bool Calculator::ApplyOneRule() {
     return this->PopTopSyntacticStack();
   }
   if (secondToLastS == "%" && lastS == "LogFull") {
-    stOutput
+    this->Comments
     << "<hr>Requested a full log of the evaluation process.<hr>";
     this->flagLogFullTreeCrunching = true;
     this->PopTopSyntacticStack();
@@ -2467,8 +2463,6 @@ bool Calculator::ApplyOneRule() {
   ) {
     return this->ReplaceXByCon(this->controlSequences.GetIndexIMustContainTheObject("MakeSequence"));
   }
-  //else
-  //  stOutput << "lastS is sequence but lastE is |" << lastE.theData.ToString() << "|";
   if (thirdToLastS == "\\sqrt" && secondToLastS == "Expression") {
     return this->ReplaceSqrtEXByEX();
   }

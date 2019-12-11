@@ -91,8 +91,13 @@ public:
   int ProcessFolderOrFile();
   int ProcessFolder();
   int ProcessFile();
+  int ProcessFileDoesntExist();
+  int ProcessFileCantOpen();
+  int ProcessFileTooLarge(long fileSize);
+  int ProcessFileLinkApache();
+
   int ProcessChangePassword(const std::string& reasonForNoAuthentication);
-  int SetEmail(const std::string& input);
+  JSData SetEmail(const std::string& input);
   bool DoSetEmail(
     UserCalculatorData& inputOutputUser,
     std::stringstream* commentsOnFailure,
@@ -102,7 +107,6 @@ public:
   int ProcessDatabaseJSON();
   int ProcessDatabaseDeleteEntry();
   int ProcessDatabaseModifyEntry();
-  int ProcessAccounts();
   int ProcessAccountsJSON();
   int ProcessActivateAccount();
   int ProcessScores();
@@ -112,7 +116,6 @@ public:
   int ProcessScoresInCoursePage();
   int ProcessAssignTeacherToSection();
   int ProcessExamPageJSON();
-  int ProcessTemplate();
   int ProcessTemplateJSON();
   int ProcessLoginUserInfo(const std::string &comments);
   int ProcessSelectCourseJSON();
@@ -155,7 +158,10 @@ public:
   bool ExtractArgumentsFromCookies(std::stringstream& argumentProcessingFailureComments);
   void WriteAfterTimeoutProgress(const std::string& input, bool forceFileWrite);
   static void WriteAfterTimeoutProgressStatic(const std::string& input);
-  void PauseIfRequested() ;
+  void PauseIfRequested();
+  // writes json to body, sanitizes.
+  int WriteToBodyJSON(const JSData& result);
+  int WriteToBody(const std::string& bytesToAppend);
   void WriteAfterTimeoutResult();
   static void WriteAfterTimeout(
     const std::string& input,
@@ -169,7 +175,6 @@ public:
   static void WriteAfterTimeoutCrash();
   void OutputShowIndicatorOnTimeout(const std::string& message);
   void GetIndicatorOnTimeout(JSData &output, const std::string& message);
-  void QueueStringForSendingWithHeadeR(const std::string& stringToSend, bool MustSendAll = false);
   void QueueStringForSendingNoHeadeR(const std::string& stringToSend, bool MustSendAll = false);
   void QueueBytesForSendingNoHeadeR(const List<char>& bytesToSend, bool MustSendAll = false);
   bool ShouldDisplayLoginPage();
@@ -188,17 +193,18 @@ public:
   std::string GetMIMEtypeFromFileExtension(const std::string& fileExtension);
 
   std::string GetChangePasswordPagePartOne(bool& outputDoShowPasswordChangeField);
-  std::string GetClonePageResult();
+  JSData GetClonePageResult();
   std::string GetModifyProblemReport();
-  std::string GetSignUpRequestResult();
+  JSData GetSignUpRequestResult();
   std::string GetAuthenticationToken(const std::string& reasonForNoAuthentication = "");
   std::string GetBrowseProblems();
-  std::string GetDatabaseJSON();
+  JSData GetDatabaseJSON();
   std::string GetDatabaseDeleteOneItem();
   std::string GetAddUserEmails();
   std::string GetHtmlHiddenInputs(bool includeUserName, bool includeAuthenticationToken);
   void SetHeaderOKNoContentLength(const std::string& extraHeader, const std::string& contentType = "text/html");
   void SetHeader(const std::string& httpResponseNoTermination, const std::string& remainingHeaderNoTermination);
+
   std::string GetHeaderConnectionClose();
   std::string GetHeaderConnectionKeepAlive();
   std::string GetHeaderSetCookie();
@@ -214,9 +220,8 @@ public:
   enum requestTypes {requestUnknown, requestGet, requestPost, requestHead, requestChunked};
   std::string ToStringAddressRequest() const;
   std::string ToStringStatus() const;
-  std::string ToStringMessageUnsafe(bool useHTML = true) const;
-  std::string ToStringMessageShortUnsafe(FormatExpressions* theFormat = nullptr) const;
-  std::string ToStringMessageFullUnsafe(bool useHTML = true) const;
+  std::string ToStringMessageShort() const;
+  std::string ToStringMessageFull() const;
   void ParseMessageHead();
   void ExtractHostInfo();
   void ExtractAddressParts();
@@ -314,7 +319,6 @@ public:
   static void SignalActiveWorkerDoneReleaseEverything();
   static void FlushActiveWorker();
   static void OutputShowIndicatorOnTimeoutStatic(const std::string &message);
-  static void SendStringThroughActiveWorker(const std::string& input);
   static void fperror_sigaction[[noreturn]](int signal);
   void ReapChildren();
   static void Signal_SIGCHLD_handler(int s);
@@ -345,7 +349,6 @@ public:
   static void TurnProcessMonitoringOff();
   static std::string GetEnvironment(const std::string& envVarName);
   static int main(int argc, char** argv);
-  static int mainApache();
   static int mainCommandLine();
 };
 

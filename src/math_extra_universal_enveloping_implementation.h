@@ -179,9 +179,8 @@ void ElementUniversalEnveloping<coefficient>::Simplify(const coefficient& theRin
   coefficient currentCoeff;
   outpuT.MakeZero(*this->owner);
   for (; this->size() > 0;) {
-   // FormatExpressions tempFormat;
+    // FormatExpressions tempFormat;
     //tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
-    //stOutput << "<hr>(At the start of reduction cycle) *this+output - (At the end of reduction cycle)(*this+output)=<br>" << (*this+outpuT).ToString(&tempFormat);
     this->PopMonomial(this->size() - 1, tempMon, currentCoeff);
     bool reductionOccurred = false;
     for (int i = 0; i < tempMon.generatorsIndices.size - 1; i ++) {
@@ -644,11 +643,9 @@ void ElementUniversalEnveloping<coefficient>::MakeCasimir(SemisimpleLieAlgebra& 
 //        killingForm.elements[i][j] += theWeyl.RootScalarCartanRoot(tempRoot1, theWeyl.RootSystem.TheObjects[k])* theWeyl.RootScalarCartanRoot(tempRoot2, theWeyl.RootSystem.TheObjects[k]);
 //    }
 //  }
-//  stOutput << killingForm.ToString(true, false);
 //  killingForm.Invert(theGlobalVariables);
 //  killingForm.ComputeDebugString();
 //  out << killingForm.ToString(true, false);
-//  stOutput << killingForm.ToString(true, false);
 
 
   ElementUniversalEnveloping<coefficient> tempElt1, tempElt2;
@@ -712,11 +709,6 @@ void ElementUniversalEnveloping<coefficient>::MakeCasimir(SemisimpleLieAlgebra& 
 // Check that the ninja formula is correct:
 //  FormatExpressions tempPolyFormat;
 //  tempPolyFormat.MakeAlphabetArbitraryWithIndex("g", "h");
-//  stOutput << "Killing divided by trace ratio:" << theWeyl.GetKillingDivTraceRatio().ToString();
-//  stOutput << "<br>casimir: " << this->ToString(false, false, theGlobalVariables, tempPolyFormat);
-//  stOutput << "<br>check element: " << checkElement.ToString(false, false, theGlobalVariables, tempPolyFormat);
-
-//  stOutput << "<br> check element minus casimir =" << checkElement.ToString(false, false, theGlobalVariables, tempPolyFormat);
   //this->DebugString= out.str();
 //  Vector<Rational> tempRoot;
 //  for (int i = 0; i < theDimension; i ++)
@@ -1561,8 +1553,7 @@ void MonomialUniversalEnvelopingOrdered<coefficient>::CommuteConsecutiveIndicesR
   int powerDroP = 0;
 //  if (this->flagAnErrorHasOccurredTimeToPanic)
 //  if (this->ToString() == "2f_{5}f_{-5}f_{-4}" || this->ToString() == "2f_{11}f_{-4}")
-//  { stOutput << "here we are!";
-//    this->flagAnErrorHasOccurredTimeToPanic = true;
+//  { this->flagAnErrorHasOccurredTimeToPanic = true;
 //  }
 
   coefficient acquiredCoefficienT;
@@ -1644,10 +1635,6 @@ void MonomialUniversalEnvelopingOrdered<coefficient>::CommuteConsecutiveIndicesL
   theLeftPower = this->Powers.TheObjects[theIndeX];
   theLeftPower -= 1;
   int powerDrop = 0;
- /* if (this->ToString() == "2f_{5}f_{-5}f_{-4}" || this->ToString() == "2f_{11}f_{-4}") {
-    stOutput << "here we are!";
-    this->flagAnErrorHasOccurredTimeToPanic = true;
-  }*/
 
   coefficient acquiredCoefficient;
   acquiredCoefficient = this->Coefficient;

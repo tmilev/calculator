@@ -121,8 +121,6 @@ bool VectorSpace<coefficient>::AddVector(const Vector<coefficient>& v) {
 
 template <typename coefficient>
 bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v) {
-  //stOutput << "AddVectorDestructively: v = " << v << " matrix is" << "\n";
-  //stOutput << fastbasis.ToString(&consoleFormat) << "\n";
   if (fastbasis.NumRows == 0) {
     this->fastbasis.MakeZeroMatrix(v.size);
     this->degree = v.size;
@@ -142,8 +140,6 @@ bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v) {
     }
     rank = 1;
     this->fastbasis.NumRows = 1;
-//    stOutput << "starting matrix" << "\n";
-//    stOutput << fastbasis.ToString(&consoleFormat) << "\n";
     return true;
   }
   int jj = 0;
@@ -195,8 +191,6 @@ bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v) {
     fastbasis.elements[fastbasis.NumRows - 1][j] = v[j];
   }
   rank ++;
-//  stOutput << "tacked on the end" << "\n";
-//  stOutput << fastbasis.ToString(&consoleFormat) << "\n";
   return true;
 }
 
@@ -355,14 +349,8 @@ VectorSpace<coefficient> VectorSpace<coefficient>::OrthogonalComplement(
   }
   if (ambient && ambient->rank < ambient->degree) {
     VectorSpace<coefficient> W = V.Intersection(*ambient);
-    //stOutput << "Orthogonal complement of rank " << this->rank << " in rank " << ambient->rank << " is rank " << W.rank << "\n";
-    //if (ambient->rank - this->rank - W.rank != 0)
-    //  stOutput << "*ambient is not *this (+) W" << "\n";
     return W;
   }
-  //stOutput << "Orthogonal complement of rank " << this->rank << " is rank " << V.rank << "\n";
-  //if (this->degree - this->rank - V.rank != 0)
-  //  stOutput << "Error: ranks of subspace and orthogonal complement should sum to degree" << "\n";
   return V;
 }
 

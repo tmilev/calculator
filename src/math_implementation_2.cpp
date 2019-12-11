@@ -421,7 +421,6 @@ void LargeIntegerUnsigned::DivPositive(
         quotientOutput.AddShiftedUIntSmallerThanCarryOverBound(static_cast<unsigned>(currentQuotientDigit), quotientDigitIndex);
         break;
       }
-      //stOutput << "<br>Restoring divisor";
       remainderOutput = remainderBackup;
       divisorLeadingDigitPlusSlack ++;
       if (divisorLeadingDigitPlusSlack > divisorLeadingDigit + 1) {

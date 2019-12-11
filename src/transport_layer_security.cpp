@@ -654,7 +654,6 @@ void TransportLayerSecurityServer::Session::WriteNamedCurveAndPublicKey(
     annotations,
     "RSA"
   );
-  // stOutput << "<br>DEBUG: Signature size: " << this->signature.size;
   output.AddListOnTop(this->signature);
 }
 

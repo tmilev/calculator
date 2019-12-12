@@ -345,7 +345,7 @@ Calculator.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function(input,
   var inputHtml = null;
   this.panelIdPairs = [];
   try {
-    this.parsedComputation = JSON.parse(input);
+    this.parsedComputation = miscellaneous.jsonUnescapeParse(input);
     var buffer = new BufferCalculator();
     var progReportTimer = document.getElementById(ids.domElements.monitoring.progressTimer);
     progReportTimer.innerHTML = "";

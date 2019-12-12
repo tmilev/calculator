@@ -4733,7 +4733,7 @@ bool CalculatorFunctionsGeneral::innerDiffdivDiffxToDifferentiation(
   bool hasArgument = false;
   bool hasExtraCF = false;
   Expression theArgument, extraCoeff;
-  if (input[1] != "\\diff" && input[1] != "d") {
+  if (input[1] != "Differential" && input[1] != "d") {
     if (!input[1].StartsWith(theCommands.opDifferential())) {
       return false;
     }
@@ -4750,7 +4750,7 @@ bool CalculatorFunctionsGeneral::innerDiffdivDiffxToDifferentiation(
   if (input[2].size() < 2) {
     return false;
   }
-  if (input[2][0] != "\\diff") {
+  if (input[2][0] != "Differential") {
     return false;
   }
   output.reset(theCommands, 2);

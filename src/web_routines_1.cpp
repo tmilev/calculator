@@ -1008,7 +1008,7 @@ int WebWorker::WriteToBodyJSON(const JSData& result) {
       << sanitizedCalculatorApp << "'>app</a>";
       toWrite = StringRoutines::ReplaceAll(toWrite, WebAPIResponse::youHaveReachedTheBackend, outLinkApp.str());
     }
-  }
+  }  
   return this->WriteToBody(toWrite);
 }
 

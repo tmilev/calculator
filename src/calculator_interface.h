@@ -1106,7 +1106,6 @@ public:
 
   bool flagLogSyntaxRules;
   bool flagUseLnInsteadOfLog;
-  bool flagDontUseDiff;
   bool flagUseLnAbsInsteadOfLogForIntegrationNotation;
   bool flagLogEvaluatioN;
   bool flagUseNumberColors;
@@ -1251,8 +1250,6 @@ public:
     if ((*this->CurrentSyntacticStacK).size - decrease <= 0) {
       crash << "Bad stack decrease. " << crash;
     }
-//    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-decrease- 1].IndexLastCharPlusOne =
-//    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size- 1].IndexLastCharPlusOne;
     (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size - decrease);
     return true;
   }
@@ -1311,15 +1308,15 @@ public:
     (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size - 1);
     return true;
   }
-  bool ReplaceEXXEXEByEusingO(int theOp);
-  bool ReplaceEXXEXEXByEXusingO(int theOp);
+  bool ReplaceEXXEXEBy_CofEEE(int theOp);
+  bool ReplaceEXXEXEXBy_CofEEE_X(int theOp);
   bool ReplaceEOXbyEX();
-  bool ReplaceEEByEusingO(int theControlIndex);
-  bool ReplaceEEXByEXusingO(int theControlIndex);
+  bool ReplaceEEBy_CofEE(int theControlIndex);
+  bool ReplaceEEXBy_CofEE_X(int theControlIndex);
   bool ReplaceOOEEXbyEXpowerLike();
   bool ReplaceEEByE();
   bool ReplaceEXEXByEX();
-  bool ReplaceEXEXByEXUsingO(int theOp);
+  bool ReplaceEXEXBy_OofEE_X(int theOp);
   bool ReplaceSsSsXdotsXbySsXdotsX(int numDots);
   bool ReplaceEXdotsXbySsXdotsX(int numDots);
   bool ReplaceEXdotsXBySs(int numDots) {
@@ -1328,7 +1325,7 @@ public:
   }
   bool ReplaceOEXByE();
   bool ReplaceOEXByEX();
-  bool ReplaceO_2O_1E_3XbyEX();
+  bool ReplaceC1C2Eby_C2ofC1E();
   bool ReplaceEOByE();
   bool ReplaceOEByE();
   bool ReplaceOXEByE      ();
@@ -1345,8 +1342,8 @@ public:
   bool ReplaceEOEXByEX    ();
   bool ReplaceUnderscoreEPowerEbyLimits();
   bool ReplacePowerEUnderScoreEbyLimits();
-  bool ReplaceXEEXByEXusingO(int inputOperation);
-  bool ReplaceXEEByEusingO(int inputOperation);
+  bool ReplaceXEEXBy_OofEE_X(int inputOperation);
+  bool ReplaceXEEBy_OofEE(int inputOperation);
   bool ReplaceECByC();
   bool ReplaceEXEBySequence(int theControlIndex);
   bool ReplaceYXBySequenceX(int theControlIndex);
@@ -1360,7 +1357,7 @@ public:
   bool ReplaceCEByC();
   bool ReplaceCCByC();
   bool ReplaceEOEByE() {
-    return this->ReplaceEXEByEusingO((*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2].controlIndex);
+    return this->ReplaceEXEByCofEE((*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2].controlIndex);
   }
   bool ReplaceMatrixEXByMatrix();
   bool ReplaceMatrixEXByMatrixX();
@@ -1368,8 +1365,8 @@ public:
   bool ReplaceMatrixXByE();
   bool ReplaceCXByE();
   bool ReplaceCXByEX();
-  bool ReplaceXEXEXByEusingO(int theOperation);
-  bool ReplaceEXEByEusingO  (int theOperation);
+  bool ReplaceXEXEXBy_CofEE(int theOperation);
+  bool ReplaceEXEByCofEE  (int theOperation);
   bool ReplaceXYByConY(int theCon) {
     (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2].controlIndex = theCon;
     return true;
@@ -1387,7 +1384,7 @@ public:
     return this->DecreaseStackSetCharacterRangeS(1);
   }
   bool ReplaceXByCon(int theCon);
-  bool ReplaceXByEusingO(int theOperation);
+  bool ReplaceXByO(int theOperation);
   bool ReplaceXByConCon(int con1, int con2);
   bool ReplaceXXXByCon(int theCon);
   bool ReplaceXXXByConCon(int con1, int con2);
@@ -1437,9 +1434,11 @@ public:
   bool ReplaceIntegerDotIntegerByE();
   bool ReplaceXXByEEmptySequence();
   bool ReplaCeOXdotsXbyEXdotsX(int numXs);
-  bool ReplaCeOXbyEX();
+  bool ReplaceOXbyEX();
   bool ReplaCeObyE();
   bool ReplaceXXbyEX();
+  bool ReplaceXXbyO(int theOperation);
+  bool ReplaceXXYbyOY(int theOperation);
   bool ReplaceXEXByEcontainingOE(int inputOpIndex);
   bool ReplaceXXByEmptyString();
   bool ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence();
@@ -1686,7 +1685,7 @@ public:
     return this->theAtoms.GetIndexIMustContainTheObject("Differentiate");
   }
   int opDifferential() {
-    return this->theAtoms.GetIndexIMustContainTheObject("\\diff");
+    return this->theAtoms.GetIndexIMustContainTheObject("Differential");
   }
   int opIndefiniteIndicator() {
     return this->theAtoms.GetIndexIMustContainTheObject("IndefiniteIndicator");

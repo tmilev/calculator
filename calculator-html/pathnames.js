@@ -34,6 +34,11 @@ var urlFields = {
     calculatorInput: "calculatorInput",
     fileContent: "fileContent",
   },
+  result: {
+    resultHtml: "resultHtml",
+    crashReport: "crashReport",
+    error: "error",
+  },
   problem: {
     failedToLoadProblem: "Failed to load problem.",
     problemLabel: "problemLabel",

@@ -2454,7 +2454,9 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
   MemorySaving<FormatExpressions> contextFormat;
   bool showContext = this->owner == nullptr ? false : owner->flagDisplayContext;
   if (this->IsAtom()) {
-    if (this->IsAtomGivenData(this->owner->opPhantom())) {
+    if (this->IsAtomGivenData(this->owner->opDifferential())) {
+      out << "{\\text{d}}";
+    } else if (this->IsAtomGivenData(this->owner->opPhantom())) {
       out << "\\phantom{}";
     } else if (this->owner->flagUseLnInsteadOfLog && this->IsAtomGivenData(this->owner->opLog())) {
       out << "\\ln";
@@ -2806,7 +2808,7 @@ bool Expression::NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost(cons
   }
   if (leftNeighbor != nullptr) {
     if (leftNeighbor->StartsWith(this->owner->opDivide(), 3)) {
-      if ((*leftNeighbor)[1] == "\\diff") {
+      if ((*leftNeighbor)[1] == "Differential") {
         return true;
       }
     }
@@ -2887,7 +2889,7 @@ bool Expression::NeedsParenthesisForMultiplication() const {
     return true;
   }
   if (this->StartsWith(this->owner->opDivide(), 3)) {
-    if ((*this)[1] == "\\diff") {
+    if ((*this)[1] == "Differential") {
       return false;
     }
   }
@@ -3563,14 +3565,14 @@ std::string Expression::ToString(
   } else if (this->IsListStartingWithAtom(this->owner->opEqualEqualEqual())) {
     out << (*this)[1].ToString(theFormat) << "===" << (*this)[2].ToString(theFormat);
   } else if (this->StartsWith(this->owner->opDifferentiate(), 3)) {
-    out << "\\frac{\\diff ";
+    out << "\\frac{\\text{d}} ";
     if ((*this)[2].NeedsParenthesisForMultiplication()) {
       out << "\\left(" << (*this)[2].ToString(theFormat)
       << "\\right)";
     } else {
       out << (*this)[2].ToString(theFormat);
     }
-    out << "}{\\diff "
+    out << "}{{\\text{d}} "
     << (*this)[1].ToString(theFormat)  << "}";
   } else if (this->StartsWith(this->owner->opDifferential(), 3)) {
     bool needsParen = (*this)[2].NeedsParenthesisForMultiplication() ||
@@ -3591,11 +3593,7 @@ std::string Expression::ToString(
     if (needsParen) {
       out << "\\right)";
     }
-    if (this->owner->flagDontUseDiff) {
-      out << "d ";
-    } else {
-      out << " \\diff ";
-    }
+    out << " {\\text{d}} ";
     if (rightNeedsParen) {
       out << "\\left(";
     }
@@ -3605,11 +3603,7 @@ std::string Expression::ToString(
     }
   } else if (this->StartsWith(this->owner->opDifferential(), 2)) {
     bool needsParen = (!(*this)[1].IsAtom()) && (!(*this)[1].IsBuiltInTypE());
-    if (this->owner->flagDontUseDiff) {
-      out << "d ";
-    } else {
-      out << "\\diff{}";
-    }
+    out << "{\\text{d}}{}";
     if (needsParen) {
       out << "\\left(";
     }

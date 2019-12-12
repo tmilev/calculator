@@ -1,9 +1,10 @@
 "use strict";
-const submitRequests = require('./submit_requests');
-const pathnames = require('./pathnames');
-const ids = require('./ids_dom_elements');
-const problemPage = require('./problem_page');
-const mathjax = require('./mathjax-calculator-setup');
+const submitRequests = require("./submit_requests");
+const pathnames = require("./pathnames");
+const ids = require("./ids_dom_elements");
+const problemPage = require("./problem_page");
+const mathjax = require("./mathjax-calculator-setup");
+const miscellaneous = require("./miscellaneous");
 
 function callbackModifyDeadlines(incomingId, input, output) {
   document.getElementById(`deadlines${incomingId}`).innerHTML = input;
@@ -72,10 +73,10 @@ function toggleProblemWeights() {
   problemWeightsVisible = !problemWeightsVisible;
 }
 
-function afterLoadCoursePage(incomingPage, result) {
+function afterLoadCoursePage(incoming, result) {
   var courseBody = document.getElementById(ids.domElements.divCurrentCourseBody); 
   var coursePage = document.getElementById(ids.domElements.divCurrentCourse);
-  courseBody.innerHTML = incomingPage;
+  courseBody.innerHTML = miscellaneous.jsonParseGetHtmlStandard(incoming);
   var titleElements = courseBody.getElementsByTagName('title');
   if (titleElements !== null && titleElements !== undefined) {
     if (titleElements.length > 0) {

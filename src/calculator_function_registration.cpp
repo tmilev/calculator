@@ -1532,10 +1532,11 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctionsGeneral::innerIsDifferentialOneFormOneVariable,
     "",
     "Tests whether the expression is a differential form in one variable.  ",
-    "IsDifferentialOneFormOneVariable(\\diff x );\n"
-    "IsDifferentialOneFormOneVariable(x\\diff y );\n"
-    "IsDifferentialOneFormOneVariable(\\frac{\\diff y}{y} );\n"
-    "IsDifferentialOneFormOneVariable(1/(\\diff y) );",
+    "IsDifferentialOneFormOneVariable(Differential x );\n"
+    "IsDifferentialOneFormOneVariable({\\text{d}} x );\n"
+    "IsDifferentialOneFormOneVariable(x {\\text{d}} y );\n"
+    "IsDifferentialOneFormOneVariable(\\frac{\\text{d} y}{y} );\n"
+    "IsDifferentialOneFormOneVariable(1/(\\text{d} y) );",
     true,
     false,
     "CalculatorFunctionsGeneral::innerIsDifferentialOneFormOneVariable",
@@ -1916,11 +1917,6 @@ void Calculator::initPredefinedInnerFunctions() {
     "CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlocks",
     "IntegratePartialFractions"
   );
-  /*this->AddOperationInnerHandler
-  ("\\diff", CalculatorFunctionsGeneral::innerDifferential, "",
-   "Differential.  ",
-   "\\diff x;");
-  */
 
   this->AddOperationInnerHandler(
     "Differentiate",
@@ -6289,7 +6285,7 @@ void Calculator::initPredefinedStandardOperations() {
     "*",
     CalculatorFunctionsGeneral::innerInterpretAsDifferential,
     "",
-    "If circumstances imply it, interprets an atom of the form dx as the differential \\diff x. ",
+    "If circumstances imply it, interprets an atom of the form dx as Differential {} x. ",
     "(\\int x)dx; \\int x (1+x) dx; \\int_2^3 x dx; \\int_2^3 x(1+x)dx",
     true,
     false,
@@ -7163,11 +7159,11 @@ void Calculator::initPredefinedStandardOperations() {
     "\\setminus"
   );
   this->AddOperationInnerHandler(
-    "\\diff",
+    "Differential",
     CalculatorFunctionsGeneral::innerDifferentialStandardHandler,
     "",
-    "Transforms \\diff{}a to the standard internal form \\diff {}(a,1).",
-    " \\int \\theta \\diff \\theta",
+    "Transforms Differential{}a to the standard internal form Differential {}(a, 1).",
+    " \\int \\theta {\\text d} \\theta",
     true,
     false,
     "CalculatorFunctionsBinaryOps::innerDifferentialStandardHandler",
@@ -7199,9 +7195,9 @@ void Calculator::initPredefinedStandardOperations() {
     "/",
     CalculatorFunctionsGeneral::innerDiffdivDiffxToDifferentiation,
     "",
-    "Replaces \\diff /\\diff {}x by Differentiate{}(x). "
-    "Should also work on the notation (\\diff y)/(\\diff x). ",
-    "\\diff /\\diff {}x x",
+    "Replaces Differential / Differential {}x by Differentiate{}(x). "
+    "Should also work on the notation (Differential y)/(Differential x). ",
+    "Differential /Differential {}x x",
     true,
     false,
     "CalculatorFunctionsGeneral::innerDiffdivDiffxToDifferentiation",
@@ -7211,7 +7207,7 @@ void Calculator::initPredefinedStandardOperations() {
     "/",
     CalculatorFunctionsGeneral::innerDdivDxToDiffDivDiffx,
     "",
-    "Replaces d/dx by \\diff /\\diff{}x. "
+    "Replaces d/dx by Differential /Differential{}x. "
     "Note that the variable of differentiation is expected to be the string following the d letter. ",
     "d/dx x",
     true,
@@ -8349,7 +8345,6 @@ void Calculator::initPredefinedStandardOperationsWithoutHandler() {
   this->AddOperationNoRepetitionAllowed("e");
   this->AddOperationNoRepetitionAllowed("i");
   this->AddOperationNoRepetitionAllowed("\\arctan");
-//  this->AddOperationNoRepetitionAllowed("\\diff");
   this->AddOperationNoRepetitionAllowed("CommandEnclosureStart");
   this->AddOperationNoRepetitionAllowed("CommandEnclosureFinish");
   this->AddOperationNoRepetitionAllowed("ExpressionHistory");

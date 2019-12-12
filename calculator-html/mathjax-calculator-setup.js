@@ -57,9 +57,6 @@ function configureMathJaxForCalculator() {
     },
     "HTML-CSS": { availableFonts: ["TeX"] },
     TeX: {
-      Macros: {
-        diff: "{\\text {d}}",
-      },
       MAXBUFFER: 100000
     },
     jsMath2jax: {

@@ -2031,27 +2031,30 @@ bool CalculatorHTML::SetTagClassFromOpenTag(SyntacticElementHTML& output) {
   return false;
 }
 
-void TopicElementParser::initTopicElementNames() {
-  MacroRegisterFunctionWithName("CalculatorHTML::initTopicElementNames");
-  if (this->elementNames.size == 0) {
-    this->elementNames.AddOnTop("Chapter");
-    this->elementNames.AddOnTop("Section");
-    this->elementNames.AddOnTop("Topic");
-    this->elementNames.AddOnTop("Title");
-    this->elementNames.AddOnTop("Problem");
-    this->elementNames.AddOnTop("Video");
-    this->elementNames.AddOnTop("VideoHandwritten");
-    this->elementNames.AddOnTop("SlidesLatex");
-    this->elementNames.AddOnTop("SlidesSource");
-    this->elementNames.AddOnTop("HomeworkLatex");
-    this->elementNames.AddOnTop("HomeworkSource");
-    this->elementNames.AddOnTop("HomeworkSolutionSource");
-    this->elementNames.AddOnTop("SlidesSourceHeader");
-    this->elementNames.AddOnTop("HomeworkSourceHeader");
-    this->elementNames.AddOnTop("LoadTopicBundles");
-    this->elementNames.AddOnTop("TopicBundle");
-    this->elementNames.AddOnTop("BundleBegin");
-    this->elementNames.AddOnTop("BundleEnd");
+void TopicElementParser::initializeElementTypes() {
+  MacroRegisterFunctionWithName("CalculatorHTML::initializeElementTypes");
+  if (this->elementTypes.size() == 0) {
+    this->elementTypes.SetKeyValue("Undefined"              , TopicElement::types::chapter               );
+    this->elementTypes.SetKeyValue("Chapter"                , TopicElement::types::chapter               );
+    this->elementTypes.SetKeyValue("Section"                , TopicElement::types::section               );
+    this->elementTypes.SetKeyValue("Topic"                  , TopicElement::types::topic                 );
+    this->elementTypes.SetKeyValue("Problem"                , TopicElement::types::problem               );
+    this->elementTypes.SetKeyValue("Error"                  , TopicElement::types::error                 );
+    this->elementTypes.SetKeyValue("TexHeader"              , TopicElement::types::error                 );
+    this->elementTypes.SetKeyValue("Title"                  , TopicElement::types::title                 );
+    this->elementTypes.SetKeyValue("Video"                  , TopicElement::types::video                 );
+    this->elementTypes.SetKeyValue("VideoHandwritten"       , TopicElement::types::videoHandwritten      );
+    this->elementTypes.SetKeyValue("SlidesLatex"            , TopicElement::types::slidesLatex           );
+    this->elementTypes.SetKeyValue("SlidesSource"           , TopicElement::types::slidesSource          );
+    this->elementTypes.SetKeyValue("HomeworkLatex"          , TopicElement::types::homeworkLatex         );
+    this->elementTypes.SetKeyValue("HomeworkSource"         , TopicElement::types::homeworkSource        );
+    this->elementTypes.SetKeyValue("HomeworkSolutionSource" , TopicElement::types::homeworkSolutionSource);
+    this->elementTypes.SetKeyValue("SlidesSourceHeader"     , TopicElement::types::slidesSourceHeader    );
+    this->elementTypes.SetKeyValue("HomeworkSourceHeader"   , TopicElement::types::homeworkSourceHeader  );
+    this->elementTypes.SetKeyValue("LoadTopicBundles"       , TopicElement::types::loadTopicBundles      );
+    this->elementTypes.SetKeyValue("TopicBundle"            , TopicElement::types::topicBundle           );
+    this->elementTypes.SetKeyValue("BundleBegin"            , TopicElement::types::bundleBegin           );
+    this->elementTypes.SetKeyValue("BundleEnd"              , TopicElement::types::bundleEnd             );
   }
 }
 
@@ -2629,19 +2632,6 @@ bool CalculatorHTML::ExtractAnswerIds(std::stringstream* comments) {
     }
   }
   this->theProblemData.CheckConsistency();
-  return true;
-}
-
-bool CalculatorHTML::CheckConsistencyTopics() {
-  for (int i = 0; i < this->topics.theTopics.size(); i ++) {
-    if (this->topics.theTopics.theValues[i].type == TopicElement::tProblem) {
-      if (this->topics.theTopics.theValues[i].immediateChildren.size > 0) {
-        crash << "Topic element: " << this->topics.theTopics.theValues[i].ToString()
-        << " has non-zero immediate children. " << crash;
-        return false;
-      }
-    }
-  }
   return true;
 }
 
@@ -3473,23 +3463,23 @@ void TopicElement::ComputeID() {
   MacroRegisterFunctionWithName("TopicElement::ComputeID");
   if (this->problemFileName != "") {
     this->id = this->problemFileName;
-    this->type = this->tProblem;
+    this->type = TopicElement::types::problem;
   } else {
     std::stringstream out;
     out << this->title;
-    if (this->type == this->tTexHeader) {
+    if (this->type == TopicElement::types::texHeader) {
       out << "[sourceHeader]";
     }
-    if (this->type == this->tChapter) {
+    if (this->type == TopicElement::types::chapter) {
       out << "[Chapter]";
     }
-    if (this->type == this->tSection) {
+    if (this->type == TopicElement::types::section) {
       out << "[Section]";
     }
-    if (this->type == this->tSubSection) {
+    if (this->type == TopicElement::types::topic) {
       out << "[SubSection]";
     }
-    if (this->type == this->tProblem) {
+    if (this->type == TopicElement::types::problem) {
       out << "[TitledItem]";
     }
     this->id = out.str();
@@ -3500,15 +3490,16 @@ void TopicElement::ComputeID() {
 
 TopicElementParser::TopicElementParser() {
   this->owner = nullptr;
+  this->maximumTopics = 10000;
 }
 
 void TopicElementParser::AddTopic(TopicElement& inputElt) {
   MacroRegisterFunctionWithName("TopicElement::AddTopic");
   int numToCheck = 4;
-  if (this->theTopics.size() >= numToCheck && inputElt.type != inputElt.tTexHeader && inputElt.type != inputElt.tChapter) {
+  if (this->theTopics.size() >= numToCheck && inputElt.type != TopicElement::types::texHeader && inputElt.type != TopicElement::types::chapter) {
     bool startsWithChapter = false;
     for (int i = 0; i < numToCheck - 1; i ++) {
-      if (this->theTopics.theValues[i].type == inputElt.tChapter) {
+      if (this->theTopics.theValues[i].type == TopicElement::types::chapter) {
         startsWithChapter = true;
         break;
       }
@@ -3516,14 +3507,14 @@ void TopicElementParser::AddTopic(TopicElement& inputElt) {
     if (!startsWithChapter) {
       TopicElement chapterlessChapter;
       chapterlessChapter.parentTopics.AddOnTop(this->theTopics.size());
-      chapterlessChapter.type = chapterlessChapter.tChapter;
+      chapterlessChapter.type = TopicElement::types::chapter;
       chapterlessChapter.title = "Topics without chapter";
       this->AddTopic(chapterlessChapter);
     }
   }
   inputElt.ComputeID();
   if (inputElt.id == "") {
-    inputElt.type = inputElt.tError;
+    inputElt.type = TopicElement::types::error;
     inputElt.id = "error";
   }
   if (this->theTopics.Contains(inputElt.id)) {
@@ -3551,13 +3542,13 @@ void TopicElementParser::AddTopic(TopicElement& inputElt) {
 }
 
 void TopicElement::MakeError(const std::string& message) {
-  this->type = this->tError;
+  this->type = TopicElement::types::error;
   this->error = message;
   this->immediateChildren.SetSize(0);
 }
 
 void TopicElement::reset(int parentSize, MapList<std::string, TopicElement, MathRoutines::HashString>* containerElements) {
-  this->type = this->tUndefined;
+  this->type = TopicElement::types::unknown;
   this->indexInParent = - 1;
   this->flagSubproblemHasNoWeight = false;
   this->title = "empty";
@@ -3594,16 +3585,16 @@ void TopicElement::reset(int parentSize, MapList<std::string, TopicElement, Math
   this->totalPointsEarned = 0;
   this->maxPointsInAllChildren = 0;
   if (parentSize == 0) {
-    this->type = this->tChapter;
+    this->type = TopicElement::types::chapter;
   }
   if (parentSize == 1) {
-    this->type = this->tSection;
+    this->type = TopicElement::types::section;
   }
   if (parentSize == 2) {
-    this->type = this->tSubSection;
+    this->type = TopicElement::types::topic;
   }
   if (parentSize == 3) {
-    this->type = this->tProblem;
+    this->type = TopicElement::types::problem;
   }
   if (containerElements == nullptr) {
     return;
@@ -3616,6 +3607,20 @@ void TopicElement::reset(int parentSize, MapList<std::string, TopicElement, Math
   }
 }
 
+bool TopicElementParser::CheckConsistencyParsed() {
+  for (int i = 0; i < this->theTopics.size(); i ++) {
+    if (this->theTopics.theValues[i].type == TopicElement::types::problem) {
+      if (this->theTopics.theValues[i].immediateChildren.size > 0) {
+        crash << "Topic element: " << this->theTopics.theValues[i].ToString()
+        << " has non-zero immediate children. " << crash;
+        return false;
+      }
+    }
+  }
+  return true;
+
+}
+
 bool TopicElementParser::CheckInitialization() {
   if (this->owner == nullptr) {
     crash << "TopicElementParser not initialized when it should be. " << crash;
@@ -3623,34 +3628,73 @@ bool TopicElementParser::CheckInitialization() {
   return true;
 }
 
-bool TopicElementParser::LoadTopicBundle(
-  const std::string& inputFileName,
-  std::stringstream& errorStream
+void TopicElementParser::TopicLine::MakeError(const std::string& message) {
+  this->content = message;
+  this->tag = "Error";
+  this->theType = TopicElement::types::error;
+}
+
+void TopicElementParser::TopicLine::MakeEmpty() {
+  this->content = "";
+  this->tag = "";
+  this->theType = TopicElement::types::empty;
+}
+
+void TopicElementParser::InsertTopicBundle(TopicElementParser::TopicLine& input) {
+  MacroRegisterFunctionWithName("TopicElementParser::InsertTopicBundle");
+  std::string bundleId = StringRoutines::StringTrimWhiteSpace(input.content);
+  if (!this->knownTopicBundles.Contains(bundleId)) {
+    std::stringstream out;
+    out << "Failed to find bundle: " << bundleId << ". ";
+    input.MakeError(out.str());
+    this->bundleStack.AddOnTop(input);
+    return;
+  }
+  List<TopicElementParser::TopicLine>& currentBundle = this->knownTopicBundles.GetValueCreate(bundleId);
+  for (int i = currentBundle.size - 1; i >= 0; i --) {
+    this->bundleStack.AddOnTop(currentBundle[i]);
+  }
+}
+
+
+void TopicElementParser::LoadTopicBundleFile(
+  TopicElementParser::TopicLine& input
 ) {
   MacroRegisterFunctionWithName("TopicElement::LoadTopicBundle");
-  std::string fileName = StringRoutines::StringTrimWhiteSpace(inputFileName);
+  std::string fileName = StringRoutines::StringTrimWhiteSpace(input.content);
+  if (this->loadedTopicBundleFiles.Contains(fileName)) {
+    return;
+  }
   std::string newTopicBundles;
+  std::stringstream errorStream;
   if (!FileOperations::IsOKfileNameVirtual(fileName, false, &errorStream)) {
     errorStream << "The file name " << fileName << " is not a valid topic bundle file name. ";
-    return false;
+    input.MakeError(errorStream.str());
+    this->bundleStack.AddOnTop(input);
+    return;
   }
   if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly(fileName, newTopicBundles, &errorStream)) {
     errorStream << "Could not open topic bundle file. ";
-    return false;
+    input.MakeError(errorStream.str());
+    this->bundleStack.AddOnTop(input);
+    return;
   }
   this->loadedTopicBundleFiles.AddOnTop(fileName);
-  std::string currentLine, currentId;
+  std::string currentLineString;
   List<std::string> bundleNameStack;
   std::stringstream bundleReader(newTopicBundles);
-  while (std::getline(bundleReader, currentLine, '\n')) {
-    if (StringRoutines::StringBeginsWith(currentLine, "BundleBegin:", &currentId)) {
-      bundleNameStack.AddOnTop(StringRoutines::StringTrimWhiteSpace(currentId));
-    } else if (StringRoutines::StringBeginsWith(currentLine, "BundleEnd:", &currentId)) {
+  while (std::getline(bundleReader, currentLineString, '\n')) {
+    TopicElementParser::TopicLine currentLine = this->ExtractLine(currentLineString);
+    if (currentLine.theType == TopicElement::types::bundleBegin) {
+      bundleNameStack.AddOnTop(StringRoutines::StringTrimWhiteSpace(currentLine.content));
+    } else if (currentLine.theType == TopicElement::types::bundleEnd) {
       if (bundleNameStack.size > 0) {
         bundleNameStack.RemoveLastObject();
       } else {
-        errorStream << "<b style =\"color:red\">BundleEnd command without BungleBegin.</b>";
-        return false;
+        errorStream << "BundleEnd command without BungleBegin.";
+        input.MakeError(errorStream.str());
+        this->bundleStack.AddOnTop(input);
+        return;
       }
     } else {
       for (int i = 0; i < bundleNameStack.size; i ++) {
@@ -3658,77 +3702,96 @@ bool TopicElementParser::LoadTopicBundle(
       }
     }
   }
-  return true;
+}
+
+TopicElementParser::TopicLine TopicElementParser::ExtractLine(const std::string& inputNonTrimmed) {
+  TopicElementParser::TopicLine result;
+  std::string input = StringRoutines::StringTrimWhiteSpace(inputNonTrimmed);
+  if (input.size() == 0) {
+    result.MakeEmpty();
+    return result;
+  }
+  if (input[0] == '%') {
+    result.MakeEmpty();
+    return result;
+  }
+  result.theType = TopicElement::types::unknown;
+  for (unsigned i = 0; i < input.size(); i ++) {
+    char current = input[i];
+    if (current == ':') {
+      result.content = input.substr(i + 1);
+      break;
+    }
+    result.tag.push_back(current);
+  }
+  if (result.content.size() == 0) {
+    result.content = result.tag;
+    result.tag = "";
+  }
+  int indexElement = this->elementTypes.GetIndex(result.tag);
+  if (indexElement >= 0) {
+    result.theType = this->elementTypes.theValues[indexElement];
+  }
+  return result;
+}
+
+void TopicElementParser::ExhaustCrawlStack() {
+  while (this->bundleStack.size > 0) {
+    if (this->crawled.size > this->maximumTopics) {
+      TopicElementParser::TopicLine errorLine;
+      std::stringstream errorStream;
+      errorStream << "Too many topics (" << this->crawled.size << ") while crawling bundles. ";
+      errorLine.MakeError(errorStream.str());
+      this->crawled.AddOnTop(errorLine);
+      return;
+    }
+    TopicElementParser::TopicLine nextLine = bundleStack.PopLastObject();
+    if (nextLine.theType == TopicElement::types::loadTopicBundles) {
+      this->LoadTopicBundleFile(nextLine);
+      continue;
+    }
+    if (nextLine.theType == TopicElement::types::topicBundle) {
+      this->InsertTopicBundle(nextLine);
+      continue;
+    }
+    this->crawled.AddOnTop(nextLine);
+  }
+}
+
+void TopicElementParser::Crawl(const std::string& inputString) {
+  this->initializeElementTypes();
+  std::string currentLine, currentArgument;
+  std::stringstream tableReader(inputString);
+  this->crawled.SetSize(0);
+  while (true) {
+    if (this->crawled.size > this->maximumTopics) {
+      TopicElementParser::TopicLine errorLine;
+      std::stringstream errorStream;
+      errorStream << "Too many topics (" << this->crawled.size << "). ";
+      errorLine.MakeError(errorStream.str());
+      this->crawled.AddOnTop(errorLine);
+      return;
+    }
+    this->ExhaustCrawlStack();
+    if (!std::getline(tableReader, currentLine, '\n')) {
+      break;
+    }
+    this->bundleStack.AddOnTop(this->ExtractLine(currentLine));
+  }
 }
 
 void TopicElementParser::ParseTopicList(
   const std::string& inputString
 ) {
-  MacroRegisterFunctionWithName("TopicElement::ParseTopicList");
-  std::stringstream tableReader(inputString);
-  std::string currentLine, currentArgument;
+  MacroRegisterFunctionWithName("TopicElementParser::ParseTopicList");
+  this->Crawl(inputString);
   TopicElement currentElt;
   bool found = false;
   currentElt.problemNumber.initializeFillInObject(4, 0);
-  List<std::string> lineStack;
-  this->initTopicElementNames();
-  int numLinesSoFar = 0;
   bool showedAllowedDataEntries = false;
-  for (;;) {
-    if (lineStack.size == 0) {
-      if (std::getline(tableReader, currentLine, '\n')) {
-        lineStack.AddOnTop(currentLine);
-      }
-    }
-    if (lineStack.size <= 0) {
-      break;
-    }
-    if (numLinesSoFar > 10000) {
-      std::stringstream errorStream;
-      errorStream << "More than 10000 topic lines have been read so far; this is not allowed. "
-      << "Could this be an error due to infinite inclusion of topic bundles - "
-      << "perhaps a topic bundle file is requesting to load itself? ";
-      currentElt.MakeError(errorStream.str());
-      found = true;
-      break;
-    }
-    currentLine = lineStack.PopLastObject();
-    if (StringRoutines::StringTrimWhiteSpace(currentLine) == "") {
-      continue;
-    }
-    if (currentLine.size() > 0) {
-      if (currentLine[0] == '%') {
-        continue;
-      }
-    }
-    if (StringRoutines::StringBeginsWith(currentLine, "LoadTopicBundles:", &currentArgument)) {
-      std::stringstream errorStream;
-      if (!this->LoadTopicBundle(
-        StringRoutines::StringTrimWhiteSpace(currentArgument),
-        errorStream
-      )) {
-        currentElt.MakeError(errorStream.str());
-        this->AddTopic(currentElt);
-        found = true;
-      }
-      theGlobalVariables.Comments << "<br>DEBUG: loaded topics.";
-    } else if (StringRoutines::StringBeginsWith(currentLine, "TopicBundle:", &currentArgument)) {
-      currentArgument = StringRoutines::StringTrimWhiteSpace(currentArgument);
-      std::stringstream errorStream;
-      if (this->knownTopicBundles.Contains(currentArgument)) {
-        List<std::string>& currentBundle = this->knownTopicBundles.GetValueCreate(currentArgument);
-        for (int j = currentBundle.size - 1; j >= 0; j --) {
-          lineStack.AddOnTop(currentBundle[j]);
-        }
-      } else {
-        if (found) {
-          this->AddTopic(currentElt);
-        }
-        errorStream << "Topic bundle does not appear to contain the desired element: "
-        << currentArgument;
-        currentElt.MakeError(errorStream.str());
-      }
-    } else if (StringRoutines::StringBeginsWith(currentLine, "SlidesSourceHeader:", &currentArgument)) {
+  for (int i = 0; i < this->crawled.size; i ++) {
+    TopicElementParser::TopicLine currentArgument = this->crawled[i];
+    if (StringRoutines::StringBeginsWith(currentLine, "SlidesSourceHeader:", &currentArgument)) {
       this->owner->slidesSourcesHeaders.AddOnTop(StringRoutines::StringTrimWhiteSpace(currentArgument));
       continue;
     } else if (StringRoutines::StringBeginsWith(currentLine, "HomeworkSourceHeader:", &currentArgument)) {
@@ -3817,6 +3880,7 @@ void TopicElementParser::ParseTopicList(
     this->AddTopic(currentElt);
   }
   theGlobalVariables.Comments << "DEBUG: topic elements: " << this->theTopics.ToStringHtml() << "<br>";
+  this->CheckConsistencyParsed();
 }
 
 void CalculatorHTML::InterpretAccountInformationLinks(SyntacticElementHTML& inputOutput) {
@@ -3859,7 +3923,6 @@ bool CalculatorHTML::LoadAndParseTopicList(std::stringstream& comments) {
     return false;
   }
   this->topics.ParseTopicList(this->topicListContent);
-  this->CheckConsistencyTopics();
   this->problemNamesNoTopics.Clear();
   for (int i = 0; i < this->topics.theTopics.size(); i ++) {
     if (this->topics.theTopics.theValues[i].problemFileName != "") {
@@ -3895,7 +3958,7 @@ bool CalculatorHTML::LoadAndParseTopicList(std::stringstream& comments) {
       currentElt.totalSubSectionsUnderMeIncludingEmptySubsections ++;
     }
   }
-  this->CheckConsistencyTopics();
+  this->topics.CheckConsistencyParsed();
   return true;
 }
 

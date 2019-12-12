@@ -2241,7 +2241,7 @@ std::string WebAPIResponse::ToStringUserScores() {
   << "<th rowspan =\"3\">Section</th><th rowspan =\"3\"> Total score</th>";
   for (int i = 0; i < theScores.theProblem.topics.theTopics.size(); i ++) {
     TopicElement& currentElt = theScores.theProblem.topics.theTopics.theValues[i];
-    if (currentElt.problemFileName != "" || currentElt.type != currentElt.tChapter) {
+    if (currentElt.problemFileName != "" || currentElt.type != TopicElement::types::chapter) {
       continue;
     }
     int numCols = currentElt.totalSubSectionsUnderMeIncludingEmptySubsections;
@@ -2255,7 +2255,7 @@ std::string WebAPIResponse::ToStringUserScores() {
   out << "<tr>";
   for (int i = 0; i < theScores.theProblem.topics.theTopics.size(); i ++) {
     TopicElement& currentElt = theScores.theProblem.topics.theTopics.theValues[i];
-    if (currentElt.problemFileName != "" || currentElt.type != currentElt.tSection) {
+    if (currentElt.problemFileName != "" || currentElt.type != TopicElement::types::section) {
       continue;
     }
     int numCols = currentElt.totalSubSectionsUnderMeIncludingEmptySubsections;
@@ -2271,9 +2271,9 @@ std::string WebAPIResponse::ToStringUserScores() {
     TopicElement& currentElt = theScores.theProblem.topics.theTopics.theValues[i];
     if (
       currentElt.problemFileName == "" &&
-      currentElt.type != currentElt.tProblem &&
-      currentElt.type != currentElt.tSubSection &&
-      currentElt.type != currentElt.tTexHeader
+      currentElt.type != TopicElement::types::problem &&
+      currentElt.type != TopicElement::types::topic &&
+      currentElt.type != TopicElement::types::texHeader
     ) {
       if ((
           currentElt.flagContainsProblemsNotInSubsection &&
@@ -2284,7 +2284,7 @@ std::string WebAPIResponse::ToStringUserScores() {
       }
       continue;
     }
-    if (currentElt.problemFileName != "" || currentElt.type != currentElt.tSubSection) {
+    if (currentElt.problemFileName != "" || currentElt.type != TopicElement::types::topic) {
       continue;
     }
     out << "<td>" << currentElt.title << "</td>";
@@ -2301,7 +2301,7 @@ std::string WebAPIResponse::ToStringUserScores() {
     if (currentElt.problemFileName != "") {
       continue;
     }
-    if (currentElt.type != currentElt.tSubSection && !currentElt.flagContainsProblemsNotInSubsection) {
+    if (currentElt.type != TopicElement::types::topic && !currentElt.flagContainsProblemsNotInSubsection) {
       continue;
     }
     out << "<td>" << currentElt.maxPointsInAllChildren << "</td>";
@@ -2316,7 +2316,7 @@ std::string WebAPIResponse::ToStringUserScores() {
       if (currentElt.problemFileName != "") {
         continue;
       }
-      if (currentElt.type != currentElt.tSubSection && !currentElt.flagContainsProblemsNotInSubsection) {
+      if (currentElt.type != TopicElement::types::topic && !currentElt.flagContainsProblemsNotInSubsection) {
         continue;
       }
       if (theScores.scoresBreakdown[i].Contains(theScores.theProblem.topics.theTopics.theKeys[j])) {

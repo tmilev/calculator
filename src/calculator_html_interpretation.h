@@ -15,14 +15,31 @@ class TopicElement {
 public:
   static int scoreButtonCounter;
   int type;
-  enum topicType {
-    tChapter = 1,
-    tSection = 2,
-    tSubSection = 3,
-    tProblem = 4,
-    tError,
-    tTexHeader,
-    tUndefined
+  class types {
+  public:
+    static const unsigned unknown                = 0 ;
+    static const unsigned empty                  = 1 ;
+    static const unsigned chapter                = 2 ;
+    static const unsigned section                = 3 ;
+    static const unsigned topic                  = 4 ;
+    static const unsigned problem                = 5 ;
+    static const unsigned error                  = 6 ;
+    static const unsigned texHeader              = 7 ;
+    // service elements
+    static const unsigned title                  = 8 ;
+    static const unsigned video                  = 9 ;
+    static const unsigned videoHandwritten       = 10;
+    static const unsigned slidesLatex            = 11;
+    static const unsigned slidesSource           = 12;
+    static const unsigned homeworkLatex          = 13;
+    static const unsigned homeworkSource         = 14;
+    static const unsigned homeworkSolutionSource = 15;
+    static const unsigned slidesSourceHeader     = 16;
+    static const unsigned homeworkSourceHeader   = 17;
+    static const unsigned loadTopicBundles       = 18;
+    static const unsigned topicBundle            = 19;
+    static const unsigned bundleBegin            = 20;
+    static const unsigned bundleEnd              = 21;
   };
   bool flagContainsProblemsNotInSubsection;
   bool flagSubproblemHasNoWeight;
@@ -97,20 +114,36 @@ public:
 
 class TopicElementParser {
 public:
+  class TopicLine {
+  public:
+    unsigned theType;
+    std::string tag;
+    std::string content;
+    void MakeError(const std::string& message);
+    void MakeEmpty();
+  };
   CalculatorHTML* owner;
   MapList<std::string, TopicElement, MathRoutines::HashString> theTopics;
-  MapList<std::string, List<std::string>, MathRoutines::HashString> knownTopicBundles;
-  List<std::string> loadedTopicBundleFiles;
-  List<std::string> elementNames;
+  MapList<std::string, List<TopicElementParser::TopicLine>, MathRoutines::HashString> knownTopicBundles;
+  HashedList<std::string, MathRoutines::HashString> loadedTopicBundleFiles;
+
+  MapList<std::string, unsigned, MathRoutines::HashString> elementTypes;
+  List<TopicElementParser::TopicLine> crawled;
+  List<TopicElementParser::TopicLine> bundleStack;
+  List<TopicElementParser::TopicLine> corrected;
+  int maximumTopics;
   TopicElementParser();
   void ParseTopicList(const std::string& inputString);
-  bool LoadTopicBundle(
-    const std::string& inputFileName,
-    std::stringstream& errorStream
-  );
+  void InsertCorrections();
+  void Crawl(const std::string& inputString);
+  void ExhaustCrawlStack();
+  void LoadTopicBundleFile(TopicLine& input);
+  void InsertTopicBundle(TopicLine& input);
   bool CheckInitialization();
+  bool CheckConsistencyParsed();
   void AddTopic(TopicElement& inputElt);
-  void initTopicElementNames();
+  void initializeElementTypes();
+  TopicLine ExtractLine(const std::string& inputNonTrimmed);
 };
 
 
@@ -223,7 +256,6 @@ public:
   /////////////////
   int GetAnswerIndex(const std::string& desiredAnswerId);
   bool CheckContent(std::stringstream* comments);
-  bool CheckConsistencyTopics();
   bool CanBeMerged(const SyntacticElementHTML& left, const SyntacticElementHTML& right);
   bool LoadMe(bool doLoadDatabase, const std::string& inputRandomSeed, std::stringstream* commentsOnFailure);
   bool LoadAndParseTopicList(std::stringstream& comments);

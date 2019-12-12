@@ -2,7 +2,6 @@
 // For additional information refer to the file "calculator.h".
 #include "calculator_html_interpretation.h"
 #include "web_api.h"
-#include "calculator_html_interpretation_interface.h"
 #include "database.h"
 #include <iomanip>
 #include "string_constants.h"

@@ -6,7 +6,6 @@
 #include "calculator_html_functions.h"
 #include "web_api.h"
 #include "calculator_html_interpretation.h"
-#include "calculator_html_interpretation_interface.h"
 #include "math_extra_drawing_variables.h"
 #include "math_general_polynomial_computations_advanced_implementation.h"
 #include "crypto.h"

@@ -6,7 +6,6 @@
 #include "general_time_date.h"
 #include "calculator_html_interpretation.h"
 #include "web_api.h"
-#include "calculator_html_interpretation_interface.h"
 #include "math_extra_latex_routines.h"
 #include <iomanip>
 #include "database.h"

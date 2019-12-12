@@ -4,7 +4,6 @@
 #include "calculator_interface.h"
 #include "database.h"
 #include "calculator_problem_storage.h"
-#include "calculator_html_interpretation_interface.h"
 #include "web_api.h"
 #include "string_constants.h"
 #include "crypto.h"

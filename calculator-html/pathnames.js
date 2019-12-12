@@ -38,6 +38,7 @@ var urlFields = {
     resultHtml: "resultHtml",
     crashReport: "crashReport",
     error: "error",
+    comments: "comments",
   },
   problem: {
     failedToLoadProblem: "Failed to load problem.",

@@ -3531,6 +3531,7 @@ void TopicElement::AddTopic(TopicElement& inputElt, MapList<std::string, TopicEl
   if (output.Contains(inputElt.id)) {
     inputElt.id += "[Error]";
     inputElt.title = "[Error]: Entry " + inputElt.title + " already present. ";
+    inputElt.immediateChildren.SetSize(0);
   }
   inputElt.indexInParent = output.size();
   output.SetKeyValue(inputElt.id, inputElt);
@@ -3549,6 +3550,12 @@ void TopicElement::AddTopic(TopicElement& inputElt, MapList<std::string, TopicEl
   if (inputElt.immediateChildren.size > 0) {
     crash << "New topic element must have zero children. " << crash;
   }
+}
+
+void TopicElement::MakeError(const std::string& message) {
+  this->type = this->tError;
+  this->error = message;
+  this->immediateChildren.SetSize(0);
 }
 
 void TopicElement::reset(int parentSize, MapList<std::string, TopicElement, MathRoutines::HashString>* containerElements) {
@@ -3679,10 +3686,9 @@ void TopicElement::GetTopicList(
     if (numLinesSoFar > 10000) {
       std::stringstream errorStream;
       errorStream << "More than 10000 topic lines have been read so far; this is not allowed. "
-      << "Could this be an error due to infinite inclusion of topic bundles -"
+      << "Could this be an error due to infinite inclusion of topic bundles - "
       << "perhaps a topic bundle file is requesting to load itself? ";
-      currentElt.error = errorStream.str();
-      currentElt.type = currentElt.tError;
+      currentElt.MakeError(errorStream.str());
       found = true;
       break;
     }
@@ -3698,12 +3704,16 @@ void TopicElement::GetTopicList(
     if (StringRoutines::StringBeginsWith(currentLine, "LoadTopicBundles:", &currentArgument)) {
       std::stringstream errorStream;
       if (!TopicElement::LoadTopicBundle(
-        StringRoutines::StringTrimWhiteSpace(currentArgument), topicBundles.GetElement(), owner, errorStream
+        StringRoutines::StringTrimWhiteSpace(currentArgument),
+        topicBundles.GetElement(),
+        owner,
+        errorStream
       )) {
-        currentElt.error = errorStream.str();
-        currentElt.type = currentElt.tError;
+        currentElt.MakeError(errorStream.str());
+        TopicElement::AddTopic(currentElt, output);
         found = true;
       }
+      theGlobalVariables.Comments << "<br>DEBUG: loaded topics.";
     } else if (StringRoutines::StringBeginsWith(currentLine, "TopicBundle:", &currentArgument)) {
       currentArgument = StringRoutines::StringTrimWhiteSpace(currentArgument);
       std::stringstream errorStream;
@@ -3718,8 +3728,7 @@ void TopicElement::GetTopicList(
         }
         errorStream << "Topic bundle does not appear to contain the desired element: "
         << currentArgument;
-        currentElt.error = errorStream.str();
-        currentElt.type = currentElt.tError;
+        currentElt.MakeError(errorStream.str());
       }
     } else if (StringRoutines::StringBeginsWith(currentLine, "SlidesSourceHeader:", &currentArgument)) {
       owner.slidesSourcesHeaders.AddOnTop(StringRoutines::StringTrimWhiteSpace(currentArgument));
@@ -3802,8 +3811,7 @@ void TopicElement::GetTopicList(
         << "<br>\n";
       }
       showedAllowedDataEntries = true;
-      currentElt.error = errorStream.str();
-      currentElt.type = currentElt.tError;
+      currentElt.MakeError(errorStream.str());
       found = true;
     }
   }
@@ -3811,6 +3819,7 @@ void TopicElement::GetTopicList(
   if (found) {
     TopicElement::AddTopic(currentElt, output);
   }
+  theGlobalVariables.Comments << "DEBUG: topic elements: " << output.ToStringHtml() << "<br>";
 }
 
 void CalculatorHTML::InterpretAccountInformationLinks(SyntacticElementHTML& inputOutput) {

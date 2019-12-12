@@ -103,6 +103,7 @@ public:
     CalculatorHTML& owner,
     std::stringstream& errorStream
   );
+  void MakeError(const std::string& message);
   static void AddTopic(TopicElement& inputElt, MapList<std::string, TopicElement, MathRoutines::HashString>& output);
 };
 

@@ -25,17 +25,25 @@ function deepCopy(from) {
 
 /**@returns{string} */
 function jsonParseGetHtmlStandard(input) {
-  var unescaped = unescapeInequalitiesAmpersands(input)
-  var parsed = JSON.parse(unescaped);
+  var parsed = jsonUnescapeParse(input);
   var result = "";
   if (parsed[pathnames.urlFields.result.resultHtml] !== undefined) {
     result += parsed[pathnames.urlFields.result.resultHtml];
   }
+  var lookForComments = false;
   if (parsed[pathnames.urlFields.result.error] !== undefined) {
-    result += `<b style='red'>Error.</b> ${parsed[pathnames.urlFields.result.error]}`;
+    result += `<b style='color:red'>Error.</b> ${parsed[pathnames.urlFields.result.error]}`;
+    lookForComments = true;
   }
   if (parsed[pathnames.urlFields.result.crashReport] !== undefined) {
-    result += `<b style='red'>Crash.</b> ${parsed[pathnames.urlFields.result.crashReport]}`;
+    result += parsed[pathnames.urlFields.result.crashReport];
+    lookForComments = true;
+  }
+  if (lookForComments) {
+    var comments = parsed[pathnames.urlFields.result.comments];
+    if (comments !== undefined && comments !== "") {
+      result += `<hr><b>Additional comments.</b><br>${comments}`;
+    }
   }
   return result;
 }

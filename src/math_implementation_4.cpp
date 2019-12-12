@@ -128,6 +128,7 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash) {
   std::cout << this->crashReportConsolE.str() << std::endl;
   JSData output;
   output[WebAPI::result::crashReport] = this->crashReportHtml.str();
+  output[WebAPI::result::comments] = theGlobalVariables.Comments.container.GetElement().str();
   theGlobalVariables.WriteResponse(output);
   if (this->CleanUpFunction != nullptr) {
     this->CleanUpFunction();

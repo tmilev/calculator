@@ -4,7 +4,7 @@
 #include "calculator_inner_functions.h"
 #include "calculator_inner_typed_functions.h"
 #include "calculator_html_functions.h"
-#include "html_snippets.h"
+#include "web_api.h"
 #include "calculator_html_interpretation.h"
 #include "calculator_html_interpretation_interface.h"
 #include "math_extra_drawing_variables.h"
@@ -148,7 +148,7 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation(
       theProblem.theProblemData.theAnswers.theValues[j].answerId;
       theGlobalVariables.SetWebInpuT(currentKey, "1");
       theGlobalVariables.SetWebInpuT(WebAPI::problem::fileName, theProblem.fileName);
-      answerGeneration += HtmlInterpretation::GetAnswerOnGiveUp(
+      answerGeneration += WebAPIResponse::GetAnswerOnGiveUp(
         randomSeedCurrent, &currentAnswer, &answerGenerated
       ).ToString(false) + "<hr>";
       if (!answerGenerated) {
@@ -156,7 +156,7 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation(
       }
       theGlobalVariables.SetWebInpuT(currentKey, HtmlRoutines::ConvertStringToURLString(currentAnswer, false));
       solutionReport +=
-      HtmlInterpretation::SubmitAnswersJSON(randomSeedCurrent, &answersWork, false).ToString(false) + "<hr>";
+      WebAPIResponse::SubmitAnswersJSON(randomSeedCurrent, &answersWork, false).ToString(false) + "<hr>";
       if (!answersWork) {
         break;
       }

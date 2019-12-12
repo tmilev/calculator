@@ -3,7 +3,7 @@
 #include "math_extra_latex_routines.h"
 #include "general_file_operations_encodings.h"
 #include "general_logging_global_variables.h"
-#include "html_snippets.h"
+#include "web_api.h"
 #include "general_strings.h"
 
 static ProjectInformationInstance ProjectInfoCalculatorLaTeXRoutines(__FILE__, "LaTeX routines. ");

@@ -9,7 +9,7 @@
 #include "math_vectors.h"
 #include "math_subsets_selections.h"
 #include "general_file_operations_encodings.h"
-#include "html_snippets.h"
+#include "web_api.h"
 
 static ProjectInformationInstance ProjectInfoVpfHeader1_2(__FILE__, "Header, math routines. ");
 

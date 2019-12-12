@@ -12,7 +12,7 @@
 #include "math_extra_modules_semisimple_Lie_algebras_implementation.h"
 #include "crypto.h"
 #include "math_extra_semisimple_Lie_algebras_implementation.h" // undefined reference to `charSSAlgMod<RationalFunctionOld>::SplitCharOverRedSubalg(std::string*, charSSAlgMod<RationalFunctionOld>&, branchingData&, GlobalVariables&)'
-#include "html_snippets.h"
+#include "web_api.h"
 #include "math_extra_latex_routines.h"
 #include "source_code_formatter.h"
 #include <cmath>

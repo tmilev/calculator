@@ -178,7 +178,8 @@ SOURCES_RELATIVE_PATH=\
     transport_layer_security_implementation.cpp \
     transport_layer_security_openssl.cpp \
     transport_layer_security_test.cpp \
-    web-routines-1.cpp \
+    web_routines_1.cpp \
+    web_api.cpp \
     webserver.cpp \
     webserver_fork.cpp
 

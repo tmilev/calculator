@@ -26,7 +26,6 @@ HEADERS += \
     calculator_database_mongo.h \
     calculator_html_functions.h \
     calculator_html_interpretation.h \
-    calculator_html_interpretation_interface.h \
     calculator_inner_functions.h \
     calculator_inner_typed_functions.h \
     calculator_interface.h \
@@ -43,7 +42,7 @@ HEADERS += \
     general_multitasking.h \
     general_test.h \
     general_time_date.h \
-    html_snippets.h \
+    web_api.h \
     json.h \
     macros.h \
     math_extra_algebraic_numbers.h \
@@ -148,7 +147,7 @@ SOURCES += \
     transport_layer_security_implementation.cpp \
     transport_layer_security_openssl.cpp \
     transport_layer_security_test.cpp \
-    web-routines-1.cpp \
+    web_routines_1.cpp \
     webserver.cpp \
     webserver_fork.cpp \
     calculator_expressions_test.cpp \
@@ -156,5 +155,6 @@ SOURCES += \
     calculator_expressions_test.cpp \
     calculator_parsing_routines_test.cpp \
     database_fallback_json.cpp \
-    main.cpp
+    main.cpp \
+    web_api.cpp
 

@@ -5,7 +5,7 @@
 #include "database.h"
 #include "calculator_problem_storage.h"
 #include "calculator_html_interpretation_interface.h"
-#include "html_snippets.h"
+#include "web_api.h"
 #include "string_constants.h"
 #include "crypto.h"
 #include <sys/wait.h>//<-waitpid f-n here
@@ -1631,43 +1631,34 @@ int WebWorker::ProcessFileDoesntExist() {
 int WebWorker::ProcessFileCantOpen() {
   this->SetHeaderOKNoContentLength("");
   std::stringstream out;
-  out << "<html><body><b>Error: file appears to exist but I could not open it.</b> ";
+  out << "Error: file appears to exist but I could not open it. ";
   if (this->flagFileNameSanitized) {
-    out << "<hr>You requested virtual file: "
-    << HtmlRoutines::ConvertStringToHtmlString(this->VirtualFileName, false)
-    << "<br>However, I do not allow addresses that contain dots. "
+    out << "You requested virtual file: "
+    << this->VirtualFileName
+    << "However, I do not allow addresses that contain dots. "
     << "Therefore I have sanitized the address to a relative physical address: "
-    << HtmlRoutines::ConvertStringToHtmlString(this->RelativePhysicalFileNamE, false);
+    << this->RelativePhysicalFileNamE;
   }
   out << "<br><b>File display name: </b>"
-  << HtmlRoutines::ConvertStringToHtmlString(this->addressGetOrPost, false)
+  << this->addressGetOrPost
   << "<br><b>Virtual file name: </b>"
-  << HtmlRoutines::ConvertStringToHtmlString(this->VirtualFileName, false)
+  << this->VirtualFileName
   << "</body></html>";
-  this->WriteToBody(out.str());
-  return 0;
+  JSData result;
+  result[WebAPI::result::error] = out.str();
+  return this->WriteToBodyJSON(result);
 }
 
 int WebWorker::ProcessFileTooLarge(long fileSize) {
   this->SetHeader("HTTP/1.0 413 Payload Too Large", "");
   std::stringstream out;
-  out << "<html><body><b>Error: user requested file: "
+  out << "User requested file: "
   << this->VirtualFileName
   << " but it is too large, namely, " << fileSize
-  << " bytes.</b></body></html>";
-  this->WriteToBody(out.str());
-  return 0;
-}
-
-int WebWorker::ProcessFileLinkApache() {
-  this->SetHeaderOKNoContentLength("");
-  std::stringstream out;
-  out << "<html><body>"
-  << "<a href=\"" << HtmlRoutines::ConvertStringToURLString(this->VirtualFileName, false) << "\">"
-  << HtmlRoutines::ConvertStringToHtmlString(this->VirtualFileName, false) << "</a>"
-  << "</body></html>";
-  this->WriteToBody(out.str());
-  return 0;
+  << " bytes.";
+  JSData result;
+  result[WebAPI::result::error] = out.str();
+  return this->WriteToBodyJSON(result);
 }
 
 int WebWorker::ProcessFile() {
@@ -1872,7 +1863,7 @@ std::string WebWorker::GetMIMEtypeFromFileExtension(const std::string& fileExten
 int WebWorker::ProcessUnknown() {
   MacroRegisterFunctionWithName("WebWorker::ProcessUnknown");
   this->SetHeader("HTTP/1.0 501 Method Not Implemented", "Content-Type: text/html");
-  theGlobalVariables.WriteResponse(HtmlInterpretation::GetJSONUserInfo("Unknown request"));
+  theGlobalVariables.WriteResponse(WebAPIResponse::GetJSONUserInfo("Unknown request"));
   return 0;
 }
 
@@ -2038,8 +2029,7 @@ JSData WebWorker::SetEmail(const std::string& input) {
   JSData result;
   if (!theGlobalVariables.flagDatabaseCompiled) {
     result[WebAPI::result::error] = "Database not available (cannot set email). ";
-    this->WriteToBodyJSON(result);
-    return 0;
+    return result;
   }
   std::stringstream out, debugStream;
   //double startTime = theGlobalVariables.GetElapsedSeconds();
@@ -2054,8 +2044,7 @@ JSData WebWorker::SetEmail(const std::string& input) {
   }
   out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() << " second(s).";
   result[WebAPI::result::comments] = out.str();
-  this->WriteToBodyJSON(result);
-  return 0;
+  return  result;
 }
 
 int WebWorker::ProcessChangePassword(const std::string& reasonForNoAuthentication) {
@@ -2204,13 +2193,13 @@ int WebWorker::ProcessLogout() {
 int WebWorker::ProcessSelectCourseJSON() {
   MacroRegisterFunctionWithName("WebWorker::ProcessSelectCourseJSON");
   this->SetHeaderOKNoContentLength("");
-  return this->WriteToBodyJSON(HtmlInterpretation::GetSelectCourseJSON());
+  return this->WriteToBodyJSON(WebAPIResponse::GetSelectCourseJSON());
 }
 
 int WebWorker::ProcessTopicListJSON() {
   MacroRegisterFunctionWithName("WebWorker::ProcessTopicListJSON");
   this->SetHeaderOKNoContentLength("");
-  return this->WriteToBodyJSON(HtmlInterpretation::GetTopicTableJSON());
+  return this->WriteToBodyJSON(WebAPIResponse::GetTopicTableJSON());
 }
 
 int WebWorker::ProcessCalculatorOnePageJS(bool appendBuildHash) {
@@ -2220,7 +2209,7 @@ int WebWorker::ProcessCalculatorOnePageJS(bool appendBuildHash) {
   } else {
     this->SetHeaderOKNoContentLength("", "text/javascript");
   }
-  return this->WriteToBody(HtmlInterpretation::GetOnePageJS(appendBuildHash));
+  return this->WriteToBody(WebAPIResponse::GetOnePageJS(appendBuildHash));
 }
 
 int WebWorker::ProcessApp(bool appendBuildHash) {
@@ -2229,7 +2218,7 @@ int WebWorker::ProcessApp(bool appendBuildHash) {
   if (theWebServer.RestartIsNeeded()) {
     return 0;
   }
-  return this->WriteToBody(HtmlInterpretation::GetApp(appendBuildHash));
+  return this->WriteToBody(WebAPIResponse::GetApp(appendBuildHash));
 }
 
 int WebWorker::ProcessLoginUserInfo(const std::string& comments) {
@@ -2238,21 +2227,21 @@ int WebWorker::ProcessLoginUserInfo(const std::string& comments) {
   if (theWebServer.RestartIsNeeded()) {
     return 0;
   }
-  return this->WriteToBodyJSON(HtmlInterpretation::GetJSONUserInfo(comments));
+  return this->WriteToBodyJSON(WebAPIResponse::GetJSONUserInfo(comments));
 }
 
 int WebWorker::ProcessTemplateJSON() {
   MacroRegisterFunctionWithName("WebWorker::ProcessTemplateJSON");
   this->SetHeaderOKNoContentLength("");
   JSData result;
-  result[WebAPI::result::resultHtml] = HtmlInterpretation::GetJSONFromTemplate();
+  result[WebAPI::result::resultHtml] = WebAPIResponse::GetJSONFromTemplate();
   return this->WriteToBodyJSON(result);
 }
 
 int WebWorker::ProcessExamPageJSON() {
   MacroRegisterFunctionWithName("WebWorker::ProcessExamPageJSON");
   this->SetHeaderOKNoContentLength("");
-  return this->WriteToBodyJSON(HtmlInterpretation::GetExamPageJSON());
+  return this->WriteToBodyJSON(WebAPIResponse::GetExamPageJSON());
 }
 
 int WebWorker::ProcessGetAuthenticationToken(const std::string& reasonForNoAuthentication) {
@@ -2265,7 +2254,7 @@ int WebWorker::ProcessSetProblemDatabaseInfo() {
   MacroRegisterFunctionWithName("WebWorker::ProcessSetProblemDatabaseInfo");
   this->SetHeaderOKNoContentLength("");
   JSData result;
-  result[WebAPI::result::resultHtml] = HtmlInterpretation::GetSetProblemDatabaseInfoHtml();
+  result[WebAPI::result::resultHtml] = WebAPIResponse::GetSetProblemDatabaseInfoHtml();
   return this->WriteToBodyJSON(result);
 }
 
@@ -2281,7 +2270,7 @@ int WebWorker::ProcessModifyPage() {
   MacroRegisterFunctionWithName("WebWorker::ProcessModifyPage");
   this->SetHeaderOKNoContentLength("");
   JSData result;
-  result[WebAPI::result::resultHtml] = HtmlInterpretation::ModifyProblemReport();
+  result[WebAPI::result::resultHtml] = WebAPIResponse::ModifyProblemReport();
   return this->WriteToBodyJSON(result);
 }
 
@@ -2289,7 +2278,7 @@ int WebWorker::ProcessAssignTeacherToSection() {
   MacroRegisterFunctionWithName("WebWorker::ProcessAssignTeacherToSection");
   this->SetHeaderOKNoContentLength("");
   JSData result;
-  result[WebAPI::result::resultHtml] = HtmlInterpretation::AddTeachersSections();
+  result[WebAPI::result::resultHtml] = WebAPIResponse::AddTeachersSections();
   return this->WriteToBodyJSON(result);
 }
 
@@ -2297,7 +2286,7 @@ int WebWorker::ProcessScores() {
   MacroRegisterFunctionWithName("WebWorker::ProcessScores");
   this->SetHeaderOKNoContentLength("");
   JSData result;
-  result[WebAPI::result::resultHtml] = HtmlInterpretation::GetScoresPage();
+  result[WebAPI::result::resultHtml] = WebAPIResponse::GetScoresPage();
   return this->WriteToBodyJSON(result);
 }
 
@@ -2305,14 +2294,14 @@ int WebWorker::ProcessScoresInCoursePage() {
   MacroRegisterFunctionWithName("WebWorker::ProcessScoresInCoursePage");
   this->SetHeaderOKNoContentLength("");
   JSData result;
-  result[WebAPI::result::resultHtml] = HtmlInterpretation::GetScoresInCoursePage();
+  result[WebAPI::result::resultHtml] = WebAPIResponse::GetScoresInCoursePage();
   return this->WriteToBodyJSON(result);
 }
 
 int WebWorker::ProcessAccountsJSON() {
   MacroRegisterFunctionWithName("WebWorker::ProcessAccountsJSON");
   this->SetHeaderOKNoContentLength("");
-  return this->WriteToBodyJSON(HtmlInterpretation::GetAccountsPageJSON(this->hostWithPort));
+  return this->WriteToBodyJSON(WebAPIResponse::GetAccountsPageJSON(this->hostWithPort));
 }
 
 int WebWorker::ProcessDatabaseJSON() {
@@ -2340,7 +2329,7 @@ int WebWorker::ProcessDatabaseModifyEntry() {
 int WebWorker::ProcessEditPageJSON() {
   MacroRegisterFunctionWithName("WebWorker::ProcessEditPageJSON");
   this->SetHeaderOKNoContentLength("");
-  return this->WriteToBodyJSON(HtmlInterpretation::GetEditPageJSON());
+  return this->WriteToBodyJSON(WebAPIResponse::GetEditPageJSON());
 }
 
 int WebWorker::ProcessSlidesOrHomeworkFromSource() {
@@ -2384,7 +2373,7 @@ int WebWorker::ProcessSlidesOrHomeworkFromSource() {
   }
   if (!theCrawler.BuildOrFetchFromCachePDF(&comments, &comments)) {
     JSData result;
-    HtmlInterpretation::GetJSDataUserInfo(result, comments.str());
+    WebAPIResponse::GetJSDataUserInfo(result, comments.str());
     this->flagDoAddContentLength = true;
     this->WriteToBodyJSON(result);
     return 0;
@@ -2429,7 +2418,7 @@ int WebWorker::ProcessSlidesSource() {
   if (!theCrawler.BuildOrFetchFromCachePDF(&comments, &comments)) {
     this->flagDoAddContentLength = true;
     comments << "Failed to build your slides. ";
-    return this->WriteToBodyJSON(HtmlInterpretation::GetJSONUserInfo(comments.str()));
+    return this->WriteToBodyJSON(WebAPIResponse::GetJSONUserInfo(comments.str()));
   }
   this->SetHeader("HTTP/1.0 200 OK", "Content-Type: application/x-latex; Access-Control-Allow-Origin: *");
   this->flagDoAddContentLength = true;
@@ -2445,33 +2434,33 @@ int WebWorker::ProcessClonePage() {
 int WebWorker::ProcessProblemGiveUp() {
   MacroRegisterFunctionWithName("WebWorker::ProcessProblemGiveUp");
   this->SetHeaderOKNoContentLength("");
-  return this->WriteToBodyJSON(HtmlInterpretation::GetAnswerOnGiveUp());
+  return this->WriteToBodyJSON(WebAPIResponse::GetAnswerOnGiveUp());
 }
 
 int WebWorker::ProcessProblemSolution() {
   MacroRegisterFunctionWithName("WebWorker::ProcessProblemSolution");
   this->SetHeaderOKNoContentLength("");
-  return this->WriteToBodyJSON(HtmlInterpretation::GetProblemSolutionJSON());
+  return this->WriteToBodyJSON(WebAPIResponse::GetProblemSolutionJSON());
 }
 
 int WebWorker::ProcessSubmitAnswersPreview() {
   MacroRegisterFunctionWithName("WebWorker::ProcessSubmitAnswersPreview");
   this->SetHeaderOKNoContentLength("");
-  return this->WriteToBodyJSON(HtmlInterpretation::submitAnswersPreviewJSON());
+  return this->WriteToBodyJSON(WebAPIResponse::submitAnswersPreviewJSON());
 }
 
 JSData WebWorker::GetClonePageResult() {
   MacroRegisterFunctionWithName("WebWorker::GetClonePageResult");
   this->SetHeaderOKNoContentLength("");
-  return HtmlInterpretation::ClonePageResult();
+  return WebAPIResponse::ClonePageResult();
 }
 
 std::string WebWorker::GetAddUserEmails() {
   MacroRegisterFunctionWithName("WebWorker::GetAddUserEmails");
-  return HtmlInterpretation::AddUserEmails(this->hostWithPort);
+  return WebAPIResponse::AddUserEmails(this->hostWithPort);
 }
 
-std::string HtmlInterpretation::ModifyProblemReport() {
+std::string WebAPIResponse::ModifyProblemReport() {
   MacroRegisterFunctionWithName("WebWorker::ModifyProblemReport");
   bool shouldProceed = theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights();
   if (shouldProceed) {
@@ -2506,18 +2495,18 @@ std::string HtmlInterpretation::ModifyProblemReport() {
 int WebWorker::ProcessSubmitAnswers() {
   MacroRegisterFunctionWithName("WebWorker::ProcessSubmitAnswers");
   this->SetHeaderOKNoContentLength("");
-  return this->WriteToBodyJSON(HtmlInterpretation::SubmitAnswersJSON());
+  return this->WriteToBodyJSON(WebAPIResponse::SubmitAnswersJSON());
 }
 
-std::string HtmlInterpretation::GetJavascriptCaptcha() {
-  MacroRegisterFunctionWithName("HtmlInterpretation::GetCaptchaJavascript");
+std::string WebAPIResponse::GetJavascriptCaptcha() {
+  MacroRegisterFunctionWithName("WebAPIResponse::GetCaptchaJavascript");
   std::stringstream out;
   out << "<script src = 'https://www.google.com/recaptcha/api.js'></script>";
   return out.str();
 }
 
-std::string HtmlInterpretation::GetCaptchaDiv() {
-  MacroRegisterFunctionWithName("HtmlInterpretation::GetCaptchaDiv");
+std::string WebAPIResponse::GetCaptchaDiv() {
+  MacroRegisterFunctionWithName("WebAPIResponse::GetCaptchaDiv");
   std::stringstream out;
   std::string recaptchaPublic;
   if (!FileOperations::LoadFileToStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
@@ -5284,7 +5273,7 @@ std::string WebServer::GetEnvironment(const std::string& envVarName) {
   return queryStringPtr;
 }
 
-std::string HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable() {
+std::string WebAPIResponse::ToStringCalculatorArgumentsHumanReadable() {
   MacroRegisterFunctionWithName("WebWorker::ToStringCalculatorArgumentsHumanReadable");
   if (!theGlobalVariables.UserDebugFlagOn()) {
     return "";

@@ -5,7 +5,7 @@
 #include "database.h"
 #include "json.h"
 #include "general_logging_global_variables.h"
-#include "html_snippets.h"
+#include "web_api.h"
 #include "string_constants.h"
 #include "general_strings.h"
 

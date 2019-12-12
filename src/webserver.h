@@ -94,7 +94,6 @@ public:
   int ProcessFileDoesntExist();
   int ProcessFileCantOpen();
   int ProcessFileTooLarge(long fileSize);
-  int ProcessFileLinkApache();
 
   int ProcessChangePassword(const std::string& reasonForNoAuthentication);
   JSData SetEmail(const std::string& input);

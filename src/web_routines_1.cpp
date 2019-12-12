@@ -999,7 +999,17 @@ JSData WebWorker::GetSignUpRequestResult() {
 }
 
 int WebWorker::WriteToBodyJSON(const JSData& result) {
-  return this->WriteToBody(result.ToString(false));
+  std::string toWrite = HtmlRoutines::ConvertStringToHtmlString(result.ToString(false), false);
+  if (toWrite.size() < 2000) {
+    if (toWrite.find(WebAPIResponse::youHaveReachedTheBackend) != std::string::npos) {
+      std::string sanitizedCalculatorApp = HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.DisplayNameExecutableApp, false);
+      std::stringstream outLinkApp;
+      outLinkApp << "You've reached the calculator's backend. The app can be accessed here: <a href = '"
+      << sanitizedCalculatorApp << "'>app</a>";
+      toWrite = StringRoutines::ReplaceAll(toWrite, WebAPIResponse::youHaveReachedTheBackend, outLinkApp.str());
+    }
+  }
+  return this->WriteToBody(toWrite);
 }
 
 int WebWorker::ProcessSignUP() {

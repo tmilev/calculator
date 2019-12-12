@@ -5,7 +5,7 @@
 #include "database.h"
 #include "general_time_date.h"
 #include "calculator_html_interpretation.h"
-#include "html_snippets.h"
+#include "web_api.h"
 #include "calculator_html_interpretation_interface.h"
 #include "math_extra_latex_routines.h"
 #include <iomanip>
@@ -684,7 +684,7 @@ bool CalculatorHtmlFunctions::innerInterpretProblemGiveUp(
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerInterpretProblemGiveUp");
   (void) input;
   return output.AssignValue(
-    HtmlInterpretation::GetAnswerOnGiveUp(theGlobalVariables.GetWebInput("randomSeed")), theCommands
+    WebAPIResponse::GetAnswerOnGiveUp(theGlobalVariables.GetWebInput("randomSeed")), theCommands
   );
 }
 

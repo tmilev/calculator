@@ -52,6 +52,7 @@ CalculatorHTML::CalculatorHTML() {
   this->flagMathQuillWithMatrices = false;
   this->flagSectionsPrepared = false;
   this->topicLectureCounter = 0;
+  this->topics.owner = this;
 }
 
 extern logger logWorker;
@@ -314,11 +315,11 @@ bool CalculatorHTML::MergeOneProblemAdminData(
   std::stringstream& commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("CalculatorHTML::MergeOneProblemAdminData");
-  if (!this->theTopicS.Contains(inputProblemName)) {
+  if (!this->topics.theTopics.Contains(inputProblemName)) {
     commentsOnFailure << "Did not find " << inputProblemName
     << " among the list of topics/problems. ";
     if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn()) {
-      commentsOnFailure << "The topics are: " << this->theTopicS.ToStringHtml();
+      commentsOnFailure << "The topics are: " << this->topics.theTopics.ToStringHtml();
     }
     return false;
   }
@@ -443,8 +444,8 @@ bool CalculatorHTML::LoadMe(
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << errorStream.str();
       }
-      for (int i = 0; i < this->theTopicS.size(); i ++) {
-        this->ComputeDeadlinesAllSectionsNoInheritance(this->theTopicS.theValues[i]);
+      for (int i = 0; i < this->topics.theTopics.size(); i ++) {
+        this->ComputeDeadlinesAllSectionsNoInheritance(this->topics.theTopics.theValues[i]);
       }
     }
   }
@@ -1420,8 +1421,6 @@ void CalculatorHTML::InterpretNotByCalculatorNotAnswer(SyntacticElementHTML& inp
     this->InterpretJavascripts(inputOutput);
   } else if (tagClass == "calculatorProblemNavigationHere") {
     this->InterpretProblemNavigationBar(inputOutput);
-  } else if (tagClass == "calculatorEditPageHere") {
-    this->InterpretEditPagePanel(inputOutput);
   }
 }
 
@@ -1488,13 +1487,13 @@ std::string CalculatorHTML::GetDeadline(
   if (!theGlobalVariables.flagDatabaseCompiled) {
     return "While getting deadline: database not compiled";
   }
-  int topicIndex = this->theTopicS.GetIndex(problemName);
+  int topicIndex = this->topics.theTopics.GetIndex(problemName);
   if (topicIndex == - 1) {
     return problemName + " not found in topic list. ";
   }
-  TopicElement& currentTopic = this->theTopicS.GetValueCreate(problemName);
+  TopicElement& currentTopic = this->topics.theTopics.GetValueCreate(problemName);
   for (int i = currentTopic.parentTopics.size - 1; i >= 0; i --) {
-    const std::string& containerName = this->theTopicS.theKeys[currentTopic.parentTopics[i]];
+    const std::string& containerName = this->topics.theTopics.theKeys[currentTopic.parentTopics[i]];
     if (this->currentUseR.theProblemData.Contains(containerName)) {
       ProblemDataAdministrative& currentProb =
       this->currentUseR.theProblemData.GetValueCreateNoInit(containerName).adminData;
@@ -2032,27 +2031,27 @@ bool CalculatorHTML::SetTagClassFromOpenTag(SyntacticElementHTML& output) {
   return false;
 }
 
-void CalculatorHTML::initTopicElementNames() {
+void TopicElementParser::initTopicElementNames() {
   MacroRegisterFunctionWithName("CalculatorHTML::initTopicElementNames");
-  if (this->calculatorTopicElementNames.size == 0) {
-    this->calculatorTopicElementNames.AddOnTop("Chapter");
-    this->calculatorTopicElementNames.AddOnTop("Section");
-    this->calculatorTopicElementNames.AddOnTop("Topic");
-    this->calculatorTopicElementNames.AddOnTop("Title");
-    this->calculatorTopicElementNames.AddOnTop("Problem");
-    this->calculatorTopicElementNames.AddOnTop("Video");
-    this->calculatorTopicElementNames.AddOnTop("VideoHandwritten");
-    this->calculatorTopicElementNames.AddOnTop("SlidesLatex");
-    this->calculatorTopicElementNames.AddOnTop("SlidesSource");
-    this->calculatorTopicElementNames.AddOnTop("HomeworkLatex");
-    this->calculatorTopicElementNames.AddOnTop("HomeworkSource");
-    this->calculatorTopicElementNames.AddOnTop("HomeworkSolutionSource");
-    this->calculatorTopicElementNames.AddOnTop("SlidesSourceHeader");
-    this->calculatorTopicElementNames.AddOnTop("HomeworkSourceHeader");
-    this->calculatorTopicElementNames.AddOnTop("LoadTopicBundles");
-    this->calculatorTopicElementNames.AddOnTop("TopicBundle");
-    this->calculatorTopicElementNames.AddOnTop("BundleBegin");
-    this->calculatorTopicElementNames.AddOnTop("BundleEnd");
+  if (this->elementNames.size == 0) {
+    this->elementNames.AddOnTop("Chapter");
+    this->elementNames.AddOnTop("Section");
+    this->elementNames.AddOnTop("Topic");
+    this->elementNames.AddOnTop("Title");
+    this->elementNames.AddOnTop("Problem");
+    this->elementNames.AddOnTop("Video");
+    this->elementNames.AddOnTop("VideoHandwritten");
+    this->elementNames.AddOnTop("SlidesLatex");
+    this->elementNames.AddOnTop("SlidesSource");
+    this->elementNames.AddOnTop("HomeworkLatex");
+    this->elementNames.AddOnTop("HomeworkSource");
+    this->elementNames.AddOnTop("HomeworkSolutionSource");
+    this->elementNames.AddOnTop("SlidesSourceHeader");
+    this->elementNames.AddOnTop("HomeworkSourceHeader");
+    this->elementNames.AddOnTop("LoadTopicBundles");
+    this->elementNames.AddOnTop("TopicBundle");
+    this->elementNames.AddOnTop("BundleBegin");
+    this->elementNames.AddOnTop("BundleEnd");
   }
 }
 
@@ -2634,10 +2633,10 @@ bool CalculatorHTML::ExtractAnswerIds(std::stringstream* comments) {
 }
 
 bool CalculatorHTML::CheckConsistencyTopics() {
-  for (int i = 0; i < this->theTopicS.size(); i ++) {
-    if (this->theTopicS.theValues[i].type == TopicElement::tProblem) {
-      if (this->theTopicS.theValues[i].immediateChildren.size > 0) {
-        crash << "Topic element: " << this->theTopicS.theValues[i].ToString()
+  for (int i = 0; i < this->topics.theTopics.size(); i ++) {
+    if (this->topics.theTopics.theValues[i].type == TopicElement::tProblem) {
+      if (this->topics.theTopics.theValues[i].immediateChildren.size > 0) {
+        crash << "Topic element: " << this->topics.theTopics.theValues[i].ToString()
         << " has non-zero immediate children. " << crash;
         return false;
       }
@@ -2903,10 +2902,10 @@ void CalculatorHTML::ComputeProblemLabel() {
   ) {
     return;
   }
-  if (!this->theTopicS.Contains(this->fileName)) {
+  if (!this->topics.theTopics.Contains(this->fileName)) {
     return;
   }
-  TopicElement& current = this->theTopicS.GetValueCreate(this->fileName);
+  TopicElement& current = this->topics.theTopics.GetValueCreate(this->fileName);
   current.ComputeLinks(*this, true);
   this->outputProblemLabel = current.problemNumberString;
   this->outputProblemTitle = current.title;
@@ -2967,8 +2966,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     theGlobalVariables.userCalculatorRequestType != "template" &&
     theGlobalVariables.userCalculatorRequestType != "templateNoLogin"
   ) {
-    if (this->theTopicS.Contains(this->fileName)) {
-      TopicElement& current = this->theTopicS.GetValueCreate(this->fileName);
+    if (this->topics.theTopics.Contains(this->fileName)) {
+      TopicElement& current = this->topics.theTopics.GetValueCreate(this->fileName);
       current.ComputeLinks(*this, true);
       problemLabel = current.displayTitle + "&nbsp;&nbsp;";
       if (this->flagDoPrependProblemNavigationBar) {
@@ -3115,11 +3114,6 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   std::stringstream navigationAndEditTagStream;
   if (this->flagDoPrependProblemNavigationBar) {
     navigationAndEditTagStream << this->ToStringProblemNavigation();
-  }
-  if (this->flagDoPrependEditPagePanel) {
-    if (theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentVieWOn()) {
-      navigationAndEditTagStream << this->GetEditPagePanel();
-    }
   }
   this->outputProblemNavigatioN = navigationAndEditTagStream.str();
   this->outputHtmlBodyNoTag = outBody.str();
@@ -3504,23 +3498,27 @@ void TopicElement::ComputeID() {
   this->studentScoresSpanId = "topic" + Crypto::computeSha3_256OutputBase64URL(this->id);
 }
 
-void TopicElement::AddTopic(TopicElement& inputElt, MapList<std::string, TopicElement, MathRoutines::HashString>& output) {
+TopicElementParser::TopicElementParser() {
+  this->owner = nullptr;
+}
+
+void TopicElementParser::AddTopic(TopicElement& inputElt) {
   MacroRegisterFunctionWithName("TopicElement::AddTopic");
   int numToCheck = 4;
-  if (output.size() >= numToCheck && inputElt.type != inputElt.tTexHeader && inputElt.type != inputElt.tChapter) {
+  if (this->theTopics.size() >= numToCheck && inputElt.type != inputElt.tTexHeader && inputElt.type != inputElt.tChapter) {
     bool startsWithChapter = false;
     for (int i = 0; i < numToCheck - 1; i ++) {
-      if (output.theValues[i].type == inputElt.tChapter) {
+      if (this->theTopics.theValues[i].type == inputElt.tChapter) {
         startsWithChapter = true;
         break;
       }
     }
     if (!startsWithChapter) {
       TopicElement chapterlessChapter;
-      chapterlessChapter.parentTopics.AddOnTop(output.size());
+      chapterlessChapter.parentTopics.AddOnTop(this->theTopics.size());
       chapterlessChapter.type = chapterlessChapter.tChapter;
       chapterlessChapter.title = "Topics without chapter";
-      TopicElement::AddTopic(chapterlessChapter, output);
+      this->AddTopic(chapterlessChapter);
     }
   }
   inputElt.ComputeID();
@@ -3528,23 +3526,23 @@ void TopicElement::AddTopic(TopicElement& inputElt, MapList<std::string, TopicEl
     inputElt.type = inputElt.tError;
     inputElt.id = "error";
   }
-  if (output.Contains(inputElt.id)) {
+  if (this->theTopics.Contains(inputElt.id)) {
     inputElt.id += "[Error]";
     inputElt.title = "[Error]: Entry " + inputElt.title + " already present. ";
     inputElt.immediateChildren.SetSize(0);
   }
-  inputElt.indexInParent = output.size();
-  output.SetKeyValue(inputElt.id, inputElt);
+  inputElt.indexInParent = this->theTopics.size();
+  this->theTopics.SetKeyValue(inputElt.id, inputElt);
   if (inputElt.parentTopics.size > 1) {
     int indexImmediateParent = - 1;
-    int indexCurrentElement = output.GetIndex(inputElt.id);
+    int indexCurrentElement = this->theTopics.GetIndex(inputElt.id);
     for (int i = 0; i < inputElt.parentTopics.size; i ++) {
       if (inputElt.parentTopics[i] > indexImmediateParent && inputElt.parentTopics[i] < indexCurrentElement) {
         indexImmediateParent = inputElt.parentTopics[i];
       }
     }
     if (indexImmediateParent > - 1) {
-      output.theValues[indexImmediateParent].immediateChildren.AddOnTop(indexCurrentElement);
+      this->theTopics.theValues[indexImmediateParent].immediateChildren.AddOnTop(indexCurrentElement);
     }
   }
   if (inputElt.immediateChildren.size > 0) {
@@ -3618,10 +3616,15 @@ void TopicElement::reset(int parentSize, MapList<std::string, TopicElement, Math
   }
 }
 
-bool TopicElement::LoadTopicBundle(
+bool TopicElementParser::CheckInitialization() {
+  if (this->owner == nullptr) {
+    crash << "TopicElementParser not initialized when it should be. " << crash;
+  }
+  return true;
+}
+
+bool TopicElementParser::LoadTopicBundle(
   const std::string& inputFileName,
-  MapList<std::string, List<std::string>, MathRoutines::HashString>& output,
-  CalculatorHTML& owner,
   std::stringstream& errorStream
 ) {
   MacroRegisterFunctionWithName("TopicElement::LoadTopicBundle");
@@ -3635,7 +3638,7 @@ bool TopicElement::LoadTopicBundle(
     errorStream << "Could not open topic bundle file. ";
     return false;
   }
-  owner.loadedTopicBundles.AddOnTop(fileName);
+  this->loadedTopicBundleFiles.AddOnTop(fileName);
   std::string currentLine, currentId;
   List<std::string> bundleNameStack;
   std::stringstream bundleReader(newTopicBundles);
@@ -3651,27 +3654,24 @@ bool TopicElement::LoadTopicBundle(
       }
     } else {
       for (int i = 0; i < bundleNameStack.size; i ++) {
-        output.GetValueCreate(bundleNameStack[i]).AddOnTop(currentLine);
+        this->knownTopicBundles.GetValueCreate(bundleNameStack[i]).AddOnTop(currentLine);
       }
     }
   }
   return true;
 }
 
-void TopicElement::GetTopicList(
-  const std::string& inputString,
-  MapList<std::string, TopicElement, MathRoutines::HashString>& output,
-  CalculatorHTML& owner
+void TopicElementParser::ParseTopicList(
+  const std::string& inputString
 ) {
-  MacroRegisterFunctionWithName("TopicElement::GetTopicList");
+  MacroRegisterFunctionWithName("TopicElement::ParseTopicList");
   std::stringstream tableReader(inputString);
   std::string currentLine, currentArgument;
   TopicElement currentElt;
   bool found = false;
   currentElt.problemNumber.initializeFillInObject(4, 0);
-  MemorySaving<MapList<std::string, List<std::string>, MathRoutines::HashString> > topicBundles;
   List<std::string> lineStack;
-  owner.initTopicElementNames();
+  this->initTopicElementNames();
   int numLinesSoFar = 0;
   bool showedAllowedDataEntries = false;
   for (;;) {
@@ -3703,72 +3703,70 @@ void TopicElement::GetTopicList(
     }
     if (StringRoutines::StringBeginsWith(currentLine, "LoadTopicBundles:", &currentArgument)) {
       std::stringstream errorStream;
-      if (!TopicElement::LoadTopicBundle(
+      if (!this->LoadTopicBundle(
         StringRoutines::StringTrimWhiteSpace(currentArgument),
-        topicBundles.GetElement(),
-        owner,
         errorStream
       )) {
         currentElt.MakeError(errorStream.str());
-        TopicElement::AddTopic(currentElt, output);
+        this->AddTopic(currentElt);
         found = true;
       }
       theGlobalVariables.Comments << "<br>DEBUG: loaded topics.";
     } else if (StringRoutines::StringBeginsWith(currentLine, "TopicBundle:", &currentArgument)) {
       currentArgument = StringRoutines::StringTrimWhiteSpace(currentArgument);
       std::stringstream errorStream;
-      if (topicBundles.GetElement().Contains(currentArgument)) {
-        List<std::string>& currentBundle = topicBundles.GetElement().GetValueCreate(currentArgument);
+      if (this->knownTopicBundles.Contains(currentArgument)) {
+        List<std::string>& currentBundle = this->knownTopicBundles.GetValueCreate(currentArgument);
         for (int j = currentBundle.size - 1; j >= 0; j --) {
           lineStack.AddOnTop(currentBundle[j]);
         }
       } else {
         if (found) {
-          TopicElement::AddTopic(currentElt, output);
+          this->AddTopic(currentElt);
         }
         errorStream << "Topic bundle does not appear to contain the desired element: "
         << currentArgument;
         currentElt.MakeError(errorStream.str());
       }
     } else if (StringRoutines::StringBeginsWith(currentLine, "SlidesSourceHeader:", &currentArgument)) {
-      owner.slidesSourcesHeaders.AddOnTop(StringRoutines::StringTrimWhiteSpace(currentArgument));
+      this->owner->slidesSourcesHeaders.AddOnTop(StringRoutines::StringTrimWhiteSpace(currentArgument));
       continue;
     } else if (StringRoutines::StringBeginsWith(currentLine, "HomeworkSourceHeader:", &currentArgument)) {
-      owner.sourcesHomeworkHeaders.AddOnTop(StringRoutines::StringTrimWhiteSpace(currentArgument));
+      this->owner->sourcesHomeworkHeaders.AddOnTop(StringRoutines::StringTrimWhiteSpace(currentArgument));
       continue;
     } else if (StringRoutines::StringBeginsWith(currentLine, "Chapter:", &currentArgument)) {
       if (found) {
-        TopicElement::AddTopic(currentElt, output);
+        this->AddTopic(currentElt);
       }
       found = true;
-      currentElt.reset(0, &output);
-      currentElt.parentTopics.AddOnTop(output.size());
+      currentElt.reset(0, &this->theTopics);
+      currentElt.parentTopics.AddOnTop(this->theTopics.size());
       currentElt.title = StringRoutines::StringTrimWhiteSpace(currentArgument);
     } else if (StringRoutines::StringBeginsWith(currentLine, "Section:", &currentArgument)) {
       if (found) {
-        TopicElement::AddTopic(currentElt, output);
+        this->AddTopic(currentElt);
       }
       found = true;
-      currentElt.reset(1, &output);
-      currentElt.parentTopics.AddOnTop(output.size());
+      currentElt.reset(1, &this->theTopics);
+      currentElt.parentTopics.AddOnTop(this->theTopics.size());
       currentElt.title = StringRoutines::StringTrimWhiteSpace(currentArgument);
       currentElt.id = currentElt.title;
     } else if (StringRoutines::StringBeginsWith(currentLine, "Topic:", &currentArgument)) {
       if (found) {
-        TopicElement::AddTopic(currentElt, output);
+       this->AddTopic(currentElt);
       }
       found = true;
-      currentElt.reset(2, &output);
-      currentElt.parentTopics.AddOnTop(output.size());
+      currentElt.reset(2, &this->theTopics);
+      currentElt.parentTopics.AddOnTop(this->theTopics.size());
       currentElt.title = StringRoutines::StringTrimWhiteSpace(currentArgument);
       currentElt.id = currentElt.title;
     } else if (StringRoutines::StringBeginsWith(currentLine, "Title:", &currentArgument)) {
       if (found) {
-        TopicElement::AddTopic(currentElt, output);
+        this->AddTopic(currentElt);
       }
       found = true;
-      currentElt.reset(3, &output);
-      currentElt.parentTopics.AddOnTop(output.size());
+      currentElt.reset(3, &this->theTopics);
+      currentElt.parentTopics.AddOnTop(this->theTopics.size());
       currentElt.title = StringRoutines::StringTrimWhiteSpace(currentArgument);
       currentElt.id = currentElt.title;
     } else if (StringRoutines::StringBeginsWith(currentLine, "Video:", &currentArgument)) {
@@ -3799,8 +3797,8 @@ void TopicElement::GetTopicList(
       errorStream << "Failed to parse topic element: " << currentLine << ". ";
       if (!showedAllowedDataEntries) {
         errorStream << "<br>The allowed data labels are CASE SENSITIVE: ";
-        for (int j = 0; j < owner.calculatorTopicElementNames.size; j ++) {
-          errorStream << "<br>" << owner.calculatorTopicElementNames[j];
+        for (int j = 0; j < this->elementNames.size; j ++) {
+          errorStream << "<br>" << this->elementNames[j];
         }
         errorStream << "<br>You need to include the column character<b>:</b> "
         << "immediately after the data labels. The data entries are terminated by new line. "
@@ -3815,11 +3813,10 @@ void TopicElement::GetTopicList(
       found = true;
     }
   }
-  owner.calculatorTopicBundles.AddOnTopNoRepetition(topicBundles.GetElement().theKeys);
   if (found) {
-    TopicElement::AddTopic(currentElt, output);
+    this->AddTopic(currentElt);
   }
-  theGlobalVariables.Comments << "DEBUG: topic elements: " << output.ToStringHtml() << "<br>";
+  theGlobalVariables.Comments << "DEBUG: topic elements: " << this->theTopics.ToStringHtml() << "<br>";
 }
 
 void CalculatorHTML::InterpretAccountInformationLinks(SyntacticElementHTML& inputOutput) {
@@ -3845,7 +3842,7 @@ void CalculatorHTML::InterpretAccountInformationLinks(SyntacticElementHTML& inpu
 
 bool CalculatorHTML::LoadAndParseTopicList(std::stringstream& comments) {
   MacroRegisterFunctionWithName("CalculatorHTML::LoadAndParseTopicList");
-  if (this->theTopicS.size() != 0) {
+  if (this->topics.theTopics.size() != 0) {
     return true;
   }
   if (this->topicListContent == "") {
@@ -3861,16 +3858,16 @@ bool CalculatorHTML::LoadAndParseTopicList(std::stringstream& comments) {
     comments  << "Topic list empty. Topic list file name: " << this->topicListFileName << ". ";
     return false;
   }
-  TopicElement::GetTopicList(this->topicListContent, this->theTopicS, *this);
+  this->topics.ParseTopicList(this->topicListContent);
   this->CheckConsistencyTopics();
   this->problemNamesNoTopics.Clear();
-  for (int i = 0; i < this->theTopicS.size(); i ++) {
-    if (this->theTopicS.theValues[i].problemFileName != "") {
-      this->problemNamesNoTopics.AddOnTop(this->theTopicS.theValues[i].problemFileName);
+  for (int i = 0; i < this->topics.theTopics.size(); i ++) {
+    if (this->topics.theTopics.theValues[i].problemFileName != "") {
+      this->problemNamesNoTopics.AddOnTop(this->topics.theTopics.theValues[i].problemFileName);
     }
   }
-  for (int i = this->theTopicS.size() - 1; i >= 0; i --) {
-    TopicElement& currentElt = this->theTopicS.theValues[i];
+  for (int i = this->topics.theTopics.size() - 1; i >= 0; i --) {
+    TopicElement& currentElt = this->topics.theTopics.theValues[i];
     if (currentElt.problemFileName != "") {
       continue;
     }
@@ -3883,7 +3880,7 @@ bool CalculatorHTML::LoadAndParseTopicList(std::stringstream& comments) {
     currentElt.flagContainsProblemsNotInSubsection = false;
     currentElt.totalSubSectionsUnderME = 0;
     for (int j = 0; j < currentElt.immediateChildren.size; j ++) {
-      TopicElement& currentChild = this->theTopicS.theValues[currentElt.immediateChildren[j]];
+      TopicElement& currentChild = this->topics.theTopics.theValues[currentElt.immediateChildren[j]];
       if (currentChild.type == currentChild.tSubSection) {
         currentElt.totalSubSectionsUnderME ++;
         currentElt.totalSubSectionsUnderMeIncludingEmptySubsections ++;
@@ -3908,49 +3905,22 @@ void CalculatorHTML::InterpretProblemNavigationBar(SyntacticElementHTML& inputOu
   this->flagDoPrependProblemNavigationBar = false;
 }
 
-std::string CalculatorHTML::GetEditPagePanel() {
-  MacroRegisterFunctionWithName("CalculatorHTML::GetEditPagePanel");
-  std::stringstream out;
-  out
-  << "<editPagePanel>";
-  if (theGlobalVariables.UserDebugFlagOn()) {
-    out << this->ToStringLinkCurrentAdmin("Turn off debug", false, false);
-  } else {
-    out << this->ToStringLinkCurrentAdmin("Debug page", true, true);
-  }
-  out << this->GetEditPageButton(this->fileName);
-  if (this->flagIsExamHome) {
-    out << this->GetEditPageButton(this->topicListFileName);
-    for (int i = 0; i < this->loadedTopicBundles.size; i ++) {
-      out << this->GetEditPageButton(this->loadedTopicBundles[i]);
-    }
-  }
-  out << "</editPagePanel>";
-  return out.str();
-}
-
-void CalculatorHTML::InterpretEditPagePanel(SyntacticElementHTML& inputOutput) {
-  MacroRegisterFunctionWithName("CalculatorHTML::InterpretCalculatorNavigationBar");
-  inputOutput.interpretedCommand = this->GetEditPagePanel();
-  this->flagDoPrependEditPagePanel = false;
-}
-
 JSData CalculatorHTML::ToStringTopicListJSON() {
   MacroRegisterFunctionWithName("CalculatorHTML::ToStringTopicListJSON");
   std::stringstream out;
-  JSData output, topicBundles;
+  JSData output, topicBundleFiles;
   if (!this->LoadAndParseTopicList(out)) {
     output[WebAPI::result::error] = out.str();
     return output;
   }
-  topicBundles.theType = JSData::token::tokenArray;
-  for (int i = 0; i < this->loadedTopicBundles.size; i ++) {
-    topicBundles[i] = this->loadedTopicBundles[i];
+  topicBundleFiles.theType = JSData::token::tokenArray;
+  for (int i = 0; i < this->topics.loadedTopicBundleFiles.size; i ++) {
+    topicBundleFiles[i] = this->topics.loadedTopicBundleFiles[i];
   }
-  output["topicBundleFile"] = topicBundles;
+  output["topicBundleFile"] = topicBundleFiles;
   output["children"].theType = JSData::token::tokenArray;
-  for (int i = 0; i < this->theTopicS.size(); i ++) {
-    TopicElement& currentElt = this->theTopicS.theValues[i];
+  for (int i = 0; i < this->topics.theTopics.size(); i ++) {
+    TopicElement& currentElt = this->topics.theTopics.theValues[i];
     if (currentElt.type == currentElt.tChapter) {
       output["children"].theList.AddOnTop(currentElt.ToJSON(*this));
     }
@@ -3974,8 +3944,8 @@ void CalculatorHTML::InterpretTableOfContents(SyntacticElementHTML& inputOutput)
   << "?request=template&fileName=" << this->fileName << "&"
   << "topicList=" << this->topicListFileName << "&" << "\">All topics</a>";
   out << "<ul>";
-  for (int i = 0; i < this->theTopicS.size(); i ++) {
-    TopicElement& currentElt = this->theTopicS.theValues[i];
+  for (int i = 0; i < this->topics.theTopics.size(); i ++) {
+    TopicElement& currentElt = this->topics.theTopics.theValues[i];
     if (subSectionStarted) {
       if (
         currentElt.type == currentElt.tSubSection ||
@@ -4275,8 +4245,8 @@ void CalculatorHTML::InterpretLectureMaterials(SyntacticElementHTML& inputOutput
     << "</tr>";
   }
   this->topicLectureCounter = 0;
-  for (int i = 0; i < this->theTopicS.size(); i ++) {
-    TopicElement currentTopic = this->theTopicS.theValues[i];
+  for (int i = 0; i < this->topics.theTopics.size(); i ++) {
+    TopicElement currentTopic = this->topics.theTopics.theValues[i];
     currentTopic.ComputeLinks(*this, plainStyle);
     if (!currentTopic.flagHasLectureTag) {
       continue;
@@ -4317,19 +4287,19 @@ bool CalculatorHTML::ComputeTopicListAndPointsEarned(std::stringstream& comments
     !theGlobalVariables.UserStudentVieWOn() &&
     theGlobalVariables.userCalculatorRequestType != "templateNoLogin";
     HashedList<std::string, MathRoutines::HashString> gradableProblems;
-    for (int i = 0; i < this->theTopicS.size(); i ++) {
-      if (this->theTopicS.theValues[i].type == TopicElement::tProblem) {
-        gradableProblems.AddOnTopNoRepetition(this->theTopicS.theValues[i].id);
-        if (this->theTopicS.theValues[i].immediateChildren.size > 0) {
-          crash << "Error: problem " << this->theTopicS.theValues[i].ToString()
+    for (int i = 0; i < this->topics.theTopics.size(); i ++) {
+      if (this->topics.theTopics.theValues[i].type == TopicElement::tProblem) {
+        gradableProblems.AddOnTopNoRepetition(this->topics.theTopics.theValues[i].id);
+        if (this->topics.theTopics.theValues[i].immediateChildren.size > 0) {
+          crash << "Error: problem " << this->topics.theTopics.theValues[i].ToString()
           << " has children topics which is not allowed. "
           << crash;
         }
       }
     }
-    this->currentUseR.ComputePointsEarned(gradableProblems, &this->theTopicS, commentsOnFailure);
+    this->currentUseR.ComputePointsEarned(gradableProblems, &this->topics.theTopics, commentsOnFailure);
   }
-  this->initTopicElementNames();
+  this->topics.initTopicElementNames();
   return true;
 }
 
@@ -4392,8 +4362,8 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput) {
   this->flagTopicSectionStarted = false;
   this->flagTopicSubSectionStarted = false;
   this->flagTopicTableStarted = false;
-  for (int i = 0; i < this->theTopicS.size(); i ++) {
-    TopicElement& currentElt = this->theTopicS.theValues[i];
+  for (int i = 0; i < this->topics.theTopics.size(); i ++) {
+    TopicElement& currentElt = this->topics.theTopics.theValues[i];
     if (currentElt.type == currentElt.tTexHeader) {
       continue;
     }
@@ -4440,8 +4410,8 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput) {
   }
   topicListJS << "];\n";
   topicListJS << "var listTopics =[";
-  for (int i = 0; i < this->theTopicS.size(); i ++) {
-    TopicElement& currentE = this->theTopicS.theValues[i];
+  for (int i = 0; i < this->topics.theTopics.size(); i ++) {
+    TopicElement& currentE = this->topics.theTopics.theValues[i];
     if (currentE.type == currentE.tTexHeader) {
       continue;
     }
@@ -4516,7 +4486,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput) {
     topicListJS << "]";
     //////////////////////////////////////////////////
     topicListJS << "}";
-    if (i != this->theTopicS.size() - 1) {
+    if (i != this->topics.theTopics.size() - 1) {
       topicListJS << ", ";
     }
   }
@@ -4744,7 +4714,7 @@ JSData TopicElement::ToJSON(CalculatorHTML& owner) {
     << this->immediateChildren.ToStringCommaDelimited() << crash;
   }
   for (int i = 0; i < this->immediateChildren.size; i ++) {
-    TopicElement& currentChild = owner.theTopicS.theValues[this->immediateChildren[i]];
+    TopicElement& currentChild = owner.topics.theTopics.theValues[this->immediateChildren[i]];
     output["children"].theList.AddOnTop(currentChild.ToJSON(owner));
   }
   output["problemNumberString"] = this->problemNumberString;

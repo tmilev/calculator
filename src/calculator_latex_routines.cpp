@@ -888,24 +888,24 @@ bool LaTeXcrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
     return false;
   }
   int numSlidePairsToBuild = 0;
-  for (int i = 0; i < topicParser.theTopicS.size(); i ++) {
-    if (topicParser.theTopicS.theValues[i].sourceSlides.size > 0) {
+  for (int i = 0; i < topicParser.topics.theTopics.size(); i ++) {
+    if (topicParser.topics.theTopics.theValues[i].sourceSlides.size > 0) {
       numSlidePairsToBuild ++;
     }
   }
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "Loaded topic list: " << topicParser.topicListFileName;
     *commentsGeneral << "<br> " << numSlidePairsToBuild << " slide pairs to build ";
-    *commentsGeneral << "(" << topicParser.theTopicS.size() << " total topic elements)";
+    *commentsGeneral << "(" << topicParser.topics.theTopics.size() << " total topic elements)";
   }
   bool result = true;
   int numProcessed = 0;
   this->slideFileNamesVirtualWithPatH.AddListOnTop(topicParser.sourcesHomeworkHeaders);
   this->slideFilesExtraFlags.initializeFillInObject(this->slideFileNamesVirtualWithPatH.size, "");
-  for (int i = 0; i < topicParser.theTopicS.size()
+  for (int i = 0; i < topicParser.topics.theTopics.size()
 //        && numProcessed < 0
         ; i ++) {
-    TopicElement& currentElt = topicParser.theTopicS.theValues[i];
+    TopicElement& currentElt = topicParser.topics.theTopics.theValues[i];
     if (currentElt.sourceHomework.size == 0) {
       continue;
     }
@@ -952,10 +952,10 @@ bool LaTeXcrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
 
   numProcessed = 0;
   this->slideFileNamesVirtualWithPatH.AddListOnTop(topicParser.slidesSourcesHeaders);
-  for (int i = 0; i < topicParser.theTopicS.size()
+  for (int i = 0; i < topicParser.topics.theTopics.size()
 //        && numProcessed < 2
         ; i ++) {
-    TopicElement& currentElt = topicParser.theTopicS.theValues[i];
+    TopicElement& currentElt = topicParser.topics.theTopics.theValues[i];
     if (currentElt.sourceSlides.size == 0) {
       continue;
     }

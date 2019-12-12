@@ -92,20 +92,27 @@ public:
   TopicElement() {
     this->reset(0, nullptr);
   }
-  static void GetTopicList(
-    const std::string& inputString,
-    MapList<std::string, TopicElement, MathRoutines::HashString>& output,
-    CalculatorHTML& owner
-  );
-  static bool LoadTopicBundle(
+  void MakeError(const std::string& message);
+};
+
+class TopicElementParser {
+public:
+  CalculatorHTML* owner;
+  MapList<std::string, TopicElement, MathRoutines::HashString> theTopics;
+  MapList<std::string, List<std::string>, MathRoutines::HashString> knownTopicBundles;
+  List<std::string> loadedTopicBundleFiles;
+  List<std::string> elementNames;
+  TopicElementParser();
+  void ParseTopicList(const std::string& inputString);
+  bool LoadTopicBundle(
     const std::string& inputFileName,
-    MapList<std::string, List<std::string>, MathRoutines::HashString>& output,
-    CalculatorHTML& owner,
     std::stringstream& errorStream
   );
-  void MakeError(const std::string& message);
-  static void AddTopic(TopicElement& inputElt, MapList<std::string, TopicElement, MathRoutines::HashString>& output);
+  bool CheckInitialization();
+  void AddTopic(TopicElement& inputElt);
+  void initTopicElementNames();
 };
+
 
 class ProblemResources {
 public:
@@ -155,7 +162,6 @@ public:
   static std::string stringScoredQuizzes;
   static std::string stringPracticE;
   static std::string stringProblemLink;
-  List<std::string> loadedTopicBundles;
   List<std::string> slidesSourcesHeaders;
   List<std::string> sourcesHomeworkHeaders;
   std::string fileName;
@@ -193,7 +199,6 @@ public:
 
   static const std::string BugsGenericMessage;
   HashedList<std::string, MathRoutines::HashString> tagKeysNoValue;
-  HashedList<std::string, MathRoutines::HashString> calculatorTopicBundles;
   List<std::string> calculatorTopicElementNames;
   List<std::string> calculatorTagsRecordedLiterally;
   List<std::string> calculatorClasses;
@@ -210,7 +215,7 @@ public:
   std::string topicListContent;
   std::string topicListFileName;
   HashedList<std::string, MathRoutines::HashString> problemNamesNoTopics;
-  MapList<std::string, TopicElement, MathRoutines::HashString> theTopicS;
+  TopicElementParser topics;
   MapList<std::string, std::string, MathRoutines::HashString> theScripts;
   List<std::string> databaseStudentSections;
   bool flagLoadedSuccessfully;
@@ -227,7 +232,6 @@ public:
   std::string CleanUpFileName(const std::string& inputLink);
   void initAutocompleteExtras();
   void initBuiltInSpanClasses();
-  void initTopicElementNames();
   bool ParseHTML(std::stringstream* comments);
   bool ParseHTMLPrepareCommands(std::stringstream* comments);
   bool IsSplittingChar(const std::string& input);
@@ -313,8 +317,6 @@ public:
   bool ComputeTopicListAndPointsEarned(std::stringstream& commentsOnFailure);
   void InterpretLectureMaterials(SyntacticElementHTML& inputOutput);
   void InterpretTableOfContents(SyntacticElementHTML& inputOutput);
-  std::string GetEditPagePanel();
-  void InterpretEditPagePanel(SyntacticElementHTML& inputOutput);
   void InterpretProblemNavigationBar(SyntacticElementHTML& inputOutput);
   void InterpretAccountInformationLinks(SyntacticElementHTML& inputOutput);
   void InterpretJavascripts(SyntacticElementHTML& inputOutput);

@@ -2954,7 +2954,7 @@ int WebWorker::ServeClient() {
     return this->ProcessSelectCourseJSON();
   } else if (
     theGlobalVariables.userCalculatorRequestType == "topicListJSON" ||
-    theGlobalVariables.userCalculatorRequestType == "topicListJSONNoLogin"
+    theGlobalVariables.userCalculatorRequestType == WebAPI::request::topicListJSONNoLogin
   ) {
     return this->ProcessTopicListJSON();
   } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::app) {

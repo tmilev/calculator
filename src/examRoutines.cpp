@@ -3477,6 +3477,7 @@ void TopicElement::ComputeID(int elementIndex, TopicElementParser& owner) {
     out << elementIndex << ". ";
     out << "[" << owner.elementNames.GetValueConstCrashIfNotPresent(this->type) << "] ";
     out << this->title;
+    this->id = out.str();
   }
   this->idBase64 = Crypto::computeSha3_256OutputBase64URL(this->id);
 }
@@ -3867,6 +3868,78 @@ void TopicElementParser::ParseTopicList(
   for (int i = 0; i < this->elements.size; i ++) {
     this->AddTopic(this->elements[i], i);
   }
+  this->ComputeTopicHierarchy();
+}
+
+void TopicElementParser::ComputeTopicHierarchy() {
+  this->ComputeTopicHierarchyPartOne();
+  this->ComputeTopicHierarchyPartTwo();
+}
+
+void TopicElementParser::ComputeTopicHierarchyPartOne() {
+  MacroRegisterFunctionWithName("ComputeTopicHierarchyPartOne");
+  List<int> parentChain;
+  List<int> parentTypes;
+  for (int i = 0; i < this->theTopics.size(); i ++) {
+    int currentAdjustedtype = this->theTopics.theValues[i].type;
+    if (
+      currentAdjustedtype != TopicElement::types::chapter &&
+      currentAdjustedtype != TopicElement::types::section &&
+      currentAdjustedtype != TopicElement::types::topic
+    ) {
+      currentAdjustedtype = TopicElement::types::problem;
+    }
+    for (int j = parentChain.size - 1; j >= 0; j --) {
+      if (parentTypes[j] >= currentAdjustedtype) {
+        parentTypes.RemoveLastObject();
+        parentChain.RemoveLastObject();
+      }
+    }
+    if (parentChain.size > 0) {
+      TopicElement& parent = this->theTopics.theValues[*parentChain.LastObject()];
+      parent.immediateChildren.AddOnTop(i);
+    }
+    this->theTopics.theValues[i].parentTopics.SetSize(0);
+    for (int j = 0; j < parentChain.size; j ++) {
+      this->theTopics.theValues[i].parentTopics.AddOnTop(parentChain[j]);
+    }
+    parentChain.AddOnTop(i);
+    parentTypes.AddOnTop(currentAdjustedtype);
+  }
+}
+
+void TopicElementParser::ComputeTopicHierarchyPartTwo() {
+  MacroRegisterFunctionWithName("TopicElementParser::ComputeTopicHierarchyPartTwo");
+  for (int i = this->theTopics.size() - 1; i >= 0; i --) {
+    TopicElement& currentElt = this->theTopics.theValues[i];
+    if (currentElt.problemFileName != "") {
+      continue;
+    }
+    if (currentElt.type == TopicElement::types::topic) {
+      currentElt.totalSubSectionsUnderME = 0;
+      currentElt.totalSubSectionsUnderMeIncludingEmptySubsections = 0;
+      currentElt.flagContainsProblemsNotInSubsection = false;
+      continue;
+    }
+    currentElt.flagContainsProblemsNotInSubsection = false;
+    currentElt.totalSubSectionsUnderME = 0;
+    for (int j = 0; j < currentElt.immediateChildren.size; j ++) {
+      TopicElement& currentChild = this->theTopics.theValues[currentElt.immediateChildren[j]];
+      if (currentChild.type == TopicElement::types::topic) {
+        currentElt.totalSubSectionsUnderME ++;
+        currentElt.totalSubSectionsUnderMeIncludingEmptySubsections ++;
+      } else if (currentChild.problemFileName != "") {
+        currentElt.flagContainsProblemsNotInSubsection = true;
+      } else {
+        currentElt.totalSubSectionsUnderME += currentChild.totalSubSectionsUnderME;
+        currentElt.totalSubSectionsUnderMeIncludingEmptySubsections += currentChild.totalSubSectionsUnderMeIncludingEmptySubsections;
+      }
+    }
+    if (currentElt.flagContainsProblemsNotInSubsection) {
+      currentElt.totalSubSectionsUnderMeIncludingEmptySubsections ++;
+    }
+  }
+  this->CheckConsistencyParsed();
 }
 
 void CalculatorHTML::InterpretAccountInformationLinks(SyntacticElementHTML& inputOutput) {
@@ -3915,36 +3988,6 @@ bool CalculatorHTML::LoadAndParseTopicList(std::stringstream& comments) {
       this->problemNamesNoTopics.AddOnTop(this->topics.theTopics.theValues[i].problemFileName);
     }
   }
-  for (int i = this->topics.theTopics.size() - 1; i >= 0; i --) {
-    TopicElement& currentElt = this->topics.theTopics.theValues[i];
-    if (currentElt.problemFileName != "") {
-      continue;
-    }
-    if (currentElt.type == TopicElement::types::topic) {
-      currentElt.totalSubSectionsUnderME = 0;
-      currentElt.totalSubSectionsUnderMeIncludingEmptySubsections = 0;
-      currentElt.flagContainsProblemsNotInSubsection = false;
-      continue;
-    }
-    currentElt.flagContainsProblemsNotInSubsection = false;
-    currentElt.totalSubSectionsUnderME = 0;
-    for (int j = 0; j < currentElt.immediateChildren.size; j ++) {
-      TopicElement& currentChild = this->topics.theTopics.theValues[currentElt.immediateChildren[j]];
-      if (currentChild.type == TopicElement::types::topic) {
-        currentElt.totalSubSectionsUnderME ++;
-        currentElt.totalSubSectionsUnderMeIncludingEmptySubsections ++;
-      } else if (currentChild.problemFileName != "") {
-        currentElt.flagContainsProblemsNotInSubsection = true;
-      } else {
-        currentElt.totalSubSectionsUnderME += currentChild.totalSubSectionsUnderME;
-        currentElt.totalSubSectionsUnderMeIncludingEmptySubsections += currentChild.totalSubSectionsUnderMeIncludingEmptySubsections;
-      }
-    }
-    if (currentElt.flagContainsProblemsNotInSubsection) {
-      currentElt.totalSubSectionsUnderMeIncludingEmptySubsections ++;
-    }
-  }
-  this->topics.CheckConsistencyParsed();
   return true;
 }
 

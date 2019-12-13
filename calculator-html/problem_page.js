@@ -232,7 +232,7 @@ Problem.prototype.initializeInfo = function(problemData, inputParentIdURLed) {
   if (this.queryHomework === undefined || this.queryHomework === null) {
     this.queryHomework = "";
   }
-  if (this.type === "chapter") {
+  if (this.type === "Chapter") {
     allProblems.theChapterIds[this.problemId] = true;
   }
   this.childrenIds = [];
@@ -894,7 +894,7 @@ Problem.prototype.toStringDeadlinePanel = function() {
   if (!thePage.user.hasInstructorRights() || thePage.studentView()) {
     return this.toStringDeadline();
   }
-  if (this.type === "problem" && this.fileName === "") {
+  if (this.type === "Problem" && this.fileName === "") {
     return "";
   }
   var result = "";
@@ -966,7 +966,7 @@ function modifyWeight(id) {
 /**@returns{HTMLElement[]} */
 Problem.prototype.getProblemWeightContent = function(inputRow) {
   var thePage = window.calculator.mainPage;
-  if (this.type !== "problem" || this.fileName === "") {
+  if (this.type !== "Problem" || this.fileName === "") {
     return [];
   }
   var content = document.createElement("span");
@@ -1213,7 +1213,7 @@ Problem.prototype.isProblemContainer = function() {
   if (this.childrenIds.length !== undefined) {
     if (this.childrenIds.length > 0) {
       var currentProblem = allProblems.getProblemById(this.childrenIds[0]);
-      if (currentProblem.type === "problem") {
+      if (currentProblem.type === "Problem") {
         return true;
       }
     }
@@ -1224,7 +1224,7 @@ Problem.prototype.isProblemContainer = function() {
 /** @returns{HTMLElement[]} */
 Problem.prototype.getHTMLSection = function() {
   var result = [];
-  if (this.type === "section") {
+  if (this.type === "Section") {
     var sectionElement = document.createElement("div");
     sectionElement.className = "headSection";
     sectionElement.innerHTML = `${this.problemNumberString} ${this.title} ${this.toStringDeadlineContainer()}`; 
@@ -1233,11 +1233,11 @@ Problem.prototype.getHTMLSection = function() {
   var nextElement = document.createElement("div");
   nextElement.className = "bodySection";
   result.push(nextElement);
-  if (this.type === "subSection") {
+  if (this.type === "Topic") {
     appendHtml(nextElement, this.getHTMLSubSection());
   } else if (this.isProblemContainer()) {
     appendHtml(nextElement, this.getHTMLProblems());
-  } else if (this.type === "section") {
+  } else if (this.type === "Section") {
     for (var counterSection = 0; counterSection < this.childrenIds.length; counterSection ++) {
       var currentSubSection = allProblems.getProblemById(this.childrenIds[counterSection]);
       appendHtml(nextElement, currentSubSection.getHTMLSubSection());

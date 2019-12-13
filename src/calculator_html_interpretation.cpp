@@ -766,14 +766,15 @@ JSData WebAPIResponse::GetTopicTableJSON() {
     result[WebAPI::result::error] = out.str();
     return result;
   }
-  if (thePage.LoadMe(true, theGlobalVariables.GetWebInput("randomSeed"), &comments)) {
-    thePage.ComputeTopicListAndPointsEarned(comments);
-  } else {
+  if (!thePage.LoadMe(true, theGlobalVariables.GetWebInput("randomSeed"), &comments)) {
     comments << "\"Failed to load file: "
     << theGlobalVariables.GetWebInput("courseHome") << ""
     << "<br>Comments:<br> " << comments.str();
     comments << "\"";
+    result[WebAPI::result::comments] = comments.str();
+    return result;
   }
+  thePage.ComputeTopicListAndPointsEarned(comments);
   return thePage.ToStringTopicListJSON();
 }
 

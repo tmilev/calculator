@@ -39,6 +39,9 @@ public:
   void ParseTopicList(const std::string& inputString);
   void CompressTopicLines();
   void ComputeIds();
+  void ComputeTopicHierarchy();
+  void ComputeTopicHierarchyPartOne();
+  void ComputeTopicHierarchyPartTwo();
   void AddNewTopicElementFromLine(const TopicLine &input);
   void CompressOneTopicLine(const TopicLine &input, CalculatorHTML& owner);
   void Crawl(const std::string& inputString);
@@ -60,6 +63,10 @@ public:
   public:
     static const int unknown                = 0 ;
     static const int empty                  = 1 ;
+    // Note: the fact that:
+    // chapter < section < topic < problem
+    // is used when determining parent-child
+    // relations between topics.
     static const int chapter                = 2 ;
     static const int section                = 3 ;
     static const int topic                  = 4 ;

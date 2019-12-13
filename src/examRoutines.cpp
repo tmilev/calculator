@@ -3736,6 +3736,8 @@ void TopicElementParser::Crawl(const std::string& inputString) {
     }
     this->bundleStack.AddOnTop(this->ExtractLine(currentLine));
   }
+  theGlobalVariables.Comments << "DEBUG: Bundle files loaded: " << this->loadedTopicBundleFiles;
+  theGlobalVariables.Comments << "DEBUG: known bundles: " << this->knownTopicBundles.theKeys.ToStringCommaDelimited();
 }
 
 bool TopicElementParser::TopicLine::AccountIfStateChanger(CalculatorHTML& owner) const {

@@ -2203,7 +2203,6 @@ std::string WebAPIResponse::GetScoresInCoursePage() {
     }
     out << "studentScoresInHomePage[" << i << "].theId ="
     << "'"
-    << currentElt.studentScoresSpanId
     << "';\n";
     out << "studentScoresInHomePage[" << i << "].numSolvedAll ="
     << theScores.numStudentsSolvedEntireTopic[i]

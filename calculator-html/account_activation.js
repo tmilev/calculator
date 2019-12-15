@@ -1,7 +1,7 @@
 "use strict";
-const ids = require('./ids_dom_elements');
-const submitRequests = require('./submit_requests');
-const pathnames = require('./pathnames');
+const ids = require("./ids_dom_elements");
+const submitRequests = require("./submit_requests");
+const pathnames = require("./pathnames");
 
 function submitAccountActivationRequestCallback(wipeOffActivationToken, result, outputComponent) {
   var thePage = window.calculator.mainPage;

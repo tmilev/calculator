@@ -1,5 +1,5 @@
 "use strict";
-var ids = require('./ids_dom_elements');
+var ids = require("./ids_dom_elements");
 
 function Theme() {
   var themeIds = ids.domElements.themeRadioButtons;

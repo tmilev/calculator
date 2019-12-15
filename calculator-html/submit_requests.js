@@ -1,7 +1,7 @@
 "use srict";
-const pathnames = require('./pathnames');
+const pathnames = require("./pathnames");
 const miscellaneous = require('./miscellaneous');
-const ids = require('./ids_dom_elements');
+const ids = require("./ids_dom_elements");
 const panels = require('./panels');
 
 function recordProgressDone(progress, timeFinished) {
@@ -115,7 +115,7 @@ function recordResult(resultText, resultSpan) {
   if (typeof resultSpan === "string") {
     resultSpan = document.getElementById(resultSpan);
   }
-  resultSpan.innerHTML = resultText;
+  resultSpan.innerHTML = miscellaneous.jsonParseGetHtmlStandard(resultText);
 }
 
 function correctAddress(inputURL) {
@@ -201,9 +201,10 @@ function submitPOST(
 
   https.onload = function() { 
     recordProgressDone(progress, (new Date()).getTime());
-    recordResult(https.responseText, result);
     if (callback !== undefined && callback !== null) {
       callback(https.responseText, result);
+    } else {
+      recordResult(https.responseText, result);
     }
   }
   ////////////////////////////////////////////

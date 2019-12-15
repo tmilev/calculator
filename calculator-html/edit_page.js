@@ -1,8 +1,9 @@
 "use strict";
-const submitRequests = require('./submit_requests');
-const pathnames = require('./pathnames');
+const submitRequests = require("./submit_requests");
+const pathnames = require("./pathnames");
 // const calculatorPage = require('./calculator_page');
-const ids = require('./ids_dom_elements');
+const ids = require("./ids_dom_elements");
+const miscellaneous = require("./miscellaneous");
 
 var staticWordCompleter = {
   getCompletions: function(editor, session, pos, prefix, callback) {
@@ -181,7 +182,7 @@ function initEditorAce() {
 function selectEditPageCallback(input, outputComponent) {
   var thePage = window.calculator.mainPage;
   try {
-    var parsedInput = JSON.parse(input);
+    var parsedInput = miscellaneous.jsonUnescapeParse(input);
     ace.require("ace/ext/language_tools");
     if (thePage.pages.editPage.editor === null) {
       initEditorAce();

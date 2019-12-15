@@ -57,8 +57,8 @@ function loadGlobals() {
   window.calculator.coursePage = require('./course_page');
   window.calculator.problemPage = require('./problem_page');
   window.calculator.standAloneProblem = require('./stand_alone_problem');
-  window.calculator.submitRequests = require('./submit_requests');
-  window.calculator.editPage = require('./edit_page');
+  window.calculator.submitRequests = require("./submit_requests");
+  window.calculator.editPage = require("./edit_page");
   window.calculator.drawing = require('./three-d').drawing;
   window.calculator.miscellaneousFrontend = require('./miscellaneous_frontend');
   window.calculator.accountActivation = require('./account_activation');

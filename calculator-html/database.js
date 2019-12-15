@@ -1,7 +1,7 @@
 "use strict";
-const submitRequests = require('./submit_requests');
-const ids = require('./ids_dom_elements');
-const pathnames = require('./pathnames');
+const submitRequests = require("./submit_requests");
+const ids = require("./ids_dom_elements");
+const pathnames = require("./pathnames");
 const jsonToHtml = require('./json_to_html');
 const miscellaneous = require('./miscellaneous');
 const panels = require('./panels');

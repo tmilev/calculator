@@ -3504,7 +3504,11 @@ void TopicElement::MakeError(const std::string& message) {
   this->immediateChildren.SetSize(0);
 }
 
-void TopicElement::reset(int parentSize, MapList<std::string, TopicElement, MathRoutines::HashString>* containerElements) {
+TopicElement::TopicElement() {
+  this->reset();
+}
+
+void TopicElement::reset() {
   this->type = TopicElement::types::unknown;
   this->indexInParent = - 1;
   this->flagSubproblemHasNoWeight = false;
@@ -3523,16 +3527,7 @@ void TopicElement::reset(int parentSize, MapList<std::string, TopicElement, Math
   this->sourceHomeworkIsSolution.SetSize(0);
   this->problemFileName = "";
   this->error = "";
-  if (parentSize != - 1) {
-    this->parentTopics.SetSize(MathRoutines::Minimum(parentSize, this->parentTopics.size));
-    if (this->problemNumber.size < 4) {
-      this->problemNumber.initializeFillInObject(4, 0);
-    }
-    for (int i = parentSize + 1; i < this->problemNumber.size; i ++) {
-      this->problemNumber[i] = 0;
-    }
-    this->problemNumber[parentSize] ++;
-  }
+
   this->immediateChildren.SetSize(0);
   this->totalSubSectionsUnderME = 0;
   this->totalSubSectionsUnderMeIncludingEmptySubsections = 0;
@@ -3541,27 +3536,7 @@ void TopicElement::reset(int parentSize, MapList<std::string, TopicElement, Math
   this->pointsEarnedInProblemsThatAreImmediateChildren = 0;
   this->totalPointsEarned = 0;
   this->maxPointsInAllChildren = 0;
-  if (parentSize == 0) {
-    this->type = TopicElement::types::chapter;
-  }
-  if (parentSize == 1) {
-    this->type = TopicElement::types::section;
-  }
-  if (parentSize == 2) {
-    this->type = TopicElement::types::topic;
-  }
-  if (parentSize == 3) {
-    this->type = TopicElement::types::problem;
-  }
-  if (containerElements == nullptr) {
-    return;
-  }
-  for (int i = 0; i < this->parentTopics.size; i ++) {
-    if (containerElements->theValues[this->parentTopics[i]].type >= this->type) {
-      this->parentTopics.PopIndexShiftDown(i);
-      i --;
-    }
-  }
+  this->type = TopicElement::types::unknown;
 }
 
 bool TopicElementParser::CheckConsistencyParsed() {
@@ -3883,6 +3858,24 @@ void TopicElementParser::ParseTopicList(
     this->AddTopic(this->elements[i], i);
   }
   this->ComputeTopicHierarchy();
+  this->ComputeTopicNumbers();
+}
+
+void TopicElementParser::ComputeTopicNumbers() {
+  List<int> currentProblemNumber;
+  for (int i = 0; i < this->theTopics.size(); i ++) {
+    TopicElement& current = this->theTopics.theValues[i];
+    int labelsNeeded = current.type - TopicElement::types::chapter + 1;
+    if (labelsNeeded > 4 || labelsNeeded < 0) {
+      labelsNeeded = 4;
+    }
+    for (int j = currentProblemNumber.size; j < labelsNeeded; j ++) {
+      currentProblemNumber.AddOnTop(0);
+    }
+    currentProblemNumber.SetSize(labelsNeeded);
+    (*currentProblemNumber.LastObject()) ++;
+    current.problemNumber = currentProblemNumber;
+  }
 }
 
 void TopicElementParser::ComputeTopicHierarchy() {

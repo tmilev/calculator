@@ -45,6 +45,7 @@ public:
   void CompressTopicLines();
   void ComputeIds();
   void ComputeTopicHierarchy();
+  void ComputeTopicNumbers();
   void ComputeTopicHierarchyPartOne();
   void ComputeTopicHierarchyPartTwo();
   void AddNewTopicElementFromLine(const TopicLine &input);
@@ -146,7 +147,7 @@ public:
   //  Rational numAnsweredInAllChildren;
   //  Rational maxCorrectAnswersInAllChildren;
   void ComputeID(int elementIndex, TopicElementParser& owner);
-  void reset(int parentSize, MapList<std::string, TopicElement, MathRoutines::HashString>* containerElements);
+  void reset();
   friend std::ostream& operator << (std::ostream& output, const TopicElement& theElt) {
     output << theElt.ToString();
     return output;
@@ -159,9 +160,7 @@ public:
   void ComputeSlides(CalculatorHTML& owner);
   void ComputeHomework(CalculatorHTML& owner);
   void ComputeLinks(CalculatorHTML& owner, bool plainStyle);
-  TopicElement() {
-    this->reset(0, nullptr);
-  }
+  TopicElement();
   void MakeError(const std::string& message);
   bool MergeTopicLine(const TopicElementParser::TopicLine& input);
 };

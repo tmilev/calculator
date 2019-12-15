@@ -1,5 +1,5 @@
 "use strict";
-const ids = require('./ids_dom_elements');
+const ids = require("./ids_dom_elements");
 var theAutocompleteDictionary = require('./autocomplete_keywords').theAutocompleteDictionary;
 
 var minLengthAutocompleteTrigger = 2;

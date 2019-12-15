@@ -1,7 +1,7 @@
 "use srict";
-const submitRequests = require('./submit_requests');
+const submitRequests = require("./submit_requests");
 const miscellaneous = require('./miscellaneous');
-const ids = require('./ids_dom_elements');
+const ids = require("./ids_dom_elements");
 const modifiableDatabaseData = require('./modifiable_database_fields').modifiableDatabaseData;
 const panels = require('./panels');
 const BufferCalculator = require('./buffer').BufferCalculator;

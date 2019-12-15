@@ -1,8 +1,8 @@
 "use strict";
-const submitRequests = require('./submit_requests');
-const pathnames = require('./pathnames');
+const submitRequests = require("./submit_requests");
+const pathnames = require("./pathnames");
 const drawing = require('./three-d').drawing;
-const ids = require('./ids_dom_elements');
+const ids = require("./ids_dom_elements");
 const miscellaneousFrontend = require('./miscellaneous_frontend');
 const miscellaneous = require('./miscellaneous');
 const BufferCalculator = require('./buffer').BufferCalculator;

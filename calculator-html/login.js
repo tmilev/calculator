@@ -1,7 +1,7 @@
 "use strict";
-const submitRequests = require('./submit_requests');
-const pathnames = require('./pathnames');
-const ids = require('./ids_dom_elements');
+const submitRequests = require("./submit_requests");
+const pathnames = require("./pathnames");
+const ids = require("./ids_dom_elements");
 
 function loginCalculator() {
   var password = document.getElementById("inputPassword").value;

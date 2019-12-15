@@ -1,8 +1,9 @@
 "use strict";
-const submitRequests = require('./submit_requests');
-const pathnames = require('./pathnames');
-const editPage = require('./edit_page');
-const ids = require('./ids_dom_elements');
+const submitRequests = require("./submit_requests");
+const pathnames = require("./pathnames");
+const editPage = require("./edit_page");
+const ids = require("./ids_dom_elements");
+const miscellaneousFrontend = require("./miscellaneous_frontend");
 
 function selectCourse(courseIndex) {
   var thePage = window.calculator.mainPage;
@@ -13,19 +14,21 @@ function selectCourse(courseIndex) {
 }
 
 function afterLoadSelectCoursePage(incomingPage, result) {
-  var resultString = "";
+  var result = [];
   var thePage = window.calculator.mainPage;
   thePage.theCourses = JSON.parse(incomingPage)["courses"];
   pageSetup.needsLoad = false;
 
-  //resultString += JSON.stringify(thePage.theCourses);
   var userHasProblemEditRights = thePage.user.hasProblemEditRights();
   if (userHasProblemEditRights) {
-    resultString += "<div class = 'problemInfoBar'>";
-    resultString += editPage.getEditPanel("/coursesavailable/default.txt");
-    resultString += "</div>";
+    var problemInfoBar = document.createElement("div");
+    problemInfoBar.className = "problemInfoBar";
+    problemInfoBar.appendChild(editPage.getEditPanel("/coursesavailable/default.txt"));
+    result.push(problemInfoBar);
   }
-  resultString += "<div style = 'text-align:center; width:100%'>";
+  var courseContainer = document.createElement("div");
+  courseContainer.style.textAlign = "center";
+  courseContainer.style.width = "100%";
   for (var counterCourses = 0; counterCourses < thePage.theCourses.length; counterCourses ++) {
     var currentCourse = thePage.theCourses[counterCourses];
     var isRoughDraft = false;
@@ -35,18 +38,25 @@ function afterLoadSelectCoursePage(incomingPage, result) {
         continue;
       }
     }
-    resultString += `<a href = "#" onclick = "window.calculator.selectCourse.selectCourse(${counterCourses})" class = "courseLink">`;
-    resultString += `${currentCourse.title}`;
+    var editAnchor = document.createElement("a");
+    editAnchor.className = "courseLink";
+    editAnchor.addEventListener("click", selectCourse.bind(null, counterCourses));
+    editAnchor.href = "#";
+    var editAnchorInternal = "";
+    editAnchorInternal += `${currentCourse.title}`;
     if (isRoughDraft) {
-      resultString += "<b style = 'color:red; font-size: x-small'>rough draft</b>";
+      editAnchorInternal += "<b style = 'color:red; font-size: x-small'>rough draft</b>";
     }
-    resultString += `</a>`;
+    editAnchor.innerHTML = editAnchorInternal;
+    courseContainer.appendChild(editAnchor);
     if (counterCourses != thePage.theCourses.length - 1) {
-      resultString += "<br>";
+      courseContainer.appendChild(document.createElement("br"));
     }
   }
-  resultString += "</div>";
-  document.getElementById("divSelectCourse").innerHTML = resultString;
+  result.push(courseContainer);
+  var divSelectcourse = document.getElementById("divSelectCourse");
+  divSelectcourse.innerHTML = "";
+  miscellaneousFrontend.appendHtml(divSelectcourse, result);
 }
 
 var pageSetup = {

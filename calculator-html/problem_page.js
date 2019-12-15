@@ -6,7 +6,8 @@ const editPage = require("./edit_page");
 const initializeButtons = require("./initialize_buttons");
 const InputPanelData = initializeButtons.InputPanelData;
 const mathjax = require("./mathjax-calculator-setup");
-const miscellaneous = require("./miscellaneous")
+const miscellaneous = require("./miscellaneous");
+const miscellaneousFrontend = require("./miscellaneous_frontend");
 
 function ProblemCollection() {
   /** @type{Object<string,Problem>} */
@@ -20,56 +21,6 @@ function ProblemCollection() {
   /** @type{Object<string, boolean>} */
   this.theChapterIds = {};
   this.theTopics = {};
-}
-
-function appendHtmlToArray(
-  /** @type{HTMLElement[]}*/
-  targetArray, 
-  /** @type{HTMLElement|HTMLElement[]}*/
-  contentToAppend,
-) {
-  if (contentToAppend === null) {
-    return;
-  }
-  if (!Array.isArray(targetArray)) {
-    throw ("appendHtmlToArray called with non-array target. ");
-  }
-  if (contentToAppend instanceof HTMLElement) {
-    targetArray.push(contentToAppend);
-    return;
-  }
-  if (Array.isArray(contentToAppend)) {
-    for (var i = 0; i < contentToAppend.length; i ++) {
-      appendHtmlToArray(targetArray, contentToAppend[i]);
-    }
-    return;
-  }
-  throw (`Could not recognize the html content ${contentToAppend}`);
-}
-
-function appendHtml(
-  /** @type{HTMLElement}*/
-  targetToAppendTo, 
-  /** @type{HTMLElement|HTMLElement[]}*/
-  contentToAppend,
-) {
-  if (contentToAppend === null) {
-    return;
-  }
-  if (!(targetToAppendTo instanceof HTMLElement)) {
-    throw ("appendHtml called with non-html element target. ");
-  }
-  if (contentToAppend instanceof HTMLElement) {
-    targetToAppendTo.appendChild(contentToAppend);
-    return;
-  }
-  if (Array.isArray(contentToAppend)) {
-    for (var i = 0; i < contentToAppend.length; i ++) {
-      appendHtml(targetToAppendTo, contentToAppend[i]);
-    }
-    return;
-  }
-  throw (`Could not recognize the html content ${contentToAppend}`);
 }
 
 /** @returns{Problem} */
@@ -265,7 +216,7 @@ Problem.prototype.computeBadProblemExplanation = function() {
     badProblemExplanationPartOne.innerHTML += "Perhaps you may like to clone the last good known problem.<br>";
   }
   this.badProblemExplanation.push(badProblemExplanationPartOne);
-  appendHtmlToArray(this.badProblemExplanation, editPage.getClonePanel(pageLastKnownGoodProblemName, this.fileName));
+  miscellaneousFrontend.appendHtmlToArray(this.badProblemExplanation, editPage.getClonePanel(pageLastKnownGoodProblemName, this.fileName));
   var epilogueElement = document.createElement("hr");
   this.badProblemExplanation.push(epilogueElement);
 }
@@ -808,10 +759,10 @@ ProblemNavigation.prototype.writeToHTML = function() {
     this.currentProblem.links !== null
   ) {
     if (this.currentProblem.links.slides !== null) {
-      appendHtml(problemTitle, this.currentProblem.links.slides);
+      miscellaneousFrontend.appendHtml(problemTitle, this.currentProblem.links.slides);
     }
     if (this.currentProblem.links.video !== null) {
-      appendHtml(problemTitle, this.currentProblem.links.video);
+      miscellaneousFrontend.appendHtml(problemTitle, this.currentProblem.links.video);
     }
   }
   //topPart += "<br>"
@@ -827,11 +778,11 @@ Problem.prototype.writeToHTML = function(outputElement) {
   outputElement.innerHTML = "";
   problemNavigation.setCurrentProblemAndUpdate(this);
   var contentArray = [];
-  appendHtmlToArray(contentArray, this.badProblemExplanation);
+  miscellaneousFrontend.appendHtmlToArray(contentArray, this.badProblemExplanation);
   var problemBody = document.createElement("span");
   problemBody.innerHTML = this.decodedProblem + this.commentsProblem 
   contentArray.push(problemBody);
-  appendHtml(outputElement, contentArray);
+  miscellaneousFrontend.appendHtml(outputElement, contentArray);
   for (var counterAnswers = 0;  counterAnswers < this.answers.length; counterAnswers ++) {
     this.onePanel(this.answers[counterAnswers]);
   }
@@ -1129,13 +1080,13 @@ Problem.prototype.getProblemMaterialLinks = function() {
       this.links.slides.push(this.getLinkFromSpec(linkSpecs[linkSlides[counter]], this.querySlides));
     }
   } 
-  appendHtmlToArray(result, this.links.slides);
+  miscellaneousFrontend.appendHtmlToArray(result, this.links.slides);
   if (this.queryHomework !== "" && this.queryHomework !== null && this.queryHomework !== undefined) {
     for (var counter in linkHomework) {
-      appendHtmlToArray(this.links.homework, this.getLinkFromSpec(linkSpecs[linkHomework[counter]], this.queryHomework));
+      miscellaneousFrontend.appendHtmlToArray(this.links.homework, this.getLinkFromSpec(linkSpecs[linkHomework[counter]], this.queryHomework));
     }
   }
-  appendHtmlToArray(result, this.links.homework);
+  miscellaneousFrontend.appendHtmlToArray(result, this.links.homework);
   return result;
 }
 
@@ -1149,7 +1100,7 @@ Problem.prototype.getHTMLOneProblemTr = function (
   nextCell = outputRow.insertCell(- 1);
   nextCell.className = "topicListMaterials";
   var materialLinks = this.getProblemMaterialLinks();
-  appendHtml(nextCell, materialLinks);
+  miscellaneousFrontend.appendHtml(nextCell, materialLinks);
   nextCell = outputRow.insertCell(- 1);
   nextCell.className = "topicListPracticeQuiz";
   if (this.fileName !== "") {
@@ -1178,7 +1129,7 @@ Problem.prototype.getHTMLOneProblemTr = function (
   nextCell = outputRow.insertCell(- 1);
   nextCell.className = "topicListProblemWeight";
   var weightContent = this.getProblemWeightContent();
-  appendHtml(nextCell, weightContent)
+  miscellaneousFrontend.appendHtml(nextCell, weightContent)
   nextCell = outputRow.insertCell(- 1);
   nextCell.className = "topicListDeadlines";
   nextCell.innerHTML = this.toStringDeadlineContainer();
@@ -1206,7 +1157,7 @@ Problem.prototype.getHTMLSubSection = function() {
   nextElement.className = "headSubsection";
   nextElement.innerHTML = `${this.problemNumberString} ${this.title} ${this.toStringDeadlineContainer()}`;
   result.push(nextElement);
-  appendHtmlToArray(result, this.getHTMLProblems());
+  miscellaneousFrontend.appendHtmlToArray(result, this.getHTMLProblems());
   return result;  
 }
 
@@ -1235,16 +1186,16 @@ Problem.prototype.getHTMLSection = function() {
   nextElement.className = "bodySection";
   result.push(nextElement);
   if (this.type === "Topic") {
-    appendHtml(nextElement, this.getHTMLSubSection());
+    miscellaneousFrontend.appendHtml(nextElement, this.getHTMLSubSection());
   } else if (this.isProblemContainer()) {
-    appendHtml(nextElement, this.getHTMLProblems());
+    miscellaneousFrontend.appendHtml(nextElement, this.getHTMLProblems());
   } else if (this.type === "Section") {
     for (var counterSection = 0; counterSection < this.childrenIds.length; counterSection ++) {
       var currentSubSection = allProblems.getProblemById(this.childrenIds[counterSection]);
-      appendHtml(nextElement, currentSubSection.getHTMLSubSection());
+      miscellaneousFrontend.appendHtml(nextElement, currentSubSection.getHTMLSubSection());
     }
   } else {
-    appendHtml(nextElement, this.getHTMLSubSection());
+    miscellaneousFrontend.appendHtml(nextElement, this.getHTMLSubSection());
   }
   return result;  
 }
@@ -1267,7 +1218,7 @@ Problem.prototype.toHTMLChapter =  function() {
   } else {
     for (var counterSection = 0; counterSection < this.childrenIds.length; counterSection ++) {
       var currentSection = allProblems.getProblemById(this.childrenIds[counterSection]);
-      appendHtml(bodyChapterElement, currentSection.getHTMLSection());
+      miscellaneousFrontend.appendHtml(bodyChapterElement, currentSection.getHTMLSection());
     }
   }
   result.push(bodyChapterElement); 
@@ -1362,7 +1313,7 @@ function writeTopicsToCoursePage() {
   }
   writeEditCoursePagePanel();
   var htmlContentElements = getHTMLfromTopics();
-  appendHtml(topicsElements[0], htmlContentElements);
+  miscellaneousFrontend.appendHtml(topicsElements[0], htmlContentElements);
   initializeProblemWeightsAndDeadlines();
   initializeDatePickers();
   //mathjax.typeSetHard(topicsElements[0]);

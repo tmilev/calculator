@@ -1,9 +1,10 @@
 "use strict";
-const submitRequests = require('./submit_requests');
-const panels = require('./panels');
-const pathnames = require('./pathnames');
-const ids = require('./ids_dom_elements');
-const mathjax = require('./mathjax-calculator-setup');
+const submitRequests = require("./submit_requests");
+const panels = require("./panels");
+const pathnames = require("./pathnames");
+const ids = require("./ids_dom_elements");
+const mathjax = require("./mathjax-calculator-setup");
+const miscellaneous = require("./miscellaneous")
 
 
 var calculatorLeftPosition = 0;
@@ -346,7 +347,7 @@ InputPanelData.prototype.submitOrPreviewAnswersCallback = function(outputCompone
   if (typeof outputComponent === "string") {
     outputComponent = document.getElementById(outputComponent);
   }
-  var inputParsed = JSON.parse(input);
+  var inputParsed = miscellaneous.jsonUnescapeParse(input);
   
   var resultHtml = "";
   if (inputParsed.error !== undefined && inputParsed.error !== null && inputParsed.error !== "") {

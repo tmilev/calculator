@@ -1,7 +1,7 @@
 "use strict";
-const pathnames = require('./pathnames');
-const submitRequests = require('./submit_requests');
-const ids = require('./ids_dom_elements');
+const pathnames = require("./pathnames");
+const submitRequests = require("./submit_requests");
+const ids = require("./ids_dom_elements");
 const BufferCalculator = require('./buffer').BufferCalculator;
 
 function Monitor() {

@@ -16,12 +16,17 @@ class TopicElementParser {
 public:
   class TopicLine {
   public:
+    friend std::ostream& operator<<(std::ostream& output, const TopicLine& line) {
+      output << line.ToString();
+      return output;
+    }
     int theType;
     std::string tag;
     std::string contentTrimmedWhiteSpace;
     void MakeError(const std::string& message);
     void MakeEmpty();
     TopicElement ToTopicElement() const;
+    std::string ToString() const;
     bool AccountIfStateChanger(CalculatorHTML& owner) const;
   };
   CalculatorHTML* owner;
@@ -51,6 +56,7 @@ public:
   bool CheckInitialization();
   bool CheckConsistencyParsed();
   void AddTopic(TopicElement& inputElt, int index);
+  std::string ToString() const;
   void initializeElementTypes();
   TopicLine ExtractLine(const std::string& inputNonTrimmed);
 };

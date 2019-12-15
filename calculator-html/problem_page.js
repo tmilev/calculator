@@ -1,11 +1,12 @@
 "use strict";
-const submitRequests = require('./submit_requests');
-const pathnames = require('./pathnames');
-const ids = require('./ids_dom_elements');
-const editPage = require('./edit_page');
-const initializeButtons = require('./initialize_buttons');
+const submitRequests = require("./submit_requests");
+const pathnames = require("./pathnames");
+const ids = require("./ids_dom_elements");
+const editPage = require("./edit_page");
+const initializeButtons = require("./initialize_buttons");
 const InputPanelData = initializeButtons.InputPanelData;
-const mathjax = require('./mathjax-calculator-setup');
+const mathjax = require("./mathjax-calculator-setup");
+const miscellaneous = require("./miscellaneous")
 
 function ProblemCollection() {
   /** @type{Object<string,Problem>} */
@@ -1280,6 +1281,12 @@ function getHTMLfromTopics() {
     var currentProblem = allProblems.getProblemById(label); 
     result.push(currentProblem.toHTMLChapter());
   }
+  if (allProblems.theTopics.comments !== undefined && allProblems.theTopics.comments !== null) {
+    var comments = document.createElement("span");
+    comments.innerHTML = "<hr>" + allProblems.theTopics.comments;
+    result.push(comments);
+  }
+  
   return result;
 }
 
@@ -1330,7 +1337,7 @@ function writeEditCoursePagePanel() {
 function processLoadedTopics(incomingTopics, result) {
   allProblems.previousProblemId = null;
   allProblems.resetTopicProblems();
-  allProblems.theTopics = JSON.parse(incomingTopics);
+  allProblems.theTopics = miscellaneous.jsonUnescapeParse(incomingTopics);
   for (var counterChapter = 0; counterChapter < allProblems.theTopics["children"].length; counterChapter ++) {
     var currentChapter = allProblems.theTopics["children"][counterChapter];
     allProblems.CreateOrUpdateProblem(currentChapter);

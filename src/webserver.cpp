@@ -2198,7 +2198,8 @@ int WebWorker::ProcessSelectCourseJSON() {
 int WebWorker::ProcessTopicListJSON() {
   MacroRegisterFunctionWithName("WebWorker::ProcessTopicListJSON");
   this->SetHeaderOKNoContentLength("");
-  return this->WriteToBodyJSON(WebAPIResponse::GetTopicTableJSON());
+  JSData resultJSON = WebAPIResponse::GetTopicTableJSON();
+  return this->WriteToBodyJSONAppendComments(resultJSON);
 }
 
 int WebWorker::ProcessCalculatorOnePageJS(bool appendBuildHash) {

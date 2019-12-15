@@ -3617,7 +3617,7 @@ void TopicElementParser::InsertTopicBundle(TopicElementParser::TopicLine& input)
 void TopicElementParser::LoadTopicBundleFile(
   TopicElementParser::TopicLine& input
 ) {
-  MacroRegisterFunctionWithName("TopicElement::LoadTopicBundle");
+  MacroRegisterFunctionWithName("TopicElement::LoadTopicBundleFile");
   std::string fileName = input.contentTrimmedWhiteSpace;
   if (this->loadedTopicBundleFiles.Contains(fileName)) {
     return;
@@ -3736,8 +3736,6 @@ void TopicElementParser::Crawl(const std::string& inputString) {
     }
     this->bundleStack.AddOnTop(this->ExtractLine(currentLine));
   }
-  theGlobalVariables.Comments << "DEBUG: Bundle files loaded: " << this->loadedTopicBundleFiles;
-  theGlobalVariables.Comments << "DEBUG: known bundles: " << this->knownTopicBundles.theKeys.ToStringCommaDelimited();
 }
 
 bool TopicElementParser::TopicLine::AccountIfStateChanger(CalculatorHTML& owner) const {
@@ -3806,6 +3804,12 @@ bool TopicElement::MergeTopicLine(
   return  false;
 }
 
+std::string TopicElementParser::TopicLine::ToString() const {
+  std::stringstream out;
+  out << this->tag << ": " << this->contentTrimmedWhiteSpace;
+  return out.str();
+}
+
 TopicElement TopicElementParser::TopicLine::ToTopicElement() const {
   TopicElement result;
   result.type = TopicElement::types::empty;
@@ -3858,6 +3862,14 @@ void TopicElementParser::ComputeIds() {
   for (int i = 0; i < this->elements.size; i ++) {
     this->elements[i].ComputeID(i, *this);
   }
+}
+
+std::string TopicElementParser::ToString() const {
+  std::stringstream out;
+  out << "Loaded bundle files: " << this->loadedTopicBundleFiles;
+  out << "<hr>";
+  out << "Known bundles: " << this->knownTopicBundles.ToStringHtml();
+  return out.str();
 }
 
 void TopicElementParser::ParseTopicList(

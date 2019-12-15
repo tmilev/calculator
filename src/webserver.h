@@ -159,6 +159,7 @@ public:
   static void WriteAfterTimeoutProgressStatic(const std::string& input);
   void PauseIfRequested();
   // writes json to body, sanitizes.
+  int WriteToBodyJSONAppendComments(JSData& result);
   int WriteToBodyJSON(const JSData& result);
   int WriteToBody(const std::string& bytesToAppend);
   void WriteAfterTimeoutResult();

@@ -998,6 +998,19 @@ JSData WebWorker::GetSignUpRequestResult() {
   return result;
 }
 
+int WebWorker::WriteToBodyJSONAppendComments(JSData &result) {
+  std::string comments = theGlobalVariables.Comments.container.GetElement().str();
+  if (comments != "") {
+    if (result[WebAPI::result::comments].theType == JSData::token::tokenString) {
+      comments = result[WebAPI::result::comments].theString + comments;
+    }
+  }
+  if (comments != "") {
+    result[WebAPI::result::comments] = comments;
+  }
+  return this->WriteToBodyJSON(result);
+}
+
 int WebWorker::WriteToBodyJSON(const JSData& result) {
   std::string toWrite = HtmlRoutines::ConvertStringToHtmlString(result.ToString(false), false);
   if (toWrite.size() < 2000) {

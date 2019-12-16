@@ -3000,7 +3000,7 @@ std::string Expression::ToStringAllSlidersInExpression() const {
   ) {
     this->owner->theObjectContainer.resetSliders();
   }
-  MapReferenceS<std::string, InputBox, MathRoutines::HashString>&
+  MapReferences<std::string, InputBox, MathRoutines::HashString>&
   theSliders = this->owner->theObjectContainer.theUserInputTextBoxesWithValues;
   std::stringstream out;
   for (int i = 0; i < boxNames.size; i ++) {

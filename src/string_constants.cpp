@@ -43,7 +43,6 @@ std::string WebAPI::problem::commentsProblem     = "commentsProblem"         ;
 
 
 std::string WebAPI::request::workerId    = WebAPI::result::workerId   ;
-std::string WebAPI::request::workerIndex = WebAPI::result::workerIndex;
 std::string WebAPI::request::userInfoJSON                 = "userInfoJSON"                             ;
 std::string WebAPI::request::examplesJSON                 = "calculatorExamplesJSON"                   ;
 std::string WebAPI::request::editPage                     = "editPageJSON"                             ;

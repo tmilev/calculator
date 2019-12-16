@@ -1043,7 +1043,7 @@ void SemisimpleSubalgebras::MakeCandidateSA(const DynkinType& input, CandidateSS
 bool SemisimpleSubalgebras::FindTheSSSubalgebrasFromScratch(
   SemisimpleLieAlgebra& newOwner,
   AlgebraicClosureRationals& ownerField,
-  MapReferenceS<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
+  MapReferences<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
   ListReferences<SltwoSubalgebras>& containerSl2Subalgebras,
   const DynkinType* targetType
 ) {
@@ -4024,7 +4024,7 @@ bool SemisimpleSubalgebras::CheckConsistency() const {
 void SemisimpleSubalgebras::initHookUpPointers(
   SemisimpleLieAlgebra& inputOwner,
   AlgebraicClosureRationals* theField,
-  MapReferenceS<DynkinType, SemisimpleLieAlgebra>* inputSubalgebrasNonEmbedded,
+  MapReferences<DynkinType, SemisimpleLieAlgebra>* inputSubalgebrasNonEmbedded,
   ListReferences<SltwoSubalgebras>* inputSl2sOfSubalgebras
 ) {
   (void) inputSl2sOfSubalgebras;

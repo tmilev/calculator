@@ -3065,7 +3065,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   if (this->flagIsExamProblem) {
     outHeadPt2 << this->GetJavascriptMathQuillBoxes();
     if (theInterpreter.flagHasGraphics) {
-      MapReferenceS<std::string, std::string, MathRoutines::HashString>& theScripts =
+      MapReferences<std::string, std::string, MathRoutines::HashString>& theScripts =
       theInterpreter.theObjectContainer.graphicsScripts;
       for (int i = 0; i < theScripts.size(); i ++) {
         this->theScripts.SetKeyValue(theScripts.theKeys[i], theScripts.theValues[i]);

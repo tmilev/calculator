@@ -801,7 +801,7 @@ bool HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism(
 }
 
 void HomomorphismSemisimpleLieAlgebra::MakeGinGWithId(
-  char theWeylLetter, int theWeylDim, MapReferenceS<DynkinType, SemisimpleLieAlgebra>& ownerOfAlgebras
+  char theWeylLetter, int theWeylDim, MapReferences<DynkinType, SemisimpleLieAlgebra>& ownerOfAlgebras
 ) {
   MacroRegisterFunctionWithName("HomomorphismSemisimpleLieAlgebra::MakeGinGWithId");
   DynkinType theType;

@@ -1369,20 +1369,7 @@ int WebWorker::GetIndexIfRunningWorkerId(
 ) {
   MacroRegisterFunctionWithName("WebWorker::GetJSONResultFromFile");
   std::string workerId = theGlobalVariables.GetWebInput(WebAPI::request::workerId);
-  std::string workerIndex = theGlobalVariables.GetWebInput(WebAPI::request::workerIndex);
-  int resultCandidate = std::atoi(workerIndex.c_str());
   std::stringstream commentsOnError;
-  if (resultCandidate == this->indexInParent) {
-    commentsOnError << "Worker index " << resultCandidate << " not allowed to pause or monitor itself. ";
-    outputComputationStatus[WebAPI::result::error] = commentsOnError.str();
-    return - 1;
-  }
-  for (unsigned i = 0; i < workerId.size(); i ++) {
-    if (!MathRoutines::IsAHexDigit(workerId[i])) {
-      outputComputationStatus[WebAPI::result::error] = "Worker ids are only allowed to contain the hex digits 0-9, a-f. ";
-      return - 1;
-    }
-  }
   std::string computationResult;
   // 1. Warning: timing attacks on the speed of looking up file names
   // may be used to guess an old worker id.
@@ -1391,14 +1378,9 @@ int WebWorker::GetIndexIfRunningWorkerId(
   // ultra-sensitive only because they are private, so there is no reason
   // to overdo the cryptographic protections beyond the common-sense one
   // of requesting a unique id.
-  //
-  // 2. Variable resultCandidate is a hint to which process is writing the file.
-  // We use this hint to lock the report file while we read it.
-  // If the hint is malliciously incorrect, this will temporarily
-  // prevent the other process from writing to this file.
-  bool shouldLock =  (resultCandidate >= 0 && resultCandidate < this->parent->theWorkers.size);
-  if (shouldLock) {
-    this->parent->theWorkers[resultCandidate].writingReportFile.Lock();
+  int indexOther = this->parent->workerIds.GetValue(workerId, - 1);
+  if (indexOther >= 0) {
+    this->parent->theWorkers[indexOther].writingReportFile.Lock();
   }
   bool success = FileOperations::LoadFileToStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
     "results/" + workerId,
@@ -1407,8 +1389,8 @@ int WebWorker::GetIndexIfRunningWorkerId(
     true,
     &commentsOnError
   );
-  if (shouldLock) {
-    this->parent->theWorkers[resultCandidate].writingReportFile.Unlock();
+  if (indexOther >= 0) {
+    this->parent->theWorkers[indexOther].writingReportFile.Unlock();
   }
   if (!success) {
     commentsOnError << "Failed to load your output with id: " << workerId << ". ";
@@ -1425,13 +1407,24 @@ int WebWorker::GetIndexIfRunningWorkerId(
   if (!outputComputationStatus[WebAPI::result::status].isEqualTo(WebAPI::result::running)) {
     return - 1;
   }
-  if (!outputComputationStatus[WebAPI::result::workerIndex].isEqualTo(workerIndex)) {
-    commentsOnError << "The worker index given by you: "
-    << workerIndex << " does not match the one given in the file: " << outputComputationStatus[WebAPI::result::workerIndex].ToString(false);
-    outputComputationStatus[WebAPI::result::error] = commentsOnError.str();
-    return - 1;
+  int indexFromFile = - 1;
+  outputComputationStatus[WebAPI::result::workerIndex].isIntegerFittingInInt(&indexFromFile);
+  if (indexOther < 0) {
+    indexOther = indexFromFile;
   }
-  return resultCandidate;
+  if (indexOther != indexFromFile || indexOther == - 1) {
+    crash << "Corrupt index worker: indexOther: " << indexOther
+    << "; indexFromFile: " << indexFromFile << ". " << crash;
+  }
+  if (indexOther >= this->parent->workerIds.size()) {
+    // Possible causes of this situation:
+    // 1) worker id was created in a worker process that was fired up after the current
+    // worker.
+    // 2) server executable was restarted.
+    indexOther = - 1;
+    outputComputationStatus[WebAPI::result::comments] = "WorkerId not found. ";
+  }
+  return indexOther;
 }
 
 JSData WebWorker::ProcessComputationIndicatorJSData() {
@@ -1481,7 +1474,6 @@ void WebWorker::WriteAfterTimeoutString(
   const std::string& fileNameCarbonCopy
 ) {
   MacroRegisterFunctionWithName("WebWorker::WriteAfterTimeout");
-  logWorker << "DEBUG: About to write: after timeout: " << input << logger::endL;
   JSData result;
   result[WebAPI::result::resultHtml] = input;
   WebWorker::WriteAfterTimeoutPartTwo(result, status, fileNameCarbonCopy);
@@ -1507,7 +1499,7 @@ void WebWorker::WriteAfterTimeoutPartTwo(
   std::stringstream commentsOnError;
   result[WebAPI::result::status] = status;
   WebWorker& currentWorker = theWebServer.GetActiveWorker();
-  result[WebAPI::result::workerIndex] = std::to_string(theWebServer.activeWorker);
+  result[WebAPI::result::workerIndex] = currentWorker.indexInParent;
   std::string toWrite = result.ToString(false, false, false, false);
   currentWorker.writingReportFile.Lock();
   bool success = FileOperations::WriteFileVirualWithPermissions_AccessUltraSensitiveFoldersIfNeeded(

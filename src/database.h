@@ -116,7 +116,7 @@ public:
       static std::string collectionAndLabelStatic(const std::string& inputCollection, const std::string& inputLabel);
       std::string collectionAndLabel();
     };
-    MapReferenceS<std::string, Database::FallBack::Index, MathRoutines::HashString> indices;
+    MapReferences<std::string, Database::FallBack::Index, MathRoutines::HashString> indices;
     bool UpdateOne(
       const QueryExact& findQuery,
       const JSData& updateQuery,

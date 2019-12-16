@@ -43,7 +43,6 @@ public:
     static std::string modifyPage;
     static std::string problemGiveUp;
     static std::string workerId;
-    static std::string workerIndex;
     static std::string forgotLogin;
     static std::string compute;
     static std::string monitoring;

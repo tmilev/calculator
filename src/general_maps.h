@@ -7,7 +7,7 @@
 #include "general_list_references.h"
 static ProjectInformationInstance ProjectInfovpfHeader1General6Maps(__FILE__, "Header, Map implementation. ");
 template <class listType, class key, class value, unsigned int hashFunction(const key&) = key::HashFunction>
-class MapTemplatE {
+class MapTemplate {
 public:
   HashedList<key, hashFunction> theKeys;
   listType theValues;
@@ -29,6 +29,13 @@ public:
     int theIndex = this->theKeys.GetIndex(input);
     if (theIndex == - 1) {
       crash << "Map does not contain key at a place where that is not allowed. " << crash;
+    }
+    return this->theValues[theIndex];
+  }
+  value GetValue(const key& input, const value& resultIfMissing) {
+    int theIndex = this->theKeys.GetIndex(input);
+    if (theIndex == - 1) {
+      return resultIfMissing;
     }
     return this->theValues[theIndex];
   }
@@ -87,12 +94,12 @@ public:
   }
 };
 
-//using C++ 11, not sure if that is a good idea:
-//In case this does not compile, please see the commented code below.
+// using C++ 11, not sure if that is a good idea:
+// In case this does not compile, please see the commented code below.
 template <class key, class value, unsigned int hashFunction(const key&) = key::HashFunction>
-using MapReferenceS = MapTemplatE<ListReferences<value>, key, value, hashFunction>;
+using MapReferences = MapTemplate<ListReferences<value>, key, value, hashFunction>;
 template <class key, class value, unsigned int hashFunction(const key&) = key::HashFunction>
-using MapList = MapTemplatE<List<value>, key, value, hashFunction>;
+using MapList = MapTemplate<List<value>, key, value, hashFunction>;
 
 /*
 template <class value, class key, unsigned int hashFunction(const key&)=key::HashFunction>

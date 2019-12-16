@@ -44,7 +44,7 @@ public:
   std::string theString;
   MemorySaving<LargeInteger> theInteger;
   ListReferences<JSData> theList;
-  MapReferenceS<std::string, JSData, MathRoutines::HashString> objects;
+  MapReferences<std::string, JSData, MathRoutines::HashString> objects;
   void operator=(const bool other);
   void operator=(int other);
   void operator=(int64_t other);

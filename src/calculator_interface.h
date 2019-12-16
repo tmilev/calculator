@@ -874,8 +874,8 @@ class ObjectContainer {
 public:
   HashedListReferences<ElementWeylGroup> theWeylGroupElements;
 ///////////////////////
-  MapReferenceS<DynkinType, SemisimpleLieAlgebra> theSSLieAlgebras;
-  MapReferenceS<DynkinType, SemisimpleSubalgebras> theSSSubalgebraS;
+  MapReferences<DynkinType, SemisimpleLieAlgebra> theSSLieAlgebras;
+  MapReferences<DynkinType, SemisimpleSubalgebras> theSSSubalgebraS;
 ////////////////////////
   HashedListReferences<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> > theWeylGroupReps;
   HashedListReferences<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> > theWeylGroupVirtualReps;
@@ -908,8 +908,8 @@ public:
   ListReferences<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational > > theHyperoctahedralReps;
   ListReferences<Plot> thePlots;
   List<bool> userInputBoxSliderDisplayed;
-  MapReferenceS<std::string, InputBox, MathRoutines::HashString> theUserInputTextBoxesWithValues;
-  MapReferenceS<std::string, std::string, MathRoutines::HashString> graphicsScripts;
+  MapReferences<std::string, InputBox, MathRoutines::HashString> theUserInputTextBoxesWithValues;
+  MapReferences<std::string, std::string, MathRoutines::HashString> graphicsScripts;
 
   AlgebraicClosureRationals theAlgebraicClosure;
   HashedList<AlgebraicNumber> theAlgebraicNumbers;

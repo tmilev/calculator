@@ -2228,7 +2228,7 @@ bool CalculatorFunctionsGeneral::innerPrecomputeSemisimpleLieAlgebraStructure(
     if ((false)) {
       if (theTypes[i].HasPrecomputedSubalgebras()) {
         SemisimpleSubalgebras theSubalgebras;
-        MapReferenceS<DynkinType, SemisimpleLieAlgebra> subalgebrasContainer;
+        MapReferences<DynkinType, SemisimpleLieAlgebra> subalgebrasContainer;
         ListReferences<SltwoSubalgebras> sl2Conainer;
         if (!theSubalgebras.ComputeStructureWriteFiles(
           theAlgebra,

@@ -13,8 +13,6 @@ function Monitor() {
   this.timeOutCounter = 0;
   /**@type{string} */
   this.currentWorkerId = ""; 
-  /**@type{string} */
-  this.currentWorkerIndex = "";
   this.currentTimeOutHandler = null;
   this.ownerCalculator = null;
 }
@@ -46,7 +44,6 @@ Monitor.prototype.progressReport = function() {
   var sURL = "";
   sURL += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.indicator}`;
   sURL += `&${pathnames.urlFields.requests.workerId}=${this.currentWorkerId}`;
-  sURL += `&${pathnames.urlFields.requests.workerIndex}=${this.currentWorkerIndex}`;
   submitRequests.submitGET({
     url: sURL,
     progress: ids.domElements.spanProgressCalculatorInput,
@@ -68,12 +65,6 @@ Monitor.prototype.callbackPauseRequest = function(input, output) {
   }
   var indicatorButton = document.getElementById(ids.domElements.monitoring.buttonTogglePauseRequest);
   this.ownerCalculator.parsedComputation = miscellaneous.jsonUnescapeParse(input);
-  if (
-    this.ownerCalculator.parsedComputation.workerIndex !== undefined && 
-    this.ownerCalculator.parsedComputation.workerIndex !== null
-  ) {
-    this.currentWorkerIndex = this.ownerCalculator.parsedComputation.workerIndex;
-  }
   var status = this.ownerCalculator.parsedComputation.status;
   var doUpdateCalculatorPage = false;
   if (status === undefined || status === null) {
@@ -87,12 +78,10 @@ Monitor.prototype.callbackPauseRequest = function(input, output) {
     this.isFinished = true;
     this.isPaused = false;
     indicatorButton.innerHTML = "finished";
-    this.currentWorkerIndex = null;
   } else if (status === "finished" || status === "crash") {
     this.isFinished = true;
     this.isPaused = false;
     indicatorButton.innerHTML = "finished";
-    this.currentWorkerIndex = null;
     doUpdateCalculatorPage = true;
   } else if (status === "paused") {
     this.isPaused = true;
@@ -136,7 +125,6 @@ Monitor.prototype.togglePause = function() {
     pauseURL += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.unpause}&`;
   }
   pauseURL += `${pathnames.urlFields.requests.workerId}=${this.currentWorkerId}&`;
-  pauseURL += `${pathnames.urlFields.requests.workerIndex}=${this.currentWorkerIndex}&`;
   submitRequests.submitGET({
     url: pauseURL,
     callback: this.callbackPauseRequest.bind(this),

@@ -454,7 +454,7 @@ bool Calculator::innerPrintSSSubalgebras(
 bool SemisimpleSubalgebras::ComputeStructureWriteFiles(
   SemisimpleLieAlgebra& newOwner,
   AlgebraicClosureRationals& ownerField,
-  MapReferenceS<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
+  MapReferences<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
   ListReferences<SltwoSubalgebras>& containerSl2Subalgebras,
   std::stringstream* outputStream,
   bool forceRecompute,

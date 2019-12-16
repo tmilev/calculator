@@ -362,8 +362,8 @@ public:
   AlgebraicClosureRationals* ownerField;
   DynkinType targetDynkinType;
   SltwoSubalgebras theSl2s;
-  MapReferenceS<DynkinType, SemisimpleLieAlgebra>* theSubalgebrasNonEmbedded;
-  MapReferenceS<Matrix<Rational>, SemisimpleLieAlgebra> theSubalgebrasNonDefaultCartanAndScale;
+  MapReferences<DynkinType, SemisimpleLieAlgebra>* theSubalgebrasNonEmbedded;
+  MapReferences<Matrix<Rational>, SemisimpleLieAlgebra> theSubalgebrasNonDefaultCartanAndScale;
   List<List<Rational> > CachedDynkinIndicesSl2subalgebrasSimpleTypes;
   HashedList<DynkinSimpleType> CachedDynkinSimpleTypesWithComputedSl2Subalgebras;
   List<OrbitIteratorRootActionWeylGroupAutomorphisms> theOrbiTs;
@@ -387,7 +387,7 @@ public:
 
   //end current computation state variables.
 
-  MapReferenceS<Vectors<Rational>, CandidateSSSubalgebra> theSubalgebras; //used to search for subalgebras quickly
+  MapReferences<Vectors<Rational>, CandidateSSSubalgebra> theSubalgebras; //used to search for subalgebras quickly
   bool flagRealizedAllCandidates;
   bool flagAttemptToSolveSystems;
   bool flagComputePairingTable;
@@ -469,7 +469,7 @@ public:
   void initHookUpPointers(
     SemisimpleLieAlgebra& inputOwner,
     AlgebraicClosureRationals* theField,
-    MapReferenceS<DynkinType, SemisimpleLieAlgebra>* inputSubalgebrasNonEmbedded,
+    MapReferences<DynkinType, SemisimpleLieAlgebra>* inputSubalgebrasNonEmbedded,
     ListReferences<SltwoSubalgebras>* inputSl2sOfSubalgebras
   );
   void reset();
@@ -524,14 +524,14 @@ public:
   bool FindTheSSSubalgebrasFromScratch(
     SemisimpleLieAlgebra& newOwner,
     AlgebraicClosureRationals& ownerField,
-    MapReferenceS<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
+    MapReferences<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
     ListReferences<SltwoSubalgebras>& containerSl2Subalgebras,
     const DynkinType* targetType
   );
   bool ComputeStructureWriteFiles(
     SemisimpleLieAlgebra& newOwner,
     AlgebraicClosureRationals& ownerField,
-    MapReferenceS<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
+    MapReferences<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
     ListReferences<SltwoSubalgebras>& containerSl2Subalgebras,
     std::stringstream* outputStream,
     bool forceRecompute,

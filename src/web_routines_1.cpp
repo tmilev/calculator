@@ -1033,6 +1033,8 @@ int WebWorker::ProcessSignUP() {
 
 void GlobalVariables::WriteResponse(const JSData& out) {
   WebWorker& theWorker = theWebServer.GetActiveWorker();
+  theWorker.SetHeaderOKNoContentLength("");
+
   theWorker.WriteToBodyJSON(out);
   theWorker.SendAllBytesWithHeaders();
 }

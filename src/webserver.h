@@ -202,7 +202,7 @@ public:
   std::string GetDatabaseDeleteOneItem();
   std::string GetAddUserEmails();
   std::string GetHtmlHiddenInputs(bool includeUserName, bool includeAuthenticationToken);
-  void SetHeaderOKNoContentLength(const std::string& extraHeader, const std::string& contentType = "text/html");
+  void SetHeaderOKNoContentLength(const std::string& extraHeader, const std::string& contentType = "application/json");
   void SetHeader(const std::string& httpResponseNoTermination, const std::string& remainingHeaderNoTermination);
 
   std::string GetHeaderConnectionClose();

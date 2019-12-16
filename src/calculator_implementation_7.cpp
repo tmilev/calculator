@@ -8193,7 +8193,7 @@ bool CalculatorFunctionsGeneral::innerTestIndicator(
   int numRuns = - 1;
   if (!input[1].IsIntegerFittingInInt(&numRuns)) {
     return theCommands << "Argument of CalculatorFunctionsGeneral::innerTestIndicator "
-    << "is not a small integer, instead it equals: " << numRuns << ".";
+    << "is not a small integer, instead it equals: " << input[1] << ".";
   }
   if (numRuns > 200000) {
     theCommands << "The argument " << numRuns

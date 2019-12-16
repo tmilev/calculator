@@ -1270,7 +1270,7 @@ void WebWorker::SetHeader(
   }
 }
 
-void WebWorker::SetHeaderOKNoContentLength(const std::string& extraHeader, const std::string &contentType) {
+void WebWorker::SetHeaderOKNoContentLength(const std::string& extraHeader, const std::string& contentType) {
   MacroRegisterFunctionWithName("WebWorker::SetHeaderOKNoContentLength");
   std::string header = "Content-Type: " + contentType + "; charset=utf-8\r\nAccess-Control-Allow-Origin: *";
   if (extraHeader != "") {
@@ -1309,7 +1309,6 @@ void WebWorker::SanitizeVirtualFileName() {
 
 int WebWorker::ProcessCalculatorExamplesJSON() {
   MacroRegisterFunctionWithName("WebWorker::ProcessCalculatorExamplesJSON");
-  this->SetHeaderOKNoContentLength("");
   theGlobalVariables.WriteResponse(theParser->FunctionHandlersJSON());
   return 0;
 }
@@ -2214,7 +2213,7 @@ int WebWorker::ProcessCalculatorOnePageJS(bool appendBuildHash) {
 
 int WebWorker::ProcessApp(bool appendBuildHash) {
   MacroRegisterFunctionWithName("WebWorker::ProcessApp");
-  this->SetHeaderOKNoContentLength("");
+  this->SetHeaderOKNoContentLength("", "text/html");
   if (theWebServer.RestartIsNeeded()) {
     return 0;
   }

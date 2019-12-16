@@ -932,7 +932,7 @@ bool LaTeXcrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
     this->flagAnswerKey = false;
     if (commentsGeneral != nullptr) {
       *commentsGeneral << "<br>Build homework pair from: "
-      << this->slideFileNamesVirtualWithPatH.ToStringCommaDelimited();
+      << this->slideFileNamesVirtualWithPatH.ToStringCommaDelimited() << ". ";
     }
     if (!this->BuildOrFetchFromCachePDF(commentsOnFailure, commentsGeneral)) {
       result = false;

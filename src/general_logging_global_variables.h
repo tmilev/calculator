@@ -236,6 +236,7 @@ public:
   };
   CommentsCurrentConnection Comments;
   void WriteResponse(const JSData& out);
+  void WriteCrash(const JSData& out);
 
   bool ConfigurationStore();
   bool ConfigurationLoad();

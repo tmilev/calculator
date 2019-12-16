@@ -136,7 +136,6 @@ public:
   int ProcessUnknown();
   int Run();
   bool CheckConsistency();
-  static void StandardOutputAfterTimeOut(const std::string& input);
 
   bool IsFileServedRaw();
 
@@ -182,7 +181,6 @@ public:
     const JSData& input,
     const std::string& fileNameCarbonCopy
   );
-  static void WriteAfterTimeoutCrash();
   void OutputShowIndicatorOnTimeout(const std::string& message);
   void GetIndicatorOnTimeout(JSData &output, const std::string& message);
   void QueueStringForSendingNoHeadeR(const std::string& stringToSend, bool MustSendAll = false);

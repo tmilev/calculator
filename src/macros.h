@@ -71,7 +71,6 @@ class Crasher {
   std::stringstream crashReportHtml;
   std::stringstream crashReportConsolE;
   std::stringstream crashReportFile;
-  void (*CleanUpFunction)();
   bool flagCrashInitiateD; //<-we crash only once, and we do not resume execution after a crash
   bool flagFinishingCrash; //<-we crash only once, and we do not resume execution after a crash
   Crasher();

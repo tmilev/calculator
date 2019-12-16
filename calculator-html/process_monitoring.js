@@ -37,7 +37,7 @@ Monitor.prototype.progressReport = function() {
   if (this.isFinished) {
     return;
   }
-  clearTimeout(this.timeoutID);
+  this.clearTimeout();
   if (this.isPaused) {
     return;
   }
@@ -52,7 +52,7 @@ Monitor.prototype.progressReport = function() {
     progress: ids.domElements.spanProgressCalculatorInput,
     callback: this.callbackPauseRequest.bind(this), 
   });
-  clearTimeout(this.currentTimeOutHandler);
+  this.clearTimeout();
   this.currentTimeOutHandler = setTimeout(this.progressReport.bind(this), this.timeIncrement * 1000);
 }
 
@@ -61,7 +61,6 @@ Monitor.prototype.clearTimeout = function() {
 }
 
 Monitor.prototype.callbackPauseRequest = function(input, output) {
-  this.clearTimeout();
   var progressReportContent = "";
   if (input === "") {
     this.currentTimeOutHandler = setTimeout(this.progressReport.bind(this), this.timeIncrement * 1000);

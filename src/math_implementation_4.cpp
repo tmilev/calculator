@@ -21,7 +21,6 @@ std::string UserCalculatorData::Roles::teacher = "teacher";
 Crasher::Crasher() {
   this->flagCrashInitiateD = false;
   this->flagFinishingCrash = false;
-  this->CleanUpFunction = nullptr;
 }
 
 void Crasher::FirstRun() {
@@ -129,10 +128,7 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash) {
   JSData output;
   output[WebAPI::result::crashReport] = this->crashReportHtml.str();
   output[WebAPI::result::comments] = theGlobalVariables.Comments.container.GetElement().str();
-  theGlobalVariables.WriteResponse(output);
-  if (this->CleanUpFunction != nullptr) {
-    this->CleanUpFunction();
-  }
+  theGlobalVariables.WriteCrash(output);
   assert(false);
   return *this;
 }

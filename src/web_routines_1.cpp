@@ -1031,6 +1031,23 @@ int WebWorker::ProcessSignUP() {
   return this->WriteToBodyJSON(this->GetSignUpRequestResult());
 }
 
+void GlobalVariables::WriteCrash(const JSData& out) {
+  MacroRegisterFunctionWithName("WebWorker::WriteAfterTimeoutCrash");
+  int toDoFixRaceCondition;
+  if (!theGlobalVariables.theProgress.flagTimedOut) {
+    this->WriteResponse(out);
+    return;
+  }
+
+  logWorker << logger::red << "Crashing AFTER timeout!" << logger::endL;
+
+  theWebServer.GetActiveWorker().WriteAfterTimeoutJSON(
+    out, "crash", ""
+  );
+  theWebServer.SignalActiveWorkerDoneReleaseEverything();
+}
+
+
 void GlobalVariables::WriteResponse(const JSData& out) {
   WebWorker& theWorker = theWebServer.GetActiveWorker();
   theWorker.SetHeaderOKNoContentLength("");

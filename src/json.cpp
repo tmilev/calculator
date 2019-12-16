@@ -788,7 +788,10 @@ void JSData::reset(char inputType) {
 }
 
 std::string JSData::ToString(
-  bool percentEncodeKeysIncludingDotsExcludingDollarSigns, bool useNewLine, bool useHTML, bool convertNonASCIIStringsToHex
+  bool percentEncodeKeysIncludingDotsExcludingDollarSigns,
+  bool useNewLine,
+  bool useHTML,
+  bool convertNonASCIIStringsToHex
 ) const {
   std::stringstream out;
   this->IntoStream(

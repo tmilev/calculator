@@ -507,11 +507,6 @@ void WebWorker::resetMessageComponentsExceptRawMessage() {
   this->ContentLength = - 1;
 }
 
-static std::stringstream standardOutputStreamAfterTimeout;
-void WebWorker::StandardOutputAfterTimeOut(const std::string& input) {
-  standardOutputStreamAfterTimeout << input;
-}
-
 JSData WebWorker::GetDatabaseJSON() {
   MacroRegisterFunctionWithName("WebWorker::GetDatabaseJSON");
   JSData result;
@@ -845,15 +840,6 @@ void WebWorker::WriteAfterTimeoutResult() {
     "finished",
     theGlobalVariables.RelativePhysicalNameOptionalResult
   );
-}
-
-void WebWorker::WriteAfterTimeoutCrash() {
-  MacroRegisterFunctionWithName("WebWorker::WriteAfterTimeoutCrash");
-  logWorker << logger::red << "Crashing AFTER timeout!" << logger::endL;
-  theWebServer.GetActiveWorker().WriteAfterTimeoutString(
-    standardOutputStreamAfterTimeout.str(), "crash", ""
-  );
-  theWebServer.SignalActiveWorkerDoneReleaseEverything();
 }
 
 void WebWorker::ParseMessageHead() {
@@ -1495,6 +1481,7 @@ void WebWorker::WriteAfterTimeoutString(
   const std::string& fileNameCarbonCopy
 ) {
   MacroRegisterFunctionWithName("WebWorker::WriteAfterTimeout");
+  logWorker << "DEBUG: About to write: after timeout: " << input << logger::endL;
   JSData result;
   result[WebAPI::result::resultHtml] = input;
   WebWorker::WriteAfterTimeoutPartTwo(result, status, fileNameCarbonCopy);
@@ -3077,7 +3064,6 @@ void WebWorker::OutputShowIndicatorOnTimeout(const std::string& message) {
   this->parent->Release(this->connectedSocketID);
   // set flags properly:
   // we need to rewire the standard output and the crashing mechanism:
-  crash.CleanUpFunction = WebWorker::WriteAfterTimeoutCrash;
 }
 
 std::string WebWorker::ToStringAddressRequest() const {
@@ -4395,7 +4381,6 @@ int WebWorker::Run() {
   processNameStream << "W" << this->indexInParent + 1 << ": ";
   MutexProcess::currentProcessName = processNameStream.str();
   theGlobalVariables.flagServerForkedIntoWorker = true;
-  crash.CleanUpFunction = WebServer::SignalActiveWorkerDoneReleaseEverything;
   CreateTimerThread();
   // Check web worker indices are initialized properly:
   theWebServer.GetActiveWorker();

@@ -659,7 +659,6 @@ std::string CalculatorHTML::ToStringProblemInfo(const std::string& theFileName, 
   std::stringstream out;
   out << this->ToStringLinkFromFileName(theFileName);
   out << this->ToStringProblemScoreFull(theFileName);
-  out << this->ToStringProblemWeightButton(theFileName);
   if (theGlobalVariables.flagDatabaseCompiled) {
     bool problemAlreadySolved = false;
     if (this->currentUseR.theProblemData.Contains(theFileName)) {
@@ -3424,45 +3423,7 @@ std::string CalculatorHTML::ToStringProblemScoreShort(const std::string& theFile
   finalOut << "<button class =\"accordionLike\" onclick=\"toggleProblemWeights();\">"
   << out.str()
   << "</button>";
-  finalOut << "<span class =\"panelProblemWeights\"><br>"
-  << this->ToStringProblemWeightButton(theFileName)
-  << "</span>";
   return finalOut.str();
-}
-
-std::string CalculatorHTML::ToStringProblemWeightButton(const std::string& theFileName) {
-  MacroRegisterFunctionWithName("CalculatorHTML::ToStringProblemWeighT");
-  if (
-    !theGlobalVariables.UserDefaultHasAdminRights() || theGlobalVariables.UserStudentVieWOn()
-  ) {
-    return "";
-  }
-  std::string urledProblem = HtmlRoutines::ConvertStringToURLString(theFileName, false);
-  std::stringstream out;
-  std::string idPoints = "points" + urledProblem;
-  std::string idButtonModifyPoints = "modifyPoints" + urledProblem;
-  std::string idPointsModOutput = "modifyPointsOutputSpan" + urledProblem;
-  out << "Pts: <textarea class =\"textareaStudentPoints\" rows =\"1\" cols =\"2\" id =\"" << idPoints << "\">";
-  bool weightIsOK = false;
-  std::string problemWeightAsGivenByInstructor;
-  if (theGlobalVariables.flagDatabaseCompiled) {
-    Rational unusedRat;
-    weightIsOK = this->currentUseR.theProblemData.GetValueCreate(theFileName).adminData.GetWeightFromCoursE(
-      this->currentUseR.courseComputed, unusedRat, &problemWeightAsGivenByInstructor
-    );
-    out << problemWeightAsGivenByInstructor;
-  }
-  out << "</textarea>";
-  if (!weightIsOK && problemWeightAsGivenByInstructor != "") {
-    out << "<b style ='color:red'>Error</b>";
-  }
-  out << "<button id =\"" << idButtonModifyPoints << "\" "
-  << "onclick=\"" << "modifyWeight('" << urledProblem << "');\""
-  << " disabled>";
-  out << "Modify";
-  out << "</button>";
-  out << "<span id =\"" << idPointsModOutput << "\">" << "</span>";
-  return out.str();
 }
 
 void TopicElement::ComputeID(int elementIndex, TopicElementParser& owner) {
@@ -3587,7 +3548,6 @@ void TopicElementParser::InsertTopicBundle(TopicElementParser::TopicLine& input)
     this->bundleStack.AddOnTop(currentBundle[i]);
   }
 }
-
 
 void TopicElementParser::LoadTopicBundleFile(
   TopicElementParser::TopicLine& input
@@ -4713,7 +4673,6 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle) {
     theRawExerciseLink = theGlobalVariables.DisplayNameExecutable + "?request=exercise&fileName=" + this->problemFileName;
     this->displayProblemLink = owner.ToStringLinkFromFileName(this->problemFileName);
     this->displayScore = owner.ToStringProblemScoreShort(this->problemFileName, problemSolved);
-    this->displayModifyWeight = owner.ToStringProblemWeightButton(this->problemFileName);
   }
   if (this->problemFileName == "" && this->type == TopicElement::types::problem) {
     this->displayDeadlinE = "";

@@ -169,14 +169,26 @@ function submitGET(
   recordProgressStarted(progress, theAddress, false, (new Date()).getTime());
   xhr.open('GET', theAddress, true);
   xhr.setRequestHeader('Accept', 'text/html');
-  xhr.onload = function () {
-    recordProgressDone(progress, (new Date()).getTime());
-    recordResult(xhr.responseText, result);
-    if (callback !== undefined && callback !== null) {
-      callback(xhr.responseText, result);
-    }
-  };
+  xhr.onload = responseStandard.bind(null, xhr, callback, result, progress);
   xhr.send();
+}
+
+function responseStandard(
+  /**@type {XMLHttpRequest} */
+  request, 
+  /**@type {Function} */
+  callback, 
+  /**@type {String|HTMLElement} */
+  result,
+  /**@type {String|HTMLElement} */
+  progress,
+) {
+  recordProgressDone(progress, (new Date()).getTime());
+  if (callback !== undefined && callback !== null) {
+    callback(request.responseText, result);
+  } else {
+    recordResult(request.responseText, result);
+  }
 }
 
 function submitPOST(
@@ -199,14 +211,7 @@ function submitPOST(
   var postRequest = `POST ${pathnames.urls.calculatorAPI}<br>message: ${miscellaneous.shortenString(200, parameters)}`;
   recordProgressStarted(progress, postRequest, true, (new Date()).getTime());
 
-  https.onload = function() { 
-    recordProgressDone(progress, (new Date()).getTime());
-    if (callback !== undefined && callback !== null) {
-      callback(https.responseText, result);
-    } else {
-      recordResult(https.responseText, result);
-    }
-  }
+  https.onload = responseStandard.bind(null, https, callback, result, progress);
   ////////////////////////////////////////////
   https.send(parameters);
   ////////////////////////////////////////////

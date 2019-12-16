@@ -84,7 +84,6 @@ function Problem() {
 }
 
 Problem.prototype.setRandomSeed = function(input) {
-  console.log("Setting random seed to: " + input);
   this.randomSeed = input;  
 }
 
@@ -235,7 +234,6 @@ Problem.prototype.initializeProblemContent = function(problemData) {
     return;    
   }
   this.flagForReal = problemData["forReal"];
-  console.log("Setting random seed to: " + problemData.randomSeed);
   this.setRandomSeed(problemData.randomSeed);
   for (var counterAnswers = 0;  counterAnswers < answerVectors.length; counterAnswers ++) {
     var currentVector = answerVectors[counterAnswers];
@@ -887,10 +885,6 @@ Problem.prototype.toHTMLWeights = function() {
   return result;
 }
 
-Problem.prototype.callbackModifyWeight = function(input, output) {
-  document.getElementById(this.idModifyReportPoints).innerHTML = input;
-}
-
 Problem.prototype.modifyWeight = function() {
   var problemWeightTextareaId = `points${this.problemId}`;
   var incomingPoints = document.getElementById(problemWeightTextareaId).value;
@@ -906,7 +900,7 @@ Problem.prototype.modifyWeight = function() {
   submitRequests.submitGET({
     url: theURL,
     progress: ids.domElements.spanProgressReportGeneral,
-    callback: this.callbackModifyWeight.bind(this)
+    result: this.idModifyReportPoints,
   });
 }
 

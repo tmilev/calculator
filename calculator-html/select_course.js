@@ -60,7 +60,7 @@ function afterLoadSelectCoursePage(incomingPage, result) {
 }
 
 var pageSetup = {
-  needsLoad: true
+  needsLoad: true,
 };
 
 function selectCoursePage() {
@@ -70,7 +70,7 @@ function selectCoursePage() {
   submitRequests.submitGET({
     url: `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.selectCourse}`,
     callback: afterLoadSelectCoursePage,
-    progress: ids.domElements.spanProgressReportGeneral
+    progress: ids.domElements.spanProgressReportGeneral,
   });
 }
 

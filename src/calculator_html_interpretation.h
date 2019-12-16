@@ -356,7 +356,6 @@ public:
   std::string ToStringLinkCurrentAdmin(const std::string& displayString, bool setDebugFlag, bool includeRandomSeed);
   std::string ToStringCalculatorProblemSourceFromFileName(const std::string& theFileName);
   void InterpretGenerateLink(SyntacticElementHTML& inputOutput);
-  std::string ToStringProblemWeightButton(const std::string& theFileName);
   std::string ToStringProblemScoreFull(const std::string& theFileName);
   std::string ToStringProblemScoreShort(const std::string& theFileName, bool& outputAlreadySolved);
   bool ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutput);

@@ -6,10 +6,6 @@ const problemPage = require("./problem_page");
 const mathjax = require("./mathjax-calculator-setup");
 const miscellaneous = require("./miscellaneous");
 
-function callbackModifyDeadlines(incomingId, input, output) {
-  document.getElementById(`deadlines${incomingId}`).innerHTML = input;
-}
-
 function modifyDeadlines(incomingId) {
   var thePage = window.calculator.mainPage;
   var nameDatePicker = `datePicker${incomingId}`;
@@ -30,7 +26,7 @@ function modifyDeadlines(incomingId) {
   submitRequests.submitGET({
     url: theURL,
     progress: ids.domElements.spanProgressReportGeneral,
-    callback: callbackModifyDeadlines.bind(null, incomingId)
+    result: `deadlines${incomingId}`,
   });
 }
 

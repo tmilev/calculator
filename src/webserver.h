@@ -163,13 +163,23 @@ public:
   int WriteToBodyJSON(const JSData& result);
   int WriteToBody(const std::string& bytesToAppend);
   void WriteAfterTimeoutResult();
-  static void WriteAfterTimeout(
+  static void WriteAfterTimeoutString(
     const std::string& input,
     const std::string& status,
     const std::string& fileNameCarbonCopy
   );
+  static void WriteAfterTimeoutJSON(
+    const JSData& input,
+    const std::string& status,
+    const std::string& fileNameCarbonCopy
+  );
+  static void WriteAfterTimeoutPartTwo(
+    JSData& result,
+    const std::string& status,
+    const std::string& fileNameCarbonCopy
+  );
   static void WriteAfterTimeoutCarbonCopy(
-    const std::string& input,
+    const JSData& input,
     const std::string& fileNameCarbonCopy
   );
   static void WriteAfterTimeoutCrash();

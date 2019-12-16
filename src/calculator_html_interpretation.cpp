@@ -780,9 +780,6 @@ JSData WebAPIResponse::GetTopicTableJSON() {
 
 void WebAPIResponse::GetJSDataUserInfo(JSData& outputAppend, const std::string& comments) {
   MacroRegisterFunctionWithName("WebAPIReponse::GetJSDataUserInfo");
-  std::stringstream outLinkApp, outLinkAppNoCache;
-  // The calculator name should not contain dangerous symbols,
-  // but let's sanitize in case of a programmer error.
   outputAppend["linkApp"] = WebAPIResponse::youHaveReachedTheBackend;
   outputAppend[WebAPI::result::loginDisabledEveryoneIsAdmin] = theGlobalVariables.flagDisableDatabaseLogEveryoneAsAdmin;
   outputAppend[WebAPI::result::useFallbackDatabase] = theGlobalVariables.flagDatabaseUseFallback;

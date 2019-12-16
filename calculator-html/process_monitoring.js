@@ -2,7 +2,8 @@
 const pathnames = require("./pathnames");
 const submitRequests = require("./submit_requests");
 const ids = require("./ids_dom_elements");
-const BufferCalculator = require('./buffer').BufferCalculator;
+const BufferCalculator = require("./buffer").BufferCalculator;
+const miscellaneous = require("./miscellaneous");
 
 function Monitor() {
   this.isPaused = false;
@@ -67,7 +68,7 @@ Monitor.prototype.callbackPauseRequest = function(input, output) {
     return;
   }
   var indicatorButton = document.getElementById(ids.domElements.monitoring.buttonTogglePauseRequest);
-  this.ownerCalculator.parsedComputation = JSON.parse(input);
+  this.ownerCalculator.parsedComputation = miscellaneous.jsonUnescapeParse(input);
   if (
     this.ownerCalculator.parsedComputation.workerIndex !== undefined && 
     this.ownerCalculator.parsedComputation.workerIndex !== null

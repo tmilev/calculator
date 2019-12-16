@@ -16,7 +16,6 @@ std::string WebAPI::databaseParameters::fetch      = "databaseFetch"    ;
 std::string WebAPI::result::error                        = "error"                       ;
 std::string WebAPI::result::status                       = "status"                      ;
 std::string WebAPI::result::running                      = "running"                     ;
-std::string WebAPI::result::resultStringified            = "resultStringified"           ;
 std::string WebAPI::result::resultHtml                   = "resultHtml"                  ;
 std::string WebAPI::result::syntaxErrors                 = "syntaxErrors"                ;
 std::string WebAPI::result::resultLabel                  = "result"                      ;
@@ -143,7 +142,6 @@ std::string DatabaseStrings::labelPageAccount         = "account"          ;
 std::string DatabaseStrings::labelPageActivateAccount = "activateAccount"  ;
 
 std::string Configuration::processMonitoringBanned                  = "processMonitoringBanned"                 ;
-std::string Configuration::millisecondsReplyAfterComputationDefault = "millisecondsReplyAfterComputationDefault";
 std::string Configuration::monitorPingTime                          = "monitorPingTime"                         ;
 std::string Configuration::millisecondsReplyAfterComputation        = "millisecondsReplyAfterComputation"       ;
 std::string Configuration::builtInTLSAvailable                      = "builtInTLSAvailable"                     ;

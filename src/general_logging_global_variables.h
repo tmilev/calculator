@@ -75,7 +75,6 @@ public:
   int64_t millisecondsMaxComputation;
   int64_t millisecondsNoPingBeforeChildIsPresumedDead;
   int64_t millisecondsReplyAfterComputation;
-  int64_t millisecondsReplyAfterComputationDefault;
   int64_t millisecondsComputationStart;
 
   //  bool flagLogInterProcessCommunication;
@@ -282,7 +281,6 @@ public:
   std::string ToStringThreadData(bool useHTML);
   std::string ToStringProgressReportNoThreadData(bool useHTML);
   std::string ToStringProgressReportWithThreadData(bool useHTML);
-  JSData ToStringProgressReportJSData();
   std::string ToStringProgressReportConsole();
   void MakeReport(const std::string& input) {
     if (this->IndicatorStringOutputFunction != nullptr) {

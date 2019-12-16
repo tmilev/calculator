@@ -205,33 +205,25 @@ Calculator.prototype.getComputationLink = function(input) {
   return stringifiedHash;
 }
 
-Calculator.prototype.writeResultUndefined = function(
+Calculator.prototype.writeErrorsAndCrashes = function(
   /**@type {BufferCalculator} */ 
   buffer,
   inputParsed,
-  panelIdPairs,
 ) {
-  if (inputParsed.resultHtml !== undefined) {
-    buffer.write(inputParsed.resultHtml);
-    return;
-  }
-  if (inputParsed.resultStringified !== undefined) {
-    try {
-      this.parsedComputation = JSON.parse(inputParsed.resultStringified);
-      //warning: this is a recursive call:
-      this.writeResult(buffer, this.parsedComputation, panelIdPairs);
-    } catch (e) {
-      buffer.write(`Failed to parse result. ${e}. The raw result was: <br>${inputParsed.resultStringified}`);
-    }
-    return;
-  }
-  if (inputParsed.error !== undefined && inputParsed.error !== null) {
+  if (
+    inputParsed.error !== undefined && 
+    inputParsed.error !== null &&
+    inputParsed.error !== ""
+  ) {
     buffer.write("<b style = 'color:red'>Error.</b>");
-    buffer.write(JSON.error);
+    buffer.write(inputParsed.error);
   }
-  if (inputParsed.crashReport === undefined || inputParsed.crashReport === null) {
-    buffer.write("Unexpected input. <br>");
-    buffer.write(JSON.stringify(inputParsed));
+  if (
+    inputParsed.crashReport !== undefined && 
+    inputParsed.crashReport !== null &&
+    inputParsed.crashReport !== ""
+  ) {
+    buffer.write(inputParsed.crashReport);
   }
 }
 
@@ -241,9 +233,7 @@ Calculator.prototype.writeResult = function(
   inputParsed,
   panelIdPairs,
 ) {
-  if (inputParsed.crashReport !== undefined) {
-    buffer.write(inputParsed.crashReport);
-  }
+  this.writeErrorsAndCrashes(buffer, inputParsed);
   if (inputParsed.timeOut === true) {
     if (inputParsed.timeOutComments !== undefined) {
       buffer.write(inputParsed.timeOutComments);
@@ -251,8 +241,13 @@ Calculator.prototype.writeResult = function(
     processMonitoring.monitor.start(inputParsed.workerId);
     return;
   }
+  if (inputParsed.result === undefined && inputParsed.resultHtml !== undefined) {
+    buffer.write(inputParsed.resultHtml);
+  }
+  if (inputParsed.result === undefined && inputParsed.comments !== undefined) {
+    buffer.write(inputParsed.comments);
+  }
   if (inputParsed.result === undefined) {
-    this.writeResultUndefined(buffer, inputParsed, panelIdPairs);
     return;
   }
   buffer.write(`<table><tr><td>`);

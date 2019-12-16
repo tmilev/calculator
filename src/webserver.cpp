@@ -831,15 +831,17 @@ void WebWorker::WriteAfterTimeoutProgress(const std::string& input, bool forceFi
   if (this->workerToWorkerRequestIndicator.lastRead.size == 0 && !forceFileWrite) {
     return;
   }
-  this->WriteAfterTimeout(input, WebAPI::result::running, theGlobalVariables.RelativePhysicalNameOptionalProgressReport);
+  this->WriteAfterTimeoutString(
+    input,
+    WebAPI::result::running,
+    theGlobalVariables.RelativePhysicalNameOptionalProgressReport
+  );
 }
 
 void WebWorker::WriteAfterTimeoutResult() {
   MacroRegisterFunctionWithName("WebWorker::WriteComputationResult");
-  WebWorker::WriteAfterTimeout(
-    theParser->ToJSONOutputAndSpecials().ToString(
-      false, false, false, false
-    ),
+  WebWorker::WriteAfterTimeoutJSON(
+    theParser->ToJSONOutputAndSpecials(),
     "finished",
     theGlobalVariables.RelativePhysicalNameOptionalResult
   );
@@ -848,7 +850,9 @@ void WebWorker::WriteAfterTimeoutResult() {
 void WebWorker::WriteAfterTimeoutCrash() {
   MacroRegisterFunctionWithName("WebWorker::WriteAfterTimeoutCrash");
   logWorker << logger::red << "Crashing AFTER timeout!" << logger::endL;
-  theWebServer.GetActiveWorker().WriteAfterTimeout(standardOutputStreamAfterTimeout.str(), "crash", "");
+  theWebServer.GetActiveWorker().WriteAfterTimeoutString(
+    standardOutputStreamAfterTimeout.str(), "crash", ""
+  );
   theWebServer.SignalActiveWorkerDoneReleaseEverything();
 }
 
@@ -1322,7 +1326,7 @@ int WebWorker::ProcessServerStatusJSON() {
   << theGlobalVariables.ToStringHTMLTopCommandLinuxSystem()
   << "</td></tr></table>";
   JSData outputJS;
-  outputJS["result"] = out.str();
+  outputJS[WebAPI::result::resultHtml] = out.str();
   theGlobalVariables.WriteResponse(outputJS);
   return 0;
 }
@@ -1468,46 +1472,53 @@ JSData WebWorker::ProcessComputationIndicatorJSData() {
   return result;
 }
 
-void WebWorker::WriteAfterTimeoutCarbonCopy(const std::string& input, const std::string& fileNameCarbonCopy) {
+void WebWorker::WriteAfterTimeoutCarbonCopy(
+  const JSData& input, const std::string& fileNameCarbonCopy
+) {
   if (fileNameCarbonCopy == "") {
     return;
   }
-  JSData result;
-  std::stringstream commentsOnError;
-  if (!result.readstring(input, false, &commentsOnError)) {
-    logWorker << logger::red
-    << "Failed to parse input to WriteAfterTimeoutCarbonCopy: "
-    << commentsOnError.str() << logger::endL;
-    return;
-  }
-  if (result[WebAPI::result::resultHtml].theType == JSData::token::tokenUndefined) {
-    logWorker << logger::red
-    << "Input to WriteAfterTimeoutCarbonCopy does not have a resultHtml entry. "
-    << logger::endL;
-    return;
-  }
-  std::string toBeWritten = result[WebAPI::result::resultHtml].theString;
-  toBeWritten = StringRoutines::ReplaceAll(toBeWritten, "\\n", "\n");
   std::string extraFilename = "output/";
   extraFilename += FileOperations::CleanUpForFileNameUse(
     fileNameCarbonCopy
-  ) + ".html";
-  bool success = FileOperations::WriteFileVirual(extraFilename, toBeWritten, &commentsOnError);
+  ) + ".json";
+  std::stringstream commentsOnError;
+  bool success = FileOperations::WriteFileVirual(extraFilename, input.ToString(false), &commentsOnError);
   if (!success) {
     logWorker << logger::red << "Error writing optional file. " << commentsOnError.str() << logger::endL;
   }
 }
 
-void WebWorker::WriteAfterTimeout(
+void WebWorker::WriteAfterTimeoutString(
   const std::string& input,
   const std::string& status,
   const std::string& fileNameCarbonCopy
 ) {
   MacroRegisterFunctionWithName("WebWorker::WriteAfterTimeout");
-  std::stringstream commentsOnError;
   JSData result;
+  result[WebAPI::result::resultHtml] = input;
+  WebWorker::WriteAfterTimeoutPartTwo(result, status, fileNameCarbonCopy);
+}
+
+void WebWorker::WriteAfterTimeoutJSON(
+  const JSData& input,
+  const std::string& status,
+  const std::string& fileNameCarbonCopy
+) {
+  MacroRegisterFunctionWithName("WebWorker::WriteAfterTimeoutJSON");
+  JSData result;
+  result = input;
+  WebWorker::WriteAfterTimeoutPartTwo(result, status, fileNameCarbonCopy);
+}
+
+void WebWorker::WriteAfterTimeoutPartTwo(
+  JSData& result,
+  const std::string& status,
+  const std::string& fileNameCarbonCopy
+) {
+  MacroRegisterFunctionWithName("WebWorker::WriteAfterTimeoutPartTwo");
+  std::stringstream commentsOnError;
   result[WebAPI::result::status] = status;
-  result[WebAPI::result::resultStringified] = input;
   WebWorker& currentWorker = theWebServer.GetActiveWorker();
   result[WebAPI::result::workerIndex] = std::to_string(theWebServer.activeWorker);
   std::string toWrite = result.ToString(false, false, false, false);
@@ -1519,7 +1530,7 @@ void WebWorker::WriteAfterTimeout(
     true,
     &commentsOnError
   );
-  currentWorker.WriteAfterTimeoutCarbonCopy(input, fileNameCarbonCopy);
+  currentWorker.WriteAfterTimeoutCarbonCopy(result, fileNameCarbonCopy);
   currentWorker.writingReportFile.Unlock();
   if (success) {
     logWorker << logger::green << "Data written to file: "
@@ -3048,6 +3059,7 @@ void WebWorker::GetIndicatorOnTimeout(JSData& output, const std::string& message
 
 void WebWorker::OutputShowIndicatorOnTimeout(const std::string& message) {
   MacroRegisterFunctionWithName("WebWorker::OutputShowIndicatorOnTimeout");
+  logWorker << "Long computation, about to display indicator. " << logger::endL;
   theGlobalVariables.theProgress.flagTimedOut = true;
   JSData result;
   this->GetIndicatorOnTimeout(result, message);
@@ -3055,7 +3067,7 @@ void WebWorker::OutputShowIndicatorOnTimeout(const std::string& message) {
     crash << "Index of worker is smaller than 0, this shouldn't happen. " << crash;
   }
   this->WriteToBodyJSON(result);
-  this->WriteAfterTimeoutProgress(theGlobalVariables.ToStringProgressReportJSData().ToString(false), true);
+  this->WriteAfterTimeoutProgress(theGlobalVariables.ToStringProgressReportNoThreadData(true), true);
   this->SendAllBytesWithHeaders();
   for (int i = 0; i < this->parent->theWorkers.size; i ++) {
     if (i != this->indexInParent) {
@@ -3971,7 +3983,7 @@ bool WebServer::initBindToPorts() {
   if (!this->initBindToOnePort(this->portHTTP, this->listeningSocketHTTP)) {
     return false;
   }
-  logServer << logger::yellow << "http://localhost:" << this->portHTTP << logger::endL;
+  logServer << "Running at: " << logger::yellow << "http://localhost:" << this->portHTTP << logger::endL;
   if (theWebServer.theTLS.flagBuiltInTLSAvailable) {
     if (!this->initBindToOnePort(this->portHTTPSBuiltIn, this->listeningSocketHTTPSBuiltIn)) {
       return false;
@@ -3980,7 +3992,7 @@ bool WebServer::initBindToPorts() {
   if (!this->initBindToOnePort(this->portHTTPSOpenSSL, this->listeningSocketHTTPSOpenSSL)) {
     return false;
   }
-  logServer << logger::yellow << "https://localhost:" << this->portHTTPSOpenSSL << logger::endL;
+  logServer << "Running at: " << logger::yellow << "https://localhost:" << this->portHTTPSOpenSSL << logger::endL;
   return true;
 }
 
@@ -4731,9 +4743,7 @@ void WebServer::AnalyzeMainArgumentsTimeString(const std::string& timeLimitStrin
     } else {
       theGlobalVariables.millisecondsMaxComputation *= 1000;
     }
-    std::cout << "Max computation time: " << theGlobalVariables.millisecondsMaxComputation << " ms." << std::endl;
   }
-
 }
 
 void WebServer::AnalyzeMainArguments(int argC, char **argv) {
@@ -4921,7 +4931,6 @@ void WebServer::InitializeMainFoldersInstructorSpecific() {
 }
 
 void WebServer::InitializeMainAll() {
-  theGlobalVariables.millisecondsReplyAfterComputation = 0;
   ParallelComputing::cgiLimitRAMuseNumPointersInList = 4000000000;
   this->InitializeMainHashes();
   FileOperations::InitializeFoldersULTRASensitive();
@@ -4937,17 +4946,15 @@ extern int mainTest(List<std::string>& remainingArgs);
 
 void WebServer::TurnProcessMonitoringOn() {
   MacroRegisterFunctionWithName("WebServer::TurnProcessMonitoringOn");
-  logServer
-  << logger::purple << "************************" << logger::endL
-  << logger::yellow << "Process monitoring IS ON. " << logger::endL
-  << logger::purple << "************************" << logger::endL;
   theGlobalVariables.theProgress.flagBanProcessMonitoring = false;
-  theGlobalVariables.millisecondsReplyAfterComputation = theGlobalVariables.millisecondsReplyAfterComputationDefault;
   theGlobalVariables.configuration[Configuration::processMonitoringBanned] = false;
+  logServer
+  << logger::yellow << "Process monitoring IS ON, reply in: " << logger::green
+  << theGlobalVariables.millisecondsReplyAfterComputation << " ms." << logger::endL;
 }
 
 void WebServer::TurnProcessMonitoringOff() {
-  MacroRegisterFunctionWithName("WebServer::TurnProcessMonitoringOn");
+  MacroRegisterFunctionWithName("WebServer::TurnProcessMonitoringOff");
   logServer
   << logger::green << "************************" << logger::endL
   << logger::red << "Process monitoring is now off. " << logger::endL
@@ -5047,9 +5054,7 @@ void GlobalVariables::ConfigurationProcess() {
     theGlobalVariables.flagServerAutoMonitor = false;
     if (!theGlobalVariables.flagRunningCommandLine) {
       logServer
-      << logger::purple << "************************" << logger::endL
-      << logger::red << "WARNING: server auto-monitoring is off. " << logger::endL
-      << logger::purple << "************************" << logger::endL;
+      << logger::red << "WARNING: server auto-monitoring is off. " << logger::endL;
     }
   }
   if (theGlobalVariables.flagServerDetailedLog) {
@@ -5096,9 +5101,13 @@ void GlobalVariables::ConfigurationProcess() {
   }
   int reader = 0;
   if (theGlobalVariables.configuration[
-    Configuration::millisecondsReplyAfterComputationDefault
+    Configuration::millisecondsReplyAfterComputation
   ].isIntegerFittingInInt(&reader)) {
-    theGlobalVariables.millisecondsReplyAfterComputationDefault = reader;
+    theGlobalVariables.millisecondsReplyAfterComputation = reader;
+  } else {
+    theGlobalVariables.configuration[
+      Configuration::millisecondsReplyAfterComputation
+    ] = theGlobalVariables.millisecondsReplyAfterComputation;
   }
   if (
     theGlobalVariables.configuration[
@@ -5180,6 +5189,7 @@ int WebServer::main(int argc, char **argv) {
     theGlobalVariables.ConfigurationProcess();
     // Store back the config file if it changed.
     theGlobalVariables.ConfigurationStore();
+    logServer << "Computation timeout: " << logger::red << theGlobalVariables.millisecondsMaxComputation << " ms." << logger::endL;
 
     if (!Database::get().initializeServer()) {
       crash << "Failed to initialize database. " << crash;

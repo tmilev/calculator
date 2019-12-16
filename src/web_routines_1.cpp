@@ -982,7 +982,7 @@ JSData WebWorker::GetSignUpRequestResult() {
     errorStream << "Failed to store error stream. ";
     result["error"] = errorStream.str();
     result["comments"] = generalCommentsStream.str();
-    result["result"] = outputStream.str();
+    result[WebAPI::result::resultLabel] = outputStream.str();
     return result;
   }
   std::stringstream* adminOutputStream = nullptr;
@@ -994,7 +994,7 @@ JSData WebWorker::GetSignUpRequestResult() {
   this->DoSetEmail(theUser, &errorStream, &generalCommentsStream, adminOutputStream);
   result["error"] = errorStream.str();
   result["comments"] = generalCommentsStream.str();
-  result["result"] = outputStream.str();
+  result[WebAPI::result::resultHtml] = outputStream.str();
   return result;
 }
 

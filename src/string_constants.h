@@ -54,7 +54,6 @@ public:
   };
   struct result {
     static std::string resultHtml;
-    static std::string resultStringified;
     static std::string syntaxErrors;
     static std::string resultLabel;
     static std::string badInput;
@@ -100,7 +99,6 @@ class Configuration {
 public:
   static std::string processMonitoringBanned                 ;
   static std::string processMonitoringTriggerTime            ;
-  static std::string millisecondsReplyAfterComputationDefault;
   static std::string millisecondsReplyAfterComputation       ;
   static std::string builtInTLSAvailable                     ;
   static std::string serverAutoMonitor                       ;

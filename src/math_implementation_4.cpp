@@ -235,12 +235,6 @@ std::string GlobalVariables::ToStringFolderInfo() const {
   return out.str();
 }
 
-JSData GlobalVariables::ToStringProgressReportJSData() {
-  JSData result;
-  result[WebAPI::result::resultHtml] = this->ToStringProgressReportNoThreadData(true);
-  return result;
-}
-
 std::string GlobalVariables::ToStringThreadData(bool useHTML) {
   std::stringstream out;
   for (int threadIndex = 0; threadIndex < this->progressReportStrings.size; threadIndex ++) {
@@ -479,7 +473,7 @@ void GlobalVariables::MakeReport() {
   if (this->flagRunningCommandLine || this->flagRunningConsoleTest) {
     this->MakeReport(this->ToStringProgressReportConsole());
   } else {
-    this->MakeReport(this->ToStringProgressReportJSData().ToString(false));
+    this->MakeReport(this->ToStringProgressReportNoThreadData(true));
   }
 }
 

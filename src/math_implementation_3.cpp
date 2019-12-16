@@ -130,8 +130,7 @@ GlobalVariables::GlobalVariables() {
   this->millisecondsMaxComputation = 100000; //100 seconds
   this->millisecondOffset = 0;
   this->millisecondsComputationStart = - 1;
-  this->millisecondsReplyAfterComputation = 0;
-  this->millisecondsReplyAfterComputationDefault = 5000; //5 seconds
+  this->millisecondsReplyAfterComputation = 5000; //5 seconds
   this->pointerCallSystemWithOutput = nullptr;
   this->pointerCallSystemNoOutput = nullptr;
   this->pointerCallChDir = nullptr;

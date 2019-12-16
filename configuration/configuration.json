@@ -35,5 +35,6 @@
   "slides-video/":"../slides-video/",
   "freecalc/":"../freecalc/",
   "mathJaxSetup":"Check for mathjax on every boot.",
-  "favicon.ico":"html-common/favicon.ico"
+  "favicon.ico":"html-common/favicon.ico",
+  "millisecondsReplyAfterComputation":5000
 }

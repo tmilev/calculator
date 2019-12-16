@@ -137,6 +137,7 @@ bool TimeoutThread::HandleComputationTimeout() {
     return false;
   }
   if (theGlobalVariables.millisecondsReplyAfterComputation <= 0) {
+    logWorker << "DEBUG: theGlobalVariables.millisecondsReplyAfterComputation : non-positive!" << logger::endL;
     return false;
   }
   if (this->elapsedComputationTimeInMilliseconds <= 0) {
@@ -146,6 +147,7 @@ bool TimeoutThread::HandleComputationTimeout() {
     return false;
   }
   if (!theGlobalVariables.theProgress.ReportAlloweD()) {
+    logWorker << "DEBUG: report not allowed!" << logger::endL;
     return false;
   }
   MacroRegisterFunctionWithName("TimerThreadData::HandleComputationTimeout");

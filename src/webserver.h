@@ -188,7 +188,7 @@ public:
   bool ShouldDisplayLoginPage();
   void SendAllAndWrapUp();
   void WrapUpConnection();
-  void ResetMutexProcessesNoAllocation();
+  void ResetMutexProcesses();
   void reset();
   void resetMessageComponentsExceptRawMessage();
   void resetConnection();
@@ -277,8 +277,6 @@ public:
   List<std::string> addressStartsSentWithCacheMaxAge;
   HashedList<std::string, MathRoutines::HashString> addressStartsInterpretedAsCalculatorRequest;
 
-  List<unsigned char> idLastWorker;
-
   int activeWorker;
   int64_t timeLastExecutableModification;
   ListReferences<std::string> theProgressReports;
@@ -318,6 +316,8 @@ public:
   // unique [with probability ~1] process id and
   // unique [with probability ~1] non-openSSL random bytes
   // for the child and parent processes.
+  bool CreateProcessMutex();
+  void ComputeActiveWorkerId();
   int Fork();
   void initializeRandomBytes();
   void WriteVersionJSFile();
@@ -348,6 +348,7 @@ public:
   void StopKillAll[[noreturn]](bool attemptToRestart);
   bool RestartIsNeeded();
   void initDates();
+  std::string ToStringWorkerToWorker();
   std::string ToStringLastErrorDescription();
   std::string ToStringStatusActive();
   std::string ToStringStatusAll();

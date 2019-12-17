@@ -22,21 +22,25 @@ class JSData {
 public:
   static const int numEmptyTokensAtStart = 6;
   struct token {
-    static const char tokenUndefined    = 0;
-    static const char tokenNull         = 1;
-    static const char tokenBool         = 2;
-    static const char tokenFloat        = 3;
-    static const char tokenString       = 4;
-    static const char tokenArray        = 5;
-    static const char tokenObject       = 6;
-    static const char tokenOpenBrace    = 7;
-    static const char tokenCloseBrace   = 8;
-    static const char tokenOpenBracket  = 9;
-    static const char tokenCloseBracket = 10;
-    static const char tokenColon        = 11;
-    static const char tokenComma        = 12;
-    static const char tokenError        = 13;
-    static const char tokenLargeInteger = 14;
+    static const char tokenUndefined                = 0;
+    static const char tokenNull                     = 1;
+    static const char tokenBool                     = 2;
+    static const char tokenFloat                    = 3;
+    static const char tokenString                   = 4;
+    static const char tokenArray                    = 5;
+    static const char tokenObject                   = 6;
+    static const char tokenLargeInteger             = 7;
+    static const char tokenOpenBrace                = 8;
+    static const char tokenCloseBrace               = 9;
+    static const char tokenOpenBracket              = 10;
+    static const char tokenCloseBracket             = 11;
+    static const char tokenColon                    = 12;
+    static const char tokenComma                    = 13;
+    static const char tokenError                    = 14;
+    static const char tokenBackslash                = 15;
+    static const char tokenQuoteUnclosedEscapeAtEnd = 16;
+    static const char tokenQuoteUnclosedStandard    = 17;
+    static const char tokenUnknown                  = 18;
   };
   char theType;
   bool theBoolean;
@@ -112,10 +116,35 @@ public:
     bool useHTML = false,
     bool convertNonASCIIStringsToHex = false
   ) const;
-  bool readstring(const std::string& json, bool stringsWerePercentEncoded, std::stringstream* commentsOnFailure = nullptr);
-  void TryToComputeType();
-  static bool Tokenize(const std::string& input, List<JSData>& output);
+  bool TokenizePrependOneDummyElement(
+    const std::string& input,
+    List<JSData>& output,
+    std::stringstream* commentsOnFailure
+  );
+  static bool ConvertTwoByteHexToChar(
+    char inputLeft, char inputRight, char& output, std::stringstream* commentsOnFailure
+  );
+  static bool readstringConsumeFourHexAppendUnicode(
+    std::string& output,
+    unsigned& currentIndex,
+    const std::string& input,
+    std::stringstream* commentsOnFailure
+  );
+  bool readstringConsumeNextCharacter(
+    List<JSData>& readingStack,
+    unsigned& currentIndex,
+    const std::string& input,
+    std::stringstream* commentsOnFailure
+  );
+  bool readstring(const std::string& json, std::stringstream* commentsOnFailure = nullptr);
+  bool TryToComputeType(std::stringstream* commentsOnFailure);
   static void FilterColumnsJSDataObjectList(List<JSData>& inputOutput, const List<std::string>& columnsToPreserve);
+  class Test {
+  public:
+    static bool All();
+    static bool TestRecode();
+    static bool TestBadInput();
+  };
 };
 
 std::ostream& operator<<(std::ostream& out, const JSData& data);

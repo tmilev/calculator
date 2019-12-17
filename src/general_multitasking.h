@@ -35,6 +35,7 @@ private:
   int lastLockerThread;
   bool flagDeallocated;
   bool flagInitialized;
+  static std::string noLockId;
   void operator=(const MutexRecursiveWrapper& other);
   MutexRecursiveWrapper(const MutexRecursiveWrapper& other);
 public:

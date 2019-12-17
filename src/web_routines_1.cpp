@@ -770,7 +770,7 @@ bool Crypto::VerifyJWTagainstKnownKeys(
   }
   std::string keyIDstring = "";
   JSData header;
-  if (!header.readstring(theToken.headerJSON, false)) {
+  if (!header.readstring(theToken.headerJSON)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Couldn't load JSON from the user token.";
     }
@@ -877,7 +877,7 @@ bool WebCrawler::VerifyRecaptcha(
   this->FetchWebPage(commentsOnFailure, commentsGeneralSensitive);
   std::string response = this->bodyReceiveD;
   JSData theJSparser;
-  if (!theJSparser.readstring(response, false, commentsOnFailure)) {
+  if (!theJSparser.readstring(response, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "<span style =\"color:red\">"
       << "<b>" << "Failed to extract response token from captcha verification. "

@@ -1170,7 +1170,7 @@ JSData Database::ToJSONDatabaseFetch(const std::string& incomingLabels) {
   JSData result;
   JSData labels;
   std::stringstream commentsOnFailure;
-  if (!labels.readstring(incomingLabels, false, &commentsOnFailure)) {
+  if (!labels.readstring(incomingLabels, &commentsOnFailure)) {
     commentsOnFailure << "Failed to parse labels from: "
     << StringRoutines::StringTrimToLengthForDisplay(incomingLabels, 100);
     result["error"] = commentsOnFailure.str();

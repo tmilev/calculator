@@ -10,6 +10,7 @@ int mainTest(List<std::string>& inputArguments) {
   std::cout << "\n!!!!!Enter main test\n";
   (void) inputArguments;
   // theWebServer.InitializeGlobalVariables();
+  JSData::Test::All();
   ASNObject::initializeNonThreadSafe();
   PrivateKeyRSA::Test::All();
   Crypto::Test::All();

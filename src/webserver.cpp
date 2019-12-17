@@ -543,7 +543,7 @@ std::string WebWorker::GetDatabaseDeleteOneItem() {
   std::string inputEncoded = theGlobalVariables.GetWebInput("item");
   std::string inputString = HtmlRoutines::ConvertURLStringToNormal(inputEncoded, false);
   JSData inputParsed;
-  if (!inputParsed.readstring(inputString, false, &commentsStream)) {
+  if (!inputParsed.readstring(inputString, &commentsStream)) {
     commentsStream << "Failed to parse input string. ";
     return commentsStream.str();
   }
@@ -1397,7 +1397,7 @@ int WebWorker::GetIndexIfRunningWorkerId(
     outputComputationStatus[WebAPI::result::error] = commentsOnError.str();
     return - 1;
   }
-  if (!outputComputationStatus.readstring(computationResult, false, nullptr)) {
+  if (!outputComputationStatus.readstring(computationResult)) {
     commentsOnError << "I found your worker id: "
     << workerId << " but I could not parse its JSON status. "
     << "This is likely an internal server error. ";
@@ -2993,8 +2993,8 @@ void WebWorker::PauseIfRequested() {
   this->PauseWorker.Unlock();
 }
 
-void WebWorker::ResetMutexProcessesNoAllocation() {
-  MacroRegisterFunctionWithName("WebWorker::ResetMutexProcessesNoAllocation");
+void WebWorker::ResetMutexProcesses() {
+  MacroRegisterFunctionWithName("WebWorker::ResetMutexProcesses");
   this->PauseWorker.ResetNoAllocation();
   this->writingReportFile.ResetNoAllocation();
 }
@@ -3295,6 +3295,12 @@ bool WebServer::EmergencyRemoval_LastCreatedWorker() {
   return false;
 }
 
+std::string WebServer::ToStringWorkerToWorker() {
+  std::stringstream out;
+  out << "W<->W" << this->activeWorker + 1 << ": ";
+  return out.str();
+}
+
 bool WebServer::CreateNewActiveWorker() {
   MacroRegisterFunctionWithName("WebServer::CreateNewActiveWorker");
   if (this->activeWorker != - 1) {
@@ -3323,24 +3329,13 @@ bool WebServer::CreateNewActiveWorker() {
   }
   this->GetActiveWorker().Release();
   this->theWorkers[this->activeWorker].flagInUsE = false; //<-until everything is initialized, we cannot be in use.
-  std::stringstream stowstream, wtosStream, wtowStream;
+  std::stringstream stowstream, wtosStream;
   stowstream << "S->W" << this->activeWorker + 1 << ": ";
   wtosStream << "W" << this->activeWorker + 1 << "->S: ";
-  wtowStream << "W<->W" << this->activeWorker + 1 << ": ";
   std::string stow = stowstream.str();
   std::string wtos = wtosStream.str();
-  std::string wtow = wtowStream.str();
+  std::string wtow = this->ToStringWorkerToWorker();
   WebWorker& worker = this->GetActiveWorker();
-  if (!worker.writingReportFile.CreateMe(stow + "output file mutex", false, true)) {
-    logPlumbing << "Failed to create process mutex: "
-    << worker.writingReportFile.name << "\n";
-    return this->EmergencyRemoval_LastCreatedWorker();
-  }
-  if (!worker.PauseWorker.CreateMe(stow + "pause mutex", false, true)) {
-    logPlumbing << "Failed to create process mutex: "
-    << worker.PauseWorker.name << "\n";
-    return this->EmergencyRemoval_LastCreatedWorker();
-  }
   if (!worker.workerToWorkerRequestIndicator.CreateMe(wtow + "request-indicator", false, false, false, true)) {
     logPlumbing << "Failed to create pipe: "
     << worker.workerToWorkerRequestIndicator.name << "\n";
@@ -3750,11 +3745,13 @@ void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress)
 }
 
 void WebServer::MarkChildNotInUse(int childIndex) {
-  this->theWorkers[childIndex].flagInUsE = false;
+  WebWorker& worker = this->theWorkers[childIndex];
+  worker.flagInUsE = false;
   this->currentlyConnectedAddresses.SubtractMonomial(
-    this->theWorkers[childIndex].userAddress, 1
+    worker.userAddress, 1
   );
-  this->workerIds.RemoveKey(this->theWorkers[childIndex].workerId);
+  this->workerIds.RemoveKey(worker.workerId);
+  worker.workerId = "";
 }
 
 void WebServer::ProcessOneChildMessage(int childIndex, int& outputNumInUse) {
@@ -3762,7 +3759,7 @@ void WebServer::ProcessOneChildMessage(int childIndex, int& outputNumInUse) {
   this->MarkChildNotInUse(childIndex);
   std::stringstream commentsOnFailure;
   JSData workerMessage;
-  if (!workerMessage.readstring(messageString, false, &commentsOnFailure)) {
+  if (!workerMessage.readstring(messageString, &commentsOnFailure)) {
     logServer << logger::red << "Worker "
     << childIndex + 1 << " sent corrupted result message: "
     << messageString << ". Marking for reuse. " << logger::endL;
@@ -4301,14 +4298,6 @@ int WebServer::Run() {
     }
     if (incomingPID < 0) {
       logProcessKills << logger::red << " FAILED to spawn a child process. " << logger::endL;
-    } else {
-      this->GetActiveWorker().workerId = Crypto::ConvertListUnsignedCharsToHex(this->idLastWorker);
-      this->workerIds.SetKeyValue(this->GetActiveWorker().workerId, this->activeWorker);
-      if (this->workerIds.size() > 2 * this->theWorkers.size) {
-        logServer << logger::red
-        << "Warning: worker ids exceeds twice the number of workers. "
-        << "This may be a memory leak. " << logger::endL;
-      }
     }
     this->GetActiveWorker().ProcessPID = incomingPID;
     if (this->GetActiveWorker().ProcessPID == 0) {
@@ -4368,7 +4357,6 @@ int WebWorker::Run() {
   if (this->connectedSocketID == - 1) {
     crash << "Worker::Run() started on a connecting with ID equal to - 1. " << crash;
   }
-  this->ResetMutexProcessesNoAllocation();
   std::stringstream processNameStream;
   processNameStream << "W" << this->indexInParent + 1 << ": ";
   MutexProcess::currentProcessName = processNameStream.str();
@@ -4959,7 +4947,7 @@ bool GlobalVariables::ConfigurationLoad() {
     return false;
   }
   if (!theGlobalVariables.configuration.readstring(
-    theGlobalVariables.configurationFileContent, false, &out
+    theGlobalVariables.configurationFileContent, &out
   )) {
     logServer << logger::red << "Failed to read configuration. " << out.str() << logger::endL;
     return false;

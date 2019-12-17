@@ -54,6 +54,8 @@ void PipePrimitive::Release() {
   this->lastRead.SetSize(0);
 }
 
+std::string MutexProcess::lockContent = "!";
+
 void MutexProcess::Release() {
   this->lockPipe.Release();
   this->name = "";
@@ -117,8 +119,7 @@ bool PipePrimitive::CreateMe(
   return true;
 }
 
-bool MutexProcess::CreateMe(
-  const std::string& inputName,
+bool MutexProcess::CreateMe(const std::string& inputName,
   bool restartServerOnFail,
   bool dontCrashOnFail
 ) {
@@ -133,7 +134,7 @@ bool MutexProcess::CreateMe(
 
 bool MutexProcess::ResetNoAllocation() {
   if (
-    this->lockPipe.WriteOnceIfFailThenCrash("!", 0, false, true)
+    this->lockPipe.WriteOnceIfFailThenCrash(MutexProcess::lockContent, 0, false, true)
   ) {
     return true;
   }
@@ -150,7 +151,8 @@ bool MutexProcess::Lock() {
   this->flagLockHeldByAnotherThread = true;
   bool success = this->lockPipe.ReadOnceIfFailThenCrash(false, true);
   if (!success) {
-    logBlock << logger::red << "Error: " << this->currentProcessName << " failed to lock pipe " << this->ToString() << logger::endL;
+    logBlock << logger::red << "Error: " << this->currentProcessName
+    << " failed to lock pipe " << this->ToString() << logger::endL;
   }
   this->flagLockHeldByAnotherThread = false;
   return success;
@@ -158,9 +160,10 @@ bool MutexProcess::Lock() {
 
 bool MutexProcess::Unlock() {
   MacroRegisterFunctionWithName("MutexProcess::Unlock");
-  bool success = this->lockPipe.WriteOnceIfFailThenCrash("!", 0, false, true);
+  bool success = this->lockPipe.WriteOnceIfFailThenCrash(MutexProcess::lockContent, 0, false, true);
   if (!success) {
-    logBlock << logger::red << "Error: " << this->currentProcessName << " failed to unlock pipe " << this->ToString() << logger::endL;
+    logBlock << logger::red << "Error: " << this->currentProcessName
+    << " failed to unlock pipe " << this->ToString() << logger::endL;
   }
   return success;
 }
@@ -175,7 +178,11 @@ std::string MutexProcess::ToString() const {
 }
 
 int Pipe::WriteWithTimeoutViaSelect(
-  int theFD, const std::string& input, int timeOutInSeconds, int maxNumTries, std::stringstream* commentsOnFailure
+  int theFD,
+  const std::string& input,
+  int timeOutInSeconds,
+  int maxNumTries,
+  std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("Pipe::WriteWithTimeoutViaSelect");
   fd_set theFDcontainer;
@@ -189,11 +196,13 @@ int Pipe::WriteWithTimeoutViaSelect(
   std::stringstream failStream;
   do {
     if (numFails > maxNumTries) {
-      failStream << maxNumTries << " failed or timed-out select attempts on file descriptor: " << theFD;
+      failStream << maxNumTries
+      << " failed or timed-out select attempts on file descriptor: " << theFD;
       break;
     }
     numSelected = select(theFD + 1, nullptr, &theFDcontainer, nullptr, &timeOut);
-    failStream << "While select-writing on file descriptor: " << theFD << ", select failed. Error message: "
+    failStream << "While select-writing on file descriptor: "
+    << theFD << ", select failed. Error message: "
     << strerror(errno) << ". \n";
     numFails ++;
   } while (numSelected < 0);
@@ -636,6 +645,7 @@ void Pipe::ReadOnce(bool restartServerOnFail, bool dontCrashOnFail) {
   this->CheckConsistency();
   MutexRecursiveWrapper& safetyFirst = theGlobalVariables.MutexWebWorkerPipeReadLock;
   MutexLockGuard guard(safetyFirst); // guard from other threads.
+  MutexProcessLockGuard lock(this->theMutexPipe);
   this->theMutexPipe.Lock();
   this->thePipe.ReadOnceIfFailThenCrash(restartServerOnFail, dontCrashOnFail);
   this->theMutexPipe.Unlock();

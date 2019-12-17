@@ -1,13 +1,11 @@
 {
-  "HTMLCommon":null,
-  "calculatorHTML":null,
   "serverDetailedLog":null,
   "autoUnitTest":null,
-  "disableDatabaseLogEveryoneAsAdmin":false,
+  "disableDatabaseLogEveryoneAsAdmin":null,
   "serverAutoMonitor":null,
   "serverRAMCachingOff":null,
   "runServerOnEmptyCommandLine":null,
-  "millisecondsReplyAfterComputationDefault":null,
+  "millisecondsReplyAfterComputation":5000,
   "processMonitoringBanned":false,
   "builtInTLSAvailable":null,
   "monitorPingTime":10,
@@ -34,7 +32,5 @@
   "LaTeX-materials/":"../LaTeX-materials/",
   "slides-video/":"../slides-video/",
   "freecalc/":"../freecalc/",
-  "mathJaxSetup":"Check for mathjax on every boot.",
-  "favicon.ico":"html-common/favicon.ico",
-  "millisecondsReplyAfterComputation":5000
+  "favicon.ico":"calculator-html/favicon.ico"
 }

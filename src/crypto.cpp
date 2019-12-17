@@ -1486,7 +1486,7 @@ bool Crypto::LoadOneKnownCertificate(
     *commentsGeneral << "Loading from: " << input;
   }
   JSData certificateJSON;
-  if (!certificateJSON.readstring(input, false, commentsOnFailure)) {
+  if (!certificateJSON.readstring(input, commentsOnFailure)) {
     return false;
   }
   PublicKeyRSA currentCert;

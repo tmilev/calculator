@@ -156,5 +156,6 @@ SOURCES += \
     calculator_parsing_routines_test.cpp \
     database_fallback_json.cpp \
     main.cpp \
-    web_api.cpp
+    web_api.cpp \
+    json_test.cpp
 

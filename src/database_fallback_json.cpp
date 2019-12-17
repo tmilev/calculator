@@ -151,7 +151,9 @@ bool Database::FallBack::FindIndexOneNoLocks(
   return true;
 }
 
-bool Database::FallBack::FetchCollectionNames(List<std::string>& output, std::stringstream* commentsOnFailure) {
+bool Database::FallBack::FetchCollectionNames(
+  List<std::string>& output, std::stringstream* commentsOnFailure
+) {
   MutexProcessLockGuard guardDB(this->access);
   if (this->ReadDatabase(commentsOnFailure)) {
     return false;
@@ -258,5 +260,5 @@ bool Database::FallBack::ReadDatabase(std::stringstream* commentsOnFailure) {
       return false;
     }
   }
-  return this->reader.readstring(theDatabase, false, commentsOnFailure);
+  return this->reader.readstring(theDatabase, commentsOnFailure);
 }

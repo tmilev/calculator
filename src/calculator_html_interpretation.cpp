@@ -1267,7 +1267,7 @@ std::string WebAPIResponse::AddTeachersSections() {
   }
   std::string input = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("teachersAndSections"), false);
   JSData inputParsed;
-  if (!inputParsed.readstring(input, false, &out)) {
+  if (!inputParsed.readstring(input, &out)) {
     out << "<b style='color:red'>Failed to interpret your input. </b>";
     return out.str();
   }

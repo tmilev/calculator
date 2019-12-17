@@ -24,7 +24,7 @@ void WebServer::initializeRandomBytes() {
     crash << "The number of system random bytes must not exceed 256. " << crash;
   }
   List<unsigned char>& output = theGlobalVariables.randomBytesCurrent;
-  output.SetSize(theGlobalVariables.numberOfRandomBytes);
+  output.SetSize(static_cast<signed>(theGlobalVariables.numberOfRandomBytes));
   // According to the
   // documentation of getrandom, the following call
   // must not block or return fewer than the requested bytes in Linux
@@ -39,9 +39,42 @@ void WebServer::initializeRandomBytes() {
   }
 }
 
-int WebServer::Fork() {
-  Crypto::GetRandomBytesSecureInternalMayLeaveTracesInMemory(this->idLastWorker, 32);
+bool WebServer::CreateProcessMutex() {
+  WebWorker& worker = this->GetActiveWorker();
+  if (!worker.PauseWorker.CreateMe(this->ToStringWorkerToWorker() + "pause mutex", false, true)) {
+    logPlumbing << "Failed to create process mutex: "
+    << worker.PauseWorker.name << "\n";
+    return false;
+  }
+  if (!worker.writingReportFile.CreateMe(this->ToStringWorkerToWorker() + "output file mutex", false, true)) {
+    logPlumbing << "Failed to create process mutex: "
+    << worker.writingReportFile.name << "\n";
+    return false;
+  }
+  return true;
+}
 
+void WebServer::ComputeActiveWorkerId() {
+  List<unsigned char> incomingId;
+  Crypto::GetRandomBytesSecureInternalMayLeaveTracesInMemory(incomingId, 32);
+  WebWorker& worker = this->GetActiveWorker();
+  if (worker.workerId != "") {
+    this->workerIds.RemoveKey(worker.workerId);
+  }
+  worker.workerId = Crypto::ConvertListUnsignedCharsToHex(incomingId);
+  this->workerIds.SetKeyValue(worker.workerId, this->activeWorker);
+  if (this->workerIds.size() > 2 * this->theWorkers.size) {
+    logServer << logger::red
+    << "Warning: worker ids exceeds twice the number of workers. "
+    << "This may be a memory leak. " << logger::endL;
+  }
+}
+
+int WebServer::Fork() {
+  if (!this->CreateProcessMutex()) {
+    return - 1;
+  }
+  this->ComputeActiveWorkerId();
   // timer taken at server level:
   int64_t millisecondsAtFork = theGlobalVariables.GetElapsedMilliseconds();
   int result = fork();
@@ -69,7 +102,7 @@ int WebServer::Fork() {
   } else if (result == 0) {
     // child process
     // lose 256 bits of entropy from the server:
-    theGlobalVariables.randomBytesCurrent.SetSize(theGlobalVariables.maximumExtractedRandomBytes);
+    theGlobalVariables.randomBytesCurrent.SetSize(static_cast<signed>(theGlobalVariables.maximumExtractedRandomBytes));
     // Forget previous random bytes, and gain a little extra entropy:
     Crypto::acquireAdditionalRandomness(millisecondsAtFork);
 

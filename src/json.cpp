@@ -299,29 +299,26 @@ bool JSData::IsValidElement() {
   this->theType == JSData::token::tokenObject;
 }
 
-void JSData::TryToComputeType() {
-  if (this->theType != JSData::token::tokenUndefined) {
-    return;
-  }
-  if (this->theString == "") {
-    return;
+bool JSData::TryToComputeType(std::stringstream* commentsOnFailure) {
+  if (this->theType != JSData::token::tokenUnknown) {
+    return true;
   }
   if (this->theString == "null") {
     this->reset();
     this->theType = JSData::token::tokenNull;
-    return;
+    return true;
   }
   if (this->theString == "true") {
     this->reset();
     this->theType = JSData::token::tokenBool;
     this->theBoolean = true;
-    return;
+    return true;
   }
   if (this->theString == "false") {
     this->reset();
     this->theType = JSData::token::tokenBool;
     this->theBoolean = false;
-    return;
+    return true;
   }
   if (this->theString.size() > 0) {
     if (this->theString[0] == '-' || MathRoutines::isADigit(this->theString[0])) {
@@ -334,104 +331,180 @@ void JSData::TryToComputeType() {
           this->theType = JSData::token::tokenLargeInteger;
           this->theInteger.GetElement() = theInt;
           this->theString = "";
-          return;
+          return true;
         }
       }
       this->theFloat = std::stod(this->theString);
       this->theType = JSData::token::tokenFloat;
       this->theString = "";
-      return;
+      return true;
     }
   }
-  this->theType = JSData::token::tokenString;
+  if (commentsOnFailure != nullptr) {
+    *commentsOnFailure << "Failed to compute type of JSData element. ";
+  }
+  return false;
 }
 
-bool JSData::Tokenize(const std::string& input, List<JSData>& output) {
+bool JSData::ConvertTwoByteHexToChar(
+  char inputLeft, char inputRight, char& output, std::stringstream* commentsOnFailure
+) {
+  char leftHex = MathRoutines::ConvertHumanReadableHexToCharValue(inputLeft);
+  if (leftHex < 0) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to interpret " << inputLeft << " as a hex digit. ";
+    }
+    return false;
+  }
+  char rightHex = MathRoutines::ConvertHumanReadableHexToCharValue(inputRight);
+  if (rightHex < 0) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to interpret " << inputRight << " as a hex digit. ";
+    }
+    return false;
+  }
+  output = leftHex * 16 + rightHex;
+  return true;
+}
+
+bool JSData::readstringConsumeFourHexAppendUnicode(
+  std::string& output,
+  unsigned int& currentIndex,
+  const std::string& input,
+  std::stringstream* commentsOnFailure
+) {
+  if (currentIndex + 3 >= input.size()) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Unicode sequence \\u at position " << currentIndex << " exceeds json boundaries. ";
+    }
+    return false;
+  }
+  for (int i = 0; i < 2; i ++) {
+    char left = input[currentIndex];
+    currentIndex ++;
+    char right = input[currentIndex];
+    currentIndex ++;
+    char next = 0;
+    if (!JSData::ConvertTwoByteHexToChar(left, right, next, commentsOnFailure)) {
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure << "Failed to read hex characters at positions "
+        << currentIndex - 2 << ", " << currentIndex - 1 << ". ";
+      }
+      return false;
+    }
+    output.push_back(next);
+  }
+  return true;
+}
+
+bool JSData::readstringConsumeNextCharacter(
+  List<JSData>& readingStack,
+  unsigned& currentIndex,
+  const std::string& input,
+  std::stringstream* commentsOnFailure
+) {
+  JSData& last = *readingStack.LastObject();
+  char next = input[currentIndex];
+  if (last.theType == JSData::token::tokenQuoteUnclosedStandard) {
+    if (next == '\\') {
+      last.theType = JSData::token::tokenQuoteUnclosedEscapeAtEnd;
+      return true;
+    }
+    if (next == '"') {
+      last.theType = JSData::token::tokenString;
+      return true;
+    }
+    last.theString.push_back(next);
+    return true;
+  }
+  if (last.theType == JSData::token::tokenQuoteUnclosedEscapeAtEnd) {
+    bool result = true;
+    switch (next) {
+      case 'u':
+        currentIndex ++;
+        result = JSData::readstringConsumeFourHexAppendUnicode(last.theString, currentIndex, input, commentsOnFailure);
+        break;
+      case 'n':
+        last.theString.push_back('\n');
+        break;
+      case '\\':
+        last.theString.push_back('\\');
+        break;
+      case 't':
+        last.theString.push_back('\t');
+        break;
+      case '"':
+        last.theString.push_back('"');
+        break;
+      default:
+        last.theString.push_back('\\');
+        last.theString.push_back(next);
+        break;
+    }
+    last.theType = JSData::token::tokenQuoteUnclosedStandard;
+    return result;
+  }
+  if (next == ' ' || next == '\r' || next == '\n') {
+    // empty space ignored
+    return true;
+  }
+  JSData incoming;
+  if (next == '"') {
+    incoming.theType = JSData::token::tokenQuoteUnclosedStandard;
+    readingStack.AddOnTop(incoming);
+    return true;
+  }
+  switch (next) {
+    case '{':
+      incoming.theType = JSData::token::tokenOpenBrace;
+      break;
+    case '}':
+      incoming.theType = JSData::token::tokenCloseBrace;
+      break;
+    case '[':
+      incoming.theType = JSData::token::tokenOpenBracket;
+      break;
+    case ']':
+      incoming.theType = JSData::token::tokenCloseBracket;
+      break;
+    case ':':
+      incoming.theType = JSData::token::tokenColon;
+      break;
+    case ',':
+      incoming.theType = JSData::token::tokenComma;
+      break;
+    default:
+      if (last.theType == JSData::token::tokenUnknown) {
+        last.theString.push_back(next);
+        return true;
+      }
+      incoming.theType = JSData::token::tokenUnknown;
+      incoming.theString = next;
+      break;
+  }
+  readingStack.AddOnTop(incoming);
+  return true;
+}
+
+bool JSData::TokenizePrependOneDummyElement(
+  const std::string& input,
+  List<JSData>& output,
+  std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("JSData::TokenizePrependOneDummyElement");
   output.SetSize(0);
   output.SetExpectedSize(static_cast<int>(input.size()));
-  JSData currentElt;
-  bool inQuotes = false;
-  bool previousIsBackSlash = false;
+  JSData emptyElt;
+  output.AddOnTop(emptyElt);
   for (unsigned i = 0; i < input.size(); i ++) {
-    if (input[i] == '"') {
-      if (currentElt.theType == JSData::token::tokenString) {
-        if (previousIsBackSlash) {
-          currentElt.theString[currentElt.theString.size() - 1] = '\"';
-          previousIsBackSlash = false;
-        } else {
-          output.AddOnTop(currentElt);
-          currentElt.reset();
-          inQuotes = false;
-        }
-      } else {
-        currentElt.TryToComputeType();
-        if (currentElt.theType != JSData::token::tokenUndefined) {
-          output.AddOnTop(currentElt);
-        }
-        currentElt.reset();
-        currentElt.theType = JSData::token::tokenString;
-        inQuotes = true;
-        previousIsBackSlash = false;
-      }
-      continue;
+    if (!this->readstringConsumeNextCharacter(output, i, input, commentsOnFailure)) {
+      return false;
     }
-    if (inQuotes && currentElt.theType == JSData::token::tokenString) {
-      if (input[i] == '\\') {
-        if (previousIsBackSlash) {
-          previousIsBackSlash = false;
-        } else {
-          previousIsBackSlash = true;
-          currentElt.theString += '\\';
-        }
-        continue;
-      }
+  }
+  for (int i = 1; i < output.size; i ++) {
+    if (!output[i].TryToComputeType(commentsOnFailure)) {
+      return false;
     }
-    previousIsBackSlash = false;
-    if (inQuotes && currentElt.theType == JSData::token::tokenString) {
-      currentElt.theString += input[i];
-      continue;
-    }
-    if (input[i] == ' ' || input[i] == '\r' || input[i] == '\n') {
-      currentElt.TryToComputeType();
-      if (currentElt.theType != JSData::token::tokenUndefined) {
-        output.AddOnTop(currentElt);
-        currentElt.reset();
-      }
-      continue;
-    }
-    if (
-      input[i] == '{' || input[i] == '}' ||
-      input[i] == '[' || input[i] == ']' ||
-      input[i] == ':' || input[i] ==  ','
-    ) {
-      currentElt.TryToComputeType();
-      if (currentElt.theType != JSData::token::tokenUndefined) {
-        output.AddOnTop(currentElt);
-      }
-      currentElt.reset();
-      if (input[i] == '{') {
-        currentElt.theType = JSData::token::tokenOpenBrace;
-      }
-      if (input[i] == '[') {
-        currentElt.theType = JSData::token::tokenOpenBracket;
-      }
-      if (input[i] == '}') {
-        currentElt.theType = JSData::token::tokenCloseBrace;
-      }
-      if (input[i] == ']') {
-        currentElt.theType = JSData::token::tokenCloseBracket;
-      }
-      if (input[i] == ':') {
-        currentElt.theType = JSData::token::tokenColon;
-      }
-      if (input[i] == ',') {
-        currentElt.theType = JSData::token::tokenComma;
-      }
-      output.AddOnTop(currentElt);
-      currentElt.reset();
-      continue;
-    }
-    currentElt.theString += input[i];
   }
   return true;
 }
@@ -473,29 +546,27 @@ bool JSData::MergeInMe(const JSData& input, std::stringstream* commentsOnFailure
 }
 
 bool JSData::readstring(
-  const std::string& json, bool stringsWerePercentEncoded, std::stringstream* commentsOnFailure
+  const std::string& json, std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("JSData::readstring");
   this->reset();
   List<JSData> theTokenS;
-  JSData::Tokenize(json, theTokenS);
-  if (theTokenS.size == 0) {
+  if (!JSData::TokenizePrependOneDummyElement(json, theTokenS, commentsOnFailure)) {
     return false;
   }
-  if (stringsWerePercentEncoded) {
-    for (int i = 0; i < theTokenS.size; i ++) {
-      if (theTokenS[i].theType == JSData::token::tokenString) {
-        theTokenS[i].theString = HtmlRoutines::ConvertURLStringToNormal(theTokenS[i].theString, false);
-      }
+  if (theTokenS.size == 1) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "The empty string is not valid json.";
     }
+    return false;
   }
   List<JSData> readingStack;
   JSData emptyElt;
-  for (int i = 0; i < JSData::numEmptyTokensAtStart; i ++) {
+  for (int i = 0; i < this->numEmptyTokensAtStart; i ++) {
     readingStack.AddOnTop(emptyElt);
   }
-  readingStack.AddOnTop(theTokenS[0]);
-  for (int i = 0;;) {
+  readingStack.AddOnTop(theTokenS[1]);
+  for (int i = 1;;) {
     int fourthToLastIndex = readingStack.size - 4; //<- used to avoid compiler warning
     JSData& last = readingStack[fourthToLastIndex + 3];
     JSData& secondToLast = readingStack[fourthToLastIndex + 2];
@@ -567,7 +638,13 @@ bool JSData::readstring(
   if (JSData::numEmptyTokensAtStart < readingStack.size) {
     *this = readingStack[JSData::numEmptyTokensAtStart];
   }
-  return true;
+  bool result = this->IsValidElement();
+  if (!result) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << this->ToString(false) << " does not appear to be valid json. ";
+    }
+  }
+  return result;
 }
 
 std::string JSData::EncodeKeyForMongo(const std::string& input) {
@@ -750,11 +827,48 @@ somestream& JSData::IntoStream(
         out << "</b>";
       }
       return out;
+    case JSData::token::tokenBackslash:
+      if (useHTML) {
+        out << "<b>";
+      }
+      out << "\\backslash";
+      if (useHTML) {
+        out << "</b>";
+      }
+      return out;
+    case JSData::token::tokenQuoteUnclosedEscapeAtEnd:
+      if (useHTML) {
+        out << "<b>";
+      }
+      out << "\\QuoteUnclosedEscapeAtEnd";
+      if (useHTML) {
+        out << "</b>";
+      }
+      return out;
+    case JSData::token::tokenQuoteUnclosedStandard:
+      if (useHTML) {
+        out << "<b>";
+      }
+      out << "\\tokenQuoteUnclosedStandard";
+      if (useHTML) {
+        out << "</b>";
+      }
+      return out;
+
+    case JSData::token::tokenUnknown:
+      if (useHTML) {
+        out << "<b>";
+      }
+      out << "unknown";
+      if (useHTML) {
+        out << "</b>";
+      }
+      return out;
     default:
       break;
   }
   //supposed to be unreachable
-  crash << "Unhandled JSData case. " << crash;
+  crash << "Unhandled JSData case: " << this->theType << crash;
   return out;
 }
 

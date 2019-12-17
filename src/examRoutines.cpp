@@ -359,7 +359,7 @@ bool CalculatorHTML::MergeProblemInfoInDatabaseJSON(
 ) {
   MacroRegisterFunctionWithName("DatabaseRoutines::MergeProblemInfoInDatabase");
   JSData theProblemJSON;
-  if (!theProblemJSON.readstring(incomingProblemInfo, false, &commentsOnFailure)) {
+  if (!theProblemJSON.readstring(incomingProblemInfo, &commentsOnFailure)) {
     return false;
   }
   MapList<std::string, ProblemData, MathRoutines::HashString> incomingProblems;

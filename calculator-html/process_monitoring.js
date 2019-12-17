@@ -35,7 +35,6 @@ Monitor.prototype.progressReport = function() {
   if (this.isFinished) {
     return;
   }
-  this.clearTimeout();
   if (this.isPaused) {
     return;
   }
@@ -60,6 +59,7 @@ Monitor.prototype.clearTimeout = function() {
 Monitor.prototype.callbackPauseRequest = function(input, output) {
   var progressReportContent = "";
   if (input === "") {
+    this.clearTimeout();
     this.currentTimeOutHandler = setTimeout(this.progressReport.bind(this), this.timeIncrement * 1000);
     return;
   }
@@ -96,6 +96,7 @@ Monitor.prototype.callbackPauseRequest = function(input, output) {
     }
     this.isPaused = false;
     indicatorButton.innerHTML = "Pause";
+    this.clearTimeout();
     this.currentTimeOutHandler = setTimeout(this.progressReport.bind(this), this.timeIncrement * 1000);
   }
   progressReportContent += `Refreshing every ${this.timeIncrement} second(s). `;

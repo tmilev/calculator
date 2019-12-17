@@ -562,7 +562,7 @@ bool CalculatorFunctionsGeneral::innerTestJSON(Calculator& theCommands, const Ex
   }
   JSData theData;
   std::stringstream out;
-  if (!theData.readstring(inputString, false, &out)) {
+  if (!theData.readstring(inputString, &out)) {
     return output.AssignValue(out.str(), theCommands);
   }
   out << "Input:<br>" << HtmlRoutines::ConvertStringToHtmlString(inputString, false) << "<hr>Output: <br>"

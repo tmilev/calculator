@@ -77,14 +77,23 @@ class MutexProcess {
 public:
   static std::string currentProcessName;
 
+  static std::string lockContent;
   PipePrimitive lockPipe;
   bool flagLockHeldByAnotherThread;
+  bool flagInitialized;
   std::string name;
-  MemorySaving<MutexRecursiveWrapper> lockThreads; //<- to avoid two threads from the same process blocking the process.
+  MemorySaving<MutexRecursiveWrapper> lockThreads;
+  //<- to avoid two threads from the same process blocking the process.
   bool flagDeallocated;
   std::string ToString() const;
   void Release();
-  bool CreateMe(const std::string& inputName, bool restartServerOnFail, bool dontCrashOnFail);
+  // inputName is the display name of the mutex - something you want
+  // to see in error messages and logs.
+  bool CreateMe(
+    const std::string& inputName,
+    bool restartServerOnFail,
+    bool dontCrashOnFail
+  );
   bool ResetNoAllocation();
 
   bool CheckConsistency();
@@ -108,7 +117,8 @@ public:
   bool Lock();
 
   // Unlock the mutex.
-  // False return indicates a i/o failure.
+  //
+  // False return may indicate an i/o failure.
   // False result should normally be a fatal error but
   // may be handled gracefully for stability reasons.
   bool Unlock();
@@ -122,9 +132,15 @@ public:
   MutexProcess* guarded;
   MutexProcessLockGuard(MutexProcess& input) {
     this->guarded = &input;
-    this->guarded->Lock();
+    if (!this->guarded->Lock()) {
+      this->guarded = nullptr;
+      return;
+    }
   }
   ~MutexProcessLockGuard() {
+    if (this->guarded == nullptr) {
+      return;
+    }
     this->guarded->Unlock();
     this->guarded = nullptr;
   }

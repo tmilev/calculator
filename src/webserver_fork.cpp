@@ -42,12 +42,12 @@ void WebServer::initializeRandomBytes() {
 bool WebServer::CreateProcessMutex() {
   WebWorker& worker = this->GetActiveWorker();
   if (!worker.PauseWorker.CreateMe(this->ToStringWorkerToWorker() + "pause mutex", false, true)) {
-    logPlumbing << "Failed to create process mutex: "
+    logServer << "Failed to create process mutex: "
     << worker.PauseWorker.name << "\n";
     return false;
   }
   if (!worker.writingReportFile.CreateMe(this->ToStringWorkerToWorker() + "output file mutex", false, true)) {
-    logPlumbing << "Failed to create process mutex: "
+    logServer << "Failed to create process mutex: "
     << worker.writingReportFile.name << "\n";
     return false;
   }

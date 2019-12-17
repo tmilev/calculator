@@ -173,12 +173,12 @@ bool WebWorker::ReceiveAllHttpSSL() {
     crash << "Attempting to receive on a socket with ID equal to - 1. " << crash;
   }
   struct timeval tv; //<- code involving tv taken from stackexchange
-  tv.tv_sec = 5;  // 5 Secs Timeout
+  tv.tv_sec = 3;  // 3 Secs Timeout
   tv.tv_usec = 0;  // Not init'ing this can cause strange errors
   setsockopt(this->connectedSocketID, SOL_SOCKET, SO_RCVTIMEO, static_cast<void*>(&tv), sizeof(timeval));
   std::string errorString;
   int numFailedReceives = 0;
-  int maxNumFailedReceives = 3;
+  int maxNumFailedReceives = 2;
   double numSecondsAtStart = theGlobalVariables.GetElapsedSeconds();
   int numBytesInBuffer = - 1;
   List<char>& readBuffer = this->parent->theTLS.readBuffer;
@@ -240,7 +240,7 @@ bool WebWorker::ReceiveAllHttpSSL() {
   while (static_cast<signed>(this->messageBody.size()) < this->ContentLength) {
     if (theGlobalVariables.GetElapsedSeconds() - numSecondsAtStart > 180) {
       this->error = "Receiving bytes timed out (180 seconds).";
-      logIO << this->error << logger::endL;
+      logWorker << this->error << logger::endL;
       this->displayUserInput = this->error;
       return false;
     }
@@ -265,7 +265,7 @@ bool WebWorker::ReceiveAllHttpSSL() {
         continue;
       }
       this->error = "Error fetching message body: " + this->parent->ToStringLastErrorDescription();
-      logIO << this->error << logger::endL;
+      logWorker << this->error << logger::endL;
       this->displayUserInput = this->error;
       return false;
     }
@@ -281,7 +281,7 @@ bool WebWorker::ReceiveAllHttpSSL() {
     out << "The message-body received by me had length " << this->messageBody.size()
     << " yet I expected a message of length " << this->ContentLength << ". More details follow. "
     << this->ToStringMessageFull();
-    logIO << out.str() << logger::endL;
+    logWorker << out.str() << logger::endL;
   }
   return true;
 }
@@ -820,7 +820,7 @@ void WebWorker::WriteAfterTimeoutProgress(const std::string& input, bool forceFi
   this->PauseIfRequested();
   MacroRegisterFunctionWithName("WebWorker::WriteAfterTimeoutProgress");
   if (!this->workerToWorkerRequestIndicator.ReadOnceIfFailThenCrash(false, true)) {
-    logIO << logger::red << "Failed to read non-blocking worker-to-worker pipe. " << logger::endL;
+    logWorker << logger::red << "Failed to read non-blocking worker-to-worker pipe. " << logger::endL;
     return;
   }
   if (this->workerToWorkerRequestIndicator.lastRead.size == 0 && !forceFileWrite) {
@@ -981,35 +981,35 @@ void WebWorker::AttemptUnknownRequestErrorCorrection() {
   if (this->requestTypE != this->requestUnknown) {
     return;
   }
-  logIO << logger::red << "Unknown request. " << logger::endL;
-  logIO << logger::blue << "Message head length: " << this->messageHead.size() << logger::endL;
+  logWorker << logger::red << "Unknown request. " << logger::endL;
+  logWorker << logger::blue << "Message head length: " << this->messageHead.size() << logger::endL;
   std::string messageHeadHexed = Crypto::ConvertStringToHex(this->messageHead, 100, false);
-  logIO << HtmlRoutines::ConvertStringToHtmlStringRestrictSize(messageHeadHexed, false, 300) << logger::endL;
-  logIO << logger::orange << "Message body length: " << this->messageBody.size() << ". " << logger::endL;
-  logIO << HtmlRoutines::ConvertStringToHtmlStringRestrictSize(this->messageBody, false, 300) << logger::endL;
-  logIO << logger::green << "Attempting to correct unknown request.\n";
+  logWorker << HtmlRoutines::ConvertStringToHtmlStringRestrictSize(messageHeadHexed, false, 300) << logger::endL;
+  logWorker << logger::orange << "Message body length: " << this->messageBody.size() << ". " << logger::endL;
+  logWorker << HtmlRoutines::ConvertStringToHtmlStringRestrictSize(this->messageBody, false, 300) << logger::endL;
+  logWorker << logger::green << "Attempting to correct unknown request.\n";
   if (this->messageBody.size() == 0) {
     if (*this->theMessageHeaderStrings.LastObject() != "\n") {
-      logIO << logger::green
+      logWorker << logger::green
       << "Message body set to last message chunk.\n";
       this->messageBody = *this->theMessageHeaderStrings.LastObject();
     }
   }
   if (this->messageBody.size() != 0) {
-    logIO << "Request set to: POST\n";
+    logWorker << "Request set to: POST\n";
     this->requestTypE = this->requestPost;
   } else {
-    logIO << "Request set to: GET\n";
+    logWorker << "Request set to: GET\n";
     this->requestTypE = this->requestGet;
   }
   if (this->addressGetOrPost == "") {
-    logIO << "Address set to: " << theGlobalVariables.DisplayNameExecutable << "\n";
+    logWorker << "Address set to: " << theGlobalVariables.DisplayNameExecutable << "\n";
     this->addressGetOrPost = theGlobalVariables.DisplayNameExecutable;
   }
-  logIO << logger::blue
+  logWorker << logger::blue
   << "Unrecognized message head, length: " << this->messageHead.size() << ".\n";
-  logIO << logger::red << "Message body length: " << this->messageBody.size() << ". ";
-  logIO << logger::endL;
+  logWorker << logger::red << "Message body length: " << this->messageBody.size() << ". ";
+  logWorker << logger::endL;
 }
 
 bool WebWorker::ReceiveAllHttp() {
@@ -1050,15 +1050,15 @@ bool WebWorker::ReceiveAllHttp() {
       << ". 5+ failed receives so far, aborting. ";
       this->displayUserInput = out.str();
       this->error = out.str();
-      logIO << out.str() << logger::endL;
+      logWorker << out.str() << logger::endL;
       numBytesInBuffer = 0;
       result = false;
       break;
     }
-    logIO << logger::orange << out.str() << "\n";
+    logWorker << logger::orange << out.str() << "\n";
     //std::string bufferCopy(buffer, bufferSize);
-    logIO << "Number of bytes in buffer so far: " << bufferSize;
-    logIO << logger::endL;
+    logWorker << "Number of bytes in buffer so far: " << bufferSize;
+    logWorker << logger::endL;
     numBytesInBuffer = recv(this->connectedSocketID, &buffer, bufferSize - 1, 0);
   }
   this->messageHead.assign(buffer, static_cast<unsigned>(numBytesInBuffer));
@@ -1104,7 +1104,7 @@ bool WebWorker::ReceiveAllHttp() {
   while ( static_cast<signed>(this->messageBody.size()) < this->ContentLength) {
     if (theGlobalVariables.GetElapsedSeconds() - numSecondsAtStart > 180) {
       this->error = "Receiving bytes timed out (180 seconds).";
-      logIO << this->error << logger::endL;
+      logWorker << this->error << logger::endL;
       this->displayUserInput = this->error;
       return false;
     }
@@ -1112,7 +1112,7 @@ bool WebWorker::ReceiveAllHttp() {
     if (numBytesInBuffer == 0) {
       this->error = "While trying to fetch message-body, received 0 bytes. " +
       this->parent->ToStringLastErrorDescription();
-      logIO << this->error << logger::endL;
+      logWorker << this->error << logger::endL;
       this->displayUserInput = this->error;
       return false;
     }
@@ -1127,7 +1127,7 @@ bool WebWorker::ReceiveAllHttp() {
         continue;
       }
       this->error = "Error fetching message body: " + this->parent->ToStringLastErrorDescription();
-      logIO << logger::red << this->error << logger::endL;
+      logWorker << logger::red << this->error << logger::endL;
       this->displayUserInput = this->error;
       return false;
     }
@@ -1136,7 +1136,7 @@ bool WebWorker::ReceiveAllHttp() {
   }
   if (static_cast<signed>(this->messageBody.size()) != this->ContentLength) {
     if (this->requestTypE != this->requestChunked) {
-      logIO << logger::red
+      logWorker << logger::red
       << "Message body is of length: " << this->messageBody.size()
       << " yet this->ContentLength equals: "
       << this->ContentLength
@@ -1155,7 +1155,7 @@ bool WebWorker::ReceiveAllHttp() {
     << this->ContentLength << ". The message body was: "
     << this->messageBody;
     this->error = out.str();
-    logIO << out.str() << logger::endL;
+    logWorker << out.str() << logger::endL;
     this->AttemptUnknownRequestErrorCorrection();
   }
   return result;
@@ -1515,7 +1515,7 @@ void WebWorker::WriteAfterTimeoutPartTwo(
     logWorker << logger::green << "Data written to file: "
     << currentWorker.workerId << logger::endL;
   } else {
-    logIO << "Failed to write computation data. " << commentsOnError.str();
+    logWorker << "Failed to write computation data. " << commentsOnError.str();
   }  
 }
 
@@ -1769,7 +1769,7 @@ bool WebWorker::IsFileExtensionOfBinaryFile(const std::string& fileExtension) {
 void WebWorker::WrapUpConnection() {
   MacroRegisterFunctionWithName("WebWorker::WrapUpConnection");
   if (theGlobalVariables.flagServerDetailedLog) {
-    logIO << "Detail: wrapping up connection. " << logger::endL;
+    logWorker << "Detail: wrapping up connection. " << logger::endL;
   }
   this->resultWork["connectionsServed"] = this->numberOfReceivesCurrentConnection;
   this->resultWork["result"] = "close";
@@ -1781,11 +1781,11 @@ void WebWorker::WrapUpConnection() {
   }
   this->pipeWorkerToServerControls.WriteOnceAfterEmptying(this->resultWork.ToString(false, false), false, false);
   if (theGlobalVariables.flagServerDetailedLog) {
-    logIO << "Detail: done with pipes, releasing resources. " << logger::endL;
+    logWorker << "Detail: done with pipes, releasing resources. " << logger::endL;
   }
   this->Release();
   if (theGlobalVariables.flagServerDetailedLog) {
-    logIO << "Detail: released. " << logger::endL;
+    logWorker << "Detail: released. " << logger::endL;
   }
   theGlobalVariables.flagComputationCompletE = true;
   theGlobalVariables.flagComputationFinishedAllOutputSentClosing = true;
@@ -3337,26 +3337,26 @@ bool WebServer::CreateNewActiveWorker() {
   std::string wtow = this->ToStringWorkerToWorker();
   WebWorker& worker = this->GetActiveWorker();
   if (!worker.workerToWorkerRequestIndicator.CreateMe(wtow + "request-indicator", false, false, false, true)) {
-    logPlumbing << "Failed to create pipe: "
+    logServer << "Failed to create pipe: "
     << worker.workerToWorkerRequestIndicator.name << "\n";
     return this->EmergencyRemoval_LastCreatedWorker();
   }
   if (!worker.pipeWorkerToServerTimerPing.CreateMe(wtos + "ping", false, false, false, true)) {
-    logPlumbing << "Failed to create pipe: "
+    logServer << "Failed to create pipe: "
     << worker.pipeWorkerToServerTimerPing.name << "\n";
     return this->EmergencyRemoval_LastCreatedWorker();
   }
   if (!worker.pipeWorkerToServerControls.CreateMe(wtos + "controls", false, false, false, true)) {
-    logPlumbing << "Failed to create pipe: "
+    logServer << "Failed to create pipe: "
     << worker.pipeWorkerToServerControls.name << "\n";
     return this->EmergencyRemoval_LastCreatedWorker();
   }
   if (!worker.pipeWorkerToWorkerStatus.CreateMe(wtos + "worker status", false, false, false, true)) {
-    logPlumbing << "Failed to create pipe: "
+    logServer << "Failed to create pipe: "
     << worker.pipeWorkerToWorkerStatus.name << "\n";
     return this->EmergencyRemoval_LastCreatedWorker();
   }
-  logPlumbing << logger::green
+  logServer << logger::green
   << "Allocated new worker & plumbing data structures. Total worker data structures: "
   << this->theWorkers.size << ". "
   << logger::endL;
@@ -3624,7 +3624,7 @@ void WebServer::initDates() {
 
 void WebServer::ReleaseWorkerSideResources() {
   MacroRegisterFunctionWithName("WebServer::ReleaseWorkerSideResources");
-  logger& currentLog = theGlobalVariables.flagIsChildProcess ? logWorker : logProcessKills;
+  logger& currentLog = theGlobalVariables.flagIsChildProcess ? logWorker : logServer;
   if (theGlobalVariables.flagServerDetailedLog) {
     currentLog << logger::red << "Detail: server about to RELEASE active workder. " << logger::endL;
   }
@@ -3679,7 +3679,7 @@ void WebServer::TerminateChildSystemCall(int i) {
   this->MarkChildNotInUse(i);
   if (this->theWorkers[i].ProcessPID > 0) {
     if (theGlobalVariables.flagServerDetailedLog) {
-      logProcessKills << "Detail: " << " killing child index: " << i << "." << logger::endL;
+      logServer << "Detail: " << " killing child index: " << i << "." << logger::endL;
     }
     this->TerminateProcessId(this->theWorkers[i].ProcessPID);
     this->theWorkers[i].ProcessPID = - 1;
@@ -3736,7 +3736,7 @@ void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress)
     << ": address: " << incomingAddress << " opened more than "
     << this->MaxNumWorkersPerIPAdress << " simultaneous connections. ";
     this->theWorkers[theIndices[j]].pingMessage = errorStream.str();
-    logProcessKills << logger::red << errorStream.str() << logger::endL;
+    logServer << logger::red << errorStream.str() << logger::endL;
   }
   if (theGlobalVariables.flagServerDetailedLog) {
     logProcessStats << logger::green
@@ -3834,7 +3834,7 @@ void WebServer::RecycleOneChild(int childIndex, int& numberInUse) {
   << currentWorker.connectionID
   << ", pid: "
   << currentWorker.ProcessPID << ". ";
-  logProcessKills << logger::red << pingTimeoutStream.str() << logger::endL;
+  logServer << logger::red << pingTimeoutStream.str() << logger::endL;
   currentWorker.pingMessage = "<b style =\"color:red\">" + pingTimeoutStream.str() + "</b>";
   numberInUse --;
   this->NumProcessAssassinated ++;
@@ -3859,7 +3859,7 @@ void WebServer::HandleTooManyWorkers(int& numInUse) {
     << this->theWorkers[i].ProcessPID
     << ": too many workers in use. ";
     this->theWorkers[i].pingMessage = errorStream.str();
-    logProcessKills << logger::red << errorStream.str() << logger::endL;
+    logProcessStats << logger::red << errorStream.str() << logger::endL;
     numInUse --;
     this->NumProcessAssassinated ++;
   }
@@ -4117,7 +4117,7 @@ int Listener::Accept() {
       << " on socket: " << result;
       return result;
     } else {
-      logSocketAccept << logger::red
+      logServer << logger::red
       << "This is not supposed to happen: accept failed. Error: "
       << this->owner->ToStringLastErrorDescription() << logger::endL;
     }
@@ -4154,18 +4154,8 @@ int WebServer::Run() {
   }
   logWorker         .reset();
   logServerMonitor  .reset();
-  logHttpErrors     .reset();
-  logBlock          .reset();
-  logIO             .reset();
-  logOpenSSL        .reset();
-  logProcessKills   .reset();
-  logSocketAccept   .reset();
   logProcessStats   .reset();
-  logPlumbing       .reset();
-  logEmail          .reset();
   logServer         .reset();
-  logSuccessfulForks.reset();
-  logSuccessfulForks.flagWriteImmediately = true;
   this->processIdServer = getpid();
   if (theGlobalVariables.flagServerAutoMonitor) {
     this->processIdServer = this->Fork();
@@ -4214,7 +4204,7 @@ int WebServer::Run() {
     int64_t millisecondsAfterSelect = theGlobalVariables.GetElapsedMilliseconds();
     this->NumSuccessfulSelectsSoFar ++;
     if ((this->NumSuccessfulSelectsSoFar + this->NumFailedSelectsSoFar) - previousReportedNumberOfSelects > 100) {
-      logSocketAccept << logger::blue << this->NumSuccessfulSelectsSoFar << " successful and "
+      logServer << logger::blue << this->NumSuccessfulSelectsSoFar << " successful and "
       << this->NumFailedSelectsSoFar << " bad ("
       << this->NumSuccessfulSelectsSoFar + this->NumFailedSelectsSoFar << " total) selects. " << logger::endL;
       previousReportedNumberOfSelects = this->NumSuccessfulSelectsSoFar + this->NumFailedSelectsSoFar;
@@ -4235,7 +4225,7 @@ int WebServer::Run() {
     }
     int newConnectedSocket = theListener.Accept();
     if (newConnectedSocket < 0) {
-      logSocketAccept << logger::red
+      logServer << logger::red
       << "This is not supposed to to happen: select succeeded "
       << "but I found no set socket. " << logger::endL;
     }
@@ -4250,7 +4240,7 @@ int WebServer::Run() {
     this->HandleTooManyConnections(theListener.userAddress);
     this->RecycleChildrenIfPossible();
     if (!this->CreateNewActiveWorker()) {
-      logPlumbing << logger::purple
+      logServer << logger::purple
       << " failed to create an active worker. System error string: "
       << strerror(errno) << "\n"
       << logger::red << "Failed to create active worker: closing connection. " << logger::endL;
@@ -4293,11 +4283,11 @@ int WebServer::Run() {
       << theGlobalVariables.GetElapsedMilliseconds() << logger::endL;
     }
     if (theGlobalVariables.flagServerDetailedLog && incomingPID > 0) {
-      logSuccessfulForks << "Detail: Fork() successful; elapsed ms @ Fork(): "
+      logServer << "Detail: Fork() successful; elapsed ms @ Fork(): "
       << theGlobalVariables.GetElapsedMilliseconds() << logger::endL;
     }
     if (incomingPID < 0) {
-      logProcessKills << logger::red << " FAILED to spawn a child process. " << logger::endL;
+      logServer << logger::red << " FAILED to spawn a child process. " << logger::endL;
     }
     this->GetActiveWorker().ProcessPID = incomingPID;
     if (this->GetActiveWorker().ProcessPID == 0) {
@@ -4370,13 +4360,13 @@ int WebWorker::Run() {
       theGlobalVariables.flagUsingSSLinCurrentConnection = false;
       this->parent->SignalActiveWorkerDoneReleaseEverything();
       this->parent->ReleaseEverything();
-      logOpenSSL << logger::red << "Ssl fail #: " << this->parent->NumConnectionsSoFar << logger::endL;
-      logOpenSSL << commentsOnFailure.str() << logger::endL;
+      logWorker << logger::red << "Ssl fail #: " << this->parent->NumConnectionsSoFar << logger::endL;
+      logWorker << commentsOnFailure.str() << logger::endL;
       return - 1;
     }
   }
   if (theGlobalVariables.flagSSLIsAvailable && theGlobalVariables.flagUsingSSLinCurrentConnection) {
-    logOpenSSL << logger::green << "ssl success #: " << this->parent->NumConnectionsSoFar << ". " << logger::endL;
+    logWorker << logger::green << "ssl success #: " << this->parent->NumConnectionsSoFar << ". " << logger::endL;
   }
   /////////////////////////////////////////////////////////////////////////
   int result = 0;
@@ -4391,12 +4381,12 @@ int WebWorker::Run() {
         sslWasOK = (this->error == TransportLayerSecurityOpenSSL::errors::errorWantRead);
       }
       if (this->numberOfReceivesCurrentConnection > 0 && sslWasOK) {
-        logIO << logger::green << "Connection timed out after successfully receiving "
+        logWorker << logger::green << "Connection timed out after successfully receiving "
         << this->numberOfReceivesCurrentConnection << " times. " << logger::endL;
         result = 0;
         break;
       }
-      logIO << logger::red << "Failed to receive all with error: " << this->error;
+      logWorker << logger::red << "Failed to receive all with error: " << this->error;
       result = - 1;
       break;
     }
@@ -5356,7 +5346,7 @@ void WebWorker::SendAllBytesHttp() {
     ));
     if (numBytesSent < 0) {
       if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR || errno == EIO) {
-        logIO << "WebWorker::SendAllBytes failed. Error: "
+        logWorker << "WebWorker::SendAllBytes failed. Error: "
         << this->parent->ToStringLastErrorDescription() << logger::endL;
       }
       return;

@@ -48,9 +48,6 @@ logger logWorker("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logCom
 logger logServerMonitor("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logServerMonitor.html", nullptr, false, ProcessTypes::serverMonitor);
 logger logServer("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logServer.html", nullptr, false, ProcessTypes::server);
 
-logger logHttpErrors("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogHttpErrors.html", &logWorker, false, ProcessTypes::worker);
-logger logBlock("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogBlockingEvents.html", &logWorker, false, ProcessTypes::worker);
-logger logIO("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogIOErrorsEvents.html", &logWorker, false, ProcessTypes::worker);
 logger logOpenSSL("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogOpenSSL.html", &logWorker, false, ProcessTypes::worker);
 logger logEmail("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogEmail.html", &logWorker, false, ProcessTypes::worker);
 

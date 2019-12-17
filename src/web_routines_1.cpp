@@ -288,7 +288,7 @@ void WebCrawler::PingCalculatorStatus() {
         numPingFails ++;
       } while (numSelected < 0);
       if (numSelected <= 0) {
-        logIO << logger::red << failStream.str() << logger::endL;
+        logWorker << logger::red << failStream.str() << logger::endL;
         reportStream << failStream.str() << "Could not connect through port. Select returned: " << numSelected;
         connectionResult = - 1;
       } else {
@@ -337,7 +337,7 @@ void WebCrawler::FetchWebPage(std::stringstream* commentsOnFailure, std::strings
   this->theTSL.openSSLData.CheckCanInitializeToClient();
   this->theTSL.initializeNonThreadSafeOnFirstCall(false);
 #ifdef MACRO_use_open_ssl
-  //logOpenSSL << logger::green  << "DEBUG: got to FetchWebPage start. " << logger::endL;
+  //logWorker << logger::green  << "DEBUG: got to FetchWebPage start. " << logger::endL;
   this->lastTransaction = "";
   this->lastTransactionErrors = "";
   memset(&this->hints, 0, sizeof this->hints); // make sure the struct is empty
@@ -414,7 +414,7 @@ void WebCrawler::FetchWebPage(std::stringstream* commentsOnFailure, std::strings
         numPingFails ++;
       } while (numSelected < 0);
       if (numSelected <= 0) {
-        logIO << logger::red << failStream.str() << logger::endL;
+        logWorker << logger::red << failStream.str() << logger::endL;
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure << failStream.str()
           << "Could not connect through port. Select returned: " << numSelected;
@@ -696,7 +696,7 @@ void WebCrawler::UpdatePublicKeys(std::stringstream* commentsOnFailure, std::str
   logWorker << logger::blue << "DEBUG: about to fetch google public keys ..." << logger::endL;
   this->FetchWebPage(commentsOnFailure, commentsGeneral);
   if (this->bodyReceiveD == "") {
-    logOpenSSL << logger::red << "Could not fetch the google public keys ..." << logger::endL;
+    logWorker << logger::red << "Could not fetch the google public keys ..." << logger::endL;
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Could not fetch google certificate list. ";
     }
@@ -712,14 +712,14 @@ void WebCrawler::UpdatePublicKeys(std::stringstream* commentsOnFailure, std::str
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "<br>Failed to open: " << googleKeysFileName;
     }
-    logOpenSSL << logger::red << "Failed to create google keys file name. " << logger::endL;
+    logWorker << logger::red << "Failed to create google keys file name. " << logger::endL;
     return;
   }
   FileOperations::OpenFileCreateIfNotPresentVirtual(googleKeysDebugFile, googleKeysDebugFileName, false, true, false);
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "<br>Updated file: " << googleKeysFileName;
   }
-  logOpenSSL << logger::green << "Updated public key file: " << googleKeysFileName << logger::endL;
+  logWorker << logger::green << "Updated public key file: " << googleKeysFileName << logger::endL;
   googleKeysFile << this->bodyReceiveD;
   googleKeysDebugFile
   << "Expected body length: " << this->expectedLength.ToString() << "\n";
@@ -812,7 +812,7 @@ bool Crypto::VerifyJWTagainstKnownKeys(
     WebCrawler theCrawler;
     theCrawler.theTSL.openSSLData.name = "public key fetcher";
     theCrawler.UpdatePublicKeys(commentsOnFailure, commentsGeneral);
-    logOpenSSL << "DEBUG: Updated public keys!";
+    logWorker << "DEBUG: Updated public keys!";
   }
   if (theIndex == - 1) {
     if (commentsOnFailure != nullptr) {

@@ -138,7 +138,7 @@ bool MutexProcess::ResetNoAllocation() {
   ) {
     return true;
   }
-  logIO << logger::red << this->ToString() << ": failed to reset without allocation. " << logger::endL;
+  logWorker << logger::red << this->ToString() << ": failed to reset without allocation. " << logger::endL;
   return false;
 }
 
@@ -151,7 +151,7 @@ bool MutexProcess::Lock() {
   this->flagLockHeldByAnotherThread = true;
   bool success = this->lockPipe.ReadOnceIfFailThenCrash(false, true);
   if (!success) {
-    logBlock << logger::red << "Error: " << this->currentProcessName
+    logWorker << logger::red << "Error: " << this->currentProcessName
     << " failed to lock pipe " << this->ToString() << logger::endL;
   }
   this->flagLockHeldByAnotherThread = false;
@@ -162,7 +162,7 @@ bool MutexProcess::Unlock() {
   MacroRegisterFunctionWithName("MutexProcess::Unlock");
   bool success = this->lockPipe.WriteOnceIfFailThenCrash(MutexProcess::lockContent, 0, false, true);
   if (!success) {
-    logBlock << logger::red << "Error: " << this->currentProcessName
+    logWorker << logger::red << "Error: " << this->currentProcessName
     << " failed to unlock pipe " << this->ToString() << logger::endL;
   }
   return success;
@@ -286,7 +286,7 @@ bool PipePrimitive::SetPipeFlagsIfFailThenCrash(int inputFlags, int whichEnd, bo
   int counter = 0;
   while (fcntl(this->pipeEnds[whichEnd], F_SETFL, inputFlags) < 0) {
     std::string theError = strerror(errno);
-    logBlock << logger::purple << "Failed to fcntl pipe end with file descriptor: "
+    logWorker << logger::purple << "Failed to fcntl pipe end with file descriptor: "
     << this->pipeEnds[whichEnd] << ": "
     << theError << ". " << logger::endL;
     if (++ counter > 100) {
@@ -347,10 +347,10 @@ int Pipe::WriteNoInterrupts(int theFD, const std::string& input) {
     }
     if (result < 0) {
       if (errno == EINTR) {
-        logBlock << logger::red << "Write operation interrupted, repeating. " << logger::endL;
+        logWorker << logger::red << "Write operation interrupted, repeating. " << logger::endL;
         numAttempts ++;
         if (numAttempts > 100) {
-          logBlock << logger::red
+          logWorker << logger::red
           << "Write operation interrupted, more than 100 times, this is not supposed to happen. "
           << logger::endL;
           return - 1;
@@ -429,7 +429,7 @@ bool PipePrimitive::HandleFailedWriteReturnFalse(
   << " or more times. Last error: "
   << strerror(errno) << ". ";
   if (theGlobalVariables.processType == ProcessTypes::worker) {
-    logIO << logger::red << errorStream.str() << logger::endL;
+    logWorker << logger::red << errorStream.str() << logger::endL;
   }
   if (theGlobalVariables.processType == ProcessTypes::server) {
     logServer << logger::red << errorStream.str() << logger::endL;
@@ -451,7 +451,7 @@ bool PipePrimitive::WriteOnceIfFailThenCrash(
 ) {
   MacroRegisterFunctionWithName("PipePrimitive::WriteIfFailThenCrash");
   if (this->pipeEnds[1] == - 1) {
-    logIO << logger::yellow << "WARNING: " << this->ToString()
+    logWorker << logger::yellow << "WARNING: " << this->ToString()
     << " writing on non-initialized pipe. ";
     return false;
   }
@@ -491,7 +491,7 @@ bool PipePrimitive::WriteOnceIfFailThenCrash(
   }
   if (static_cast<unsigned>(this->numberOfBytesLastWrite) < remaining) {
     if (theGlobalVariables.processType == ProcessTypes::worker) {
-      logIO << logger::red << this->ToString() << ": wrote only "
+      logWorker << logger::red << this->ToString() << ": wrote only "
       << this->numberOfBytesLastWrite << " bytes out of " << remaining << " total. " << logger::endL;
     }
     if (theGlobalVariables.processType == ProcessTypes::server) {
@@ -533,7 +533,7 @@ bool Pipe::ResetNoAllocation() {
   ) {
     return true;
   }
-  logIO << logger::red << this->ToString() << ": failed to reset without allocation. " << logger::endL;
+  logWorker << logger::red << this->ToString() << ": failed to reset without allocation. " << logger::endL;
   return false;
 }
 
@@ -599,7 +599,7 @@ bool PipePrimitive::ReadOnceIfFailThenCrash(bool restartServerOnFail, bool dontC
     }
     counter ++;
     if (counter > 100) {
-      logIO << logger::red << this->ToString()
+      logWorker << logger::red << this->ToString()
       << ": more than 100 iterations of read resulted in an error. "
       << logger::endL;
       if (restartServerOnFail) {
@@ -616,7 +616,7 @@ bool PipePrimitive::ReadOnceIfFailThenCrash(bool restartServerOnFail, bool dontC
     }
   }
   if (numReadBytes > 150000) {
-    logIO << logger::red << this->ToString()
+    logWorker << logger::red << this->ToString()
     << "This is not supposed to happen: pipe read more than 150000 bytes. " << logger::endL;
   }
   if (numReadBytes > 0) {

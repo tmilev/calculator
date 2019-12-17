@@ -807,7 +807,7 @@ bool Database::User::SendActivationEmail(
   UserCalculator currentUser;
   bool result = true;
   for (int i = 0; i < theEmails.size; i ++) {
-    logEmail << "Sending activation email, user "
+    logWorker << "Sending activation email, user "
     << i + 1 << " out of " << theEmails.size << " ... ";
     currentUser.username = theEmails[i];
     currentUser.email = theEmails[i];
@@ -816,13 +816,13 @@ bool Database::User::SendActivationEmail(
     );
   }
   if (commentsOnFailure != nullptr) {
-    logEmail << commentsOnFailure->str();
+    logWorker << commentsOnFailure->str();
   }
   if (commentsGeneral != nullptr && commentsOnFailure != commentsGeneral) {
-    logEmail << commentsGeneral->str();
+    logWorker << commentsGeneral->str();
   }
   if (commentsGeneralSensitive != nullptr && commentsGeneralSensitive != commentsOnFailure) {
-    logEmail << commentsGeneralSensitive->str();
+    logWorker << commentsGeneralSensitive->str();
   }
   return result;
 }
@@ -1453,7 +1453,7 @@ bool EmailRoutines::SendEmailWithMailGun(
   if (mailGunKey.size() > 0) {
     mailGunKey.resize(mailGunKey.size() - 1);
   }
-  logEmail << "Sending email via "
+  logWorker << "Sending email via "
   << "https://api.mailgun.net/v3/mail2."
   << hostnameToSendEmailFrom
   << "/messages " << logger::endL;

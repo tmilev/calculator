@@ -17,17 +17,9 @@ class logger;
 class Calculator;
 extern logger logWorker  ;
 extern logger logServerMonitor  ;
-extern logger logHttpErrors;
-extern logger logBlock;
-extern logger logIO   ;
-extern logger logOpenSSL   ;
-extern logger logProcessKills   ;
-extern logger logSocketAccept;
-extern logger logProcessStats;
-extern logger logPlumbing;
-extern logger logEmail  ;
 extern logger logServer  ;
-extern logger logSuccessfulForks  ;
+
+extern logger logProcessStats;
 extern FormatExpressions consoleFormat;
 extern Calculator* theParser;
 

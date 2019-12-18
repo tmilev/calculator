@@ -198,17 +198,30 @@ void TimeoutThread::Run() {
   this->reset();
   for (;;) {
     this->counter ++;
+    theGlobalVariables.CheckConsistency();
     this->HandleComputationTimer();
     theGlobalVariables.FallAsleep(this->intervalBetweenChecksInMilliseconds);
+    // theGlobalVariables.CheckConsistency();
     this->HandleComputationCompleteStandard();
+    // theGlobalVariables.CheckConsistency();
     this->HandleTimerSignalToServer();
+    // theGlobalVariables.CheckConsistency();
     this->HandleMaxComputationTime();
+    // theGlobalVariables.CheckConsistency();
+    // std::cout << "DEBUG: before handle timeout\n";
     this->HandleComputationTimeout();
+    // std::cout << "DEBUG: before handle ping\n";
+    // theGlobalVariables.CheckConsistency();
     this->HandlePingServerIamAlive();
+    // std::cout << "DEBUG: before handle every thing\n";
+    // theGlobalVariables.CheckConsistency();
     if (this->HandleEverythingIsDone()) {
       break;
     }
+    // std::cout << "DEBUG: about to loop\n";
   }
+  std::cout << "DEBUG: timer thread exited.\n";
+  theGlobalVariables.CheckConsistency();
 }
 
 void RunTimerThread(int threadIndex) {

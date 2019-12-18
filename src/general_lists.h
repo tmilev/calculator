@@ -503,20 +503,20 @@ class PointerObjectDestroyer {
       crash << "Unexpeced: uninitialized object pointer. " << crash;
     }
     delete *(this->theObjectPointer);
-    *(this->theObjectPointer) = 0;
+    *(this->theObjectPointer) = nullptr;
     *(this->theObjectPointer) = new Object;
   }
   PointerObjectDestroyer() {
-    this->theObjectPointer = 0;
+    this->theObjectPointer = nullptr;
   }
   PointerObjectDestroyer(Object*& inputObject): theObjectPointer(&inputObject) {
   }
   ~PointerObjectDestroyer() {
-    if (this->theObjectPointer == 0) {
+    if (this->theObjectPointer == nullptr) {
       return;
     }
     delete *(this->theObjectPointer);
-    *(this->theObjectPointer) = 0;
+    *(this->theObjectPointer) = nullptr;
   }
 };
 

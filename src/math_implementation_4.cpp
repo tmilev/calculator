@@ -371,6 +371,13 @@ bool GlobalVariables::UserStudentVieWOn() {
   return theGlobalVariables.GetWebInput("studentView") == "true";
 }
 
+bool GlobalVariables::CheckConsistency() {
+  if (this->flagDeallocated) {
+    crash << "Global variables not allowed to be deallocated. " << crash;
+  }
+  return true;
+}
+
 bool GlobalVariables::UserDefaultIsDebuggingAdmin() {
   return this->UserDefaultHasAdminRights() && this->UserDebugFlagOn();
 }

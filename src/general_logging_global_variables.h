@@ -135,6 +135,7 @@ public:
   bool flagComputationCompletE;
   bool flagComputationStarted;
   bool flagComputationFinishedAllOutputSentClosing;
+  bool flagDeallocated;
   // progress report flags:
   class Progress {
   public:
@@ -274,6 +275,7 @@ public:
   bool UserGuestMode();
   bool UserDebugFlagOn();
   bool UserStudentVieWOn();
+  bool CheckConsistency();
   int CallSystemNoOutput(const std::string& systemCommand, logger* theLog);
   std::string CallSystemWithOutput(const std::string& systemCommand);
   void ChDir(const std::string& systemCommand);

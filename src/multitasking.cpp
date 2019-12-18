@@ -178,6 +178,7 @@ GlobalVariables::~GlobalVariables() {
   for (int i = 1; i < this->theThreads.size; i ++) {
     this->theThreads[i].join();
   }
+  this->flagDeallocated = true;
 }
 
 void ThreadData::RegisterFirstThread(const std::string& inputName) {

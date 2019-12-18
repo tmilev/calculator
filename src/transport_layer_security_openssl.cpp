@@ -20,7 +20,6 @@ std::string TransportLayerSecurityOpenSSL::errors::errorWantRead = "SSL_ERROR_WA
 bool TransportLayerSecurityOpenSSL::flagSSLlibraryInitialized = false;
 
 extern logger logServer ;
-extern logger logOpenSSL;
 extern logger logWorker ;
 
 TransportLayerSecurityOpenSSL::~TransportLayerSecurityOpenSSL() {
@@ -48,7 +47,7 @@ void TransportLayerSecurityOpenSSL::FreeContext() {
 #ifdef  MACRO_use_open_ssl
 
   if (this->context != nullptr && this->name != "") {
-    logOpenSSL << logger::blue << "DEBUG: Freeing openSSL context: " << this->name << ". " << logger::endL;
+    logWorker << logger::blue << "DEBUG: Freeing openSSL context: " << this->name << ". " << logger::endL;
   }
   SSL_CTX_free (this->context);
 #endif // MACRO_use_open_ssl
@@ -385,7 +384,7 @@ bool TransportLayerSecurityOpenSSL::HandShakeIamClientNoSocketCleanup(
   this->sslData = SSL_new(this->context);
   if (this->sslData == nullptr) {
     this->flagSSLHandshakeSuccessful = false;
-    logOpenSSL << logger::red << "Failed to allocate ssl. " << logger::endL;
+    logWorker << logger::red << "Failed to allocate ssl. " << logger::endL;
     crash << "Failed to allocate ssl: not supposed to happen. " << crash;
   }
   this->SetSocketAddToStack(inputSocketID);

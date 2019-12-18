@@ -1802,8 +1802,9 @@ void WebWorker::SendAllAndWrapUp() {
 }
 
 WebWorker::~WebWorker() {
-  //Workers are not allowed to release resources in the destructor:
-  //a Worker's destructor is called when expanding List<WebWorker>.
+  // Workers are not allowed to release resources in the destructor:
+  // a Worker's destructor is called when expanding List<WebWorker>.
+  // logWorker << " web worker destructor called. " << logger::endL;
   this->flagDeallocated = true;
 }
 

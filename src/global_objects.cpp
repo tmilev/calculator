@@ -48,14 +48,8 @@ logger logWorker("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logCom
 logger logServerMonitor("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logServerMonitor.html", nullptr, false, ProcessTypes::serverMonitor);
 logger logServer("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logServer.html", nullptr, false, ProcessTypes::server);
 
-logger logOpenSSL("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogOpenSSL.html", &logWorker, false, ProcessTypes::worker);
-logger logEmail("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogEmail.html", &logWorker, false, ProcessTypes::worker);
 
-logger logSocketAccept("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogSocketAccept.html", &logServer, false, ProcessTypes::server);
 logger logProcessStats("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogWorkerProcessStats.html", &logServer, false, ProcessTypes::server);
-logger logPlumbing("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogServerPlumbing.html", &logServer, false, ProcessTypes::server);
-logger logProcessKills("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogMultiprocessing.html", &logServer, false, ProcessTypes::server);
-logger logSuccessfulForks("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogForkSuccess.html", &logServer, false, ProcessTypes::server);
 
 Calculator* theParser = nullptr;
 FormatExpressions consoleFormat;

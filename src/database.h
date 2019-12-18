@@ -102,7 +102,8 @@ public:
   public:
     Database* owner;
     MutexProcess access;
-    HashedList<std::string, MathRoutines::HashString> knownCollections;
+    HashedList<std::string, MathRoutines::HashString> knownCollectionS;
+    HashedList<std::string, MathRoutines::HashString> knownIndices;
     JSData reader;
     bool flagDatabaseRead;
     class Index {
@@ -153,7 +154,7 @@ public:
       JSData& output,
       std::stringstream* commentsOnFailure
     );
-    std::string ToStringIndicesAllowed() const;
+    std::string ToStringIndices() const;
     FallBack();
   };
   FallBack theFallBack;

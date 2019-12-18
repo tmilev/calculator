@@ -24,6 +24,7 @@ bool Database::FallBack::UpdateOne(
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("DatabaseFallback::UpdateOneFromQueryString");
+  logWorker << "DEBUG: Inside update one." << logger::endL;
   if (!theGlobalVariables.flagDatabaseUseFallback) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
@@ -33,6 +34,7 @@ bool Database::FallBack::UpdateOne(
     return false;
   }
   MutexProcessLockGuard guardDB(this->access);
+  logWorker << "DEBUG: About to read database." << logger::endL;
   if (!this->ReadAndIndexDatabase(commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to read and index database. ";
@@ -76,14 +78,16 @@ bool Database::FallBack::UpdateOneNoLocks(
   JSData& modified = this->reader[findQuery.collection][index];
   if (dataToMerge.theType != JSData::token::tokenObject) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "I only know how to merge objects, you gave me: " << dataToMerge.ToString(false);
+      *commentsOnFailure << "I only know how to merge objects, you gave me: "
+      << dataToMerge.ToString(false);
     }
     return false;
   }
-  if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Got to here. ";
+  bool result = modified.MergeInMe(dataToMerge, commentsOnFailure);
+  if (!result && commentsOnFailure != nullptr) {
+    *commentsOnFailure << "Merge failed. ";
   }
-  return modified.MergeInMe(dataToMerge, commentsOnFailure);
+  return result;
 }
 
 bool Database::FallBack::FindOne(
@@ -107,10 +111,28 @@ bool Database::FallBack::FindOne(
   return true;
 }
 
-std::string Database::FallBack::ToStringIndicesAllowed() const {
+std::string Database::FallBack::ToStringIndices() const {
   std::stringstream out;
-  out << "indexed: " << this->indices.theKeys.ToStringCommaDelimited()
-  << ", known: " << this->knownCollections.ToStringCommaDelimited();
+  out << this->indices.size() << " indices total.\n";
+  int maxIndexedToDisplay = 3;
+  for (int i = 0; i < this->indices.size(); i ++) {
+    const MapList<std::string, List<int32_t>, MathRoutines::HashString>& currentLocation =
+    this->indices.theValues[i].locations;
+    out << this->indices.theKeys[i] << ": " << currentLocation.size() << " indexed: ";
+    int numberToDisplay = MathRoutines::Minimum(currentLocation.size(), maxIndexedToDisplay);
+    out << "[";
+    for (int j = 0; j < numberToDisplay; j ++) {
+      out << currentLocation.theKeys[j];
+      if (j != numberToDisplay - 1) {
+        out << ", ";
+      }
+    }
+    if (numberToDisplay < currentLocation.size()) {
+      out << ", ...";
+    }
+    out << "]\n";
+  }
+  out << "Known indices: " << this->knownIndices.ToStringCommaDelimited();
   return out.str();
 }
 
@@ -129,7 +151,9 @@ bool Database::FallBack::FindIndexOneNoLocks(
   std::string key = query.getCollectionAndLabel();
   if (!this->indices.Contains(key)) {
     if (commentsOnNotFound != nullptr) {
-      *commentsOnNotFound << "Finding by non-indexed key: " << key << " not allowed. Indices allowed: " << this->ToStringIndicesAllowed() << ". ";
+      *commentsOnNotFound << "Finding by non-indexed key: "
+      << key << " not allowed. Indices allowed: "
+      << this->ToStringIndices() << ". ";
     }
     return false;
   }
@@ -163,16 +187,22 @@ bool Database::FallBack::FetchCollectionNames(
   return true;
 }
 
-bool Database::FallBack::HasCollection(const std::string& collection, std::stringstream* commentsOnFailure) {
-  if (Database::FallBack::knownCollections.Contains(collection)) {
+bool Database::FallBack::HasCollection(
+  const std::string& collection, std::stringstream* commentsOnFailure
+) {
+  if (Database::FallBack::knownCollectionS.Contains(collection)) {
     this->reader[collection].theType = JSData::token::tokenArray;
     return true;
   }
-  if (!this->reader.HasKey(collection)) {
+  if (this->reader.HasKey(collection)) {
     return true;
   }
   if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "Database collection " << collection << " not found. ";
+    *commentsOnFailure << "Database collection "
+    << collection << " not found. "
+    << "Known collections: "
+    << this->knownCollectionS.ToStringCommaDelimited()
+    << ". ";
   }
   return false;
 }
@@ -184,8 +214,11 @@ Database::FallBack::FallBack() {
 
 void Database::FallBack::initialize() {
   this->access.CreateMe("databaseFallback", true, false);
-  this->knownCollections.AddOnTop({
+  this->knownIndices.AddOnTop({
     DatabaseStrings::tableUsers + "." + DatabaseStrings::labelUsername
+  });
+  this->knownCollectionS.AddOnTop({
+    DatabaseStrings::tableUsers
   });
 }
 
@@ -208,24 +241,28 @@ std::string Database::FallBack::Index::collectionAndLabel() {
 }
 
 bool Database::FallBack::ReadAndIndexDatabase(std::stringstream* commentsOnFailure) {
+  MacroRegisterFunctionWithName("Database::FallBack::ReadAndIndexDatabase");
   this->ReadDatabase(commentsOnFailure);
-  for (int i = 0; i < this->knownCollections.size; i ++) {
-    this->indices.GetValueCreate(this->knownCollections[i]);
+  for (int i = 0; i < this->knownIndices.size; i ++) {
+    this->indices.GetValueCreate(this->knownIndices[i]);
   }
   for (int i = 0; i < this->reader.objects.size(); i ++) {
     std::string collection = this->reader.objects.theKeys[i];
     JSData& currentCollection = this->reader.objects.theValues[i];
     for (int i = 0; i < currentCollection.theList.size; i ++) {
-      this->IndexOneRecord(currentCollection, i, collection);
+      this->IndexOneRecord(currentCollection.theList[i], i, collection);
     }
   }
+  logWorker << "Database indexed. " << this->ToStringIndices() << logger::endL;
   return true;
 }
 
 void Database::FallBack::IndexOneRecord(
   const JSData& entry, int32_t row, const std::string& collection
 ) {
+  logWorker << "DEBUG: about to index record: " << entry.ToString(false) << logger::endL;
   if (entry.theType != JSData::token::tokenObject) {
+    logWorker << "DEBUG: not of type object! " << logger::endL;
     return;
   }
   for (int i = 0; i < entry.objects.size(); i ++) {

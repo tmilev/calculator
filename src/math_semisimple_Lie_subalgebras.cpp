@@ -376,7 +376,7 @@ void SemisimpleSubalgebras::CheckFileWritePermissions() {
   FileOperations::GetPhysicalFileNameFromVirtual(
     this->owner->ToStringVirtualFolderName(), testFileFolderPhysical, false, false, nullptr
   );
-  theGlobalVariables.CallSystemNoOutput("mkdir " + testFileFolderPhysical, &logWorker);
+  global.CallSystemNoOutput("mkdir " + testFileFolderPhysical, &logWorker);
 
   if (!FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(testFile, testFileNameRelative, false, true, false)) {
     crash << "<br>This may or may not be a programming error. I requested to create file "
@@ -393,7 +393,7 @@ void SemisimpleSubalgebras::CheckFileWritePermissions() {
 }
 
 void SemisimpleSubalgebras::WriteReportToFiles() {
-  this->millisecondsComputationEnd = theGlobalVariables.GetElapsedMilliseconds();
+  this->millisecondsComputationEnd = global.GetElapsedMilliseconds();
   this->numAdditions = Rational::TotalSmallAdditions + Rational::TotalLargeAdditions;
   this->numMultiplications = Rational::TotalSmallMultiplications + Rational::TotalLargeMultiplications;
   this->currentFormat.flagUseHTML = true;
@@ -997,7 +997,7 @@ void SemisimpleSubalgebras::FindTheSSSubalgebrasInit() {
   if (this->owner == nullptr) {
     crash << "<hr>Owner of semisimple subalgebras is zero" << crash;
   }
-  if (theGlobalVariables.theProgress.flagReportAlloweD) {
+  if (global.theProgress.flagReportAlloweD) {
     this->fileNameToLogComments = "LogFileComments_" +
     FileOperations::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) +
     ".html";
@@ -1714,7 +1714,7 @@ bool SemisimpleSubalgebras::CentralizersComputedToHaveUnsuitableNilpotentOrbits(
           << " I am crashing to let you know. " << crash;
         }
         theLogFile << reportStream.str();
-        theGlobalVariables.Comments << reportStream.str();
+        global.Comments << reportStream.str();
         return true;
       }
     }
@@ -1796,7 +1796,7 @@ bool SemisimpleSubalgebras::CentralizerOfBaseComputedToHaveUnsuitableNilpotentOr
   << "The absolute Dynkin indices of the sl(2) subalgebras of the original summand I computed to be:<br> "
   << theDynkinIndicesNewSummand.ToStringCommaDelimited() << ". ";
   theLogFile << reportStream.str();
-  theGlobalVariables.Comments << reportStream.str();
+  global.Comments << reportStream.str();
   return true;
 }
 
@@ -1940,10 +1940,10 @@ void SemisimpleSubalgebras::AddSubalgebraToStack(
   );
   ///////////
   this->currentNumLargerTypesExplored.AddOnTop(inputNumLargerTypesExplored);
-  // theGlobalVariables.Comments << "<hr>" << this->currentPossibleLargerDynkinTypes.LastObject()->size
+  // global.Comments << "<hr>" << this->currentPossibleLargerDynkinTypes.LastObject()->size
   // << " possible extensions of " << input.theWeylNonEmbedded->theDynkinType.ToString() << ": ";
   // for (int i = 0; i < this->currentPossibleLargerDynkinTypes.LastObject()->size; i ++)
-  //   theGlobalVariables.Comments << (*this->currentPossibleLargerDynkinTypes.LastObject())[i].ToString() << ", ";
+  //   global.Comments << (*this->currentPossibleLargerDynkinTypes.LastObject())[i].ToString() << ", ";
   ///////////
   this->currentHCandidatesScaledToActByTwo.SetSize(this->currentSubalgebraChain.size);
   this->currentNumHcandidatesExplored.AddOnTop(inputNumHcandidatesExplored);
@@ -4103,9 +4103,9 @@ bool CandidateSSSubalgebra::AttemptToSolveSystem() {
     }
   } else {
     //if (this->flagSystemProvedToHaveNoSolution)
-    //  theGlobalVariables.Comments << "System " << this->transformedSystem.ToString() << " <b> proven contradictory, good. </b>";
+    //  global.Comments << "System " << this->transformedSystem.ToString() << " <b> proven contradictory, good. </b>";
     //else
-    //  theGlobalVariables.Comments << "System " << this->transformedSystem.ToString() << " <b> not solved! </b>";
+    //  global.Comments << "System " << this->transformedSystem.ToString() << " <b> not solved! </b>";
   }
   return !this->flagSystemProvedToHaveNoSolution;
 }
@@ -4189,7 +4189,7 @@ bool CandidateSSSubalgebra::ComputeChar(bool allowBadCharacter) {
   this->theCharFundamentalCoordsRelativeToCartan.AddMonomial(tempMon, this->GetAmbientSS().GetRank());
   List<DynkinSimpleType> theTypes;
   this->theWeylNonEmbedded->theDynkinType.GetTypesWithMults(theTypes);
-/*  theGlobalVariables.Comments << "<br>Cartan symmetric, type  "
+/*  global.Comments << "<br>Cartan symmetric, type  "
   << this->theWeylNonEmbedded->theDynkinType.ToString() << " <br>"
   << this->theWeylNonEmbedded->CartanSymmetric.ToString()
   << "<br> Co-Cartan symmetric: "
@@ -4535,7 +4535,7 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, 
   output.GetOwner().ComputeChevalleyConstants();
   output.theRootSAs.owner = &inputOwner;
   output.theRootSAs.ComputeAllReductiveRootSubalgebrasUpToIsomorphism();
-  //output.theRootSAs.ComputeDebugString(false, false, false, 0, 0, theGlobalVariables);
+  //output.theRootSAs.ComputeDebugString(false, false, false, 0, 0, global);
   output.IndicesSl2sContainedInRootSA.SetSize(output.theRootSAs.theSubalgebras.size);
   output.IndicesSl2sContainedInRootSA.Reserve(output.theRootSAs.theSubalgebras.size * 2);
   for (int i = 0; i < output.IndicesSl2sContainedInRootSA.size; i ++) {
@@ -6275,7 +6275,7 @@ std::string CandidateSSSubalgebra::ToStringCentralizerDebugData(FormatExpression
 void CandidateSSSubalgebra::ComputeCentralizerIsWellChosen() {
   MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeCentralizerIsWellChosen");
   if (this->flagSystemProvedToHaveNoSolution) {
-    theGlobalVariables.Comments << "This is unexpected, but not considered an error: "
+    global.Comments << "This is unexpected, but not considered an error: "
     << "I am asked to compute the centralizer of a candidate for a subalgebra which cannot be realized. ";
     this->flagCentralizerIsWellChosen = false;
     return;
@@ -7085,20 +7085,20 @@ void CandidateSSSubalgebra::ComputeCartanOfCentralizer() {
       aBasisProjection.RemoveLastObject();
   }
   aBasisPreimages.GetGramMatrix(this->BilinearFormFundPrimal, &this->owner->owner->theWeyl.CartanSymmetric);
-  theGlobalVariables.Comments << "<hr>aBasisPreimages: " << aBasisPreimages.ToString();
+  global.Comments << "<hr>aBasisPreimages: " << aBasisPreimages.ToString();
   basisChangeMatrix.AssignVectorsToColumns(aBasisProjection);
   basisChangeMatrix.Invert();
-  theGlobalVariables.Comments << "<br>basisChangeMatrix: " << basisChangeMatrix.ToString();
-  theGlobalVariables.Comments << "<br>BilinearFormFundPrimal: " << this->BilinearFormFundPrimal.ToString();
+  global.Comments << "<br>basisChangeMatrix: " << basisChangeMatrix.ToString();
+  global.Comments << "<br>BilinearFormFundPrimal: " << this->BilinearFormFundPrimal.ToString();
   this->BilinearFormFundPrimal*=basisChangeMatrix;
   basisChangeMatrix.Transpose();
   this->BilinearFormFundPrimal.MultiplyOnTheLeft(basisChangeMatrix);
-  theGlobalVariables.Comments << "<br>final bilinear form fund primal: " << this->BilinearFormFundPrimal.ToString();
+  global.Comments << "<br>final bilinear form fund primal: " << this->BilinearFormFundPrimal.ToString();
 */
   ////////////////
   this->BilinearFormSimplePrimal = this->theWeylNonEmbedded->CartanSymmetric;
   Matrix<Rational> centralizerPart, matFundCoordsSimple, diagMat, diagMatrix2, bilinearFormInverted;
-  // theGlobalVariables.Comments << "<hr>Cartan of Centralizer: " << this->CartanOfCentralizer.ToString() << "<br>Cartan symmetric: "
+  // global.Comments << "<hr>Cartan of Centralizer: " << this->CartanOfCentralizer.ToString() << "<br>Cartan symmetric: "
   // << this->owner->owner->theWeyl.CartanSymmetric.ToString();
   this->CartanOfCentralizer.GetGramMatrix(centralizerPart, &this->owner->owner->theWeyl.CartanSymmetric);
   this->BilinearFormSimplePrimal.DirectSumWith(centralizerPart);

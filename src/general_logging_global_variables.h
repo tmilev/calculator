@@ -40,19 +40,19 @@ class logger;
 // The fiasco states that global objects (allocated before main)
 // may be allocated in an unexpected order.
 // In particular an object allocated before main cannot
-// assume that the constructor of theGlobalVariables
+// assume that the constructor of global
 // object has already been called.
 // In particular one should avoid declaring objects at global scope as
-// the constructors of those may rely on the theGlobalVariables object.
+// the constructors of those may rely on the global object.
 // A possible "horror" scenario: the programmer decides to register a stack trace
 // in the constructor of an object. That runs just fine.
 // One year later, the programmer decides to
 // declare a global object of that type,
-// and again everything runs just fine as theGlobalVariables
+// and again everything runs just fine as global
 // happens to be initialized before that object.
 // Finally, two years later, the same programmer
 // decides to declare a global object of the same type in
-// a file initialized before the declaration of theGlobalVariables.
+// a file initialized before the declaration of global.
 // This causes a nasty and difficult to catch
 // crash before main.
 class GlobalVariables {
@@ -293,7 +293,7 @@ public:
   void MakeReport();
   /// @endcond
 };
-//extern GlobalVariables theGlobalVariables;
+//extern GlobalVariables global;
 
 class logger {
   public:
@@ -363,9 +363,9 @@ class logger {
   logger& doTheLogging(const theType& toBePrinted) {
     this->initializeIfNeeded();
     std::stringstream out;
-    if (this->processType != theGlobalVariables.processType) {
+    if (this->processType != global.processType) {
       out << "WARNING: logger is for process type: " << this->processType
-      << " but current process is of type: " << theGlobalVariables.processType << ". ";
+      << " but current process is of type: " << global.processType << ". ";
     }
     out << toBePrinted;
     this->bufferStandardOutput += out.str();
@@ -383,7 +383,7 @@ class logger {
     }
     if (this->carbonCopy != nullptr) {
       (*(this->carbonCopy)) << out.str();
-    } else if (theGlobalVariables.flagRunningBuiltInWebServer || theGlobalVariables.flagRunningCommandLine) {
+    } else if (global.flagRunningBuiltInWebServer || global.flagRunningCommandLine) {
       if (this->flagWriteImmediately) {
         std::cout << this->bufferStandardOutput;
         this->bufferStandardOutput.clear();

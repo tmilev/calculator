@@ -256,7 +256,7 @@ bool CalculatorFunctionsGeneral::innerTestTLSMessageSequence(
 
   std::stringstream out;
   std::stringstream spanId;
-  spanId << "spanServerSpoofer_" << "_" << theGlobalVariables.GetElapsedMilliseconds();
+  spanId << "spanServerSpoofer_" << "_" << global.GetElapsedMilliseconds();
   out << "<div id = '" << spanId.str() << "'></div>";
   out << "<script>"
   << "window.calculator.crypto.displayTransportLayerSecurity('"
@@ -1204,7 +1204,7 @@ bool CalculatorFunctionsGeneral::innerSolveSerreLikeSystem(
   MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest;
   theComputation.theAlgebraicClosurE = &theCommands.theObjectContainer.theAlgebraicClosure;
   theComputation.flagTryDirectlySolutionOverAlgebraicClosure = startWithAlgebraicClosure;
-  theGlobalVariables.theDefaultFormat.GetElement() = theComputation.theFormat;
+  global.theDefaultFormat.GetElement() = theComputation.theFormat;
   theComputation.flagUseTheMonomialBranchingOptimization = true;
   theComputation.SolveSerreLikeSystem(thePolysAlgebraic);
   std::stringstream out;
@@ -2132,7 +2132,7 @@ bool CalculatorFunctionsGeneral::innerCompositeEWAactOnPoly(
 bool CalculatorFunctionsGeneral::innerFormatCPPSourceCode(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
+  if (!global.UserDefaultHasAdminRights()) {
     return theCommands << "Cpp code formatting available only to logged-in admins. ";
   }
   std::string fileName;
@@ -2148,7 +2148,7 @@ bool CalculatorFunctionsGeneral::innerFormatCPPSourceCode(
 bool CalculatorFunctionsGeneral::innerFormatCPPDirectory(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
+  if (!global.UserDefaultHasAdminRights()) {
     return theCommands << "Cpp code formatting available only to logged-in admins. ";
   }
   std::string fileName;
@@ -6548,7 +6548,7 @@ bool CalculatorFunctionsGeneral::innerComputePairingTablesAndFKFTsubalgebras(
   FileOperations::OpenFileCreateIfNotPresentVirtual(theFile, "output/" + theFileName, false, true, false);
   theFile << theSAs.ToString(&tempFormat);
   std::stringstream out;
-  out << "<a href=\"" << theGlobalVariables.DisplayPathOutputFolder << "FKFTcomputation.html\">FKFTcomputation.html</a>";
+  out << "<a href=\"" << global.DisplayPathOutputFolder << "FKFTcomputation.html\">FKFTcomputation.html</a>";
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -7797,7 +7797,7 @@ bool Calculator::innerSplitFDpartB3overG2old(Calculator& theCommands, const Expr
     << "</td><td>" << HtmlRoutines::GetMathSpanPure(theG2B3Data.theEigenVectorS[k].ToString()) << "</td></tr>";
   }
   out << "</table>";
-  out << "<br>Time final: " << theGlobalVariables.GetElapsedSeconds();
+  out << "<br>Time final: " << global.GetElapsedSeconds();
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -8162,20 +8162,20 @@ bool CalculatorFunctionsGeneral::innerTestTopCommand(
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestTopCommand");
   (void) input;
   (void) theCommands;//portable way of avoiding unused parameter warning
-  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
+  if (!global.UserDefaultHasAdminRights()) {
     return theCommands << "Test top command available only to logged-in admins. ";
   }
-  return output.AssignValue(theGlobalVariables.ToStringHTMLTopCommandLinuxSystem(), theCommands);
+  return output.AssignValue(global.ToStringHTMLTopCommandLinuxSystem(), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerTestIndicator(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestIndicator");
-  if (theGlobalVariables.theProgress.flagBanProcessMonitoring) {
+  if (global.theProgress.flagBanProcessMonitoring) {
     std::stringstream out;
     if (
-      theGlobalVariables.configuration.GetValue(
+      global.configuration.GetValue(
         Configuration::processMonitoringBanned
       ).isTrueRepresentationInJSON()
     ) {
@@ -8219,8 +8219,8 @@ bool CalculatorFunctionsGeneral::innerTestIndicator(
   for (unsigned i = 0; i < static_cast<unsigned>(dummyCommentSize); i ++) {
     dummyComment[i] = 'a';
   }
-  if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection != nullptr) {
-    theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection("Triggered by test indicator. ");
+  if (global.WebServerReturnDisplayIndicatorCloseConnection != nullptr) {
+    global.WebServerReturnDisplayIndicatorCloseConnection("Triggered by test indicator. ");
   } else {
     theCommands << "WebServerReturnDisplayIndicatorCloseConnection is zero. ";
   }
@@ -8229,7 +8229,7 @@ bool CalculatorFunctionsGeneral::innerTestIndicator(
     std::stringstream reportStream;
     reportStream << " Running indicator test, " << i + 1 << " out of " << numRuns << ".";
     theReport.Report(reportStream.str());
-    theGlobalVariables.FallAsleep(4000);
+    global.FallAsleep(4000);
   }
   std::stringstream out;
   out << numRuns << " iterations of the indicator test executed. ";
@@ -8288,7 +8288,7 @@ bool CalculatorFunctionsGeneral::innerCrawlTexFile(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCrawlTexFile");
-  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
+  if (!global.UserDefaultHasAdminRights()) {
     std::stringstream out;
     out << "Command available to logged-in admins only. ";
     return output.AssignValue(out.str(), theCommands);
@@ -8307,7 +8307,7 @@ bool CalculatorFunctionsGeneral::innerBuildFreecalcSlidesOnTopic(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerBuildFreecalcSlidesOnTopic");
-  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
+  if (!global.UserDefaultHasAdminRights()) {
     std::stringstream out;
     out << "Command available to logged-in admins only. ";
     return output.AssignValue(out.str(), theCommands);
@@ -8326,7 +8326,7 @@ bool CalculatorFunctionsGeneral::innerBuildFreecalcSingleSlides(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerBuildFreecalcSingleSlides");
-  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
+  if (!global.UserDefaultHasAdminRights()) {
     std::stringstream out;
     out << "Command available to logged-in admins only. ";
     return output.AssignValue(out.str(), theCommands);
@@ -8340,7 +8340,7 @@ bool CalculatorFunctionsGeneral::innerBuildFreecalcSingleSlides(
   theCrawler.theFileNameToCrawlRelative = input.GetValue<std::string>();
   std::string startingFolder = FileOperations::GetCurrentFolder();
   theCrawler.BuildFreecalC();
-  theGlobalVariables.ChDir(startingFolder);
+  global.ChDir(startingFolder);
   return output.AssignValue(theCrawler.displayResult.str(), theCommands);
 }
 
@@ -8348,7 +8348,7 @@ bool CalculatorFunctionsGeneral::innerBuildFreecalc(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerBuildFreecalc");
-  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
+  if (!global.UserDefaultHasAdminRights()) {
     std::stringstream out;
     out << "Command available to logged-in admins only. ";
     return output.AssignValue(out.str(), theCommands);
@@ -8362,7 +8362,7 @@ bool CalculatorFunctionsGeneral::innerBuildFreecalc(
   theCrawler.theFileNameToCrawlRelative = input.GetValue<std::string>();
   std::string startingFolder = FileOperations::GetCurrentFolder();
   theCrawler.BuildFreecalC();
-  theGlobalVariables.ChDir(startingFolder);
+  global.ChDir(startingFolder);
   return output.AssignValue(theCrawler.displayResult.str(), theCommands);
 }
 
@@ -8606,7 +8606,7 @@ void Calculator::AutomatedTestRun(
   FormatExpressions theFormat;
   theFormat.flagExpressionIsFinal = true;
   for (int i = 0; i < outputCommandStrings.size; i ++) {
-    double startingTime = theGlobalVariables.GetElapsedSeconds();
+    double startingTime = global.GetElapsedSeconds();
     std::stringstream reportStream;
     reportStream << "<br>Testing expression:<br> " << outputCommandStrings[i]
     << "<br>Test progress: testing " << i + 1 << " out of " << outputCommandStrings.size << ". ";
@@ -8617,7 +8617,7 @@ void Calculator::AutomatedTestRun(
     theTester.Evaluate(outputCommandStrings[i]);
     outputResultsWithInit[i] = theTester.theProgramExpression.ToString(&theFormat);
     reportStream << "<br>Result: " << theTester.theProgramExpression.ToString();
-    reportStream << "<br>Done in: " << theGlobalVariables.GetElapsedSeconds()-startingTime << " seconds. ";
+    reportStream << "<br>Done in: " << global.GetElapsedSeconds()-startingTime << " seconds. ";
     theReport.Report(reportStream.str());
   }
 }
@@ -8647,11 +8647,11 @@ bool CalculatorFunctionsGeneral::innerCrash(
 bool CalculatorFunctionsGeneral::innerStopServer(Calculator& theCommands, const Expression& input, Expression& output) {
   (void) input;
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerStopServer");
-  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
+  if (!global.UserDefaultHasAdminRights()) {
     return output.MakeError("Stop server function allowed to logged-in admins only. ", theCommands);
   }
   logWorker << "Stopping server as requested. ";
-  theGlobalVariables.flagStopNeeded = true;
+  global.flagStopNeeded = true;
   theCommands.flagAbortComputationASAP = true;
   return output.AssignValue(std::string("Stopping."), theCommands);
 }

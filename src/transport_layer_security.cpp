@@ -65,7 +65,7 @@ void TransportLayerSecurity::initializeNonThreadSafeOnFirstCall(bool IamServer) 
     this->openSSLData.initSSLServer();
     if (this->flagBuiltInTLSAvailable) {
       this->theServer.initialize();
-      if (theGlobalVariables.flagAutoUnitTest) {
+      if (global.flagAutoUnitTest) {
         logServer << logger::yellow
         << "Testing cryptographic functions ..." << logger::endL;
         SSLRecord::Test::Serialization();
@@ -1456,7 +1456,7 @@ JSData Serialization::Marker::ToJSON() {
 
 std::string SSLRecord::ToHtml() {
   std::stringstream out, spanId;
-  spanId << "spanSSLRecord_" << "_" << theGlobalVariables.GetElapsedMilliseconds();
+  spanId << "spanSSLRecord_" << "_" << global.GetElapsedMilliseconds();
   out << "<div id = '" << spanId.str() << "'></div>";
   out << "<script>"
   << "window.calculator.crypto.displaySSLRecord('"

@@ -35,7 +35,7 @@ std::string Calculator::WriteDefaultLatexFileReturnHtmlLink(
   std::stringstream systemCommand1, systemCommand2, systemCommand3;
   fileName << "defaultOutput" << MathRoutines::HashString(fileContent);
   if (!FileOperations::OpenFileCreateIfNotPresentVirtual(
-    theFile, theGlobalVariables.DisplayPathOutputFolder + fileName.str() + ".tex", false, true, false
+    theFile, global.DisplayPathOutputFolder + fileName.str() + ".tex", false, true, false
   )) {
     return "failed to create file: " + fileName.str() + ".tex";
   }
@@ -49,23 +49,23 @@ std::string Calculator::WriteDefaultLatexFileReturnHtmlLink(
   theFile.flush();
   theFile.close();
   systemCommand1 << " latex -output-directory=" << baseFolder << " " << fileName.str() << ".tex";
-  theGlobalVariables.CallSystemNoOutput(systemCommand1.str(), &logWorker);
+  global.CallSystemNoOutput(systemCommand1.str(), &logWorker);
   if (useLatexDviPSpsToPNG) {
     systemCommand2 << " dvips -o " << fileNameWithPathPhysical << ".ps "
     << fileNameWithPathPhysical << ".dvi";
-    theGlobalVariables.CallSystemNoOutput(systemCommand2.str(), &logWorker);
+    global.CallSystemNoOutput(systemCommand2.str(), &logWorker);
     systemCommand3 << " convert " << fileNameWithPathPhysical
     << ".ps " << fileNameWithPathPhysical << ".png";
-    theGlobalVariables.CallSystemNoOutput(systemCommand3.str(), &logWorker);
+    global.CallSystemNoOutput(systemCommand3.str(), &logWorker);
   }
   std::stringstream out;
-  out << "<img src =\"" << theGlobalVariables.DisplayPathOutputFolder
+  out << "<img src =\"" << global.DisplayPathOutputFolder
   << fileName.str() << ".png\"></img><a href=\""
-  << theGlobalVariables.DisplayPathOutputFolder
-  << fileName.str() << ".tex\">" << theGlobalVariables.DisplayPathOutputFolder
+  << global.DisplayPathOutputFolder
+  << fileName.str() << ".tex\">" << global.DisplayPathOutputFolder
   << fileName.str() << ".tex</a>";
   if (outputFileNameNoExtension != nullptr) {
-    *outputFileNameNoExtension = theGlobalVariables.DisplayPathOutputFolder + fileName.str();
+    *outputFileNameNoExtension = global.DisplayPathOutputFolder + fileName.str();
   }
   this->numOutputFileS ++;
   return out.str();
@@ -654,13 +654,13 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
     latexReport << "$\\begin{array}{r}" << theMod.theChaR.ToString() << "(\\mathfrak{l}) \\\\ \\\\dim:~" << theMod.GetDim() << " \\end{array}$";
     for (int j = 0; j < theGeneratorsItry.size; j ++) {
       theGenerator = theGeneratorsItry[j];
-      currentTime = theGlobalVariables.GetElapsedSeconds();
+      currentTime = global.GetElapsedSeconds();
       currentAdditions = Rational::TotalAdditions();
       currentMultiplications = Rational::TotalMultiplications();
       theMod.GetActionGenVermaModuleAsDiffOperator(theGenerator, theQDOs[j], useNilWeight, ascending);
       totalAdditions += Rational::TotalAdditions() - currentAdditions;
       totalMultiplications += Rational::TotalMultiplications() - currentMultiplications;
-      totalTime += theGlobalVariables.GetElapsedSeconds() - currentTime;
+      totalTime += global.GetElapsedSeconds() - currentTime;
       theWeylFormat.CustomCoeffMonSeparator = "\\otimes ";
       theWeylFormat.NumAmpersandsPerNewLineForLaTeX = 2;
       out << "<td>" << HtmlRoutines::GetMathMouseHover("\\begin{array}{|r|c|l|}&&"+theQDOs[j].ToString(&theWeylFormat) +"\\end{array}")
@@ -959,7 +959,7 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
 }
 
 bool Calculator::innerWriteSSLieAlgebraToHD(Calculator& theCommands, const Expression& input, Expression& output) {
-  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
+  if (!global.UserDefaultHasAdminRights()) {
     return output.MakeError(std::string("Caching structure constants to HD available to logged-in admins only. "), theCommands);
   }
   return Calculator::innerWriteToHDOrPrintSSLieAlgebra(theCommands, input, output, true, true);
@@ -969,7 +969,7 @@ bool Calculator::innerWriteToHDOrPrintSSLieAlgebra(
   Calculator& theCommands, const Expression& input, Expression& output, bool Verbose, bool writeToHD
 ) {
   MacroRegisterFunctionWithName("Calculator::innerPrintSSLieAlgebra");
-//  double startTimeDebug= theGlobalVariables.GetElapsedSeconds();
+//  double startTimeDebug= global.GetElapsedSeconds();
   SemisimpleLieAlgebra *tempSSpointer = nullptr;
   input.CheckInitialization();
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
@@ -2363,7 +2363,7 @@ std::string Function::ToStringFull() const {
     }
     out2 << HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(out.str());
     if (this->theExample != "") {
-      out2 << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
+      out2 << "<a href=\"" << global.DisplayNameExecutable
       << "?request=calculator&showExamples = true&mainInput="
       << HtmlRoutines::ConvertStringToURLString(this->theExample, false)
       << "\"> " << " Example" << "</a>" ;
@@ -2460,9 +2460,9 @@ void Calculator::ComputeAutoCompleteKeyWords() {
 std::string Calculator::ToStringPerformance() {
   MacroRegisterFunctionWithName("Calculator::ToStringPerformance");
   std::stringstream out;
-  int64_t elapsedMilliseconds = theGlobalVariables.GetElapsedMilliseconds();
+  int64_t elapsedMilliseconds = global.GetElapsedMilliseconds();
   int64_t computationMilliseconds = elapsedMilliseconds - this->startTimeEvaluationMilliseconds;
-  int64_t requestMilliseconds = elapsedMilliseconds - theGlobalVariables.millisecondsComputationStart;
+  int64_t requestMilliseconds = elapsedMilliseconds - global.millisecondsComputationStart;
   int64_t waitingMilliseconds = elapsedMilliseconds - requestMilliseconds;
   out << "<b>Double-click formulas to get their LaTeX.</b>"
   << "<br>Double-click back to hide the LaTeX. ";
@@ -2473,10 +2473,10 @@ std::string Calculator::ToStringPerformance() {
   << " s). ";
   std::stringstream moreDetails;
   moreDetails << "<br>Max computation time soft: "
-  << (static_cast<double>(theGlobalVariables.millisecondsMaxComputation) / 2000)
+  << (static_cast<double>(global.millisecondsMaxComputation) / 2000)
   << " s [calculator error when exceeded]. ";
   moreDetails << "<br>Max computation time hard: "
-  << (static_cast<double>(theGlobalVariables.millisecondsMaxComputation) / 1000) << " s [worker crash when exceeded]. ";
+  << (static_cast<double>(global.millisecondsMaxComputation) / 1000) << " s [worker crash when exceeded]. ";
   moreDetails << "<br>Total process request time: "
   << requestMilliseconds << " ms (~"
   << (static_cast<double> (requestMilliseconds) / 1000)
@@ -2542,9 +2542,9 @@ std::string Calculator::ToString() {
   std::stringstream out2;
   std::string openTag1 = "<span style =\"color:blue\">";
   std::string closeTag1 = "</span>";
-  if (theGlobalVariables.millisecondsMaxComputation > 0) {
+  if (global.millisecondsMaxComputation > 0) {
     out2 << "Computation time limit: "
-    << theGlobalVariables.millisecondsMaxComputation
+    << global.millisecondsMaxComputation
     << " ms.<hr>";
   } else {
     out2 << "No computation time limit.<hr> ";
@@ -2570,7 +2570,7 @@ std::string Calculator::ToString() {
     out2 << HtmlRoutines::GetHtmlButton("ShowCalculatorExamplesButton", theExampleInjector.str(), "Examples.");
     out2 << "<span id =\"calculatorExamples\"></span>";
   }
-  if (!theGlobalVariables.UserDebugFlagOn()) {
+  if (!global.UserDebugFlagOn()) {
     return out2.str();
   }
   std::stringstream out;

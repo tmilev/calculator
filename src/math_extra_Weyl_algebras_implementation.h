@@ -80,12 +80,12 @@ void ElementWeylAlgebra<coefficient>::MultiplyTwoMonomials(
 
 template <class coefficient>
 void ElementWeylAlgebra<coefficient>::LieBracketOnTheLeftMakeReport(const ElementWeylAlgebra& standsOnTheLeft) {
-  this->LieBracketOnTheLeft(standsOnTheLeft, theGlobalVariables);
+  this->LieBracketOnTheLeft(standsOnTheLeft, global);
 }
 
 template <class coefficient>
 void ElementWeylAlgebra<coefficient>::LieBracketOnTheRightMakeReport(const ElementWeylAlgebra& standsOnTheRight) {
-  this->LieBracketOnTheRight(standsOnTheRight, theGlobalVariables);
+  this->LieBracketOnTheRight(standsOnTheRight, global);
 }
 
 template <class coefficient>
@@ -126,7 +126,7 @@ void ElementWeylAlgebra<coefficient>::LieBracketOnTheRight(const ElementWeylAlge
   tempEl1 = standsOnTheRight;
   tempEl1.MultiplyOnTheLeft(*this);
   tempEl2 = *this;
-  tempEl2.MultiplyOnTheLeft(standsOnTheRight, theGlobalVariables);
+  tempEl2.MultiplyOnTheLeft(standsOnTheRight, global);
   *this = tempEl1;
   *this -= tempEl2;
 }

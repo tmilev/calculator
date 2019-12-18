@@ -3747,7 +3747,7 @@ std::string Expression::ToString(
   } else if (this->IsListStartingWithAtom(this->owner->opEndStatement())) {
     bool createTable = (startingExpression != nullptr);
     bool createSingleTable = false;
-    if (createTable == false && theFormat != nullptr && !theGlobalVariables.flagRunningCommandLine) {
+    if (createTable == false && theFormat != nullptr && !global.flagRunningCommandLine) {
       createSingleTable = theFormat->flagMakingExpressionTableWithLatex;
       theFormat->flagMakingExpressionTableWithLatex = false;
     }

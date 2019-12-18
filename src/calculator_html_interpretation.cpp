@@ -12,11 +12,11 @@ static ProjectInformationInstance projectInfoInstanceHtmlInterpretationInterface
 
 JSData WebAPIResponse::GetProblemSolutionJSON() {
   MacroRegisterFunctionWithName("WebAPIReponse::GetProblemSolution");
-  int64_t startMilliseconds = theGlobalVariables.GetElapsedMilliseconds();
+  int64_t startMilliseconds = global.GetElapsedMilliseconds();
   CalculatorHTML theProblem;
   std::stringstream out, errorStream;
   JSData result;
-  theProblem.LoadCurrentProblemItem(false, theGlobalVariables.GetWebInput("randomSeed"), &errorStream);
+  theProblem.LoadCurrentProblemItem(false, global.GetWebInput("randomSeed"), &errorStream);
   if (!theProblem.flagLoadedSuccessfully) {
     out << "Problem name is: " << theProblem.fileName
     << " <b>Could not load problem, this may be a bug. "
@@ -32,7 +32,7 @@ JSData WebAPIResponse::GetProblemSolutionJSON() {
     result[WebAPI::result::resultHtml] = out.str();
     return result;
   }
-  if (theGlobalVariables.GetWebInput("randomSeed") == "") {
+  if (global.GetWebInput("randomSeed") == "") {
     out << "<b>I could not figure out the exercise problem (missing random seed). </b>";
     result[WebAPI::result::resultHtml] = out.str();
     return result;
@@ -45,7 +45,7 @@ JSData WebAPIResponse::GetProblemSolutionJSON() {
 
   }
   std::string lastStudentAnswerID;
-  MapList<std::string, std::string, MathRoutines::HashString>& theArgs = theGlobalVariables.webArguments;
+  MapList<std::string, std::string, MathRoutines::HashString>& theArgs = global.webArguments;
   for (int i = 0; i < theArgs.size(); i ++) {
     StringRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID);
   }
@@ -54,13 +54,13 @@ JSData WebAPIResponse::GetProblemSolutionJSON() {
     out << "<b>Student submitted answerID: " << lastStudentAnswerID
     << " but that is not an ID of an answer tag. "
     << "</b>";
-    if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights()) {
+    if (global.UserDebugFlagOn() && global.UserDefaultHasAdminRights()) {
       out << "<hr>" << theProblem.theProblemData.ToStringAvailableAnswerIds();
       //out << "<hr>Client input: " << this->mainArgumentRAW << "<hr>";
       out << WebAPIResponse::ToStringCalculatorArgumentsHumanReadable();
     }
     result[WebAPI::result::resultHtml] = out.str();
-    result[WebAPI::result::millisecondsComputation] = theGlobalVariables.GetElapsedMilliseconds() - startMilliseconds;
+    result[WebAPI::result::millisecondsComputation] = global.GetElapsedMilliseconds() - startMilliseconds;
     return result;
   }
   Answer& currentA = theProblem.theProblemData.theAnswers.theValues[indexLastAnswerId];
@@ -91,7 +91,7 @@ JSData WebAPIResponse::GetProblemSolutionJSON() {
     << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
     << theInterpreteR.ToStringSyntacticStackHumanReadable(false, false);
     result[WebAPI::result::resultHtml] = out.str();
-    result[WebAPI::result::millisecondsComputation] = theGlobalVariables.GetElapsedMilliseconds() - startMilliseconds;
+    result[WebAPI::result::millisecondsComputation] = global.GetElapsedMilliseconds() - startMilliseconds;
     return result;
   }
   if (theInterpreteR.flagAbortComputationASAP) {
@@ -102,12 +102,12 @@ JSData WebAPIResponse::GetProblemSolutionJSON() {
     << theInterpreteR.outputCommentsString
     << "<hr>Input: <br>" << theInterpreteR.inputString;
     result[WebAPI::result::resultHtml] = out.str();
-    result[WebAPI::result::millisecondsComputation] = theGlobalVariables.GetElapsedMilliseconds() - startMilliseconds;
+    result[WebAPI::result::millisecondsComputation] = global.GetElapsedMilliseconds() - startMilliseconds;
     return result;
   }
   if (!theProblem.InterpretProcessExecutedCommands(theInterpreteR, currentA.solutionElements, out)) {
     result[WebAPI::result::resultHtml] = out.str();
-    result[WebAPI::result::millisecondsComputation] = theGlobalVariables.GetElapsedMilliseconds() - startMilliseconds;
+    result[WebAPI::result::millisecondsComputation] = global.GetElapsedMilliseconds() - startMilliseconds;
     return result;
   }
   for (int i = 0; i < currentA.solutionElements.size; i ++) {
@@ -115,9 +115,9 @@ JSData WebAPIResponse::GetProblemSolutionJSON() {
       out << currentA.solutionElements[i].ToStringInterpretedBody();
     }
   }
-  if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights()) {
+  if (global.UserDebugFlagOn() && global.UserDefaultHasAdminRights()) {
     out << "<hr>"
-    << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
+    << "<a href=\"" << global.DisplayNameExecutable
     << "?request=calculator&mainInput="
     << HtmlRoutines::ConvertStringToURLString(answerCommandsNoEnclosures.str(), false)
     << "\">Input link</a>"
@@ -125,26 +125,26 @@ JSData WebAPIResponse::GetProblemSolutionJSON() {
     << "<hr>Raw input: " << WebAPIResponse::ToStringCalculatorArgumentsHumanReadable();
   }
   result[WebAPI::result::resultHtml] = out.str();
-  result[WebAPI::result::millisecondsComputation] = theGlobalVariables.GetElapsedMilliseconds() - startMilliseconds;
+  result[WebAPI::result::millisecondsComputation] = global.GetElapsedMilliseconds() - startMilliseconds;
   return result;
 }
 
 std::string WebAPIResponse::GetSetProblemDatabaseInfoHtml() {
   MacroRegisterFunctionWithName("WebAPIReponse::GetSetProblemDatabaseInfoHtml");
-  if (!theGlobalVariables.flagDatabaseCompiled) {
+  if (!global.flagDatabaseCompiled) {
     return "Cannot modify problem weights (no database available)";
   }
-  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
+  if (!global.UserDefaultHasAdminRights()) {
     return "<b>Only admins may set problem weights.</b>";
   }
   CalculatorHTML theProblem;
-  std::string inputProblemInfo = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false);
-  theProblem.topicListFileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("topicList"), false);
+  std::string inputProblemInfo = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("mainInput"), false);
+  theProblem.topicListFileName = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("topicList"), false);
   std::stringstream commentsOnFailure;
   if (!theProblem.LoadAndParseTopicList(commentsOnFailure)) {
     return "Failed to load topic list from file name: " + theProblem.topicListFileName + ". " + commentsOnFailure.str();
   }
-  theProblem.currentUseR.UserCalculatorData::operator=(theGlobalVariables.userDefault);
+  theProblem.currentUseR.UserCalculatorData::operator=(global.userDefault);
   std::stringstream out;
   if (!theProblem.PrepareSectionList(commentsOnFailure)) {
     out << "<span style =\"color:red\"><b>Failed to prepare section list. </b></span>" << commentsOnFailure.str();
@@ -233,12 +233,12 @@ std::string WebAPIResponse::GetCommentsInterpretation(
 
 JSData WebAPIResponse::submitAnswersPreviewJSON() {
   MacroRegisterFunctionWithName("HtmlInterpretation::submitAnswersPreviewJSON");
-  double startTime = theGlobalVariables.GetElapsedSeconds();
+  double startTime = global.GetElapsedSeconds();
   std::string lastStudentAnswerID;
   std::string lastAnswer;
   std::stringstream out, studentAnswerSream;
   MapList<std::string, std::string, MathRoutines::HashString>& theArgs =
-  theGlobalVariables.webArguments;
+  global.webArguments;
   JSData result;
   for (int i = 0; i < theArgs.size(); i ++) {
     if (StringRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID)) {
@@ -250,8 +250,8 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   CalculatorHTML theProblem;
   std::stringstream errorStream, comments;
   theProblem.LoadCurrentProblemItem(
-    theGlobalVariables.UserRequestRequiresLoadingRealExamData(),
-    theGlobalVariables.GetWebInput("randomSeed"),
+    global.UserRequestRequiresLoadingRealExamData(),
+    global.GetWebInput("randomSeed"),
     &errorStream
   );
   if (!theProblem.flagLoadedSuccessfully) {
@@ -264,7 +264,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   if (indexLastAnswerId == - 1) {
     errorStream << "<br>Student submitted answerID: " << lastStudentAnswerID
     << " but that is not an ID of an answer tag. "
-    << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() - startTime
+    << "<br>Response time: " << global.GetElapsedSeconds() - startTime
     << " second(s). ";
     result[WebAPI::result::error] = errorStream.str();
     result[WebAPI::result::resultHtml] = out.str();
@@ -273,10 +273,10 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   Answer& currentA = theProblem.theProblemData.theAnswers.theValues[indexLastAnswerId];
   if (!theProblem.PrepareCommands(&comments)) {
     errorStream << "Something went wrong while interpreting the problem file. ";
-    if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights()) {
+    if (global.UserDebugFlagOn() && global.UserDefaultHasAdminRights()) {
       errorStream << comments.str();
     }
-    result[WebAPI::result::millisecondsComputation] = theGlobalVariables.GetElapsedSeconds() - startTime;
+    result[WebAPI::result::millisecondsComputation] = global.GetElapsedSeconds() - startTime;
     result[WebAPI::result::error] = errorStream.str();
     result[WebAPI::result::resultHtml] = out.str();
     return result;
@@ -298,14 +298,14 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
     errorStream << "<b style ='color:red'>Failed to parse your answer, got:</b><br>"
     << theInterpreteR.ToStringSyntacticStackHumanReadable(false, true);
     result[WebAPI::result::error] = errorStream.str();
-    result[WebAPI::result::millisecondsComputation] = theGlobalVariables.GetElapsedSeconds() - startTime;
+    result[WebAPI::result::millisecondsComputation] = global.GetElapsedSeconds() - startTime;
     result[WebAPI::result::resultHtml] = out.str();
     return result;
   } else if (theInterpreteR.flagAbortComputationASAP) {
     out << "<b style = 'color:red'>Failed to evaluate your answer, got:</b><br>"
     << theInterpreteR.outputString;
     result[WebAPI::result::resultHtml] = out.str();
-    result[WebAPI::result::millisecondsComputation] = theGlobalVariables.GetElapsedSeconds() - startTime;
+    result[WebAPI::result::millisecondsComputation] = global.GetElapsedSeconds() - startTime;
     return result;
   }
   FormatExpressions theFormat;
@@ -344,7 +344,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   }
   std::stringstream problemLinkStream;
   problemLinkStream
-  << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
+  << "<a href=\"" << global.DisplayNameExecutable
   << "?request=calculator&mainInput="
   << HtmlRoutines::ConvertStringToURLString(calculatorInputStreamNoEnclosures.str(), false)
   << "\">Input link</a>";
@@ -354,14 +354,14 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
     << "Something went wrong when parsing your answer "
     << "in the context of the current problem. "
     << "</b></span>";
-    if (theGlobalVariables.UserDefaultHasAdminRights()) {
+    if (global.UserDefaultHasAdminRights()) {
       out
       << problemLinkStream.str()
       << theInterpreterWithAdvice.outputString << "<br>"
       << theInterpreterWithAdvice.outputCommentsString;
     }
     result[WebAPI::result::resultHtml] = out.str();
-    result[WebAPI::result::millisecondsComputation] = theGlobalVariables.GetElapsedSeconds() - startTime;
+    result[WebAPI::result::millisecondsComputation] = global.GetElapsedSeconds() - startTime;
     return result;
   }
   if (theInterpreterWithAdvice.flagAbortComputationASAP) {
@@ -369,7 +369,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
     << "Something went wrong when interpreting your answer "
     << "in the context of the current problem. "
     << "</b></span>";
-    if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn()) {
+    if (global.UserDefaultHasAdminRights() && global.UserDebugFlagOn()) {
       out << "<br>Logged-in as admin with debug flag on => printing error details. "
       << theInterpreterWithAdvice.outputString << "<br>"
       << theInterpreterWithAdvice.outputCommentsString;
@@ -378,14 +378,14 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
       << calculatorInputStream.str();
     }
     result[WebAPI::result::resultHtml] = out.str();
-    result[WebAPI::result::millisecondsComputation] = theGlobalVariables.GetElapsedSeconds() - startTime;
+    result[WebAPI::result::millisecondsComputation] = global.GetElapsedSeconds() - startTime;
     return result;
   }
   if (hasCommentsBeforeSubmission){
     out << WebAPIResponse::GetCommentsInterpretation(theInterpreterWithAdvice, 3, theFormat);
   }
-  result[WebAPI::result::millisecondsComputation] = theGlobalVariables.GetElapsedSeconds() - startTime;
-  if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn()) {
+  result[WebAPI::result::millisecondsComputation] = global.GetElapsedSeconds() - startTime;
+  if (global.UserDefaultHasAdminRights() && global.UserDebugFlagOn()) {
     out << "<hr> " << problemLinkStream.str()
     << "<br>"
     << calculatorInputStreamNoEnclosures.str()
@@ -402,15 +402,15 @@ JSData WebAPIResponse::ClonePageResult() {
   MacroRegisterFunctionWithName("WebAPIReponse::ClonePageResult");
   JSData result;
   if (
-    !theGlobalVariables.flagLoggedIn ||
-    !theGlobalVariables.UserDefaultHasAdminRights() ||
-    !theGlobalVariables.flagUsingSSLinCurrentConnection
+    !global.flagLoggedIn ||
+    !global.UserDefaultHasAdminRights() ||
+    !global.flagUsingSSLinCurrentConnection
   ) {
     result[WebAPI::result::error]= "Cloning problems allowed only for logged-in admins under ssl connection.";
     return result;
   }
-  std::string fileNameTarget = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput(WebAPI::problem::fileNameTarget), false);
-  std::string fileNameToBeCloned = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput(WebAPI::problem::fileName), false);
+  std::string fileNameTarget = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput(WebAPI::problem::fileNameTarget), false);
+  std::string fileNameToBeCloned = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput(WebAPI::problem::fileName), false);
   std::stringstream out;
   std::string startingFileString;
   if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly(fileNameToBeCloned, startingFileString, &out)) {
@@ -708,14 +708,14 @@ std::string WebAPIResponse::GetPageFromTemplate() {
   std::stringstream out;
   CalculatorHTML thePage;
   std::stringstream comments;
-  thePage.fileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
-  if (!thePage.LoadMe(true, theGlobalVariables.GetWebInput("randomSeed"), &comments)) {
+  thePage.fileName = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("courseHome"), false);
+  if (!thePage.LoadMe(true, global.GetWebInput("randomSeed"), &comments)) {
     out << "<html>"
     << "<head>" << HtmlRoutines::GetCSSLinkCalculator("/") << "</head>"
     << "<body>";
     out
     << "<b>Failed to load file: "
-    << theGlobalVariables.GetWebInput("courseHome") << ". </b>"
+    << global.GetWebInput("courseHome") << ". </b>"
     << "<br>Comments:<br> " << comments.str();
     out << "</body></html>";
     return out.str();
@@ -728,14 +728,14 @@ std::string WebAPIResponse::GetPageFromTemplate() {
     << "<body>";
     out
     << "<b>Failed to interpret as template the following file: "
-    << theGlobalVariables.GetWebInput("courseHome") << ". </b>"
+    << global.GetWebInput("courseHome") << ". </b>"
     << "<br>Comments:<br> " << comments.str();
     out << "</body></html>";
     return out.str();
   }
   out << WebAPIResponse::GetHtmlTagWithManifest();
   out << "<!-- File automatically generated from template: "
-  << theGlobalVariables.GetWebInput(WebAPI::problem::fileName)
+  << global.GetWebInput(WebAPI::problem::fileName)
   << ".-->\n";
   out << "<head><!-- tag added automatically; user-specified head tag ignored-->\n";
   out << thePage.outputHtmlHeadNoTag;
@@ -758,17 +758,17 @@ JSData WebAPIResponse::GetTopicTableJSON() {
   std::stringstream out;
   CalculatorHTML thePage;
   std::stringstream comments;
-  thePage.fileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
-  thePage.topicListFileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("topicList"), false);
+  thePage.fileName = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("courseHome"), false);
+  thePage.topicListFileName = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("topicList"), false);
   JSData result;
   if (!thePage.LoadAndParseTopicList(out)) {
     out << "Failed to load and parse topic list.";
     result[WebAPI::result::error] = out.str();
     return result;
   }
-  if (!thePage.LoadMe(true, theGlobalVariables.GetWebInput("randomSeed"), &comments)) {
+  if (!thePage.LoadMe(true, global.GetWebInput("randomSeed"), &comments)) {
     comments << "\"Failed to load file: "
-    << theGlobalVariables.GetWebInput("courseHome") << ""
+    << global.GetWebInput("courseHome") << ""
     << "<br>Comments:<br> " << comments.str();
     comments << "\"";
     result[WebAPI::result::comments] = comments.str();
@@ -781,37 +781,37 @@ JSData WebAPIResponse::GetTopicTableJSON() {
 void WebAPIResponse::GetJSDataUserInfo(JSData& outputAppend, const std::string& comments) {
   MacroRegisterFunctionWithName("WebAPIReponse::GetJSDataUserInfo");
   outputAppend["linkApp"] = WebAPIResponse::youHaveReachedTheBackend;
-  outputAppend[WebAPI::result::loginDisabledEveryoneIsAdmin] = theGlobalVariables.flagDisableDatabaseLogEveryoneAsAdmin;
-  outputAppend[WebAPI::result::useFallbackDatabase] = theGlobalVariables.flagDatabaseUseFallback;
+  outputAppend[WebAPI::result::loginDisabledEveryoneIsAdmin] = global.flagDisableDatabaseLogEveryoneAsAdmin;
+  outputAppend[WebAPI::result::useFallbackDatabase] = global.flagDatabaseUseFallback;
   if (comments != "") {
     outputAppend[WebAPI::result::comments] = HtmlRoutines::ConvertStringToHtmlString(comments, false);
   }
-  if (!theGlobalVariables.theProgress.flagBanProcessMonitoring) {
+  if (!global.theProgress.flagBanProcessMonitoring) {
     outputAppend[WebAPI::UserInfo::processMonitoring] = "true";
-    outputAppend[Configuration::millisecondsReplyAfterComputation] = static_cast<double>(theGlobalVariables.millisecondsReplyAfterComputation);
+    outputAppend[Configuration::millisecondsReplyAfterComputation] = static_cast<double>(global.millisecondsReplyAfterComputation);
   } else {
     outputAppend[WebAPI::UserInfo::processMonitoring] = "false";
   }
-  if (theGlobalVariables.GetWebInput(WebAPI::result::error) != "") {
-    outputAppend[WebAPI::result::error] = HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.GetWebInput(WebAPI::result::error), false);
+  if (global.GetWebInput(WebAPI::result::error) != "") {
+    outputAppend[WebAPI::result::error] = HtmlRoutines::ConvertStringToHtmlString(global.GetWebInput(WebAPI::result::error), false);
   }
-  if (!theGlobalVariables.flagLoggedIn) {
+  if (!global.flagLoggedIn) {
     outputAppend[WebAPI::result::status] = "not logged in";
     return;
   }
   outputAppend[WebAPI::result::status] = "logged in";
-  outputAppend[DatabaseStrings::labelUsername]            = HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.userDefault.username                 , false);
-  outputAppend[DatabaseStrings::labelAuthenticationToken] = HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.userDefault.actualAuthenticationToken, false);
-  outputAppend[DatabaseStrings::labelUserRole]            = HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.userDefault.userRole                 , false);
-  outputAppend[DatabaseStrings::labelInstructor]          = HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.userDefault.instructorInDB           , false);
-  outputAppend[DatabaseStrings::labelSection]             = HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.userDefault.sectionInDB              , false);
-  outputAppend[DatabaseStrings::labelCurrentCourses]      = HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.userDefault.courseInDB               , false);
-  outputAppend[DatabaseStrings::labelDeadlinesSchema]     = HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.userDefault.deadlineSchema           , false);
+  outputAppend[DatabaseStrings::labelUsername]            = HtmlRoutines::ConvertStringToHtmlString(global.userDefault.username                 , false);
+  outputAppend[DatabaseStrings::labelAuthenticationToken] = HtmlRoutines::ConvertStringToHtmlString(global.userDefault.actualAuthenticationToken, false);
+  outputAppend[DatabaseStrings::labelUserRole]            = HtmlRoutines::ConvertStringToHtmlString(global.userDefault.userRole                 , false);
+  outputAppend[DatabaseStrings::labelInstructor]          = HtmlRoutines::ConvertStringToHtmlString(global.userDefault.instructorInDB           , false);
+  outputAppend[DatabaseStrings::labelSection]             = HtmlRoutines::ConvertStringToHtmlString(global.userDefault.sectionInDB              , false);
+  outputAppend[DatabaseStrings::labelCurrentCourses]      = HtmlRoutines::ConvertStringToHtmlString(global.userDefault.courseInDB               , false);
+  outputAppend[DatabaseStrings::labelDeadlinesSchema]     = HtmlRoutines::ConvertStringToHtmlString(global.userDefault.deadlineSchema           , false);
   JSData sectionsTaught;
   sectionsTaught.theType = JSData::token::tokenArray;
-  for (int i = 0; i < theGlobalVariables.userDefault.sectionsTaught.size; i ++) {
+  for (int i = 0; i < global.userDefault.sectionsTaught.size; i ++) {
     JSData nextSection;
-    nextSection = HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.userDefault.sectionsTaught[i], false);
+    nextSection = HtmlRoutines::ConvertStringToHtmlString(global.userDefault.sectionsTaught[i], false);
     sectionsTaught.theList.AddOnTop(nextSection);
   }
   outputAppend[DatabaseStrings::labelSectionsTaught] = sectionsTaught;
@@ -830,24 +830,24 @@ std::string WebAPIResponse::GetJSONFromTemplate() {
   CalculatorHTML thePage;
   thePage.flagUseJSON = true;
   std::stringstream comments;
-  thePage.fileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
-  if (!thePage.LoadMe(true, theGlobalVariables.GetWebInput("randomSeed"), &comments)) {
+  thePage.fileName = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("courseHome"), false);
+  if (!thePage.LoadMe(true, global.GetWebInput("randomSeed"), &comments)) {
     out << "<b>Failed to load file: "
-    << theGlobalVariables.GetWebInput("courseHome") << ". </b>"
+    << global.GetWebInput("courseHome") << ". </b>"
     << "<br>Comments:<br> " << comments.str();
     return out.str();
   }
   if (!thePage.InterpretHtml(&comments)) {
     out << "<b>Failed to interpret as template the following file: "
-    << theGlobalVariables.GetWebInput("courseHome") << ". </b>"
+    << global.GetWebInput("courseHome") << ". </b>"
     << "<br>Comments:<br> " << comments.str();
     return out.str();
   }
   out << "<!-- File automatically generated from template: "
-  << theGlobalVariables.GetWebInput(WebAPI::problem::fileName)
+  << global.GetWebInput(WebAPI::problem::fileName)
   << ".-->\n";
   out << thePage.outputHtmlBodyNoTag;
-  out << "<small>Generated in " << theGlobalVariables.GetElapsedMilliseconds() << " ms. </small>";
+  out << "<small>Generated in " << global.GetElapsedMilliseconds() << " ms. </small>";
   return out.str();
 }
 
@@ -857,7 +857,7 @@ JSData WebAPIResponse::GetExamPageJSON() {
   MacroRegisterFunctionWithName("WebAPIReponse::GetExamPageJSON");
   std::stringstream out;
   JSData output;
-  if (!theGlobalVariables.flagLoggedIn && theGlobalVariables.userCalculatorRequestType == "scoredQuizJSON") {
+  if (!global.flagLoggedIn && global.userCalculatorRequestType == "scoredQuizJSON") {
     output[WebAPI::result::error] = "Scored quiz requires login";
     return output;
   }
@@ -866,8 +866,8 @@ JSData WebAPIResponse::GetExamPageJSON() {
   theFile.flagUseJSON = true;
   std::stringstream errorAndDebugStream;
   std::string problemBody = theFile.LoadAndInterpretCurrentProblemItemJSON(
-    theGlobalVariables.UserRequestRequiresLoadingRealExamData(),
-    theGlobalVariables.GetWebInput("randomSeed"),
+    global.UserRequestRequiresLoadingRealExamData(),
+    global.GetWebInput("randomSeed"),
     &errorAndDebugStream
   );
   //<-must come after theFile.outputHtmlHeadNoTag
@@ -911,8 +911,8 @@ JSData WebAPIResponse::GetEditPageJSON() {
   MacroRegisterFunctionWithName("WebAPIReponse::GetEditPageJSON");
   JSData output;
   if (
-    !theGlobalVariables.flagLoggedIn ||
-    !theGlobalVariables.UserDefaultHasAdminRights()
+    !global.flagLoggedIn ||
+    !global.UserDefaultHasAdminRights()
   ) {
     output[WebAPI::result::error] = "Only logged-in admins are allowed to edit pages.";
     return output;
@@ -920,7 +920,7 @@ JSData WebAPIResponse::GetEditPageJSON() {
   CalculatorHTML theFile;
   theFile.LoadFileNames();
   std::stringstream failureStream;
-  if (!theFile.LoadMe(false, theGlobalVariables.GetWebInput("randomSeed"), &failureStream)) {
+  if (!theFile.LoadMe(false, global.GetWebInput("randomSeed"), &failureStream)) {
     std::stringstream errorStream;
     errorStream << " <b>Failed to load file: " << theFile.fileName << ", perhaps the file does not exist. </b>"
     << failureStream.str();
@@ -963,21 +963,21 @@ JSData WebAPIResponse::GetEditPageJSON() {
 }
 
 JSData WebAPIResponse::SubmitAnswersJSON() {
-  return WebAPIResponse::SubmitAnswersJSON(theGlobalVariables.GetWebInput("randomSeed"), nullptr, true);
+  return WebAPIResponse::SubmitAnswersJSON(global.GetWebInput("randomSeed"), nullptr, true);
 }
 
 JSData WebAPIResponse::SubmitAnswersJSON(
   const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake
 ) {
   MacroRegisterFunctionWithName("WebAPIReponse::submitAnswers");
-  StateMaintainer<bool> maintain(theGlobalVariables.theProgress.flagBanProcessMonitoring);
-  theGlobalVariables.theProgress.flagBanProcessMonitoring = true;
+  StateMaintainer<bool> maintain(global.theProgress.flagBanProcessMonitoring);
+  global.theProgress.flagBanProcessMonitoring = true;
   std::stringstream output, errorStream, comments;
   JSData result;
-  double startTime = theGlobalVariables.GetElapsedSeconds();
+  double startTime = global.GetElapsedSeconds();
   CalculatorHTML theProblem;
   theProblem.LoadCurrentProblemItem(
-    theGlobalVariables.UserRequestRequiresLoadingRealExamData(), inputRandomSeed, &errorStream
+    global.UserRequestRequiresLoadingRealExamData(), inputRandomSeed, &errorStream
   );
   if (!theProblem.flagLoadedSuccessfully) {
     errorStream << "Failed to load current problem. ";
@@ -998,7 +998,7 @@ JSData WebAPIResponse::SubmitAnswersJSON(
   }
   std::string studentAnswerNameReader;
   theProblem.studentTagsAnswered.init(theProblem.theProblemData.theAnswers.size());
-  MapList<std::string, std::string, MathRoutines::HashString>& theArgs = theGlobalVariables.webArguments;
+  MapList<std::string, std::string, MathRoutines::HashString>& theArgs = global.webArguments;
   int answerIdIndex = - 1;
   for (int i = 0; i < theArgs.size(); i ++) {
     if (StringRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &studentAnswerNameReader)) {
@@ -1068,16 +1068,16 @@ JSData WebAPIResponse::SubmitAnswersJSON(
   completedProblemStreamNoEnclosures << theProblem.CleanUpCommandString(currentA.commandVerificationOnly);
 
   std::stringstream debugInputStream;
-  if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights()) {
+  if (global.UserDebugFlagOn() && global.UserDefaultHasAdminRights()) {
     debugInputStream
     << "Input, no enclosures, direct link: "
-    << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
+    << "<a href=\"" << global.DisplayNameExecutable
     << "?request=calculator&mainInput="
     << HtmlRoutines::ConvertStringToURLString(completedProblemStreamNoEnclosures.str(), false)
     << "\">Input link</a>";
   }
   if (timeSafetyBrake) {
-    theGlobalVariables.millisecondsMaxComputation = theGlobalVariables.GetElapsedMilliseconds() + 20000; // + 20 sec
+    global.millisecondsMaxComputation = global.GetElapsedMilliseconds() + 20000; // + 20 sec
   }
   Calculator theInterpreter;
   theInterpreter.initialize();
@@ -1103,7 +1103,7 @@ JSData WebAPIResponse::SubmitAnswersJSON(
     isolatedInterpreter.flagWriteLatexPlots = false;
     isolatedInterpreter.flagPlotNoControls = true;
     if (timeSafetyBrake) {
-      theGlobalVariables.millisecondsMaxComputation = theGlobalVariables.GetElapsedMilliseconds() + 20000; //+20 sec
+      global.millisecondsMaxComputation = global.GetElapsedMilliseconds() + 20000; //+20 sec
     }
     isolatedInterpreter.Evaluate("(" + currentA.currentAnswerClean + ")");
     if (isolatedInterpreter.syntaxErrors != "") {
@@ -1111,7 +1111,7 @@ JSData WebAPIResponse::SubmitAnswersJSON(
     } else {
       output << isolatedInterpreter.outputString;
     }
-    if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights()) {
+    if (global.UserDebugFlagOn() && global.UserDefaultHasAdminRights()) {
       output << "<hr><b>Admin view internals.</b><hr>"
       << debugInputStream.str() << "<hr>"
       << theInterpreter.outputString
@@ -1138,7 +1138,7 @@ JSData WebAPIResponse::SubmitAnswersJSON(
   output << "<table style = 'width:300px'>";
   if (!(*outputIsCorrect)) {
     output << "<tr><td><b style = 'color:red'><b>Your answer appears to be incorrect. </b></td></tr>";
-    if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn()) {
+    if (global.UserDefaultHasAdminRights() && global.UserDebugFlagOn()) {
       output << "<tr><td>Admin view internals. "
       << "<hr>" << debugInputStream.str()
       << "<br>The calculator output is: " << theInterpreter.outputString
@@ -1154,9 +1154,9 @@ JSData WebAPIResponse::SubmitAnswersJSON(
   if (hasCommentsBeforeSubmission) {
     output << "<tr><td>" << WebAPIResponse::GetCommentsInterpretation(theInterpreter, 3, theFormat) << "</td></tr>\n";
   }
-  if (theGlobalVariables.flagDatabaseCompiled) {
+  if (global.flagDatabaseCompiled) {
     UserCalculator& theUser = theProblem.currentUseR;
-    theUser.::UserCalculatorData::operator=(theGlobalVariables.userDefault);
+    theUser.::UserCalculatorData::operator=(global.userDefault);
     bool deadLinePassed = false;
     bool hasDeadline = true;
     double secondsTillDeadline = - 1;
@@ -1254,18 +1254,18 @@ JSData WebAPIResponse::SubmitAnswersJSON(
   output << "</td></tr>";
   output << "</table>";
   result[WebAPI::result::resultHtml] = output.str();
-  result[WebAPI::result::millisecondsComputation] = theGlobalVariables.GetElapsedSeconds() - startTime;
+  result[WebAPI::result::millisecondsComputation] = global.GetElapsedSeconds() - startTime;
   return result;
 }
 
 std::string WebAPIResponse::AddTeachersSections() {
   MacroRegisterFunctionWithName("WebAPIReponse::AddTeachersSections");
   std::stringstream out;
-  if (!theGlobalVariables.UserDefaultHasAdminRights() || !theGlobalVariables.flagUsingSSLinCurrentConnection) {
+  if (!global.UserDefaultHasAdminRights() || !global.flagUsingSSLinCurrentConnection) {
     out << "<b>Only admins may assign sections to teachers.</b>";
     return out.str();
   }
-  std::string input = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("teachersAndSections"), false);
+  std::string input = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("teachersAndSections"), false);
   JSData inputParsed;
   if (!inputParsed.readstring(input, &out)) {
     out << "<b style='color:red'>Failed to interpret your input. </b>";
@@ -1279,7 +1279,7 @@ std::string WebAPIResponse::AddTeachersSections() {
     out << "<b style='color:red'>Failed to find key 'students' in your input. </b>";
     return out.str();
   }
-  if (!theGlobalVariables.flagDatabaseCompiled) {
+  if (!global.flagDatabaseCompiled) {
     return "<b>no database present.</b>";
   }
   std::string desiredUsers =
@@ -1336,28 +1336,28 @@ std::string WebAPIResponse::AddUserEmails(const std::string& hostWebAddressWithP
   MacroRegisterFunctionWithName("WebAPIReponse::AddUserEmails");
   (void) hostWebAddressWithPort;
   std::stringstream out;
-  if (!theGlobalVariables.UserDefaultHasAdminRights() || !theGlobalVariables.flagUsingSSLinCurrentConnection) {
+  if (!global.UserDefaultHasAdminRights() || !global.flagUsingSSLinCurrentConnection) {
     out << "<b>Only admins may add users, under ssl connection. </b>";
     return out.str();
   }
-  std::string inputEmails = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("userList"), false);
-  std::string userPasswords = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("passwordList"), false);
+  std::string inputEmails = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("userList"), false);
+  std::string userPasswords = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("passwordList"), false);
   std::string userGroup =
   StringRoutines::StringTrimWhiteSpace(HtmlRoutines::ConvertURLStringToNormal(
-    theGlobalVariables.GetWebInput(DatabaseStrings::labelSection), false
+    global.GetWebInput(DatabaseStrings::labelSection), false
   ));
-  std::string userRole = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("userRole"), false);
+  std::string userRole = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("userRole"), false);
 
   if (inputEmails == "") {
     out << "<b>No emails to add</b>";
     return out.str();
   }
-  if (!theGlobalVariables.flagDatabaseCompiled) {
+  if (!global.flagDatabaseCompiled) {
     return "<b>no database present.</b>";
   }
   std::stringstream comments;
   bool sentEmails = true;
-  bool doSendEmails = theGlobalVariables.userCalculatorRequestType == "sendEmails" ?  true : false;
+  bool doSendEmails = global.userCalculatorRequestType == "sendEmails" ?  true : false;
   int numNewUsers = 0;
   int numUpdatedUsers = 0;
   bool createdUsers = Database::get().theUser.AddUsersFromEmails(
@@ -1385,22 +1385,22 @@ const std::string CalculatorHTML::BugsGenericMessage =
 "with a short explanation to the administrator of the web site. ";
 
 JSData WebAPIResponse::GetAnswerOnGiveUp() {
-  return WebAPIResponse::GetAnswerOnGiveUp(theGlobalVariables.GetWebInput("randomSeed"));
+  return WebAPIResponse::GetAnswerOnGiveUp(global.GetWebInput("randomSeed"));
 }
 
 JSData WebAPIResponse::GetAnswerOnGiveUp(
   const std::string& inputRandomSeed, std::string* outputNakedAnswer, bool* outputDidSucceed
 ) {
   MacroRegisterFunctionWithName("CalculatorHTML::GetAnswerOnGiveUp");
-  StateMaintainer<bool> maintain(theGlobalVariables.theProgress.flagBanProcessMonitoring);
-  theGlobalVariables.theProgress.flagBanProcessMonitoring = true;
+  StateMaintainer<bool> maintain(global.theProgress.flagBanProcessMonitoring);
+  global.theProgress.flagBanProcessMonitoring = true;
   if (outputNakedAnswer != nullptr) {
     *outputNakedAnswer = "";
   }
   if (outputDidSucceed != nullptr) {
     *outputDidSucceed = false;
   }
-  int64_t startTimeInMilliseconds = theGlobalVariables.GetElapsedMilliseconds();
+  int64_t startTimeInMilliseconds = global.GetElapsedMilliseconds();
   CalculatorHTML theProblem;
   std::stringstream errorStream;
   theProblem.LoadCurrentProblemItem(false, inputRandomSeed, &errorStream);
@@ -1427,7 +1427,7 @@ JSData WebAPIResponse::GetAnswerOnGiveUp(
     return result;
   }
   std::string lastStudentAnswerID;
-  MapList<std::string, std::string, MathRoutines::HashString>& theArgs = theGlobalVariables.webArguments;
+  MapList<std::string, std::string, MathRoutines::HashString>& theArgs = global.webArguments;
   for (int i = 0; i < theArgs.size(); i ++) {
     StringRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID);
   }
@@ -1439,11 +1439,11 @@ JSData WebAPIResponse::GetAnswerOnGiveUp(
     << "<br><b>Student submitted answerID: " << lastStudentAnswerID
     << " but that is not an ID of an answer tag. "
     << "</b>";
-    if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights()) {
+    if (global.UserDebugFlagOn() && global.UserDefaultHasAdminRights()) {
       errorStream << "<hr>" << theProblem.theProblemData.ToStringAvailableAnswerIds();
       errorStream << WebAPIResponse::ToStringCalculatorArgumentsHumanReadable();
     }
-    result[WebAPI::result::millisecondsComputation] = theGlobalVariables.GetElapsedMilliseconds() - startTimeInMilliseconds;
+    result[WebAPI::result::millisecondsComputation] = global.GetElapsedMilliseconds() - startTimeInMilliseconds;
     result[WebAPI::result::error] = errorStream.str();
     return result;
   }
@@ -1451,7 +1451,7 @@ JSData WebAPIResponse::GetAnswerOnGiveUp(
   if (currentA.commandsNoEnclosureAnswerOnGiveUpOnly == "") {
     out << "<b> Unfortunately there is no answer given for this "
     << "question (answerID: " << lastStudentAnswerID << ").</b>";
-    if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasProblemComposingRights()) {
+    if (global.UserDebugFlagOn() && global.UserDefaultHasProblemComposingRights()) {
       out << "<br>Answer status: " << currentA.ToString();
     }
     result[WebAPI::result::error] = out.str();
@@ -1470,8 +1470,8 @@ JSData WebAPIResponse::GetAnswerOnGiveUp(
   if (theInterpreteR.syntaxErrors != "") {
     out << "<span style =\"color:red\"><b>Failed to evaluate the default answer. "
     << "Likely there is a bug with the problem. </b></span>";
-    if (theGlobalVariables.UserDefaultHasProblemComposingRights()) {
-      out << "<br>\n<a href=\"" << theGlobalVariables.DisplayNameExecutable
+    if (global.UserDefaultHasProblemComposingRights()) {
+      out << "<br>\n<a href=\"" << global.DisplayNameExecutable
       << "?request=calculator&"
       << "mainInput="
       << HtmlRoutines::ConvertStringToURLString(answerCommandsNoEnclosure.str(), false)
@@ -1480,15 +1480,15 @@ JSData WebAPIResponse::GetAnswerOnGiveUp(
     out << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
     << theInterpreteR.ToStringSyntacticStackHumanReadable(false, false);
     result[WebAPI::result::resultHtml] = out.str();
-    int64_t ellapsedTime = theGlobalVariables.GetElapsedMilliseconds() - startTimeInMilliseconds;
+    int64_t ellapsedTime = global.GetElapsedMilliseconds() - startTimeInMilliseconds;
     result[WebAPI::result::millisecondsComputation] = ellapsedTime;
     return result;
   }
   if (theInterpreteR.flagAbortComputationASAP) {
     out << "<span style =\"color:red\"><b>Failed to evaluate the default answer. "
     << "Likely there is a bug with the problem. </b></span>";
-    if (theGlobalVariables.UserDefaultHasProblemComposingRights()) {
-      out << "<br>\n<a href=\"" << theGlobalVariables.DisplayNameExecutable
+    if (global.UserDefaultHasProblemComposingRights()) {
+      out << "<br>\n<a href=\"" << global.DisplayNameExecutable
       << "?request=calculator&"
       << "mainInput="
       << HtmlRoutines::ConvertStringToURLString(answerCommandsNoEnclosure.str(), false)
@@ -1498,7 +1498,7 @@ JSData WebAPIResponse::GetAnswerOnGiveUp(
     << theInterpreteR.outputString
     << theInterpreteR.outputCommentsString
     << "<hr>Input: <br>" << theInterpreteR.inputString;
-    int64_t ellapsedTime = theGlobalVariables.GetElapsedMilliseconds() - startTimeInMilliseconds;
+    int64_t ellapsedTime = global.GetElapsedMilliseconds() - startTimeInMilliseconds;
     result[WebAPI::result::millisecondsComputation] = ellapsedTime;
     result[WebAPI::result::resultHtml] = out.str();
     return result;
@@ -1556,11 +1556,11 @@ JSData WebAPIResponse::GetAnswerOnGiveUp(
       isFirst = false;
     }
   }
-  int64_t ellapsedTime = theGlobalVariables.GetElapsedMilliseconds() - startTimeInMilliseconds;
+  int64_t ellapsedTime = global.GetElapsedMilliseconds() - startTimeInMilliseconds;
   result[WebAPI::result::millisecondsComputation] = ellapsedTime;
-  if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights()) {
+  if (global.UserDebugFlagOn() && global.UserDefaultHasAdminRights()) {
     out
-    << "<hr><a href=\"" << theGlobalVariables.DisplayNameExecutable
+    << "<hr><a href=\"" << global.DisplayNameExecutable
     << "?request=calculator&"
     << "mainInput="
     << HtmlRoutines::ConvertStringToURLString(answerCommandsNoEnclosure.str() ,false)
@@ -1577,14 +1577,14 @@ JSData WebAPIResponse::GetAccountsPageJSON(const std::string& hostWebAddressWith
   MacroRegisterFunctionWithName("WebAPIReponse::GetAccountsPageJSON");
   (void) hostWebAddressWithPort;
   JSData output;
-  if (!theGlobalVariables.flagDatabaseCompiled) {
+  if (!global.flagDatabaseCompiled) {
     output[WebAPI::result::error] = "Database not available (cannot get accounts). ";
     return output;
   }
   if (
-    !theGlobalVariables.UserDefaultHasAdminRights() ||
-    !theGlobalVariables.flagLoggedIn ||
-    !theGlobalVariables.flagUsingSSLinCurrentConnection
+    !global.UserDefaultHasAdminRights() ||
+    !global.flagLoggedIn ||
+    !global.flagUsingSSLinCurrentConnection
   ) {
     output[WebAPI::result::error] = "Must be logged-in admin over ssl.";
     return output;
@@ -1595,7 +1595,7 @@ JSData WebAPIResponse::GetAccountsPageJSON(const std::string& hostWebAddressWith
   List<JSData> students;
   List<JSData> admins;
   long long totalStudents;
-  findStudents[DatabaseStrings::labelInstructor] = theGlobalVariables.userDefault.username;
+  findStudents[DatabaseStrings::labelInstructor] = global.userDefault.username;
   findAdmins[DatabaseStrings::labelUserRole] = "admin";
   List<std::string> columnsToRetain;
   columnsToRetain.AddOnTop(DatabaseStrings::labelUsername);
@@ -1625,14 +1625,14 @@ JSData WebAPIResponse::GetAccountsPageJSON(const std::string& hostWebAddressWith
 std::string WebAPIResponse::GetAccountsPageBody(const std::string& hostWebAddressWithPort) {
   MacroRegisterFunctionWithName("WebAPIReponse::GetAccountsPageBody");
   (void) hostWebAddressWithPort;
-  if (!theGlobalVariables.flagDatabaseCompiled) {
+  if (!global.flagDatabaseCompiled) {
     return "Database not available. ";
   }
   std::stringstream out;
   if (
-    !theGlobalVariables.UserDefaultHasAdminRights() ||
-    !theGlobalVariables.flagLoggedIn ||
-    !theGlobalVariables.flagUsingSSLinCurrentConnection
+    !global.UserDefaultHasAdminRights() ||
+    !global.flagLoggedIn ||
+    !global.flagUsingSSLinCurrentConnection
   ) {
     out << "Browsing accounts allowed only for logged-in admins over ssl connection.";
     return out.str();
@@ -1643,7 +1643,7 @@ std::string WebAPIResponse::GetAccountsPageBody(const std::string& hostWebAddres
   List<JSData> students;
   List<JSData> admins;
   long long totalStudents;
-  findStudents[DatabaseStrings::labelInstructor] = theGlobalVariables.userDefault.username;
+  findStudents[DatabaseStrings::labelInstructor] = global.userDefault.username;
   findAdmins[DatabaseStrings::labelUserRole] = "admin";
   if (!Database::get().FindFromJSON(
     DatabaseStrings::tableUsers, findStudents, students, - 1, &totalStudents, &commentsOnFailure
@@ -1695,7 +1695,7 @@ std::string WebAPIResponse::GetAccountsPage(const std::string& hostWebAddressWit
   //<< HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile()
   << "</head>"
   << "<body onload =\"loadSettings();\">\n";
-  bool isOK = theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights();
+  bool isOK = global.flagLoggedIn && global.UserDefaultHasAdminRights();
   std::string accountsPageBody;
   if (isOK) {
     accountsPageBody = WebAPIResponse::GetAccountsPageBody(hostWebAddressWithPort);
@@ -1709,7 +1709,7 @@ std::string WebAPIResponse::GetAccountsPage(const std::string& hostWebAddressWit
     return out.str();
   }
   out << accountsPageBody;
-//  out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation() << "</calculatorNavigation>\n";
+//  out << "<calculatorNavigation>" << global.ToStringNavigation() << "</calculatorNavigation>\n";
   out << WebAPIResponse::ToStringCalculatorArgumentsHumanReadable();
   out << "</body></html>";
   return out.str();
@@ -1719,21 +1719,21 @@ std::string WebAPIResponse::ToStringUserDetailsTable(
   bool adminsOnly, List<JSData>& theUsers, const std::string& hostWebAddressWithPort
 ) {
   MacroRegisterFunctionWithName("WebAPIReponse::ToStringUserDetailsTable");
-  if (!theGlobalVariables.flagDatabaseCompiled) {
+  if (!global.flagDatabaseCompiled) {
     return "Compiled without database support. ";
   }
   std::stringstream out;
   //std::string userRole = adminsOnly ? "admin" : "student";
-  bool flagFilterCourse = (!adminsOnly) && (theGlobalVariables.GetWebInput("filterAccounts") == "true");
+  bool flagFilterCourse = (!adminsOnly) && (global.GetWebInput("filterAccounts") == "true");
   std::string currentCourse = HtmlRoutines::ConvertURLStringToNormal(
-    theGlobalVariables.GetWebInput("courseHome"), false
+    global.GetWebInput("courseHome"), false
   );
   if (flagFilterCourse) {
     out << "<br>Displaying only students in course: <b style =\"color:blue\">"
     << currentCourse << "</b>. "
-    << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
+    << "<a href=\"" << global.DisplayNameExecutable
     << "?request=accounts&"
-    << theGlobalVariables.ToStringCalcArgsNoNavigation(nullptr)
+    << global.ToStringCalcArgsNoNavigation(nullptr)
     << "filterAccounts=false&"
     << "\">Show all. </a>"
     << "<br>";
@@ -1747,7 +1747,7 @@ std::string WebAPIResponse::ToStringUserDetailsTable(
   for (int i = 0; i < theUsers.size; i ++) {
     currentUser.LoadFromJSON(theUsers[i]);
     if (flagFilterCourse &&
-      (currentUser.courseInDB != currentCourse || currentUser.instructorInDB != theGlobalVariables.userDefault.username)
+      (currentUser.courseInDB != currentCourse || currentUser.instructorInDB != global.userDefault.username)
     ) {
       continue;
     }
@@ -1821,7 +1821,7 @@ std::string WebAPIResponse::ToStringUserDetailsTable(
       oneTableLineStream << "<td><span style =\"color:green\">activated</span></td><td></td><td></td>";
     }
     std::stringstream oneLink;
-    oneLink << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=login&username="
+    oneLink << "<a href=\"" << global.DisplayNameExecutable << "?request=login&username="
     << currentUser.username << "\">" << currentUser.username << "</a>";
     oneTableLineStream << "<td>" << oneLink.str() << "</td>";
     oneTableLineStream << "</tr>";
@@ -1926,7 +1926,7 @@ int ProblemData::getExpectedNumberOfAnswers(const std::string& problemName, std:
   if (this->knownNumberOfAnswersFromHD != - 1) {
     return this->knownNumberOfAnswersFromHD;
   }
-  if (theGlobalVariables.problemExpectedNumberOfAnswers.size() == 0) {
+  if (global.problemExpectedNumberOfAnswers.size() == 0) {
     JSData findProblemInfo;
     findProblemInfo.theType = JSData::token::tokenArray;
     List<JSData> result;
@@ -1952,14 +1952,14 @@ int ProblemData::getExpectedNumberOfAnswers(const std::string& problemName, std:
         if (numAnswers == - 1) {
           continue;
         }
-        theGlobalVariables.problemExpectedNumberOfAnswers.SetKeyValue(currentProblemName, numAnswers);
+        global.problemExpectedNumberOfAnswers.SetKeyValue(currentProblemName, numAnswers);
         //logWorker << logger::green << "DEBUG: problem: " << currentProblemName
         //<< " got number of answers from DB: " << numAnswers;
       }
     }
   }
-  if (theGlobalVariables.problemExpectedNumberOfAnswers.Contains(problemName)) {
-    return theGlobalVariables.problemExpectedNumberOfAnswers.GetValueCreate(problemName);
+  if (global.problemExpectedNumberOfAnswers.Contains(problemName)) {
+    return global.problemExpectedNumberOfAnswers.GetValueCreate(problemName);
   }
   logWorker << logger::yellow << "Couldn't find problem info in DB for: "
   << problemName << ", trying to read problem from hd. " << logger::endL;
@@ -2075,10 +2075,10 @@ public:
 
 bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
   MacroRegisterFunctionWithName("UserScores::ComputeScoresAndStats");
-  if (!theGlobalVariables.flagDatabaseCompiled) {
+  if (!global.flagDatabaseCompiled) {
     return false;
   }
-  theProblem.currentUseR.::UserCalculatorData::operator=(theGlobalVariables.userDefault);
+  theProblem.currentUseR.::UserCalculatorData::operator=(global.userDefault);
   this->theProblem.LoadFileNames();
   if (!this->theProblem.LoadAndParseTopicList(comments)) {
     return false;
@@ -2118,11 +2118,11 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
   this->numStudentsSolvedPartOfTopic.initializeFillInObject(this->theProblem.topics.theTopics.size(), 0);
   this->numStudentsSolvedNothingInTopic.initializeFillInObject(this->theProblem.topics.theTopics.size(), 0);
   bool ignoreSectionsIdontTeach = true;
-  this->currentSection = theGlobalVariables.userDefault.sectionComputed;
-  this->currentCourse = theGlobalVariables.GetWebInput("courseHome");
-  if (theGlobalVariables.GetWebInput("request") == "scoresInCoursePage") {
+  this->currentSection = global.userDefault.sectionComputed;
+  this->currentCourse = global.GetWebInput("courseHome");
+  if (global.GetWebInput("request") == "scoresInCoursePage") {
     this->currentSection = StringRoutines::StringTrimWhiteSpace(
-      HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false)
+      HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("mainInput"), false)
     );
   }
   for (int i = 0; i < this->userProblemData.size; i ++) {
@@ -2132,7 +2132,7 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
       if (currentUserRecord.currentUseR.courseComputed != this->currentCourse) {
         continue;
       }
-      if (theGlobalVariables.UserStudentVieWOn()) {
+      if (global.UserStudentVieWOn()) {
         if (currentUserRecord.currentUseR.sectionInDB != this->currentSection) {
           continue;
         }
@@ -2178,7 +2178,7 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
 
 std::string WebAPIResponse::GetScoresInCoursePage() {
   MacroRegisterFunctionWithName("WebWorker::GetScoresInCoursePage");
-  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
+  if (!global.UserDefaultHasAdminRights()) {
     return "Only admins are allowed to view student scores.";
   }
   std::stringstream out;
@@ -2218,9 +2218,9 @@ std::string WebAPIResponse::GetScoresInCoursePage() {
 
 std::string WebAPIResponse::ToStringUserScores() {
   MacroRegisterFunctionWithName("WebAPIReponse::ToStringUserScores");
-  if (!theGlobalVariables.UserDefaultHasAdminRights())
+  if (!global.UserDefaultHasAdminRights())
     return "only admins are allowed to view scores";
-  if (!theGlobalVariables.flagDatabaseCompiled) {
+  if (!global.flagDatabaseCompiled) {
     return "Error: database not running. ";
   }
 
@@ -2333,7 +2333,7 @@ std::string WebAPIResponse::ToStringUserDetails(
 ) {
   MacroRegisterFunctionWithName("WebAPIReponse::ToStringUserDetails");
   std::stringstream out;
-  if (!theGlobalVariables.flagDatabaseCompiled) {
+  if (!global.flagDatabaseCompiled) {
     out << "<b>Adding emails not available (database not present).</b> ";
     return out.str();
   }
@@ -2345,7 +2345,7 @@ std::string WebAPIResponse::ToStringUserDetails(
   out << "<ul><li>Add <b>" << userRole << "(s)</b> here.</li> ";
   out << "<li>Added/updated users will have their current course set to: <br>"
   << "<span class =\"currentCourseIndicator\">"
-  << HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false)
+  << HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("courseHome"), false)
   << "</span></li>"
   << "<li>To change course use the select course link in the top panel.</li>"
   << "<li>List users with a comma/space bar/new line/tab/semicolumn separated list. </li>"

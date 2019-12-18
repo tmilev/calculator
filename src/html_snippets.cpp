@@ -105,7 +105,7 @@ const std::string& HtmlRoutines::GetFile(
 ) {
   MacroRegisterFunctionWithName("HtmlRoutines::GetFile");
   std::string theID = fileNameVirtual + additionalBeginTag + additionalEndTag;
-  if (theGlobalVariables.flagCachingInternalFilesOn) {
+  if (global.flagCachingInternalFilesOn) {
     if (HtmlRoutines::preLoadedFiles.GetValueCreate(theID) != "") {
       return HtmlRoutines::preLoadedFiles.GetValueCreate(theID);
     }
@@ -115,11 +115,11 @@ const std::string& HtmlRoutines::GetFile(
   if (FileOperations::LoadFileToStringVirtual(fileNameVirtual, fileReader, false, &commentsOnFailure)) {
     out << additionalBeginTag << fileReader << additionalEndTag;
   } else {
-    if (theGlobalVariables.processType == ProcessTypes::worker) {
+    if (global.processType == ProcessTypes::worker) {
       logWorker << logger::red << "File: "
       << fileNameVirtual << " not found. " << commentsOnFailure.str() << logger::endL;
     }
-    if (theGlobalVariables.processType == ProcessTypes::server) {
+    if (global.processType == ProcessTypes::server) {
       logServer << logger::red << "File: "
       << fileNameVirtual << " not found. " << commentsOnFailure.str() << logger::endL;
     }

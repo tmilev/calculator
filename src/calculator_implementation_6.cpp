@@ -23,7 +23,7 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation(
   Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation");
-  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
+  if (!global.UserDefaultHasAdminRights()) {
     return theCommands << "Automated tests available to logged-in admins only. ";
   }
   if (input.size() != 4) {
@@ -77,7 +77,7 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation(
   << "</tr>";
 
   MapList<std::string, std::string, MathRoutines::HashString>&
-  globalKeys = theGlobalVariables.webArguments;
+  globalKeys = global.webArguments;
   for (int i = 0; i < theFileNames.size; i ++) {
     if (numInterpretations >= numDesiredTests) {
       break;
@@ -112,10 +112,10 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation(
     randomSeedCurrent = randSeedCurrentStream.str();
     out << "<td>" << numInterpretations << ". <td>";
     out << "<td>"
-    << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
+    << "<a href=\"" << global.DisplayNameExecutable
     << "?request=exerciseNoLogin"
     << "&"
-    << theGlobalVariables.ToStringCalcArgsNoNavigation(nullptr)
+    << global.ToStringCalcArgsNoNavigation(nullptr)
     << "fileName=" << theProblem.fileName << "&randomSeed="
     << randomSeedCurrent << "\">"
     << theFileNames[i]
@@ -145,15 +145,15 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation(
       std::string currentAnswer;
       std::string currentKey = "calculatorAnswer" +
       theProblem.theProblemData.theAnswers.theValues[j].answerId;
-      theGlobalVariables.SetWebInpuT(currentKey, "1");
-      theGlobalVariables.SetWebInpuT(WebAPI::problem::fileName, theProblem.fileName);
+      global.SetWebInpuT(currentKey, "1");
+      global.SetWebInpuT(WebAPI::problem::fileName, theProblem.fileName);
       answerGeneration += WebAPIResponse::GetAnswerOnGiveUp(
         randomSeedCurrent, &currentAnswer, &answerGenerated
       ).ToString(false) + "<hr>";
       if (!answerGenerated) {
         break;
       }
-      theGlobalVariables.SetWebInpuT(currentKey, HtmlRoutines::ConvertStringToURLString(currentAnswer, false));
+      global.SetWebInpuT(currentKey, HtmlRoutines::ConvertStringToURLString(currentAnswer, false));
       solutionReport +=
       WebAPIResponse::SubmitAnswersJSON(randomSeedCurrent, &answersWork, false).ToString(false) + "<hr>";
       if (!answersWork) {
@@ -495,7 +495,7 @@ bool CalculatorFunctionsGeneral::innerJWTVerifyAgainstKnownKeys(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerJWTverifyAgainstKnownKeys");
-  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
+  if (!global.UserDefaultHasAdminRights()) {
     return theCommands << "This function is only available to logged-in admins. ";
   }
   if (!input.IsOfType<std::string>()) {
@@ -684,11 +684,11 @@ bool CalculatorFunctionsGeneral::innerSendEmailWithMailGun(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSendEmailWithMailGun");
-  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
+  if (!global.UserDefaultHasAdminRights()) {
     return theCommands << "Sending mail available to logged-in admins only. ";
   }
   std::stringstream out;
-  if (theGlobalVariables.flagDatabaseCompiled) {
+  if (global.flagDatabaseCompiled) {
     if (input.size() != 4) {
       return theCommands << "Send email requires three arguments. ";
     }
@@ -2198,9 +2198,9 @@ bool CalculatorFunctionsGeneral::innerPrecomputeSemisimpleLieAlgebraStructure(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPrecomputeSemisimpleLieAlgebraStructure");
-  if (!theGlobalVariables.theProgress.flagBanProcessMonitoring) {
-    if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection != nullptr) {
-      theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection("Triggered by innerPrecomputeSemisimpleLieAlgebraStructure.");
+  if (!global.theProgress.flagBanProcessMonitoring) {
+    if (global.WebServerReturnDisplayIndicatorCloseConnection != nullptr) {
+      global.WebServerReturnDisplayIndicatorCloseConnection("Triggered by innerPrecomputeSemisimpleLieAlgebraStructure.");
     }
   }
   (void) input;

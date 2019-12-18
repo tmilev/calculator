@@ -122,11 +122,11 @@ void Calculator::DoLogEvaluationIfNeedBe(Function& inputF) {
     return;
   }
   *this << "<hr>Built-in substitution: " << inputF.ToStringSummary()
-  << "<br>" << theGlobalVariables.GetElapsedSeconds() - this->LastLogEvaluationTime
+  << "<br>" << global.GetElapsedSeconds() - this->LastLogEvaluationTime
   << " second(s) since last log entry. "
   << "Rule stack id: "
   << this->RuleStackCacheIndex << ", stack size: " << this->RuleStack.size();
-  this->LastLogEvaluationTime = theGlobalVariables.GetElapsedSeconds();
+  this->LastLogEvaluationTime = global.GetElapsedSeconds();
 }
 
 bool Calculator::outerStandardFunction(
@@ -437,11 +437,11 @@ bool Calculator::EvaluateExpression(
 }
 
 bool Calculator::TimedOut() {
-  if (theGlobalVariables.millisecondsMaxComputation <= 0) {
+  if (global.millisecondsMaxComputation <= 0) {
     return false;
   }
-  int64_t elapsedMilliseconds = theGlobalVariables.GetElapsedMilliseconds();
-  int64_t halfTimeLimit = theGlobalVariables.millisecondsMaxComputation / 2;
+  int64_t elapsedMilliseconds = global.GetElapsedMilliseconds();
+  int64_t halfTimeLimit = global.millisecondsMaxComputation / 2;
   if (elapsedMilliseconds <= halfTimeLimit) {
     return false;
   }
@@ -853,7 +853,7 @@ bool Calculator::ParseAndExtractExpressions(
 }
 
 void Calculator::initComputationStats() {
-  this->startTimeEvaluationMilliseconds = theGlobalVariables.GetElapsedMilliseconds();
+  this->startTimeEvaluationMilliseconds = global.GetElapsedMilliseconds();
   this->NumListsStart                   = static_cast<signed>( ParallelComputing::NumListsCreated    );
   this->NumListResizesStart             = static_cast<signed>( ParallelComputing::NumListResizesTotal);
   this->NumHashResizesStart             = static_cast<signed>( ParallelComputing::NumHashResizes     );
@@ -879,7 +879,7 @@ void Calculator::EvaluateCommands() {
   MacroRegisterFunctionWithName("Calculator::EvaluateCommands");
   std::stringstream out;
   if (this->syntaxErrors != "") {
-    if (!theGlobalVariables.flagRunningCommandLine) {
+    if (!global.flagRunningCommandLine) {
       out << "<hr><b>Syntax errors encountered</b><br>";
     } else {
       out << logger::consoleRed() << "Syntax errors encountered: " << logger::consoleNormal();
@@ -892,7 +892,7 @@ void Calculator::EvaluateCommands() {
   this->flagAbortComputationASAP = false;
   this->Comments.clear();
   ProgressReport theReport;
-  if (!theGlobalVariables.flagRunningCommandLine) {
+  if (!global.flagRunningCommandLine) {
     theReport.Report("Evaluating expressions, current expression stack:\n");
   }
   this->EvaluateExpression(*this, this->theProgramExpression, this->theProgramExpression);
@@ -901,23 +901,23 @@ void Calculator::EvaluateCommands() {
     << "depth before evaluation was 0, but after evaluation it is "
     << this->RecursionDeptH << "." << crash;
   }
-  theGlobalVariables.theDefaultFormat.GetElement().flagMakingExpressionTableWithLatex = true;
-  theGlobalVariables.theDefaultFormat.GetElement().flagUseLatex = true;
-  theGlobalVariables.theDefaultFormat.GetElement().flagExpressionNewLineAllowed = true;
-  theGlobalVariables.theDefaultFormat.GetElement().flagIncludeExtraHtmlDescriptionsInPlots = !this->flagPlotNoControls;
-  theGlobalVariables.theDefaultFormat.GetElement().flagLatexDetailsInHtml = this->flagWriteLatexPlots;
-  theGlobalVariables.theDefaultFormat.GetElement().flagExpressionIsFinal = true;
-  if (theGlobalVariables.flagRunningCommandLine) {
-    theGlobalVariables.theDefaultFormat.GetElement().flagUseQuotes = false;
-    theGlobalVariables.theDefaultFormat.GetElement().flagExpressionIsFinal = true;
-    if (theGlobalVariables.programArguments.size > 1) {
+  global.theDefaultFormat.GetElement().flagMakingExpressionTableWithLatex = true;
+  global.theDefaultFormat.GetElement().flagUseLatex = true;
+  global.theDefaultFormat.GetElement().flagExpressionNewLineAllowed = true;
+  global.theDefaultFormat.GetElement().flagIncludeExtraHtmlDescriptionsInPlots = !this->flagPlotNoControls;
+  global.theDefaultFormat.GetElement().flagLatexDetailsInHtml = this->flagWriteLatexPlots;
+  global.theDefaultFormat.GetElement().flagExpressionIsFinal = true;
+  if (global.flagRunningCommandLine) {
+    global.theDefaultFormat.GetElement().flagUseQuotes = false;
+    global.theDefaultFormat.GetElement().flagExpressionIsFinal = true;
+    if (global.programArguments.size > 1) {
       out << "Input: " << logger::consoleYellow()
-      << StartingExpression.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << std::endl;
+      << StartingExpression.ToString(&global.theDefaultFormat.GetElement()) << std::endl;
     }
-    theGlobalVariables.theDefaultFormat.GetElement().flagExpressionIsFinal = true;
+    global.theDefaultFormat.GetElement().flagExpressionIsFinal = true;
     this->theObjectContainer.resetSliders();
     out << logger::consoleNormal() << "Output: " << logger::consoleGreen()
-    << this->theProgramExpression.ToString(&theGlobalVariables.theDefaultFormat.GetElement())
+    << this->theProgramExpression.ToString(&global.theDefaultFormat.GetElement())
     << logger::consoleNormal() << std::endl;
   } else if (!this->flagDisplayFullExpressionTree) {
     std::string badCharsString = this->ToStringIsCorrectAsciiCalculatorString(this->inputString);
@@ -935,7 +935,7 @@ void Calculator::EvaluateCommands() {
     JSData result;
     result.theType = JSData::token::tokenObject;
     std::string resultString = this->theProgramExpression.ToString(
-      &theGlobalVariables.theDefaultFormat.GetElement(), &StartingExpression, true, &result
+      &global.theDefaultFormat.GetElement(), &StartingExpression, true, &result
     );
     this->outputJS[WebAPI::result::resultLabel] = result;
     out << resultString;
@@ -963,7 +963,7 @@ void Calculator::EvaluateCommands() {
   }
   this->outputCommentsString = commentsStream.str();
   this->outputJS[WebAPI::result::comments] = this->outputCommentsString;
-  if (theGlobalVariables.flagRunningCommandLine && this->Comments.str() != "") {
+  if (global.flagRunningCommandLine && this->Comments.str() != "") {
     this->outputString += this->outputCommentsString;
   }
 }

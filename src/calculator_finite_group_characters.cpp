@@ -81,7 +81,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::CheckRepIsMu
 
 /*
 template <typename somegroup, typename coefficient>
-void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::ComputeAllGeneratorImagesFromSimple(GlobalVariables* theGlobalVariables) {
+void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::ComputeAllGeneratorImagesFromSimple(GlobalVariables* global) {
   MacroRegisterFunctionWithName("GroupRepresentationCarriesAllMatrices::ComputeAllGeneratorImagesFromSimple");
   this->CheckInitialization();
   this->ownerGroup->CheckInitializationFDrepComputation();
@@ -244,7 +244,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::Restrict(
   for (int i = 0; i < this->classFunctionMatrices.size; i ++)
     if (this->classFunctionMatricesComputed[i]) {
       output.classFunctionMatricesComputed[i] = true;
-      if (theGlobalVariables != 0) {
+      if (global != 0) {
         std::stringstream reportStream;
         reportStream << "Restricting class function matrix " << i + 1 << " out of "
         << this->classFunctionMatrices.size;
@@ -542,7 +542,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSize(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSize");
-  //double startTimeForDebug= theGlobalVariables.GetElapsedSeconds();
+  //double startTimeForDebug= global.GetElapsedSeconds();
   SemisimpleLieAlgebra* theSSalgebra = nullptr;
   Vector<Rational> theWeightRat;
   Expression theContextE;
@@ -846,11 +846,11 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements
     << "not to compute when the rank is larger than 7. ";
     return false;
   }
-  double timeStart1 = theGlobalVariables.GetElapsedSeconds();
+  double timeStart1 = global.GetElapsedSeconds();
   theGroupData.theGroup.ComputeCCfromAllElements();
   //std::stringstream out;
   theCommands << "<hr> Computed conjugacy classes of "
-  << theGroupData.ToString() << " in " << theGlobalVariables.GetElapsedSeconds() - timeStart1
+  << theGroupData.ToString() << " in " << global.GetElapsedSeconds() - timeStart1
   << " second(s). ";
   return output.AssignValue(theGroupData, theCommands);
 }
@@ -870,11 +870,11 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesRepresentatives
     << "not to compute when the rank is larger than 8. ";
   }
   theGroupData.CheckConsistency();
-  double timeStart1 = theGlobalVariables.GetElapsedSeconds();
+  double timeStart1 = global.GetElapsedSeconds();
   theGroupData.CheckConsistency();
   theGroupData.theGroup.ComputeCCSizesAndRepresentatives();
   theCommands << "<hr> Computed conjugacy classes representatives of "
-  << theGroupData.theDynkinType.ToString() << " in " << theGlobalVariables.GetElapsedSeconds()-timeStart1
+  << theGroupData.theDynkinType.ToString() << " in " << global.GetElapsedSeconds()-timeStart1
   << " second(s). ";
   return output.AssignValue(theGroupData, theCommands);
 }
@@ -2483,14 +2483,14 @@ void VirtualRepresentation<somegroup, coefficient>::AssignRep(
   crash << " not implemented " << crash;
   GroupRepresentationCarriesAllMatrices<somegroup, coefficient> otherCopy;
   otherCopy = other;
-//  otherCopy.DecomposeTodorsVersion(this->coefficientsIrreps, theGlobalVariables);
+//  otherCopy.DecomposeTodorsVersion(this->coefficientsIrreps, global);
 }
 
 template <typename somegroup, typename coefficient>
 void VirtualRepresentation<somegroup, coefficient>::AssignRep(const GroupRepresentation<somegroup, Rational>& other) {
   VirtualRepresentation<somegroup, coefficient> out;
   out.AddMonomial(other.theCharacteR, 1);
-//  otherCopy.DecomposeTodorsVersion(this->coefficientsIrreps, theGlobalVariables);
+//  otherCopy.DecomposeTodorsVersion(this->coefficientsIrreps, global);
 }
 
 bool CalculatorFunctionsWeylGroup::innerMakeVirtualWeylRep(

@@ -35,10 +35,10 @@ void TransportLayerSecurityOpenSSL::FreeSSL() {
 }
 
 void TransportLayerSecurityOpenSSL::FreeEverythingShutdownSSL() {
-  if (!theGlobalVariables.flagSSLIsAvailable) {
+  if (!global.flagSSLIsAvailable) {
     return;
   }
-  theGlobalVariables.flagSSLIsAvailable = false;
+  global.flagSSLIsAvailable = false;
   this->FreeSSL();
   this->FreeContext();
 }
@@ -78,7 +78,7 @@ void TransportLayerSecurityOpenSSL::initSSLLibrary() {
 
 bool TransportLayerSecurityOpenSSL::initSSLKeyFilesCreateOnDemand() {
   MacroRegisterFunctionWithName("TransportLayerSecurityOpenSSL::initSSLKeyFilesCreateOnDemand");
-  if (!theGlobalVariables.flagSSLIsAvailable) {
+  if (!global.flagSSLIsAvailable) {
     return false;
   }
   if (
@@ -101,15 +101,15 @@ bool TransportLayerSecurityOpenSSL::initSSLKeyFilesCreateOnDemand() {
   << " -out " << certificatePhysicalName
   << " -days 3001 ";
   if (
-    theGlobalVariables.configuration["openSSLSubject"].theType != JSData::token::tokenUndefined &&
-    theGlobalVariables.configuration["openSSLSubject"].theType == JSData::token::tokenString
+    global.configuration["openSSLSubject"].theType != JSData::token::tokenUndefined &&
+    global.configuration["openSSLSubject"].theType == JSData::token::tokenString
   ) {
-    theCommand << "-subj " << theGlobalVariables.configuration["openSSLSubject"].theString;
+    theCommand << "-subj " << global.configuration["openSSLSubject"].theString;
     // "/C=CA/ST=ON/L=MyTown/O=MyOrganization/OU=none/CN=localhost/emailAddress=myemail@gmail.com"
   }
   logServer << "About to generate key files with the following command. " << logger::endL;
   logServer << logger::green << theCommand.str() << logger::endL;
-  theGlobalVariables.CallSystemNoOutput(theCommand.str(), &logServer);
+  global.CallSystemNoOutput(theCommand.str(), &logServer);
   return true;
 }
 
@@ -122,7 +122,7 @@ bool TransportLayerSecurityOpenSSL::initSSLKeyFiles() {
     !FileOperations::FileExistsVirtual(TransportLayerSecurity::fileCertificate, true, true) ||
     !FileOperations::FileExistsVirtual(TransportLayerSecurity::fileKey, true, true)
   ) {
-    theGlobalVariables.flagSSLIsAvailable = false;
+    global.flagSSLIsAvailable = false;
     return false;
   }
   return true;
@@ -256,7 +256,7 @@ void TransportLayerSecurityOpenSSL::initSSLServer() {
       ERR_print_errors_fp(stderr);
       crash << "Failed to use private key." << crash;
     }
-    theGlobalVariables.flagCertificatesAreOfficiallySigned = true;
+    global.flagCertificatesAreOfficiallySigned = true;
   }
   if (!SSL_CTX_check_private_key(this->context)) {
     logServer << "Private key does not match the certificate public key. ";
@@ -466,7 +466,7 @@ bool TransportLayerSecurityOpenSSL::HandShakeIamClientNoSocketCleanup(
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Retrying connection in 0.5 seconds... <br>";
       }
-      theGlobalVariables.FallAsleep(500000);
+      global.FallAsleep(500000);
     } else {
       this->flagSSLHandshakeSuccessful = true;
       break;
@@ -696,7 +696,7 @@ bool TransportLayerSecurityOpenSSL::HandShakeIamServer(int inputSocketID, std::s
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Retrying connection in 0.5 seconds... ";
       }
-      theGlobalVariables.FallAsleep(500000);
+      global.FallAsleep(500000);
     } else {
       this->flagSSLHandshakeSuccessful = true;
       break;

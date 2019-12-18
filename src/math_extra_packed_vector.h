@@ -218,12 +218,12 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeRho() {
       }
     }
   }
-  theGlobalVariables.Comments << "symmetric Cartan matrix is" << "\n";
+  global.Comments << "symmetric Cartan matrix is" << "\n";
   for (int i = 0; i < unrationalCartanSymmetric.NumRows; i ++) {
     for (int j = 0; j < unrationalCartanSymmetric.NumCols; j ++) {
-      theGlobalVariables.Comments << unrationalCartanSymmetric.elements[i][j] << '\t';
+      global.Comments << unrationalCartanSymmetric.elements[i][j] << '\t';
     }
-    theGlobalVariables.Comments << '\n';
+    global.Comments << '\n';
   }
   this->rank = this->unrationalCartanSymmetric.NumRows;
   for (int rvi = 0; rvi < rank; rvi ++) {
@@ -248,8 +248,8 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeRho() {
       }
     }
   }
-  theGlobalVariables.Comments << "root system is" << "\n";
-  theGlobalVariables.Comments << this->RootSystem << "\n";
+  global.Comments << "root system is" << "\n";
+  global.Comments << this->RootSystem << "\n";
   this->RootSystem.QuickSortAscending();
   this->twiceRho.MakeZero(rank);
   for (int i = 0; i < this->RootSystem.size; i ++) {
@@ -268,16 +268,16 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeRho() {
   for (int i = 0; i < this->twiceRho.size; i ++) {
     this->rho[i] = this->twiceRho[i] / 2;
   }
-  theGlobalVariables.Comments << "half sum of positive roots is " << this->rho << "\n";
+  global.Comments << "half sum of positive roots is " << this->rho << "\n";
 }
 
 template <typename scalar, typename templateVector>
 void AnotherWeylGroup<scalar, templateVector>::ComputeAllElements() {
-  theGlobalVariables.Comments << "Getting elements...";
+  global.Comments << "Getting elements...";
   if (this->RootSystem.size == 0) {
     this->ComputeRho();
   }
-  theGlobalVariables.Comments << "(twiceRho is " << this->twiceRho << ")" << "\n";
+  global.Comments << "(twiceRho is " << this->twiceRho << ")" << "\n";
   templateVector w;
   List<int> newelts;
   this->rhoOrbit.AddOnTop(twiceRho);
@@ -294,12 +294,12 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeAllElements() {
     }
   }
   this->sizePrivate = this->rhoOrbit.size;
-  theGlobalVariables.Comments << this->size() << "\n";
+  global.Comments << this->size() << "\n";
 }
 
 template <typename scalar, typename templateVector>
 void AnotherWeylGroup<scalar, templateVector>::ComputeCC() {
-  theGlobalVariables.Comments << "Getting conjugacy classes...";
+  global.Comments << "Getting conjugacy classes...";
   if (this->rhoOrbit.size == 0) {
     this->ComputeAllElements();
   }
@@ -311,7 +311,7 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeCC() {
   theStack.SetExpectedSize(this->size());
   int theRank = this->GetRank();
   templateVector theRhoImage;
-  theGlobalVariables.Comments << "number of conjugacy classes... ";
+  global.Comments << "number of conjugacy classes... ";
   for (int i = 0; i < this->size(); i ++) {
     if (!Accounted[i]) {
       theStack.Clear();
@@ -328,11 +328,11 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeCC() {
         }
       this->conjugacyClasses.AddOnTop(theStack);
       this->conjugacyClasses.LastObject()->QuickSortAscending();
-      theGlobalVariables.Comments << this->ConjugacyClassCount() << " ";
+      global.Comments << this->ConjugacyClassCount() << " ";
     }
   }
   this->conjugacyClasses.QuickSortAscending();
-  theGlobalVariables.Comments << this->ConjugacyClassCount() << "\n";
+  global.Comments << this->ConjugacyClassCount() << "\n";
 }
 
 template<typename scalar, typename templateVector>
@@ -366,7 +366,7 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeClassMatrices() {
     this->ComputeCC();
   }
   for (int i = 0; i < this->ConjugacyClassCount(); i ++) {
-    theGlobalVariables.Comments << "//getting class matrix " << i << "\n";
+    global.Comments << "//getting class matrix " << i << "\n";
     this->GetClassMatrix(i);
   }
 }
@@ -475,7 +475,7 @@ List<ClassFunction<somegroup, Rational> > ComputeCharacterTable(somegroup &G) {
   bool foundEmAll = false;
   for (int i = 0; !foundEmAll && i < G.ConjugacyClassCount(); i ++) {
     Matrix<Rational> M;
-    theGlobalVariables.Comments << "Getting class matrix " << i << "\n";
+    global.Comments << "Getting class matrix " << i << "\n";
     M = GetClassMatrix(G,i,&classmap);
     List<VectorSpace<Rational> > es = GetEigenspaces(M);
     for (int esi = 0; !foundEmAll && esi < es.size; esi ++) {
@@ -502,7 +502,7 @@ List<ClassFunction<somegroup, Rational> > ComputeCharacterTable(somegroup &G) {
         nchars += 1;
       }
     }
-    theGlobalVariables.Comments << "Have " << nchars << " chars" << "\n";
+    global.Comments << "Have " << nchars << " chars" << "\n";
   }
   List<ClassFunction<somegroup, Rational> > chars;
   chars.SetSize(spaces.size);
@@ -518,23 +518,23 @@ List<ClassFunction<somegroup, Rational> > ComputeCharacterTable(somegroup &G) {
     if (chars[i][0] < 0) {
       chars[i] *= - 1;
     }
-    theGlobalVariables.Comments << x2 << "\n";
+    global.Comments << x2 << "\n";
   }
 
   chars.QuickSortAscending(/*&CharacterComparator*/);
   for (int i = 0; i < chars.size; i ++) {
     for (int j = i; j < chars.size; j ++) {
       if (chars[i] > chars[j]) {
-        theGlobalVariables.Comments << "error: " << i << j << "\n";
+        global.Comments << "error: " << i << j << "\n";
       }
     }
   }
   for (int i = 0; i < chars.size; i ++) {
-    theGlobalVariables.Comments << chars[i] << "\n";
+    global.Comments << chars[i] << "\n";
   }
   G.characterTable = chars;
   for (int i = 0; i < G.characterTable.size; i ++) {
-    theGlobalVariables.Comments << G.characterTable[i] << "\n";
+    global.Comments << G.characterTable[i] << "\n";
   }
   return chars;
 }
@@ -649,7 +649,7 @@ void ComputeTauSignatures(WeylGroupData* G, List<List<bool> >& tauSignatures, bo
   tss.AddOnTop(tsg);
 
   if (pseudo) {
-    theGlobalVariables.Comments << "pseudo-parabolics" << "\n";
+    global.Comments << "pseudo-parabolics" << "\n";
     ElementWeylGroup hr = G->GetRootReflection(G->RootSystem.size- 1);
     sel.init(G->CartanSymmetric.NumCols);
     for (int i = 0; i < numCycles - 1; i ++) {
@@ -677,11 +677,11 @@ void ComputeTauSignatures(WeylGroupData* G, List<List<bool> >& tauSignatures, bo
     }
   }
   for (int i = 0; i < G->theGroup.characterTable.size; i ++) {
-    theGlobalVariables.Comments << G->theGroup.characterTable[i] << "\n";
+    global.Comments << G->theGroup.characterTable[i] << "\n";
     for (int j = 0; j < tauSignatures[i].size; j ++) {
-      theGlobalVariables.Comments << tauSignatures[i][j] << ' ';
+      global.Comments << tauSignatures[i][j] << ' ';
     }
-    theGlobalVariables.Comments << "\n";
+    global.Comments << "\n";
   }
 }
 

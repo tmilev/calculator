@@ -26,9 +26,9 @@ Crasher::Crasher() {
 void Crasher::FirstRun() {
   if (
     !this->flagCrashInitiateD &&
-    theGlobalVariables.flagRunningBuiltInWebServer
+    global.flagRunningBuiltInWebServer
   ) {
-    double elapsedSeconds = theGlobalVariables.GetElapsedSeconds();
+    double elapsedSeconds = global.GetElapsedSeconds();
     this->crashReportHtml << "\n<b style = 'color:red'>Crash</b> "
     << elapsedSeconds << " second(s) from the start.<hr>";
     this->crashReportConsolE << logger::consoleRed() << "Crash " << elapsedSeconds
@@ -55,36 +55,36 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash) {
   this->crashReportFile << this->crashReport.str();
 
   this->flagFinishingCrash = true;
-  if (!theGlobalVariables.flagNotAllocated) {
+  if (!global.flagNotAllocated) {
     this->crashReportConsolE << "\n";
   }
-  if (!theGlobalVariables.flagNotAllocated) {
-    if (theGlobalVariables.userInputStringIfAvailable != "") {
+  if (!global.flagNotAllocated) {
+    if (global.userInputStringIfAvailable != "") {
       this->crashReportHtml << "<hr>User input: <br> "
-      << theGlobalVariables.userInputStringIfAvailable << "<hr>";
+      << global.userInputStringIfAvailable << "<hr>";
       this->crashReportConsolE << "User input: "
-      << logger::consoleBlue() << theGlobalVariables.userInputStringIfAvailable
+      << logger::consoleBlue() << global.userInputStringIfAvailable
       << logger::consoleNormal() << "\n";
-      this->crashReportFile << "User input:\n" << theGlobalVariables.userInputStringIfAvailable << "\n";
+      this->crashReportFile << "User input:\n" << global.userInputStringIfAvailable << "\n";
     }
   }
   this->crashReportConsolE << Crasher::GetStackTraceEtcErrorMessageConsole();
   this->crashReportHtml << Crasher::GetStackTraceEtcErrorMessageHTML();
   this->crashReportFile << Crasher::GetStackTraceEtcErrorMessageHTML();
-  if (!theGlobalVariables.flagNotAllocated) {
-    if (theGlobalVariables.progressReportStrings.size > 0) {
+  if (!global.flagNotAllocated) {
+    if (global.progressReportStrings.size > 0) {
       this->crashReportHtml
       << "<hr><b>Computation progress report strings:</b><br>"
-      << theGlobalVariables.ToStringProgressReportNoThreadData(true);
+      << global.ToStringProgressReportNoThreadData(true);
       this->crashReportFile
       << "<hr><b>Computation progress report strings:</b><br>"
-      << theGlobalVariables.ToStringProgressReportNoThreadData(true);
+      << global.ToStringProgressReportNoThreadData(true);
 
       this->crashReportConsolE << "Computation progress strings:\n";
-      this->crashReportConsolE << theGlobalVariables.ToStringProgressReportNoThreadData(false);
+      this->crashReportConsolE << global.ToStringProgressReportNoThreadData(false);
     }
   }
-  if (!theGlobalVariables.flagNotAllocated) {
+  if (!global.flagNotAllocated) {
     if (theParser != nullptr) {
       if (theParser->Comments.str() != "") {
         this->crashReportHtml << "<hr>Additional comments follow. " << theParser->Comments.str();
@@ -93,7 +93,7 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash) {
     std::fstream theFile;
     bool openSuccess = FileOperations::OpenFileCreateIfNotPresentVirtual(
       theFile,
-      "crashes/" + theGlobalVariables.RelativePhysicalNameCrashReport,
+      "crashes/" + global.RelativePhysicalNameCrashReport,
       false,
       true,
       false,
@@ -107,14 +107,14 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash) {
       << "folder within your calculator folder. "
       << "If running remotely, you will need an ssh connection. ";
       this->crashReportConsolE << "Crash dumped in file: " << logger::consoleGreen()
-      << theGlobalVariables.RelativePhysicalNameCrashReport << logger::consoleNormal() << "\n";
+      << global.RelativePhysicalNameCrashReport << logger::consoleNormal() << "\n";
     } else {
       this->crashReportHtml << "<hr>Failed to open crash report file: "
-      << theGlobalVariables.RelativePhysicalNameCrashReport
+      << global.RelativePhysicalNameCrashReport
       << ". Check file permissions. ";
       this->crashReportConsolE << "Failed to open crash report file: "
       << logger::consoleRed()
-      << theGlobalVariables.RelativePhysicalNameCrashReport
+      << global.RelativePhysicalNameCrashReport
       << logger::consoleNormal() << "\n";
     }
     theFile << this->crashReportFile.str();
@@ -127,8 +127,8 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash) {
   std::cout << this->crashReportConsolE.str() << std::endl;
   JSData output;
   output[WebAPI::result::crashReport] = this->crashReportHtml.str();
-  output[WebAPI::result::comments] = theGlobalVariables.Comments.container.GetElement().str();
-  theGlobalVariables.WriteCrash(output);
+  output[WebAPI::result::comments] = global.Comments.container.GetElement().str();
+  global.WriteCrash(output);
   assert(false);
   return *this;
 }
@@ -137,20 +137,20 @@ std::string Crasher::GetStackTraceEtcErrorMessageHTML() {
   std::stringstream out;
   out << "A partial stack trace follows (function calls not explicitly logged not included).";
   out << "<table><tr>";
-  for (int threadCounter = 0; threadCounter < theGlobalVariables.CustomStackTrace.size; threadCounter ++) {
-    if (threadCounter >= theGlobalVariables.theThreadData.size) {
+  for (int threadCounter = 0; threadCounter < global.CustomStackTrace.size; threadCounter ++) {
+    if (threadCounter >= global.theThreadData.size) {
       out << "<td><b>WARNING: the stack trace reports "
-      << theGlobalVariables.CustomStackTrace.size
+      << global.CustomStackTrace.size
       << " threads but the thread data array has record of only "
-      << theGlobalVariables.theThreadData.size
+      << global.theThreadData.size
       << " threads. " << "</b></td>";
       break;
     }
-    out << "<td>" << theGlobalVariables.theThreadData[threadCounter].ToStringHtml() << "</td>";
+    out << "<td>" << global.theThreadData[threadCounter].ToStringHtml() << "</td>";
   }
   out << "</tr> <tr>";
-  for (int threadCounter = 0; threadCounter<theGlobalVariables.CustomStackTrace.size; threadCounter ++) {
-    if (threadCounter >= theGlobalVariables.theThreadData.size) {
+  for (int threadCounter = 0; threadCounter<global.CustomStackTrace.size; threadCounter ++) {
+    if (threadCounter >= global.theThreadData.size) {
       break;
     }
     if (ThreadData::getCurrentThreadId() != threadCounter) {
@@ -158,7 +158,7 @@ std::string Crasher::GetStackTraceEtcErrorMessageHTML() {
       //<-to avoid coordinating threads
       continue;
     }
-    ListReferences<stackInfo>& currentInfo = theGlobalVariables.CustomStackTrace[threadCounter];
+    ListReferences<stackInfo>& currentInfo = global.CustomStackTrace[threadCounter];
     out << "<td><table><tr><td>file</td><td>line</td><td>function name (if known)</td></tr>";
     for (int i = currentInfo.size - 1; i >= 0; i --) {
       out << "<tr><td>" << HtmlRoutines::GetHtmlLinkFromProjectFileName(currentInfo[i].fileName, "", currentInfo[i].line)
@@ -176,10 +176,10 @@ std::string Crasher::GetStackTraceEtcErrorMessageHTML() {
 
 std::string Crasher::GetStackTraceEtcErrorMessageConsole() {
   std::stringstream out;
-  for (int threadCounter = 0; threadCounter<theGlobalVariables.CustomStackTrace.size; threadCounter ++) {
-    if (threadCounter >= theGlobalVariables.theThreadData.size) {
-      out << "WARNING: stack trace reports " << theGlobalVariables.CustomStackTrace.size << " threads "
-      << "while I have only " << theGlobalVariables.theThreadData.size << " registered threads. ";
+  for (int threadCounter = 0; threadCounter<global.CustomStackTrace.size; threadCounter ++) {
+    if (threadCounter >= global.theThreadData.size) {
+      out << "WARNING: stack trace reports " << global.CustomStackTrace.size << " threads "
+      << "while I have only " << global.theThreadData.size << " registered threads. ";
       break;
     }
     out << "********************\r\nThread index " << threadCounter << ": \r\n";
@@ -188,7 +188,7 @@ std::string Crasher::GetStackTraceEtcErrorMessageConsole() {
       //<-to avoid coordinating threads
       continue;
     }
-    ListReferences<stackInfo>& currentInfo = theGlobalVariables.CustomStackTrace[threadCounter];
+    ListReferences<stackInfo>& currentInfo = global.CustomStackTrace[threadCounter];
     for (int i = currentInfo.size - 1; i >= 0; i --) {
       out << currentInfo[i].functionName << "\n";
     }
@@ -198,7 +198,7 @@ std::string Crasher::GetStackTraceEtcErrorMessageConsole() {
 
 std::string GlobalVariables::ToStringHTMLTopCommandLinuxSystem() {
   MacroRegisterFunctionWithName("GlobalVariables::ToStringHTMLTopCommandLinuxSystem");
-  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
+  if (!global.UserDefaultHasAdminRights()) {
     return "Login as admin for RAM memory statistics.";
   }
   std::string topString = this->CallSystemWithOutput("top -b -n 1 -s");
@@ -249,8 +249,8 @@ std::string GlobalVariables::ToStringThreadData(bool useHTML) {
 std::string GlobalVariables::ToStringProgressReportWithThreadData(bool useHTML) {
   MacroRegisterFunctionWithName("GlobalVariables::ToStringProgressReportHtmlWithThreadData");
   std::stringstream out;
-  out << theGlobalVariables.ToStringThreadData(useHTML);
-  out << theGlobalVariables.ToStringProgressReportNoThreadData(useHTML);
+  out << global.ToStringThreadData(useHTML);
+  out << global.ToStringProgressReportNoThreadData(useHTML);
   return out.str();
 }
 
@@ -287,20 +287,20 @@ std::string GlobalVariables::ToStringProgressReportNoThreadData(bool useHTML) {
     } else {
       reportStream << crash.GetStackTraceEtcErrorMessageConsole();
     }
-    reportStream << theGlobalVariables.GetElapsedMilliseconds()
+    reportStream << global.GetElapsedMilliseconds()
     << " ms elapsed. ";
-    if (theGlobalVariables.millisecondsMaxComputation > 0) {
+    if (global.millisecondsMaxComputation > 0) {
       if (useHTML) {
         reportStream << "<br>";
       }
       reportStream << "\nHard limit: "
-      << theGlobalVariables.millisecondsMaxComputation
+      << global.millisecondsMaxComputation
       << " ms [system crash if limit exceeded].";
       if (useHTML) {
         reportStream << "<br>";
       }
       reportStream << "\nSoft limit: "
-      << theGlobalVariables.millisecondsMaxComputation / 2
+      << global.millisecondsMaxComputation / 2
       << " ms [computation error if limit exceeded, triggered between calculator/atomic functions].";
     }
   }
@@ -364,11 +364,11 @@ bool GlobalVariables::UserSecureNonAdminOperationsAllowed() {
 }
 
 bool GlobalVariables::UserDebugFlagOn() {
-  return theGlobalVariables.GetWebInput("debugFlag") == "true";
+  return global.GetWebInput("debugFlag") == "true";
 }
 
 bool GlobalVariables::UserStudentVieWOn() {
-  return theGlobalVariables.GetWebInput("studentView") == "true";
+  return global.GetWebInput("studentView") == "true";
 }
 
 bool GlobalVariables::CheckConsistency() {
@@ -383,7 +383,7 @@ bool GlobalVariables::UserDefaultIsDebuggingAdmin() {
 }
 
 bool GlobalVariables::UserDefaultHasAdminRights() {
-  if (theGlobalVariables.flagDisableDatabaseLogEveryoneAsAdmin) {
+  if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
     return true;
   }
   return this->flagLoggedIn && (this->userDefault.userRole == "admin");
@@ -457,8 +457,8 @@ std::string GlobalVariables::ToStringCalcArgsNoNavigation(List<std::string>* tag
         continue;
       }
     }
-    out << theGlobalVariables.webArguments.theKeys[i] << "="
-    << theGlobalVariables.webArguments.theValues[i]
+    out << global.webArguments.theKeys[i] << "="
+    << global.webArguments.theValues[i]
     << "&";
   }
   return out.str();
@@ -488,7 +488,7 @@ void GlobalVariables::initOutputReportAndCrashFileNames(
   FileOperations::CleanUpForFileNameUse(
     inputUserStringCivilized
   );
-  if (!theGlobalVariables.flagUsingSSLinCurrentConnection) {
+  if (!global.flagUsingSSLinCurrentConnection) {
     this->userInputStringRAWIfAvailable = inputUserStringRAW;
     inputAbbreviated = this->userInputStringRAWIfAvailable;
   } else {
@@ -503,12 +503,12 @@ void FileInformation::AddProjectInfo(const std::string& fileName, const std::str
   FileInformation theInfo;
   theInfo.FileName = fileName;
   theInfo.FileDescription = fileDescription;
-  if (theGlobalVariables.flagNotAllocated) {
+  if (global.flagNotAllocated) {
     std::cout << "The global variables are not allocated: "
     << "this is the static initialization order fiasco at work! ";
     assert(false);//cannot crash with mechanisms: nothing works yet!
   }
-  theGlobalVariables.theSourceCodeFiles().AddOnTopNoRepetition(theInfo);
+  global.theSourceCodeFiles().AddOnTopNoRepetition(theInfo);
 }
 
 UserCalculatorData::UserCalculatorData() {
@@ -1361,8 +1361,8 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex() {
         QuasiPolynomial& currentQPSub= this->theQPsSubstituted.TheObjects[i].TheObjects[k];
         std::stringstream tempStream;
         tempStream << "Processing chamber " << i + 1 << " linear operator " << k+ 1;
-        theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0] = tempStream.str();
-        theGlobalVariables.MakeReport();
+        global.theIndicatorVariables.ProgressReportStrings[0] = tempStream.str();
+        global.MakeReport();
         currentQPNoSub.Substitution(this->theLinearOperatorsExtended.TheObjects[k], this->theTranslationsProjectedBasisChanged[k], this->theExtendedIntegralLatticeMatForM, currentQPSub);
         out << "; after substitution we get: " << currentQPSub.ToString(false, false);
       }
@@ -1549,15 +1549,15 @@ void GeneralizedVermaModuleCharacters::IncrementComputation(Vector<Rational>& pa
 //      this->theParser.theHmm.MakeG2InB3(this->theParser);
       this->initFromHomomorphism(parabolicSel, this->theHmm);
       this->TransformToWeylProjectiveStep1();
-//      out << theGlobalVariables.theIndicatorVariables.StatusString1;
+//      out << global.theIndicatorVariables.StatusString1;
       this->TransformToWeylProjectiveStep2();
-//      out << theGlobalVariables.theIndicatorVariables.StatusString1;
+//      out << global.theIndicatorVariables.StatusString1;
       break;
     case 1:
       this->projectivizedChambeR.Refine();
       this->SortMultiplicities();
       out << this->projectivizedChambeR.ToString(false);
-//      out << theGlobalVariables.theIndicatorVariables.StatusString1;
+//      out << global.theIndicatorVariables.StatusString1;
       break;
     case 2:
       this->ComputeQPsFromChamberComplex();
@@ -1568,23 +1568,23 @@ void GeneralizedVermaModuleCharacters::IncrementComputation(Vector<Rational>& pa
       break;
     case 4:
       this->InitTheMaxComputation();
-//      out << theGlobalVariables.theIndicatorVariables.StatusString1;
+//      out << global.theIndicatorVariables.StatusString1;
       break;
     case 5:
       this->theMaxComputation.FindExtremaParametricStep1(this->thePauseControlleR);
-//      out << theGlobalVariables.theIndicatorVariables.StatusString1;
+//      out << global.theIndicatorVariables.StatusString1;
       break;
     case 6:
       this->theMaxComputation.FindExtremaParametricStep3();
-//      out << theGlobalVariables.theIndicatorVariables.StatusString1;
+//      out << global.theIndicatorVariables.StatusString1;
       break;
     case 7:
       this->theMaxComputation.FindExtremaParametricStep4();
-//      out << theGlobalVariables.theIndicatorVariables.StatusString1;
+//      out << global.theIndicatorVariables.StatusString1;
       break;
     case 8:
       this->theMaxComputation.FindExtremaParametricStep5();
-//      out << theGlobalVariables.theIndicatorVariables.StatusString1;
+//      out << global.theIndicatorVariables.StatusString1;
       break;
     default:
       break;
@@ -1762,7 +1762,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
     }
   }
   this->log << "\nDual cartan embedding smaller into larger:\n" <<
-  DualCartanEmbedding.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
+  DualCartanEmbedding.ToString(&global.theDefaultFormat.GetElement());
   this->log << "\nParabolic subalgebra large algebra: " << this->ParabolicLeviPartRootSpacesZeroStandsForSelected.ToString();
   tempRoot = this->ParabolicSelectionSmallerAlgebra;
   this->log << "\nParabolic subalgebra smaller algebra: " << tempRoot.ToString();
@@ -1781,7 +1781,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
     Matrix<Rational>& currentLinearOperator = this->theLinearOperators[i];
     theSubgroup.GetMatrixOfElement(theSubgroup.allElements[i], currentLinearOperator);
 //    currentLinearOperator.MultiplyOnTheLeft(preferredBasisChangeInverse);
-    this->log << "\n" << currentLinearOperator.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
+    this->log << "\n" << currentLinearOperator.ToString(&global.theDefaultFormat.GetElement());
     currentLinearOperator.ActOnVectorColumn(theSubgroup.GetRho(), this->theTranslationS[i]);
     this->theTranslationS[i] -= theSubgroup.GetRho();
     this->theTranslationS[i].Minus();
@@ -1793,7 +1793,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
     }
   }
   this->log << "\n\n\nMatrix of the projection operator (basis-changed):\n"
-  << theProjectionBasisChanged.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
+  << theProjectionBasisChanged.ToString(&global.theDefaultFormat.GetElement());
   this->log << "\n\n\nMatrix form of the operators $u_w$, "
   << "the translations $\tau_w$ and their projections (" << this->theLinearOperatorsExtended.size << "):";
   //List<Matrix<Rational> > tempList;
@@ -1810,7 +1810,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
         currentLOExtended.elements[i][j + currentLO.NumRows] = currentLO.elements[i][j];
       }
     }
-    this->log << "\n\n" << currentLOExtended.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
+    this->log << "\n\n" << currentLOExtended.ToString(&global.theDefaultFormat.GetElement());
     this->log << this->theTranslationS[k].ToString() << ";   " << this->theTranslationsProjectedBasisChanged[k].ToString();
   }
 
@@ -1883,7 +1883,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   Vectors<Rational> rootsGeneratingExtendedLattice;
   int totalDim = input.theRange().GetRank() + input.theDomain().GetRank();
   rootsGeneratingExtendedLattice.SetSize(totalDim);
-  this->log << "\n" << tempMat.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "\n";
+  this->log << "\n" << tempMat.ToString(&global.theDefaultFormat.GetElement()) << "\n";
   this->log << this->theExtendedIntegralLatticeMatForM.ToString();
   this->WeylChamberSmallerAlgebra.CreateFromNormals(WallsWeylChamberLargerAlgebra);
   this->log << "\nWeyl chamber larger algebra before projectivizing: " << this->WeylChamberSmallerAlgebra.ToString(&theFormat) << "\n";
@@ -1915,9 +1915,9 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   this->log << "\nWeyl chamber smaller algebra: " << this->PreimageWeylChamberSmallerAlgebra.ToString(&theFormat) << "\n";
   this->log << "**********************\n\n\n";
   this->log << "\nThe first operator extended:\n"
-  << this->theLinearOperatorsExtended[0].ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "\n";
+  << this->theLinearOperatorsExtended[0].ToString(&global.theDefaultFormat.GetElement()) << "\n";
   this->log << "\nThe second operator extended:\n"
-  << this->theLinearOperatorsExtended[1].ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "\n";
+  << this->theLinearOperatorsExtended[1].ToString(&global.theDefaultFormat.GetElement()) << "\n";
   /*tempMat = this->theLinearOperatorsExtended.TheObjects[0];
   tempMat.Transpose();
   tempMat.ActOnVectorsColumn(this->PreimageWeylChamberSmallerAlgebra);
@@ -1943,9 +1943,9 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   this->log << "\nPreimage Weyl chamber smaller algebra: " << this->PreimageWeylChamberSmallerAlgebra.ToString(&theFormat) << "\n";
   this->log << "\nPreimage Weyl chamber larger algebra: " << this->PreimageWeylChamberLargerAlgebra.ToString(&theFormat) << "\n";
 
-  //theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh = true;
-  //theGlobalVariables.theIndicatorVariables.StatusString1= this->log.str();
-  //theGlobalVariables.MakeReport();
+  //global.theIndicatorVariables.StatusString1NeedsRefresh = true;
+  //global.theIndicatorVariables.StatusString1= this->log.str();
+  //global.MakeReport();
 }
 
 std::string GeneralizedVermaModuleCharacters::PrepareReport() {

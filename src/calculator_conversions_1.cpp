@@ -613,7 +613,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
   theSAs.flagComputePairingTable = false;
   theSAs.flagComputeNilradicals = false;
   theReport.Report("Got to here pt 3");
-  theSAs.millisecondsComputationStart = theGlobalVariables.GetElapsedMilliseconds();
+  theSAs.millisecondsComputationStart = global.GetElapsedMilliseconds();
   reportStream << " done. <br>Total subalgebras: " << theSAsE.children.size - 1 << ". ";
   theReport.Report(reportStream.str());
 
@@ -657,7 +657,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
     << theSAs.ToStringProgressReport();
     return output.AssignValue(out.str(), theCommands);
   }
-  theSAs.millisecondsComputationEnd = theGlobalVariables.GetElapsedMilliseconds();
+  theSAs.millisecondsComputationEnd = global.GetElapsedMilliseconds();
   return output.AssignValue(theSAs, theCommands);
 }
 

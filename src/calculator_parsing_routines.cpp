@@ -60,7 +60,7 @@ void Calculator::reset() {
   this->NumLargeAdditionsStart      = - 1;
   this->NumLargeMultiplicationsStart = - 1;
   this->NumLargeGCDcallsStart       = - 1;
-  this->LastLogEvaluationTime = theGlobalVariables.GetElapsedSeconds();
+  this->LastLogEvaluationTime = global.GetElapsedSeconds();
   this->DepthRecursionReached = 0;
   this->flagWriteLatexPlots = false;
   this->flagLogSyntaxRules = false;
@@ -336,7 +336,7 @@ void Calculator::initialize() {
   this->RuleStackCacheIndex = 0;
   this->cachedRuleStacks.AddOnTop(this->RuleStack);
   this->NumPredefinedAtoms = this->theAtoms.size; //<-operations added up to this point are called ``operations''
-  if (theGlobalVariables.flagAutoUnitTest) {
+  if (global.flagAutoUnitTest) {
     this->CheckPredefinedFunctions();
   }
 }
@@ -1850,7 +1850,7 @@ bool Calculator::ExtractExpressions(Expression& outputExpression, std::string* o
   int counterReport = 0;
   int symbolsToIssueReport = 100;
   int minMillisecondsPerReport = 200;
-  int64_t lastMilliseconds = theGlobalVariables.GetElapsedMilliseconds();
+  int64_t lastMilliseconds = global.GetElapsedMilliseconds();
   ProgressReport theReport;
   for (
     this->counterInSyntacticSoup = 0;
@@ -1860,7 +1860,7 @@ bool Calculator::ExtractExpressions(Expression& outputExpression, std::string* o
     counterReport ++;
     if (counterReport >= symbolsToIssueReport) {
       counterReport = 0;
-      int64_t currentMilliseconds = theGlobalVariables.GetElapsedMilliseconds();
+      int64_t currentMilliseconds = global.GetElapsedMilliseconds();
       if (currentMilliseconds - lastMilliseconds > minMillisecondsPerReport) {
         currentMilliseconds = lastMilliseconds;
         std::stringstream reportStream;

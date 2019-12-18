@@ -459,19 +459,19 @@ bool ElementUniversalEnveloping<coefficient>::HWTAAbilinearForm(
   constMon.MakeOne(this->GetOwner());
   if (logStream != nullptr) {
     *logStream << "left eltement transposed: "
-    << TAleft.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
-    *logStream << "right element: " << right.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
+    << TAleft.ToString(&global.theDefaultFormat.GetElement()) << "<br>";
+    *logStream << "right element: " << right.ToString(&global.theDefaultFormat.GetElement()) << "<br>";
   }
   startingElt = right;
   startingElt.Simplify(theRingUnit);
   if (logStream != nullptr) {
     *logStream << "right element after simplification: "
-    << startingElt.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
+    << startingElt.ToString(&global.theDefaultFormat.GetElement()) << "<br>";
   }
   startingElt.ModOutVermaRelations(subHiGoesToIthElement, theRingUnit);
   if (logStream != nullptr) {
     *logStream << "right element after Verma rels: "
-    << startingElt.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
+    << startingElt.ToString(&global.theDefaultFormat.GetElement()) << "<br>";
   }
   coefficient leftMonCoeff;
   for (int j = 0; j < TAleft.size(); j ++) {
@@ -485,24 +485,24 @@ bool ElementUniversalEnveloping<coefficient>::HWTAAbilinearForm(
           tempElt.MakeOneGenerator(leftMon.generatorsIndices[i], this->GetOwner(), theRingUnit);
           MathRoutines::swap(tempElt, intermediateAccum);
           if (logStream != nullptr) {
-            //*logStream << "tempElt before mult: " << tempElt.ToString(theGlobalVariables, tempFormat) << "<br>";
+            //*logStream << "tempElt before mult: " << tempElt.ToString(global, tempFormat) << "<br>";
             *logStream << "intermediate before mult: "
-            << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
+            << intermediateAccum.ToString(&global.theDefaultFormat.GetElement()) << "<br>";
           }
           intermediateAccum *= tempElt;
           if (logStream != nullptr) {
             *logStream << "intermediate before simplification: "
-            << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
+            << intermediateAccum.ToString(&global.theDefaultFormat.GetElement()) << "<br>";
           }
           intermediateAccum.Simplify(theRingUnit);
           if (logStream != nullptr) {
             *logStream << "intermediate after simplification: "
-            << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
+            << intermediateAccum.ToString(&global.theDefaultFormat.GetElement()) << "<br>";
           }
           intermediateAccum.ModOutVermaRelations(subHiGoesToIthElement, theRingUnit, theRingZero);
           if (logStream != nullptr) {
             *logStream << "intermediate after Verma rels: "
-            << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
+            << intermediateAccum.ToString(&global.theDefaultFormat.GetElement()) << "<br>";
           }
         }
       } else {
@@ -518,7 +518,7 @@ bool ElementUniversalEnveloping<coefficient>::HWTAAbilinearForm(
     }
   }
   if (logStream != nullptr) {
-    *logStream << "final UE element: " << Accum.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
+    *logStream << "final UE element: " << Accum.ToString(&global.theDefaultFormat.GetElement());
   }
   this->GetOwner().UEGeneratorOrderIncludingCartanElts = oldOrder;
   return true;
@@ -643,7 +643,7 @@ void ElementUniversalEnveloping<coefficient>::MakeCasimir(SemisimpleLieAlgebra& 
 //        killingForm.elements[i][j] += theWeyl.RootScalarCartanRoot(tempRoot1, theWeyl.RootSystem.TheObjects[k])* theWeyl.RootScalarCartanRoot(tempRoot2, theWeyl.RootSystem.TheObjects[k]);
 //    }
 //  }
-//  killingForm.Invert(theGlobalVariables);
+//  killingForm.Invert(global);
 //  killingForm.ComputeDebugString();
 //  out << killingForm.ToString(true, false);
 
@@ -964,7 +964,7 @@ bool ElementUniversalEnvelopingOrdered<coefficient>::GetCoordsInBasis(
   tempBasis = theBasis;
   tempBasis.AddOnTop(*this);
   Vectors<coefficient> tempCoords;
-  this->GetBasisFromSpanOfElements(tempBasis, tempCoords, tempElts, theRingUnit, theRingZero, theGlobalVariables);
+  this->GetBasisFromSpanOfElements(tempBasis, tempCoords, tempElts, theRingUnit, theRingZero, global);
   Vector<coefficient> tempRoot;
   tempRoot = *tempCoords.LastObject();
   tempCoords.SetSize(theBasis.size);
@@ -1095,7 +1095,7 @@ void ElementVermaModuleOrdered<coefficient>::GetBasisFromSpanOfElements(
   }
   List<ElementUniversalEnvelopingOrdered<coefficient> > theBasisUEform;
   ElementUniversalEnvelopingOrdered<coefficient>::GetBasisFromSpanOfElements(
-    theEltsUEform, outputCoordinates, theBasisUEform, RFOne, RFZero, theGlobalVariables
+    theEltsUEform, outputCoordinates, theBasisUEform, RFOne, RFZero, global
   );
   outputTheBasis.SetSize(theBasisUEform.size);
   for (int i = 0; i < theBasisUEform.size; i ++) {

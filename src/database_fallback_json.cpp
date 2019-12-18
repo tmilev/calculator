@@ -25,7 +25,7 @@ bool Database::FallBack::UpdateOne(
 ) {
   MacroRegisterFunctionWithName("DatabaseFallback::UpdateOneFromQueryString");
   logWorker << "DEBUG: Inside update one." << logger::endL;
-  if (!theGlobalVariables.flagDatabaseUseFallback) {
+  if (!global.flagDatabaseUseFallback) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "DatabaseFallback::UpdateOneFromQueryString: "

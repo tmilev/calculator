@@ -83,24 +83,24 @@ void WebServerMonitor::BackupDatabaseIfNeeded() {
   MacroRegisterFunctionWithName("WebServer::BackupDatabaseIfNeeded");
   if (
     this->timeAtLastBackup > 0 &&
-    theGlobalVariables.GetElapsedSeconds() - this->timeAtLastBackup < (24 * 3600)
+    global.GetElapsedSeconds() - this->timeAtLastBackup < (24 * 3600)
   ) {
     return;
   }
   std::stringstream commandStream;
   commandStream << "mongodump --db calculator --archive ="
-  << theGlobalVariables.PhysicalPathProjectBase
+  << global.PhysicalPathProjectBase
   << "database-backups/dbBackup"
-  << theGlobalVariables.GetDateForLogFiles() << ".mongo";
+  << global.GetDateForLogFiles() << ".mongo";
   logServerMonitor << logger::orange << "Backing up database with command: " << logger::endL;
   logServerMonitor << commandStream.str() << logger::endL;
-  theGlobalVariables.CallSystemWithOutput(commandStream.str());
+  global.CallSystemWithOutput(commandStream.str());
   logServerMonitor << logger::green << "Backing up completed. " << logger::endL;
-  this->timeAtLastBackup = theGlobalVariables.GetElapsedSeconds();
+  this->timeAtLastBackup = global.GetElapsedSeconds();
 }
 
 void WebServerMonitor::Monitor(int pidServer) {
-  if (!theGlobalVariables.flagServerAutoMonitor) {
+  if (!global.flagServerAutoMonitor) {
     return;
   }
   this->pidServer = pidServer;
@@ -136,7 +136,7 @@ void WebServerMonitor::Monitor(int pidServer) {
   int numPings = 0;
   TimeWrapper now;
   for (;;) {
-    theGlobalVariables.FallAsleep(microsecondsToSleep);
+    global.FallAsleep(microsecondsToSleep);
     this->BackupDatabaseIfNeeded();
     theCrawler.PingCalculatorStatus();
     numPings ++;
@@ -175,7 +175,7 @@ void WebServerMonitor::Restart() {
   std::stringstream killServerChildrenCommand;
   killServerChildrenCommand << "pkill -9 -P " << this->pidServer;
   logServerMonitor  << "Terminating server children with command: " << killServerChildrenCommand.str() << logger::endL;
-  theGlobalVariables.CallSystemNoOutput(killServerChildrenCommand.str(), &logServerMonitor);
+  global.CallSystemNoOutput(killServerChildrenCommand.str(), &logServerMonitor);
   logServerMonitor << logger::red << "Terminating server with pid: " << this->pidServer << logger::endL;
   WebServer::TerminateProcessId(this->pidServer);
   logServerMonitor << logger::red << "Restarting monitor. " << this->pidServer << logger::endL;
@@ -606,7 +606,7 @@ void WebCrawler::FetchWebPagePart2(
 
 bool CalculatorFunctionsGeneral::innerFetchWebPageGET(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerFetchWebPageGET");
-  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
+  if (!global.UserDefaultHasAdminRights()) {
     return output.AssignValue(std::string("Fetching web pages available only for logged-in admins. "), theCommands);
   }
   WebCrawler theCrawler;
@@ -636,7 +636,7 @@ bool CalculatorFunctionsGeneral::innerFetchWebPageGET(Calculator& theCommands, c
 
 bool CalculatorFunctionsGeneral::innerFetchWebPagePOST(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerFetchWebPagePOST");
-  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
+  if (!global.UserDefaultHasAdminRights()) {
     return output.AssignValue(std::string("Fetching web pages available only for logged-in admins. "), theCommands);
   }
   WebCrawler theCrawler;
@@ -673,7 +673,7 @@ bool CalculatorFunctionsGeneral::innerFetchKnownPublicKeys(
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerFetchKnownPublicKeys");
   (void) input;
   std::stringstream out;
-  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
+  if (!global.UserDefaultHasAdminRights()) {
     out << "You need to be a logged-in admin to call this function. ";
     return output.AssignValue(out.str(), theCommands);
   }
@@ -853,7 +853,7 @@ bool WebCrawler::VerifyRecaptcha(
     }
     return false;
   }
-  std::string recaptchaURLencoded = theGlobalVariables.GetWebInput("recaptchaToken");
+  std::string recaptchaURLencoded = global.GetWebInput("recaptchaToken");
   if (commentsGeneralSensitive != nullptr) {
     *commentsGeneralSensitive << "Recaptcha: " << recaptchaURLencoded;
   }
@@ -930,14 +930,14 @@ JSData WebWorker::GetSignUpRequestResult() {
   MacroRegisterFunctionWithName("WebWorker::GetSignUpRequestResult");
   JSData result;
   std::stringstream errorStream;
-  if (!theGlobalVariables.flagDatabaseCompiled) {
+  if (!global.flagDatabaseCompiled) {
     result["error"] = "Database not available (cannot sign up). ";
     return result;
   }
   Database::get().theUser.LogoutViaDatabase();
   UserCalculator theUser;
-  theUser.username = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("desiredUsername"), false);
-  theUser.email = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("email"), false);
+  theUser.username = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("desiredUsername"), false);
+  theUser.email = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("email"), false);
   std::stringstream generalCommentsStream;
   std::stringstream outputStream;
   generalCommentsStream
@@ -986,7 +986,7 @@ JSData WebWorker::GetSignUpRequestResult() {
     return result;
   }
   std::stringstream* adminOutputStream = nullptr;
-  if (theGlobalVariables.UserDefaultHasAdminRights()) {
+  if (global.UserDefaultHasAdminRights()) {
     adminOutputStream = &generalCommentsStream;
   }
   //int fixThis;
@@ -999,7 +999,7 @@ JSData WebWorker::GetSignUpRequestResult() {
 }
 
 int WebWorker::WriteToBodyJSONAppendComments(JSData &result) {
-  std::string comments = theGlobalVariables.Comments.container.GetElement().str();
+  std::string comments = global.Comments.container.GetElement().str();
   if (comments != "") {
     if (result[WebAPI::result::comments].theType == JSData::token::tokenString) {
       comments = result[WebAPI::result::comments].theString + comments;
@@ -1015,7 +1015,7 @@ int WebWorker::WriteToBodyJSON(const JSData& result) {
   std::string toWrite = HtmlRoutines::ConvertStringToHtmlString(result.ToString(false), false);
   if (toWrite.size() < 2000) {
     if (toWrite.find(WebAPIResponse::youHaveReachedTheBackend) != std::string::npos) {
-      std::string sanitizedCalculatorApp = HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.DisplayNameExecutableApp, false);
+      std::string sanitizedCalculatorApp = HtmlRoutines::ConvertStringToHtmlString(global.DisplayNameExecutableApp, false);
       std::stringstream outLinkApp;
       outLinkApp << "You've reached the calculator's backend. The app can be accessed here: <a href = '"
       << sanitizedCalculatorApp << "'>app</a>";
@@ -1034,7 +1034,7 @@ int WebWorker::ProcessSignUP() {
 void GlobalVariables::WriteCrash(const JSData& out) {
   MacroRegisterFunctionWithName("WebWorker::WriteAfterTimeoutCrash");
   int toDoFixRaceCondition;
-  if (!theGlobalVariables.theProgress.flagTimedOut) {
+  if (!global.theProgress.flagTimedOut) {
     this->WriteResponse(out);
     return;
   }
@@ -1060,17 +1060,17 @@ int WebWorker::ProcessForgotLogin() {
   MacroRegisterFunctionWithName("WebWorker::ProcessForgotLogin");
   this->SetHeaderOKNoContentLength("");
   JSData result;
-  if (!theGlobalVariables.flagDatabaseCompiled) {
+  if (!global.flagDatabaseCompiled) {
     result[WebAPI::result::error] = "Error: database not running. ";
-    theGlobalVariables.WriteResponse(result);
+    global.WriteResponse(result);
     return 0;
   }
   std::stringstream out;
-  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
+  if (!global.UserDefaultHasAdminRights()) {
     Database::get().theUser.LogoutViaDatabase();
   }
   UserCalculator theUser;
-  theUser.email = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("email"), false);
+  theUser.email = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("email"), false);
   WebCrawler theCrawler;
   out << "<br><b> "
   << "Please excuse our verbose technical messages. </b>"
@@ -1079,7 +1079,7 @@ int WebWorker::ProcessForgotLogin() {
   << "</b><br>\n";
   if (!theCrawler.VerifyRecaptcha(&out, &out, nullptr)) {
     result[WebAPI::result::comments] = out.str();
-    theGlobalVariables.WriteResponse(result);
+    global.WriteResponse(result);
     return 0;
   }
   if (!theUser.Iexist(&out)) {
@@ -1087,7 +1087,7 @@ int WebWorker::ProcessForgotLogin() {
     << "We failed to find your email: " << theUser.email << " in our records. "
     << "</b>";
     result[WebAPI::result::comments] = out.str();
-    theGlobalVariables.WriteResponse(result);
+    global.WriteResponse(result);
     return 0;
   }
   if (!theUser.LoadFromDB(&out, &out)) {
@@ -1095,22 +1095,22 @@ int WebWorker::ProcessForgotLogin() {
     << "Failed to fetch user info for email: " << theUser.email
     << "</b>";
     result[WebAPI::result::comments] = out.str();
-    theGlobalVariables.WriteResponse(result);
+    global.WriteResponse(result);
     return 0;
   }
   out << "<b style =\"color:green\">"
   << "Your email is on record. "
   << "</b>";
-  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
+  if (!global.UserDefaultHasAdminRights()) {
     this->DoSetEmail(theUser, &out, &out, nullptr);
   } else {
     this->DoSetEmail(theUser, &out, &out, &out);
   }
 
-  out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() << " second(s); "
-  << theGlobalVariables.GetElapsedSeconds() << " second(s) spent creating account. ";
+  out << "<br>Response time: " << global.GetElapsedSeconds() << " second(s); "
+  << global.GetElapsedSeconds() << " second(s) spent creating account. ";
   result[WebAPI::result::comments] = out.str();
-  theGlobalVariables.WriteResponse(result);
+  global.WriteResponse(result);
   return 0;
 }
 

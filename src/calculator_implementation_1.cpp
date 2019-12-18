@@ -242,7 +242,7 @@ bool DynkinSimpleType:: HasPrecomputedSubalgebras() const {
 // EXCEPT in special circumstances described below.
 // Instead, to get the web address of the
 // calculator server,
-// please use theGlobalVariables.hostNoPort.
+// please use global.hostNoPort.
 // That address is extracted from the
 // incoming message headers
 // and is how our server is seen from the outside world.
@@ -396,13 +396,13 @@ bool Calculator::innerPrintSSSubalgebras(
 ) {
   MacroRegisterFunctionWithName("Calculator::innerPrintSSsubalgebras");
   if (doForceRecompute) {
-    if (!theGlobalVariables.UserDefaultHasAdminRights()) {
+    if (!global.UserDefaultHasAdminRights()) {
       return theCommands << "Only logged-in admins allowed to force-recompute semisimple subalgebras. ";
     }
   }
-  if (!theGlobalVariables.theProgress.flagBanProcessMonitoring) {
-    if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection != nullptr) {
-      theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection("Triggered by printSemisimpleSubalgebras.");
+  if (!global.theProgress.flagBanProcessMonitoring) {
+    if (global.WebServerReturnDisplayIndicatorCloseConnection != nullptr) {
+      global.WebServerReturnDisplayIndicatorCloseConnection("Triggered by printSemisimpleSubalgebras.");
     }
   }
   std::stringstream out;
@@ -430,8 +430,8 @@ bool Calculator::innerPrintSSSubalgebras(
   }
   SemisimpleLieAlgebra& ownerLieAlgebra = *ownerSSPointer;
   std::string dynkinString = ownerSSPointer->theWeyl.theDynkinType.ToString();;
-  theGlobalVariables.RelativePhysicalNameOptionalProgressReport = "progress_subalgebras_" + dynkinString;
-  theGlobalVariables.RelativePhysicalNameOptionalResult = "result_subalgebras_" + dynkinString;
+  global.RelativePhysicalNameOptionalProgressReport = "progress_subalgebras_" + dynkinString;
+  global.RelativePhysicalNameOptionalResult = "result_subalgebras_" + dynkinString;
   SemisimpleSubalgebras& theSubalgebras =
   theCommands.theObjectContainer.GetSemisimpleSubalgebrasCreateIfNotPresent(ownerLieAlgebra.theWeyl.theDynkinType);
   theSubalgebras.ComputeStructureWriteFiles(
@@ -471,7 +471,7 @@ bool SemisimpleSubalgebras::ComputeStructureWriteFiles(
   this->ComputeFolderNames(this->currentFormat);
   if (!FileOperations::FileExistsVirtual(this->VirtualNameMainFile1) || forceRecompute) {
     if (doFullInit) {
-      this->millisecondsComputationStart = theGlobalVariables.GetElapsedMilliseconds();
+      this->millisecondsComputationStart = global.GetElapsedMilliseconds();
     }
     this->flagComputeNilradicals = computeNilradicals;
     this->flagComputeModuleDecomposition = computeModuleDecomposition;
@@ -622,7 +622,7 @@ bool Calculator::innerGroebner(
   }
   GroebnerBasisComputation<AlgebraicNumber> theGroebnerComputation;
   theContext.ContextGetFormatExpressions(theGroebnerComputation.theFormat);
-  theContext.ContextGetFormatExpressions(theGlobalVariables.theDefaultFormat.GetElement());
+  theContext.ContextGetFormatExpressions(global.theDefaultFormat.GetElement());
   if (useModZp) {
     ElementZmodP tempElt;
     tempElt.MakeMOne(static_cast<unsigned>(theMod));

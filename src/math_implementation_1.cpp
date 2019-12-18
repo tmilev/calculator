@@ -142,7 +142,7 @@ void LittelmannPath::ActByEalpha(int indexAlpha) {
   }
   Rational s2 = this->owner->RootScalarCartanRoot(this->Waypoints[precedingIndex], alphaScaled);
   if (!this->MinimaAreIntegral()) {
-    theGlobalVariables.Comments << "<br>Something is wrong: starting path is BAD!";
+    global.Comments << "<br>Something is wrong: starting path is BAD!";
   }
   if (s2 > theMin + 1) {
     this->Waypoints.SetSize(this->Waypoints.size + 1);
@@ -277,7 +277,7 @@ void LittelmannPath::Simplify() {
 /*  if (leftIndex + 1< this->Waypoints.size) {
     this->Waypoints.SetSize(leftIndex + 1);
     tempStream << " reduced to " << this->ToString();
-    theGlobalVariables.Comments << tempStream.str();
+    global.Comments << tempStream.str();
   }*/
   this->Waypoints.SetSize(leftIndex + 1);
 }
@@ -377,8 +377,8 @@ bool LittelmannPath::GenerateOrbit(
               currentSequence.AddOnTop(theIndex);
               outputOperators.AddOnTop(currentSequence);
               if (!currentPath.MinimaAreIntegral()) {
-                theGlobalVariables.Comments << "<hr>Found a bad path:<br> ";
-                theGlobalVariables.Comments << " = " << currentPath.ToString();
+                global.Comments << "<hr>Found a bad path:<br> ";
+                global.Comments << " = " << currentPath.ToString();
               }
             }
           }
@@ -395,8 +395,8 @@ bool LittelmannPath::GenerateOrbit(
               currentSequence.AddOnTop(- theIndex - 1);
               outputOperators.AddOnTop(currentSequence);
               if (!currentPath.MinimaAreIntegral()) {
-                theGlobalVariables.Comments << "<hr>Found a bad path:<br> ";
-                theGlobalVariables.Comments << " = " << currentPath.ToString();
+                global.Comments << "<hr>Found a bad path:<br> ";
+                global.Comments << " = " << currentPath.ToString();
               }
             }
           }
@@ -633,17 +633,17 @@ bool ElementUniversalEnveloping<coefficient>::HWMTAbilinearForm(
   MonomialUniversalEnveloping<coefficient> constMon;
   constMon.MakeConst();
   if (logStream != nullptr) {
-    *logStream << "backtraced elt: " << MTright.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
-    *logStream << "this element: " << this->ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
+    *logStream << "backtraced elt: " << MTright.ToString(&global.theDefaultFormat.GetElement()) << "<br>";
+    *logStream << "this element: " << this->ToString(&global.theDefaultFormat.GetElement()) << "<br>";
   }
   for (int j = 0; j < right.size; j ++) {
     intermediateAccum = *this;
-    intermediateAccum.Simplify(theGlobalVariables, theRingUnit, theRingZero);
+    intermediateAccum.Simplify(global, theRingUnit, theRingZero);
     if (logStream != nullptr) {
       *logStream << "intermediate after simplification: "
-      << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
+      << intermediateAccum.ToString(&global.theDefaultFormat.GetElement()) << "<br>";
     }
-    intermediateAccum.ModOutVermaRelations(&theGlobalVariables, subHiGoesToIthElement, theRingUnit, theRingZero);
+    intermediateAccum.ModOutVermaRelations(&global, subHiGoesToIthElement, theRingUnit, theRingZero);
     MonomialUniversalEnveloping<coefficient>& rightMon = MTright[j];
     coefficient& rightMonCoeff = MTright.theCoeffs[j];
     int thePower;
@@ -653,24 +653,24 @@ bool ElementUniversalEnveloping<coefficient>::HWMTAbilinearForm(
           tempElt.MakeOneGenerator(rightMon.generatorsIndices[i], *this->owners, this->indexInOwners, theRingUnit);
           MathRoutines::swap(tempElt, intermediateAccum);
           if (logStream != nullptr) {
-            *logStream << "tempElt before mult: " << tempElt.ToString(&theGlobalVariables.theDefaultFormat) << "<br>";
+            *logStream << "tempElt before mult: " << tempElt.ToString(&global.theDefaultFormat) << "<br>";
             *logStream << "intermediate before mult: "
-            << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
+            << intermediateAccum.ToString(&global.theDefaultFormat.GetElement()) << "<br>";
           }
           intermediateAccum *= (tempElt);
           if (logStream != nullptr) {
             *logStream << "intermediate before simplification: "
-            << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
+            << intermediateAccum.ToString(&global.theDefaultFormat.GetElement()) << "<br>";
           }
           intermediateAccum.Simplify(theRingUnit);
           if (logStream != nullptr) {
             *logStream << "intermediate after simplification: "
-            << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
+            << intermediateAccum.ToString(&global.theDefaultFormat.GetElement()) << "<br>";
           }
           intermediateAccum.ModOutVermaRelations(subHiGoesToIthElement, theRingUnit, theRingZero);
           if (logStream != nullptr) {
             *logStream << "intermediate after Verma rels: "
-            << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
+            << intermediateAccum.ToString(&global.theDefaultFormat.GetElement()) << "<br>";
           }
         }
       } else {
@@ -685,7 +685,7 @@ bool ElementUniversalEnveloping<coefficient>::HWMTAbilinearForm(
     }
   }
   if (logStream != nullptr) {
-    *logStream << "final UE element: " << Accum.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
+    *logStream << "final UE element: " << Accum.ToString(&global.theDefaultFormat.GetElement());
   }
   return true;
 }
@@ -714,7 +714,7 @@ std::string ElementUniversalEnveloping<coefficient>::IsInProperSubmodule(
   }
   for (int i = 0; i < theOrbit.size; i ++) {
     ElementUniversalEnveloping<coefficient>& current = theOrbit[i];
-    out << "<br>" << current.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
+    out << "<br>" << current.ToString(&global.theDefaultFormat.GetElement());
   }
   return out.str();
 }

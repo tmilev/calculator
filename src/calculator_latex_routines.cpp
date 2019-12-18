@@ -76,11 +76,11 @@ bool LaTeXcrawler::ExtractFileNamesFromRelativeFileName(std::stringstream* comme
 void LaTeXcrawler::BuildFreecalC() {
   MacroRegisterFunctionWithName("LaTeXcrawler::BuildFreecalc");
   StateMaintainerCurrentFolder preserveCurrentFolder;
-  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
+  if (!global.UserDefaultHasAdminRights()) {
     this->displayResult << "Build freecalc command allowed only for logged-in admins.";
     return;
   }
-  theGlobalVariables.millisecondsMaxComputation = 50000000; //50k seconds: ok as we are admin.
+  global.millisecondsMaxComputation = 50000000; //50k seconds: ok as we are admin.
   if (!this->ExtractFileNamesFromRelativeFileName(&this->errorStream)) {
     return;
   }
@@ -245,7 +245,7 @@ void LaTeXcrawler::BuildFreecalC() {
   }
   std::stringstream executedCommands, resultTable;
   std::string currentSysCommand; //"ch " + this->baseFolderStartFilePhysical+"\n\n\n\n";
-  theGlobalVariables.ChDir(this->baseFolderStartFilePhysical);
+  global.ChDir(this->baseFolderStartFilePhysical);
   executedCommands
   << "<br>Directory changed to: " << this->baseFolderStartFilePhysical
   << ", making the current directory: "
@@ -263,14 +263,14 @@ void LaTeXcrawler::BuildFreecalC() {
   } else {
     printableFolder = "lectures_printable_" + folderEnd + "/";
   }
-  theGlobalVariables.CallSystemNoOutput("mkdir " + printableFolder, &logWorker);
+  global.CallSystemNoOutput("mkdir " + printableFolder, &logWorker);
   if (isLecturE) {
-    theGlobalVariables.CallSystemNoOutput("mkdir " + lectureProjectorFolder, &logWorker);
+    global.CallSystemNoOutput("mkdir " + lectureProjectorFolder, &logWorker);
     if (this->flagBuildSingleSlides) {
       slideProjectorFolder = "slides_projector_" + folderEnd + "/";
       slideHandoutFolder = "slides_handout_" + folderEnd + "/";
-      theGlobalVariables.CallSystemNoOutput("mkdir " + slideProjectorFolder, &logWorker);
-      theGlobalVariables.CallSystemNoOutput("mkdir " + slideHandoutFolder, &logWorker);
+      global.CallSystemNoOutput("mkdir " + slideProjectorFolder, &logWorker);
+      global.CallSystemNoOutput("mkdir " + slideHandoutFolder, &logWorker);
     }
   }
   this->theFileNameWorkingCopy = "working_file_" + this->theFileNameToCrawlPhysicalNoPathName;
@@ -301,10 +301,10 @@ void LaTeXcrawler::BuildFreecalC() {
     executedCommands << "<br>" << currentSysCommand;
     reportStream << currentSysCommand;
     theReport.Report(reportStream.str());
-    theGlobalVariables.CallSystemNoOutput(currentSysCommand, &logWorker);
+    global.CallSystemNoOutput(currentSysCommand, &logWorker);
     reportStream << "<b>[x2]</b>";
     theReport.Report(reportStream.str());
-    theGlobalVariables.CallSystemNoOutput(currentSysCommand, &logWorker);
+    global.CallSystemNoOutput(currentSysCommand, &logWorker);
     std::stringstream thePdfFileNameHandout;
     if (isLecturE) {
       thePdfFileNameHandout << "./" << printableFolder << "Lecture" << theLectureNumbers[i] << "Handout_"
@@ -325,7 +325,7 @@ void LaTeXcrawler::BuildFreecalC() {
     executedCommands << "<br>" << currentSysCommand;
     reportStream << "<br>Lecture/Homework " << i + 1 << " handout compiled, renaming file ... ";
     theReport.Report(reportStream.str());
-    theGlobalVariables.CallSystemNoOutput(currentSysCommand, &logWorker);
+    global.CallSystemNoOutput(currentSysCommand, &logWorker);
     reportStream << " done.";
     theReport.Report(reportStream.str());
     if (!isLecturE) {
@@ -348,7 +348,7 @@ void LaTeXcrawler::BuildFreecalC() {
     executedCommands << "<br>" << currentSysCommand;
     reportStream << currentSysCommand;
     theReport.Report(reportStream.str());
-    theGlobalVariables.CallSystemNoOutput(currentSysCommand, &logWorker);
+    global.CallSystemNoOutput(currentSysCommand, &logWorker);
     std::stringstream thePdfFileNameNormal;
     thePdfFileNameNormal << "./" << lectureProjectorFolder << "Lecture"
     << theLectureNumbers[i] << "_" << theLectureDesiredNames[i] << "_"
@@ -357,7 +357,7 @@ void LaTeXcrawler::BuildFreecalC() {
     executedCommands << "<br>" << currentSysCommand;
     reportStream << "<br>Lecture " << i + 1 << " regular slides compiled, renaming file ... ";
     theReport.Report(reportStream.str());
-    theGlobalVariables.CallSystemNoOutput(currentSysCommand, &logWorker);
+    global.CallSystemNoOutput(currentSysCommand, &logWorker);
     reportStream << " done.";
     theReport.Report(reportStream.str());
     resultTable << "<td>" << thePdfFileNameNormal.str() << "</td>" << "<td>" << thePdfFileNameHandout.str() << "</td>";
@@ -397,7 +397,7 @@ void LaTeXcrawler::BuildFreecalC() {
       executedCommands << "<br>" << currentSysCommand;
       reportStream << currentSysCommand;
       theReport.Report(reportStream.str());
-      theGlobalVariables.CallSystemNoOutput(currentSysCommand, &logWorker);
+      global.CallSystemNoOutput(currentSysCommand, &logWorker);
       std::stringstream thePdfFileNameNormal;
       thePdfFileNameNormal << "./";
       if (k == 0) {
@@ -411,7 +411,7 @@ void LaTeXcrawler::BuildFreecalC() {
       executedCommands << "<br>" << currentSysCommand;
       reportStream << "<br>Slide " << i + 1 << ", run " << k << " compiled, renaming file ... ";
       theReport.Report(reportStream.str());
-      theGlobalVariables.CallSystemWithOutput(currentSysCommand);
+      global.CallSystemWithOutput(currentSysCommand);
       reportStream << " done.";
       theReport.Report(reportStream.str());
       resultTable << "<td>" << thePdfFileNameNormal.str() << "</td>";
@@ -431,9 +431,9 @@ void LaTeXcrawler::Crawl() {
   std::stringstream crawlingResult;
 
   std::string startingDirectory = FileOperations::GetCurrentFolder();
-  theGlobalVariables.ChDir(this->baseFolderStartFilePhysical);
+  global.ChDir(this->baseFolderStartFilePhysical);
   this->CrawlRecursive(crawlingResult, this->baseFolderStartFilePhysical + this->theFileNameToCrawlPhysicalNoPathName);
-  theGlobalVariables.ChDir(startingDirectory);
+  global.ChDir(startingDirectory);
   std::fstream outputFile;
   std::string outputFileName = "latexOutput.tex";
   if (!FileOperations::OpenFileCreateIfNotPresentVirtual(
@@ -448,7 +448,7 @@ void LaTeXcrawler::Crawl() {
   if (this->errorStream.str() != "") {
     this->displayResult << "Errors encountered. " << this->errorStream.str();
   }
-  this->displayResult << "Output file: <a href=\"" << theGlobalVariables.DisplayPathOutputFolder
+  this->displayResult << "Output file: <a href=\"" << global.DisplayPathOutputFolder
   << "latexOutput.tex\">" << "latexOutput.tex" << "</a>";
 }
 
@@ -588,7 +588,7 @@ bool LaTeXcrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFai
       }
       return false;
     }
-    if (theGlobalVariables.UserDefaultHasAdminRights()) {
+    if (global.UserDefaultHasAdminRights()) {
       if (!FileOperations::FileExistsVirtual(this->slideFileNamesVirtualWithPatH[i], false, false)) {
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure << "Failed to find file: " << this->slideFileNamesVirtualWithPatH[i] << "<br>";
@@ -724,7 +724,7 @@ bool LaTeXcrawler::BuildOrFetchFromCachePDF(std::stringstream* commentsOnFailure
       this->targetPDFFileNameWithPathVirtual, this->targetPDFbinaryContent, false, commentsOnFailure
     );
   }
-  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
+  if (!global.UserDefaultHasAdminRights()) {
     if (!pdfExists || !this->flagSourceOnly) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Pdf of slides not created. Only logged-in admins can compile pdfs. "
@@ -760,7 +760,7 @@ bool LaTeXcrawler::BuildOrFetchFromCachePDF(std::stringstream* commentsOnFailure
   }
   bool addExtraTex = (this->slideFileNamesVirtualWithPatH.size > 1);
   if (this->flagDoChangeDirs) {
-    theGlobalVariables.ChDir(this->workingFilePathPhysical);
+    global.ChDir(this->workingFilePathPhysical);
     if (commentsGeneral != nullptr) {
       *commentsGeneral << "Changed directory. Current: <b style = 'color:blue'>" << FileOperations::GetCurrentFolder() << "</b><br>";
     }
@@ -839,25 +839,25 @@ bool LaTeXcrawler::BuildOrFetchFromCachePDF(std::stringstream* commentsOnFailure
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "Executing command: " << currentSysCommand << " ... ";
   }
-  theGlobalVariables.CallSystemNoOutput(currentSysCommand, &logWorker);
+  global.CallSystemNoOutput(currentSysCommand, &logWorker);
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "done!<br>";
   }
   *commentsGeneral << "DEBUG: current dir: <b>" << FileOperations::GetCurrentFolder() << "</b><br>";
   currentSysCommand = "mkdir -p " + this->targetPDFLatexPath;
-  std::string commandResult = theGlobalVariables.CallSystemWithOutput(currentSysCommand);
+  std::string commandResult = global.CallSystemWithOutput(currentSysCommand);
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "Executed command: " << currentSysCommand << " ... to get result: " << commandResult << "<br>";
   }
   if (this->targetVideoLatexPath!= "") {
     currentSysCommand = "mkdir -p " + this->targetVideoLatexPath;
-    std::string commandResult = theGlobalVariables.CallSystemWithOutput(currentSysCommand);
+    std::string commandResult = global.CallSystemWithOutput(currentSysCommand);
     if (commentsGeneral != nullptr) {
       *commentsGeneral << "Executed command: " << currentSysCommand << " ... to get result: " << commandResult << "<br>";
     }
   }
   currentSysCommand = "mv " + this->workingFileNameNoPathPDF + " " + this->targetPDFFileNameWithLatexPath;
-  commandResult = theGlobalVariables.CallSystemWithOutput(currentSysCommand);
+  commandResult = global.CallSystemWithOutput(currentSysCommand);
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "Executed command: " << currentSysCommand
     << " ... to get result: " << commandResult << "<br>";

@@ -186,7 +186,7 @@ std::string SemisimpleLieAlgebra::ToHTMLCalculator(bool Verbose, bool writeToHD,
     << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
     out << theWeyl.ToStringRootsAndRootReflections();
     out << " The resulting Lie bracket pairing table follows. <hr> "
-    << this->ToString(&theGlobalVariables.theDefaultFormat.GetElement());
+    << this->ToString(&global.theDefaultFormat.GetElement());
     if (flagWriteLatexPlots) {
       out << "Ready for LaTeX consumption version of the first three columns: ";
       out << "<br>%Add to preamble: <br>\\usepackage{longtable} <br>%Add to body: <br>"
@@ -405,7 +405,7 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstants() {
   double startTimer = - 1;
   if (theReport.TickAndWantReport()) {
     out << "Initializing matrix for structure constant computation of " << this->ToStringLieAlgebraName() << "... ";
-    startTimer = theGlobalVariables.GetElapsedSeconds();
+    startTimer = global.GetElapsedSeconds();
     theReport.Report(out.str());
   }
   for (int i = 0; i < this->theWeyl.RootSystem.size; i ++) {
@@ -423,10 +423,10 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstants() {
   }
   double startStructureConstantComputation = - 1;
   if (theReport.TickAndWantReport()) {
-    out << "done in " << theGlobalVariables.GetElapsedSeconds() - startTimer
+    out << "done in " << global.GetElapsedSeconds() - startTimer
     << " seconds.<br> " << "Computing structure constants...";
     theReport.Report(out.str());
-    startStructureConstantComputation = theGlobalVariables.GetElapsedSeconds();
+    startStructureConstantComputation = global.GetElapsedSeconds();
   }
   Rational tempRat;
   while (nonExploredRoots.CardinalitySelection > 0) {
@@ -476,16 +476,16 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstants() {
   }
   double startMultTable = - 1;
   if (theReport.TickAndWantReport()) {
-    out << " done in " << theGlobalVariables.GetElapsedSeconds() - startStructureConstantComputation
+    out << " done in " << global.GetElapsedSeconds() - startStructureConstantComputation
     << " seconds.<br> Computing Lie bracket pairing (``multiplication'') table...";
     theReport.Report(out.str());
-    startMultTable = theGlobalVariables.GetElapsedSeconds();
+    startMultTable = global.GetElapsedSeconds();
   }
   this->ComputeMultTable();
   if (theReport.TickAndWantReport()) {
-    out << " done in " << theGlobalVariables.GetElapsedSeconds() - startMultTable
+    out << " done in " << global.GetElapsedSeconds() - startMultTable
     << " seconds. Total structure constant computation time: "
-    << theGlobalVariables.GetElapsedSeconds() - startTimer << " seconds. ";
+    << global.GetElapsedSeconds() - startTimer << " seconds. ";
     theReport.Report(out.str());
   }
   if (this->GetNumPosRoots() <= 0) {
@@ -704,9 +704,9 @@ void SemisimpleLieAlgebra::ComputeOneChevalleyConstant(
 
 bool SemisimpleLieAlgebra::TestForConsistency() {
   //HashedList<Vector<Rational> >& theRoots = this->theWeyl.RootSystem;
-  FormatExpressions& theFormat = theGlobalVariables.theDefaultFormat.GetElement();
+  FormatExpressions& theFormat = global.theDefaultFormat.GetElement();
   ElementSemisimpleLieAlgebra<Rational> g1, g2, g3, g23, g31, g12, g123, g231, g312, temp;
-  //this->ComputeDebugString(false, false, theGlobalVariables);
+  //this->ComputeDebugString(false, false, global);
   for (int i = 0; i < this->GetNumGenerators(); i ++) {
     g1.MakeGenerator(i, *this);
     for (int j = 0; j < this->GetNumGenerators(); j ++) {
@@ -767,7 +767,7 @@ bool SemisimpleLieAlgebra::GetConstantOrHElement(
 }
 
 void SemisimpleLieAlgebra::MakeChevalleyTestReport(int i, int j, int k, int Total) {
-  if (theGlobalVariables.IndicatorStringOutputFunction == nullptr) {
+  if (global.IndicatorStringOutputFunction == nullptr) {
     return;
   }
   std::stringstream out2, out3;

@@ -53,7 +53,7 @@ bool Database::Mongo::initialize() {
     return true;
   }
   logWorker << logger::blue << "Initializing mongoDB. " << logger::endL;
-  if (!theGlobalVariables.flagServerForkedIntoWorker) {
+  if (!global.flagServerForkedIntoWorker) {
     crash << "MongoDB not allowed to run before server fork. " << crash;
   }
   this->flagInitialized = true;
@@ -356,7 +356,7 @@ bool MongoQuery::FindMultiple(
     return false;
   }
   MongoCollection theCollection(this->collectionName);
-  if (commentsGeneralNonSensitive != nullptr && theGlobalVariables.UserDefaultHasAdminRights()) {
+  if (commentsGeneralNonSensitive != nullptr && global.UserDefaultHasAdminRights()) {
     *commentsGeneralNonSensitive
     << "Query: " << this->findQuery << ". Options: " << inputOptions.ToString(false, false);
   }
@@ -424,12 +424,12 @@ bool MongoQuery::FindMultiple(
 
   output.SetSize(outputString.size);
   for (int i = 0; i < outputString.size; i ++) {
-    if (!output[i].readstring(outputString[i], true, commentsOnFailure)) {
+    if (!output[i].readstring(outputString[i], commentsOnFailure)) {
       logWorker << logger::red << "Mongo/JSData error: failed to read string" << logger::endL;
       return false;
     }
   }
-  //double timeAfterQuery = theGlobalVariables.GetElapsedSeconds();
+  //double timeAfterQuery = global.GetElapsedSeconds();
   //double timeInMsDouble = (timeAfterQuery - timeBeforeQuery ) * 1000;
   //double timeWithDBStart = (timeAfterQuery - timeBeforeDatabase) *1000 ;
   //logWorker << logger::green << "Time in ms: " << timeInMsDouble << logger::endL;
@@ -478,7 +478,7 @@ bool Database::FindFromString(
 #ifdef MACRO_use_MongoDB
   JSData theData;
   //logWorker << logger::blue << "Query input: " << findQuery << logger::endL;
-  if (!theData.readstring(findQuery, true, commentsOnFailure)) {
+  if (!theData.readstring(findQuery, commentsOnFailure)) {
     return false;
   }
   return Database::get().FindFromJSON(
@@ -775,12 +775,12 @@ bool Database::isDeleteable(
   const List<std::string>& theLabels, List<std::string>** outputPattern, std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("Database::isDeleteable");
-  for (int i = 0; i < theGlobalVariables.databaseModifiableFields.size; i ++) {
+  for (int i = 0; i < global.databaseModifiableFields.size; i ++) {
     if (Database::matchesPattern(
-      theLabels, theGlobalVariables.databaseModifiableFields[i]
+      theLabels, global.databaseModifiableFields[i]
     )) {
       if (outputPattern != nullptr) {
-        *outputPattern = &theGlobalVariables.databaseModifiableFields[i];
+        *outputPattern = &global.databaseModifiableFields[i];
       }
       return true;
     }
@@ -831,7 +831,7 @@ bool Database::isDeleteable(
 
 bool Database::DeleteOneEntry(const JSData& theEntry, std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("Database::DeleteOneEntry");
-  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
+  if (!global.UserDefaultHasAdminRights()) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Only logged-in admins can delete DB entries.";
     }
@@ -1011,7 +1011,7 @@ bool Database::UpdateOneFromSome(
   const JSData& updateQuery,
   std::stringstream* commentsOnFailure
 ) {
-  if (theGlobalVariables.flagDatabaseCompiled) {
+  if (global.flagDatabaseCompiled) {
     return this->mongoDB.UpdateOneFromSome(findOrQueries, updateQuery, commentsOnFailure);
   }
   if (commentsOnFailure != nullptr) {
@@ -1080,13 +1080,13 @@ bool Database::FetchCollectionNames(
   if (!Database::get().initializeWorker()) {
     return false;
   }
-  if (theGlobalVariables.flagDisableDatabaseLogEveryoneAsAdmin) {
+  if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Database disabled. ";
     }
     return false;
   }
-  if (theGlobalVariables.flagDatabaseCompiled) {
+  if (global.flagDatabaseCompiled) {
     return Database::get().mongoDB.FetchCollectionNames(output, commentsOnFailure);
   }
   return this->theFallBack.FetchCollectionNames(output, commentsOnFailure);
@@ -1216,7 +1216,7 @@ JSData Database::ToJSONFetchItem(const List<std::string>& labelStrings) {
   long long totalItems = 0;
   std::stringstream comments;
   std::stringstream* commentsPointer = nullptr;
-  bool flagDebuggingAdmin = theGlobalVariables.UserDefaultIsDebuggingAdmin();
+  bool flagDebuggingAdmin = global.UserDefaultIsDebuggingAdmin();
   if (flagDebuggingAdmin) {
     commentsPointer = &comments;
   }
@@ -1243,7 +1243,7 @@ JSData Database::ToJSONDatabaseCollection(const std::string& currentTable) {
   std::stringstream out;
   result["currentTable"] = currentTable;
   if (currentTable == "") {
-    if (theGlobalVariables.UserDebugFlagOn() != 0) {
+    if (global.UserDebugFlagOn() != 0) {
       result["comments"] = "Requested table empty, returning list of tables. ";
     }
     List<std::string> theCollectionNames;
@@ -1270,7 +1270,7 @@ JSData Database::ToJSONDatabaseCollection(const std::string& currentTable) {
   long long totalItems = 0;
   std::stringstream comments;
   std::stringstream* commentsPointer = nullptr;
-  bool flagDebuggingAdmin = theGlobalVariables.UserDefaultIsDebuggingAdmin();
+  bool flagDebuggingAdmin = global.UserDefaultIsDebuggingAdmin();
   if (flagDebuggingAdmin) {
     commentsPointer = &comments;
   }
@@ -1308,7 +1308,7 @@ std::string Database::ToHtmlDatabaseCollection(const std::string& currentTable) 
       out << "There are " << theCollectionNames.size << " collections. ";
       for (int i = 0; i < theCollectionNames.size; i ++) {
         out << "<br>";
-        out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
+        out << "<a href=\"" << global.DisplayNameExecutable
         << "?request=database&currentDatabaseTable="
         << theCollectionNames[i] << "\">" << theCollectionNames[i] << "</a>";
       }

@@ -366,7 +366,7 @@ int Pipe::WriteNoInterrupts(int theFD, const std::string& input) {
 void Pipe::ReadLoop(List<char>& output) {
   MacroRegisterFunctionWithName("Pipe::ReadLoop");
   this->CheckConsistency();
-  MutexRecursiveWrapper& safetyFirst = theGlobalVariables.MutexWebWorkerPipeReadLock;
+  MutexRecursiveWrapper& safetyFirst = global.MutexWebWorkerPipeReadLock;
   safetyFirst.LockMe(); // Prevent threads from locking one another.
   this->metaData.lastRead.SetSize(0);
   this->metaData.ReadOnceIfFailThenCrash(false, true);
@@ -390,7 +390,7 @@ void Pipe::WriteOnceAfterEmptying(
   const std::string& toBeSent, bool restartServerOnFail, bool dontCrashOnFail
 ) {
   MacroRegisterFunctionWithName("Pipe::WriteOnceAfterEmptying");
-  MutexLockGuard safety(theGlobalVariables.MutexWebWorkerPipeWriteLock);
+  MutexLockGuard safety(global.MutexWebWorkerPipeWriteLock);
   this->theMutexPipe.Lock();
   this->thePipe.ReadOnceIfFailThenCrash(restartServerOnFail, dontCrashOnFail);
   this->thePipe.lastRead.SetSize(0);
@@ -428,10 +428,10 @@ bool PipePrimitive::HandleFailedWriteReturnFalse(
   << StringRoutines::StringShortenInsertDots(toBeSent, 200) << "] onto: " << this->ToString() << numBadAttempts
   << " or more times. Last error: "
   << strerror(errno) << ". ";
-  if (theGlobalVariables.processType == ProcessTypes::worker) {
+  if (global.processType == ProcessTypes::worker) {
     logWorker << logger::red << errorStream.str() << logger::endL;
   }
-  if (theGlobalVariables.processType == ProcessTypes::server) {
+  if (global.processType == ProcessTypes::server) {
     logServer << logger::red << errorStream.str() << logger::endL;
   }
   if (restartServerOnFail) {
@@ -490,11 +490,11 @@ bool PipePrimitive::WriteOnceIfFailThenCrash(
     return false;
   }
   if (static_cast<unsigned>(this->numberOfBytesLastWrite) < remaining) {
-    if (theGlobalVariables.processType == ProcessTypes::worker) {
+    if (global.processType == ProcessTypes::worker) {
       logWorker << logger::red << this->ToString() << ": wrote only "
       << this->numberOfBytesLastWrite << " bytes out of " << remaining << " total. " << logger::endL;
     }
-    if (theGlobalVariables.processType == ProcessTypes::server) {
+    if (global.processType == ProcessTypes::server) {
       logServer << logger::red << this->ToString() << ": wrote only "
       << this->numberOfBytesLastWrite << " bytes out of " << remaining << " total. " << logger::endL;
     }
@@ -628,7 +628,7 @@ bool PipePrimitive::ReadOnceIfFailThenCrash(bool restartServerOnFail, bool dontC
 
 void Pipe::ReadOnceWithoutEmptying(bool restartServerOnFail, bool dontCrashOnFail) {
   MacroRegisterFunctionWithName("Pipe::ReadOnceWithoutEmptying");
-  MutexRecursiveWrapper& safetyFirst = theGlobalVariables.MutexWebWorkerPipeReadLock;
+  MutexRecursiveWrapper& safetyFirst = global.MutexWebWorkerPipeReadLock;
   MutexLockGuard guard (safetyFirst); // guard from other threads.
   this->theMutexPipe.Lock();
   this->thePipe.ReadOnceIfFailThenCrash(restartServerOnFail, dontCrashOnFail);
@@ -643,7 +643,7 @@ void Pipe::ReadOnceWithoutEmptying(bool restartServerOnFail, bool dontCrashOnFai
 void Pipe::ReadOnce(bool restartServerOnFail, bool dontCrashOnFail) {
   MacroRegisterFunctionWithName("Pipe::ReadOnce");
   this->CheckConsistency();
-  MutexRecursiveWrapper& safetyFirst = theGlobalVariables.MutexWebWorkerPipeReadLock;
+  MutexRecursiveWrapper& safetyFirst = global.MutexWebWorkerPipeReadLock;
   MutexLockGuard guard(safetyFirst); // guard from other threads.
   MutexProcessLockGuard lock(this->theMutexPipe);
   this->theMutexPipe.Lock();
@@ -837,7 +837,7 @@ std::string logger::openTagHtml() {
 
 std::string logger::getStampShort() {
   std::stringstream out;
-  out << "[" << theGlobalVariables.processType << ", ";
+  out << "[" << global.processType << ", ";
   // out << "||DEBUG: " << this->theFileName << "||";
   if (theWebServer.activeWorker != - 1) {
     out << "w: " << theWebServer.activeWorker << ", ";
@@ -853,10 +853,10 @@ std::string logger::getStampShort() {
 
 std::string logger::getStamp() {
   std::stringstream out;
-  out << theGlobalVariables.processType << ", ";
+  out << global.processType << ", ";
   out
-  << theGlobalVariables.GetDateForLogFiles() << ", "
-  << theGlobalVariables.GetElapsedSeconds() << " s, ";
+  << global.GetDateForLogFiles() << ", "
+  << global.GetElapsedSeconds() << " s, ";
   if (theWebServer.activeWorker != - 1) {
     out << "w: " << theWebServer.activeWorker << ",";
   }
@@ -1019,7 +1019,7 @@ logger& logger::operator<<(const std::string& input) {
 logger& logger::operator<<(const loggerSpecialSymbols& input) {
   this->initializeIfNeeded();
   this->CheckLogSize();
-  bool doUseColors = theGlobalVariables.flagRunningBuiltInWebServer || theGlobalVariables.flagRunningCommandLine;
+  bool doUseColors = global.flagRunningBuiltInWebServer || global.flagRunningCommandLine;
   switch (input) {
     case logger::endL:
       std::cout << this->getStampShort() << this->bufferStandardOutput;

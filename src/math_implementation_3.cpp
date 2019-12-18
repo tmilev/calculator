@@ -206,18 +206,18 @@ void ProgressReport::Report(const std::string& theReport) {
   if (this->threadIndex == - 1) {
     return;
   }
-  if (theGlobalVariables.progressReportStrings[this->threadIndex].size > this->currentLevel) {
-    theGlobalVariables.progressReportStrings[this->threadIndex][this->currentLevel] = theReport;
-    theGlobalVariables.MakeReport();
+  if (global.progressReportStrings[this->threadIndex].size > this->currentLevel) {
+    global.progressReportStrings[this->threadIndex][this->currentLevel] = theReport;
+    global.MakeReport();
   }
 }
 
 void ProgressReport::init() {
   this->flagInitialized = false;
-  if (theGlobalVariables.theProgress.ReportBanneD()) {
+  if (global.theProgress.ReportBanneD()) {
     return;
   }
-  if (!theGlobalVariables.theProgress.ReportAlloweD()) {
+  if (!global.theProgress.ReportAlloweD()) {
     return;
   }
   if (crash.flagCrashInitiateD) {
@@ -229,8 +229,8 @@ void ProgressReport::init() {
     return;
   }
   this->flagInitialized = true;
-  this->currentLevel = theGlobalVariables.progressReportStrings[this->threadIndex].size;
-  theGlobalVariables.progressReportStrings[this->threadIndex].AddOnTop(std::string(""));
+  this->currentLevel = global.progressReportStrings[this->threadIndex].size;
+  global.progressReportStrings[this->threadIndex].AddOnTop(std::string(""));
   this->ticks = 0;
   this->ticksPerReport = 1;
   this->reportType = GlobalVariables::Progress::ReportType::general;
@@ -250,7 +250,7 @@ ProgressReport::~ProgressReport() {
   if (crash.flagCrashInitiateD) {
     return;
   }
-  theGlobalVariables.progressReportStrings[this->threadIndex].size --;
+  global.progressReportStrings[this->threadIndex].size --;
 }
 
 ProjectInformationInstance::ProjectInformationInstance(const char* fileName, const std::string& fileDescription) {
@@ -262,7 +262,7 @@ RegisterFunctionCall::RegisterFunctionCall(const char* fileName, int line, const
   if (this->threadIndex == - 1) {
     return;
   }
-  ListReferences<stackInfo>& theStack = theGlobalVariables.CustomStackTrace[this->threadIndex];
+  ListReferences<stackInfo>& theStack = global.CustomStackTrace[this->threadIndex];
   theStack.SetSize(theStack.size + 1);
   stackInfo& stackTop = theStack.LastObject();
   stackTop.fileName = fileName;
@@ -277,7 +277,7 @@ RegisterFunctionCall::~RegisterFunctionCall() {
   if (this->threadIndex == - 1) {
     return;
   }
-  theGlobalVariables.CustomStackTrace[this->threadIndex].size --;
+  global.CustomStackTrace[this->threadIndex].size --;
 }
 
 int DrawingVariables::GetColorFromChamberIndex(int index) {
@@ -1045,7 +1045,7 @@ void FileOperations::InitializeFoldersNonSensitive() {
   // are used together with file configuration.json,
   // to compute the folder locations below.
 
-  std::string HTMLCommonFolder = theGlobalVariables.configuration[Configuration::HTMLCommon].theString;
+  std::string HTMLCommonFolder = global.configuration[Configuration::HTMLCommon].theString;
   List<List<std::string> > links = FileOperations::FolderVirtualLinksDefault();
   for (int i = 0; i < links.size; i ++) {
     std::string& key = links[i][0];
@@ -1186,9 +1186,9 @@ bool FileOperations::OpenFileVirtual(
 std::string FileOperations::GetWouldBeFolderAfterHypotheticalChdirNonThreadSafe(const std::string& wouldBePath) {
   // TODO: Investigate whether this code is safe.
   std::string currentFolder = FileOperations::GetCurrentFolder();
-  theGlobalVariables.ChDir(wouldBePath);
+  global.ChDir(wouldBePath);
   std::string result = FileOperations::GetCurrentFolder();
-  theGlobalVariables.ChDir(currentFolder);
+  global.ChDir(currentFolder);
   return result;
 }
 
@@ -1241,7 +1241,7 @@ std::string FileOperations::GetVirtualNameWithHash(const std::string& inputFileN
   for (int i = 0; i < FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash().size; i ++) {
     const std::string& currentStart = FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash()[i];
     if (StringRoutines::StringBeginsWith(result, currentStart, &fileNameEnd)) {
-      result = currentStart + theGlobalVariables.buildHeadHashWithServerTime + fileNameEnd;
+      result = currentStart + global.buildHeadHashWithServerTime + fileNameEnd;
       break;
     }
   }
@@ -1268,7 +1268,7 @@ bool FileOperations::GetPhysicalFileNameFromVirtualCustomizedWriteOnly(
     return false;
   }
   std::string customized =
-  HtmlRoutines::ConvertStringToURLString(theGlobalVariables.userDefault.instructorComputed, false);
+  HtmlRoutines::ConvertStringToURLString(global.userDefault.instructorComputed, false);
   if (customized == "") {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Customizing files not available for non-logged-in users. ";
@@ -1317,7 +1317,7 @@ bool FileOperations::GetPhysicalFileNameFromVirtualCustomizedReadOnly(
     return FileOperations::GetPhysicalFileNameFromVirtual(inputFileName, output, false, false, commentsOnFailure);
   }
   std::string customized =
-  HtmlRoutines::ConvertStringToURLString(theGlobalVariables.userDefault.instructorComputed, false) + "/";
+  HtmlRoutines::ConvertStringToURLString(global.userDefault.instructorComputed, false) + "/";
   if (customized == "") {
     customized = "default/";
   }
@@ -1352,7 +1352,7 @@ bool FileOperations::GetPhysicalFileNameFromVirtual(
       FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash()[i], &folderEnd
     )) {
       if (StringRoutines::StringBeginsWith(
-        folderEnd, theGlobalVariables.buildHeadHashWithServerTime, &folderEnd2
+        folderEnd, global.buildHeadHashWithServerTime, &folderEnd2
       )) {
         inputCopy = FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash()[i] + folderEnd2;
       }
@@ -1362,7 +1362,7 @@ bool FileOperations::GetPhysicalFileNameFromVirtual(
     if (StringRoutines::StringBeginsWith(
       inputCopy, FileOperations::FolderVirtualLinksNonSensitive().theKeys[i], &folderEnd
     )) {
-      output = theGlobalVariables.PhysicalPathProjectBase +
+      output = global.PhysicalPathProjectBase +
       FileOperations::FolderVirtualLinksNonSensitive().theValues[i] + folderEnd;
       return true;
     }
@@ -1372,7 +1372,7 @@ bool FileOperations::GetPhysicalFileNameFromVirtual(
       if (StringRoutines::StringBeginsWith(
         inputCopy, FileOperations::FolderVirtualLinksSensitive().theKeys[i], &folderEnd
       )) {
-        output = theGlobalVariables.PhysicalPathProjectBase +
+        output = global.PhysicalPathProjectBase +
         FileOperations::FolderVirtualLinksSensitive().theValues[i] + folderEnd;
         return true;
       }
@@ -1383,13 +1383,13 @@ bool FileOperations::GetPhysicalFileNameFromVirtual(
       if (StringRoutines::StringBeginsWith(
         inputCopy, FileOperations::FolderVirtualLinksULTRASensitive().theKeys[i], &folderEnd
       )) {
-        output = theGlobalVariables.PhysicalPathProjectBase +
+        output = global.PhysicalPathProjectBase +
         FileOperations::FolderVirtualLinksULTRASensitive().theValues[i] + folderEnd;
         return true;
       }
     }
   }
-  output = theGlobalVariables.PhysicalPathHtmlFolder + inputCopy;
+  output = global.PhysicalPathHtmlFolder + inputCopy;
   return true;
 }
 
@@ -1434,7 +1434,7 @@ bool FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded_Ultr
   std::string folderName = FileOperations::GetPathFromFileNameWithPath(computedFileName);
   std::stringstream mkDirCommand;
   mkDirCommand << "mkdir -p " << folderName;
-  theGlobalVariables.CallSystemWithOutput(mkDirCommand.str());
+  global.CallSystemWithOutput(mkDirCommand.str());
   return FileOperations::OpenFileCreateIfNotPresentUnsecure(
     theFile, computedFileName, OpenInAppendMode, truncate, openAsBinary
   );
@@ -1504,7 +1504,7 @@ StateMaintainerCurrentFolder::StateMaintainerCurrentFolder() {
 }
 
 StateMaintainerCurrentFolder::~StateMaintainerCurrentFolder() {
-  theGlobalVariables.ChDir(this->currentFolderPhysicalAbsolute);
+  global.ChDir(this->currentFolderPhysicalAbsolute);
 }
 
 bool XML::ReadFromFile(std::fstream& inputFile) {
@@ -3847,10 +3847,10 @@ void PartFraction::ReduceMonomialByMonomial(PartFractions& owner, int myIndex, V
     this->ComputeDebugString(owner);
     owner.NumRunsReduceMonomialByMonomial ++;
   }
-  Matrix<Rational> & tempMat = theGlobalVariables.matReduceMonomialByMonomial.GetElement();
-  Matrix<Rational> & startAsIdMat = theGlobalVariables.matIdMatrix.GetElement();
-  Matrix<Rational> & matColumn = theGlobalVariables.matOneColumn.GetElement();
-  Matrix<Rational> & matLinComb = theGlobalVariables.matReduceMonomialByMonomial2.GetElement();
+  Matrix<Rational> & tempMat = global.matReduceMonomialByMonomial.GetElement();
+  Matrix<Rational> & startAsIdMat = global.matIdMatrix.GetElement();
+  Matrix<Rational> & matColumn = global.matOneColumn.GetElement();
+  Matrix<Rational> & matLinComb = global.matReduceMonomialByMonomial2.GetElement();
   Selection tempSel;
   MonomialP tempMon;
   Vector<Rational> tempRoot;
@@ -3962,8 +3962,8 @@ void PartFraction::ReduceMonomialByMonomialModifyOneMonomial(
   LargeInteger& inputCoeff
 ) {
   (void) Accum; (void) thePowers; (void) thePowersSigned; (void) input; (void) inputCoeff;
-  /*Polynomial<LargeInt>& theNumerator = theGlobalVariables.PolyLargeIntPartFracBuffer5.GetElement();
-  Polynomial<LargeInt>& tempP = theGlobalVariables.PolyLargeIntPartFracBuffer6.GetElement();
+  /*Polynomial<LargeInt>& theNumerator = global.PolyLargeIntPartFracBuffer5.GetElement();
+  Polynomial<LargeInt>& tempP = global.PolyLargeIntPartFracBuffer6.GetElement();
   theNumerator.MakeZero(Accum.AmbientDimension);
   theNumerator.AddMonomial(input, inputCoeff);
   if (thePowersSigned.size != thePowers.Multiplicities.size)
@@ -4179,7 +4179,7 @@ int PartFraction::ControlLineSizeStringPolys(std::string& output, FormatExpressi
 }
 
 void PartFractions::MakeProgressReportSplittingMainPart() {
-  if (theGlobalVariables.IndicatorStringOutputFunction == nullptr) {
+  if (global.IndicatorStringOutputFunction == nullptr) {
     return;
   }
   std::stringstream out1, out2, out3;
@@ -4211,7 +4211,7 @@ void PartFractions::MakeProgressReportSplittingMainPart() {
 
 void PartFractions::MakeProgressVPFcomputation() {
   this->NumProcessedForVPFfractions ++;
-  if (theGlobalVariables.IndicatorStringOutputFunction == nullptr) {
+  if (global.IndicatorStringOutputFunction == nullptr) {
     return;
   }
   std::stringstream out2;
@@ -4309,8 +4309,8 @@ void PartFractions::RemoveRedundantShortRootsClassicalRootSystem(Vector<Rational
     if (this->flagMakingProgressReport) {
       std::stringstream out;
       out << "Elongating denominator " << i + 1 << " out of " << this->size;
-      theGlobalVariables.theIndicatorVariables.ProgressReportStrings[3] = out.str();
-      theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
+      global.theIndicatorVariables.ProgressReportStrings[3] = out.str();
+      global.FeedIndicatorWindow(global.theIndicatorVariables);
     }
   }
   for (int i = 0; i < this->size; i ++)
@@ -9006,22 +9006,22 @@ bool Lattice::GetClosestPointInDirectionOfTheNormalToAffineWallMovingIntegralSte
     return false;
   }
   Rational theMovement = (theShift - startingPoint.ScalarEuclidean(theNormal)) / theDirection.ScalarEuclidean(theNormal);
-  theGlobalVariables.Comments << "<br>the movement: " << theMovement.ToString() << ", (" << theShift.ToString()
+  global.Comments << "<br>the movement: " << theMovement.ToString() << ", (" << theShift.ToString()
   << " - " << startingPoint.ScalarEuclidean(theNormal).ToString() << ")/ "
   << theDirection.ScalarEuclidean(theNormal).ToString() << ", ";
   if (!theMovement.IsInteger()) {
-    theGlobalVariables.Comments << "the movement is not integral; ";
+    global.Comments << "the movement is not integral; ";
     theMovement.AssignFloor();
     if (theDirection.ScalarEuclidean(theNormal).IsPositive()) {
       theMovement += 1;
     }
   }
-  theGlobalVariables.Comments << "the normal: " << theNormal.ToString() << ", the direction: "
+  global.Comments << "the normal: " << theNormal.ToString() << ", the direction: "
   << theDirection.ToString() << ", the shift: " << theShift.ToString()
   << ", the movement: " << theMovement.ToString() << ", startingPoint: " << startingPoint.ToString();
   outputPoint = startingPoint;
   outputPoint += theDirection * theMovement;
-  theGlobalVariables.Comments << ", finalPoint: " << outputPoint.ToString();
+  global.Comments << ", finalPoint: " << outputPoint.ToString();
   return true;
 }
 
@@ -9441,7 +9441,7 @@ std::string PartFractions::DoTheFullComputationReturnLatexFileString(
 //  this->theChambersOld.QuickSortAscending();
 //  this->theChambersOld.LabelChamberIndicesProperly();
 //  this->theChambers.AssignCombinatorialChamberComplex(this->theChambersOld);
-//  this->theChambersOld.drawOutput(theGlobalVariables.theDrawingVariables, tempRoot, 0);
+//  this->theChambersOld.drawOutput(global.theDrawingVariables, tempRoot, 0);
 //  this->theChambersOld.thePauseController.ExitComputation();
   DrawingVariables theDVs;
   this->theChambers.DrawMeProjective(nullptr, true, theDVs, theFormat);
@@ -9836,7 +9836,7 @@ bool Cone::ReadFromFile(std::fstream& input) {
   buffer.size = 0;
   Vector<Rational> tempRoot;
   if (tempS != "Cone(") {
-    theGlobalVariables.Comments << "tempS was instead " << tempS;
+    global.Comments << "tempS was instead " << tempS;
     XML::ReadEverythingPassedTagOpenUntilTagClose(input, NumWordsRead, this->GetXMLClassName());
     return false;
   }
@@ -11255,14 +11255,14 @@ bool RationalFunctionOld::Substitution(const PolynomialSubstitution<Rational>& t
 //      if (!this->checkConsistency())crash << crash;
       return true;
     case RationalFunctionOld::typePoly:
-//      theGlobalVariables.Comments << "<hr>subbing in<br>" << this->ToString(tempFormat) << " using " << theSub.ToString()
+//      global.Comments << "<hr>subbing in<br>" << this->ToString(tempFormat) << " using " << theSub.ToString()
 //      << " to get ";
       if (!this->Numerator.GetElement().Substitution(theSub)) {
         return false;
       }
-//      theGlobalVariables.Comments << "<br>finally:<br>" << this->Numerator.GetElement().ToString();
+//      global.Comments << "<br>finally:<br>" << this->Numerator.GetElement().ToString();
       this->Simplify();
-//      theGlobalVariables.Comments << ", which, simplified, yields<br> " << this->ToString(tempFormat);
+//      global.Comments << ", which, simplified, yields<br> " << this->ToString(tempFormat);
 //      if (!this->checkConsistency())crash << crash;
       return true;
     case RationalFunctionOld::typeRationalFunction:
@@ -11719,26 +11719,26 @@ Rational PiecewiseQuasipolynomial::EvaluateInputProjectivized(const Vector<Ratio
             break;
           }
           FormatExpressions tempFormat;
-          theGlobalVariables.Comments << "<hr>Error!!! Failed on chamber " << theIndex + 1 << " and " << i + 1;
-          theGlobalVariables.Comments << "<br>Evaluating at point " << AffineInput.ToString() << "<br>";
-          theGlobalVariables.Comments << "<br>Chamber " << theIndex + 1 << ": " << this->theProjectivizedComplex[theIndex].ToString(&tempFormat);
-          theGlobalVariables.Comments << "<br>QP: " << this->theQPs[theIndex].ToString(true, false);
-          theGlobalVariables.Comments << "<br>value: " << result.ToString();
-          theGlobalVariables.Comments << "<br><br>Chamber " << i + 1 << ": " << this->theProjectivizedComplex[i].ToString(&tempFormat);
-          theGlobalVariables.Comments << "<br>QP: " << this->theQPs[i].ToString(true, false);
-          theGlobalVariables.Comments << "<br>value: " << altResult.ToString();
+          global.Comments << "<hr>Error!!! Failed on chamber " << theIndex + 1 << " and " << i + 1;
+          global.Comments << "<br>Evaluating at point " << AffineInput.ToString() << "<br>";
+          global.Comments << "<br>Chamber " << theIndex + 1 << ": " << this->theProjectivizedComplex[theIndex].ToString(&tempFormat);
+          global.Comments << "<br>QP: " << this->theQPs[theIndex].ToString(true, false);
+          global.Comments << "<br>value: " << result.ToString();
+          global.Comments << "<br><br>Chamber " << i + 1 << ": " << this->theProjectivizedComplex[i].ToString(&tempFormat);
+          global.Comments << "<br>QP: " << this->theQPs[i].ToString(true, false);
+          global.Comments << "<br>value: " << altResult.ToString();
           if (firstFail) {
             DrawingVariables tempDV;
-            theGlobalVariables.Comments << "<br><b>Point of failure: " << AffineInput.ToString() << "</b>";
+            global.Comments << "<br><b>Point of failure: " << AffineInput.ToString() << "</b>";
             //this->DrawMe(tempDV);
             this->theProjectivizedComplex.DrawMeLastCoordAffine(true, tempDV, tempFormat);
             tempDV.NumHtmlGraphics = 5;
             tempDV.theBuffer.drawCircleAtVectorBufferRational(AffineInput, "black", 5);
             tempDV.theBuffer.drawCircleAtVectorBufferRational(AffineInput, "black", 10);
             tempDV.theBuffer.drawCircleAtVectorBufferRational(AffineInput, "red", 4);
-            theGlobalVariables.Comments << "<br> <script src =\"http://ajax.googleapis.com/ajax/libs/dojo/1.6.1/dojo/dojo.xd.js\" "
+            global.Comments << "<br> <script src =\"http://ajax.googleapis.com/ajax/libs/dojo/1.6.1/dojo/dojo.xd.js\" "
             << "type =\"text/javascript\"></script>\n";
-            theGlobalVariables.Comments << tempDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->theProjectivizedComplex.GetDim() - 1);
+            global.Comments << tempDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->theProjectivizedComplex.GetDim() - 1);
           }
           firstFail = false;
         }
@@ -11865,9 +11865,9 @@ void ConeComplex::TransformToWeylProjective() {
   this->log << "the global cone normals: " << this->TheGlobalConeNormals.ToString();
   this->ToString(tempS);
   this->log << tempS;
-  theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh = true;
-  theGlobalVariables.theIndicatorVariables.StatusString1= this->log.str();
-  theGlobalVariables.MakeReport();*/
+  global.theIndicatorVariables.StatusString1NeedsRefresh = true;
+  global.theIndicatorVariables.StatusString1= this->log.str();
+  global.MakeReport();*/
 }
 
 void ConeLatticeAndShiftMaxComputation::init(
@@ -12004,8 +12004,8 @@ void ConeLatticeAndShiftMaxComputation::FindExtremaParametricStep3() {
     std::stringstream tempStream;
     tempStream << "Processed " << i +numKilledCones << " out of " << startingNumCones;
     tempStream << "\nKilled " << numKilledCones << " cones so far";
-    theGlobalVariables.theIndicatorVariables.ProgressReportStrings[2] = tempStream.str();
-    theGlobalVariables.MakeReport();
+    global.theIndicatorVariables.ProgressReportStrings[2] = tempStream.str();
+    global.MakeReport();
   }
 }
 */
@@ -12220,10 +12220,10 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam(
         exitRepresentatives[j], exitNormalAffine, directionSmallerDimOnLattice, exitRepresentatives[j]
       );
     }
-    theGlobalVariables.Comments << "<hr><hr><hr>" << currentCone.ToString(&theFormat);
-    theGlobalVariables.Comments << "<br>Entering normal: " << ((foundEnteringNormal) ? enteringNormalAffine.ToString() : "not found");
-    theGlobalVariables.Comments << "<br>Exit normal: " << ((foundExitNormal) ? exitNormalAffine.ToString() : "not found");
-    theGlobalVariables.Comments << "<br>The shifted lattice representatives: " << exitRepresentatives.ToString()
+    global.Comments << "<hr><hr><hr>" << currentCone.ToString(&theFormat);
+    global.Comments << "<br>Entering normal: " << ((foundEnteringNormal) ? enteringNormalAffine.ToString() : "not found");
+    global.Comments << "<br>Exit normal: " << ((foundExitNormal) ? exitNormalAffine.ToString() : "not found");
+    global.Comments << "<br>The shifted lattice representatives: " << exitRepresentatives.ToString()
     << "<br>exitNormalsShiftedAffineProjected";
     if (theNewNormals.size <= 0) {
       crash << "New normals missing. " << crash;
@@ -12232,11 +12232,11 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam(
       tempCLS.theProjectivizedCone.Normals = theNewNormals;
       exitNormalShiftedAffineProjected = exitNormalAffine.GetShiftToTheLeftOnePosition();
       *exitNormalShiftedAffineProjected.LastObject() = - exitNormalLatticeLevel.ScalarEuclidean(exitRepresentatives[j]);
-      theGlobalVariables.Comments << exitNormalShiftedAffineProjected.ToString() << ", ";
+      global.Comments << exitNormalShiftedAffineProjected.ToString() << ", ";
       if (foundEnteringNormal) {
         extraEquation = enteringNormalAffine.GetShiftToTheLeftOnePosition();
         extraEquation -= (exitNormalShiftedAffineProjected * enteringNormalAffine[0]) / exitNormalAffine[0];
-        theGlobalVariables.Comments << "extra equation: " << extraEquation.ToString() << ", ";
+        global.Comments << "extra equation: " << extraEquation.ToString() << ", ";
         tempCLS.theProjectivizedCone.Normals.AddOnTop(extraEquation);
       }
       tempRoot = theLPToMaximizeAffine.GetShiftToTheLeftOnePosition();
@@ -12260,16 +12260,16 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam(
         tempCone.CreateFromNormals(tempTempRoots);
         tempStream << "\n\n\n\n<br><br><hr>The bad normals: " << tempTempRoots.ToString();
         tempStream << "\n\n\n\n<br><br><hr>The bad normals after creation: " << tempCLS.theProjectivizedCone.Normals.ToString();
-        theGlobalVariables.theIndicatorVariables.StatusString1= tempStream.str();
-        theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh = true;
-        theGlobalVariables.MakeReport();
+        global.theIndicatorVariables.StatusString1= tempStream.str();
+        global.theIndicatorVariables.StatusString1NeedsRefresh = true;
+        global.MakeReport();
         for (int i = 0; i <10000000; i ++)
           if (i%3== 0)
             i = i +2;
         while (true){}
       }*/
       //if (!tempBool)crash << crash;
-      //theGlobalVariables.Comments << tempCLS.theProjectivizedCone.ToString(false, true, true, true, theFormat);
+      //global.Comments << tempCLS.theProjectivizedCone.ToString(false, true, true, true, theFormat);
       if (!tempCLS.theProjectivizedCone.flagIsTheZeroCone) {
         theProjectionLatticeLevel.ActOnVectorColumn(exitRepresentatives[j], tempCLS.theShift);
         outputAppend.AddOnTop(tempCLS);
@@ -12571,7 +12571,7 @@ bool Cone::EliminateFakeNormalsUsingVertices(int numAddedFakeWalls) {
     tempMat.GetZeroEigenSpaceModifyMe(NormalsToSubspace);
     if (NormalsToSubspace.size > 0) {
       matNormals.AssignVectorsToRows(NormalsToSubspace);
-//      theGlobalVariables.Comments << "<br>Normals to the subspace spanned by the vertices: " << NormalsToSubspace.ToString();
+//      global.Comments << "<br>Normals to the subspace spanned by the vertices: " << NormalsToSubspace.ToString();
       gramMatrixInverted = matNormals;
       gramMatrixInverted.Transpose();
       gramMatrixInverted.MultiplyOnTheLeft(matNormals);
@@ -12981,7 +12981,7 @@ bool ConeComplex::findMaxLFOverConeProjective(
   for (int i = 0; i < inputLinPolys.size; i ++) {
     Polynomial<Rational>& currentPoly = inputLinPolys[i];
     if (currentPoly.TotalDegree() != 1 ) {
-      theGlobalVariables.Comments << "You messed up the total degree which must be one, instead it is "
+      global.Comments << "You messed up the total degree which must be one, instead it is "
       << currentPoly.TotalDegree() << ". The dimension of the cone is " << theDim;
       return false;
     }
@@ -13018,7 +13018,7 @@ bool ConeComplex::findMaxLFOverConeProjective(
       }
     }
   }
-  theGlobalVariables.Comments << this->ToString(true);
+  global.Comments << this->ToString(true);
   this->Refine();
   outputMaximumOverEeachSubChamber.SetSize(this->size);
   Rational theMax = 0;
@@ -13060,10 +13060,10 @@ void Lattice::Reduce() {
 void Lattice::TestGaussianEliminationEuclideanDomainRationals(Matrix<Rational>& output) {
   output.AssignMatrixIntWithDen(this->basis, this->Den);
   std::stringstream out;
-  theGlobalVariables.Comments << "Test output: " << output.ToString();
+  global.Comments << "Test output: " << output.ToString();
   out << "Test output: " << output.ToString();
   output.GaussianEliminationEuclideanDomain();
-  theGlobalVariables.Comments << "<br>After gaussian elimination:" << output.ToString();
+  global.Comments << "<br>After gaussian elimination:" << output.ToString();
   out << "<br>After gaussian elimination:" << output.ToString();
 }
 

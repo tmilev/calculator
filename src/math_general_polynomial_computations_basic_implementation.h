@@ -32,7 +32,7 @@ bool MonomialP::SubstitutioN(const List<Polynomial<coefficient> >& TheSubstituti
           output *= tempMon;
           continue;
         }
-        theGlobalVariables.Comments << "This may or may not be a programming error. "
+        global.Comments << "This may or may not be a programming error. "
         << "I cannot carry out a substitution in a monomial that has exponent "
         << "which is not a small integer: it is " << this->monBody[i]
         << " instead. " << Crasher::GetStackTraceEtcErrorMessageHTML();

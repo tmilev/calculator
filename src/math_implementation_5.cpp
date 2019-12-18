@@ -843,15 +843,15 @@ void HomomorphismSemisimpleLieAlgebra::ToString(std::string& output, bool useHtm
     out << "<br>";
   }
   for (int i = 0; i < this->imagesSimpleChevalleyGenerators.size; i ++) {
-    out << this->imagesSimpleChevalleyGenerators[i].ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "\n\n";
+    out << this->imagesSimpleChevalleyGenerators[i].ToString(&global.theDefaultFormat.GetElement()) << "\n\n";
     if (useHtml) {
       out << "<br>";
     }
   }
   out << "Maps of Chevalley generators:\n\n";
   for (int i = 0; i < this->domainAllChevalleyGenerators.size; i ++) {
-    out << "<br>" << this->domainAllChevalleyGenerators[i].ToString(&theGlobalVariables.theDefaultFormat.GetElement())
-    << " \\mapsto " << this->imagesAllChevalleyGenerators[i].ToString(&theGlobalVariables.theDefaultFormat.GetElement());
+    out << "<br>" << this->domainAllChevalleyGenerators[i].ToString(&global.theDefaultFormat.GetElement())
+    << " \\mapsto " << this->imagesAllChevalleyGenerators[i].ToString(&global.theDefaultFormat.GetElement());
   }
   output = out.str();
 }
@@ -1650,8 +1650,8 @@ void RationalFunctionOld::operator*=(const Polynomial<Rational>& other) {
   ProgressReport theReport;
   if (theReport.TickAndWantReport()) {
     std::stringstream out;
-    out << "Multiplying " << this->ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << " by "
-    << other.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
+    out << "Multiplying " << this->ToString(&global.theDefaultFormat.GetElement()) << " by "
+    << other.ToString(&global.theDefaultFormat.GetElement());
     theReport.Report(out.str());
   }
   RationalFunctionOld::gcd(this->Denominator.GetElement(), other, theGCD);
@@ -1670,8 +1670,8 @@ void RationalFunctionOld::operator*=(const Polynomial<Rational>& other) {
   this->SimplifyLeadingCoefficientOnly();
   if (theReport.TickAndWantReport()) {
     std::stringstream out;
-    out << "Multiplying " << this->ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << " by "
-    << other.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
+    out << "Multiplying " << this->ToString(&global.theDefaultFormat.GetElement()) << " by "
+    << other.ToString(&global.theDefaultFormat.GetElement());
     out << " and the result is:\n" << this->ToString();
     theReport.Report(out.str());
   }
@@ -2147,7 +2147,7 @@ void slTwoInSlN::ClimbDownFromHighestWeightAlongSl2String(
   Matrix<Rational>::LieBracket(this->theH, input, output);
   bool tempBool = input.IsProportionalTo(output, currentWeight);
   if (!tempBool) {
-    theGlobalVariables.Comments << "<br>Climbing down does not work as expected!";
+    global.Comments << "<br>Climbing down does not work as expected!";
   }
   Rational RaiseCoeff;
   RaiseCoeff.MakeZero();
@@ -2490,7 +2490,7 @@ std::string slTwoInSlN::PairTwoIndices(List<int>& output, int leftIndex, int rig
         for (int k = 0; k < HighestWeightsContainingModules.size; k ++) {
           output.AddOnTopNoRepetition(this->GetModuleIndexFromHighestWeightVector(HighestWeightsContainingModules[k]));
           if (this->GetModuleIndexFromHighestWeightVector(HighestWeightsContainingModules[k]) == - 1) {
-            theGlobalVariables.Comments << newLine << beginMath << "[" << leftElt.ToString(&latexFormat) << ", "
+            global.Comments << newLine << beginMath << "[" << leftElt.ToString(&latexFormat) << ", "
             << rightElt.ToString(&latexFormat) << "] =" << tempMat.ToString(&latexFormat) << endMath;
           }
         }

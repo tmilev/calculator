@@ -59,7 +59,7 @@ class ProjectInformationInstance {
   ProjectInformationInstance(const char* fileName, const std::string& fileDescription);
 };
 class GlobalVariables;
-extern GlobalVariables theGlobalVariables;
+extern GlobalVariables global;
 
 static ProjectInformationInstance vpfMacrosHprojectInstance(
   __FILE__, "Header, External includes + macros. Macro/build configuration."

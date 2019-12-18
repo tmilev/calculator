@@ -14,23 +14,23 @@ void Crypto::GetRandomBytesSecureInternal(ListZeroAfterUse<unsigned char>& outpu
 
 void Crypto::acquireAdditionalRandomness(int64_t additionalRandomness) {
   if (
-    static_cast<unsigned>(theGlobalVariables.randomBytesCurrent.size) <
-    theGlobalVariables.maximumExtractedRandomBytes
+    static_cast<unsigned>(global.randomBytesCurrent.size) <
+    global.maximumExtractedRandomBytes
   ) {
     crash << "Current random bytes have not been initialized. " << crash;
   }
   Crypto::ConvertUint64toBigendianListUnsignedCharAppendResult(
-    static_cast<uint64_t>(additionalRandomness), theGlobalVariables.randomBytesCurrent
+    static_cast<uint64_t>(additionalRandomness), global.randomBytesCurrent
   );
-  Crypto::computeSha512(theGlobalVariables.randomBytesCurrent, theGlobalVariables.randomBytesCurrent);
+  Crypto::computeSha512(global.randomBytesCurrent, global.randomBytesCurrent);
 }
 
 void Crypto::GetRandomBytesSecureInternalMayLeaveTracesInMemory(List<unsigned char>& output, int numberOfBytesMax32) {
-  Crypto::acquireAdditionalRandomness(theGlobalVariables.GetElapsedMilliseconds());
-  if (static_cast<unsigned>(numberOfBytesMax32) > theGlobalVariables.maximumExtractedRandomBytes) {
-    crash << "Not allowed to extract more than " << theGlobalVariables.maximumExtractedRandomBytes << " bytes of randomness. " << crash;
+  Crypto::acquireAdditionalRandomness(global.GetElapsedMilliseconds());
+  if (static_cast<unsigned>(numberOfBytesMax32) > global.maximumExtractedRandomBytes) {
+    crash << "Not allowed to extract more than " << global.maximumExtractedRandomBytes << " bytes of randomness. " << crash;
   }
-  theGlobalVariables.randomBytesCurrent.Slice(0, numberOfBytesMax32, output);
+  global.randomBytesCurrent.Slice(0, numberOfBytesMax32, output);
 }
 
 bool Crypto::HaveEqualHashes(const std::string& left, const std::string& right) {
@@ -1622,7 +1622,7 @@ bool JSONWebToken::VerifyRSA256(
   }
   double timeStart = - 1;
   if (commentsGeneral != nullptr) {
-    timeStart = theGlobalVariables.GetElapsedSeconds();
+    timeStart = global.GetElapsedSeconds();
   }
   if (theModulus == 0 || theExponent == 0) {
     if (commentsOnFailure != nullptr) {
@@ -1634,7 +1634,7 @@ bool JSONWebToken::VerifyRSA256(
   LargeIntegerUnsigned RSAresult = Crypto::RSAencrypt(theModulus, theExponent, theSignatureInt);
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "<br>RSA encryption took: "
-    << theGlobalVariables.GetElapsedSeconds() - timeStart << " second(s).<br>";
+    << global.GetElapsedSeconds() - timeStart << " second(s).<br>";
   }
   std::string RSAresultBitstream, RSAresultLast32bytes;
   Crypto::ConvertLargeUnsignedIntToStringSignificantDigitsFirst(RSAresult, 0, RSAresultBitstream);

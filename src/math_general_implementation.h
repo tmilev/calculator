@@ -76,7 +76,7 @@ std::ostream& operator<< (std::ostream& output, const Matrix<coefficient>& theMa
   int lastMatRowIndexToHide = theMat.NumRows;
   int firstMatColIndexToHide = theMat.NumCols;
   int lastMatColIndexToHide = theMat.NumCols;
-  FormatExpressions& theFormat = theGlobalVariables.theDefaultFormat.GetElement();
+  FormatExpressions& theFormat = global.theDefaultFormat.GetElement();
   if (theFormat.flagSuppressLongMatrices) {
     if (theMat.NumRows > theFormat.MaxMatrixDisplayedRows) {
       firstMatRowIndexToHide = theFormat.MaxMatrixDisplayedRows / 2;

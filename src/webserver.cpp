@@ -62,7 +62,7 @@ void SignalsInfrastructure::unblockSignals() {
     crash << "Sigprocmask failed on server." << crash;
   }
   this->flagSignalsAreBlocked = false;
-  if (theGlobalVariables.flagServerDetailedLog) {
+  if (global.flagServerDetailedLog) {
     logProcessStats << logger::green << "Detail: unmask successful. " << logger::endL;
   }
 }
@@ -103,7 +103,7 @@ bool WebWorker::ReceiveAll() {
   if (this->connectedSocketID == - 1) {
     crash << "Attempting to receive on a socket with ID equal to - 1. " << crash;
   }
-  if (theGlobalVariables.flagUsingSSLinCurrentConnection) {
+  if (global.flagUsingSSLinCurrentConnection) {
     return this->ReceiveAllHttpSSL();
   }
   return this->ReceiveAllHttp();
@@ -140,7 +140,7 @@ bool WebWorker::IsAllowedAsRequestCookie(const std::string& input) {
 
 void WebServer::initSSL() {
   MacroRegisterFunctionWithName("WebServer::initSSL");
-  if (!theGlobalVariables.flagSSLIsAvailable) {
+  if (!global.flagSSLIsAvailable) {
     logServer << logger::red << "SSL is DISABLED." << logger::endL;
     return;
   }
@@ -149,10 +149,10 @@ void WebServer::initSSL() {
 }
 
 bool WebServer::SSLServerSideHandShake(std::stringstream* commentsOnFailure) {
-  if (!theGlobalVariables.flagSSLIsAvailable) {
+  if (!global.flagSSLIsAvailable) {
     return false;
   }
-  if (!theGlobalVariables.flagUsingSSLinCurrentConnection) {
+  if (!global.flagUsingSSLinCurrentConnection) {
     return false;
   }
   return this->theTLS.HandShakeIamServer(this->GetActiveWorker().connectedSocketID, commentsOnFailure);
@@ -160,10 +160,10 @@ bool WebServer::SSLServerSideHandShake(std::stringstream* commentsOnFailure) {
 
 bool WebWorker::ReceiveAllHttpSSL() {
   MacroRegisterFunctionWithName("WebWorker::ReceiveAllHttpSSL");
-  if (!theGlobalVariables.flagUsingSSLinCurrentConnection) {
+  if (!global.flagUsingSSLinCurrentConnection) {
     return true;
   }
-  if (!theGlobalVariables.flagSSLIsAvailable) {
+  if (!global.flagSSLIsAvailable) {
     return false;
   }
   this->messageBody = "";
@@ -179,14 +179,14 @@ bool WebWorker::ReceiveAllHttpSSL() {
   std::string errorString;
   int numFailedReceives = 0;
   int maxNumFailedReceives = 2;
-  double numSecondsAtStart = theGlobalVariables.GetElapsedSeconds();
+  double numSecondsAtStart = global.GetElapsedSeconds();
   int numBytesInBuffer = - 1;
   List<char>& readBuffer = this->parent->theTLS.readBuffer;
   while (true) {
     numBytesInBuffer = this->parent->theTLS.SSLRead(
       &errorString, nullptr, true
     );
-    //int64_t readTime = theGlobalVariables.GetElapsedMilliseconds() - msBeforesslread;
+    //int64_t readTime = global.GetElapsedMilliseconds() - msBeforesslread;
     if (numBytesInBuffer >= 0) {
       //if (numBytesInBuffer > 0 && numBytesInBuffer <= (signed) reader.size) {
       break;
@@ -238,7 +238,7 @@ bool WebWorker::ReceiveAllHttpSSL() {
   this->remainingBytesToSenD.SetSize(0);
   std::string bufferString;
   while (static_cast<signed>(this->messageBody.size()) < this->ContentLength) {
-    if (theGlobalVariables.GetElapsedSeconds() - numSecondsAtStart > 180) {
+    if (global.GetElapsedSeconds() - numSecondsAtStart > 180) {
       this->error = "Receiving bytes timed out (180 seconds).";
       logWorker << this->error << logger::endL;
       this->displayUserInput = this->error;
@@ -292,7 +292,7 @@ void WebWorker::SendAllBytesHttpSSL() {
     return;
   }
   this->CheckConsistency();
-  if (!theGlobalVariables.flagUsingSSLinCurrentConnection) {
+  if (!global.flagUsingSSLinCurrentConnection) {
     crash
     << "Error: WebWorker::SendAllBytesHttpSSL called "
     << "while flagUsingSSLinCurrentConnection is set to false. "
@@ -304,7 +304,7 @@ void WebWorker::SendAllBytesHttpSSL() {
   }
   logWorker << "SSL Worker " << this->indexInParent + 1
   << " sending " << this->remainingBytesToSenD.size << " bytes in chunks of: ";
-  double startTime = theGlobalVariables.GetElapsedSeconds();
+  double startTime = global.GetElapsedSeconds();
   struct timeval tv; //<- code involving tv taken from stackexchange
   tv.tv_sec = 5;  // 5 Secs Timeout
   tv.tv_usec = 0;  // Not init'ing this can cause strange errors
@@ -314,7 +314,7 @@ void WebWorker::SendAllBytesHttpSSL() {
   std::string errorString;
   std::stringstream commentsOnError;
   while (this->remainingBytesToSenD.size > 0) {
-    if (theGlobalVariables.GetElapsedSeconds() - startTime > timeOutInSeconds) {
+    if (global.GetElapsedSeconds() - startTime > timeOutInSeconds) {
       logWorker << "WebWorker::SendAllBytes failed: more than " << timeOutInSeconds << " seconds have elapsed. "
       << logger::endL;
       return;
@@ -375,14 +375,14 @@ ProgressReportWebServer::~ProgressReportWebServer() {
 
 void ProgressReportWebServer::SetStatus(const std::string& inputStatus) {
   MacroRegisterFunctionWithName("ProgressReportWebServer::SetStatus");
-  if (theGlobalVariables.flagComputationFinishedAllOutputSentClosing || !this->flagServerExists) {
+  if (global.flagComputationFinishedAllOutputSentClosing || !this->flagServerExists) {
     return;
   }
-  if (!theGlobalVariables.flagRunningBuiltInWebServer) {
+  if (!global.flagRunningBuiltInWebServer) {
     return;
   }
   theWebServer.CheckConsistency();
-  MutexRecursiveWrapper& safetyFirst = theGlobalVariables.MutexWebWorkerStaticFiasco;
+  MutexRecursiveWrapper& safetyFirst = global.MutexWebWorkerStaticFiasco;
   safetyFirst.LockMe();
   if (this->indexProgressReport >= theWebServer.theProgressReports.size) {
     theWebServer.theProgressReports.SetSize(this->indexProgressReport + 1);
@@ -395,7 +395,7 @@ void ProgressReportWebServer::SetStatus(const std::string& inputStatus) {
     }
   }
   safetyFirst.UnlockMe();
-  if (!theGlobalVariables.flagRunningBuiltInWebServer) {
+  if (!global.flagRunningBuiltInWebServer) {
     return;
   }
   theWebServer.GetActiveWorker().pipeWorkerToWorkerStatus.WriteOnceAfterEmptying(toBePiped.str(), false, false);
@@ -410,7 +410,7 @@ void *get_in_addr(struct sockaddr* sa) {
 }
 
 std::string WebWorker::ToStringMessageFull() const {
-  //if (theGlobalVariables.flagUsingSSLinCurrentConnection)
+  //if (global.flagUsingSSLinCurrentConnection)
   //  return "Message cannot be viewed when using SSL";
   std::stringstream out;
   out << this->ToStringMessageShort();
@@ -446,13 +446,13 @@ std::string WebWorker::ToStringMessageShort() const {
   out << lineBreak << "\nRelative physical file/directory name:\n"
   << HtmlRoutines::ConvertStringToHtmlString(this->RelativePhysicalFileNamE, true);
   out << lineBreak << "\nExecutable url:\n"
-  << HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.DisplayNameExecutable, false);
+  << HtmlRoutines::ConvertStringToHtmlString(global.DisplayNameExecutable, false);
   out << lineBreak << "\nPhysical address project base:\n"
-  << HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.PhysicalPathProjectBase, false);
+  << HtmlRoutines::ConvertStringToHtmlString(global.PhysicalPathProjectBase, false);
   out << lineBreak << "\nPhysical address server base:\n"
-  << HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.PhysicalPathServerBase, false);
+  << HtmlRoutines::ConvertStringToHtmlString(global.PhysicalPathServerBase, false);
   out << lineBreak << "\nPhysical address output folder:\n"
-  << HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.PhysicalPathHtmlFolder, false);
+  << HtmlRoutines::ConvertStringToHtmlString(global.PhysicalPathHtmlFolder, false);
   out << "<hr>";
   if (this->flagKeepAlive) {
     out << "<br><b>Keeping alive.</b><br>";
@@ -463,7 +463,7 @@ std::string WebWorker::ToStringMessageShort() const {
   for (int i = 0; i < this->cookies.size; i ++) {
     out << "<br>" << HtmlRoutines::ConvertStringToHtmlString(this->cookies[i], false);
   }
-  out << "\n<hr>\nHost with port:<br>\n" << HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.hostWithPort, false);
+  out << "\n<hr>\nHost with port:<br>\n" << HtmlRoutines::ConvertStringToHtmlString(global.hostWithPort, false);
   out << "\n<hr>\nFull message head:<br>\n" << HtmlRoutines::ConvertStringToHtmlString(this->messageHead, true);
   out << "\n<hr>\nFull message body:<br>\n" << HtmlRoutines::ConvertStringToHtmlString(this->messageBody, true);
   return out.str();
@@ -474,22 +474,22 @@ void WebWorker::resetConnection() {
   //This function needs a security audit.
   this->resetMessageComponentsExceptRawMessage();
   UserCalculatorData blankUser;
-  theGlobalVariables.userDefault = blankUser;
+  global.userDefault = blankUser;
   if (
-    theGlobalVariables.userDefault.enteredActivationToken != "" ||
-    theGlobalVariables.userDefault.enteredAuthenticationToken != "" ||
-    theGlobalVariables.userDefault.enteredGoogleToken != "" ||
-    theGlobalVariables.userDefault.enteredPassword != "" ||
-    theGlobalVariables.userDefault.enteredHashedSaltedPassword != ""
+    global.userDefault.enteredActivationToken != "" ||
+    global.userDefault.enteredAuthenticationToken != "" ||
+    global.userDefault.enteredGoogleToken != "" ||
+    global.userDefault.enteredPassword != "" ||
+    global.userDefault.enteredHashedSaltedPassword != ""
   ) {
     crash << "User default not reset correctly. " << crash;
   }
-  theGlobalVariables.flagLoggedIn = false;
-  theGlobalVariables.flagLogInAttempted = false;
-  theGlobalVariables.webArguments.Clear();
-  theGlobalVariables.userCalculatorRequestType = "";
-  theGlobalVariables.userInputStringIfAvailable = "";
-  theGlobalVariables.userInputStringRAWIfAvailable = "";
+  global.flagLoggedIn = false;
+  global.flagLogInAttempted = false;
+  global.webArguments.Clear();
+  global.userCalculatorRequestType = "";
+  global.userInputStringIfAvailable = "";
+  global.userInputStringRAWIfAvailable = "";
   this->flagAllBytesSentUsingFile = false;
   this->flagEncounteredErrorWhileServingFile = false;
 }
@@ -510,21 +510,21 @@ void WebWorker::resetMessageComponentsExceptRawMessage() {
 JSData WebWorker::GetDatabaseJSON() {
   MacroRegisterFunctionWithName("WebWorker::GetDatabaseJSON");
   JSData result;
-  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
+  if (!global.UserDefaultHasAdminRights()) {
     result[WebAPI::result::error] = "Only logged-in admins can access database. ";
     return result;
   }
-  if (theGlobalVariables.flagDatabaseCompiled) {
-    std::string operation = theGlobalVariables.GetWebInput(WebAPI::databaseParameters::operation);
+  if (global.flagDatabaseCompiled) {
+    std::string operation = global.GetWebInput(WebAPI::databaseParameters::operation);
     std::string labels = HtmlRoutines::ConvertURLStringToNormal(
-      theGlobalVariables.GetWebInput(WebAPI::databaseParameters::labels), false
+      global.GetWebInput(WebAPI::databaseParameters::labels), false
     );
     if (operation == WebAPI::databaseParameters::fetch) {
       result = Database::get().ToJSONDatabaseFetch(labels);
     } else {
       result[WebAPI::result::error] = "Uknown database operation: " + operation + ". ";
     }
-    if (theGlobalVariables.UserDebugFlagOn()) {
+    if (global.UserDebugFlagOn()) {
       result["databaseOperation"] = operation;
       result["databaseLabels"] = labels;
     }
@@ -536,11 +536,11 @@ JSData WebWorker::GetDatabaseJSON() {
 
 std::string WebWorker::GetDatabaseDeleteOneItem() {
   MacroRegisterFunctionWithName("WebWorker::GetDatabaseDeleteOneItem");
-  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
+  if (!global.UserDefaultHasAdminRights()) {
     return "Only logged-in admins can execute the delete command. ";
   }
   std::stringstream commentsStream;
-  std::string inputEncoded = theGlobalVariables.GetWebInput("item");
+  std::string inputEncoded = global.GetWebInput("item");
   std::string inputString = HtmlRoutines::ConvertURLStringToNormal(inputEncoded, false);
   JSData inputParsed;
   if (!inputParsed.readstring(inputString, &commentsStream)) {
@@ -551,7 +551,7 @@ std::string WebWorker::GetDatabaseDeleteOneItem() {
   if (Database::get().DeleteOneEntry(inputParsed, &commentsStream)) {
     return "success";
   }
-  if (!theGlobalVariables.flagDatabaseCompiled) {
+  if (!global.flagDatabaseCompiled) {
     commentsStream << "Database not available (cannot delete item). ";
   }
   return commentsStream.str();
@@ -567,7 +567,7 @@ bool WebWorker::ExtractArgumentsFromCookies(std::stringstream& argumentProcessin
     }
   }
   for (int i = 0; i < newlyFoundArgs.size(); i ++) {
-    if (theGlobalVariables.webArguments.Contains(newlyFoundArgs.theKeys[i])) {
+    if (global.webArguments.Contains(newlyFoundArgs.theKeys[i])) {
       continue; //<-if a key is already given cookie entries are ignored.
     }
     std::string trimmed = newlyFoundArgs.theValues[i];
@@ -596,7 +596,7 @@ bool WebWorker::ExtractArgumentsFromCookies(std::stringstream& argumentProcessin
       }
     }
     if (isGood) {
-      theGlobalVariables.webArguments.SetKeyValue(newlyFoundArgs.theKeys[i], trimmed);
+      global.webArguments.SetKeyValue(newlyFoundArgs.theKeys[i], trimmed);
     }
   }
   return result;
@@ -611,7 +611,7 @@ bool WebWorker::ExtractArgumentsFromMessage(
     return false;
   }
   MapList<std::string, std::string, MathRoutines::HashString>& theArgs =
-  theGlobalVariables.webArguments;
+  global.webArguments;
   if (!HtmlRoutines::ChopCGIStringAppend(input, theArgs, argumentProcessingFailureComments)) {
     return false;
   }
@@ -623,32 +623,32 @@ bool WebWorker::ExtractArgumentsFromMessage(
 // Returning false guarantees the login information was not accepted.
 bool WebWorker::LoginProcedure(std::stringstream& argumentProcessingFailureComments, std::stringstream* comments) {
   MacroRegisterFunctionWithName("WebWorker::LoginProcedure");
-  theGlobalVariables.flagLoggedIn = false;
-  if (theGlobalVariables.flagDisableDatabaseLogEveryoneAsAdmin) {
-    theGlobalVariables.flagLoggedIn = true;
-    theGlobalVariables.flagDatabaseCompiled = false;
+  global.flagLoggedIn = false;
+  if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
+    global.flagLoggedIn = true;
+    global.flagDatabaseCompiled = false;
     return true;
   }
 
-  MapList<std::string, std::string, MathRoutines::HashString>& theArgs = theGlobalVariables.webArguments;
-  UserCalculatorData& theUser = theGlobalVariables.userDefault;
+  MapList<std::string, std::string, MathRoutines::HashString>& theArgs = global.webArguments;
+  UserCalculatorData& theUser = global.userDefault;
   theUser.username = HtmlRoutines::ConvertURLStringToNormal(
-    theGlobalVariables.GetWebInput("username"), true
+    global.GetWebInput("username"), true
   );
   if (theUser.username.find('%') != std::string::npos) {
     argumentProcessingFailureComments << "<b>Unusual behavior: % sign in username.</b>";
   }
   theUser.enteredAuthenticationToken = HtmlRoutines::ConvertURLStringToNormal(
-    theGlobalVariables.GetWebInput("authenticationToken"), false
+    global.GetWebInput("authenticationToken"), false
   );
   theUser.enteredGoogleToken = HtmlRoutines::ConvertURLStringToNormal(
-    theGlobalVariables.GetWebInput("googleToken"), false
+    global.GetWebInput("googleToken"), false
   );
   theUser.enteredActivationToken = HtmlRoutines::ConvertURLStringToNormal(
-    theGlobalVariables.GetWebInput("activationToken"), false
+    global.GetWebInput("activationToken"), false
   );
   theUser.enteredPassword = HtmlRoutines::ConvertStringToURLString(
-    HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("password"), true), false
+    HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("password"), true), false
   );
   //<-Passwords are ONE-LAYER url-encoded
   //<-INCOMING pluses in passwords MUST be decoded as spaces, this is how form.submit() works!
@@ -662,8 +662,8 @@ bool WebWorker::LoginProcedure(std::stringstream& argumentProcessingFailureComme
     theUser.enteredActivationToken = "";
     theUser.flagEnteredAuthenticationToken = false;
     theUser.flagEnteredActivationToken = false;
-    theGlobalVariables.flagLogInAttempted = true;
-    if (theGlobalVariables.UserDebugFlagOn() && comments != nullptr) {
+    global.flagLogInAttempted = true;
+    if (global.UserDebugFlagOn() && comments != nullptr) {
       *comments << "Password was entered: all other authentication methods ignored. ";
     }
   }
@@ -672,8 +672,8 @@ bool WebWorker::LoginProcedure(std::stringstream& argumentProcessingFailureComme
     theUser.enteredAuthenticationToken = "";
     theUser.flagEnteredAuthenticationToken = false;
     theUser.flagEnteredActivationToken = true;
-    theGlobalVariables.flagLogInAttempted = true;
-    if (theGlobalVariables.UserDebugFlagOn() && comments != nullptr) {
+    global.flagLogInAttempted = true;
+    if (global.UserDebugFlagOn() && comments != nullptr) {
       *comments << "Activation token entered: authentication token and google token ignored. ";
     }
   }
@@ -682,7 +682,7 @@ bool WebWorker::LoginProcedure(std::stringstream& argumentProcessingFailureComme
   }
   if (theUser.enteredAuthenticationToken != "") {
     theUser.flagEnteredAuthenticationToken = true;
-    theGlobalVariables.flagLogInAttempted = true;
+    global.flagLogInAttempted = true;
   }
   /////////////////////////////////////////////
   // this may need a security audit: the URLStringToNormal and GetWebInput
@@ -699,7 +699,7 @@ bool WebWorker::LoginProcedure(std::stringstream& argumentProcessingFailureComme
   ) {
     return !theUser.flagMustLogin;
   }
-  if (!theGlobalVariables.flagUsingSSLinCurrentConnection) {
+  if (!global.flagUsingSSLinCurrentConnection) {
     return false;
   }
   bool doAttemptGoogleTokenLogin = false;
@@ -719,18 +719,18 @@ bool WebWorker::LoginProcedure(std::stringstream& argumentProcessingFailureComme
     return !theUser.flagMustLogin;
   }
   bool changingPass =
-  theGlobalVariables.userCalculatorRequestType == WebAPI::request::changePassword ||
-  theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccountJSON;
+  global.userCalculatorRequestType == WebAPI::request::changePassword ||
+  global.userCalculatorRequestType == WebAPI::request::activateAccountJSON;
 
   if (changingPass) {
     theUser.enteredAuthenticationToken = "";
   }
   if (doAttemptGoogleTokenLogin) {
     bool tokenIsGood = false;
-    theGlobalVariables.flagLoggedIn = Database().get().theUser.LoginViaGoogleTokenCreateNewAccountIfNeeded(
+    global.flagLoggedIn = Database().get().theUser.LoginViaGoogleTokenCreateNewAccountIfNeeded(
       theUser, &argumentProcessingFailureComments, nullptr, tokenIsGood
     );
-    if (tokenIsGood && !theGlobalVariables.flagLoggedIn && comments != nullptr) {
+    if (tokenIsGood && !global.flagLoggedIn && comments != nullptr) {
       *comments << "Your authentication is valid but I have problems with my database records. ";
     }
   } else if (
@@ -738,32 +738,32 @@ bool WebWorker::LoginProcedure(std::stringstream& argumentProcessingFailureComme
     theUser.enteredPassword != "" ||
     theUser.enteredActivationToken != ""
   ) {
-    theGlobalVariables.flagLoggedIn = Database().get().theUser.LoginViaDatabase(
+    global.flagLoggedIn = Database().get().theUser.LoginViaDatabase(
       theUser, &argumentProcessingFailureComments
     );
   }
-  theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue(
+  global.CookiesToSetUsingHeaders.SetKeyValue(
     "username",
     HtmlRoutines::ConvertStringToURLString(theUser.username, false)
     //<-User name must be stored in URL-encoded fashion, NO PLUSES.
   );
-  if (theGlobalVariables.flagLoggedIn && theUser.enteredActivationToken == "") {
+  if (global.flagLoggedIn && theUser.enteredActivationToken == "") {
     //in case the user logged in with password, we need
     //to give him/her the correct authentication token
-    theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue(
+    global.CookiesToSetUsingHeaders.SetKeyValue(
       DatabaseStrings::labelAuthenticationToken,
       HtmlRoutines::ConvertStringToURLString(theUser.actualAuthenticationToken, false)
       //<-URL-encoded fashion, NO PLUSES.
     );
-    theGlobalVariables.SetWebInpuT(
+    global.SetWebInpuT(
       DatabaseStrings::labelAuthenticationToken,
       HtmlRoutines::ConvertStringToURLString(theUser.actualAuthenticationToken, false)
     );
   } else {
-    theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue("authenticationToken", "0");
+    global.CookiesToSetUsingHeaders.SetKeyValue("authenticationToken", "0");
   }
   bool shouldDisplayMessage = false;
-  if (!theGlobalVariables.flagLoggedIn && theUser.username != "") {
+  if (!global.flagLoggedIn && theUser.username != "") {
     if (theUser.flagEnteredPassword || theUser.flagEnteredActivationToken) {
       shouldDisplayMessage = true;
     }
@@ -783,7 +783,7 @@ bool WebWorker::LoginProcedure(std::stringstream& argumentProcessingFailureComme
 
 std::string WebWorker::GetHtmlHiddenInputs(bool includeUserName, bool includeAuthenticationToken) {
   MacroRegisterFunctionWithName("WebWorker::GetHtmlHiddenInputs");
-  if (!theGlobalVariables.flagUsingSSLinCurrentConnection) {
+  if (!global.flagUsingSSLinCurrentConnection) {
     return "";
   }
   std::stringstream out;
@@ -811,9 +811,9 @@ void WebWorker::WriteAfterTimeoutProgressStatic(const std::string& input) {
 
 void WebWorker::WriteAfterTimeoutProgress(const std::string& input, bool forceFileWrite) {
   if (
-    !theGlobalVariables.theProgress.flagReportAlloweD ||
-    !theGlobalVariables.theProgress.flagTimedOut ||
-    theGlobalVariables.theProgress.flagBanProcessMonitoring
+    !global.theProgress.flagReportAlloweD ||
+    !global.theProgress.flagTimedOut ||
+    global.theProgress.flagBanProcessMonitoring
   ) {
     return;
   }
@@ -829,7 +829,7 @@ void WebWorker::WriteAfterTimeoutProgress(const std::string& input, bool forceFi
   this->WriteAfterTimeoutString(
     input,
     WebAPI::result::running,
-    theGlobalVariables.RelativePhysicalNameOptionalProgressReport
+    global.RelativePhysicalNameOptionalProgressReport
   );
 }
 
@@ -838,7 +838,7 @@ void WebWorker::WriteAfterTimeoutResult() {
   WebWorker::WriteAfterTimeoutJSON(
     theParser->ToJSONOutputAndSpecials(),
     "finished",
-    theGlobalVariables.RelativePhysicalNameOptionalResult
+    global.RelativePhysicalNameOptionalResult
   );
 }
 
@@ -973,7 +973,7 @@ void WebWorker::ParseMessageHead() {
   if (this->messageBody.size() > 0 && this->ContentLength < 0) {
     this->ContentLength = static_cast<signed>(this->messageBody.size());
   }
-  theGlobalVariables.hostWithPort = this->hostWithPort;
+  global.hostWithPort = this->hostWithPort;
 }
 
 void WebWorker::AttemptUnknownRequestErrorCorrection() {
@@ -1003,8 +1003,8 @@ void WebWorker::AttemptUnknownRequestErrorCorrection() {
     this->requestTypE = this->requestGet;
   }
   if (this->addressGetOrPost == "") {
-    logWorker << "Address set to: " << theGlobalVariables.DisplayNameExecutable << "\n";
-    this->addressGetOrPost = theGlobalVariables.DisplayNameExecutable;
+    logWorker << "Address set to: " << global.DisplayNameExecutable << "\n";
+    this->addressGetOrPost = global.DisplayNameExecutable;
   }
   logWorker << logger::blue
   << "Unrecognized message head, length: " << this->messageHead.size() << ".\n";
@@ -1026,7 +1026,7 @@ bool WebWorker::ReceiveAllHttp() {
   tv.tv_sec = 5;  // 5 Secs Timeout
   tv.tv_usec = 0;  // Not init'ing this can cause strange errors
   setsockopt(this->connectedSocketID, SOL_SOCKET, SO_RCVTIMEO, static_cast<void*>(&tv), sizeof(timeval));
-  double numSecondsAtStart = theGlobalVariables.GetElapsedSeconds();
+  double numSecondsAtStart = global.GetElapsedSeconds();
   ssize_t numBytesInBuffer = recv(
     this->connectedSocketID, &buffer, bufferSize - 1, 0
   );
@@ -1102,7 +1102,7 @@ bool WebWorker::ReceiveAllHttp() {
   this->remainingBytesToSenD.SetSize(0);
   std::string bufferString;
   while ( static_cast<signed>(this->messageBody.size()) < this->ContentLength) {
-    if (theGlobalVariables.GetElapsedSeconds() - numSecondsAtStart > 180) {
+    if (global.GetElapsedSeconds() - numSecondsAtStart > 180) {
       this->error = "Receiving bytes timed out (180 seconds).";
       logWorker << this->error << logger::endL;
       this->displayUserInput = this->error;
@@ -1174,15 +1174,15 @@ void WebWorker::ExtractHostInfo() {
   } else {
     this->hostNoPort = this->hostWithPort;
   }
-  theGlobalVariables.hostWithPort = this->hostWithPort;
-  theGlobalVariables.hostNoPort = this->hostNoPort;
+  global.hostWithPort = this->hostWithPort;
+  global.hostNoPort = this->hostNoPort;
   if (
-    theGlobalVariables.hostNoPort == "localhost" ||
-    theGlobalVariables.hostNoPort == "127.0.0.1"
+    global.hostNoPort == "localhost" ||
+    global.hostNoPort == "127.0.0.1"
   ) {
-    theGlobalVariables.flagRequestComingLocally = true;
+    global.flagRequestComingLocally = true;
   } else {
-    theGlobalVariables.flagRequestComingLocally = false;
+    global.flagRequestComingLocally = false;
   }
 }
 
@@ -1219,12 +1219,12 @@ std::string WebWorker::GetHeaderConnectionKeepAlive() {
 
 std::string WebWorker::GetHeaderSetCookie() {
   std::stringstream out;
-  for (int i = 0; i < theGlobalVariables.CookiesToSetUsingHeaders.size(); i ++) {
-    out << "Set-Cookie: " << theGlobalVariables.CookiesToSetUsingHeaders.theKeys[i]
+  for (int i = 0; i < global.CookiesToSetUsingHeaders.size(); i ++) {
+    out << "Set-Cookie: " << global.CookiesToSetUsingHeaders.theKeys[i]
     << "="
-    << theGlobalVariables.CookiesToSetUsingHeaders.theValues[i]
+    << global.CookiesToSetUsingHeaders.theValues[i]
     << "; Path=/; Expires=Sat, 01 Jan 2030 20:00:00 GMT;Secure;SameSite=Strict;";
-    if (i != theGlobalVariables.CookiesToSetUsingHeaders.size() - 1) {
+    if (i != global.CookiesToSetUsingHeaders.size() - 1) {
       out << "\r\n";
     }
   }
@@ -1247,7 +1247,7 @@ void WebWorker::SetHeader(
     out << remainingHeaderNoTermination << "\r\n";
   }
   if (
-    (theGlobalVariables.flagLoggedIn || theGlobalVariables.flagLogInAttempted) &&
+    (global.flagLoggedIn || global.flagLogInAttempted) &&
     WebWorker::GetHeaderSetCookie() != ""
   ) {
     out << WebWorker::GetHeaderSetCookie() << "\r\n";
@@ -1299,7 +1299,7 @@ void WebWorker::SanitizeVirtualFileName() {
 
 int WebWorker::ProcessCalculatorExamplesJSON() {
   MacroRegisterFunctionWithName("WebWorker::ProcessCalculatorExamplesJSON");
-  theGlobalVariables.WriteResponse(theParser->FunctionHandlersJSON());
+  global.WriteResponse(theParser->FunctionHandlersJSON());
   return 0;
 }
 
@@ -1309,11 +1309,11 @@ int WebWorker::ProcessServerStatusJSON() {
   std::stringstream out;
   out << " <table><tr><td style =\"vertical-align:top\">"
   << this->parent->ToStringStatusAll() << "</td><td>"
-  << theGlobalVariables.ToStringHTMLTopCommandLinuxSystem()
+  << global.ToStringHTMLTopCommandLinuxSystem()
   << "</td></tr></table>";
   JSData outputJS;
   outputJS[WebAPI::result::resultHtml] = out.str();
-  theGlobalVariables.WriteResponse(outputJS);
+  global.WriteResponse(outputJS);
   return 0;
 }
 
@@ -1323,7 +1323,7 @@ int WebWorker::ProcessUnpauseWorker() {
   JSData progressReader, result;
   int indexWorker = this->GetIndexIfRunningWorkerId(progressReader);
   if (indexWorker < 0) {
-    theGlobalVariables.WriteResponse(progressReader);
+    global.WriteResponse(progressReader);
     return 0;
   }
   WebWorker& otherWorker = this->parent->theWorkers[indexWorker];
@@ -1332,7 +1332,7 @@ int WebWorker::ProcessUnpauseWorker() {
   } else {
     result[WebAPI::result::status] = "unpaused";
   }
-  theGlobalVariables.WriteResponse(result);
+  global.WriteResponse(result);
   return 0;
 }
 
@@ -1342,7 +1342,7 @@ int WebWorker::ProcessPauseWorker() {
   JSData progressReader, result;
   int indexWorker = this->GetIndexIfRunningWorkerId(progressReader);
   if (indexWorker < 0) {
-    theGlobalVariables.WriteResponse(progressReader);
+    global.WriteResponse(progressReader);
     return 0;
   }
   WebWorker& otherWorker = this->parent->theWorkers[indexWorker];
@@ -1351,7 +1351,7 @@ int WebWorker::ProcessPauseWorker() {
   } else {
     result[WebAPI::result::error] = "Failed to pause process. ";
   }
-  theGlobalVariables.WriteResponse(result);
+  global.WriteResponse(result);
   return 0;
 }
 
@@ -1360,7 +1360,7 @@ int WebWorker::ProcessComputationIndicator() {
   this->SetHeaderOKNoContentLength("");
   logWorker << "Processing get request indicator." << logger::endL;
   JSData result = this->ProcessComputationIndicatorJSData();
-  theGlobalVariables.WriteResponse(result);
+  global.WriteResponse(result);
   return 0;
 }
 
@@ -1368,7 +1368,7 @@ int WebWorker::GetIndexIfRunningWorkerId(
   JSData& outputComputationStatus
 ) {
   MacroRegisterFunctionWithName("WebWorker::GetJSONResultFromFile");
-  std::string workerId = theGlobalVariables.GetWebInput(WebAPI::request::workerId);
+  std::string workerId = global.GetWebInput(WebAPI::request::workerId);
   std::stringstream commentsOnError;
   std::string computationResult;
   // 1. Warning: timing attacks on the speed of looking up file names
@@ -1430,10 +1430,10 @@ int WebWorker::GetIndexIfRunningWorkerId(
 JSData WebWorker::ProcessComputationIndicatorJSData() {
   MacroRegisterFunctionWithName("WebWorker::ProcessComputationIndicatorJSData");
   // Timer thread will no longer time us out.
-  StateMaintainer<bool> maintainReport(theGlobalVariables.theProgress.flagReportAlloweD);
-  StateMaintainer<bool> maintainProcess(theGlobalVariables.theProgress.flagBanProcessMonitoring);
-  theGlobalVariables.theProgress.flagReportAlloweD = false;
-  theGlobalVariables.theProgress.flagBanProcessMonitoring = true;
+  StateMaintainer<bool> maintainReport(global.theProgress.flagReportAlloweD);
+  StateMaintainer<bool> maintainProcess(global.theProgress.flagBanProcessMonitoring);
+  global.theProgress.flagReportAlloweD = false;
+  global.theProgress.flagBanProcessMonitoring = true;
   JSData result;
   std::stringstream commentsOnFailure;
   if (!this->flagUsingSSLInWorkerProcess) {
@@ -1587,9 +1587,9 @@ int WebWorker::ProcessFileDoesntExist() {
   std::stringstream out;
   out << "<html>"
   << "<body>";
-  out << "One page <a href = \"" << theGlobalVariables.DisplayNameExecutableApp << "\">app</a>. ";
+  out << "One page <a href = \"" << global.DisplayNameExecutableApp << "\">app</a>. ";
   out << " Same app without browser cache: <a href = \""
-  << theGlobalVariables.DisplayNameExecutableAppNoCache << "\">app no cache</a>.<hr>";
+  << global.DisplayNameExecutableAppNoCache << "\">app no cache</a>.<hr>";
   out << "<b>File does not exist.</b>";
   if (this->flagFileNameSanitized) {
     out
@@ -1607,7 +1607,7 @@ int WebWorker::ProcessFileDoesntExist() {
   << HtmlRoutines::ConvertStringToHtmlString(this->VirtualFileName, true)
   << "<br><b>Computed relative physical file name:</b> "
   << HtmlRoutines::ConvertStringToHtmlString(this->RelativePhysicalFileNamE, true);
-  out << "<br><b>Request:</b> " << theGlobalVariables.userCalculatorRequestType;
+  out << "<br><b>Request:</b> " << global.userCalculatorRequestType;
   out << "<hr><hr><hr>Message details:<br>"
   << this->ToStringMessageFull();
   out << "</body></html>";
@@ -1729,9 +1729,9 @@ void WebWorker::reset() {
   this->flagUsingSSLInWorkerProcess = false;
   this->flagAllBytesSentUsingFile = false;
   this->flagEncounteredErrorWhileServingFile = false;
-  theGlobalVariables.flagUsingSSLinCurrentConnection = false;
-  theGlobalVariables.flagLoggedIn = false;
-  theGlobalVariables.userDefault.reset();
+  global.flagUsingSSLinCurrentConnection = false;
+  global.flagLoggedIn = false;
+  global.userDefault.reset();
   this->RelativePhysicalFileNamE = "";
   this->numberOfReceivesCurrentConnection = 0;
   this->numberOfConsecutiveNoReportsBeforeDisconnect = 0;
@@ -1768,27 +1768,27 @@ bool WebWorker::IsFileExtensionOfBinaryFile(const std::string& fileExtension) {
 
 void WebWorker::WrapUpConnection() {
   MacroRegisterFunctionWithName("WebWorker::WrapUpConnection");
-  if (theGlobalVariables.flagServerDetailedLog) {
+  if (global.flagServerDetailedLog) {
     logWorker << "Detail: wrapping up connection. " << logger::endL;
   }
   this->resultWork["connectionsServed"] = this->numberOfReceivesCurrentConnection;
   this->resultWork["result"] = "close";
-  if (theGlobalVariables.flagRestartNeeded) {
+  if (global.flagRestartNeeded) {
     this->resultWork["restartNeeded"] = "true";
   }
-  if (theGlobalVariables.flagStopNeeded) {
+  if (global.flagStopNeeded) {
     this->resultWork["stopNeeded"] = "true";
   }
   this->pipeWorkerToServerControls.WriteOnceAfterEmptying(this->resultWork.ToString(false, false), false, false);
-  if (theGlobalVariables.flagServerDetailedLog) {
+  if (global.flagServerDetailedLog) {
     logWorker << "Detail: done with pipes, releasing resources. " << logger::endL;
   }
   this->Release();
-  if (theGlobalVariables.flagServerDetailedLog) {
+  if (global.flagServerDetailedLog) {
     logWorker << "Detail: released. " << logger::endL;
   }
-  theGlobalVariables.flagComputationCompletE = true;
-  theGlobalVariables.flagComputationFinishedAllOutputSentClosing = true;
+  global.flagComputationCompletE = true;
+  global.flagComputationFinishedAllOutputSentClosing = true;
 }
 
 void WebWorker::SendAllAndWrapUp() {
@@ -1852,22 +1852,22 @@ std::string WebWorker::GetMIMEtypeFromFileExtension(const std::string& fileExten
 int WebWorker::ProcessUnknown() {
   MacroRegisterFunctionWithName("WebWorker::ProcessUnknown");
   this->SetHeader("HTTP/1.0 501 Method Not Implemented", "Content-Type: text/html");
-  theGlobalVariables.WriteResponse(WebAPIResponse::GetJSONUserInfo("Unknown request"));
+  global.WriteResponse(WebAPIResponse::GetJSONUserInfo("Unknown request"));
   return 0;
 }
 
 bool WebWorker::ShouldDisplayLoginPage() {
-  if (theGlobalVariables.userCalculatorRequestType == "login") {
+  if (global.userCalculatorRequestType == "login") {
     return true;
   }
   if (
-    theGlobalVariables.flagUsingSSLinCurrentConnection &&
-    !theGlobalVariables.flagLoggedIn &&
-    theGlobalVariables.userCalculatorRequestType != "calculator"
+    global.flagUsingSSLinCurrentConnection &&
+    !global.flagLoggedIn &&
+    global.userCalculatorRequestType != "calculator"
   ) {
     return true;
   }
-  if (theGlobalVariables.UserRequestMustBePromptedToLogInIfNotLoggedIn() && !theGlobalVariables.flagLoggedIn) {
+  if (global.UserRequestMustBePromptedToLogInIfNotLoggedIn() && !global.flagLoggedIn) {
     return true;
   }
   return false;
@@ -1875,8 +1875,8 @@ bool WebWorker::ShouldDisplayLoginPage() {
 
 std::string WebWorker::GetAuthenticationToken(const std::string& reasonForNoAuthentication) {
   MacroRegisterFunctionWithName("WebWorker::GetAuthenticationToken");
-  if (theGlobalVariables.flagLoggedIn && theGlobalVariables.flagUsingSSLinCurrentConnection) {
-    return theGlobalVariables.userDefault.actualActivationToken;
+  if (global.flagLoggedIn && global.flagUsingSSLinCurrentConnection) {
+    return global.userDefault.actualActivationToken;
   }
   return reasonForNoAuthentication;
 }
@@ -1885,9 +1885,9 @@ std::string WebWorker::GetChangePasswordPagePartOne(bool& outputDoShowPasswordCh
   MacroRegisterFunctionWithName("WebWorker::GetChangePasswordPagePartOne");
   std::stringstream out;
   std::string claimedActivationToken =
-  HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("activationToken"), false);
+  HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("activationToken"), false);
   std::string claimedEmail =
-  HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("email"), false);
+  HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("email"), false);
   out << "<input type =\"hidden\" id =\"activationToken\" value =\""
   << claimedActivationToken << "\">";
   if (claimedActivationToken == "") {
@@ -1899,7 +1899,7 @@ std::string WebWorker::GetChangePasswordPagePartOne(bool& outputDoShowPasswordCh
     return out.str();
   }
   std::string actualEmailActivationToken, usernameAssociatedWithToken;
-  if (theGlobalVariables.userDefault.email == claimedEmail) {
+  if (global.userDefault.email == claimedEmail) {
     out << "\n<b style =\"color:green\">Email " << claimedEmail << " updated. </b>";
     return out.str();
   }
@@ -1919,7 +1919,7 @@ std::string WebWorker::GetChangePasswordPagePartOne(bool& outputDoShowPasswordCh
     out << "\n<b style =\"color:red\">Bad activation token. Could not activate your email. </b>";
     return out.str();
   }
-  if (usernameAssociatedWithToken != theGlobalVariables.userDefault.username) {
+  if (usernameAssociatedWithToken != global.userDefault.username) {
     out << "\n<b style =\"color:red\">Activation token was issued for another user. </b>";
     return out.str();
   }
@@ -1934,7 +1934,7 @@ std::string WebWorker::GetChangePasswordPagePartOne(bool& outputDoShowPasswordCh
   QueryExact findUser(
     DatabaseStrings::tableUsers,
     DatabaseStrings::labelUsername,
-    theGlobalVariables.userDefault.username
+    global.userDefault.username
   );
   if (!Database::get().UpdateOne(
     findUser, userInfo, &out
@@ -1942,16 +1942,16 @@ std::string WebWorker::GetChangePasswordPagePartOne(bool& outputDoShowPasswordCh
     out << "\n<b style =\"color:red\">Could not store your email (database is down?). </b>";
     return out.str();
   }
-  theGlobalVariables.userDefault.email = claimedEmail;
+  global.userDefault.email = claimedEmail;
   out << "\n<b style =\"color:green\">Email successfully updated. </b>";
   if (
-    theGlobalVariables.userDefault.actualActivationToken != "" &&
-    theGlobalVariables.userDefault.actualActivationToken != "activated" &&
-    theGlobalVariables.userDefault.actualHashedSaltedPassword != ""
+    global.userDefault.actualActivationToken != "" &&
+    global.userDefault.actualActivationToken != "activated" &&
+    global.userDefault.actualHashedSaltedPassword != ""
   ) {
     out << "<br>It appears your password is already set. "
     << "<br>If you'd like to change it using your old password, "
-    << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
+    << "<a href=\"" << global.DisplayNameExecutable
     << "?request=changePasswordPage\">click here</a>. ";
     outputDoShowPasswordChangeField = false;
     userInfo[DatabaseStrings::labelActivationToken] = "activated";
@@ -1973,7 +1973,7 @@ bool WebWorker::DoSetEmail(
   (void) commentsOnFailure;
   (void) commentsGeneralNonSensitive;
   (void) commentsGeneralSensitive;
-  if (!theGlobalVariables.flagDatabaseCompiled) {
+  if (!global.flagDatabaseCompiled) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "DoSetEmail: project compiled without database support. ";
     }
@@ -1997,7 +1997,7 @@ bool WebWorker::DoSetEmail(
   }
   theEmail.SendEmailWithMailGun(commentsOnFailure, commentsGeneralNonSensitive, commentsGeneralSensitive);
   if (commentsGeneralSensitive != nullptr) {
-    if (theGlobalVariables.UserDefaultHasAdminRights()) {
+    if (global.UserDefaultHasAdminRights()) {
       *commentsGeneralSensitive << "<hr>Content of sent email (admin view only):<br>"
       << HtmlRoutines::ConvertStringToHtmlString(theEmail.emailContent, true);
     }
@@ -2016,22 +2016,22 @@ JSData WebWorker::SetEmail(const std::string& input) {
   MacroRegisterFunctionWithName("WebWorker::SetEmail");
   (void) input;
   JSData result;
-  if (!theGlobalVariables.flagDatabaseCompiled) {
+  if (!global.flagDatabaseCompiled) {
     result[WebAPI::result::error] = "Database not available (cannot set email). ";
     return result;
   }
   std::stringstream out, debugStream;
-  //double startTime = theGlobalVariables.GetElapsedSeconds();
-  theGlobalVariables.userDefault.email = input;
+  //double startTime = global.GetElapsedSeconds();
+  global.userDefault.email = input;
   std::stringstream* adminOutputStream = nullptr;
-  if (theGlobalVariables.UserDefaultHasAdminRights()) {
+  if (global.UserDefaultHasAdminRights()) {
     adminOutputStream = &out;
   }
-  this->DoSetEmail(theGlobalVariables.userDefault, &out, &out, adminOutputStream);
-  if (theGlobalVariables.UserDefaultHasAdminRights()) {
+  this->DoSetEmail(global.userDefault, &out, &out, adminOutputStream);
+  if (global.UserDefaultHasAdminRights()) {
     out << "<hr><b>Admin view only. </b>" << debugStream.str();
   }
-  out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() << " second(s).";
+  out << "<br>Response time: " << global.GetElapsedSeconds() << " second(s).";
   result[WebAPI::result::comments] = out.str();
   return  result;
 }
@@ -2041,23 +2041,23 @@ int WebWorker::ProcessChangePassword(const std::string& reasonForNoAuthenticatio
   (void) reasonForNoAuthentication;
   this->SetHeaderOKNoContentLength("");
   JSData result;
-  if (!theGlobalVariables.flagDatabaseCompiled) {
+  if (!global.flagDatabaseCompiled) {
     result[WebAPI::result::error] = "Database not compiled";
     this->WriteToBodyJSON(result);
     return 0;
   }
-  UserCalculatorData& theUser = theGlobalVariables.userDefault;
+  UserCalculatorData& theUser = global.userDefault;
   theUser.enteredAuthenticationToken = "";
-  if (!theGlobalVariables.flagUsingSSLinCurrentConnection) {
+  if (!global.flagUsingSSLinCurrentConnection) {
     result[WebAPI::result::error] = "Please use secure connection.";
     return this->WriteToBodyJSON(result);
   }
-  if (!theGlobalVariables.flagLoggedIn) {
+  if (!global.flagLoggedIn) {
     result[WebAPI::result::error] = "Please enter (old) password. " + reasonForNoAuthentication;
     return this->WriteToBodyJSON(result);
   }
   std::string newPassword = HtmlRoutines::ConvertStringToURLString(
-    HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("newPassword"), true),
+    HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("newPassword"), true),
     false
   );
   //<-Passwords are ONE-LAYER url-encoded
@@ -2065,14 +2065,14 @@ int WebWorker::ProcessChangePassword(const std::string& reasonForNoAuthenticatio
   //<-Incoming pluses must be re-coded as spaces (%20).
 
   std::string reenteredPassword = HtmlRoutines::ConvertStringToURLString(
-    HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("reenteredPassword"), true),
+    HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("reenteredPassword"), true),
     false
   );
   //<-Passwords are ONE-LAYER url-encoded
   //<-INCOMING pluses in passwords MUST be decoded as spaces, this is how form.submit() works!
   //<-Incoming pluses must be re-coded as spaces (%20).
 
-  std::string newEmail = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("email"), false);
+  std::string newEmail = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("email"), false);
   if (newEmail != "") {
     JSData notUsed;
     QueryExact queryEmailTaken(DatabaseStrings::tableUsers, DatabaseStrings::labelEmail, newEmail);
@@ -2113,12 +2113,12 @@ int WebWorker::ProcessChangePassword(const std::string& reasonForNoAuthenticatio
   }
   std::stringstream out;
   out << "<b style = \"color:green\">Password change successful. </b>";
-  if (theGlobalVariables.GetWebInput("doReload") != "false") {
+  if (global.GetWebInput("doReload") != "false") {
     out
     << "<meta http-equiv=\"refresh\" content =\"0; url ='"
-    << theGlobalVariables.DisplayNameExecutable  << "?request=logout"
+    << global.DisplayNameExecutable  << "?request=logout"
     << "&username="
-    << HtmlRoutines::ConvertStringToURLString(theGlobalVariables.userDefault.username, false)
+    << HtmlRoutines::ConvertStringToURLString(global.userDefault.username, false)
     << "&activationToken = &authenticationToken = &"
     << "'\" />";
   }
@@ -2129,29 +2129,29 @@ int WebWorker::ProcessChangePassword(const std::string& reasonForNoAuthenticatio
 int WebWorker::ProcessCompute() {
   MacroRegisterFunctionWithName("WebWorker::ProcessCompute");
   this->SetHeaderOKNoContentLength("");
-  std::string monitoring = theGlobalVariables.GetWebInput(WebAPI::request::monitoring);
+  std::string monitoring = global.GetWebInput(WebAPI::request::monitoring);
   if (monitoring == "false") {
-    theGlobalVariables.theProgress.flagBanProcessMonitoring = true;
-    theGlobalVariables.theProgress.flagReportAlloweD = false;
+    global.theProgress.flagBanProcessMonitoring = true;
+    global.theProgress.flagReportAlloweD = false;
   }
 
   theParser->inputString = HtmlRoutines::ConvertURLStringToNormal(
-    theGlobalVariables.GetWebInput(WebAPI::request::calculatorInput),
+    global.GetWebInput(WebAPI::request::calculatorInput),
     false
   );
-  theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection = WebServer::OutputShowIndicatorOnTimeoutStatic;
-  theGlobalVariables.initOutputReportAndCrashFileNames(
+  global.WebServerReturnDisplayIndicatorCloseConnection = WebServer::OutputShowIndicatorOnTimeoutStatic;
+  global.initOutputReportAndCrashFileNames(
     HtmlRoutines::ConvertStringToURLString(theParser->inputString, false), theParser->inputString
   );
   ////////////////////////////////////////////////
   //  the initialization below moved to the start of the web server!
   //  theParser.init();
   ////////////////////////////////////////////////
-  theGlobalVariables.theProgress.flagReportAlloweD = true;
+  global.theProgress.flagReportAlloweD = true;
   theParser->Evaluate(theParser->inputString);
-  theGlobalVariables.theProgress.flagReportAlloweD = false;
-  if (theGlobalVariables.flagRunningBuiltInWebServer) {
-    if (theGlobalVariables.theProgress.flagTimedOut) {
+  global.theProgress.flagReportAlloweD = false;
+  if (global.flagRunningBuiltInWebServer) {
+    if (global.theProgress.flagTimedOut) {
       this->WriteAfterTimeoutResult();
       return 0;
     }
@@ -2159,7 +2159,7 @@ int WebWorker::ProcessCompute() {
   JSData result;
   result = theParser->ToJSONOutputAndSpecials();
   this->WriteToBodyJSON(result);
-  theGlobalVariables.flagComputationCompletE = true;
+  global.flagComputationCompletE = true;
   return 0;
 }
 
@@ -2326,16 +2326,16 @@ int WebWorker::ProcessSlidesOrHomeworkFromSource() {
   MacroRegisterFunctionWithName("WebWorker::ProcessSlidesOrHomeworkFromSource");
   this->SetHeaderOKNoContentLength("");
   LaTeXcrawler theCrawler;
-  for (int i = 0; i < theGlobalVariables.webArguments.size(); i ++) {
-    std::string theKey = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.webArguments.theKeys[i], false);
+  for (int i = 0; i < global.webArguments.size(); i ++) {
+    std::string theKey = HtmlRoutines::ConvertURLStringToNormal(global.webArguments.theKeys[i], false);
     if (theKey != WebAPI::problem::fileName && StringRoutines::StringBeginsWith(theKey, "file")) {
       theCrawler.slideFileNamesVirtualWithPatH.AddOnTop(StringRoutines::StringTrimWhiteSpace(
-        HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.webArguments.theValues[i], false)
+        HtmlRoutines::ConvertURLStringToNormal(global.webArguments.theValues[i], false)
       ));
     }
     if (StringRoutines::StringBeginsWith(theKey, "isSolutionFile")) {
       theCrawler.slideFilesExtraFlags.AddOnTop(StringRoutines::StringTrimWhiteSpace(
-        HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.webArguments.theValues[i], false)
+        HtmlRoutines::ConvertURLStringToNormal(global.webArguments.theValues[i], false)
       ));
     }
   }
@@ -2347,17 +2347,17 @@ int WebWorker::ProcessSlidesOrHomeworkFromSource() {
     }
   }
   theCrawler.desiredPresentationTitle =
-  HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("title"), false);
+  HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("title"), false);
   std::stringstream comments;
-  if (theGlobalVariables.GetWebInput("layout") == "printable") {
+  if (global.GetWebInput("layout") == "printable") {
     theCrawler.flagProjectorMode = false;
   }
-  if (theGlobalVariables.GetWebInput("answerKey") == "true") {
+  if (global.GetWebInput("answerKey") == "true") {
     theCrawler.flagAnswerKey = true;
   }
   if (
-    theGlobalVariables.userCalculatorRequestType == "homeworkFromSource" ||
-    theGlobalVariables.userCalculatorRequestType == "homeworkSource"
+    global.userCalculatorRequestType == "homeworkFromSource" ||
+    global.userCalculatorRequestType == "homeworkSource"
   ) {
     theCrawler.flagHomeworkRatherThanSlides = true;
   }
@@ -2377,28 +2377,28 @@ int WebWorker::ProcessSlidesSource() {
   MacroRegisterFunctionWithName("WebWorker::ProcessSlidesSource");
   this->SetHeaderOKNoContentLength("");
   LaTeXcrawler theCrawler;
-  for (int i = 0; i < theGlobalVariables.webArguments.size(); i ++) {
-    std::string theKey = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.webArguments.theKeys[i], false);
+  for (int i = 0; i < global.webArguments.size(); i ++) {
+    std::string theKey = HtmlRoutines::ConvertURLStringToNormal(global.webArguments.theKeys[i], false);
     if (
       theKey != WebAPI::problem::fileName && StringRoutines::StringBeginsWith(theKey, "file")
     ) {
       theCrawler.slideFileNamesVirtualWithPatH.AddOnTop(StringRoutines::StringTrimWhiteSpace(
-        HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.webArguments.theValues[i], false)
+        HtmlRoutines::ConvertURLStringToNormal(global.webArguments.theValues[i], false)
       ));
     }
   }
-  if (theGlobalVariables.userCalculatorRequestType == "homeworkSource") {
+  if (global.userCalculatorRequestType == "homeworkSource") {
     theCrawler.flagHomeworkRatherThanSlides = true;
   } else {
     theCrawler.flagHomeworkRatherThanSlides = false;
   }
   theCrawler.desiredPresentationTitle =
-  HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("title"), false);
+  HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("title"), false);
   std::stringstream comments;
-  if (theGlobalVariables.GetWebInput("layout") == "printable") {
+  if (global.GetWebInput("layout") == "printable") {
     theCrawler.flagProjectorMode = false;
   }
-  if (theGlobalVariables.GetWebInput("answerKey") == "false") {
+  if (global.GetWebInput("answerKey") == "false") {
     theCrawler.flagAnswerKey = false;
   } else {
     theCrawler.flagAnswerKey = true;
@@ -2452,20 +2452,20 @@ std::string WebWorker::GetAddUserEmails() {
 
 std::string WebAPIResponse::ModifyProblemReport() {
   MacroRegisterFunctionWithName("WebWorker::ModifyProblemReport");
-  bool shouldProceed = theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights();
+  bool shouldProceed = global.flagLoggedIn && global.UserDefaultHasAdminRights();
   if (shouldProceed) {
-    shouldProceed = theGlobalVariables.flagUsingSSLinCurrentConnection;
+    shouldProceed = global.flagUsingSSLinCurrentConnection;
   }
   if (!shouldProceed) {
     return "<b>Modifying problems allowed only for logged-in admins under ssl connection. </b>";
   }
-  std::string mainInput = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput(WebAPI::problem::fileContent), false);
-  std::string fileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput(WebAPI::problem::fileName), false);
+  std::string mainInput = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput(WebAPI::problem::fileContent), false);
+  std::string fileName = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput(WebAPI::problem::fileName), false);
   std::stringstream commentsOnFailure;
   bool fileExists = FileOperations::FileExistsVirtualCustomizedReadOnly(fileName, &commentsOnFailure);
   std::fstream theFile;
-  if (theGlobalVariables.flagDisableDatabaseLogEveryoneAsAdmin) {
-    theGlobalVariables.userDefault.instructorComputed = "default";
+  if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
+    global.userDefault.instructorComputed = "default";
   }
   if (!FileOperations::OpenFileVirtualCustomizedWriteOnly(theFile, fileName, false, true, false, &commentsOnFailure)) {
     commentsOnFailure << "<b style =\"color:red\">Failed to open/create file: " << fileName << ". </b>";
@@ -2513,20 +2513,20 @@ std::string WebAPIResponse::GetCaptchaDiv() {
 bool WebWorker::CorrectRequestsBEFORELoginReturnFalseIfModified() {
   MacroRegisterFunctionWithName("WebWorker::CorrectRequestsBEFORELoginReturnFalseIfModified");
   bool stateNotModified = true;
-  if (!theGlobalVariables.flagSSLIsAvailable) {
+  if (!global.flagSSLIsAvailable) {
     if (
-      this->addressComputed == theGlobalVariables.DisplayNameExecutable &&
-      theGlobalVariables.userCalculatorRequestType == ""
+      this->addressComputed == global.DisplayNameExecutable &&
+      global.userCalculatorRequestType == ""
     ) {
-      this->addressComputed = theGlobalVariables.DisplayNameExecutable;
-      theGlobalVariables.userCalculatorRequestType = "calculator";
+      this->addressComputed = global.DisplayNameExecutable;
+      global.userCalculatorRequestType = "calculator";
       stateNotModified = false;
     }
   }
   if (this->addressComputed == "/" || this->addressComputed == "") {
-    this->addressComputed = theGlobalVariables.DisplayNameExecutableApp; //was: theGlobalVariables.DisplayNameExecutable;
-    theGlobalVariables.userCalculatorRequestType = WebAPI::app;
-    //theGlobalVariables.userCalculatorRequestType = "selectCourse";
+    this->addressComputed = global.DisplayNameExecutableApp; //was: global.DisplayNameExecutable;
+    global.userCalculatorRequestType = WebAPI::app;
+    //global.userCalculatorRequestType = "selectCourse";
     stateNotModified = false;
   }
   return stateNotModified;
@@ -2534,33 +2534,33 @@ bool WebWorker::CorrectRequestsBEFORELoginReturnFalseIfModified() {
 
 bool WebWorker::RedirectIfNeeded(std::stringstream& argumentProcessingFailureComments) {
   MacroRegisterFunctionWithName("WebWorker::RedirectIfNeeded");
-  UserCalculatorData& theUser = theGlobalVariables.userDefault;
+  UserCalculatorData& theUser = global.userDefault;
   if (!theUser.flagEnteredPassword) {
     return false;
   }
   if (
-    theGlobalVariables.userCalculatorRequestType == WebAPI::request::changePassword ||
-    theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccountJSON
+    global.userCalculatorRequestType == WebAPI::request::changePassword ||
+    global.userCalculatorRequestType == WebAPI::request::activateAccountJSON
   ) {
     return false;
   }
   std::stringstream redirectedAddress;
-  if (this->addressComputed == theGlobalVariables.DisplayNameExecutable) {
-    redirectedAddress << theGlobalVariables.DisplayNameExecutable << "?request="
-    << theGlobalVariables.userCalculatorRequestType << "&";
+  if (this->addressComputed == global.DisplayNameExecutable) {
+    redirectedAddress << global.DisplayNameExecutable << "?request="
+    << global.userCalculatorRequestType << "&";
   } else {
     redirectedAddress << this->addressComputed << "?";
   }
-  for (int i = 0; i < theGlobalVariables.webArguments.size(); i ++) {
+  for (int i = 0; i < global.webArguments.size(); i ++) {
     if (
-      theGlobalVariables.webArguments.theKeys[i] != "password" &&
-      theGlobalVariables.webArguments.theKeys[i] != "request" &&
-      theGlobalVariables.webArguments.theKeys[i] != "googleToken" &&
-      theGlobalVariables.webArguments.theKeys[i] != "G_AUTHUSER_H" &&
-      theGlobalVariables.webArguments.theKeys[i] != "activationToken"
+      global.webArguments.theKeys[i] != "password" &&
+      global.webArguments.theKeys[i] != "request" &&
+      global.webArguments.theKeys[i] != "googleToken" &&
+      global.webArguments.theKeys[i] != "G_AUTHUSER_H" &&
+      global.webArguments.theKeys[i] != "activationToken"
     ) {
-      redirectedAddress << theGlobalVariables.webArguments.theKeys[i] << "="
-      << theGlobalVariables.webArguments.theValues[i] << "&";
+      redirectedAddress << global.webArguments.theKeys[i] << "="
+      << global.webArguments.theValues[i] << "&";
     }
   }
   if (argumentProcessingFailureComments.str() != "") {
@@ -2590,32 +2590,32 @@ bool WebWorker::CorrectRequestsAFTERLoginReturnFalseIfModified() {
   if (this->addressComputed == "/" || this->addressComputed == "") {
     shouldFallBackToDefaultPage = true;
   }
-  if (!theGlobalVariables.flagSSLIsAvailable) {
+  if (!global.flagSSLIsAvailable) {
     if (
-      this->addressComputed == theGlobalVariables.DisplayNameExecutable &&
-      theGlobalVariables.userCalculatorRequestType == ""
+      this->addressComputed == global.DisplayNameExecutable &&
+      global.userCalculatorRequestType == ""
     ) {
-      this->addressComputed = theGlobalVariables.DisplayNameExecutable;
-      theGlobalVariables.userCalculatorRequestType = WebAPI::app;
+      this->addressComputed = global.DisplayNameExecutable;
+      global.userCalculatorRequestType = WebAPI::app;
       stateNotModified = false;
     }
   }
-  if (theGlobalVariables.flagLoggedIn) {
+  if (global.flagLoggedIn) {
     if (
-      this->addressComputed == theGlobalVariables.DisplayNameExecutable &&
-      theGlobalVariables.userCalculatorRequestType == ""
+      this->addressComputed == global.DisplayNameExecutable &&
+      global.userCalculatorRequestType == ""
     ) {
       shouldFallBackToDefaultPage = true;
     } else if (
-      theGlobalVariables.userCalculatorRequestType == "template" &&
-      theGlobalVariables.GetWebInput("courseHome") == ""
+      global.userCalculatorRequestType == "template" &&
+      global.GetWebInput("courseHome") == ""
     ) {
       shouldFallBackToDefaultPage = true;
     }
   }
   if (shouldFallBackToDefaultPage) {
-    this->addressComputed = theGlobalVariables.DisplayNameExecutableApp;
-    theGlobalVariables.userCalculatorRequestType = WebAPI::app;
+    this->addressComputed = global.DisplayNameExecutableApp;
+    global.userCalculatorRequestType = WebAPI::app;
     stateNotModified = false;
   }
   return stateNotModified;
@@ -2623,7 +2623,7 @@ bool WebWorker::CorrectRequestsAFTERLoginReturnFalseIfModified() {
 
 bool WebWorker::ProcessRedirectAwayFromWWW() {
   std::string addressNoWWW;
-  if (!StringRoutines::StringBeginsWith(theGlobalVariables.hostWithPort, "www.", &addressNoWWW)) {
+  if (!StringRoutines::StringBeginsWith(global.hostWithPort, "www.", &addressNoWWW)) {
     return false;
   }
   std::stringstream newAddressStream, redirectHeaderStream;
@@ -2677,18 +2677,18 @@ int WebWorker::ProcessLoginNeededOverUnsecureConnection() {
 }
 
 bool WebWorker::RequireSSL() {
-  return theGlobalVariables.flagSSLIsAvailable;
+  return global.flagSSLIsAvailable;
 }
 
 int WebWorker::ServeClient() {
   MacroRegisterFunctionWithName("WebWorker::ServeClient");
-  theGlobalVariables.millisecondsComputationStart = theGlobalVariables.GetElapsedMilliseconds();
-  theGlobalVariables.flagComputationStarted = true;
-  theGlobalVariables.flagComputationCompletE = false;
-  theGlobalVariables.userDefault.flagMustLogin = true;
-  theGlobalVariables.userDefault.flagStopIfNoLogin = true;
-  UserCalculatorData& theUser = theGlobalVariables.userDefault;
-  theGlobalVariables.IndicatorStringOutputFunction = WebWorker::WriteAfterTimeoutProgressStatic;
+  global.millisecondsComputationStart = global.GetElapsedMilliseconds();
+  global.flagComputationStarted = true;
+  global.flagComputationCompletE = false;
+  global.userDefault.flagMustLogin = true;
+  global.userDefault.flagStopIfNoLogin = true;
+  UserCalculatorData& theUser = global.userDefault;
+  global.IndicatorStringOutputFunction = WebWorker::WriteAfterTimeoutProgressStatic;
   if (
     this->requestTypE != this->requestGet &&
     this->requestTypE != this->requestPost &&
@@ -2703,7 +2703,7 @@ int WebWorker::ServeClient() {
     this->ProcessUnknown();
     return 0;
   }
-  if (theGlobalVariables.theThreads.size <= 1) {
+  if (global.theThreads.size <= 1) {
     crash << "Number of threads must be at least 2 in this point of code..." << crash;
   }
   this->ExtractHostInfo();
@@ -2716,9 +2716,9 @@ int WebWorker::ServeClient() {
   if (!this->ExtractArgumentsFromCookies(argumentProcessingFailureComments)) {
     this->flagArgumentsAreOK = false;
   }
-  theGlobalVariables.userCalculatorRequestType = "";
-  if (this->addressComputed == theGlobalVariables.DisplayNameExecutable) {
-    theGlobalVariables.userCalculatorRequestType = theGlobalVariables.GetWebInput("request");
+  global.userCalculatorRequestType = "";
+  if (this->addressComputed == global.DisplayNameExecutable) {
+    global.userCalculatorRequestType = global.GetWebInput("request");
   }
   std::stringstream comments;
   comments << "Address, request computed: ";
@@ -2728,8 +2728,8 @@ int WebWorker::ServeClient() {
     comments << "[empty]";
   }
   comments << ", ";
-  if (theGlobalVariables.userCalculatorRequestType != "") {
-    comments << HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.userCalculatorRequestType, false);
+  if (global.userCalculatorRequestType != "") {
+    comments << HtmlRoutines::ConvertStringToHtmlString(global.userCalculatorRequestType, false);
   } else {
     comments << "[empty]";
   }
@@ -2739,19 +2739,19 @@ int WebWorker::ServeClient() {
     comments << this->ToStringAddressRequest() << ": modified before login. ";
   }
   if (theWebServer.addressStartsInterpretedAsCalculatorRequest.Contains(this->addressComputed)) {
-    theGlobalVariables.userCalculatorRequestType = this->addressComputed;
+    global.userCalculatorRequestType = this->addressComputed;
     std::string correctedRequest;
-    if (StringRoutines::StringBeginsWith(theGlobalVariables.userCalculatorRequestType, "/", &correctedRequest)) {
-      theGlobalVariables.userCalculatorRequestType = correctedRequest;
+    if (StringRoutines::StringBeginsWith(global.userCalculatorRequestType, "/", &correctedRequest)) {
+      global.userCalculatorRequestType = correctedRequest;
       comments << "Address was interpretted as request, so your request was set to: "
-      << theGlobalVariables.userCalculatorRequestType << ". ";
+      << global.userCalculatorRequestType << ". ";
     }
   }
-  theUser.flagMustLogin = this->parent->RequiresLogin(theGlobalVariables.userCalculatorRequestType, this->addressComputed);
+  theUser.flagMustLogin = this->parent->RequiresLogin(global.userCalculatorRequestType, this->addressComputed);
   if (!theUser.flagMustLogin) {
     comments << "Login not needed. ";
   }
-  if (this->RequireSSL() && !theGlobalVariables.flagUsingSSLinCurrentConnection) {
+  if (this->RequireSSL() && !global.flagUsingSSLinCurrentConnection) {
     return this->ProcessLoginNeededOverUnsecureConnection();
   }
   if (this->ProcessRedirectAwayFromWWW()) {
@@ -2766,195 +2766,195 @@ int WebWorker::ServeClient() {
     return 0;
   }
   theUser.flagStopIfNoLogin = (
-    !theGlobalVariables.flagLoggedIn &&
-    theGlobalVariables.flagUsingSSLinCurrentConnection &&
+    !global.flagLoggedIn &&
+    global.flagUsingSSLinCurrentConnection &&
     theUser.flagMustLogin
   );
   if (theUser.flagStopIfNoLogin) {
-    if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::changePassword) {
+    if (global.userCalculatorRequestType == WebAPI::request::changePassword) {
       theUser.flagStopIfNoLogin = false;
     }
   }
   if (theUser.flagStopIfNoLogin) {
     if (
-      theGlobalVariables.userCalculatorRequestType != WebAPI::request::logout &&
-      theGlobalVariables.userCalculatorRequestType != WebAPI::request::login
+      global.userCalculatorRequestType != WebAPI::request::logout &&
+      global.userCalculatorRequestType != WebAPI::request::login
     ) {
       argumentProcessingFailureComments << this->ToStringAddressRequest() << " requires login. ";
     }
     argumentProcessingFailureComments << comments.str();
-    theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue("authenticationToken", "");
+    global.CookiesToSetUsingHeaders.SetKeyValue("authenticationToken", "");
     if (argumentProcessingFailureComments.str() != "") {
-      theGlobalVariables.SetWebInpuT("authenticationToken", "");
+      global.SetWebInpuT("authenticationToken", "");
     }
     return this->ProcessLoginUserInfo(argumentProcessingFailureComments.str());
   }
   if (
     argumentProcessingFailureComments.str() != "" && (
       theUser.flagMustLogin ||
-      theGlobalVariables.userCalculatorRequestType == WebAPI::request::userInfoJSON
+      global.userCalculatorRequestType == WebAPI::request::userInfoJSON
     )
   ) {
-    theGlobalVariables.SetWebInpuT("error", argumentProcessingFailureComments.str());
+    global.SetWebInpuT("error", argumentProcessingFailureComments.str());
   }
-  if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.flagLoggedIn) {
-    if (theGlobalVariables.GetWebInput("spoofHostName") != "") {
-      theGlobalVariables.hostNoPort = HtmlRoutines::ConvertURLStringToNormal(
-        theGlobalVariables.GetWebInput("spoofHostName"), false
+  if (global.UserDefaultHasAdminRights() && global.flagLoggedIn) {
+    if (global.GetWebInput("spoofHostName") != "") {
+      global.hostNoPort = HtmlRoutines::ConvertURLStringToNormal(
+        global.GetWebInput("spoofHostName"), false
       );
-      theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue("spoofHostName", theGlobalVariables.hostNoPort);
+      global.CookiesToSetUsingHeaders.SetKeyValue("spoofHostName", global.hostNoPort);
     }
   }
   if (
-    theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
-    theGlobalVariables.userCalculatorRequestType == WebAPI::databaseParameters::entryPoint
+    global.flagLoggedIn && global.UserDefaultHasAdminRights() &&
+    global.userCalculatorRequestType == WebAPI::databaseParameters::entryPoint
   ) {
     return this->ProcessDatabaseJSON();
   } else if (
-    theGlobalVariables.flagLoggedIn &&
-    theGlobalVariables.userCalculatorRequestType == "databaseDeleteOneEntry"
+    global.flagLoggedIn &&
+    global.userCalculatorRequestType == "databaseDeleteOneEntry"
   ) {
     return this->ProcessDatabaseDeleteEntry();
   } else if (
-    theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
-    theGlobalVariables.userCalculatorRequestType == "databaseModifyEntry"
+    global.flagLoggedIn && global.UserDefaultHasAdminRights() &&
+    global.userCalculatorRequestType == "databaseModifyEntry"
   ) {
     return this->ProcessDatabaseModifyEntry();
-  } else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.userCalculatorRequestType == "accountsJSON") {
+  } else if (global.flagLoggedIn && global.userCalculatorRequestType == "accountsJSON") {
     return this->ProcessAccountsJSON();
-  } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::examplesJSON) {
+  } else if (global.userCalculatorRequestType == WebAPI::request::examplesJSON) {
     return this->ProcessCalculatorExamplesJSON();
-  } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::serverStatusJSON) {
+  } else if (global.userCalculatorRequestType == WebAPI::request::serverStatusJSON) {
     return this->ProcessServerStatusJSON();
   }
   if (
-    theGlobalVariables.userCalculatorRequestType == WebAPI::request::pause &&
-    (!theGlobalVariables.theProgress.flagBanProcessMonitoring)
+    global.userCalculatorRequestType == WebAPI::request::pause &&
+    (!global.theProgress.flagBanProcessMonitoring)
   ) {
     return this->ProcessPauseWorker();
   } else if (
-    theGlobalVariables.userCalculatorRequestType == WebAPI::request::unpause &&
-    (!theGlobalVariables.theProgress.flagBanProcessMonitoring)
+    global.userCalculatorRequestType == WebAPI::request::unpause &&
+    (!global.theProgress.flagBanProcessMonitoring)
   ) {
     return this->ProcessUnpauseWorker();
   } else if (
-    theGlobalVariables.userCalculatorRequestType == WebAPI::request::indicator &&
-    (!theGlobalVariables.theProgress.flagBanProcessMonitoring)
+    global.userCalculatorRequestType == WebAPI::request::indicator &&
+    (!global.theProgress.flagBanProcessMonitoring)
   ) {
     return this->ProcessComputationIndicator();
-  } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::setProblemData) {
+  } else if (global.userCalculatorRequestType == WebAPI::request::setProblemData) {
     return this->ProcessSetProblemDatabaseInfo();
-  } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::changePassword) {
+  } else if (global.userCalculatorRequestType == WebAPI::request::changePassword) {
     return this->ProcessChangePassword(argumentProcessingFailureComments.str());
-  } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccountJSON) {
+  } else if (global.userCalculatorRequestType == WebAPI::request::activateAccountJSON) {
     return this->ProcessActivateAccount();
-  } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::signUp) {
+  } else if (global.userCalculatorRequestType == WebAPI::request::signUp) {
     return this->ProcessSignUP();
-  } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::forgotLogin) {
+  } else if (global.userCalculatorRequestType == WebAPI::request::forgotLogin) {
     return this->ProcessForgotLogin();
-  } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::login) {
+  } else if (global.userCalculatorRequestType == WebAPI::request::login) {
     return this->ProcessLoginUserInfo(comments.str());
-  } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::logout) {
+  } else if (global.userCalculatorRequestType == WebAPI::request::logout) {
     return this->ProcessLogout();
   } else if ((
-      theGlobalVariables.userCalculatorRequestType == "addEmails"||
-      theGlobalVariables.userCalculatorRequestType == "addUsers"
+      global.userCalculatorRequestType == "addEmails"||
+      global.userCalculatorRequestType == "addUsers"
     ) &&
-    theGlobalVariables.flagLoggedIn
+    global.flagLoggedIn
   ) {
     return this->ProcessAddUserEmails();
   } else if (
-    theGlobalVariables.userCalculatorRequestType == "setTeacher" &&
-    theGlobalVariables.flagLoggedIn
+    global.userCalculatorRequestType == "setTeacher" &&
+    global.flagLoggedIn
   ) {
     return this->ProcessAssignTeacherToSection();
   } else if ((
-      theGlobalVariables.userCalculatorRequestType == WebAPI::request::submitAnswers ||
-      theGlobalVariables.userCalculatorRequestType == WebAPI::request::submitExercise
+      global.userCalculatorRequestType == WebAPI::request::submitAnswers ||
+      global.userCalculatorRequestType == WebAPI::request::submitExercise
     ) &&
-    theGlobalVariables.flagLoggedIn
+    global.flagLoggedIn
   ) {
     return this->ProcessSubmitAnswers();
-  } else if (theGlobalVariables.userCalculatorRequestType == "scores" && theGlobalVariables.flagLoggedIn) {
+  } else if (global.userCalculatorRequestType == "scores" && global.flagLoggedIn) {
     return this->ProcessScores();
-  } else if (theGlobalVariables.userCalculatorRequestType == "scoresInCoursePage" && theGlobalVariables.flagLoggedIn) {
+  } else if (global.userCalculatorRequestType == "scoresInCoursePage" && global.flagLoggedIn) {
     return this->ProcessScoresInCoursePage();
-  } else if (theGlobalVariables.UserGuestMode() && theGlobalVariables.userCalculatorRequestType == "submitExerciseNoLogin") {
+  } else if (global.UserGuestMode() && global.userCalculatorRequestType == "submitExerciseNoLogin") {
     return this->ProcessSubmitAnswers();
   } else if ((
-      theGlobalVariables.userCalculatorRequestType == WebAPI::request::problemGiveUp &&
-      theGlobalVariables.flagLoggedIn
+      global.userCalculatorRequestType == WebAPI::request::problemGiveUp &&
+      global.flagLoggedIn
     ) ||
-    theGlobalVariables.userCalculatorRequestType == WebAPI::request::problemGiveUpNoLogin
+    global.userCalculatorRequestType == WebAPI::request::problemGiveUpNoLogin
   ) {
     return this->ProcessProblemGiveUp();
   } else if ((
-      theGlobalVariables.userCalculatorRequestType == "problemSolution" &&
-      theGlobalVariables.flagLoggedIn
+      global.userCalculatorRequestType == "problemSolution" &&
+      global.flagLoggedIn
     ) ||
-    theGlobalVariables.userCalculatorRequestType == "problemSolutionNoLogin"
+    global.userCalculatorRequestType == "problemSolutionNoLogin"
   ) {
     return this->ProcessProblemSolution();
   } else if ((
-      theGlobalVariables.userCalculatorRequestType == "submitAnswersPreview" ||
-      theGlobalVariables.userCalculatorRequestType == "submitExercisePreview"
+      global.userCalculatorRequestType == "submitAnswersPreview" ||
+      global.userCalculatorRequestType == "submitExercisePreview"
     ) &&
-    theGlobalVariables.flagLoggedIn
+    global.flagLoggedIn
   ) {
     return this->ProcessSubmitAnswersPreview();
   } else if (
-    theGlobalVariables.userCalculatorRequestType == WebAPI::request::submitExercisePreviewNoLogin &&
-    theGlobalVariables.UserGuestMode()
+    global.userCalculatorRequestType == WebAPI::request::submitExercisePreviewNoLogin &&
+    global.UserGuestMode()
   ) {
     return this->ProcessSubmitAnswersPreview();
   } else if (
-    theGlobalVariables.userCalculatorRequestType == "scoredQuiz" ||
-    theGlobalVariables.userCalculatorRequestType == "exercise" ||
-    theGlobalVariables.userCalculatorRequestType == "exerciseNoLogin" ||
-    theGlobalVariables.userCalculatorRequestType == "exerciseJSON" ||
-    theGlobalVariables.userCalculatorRequestType == "scoredQuizJSON"
+    global.userCalculatorRequestType == "scoredQuiz" ||
+    global.userCalculatorRequestType == "exercise" ||
+    global.userCalculatorRequestType == "exerciseNoLogin" ||
+    global.userCalculatorRequestType == "exerciseJSON" ||
+    global.userCalculatorRequestType == "scoredQuizJSON"
   ) {
     return this->ProcessExamPageJSON();
   } else if (
-    theGlobalVariables.userCalculatorRequestType == "templateJSON" ||
-    theGlobalVariables.userCalculatorRequestType == WebAPI::request::templateJSONNoLogin
+    global.userCalculatorRequestType == "templateJSON" ||
+    global.userCalculatorRequestType == WebAPI::request::templateJSONNoLogin
   ) {
     return this->ProcessTemplateJSON();
-  } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::userInfoJSON) {
+  } else if (global.userCalculatorRequestType == WebAPI::request::userInfoJSON) {
     comments << argumentProcessingFailureComments.str();
     return this->ProcessLoginUserInfo(comments.str());
-  } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::editPage) {
+  } else if (global.userCalculatorRequestType == WebAPI::request::editPage) {
     return this->ProcessEditPageJSON();
-  } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::modifyPage) {
+  } else if (global.userCalculatorRequestType == WebAPI::request::modifyPage) {
     return this->ProcessModifyPage();
   } else if (
-    theGlobalVariables.userCalculatorRequestType == "slidesFromSource" ||
-    theGlobalVariables.userCalculatorRequestType == "homeworkFromSource"
+    global.userCalculatorRequestType == "slidesFromSource" ||
+    global.userCalculatorRequestType == "homeworkFromSource"
   ) {
     return this->ProcessSlidesOrHomeworkFromSource();
   } else if (
-    theGlobalVariables.userCalculatorRequestType == "slidesSource" ||
-    theGlobalVariables.userCalculatorRequestType == "homeworkSource"
+    global.userCalculatorRequestType == "slidesSource" ||
+    global.userCalculatorRequestType == "homeworkSource"
   ) {
     return this->ProcessSlidesSource();
-  } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::clonePage) {
+  } else if (global.userCalculatorRequestType == WebAPI::request::clonePage) {
     return this->ProcessClonePage();
-  } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::compute) {
+  } else if (global.userCalculatorRequestType == WebAPI::request::compute) {
     return this->ProcessCompute();
-  } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::request::selectCourseJSON) {
+  } else if (global.userCalculatorRequestType == WebAPI::request::selectCourseJSON) {
     return this->ProcessSelectCourseJSON();
   } else if (
-    theGlobalVariables.userCalculatorRequestType == "topicListJSON" ||
-    theGlobalVariables.userCalculatorRequestType == WebAPI::request::topicListJSONNoLogin
+    global.userCalculatorRequestType == "topicListJSON" ||
+    global.userCalculatorRequestType == WebAPI::request::topicListJSONNoLogin
   ) {
     return this->ProcessTopicListJSON();
-  } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::app) {
+  } else if (global.userCalculatorRequestType == WebAPI::app) {
     return this->ProcessApp(true);
-  } else if (theGlobalVariables.userCalculatorRequestType == WebAPI::appNoCache) {
+  } else if (global.userCalculatorRequestType == WebAPI::appNoCache) {
     return this->ProcessApp(false);
-  } else if ("/" + theGlobalVariables.userCalculatorRequestType == WebAPI::request::onePageJS) {
+  } else if ("/" + global.userCalculatorRequestType == WebAPI::request::onePageJS) {
     return this->ProcessCalculatorOnePageJS(false);
-  } else if ("/" + theGlobalVariables.userCalculatorRequestType == WebAPI::request::onePageJSWithHash) {
+  } else if ("/" + global.userCalculatorRequestType == WebAPI::request::onePageJSWithHash) {
     return this->ProcessCalculatorOnePageJS(true);
   }
   return this->ProcessFolderOrFile();
@@ -2969,7 +2969,7 @@ int WebWorker::ProcessFolderOrFile() {
     !FileOperations::GetPhysicalFileNameFromVirtual(
       this->VirtualFileName,
       this->RelativePhysicalFileNamE,
-      theGlobalVariables.UserDefaultHasAdminRights(),
+      global.UserDefaultHasAdminRights(),
       false,
       &commentsOnFailure
   )) {
@@ -3020,13 +3020,13 @@ void WebWorker::Release() {
 void WebWorker::GetIndicatorOnTimeout(JSData& output, const std::string& message) {
   MacroRegisterFunctionWithName("WebWorker::OutputShowIndicatorOnTimeout");
   MutexLockGuard theLock(this->PauseWorker.lockThreads.GetElement());
-  theGlobalVariables.theProgress.flagTimedOut = true;
+  global.theProgress.flagTimedOut = true;
   logWorker << logger::blue << "Computation timeout, sending progress indicator instead of output. " << logger::endL;
   std::stringstream timeOutComments;
   output[WebAPI::result::timeOut] = true;
 
   timeOutComments << message;
-  if (theGlobalVariables.theProgress.flagBanProcessMonitoring) {
+  if (global.theProgress.flagBanProcessMonitoring) {
     timeOutComments << "Monitoring computations is not allowed on this server.<br> "
     << "Please note that monitoring computations is the default behavior, so the "
     << "owners of the server must have explicitly banned monitoring. ";
@@ -3040,14 +3040,14 @@ void WebWorker::GetIndicatorOnTimeout(JSData& output, const std::string& message
 void WebWorker::OutputShowIndicatorOnTimeout(const std::string& message) {
   MacroRegisterFunctionWithName("WebWorker::OutputShowIndicatorOnTimeout");
   logWorker << "Long computation, about to display indicator. " << logger::endL;
-  theGlobalVariables.theProgress.flagTimedOut = true;
+  global.theProgress.flagTimedOut = true;
   JSData result;
   this->GetIndicatorOnTimeout(result, message);
   if (this->indexInParent < 0) {
     crash << "Index of worker is smaller than 0, this shouldn't happen. " << crash;
   }
   this->WriteToBodyJSON(result);
-  this->WriteAfterTimeoutProgress(theGlobalVariables.ToStringProgressReportNoThreadData(true), true);
+  this->WriteAfterTimeoutProgress(global.ToStringProgressReportNoThreadData(true), true);
   this->SendAllBytesWithHeaders();
   for (int i = 0; i < this->parent->theWorkers.size; i ++) {
     if (i != this->indexInParent) {
@@ -3069,10 +3069,10 @@ std::string WebWorker::ToStringAddressRequest() const {
   }
   out << "; ";
   out << " request = ";
-  if (theGlobalVariables.userCalculatorRequestType == "") {
+  if (global.userCalculatorRequestType == "") {
     out << "[empty]";
   } else {
-    out << theGlobalVariables.userCalculatorRequestType;
+    out << global.userCalculatorRequestType;
   }
   return out.str();
 }
@@ -3136,22 +3136,22 @@ bool WebServer::CheckConsistency() {
 
 void WebServer::ReleaseEverything() {
   this->theTLS.Free();
-  logger& currentLog = theGlobalVariables.flagIsChildProcess ? logWorker : logServer;
+  logger& currentLog = global.flagIsChildProcess ? logWorker : logServer;
   ProgressReportWebServer::flagServerExists = false;
   for (int i = 0; i < this->theWorkers.size; i ++) {
     this->theWorkers[i].Release();
   }
-  theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection = nullptr;
-  theGlobalVariables.IndicatorStringOutputFunction = nullptr;
+  global.WebServerReturnDisplayIndicatorCloseConnection = nullptr;
+  global.IndicatorStringOutputFunction = nullptr;
   this->activeWorker = - 1;
-  if (theGlobalVariables.flagServerDetailedLog) {
+  if (global.flagServerDetailedLog) {
     currentLog << logger::red << "Detail: "
     << "About to close socket: " << this->listeningSocketHTTP << ". " << logger::endL;
   }
   for (int i = 0; i < this->theListeningSockets.size; i ++) {
     int socket = this->theListeningSockets[i];
     close(socket);
-    if (theGlobalVariables.flagServerDetailedLog) {
+    if (global.flagServerDetailedLog) {
       currentLog << logger::red << "Detail: "
       << "Closed socket: " << socket << ". " << logger::endL;
     }
@@ -3201,10 +3201,10 @@ WebServer::WebServer() {
 
 void WebServer::Signal_SIGCHLD_handler(int s) {
   (void) s; //avoid unused parameter warning, portable.
-  if (theGlobalVariables.flagIsChildProcess) {
+  if (global.flagIsChildProcess) {
     return;
   }
-  if (theGlobalVariables.flagServerDetailedLog) {
+  if (global.flagServerDetailedLog) {
     logProcessStats << "Detail: webServer received SIGCHLD signal. " << logger::endL;
   }
   theWebServer.flagReapingChildren = true;
@@ -3261,7 +3261,7 @@ void WebServer::ReleaseActiveWorker() {
 
 void WebServer::WorkerTimerPing(int64_t pingTime) {
   if (theWebServer.activeWorker == - 1) {
-    if (!theGlobalVariables.flagComputationFinishedAllOutputSentClosing) {
+    if (!global.flagComputationFinishedAllOutputSentClosing) {
       crash << "WebServer::WorkerTimerPing called when the computation is not entirely complete. " << crash;
     }
     return;
@@ -3395,7 +3395,7 @@ std::string WebServer::ToStringConnectionSummary() {
   out << "<b>Server status.</b> Server time: local: " << now.ToStringLocal() << ", gm: " << now.ToStringGM() << ".<br>";
   int64_t timeRunninG = - 1;
   if (this->activeWorker < 0 || this->activeWorker >= this->theWorkers.size) {
-    timeRunninG = theGlobalVariables.GetElapsedMilliseconds();
+    timeRunninG = global.GetElapsedMilliseconds();
   } else {
     timeRunninG = this->GetActiveWorker().millisecondsLastPingServerSideOnly;
   }
@@ -3453,7 +3453,7 @@ std::string WebServer::ToStringStatusAll() {
   MacroRegisterFunctionWithName("WebServer::ToStringStatusAll");
   std::stringstream out;
 
-  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
+  if (!global.UserDefaultHasAdminRights()) {
     out << this->ToStringConnectionSummary();
     return out.str();
   }
@@ -3486,7 +3486,7 @@ std::string WebServer::ToStringStatusAll() {
 bool WebServer::RestartIsNeeded() {
   MacroRegisterFunctionWithName("WebServer::RestartIsNeeded");
   struct stat theFileStat;
-  if (stat(theGlobalVariables.PhysicalNameExecutableWithPath.c_str(), &theFileStat) != 0) {
+  if (stat(global.PhysicalNameExecutableWithPath.c_str(), &theFileStat) != 0) {
     return false;
   }
   if (this->timeLastExecutableModification == - 1) {
@@ -3508,23 +3508,23 @@ bool WebServer::RestartIsNeeded() {
   << this->timeLastExecutableModification
   << "; latest executable has different time stamp: " << theFileStat.st_ctime
   << ". " << logger::red << "RESTARTING." << logger::endL;
-  theGlobalVariables.flagRestartNeeded = true;
+  global.flagRestartNeeded = true;
   this->GetActiveWorker().WriteToBody(out.str());
   return true;
 }
 
 void WebServer::StopKillAll[[noreturn]](bool attemptToRestart) {
   if (
-    theGlobalVariables.processType != ProcessTypes::server &&
-    theGlobalVariables.processType != ProcessTypes::serverMonitor
+    global.processType != ProcessTypes::server &&
+    global.processType != ProcessTypes::serverMonitor
   ) {
     crash << "Server restart is allowed only to the server/monitor processes. " << crash;
   }
   logger* currentLog = nullptr;
-  if (theGlobalVariables.processType == "serverMonitor") {
+  if (global.processType == "serverMonitor") {
     currentLog = &logServerMonitor;
   }
-  if (theGlobalVariables.processType == "server") {
+  if (global.processType == "server") {
     currentLog = &logServer;
   }
 
@@ -3555,37 +3555,37 @@ void WebServer::StopKillAll[[noreturn]](bool attemptToRestart) {
       break;
     }
     *currentLog << logger::blue << "Still waiting on " << workersStillInUse << " workers to finish. " << logger::endL;
-    theGlobalVariables.FallAsleep(1000000);
+    global.FallAsleep(1000000);
   }
   this->ReleaseEverything();
   std::stringstream theCommand;
-  theCommand << "killall " << theGlobalVariables.PhysicalNameExecutableNoPath;
+  theCommand << "killall " << global.PhysicalNameExecutableNoPath;
   if (attemptToRestart) {
     *currentLog << logger::yellow << "Proceeding to restart server. " << logger::endL;
     *currentLog << "Current folder: " << FileOperations::GetCurrentFolder() << logger::endL;
-    long timeLimitSeconds = theGlobalVariables.millisecondsMaxComputation / 1000;
+    long timeLimitSeconds = global.millisecondsMaxComputation / 1000;
     *currentLog << logger::red << "Restart with time limit " << timeLimitSeconds << logger::endL;
     theCommand << " && ";
-    theCommand << theGlobalVariables.PhysicalNameExecutableWithPath;
+    theCommand << global.PhysicalNameExecutableWithPath;
     theCommand << " server " << timeLimitSeconds;
     *currentLog << logger::red << "Restart command: " << logger::blue << theCommand.str() << logger::endL;
   } else {
     *currentLog << logger::red << "Proceeding to stop server. " << logger::endL;
   }
-  theGlobalVariables.CallSystemNoOutput(theCommand.str(), currentLog); //kill any other running copies of the calculator.
+  global.CallSystemNoOutput(theCommand.str(), currentLog); //kill any other running copies of the calculator.
   while (true) {
-    theGlobalVariables.FallAsleep(1000000);
+    global.FallAsleep(1000000);
     logServer << logger::red << "Waiting for killall command ... " << logger::endL;
   }
 }
 
 void WebServer::initPortsITry() {
-  this->portHTTP = theGlobalVariables.configuration[Configuration::portHTTP].theString;
-  if (!theGlobalVariables.flagSSLIsAvailable) {
+  this->portHTTP = global.configuration[Configuration::portHTTP].theString;
+  if (!global.flagSSLIsAvailable) {
     return;
   }
-  this->portHTTPSOpenSSL = theGlobalVariables.configuration[Configuration::portHTTPSOpenSSL].theString;
-  this->portHTTPSBuiltIn = theGlobalVariables.configuration[Configuration::portHTTPSBuiltIn].theString;
+  this->portHTTPSOpenSSL = global.configuration[Configuration::portHTTPSOpenSSL].theString;
+  this->portHTTPSBuiltIn = global.configuration[Configuration::portHTTPSBuiltIn].theString;
   this->portHTTPSDefault = this->portHTTPSOpenSSL;
 }
 
@@ -3617,7 +3617,7 @@ void WebServer::initListeningSockets() {
 void WebServer::initDates() {
   this->timeLastExecutableModification = - 1;
   struct stat theFileStat;
-  if (stat(theGlobalVariables.PhysicalNameExecutableWithPath.c_str(), &theFileStat) != 0) {
+  if (stat(global.PhysicalNameExecutableWithPath.c_str(), &theFileStat) != 0) {
     return;
   }
   this->timeLastExecutableModification = theFileStat.st_ctime;
@@ -3625,12 +3625,12 @@ void WebServer::initDates() {
 
 void WebServer::ReleaseWorkerSideResources() {
   MacroRegisterFunctionWithName("WebServer::ReleaseWorkerSideResources");
-  logger& currentLog = theGlobalVariables.flagIsChildProcess ? logWorker : logServer;
-  if (theGlobalVariables.flagServerDetailedLog) {
+  logger& currentLog = global.flagIsChildProcess ? logWorker : logServer;
+  if (global.flagServerDetailedLog) {
     currentLog << logger::red << "Detail: server about to RELEASE active workder. " << logger::endL;
   }
   this->Release(this->GetActiveWorker().connectedSocketID);
-  if (theGlobalVariables.flagServerDetailedLog) {
+  if (global.flagServerDetailedLog) {
     currentLog << logger::green << "Detail: server RELEASED active worker. " << logger::endL;
   }
   //<-release socket- communication is handled by the worker.
@@ -3639,7 +3639,7 @@ void WebServer::ReleaseWorkerSideResources() {
 
 bool WebServer::RequiresLogin(const std::string& inputRequest, const std::string& inputAddress) {
   MacroRegisterFunctionWithName("WebServer::RequiresLogin");
-  if (inputAddress == theGlobalVariables.DisplayNameExecutable) {
+  if (inputAddress == global.DisplayNameExecutable) {
     if (this->requestsNotNeedingLogin.Contains(inputRequest)) {
       return false;
     }
@@ -3679,7 +3679,7 @@ void WebServer::TerminateChildSystemCall(int i) {
   }
   this->MarkChildNotInUse(i);
   if (this->theWorkers[i].ProcessPID > 0) {
-    if (theGlobalVariables.flagServerDetailedLog) {
+    if (global.flagServerDetailedLog) {
       logServer << "Detail: " << " killing child index: " << i << "." << logger::endL;
     }
     this->TerminateProcessId(this->theWorkers[i].ProcessPID);
@@ -3689,10 +3689,10 @@ void WebServer::TerminateChildSystemCall(int i) {
 
 void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress) {
   MacroRegisterFunctionWithName("WebServer::HandleTooManyConnections");
-  if (theGlobalVariables.flagIsChildProcess) {
+  if (global.flagIsChildProcess) {
     return;
   }
-  if (theGlobalVariables.flagServerDetailedLog) {
+  if (global.flagServerDetailedLog) {
     logProcessStats << logger::red << "Detail: "
     << "too many connections handler start. " << logger::endL;
   }
@@ -3739,7 +3739,7 @@ void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress)
     this->theWorkers[theIndices[j]].pingMessage = errorStream.str();
     logServer << logger::red << errorStream.str() << logger::endL;
   }
-  if (theGlobalVariables.flagServerDetailedLog) {
+  if (global.flagServerDetailedLog) {
     logProcessStats << logger::green
     << "Detail: connection cleanup successful. " << logger::endL;
   }
@@ -3809,18 +3809,18 @@ void WebServer::RecycleOneChild(int childIndex, int& numberInUse) {
   currentPingPipe.ReadOnceIfFailThenCrash(false, true);
   if (currentPingPipe.lastRead.size > 0) {
     currentWorker.pingMessage = currentPingPipe.GetLastRead();
-    currentWorker.millisecondsLastPingServerSideOnly = theGlobalVariables.GetElapsedMilliseconds();
+    currentWorker.millisecondsLastPingServerSideOnly = global.GetElapsedMilliseconds();
     if (currentWorker.pingMessage != "") {
       logServer << logger::blue << "Worker " << childIndex + 1 << " ping: "
       << currentWorker.pingMessage << ". " << logger::endL;
     }
     return;
   }
-  if (theGlobalVariables.millisecondsNoPingBeforeChildIsPresumedDead <= 0) {
+  if (global.millisecondsNoPingBeforeChildIsPresumedDead <= 0) {
     return;
   }
-  int64_t millisecondsElapsed = theGlobalVariables.GetElapsedMilliseconds() - currentWorker.millisecondsLastPingServerSideOnly;
-  if (millisecondsElapsed <= theGlobalVariables.millisecondsNoPingBeforeChildIsPresumedDead) {
+  int64_t millisecondsElapsed = global.GetElapsedMilliseconds() - currentWorker.millisecondsLastPingServerSideOnly;
+  if (millisecondsElapsed <= global.millisecondsNoPingBeforeChildIsPresumedDead) {
     return;
   }
   this->TerminateChildSystemCall(childIndex);
@@ -3829,7 +3829,7 @@ void WebServer::RecycleOneChild(int childIndex, int& numberInUse) {
   << millisecondsElapsed
   << " milliseconds passed since worker " << childIndex + 1
   << " last pinged the server; "
-  << "the maximum allowed is: " << theGlobalVariables.millisecondsNoPingBeforeChildIsPresumedDead
+  << "the maximum allowed is: " << global.millisecondsNoPingBeforeChildIsPresumedDead
   << ". ";
   pingTimeoutStream << "Killing connection "
   << currentWorker.connectionID
@@ -3843,7 +3843,7 @@ void WebServer::RecycleOneChild(int childIndex, int& numberInUse) {
 
 void WebServer::HandleTooManyWorkers(int& numInUse) {
   if (numInUse <= this->MaxTotalUsedWorkers) {
-    if (theGlobalVariables.flagServerDetailedLog) {
+    if (global.flagServerDetailedLog) {
       logProcessStats << logger::green
       << "Detail: RecycleChildrenIfPossible exit point 1. " << logger::endL;
     }
@@ -3864,7 +3864,7 @@ void WebServer::HandleTooManyWorkers(int& numInUse) {
     numInUse --;
     this->NumProcessAssassinated ++;
   }
-  if (theGlobalVariables.flagServerDetailedLog) {
+  if (global.flagServerDetailedLog) {
     logProcessStats << logger::green
     << "Detail: RecycleChildrenIfPossible exit point 2. " << logger::endL;
   }
@@ -3875,10 +3875,10 @@ void WebServer::RecycleChildrenIfPossible() {
   // This might need to be rewritten: I wasn't able to make this work with any
   // mechanism other than pipes.
   MacroRegisterFunctionWithName("WebServer::RecycleChildrenIfPossible");
-  if (theGlobalVariables.flagIsChildProcess) {
+  if (global.flagIsChildProcess) {
     return;
   }
-  if (theGlobalVariables.flagServerDetailedLog) {
+  if (global.flagServerDetailedLog) {
     logProcessStats << logger::red << "Detail: RecycleChildrenIfPossible start. " << logger::endL;
   }
   int numInUse = 0;
@@ -4045,7 +4045,7 @@ void WebServer::WriteVersionJSFile() {
   std::stringstream out;
   out << "\"use strict\"; //This file is automatically generated, please do not modify.\n";
   out << "var serverInformation = {\n  ";
-  out << "  version:\"" << theGlobalVariables.buildVersionSimple << "\",\n";
+  out << "  version:\"" << global.buildVersionSimple << "\",\n";
   out << "};\n";
   out << "module.exports = {\nserverInformation,\n};\n";
   std::fstream theFileStream;
@@ -4079,7 +4079,7 @@ void Listener::zeroSocketSet() {
   for (int i = 0; i < this->owner->theListeningSockets.size; i ++) {
     FD_SET(this->owner->theListeningSockets[i], &this->FDSetListenSockets);
   }
-  if (theGlobalVariables.flagServerDetailedLog) {
+  if (global.flagServerDetailedLog) {
     logServer << logger::red << "Detail: About to enter select loop. " << logger::endL;
   }
 
@@ -4088,7 +4088,7 @@ void Listener::zeroSocketSet() {
 void Listener::Select() {
   while (select(this->owner->highestSocketNumber + 1, &this->FDSetListenSockets, nullptr, nullptr, nullptr) == - 1) {
     if (this->owner->flagReapingChildren) {
-      if (theGlobalVariables.flagServerDetailedLog) {
+      if (global.flagServerDetailedLog) {
         logServer << logger::yellow << "Interrupted select loop by child exit signal. "
         << logger::endL;
       }
@@ -4142,12 +4142,12 @@ TransportLayerSecurity& TransportLayerSecurity::DefaultTLS_READ_ONLY() {
 
 int WebServer::Run() {
   MacroRegisterFunctionWithName("WebServer::Run");
-  theGlobalVariables.RelativePhysicalNameCrashReport = "crash_WebServerRun.html";
+  global.RelativePhysicalNameCrashReport = "crash_WebServerRun.html";
   WebServer::initializeRandomBytes();
 
   // <-worker log resets are needed, else forked processes reset their common log.
   // <-resets of the server logs are not needed, but I put them here nonetheless.
-  if (theGlobalVariables.flagSSLIsAvailable) {
+  if (global.flagSSLIsAvailable) {
     // creates key files if absent. Does not call any openssl functions.
     std::stringstream commentsOnFailure;
     TransportLayerSecurity::initializeNonThreadSafePartsCommon();
@@ -4158,14 +4158,14 @@ int WebServer::Run() {
   logProcessStats   .reset();
   logServer         .reset();
   this->processIdServer = getpid();
-  if (theGlobalVariables.flagServerAutoMonitor) {
+  if (global.flagServerAutoMonitor) {
     this->processIdServer = this->Fork();
     if (this->processIdServer < 0) {
       crash << "Failed to create server process. " << crash;
     }
     if (this->processIdServer > 0) {
-      theGlobalVariables.processType = "serverMonitor";
-      theGlobalVariables.flagIsChildProcess = true;
+      global.processType = "serverMonitor";
+      global.flagIsChildProcess = true;
       MonitorWebServer(this->processIdServer); //<-this attempts to connect to the server over the internet and restarts if it can't.
       return 0;
     }
@@ -4179,8 +4179,8 @@ int WebServer::Run() {
   theParser->ComputeAutoCompleteKeyWords();
   theParser->WriteAutoCompleteKeyWordsToFile();
   this->WriteVersionJSFile();
-  // theGlobalVariables.WriteSourceCodeFilesJS();
-  theGlobalVariables.initModifiableDatabaseFields();
+  // global.WriteSourceCodeFilesJS();
+  global.initModifiableDatabaseFields();
   HtmlRoutines::LoadStrings();
   this->theTLS.initializeNonThreadSafeOnFirstCall(true);
   theParser->flagShowCalculatorExamples = false;
@@ -4199,10 +4199,10 @@ int WebServer::Run() {
     theSignals.unblockSignals();
     theListener.Select();
     theSignals.blockSignals();
-    if (theGlobalVariables.flagServerDetailedLog) {
+    if (global.flagServerDetailedLog) {
       logServer << logger::green << "Detail: select success. " << logger::endL;
     }
-    int64_t millisecondsAfterSelect = theGlobalVariables.GetElapsedMilliseconds();
+    int64_t millisecondsAfterSelect = global.GetElapsedMilliseconds();
     this->NumSuccessfulSelectsSoFar ++;
     if ((this->NumSuccessfulSelectsSoFar + this->NumFailedSelectsSoFar) - previousReportedNumberOfSelects > 100) {
       logServer << logger::blue << this->NumSuccessfulSelectsSoFar << " successful and "
@@ -4231,7 +4231,7 @@ int WebServer::Run() {
       << "but I found no set socket. " << logger::endL;
     }
     if (newConnectedSocket < 0) {
-      if (theGlobalVariables.flagServerDetailedLog) {
+      if (global.flagServerDetailedLog) {
         logServer << "Detail: newConnectedSocket is negative: "
         << newConnectedSocket << ". Not accepting. " << logger::endL;
       }
@@ -4252,7 +4252,7 @@ int WebServer::Run() {
     this->GetActiveWorker().connectedSocketID = newConnectedSocket;
     this->ComputeSSLFlags();
     this->GetActiveWorker().connectedSocketIDLastValueBeforeRelease = newConnectedSocket;
-    this->GetActiveWorker().millisecondsServerAtWorkerStart = theGlobalVariables.GetElapsedMilliseconds();
+    this->GetActiveWorker().millisecondsServerAtWorkerStart = global.GetElapsedMilliseconds();
     this->GetActiveWorker().millisecondsLastPingServerSideOnly = this->GetActiveWorker().millisecondsServerAtWorkerStart;
     this->GetActiveWorker().millisecondsAfterSelect = millisecondsAfterSelect; //<- measured right after select()
     //<-cannot set earlier as the active worker may change after recycling.
@@ -4262,12 +4262,12 @@ int WebServer::Run() {
     this->currentlyConnectedAddresses.AddMonomial(this->GetActiveWorker().userAddress, 1);
 //    logWorker << this->ToStringStatus();
     /////////////
-    if (theGlobalVariables.flagServerDetailedLog) {
+    if (global.flagServerDetailedLog) {
       logProcessStats << "Detail: about to fork, sigprocmasking " << logger::endL;
     }
-    if (theGlobalVariables.flagServerDetailedLog) {
+    if (global.flagServerDetailedLog) {
       logProcessStats << "Detail: Sigprocmask done. Proceeding to fork. "
-      << "Time elapsed: " << theGlobalVariables.GetElapsedSeconds() << " second(s). <br>"
+      << "Time elapsed: " << global.GetElapsedSeconds() << " second(s). <br>"
       << logger::endL;
     }
     int incomingPID = this->Fork(); // creates an almost identical copy of this process.
@@ -4277,15 +4277,15 @@ int WebServer::Run() {
     // The original process is the parent, the almost identical copy is the child.
     // logWorker << "\r\nChildPID: " << this->childPID;
     if (incomingPID == 0) {
-      theGlobalVariables.processType = "worker";
+      global.processType = "worker";
     }
-    if (theGlobalVariables.flagServerDetailedLog && incomingPID == 0) {
+    if (global.flagServerDetailedLog && incomingPID == 0) {
       logWorker << "Detail: Fork() successful in worker; elapsed ms @ Fork(): "
-      << theGlobalVariables.GetElapsedMilliseconds() << logger::endL;
+      << global.GetElapsedMilliseconds() << logger::endL;
     }
-    if (theGlobalVariables.flagServerDetailedLog && incomingPID > 0) {
+    if (global.flagServerDetailedLog && incomingPID > 0) {
       logServer << "Detail: Fork() successful; elapsed ms @ Fork(): "
-      << theGlobalVariables.GetElapsedMilliseconds() << logger::endL;
+      << global.GetElapsedMilliseconds() << logger::endL;
     }
     if (incomingPID < 0) {
       logServer << logger::red << " FAILED to spawn a child process. " << logger::endL;
@@ -4293,30 +4293,30 @@ int WebServer::Run() {
     this->GetActiveWorker().ProcessPID = incomingPID;
     if (this->GetActiveWorker().ProcessPID == 0) {
       // this is the child (worker) process
-      theGlobalVariables.flagIsChildProcess = true;
-      if (theGlobalVariables.flagServerDetailedLog) {
+      global.flagIsChildProcess = true;
+      if (global.flagServerDetailedLog) {
         logWorker << logger::green << "Detail: "
         << "FORK successful in worker, next step. "
-        << "Time elapsed: " << theGlobalVariables.GetElapsedSeconds()
+        << "Time elapsed: " << global.GetElapsedSeconds()
         << " second(s). Calling sigprocmask. " << logger::endL;
       }
       theSignals.unblockSignals();
-      if (theGlobalVariables.flagServerDetailedLog) {
+      if (global.flagServerDetailedLog) {
         logWorker << logger::green << "Detail: sigprocmask success, running... " << logger::endL;
       }
       int result = this->GetActiveWorker().Run();
-      if (theGlobalVariables.flagServerDetailedLog) {
+      if (global.flagServerDetailedLog) {
         logWorker << "Detail: run finished, releasing resources. " << logger::endL;
       }
       this->ReleaseEverything();
-      if (theGlobalVariables.flagServerDetailedLog) {
+      if (global.flagServerDetailedLog) {
         logWorker << logger::green << "Detail: resources released, returning. " << logger::endL;
       }
       return result;
     }
-    if (theGlobalVariables.flagServerDetailedLog) {
+    if (global.flagServerDetailedLog) {
       logProcessStats << logger::green << "Detail: fork successful. Time elapsed: "
-      << theGlobalVariables.GetElapsedMilliseconds() << " ms. "
+      << global.GetElapsedMilliseconds() << " ms. "
       << "About to unmask signals. " << logger::endL;
     }
     this->ReleaseWorkerSideResources();
@@ -4328,22 +4328,22 @@ int WebServer::Run() {
 }
 
 void WebServer::ComputeSSLFlags() {
-  theGlobalVariables.flagUsingSSLinCurrentConnection = false;
+  global.flagUsingSSLinCurrentConnection = false;
 
   if (this->lastListeningSocket == this->listeningSocketHTTPSBuiltIn) {
-    theGlobalVariables.flagUsingSSLinCurrentConnection = true;
+    global.flagUsingSSLinCurrentConnection = true;
     this->theTLS.flagUseBuiltInTlS = true;
   } else if (this->lastListeningSocket == this->listeningSocketHTTPSOpenSSL){
-    theGlobalVariables.flagUsingSSLinCurrentConnection = true;
+    global.flagUsingSSLinCurrentConnection = true;
     this->theTLS.flagUseBuiltInTlS = false;
   }
-  this->GetActiveWorker().flagUsingSSLInWorkerProcess = theGlobalVariables.flagUsingSSLinCurrentConnection;
+  this->GetActiveWorker().flagUsingSSLInWorkerProcess = global.flagUsingSSLinCurrentConnection;
 }
 
 int WebWorker::Run() {
   MacroRegisterFunctionWithName("WebWorker::Run");
 
-  theGlobalVariables.millisecondOffset = this->millisecondsAfterSelect;
+  global.millisecondOffset = this->millisecondsAfterSelect;
   this->CheckConsistency();
   if (this->connectedSocketID == - 1) {
     crash << "Worker::Run() started on a connecting with ID equal to - 1. " << crash;
@@ -4351,14 +4351,14 @@ int WebWorker::Run() {
   std::stringstream processNameStream;
   processNameStream << "W" << this->indexInParent + 1 << ": ";
   MutexProcess::currentProcessName = processNameStream.str();
-  theGlobalVariables.flagServerForkedIntoWorker = true;
+  global.flagServerForkedIntoWorker = true;
   CreateTimerThread();
   // Check web worker indices are initialized properly:
   theWebServer.GetActiveWorker();
-  if (theGlobalVariables.flagUsingSSLinCurrentConnection) {
+  if (global.flagUsingSSLinCurrentConnection) {
     std::stringstream commentsOnFailure;
     if (!theWebServer.SSLServerSideHandShake(&commentsOnFailure)) {
-      theGlobalVariables.flagUsingSSLinCurrentConnection = false;
+      global.flagUsingSSLinCurrentConnection = false;
       this->parent->SignalActiveWorkerDoneReleaseEverything();
       this->parent->ReleaseEverything();
       logWorker << logger::red << "Ssl fail #: " << this->parent->NumConnectionsSoFar << logger::endL;
@@ -4366,7 +4366,7 @@ int WebWorker::Run() {
       return - 1;
     }
   }
-  if (theGlobalVariables.flagSSLIsAvailable && theGlobalVariables.flagUsingSSLinCurrentConnection) {
+  if (global.flagSSLIsAvailable && global.flagUsingSSLinCurrentConnection) {
     logWorker << logger::green << "ssl success #: " << this->parent->NumConnectionsSoFar << ". " << logger::endL;
   }
   /////////////////////////////////////////////////////////////////////////
@@ -4378,7 +4378,7 @@ int WebWorker::Run() {
     this->flagEncounteredErrorWhileServingFile = false;
     if (!this->ReceiveAll()) {
       bool sslWasOK = true;
-      if (theGlobalVariables.flagSSLIsAvailable) {
+      if (global.flagSSLIsAvailable) {
         sslWasOK = (this->error == TransportLayerSecurityOpenSSL::errors::errorWantRead);
       }
       if (this->numberOfReceivesCurrentConnection > 0 && sslWasOK) {
@@ -4394,7 +4394,7 @@ int WebWorker::Run() {
     if (this->numberOfReceivesCurrentConnection > 0) {
       this->parent->theCalculator.RenewObject();
       theParser->initialize();
-      theGlobalVariables.Comments.resetComments();
+      global.Comments.resetComments();
       logWorker << logger::blue << "Created new calculator for connection: "
       << this->numberOfReceivesCurrentConnection << logger::endL;
     }
@@ -4412,9 +4412,9 @@ int WebWorker::Run() {
     if (
       (!this->flagKeepAlive) ||
       this->flagEncounteredErrorWhileServingFile ||
-      theGlobalVariables.flagRestartNeeded ||
-      theGlobalVariables.flagStopNeeded ||
-      theGlobalVariables.theProgress.flagTimedOut
+      global.flagRestartNeeded ||
+      global.flagStopNeeded ||
+      global.theProgress.flagTimedOut
     ) {
       break;
     }
@@ -4423,8 +4423,8 @@ int WebWorker::Run() {
     logWorker << logger::blue << "Received " << this->numberOfReceivesCurrentConnection
     << " times on this connection, waiting for more. "
     << logger::endL;
-    theGlobalVariables.millisecondOffset += theGlobalVariables.GetElapsedMilliseconds();
-    this->parent->WorkerTimerPing(theGlobalVariables.millisecondOffset);
+    global.millisecondOffset += global.GetElapsedMilliseconds();
+    this->parent->WorkerTimerPing(global.millisecondOffset);
   }
   this->WrapUpConnection();
   return result;
@@ -4438,25 +4438,25 @@ extern int mainTest(List<std::string>& remainingArgs);
 
 void WebServer::FigureOutOperatingSystem() {
   MacroRegisterFunctionWithName("WebServer::FigureOutOperatingSystem");
-  if (theGlobalVariables.OperatingSystem != "") {
+  if (global.OperatingSystem != "") {
     return;
   }
   List<std::string> supportedOSes;
   supportedOSes.AddOnTop("Ubuntu");
   supportedOSes.AddOnTop("CentOS");
-  std::string commandOutput = theGlobalVariables.CallSystemWithOutput("cat /etc/*-release");
+  std::string commandOutput = global.CallSystemWithOutput("cat /etc/*-release");
   if (
     commandOutput.find("ubuntu") != std::string::npos ||
     commandOutput.find("Ubuntu") != std::string::npos ||
     commandOutput.find("UBUNTU") != std::string::npos
   ) {
-    theGlobalVariables.OperatingSystem = "Ubuntu";
+    global.OperatingSystem = "Ubuntu";
   } else if (commandOutput.find("CentOS") != std::string::npos) {
-    theGlobalVariables.OperatingSystem = "CentOS";
+    global.OperatingSystem = "CentOS";
   } else {
-    theGlobalVariables.OperatingSystem = "";
+    global.OperatingSystem = "";
   }
-  if (theGlobalVariables.OperatingSystem != "") {
+  if (global.OperatingSystem != "") {
     return;
   }
   logServer << logger::red << "Your Linux flavor is not currently supported. " << logger::endL;
@@ -4469,20 +4469,20 @@ void WebServer::FigureOutOperatingSystem() {
 
 void WebServer::CheckSystemInstallationOpenSSL() {
   MacroRegisterFunctionWithName("WebServer::CheckSystemInstallationOpenSSL");
-  if (!theGlobalVariables.flagDatabaseCompiled) {
+  if (!global.flagDatabaseCompiled) {
     return;
   }
-  if (theGlobalVariables.configuration["openSSL"].theType != JSData::token::tokenUndefined) {
+  if (global.configuration["openSSL"].theType != JSData::token::tokenUndefined) {
     return;
   }
-  theGlobalVariables.configuration["openSSL"] = "Attempted installation";
-  theGlobalVariables.ConfigurationStore();
+  global.configuration["openSSL"] = "Attempted installation";
+  global.ConfigurationStore();
   WebServer::FigureOutOperatingSystem();
   StateMaintainerCurrentFolder preserveFolder;
   std::string sslInstallCommand = "CentOS";
-  if (theGlobalVariables.OperatingSystem == "Ubuntu") {
+  if (global.OperatingSystem == "Ubuntu") {
     sslInstallCommand = "sudo apt-get install libssl-dev";
-  } else if (theGlobalVariables.OperatingSystem == "CentOS") {
+  } else if (global.OperatingSystem == "CentOS") {
     sslInstallCommand = "sudo yum install openssl-devel";
   } else {
     logServer << "You appear to be missing an openssl installation. "
@@ -4493,121 +4493,121 @@ void WebServer::CheckSystemInstallationOpenSSL() {
     logServer << "You appear to be missing an openssl installation. Let me try to install that for you. "
     << logger::green << "About to request sudo password for: " << sslInstallCommand << logger::endL;
     logServer << logger::red << "To refuse the command type CTRL+C. " << logger::endL;
-    theGlobalVariables.CallSystemNoOutput(sslInstallCommand, &logServer);
-    theGlobalVariables.configuration["openSSL"] = "Attempted installation on Ubuntu";
+    global.CallSystemNoOutput(sslInstallCommand, &logServer);
+    global.configuration["openSSL"] = "Attempted installation on Ubuntu";
   }
-  theGlobalVariables.ConfigurationStore();
+  global.ConfigurationStore();
 }
 
 void WebServer::CheckSystemInstallationMongoDB() {
   MacroRegisterFunctionWithName("WebServer::CheckSystemInstallationMongoDB");
-  if (theGlobalVariables.flagDatabaseCompiled) {
+  if (global.flagDatabaseCompiled) {
     return;
   }
   WebServer::FigureOutOperatingSystem();
-  if (theGlobalVariables.OperatingSystem == "") {
+  if (global.OperatingSystem == "") {
     return;
   }
-  if (theGlobalVariables.configuration["mongoDB"].theType != JSData::token::tokenUndefined) {
+  if (global.configuration["mongoDB"].theType != JSData::token::tokenUndefined) {
     return;
   }
-  theGlobalVariables.configuration["mongoDB"] = "Attempted installation";
-  theGlobalVariables.ConfigurationStore();
+  global.configuration["mongoDB"] = "Attempted installation";
+  global.ConfigurationStore();
 
   StateMaintainerCurrentFolder preserveFolder;
   logServer << "You appear to be missing an mongoDB installation. Let me try to install that for you. "
   << logger::green << "Enter your the sudo password as prompted please. " << logger::endL;
-  if (theGlobalVariables.OperatingSystem == "Ubuntu") {
-    theGlobalVariables.CallSystemNoOutput("sudo apt-get install mongodb", &logServer);
-    theGlobalVariables.configuration["mongoDB"] = "Attempted installation on Ubuntu";
-  } else if (theGlobalVariables.OperatingSystem == "CentOS") {
-    theGlobalVariables.CallSystemNoOutput("sudo yum install mongodb", &logServer);
-    theGlobalVariables.configuration["mongoDB"] = "Attempted installation on CentOS";
+  if (global.OperatingSystem == "Ubuntu") {
+    global.CallSystemNoOutput("sudo apt-get install mongodb", &logServer);
+    global.configuration["mongoDB"] = "Attempted installation on Ubuntu";
+  } else if (global.OperatingSystem == "CentOS") {
+    global.CallSystemNoOutput("sudo yum install mongodb", &logServer);
+    global.configuration["mongoDB"] = "Attempted installation on CentOS";
   }
-  theGlobalVariables.ChDir(theGlobalVariables.PhysicalPathProjectBase);
-  theGlobalVariables.CallSystemNoOutput("make clean", &logServer);
+  global.ChDir(global.PhysicalPathProjectBase);
+  global.CallSystemNoOutput("make clean", &logServer);
   logServer << "Proceeding to rebuild the calculator. " << logger::red
   << "This is expected to take 10+ minutes. " << logger::endL;
-  theGlobalVariables.CallSystemNoOutput("make -j8", &logServer);
-  theGlobalVariables.ConfigurationStore();
+  global.CallSystemNoOutput("make -j8", &logServer);
+  global.ConfigurationStore();
 }
 
 void WebServer::CheckMongoDBSetup() {
   MacroRegisterFunctionWithName("WebServer::CheckMongoDBSetup");
-  if (theGlobalVariables.flagDatabaseCompiled) {
+  if (global.flagDatabaseCompiled) {
     logServer << logger::green << "Compiled with mongo DB support. " << logger::endL;
   } else {
     logServer << logger::red << "Compiled without mongo DB support. " << logger::endL;
   }
-  if (theGlobalVariables.configuration["mongoDBSetup"].theType != JSData::token::tokenUndefined) {
+  if (global.configuration["mongoDBSetup"].theType != JSData::token::tokenUndefined) {
     return;
   }
-  logServer << "DEBUG: mongoDB token: " << static_cast<int>(theGlobalVariables.configuration["mongoDBSetup"].theType) << logger::endL;
-  logServer << logger::yellow << "configuration so far: " << theGlobalVariables.configuration.ToString(false) << logger::endL;
-  theGlobalVariables.configuration["mongoDBSetup"] = "Attempting";
-  theGlobalVariables.ConfigurationStore();
+  logServer << "DEBUG: mongoDB token: " << static_cast<int>(global.configuration["mongoDBSetup"].theType) << logger::endL;
+  logServer << logger::yellow << "configuration so far: " << global.configuration.ToString(false) << logger::endL;
+  global.configuration["mongoDBSetup"] = "Attempting";
+  global.ConfigurationStore();
   WebServer::FigureOutOperatingSystem();
   logServer << logger::yellow << "Mongo setup file missing, proceeding with setup. " << logger::endL;
   logServer << logger::green << "Enter the sudo password as prompted please. " << logger::endL;
   //result << logger::yellow << "(Re)-starting mongo: " << logger::endL;
   StateMaintainerCurrentFolder maintainFolder;
-  theGlobalVariables.ChDir("../external-source");
+  global.ChDir("../external-source");
 
   std::stringstream commandUnzipMongoC, commandUnzipLibbson;
   commandUnzipMongoC << "tar -xvzf mongo-c-driver-1.9.3.tar.gz";
   logServer << logger::green << commandUnzipMongoC.str() << logger::endL;
-  logServer << theGlobalVariables.CallSystemWithOutput(commandUnzipMongoC.str());
+  logServer << global.CallSystemWithOutput(commandUnzipMongoC.str());
   commandUnzipLibbson << "tar -xvzf libbson-1.9.3.tar.gz";
   logServer << logger::green << commandUnzipLibbson.str() << logger::endL;
-  logServer << theGlobalVariables.CallSystemWithOutput(commandUnzipLibbson.str());
+  logServer << global.CallSystemWithOutput(commandUnzipLibbson.str());
 
-  theGlobalVariables.ChDir("./mongo-c-driver-1.9.3");
-  theGlobalVariables.CallSystemNoOutput("./configure", &logServer);
-  theGlobalVariables.CallSystemNoOutput("make -j8", &logServer);
+  global.ChDir("./mongo-c-driver-1.9.3");
+  global.CallSystemNoOutput("./configure", &logServer);
+  global.CallSystemNoOutput("make -j8", &logServer);
   logServer << "Need sudo access for command: "
   << logger::red << "sudo make install" << logger::endL;
-  theGlobalVariables.CallSystemNoOutput("sudo make install", &logServer);
-  theGlobalVariables.ChDir("../libbson-1.9.3");
-  theGlobalVariables.CallSystemNoOutput("./configure", &logServer);
-  theGlobalVariables.CallSystemNoOutput("make -j8", &logServer);
+  global.CallSystemNoOutput("sudo make install", &logServer);
+  global.ChDir("../libbson-1.9.3");
+  global.CallSystemNoOutput("./configure", &logServer);
+  global.CallSystemNoOutput("make -j8", &logServer);
   logServer << "Need sudo access for command: "
   << logger::red << "sudo make install" << logger::endL;
-  theGlobalVariables.CallSystemNoOutput("sudo make install", &logServer);
-  theGlobalVariables.ChDir("../../bin");
+  global.CallSystemNoOutput("sudo make install", &logServer);
+  global.ChDir("../../bin");
   logServer << "Need sudo access for command to configure linker to use local usr/local/lib path (needed by mongo): "
   << logger::red << "sudo cp ../external-source/usr_local_lib_for_mongo.conf /etc/ld.so.conf.d/" << logger::endL;
-  theGlobalVariables.CallSystemNoOutput("sudo cp ../external-source/usr_local_lib_for_mongo.conf /etc/ld.so.conf.d/", &logServer);
+  global.CallSystemNoOutput("sudo cp ../external-source/usr_local_lib_for_mongo.conf /etc/ld.so.conf.d/", &logServer);
   logServer << "Need sudo access for command: " << logger::red << "sudo ldconfig" << logger::endL;
-  theGlobalVariables.CallSystemNoOutput("sudo ldconfig", &logServer);
-  theGlobalVariables.configuration["mongoDBSetup"] = "Setup complete";
-  theGlobalVariables.ConfigurationStore();
+  global.CallSystemNoOutput("sudo ldconfig", &logServer);
+  global.configuration["mongoDBSetup"] = "Setup complete";
+  global.ConfigurationStore();
 }
 
 void WebServer::CheckFreecalcSetup() {
   MacroRegisterFunctionWithName("WebServer::CheckFreecalcSetup");
-  if (theGlobalVariables.configuration["freecalcSetup"].theType != JSData::token::tokenUndefined) {
+  if (global.configuration["freecalcSetup"].theType != JSData::token::tokenUndefined) {
     return;
   }
-  theGlobalVariables.configuration["freecalcSetup"] = "Setup started";
-  theGlobalVariables.ConfigurationStore();
+  global.configuration["freecalcSetup"] = "Setup started";
+  global.ConfigurationStore();
   WebServer::FigureOutOperatingSystem();
   logServer << logger::yellow << "Freelcalc setup file missing, proceeding to set it up. " << logger::endL;
   StateMaintainerCurrentFolder preserveFolder;
   std::string startingDir = FileOperations::GetCurrentFolder();
-  theGlobalVariables.ChDir(theGlobalVariables.PhysicalPathProjectBase + "../");
+  global.ChDir(global.PhysicalPathProjectBase + "../");
   logServer << logger::green << "Current folder: " << FileOperations::GetCurrentFolder() << logger::endL;
   logServer << logger::green << "git clone https://github.com/tmilev/freecalc.git" << logger::endL;
-  theGlobalVariables.CallSystemNoOutput("git clone https://github.com/tmilev/freecalc.git", &logServer);
-  theGlobalVariables.configuration["freecalcSetup"] = "Setup complete";
-  theGlobalVariables.ConfigurationStore();
+  global.CallSystemNoOutput("git clone https://github.com/tmilev/freecalc.git", &logServer);
+  global.configuration["freecalcSetup"] = "Setup complete";
+  global.ConfigurationStore();
 }
 
 void WebServer::CheckUnzipInstall() {
   WebServer::FigureOutOperatingSystem();
-  if (theGlobalVariables.OperatingSystem == "Ubuntu") {
-    theGlobalVariables.CallSystemNoOutput("sudo apt-get install unzip", &logServer);
-  } else if (theGlobalVariables.OperatingSystem == "CentOS") {
-    theGlobalVariables.CallSystemNoOutput("sudo yum install unzip", &logServer);
+  if (global.OperatingSystem == "Ubuntu") {
+    global.CallSystemNoOutput("sudo apt-get install unzip", &logServer);
+  } else if (global.OperatingSystem == "CentOS") {
+    global.CallSystemNoOutput("sudo yum install unzip", &logServer);
   }
 
 }
@@ -4616,12 +4616,12 @@ void WebServer::CheckMathJaxSetup() {
   MacroRegisterFunctionWithName("WebServer::CheckMathJaxSetup");
   std::string checkForMathJaxAndAutoInstall = "Check for mathjax on every boot.";
   if (
-    theGlobalVariables.configuration[Configuration::mathJaxSetup].theString !=
+    global.configuration[Configuration::mathJaxSetup].theString !=
     checkForMathJaxAndAutoInstall
   ) {
     return;
   }
-  theGlobalVariables.ConfigurationStore();
+  global.ConfigurationStore();
   if ((false)) {
     WebServer::CheckUnzipInstall();
   }
@@ -4681,8 +4681,8 @@ void WebServer::CheckMathJaxSetup() {
   std::stringstream unzipCommand, moveCommand;
   unzipCommand << "unzip " << mathjaxZipSource << " -d " << publicHtmlFolder;
   moveCommand << "mv " << publicHtmlFolder << "MathJax-2.7.2 " << publicHtmlFolder << "MathJax-2.7-latest";
-  theGlobalVariables.CallSystemNoOutput(unzipCommand.str(), &logServer);
-  theGlobalVariables.CallSystemNoOutput(moveCommand.str(), &logServer);
+  global.CallSystemNoOutput(unzipCommand.str(), &logServer);
+  global.CallSystemNoOutput(moveCommand.str(), &logServer);
 }
 
 void WebServer::AnalyzeMainArgumentsTimeString(const std::string& timeLimitString) {
@@ -4693,11 +4693,11 @@ void WebServer::AnalyzeMainArgumentsTimeString(const std::string& timeLimitStrin
   timeLimit.AssignString(timeLimitString);
   int timeLimitInt = 0;
   if (timeLimit.IsIntegerFittingInInt(&timeLimitInt)) {
-    theGlobalVariables.millisecondsMaxComputation = timeLimitInt;
-    if (theGlobalVariables.millisecondsMaxComputation <= 0) {
-      theGlobalVariables.millisecondsMaxComputation = 0;
+    global.millisecondsMaxComputation = timeLimitInt;
+    if (global.millisecondsMaxComputation <= 0) {
+      global.millisecondsMaxComputation = 0;
     } else {
-      theGlobalVariables.millisecondsMaxComputation *= 1000;
+      global.millisecondsMaxComputation *= 1000;
     }
   }
 }
@@ -4707,44 +4707,44 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv) {
   if (argC < 0) {
     argC = 0;
   }
-  theGlobalVariables.programArguments.SetSize(argC);
+  global.programArguments.SetSize(argC);
   for (int i = 0; i < argC; i ++) {
-    theGlobalVariables.programArguments[i] = argv[i];
-    //std::cout << "Argument " << i + 1 << ": " << theGlobalVariables.programArguments[i] << "\n";
+    global.programArguments[i] = argv[i];
+    //std::cout << "Argument " << i + 1 << ": " << global.programArguments[i] << "\n";
   }
   ////////////////////////////////////////////////////
-  theGlobalVariables.flagRunningCommandLine = false;
-  theGlobalVariables.flagRunningConsoleTest = false;
+  global.flagRunningCommandLine = false;
+  global.flagRunningConsoleTest = false;
   #ifdef MACRO_use_open_ssl
-  theGlobalVariables.flagSSLIsAvailable = true;
+  global.flagSSLIsAvailable = true;
   #endif
   #ifdef MACRO_use_MongoDB
-  theGlobalVariables.flagDatabaseCompiled = true;
+  global.flagDatabaseCompiled = true;
   #endif
-  theGlobalVariables.flagRunningBuiltInWebServer = false;
+  global.flagRunningBuiltInWebServer = false;
   ////////////////////////////////////////////////////
   if (argC == 0) {
-    theGlobalVariables.flagRunningCommandLine = true;
+    global.flagRunningCommandLine = true;
     return;
   }
-  theGlobalVariables.initDefaultFolderAndFileNames(theGlobalVariables.programArguments[0]);
+  global.initDefaultFolderAndFileNames(global.programArguments[0]);
   if (argC < 2) {
-    theGlobalVariables.flagRunningCommandLine = true;
+    global.flagRunningCommandLine = true;
     return;
   }
-  std::string& secondArgument = theGlobalVariables.programArguments[1];
+  std::string& secondArgument = global.programArguments[1];
   if (secondArgument == "server") {
-    theGlobalVariables.flagRunningBuiltInWebServer = true;
+    global.flagRunningBuiltInWebServer = true;
     if (argC == 2) {
       return;
     }
     bool doRestart = false;
     std::string timeLimitString = "";
-    std::string& thirdArgument = theGlobalVariables.programArguments[2];
+    std::string& thirdArgument = global.programArguments[2];
     if (thirdArgument == "restart") {
       doRestart = true;
       if (argC > 3) {
-        timeLimitString = theGlobalVariables.programArguments[3];
+        timeLimitString = global.programArguments[3];
       }
     } else {
       timeLimitString = thirdArgument;
@@ -4757,38 +4757,38 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv) {
   }
   ////////////////////////////////
   if (secondArgument == "test") {
-    theGlobalVariables.flagRunningConsoleTest = true;
+    global.flagRunningConsoleTest = true;
     return;
   }
-  theGlobalVariables.flagRunningCommandLine = true;
+  global.flagRunningCommandLine = true;
 }
 
 void WebServer::InitializeMainHashes() {
   StateMaintainerCurrentFolder preserveCurrentFolder;
-  if (theGlobalVariables.buildVersionSimple == "") {
-    theGlobalVariables.buildVersionSimple =
-    StringRoutines::StringTrimWhiteSpace(theGlobalVariables.CallSystemWithOutput("git rev-list --count HEAD"));
+  if (global.buildVersionSimple == "") {
+    global.buildVersionSimple =
+    StringRoutines::StringTrimWhiteSpace(global.CallSystemWithOutput("git rev-list --count HEAD"));
   }
-  theGlobalVariables.buildVersionSimple = StringRoutines::StringTrimWhiteSpace(theGlobalVariables.buildVersionSimple);
-  for (unsigned i = 0; i < theGlobalVariables.buildVersionSimple.size(); i ++) {
-    if (MathRoutines::isALatinLetter(theGlobalVariables.buildVersionSimple[i])) {
-      theGlobalVariables.buildVersionSimple = "?";
+  global.buildVersionSimple = StringRoutines::StringTrimWhiteSpace(global.buildVersionSimple);
+  for (unsigned i = 0; i < global.buildVersionSimple.size(); i ++) {
+    if (MathRoutines::isALatinLetter(global.buildVersionSimple[i])) {
+      global.buildVersionSimple = "?";
       break;
     }
   }
-  theGlobalVariables.buildHeadHashWithServerTime = StringRoutines::StringTrimWhiteSpace(
-    theGlobalVariables.CallSystemWithOutput("git rev-parse HEAD")
+  global.buildHeadHashWithServerTime = StringRoutines::StringTrimWhiteSpace(
+    global.CallSystemWithOutput("git rev-parse HEAD")
   );
-  for (unsigned i = 0; i < theGlobalVariables.buildHeadHashWithServerTime.size(); i ++) {
-    if (!MathRoutines::IsAHexDigit(theGlobalVariables.buildHeadHashWithServerTime[i])) {
-      theGlobalVariables.buildHeadHashWithServerTime = "x";
+  for (unsigned i = 0; i < global.buildHeadHashWithServerTime.size(); i ++) {
+    if (!MathRoutines::IsAHexDigit(global.buildHeadHashWithServerTime[i])) {
+      global.buildHeadHashWithServerTime = "x";
       break;
     }
   }
   std::stringstream buildHeadHashWithTimeStream;
-  buildHeadHashWithTimeStream << theGlobalVariables.buildHeadHashWithServerTime
-  << theGlobalVariables.GetGlobalTimeInSeconds();
-  theGlobalVariables.buildHeadHashWithServerTime = buildHeadHashWithTimeStream.str();
+  buildHeadHashWithTimeStream << global.buildHeadHashWithServerTime
+  << global.GetGlobalTimeInSeconds();
+  global.buildHeadHashWithServerTime = buildHeadHashWithTimeStream.str();
 
   FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash().AddOnTopNoRepetitionMustBeNewCrashIfNot(
     WebAPI::request::calculatorHTML
@@ -4866,7 +4866,7 @@ void WebServer::InitializeMainAddresses() {
   for (int i = 0; i < FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash().size; i ++) {
     this->addressStartsSentWithCacheMaxAge.AddOnTop(
       FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash()[i] +
-      theGlobalVariables.buildHeadHashWithServerTime
+      global.buildHeadHashWithServerTime
     );
   }
 
@@ -4902,11 +4902,11 @@ extern int mainTest(List<std::string>& remainingArgs);
 
 void WebServer::TurnProcessMonitoringOn() {
   MacroRegisterFunctionWithName("WebServer::TurnProcessMonitoringOn");
-  theGlobalVariables.theProgress.flagBanProcessMonitoring = false;
-  theGlobalVariables.configuration[Configuration::processMonitoringBanned] = false;
+  global.theProgress.flagBanProcessMonitoring = false;
+  global.configuration[Configuration::processMonitoringBanned] = false;
   logServer
   << logger::yellow << "Process monitoring IS ON, reply in: " << logger::green
-  << theGlobalVariables.millisecondsReplyAfterComputation << " ms." << logger::endL;
+  << global.millisecondsReplyAfterComputation << " ms." << logger::endL;
 }
 
 void WebServer::TurnProcessMonitoringOff() {
@@ -4915,9 +4915,9 @@ void WebServer::TurnProcessMonitoringOff() {
   << logger::green << "************************" << logger::endL
   << logger::red << "Process monitoring is now off. " << logger::endL
   << logger::green << "************************" << logger::endL;
-  theGlobalVariables.theProgress.flagBanProcessMonitoring = true;
-  theGlobalVariables.millisecondsReplyAfterComputation = 0;
-  theGlobalVariables.configuration[Configuration::processMonitoringBanned] = true;
+  global.theProgress.flagBanProcessMonitoring = true;
+  global.millisecondsReplyAfterComputation = 0;
+  global.configuration[Configuration::processMonitoringBanned] = true;
 }
 
 bool GlobalVariables::ConfigurationLoad() {
@@ -4925,7 +4925,7 @@ bool GlobalVariables::ConfigurationLoad() {
   std::stringstream out;
   std::string configurationFileName = "/configuration/configuration.json";
   if (!FileOperations::LoadFileToStringVirtual(
-    configurationFileName, theGlobalVariables.configurationFileContent, true, &out
+    configurationFileName, global.configurationFileContent, true, &out
   )) {
     logServer << logger::yellow << "Failed to read configuration file. " << out.str() << logger::endL;
     std::string computedPhysicalFileName;
@@ -4937,8 +4937,8 @@ bool GlobalVariables::ConfigurationLoad() {
     }
     return false;
   }
-  if (!theGlobalVariables.configuration.readstring(
-    theGlobalVariables.configurationFileContent, &out
+  if (!global.configuration.readstring(
+    global.configurationFileContent, &out
   )) {
     logServer << logger::red << "Failed to read configuration. " << out.str() << logger::endL;
     return false;
@@ -4948,8 +4948,8 @@ bool GlobalVariables::ConfigurationLoad() {
 
 bool GlobalVariables::ConfigurationStore() {
   MacroRegisterFunctionWithName("GlobalVariables::ConfigurationStore");
-  std::string correctedConfiguration = theGlobalVariables.configuration.ToString(false, true);
-  if (correctedConfiguration == theGlobalVariables.configurationFileContent) {
+  std::string correctedConfiguration = global.configuration.ToString(false, true);
+  if (correctedConfiguration == global.configurationFileContent) {
     return true;
   }
   std::fstream configurationFile;
@@ -4965,7 +4965,7 @@ bool GlobalVariables::ConfigurationStore() {
       logServer << logger::red << "Physical file name configuration: "
       << logger::blue << configFileNamePhysical << logger::endL;
       logServer << logger::red << "Server base: " << logger::blue
-      << theGlobalVariables.PhysicalPathProjectBase << logger::endL;
+      << global.PhysicalPathProjectBase << logger::endL;
     }
     return false;
   }
@@ -4977,13 +4977,13 @@ bool GlobalVariables::ConfigurationStore() {
 
 void GlobalVariables::ConfigurationProcess() {
   MacroRegisterFunctionWithName("GlobalVariables::ConfigurationProcess");
-  theGlobalVariables.flagServerDetailedLog = theGlobalVariables.configuration[
+  global.flagServerDetailedLog = global.configuration[
     Configuration::serverDetailedLog
   ].isTrueRepresentationInJSON();
-  theGlobalVariables.flagAutoUnitTest = theGlobalVariables.configuration[
+  global.flagAutoUnitTest = global.configuration[
     Configuration::autoUnitTest
   ].isTrueRepresentationInJSON();
-  if (theGlobalVariables.flagAutoUnitTest) {
+  if (global.flagAutoUnitTest) {
     logServer
     << logger::purple << "************************" << logger::endL
     << logger::yellow << "Auto-unit tests are ON. "
@@ -4991,11 +4991,11 @@ void GlobalVariables::ConfigurationProcess() {
     << logger::endL
     << logger::purple << "************************" << logger::endL;
   }
-  theGlobalVariables.flagDisableDatabaseLogEveryoneAsAdmin = theGlobalVariables.configuration[
+  global.flagDisableDatabaseLogEveryoneAsAdmin = global.configuration[
     Configuration::disableDatabaseLogEveryoneAsAdmin
   ].isTrueRepresentationInJSON();
-  if (theGlobalVariables.flagDisableDatabaseLogEveryoneAsAdmin) {
-    theGlobalVariables.flagDatabaseCompiled = false;
+  if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
+    global.flagDatabaseCompiled = false;
     logServer
     << logger::purple << "************************" << logger::endL
     << logger::red << "WARNING: database disabled, " << logger::green
@@ -5004,16 +5004,16 @@ void GlobalVariables::ConfigurationProcess() {
     << "Everyone gets logged-in as admin. " << logger::endL
     << logger::purple << "************************" << logger::endL;
   }
-  if (theGlobalVariables.configuration[Configuration::serverAutoMonitor].isTrueRepresentationInJSON()) {
-    theGlobalVariables.flagServerAutoMonitor = true;
+  if (global.configuration[Configuration::serverAutoMonitor].isTrueRepresentationInJSON()) {
+    global.flagServerAutoMonitor = true;
   } else {
-    theGlobalVariables.flagServerAutoMonitor = false;
-    if (!theGlobalVariables.flagRunningCommandLine) {
+    global.flagServerAutoMonitor = false;
+    if (!global.flagRunningCommandLine) {
       logServer
       << logger::red << "WARNING: server auto-monitoring is off. " << logger::endL;
     }
   }
-  if (theGlobalVariables.flagServerDetailedLog) {
+  if (global.flagServerDetailedLog) {
     logServer
     << logger::purple << "************************" << logger::endL
     << logger::purple << "************************" << logger::endL
@@ -5027,10 +5027,10 @@ void GlobalVariables::ConfigurationProcess() {
     << logger::purple << "************************" << logger::endL
     << logger::purple << "************************" << logger::endL;
   }
-  theGlobalVariables.flagCachingInternalFilesOn = !theGlobalVariables.configuration[
+  global.flagCachingInternalFilesOn = !global.configuration[
     "serverRAMCachingOff"
   ].isTrueRepresentationInJSON();
-  if (!theGlobalVariables.flagCachingInternalFilesOn && theGlobalVariables.flagRunningBuiltInWebServer) {
+  if (!global.flagCachingInternalFilesOn && global.flagRunningBuiltInWebServer) {
     logServer
     << logger::purple << "************************" << logger::endL
     << logger::red << "WARNING: caching files is off. " << logger::endL
@@ -5040,33 +5040,33 @@ void GlobalVariables::ConfigurationProcess() {
     << "in configuration/configuration.json." << logger::endL
     << logger::purple << "************************" << logger::endL;
   }
-  theGlobalVariables.flagRunServerOnEmptyCommandLine = theGlobalVariables.configuration[
+  global.flagRunServerOnEmptyCommandLine = global.configuration[
     "runServerOnEmptyCommandLine"
   ].isTrueRepresentationInJSON();
   if (
-    theGlobalVariables.flagRunningCommandLine &&
-    theGlobalVariables.programArguments.size == 1 &&
-    theGlobalVariables.flagRunServerOnEmptyCommandLine
+    global.flagRunningCommandLine &&
+    global.programArguments.size == 1 &&
+    global.flagRunServerOnEmptyCommandLine
   ) {
     logServer << logger::green
     << "runServerOnEmptyCommandLine is set to true => Starting server with default configuration. "
     << logger::endL;
-    theGlobalVariables.flagRunningBuiltInWebServer = true;
-    theGlobalVariables.flagRunningCommandLine = false;
-    theGlobalVariables.millisecondsMaxComputation = 30000; // 30 seconds, default
+    global.flagRunningBuiltInWebServer = true;
+    global.flagRunningCommandLine = false;
+    global.millisecondsMaxComputation = 30000; // 30 seconds, default
   }
   int reader = 0;
-  if (theGlobalVariables.configuration[
+  if (global.configuration[
     Configuration::millisecondsReplyAfterComputation
   ].isIntegerFittingInInt(&reader)) {
-    theGlobalVariables.millisecondsReplyAfterComputation = reader;
+    global.millisecondsReplyAfterComputation = reader;
   } else {
-    theGlobalVariables.configuration[
+    global.configuration[
       Configuration::millisecondsReplyAfterComputation
-    ] = theGlobalVariables.millisecondsReplyAfterComputation;
+    ] = global.millisecondsReplyAfterComputation;
   }
   if (
-    theGlobalVariables.configuration[
+    global.configuration[
       Configuration::processMonitoringBanned
     ].isTrueRepresentationInJSON()
   ) {
@@ -5075,41 +5075,41 @@ void GlobalVariables::ConfigurationProcess() {
   } else {
     WebServer::TurnProcessMonitoringOn();
   }
-  if (theGlobalVariables.configuration[Configuration::builtInTLSAvailable].isTrueRepresentationInJSON()) {
+  if (global.configuration[Configuration::builtInTLSAvailable].isTrueRepresentationInJSON()) {
     logServer << logger::red << "Experimental: " << logger::blue << "using built-in TLS library. " << logger::endL;
     TransportLayerSecurity::flagBuiltInTLSAvailable = true;
   }
-  if (theGlobalVariables.configuration[Configuration::monitorPingTime].isIntegerFittingInInt(
+  if (global.configuration[Configuration::monitorPingTime].isIntegerFittingInInt(
     &theWebServer.WebServerPingIntervalInSeconds
   )) {
     if (theWebServer.WebServerPingIntervalInSeconds < 0) {
       theWebServer.WebServerPingIntervalInSeconds = 10;
     }
   } else {
-    theGlobalVariables.configuration[Configuration::monitorPingTime] = theWebServer.WebServerPingIntervalInSeconds;
+    global.configuration[Configuration::monitorPingTime] = theWebServer.WebServerPingIntervalInSeconds;
   }
-  if (theGlobalVariables.configuration[Configuration::gitRepository].theType == JSData::token::tokenString) {
-    HtmlRoutines::gitRepository = theGlobalVariables.configuration[Configuration::gitRepository].theString;
+  if (global.configuration[Configuration::gitRepository].theType == JSData::token::tokenString) {
+    HtmlRoutines::gitRepository = global.configuration[Configuration::gitRepository].theString;
   } else {
-    theGlobalVariables.configuration[Configuration::gitRepository] = HtmlRoutines::gitRepository;
+    global.configuration[Configuration::gitRepository] = HtmlRoutines::gitRepository;
   }
-  if (theGlobalVariables.configuration[Configuration::portHTTP].theString == "") {
-    theGlobalVariables.configuration[Configuration::portHTTP] = "8155";
+  if (global.configuration[Configuration::portHTTP].theString == "") {
+    global.configuration[Configuration::portHTTP] = "8155";
   }
-  if (theGlobalVariables.configuration[Configuration::portHTTPSOpenSSL].theString == "") {
-    theGlobalVariables.configuration[Configuration::portHTTPSOpenSSL] = "8166";
+  if (global.configuration[Configuration::portHTTPSOpenSSL].theString == "") {
+    global.configuration[Configuration::portHTTPSOpenSSL] = "8166";
   }
-  if (theGlobalVariables.configuration[Configuration::portHTTPSBuiltIn].theString == "") {
-    theGlobalVariables.configuration[Configuration::portHTTPSBuiltIn] = "8177";
+  if (global.configuration[Configuration::portHTTPSBuiltIn].theString == "") {
+    global.configuration[Configuration::portHTTPSBuiltIn] = "8177";
   }
   List<List<std::string> > folderVirtualLinksDefault = FileOperations::InitializeFolderVirtualLinksDefaults();
   for (int i = 0; i < folderVirtualLinksDefault.size; i ++) {
     std::string key = folderVirtualLinksDefault[i][0];
     std::string value = folderVirtualLinksDefault[i][1];
     if (
-      theGlobalVariables.configuration[key].theString == ""
+      global.configuration[key].theString == ""
     ) {
-      theGlobalVariables.configuration[key] = value;
+      global.configuration[key] = value;
     }
   }
 }
@@ -5123,7 +5123,7 @@ void WebServer::CheckInstallation() {
 }
 
 int WebServer::main(int argc, char **argv) {
-  theGlobalVariables.InitThreadsExecutableStart();
+  global.InitThreadsExecutableStart();
   // use of loggers forbidden before calling   theWebServer.AnalyzeMainArguments(...):
   // we need to initialize first the folder locations relative to the executable.
   MacroRegisterFunctionWithName("main");
@@ -5135,54 +5135,54 @@ int WebServer::main(int argc, char **argv) {
     // Process executable arguments.
     theWebServer.AnalyzeMainArguments(argc, argv);
     logServer << logger::green << "Project base folder: "
-    << logger::blue << theGlobalVariables.PhysicalPathProjectBase
+    << logger::blue << global.PhysicalPathProjectBase
     << logger::endL;
     // Compute configuration file location.
     // Load the configuration file.
-    theGlobalVariables.ConfigurationLoad();
+    global.ConfigurationLoad();
     // Compute various flags and settings from the desired configuration.
     // Correct bad configuration settings if any.
-    theGlobalVariables.ConfigurationProcess();
+    global.ConfigurationProcess();
     // Store back the config file if it changed.
-    theGlobalVariables.ConfigurationStore();
-    logServer << "Computation timeout: " << logger::red << theGlobalVariables.millisecondsMaxComputation << " ms." << logger::endL;
+    global.ConfigurationStore();
+    logServer << "Computation timeout: " << logger::red << global.millisecondsMaxComputation << " ms." << logger::endL;
 
     if (!Database::get().initializeServer()) {
       crash << "Failed to initialize database. " << crash;
     }
-    if (theGlobalVariables.millisecondsMaxComputation > 0) {
-      theGlobalVariables.millisecondsNoPingBeforeChildIsPresumedDead =
-      theGlobalVariables.millisecondsMaxComputation + 20000; // + 20 seconds
+    if (global.millisecondsMaxComputation > 0) {
+      global.millisecondsNoPingBeforeChildIsPresumedDead =
+      global.millisecondsMaxComputation + 20000; // + 20 seconds
     } else {
-      theGlobalVariables.millisecondsNoPingBeforeChildIsPresumedDead = - 1;
+      global.millisecondsNoPingBeforeChildIsPresumedDead = - 1;
     }
     // Uses the configuration file.
     // Calls again theWebServer.InitializeMainFoldersSensitive();
     theWebServer.InitializeMainAll();
     theWebServer.CheckMathJaxSetup();
     bool mathJaxPresent = FileOperations::FileExistsVirtual("/MathJax-2.7-latest/", false);
-    if (!mathJaxPresent && theGlobalVariables.flagRunningBuiltInWebServer) {
+    if (!mathJaxPresent && global.flagRunningBuiltInWebServer) {
       logServer << logger::red << "MathJax not available. " << logger::endL;
     }
-    if (theGlobalVariables.flagRunningBuiltInWebServer) {
-      if (theGlobalVariables.millisecondsMaxComputation <= 0) {
+    if (global.flagRunningBuiltInWebServer) {
+      if (global.millisecondsMaxComputation <= 0) {
         logServer
         << logger::purple << "************************" << logger::endL
         << logger::red << "WARNING: no computation time limit set. " << logger::endL
         << logger::purple << "************************" << logger::endL;
       }
-      if (theGlobalVariables.millisecondsMaxComputation > 500000) {
+      if (global.millisecondsMaxComputation > 500000) {
         logServer
         << logger::purple << "************************" << logger::endL
         << logger::red << "WARNING: computation time limit is high: "
-        << (theGlobalVariables.millisecondsMaxComputation / 1000)
+        << (global.millisecondsMaxComputation / 1000)
         << " seconds. " << logger::endL
         << logger::purple << "************************" << logger::endL;
       }
       return theWebServer.Run();
-    } else if (theGlobalVariables.flagRunningConsoleTest) {
-      return mainTest(theGlobalVariables.programArguments);
-    } else if (theGlobalVariables.flagRunningCommandLine) {
+    } else if (global.flagRunningConsoleTest) {
+      return mainTest(global.programArguments);
+    } else if (global.flagRunningCommandLine) {
       return WebServer::mainCommandLine();
     }
   } catch (...) {
@@ -5194,15 +5194,15 @@ int WebServer::main(int argc, char **argv) {
 
 int WebServer::mainCommandLine() {
   MacroRegisterFunctionWithName("main_command_input");
-  theGlobalVariables.IndicatorStringOutputFunction = HtmlRoutines::MakeStdCoutReport;
+  global.IndicatorStringOutputFunction = HtmlRoutines::MakeStdCoutReport;
   PointerObjectDestroyer<Calculator> theDestroyer(theParser);
   theDestroyer.RenewObject();
   theParser->initialize();
   logger result("", nullptr, false, "server");
-  if (theGlobalVariables.programArguments.size > 1) {
-    for (int i = 1; i < theGlobalVariables.programArguments.size; i ++) {
-      theParser->inputString += theGlobalVariables.programArguments[i];
-      if (i != theGlobalVariables.programArguments.size - 1) {
+  if (global.programArguments.size > 1) {
+    for (int i = 1; i < global.programArguments.size; i ++) {
+      theParser->inputString += global.programArguments[i];
+      if (i != global.programArguments.size - 1) {
         theParser->inputString += " ";
       }
     }
@@ -5224,7 +5224,7 @@ int WebServer::mainCommandLine() {
   );
   result << theParser->outputString;
   outputFile << theParser->outputString;
-  result << "\nTotal running time: " << logger::blue << theGlobalVariables.GetElapsedMilliseconds() << " ms. "
+  result << "\nTotal running time: " << logger::blue << global.GetElapsedMilliseconds() << " ms. "
   << logger::endL
   << "Output written in: " << logger::green << outputFileName << logger::endL << "\n";
   return 0;
@@ -5240,37 +5240,37 @@ std::string WebServer::GetEnvironment(const std::string& envVarName) {
 
 std::string WebAPIResponse::ToStringCalculatorArgumentsHumanReadable() {
   MacroRegisterFunctionWithName("WebWorker::ToStringCalculatorArgumentsHumanReadable");
-  if (!theGlobalVariables.UserDebugFlagOn()) {
+  if (!global.UserDebugFlagOn()) {
     return "";
   }
   std::stringstream out;
   out << "<hr>\n";
-  out << "Default user: " << HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.userDefault.username, false);
-  if (theGlobalVariables.flagLoggedIn) {
+  out << "Default user: " << HtmlRoutines::ConvertStringToHtmlString(global.userDefault.username, false);
+  if (global.flagLoggedIn) {
     out << "\n<br>\nLogged in.";
   }
   out << "\n<br>\nAddress:\n" << HtmlRoutines::ConvertStringToHtmlString(theWebServer.GetActiveWorker().addressComputed, true);
-  out << "\n<br>\nRequest:\n" << theGlobalVariables.userCalculatorRequestType;
-  if (theGlobalVariables.UserDefaultHasAdminRights()) {
+  out << "\n<br>\nRequest:\n" << global.userCalculatorRequestType;
+  if (global.UserDefaultHasAdminRights()) {
     out << "\n<br>\n<b>User has admin rights</b>";
   }
   if (theWebServer.RequiresLogin(
-    theGlobalVariables.userCalculatorRequestType, theWebServer.GetActiveWorker().addressComputed
+    global.userCalculatorRequestType, theWebServer.GetActiveWorker().addressComputed
   )) {
     out << "\n<br>\nAddress requires login. ";
   } else {
     out << "\n<br>\nAddress <b>does not</b> require any login. ";
   }
   out << "\n<hr>\n";
-  for (int i = 0; i < theGlobalVariables.webArguments.size(); i ++) {
-    out << theGlobalVariables.webArguments.theKeys[i] << ": "
-    << HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.webArguments.theValues[i], true);
-    if (i != theGlobalVariables.webArguments.size() - 1) {
+  for (int i = 0; i < global.webArguments.size(); i ++) {
+    out << global.webArguments.theKeys[i] << ": "
+    << HtmlRoutines::ConvertStringToHtmlString(global.webArguments.theValues[i], true);
+    if (i != global.webArguments.size() - 1) {
       out << "\n<br>\n";
     }
   }
   out << "\n<hr>\n";
-  if (theGlobalVariables.flagRunningBuiltInWebServer) {
+  if (global.flagRunningBuiltInWebServer) {
     out << "Sent with max cache: "
     << theWebServer.addressStartsSentWithCacheMaxAge.ToStringCommaDelimited()
     << "<hr>";
@@ -5326,7 +5326,7 @@ void WebWorker::SendAllBytesHttp() {
   }
   logWorker << "Sending " << this->remainingBytesToSenD.size << " bytes in chunks of: ";
   logWorker.flush();
-  double startTime = theGlobalVariables.GetElapsedSeconds();
+  double startTime = global.GetElapsedSeconds();
   struct timeval tv; //<- code involving tv taken from stackexchange
   tv.tv_sec = 5; // 5 Secs Timeout
   tv.tv_usec = 0; // Not init'ing this can cause strange errors
@@ -5334,7 +5334,7 @@ void WebWorker::SendAllBytesHttp() {
   int timeOutInSeconds = 20;
   setsockopt(this->connectedSocketID, SOL_SOCKET, SO_SNDTIMEO, static_cast<void*>(&tv), sizeof(timeval));
   while (this->remainingBytesToSenD.size > 0) {
-    if (theGlobalVariables.GetElapsedSeconds() - startTime > timeOutInSeconds) {
+    if (global.GetElapsedSeconds() - startTime > timeOutInSeconds) {
       logWorker << "WebWorker::SendAllBytes failed: more than " << timeOutInSeconds << " seconds have elapsed. "
       << logger::endL;
       return;
@@ -5410,7 +5410,7 @@ void WebWorker::QueueStringForSendingNoHeadeR(const std::string& stringToSend, b
 
 void WebWorker::SendAllBytesNoHeaders() {
   MacroRegisterFunctionWithName("WebWorker::SendAllBytesNoHeaders");
-  if (theGlobalVariables.flagUsingSSLinCurrentConnection) {
+  if (global.flagUsingSSLinCurrentConnection) {
     this->SendAllBytesHttpSSL();
     return;
   }

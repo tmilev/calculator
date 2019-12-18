@@ -17,12 +17,12 @@ bool Database::User::SetPassword(
   std::string& outputAuthenticationToken,
   std::stringstream& comments
 ) {
-  if (!theGlobalVariables.flagDatabaseCompiled) {
+  if (!global.flagDatabaseCompiled) {
     comments << "Database not present. ";
     return false;
   }
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::SetPassword");
-  if (!theGlobalVariables.flagLoggedIn) {
+  if (!global.flagLoggedIn) {
     comments << "Changing passwords allowed for logged-in users only. ";
     return false;
   }
@@ -38,12 +38,12 @@ bool Database::User::SetPassword(
 bool Database::User::UserExists(
   const std::string& inputUsername, std::stringstream& comments
 ) {
-  if (!theGlobalVariables.flagDatabaseCompiled) {
+  if (!global.flagDatabaseCompiled) {
     comments << "No database available.";
     return false;
   }
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::UserExists");
-  if (!theGlobalVariables.flagLoggedIn) {
+  if (!global.flagLoggedIn) {
     return false;
   }
   JSData theUserQuery;
@@ -57,33 +57,33 @@ bool Database::User::UserExists(
 
 bool Database::User::UserDefaultHasInstructorRights() {
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::UserDefaultHasInstructorRights");
-  if (theGlobalVariables.UserDefaultHasAdminRights())
+  if (global.UserDefaultHasAdminRights())
     return true;
-  if (!theGlobalVariables.flagDatabaseCompiled) {
+  if (!global.flagDatabaseCompiled) {
     return true;
   }
-  if (!theGlobalVariables.flagLoggedIn) {
+  if (!global.flagLoggedIn) {
     return false;
   }
   return
-    theGlobalVariables.userDefault.userRole == UserCalculatorData::Roles::admin ||
-    theGlobalVariables.userDefault.userRole == UserCalculator::Roles::instructor ||
-    theGlobalVariables.userDefault.userRole == UserCalculator::Roles::teacher;
+    global.userDefault.userRole == UserCalculatorData::Roles::admin ||
+    global.userDefault.userRole == UserCalculator::Roles::instructor ||
+    global.userDefault.userRole == UserCalculator::Roles::teacher;
 }
 
 bool Database::User::LogoutViaDatabase() {
-  if (!theGlobalVariables.flagDatabaseCompiled) {
+  if (!global.flagDatabaseCompiled) {
     return true;
   }
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LogoutViaDatabase");
-  if (!theGlobalVariables.flagLoggedIn) {
+  if (!global.flagLoggedIn) {
     return true;
   }
   UserCalculator theUser;
-  theUser.UserCalculatorData::operator=(theGlobalVariables.userDefault);
+  theUser.UserCalculatorData::operator=(global.userDefault);
   theUser.ResetAuthenticationToken(nullptr);
-  theGlobalVariables.SetWebInpuT("authenticationToken", "");
-  theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue("authenticationToken", "");
+  global.SetWebInpuT("authenticationToken", "");
+  global.CookiesToSetUsingHeaders.SetKeyValue("authenticationToken", "");
   return true;
 }
 
@@ -151,7 +151,7 @@ void QueryExact::SetLabelValue(const std::string& label, const std::string& desi
 }
 
 bool Database::FindOne(const QueryExact& query, JSData& output, std::stringstream* commentsOnFailure) {
-  if (theGlobalVariables.flagDatabaseCompiled) {
+  if (global.flagDatabaseCompiled) {
     return this->mongoDB.FindOneFromQueryString(query.collection, query.ToJSON().ToString(false), output, commentsOnFailure);
   }
   if (commentsOnFailure != nullptr) {
@@ -171,9 +171,9 @@ bool Database::UpdateOne(
     }
     return false;
   }
-  if (theGlobalVariables.flagDatabaseCompiled) {
+  if (global.flagDatabaseCompiled) {
     return this->mongoDB.UpdateOne(findQuery, dataToMerge, commentsOnFailure);
-  } else if (theGlobalVariables.flagDatabaseUseFallback) {
+  } else if (global.flagDatabaseUseFallback) {
     return this->theFallBack.UpdateOne(findQuery, dataToMerge, commentsOnFailure);
   }
 
@@ -188,9 +188,9 @@ bool Database::FindOneFromSome(
   JSData& output,
   std::stringstream* commentsOnFailure
 ) {
-  if (theGlobalVariables.flagDatabaseCompiled) {
+  if (global.flagDatabaseCompiled) {
     return this->mongoDB.FindOneFromSome(findOrQueries, output, commentsOnFailure);
-  } else if (theGlobalVariables.flagDatabaseUseFallback) {
+  } else if (global.flagDatabaseUseFallback) {
     return this->theFallBack.FindOneFromSome(findOrQueries, output, commentsOnFailure);
   } else {
     if (commentsOnFailure != nullptr) {
@@ -204,9 +204,9 @@ bool Database::FindOneFromSome(
 void Database::CreateHashIndex(
   const std::string& collectionName, const std::string& theKey
 ) {
-  if (theGlobalVariables.flagDatabaseCompiled) {
+  if (global.flagDatabaseCompiled) {
     this->mongoDB.CreateHashIndex(collectionName, theKey);
-  } else if (theGlobalVariables.flagDatabaseUseFallback) {
+  } else if (global.flagDatabaseUseFallback) {
     this->theFallBack.CreateHashIndex(collectionName, theKey);
   }
 }
@@ -216,7 +216,7 @@ bool Database::initializeWorker() {
   if (this->flagInitializedWorker) {
     return true;
   }
-  if (theGlobalVariables.flagDatabaseCompiled) {
+  if (global.flagDatabaseCompiled) {
     this->mongoDB.initialize();
   }
   this->CreateHashIndex(DatabaseStrings::tableUsers, DatabaseStrings::labelUsername);
@@ -234,13 +234,13 @@ bool Database::initializeServer() {
   this->theUser.owner = this;
   this->theFallBack.owner = this;
   this->flagInitializedServer = true;
-  if (theGlobalVariables.flagDisableDatabaseLogEveryoneAsAdmin) {
+  if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
     return true;
   }
-  if (theGlobalVariables.flagDatabaseCompiled) {
+  if (global.flagDatabaseCompiled) {
     return true;
   }
-  theGlobalVariables.flagDatabaseUseFallback = true;
+  global.flagDatabaseUseFallback = true;
   logServer << logger::red << "Calculator compiled without (mongoDB) database support. "
   << logger::green << "Using " << logger::red
   << "**SLOW** " << logger::green << "fall-back JSON storage." << logger::endL;
@@ -250,7 +250,7 @@ bool Database::initializeServer() {
 
 void GlobalVariables::initModifiableDatabaseFields() {
   MacroRegisterFunctionWithName("GlobalVariables::initModifiableDatabaseFields");
-  List<List<std::string> >& modifiableData = theGlobalVariables.databaseModifiableFields;
+  List<List<std::string> >& modifiableData = global.databaseModifiableFields;
   List<std::string> currentEntry;
   modifiableData.Reserve(10);
   currentEntry.AddOnTop(DatabaseStrings::tableUsers);
@@ -473,7 +473,7 @@ bool UserCalculator::AuthenticateWithToken(std::stringstream* commentsOnFailure)
 bool UserCalculator::LoadFromDB(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
   MacroRegisterFunctionWithName("UserCalculator::FetchOneUserRow");
   (void) commentsGeneral;
-  double startTime = theGlobalVariables.GetElapsedSeconds();
+  double startTime = global.GetElapsedSeconds();
   if (!Database::get().theUser.LoadUserInfo(*this, commentsOnFailure)) {
     return false;
   }
@@ -498,7 +498,7 @@ bool UserCalculator::LoadFromDB(std::stringstream* commentsOnFailure, std::strin
       this->problemWeights = outProblemWeightsQuery[DatabaseStrings::labelProblemWeights];
     }
   }
-  theGlobalVariables.timeStats["userLoadTime"] = theGlobalVariables.GetElapsedSeconds() - startTime;
+  global.timeStats["userLoadTime"] = global.GetElapsedSeconds() - startTime;
   return true;
 }
 
@@ -572,22 +572,22 @@ JSData UserCalculatorData::ToJSON() {
 
 bool UserCalculatorData::ComputeCourseInfo() {
   MacroRegisterFunctionWithName("UserCalculator::ComputeCourseInfo");
-  bool isAdmin = (this->userRole == UserCalculatorData::Roles::admin && this->username == theGlobalVariables.userDefault.username);
+  bool isAdmin = (this->userRole == UserCalculatorData::Roles::admin && this->username == global.userDefault.username);
   if (
-    theGlobalVariables.UserStudentVieWOn() &&
+    global.UserStudentVieWOn() &&
     isAdmin &&
-    theGlobalVariables.GetWebInput("studentSection") != ""
+    global.GetWebInput("studentSection") != ""
   ) {
     //<- warning, the user may not be
-    //fully logged-in yet so theGlobalVariables.UserDefaultHasAdminRights()
+    //fully logged-in yet so global.UserDefaultHasAdminRights()
     //does not work right.
-    this->sectionComputed = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("studentSection"), false);
+    this->sectionComputed = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("studentSection"), false);
   } else {
     this->sectionComputed = this->sectionInDB;
   }
-  if (isAdmin && theGlobalVariables.GetWebInput("courseHome") != "") {
+  if (isAdmin && global.GetWebInput("courseHome") != "") {
     this->courseComputed =
-    HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
+    HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("courseHome"), false);
   } else {
     this->courseComputed = this->courseInDB;
   }
@@ -660,7 +660,7 @@ bool UserCalculator::ShouldCommentOnMissingUser() {
 
 std::string UserCalculator::FirstLoginMessage() {
   std::stringstream out;
-  if (theGlobalVariables.flagRequestComingLocally) {
+  if (global.flagRequestComingLocally) {
     out << "If this is your first run, set the username to "
     << "admin and enter the password you desire. "
     << "The password will then be automatically set. "
@@ -842,7 +842,7 @@ bool ProblemData::LoadFroM(const std::string& inputData, std::stringstream& comm
   this->numCorrectlyAnswered = 0;
   this->totalNumSubmissions = 0;
   this->flagRandomSeedGiven = false;
-  if (theGlobalVariables.UserRequestRequiresLoadingRealExamData()) {
+  if (global.UserRequestRequiresLoadingRealExamData()) {
     if (theMap.Contains("randomSeed")) {
       this->randomSeed = static_cast<unsigned>(atoi(theMap.GetValueCreate("randomSeed").c_str()));
       this->flagRandomSeedGiven = true;
@@ -890,7 +890,7 @@ bool ProblemData::LoadFromJSON(const JSData& inputData, std::stringstream& comme
   this->numCorrectlyAnswered = 0;
   this->totalNumSubmissions = 0;
   this->flagRandomSeedGiven = false;
-  if (theGlobalVariables.UserRequestRequiresLoadingRealExamData()) {
+  if (global.UserRequestRequiresLoadingRealExamData()) {
     if (inputData.objects.Contains("randomSeed")) {
       this->randomSeed = static_cast<unsigned>(atoi(
         inputData.objects.GetValueConstCrashIfNotPresent("randomSeed").theString.c_str()
@@ -1023,7 +1023,7 @@ bool UserCalculator::ComputeAndStoreActivationEmailAndTokens(
 bool UserCalculator::ComputeAndStoreActivationStats(
   std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
 ) {
-  if (!theGlobalVariables.flagDatabaseCompiled) {
+  if (!global.flagDatabaseCompiled) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Compiled without database support. ";
     }
@@ -1031,7 +1031,7 @@ bool UserCalculator::ComputeAndStoreActivationStats(
   }
   MacroRegisterFunctionWithName("UserCalculator::ComputeAndStoreActivationStats");
   std::string activationAddress = this->GetActivationAddressFromActivationToken(
-    this->actualActivationToken, theGlobalVariables.hostWithPort, this->username, this->email
+    this->actualActivationToken, global.hostWithPort, this->username, this->email
   );
   JSData emailStatQuery;
   QueryExact findEmail(DatabaseStrings::tableEmailInfo, DatabaseStrings::labelEmail, this->email);
@@ -1100,7 +1100,7 @@ bool UserCalculator::ComputeAndStoreActivationStats(
   std::stringstream emailBody;
   emailBody << "Dear user,"
   << "\n\nto confirm your email change at our website "
-  << theGlobalVariables.hostWithPort
+  << global.hostWithPort
   << ", please follow the activation link below.\n\n "
   << activationAddress
   << "\n\nSincerely, \nthe calculator-algebra.org team";
@@ -1148,7 +1148,7 @@ bool UserCalculator::StoreProblemDataToDatabaseJSON(std::stringstream* commentsO
     }
     problemData[HtmlRoutines::ConvertStringToURLString(this->theProblemData.theKeys[i], false)] = nextProblem;
   }
-  theGlobalVariables.userDefault.problemDataJSON = problemData;
+  global.userDefault.problemDataJSON = problemData;
   JSData updateData;
   updateData[DatabaseStrings::labelProblemDataJSON] = problemData;
   return Database::get().UpdateOneFromSome(
@@ -1166,8 +1166,8 @@ bool Database::User::AddUsersFromEmails(
   int& outputNumUpdatedUsers
 ) {
   MacroRegisterFunctionWithName("DatabaseRoutines::AddUsersFromEmails");
-  theGlobalVariables.millisecondsMaxComputation = 100000; //100 seconds
-  theGlobalVariables.millisecondsReplyAfterComputation = 200000; // 200 seconds
+  global.millisecondsMaxComputation = 100000; //100 seconds
+  global.millisecondsReplyAfterComputation = 200000; // 200 seconds
   List<std::string> theEmails, thePasswords;
   StringRoutines::StringSplitDefaultDelimiters(emailList, theEmails);
   StringRoutines::StringSplitDefaultDelimiters(userPasswords, thePasswords);
@@ -1187,9 +1187,9 @@ bool Database::User::AddUsersFromEmails(
   for (int i = 0; i < theEmails.size; i ++) {
     currentUser.reset();
     currentUser.username = theEmails[i];
-    currentUser.courseInDB = theGlobalVariables.GetWebInput("courseHome");
+    currentUser.courseInDB = global.GetWebInput("courseHome");
     currentUser.sectionInDB = userGroup;
-    currentUser.instructorInDB = theGlobalVariables.userDefault.username;
+    currentUser.instructorInDB = global.userDefault.username;
     currentUser.email = theEmails[i];
     currentUser.userRole = userRole;
 
@@ -1255,7 +1255,7 @@ bool Database::User::AddUsersFromEmails(
   }
   if (doSendEmails) {
     std::stringstream* commentsGeneralSensitive = nullptr;
-    if (theGlobalVariables.UserDefaultHasAdminRights()) {
+    if (global.UserDefaultHasAdminRights()) {
       commentsGeneralSensitive = &comments;
     }
     if (!Database::User::SendActivationEmail(theEmails, &comments, &comments, commentsGeneralSensitive)) {
@@ -1268,7 +1268,7 @@ bool Database::User::AddUsersFromEmails(
 bool UserCalculator::GetActivationAbsoluteAddress(std::string& output, std::stringstream& comments) {
   MacroRegisterFunctionWithName("UserCalculator::GetActivationAbsoluteAddress");
   return this->GetActivationAddress(
-    output, theGlobalVariables.hopefullyPermanent_HTTPS_WebAdressOfServerExecutable, comments
+    output, global.hopefullyPermanent_HTTPS_WebAdressOfServerExecutable, comments
   );
 }
 
@@ -1299,11 +1299,11 @@ bool CalculatorDatabaseFunctions::innerRepairDatabaseEmailRecords(
 ) {
   MacroRegisterFunctionWithName("DatabaseRoutines::innerRepairDatabaseEmailRecords");
   std::stringstream out;
-  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
+  if (!global.UserDefaultHasAdminRights()) {
     out << "Function available to logged-in admins only. ";
     return output.AssignValue(out.str(), theCommands);
   }
-  theGlobalVariables.millisecondsMaxComputation = 20000000; //20k seconds, ok as this is admin-only.
+  global.millisecondsMaxComputation = 20000000; //20k seconds, ok as this is admin-only.
   (void) input;//prevent unused parameter, portable
   out << "Testing/repairing database ... Comments:<br>";
   out << "NOT IMPLEMENTED YET";
@@ -1438,14 +1438,14 @@ bool EmailRoutines::SendEmailWithMailGun(
   if (!FileOperations::LoadFileToStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
     "certificates/mailgun-hostname.txt", hostnameToSendEmailFrom, true, true, nullptr
   )) {
-    hostnameToSendEmailFrom = theGlobalVariables.hostNoPort;
-    if (theGlobalVariables.UserDefaultHasAdminRights() && commentsGeneral != nullptr) {
+    hostnameToSendEmailFrom = global.hostNoPort;
+    if (global.UserDefaultHasAdminRights() && commentsGeneral != nullptr) {
       *commentsGeneral << "Did not find the mailgun hostname file: certificates/mailgun-hostname.txt. Using the "
       << "domain name: " << hostnameToSendEmailFrom << " instead. ";
     }
   } else {
     hostnameToSendEmailFrom = StringRoutines::StringTrimWhiteSpace(hostnameToSendEmailFrom);
-    if (theGlobalVariables.UserDefaultHasAdminRights() && commentsGeneral != nullptr) {
+    if (global.UserDefaultHasAdminRights() && commentsGeneral != nullptr) {
       *commentsGeneral << "Hostname loaded: "
       << HtmlRoutines::ConvertStringToURLString(hostnameToSendEmailFrom, false);
     }
@@ -1491,7 +1491,7 @@ bool EmailRoutines::SendEmailWithMailGun(
   << "-F text=\""
   << HtmlRoutines::ConvertStringEscapeQuotesAndBackslashes(this->emailContent)
   << "\"";
-  std::string commandResult = theGlobalVariables.CallSystemWithOutput(commandToExecute.str());
+  std::string commandResult = global.CallSystemWithOutput(commandToExecute.str());
   if (commentsGeneralSensitive != nullptr) {
     *commentsGeneralSensitive << "Command: " << HtmlRoutines::ConvertStringToHtmlString(commandToExecute.str(), true);
     bool isBad = false;
@@ -1569,7 +1569,7 @@ bool Database::User::LoginViaGoogleTokenCreateNewAccountIfNeeded(
   (void) commentsOnFailure;
   (void) theUseR;
   (void) commentsGeneral;
-  if (!theGlobalVariables.flagDatabaseCompiled) {
+  if (!global.flagDatabaseCompiled) {
     return Database::User::LoginNoDatabaseSupport(theUseR, commentsGeneral);
   }
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeeded");
@@ -1628,7 +1628,7 @@ bool Database::User::LoginViaGoogleTokenCreateNewAccountIfNeeded(
 bool Database::User::LoginNoDatabaseSupport(
   UserCalculatorData& theUser, std::stringstream* commentsGeneral
 ) {
-  if (theGlobalVariables.flagDatabaseCompiled) {
+  if (global.flagDatabaseCompiled) {
     if (commentsGeneral != nullptr) {
       *commentsGeneral
       << "Database support is available, yet you requested no-database login. "
@@ -1636,7 +1636,7 @@ bool Database::User::LoginNoDatabaseSupport(
     }
     return false;
   }
-  if (!theGlobalVariables.flagDisableDatabaseLogEveryoneAsAdmin) {
+  if (!global.flagDisableDatabaseLogEveryoneAsAdmin) {
     if (commentsGeneral != nullptr) {
       *commentsGeneral << "Logging-in without database is not allowed. "
       << "To allow, set "
@@ -1663,7 +1663,7 @@ bool Database::User::LoginViaDatabase(
   UserCalculatorData& theUseR,
   std::stringstream* commentsOnFailure
 ) {
-  if (theGlobalVariables.flagDisableDatabaseLogEveryoneAsAdmin) {
+  if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
     return Database::User::LoginNoDatabaseSupport(theUseR, commentsOnFailure);
   }
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LoginViaDatabase");
@@ -1683,9 +1683,9 @@ bool Database::User::LoginViaDatabase(
   }
   if (userWrapper.enteredActivationToken != "") {
     if (
-      theGlobalVariables.userCalculatorRequestType == WebAPI::request::changePassword ||
-      theGlobalVariables.userCalculatorRequestType == "changePasswordPage" ||
-      theGlobalVariables.userCalculatorRequestType == WebAPI::request::activateAccountJSON
+      global.userCalculatorRequestType == WebAPI::request::changePassword ||
+      global.userCalculatorRequestType == "changePasswordPage" ||
+      global.userCalculatorRequestType == WebAPI::request::activateAccountJSON
     ) {
       if (
         userWrapper.actualActivationToken != "activated" &&
@@ -1706,7 +1706,7 @@ bool Database::User::LoginViaDatabase(
     } else {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Activation token entered but the user request type: "
-        << theGlobalVariables.userCalculatorRequestType
+        << global.userCalculatorRequestType
         << " does not allow login with activation token. ";
       }
     }
@@ -1780,7 +1780,7 @@ std::string UserCalculator::GetActivationAddressFromActivationToken(
   } else if (StringRoutines::StringBeginsWith(calculatorBase, "https://localhost")) {
     out << calculatorBase;
   } else {
-    out << theGlobalVariables.hopefullyPermanentWebAdress;
+    out << global.hopefullyPermanentWebAdress;
   }
   JSData theJS;
   theJS[DatabaseStrings::labelActivationToken] = theActivationToken;
@@ -1788,7 +1788,7 @@ std::string UserCalculator::GetActivationAddressFromActivationToken(
   theJS[DatabaseStrings::labelCalculatorRequest] = WebAPI::request::activateAccountJSON;
   theJS[DatabaseStrings::labelEmail] = inputEmailUnsafe;
   theJS[DatabaseStrings::labelCurrentPage] = DatabaseStrings::labelPageActivateAccount;
-  out << theGlobalVariables.DisplayNameExecutableApp
+  out << global.DisplayNameExecutableApp
   << "#" << HtmlRoutines::ConvertStringToURLString(theJS.ToString(false), false);
   return out.str();
 }

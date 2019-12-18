@@ -30,7 +30,7 @@ void Calculator::initAdminFunctions() {
     true
   );
 
-  if (!theGlobalVariables.flagDatabaseCompiled) {
+  if (!global.flagDatabaseCompiled) {
     return;
   }
   this->AddOperationInnerHandler(

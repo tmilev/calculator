@@ -433,7 +433,7 @@ void rootSubalgebra::MakeProgressReportGenAutos(int progress, int outOf, int fou
 
 void rootSubalgebra::MakeProgressReportPossibleNilradicalComputation(rootSubalgebras& owner) {
   MacroRegisterFunctionWithName("rootSubalgebra::MakeProgressReportPossibleNilradicalComputation");
-  if (theGlobalVariables.theProgress.ReportBanneD()) {
+  if (global.theProgress.ReportBanneD()) {
     return;
   }
   ProgressReport report1, report2, report3, report4, report5;
@@ -2744,7 +2744,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(
       output.BadHCharacteristics.AddOnTop(characteristicH);
       DynkinType tempType;
       diagramZeroCharRoots.GetDynkinType(tempType);
-      theGlobalVariables.Comments
+      global.Comments
       << "<br>obtained bad characteristic " << characteristicH.ToString()
       << ". The zero char root diagram is "
       << tempType.ToString() << "; the Dynkin epsilon is "
@@ -3519,7 +3519,7 @@ void rootSubalgebras::ComputeActionNormalizerOfCentralizerIntersectNilradical(
       int tempI = theRootSA.GetIndexKmoduleContainingRoot(tempRoot);
       this->ActionsNormalizerCentralizerNilradical[i][j] = tempI;
     }
-    if (theGlobalVariables.IndicatorStringOutputFunction != nullptr) {
+    if (global.IndicatorStringOutputFunction != nullptr) {
       std::stringstream out;
       out << "Computing action of element " << i + 1 << " out of " << theSubgroup.allElements.size;
       theReport.Report(out.str());

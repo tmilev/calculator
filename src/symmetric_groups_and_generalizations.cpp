@@ -197,7 +197,7 @@ void Partition::TestAllSpechtModules(int n) {
   }
   for (int i = 0; i <partitions.size; i ++) {
     //std::cout << partitions[i] << "\n";
-    theGlobalVariables.Comments << partitions[i] << "\n";
+    global.Comments << partitions[i] << "\n";
     //std::cout << "got to here\n";
 
     List<Matrix<Rational> > repgens;
@@ -206,10 +206,10 @@ void Partition::TestAllSpechtModules(int n) {
     //std::cout << "got to here3\n";
     for (int ri = 0; ri < repgens.size; ri ++) {
       //std::cout << "got to here4\n";
-      theGlobalVariables.Comments << repgens[ri].ToStringPlainText();
+      global.Comments << repgens[ri].ToStringPlainText();
       //std::cout << "got to here5\n";
       Rational det = repgens[ri].GetDeterminant();
-      theGlobalVariables.Comments << " determinant is " << det << "\n\n";
+      global.Comments << " determinant is " << det << "\n\n";
       if ((det != 1) && (det != - 1)) {
         crash << "invalid determinant" << crash;
       }
@@ -960,7 +960,7 @@ void ElementHyperoctahedralGroup::MakeFromMul(const ElementHyperoctahedralGroup&
     if (this->s[i])
       lastset = i;
   this->s.SetSize(lastset + 1);
-  //theGlobalVariables.Comments << left << "*" << right << "=" << *this << "   ";
+  //global.Comments << left << "*" << right << "=" << *this << "   ";
 }
 
 int ElementHyperoctahedralGroup::SmallestN()  const {
@@ -1159,7 +1159,7 @@ void HyperoctahedralGroup::SpechtModuleOfPartititons(const Partition &positive, 
 /*void HyperoctahedralGroup::SpechtModuleOfPartititons(const Partition &positive, const Partition &negative,
                                                      GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroup>, Rational> &out) {
   List<Matrix<Rational> > pozm, negm;
-  theGlobalVariables.Comments << "HyperoctahedralGroup::SpectModuleOfPartitions(" << positive << ", " << negative << ")\n";
+  global.Comments << "HyperoctahedralGroup::SpectModuleOfPartitions(" << positive << ", " << negative << ")\n";
   // the next two things should be done in parallel.  How can I make that happen?
   positive.SpechtModuleMatricesOfTranspositionsjjplusone(pozm);
   negative.SpechtModuleMatricesOfTranspositionsjjplusone(negm);
@@ -1196,7 +1196,7 @@ void HyperoctahedralGroup::SpechtModuleOfPartititons(const Partition &positive, 
 void HyperoctahedralGroup::SpechtModuleOfPartititons(const Partition &positive, const Partition &negative,
                                                      GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroup>, Rational> &out) {
   List<Matrix<Rational> > pozm, negm;
-  theGlobalVariables.Comments << "HyperoctahedralGroup::SpectModuleOfPartitions(" << positive << ", " << negative << ")\n";
+  global.Comments << "HyperoctahedralGroup::SpectModuleOfPartitions(" << positive << ", " << negative << ")\n";
   // the next two things should be done in parallel.  How can I make that happen?
   positive.SpechtModuleMatricesOfTranspositionsjjplusone(pozm);
   negative.SpechtModuleMatricesOfTranspositionsjjplusone(negm);
@@ -1208,12 +1208,12 @@ void HyperoctahedralGroup::SpechtModuleOfPartititons(const Partition &positive, 
   if ((positive.n > 0) && (negative.n > 0))
     subgens.RemoveIndexShiftDown(positive.n- 1);
   PxM.MakeTranslatableWordsSubgroup(*this, subgens);
-  theGlobalVariables.Comments << "Generating subgroup:\n";
+  global.Comments << "Generating subgroup:\n";
   for (int i = 0; i < this->generators.size; i ++)
-    theGlobalVariables.Comments << i << " " << this->generators[i] << " " << PxM.superGeneratorSubWordExists[i] << " "
+    global.Comments << i << " " << this->generators[i] << " " << PxM.superGeneratorSubWordExists[i] << " "
              << PxM.superGeneratorSubWords[i].ToStringCommaDelimited() << '\n';
   for (int i = 0; i <PxM.generators.size; i ++)
-    theGlobalVariables.Comments << i << " " << PxM.generators[i] << '\n';
+    global.Comments << i << " " << PxM.generators[i] << '\n';
 
   GroupRepresentation<Subgroup<HyperoctahedralGroup, ElementHyperoctahedralGroup>, Rational> pxmr;
   pxmr.ownerGroup = &PxM;
@@ -1250,7 +1250,7 @@ void HyperoctahedralGroupData::SpechtModuleOfPartititons(
   GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational>& out
 ) {
   List<Matrix<Rational> > pozm, negm;
-  //theGlobalVariables.Comments << "HyperoctahedralGroupR2::SpectModuleOfPartitions(" << positive << ", " << negative << ")\n";
+  //global.Comments << "HyperoctahedralGroupR2::SpectModuleOfPartitions(" << positive << ", " << negative << ")\n";
   positive.SpechtModuleMatricesOfTranspositionsjjplusone(pozm);
   negative.SpechtModuleMatricesOfTranspositionsjjplusone(negm);
   List<int> subgenids;
@@ -1297,7 +1297,7 @@ void HyperoctahedralGroup::SomeModuleOfPartititons(const Partition& positive, co
                                                      GroupRepresentation<SimpleFiniteGroup<ElementHyperoctahedralGroup>,Rational> &out,
                                                      Subgroup<HyperoctahedralGroup, ElementHyperoctahedralGroup>* subsn) {
   List<Matrix<Rational> > pozm, negm;
-  theGlobalVariables.Comments << "HyperoctahedralGroup::SomeModuleOfPartitions(" << positive << ", " << negative << ")\n";
+  global.Comments << "HyperoctahedralGroup::SomeModuleOfPartitions(" << positive << ", " << negative << ")\n";
   // the next two things should be done in parallel.  How can I make that happen?
   positive.SpechtModuleMatricesOfTranspositionsjjplusone(pozm);
   negative.SpechtModuleMatricesOfTranspositionsjjplusone(negm);
@@ -1321,12 +1321,12 @@ void HyperoctahedralGroup::SomeModuleOfPartititons(const Partition& positive, co
   if (pozm.size + negm.size != subsn->generators.size)
     subgens.RemoveIndexShiftDown(pozm.size);
   PxM.MakeTranslatableWordsSubgroup(*subsn, subgens);
-  theGlobalVariables.Comments << "Generating subgroup:\n";
+  global.Comments << "Generating subgroup:\n";
   for (int i = 0; i <subsn->generators.size; i ++)
-    theGlobalVariables.Comments << i << " " << subsn->generators[i] << " " << PxM.superGeneratorSubWordExists[i] << " "
+    global.Comments << i << " " << subsn->generators[i] << " " << PxM.superGeneratorSubWordExists[i] << " "
              << PxM.superGeneratorSubWords[i].ToStringCommaDelimited() << '\n';
   for (int i = 0; i <PxM.generators.size; i ++)
-    theGlobalVariables.Comments << i << " " << PxM.generators[i] << '\n';
+    global.Comments << i << " " << PxM.generators[i] << '\n';
   //PxM.CosetRepresentativeEnumerator = HyperoctahedralGroup::ParabolicSubgroupCosetRepresentativeEnumerator;
   PxM.GetWordByFormula = MissingGeneratorsSubgroupElementGetWord<PermutationGroup, PermutationR2>;
   GroupRepresentation<Subgroup<PermutationGroup, PermutationR2>, Rational> pxmr;
@@ -1369,16 +1369,16 @@ void HyperoctahedralGroup::AllSpechtModules() {
       Partition::GetPartitions(pps,N-p);
       for (int ppi = 0; ppi <pps.size; ppi ++) {
         GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroup>, Rational> sm;
-        theGlobalVariables.Comments << "Computing representation {" << nps[npi] << "}, {" << pps[ppi] << "}\n";
+        global.Comments << "Computing representation {" << nps[npi] << "}, {" << pps[ppi] << "}\n";
         this->SpechtModuleOfPartititons(pps[ppi],nps[npi],sm);
         sm.VerifyRepresentation();
-        theGlobalVariables.Comments << sm << '\n';
+        global.Comments << sm << '\n';
         this->irreps.AddOnTop(sm);
       }
     }
   }
   this->irreps.QuickSortAscending();
-  theGlobalVariables.Comments << this->PrettyPrintCharacterTable() << '\n';
+  global.Comments << this->PrettyPrintCharacterTable() << '\n';
   RepresentationDataIntoJS().writefile("representations_hyperoctahedral_group");
 }*/
 
@@ -1391,14 +1391,14 @@ void HyperoctahedralGroupData::AllSpechtModules() {
       Partition::GetPartitions(pps, this->N - p);
       for (int ppi = 0; ppi < pps.size; ppi ++) {
         GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> sm;
-        //theGlobalVariables.Comments << "Computing representation {" << nps[npi] << "}, {" << pps[ppi] << "}\n";
+        //global.Comments << "Computing representation {" << nps[npi] << "}, {" << pps[ppi] << "}\n";
         this->SpechtModuleOfPartititons(pps[ppi], nps[npi], sm);
         //sm.VerifyRepresentation();
         this->theGroup->AddIrreducibleRepresentation(sm);
       }
     }
   }
-  theGlobalVariables.Comments << this->theGroup->PrettyPrintCharacterTable() << '\n';
+  global.Comments << this->theGroup->PrettyPrintCharacterTable() << '\n';
   //this->theGroup->RepresentationDataIntoJS().writefile("representations_hyperoctahedral_group");
 }
 
@@ -1418,7 +1418,7 @@ int HyperoctahedralGroup::GetN() {
 
 LargeInteger HyperoctahedralGroupData::GetSizeByFormulaImplementation(FiniteGroup<ElementHyperoctahedralGroupR2>& G) {
   HyperoctahedralGroupData* HD = static_cast<HyperoctahedralGroupData*>(G.specificDataPointer);
-  //theGlobalVariables.Comments << "HyperoctahedralGroup::GetSize() called.  N =" << HD->N << '\n';
+  //global.Comments << "HyperoctahedralGroup::GetSize() called.  N =" << HD->N << '\n';
   if (!HD) {
     crash << "Consistency error. " << crash;
   }
@@ -1531,8 +1531,8 @@ bool FiniteGroup<ElementHyperoctahedralGroup>::AreConjugate
 template <>
 void ElementHyperoctahedralGroupR2::MakeFromString(const std::string& in) {
   unsigned sep = static_cast<unsigned>(in.find_last_of(','));
-  theGlobalVariables.Comments << in.substr(1, sep) << '\n';
-  theGlobalVariables.Comments << in.substr(sep, in.size() - 1) << '\n';
+  global.Comments << in.substr(1, sep) << '\n';
+  global.Comments << in.substr(sep, in.size() - 1) << '\n';
   this->h.MakeFromString(in.substr(1, sep));
   this->k.MakeFromString(in.substr(sep, in.size() - 1));
 }

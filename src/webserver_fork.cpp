@@ -20,11 +20,11 @@ void WebServer::initializeRandomBytes() {
   if (alreadyRan) {
     crash << "Random bytes initialization allowed only once. " << crash;
   }
-  if (theGlobalVariables.numberOfRandomBytes > 256) {
+  if (global.numberOfRandomBytes > 256) {
     crash << "The number of system random bytes must not exceed 256. " << crash;
   }
-  List<unsigned char>& output = theGlobalVariables.randomBytesCurrent;
-  output.SetSize(static_cast<signed>(theGlobalVariables.numberOfRandomBytes));
+  List<unsigned char>& output = global.randomBytesCurrent;
+  output.SetSize(static_cast<signed>(global.numberOfRandomBytes));
   // According to the
   // documentation of getrandom, the following call
   // must not block or return fewer than the requested bytes in Linux
@@ -76,7 +76,7 @@ int WebServer::Fork() {
   }
   this->ComputeActiveWorkerId();
   // timer taken at server level:
-  int64_t millisecondsAtFork = theGlobalVariables.GetElapsedMilliseconds();
+  int64_t millisecondsAtFork = global.GetElapsedMilliseconds();
   int result = fork();
   // We need to make sure that the child retains no information
   // about the server's random bytes, and similarly the server
@@ -102,7 +102,7 @@ int WebServer::Fork() {
   } else if (result == 0) {
     // child process
     // lose 256 bits of entropy from the server:
-    theGlobalVariables.randomBytesCurrent.SetSize(static_cast<signed>(theGlobalVariables.maximumExtractedRandomBytes));
+    global.randomBytesCurrent.SetSize(static_cast<signed>(global.maximumExtractedRandomBytes));
     // Forget previous random bytes, and gain a little extra entropy:
     Crypto::acquireAdditionalRandomness(millisecondsAtFork);
 

@@ -16,7 +16,7 @@ static timeval ComputationStartGlobal, LastMeasureOfCurrentTime;
 int64_t GlobalVariables::GetElapsedMilliseconds() {
   gettimeofday(&LastMeasureOfCurrentTime, nullptr);
   return (LastMeasureOfCurrentTime.tv_sec - ComputationStartGlobal.tv_sec) * 1000 +
-  (LastMeasureOfCurrentTime.tv_usec - ComputationStartGlobal.tv_usec) / 1000 - theGlobalVariables.millisecondOffset;
+  (LastMeasureOfCurrentTime.tv_usec - ComputationStartGlobal.tv_usec) / 1000 - global.millisecondOffset;
 }
 
 void InitializeTimeR() {
@@ -52,20 +52,20 @@ public:
 };
 
 bool TimeoutThread::HandleComputationTimer() {
-  if (theGlobalVariables.flagComputationStarted) {
-    if (theGlobalVariables.millisecondsComputationStart < 0) {
-      theGlobalVariables.millisecondsComputationStart = theGlobalVariables.GetElapsedMilliseconds();
+  if (global.flagComputationStarted) {
+    if (global.millisecondsComputationStart < 0) {
+      global.millisecondsComputationStart = global.GetElapsedMilliseconds();
     }
   }
-  this->elapsedTimeInMilliseconds = theGlobalVariables.GetElapsedMilliseconds();
-  if (theGlobalVariables.millisecondsComputationStart > 0) {
-    this->elapsedComputationTimeInMilliseconds = this->elapsedTimeInMilliseconds - theGlobalVariables.millisecondsComputationStart;
+  this->elapsedTimeInMilliseconds = global.GetElapsedMilliseconds();
+  if (global.millisecondsComputationStart > 0) {
+    this->elapsedComputationTimeInMilliseconds = this->elapsedTimeInMilliseconds - global.millisecondsComputationStart;
   }
   return false;
 }
 
 bool TimeoutThread::HandleComputationCompleteStandard() {
-  //if (theGlobalVariables.flagComputationCompletE)
+  //if (global.flagComputationCompletE)
   //  theReport1.SetStatus("Starting timer cycle break: computation is complete.");
   return false;
 }
@@ -81,20 +81,20 @@ bool TimeoutThread::HandleTimerSignalToServer() {
 }
 
 bool TimeoutThread::HandleMaxComputationTime() {
-  if (theGlobalVariables.millisecondsMaxComputation <= 0) {
+  if (global.millisecondsMaxComputation <= 0) {
     return false;
   }
   if (this->elapsedComputationTimeInMilliseconds <= 0) {
     return false;
   }
-  if (this->elapsedComputationTimeInMilliseconds <= theGlobalVariables.millisecondsMaxComputation) {
+  if (this->elapsedComputationTimeInMilliseconds <= global.millisecondsMaxComputation) {
     return false;
   }
-  if (theGlobalVariables.flagComputationCompletE) {
+  if (global.flagComputationCompletE) {
     return false;
   }
   //theReport2.SetStatus("Starting timer cycle break: computation time too long.");
-  if (!theGlobalVariables.flagComputationStarted) {
+  if (!global.flagComputationStarted) {
     crash << "Something has gone wrong. Computation has not started, yet " << this->elapsedTimeInMilliseconds
     << " ms have already passed."
     << " This may be an error in the web-server routines of the calculator. " << crash;
@@ -108,7 +108,7 @@ bool TimeoutThread::HandleMaxComputationTime() {
     out << " (unknown amount of time)";
   }
   out << ". The allowed run time is "
-  << theGlobalVariables. millisecondsMaxComputation
+  << global. millisecondsMaxComputation
   << " ms (twice the amount allowed for calculator interpretation). "
   << "<br>This restriction may be lifted "
   << "by restarting the server "
@@ -124,7 +124,7 @@ bool TimeoutThread::HandleMaxComputationTime() {
   << "(on computers not facing the internet). "
   << "<br>Finally, you may modify the timeout restrictions "
   << "by modifying the source code directly, increasing the variable: "
-  << "theGlobalVariables.MaxComputationTimeMillisecondsNonPositiveForNoLimit. "
+  << "global.MaxComputationTimeMillisecondsNonPositiveForNoLimit. "
   << "<br>This may be a lot of work but will allow you to alter "
   << "time limits dynamically. You will need to modify file: "
   << __FILE__ << "<br>";
@@ -133,52 +133,52 @@ bool TimeoutThread::HandleMaxComputationTime() {
 }
 
 bool TimeoutThread::HandleComputationTimeout() {
-  if (!theGlobalVariables.flagRunningBuiltInWebServer) {
+  if (!global.flagRunningBuiltInWebServer) {
     return false;
   }
-  if (theGlobalVariables.millisecondsReplyAfterComputation <= 0) {
-    logWorker << "DEBUG: theGlobalVariables.millisecondsReplyAfterComputation : non-positive!" << logger::endL;
+  if (global.millisecondsReplyAfterComputation <= 0) {
+    logWorker << "DEBUG: global.millisecondsReplyAfterComputation : non-positive!" << logger::endL;
     return false;
   }
   if (this->elapsedComputationTimeInMilliseconds <= 0) {
     return false;
   }
-  if (this->elapsedComputationTimeInMilliseconds <= theGlobalVariables.millisecondsReplyAfterComputation) {
+  if (this->elapsedComputationTimeInMilliseconds <= global.millisecondsReplyAfterComputation) {
     return false;
   }
-  if (!theGlobalVariables.theProgress.ReportAlloweD()) {
+  if (!global.theProgress.ReportAlloweD()) {
     logWorker << "DEBUG: report not allowed!" << logger::endL;
     return false;
   }
   MacroRegisterFunctionWithName("TimerThreadData::HandleComputationTimeout");
-  if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection == nullptr) {
+  if (global.WebServerReturnDisplayIndicatorCloseConnection == nullptr) {
     return false;
   }
-  if (theGlobalVariables.theProgress.flagTimedOut) {
+  if (global.theProgress.flagTimedOut) {
     return false;
   }
-  theGlobalVariables.theProgress.flagTimedOut = true;
+  global.theProgress.flagTimedOut = true;
   // theReport2.SetStatus("Starting timer cycle displaying time out explanation.");
-  // Possible values for theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection:
+  // Possible values for global.WebServerReturnDisplayIndicatorCloseConnection:
   // 1) nullptr
   // 2) WebServer::OutputShowIndicatorOnTimeoutStatic
-  theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection("Triggered by timer thread.");
+  global.WebServerReturnDisplayIndicatorCloseConnection("Triggered by timer thread.");
   //theReport2.SetStatus("Starting timer cycle displaying time out indicator done, continuing timer cycle.");
   return false;
 }
 
 bool TimeoutThread::HandleEverythingIsDone() {
-  return theGlobalVariables.flagComputationFinishedAllOutputSentClosing;
+  return global.flagComputationFinishedAllOutputSentClosing;
 }
 
 bool TimeoutThread::HandlePingServerIamAlive() {
-  if (theGlobalVariables.flagComputationFinishedAllOutputSentClosing) {
+  if (global.flagComputationFinishedAllOutputSentClosing) {
     return true;
   }
-  if (theGlobalVariables.WebServerTimerPing == nullptr) {
+  if (global.WebServerTimerPing == nullptr) {
     return false;
   }
-  theGlobalVariables.WebServerTimerPing(this->elapsedTimeInMilliseconds);
+  global.WebServerTimerPing(this->elapsedTimeInMilliseconds);
   return false;
 }
 
@@ -198,34 +198,34 @@ void TimeoutThread::Run() {
   this->reset();
   for (;;) {
     this->counter ++;
-    theGlobalVariables.CheckConsistency();
+    global.CheckConsistency();
     this->HandleComputationTimer();
-    theGlobalVariables.FallAsleep(this->intervalBetweenChecksInMilliseconds);
-    // theGlobalVariables.CheckConsistency();
+    global.FallAsleep(this->intervalBetweenChecksInMilliseconds);
+    // global.CheckConsistency();
     this->HandleComputationCompleteStandard();
-    // theGlobalVariables.CheckConsistency();
+    // global.CheckConsistency();
     this->HandleTimerSignalToServer();
-    // theGlobalVariables.CheckConsistency();
+    // global.CheckConsistency();
     this->HandleMaxComputationTime();
-    // theGlobalVariables.CheckConsistency();
+    // global.CheckConsistency();
     // std::cout << "DEBUG: before handle timeout\n";
     this->HandleComputationTimeout();
     // std::cout << "DEBUG: before handle ping\n";
-    // theGlobalVariables.CheckConsistency();
+    // global.CheckConsistency();
     this->HandlePingServerIamAlive();
     // std::cout << "DEBUG: before handle every thing\n";
-    // theGlobalVariables.CheckConsistency();
+    // global.CheckConsistency();
     if (this->HandleEverythingIsDone()) {
       break;
     }
     // std::cout << "DEBUG: about to loop\n";
   }
   std::cout << "DEBUG: timer thread exited.\n";
-  theGlobalVariables.CheckConsistency();
+  global.CheckConsistency();
 }
 
 void RunTimerThread(int threadIndex) {
-  theGlobalVariables.theThreadData[threadIndex].theId = std::this_thread::get_id();
+  global.theThreadData[threadIndex].theId = std::this_thread::get_id();
   MacroRegisterFunctionWithName("RunTimerThread");
   TimeoutThread theThread;
   theThread.Run();

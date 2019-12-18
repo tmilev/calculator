@@ -30,7 +30,7 @@ bool FiniteGroup<elementSomeGroup>::ComputeAllElements(
 ) {
   MacroRegisterFunctionWithName("FiniteGroup::ComputeAllElements");
   this->CheckConsistency();
-  //double startTimeDebug= theGlobalVariables.GetElapsedSeconds();
+  //double startTimeDebug= global.GetElapsedSeconds();
   this->sizePrivate = this->SizeByFormulaOrNeg1();
   if (this->sizePrivate > 0 && MaxElements > 0 && this->sizePrivate > MaxElements) {
     return false;
@@ -1752,7 +1752,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::F
   int UpperBoundFreudenthal
 ) {
   MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::FreudenthalEvalIrrepIsWRTLeviPart");
-  //double startTimer = theGlobalVariables.GetElapsedSeconds();
+  //double startTimer = global.GetElapsedSeconds();
   this->ComputeRootSubsystem();
   Vector<Rational> EiVect;
   List<bool> Explored;
@@ -2335,7 +2335,7 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsThomasVersi
   }
   GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational>& sr = *startingIrrep;
   if (this->theGroup.squaresCCReps.size == 0) {
-    this->theGroup.ComputeSquaresCCReps(theGlobalVariables);
+    this->theGroup.ComputeSquaresCCReps(global);
   }
   this->theGroup.characterTable.SetSize(0);
   this->irreps_grcam.SetSize(0);

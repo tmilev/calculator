@@ -9,7 +9,7 @@
 
 static ProjectInformationInstance projectInfoCalculatorGlobal(__FILE__, "Global objects");
 
-GlobalVariables theGlobalVariables;
+GlobalVariables global;
 std::string GlobalVariables::GetDateForLogFiles() {
   static std::string tempDate;
   if (tempDate != "") {
@@ -56,13 +56,13 @@ FormatExpressions consoleFormat;
 Crasher crash;
 
 void InitializeGlobalObjects() {
-  theGlobalVariables.processType = ProcessTypes::server;
-  theGlobalVariables.flagIsChildProcess = false;
+  global.processType = ProcessTypes::server;
+  global.flagIsChildProcess = false;
   InitializeTimeR();
-  theGlobalVariables.IndicatorStringOutputFunction = nullptr;
-  theGlobalVariables.pointerCallSystemNoOutput = &CallSystemWrapperNoOutput;
-  theGlobalVariables.pointerCallSystemWithOutput = &CallSystemWrapperReturnStandardOutput;
-  theGlobalVariables.pointerCallChDir = &CallChDirWrapper;
+  global.IndicatorStringOutputFunction = nullptr;
+  global.pointerCallSystemNoOutput = &CallSystemWrapperNoOutput;
+  global.pointerCallSystemWithOutput = &CallSystemWrapperReturnStandardOutput;
+  global.pointerCallChDir = &CallChDirWrapper;
   consoleFormat.flagUseHTML = false;
   consoleFormat.flagUseLatex = false;
 }
@@ -74,14 +74,14 @@ void HtmlRoutines::MakeReportIndicatorFile(const std::string& input) {
   FileOperations::OpenFileCreateIfNotPresentVirtual(
     theFile, "result/output.html", false, true, false
   );
-  theFile << " Elapsed calculator time: " << theGlobalVariables.GetElapsedSeconds() << " second(s).";
+  theFile << " Elapsed calculator time: " << global.GetElapsedSeconds() << " second(s).";
   theFile << input;
   theFile.flush();
   theFile.close();
 }
 
 void HtmlRoutines::MakeStdCoutReport(const std::string& input) {
-  theGlobalVariables.Comments << input;
+  global.Comments << input;
   HtmlRoutines::MakeReportIndicatorFile(input);
 }
 

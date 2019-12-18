@@ -111,11 +111,11 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasis(List
         this->SoPolyBuf.MultiplyBy(this->SoPolyRightShift, currentLeft.theCoeffs[leftIndex]);
         this->SoPolyBuf -= this->bufPoly;
 //        this->RemainderDivisionWithRespectToBasis
-//        (this->SoPolyBuf, &this->remainderDivision, theGlobalVariables, i);
+//        (this->SoPolyBuf, &this->remainderDivision, global, i);
         //if (!this->remainderDivision.IsEqualToZero())
         //  this->basisCandidates.AddOnTop(this->remainderDivision);
         //if (this->basisCandidates.size >this->theBasiS.size)
-        //  if (this->AddPolysAndReduceBasis(theGlobalVariables))
+        //  if (this->AddPolysAndReduceBasis(global))
         //    changed = true;
         this->basisCandidates.AddOnTop(this->SoPolyBuf);
         this->NumberGBComputations ++;
@@ -124,7 +124,7 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasis(List
             return this->WrapUpGroebnerOnExceedingComputationLimit(inputOutpuT);
           }
         }
-//        if (this->AddPolyAndReduceBasis(theGlobalVariables))
+//        if (this->AddPolyAndReduceBasis(global))
 //        { i = 0;
 //          j = - 1;
 //          changed = true;
@@ -302,7 +302,7 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasisImpro
   (void) upperComputationBound;
   //This is an implementation of the algorithm on page 106, Cox, Little, O'Shea,
   //Ideals, Varieties, algorithms
-  this->initForGroebnerComputation(inputOutpuT, theGlobalVariables);
+  this->initForGroebnerComputation(inputOutpuT, global);
   this->theBasiS = inputOutpuT;
   HashedListSpecialized<PairInts> indexPairs;
 //  Pair<int, int> currentPair;
@@ -360,7 +360,7 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasisImpro
         leftBuf.MultiplyBy(leftShift, this->leadingCoeffs[lastPair.Object2]);
         rightBuf.MultiplyBy(rightShift, this->leadingCoeffs[lastPair.Object1]);
         leftBuf -= rightBuf;
-        this->RemainderDivisionWithRespectToBasis(leftBuf, &outputRemainder, theGlobalVariables);
+        this->RemainderDivisionWithRespectToBasis(leftBuf, &outputRemainder, global);
         if (this->flagDoProgressReport) {
           std::stringstream out;
           out << "Basis size: " << this->theBasiS.size << ".\n<br>Remaining cases current round: " << indexPairs.size;
@@ -457,7 +457,7 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis(
   ProgressReport theReport;
   if (this->flagDoProgressReport) {
     theReportStart.Report("Computing remainder division");
-    //+     inputOutput.ToString(&theGlobalVariables->theDefaultFormat) + " mod " +theBasiS.ToString(&theGlobalVariables->theDefaultFormat));
+    //+     inputOutput.ToString(&global->theDefaultFormat) + " mod " +theBasiS.ToString(&global->theDefaultFormat));
   }
   outputRemainder->MakeZero();
   Polynomial<coefficient>& currentRemainder = inputOutput;
@@ -526,19 +526,19 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis(
           theReport.Report(out.str());
         }
 /*        if (this->NumberOfComputations>this->MaxNumGBComputations+ 1000) {
-          theGlobalVariables.Comments << "<br>Dividing "
+          global.Comments << "<br>Dividing "
           << currentRemainder.ToString()
           <<  " by " << theBasiS[i].ToString() << "<br>i.e. subtracting "
           << this->bufPoly.ToString() ;
           Polynomial<Rational> currentRemainder1;
           currentRemainder1= currentRemainder;
           currentRemainder1-= this->bufPoly;
-          theGlobalVariables.Comments << " I must get: " << currentRemainder1.ToString();
+          global.Comments << " I must get: " << currentRemainder1.ToString();
         }*/
-        //theGlobalVariables.Comments << " <hr>Subtracting " << this->bufPoly.ToString()
+        //global.Comments << " <hr>Subtracting " << this->bufPoly.ToString()
         //<< " from " << currentRemainder.ToString();
         currentRemainder -= this->bufPoly;
-        //theGlobalVariables.Comments << " to get " << currentRemainder.ToString();
+        //global.Comments << " to get " << currentRemainder.ToString();
         if (this->flagDoLogDivision) {
           this->intermediateRemainders.GetElement().AddOnTop(currentRemainder);
           List<MonomialP> empty;
@@ -546,7 +546,7 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis(
         }
         divisionOcurred = true;
 /*        if (this->NumberOfComputations>this->MaxNumGBComputations+ 1000) {
-          theGlobalVariables.Comments << "<br>Result:<br> " << currentRemainder.ToString()
+          global.Comments << "<br>Result:<br> " << currentRemainder.ToString()
           << "<br>Current divisor index: " << i + 1;
           if (this->NumberOfComputations>this->MaxNumGBComputations+ 1010)
             crash
@@ -556,7 +556,7 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis(
             << " something is fishy. " << crash;
         }*/
         this->NumberGBComputations++;
-        //theGlobalVariables.Comments << " to get " << currentRemainder.ToString(&theGlobalVariables->theDefaultFormat);
+        //global.Comments << " to get " << currentRemainder.ToString(&global->theDefaultFormat);
       } else {
         i ++;
       }
@@ -584,12 +584,12 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis(
         << " monomials in current remainder.\n<br>"
         << outputRemainder->size() << " monomials in output remainder.";
         theReport.Report(out.str());
-          //theGlobalVariables.Comments << out.str();
+          //global.Comments << out.str();
       }
     }
   }
-//  theGlobalVariables.Comments << " <br>final remainder: "
-//  << outputRemainder.ToString(&theGlobalVariables->theDefaultFormat)
+//  global.Comments << " <br>final remainder: "
+//  << outputRemainder.ToString(&global->theDefaultFormat)
 //  << "<hr>";
 }
 
@@ -746,7 +746,7 @@ bool GroebnerBasisComputation<coefficient>::HasImpliedSubstitutions(
   Polynomial<coefficient> tempP;
   coefficient theCF;
 //  if (theAlgebraicClosure != 0)
-//  { theGlobalVariables.Comments << "running with non-zero algebraic closure";
+//  { global.Comments << "running with non-zero algebraic closure";
 //  }
   for (int i = 0; i < inputSystem.size; i ++) {
     tempP = inputSystem[i];
@@ -774,10 +774,10 @@ bool GroebnerBasisComputation<coefficient>::HasImpliedSubstitutions(
       theCF *= - 1;
       outputSub[j] /= theCF;
 //      coefficient theConst;
-//      theGlobalVariables.Comments << "<hr>Output sub is: x_{" << j+ 1 << "}=" << outputSub[j].ToString();
+//      global.Comments << "<hr>Output sub is: x_{" << j+ 1 << "}=" << outputSub[j].ToString();
 //      if (outputSub[j].IsConstant(&theConst))
 //        this->SetSerreLikeSolutionIndex(j, theConst);
-      //theGlobalVariables.Comments << "<br>Current solution candidate is: " << this->systemSolution.GetElement().ToString();
+      //global.Comments << "<br>Current solution candidate is: " << this->systemSolution.GetElement().ToString();
       return true;
     }
     int oneVarIndex;

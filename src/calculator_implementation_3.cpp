@@ -141,7 +141,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
     lowestUnexploredHeightDiff <= theTopHeightSimpleCoords;
     lowestUnexploredHeightDiff ++
   ) {
-    //double startCycleTime = theGlobalVariables.GetElapsedSeconds();
+    //double startCycleTime = global.GetElapsedSeconds();
     if (upperBoundDominantWeights > 0 && numTotalWeightsFound > upperBoundDominantWeights) {
       break;
     }
@@ -412,25 +412,25 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg(
       currentOp += tempMat;
     }
     std::stringstream tempStream3;
-    double timeAtStart1 = theGlobalVariables.GetElapsedSeconds();
+    double timeAtStart1 = global.GetElapsedSeconds();
     tempStream3 << "Computing eigenspace corresponding to " << currentElt.ToString() << "...";
     theReport.Report(tempStream3.str());
     Matrix<coefficient> currentOpMat;
     currentOp.GetMatrix(currentOpMat, this->GetDim());
     currentOpMat.GetZeroEigenSpace(eigenSpacesPerSimpleGenerator[i]);
-    tempStream3 << " done in " << theGlobalVariables.GetElapsedSeconds() - timeAtStart1 << " seconds. ";
+    tempStream3 << " done in " << global.GetElapsedSeconds() - timeAtStart1 << " seconds. ";
     theReport.Report(tempStream3.str());
     if (i == 0) {
       theFinalEigenSpace = eigenSpacesPerSimpleGenerator[i];
     } else {
       std::stringstream tempStream4;
-      double timeAtStart2 = theGlobalVariables.GetElapsedSeconds();
+      double timeAtStart2 = global.GetElapsedSeconds();
       tempStream4 << "Intersecting with eigenspace corresponding to " << currentElt.ToString() << "...";
       tempSpace1 = theFinalEigenSpace;
       theReport.Report(tempStream4.str());
       tempSpace2 = eigenSpacesPerSimpleGenerator[i];
       theFinalEigenSpace.IntersectTwoLinSpaces(tempSpace1, tempSpace2, theFinalEigenSpace);
-      tempStream4 << " done in " << theGlobalVariables.GetElapsedSeconds() - timeAtStart2 << " seconds. ";
+      tempStream4 << " done in " << global.GetElapsedSeconds() - timeAtStart2 << " seconds. ";
       theReport.Report(tempStream4.str());
     }
   }
@@ -476,7 +476,7 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg(
     if (outputWeightsFundCoords != nullptr) {
       outputWeightsFundCoords->AddOnTop(currentWeight);
     }
-    out << currentElt.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
+    out << currentElt.ToString(&global.theDefaultFormat.GetElement());
     if (currentElt.size() > 1) {
       out << ")";
     }
@@ -915,8 +915,8 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
   ModuleSSalgebra<RationalFunctionOld>& theMod = theCommands.theObjectContainer.theCategoryOmodules[theModIndex];
   theMod.GetOwner().flagHasNilradicalOrder = true;
   std::stringstream out;
-  theCommands << "<hr>Time elapsed before making B3 irrep: " << theGlobalVariables.GetElapsedSeconds();
-  double timeAtStart = theGlobalVariables.GetElapsedSeconds();
+  theCommands << "<hr>Time elapsed before making B3 irrep: " << global.GetElapsedSeconds();
+  double timeAtStart = global.GetElapsedSeconds();
   theMod.SplitFDpartOverFKLeviRedSubalg(
     theG2B3Data.theHmm,
     theG2B3Data.selSmallParSel,
@@ -925,7 +925,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
     &theG2B3Data.leviEigenSpace,
     nullptr
   );
-  theCommands << "<br>Time needed to make B3 irrep: " << theGlobalVariables.GetElapsedSeconds() - timeAtStart;
+  theCommands << "<br>Time needed to make B3 irrep: " << global.GetElapsedSeconds() - timeAtStart;
   theG2B3Data.g2Weights.SetSize(theG2B3Data.outputWeightsFundCoordS.size);
   theG2B3Data.g2DualWeights.SetSize(theG2B3Data.outputWeightsFundCoordS.size);
   Matrix<Rational> invertedG2cartanMat;
@@ -1228,7 +1228,7 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
         nullptr
       );
       reportStream << "\nPath orbit size = " << theStrings.size
-      << " generated in " << theGlobalVariables.GetElapsedSeconds() << " seconds. ";
+      << " generated in " << global.GetElapsedSeconds() << " seconds. ";
       theReport.Report(reportStream.str());
       for (int k = 0; k < theStrings.size; k ++) {
         LittelmannPath& currentPath = tempList[k];
@@ -1770,11 +1770,11 @@ bool Calculator::WriteTestStrings(List<std::string>& inputCommands, List<std::st
 
 bool Calculator::innerAutomatedTestSetKnownGoodCopy(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerAutomatedTestSetKnownGoodCopy");
-  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
+  if (!global.UserDefaultHasAdminRights()) {
     return theCommands << "Function requires admin access. ";
   }
   (void) input;//avoid unused variable warning, portable
-  theGlobalVariables.millisecondsMaxComputation = 30000000; //30k seconds: ok, we have admin access.
+  global.millisecondsMaxComputation = 30000000; //30k seconds: ok, we have admin access.
   List<std::string> inputStringsTest, outputStringsTestWithInit, outputStringsTestNoInit;
   std::stringstream out;
   theCommands.theTestFileName = "automatedTest.txt";
@@ -1782,20 +1782,20 @@ bool Calculator::innerAutomatedTestSetKnownGoodCopy(Calculator& theCommands, con
     crash << "This is a programming error or worse: file " << theCommands.theTestFileName
     << " does not exist but cannot be created. Something is very wrong. " << crash;
   }
-  double startTime = theGlobalVariables.GetElapsedSeconds();
+  double startTime = global.GetElapsedSeconds();
   theCommands.AutomatedTestRun(inputStringsTest, outputStringsTestWithInit, outputStringsTestNoInit);
   theCommands.WriteTestStrings(inputStringsTest, outputStringsTestWithInit);
-  out << "Test run completed in " << theGlobalVariables.GetElapsedSeconds() - startTime << " seconds.";
+  out << "Test run completed in " << global.GetElapsedSeconds() - startTime << " seconds.";
   return output.AssignValue(out.str(), theCommands);
 }
 
 bool Calculator::innerAutomatedTest(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerAutomatedTest");
-  if (!theGlobalVariables.UserDefaultHasAdminRights()) {
+  if (!global.UserDefaultHasAdminRights()) {
     return theCommands << "Automated test requires admin access";
   }
-  theGlobalVariables.millisecondsMaxComputation = 30000000; //30k seconds, ok as we have admin access
-  int64_t startTime = theGlobalVariables.GetElapsedMilliseconds();
+  global.millisecondsMaxComputation = 30000000; //30k seconds, ok as we have admin access
+  int64_t startTime = global.GetElapsedMilliseconds();
   theCommands.theTestFileName = "automatedTest.txt";
   if (!FileOperations::FileExistsVirtual("output/" + theCommands.theTestFileName)) {
     return theCommands.innerAutomatedTestSetKnownGoodCopy(theCommands, input, output);
@@ -1861,7 +1861,7 @@ bool Calculator::innerAutomatedTest(Calculator& theCommands, const Expression& i
   }
   out << "<br>The command for updating the test file is "
   << HtmlRoutines::GetCalculatorComputationAnchor("AutomatedTestSetKnownGoodCopy 0");
-  out << "<br>Total time for the test: " << theGlobalVariables.GetElapsedMilliseconds() - startTime << " ms. ";
+  out << "<br>Total time for the test: " << global.GetElapsedMilliseconds() - startTime << " ms. ";
   return output.AssignValue(out.str(), theCommands);
 }
 

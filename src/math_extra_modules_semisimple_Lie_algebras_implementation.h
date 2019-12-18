@@ -81,7 +81,7 @@ Rational ModuleSSalgebra<coefficient>::hwTrace(
   if (theProgressReport != nullptr && this->cachedPairs.size < 500000) {
     std::stringstream tempStream;
     tempStream << "Number of cached pairs: " << this->cachedPairs.size
-    << " at recursion depth " << theGlobalVariables.CustomStackTrace.size;
+    << " at recursion depth " << global.CustomStackTrace.size;
     theProgressReport->Report(tempStream.str());
   }
   return result;
@@ -496,7 +496,7 @@ void ModuleSSalgebra<coefficient>::SplitOverLevi(
     if (outputWeightsFundCoords != 0) {
       outputWeightsFundCoords->AddOnTop(currentWeight);
     }
-    out << currentElt.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
+    out << currentElt.ToString(&global.theDefaultFormat.GetElement());
     if (currentElt.size() > 1) {
       out << ")";
     }
@@ -731,7 +731,7 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW(
           }
           tempSSElt.MakeGenerator(theIndex, this->GetOwner());
           if (outputReport != nullptr) {
-            out2 << "<hr>Simple generator: " << tempSSElt.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
+            out2 << "<hr>Simple generator: " << tempSSElt.ToString(&global.theDefaultFormat.GetElement());
           }
           MatrixTensor<coefficient>& theMatrix = this->GetActionGeneratorIndeX(theIndex);
           std::stringstream tempStream;
@@ -748,9 +748,9 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW(
           }
       /*    for (int j = 0; j < this->actionsSimpleGens[i].size; j ++)
             for (int k = 0; k< this->actionsSimpleGens[i][j].size; k++) {
-              out << "<br>" << theSimpleGenerator.ToString(theGlobalVariables, tempFormat) << "\\cdot "
+              out << "<br>" << theSimpleGenerator.ToString(global, tempFormat) << "\\cdot "
               << this->theGeneratingWordsGrouppedByWeight[j][k].ToString(false, false, tempFormat)
-              << "\\cdot v=" << this->actionsSimpleGens[i][j][k].ToString(theGlobalVariables, tempFormat)
+              << "\\cdot v=" << this->actionsSimpleGens[i][j][k].ToString(global, tempFormat)
               << "\\cdot v"
               ;
             }*/
@@ -909,7 +909,7 @@ void ModuleSSalgebra<coefficient>::CheckConsistency() {
     left = this->GetActionGeneratorIndeX(i);
     right.LieBracketOnTheLeft(left);
   }
-  theGlobalVariables.Comments << "Consistency check passed successfully!";
+  global.Comments << "Consistency check passed successfully!";
 }
 
 template <class coefficient>
@@ -1087,7 +1087,7 @@ bool ElementTensorsGeneralizedVermas<coefficient>::MultiplyOnTheLeft(
   for (int i = 0; i < theUE.size(); i ++) {
     if (!this->MultiplyOnTheLeft(theUE[i], buffer, ownerAlgebra, theRingUnit)) {
       ElementSumGeneralizedVermas<coefficient> tempOutput;
-      theGlobalVariables.Comments << "<hr>emergency mode!";
+      global.Comments << "<hr>emergency mode!";
       for (int j = 0; j < this->size(); j ++) {
         const MonomialTensorGeneralizedVermas<coefficient>& currentMon = (*this)[j];
         if (currentMon.theMons.size != 1) {
@@ -1235,7 +1235,7 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
   SemisimpleLieAlgebra& theAlgebrA = *this->owner;
   WeylGroupData& theWeyl = theAlgebrA.theWeyl;
   std::stringstream out;
-  GlobalVariables theGlobalVariables;
+  GlobalVariables global;
   out << "<br>Semisimple Lie algebra acting on generalized Verma module: " << theAlgebrA.ToStringLieAlgebraName() << ".";
   out << "<br>Parabolic selection: " << this->parabolicSelectionNonSelectedAreElementsLevi.ToString();
   out << "<br>Highest weight of Generalized Verma module in fundamental coordinates: "
@@ -1269,7 +1269,7 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
         tempWelt.generatorsLastAppliedFirst[k] = aGen;
       }
       out << "<tr><td>m_{ " << wordCounter << "} </td><td>"
-      << currentList[j].ToString(&theGlobalVariables.theDefaultFormat.GetElement())
+      << currentList[j].ToString(&global.theDefaultFormat.GetElement())
       << "  v_\\lambda</td><td>" << tempWelt.ToString() << "</td> </tr>";
     }
   }
@@ -1313,10 +1313,10 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
     List<MonomialUniversalEnveloping<coefficient> >& currentList = this->theGeneratingWordsGrouppedByWeight[k];
     for (int i = 0; i < currentList.size; i ++) {
       MonomialUniversalEnveloping<coefficient>& currentElt = currentList[i];
-      out << "<br>monomial " << i + 1 << ": " << currentElt.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
+      out << "<br>monomial " << i + 1 << ": " << currentElt.ToString(&global.theDefaultFormat.GetElement());
     }
     out << "; Matrix of Shapovalov form associated to current weight level: <br> "
-    << theBF.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
+    << theBF.ToString(&global.theDefaultFormat.GetElement());
 /*    if (!theBF.IsPositiveDefinite()) {
       monomialDetailStream << "<b>Is not positive definite!</b>";
       this->flagConjectureCholds = false;
@@ -1330,7 +1330,7 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
     }
     out << " corresonding inverted matrix:<br>";
     if (theBFinverted.NumRows > 0) {
-      out << theBFinverted.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
+      out << theBFinverted.ToString(&global.theDefaultFormat.GetElement());
     } else {
       out << "<b>The matrix of the bilinear form is not invertible!</b>";
       isBad = true;

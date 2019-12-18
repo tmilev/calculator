@@ -622,7 +622,7 @@ bool JSData::readstring(
       << "\")";
       *commentsOnFailure << "<hr>Failed to parse your JSON. Input:\n<br>\n "
       << "<a href=\""
-      << theGlobalVariables.DisplayNameExecutable
+      << global.DisplayNameExecutable
       << "?request=calculator&mainInput="
       << HtmlRoutines::ConvertStringToURLString(calculatorInput.str(), false)
       << "\">"

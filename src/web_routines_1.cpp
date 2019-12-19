@@ -175,7 +175,7 @@ void WebServerMonitor::Restart() {
   std::stringstream killServerChildrenCommand;
   killServerChildrenCommand << "pkill -9 -P " << this->pidServer;
   global  << "Terminating server children with command: " << killServerChildrenCommand.str() << logger::endL;
-  global.CallSystemNoOutput(killServerChildrenCommand.str(), &global);
+  global.CallSystemNoOutput(killServerChildrenCommand.str(), true);
   global << logger::red << "Terminating server with pid: " << this->pidServer << logger::endL;
   WebServer::TerminateProcessId(this->pidServer);
   global << logger::red << "Restarting monitor. " << this->pidServer << logger::endL;

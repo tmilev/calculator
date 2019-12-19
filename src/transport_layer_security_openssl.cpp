@@ -106,7 +106,7 @@ bool TransportLayerSecurityOpenSSL::initSSLKeyFilesCreateOnDemand() {
   }
   global << "About to generate key files with the following command. " << logger::endL;
   global << logger::green << theCommand.str() << logger::endL;
-  global.CallSystemNoOutput(theCommand.str(), &global);
+  global.CallSystemNoOutput(theCommand.str(), true);
   return true;
 }
 

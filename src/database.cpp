@@ -336,7 +336,7 @@ bool ProblemData::CheckConsistency() const {
   MacroRegisterFunctionWithName("ProblemData::CheckConsistency");
   for (int i = 0; i < this->theAnswers.size(); i ++) {
     if (StringRoutines::StringTrimWhiteSpace(this->theAnswers.theValues[i].answerId) == "") {
-      crash << "This is not supposed to happen: empty answer id." << crash;
+      global.fatal << "This is not supposed to happen: empty answer id." << global.fatal;
     }
   }
   return true;
@@ -350,7 +350,7 @@ bool ProblemData::CheckConsistencyMQids() const {
       errorStream << "This is not supposed to happen: empty idMQfield. The answer id is: "
       << this->theAnswers.theValues[i].answerId << "<br>" << this->ToString() << "<hr>Answer information: "
       << this->ToString() << "<br>";
-      crash << errorStream.str() << crash;
+      global.fatal << errorStream.str() << global.fatal;
     }
   }
   return true;
@@ -452,7 +452,7 @@ bool UserCalculator::FetchOneColumn(
   (void) columnNameUnsafe;
   (void) outputUnsafe;
   (void) failureComments;
-  crash << "not implemented" << crash;
+  global.fatal << "not implemented" << global.fatal;
   return false;
 }
 
@@ -1119,7 +1119,7 @@ List<QueryExact> UserCalculatorData::GetFindMeFromUserNameQuery() {
     result.AddOnTop(findByEmail);
   }
   if (result.size == 0) {
-    crash << "User with find query not allowed to have neither username nor email. " << crash;
+    global.fatal << "User with find query not allowed to have neither username nor email. " << global.fatal;
   }
   return result;
 }

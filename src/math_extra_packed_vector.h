@@ -605,7 +605,7 @@ void GetTauSignaturesFromSubgroup(WeylGroupData& G, const List<ElementWeylGroup>
       }
     }
     if (notFound) {
-      crash << "Something went very wrong: couldn't find preimage of conjugacy class of subgroup. " << crash;
+      global.fatal << "Something went very wrong: couldn't find preimage of conjugacy class of subgroup. " << global.fatal;
     }
   }
   out.SetSize(G.theGroup.characterTable.size);

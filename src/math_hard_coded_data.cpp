@@ -14,11 +14,11 @@ void ElementWeylGroup::MakeFromReadableReflections(
   this->generatorsLastAppliedFirst.SetSize(theReflections.size);
   for (int i = 0; i < theReflections.size; i ++) {
     if (!theReflections[i].IsSmallInteger(&this->generatorsLastAppliedFirst[i].index)) {
-      crash << "Bad reflection list." << crash;
+      global.fatal << "Bad reflection list." << global.fatal;
     }
     this->generatorsLastAppliedFirst[i].index --;
     if (this->generatorsLastAppliedFirst[i].index < 0 || this->generatorsLastAppliedFirst[i].index >= input.GetDim()) {
-      crash << "Bad reflection index: " << this->generatorsLastAppliedFirst[i].ToString() << crash;
+      global.fatal << "Bad reflection index: " << this->generatorsLastAppliedFirst[i].ToString() << global.fatal;
     }
   }
   if (!dontMakeCanonical_SET_TRUE_ON_YOUR_OWN_RISK) {
@@ -1145,8 +1145,8 @@ bool LoadOutputSubgroupsFromJSData(JSData& input, WeylGroupData& inputGroup, Lis
       readerSubgroup.flagIsExtendedParabolic = false;
       readerSubgroup.flagIsParabolic = false;
     } else {
-      crash << "Corrupt JSon data, entry number " << i + 1 << ": the group labels are: "
-      << currentSGdata.theList[0].ToString(false) << crash;
+      global.fatal << "Corrupt JSon data, entry number " << i + 1 << ": the group labels are: "
+      << currentSGdata.theList[0].ToString(false) << global.fatal;
     }
     std::string sgString = currentSGdata.theList[0].theList[1].theString;
     readerSubgroup.generatingSimpleRoots.SetSize(0);
@@ -1159,24 +1159,24 @@ bool LoadOutputSubgroupsFromJSData(JSData& input, WeylGroupData& inputGroup, Lis
     theSAdiagram.ComputeDiagramTypeModifyInput(readerSubgroup.generatingSimpleRoots, inputGroup);
     theSAdiagram.GetDynkinType(readerSubgroup.theDynkinType);
     if (readerSubgroup.theDynkinType.ToString() != sgString) {
-      crash << "Corrupt JSon data: hard-coded Dynkin type is: "
+      global.fatal << "Corrupt JSon data: hard-coded Dynkin type is: "
       << sgString << " but dynkin type is computed to be: "
-      << readerSubgroup.theDynkinType.ToString() << crash;
+      << readerSubgroup.theDynkinType.ToString() << global.fatal;
     }
     if (currentSGdata.theList[1].theList.size != inputGroup.theGroup.characterTable.size) {
-      crash << "Corrupt JSon or non-initialized Weyl group: tau signature has " << currentSGdata.theList[1].theList.size
+      global.fatal << "Corrupt JSon or non-initialized Weyl group: tau signature has " << currentSGdata.theList[1].theList.size
       << " entries "
-      << " but Weyl group has " << inputGroup.theGroup.characterTable.size << " irreps. " << crash;
+      << " but Weyl group has " << inputGroup.theGroup.characterTable.size << " irreps. " << global.fatal;
     }
     if (
       inputGroup.theGroup.characterTable.size <= 0 ||
       inputGroup.theGroup.characterTable.size != inputGroup.theGroup.ConjugacyClassCount()
     ) {
-      crash << "Bad input group. " << crash;
+      global.fatal << "Bad input group. " << global.fatal;
     }
     if (inputGroup.theDynkinType.ToString() == "F^{1}_4") {
       if (inputGroup.theGroup.ConjugacyClassCount() != 25) {
-        crash << "Bad f4. " << crash;
+        global.fatal << "Bad f4. " << global.fatal;
       }
     }
     readerSubgroup.tauSignature.SetSize(inputGroup.theGroup.characterTable.size);
@@ -1417,7 +1417,7 @@ bool WeylGroupData::LoadConjugacyClassesHelper() {
     this->theGroup.sizePrivate += this->theGroup.conjugacyClasseS[i].size;
   }
   if (this->theGroup.sizePrivate != this->theGroup.GetSizeByFormula(this->theGroup)) {
-    crash << "Corrupt hard-coded data: the size of the group does not work out according to formula. " << crash;
+    global.fatal << "Corrupt hard-coded data: the size of the group does not work out according to formula. " << global.fatal;
   }
   this->theGroup.flagCCRepresentativesComputed = true;
   this->theGroup.flagCCsComputed = false;
@@ -1774,11 +1774,11 @@ bool WeylGroupData::LoadGAPRootSystem(HashedList<Vector<Rational> >& outputPosit
     return result;
   }
   if (outputPositiveRootSystem.size != this->RootsOfBorel.size) {
-    crash << "Wrong number of GAP roots! " << crash;
+    global.fatal << "Wrong number of GAP roots! " << global.fatal;
   }
   for (int i = 0; i < this->RootsOfBorel.size; i ++) {
     if (!outputPositiveRootSystem.Contains(this->RootsOfBorel[i])) {
-      crash << " Positive root " << outputPositiveRootSystem[i].ToString() << " is not a GAP root. " << crash;
+      global.fatal << " Positive root " << outputPositiveRootSystem[i].ToString() << " is not a GAP root. " << global.fatal;
     }
   }
   return true;

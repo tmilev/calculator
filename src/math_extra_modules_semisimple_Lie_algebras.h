@@ -127,10 +127,10 @@ public:
   }
   bool CheckInitialization() const {
     if (this->flagDeallocated) {
-      crash << "Use after free of ModuleSSalgebra. " << crash;
+      global.fatal << "Use after free of ModuleSSalgebra. " << global.fatal;
     }
     if (this->owner == nullptr) {
-      crash << "ModuleSSalgebra does not have its owner Semisimple algebra properly set. " << crash;
+      global.fatal << "ModuleSSalgebra does not have its owner Semisimple algebra properly set. " << global.fatal;
     }
     return true;
   }
@@ -146,8 +146,8 @@ public:
   );
   SemisimpleLieAlgebra& GetOwner() const {
     if (this->owner == nullptr) {
-      crash << "This is a programming error: calling GetOwner() "
-      << "on a non-initialized generalized Verma module. " << crash;
+      global.fatal << "This is a programming error: calling GetOwner() "
+      << "on a non-initialized generalized Verma module. " << global.fatal;
     }
     return *this->owner;
   }
@@ -288,16 +288,16 @@ public:
   }
   ModuleSSalgebra<coefficient>& GetOwnerModule() const {
     if (this->size() <= 0) {
-      crash << "This is a programming error: "
+      global.fatal << "This is a programming error: "
       << "calling GetOwnerModule() on a tensor element which has no monomials. "
       << "This is not allowed as the index of "
-      << "the owner modules are stored in the monomials. " << crash;
+      << "the owner modules are stored in the monomials. " << global.fatal;
     }
     const MonomialTensorGeneralizedVermas<coefficient>& theMon = (*this)[0];
     if (theMon.theMons.size <= 0) {
-      crash << "This is a programming error: calling GetOwnerModule() "
+      global.fatal << "This is a programming error: calling GetOwnerModule() "
       << "on a tensor element which has a constant monomial. "
-      << "This is not allowed: constant monomials do not have owners. " << crash;
+      << "This is not allowed: constant monomials do not have owners. " << global.fatal;
     }
     MonomialGeneralizedVerma<coefficient>& theGmon = theMon.theMons[0];
     return *theGmon.owner;

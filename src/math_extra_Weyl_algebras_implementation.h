@@ -47,11 +47,11 @@ void ElementWeylAlgebra<coefficient>::MultiplyTwoMonomials(
   for (int i = 0; i < theDimensioN; i ++) {
     int powerDiffOp = 0;
     if (!left.differentialPart(i).IsSmallInteger(&powerDiffOp)) {
-      crash << "This is a programming error. Requested operations with elements of Weyl algebra "
+      global.fatal << "This is a programming error. Requested operations with elements of Weyl algebra "
       << "that have monomials of exponent "
       << left.differentialPart(i).ToString()
       << " which I cannot handle. If this is bad user input, "
-      << "it should have been caught at an earlier level. " << crash;
+      << "it should have been caught at an earlier level. " << global.fatal;
     }
     tempSel.MaxMultiplicities[i] = powerDiffOp;
     theExpectedSize *= powerDiffOp;
@@ -273,8 +273,8 @@ void ElementWeylAlgebra<coefficient>::GetStandardOrderDiffOperatorCorrespondingT
   outputDO.MakeZero();
   int inputPower = 0;
   if (!inputRationalPower.IsSmallInteger(&inputPower)) {
-    crash << "This is a programming error: "
-    << " I can give you a differential operator only from integer exponent. " << crash;
+    global.fatal << "This is a programming error: "
+    << " I can give you a differential operator only from integer exponent. " << global.fatal;
   }
   if (inputPower >= 0) {
     tempMon.polynomialPart.MakeEi(indexVar, inputPower);
@@ -340,8 +340,8 @@ void ElementWeylAlgebra<coefficient>::FourierTransform(ElementWeylAlgebra<coeffi
   for (int i = 0; i < this->size(); i ++) {
     const MonomialWeylAlgebra& currentMon = (*this)[i];
     if (!(currentMon.polynomialPart.TotalDegree() + currentMon.differentialPart.TotalDegree()).IsInteger(&totalDeg)) {
-      crash << "This is a programming error: calling Fourier transoform "
-      << "on differential operator with non-integral exponents. " << crash;
+      global.fatal << "This is a programming error: calling Fourier transoform "
+      << "on differential operator with non-integral exponents. " << global.fatal;
     }
     theMon.differentialPart = currentMon.polynomialPart;
     theMon.polynomialPart = currentMon.differentialPart;

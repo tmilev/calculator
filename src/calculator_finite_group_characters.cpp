@@ -17,9 +17,9 @@ FormatExpressions::GetMonOrder<ClassFunction<WeylGroupData::WeylGroupBase, Ratio
 
 bool WeylGroupData::CheckConsistency() const {
   //if (this == 0)
-  //  crash << "The this pointer of a Weyl group is zero. " << crash;
+  //  global.fatal << "The this pointer of a Weyl group is zero. " << global.fatal;
   if (this->flagDeallocated) {
-    crash << "This is a programming error: use after free of WeylGroup. " << crash;
+    global.fatal << "This is a programming error: use after free of WeylGroup. " << global.fatal;
   }
   for (int i = 0; i < this->theGroup.generators.size; i ++) {
     this->theGroup.generators[i].CheckConsistency();
@@ -31,10 +31,10 @@ bool WeylGroupData::CheckConsistency() const {
 template <typename elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::CheckInitializationFDrepComputation() const {
   if (this->theElements.size == 0) {
-    crash << "This is a programming error: requesting to compute character hermitian product in a group whose "
+    global.fatal << "This is a programming error: requesting to compute character hermitian product in a group whose "
     << "conjugacy classes and/or elements have not been computed. The group reports to have "
     << this->ConjugacyClassCount() << " conjugacy classes and " << this->theElements.size << " elements. "
-    << crash;
+    << global.fatal;
     return false;
   }
   return this->CheckInitializationConjugacyClasses();
@@ -45,8 +45,8 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::CheckAllSimp
   this->CheckInitialization();
   for (int i = 0; i < this->ownerGroup->generators.size; i ++) {
     if (this->generatorS[i].NumRows == 0) {
-      crash << "This is a programming error: working with a "
-      << "representation in which the action of the simple generators is not computed. " << crash;
+      global.fatal << "This is a programming error: working with a "
+      << "representation in which the action of the simple generators is not computed. " << global.fatal;
       return false;
     }
   }
@@ -68,9 +68,9 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::CheckRepIsMu
       tempElt.MakeCanonical();
       int targetIndex = this->ownerGroup->theElements.GetIndex(tempElt);
       if (!(tempMat == this->theElementImages[targetIndex])) {
-        crash << "this is a programming error: element " << i + 1 << " times element "
+        global.fatal << "this is a programming error: element " << i + 1 << " times element "
         << j + 1 << " is outside of the set, i.e.,  "
-        << tempList[i].ToString() << " * " << tempList[j].ToString() << " is bad. " << crash;
+        << tempList[i].ToString() << " * " << tempList[j].ToString() << " is bad. " << global.fatal;
       }
     }
   }
@@ -164,10 +164,10 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::operator*=(
   }
   //////////////////////////////////
   if (this->ownerGroup != other.ownerGroup) {
-    crash << "This is a programming error: attempting to multiply representations with different owner groups. " << crash;
+    global.fatal << "This is a programming error: attempting to multiply representations with different owner groups. " << global.fatal;
   }
   if (!this->flagCharacterIsComputed || !other.flagCharacterIsComputed) {
-    crash << "Attempting to multiply weyl group reps whose characters have not been computed. " << crash;
+    global.fatal << "Attempting to multiply weyl group reps whose characters have not been computed. " << global.fatal;
   }
   GroupRepresentationCarriesAllMatrices<somegroup, coefficient> output;
   output.init(*this->ownerGroup);
@@ -197,10 +197,10 @@ void GroupRepresentation<somegroup, coefficient>::operator*=(const GroupRepresen
   }
   //////////////////////////////////
   if (this->ownerGroup != other.ownerGroup) {
-    crash << "This is a programming error: attempting to multiply representations with different owner groups. " << crash;
+    global.fatal << "This is a programming error: attempting to multiply representations with different owner groups. " << global.fatal;
   }
   if (!this->flagCharacterIsComputed || !other.flagCharacterIsComputed) {
-    crash << "Attempting to multiply weyl group reps whose characters have not been computed. " << crash;
+    global.fatal << "Attempting to multiply weyl group reps whose characters have not been computed. " << global.fatal;
   }
   GroupRepresentation<somegroup, coefficient> output;
   output.ownerGroup = this->ownerGroup;
@@ -221,8 +221,8 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::Restrict(
   MacroRegisterFunctionWithName("WeylGroupRepresentation::Restrict");
   this->CheckAllSimpleGensAreOK();
   if (VectorSpaceBasisSubrep.size == 0) {
-    crash << "This is a programming error: restriction of "
-    << "representation to a zero subspace is not allowed. " << crash;
+    global.fatal << "This is a programming error: restriction of "
+    << "representation to a zero subspace is not allowed. " << global.fatal;
   }
   output.init(*this->ownerGroup);
   output.basis = VectorSpaceBasisSubrep;
@@ -290,10 +290,10 @@ bool Matrix<Element>::GetEigenspacesProvidedAllAreIntegralWithEigenValueSmallerT
       output.SetSize(output.size + 1);
       tempMat.GetEigenspaceModifyMe(theEigenValueCandidate[0], *output.LastObject());
       if (output.LastObject()->size == 0) {
-        crash << "This is a programmig error: " << theEigenValueCandidate[0].ToString()
+        global.fatal << "This is a programmig error: " << theEigenValueCandidate[0].ToString()
         << " is a zero of the minimal polynomial "
         << theMinPoly.ToString() << " of the operator " << this->ToString()
-        << " but the corresponding eigenspace is empty. " << crash;
+        << " but the corresponding eigenspace is empty. " << global.fatal;
       }
       found += output.LastObject()->size;
       if (found == this->NumCols) {
@@ -379,8 +379,8 @@ void WeylGroupData::ComputeIrreducibleRepresentationsWithFormulasImplementation(
   // silently fail instead of crashing to support calling into this and if it doesn't
   // work then using brute force
   //  else
-  //    crash << "ComputeIrreducibleRepresentationsUsingSpechtModules: Type "
-  // << this->theDynkinType << " is unsupported.  If you think it should work, edit " << __FILE__ << ":" << __LINE__ << crash;
+  //    global.fatal << "ComputeIrreducibleRepresentationsUsingSpechtModules: Type "
+  // << this->theDynkinType << " is unsupported.  If you think it should work, edit " << __FILE__ << ":" << __LINE__ << global.fatal;
   global << G.PrettyPrintCharacterTable() << '\n';
 }
 
@@ -1974,7 +1974,7 @@ public:
   std::string ToString(FormatExpressions* theFormat = nullptr) const;
   bool CheckConsistency() {
     if (this->flagDeallocated) {
-      crash << "This is a programming error: use after free of MonomialMacdonald. " << crash;
+      global.fatal << "This is a programming error: use after free of MonomialMacdonald. " << global.fatal;
       return false;
     }
     return true;
@@ -2045,9 +2045,9 @@ void MonomialMacdonald::MakeFromRootSubsystem(const Vectors<Rational>& inputRoot
     }
     int indexInRoots = inputOwner.theWeyl.RootSystem.GetIndex(currentV);
     if (indexInRoots < 0) {
-      crash << "This is a programming error: attempting to make a Macdonald polynomial from " << inputRoots.ToString()
+      global.fatal << "This is a programming error: attempting to make a Macdonald polynomial from " << inputRoots.ToString()
       << ": the vector " << currentV.ToString()
-      << " is not a root. " << crash;
+      << " is not a root. " << global.fatal;
     }
     this->rootSel.AddSelectionAppendNewIndex(indexInRoots);
   }
@@ -2456,7 +2456,7 @@ template <typename somegroup, typename coefficient>
 void VirtualRepresentation<somegroup, coefficient>::operator*=(const VirtualRepresentation<somegroup, coefficient>& other) {
   MacroRegisterFunctionWithName("VirtualRepresentation::operator*=");
   (void) other;
-  crash << "Not implemented yet. " << crash;
+  global.fatal << "Not implemented yet. " << global.fatal;
 /*  WeylGroupVirtualRepresentation<coefficient> output, currentContribution;
   output.ownerGroup = this->ownerGroup;
   output.coefficientsIrreps.MakeZero(this->coefficientsIrreps.size);
@@ -2478,7 +2478,7 @@ template <typename somegroup, typename coefficient>
 void VirtualRepresentation<somegroup, coefficient>::AssignRep(
   const GroupRepresentationCarriesAllMatrices<somegroup, Rational>& other
 ) {
-  crash << " not implemented " << crash;
+  global.fatal << " not implemented " << global.fatal;
   GroupRepresentationCarriesAllMatrices<somegroup, coefficient> otherCopy;
   otherCopy = other;
 //  otherCopy.DecomposeTodorsVersion(this->coefficientsIrreps, global);

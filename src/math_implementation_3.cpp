@@ -203,7 +203,7 @@ void ProgressReport::Report(const std::string& theReport) {
   if (!this->flagInitialized) {
     return;
   }
-  if (crash.flagCrashInitiateD) {
+  if (global.fatal.flagCrashInitiateD) {
     this->threadIndex = - 1;
     return;
   }
@@ -224,7 +224,7 @@ void ProgressReport::init() {
   if (!global.theProgress.ReportAlloweD()) {
     return;
   }
-  if (crash.flagCrashInitiateD) {
+  if (global.fatal.flagCrashInitiateD) {
     this->threadIndex = - 1;
     return;
   }
@@ -244,14 +244,14 @@ ProgressReport::~ProgressReport() {
   if (!this->flagInitialized) {
     return;
   }
-  if (crash.flagCrashInitiateD) {
+  if (global.fatal.flagCrashInitiateD) {
     this->threadIndex = - 1;
     return;
   }
   if (this->threadIndex == - 1) {
     return;
   }
-  if (crash.flagCrashInitiateD) {
+  if (global.fatal.flagCrashInitiateD) {
     return;
   }
   global.progressReportStrings[this->threadIndex].size --;
@@ -273,7 +273,7 @@ RegisterFunctionCall::RegisterFunctionCall(const char* fileName, int line, const
   stackTop.line = line;
   stackTop.functionName = functionName;
   if (theStack.size > 20000) {
-    crash << "Stack too deep: 20000 layers. " << crash;
+    global.fatal << "Stack too deep: 20000 layers. " << global.fatal;
   }
 }
 
@@ -880,7 +880,7 @@ std::string FileOperations::WriteFileReturnHTMLLink(
   std::stringstream commentsOnError;
   bool success = FileOperations::WriteFileVirual(fileNameVirtual, fileContent, &commentsOnError);
   if (!success) {
-    crash << "Failed to write file. " << commentsOnError.str() << crash;
+    global.fatal << "Failed to write file. " << commentsOnError.str() << global.fatal;
   }
   std::stringstream out;
   out << "<a href=\"" << fileNameVirtual << "\" target = \"_blank\">" << linkText << "</a>";
@@ -1064,14 +1064,14 @@ bool FileOperations::CheckFolderLinks() {
   List<List<std::string> > links = FileOperations::FolderVirtualLinksDefault();
   for (int i = 0; i < links.size; i ++) {
     if (links[i].size != 2) {
-      crash << "Folder links incorrectly initialized. " << crash;
+      global.fatal << "Folder links incorrectly initialized. " << global.fatal;
     }
     std::string& key = links[i][0];
     if (key.size() <= 1) {
-      crash << "Folder link key: " << key << " is too short. " << crash;
+      global.fatal << "Folder link key: " << key << " is too short. " << global.fatal;
     }
     if (key[0] == '/' || key[0] == '.' || key[0] == ' ') {
-      crash << "Folder link key " << key << " starts with a banned character. " << crash;
+      global.fatal << "Folder link key " << key << " starts with a banned character. " << global.fatal;
     }
   }
   return true;
@@ -1201,7 +1201,7 @@ std::string FileOperations::GetCurrentFolder() {
   if (getcwd(cwd, sizeof(cwd)) != nullptr) {
     return std::string(cwd);
   } else {
-    crash << "Error: getcwd returned NULL. This shouldn't happen. " << crash;
+    global.fatal << "Error: getcwd returned NULL. This shouldn't happen. " << global.fatal;
   }
   return "";
 }
@@ -2272,7 +2272,7 @@ std::string StringRoutines::ReplaceAll(
 ) {
   std::stringstream out;
   if (subStringToReplace.size() == 0) {
-    crash << "Not allowed to replace the empty string. " << crash;
+    global.fatal << "Not allowed to replace the empty string. " << global.fatal;
   }
   for (unsigned i = 0; i < input.size(); i ++) {
     bool found = true;
@@ -2347,10 +2347,10 @@ int MathRoutines::parity(int n) {
 
 int MathRoutines::Factorial(int n) {
   if (n < 0) {
-    crash << "We do not have factorials of negative integers here. You wanted factorial of: " << n
+    global.fatal << "We do not have factorials of negative integers here. You wanted factorial of: " << n
     << ". If you are interested in the Gamma function, "
     << "you may want to use a different data structure rather than int. "
-    << crash;
+    << global.fatal;
   }
   int fac = 1;
   for (int i = 1; i <= n; i ++) {
@@ -2597,7 +2597,7 @@ void Selection::ReadFromFile(std::fstream& input) {
   this->init(tempI);
   input >> tempS >> card;
   if (tempS != "cardinality:") {
-    crash << "Failed to read selection from file. " << crash;
+    global.fatal << "Failed to read selection from file. " << global.fatal;
   }
   for (int i = 0; i < card; i ++) {
     input >> tempI;
@@ -3015,7 +3015,7 @@ void PartFraction::ReadFromFile(PartFractions& owner, std::fstream& input) {
   int tempI;
   input >> tempS >> tempI;
   if (tempI != owner.startingVectors.size) {
-    crash << "Failed to read partial fraction from file. " << crash;
+    global.fatal << "Failed to read partial fraction from file. " << global.fatal;
   }
   this->init(tempI);
   for (int j = 0; j < this->size; j ++) {
@@ -3140,7 +3140,7 @@ int PartFraction::getSmallestNonZeroIndexGreaterThanOrEqualTo(PartFractions& own
 }
 
 bool PartFraction::CheckForOrlikSolomonAdmissibility(List<int>& theSelectedIndices) {
-  crash << "Orlik solomon admissability not implemented yet " << crash;
+  global.fatal << "Orlik solomon admissability not implemented yet " << global.fatal;
   (void) theSelectedIndices;
   return true;
 }
@@ -3227,7 +3227,7 @@ bool PartFraction::DecomposeFromLinRelation(
   );
 
   //if (this->MakingConsistencyCheck)
-  //{ if (!this->CheckSum2.IsEqualTo(this->CheckSum))crash << crash;
+  //{ if (!this->CheckSum2.IsEqualTo(this->CheckSum))global.fatal << global.fatal;
   //}
   /*if (PartFraction::flagAnErrorHasOccurredTimeToPanic) {
     Rational tempRat2, tempRat;
@@ -3237,7 +3237,7 @@ bool PartFraction::DecomposeFromLinRelation(
     tempRat.ToString(tempS1);
     this->CheckSum2.ToString(tempS2);
     tempRat2.Subtract(tempRat);
-    if (!oldCheckSum.IsEqualTo(tempRat2))crash << crash;
+    if (!oldCheckSum.IsEqualTo(tempRat2))global.fatal << global.fatal;
   }*/
   //Accum.ComputeDebugString();
   return true;
@@ -3544,7 +3544,7 @@ void PartFraction::ComputeNormals(PartFractions& owner, Vectors<Rational>& outpu
     dens.ComputeNormalExcludingIndex(tempRoot, i, buffer);
     tempRat = tempRoot.ScalarEuclidean(dens[i]);
     if (tempRat.IsEqualToZero()) {
-      crash << "Scalar product is equal to zero. " << crash;
+      global.fatal << "Scalar product is equal to zero. " << global.fatal;
     }
     tempRoot /= tempRat;
     output.AddOnTop(tempRoot);
@@ -3647,7 +3647,7 @@ void PartFractions::CompareCheckSums() {
       theReport2.Report(out2.str());
     }
     if (!this->StartCheckSum.IsEqualTo(this->EndCheckSum)) {
-      crash << "<b>This is a programmign error. The checksum of the partial fractions failed. " << crash;
+      global.fatal << "<b>This is a programmign error. The checksum of the partial fractions failed. " << global.fatal;
     } else {
     }
   }
@@ -3703,8 +3703,8 @@ bool PartFractions::splitPartial() {
     Rational tempRat;
     reducedForGood.ComputeOneCheckSum(tempRat);
     if (tempRat != this->CheckSum) {
-      crash << "This is a programming error. "
-      << "The checksums of the partial fraction decomposition do not match. " << crash;
+      global.fatal << "This is a programming error. "
+      << "The checksums of the partial fraction decomposition do not match. " << global.fatal;
     }
   }
   *this = reducedForGood;
@@ -3714,7 +3714,7 @@ bool PartFractions::splitPartial() {
 bool PartFractions::splitClassicalRootSystem(bool ShouldElongate, Vector<Rational>* Indicator) {
   (void) ShouldElongate;
   (void) Indicator;
-  crash << "Split classical root system not implemented" << crash;
+  global.fatal << "Split classical root system not implemented" << global.fatal;
     /*this->IndexLowestNonProcessed = 0;
   this->PrepareIndicatorVariables();
   //PartFraction::flagAnErrorHasOccurredTimeToPanic = true;
@@ -3811,7 +3811,7 @@ int PartFractions::ReadFromFileComputedContributions(std::fstream& input) {
       lastNonZero = fileStoragePosition;
     }
     if (x != i) {
-      crash << "Failed to read. " << crash;
+      global.fatal << "Failed to read. " << global.fatal;
     }
   }
   this->LimitSplittingSteps = 0;
@@ -3942,7 +3942,7 @@ void PartFraction::ReduceMonomialByMonomial(PartFractions& owner, int myIndex, V
           tempFracs.ComputeOneCheckSum(tempFracsCheckSum);
           tempFracs.ComputeDebugString();
           if (!tempFracsCheckSum.IsEqualTo(tempDiff))
-            crash << crash;
+            global.fatal << global.fatal;
         }
       }
     }
@@ -3954,7 +3954,7 @@ void PartFraction::ReduceMonomialByMonomial(PartFractions& owner, int myIndex, V
     owner.ComputeOneCheckSum(tempRat);
     tempRat.Subtract(theDiff);
     if (!tempRat.IsEqualTo(StartCheckSum))
-      crash << crash;
+      global.fatal << global.fatal;
   }*/
 }
 
@@ -3971,7 +3971,7 @@ void PartFraction::ReduceMonomialByMonomialModifyOneMonomial(
   theNumerator.MakeZero(Accum.AmbientDimension);
   theNumerator.AddMonomial(input, inputCoeff);
   if (thePowersSigned.size != thePowers.Multiplicities.size)
-    crash << crash;
+    global.fatal << global.fatal;
   if (this->flagAnErrorHasOccurredTimeToPanic) {
    // theNumerator.ComputeDebugString();
   }
@@ -4023,8 +4023,8 @@ void PartFraction::GetPolyReduceMonomialByMonomial(
       output.AddMonomial(tempMon, theCoeff);
     } else {
       if (StartMonomialPower < startDenominatorPower) {
-        crash << "Start monomial power: " << StartMonomialPower << " smaller than start denominator power: "
-        << startDenominatorPower << ". " << crash;
+        global.fatal << "Start monomial power: " << StartMonomialPower << " smaller than start denominator power: "
+        << startDenominatorPower << ". " << global.fatal;
       }
       for (int k = 0; k <= StartMonomialPower - startDenominatorPower; k++) {
         tempMon = theExponent;
@@ -4326,7 +4326,7 @@ void PartFractions::RemoveRedundantShortRootsClassicalRootSystem(Vector<Rational
 
 void FileSetPutPointerToEnd(std::fstream& theFile, bool StoreToFile) {
   if (!theFile.is_open() && StoreToFile) {
-    crash << "Put pointer seek on closed file not allowed. " << crash;
+    global.fatal << "Put pointer seek on closed file not allowed. " << global.fatal;
   }
   std::filebuf* pbuf = theFile.rdbuf();
   long tempSize = pbuf->pubseekoff(0, std::fstream::end);
@@ -4408,7 +4408,7 @@ bool PartFractions::IsHigherThanWRTWeight(
   const Vector<Rational>& left, const Vector<Rational>& r, const Vector<Rational>& theWeights
 ) {
   if (left.size != r.size) {
-    crash << "Left and right vectors need equal dimensions. " << crash;
+    global.fatal << "Left and right vectors need equal dimensions. " << global.fatal;
   }
   Rational accum = 0;
   for (int i = 0; i < left.size; i ++) {
@@ -4450,21 +4450,21 @@ void PartFractions::ComputeKostantFunctionFromWeylGroup(
     theVPbasis.AddOnTop(tempRoot);
     for (int i = this->AmbientDimension - 3; i >= 0; i --) {
       tempRoot[i] = 2;
-      crash << "This is a programming error: this line of code "
+      global.fatal << "This is a programming error: this line of code "
       << "needs to be fixed but I don't have time right now. "
-      << "This code shouldn't be used before the line is fixed! " << crash;
+      << "This code shouldn't be used before the line is fixed! " << global.fatal;
     }
     tempWeight[this->AmbientDimension - 2] = 7;
     tempWeight[this->AmbientDimension - 1] = 8;
   }
   theVPbasis.QuickSortAscending();
   //fix this!
-  crash << " Not implemented yet. " << crash;
+  global.fatal << " Not implemented yet. " << global.fatal;
   //  this->initFromRoots(theVPbasis, 0);
   //this->flagSplitTestModeNoNumerators = true;
   //  this->split(ChamberIndicator);
   if (!this->CheckForMinimalityDecompositionWithRespectToRoot(ChamberIndicator)) {
-    crash << "Minimality decomposition missing. " << crash;
+    global.fatal << "Minimality decomposition missing. " << global.fatal;
   }
   //return;
   Vector<Rational> tempRoot;
@@ -4475,7 +4475,7 @@ void PartFractions::ComputeKostantFunctionFromWeylGroup(
   }
   if (!this->GetVectorPartitionFunction(output, tempRoot)) {
     this->ComputeDebugStringNoNumerator();
-    crash << "Failed to get vector partition function. " << crash;
+    global.fatal << "Failed to get vector partition function. " << global.fatal;
   }
 }
 
@@ -4492,7 +4492,7 @@ void oneFracWithMultiplicitiesAndElongations::GetPolyDenominator(
   Polynomial<LargeInteger>& output, int MultiplicityIndex, Vector<Rational>& theExponent
 ) {
   if (MultiplicityIndex >= this->Multiplicities.size) {
-    crash << "Bad multiplicity. " << crash;
+    global.fatal << "Bad multiplicity. " << global.fatal;
   }
   MonomialP tempM;
   output.MakeOne(theExponent.size);
@@ -4507,7 +4507,7 @@ int oneFracWithMultiplicitiesAndElongations::GetLargestElongation() {
   int result = this->Elongations[0];
   for (int i = 1; i < this->Elongations.size; i ++) {
     if (this->Elongations[i] == result) {
-      crash << "Elongation does not math the result. " << crash;
+      global.fatal << "Elongation does not math the result. " << global.fatal;
     }
     if (this->Elongations[i] > result) {
       result = this->Elongations[i];
@@ -4520,7 +4520,7 @@ int oneFracWithMultiplicitiesAndElongations::GetLCMElongations() {
   int result = 1;
   for (int i = 0; i < this->Elongations.size; i ++) {
     if (this->Elongations[i] == 0) {
-      crash << "Elongation not allowed to be zero. " << crash;
+      global.fatal << "Elongation not allowed to be zero. " << global.fatal;
     }
     result = MathRoutines::lcm(this->Elongations[i], result);
   }
@@ -4617,7 +4617,7 @@ void oneFracWithMultiplicitiesAndElongations::AddMultiplicity(int MultiplicityIn
   }
   this->Multiplicities[ElongationIndex] += MultiplicityIncrement;
   if (!(this->Multiplicities[ElongationIndex] >= 0)) {
-    crash << "Multiplicity is supposed to be positive. " << crash;
+    global.fatal << "Multiplicity is supposed to be positive. " << global.fatal;
   }
   if (this->Multiplicities[ElongationIndex] == 0) {
     this->Multiplicities.PopIndexSwapWithLastLight(ElongationIndex);
@@ -4877,7 +4877,7 @@ void SelectionWithMaxMultiplicity::IncrementSubsetFixedCardinality(int Cardinali
   }
   for (int i = this->Multiplicities.size - 1; currentCardinality < Cardinality; i --) {
     if (this->Multiplicities[i] != 0) {
-      crash << "Non-zero multiplicities not implemented here. " << crash;
+      global.fatal << "Non-zero multiplicities not implemented here. " << global.fatal;
     }
     if (Cardinality - currentCardinality >= this->MaxMultiplicity) {
       this->Multiplicities[i] = this->MaxMultiplicity;
@@ -4940,13 +4940,13 @@ int SelectionWithDifferentMaxMultiplicities::TotalNumSubsetsMustBeSmalInt() {
   for (int i = 0; i < this->MaxMultiplicities.size; i ++) {
     result *= (this->MaxMultiplicities[i] + 1);
     if (result < 0) {
-      crash << "This is a programming error: I was asked to enumerate "
+      global.fatal << "This is a programming error: I was asked to enumerate "
       << "all subsets of a multi-set, however the number of subsets is larger than  "
       << " the maximum value allowed for int on the system "
       << "(on a 32 bit machine that is around  2 billion). "
       << "This can be fixed, however I do not have time at the moment. If you "
       << " encounter this error, write me an email and I will take the time to fix this issue. "
-      << crash;
+      << global.fatal;
     }
   }
   return result;
@@ -5076,8 +5076,8 @@ void DynkinType::GetOuterAutosGeneratorsActOnVectorColumn(List<MatrixTensor<Rati
   int numRowsSoFar = 0;
   for (int i = 0; i < this->size(); i ++) {
     if (!this->theCoeffs[i].IsSmallInteger(&currentMult)) {
-      crash << "This is not supposed to happen in function "
-      << "DynkinType::GetOuterAutosGeneratorsActOnVectorColumn." << crash;
+      global.fatal << "This is not supposed to happen in function "
+      << "DynkinType::GetOuterAutosGeneratorsActOnVectorColumn." << global.fatal;
     }
     this->GetOuterAutosGeneratorsOneTypeActOnVectorColumn(intermediateGenerators,(*this)[i], currentMult);
     matrixToGo.MakeId(this->GetRank() - numRowsSoFar - currentMult * (*this)[i].theRank);
@@ -5261,10 +5261,10 @@ int DynkinType::GetIndexPreimageFromRootInjection(int inputIndex, const List<int
       return i;
     }
   }
-  crash << "This is a programming error: asking to find the preimage of root index "
+  global.fatal << "This is a programming error: asking to find the preimage of root index "
   << inputIndex << " w.r.t. root injection "
   << inputRootInjection << " - the root index has no preimage. This function is not allowed to fail. ";
-  crash << crash;
+  global.fatal << global.fatal;
   return - 1;
 }
 
@@ -5323,8 +5323,8 @@ int DynkinType::GetNumSimpleComponentsOfGivenRank(int desiredRank) const {
   }
   int output = 0;
   if (!result.IsSmallInteger(&output)) {
-    crash << "This is a programming error: "
-    << "Dynkin type has a number of simple components which is not a small integer. " << crash;
+    global.fatal << "This is a programming error: "
+    << "Dynkin type has a number of simple components which is not a small integer. " << global.fatal;
   }
   return output;
 }
@@ -5336,8 +5336,8 @@ int DynkinType::GetNumSimpleComponents() const {
   }
   int output = 0;
   if (!result.IsSmallInteger(&output)) {
-    crash << "This is a programming error: "
-    << "Dynkin type has a number of simple components which is not a small integer. " << crash;
+    global.fatal << "This is a programming error: "
+    << "Dynkin type has a number of simple components which is not a small integer. " << global.fatal;
   }
   return output;
 }
@@ -5354,9 +5354,9 @@ int DynkinType::GetRank() const {
   Rational tempRat = this->GetRankRational();
   int result = 0;
   if (!tempRat.IsSmallInteger(&result)) {
-    crash << "This is a programming error: attempting to get a small integer "
+    global.fatal << "This is a programming error: attempting to get a small integer "
     << "rank from a Dynkin type whose rank is not a small integer, but is instead "
-    << tempRat.ToString() << ". " << crash;
+    << tempRat.ToString() << ". " << global.fatal;
   }
   return result;
 }
@@ -5456,8 +5456,8 @@ int DynkinType::GetCoxeterEdgeWeight(int v, int w) {
       }
     }
   }
-  crash << "If you would like an edge weight of a non-crystallographic Coxeter graph, replace the code near "
-  << __FILE__ << ":" << __LINE__ << " with an arccos function. " << crash;
+  global.fatal << "If you would like an edge weight of a non-crystallographic Coxeter graph, replace the code near "
+  << __FILE__ << ":" << __LINE__ << " with an arccos function. " << global.fatal;
   return - 1;
 }
 
@@ -5472,8 +5472,8 @@ LargeInteger DynkinType::GetWeylGroupSizeByFormula() const {
     result *= tempLI;
   }
   if (result <= 0) {
-    crash << "Something has gone very wrong: Weyl group size reported to be " << result.ToString()
-    << " which appears to not be a positive integer! " << crash;
+    global.fatal << "Something has gone very wrong: Weyl group size reported to be " << result.ToString()
+    << " which appears to not be a positive integer! " << global.fatal;
   }
   return result;
 }
@@ -5505,8 +5505,8 @@ Rational DynkinSimpleType::GetEpsilonRealizationLongRootLengthSquared() const {
     default:
       break;
   }
-  crash << "This is a programming error: calling "
-  << "DynkinSimpleType::GetLongRootLengthSquared on a non-initialized simple type. " << crash;
+  global.fatal << "This is a programming error: calling "
+  << "DynkinSimpleType::GetLongRootLengthSquared on a non-initialized simple type. " << global.fatal;
   return - 1;
 }
 
@@ -5656,9 +5656,9 @@ Rational DynkinSimpleType::GetRatioRootSquaredToFirstSquared(int rootIndex) cons
 
 Rational DynkinSimpleType::GetDefaultRootLengthSquared(int rootIndex) const {
   if (rootIndex >= this->theRank) {
-    crash << "This is a programming error: "
+    global.fatal << "This is a programming error: "
     << "attempting to get the squared length of simple root number " << rootIndex + 1
-    << ", however the root system if of rank " << this->theRank << ". " << crash;
+    << ", however the root system if of rank " << this->theRank << ". " << global.fatal;
   }
   switch (this->theLetter) {
     case 'A':
@@ -5686,9 +5686,9 @@ Rational DynkinSimpleType::GetDefaultRootLengthSquared(int rootIndex) const {
       }
       return Rational(2, 3);
     default:
-      crash << "This is a programming error: calling "
+      global.fatal << "This is a programming error: calling "
       << "DynkinSimpleType::GetDefaultRootLengthSquared on the non-initialized Dynkin type "
-      << this->ToString() << crash;
+      << this->ToString() << global.fatal;
       return - 1;
   }
 }
@@ -5813,9 +5813,9 @@ void DynkinSimpleType::GetEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Ra
 
 void DynkinSimpleType::GetAn(int n, Matrix<Rational>& output) const {
   if (n <= 0 || n > 30000) {
-    crash << "This is a programming error: attempting to create type A_n with n ="
+    global.fatal << "This is a programming error: attempting to create type A_n with n ="
     << n << " is illegal. If this was a bad user input, it should "
-    << " be handled at an earlier stage. " << crash;
+    << " be handled at an earlier stage. " << global.fatal;
   }
   output.init(n, n);
   output.MakeZero();
@@ -5845,8 +5845,8 @@ Rational DynkinSimpleType::GetDynkinIndexParabolicallyInducingSubalgebra(char in
     case 'C':
       return 2;
     default:
-      crash << "DynkinSimpleType::GetDynkinIndexParabolicallyInducingSubalgebra called with input "
-      << inputType << ", this is not allowed. " << crash;
+      global.fatal << "DynkinSimpleType::GetDynkinIndexParabolicallyInducingSubalgebra called with input "
+      << inputType << ", this is not allowed. " << global.fatal;
       return - 1;
   }
 }
@@ -6089,8 +6089,8 @@ Rational DynkinSimpleType::GetPrincipalSlTwoCSInverseScale() const {
       nonScaled = 28;
       break;
     default:
-      crash << "This is a programming error: requesting DynkinSimpleType::GetCartanSymmetric "
-      << "from a non-initialized Dynkin simple type. " << crash;
+      global.fatal << "This is a programming error: requesting DynkinSimpleType::GetCartanSymmetric "
+      << "from a non-initialized Dynkin simple type. " << global.fatal;
       break;
   }
   return nonScaled * this->CartanSymmetricInverseScale;
@@ -6106,8 +6106,8 @@ void DynkinSimpleType::GetCartanSymmetric(Matrix<Rational>& output) const {
     case 'F': this->GetF4(output);                break;
     case 'G': this->GetG2(output);                break;
     default:
-      crash << "This is a programming error: requesting "
-      << "DynkinSimpleType::GetCartanSymmetric from a non-initialized Dynkin simple type. " << crash;
+      global.fatal << "This is a programming error: requesting "
+      << "DynkinSimpleType::GetCartanSymmetric from a non-initialized Dynkin simple type. " << global.fatal;
       break;
   }
   output /= this->CartanSymmetricInverseScale;
@@ -6171,9 +6171,9 @@ void DynkinSimpleType::operator++(int) {
     this->theLetter = 'A';
     return;
   }
-  crash << "This is a programming error. "
+  global.fatal << "This is a programming error. "
   << "This is a portion of code that should never be reached. "
-  << "Something has gone very wrong. " << crash;
+  << "Something has gone very wrong. " << global.fatal;
 }
 
 bool DynkinSimpleType::operator<(int otherRank) const {
@@ -6192,7 +6192,7 @@ ElementWeylGroupAutomorphisms::~ElementWeylGroupAutomorphisms() {
 
 bool ElementWeylGroupAutomorphisms::CheckInitialization() const {
   if (this->owner == nullptr) {
-    crash << "Element of Weyl group automorphisms has zero owner. " << crash;
+    global.fatal << "Element of Weyl group automorphisms has zero owner. " << global.fatal;
   }
   return true;
 }
@@ -6281,7 +6281,7 @@ std::string ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAu
 
 bool ElementWeylGroup::CheckConsistency() const {
   if (this->flagDeallocated) {
-    crash << "Programming error: use after free of class ElementWeylGroup" << crash;
+    global.fatal << "Programming error: use after free of class ElementWeylGroup" << global.fatal;
   }
   return true;
 }
@@ -6289,7 +6289,7 @@ bool ElementWeylGroup::CheckConsistency() const {
 bool ElementWeylGroup::CheckInitialization() const {
   this->CheckConsistency();
   if (this->owner == nullptr) {
-    crash << "This is a programming error: non-initialized element Weyl group. " << crash;
+    global.fatal << "This is a programming error: non-initialized element Weyl group. " << global.fatal;
     return false;
   }
   this->owner->CheckConsistency();
@@ -6304,9 +6304,9 @@ ElementWeylGroup ElementWeylGroup::operator^(
   const ElementWeylGroup& right
 ) const {
   if (this->owner != right.owner) {
-    crash << "Not allowed to conjugate elements of different Weyl groups. "
+    global.fatal << "Not allowed to conjugate elements of different Weyl groups. "
     << "If you did this intentionally, change the present file. "
-    << crash;
+    << global.fatal;
   }
   ElementWeylGroup out;
   out.owner = this->owner;
@@ -6329,8 +6329,8 @@ void ElementWeylGroup::ConjugationAction(
 
 void ElementWeylGroup::operator*=(const ElementWeylGroup& other) {
   if (this->owner != other.owner) {
-    crash << "This is a programming error: attempting to "
-    << "multiply elements belonging to different Weyl groups. " << crash;
+    global.fatal << "This is a programming error: attempting to "
+    << "multiply elements belonging to different Weyl groups. " << global.fatal;
   }
   if (&other == this) {
     ElementWeylGroup otherCopy = other;
@@ -6511,7 +6511,7 @@ unsigned int ElementWeylGroup::HashFunction() const {
 
 bool ElementWeylGroup::operator>(const ElementWeylGroup& other) const {
   if (this->owner != other.owner) {
-    crash << "Comparing elements of different Weyl groups. " << crash;
+    global.fatal << "Comparing elements of different Weyl groups. " << global.fatal;
   }
   return this->generatorsLastAppliedFirst > other.generatorsLastAppliedFirst;
 }
@@ -6774,7 +6774,7 @@ LargeInteger WeylGroupData::SizeByFormulaOrNeg1(char weylLetter, int theDim) {
     weylLetter != 'F' &&
     weylLetter != 'G'
   ) {
-    crash << "WeylGroupData::SizeByFormulaOrNeg1 called with impossible Weyl type: " << weylLetter << crash;
+    global.fatal << "WeylGroupData::SizeByFormulaOrNeg1 called with impossible Weyl type: " << weylLetter << global.fatal;
   }
   LargeInteger theOutput = 1;
   if (weylLetter == 'A') {
@@ -7197,7 +7197,7 @@ void WeylGroupAutomorphisms::ComputeOuterAutoGenerators() {
       theGens[i].GetMinNumCols() != this->theWeyl->GetDim() ||
       theGens[i].GetMinNumRows() != this->theWeyl->GetDim()
     ) {
-      crash << "Bad outer automorphisms, type " << this->theWeyl->theDynkinType.ToString() << "." << crash;
+      global.fatal << "Bad outer automorphisms, type " << this->theWeyl->theDynkinType.ToString() << "." << global.fatal;
     }
   }
   this->flagOuterAutosGeneratorsComputed = true;
@@ -7520,8 +7520,8 @@ void WeylGroupData::DrawRootSystem(
     predefinedProjectionPlane->GetVectorsDouble(theTwoPlane);
   }
   if (theTwoPlane.size != 2) {
-    crash << "Object theTwoPlane is supposed to be two-dimensional but it is instead of dimension: "
-    << theTwoPlane.size << ". " << crash;
+    global.fatal << "Object theTwoPlane is supposed to be two-dimensional but it is instead of dimension: "
+    << theTwoPlane.size << ". " << global.fatal;
   }
   Vectors<Rational> RootSystemSorted;
   RootSystemSorted = this->RootSystem;
@@ -7792,7 +7792,7 @@ std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorph
         out << " \\ar[d";
         int indexInLayer = Layers[i + 1].GetIndex(arrows[i][j][k]);
         if (indexInLayer == - 1) {
-          crash << "Negative index in layer ... " << crash;
+          global.fatal << "Negative index in layer ... " << global.fatal;
         }
         int nextOffset = indexInLayer+nextRowOffset;
         if (Layers[i + 1].size % 2 == 0) {
@@ -7859,7 +7859,7 @@ std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorph
         this->AmbientWeyl->ReflectBetaWRTAlpha(this->simpleRootsInner[k], orbit[indexOther], false, tempRoot);
         int index = orbit.GetIndex(tempRoot);
         if (index == - 1) {
-          crash << "Negative index not allowed. " << crash;
+          global.fatal << "Negative index not allowed. " << global.fatal;
         }
         const ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& currentElement = this->allElements[index];
         if (currentElement.generatorsLastAppliedFirst.size > this->allElements[indexOther].generatorsLastAppliedFirst.size) {
@@ -7946,9 +7946,9 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::M
   Vectors<Rational> selectedRoots;
   selectedRoots.Reserve(ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize - ZeroesMeanSimpleRootSpaceIsInParabolic.CardinalitySelection);
   if (this->AmbientWeyl->GetDim() != ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize) {
-    crash << "This is a programming error: parabolic selection selects out of "
+    global.fatal << "This is a programming error: parabolic selection selects out of "
     << ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize
-    << " elements while the Weyl group is of rank " << this->AmbientWeyl->GetDim() << ". " << crash;
+    << " elements while the Weyl group is of rank " << this->AmbientWeyl->GetDim() << ". " << global.fatal;
   }
   for (int i = 0; i < ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize; i ++) {
     if (!ZeroesMeanSimpleRootSpaceIsInParabolic.selected[i]) {
@@ -8071,15 +8071,15 @@ SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::~Subgr
 
 bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::CheckInitialization() {
   //if (this == 0)
-  //  crash << "Subgroup of Weyl Group has 0 this pointer. " << crash;
+  //  global.fatal << "Subgroup of Weyl Group has 0 this pointer. " << global.fatal;
   if (this->AmbientWeyl == nullptr) {
-    crash << "Use of non-initialized subgroup of Weyl Group. " << crash;
+    global.fatal << "Use of non-initialized subgroup of Weyl Group. " << global.fatal;
   }
   if (this->flagDeallocated) {
-    crash << "Use after free of subgroup of a Weyl group. " << crash;
+    global.fatal << "Use after free of subgroup of a Weyl group. " << global.fatal;
   }
   if (this->AmbientWeyl->flagDeallocated) {
-    crash << "Use after free of owner Weyl groups in a subgroup. " << crash;
+    global.fatal << "Use after free of owner Weyl groups in a subgroup. " << global.fatal;
   }
   return true;
 }
@@ -8102,11 +8102,11 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::C
   tempRoots.QuickSortAscending();
   this->RootSubsystem = tempRoots;
   if (this->RootSubsystem.size % 2 != 0) {
-    crash << "This is a programming error. "
+    global.fatal << "This is a programming error. "
     << "I am getting that the number of weights of a root system is odd. "
     << "The generating set of simple weights is "
     << this->simpleRootsInner.ToString() << ", and the "
-    << "generated weight subsystem is " << tempRoots.ToString() << crash;
+    << "generated weight subsystem is " << tempRoots.ToString() << global.fatal;
   }
   int numPosRoots = this->RootSubsystem.size / 2;
   this->RootsOfBorel.SetSize(numPosRoots);
@@ -8286,10 +8286,10 @@ void KLpolys::GeneratePartialBruhatOrder() {
       this->TheWeylGroup->SimpleReflectionRoot(j, tempRoot, false, false);
       int x = this->GetIndex(tempRoot);
       if (x == - 1) {
-        crash << "This is a programming error: something wrong has happened. "
+        global.fatal << "This is a programming error: something wrong has happened. "
         << "A weight that is supposed to "
         << " be in a certain Weyl group orbit isn't there. "
-        << "There is an error in the code, crashing accordingly. " << crash;
+        << "There is an error in the code, crashing accordingly. " << global.fatal;
       }
       this->SimpleReflectionsActionList[i].AddOnTop(x);
       tempRoot2 -= tempRoot;
@@ -8368,7 +8368,7 @@ int KLpolys::ChamberIndicatorToIndex(Vector<Rational>& ChamberIndicator) {
       tempBool1 = tempRat1.IsPositive();
       tempBool2 = tempRat2.IsPositive();
       if (tempRat1.IsEqualToZero() || tempRat2.IsEqualToZero()) {
-        crash << "Coefficients are zero at a bad place. " << crash;
+        global.fatal << "Coefficients are zero at a bad place. " << global.fatal;
       }
       if (tempBool1 != tempBool2) {
         haveSameSigns = false;
@@ -8461,7 +8461,7 @@ void KLpolys::ComputeRPolys() {
         }
       }
       if (!tempBool) {
-        crash << "This is a programming error: an algorithmic check failed while computing R-polynomials. " << crash;
+        global.fatal << "This is a programming error: an algorithmic check failed while computing R-polynomials. " << global.fatal;
       }
       ExploredFromTop[a] = true;
       a = this->FindMaximalBruhatNonExplored(ExploredFromTop);
@@ -8535,11 +8535,11 @@ void KLpolys::ComputeKLxy(int x, int y) {
       tempP1 *= tempP2;
       tempP1 *= this->theKLPolys[i][y];
       if (!this->Explored[i]) {
-        crash << "This is a programming error: an internal check during the "
+        global.fatal << "This is a programming error: an internal check during the "
         << "Kazhdan-Lusztig polynomial computation fails. More precisely, while computing "
         << "KL poly of indices " << x << ", " << y
         << " I am using KL poly with indices " << i << ", " << y << " which hasn't been computed yet. "
-        << crash;
+        << global.fatal;
       }
       Accum += tempP1;
     }
@@ -8575,8 +8575,8 @@ bool KLpolys::ComputeRxy(int x, int y, int SimpleReflectionIndex) {
   boolY = this->IndexGreaterThanIndex(y, sy);
   if (boolX && boolY) {
     if (!this->Explored[sy]) {
-      crash << "This is a programming error: the computaion of R-polynomials "
-      << "is attempting to use a non-computed R-polynomial. " << crash;
+      global.fatal << "This is a programming error: the computaion of R-polynomials "
+      << "is attempting to use a non-computed R-polynomial. " << global.fatal;
     }
     this->theRPolys[x][y] = this->theRPolys[sx][sy];
     return true;
@@ -8823,10 +8823,10 @@ void Vector<coefficient>::PerturbNoZeroScalarProductWithMe(const List<Vector<coe
   }
   for (int i = 0; i < inputVectors.size; i ++) {
     if (this->ScalarEuclidean(inputVectors[i]) == 0) {
-      crash << "This is a programming error: the vector produced by PerturbNoZeroScalarProductWithMe, namely, "
+      global.fatal << "This is a programming error: the vector produced by PerturbNoZeroScalarProductWithMe, namely, "
       << this->ToString() << " is orthogonal to input vector "
       << inputVectors[i].ToString() << ". The full list of vectors is "
-      << inputVectors.ToString() << crash;
+      << inputVectors.ToString() << global.fatal;
     }
   }
 }
@@ -9111,7 +9111,7 @@ void Lattice::IntersectWithPreimageOfLattice(const Matrix<Rational> & theLinearM
   );
   ImageBasisInImageStartingBasisCoords =(tempImageBasisInImageStartingBasisCoords);
   if (!tempBool) {
-    crash << "Coordinates not integral when they should be. " << crash;
+    global.fatal << "Coordinates not integral when they should be. " << global.fatal;
   }
   resultNonKernelPart.SetSize(ImageBasisInImageStartingBasisCoords.size);
   for (int i = 0; i < resultNonKernelPart.size; i ++) {
@@ -9164,7 +9164,7 @@ void Lattice::IntersectWith(const Lattice& other) {
 void Lattice::IntersectWithBothOfMaxRank(const Lattice& other) {
   Lattice dualLatticeThis, dualLatticeOther;
   if (this->basis.NumRows != this->GetDim() || this->GetDim() != other.GetDim() || other.basis.NumRows != this->GetDim()) {
-    crash << "Bad dimensions. " << crash;
+    global.fatal << "Bad dimensions. " << global.fatal;
   }
   this->GetDualLattice(dualLatticeThis);
   other.GetDualLattice(dualLatticeOther);
@@ -9310,12 +9310,12 @@ void QuasiPolynomial::MakeFromPolyShiftAndLattice(
 bool Lattice::ReduceVector(Vector<Rational>& theVector) const {
   Vector<Rational> output;
   if (theVector.size != this->GetDim()) {
-    crash << "Vector dimension not as expected. " << crash;
+    global.fatal << "Vector dimension not as expected. " << global.fatal;
   }
   Vectors<Rational> basisRoots;
   basisRoots.AssignMatrixRows(this->basisRationalForm);
   if (!theVector.GetCoordsInBasiS(basisRoots, output)) {
-    crash << "Failed to get coordinates in basis. " << crash;
+    global.fatal << "Failed to get coordinates in basis. " << global.fatal;
     return false;
   }
   for (int i = 0; i < output.size; i ++) {
@@ -9342,7 +9342,7 @@ void QuasiPolynomial::MakeZeroOverLattice(Lattice& theLattice) {
 
 void QuasiPolynomial::MakeZeroLatTiceZn(int theDim) {
   if (theDim <= 0) {
-    crash << "Negative dimension not allowed. " << crash;
+    global.fatal << "Negative dimension not allowed. " << global.fatal;
   }
   this->AmbientLatticeReduced.MakeZn(theDim);
   this->LatticeShifts.size = 0;
@@ -9355,7 +9355,7 @@ void PartFraction::GetRootsFromDenominator(PartFractions& owner, Vectors<Rationa
     output[i] = owner.startingVectors[this->IndicesNonZeroMults[i]];
     oneFracWithMultiplicitiesAndElongations& current = this->TheObjects[this->IndicesNonZeroMults[i]];
     if (current.Elongations.size != 1) {
-      crash << "Elongations expected to have a single element. " << crash;
+      global.fatal << "Elongations expected to have a single element. " << global.fatal;
     }
     output[i] *= current.Elongations[0];
   }
@@ -9432,7 +9432,7 @@ std::string PartFractions::DoTheFullComputationReturnLatexFileString(
   Vectors<Rational>& toBePartitioned, FormatExpressions& theFormat, std::string* outputHtml
 ) {
   std::string whatWentWrong;
-  crash << "Not implemented yet. " << crash;
+  global.fatal << "Not implemented yet. " << global.fatal;
 //  this->theChambersOld.theDirections = toBePartitioned;
   this->AmbientDimension = toBePartitioned.GetDim();
 //  this->theChambersOld.AmbientDimension = toBePartitioned.GetDim();
@@ -9440,7 +9440,7 @@ std::string PartFractions::DoTheFullComputationReturnLatexFileString(
   //this->theChambers.ReadFromDefaultFile();
   std::stringstream out;
   std::stringstream outHtml;
-  crash << crash ;
+  global.fatal << global.fatal ;
 //  this->theChambersOld.SliceTheEuclideanSpace(false);
 //  this->theChambersOld.QuickSortAscending();
 //  this->theChambersOld.LabelChamberIndicesProperly();
@@ -9452,17 +9452,17 @@ std::string PartFractions::DoTheFullComputationReturnLatexFileString(
   outHtml << theDVs.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->AmbientDimension);
   Vector<Rational> tempRoot;
   tempRoot.MakeZero(this->AmbientDimension);
-  crash << "not implemented yet" << crash;
+  global.fatal << "not implemented yet" << global.fatal;
 //  this->initFromRoots(theChambersOld.theDirections);
   out << "\\documentclass{article}\\usepackage{amsmath, amsfonts, amssymb} \n\\begin{document}\n";
   out << "The vector partition funciton is the number of ways you can represent a vector $(x_1,\\dots, x_n)$ as a non-negative integral linear combination of "
   << " a given set of vectors.  You requested the vector partition function with respect to the set of vectors: ";
-  crash << crash;
+  global.fatal << global.fatal;
 //  out << this->theChambersOld.theDirections.ElementToStringGeneric();
   out << "\n\n The corresponding generating function is: " << this->ToString(theFormat) << "= (after splitting acording to algorithm)";
   this->split(nullptr);
   out << this->ToString(theFormat);
-  crash << crash;
+  global.fatal << global.fatal;
 //  out << "Therefore the vector partition function is given by " << this->theChambersOld.GetNumNonZeroPointers()
 //        << " quasipolynomials depending on which set of linear inequalities is satisfied (each such set we call ``Chamber'').";
 //  outHtml << "There are " << this->theChambersOld.size << " systems of linear inequalities "
@@ -9471,7 +9471,7 @@ std::string PartFractions::DoTheFullComputationReturnLatexFileString(
   QuasiPolynomial tempQP;
   std::string tempS;
   Vector<Rational> tempIndicator;
-  crash << crash;
+  global.fatal << global.fatal;
   /*for (int i = 0; i < this->theChambersOld.size; i ++)
     if (this->theChambersOld[i] != 0) {
       Cone& currentChamber = this->theChambers[i];
@@ -9532,14 +9532,14 @@ void QuasiPolynomial::Substitution(
     this == &output || mapFromNewSpaceToOldSpace.NumRows != this->GetNumVars() ||
     ambientLatticeNewSpace.GetDim() != mapFromNewSpaceToOldSpace.NumCols
   ) {
-    crash << "Bad lattice dimensions. " << crash;
+    global.fatal << "Bad lattice dimensions. " << global.fatal;
   }
   output.AmbientLatticeReduced = ambientLatticeNewSpace;
   output.AmbientLatticeReduced.IntersectWithPreimageOfLattice(mapFromNewSpaceToOldSpace, this->AmbientLatticeReduced);
   Vectors<Rational> allRepresentatives, imagesAllRepresentatives;
   bool tempBool = ambientLatticeNewSpace.GetAllRepresentatives(output.AmbientLatticeReduced, allRepresentatives);
   if (!tempBool) {
-    crash << "Failed to get all representatives. " << crash;
+    global.fatal << "Failed to get all representatives. " << global.fatal;
   }
   mapFromNewSpaceToOldSpace.ActOnVectorsColumn(allRepresentatives, imagesAllRepresentatives);
   PolynomialSubstitution<Rational> theSub;
@@ -9555,9 +9555,9 @@ void QuasiPolynomial::Substitution(
     tempP = this->valueOnEachLatticeShift[i];
     bool tempB = tempP.Substitution(theSub);
     if (!tempB) {
-      crash << "This is a programming error: substitution "
+      global.fatal << "This is a programming error: substitution "
       << theSub.ToString() << " into polynomial " << tempP.ToString()
-      << " failed but the current function does not handle this properly. " << crash;
+      << " failed but the current function does not handle this properly. " << global.fatal;
     }
     for (int j = 0; j < allRepresentatives.size; j ++) {
       if (imagesAllRepresentatives[j] == this->LatticeShifts[i]) {
@@ -9586,9 +9586,9 @@ void QuasiPolynomial::Substitution(
     tempP = this->valueOnEachLatticeShift[i];
     bool tempB = tempP.Substitution(theSub);
     if (!tempB) {
-      crash << "This is a programming error: substitution "
+      global.fatal << "This is a programming error: substitution "
       << theSub.ToString() << " into polynomial " << tempP.ToString()
-      << " failed but the current function does not handle this properly. " << crash;
+      << " failed but the current function does not handle this properly. " << global.fatal;
     }
     output.AddLatticeShift(tempP, this->LatticeShifts[i] + inputTranslationSubtractedFromArgument);
   }
@@ -9634,9 +9634,9 @@ bool QuasiPolynomial::SubstitutionLessVariables(const PolynomialSubstitution<Rat
       tempP = this->valueOnEachLatticeShift[i];
       bool tempB = tempP.Substitution(theSub);
       if (!tempB) {
-        crash << "This is a programming error: substitution "
+        global.fatal << "This is a programming error: substitution "
         << theSub.ToString() << " into polynomial " << tempP.ToString()
-        << " failed but the current function does not handle this properly. " << crash;
+        << " failed but the current function does not handle this properly. " << global.fatal;
       }
       output.AddLatticeShift(tempP, tempRoot);
     }
@@ -9712,7 +9712,7 @@ void Lattice::IntersectWithLinearSubspaceGivenByNormal(const Vector<Rational>& t
     orthogonalComponent = tempRoot.ScalarEuclidean(theScalarProducts) / theScalarProducts.ScalarEuclidean(theScalarProducts);
     tempRoot -= theScalarProducts * orthogonalComponent;
     if (!orthogonalComponent.IsInteger()) {
-      crash << "Orthogonal component is supposed to be an integer. " << crash;
+      global.fatal << "Orthogonal component is supposed to be an integer. " << global.fatal;
     }
     if (!tempRoot.IsEqualToZero()) {
       resultRoot.MakeZero(this->GetDim());
@@ -9742,7 +9742,7 @@ void Lattice::IntersectWithLinearSubspaceGivenByNormals(const Vectors<Rational>&
 bool Lattice::SubstitutionHomogeneous(const Matrix<Rational> & theSub, Lattice& resultIsSubsetOf) {
   (void) theSub;
   (void) resultIsSubsetOf;
-  crash << "Not implemented yet. " << crash;
+  global.fatal << "Not implemented yet. " << global.fatal;
  /*Vectors<Rational> preimageBasis;
   preimageBasis.AssignMatrixRows(this->basisRationalForm);
   Matrix<Rational>  theSubModifiable, currentBasisVector, oneSolution;
@@ -9834,7 +9834,7 @@ bool Cone::ReadFromFile(std::fstream& input) {
   int NumWordsRead;
   XML::ReadThroughFirstOpenTag(input, NumWordsRead, this->GetXMLClassName());
   if (NumWordsRead != 0) {
-    crash << "Reading code from file failed. " << crash;
+    global.fatal << "Reading code from file failed. " << global.fatal;
   }
   input >> tempS;
   buffer.size = 0;
@@ -10009,7 +10009,7 @@ bool ConeLatticeAndShiftMaxComputation::ReadFromFile(std::fstream& input, int Up
   XML::ReadEverythingPassedTagOpenUntilTagClose(input, "LPtoMaximizeSmallerDim");
   XML::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, this->GetXMLClassName());
   if (numReadWords != 0) {
-    crash << "Failed to read conelattice and shift from file. " << crash;
+    global.fatal << "Failed to read conelattice and shift from file. " << global.fatal;
   }
   return true;
 }
@@ -10040,7 +10040,7 @@ bool Lattice::ReadFromFile(std::fstream& input) {
   this->basisRationalForm.GetMatrixIntWithDen(this->basis, this->Den);
   XML::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, this->GetXMLClassName());
   if (numReadWords != 0) {
-    crash << "Failed to read rational form. " << crash;
+    global.fatal << "Failed to read rational form. " << global.fatal;
   }
   return result;
 }
@@ -10055,17 +10055,17 @@ void ConeComplex::WriteToFile(std::fstream& output, int UpperLimit) {
 
 bool ConeComplex::ReadFromFile(std::fstream& input, int UpperLimitDebugPurposes) {
   if (!this->List<Cone>::ReadFromFile(input, UpperLimitDebugPurposes)) {
-    crash << "Failed to read cone complex. " << crash ;
+    global.fatal << "Failed to read cone complex. " << global.fatal ;
     return false;
   }
   std::string tempS;
   input >> tempS >> this->indexLowestNonRefinedChamber;
   if (tempS != "IndexLowestNonRefined:") {
-    crash << "Failed to read from file" << crash;
+    global.fatal << "Failed to read from file" << global.fatal;
     return false;
   }
   if (!this->splittingNormals.ReadFromFile(input)) {
-    crash << "Failed to read splitting normals. " << crash;
+    global.fatal << "Failed to read splitting normals. " << global.fatal;
     return false;
   }
   this->slicingDirections.ReadFromFile(input);
@@ -10075,7 +10075,7 @@ bool ConeComplex::ReadFromFile(std::fstream& input, int UpperLimitDebugPurposes)
 
 void Cone::IntersectAHyperplane(Vector<Rational>& theNormal, Cone& outputConeLowerDim) {
   if (theNormal.IsEqualToZero()) {
-    crash << "Zero normal not allowed. " << crash;
+    global.fatal << "Zero normal not allowed. " << global.fatal;
   }
   int theDimension = theNormal.size;
   Matrix<Rational> tempMat, theEmbedding, theProjection;
@@ -10083,7 +10083,7 @@ void Cone::IntersectAHyperplane(Vector<Rational>& theNormal, Cone& outputConeLow
   Vectors<Rational> theBasis;
   tempMat.GetZeroEigenSpace(theBasis);
   if (theBasis.size != theNormal.size - 1) {
-    crash << "Plane intersection: normals don't match. " << crash;
+    global.fatal << "Plane intersection: normals don't match. " << global.fatal;
   }
   theEmbedding.AssignVectorsToRows(theBasis);
   theEmbedding.Transpose();
@@ -10098,7 +10098,7 @@ void Cone::IntersectAHyperplane(Vector<Rational>& theNormal, Cone& outputConeLow
   theProjection.ActOnVectorsColumn(newNormals);
   bool tempBool = outputConeLowerDim.CreateFromNormals(newNormals);
   if (tempBool) {
-    crash << "Create from normals failed. " << crash;
+    global.fatal << "Create from normals failed. " << global.fatal;
   }
 }
 
@@ -10184,8 +10184,8 @@ std::string HtmlRoutines::ToHtmlTable(List<std::string>& labels, List<List<std::
   for (int i = 0; i < content.size; i ++) {
     out << "<tr>";
     if (labels.size != content[i].size) {
-      crash << "Error: while composing table, got " << labels.size << " labels but row index " << i
-      << " has " << content[i].size << " elements. " << crash;
+      global.fatal << "Error: while composing table, got " << labels.size << " labels but row index " << i
+      << " has " << content[i].size << " elements. " << global.fatal;
     }
     for (int j = 0; j < content[i].size; j ++) {
       if (! nestTables) {
@@ -10324,7 +10324,7 @@ bool PartFractions::RemoveRedundantShortRootsIndex(int theIndex, Vector<Rational
           currentFrac.AddMultiplicity(currentFrac.Multiplicities[i], LCMElongations);
           currentFrac.AddMultiplicity(- currentFrac.Multiplicities[i], ElongationValue);
           if (!localEndCheckSum.IsEqualTo(localStartCheckSum)) {
-            crash << "Local end checksum must be zero. " << crash;
+            global.fatal << "Local end checksum must be zero. " << global.fatal;
           }
         }
       }
@@ -10746,7 +10746,7 @@ bool Cone::DrawMeProjective(
       sumAbsValuesCoords += (VerticesScaled[i][j].IsPositive()) ? VerticesScaled[i][j] : - VerticesScaled[i][j];
     }
     if (sumAbsValuesCoords.IsEqualToZero()) {
-      crash << "Zero vector not allowed. " << crash;
+      global.fatal << "Zero vector not allowed. " << global.fatal;
     }
     VerticesScaled[i] /= sumAbsValuesCoords;
   }
@@ -11229,7 +11229,7 @@ void RationalFunctionOld::operator/=(const Polynomial<Rational>& other) {
   tempRF.Invert();
   *this *= tempRF;
   if (!this->checkConsistency()) {
-    crash << "Bad rational function." << crash;
+    global.fatal << "Bad rational function." << global.fatal;
   }
 }
 
@@ -11256,7 +11256,7 @@ bool RationalFunctionOld::Substitution(const PolynomialSubstitution<Rational>& t
 //  int commentMEWhenDone;
   switch(this->expressionType) {
     case RationalFunctionOld::typeRational:
-//      if (!this->checkConsistency())crash << crash;
+//      if (!this->checkConsistency())global.fatal << global.fatal;
       return true;
     case RationalFunctionOld::typePoly:
 //      global.Comments << "<hr>subbing in<br>" << this->ToString(tempFormat) << " using " << theSub.ToString()
@@ -11267,7 +11267,7 @@ bool RationalFunctionOld::Substitution(const PolynomialSubstitution<Rational>& t
 //      global.Comments << "<br>finally:<br>" << this->Numerator.GetElement().ToString();
       this->Simplify();
 //      global.Comments << ", which, simplified, yields<br> " << this->ToString(tempFormat);
-//      if (!this->checkConsistency())crash << crash;
+//      if (!this->checkConsistency())global.fatal << global.fatal;
       return true;
     case RationalFunctionOld::typeRationalFunction:
       if (!this->Numerator.GetElement().Substitution(theSub)) {
@@ -11282,7 +11282,7 @@ bool RationalFunctionOld::Substitution(const PolynomialSubstitution<Rational>& t
       this->Simplify();
       return true;
     default:
-      crash << "Default case not allowed. " << crash;
+      global.fatal << "Default case not allowed. " << global.fatal;
       break;
   }
   return false;
@@ -11300,7 +11300,7 @@ void Selection::operator=(const Vector<Rational>& other) {
 
 void ConeComplex::InitFromAffineDirectionsAndRefine(Vectors<Rational>& inputDirections, Vectors<Rational>& inputAffinePoints) {
   if (inputDirections.size != inputAffinePoints.size || inputDirections.size <= 0) {
-    crash << "Input directions size does not match affine point size. " << crash;
+    global.fatal << "Input directions size does not match affine point size. " << global.fatal;
   }
   Vectors<Rational> projectivizedDirections;
   projectivizedDirections.SetSize(inputDirections.size * 2);
@@ -11320,7 +11320,7 @@ void ConeComplex::InitFromAffineDirectionsAndRefine(Vectors<Rational>& inputDire
 
 void ConeComplex::MakeAffineAndTransformToProjectiveDimPlusOne(Vector<Rational>& affinePoint, ConeComplex& output) {
   if (&output == this) {
-    crash << "Output coincides with input, not allowed. " << crash;
+    global.fatal << "Output coincides with input, not allowed. " << global.fatal;
   }
   output.init();
   Cone tempCone;
@@ -11347,7 +11347,7 @@ Vector<coefficient> Vector<coefficient>::GetProjectivizedNormal(Vector<coefficie
 
 void Lattice::GetRootOnLatticeSmallestPositiveProportionalTo(Vector<Rational>& input, Vector<Rational>& output) {
   if (&input == &output) {
-    crash << "Input not allowed to coincide with output. " << crash;
+    global.fatal << "Input not allowed to coincide with output. " << global.fatal;
   }
   Vectors<Rational> theBasis;
   Vector<Rational> tempRoot;
@@ -11363,11 +11363,11 @@ void Lattice::GetRootOnLatticeSmallestPositiveProportionalTo(Vector<Rational>& i
   tempRoots.AddOnTop(input);
   Lattice tempLattice =*this;
   tempLattice.IntersectWithLinearSubspaceSpannedBy(tempRoots);
-  if (!tempLattice.basisRationalForm.NumRows ==1)crash << crash;
+  if (!tempLattice.basisRationalForm.NumRows ==1)global.fatal << global.fatal;
   tempLattice.basisRationalForm.RowToRoot(0, output);
   Rational tempRat;
   bool tempBool =  output.IsProportionalTo(input, tempRat);
-  if (!tempBool)crash << crash;
+  if (!tempBool)global.fatal << global.fatal;
   if (tempRat.IsNegative())
     output.Minus();*/
 }
@@ -11463,7 +11463,7 @@ bool PiecewiseQuasipolynomial::MakeVPF(Vectors<Rational>& theRoots, std::string&
   theFracs.split(nullptr);
   out << HtmlRoutines::GetMathMouseHover(theFracs.ToString(theFormat));
   //theFracs.theChambers.InitFromDirectionsAndRefine(theRoots);
-  crash << "Not implemented. " << crash ;
+  global.fatal << "Not implemented. " << global.fatal ;
 //  theFracs.theChambersOld.AmbientDimension = theRoots[0].size;
 //  theFracs.theChambersOld.theDirections = theRoots;
 //  theFracs.theChambersOld.SliceTheEuclideanSpace(false);
@@ -11512,7 +11512,7 @@ bool Lattice::GetInternalPointInConeForSomeFundamentalDomain(Vector<Rational>& o
 
 void Cone::TranslateMeMyLastCoordinateAffinization(Vector<Rational>& theTranslationVector) {
   if (theTranslationVector.size != this->GetDim() - 1) {
-    crash << "Translation vector size does not equal dimension minus one. " << crash;
+    global.fatal << "Translation vector size does not equal dimension minus one. " << global.fatal;
   }
   Vector<Rational> tempRoot;
   for (int i = 0; i < this->Normals.size; i ++) {
@@ -11691,7 +11691,7 @@ Rational QuasiPolynomial::Evaluate(const Vector<Rational>& input) {
 
 Rational PiecewiseQuasipolynomial::Evaluate(const Vector<Rational>& input) {
   if (input.size != this->theProjectivizedComplex.GetDim() - 1) {
-    crash << "Input size does not equal the projectivized complex dimension minus one. " << crash;
+    global.fatal << "Input size does not equal the projectivized complex dimension minus one. " << global.fatal;
   }
   Vector<Rational> ProjectivizedInput = input;
   ProjectivizedInput.SetSize(input.size + 1);
@@ -11702,7 +11702,7 @@ Rational PiecewiseQuasipolynomial::Evaluate(const Vector<Rational>& input) {
 Rational PiecewiseQuasipolynomial::EvaluateInputProjectivized(const Vector<Rational>& input) {
   Rational result;
   if (input.size != this->theProjectivizedComplex.GetDim()) {
-    crash << "Input size not equal to projectivized complex dimension. " << crash;
+    global.fatal << "Input size not equal to projectivized complex dimension. " << global.fatal;
   }
   Vector<Rational> AffineInput = input;
   AffineInput.SetSize(input.size - 1);
@@ -11803,7 +11803,7 @@ void Cone::ChangeBasis(Matrix<Rational>& theLinearMap) {
 
 void Cone::TransformToWeylProjective(ConeComplex& owner) {
   (void) owner;
-  crash << "Not implemented yet. " << crash;
+  global.fatal << "Not implemented yet. " << global.fatal;
 /*
   for (int i = 0; i < this->Externalwalls.size; i ++)
     this->Externalwalls[i].TransformToWeylProjective();
@@ -12065,8 +12065,8 @@ void ConeLatticeAndShiftMaxComputation::FindExtremaParametricStep1(
     while (this->theConesLargerDim.size > 0) {
       ConeLatticeAndShift& currentCLS = *this->theConesLargerDim.LastObject();
       if (this->LPtoMaximizeLargerDim.LastObject()->size != currentCLS.GetDimAffine() + 1) {
-        crash << "In ConeLatticeAndShiftMaxComputation::FindExtremaParametricStep1: "
-        << "dimensions don't match. " << crash;
+        global.fatal << "In ConeLatticeAndShiftMaxComputation::FindExtremaParametricStep1: "
+        << "dimensions don't match. " << global.fatal;
       }
       if (!this->LPtoMaximizeLargerDim.LastObject()->IsEqualToZero()) {
         currentCLS.FindExtremaInDirectionOverLatticeOneNonParam(
@@ -12195,7 +12195,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam(
       } else {
         numNonPerpWalls ++;
         if (numNonPerpWalls >= 3) {
-          crash << "Number of non-perpendicular walls is larger than 3. " << crash;
+          global.fatal << "Number of non-perpendicular walls is larger than 3. " << global.fatal;
         }
         if (!currentNormal.ScalarEuclidean(direction).IsPositive() && !foundExitNormal) {
           theLattice.GetRougherLatticeFromAffineHyperplaneDirectionAndLattice(
@@ -12230,7 +12230,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam(
     global.Comments << "<br>The shifted lattice representatives: " << exitRepresentatives.ToString()
     << "<br>exitNormalsShiftedAffineProjected";
     if (theNewNormals.size <= 0) {
-      crash << "New normals missing. " << crash;
+      global.fatal << "New normals missing. " << global.fatal;
     }
     for (int j = 0; j < exitRepresentatives.size; j ++) {
       tempCLS.theProjectivizedCone.Normals = theNewNormals;
@@ -12247,7 +12247,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam(
       tempRoot -= exitNormalShiftedAffineProjected * theLPToMaximizeAffine[0] / exitNormalAffine[0];
       outputAppendLPToMaximizeAffine.AddOnTop(tempRoot);
       if (tempCLS.theProjectivizedCone.Normals.size <= 0) {
-        crash << "Projectivized cone has no normals. " << crash;
+        global.fatal << "Projectivized cone has no normals. " << global.fatal;
       }
       Vectors<Rational> tempTempRoots = tempCLS.theProjectivizedCone.Normals;
       tempCLS.theProjectivizedCone.CreateFromNormals(tempTempRoots);
@@ -12272,7 +12272,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam(
             i = i +2;
         while (true){}
       }*/
-      //if (!tempBool)crash << crash;
+      //if (!tempBool)global.fatal << global.fatal;
       //global.Comments << tempCLS.theProjectivizedCone.ToString(false, true, true, true, theFormat);
       if (!tempCLS.theProjectivizedCone.flagIsTheZeroCone) {
         theProjectionLatticeLevel.ActOnVectorColumn(exitRepresentatives[j], tempCLS.theShift);
@@ -12283,7 +12283,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam(
           }
         }
         if (tempCLS.GetDimProjectivized() != theDimProjectivized - 1) {
-          crash << "Projectivized dimension not correct. " << crash;
+          global.fatal << "Projectivized dimension not correct. " << global.fatal;
         }
       }
     }
@@ -12645,7 +12645,7 @@ bool Cone::EliminateFakeNormalsUsingVertices(int numAddedFakeWalls) {
   }
   for (int i = 0; i < this->Vertices.size; i ++) {
     if (this->Normals.HasAnElementWithNegativeScalarProduct(this->Vertices[i])) {
-      crash << "Negative scalar products not allowed. " << crash;
+      global.fatal << "Negative scalar products not allowed. " << global.fatal;
     }
   }
   for (int i = 0; i < this->Normals.size; i ++) {
@@ -12917,7 +12917,7 @@ int RationalFunctionOld::GetMinNumVars() const {
       return MathRoutines::Maximum(
         this->Numerator.GetElementConst().GetMinNumVars(), this->Denominator.GetElementConst().GetMinNumVars()
       );
-    default: //this should never happen! maybe crash << crash here...
+    default: //this should never happen! maybe global.fatal << global.fatal here...
       return - 1;
   }
 }
@@ -13079,7 +13079,7 @@ void Lattice::RefineByOtherLattice(const Lattice& other) {
     return;
   }
   if (other.GetDim() != this->GetDim()) {
-    crash << "Dimension mismatch. " << crash;
+    global.fatal << "Dimension mismatch. " << global.fatal;
   }
   int theDim = this->GetDim();
   LargeIntegerUnsigned oldDen = this->Den;

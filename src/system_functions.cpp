@@ -95,9 +95,9 @@ bool TimeoutThread::HandleMaxComputationTime() {
   }
   //theReport2.SetStatus("Starting timer cycle break: computation time too long.");
   if (!global.flagComputationStarted) {
-    crash << "Something has gone wrong. Computation has not started, yet " << this->elapsedTimeInMilliseconds
+    global.fatal << "Something has gone wrong. Computation has not started, yet " << this->elapsedTimeInMilliseconds
     << " ms have already passed."
-    << " This may be an error in the web-server routines of the calculator. " << crash;
+    << " This may be an error in the web-server routines of the calculator. " << global.fatal;
   }
   std::stringstream out;
   out << "<b>This is a safety time-out crash. You may have requested a computation that takes too long."
@@ -128,7 +128,7 @@ bool TimeoutThread::HandleMaxComputationTime() {
   << "<br>This may be a lot of work but will allow you to alter "
   << "time limits dynamically. You will need to modify file: "
   << __FILE__ << "<br>";
-  crash << out.str() << crash;
+  global.fatal << out.str() << global.fatal;
   return true;
 }
 

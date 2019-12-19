@@ -30,7 +30,7 @@ public:
   void DenseVectorInBasis(Vector<coefficient>& out, const templateVector& in);
   bool CheckConsistency() const {
     if (this->flagDeallocated) {
-      crash << "This is a programming error: use of SparseSubspaceBasis after free. " << crash;
+      global.fatal << "This is a programming error: use of SparseSubspaceBasis after free. " << global.fatal;
     }
     for (int i = 0; i < this->involvedMonomials.size; i ++) {
       this->involvedMonomials[i].CheckConsistency();
@@ -398,7 +398,7 @@ public:
 
   void MakeFromString(const std::string& in) {
     (void) in;
-    crash << "not implemented yet" << crash;
+    global.fatal << "not implemented yet" << global.fatal;
   }
 
   friend std::ostream& operator<<(std::ostream& s, const SemidirectProductElement<helt, kelt, oa>& in) {
@@ -470,7 +470,7 @@ public:
   void Validate() const {
     for (int i = 0; i < bits.size; i ++) {
       if ((bits[i] != true) && (bits[i] != false)) {
-        crash << "invalid bit " << bits[i] << crash;
+        global.fatal << "invalid bit " << bits[i] << global.fatal;
       }
     }
   }
@@ -1185,7 +1185,7 @@ class ElementFiniteGroup: public GroupConjugacyImplementation<ElementFiniteGroup
       out.data = this->inv(this->data);
       return out;
     }
-    crash << "Inversion function not available. " << crash;
+    global.fatal << "Inversion function not available. " << global.fatal;
     return out;
   }
   ElementFiniteGroup MakeID(const ElementFiniteGroup& prototype) {

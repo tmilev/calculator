@@ -19,10 +19,10 @@ void ParallelComputing::CheckPointerCounters() {
     }
     ParallelComputing::flagUngracefulExitInitiated = true;
     tempMutex.UnlockMe();
-    crash << "This may or may not be an error: the number of pointers "
+    global.fatal << "This may or may not be an error: the number of pointers "
     << "allocated by the program exceeded the allowed <b>limit of "
     << ParallelComputing::cgiLimitRAMuseNumPointersInList
-    << ".</b>" << crash;
+    << ".</b>" << global.fatal;
   }
   if (ParallelComputing::PointerCounterPeakRamUse < ParallelComputing::GlobalPointerCounter) {
     ParallelComputing::PointerCounterPeakRamUse = ParallelComputing::GlobalPointerCounter;
@@ -32,7 +32,7 @@ void ParallelComputing::CheckPointerCounters() {
 void MutexRecursiveWrapper::CheckConsistency() {
   if (this->flagDeallocated) {
     global << logger::red << "Use after free of mutex. "
-    << crash.GetStackTraceEtcErrorMessageConsole() << logger::endL;
+    << global.fatal.GetStackTraceEtcErrorMessageConsole() << logger::endL;
     assert(false);
   }
 }
@@ -96,7 +96,7 @@ void MutexRecursiveWrapper::LockMe() {
     }
     static_cast<std::mutex*>(this->theMutexImplementation)->lock();
   } catch (...) {
-    crash << "Fatal error: mutex lock failed. " << crash;
+    global.fatal << "Fatal error: mutex lock failed. " << global.fatal;
   }
   this->flagUnsafeFlagForDebuggingIsLocked = true;
   this->lastLockerThread = ThreadData::getCurrentThreadId();

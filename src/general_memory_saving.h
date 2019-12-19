@@ -15,7 +15,7 @@ private:
   Object* theValue;
   MemorySaving(const MemorySaving<Object>& other) {
     (void) other;
-    crash << "This constructor should not be used. " << crash;
+    fatalCrash("This constructor should not be used. ");
   }
 public:
   void operator=(const MemorySaving<Object>& other) {
@@ -27,7 +27,7 @@ public:
   }
   const Object& GetElementConst() const {
     if (this->theValue == 0) {
-      crash << "Programming error: attempting to access zero pointer. " << crash;
+      fatalCrash("Programming error: attempting to access zero pointer. ");
     }
     return *this->theValue;
   }

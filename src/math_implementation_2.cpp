@@ -18,13 +18,13 @@ void LargeIntegerUnsigned::AssignString(const std::string& input) {
     this->operator*=(10);
     int whichDigit = input[i] - '0';
     if (whichDigit > 9 || whichDigit < 0) {
-      crash << "This is a programming error: LargeIntUnsigned::AssignString "
+      global.fatal << "This is a programming error: LargeIntUnsigned::AssignString "
       << "called on the string " << input
       << " which does not consist entirely of digits. "
       << "Please note that LargeIntUnsigned::AssignString is a no-fail function, intended for "
       << "internal use only. If you want to parse arbitrary unsafe "
       << "expressions coming from the user, please use the big gun (a.k.a. Calculator). "
-      << crash;
+      << global.fatal;
     }
     this->operator+=(static_cast<unsigned>(whichDigit));
   }
@@ -318,8 +318,8 @@ bool LargeIntegerUnsigned::operator!=(const LargeIntegerUnsigned& other) const {
 
 void LargeIntegerUnsigned::operator--(int) {
   if (this->IsEqualToZero()) {
-    crash << "This is a programming error: attempting to subtract "
-    << "1 from a large unsigned integer with value 0. " << crash;
+    global.fatal << "This is a programming error: attempting to subtract "
+    << "1 from a large unsigned integer with value 0. " << global.fatal;
   }
   this->SubtractSmallerPositive(1);
 }
@@ -373,7 +373,7 @@ void LargeIntegerUnsigned::DivPositive(
   LargeIntegerUnsigned& remainderOutput
 ) const {
   if (divisor.IsEqualToZero()) {
-    crash << "Division by zero. " << crash;
+    global.fatal << "Division by zero. " << global.fatal;
   }
   if (divisor.theDigits.size == 1 && this->theDigits.size == 1) {
     unsigned quotientDigit = static_cast<unsigned>(this->theDigits[0] / divisor.theDigits[0]);
@@ -424,7 +424,7 @@ void LargeIntegerUnsigned::DivPositive(
       remainderOutput = remainderBackup;
       divisorLeadingDigitPlusSlack ++;
       if (divisorLeadingDigitPlusSlack > divisorLeadingDigit + 1) {
-        crash << "Bad division algorithm: could not figure out currentQuotientDigit for more than 2 runs. " << crash;
+        global.fatal << "Bad division algorithm: could not figure out currentQuotientDigit for more than 2 runs. " << global.fatal;
       }
     }
     if (lastRemainderSize == remainderOutput.theDigits.size && lastRemainderSize != 1) {
@@ -434,10 +434,10 @@ void LargeIntegerUnsigned::DivPositive(
     }
     lastRemainderSize = remainderOutput.theDigits.size;
     if (numRunsNoDigitImprovement > upperlimitNoImprovementRounds) {
-      crash << "Bad division: while dividing " << this->ToString() << " by "
+      global.fatal << "Bad division: while dividing " << this->ToString() << " by "
       << divisor.ToString()
       << " got too many algorithm steps without remainder size decrease. "
-      << "." << crash;
+      << "." << global.fatal;
     }
   }
 }
@@ -552,7 +552,7 @@ LargeIntegerUnsigned::LargeIntegerUnsigned(const LargeIntegerUnsigned& x) {
 
 void LargeIntegerUnsigned::AddShiftedUIntSmallerThanCarryOverBound(unsigned int x, int shift) {
   if (!(x < LargeIntegerUnsigned::CarryOverBound)) {
-    crash << "Digit too large. " << crash;
+    global.fatal << "Digit too large. " << global.fatal;
   }
   while (x > 0) {
     if (shift >= this->theDigits.size) {
@@ -578,7 +578,7 @@ unsigned int LargeIntegerUnsigned::LogarithmBaseNCeiling(unsigned int theBase) c
     return 0;
   }
   if (theBase <= 1) {
-    crash << "Base of logarithm needs to be larger than one. " << crash;
+    global.fatal << "Base of logarithm needs to be larger than one. " << global.fatal;
   }
   LargeIntegerUnsigned current;
   List<LargeIntegerUnsigned> baseRaisedTo2ToPowerIndex;
@@ -701,7 +701,7 @@ void LargeIntegerUnsigned::PadWithZeroesToAtLeastNDigits(int desiredMinNumDigits
 
 void LargeIntegerUnsigned::AddLargeIntUnsignedShiftedTimesDigit(const LargeIntegerUnsigned& other, int digitShift, int theConst) {
   if (theConst >= this->CarryOverBound || (- theConst) <= (- this->CarryOverBound)) {
-    crash << "Digit: " << theConst << " is too large" << crash;
+    global.fatal << "Digit: " << theConst << " is too large" << global.fatal;
   }
   int numDigits = MathRoutines::Maximum(other.theDigits.size + 1 + digitShift, this->theDigits.size + 1);
   this->PadWithZeroesToAtLeastNDigits(numDigits);
@@ -719,13 +719,13 @@ void LargeIntegerUnsigned::AddLargeIntUnsignedShiftedTimesDigit(const LargeInteg
       this->theDigits[nextIndex] --;
     }
     if (this->theDigits[currentIndex] < 0) {
-      crash << "Non-positive non-leading digit." << crash;
+      global.fatal << "Non-positive non-leading digit." << global.fatal;
     }
   }
   this->FitSize();
   int lastDigit =* this->theDigits.LastObject();
   if (lastDigit >= this->CarryOverBound || (- lastDigit) <= (- this->CarryOverBound)) {
-    crash << "Leading digit: " << lastDigit << " is too large" << crash;
+    global.fatal << "Leading digit: " << lastDigit << " is too large" << global.fatal;
   }
 }
 
@@ -896,7 +896,7 @@ bool LargeIntegerUnsigned::FactorLargeReturnFalseIfFactorizationIncomplete(
     return false;
   }
   if (this->IsEqualToZero()) {
-    crash << "This is a programming error: it was requested that I factor 0, which is forbidden. " << crash;
+    global.fatal << "This is a programming error: it was requested that I factor 0, which is forbidden. " << global.fatal;
   }
   LargeIntegerUnsigned toBeFactored = *this;
   outputFactors.SetSize(0);
@@ -949,7 +949,7 @@ bool LargeIntegerUnsigned::FactorReturnFalseIfFactorizationIncomplete(
     );
   }
   if (this->IsEqualToZero()) {
-    crash << "This is a programming error: it was requested that I factor 0, which is forbidden." << crash;
+    global.fatal << "This is a programming error: it was requested that I factor 0, which is forbidden." << global.fatal;
   }
   unsigned int toBeFactored = static_cast<unsigned>(this->theDigits[0]);
   outputFactors.SetSize(0);
@@ -980,14 +980,14 @@ bool LargeIntegerUnsigned::FactorReturnFalseIfFactorizationIncomplete(
 void LargeIntegerUnsigned::lcm(const LargeIntegerUnsigned& a, const LargeIntegerUnsigned& b, LargeIntegerUnsigned& output) {
   LargeIntegerUnsigned tempUI, tempUI2;
   if (a.IsEqualToZero() || b.IsEqualToZero()) {
-    crash << "This is a programming error: calling lcm on zero elements is not allowed. " << crash;
+    global.fatal << "This is a programming error: calling lcm on zero elements is not allowed. " << global.fatal;
   }
   LargeIntegerUnsigned::gcd(a, b, tempUI);
   a.MultiplyBy(b, tempUI2);
   output = tempUI2;
   output.DivPositive(tempUI, output, tempUI2);
   if (output.IsEqualToZero()) {
-    crash << "Least common multiple not allowed to be zero. " << crash;
+    global.fatal << "Least common multiple not allowed to be zero. " << global.fatal;
   }
 }
 
@@ -1060,7 +1060,7 @@ void LargeInteger::ReadFromFile(std::fstream& input) {
 void LargeInteger::AssignString(const std::string& input) {
   bool success = this->AssignStringFailureAllowed(input, nullptr);
   if (!success) {
-    crash << "LargeInt::AssignString is not allowed to fail." << crash;
+    global.fatal << "LargeInt::AssignString is not allowed to fail." << global.fatal;
   }
 }
 
@@ -1250,8 +1250,8 @@ void LargeInteger::MakeZero() {
 
 void LargeInteger::operator=(const Rational& other) {
   if (!other.IsInteger(this)) {
-    crash << "This is a programming error: converting implicitly rational number " << other.ToString()
-    << " to integer is not possible as the Rational number is not integral. " << crash;
+    global.fatal << "This is a programming error: converting implicitly rational number " << other.ToString()
+    << " to integer is not possible as the Rational number is not integral. " << global.fatal;
   }
 }
 
@@ -1282,14 +1282,14 @@ LargeInteger LargeInteger::operator/(LargeInteger& x) const {
   this->value.DivPositive(x.value, result.value, remainder.value);
   result.sign = this->sign * x.sign;
   if (!result.CheckForConsistensy()) {
-    crash << "Large integer corrupt. " << crash;
+    global.fatal << "Large integer corrupt. " << global.fatal;
   }
   return result;
 }
 
 int LargeInteger::operator%(int x) {
   if (x <= 0) {
-    crash << "Bad mod operator output. " << crash;
+    global.fatal << "Bad mod operator output. " << global.fatal;
   }
   LargeIntegerUnsigned result;
   LargeIntegerUnsigned remainder;
@@ -1339,7 +1339,7 @@ void Rational::Invert() {
   if (this->Extended == nullptr) {
     int tempI = this->DenShort;
     if (tempI <= 0) {
-      crash << "Denominator not allowed to be negative. " << crash;
+      global.fatal << "Denominator not allowed to be negative. " << global.fatal;
     }
     if (this->NumShort < 0) {
       this->DenShort = - this->NumShort;
@@ -1490,7 +1490,7 @@ void Rational::AssignFracValue() {
     this->Extended->num.AddLargeIntUnsigned(this->Extended->den);
   }
   if (!this->Extended->num.IsPositiveOrZero()) {
-    crash << "Numerator must not be negative. " << crash;
+    global.fatal << "Numerator must not be negative. " << global.fatal;
   }
   this->Simplify();
 }
@@ -1595,7 +1595,7 @@ bool Rational::ShrinkExtendedPartIfPossible() {
 
 Rational Rational::Factorial(int n) {
   if (n < 0) {
-    crash << "This is a programming error: taking factorial of the negative number " << n << ". " << crash;
+    global.fatal << "This is a programming error: taking factorial of the negative number " << n << ". " << global.fatal;
     return 0;
   }
   LargeIntegerUnsigned result;
@@ -1715,9 +1715,9 @@ void Rational::DrawElement(DrawElementInputOutput& theDrawData) {
 
 void Rational::operator=(const Polynomial<Rational>& other) {
   if (!other.IsConstant(this)) {
-    crash << "This is a programming error: attempting to assign "
+    global.fatal << "This is a programming error: attempting to assign "
     << "non-constant polynomial to a Rational number is not allowed. "
-    << crash;
+    << global.fatal;
   }
 }
 
@@ -1823,8 +1823,8 @@ std::string Rational::ToStringFrac() const {
 void Rational::operator=(const AlgebraicNumber& other) {
   bool isGood = other.IsRational(this);
   if (!isGood) {
-    crash << "This is a programming error: attempting to assign the "
-    << "non-rational algebraic number " << other.ToString() << "to a rational number. " << crash;
+    global.fatal << "This is a programming error: attempting to assign the "
+    << "non-rational algebraic number " << other.ToString() << "to a rational number. " << global.fatal;
   }
 }
 
@@ -1877,6 +1877,6 @@ bool Rational::AssignStringFailureAllowed(const std::string& input) {
 
 void Rational::AssignString(const std::string& input) {
   if (!Rational::AssignStringFailureAllowed(input)) {
-    crash << "Programming error: Rational::AssignString failed (likely a zero denominator). " << crash;
+    global.fatal << "Programming error: Rational::AssignString failed (likely a zero denominator). " << global.fatal;
   }
 }

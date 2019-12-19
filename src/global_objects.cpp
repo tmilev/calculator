@@ -43,7 +43,6 @@ std::string GlobalVariables::GetTimeLocal() {
 
 Calculator* theParser = nullptr;
 FormatExpressions consoleFormat;
-Crasher crash;
 
 void InitializeGlobalObjects() {
   global.logs.logType = GlobalVariables::LogData::type::server;

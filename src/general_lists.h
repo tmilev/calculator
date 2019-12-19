@@ -347,9 +347,11 @@ public:
   ) {
     if (carbonCopy != 0) {
       if (carbonCopy->size != theList.size) {
-        crash << "Programming error: requesting quicksort with carbon copy on a list with "
+        std::stringstream crashComments;
+        crashComments << "Programming error: requesting quicksort with carbon copy on a list with "
         << theList.size << " elements, but the but the carbon copy has "
-        << carbonCopy->size << " elements. " << crash;
+        << carbonCopy->size << " elements. ";
+        fatalCrash(crashComments.str());
       }
     }
     if (theList.size == 0) {
@@ -407,7 +409,7 @@ private:
         << HighIndex << " is strictly greater than itself which is not allowed for strict orders. "
         << "Maybe the programmer has given a "
         << "non-strict order instead of strict one by mistake? ";
-        crash << crashStream.str() << crash;
+        fatalCrash(crashStream.str());
       }
       HighIndex --;
     }
@@ -500,7 +502,7 @@ class PointerObjectDestroyer {
 
   void RenewObject() {
     if (this->theObjectPointer == 0) {
-      crash << "Unexpeced: uninitialized object pointer. " << crash;
+      fatalCrash("Unexpeced: uninitialized object pointer. ");
     }
     delete *(this->theObjectPointer);
     *(this->theObjectPointer) = nullptr;
@@ -531,7 +533,7 @@ public:
   }
   ~StateMaintainer() {
     if (this->toMaintain == nullptr) {
-      crash << "Non-initialized state maintainer. " << crash;
+      fatalCrash("Non-initialized state maintainer. ");
     }
     *(this->toMaintain) = this->contentAtStart;
     this->toMaintain = nullptr;
@@ -731,7 +733,7 @@ std::iostream& operator>>(std::iostream& input, List<Object>& theList) {
   int tempI;
   input >> tempS >> tempI;
   if (tempS != "size:") {
-    crash << "Failed reading list from stream. " << crash;
+    fatalCrash("Failed reading list from stream. ");
   }
   theList.SetSize(tempI);
   for (int i = 0; i < theList.size; i ++) {
@@ -798,7 +800,7 @@ public:
   ~List();
   bool CheckConsistency() const {
     if (this->flagDeallocated) {
-      crash << "This is a programming error: use after free of List. " << crash;
+      fatalCrash("This is a programming error: use after free of List. ");
     }
     return true;
   }
@@ -1166,8 +1168,11 @@ public:
   Object& operator[](int i) const {
     this->CheckConsistency();
     if ((i >= this->size) || i < 0) {
-      crash << "Programming error: attempting to access the entry of index "
-      << i << " in an array of " << this->size << " elements. " << crash;
+      std::stringstream crashReport;
+      crashReport <<
+      "Programming error: attempting to access the entry of index "
+      << i << " in an array of " << this->size << " elements. ";
+      fatalCrash(crashReport.str());
     }
     return this->TheObjects[i];
   }
@@ -1360,25 +1365,29 @@ public:
       for (int j = 0; j < current.size; j ++) {
         int theIndex = current[j];
         if (theIndex >= this->size) {
-          crash << "This is a programming error: hash lookup array of index "
+          std::stringstream commentsOnCrash;
+          commentsOnCrash << "This is a programming error: hash lookup array of index "
           << i << ", entry of index " << j << " reports index "
-          << theIndex << " but I have only " << this->size << " entries. " << crash;
+          << theIndex << " but I have only " << this->size << " entries. ";
+          fatalCrash(commentsOnCrash.str());
         }
         if (this->GetHash((*this)[theIndex]) != static_cast<unsigned>(i)) {
-          crash << "<hr>This is a programming error: the hashed element in position "
+          std::stringstream commentsOnCrash;
+
+          commentsOnCrash << "<hr>This is a programming error: the hashed element in position "
           << theIndex << " is recorded in hash array of index "
           << i << ", however its hash value is instead " << this->GetHash((*this)[theIndex]) << ". The hash size is "
           << this->TheHashedArrays.size << "<br>hashes of objects: ";
           for (int l = 0; l < this->size; l ++) {
-            crash << this->GetHash((*this)[l]) << "= " << this->GetHash((*this)[l]) % this->TheHashedArrays.size << ", ";
+            commentsOnCrash << this->GetHash((*this)[l]) << "= " << this->GetHash((*this)[l]) % this->TheHashedArrays.size << ", ";
           }
-          crash << "<br>hashes recorded: ";
+          commentsOnCrash << "<br>hashes recorded: ";
           for (int l = 0; l < this->TheHashedArrays.size; l ++) {
             for (int k = 0; k < this->TheHashedArrays[l].size; k ++) {
-              crash << this->TheHashedArrays[l][k] << ", ";
+              commentsOnCrash << this->TheHashedArrays[l][k] << ", ";
             }
           }
-          crash << crash;
+          fatalCrash(commentsOnCrash.str());
         }
       }
     }
@@ -1414,7 +1423,7 @@ public:
       << o << " without repetition "
       << "to the hashed list with a function that does not allow repetition, "
       << "but the hashed list already contains the object. ";
-      crash << crashStream.str() << crash;
+      fatalCrash(crashStream.str());
     }
     this->AddOnTop(o);
     return true;
@@ -1440,9 +1449,11 @@ public:
   }
   void SetObjectAtIndex(int index, const Object& theObject) {
     if (index < 0 || index >= this->size) {
-      crash << "This is a programming error. You are attempting to pop out index "
+      std::stringstream commentsOnCrash;
+      commentsOnCrash << "This is a programming error. You are attempting to pop out index "
       << index << " out of hashed array "
-      << " of size " << this->size << ". " << crash;
+      << " of size " << this->size << ". ";
+      fatalCrash(commentsOnCrash.str());
     }
     int hashIndexPop = this->GetHash(this->TheObjects[index]);
     this->TheHashedArrays[hashIndexPop].RemoveFirstOccurenceSwapWithLast(index);
@@ -1452,9 +1463,11 @@ public:
   }
   void RemoveIndexSwapWithLast(int index) {
     if (index < 0 || index >= this->size) {
-      crash << "This is a programming error. You are attempting to pop out index "
+      std::stringstream commentsOnCrash;
+      commentsOnCrash << "This is a programming error. You are attempting to pop out index "
       << index << " out of hashed array "
-      << " of size " << this->size << ". " << crash;
+      << " of size " << this->size << ". ";
+      fatalCrash(commentsOnCrash.str());
     }
     Object* oPop = &this->TheObjects[index];
     int hashIndexPop = this->GetHash(*oPop);
@@ -1498,9 +1511,11 @@ public:
     for (int i = 0; i < this->TheHashedArrays[hashIndex].size; i ++) {
       int j = this->TheHashedArrays[hashIndex].TheObjects[i];
       if (j >= this->size) {
-        crash << "This is a programming error: corrupt hash table: at hashindex = "
+        std::stringstream commentsOnCrash;
+        commentsOnCrash << "This is a programming error: corrupt hash table: at hashindex = "
         << hashIndex << " I get instructed to look up index " << j
-        << " but I have only " << this->size << " elements. " << crash;
+        << " but I have only " << this->size << " elements. ";
+        fatalCrash(commentsOnCrash.str());
       }
       if ((*this)[j] == o) {
         return j;
@@ -1516,7 +1531,7 @@ public:
       << "the programmer has requested the index of object " << o
       << " with a function that does not allow failure. "
       << "However, the container array does not contain this object. ";
-      crash << errorStream.str() << crash;
+      fatalCrash(errorStream.str());
     }
     return result;
   }
@@ -1525,10 +1540,11 @@ public:
       inputSize = 0;
     }
     if (inputSize > this->size) {
-      crash << "SetSize is allowed for hashed lists only when resizing the hashed list to smaller. "
-      << "This is because if I was to resize to larger, I would have to allocate non-initialized "
-      << " objects, and those will have to be rehashed which does not make sense. "
-      << crash;
+      fatalCrash(
+        "SetSize is allowed for hashed lists only when resizing the hashed list to smaller. "
+        "This is because if I was to resize to larger, I would have to allocate non-initialized "
+        "objects, and those will have to be rehashed which does not make sense. "
+      );
     }
     for (int i = this->size - 1; i >= inputSize; i --) {
       this->PopLastObject();
@@ -1874,9 +1890,11 @@ void List<Object>::AddListOnTop(const List<Object>& theList) {
 template<class Object>
 void List<Object>::SwapTwoIndices(int index1, int index2) {
   if (index1 < 0 || index1 >= this->size || index2 < 0 || index2 >= this->size) {
-    crash << "This is a programming error: requested elements with indices "
+    std::stringstream commentsOnCrash;
+    commentsOnCrash << "This is a programming error: requested elements with indices "
     << index1 << " and " << index2 << " in a list that has "
-    << this->size << " elements. This is impossible. " << crash;
+    << this->size << " elements. ";
+    fatalCrash(commentsOnCrash.str());
   }
   if (index1 == index2) {
     return;
@@ -1894,8 +1912,10 @@ void List<Object>::CycleIndices(const List<int>& cycle) {
   }
   for (int i = 0; i < cycle.size; i ++) {
     if ((cycle[i] >= this->size) || (cycle[i] < 0)) {
-      crash << "Programming error: request to cycle indices " << cycle
-      << " in list of " << this->size << " elements." << crash;
+      std::stringstream commentsOnCrash;
+      commentsOnCrash << "Programming error: request to cycle indices " << cycle
+      << " in list of " << this->size << " elements.";
+      fatalCrash(commentsOnCrash.str());
     }
   }
   // ironically, it's easier to program the cycles to go backwards XD
@@ -2064,8 +2084,10 @@ template <class Object>
 Object* List<Object>::LastObject() const {
   // <-Registering stack trace forbidden! Multithreading deadlock alert.
   if (this->size <= 0) {
-    crash << "This is a programming error: trying to fetch the last object of an array with "
-    << this->size << " elements. " << crash;
+    std::stringstream commentsOnCrash;
+    commentsOnCrash << "This is a programming error: trying to fetch the last object of an array with "
+    << this->size << " elements. ";
+    fatalCrash(commentsOnCrash.str());
   }
   return &this->TheObjects[this->size - 1];
 }
@@ -2187,7 +2209,7 @@ void List<Object>::RemoveIndexSwapWithLast(int index) {
 template <class Object>
 void List<Object>::RemoveLastObject() {
   if (this->size == 0) {
-    crash << "Programming error: attempting to pop empty list" << crash;
+    fatalCrash("Programming error: attempting to pop empty list. ");
   }
   this->size --;
 }
@@ -2195,7 +2217,7 @@ void List<Object>::RemoveLastObject() {
 template <class Object>
 Object List<Object>::PopLastObject() {
   if (this->size == 0) {
-    crash << "Programming error: attempting to pop empty list" << crash;
+    fatalCrash("Programming error: attempting to pop empty list. ");
   }
   this->size --;
   return this->TheObjects[size];
@@ -2236,7 +2258,9 @@ void List<Object>::ExpandArrayOnTop(int increase) {
   try {
     newArray = new Object[this->ActualSize + increase];
   } catch (std::bad_alloc&) {
-    crash << "Memory allocation failure: failed to allocate " << this->ActualSize + increase << " objects. " << crash;
+    std::stringstream commentsOnCrash;
+    commentsOnCrash << "Memory allocation failure: failed to allocate " << this->ActualSize + increase << " objects. ";
+    fatalCrash(commentsOnCrash.str());
   }
 #ifdef AllocationLimitsSafeguard
   ParallelComputing::GlobalPointerCounter += this->ActualSize + increase;
@@ -2280,9 +2304,11 @@ template <class Object>
 void List<Object>::AddOnTop(const Object& o) {
   // <-Registering stack trace forbidden! Multithreading deadlock alert.
   if (this->size > this->ActualSize) {
-    crash << "This is a programming error: the actual size of the list is "
+    std::stringstream commentsOnCrash;
+    commentsOnCrash << "This is a programming error: the actual size of the list is "
     << this->ActualSize << " but this->size equals " << this->size
-    << ". " << crash;
+    << ". ";
+    fatalCrash(commentsOnCrash.str());
   }
   if (this->size == this->ActualSize) {
     this->ExpandArrayOnTop(this->GetNewSizeRelativeToExpectedSize(this->ActualSize + 1) - this->size);

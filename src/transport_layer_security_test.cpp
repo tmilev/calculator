@@ -36,10 +36,10 @@ bool SSLRecord::Test::SerializationClientHello(TransportLayerSecurityServer& tes
   if (!Crypto::ConvertHexToListUnsignedChar(
     inputHex, theRecord.incomingBytes, &comments
   )) {
-    crash << "Bad hard-coded test hex string!" << crash;
+    global.fatal << "Bad hard-coded test hex string!" << global.fatal;
   }
   if (!theRecord.Decode(&comments)) {
-    crash << "Failed to decode built-in message. " << comments.str() << crash;
+    global.fatal << "Failed to decode built-in message. " << comments.str() << global.fatal;
   }
   List<unsigned char> encoded;
   theRecord.WriteBytes(encoded, nullptr);
@@ -48,7 +48,7 @@ bool SSLRecord::Test::SerializationClientHello(TransportLayerSecurityServer& tes
     << Crypto::ConvertListUnsignedCharsToHex(theRecord.incomingBytes) << logger::endL;
     global << "Encoded:\n" << theRecord.content.getStringHighlighter()
     << Crypto::ConvertListUnsignedCharsToHex(encoded) << logger::endL;
-    crash << "Decode->Encode did not reproduce the original input. " << crash;
+    global.fatal << "Decode->Encode did not reproduce the original input. " << global.fatal;
   }
   return true;
 }
@@ -60,7 +60,7 @@ bool SSLRecord::Test::Serialization() {
   server.initialize();
   server.session.initialize();
   if (!SSLRecord::Test::SerializationClientHello(server)) {
-    crash << "Failed serialization of client hello. " << crash;
+    global.fatal << "Failed serialization of client hello. " << global.fatal;
   }
   return true;
 }

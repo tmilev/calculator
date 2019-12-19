@@ -298,7 +298,7 @@ SemisimpleSubalgebras
   this->CheckInitialization();
   inputValue.CheckInitialization();
   if (!this->owner->theObjectContainer.theSSSubalgebraS.Contains(inputValue.owner->theWeyl.theDynkinType)) {
-    crash << "Semisimple subalgebras must be allocated directly in the object container. " << crash;
+    global.fatal << "Semisimple subalgebras must be allocated directly in the object container. " << global.fatal;
   }
   return this->owner->theObjectContainer.theSSSubalgebraS.GetIndex(inputValue.owner->theWeyl.theDynkinType);
 }
@@ -458,7 +458,7 @@ SemisimpleLieAlgebra
 & inputValue) const {
   this->CheckInitialization();
   if (!this->owner->theObjectContainer.theSSLieAlgebras.Contains(inputValue.theWeyl.theDynkinType)) {
-    crash << "Semisimple Lie algebra must be allocated directly in the object container. " << crash;
+    global.fatal << "Semisimple Lie algebra must be allocated directly in the object container. " << global.fatal;
   }
   return this->owner->theObjectContainer.theSSLieAlgebras.GetIndex(inputValue.theWeyl.theDynkinType);
 }
@@ -579,8 +579,8 @@ ElementWeylGroup
 template < >
 Rational& Expression::GetValueNonConst() const {
   if (!this->IsOfType<Rational>()) {
-    crash << "This is a programming error: expression not of required type Rational. "
-    << "The expression equals " << this->ToString() << "." << crash;
+    global.fatal << "This is a programming error: expression not of required type Rational. "
+    << "The expression equals " << this->ToString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theRationals.GetElement(this->GetLastChild().theData);
 }
@@ -588,8 +588,8 @@ Rational& Expression::GetValueNonConst() const {
 template < >
 ElementEllipticCurve<Rational>& Expression::GetValueNonConst() const {
   if (!this->IsOfType<ElementEllipticCurve<Rational> >()) {
-    crash << "This is a programming error: expression not of required type Rational. "
-    << "The expression equals " << this->ToString() << "." << crash;
+    global.fatal << "This is a programming error: expression not of required type Rational. "
+    << "The expression equals " << this->ToString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.EllipticCurveElementsRational.GetElement(this->GetLastChild().theData);
 }
@@ -597,8 +597,8 @@ ElementEllipticCurve<Rational>& Expression::GetValueNonConst() const {
 template < >
 ElementEllipticCurve<ElementZmodP>& Expression::GetValueNonConst() const {
   if (!this->IsOfType<ElementEllipticCurve<ElementZmodP> >()) {
-    crash << "This is a programming error: expression not of required type Rational. The expression equals "
-    << this->ToString() << "." << crash;
+    global.fatal << "This is a programming error: expression not of required type Rational. The expression equals "
+    << this->ToString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.EllipticCurveElementsZmodP.GetElement(this->GetLastChild().theData);
 }
@@ -606,8 +606,8 @@ ElementEllipticCurve<ElementZmodP>& Expression::GetValueNonConst() const {
 template < >
 ElementHyperoctahedralGroupR2& Expression::GetValueNonConst() const {
   if (!this->IsOfType<ElementHyperoctahedralGroupR2>()) {
-    crash << "This is a programming error: expression not of required type Rational. "
-    << "The expression equals " << this->ToString() << "." << crash;
+    global.fatal << "This is a programming error: expression not of required type Rational. "
+    << "The expression equals " << this->ToString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theElementsHyperOctGroup.GetElement(this->GetLastChild().theData);
 }
@@ -615,8 +615,8 @@ ElementHyperoctahedralGroupR2& Expression::GetValueNonConst() const {
 template < >
 InputBox& Expression::GetValueNonConst() const {
   if (!this->IsOfType<InputBox>()) {
-    crash << "This is a programming error: expression not of required type Rational. "
-    << "The expression equals " << this->ToString() << "." << crash;
+    global.fatal << "This is a programming error: expression not of required type Rational. "
+    << "The expression equals " << this->ToString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theUserInputTextBoxesWithValues.theValues[this->GetLastChild().theData];
 }
@@ -624,8 +624,8 @@ InputBox& Expression::GetValueNonConst() const {
 template < >
 GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> & Expression::GetValueNonConst() const {
   if (!this->IsOfType<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> >()) {
-    crash << "This is a programming error: expression not of required type Rational. "
-    << "The expression equals " << this->ToString() << "." << crash;
+    global.fatal << "This is a programming error: expression not of required type Rational. "
+    << "The expression equals " << this->ToString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theHyperoctahedralReps[this->GetLastChild().theData];
 }
@@ -633,16 +633,16 @@ GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> & Expr
 template < >
 ElementZmodP& Expression::GetValueNonConst() const {
   if (!this->IsOfType<ElementZmodP>())
-    crash << "This is a programming error: expression not of required type ElementZmodP. "
-    << "The expression equals " << this->ToString() << "." << crash;
+    global.fatal << "This is a programming error: expression not of required type ElementZmodP. "
+    << "The expression equals " << this->ToString() << "." << global.fatal;
   return this->owner->theObjectContainer.theEltsModP.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 AlgebraicNumber& Expression::GetValueNonConst() const {
   if (!this->IsOfType<AlgebraicNumber>()) {
-    crash << "This is a programming error: expression not of required type AlgebraicNumber. "
-    << "The expression equals " << this->ToString() << "." << crash;
+    global.fatal << "This is a programming error: expression not of required type AlgebraicNumber. "
+    << "The expression equals " << this->ToString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theAlgebraicNumbers.GetElement(this->GetLastChild().theData);
 }
@@ -650,8 +650,8 @@ AlgebraicNumber& Expression::GetValueNonConst() const {
 template < >
 double& Expression::GetValueNonConst() const {
   if (!this->IsOfType<double>()) {
-    crash << "This is a programming error: expression not of required type double. "
-    << "The expression equals " << this->ToString() << "." << crash;
+    global.fatal << "This is a programming error: expression not of required type double. "
+    << "The expression equals " << this->ToString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theDoubles.GetElement(this->GetLastChild().theData);
 }
@@ -659,8 +659,8 @@ double& Expression::GetValueNonConst() const {
 template < >
 std::string& Expression::GetValueNonConst() const {
   if (!this->IsOfType<std::string>()) {
-    crash << "This is a programming error: expression not of required type std::string. "
-    << "The expression equals " << this->ToString() << "." << crash;
+    global.fatal << "This is a programming error: expression not of required type std::string. "
+    << "The expression equals " << this->ToString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theStrings.GetElement(this->GetLastChild().theData);
 }
@@ -668,8 +668,8 @@ std::string& Expression::GetValueNonConst() const {
 template < >
 RationalFunctionOld& Expression::GetValueNonConst() const {
   if (!this->IsOfType<RationalFunctionOld>()) {
-    crash << "This is a programming error: expression not of required type RationalFunctionOld. "
-    << "The expression equals " << this->ToString() << "." << crash;
+    global.fatal << "This is a programming error: expression not of required type RationalFunctionOld. "
+    << "The expression equals " << this->ToString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theRFs.GetElement(this->GetLastChild().theData);
 }
@@ -677,8 +677,8 @@ RationalFunctionOld& Expression::GetValueNonConst() const {
 template < >
 ElementUniversalEnveloping<RationalFunctionOld>& Expression::GetValueNonConst() const {
   if (!this->IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >()) {
-    crash << "This is a programming error: expression not of required type "
-    << "ElementUniversalEnveloping_RationalFunctionOld. The expression equals " << this->ToString() << "." << crash;
+    global.fatal << "This is a programming error: expression not of required type "
+    << "ElementUniversalEnveloping_RationalFunctionOld. The expression equals " << this->ToString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theUEs.GetElement(this->GetLastChild().theData);
 }
@@ -686,8 +686,8 @@ ElementUniversalEnveloping<RationalFunctionOld>& Expression::GetValueNonConst() 
 template < >
 Polynomial<Rational>& Expression::GetValueNonConst() const {
   if (!this->IsOfType<Polynomial<Rational> >()) {
-    crash << "This is a programming error: expression not of required type Polynomial_Rational. "
-    << "The expression equals " << this->ToString() << "." << crash;
+    global.fatal << "This is a programming error: expression not of required type Polynomial_Rational. "
+    << "The expression equals " << this->ToString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.thePolys.GetElement(this->GetLastChild().theData);
 }
@@ -695,8 +695,8 @@ Polynomial<Rational>& Expression::GetValueNonConst() const {
 template < >
 Polynomial<AlgebraicNumber>& Expression::GetValueNonConst() const {
   if (!this->IsOfType<Polynomial<AlgebraicNumber> >()) {
-    crash << "This is a programming error: expression not of required type Polynomial_AlgebraicNumber. "
-    << "The expression equals " << this->ToString() << "." << crash;
+    global.fatal << "This is a programming error: expression not of required type Polynomial_AlgebraicNumber. "
+    << "The expression equals " << this->ToString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.thePolysOverANs.GetElement(this->GetLastChild().theData);
 }
@@ -704,8 +704,8 @@ Polynomial<AlgebraicNumber>& Expression::GetValueNonConst() const {
 template < >
 ElementWeylAlgebra<Rational>& Expression::GetValueNonConst() const {
   if (!this->IsOfType<ElementWeylAlgebra<Rational> >()) {
-    crash << "This is a programming error: expression not of required type "
-    << "ElementWeylAlgebra_Rational. The expression equals " << this->ToString() << "." << crash;
+    global.fatal << "This is a programming error: expression not of required type "
+    << "ElementWeylAlgebra_Rational. The expression equals " << this->ToString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theWeylAlgebraElements.GetElement(this->GetLastChild().theData);
 }
@@ -713,8 +713,8 @@ ElementWeylAlgebra<Rational>& Expression::GetValueNonConst() const {
 template < >
 LittelmannPath& Expression::GetValueNonConst() const {
   if (!this->IsOfType<LittelmannPath>()) {
-    crash << "This is a programming error: expression not of required type "
-    << "LittelmannPath. The expression equals " << this->ToString() << "." << crash;
+    global.fatal << "This is a programming error: expression not of required type "
+    << "LittelmannPath. The expression equals " << this->ToString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theLSpaths.GetElement(this->GetLastChild().theData);
 }
@@ -722,8 +722,8 @@ LittelmannPath& Expression::GetValueNonConst() const {
 template < >
 Weight<Polynomial<Rational> >& Expression::GetValueNonConst() const {
   if (!this->IsOfType<Weight<Polynomial<Rational> > >()) {
-    crash << "This is a programming error: expression not of required type "
-    << "LittelmannPath. The expression equals " << this->ToString() << "." << crash;
+    global.fatal << "This is a programming error: expression not of required type "
+    << "LittelmannPath. The expression equals " << this->ToString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theWeightsPoly.GetElement(this->GetLastChild().theData);
 }
@@ -731,8 +731,8 @@ Weight<Polynomial<Rational> >& Expression::GetValueNonConst() const {
 template < >
 MonomialTensor<int, MathRoutines::IntUnsignIdentity>& Expression::GetValueNonConst() const {
   if (!this->IsOfType<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >()) {
-    crash << "This is a programming error: expression not of required type "
-    << "MonomialTensor. The expression equals " << this->ToString() << "." << crash;
+    global.fatal << "This is a programming error: expression not of required type "
+    << "MonomialTensor. The expression equals " << this->ToString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theLittelmannOperators.GetElement(this->GetLastChild().theData);
 }
@@ -740,8 +740,8 @@ MonomialTensor<int, MathRoutines::IntUnsignIdentity>& Expression::GetValueNonCon
 template < >
 ElementTensorsGeneralizedVermas<RationalFunctionOld>& Expression::GetValueNonConst() const {
   if (!this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >()) {
-    crash << "This is a programming error: expression not of "
-    << "required type ElementTGVM_RationalFunctionOld. The expression equals " << this->ToString() << "." << crash;
+    global.fatal << "This is a programming error: expression not of "
+    << "required type ElementTGVM_RationalFunctionOld. The expression equals " << this->ToString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theTensorElts.GetElement(this->GetLastChild().theData);
 }
@@ -749,8 +749,8 @@ ElementTensorsGeneralizedVermas<RationalFunctionOld>& Expression::GetValueNonCon
 template < >
 charSSAlgMod<Rational>& Expression::GetValueNonConst() const {
   if (!this->IsOfType<charSSAlgMod<Rational> >()) {
-    crash << "This is a programming error: expression not of required type "
-    << "charSSAlgMod_Rational. The expression equals " << this->ToString() << "." << crash;
+    global.fatal << "This is a programming error: expression not of required type "
+    << "charSSAlgMod_Rational. The expression equals " << this->ToString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theCharsSSLieAlgFD.GetElement(this->GetLastChild().theData);
 }
@@ -758,8 +758,8 @@ charSSAlgMod<Rational>& Expression::GetValueNonConst() const {
 template < >
 SemisimpleLieAlgebra& Expression::GetValueNonConst() const {
   if (!this->IsOfType<SemisimpleLieAlgebra>()) {
-    crash << "This is a programming error: expression not of required type "
-    << "SemisimpleLieAlgebra. The expression equals " << this->ToString() << "." << crash;
+    global.fatal << "This is a programming error: expression not of required type "
+    << "SemisimpleLieAlgebra. The expression equals " << this->ToString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theSSLieAlgebras.theValues[this->GetLastChild().theData];
 }
@@ -767,8 +767,8 @@ SemisimpleLieAlgebra& Expression::GetValueNonConst() const {
 template < >
 MatrixTensor<Rational>& Expression::GetValueNonConst() const {
   if (!this->IsOfType<MatrixTensor<Rational> >()) {
-    crash << "This is a programming error: expression not of required type "
-    << "MatrixTensorRational. The expression equals " << this->ToString() << "." << crash;
+    global.fatal << "This is a programming error: expression not of required type "
+    << "MatrixTensorRational. The expression equals " << this->ToString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theMatTensorRats.GetElement(this->GetLastChild().theData);
 }
@@ -776,8 +776,8 @@ MatrixTensor<Rational>& Expression::GetValueNonConst() const {
 template < >
 SemisimpleSubalgebras& Expression::GetValueNonConst() const {
   if (!this->IsOfType<SemisimpleSubalgebras>()) {
-    crash << "This is a programming error: expression not of required type "
-    << "SemisimpleSubalgebras. The expression equals " << this->ToString() << "." << crash;
+    global.fatal << "This is a programming error: expression not of required type "
+    << "SemisimpleSubalgebras. The expression equals " << this->ToString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theSSSubalgebraS.theValues[this->GetLastChild().theData];
 }
@@ -785,8 +785,8 @@ SemisimpleSubalgebras& Expression::GetValueNonConst() const {
 template < >
 Plot& Expression::GetValueNonConst() const {
   if (!this->IsOfType<Plot>()) {
-    crash << "This is a programming error: expression not of required type "
-    << "Plot. The expression equals " << this->ToString() << "." << crash;
+    global.fatal << "This is a programming error: expression not of required type "
+    << "Plot. The expression equals " << this->ToString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.thePlots[this->GetLastChild().theData];
 }
@@ -794,9 +794,9 @@ Plot& Expression::GetValueNonConst() const {
 template < >
 WeylGroupData& Expression::GetValueNonConst() const {
   if (!this->IsOfType<WeylGroupData>()) {
-    crash << "This is a programming error: expression not of required type "
+    global.fatal << "This is a programming error: expression not of required type "
     << "WeylGroupData. The expression equals "
-    << this->ToString() << "." << crash;
+    << this->ToString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theSSLieAlgebras.theValues[this->GetLastChild().theData].theWeyl;
 }
@@ -804,8 +804,8 @@ WeylGroupData& Expression::GetValueNonConst() const {
 template < >
 GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& Expression::GetValueNonConst() const {
   if (!this->IsOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >()) {
-    crash << "This is a programming error: expression not of required type "
-    << "WeylGroupRepresentation_Rational. The expression equals " << this->ToString() << "." << crash;
+    global.fatal << "This is a programming error: expression not of required type "
+    << "WeylGroupRepresentation_Rational. The expression equals " << this->ToString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theWeylGroupReps.GetElement(this->GetLastChild().theData);
 }
@@ -813,8 +813,8 @@ GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& Expression::GetVal
 template < >
 ElementWeylGroup& Expression::GetValueNonConst() const {
   if (!this->IsOfType<ElementWeylGroup>()) {
-    crash << "This is a programming error: expression not of required type "
-    << "ElementWeylGroup. The expression equals " << this->ToString() << "." << crash;
+    global.fatal << "This is a programming error: expression not of required type "
+    << "ElementWeylGroup. The expression equals " << this->ToString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theWeylGroupElements.GetElement(this->GetLastChild().theData);
 }
@@ -822,9 +822,9 @@ ElementWeylGroup& Expression::GetValueNonConst() const {
 template < >
 VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& Expression::GetValueNonConst() const {
   if (!this->IsOfType<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >()) {
-    crash << "This is a programming error: expression not of required type "
+    global.fatal << "This is a programming error: expression not of required type "
     << "WeylGroupVirtualRepresentation. The expression equals "
-    << this->ToString() << "." << crash;
+    << this->ToString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theWeylGroupVirtualReps.GetElement(this->GetLastChild().theData);
 }
@@ -1054,7 +1054,7 @@ bool Expression::CheckConsistency() const {
   // so that causes an "infinite" recursion call cycle,
   // i.e., stack overflow.
   if (this->flagDeallocated) {
-    crash << "Use after free of Expression. " << crash;
+    global.fatal << "Use after free of Expression. " << global.fatal;
   }
   this->CheckInitialization();
   if (this->children.size == 0) {
@@ -1062,15 +1062,15 @@ bool Expression::CheckConsistency() const {
   }
   if (this->IsBuiltInTypE()) {
     if (this->children.size != 3) {
-      crash << "This is a programming error. At the moment of writing, an expression of built-in type must have 3 "
+      global.fatal << "This is a programming error. At the moment of writing, an expression of built-in type must have 3 "
       << "children: type, context, and index in Calculator. The expression is " << this->ToStringFull()
-      << crash;
+      << global.fatal;
     }
     const Expression& mustBeTheContext = (*this)[1];
     if (!mustBeTheContext.StartsWith(this->owner->opContexT())) {
-      crash << "This is a programming error. At the moment of writing, "
+      global.fatal << "This is a programming error. At the moment of writing, "
       << "the second child of a built-in type must be a context. It is instead "
-      << mustBeTheContext.ToStringFull() << crash;
+      << mustBeTheContext.ToStringFull() << global.fatal;
     }
     for (int i = 1; i < mustBeTheContext.children.size; i ++) {
       bool isGood = false;
@@ -1085,9 +1085,9 @@ bool Expression::CheckConsistency() const {
         isGood = true;
       }
       if (!isGood) {
-        crash << "This is a programming error. The context "
+        global.fatal << "This is a programming error. The context "
         << mustBeTheContext.ToStringFull() << " has an entry which I do not recognize, namely, "
-        << currentE.ToStringFull() << ". " << crash;
+        << currentE.ToStringFull() << ". " << global.fatal;
       }
     }
   }
@@ -1098,9 +1098,9 @@ const Expression& Expression::operator[](int n) const {
   this->CheckInitialization();
   int childIndex = this->children[n];
   if (childIndex < 0) {
-    crash << "<hr>This is a programming error: the child of position "
+    global.fatal << "<hr>This is a programming error: the child of position "
     << n << " out of " << this->children.size - 1
-    << " is not contained in the expression container. " << crash;
+    << " is not contained in the expression container. " << global.fatal;
   }
   return this->owner->theExpressionContainer[childIndex];
 }
@@ -1151,7 +1151,7 @@ bool Expression::SetChilD(int childIndexInMe, int childIndexInBoss) {
   this->CheckInitialization();
   this->children.SetObjectAtIndex(childIndexInMe, childIndexInBoss);
   if (this->children[childIndexInMe] != childIndexInBoss) {
-    crash << "This shouldn't happen." << crash;
+    global.fatal << "This shouldn't happen." << global.fatal;
   }
   return true;
 }
@@ -1250,15 +1250,15 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext) {
   MacroRegisterFunctionWithName("Expression::SetContextAtLeastEqualTo");
   this->CheckInitialization();
   if (!this->IsBuiltInTypE()) {
-    crash << "This is a programming error: calling "
+    global.fatal << "This is a programming error: calling "
     << "Expression::SetContextAtLeastEqualTo on an expression "
     << "that is not of built-in type. "
-    << "Contexts are Reserved for built-in data types. " << crash;
+    << "Contexts are Reserved for built-in data types. " << global.fatal;
   }
   if (!inputOutputMinContext.IsContext()) {
     this->owner->Comments << "<br>Warning: non-initialized input context in "
     << "Expression::SetContextAtLeastEqualTo. Stack trace: "
-    << Crasher::GetStackTraceEtcErrorMessageHTML();
+    << global.fatal.GetStackTraceEtcErrorMessageHTML();
     inputOutputMinContext.MakeEmptyContext(*this->owner);
   }
   Expression newContext;
@@ -1395,8 +1395,8 @@ Expression Expression::ContextGetContextVariable(int variableIndex) const {
 
 bool Expression::ContextSetSSLieAlgebrA(int indexInOwners, Calculator& owner) {
   if (!this->IsContext()) {
-    crash << "This is a programming error: calling Expression::ContextSetSSLieAlgebrA "
-    << "on a non-context expression. " << crash;
+    global.fatal << "This is a programming error: calling Expression::ContextSetSSLieAlgebrA "
+    << "on a non-context expression. " << global.fatal;
   }
   int index = this->ContextGetIndexAmbientSSalg();
   if (index != - 1 && index != indexInOwners) {
@@ -1417,8 +1417,8 @@ bool Expression::ContextSetSSLieAlgebrA(int indexInOwners, Calculator& owner) {
 
 bool Expression::ContextSetDiffOperatorVar(const Expression& thePolyVar, const Expression& theDiffOpVar) {
   if (!this->IsContext()) {
-    crash << "This is a programming error: calling "
-    << "Expression::ContextSetDiffOperatorVar on a non-context expression. " << crash;
+    global.fatal << "This is a programming error: calling "
+    << "Expression::ContextSetDiffOperatorVar on a non-context expression. " << global.fatal;
   }
   Expression diffVarsE, polyVarsE;
   diffVarsE.reset(*this->owner, 2);
@@ -1461,9 +1461,9 @@ Expression Expression::ContextGetContextType(int theType) const {
   MacroRegisterFunctionWithName("Expression::ContextGetPolynomialVariables");
   this->CheckInitialization();
   if (!this->IsContext()) {
-    //crash << "This is a programming error: calling Expression::ContextGetPolynomialVariables"
+    //global.fatal << "This is a programming error: calling Expression::ContextGetPolynomialVariables"
     //<< " on a non-context expression. "
-    //<< crash;
+    //<< global.fatal;
   }
   for (int i = 1; i < this->children.size; i ++) {
     if ((*this)[i].StartsWith(theType)) {
@@ -2146,10 +2146,10 @@ bool Expression::ContextGetPolySubFromSuperContextNoFailure(
 ) const {
   bool mustBeTrue = this->ContextGetPolySubFromSuperContext(largerContext, output);
   if (!mustBeTrue) {
-    crash << "This is a programming error: I was not able to "
+    global.fatal << "This is a programming error: I was not able to "
     << "extract a polynomial substitution from smaller context "
     << this->ToString() << " relative to larger context "
-    << largerContext.ToString() << ". " << crash;
+    << largerContext.ToString() << ". " << global.fatal;
   }
   return mustBeTrue;
 }
@@ -2179,9 +2179,9 @@ bool Expression::ContextGetPolyAndEWASubFromSuperContextNoFailure(
 ) const {
   bool mustBeTrue = this->ContextGetPolyAndEWASubFromSuperContext(largerContext, outputPolyPart, outputEWApart);
   if (!mustBeTrue) {
-    crash << "This is a programming error: "
+    global.fatal << "This is a programming error: "
     << "I was not able to extract a polynomial/differential operator substitution from smaller context "
-    << this->ToString() << " relative to larger context " << largerContext.ToString() << crash;
+    << this->ToString() << " relative to larger context " << largerContext.ToString() << global.fatal;
   }
   return mustBeTrue;
 }
@@ -2251,11 +2251,11 @@ Expression Expression::GetContext() const {
   }
   Expression output;
   output.MakeEmptyContext(*this->owner);
-  crash << "This is a programming error: GetContext called on an Expression"
+  global.fatal << "This is a programming error: GetContext called on an Expression"
   << " that is not a built-in data type. "
   << " I can't display the expression as this may cause ``infinite'' "
   << "recursion if the error is caused by the ToString method. Here is however the lisp form "
-  << this->ToStringFull() << " of the expression. " << "Here's  a stack trace. " << crash;
+  << this->ToStringFull() << " of the expression. " << "Here's  a stack trace. " << global.fatal;
   return output;
 }
 
@@ -3097,7 +3097,7 @@ void Expression::ToStringOpTimes(
   std::stringstream& out, FormatExpressions *theFormat
 ) const {
   if (!this->StartsWith(this->owner->opTimes(), 3)) {
-    crash << "Bad call of tostring function. " << crash;
+    global.fatal << "Bad call of tostring function. " << global.fatal;
   }
   std::string secondE = (*this)[2].ToString(theFormat);
   if ((*this)[1].IsAtomGivenData(this->owner->opSqrt())) {
@@ -3489,8 +3489,8 @@ std::string Expression::ToString(
     }
   } else if (this->StartsWith(this->owner->opPlus())) {
     if (this->children.size < 3) {
-      crash << "Plus operation takes at least 2 arguments, whereas this expression has "
-      << this->children.size - 1 << " arguments. " << crash;
+      global.fatal << "Plus operation takes at least 2 arguments, whereas this expression has "
+      << this->children.size - 1 << " arguments. " << global.fatal;
     }
     const Expression& left = (*this)[1];
     const Expression& right = (*this)[2];
@@ -3514,8 +3514,8 @@ std::string Expression::ToString(
     out << rightString;
   } else if (this->IsListStartingWithAtom(this->owner->opDirectSum())) {
     if (this->children.size < 3) {
-      crash << "Direct sum operation takes at least 2 arguments, whereas this expression has "
-      << this->children.size << " arguments. " << crash;
+      global.fatal << "Direct sum operation takes at least 2 arguments, whereas this expression has "
+      << this->children.size << " arguments. " << global.fatal;
     }
     const Expression& left = (*this)[1];
     const Expression& right = (*this)[2];
@@ -3547,10 +3547,10 @@ std::string Expression::ToString(
     out << "\\sqrt{" << (*this)[1].ToString(theFormat) << "}";
   } else if (this->StartsWith(this->owner->opMinus(), 3)) {
     if (!(this->children.size == 3)) {
-      crash << "This is a programming error: "
+      global.fatal << "This is a programming error: "
       << "the minus function expects 1 or 2 arguments, "
       << "instead there are " << this->children.size - 1
-      << ". " << crash;
+      << ". " << global.fatal;
     }
     out << (*this)[1].ToString(theFormat) << "-";
     if ((*this)[2].StartsWith(this->owner->opPlus()) || (*this)[2].StartsWith(this->owner->opMinus())) {
@@ -3940,8 +3940,8 @@ bool Expression::IsLisT() const {
     return false;
   }
   if (this->theData != this->owner->opLisT()) {
-    crash << "This is a programming error. List expressions "
-    << "must have data valule equal to Calculator::opList(). " << crash;
+    global.fatal << "This is a programming error. List expressions "
+    << "must have data valule equal to Calculator::opList(). " << global.fatal;
   }
   return true;
 }
@@ -4169,7 +4169,7 @@ bool Expression::IsCacheableExpression() const {
   }
   Calculator& theBoss = *this->owner;
   if (this->theData < 0 || this->theData >= theBoss.theAtoms.size) {
-    crash << "This is a programming error: corrupted atom in Expression::IsCacheableExpression. " << crash;
+    global.fatal << "This is a programming error: corrupted atom in Expression::IsCacheableExpression. " << global.fatal;
   }
   return theBoss.atomsThatMustNotBeCached.Contains(theBoss.theAtoms[this->theData]);
 }
@@ -4245,7 +4245,7 @@ bool Expression::MakeSum(Calculator& owner, const List<Expression>& theSummands)
 bool Expression::MakeOXdotsX(Calculator& owner, int theOp, const List<Expression>& theOpands) {
   MacroRegisterFunctionWithName("Expression::MakeOXdotsX");
   if (theOpands.size == 0) {
-    crash << "Zero opands not allowed at this point. " << crash;
+    global.fatal << "Zero opands not allowed at this point. " << global.fatal;
   }
   if (theOpands.size == 1) {
     *this = theOpands[0];
@@ -4342,7 +4342,7 @@ bool Expression::MakeXOX(Calculator& owner, int theOp, const Expression& left, c
     return this->MakeXOX(owner, theOp, leftCopy, rightCopy);
   }
   if (right.owner == nullptr && left.owner == nullptr) {
-    crash << "Cannot build an expression from two non-initialized expressions. " << crash;
+    global.fatal << "Cannot build an expression from two non-initialized expressions. " << global.fatal;
   }
   if (right.owner == nullptr) {
     Expression rightCopy;

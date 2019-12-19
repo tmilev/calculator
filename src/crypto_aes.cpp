@@ -118,7 +118,7 @@ public:
 void AESContext::SetNumBits(int inputNumBits) {
   this->numBits = inputNumBits;
   if (this->numBits != 256 && this->numBits != 192 && this->numBits != 128) {
-    crash << "Bad number of bits: " << inputNumBits << " for AES cipher. Allowed inputs: 256, 192, 128. " << crash;
+    global.fatal << "Bad number of bits: " << inputNumBits << " for AES cipher. Allowed inputs: 256, 192, 128. " << global.fatal;
   }
   if (this->numBits == 256) {
     this->keyExpSize = 240;

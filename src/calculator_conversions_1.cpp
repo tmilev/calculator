@@ -1073,7 +1073,7 @@ bool CalculatorConversions::innerRationalFunction(Calculator& theCommands, const
     if (input.StartsWith(theCommands.opDivide())) {
       return CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly(theCommands, intermediate, output);
     }
-    crash << "This line of code should never be reached, something has gone wrong." << crash;
+    global.fatal << "This line of code should never be reached, something has gone wrong." << global.fatal;
   }
   int theSmallPower = - 1;
   if (input.StartsWith(theCommands.opThePower(), 3) ) {

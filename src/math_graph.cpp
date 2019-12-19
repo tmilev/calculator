@@ -27,7 +27,7 @@ void GraphOLD::AddDiEdge(int v1, int v2) {
       return;
     }
   }
-  crash << "attempting to add an edge beyond max_edges" << crash;
+  global.fatal << "attempting to add an edge beyond max_edges" << global.fatal;
 }
 
 // methods that can only be called once can have long names
@@ -88,15 +88,15 @@ bool Graph::CheckConsistency() const {
       this->theEdges[i].vEnd  < 0 ||
       this->theEdges[i].vEnd >= this->numNodes
     ) {
-      crash << "Graph error in graph with " << this->numNodes << " nodes: detected a corrupt edge: "
-      << this->theEdges[i].ToString() << " is a bad." << crash;
+      global.fatal << "Graph error in graph with " << this->numNodes << " nodes: detected a corrupt edge: "
+      << this->theEdges[i].ToString() << " is a bad." << global.fatal;
     }
   }
   for (int i = 0; i < this->nodeGroupsForDisplay.size; i ++) {
     for (int j = 0; j < this->nodeGroupsForDisplay[i].size; j ++) {
       if (this->nodeGroupsForDisplay[i][j] < 0 || this->nodeGroupsForDisplay[i][j] >= numNodes) {
-        crash << "Graph error in graph with " << this->numNodes << " nodes: display group " << i + 1 << " is corrupt: has "
-        << " node of index " << this->nodeGroupsForDisplay[i][j] << crash;
+        global.fatal << "Graph error in graph with " << this->numNodes << " nodes: display group " << i + 1 << " is corrupt: has "
+        << " node of index " << this->nodeGroupsForDisplay[i][j] << global.fatal;
       }
     }
   }
@@ -117,7 +117,7 @@ void Graph::AddNodeToComponent(int nodeIndex) {
   MacroRegisterFunctionWithName("Graph::AddNodeToComponent");
   int componentIndex = this->baseNode[nodeIndex];
   if (componentIndex == - 1) {
-    crash << "Bad component index." << crash;
+    global.fatal << "Bad component index." << global.fatal;
   }
   if (componentIndex >= this->connectedComponents.size) {
     int oldSize = this->connectedComponents.size;
@@ -129,7 +129,7 @@ void Graph::AddNodeToComponent(int nodeIndex) {
   List<List<int> >& currentComponent = this->connectedComponents[componentIndex];
   int distanceFromBase = this->distanceToBaseNode[nodeIndex];
   if (distanceFromBase == - 1) {
-    crash << "Bad node distance." << crash;
+    global.fatal << "Bad node distance." << global.fatal;
   }
   if (distanceFromBase >= currentComponent.size) {
     int oldSize = currentComponent.size;

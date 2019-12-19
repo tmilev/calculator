@@ -868,7 +868,7 @@ somestream& JSData::IntoStream(
       break;
   }
   //supposed to be unreachable
-  crash << "Unhandled JSData case: " << this->theType << crash;
+  global.fatal << "Unhandled JSData case: " << this->theType << global.fatal;
   return out;
 }
 

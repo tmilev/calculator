@@ -28,7 +28,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::I
   tempVect = this->simpleRootsInner[generatorIndex].GetVectorRational();
   tempRF = this->AmbientWeyl->RootScalarCartanRoot(theWeight, tempVect);
   if (tempRF.expressionType != tempRF.typeRational) {
-    crash << "This might or might not be a programming mistake: "
+    global.fatal << "This might or might not be a programming mistake: "
     << "I am being asked whether a weight "
     << "with rational function coefficients is dominant. "
     << "I took the scalar products with the positive simple roots "
@@ -43,7 +43,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::I
     << "you might want to consider introducing a substitution "
     << "evaluating the rational function, some sort of a monomial order, "
     << "or some other method of deciding the \"sign\" of a rational function. "
-    << "Whether or not this is a mistake, I am crashing. " << crash;
+    << "Whether or not this is a mistake, I am crashing. " << global.fatal;
     return false;
   }
   return !tempRF.ratValue.IsNegative();
@@ -66,7 +66,7 @@ bool WeylGroupData::IsDominantWRTgenerator<RationalFunctionOld>(
   tempVect.MakeEi(this->GetDim(), generatorIndex);
   tempRF = this->RootScalarCartanRoot(theWeight, tempVect);
   if (tempRF.expressionType != tempRF.typeRational) {
-    crash << "This might or might not be a programming mistake: "
+    global.fatal << "This might or might not be a programming mistake: "
     << "I am being asked whether a weight "
     << "with rational function coefficients is dominant. "
     << "I took the scalar products with the positive simple roots "
@@ -82,7 +82,7 @@ bool WeylGroupData::IsDominantWRTgenerator<RationalFunctionOld>(
     << "evaluating the rational function, some sort of a monomial order, "
     << "or some other method of deciding the \"sign\" of a rational function. "
     << "Whether or not this is a mistake, I am crashing.  "
-    << crash;
+    << global.fatal;
     return false;
   }
   return !tempRF.ratValue.IsNegative();
@@ -1023,7 +1023,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
 
 bool Calculator::innerJacobiSymbol(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerJacobiSymbol");
-  crash << "Function not implemented yet." << crash;
+  global.fatal << "Function not implemented yet." << global.fatal;
   (void) theCommands;//avoid unused parameter warning, portable
   (void) output;
   if (input.children.size != 3) {
@@ -1779,8 +1779,8 @@ bool Calculator::innerAutomatedTestSetKnownGoodCopy(Calculator& theCommands, con
   std::stringstream out;
   theCommands.theTestFileName = "automatedTest.txt";
   if (!FileOperations::OpenFileVirtual(theCommands.theTestFile, "output/" + theCommands.theTestFileName, false, true, false)) {
-    crash << "This is a programming error or worse: file " << theCommands.theTestFileName
-    << " does not exist but cannot be created. Something is very wrong. " << crash;
+    global.fatal << "This is a programming error or worse: file " << theCommands.theTestFileName
+    << " does not exist but cannot be created. Something is very wrong. " << global.fatal;
   }
   double startTime = global.GetElapsedSeconds();
   theCommands.AutomatedTestRun(inputStringsTest, outputStringsTestWithInit, outputStringsTestNoInit);
@@ -1801,8 +1801,8 @@ bool Calculator::innerAutomatedTest(Calculator& theCommands, const Expression& i
     return theCommands.innerAutomatedTestSetKnownGoodCopy(theCommands, input, output);
   }
   if (!FileOperations::OpenFileCreateIfNotPresentVirtual(theCommands.theTestFile, "ouput/" + theCommands.theTestFileName, false, false, false)) {
-    crash << "This is a programming error or worse: failed to open an existing file: "
-    << theCommands.theTestFileName << ". Something is very wrong. " << crash;
+    global.fatal << "This is a programming error or worse: failed to open an existing file: "
+    << theCommands.theTestFileName << ". Something is very wrong. " << global.fatal;
   }
   List<std::string> knownResults;
   HashedList<std::string, MathRoutines::HashString> knownCommands;
@@ -1820,7 +1820,7 @@ bool Calculator::innerAutomatedTest(Calculator& theCommands, const Expression& i
     if (!knownCommands.Contains(commandStrings[i])) {
       newCommands.AddOnTop(commandStrings[i]);
       if (knownCommands[i] == commandStrings[i]) {
-        crash << "Known command result does not match current. " << crash;
+        global.fatal << "Known command result does not match current. " << global.fatal;
       }
       continue;
     }

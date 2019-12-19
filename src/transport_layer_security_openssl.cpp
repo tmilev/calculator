@@ -64,7 +64,7 @@ void TransportLayerSecurityOpenSSL::initSSLLibrary() {
   int loadedSuccessfully = OpenSSL_add_ssl_algorithms();
   if (!loadedSuccessfully) {
     global << logger::red << commentsOnError.str() << logger::endL;
-    crash << "Failed to add ssl algorithms. " << crash;
+    global.fatal << "Failed to add ssl algorithms. " << global.fatal;
   }
   if (commentsOnError.str() != "") {
     global << logger::red << "OpenSSL initialization comments: " << logger::blue << commentsOnError.str() << logger::endL;
@@ -140,7 +140,7 @@ bool TransportLayerSecurityOpenSSL::CheckCanInitializeToServer() {
 bool TransportLayerSecurityOpenSSL::CheckCanInitialize(bool toServer) {
   if (this->flagContextInitialized) {
     if (this->flagIsServer != toServer) {
-      crash << "Attempt to initialize TLS as both server and client. " << crash;
+      global.fatal << "Attempt to initialize TLS as both server and client. " << global.fatal;
       return false;
     }
   }
@@ -168,7 +168,7 @@ void TransportLayerSecurityOpenSSL::initSSLCommon(bool isServer) {
   if (this->context == nullptr) {
     global << logger::red << "Failed to create ssl context. " << logger::endL;
     ERR_print_errors_fp(stderr);
-    crash << "Openssl context error.\n" << commentsOnError.str() << crash;
+    global.fatal << "Openssl context error.\n" << commentsOnError.str() << global.fatal;
   }
 #endif // MACRO_use_open_ssl
   this->flagContextInitialized = true;
@@ -247,17 +247,17 @@ void TransportLayerSecurityOpenSSL::initSSLServer() {
     //}
     if (SSL_CTX_use_certificate_chain_file(this->context, singedFileCertificate1Physical.c_str()) <= 0) {
       ERR_print_errors_fp(stderr);
-      crash << "Failed to user certificate file." << crash;
+      global.fatal << "Failed to user certificate file." << global.fatal;
     }
     if (SSL_CTX_use_PrivateKey_file(this->context, signedFileKeyPhysical.c_str(), SSL_FILETYPE_PEM) <= 0) {
       ERR_print_errors_fp(stderr);
-      crash << "Failed to use private key." << crash;
+      global.fatal << "Failed to use private key." << global.fatal;
     }
     global.flagCertificatesAreOfficiallySigned = true;
   }
   if (!SSL_CTX_check_private_key(this->context)) {
     global << "Private key does not match the certificate public key. ";
-    crash << "Private key does not match the certificate public key. " << crash;
+    global.fatal << "Private key does not match the certificate public key. " << global.fatal;
   }
 #else
   global << logger::red << "Openssl not available." << logger::endL;
@@ -361,7 +361,7 @@ void TransportLayerSecurityOpenSSL::DoSetSocket(int theSocket) {
     }
   }
   if (result == 0) {
-    crash << "Failed to set socket of server. " << crash;
+    global.fatal << "Failed to set socket of server. " << global.fatal;
   }
 #endif // MACRO_use_open_ssl
 }
@@ -382,7 +382,7 @@ bool TransportLayerSecurityOpenSSL::HandShakeIamClientNoSocketCleanup(
   if (this->sslData == nullptr) {
     this->flagSSLHandshakeSuccessful = false;
     global << logger::red << "Failed to allocate ssl. " << logger::endL;
-    crash << "Failed to allocate ssl: not supposed to happen. " << crash;
+    global.fatal << "Failed to allocate ssl: not supposed to happen. " << global.fatal;
   }
   this->SetSocketAddToStack(inputSocketID);
   int maxNumHandshakeTries = 4;
@@ -586,11 +586,11 @@ int TransportLayerSecurityOpenSSL::SSLWrite(
 #ifdef MACRO_use_open_ssl
   ERR_clear_error();
   if (writeBuffer.size <= 0) {
-    crash << "Write buffer size: " << writeBuffer.size
-    << " must be positive." << crash;
+    global.fatal << "Write buffer size: " << writeBuffer.size
+    << " must be positive." << global.fatal;
   }
   if (this->sslData == nullptr) {
-    crash << "Uninitialized ssl not allowed here. " << crash;
+    global.fatal << "Uninitialized ssl not allowed here. " << global.fatal;
   }
   int result = SSL_write(this->sslData, writeBuffer.TheObjects, writeBuffer.size);
   this->ClearErrorQueue(
@@ -607,13 +607,13 @@ bool TransportLayerSecurityOpenSSL::HandShakeIamServer(int inputSocketID, std::s
   (void) inputSocketID;
   (void) commentsOnFailure;
   if (this->sslData != nullptr) {
-    crash << "SSL data expected to be zero. " << crash;
+    global.fatal << "SSL data expected to be zero. " << global.fatal;
   }
 #ifdef MACRO_use_open_ssl
   this->sslData = SSL_new(this->context);
   SSL_set_verify(this->sslData, SSL_VERIFY_NONE, nullptr);
   if (this->sslData == nullptr) {
-    crash << "Failed to allocate ssl: not supposed to happen. " << crash;
+    global.fatal << "Failed to allocate ssl: not supposed to happen. " << global.fatal;
   }
   this->SetSocketAddToStack(inputSocketID);
   int maxNumHandshakeTries = 3;

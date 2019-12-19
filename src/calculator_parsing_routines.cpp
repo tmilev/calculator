@@ -351,7 +351,7 @@ bool Calculator::CheckPredefinedFunctions() {
         continue;
       }
       if (ruleIds.Contains(currentName)) {
-        crash << "Calculator identifier: " << currentName << " is not unique. ";
+        global.fatal << "Calculator identifier: " << currentName << " is not unique. ";
       }
       ruleIds.AddOnTopNoRepetitionMustBeNewCrashIfNot(currentName);
     }
@@ -471,7 +471,7 @@ bool Calculator::DecreaseStackExceptLast(int decrease) {
     return true;
   }
   if ((*this->CurrentSyntacticStacK).size - decrease <= 0) {
-    crash << "Bad stack decrease amount. " << crash;
+    global.fatal << "Bad stack decrease amount. " << global.fatal;
   }
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - decrease - 1] =
   *this->CurrentSyntacticStacK->LastObject();
@@ -484,7 +484,7 @@ bool Calculator::DecreaseStackExceptLastTwo(int decrease) {
     return true;
   }
   if ((*this->CurrentSyntacticStacK).size - decrease <= 0) {
-    crash << "Bad stack decrease amount. " << crash;
+    global.fatal << "Bad stack decrease amount. " << global.fatal;
   }
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-decrease - 2] =
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
@@ -1171,12 +1171,12 @@ bool Calculator::ReplaceAXbyEX() {
 
 std::string SyntacticElement::GetIntegerStringCrashIfNot(Calculator& owner) {
   if (this->controlIndex != owner.conInteger()) {
-    crash << "Request to get rational from a non-rational element. " << crash;
+    global.fatal << "Request to get rational from a non-rational element. " << global.fatal;
   }
   std::string result = this->theData.GetValue<std::string>();
   for (unsigned i = 0; i < result.size(); i ++) {
     if (!MathRoutines::isADigit(result[i])) {
-      crash << "Integer string non-digit entries. " << crash;
+      global.fatal << "Integer string non-digit entries. " << global.fatal;
     }
   }
   return result;
@@ -1358,8 +1358,8 @@ bool Calculator::ReplaceVbyVdotsVAccordingToPredefinedWordSplits() {
   SyntacticElement& theE = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1];
   const std::string& currentVar = this->theAtoms[theE.theData.theData];
   if (!this->predefinedWordSplits.Contains(currentVar)) {
-    crash << "Predefined word splits array does not contain the variable: " << theE.theData.ToString()
-    << ". This should not happen in the body of this function. " << crash;
+    global.fatal << "Predefined word splits array does not contain the variable: " << theE.theData.ToString()
+    << ". This should not happen in the body of this function. " << global.fatal;
   }
   List<std::string>& theSplit = this->predefinedWordSplits.GetValueCreate(currentVar);
   SyntacticElement newElt;
@@ -1512,8 +1512,8 @@ bool Calculator::ReplaceSsSsXdotsXbySsXdotsX(int numDots) {
   SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - numDots - 2];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - numDots - 1];
   if (!left.theData.StartsWith(this->opEndStatement())) {
-    crash << "This is a programming error: ReplaceSsSsXdotsXbySsXdotsX "
-    << "called but left expression is not EndStatement." << crash;
+    global.fatal << "This is a programming error: ReplaceSsSsXdotsXbySsXdotsX "
+    << "called but left expression is not EndStatement." << global.fatal;
   }
   left.theData.children.Reserve(left.theData.children.size + right.theData.children.size - 1);
   for (int i = 1; i < right.theData.children.size; i ++) {
@@ -1880,13 +1880,13 @@ bool Calculator::ExtractExpressions(Expression& outputExpression, std::string* o
         numTimesRulesCanBeAppliedWithoutStackDecrease ++;
       }
       if (numTimesRulesCanBeAppliedWithoutStackDecrease > maxNumTimesOneRuleCanBeCalled) {
-        crash << "This may be a programming error: Calculator::ApplyOneRule called more than "
+        global.fatal << "This may be a programming error: Calculator::ApplyOneRule called more than "
         << maxNumTimesOneRuleCanBeCalled
         << " times without advancing to the next syntactic element in the syntactic soup. "
         << "If this is indeed an expression which requires that "
         << "many application of a single parsing rule, "
         << "then you should modify function Calculator::ExtractExpressions"
-        << crash;
+        << global.fatal;
       }
     }
   }

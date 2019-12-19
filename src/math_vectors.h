@@ -98,11 +98,11 @@ public:
     coefficient& result
   ) {
     if (r1.size != TheBilinearForm.NumRows || r1.size != r2.size || r1.size != TheBilinearForm.NumCols) {
-      crash << "This is a programming error: attempting to take "
+      global.fatal << "This is a programming error: attempting to take "
       << "a bilinear form represented by matrix with " << TheBilinearForm.NumRows
       << " rows and " << TheBilinearForm.NumCols << " columns "
       << " of vectors of dimension " << r1.size << " and " << r2.size << ". "
-      << crash;
+      << global.fatal;
     }
     coefficient tempRat, accumRow;
     result = 0;
@@ -200,9 +200,9 @@ public:
   template <class otherType>
   void ScalarEuclidean(const Vector<otherType>& other, otherType& output) const {
     if (this->size != other.size) {
-      crash << "This is a programming error: taking scalar product of elements of different dimensions: "
+      global.fatal << "This is a programming error: taking scalar product of elements of different dimensions: "
       << *this << " and " << other << ". ";
-      crash << crash;
+      global.fatal << global.fatal;
     }
     otherType tempElt;
     output = 0;
@@ -234,7 +234,7 @@ public:
   ) {
     coefficient tempRat;
     if (r1.size != r2.size) {
-      crash << "Adding vectors of different dimensions. " << crash;
+      global.fatal << "Adding vectors of different dimensions. " << global.fatal;
     }
     output = r1;
     for (int i = 0; i < r1.size; i ++) {
@@ -358,9 +358,9 @@ public:
   Vector<coefficient> GetShiftToTheLeft(int numPositions) {
     Vector<coefficient> result;
     if (numPositions > this->size) {
-      crash << "You requested a shift of "
+      global.fatal << "You requested a shift of "
       << numPositions << " positions in a vector with "
-      << this->size << "elements" << crash;
+      << this->size << "elements" << global.fatal;
     }
     result.SetSize(this->size - numPositions);
     for (int i = 0; i < result.size; i ++) {
@@ -373,7 +373,7 @@ public:
   }
   void ShiftToTheLeft(int numPositions) {
     if (numPositions > this->size) {
-      crash << "Bad vector shift. " << crash;
+      global.fatal << "Bad vector shift. " << global.fatal;
     }
     for (int i = 0; i < this->size - numPositions; i ++) {
       this->TheObjects[i] = this->TheObjects[i + numPositions];
@@ -382,7 +382,7 @@ public:
   }
   void ShiftToTheRightInsertZeroes(int numPositions, const coefficient& theRingZero) {
     if (numPositions < 0) {
-      crash << "Bad vector shift, cannot fill with zeroes. " << crash;
+      global.fatal << "Bad vector shift, cannot fill with zeroes. " << global.fatal;
     }
     this->SetSize(this->size + numPositions);
     for (int i = this->size - 1; i >= numPositions; i --) {
@@ -448,8 +448,8 @@ public:
   }
   Vector<coefficient> operator/(const coefficient& other) const {
     if (other.IsEqualToZero()) {
-      crash << "This is a programming error: division by zero. "
-      << "Division by zero error are supposed to be handled at an earlier level. " << crash;
+      global.fatal << "This is a programming error: division by zero. "
+      << "Division by zero error are supposed to be handled at an earlier level. " << global.fatal;
     }
     Vector<coefficient> result;
     result.SetSize(this->size);
@@ -483,8 +483,8 @@ public:
   }
   bool operator>(const Vector<coefficient>& other) const {
     if (this->size != other.size) {
-      crash << "This is a programming error: comparing Vectors with different number of coordinates, namely, "
-      << this->ToString() << " and " << other.ToString() << ". " << crash;
+      global.fatal << "This is a programming error: comparing Vectors with different number of coordinates, namely, "
+      << this->ToString() << " and " << other.ToString() << ". " << global.fatal;
     }
     coefficient c1 = 0, c2 = 0;
     for (int i = 0; i < this->size; i ++) {
@@ -510,7 +510,7 @@ public:
   template <class otherType>
   void operator-=(const Vector<otherType>& other) {
     if (this->size != other.size) {
-      crash << "This is a programming error: subtracting vectors with different dimensions. " << crash;
+      global.fatal << "This is a programming error: subtracting vectors with different dimensions. " << global.fatal;
     }
     for (int i = 0; i < this->size; i ++) {
       this->TheObjects[i] -= other[i];
@@ -566,7 +566,7 @@ public:
     std::string tempS;
     input >> tempS;
     if (tempS != "root_dim:") {
-      crash << "Failed to read vector from file. " << crash;
+      global.fatal << "Failed to read vector from file. " << global.fatal;
     }
     int tempI;
     input >> tempI;
@@ -672,7 +672,7 @@ int Vector<coefficient>::FindLCMDenominatorsTruncateToInt() {
   for (int i = 0; i < this->size; i ++) {
     result = MathRoutines::lcm(result, this->TheObjects[i].DenShort);
     if ((*this)[i].Extended != 0) {
-      crash << "Coefficient is large rational at a place where that is not allowed. " << crash;
+      global.fatal << "Coefficient is large rational at a place where that is not allowed. " << global.fatal;
     }
   }
   return result;
@@ -1044,9 +1044,9 @@ bool Vector<coefficient>::GetCoordsInBasiS(const Vectors<coefficient>& inputBasi
   Vectors<coefficient> bufferVectors;
   Matrix<coefficient> bufferMat;
   if (this->size != inputBasis[0].size) {
-    crash << "This is a programming error: asking to get coordinates of vector of "
+    global.fatal << "This is a programming error: asking to get coordinates of vector of "
     << this->size << " coordinates using a basis whose first vector has "
-    << inputBasis[0].size << " coordinates." << crash;
+    << inputBasis[0].size << " coordinates." << global.fatal;
   }
   bufferVectors.Reserve(inputBasis.size + 1);
   bufferVectors.AddListOnTop(inputBasis);
@@ -1099,8 +1099,8 @@ bool Vectors<coefficient>::GetCoordsInBasis(
 ) const {
   MacroRegisterFunctionWithName("Vectors::GetCoordsInBasis");
   //if (this == 0 || &outputCoords == 0 || this == &outputCoords)
-  //  crash << "This is a programming error: input and output addresses are zero or coincide. this address: "
-  //  << (unsigned long) this << "; output address: " << (unsigned long)(&outputCoords) << crash;
+  //  global.fatal << "This is a programming error: input and output addresses are zero or coincide. this address: "
+  //  << (unsigned long) this << "; output address: " << (unsigned long)(&outputCoords) << global.fatal;
   outputCoords.SetSize(this->size);
   for (int i = 0; i < this->size; i ++) {
     if (!(this->operator[](i).GetCoordsInBasiS(inputBasis, outputCoords[i]))) {
@@ -1133,7 +1133,7 @@ bool Vector<coefficient>::GetIntegralCoordsInBasisIfTheyExist(
   );
   Vector<coefficient> tempRoot, theCombination;
   if (this == &output) {
-    crash << "Output not allowed to coincide with this object" << crash;
+    global.fatal << "Output not allowed to coincide with this object" << global.fatal;
   }
   output.MakeZero(inputBasis.size);
   theCombination = *this;
@@ -1205,7 +1205,7 @@ int Vectors<coefficient>::ArrangeFirstVectorsBeOfMaxPossibleRank(Matrix<coeffici
     } else {
       this->SwapTwoIndices(oldRank, i);
       if (oldRank + 1 != newRank) {
-        crash << "Old rank plus one must equal new rank. " << crash;
+        global.fatal << "Old rank plus one must equal new rank. " << global.fatal;
       }
       oldRank = newRank;
     }
@@ -1267,7 +1267,7 @@ template <class coefficient>
 bool affineHyperplane<coefficient>::ProjectFromFacetNormal(Vector<coefficient>& input) {
   int tempI = input.GetIndexFirstNonZeroCoordinate();
   if (tempI == - 1) {
-    crash << "No non-zero coordinate found. " << crash;
+    global.fatal << "No non-zero coordinate found. " << global.fatal;
   }
   if (tempI == input.size - 1) {
     return false;

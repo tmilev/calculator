@@ -63,7 +63,7 @@ void MutexProcess::Release() {
 
 bool MutexProcess::CheckConsistency() {
   if (this->flagDeallocated) {
-    crash << "Use after free of " << this->ToString() << crash;
+    global.fatal << "Use after free of " << this->ToString() << global.fatal;
   }
   return true;
 }
@@ -85,7 +85,7 @@ std::string PipePrimitive::GetLastRead() {
 
 bool PipePrimitive::CheckConsistency() {
   if (this->flagDeallocated) {
-    crash << "Use after free of pipe: " << this->ToString() << crash;
+    global.fatal << "Use after free of pipe: " << this->ToString() << global.fatal;
   }
   return true;
 }
@@ -145,7 +145,7 @@ bool MutexProcess::ResetNoAllocation() {
 bool MutexProcess::Lock() {
   this->CheckConsistency();
   if (this->flagLockHeldByAnotherThread) {
-    crash << "MutexProcess about to deadlock itself. " << crash;
+    global.fatal << "MutexProcess about to deadlock itself. " << global.fatal;
   }
   MutexLockGuard guard(this->lockThreads.GetElement()); // <- lock out other threads
   this->flagLockHeldByAnotherThread = true;
@@ -293,8 +293,8 @@ bool PipePrimitive::SetPipeFlagsIfFailThenCrash(int inputFlags, int whichEnd, bo
       if (restartServerOnFail) {
         theWebServer.StopKillAll(false);
       } else if (!dontCrashOnFail) {
-        crash << "fcntl failed more than 100 times on "
-        << "file desciptor: " << this->pipeEnds[whichEnd] << ": " << theError << ". " << crash;
+        global.fatal << "fcntl failed more than 100 times on "
+        << "file desciptor: " << this->pipeEnds[whichEnd] << ": " << theError << ". " << global.fatal;
       }
       return false;
     }
@@ -400,7 +400,7 @@ void Pipe::WriteOnceAfterEmptying(
 
 bool PipePrimitive::ReadOnceWithoutEmptying(bool restartServerOnFail, bool dontCrashOnFail) {
   if (this->flagReadEndBlocks || this->flagWriteEndBlocks) {
-    crash << this->ToString() << ": read without emptying allowed only on fully non-blocking pipes. " << crash;
+    global.fatal << this->ToString() << ": read without emptying allowed only on fully non-blocking pipes. " << global.fatal;
   }
   if (!this->ReadOnceIfFailThenCrash(restartServerOnFail, dontCrashOnFail)) {
     return false;
@@ -412,7 +412,7 @@ bool PipePrimitive::WriteOnceAfterEmptying(
   const std::string& input, bool restartServerOnFail, bool dontCrashOnFail
 ) {
   if (this->flagReadEndBlocks) {
-    crash << this->ToString() << ": write after emptying allowed only on non-blocking read pipes. " << crash;
+    global.fatal << this->ToString() << ": write after emptying allowed only on non-blocking read pipes. " << global.fatal;
   }
   if (!this->ReadOnceIfFailThenCrash(restartServerOnFail, dontCrashOnFail)) {
     return false;
@@ -432,8 +432,8 @@ bool PipePrimitive::HandleFailedWriteReturnFalse(
   if (restartServerOnFail) {
     theWebServer.StopKillAll(false);
   } else if (!dontCrashOnFail) {
-    crash << "Failed write on: " << this->ToString() << numBadAttempts << " or more times. Last error: "
-    << strerror(errno) << ". " << crash;
+    global.fatal << "Failed write on: " << this->ToString() << numBadAttempts << " or more times. Last error: "
+    << strerror(errno) << ". " << global.fatal;
   }
   return false;
 }
@@ -451,7 +451,7 @@ bool PipePrimitive::WriteOnceIfFailThenCrash(
     return false;
   }
   if (static_cast<unsigned>(offset) >= toBeSent.size() || offset < 0) {
-    crash << "Invalid offset: " << offset << "; toBeSent string has size: " << toBeSent.size() << ". ";
+    global.fatal << "Invalid offset: " << offset << "; toBeSent string has size: " << toBeSent.size() << ". ";
   }
   unsigned remaining = static_cast<unsigned>(toBeSent.size() - static_cast<unsigned>(offset));
   if (remaining == 0) {
@@ -548,7 +548,7 @@ bool Pipe::CreateMe(const std::string& inputPipeName) {
 bool Pipe::CheckConsistency() {
   MacroRegisterFunctionWithName("Pipe::CheckConsistency");
   if (this->flagDeallocated) {
-    crash << "This is a programming error: use after free of pipe. " << crash;
+    global.fatal << "This is a programming error: use after free of pipe. " << global.fatal;
   }
   return true;
 }
@@ -594,9 +594,9 @@ bool PipePrimitive::ReadOnceIfFailThenCrash(bool restartServerOnFail, bool dontC
       if (restartServerOnFail) {
         theWebServer.StopKillAll(false);
       } else if (!dontCrashOnFail) {
-        crash << this->ToString()
+        global.fatal << this->ToString()
         << ": more than 100 iterations of read resulted in an error. "
-        << crash;
+        << global.fatal;
       }
       return false;
     }
@@ -895,8 +895,8 @@ logger::StringHighligher::StringHighligher(const std::string& input) {
     LargeInteger theLI;
     theLI.AssignString(current);
     if (!theLI.IsIntegerFittingInInt(&incoming.length)) {
-      crash << "StringHighligher is not allowed to fail: this is an internal function, "
-      << "please do not expose to the outside world. " << crash;
+      global.fatal << "StringHighligher is not allowed to fail: this is an internal function, "
+      << "please do not expose to the outside world. " << global.fatal;
     }
     this->sections.AddOnTop(incoming);
   }
@@ -905,7 +905,7 @@ logger::StringHighligher::StringHighligher(const std::string& input) {
 void MathRoutines::ParseListIntCrashOnFailure(const std::string& input, List<int>& result) {
   bool success = MathRoutines::ParseListInt(input, result, nullptr);
   if (!success) {
-    crash << "Failed to parse list int with a function that does not allow failure. " << crash;
+    global.fatal << "Failed to parse list int with a function that does not allow failure. " << global.fatal;
   }
 }
 

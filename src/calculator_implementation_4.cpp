@@ -377,12 +377,12 @@ std::string quasiDiffOp<coefficient>::ToString(FormatExpressions* theFormat) con
   }
   std::string result = reordered.ToString(theFormat);
   if (result == "0" && this->size() != 0) {
-    crash << "This is likely a programming error (crashing at any rate): "
+    global.fatal << "This is likely a programming error (crashing at any rate): "
     << "I have a non-zero quasidifferential operator "
     << " with non-properly formatted LaTeX string "
     << this->MonomialCollection<quasiDiffMon, coefficient>::ToString(theFormat)
     << ", however its properly formatted string is 0. "
-    << "Probably there is something wrong with the initializations of the monomials of the qdo. " << crash;
+    << "Probably there is something wrong with the initializations of the monomials of the qdo. " << global.fatal;
   }
   return result;
 }
@@ -397,10 +397,10 @@ bool ModuleSSalgebra<coefficient>::GetActionEulerOperatorPart(
   outputDO.MakeOne();
   for (int i = 0; i < theCoeff.GetMinNumVars(); i ++) {
     if (!theCoeff(i).IsSmallInteger(&powerMonCoeff)) {
-      crash << "This is a programming error. "
+      global.fatal << "This is a programming error. "
       << "Getting euler operator part of action on generalized Verma module: "
       << "I have an exponent with non-small integer entry. "
-      << crash;
+      << global.fatal;
     }
     currentMonContribution.Makexidj(i, i, 0);
     currentMonContribution.RaiseToPower(powerMonCoeff);
@@ -469,9 +469,9 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator(
       exponentContribution *= oneIndexContribution;
       theCoeff.DivideBy(negativeExponentDenominatorContribution, theCoeff, tempP1);
       if (!tempP1.IsEqualToZero()) {
-        crash << "This is a mathematical error! "
+        global.fatal << "This is a mathematical error! "
         << "Something is very wrong with embedding semisimple Lie algebras in Weyl algebras. "
-        << crash;
+        << global.fatal;
       }
     }
     for (int l = 0; l < theCoeff.size(); l ++) {
@@ -774,12 +774,12 @@ bool Calculator::innerHWVCommon(
     }
   }
   if (&theMod.GetOwner() != owner) {
-    crash << "This is a programming error: module has owner that is not what it should be. " << crash;
+    global.fatal << "This is a programming error: module has owner that is not what it should be. " << global.fatal;
   }
   theElt.MakeHWV(theMod, RFOne);
   if (&theElt.GetOwnerSS() != owner) {
-    crash << "This is a programming error: just created an ElementTensorsGeneralizedVermas "
-    << "whose owner is not what it should be. " << crash;
+    global.fatal << "This is a programming error: just created an ElementTensorsGeneralizedVermas "
+    << "whose owner is not what it should be. " << global.fatal;
   }
   return output.AssignValueWithContext<ElementTensorsGeneralizedVermas<RationalFunctionOld> >(theElt, hwContext, theCommands);
 }
@@ -808,12 +808,12 @@ bool Calculator::CheckConsistencyAfterInitializationExpressionStackEmpty() {
     this->EvaluatedExpressionsStack.size != 0 ||
     this->theExpressionContainer.size != 0
   ) {
-    crash << "This is a programming error: cached expressions, "
+    global.fatal << "This is a programming error: cached expressions, "
     << "images cached expressions, expression stack and expression container are supposed to be empty, but "
     << " instead they contain respectively "
     << this->cachedExpressions.size << ", " << this->imagesCachedExpressions.size << ", "
     << this->EvaluatedExpressionsStack.size << " and "
-    << this->theExpressionContainer.size << " elements. " << crash;
+    << this->theExpressionContainer.size << " elements. " << global.fatal;
   }
   return true;
 }
@@ -901,9 +901,9 @@ bool Calculator::innerGetCartanGen(Calculator& theCommands, const Expression& in
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
   if (theSSalg == nullptr) {
-    crash << "This is a programming error: called conversion function successfully, "
+    global.fatal << "This is a programming error: called conversion function successfully, "
     << "but the output is a zero pointer to a semisimple Lie algebra. "
-    << crash;
+    << global.fatal;
   }
   int theIndex;
   if (!input[2].IsSmallInteger(&theIndex)) {
@@ -993,7 +993,7 @@ bool Expression::CheckInitializationRecursively() const {
 
 bool Expression::CheckInitialization() const {
   if (this->owner == nullptr) {
-    crash << "This is a programming error: " << "Expression has non-initialized owner. " << crash;
+    global.fatal << "This is a programming error: " << "Expression has non-initialized owner. " << global.fatal;
     return false;
   }
   return true;
@@ -1006,9 +1006,9 @@ bool Expression::HasInputBoxVariables(HashedList<std::string, MathRoutines::Hash
   }
   RecursionDepthCounter recursionCounter(&this->owner->RecursionDeptH);
   if (this->owner->RecursionDeptH > this->owner->MaxRecursionDeptH) {
-    crash << "This is a programming error: "
+    global.fatal << "This is a programming error: "
     << "function HasInputBoxVariables has exceeded "
-    << "recursion depth limit. " << crash;
+    << "recursion depth limit. " << global.fatal;
   }
   bool result = false;
   InputBox tempBox;
@@ -1034,13 +1034,13 @@ bool Expression::HasInputBoxVariables(HashedList<std::string, MathRoutines::Hash
 
 bool Expression::HasBoundVariables() const {
   if (this->owner == nullptr) {
-    crash << "This is a programming error: calling function "
-    << "HasBoundVariables on non-initialized expression. " << crash;
+    global.fatal << "This is a programming error: calling function "
+    << "HasBoundVariables on non-initialized expression. " << global.fatal;
   }
   RecursionDepthCounter recursionCounter(&this->owner->RecursionDeptH);
   MacroRegisterFunctionWithName("Expression::HasBoundVariables");
   if (this->owner->RecursionDeptH>this->owner->MaxRecursionDeptH) {
-    crash << "This is a programming error: function HasBoundVariables has exceeded recursion depth limit. " << crash;
+    global.fatal << "This is a programming error: function HasBoundVariables has exceeded recursion depth limit. " << global.fatal;
   }
   if (this->IsListOfTwoAtomsStartingWith(this->owner->opBind())) {
     return true;
@@ -1645,7 +1645,7 @@ bool Calculator::outerPowerRaiseToFirst(Calculator& theCommands, const Expressio
 bool Expression::MakeXOXOdotsOX(Calculator& owner, int theOp, const List<Expression>& input) {
   MacroRegisterFunctionWithName("Expression::MakeXOXOdotsOX");
   if (input.size == 0) {
-    crash << "This is a programming error: cannot create operation sequence from an empty list. " << crash;
+    global.fatal << "This is a programming error: cannot create operation sequence from an empty list. " << global.fatal;
   }
   if (input.size == 1) {
     *this = input[0];
@@ -1684,8 +1684,8 @@ bool Calculator::outerPlus(Calculator& theCommands, const Expression& input, Exp
     for (int i = 0; i < theSum.size(); i ++) {
       for (int j = i; j < theSum.size(); j ++) {
         if (theSum[i] > theSum[j] && theSum[j] > theSum[i]) {
-          crash << "Faulty comparison: " << theSum[i].ToString() << " and " << theSum[j].ToString()
-          << " are mutually greater than one another. " << crash;
+          global.fatal << "Faulty comparison: " << theSum[i].ToString() << " and " << theSum[j].ToString()
+          << " are mutually greater than one another. " << global.fatal;
         }
       }
     }
@@ -1736,7 +1736,7 @@ void Expression::operator+=(const Expression& other) {
   if (this->owner == nullptr && other.owner == nullptr) {
     this->theData += other.theData;
     if (this->theData != 1 && this->theData != 0) {
-      crash << "Attempting to add non-initialized expressions" << crash;
+      global.fatal << "Attempting to add non-initialized expressions" << global.fatal;
     }
     return;
   }
@@ -1750,7 +1750,7 @@ void Expression::operator+=(const Expression& other) {
     this->AssignValue(this->theData, *other.owner);
   }
   if (this->owner != other.owner) {
-    crash << "Error: adding expressions with different owners. " << crash;
+    global.fatal << "Error: adding expressions with different owners. " << global.fatal;
   }
   Expression resultE;
   resultE.MakeXOX(*this->owner, this->owner->opPlus(), *this, other);
@@ -1762,7 +1762,7 @@ void Expression::operator-=(const Expression& other) {
   if (this->owner == nullptr && other.owner == nullptr) {
     this->theData -= other.theData;
     if (this->theData != 1 && this->theData != 0) {
-      crash << "Attempting to subtract non-initialized expressions" << crash;
+      global.fatal << "Attempting to subtract non-initialized expressions" << global.fatal;
     }
     return;
   }
@@ -1776,7 +1776,7 @@ void Expression::operator-=(const Expression& other) {
     this->AssignValue(this->theData, *other.owner);
   }
   if (this->owner != other.owner) {
-    crash << "Error: adding expressions with different owners. " << crash;
+    global.fatal << "Error: adding expressions with different owners. " << global.fatal;
   }
   Expression resultE;
   resultE.MakeXOX(*this->owner, this->owner->opMinus(), *this, other);
@@ -1801,9 +1801,9 @@ Expression Expression::operator*(int other) {
     //resultRat*= other;
     //if (resultRat.IsSmallInteger(&result.theData))
     //  return result;
-    crash << "Multiplying non-initialized expression with data: "
+    global.fatal << "Multiplying non-initialized expression with data: "
     << this->theData << " by integer " << other << " is not allowed. "
-    << crash;
+    << global.fatal;
   }
   Expression otherE;
   otherE.AssignValue(other, *this->owner);
@@ -1816,10 +1816,10 @@ Expression Expression::operator/(int other) {
   MacroRegisterFunctionWithName("Expression::operator/");
   Expression result;
   if (this->owner == nullptr) {
-    crash << "Multiplying non-initialized expression with data: "
+    global.fatal << "Multiplying non-initialized expression with data: "
     << this->theData << " by integer " << other
     << " is not allowed. "
-    << crash;
+    << global.fatal;
   }
   Expression otherE;
   otherE.AssignValue(other, *this->owner);
@@ -1855,7 +1855,7 @@ void Expression::operator/=(const Expression& other) {
   if (this->owner == nullptr && other.owner == nullptr) {
     this->theData /= other.theData;
     if (this->theData != 1 && this->theData != 0) {
-      crash << "Attempting to divide non-initialized expressions" << crash;
+      global.fatal << "Attempting to divide non-initialized expressions" << global.fatal;
     }
     return;
   }
@@ -1869,7 +1869,7 @@ void Expression::operator/=(const Expression& other) {
     this->AssignValue(this->theData, *other.owner);
   }
   if (this->owner != other.owner) {
-    crash << "Error: dividing expressions with different owners. " << crash;
+    global.fatal << "Error: dividing expressions with different owners. " << global.fatal;
   }
   Expression resultE;
   resultE.MakeXOX(*this->owner, this->owner->opDivide(), *this, other);
@@ -1881,7 +1881,7 @@ void Expression::operator*=(const Expression& other) {
   if (this->owner == nullptr && other.owner == nullptr) {
     this->theData *= other.theData;
     if (this->theData != 1 && this->theData != 0) {
-      crash << "Attempting to add non-initialized expressions" << crash;
+      global.fatal << "Attempting to add non-initialized expressions" << global.fatal;
     }
     return;
   }
@@ -1895,7 +1895,7 @@ void Expression::operator*=(const Expression& other) {
     this->AssignValue(this->theData, *other.owner);
   }
   if (this->owner != other.owner) {
-    crash << "Error: adding expressions with different owners. " << crash;
+    global.fatal << "Error: adding expressions with different owners. " << global.fatal;
   }
   Expression resultE;
   resultE.MakeXOX(*this->owner, this->owner->opTimes(), *this, other);
@@ -1979,7 +1979,7 @@ SemisimpleLieAlgebra* Expression::GetAmbientSSAlgebraNonConstUseWithCaution() co
 Function& Calculator::GetFunctionHandlerFromNamedRule(const std::string& inputNamedRule) {
   int theIndex = this->namedRules.GetIndex(inputNamedRule);
   if (theIndex == - 1) {
-    crash << "Named rule " << inputNamedRule << " does not exist." << crash;
+    global.fatal << "Named rule " << inputNamedRule << " does not exist." << global.fatal;
   }
   if (this->namedRulesLocations[theIndex][0] == 0) {
     return this->FunctionHandlers[this->namedRulesLocations[theIndex][1]][this->namedRulesLocations[theIndex][2]];
@@ -2005,7 +2005,7 @@ void Calculator::AddOperationBuiltInType(const std::string& theOpName) {
 
 void Calculator::AddOperationNoRepetitionAllowed(const std::string& theOpName) {
   if (this->GetOperations().Contains(theOpName)) {
-    crash << "This is a programming error: operation " << theOpName << " already created. " << crash;
+    global.fatal << "This is a programming error: operation " << theOpName << " already created. " << global.fatal;
   }
   this->theAtoms.AddOnTop(theOpName);
   this->FunctionHandlers.SetSize(this->theAtoms.size);
@@ -2118,7 +2118,7 @@ void Calculator::AddOperationHandler(
     this->FunctionHandlers.LastObject()->SetSize(0);
   }
   if (opArgumentListIgnoredForTheTimeBeing != "") {
-    crash << "This section of code is not implemented yet. Crashing to let you know. " << crash;
+    global.fatal << "This section of code is not implemented yet. Crashing to let you know. " << global.fatal;
   }
   Function theFun(
     *this,
@@ -2162,7 +2162,7 @@ void Calculator::AddOperationComposite(
   MacroRegisterFunctionWithName("Calculator::AddOperationComposite");
   int theIndex = this->operationsComposite.GetIndex(theOpName);
   if (opArgumentListIgnoredForTheTimeBeing != "") {
-    crash << "This section of code is not implemented yet. Crashing to let you know. " << crash;
+    global.fatal << "This section of code is not implemented yet. Crashing to let you know. " << global.fatal;
   }
   if (theIndex == - 1) {
     theIndex = this->operationsComposite.size;
@@ -2982,7 +2982,7 @@ bool Calculator::ConvertExpressionsToCommonContext(List<Expression>& inputOutput
     if (!inputOutputEs[i].IsBuiltInTypE()) {
       return *this << "<hr>Possible programming error: calling ConvertExpressionsToCommonContext "
       << "on expressions without context. "
-      << Crasher::GetStackTraceEtcErrorMessageHTML();
+      << global.fatal.GetStackTraceEtcErrorMessageHTML();
     }
     if (!commonContext.ContextMergeContexts(commonContext, inputOutputEs[i].GetContext(), commonContext)) {
       return *this << "<hr>Failed to merge context "

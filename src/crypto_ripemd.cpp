@@ -211,7 +211,7 @@ static void ripemd160_compress(Ripemd160State* self) {
 
   /* Sanity check */
   if (self->bufpos != 64) {
-    crash << "Internal error in RIPEMD160 implementation. " << crash;
+    global.fatal << "Internal error in RIPEMD160 implementation. " << global.fatal;
   }
   /* Byte-swap the buffer if we're on a big-endian machine */
   if (Crypto::flagRIPEMDBigEndian) {
@@ -364,7 +364,7 @@ void ripemd160_process(Ripemd160State* self, const unsigned char* p, unsigned lo
   unsigned long bytes_needed;
   /* We never leave a full buffer */
   if (self->bufpos >= 64) {
-    crash << "Internal error in RIPEMD160 computation. " << crash;
+    global.fatal << "Internal error in RIPEMD160 computation. " << global.fatal;
   }
   while (length > 0) {
     /* Figure out how many bytes we need to fill the internal buffer. */

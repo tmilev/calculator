@@ -102,7 +102,7 @@ public:
   }
   bool CheckConsistency() {
     if (this->flagDeallocated) {
-      crash << "Programming error: use after free of MonomialTensor." << crash;
+      global.fatal << "Programming error: use after free of MonomialTensor." << global.fatal;
     }
     return true;
   }
@@ -308,8 +308,8 @@ public:
   }
   Rational& operator[](int i) {
     if (i < 0) {
-      crash << "This is a programming error: requested exponent of monomial variable with index "
-      << i << " which is negative. " << crash;
+      global.fatal << "This is a programming error: requested exponent of monomial variable with index "
+      << i << " which is negative. " << global.fatal;
     }
     if (i >= this->monBody.size) {
       this->SetNumVariablesSubDeletedVarsByOne(i + 1);
@@ -318,8 +318,8 @@ public:
   }
   Rational operator()(int i) const {
     if (i < 0) {
-      crash << "This is a programming error: requested exponent of monomial variable"
-      << " with index " << i << " which is negative. " << crash;
+      global.fatal << "This is a programming error: requested exponent of monomial variable"
+      << " with index " << i << " which is negative. " << global.fatal;
     }
     if (i >= this->monBody.size) {
       return 0;
@@ -364,8 +364,8 @@ public:
   int TotalDegreeInt() const {
     int result = - 1;
     if (!this->TotalDegree().IsSmallInteger(&result)) {
-      crash << "This is a programming error: total degree of monomial must be "
-      << "a small integer to call this function. " << crash;
+      global.fatal << "This is a programming error: total degree of monomial must be "
+      << "a small integer to call this function. " << global.fatal;
     }
     return result;
   }
@@ -631,7 +631,7 @@ public:
   }
   bool CheckConsistency() const {
     if (this->flagDeallocated) {
-      crash << "Programming error: use after free of Matrix. " << crash;
+      global.fatal << "Programming error: use after free of Matrix. " << global.fatal;
     }
     return true;
   }
@@ -667,10 +667,10 @@ public:
     List<Vector<coefficient> >& output
   ) const {
     if (this->NumCols != standOnTheRightAsVectorRow.size) {
-      crash << "This is a programming error: attempting to multiply a matrix, standing on the left, with "
+      global.fatal << "This is a programming error: attempting to multiply a matrix, standing on the left, with "
       << this->NumCols << " columns, by a matrix, standing on the right, with "
       << standOnTheRightAsVectorRow.size << " rows. "
-      << crash;
+      << global.fatal;
     }
     output.SetSize(this->NumRows);
     for (int i = 0; i < this->NumRows; i ++) {
@@ -687,10 +687,10 @@ public:
   }
   void ActMultiplyVectorRowOnTheRight(const Vector<coefficient>& standsOnTheLeft, Vector<coefficient>& output) const {
     if (&standsOnTheLeft == &output) {
-      crash << "In ActMultiplyVectorRowOnTheRight: output not allowed to equal input. " << crash;
+      global.fatal << "In ActMultiplyVectorRowOnTheRight: output not allowed to equal input. " << global.fatal;
     }
     if (this->NumRows != standsOnTheLeft.size) {
-      crash << "Number of rows of matrix vector number of elements. " << crash;
+      global.fatal << "Number of rows of matrix vector number of elements. " << global.fatal;
     }
     output.MakeZero(this->NumCols);
     coefficient tempElt;
@@ -718,9 +718,9 @@ public:
       return;
     }
     if (this->NumCols != input.size) {
-      crash << "This is a programming error: attempting to multiply a matrix with "
+      global.fatal << "This is a programming error: attempting to multiply a matrix with "
       << this->NumCols << " columns with a vector(column) of "
-      << " dimension " << input.size << ". " << crash;
+      << " dimension " << input.size << ". " << global.fatal;
     }
     output.MakeZero(this->NumRows);
     otherType tempElt;
@@ -756,16 +756,16 @@ public:
     const otherType& TheRingZero = 0
   ) const {
     if (&input == &output) {
-      crash << "In ActOnVectorsColumn: input not allowed to equal output. " << crash;
+      global.fatal << "In ActOnVectorsColumn: input not allowed to equal output. " << global.fatal;
     }
     if (input.size == 0) {
       return;
     }
     if (this->NumCols != input.GetDim()) {
-      crash << "This is a programming error: attempting to act by "
+      global.fatal << "This is a programming error: attempting to act by "
       << this->ToString() << "(an " << this->NumRows << " x "
       << this->NumCols << " matrix) on a column vector "
-      << input.ToString() << "(dimension " << input.size << ")." << crash;
+      << input.ToString() << "(dimension " << input.size << ")." << global.fatal;
     }
     output.SetSize(input.size);
     for (int i = 0; i < input.size; i ++) {
@@ -842,7 +842,7 @@ public:
     const Vector<coefficient>& left, const Vector<coefficient>& right, const coefficient& theRingZero
   ) {
     if (left.size != this->NumCols || right.size != this->NumRows) {
-      crash << "Scalar product using matrix: dimensions of vectors don't match. " << crash;
+      global.fatal << "Scalar product using matrix: dimensions of vectors don't match. " << global.fatal;
     }
     coefficient Result, tempElt;
     Result = theRingZero;
@@ -861,9 +861,9 @@ public:
   }
   coefficient& operator()(int i, int j) const {
     if (i < 0 || i >= this->NumRows || j < 0 || j >= this->NumCols) {
-      crash << "This is a programming error: requesting row, column indexed by "
+      global.fatal << "This is a programming error: requesting row, column indexed by "
       << i << " and " << j << " but I am a matrix with "
-      << this->NumRows << " rows and " << this->NumCols << " colums. " << crash;
+      << this->NumRows << " rows and " << this->NumCols << " colums. " << global.fatal;
     }
     return this->elements[i][j];
   }
@@ -975,7 +975,7 @@ public:
   Matrix<coefficient> Inverse() {
     Matrix<coefficient> copy = *this;
     if (!copy.Invert()) {
-      crash << "Request to invert " << copy.ToString() << " failed. " << crash;
+      global.fatal << "Request to invert " << copy.ToString() << " failed. " << global.fatal;
     }
     return copy;
   }
@@ -1028,10 +1028,10 @@ public:
   }
   void AssignVectorToRowKeepOtherRowsIntactNoInit(int rowIndex, const Vector<coefficient>& input) {
     if (input.size != this->NumCols || rowIndex >= this->NumRows || rowIndex < 0) {
-      crash << "Error: attempting to assign vector " << input.ToString()
+      global.fatal << "Error: attempting to assign vector " << input.ToString()
       << " (" << input.size << " coordinates) "
       << " to row with index " << rowIndex << " in a matrix with "
-      << this->NumRows << " rows and " << this->NumCols << " columns. " << crash;
+      << this->NumRows << " rows and " << this->NumCols << " columns. " << global.fatal;
     }
     for (int i = 0; i < this->NumCols; i ++) {
       this->elements[rowIndex][i] = input[i];
@@ -1039,7 +1039,7 @@ public:
   }
   void AssignVectorToColumnKeepOtherColsIntactNoInit(int colIndex, const Vector<coefficient>& input) {
     if (input.size != this->NumRows || colIndex >= this->NumCols || colIndex < 0) {
-      crash << "In AssignVectorToColumnKeepOtherColsIntactNoInit: bad vector/matrix dimensions. "  << crash;
+      global.fatal << "In AssignVectorToColumnKeepOtherColsIntactNoInit: bad vector/matrix dimensions. "  << global.fatal;
     }
     for (int i = 0; i < this->NumRows; i ++) {
       this->elements[i][colIndex] = input[i];
@@ -1047,7 +1047,7 @@ public:
   }
   void AssignBlock(Matrix<coefficient>& block, int starti, int startj) {
     if (starti + block.NumRows > this->NumRows || startj + block.NumCols > this->NumCols) {
-      crash << "In AssignBlock: bad indices. " << crash;
+      global.fatal << "In AssignBlock: bad indices. " << global.fatal;
     }
     for (int i = 0; i < block.NumRows; i ++) {
       for (int j = 0; j < block.NumCols; j ++) {
@@ -1118,10 +1118,10 @@ public:
   );
   void operator+=(const Matrix<coefficient>& right) {
     if (this->NumRows != right.NumRows || this->NumCols != right.NumCols) {
-      crash << "This is a programming error: attempting to add matrix with "
+      global.fatal << "This is a programming error: attempting to add matrix with "
       << this->NumRows << " rows and " << this->NumCols
       << " columns to a matrix with " << right.NumRows << " rows and "
-      << right.NumCols << " columns. " << crash;
+      << right.NumCols << " columns. " << global.fatal;
     }
     for (int i = 0; i < this->NumRows; i ++) {
       for (int j = 0; j < this->NumCols; j ++) {
@@ -1132,9 +1132,9 @@ public:
   LargeIntegerUnsigned FindPositiveLCMCoefficientDenominators();
   void operator-=(const Matrix<coefficient>& right) {
     if (this->NumRows != right.NumRows || this->NumCols != right.NumCols) {
-      crash << "This is a programming error: attempting to subtract from matrix with "
+      global.fatal << "This is a programming error: attempting to subtract from matrix with "
       << this->NumRows << " rows and " << this->NumCols
-      << " columns a matrix with " << right.NumRows << " rows and " << right.NumCols << " columns. " << crash;
+      << " columns a matrix with " << right.NumRows << " rows and " << right.NumCols << " columns. " << global.fatal;
     }
     for (int i = 0; i < this->NumRows; i ++) {
       for (int j = 0; j < this->NumCols; j ++) {
@@ -1168,7 +1168,7 @@ public:
   }
   static void LieBracket(const Matrix<coefficient>& left, const Matrix<coefficient>& right, Matrix<coefficient>& output) {
     if (left.NumCols != left.NumRows || right.NumCols != right.NumRows || left.NumCols != right.NumCols) {
-      crash << "In LieBracket: bad dimensions of matrices. " << crash;
+      global.fatal << "In LieBracket: bad dimensions of matrices. " << global.fatal;
     }
     Matrix<coefficient> tempPlus, tempMinus;
     tempPlus = (right);
@@ -1291,9 +1291,9 @@ public:
   }
   bool operator>(const Matrix<coefficient>& right) const {
     if (this->NumRows != right.NumRows || this->NumCols != right.NumCols) {
-      crash << "An attempt was just made to compare two matrices of different dimensions; "
+      global.fatal << "An attempt was just made to compare two matrices of different dimensions; "
       << "most likely something is wrong in some FiniteGroup, see the frames above. "
-      << crash;
+      << global.fatal;
     }
     for (int i = 0; i < this->NumRows; i ++) {
       for (int j = 0; j < this->NumCols; j ++) {
@@ -1348,12 +1348,12 @@ bool Vectors<coefficient>::ConesIntersect(
     if (outputSplittingNormal != nullptr) {
       bool tempBool = Vectors<coefficient>::GetNormalSeparatingCones(StrictCone, NonStrictCone, *outputSplittingNormal);
       if (!tempBool) {
-        crash << "This is an algorithmic/mathematical (hence also programming) error: "
+        global.fatal << "This is an algorithmic/mathematical (hence also programming) error: "
         << "I get that two cones do not intersect, yet there exists no plane separating them. "
         << "Something is wrong with the implementation of the simplex algorithm. "
         << "The input which manifested the problem was: <br>StrictCone: <br>"
         << StrictCone.ToString() << "<br>Non-strict cone: <br>"
-        << NonStrictCone.ToString() << "<br>" << crash;
+        << NonStrictCone.ToString() << "<br>" << global.fatal;
       }
     }
     return false;
@@ -1451,8 +1451,8 @@ void Vectors<coefficient>::GetOrthogonalComplement(Vectors<coefficient>& output,
       output.MakeEiBasis(theBilinearForm->NumRows);
       return;
     }
-    crash << "Finding orthogonal complement of zero vectors without specifying a bilinear form is "
-    << " forbidden: I can't determine the dimension of the ambient vector space. " << crash;
+    global.fatal << "Finding orthogonal complement of zero vectors without specifying a bilinear form is "
+    << " forbidden: I can't determine the dimension of the ambient vector space. " << global.fatal;
   }
   Matrix<coefficient> theMatrix;
   theMatrix.AssignVectorsToRows(*this);
@@ -1535,11 +1535,11 @@ bool Matrix<Element>::ReadFromFile(std::fstream& input) {
   int NumReadWords;
   XML::ReadThroughFirstOpenTag(input, NumReadWords, this->GetXMLClassName());
   if (NumReadWords != 0) {
-    crash << "While reading matrix, encountered fatal error. " << crash;
+    global.fatal << "While reading matrix, encountered fatal error. " << global.fatal;
   }
   input >> tempS >> r >> tempS >> c;
   if (tempS != "c:") {
-    crash << "Bad matrix file. " << crash;
+    global.fatal << "Bad matrix file. " << global.fatal;
     return false;
   }
   this->init(r, c);
@@ -1550,7 +1550,7 @@ bool Matrix<Element>::ReadFromFile(std::fstream& input) {
   }
   XML::ReadEverythingPassedTagOpenUntilTagClose(input, NumReadWords, this->GetXMLClassName());
   if (NumReadWords != 0) {
-    crash << "Bad matrix file: not enough words read. " << crash;
+    global.fatal << "Bad matrix file: not enough words read. " << global.fatal;
   }
   return true;
 }
@@ -1558,9 +1558,9 @@ bool Matrix<Element>::ReadFromFile(std::fstream& input) {
 template <typename coefficient>
 bool Matrix<coefficient>::Invert() {
   if (this->NumCols != this->NumRows) {
-    crash << "This is a programming error: requesting to invert a non-square matrix of "
+    global.fatal << "This is a programming error: requesting to invert a non-square matrix of "
     << this->NumRows << " rows and "
-    << this->NumCols << " columns. " << crash;
+    << this->NumCols << " columns. " << global.fatal;
   }
   MacroRegisterFunctionWithName("Matrix::Invert");
 //  if (this->flagComputingDebugInfo)
@@ -1616,8 +1616,8 @@ void Matrix<coefficient>::MultiplyOnTheLeft(
     return;
   }
   if (this->NumRows != standsOnTheLeft.NumCols) {
-    crash << "This is a programming error: attempting to multiply a matrix with " << standsOnTheLeft.NumCols
-    << " columns by a matrix with " << this->NumRows << "rows. " << crash;
+    global.fatal << "This is a programming error: attempting to multiply a matrix with " << standsOnTheLeft.NumCols
+    << " columns by a matrix with " << this->NumRows << "rows. " << global.fatal;
   }
   coefficient tempEl;
   output.init(standsOnTheLeft.NumRows, this->NumCols);
@@ -1679,7 +1679,7 @@ std::string Matrix<Element>::ElementToStringWithBlocks(List<int>& theBlocks) {
 template<typename Element>
 void Matrix<Element>::AssignDirectSum(Matrix<Element>& m1, Matrix<Element>& m2) {
   if (this == &m1 || this == &m2) {
-    crash << "In AssignDirectSum: output not allowed to equal any of the inputs. " << crash;
+    global.fatal << "In AssignDirectSum: output not allowed to equal any of the inputs. " << global.fatal;
   }
   this->Resize(m1.NumRows + m2.NumRows, m1.NumCols + m2.NumCols, false);
   this->MakeZero();
@@ -1789,7 +1789,7 @@ bool Matrix<Element>::Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(
   Matrix<Element>& A, Matrix<Element>& b, Matrix<Element>& output
 ) {
   if (A.NumRows != b.NumRows) {
-    crash << "Number of matrix rows does not match number of vector entries. " << crash;
+    global.fatal << "Number of matrix rows does not match number of vector entries. " << global.fatal;
   }
   Selection thePivotPoints;
   A.GaussianEliminationByRows(&b, 0, &thePivotPoints);
@@ -1805,7 +1805,7 @@ bool Matrix<Element>::RowEchelonFormToLinearSystemSolution(
     inputRightHandSide.NumCols != 1 ||
     inputRightHandSide.NumRows != this->NumRows
   ) {
-    crash << "In RowEchelonFormToLinearSystemSolution: bad matrix dimensions. " << crash;
+    global.fatal << "In RowEchelonFormToLinearSystemSolution: bad matrix dimensions. " << global.fatal;
   }
   outputSolution.init(this->NumCols, 1);
   int NumPivots = 0;
@@ -2107,8 +2107,8 @@ public:
   }
   void GetMinMonomial(templateMonomial& outputMon, coefficient& outputCF) const {
     if (this->IsEqualToZero()) {
-      crash << "This is a programming error: calling GetMinMon "
-      << "on a zero monomial collection is forbidden. " << crash;
+      global.fatal << "This is a programming error: calling GetMinMon "
+      << "on a zero monomial collection is forbidden. " << global.fatal;
     }
     outputMon = (*this)[0];
     outputCF = this->theCoeffs[0];
@@ -2121,8 +2121,8 @@ public:
   }
   void GetMaxMonomial(templateMonomial& outputMon, coefficient& outputCF) const {
     if (this->IsEqualToZero()) {
-      crash << "This is a programming error: calling GetMinMon "
-      << "on a zero monomial collection is forbidden. " << crash;
+      global.fatal << "This is a programming error: calling GetMinMon "
+      << "on a zero monomial collection is forbidden. " << global.fatal;
     }
     outputMon = (*this)[0];
     outputCF = this->theCoeffs[0];
@@ -2146,7 +2146,7 @@ public:
     if (theIndex != - 1) {
       if (this->theCoeffs[theIndex] == 0) {
         if (this->flagDeallocated) {
-          crash << "Use after free or race condition on monomial collection. " << crash;
+          global.fatal << "Use after free or race condition on monomial collection. " << global.fatal;
         }
         bool oldFlagDeallocated = this->flagDeallocated;
         this->flagDeallocated = true;
@@ -2324,7 +2324,7 @@ public:
       this->theCoeffs.flagDeallocated ||
       this->flagDeallocated
     ) {
-      crash << "Use after free of monomial collection. " << crash;
+      global.fatal << "Use after free of monomial collection. " << global.fatal;
     }
   }
   void CheckConsistencyGrandMaster() const {
@@ -2410,9 +2410,9 @@ public:
   );
   void CheckNumCoeffsConsistency() const {
     if (this->theCoeffs.size != this->theMonomials.size) {
-      crash << "This is a programming error: a monomial collection has "
+      global.fatal << "This is a programming error: a monomial collection has "
       << this->theMonomials.size << " monomials but "
-      << this->theCoeffs.size << " coefficients. " << crash;
+      << this->theCoeffs.size << " coefficients. " << global.fatal;
     }
   }
   bool IsEqualToZero() const;
@@ -2525,9 +2525,9 @@ public:
   template <class otherType>
   void operator/=(const otherType& other) {
     if (other == 0) {
-      crash << "This is a programming error. A MonomialCollection division "
+      global.fatal << "This is a programming error. A MonomialCollection division "
       << "by zero has been requested: division by zero error should "
-      << "be handled before calling operator/=. " << crash;
+      << "be handled before calling operator/=. " << global.fatal;
       return;
     }
     for (int i = 0; i < this->theCoeffs.size; i ++) {
@@ -2735,8 +2735,8 @@ public:
   void GetCoeffInFrontOfLinearTermVariableIndex(int index, coefficient& output);
   void MakeMonomiaL(int LetterIndex, const Rational& Power, const coefficient& Coeff = 1, int ExpectedNumVars = 0) {
     if (LetterIndex < 0) {
-      crash << "This is a programming error: the index"
-      << LetterIndex + 1 << " is  non-positive which is not allowed. " << crash;
+      global.fatal << "This is a programming error: the index"
+      << LetterIndex + 1 << " is  non-positive which is not allowed. " << global.fatal;
     }
     int numVars = MathRoutines::Maximum(LetterIndex + 1, ExpectedNumVars);
     this->MakeZero();
@@ -2931,9 +2931,9 @@ public:
       return;
     }
     if (d < 0) {
-      crash << "This is a programming error: attempting to raise the polynomial "
+      global.fatal << "This is a programming error: attempting to raise the polynomial "
       << this->ToString() << " to the negative power "
-      << d << ". " << crash;
+      << d << ". " << global.fatal;
     }
     Polynomial<coefficient> theOne;
     theOne.MakeOne(this->GetMinNumVars());
@@ -2977,11 +2977,11 @@ public:
   bool operator<=(const coefficient& other) const {
     coefficient constME;
     if (!this->IsConstant(&constME)) {
-      crash << "This may or may not be a programming error: "
+      global.fatal << "This may or may not be a programming error: "
       << "attempting to compare a non-constant polynomial to "
       << "a constant. I cannot judge at the moment whether allowing that is a good decision. "
       << "In any case, crashing to let you know. "
-      << crash;
+      << global.fatal;
       return false;
     }
     return constME <= other;
@@ -2989,11 +2989,11 @@ public:
   bool operator<(const coefficient& other) const {
     coefficient constME;
     if (!this->IsConstant(&constME)) {
-      crash << "This may or may not be a programming error: "
+      global.fatal << "This may or may not be a programming error: "
       << "attempting to compare a non-constant polynomial to "
       << "a constant. I cannot judge at the moment whether allowing "
       << "that is a good decision. In any case, crashing to let you know. "
-      << crash;
+      << global.fatal;
       return false;
     }
     return constME<other;
@@ -3453,7 +3453,7 @@ private:
     }
     this->ReduceMemory();
     if (!this->checkConsistency()) {
-      crash << "Bad rational function. " << crash;
+      global.fatal << "Bad rational function. " << global.fatal;
     }
   }
   void AddHonestRF(const RationalFunctionOld& other);
@@ -3472,7 +3472,7 @@ private:
     }
 //    int commentMEWhenDone;
 //    if (!this->checkConsistency())
-//      crash << crash;
+//      global.fatal << global.fatal;
   }
   bool ConvertToType(int theType);
 public:
@@ -3529,7 +3529,7 @@ public:
     this->ReduceRFToPoly();
     this->ReducePolyToRational();
     if (!this->checkConsistency()) {
-      crash << "Corrupt rational function. " << crash;
+      global.fatal << "Corrupt rational function. " << global.fatal;
     }
   }
   void operator=(const Polynomial<Rational>& other) {
@@ -3586,8 +3586,8 @@ public:
     switch (this->expressionType) {
       case RationalFunctionOld::typeRationalFunction:
         if (this->Denominator.IsZeroPointer()) {
-          crash << "This is a programming error: the rational function is "
-          << "supposed to be honest, but the denominator pointer is zero. " << crash;
+          global.fatal << "This is a programming error: the rational function is "
+          << "supposed to be honest, but the denominator pointer is zero. " << global.fatal;
         }
         output = this->Denominator.GetElementConst();
         return;
@@ -3710,7 +3710,7 @@ public:
       case RationalFunctionOld::typeRational:
         return this->ratValue == other.ratValue;
     }
-    crash << "This line of code is supposed to be unreachable. " << crash;
+    global.fatal << "This line of code is supposed to be unreachable. " << global.fatal;
     return false;
   }
   static bool GetRelations(
@@ -3742,10 +3742,10 @@ bool MonomialCollection<templateMonomial, coefficient>::operator==(int x) const 
   if (x == 0) {
     return this->size() == 0;
   }
-  crash << "This is either a programming error, or an unforeseen use of operator==. "
+  global.fatal << "This is either a programming error, or an unforeseen use of operator==. "
   << "If the second is the case, an audit/careful "
   << "proofreading of the code calling this function is needed; "
-  << "I am crashing just in case. " << crash;
+  << "I am crashing just in case. " << global.fatal;
   return false;
 }
 
@@ -3794,7 +3794,7 @@ bool MonomialCollection<templateMonomial, coefficient>::ReadFromFile(std::fstrea
   bool result = true;
   input >> ReaderString >> targetSize;
   if (ReaderString != "numMons:" ) {
-    crash << "Bad monomial collection in file. " << crash;
+    global.fatal << "Bad monomial collection in file. " << global.fatal;
     return false;
   }
   this->MakeZero();
@@ -3815,7 +3815,7 @@ bool MonomialCollection<templateMonomial, coefficient>::ReadFromFile(std::fstrea
   }
   XML::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, this->GetXMLClassName());
   if (numReadWords != 0) {
-    crash << "Trailing words while reading monomial collection. " << crash;
+    global.fatal << "Trailing words while reading monomial collection. " << global.fatal;
   }
   return result;
 }
@@ -3891,11 +3891,11 @@ void Polynomial<coefficient>::MakeLinPolyFromRootNoConstantTerm(const Vector<Rat
   for (int i = 0; i < r.size; i ++) {
     tempM.MakeEi(i);
     if (!r[i].IsInteger()) {
-      crash << "This may or may not be a programming error: "
+      global.fatal << "This may or may not be a programming error: "
       << "requesting a monomial with non-integer exponent. "
       << "It appears this operation should be allowed, however "
       << "this requires further consideration. I am crashing just in case. "
-      << crash;
+      << global.fatal;
     }
     this->AddMonomial(tempM, r[i].GetNumerator());
   }
@@ -4010,16 +4010,16 @@ void MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRow
   MacroRegisterFunctionWithName("MonomialCollection::GaussianEliminationByRows");
   if (carbonCopyMatrix != 0) {
     if (carbonCopyMatrix->NumRows != theList.size) {
-      crash << "This is a programming error: carbon copy matrix has "
+      global.fatal << "This is a programming error: carbon copy matrix has "
       << carbonCopyMatrix->NumRows << " rows, while the gaussian-eliminated list has " << theList.size
-      << " elements; the two numbers must be the same!" << crash;
+      << " elements; the two numbers must be the same!" << global.fatal;
     }
   }
   if (carbonCopyList != 0) {
     if (carbonCopyList->size != theList.size) {
-      crash << "This is a programming error: carbon copy list has "
+      global.fatal << "This is a programming error: carbon copy list has "
       << carbonCopyList->size << " elements, while the gaussian-eliminated list has "
-      << theList.size << " elements; the two numbers must be the same!" << crash;
+      << theList.size << " elements; the two numbers must be the same!" << global.fatal;
     }
   }
   MemorySaving<HashedList<templateMonomial> > bufferMons;
@@ -4069,10 +4069,10 @@ void MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRow
     MonomialCollection<templateMonomial, coefficient>& currentPivot = theList[currentRowIndex];
     int colIndex = currentPivot.theMonomials.GetIndex(currentMon);
     if (colIndex == - 1) {
-      crash << "This is a programming error. An internal check at the "
+      global.fatal << "This is a programming error. An internal check at the "
       << "Gaussian elimination method for monomial collections fails. "
       << "Something is wrong. Here is the List you wanted to perform Gaussian elimination upon. "
-      << theList.ToString() << ". " << crash;
+      << theList.ToString() << ". " << global.fatal;
     }
     tempCF = currentPivot.theCoeffs[colIndex];
     tempCF.Invert();
@@ -4114,18 +4114,18 @@ int MonomialCollection<templateMonomial, coefficient>::AddMonomialNoCoeffCleanUp
     return - 1;
   }
   if (this->flagDeallocated) {
-    crash << "Use after free or race condition on monomial collection. " << crash;
+    global.fatal << "Use after free or race condition on monomial collection. " << global.fatal;
   }
   bool oldFlagDeallocated = this->flagDeallocated;
   this->flagDeallocated = true;
   int j = this->theMonomials.GetIndex(inputMon);
   if (j >= this->size()) {
-    crash << "Error: function GetIndex evaluated on "
+    global.fatal << "Error: function GetIndex evaluated on "
     << inputMon << " with hash function "
     << inputMon.HashFunction(inputMon)
     << " returns index " << j << " but I have only "
     << this->size() << " elements. ";
-    crash << crash;
+    global.fatal << global.fatal;
   }
   if (j == - 1) {
     this->theMonomials.AddOnTop(inputMon);
@@ -4133,10 +4133,10 @@ int MonomialCollection<templateMonomial, coefficient>::AddMonomialNoCoeffCleanUp
     j = this->size() - 1;
   } else {
     if (j >= this->theCoeffs.size) {
-      crash << "This is a programming error. "
+      global.fatal << "This is a programming error. "
       << "Looking for coefficient index " << j
       << " when number of coefficients is "
-      << this->theCoeffs.size <<  ". " << crash;
+      << this->theCoeffs.size <<  ". " << global.fatal;
     }
     this->theCoeffs[j] += inputCoeff;
   }
@@ -4196,7 +4196,7 @@ void PolynomialSubstitution<coefficient>::MakeIdLikeInjectionSub(
   int numStartingVars, int numTargetVarsMustBeLargerOrEqual, const coefficient& theRingUnit
 ) {
   if (numStartingVars > numTargetVarsMustBeLargerOrEqual) {
-    crash << "Bad number of variables. " << crash;
+    global.fatal << "Bad number of variables. " << global.fatal;
   }
   this->SetSize(numStartingVars);
   for (int i = 0; i < this->size; i ++) {
@@ -4467,8 +4467,8 @@ public:
     SemisimpleLieAlgebra* owner = (*this)[0].owner;
     for (int i = 1; i < this->size(); i ++) {
       if (owner != (*this)[i].owner) {
-        crash << "This is a programming error: ElementSemisimpleLieAlgebra "
-        << "contains Chevalley generators with different owners. " << crash;
+        global.fatal << "This is a programming error: ElementSemisimpleLieAlgebra "
+        << "contains Chevalley generators with different owners. " << global.fatal;
       }
     }
     return true;
@@ -4592,7 +4592,7 @@ int Matrix<coefficient>::FindPositiveGCDCoefficientNumeratorsTruncated() {
     }
   }
   if (result == 0) {
-    crash << "Crash in Matrix::FindPositiveGCDCoefficientNumeratorsTruncated" << crash;
+    global.fatal << "Crash in Matrix::FindPositiveGCDCoefficientNumeratorsTruncated" << global.fatal;
   }
   if (result < 0) {
     result = - result;
@@ -4621,11 +4621,11 @@ coefficient Matrix<coefficient> ::GetDeterminant() {
 template <class coefficient>
 coefficient Matrix<coefficient>::GetTrace() const {
   if (this->NumCols != this->NumRows) {
-    crash << "This is either programming error, a mathematical error, "
+    global.fatal << "This is either programming error, a mathematical error, "
     << "or requires a more general definition of trace. Requesting the trace of "
     << "a non-square matrix of " << this->NumRows << " rows and "
     << this->NumCols << " columns is not allowed. "
-    << crash;
+    << global.fatal;
   }
   coefficient acc = 0;
   for (int i = 0; i < this->NumCols; i ++) {
@@ -4645,8 +4645,8 @@ Matrix<coefficient> Matrix<coefficient>::operator*(const Matrix<coefficient>& ri
 template <class coefficient>
 Vector<coefficient> Matrix<coefficient>::operator*(const Vector<coefficient>& v) const {
   if (v.size != NumCols) {
-    crash << "matrix application mismatch: matrix with " << NumCols
-    << " columns attempted to multiply vector of length " << v.size << crash;
+    global.fatal << "matrix application mismatch: matrix with " << NumCols
+    << " columns attempted to multiply vector of length " << v.size << global.fatal;
   }
   Vector<coefficient> out;
   out.MakeZero(NumRows);
@@ -4742,13 +4742,13 @@ bool Vectors<coefficient>::GetNormalSeparatingCones(
     for (int i = 0; i < coneStrictlyPositiveCoeffs.size; i ++) {
       coneStrictlyPositiveCoeffs[i].ScalarEuclidean(outputNormal, tempRat);
       if (!tempRat.IsPositive()) {
-        crash << "Unexpected non-positive value. " << crash;
+        global.fatal << "Unexpected non-positive value. " << global.fatal;
       }
     }
     for (int i = 0; i < coneNonNegativeCoeffs.size; i ++) {
       coneNonNegativeCoeffs[i].ScalarEuclidean(outputNormal, tempRat);
       if (!tempRat.IsNonPositive()) {
-        crash << "Unexpected positive value" << crash;
+        global.fatal << "Unexpected positive value" << global.fatal;
       }
     }
   }
@@ -4808,7 +4808,7 @@ void Matrix<coefficient>::ActOnMonomialAsDifferentialOperator(
   const MonomialP& input, Polynomial<Rational>& output
 ) {
   if (this->NumRows != this->NumCols) {
-    crash << "Matrix not square as expected. " << crash;
+    global.fatal << "Matrix not square as expected. " << global.fatal;
   }
   MonomialP tempMon;
   output.MakeZero();
@@ -5104,7 +5104,7 @@ std::string Matrix<coefficient>::ToStringSystemLatex(
         theMon.MakeMonomiaL(j, 1, (*this)(i, j));
         currentEntry = theMon.ToString(theFormat);
         if (currentEntry == "") {
-          crash << "Empty strings not allowed as result of ToString() function call. " << crash;
+          global.fatal << "Empty strings not allowed as result of ToString() function call. " << global.fatal;
         }
         if (currentEntry[0] != '-' && foundNonZeroEntry) {
           out << "+";
@@ -5629,7 +5629,7 @@ public:
   List<int> IndicesNonZeroMults;
   friend std::ostream& operator << (std::ostream& output, const PartFraction& input) {
     (void) input;//avoid unused parameter warning, portable
-    crash << " Not implemented, please fix. " << crash;
+    global.fatal << " Not implemented, please fix. " << global.fatal;
     return output;
   }
   static bool IsMonEqualToZero() {
@@ -6203,7 +6203,7 @@ public:
   void WriteToFile(std::fstream& output);
   void ReadFromFile(std::fstream& input);
   void ResetRelevanceIsComputed() {
-    crash << "This is not implemented yet. " << crash;
+    global.fatal << "This is not implemented yet. " << global.fatal;
   }
   PartFractions();
   int SizeWithoutDebugString();
@@ -6247,10 +6247,10 @@ class DynkinSimpleType {
         inputLetter != 'E' && inputLetter != 'F' && inputLetter != 'G'
       ) || inputRank <= 0
     ) {
-      crash << "This is a programming error. Requested to create a simple Dynkin type of type "
+      global.fatal << "This is a programming error. Requested to create a simple Dynkin type of type "
       << inputLetter << " and rank "
       << inputRank << ". This is not allowed: I only accept types A, B, C, D, E, F and G and non-negative ranks. "
-      << crash;
+      << global.fatal;
     }
     if (inputLetter == 'G') {
       inputRank = 2;
@@ -6388,7 +6388,7 @@ public:
   int GetMult(int SimpleTypeIdentifier) const {
     int result = 0;
     if (!this->theCoeffs[SimpleTypeIdentifier].IsSmallInteger(&result)) {
-      crash << "This is a programming error: Dynkin type has multiplicity that is not a small integer " << crash;
+      global.fatal << "This is a programming error: Dynkin type has multiplicity that is not a small integer " << global.fatal;
     }
     return result;
   }
@@ -6403,7 +6403,7 @@ public:
     }
     int intResult = 0;
     if (!result.IsSmallInteger(&intResult)) {
-      crash << "This is a programming error: multiplicity of simple type is not a small integer. " << crash;
+      global.fatal << "This is a programming error: multiplicity of simple type is not a small integer. " << global.fatal;
     }
     return intResult;
   }
@@ -6414,7 +6414,7 @@ public:
     }
     int intResult = 0;
     if (!result.IsSmallInteger(&intResult)) {
-      crash << "This is a programming error: multiplicity of simple type is not a small integer. " << crash;
+      global.fatal << "This is a programming error: multiplicity of simple type is not a small integer. " << global.fatal;
     }
     return intResult;
   }
@@ -7067,11 +7067,11 @@ public:
     output.SetSize(this->GetMinNumRows());
     int numColsTarget = inputStandToTheLeftAsVectorRows[0].size;
     if (this->GetMinNumCols() != inputStandToTheLeftAsVectorRows.size) {
-      crash << "This is a programming error: attemtping to act by matrix "
+      global.fatal << "This is a programming error: attemtping to act by matrix "
       << this->ToString() << " (" << this->GetMinNumCols() << " columns) "
       << " on the " << inputStandToTheLeftAsVectorRows.size << " vector-rows: "
       << inputStandToTheLeftAsVectorRows.ToString() << ". "
-      << crash;
+      << global.fatal;
     }
     for (int i = 0; i < inputStandToTheLeftAsVectorRows.size; i ++) {
       output[i].MakeZero(numColsTarget);
@@ -7181,9 +7181,9 @@ void MatrixTensor<coefficient>::Invert() {
   MatrixTensor<coefficient> result = theId;
   this->GaussianEliminationByRowsMatrix(&result);
   if (*this != theId) {
-    crash << "This is a programming error: attempting to invert a "
+    global.fatal << "This is a programming error: attempting to invert a "
     << "non-invertable matrix tensor. After Gaussian elimination, the matrix equals "
-    << this->ToStringMatForm() << " but should instead be equal to " << theId.ToStringMatForm() << crash;
+    << this->ToStringMatForm() << " but should instead be equal to " << theId.ToStringMatForm() << global.fatal;
   }
   *this = result;
 }
@@ -7222,7 +7222,7 @@ class MonomialGeneralizedVerma {
   }
   void SetNumVariables(int GoalNumVars) {
     if (this->owner->size <= this->indexInOwner) {
-      crash << "Crash in SetNumVariables: bad number of variables. " << crash;
+      global.fatal << "Crash in SetNumVariables: bad number of variables. " << global.fatal;
     }
     this->theMonCoeffOne.SetNumVariables(GoalNumVars);
     this->owner->TheObjects[this->indexInOwner].SetNumVariables(GoalNumVars);
@@ -7549,7 +7549,7 @@ std::string MonomialTensorGeneralizedVermas<coefficient>::ToString(FormatExpress
 template <class coefficient>
 std::string MonomialGeneralizedVerma<coefficient>::ToString(FormatExpressions* theFormat, bool includeV) const {
   if (this->owner == nullptr) {
-    crash << "This is a programming error: non-initialized generalized Verma monomial (owner is 0)." << crash;
+    global.fatal << "This is a programming error: non-initialized generalized Verma monomial (owner is 0)." << global.fatal;
   }
   ModuleSSalgebra<coefficient>& theMod = *this->owner;
   std::string tempS;
@@ -7671,8 +7671,8 @@ void MonomialGeneralizedVerma<coefficient>::MultiplyMeByUEEltOnTheLefT(
   ElementSumGeneralizedVermas<coefficient> buffer;
   ProgressReport theReport;
   if (!this->GetOwner().owner->flagHasNilradicalOrder) {
-    crash << "Calling generalized verma module simplification requires nilradical order on the generators. "
-    << crash;
+    global.fatal << "Calling generalized verma module simplification requires nilradical order on the generators. "
+    << global.fatal;
   }
   for (int j = 0; j < theUE.size(); j ++) {
     currentMon.theMonCoeffOne = theUE[j];
@@ -7719,7 +7719,7 @@ void MonomialGeneralizedVerma<coefficient>::ReduceMe(
   tempMon *= theMod.theGeneratingWordsNonReduced[this->indexFDVector];
   int indexCheck = theMod.theGeneratingWordsNonReduced.GetIndex(tempMon);
   if (!this->owner->owner->flagHasNilradicalOrder) {
-    crash << "Owner needs nilradical order!!!" << crash;
+    global.fatal << "Owner needs nilradical order!!!" << global.fatal;
   }
   if (indexCheck != - 1) {
     MonomialGeneralizedVerma<coefficient> basisMon;
@@ -7819,7 +7819,7 @@ void Vectors<coefficient>::IntersectTwoLinSpaces(
   for (int i = 0; i < tempSel.CardinalitySelection; i ++) {
     int currentIndex = tempSel.elements[i];
     if (currentIndex < firstReduced.size) {
-      crash << "Unexpected condition in Vectors::IntersectTwoLinSpaces. " << crash;
+      global.fatal << "Unexpected condition in Vectors::IntersectTwoLinSpaces. " << global.fatal;
     }
     nextIntersection.MakeZero(theDim);
     for (int j = 0; j < firstReduced.size; j ++) {
@@ -7846,8 +7846,8 @@ void ElementSumGeneralizedVermas<coefficient>::MakeHWV(
 template<class coefficient>
 bool Matrix<coefficient>::IsPositiveDefinite() {
   if (this->NumRows != this->NumCols) {
-    crash << "This is a programming error: attempting to evaluate whether a matrix "
-    << "is positive definite, but the matrix is not square. " << crash;
+    global.fatal << "This is a programming error: attempting to evaluate whether a matrix "
+    << "is positive definite, but the matrix is not square. " << global.fatal;
   }
   coefficient det;
   Matrix<coefficient> tempMat;

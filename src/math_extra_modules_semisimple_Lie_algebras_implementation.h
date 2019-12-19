@@ -162,15 +162,15 @@ MatrixTensor<coefficient>& ModuleSSalgebra<coefficient>::GetActionGeneratorIndeX
   MacroRegisterFunctionWithName("ModuleSSalgebra<coefficient>::GetActionGeneratorIndeX");
   int numGenerators = this->GetOwner().GetNumGenerators();
   if (generatorIndex < 0 || generatorIndex >= numGenerators) {
-    crash << "Bad generator index: " << generatorIndex << ". " << crash;
+    global.fatal << "Bad generator index: " << generatorIndex << ". " << global.fatal;
   }
   if (this->ComputedGeneratorActions.selected[generatorIndex]) {
     return this->actionsGeneratorsMaT[generatorIndex];
   }
   this->ComputedGeneratorActions.AddSelectionAppendNewIndex(generatorIndex);
   if (this->HasFreeAction(generatorIndex)) {
-    crash << "This is a programming error, due to a change in "
-    << "implementation of the generalized Verma module class. " << crash;
+    global.fatal << "This is a programming error, due to a change in "
+    << "implementation of the generalized Verma module class. " << global.fatal;
     this->actionsGeneratorsMaT[generatorIndex].MakeZero();
     return this->actionsGeneratorsMaT[generatorIndex];
   }
@@ -236,12 +236,12 @@ void ModuleSSalgebra<coefficient>::GetMatrixHomogenousElt(
       ElementUniversalEnveloping<coefficient>& imageCurrentMon = outputSortedByArgumentWeight[j][k];
       int indexColumn = this->theGeneratingWordsNonReduced.GetIndex(currentMon);
       if (indexColumn == - 1) {
-        crash << "Column index equals -1. " << crash;
+        global.fatal << "Column index equals -1. " << global.fatal;
       }
       for (int l = 0; l < imageCurrentMon.size; l ++) {
         int indexRow = this->theGeneratingWordsNonReduced.GetIndex(imageCurrentMon[l]);
         if (indexRow == - 1) {
-          crash << "Negative row index not allowed. " << crash;
+          global.fatal << "Negative row index not allowed. " << global.fatal;
         }
         output.AddMonomial(MonomialMatrix(indexRow, indexColumn), imageCurrentMon.theCoeffs[l]);
       }
@@ -265,8 +265,8 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight(
   std::stringstream out;
   std::string tempS;
   if (this->GetOwner()->GetRank() != splittingParSel.MaxSize) {
-    crash << "This is a programming error: parabolic selection selects out of " << splittingParSel.MaxSize
-    << " elements while the weyl group is of rank " << this->GetOwner()->GetRank() << ". " << crash;
+    global.fatal << "This is a programming error: parabolic selection selects out of " << splittingParSel.MaxSize
+    << " elements while the weyl group is of rank " << this->GetOwner()->GetRank() << ". " << global.fatal;
   }
   outputWeylSub.MakeParabolicFromSelectionSimpleRoots(this->GetOwner()->theWeyl, splittingParSel, 1);
   outputWeylSub.ComputeRootSubsystem();
@@ -408,9 +408,9 @@ void ModuleSSalgebra<coefficient>::SplitOverLevi(
     return;
   }
   if (this->GetOwner().GetRank() != splittingParSel.MaxSize) {
-    crash << "This is a programming error: semisimple rank is "
+    global.fatal << "This is a programming error: semisimple rank is "
     << this->GetOwner().GetRank() << " but splitting parabolic selects "
-    << " out of " << splittingParSel.MaxSize << " simple roots. " << crash;
+    << " out of " << splittingParSel.MaxSize << " simple roots. " << global.fatal;
   }
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms subWeyl;
   subWeyl.AmbientWeyl = &this->owner->theWeyl;
@@ -576,12 +576,12 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW(
 
   int theRank = theAlgebrA.GetRank();
   if (HWFundCoords.size != theRank || selNonSelectedAreElementsLevi.MaxSize != theRank) {
-    crash << "This is a programming error. I am asked to create a "
+    global.fatal << "This is a programming error. I am asked to create a "
     << "generalized Verma module with a semisimple Lie algebra of rank "
     << theRank << " but the input highest weight, "
     << HWFundCoords.ToString() << ", has " << HWFundCoords.size << " coordinates and "
     << " the parabolic section indicates rank of "
-    << selNonSelectedAreElementsLevi.MaxSize << ". " << crash;
+    << selNonSelectedAreElementsLevi.MaxSize << ". " << global.fatal;
   }
   WeylGroupData& theWeyl = theAlgebrA.theWeyl;
   this->cachedPairs.Clear();
@@ -888,11 +888,11 @@ void ModuleSSalgebra<coefficient>::CheckConsistency() {
       diffMat = otherOutput;
       diffMat -= output;
       if (!diffMat.IsEqualToZero()) {
-        crash << "<br>[" << left.ToString() << ", " << right.ToString() << "] = "
+        global.fatal << "<br>[" << left.ToString() << ", " << right.ToString() << "] = "
         << output.ToString() << "<br> [" << leftGen.ToString()
         << ", " << rightGen.ToString() << "] = " << outputGen.ToString() << "<br> "
         << outputGen.ToString() << "->" << otherOutput.ToString()
-        << "<br>This is a programming error: something is wrong with the algorithm, a check fails! " << crash;
+        << "<br>This is a programming error: something is wrong with the algorithm, a check fails! " << global.fatal;
       } else {
         std::stringstream tempStream;
         tempStream << "tested index" << i + 1 << " out of " << this->GetOwner().GetNumGenerators()
@@ -1133,7 +1133,7 @@ bool ElementTensorsGeneralizedVermas<coefficient>::MultiplyOnTheLeft(
 ) const {
   MacroRegisterFunctionWithName("ElementTensorsGeneralizedVermas<coefficient>::MultiplyOnTheLeft");
   if (&output == this) {
-    crash << "Output equals input, this is not supposed to happen. " << crash;
+    global.fatal << "Output equals input, this is not supposed to happen. " << global.fatal;
   }
   //int commentmewhendone;
   //static int problemCounter = 0;

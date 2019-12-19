@@ -185,10 +185,10 @@ void charSSAlgMod<coefficient>::MakeFromWeight(
 ) {
   this->MakeZero();
   if (inputWeightSimpleCoords.size != inputOwner->GetRank()) {
-    crash << "This is a programming error: attempting to create a character from highest weight in simple coords "
+    global.fatal << "This is a programming error: attempting to create a character from highest weight in simple coords "
     << inputWeightSimpleCoords.ToString() << "("
     << inputWeightSimpleCoords.size << " coordinates) while the owner semisimple "
-    << " Lie algebra is of rank " << (inputOwner->GetRank()) << crash;
+    << " Lie algebra is of rank " << (inputOwner->GetRank()) << global.fatal;
   }
   Weight<coefficient> theMon;
   theMon.owner = inputOwner;
@@ -338,8 +338,8 @@ Vector<coefficient> ElementSemisimpleLieAlgebra<coefficient>::GetCartanPart() co
   int numPosRoots = owner->GetNumPosRoots();
   result.MakeZero(theRank);
   if (theRank <= 0 || owner == nullptr) {
-    crash << "This is a programming error: the owner of "
-    << "a semisimple Lie algebra element is non-present or corrupted. " << crash;
+    global.fatal << "This is a programming error: the owner of "
+    << "a semisimple Lie algebra element is non-present or corrupted. " << global.fatal;
   }
   for (int i = 0; i < theRank; i ++) {
     tempGen.MakeGenerator(*owner, i + numPosRoots);
@@ -489,8 +489,8 @@ std::string charSSAlgMod<coefficient>::operator*=(const charSSAlgMod& other) {
 template <class coefficient>
 std::string charSSAlgMod<coefficient>::MultiplyBy(const charSSAlgMod& other) {
   if (this->GetOwner() != other.GetOwner() || this->GetOwner() == 0) {
-    crash << "This is a programming error: attempting to multiply characters of "
-    << "different or non-initialized semisimple Lie algebras." << crash;
+    global.fatal << "This is a programming error: attempting to multiply characters of "
+    << "different or non-initialized semisimple Lie algebras." << global.fatal;
   }
   this->SetExpectedSize(other.size() + this->size());
   charSSAlgMod result, summand;

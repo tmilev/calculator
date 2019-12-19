@@ -46,8 +46,8 @@ bool FiniteGroup<elementSomeGroup>::ComputeAllElementsLargeGroup(bool andWords, 
   MacroRegisterFunctionWithName("Subgroup::ComputeAllElements");
   this->InitGenerators();
   if (this->generators.size == 0) {
-    crash << "Groups with zero generators are not allowed: if you wanted to create a trivial group, "
-    << " trivial groups are assumed to have a generator (the identity). " << crash;
+    global.fatal << "Groups with zero generators are not allowed: if you wanted to create a trivial group, "
+    << " trivial groups are assumed to have a generator (the identity). " << global.fatal;
   }
   this->theElements.Clear();
   elementSomeGroup currentElement;
@@ -255,10 +255,10 @@ void SubgroupData<someGroup, elementSomeGroup>::MakeTranslatableWordsSubgroup(
 template <class someGroup, class elementSomeGroup>
 bool SubgroupData<someGroup, elementSomeGroup>::CheckInitialization() {
   if (this == 0) {
-    crash << "A subgroup has the ``this'' pointer equal to zero. " << crash;
+    global.fatal << "A subgroup has the ``this'' pointer equal to zero. " << global.fatal;
   }
   if (this->theGroup == 0) {
-    crash << "This is a programming error: subgroup not initialized when it should be" << crash;
+    global.fatal << "This is a programming error: subgroup not initialized when it should be" << global.fatal;
   }
   return true;
 }
@@ -329,7 +329,7 @@ coefficient FiniteGroup<elementSomeGroup>::GetHermitianProduct(
   for (int i = 0; i < X1.size; i ++) {
     acc += MathRoutines::ComplexConjugate(X1[i]) * X2[i] * this->conjugacyClasseS[i].size;
     if (this->conjugacyClasseS[i].size == 0) {
-      crash << "Error: conjugacy class size is zero." << crash;
+      global.fatal << "Error: conjugacy class size is zero." << global.fatal;
     }
   }
   return acc / this->GetSize();
@@ -338,7 +338,7 @@ coefficient FiniteGroup<elementSomeGroup>::GetHermitianProduct(
 template <class elementSomeGroup>
 int FiniteGroup<elementSomeGroup>::ConjugacyClassCount() const {
   if (!this->flagCCRepresentativesComputed) {
-    crash << "Requesting conjugacy class count but conjugacy class representatives are not computed." << crash;
+    global.fatal << "Requesting conjugacy class count but conjugacy class representatives are not computed." << global.fatal;
   }
   return this->conjugacyClasseS.size;
 }
@@ -348,10 +348,10 @@ void SubgroupData<someGroup, elementSomeGroup>::ComputeCCRepresentativesPreimage
   MacroRegisterFunctionWithName("Subgroup::ComputeCCRepresentativesPreimages");
   this->ccRepresentativesPreimages.SetSize(this->theSubgroup->ConjugacyClassCount());
   if (this->theSubgroup->generators.size == 0) {
-    crash << "At this computation the group must have initialized generators. " << crash;
+    global.fatal << "At this computation the group must have initialized generators. " << global.fatal;
   }
   if (this->theGroup->generators.size == 0) {
-    crash << "Parent group must have initialized generators. " << crash;
+    global.fatal << "Parent group must have initialized generators. " << global.fatal;
   }
   for (int i = 0; i < this->theSubgroup->conjugacyClasseS.size; i ++) {
     elementSomeGroup& scr = this->theSubgroup->conjugacyClasseS[i].representative;
@@ -365,8 +365,8 @@ void SubgroupData<someGroup, elementSomeGroup>::ComputeCCRepresentativesPreimage
       }
     }
     if (notFound) {
-      crash << "Programming error: couldn't find preimage "
-      << "of the subgroup conjugacy class representative " << scr << crash;
+      global.fatal << "Programming error: couldn't find preimage "
+      << "of the subgroup conjugacy class representative " << scr << global.fatal;
     }
   }
 }
@@ -459,8 +459,8 @@ template <class elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::CheckInitialization() const {
   this->CheckConsistency();
   if (this->generators.size == 0) {
-    crash << "Error: group has 0 generators, which is not allowed. If you want to use the trivial "
-    << "group, you are still supposed to put the identity element in the group generators. " << crash;
+    global.fatal << "Error: group has 0 generators, which is not allowed. If you want to use the trivial "
+    << "group, you are still supposed to put the identity element in the group generators. " << global.fatal;
   }
   return true;
 }
@@ -475,17 +475,17 @@ bool FiniteGroup<elementSomeGroup>::CheckOrthogonalityCharTable() {
       Rational theScalarProd = this->GetHermitianProduct(leftChar.data, rightChar.data);
       if (j != i) {
         if (theScalarProd != 0) {
-          crash << "Error: the character table is not orthonormal: char number " << i + 1 << " = "
+          global.fatal << "Error: the character table is not orthonormal: char number " << i + 1 << " = "
           << leftChar.ToString() << " is not orthogonal to char number "
           << j+ 1 << " = " << rightChar.ToString() << ". <br>The entire char table is: "
-          << this->PrettyPrintCharacterTable() << crash;
+          << this->PrettyPrintCharacterTable() << global.fatal;
         }
       }
       if (j == i) {
         if (theScalarProd != 1) {
-          crash << "Error: the character table is not orthonormal: char number " << i + 1 << " = "
+          global.fatal << "Error: the character table is not orthonormal: char number " << i + 1 << " = "
           << leftChar.ToString() << " is not of norm 1. "
-          << "<br>The entire char table is: " << this->PrettyPrintCharacterTable() << crash;
+          << "<br>The entire char table is: " << this->PrettyPrintCharacterTable() << global.fatal;
         }
       }
     }
@@ -529,8 +529,8 @@ void FiniteGroup<elementSomeGroup>::ComputeCCSizeOrCCFromRepresentative(
     inputOutputClass.size ++;
     if (storeCC) {
       if (inputOutputClass.theElements.Contains(theOrbitIterator.GetCurrentElement())) {
-        crash << " !element " << theOrbitIterator.GetCurrentElement().ToString()
-        << " already contained !" << crash;
+        global.fatal << " !element " << theOrbitIterator.GetCurrentElement().ToString()
+        << " already contained !" << global.fatal;
       }
       inputOutputClass.theElements.AddOnTop(theOrbitIterator.GetCurrentElement());
     }
@@ -545,21 +545,21 @@ bool FiniteGroup<elementSomeGroup>::CheckConjugacyClassRepsMatchCCsizes() {
     LargeInteger oldCCsize = this->conjugacyClasseS[i].size;
     this->ComputeCCSizeOrCCFromRepresentative(this->conjugacyClasseS[i], true);
     if (oldCCsize != this->conjugacyClasseS[i].size) {
-      crash << "The precomputed size " << oldCCsize.ToString()
+      global.fatal << "The precomputed size " << oldCCsize.ToString()
       << " of the class represented by " << this->conjugacyClasseS[i].representative.ToString()
       << " doesn't match actual class size which is: " << this->conjugacyClasseS[i].size.ToString()
-      << crash;
+      << global.fatal;
     }
     computedSize += oldCCsize;
   }
   if (computedSize != this->sizePrivate) {
-    crash << "Computed size " << computedSize.ToString() << " is different from recorded size "
-    << sizePrivate.ToString() << crash;
+    global.fatal << "Computed size " << computedSize.ToString() << " is different from recorded size "
+    << sizePrivate.ToString() << global.fatal;
   }
   if (this->SizeByFormulaOrNeg1() > 0) {
     if (computedSize != this->SizeByFormulaOrNeg1()) {
-      crash << "Computed size is different from size dicated by formula which is: "
-      << this->SizeByFormulaOrNeg1().ToString() << crash;
+      global.fatal << "Computed size is different from size dicated by formula which is: "
+      << this->SizeByFormulaOrNeg1().ToString() << global.fatal;
     }
   }
   return true;
@@ -613,8 +613,8 @@ bool FiniteGroup<elementSomeGroup>::ComputeCCRepresentatives() {
   }
   if (groupSizeByFla > 0) {
     if (this->sizePrivate != groupSizeByFla) {
-      crash << "Something went very wrong: number of elements "
-      << "generated is not equal to group size by formula. " << crash;
+      global.fatal << "Something went very wrong: number of elements "
+      << "generated is not equal to group size by formula. " << global.fatal;
     }
   }
   return true;
@@ -657,7 +657,7 @@ void FiniteGroup<elementSomeGroup>::ComputeCCSizesAndRepresentativesWithOrbitIte
   static int recursionCount = 0;
   recursionCount ++;
   if (recursionCount > 100) {
-    crash << "Recursion too deep: something is very wrong. " << crash;
+    global.fatal << "Recursion too deep: something is very wrong. " << global.fatal;
   }
   std::cout << "got to here!\n";
   this->RegisterCCclass(currentElt, false);
@@ -752,8 +752,8 @@ LargeInteger WeylGroupData::GetOrbitSize(Vector<coefficient>& theWeight) {
   resultRat /= theStabilizerDynkinType.GetWeylGroupSizeByFormula();
   LargeInteger result;
   if (!resultRat.IsInteger(&result)) {
-    crash << "Something has gone very wrong: orbit size reported to be " << resultRat.ToString()
-    << " which is non-integer!" << crash;
+    global.fatal << "Something has gone very wrong: orbit size reported to be " << resultRat.ToString()
+    << " which is non-integer!" << global.fatal;
   }
   bool doDebug = true;
   if (doDebug) {
@@ -761,8 +761,8 @@ LargeInteger WeylGroupData::GetOrbitSize(Vector<coefficient>& theWeight) {
       HashedList<Vector<coefficient> > comparisonOrbit;
       this->GenerateOrbit(theWeight, false, comparisonOrbit, false, - 1, 0, - 1);
       if (result != comparisonOrbit.size) {
-        crash << "Actual orbit of " << theWeight.ToString() << " has size " << comparisonOrbit.size << " but I computed "
-        << " the orbit size to be " << result.ToString() << ". This may be a mathematical error. " << crash;
+        global.fatal << "Actual orbit of " << theWeight.ToString() << " has size " << comparisonOrbit.size << " but I computed "
+        << " the orbit size to be " << result.ToString() << ". This may be a mathematical error. " << global.fatal;
       }
     }
   }
@@ -986,9 +986,9 @@ void WeylGroupData::SimpleReflectionMinusRhoModified(int index, Vector<coefficie
 template <class coefficient>
 void WeylGroupData::SimpleReflection(int index, Vector<coefficient>& theVector) const {
   if (index < 0 || index >= this->CartanSymmetric.NumCols) {
-    crash << "This is a programming error: simple reflection with respect to index "
+    global.fatal << "This is a programming error: simple reflection with respect to index "
     << index + 1 << " in a Weyl group of rank "
-    << this->GetDim() << crash;
+    << this->GetDim() << global.fatal;
   }
   coefficient alphaShift, tempRat;
   alphaShift = 0;
@@ -1159,10 +1159,10 @@ bool WeylGroupData::FreudenthalEval(
     BufferCoeff = hwPlusRhoSquared;
     BufferCoeff -= this->RootScalarCartanRoot(convertor, convertor);
     if (BufferCoeff == 0) {
-      crash << "This is a programming or a mathematical error. "
+      global.fatal << "This is a programming or a mathematical error. "
       << "I get that the denominator in the Freundenthal formula is zero. "
       << " The highest weight is " << inputHWfundamentalCoords.ToString()
-      << ". The Weyl group details follow. " << this->ToString() << crash;
+      << ". The Weyl group details follow. " << this->ToString() << global.fatal;
     }
     currentAccum /= BufferCoeff;
     std::stringstream out;
@@ -1291,8 +1291,8 @@ void WeylGroupData::ReflectBetaWRTAlpha(
 template <typename somegroup, typename coefficient>
 bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::CheckInitialization() const {
   if (this->ownerGroup == 0) {
-    crash << "This is a programming error: working with a representation "
-    << "with non-initialized owner Weyl group. " << crash;
+    global.fatal << "This is a programming error: working with a representation "
+    << "with non-initialized owner Weyl group. " << global.fatal;
     return false;
   }
   return true;
@@ -1551,7 +1551,7 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::A
   Vector<coefficient>& output
 ) const {
   if (&input == &output) {
-    crash << "Input not allowed to coincide with output. " << crash;
+    global.fatal << "Input not allowed to coincide with output. " << global.fatal;
   }
   Vector<coefficient> tempRoot, tempRoot2;
   output = input;
@@ -1834,7 +1834,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::F
     );
     //bufferCoeff now holds the denominator participating in the Freudenthal formula.
     if (bufferCoeff.IsEqualToZero()) {
-      crash << "Coefficient must not be zero at this point. " << crash;
+      global.fatal << "Coefficient must not be zero at this point. " << global.fatal;
     }
     currentAccum /= bufferCoeff;
     std::stringstream out;
@@ -1972,10 +1972,10 @@ bool SubgroupData<someGroup, elementSomeGroup>::VerifyCosets() {
     for (int cs = 0; cs < this->cosets.size; cs ++) {
       auto g = cosets[cs].representative * this->theSubgroup->generators[i];
       if (this->GetCosetId(g) != cs) {
-        crash << "Error: element " << g << " not found in coset " << cs
+        global.fatal << "Error: element " << g << " not found in coset " << cs
         << " despite being product of subgroup generator "
         << this->theSubgroup->generators[i] << " by coset representative "
-        << cosets[cs].representative << crash;
+        << cosets[cs].representative << global.fatal;
       }
     }
   }
@@ -1987,9 +1987,9 @@ bool SubgroupData<someGroup, elementSomeGroup>::VerifyCosets() {
         auto g2 = this->theGroup->theElements[this->cosets[cs].supergroupIndices[i]];
         auto g3 = g * g2;
         if (!this->theSubgroup->HasElement(g3)) {
-          crash << "Error: coset " << cs << " has representative " << this->cosets[cs].representative
+          global.fatal << "Error: coset " << cs << " has representative " << this->cosets[cs].representative
           << "; a putative coset element has " << g << " * " << g2 << " = " << g3
-          << " which is not in the subgroup" << crash;
+          << " which is not in the subgroup" << global.fatal;
         }
       }
     }
@@ -2046,7 +2046,7 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsTodorsVersi
   MacroRegisterFunctionWithName("FiniteGroup::ComputeIrreducibleRepresentationsTodorsVersion");
   if (this->irreps_grcam.size == 0) {
     if (this->irreps.size == 0) {
-      crash << "Need an initial irrep.  Check up the call chain and find out where it should be provided" << crash;
+      global.fatal << "Need an initial irrep.  Check up the call chain and find out where it should be provided" << global.fatal;
     }
     for (int i = 0; i < this->irreps.size; i ++) {
       this->irreps_grcam.AddOnTop(irreps[i].MakeGRCAM());
@@ -2090,7 +2090,7 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsTodorsVersi
       newRep *= appendOnlyIrrepsList[i];
       bool tempB = newRep.DecomposeTodorsVersion(decompositionNewRep, &appendOnlyIrrepsList);
       if (!tempB) {
-        crash << "This is a mathematical error: failed to decompose " << newRep.theCharacteR.ToString() << ". " << crash;
+        global.fatal << "This is a mathematical error: failed to decompose " << newRep.theCharacteR.ToString() << ". " << global.fatal;
       }
     }
   }
@@ -2110,10 +2110,10 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsTodorsVersi
   this->flagCharTableIsComputed = true;
   this->flagIrrepsAreComputed = true;
   if (this->characterTable.size < this->conjugacyClasseS.size) {
-    crash << "Character table size does not equal the number of conjugacy classes. " << crash;
+    global.fatal << "Character table size does not equal the number of conjugacy classes. " << global.fatal;
   }
   if (this->irreps.size < this->conjugacyClasseS.size) {
-    crash << "Bad number of irreducible representations. " << crash;
+    global.fatal << "Bad number of irreducible representations. " << global.fatal;
   }
 }
 
@@ -2170,9 +2170,9 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
   this->GetCharacter();
   coefficient SumOfNumComponentsSquared = this->GetNumberOfComponents();
   if (SumOfNumComponentsSquared == 0) {
-    crash << "This is a programming error: a module has character " << this->theCharacteR.ToString()
+    global.fatal << "This is a programming error: a module has character " << this->theCharacteR.ToString()
     << " of zero length, which is impossible. " << "Here is a printout of the module. "
-    << this->ToString() << crash;
+    << this->ToString() << global.fatal;
   }
   if (SumOfNumComponentsSquared == 1) {
     int i = this->ownerGroup->characterTable.BSGetIndex(this->theCharacteR);
@@ -2239,14 +2239,14 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
       }
       remainingVectorSpace = tempSpace;
       if (remainingCharacter[0] != remainingVectorSpace.size) {
-        crash << "<br>This is a programming error: remaining char " << remainingCharacter.ToString() << " indicates dimension "
+        global.fatal << "<br>This is a programming error: remaining char " << remainingCharacter.ToString() << " indicates dimension "
         << remainingCharacter[0].ToString()
-        << " but remaining vector space has dim " << remainingVectorSpace.size << crash;
+        << " but remaining vector space has dim " << remainingVectorSpace.size << global.fatal;
       }
       if (remainingCharacter.IsEqualToZero()) {
         if (remainingVectorSpace.size != 0) {
-          crash << "This is a programming error: remaining char is zero but remaining space is " << remainingVectorSpace.ToString()
-          << ". Starting char: " << this->theCharacteR.ToString() << crash;
+          global.fatal << "This is a programming error: remaining char is zero but remaining space is " << remainingVectorSpace.ToString()
+          << ". Starting char: " << this->theCharacteR.ToString() << global.fatal;
         }
       }
     }
@@ -2268,8 +2268,8 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
     this->GetClassFunctionMatrix(virtualChar, splittingOperatorMatrix);
     bool tempB = splittingOperatorMatrix.GetEigenspacesProvidedAllAreIntegralWithEigenValueSmallerThanDim(theSubRepsBasis);
     if (!tempB) {
-      crash << "<br>This is a mathematical or programming mistake: "
-      << "splittingOperatorMatrix should have small integral values, which it doesn't!" << crash;
+      global.fatal << "<br>This is a mathematical or programming mistake: "
+      << "splittingOperatorMatrix should have small integral values, which it doesn't!" << global.fatal;
     }
     GroupRepresentationCarriesAllMatrices<somegroup, coefficient> newRep;
     if (theSubRepsBasis.size > 1) {
@@ -2289,7 +2289,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
   average.MakeZero(this->GetDim());
   for (int i = 0; i < this->theElementImageS.size; i ++) {
     if (!this->theElementIsComputed[i]) {
-      crash << "<hr>This is a programming error: an internal check failed. " << crash;
+      global.fatal << "<hr>This is a programming error: an internal check failed. " << global.fatal;
     }
     this->theElementImageS[i].ActOnVectorColumn(startingVector, tempV);
     average += tempV;
@@ -2329,8 +2329,8 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsThomasVersi
       }
     }
     if (!startingIrrep || (startingIrrep->generatorS.size > 0 && startingIrrep->generatorS[0].NumRows == 1)) {
-      crash << "Can't find a good starting irrep.  If you think you provided one, change the present assertion. "
-      << crash;
+      global.fatal << "Can't find a good starting irrep.  If you think you provided one, change the present assertion. "
+      << global.fatal;
     }
   }
   GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational>& sr = *startingIrrep;
@@ -2406,9 +2406,9 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentations() {
   } else if (this->irreps_grcam.size != 0 || this->irreps.size != 0) {
     this->ComputeIrreducibleRepresentationsTodorsVersion();
   } else {
-    crash << "FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentations: "
+    global.fatal << "FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentations: "
     << "We must have either a formula to generate the irreps, "
-    << "or a list of irreps with everything in their tensor products. " << crash;
+    << "or a list of irreps with everything in their tensor products. " << global.fatal;
   }
 }
 

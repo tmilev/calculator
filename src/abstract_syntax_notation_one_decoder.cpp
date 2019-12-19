@@ -53,14 +53,13 @@ AbstractSyntaxNotationOneSubsetDecoder::~AbstractSyntaxNotationOneSubsetDecoder(
 
 bool AbstractSyntaxNotationOneSubsetDecoder::CheckInitialization() const {
   if (this->decodedData == nullptr) {
-    crash << "Uninitialized ASN1 output json. " << crash;
+    global.fatal << "Uninitialized ASN1 output json. " << global.fatal;
   }
   if (this->rawDatA == nullptr) {
-    crash << "Uninitialized ASN1 raw data. " << crash;
+    global.fatal << "Uninitialized ASN1 raw data. " << global.fatal;
   }
   return true;
 }
-
 
 bool AbstractSyntaxNotationOneSubsetDecoder::DecodeLengthIncrementDataPointer(
   ASNElement& output
@@ -147,8 +146,8 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeSequenceLikeContent(
       return false;
     }
     if (lastPointer >= this->dataPointer) {
-      crash << "Programming error: decode current "
-      << "did not increment the data pointer. " << crash;
+      global.fatal << "Programming error: decode current "
+      << "did not increment the data pointer. " << global.fatal;
     }
     output.theElements.AddOnTop(nextElement);
     numberOfDecoded ++;
@@ -643,7 +642,7 @@ bool ASNElement::isIntegerUnsigned(
   }
   LargeInteger result;
   if (!this->isInteger(&result, commentsOnFalse)) {
-    crash << "ASNElement must be an integer at this point. " << crash;
+    global.fatal << "ASNElement must be an integer at this point. " << global.fatal;
   }
   *whichInteger = result.value;
   return true;
@@ -1027,7 +1026,7 @@ void ASNObject::initializeAddSample(
   if (!Crypto::ConvertHexToListUnsignedChar(
     inputObjectIdHex, incoming.objectId.ASNAtom, &commentsOnFailure
   )) {
-    crash << "Failure in certificate field initialization is not allowed. " << crash;
+    global.fatal << "Failure in certificate field initialization is not allowed. " << global.fatal;
   }
   container.SetKeyValue(incoming.name, incoming);
 }
@@ -1172,7 +1171,7 @@ int ASNObject::LoadField(
   const MapList<std::string, ASNObject, MathRoutines::HashString>& inputFields, const std::string& fieldName
 ) {
   if (!ASNObject::NamesToObjectIdsNonThreadSafe().Contains(fieldName)) {
-    crash << "Field " << fieldName << " is hard-coded but is yet unknown. " << crash;
+    global.fatal << "Field " << fieldName << " is hard-coded but is yet unknown. " << global.fatal;
   }
   if (!inputFields.Contains(fieldName)) {
     this->name = fieldName;
@@ -1647,7 +1646,7 @@ void PrivateKeyRSA::SignBytesPadPKCS1(
   this->HashAndPadPKCS1(input, hash, inputHashedPadded);
   ElementZmodP theElement, theOne;
   if (this->thePublicKey.theModulus.IsEqualToZero()) {
-    crash << "Public key modulus is zero. " << crash;
+    global.fatal << "Public key modulus is zero. " << global.fatal;
   }
   theElement.theModulus = this->thePublicKey.theModulus;
   theOne.MakeOne(this->thePublicKey.theModulus);
@@ -1732,7 +1731,7 @@ void PrivateKeyRSA::HashAndPadPKCS1(
     hashObject = ASNObject::NamesToObjectIdsNonThreadSafe().GetValueConstCrashIfNotPresent(ASNObject::names::sha256);
     break;
   default:
-    crash << "Non-allowed or non-implemented value for the hash algorithm. " << crash;
+    global.fatal << "Non-allowed or non-implemented value for the hash algorithm. " << global.fatal;
   }
   encoder.theElements[1].MakeOctetString(inputHashed);
   hashObject.ComputeASN(encoder.theElements[0]);

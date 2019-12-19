@@ -39,7 +39,7 @@ Database::User::User() {
 
 bool Database::CheckInitialization() {
   if (!this->flagInitializedServer) {
-    crash << "Database not initialized at a place it should be. " << crash;
+    global.fatal << "Database not initialized at a place it should be. " << global.fatal;
   }
   return true;
 }
@@ -51,7 +51,7 @@ bool Database::Mongo::initialize() {
   }
   global << logger::blue << "Initializing mongoDB. " << logger::endL;
   if (!global.flagServerForkedIntoWorker) {
-    crash << "MongoDB not allowed to run before server fork. " << crash;
+    global.fatal << "MongoDB not allowed to run before server fork. " << global.fatal;
   }
   this->flagInitialized = true;
   mongoc_init();
@@ -101,7 +101,7 @@ public:
 
 MongoCollection::MongoCollection(const std::string& collectionName) {
   if (!Database::get().mongoDB.initialize()) {
-    crash << "Mongo DB not initialized when it should be" << crash;
+    global.fatal << "Mongo DB not initialized when it should be" << global.fatal;
     return;
   }
   this->name = collectionName;
@@ -154,7 +154,7 @@ public:
 
 MongoQuery::MongoQuery() {
   if (!Database::get().mongoDB.initialize()) {
-    crash << "Mongo DB did not start correctly. " << crash;
+    global.fatal << "Mongo DB did not start correctly. " << global.fatal;
   }
   this->query = nullptr;
   this->command = nullptr;
@@ -201,7 +201,7 @@ bool MongoQuery::RemoveOne(std::stringstream* commentsOnFailure) {
   }
   MongoCollection theCollection(this->collectionName);
   if (this->query != nullptr) {
-    crash << "At this point of code, query is supposed to be 0. " << crash;
+    global.fatal << "At this point of code, query is supposed to be 0. " << global.fatal;
   }
   this->query = bson_new_from_json(
     reinterpret_cast<const uint8_t*>(this->findQuery.c_str()),
@@ -240,7 +240,7 @@ bool MongoQuery::InsertOne(const JSData& incoming, std::stringstream* commentsOn
   }
   MongoCollection theCollection(this->collectionName);
   if (this->query != nullptr) {
-    crash << "At this point of code, query is supposed to be 0. " << crash;
+    global.fatal << "At this point of code, query is supposed to be 0. " << global.fatal;
   }
   std::string incomingJSONString = incoming.ToString(true, false);
   this->update = bson_new_from_json(
@@ -285,7 +285,7 @@ bool MongoQuery::UpdateOne(std::stringstream* commentsOnFailure, bool doUpsert) 
 //  global << "DEBUG: Update: " << this->findQuery << " to: "
 //  << this->updateQuery << " inside: " << this->collectionName << logger::endL;
   if (this->query != nullptr) {
-    crash << "At this point of code, query is supposed to be 0. " << crash;
+    global.fatal << "At this point of code, query is supposed to be 0. " << global.fatal;
   }
   this->query = bson_new_from_json(
     reinterpret_cast<const uint8_t*>( this->findQuery.c_str()),
@@ -358,7 +358,7 @@ bool MongoQuery::FindMultiple(
     << "Query: " << this->findQuery << ". Options: " << inputOptions.ToString(false, false);
   }
   if (this->query != nullptr) {
-    crash << "At this point of code, query is supposed to be 0. " << crash;
+    global.fatal << "At this point of code, query is supposed to be 0. " << global.fatal;
   }
   this->query = bson_new_from_json(
     reinterpret_cast<const uint8_t*>(this->findQuery.c_str()),

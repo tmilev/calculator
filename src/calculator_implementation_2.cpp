@@ -16,7 +16,7 @@ JSData Calculator::FunctionHandlersJSON() {
     currentFunctionListDirect.theType = JSData::token::tokenArray;
     currentFunctionListComposite.theType = JSData::token::tokenArray;
     if (currentAtomIndex >= this->FunctionHandlers.size) {
-      crash << "This shouldn't happen: bad atom index. " << crash;
+      global.fatal << "This shouldn't happen: bad atom index. " << global.fatal;
     }
     if (this->FunctionHandlers[currentAtomIndex].size > 0) {
       for (int j = 0; j < this->FunctionHandlers[currentAtomIndex].size; j ++) {
@@ -199,12 +199,12 @@ bool Calculator::ExpressionMatchesPattern(
   RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////
   if (!(thePattern.owner == this && input.owner == this)) {
-    crash << "This is a programming error. "
+    global.fatal << "This is a programming error. "
     << "Either a pattern or an input has a wrongly  initialized owner: the pattern is "
     << thePattern.ToString() << " and the input is "
     << input.ToString() << ". The error is certainly in the preceding code; here "
     << "is a stack trace, however beware that the error might be in code preceding the stack loading. "
-    << crash;
+    << global.fatal;
   }
   if (commentsGeneral!= nullptr) {
     *commentsGeneral << " <hr> current input: " << input.ToString() << "<br>current pattern: " << thePattern.ToString();
@@ -270,7 +270,7 @@ bool Calculator::ExpressionMatchesPattern(
 
 void StateMaintainerCalculator::AddRule(const Expression& theRule) {
   if (this->owner == nullptr) {
-    crash << "StackMaintainerCalculator has zero owner. " << crash;
+    global.fatal << "StackMaintainerCalculator has zero owner. " << global.fatal;
   }
   this->owner->RuleStack.AddChildOnTop(theRule);
   std::string currentRule;
@@ -662,12 +662,12 @@ bool Calculator::EvaluateExpression(
         theCommands.ExpressionHistoryAdd(output, - 1);
       } else {
         if (historyStackSizeAtStart > theRuleStackMaintainer.GetCurrentHistory().size()) {
-          crash << "Error: we have historyStackSizeAtStart = " << historyStackSizeAtStart
+          global.fatal << "Error: we have historyStackSizeAtStart = " << historyStackSizeAtStart
           << " yet the expression history has size: "
           << theRuleStackMaintainer.GetCurrentHistory().size()
           << "<br>Expression history so far: "
           << theRuleStackMaintainer.GetCurrentHistory().ToString()
-          << crash;
+          << global.fatal;
         }
         theRuleStackMaintainer.GetCurrentHistory().children.SetSize(historyStackSizeAtStart);
       }
@@ -897,9 +897,9 @@ void Calculator::EvaluateCommands() {
   }
   this->EvaluateExpression(*this, this->theProgramExpression, this->theProgramExpression);
   if (this->RecursionDeptH != 0) {
-    crash << "This is a programming error: the starting recursion "
+    global.fatal << "This is a programming error: the starting recursion "
     << "depth before evaluation was 0, but after evaluation it is "
-    << this->RecursionDeptH << "." << crash;
+    << this->RecursionDeptH << "." << global.fatal;
   }
   global.theDefaultFormat.GetElement().flagMakingExpressionTableWithLatex = true;
   global.theDefaultFormat.GetElement().flagUseLatex = true;

@@ -61,7 +61,7 @@ void Partition::FromListInt(const List<int> &in, int lastElement) {
   bool needsSorting = false;
   for (; i <lastElement; i ++) {
     if (in[i] < 0) {
-      crash << "Partitions should not have negative numbers in them. " << crash;
+      global.fatal << "Partitions should not have negative numbers in them. " << global.fatal;
     }
     if ((in[i] > l) && (l != - 1)) {
       needsSorting = true;
@@ -150,8 +150,8 @@ void Partition::Transpose() {
 
 void Partition::FillTableau(Tableau& out, List<int>& stuffing) const {
   if (stuffing.size < this->n) {
-    crash << "need at least " << this->n << " things to stuff tableau with partition "
-    << *this << " but you provided only " << stuffing.size << '\n' << crash;
+    global.fatal << "need at least " << this->n << " things to stuff tableau with partition "
+    << *this << " but you provided only " << stuffing.size << '\n' << global.fatal;
   }
   out.t.SetSize(this->p.size);
   int cur = 0;
@@ -211,7 +211,7 @@ void Partition::TestAllSpechtModules(int n) {
       Rational det = repgens[ri].GetDeterminant();
       global.Comments << " determinant is " << det << "\n\n";
       if ((det != 1) && (det != - 1)) {
-        crash << "invalid determinant" << crash;
+        global.fatal << "invalid determinant" << global.fatal;
       }
     }
     std::cout << "got to here7\n";
@@ -224,7 +224,7 @@ void Partition::TestAllSpechtModules(int n) {
     std::cout << "got to here11\n";
     if (outg.theElements.size != 0) {
       if ((fac % outg.theElements.size) != 0) {
-        crash << "invalid elements count" << crash;
+        global.fatal << "invalid elements count" << global.fatal;
       }
     }
   }
@@ -830,7 +830,7 @@ void PermutationGroupData::MakeSymmetricGroupGeneratorsjjPlus1(int n) {
 LargeInteger PermutationGroupData::GetSizeByFormulaImplementation(FiniteGroup<PermutationR2>& G) {
   PermutationGroupData* PD = static_cast<PermutationGroupData*>(G.specificDataPointer);
   if (!PD || !PD->flagIsSymmetricGroup) {
-    crash << "This method should not have been called. " << crash;
+    global.fatal << "This method should not have been called. " << global.fatal;
     // control reaches end of non-void function
     return - 1;
   }
@@ -840,7 +840,7 @@ LargeInteger PermutationGroupData::GetSizeByFormulaImplementation(FiniteGroup<Pe
 void PermutationGroupData::ComputeCCSizesAndRepresentativesByFormulaImplementation(FiniteGroup<PermutationR2>& G) {
   PermutationGroupData* PD = static_cast<PermutationGroupData*>(G.specificDataPointer);
   if (!PD || !PD->flagIsSymmetricGroup) {
-    crash << "This should not have been called. " << crash;
+    global.fatal << "This should not have been called. " << global.fatal;
   }
   G.flagCCsComputed = true;
   G.flagCCRepresentativesComputed = true;
@@ -913,12 +913,12 @@ bool NeedRankAdjustment(const ElementHyperoctahedralGroup& left, const ElementHy
     return true;
   else
     if (left.s.size != theRank)
-      crash << "Change here and maybe elsewhere if you want to do stuff with multiple ranks of ElementHyperoctahedralGroup" << crash;
+      global.fatal << "Change here and maybe elsewhere if you want to do stuff with multiple ranks of ElementHyperoctahedralGroup" << global.fatal;
   if (right.s.size == 0)
     return true;
   else
     if (right.s.size != theRank)
-      crash << "Change here and maybe elsewhere if you want to do stuff with multiple ranks of ElementHyperoctahedralGroup" << crash;
+      global.fatal << "Change here and maybe elsewhere if you want to do stuff with multiple ranks of ElementHyperoctahedralGroup" << global.fatal;
   return false;
 }
 
@@ -1190,7 +1190,7 @@ void HyperoctahedralGroup::SpechtModuleOfPartititons(const Partition &positive, 
   ids << negative << ", " << positive;
   out.identifyingString = ids.str();
   if (!out.VerifyRepresentation())
-    crash << crash;
+    global.fatal << global.fatal;
 }
 
 void HyperoctahedralGroup::SpechtModuleOfPartititons(const Partition &positive, const Partition &negative,
@@ -1233,7 +1233,7 @@ void HyperoctahedralGroup::SpechtModuleOfPartititons(const Partition &positive, 
       pxmr.generatorS[cur+ i] *= - 1;
     }
   if (!pxmr.VerifyRepresentation())
-    crash << "lol" << crash;
+    global.fatal << "lol" << global.fatal;
   auto outreboxme = PxM.InduceRepresentation(pxmr);
   out.ownerGroup = this;
   out.generatorS = outreboxme.generatorS;
@@ -1241,7 +1241,7 @@ void HyperoctahedralGroup::SpechtModuleOfPartititons(const Partition &positive, 
   ids << negative << ", " << positive;
   out.identifyingString = ids.str();
   if (!out.VerifyRepresentation())
-    crash << crash;
+    global.fatal << global.fatal;
 }*/
 
 void HyperoctahedralGroupData::SpechtModuleOfPartititons(
@@ -1280,7 +1280,7 @@ void HyperoctahedralGroupData::SpechtModuleOfPartititons(
     }
   }
   if (!pxmr.VerifyRepresentation()) {
-    crash << "Representation not verified. " << crash;
+    global.fatal << "Representation not verified. " << global.fatal;
   }
   out = PxM.InduceRepresentation(pxmr);
   out.ownerGroup = this->theGroup;
@@ -1288,7 +1288,7 @@ void HyperoctahedralGroupData::SpechtModuleOfPartititons(
   ids << negative << ", " << positive;
   out.identifyingString = ids.str();
   if (!out.VerifyRepresentation()) {
-    crash << "Representation not verified at the end. " << crash;
+    global.fatal << "Representation not verified at the end. " << global.fatal;
   }
 }
 
@@ -1356,7 +1356,7 @@ void HyperoctahedralGroup::SomeModuleOfPartititons(const Partition& positive, co
   out.identifyingString = ids.str();
   out.ownerGroup = this;
   if (!out.VerifyRepresentation())
-    crash << crash;
+    global.fatal << global.fatal;
 }
 
 void HyperoctahedralGroup::AllSpechtModules() {
@@ -1420,7 +1420,7 @@ LargeInteger HyperoctahedralGroupData::GetSizeByFormulaImplementation(FiniteGrou
   HyperoctahedralGroupData* HD = static_cast<HyperoctahedralGroupData*>(G.specificDataPointer);
   //global.Comments << "HyperoctahedralGroup::GetSize() called.  N =" << HD->N << '\n';
   if (!HD) {
-    crash << "Consistency error. " << crash;
+    global.fatal << "Consistency error. " << global.fatal;
   }
   if (HD->flagIsEntireHyperoctahedralGroup) {
     return MathRoutines::Factorial(HD->N) * (1 << HD->N);
@@ -1428,7 +1428,7 @@ LargeInteger HyperoctahedralGroupData::GetSizeByFormulaImplementation(FiniteGrou
   if (HD->flagIsEntireDn) {
     return MathRoutines::Factorial(HD->N) * (1 << HD->N) / 2;
   }
-  crash << "This method should not have been called. " << crash;
+  global.fatal << "This method should not have been called. " << global.fatal;
   // control reaches end of non-void function
   return - 1;
 }
@@ -1443,7 +1443,7 @@ bool HyperoctahedralGroup::GetWordByFormulaImplementation(void* GG, const Elemen
         word.AddOnTop(G->N- 1+ i);
     return true;
   }
-  crash << "This method should not have been called " << __FILE__ << ":" << __LINE__ << crash;
+  global.fatal << "This method should not have been called " << __FILE__ << ":" << __LINE__ << global.fatal;
   return true;
 }*/
 
@@ -1462,7 +1462,7 @@ bool HyperoctahedralGroupData::GetWordByFormulaImplementation(
     }
     return true;
   }
-  crash << "This method should not have been called. " << crash;
+  global.fatal << "This method should not have been called. " << global.fatal;
   return true;
 }
 
@@ -1508,7 +1508,7 @@ void HyperoctahedralGroup::ComputeCCSizesAndRepresentativesByFormulaImplementati
   //  for (int i = 0; i < this->conjugacyClasseS.size; i ++)
   //    for (int j = i + 1; j < this->conjugacyClasseS.size; j ++)
   //      if (this->AreConjugate(this->conjugacyClasseS[i].representative, this->conjugacyClasseS[j].representative))
-  //        crash << "Claimed conjugacy class representatives are actually conjugate " << __FILE__ << ":" << __LINE__ << crash;
+  //        global.fatal << "Claimed conjugacy class representatives are actually conjugate " << __FILE__ << ":" << __LINE__ << global.fatal;
 
 }
 */

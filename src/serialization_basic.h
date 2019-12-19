@@ -84,7 +84,7 @@ public:
     }
     ~WriterIntegerWithMarker() {
       if (this->flagDeallocated) {
-        crash << "Use after free of WriterUnsignedIntegerWithMarker. " << crash;
+        fatalCrash("Use after free of WriterUnsignedIntegerWithMarker. ");
       }
       this->flagDeallocated = true;
       if (this->outputMarkers == nullptr) {

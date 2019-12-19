@@ -18,10 +18,10 @@ extern WebServer theWebServer;
 void WebServer::initializeRandomBytes() {
   static bool alreadyRan = false;
   if (alreadyRan) {
-    crash << "Random bytes initialization allowed only once. " << crash;
+    global.fatal << "Random bytes initialization allowed only once. " << global.fatal;
   }
   if (global.numberOfRandomBytes > 256) {
-    crash << "The number of system random bytes must not exceed 256. " << crash;
+    global.fatal << "The number of system random bytes must not exceed 256. " << global.fatal;
   }
   List<unsigned char>& output = global.randomBytesCurrent;
   output.SetSize(static_cast<signed>(global.numberOfRandomBytes));
@@ -35,7 +35,7 @@ void WebServer::initializeRandomBytes() {
     // getrandom(output.TheObjects, static_cast<unsigned>(output.size), 0)
   );
   if (generatedBytes != output.size) {
-    crash << "Failed to get the necessary number of random bytes. " << crash;
+    global.fatal << "Failed to get the necessary number of random bytes. " << global.fatal;
   }
 }
 

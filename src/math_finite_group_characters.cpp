@@ -216,8 +216,8 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::MultiplyBy(
   }
   //////////////////////////////////
   if (this->ownerGroup != other.ownerGroup) {
-    crash << "This is a programming error: attempting to multiply "
-    << "representations with different owner groups. " << crash;
+    global.fatal << "This is a programming error: attempting to multiply "
+    << "representations with different owner groups. " << global.fatal;
   }
   output.reset(this->G);
   int Vd = this->basis[0].size;
@@ -942,7 +942,7 @@ SubgroupDataRootReflections::SubgroupDataRootReflections() {
 
 bool SubgroupDataWeylGroup::CheckInitialization() {
   if (this->theWeylData == nullptr) {
-    crash << "SubgroupDataWeylGroup: non-initialized theWeylData pointer. " << crash;
+    global.fatal << "SubgroupDataWeylGroup: non-initialized theWeylData pointer. " << global.fatal;
   }
   return true;
 }
@@ -1017,7 +1017,7 @@ void SubgroupDataWeylGroup::ComputeTauSignature() {
     //global.Comments << "<br>Hermitian product of " << Xs.ToString() << " and "
     //<< XiS.ToString() << " = " << this->tauSignature[i];
     if (!this->tauSignature[i].IsSmallInteger()) {
-      crash << " Tau signature is not integral, something is wrong. " << crash ;
+      global.fatal << " Tau signature is not integral, something is wrong. " << global.fatal ;
     }
   }
 }
@@ -1110,7 +1110,7 @@ void SubgroupDataRootReflections::MakeFromRoots(WeylGroupData& G, const Vectors<
   DynkinType verificationType;
   theDiagram.GetDynkinType(verificationType);
   if (this->theDynkinType != verificationType) {
-    crash << "Two different comptuations of the Dynkin type a set of roots did not coincide. " << crash;
+    global.fatal << "Two different comptuations of the Dynkin type a set of roots did not coincide. " << global.fatal;
   }
   this->InitGenerators();
 }
@@ -1126,7 +1126,7 @@ bool FiniteGroup<elementSomeGroup>::AreConjugate_OLD_Deprecated_Version_By_Todor
   OrbitIteratorWeylGroup theIterator;
   theIterator.init(this->generators, left, ElementWeylGroup::ConjugationAction);
   if (this->generators.size == 0) {
-    crash << "Generators not allowed to be 0. " << crash;
+    global.fatal << "Generators not allowed to be 0. " << global.fatal;
   }
   do {
     //if (left.ToString() == "s_{4}")

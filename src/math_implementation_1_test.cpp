@@ -9,16 +9,16 @@ bool LargeIntegerUnsigned::Test::SerializationToHex(const LargeIntegerUnsigned& 
   MacroRegisterFunctionWithName("LargeIntUnsigned::Test::SerializationToHex");
   std::string resultCryptoHex, resultByteSerializationHex;
   if (!Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst(input, 0, resultCryptoHex)) {
-    crash << "Function Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst is not supposed to return false. " << crash;
+    global.fatal << "Function Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst is not supposed to return false. " << global.fatal;
   }
   List<unsigned char> serialization;
   input.WriteBigEndianBytes(serialization, true);
   resultByteSerializationHex = Crypto::ConvertListUnsignedCharsToHex(serialization);
   if (resultByteSerializationHex != resultCryptoHex) {
-    crash << "Byte serialization hex: " << resultByteSerializationHex
+    global.fatal << "Byte serialization hex: " << resultByteSerializationHex
     << " not equal to crypto hex conversion: "
     << resultCryptoHex << ". "
-    << crash;
+    << global.fatal;
   }
   return true;
 }

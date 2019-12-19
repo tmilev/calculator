@@ -445,14 +445,14 @@ public:
       return true;
     }
     if (this->owner == nullptr || other.owner == nullptr) {
-      crash << "This is a programming error: comparing non-initialized Semisimple Lie Subalgebras. " << crash;
+      global.fatal << "This is a programming error: comparing non-initialized Semisimple Lie Subalgebras. " << global.fatal;
     }
     return *this->owner == *other.owner;
   }
   SemisimpleLieAlgebra& GetSSowner() const {
     if (this->owner == nullptr) {
-      crash << "This is a programming error: attempted to "
-      << "access non-initialized semisimple Lie subalgerbas. " << crash;
+      global.fatal << "This is a programming error: attempted to "
+      << "access non-initialized semisimple Lie subalgerbas. " << global.fatal;
     }
     return *this->owner;
   }

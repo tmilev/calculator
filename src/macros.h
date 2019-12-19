@@ -65,27 +65,6 @@ static ProjectInformationInstance vpfMacrosHprojectInstance(
   __FILE__, "Header, External includes + macros. Macro/build configuration."
 );
 
-class Crasher {
-  public:
-  std::stringstream crashReport;
-  std::stringstream crashReportHtml;
-  std::stringstream crashReportConsolE;
-  std::stringstream crashReportFile;
-  bool flagCrashInitiateD; //<-we crash only once, and we do not resume execution after a crash
-  bool flagFinishingCrash; //<-we crash only once, and we do not resume execution after a crash
-  Crasher();
-  void FirstRun();
-  static std::string GetStackTraceEtcErrorMessageHTML();
-  static std::string GetStackTraceEtcErrorMessageConsole();
-  Crasher& operator<<(const Crasher& dummyCrasherSignalsActualCrash);
-  template <class AnyObject>
-  Crasher& operator<<(const AnyObject& input) {
-    this->FirstRun();
-    this->crashReport << input;
-    return *this;
-  }
-};
-
 class StdoutClass {
 public:
   template <typename anyType>
@@ -122,5 +101,6 @@ public:
   }
 };
 
-extern Crasher crash;
+void fatalCrash(const std::string& input);
+
 #endif

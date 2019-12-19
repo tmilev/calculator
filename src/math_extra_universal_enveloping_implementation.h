@@ -157,7 +157,7 @@ bool ElementUniversalEnveloping<coefficient>::AdjointRepresentationAction(
   ElementUniversalEnveloping<coefficient>& output
 ) const {
   if (&input == &output) {
-    crash << "Input not allowed to coincide with output. " << crash;
+    global.fatal << "Input not allowed to coincide with output. " << global.fatal;
   }
   output.MakeZero(*this->owner);
   ElementUniversalEnveloping<coefficient> summand;
@@ -1132,7 +1132,7 @@ void ElementVermaModuleOrdered<coefficient>::AssignElementUniversalEnvelopingOrd
 ) {
   this->theElT.operator=(input);
   if (theRingZero.theSubNthElementIsImageNthCoordSimpleBasis.size != 3) {
-    crash << "theRingZero.theSubNthElementIsImageNthCoordSimpleBasis.size is not equal to 3 as expected. " << crash;
+    global.fatal << "theRingZero.theSubNthElementIsImageNthCoordSimpleBasis.size is not equal to 3 as expected. " << global.fatal;
   }
   this->theSubNthElementIsImageNthCoordSimpleBasis = theRingZero.theSubNthElementIsImageNthCoordSimpleBasis;
   this->theElT.ModOutVermaRelationSOld(false, this->theSubNthElementIsImageNthCoordSimpleBasis, theRingUnit);
@@ -1317,7 +1317,7 @@ void ElementUniversalEnvelopingOrdered<coefficient>::operator/=(const SecondType
 template <class coefficient>
 void MonomialUniversalEnvelopingOrdered<coefficient>::MultiplyByNoSimplify(const MonomialUniversalEnvelopingOrdered& other) {
   if (this == &other) {
-    crash << "Output not allowed to be equal to this object. " << crash;
+    global.fatal << "Output not allowed to be equal to this object. " << global.fatal;
   }
   this->generatorsIndices.Reserve(other.generatorsIndices.size + this->generatorsIndices.size);
   this->Powers.Reserve(other.generatorsIndices.size + this->generatorsIndices.size);
@@ -1379,7 +1379,7 @@ bool ElementUniversalEnvelopingOrdered<coefficient>::IsProportionalTo(
 template<class coefficient>
 void MonomialUniversalEnvelopingOrdered<coefficient>::operator*=(const MonomialUniversalEnvelopingOrdered& other) {
   if (this == &other) {
-    crash << "Output and input are the same. " << crash;
+    global.fatal << "Output and input are the same. " << global.fatal;
   }
   this->Coefficient *= other.Coefficient;
   for (int i = 0; i < other.generatorsIndices.size; i ++) {

@@ -28,14 +28,14 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
   Rational GlobalGoal;
   GlobalGoal.MakeZero();
   if (matA.NumRows != matb.NumRows) {
-    crash << "The number of inequalities: " << matA.NumRows << " does not match the number of "
-    << "constaints: " << matb.NumRows << ". " << crash;
+    global.fatal << "The number of inequalities: " << matA.NumRows << " does not match the number of "
+    << "constaints: " << matb.NumRows << ". " << global.fatal;
   }
   for (int j = 0; j < matb.NumRows; j ++) {
     GlobalGoal += matb.elements[j][0];
     if (matb.elements[j][0].IsNegative()) {
-      crash << "Constraint index " << j << " is negative: "
-      << matb.elements[j][0] << " which is not allowed. " << crash;
+      global.fatal << "Constraint index " << j << " is negative: "
+      << matb.elements[j][0] << " which is not allowed. " << global.fatal;
     }
   }
   if (GlobalGoal.IsEqualToZero()) {
@@ -84,14 +84,14 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
       );
       Rational tempRat, tempTotalChange;
       if (tempMatA.elements[LeavingVariableRow][EnteringVariable].IsEqualToZero()) {
-        crash << "The leaving-entering coefficient is not allowed to be zero. " << crash;
+        global.fatal << "The leaving-entering coefficient is not allowed to be zero. " << global.fatal;
       }
       tempRat.Assign(tempMatA.elements[LeavingVariableRow][EnteringVariable]);
       tempRat.Invert();
       for (int i = 0; i < tempMatA.NumRows; i ++) {
         if (!tempMatA.elements[i][BaseVariables.elements[i]].IsEqualTo(1)) {
-          crash << "The base variable coefficient is required to be 1 at this point of code. "
-          << crash;
+          global.fatal << "The base variable coefficient is required to be 1 at this point of code. "
+          << global.fatal;
         }
       }
       tempMatA.RowTimesScalar(LeavingVariableRow, tempRat);
@@ -123,7 +123,7 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
         }
       }
       if (!matX[BaseVariables.elements[LeavingVariableRow]].IsEqualToZero()) {
-        crash << "Leaving variable coefficient not allowed to be zero. " << crash;
+        global.fatal << "Leaving variable coefficient not allowed to be zero. " << global.fatal;
       }
       BaseVariables.selected[BaseVariables.elements[LeavingVariableRow]] = false;
       BaseVariables.elements[LeavingVariableRow] = EnteringVariable;
@@ -131,7 +131,7 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
       //BaseVariables.ComputeDebugString();
       for (int i = 0; i < tempMatA.NumRows; i ++) {
         if (!tempMatA.elements[i][BaseVariables.elements[i]].IsEqualTo(1)) {
-          crash << "New base variable expected to be equal to 1. " << crash;
+          global.fatal << "New base variable expected to be equal to 1. " << global.fatal;
         }
       }
     }
@@ -426,7 +426,7 @@ bool Calculator::innerPrintSSSubalgebras(
     ownerSSPointer = input.GetValue<SemisimpleSubalgebras>().owner;
   }
   if (ownerSSPointer == nullptr) {
-    crash << "Zero pointer to semisimple Lie algebra: this shouldn't happen. " << crash;
+    global.fatal << "Zero pointer to semisimple Lie algebra: this shouldn't happen. " << global.fatal;
   }
   SemisimpleLieAlgebra& ownerLieAlgebra = *ownerSSPointer;
   std::string dynkinString = ownerSSPointer->theWeyl.theDynkinType.ToString();;
@@ -815,9 +815,9 @@ bool Plot::operator==(const Plot& other) const {
 
 void Plot::operator+=(const PlotObject& other) {
   if (other.dimension != - 1 && this->dimension != - 1 && this->dimension != other.dimension) {
-    crash << "Attempting to add plot of dimension: "
+    global.fatal << "Attempting to add plot of dimension: "
     << this->dimension << " to a plot of dimension: "
-    << other.dimension << ". " << crash;
+    << other.dimension << ". " << global.fatal;
   }
   if (this->dimension == - 1) {
     this->dimension = other.dimension;
@@ -1985,10 +1985,10 @@ bool Calculator::innerConesIntersect(Calculator& theCommands, const Expression& 
       checkVector += coneNonStrictGens[i] * outputIntersection[coneStrictGens.size + i];
     }
     if (!checkVector.IsEqualToZero()) {
-      crash << "<br>This is a programming error: the output linear combination " << outputIntersection.ToString()
+      global.fatal << "<br>This is a programming error: the output linear combination " << outputIntersection.ToString()
       << " corresponds to the cone intersection " << checkVector.ToString()
       << " and is not equal to zero! Here is the cone output so far: "
-      << out.str() << crash;
+      << out.str() << global.fatal;
     }
     out << "<br>Cones intersect, here is one intersection: 0= " << outputIntersection.ToStringLetterFormat("v");
   } else {
@@ -2403,7 +2403,7 @@ public:
   bool IncrementRecursivelyReturnFalseIfPastLast(TreeNode<HistorySubExpression>& currentNode);
   bool CheckInitialization() {
     if (this->owner == nullptr) {
-      crash << "Expression history enumerator has zero owner. " << crash;
+      global.fatal << "Expression history enumerator has zero owner. " << global.fatal;
     }
     return true;
   }

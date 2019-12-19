@@ -125,12 +125,12 @@ void rootSubalgebra::ComputeCentralizerFromKModulesAndSortKModules() {
   this->SimpleBasisCentralizerRoots.Reserve(this->Modules.size);
   if (this->SimpleBasisK.size == 0) {
     if (this->Modules.size != this->GetOwnerSSalg().GetNumGenerators()) {
-      crash << " bad number of modules!" << crash;
+      global.fatal << " bad number of modules!" << global.fatal;
     }
   } else {
     if (this->theDynkinType.IsEqualToZero()) {
-      crash << "Simple basis is " << this->SimpleBasisK.ToString() << " but Dynkin type is: "
-      << this->theDynkinType.ToString() << crash;
+      global.fatal << "Simple basis is " << this->SimpleBasisK.ToString() << " but Dynkin type is: "
+      << this->theDynkinType.ToString() << global.fatal;
     }
   }
   for (int i = 0; i < this->Modules.size; i ++) {
@@ -146,9 +146,9 @@ void rootSubalgebra::ComputeCentralizerFromKModulesAndSortKModules() {
   this->theCentralizerDiagram.GetDynkinType(this->theCentralizerDynkinType);
   if (this->theDynkinType.IsEqualToZero()) {
     if (this->theCentralizerDynkinType.GetRank() + this->theDynkinType.GetRank() != this->ownEr->owner->GetRank()) {
-      crash << "Centralizer of " << this->theDynkinType.ToString() << " computed to be "
+      global.fatal << "Centralizer of " << this->theDynkinType.ToString() << " computed to be "
       << this->theCentralizerDynkinType.ToString()
-      << " which is impossible. " << crash;
+      << " which is impossible. " << global.fatal;
     }
   }
 }
@@ -260,7 +260,7 @@ void rootSubalgebra::ReadMultTableAndOppositeKmodsFromFile(
     input >> outOpposites[i];
   }
   if (tempS != "opposites:") {
-    crash << "Error reading from file. " << crash;
+    global.fatal << "Error reading from file. " << global.fatal;
   }
 }
 
@@ -632,10 +632,10 @@ void rootSubalgebra::ComputeModuleFromHighestVector(int moduleIndex) {
     if (this->IsBKlowest(wPrimalSimple[j]) || wPrimalSimple.size == 1) {
       this->LowestWeightsPrimalSimple[moduleIndex] = wPrimalSimple[j];
       if (j != wPrimalSimple.size - 1) {
-        crash << "Last module weight is not lowest. The simple basis is: "
+        global.fatal << "Last module weight is not lowest. The simple basis is: "
         << this->SimpleBasisK.ToString() << ". The lowest weight is "
         << this->LowestWeightsPrimalSimple[moduleIndex].ToString() << " and the weights of the module are: "
-        << wPrimalSimple.ToString() << ". I think this shouldn't happen, should it?" << crash;
+        << wPrimalSimple.ToString() << ". I think this shouldn't happen, should it?" << global.fatal;
       }
     }
   }
@@ -693,7 +693,7 @@ void rootSubalgebra::ComputeKModules() {
     dimFinal += this->Modules[i].size;
   }
   if (dimFinal != this->GetOwnerSSalg().GetNumGenerators()) {
-    crash << "Sum of k-module dimensions does not equal the dimension of the ambient Lie algebra. " << crash;
+    global.fatal << "Sum of k-module dimensions does not equal the dimension of the ambient Lie algebra. " << global.fatal;
   }
 }
 
@@ -761,9 +761,9 @@ bool rootSubalgebra::ConeConditionHolds(rootSubalgebras& owner, int indexInOwner
 
 bool rootSubalgebra::CheckRankInequality() const {
   if ((this->theDynkinType.GetRank() + this->theCentralizerDynkinType.GetRank()) * 2 < this->ownEr->owner->GetRank()) {
-    crash << "2*(Centralizer rank + rank) < ambient rank, "
+    global.fatal << "2*(Centralizer rank + rank) < ambient rank, "
     << "which is mathematically impossible. There was a programming error. "
-    << crash;
+    << global.fatal;
   }
   return true;
 }
@@ -827,8 +827,8 @@ void rootSubalgebra::MatrixToRelation(
   tempRoot.SetSize(theDimension);
   matX.ScaleToIntegralForMinRationalHeightNoSignChange();
   if (matA.NumCols != matX.NumRows) {
-    crash << "Right matrix has different number of columns from "
-    << "the number of rows of the left one. " << crash;
+    global.fatal << "Right matrix has different number of columns from "
+    << "the number of rows of the left one. " << global.fatal;
   }
   for (int i = 0; i < matA.NumCols; i ++) {
     if (!matX.elements[i][0].IsEqualToZero()) {
@@ -836,7 +836,7 @@ void rootSubalgebra::MatrixToRelation(
         tempRoot.TheObjects[j].Assign(matA.elements[j][i]);
       }
       if (!(matX.elements[i][0].DenShort == 1)) {
-        crash << "Matrix element not integer. " << crash;
+        global.fatal << "Matrix element not integer. " << global.fatal;
       }
       if (i < NilradicalRoots.size) {
         output.Betas.AddOnTop(tempRoot);
@@ -898,7 +898,7 @@ void rootSubalgebra::ExtractRelations(
           }
         }
         if (!theRel.CheckForBugs(*this, NilradicalRoots)) {
-          crash << "Check for bugs failed. " << crash;
+          global.fatal << "Check for bugs failed. " << global.fatal;
         }
       }
       owner.theBadRelations.AddOnTop(theRel);
@@ -1074,7 +1074,7 @@ void rootSubalgebra::ComputeEpsCoordsWRTk() {
     if (this->kModulesKepsCoords[i].size > 0) {
       this->kModulesKepsCoords[i].average(tempRoot, this->kModulesKepsCoords[i][0].size);
       if (!tempRoot.IsEqualToZero()) {
-        crash << "Root expected to be zero at this point. " << crash;
+        global.fatal << "Root expected to be zero at this point. " << global.fatal;
       }
     }
   }
@@ -1094,7 +1094,7 @@ bool rootSubalgebra::attemptExtensionToIsomorphismNoCentralizer(
 ) {
   int CurrentRank = Domain.GetRankOfSpanOfElements();
   if (CurrentRank != Range.GetRankOfSpanOfElements()) {
-    crash << "Ranks do not coincide. " << crash;
+    global.fatal << "Ranks do not coincide. " << global.fatal;
   }
   if (abortKmodule != nullptr) {
     *abortKmodule = false;
@@ -1141,7 +1141,7 @@ bool rootSubalgebra::attemptExtensionToIsomorphismNoCentralizer(
   while (domainRec.GetRankOfSpanOfElements() == CurrentRank) {
     counter ++;
     if (leftSA.Modules.size <= counter) {
-      crash << "Left subalgebra modules not allowed to be empty. " << crash;
+      global.fatal << "Left subalgebra modules not allowed to be empty. " << global.fatal;
     }
     domainRec.RemoveIndexSwapWithLast(domainRec.size - 1);
     domainRec.AddOnTop(leftSA.HighestWeightsPrimalSimple[counter]);
@@ -1158,7 +1158,7 @@ bool rootSubalgebra::attemptExtensionToIsomorphismNoCentralizer(
     }
   }
   if (!(domainRec.GetRankOfSpanOfElements() == CurrentRank + 1)) {
-    crash << "Ranks do not match. " << crash;
+    global.fatal << "Ranks do not match. " << global.fatal;
   }
   Vectors<Rational>& firstKmodLeft = leftSA.WeightsModulesPrimalSimple[counter];
   bool result = false;
@@ -1699,7 +1699,7 @@ void rootSubalgebra::ReadFromFileNilradicalGeneration(std::fstream& input, rootS
   std::string tempS;
   input >> tempS;
   if (tempS != "Simple_basis_k:") {
-    crash << "Failed to read simple basis of k. " << crash;
+    global.fatal << "Failed to read simple basis of k. " << global.fatal;
   }
   this->SimpleBasisK.ReadFromFile(input);
   this->genK=(this->SimpleBasisK);
@@ -1745,8 +1745,8 @@ bool rootSubalgebra::LinCombToStringDistinguishedIndex(
 
 SemisimpleLieAlgebra& rootSubalgebra::GetOwnerSSalg() const {
   if (this->ownEr == nullptr) {
-    crash << "This is a programming error. Attempting to "
-    << "access ambient Lie algebra of non-initialized root subalgebras. " << crash;
+    global.fatal << "This is a programming error. Attempting to "
+    << "access ambient Lie algebra of non-initialized root subalgebras. " << global.fatal;
   }
   return *this->ownEr->owner;
 }
@@ -2095,7 +2095,7 @@ void rootSubalgebra::KEnumerationsToLinComb() {
 
 bool rootSubalgebra::CheckConsistency() const {
   if (this->flagDeallocated) {
-    crash << "Programming error: use after free of root subalgebra. " << crash;
+    global.fatal << "Programming error: use after free of root subalgebra. " << global.fatal;
     return false;
   }
   return true;
@@ -2104,7 +2104,7 @@ bool rootSubalgebra::CheckConsistency() const {
 bool rootSubalgebra::CheckInitialization() const {
   this->CheckConsistency();
   if (this->ownEr == nullptr) {
-    crash << "Root subalgebra is not initialized properly. " << crash;
+    global.fatal << "Root subalgebra is not initialized properly. " << global.fatal;
     return false;
   }
   return true;
@@ -2114,7 +2114,7 @@ bool rootSubalgebra::CheckScalarProdMatrixOrdered() const {
   Matrix<Rational> theMat;
   this->SimpleBasisK.GetGramMatrix(theMat, &this->GetAmbientWeyl().CartanSymmetric);
   if (theMat != this->scalarProdMatrixOrdered) {
-    crash << "Bilinear product matrix does not match the stored value. " << crash;
+    global.fatal << "Bilinear product matrix does not match the stored value. " << global.fatal;
   }
   return true;
 }
@@ -2270,8 +2270,8 @@ void rootSubalgebra::ComputeEssentialS() {
   this->theDynkinDiagram.GetDynkinType(this->theDynkinType);
   if (this->SimpleBasisK.size != 0) {
     if (this->theDynkinType.ToString() == "0") {
-      crash << "Subalgebra dynkin type computed to be zero while the simple basis is: "
-      << this->SimpleBasisK.ToString() << ". " << crash;
+      global.fatal << "Subalgebra dynkin type computed to be zero while the simple basis is: "
+      << this->SimpleBasisK.ToString() << ". " << global.fatal;
     }
   }
   this->ComputeKModules();
@@ -2334,14 +2334,14 @@ bool rootSubalgebra::ComputeEssentialsIfNew() {
     theReport.Report(reportStream.str());
   }
   if (this->SimpleBasisK.GetRankOfSpanOfElements() != this->SimpleBasisK.size) {
-    crash << "<br>simple basis vectors not linearly independent! " << crash;
+    global.fatal << "<br>simple basis vectors not linearly independent! " << global.fatal;
   }
   if (!this->GetAmbientWeylAutomorphisms().AreMaximallyDominantGroupOuter(this->SimpleBasisKinOrderOfGeneration)) {
     Vectors<Rational> tempVs = this->SimpleBasisKinOrderOfGeneration;
     tempVs.RemoveLastObject();
     if (!this->GetAmbientWeylAutomorphisms().AreMaximallyDominantGroupOuter(tempVs)) {
-      crash << "<br>This is a programming error: first vectors "
-      << tempVs.ToString() << " are not maximally dominant. " << crash;
+      global.fatal << "<br>This is a programming error: first vectors "
+      << tempVs.ToString() << " are not maximally dominant. " << global.fatal;
     }
     if (this->indexInducingSubalgebra != - 1) {
       this->ownEr->theSubalgebras[this->indexInducingSubalgebra].numHeirsRejectedNotMaximallyDominant ++;
@@ -2437,7 +2437,7 @@ bool slTwoSubalgebra::AttemptExtendingHFtoHEFWRTSubalgebra(
   int theRelativeDimension = simpleBasisSA.size;
 //  int theDimension = this->theWeyl.CartanSymmetric.NumRows;
   if (theRelativeDimension != theZeroCharacteristics.MaxSize) {
-    crash << "Relative dimension is incorrect. " << crash;
+    global.fatal << "Relative dimension is incorrect. " << global.fatal;
   }
   //format. We are looking for an sl(2) for which e = a_0 g^\alpha_0+... a_kg^\alpha_k, and
   // f=b_0 g^{-\alpha_0}+... +b_kg^{-\alpha_k}
@@ -2530,9 +2530,9 @@ void slTwoSubalgebra::initHEFSystemFromECoeffs(
   outputMatrixSystemToBeSolved.init(0, numberVariables);
   for (int i = 0; i < rootsInPlay.size; i ++) {
     if (this->GetOwnerWeyl().RootScalarCartanRoot(targetH, rootsInPlay[i]) != 2) {
-      crash << "The scalar product of the h element: " << targetH.ToString()
+      global.fatal << "The scalar product of the h element: " << targetH.ToString()
       << " and the root in play " << rootsInPlay[i].ToString() << " must be 2, but equals instead "
-      << this->GetOwnerWeyl().RootScalarCartanRoot(targetH, rootsInPlay[i]).ToString() << crash;
+      << this->GetOwnerWeyl().RootScalarCartanRoot(targetH, rootsInPlay[i]).ToString() << global.fatal;
     }
   }
   for (int i = 0; i < rootsInPlay.size; i ++) {
@@ -2561,7 +2561,7 @@ void slTwoSubalgebra::initHEFSystemFromECoeffs(
   }
   for (int i = 0; i < rootsInPlay.size; i ++) {
     if (rootsInPlay.size != halfNumberVariables) {
-      crash << "Roots in play must be half the number of variables. " << crash;
+      global.fatal << "Roots in play must be half the number of variables. " << global.fatal;
     }
     this->GetOwnerSSAlgebra().GetConstantOrHElement(rootsInPlay[i], - rootsInPlay[i], tempRat, tempRoot);
     for (int j = 0; j < this->GetOwnerSSAlgebra().GetRank(); j ++) {
@@ -2680,12 +2680,12 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(
     }
     for (int k = 0; k < rootsScalarProduct2HnonRaised.size; k ++) {
       if (this->GetAmbientWeyl().RootScalarCartanRoot(characteristicH, rootsScalarProduct2HnonRaised[k]) != 2) {
-        crash << "Programming error: characteristicH is: " << characteristicH.ToString()
+        global.fatal << "Programming error: characteristicH is: " << characteristicH.ToString()
         << "; rootsWithScalarProduct2NonRaised: "
         << rootsScalarProduct2HnonRaised.ToString()
         << "; the scalar product with vector " << rootsScalarProduct2HnonRaised[k].ToString() << " is:  "
         << this->GetAmbientWeyl().RootScalarCartanRoot(characteristicH, rootsScalarProduct2HnonRaised[k]).ToString()
-        << " which is supposed to equal 2. " << crash;
+        << " which is supposed to equal 2. " << global.fatal;
       }
     }
     this->GetAmbientWeyl().RaiseToDominantWeight(characteristicH, nullptr, nullptr, &raisingElt);
@@ -2699,7 +2699,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(
     }
     for (int i = 0; i < theSl2.RootsWithScalar2WithH.size; i ++) {
       if (this->GetAmbientWeyl().RootScalarCartanRoot(characteristicH, theSl2.RootsWithScalar2WithH[i]) != 2) {
-        crash << "Programming error, bad scalar product after raising: raised characteristic: "
+        global.fatal << "Programming error, bad scalar product after raising: raised characteristic: "
         << characteristicH.ToString()
         << " simplebasisK: " << this->SimpleBasisK.ToString()
         << "raised by: " << raisingElt.ToString()
@@ -2712,7 +2712,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(
         << this->GetAmbientWeyl().RootScalarCartanRoot(characteristicH, theSl2.RootsWithScalar2WithH[i]).ToString()
         << ". The inverted relative cartan: " << InvertedRelativeKillingForm.ToString()
         << ". The cartan: " << this->GetAmbientWeyl().CartanSymmetric.ToString() << ". "
-        << crash;
+        << global.fatal;
       }
     }
     theSl2.theH.MakeHgenerator(characteristicH, theLieAlgebra);
@@ -2809,13 +2809,13 @@ void rootSubalgebras::ComputeParabolicPseudoParabolicNeitherOrder() {
       currentSA.ComputeEssentialS();
       if (currentBasis.size != 0) {
         if (currentSA.theDynkinType.ToString() == "0") {
-          crash << "Subalgebra dynkin type computed to be zero while currentBasis is " << currentBasis.ToString()
-          << " and simple basis k is: " << currentSA.SimpleBasisK.ToString() << crash;
+          global.fatal << "Subalgebra dynkin type computed to be zero while currentBasis is " << currentBasis.ToString()
+          << " and simple basis k is: " << currentSA.SimpleBasisK.ToString() << global.fatal;
         }
       }
       int theIndex = this->GetIndexUpToEquivalenceByDiagramsAndDimensions(currentSA);
       if (theIndex == - 1) {
-        crash << "Experimental code has failed an internal check on currentSA: " << currentSA.ToString() << crash;
+        global.fatal << "Experimental code has failed an internal check on currentSA: " << currentSA.ToString() << global.fatal;
       }
       if (!Explored[theIndex]) {
         currentList.AddOnTop(this->theSubalgebras[theIndex]);
@@ -2891,7 +2891,7 @@ void rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism() {
         continue;
       }
       if (currentSA.SimpleBasisK.GetRankOfSpanOfElements() != currentSA.SimpleBasisK.size) {
-        crash << "<br>simple basis vectors not linearly independent! " << crash;
+        global.fatal << "<br>simple basis vectors not linearly independent! " << global.fatal;
       }
       this->theSubalgebras.AddOnTop(currentSA);
       this->theSubalgebras.LastObject()->ComputePotentialExtensions();
@@ -3039,10 +3039,10 @@ void rootSubalgebras::ToHTML(FormatExpressions* theFormat) {
   std::fstream output;
   FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(output, myPathVirtual, false, true, false);
   if (!FileOperations::FileExistsVirtual(myPathVirtual)) {
-    crash << "This may or may not be a programming error. Failed to create virtual file " << myPathVirtual
+    global.fatal << "This may or may not be a programming error. Failed to create virtual file " << myPathVirtual
     << ". Possible explanations. 1. File permissions - can I write in that folder? "
     << "2. Programming error (less likely). "
-    << crash;
+    << global.fatal;
   }
   output << "<html><title> Root subsystems of "
   << this->theSubalgebras[0].theDynkinDiagram.ToString()
@@ -3119,7 +3119,7 @@ void rootSubalgebras::ReadFromFileNilradicalGeneration(std::fstream& input) {
   this->GetOwnerWeyl().ComputeRho(true);
   input >> tempS >> tempI;
   if (tempS != "Number_subalgebras:") {
-    crash << "Error loading nilradical generation file. " << crash;
+    global.fatal << "Error loading nilradical generation file. " << global.fatal;
   }
   this->theSubalgebras.SetSize(tempI);
   //////////////////////////////////////////////////////////////////////////////////////
@@ -3227,13 +3227,13 @@ std::string rootSubalgebras::ToStringAlgebraLink(int index) {
 template<class coefficient>
 Vector<Rational> ElementSemisimpleLieAlgebra<coefficient>::GetRootIMustBeWeight() const {
   if (this->IsEqualToZero()) {
-    crash << "Calling ElementSemisimpleLieAlgebra::GetRootIMustBeWeight on a zero element is forbidden." << crash;
+    global.fatal << "Calling ElementSemisimpleLieAlgebra::GetRootIMustBeWeight on a zero element is forbidden." << global.fatal;
   }
   if (this->size() > 1) {
     if (!this->IsElementCartan()) {
-      crash << "Calling ElementSemisimpleLieAlgebra::GetRootIMustBeWeight "
+      global.fatal << "Calling ElementSemisimpleLieAlgebra::GetRootIMustBeWeight "
       << "on a non-weight element is forbidden. The element is: "
-      << this->ToString() << crash;
+      << this->ToString() << global.fatal;
     }
     Vector<Rational> result;
     result.MakeZero(this->GetOwner()->GetRank());
@@ -3405,7 +3405,7 @@ void rootSubalgebras::ComputeKmodMultTables() {
 
 bool rootSubalgebras::CheckInitialization() const {
   if (this->owner == nullptr) {
-    crash << "This is a programming error: root subalgebras with non-initialized owner. " << crash;
+    global.fatal << "This is a programming error: root subalgebras with non-initialized owner. " << global.fatal;
   }
   return true;
 }
@@ -3423,7 +3423,7 @@ int rootSubalgebras::GetIndexUpToEquivalenceByDiagramsAndDimensions(const rootSu
   for (int i = 0; i < this->theSubalgebras.size; i ++) {
     if (this->theSubalgebras[i].IsEquivalentToByDiagramsAndDimensions(theSA)) {
       if (result != - 1) {
-        crash << "Programming error: experimental code internal check failed. " << crash;
+        global.fatal << "Programming error: experimental code internal check failed. " << global.fatal;
       }
       result = i;
     }
@@ -3625,8 +3625,8 @@ void rootSubalgebras::ElementToStringConeConditionNotSatisfying(std::string& out
   char simpleType;
   int theRank;
   if (!this->GetOwnerWeyl().theDynkinType.IsSimple(&simpleType, &theRank)) {
-    crash << "This is a programming error: ElementToStringConeConditionNotSatisfying "
-    << "called on a non-simple Lie algebra. " << crash;
+    global.fatal << "This is a programming error: ElementToStringConeConditionNotSatisfying "
+    << "called on a non-simple Lie algebra. " << global.fatal;
   }
   if (simpleType == 'B') {
     out << "$\\mathrm{so}(2n + 1)$ is realized as a matrix Lie algebra as "
@@ -3722,8 +3722,8 @@ void rootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includ
   char simpleType;
   int theDimension;
   if (!this->GetOwnerWeyl().theDynkinType.IsSimple(&simpleType, &theDimension)) {
-    crash << "This is a programming error: ElementToStringConeConditionNotSatisfying "
-    << "called on a non-simple Lie algebra. " << crash;
+    global.fatal << "This is a programming error: ElementToStringConeConditionNotSatisfying "
+    << "called on a non-simple Lie algebra. " << global.fatal;
   }
   if (simpleType == 'B') {
     this->GetOwnerWeyl().GetEpsilonCoords(input, epsCoords);
@@ -3974,7 +3974,7 @@ void rootSubalgebra::ComputeRootsOfK() {
   }
   if (this->SimpleBasisK.size == 0) {
     if (this->AllRootsK.size != 0) {
-      crash << "Internal check went bad. " << crash;
+      global.fatal << "Internal check went bad. " << global.fatal;
     }
   }
 }
@@ -3993,7 +3993,7 @@ void coneRelation::RelationOneSideToStringCoordForm(
       tempS = "-";
     }
     if ((tempS == "0")) {
-      crash << "Zero not allowed at this point of code. " << crash;
+      global.fatal << "Zero not allowed at this point of code. " << global.fatal;
     }
     out << tempS;
     if (!EpsilonForm) {
@@ -4019,7 +4019,7 @@ void coneRelation::RelationOneSideToString(
   rootSubalgebra& owner
 ) {
   if (theRoots.size != coeffs.size) {
-    crash << "The number of coefficients must equal the number of roots. " << crash;
+    global.fatal << "The number of coefficients must equal the number of roots. " << global.fatal;
   }
   std::stringstream out;
   std::string tempS;
@@ -4039,7 +4039,7 @@ void coneRelation::RelationOneSideToString(
       tempS = "-";
     }
     if ((tempS == "0")) {
-      crash << "Zero not allowed here. " << crash;
+      global.fatal << "Zero not allowed here. " << global.fatal;
     }
     out << tempS;
     if (!useLatex) {
@@ -4100,7 +4100,7 @@ int coneRelation::ToString(
   std::string tempS;
   std::stringstream out;
   if (this->AlphaCoeffs.size != this->Alphas.size || this->BetaCoeffs.size != this->Betas.size) {
-    crash << "Number of coefficients is wrong. " << crash;
+    global.fatal << "Number of coefficients is wrong. " << global.fatal;
   }
   int LatexLineCounter = 0;
   this->ComputeConnectedComponents(
@@ -4223,7 +4223,7 @@ bool coneRelation::IsStrictlyWeaklyProhibiting(
     return false;
   }
   if (this->theDiagram.SimpleComponentTypes[0].theLetter == 'A' && this->theDiagram.SimpleComponentTypes[0].theRank == 1) {
-   //  crash << crash;
+   //  global.fatal << global.fatal;
   }
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms tempSubgroup;
   tempSubgroup.AmbientWeyl = &(owner.GetAmbientWeyl());
@@ -4273,7 +4273,7 @@ void coneRelation::MakeLookCivilized(rootSubalgebra& owner) {
     this->theDiagram.SimpleComponentTypes[0].theRank == 1
   ) {
     this->ComputeDiagramRelAndK(owner);
-    crash << "Failed to compute diagram relation and k. " << crash;
+    global.fatal << "Failed to compute diagram relation and k. " << global.fatal;
   }
   this->SortRelation(owner);
   this->FixRepeatingRoots(this->Alphas, this->AlphaCoeffs);
@@ -4302,7 +4302,7 @@ void coneRelation::FixRightHandSide(rootSubalgebra& owner, Vectors<Rational>& Ni
             this->Betas.RemoveIndexSwapWithLast(remainingIndex);
           }
           if (!NilradicalRoots.Contains(tempRoot)) {
-            crash << "Nilradical doesn't have required root. " << crash;
+            global.fatal << "Nilradical doesn't have required root. " << global.fatal;
           }
           hasChanged = true;
         }
@@ -4331,7 +4331,7 @@ bool coneRelation::CheckForBugs(rootSubalgebra& owner, Vectors<Rational>& Nilrad
 
 void coneRelation::GetSumAlphas(Vector<Rational>& output, int theDimension) {
   if (this->AlphaCoeffs.size != this->Alphas.size) {
-    crash << "Wrong number of alpha coefficients" << crash;
+    global.fatal << "Wrong number of alpha coefficients" << global.fatal;
   }
   output.MakeZero(theDimension);
   Vector<Rational> tempRoot;
@@ -4449,7 +4449,7 @@ void coneRelation::ReadFromFile(std::fstream& input, rootSubalgebras& owner) {
   input >> this->BetaKComponents;
   input >> tempS >> this->IndexOwnerRootSubalgebra;
   if (tempS != "Index_owner_root_SA:") {
-    crash << "Error loading cone relation from file. " << crash;
+    global.fatal << "Error loading cone relation from file. " << global.fatal;
   }
   this->ComputeTheDiagramAndDiagramRelAndK(owner.theSubalgebras[this->IndexOwnerRootSubalgebra]);
   this->ComputeDebugString(owner, true, true);

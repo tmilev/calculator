@@ -482,7 +482,7 @@ void LaTeXcrawler::CrawlRecursive(std::stringstream& crawlingResult, const std::
   /// an attacker could get a .tex file with our site's private keys!
   /// Touch very carefully.
   if (this->baseFoldersCrawlableFilesPhysical.size == 0) {
-    crash << "Error: this->baseFoldersCrawlableFilesPhysical is empty which is not allowed here. " << crash;
+    global.fatal << "Error: this->baseFoldersCrawlableFilesPhysical is empty which is not allowed here. " << global.fatal;
   }
   std::string trimmedFileName = StringRoutines::StringTrimWhiteSpace(currentFileNamE);
   std::string trimmedFolder = FileOperations::GetPathFromFileNameWithPath(trimmedFileName);

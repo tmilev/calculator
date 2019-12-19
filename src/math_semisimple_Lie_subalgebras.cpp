@@ -70,7 +70,7 @@ std::string SemisimpleLieAlgebra::ToStringLieAlgebraNameNonTechnicalHTML() const
   const DynkinType& theType = this->theWeyl.theDynkinType;
   for (int indexType = 0; indexType < theType.size(); indexType ++) {
     if (!(theType.theCoeffs[indexType] > 0)) {
-      crash << "Simple constituents must appear with positive coefficient. " << crash;
+      global.fatal << "Simple constituents must appear with positive coefficient. " << global.fatal;
     }
     const DynkinSimpleType& currentSimpleType = theType[indexType];
     for (int indexIsotypic = 0; indexIsotypic < theType.theCoeffs[indexType]; indexIsotypic ++) {
@@ -88,7 +88,7 @@ std::string SemisimpleLieAlgebra::ToStringLieAlgebraNameNonTechnicalHTML() const
 
 bool SemisimpleLieAlgebra::CheckConsistency() const {
   if (this->flagDeallocated) {
-    crash << "This is a programming error: use after free of SemisimpleLieAlgebra. " << crash;
+    global.fatal << "This is a programming error: use after free of SemisimpleLieAlgebra. " << global.fatal;
   }
   this->theWeyl.CheckConsistency();
   return true;
@@ -196,7 +196,7 @@ SubalgebraSemisimpleLieAlgebra::SubalgebraSemisimpleLieAlgebra() {
 
 bool SubalgebraSemisimpleLieAlgebra::CheckInitialization() {
   if (this->owner == nullptr) {
-    crash << "Non-initilized (no owner) subalgebra of semisimple Lie algebra." << crash;
+    global.fatal << "Non-initilized (no owner) subalgebra of semisimple Lie algebra." << global.fatal;
   }
   return true;
 }
@@ -268,7 +268,7 @@ void SubalgebraSemisimpleLieAlgebra::ComputeCartanSA() {
       }
     }
     if (!foundNewElement) {
-      crash  << "This shouldn't happen: could not found a new nilpotent element. " << crash;
+      global.fatal  << "This shouldn't happen: could not found a new nilpotent element. " << global.fatal;
     }
     this->CartanSA.AddOnTop(newElt);
     this->owner->GetCommonCentralizer(this->CartanSA, CurrentCentralizer);
@@ -378,14 +378,14 @@ void SemisimpleSubalgebras::CheckFileWritePermissions() {
   global.CallSystemNoOutput("mkdir " + testFileFolderPhysical, true);
 
   if (!FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(testFile, testFileNameRelative, false, true, false)) {
-    crash << "<br>This may or may not be a programming error. I requested to create file "
+    global.fatal << "<br>This may or may not be a programming error. I requested to create file "
     << this->VirtualNameMainFile1
     << " for output. However, the file failed to create. "
     << "Possible explanations: "
     << "1. Programming error. "
     << "2. The calculator has no write permission to the "
     << "folder in which the file is located. "
-    << "3. The folder does not exist for some reason lying outside of the calculator. " << crash;
+    << "3. The folder does not exist for some reason lying outside of the calculator. " << global.fatal;
   }
   FileOperations::OpenFileCreateIfNotPresentVirtual(testFile, testFileNameRelative, false, true, false);
   testFile << "Write permissions test file.";
@@ -421,8 +421,8 @@ void SemisimpleSubalgebras::ComputeFolderNames(FormatExpressions& inputFormat) {
   (void) inputFormat;//avoid unused parameter warning in a portable way
   this->CheckConsistency();
   if (this->owner == nullptr) {
-    crash << "To compute semisimple subalgebra folders, "
-    << "you need to specify the ambient Lie algebra. " << crash;
+    global.fatal << "To compute semisimple subalgebra folders, "
+    << "you need to specify the ambient Lie algebra. " << global.fatal;
   }
 
   this->DisplayNameMainFile1NoPath = this->owner->ToStringFileNameNoPathSemisimpleSubalgebras();
@@ -639,13 +639,13 @@ void SemisimpleSubalgebras::WriteSubalgebraToFile(FormatExpressions *theFormat, 
   if (!FileOperations::OpenFileCreateIfNotPresentVirtual(
     outputFileSubalgebra, this->GetRelativePhysicalFileNameSubalgebra(subalgebraIndex), false, true, false
   )) {
-    crash << "<br>This may or may not be a programming error. While processing subalgebra of actual index "
+    global.fatal << "<br>This may or may not be a programming error. While processing subalgebra of actual index "
     << subalgebraIndex << " and display index "
     << this->GetDisplayIndexFromActual(subalgebraIndex) << ", I requested to create file "
     << this->GetRelativePhysicalFileNameSubalgebra(subalgebraIndex)
     << " for output. However, the file failed to create. Possible explanations: 1. Programming error. "
     << "2. The calculator has no write permission to the folder in which the file is located. "
-    << "3. The folder does not exist for some reason lying outside of the calculator. " << crash;
+    << "3. The folder does not exist for some reason lying outside of the calculator. " << global.fatal;
   }
   outputFileSubalgebra << "<html>\n" << HtmlRoutines::GetJavascriptMathjax("../../../")
   << "\n" << HtmlRoutines::GetCSSLinkLieAlgebrasAndCalculator("../../../")
@@ -662,7 +662,7 @@ void SemisimpleSubalgebras::WriteSubalgebraToFile(FormatExpressions *theFormat, 
     if (!FileOperations::OpenFileCreateIfNotPresentVirtual(
       outputFileFKFTnilradicals, "output/" + this->GetRelativePhysicalFileNameFKFTNilradicals(subalgebraIndex), false, true, false
     )) {
-      crash << "<br>This may or may not be a programming error. "
+      global.fatal << "<br>This may or may not be a programming error. "
       << "While processing subalgebra of actual index " << subalgebraIndex
       << " and display index " << this->GetDisplayIndexFromActual(subalgebraIndex)
       << ", I requested to create file "
@@ -671,7 +671,7 @@ void SemisimpleSubalgebras::WriteSubalgebraToFile(FormatExpressions *theFormat, 
       << "Possible explanations: 1. Programming error. "
       << "2. The calculator has no write permission to the "
       << "folder in which the file is located. "
-      << "3. The folder does not exist for some reason lying outside of the calculator. " << crash;
+      << "3. The folder does not exist for some reason lying outside of the calculator. " << global.fatal;
     }
     outputFileFKFTnilradicals << "<html>"
     << HtmlRoutines::GetJavascriptMathjax("../../../")
@@ -994,7 +994,7 @@ void SemisimpleSubalgebras::FindTheSSSubalgebrasInit() {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::FindTheSSSubalgebrasInit");
   this->CheckConsistency();
   if (this->owner == nullptr) {
-    crash << "<hr>Owner of semisimple subalgebras is zero" << crash;
+    global.fatal << "<hr>Owner of semisimple subalgebras is zero" << global.fatal;
   }
   if (global.theProgress.flagReportAlloweD) {
     this->fileNameToLogComments = "LogFileComments_" +
@@ -1004,7 +1004,7 @@ void SemisimpleSubalgebras::FindTheSSSubalgebrasInit() {
     if (!FileOperations::OpenFileCreateIfNotPresentVirtual(
       LogFile, this->owner->ToStringVirtualFolderName() + this->fileNameToLogComments, true, false, false
     )) {
-      crash << "Failed to open/create log file " << this->fileNameToLogComments
+      global.fatal << "Failed to open/create log file " << this->fileNameToLogComments
       << ". This is not fatal but I am crashing to let you know. ";
     }
     LogFile.close();
@@ -1117,9 +1117,9 @@ Vector<Rational> SemisimpleSubalgebras::GetHighestWeightFundNewComponentFromImag
   Vectors<Rational> simpleBasisOld;
   simpleBasisOld.SetSize(newRank - 1);
   if (imagesOldSimpleRootsAndNewRoot.size != newRank) {
-    crash << "This is a programming error: the root images must be "
+    global.fatal << "This is a programming error: the root images must be "
     << newRank << " but there are " << imagesOldSimpleRootsAndNewRoot.size << " elements instead. "
-    << "The type is " << input.ToString() << ". " << crash;
+    << "The type is " << input.ToString() << ". " << global.fatal;
   }
   for (int i = 0; i < newRank - 1; i ++) {
     simpleBasisOld[i].MakeEi(newRank, imagesOldSimpleRootsAndNewRoot[i]);
@@ -1238,9 +1238,9 @@ bool CandidateSSSubalgebra::CreateAndAddExtendBaseSubalgebra(
   }
   this->CheckFullInitializatioN();
   if (!baseSubalgebra.theWeylNonEmbedded->theDynkinType.IsEqualToZero() && baseSubalgebra.indexInOwner == - 1) {
-    crash << "This is a programming error: attempting to induce a subalgebra "
+    global.fatal << "This is a programming error: attempting to induce a subalgebra "
     << "from a non-registered base subalgebra of type "
-    << baseSubalgebra.theWeylNonEmbedded->theDynkinType.ToString() << ". " << crash;
+    << baseSubalgebra.theWeylNonEmbedded->theDynkinType.ToString() << ". " << global.fatal;
   }
   ProgressReport theReport;
   if (!this->ComputeChar(false)) {
@@ -1265,8 +1265,8 @@ bool CandidateSSSubalgebra::CreateAndAddExtendBaseSubalgebra(
         this->theWeylNonEmbedded->theDynkinType.ToString() ==
         this->owner->theSubalgebras.theValues[i].theWeylNonEmbedded->theDynkinType.ToString()
       ) {
-        crash << "This is not supposed to happen: different Dynkin types with equal ToString outputs. "
-        << crash;
+        global.fatal << "This is not supposed to happen: different Dynkin types with equal ToString outputs. "
+        << global.fatal;
       }
     }
   }
@@ -1284,28 +1284,28 @@ const Vector<Rational>& OrbitIteratorRootActionWeylGroupAutomorphisms::GetCurren
 bool OrbitIteratorRootActionWeylGroupAutomorphisms::CheckConsistency() {
   if (this->flagOrbitIsBuffered) {
     if (this->currentIndexInBuffer >= this->orbitBuffer.size) {
-      crash << "Current buffer index is: " << this->currentIndexInBuffer << " but the orbit has "
-      << this->orbitBuffer.size << " elements. " << crash;
+      global.fatal << "Current buffer index is: " << this->currentIndexInBuffer << " but the orbit has "
+      << this->orbitBuffer.size << " elements. " << global.fatal;
     }
   }
   if (this->flagOrbitEnumeratedOnce) {
     if (this->currentIndexInBuffer >= this->orbitSize) {
-      crash << "Current buffer index is: " << this->currentIndexInBuffer << " but the orbit was computed to have "
-      << this->orbitSize << " elements. " << crash;
+      global.fatal << "Current buffer index is: " << this->currentIndexInBuffer << " but the orbit was computed to have "
+      << this->orbitSize << " elements. " << global.fatal;
     }
   }
   if (this->flagOrbitIsBuffered) {
     if (this->orbitSize != this->orbitBuffer.size) {
-     crash << "Orbit is supposed to be buffered but the orbit buffer has "
+     global.fatal << "Orbit is supposed to be buffered but the orbit buffer has "
      << this->orbitBuffer.size << " elements "
      << "and the orbit size is reported to be: "
      << this->orbitSize << ". A detailed orbit printout: <br>"
-     << this->ToString() << crash;
+     << this->ToString() << global.fatal;
     }
   }
   if (!this->flagOrbitEnumeratedOnce && this->flagOrbitIsBuffered) {
-    crash << "Orbit reported to be buffered but at the same time it hasn't been enumerated yet. "
-    << this->ToString() << crash;
+    global.fatal << "Orbit reported to be buffered but at the same time it hasn't been enumerated yet. "
+    << this->ToString() << global.fatal;
   }
   return true;
 }
@@ -1330,11 +1330,11 @@ bool OrbitIteratorRootActionWeylGroupAutomorphisms::IncrementReturnFalseIfPastLa
     this->orbitSize = this->currentIndexInBuffer;
     if (this->computedSize != - 1) {
       if (this->computedSize != this->orbitSize) {
-        crash << "This is a mathematical error: "
+        global.fatal << "This is a mathematical error: "
         << "the computed size of the orbit is " << this->computedSize.ToString() << " "
         << "but I enumerated an orbit of size " << this->orbitSize
         << ". More details on the orbit follow. "
-        << this->ToString() << crash;
+        << this->ToString() << global.fatal;
       }
     }
     this->currentIndexInBuffer = - 1;
@@ -1536,10 +1536,10 @@ const CandidateSSSubalgebra& SemisimpleSubalgebras::baseSubalgebra() {
     !this->currentSubalgebraChain.LastObject()->theWeylNonEmbedded->theDynkinType.IsEqualToZero() &&
     this->currentSubalgebraChain.LastObject()->indexInOwner == - 1
   ) {
-    crash << "This is a programming error: base subalgebra has index in owner equal to - 1 yet "
+    global.fatal << "This is a programming error: base subalgebra has index in owner equal to - 1 yet "
     << "is of non-zero type: "
     << this->currentSubalgebraChain.LastObject()->theWeylNonEmbedded->theDynkinType.ToString() << ". "
-    << crash;
+    << global.fatal;
   }
   return * this->currentSubalgebraChain.LastObject();
 }
@@ -1659,9 +1659,9 @@ bool SemisimpleSubalgebras::CentralizersComputedToHaveUnsuitableNilpotentOrbits(
   theMults.SetSize(currentType.size());
   for (int i = 0; i < currentType.size(); i ++) {
     if (!currentType.theCoeffs[i].IsSmallInteger(& theMults[i])) {
-      crash << "This is not supposed to happen: "
+      global.fatal << "This is not supposed to happen: "
       << "Dynkin type with multiplicity that doesn't fit in a small int. "
-      << crash;
+      << global.fatal;
     }
   }
   simpleSummandSelection.initFromInts(theMults);
@@ -1709,8 +1709,8 @@ bool SemisimpleSubalgebras::CentralizersComputedToHaveUnsuitableNilpotentOrbits(
         if (!FileOperations::OpenFileCreateIfNotPresentVirtual(
           theLogFile, this->owner->ToStringVirtualFolderName() + this->fileNameToLogComments, true, false, false
         )) {
-          crash << "Failed to open log file: " << this->fileNameToLogComments << ". This is not fatal but "
-          << " I am crashing to let you know. " << crash;
+          global.fatal << "Failed to open log file: " << this->fileNameToLogComments << ". This is not fatal but "
+          << " I am crashing to let you know. " << global.fatal;
         }
         theLogFile << reportStream.str();
         global.Comments << reportStream.str();
@@ -1731,9 +1731,9 @@ bool CandidateSSSubalgebra::ComputeCentralizerTypeFailureAllowed() {
   int indexSl2 = - 1;
   bool mustBeTrue =  this->owner->theSl2s.ContainsSl2WithGivenH(theH, &indexSl2);
   if (!mustBeTrue) {
-    crash << "Something went very wrong: the semisimple "
+    global.fatal << "Something went very wrong: the semisimple "
     << "subalgebra is of rank 1, hence an sl(2) subalgebra, yet "
-    << "I can't find its H element in the list of sl(2) subalgebras. " << crash;
+    << "I can't find its H element in the list of sl(2) subalgebras. " << global.fatal;
   }
   const slTwoSubalgebra& theSl2 = this->owner->theSl2s[indexSl2];
   if (!theSl2.flagCentralizerTypeComputed) {
@@ -1776,8 +1776,8 @@ bool SemisimpleSubalgebras::CentralizerOfBaseComputedToHaveUnsuitableNilpotentOr
   if (!FileOperations::OpenFileCreateIfNotPresentVirtual(
     theLogFile, this->owner->ToStringVirtualFolderName() + this->fileNameToLogComments, true, false, false
   )) {
-    crash << "Failed to open log file: " << this->fileNameToLogComments << ". This is not fatal but "
-    << " I am crashing to let you know. " << crash;
+    global.fatal << "Failed to open log file: " << this->fileNameToLogComments << ". This is not fatal but "
+    << " I am crashing to let you know. " << global.fatal;
   }
   std::stringstream reportStream;
   reportStream << "<hr>"
@@ -1903,8 +1903,8 @@ void SemisimpleSubalgebras::AddSubalgebraIfNewSetToStackTop(CandidateSSSubalgebr
   if (this->theSubalgebras.Contains(input.theHs)) {
     input = this->theSubalgebras.theValues[this->theSubalgebras.GetIndex(input.theHs)];
     if (!input.theWeylNonEmbedded->theDynkinType.IsEqualToZero() && input.indexInOwner == - 1) {
-      crash << "This is not supposed to happen: subalgebra of type "
-      << input.theWeylNonEmbedded->theDynkinType.ToString() << " has index in owner - 1. " << crash;
+      global.fatal << "This is not supposed to happen: subalgebra of type "
+      << input.theWeylNonEmbedded->theDynkinType.ToString() << " has index in owner - 1. " << global.fatal;
     }
   } else {
     input.indexInOwner = this->theSubalgebras.theValues.size;
@@ -1919,13 +1919,13 @@ void SemisimpleSubalgebras::AddSubalgebraToStack(
 ) {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::AddSubalgebraToStack");
   if (input.indexInOwner == - 1 && !input.theWeylNonEmbedded->theDynkinType.IsEqualToZero()) {
-    crash << "Adding to stack subalgebra with indexInOwner equal to - 1 is forbidden. " << crash;
+    global.fatal << "Adding to stack subalgebra with indexInOwner equal to - 1 is forbidden. " << global.fatal;
   }
   if (input.theHs.size != input.theHsScaledToActByTwoInOrderOfCreation.size) {
-    crash << "In order to add subalgebra "
+    global.fatal << "In order to add subalgebra "
     << input.theWeylNonEmbedded->theDynkinType.ToString()
     << " to the stack I need to know the order of creation of its h-vectors. "
-    << crash;
+    << global.fatal;
   }
   input.ComputeCentralizerTypeFailureAllowed();//<- trying to compute the centralizer of a subalgebra on the stack.
   this->currentSubalgebraChain.AddOnTop(input);
@@ -2021,9 +2021,9 @@ bool SemisimpleSubalgebras::IncrementReturnFalseIfPastLast() {
     return false;
   }
   if (this->baseSubalgebra().theHs.size != this->baseSubalgebra().theHsScaledToActByTwoInOrderOfCreation.size) {
-    crash << " The order of creation of the elements of the Cartan is missing in base subalgebra of type "
+    global.fatal << " The order of creation of the elements of the Cartan is missing in base subalgebra of type "
     << this->baseSubalgebra().theWeylNonEmbedded->theDynkinType.ToString()
-    << ", and this order is needed to construct extensions. " << crash;
+    << ", and this order is needed to construct extensions. " << global.fatal;
   }
   ProgressReport theReport1;
   if (this->baseSubalgebra().GetRank() >= this->owner->GetRank()) {
@@ -2079,7 +2079,7 @@ void SemisimpleSubalgebras::RegisterPossibleCandidate(CandidateSSSubalgebra& inp
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::RegisterPossibleCandidate");
   this->CheckConsistency();
   if (input.theSubalgebraNonEmbeddedDefaultScale == 0)
-    crash << "Non-initialized non-default scale subalgebra in candidate subalgebra. " << crash;
+    global.fatal << "Non-initialized non-default scale subalgebra in candidate subalgebra. " << global.fatal;
   this->CheckInitialization();
 }*/
 
@@ -2162,8 +2162,8 @@ void DynkinSimpleType::GetAutomorphismActingOnVectorColumn(MatrixTensor<Rational
         output.AddMonomial(MonomialMatrix(2, 2), 1);
         output.AddMonomial(MonomialMatrix(3, 0), 1);
       } else {
-        crash << "This is a programming error: requesting triality "
-        << "automorphism with index not in the range 0-5. " << crash;
+        global.fatal << "This is a programming error: requesting triality "
+        << "automorphism with index not in the range 0-5. " << global.fatal;
       }
     } else {
       for (int i = 0; i < this->theRank - 2; i ++) {
@@ -2190,17 +2190,17 @@ void DynkinSimpleType::GetAutomorphismActingOnVectorColumn(MatrixTensor<Rational
     FormatExpressions theFormat;
     theFormat.flagUseHTML = false;
     theFormat.flagUseLatex = true;
-    crash << "This is a programming error: the determinant of the automorphism matrix "
+    global.fatal << "This is a programming error: the determinant of the automorphism matrix "
     << "of the Dynkin graph must be +/- 1, it is instead "
     << tempRat.ToString() << ". The auto matrix is: "
     << HtmlRoutines::GetMathMouseHover(output.ToStringMatForm(&theFormat)) << " and the dynkin type is: "
-    << this->ToString() << "." << crash;
+    << this->ToString() << "." << global.fatal;
   }
 }
 
 DynkinSimpleType DynkinType::GetSmallestSimpleType() const {
   if (this->size() == 0) {
-    crash << "This is a programming error: asking for the smallest simple type of a 0 dynkin type. " << crash;
+    global.fatal << "This is a programming error: asking for the smallest simple type of a 0 dynkin type. " << global.fatal;
   }
   DynkinSimpleType result = (*this)[0];
   for (int i = 1; i < this->size(); i ++) {
@@ -2213,7 +2213,7 @@ DynkinSimpleType DynkinType::GetSmallestSimpleType() const {
 
 DynkinSimpleType DynkinType::GetGreatestSimpleType() const {
   if (this->size() == 0) {
-    crash << "This is a programming error: asking for the greatest simple type of a 0 dynkin type. " << crash;
+    global.fatal << "This is a programming error: asking for the greatest simple type of a 0 dynkin type. " << global.fatal;
   }
   DynkinSimpleType result = (*this)[0];
   for (int i = 1; i < this->size(); i ++) {
@@ -2235,10 +2235,10 @@ Rational DynkinType::GetPrincipalSlTwoCSInverseScale() const {
 
 bool CandidateSSSubalgebra::CheckBasicInitialization() const {
   if (this->flagDeallocated) {
-    crash << "This is a programming error: use after free of CandidateSSSubalgebra. " << crash;
+    global.fatal << "This is a programming error: use after free of CandidateSSSubalgebra. " << global.fatal;
   }
   if (this->owner == nullptr) {
-    crash << "This is a programming error: use of non-initialized semisimple subalgebra candidate. " << crash;
+    global.fatal << "This is a programming error: use of non-initialized semisimple subalgebra candidate. " << global.fatal;
   }
   return true;
 }
@@ -2246,8 +2246,8 @@ bool CandidateSSSubalgebra::CheckBasicInitialization() const {
 bool CandidateSSSubalgebra::CheckCandidateInitialization() const {
   this->CheckBasicInitialization();
   if (this->theWeylNonEmbedded == nullptr) {
-    crash << "Weyl group data not initialized for "
-    << "a semisimple subalgebra candidate. " << crash;
+    global.fatal << "Weyl group data not initialized for "
+    << "a semisimple subalgebra candidate. " << global.fatal;
   }
   return true;
 }
@@ -2255,8 +2255,8 @@ bool CandidateSSSubalgebra::CheckCandidateInitialization() const {
 bool CandidateSSSubalgebra::CheckFullInitializatioN() const {
   this->CheckCandidateInitialization();
   if (this->theSubalgebraNonEmbeddedDefaultScale == nullptr) {
-    crash << "The semisimple default scale subalgebra is not initialized. "
-    << crash;
+    global.fatal << "The semisimple default scale subalgebra is not initialized. "
+    << global.fatal;
   }
   return true;
 }
@@ -2311,13 +2311,13 @@ bool CandidateSSSubalgebra::IsGoodHnewActingByTwo(
         canBeRaisingReflection = false;
       }
       if (theScalarProd < 0) {
-        crash << "This is a programming error. While trying to realize type " << this->theWeylNonEmbedded->theDynkinType.ToString()
+        global.fatal << "This is a programming error. While trying to realize type " << this->theWeylNonEmbedded->theDynkinType.ToString()
         << ", the candidate h elements of the semisimple subalgebra are supposed to be maximally dominant, "
         << "however the scalar product of the positive root " << currentPosRoot.ToString() << " with the subalgebra root "
         << this->theHsScaledToActByTwoInOrderOfCreation[l].ToString()
         << " is negative, while the very same positive root has had zero scalar products with all "
         << " preceding roots. Hnew equals: " << HNewActingByTwo.ToString() << " Here are all preceding roots: "
-        << this->theHsScaledToActByTwoInOrderOfCreation.ToString() << crash;
+        << this->theHsScaledToActByTwoInOrderOfCreation.ToString() << global.fatal;
       }
     }
     if (canBeRaisingReflection) {
@@ -2397,8 +2397,8 @@ bool CandidateSSSubalgebra::ComputeSystem(bool AttemptToChooseCentalizer, bool a
     }
     if (currentInvolvedNegGens.size == 0) {
       if (currentInvolvedPosGens.size != 0) {
-        crash << "The number of involved negative generators is different "
-        << "from the number of involved positive generators. " << crash;
+        global.fatal << "The number of involved negative generators is different "
+        << "from the number of involved positive generators. " << global.fatal;
       }
       this->flagSystemProvedToHaveNoSolution = true;
       return false;
@@ -2435,17 +2435,17 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(bool AttemptToChooseCentalizer, b
   this->owner->theSubalgebrasNonDefaultCartanAndScale.theValues[this->indexNonEmbeddedMeNonStandardCartan];
   this->totalNumUnknownsNoCentralizer = 0;
   if (this->theHs.size == 0) {
-    crash << "This is a programming error: the number of involved H's cannot be zero. " << crash;
+    global.fatal << "This is a programming error: the number of involved H's cannot be zero. " << global.fatal;
   }
   if (this->theInvolvedNegGenerators.size != this->theHs.size) {
-    crash << "This is a programming error: the number of involved negative generators: " << this->theInvolvedNegGenerators.size
-    << " is not equal to the subalgebra rank: " << this->theHs.size << ". " << crash;
+    global.fatal << "This is a programming error: the number of involved negative generators: " << this->theInvolvedNegGenerators.size
+    << " is not equal to the subalgebra rank: " << this->theHs.size << ". " << global.fatal;
   }
   for (int i = 0; i < this->theInvolvedNegGenerators.size; i ++) {
     this->totalNumUnknownsNoCentralizer += this->theInvolvedNegGenerators[i].size;
   }
   if (this->theWeylNonEmbedded->RootSystem.size == 0) {
-    crash << "This is a programming error: the root system of the candidate subalgebra has not been computed " << crash;
+    global.fatal << "This is a programming error: the root system of the candidate subalgebra has not been computed " << global.fatal;
   }
   this->totalNumUnknownsNoCentralizer *= 2;
   this->totalNumUnknownsWithCentralizer = this->totalNumUnknownsNoCentralizer;
@@ -2462,20 +2462,20 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(bool AttemptToChooseCentalizer, b
       }
     }
     if (!tempB) {
-      crash << "Error: rankCentralizer is not a small integer. Detailed subalgebra printout: "
-      << this->ToString() << crash;
+      global.fatal << "Error: rankCentralizer is not a small integer. Detailed subalgebra printout: "
+      << this->ToString() << global.fatal;
     }
     if (rankCentralizer < 0) {
-      crash << "This is a programming error: centralizer rank extracted as a negative number. The centralizer rank is: "
+      global.fatal << "This is a programming error: centralizer rank extracted as a negative number. The centralizer rank is: "
       << this->centralizerRank.ToString() << ". This most probably means the centralizer was not computed correctly. "
       << "Here's a full subalgebra printout" << this->ToString()
-      << crash;
+      << global.fatal;
     }
     if (rankCentralizer>this->GetAmbientWeyl().GetDim()) {
-      crash << " Currently rankCentralizer is computed to be " << rankCentralizer << " which is greater than the rank "
+      global.fatal << " Currently rankCentralizer is computed to be " << rankCentralizer << " which is greater than the rank "
       << this->GetAmbientWeyl().GetDim() << " of the ambient semisimple Lie algebra. Something has gone wrong. "
       << "Here is a detailed printout of the candidate subalgebra. "
-      << this->ToString() << crash;
+      << this->ToString() << global.fatal;
     }
     this->totalNumUnknownsWithCentralizer +=rankCentralizer*this->GetAmbientWeyl().GetDim() + 1;
     this->theUnknownCartanCentralizerBasis.SetSize(rankCentralizer);
@@ -2521,7 +2521,7 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(bool AttemptToChooseCentalizer, b
     this->theSystemToSolve.AddOnTop(theDeterminant);
   }
   if (this->theUnknownNegGens.size != this->theUnknownPosGens.size) {
-    crash << "Error: number of unknown negative generators differs from number of unknown positive ones. " << crash;
+    global.fatal << "Error: number of unknown negative generators differs from number of unknown positive ones. " << global.fatal;
   }
   for (int i = 0; i < this->theUnknownNegGens.size; i ++) {
     desiredHpart = this->theHsScaledToActByTwo[i];//<-implicit type conversion here!
@@ -2544,9 +2544,9 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(bool AttemptToChooseCentalizer, b
         posRoot2.MakeEi(this->theWeylNonEmbedded->GetDim(), j);
         int alphaStringLength = - 1;
         if (!nonEmbeddedMe.GetMaxQForWhichBetaMinusQAlphaIsARoot(posRoot1, - posRoot2, alphaStringLength)) {
-          crash << "This is a programming error: the alpha-string along " << posRoot1.ToString()
+          global.fatal << "This is a programming error: the alpha-string along " << posRoot1.ToString()
           << " through " << (- posRoot2).ToString()
-          << " does not contain any root, which is impossible. " << crash;
+          << " does not contain any root, which is impossible. " << global.fatal;
         }
         // positive-positive generator Serre relations
         lieBracketMinusGoalValue = this->theUnknownPosGens[j];
@@ -2595,12 +2595,12 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(bool AttemptToChooseCentalizer, b
       this->owner->owner->GenerateLieSubalgebra(this->theBasis);
       if (this->theBasis.size != this->theWeylNonEmbedded->theDynkinType.GetLieAlgebraDimension()) {
         if (!allowNonPolynomialSystemFailure) {
-          crash << "This is a programming error. "
+          global.fatal << "This is a programming error. "
           << "Lie subalgebra dimension doesn't fit: dimension of generated subalgebra is "
           << this->theBasis.size << ", must be " << this->theWeylNonEmbedded->theDynkinType.GetLieAlgebraDimension()
           << ". The subalgebra is " << this->ToString() << "<br>Involved generators: "
           << this->theInvolvedNegGenerators.ToString()
-          << "<br>and<br>" << this->theInvolvedPosGenerators.ToString() << crash;
+          << "<br>and<br>" << this->theInvolvedPosGenerators.ToString() << global.fatal;
         }
         return false;
       }
@@ -2690,11 +2690,11 @@ bool CandidateSSSubalgebra::CheckModuleDimensions() const {
   if (totalDim != this->GetAmbientSS().GetNumGenerators()) {
     FormatExpressions theFormat;
     theFormat.flagCandidateSubalgebraShortReportOnly = false;
-    crash << "<br><b>Something went very wrong with candidate "
+    global.fatal << "<br><b>Something went very wrong with candidate "
     << this->theWeylNonEmbedded->theDynkinType.ToString() << ": dimensions DONT FIT!!! More precisely, "
     << "I am getting total module dimension sum  " << totalDim
     << " instead of " << this->GetAmbientSS().GetNumGenerators()
-    << ".</b> Here is a detailed subalgebra printout. " << this->ToString(&theFormat) << crash;
+    << ".</b> Here is a detailed subalgebra printout. " << this->ToString(&theFormat) << global.fatal;
   }
   return true;
 }
@@ -2713,7 +2713,7 @@ void CandidateSSSubalgebra::ComputeRatioKillingsByComponent() {
       this->GetAmbientSS().LieBracket(currentElt, adActionElt, adadActionElt);
       bool tempB= currentElt.LinSpanContainsGetFirstLinearCombination(this->theBasis, adadActionElt, theLinearCombi);
       if (!tempB) {
-        crash << "Programming error: Candidate subalgebra not closed under Lie bracket. " << crash;
+        global.fatal << "Programming error: Candidate subalgebra not closed under Lie bracket. " << global.fatal;
       }
       result += theLinearCombi[k];
     }
@@ -2744,9 +2744,9 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecomposition() {
     if (this->ModulesIsotypicallyMerged[i][0].IsElementCartan()) {
       for (int j = 0; j < this->ModulesIsotypicallyMerged[i].size; j ++) {
         if (!this->ModulesIsotypicallyMerged[i][j].IsElementCartan()) {
-          crash << "<br>This is a programming or mathematical error. Module " << this->ModulesIsotypicallyMerged[i].ToString()
+          global.fatal << "<br>This is a programming or mathematical error. Module " << this->ModulesIsotypicallyMerged[i].ToString()
           << " has elements of the ambient Cartan and elements outside of the ambient Cartan, which is not allowed. "
-          << "<br>Here is a detailed subalgebra printout. " << crash;
+          << "<br>Here is a detailed subalgebra printout. " << global.fatal;
         }
       }
       this->primalSubalgebraModules.AddOnTop(i);
@@ -2763,9 +2763,9 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecomposition() {
     }
   }
   if (this->fullBasisByModules.size != this->GetAmbientSS().GetNumGenerators()) {
-    crash << "This is a programming error: the full basis by modules "
+    global.fatal << "This is a programming error: the full basis by modules "
     << "does not have same number of elements as the number of generators of the ambient Lie algebra. "
-    << crash;
+    << global.fatal;
   }
   this->WeightsModulesNONprimal.SetSize(this->Modules.size);
   this->WeightsModulesPrimal.SetSize(this->Modules.size);
@@ -2786,10 +2786,10 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecomposition() {
           this->WeightsModulesPrimal[i][j] = thePrimalProjection;
         } else {
           if (this->WeightsModulesNONprimal[i][j] != theProjection || this->WeightsModulesPrimal[i][j] != thePrimalProjection) {
-            crash << "This is a programming or mathematical error. Given two isomorphic modules over "
+            global.fatal << "This is a programming or mathematical error. Given two isomorphic modules over "
             << "the semisimple subalgebra (i.e., same highest weights), "
             << "and the same order of generation of weights, I got different order "
-            << " of the lower weights of the modules. Something is very wrong. " << crash;
+            << " of the lower weights of the modules. Something is very wrong. " << global.fatal;
           }
         }
       }
@@ -2871,7 +2871,7 @@ void CandidateSSSubalgebra::ComputePairKweightElementAndModule(
   Vector<AlgebraicNumber> coordsInFullBasis;
   output.SetSize(0);
   if (this->fullBasisByModules.size != this->GetAmbientSS().GetNumGenerators()) {
-    crash << "This is a programming error: fullBasisByModules not computed when it should be. " << crash;
+    global.fatal << "This is a programming error: fullBasisByModules not computed when it should be. " << global.fatal;
   }
   for (int j = 0; j < rightModule.size; j ++) {
     this->GetAmbientSS().LieBracket(leftKweightElt, rightModule[j], theLieBracket);
@@ -2882,9 +2882,9 @@ void CandidateSSSubalgebra::ComputePairKweightElementAndModule(
     }
     bool tempbool = theLieBracket.GetCoordsInBasis(this->fullBasisByModules, coordsInFullBasis);
     if (!tempbool) {
-      crash << "This is a programming error: something has gone very wrong: my k-weight basis "
+      global.fatal << "This is a programming error: something has gone very wrong: my k-weight basis "
       << this->fullBasisByModules.ToString()
-      << " does not contain " << theLieBracket.ToString() << crash;
+      << " does not contain " << theLieBracket.ToString() << global.fatal;
     }
     for (int i = 0; i < coordsInFullBasis.size; i ++) {
       if (!coordsInFullBasis[i].IsEqualToZero()) {
@@ -3033,9 +3033,9 @@ void CandidateSSSubalgebra::ComputeKsl2triplesGetOppositeEltsAll(
         for (int k = 0; k < this->Modules[i].size; k ++) {
           outputElts.AddOnTop(this->Modules[i][k][j]);
           if (!(theElementWeight + this->GetPrimalWeightFirstGen(this->Modules[i][k][j])).IsEqualToZero()) {
-            crash << "This is a programming error: element "
+            global.fatal << "This is a programming error: element "
             << "this->Modules[i][k][j] does not have the primal weight it is supposed to have. "
-            << crash;
+            << global.fatal;
           }
         }
       }
@@ -3111,7 +3111,7 @@ int CandidateSSSubalgebra::GetPrimalRank() const {
 
 void NilradicalCandidate::CheckInitialization() const {
   if (this->owner == nullptr) {
-    crash << "This is a programming error: NilradicalCandidate with non-initialized owner" << crash;
+    global.fatal << "This is a programming error: NilradicalCandidate with non-initialized owner" << global.fatal;
   }
 }
 
@@ -3156,7 +3156,7 @@ bool NilradicalCandidate::IsCommutingSelectionNilradicalElements(Selection& inpu
           this->theNilradicalWeights[inputNilradSel.elements[i]], this->theNilradicalWeights[inputNilradSel.elements[j]]
         ) < 0
       ) {
-        /*crash << "<br>This is either a programming error, or I am missing some mathematical phenomenon: k-sl(2)-triples are "
+        /*global.fatal << "<br>This is either a programming error, or I am missing some mathematical phenomenon: k-sl(2)-triples are "
         << "strongly orthogonal, but their k-weights aren't. Crashing to tactfully let you know. "
         << "The bad elements are: "
         << this->theNilradical[inputNilradSel.elements[i]].ToString() << " of weight "
@@ -3166,7 +3166,7 @@ bool NilradicalCandidate::IsCommutingSelectionNilradicalElements(Selection& inpu
         << this->theNilradicalWeights[inputNilradSel.elements[j]].ToString() << ". "
         //<< "The bilinear form is: " << this->owner->BilinearFormFundPrimal.ToString() << ". "
         //<< " and the subalgebra in play is: " << this->owner->ToString() << ". "
-        //<< crash;
+        //<< global.fatal;
         */
         return false;
       }
@@ -3255,9 +3255,9 @@ void NilradicalCandidate::ComputeParabolicACextendsToParabolicAC() {
   if (smallLeviHasBDGE) {
     this->flagParabolicACextendsToParabolicAC = true;
     if (!ambientLeviHasBDGE) {
-      crash << "This is a mathematical error. Something is very wrong. The ambient parabolic subalgebra has components "
+      global.fatal << "This is a mathematical error. Something is very wrong. The ambient parabolic subalgebra has components "
       << " of type A and C, but intesects the centralizer in components of type B and D. This must be impossible according to "
-      << "the PSZ paper and the restriction of Fernando's theorem to the centralizer. " << crash;
+      << "the PSZ paper and the restriction of Fernando's theorem to the centralizer. " << global.fatal;
     }
   }
 }
@@ -3437,8 +3437,8 @@ void NilradicalCandidate::ComputeTheTwoCones() {
     this->ownerModulesNilradicalElements.size != this->theNilradical.size ||
     this->theNonFKhws.size != this->ownerModulestheNonFKhwVectors.size
   ) {
-    crash << "This is a programming error: sizes of indexing arrasy in "
-    << "Fernando Kac nilradical candidate don't match. " << crash;
+    global.fatal << "This is a programming error: sizes of indexing arrasy in "
+    << "Fernando Kac nilradical candidate don't match. " << global.fatal;
   }
 }
 
@@ -3459,16 +3459,16 @@ void CandidateSSSubalgebra::EnumerateAllNilradicals() {
   }
   std::stringstream out;
   if (theSel.size != this->NilradicalPairingTable.size || theSel.size != this->ModulesIsotypicallyMerged.size) {
-    crash << "This is a programming error: selection has "
+    global.fatal << "This is a programming error: selection has "
     << theSel.size << ", nilraidcal pairing table has " << this->NilradicalPairingTable.size
     << " elements and modules isotypically merged has " << this->ModulesIsotypicallyMerged.size
-    << " elements." << crash;
+    << " elements." << global.fatal;
   }
   this->EnumerateNilradicalsRecursively(theSel, &out);
   if (this->FKNilradicalCandidates.size < 1) {
-    crash << "This is a programming error:" << " while enumerating nilradicals of "
+    global.fatal << "This is a programming error:" << " while enumerating nilradicals of "
     << this->theWeylNonEmbedded->theDynkinType.ToString()
-    << " got 0 nilradical candidates which is impossible (the zero nilradical is always possible). " << crash;
+    << " got 0 nilradical candidates which is impossible (the zero nilradical is always possible). " << global.fatal;
   }
   for (int i = 0; i < this->FKNilradicalCandidates.size; i ++) {
     std::stringstream reportStream2;
@@ -3515,9 +3515,9 @@ void Vector<coefficient>::PerturbNormalRelativeToVectorsInGeneralPosition(
   MacroRegisterFunctionWithName("Vectors::PerturbSplittingNormal");
   for (int i = 0; i <NonStrictConeNonPositiveScalar.size; i ++) {
     if (this->ScalarEuclidean(NonStrictConeNonPositiveScalar[i]) < 0) {
-      crash << "This is a programming error: the splitting normal " << this->ToString()
+      global.fatal << "This is a programming error: the splitting normal " << this->ToString()
       << " is supposed to have non-negative scalar product with the vector "
-      << NonStrictConeNonPositiveScalar[i].ToString() << ", but it doesn't." << crash;
+      << NonStrictConeNonPositiveScalar[i].ToString() << ", but it doesn't." << global.fatal;
     }
   }
   Vector<Rational> oldThis =*this;
@@ -3554,16 +3554,16 @@ void Vector<coefficient>::PerturbNormalRelativeToVectorsInGeneralPosition(
     *this += currentModifier * theScale;
     for (int i = 0; i < NonStrictConeNonPositiveScalar.size; i ++) {
       if (this->ScalarEuclidean(NonStrictConeNonPositiveScalar[i]) < 0) {
-        crash << "<br>This is a programming error: during perturbation, the splitting normal " << this->ToString()
+        global.fatal << "<br>This is a programming error: during perturbation, the splitting normal " << this->ToString()
         << " is supposed to have non-negative scalar product with the vector " << NonStrictConeNonPositiveScalar[i].ToString()
-        << ", but it doesn't." << crash;
+        << ", but it doesn't." << global.fatal;
       } else {
         if (
           this->ScalarEuclidean(NonStrictConeNonPositiveScalar[i]) == 0 &&
           oldThis.ScalarEuclidean(NonStrictConeNonPositiveScalar[i]) > 0
         ) {
-          crash << "<br>This is a programming error: during perturbation, the splitting normal " << this->ToString()
-          << " lost  positive scalar product with " << NonStrictConeNonPositiveScalar[i].ToString() << "." << crash;
+          global.fatal << "<br>This is a programming error: during perturbation, the splitting normal " << this->ToString()
+          << " lost  positive scalar product with " << NonStrictConeNonPositiveScalar[i].ToString() << "." << global.fatal;
         }
       }
     }
@@ -3701,9 +3701,9 @@ void CandidateSSSubalgebra::EnumerateNilradicalsRecursively(List<int>& theSelect
   MacroRegisterFunctionWithName("CandidateSSSubalgebra::EnumerateNilradicalsRecursively");
   RecursionDepthCounter theCounter(&this->RecursionDepthCounterForNilradicalGeneration);
   if (this->RecursionDepthCounterForNilradicalGeneration>this->NilradicalPairingTable.size + 1) {
-    crash << "<br>oh no... something went very wrong! The nilradical generation recursion "
+    global.fatal << "<br>oh no... something went very wrong! The nilradical generation recursion "
     << "depth cannot exceed the number of nilradicals! "
-    << crash;
+    << global.fatal;
   }
   ProgressReport theReport;
   if (theReport.TickAndWantReport()) {
@@ -3870,8 +3870,8 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart(
         tempModules[i], this->theBasis, *this->HighestVectors.LastObject()
       );
       if (this->HighestVectors.LastObject()->size != 1) {
-        crash << "This is a programming error: simple component "
-        << "computed to have more than one highest weight vector. " << crash;
+        global.fatal << "This is a programming error: simple component "
+        << "computed to have more than one highest weight vector. " << global.fatal;
       }
       this->primalSubalgebraModules.AddOnTop(this->Modules.size- 1);
       this->Modules.LastObject()->SetSize(1);
@@ -3894,9 +3894,9 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart(
         }
         this->HighestVectors.LastObject()->RemoveIndexSwapWithLast(0);
         if (this->HighestVectors.LastObject()->size != tempModules[i].size - 1) {
-          crash << "This is a programming error: wrong number of hwv's: got "
+          global.fatal << "This is a programming error: wrong number of hwv's: got "
           << this->HighestVectors.LastObject()->size << ", must have "
-          << tempModules[i].size- 1 << ". " << crash;
+          << tempModules[i].size- 1 << ". " << global.fatal;
         }
         for (int j = 0; j < this->HighestVectors.LastObject()->size; j ++) {
           (*this->Modules.LastObject())[j].SetSize(1);
@@ -3939,15 +3939,15 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart(
   for (int i = 0; i < this->Modules.size; i ++) {
     for (int j = 0; j < this->Modules[i].size; j ++) {
       if (this->Modules[i][j].size != 1) {
-        crash << "This is a programming error: empty module! " << crash;
+        global.fatal << "This is a programming error: empty module! " << global.fatal;
       }
     }
   }
   if (this->thePrimalChaR.GetCoefficientsSum() != numMods) {
-    crash << "This is a programming error: the sum of the coeffs of the primal char is "
+    global.fatal << "This is a programming error: the sum of the coeffs of the primal char is "
     << this->thePrimalChaR.GetCoefficientsSum().ToString()
     << " but there are  " << numMods << " modules. Tempmodules variable: "
-    << tempModules.ToString() << "<br>Candidate details: " << this->ToString() << crash;
+    << tempModules.ToString() << "<br>Candidate details: " << this->ToString() << global.fatal;
   }
 }
 
@@ -3994,7 +3994,7 @@ bool SemisimpleSubalgebras::CheckConsistencyHs() const {
   this->CheckInitialization();
   for (int i = 0; i < this->theSubalgebras.theValues.size; i ++) {
     if (this->theSubalgebras.theKeys[i] != this->theSubalgebras.theValues[i].theHs) {
-      crash << "List this->theHsOfSubalgebras does not match this->theSubalgebras" << crash;
+      global.fatal << "List this->theHsOfSubalgebras does not match this->theSubalgebras" << global.fatal;
     }
   }
   return true;
@@ -4003,19 +4003,19 @@ bool SemisimpleSubalgebras::CheckConsistencyHs() const {
 bool SemisimpleSubalgebras::CheckInitialization() const {
   this->CheckConsistency();
   if (this->owner == nullptr) {
-    crash << "No owner semisimple Lie algebra. " << crash;
+    global.fatal << "No owner semisimple Lie algebra. " << global.fatal;
   }
   if (this->theSubalgebrasNonEmbedded == nullptr) {
-    crash << "No container for non-embedded subalgebras. " << crash;
+    global.fatal << "No container for non-embedded subalgebras. " << global.fatal;
   }
   return true;
 }
 
 bool SemisimpleSubalgebras::CheckConsistency() const {
   //if (this == 0)
-  //  crash << "Programming error: this pointer is zero." << crash;
+  //  global.fatal << "Programming error: this pointer is zero." << global.fatal;
   if (this->flagDeallocated) {
-    crash << "This is a programming error: use after free of semisimple subalgebras. " << crash;
+    global.fatal << "This is a programming error: use after free of semisimple subalgebras. " << global.fatal;
   }
   return true;
 }
@@ -4095,10 +4095,10 @@ bool CandidateSSSubalgebra::AttemptToSolveSystem() {
       this->thePosGens[i] = currentPosElt;//<-implicit type conversion here, will crash if currentNegElt has non-const coefficients
     }
     if (!this->CheckGensBracketToHs()) {
-      crash << "This is a programming error: I just solved the "
+      global.fatal << "This is a programming error: I just solved the "
       << "Serre-Like system governing the subalgebra embedding, but the Lie brackets of the "
       << "resulting positive and negative generators are not what they should be. "
-      << "Something has gone very wrong. " << crash;
+      << "Something has gone very wrong. " << global.fatal;
     }
   } else {
     //if (this->flagSystemProvedToHaveNoSolution)
@@ -4175,8 +4175,8 @@ void CandidateSSSubalgebra::GetGenericLinearCombination(
 
 bool CandidateSSSubalgebra::ComputeChar(bool allowBadCharacter) {
   if (this->indexNonEmbeddedMeStandard == - 1) {
-    crash << "This is a programming error: attempting to "
-    << "compute char of candidate subalgebra that has not been initialized properly. " << crash;
+    global.fatal << "This is a programming error: attempting to "
+    << "compute char of candidate subalgebra that has not been initialized properly. " << global.fatal;
   }
   MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeChar");
   this->CheckCandidateInitialization();
@@ -4200,7 +4200,7 @@ bool CandidateSSSubalgebra::ComputeChar(bool allowBadCharacter) {
   this->theHsScaledToActByTwo.GetGramMatrix(coCartanCandidate, &this->GetAmbientWeyl().CartanSymmetric);
   if (coCartanCandidate != this->theWeylNonEmbedded->CoCartanSymmetric) {
     if (!allowBadCharacter) {
-      crash << "This is a mathematical error. The co-Cartan symmetric matrix is: "
+      global.fatal << "This is a mathematical error. The co-Cartan symmetric matrix is: "
       << this->theWeylNonEmbedded->CoCartanSymmetric.ToString()
       << " but co-Cartan of the computed candidate elements of the Cartan, "
       << this->theHsScaledToActByTwo.ToString()
@@ -4217,9 +4217,9 @@ bool CandidateSSSubalgebra::ComputeChar(bool allowBadCharacter) {
         );
         if (!tempMon.weightFundamentalCoordS[counter].IsInteger()) {
           if (!allowBadCharacter) {
-            crash << "This is a programming error: function ComputeChar "
+            global.fatal << "This is a programming error: function ComputeChar "
             << "called with Cartan that suggests non-integral characters. At "
-            << "the same time, an option banning this possibility has been explicitly selected. " << crash;
+            << "the same time, an option banning this possibility has been explicitly selected. " << global.fatal;
           }
           return false;
         }
@@ -4236,8 +4236,8 @@ bool CandidateSSSubalgebra::ComputeChar(bool allowBadCharacter) {
   while (accumChar.size() > 0) {
     int currentIndex = accumChar.GetIndexExtremeWeightRelativeToWeyl(*this->theWeylNonEmbedded);
     if (currentIndex == - 1) {
-      crash << "This is a programming error: while decomposing ambient Lie algebra over the candidate subalgebra, I got "
-      << "that there is no extreme weight. This is impossible: something has gone very wrong. " << crash;
+      global.fatal << "This is a programming error: while decomposing ambient Lie algebra over the candidate subalgebra, I got "
+      << "that there is no extreme weight. This is impossible: something has gone very wrong. " << global.fatal;
     }
     if (accumChar.theCoeffs[currentIndex] < 0) {
       return false;
@@ -4255,10 +4255,10 @@ bool CandidateSSSubalgebra::ComputeChar(bool allowBadCharacter) {
     std::string tempS;
     bool tempBool = freudenthalChar.FreudenthalEvalMeFullCharacter(outputChar, - 1, &tempS);
     if (!tempBool && !allowBadCharacter) {
-      crash << "This is a programming error: failed to evaluate full character "
+      global.fatal << "This is a programming error: failed to evaluate full character "
       << "via the Freudenthal formula on a relatively small example, namely "
       << freudenthalChar.ToString() << ". The failure message was: "
-      << tempS << ". This shouldn't happen. " << crash;
+      << tempS << ". This shouldn't happen. " << global.fatal;
       return false;
     }
     accumChar -= outputChar;
@@ -4307,7 +4307,7 @@ void slTwoSubalgebra::ElementToStringModuleDecompositionMinimalContainingRegular
 
 const WeylGroupData& slTwoSubalgebra::GetOwnerWeyl() const {
   if (this->owner == nullptr) {
-    crash << "Weyl group with non-initialized owner. " << crash;
+    global.fatal << "Weyl group with non-initialized owner. " << global.fatal;
   }
   return this->owner->theWeyl;
 }
@@ -4315,7 +4315,7 @@ const WeylGroupData& slTwoSubalgebra::GetOwnerWeyl() const {
 bool slTwoSubalgebra::operator>(const slTwoSubalgebra& right) const {
   MacroRegisterFunctionWithName("slTwoSubalgebra::operatorGT");
   if (this->owner != right.owner) {
-    crash << "Error: comparing sl(2) subalgebras with different owners." << crash;
+    global.fatal << "Error: comparing sl(2) subalgebras with different owners." << global.fatal;
   }
   if ( this->LengthHsquared > right.LengthHsquared) {
     return true;
@@ -4329,8 +4329,8 @@ bool slTwoSubalgebra::operator>(const slTwoSubalgebra& right) const {
 bool slTwoSubalgebra::operator==(const slTwoSubalgebra& right) const {
  // See Dynkin, Semisimple Lie subalgebras of semisimple Lie algebras, chapter 7- 10
   if (this->owner != right.owner) {
-    crash << "This is a programming error: comparing sl(2) "
-    << "subalgebras that have different ambient Lie algebras. " << crash;
+    global.fatal << "This is a programming error: comparing sl(2) "
+    << "subalgebras that have different ambient Lie algebras. " << global.fatal;
   }
   return this->hCharacteristic == right.hCharacteristic;
 }
@@ -4442,7 +4442,7 @@ void slTwoSubalgebra::init() {
 
 bool slTwoSubalgebra::CheckConsistency() const {
   if (this->flagDeallocated) {
-    crash << "This is a programming error: use after free of slTwoSubalgebra. " << crash;
+    global.fatal << "This is a programming error: use after free of slTwoSubalgebra. " << global.fatal;
   }
   if (this->owner != nullptr) {
     this->owner->CheckConsistency();
@@ -4591,7 +4591,7 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, 
 
 bool CandidateSSSubalgebra::CheckConsistency() const {
   if (this->flagDeallocated) {
-    crash << "This is a programming error: use after free of CandidateSSSubalgebra. " << crash;
+    global.fatal << "This is a programming error: use after free of CandidateSSSubalgebra. " << global.fatal;
   }
   return true;
 }
@@ -4641,14 +4641,14 @@ bool CandidateSSSubalgebra::CheckMaximalDominance() const {
           canBeRaisingReflection = false;
         }
         if (theScalarProd < 0) {
-          crash << "This is a programming error. The candidate h elements "
+          global.fatal << "This is a programming error. The candidate h elements "
           << "of the semisimple subalgebra are supposed to be maximally dominant, "
           << "however the scalar product of the positive root " << currentPosRoot.ToString()
           << " with the subalgebra root "
           << this->CartanSAsByComponentScaledToActByTwo[k][l].ToString()
           << " is negative, while the very same positive root has had zero scalar products with all "
           << " preceding roots. Here are all preceding roots: "
-          << this->CartanSAsByComponentScaledToActByTwo.ToString() << crash;
+          << this->CartanSAsByComponentScaledToActByTwo.ToString() << global.fatal;
           return false;
         }
       }
@@ -4659,7 +4659,7 @@ bool CandidateSSSubalgebra::CheckMaximalDominance() const {
 
 bool SltwoSubalgebras::CheckConsistency() const {
   if (this->flagDeallocated) {
-    crash << "This is a programming error: use after free of SemisimpleLieAlgebra. " << crash;
+    global.fatal << "This is a programming error: use after free of SemisimpleLieAlgebra. " << global.fatal;
   }
   if (this->owner != nullptr) {
     this->owner->CheckConsistency();
@@ -4722,7 +4722,7 @@ bool slTwoSubalgebra::AttemptToComputeCentralizer() {
     !this->moduleDecompositionAmbientSA.GetMonomialCoefficient(zeroWeight).IsSmallInteger(
       &this->dimensionCentralizer
   )) {
-    crash << "Dimension of centralizer of sl(2) subalgebra is not a small integer. This shouldn't happen. " << crash;
+    global.fatal << "Dimension of centralizer of sl(2) subalgebra is not a small integer. This shouldn't happen. " << global.fatal;
   }
   for (int i = 0; i < this->IndicesMinimalContainingRootSAs.size; i ++) {
     rootSubalgebra& currentMinimalContainer =
@@ -4823,7 +4823,7 @@ void slTwoSubalgebra::ComputeModuleDecomposition(
   this->CheckConsistency();
   positiveRootsContainingRegularSA.CheckConsistency();
   if (positiveRootsContainingRegularSA.size <= 0) {
-    crash << "This is a programming error: positiveRootsContainingRegularSA has less than one element. " << crash;
+    global.fatal << "This is a programming error: positiveRootsContainingRegularSA has less than one element. " << global.fatal;
   }
   int IndexZeroWeight = positiveRootsContainingRegularSA.size * 2;
   outputModuleDimensions.initializeFillInObject(4 * positiveRootsContainingRegularSA.size + 1, 0);
@@ -4837,14 +4837,14 @@ void slTwoSubalgebra::ComputeModuleDecomposition(
   for (int k = 0; k < positiveRootsContainingRegularSA.size; k ++) {
     tempRat = this->hCharacteristic.ScalarEuclidean(coordsInPreferredSimpleBasis[k]);
     if (tempRat.DenShort != 1) {
-      crash << "Characteristic must be integer. " << crash;
+      global.fatal << "Characteristic must be integer. " << global.fatal;
     }
     if (tempRat>positiveRootsContainingRegularSA.size * 2) {
-      crash << "This is a programming error. The scalar product of the h-Characteristic "
+      global.fatal << "This is a programming error. The scalar product of the h-Characteristic "
       << this->hCharacteristic.ToString()
       << " with the simple root " << coordsInPreferredSimpleBasis[k].ToString()
       << " is larger than " << positiveRootsContainingRegularSA.size * 2
-      << ". The affected sl(2) subalgebra is " << this->ToString() << ". " << crash;
+      << ". The affected sl(2) subalgebra is " << this->ToString() << ". " << global.fatal;
       break;
     }
     outputModuleDimensions[IndexZeroWeight + tempRat.NumShort] ++;
@@ -4858,8 +4858,8 @@ void slTwoSubalgebra::ComputeModuleDecomposition(
   for (int j = BufferHighestWeights.size - 1; j >= IndexZeroWeight; j --) {
     int topMult = BufferHighestWeights[j];
     if (topMult < 0) {
-      crash << "This is a programming error: the sl(2)-module decomposition shows an sl(2)-module with highest weight "
-      << topMult << " which is impossible. Here is the sl(2) subalgebra. " << this->ToString() << "." << crash;
+      global.fatal << "This is a programming error: the sl(2)-module decomposition shows an sl(2)-module with highest weight "
+      << topMult << " which is impossible. Here is the sl(2) subalgebra. " << this->ToString() << "." << global.fatal;
     }
     if (topMult > 0) {
       currentHW.weightFundamentalCoordS[0] = j - IndexZeroWeight;
@@ -4884,7 +4884,7 @@ void slTwoSubalgebra::ComputeModuleDecomposition(
           << coordsInPreferredSimpleBasis.ToString() << " The starting weights list is <br>"
           << outputModuleDimensions << ". "
           << " I got that the root space of index  " <<  k + 1 << " has negative dimension. Something is wrong. ";
-          crash << crashStream.str() << crash;
+          global.fatal << crashStream.str() << global.fatal;
         }
       }
     }
@@ -5134,7 +5134,7 @@ void SltwoSubalgebras::ToHTML(FormatExpressions* theFormat) {
   out << "</body></html>";
   std::stringstream commentsOnError;
   if (!FileOperations::WriteFileVirual(virtualFileName, out.str(), &commentsOnError)) {
-    crash << "Failed to write sl(2)-subalgebras. " << commentsOnError.str() << crash;
+    global.fatal << "Failed to write sl(2)-subalgebras. " << commentsOnError.str() << global.fatal;
   }
 }
 
@@ -6303,20 +6303,20 @@ void CandidateSSSubalgebra::ComputeCentralizerIsWellChosen() {
     this->centralizerRank -= centralizerTypeAlternative.GetRootSystemSize();
     if (this->RootSystemCentralizerPrimalCoords.size > 0) {
       if (centralizerTypeAlternative != this->theCentralizerType) {
-        crash << "This is a programming error: two different methods "
+        global.fatal << "This is a programming error: two different methods "
         << "for computing the centralizer type yield different results: "
         << "by sub-diagram I computed the type as "
         << this->theCentralizerType.ToString()
         << " but looking at subalgerba containing the current one I got centralizer type "
-        << centralizerTypeAlternative.ToString() << crash;
+        << centralizerTypeAlternative.ToString() << global.fatal;
       }
     }
     if (this->centralizerRank>this->owner->owner->GetRank()) {
-      crash << "Something is wrong." << this->ToStringCentralizerDebugData() << crash;
+      global.fatal << "Something is wrong." << this->ToStringCentralizerDebugData() << global.fatal;
     }
   } else {
     if (this->centralizerDimension + this->GetRank() > this->owner->owner->GetRank()) {
-      crash << "Something is wrong. " << this->ToStringCentralizerDebugData() << crash;
+      global.fatal << "Something is wrong. " << this->ToStringCentralizerDebugData() << global.fatal;
     }
   }
   this->flagCentralizerIsWellChosen = (this->centralizerRank == this->CartanOfCentralizer.size);
@@ -6724,7 +6724,7 @@ void CandidateSSSubalgebra::GetHsScaledToActByTwoByType(
   outputHsByType.SetSize(0);
   outputTypeList.SetSize(0);
   if (allTypes.size != this->CartanSAsByComponentScaledToActByTwo.size) {
-    crash << "This is a programming error: allTypes.size must equal this->CartanSAsByComponentScaledToActByTwo.size. " << crash;
+    global.fatal << "This is a programming error: allTypes.size must equal this->CartanSAsByComponentScaledToActByTwo.size. " << global.fatal;
   }
   for (int i = 0; i < allTypes.size; i ++) {
     bool shouldOpenNewType = true;
@@ -6808,14 +6808,14 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other
   }
   bool mustBeTrue = theOuterAutos.GenerateElements(100000);
   if (!mustBeTrue) {
-    crash << "Failed to generate outer automorphisms of Dynkin simple type. "
-    << "The upper limit for such automorphism group size is 100000. " << crash;
+    global.fatal << "Failed to generate outer automorphisms of Dynkin simple type. "
+    << "The upper limit for such automorphism group size is 100000. " << global.fatal;
   }
   Rational numCyclesFromTypes = selectedTypes.GetNumTotalCombinations();
   if (!numCyclesFromTypes.IsSmallInteger()) {
-    crash << "Computation is too large: "
+    global.fatal << "Computation is too large: "
     << "I am crashing to let you know that the program cannot "
-    << "handle such a large number of outer automorphisms. " << crash;
+    << "handle such a large number of outer automorphisms. " << global.fatal;
   }
   List<Vector<Rational> > conjugationCandidates;
   Vectors<Rational> currentComponent;
@@ -6973,10 +6973,10 @@ void SemisimpleSubalgebras::HookUpCentralizers(bool allowNonPolynomialSystemFail
     }
     currentSA.ComputeCentralizerIsWellChosen();
     if (currentSA.centralizerRank > this->owner->GetRank()) {
-      crash << "Subalgebra " << currentSA.ToStringType() << " has rank "
+      global.fatal << "Subalgebra " << currentSA.ToStringType() << " has rank "
       << currentSA.centralizerRank.ToString()
       << " but the ambient Lie algebra isonly of rank "
-      << this->owner->GetRank() << ". " << crash;
+      << this->owner->GetRank() << ". " << global.fatal;
     }
   }
   theReport1.Report("<hr>\nCentralizers computed, adjusting centralizers with respect to the Cartan subalgebra.");
@@ -7032,8 +7032,8 @@ bool DynkinType::operator>(const DynkinType& other) const {
 
 bool CandidateSSSubalgebra::operator>(const CandidateSSSubalgebra& other) const {
   //if (this->owner != other.owner)
-  //{ crash << "This is a programming error: comparing CandidateSSSubalgebra with different owners. "
-  //  << crash;
+  //{ global.fatal << "This is a programming error: comparing CandidateSSSubalgebra with different owners. "
+  //  << global.fatal;
   //}
   return this->theWeylNonEmbedded->theDynkinType > other.theWeylNonEmbedded->theDynkinType;
 }

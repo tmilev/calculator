@@ -97,10 +97,10 @@ bool AlgebraicClosureRationals::GetRadicalSelectionFromIndex(int inputIndex, Sel
 
 int AlgebraicClosureRationals::GetIndexFromRadicalSelection(const Selection& theSel) {
   if (theSel.MaxSize > 30) {
-    crash
+    global.fatal
     << "This is a programming error: the algebraic extension "
     << "is too large to be handled by the current data structures. "
-    << crash;
+    << global.fatal;
   }
   int result = 0;
   for (int i = theSel.MaxSize - 1; i >= 0; i --) {
@@ -115,9 +115,9 @@ int AlgebraicClosureRationals::GetIndexFromRadicalSelection(const Selection& the
 bool AlgebraicClosureRationals::MergeRadicals(const List<LargeInteger>& theRadicals) {
   MacroRegisterFunctionWithName("AlgebraicClosureRationals::MergeTwoQuadraticRadicalExtensions");
   if (!this->flagIsQuadraticRadicalExtensionRationals) {
-    crash << "This is a programming error: AlgebraicClosureRationals::MergeTwoQuadraticRadicalExtensions "
+    global.fatal << "This is a programming error: AlgebraicClosureRationals::MergeTwoQuadraticRadicalExtensions "
     << "with at least one of two arguments that is not a quadratic radical extension of the rationals. "
-    << crash;
+    << global.fatal;
   }
   //refine factors:
   HashedList<LargeInteger> radicalsNew = this->theQuadraticRadicals;
@@ -155,7 +155,7 @@ bool AlgebraicClosureRationals::MergeRadicals(const List<LargeInteger>& theRadic
     << "rationals is greater than 2^16 is not allowed. "
     << "Such computations are too large for the current "
     << "implementation of algberaic extensions of the rationals. "
-    << Crasher::GetStackTraceEtcErrorMessageHTML();
+    << GlobalVariables::Crasher::GetStackTraceEtcErrorMessageHTML();
     return (false);
   }
   this->theBasisMultiplicative.SetSize(MathRoutines::TwoToTheNth(radicalsNew.size));
@@ -259,7 +259,7 @@ bool AlgebraicClosureRationals::ReduceMe() {
   List<Polynomial<Rational> > theFactors;
   bool mustBeTrue = theMinPoly.FactorMe(theFactors, nullptr);
   if (!mustBeTrue) {
-    crash << "This is a programming error: failed to factor polynomial " << theMinPoly.ToString() << crash;
+    global.fatal << "This is a programming error: failed to factor polynomial " << theMinPoly.ToString() << global.fatal;
   }
   smallestFactor = theFactors[0];
   if (smallestFactor.TotalDegreeInt() == theDim) {
@@ -273,8 +273,8 @@ bool AlgebraicClosureRationals::ReduceMe() {
   MatrixTensor<Rational> theProjection;
   int smallestFactorDegree = - 1;
   if (!smallestFactor.TotalDegree().IsSmallInteger(&smallestFactorDegree)) {
-    crash << "This is a programming error: " << smallestFactor.ToString()
-    << " has non-integral exponent, which should be impossible in the current context. " << crash;
+    global.fatal << "This is a programming error: " << smallestFactor.ToString()
+    << " has non-integral exponent, which should be impossible in the current context. " << global.fatal;
   }
   theProjection.MakeZero();
   for (int i = 0; i < smallestFactorDegree; i ++) {
@@ -332,7 +332,7 @@ void AlgebraicClosureRationals::GetAdditionTo(const AlgebraicNumber& input, Vect
   }
   if (input.basisIndex < 0 || input.basisIndex >= this->theBasesAdditive.size) {
     global.Comments << "This is a programming error: element has basis index " << input.basisIndex << ". "
-    << Crasher::GetStackTraceEtcErrorMessageHTML();
+    << global.fatal.GetStackTraceEtcErrorMessageHTML();
   }
   if (input.basisIndex == this->theBasesAdditive.size - 1) {
     output = input.theElT;
@@ -342,9 +342,9 @@ void AlgebraicClosureRationals::GetAdditionTo(const AlgebraicNumber& input, Vect
   for (int i = 0; i < input.theElT.size(); i ++) {
     int currentIndex = input.theElT[i].theIndex;
     if (currentIndex < 0 || currentIndex >= this->theBasesAdditive[input.basisIndex].size) {
-      crash << "This is a programming error: I am getting basis index "
+      global.fatal << "This is a programming error: I am getting basis index "
       << input.basisIndex << " with current index " << currentIndex
-      << ". A printout of the algebraic closure follows. " << this->ToString() << crash;
+      << ". A printout of the algebraic closure follows. " << this->ToString() << global.fatal;
     }
     output.AddOtherTimesConst(this->theBasesAdditive[input.basisIndex][currentIndex], input.theElT.theCoeffs[i]);
   }
@@ -360,9 +360,9 @@ void AlgebraicClosureRationals::GetMultiplicationBy(
   MatrixTensor<Rational> currentMat;
   for (int i = 0; i < inputAdditiveForm.size(); i ++) {
     if (inputAdditiveForm[i].theIndex < 0 || inputAdditiveForm[i].theIndex >= this->theBasisMultiplicative.size) {
-      crash << "This is a programming error: element " << input.ToString()
+      global.fatal << "This is a programming error: element " << input.ToString()
       << " has bad index, namely, " << inputAdditiveForm[i].theIndex
-      << ". The algebraic closure is: " << this->ToString() << ". " << crash;
+      << ". The algebraic closure is: " << this->ToString() << ". " << global.fatal;
     }
     currentMat = this->theBasisMultiplicative[inputAdditiveForm[i].theIndex];
     currentMat *= inputAdditiveForm.theCoeffs[i];
@@ -394,7 +394,7 @@ bool AlgebraicNumber::AssignCosRationalTimesPi(const Rational& input, AlgebraicC
   halfIntegerPart.AssignFloor();
   LargeInteger halfIntegerPartTimesTwo;
   if (!halfIntegerPart.IsInteger(&halfIntegerPartTimesTwo)) {
-    crash << "something went wrong: floor function returns non-integer" << crash;
+    global.fatal << "something went wrong: floor function returns non-integer" << global.fatal;
   }
   halfIntegerPart /= 2;
   Rational halfFracPart = input - halfIntegerPart;
@@ -476,7 +476,7 @@ Rational AlgebraicNumber::GetNumeratorRationalPart() const {
 }
 
 unsigned int AlgebraicNumber::HashFunction() const {
-  //crash << crash;
+  //global.fatal << global.fatal;
   //WARNING. Algebraic numbers, as they are recorded in memory at the moment,
   //do not have unique presentations, so we return 0 as their hash function.
   //Computing a hash function can be done, for example, by picking the hash function of the minimal polynomial
@@ -525,8 +525,8 @@ bool AlgebraicNumber::NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost
 
 bool AlgebraicNumber::CheckNonZeroOwner() const {
   if (this->owner == nullptr) {
-    crash << "This is a programming error: algebraic number with "
-    << "non-initialized owner not permitted in the current context." << crash;
+    global.fatal << "This is a programming error: algebraic number with "
+    << "non-initialized owner not permitted in the current context." << global.fatal;
   }
   return true;
 }
@@ -590,11 +590,11 @@ bool AlgebraicClosureRationals::AdjoinRootQuadraticPolyToQuadraticRadicalExtensi
   checkSub[0].MakeConst(outputRoot);
   algNumPoly.Substitution(checkSub);
   if (!algNumPoly.IsEqualToZero()) {
-    crash << "This is a programming error. The number z=" << outputRoot.ToString()
+    global.fatal << "This is a programming error. The number z=" << outputRoot.ToString()
     << " was just adjoined to the base field; z "
     << "was given by requesting that it has minimial polynomial " << algNumPoly.ToString()
     << ", however, substituting z back in to the minimal polynomial "
-    << "does not yield zero, rather yields " << algNumPoly.ToString() << ". " << crash;
+    << "does not yield zero, rather yields " << algNumPoly.ToString() << ". " << global.fatal;
   }
   return true;
 }
@@ -605,10 +605,10 @@ void AlgebraicClosureRationals::ConvertPolyDependingOneVariableToPolyDependingOn
   MacroRegisterFunctionWithName("AlgebraicClosureRationals::ConvertPolyDependingOneVariableToPolyDependingOnFirstVariableNoFail");
   int indexVar = - 1;
   if (!input.IsOneVariableNonConstPoly(&indexVar)) {
-    crash << "This is a programming error: "
+    global.fatal << "This is a programming error: "
     << "I am being asked convert to a one-variable polynomial a polynomial "
     << "depending on more than one variables. "
-    << "The input poly is: " << input.ToString() << crash;
+    << "The input poly is: " << input.ToString() << global.fatal;
   }
   PolynomialSubstitution<AlgebraicNumber> theSub;
   theSub.MakeIdSubstitution(indexVar + 1);
@@ -670,7 +670,7 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(const Polynomial<AlgebraicNumb
       int relRowIndex = currentCoeffMatForm[j].vIndex;
       int relColIndex = currentCoeffMatForm[j].dualIndex;
       if (relRowIndex == - 1 || relColIndex == - 1) {
-        crash << "This is a programming error: non initialized monomial. " << crash;
+        global.fatal << "This is a programming error: non initialized monomial. " << global.fatal;
       }
       theGenMat.AddMonomial(MonomialMatrix(
           currentMon.TotalDegreeInt() * startingDim + relRowIndex,
@@ -716,11 +716,11 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(const Polynomial<AlgebraicNumb
   theSub[0].MakeConst(outputRoot);
   minPoly.Substitution(theSub);
   if (!minPoly.IsEqualToZero()) {
-    crash << "This is a programming error. The number z="
+    global.fatal << "This is a programming error. The number z="
     << outputRoot.ToString() << " was just adjoined to the base field; z "
     << "was given by requesting that it has minimial polynomial "
     << minPoly.ToString() << ", however, substituting z back in to the minimal polynomial "
-    << "does not yield zero, rather yields " << minPoly.ToString() << ". " << crash;
+    << "does not yield zero, rather yields " << minPoly.ToString() << ". " << global.fatal;
   }
   return true;
 }
@@ -729,16 +729,16 @@ void AlgebraicNumber::Invert() {
   MacroRegisterFunctionWithName("AlgebraicNumber::Invert");
   if (this->owner == nullptr) {
     if (this->theElT.IsEqualToZero()) {
-      crash << "This is a programming error: division by zero. " << crash;
+      global.fatal << "This is a programming error: division by zero. " << global.fatal;
     }
     bool isGood = (this->theElT.size() == 1);
     if (isGood) {
       isGood = (this->theElT[0].theIndex == 0);
     }
     if (!isGood) {
-      crash << "This is a programming error: Algebraic number has no owner, "
+      global.fatal << "This is a programming error: Algebraic number has no owner, "
       << "so it must be rational, but it appears to be not. "
-      << "Its theElt vector is: " << this->theElT.ToString() << crash;
+      << "Its theElt vector is: " << this->theElT.ToString() << global.fatal;
     }
     this->theElT.theCoeffs[0].Invert();
     return;
@@ -770,8 +770,8 @@ bool AlgebraicNumber::CheckCommonOwner(const AlgebraicNumber& other) const {
     return true;
   }
   if (this->owner != other.owner) {
-    crash << "This is a programming error. Two algebraic numbers have "
-    << "different algebraic closures when they shouldn't. " << crash;
+    global.fatal << "This is a programming error. Two algebraic numbers have "
+    << "different algebraic closures when they shouldn't. " << global.fatal;
     return false;
   }
   return true;
@@ -789,8 +789,8 @@ void AlgebraicNumber::operator-=(const AlgebraicNumber& other) {
     theOwner = other.owner;
   }
   if (theOwner == nullptr && this->basisIndex != other.basisIndex) {
-    crash << "This is a programming error: algebraic numbers "
-    << "with zero owners but different basis indices. " << crash;
+    global.fatal << "This is a programming error: algebraic numbers "
+    << "with zero owners but different basis indices. " << global.fatal;
   }
   VectorSparse<Rational> AdditiveFormOther;
   theOwner->GetAdditionTo(*this, this->theElT);
@@ -816,9 +816,9 @@ void AlgebraicNumber::operator+=(const AlgebraicNumber& other) {
     theOwner = other.owner;
   }
   if (theOwner == nullptr && this->basisIndex != other.basisIndex) {
-    crash << "This is a programming error: algebraic numbers: "
+    global.fatal << "This is a programming error: algebraic numbers: "
     << this->ToString() << " and " << other.ToString()
-    << " have with zero owners but different basis indices. " << crash;
+    << " have with zero owners but different basis indices. " << global.fatal;
   }
   if (this->basisIndex == other.basisIndex) {
     this->owner = theOwner;
@@ -839,7 +839,7 @@ void AlgebraicNumber::operator+=(const AlgebraicNumber& other) {
 
 bool AlgebraicNumber::CheckConsistency() const {
   if (this->flagDeallocated) {
-    crash << "This is a programming error: use after free of AlgebraicNumber. " << crash;
+    global.fatal << "This is a programming error: use after free of AlgebraicNumber. " << global.fatal;
   }
   if (this->owner == nullptr) {
     if (!this->IsRational()) {
@@ -847,10 +847,10 @@ bool AlgebraicNumber::CheckConsistency() const {
         global.Comments << "<br>index: " << this->theElT[i].theIndex << ", coefficient: "
         << this->theElT.theCoeffs[i];
       }
-      crash << "Detected non-rational algebraic number with zero owner. " << crash;
+      global.fatal << "Detected non-rational algebraic number with zero owner. " << global.fatal;
     }
     if (this->basisIndex != 0) {
-      crash << "Algebraic number with non-zero basis and zero owner. " << crash;
+      global.fatal << "Algebraic number with non-zero basis and zero owner. " << global.fatal;
     }
   }
   return true;
@@ -954,7 +954,7 @@ bool AlgebraicNumber::EvaluatesToDouble(double* outputWhichDouble) const {
     return true;
   }
   if (this->owner == nullptr) {
-    crash << "Owner is zero but algebraic number is not rational. " << crash;
+    global.fatal << "Owner is zero but algebraic number is not rational. " << global.fatal;
   }
   if (!this->owner->flagIsQuadraticRadicalExtensionRationals) {
     return false;
@@ -1062,7 +1062,7 @@ bool AlgebraicNumber::AssignRationalQuadraticRadical(const Rational& inpuT, Alge
 
 void AlgebraicNumber::RadicalMeDefault(int theRad) {
   (void) theRad;
-  crash << "Not implemented yet!" << crash;
+  global.fatal << "Not implemented yet!" << global.fatal;
 /*  MatrixTensor<Rational> theRadicalOp;
   theRadicalOp.MakeZero();
   MonomialTensor tempM;
@@ -1185,12 +1185,12 @@ bool AlgebraicNumber::operator==(const AlgebraicNumber& other) const {
     return *this == ratValue;
   }
   if (this->owner != other.owner) {
-    crash << "This might or might not be a programming error: "
+    global.fatal << "This might or might not be a programming error: "
     << "comparing two algebraic number that do not have the same owner. "
     << "The numbers have owners of respective addresses "
     << this->owner << " and " << other.owner << ". The numbers are: "
     << this->ToString() << " and " << other.ToString() << ". Crashing to let you know. ";
-    crash << crash;
+    global.fatal << global.fatal;
   }
   this->CheckNonZeroOwner();
   if (this->basisIndex == other.basisIndex) {
@@ -1204,8 +1204,8 @@ bool AlgebraicNumber::operator==(const AlgebraicNumber& other) const {
 
 void AlgebraicNumber::operator=(const Polynomial<AlgebraicNumber>& other) {
   if (!other.IsConstant(this)) {
-    crash << "This is a programming error: attempting to assign non-constant "
-    << "polynomial to a Rational number is not allowed. " << crash;
+    global.fatal << "This is a programming error: attempting to assign non-constant "
+    << "polynomial to a Rational number is not allowed. " << global.fatal;
   }
 }
 
@@ -1240,12 +1240,12 @@ unsigned int ElementZmodP::HashFunction() const {
 
 void ElementZmodP::CheckIamInitialized() const {
   if (this->theModulus.IsEqualToZero()) {
-    crash << "This is a programming error: computing with non-initialized "
+    global.fatal << "This is a programming error: computing with non-initialized "
     << "element the ring Z mod p (the number p has not been initialized!)."
-    << crash;
+    << global.fatal;
   }
   if (this->flagDeallocated) {
-    crash << "This is a programming error: use after free of element z mod p. " << crash;
+    global.fatal << "This is a programming error: use after free of element z mod p. " << global.fatal;
   }
 }
 
@@ -1300,9 +1300,9 @@ void ElementZmodP::MakeMOne(const LargeIntegerUnsigned& newModulo) {
 
 void ElementZmodP::CheckEqualModuli(const ElementZmodP& other) {
   if (this->theModulus != other.theModulus) {
-    crash << "This is a programming error: attempting to make an operation "
+    global.fatal << "This is a programming error: attempting to make an operation "
     << "with two elemetns of Z mod P with different moduli, "
-    << this->theModulus.ToString() << " and " << other.theModulus.ToString() << ". " << crash;
+    << this->theModulus.ToString() << " and " << other.theModulus.ToString() << ". " << global.fatal;
   }
 }
 
@@ -1381,8 +1381,8 @@ void ElementZmodP::operator-=(const ElementZmodP& other) {
 void ElementZmodP::operator=(const Rational& other) {
   bool tempB = this->AssignRational(other);
   if (!tempB) {
-    crash << "This is a programming error: using ElementZmodP::operator= to assign a Rational number failed. "
-    << " Operator = does not allow failure. " << crash;
+    global.fatal << "This is a programming error: using ElementZmodP::operator= to assign a Rational number failed. "
+    << " Operator = does not allow failure. " << global.fatal;
   }
 }
 

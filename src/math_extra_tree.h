@@ -21,7 +21,7 @@ public:
   }
   bool CheckInitialization() {
     if (this->owner == nullptr) {
-      crash << "Tree node without parent. " << crash;
+      global.fatal << "Tree node without parent. " << global.fatal;
     }
     return true;
   }
@@ -67,7 +67,7 @@ void TreeNode<data>::RemoveAllChildren() {
   for (int i = 0; i < this->children.size; i ++) {
     TreeNode<data>& currentNode = this->owner->theNodes[this->children[i]];
     if (currentNode.myIndex == - 1) {
-      crash << "Faulty index in tree node: " << this->children[i] << crash;
+      global.fatal << "Faulty index in tree node: " << this->children[i] << global.fatal;
     }
     currentNode.myIndex = - 1;
     currentNode.RemoveAllChildren();

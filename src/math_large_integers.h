@@ -393,11 +393,11 @@ private:
 //The following doesn't compile, when it should.
 //  friend int operator=(int& left, const Rational& right)
 //  { if (!right.IsSmallInteger(&left))
-//      crash << "This is a programming error. I am asked to assign a rational number to a small integer, but the rational "
+//      global.fatal << "This is a programming error. I am asked to assign a rational number to a small integer, but the rational "
 //      << " number is either too large or is not an integer. Namely, the rational number equals " << this->ToString()
 //      << ". The programmer is supposed to write something of the sort int = rational only on condition that "
 //      << " the programmer is sure that the rational contains is a small int. "
-//      << crash;
+//      << global.fatal;
 //    return left;
 //  }
   struct LargeRationalExtended {
@@ -413,7 +413,7 @@ private:
   }
   friend std::istream& operator >> (std::istream& input, const Rational& output) {
     (void) output;
-    crash << "This line of code should not be running. " << crash;
+    global.fatal << "This line of code should not be running. " << global.fatal;
     return input;
   }
   friend Rational operator*(int left, const Rational& right) {
@@ -425,9 +425,9 @@ private:
   inline bool TryToAddQuickly(int OtherNum, int OtherDen) {
     int OtherNumAbs, thisNumAbs;
     if (this->DenShort <= 0 || OtherDen <= 0) {
-      crash << "This is a programming error: trying to add corrupt rational number(s) with denominators "
+      global.fatal << "This is a programming error: trying to add corrupt rational number(s) with denominators "
       << this->DenShort << " and " << OtherDen
-      << ". The cause of the error should be in some of the calling functions. " << crash;
+      << ". The cause of the error should be in some of the calling functions. " << global.fatal;
     }
     if (OtherNum < 0) {
       OtherNumAbs = - OtherNum;
@@ -471,12 +471,12 @@ private:
     int OtherNumAbs, thisNumAbs;
     if (this->DenShort <= 0 || OtherDen <= 0) {
       if (DenShort == 0 || OtherDen == 0) {
-        crash << "This is a programming error: division by zero. ";
+        global.fatal << "This is a programming error: division by zero. ";
       } else {
-        crash << "This is a programming error during rational number multiplication: "
+        global.fatal << "This is a programming error during rational number multiplication: "
         << "corrupt rational number denominator. ";
       }
-      crash << crash;
+      global.fatal << global.fatal;
     }
     if (OtherNum < 0) {
       OtherNumAbs = - OtherNum;
@@ -568,11 +568,11 @@ public:
 /*  operator int() const {
     int result = 0;
     if (!this->IsSmallInteger(&result))
-      crash << "This is a programming error. I am asked to assign a rational number to a small integer, but the rational "
+      global.fatal << "This is a programming error. I am asked to assign a rational number to a small integer, but the rational "
       << " number is either too large or is not an integer. Namely, the rational number equals " << this->ToString()
       << ". The programmer is supposed to write something of the sort int = rational only on condition that "
       << " the programmer is sure that the rational contains is a small int. "
-      << crash;
+      << global.fatal;
     return result;
   }*/
   bool NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost() const {
@@ -830,7 +830,7 @@ public:
         return this->NumShort / this->DenShort;
       }
     }
-    crash << "This piece of code should not be reached. " << crash;
+    global.fatal << "This piece of code should not be reached. " << global.fatal;
     return - 1;
   }
   void MakeZero() {

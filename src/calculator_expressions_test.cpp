@@ -14,13 +14,13 @@ bool Expression::Test::All() {
 bool Expression::Test::ToStringTestRecode(const std::string& inputHardCodedMustParse, Calculator& ownerInitialized) {
   Expression parsed;
   if (!ownerInitialized.Parse(inputHardCodedMustParse, parsed)) {
-    crash << "Failed to parse hard-coded input string. " << crash;
+    global.fatal << "Failed to parse hard-coded input string. " << global.fatal;
   }
   std::string recoded = parsed.ToString();
   if (recoded != inputHardCodedMustParse) {
-    crash << "Recoded string: " << recoded
+    global.fatal << "Recoded string: " << recoded
     << " does not coincide with the original: "
-    << inputHardCodedMustParse << "." << crash;
+    << inputHardCodedMustParse << "." << global.fatal;
   }
   return true;
 }

@@ -1331,8 +1331,8 @@ void Polynomial<coefficient>::GetPolyWithPolyCoeff(
 ) const {
   MacroRegisterFunctionWithName("Polynomial::GetPolyWithPolyCoeff");
   if (theNonCoefficientVariables.MaxSize != this->GetMinNumVars()) {
-    crash << "GetPolyWithPolyCoeff called with selection which has "
-    << "selects the wrong number of variables. " << crash;
+    global.fatal << "GetPolyWithPolyCoeff called with selection which has "
+    << "selects the wrong number of variables. " << global.fatal;
   }
   output.MakeZero();
   MonomialP coeffPart, polyPart;
@@ -1398,10 +1398,10 @@ template <class coefficient>
 coefficient Polynomial<coefficient>::GetDiscriminant() {
   MacroRegisterFunctionWithName("Polynomial::GetDiscriminant");
   if (this->GetMinNumVars() > 1) {
-    crash << "I do not have a definition of discriminant for more than one variable. " << crash;
+    global.fatal << "I do not have a definition of discriminant for more than one variable. " << global.fatal;
   }
   if (this->TotalDegree() != 2) {
-    crash << "Discriminant not implemented for polynomial of degree not equal to 1." << crash;
+    global.fatal << "Discriminant not implemented for polynomial of degree not equal to 1." << global.fatal;
   }
   coefficient a = this->GetMonomialCoefficient(MonomialP(0, 2));
   coefficient b = this->GetMonomialCoefficient(MonomialP(0, 1));
@@ -1455,7 +1455,7 @@ public:
 
 bool IntegralRFComputation::CheckConsistency() const {
   if (this->owner == nullptr) {
-    crash << "Non-initialized rf computation" << crash;
+    global.fatal << "Non-initialized rf computation" << global.fatal;
   }
   return true;
 }
@@ -1629,7 +1629,7 @@ bool Polynomial<coefficient>::FactorMeNormalizedFactors(
     checkComputations *= outputFactors[i];
   }
   if (!checkComputations.IsProportionalTo(*this, outputCoeff, 1)) {
-    crash << "Error in polynomial factorization function." << crash;
+    global.fatal << "Error in polynomial factorization function." << global.fatal;
   }
   return true;
 }
@@ -1846,7 +1846,7 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
     tempP *= this->theFactors[i];
   }
   if (tempP != this->theDen) {
-    crash << "Something is very wrong: product of denominator factors is "
+    global.fatal << "Something is very wrong: product of denominator factors is "
     << tempP.ToString(&this->currentFormaT)
     << ", but the denominator equals: " << this->theDen.ToString(&this->currentFormaT);
   }
@@ -5066,9 +5066,9 @@ bool Expression::MakeSequenceCommands(Calculator& owner, List<std::string>& inpu
   List<Expression> theStatements;
   Expression currentStatement, currentKey;
   if (inputValues.size != inputKeys.size) {
-    crash << "This is a programming error: I am asked to create a "
+    global.fatal << "This is a programming error: I am asked to create a "
     << "sequence of statements but I was given different"
-    << " number of keys and expressions." << crash;
+    << " number of keys and expressions." << global.fatal;
   }
   for (int i = 0; i < inputValues.size; i ++) {
     currentKey.MakeAtom(inputKeys[i], owner);
@@ -7150,10 +7150,10 @@ bool CalculatorFunctionsGeneral::innerDecomposeCharGenVerma(Calculator& theComma
 
     int indexInWeyl = theKLpolys.TheWeylGroup->theGroup.theElements.GetIndex(currentElement);
     if (indexInWeyl == - 1) {
-      crash << "This is a programming error. Something is wrong: "
+      global.fatal << "This is a programming error. Something is wrong: "
       << "I am getting that an element of the Weyl group of the Levi part of "
       << "the parabolic does not lie in the ambient Weyl group, which is impossible. "
-      << "There is a bug somewhere; crashing in accordance. " << crash;
+      << "There is a bug somewhere; crashing in accordance. " << global.fatal;
     }
     currentChar.MakeZero();
     theMon.owner = theSSlieAlg;
@@ -7428,11 +7428,11 @@ bool CalculatorFunctionsGeneral::innerSplitGenericGenVermaTensorFD(
     theGenMod.GetOwner().GetRank() != theGenMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize ||
     theFDMod.GetOwner().GetRank() != theFDMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize
   ) {
-    crash << "This is a programming error: the two modules have owners, "
+    global.fatal << "This is a programming error: the two modules have owners, "
     << theFDMod.GetOwner().theWeyl.theDynkinType.ToString()
     << " and " << theGenMod.GetOwner().theWeyl.theDynkinType.ToString() << ", and parabolic selections of max size "
     << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize
-    << " and " << theFDMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize << crash;
+    << " and " << theFDMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize << global.fatal;
   }
   ElementUniversalEnveloping<RationalFunctionOld> theCasimir, theCasimirMinusChar;
   charSSAlgMod<RationalFunctionOld> theHWchar, theFDLeviSplit, theFDChaR, theFDLeviSplitShifteD;
@@ -7440,9 +7440,9 @@ bool CalculatorFunctionsGeneral::innerSplitGenericGenVermaTensorFD(
   List<ElementUniversalEnveloping<RationalFunctionOld> > theLeviEigenVectors;
   Vectors<RationalFunctionOld> theEigenVectorWeightsFund;
   if (theGenMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize != theGenMod.GetOwner().GetRank()) {
-    crash << "This is a programming error: module has parabolic selection with max size "
+    global.fatal << "This is a programming error: module has parabolic selection with max size "
     << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize << " but the ambient semisimple Lie algebra is of rank "
-    << theGenMod.GetOwner().GetRank() << ". " << crash;
+    << theGenMod.GetOwner().GetRank() << ". " << global.fatal;
   }
   std::string report;
   theFDMod.SplitOverLevi(
@@ -8036,7 +8036,7 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
       }
       return true;
     }
-    crash << "This is a piece of code which should never be reached. " << crash;
+    global.fatal << "This is a piece of code which should never be reached. " << global.fatal;
   }
   bool isKnownFunctionOneArgument =
   this->StartsWith(theCommands.opSin(), 2) ||
@@ -8633,12 +8633,12 @@ bool CalculatorFunctionsGeneral::innerCrash(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCrash");
   (void) input;//portable way of avoiding unused parameter warning
-  crash << "This is a test of the crashing mechanism. "
+  global.fatal << "This is a test of the crashing mechanism. "
   << "A file report must have been written. "
   << "The crash file report is not accessible through the calculator's webserver. "
   << "It can be reached locally in the results/crashes folder of the calculator or, "
   << "if running remotely, through an administrator ssh connection. "
-  << crash;
+  << global.fatal;
   return output.AssignValue(std::string("Crashed succesfully"), theCommands);
 }
 
@@ -9324,7 +9324,7 @@ bool CalculatorFunctionsGeneral::innerRandomInteger(
     accum += currentContribution + 1;
   }
   if (accum == 0) {
-    crash << "This shouldn't happen: accum should not be zero at this point. " << crash;
+    global.fatal << "This shouldn't happen: accum should not be zero at this point. " << global.fatal;
   }
   int generatedRandomInt = rand() % accum;
   int resultRandomValue = theIntervals[0][0];

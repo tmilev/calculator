@@ -1309,9 +1309,9 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
   }
   int theIndex = this->GetAnswerIndex(desiredAnswerId);
   if (theIndex == - 1) {
-    crash << "This is not supposed to happen: problem has syntactic element with answerId: "
+    global.fatal << "This is not supposed to happen: problem has syntactic element with answerId: "
     << desiredAnswerId << " but the answerId is missing from the list of known answer ids. "
-    << this->theProblemData.ToStringAvailableAnswerIds() << crash;
+    << this->theProblemData.ToStringAvailableAnswerIds() << global.fatal;
   }
   Answer& currentA = this->theProblemData.theAnswers.theValues[theIndex];
   if (theIndex < this->answerHighlights.size) {
@@ -1828,9 +1828,9 @@ bool CalculatorHTML::InterpretProcessExecutedCommands(
       continue;
     }
     if (!theInterpreter.theProgramExpression[currentElt.commandIndex].StartsWith(theInterpreter.opCommandEnclosure())) {
-      crash << "Element: " << theInterpreter.theProgramExpression[currentElt.commandIndex].ToString()
+      global.fatal << "Element: " << theInterpreter.theProgramExpression[currentElt.commandIndex].ToString()
       << " in " << theInterpreter.theProgramExpression.ToString()
-      << " is supposed to be a command enclosure but apparently isn't. " << crash;
+      << " is supposed to be a command enclosure but apparently isn't. " << global.fatal;
     }
     Expression currentExpr = theInterpreter.theProgramExpression[currentElt.commandIndex][1];
     if (currentExpr.StartsWith(theInterpreter.opEndStatement()) && currentExpr.size() == 2) {
@@ -3429,7 +3429,7 @@ void TopicElement::ComputeID(int elementIndex, TopicElementParser& owner) {
   if (this->problemFileName != "") {
     this->id = this->problemFileName;
     if (this->type != TopicElement::types::problem) {
-      crash << "Type problem is the only type allowed to have non-empty file name. " << crash;
+      global.fatal << "Type problem is the only type allowed to have non-empty file name. " << global.fatal;
     }
   } else {
     std::stringstream out;
@@ -3502,8 +3502,8 @@ bool TopicElementParser::CheckConsistencyParsed() {
   for (int i = 0; i < this->theTopics.size(); i ++) {
     if (this->theTopics.theValues[i].type == TopicElement::types::problem) {
       if (this->theTopics.theValues[i].immediateChildren.size > 0) {
-        crash << "Topic element: " << this->theTopics.theValues[i].ToString()
-        << " has non-zero immediate children. " << crash;
+        global.fatal << "Topic element: " << this->theTopics.theValues[i].ToString()
+        << " has non-zero immediate children. " << global.fatal;
         return false;
       }
     }
@@ -3514,7 +3514,7 @@ bool TopicElementParser::CheckConsistencyParsed() {
 
 bool TopicElementParser::CheckInitialization() {
   if (this->owner == nullptr) {
-    crash << "TopicElementParser not initialized when it should be. " << crash;
+    global.fatal << "TopicElementParser not initialized when it should be. " << global.fatal;
   }
   return true;
 }
@@ -4329,9 +4329,9 @@ bool CalculatorHTML::ComputeTopicListAndPointsEarned(std::stringstream& comments
       if (this->topics.theTopics.theValues[i].type == TopicElement::types::problem) {
         gradableProblems.AddOnTopNoRepetition(this->topics.theTopics.theValues[i].id);
         if (this->topics.theTopics.theValues[i].immediateChildren.size > 0) {
-          crash << "Error: problem " << this->topics.theTopics.theValues[i].ToString()
+          global.fatal << "Error: problem " << this->topics.theTopics.theValues[i].ToString()
           << " has children topics which is not allowed. "
-          << crash;
+          << global.fatal;
         }
       }
     }
@@ -4736,8 +4736,8 @@ JSData TopicElement::ToJSON(CalculatorHTML& owner) {
   output["children"].theType = JSData::token::tokenArray;
   this->ComputeLinks(owner, true);
   if (this->type == TopicElement::types::problem && this->immediateChildren.size > 0) {
-    crash << "Error: Problem " << this->ToString() << " reported to have children topic elements: "
-    << this->immediateChildren.ToStringCommaDelimited() << crash;
+    global.fatal << "Error: Problem " << this->ToString() << " reported to have children topic elements: "
+    << this->immediateChildren.ToStringCommaDelimited() << global.fatal;
   }
   for (int i = 0; i < this->immediateChildren.size; i ++) {
     TopicElement& currentChild = owner.topics.theTopics.theValues[this->immediateChildren[i]];

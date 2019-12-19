@@ -17,12 +17,12 @@ bool MonomialP::SubstitutioN(const List<Polynomial<coefficient> >& TheSubstituti
   for (int i = 0; i < this->monBody.size; i ++) {
     if (this->monBody[i] != 0) {
       if (i >= TheSubstitution.size) {
-        crash << "This is a programming error. Attempting to carry out a substitution in the monomial "
+        global.fatal << "This is a programming error. Attempting to carry out a substitution in the monomial "
         << this->ToString()
         << " which does have non-zero exponent of variable x_{" << i + 1 << "}; however, the input substitution has "
         << TheSubstitution.size
         << " variable images. More precisely, the input substitution is:  "
-        << TheSubstitution.ToString() << ". " << crash;
+        << TheSubstitution.ToString() << ". " << global.fatal;
       }
       int theExponent = 0;
       if (!this->monBody[i].IsSmallInteger(&theExponent) || this->monBody[i] < 0) {
@@ -35,7 +35,7 @@ bool MonomialP::SubstitutioN(const List<Polynomial<coefficient> >& TheSubstituti
         global.Comments << "This may or may not be a programming error. "
         << "I cannot carry out a substitution in a monomial that has exponent "
         << "which is not a small integer: it is " << this->monBody[i]
-        << " instead. " << Crasher::GetStackTraceEtcErrorMessageHTML();
+        << " instead. " << GlobalVariables::Crasher::GetStackTraceEtcErrorMessageHTML();
         return false;
       }
       tempPoly = TheSubstitution[i];
@@ -99,8 +99,8 @@ bool Polynomial<coefficient>::FactorMe(List<Polynomial<Rational> >& outputFactor
 template <class coefficient>
 void Polynomial<coefficient>::MakeDeterminantFromSquareMatrix(const Matrix<Polynomial<coefficient> >& theMat) {
   if (theMat.NumCols != theMat.NumRows) {
-    crash << "Cannot compute determinant: matrix has "
-    << theMat.NumRows << " rows and " << theMat.NumCols << " columns. " << crash;
+    global.fatal << "Cannot compute determinant: matrix has "
+    << theMat.NumRows << " rows and " << theMat.NumCols << " columns. " << global.fatal;
   }
   permutation thePerm;
   thePerm.initPermutation(theMat.NumRows);
@@ -168,8 +168,8 @@ template <class coefficient>
 int Polynomial<coefficient>::TotalDegreeInt() const {
   int result = - 1;
   if (!this->TotalDegree().IsSmallInteger(&result)) {
-    crash << "This is a programming error: requested total degree of a "
-    << "polynomial in int formal, but the degree of the polynomial is not a small integer. " << crash;
+    global.fatal << "This is a programming error: requested total degree of a "
+    << "polynomial in int formal, but the degree of the polynomial is not a small integer. " << global.fatal;
   }
   return result;
 }
@@ -236,12 +236,12 @@ coefficient Polynomial<coefficient>::Evaluate(const Vector<coefficient>& input) 
     for (int j = 0; j < currentMon.GetMinNumVars(); j ++) {
       int numCycles = 0;
       if (!(*this)[i](j).IsSmallInteger(&numCycles)) {
-        crash << "This is a programming error. Attempting to evaluate a polynomial whose "
+        global.fatal << "This is a programming error. Attempting to evaluate a polynomial whose "
         <<  i + 1 << "^{th} variable is raised to the power "
         << (*this)[i](j).ToString()
         << ". Raising variables to power is allowed only if the power is a small integer. "
         << "If the user has requested such an operation, "
-        << "it *must* be intercepted at an earlier level (and the user must be informed)." << crash;
+        << "it *must* be intercepted at an earlier level (and the user must be informed)." << global.fatal;
       }
       bool isPositive = numCycles > 0;
       if (numCycles < 0) {
@@ -266,9 +266,9 @@ void Polynomial<coefficient>::SetNumVariablesSubDeletedVarsByOne(int newNumVars)
     return;
   }
   if (newNumVars < 0) {
-    crash << "This is a programming error. "
+    global.fatal << "This is a programming error. "
     << "Requesting negative number of variables (more precisely, "
-    << newNumVars << ") is not allowed. " << crash;
+    << newNumVars << ") is not allowed. " << global.fatal;
   }
   Polynomial<coefficient> Accum;
   Accum.MakeZero();
@@ -287,8 +287,8 @@ void Polynomial<coefficient>::SetNumVariablesSubDeletedVarsByOne(int newNumVars)
 template <class coefficient>
 void Polynomial<coefficient>::ShiftVariableIndicesToTheRight(int VarIndexShift) {
   if (VarIndexShift < 0) {
-    crash << "This is a programming error. Requesting negative variable shift (more precisely, "
-    << VarIndexShift << ") not allowed. " << crash;
+    global.fatal << "This is a programming error. Requesting negative variable shift (more precisely, "
+    << VarIndexShift << ") not allowed. " << global.fatal;
   }
   if (VarIndexShift == 0) {
     return;
@@ -320,13 +320,13 @@ Matrix<coefficient> Polynomial<coefficient>::EvaluateUnivariatePoly(const Matrix
     const MonomialP& currentMon = (*this)[i];
     int numCycles = 0;
     if (!currentMon(0).IsSmallInteger(&numCycles) ) {
-      crash << "This is a programming error. Attempting to evaluate a polynomial whose "
+      global.fatal << "This is a programming error. Attempting to evaluate a polynomial whose "
       <<  i + 1 << "^{th} variable is raised to the power "
       << currentMon(0).ToString()
       << ". Raising variables to power is allowed only if the power is a small integer. "
       << "If the user has requested such an operation, "
       << "it *must* be intercepted at an earlier level (and the user must be informed)."
-      << crash;
+      << global.fatal;
     }
     bool isPositive = (numCycles > 0);
     if (numCycles < 0) {
@@ -424,17 +424,17 @@ void Polynomial<coefficient>::DivideBy(
    // tempInput.ComputeDebugString();
   //}
   if (remainderMaxMonomial >= outputRemainder.size()) {
-    crash << "Remainder max monomial too large. " << crash;
+    global.fatal << "Remainder max monomial too large. " << global.fatal;
   }
   if (inputMaxMonomial >= tempInput.size() || inputMaxMonomial < 0) {
-    crash << "This is a programming error: the index of the maximal input monomial is "
+    global.fatal << "This is a programming error: the index of the maximal input monomial is "
     << inputMaxMonomial << " while the polynomial has "
     << tempInput.size() << "  monomials. I am attempting to divide "
-    << this->ToString() << " by " << inputDivisor.ToString() << ". " << crash;
+    << this->ToString() << " by " << inputDivisor.ToString() << ". " << global.fatal;
   }
   while (outputRemainder[remainderMaxMonomial].IsGEQLexicographicLastVariableStrongest(tempInput[inputMaxMonomial])) {
     if (remainderMaxMonomial >= outputRemainder.size()) {
-      crash << "Remainder max monomial too large. " << crash;
+      global.fatal << "Remainder max monomial too large. " << global.fatal;
     }
     tempMon = outputRemainder[remainderMaxMonomial];
     tempMon /= tempInput[inputMaxMonomial];
@@ -476,13 +476,13 @@ template <class coefficient>
 void Polynomial<coefficient>::AssignCharPoly(const Matrix<coefficient>& input) {
   MacroRegisterFunctionWithName("Polynomial::AssignCharPoly");
   if (input.NumCols != input.NumRows) {
-    crash << "Programming error: requesting the minimimal polynomial of a non-square matrix. " << crash;
+    global.fatal << "Programming error: requesting the minimimal polynomial of a non-square matrix. " << global.fatal;
   }
   int n = input.NumCols;
   if (n == 0) {
-    crash << "At present, the characteristic polyomial of a 0x0 matrix is not defined. "
+    global.fatal << "At present, the characteristic polyomial of a 0x0 matrix is not defined. "
     << "Crashing to let you know. If you think this should be changed, document why and "
-    << "modify the present assertion. " << crash;
+    << "modify the present assertion. " << global.fatal;
   }
   this->MakeConst(1);
   Matrix<coefficient> acc = input;
@@ -502,7 +502,7 @@ template <class coefficient>
 void Polynomial<coefficient>::AssignMinPoly(const Matrix<coefficient>& input) {
   MacroRegisterFunctionWithName("Polynomial::AssignMinPoly");
   if (input.NumCols != input.NumRows) {
-    crash << "Programming error: requesting the minimimal polynomial of a non-square matrix. " << crash;
+    global.fatal << "Programming error: requesting the minimimal polynomial of a non-square matrix. " << global.fatal;
   }
   int theDim = input.NumCols;
   this->MakeOne(1);
@@ -542,8 +542,8 @@ int Polynomial<coefficient>::GetMaxPowerOfVariableIndex(int VariableIndex) {
   for (int i = 0; i < this->size(); i ++) {
     result = MathRoutines::Maximum(result, (*this)[i](VariableIndex).NumShort);
     if (!(*this)[i](VariableIndex).IsSmallInteger()) {
-      crash << " This is a programming error: GetMaxPowerOfVariableIndex is called on a polynomial whose monomials"
-      << " have degrees that are not small integers. This needs to be fixed! " << crash;
+      global.fatal << " This is a programming error: GetMaxPowerOfVariableIndex is called on a polynomial whose monomials"
+      << " have degrees that are not small integers. This needs to be fixed! " << global.fatal;
     }
   }
   return result;
@@ -889,12 +889,12 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionStringHtml() {
   }
   out << "</tr>";
   if (theRemainders.size != this->intermediateHighlightedMons.GetElement().size) {
-    crash << "Should have as many remainders: " << theRemainders.size
+    global.fatal << "Should have as many remainders: " << theRemainders.size
     << " as intermediate highlighted mons: "
-    << this->intermediateHighlightedMons.GetElement().size << crash;
+    << this->intermediateHighlightedMons.GetElement().size << global.fatal;
   }
   if (theRemainders.size != theSubtracands.size + 1) {
-    crash << "Remainders should equal subtracands plus one. " << crash;
+    global.fatal << "Remainders should equal subtracands plus one. " << global.fatal;
   }
   for (int i = 0; i < theRemainders.size; i ++) {
     out << "<tr><td></td>"

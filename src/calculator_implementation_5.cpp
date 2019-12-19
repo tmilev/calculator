@@ -113,8 +113,8 @@ void MeshTriangles::EvaluateFunAtTriangleVertices(int triangleIndex) {
 double MeshTriangles::GetTriangleMaxSideLength(int triangleIndex) {
   MacroRegisterFunctionWithName("MeshTriangles::GetTriangleMaxSideLength");
   if (this->theTriangles[triangleIndex].size != 3) {
-    crash << "Error: triangle needs three vertices, instead it has vertices: "
-    << this->theTriangles[triangleIndex] << crash;
+    global.fatal << "Error: triangle needs three vertices, instead it has vertices: "
+    << this->theTriangles[triangleIndex] << global.fatal;
   }
   Vector<double>& firstV = this->theTriangles[triangleIndex][0];
   Vector<double>& secondV = this->theTriangles[triangleIndex][1];
@@ -166,8 +166,8 @@ int MeshTriangles::CleanUpTrianglesReturnUpdatedCurrentIndex(int currentIndex) {
   // we have generated at least maxNumTriangles since the last cleanup
   // (which leaves no more than maxNumTriangles alive).
   if (this->theTriangles.size != this->trianglesUsed.size) {
-    crash << "this->theTriangles.size is not equal to this->trianglesUsed.size: the values are: "
-    << this->theTriangles.size << " and " << this->trianglesUsed.size << ". " << crash;
+    global.fatal << "this->theTriangles.size is not equal to this->trianglesUsed.size: the values are: "
+    << this->theTriangles.size << " and " << this->trianglesUsed.size << ". " << global.fatal;
   }
   int lowestFree = 0;
   for (int i = 0; i < this->theTriangles.size; i ++) {
@@ -192,7 +192,7 @@ void MeshTriangles::Subdivide(int triangleIndex) {
   MacroRegisterFunctionWithName("MeshTriangles::Subdivide");
   List<Vector<double> > currentTriangle = this->theTriangles[triangleIndex];
   if (currentTriangle.size != 3) {
-    crash << "Triangle in mesh with less than 3 sides! " << crash;
+    global.fatal << "Triangle in mesh with less than 3 sides! " << global.fatal;
   }
   List<Vector<double> > insideTriange;
   insideTriange.SetSize(3);
@@ -238,7 +238,7 @@ void MeshTriangles::ComputeImplicitPlotPart2() {
   for (int i = 0; i < this->theTriangles.size; i ++) {
     currentTriangle = this->theTriangles[i]; //making a copy in case this->theTriangles changes underneath.
     if (currentTriangle.size != 3) {
-      crash << "Error: triangle needs three vertices, instead it has vertices: " << currentTriangle << crash;
+      global.fatal << "Error: triangle needs three vertices, instead it has vertices: " << currentTriangle << global.fatal;
     }
     bool isGood = true;
     for (int j = 0; j < currentTriangle.size; j ++) {
@@ -2689,7 +2689,7 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
     ].AddOnTop(currentSlideNumber);
   }
   if (remainderIndex + 1 >= this->intermediateRemainders.GetElement().size) {
-    crash << "Something is wrong: not enough intermediate remainders. " << crash;
+    global.fatal << "Something is wrong: not enough intermediate remainders. " << global.fatal;
   }
   for (int i = 0; i < this->intermediateRemainders.GetElement()[remainderIndex + 1].size(); i ++) {
     this->fcAnswerMonsRemainders[remainderIndex + 1][

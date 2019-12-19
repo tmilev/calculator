@@ -59,7 +59,7 @@ void SignalsInfrastructure::unblockSignals() {
   int error = sigprocmask(SIG_SETMASK, &oldSignals, nullptr);
   if (error < 0) {
     global << "Sigprocmask failed on server, I shall now crash. " << logger::endL;
-    crash << "Sigprocmask failed on server." << crash;
+    global.fatal << "Sigprocmask failed on server." << global.fatal;
   }
   this->flagSignalsAreBlocked = false;
   if (global.flagServerDetailedLog) {
@@ -77,23 +77,23 @@ void SignalsInfrastructure::blockSignals() {
   this->flagSignalsAreStored = true;
   if (error < 0) {
     global << logger::red << "Fatal error: sigprocmask failed. The server is going to crash. " << logger::endL;
-    crash << "Sigprocmas failed. This should not happen. " << crash;
+    global.fatal << "Sigprocmas failed. This should not happen. " << global.fatal;
   }
   this->flagSignalsAreBlocked = true;
 }
 
 bool WebWorker::CheckConsistency() {
   if (this->flagDeallocated) {
-    crash << "Use after free of webworker." << crash;
+    global.fatal << "Use after free of webworker." << global.fatal;
   }
   if (this->parent == nullptr) {
-    crash << "Parent of web worker is not initialized." << crash;
+    global.fatal << "Parent of web worker is not initialized." << global.fatal;
   }
   if (this->indexInParent == - 1) {
-    crash << "Index in parent is bad. " << crash;
+    global.fatal << "Index in parent is bad. " << global.fatal;
   }
   if (this->connectionID == - 1) {
-    crash << "Connection id is bad. " << crash;
+    global.fatal << "Connection id is bad. " << global.fatal;
   }
   return true;
 }
@@ -101,7 +101,7 @@ bool WebWorker::CheckConsistency() {
 bool WebWorker::ReceiveAll() {
   MacroRegisterFunctionWithName("WebWorker::ReceiveAll");
   if (this->connectedSocketID == - 1) {
-    crash << "Attempting to receive on a socket with ID equal to - 1. " << crash;
+    global.fatal << "Attempting to receive on a socket with ID equal to - 1. " << global.fatal;
   }
   if (global.flagUsingSSLinCurrentConnection) {
     return this->ReceiveAllHttpSSL();
@@ -170,7 +170,7 @@ bool WebWorker::ReceiveAllHttpSSL() {
   this->messageHead = "";
   this->requestTypE = this->requestUnknown;
   if (this->connectedSocketID == - 1) {
-    crash << "Attempting to receive on a socket with ID equal to - 1. " << crash;
+    global.fatal << "Attempting to receive on a socket with ID equal to - 1. " << global.fatal;
   }
   struct timeval tv; //<- code involving tv taken from stackexchange
   tv.tv_sec = 3;  // 3 Secs Timeout
@@ -293,10 +293,10 @@ void WebWorker::SendAllBytesHttpSSL() {
   }
   this->CheckConsistency();
   if (!global.flagUsingSSLinCurrentConnection) {
-    crash
+    global.fatal
     << "Error: WebWorker::SendAllBytesHttpSSL called "
     << "while flagUsingSSLinCurrentConnection is set to false. "
-    << crash;
+    << global.fatal;
   }
   if (this->connectedSocketID == - 1) {
     global << logger::red << "Socket::SendAllBytes failed: connectedSocketID = - 1." << logger::endL;
@@ -481,7 +481,7 @@ void WebWorker::resetConnection() {
     global.userDefault.enteredPassword != "" ||
     global.userDefault.enteredHashedSaltedPassword != ""
   ) {
-    crash << "User default not reset correctly. " << crash;
+    global.fatal << "User default not reset correctly. " << global.fatal;
   }
   global.flagLoggedIn = false;
   global.flagLogInAttempted = false;
@@ -1019,7 +1019,7 @@ bool WebWorker::ReceiveAllHttp() {
   unsigned const int bufferSize = 60000;
   char buffer[bufferSize];
   if (this->connectedSocketID == - 1) {
-    crash << "Attempting to receive on a socket with ID equal to - 1. " << crash;
+    global.fatal << "Attempting to receive on a socket with ID equal to - 1. " << global.fatal;
   }
   struct timeval tv; //<- code involving tv taken from stackexchange
   tv.tv_sec = 5;  // 5 Secs Timeout
@@ -1412,8 +1412,8 @@ int WebWorker::GetIndexIfRunningWorkerId(
     indexOther = indexFromFile;
   }
   if (indexOther != indexFromFile || indexOther == - 1) {
-    crash << "Corrupt index worker: indexOther: " << indexOther
-    << "; indexFromFile: " << indexFromFile << ". " << crash;
+    global.fatal << "Corrupt index worker: indexOther: " << indexOther
+    << "; indexFromFile: " << indexFromFile << ". " << global.fatal;
   }
   if (indexOther >= this->parent->workerIds.size()) {
     // Possible causes of this situation:
@@ -2697,13 +2697,13 @@ int WebWorker::ServeClient() {
       this->requestTypE != this->requestUnknown &&
       this->requestTypE != this->requestChunked
     ) {
-      crash << "Something is wrong: request type does not have any of the expected values. " << crash;
+      global.fatal << "Something is wrong: request type does not have any of the expected values. " << global.fatal;
     }
     this->ProcessUnknown();
     return 0;
   }
   if (global.theThreads.size <= 1) {
-    crash << "Number of threads must be at least 2 in this point of code..." << crash;
+    global.fatal << "Number of threads must be at least 2 in this point of code..." << global.fatal;
   }
   this->ExtractHostInfo();
   this->ExtractAddressParts();
@@ -3043,7 +3043,7 @@ void WebWorker::OutputShowIndicatorOnTimeout(const std::string& message) {
   JSData result;
   this->GetIndicatorOnTimeout(result, message);
   if (this->indexInParent < 0) {
-    crash << "Index of worker is smaller than 0, this shouldn't happen. " << crash;
+    global.fatal << "Index of worker is smaller than 0, this shouldn't happen. " << global.fatal;
   }
   this->WriteToBodyJSON(result);
   this->WriteAfterTimeoutProgress(global.ToStringProgressReportNoThreadData(true), true);
@@ -3128,7 +3128,7 @@ std::string WebWorker::ToStringStatus() const {
 
 bool WebServer::CheckConsistency() {
   if (this->flagDeallocated) {
-    crash << "Use after free of WebServer." << crash;
+    global.fatal << "Use after free of WebServer." << global.fatal;
   }
   return true;
 }
@@ -3233,8 +3233,8 @@ void WebServer::ReapChildren() {
 WebWorker& WebServer::GetActiveWorker() {
   MacroRegisterFunctionWithName("WebServer::GetActiveWorker");
   if (this->activeWorker < 0 || this->activeWorker >= this->theWorkers.size) {
-    crash << "Active worker index is " << this->activeWorker << " however I have " << this->theWorkers.size
-    << " workers. " << crash;
+    global.fatal << "Active worker index is " << this->activeWorker << " however I have " << this->theWorkers.size
+    << " workers. " << global.fatal;
   }
   return this->theWorkers[this->activeWorker];
 }
@@ -3260,7 +3260,7 @@ void WebServer::ReleaseActiveWorker() {
 void WebServer::WorkerTimerPing(int64_t pingTime) {
   if (theWebServer.activeWorker == - 1) {
     if (!global.flagComputationFinishedAllOutputSentClosing) {
-      crash << "WebServer::WorkerTimerPing called when the computation is not entirely complete. " << crash;
+      global.fatal << "WebServer::WorkerTimerPing called when the computation is not entirely complete. " << global.fatal;
     }
     return;
   }
@@ -3303,7 +3303,7 @@ std::string WebServer::ToStringWorkerToWorker() {
 bool WebServer::CreateNewActiveWorker() {
   MacroRegisterFunctionWithName("WebServer::CreateNewActiveWorker");
   if (this->activeWorker != - 1) {
-    crash << "Calling CreateNewActiveWorker requires the active worker index to be - 1." << crash;
+    global.fatal << "Calling CreateNewActiveWorker requires the active worker index to be - 1." << global.fatal;
     return false;
   }
   bool found = false;
@@ -3379,7 +3379,7 @@ std::string WebServer::ToStringStatusActive() {
   }
   std::stringstream out;
   if (this->activeWorker != this->GetActiveWorker().indexInParent) {
-    crash << "Bad index in parent!" << crash;
+    global.fatal << "Bad index in parent!" << global.fatal;
   }
   out << this->GetActiveWorker().ToStringStatus();
   return out.str();
@@ -3516,7 +3516,7 @@ void WebServer::StopKillAll[[noreturn]](bool attemptToRestart) {
     global.logs.logType != GlobalVariables::LogData::type::server &&
     global.logs.logType != GlobalVariables::LogData::type::serverMonitor
   ) {
-    crash << "Server restart is allowed only to the server/monitor processes. " << crash;
+    global.fatal << "Server restart is allowed only to the server/monitor processes. " << global.fatal;
   }
   global << logger::red << "Server restart requested. " << logger::endL;
   global << "Sending kill signal to all copies of the calculator. " << logger::endL;
@@ -3599,7 +3599,7 @@ void WebServer::initListeningSockets() {
       this->theListeningSockets[i], this->highestSocketNumber
     );
     if (listen(this->theListeningSockets[i], WebServer::maxNumPendingConnections) == - 1) {
-      crash << "Listen function failed on socket: " << this->theListeningSockets[i] << crash;
+      global.fatal << "Listen function failed on socket: " << this->theListeningSockets[i] << global.fatal;
     }
   }
 }
@@ -3647,13 +3647,13 @@ void segfault_sigaction[[noreturn]](int signal, siginfo_t* si, void* arg) {
   // <- racy-ness in child process does not bother us: hanged children are still fine.
   (void) signal; //avoid unused parameter warning, portable.
   (void) arg;
-  crash << "Caught segfault at address: " << si->si_addr << crash;
+  global.fatal << "Caught segfault at address: " << si->si_addr << global.fatal;
   exit(0);
 }
 
 void WebServer::fperror_sigaction[[noreturn]](int signal) {
   (void) signal;
-  crash << "Fatal arithmetic error. " << crash;
+  global.fatal << "Fatal arithmetic error. " << global.fatal;
   exit(0);
 }
 
@@ -3706,7 +3706,7 @@ void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress)
   }
   theTimes.QuickSortAscending(nullptr, &theIndices);
   if (!theSignals.flagSignalsAreBlocked) {
-    crash << "Signals must be blocked at this point of code. " << crash;
+    global.fatal << "Signals must be blocked at this point of code. " << global.fatal;
   }
   for (int j = 0; j < theTimes.size; j ++) {
     // Child processes exit completely when their sigchld
@@ -3783,7 +3783,7 @@ void WebServer::RecycleOneChild(int childIndex, int& numberInUse) {
   WebWorker& currentWorker = this->theWorkers[childIndex];
   PipePrimitive& currentControlPipe = currentWorker.pipeWorkerToServerControls;
   if (currentControlPipe.flagReadEndBlocks) {
-    crash << "Pipe: " << currentControlPipe.ToString() << " has blocking read end. " << crash;
+    global.fatal << "Pipe: " << currentControlPipe.ToString() << " has blocking read end. " << global.fatal;
   }
   currentControlPipe.ReadOnceIfFailThenCrash(false, true);
   if (currentControlPipe.lastRead.size > 0) {
@@ -3793,7 +3793,7 @@ void WebServer::RecycleOneChild(int childIndex, int& numberInUse) {
   }
   PipePrimitive& currentPingPipe = currentWorker.pipeWorkerToServerTimerPing;
   if (currentPingPipe.flagReadEndBlocks) {
-    crash << "Pipe: " << currentPingPipe.ToString() << " has blocking read end. " << crash;
+    global.fatal << "Pipe: " << currentPingPipe.ToString() << " has blocking read end. " << global.fatal;
   }
   currentPingPipe.ReadOnceIfFailThenCrash(false, true);
   if (currentPingPipe.lastRead.size > 0) {
@@ -3919,7 +3919,7 @@ bool WebServer::initBindToOnePort(const std::string& thePort, int& outputListeni
       continue;
     }
     if (setsockopt(outputListeningSocket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == - 1) {
-      crash << "Error: setsockopt failed, error: \n" << strerror(errno) << crash;
+      global.fatal << "Error: setsockopt failed, error: \n" << strerror(errno) << global.fatal;
     }
     if (bind(outputListeningSocket, p->ai_addr, p->ai_addrlen) == - 1) {
       close(outputListeningSocket);
@@ -3931,14 +3931,14 @@ bool WebServer::initBindToOnePort(const std::string& thePort, int& outputListeni
     int setFlagCounter = 0;
     while (fcntl(outputListeningSocket, F_SETFL, O_NONBLOCK) != 0) {
       if (++ setFlagCounter > 10) {
-        crash << "Error: failed to set non-blocking status to listening socket. " << crash;
+        global.fatal << "Error: failed to set non-blocking status to listening socket. " << global.fatal;
       }
     }
     break;
   }
   freeaddrinfo(servinfo); // all done with this structure
   if (outputListeningSocket == - 1) {
-    crash << "Failed to bind to port: " << thePort << ". " << crash;
+    global.fatal << "Failed to bind to port: " << thePort << ". " << global.fatal;
   }
   return true;
 }
@@ -3972,53 +3972,53 @@ void SignalsInfrastructure::initializeSignals() {
   }
   sigfillset(&this->allSignals);
   if (sigemptyset(&this->SignalSEGV.sa_mask) == - 1) {
-    crash << "Failed to initialize SignalSEGV mask. Crashing to let you know. " << crash;
+    global.fatal << "Failed to initialize SignalSEGV mask. Crashing to let you know. " << global.fatal;
   }
   this->SignalSEGV.sa_sigaction = &segfault_sigaction;
   this->SignalSEGV.sa_flags = SA_SIGINFO;
   if (sigaction(SIGSEGV, &SignalSEGV, nullptr) == - 1) {
-    crash << "Failed to register SIGSEGV handler "
+    global.fatal << "Failed to register SIGSEGV handler "
     << "(segmentation fault (attempt to write memory without permission)). "
-    << "Crashing to let you know. " << crash;
+    << "Crashing to let you know. " << global.fatal;
   }
   ///////////////////////
   //catch floating point exceptions
   if (sigemptyset(&SignalFPE.sa_mask) == - 1) {
-    crash << "Failed to initialize SignalFPE mask. Crashing to let you know. " << crash;
+    global.fatal << "Failed to initialize SignalFPE mask. Crashing to let you know. " << global.fatal;
   }
   SignalFPE.sa_sigaction = nullptr;
   SignalFPE.sa_handler = &WebServer::fperror_sigaction;
   if (sigaction(SIGFPE, &SignalFPE, nullptr) == - 1) {
-    crash << "Failed to register SIGFPE handler (fatal arithmetic error). Crashing to let you know. " << crash;
+    global.fatal << "Failed to register SIGFPE handler (fatal arithmetic error). Crashing to let you know. " << global.fatal;
   }
   ////////////////////
   //ignore interruptsflagSignalsInitialized
   //if (sigemptyset(&SignalINT.sa_mask) == - 1)
-  //  crash << "Failed to initialize SignalINT mask. Crashing to let you know. " << crash;
+  //  global.fatal << "Failed to initialize SignalINT mask. Crashing to let you know. " << global.fatal;
   //SignalINT.sa_sigaction = 0;
   //SignalINT.sa_handler = &WebServer::Signal_SIGINT_handler;
   //if (sigaction(SIGINT, &SignalINT, NULL) == - 1)
-  //  crash << "Failed to register null SIGINT handler. Crashing to let you know. " << crash;
+  //  global.fatal << "Failed to register null SIGINT handler. Crashing to let you know. " << global.fatal;
   ////////////////////
   //reap children
   //if (sigemptyset(&SignalChild.sa_mask) == - 1)
-  //  crash << "Failed to initialize SignalChild mask. Crashing to let you know. " << crash;
+  //  global.fatal << "Failed to initialize SignalChild mask. Crashing to let you know. " << global.fatal;
   //if (sigaddset(&SignalChild.sa_mask, SIGINT) == - 1)
-  //  crash << "Failed to initialize SignalChild mask. Crashing to let you know. " << crash;
+  //  global.fatal << "Failed to initialize SignalChild mask. Crashing to let you know. " << global.fatal;
   ////////////////////////////////
   //sigchld signal should automatically be blocked when calling the sigchld handler.
   //Nevertheless, let's explicitly add it:
   //if (sigaddset(&SignalChild.sa_mask, SIGCHLD) == - 1)
-  //  crash << "Failed to initialize SignalChild mask. Crashing to let you know. " << crash;
+  //  global.fatal << "Failed to initialize SignalChild mask. Crashing to let you know. " << global.fatal;
   ////////////////////////////////
   //if (sigaddset(&SignalChild.sa_mask, SIGFPE) == - 1)
-  //  crash << "Failed to initialize SignalChild mask. Crashing to let you know. " << crash;
+  //  global.fatal << "Failed to initialize SignalChild mask. Crashing to let you know. " << global.fatal;
   //if (sigaddset(&SignalChild.sa_mask, SIGSEGV) == - 1)
-  //  crash << "Failed to initialize SignalChild mask. Crashing to let you know. " << crash;
+  //  global.fatal << "Failed to initialize SignalChild mask. Crashing to let you know. " << global.fatal;
   SignalChild.sa_flags = SA_NOCLDWAIT;
   SignalChild.sa_handler = &WebServer::Signal_SIGCHLD_handler; // reap all dead processes
   if (sigaction(SIGCHLD, &SignalChild, nullptr) == - 1) {
-    crash << "Was not able to register SIGCHLD handler (reaping child processes). Crashing to let you know." << crash;
+    global.fatal << "Was not able to register SIGCHLD handler (reaping child processes). Crashing to let you know." << global.fatal;
   }
 //  sigemptyset(&sa.sa_mask);
 //  sa.sa_flags = SA_RESTART;
@@ -4149,7 +4149,7 @@ int WebServer::Run() {
   if (global.flagServerAutoMonitor) {
     this->processIdServer = this->Fork();
     if (this->processIdServer < 0) {
-      crash << "Failed to create server process. " << crash;
+      global.fatal << "Failed to create server process. " << global.fatal;
     }
     if (this->processIdServer > 0) {
       global.logs.logType = GlobalVariables::LogData::type::serverMonitor;
@@ -4331,7 +4331,7 @@ int WebWorker::Run() {
   global.millisecondOffset = this->millisecondsAfterSelect;
   this->CheckConsistency();
   if (this->connectedSocketID == - 1) {
-    crash << "Worker::Run() started on a connecting with ID equal to - 1. " << crash;
+    global.fatal << "Worker::Run() started on a connecting with ID equal to - 1. " << global.fatal;
   }
   std::stringstream processNameStream;
   processNameStream << "W" << this->indexInParent + 1 << ": ";
@@ -5133,7 +5133,7 @@ int WebServer::main(int argc, char **argv) {
     global << "Computation timeout: " << logger::red << global.millisecondsMaxComputation << " ms." << logger::endL;
 
     if (!Database::get().initializeServer()) {
-      crash << "Failed to initialize database. " << crash;
+      global.fatal << "Failed to initialize database. " << global.fatal;
     }
     if (global.millisecondsMaxComputation > 0) {
       global.millisecondsNoPingBeforeChildIsPresumedDead =
@@ -5171,9 +5171,9 @@ int WebServer::main(int argc, char **argv) {
       return WebServer::mainCommandLine();
     }
   } catch (...) {
-    crash << "Exception caught: something very wrong has happened. " << crash;
+    global.fatal << "Exception caught: something very wrong has happened. " << global.fatal;
   }
-  crash << "This point of code is not supposed to be reachable. " << crash;
+  global.fatal << "This point of code is not supposed to be reachable. " << global.fatal;
   return - 1;
 }
 

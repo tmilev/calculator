@@ -28,7 +28,7 @@ public:
   const value& GetValueConstCrashIfNotPresent(const key& input) const {
     int theIndex = this->theKeys.GetIndex(input);
     if (theIndex == - 1) {
-      crash << "Map does not contain key at a place where that is not allowed. " << crash;
+      fatalCrash("Map does not contain key at a place where that is not allowed. ");
     }
     return this->theValues[theIndex];
   }

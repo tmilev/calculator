@@ -189,10 +189,10 @@ void Sha3::sha3_Update(void const* bufIn, size_t len) {
   size_t i;
   const uint8_t* buf = static_cast<const uint8_t *>(bufIn);
   if (this->byteIndex >= 8) {
-    crash << "Internal sha3 computation error: byteIndex too large: " << this->byteIndex << crash;
+    global.fatal << "Internal sha3 computation error: byteIndex too large: " << this->byteIndex << global.fatal;
   }
   if (this->wordIndex >= (sizeof(this->s) / sizeof(this->s[0]))) {
-    crash << "Internal sha3 computation error: wordIndex too large: " << this->wordIndex << crash;
+    global.fatal << "Internal sha3 computation error: wordIndex too large: " << this->wordIndex << global.fatal;
   }
   if (len < old_tail) {
     // Have no complete word or haven't started the word yet.
@@ -201,7 +201,7 @@ void Sha3::sha3_Update(void const* bufIn, size_t len) {
       this->saved |= static_cast<uint64_t>(*(buf ++)) << ((this->byteIndex ++) * 8);
     }
     if (this->byteIndex >= 8) {
-      crash << "Internal sha3 computation error. " << crash;
+      global.fatal << "Internal sha3 computation error. " << global.fatal;
     }
     return;
   }
@@ -216,7 +216,7 @@ void Sha3::sha3_Update(void const* bufIn, size_t len) {
     // now ready to add saved to the sponge
     this->s[this->wordIndex] ^= this->saved;
     if (this->byteIndex != 8) {
-      crash << "Internal sha3 computation error. " << crash;
+      global.fatal << "Internal sha3 computation error. " << global.fatal;
     }
     this->byteIndex = 0;
     this->saved = 0;
@@ -227,7 +227,7 @@ void Sha3::sha3_Update(void const* bufIn, size_t len) {
   }
   // now work in full words directly from input
   if (this->byteIndex != 0) {
-    crash << "Internal sha3 computation error. " << crash;
+    global.fatal << "Internal sha3 computation error. " << global.fatal;
   }
   words = len / sizeof(uint64_t);
   tail = static_cast<unsigned>(len - words * sizeof(uint64_t));
@@ -249,13 +249,13 @@ void Sha3::sha3_Update(void const* bufIn, size_t len) {
   }
   // finally, save the partial word
   if (!(this->byteIndex == 0 && tail < 8)) {
-    crash << "Internal sha3 computation error. " << crash;
+    global.fatal << "Internal sha3 computation error. " << global.fatal;
   }
   while (tail --) {
     this->saved |= static_cast<uint64_t>(*(buf ++)) << ((this->byteIndex ++) * 8);
   }
   if (this->byteIndex >= 8) {
-    crash << "Internal sha3 computation error. " << crash;
+    global.fatal << "Internal sha3 computation error. " << global.fatal;
   }
 }
 

@@ -176,7 +176,7 @@ bool CalculatorConversions::innerPolynomial(Calculator& theCommands, const Expre
   }
   if (input.IsOfType<coefficient>() || input.IsOfType<Rational>()) {
     if (!input.ConvertToType<Polynomial<coefficient> >(output)) {
-      crash << "This is a programming error: failed to convert coefficient to polynomial. " << crash;
+      global.fatal << "This is a programming error: failed to convert coefficient to polynomial. " << global.fatal;
     }
     return true;
   }
@@ -199,7 +199,7 @@ bool CalculatorConversions::innerPolynomial(Calculator& theCommands, const Expre
     if (input.IsListStartingWithAtom(theCommands.opPlus())) {
       return CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly(theCommands, theComputed, output);
     }
-    crash << "Error, this line of code should never be reached. " << crash;
+    global.fatal << "Error, this line of code should never be reached. " << global.fatal;
   }
   if (input.StartsWith(theCommands.opMinus(), 3)) {
     theComputed.reset(theCommands, input.size());

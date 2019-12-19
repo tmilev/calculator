@@ -17,7 +17,7 @@ void Matrix<coefficient>::ComputeDeterminantOverwriteMatrix(
   output = theRingOne;
   coefficient tempRat;
   if (this->NumCols != this->NumRows) {
-    crash << "Error: determinant computation: number of columns different from number of rows. " << crash;
+    global.fatal << "Error: determinant computation: number of columns different from number of rows. " << global.fatal;
   }
   int dim = this->NumCols;
   for (int i = 0; i < dim; i ++) {
@@ -185,7 +185,7 @@ void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy(
     return;
   }
   if (&bufferPoly == this || &bufferPoly == &other) {
-    crash << "Bad buffer in ElementMonomialAlgebra::MultiplyBy." << crash;
+    global.fatal << "Bad buffer in ElementMonomialAlgebra::MultiplyBy." << global.fatal;
   }
   this->CheckConsistency();
   other.CheckConsistency();
@@ -238,9 +238,9 @@ void Matrix<coefficient>::GaussianEliminationEuclideanDomain(
   MacroRegisterFunctionWithName("Matrix_Element::GaussianEliminationEuclideanDomain");
   ProgressReport theReport(1, GlobalVariables::Progress::ReportType::gaussianElimination);
   if (otherMatrix == this) {
-    crash << "This is a programming error: the Carbon copy in the Gaussian elimination "
+    global.fatal << "This is a programming error: the Carbon copy in the Gaussian elimination "
     << "coincides with the matrix which we are row-reducing "
-    << "(most probably this is a wrong pointer typo). " << crash;
+    << "(most probably this is a wrong pointer typo). " << global.fatal;
   }
   int col = 0;
   coefficient tempElt;
@@ -320,7 +320,7 @@ void Vectors<coefficient>::BeefUpWithEiToLinearlyIndependentBasis(int theDim) {
   Selection BufferSel;
   Matrix<coefficient> Buffer;
   if (this->size != 0 && theDim != this->GetDim()) {
-    crash << "Vector dimension is incorrect. " << crash;
+    global.fatal << "Vector dimension is incorrect. " << global.fatal;
   }
   int currentRank = this->GetRankOfSpanOfElements(Buffer, BufferSel);
   if (currentRank == theDim) {
@@ -338,7 +338,7 @@ void Vectors<coefficient>::BeefUpWithEiToLinearlyIndependentBasis(int theDim) {
     }
   }
   if (currentRank != theDim) {
-    crash << "Rank does not match dimension. " << crash;
+    global.fatal << "Rank does not match dimension. " << global.fatal;
   }
 }
 
@@ -407,11 +407,11 @@ bool List<Object>::ReadFromFile(std::fstream& input, int UpperLimitForDebugPurpo
   int ActualListSize; int NumWordsBeforeTag;
   XML::ReadThroughFirstOpenTag(input, NumWordsBeforeTag, this->GetXMLClassName());
   if (NumWordsBeforeTag != 0) {
-    crash << "Bad file input. " << crash;
+    global.fatal << "Bad file input. " << global.fatal;
   }
   input >> tempS >> ActualListSize;
   if (tempS != "size:") {
-    crash << "Failed to read list. " << crash;
+    global.fatal << "Failed to read list. " << global.fatal;
   }
   if (tempS != "size:") {
     return false;
@@ -435,7 +435,7 @@ bool List<Object>::ReadFromFile(std::fstream& input, int UpperLimitForDebugPurpo
   }
   bool tempBool = XML::ReadEverythingPassedTagOpenUntilTagClose(input, NumWordsBeforeTag, this->GetXMLClassName());
   if (!tempBool) {
-    crash << "Bad input file. " << crash;
+    global.fatal << "Bad input file. " << global.fatal;
   }
   return true;
 }
@@ -466,15 +466,15 @@ void Matrix<coefficient>::GaussianEliminationByRows(
 ) {
   MacroRegisterFunctionWithName("Matrix::GaussianEliminationByRows");
   if (this->NumRows == 0) {
-    crash << "This is a programming error: requesting to do Gaussian elimination on a matrix with "
-    << " zero rows. " << crash;
+    global.fatal << "This is a programming error: requesting to do Gaussian elimination on a matrix with "
+    << " zero rows. " << global.fatal;
   }
   if (carbonCopyMat != 0) {
     if (carbonCopyMat->NumRows != this->NumRows) {
-      crash << "This is a programming error: requesting to do "
+      global.fatal << "This is a programming error: requesting to do "
       << "Gaussian elimination with carbon copy, however the matrix has "
       << this->NumRows << " rows, while the carbon copy has "
-      << carbonCopyMat->NumRows << " rows. " << crash;
+      << carbonCopyMat->NumRows << " rows. " << global.fatal;
     }
   }
   ///////////////////

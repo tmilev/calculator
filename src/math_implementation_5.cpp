@@ -429,7 +429,7 @@ void DrawingVariables::drawString(
 }
 
 void WeylGroupData::WriteToFile(std::fstream& output) {
-  crash << "WeylGroupData::WriteToFile Not implemented yet due to a regression. " << crash;
+  global.fatal << "WeylGroupData::WriteToFile Not implemented yet due to a regression. " << global.fatal;
 //  output << this->WeylLetter << " " << this->CartanSymmetric.NumRows << "\n";
   output << "Long_root_length: ";
 //  this->lengthLongestRootSquared.WriteToFile(output);
@@ -440,17 +440,17 @@ void WeylGroupData::WriteToFile(std::fstream& output) {
 void WeylGroupData::ReadFromFile(std::fstream& input) {
   std::string tempS;
   input >> tempS;
-  crash << "WeylGroupData::ReadFromFile is not implemented yet (due to a regression)." << crash;
+  global.fatal << "WeylGroupData::ReadFromFile is not implemented yet (due to a regression)." << global.fatal;
   //input >> this->WeylLetter >> tempI >> tempS;
   if (tempS != "Long_root_length:") {
-    crash << "Failed to read weyl group data from file. " << crash;
+    global.fatal << "Failed to read weyl group data from file. " << global.fatal;
   }
 //  this->lengthLongestRootSquared.ReadFromFile(input);
   this->CartanSymmetric.ReadFromFile(input);
 }
 
 void SemisimpleLieAlgebra::ComputeOneAutomorphism(Matrix<Rational>& outputAuto, bool useNegativeRootsFirst) {
-  crash << "Not implemented yet!!!!!" << crash;
+  global.fatal << "Not implemented yet!!!!!" << global.fatal;
   rootSubalgebra theRootSA;
 //  theRootSA.init(*this);
   int theDimension = this->theWeyl.CartanSymmetric.NumRows;
@@ -623,7 +623,7 @@ int SemisimpleLieAlgebra::GetLengthStringAlongAlphaThroughBeta(Vector<Rational>&
       return i;
     }
   }
-//  crash << crash;
+//  global.fatal << global.fatal;
 //  return - 1;
 }
 
@@ -763,7 +763,7 @@ void HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism(
   const ElementSemisimpleLieAlgebra<Rational>& input, ElementSemisimpleLieAlgebra<Rational>& output
 ) {
   if (&output == &input) {
-    crash << "Output required to be different from input. " << crash;
+    global.fatal << "Output required to be different from input. " << global.fatal;
   }
   output.MakeZero();
   for (int i = 0; i < input.size(); i ++) {
@@ -787,7 +787,7 @@ bool HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism(
   ElementUniversalEnveloping<RationalFunctionOld>& output
 ) {
   if (&output == &input) {
-    crash << "Output must be different from input. " << crash;
+    global.fatal << "Output must be different from input. " << global.fatal;
   }
   output.MakeZero(this->theRange());
   ElementUniversalEnveloping<RationalFunctionOld> tempElt;
@@ -903,13 +903,13 @@ bool HomomorphismSemisimpleLieAlgebra::CheckClosednessLieBracket() {
 
 void ChevalleyGenerator::CheckConsistencyWithOther(const ChevalleyGenerator& other) const {
   if (this->owner != other.owner) {
-    crash << "This is a programming error: attempting to compare Chevalley generators of different Lie algebras. " << crash;
+    global.fatal << "This is a programming error: attempting to compare Chevalley generators of different Lie algebras. " << global.fatal;
   }
 }
 
 bool ChevalleyGenerator::CheckInitialization() const {
   if (this->owner == nullptr) {
-    crash << "This is a programming error: attempting to use a non-initialized Chevalley generator. " << crash;
+    global.fatal << "This is a programming error: attempting to use a non-initialized Chevalley generator. " << global.fatal;
     return false;
   }
   return true;
@@ -1192,7 +1192,7 @@ bool VectorPartition::NudgePartition() {
     }
   }
   if (indexFirstNonZero == - 1) {
-    crash << "Error: an internal check has failed in VectorPartition::IncrementReturnFalseIfPastLast." << crash;
+    global.fatal << "Error: an internal check has failed in VectorPartition::IncrementReturnFalseIfPastLast." << global.fatal;
   }
   if (indexFirstNonZero == 0) {
     return false;
@@ -1277,12 +1277,12 @@ bool RationalFunctionOld::ConvertToType(int theType) {
 
 void RationalFunctionOld::Invert() {
   if (!this->checkConsistency()) {
-    crash << "Inconsistent rational functoin. " << crash;
+    global.fatal << "Inconsistent rational functoin. " << global.fatal;
   }
   if (this->expressionType == this->typeRational) {
     if (this->ratValue.IsEqualToZero()) {
-      crash  << "This is a programming error: division by zero. Division by zero errors must be caught earlier in the program and "
-      << "handled gracefully. Crashing ungracefully. " << crash;
+      global.fatal  << "This is a programming error: division by zero. Division by zero errors must be caught earlier in the program and "
+      << "handled gracefully. Crashing ungracefully. " << global.fatal;
     }
     this->ratValue.Invert();
     return;
@@ -1291,39 +1291,39 @@ void RationalFunctionOld::Invert() {
     this->ConvertToType(this->typeRationalFunction);
   }
   if (this->Numerator.GetElement().IsEqualToZero()) {
-    crash << "Cannot invert rational function with zero numerator. " << crash;
+    global.fatal << "Cannot invert rational function with zero numerator. " << global.fatal;
   }
   MathRoutines::swap(this->Numerator.GetElement(), this->Denominator.GetElement());
   this->expressionType = this->typeRationalFunction;
   this->ReduceMemory();
   this->SimplifyLeadingCoefficientOnly();
   if (!this->checkConsistency()) {
-    crash << "Consistency check failed. " << crash;
+    global.fatal << "Consistency check failed. " << global.fatal;
   }
 }
 
 bool RationalFunctionOld::checkConsistency() const {
   if (this->expressionType == this->typePoly) {
     if (this->Numerator.IsZeroPointer()) {
-      crash << "This is a programming error: a rational function is flagged as being a non-constant polynomial, but the numerator pointer is zero. " << crash;
+      global.fatal << "This is a programming error: a rational function is flagged as being a non-constant polynomial, but the numerator pointer is zero. " << global.fatal;
       return false;
     }
     if (this->Numerator.GetElementConst().IsConstant()) {
-      crash << "This is a programming error: a rational function is flagged as "
-      << "having a non-constant numerator, but the numerator is constant. " << crash;
+      global.fatal << "This is a programming error: a rational function is flagged as "
+      << "having a non-constant numerator, but the numerator is constant. " << global.fatal;
       return false;
     }
   }
   if (this->expressionType == this->typeRationalFunction) {
     if (this->Numerator.IsZeroPointer() || this->Denominator.IsZeroPointer()) {
-      crash << "This is a programming error: a rational function is flagged as "
+      global.fatal << "This is a programming error: a rational function is flagged as "
       << "having non-constant denominator, but either the numerator or the denominator pointer is zero. "
-      << crash;
+      << global.fatal;
       return false;
     }
     if (this->Denominator.GetElementConst().IsConstant()) {
-      crash << "This is a programming error: a rational function is flagged as "
-      << "having non-constant denominator, but the denominator is constant. " << crash;
+      global.fatal << "This is a programming error: a rational function is flagged as "
+      << "having non-constant denominator, but the denominator is constant. " << global.fatal;
       return false;
     }
   }
@@ -1332,9 +1332,9 @@ bool RationalFunctionOld::checkConsistency() const {
     this->expressionType != this->typePoly &&
     this->expressionType != this->typeRationalFunction
   ) {
-    crash << "This is a programming error: a rational function is not initialized properly: its type is "
+    global.fatal << "This is a programming error: a rational function is not initialized properly: its type is "
     << this->expressionType
-    << " which is not allowed. " << crash;
+    << " which is not allowed. " << global.fatal;
     return false;
   }
   return true;
@@ -1349,36 +1349,36 @@ void RationalFunctionOld::operator/=(int other) {
 void RationalFunctionOld::Minus() {
   this->operator*= (Rational(- 1));
   if (!this->checkConsistency()) {
-    crash << "Failed to take the negative sign of a rational function. " << crash;
+    global.fatal << "Failed to take the negative sign of a rational function. " << global.fatal;
   }
 }
 
 void RationalFunctionOld::operator-=(const RationalFunctionOld& other) {
   if (!this->checkConsistency()) {
-    crash << "Corrupt rational function in operator -=. " << crash;
+    global.fatal << "Corrupt rational function in operator -=. " << global.fatal;
   }
   if (!other.checkConsistency()) {
-    crash << "Corrupt other rational function in operator -=. " << crash;
+    global.fatal << "Corrupt other rational function in operator -=. " << global.fatal;
   }
   RationalFunctionOld tempRF;
   tempRF = other;
   tempRF.Minus();
   this->operator+=(tempRF);
   if (!this->checkConsistency()) {
-    crash << "Corrupt output in rational function operator -=." << crash;
+    global.fatal << "Corrupt output in rational function operator -=." << global.fatal;
   }
 }
 
 void RationalFunctionOld::operator-=(const Rational& other) {
   if (!this->checkConsistency()) {
-    crash << "Corrupt rational function in operator-=(Rational). " << crash;
+    global.fatal << "Corrupt rational function in operator-=(Rational). " << global.fatal;
   }
   RationalFunctionOld tempRF;
   tempRF.MakeConst(other);
   tempRF.Minus();
   this->operator+=(tempRF);
   if (!(this->checkConsistency())) {
-    crash << "Corrupt output in rational function operator-=(Rational)." << crash;
+    global.fatal << "Corrupt output in rational function operator-=(Rational)." << global.fatal;
   }
 }
 
@@ -1392,7 +1392,7 @@ void RationalFunctionOld::MakeZero() {
   this->Numerator.FreeMemory();
   this->Denominator.FreeMemory();
   if (!this->checkConsistency()) {
-    crash << "MakeZero produced corrupt output in rational function old. " << crash;
+    global.fatal << "MakeZero produced corrupt output in rational function old. " << global.fatal;
   }
 }
 
@@ -1505,22 +1505,22 @@ void RationalFunctionOld::gcd(
   prodBuf *= right;
   prodBuf.DivideBy(lcmBuf, output, remBuf);
   if (!remBuf.IsEqualToZero() || output.IsEqualToZero()) {
-    crash << "This is a programming error. <br>While computing the gcd of left ="
+    global.fatal << "This is a programming error. <br>While computing the gcd of left ="
     << left.ToString() << " <br>and right ="
     << right.ToString() << " <br>I got that left*right = " << prodBuf.ToString()
     << "<br>, and that lcm(left,right)="
     << lcmBuf.ToString() << " <br>but at the same time right*left divided by lcm (left, right) equals <br>"
     << output.ToString()
     << "<br> with remainder " << remBuf.ToString()
-    << ", which is imposible. <br>The Groebner basis follows. <br>" << crash;
+    << ", which is imposible. <br>The Groebner basis follows. <br>" << global.fatal;
   }
   output.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
 }
 
 void RationalFunctionOld::MakeOneLetterMoN(int theIndex, const Rational& theCoeff, int ExpectedNumVars) {
   if (theIndex < 0) {
-    crash << "This is a programming error: I am asked to create "
-    << "Monomial which has a variable of negative index " << theIndex << ". " << crash;
+    global.fatal << "This is a programming error: I am asked to create "
+    << "Monomial which has a variable of negative index " << theIndex << ". " << global.fatal;
   }
   this->expressionType = this->typePoly;
   ExpectedNumVars = MathRoutines::Maximum(theIndex + 1, ExpectedNumVars);
@@ -1531,8 +1531,8 @@ void RationalFunctionOld::MakeMonomiaL(
   int LetterIndex, const Rational& Power, const Rational& Coeff, int ExpectedNumVars
 ) {
   if (LetterIndex < 0) {
-    crash << "This is a programming error: I am asked to create Monomial which has a variable of negative index "
-    << LetterIndex << ". " << crash;
+    global.fatal << "This is a programming error: I am asked to create Monomial which has a variable of negative index "
+    << LetterIndex << ". " << global.fatal;
   }
   this->expressionType = this->typePoly;
   this->Numerator.GetElement().MakeMonomiaL(LetterIndex, Power, Coeff, ExpectedNumVars);
@@ -1555,13 +1555,13 @@ void RationalFunctionOld::operator=(const RationalFunctionOld& other) {
       break;
     case RationalFunctionOld::typePoly:
       if (other.Numerator.IsZeroPointer()) {
-        crash << "Zero pointer in numerator of other. " << crash;
+        global.fatal << "Zero pointer in numerator of other. " << global.fatal;
       }
       this->Numerator.GetElement() = other.Numerator.GetElementConst();
       break;
     case RationalFunctionOld::typeRationalFunction:
       if (other.Numerator.IsZeroPointer() || other.Denominator.IsZeroPointer()) {
-        crash << "Zero pointer in numerator or denominator of other. " << crash;
+        global.fatal << "Zero pointer in numerator or denominator of other. " << global.fatal;
       }
       this->Numerator.GetElement() = other.Numerator.GetElementConst();
       this->Denominator.GetElement() = other.Denominator.GetElementConst();
@@ -1597,7 +1597,7 @@ void RationalFunctionOld::lcm(
   theComp.thePolynomialOrder.theMonOrder =MonomialP::LeftIsGEQLexicographicLastVariableStrongest;
   theComp.MaxNumGBComputations = - 1;
   if (!theComp.TransformToReducedGroebnerBasis(theBasis)) {
-    crash << "Transformation to reduced Groebner basis is not allowed to fail in this function. " << crash;
+    global.fatal << "Transformation to reduced Groebner basis is not allowed to fail in this function. " << global.fatal;
   }
   int maxMonNoTIndex = - 1;
   Rational MaxTotalDeg;
@@ -1615,11 +1615,11 @@ void RationalFunctionOld::lcm(
     }
   }
   if (maxMonNoTIndex == - 1) {
-    crash << "This is a programming error: failed to obtain lcm of two rational functions. The list of polynomials is: ";
+    global.fatal << "This is a programming error: failed to obtain lcm of two rational functions. The list of polynomials is: ";
     for (int i = 0; i < theBasis.size; i ++) {
-      crash << theBasis[i].ToString() << ", ";
+      global.fatal << theBasis[i].ToString() << ", ";
     }
-    crash << crash;
+    global.fatal << global.fatal;
   }
   output = theBasis[maxMonNoTIndex];
   output.SetNumVariablesSubDeletedVarsByOne(theNumVars);
@@ -1658,12 +1658,12 @@ void RationalFunctionOld::operator*=(const Polynomial<Rational>& other) {
   this->Numerator.GetElement() *= other;
   this->Numerator.GetElement().DivideBy(theGCD, theResult, tempP);
   if (!tempP.IsEqualToZero()) {
-    crash << "Polynomial equal to zero not allowed here. " << crash;
+    global.fatal << "Polynomial equal to zero not allowed here. " << global.fatal;
   }
   this->Numerator.GetElement() = theResult;
   this->Denominator.GetElement().DivideBy(theGCD, theResult, tempP);
   if (!tempP.IsEqualToZero()) {
-    crash << "Polynomial not equal to zero. " << crash;
+    global.fatal << "Polynomial not equal to zero. " << global.fatal;
   }
   this->Denominator.GetElement() = theResult;
   this->ReduceMemory();
@@ -1686,13 +1686,13 @@ void RationalFunctionOld::operator/=(const RationalFunctionOld& other) {
   tempRF.checkConsistency();
   *this *= tempRF;
   if (!this->checkConsistency()) {
-    crash << "Incosistent rational function. " << crash;
+    global.fatal << "Incosistent rational function. " << global.fatal;
   }
 }
 
 
 void RationalFunctionOld::operator*=(const Rational& other) {
-  //if (!this->checkConsistency()) crash << crash;
+  //if (!this->checkConsistency()) global.fatal << global.fatal;
   if (other.IsEqualToZero()) {
     this->MakeZero();
     return;
@@ -1761,21 +1761,21 @@ void RationalFunctionOld::operator*=(const RationalFunctionOld& other) {
   this->Numerator.GetElement().DivideBy(theGCD1, tempP1, tempP2);
   this->Numerator.GetElement() = tempP1;
   if (!tempP2.IsEqualToZero()) {
-    crash << "Polynomial equal to zero not allowed here. " << crash;
+    global.fatal << "Polynomial equal to zero not allowed here. " << global.fatal;
   }
   other.Denominator.GetElementConst().DivideBy(theGCD1, tempP1, tempP2);
   if (!tempP2.IsEqualToZero()) {
-    crash << "Polynomial must not be zero here. " << crash;
+    global.fatal << "Polynomial must not be zero here. " << global.fatal;
   }
   this->Denominator.GetElement() *= tempP1;
   this->Denominator.GetElement().DivideBy(theGCD2, tempP1, tempP2);
   if (!tempP2.IsEqualToZero()) {
-    crash << "Polynomial must not be zero here. " << crash;
+    global.fatal << "Polynomial must not be zero here. " << global.fatal;
   }
   this->Denominator.GetElement() = tempP1;
   other.Numerator.GetElementConst().DivideBy(theGCD2, tempP1, tempP2);
   if (!tempP2.IsEqualToZero()) {
-    crash << "Polynomial must not be zero here. " << crash;
+    global.fatal << "Polynomial must not be zero here. " << global.fatal;
   }
   this->Numerator.GetElement() *= tempP1;
   this->ReduceMemory();
@@ -1794,10 +1794,10 @@ void RationalFunctionOld::operator+=(const RationalFunctionOld& other) {
     return;
   }
   if (!this->checkConsistency()) {
-    crash << "Corrupt rational function. " << crash;
+    global.fatal << "Corrupt rational function. " << global.fatal;
   }
   if (!other.checkConsistency()) {
-    crash << "Corrupt other rational function. " << crash;
+    global.fatal << "Corrupt other rational function. " << global.fatal;
   }
   if (other.expressionType < this->expressionType) {
     RationalFunctionOld tempRF;
@@ -1805,15 +1805,15 @@ void RationalFunctionOld::operator+=(const RationalFunctionOld& other) {
     tempRF.ConvertToType(this->expressionType);
     this->AddSameTypes(tempRF);
     if (!this->checkConsistency()) {
-      crash << "Output of rational function addition is corrupt. " << crash;
+      global.fatal << "Output of rational function addition is corrupt. " << global.fatal;
     }
     return;
   }
   if (this->expressionType == other.expressionType) {
     this->AddSameTypes(other);
     if (!this->checkConsistency()) {
-      crash << "Output of rational function addition is corrupt "
-      << "for same type of rational functions." << crash;
+      global.fatal << "Output of rational function addition is corrupt "
+      << "for same type of rational functions." << global.fatal;
     }
     return;
   }
@@ -1821,11 +1821,11 @@ void RationalFunctionOld::operator+=(const RationalFunctionOld& other) {
     this->ConvertToType(other.expressionType);
     this->AddSameTypes(other);
     if (!this->checkConsistency()) {
-      crash << "Corrupt outputs of rational function addition, different expression types. " << crash;
+      global.fatal << "Corrupt outputs of rational function addition, different expression types. " << global.fatal;
     }
   }
   if (!this->checkConsistency()) {
-    crash <<  "Corrupt final output of rational function addition. " << crash;
+    global.fatal <<  "Corrupt final output of rational function addition. " << global.fatal;
   }
 }
 
@@ -1836,10 +1836,10 @@ void RationalFunctionOld::Simplify() {
       Polynomial<Rational> theGCD, tempP, tempP2;
       this->gcd(this->Numerator.GetElement(), this->Denominator.GetElement(), theGCD);
       if (theGCD.IsEqualToZero()) {
-        crash << "This is a programing error: "
+        global.fatal << "This is a programing error: "
         << " while fetching the gcd of " << this->Numerator.GetElement().ToString()
         << " and " << this->Denominator.GetElement().ToString()
-        << " I got 0, which is impossible. " << crash;
+        << " I got 0, which is impossible. " << global.fatal;
       }
       this->Numerator.GetElement().DivideBy(theGCD, tempP, tempP2);
       this->Numerator.GetElement() = tempP;
@@ -1913,10 +1913,10 @@ void RationalFunctionOld::ScaleClearDenominator(List<RationalFunctionOld>& input
 
 bool SemisimpleLieAlgebraOrdered::CheckInitialization() const {
   if (this->theOwner == nullptr) {
-    crash << "Use of semisimple Lie algebra without an owner. " << crash;
+    global.fatal << "Use of semisimple Lie algebra without an owner. " << global.fatal;
   }
   if (this->theOwner->flagDeallocated) {
-    crash << "Use after free of semisimple Lie algebra. ";
+    global.fatal << "Use after free of semisimple Lie algebra. ";
   }
   return true;
 }
@@ -1953,7 +1953,7 @@ int SemisimpleLieAlgebraOrdered::GetDisplayIndexFromGeneratorIndex(int Generator
 void SemisimpleLieAlgebraOrdered::init(
   List<ElementSemisimpleLieAlgebra<Rational> >& inputOrder, SemisimpleLieAlgebra& owner
 ) {
-  crash << "not implemented" << crash;
+  global.fatal << "not implemented" << global.fatal;
   if (inputOrder.size != owner.GetNumGenerators()) {
     return;
   }
@@ -2017,7 +2017,7 @@ void HomomorphismSemisimpleLieAlgebra::GetWeightsWrtKInSimpleCoordsK(
         tempLieElement
       );
       if (!currentLieElt.IsProportionalTo(tempLieElement, tempRat)) {
-        crash << "Lie algebra elements not proportional as expected. " << crash;
+        global.fatal << "Lie algebra elements not proportional as expected. " << global.fatal;
       }
       currentWeight[j] = tempRat;
     }
@@ -2088,7 +2088,7 @@ void RationalFunctionOld::RaiseToPower(int thePower) {
   }
   if (thePower == 0) {
     if (this->IsEqualToZero()) {
-      crash << "This is a programming error: attempting to raise 0 to the 0th power, which is undefined. " << crash;
+      global.fatal << "This is a programming error: attempting to raise 0 to the 0th power, which is undefined. " << global.fatal;
     }
     this->MakeOne();
     return;
@@ -2141,7 +2141,7 @@ void slTwoInSlN::ClimbDownFromHighestWeightAlongSl2String(
 ) {
   MacroRegisterFunctionWithName("slTwoInSlN::ClimbDownFromHighestWeightAlongSl2String");
   if (&input == &output) {
-    crash << "Input coincides with output. " << crash;
+    global.fatal << "Input coincides with output. " << global.fatal;
   }
   Rational currentWeight;
   Matrix<Rational>::LieBracket(this->theH, input, output);
@@ -2296,7 +2296,7 @@ void slTwoInSlN::ExtractHighestWeightVectorsFromVector(
         outputTheHWVectors.AddOnTop(tempMat);
       }
     }
-    crash << "Extract highest vector not fully implemented yet. " << crash;
+    global.fatal << "Extract highest vector not fully implemented yet. " << global.fatal;
     component /= theCoeff;
     outputDecompositionOfInput.AddOnTop(component);
     remainder -= component;
@@ -2310,7 +2310,7 @@ void slTwoInSlN::ExtractHighestWeightVectorsFromVector(
 void slTwoInSlN::ClimbUpFromVector(Matrix<Rational>& input, Matrix<Rational>& outputLastNonZero, int& largestPowerNotKillingInput) {
   Matrix<Rational>  tempMat;
   if (&input == &outputLastNonZero) {
-    crash << "Input not allowed to coincide with the output. " << crash;
+    global.fatal << "Input not allowed to coincide with the output. " << global.fatal;
   }
   outputLastNonZero = input;
   largestPowerNotKillingInput = 0;
@@ -2530,7 +2530,7 @@ void RationalFunctionOld::AddHonestRF(const RationalFunctionOld& other) {
     this->Numerator.GetElement() += buffer;
     this->Denominator.GetElement() *= other.Denominator.GetElementConst();
     if (this->Denominator.GetElement().IsEqualToZero())
-      crash << "Denominator of rational function is zero." << crash;
+      global.fatal << "Denominator of rational function is zero." << global.fatal;
     this->Simplify();
 //    this->ComputeDebugString();
   } else {
@@ -2541,7 +2541,7 @@ void RationalFunctionOld::AddHonestRF(const RationalFunctionOld& other) {
     this->SimplifyLeadingCoefficientOnly();
   }
   if (!this->checkConsistency()) {
-    crash << "Inconsistent rational function. " << crash;
+    global.fatal << "Inconsistent rational function. " << global.fatal;
   }
 }
 
@@ -2673,7 +2673,7 @@ bool MonomialP::IsGEQTotalDegThenLexicographicLastVariableStrongest(const Monomi
 
 bool MonomialP::IsGEQpartialOrder(MonomialP& m) {
   if (this->monBody.size != m.monBody.size) {
-    crash << "This is a programming error: comparing two monomials with different number of variables. " << crash;
+    global.fatal << "This is a programming error: comparing two monomials with different number of variables. " << global.fatal;
   }
   for (int i = 0; i < m.monBody.size; i ++) {
     if ((*this)[i] < m[i]) {

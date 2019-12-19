@@ -39,8 +39,8 @@ void SemisimpleLieAlgebra::GetChevalleyGeneratorAsLieBracketsSimpleGens(
           int currentIndex = this->theWeyl.RootSystem.GetIndex(theWeight);
           theIndex = this->GetRootIndexFromGenerator(theIndex);
           if (!this->Computed.elements[theIndex][currentIndex]) {
-            crash << "This is a programming error. "
-            << "For some reason I am not computed. Here is me: " << this->ToString() << crash;
+            global.fatal << "This is a programming error. "
+            << "For some reason I am not computed. Here is me: " << this->ToString() << global.fatal;
           }
           outputMultiplyLieBracketsToGetGenerator /= this->ChevalleyConstants.elements[theIndex][currentIndex];
         }
@@ -79,7 +79,7 @@ void Lattice::IntersectWithLineGivenBy(Vector<Rational>& inputLine, Vector<Ratio
   tempRoots.AddOnTop(inputLine);
   this->IntersectWithLinearSubspaceSpannedBy(tempRoots);
   if (this->basisRationalForm.NumRows > 1) {
-    crash << "This should not be possible. " << crash;
+    global.fatal << "This should not be possible. " << global.fatal;
   }
   if (this->basisRationalForm.NumRows == 0) {
     outputGenerator.MakeZero(inputLine.size);
@@ -90,7 +90,7 @@ void Lattice::IntersectWithLineGivenBy(Vector<Rational>& inputLine, Vector<Ratio
 
 void LittelmannPath::ActByEFDisplayIndex(int displayIndex) {
   if (this->owner == nullptr) {
-    crash << " This is a programming error: LS path without initialized owner is begin acted upon. " << crash;
+    global.fatal << " This is a programming error: LS path without initialized owner is begin acted upon. " << global.fatal;
   }
   if (displayIndex > 0) {
     this->ActByEalpha(displayIndex - 1);
@@ -101,10 +101,10 @@ void LittelmannPath::ActByEFDisplayIndex(int displayIndex) {
 
 void LittelmannPath::ActByEalpha(int indexAlpha) {
   if (this->owner == nullptr) {
-    crash << " This is a programming error: LS path without initialized owner is begin acted upon. " << crash;
+    global.fatal << " This is a programming error: LS path without initialized owner is begin acted upon. " << global.fatal;
   }
   if (indexAlpha < 0 || indexAlpha >= this->owner->GetDim()) {
-    crash << " This is a programming error: index of Littelmann root operator out of range. " << crash;
+    global.fatal << " This is a programming error: index of Littelmann root operator out of range. " << global.fatal;
   }
   if (this->Waypoints.size == 0) {
     return;
@@ -112,7 +112,7 @@ void LittelmannPath::ActByEalpha(int indexAlpha) {
   Rational theMin = 0;
   int minIndex = - 1;
   if (this->owner == nullptr) {
-    crash << "Zero owner not allowed here. " << crash;
+    global.fatal << "Zero owner not allowed here. " << global.fatal;
   }
   WeylGroupData& theWeyl = *this->owner;
   theWeyl.ComputeRho(true);
@@ -183,10 +183,10 @@ void LittelmannPath::ActByFalpha(int indexAlpha) {
     return;
   }
   if (this->owner == nullptr) {
-    crash << " This is a programming error: LS path without initialized owner is begin acted upon. " << crash;
+    global.fatal << " This is a programming error: LS path without initialized owner is begin acted upon. " << global.fatal;
   }
   if (indexAlpha < 0 || indexAlpha >= this->owner->GetDim()) {
-    crash << " This is a programming error: index of Littelmann root operator out of range. " << crash;
+    global.fatal << " This is a programming error: index of Littelmann root operator out of range. " << global.fatal;
   }
   Rational theMin = 0;
   int minIndex = - 1;
@@ -827,10 +827,10 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
       }
     }
     if (!isGood) {
-      crash << "This is either a programming error, or Lemma 3.3, T. Milev, P. Somberg, \"On branching...\""
+      global.fatal << "This is either a programming error, or Lemma 3.3, T. Milev, P. Somberg, \"On branching...\""
       << " is wrong. The question is, which is the more desirable case... The bad apple is element "
       << this->nilradicalSmall[i].ToString() << " of weight "
-      << this->weightsNilradicalSmall[i].ToString() << ". " << crash;
+      << this->weightsNilradicalSmall[i].ToString() << ". " << global.fatal;
     }
   }
 }
@@ -899,10 +899,10 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
 ) {
   MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::GetGroupElementsIndexedAsAmbientGroup");
   if (this->ExternalAutomorphisms.size > 0) {
-    crash << "This is  a programming error: a function meant for subgroups that are "
+    global.fatal << "This is  a programming error: a function meant for subgroups that are "
     << "Weyl groups of Levi parts of parabolics "
     << "is called on a subgroup that is not of that type. "
-    << crash;
+    << global.fatal;
   }
   output.Reserve(this->allElements.size);
   output.SetSize(0);

@@ -62,9 +62,9 @@ void Basis<coefficient>::AddVector(const Vector<coefficient>& v) {
     basis.NumRows = 0;
   }
   if (basis.NumRows == basis.NumCols) {
-    crash << "Programming error: attempting to add the " << basis.NumRows
+    global.fatal << "Programming error: attempting to add the " << basis.NumRows
     << " vector to a Basis of degree " << basis.NumCols;
-    crash << crash;
+    global.fatal << global.fatal;
   }
   haveGramMatrix = false;
   for (int i = 0; i < v.size; i ++) {
@@ -246,8 +246,8 @@ template<typename coefficient>
 VectorSpace<coefficient> VectorSpace<coefficient>::Intersection(const VectorSpace<coefficient>& other) const {
   // perhaps at some point it would be nice to ban intersections with spaces of unspecified degree
   if (this->degree != other.degree && ((this->degree != - 1) && (other.degree != - 1))) {
-    crash << "Attempting to intersect vector spaces of different degrees, "
-    << this->degree << " and " << other.degree << ". " << crash;
+    global.fatal << "Attempting to intersect vector spaces of different degrees, "
+    << this->degree << " and " << other.degree << ". " << global.fatal;
   }
   VectorSpace<coefficient> output;
   output.degree = this->degree;
@@ -371,7 +371,7 @@ bool VectorSpace<coefficient>::operator==(const VectorSpace<coefficient>& other)
 template <typename coefficient>
 Vector<coefficient> VectorSpace<coefficient>::GetBasisVector(int i) const {
   if (i >= this->rank) {
-    crash << "Bad vector index. " << crash;
+    global.fatal << "Bad vector index. " << global.fatal;
   }
   Vector<coefficient> out;
   if (basis.basis.NumRows > i) {
@@ -385,7 +385,7 @@ Vector<coefficient> VectorSpace<coefficient>::GetBasisVector(int i) const {
 template <typename coefficient>
 Vector<coefficient> VectorSpace<coefficient>::GetCanonicalBasisVector(int i) const {
   if (i >= this->rank) {
-    crash << "Vector index too large. " << crash;
+    global.fatal << "Vector index too large. " << global.fatal;
   }
   Vector<coefficient> out;
   fastbasis.GetVectorFromRow(i, out);

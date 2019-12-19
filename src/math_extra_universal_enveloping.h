@@ -41,7 +41,7 @@ public:
   }
   void MakeGenerator(int generatorIndex, SemisimpleLieAlgebra& inputOwner) {
     if (generatorIndex < 0 || generatorIndex>inputOwner.GetNumGenerators()) {
-      crash << "This is a programming error: attempting to assign impossible index to monomial UE. " << crash;
+      global.fatal << "This is a programming error: attempting to assign impossible index to monomial UE. " << global.fatal;
     }
     this->owner = &inputOwner;
     this->generatorsIndices.SetSize(1);

@@ -318,7 +318,7 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasisImpro
     this->leadingCoeffs.AddOnTop(this->theBasiS[i].theCoeffs[theIndex]);
   }
   if (this->theBasiS.size <= 0) {
-    crash << "This is a programming error: transforming to Groebner basis not allowed for empty basis. " << crash;
+    global.fatal << "This is a programming error: transforming to Groebner basis not allowed for empty basis. " << global.fatal;
   }
   MonomialP leftShift, rightShift, monLCM;
   Polynomial<Rational> leftBuf, rightBuf;
@@ -439,9 +439,9 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis(
     &inputOutput == &this->bufPoly ||
     outputRemainder == &this->bufPoly
   ) {
-    crash << "This is a programming error: the input, the output and "
+    global.fatal << "This is a programming error: the input, the output and "
     << "the buffer member object must be pairwise distinct when carrying out "
-    << " multi-polynomial division. " << crash;
+    << " multi-polynomial division. " << global.fatal;
   }
   if (this->flagStoreQuotients) {
     this->theQuotients.SetSize(this->theBasiS.size);
@@ -490,9 +490,9 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis(
         numIntermediateRemainders ++;
         highestMonCurrentDivHighestMonOther /= highestMonBasis;
         if (!highestMonCurrentDivHighestMonOther.HasPositiveOrZeroExponents()) {
-          crash << "This is a programming error: the pivot monomial "
+          global.fatal << "This is a programming error: the pivot monomial "
           << "in the polynomial division algorithm has negative exponent(s). "
-          << "This is not allowed. " << crash;
+          << "This is not allowed. " << global.fatal;
         }
         if (this->flagDoLogDivision) {
           this->intermediateHighestMonDivHighestMon.GetElement().AddOnTop(highestMonCurrentDivHighestMonOther);
@@ -553,7 +553,7 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis(
             << "<br>This may or may not be a programming error. While handling computation excess limit, "
             << " I got that NumberOfComputations is much larger than MaxNumGBComputations. "
             << " I have no explanation for this issue right now, so I am crashing to let you know "
-            << " something is fishy. " << crash;
+            << " something is fishy. " << global.fatal;
         }*/
         this->NumberGBComputations++;
         //global.Comments << " to get " << currentRemainder.ToString(&global->theDefaultFormat);
@@ -573,7 +573,7 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis(
         << "This may or may not be a programming error. While handling computation excess limit, "
         << " I got that NumberGBComputations is much larger than MaxNumGBComputations. "
         << " I have no explanation for this issue right now, so I am crashing to let you know "
-        << " something is fishy. " << "<br>Current remainder:<br> " << currentRemainder.ToString() << crash;
+        << " something is fishy. " << "<br>Current remainder:<br> " << currentRemainder.ToString() << global.fatal;
         */
       if (this->flagDoProgressReport) {
         std::stringstream out;
@@ -596,7 +596,7 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis(
 template <class coefficient>
 bool GroebnerBasisComputation<coefficient>::AddRemainderToBasis() {
   if (this->leadingMons.size != this->theBasiS.size) {
-    crash << "This is a programming error: the number of leading monomials does not equal the number of polynomials. " << crash;
+    global.fatal << "This is a programming error: the number of leading monomials does not equal the number of polynomials. " << global.fatal;
   }
   MacroRegisterFunctionWithName("GroebnerBasisComputation::AddPolyToBasis");
   if (this->remainderDivision.IsEqualToZero()) {
@@ -667,7 +667,7 @@ template <class coefficient>
 void GroebnerBasisComputation<coefficient>::initForDivisionAlone(List<Polynomial<coefficient> >& inputOutpuT) {
   MacroRegisterFunctionWithName("GroebnerBasisComputation::initForDivisionAlone");
   if (inputOutpuT.size <= 0) {
-    crash << "This is a programming error: I cannot transform an empty list to a Groebner basis. " << crash;
+    global.fatal << "This is a programming error: I cannot transform an empty list to a Groebner basis. " << global.fatal;
   }
   this->theBasiS = inputOutpuT;
   this->leadingMons.SetSize(inputOutpuT.size);
@@ -676,11 +676,11 @@ void GroebnerBasisComputation<coefficient>::initForDivisionAlone(List<Polynomial
     Polynomial<Rational>& curPoly = theBasiS[i];
     int theIndex = curPoly.GetIndexMaxMonomial(this->thePolynomialOrder.theMonOrder);
     if (theIndex == - 1) {
-      crash << "This is a programming error: initialization for polynomial "
+      global.fatal << "This is a programming error: initialization for polynomial "
       << "division with respect to at least one zero polynomial. "
       << "If this is a bad user input, it should be handled at an earlier level. "
       << "Here is the current basis by which we need to divide. "
-      << this->theBasiS.ToString() << crash;
+      << this->theBasiS.ToString() << global.fatal;
     }
     this->leadingMons[i] = curPoly[theIndex];
     this->leadingCoeffs[i] = curPoly.theCoeffs[theIndex];
@@ -704,9 +704,9 @@ void GroebnerBasisComputation<coefficient>::initForGroebnerComputation(int expec
 template<class coefficient>
 void GroebnerBasisComputation<coefficient>::CheckConsistency() {
   //if (this->NumberOfComputations>this->MaxNumComputations+ 1000)
-    //crash << "This may or may not be a programming error. While handling computation excess limit, I got that NumberOfComputations is much larger than MaxNumComputations. "
+    //global.fatal << "This may or may not be a programming error. While handling computation excess limit, I got that NumberOfComputations is much larger than MaxNumComputations. "
     //<< " I have no explanation for this issue right now, so I am crashing to let you know something is fishy. "
-    //<< crash;
+    //<< global.fatal;
 }
 
 template <class coefficient>
@@ -789,10 +789,10 @@ bool GroebnerBasisComputation<coefficient>::HasImpliedSubstitutions(
           //check our work:
           tempP.Substitution(outputSub);
           if (!tempP.IsEqualToZero()) {
-            crash << "This is a programming error: I was solving the polynomial equation " << inputSystem[i].ToString()
+            global.fatal << "This is a programming error: I was solving the polynomial equation " << inputSystem[i].ToString()
             << ", which resulted in the substitution " << outputSub.ToString()
             << ". However, after carrying out the substitution in the polynomial, I got " << tempP.ToString() << ". "
-            << crash;
+            << global.fatal;
           }
           //
           return true;
@@ -865,8 +865,8 @@ void GroebnerBasisComputation<coefficient>::BackSubstituteIntoSinglePoly(
           this->SetSerreLikeSolutionIndex(j, 0);
         } else {
           if (this->systemSolution.GetElement()[j] != 0) {
-            crash << "This is a programming error: variable index " << j + 1 << " is supposed to be a free parameter, i.e., be set to zero, but "
-            << "instead it has a non-zero value. " << crash;
+            global.fatal << "This is a programming error: variable index " << j + 1 << " is supposed to be a free parameter, i.e., be set to zero, but "
+            << "instead it has a non-zero value. " << global.fatal;
           }
         }
         theFinalSub[j] = 0;
@@ -879,9 +879,9 @@ void GroebnerBasisComputation<coefficient>::BackSubstituteIntoSinglePoly(
   }
   coefficient tempCF;
   if (!thePoly.IsConstant(&tempCF)) {
-    crash << "\n<br>\nThis is a programming error: after carrying all implied substitutions "
+    global.fatal << "\n<br>\nThis is a programming error: after carrying all implied substitutions "
     << "the polynomial is not a constant, rather equals "
-    << thePoly.ToString() << ". " << crash;
+    << thePoly.ToString() << ". " << global.fatal;
   }
   theFinalSub[theIndex] = tempCF;
   this->SetSerreLikeSolutionIndex(theIndex, tempCF);
@@ -1100,9 +1100,9 @@ void GroebnerBasisComputation<coefficient>::TrySettingValueToVariable(
   this->SetUpRecursiveComputation(theHeuristicAttempt);
   int theVarIndex = this->GetPreferredSerreSystemSubIndex(inputSystem);
   if (theVarIndex == - 1) {
-    crash << "This is a programming error: preferred substitution variable index is - 1. "
+    global.fatal << "This is a programming error: preferred substitution variable index is - 1. "
     << "Input system in calculator-input format: <br>"
-    << this->ToStringCalculatorInputFromSystem(inputSystem) << "<br>" << crash;
+    << this->ToStringCalculatorInputFromSystem(inputSystem) << "<br>" << global.fatal;
   }
   PolynomialSubstitution<coefficient> theSub;
   theSub.MakeIdSubstitution(this->systemSolution.GetElement().size);
@@ -1327,7 +1327,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystem(List<Polynomial
     for (int i = 0; i < workingSystem.size; i ++) {
       workingSystem[i].Substitution(theSub);
       if (!workingSystem[i].IsEqualToZero()) {
-        crash << "<br>This is a programming error. "
+        global.fatal << "<br>This is a programming error. "
         << "Function SolveSerreLikeSystem reports to have found a solution over the base field, "
         << "but substituting the solution back to the original "
         << "system does not yield a zero system of equations. More precisely, "
@@ -1335,7 +1335,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystem(List<Polynomial
         << " but substitution in equation " << inputSystem[i].ToString()
         << " yields " << workingSystem[i].ToString() << ". Calculator input: <br>"
         << this->ToStringCalculatorInputFromSystem(inputSystem) << " <br>"
-        << crash;
+        << global.fatal;
       }
     }
   }
@@ -1360,8 +1360,8 @@ template <class coefficient>
 void GroebnerBasisComputation<coefficient>::SetSerreLikeSolutionIndex(int theIndex, const coefficient& theConst) {
   this->systemSolution.GetElement()[theIndex] = theConst;
   if (this->solutionsFound.GetElement().selected[theIndex]) {
-    crash << "This a programming error: attempting to set "
-    << "value to a variable whose value has already been computed. " << crash;
+    global.fatal << "This a programming error: attempting to set "
+    << "value to a variable whose value has already been computed. " << global.fatal;
   }
   this->solutionsFound.GetElement().AddSelectionAppendNewIndex(theIndex);
 }

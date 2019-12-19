@@ -86,9 +86,9 @@ bool TransportLayerSecurity::initSSLKeyFiles(std::stringstream* commentsOnFailur
   }
   if (!this->initSSLKeyFilesInternal(commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
-      crash << commentsOnFailure->str();
+      global.fatal << commentsOnFailure->str();
     }
-    crash << "Failed to initialize ssl keys of built-in tls server. " << crash;
+    global.fatal << "Failed to initialize ssl keys of built-in tls server. " << global.fatal;
   }
   return true;
 }
@@ -198,10 +198,10 @@ void TransportLayerSecurityOpenSSL::RemoveLastSocket() {
 
 CipherSuiteSpecification TransportLayerSecurityServer::GetCipherCrashIfUnknown(int inputId) {
   if (inputId == 0) {
-    crash << "Zero cipher suite specification not allowed here. " << crash;
+    global.fatal << "Zero cipher suite specification not allowed here. " << global.fatal;
   }
   if (!this->cipherSuiteNames.Contains(inputId)) {
-    crash << "Unknown cipher suite specification not allowed here. " << crash;
+    global.fatal << "Unknown cipher suite specification not allowed here. " << global.fatal;
   }
   CipherSuiteSpecification result;
   result.id = inputId;
@@ -539,7 +539,7 @@ CipherSuiteSpecification::CipherSuiteSpecification() {
 
 bool CipherSuiteSpecification::CheckInitialization() const {
   if (this->owner == nullptr) {
-    crash << "CipherSuiteSpecification not initialized correctly. " << crash;
+    global.fatal << "CipherSuiteSpecification not initialized correctly. " << global.fatal;
   }
   return true;
 }
@@ -585,7 +585,7 @@ void SSLContent::WriteBytesHandshakeServerHello(
 ) const {
   MacroRegisterFunctionWithName("SSLHello::WriteBytesHandshakeServerHello");
   if (this->theType != SSLContent::tokens::serverHello) {
-    crash << "Not allowed to serialize non server-hello content as server hello. " << crash;
+    global.fatal << "Not allowed to serialize non server-hello content as server hello. " << global.fatal;
   }
   this->WriteType(output, annotations);
   Serialization::LengthWriterThreeBytes writeLength(output, annotations, "SSL content body");
@@ -628,9 +628,9 @@ void TransportLayerSecurityServer::Session::WriteNamedCurveAndPublicKey(
   );
   Serialization::WriteOneByteLengthFollowedByBytes(publicKeyBytes, output, annotations, "public key");
   if (!mustBeTrue) {
-    crash << "Internally generated public key does not serialize properly. "
+    global.fatal << "Internally generated public key does not serialize properly. "
     << shouldNotBeNeeded.str()
-    << crash;
+    << global.fatal;
   }
   Serialization::WriterOneByteInteger(
     SignatureAlgorithmSpecification::HashAlgorithm::sha256,
@@ -667,7 +667,7 @@ void SSLContent::WriteBytesHandshakeCertificate(
 ) const {
   MacroRegisterFunctionWithName("SSLHello::WriteBytesHandshakeCertificate");
   if (this->theType != SSLContent::tokens::certificate) {
-    crash << "Not allowed to serialize non-certificate content as certificate. " << crash;
+    global.fatal << "Not allowed to serialize non-certificate content as certificate. " << global.fatal;
   }
   this->WriteType(output, annotations);
   Serialization::LengthWriterThreeBytes writeLength(output, annotations, "certificateCollection");
@@ -681,7 +681,7 @@ void SSLContent::WriteBytesHandshakeSecretExchange(
   MacroRegisterFunctionWithName("SSLContent::WriteBytesHandshakeSecretExchange");
   this->CheckInitialization();
   if (this->theType != SSLContent::tokens::serverKeyExchange) {
-    crash << "Not allowed to serialize non-server key exchange as such. " << crash;
+    global.fatal << "Not allowed to serialize non-server key exchange as such. " << global.fatal;
   }
   this->WriteType(output, annotations);
   Serialization::LengthWriterThreeBytes writeLength(output, annotations, "server key exchange");
@@ -693,7 +693,7 @@ void SSLContent::WriteBytesHandshakeClientHello(
 ) const {
   MacroRegisterFunctionWithName("SSLHello::WriteBytesHandshakeClientHello");
   if (this->theType != SSLContent::tokens::clientHello) {
-    crash << "Not allowed to serialize non client-hello content as client hello. " << crash;
+    global.fatal << "Not allowed to serialize non client-hello content as client hello. " << global.fatal;
   }
   this->WriteType(output, annotations);
   Serialization::LengthWriterThreeBytes writeLength(output, annotations, "Handshake clientHello body");
@@ -710,7 +710,7 @@ List<unsigned char>& SSLContent::GetMyRandomBytes() const {
     this->owner->owner->session.myRandomBytes.size !=
     this->LengthRandomBytesInSSLHello
   ) {
-    crash << "Writing non-initialized SSL hello forbidden. " << crash;
+    global.fatal << "Writing non-initialized SSL hello forbidden. " << global.fatal;
   }
   return this->owner->owner->session.myRandomBytes;
 }
@@ -990,7 +990,7 @@ void SSLHelloExtension::MakeEllipticCurvePointFormat(SSLContent* inputOwner) {
 
 bool SSLHelloExtension::CheckInitialization() {
   if (this->owner == nullptr) {
-    crash << "Non-initialized owner of ssl hello extension. " << crash;
+    global.fatal << "Non-initialized owner of ssl hello extension. " << global.fatal;
   }
   return true;
 }
@@ -1154,7 +1154,7 @@ bool Serialization::ReadNByteInt(
   std::stringstream* commentsOnFailure
 ) {
   if (numBytes > 4) {
-    crash << "Not allowed to read more than 4 bytes into an integer. " << crash;
+    global.fatal << "Not allowed to read more than 4 bytes into an integer. " << global.fatal;
   }
   if (numBytes + inputOutputOffset > input.size) {
     if (commentsOnFailure != nullptr) {
@@ -1331,7 +1331,7 @@ void Serialization::WriteNByteUnsigned(
   int& inputOutputOffset
 ) {
   if (byteCountOfLength < 0 || byteCountOfLength > 4) {
-    crash << "Invalid byteCountOfLength: " << byteCountOfLength << crash;
+    global.fatal << "Invalid byteCountOfLength: " << byteCountOfLength << global.fatal;
   }
   if (inputOutputOffset + byteCountOfLength > output.size) {
     output.SetSize(inputOutputOffset + byteCountOfLength);
@@ -1341,7 +1341,7 @@ void Serialization::WriteNByteUnsigned(
     input /= 256;
   }
   if (input > 0) {
-    crash << "Input has more significant digits than the number of bytes allow. " << crash;
+    global.fatal << "Input has more significant digits than the number of bytes allow. " << global.fatal;
   }
   inputOutputOffset += byteCountOfLength;
 }
@@ -1408,7 +1408,7 @@ void Serialization::WriteNByteLengthFollowedByBytes(
 
 bool SSLRecord::CheckInitialization() const {
   if (this->owner == nullptr) {
-    crash << "Uninitialized ssl record. " << crash;
+    global.fatal << "Uninitialized ssl record. " << global.fatal;
   }
   return true;
 }
@@ -1720,7 +1720,7 @@ bool TransportLayerSecurityServer::ReadBytesDecodeOnce(std::stringstream* commen
 
 bool SSLContent::CheckInitialization() const {
   if (this->owner == nullptr) {
-    crash << "Uninitialized ssl content. " << crash;
+    global.fatal << "Uninitialized ssl content. " << global.fatal;
   }
   this->owner->CheckInitialization();
   return true;
@@ -1855,7 +1855,7 @@ bool SSLRecord::PrepareServerHello3SecretExchange(std::stringstream* commentsOnF
       false,
       commentsOnFailure
     )) {
-      crash << "Failed to compute public key. " << crash;
+      global.fatal << "Failed to compute public key. " << global.fatal;
     }
   }
   this->resetExceptOwner();
@@ -1960,7 +1960,7 @@ bool TransportLayerSecurityServer::HandShakeIamServer(
     }
     return false;
   }
-  //crash << "Handshake i am server not implemented yet. " << crash;
+  //global.fatal << "Handshake i am server not implemented yet. " << global.fatal;
   return false;
 }
 
@@ -1993,7 +1993,7 @@ int TransportLayerSecurity::SSLRead(
   if (!this->flagUseBuiltInTlS) {
     return this->openSSLData.SSLRead(readBuffer, outputError, commentsGeneral, includeNoErrorInComments);
   } else {
-    crash << "SSL read not implemented yet. " << crash;
+    global.fatal << "SSL read not implemented yet. " << global.fatal;
     return - 1;
   }
 }
@@ -2014,7 +2014,7 @@ int TransportLayerSecurity::SSLWrite(
       includeNoErrorInComments
     );
   } else {
-    crash << "Not implemented yet. " << crash;
+    global.fatal << "Not implemented yet. " << global.fatal;
     return - 1;
   }
 }

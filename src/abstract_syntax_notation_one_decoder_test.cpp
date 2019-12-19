@@ -18,7 +18,7 @@ bool PrivateKeyRSA::Test::LoadFromPEMFile() {
   PrivateKeyRSA theKey;
   std::stringstream commentsOnFailure;
   if (!theKey.LoadFromPEMFile(fileName, &commentsOnFailure)) {
-    crash << "Failed to load pem file. " << commentsOnFailure.str() << crash;
+    global.fatal << "Failed to load pem file. " << commentsOnFailure.str() << global.fatal;
   }
   return true;
 }
@@ -56,10 +56,10 @@ bool PrivateKeyRSA::Test::LoadFromPEM() {
   PrivateKeyRSA theKey;
   std::stringstream commentsOnFailure;
   if (!theKey.LoadFromPEM(pemContent, &commentsOnFailure)) {
-    crash << "Failed to load pem content. " << crash;
+    global.fatal << "Failed to load pem content. " << global.fatal;
   }
   if (!theKey.BasicChecks(&commentsOnFailure)) {
-    crash << "Hard coded private key did not pass basic checks. " << crash;
+    global.fatal << "Hard coded private key did not pass basic checks. " << global.fatal;
   }
   return true;
 }
@@ -99,7 +99,7 @@ bool X509Certificate::Test::LoadFromPEM() {
   std::stringstream commentsOnFailure;
   X509Certificate theCertificate;
   if (!theCertificate.LoadFromPEM(pemContent, &commentsOnFailure)) {
-    crash << "Failed to load built-in test certificate content. " << crash;
+    global.fatal << "Failed to load built-in test certificate content. " << global.fatal;
   }
   return true;
 }
@@ -109,8 +109,8 @@ bool X509Certificate::Test::LoadFromPEMFile() {
   std::stringstream commentsOnFailure;
   X509Certificate theCertificate;
   if (!theCertificate.LoadFromPEMFile(fileName, &commentsOnFailure)) {
-    crash << "Failed to load built-in test certificate file. "
-    << commentsOnFailure.str() << crash;
+    global.fatal << "Failed to load built-in test certificate file. "
+    << commentsOnFailure.str() << global.fatal;
   }
   return true;
 }

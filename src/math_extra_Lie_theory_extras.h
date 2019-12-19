@@ -165,7 +165,7 @@ public:
     parSel = this->ParabolicLeviPartRootSpacesZeroStandsForSelected;
     input >> tempS >> this->computationPhase;
     if (tempS != "ComputationPhase:") {
-      crash << "Reading generalized characters from file failed. " << crash;
+      global.fatal << "Reading generalized characters from file failed. " << global.fatal;
     }
     bool result = true;
     if (this->computationPhase != 0) {
@@ -294,7 +294,7 @@ public:
   void SubstitutionCoefficients(PolynomialSubstitution<Rational>& theSub);
   bool operator==(const MonomialUniversalEnvelopingOrdered& other) const {
     if (this->owner != other.owner) {
-      crash << "Attempt to compare universal enveloping algebra monomials with different owners. " << crash;
+      global.fatal << "Attempt to compare universal enveloping algebra monomials with different owners. " << global.fatal;
     }
     return this->Powers == other.Powers && this->generatorsIndices == other.generatorsIndices;
   }

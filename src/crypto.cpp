@@ -17,7 +17,7 @@ void Crypto::acquireAdditionalRandomness(int64_t additionalRandomness) {
     static_cast<unsigned>(global.randomBytesCurrent.size) <
     global.maximumExtractedRandomBytes
   ) {
-    crash << "Current random bytes have not been initialized. " << crash;
+    global.fatal << "Current random bytes have not been initialized. " << global.fatal;
   }
   Crypto::ConvertUint64toBigendianListUnsignedCharAppendResult(
     static_cast<uint64_t>(additionalRandomness), global.randomBytesCurrent
@@ -28,7 +28,7 @@ void Crypto::acquireAdditionalRandomness(int64_t additionalRandomness) {
 void Crypto::GetRandomBytesSecureInternalMayLeaveTracesInMemory(List<unsigned char>& output, int numberOfBytesMax32) {
   Crypto::acquireAdditionalRandomness(global.GetElapsedMilliseconds());
   if (static_cast<unsigned>(numberOfBytesMax32) > global.maximumExtractedRandomBytes) {
-    crash << "Not allowed to extract more than " << global.maximumExtractedRandomBytes << " bytes of randomness. " << crash;
+    global.fatal << "Not allowed to extract more than " << global.maximumExtractedRandomBytes << " bytes of randomness. " << global.fatal;
   }
   global.randomBytesCurrent.Slice(0, numberOfBytesMax32, output);
 }
@@ -135,7 +135,7 @@ char Crypto::GetCharFrom6bit(uint32_t input, bool useBase64URL) {
       } else {
         return '/'; // RFC 4648, base64url.
       }
-    default: crash << "Requesting character from a purported 6 bit integer, which in fact has more significant bits. " << crash;
+    default: global.fatal << "Requesting character from a purported 6 bit integer, which in fact has more significant bits. " << global.fatal;
       break;
   }
   return - 1;
@@ -1578,8 +1578,8 @@ LargeIntegerUnsigned Crypto::RSAencrypt(
 ) {
   MacroRegisterFunctionWithName("Crypto::RSAencrypt");
   if (theModulus == 0 || theExponent == 0) {
-    crash << "The modulus and the exponent are not allowed to be zero while running RSA. "
-    << "The modulus: " << theModulus.ToString() << "; the exponent: " << theExponent.ToString() << crash;
+    global.fatal << "The modulus and the exponent are not allowed to be zero while running RSA. "
+    << "The modulus: " << theModulus.ToString() << "; the exponent: " << theExponent.ToString() << global.fatal;
   }
   ElementZmodP theElt, theOne;
   theElt.theModulus = theModulus;

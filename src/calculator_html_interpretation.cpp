@@ -992,7 +992,7 @@ JSData WebAPIResponse::SubmitAnswersJSON(
     output << "<b>Random seed not given.</b>";
   }
   if (theProblem.fileName == "") {
-    crash << "This shouldn't happen: empty file name: theProblem.fileName." << crash;
+    global.fatal << "This shouldn't happen: empty file name: theProblem.fileName." << global.fatal;
   }
   std::string studentAnswerNameReader;
   theProblem.studentTagsAnswered.init(theProblem.theProblemData.theAnswers.size());

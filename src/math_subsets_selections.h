@@ -272,9 +272,9 @@ public:
   }
   void SetNumItemsAndDesiredSubsetSize(int inputDesiredSubsetSize, int inputNumItems) {
     if (inputDesiredSubsetSize < 0 || inputNumItems < 0) {
-      crash << "This is a programming error: requesting to initialize a selection of size "
+      global.fatal << "This is a programming error: requesting to initialize a selection of size "
       << inputDesiredSubsetSize << " out of "
-      << inputNumItems << " elements, which does not make sense. " << crash;
+      << inputNumItems << " elements, which does not make sense. " << global.fatal;
     }
     this->theSelection.init(inputNumItems);
     this->DesiredSubsetSize = inputDesiredSubsetSize;
@@ -574,7 +574,7 @@ bool Vectors<coefficient>::LinearAlgebraForVertexComputation(
   int theDimension = this->TheObjects[0].size;
   output.SetSize(theDimension);
   if (theDimension - 1 != theSelection.CardinalitySelection) {
-    crash << "Dimensions don't match. " << crash;
+    global.fatal << "Dimensions don't match. " << global.fatal;
   }
   buffer.init(theDimension - 1, theDimension);
   for (int i = 0; i < theDimension - 1; i ++) {

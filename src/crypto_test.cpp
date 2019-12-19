@@ -23,13 +23,13 @@ bool Crypto::Test::Sha256() {
     std::string result, desiredResult;
     Crypto::computeSha256(inputs[i], result);
     if (!Crypto::ConvertHexToString(outputs[i], desiredResult, &commentsOnFailure)) {
-      crash << "Conversion of hard-coded hex string failed. " << crash;
+      global.fatal << "Conversion of hard-coded hex string failed. " << global.fatal;
     }
     if (result != desiredResult) {
-      crash
+      global.fatal
       << "Hash of:\n" << inputs[i] << "\nresulted in:\n"
       << Crypto::ConvertStringToHex(result, 50, false)
-      << "\ninstead of the desired:\n" << outputs[i] << crash;
+      << "\ninstead of the desired:\n" << outputs[i] << global.fatal;
     }
   }
   return true;

@@ -493,16 +493,16 @@ public:
 
   SltwoSubalgebras& GetContainerSl2s() {
     if (this->container == nullptr) {
-      crash << "This is a programming error: attempting to "
-      << "access the container list of a non-initialized sl(2)-subalgebra. " << crash;
+      global.fatal << "This is a programming error: attempting to "
+      << "access the container list of a non-initialized sl(2)-subalgebra. " << global.fatal;
     }
     return *this->container;
   }
   const WeylGroupData& GetOwnerWeyl() const;
   SemisimpleLieAlgebra& GetOwnerSSAlgebra() {
     if (this->owner == nullptr) {
-      crash << "This is a programming error: attempting to access "
-      << "the ambient Lie algebra of a non-initialized sl(2)-subalgebra. " << crash;
+      global.fatal << "This is a programming error: attempting to access "
+      << "the ambient Lie algebra of a non-initialized sl(2)-subalgebra. " << global.fatal;
     }
     return *this->owner;
   }
@@ -601,8 +601,8 @@ public:
   bool CheckConsistency() const;
   void CheckForCorrectInitializationCrashIfNot() const {
     if (this->owner == nullptr) {
-      crash << "<br>This is a programming error. Object SltwoSubalgebras "
-      << "is not initialized, although it is supposed to be. " << crash;
+      global.fatal << "<br>This is a programming error. Object SltwoSubalgebras "
+      << "is not initialized, although it is supposed to be. " << global.fatal;
     }
   }
   WeylGroupData& GetOwnerWeyl() const {

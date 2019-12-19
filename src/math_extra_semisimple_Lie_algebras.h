@@ -309,8 +309,8 @@ public:
     if (this->owner != nullptr) {
       return;
     }
-    crash << "This is a programming error: Monomial char has zero owner, "
-    << "which is not allowed by the current function call. " << crash;
+    global.fatal << "This is a programming error: Monomial char has zero owner, "
+    << "which is not allowed by the current function call. " << global.fatal;
   }
   void AccountSingleWeight(
     const Vector<Rational>& currentWeightSimpleCoords,
@@ -328,7 +328,7 @@ public:
   }
   void operator+=(const Weight<coefficient>& other) {
     if (this->owner != other.owner) {
-      crash << "Attempting to add weights with different owner algebras. " << crash;
+      global.fatal << "Attempting to add weights with different owner algebras. " << global.fatal;
     }
     this->weightFundamentalCoordS += other.weightFundamentalCoordS;
   }
@@ -353,16 +353,16 @@ class charSSAlgMod : public MonomialCollection<Weight<coefficient>, coefficient>
     const SemisimpleLieAlgebra* owner = (*this)[0].owner;
     for (int i = 1; i < this->size(); i ++) {
       if ((*this)[i].owner != owner) {
-        crash << "This is a programming error: charSSAlgMod contains "
-        << "elements belonging to different semisimple Lie algebras. " << crash;
+        global.fatal << "This is a programming error: charSSAlgMod contains "
+        << "elements belonging to different semisimple Lie algebras. " << global.fatal;
       }
     }
   }
   void CheckNonZeroOwner() const {
     this->CheckConsistency();
     if (this->GetOwner() == 0) {
-      crash << "This is a programming error: charSSAlgMod has no owner semisimple Lie algebra, "
-      << "which is not allowed at by the calling function. " << crash;
+      global.fatal << "This is a programming error: charSSAlgMod has no owner semisimple Lie algebra, "
+      << "which is not allowed at by the calling function. " << global.fatal;
     }
   }
   bool IsEqualToZero() {
@@ -399,7 +399,7 @@ class charSSAlgMod : public MonomialCollection<Weight<coefficient>, coefficient>
   void DrawMeAssumeCharIsOverCartan(WeylGroupData& actualAmbientWeyl, DrawingVariables& theDrawingVars) const;
   SemisimpleLieAlgebra* GetOwner() const {
     if (this->size() == 0) {
-      crash << "This is a programming error: requesting owner semisimple Lie algebra of zero character. " << crash;
+      global.fatal << "This is a programming error: requesting owner semisimple Lie algebra of zero character. " << global.fatal;
     }
     return (*this)[0].owner;
   }
@@ -445,13 +445,13 @@ public:
   Vectors<Rational> ImagesCartanDomain;
   SemisimpleLieAlgebra& theDomain() {
     if (this->domainAlg == nullptr) {
-      crash << "This is a programming error: non-initialized HomomorphismSemisimpleLieAlgebra. " << crash;
+      global.fatal << "This is a programming error: non-initialized HomomorphismSemisimpleLieAlgebra. " << global.fatal;
     }
     return *this->domainAlg;
   }
   SemisimpleLieAlgebra& theRange() {
     if (this->rangeAlg == nullptr) {
-      crash << "This is a programming error: non-initialized HomomorphismSemisimpleLieAlgebra. " << crash;
+      global.fatal << "This is a programming error: non-initialized HomomorphismSemisimpleLieAlgebra. " << global.fatal;
     }
     return *this->rangeAlg;
   }

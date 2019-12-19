@@ -239,10 +239,10 @@ public:
   }
   bool CheckConsistency() const {
     if (this->flagDeallocated) {
-      crash << "This is a programming error: use after free of Finite group. " << crash;
+      global.fatal << "This is a programming error: use after free of Finite group. " << global.fatal;
     }
     //if (this == 0)
-    //  crash << "Finite group this pointer is zero. " << crash;
+    //  global.fatal << "Finite group this pointer is zero. " << global.fatal;
     return true;
   }
   bool CheckInitialization() const;
@@ -722,9 +722,9 @@ public:
   Vector<coefficient> GetDualCoordinatesFromFundamental(const Vector<coefficient>& inputInFundamentalCoords) {
     Vector<coefficient> result = inputInFundamentalCoords;
     if (result.size != this->GetDim()) {
-      crash << "This is a programming error. The input fundamental weight has "
+      global.fatal << "This is a programming error. The input fundamental weight has "
       << result.size << " coordinates, while the rank of the Weyl group is "
-      << this->GetDim() << ". " << crash;
+      << this->GetDim() << ". " << global.fatal;
     }
     for (int i = 0; i < result.size; i ++) {
       result[i] *= this->CartanSymmetric.elements[i][i] / 2;
@@ -734,11 +734,11 @@ public:
   template <class coefficient>
   coefficient GetScalarProdSimpleRoot(const Vector<coefficient>& input, int indexSimpleRoot) const {
     if (indexSimpleRoot < 0 || indexSimpleRoot >= this->GetDim()) {
-      crash << "This is a programming error. "
+      global.fatal << "This is a programming error. "
       << "Attempting to take scalar product with simple root of index "
       << indexSimpleRoot
       << " which is impossible, as the rank of the Weyl group is "
-      << this->GetDim() << ". " << crash;
+      << this->GetDim() << ". " << global.fatal;
     }
     coefficient result, buffer;
     result = 0;
@@ -995,11 +995,11 @@ public:
   void RootScalarCartanRoot(const Vector<leftType>& r1, const Vector<rightType>& r2, leftType& output) const;
   double RootScalarCartanRoot(const Vector<double>& r1, const Vector<double>& r2) const {
     if (r1.size != r2.size || r1.size != this->GetDim()) {
-      crash << "This is a programming error: attempting to take the root system scalar product of "
+      global.fatal << "This is a programming error: attempting to take the root system scalar product of "
       << "vectors of different dimension or of dimension different "
       << "from that of the ambient Lie algebra. The two input vectors were "
       << r1 << " and " << r2 << " and the rank of the Weyl group is " << this->GetDim() << ". ";
-      crash << crash;
+      global.fatal << global.fatal;
     }
     double result = 0;
     for (int i = 0; i < this->GetDim(); i ++) {
@@ -1038,12 +1038,12 @@ public:
 template<class leftType, class rightType>
 void WeylGroupData::RootScalarCartanRoot(const Vector<leftType>& r1, const Vector<rightType>& r2, leftType& output) const {
   if (r1.size != r2.size || r1.size != this->GetDim()) {
-    crash << "This is a programming error: attempting to get the scalar product of the weight "
+    global.fatal << "This is a programming error: attempting to get the scalar product of the weight "
     << r1 << " (dimension " << r1.size
     << ") with the weight " << r2 << " (dimension " << r2.size
     << "), while the dimension of the ambient Weyl group is " << this->GetDim()
     << ". ";
-    crash << crash;
+    global.fatal << global.fatal;
   }
   output = r1[0].GetZero();
   leftType buffer;
@@ -1131,8 +1131,8 @@ void WeylGroupAutomorphisms::ActOn(
       this->theWeyl->SimpleReflection(currentGenerator.index, outputVector);
     } else {
       if (!this->flagAllOuterAutosComputed) {
-        crash << "Weyl group of type " << this->theWeyl->theDynkinType.ToString()
-        << " does not have its outer autos computed at a place where it should. " << crash;
+        global.fatal << "Weyl group of type " << this->theWeyl->theDynkinType.ToString()
+        << " does not have its outer autos computed at a place where it should. " << global.fatal;
       }
       this->theOuterAutos.theGenerators[currentGenerator.index].ActOnVectorColumn(outputVector, outputVector);
     }
@@ -1223,7 +1223,7 @@ public:
         if (repms[i] * repms[j] != repms[this->ownerGroup->theElements.GetIndex(
           this->ownerGroup->theElements[i] * this->ownerGroup->theElements[j])]
         ) {
-          crash << "Bad representation. " << crash;
+          global.fatal << "Bad representation. " << global.fatal;
         }
       }
     }
@@ -1297,7 +1297,7 @@ bool GroupRepresentation<someGroup, coefficient>::GetMatrixOfElement(const eleme
 template <typename someGroup, typename coefficient>
 bool GroupRepresentation<someGroup, coefficient>::CheckInitialization() const {
   if (this->ownerGroup == 0) {
-    crash << "This is a programming error: group not initialized at a place where it should be." << crash;
+    global.fatal << "This is a programming error: group not initialized at a place where it should be." << global.fatal;
   }
   return true;
 }
@@ -1526,7 +1526,7 @@ public:
     std::string name;
     bool CheckInitialization() const {
       if (this->actOn == 0) {
-        crash << "Non-initialized group action with name: " << this->name << ". " << crash;
+        global.fatal << "Non-initialized group action with name: " << this->name << ". " << global.fatal;
       }
       return true;
     }
@@ -1678,10 +1678,10 @@ bool TranslatableWordsSubgroupElementGetWord(FiniteGroup<elementSomeGroup>& H, c
       if (!H.HasElement(g)) {
         global.Comments << "element g isn't a member of H\n";
       }
-      crash << "element " << g << " is assigned parent word " << superword.ToStringCommaDelimited()
+      global.fatal << "element " << g << " is assigned parent word " << superword.ToStringCommaDelimited()
       << " containing generator not found in subgroup " << superword[i]
       << " so if this does belong to the subgroup, we need a better algorithm. "
-      << crash;
+      << global.fatal;
     }
     out.AddListOnTop(H.parentRelationship->superGeneratorSubWords[superword[i]]);
   }
@@ -1759,8 +1759,8 @@ int SubgroupData<someGroup, elementSomeGroup>::GetCosetId(elementSomeGroup& g) {
       }
     }
   }
-  crash << "Error: element " << g << " (possible index " << gi << ") not found in cosets. "
-  << "Also some groups are unprintable. " << crash;
+  global.fatal << "Error: element " << g << " (possible index " << gi << ") not found in cosets. "
+  << "Also some groups are unprintable. " << global.fatal;
   return - 1;
 }
 
@@ -1887,7 +1887,7 @@ GroupRepresentation<someGroup, coefficient> SubgroupData<someGroup, elementSomeG
     global.Comments << "Generator commutation relations for 'representation':\n"
     << outgroup.PrettyPrintGeneratorCommutationRelations();
     global.Comments << "It was supposed to be a quotient group of\n" << this->theGroup->PrettyPrintGeneratorCommutationRelations();
-    crash << "Error in InduceRepresentation. " << crash;
+    global.fatal << "Error in InduceRepresentation. " << global.fatal;
   }
   return out;
 }
@@ -2088,7 +2088,7 @@ template <typename coefficient>
 void ElementWeylGroupRing<coefficient>::MakeFromClassFunction(WeylGroupData* GG, const List<coefficient>& l) {
   MacroRegisterFunctionWithName("ElementWeylGroupRing::MakeFromClassFunction");
   if (GG == nullptr) {
-    crash << "Weyl group pointer not allowed to be zero. " << crash;
+    global.fatal << "Weyl group pointer not allowed to be zero. " << global.fatal;
   }
   this->MakeZero();
   ElementWeylGroup theMon;
@@ -2130,7 +2130,7 @@ ClassFunction<someFiniteGroup, coefficient> ClassFunction<someFiniteGroup, coeff
 template<class someFiniteGroup, typename coefficient>
 void ClassFunction<someFiniteGroup, coefficient>::operator*= (const ClassFunction<someFiniteGroup, coefficient>& right) {
   if (this->G != right.G) {
-    crash << "Attempting to multiply class functions belonging to different groups." << crash;
+    global.fatal << "Attempting to multiply class functions belonging to different groups." << global.fatal;
   }
   for (int i = 0; i < this->data.size; i ++) {
     this->data[i] *= right[i];
@@ -2507,16 +2507,16 @@ LargeInteger FiniteGroup<elementSomeGroup>::GetSize() {
 template <typename elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::CheckInitializationConjugacyClasses() const {
   if (this->ConjugacyClassCount() == 0) {
-    crash << "This is a programming error: requesting to "
+    global.fatal << "This is a programming error: requesting to "
     << "compute character hermitian product in a group whose "
     << "conjugacy classes and/or elements have not been computed. The group reports to have "
     << this->ConjugacyClassCount() << " conjugacy classes and " << this->theElements.size << " elements. "
-    << crash;
+    << global.fatal;
     return false;
   }
   for (int i = 0; i < this->irreps.size; i ++) {
     if (this->irreps[i].theCharacteR.data.IsEqualToZero()) {
-      crash << "This is a programming error: irrep number " << i + 1 << " has zero character!" << crash;
+      global.fatal << "This is a programming error: irrep number " << i + 1 << " has zero character!" << global.fatal;
       return false;
     }
   }
@@ -2527,7 +2527,7 @@ bool FiniteGroup<elementSomeGroup>::CheckInitializationConjugacyClasses() const 
     sumSquares+= tempRat*tempRat;
   }
   if (sumSquares !=1)
-    crash << "This is a programming error: sumSquares equals " << sumSquares.ToString() << " when it should equal 1. " << crash;*/
+    global.fatal << "This is a programming error: sumSquares equals " << sumSquares.ToString() << " when it should equal 1. " << global.fatal;*/
   return true;
 }
 

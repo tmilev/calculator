@@ -1248,7 +1248,7 @@ public:
       return true;
     }
     if ((*this->CurrentSyntacticStacK).size - decrease <= 0) {
-      crash << "Bad stack decrease. " << crash;
+      global.fatal << "Bad stack decrease. " << global.fatal;
     }
     (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size - decrease);
     return true;
@@ -1910,9 +1910,9 @@ public:
   );
   static void CheckInputNotSameAsOutput(const Expression& input, const Expression& output) {
     if (&input == &output) {
-      crash << "This is a programming error: the input expression, equal to "
+      global.fatal << "This is a programming error: the input expression, equal to "
       << input.ToString() << " has the same address as the output expression. "
-      << crash;
+      << global.fatal;
     }
   }
 //  bool OrderMultiplicationTreeProperly(int commandIndex, Expression& theExpression);
@@ -2712,9 +2712,9 @@ bool Expression::MakeSum(Calculator& theCommands, const MonomialCollection<Expre
     for (int i = 0; i < summandsWithCoeff.size; i ++) {
       for (int j = i; j < summandsWithCoeff.size; j ++) {
         if (summandsWithCoeff[i] > summandsWithCoeff[j] && summandsWithCoeff[j] > summandsWithCoeff[i]) {
-          crash << "This is a programming error: bad comparison function: each of the expressions "
+          global.fatal << "This is a programming error: bad comparison function: each of the expressions "
           << summandsWithCoeff[i].ToString() << " and " << summandsWithCoeff[j].ToString()
-          << " is reported to be greater than the other. " << crash;
+          << " is reported to be greater than the other. " << global.fatal;
         }
       }
     }
@@ -2725,7 +2725,7 @@ bool Expression::MakeSum(Calculator& theCommands, const MonomialCollection<Expre
 template <typename theType>
 int Expression::AddObjectReturnIndex(const theType& inputValue) const {
   (void) inputValue;
-  crash << "Please implement AddObjectReturnIndex for the current type. " << crash;
+  global.fatal << "Please implement AddObjectReturnIndex for the current type. " << global.fatal;
   return - 1;
 }
 
@@ -2739,7 +2739,7 @@ bool Expression::AssignValueWithContext(const theType& inputValue, const Express
 
 template<class theType>
 int Expression::GetTypeOperation() const {
-  crash << "Please implement GetTypeOperation for the current type. " << crash;
+  global.fatal << "Please implement GetTypeOperation for the current type. " << global.fatal;
   return - 1;
 }
 
@@ -2756,11 +2756,11 @@ bool Expression::AssignValue(const theType& inputValue, Calculator& owner) {
     curType == owner.opElementWeylAlgebra() ||
     curType == owner.opWeightLieAlgPoly()
   ) {
-    crash << "This may or may not be a programming error. "
+    global.fatal << "This may or may not be a programming error. "
     << "Assigning value WITHOUT CONTEXT to data type "
     << this->owner->GetOperations()[curType]
     << " is discouraged, and most likely is an error. Crashing to let you know. "
-    << crash;
+    << global.fatal;
   }
   Expression emptyContext;
   emptyContext.MakeEmptyContext(owner);
@@ -2823,8 +2823,8 @@ bool Calculator::GetTypeWeight(
     return false;
   }
   if (!theCommands.theObjectContainer.theSSLieAlgebras.Contains(ambientSSalgebra->theWeyl.theDynkinType)) {
-    crash << "This is a programming error: " << ambientSSalgebra->ToStringLieAlgebraName()
-    << " contained object container more than once. " << crash;
+    global.fatal << "This is a programming error: " << ambientSSalgebra->ToStringLieAlgebraName()
+    << " contained object container more than once. " << global.fatal;
   }
   int algebraIndex = theCommands.theObjectContainer.theSSLieAlgebras.GetIndex(ambientSSalgebra->theWeyl.theDynkinType);
   outputWeightContext.ContextSetSSLieAlgebrA(algebraIndex, theCommands);
@@ -2887,8 +2887,8 @@ bool Calculator::GetTypeHighestWeightParabolic(
     }
   }
   if (!theCommands.theObjectContainer.theSSLieAlgebras.Contains(ambientSSalgebra->theWeyl.theDynkinType)) {
-    crash << "This is a programming error: " << ambientSSalgebra->ToStringLieAlgebraName()
-    << " contained object container more than once. " << crash;
+    global.fatal << "This is a programming error: " << ambientSSalgebra->ToStringLieAlgebraName()
+    << " contained object container more than once. " << global.fatal;
   }
   int algebraIndex = theCommands.theObjectContainer.theSSLieAlgebras.GetIndex(ambientSSalgebra->theWeyl.theDynkinType);
   outputHWContext.ContextSetSSLieAlgebrA(algebraIndex, theCommands);

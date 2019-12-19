@@ -18,12 +18,16 @@ std::string UserCalculatorData::Roles::student = "student";
 std::string UserCalculatorData::Roles::instructor = "instructor";
 std::string UserCalculatorData::Roles::teacher = "teacher";
 
-Crasher::Crasher() {
+void fatalCrash(const std::string& input) {
+  global.fatal << input << global.fatal;
+}
+
+GlobalVariables::Crasher::Crasher() {
   this->flagCrashInitiateD = false;
   this->flagFinishingCrash = false;
 }
 
-void Crasher::FirstRun() {
+void GlobalVariables::Crasher::FirstRun() {
   if (
     !this->flagCrashInitiateD &&
     global.flagRunningBuiltInWebServer
@@ -41,7 +45,7 @@ void Crasher::FirstRun() {
 
 extern Calculator* theParser;
 
-Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash) {
+GlobalVariables::Crasher& GlobalVariables::Crasher::operator<<(const GlobalVariables::Crasher& dummyCrasherSignalsActualCrash) {
   (void) dummyCrasherSignalsActualCrash;
   this->FirstRun();
   if (this->flagFinishingCrash) {
@@ -133,7 +137,7 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash) {
   return *this;
 }
 
-std::string Crasher::GetStackTraceEtcErrorMessageHTML() {
+std::string GlobalVariables::Crasher::GetStackTraceEtcErrorMessageHTML() {
   std::stringstream out;
   out << "A partial stack trace follows (function calls not explicitly logged not included).";
   out << "<table><tr>";
@@ -174,7 +178,7 @@ std::string Crasher::GetStackTraceEtcErrorMessageHTML() {
   return out.str();
 }
 
-std::string Crasher::GetStackTraceEtcErrorMessageConsole() {
+std::string GlobalVariables::Crasher::GetStackTraceEtcErrorMessageConsole() {
   std::stringstream out;
   for (int threadCounter = 0; threadCounter<global.CustomStackTrace.size; threadCounter ++) {
     if (threadCounter >= global.theThreadData.size) {
@@ -281,11 +285,11 @@ std::string GlobalVariables::ToStringProgressReportNoThreadData(bool useHTML) {
       }
     }
   }
-  if (!crash.flagCrashInitiateD) {
+  if (!global.fatal.flagCrashInitiateD) {
     if (useHTML) {
-      reportStream << crash.GetStackTraceEtcErrorMessageHTML();
+      reportStream << global.fatal.GetStackTraceEtcErrorMessageHTML();
     } else {
-      reportStream << crash.GetStackTraceEtcErrorMessageConsole();
+      reportStream << global.fatal.GetStackTraceEtcErrorMessageConsole();
     }
     reportStream << global.GetElapsedMilliseconds()
     << " ms elapsed. ";
@@ -386,7 +390,7 @@ std::string GlobalVariables::LogData::ToStringProcessType() const {
 
 bool GlobalVariables::CheckConsistency() {
   if (this->flagDeallocated) {
-    crash << "Global variables not allowed to be deallocated. " << crash;
+    global.fatal << "Global variables not allowed to be deallocated. " << global.fatal;
   }
   return true;
 }
@@ -688,13 +692,13 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent) {
   MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::ComputeDynkinString");
   this->CheckInitialization();
   if (indexComponent >= this->SimpleBasesConnectedComponents.size) {
-    crash << "Bad Dynkin index. " << crash;
+    global.fatal << "Bad Dynkin index. " << global.fatal;
   }
   DynkinSimpleType& outputType = this->SimpleComponentTypes[indexComponent];
   Vectors<Rational>& currentComponent = this->SimpleBasesConnectedComponents[indexComponent];
   List<int>& currentEnds = this->indicesEnds[indexComponent];
   if (currentComponent.size < 1) {
-    crash << "This is a programming error: currentComponent is empty which is impossible. " << crash;
+    global.fatal << "This is a programming error: currentComponent is empty which is impossible. " << global.fatal;
   }
   if (this->numberOfThreeValencyNodes(indexComponent) == 1) {
     //type D or E
@@ -714,8 +718,8 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent) {
     diagramWithoutTripleNode.AmbientRootSystem = this->AmbientRootSystem;
     diagramWithoutTripleNode.ComputeDiagramInputIsSimple(rootsWithoutTripleNode);
     if (diagramWithoutTripleNode.SimpleBasesConnectedComponents.size != 3) {
-      crash << "This is a programming error: Dynkin diagram has a triple "
-      << "node whose removal does not yield 3 connected components. " << crash;
+      global.fatal << "This is a programming error: Dynkin diagram has a triple "
+      << "node whose removal does not yield 3 connected components. " << global.fatal;
     }
     for (int i = 0; i < 3; i ++) {
       if (diagramWithoutTripleNode.SimpleBasesConnectedComponents[i][0].ScalarProduct(tripleNode, this->AmbientBilinearForm) == 0) {
@@ -750,9 +754,9 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent) {
       //the second largest component has more than one element, hence we are in type E_n.
       Rational theScale = DynkinSimpleType::GetDefaultLongRootLengthSquared('E') / tripleNode.ScalarProduct(tripleNode, this->AmbientBilinearForm);
       if (diagramWithoutTripleNode.SimpleBasesConnectedComponents[1].size != 2) {
-        crash << "This is a programming error: the Dynkin diagram has two components of "
+        global.fatal << "This is a programming error: the Dynkin diagram has two components of "
         << "length larger than 2 linked to the triple node."
-        << crash;
+        << global.fatal;
       }
       if (!tripleNode.ScalarProduct(
         diagramWithoutTripleNode.SimpleBasesConnectedComponents[1][0],
@@ -848,7 +852,7 @@ bool DynkinDiagramRootSubalgebra::CheckInitialization() const {
   MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::CheckInitialization");
   if (this->AmbientRootSystem.size != 0) {
     if (this->AmbientBilinearForm.NumRows != this->AmbientRootSystem[0].size) {
-      crash << "Ambient bilinear form of Dynkin subdiagram not initialized. " << crash;
+      global.fatal << "Ambient bilinear form of Dynkin subdiagram not initialized. " << global.fatal;
     }
   }
   return true;
@@ -889,7 +893,7 @@ void DynkinDiagramRootSubalgebra::ComputeDiagramInputIsSimple(const Vectors<Rati
   DynkinType tempType;
   this->GetDynkinType(tempType);
   if (tempType.IsEqualToZero() && simpleBasisInput.size != 0) {
-    crash << "Dynkin type of zero but the roots generating the type are: " << simpleBasisInput.ToString() << crash;
+    global.fatal << "Dynkin type of zero but the roots generating the type are: " << simpleBasisInput.ToString() << global.fatal;
   }
 }
 
@@ -915,7 +919,7 @@ bool DynkinDiagramRootSubalgebra::IsGreaterThan(DynkinDiagramRootSubalgebra& rig
     return false;
   }
   if (this->SimpleComponentTypes.size != this->SimpleBasesConnectedComponents.size) {
-    crash << "Simple component types do not match number of connected components. " << crash;
+    global.fatal << "Simple component types do not match number of connected components. " << global.fatal;
   }
   for (int i = 0; i < this->SimpleComponentTypes.size; i ++) {
     if (this->SimpleBasesConnectedComponents[i].size > right.SimpleBasesConnectedComponents[i].size) {
@@ -954,7 +958,7 @@ void DynkinDiagramRootSubalgebra::GetMapFromPermutation(
   for (int i = 0; i < this->SimpleBasesConnectedComponents.size; i ++) {
     for (int j = 0; j < this->SimpleBasesConnectedComponents[i].size; j ++) {
       if (this->SimpleBasesConnectedComponents[i].size != right.SimpleBasesConnectedComponents[thePerm[i]].size) {
-        crash << "Connected components simple bases sizes do not match. " << crash;
+        global.fatal << "Connected components simple bases sizes do not match. " << global.fatal;
       }
       domain.AddOnTop( this->SimpleBasesConnectedComponents[i][j]);
       int indexTargetComponent = thePerm[i];
@@ -1088,7 +1092,7 @@ int DynkinDiagramRootSubalgebra::RankTotal() {
 int DynkinDiagramRootSubalgebra::NumRootsGeneratedByDiagram() {
   int result = 0;
   if (this->SimpleBasesConnectedComponents.size != this->SimpleComponentTypes.size) {
-    crash << "Number of simple connected components does not match the number of types. " << crash;
+    global.fatal << "Number of simple connected components does not match the number of types. " << global.fatal;
   }
   for (int i = 0; i < this->SimpleComponentTypes.size; i ++) {
     int Rank = this->SimpleBasesConnectedComponents[i].size;
@@ -1139,11 +1143,11 @@ int DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes(int indexComponent) {
     if (counter > 3) {
       Matrix<Rational> theGram;
       currentComponent.GetGramMatrix(theGram, &this->AmbientBilinearForm);
-      crash << "This is a programming error: corrupt simple basis corresponding to "
+      global.fatal << "This is a programming error: corrupt simple basis corresponding to "
       << "Dynkin diagram: the Dynkin diagram should have nodes with"
       << " valency at most 3, but this diagram has node with valency " << counter << ". The current component is: "
       << currentComponent.ToString() << ". The corresponding Symmetric Cartan is: "
-      << theGram.ToString() << ". " << crash;
+      << theGram.ToString() << ". " << global.fatal;
     }
     if (counter == 3) {
       result ++;
@@ -1155,19 +1159,19 @@ int DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes(int indexComponent) {
     }
   }
   if (result > 1) {
-    crash << "numEnds variable equals: " << numEnds << ", number of three-nodes equals: "
+    global.fatal << "numEnds variable equals: " << numEnds << ", number of three-nodes equals: "
     << result << "; this should not happen. The bilinear form is: "
-    << this->AmbientBilinearForm.ToString() << crash;
+    << this->AmbientBilinearForm.ToString() << global.fatal;
   }
   if (result == 1) {
     if (numEnds != 3) {
-      crash << "numEnds variable equals: " << numEnds << ", number of three-nodes equals: "
-      << result << "; this should not happen. The bilinear form is: " << this->AmbientBilinearForm.ToString() << crash;
+      global.fatal << "numEnds variable equals: " << numEnds << ", number of three-nodes equals: "
+      << result << "; this should not happen. The bilinear form is: " << this->AmbientBilinearForm.ToString() << global.fatal;
     }
   } else {
     if (numEnds > 2) {
-      crash << "numEnds variable equals: " << numEnds << ", number of three-nodes equals: "
-      << result << "; this should not happen. The bilinear form is: " << this->AmbientBilinearForm.ToString() << crash;
+      global.fatal << "numEnds variable equals: " << numEnds << ", number of three-nodes equals: "
+      << result << "; this should not happen. The bilinear form is: " << this->AmbientBilinearForm.ToString() << global.fatal;
     }
   }
   return result;
@@ -1230,7 +1234,7 @@ void permutation::initPermutation(List<int>& disjointSubsets, int TotalNumElemen
     TotalNumElements -= disjointSubsets[i];
   }
   if (TotalNumElements != 0) {
-    crash << "Permutations with 0 elements not allowed. " << crash;
+    global.fatal << "Permutations with 0 elements not allowed. " << global.fatal;
   }
 }
 
@@ -1273,10 +1277,10 @@ bool WeylGroupData::AreMaximallyDominantGroupInner(List<Vector<Rational> >& theW
 
 bool WeylGroupAutomorphisms::checkInitialization() const {
   if (this->flagDeallocated) {
-    crash << "Use after free of Weyl group automorphism. " << crash;
+    global.fatal << "Use after free of Weyl group automorphism. " << global.fatal;
   }
   if (this->theWeyl == nullptr) {
-    crash << "Non-initialized Weyl group automorphisms. " << crash;
+    global.fatal << "Non-initialized Weyl group automorphisms. " << global.fatal;
   }
   return true;
 }
@@ -1355,14 +1359,14 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex() {
   out << "=" << this->thePfs.DebugString;
 //  int totalDim= this->theTranslationS[0].size +this->theTranslationsProjecteD[0].size;
   this->theQPsSubstituted.SetSize(this->projectivizedChambeR.size);
-  crash << "not implemented fully, crashing to let you know. " << crash;
+  global.fatal << "not implemented fully, crashing to let you know. " << global.fatal;
 //  this->thePfs.theChambersOld.init();
 //  this->thePfs.theChambersOld.theDirections = this->GmodKNegWeightsBasisChanged;
 //  this->thePfs.theChambersOld.SliceTheEuclideanSpace(false);
 //  this->theQPsNonSubstituted.SetSize(this->thePfs.theChambersOld.size);
 //  this->theQPsSubstituted.SetSize(this->thePfs.theChambersOld.size);
   out << "\n\nThe vector partition functions in each chamber follow.";
-  crash << "Not implemented yet. " << crash;
+  global.fatal << "Not implemented yet. " << global.fatal;
 /*
   for (int i = 0; i < this->thePfs.theChambersOld.size; i ++)
     if (this->thePfs.theChambersOld.TheObjects[i] != 0) {
@@ -1395,7 +1399,7 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex() {
     for (int k = 0; k < this->theLinearOperators.size; k ++) {
       this->GetProjection(k, this->projectivizedChambeR.TheObjects[i].GetInternalPoint(), tempRoot);
       tempRoot -= this->NonIntegralOriginModificationBasisChanged;
-      crash << crash ;
+      global.fatal << global.fatal ;
       int theIndex = - 1;//= this->thePfs.theChambersOld.GetFirstChamberIndexContainingPoint(tempRoot);
       if (theIndex != - 1) {
         tempQP = this->theQPsSubstituted[theIndex][k];
@@ -1690,10 +1694,10 @@ GeneralizedVermaModuleCharacters::GeneralizedVermaModuleCharacters() {
 
 bool GeneralizedVermaModuleCharacters::CheckInitialization() const {
   if (this->WeylLarger == nullptr || this->WeylSmaller == nullptr) {
-    crash << "Use of non-initialized Weyl group within generalized Verma module characters. " << crash;
+    global.fatal << "Use of non-initialized Weyl group within generalized Verma module characters. " << global.fatal;
   }
   if (this->WeylLarger->flagDeallocated || this->WeylSmaller->flagDeallocated) {
-    crash << "Use after free of Weyl group within Verma module characters. " << crash;
+    global.fatal << "Use after free of Weyl group within Verma module characters. " << global.fatal;
   }
   return true;
 }
@@ -1713,10 +1717,10 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   Matrix<Rational> theProjectionBasisChanged;
   Vector<Rational> startingWeight, projectedWeight;
   FormatExpressions theFormat;
-  crash << "Not implemented. " << crash;
+  global.fatal << "Not implemented. " << global.fatal;
 //  SSalgebraModuleOld tempM;
   input.ComputeHomomorphismFromImagesSimpleChevalleyGenerators();
-  crash << "Not implemented. " << crash;
+  global.fatal << "Not implemented. " << global.fatal;
 //  tempM.InduceFromEmbedding(tempStream, input);
   input.GetWeightsGmodKInSimpleCoordsK(this->GmodKnegativeWeightS);
 //  this->log << "weights of g mod k: " << this->GmodKnegativeWeights.ToString();
@@ -2021,7 +2025,7 @@ std::string GeneralizedVermaModuleCharacters::PrepareReport() {
     for (int j = 0; j < this->projectivizedChamber.size; j ++)
       if (this->projectivizedChamber.TheObjects[j].IsInCone(tempRoot)) {
         if (found)
-          crash << crash;
+          global.fatal << global.fatal;
         found = true;
       }
   }
@@ -2079,7 +2083,7 @@ void GeneralizedVermaModuleCharacters::InitTheMaxComputation() {
       currentCLS.theLattice = ZnLattice;
       bool tempBool = this->theMultiplicities[i].valueOnEachLatticeShift[0].GetRootFromLinPolyConstTermLastVariable(theLPtoMax);
       if (!tempBool) {
-        crash << "This should not happen. " << crash;
+        global.fatal << "This should not happen. " << global.fatal;
       }
       this->theMaxComputation.theConesLargerDim.AddOnTop(currentCLS);
       this->theMaxComputation.LPtoMaximizeLargerDim.AddOnTop(theLPtoMax);
@@ -2121,7 +2125,7 @@ bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase(std::fstre
   input >> tempS;
   int numReadWords;
   if (tempS != "NormalConstAdjustment:") {
-    crash << "Unexpected identifier while reading from file. " << crash;
+    global.fatal << "Unexpected identifier while reading from file. " << global.fatal;
     return false;
   }
   this->NonIntegralOriginModificationBasisChanged.ReadFromFile(input);
@@ -2185,7 +2189,7 @@ void GeneralizedVermaModuleCharacters::WriteToDefaultFile() {
 
 std::string GeneralizedVermaModuleCharacters::ElementToStringMultiplicitiesReport() {
   if (this->theMultiplicities.size != this->projectivizedChambeR.size) {
-    crash << "Bad number of multiplicities. " << crash;
+    global.fatal << "Bad number of multiplicities. " << global.fatal;
   }
   std::stringstream out;
   FormatExpressions theFormat;
@@ -2232,7 +2236,7 @@ void GeneralizedVermaModuleCharacters::GetProjection(
   Matrix<Rational>& currentExtendedOperator = this->theLinearOperatorsExtended[indexOperator];
   Vector<Rational>& currentTranslation = this->theTranslationsProjectedBasisChanged[indexOperator];
   if (input.LastObject()->IsEqualToZero()) {
-    crash << "Last coordinate is not supposed to be be zero. " << crash;
+    global.fatal << "Last coordinate is not supposed to be be zero. " << global.fatal;
   }
   output = input;
   Rational tempRat = *output.LastObject();

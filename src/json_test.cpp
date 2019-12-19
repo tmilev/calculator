@@ -46,12 +46,12 @@ bool JSData::Test::TestRecode() {
     JSData parser;
     std::string input = toRecode[i][0];
     if (!parser.readstring(input, &commentsOnFailure)) {
-      crash << "Failed to decode "<< toRecode[i][0] << crash;
+      global.fatal << "Failed to decode "<< toRecode[i][0] << global.fatal;
     }
     std::string expectedOutput = toRecode[i][1];
     std::string recoded = parser.ToString(false);
     if (recoded != expectedOutput) {
-      crash << "Input " << input << " decoded to " << recoded << ". However, I expected: " << expectedOutput << ". " << crash;
+      global.fatal << "Input " << input << " decoded to " << recoded << ". However, I expected: " << expectedOutput << ". " << global.fatal;
     }
 
   }
@@ -71,7 +71,7 @@ bool JSData::Test::TestBadInput() {
     JSData parser;
     std::string input = broken[i];
     if (parser.readstring(input, &commentsOnFailure)) {
-      crash << "Successfully decoded invalid json: " << input << "." << crash;
+      global.fatal << "Successfully decoded invalid json: " << input << "." << global.fatal;
     }
   }
   return true;

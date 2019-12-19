@@ -41,12 +41,16 @@ public:
   int size;
   Object& operator[](int i) const {
     if (i < 0 || i >= this->size) {
-      crash << "This is a programing error: attempting to access element of index "
-      << i << " in ListReferences that has only " << this->size << " elements. " << crash;
+      std::stringstream commentsOnCrash;
+      commentsOnCrash << "This is a programing error: attempting to access element of index "
+      << i << " in ListReferences that has only " << this->size << " elements. ";
+      fatalCrash(commentsOnCrash.str());
     }
     if (this->theReferences[i] == 0) {
-      crash << "This is a programing error: element of index "
-      << i << " in ListReferences has zero pointer. This is not allowed. " << crash;
+      std::stringstream commentsOnCrash;
+      commentsOnCrash << "This is a programing error: element of index "
+      << i << " in ListReferences has zero pointer. This is not allowed. ";
+      fatalCrash(commentsOnCrash.str());
     }
     return *this->theReferences[i];
   }
@@ -147,10 +151,12 @@ public:
 template<class Object>
 void ListReferences<Object>::AllocateElements(int newSize) {
   if (newSize < 0) {
-    crash << "This is a programming error: requested to set negative size "
+    std::stringstream commentsOnCrash;
+    commentsOnCrash << "This is a programming error: requested to set negative size "
     << newSize << " of List of References. If a "
     << " List is to be set empty, then one should call SetSize(0), "
-    << "rather than provide a negative argument to SetSize." << crash;
+    << "rather than provide a negative argument to SetSize.";
+    fatalCrash(commentsOnCrash.str());
   }
   if (newSize <= this->theReferences.size) {
     return;

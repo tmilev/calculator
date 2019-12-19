@@ -11,9 +11,6 @@
 
 static ProjectInformationInstance ProjectInfoVpfDatabaseMongo(__FILE__, "Database mongoDB.");
 
-extern logger logWorker;
-extern logger logServer;
-
 JSData Database::GetStandardProjectors() {
   JSData result;
   JSData userProjector;
@@ -52,7 +49,7 @@ bool Database::Mongo::initialize() {
   if (this->flagInitialized) {
     return true;
   }
-  logWorker << logger::blue << "Initializing mongoDB. " << logger::endL;
+  global << logger::blue << "Initializing mongoDB. " << logger::endL;
   if (!global.flagServerForkedIntoWorker) {
     crash << "MongoDB not allowed to run before server fork. " << crash;
   }
@@ -222,7 +219,7 @@ bool MongoQuery::RemoveOne(std::stringstream* commentsOnFailure) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << this->theError.message;
     }
-    logWorker << logger::red << "While removing: "
+    global << logger::red << "While removing: "
     << this->findQuery << " inside: "
     << this->collectionName << " got mongo error: "
     << this->theError.message << logger::endL;
@@ -232,7 +229,7 @@ bool MongoQuery::RemoveOne(std::stringstream* commentsOnFailure) {
   //bufferOutpurStringFormat = bson_as_canonical_extended_json(this->updateResult, NULL);
   //std::string updateResultString(bufferOutpurStringFormat);
   //bson_free(bufferOutpurStringFormat);
-  //logWorker << logger::red << "Update result: " << updateResultString << logger::endL;
+  //global << logger::red << "Update result: " << updateResultString << logger::endL;
   return true;
 }
 
@@ -265,7 +262,7 @@ bool MongoQuery::InsertOne(const JSData& incoming, std::stringstream* commentsOn
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << this->theError.message;
     }
-    logWorker << logger::red << "While updating: "
+    global << logger::red << "While updating: "
     << this->findQuery << " to: " << this->updateQuery << " inside: "
     << this->collectionName << " got mongo error: "
     << this->theError.message << logger::endL;
@@ -275,7 +272,7 @@ bool MongoQuery::InsertOne(const JSData& incoming, std::stringstream* commentsOn
   //bufferOutpurStringFormat = bson_as_canonical_extended_json(this->updateResult, NULL);
   //std::string updateResultString(bufferOutpurStringFormat);
   //bson_free(bufferOutpurStringFormat);
-  //logWorker << logger::red << "Update result: " << updateResultString << logger::endL;
+  //global << logger::red << "Update result: " << updateResultString << logger::endL;
   return true;
 }
 
@@ -285,7 +282,7 @@ bool MongoQuery::UpdateOne(std::stringstream* commentsOnFailure, bool doUpsert) 
     return false;
   }
   MongoCollection theCollection(this->collectionName);
-//  logWorker << "DEBUG: Update: " << this->findQuery << " to: "
+//  global << "DEBUG: Update: " << this->findQuery << " to: "
 //  << this->updateQuery << " inside: " << this->collectionName << logger::endL;
   if (this->query != nullptr) {
     crash << "At this point of code, query is supposed to be 0. " << crash;
@@ -323,7 +320,7 @@ bool MongoQuery::UpdateOne(std::stringstream* commentsOnFailure, bool doUpsert) 
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << this->theError.message;
     }
-    logWorker << logger::red << "While updating: "
+    global << logger::red << "While updating: "
     << this->findQuery << " to: " << this->updateQuery << " inside: "
     << this->collectionName << " got mongo error: "
     << this->theError.message << logger::endL;
@@ -333,7 +330,7 @@ bool MongoQuery::UpdateOne(std::stringstream* commentsOnFailure, bool doUpsert) 
   //bufferOutpurStringFormat = bson_as_canonical_extended_json(this->updateResult, NULL);
   //std::string updateResultString(bufferOutpurStringFormat);
   //bson_free(bufferOutpurStringFormat);
-  //logWorker << logger::red << "Update result: " << updateResultString << logger::endL;
+  //global << logger::red << "Update result: " << updateResultString << logger::endL;
   return true;
 }
 
@@ -372,7 +369,7 @@ bool MongoQuery::FindMultiple(
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << this->theError.message;
     }
-    logWorker << logger::red << "While finding: "
+    global << logger::red << "While finding: "
     << this->findQuery << " inside: "
     << this->collectionName << " got mongo error: "
     << this->theError.message << logger::endL;
@@ -393,7 +390,7 @@ bool MongoQuery::FindMultiple(
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << this->theError.message;
       }
-      logWorker << logger::red << "Mongo error: " << this->theError.message << logger::endL;
+      global << logger::red << "Mongo error: " << this->theError.message << logger::endL;
       return false;
     }
   }
@@ -402,7 +399,7 @@ bool MongoQuery::FindMultiple(
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Bad mongoDB cursor. ";
     }
-    logWorker << logger::red << "Mongo error: bad mongoDB cursor. " << logger::endL;
+    global << logger::red << "Mongo error: bad mongoDB cursor. " << logger::endL;
     return false;
   }
   this->totalItems = 0;
@@ -425,16 +422,16 @@ bool MongoQuery::FindMultiple(
   output.SetSize(outputString.size);
   for (int i = 0; i < outputString.size; i ++) {
     if (!output[i].readstring(outputString[i], commentsOnFailure)) {
-      logWorker << logger::red << "Mongo/JSData error: failed to read string" << logger::endL;
+      global << logger::red << "Mongo/JSData error: failed to read string" << logger::endL;
       return false;
     }
   }
   //double timeAfterQuery = global.GetElapsedSeconds();
   //double timeInMsDouble = (timeAfterQuery - timeBeforeQuery ) * 1000;
   //double timeWithDBStart = (timeAfterQuery - timeBeforeDatabase) *1000 ;
-  //logWorker << logger::green << "Time in ms: " << timeInMsDouble << logger::endL;
-  //logWorker << logger::blue << "Time in ms INDCLUDING first connection: " << timeWithDBStart << logger::endL;
-  //logWorker << logger::green << "DEBUG: Query successful. Output size: " << output.size << ". "
+  //global << logger::green << "Time in ms: " << timeInMsDouble << logger::endL;
+  //global << logger::blue << "Time in ms INDCLUDING first connection: " << timeWithDBStart << logger::endL;
+  //global << logger::green << "DEBUG: Query successful. Output size: " << output.size << ". "
   //<< output.ToStringCommaDelimited() << logger::endL;
   return true;
 }
@@ -477,7 +474,7 @@ bool Database::FindFromString(
   MacroRegisterFunctionWithName("Database::FindFromString");
 #ifdef MACRO_use_MongoDB
   JSData theData;
-  //logWorker << logger::blue << "Query input: " << findQuery << logger::endL;
+  //global << logger::blue << "Query input: " << findQuery << logger::endL;
   if (!theData.readstring(findQuery, commentsOnFailure)) {
     return false;
   }
@@ -559,7 +556,7 @@ bool Database::FindFromJSONWithOptions(
   MacroRegisterFunctionWithName("Database::FindFromJSONWithOptions");
   (void) commentsGeneralNonSensitive;
 #ifdef MACRO_use_MongoDB
-  logWorker << logger::blue << "Query input JSON: " << findQuery.ToString(true) << logger::endL;
+  global << logger::blue << "Query input JSON: " << findQuery.ToString(true) << logger::endL;
   MongoQuery query;
   query.collectionName = collectionName;
   query.findQuery = findQuery.ToString(true);
@@ -965,7 +962,7 @@ bool Database::DeleteOneEntryUnsetUnsecure(
   std::stringstream updateQueryStream;
   updateQueryStream << "{\"$unset\": {\"" << selectorStream.str() << "\":\"\"}}";
   query.updateQuery = updateQueryStream.str();
-  logWorker << logger::red << "DEBUG: update query: " << logger::blue << query.updateQuery << logger::endL;
+  global << logger::red << "DEBUG: update query: " << logger::blue << query.updateQuery << logger::endL;
   return query.UpdateOneNoOptions(commentsOnFailure);
 #else
   (void) findQuery;

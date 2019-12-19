@@ -27,16 +27,78 @@ public:
   ~ThreadData();
 };
 
-class ProcessTypes {
-public:
-  static std::string worker;
-  static std::string server;
-  static std::string serverMonitor;
+class logger {
+  public:
+  class StringHighligher {
+    public:
+    class Section {
+    public:
+      int length;
+      std::string theType;
+      Section();
+      Section(int inputLength);
+      Section(const std::string& input);
+    };
+    List<logger::StringHighligher::Section> sections;
+    StringHighligher();
+    StringHighligher(const std::string& input);
+    void reset();
+  };
+  StringHighligher nextHighlighter;
+  int currentColor;
+  int MaxLogSize;
+  std::string theFileName;
+  std::string bufferFile;
+  std::string bufferStandardOutput;
+  std::fstream theFile;
+  bool flagStopWritingToFile;
+  bool flagInitialized;
+  bool flagTagColorHtmlOpened;
+  bool flagTagColorConsoleOpened;
+  bool flagResetLogFileWhenTooLarge;
+  bool flagWriteImmediately;
+  logger();
+  void CheckLogSize();
+  enum loggerSpecialSymbols{ endL, red, blue, yellow, green, purple, cyan, normalColor, orange};
+  static std::string consoleRed();
+  static std::string consoleBlue();
+  static std::string consoleYellow();
+  static std::string consoleGreen();
+  static std::string purpleConsole();
+  static std::string cyanConsole();
+  static std::string orangeConsole();
+  static std::string consoleNormal();
+  std::string getStamp();
+  std::string getStampShort();
+  std::string closeTagConsole();
+  std::string closeTagHtml();
+  std::string openTagConsole();
+  std::string openTagHtml();
+  void initializeIfNeeded();
+  void reset();
+  logger& operator<<(const logger::StringHighligher& input);
+  logger& operator<<(const std::string& input);
+  logger& operator<<(const loggerSpecialSymbols& input);
+  void flush();
+  template <typename theType>
+  logger& operator<<(const theType& toBePrinted) {
+    return this->doTheLogging(toBePrinted);
+  }
+  template <typename theType>
+  logger& doTheLogging(const theType& toBePrinted);
 };
 
-class logger;
-
-// Warning: please pay attention to the static initialization order fiasco.
+// All global objects except instances of ProjectInformationInstance are
+// go be members of variable:
+//
+// GlobalVariables global.
+//
+// No other global variables allowed: if you see any, they should be refactored
+// and folded into global.
+//
+// Discussion.
+//
+// Please pay attention to the static initialization order fiasco.
 // The fiasco states that global objects (allocated before main)
 // may be allocated in an unexpected order.
 // In particular an object allocated before main cannot
@@ -59,7 +121,41 @@ class GlobalVariables {
 public:
   GlobalVariables();
   ~GlobalVariables();
-
+  class LogData {
+  public:
+    class type {
+    public:
+      static const int server = 0;
+      static const int serverMonitor = 1;
+      static const int worker = 2;
+    };
+    int logType;
+    logger server;
+    logger serverMonitor;
+    logger worker;
+    LogData() {
+      this->logType = LogData::type::server;
+    }
+    std::string ToStringProcessType() const;
+  };
+  LogData logs;
+  template <typename theType>
+  GlobalVariables& operator<<(const theType& toBePrinted) {
+    switch (this->logs.logType) {
+    case GlobalVariables::LogData::type::server:
+      this->logs.server << toBePrinted;
+      return *this;
+    case GlobalVariables::LogData::type::serverMonitor:
+      this->logs.serverMonitor << toBePrinted;
+      return *this;
+    case GlobalVariables::LogData::type::worker:
+      this->logs.worker << toBePrinted;
+      return *this;
+    default:
+      this->logs.worker << toBePrinted;
+      return *this;
+    }
+  }
   int (*pointerCallSystemNoOutput)(const std::string& theSystemCommand);
   std::string (*pointerCallSystemWithOutput)(const std::string& theSystemCommand);
   void (*pointerCallChDir)(const std::string& theDirectoryName);
@@ -89,7 +185,6 @@ public:
   bool flagIsChildProcess;
   bool flagRestartNeeded;
   bool flagStopNeeded;
-  std::string processType;
 
   bool flagLoggedIn;
   bool flagLogInAttempted;
@@ -276,7 +371,7 @@ public:
   bool UserDebugFlagOn();
   bool UserStudentVieWOn();
   bool CheckConsistency();
-  int CallSystemNoOutput(const std::string& systemCommand, logger* theLog);
+  int CallSystemNoOutput(const std::string& systemCommand, bool logErrors);
   std::string CallSystemWithOutput(const std::string& systemCommand);
   void ChDir(const std::string& systemCommand);
   std::string ToStringHTMLTopCommandLinuxSystem();
@@ -293,105 +388,33 @@ public:
   void MakeReport();
   /// @endcond
 };
-//extern GlobalVariables global;
 
-class logger {
-  public:
-  class StringHighligher {
-    public:
-    class Section {
-    public:
-      int length;
-      std::string theType;
-      Section();
-      Section(int inputLength);
-      Section(const std::string& input);
-    };
-    List<logger::StringHighligher::Section> sections;
-    StringHighligher();
-    StringHighligher(const std::string& input);
-    void reset();
-  };
-  StringHighligher nextHighlighter;
-  int currentColor;
-  int MaxLogSize;
-  std::string theFileName;
-  std::string bufferFile;
-  std::string bufferStandardOutput;
-  std::fstream theFile;
-  bool flagStopWritingToFile;
-  bool flagInitialized;
-  bool flagTagColorHtmlOpened;
-  bool flagTagColorConsoleOpened;
-  bool flagResetLogFileWhenTooLarge;
-  bool flagWriteImmediately;
-  std::string processType;
-  logger* carbonCopy;
-  logger(
-    const std::string& logFileName,
-    logger* inputCarbonCopy,
-    bool inputResetLogWhenTooLarge,
-    const std::string& inputProcessType
-  );
-  void CheckLogSize();
-  enum loggerSpecialSymbols{ endL, red, blue, yellow, green, purple, cyan, normalColor, orange};
-  static std::string consoleRed();
-  static std::string consoleBlue();
-  static std::string consoleYellow();
-  static std::string consoleGreen();
-  static std::string purpleConsole();
-  static std::string cyanConsole();
-  static std::string orangeConsole();
-  static std::string consoleNormal();
-  std::string getStamp();
-  std::string getStampShort();
-  std::string closeTagConsole();
-  std::string closeTagHtml();
-  std::string openTagConsole();
-  std::string openTagHtml();
-  void initializeIfNeeded();
-  void reset();
-  logger& operator<<(const logger::StringHighligher& input);
-  logger& operator<<(const std::string& input);
-  logger& operator<<(const loggerSpecialSymbols& input);
-  void flush();
-  template <typename theType>
-  logger& operator<<(const theType& toBePrinted) {
-    return this->doTheLogging(toBePrinted);
-  }
-  template <typename theType>
-  logger& doTheLogging(const theType& toBePrinted) {
-    this->initializeIfNeeded();
-    std::stringstream out;
-    if (this->processType != global.processType) {
-      out << "WARNING: logger is for process type: " << this->processType
-      << " but current process is of type: " << global.processType << ". ";
-    }
-    out << toBePrinted;
-    this->bufferStandardOutput += out.str();
+template <typename theType>
+logger& logger::doTheLogging(const theType& toBePrinted) {
+  this->initializeIfNeeded();
+  std::stringstream out;
+  out << toBePrinted;
+  this->bufferStandardOutput += out.str();
 
-    if (!this->flagStopWritingToFile) {
-      this->bufferFile += out.str();
-      if (this->flagWriteImmediately) {
-        // <- Please do not use flagWriteImmediately
-        // unless it is an extremely time-sensitive logging
-        // issue such as investigating fork hangups.
-        this->theFile << this->bufferFile;
-        this->theFile.flush();
-        this->bufferFile.clear();
-      }
+  if (!this->flagStopWritingToFile) {
+    this->bufferFile += out.str();
+    if (this->flagWriteImmediately) {
+      // <- Please do not use flagWriteImmediately
+      // unless it is an extremely time-sensitive logging
+      // issue such as investigating fork hangups.
+      this->theFile << this->bufferFile;
+      this->theFile.flush();
+      this->bufferFile.clear();
     }
-    if (this->carbonCopy != nullptr) {
-      (*(this->carbonCopy)) << out.str();
-    } else if (global.flagRunningBuiltInWebServer || global.flagRunningCommandLine) {
-      if (this->flagWriteImmediately) {
-        std::cout << this->bufferStandardOutput;
-        this->bufferStandardOutput.clear();
-      }
-    }
-    this->CheckLogSize();
-    return *this;
   }
-};
+  if (global.flagRunningBuiltInWebServer || global.flagRunningCommandLine) {
+    if (this->flagWriteImmediately) {
+      std::cout << this->bufferStandardOutput;
+      this->bufferStandardOutput.clear();
+    }
+  }
+  this->CheckLogSize();
+  return *this;
+}
 #endif
 

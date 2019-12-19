@@ -371,6 +371,19 @@ bool GlobalVariables::UserStudentVieWOn() {
   return global.GetWebInput("studentView") == "true";
 }
 
+std::string GlobalVariables::LogData::ToStringProcessType() const {
+  switch (this->logType) {
+  case GlobalVariables::LogData::type::server:
+    return "server";
+  case GlobalVariables::LogData::type::serverMonitor:
+    return "server monitor";
+  case GlobalVariables::LogData::type::worker:
+    return "worker";
+  default:
+    return "uknown process type";
+  }
+}
+
 bool GlobalVariables::CheckConsistency() {
   if (this->flagDeallocated) {
     crash << "Global variables not allowed to be deallocated. " << crash;

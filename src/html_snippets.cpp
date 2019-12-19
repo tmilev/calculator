@@ -82,9 +82,6 @@ void HtmlRoutines::LoadStrings() {
   HtmlRoutines::GetJavascriptBrowserifier();
 }
 
-extern logger logWorker;
-extern logger logServer;
-
 const std::string& HtmlRoutines::GetJavascriptAceEditorScriptWithTags() {
   if (HtmlRoutines::preLoadedFiles.Contains("AceEditor")) {
     return HtmlRoutines::preLoadedFiles.GetValueCreateNoInit("AceEditor");
@@ -115,14 +112,8 @@ const std::string& HtmlRoutines::GetFile(
   if (FileOperations::LoadFileToStringVirtual(fileNameVirtual, fileReader, false, &commentsOnFailure)) {
     out << additionalBeginTag << fileReader << additionalEndTag;
   } else {
-    if (global.processType == ProcessTypes::worker) {
-      logWorker << logger::red << "File: "
-      << fileNameVirtual << " not found. " << commentsOnFailure.str() << logger::endL;
-    }
-    if (global.processType == ProcessTypes::server) {
-      logServer << logger::red << "File: "
-      << fileNameVirtual << " not found. " << commentsOnFailure.str() << logger::endL;
-    }
+    global << logger::red << "File: "
+    << fileNameVirtual << " not found. " << commentsOnFailure.str() << logger::endL;
     out << "<b style =\"color:red\">Failed to load file: " << fileNameVirtual
     << ". Comments: " << commentsOnFailure.str() << "</b>";
   }

@@ -92,10 +92,10 @@ void WebServerMonitor::BackupDatabaseIfNeeded() {
   << global.PhysicalPathProjectBase
   << "database-backups/dbBackup"
   << global.GetDateForLogFiles() << ".mongo";
-  logServerMonitor << logger::orange << "Backing up database with command: " << logger::endL;
-  logServerMonitor << commandStream.str() << logger::endL;
+  global << logger::orange << "Backing up database with command: " << logger::endL;
+  global << commandStream.str() << logger::endL;
   global.CallSystemWithOutput(commandStream.str());
-  logServerMonitor << logger::green << "Backing up completed. " << logger::endL;
+  global << logger::green << "Backing up completed. " << logger::endL;
   this->timeAtLastBackup = global.GetElapsedSeconds();
 }
 
@@ -111,7 +111,7 @@ void WebServerMonitor::Monitor(int pidServer) {
   //theWebServer.WebServerPingIntervalInSeconds=1000;
   int microsecondsToSleep = 1000000 * theWebServer.WebServerPingIntervalInSeconds;//
   if (theWebServer.WebServerPingIntervalInSeconds > 30) {
-    logServerMonitor << logger::red << "**********WARNING**************"
+    global << logger::red << "**********WARNING**************"
     << logger::endL
     << logger::red << " The ping interval: "
     << theWebServer.WebServerPingIntervalInSeconds
@@ -127,10 +127,10 @@ void WebServerMonitor::Monitor(int pidServer) {
   theFile.close();
   WebCrawler theCrawler;
   theCrawler.init();
-  logServerMonitor << logger::blue << "Pinging " << theCrawler.addressToConnectTo << " at port/service "
+  global << logger::blue << "Pinging " << theCrawler.addressToConnectTo << " at port/service "
   << theCrawler.portOrService << " every " << (microsecondsToSleep / 1000000) << " second(s). "
   << logger::endL;
-  logServerMonitor << logger::red << "Please beware that the server will restart and you will lose all computations "
+  global << logger::red << "Please beware that the server will restart and you will lose all computations "
   << "if " << maxNumPingFailures << " consecutive pings fail. " << logger::endL;
   int numConsecutiveFailedPings = 0;
   int numPings = 0;
@@ -143,7 +143,7 @@ void WebServerMonitor::Monitor(int pidServer) {
     if (theCrawler.lastTransactionErrors != "") {
       now.AssignLocalTime();
       numConsecutiveFailedPings ++;
-      logServerMonitor << logger::red << "Connection monitor: ping of " << theCrawler.addressToConnectTo
+      global << logger::red << "Connection monitor: ping of " << theCrawler.addressToConnectTo
       << " at port/service " << theCrawler.portOrService
       << " failed. GM time: " << now.ToStringGM() << ", local time: " << now.ToStringLocal()
       << ". " << "Errors: "
@@ -163,7 +163,7 @@ void WebServerMonitor::Monitor(int pidServer) {
 void WebServerMonitor::Restart() {
   TimeWrapper now;
   now.AssignLocalTime();
-  logServerMonitor << logger::red << "Server stopped responding (probably locked pipe?)"
+  global << logger::red << "Server stopped responding (probably locked pipe?)"
   << ", restarting. " << logger::endL;
   std::fstream theFile;
   FileOperations::OpenFileCreateIfNotPresentVirtual(
@@ -174,11 +174,11 @@ void WebServerMonitor::Restart() {
   theFile.flush();
   std::stringstream killServerChildrenCommand;
   killServerChildrenCommand << "pkill -9 -P " << this->pidServer;
-  logServerMonitor  << "Terminating server children with command: " << killServerChildrenCommand.str() << logger::endL;
-  global.CallSystemNoOutput(killServerChildrenCommand.str(), &logServerMonitor);
-  logServerMonitor << logger::red << "Terminating server with pid: " << this->pidServer << logger::endL;
+  global  << "Terminating server children with command: " << killServerChildrenCommand.str() << logger::endL;
+  global.CallSystemNoOutput(killServerChildrenCommand.str(), &global);
+  global << logger::red << "Terminating server with pid: " << this->pidServer << logger::endL;
   WebServer::TerminateProcessId(this->pidServer);
-  logServerMonitor << logger::red << "Restarting monitor. " << this->pidServer << logger::endL;
+  global << logger::red << "Restarting monitor. " << this->pidServer << logger::endL;
   theWebServer.StopKillAll(false);
 }
 
@@ -288,7 +288,7 @@ void WebCrawler::PingCalculatorStatus() {
         numPingFails ++;
       } while (numSelected < 0);
       if (numSelected <= 0) {
-        logWorker << logger::red << failStream.str() << logger::endL;
+        global << logger::red << failStream.str() << logger::endL;
         reportStream << failStream.str() << "Could not connect through port. Select returned: " << numSelected;
         connectionResult = - 1;
       } else {
@@ -337,7 +337,7 @@ void WebCrawler::FetchWebPage(std::stringstream* commentsOnFailure, std::strings
   this->theTSL.openSSLData.CheckCanInitializeToClient();
   this->theTSL.initializeNonThreadSafeOnFirstCall(false);
 #ifdef MACRO_use_open_ssl
-  //logWorker << logger::green  << "DEBUG: got to FetchWebPage start. " << logger::endL;
+  //global << logger::green  << "DEBUG: got to FetchWebPage start. " << logger::endL;
   this->lastTransaction = "";
   this->lastTransactionErrors = "";
   memset(&this->hints, 0, sizeof this->hints); // make sure the struct is empty
@@ -414,7 +414,7 @@ void WebCrawler::FetchWebPage(std::stringstream* commentsOnFailure, std::strings
         numPingFails ++;
       } while (numSelected < 0);
       if (numSelected <= 0) {
-        logWorker << logger::red << failStream.str() << logger::endL;
+        global << logger::red << failStream.str() << logger::endL;
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure << failStream.str()
           << "Could not connect through port. Select returned: " << numSelected;
@@ -685,7 +685,7 @@ bool CalculatorFunctionsGeneral::innerFetchKnownPublicKeys(
 
 void WebCrawler::UpdatePublicKeys(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
   MacroRegisterFunctionWithName("WebCrawler::UpdatePublicKeys");
-  logWorker << logger::blue << "DEBUG: About to update public keys ..." << logger::endL;
+  global << logger::blue << "DEBUG: About to update public keys ..." << logger::endL;
   this->serverToConnectTo  = "www.googleapis.com";
   this->portOrService      = "https";
   this->addressToConnectTo = "https://www.googleapis.com/oauth2/v3/certs";
@@ -693,16 +693,16 @@ void WebCrawler::UpdatePublicKeys(std::stringstream* commentsOnFailure, std::str
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "<hr>" << "Updating public keys <hr>";
   }
-  logWorker << logger::blue << "DEBUG: about to fetch google public keys ..." << logger::endL;
+  global << logger::blue << "DEBUG: about to fetch google public keys ..." << logger::endL;
   this->FetchWebPage(commentsOnFailure, commentsGeneral);
   if (this->bodyReceiveD == "") {
-    logWorker << logger::red << "Could not fetch the google public keys ..." << logger::endL;
+    global << logger::red << "Could not fetch the google public keys ..." << logger::endL;
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Could not fetch google certificate list. ";
     }
     return;
   }
-  logWorker << logger::blue << "DEBUG: GOT keys!!!..." << logger::endL;
+  global << logger::blue << "DEBUG: GOT keys!!!..." << logger::endL;
   std::string googleKeysFileName = "certificates-public/google.txt";
   std::string googleKeysDebugFileName = "certificates-public/debug-google.txt";
   std::fstream googleKeysFile, googleKeysDebugFile;
@@ -712,14 +712,14 @@ void WebCrawler::UpdatePublicKeys(std::stringstream* commentsOnFailure, std::str
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "<br>Failed to open: " << googleKeysFileName;
     }
-    logWorker << logger::red << "Failed to create google keys file name. " << logger::endL;
+    global << logger::red << "Failed to create google keys file name. " << logger::endL;
     return;
   }
   FileOperations::OpenFileCreateIfNotPresentVirtual(googleKeysDebugFile, googleKeysDebugFileName, false, true, false);
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "<br>Updated file: " << googleKeysFileName;
   }
-  logWorker << logger::green << "Updated public key file: " << googleKeysFileName << logger::endL;
+  global << logger::green << "Updated public key file: " << googleKeysFileName << logger::endL;
   googleKeysFile << this->bodyReceiveD;
   googleKeysDebugFile
   << "Expected body length: " << this->expectedLength.ToString() << "\n";
@@ -812,7 +812,7 @@ bool Crypto::VerifyJWTagainstKnownKeys(
     WebCrawler theCrawler;
     theCrawler.theTSL.openSSLData.name = "public key fetcher";
     theCrawler.UpdatePublicKeys(commentsOnFailure, commentsGeneral);
-    logWorker << "DEBUG: Updated public keys!";
+    global << "DEBUG: Updated public keys!";
   }
   if (theIndex == - 1) {
     if (commentsOnFailure != nullptr) {
@@ -1039,7 +1039,7 @@ void GlobalVariables::WriteCrash(const JSData& out) {
     return;
   }
 
-  logWorker << logger::red << "Crashing AFTER timeout!" << logger::endL;
+  global << logger::red << "Crashing AFTER timeout!" << logger::endL;
 
   theWebServer.GetActiveWorker().WriteAfterTimeoutJSON(
     out, "crash", ""

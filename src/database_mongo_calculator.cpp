@@ -3,8 +3,6 @@
 
 static ProjectInformationInstance ProjectInfoVpfMongoCalculatorInterface(__FILE__, "Database mongo-calculator interface.");
 
-extern logger logWorker;
-
 bool CalculatorDatabaseFunctions::innerExecuteMongoQuery(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {

@@ -137,7 +137,7 @@ bool TimeoutThread::HandleComputationTimeout() {
     return false;
   }
   if (global.millisecondsReplyAfterComputation <= 0) {
-    logWorker << "DEBUG: global.millisecondsReplyAfterComputation : non-positive!" << logger::endL;
+    global << "DEBUG: global.millisecondsReplyAfterComputation : non-positive!" << logger::endL;
     return false;
   }
   if (this->elapsedComputationTimeInMilliseconds <= 0) {
@@ -147,7 +147,7 @@ bool TimeoutThread::HandleComputationTimeout() {
     return false;
   }
   if (!global.theProgress.ReportAlloweD()) {
-    logWorker << "DEBUG: report not allowed!" << logger::endL;
+    global << "DEBUG: report not allowed!" << logger::endL;
     return false;
   }
   MacroRegisterFunctionWithName("TimerThreadData::HandleComputationTimeout");
@@ -259,7 +259,7 @@ std::string CallSystemWrapperReturnStandardOutput(const std::string& inputComman
 void CallChDirWrapper(const std::string& theDir) {
   int systemOutput = chdir(theDir.c_str());
   if (systemOutput != 0) {
-    logWorker << logger::red << "Chdir command to directory: " << theDir << " exited with " << systemOutput
+    global << logger::red << "Chdir command to directory: " << theDir << " exited with " << systemOutput
     << ". " << logger::endL;
   }
 }

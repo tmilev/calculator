@@ -9,7 +9,6 @@
 
 static ProjectInformationInstance ProjectInfoVpfSemisimpleSubalgebras(__FILE__, "Semisimple subalgebras of the semisimple Lie algebras. ");
 
-extern logger logWorker;
 template<>
 List<DynkinSimpleType>::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<DynkinSimpleType>() {
@@ -376,7 +375,7 @@ void SemisimpleSubalgebras::CheckFileWritePermissions() {
   FileOperations::GetPhysicalFileNameFromVirtual(
     this->owner->ToStringVirtualFolderName(), testFileFolderPhysical, false, false, nullptr
   );
-  global.CallSystemNoOutput("mkdir " + testFileFolderPhysical, &logWorker);
+  global.CallSystemNoOutput("mkdir " + testFileFolderPhysical, &global);
 
   if (!FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(testFile, testFileNameRelative, false, true, false)) {
     crash << "<br>This may or may not be a programming error. I requested to create file "

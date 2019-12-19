@@ -13,13 +13,8 @@ static ProjectInformationInstance projectInfoInstanceCalculatorGlobalAndSystemHe
   __FILE__, "Global objects and system calls header"
 );
 
-class logger;
 class Calculator;
-extern logger logWorker  ;
-extern logger logServerMonitor  ;
-extern logger logServer  ;
 
-extern logger logProcessStats;
 extern FormatExpressions consoleFormat;
 extern Calculator* theParser;
 

@@ -55,8 +55,6 @@ CalculatorHTML::CalculatorHTML() {
   this->topics.owner = this;
 }
 
-extern logger logWorker;
-
 bool CalculatorHTML::LoadProblemInfoFromJSONAppend(
   const JSData& inputJSON,
   MapList<std::string, ProblemData, MathRoutines::HashString>& outputProblemInfo,
@@ -3099,7 +3097,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     if (shouldResetTheRandomSeed) {
       bool successStoringSeed = this->StoreRandomSeedCurrent(&comments);
       if (!successStoringSeed) {
-        logWorker << logger::red << "This should not happen: failed to store random seed." << logger::endL
+        global << logger::red << "This should not happen: failed to store random seed." << logger::endL
         << logger::yellow << comments.str() << logger::endL;
       }
     }

@@ -9,8 +9,6 @@
 
 static ProjectInformationInstance ProjectInfoVpfCharactersCalculatorInterfaceCPP(__FILE__, "Weyl group calculator interface. Work in progress by Thomas & Todor. ");
 
-extern logger logWorker;
-
 template<>
 List<ClassFunction<WeylGroupData::WeylGroupBase, Rational> >::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<ClassFunction<WeylGroupData::WeylGroupBase, Rational> >() {
@@ -342,17 +340,17 @@ void WeylGroupData::ComputeIrreducibleRepresentationsWithFormulasImplementation(
     for (int i = 0; i < phi.generatorImages.size - 1; i ++) {
       phi.generatorImages.LastObject()->k.ToggleBit(i);
     }
-    logWorker << "Generator commutation relations of groups\n";
-    logWorker << HOG.theGroup->PrettyPrintGeneratorCommutationRelations();
+    global << "Generator commutation relations of groups\n";
+    global << HOG.theGroup->PrettyPrintGeneratorCommutationRelations();
     FiniteGroup<ElementHyperoctahedralGroupR2> phiG;
     phiG.generators = phi.generatorImages;
-    logWorker << phiG.PrettyPrintGeneratorCommutationRelations();
-    logWorker << G.PrettyPrintGeneratorCommutationRelations();
-    logWorker << "pulling back irreps:\n";
+    global << phiG.PrettyPrintGeneratorCommutationRelations();
+    global << G.PrettyPrintGeneratorCommutationRelations();
+    global << "pulling back irreps:\n";
     for (int i = 0; i < HOG.theGroup->irreps.size; i ++) {
       auto irrep = phi.PullbackRepresentation(HOG.theGroup->irreps[i]);
       irrep.ComputeCharacter();
-      logWorker << HOG.theGroup->irreps[i].theCharacteR << "->" << irrep.theCharacteR << '\n';
+      global << HOG.theGroup->irreps[i].theCharacteR << "->" << irrep.theCharacteR << '\n';
       G.AddIrreducibleRepresentation(irrep);
     }
   } else if ((letters.size == 1) && (letters[0] == 'D')) {
@@ -374,16 +372,16 @@ void WeylGroupData::ComputeIrreducibleRepresentationsWithFormulasImplementation(
 
     FiniteGroup<ElementHyperoctahedralGroupR2> imG;
     imG.generators = inclusionMap.generatorImages;
-    logWorker << HOG.theGroup->PrettyPrintGeneratorCommutationRelations() << '\n';
-    logWorker << imG.PrettyPrintGeneratorCommutationRelations();
-    logWorker << G.PrettyPrintGeneratorCommutationRelations() << '\n';
+    global << HOG.theGroup->PrettyPrintGeneratorCommutationRelations() << '\n';
+    global << imG.PrettyPrintGeneratorCommutationRelations();
+    global << G.PrettyPrintGeneratorCommutationRelations() << '\n';
   }
   // silently fail instead of crashing to support calling into this and if it doesn't
   // work then using brute force
   //  else
   //    crash << "ComputeIrreducibleRepresentationsUsingSpechtModules: Type "
   // << this->theDynkinType << " is unsupported.  If you think it should work, edit " << __FILE__ << ":" << __LINE__ << crash;
-  logWorker << G.PrettyPrintCharacterTable() << '\n';
+  global << G.PrettyPrintCharacterTable() << '\n';
 }
 
 template <class coefficient>

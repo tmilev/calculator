@@ -77,13 +77,13 @@ unsigned long long int Rational::TotalSmallAdditions = 0;
 unsigned long long int Rational::TotalSmallGCDcalls = 0;
 unsigned long long int Rational::TotalSmallMultiplications = 0;
 
-int GlobalVariables::CallSystemNoOutput(const std::string& systemCommand, logger* theLog) {
+int GlobalVariables::CallSystemNoOutput(const std::string& systemCommand, bool logErrors) {
   if (this->pointerCallSystemNoOutput == nullptr) {
     return - 1;
   }
   int exitCode = this->pointerCallSystemNoOutput(systemCommand);
-  if (exitCode != 0 && theLog != nullptr) {
-    *theLog << logger::red << "System command: " << systemCommand << " exited with " << exitCode << ". " << logger::endL;
+  if (exitCode != 0 && logErrors) {
+    global << logger::red << "System command: " << systemCommand << " exited with " << exitCode << ". " << logger::endL;
   }
   return exitCode;
 }
@@ -156,6 +156,10 @@ GlobalVariables::GlobalVariables() {
   this->flagDatabaseUseFallback = false;
   this->flagServerAutoMonitor = true;
   this->flagDisableDatabaseLogEveryoneAsAdmin = false;
+
+  this->logs.worker.theFileName = "/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logCommon.html";
+  this->logs.server.theFileName = "/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/global.html";
+  this->logs.serverMonitor.theFileName = "/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/global.html";
 }
 
 void GlobalVariables::WriteSourceCodeFilesJS() {

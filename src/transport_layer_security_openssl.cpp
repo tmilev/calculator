@@ -19,9 +19,6 @@ static ProjectInformationInstance projectInfoInstanceTransportLayerSecurityOpenS
 std::string TransportLayerSecurityOpenSSL::errors::errorWantRead = "SSL_ERROR_WANT_READ";
 bool TransportLayerSecurityOpenSSL::flagSSLlibraryInitialized = false;
 
-extern logger logServer ;
-extern logger logWorker ;
-
 TransportLayerSecurityOpenSSL::~TransportLayerSecurityOpenSSL() {
   this->FreeSSL();
   this->FreeContext();
@@ -47,7 +44,7 @@ void TransportLayerSecurityOpenSSL::FreeContext() {
 #ifdef  MACRO_use_open_ssl
 
   if (this->context != nullptr && this->name != "") {
-    logWorker << logger::blue << "DEBUG: Freeing openSSL context: " << this->name << ". " << logger::endL;
+    global << logger::blue << "DEBUG: Freeing openSSL context: " << this->name << ". " << logger::endL;
   }
   SSL_CTX_free (this->context);
 #endif // MACRO_use_open_ssl
@@ -66,11 +63,11 @@ void TransportLayerSecurityOpenSSL::initSSLLibrary() {
   SSL_load_error_strings();
   int loadedSuccessfully = OpenSSL_add_ssl_algorithms();
   if (!loadedSuccessfully) {
-    logServer << logger::red << commentsOnError.str() << logger::endL;
+    global << logger::red << commentsOnError.str() << logger::endL;
     crash << "Failed to add ssl algorithms. " << crash;
   }
   if (commentsOnError.str() != "") {
-    logServer << logger::red << "OpenSSL initialization comments: " << logger::blue << commentsOnError.str() << logger::endL;
+    global << logger::red << "OpenSSL initialization comments: " << logger::blue << commentsOnError.str() << logger::endL;
   }
 #endif // MACRO_use_open_ssl
 }
@@ -87,8 +84,8 @@ bool TransportLayerSecurityOpenSSL::initSSLKeyFilesCreateOnDemand() {
   ) {
     return true;
   }
-  logWorker << logger::red << "SSL is available but CERTIFICATE files are missing." << logger::endL;
-  logWorker << logger::green << "Let me try to create those files for you." << logger::endL;
+  global << logger::red << "SSL is available but CERTIFICATE files are missing." << logger::endL;
+  global << logger::green << "Let me try to create those files for you." << logger::endL;
   std::stringstream theCommand;
   std::string certificatePhysicalName, keyPhysicalName;
   FileOperations::GetPhysicalFileNameFromVirtual(
@@ -107,9 +104,9 @@ bool TransportLayerSecurityOpenSSL::initSSLKeyFilesCreateOnDemand() {
     theCommand << "-subj " << global.configuration["openSSLSubject"].theString;
     // "/C=CA/ST=ON/L=MyTown/O=MyOrganization/OU=none/CN=localhost/emailAddress=myemail@gmail.com"
   }
-  logServer << "About to generate key files with the following command. " << logger::endL;
-  logServer << logger::green << theCommand.str() << logger::endL;
-  global.CallSystemNoOutput(theCommand.str(), &logServer);
+  global << "About to generate key files with the following command. " << logger::endL;
+  global << logger::green << theCommand.str() << logger::endL;
+  global.CallSystemNoOutput(theCommand.str(), &global);
   return true;
 }
 
@@ -169,7 +166,7 @@ void TransportLayerSecurityOpenSSL::initSSLCommon(bool isServer) {
   this->context = SSL_CTX_new(this->theSSLMethod);
 
   if (this->context == nullptr) {
-    logServer << logger::red << "Failed to create ssl context. " << logger::endL;
+    global << logger::red << "Failed to create ssl context. " << logger::endL;
     ERR_print_errors_fp(stderr);
     crash << "Openssl context error.\n" << commentsOnError.str() << crash;
   }
@@ -229,10 +226,10 @@ void TransportLayerSecurityOpenSSL::initSSLServer() {
     return;
   }
 #ifdef MACRO_use_open_ssl
-  logServer << logger::green << "SSL is available." << logger::endL;
+  global << logger::green << "SSL is available." << logger::endL;
   SSL_CTX_set_ecdh_auto(this->context, 1);
   if (SSL_CTX_use_certificate_chain_file(this->context, signedFileCertificate3Physical.c_str()) <= 0) {
-    logServer << logger::purple << "Found no officially signed certificate, trying self-signed certificate. "
+    global << logger::purple << "Found no officially signed certificate, trying self-signed certificate. "
     << logger::endL;
     if (SSL_CTX_use_certificate_file(this->context, fileCertificatePhysical.c_str(), SSL_FILETYPE_PEM) <= 0) {
       ERR_print_errors_fp(stderr);
@@ -243,7 +240,7 @@ void TransportLayerSecurityOpenSSL::initSSLServer() {
       exit(4);
     }
   } else {
-    logServer << logger::green << "Found officially signed certificate... " << logger::endL;
+    global << logger::green << "Found officially signed certificate... " << logger::endL;
     //if (SSL_CTX_use_certificate_chain_file(theSSLdata.ctx, signedFileCertificate2.c_str()) <= 0)
     //{ ERR_print_errors_fp(stderr);
     //  exit(3);
@@ -259,11 +256,11 @@ void TransportLayerSecurityOpenSSL::initSSLServer() {
     global.flagCertificatesAreOfficiallySigned = true;
   }
   if (!SSL_CTX_check_private_key(this->context)) {
-    logServer << "Private key does not match the certificate public key. ";
+    global << "Private key does not match the certificate public key. ";
     crash << "Private key does not match the certificate public key. " << crash;
   }
 #else
-  logServer << logger::red << "Openssl not available." << logger::endL;
+  global << logger::red << "Openssl not available." << logger::endL;
 #endif // MACRO_use_open_ssl
 }
 
@@ -384,7 +381,7 @@ bool TransportLayerSecurityOpenSSL::HandShakeIamClientNoSocketCleanup(
   this->sslData = SSL_new(this->context);
   if (this->sslData == nullptr) {
     this->flagSSLHandshakeSuccessful = false;
-    logWorker << logger::red << "Failed to allocate ssl. " << logger::endL;
+    global << logger::red << "Failed to allocate ssl. " << logger::endL;
     crash << "Failed to allocate ssl: not supposed to happen. " << crash;
   }
   this->SetSocketAddToStack(inputSocketID);

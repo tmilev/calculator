@@ -42,12 +42,12 @@ void WebServer::initializeRandomBytes() {
 bool WebServer::CreateProcessMutex() {
   WebWorker& worker = this->GetActiveWorker();
   if (!worker.PauseWorker.CreateMe(this->ToStringWorkerToWorker() + "pause mutex", false, true)) {
-    logServer << "Failed to create process mutex: "
+    global << "Failed to create process mutex: "
     << worker.PauseWorker.name << "\n";
     return false;
   }
   if (!worker.writingReportFile.CreateMe(this->ToStringWorkerToWorker() + "output file mutex", false, true)) {
-    logServer << "Failed to create process mutex: "
+    global << "Failed to create process mutex: "
     << worker.writingReportFile.name << "\n";
     return false;
   }
@@ -64,7 +64,7 @@ void WebServer::ComputeActiveWorkerId() {
   worker.workerId = Crypto::ConvertListUnsignedCharsToHex(incomingId);
   this->workerIds.SetKeyValue(worker.workerId, this->activeWorker);
   if (this->workerIds.size() > 2 * this->theWorkers.size) {
-    logServer << logger::red
+    global << logger::red
     << "Warning: worker ids exceeds twice the number of workers. "
     << "This may be a memory leak. " << logger::endL;
   }
@@ -100,6 +100,8 @@ int WebServer::Fork() {
     // Forget previous random bytes, and gain a little extra entropy:
     Crypto::acquireAdditionalRandomness(millisecondsAtFork);
   } else if (result == 0) {
+    global.logs.logType = GlobalVariables::LogData::type::worker;
+
     // child process
     // lose 256 bits of entropy from the server:
     global.randomBytesCurrent.SetSize(static_cast<signed>(global.maximumExtractedRandomBytes));
@@ -111,7 +113,7 @@ int WebServer::Fork() {
     // this will not work.
     int success = prctl(PR_SET_PDEATHSIG, SIGKILL);
     if (success == -1) {
-      logWorker << logger::red << "Failed to set parent death signal. " << logger::endL;
+      global << logger::red << "Failed to set parent death signal. " << logger::endL;
       exit(1);
     }
   }

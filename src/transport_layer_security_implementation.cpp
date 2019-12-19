@@ -11,8 +11,6 @@
 
 static ProjectInformationInstance projectInfoInstanceTransportLayerSecurityImplementationInternal(__FILE__, "TSL/ssl implementation playground.");
 
-extern logger logServer   ;
-
 bool TransportLayerSecurity::LoadPEMCertificate(std::stringstream* commentsOnFailure) {
   std::string certificateContent;
   if (!FileOperations::LoadFileToStringVirtual_AccessUltraSensitiveFoldersIfNeeded(
@@ -53,7 +51,7 @@ bool TransportLayerSecurity::LoadPEMPrivateKey(
 bool TransportLayerSecurity::initSSLKeyFilesInternal(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("TransportLayerSecurity::initSSLKeyFilesInternal");
   this->openSSLData.initSSLKeyFilesCreateOnDemand();
-  logServer << logger::purple << "Using self-signed certificate. " << logger::endL;
+  global << logger::purple << "Using self-signed certificate. " << logger::endL;
   if (!this->LoadPEMCertificate(commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to load pem certificate. ";

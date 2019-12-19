@@ -31,7 +31,7 @@ void ParallelComputing::CheckPointerCounters() {
 
 void MutexRecursiveWrapper::CheckConsistency() {
   if (this->flagDeallocated) {
-    logWorker << logger::red << "Use after free of mutex. "
+    global << logger::red << "Use after free of mutex. "
     << crash.GetStackTraceEtcErrorMessageConsole() << logger::endL;
     assert(false);
   }
@@ -87,7 +87,7 @@ void MutexRecursiveWrapper::LockMe() {
     if (this->flagUnsafeFlagForDebuggingIsLocked) {
       int currentThreadId = ThreadData::getCurrentThreadId();
       if (currentThreadId == this->lastLockerThread) {
-        logWorker << logger::red << "Fatal: about to self-lock: ["
+        global << logger::red << "Fatal: about to self-lock: ["
         << this->mutexName << "] thread: "
         << currentThreadId
         << "." << logger::endL
@@ -222,7 +222,7 @@ int ThreadData::getCurrentThreadId() {
 
 std::string ThreadData::ToStringHtml() const {
   std::stringstream out;
-  out << "Process type: <b>" << global.processType << "</b>. ";
+  out << "Process type: <b>" << global.logs.ToStringProcessType() << "</b>. ";
   if (this->getCurrentThreadId() == this->index) {
     out << "<b style = 'color:green'>Current thread</b> ";
   } else {

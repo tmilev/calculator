@@ -241,7 +241,7 @@ bool Database::initializeServer() {
     return true;
   }
   global.flagDatabaseUseFallback = true;
-  logServer << logger::red << "Calculator compiled without (mongoDB) database support. "
+  global << logger::red << "Calculator compiled without (mongoDB) database support. "
   << logger::green << "Using " << logger::red
   << "**SLOW** " << logger::green << "fall-back JSON storage." << logger::endL;
   this->theFallBack.initialize();
@@ -807,7 +807,7 @@ bool Database::User::SendActivationEmail(
   UserCalculator currentUser;
   bool result = true;
   for (int i = 0; i < theEmails.size; i ++) {
-    logWorker << "Sending activation email, user "
+    global << "Sending activation email, user "
     << i + 1 << " out of " << theEmails.size << " ... ";
     currentUser.username = theEmails[i];
     currentUser.email = theEmails[i];
@@ -816,13 +816,13 @@ bool Database::User::SendActivationEmail(
     );
   }
   if (commentsOnFailure != nullptr) {
-    logWorker << commentsOnFailure->str();
+    global << commentsOnFailure->str();
   }
   if (commentsGeneral != nullptr && commentsOnFailure != commentsGeneral) {
-    logWorker << commentsGeneral->str();
+    global << commentsGeneral->str();
   }
   if (commentsGeneralSensitive != nullptr && commentsGeneralSensitive != commentsOnFailure) {
-    logWorker << commentsGeneralSensitive->str();
+    global << commentsGeneralSensitive->str();
   }
   return result;
 }
@@ -1453,7 +1453,7 @@ bool EmailRoutines::SendEmailWithMailGun(
   if (mailGunKey.size() > 0) {
     mailGunKey.resize(mailGunKey.size() - 1);
   }
-  logWorker << "Sending email via "
+  global << "Sending email via "
   << "https://api.mailgun.net/v3/mail2."
   << hostnameToSendEmailFrom
   << "/messages " << logger::endL;
@@ -1716,14 +1716,14 @@ bool Database::User::LoginViaDatabase(
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "<b>First login of user admin: setting admin password.</b> ";
       }
-      logWorker << logger::yellow << "First login of user admin: setting admin password." << logger::endL;
+      global << logger::yellow << "First login of user admin: setting admin password." << logger::endL;
       userWrapper.actualActivationToken = "activated";
       userWrapper.userRole = "admin";
       if (!userWrapper.StoreToDB(true, commentsOnFailure)) {
-        logWorker << logger::red << "Failed to store admin pass to database. ";
+        global << logger::red << "Failed to store admin pass to database. ";
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure << "Failed to store admin pass to database. ";
-          logWorker << commentsOnFailure->str();
+          global << commentsOnFailure->str();
         }
       }
       theUseR = userWrapper;

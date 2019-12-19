@@ -9,9 +9,6 @@
 
 static ProjectInformationInstance projectInfoInstanceTransportLayerSecurityTest(__FILE__, "TSL/ssl implementation.");
 
-extern logger logServer;
-
-
 std::string SSLRecord::Test::sampleClientHelloHex =
 "1603010200010001fc03031e70e7e6d1ccf06a234cf5b6f4c207609d824787e70a63808cacbe5fb2b67ea1"
 "202ae1460ab9498ccc0b624b4eb0f859a840d98724873a214a64c8b0b09c431cc6"
@@ -47,9 +44,9 @@ bool SSLRecord::Test::SerializationClientHello(TransportLayerSecurityServer& tes
   List<unsigned char> encoded;
   theRecord.WriteBytes(encoded, nullptr);
   if (encoded != theRecord.incomingBytes) {
-    logServer << "Decoded:\n" << theRecord.content.getStringHighlighter()
+    global << "Decoded:\n" << theRecord.content.getStringHighlighter()
     << Crypto::ConvertListUnsignedCharsToHex(theRecord.incomingBytes) << logger::endL;
-    logServer << "Encoded:\n" << theRecord.content.getStringHighlighter()
+    global << "Encoded:\n" << theRecord.content.getStringHighlighter()
     << Crypto::ConvertListUnsignedCharsToHex(encoded) << logger::endL;
     crash << "Decode->Encode did not reproduce the original input. " << crash;
   }

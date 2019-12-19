@@ -99,7 +99,7 @@ bool PipePrimitive::CreateMe(
 ) {
   this->name = inputPipeName;
   if (pipe(this->pipeEnds.TheObjects) < 0) {
-    logServer << logger::red << "FAILED to create pipe: " << this->name << ". " << logger::endL;
+    global << logger::red << "FAILED to create pipe: " << this->name << ". " << logger::endL;
     this->Release();
     theWebServer.StopKillAll(false);
     // return false;
@@ -138,7 +138,7 @@ bool MutexProcess::ResetNoAllocation() {
   ) {
     return true;
   }
-  logWorker << logger::red << this->ToString() << ": failed to reset without allocation. " << logger::endL;
+  global << logger::red << this->ToString() << ": failed to reset without allocation. " << logger::endL;
   return false;
 }
 
@@ -151,7 +151,7 @@ bool MutexProcess::Lock() {
   this->flagLockHeldByAnotherThread = true;
   bool success = this->lockPipe.ReadOnceIfFailThenCrash(false, true);
   if (!success) {
-    logWorker << logger::red << "Error: " << this->currentProcessName
+    global << logger::red << "Error: " << this->currentProcessName
     << " failed to lock pipe " << this->ToString() << logger::endL;
   }
   this->flagLockHeldByAnotherThread = false;
@@ -162,7 +162,7 @@ bool MutexProcess::Unlock() {
   MacroRegisterFunctionWithName("MutexProcess::Unlock");
   bool success = this->lockPipe.WriteOnceIfFailThenCrash(MutexProcess::lockContent, 0, false, true);
   if (!success) {
-    logWorker << logger::red << "Error: " << this->currentProcessName
+    global << logger::red << "Error: " << this->currentProcessName
     << " failed to unlock pipe " << this->ToString() << logger::endL;
   }
   return success;
@@ -286,7 +286,7 @@ bool PipePrimitive::SetPipeFlagsIfFailThenCrash(int inputFlags, int whichEnd, bo
   int counter = 0;
   while (fcntl(this->pipeEnds[whichEnd], F_SETFL, inputFlags) < 0) {
     std::string theError = strerror(errno);
-    logWorker << logger::purple << "Failed to fcntl pipe end with file descriptor: "
+    global << logger::purple << "Failed to fcntl pipe end with file descriptor: "
     << this->pipeEnds[whichEnd] << ": "
     << theError << ". " << logger::endL;
     if (++ counter > 100) {
@@ -347,10 +347,10 @@ int Pipe::WriteNoInterrupts(int theFD, const std::string& input) {
     }
     if (result < 0) {
       if (errno == EINTR) {
-        logWorker << logger::red << "Write operation interrupted, repeating. " << logger::endL;
+        global << logger::red << "Write operation interrupted, repeating. " << logger::endL;
         numAttempts ++;
         if (numAttempts > 100) {
-          logWorker << logger::red
+          global << logger::red
           << "Write operation interrupted, more than 100 times, this is not supposed to happen. "
           << logger::endL;
           return - 1;
@@ -428,12 +428,7 @@ bool PipePrimitive::HandleFailedWriteReturnFalse(
   << StringRoutines::StringShortenInsertDots(toBeSent, 200) << "] onto: " << this->ToString() << numBadAttempts
   << " or more times. Last error: "
   << strerror(errno) << ". ";
-  if (global.processType == ProcessTypes::worker) {
-    logWorker << logger::red << errorStream.str() << logger::endL;
-  }
-  if (global.processType == ProcessTypes::server) {
-    logServer << logger::red << errorStream.str() << logger::endL;
-  }
+  global << logger::red << errorStream.str() << logger::endL;
   if (restartServerOnFail) {
     theWebServer.StopKillAll(false);
   } else if (!dontCrashOnFail) {
@@ -451,7 +446,7 @@ bool PipePrimitive::WriteOnceIfFailThenCrash(
 ) {
   MacroRegisterFunctionWithName("PipePrimitive::WriteIfFailThenCrash");
   if (this->pipeEnds[1] == - 1) {
-    logWorker << logger::yellow << "WARNING: " << this->ToString()
+    global << logger::yellow << "WARNING: " << this->ToString()
     << " writing on non-initialized pipe. ";
     return false;
   }
@@ -490,14 +485,8 @@ bool PipePrimitive::WriteOnceIfFailThenCrash(
     return false;
   }
   if (static_cast<unsigned>(this->numberOfBytesLastWrite) < remaining) {
-    if (global.processType == ProcessTypes::worker) {
-      logWorker << logger::red << this->ToString() << ": wrote only "
-      << this->numberOfBytesLastWrite << " bytes out of " << remaining << " total. " << logger::endL;
-    }
-    if (global.processType == ProcessTypes::server) {
-      logServer << logger::red << this->ToString() << ": wrote only "
-      << this->numberOfBytesLastWrite << " bytes out of " << remaining << " total. " << logger::endL;
-    }
+    global << logger::red << this->ToString() << ": wrote only "
+    << this->numberOfBytesLastWrite << " bytes out of " << remaining << " total. " << logger::endL;
   }
   return true;
 }
@@ -533,7 +522,7 @@ bool Pipe::ResetNoAllocation() {
   ) {
     return true;
   }
-  logWorker << logger::red << this->ToString() << ": failed to reset without allocation. " << logger::endL;
+  global << logger::red << this->ToString() << ": failed to reset without allocation. " << logger::endL;
   return false;
 }
 
@@ -599,7 +588,7 @@ bool PipePrimitive::ReadOnceIfFailThenCrash(bool restartServerOnFail, bool dontC
     }
     counter ++;
     if (counter > 100) {
-      logWorker << logger::red << this->ToString()
+      global << logger::red << this->ToString()
       << ": more than 100 iterations of read resulted in an error. "
       << logger::endL;
       if (restartServerOnFail) {
@@ -616,7 +605,7 @@ bool PipePrimitive::ReadOnceIfFailThenCrash(bool restartServerOnFail, bool dontC
     }
   }
   if (numReadBytes > 150000) {
-    logWorker << logger::red << this->ToString()
+    global << logger::red << this->ToString()
     << "This is not supposed to happen: pipe read more than 150000 bytes. " << logger::endL;
   }
   if (numReadBytes > 0) {
@@ -651,21 +640,14 @@ void Pipe::ReadOnce(bool restartServerOnFail, bool dontCrashOnFail) {
   this->theMutexPipe.Unlock();
 }
 
-logger::logger(
-  const std::string& logFileName,
-  logger* inputCarbonCopy,
-  bool inputResetLogWhenTooLarge,
-  const std::string& inputProcessType
-) {
+logger::logger() {
   this->flagInitialized = false;
-  this->theFileName = logFileName;
+  this->theFileName = "";
   this->currentColor = logger::normalColor;
   this->flagTagColorHtmlOpened = false;
   this->flagTagColorConsoleOpened = false;
   this->flagStopWritingToFile = true;
-  this->carbonCopy = inputCarbonCopy;
-  this->flagResetLogFileWhenTooLarge = inputResetLogWhenTooLarge;
-  this->processType = inputProcessType;
+  this->flagResetLogFileWhenTooLarge = true;
   this->flagWriteImmediately = false;
 }
 
@@ -837,7 +819,7 @@ std::string logger::openTagHtml() {
 
 std::string logger::getStampShort() {
   std::stringstream out;
-  out << "[" << global.processType << ", ";
+  out << "[" << global.logs.ToStringProcessType() << ", ";
   // out << "||DEBUG: " << this->theFileName << "||";
   if (theWebServer.activeWorker != - 1) {
     out << "w: " << theWebServer.activeWorker << ", ";
@@ -853,7 +835,7 @@ std::string logger::getStampShort() {
 
 std::string logger::getStamp() {
   std::stringstream out;
-  out << global.processType << ", ";
+  out << global.logs.ToStringProcessType() << ", ";
   out
   << global.GetDateForLogFiles() << ", "
   << global.GetElapsedSeconds() << " s, ";

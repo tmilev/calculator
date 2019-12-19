@@ -40,23 +40,13 @@ std::string GlobalVariables::GetTimeLocal() {
   return now.ToStringLocal();
 }
 
-std::string ProcessTypes::worker = "worker";
-std::string ProcessTypes::server = "server";
-std::string ProcessTypes::serverMonitor = "serverMonitor";
-
-logger logWorker("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logCommon.html", nullptr, true, ProcessTypes::worker);
-logger logServerMonitor("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logServerMonitor.html", nullptr, false, ProcessTypes::serverMonitor);
-logger logServer("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logServer.html", nullptr, false, ProcessTypes::server);
-
-
-logger logProcessStats("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogWorkerProcessStats.html", &logServer, false, ProcessTypes::server);
 
 Calculator* theParser = nullptr;
 FormatExpressions consoleFormat;
 Crasher crash;
 
 void InitializeGlobalObjects() {
-  global.processType = ProcessTypes::server;
+  global.logs.logType = GlobalVariables::LogData::type::server;
   global.flagIsChildProcess = false;
   InitializeTimeR();
   global.IndicatorStringOutputFunction = nullptr;

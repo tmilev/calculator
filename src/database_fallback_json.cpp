@@ -24,7 +24,7 @@ bool Database::FallBack::UpdateOne(
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("DatabaseFallback::UpdateOneFromQueryString");
-  logWorker << "DEBUG: Inside update one." << logger::endL;
+  global << "DEBUG: Inside update one." << logger::endL;
   if (!global.flagDatabaseUseFallback) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
@@ -34,7 +34,7 @@ bool Database::FallBack::UpdateOne(
     return false;
   }
   MutexProcessLockGuard guardDB(this->access);
-  logWorker << "DEBUG: About to read database." << logger::endL;
+  global << "DEBUG: About to read database." << logger::endL;
   if (!this->ReadAndIndexDatabase(commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to read and index database. ";
@@ -253,16 +253,16 @@ bool Database::FallBack::ReadAndIndexDatabase(std::stringstream* commentsOnFailu
       this->IndexOneRecord(currentCollection.theList[i], i, collection);
     }
   }
-  logWorker << "Database indexed. " << this->ToStringIndices() << logger::endL;
+  global << "Database indexed. " << this->ToStringIndices() << logger::endL;
   return true;
 }
 
 void Database::FallBack::IndexOneRecord(
   const JSData& entry, int32_t row, const std::string& collection
 ) {
-  logWorker << "DEBUG: about to index record: " << entry.ToString(false) << logger::endL;
+  global << "DEBUG: about to index record: " << entry.ToString(false) << logger::endL;
   if (entry.theType != JSData::token::tokenObject) {
-    logWorker << "DEBUG: not of type object! " << logger::endL;
+    global << "DEBUG: not of type object! " << logger::endL;
     return;
   }
   for (int i = 0; i < entry.objects.size(); i ++) {

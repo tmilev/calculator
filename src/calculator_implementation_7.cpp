@@ -21,8 +21,6 @@
 
 static ProjectInformationInstance ProjectInfoVpf6_3cpp(__FILE__, "Calculator built-in functions. ");
 
-extern logger logWorker;
-
 template <class theType>
 bool MathRoutines::GenerateVectorSpaceClosedWRTOperation(
   List<theType>& inputOutputElts,
@@ -8650,7 +8648,7 @@ bool CalculatorFunctionsGeneral::innerStopServer(Calculator& theCommands, const 
   if (!global.UserDefaultHasAdminRights()) {
     return output.MakeError("Stop server function allowed to logged-in admins only. ", theCommands);
   }
-  logWorker << "Stopping server as requested. ";
+  global << "Stopping server as requested. ";
   global.flagStopNeeded = true;
   theCommands.flagAbortComputationASAP = true;
   return output.AssignValue(std::string("Stopping."), theCommands);

@@ -8,8 +8,6 @@
 #include "serialization_basic.h"
 #include "transport_layer_security.h"
 
-extern logger logWorker, logServer;
-
 static ProjectInformationInstance projectInfoAbstractSyntaxNotationOneDecoderImplementation(
   __FILE__, "Abstract syntax notation one (ASN-1) implementation. "
 );
@@ -970,14 +968,14 @@ AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::~WriterObjectFi
   }
   int actualBytesNeededForLength = this->GetReservedBytesForLength(this->totalByteLength);
   if (actualBytesNeededForLength > this->reservedBytesForLength) {
-    logWorker << logger::red << "Wrong number of reserved bytes for sequence writer. "
+    global << logger::red << "Wrong number of reserved bytes for sequence writer. "
     << "This is non-fatal but affects negatively performance. " << logger::endL;
     this->outputPointer->ShiftUpExpandOnTopRepeated(
       this->offset + 1, actualBytesNeededForLength - this->reservedBytesForLength
     );
   }
   if (actualBytesNeededForLength < this->reservedBytesForLength) {
-    logWorker << logger::red << "Wrong number of reserved bytes for sequence writer. "
+    global << logger::red << "Wrong number of reserved bytes for sequence writer. "
     << "This is non-fatal but affects negatively performance. " << logger::endL;
     this->outputPointer->RemoveIndicesShiftDown(
       this->offset + 1, this->reservedBytesForLength - actualBytesNeededForLength

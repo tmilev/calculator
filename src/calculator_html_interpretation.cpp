@@ -851,8 +851,6 @@ std::string WebAPIResponse::GetJSONFromTemplate() {
   return out.str();
 }
 
-extern logger logWorker;
-
 JSData WebAPIResponse::GetExamPageJSON() {
   MacroRegisterFunctionWithName("WebAPIReponse::GetExamPageJSON");
   std::stringstream out;
@@ -1920,7 +1918,6 @@ std::string WebAPIResponse::ToStringAssignSection() {
   return out.str();
 }
 
-extern logger logWorker;
 int ProblemData::getExpectedNumberOfAnswers(const std::string& problemName, std::stringstream& commentsOnFailure) {
   MacroRegisterFunctionWithName("ProblemData::getExpectedNumberOfAnswers");
   if (this->knownNumberOfAnswersFromHD != - 1) {
@@ -1953,7 +1950,7 @@ int ProblemData::getExpectedNumberOfAnswers(const std::string& problemName, std:
           continue;
         }
         global.problemExpectedNumberOfAnswers.SetKeyValue(currentProblemName, numAnswers);
-        //logWorker << logger::green << "DEBUG: problem: " << currentProblemName
+        //global << logger::green << "DEBUG: problem: " << currentProblemName
         //<< " got number of answers from DB: " << numAnswers;
       }
     }
@@ -1961,22 +1958,22 @@ int ProblemData::getExpectedNumberOfAnswers(const std::string& problemName, std:
   if (global.problemExpectedNumberOfAnswers.Contains(problemName)) {
     return global.problemExpectedNumberOfAnswers.GetValueCreate(problemName);
   }
-  logWorker << logger::yellow << "Couldn't find problem info in DB for: "
+  global << logger::yellow << "Couldn't find problem info in DB for: "
   << problemName << ", trying to read problem from hd. " << logger::endL;
   CalculatorHTML problemParser;
   problemParser.fileName = problemName;
   if (!problemParser.LoadMe(false, "", &commentsOnFailure)) {
-    logWorker << logger::yellow << WebAPI::problem::failedToLoadProblem
+    global << logger::yellow << WebAPI::problem::failedToLoadProblem
     << commentsOnFailure.str() << logger::endL;
     return 0;
   }
   if (!problemParser.ParseHTML(&commentsOnFailure)) {
-    logWorker << logger::red << "<b>Failed to parse file: " << problemParser.fileName
+    global << logger::red << "<b>Failed to parse file: " << problemParser.fileName
     << ".</b> Details:<br>" << commentsOnFailure.str();
     return 0;
   }
   this->knownNumberOfAnswersFromHD = problemParser.theProblemData.theAnswers.size();
-  logWorker << logger::yellow << "Loaded problem: " << problemName
+  global << logger::yellow << "Loaded problem: " << problemName
   << "; number of answers: " << this->knownNumberOfAnswersFromHD << logger::endL;
   this->expectedNumberOfAnswersFromDB = this->knownNumberOfAnswersFromHD;
   JSData newDBentry;

@@ -27,16 +27,6 @@ const std::string TransportLayerSecurity::signedFileCertificate1 = "certificates
 const std::string TransportLayerSecurity::signedFileCertificate3 = "certificates/godaddy-signature.crt";
 const std::string TransportLayerSecurity::signedFileKey = "certificates/calculator-algebra.key";
 
-extern logger logWorker  ;
-extern logger logHttpErrors;
-extern logger logBlock;
-extern logger logIO   ;
-extern logger logOpenSSL   ;
-extern logger logProcessKills   ;
-extern logger logProcessStats;
-extern logger logPlumbing;
-extern logger logServer  ;
-
 TransportLayerSecurity::TransportLayerSecurity() {
   this->flagIsServer = true;
   this->flagInitializedPrivateKey = false;
@@ -66,13 +56,13 @@ void TransportLayerSecurity::initializeNonThreadSafeOnFirstCall(bool IamServer) 
     if (this->flagBuiltInTLSAvailable) {
       this->theServer.initialize();
       if (global.flagAutoUnitTest) {
-        logServer << logger::yellow
+        global << logger::yellow
         << "Testing cryptographic functions ..." << logger::endL;
         SSLRecord::Test::Serialization();
         Crypto::Test::Sha256();
         PrivateKeyRSA::Test::All();
         X509Certificate::Test::All();
-        logServer << logger::green << "Cryptographic tests done." << logger::endL;
+        global << logger::green << "Cryptographic tests done." << logger::endL;
       }
     }
   } else {
@@ -407,7 +397,7 @@ JSData TransportLayerSecurityServer::NetworkSpoofer::ToJSON() {
 bool TransportLayerSecurityServer::NetworkSpoofer::ReadBytesOnce(
   std::stringstream* commentsOnError
 ) {
-  logWorker << logger::red
+  global << logger::red
   << "Transport layer security server is spoofing the network. " << logger::endL;
   if (
     this->currentInputMessageIndex < 0 ||
@@ -444,7 +434,7 @@ bool TransportLayerSecurityServer::ReadBytesOnce(std::stringstream* commentsOnEr
   if (numBytesInBuffer >= 0) {
     this->incomingBytes.SetSize(numBytesInBuffer);
   }
-  logWorker << "Read bytes:\n"
+  global << "Read bytes:\n"
   << Crypto::ConvertListUnsignedCharsToHexFormat(this->incomingBytes, 40, false) << logger::endL;
   return numBytesInBuffer > 0;
 }
@@ -1704,7 +1694,7 @@ bool SSLRecord::DecodeBody(std::stringstream *commentsOnFailure) {
 bool TransportLayerSecurityServer::DecodeSSLRecord(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("TransportLayerSecurityServer::DecodeSSLRecord");
   if (!this->lastReaD.Decode(commentsOnFailure)) {
-    logWorker << "DEBUG: one record decode error.\n" << this->lastReaD.ToString() << logger::endL;
+    global << "DEBUG: one record decode error.\n" << this->lastReaD.ToString() << logger::endL;
     return false;
   }
   return true;
@@ -1894,13 +1884,13 @@ bool TransportLayerSecurityServer::ReplyToClientHello(
   }
   this->outgoingBytes.SetSize(0);
   if (!this->WriteSSLRecords(this->outgoingRecords, commentsOnFailure)) {
-    logWorker << "Error replying to client hello. ";
+    global << "Error replying to client hello. ";
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure  << "Error replying to client hello. ";
     }
     return false;
   }
-  logWorker << "Wrote ssl records successfully. " << logger::endL;
+  global << "Wrote ssl records successfully. " << logger::endL;
   return true;
 }
 
@@ -1956,7 +1946,7 @@ bool TransportLayerSecurityServer::HandShakeIamServer(
     ] = this->lastReaD;
   }
   if (!success) {
-    logWorker << logger::red << commentsOnFailure->str() << logger::endL;
+    global << logger::red << commentsOnFailure->str() << logger::endL;
     if (this->spoofer.flagDoSpoof) {
       this->spoofer.errorsOnIncoming.AddOnTop(commentsOnFailure->str());
     }
@@ -1964,7 +1954,7 @@ bool TransportLayerSecurityServer::HandShakeIamServer(
   }
   success = TransportLayerSecurityServer::ReplyToClientHello(inputSocketID, commentsOnFailure);
   if (!success) {
-    logWorker << logger::red << commentsOnFailure->str() << logger::endL;
+    global << logger::red << commentsOnFailure->str() << logger::endL;
     if (this->spoofer.flagDoSpoof) {
       this->spoofer.errorsOnOutgoing.AddOnTop(commentsOnFailure->str());
     }

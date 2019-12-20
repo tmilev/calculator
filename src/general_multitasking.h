@@ -1,7 +1,7 @@
 #ifndef header_vpfHeader1General2Mutexes_already_Defined
 #define header_vpfHeader1General2Mutexes_already_Defined
 #include "macros.h"
-static ProjectInformationInstance vpfHeader1General2Mutexes(__FILE__, "Header, mutexes. ");
+static ProjectInformationInstance projectInfoGeneralMultitaskingHeader(__FILE__, "Header, mutexes. ");
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // The documentation of pthreads.h can be found at:

@@ -6,7 +6,7 @@
 #include "macros.h"
 #include "general_list_references.h"
 
-static ProjectInformationInstance vpfHeader9MemorySaving(__FILE__, "Header, memory some basic templates. ");
+static ProjectInformationInstance projectInfoGeneralMemorySavingHeader(__FILE__, "Header, memory some basic templates. ");
 
 // This is a wrapper-allocate-on-first-use around a regular object.
 template <class Object>

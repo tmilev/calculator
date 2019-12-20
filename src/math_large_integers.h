@@ -4,7 +4,7 @@
 #define vpfHeader2Math_01LargeIntegersInstance_already_included
 
 #include "general_lists.h"
-static ProjectInformationInstance vpfHeader2Math_01LargeIntegersInstance(
+static ProjectInformationInstance projectInfoMathLargeIntegersHeader(
   __FILE__, "Header, large integer/rational number arithmetic. "
 );
 

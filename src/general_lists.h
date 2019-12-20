@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <string.h>
 
-static ProjectInformationInstance vpfHeader1instance(__FILE__, "Header, general routines. ");
+static ProjectInformationInstance projectInfoGeneralListsHeader(__FILE__, "Header, general routines. ");
 
 // IMPORTANT.
 // Convention on Hash functions.

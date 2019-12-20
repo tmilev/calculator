@@ -4,7 +4,7 @@
 #define vpfHeaderMathVectors_h_already_included
 
 #include "math_large_integers.h"
-static ProjectInformationInstance vpfHeader2Math_02Vectors(__FILE__, "Header, vectors and related machinery. ");
+static ProjectInformationInstance projectInfoMathVectorsHeader(__FILE__, "Header, vectors and related machinery. ");
 class SelectionWithMultiplicities;
 class Selection;
 

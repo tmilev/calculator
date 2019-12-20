@@ -5,7 +5,7 @@
 #include "math_extra_modules_semisimple_Lie_algebras.h"
 #include "math_extra_drawing_variables.h"
 
-static ProjectInformationInstance ProjectInfoVpfImplementationHeaderModulesSSLielgebras(
+static ProjectInformationInstance projectInfoModulesSemisimpleLieAlgebrasImplementationHeader(
   __FILE__, "Implementation header, generalized Verma modules. "
 );
 

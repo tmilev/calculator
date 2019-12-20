@@ -5,7 +5,7 @@
 
 #include "math_general.h"
 #include "math_extra_semisimple_Lie_algebras_root_subalgebras.h"
-static ProjectInformationInstance ProjectInfoVpfHeader1_4(__FILE__, "Header, semisimple Lie subalgebras. ");
+static ProjectInformationInstance projectInfoSemisimpleLieSubalgebrasHeader(__FILE__, "Header, semisimple Lie subalgebras. ");
 
 class SemisimpleSubalgebras;
 class CandidateSSSubalgebra;

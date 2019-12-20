@@ -9,7 +9,7 @@
 #include "string_constants.h"
 #include "general_strings.h"
 
-static ProjectInformationInstance ProjectInfoVpfDatabaseMongo(__FILE__, "Database mongoDB.");
+static ProjectInformationInstance projectInfoDatabaseMongoCPP(__FILE__, "Database mongoDB.");
 
 JSData Database::GetStandardProjectors() {
   JSData result;

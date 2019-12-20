@@ -5,7 +5,7 @@
 
 #include "math_general.h"
 #include "math_extra_algebraic_numbers.h"
-static ProjectInformationInstance ProjectInfovpfImplementationHeaderWeylAlgebras(
+static ProjectInformationInstance projectInfoWeylAlgebrasImplementationHeader(
   __FILE__, "Implementation header, Weyl algebra routines. "
 );
 

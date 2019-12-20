@@ -5,7 +5,7 @@
 
 #include "math_extra_semisimple_Lie_algebras.h"
 
-static ProjectInformationInstance ProjectInfoVpfSSlieAlgRootSAs(
+static ProjectInformationInstance projectInfoSemisimpleLieAlgevraRootSubalgebrasHeader(
   __FILE__, "Header, root and sl2 subalgebras of semisimple Lie algebras. "
 );
 

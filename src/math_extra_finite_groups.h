@@ -10,7 +10,7 @@
 
 //To do: move Weyl groups to this file. Eliminate all redundant code and organize nicely.
 
-static ProjectInformationInstance ProjectInfoVpfFiniteGroups(__FILE__, "Header file, finite groups. Work in progress.");
+static ProjectInformationInstance projectInfoFiniteGroupsCPP(__FILE__, "Header file, finite groups. Work in progress.");
 
 class SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms;
 template <typename someGroup, typename coefficient>

@@ -5,7 +5,7 @@
 #include "math_general.h"
 #include "math_extra_Lie_theory_extras.h"
 
-static ProjectInformationInstance ProjectInfovpfHeader1_HeaderUniversalEnveloping(
+static ProjectInformationInstance projectInfoMathExtraUniversalEnvelopingHeader(
   __FILE__, "Header, universal enveloping algebras. "
 );
 

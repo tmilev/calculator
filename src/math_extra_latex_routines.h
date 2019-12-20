@@ -4,7 +4,7 @@
 #define vpfHeader1_HeaderLaTeXRoutines
 #include "general_list_references.h"
 
-static ProjectInformationInstance ProjectInfovpfHeader_HeaderLaTeXRoutines(__FILE__, "Header, LaTeX routines. ");
+static ProjectInformationInstance projectInfoLaTeXRoutinesHeader(__FILE__, "Header, LaTeX routines. ");
 
 class LaTeXcrawler {
   public:

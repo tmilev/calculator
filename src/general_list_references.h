@@ -4,7 +4,7 @@
 #define vpfHeader3_already_included
 
 #include "general_lists.h"
-static ProjectInformationInstance ProjectInfoVpfHeader3(
+static ProjectInformationInstance projectInfoGeneralListReferencesHeader(
   __FILE__, "Header, ListReferences and HashedListReferences implementation. "
 );
 

@@ -4,7 +4,7 @@
 #include <sys/stat.h>
 #include <cassert>
 
-static ProjectInformationInstance ProjectInfoVpfJSON(__FILE__, "Implementation JSON.");
+static ProjectInformationInstance projectInfoJSONHeader(__FILE__, "Implementation JSON.");
 
 void JSData::operator=(const LargeInteger& other) {
   this->reset();

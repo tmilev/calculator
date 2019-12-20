@@ -7,7 +7,7 @@
 #include "calculator_Weyl_group_characters.h"
 #include "math_extra_universal_enveloping_implementation.h"
 
-static ProjectInformationInstance ProjectInfoVpfCharactersCalculatorInterfaceCPP(__FILE__, "Weyl group calculator interface. Work in progress by Thomas & Todor. ");
+static ProjectInformationInstance projectInfoCharactersCalculatorInterfaceCPP(__FILE__, "Weyl group calculator interface. Work in progress. ");
 
 template<>
 List<ClassFunction<WeylGroupData::WeylGroupBase, Rational> >::OrderLeftGreaterThanRight

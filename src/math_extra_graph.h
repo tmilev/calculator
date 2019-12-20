@@ -1,8 +1,8 @@
 #ifndef vpfGraphHeaderAlreadyDefined
 #define vpfGraphHeaderAlreadyDefined
 #include "math_general.h"
-static ProjectInformationInstance ProjectInfoVpfGraphsHeader(
-  __FILE__, "Header file, graphs (Thomas)."
+static ProjectInformationInstance projectInfoGraphsHeader(
+  __FILE__, "Header file, graphs, work in progress."
 );
 
 // a bit of graph theory

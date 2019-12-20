@@ -6,7 +6,8 @@
 #include "math_extra_semisimple_Lie_algebras.h"
 #include "math_extra_Lie_theory_extras.h" // error: invalid use of incomplete type ‘struct branchingData’
 #include "math_extra_drawing_variables.h"
-static ProjectInformationInstance ProjectInfovpfImplementationHeaderSemisimpleLieAlgebras(
+
+static ProjectInformationInstance projectInfoSemisimpleLieAlgebrasImplementationHeader(
   __FILE__, "Implementation header, semisimple Lie algebra routines. "
 );
 

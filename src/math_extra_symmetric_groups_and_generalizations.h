@@ -10,7 +10,7 @@
 #include "math_extra_finite_groups.h"
 #include "math_extra_finite_groups_implementation.h"
 
-static ProjectInformationInstance ProjectInfoVpfSymmetricGroups(
+static ProjectInformationInstance projectInfoSymmetricGroupsAndGeneralizationsHeader(
   __FILE__, "Header file, symmetric and related groups. Work in progress."
 );
 

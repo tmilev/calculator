@@ -1,7 +1,7 @@
 #ifndef math_general_implementation_H
 #define math_general_implementation_H
 #include "math_general.h"
-static ProjectInformationInstance ProjectInfomath_general_implementation_H(
+static ProjectInformationInstance projectInfoMathGeneralImplementationHeader(
   __FILE__, "Header implementation, math routines. "
 );
 

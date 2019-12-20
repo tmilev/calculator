@@ -1,6 +1,6 @@
 #include "string_constants.h"
 
-static ProjectInformationInstance ProjectInfoVpfStringConstants(__FILE__, "String constants");
+static ProjectInformationInstance projectInfoStringConstantsCPP(__FILE__, "String constants");
 
 std::string WebAPI::appNoCache = "appNoCache";
 std::string WebAPI::app = "app";

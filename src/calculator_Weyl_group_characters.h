@@ -2,7 +2,7 @@
 #define vpfCharacterHeaderCalculatorInterface
 #include "calculator.h"
 
-static ProjectInformationInstance ProjectInfoVpfCharactersCalculatorInterfaceHeader(
+static ProjectInformationInstance projectInfoCharactersCalculatorInterfaceHeader(
   __FILE__, "Header, calculator built-in functions for Weyl groups."
 );
 

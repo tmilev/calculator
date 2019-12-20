@@ -15,7 +15,7 @@
 #include "math_extra_symmetric_groups_and_generalizations.h"
 #include "math_extra_elliptic_curves_implementation.h"
 
-static ProjectInformationInstance ProjectInfoVpfHeader2(__FILE__, "Header file, calculator declaration. ");
+static ProjectInformationInstance projectInfoCalculatorInterfaceHeader(__FILE__, "Header file, calculator declaration. ");
 
 class Expression {
 private:

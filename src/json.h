@@ -8,7 +8,7 @@
 #include "general_maps.h"
 
 
-static ProjectInformationInstance vpfJson(__FILE__, "Implementation of JSON, work in progress.");
+static ProjectInformationInstance projectInfoJsonHeader(__FILE__, "JSON header.");
 
 //struct JSHashData;
 class Rational;

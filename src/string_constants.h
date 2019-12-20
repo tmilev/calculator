@@ -2,7 +2,7 @@
 #define vpfWEBAPI_HEADER_H
 #include "macros.h"
 
-static ProjectInformationInstance vpfWEBAPI_HEADER_Hinstance(__FILE__, "Header, web api strings. ");
+static ProjectInformationInstance projectInfoStringConstantsHeader(__FILE__, "Header, web api strings. ");
 
 class WebAPI {
 public:

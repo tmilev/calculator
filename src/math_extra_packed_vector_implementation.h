@@ -5,7 +5,7 @@
 
 #include "math_extra_packed_vector.h"
 #include "assert.h"
-static ProjectInformationInstance ProjectInfovpfImplementationHeaderPackedVector(__FILE__, "Implementation header, packed vector. ");
+static ProjectInformationInstance projectInfoPackedVectorImplementationHeader(__FILE__, "Implementation header, packed vector. ");
 
 template <typename scalar>
 const int PackedVector<scalar>::size;

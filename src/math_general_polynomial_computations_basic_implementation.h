@@ -4,7 +4,7 @@
 #define vpfImplementationHeaderPolynomialComputationsBasic_already_included
 
 #include "math_general.h"
-static ProjectInformationInstance ProjectInfovpfImplementationHeaderPolynomialComputationsBasic(__FILE__, "Implementation header, basic polynomial computations. ");
+static ProjectInformationInstance projectInfoPolynomialComputationsBasicImplementationHeader(__FILE__, "Implementation header, basic polynomial computations. ");
 
 template <class coefficient>
 bool MonomialP::SubstitutioN(const List<Polynomial<coefficient> >& TheSubstitution, Polynomial<coefficient>& output) const {

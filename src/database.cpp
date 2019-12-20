@@ -9,7 +9,7 @@
 #include "calculator_problem_storage.h"
 #include "string_constants.h"
 
-static ProjectInformationInstance ProjectInfoVpfDatabasecpp(__FILE__, "Database-related code. ");
+static ProjectInformationInstance projectInfoDatabaseCPP(__FILE__, "Database-related code. ");
 
 bool Database::User::SetPassword(
   const std::string& inputUsername,

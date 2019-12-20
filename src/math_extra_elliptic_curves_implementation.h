@@ -5,7 +5,7 @@
 #include "math_extra_elliptic_curves.h"
 #include "math_extra_algebraic_numbers.h"
 
-static ProjectInformationInstance ProjectInfovpfImplementationHeader_HeaderEllipticCurves(
+static ProjectInformationInstance projectInfoEllipticCurvesImplementationHeader(
   __FILE__, "Implementation header, elliptic curves. "
 );
 
@@ -60,7 +60,7 @@ bool ElementEllipticCurve<coefficient>::operator*=(const ElementEllipticCurve& o
   }
   // We use the formulas:
   // s = slope will be determined later
-  // (it is the slope of the line or tangent through the two points).
+  // (the slope of secant line (two points) or tangent line (double point).
   // x_C = s^2 - x_A - x_B
   // y_C = -s(x_C - x_A)-y_A
   coefficient slope;

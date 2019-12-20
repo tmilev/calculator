@@ -61,7 +61,7 @@ class ProjectInformationInstance {
 class GlobalVariables;
 extern GlobalVariables global;
 
-static ProjectInformationInstance vpfMacrosHprojectInstance(
+static ProjectInformationInstance projectInfoMacrosHeader(
   __FILE__, "Header, External includes + macros. Macro/build configuration."
 );
 

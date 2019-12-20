@@ -5,7 +5,7 @@
 
 #include "math_extra_semisimple_Lie_algebras.h"
 //#include "math_extra_universal_enveloping.h"
-static ProjectInformationInstance ProjectInfoVpfHeaderLieTheoryMiscellaneous(
+static ProjectInformationInstance projectInfoLieTheoryMiscellaneousHeader(
   __FILE__, "Header, Lie theory, miscellaneous. "
 );
 

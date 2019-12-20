@@ -3,7 +3,7 @@
 #ifndef vpfImplementationHeader1_HeaderUniversalEnveloping
 #define vpfImplementationHeader1_HeaderUniversalEnveloping
 #include "math_extra_universal_enveloping.h"
-static ProjectInformationInstance ProjectInfovpfImplementationHeader1_HeaderUniversalEnveloping(__FILE__, "Implementation header, universal enveloping algebras. ");
+static ProjectInformationInstance projectInfoUniversalEnvelopingImplementationHeader(__FILE__, "Implementation header, universal enveloping algebras. ");
 
 template <class coefficient>
 coefficient SemisimpleLieAlgebra::GetKillingFormProductWRTLevi(

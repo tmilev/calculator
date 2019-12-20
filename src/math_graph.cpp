@@ -1,6 +1,6 @@
 #include "math_extra_graph.h"
 #include "math_general.h"
-static ProjectInformationInstance ProjectInfoVpfGraphs(__FILE__, "A graph class.");
+static ProjectInformationInstance projectInfoGraphsCPP(__FILE__, "A graph class, work in progress.");
 
 GraphOLD::GraphOLD(int max_vertices, int max_edges) {
   this->vertices = max_vertices;

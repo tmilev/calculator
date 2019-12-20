@@ -5,7 +5,7 @@
 
 #include "math_general.h"
 
-static ProjectInformationInstance ProjectInfoVpfHeaderDrawingVars(__FILE__, "Header, drawing routines. ");
+static ProjectInformationInstance projectInfoMathExtraDrawingVariablesHeader(__FILE__, "Header, drawing routines. ");
 
 class DrawOperations {
 private:

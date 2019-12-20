@@ -4,7 +4,7 @@
 #define vpfHeaderSemisimpleLieAlgebrasIncluded
 
 #include "math_extra_finite_groups.h"
-static ProjectInformationInstance ProjectInfoVpfHeaderSemisimpleLieAlgebras(__FILE__, "Header, semisimple Lie algebras. ");
+static ProjectInformationInstance projectInfoSemisimpleLieAlgebrasHeader(__FILE__, "Header, semisimple Lie algebras. ");
 
 class SemisimpleLieAlgebra {
 private:

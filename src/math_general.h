@@ -11,7 +11,7 @@
 #include "general_file_operations_encodings.h"
 #include "web_api.h"
 
-static ProjectInformationInstance ProjectInfoVpfHeader1_2(__FILE__, "Header, math routines. ");
+static ProjectInformationInstance projectInfoMathGeneralfHeader(__FILE__, "Header, math routines. ");
 
 // We are wrapping the math.h c++ functions for portability reasons
 // (if for some reason we want to change from math.h to a better floating point

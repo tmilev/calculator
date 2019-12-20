@@ -10,7 +10,7 @@
 #include "string_constants.h"
 #include <dirent.h>
 
-static ProjectInformationInstance ProjectInfoVpf9cpp(__FILE__, "Math routines implementation. ");
+static ProjectInformationInstance projectInfoMathImplementation3CPP(__FILE__, "Math routines implementation. ");
 
 // The below gives upper limit to the amount of pointers
 // that are allowed to be allocated by the program. Can be changed dynamically.

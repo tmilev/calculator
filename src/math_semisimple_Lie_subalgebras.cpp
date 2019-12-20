@@ -7,7 +7,7 @@
 #include "math_extra_semisimple_Lie_algebras_implementation.h"
 #include "math_extra_finite_groups_implementation.h"
 
-static ProjectInformationInstance ProjectInfoVpfSemisimpleSubalgebras(__FILE__, "Semisimple subalgebras of the semisimple Lie algebras. ");
+static ProjectInformationInstance projectInfoSemisimpleSubalgebrasOfSemisimpleLieAlgebrasCPP(__FILE__, "Semisimple subalgebras of the semisimple Lie algebras. ");
 
 template<>
 List<DynkinSimpleType>::OrderLeftGreaterThanRight

@@ -4,7 +4,7 @@
 #include "general_logging_global_variables.h"
 #include "source_code_formatter.h"
 
-static ProjectInformationInstance ProjectInfoVpfSourceCodeFormatter(__FILE__, "Source code formatter implementation.");
+static ProjectInformationInstance projectInfoSourceCodeFormatterCPP(__FILE__, "Source code formatter implementation, work in progress.");
 
 bool CodeFormatter::initializeFileNames(
   const std::string& fileName,

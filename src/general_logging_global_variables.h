@@ -170,7 +170,7 @@ public:
   void (*WebServerReturnDisplayIndicatorCloseConnection)(const std::string& message);
   void (*WebServerTimerPing)(int64_t pingTime);
   //  double MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit;
-  MemorySaving<Calculator> calculator;
+  MemorySaving<Calculator>& calculator();
 
   int64_t millisecondOffset;
   int64_t millisecondsMaxComputation;

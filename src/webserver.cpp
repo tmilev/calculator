@@ -839,7 +839,7 @@ void WebWorker::WriteAfterTimeoutProgress(const std::string& input, bool forceFi
 void WebWorker::WriteAfterTimeoutResult() {
   MacroRegisterFunctionWithName("WebWorker::WriteComputationResult");
   WebWorker::WriteAfterTimeoutJSON(
-    global.calculator.GetElement().ToJSONOutputAndSpecials(),
+    global.calculator().GetElement().ToJSONOutputAndSpecials(),
     "finished",
     global.RelativePhysicalNameOptionalResult
   );
@@ -1302,7 +1302,7 @@ void WebWorker::SanitizeVirtualFileName() {
 
 int WebWorker::ProcessCalculatorExamplesJSON() {
   MacroRegisterFunctionWithName("WebWorker::ProcessCalculatorExamplesJSON");
-  global.WriteResponse(global.calculator.GetElement().FunctionHandlersJSON());
+  global.WriteResponse(global.calculator().GetElement().FunctionHandlersJSON());
   return 0;
 }
 
@@ -2137,7 +2137,7 @@ int WebWorker::ProcessCompute() {
     global.theProgress.flagBanProcessMonitoring = true;
     global.theProgress.flagReportAlloweD = false;
   }
-  Calculator& theCalculator = global.calculator.GetElement();
+  Calculator& theCalculator = global.calculator().GetElement();
 
   theCalculator.inputString = HtmlRoutines::ConvertURLStringToNormal(
     global.GetWebInput(WebAPI::request::calculatorInput),
@@ -4165,16 +4165,16 @@ int WebServer::Run() {
     }
   }
   this->initializeSignals();
-  global.calculator.GetElement().initialize();
+  global.calculator().GetElement().initialize();
   // cannot call initializeMutex here: not before we execute Fork();
-  global.calculator.GetElement().ComputeAutoCompleteKeyWords();
-  global.calculator.GetElement().WriteAutoCompleteKeyWordsToFile();
+  global.calculator().GetElement().ComputeAutoCompleteKeyWords();
+  global.calculator().GetElement().WriteAutoCompleteKeyWordsToFile();
   this->WriteVersionJSFile();
   // global.WriteSourceCodeFilesJS();
   global.initModifiableDatabaseFields();
   HtmlRoutines::LoadStrings();
   this->theTLS.initializeNonThreadSafeOnFirstCall(true);
-  global.calculator.GetElement().flagShowCalculatorExamples = false;
+  global.calculator().GetElement().flagShowCalculatorExamples = false;
   if (!this->initPrepareWebServerALL()) {
     return 1;
   }
@@ -4380,8 +4380,8 @@ int WebWorker::Run() {
       break;
     }
     if (this->numberOfReceivesCurrentConnection > 0) {
-      global.calculator.FreeMemory();
-      global.calculator.GetElement().initialize();
+      global.calculator().FreeMemory();
+      global.calculator().GetElement().initialize();
       global.Comments.resetComments();
       global << logger::blue << "Created new calculator for connection: "
       << this->numberOfReceivesCurrentConnection << logger::endL;
@@ -5183,7 +5183,7 @@ int WebServer::main(int argc, char **argv) {
 int WebServer::mainCommandLine() {
   MacroRegisterFunctionWithName("main_command_input");
   global.IndicatorStringOutputFunction = HtmlRoutines::MakeStdCoutReport;
-  Calculator& theCalculator = global.calculator.GetElement();
+  Calculator& theCalculator = global.calculator().GetElement();
   theCalculator.initialize();
   if (global.programArguments.size > 1) {
     for (int i = 1; i < global.programArguments.size; i ++) {

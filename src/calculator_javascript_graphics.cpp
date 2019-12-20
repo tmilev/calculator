@@ -4,7 +4,7 @@
 #include "math_general.h"
 #include "math_extra_drawing_variables.h"
 
-static ProjectInformationInstance ProjectInfoVpf5_2cpp(__FILE__, "Calculator javascript/html/graphics. ");
+static ProjectInformationInstance projectInfoJavascriptCPP(__FILE__, "Calculator javascript/html/graphics. ");
 
 std::string CreateJavaScriptVectors(Vectors<double>& inputVectors, const std::string& arrayName, bool useVar) {
   MacroRegisterFunctionWithName("CreateStaticJavaScriptVectorsArrayWithProjection");

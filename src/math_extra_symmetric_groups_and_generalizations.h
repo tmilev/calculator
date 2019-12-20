@@ -642,7 +642,6 @@ typedef SemidirectProductElement<PermutationR2, ElementZ2N, HyperoctahedralBitsA
 template <>
 void ElementHyperoctahedralGroupR2::MakeFromString(const std::string& in);
 
-
 //class HyperoctahedralElementR2: public SemidirectProductElement<PermutationR2,ElementZ2N,HyperoctahedralBitsAutomorphism>
 //{
 //  unsigned int HashFunction() const {return SemidirectProductElement<PermutationR2,ElementZ2N,HyperoctahedralBitsAutomorphism>::HashFunction();}

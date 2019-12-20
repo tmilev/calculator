@@ -62,7 +62,14 @@ public:
   bool IsZeroPointer() const {
     return this->theValue == 0;
   }
-  void FreeMemory();
+  void FreeMemory() {
+    delete this->theValue;
+    this->theValue = 0;
+    #ifdef AllocationLimitsSafeguard
+    ParallelComputing::GlobalPointerCounter --;
+    ParallelComputing::CheckPointerCounters();
+    #endif
+  }
   MemorySaving() {
     this->theValue = 0;
   }
@@ -70,15 +77,5 @@ public:
     this->FreeMemory();
   }
 };
-
-template <typename Object>
-void MemorySaving<Object>::FreeMemory() {
-  delete this->theValue;
-  this->theValue = 0;
-  #ifdef AllocationLimitsSafeguard
-  ParallelComputing::GlobalPointerCounter --;
-  ParallelComputing::CheckPointerCounters();
-  #endif
-}
 
 #endif

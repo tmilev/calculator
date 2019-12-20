@@ -24,6 +24,11 @@ Calculator::Calculator() {
   this->flagPlotShowJavascriptOnly = false;
 }
 
+MemorySaving<Calculator>& GlobalVariables::calculator() {
+  static MemorySaving<Calculator> result;
+  return result;
+}
+
 std::string Calculator::WriteDefaultLatexFileReturnHtmlLink(
   const std::string& fileContent,
   std::string* outputFileNameNoExtension,

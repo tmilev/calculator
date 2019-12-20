@@ -5,7 +5,7 @@
 
 #include "calculator_interface.h"
 
-static ProjectInformationInstance ProjectInfoVpf6_1Header(__FILE__, "Header, calculator inner binary typed functions. ");
+static ProjectInformationInstance projectInfoCalculatorTypedFunctionsHeader(__FILE__, "Header, calculator inner binary typed functions. ");
 
 class CalculatorFunctionsBinaryOps {
 public:

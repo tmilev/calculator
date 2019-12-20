@@ -87,9 +87,9 @@ GlobalVariables::Crasher& GlobalVariables::Crasher::operator<<(const GlobalVaria
     }
   }
   if (!global.flagNotAllocated) {
-    if (!global.calculator.IsZeroPointer()) {
-      if (global.calculator.GetElement().Comments.str() != "") {
-        this->crashReportHtml << "<hr>Additional comments follow. " << global.calculator.GetElement().Comments.str();
+    if (!global.calculator().IsZeroPointer()) {
+      if (global.calculator().GetElement().Comments.str() != "") {
+        this->crashReportHtml << "<hr>Additional comments follow. " << global.calculator().GetElement().Comments.str();
       }
     }
     std::fstream theFile;

@@ -5,7 +5,7 @@
 #include "calculator_inner_typed_functions.h"
 #include "math_general_polynomial_computations_basic_implementation.h"
 #include "math_extra_universal_enveloping_implementation.h" // undefined reference to `ElementUniversalEnveloping<RationalFunctionOld>::MakeZero(SemisimpleLieAlgebra&)'
-static ProjectInformationInstance ProjectInfoVpf5_1cpp(__FILE__, "C++ object <-> calculator expression conversions.");
+static ProjectInformationInstance projectInfoCalculatorConversionsCPP(__FILE__, "C++ object <-> calculator expression conversions.");
 
 bool CalculatorConversions::innerExpressionFromChevalleyGenerator(
   Calculator& theCommands, const ChevalleyGenerator& input, Expression& output

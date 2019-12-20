@@ -10,6 +10,9 @@
 
 static ProjectInformationInstance projectInfoHeaderLoggingRoutines(__FILE__, "Logging routines, global variables. ");
 
+// Forward-declared class webserver.
+class WebServer;
+
 class ThreadData {
 public:
   std::thread::id theId;
@@ -407,6 +410,7 @@ public:
       this->IndicatorStringOutputFunction(input);
     }
   }
+  WebServer& server();
   void MakeReport();
   /// @endcond
 };

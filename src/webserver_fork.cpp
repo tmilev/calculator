@@ -13,7 +13,6 @@
 #include <signal.h> // <-signals here
 
 static ProjectInformationInstance projectInfoInstanceWebServer(__FILE__, "Web server fork.");
-extern WebServer theWebServer;
 
 void WebServer::initializeRandomBytes() {
   static bool alreadyRan = false;

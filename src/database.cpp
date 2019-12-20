@@ -811,7 +811,7 @@ bool Database::User::SendActivationEmail(
     << i + 1 << " out of " << theEmails.size << " ... ";
     currentUser.username = theEmails[i];
     currentUser.email = theEmails[i];
-    theWebServer.GetActiveWorker().DoSetEmail(
+    global.server().GetActiveWorker().DoSetEmail(
       currentUser, commentsOnFailure, commentsGeneral, commentsGeneralSensitive
     );
   }

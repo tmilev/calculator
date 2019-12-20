@@ -6,8 +6,6 @@
 #include <netdb.h> //<-addrinfo and related data structures defined here
 #include "webserver.h"
 
-extern WebServer theWebServer;
-
 static ProjectInformationInstance projectInfoInstanceWebServerInterProcessLogisticsImplementation(
   __FILE__, "Web server interprocess communication implementation."
 );
@@ -101,7 +99,7 @@ bool PipePrimitive::CreateMe(
   if (pipe(this->pipeEnds.TheObjects) < 0) {
     global << logger::red << "FAILED to create pipe: " << this->name << ". " << logger::endL;
     this->Release();
-    theWebServer.StopKillAll(false);
+    global.server().StopKillAll(false);
     // return false;
   }
   if (!readEndBlocks) {
@@ -291,7 +289,7 @@ bool PipePrimitive::SetPipeFlagsIfFailThenCrash(int inputFlags, int whichEnd, bo
     << theError << ". " << logger::endL;
     if (++ counter > 100) {
       if (restartServerOnFail) {
-        theWebServer.StopKillAll(false);
+        global.server().StopKillAll(false);
       } else if (!dontCrashOnFail) {
         global.fatal << "fcntl failed more than 100 times on "
         << "file desciptor: " << this->pipeEnds[whichEnd] << ": " << theError << ". " << global.fatal;
@@ -430,7 +428,7 @@ bool PipePrimitive::HandleFailedWriteReturnFalse(
   << strerror(errno) << ". ";
   global << logger::red << errorStream.str() << logger::endL;
   if (restartServerOnFail) {
-    theWebServer.StopKillAll(false);
+    global.server().StopKillAll(false);
   } else if (!dontCrashOnFail) {
     global.fatal << "Failed write on: " << this->ToString() << numBadAttempts << " or more times. Last error: "
     << strerror(errno) << ". " << global.fatal;
@@ -592,7 +590,7 @@ bool PipePrimitive::ReadOnceIfFailThenCrash(bool restartServerOnFail, bool dontC
       << ": more than 100 iterations of read resulted in an error. "
       << logger::endL;
       if (restartServerOnFail) {
-        theWebServer.StopKillAll(false);
+        global.server().StopKillAll(false);
       } else if (!dontCrashOnFail) {
         global.fatal << this->ToString()
         << ": more than 100 iterations of read resulted in an error. "
@@ -821,12 +819,12 @@ std::string logger::getStampShort() {
   std::stringstream out;
   out << "[" << global.logs.ToStringProcessType() << ", ";
   // out << "||DEBUG: " << this->theFileName << "||";
-  if (theWebServer.activeWorker != - 1) {
-    out << "w: " << theWebServer.activeWorker << ", ";
+  if (global.server().activeWorker != - 1) {
+    out << "w: " << global.server().activeWorker << ", ";
   }
-  out << "c: " << theWebServer.NumConnectionsSoFar;
-  if (theWebServer.activeWorker != -1) {
-    out << "." << theWebServer.GetActiveWorker().numberOfReceivesCurrentConnection;
+  out << "c: " << global.server().NumConnectionsSoFar;
+  if (global.server().activeWorker != -1) {
+    out << "." << global.server().GetActiveWorker().numberOfReceivesCurrentConnection;
   }
   out << "] ";
   //<-abbreviating worker to w and connection to c to reduce the log size.
@@ -839,10 +837,10 @@ std::string logger::getStamp() {
   out
   << global.GetDateForLogFiles() << ", "
   << global.GetElapsedSeconds() << " s, ";
-  if (theWebServer.activeWorker != - 1) {
-    out << "w: " << theWebServer.activeWorker << ",";
+  if (global.server().activeWorker != - 1) {
+    out << "w: " << global.server().activeWorker << ",";
   }
-  out << " c: " << theWebServer.NumConnectionsSoFar << ". ";
+  out << " c: " << global.server().NumConnectionsSoFar << ". ";
   //<-abbreviating worker to w and connection to c to reduce the log size.
   return out.str();
 }

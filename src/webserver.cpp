@@ -17,7 +17,11 @@
 #include <sys/resource.h> //<- for setrlimit(...) function. Restricts the time the executable can run.
 
 static ProjectInformationInstance projectInfoInstanceWebServer(__FILE__, "Web server implementation.");
-WebServer theWebServer;
+
+WebServer& GlobalVariables::server() {
+  static WebServer theServer;
+  return theServer;
+}
 
 class SignalsInfrastructure {
 public:
@@ -355,20 +359,20 @@ const int WebServer::maxNumPendingConnections = 1000000;
 
 ProgressReportWebServer::ProgressReportWebServer(const std::string& inputStatus) {
   this->flagDeallocated = false;
-  this->indexProgressReport = theWebServer.theProgressReports.size;
+  this->indexProgressReport = global.server().theProgressReports.size;
   this->SetStatus(inputStatus);
 }
 
 ProgressReportWebServer::ProgressReportWebServer() {
   this->flagDeallocated = false;
-  this->indexProgressReport = theWebServer.theProgressReports.size;
+  this->indexProgressReport = global.server().theProgressReports.size;
 }
 
 ProgressReportWebServer::~ProgressReportWebServer() {
   if (!this->flagServerExists) {
     return;
   }
-  theWebServer.theProgressReports.SetSize(this->indexProgressReport);
+  global.server().theProgressReports.SetSize(this->indexProgressReport);
   this->flagDeallocated = true;
 }
 
@@ -380,24 +384,24 @@ void ProgressReportWebServer::SetStatus(const std::string& inputStatus) {
   if (!global.flagRunningBuiltInWebServer) {
     return;
   }
-  theWebServer.CheckConsistency();
+  global.server().CheckConsistency();
   MutexRecursiveWrapper& safetyFirst = global.MutexWebWorkerStaticFiasco;
   safetyFirst.LockMe();
-  if (this->indexProgressReport >= theWebServer.theProgressReports.size) {
-    theWebServer.theProgressReports.SetSize(this->indexProgressReport + 1);
+  if (this->indexProgressReport >= global.server().theProgressReports.size) {
+    global.server().theProgressReports.SetSize(this->indexProgressReport + 1);
   }
-  theWebServer.theProgressReports[this->indexProgressReport] = inputStatus;
+  global.server().theProgressReports[this->indexProgressReport] = inputStatus;
   std::stringstream toBePiped;
-  for (int i = 0; i < theWebServer.theProgressReports.size; i ++) {
-    if (theWebServer.theProgressReports[i] != "") {
-      toBePiped << "<br>" << theWebServer.theProgressReports[i];
+  for (int i = 0; i < global.server().theProgressReports.size; i ++) {
+    if (global.server().theProgressReports[i] != "") {
+      toBePiped << "<br>" << global.server().theProgressReports[i];
     }
   }
   safetyFirst.UnlockMe();
   if (!global.flagRunningBuiltInWebServer) {
     return;
   }
-  theWebServer.GetActiveWorker().pipeWorkerToWorkerStatus.WriteOnceAfterEmptying(toBePiped.str(), false, false);
+  global.server().GetActiveWorker().pipeWorkerToWorkerStatus.WriteOnceAfterEmptying(toBePiped.str(), false, false);
 }
 
 // get sockaddr, IPv4 or IPv6:
@@ -805,7 +809,7 @@ std::string WebWorker::GetHtmlHiddenInputs(bool includeUserName, bool includeAut
 }
 
 void WebWorker::WriteAfterTimeoutProgressStatic(const std::string& input) {
-  return theWebServer.GetActiveWorker().WriteAfterTimeoutProgress(input, false);
+  return global.server().GetActiveWorker().WriteAfterTimeoutProgress(input, false);
 }
 
 void WebWorker::WriteAfterTimeoutProgress(const std::string& input, bool forceFileWrite) {
@@ -1497,7 +1501,7 @@ void WebWorker::WriteAfterTimeoutPartTwo(
   MacroRegisterFunctionWithName("WebWorker::WriteAfterTimeoutPartTwo");
   std::stringstream commentsOnError;
   result[WebAPI::result::status] = status;
-  WebWorker& currentWorker = theWebServer.GetActiveWorker();
+  WebWorker& currentWorker = global.server().GetActiveWorker();
   result[WebAPI::result::workerIndex] = currentWorker.indexInParent;
   std::string toWrite = result.ToString(false, false, false, false);
   currentWorker.writingReportFile.Lock();
@@ -2206,7 +2210,7 @@ int WebWorker::ProcessCalculatorOnePageJS(bool appendBuildHash) {
 int WebWorker::ProcessApp(bool appendBuildHash) {
   MacroRegisterFunctionWithName("WebWorker::ProcessApp");
   this->SetHeaderOKNoContentLength("", "text/html");
-  if (theWebServer.RestartIsNeeded()) {
+  if (global.server().RestartIsNeeded()) {
     return 0;
   }
   return this->WriteToBody(WebAPIResponse::GetApp(appendBuildHash));
@@ -2215,7 +2219,7 @@ int WebWorker::ProcessApp(bool appendBuildHash) {
 int WebWorker::ProcessLoginUserInfo(const std::string& comments) {
   MacroRegisterFunctionWithName("WebWorker::ProcessLoginUserInfo");
   this->SetHeaderOKNoContentLength("");
-  if (theWebServer.RestartIsNeeded()) {
+  if (global.server().RestartIsNeeded()) {
     return 0;
   }
   return this->WriteToBodyJSON(WebAPIResponse::GetJSONUserInfo(comments));
@@ -2739,7 +2743,7 @@ int WebWorker::ServeClient() {
   if (!isNotModified) {
     comments << this->ToStringAddressRequest() << ": modified before login. ";
   }
-  if (theWebServer.addressStartsInterpretedAsCalculatorRequest.Contains(this->addressComputed)) {
+  if (global.server().addressStartsInterpretedAsCalculatorRequest.Contains(this->addressComputed)) {
     global.userCalculatorRequestType = this->addressComputed;
     std::string correctedRequest;
     if (StringRoutines::StringBeginsWith(global.userCalculatorRequestType, "/", &correctedRequest)) {
@@ -3167,11 +3171,11 @@ WebServer::~WebServer() {
 
 void WebServer::OutputShowIndicatorOnTimeoutStatic(const std::string& message) {
   MacroRegisterFunctionWithName("WebServer::OutputShowIndicatorOnTimeoutStatic");
-  theWebServer.GetActiveWorker().OutputShowIndicatorOnTimeout(message);
+  global.server().GetActiveWorker().OutputShowIndicatorOnTimeout(message);
 }
 
 void WebServer::FlushActiveWorker() {
-  theWebServer.GetActiveWorker().SendAllBytesWithHeaders();
+  global.server().GetActiveWorker().SendAllBytesWithHeaders();
 }
 
 WebServer::WebServer() {
@@ -3207,8 +3211,8 @@ void WebServer::Signal_SIGCHLD_handler(int s) {
   if (global.flagServerDetailedLog) {
     global << "Detail: webServer received SIGCHLD signal. " << logger::endL;
   }
-  theWebServer.flagReapingChildren = true;
-  theWebServer.ReapChildren();
+  global.server().flagReapingChildren = true;
+  global.server().ReapChildren();
 }
 
 void WebServer::ReapChildren() {
@@ -3243,11 +3247,11 @@ WebWorker& WebServer::GetActiveWorker() {
 
 void WebServer::SignalActiveWorkerDoneReleaseEverything() {
   MacroRegisterFunctionWithName("WebServer::SignalActiveWorkerDoneReleaseEverything");
-  if (theWebServer.activeWorker == - 1) {
+  if (global.server().activeWorker == - 1) {
     return;
   }
-  theWebServer.GetActiveWorker().SendAllAndWrapUp();
-  theWebServer.activeWorker = - 1;
+  global.server().GetActiveWorker().SendAllAndWrapUp();
+  global.server().activeWorker = - 1;
 }
 
 void WebServer::ReleaseActiveWorker() {
@@ -3260,7 +3264,7 @@ void WebServer::ReleaseActiveWorker() {
 }
 
 void WebServer::WorkerTimerPing(int64_t pingTime) {
-  if (theWebServer.activeWorker == - 1) {
+  if (global.server().activeWorker == - 1) {
     if (!global.flagComputationFinishedAllOutputSentClosing) {
       global.fatal << "WebServer::WorkerTimerPing called when the computation is not entirely complete. " << global.fatal;
     }
@@ -3268,7 +3272,7 @@ void WebServer::WorkerTimerPing(int64_t pingTime) {
   }
   std::stringstream outTimestream;
   outTimestream << pingTime;
-  theWebServer.GetActiveWorker().pipeWorkerToServerTimerPing.WriteOnceAfterEmptying(outTimestream.str(), false, false);
+  global.server().GetActiveWorker().pipeWorkerToServerTimerPing.WriteOnceAfterEmptying(outTimestream.str(), false, false);
 }
 
 void WebServer::ReleaseNonActiveWorkers() {
@@ -3951,7 +3955,7 @@ bool WebServer::initBindToPorts() {
     return false;
   }
   global << "Running at: " << logger::yellow << "http://localhost:" << this->portHTTP << logger::endL;
-  if (theWebServer.theTLS.flagBuiltInTLSAvailable) {
+  if (global.server().theTLS.flagBuiltInTLSAvailable) {
     if (!this->initBindToOnePort(this->portHTTPSBuiltIn, this->listeningSocketHTTPSBuiltIn)) {
       return false;
     }
@@ -4128,7 +4132,7 @@ void Listener::ComputeUserAddress() {
 }
 
 TransportLayerSecurity& TransportLayerSecurity::DefaultTLS_READ_ONLY() {
-  return theWebServer.theTLS;
+  return global.server().theTLS;
 }
 
 int WebServer::Run() {
@@ -4338,10 +4342,10 @@ int WebWorker::Run() {
   global.flagServerForkedIntoWorker = true;
   CreateTimerThread();
   // Check web worker indices are initialized properly:
-  theWebServer.GetActiveWorker();
+  global.server().GetActiveWorker();
   if (global.flagUsingSSLinCurrentConnection) {
     std::stringstream commentsOnFailure;
-    if (!theWebServer.SSLServerSideHandShake(&commentsOnFailure)) {
+    if (!global.server().SSLServerSideHandShake(&commentsOnFailure)) {
       global.flagUsingSSLinCurrentConnection = false;
       this->parent->SignalActiveWorkerDoneReleaseEverything();
       this->parent->ReleaseEverything();
@@ -4735,7 +4739,7 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv) {
     }
     WebServer::AnalyzeMainArgumentsTimeString(timeLimitString);
     if (doRestart) {
-      theWebServer.StopKillAll(true);
+      global.server().StopKillAll(true);
     }
     return;
   }
@@ -5064,13 +5068,13 @@ void GlobalVariables::ConfigurationProcess() {
     TransportLayerSecurity::flagBuiltInTLSAvailable = true;
   }
   if (global.configuration[Configuration::monitorPingTime].isIntegerFittingInInt(
-    &theWebServer.WebServerPingIntervalInSeconds
+    &global.server().WebServerPingIntervalInSeconds
   )) {
-    if (theWebServer.WebServerPingIntervalInSeconds < 0) {
-      theWebServer.WebServerPingIntervalInSeconds = 10;
+    if (global.server().WebServerPingIntervalInSeconds < 0) {
+      global.server().WebServerPingIntervalInSeconds = 10;
     }
   } else {
-    global.configuration[Configuration::monitorPingTime] = theWebServer.WebServerPingIntervalInSeconds;
+    global.configuration[Configuration::monitorPingTime] = global.server().WebServerPingIntervalInSeconds;
   }
   if (global.configuration[Configuration::gitRepository].theType == JSData::token::tokenString) {
     HtmlRoutines::gitRepository = global.configuration[Configuration::gitRepository].theString;
@@ -5099,16 +5103,16 @@ void GlobalVariables::ConfigurationProcess() {
 }
 
 void WebServer::CheckInstallation() {
-  theWebServer.CheckSystemInstallationOpenSSL();
-  theWebServer.CheckSystemInstallationMongoDB();
-  theWebServer.CheckMongoDBSetup();
-  theWebServer.CheckMathJaxSetup();
-  theWebServer.CheckFreecalcSetup();
+  global.server().CheckSystemInstallationOpenSSL();
+  global.server().CheckSystemInstallationMongoDB();
+  global.server().CheckMongoDBSetup();
+  global.server().CheckMathJaxSetup();
+  global.server().CheckFreecalcSetup();
 }
 
 int WebServer::main(int argc, char **argv) {
   global.InitThreadsExecutableStart();
-  // use of loggers forbidden before calling   theWebServer.AnalyzeMainArguments(...):
+  // use of loggers forbidden before calling global.server().AnalyzeMainArguments(...):
   // we need to initialize first the folder locations relative to the executable.
   MacroRegisterFunctionWithName("main");
   try {
@@ -5117,7 +5121,7 @@ int WebServer::main(int argc, char **argv) {
     // Initializes folder locations needed by logging facilities.
     FileOperations::InitializeFoldersSensitive();
     // Process executable arguments.
-    theWebServer.AnalyzeMainArguments(argc, argv);
+    global.server().AnalyzeMainArguments(argc, argv);
     global << logger::green << "Project base folder: "
     << logger::blue << global.PhysicalPathProjectBase
     << logger::endL;
@@ -5141,9 +5145,9 @@ int WebServer::main(int argc, char **argv) {
       global.millisecondsNoPingBeforeChildIsPresumedDead = - 1;
     }
     // Uses the configuration file.
-    // Calls again theWebServer.InitializeMainFoldersSensitive();
-    theWebServer.InitializeMainAll();
-    theWebServer.CheckMathJaxSetup();
+    // Calls again global.server().InitializeMainFoldersSensitive();
+    global.server().InitializeMainAll();
+    global.server().CheckMathJaxSetup();
     bool mathJaxPresent = FileOperations::FileExistsVirtual("/MathJax-2.7-latest/", false);
     if (!mathJaxPresent && global.flagRunningBuiltInWebServer) {
       global << logger::red << "MathJax not available. " << logger::endL;
@@ -5163,7 +5167,7 @@ int WebServer::main(int argc, char **argv) {
         << " seconds. " << logger::endL
         << logger::purple << "************************" << logger::endL;
       }
-      return theWebServer.Run();
+      return global.server().Run();
     } else if (global.flagRunningConsoleTest) {
       return mainTest(global.programArguments);
     } else if (global.flagRunningCommandLine) {
@@ -5231,13 +5235,13 @@ std::string WebAPIResponse::ToStringCalculatorArgumentsHumanReadable() {
   if (global.flagLoggedIn) {
     out << "\n<br>\nLogged in.";
   }
-  out << "\n<br>\nAddress:\n" << HtmlRoutines::ConvertStringToHtmlString(theWebServer.GetActiveWorker().addressComputed, true);
+  out << "\n<br>\nAddress:\n" << HtmlRoutines::ConvertStringToHtmlString(global.server().GetActiveWorker().addressComputed, true);
   out << "\n<br>\nRequest:\n" << global.userCalculatorRequestType;
   if (global.UserDefaultHasAdminRights()) {
     out << "\n<br>\n<b>User has admin rights</b>";
   }
-  if (theWebServer.RequiresLogin(
-    global.userCalculatorRequestType, theWebServer.GetActiveWorker().addressComputed
+  if (global.server().RequiresLogin(
+    global.userCalculatorRequestType, global.server().GetActiveWorker().addressComputed
   )) {
     out << "\n<br>\nAddress requires login. ";
   } else {
@@ -5254,9 +5258,9 @@ std::string WebAPIResponse::ToStringCalculatorArgumentsHumanReadable() {
   out << "\n<hr>\n";
   if (global.flagRunningBuiltInWebServer) {
     out << "Sent with max cache: "
-    << theWebServer.addressStartsSentWithCacheMaxAge.ToStringCommaDelimited()
+    << global.server().addressStartsSentWithCacheMaxAge.ToStringCommaDelimited()
     << "<hr>";
-    out << theWebServer.GetActiveWorker().ToStringMessageShort();
+    out << global.server().GetActiveWorker().ToStringMessageShort();
   }
   return out.str();
 }

@@ -360,8 +360,6 @@ public:
   static int mainCommandLine();
 };
 
-extern WebServer theWebServer;
-
 class ProgressReportWebServer {
   public:
   int indexProgressReport;

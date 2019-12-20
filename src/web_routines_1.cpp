@@ -106,15 +106,15 @@ void WebServerMonitor::Monitor(int pidServer) {
   this->pidServer = pidServer;
   MacroRegisterFunctionWithName("Monitor");
   int maxNumPingFailures = 3;
-  //warning: setting theWebServer.WebServerPingIntervalInSeconds to more than 1000
+  //warning: setting global.server().WebServerPingIntervalInSeconds to more than 1000
   //may overflow the variable int microsecondsToSleep.
-  //theWebServer.WebServerPingIntervalInSeconds=1000;
-  int microsecondsToSleep = 1000000 * theWebServer.WebServerPingIntervalInSeconds;//
-  if (theWebServer.WebServerPingIntervalInSeconds > 30) {
+  //global.server().WebServerPingIntervalInSeconds=1000;
+  int microsecondsToSleep = 1000000 * global.server().WebServerPingIntervalInSeconds;//
+  if (global.server().WebServerPingIntervalInSeconds > 30) {
     global << logger::red << "**********WARNING**************"
     << logger::endL
     << logger::red << " The ping interval: "
-    << theWebServer.WebServerPingIntervalInSeconds
+    << global.server().WebServerPingIntervalInSeconds
     << " is set to a large value. "
     << "Set the ping interval to less than 30 seconds to remove this message. " << logger::endL;
   }
@@ -179,7 +179,7 @@ void WebServerMonitor::Restart() {
   global << logger::red << "Terminating server with pid: " << this->pidServer << logger::endL;
   WebServer::TerminateProcessId(this->pidServer);
   global << logger::red << "Restarting monitor. " << this->pidServer << logger::endL;
-  theWebServer.StopKillAll(false);
+  global.server().StopKillAll(false);
 }
 
 WebCrawler::WebCrawler() {
@@ -445,7 +445,7 @@ void WebCrawler::FetchWebPage(std::stringstream* commentsOnFailure, std::strings
       }
     }
     this->FetchWebPagePart2(commentsOnFailure, commentsGeneral);
-    theWebServer.theTLS.RemoveLastSocket();
+    global.server().theTLS.RemoveLastSocket();
     close(this->theSocket);
     break;
   }
@@ -584,8 +584,8 @@ void WebCrawler::FetchWebPagePart2(
     this->bodyReceivedOutsideOfExpectedLength = this->bodyReceiveD.substr(static_cast<unsigned>(theSize));
     this->bodyReceiveD = this->bodyReceiveD.substr(0, static_cast<unsigned>(theSize));
   }
-  //if (!theWebServer.theSSLdata.SSLreadLoop
-  //    (10,theWebServer.theSSLdata.sslClient, secondPart, comments, comments, true))
+  //if (!global.server().theSSLdata.SSLreadLoop
+  //    (10,global.server().theSSLdata.sslClient, secondPart, comments, comments, true))
   //  return;
   //this->bodyReceived+=secondPart;
   if (commentsGeneral != nullptr) {
@@ -1041,15 +1041,15 @@ void GlobalVariables::WriteCrash(const JSData& out) {
 
   global << logger::red << "Crashing AFTER timeout!" << logger::endL;
 
-  theWebServer.GetActiveWorker().WriteAfterTimeoutJSON(
+  global.server().GetActiveWorker().WriteAfterTimeoutJSON(
     out, "crash", ""
   );
-  theWebServer.SignalActiveWorkerDoneReleaseEverything();
+  global.server().SignalActiveWorkerDoneReleaseEverything();
 }
 
 
 void GlobalVariables::WriteResponse(const JSData& out) {
-  WebWorker& theWorker = theWebServer.GetActiveWorker();
+  WebWorker& theWorker = global.server().GetActiveWorker();
   theWorker.SetHeaderOKNoContentLength("");
 
   theWorker.WriteToBodyJSON(out);

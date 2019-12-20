@@ -356,6 +356,7 @@ public:
 
   };
   CommentsCurrentConnection Comments;
+  void JoinAllThreads();
   void WriteResponse(const JSData& out);
   void WriteCrash(const JSData& out);
 

@@ -173,11 +173,14 @@ ThreadData::~ThreadData() {
 
 }
 
-GlobalVariables::~GlobalVariables() {
+void GlobalVariables::JoinAllThreads() {
   this->flagComputationFinishedAllOutputSentClosing = true;
   for (int i = 1; i < this->theThreads.size; i ++) {
     this->theThreads[i].join();
   }
+}
+
+GlobalVariables::~GlobalVariables() {
   this->flagDeallocated = true;
 }
 

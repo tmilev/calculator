@@ -12,8 +12,11 @@ bool Database::FallBack::FindOneFromSome(
   JSData& output,
   std::stringstream* commentsOnFailure
 ) {
-  if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "Database::FallBack::FindOneFromSome not implemented yet.";
+  for (int i = 0; i < findOrQueries.size; i ++) {
+    global << "DEBUG: Finding query: " << findOrQueries[i].ToJSON().ToString(false) << logger::endL;
+    if (this->FindOne(findOrQueries[i], output, commentsOnFailure)) {
+      return true;
+    }
   }
   return false;
 }
@@ -63,9 +66,9 @@ bool Database::FallBack::UpdateOneNoLocks(
     return false;
   }
   int index = - 1;
-  if (!this->FindIndexOneNoLocks(findQuery, index, commentsOnFailure)) {
+  if (!this->FindIndexOneNoLocksMinusOneOnNotFound(findQuery, index, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to element index. ";
+      *commentsOnFailure << "Failed to find one entry. ";
     }
     return false;
   }
@@ -97,13 +100,16 @@ bool Database::FallBack::FindOne(
 ) {
   MacroRegisterFunctionWithName("Database::FallBack::FindOne");
   MutexProcessLockGuard guardDB(this->access);
-  if (this->ReadAndIndexDatabase(commentsOnFailure)) {
+  if (!this->ReadAndIndexDatabase(commentsOnFailure)) {
+    global << "DEBUG:: failed to index DB!!!!!!!!!!!!!!!!!" << logger::endL;
     return false;
   }
   int index = - 1;
-  if (!this->FindIndexOneNoLocks(query, index, commentsOnFailure)) {
+  if (!this->FindIndexOneNoLocksMinusOneOnNotFound(query, index, commentsOnFailure)) {
+    global << "DEBUG:: find failed!!!!!!!!!!!!!!!!!" << logger::endL;
     return false;
   }
+  global << "DEBUG:: GOT TO HERE!!!!!!!!!!!!!!!!!" << logger::endL;
   if (index < 0) {
     return false;
   }
@@ -136,7 +142,7 @@ std::string Database::FallBack::ToStringIndices() const {
   return out.str();
 }
 
-bool Database::FallBack::FindIndexOneNoLocks(
+bool Database::FallBack::FindIndexOneNoLocksMinusOneOnNotFound(
   const QueryExact& query,
   int& output,
   std::stringstream* commentsOnNotFound
@@ -158,10 +164,17 @@ bool Database::FallBack::FindIndexOneNoLocks(
     return false;
   }
   Database::FallBack::Index& currentIndex = indices.GetValueCreate(key);
-  int currentLocationIndex = currentIndex.locations.GetIndex(query.value.ToString(false));
+  if (query.value.theType != JSData::token::tokenString) {
+    if (commentsOnNotFound != nullptr) {
+      *commentsOnNotFound << "At the moment, only string value queries are supported.";
+    }
+    return false;
+  }
+  int currentLocationIndex = currentIndex.locations.GetIndex(query.value.theString);
   if (currentLocationIndex == - 1) {
     if (commentsOnNotFound != nullptr ) {
-      *commentsOnNotFound << "Element not found. ";
+      *commentsOnNotFound << "Entry " << query.value.ToString(false) << " not found. " ;
+      *commentsOnNotFound << "DEBUG: keys present: " << currentIndex.locations.theKeys.ToStringCommaDelimited() << ". " ;
     }
     return true;
   }
@@ -242,7 +255,9 @@ std::string Database::FallBack::Index::collectionAndLabel() {
 
 bool Database::FallBack::ReadAndIndexDatabase(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("Database::FallBack::ReadAndIndexDatabase");
-  this->ReadDatabase(commentsOnFailure);
+  if (!this->ReadDatabase(commentsOnFailure)) {
+    return false;
+  }
   for (int i = 0; i < this->knownIndices.size; i ++) {
     this->indices.GetValueCreate(this->knownIndices[i]);
   }

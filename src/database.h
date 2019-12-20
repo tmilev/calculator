@@ -128,7 +128,11 @@ public:
       JSData& output,
       std::stringstream* commentsOnFailure
     );
-    bool FindIndexOneNoLocks(
+    // Return indicates query success / failure.
+    // When the element isn't found but otherwise there were
+    // no problems with the query, true will be returned with
+    // output set to - 1.
+    bool FindIndexOneNoLocksMinusOneOnNotFound(
       const QueryExact& query,
       int& output,
       std::stringstream* commentsOnNotFound

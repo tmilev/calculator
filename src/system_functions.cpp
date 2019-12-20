@@ -137,7 +137,6 @@ bool TimeoutThread::HandleComputationTimeout() {
     return false;
   }
   if (global.millisecondsReplyAfterComputation <= 0) {
-    global << "DEBUG: global.millisecondsReplyAfterComputation : non-positive!" << logger::endL;
     return false;
   }
   if (this->elapsedComputationTimeInMilliseconds <= 0) {
@@ -147,7 +146,6 @@ bool TimeoutThread::HandleComputationTimeout() {
     return false;
   }
   if (!global.theProgress.ReportAlloweD()) {
-    global << "DEBUG: report not allowed!" << logger::endL;
     return false;
   }
   MacroRegisterFunctionWithName("TimerThreadData::HandleComputationTimeout");
@@ -218,9 +216,7 @@ void TimeoutThread::Run() {
     if (this->HandleEverythingIsDone()) {
       break;
     }
-    // std::cout << "DEBUG: about to loop\n";
   }
-  std::cout << "DEBUG: timer thread exited.\n";
   global.CheckConsistency();
 }
 

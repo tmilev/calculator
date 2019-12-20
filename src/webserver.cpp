@@ -1791,7 +1791,7 @@ void WebWorker::WrapUpConnection() {
     global << "Detail: released. " << logger::endL;
   }
   global.flagComputationCompletE = true;
-  global.flagComputationFinishedAllOutputSentClosing = true;
+  global.JoinAllThreads();
 }
 
 void WebWorker::SendAllAndWrapUp() {
@@ -3266,7 +3266,7 @@ void WebServer::ReleaseActiveWorker() {
 void WebServer::WorkerTimerPing(int64_t pingTime) {
   if (global.server().activeWorker == - 1) {
     if (!global.flagComputationFinishedAllOutputSentClosing) {
-      global.fatal << "WebServer::WorkerTimerPing called when the computation is not entirely complete. " << global.fatal;
+      global.fatal << "No active worker yet the computation is not complete. " << global.fatal;
     }
     return;
   }

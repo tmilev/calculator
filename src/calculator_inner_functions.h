@@ -4,7 +4,7 @@
 #define vpfHeader6_2InnerFns
 #include "calculator_interface.h"
 
-static ProjectInformationInstance ProjectInfoVpf6_2Header(__FILE__, "Header, calculator built-in functions. ");
+static ProjectInformationInstance projectInfoCalculatorInnerFunctionsHeader(__FILE__, "Header, calculator built-in functions. ");
 
 
 class CalculatorFunctionsCrypto {

@@ -13,7 +13,7 @@
 #include <cmath>
 #include <cfloat>
 
-static ProjectInformationInstance ProjectInfoVpf5_1cpp(__FILE__, "Calculator built-in functions. ");
+static ProjectInformationInstance projectInfoCalculatorImplementation1CPP(__FILE__, "Calculator built-in functions. ");
 
 template<class Element>
 bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(

@@ -5,7 +5,7 @@
 #include "math_general.h"
 #include "math_extra_algebraic_numbers.h"
 
-static ProjectInformationInstance ProjectInfoVpf8cpp(__FILE__, "Math routines implementation. ");
+static ProjectInformationInstance projectInfoMathImplementation2CPP(__FILE__, "Math routines implementation. ");
 
 void LargeIntegerUnsigned::AssignString(const std::string& input) {
   if (input.size() < 10) {

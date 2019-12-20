@@ -6,7 +6,7 @@
 #include "web_api.h"
 #include "general_strings.h"
 
-static ProjectInformationInstance ProjectInfoCalculatorLaTeXRoutines(__FILE__, "LaTeX routines. ");
+static ProjectInformationInstance projectInfoCalculatorLaTeXRoutinesCPP(__FILE__, "LaTeX routines. ");
 
 bool LaTeXcrawler::IsInCrawlableFolder(const std::string& folderName, std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("LaTeXcrawler::IsInCrawlableFolder");

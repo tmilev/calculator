@@ -12,7 +12,7 @@
 #include <cmath>
 #include <cfloat>
 
-static ProjectInformationInstance ProjectInfoVpf6cpp(__FILE__, "Calculator parser, implementation. ");
+static ProjectInformationInstance projectInfoCalculatorParserCPP(__FILE__, "Calculator parser, implementation. ");
 
 Calculator::Calculator() {
   this->numOutputFileS = 0;

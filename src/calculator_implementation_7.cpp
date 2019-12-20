@@ -19,7 +19,7 @@
 #include "transport_layer_security.h"
 #include "string_constants.h"
 
-static ProjectInformationInstance ProjectInfoVpf6_3cpp(__FILE__, "Calculator built-in functions. ");
+static ProjectInformationInstance projectInfoCalculatorImplementation7CPP(__FILE__, "Calculator built-in functions. ");
 
 template <class theType>
 bool MathRoutines::GenerateVectorSpaceClosedWRTOperation(

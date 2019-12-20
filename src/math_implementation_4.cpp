@@ -11,7 +11,7 @@
 #include "system_functions_global_objects.h"
 #include "string_constants.h"
 
-static ProjectInformationInstance ProjectInfoVpf9_1cpp(__FILE__, "Math routines implementation. ");
+static ProjectInformationInstance projectInfoMathImplementation4CPP(__FILE__, "Math routines implementation. ");
 
 std::string UserCalculatorData::Roles::admin = "admin";
 std::string UserCalculatorData::Roles::student = "student";

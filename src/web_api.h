@@ -6,7 +6,7 @@
 #include "general_maps.h"
 #include "general_list_references.h"
 
-static ProjectInformationInstance ProjectInfoHeaderHtmlSnippets(__FILE__, "Html snippets header.");
+static ProjectInformationInstance projectInfoHtmlSnippetsHeader(__FILE__, "Html snippets header.");
 
 class JSData;
 

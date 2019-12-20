@@ -2,7 +2,7 @@
 #include "math_general.h"
 
 
-static ProjectInformationInstance ProjectInfoJSONTestCPP(__FILE__, "Unit tests, JSON.");
+static ProjectInformationInstance projectInfoJSONTestCPP(__FILE__, "Unit tests, JSON.");
 
 bool JSData::Test::All() {
   MacroRegisterFunctionWithName("JSData::Test::All");

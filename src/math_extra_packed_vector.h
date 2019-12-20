@@ -6,7 +6,7 @@
 #include "math_extra_vector_space.h"
 #include "math_extra_finite_groups_implementation.h"
 
-static ProjectInformationInstance vpfPackedVector(__FILE__, "Very small (RAM-wise) vectors for extreme computations with small built-in coefficients. ");
+static ProjectInformationInstance projectInfoMathExtraPackedVectorCPP(__FILE__, "Very small (RAM-wise) vectors for extreme computations with small built-in coefficients. ");
 
 template <typename scalar>
 class PackedVector {

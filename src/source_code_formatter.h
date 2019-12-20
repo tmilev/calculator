@@ -6,7 +6,7 @@
 #include "general_list_references.h"
 #include "general_maps.h"
 
-static ProjectInformationInstance ProjectInfoHeaderSourceCodeFormatterHeader(__FILE__, "Source code formatter header.");
+static ProjectInformationInstance projectInfoSourceCodeFormatterHeader(__FILE__, "Source code formatter header.");
 
 class CodeElement {
 public:

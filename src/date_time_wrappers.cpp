@@ -4,7 +4,7 @@
 #include "general_lists.h"
 #include "math_general.h"
 
-static ProjectInformationInstance ProjectInfoDateAndtimeWrappers(__FILE__, "Date and time wrapper class implementation. ");
+static ProjectInformationInstance projectInfoDateAndtimeWrappersCPP(__FILE__, "Date and time wrapper class implementation. ");
 
 TimeWrapper::TimeWrapper() {
   this->timeGM.tm_gmtoff = 0;

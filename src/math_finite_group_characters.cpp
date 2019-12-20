@@ -8,8 +8,6 @@
 #include "math_general_implementation.h"
 static ProjectInformationInstance ProjectInfoVpfCharacters(__FILE__, "Finite group characters sandbox. Work in progress by Thomas. ");
 
-extern FormatExpressions consoleFormat;
-
 template<>
 List<ElementWeylGroup>::OrderLeftGreaterThanRight FormatExpressions::GetMonOrder<ElementWeylGroup>() {
   return nullptr;

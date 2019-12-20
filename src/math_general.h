@@ -6114,7 +6114,6 @@ public:
   int NumTotalReduced;
   int NumProcessedForVPFfractions;
   int NumRunsReduceMonomialByMonomial;
-  //GlobalVariables global;
   static int NumProcessedForVPFMonomialsTotal;
   static std::fstream ComputedContributionsList;
   static const int MaxReadFileBufferSize = 33554432; //= 32 MB of read buffer size

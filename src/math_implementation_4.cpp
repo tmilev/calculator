@@ -43,8 +43,6 @@ void GlobalVariables::Crasher::FirstRun() {
   this->flagCrashInitiateD = true;
 }
 
-extern Calculator* theParser;
-
 GlobalVariables::Crasher& GlobalVariables::Crasher::operator<<(const GlobalVariables::Crasher& dummyCrasherSignalsActualCrash) {
   (void) dummyCrasherSignalsActualCrash;
   this->FirstRun();
@@ -89,9 +87,9 @@ GlobalVariables::Crasher& GlobalVariables::Crasher::operator<<(const GlobalVaria
     }
   }
   if (!global.flagNotAllocated) {
-    if (theParser != nullptr) {
-      if (theParser->Comments.str() != "") {
-        this->crashReportHtml << "<hr>Additional comments follow. " << theParser->Comments.str();
+    if (!global.calculator.IsZeroPointer()) {
+      if (global.calculator.GetElement().Comments.str() != "") {
+        this->crashReportHtml << "<hr>Additional comments follow. " << global.calculator.GetElement().Comments.str();
       }
     }
     std::fstream theFile;

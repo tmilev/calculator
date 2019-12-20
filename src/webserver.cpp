@@ -835,7 +835,7 @@ void WebWorker::WriteAfterTimeoutProgress(const std::string& input, bool forceFi
 void WebWorker::WriteAfterTimeoutResult() {
   MacroRegisterFunctionWithName("WebWorker::WriteComputationResult");
   WebWorker::WriteAfterTimeoutJSON(
-    theParser->ToJSONOutputAndSpecials(),
+    global.calculator.GetElement().ToJSONOutputAndSpecials(),
     "finished",
     global.RelativePhysicalNameOptionalResult
   );
@@ -1298,7 +1298,7 @@ void WebWorker::SanitizeVirtualFileName() {
 
 int WebWorker::ProcessCalculatorExamplesJSON() {
   MacroRegisterFunctionWithName("WebWorker::ProcessCalculatorExamplesJSON");
-  global.WriteResponse(theParser->FunctionHandlersJSON());
+  global.WriteResponse(global.calculator.GetElement().FunctionHandlersJSON());
   return 0;
 }
 
@@ -2133,21 +2133,23 @@ int WebWorker::ProcessCompute() {
     global.theProgress.flagBanProcessMonitoring = true;
     global.theProgress.flagReportAlloweD = false;
   }
+  Calculator& theCalculator = global.calculator.GetElement();
 
-  theParser->inputString = HtmlRoutines::ConvertURLStringToNormal(
+  theCalculator.inputString = HtmlRoutines::ConvertURLStringToNormal(
     global.GetWebInput(WebAPI::request::calculatorInput),
     false
   );
   global.WebServerReturnDisplayIndicatorCloseConnection = WebServer::OutputShowIndicatorOnTimeoutStatic;
   global.initOutputReportAndCrashFileNames(
-    HtmlRoutines::ConvertStringToURLString(theParser->inputString, false), theParser->inputString
+    HtmlRoutines::ConvertStringToURLString(theCalculator.inputString, false),
+    theCalculator.inputString
   );
   ////////////////////////////////////////////////
   //  the initialization below moved to the start of the web server!
   //  theParser.init();
   ////////////////////////////////////////////////
   global.theProgress.flagReportAlloweD = true;
-  theParser->Evaluate(theParser->inputString);
+  theCalculator.Evaluate(theCalculator.inputString);
   global.theProgress.flagReportAlloweD = false;
   if (global.flagRunningBuiltInWebServer) {
     if (global.theProgress.flagTimedOut) {
@@ -2156,7 +2158,7 @@ int WebWorker::ProcessCompute() {
     }
   }
   JSData result;
-  result = theParser->ToJSONOutputAndSpecials();
+  result = theCalculator.ToJSONOutputAndSpecials();
   this->WriteToBodyJSON(result);
   global.flagComputationCompletE = true;
   return 0;
@@ -4159,19 +4161,16 @@ int WebServer::Run() {
     }
   }
   this->initializeSignals();
-  // This object will delete theParser when out of scope:
-  this->theCalculator.theObjectPointer = &theParser;
-  this->theCalculator.RenewObject();
-  theParser->initialize();
+  global.calculator.GetElement().initialize();
   // cannot call initializeMutex here: not before we execute Fork();
-  theParser->ComputeAutoCompleteKeyWords();
-  theParser->WriteAutoCompleteKeyWordsToFile();
+  global.calculator.GetElement().ComputeAutoCompleteKeyWords();
+  global.calculator.GetElement().WriteAutoCompleteKeyWordsToFile();
   this->WriteVersionJSFile();
   // global.WriteSourceCodeFilesJS();
   global.initModifiableDatabaseFields();
   HtmlRoutines::LoadStrings();
   this->theTLS.initializeNonThreadSafeOnFirstCall(true);
-  theParser->flagShowCalculatorExamples = false;
+  global.calculator.GetElement().flagShowCalculatorExamples = false;
   if (!this->initPrepareWebServerALL()) {
     return 1;
   }
@@ -4377,8 +4376,8 @@ int WebWorker::Run() {
       break;
     }
     if (this->numberOfReceivesCurrentConnection > 0) {
-      this->parent->theCalculator.RenewObject();
-      theParser->initialize();
+      global.calculator.FreeMemory();
+      global.calculator.GetElement().initialize();
       global.Comments.resetComments();
       global << logger::blue << "Created new calculator for connection: "
       << this->numberOfReceivesCurrentConnection << logger::endL;
@@ -5180,22 +5179,21 @@ int WebServer::main(int argc, char **argv) {
 int WebServer::mainCommandLine() {
   MacroRegisterFunctionWithName("main_command_input");
   global.IndicatorStringOutputFunction = HtmlRoutines::MakeStdCoutReport;
-  PointerObjectDestroyer<Calculator> theDestroyer(theParser);
-  theDestroyer.RenewObject();
-  theParser->initialize();
+  Calculator& theCalculator = global.calculator.GetElement();
+  theCalculator.initialize();
   if (global.programArguments.size > 1) {
     for (int i = 1; i < global.programArguments.size; i ++) {
-      theParser->inputString += global.programArguments[i];
+      theCalculator.inputString += global.programArguments[i];
       if (i != global.programArguments.size - 1) {
-        theParser->inputString += " ";
+        theCalculator.inputString += " ";
       }
     }
   } else {
     global << "Input: " << logger::yellow;
-    std::cin >> theParser->inputString;
+    std::cin >> theCalculator.inputString;
   }
-  theParser->flagUseHtml = false;
-  theParser->Evaluate(theParser->inputString);
+  theCalculator.flagUseHtml = false;
+  theCalculator.Evaluate(theCalculator.inputString);
   std::fstream outputFile;
   std::string outputFileName;
   if (!FileOperations::GetPhysicalFileNameFromVirtual(
@@ -5206,8 +5204,8 @@ int WebServer::mainCommandLine() {
   FileOperations::OpenFileCreateIfNotPresentVirtual(
     outputFile, "output/outputFileCommandLine.html", false, true, false
   );
-  global << theParser->outputString;
-  outputFile << theParser->outputString;
+  global << theCalculator.outputString;
+  outputFile << theCalculator.outputString;
   global << "\nTotal running time: " << logger::blue << global.GetElapsedMilliseconds() << " ms. "
   << logger::endL
   << "Output written in: " << logger::green << outputFileName << logger::endL << "\n";

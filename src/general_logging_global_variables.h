@@ -89,7 +89,7 @@ class logger {
 };
 
 // All global objects except instances of ProjectInformationInstance are
-// go be members of variable:
+// to be members of variable:
 //
 // GlobalVariables global.
 //
@@ -167,6 +167,8 @@ public:
   void (*WebServerReturnDisplayIndicatorCloseConnection)(const std::string& message);
   void (*WebServerTimerPing)(int64_t pingTime);
   //  double MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit;
+  MemorySaving<Calculator> calculator;
+
   int64_t millisecondOffset;
   int64_t millisecondsMaxComputation;
   int64_t millisecondsNoPingBeforeChildIsPresumedDead;

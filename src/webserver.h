@@ -261,7 +261,6 @@ public:
   long long NumSuccessfulSelectsSoFar;
   bool flagReapingChildren;
   TransportLayerSecurity theTLS;
-  PointerObjectDestroyer<Calculator> theCalculator;
   MonomialCollection<MonomialWrapper<std::string, MathRoutines::HashString>, LargeInteger> currentlyConnectedAddresses;
   std::string portHTTP;
   std::string portHTTPSOpenSSL;

@@ -15,9 +15,6 @@ static ProjectInformationInstance projectInfoInstanceCalculatorGlobalAndSystemHe
 
 class Calculator;
 
-extern FormatExpressions consoleFormat;
-extern Calculator* theParser;
-
 extern int GetElapsedMilliseconds();
 extern int CallSystemWrapperNoOutput(const std::string& theCommand);
 extern std::string CallSystemWrapperReturnStandardOutput(const std::string& theCommand);

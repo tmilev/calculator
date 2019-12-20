@@ -492,36 +492,6 @@ public:
   int outputHeight;
 };
 
-// This object wraps a regular pointer
-// and ensures the regular pointer is deleted
-// when the object goes out of scope.
-template <class Object>
-class PointerObjectDestroyer {
-  public:
-  Object** theObjectPointer;
-
-  void RenewObject() {
-    if (this->theObjectPointer == 0) {
-      fatalCrash("Unexpeced: uninitialized object pointer. ");
-    }
-    delete *(this->theObjectPointer);
-    *(this->theObjectPointer) = nullptr;
-    *(this->theObjectPointer) = new Object;
-  }
-  PointerObjectDestroyer() {
-    this->theObjectPointer = nullptr;
-  }
-  PointerObjectDestroyer(Object*& inputObject): theObjectPointer(&inputObject) {
-  }
-  ~PointerObjectDestroyer() {
-    if (this->theObjectPointer == nullptr) {
-      return;
-    }
-    delete *(this->theObjectPointer);
-    *(this->theObjectPointer) = nullptr;
-  }
-};
-
 template <typename basicType>
 class StateMaintainer {
 public:

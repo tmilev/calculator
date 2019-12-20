@@ -1235,7 +1235,6 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
   SemisimpleLieAlgebra& theAlgebrA = *this->owner;
   WeylGroupData& theWeyl = theAlgebrA.theWeyl;
   std::stringstream out;
-  GlobalVariables global;
   out << "<br>Semisimple Lie algebra acting on generalized Verma module: " << theAlgebrA.ToStringLieAlgebraName() << ".";
   out << "<br>Parabolic selection: " << this->parabolicSelectionNonSelectedAreElementsLevi.ToString();
   out << "<br>Highest weight of Generalized Verma module in fundamental coordinates: "

@@ -40,10 +40,6 @@ std::string GlobalVariables::GetTimeLocal() {
   return now.ToStringLocal();
 }
 
-
-Calculator* theParser = nullptr;
-FormatExpressions consoleFormat;
-
 void InitializeGlobalObjects() {
   global.logs.logType = GlobalVariables::LogData::type::server;
   global.flagIsChildProcess = false;
@@ -52,8 +48,6 @@ void InitializeGlobalObjects() {
   global.pointerCallSystemNoOutput = &CallSystemWrapperNoOutput;
   global.pointerCallSystemWithOutput = &CallSystemWrapperReturnStandardOutput;
   global.pointerCallChDir = &CallChDirWrapper;
-  consoleFormat.flagUseHTML = false;
-  consoleFormat.flagUseLatex = false;
 }
 
 void HtmlRoutines::MakeReportIndicatorFile(const std::string& input) {

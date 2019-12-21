@@ -707,9 +707,11 @@ Page.prototype.sectionSelect = function(sectionNumber) {
   this.storage.variables.currentSectionComputed.setAndStore(sectionNumber);
   this.user.sectionComputed = this.user.sectionsTaught[sectionNumber];
   var deadlineSpans = document.getElementsByClassName(ids.domElements.classSpanDeadlineContainer);
-  for (var counterDeadlines = 0; counterDeadlines < deadlineSpans.length; counterDeadlines ++) {
-    var currentDeadlineSpan = deadlineSpans[counterDeadlines];
-    var currentDeadlineId = currentDeadlineSpan.id.substr(ids.stringResources.prefixDeadlineContainer.length);
+  for (var i = 0; i < deadlineSpans.length; i ++) {
+    var currentDeadlineSpan = deadlineSpans[i];
+    var currentDeadlineId = currentDeadlineSpan.id.substr(
+      ids.stringResources.prefixDeadlineContainer.length
+    );
     var currentProblem = problemPage.allProblems[currentDeadlineId];
     if (currentProblem === undefined) {
       continue;

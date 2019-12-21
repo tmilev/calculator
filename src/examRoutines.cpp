@@ -1460,7 +1460,8 @@ std::string CalculatorHTML::GetDeadlineNoInheritance(const std::string& id) {
   MacroRegisterFunctionWithName("CalculatorHTML::GetDeadlineNoInheritance");
   (void) id;
   if (!global.flagDatabaseCompiled) {
-    return "Database not present. ";
+    // deadline not present.
+    return "";
   }
   if (!this->currentUseR.theProblemData.Contains(id)) {
     return "";

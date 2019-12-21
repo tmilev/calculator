@@ -27,7 +27,7 @@ bool Database::FallBack::UpdateOne(
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("DatabaseFallback::UpdateOneFromQueryString");
-  global << "DEBUG: Inside update one." << logger::endL;
+  global << logger::green << "DEBUG: Inside update one." << logger::endL;
   if (!global.flagDatabaseUseFallback) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
@@ -42,6 +42,7 @@ bool Database::FallBack::UpdateOne(
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to read and index database. ";
     }
+    global << "Failed to read and index database. " << logger::endL;
     return false;
   }
   if (!this->UpdateOneNoLocks(findQuery, dataToMerge, commentsOnFailure)) {
@@ -62,6 +63,7 @@ bool Database::FallBack::UpdateOneNoLocks(
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("Database::FallBack::UpdateOneNoLocks");
+  global << "DEBUG: inside update one no locks!!! " << findQuery.ToJSON() << logger::endL;
   if (!this->HasCollection(findQuery.collection, commentsOnFailure)) {
     return false;
   }
@@ -78,6 +80,7 @@ bool Database::FallBack::UpdateOneNoLocks(
     incoming.theType = JSData::token::tokenObject;
     this->reader[findQuery.collection].theList.AddOnTop(incoming);
   }
+  global << "DEBUG: about to modify!!!" << logger::endL;
   JSData& modified = this->reader[findQuery.collection][index];
   if (dataToMerge.theType != JSData::token::tokenObject) {
     if (commentsOnFailure != nullptr) {
@@ -89,6 +92,7 @@ bool Database::FallBack::UpdateOneNoLocks(
   bool result = modified.MergeInMe(dataToMerge, commentsOnFailure);
   if (!result && commentsOnFailure != nullptr) {
     *commentsOnFailure << "Merge failed. ";
+    global << "DEBUG: Merge failed!!!" << logger::endL;
   }
   return result;
 }
@@ -256,6 +260,7 @@ std::string Database::FallBack::Index::collectionAndLabel() {
 bool Database::FallBack::ReadAndIndexDatabase(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("Database::FallBack::ReadAndIndexDatabase");
   if (!this->ReadDatabase(commentsOnFailure)) {
+    global << "DEBUG: failed to read database. " << logger::endL;
     return false;
   }
   for (int i = 0; i < this->knownIndices.size; i ++) {
@@ -309,7 +314,9 @@ bool Database::FallBack::ReadDatabase(std::stringstream* commentsOnFailure) {
       false,
       commentsOnFailure
     )) {
-      return false;
+      global << logger::green << "Fallback database file does not exist. Creating ..." << logger::endL;
+      this->reader.theType = JSData::token::tokenObject;
+      return true;
     }
   }
   return this->reader.readstring(theDatabase, commentsOnFailure);

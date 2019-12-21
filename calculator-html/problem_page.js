@@ -985,33 +985,39 @@ var linkSpecs = {
   slidesProjector: { 
     request: pathnames.urlFields.requests.slidesFromSource,
     name: "Slides",
+    extension: ".pdf",
     options: "layout=projector&",
   }, 
   slidesPrintable: {
     request: pathnames.urlFields.requests.slidesFromSource,
     name: "Printable",
+    extension: ".pdf",
     options: "layout=printable&",
   }, 
   slidesTex: {
     request: pathnames.urlFields.requests.sourceSlides,
     name: ".tex",
+    extension: ".tex",
     options: "",
     download: true,
     adminView: true,
   }, 
   homeworkWithAnswers: {
     request: pathnames.urlFields.requests.homeworkFromSource,
+    extension: ".pdf",
     name: "HW",
     options: "answerKey=true&",
   }, 
   homeworkNoAnswers: {
     request: pathnames.urlFields.requests.homeworkFromSource,
     name: "HW+answ.",
+    extension: ".pdf",
     options: "answerKey=false&",
   }, 
   homeworkTex: {
     request: pathnames.urlFields.requests.sourceHomework,
     name: ".tex",
+    extension: ".pdf",
     options: "",
     download: true,
     adminView: true,
@@ -1020,7 +1026,7 @@ var linkSpecs = {
 
 /** @returns{HTMLElement} */
 Problem.prototype.getLinkFromSpec = function(
-  /**@type {{request: string, name: string, options: string, download: boolean}} */
+  /**@type {{request: string, name: string, extension: string, options: string, download: boolean}} */
   linkSpec, 
   /**@type {string} */
   query
@@ -1037,7 +1043,11 @@ Problem.prototype.getLinkFromSpec = function(
   var result = document.createElement("a");
   result.className = "slidesLink";
   result.href = href;
-  result.download = `${convertStringToLaTeXFileName(this.title)}.tex`;
+  var extension = linkSpec.extension;
+  if (extension === undefined || extension === null) {
+    extension = "";
+  }
+  result.download = `${convertStringToLaTeXFileName(this.title)}${extension}`;
   result.target = "_blank";
   result.innerHTML = linkSpec.name;
   return result;

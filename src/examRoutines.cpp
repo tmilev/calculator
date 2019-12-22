@@ -681,7 +681,7 @@ bool CalculatorHtmlFunctions::innerInterpretProblemGiveUp(
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerInterpretProblemGiveUp");
   (void) input;
   return output.AssignValue(
-    WebAPIResponse::GetAnswerOnGiveUp(global.GetWebInput("randomSeed")), theCommands
+    WebAPIResponse::GetAnswerOnGiveUp(global.GetWebInput("randomSeed")).ToString(false), theCommands
   );
 }
 

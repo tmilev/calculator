@@ -320,7 +320,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Gives the predefined answer to a problem. First argument must be a string with the problem. "
     "The second argument must be the id of the answer. ",
     "ProblemGiveUp(LoadFileIntoString("
-    "\"problems/default/Functions-composing-fractional-linear-1.html\"), AlgebraAnswer)",
+    "\"problems/Functions-composing-fractional-linear-1.html\"), AlgebraAnswer)",
     true,
     false,
     "CalculatorHtmlFunctions::innerInterpretProblemGiveUp",
@@ -378,7 +378,10 @@ void Calculator::initPredefinedInnerFunctions() {
     true,
     false,
     "CalculatorFunctionsGeneral::innerTestIndicator",
-    "TestCalculatorIndicator"
+    "TestCalculatorIndicator",
+    false,
+    "",
+    true
   );
   this->AddOperationInnerHandler(
     "TestTopCommand",
@@ -401,7 +404,10 @@ void Calculator::initPredefinedInnerFunctions() {
     true,
     false,
     "CalculatorFunctionsGeneral::innerCrash",
-    "Crash"
+    "Crash",
+    false,
+    "",
+    true
   );
   this->AddOperationInnerHandler(
     "CrashListOutOfBounds",
@@ -412,7 +418,10 @@ void Calculator::initPredefinedInnerFunctions() {
     true,
     false,
     "CalculatorFunctionsGeneral::innerCrashByListOutOfBounds",
-    "CrashListOutOfBounds"
+    "CrashListOutOfBounds",
+    false,
+    "",
+    true
   );
   this->AddOperationInnerHandler(
     "CrashVectorOutOfBounds",
@@ -424,7 +433,10 @@ void Calculator::initPredefinedInnerFunctions() {
     true,
     false,
     "CalculatorFunctionsGeneral::innerCrashByVectorOutOfBounds",
-    "CrashVectorOutOfBounds"
+    "CrashVectorOutOfBounds",
+    false,
+    "",
+    true
   );
   this->AddOperationInnerHandler(
     "PlotExpressionTree",
@@ -983,7 +995,10 @@ void Calculator::initPredefinedInnerFunctions() {
     true,
     false,
     "CalculatorFunctionsGeneral::innerGenerateRandomPrime",
-    "GenerateRandomPrime"
+    "GenerateRandomPrime",
+    false,
+    "",
+    true
   );
 
   this->AddOperationInnerHandler(
@@ -1176,7 +1191,9 @@ void Calculator::initPredefinedInnerFunctions() {
     false,
     "Calculator::innerFormatCPPSourceCode",
     "FormatCPPCode",
-    false
+    false,
+    "",
+    true
   );
   this->AddOperationInnerHandler(
     "FormatCPPDirectory",
@@ -1188,7 +1205,9 @@ void Calculator::initPredefinedInnerFunctions() {
     false,
     "Calculator::innerFormatCPPDirectory",
     "FormatCPPDirectory",
-    false
+    false,
+    "",
+    true
   );
 
   this->AddOperationInnerHandler(
@@ -1202,6 +1221,8 @@ void Calculator::initPredefinedInnerFunctions() {
     false,
     "Calculator::innerAutomatedTest",
     "AutomatedTest",
+    true,
+    "",
     true
   );
   this->AddOperationInnerHandler(
@@ -6698,7 +6719,8 @@ void Calculator::initPredefinedStandardOperations() {
     true,
     true,
     "CalculatorFunctionsWeylGroup::innerTensorAndDecomposeWeylReps",
-    "TensorAndDecomposeWeylGroupRepresentations"
+    "TensorAndDecomposeWeylGroupRepresentations",
+    true
   );
   this->AddOperationInnerHandler(
     "*",
@@ -6739,7 +6761,8 @@ void Calculator::initPredefinedStandardOperations() {
     "CalculatorFunctionsGeneral::outerCommuteConstants",
     "CommuteConstants",
     false,
-    ""
+    "",
+    false
   );
   this->AddOperationHandler(
     "*",
@@ -6753,7 +6776,8 @@ void Calculator::initPredefinedStandardOperations() {
     "CalculatorFunctionsGeneral::outerMergeConstantRadicals",
     "MergeConstantRadicals",
     false,
-    ""
+    "",
+    false
   );
   this->AddOperationOuterHandler(
     "*",
@@ -7501,7 +7525,8 @@ void Calculator::initPredefinedStandardOperations() {
     "CalculatorFunctionsGeneral::innerPowerAnyToZero",
     "PowerAnytoZero",
     false,
-    ""
+    "",
+    false
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "^",
@@ -7704,8 +7729,10 @@ void Calculator::initPredefinedStandardOperations() {
     true,
     false,
     "CalculatorFunctionsGeneral::innerIntegralUpperBound",
-    "OperatorBoundsSuperscript", false,
-    ""
+    "OperatorBoundsSuperscript",
+    false,
+    "",
+    false
   );
   this->AddOperationInnerHandler(
     "_",
@@ -8342,6 +8369,7 @@ void Calculator::initAtomsNonCacheable() {
   this->atomsThatMustNotBeCached.SetExpectedSize(30);
   this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("RandomInteger");
   this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("SelectAtRandom");
+  this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("GenerateRandomPrime");
   this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("TurnOffApproximations");
   this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("TurnOnApproximations");
 //  this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("PrintRuleStack");

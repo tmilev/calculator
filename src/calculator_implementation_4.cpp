@@ -8,6 +8,7 @@
 #include "math_extra_modules_semisimple_Lie_algebras_implementation.h"
 #include "math_extra_semisimple_Lie_algebras_implementation.h"
 #include "math_extra_finite_groups_implementation.h"
+#include "string_constants.h"
 
 #include <cmath>
 #include <cfloat>
@@ -2037,7 +2038,8 @@ void Calculator::AddOperationBinaryInnerHandlerWithTypes(
   bool visible,
   bool experimental,
   const std::string& inputAdditionalIdentifier,
-  const std::string& inputCalculatorIdentifier
+  const std::string& inputCalculatorIdentifier,
+  bool dontTestAutomatically
 ) {
   int indexOp = this->theAtoms.GetIndex(theOpName);
   if (indexOp == - 1) {
@@ -2057,7 +2059,10 @@ void Calculator::AddOperationBinaryInnerHandlerWithTypes(
     true,
     visible,
     experimental,
-    true
+    true,
+    false,
+    - 1,
+    dontTestAutomatically
   );
   innerFunction.theArgumentTypes.reset(*this, 2);
   innerFunction.theArgumentTypes.AddChildAtomOnTop(leftType);
@@ -2102,24 +2107,40 @@ void Calculator::AddOperationOuterHandler(
   const std::string& inputAdditionalIdentifier,
   const std::string& inputCalculatorIdentifier,
   bool inputDisabledByDefault,
-  const std::string& parentOpThatBansHandler
+  const std::string& parentOpThatBansHandler,
+  bool dontTestAutomatically
 ) {
   this->AddOperationHandler(
-    theOpName, outerHandler, opArgumentListIgnoredForTheTimeBeing, opDescription,
-    opExample, false, visible, experimental, inputAdditionalIdentifier,
-    inputCalculatorIdentifier, inputDisabledByDefault, parentOpThatBansHandler
+    theOpName,
+    outerHandler,
+    opArgumentListIgnoredForTheTimeBeing,
+    opDescription,
+    opExample,
+    false,
+    visible,
+    experimental,
+    inputAdditionalIdentifier,
+    inputCalculatorIdentifier,
+    inputDisabledByDefault,
+    parentOpThatBansHandler,
+    dontTestAutomatically
   );
 }
 
 void Calculator::AddOperationHandler(
-  const std::string& theOpName, Expression::FunctionAddress handler,
+  const std::string& theOpName,
+  Expression::FunctionAddress handler,
   const std::string& opArgumentListIgnoredForTheTimeBeing,
   const std::string& opDescription,
-  const std::string& opExample, bool isInner, bool visible,
-  bool experimental, const std::string& inputAdditionalIdentifier,
+  const std::string& opExample,
+  bool isInner,
+  bool visible,
+  bool experimental,
+  const std::string& inputAdditionalIdentifier,
   const std::string& inputCalculatorIdentifier,
   bool inputDisabledByDefault,
-  const std::string& parentOpThatBansHandler
+  const std::string& parentOpThatBansHandler,
+  bool dontTestAutomatically
 ) {
   int indexOp = this->theAtoms.GetIndex(theOpName);
   int indexParentOpThatBansHandler = - 1;
@@ -2148,8 +2169,12 @@ void Calculator::AddOperationHandler(
     experimental,
     false,
     inputDisabledByDefault,
-    indexParentOpThatBansHandler
+    indexParentOpThatBansHandler,
+    dontTestAutomatically
   );
+  if (theFun.theFunction == nullptr || theFun.owner == nullptr) {
+    global.fatal << "Function not initialized properly. " << global.fatal;
+  }
   theFun.additionalIdentifier = inputAdditionalIdentifier;
   theFun.calculatorIdentifier = inputCalculatorIdentifier;
 
@@ -2207,9 +2232,7 @@ void Calculator::AddOperationComposite(
 std::string Calculator::ElementToStringNonBoundVars() {
   std::stringstream out;
   std::string openTag1 = "<span style =\"color:#0000FF\">";
-  std::string closeTag1 ="</span>";
-  std::string openTag2 = "<span style =\"color:#FF0000\">";
-  std::string closeTag2 = "</span>";
+  std::string closeTag1 = "</span>";
   out << "<br>\n" << this->theAtoms.size << " atoms " << " (= " << this->NumPredefinedAtoms << " predefined atoms+ "
   << this->theAtoms.size - this->NumPredefinedAtoms << " user-or-run-time defined). <br>Predefined: \n<br>\n";
   for (int i = 0; i < this->theAtoms.size; i ++) {
@@ -2302,7 +2325,7 @@ JSData Function::ToJSON() const {
   JSData result;
   result.theType = JSData::token::tokenObject;
   if (this->owner == nullptr) {
-    result["error"] = "bad_owner";
+    result[WebAPI::result::error] = "bad_owner";
     return result;
   }
   if (this->flagIamVisible) {

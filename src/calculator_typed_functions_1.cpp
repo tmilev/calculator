@@ -12,7 +12,9 @@
 
 static ProjectInformationInstance projectInfoCalculatorTypedFunctionsCPP(__FILE__, "Calculator inner binary typed functions. ");
 
-bool Calculator::innerOperationBinary(Calculator& theCommands, const Expression& input, Expression& output, int theOp) {
+bool Calculator::innerOperationBinary(
+  Calculator& theCommands, const Expression& input, Expression& output, int theOp
+) {
   for (int i = 0; i < theCommands.FunctionHandlers[theOp].size; i ++) {
     if (theCommands.FunctionHandlers[theOp][i].inputFitsMyInnerType(input)) {
       if (theCommands.FunctionHandlers[theOp][i].theFunction(theCommands, input, output)) {
@@ -23,7 +25,9 @@ bool Calculator::innerOperationBinary(Calculator& theCommands, const Expression&
   return false;
 }
 
-bool Calculator::outerExtractBaseMultiplication(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::outerExtractBaseMultiplication(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("Calculator::outerExtractBaseMultiplication");
   if (!input.StartsWith(theCommands.opTimes(), 3)) {
@@ -180,7 +184,9 @@ bool CalculatorFunctionsBinaryOps::innerDivideEltZmodPorRatByEltZmodPorRat(
   return false;
 }
 
-bool CalculatorFunctionsBinaryOps::innerAddRatToRat(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsBinaryOps::innerAddRatToRat(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddRatToRat");
   if (input.size() != 3) {
     return false;
@@ -547,11 +553,6 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(
   if (!inputConverted[1].ConvertToType<ElementUniversalEnveloping<RationalFunctionOld> >(leftE)) {
     return false;
   }
-  static bool theGhostHasAppeared = false;
-  if (!theGhostHasAppeared) {
-    theCommands << "Ere I am J.H. ... The ghost in the machine...<br>";
-    theGhostHasAppeared = true;
-  }
   const ElementTensorsGeneralizedVermas<RationalFunctionOld>& rightEltETGVM =
   inputConverted[2].GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >();
   ElementTensorsGeneralizedVermas<RationalFunctionOld> outputElt;
@@ -588,7 +589,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA(
   ) {
     return theCommands << "<hr> Failed to multiply " << inputContextsMerged[1].ToString()
     << " by " << inputContextsMerged[2].ToString() << ": "
-    << " one of the two differential operators has differential operator exponent that is not a small integer. ";
+    << "one of the two differential operators has differential operator exponent that is not a small integer. ";
   }
   ElementWeylAlgebra<Rational> result = inputContextsMerged[1].GetValue<ElementWeylAlgebra<Rational> >();
   result *= inputContextsMerged[2].GetValue<ElementWeylAlgebra<Rational> >();
@@ -1064,7 +1065,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger(
 bool CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerPolyBySmallInteger");
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger");
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3)) {
     return false;
@@ -1100,7 +1101,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger(
       if (theMon.polynomialPart[i] != 0 && theMon.differentialPart[i] != 0) {
         return theCommands << "<hr>Failed to raise " << base.ToString() << " to power "
         << powerRat.ToString() << ": the exponent is not a "
-        << " small integer, the base is a monomial, however the monomial "
+        << "small integer, the base is a monomial, however the monomial "
         << "contains derivative and polynomial with respect to the same variable. ";
       }
     }

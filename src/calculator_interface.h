@@ -239,16 +239,23 @@ private:
   bool IsBuiltInAtom(std::string* outputWhichOperation = nullptr) const;
   bool IsGoodForChainRuleFunction(std::string* outputWhichOperation = nullptr) const;
   bool IsIntegraLfdx(
-    Expression* differentialVariable = nullptr, Expression* functionToIntegrate = nullptr, Expression* integrationSet = nullptr
+    Expression* differentialVariable = nullptr,
+    Expression* functionToIntegrate = nullptr,
+    Expression* integrationSet = nullptr
   ) const;
   bool IsIndefiniteIntegralfdx(
-    Expression* differentialVariable = nullptr, Expression* functionToIntegrate = nullptr, Expression* integrationSet = nullptr
+    Expression* differentialVariable = nullptr,
+    Expression* functionToIntegrate = nullptr,
+    Expression* integrationSet = nullptr
   ) const;
   bool IsDefiniteIntegralOverIntervalfdx(
-    Expression* differentialVariable = nullptr, Expression* functionToIntegrate = nullptr, Expression* integrationSet = nullptr
+    Expression* differentialVariable = nullptr,
+    Expression* functionToIntegrate = nullptr,
+    Expression* integrationSet = nullptr
   ) const;
   bool IsDifferentialOneFormOneVariablE(
-    Expression* outputDifferentialOfWhat = nullptr, Expression* outputCoeffInFrontOfDifferential = nullptr
+    Expression* outputDifferentialOfWhat = nullptr,
+    Expression* outputCoeffInFrontOfDifferential = nullptr
   ) const;
   bool IsKnownFunctionWithComplexRange(std::string* outputWhichOperation = nullptr) const;
   bool IsArithmeticOperation(std::string* outputWhichOperation = nullptr) const;
@@ -634,6 +641,7 @@ class Function {
   bool flagIsExperimental;
   bool flagDisabledByUser;
   bool flagDisabledByUserDefaultValue;
+  bool flagDontTestAutomatically;
   Expression::FunctionAddress theFunction;
 
   std::string ToStringShort() const;
@@ -642,25 +650,32 @@ class Function {
   JSData ToJSON() const;
   bool ShouldBeApplied(int parentOpIfAvailable);
   bool operator==(const Function& other) const {
-    return this->theArgumentTypes == other.theArgumentTypes &&
+    return
+    this->theArgumentTypes == other.theArgumentTypes &&
     this->theFunction == other.theFunction &&
     this->flagIsInner == other.flagIsInner;
   }
   void reset(Calculator& owner) {
     this->theArgumentTypes.reset(owner);
+    this->owner = &owner;
+    this->resetExceptOwner();
+  }
+  void resetExceptOwner() {
     this->theFunction = nullptr;
     this->flagIsInner = true;
-  }
-  bool inputFitsMyInnerType(const Expression& input);
-  Function() {
     this->theFunction = nullptr;
     this->indexAmongOperationHandlers = - 1;
     this->indexOperation = - 1;
     this->indexOperationParentThatBansHandler = - 1;
-    this->owner = nullptr;
     this->flagIsCompositeHandler = false;
     this->flagDisabledByUserDefaultValue = false;
     this->flagDisabledByUser = false;
+    this->flagDontTestAutomatically = false;
+  }
+  bool inputFitsMyInnerType(const Expression& input);
+  Function() {
+    this->owner = nullptr;
+    this->resetExceptOwner();
   }
   Function(
     Calculator& inputOwner,
@@ -675,9 +690,11 @@ class Function {
     bool inputIsExperimental = false,
     bool inputflagMayActOnBoundVars = false,
     bool inputDisabledByUser = false,
-    int inputIndexParentThatBansHandler = - 1
+    int inputIndexParentThatBansHandler = - 1,
+    bool inputDontTestAutomatically = false
   ) {
-    this->owner = &inputOwner;
+    this->owner = nullptr;
+    this->reset(inputOwner);
     this->indexOperation = inputIndexOperation;
     this->indexAmongOperationHandlers = inputIndexAmongOperationHandlers;
     this->theFunction = functionPointer;
@@ -694,6 +711,7 @@ class Function {
     this->flagDisabledByUserDefaultValue = inputDisabledByUser;
     this->flagDisabledByUser = inputDisabledByUser;
     this->indexOperationParentThatBansHandler = inputIndexParentThatBansHandler;
+    this->flagDontTestAutomatically = inputDontTestAutomatically;
   }
   static unsigned int HashFunction(const Function& input) {
     return input.HashFunction();
@@ -1110,7 +1128,7 @@ public:
 
   bool flagNoApproximationS;
 
-  //  bool flagReplaceInputBoxesByValues;
+  // bool flagReplaceInputBoxesByValues;
 
   bool flagForkingProcessAllowed;
 
@@ -1130,7 +1148,7 @@ public:
   int NumPredefinedAtoms;
   int numEmptyTokensStart;
   Expression theProgramExpression;
-  //  std::vector<std::stringstream> theLogs;
+  // std::vector<std::stringstream> theLogs;
   int counterInSyntacticSoup;
   List<SyntacticElement> syntacticSouP;
   List<SyntacticElement> syntacticStacK;
@@ -1153,7 +1171,7 @@ public:
   std::string syntaxErrors;
   List<std::string> evaluationErrors;
 
-  //std::string inputStringRawestOfTheRaw;
+  // std::string inputStringRawestOfTheRaw;
   std::string inputString;
   std::string outputString;
   JSData outputJS;
@@ -1168,7 +1186,7 @@ public:
   std::string javaScriptDisplayingIndicator;
   int numOutputFileS;
   std::string userLabel;
-  //List<std::string> logEvaluationSteps;
+  // List<std::string> logEvaluationSteps;
   std::stringstream Comments;
   std::stringstream errorsPublic;
   FormatExpressions formatVisibleStrings;
@@ -1182,8 +1200,8 @@ public:
   std::string ElementToStringNonBoundVars();
   JSData ToJSONOutputAndSpecials();
   std::string ToStringOutputAndSpecials();
-  JSData FunctionHandlersJSON();
-  //the purpose of the operator below is to save on typing when returning false with a comment.
+  JSData ToJSONFunctionHandlers();
+  // the purpose of the operator below is to save on typing when returning false with a comment.
   operator bool() const {
     return false;
   }
@@ -2325,7 +2343,8 @@ public:
     bool visible = true,
     bool experimental = false,
     const std::string& inputAdditionalIdentifier = "",
-    const std::string& inputCalculatorIdentifier = ""
+    const std::string& inputCalculatorIdentifier = "",
+    bool dontTestAutomatically = false
   );
   void AddOperationHandler(
     const std::string& theOpName,
@@ -2339,7 +2358,8 @@ public:
     const std::string& inputAdditionalIdentifier,
     const std::string& inputCalculatorIdentifier,
     bool inputDisabledByDefault,
-    const std::string& parentOpThatBansHandler
+    const std::string& parentOpThatBansHandler,
+    bool dontTestAutomatically
   );
   void AddOperationInnerHandler(
     const std::string& theOpName,
@@ -2352,7 +2372,8 @@ public:
     const std::string& inputAdditionalIdentifier = "",
     const std::string& inputCalculatorIdentifier = "",
     bool inputDisabledByDefault = false,
-    const std::string& parentOpThatBansHandler = ""
+    const std::string& parentOpThatBansHandler = "",
+    bool dontTestAutomatically = false
   ) {
     this->AddOperationHandler(
       theOpName,
@@ -2366,7 +2387,8 @@ public:
       inputAdditionalIdentifier,
       inputCalculatorIdentifier,
       inputDisabledByDefault,
-      parentOpThatBansHandler
+      parentOpThatBansHandler,
+      dontTestAutomatically
     );
   }
   void AddOperationOuterHandler(
@@ -2380,7 +2402,8 @@ public:
     const std::string& inputAdditionalIdentifier = "",
     const std::string& inputCalculatorIdentifier = "",
     bool inputDisabledByDefault = false,
-    const std::string& parentOpThatBansHandler = ""
+    const std::string& parentOpThatBansHandler = "",
+    bool dontTestAutomatically = false
   );
   void initialize();
   void reset();

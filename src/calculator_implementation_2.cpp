@@ -5,8 +5,8 @@
 
 static ProjectInformationInstance projectInfoCalculatorImplementation2CPP(__FILE__, "Calculator core evaluation engine. ");
 
-JSData Calculator::FunctionHandlersJSON() {
-  MacroRegisterFunctionWithName("Calculator::ToStringFunctionHandlersJSON");
+JSData Calculator::ToJSONFunctionHandlers() {
+  MacroRegisterFunctionWithName("Calculator::ToJSONFunctionHandlers");
   JSData output;
   output.theType = JSData::token::tokenObject;
   for (int currentAtomIndex = 0; currentAtomIndex < this->theAtoms.size; currentAtomIndex ++) {

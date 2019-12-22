@@ -135,12 +135,12 @@ Calculator.prototype.processOneFunctionAtom = function(handlers, isComposite) {
 
 Calculator.prototype.processExamples = function(inputJSONtext) {
   try {
-    this.examples = JSON.parse(inputJSONtext);
+    this.examples = miscellaneous.jsonUnescapeParse(inputJSONtext);
     var examplesString = "";
     var atomsSorted = Object.keys(this.examples).slice().sort();
     var numHandlers = 0;
-    for (var counterAtoms = 0; counterAtoms < atomsSorted.length; counterAtoms ++) {
-      var atom = atomsSorted[counterAtoms];
+    for (var i = 0; i < atomsSorted.length; i ++) {
+      var atom = atomsSorted[i];
       var currentExamples = this.examples[atom];
       examplesString += this.processOneFunctionAtom(currentExamples.regular, false);
       examplesString += this.processOneFunctionAtom(currentExamples.composite, true);
@@ -165,9 +165,12 @@ Calculator.prototype.submitCalculatorInputOnEnter = function (event) {
 
 Calculator.prototype.toggleExamples = function(theButton) {
   var theExamples = document.getElementById(ids.domElements.calculatorExamples);
+  var theURL = "";
+  theURL += pathnames.urls.calculatorAPI;
+  theURL += `?${pathnames.urlFields.request}=${pathnames.urlFields.requests.calculatorExamplesJSON}`;
   if (theExamples.innerHTML.length < 300) {
     submitRequests.submitGET({
-      url: `${pathnames.urls.calculatorAPI}?request=calculatorExamplesJSON`,
+      url: theURL,
       callback: this.processExamples.bind(this),
       progress: "spanProgressCalculatorExamples"
     });

@@ -8582,13 +8582,7 @@ void Calculator::AutomatedTestRun(
   outputCommandStrings.SetSize(0);
   for (int i = 0; i < this->FunctionHandlers.size; i ++) {
     for (int j = 0; j < this->FunctionHandlers[i].size; j ++) {
-      if (
-        this->FunctionHandlers[i][j].theFunction != Calculator::innerAutomatedTest &&
-        this->FunctionHandlers[i][j].theFunction != Calculator::innerAutomatedTestSetKnownGoodCopy &&
-        this->FunctionHandlers[i][j].theFunction != CalculatorFunctionsGeneral::innerCrash &&
-        this->FunctionHandlers[i][j].theFunction != CalculatorFunctionsGeneral::innerCrashByListOutOfBounds &&
-        !this->FunctionHandlers[i][j].flagIsExperimental
-      ) {
+      if (!this->FunctionHandlers[i][j].flagDontTestAutomatically) {
         outputCommandStrings.AddOnTop(this->FunctionHandlers[i][j].theExample);
       }
     }

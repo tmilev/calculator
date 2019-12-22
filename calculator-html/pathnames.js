@@ -32,6 +32,7 @@ var urlFields = {
     monitoring: "monitoring",
     calculatorInput: "calculatorInput",
     fileContent: "fileContent",
+    calculatorExamplesJSON: "calculatorExamplesJSON",
   },
   result: {
     resultHtml: "resultHtml",

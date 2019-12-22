@@ -1302,7 +1302,7 @@ void WebWorker::SanitizeVirtualFileName() {
 
 int WebWorker::ProcessCalculatorExamplesJSON() {
   MacroRegisterFunctionWithName("WebWorker::ProcessCalculatorExamplesJSON");
-  global.WriteResponse(global.calculator().GetElement().FunctionHandlersJSON());
+  global.WriteResponse(global.calculator().GetElement().ToJSONFunctionHandlers());
   return 0;
 }
 

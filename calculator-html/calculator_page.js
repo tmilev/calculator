@@ -233,6 +233,9 @@ Calculator.prototype.writeResult = function(
   inputParsed,
   panelIdPairs,
 ) {
+  if (inputParsed.result === undefined && inputParsed.comments !== undefined) {
+    buffer.write(inputParsed.comments);
+  }
   this.writeErrorsAndCrashes(buffer, inputParsed);
   if (inputParsed.timeOut === true) {
     if (inputParsed.timeOutComments !== undefined) {
@@ -243,9 +246,6 @@ Calculator.prototype.writeResult = function(
   }
   if (inputParsed.result === undefined && inputParsed.resultHtml !== undefined) {
     buffer.write(inputParsed.resultHtml);
-  }
-  if (inputParsed.result === undefined && inputParsed.comments !== undefined) {
-    buffer.write(inputParsed.comments);
   }
   if (inputParsed.result === undefined) {
     return;

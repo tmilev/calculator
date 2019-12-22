@@ -212,10 +212,10 @@ public:
 
   List<List<int> > theWords;
 
-  //<-The character polynomials in the ``standard representation''.
-  //The ``standard representation'' is specified by the elementSomeGroup class.
-  //It is up to the user of the FiniteGroup template to define which representation is
-  //``standard'' - this is not a serious restriction as one can always choose the trivial representation.
+  // <-The character polynomials in the ``standard representation''.
+  // The ``standard representation'' is specified by the elementSomeGroup class.
+  // It is up to the user of the FiniteGroup template to define which representation is
+  // ``standard'' - this is not a serious restriction as one can always choose the trivial representation.
   bool flagCCsComputed;
   bool flagCCRepresentativesComputed;
   bool flagAllElementsAreComputed;
@@ -331,10 +331,10 @@ public:
   void (*ComputeIrreducibleRepresentationsWithFormulas)(FiniteGroup<elementSomeGroup>& G);
   void ComputeIrreducibleRepresentations();
 
-  // A parabolic kinda subgroup H = <hᵢ> is a subgroup of G = <gᵢ> in which for h∈H,
+  // A parabolic subgroup H = <hᵢ> is a subgroup of G = <gᵢ> in which for h∈H,
   // there is a canonical word in gᵢ..gₖ for h in G, with the property that the gᵢ's
   // in h are actually hᵢ's.  Where this happens, it makes it much easier to come up
-  // with words in H, to be used for representation theory
+  // with words in H, to be used for representation theory.
   // The intended use for this API call is
   // auto H = G.ParabolicKindaSubgroupGeneratorSubset(subgenids);
   SubgroupData<FiniteGroup<elementSomeGroup>, elementSomeGroup> ParabolicKindaSubgroupGeneratorSubset(const List<int>& subgens);
@@ -618,7 +618,7 @@ public:
   bool flagDeallocated;
 
   typedef FiniteGroup<ElementWeylGroup> WeylGroupBase;
-  void init();
+  void reset();
   static void GetCoCartanSymmetric(const Matrix<Rational>& input, Matrix<Rational>& output);
   void ComputeSquares();
   void ComputeInitialIrreps();
@@ -688,7 +688,7 @@ public:
   }
   WeylGroupData() {
     this->flagDeallocated = false;
-    this->init();
+    this->reset();
   }
   ~WeylGroupData() {
     this->flagDeallocated = true;

@@ -86,6 +86,8 @@ std::string WebAPI::request::homeworkSource               = "homeworkSource"    
 
 std::string WebAPI::UserInfo::processMonitoring = "processMonitoring";
 
+std::string WebAPI::calculator::testFileNameVirtual = "test/automated_test_known_inputs_outputs.json";
+
 std::string DatabaseStrings::labelUserId                            = "id"                         ;
 std::string DatabaseStrings::labelUsername                          = "username"                   ;
 std::string DatabaseStrings::labelPassword                          = "password"                   ;

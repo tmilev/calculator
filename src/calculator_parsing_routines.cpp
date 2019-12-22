@@ -44,6 +44,10 @@ Calculator::EvaluationStats::EvaluationStats() {
   this->callsSinceReport = 0;
 }
 
+void Calculator::resetFrequentConstants() {
+
+}
+
 void Calculator::reset() {
   this->MaxAlgTransformationsPerExpression = 100;
   this->MaxRuleStacksCached = 500;
@@ -103,6 +107,7 @@ void Calculator::reset() {
   this->atomsWhoseExponentsAreInterpretedAsFunctions.Clear();
   this->atomsThatMustNotBeCached.Clear();
   this->arithmeticOperations.Clear();
+  this->stringsThatSplitIfFollowedByDigit.Clear();
   this->knownFunctionsWithComplexRange.Clear();
   this->knownDoubleConstants.Clear();
   this->knownDoubleConstantValues.SetSize(0);
@@ -130,7 +135,7 @@ void Calculator::reset() {
   this->RuleStackCacheIndex = - 1;
   this->RuleStack.reset(*this,this->MaxRuleStacksCached);
   this->cachedRuleStacks.Clear();
-  //The expression container must be cleared last!
+  // The expression container must be cleared last!
   this->theExpressionContainer.Clear();
 }
 
@@ -243,7 +248,7 @@ void Calculator::initialize() {
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("{}");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot(",");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot(".");
-//  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\"");
+  //  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\"");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\choose");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\frac");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\cdot");
@@ -314,7 +319,6 @@ void Calculator::initialize() {
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\text");
 
   this->initPredefinedStandardOperationsWithoutHandler();
-
   this->TotalNumPatternMatchedPerformed = 0;
   this->initPredefinedStandardOperations();
   this->initPredefinedInnerFunctions();
@@ -330,6 +334,7 @@ void Calculator::initialize() {
   this->initArithmeticOperations();
   this->initPredefinedWordSplits();
   this->initStringsThatSplitIfFollowedByDigit();
+
   this->RuleStack.reset(*this, 100);
   this->RuleStack.AddChildAtomOnTop(this->opEndStatement());
   this->cachedRuleStacks.Clear();
@@ -339,6 +344,8 @@ void Calculator::initialize() {
   if (global.flagAutoUnitTest) {
     this->CheckPredefinedFunctions();
   }
+  this->CheckConsistencyAfterInitialization();
+
 }
 
 bool Calculator::CheckPredefinedFunctions() {

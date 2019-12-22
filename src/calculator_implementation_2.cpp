@@ -40,60 +40,52 @@ JSData Calculator::FunctionHandlersJSON() {
   return output;
 }
 
-const Expression& Calculator::EZero() {
-  if (this->frequentConstantZero.owner == nullptr) {
-    this->frequentConstantZero.AssignValue(0, *this);
-  }
-  return this->frequentConstantZero;
+Expression Calculator::EZero() {
+  Expression result;
+  result.AssignValue(0, *this);
+  return result;
 }
 
-const Expression& Calculator::EOne() {
-  if (this->frequentConstantOne.owner == nullptr) {
-    this->frequentConstantOne.AssignValue(1, *this);
-  }
-  return this->frequentConstantOne;
+Expression Calculator::EOne() {
+  Expression result;
+  result.AssignValue(1, *this);
+  return result;
 }
 
-const Expression& Calculator::EMOne() {
-  if (this->frequentConstantMinusOne.owner == nullptr) {
-    this->frequentConstantMinusOne.AssignValue(- 1, *this);
-  }
-  return this->frequentConstantMinusOne;
+Expression Calculator::EMOne() {
+  Expression result;
+  result.AssignValue(- 1, *this);
+  return result;
 }
 
-const Expression& Calculator::EFour() {
-  if (this->frequentConstantFour.owner == nullptr) {
-    this->frequentConstantFour.AssignValue(4, *this);
-  }
-  return this->frequentConstantFour;
+Expression Calculator::EFour() {
+  Expression result;
+  result.AssignValue(4, *this);
+  return result;
 }
 
-const Expression& Calculator::ETwo() {
-  if (this->frequentConstantTwo.owner == nullptr) {
-    this->frequentConstantTwo.AssignValue(2, *this);
-  }
-  return this->frequentConstantTwo;
+Expression Calculator::ETwo() {
+  Expression result;
+  result.AssignValue(2, *this);
+  return result;
 }
 
-const Expression& Calculator::EMHalf() {
-  if (this->frequentConstantMinusHalf.owner == nullptr) {
-    this->frequentConstantMinusHalf.AssignValue(Rational(- 1, 2), *this);
-  }
-  return this->frequentConstantMinusHalf;
+Expression Calculator::EMHalf() {
+  Expression result;
+  result.AssignValue(Rational(- 1, 2), *this);
+  return result;
 }
 
-const Expression& Calculator::EInfinity() {
-  if (this->frequentEInfinity.owner == nullptr) {
-    this->frequentEInfinity.MakeAtom(this->opInfinity(), *this);
-  }
-  return this->frequentEInfinity;
+Expression Calculator::EInfinity() {
+  Expression result;
+  result.MakeAtom(this->opInfinity(), *this);
+  return result;
 }
 
-const Expression& Calculator::EMInfinity() {
-  if (this->frequentEMInfinity.owner == nullptr) {
-    this->frequentEMInfinity = this->EMOne() * this->EInfinity();
-  }
-  return this->frequentEMInfinity;
+Expression Calculator::EMInfinity() {
+  Expression result;
+  result = this->EMOne() * this->EInfinity();
+  return result;
 }
 
 std::string Calculator::ToStringRuleStatusUser() {

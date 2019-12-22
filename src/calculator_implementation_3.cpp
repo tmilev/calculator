@@ -9,6 +9,7 @@
 #include "math_subsets_selections.h"
 #include "math_extra_finite_groups_implementation.h"
 #include "math_extra_semisimple_Lie_algebras_implementation.h"
+#include "string_constants.h"
 
 static ProjectInformationInstance projectInfoCalculatorImplementation3CPP(__FILE__, "Calculator built-in functions. ");
 
@@ -1720,32 +1721,69 @@ bool Calculator::innerEWAorPoly(Calculator& theCommands, const Expression& input
   return output.AssignValueWithContext(outputEWA, endContext, theCommands);
 }
 
-bool Calculator::ReadTestStrings(
-  HashedList<std::string, MathRoutines::HashString>& outputCommands, List<std::string>& outputResults
+bool Calculator::Test::AppendOneTest(
+  JSData& input,
+  HashedList<std::string, MathRoutines::HashString>& outputCommands,
+  List<std::string>& outputResults,
+  std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Calculator::ReadTestStrings");
-  XML theFileReader;
-  if (!theFileReader.ReadFromFile(this->theTestFile)) {
+  if (input["input"].theType != JSData::token::tokenString) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Input command is missing. ";
+    }
+    return false;
+  }
+  if (input["output"].theType != JSData::token::tokenString) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Expected output is missing. ";
+    }
+    return false;
+  }
+  outputCommands.AddOnTop(input["input"].theString);
+  outputResults.AddOnTop(input["output"].theString);
+  return true;
+}
+
+bool Calculator::Test::LoadTestStrings(
+  HashedList<std::string, MathRoutines::HashString>& outputCommands,
+  List<std::string>& outputResults,
+  std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("Calculator::LoadTestStrings");
+  std::string testStrings;
+  if (!FileOperations::LoadFileToStringVirtual(
+    WebAPI::calculator::testFileNameVirtual,
+    testStrings,
+    false,
+    commentsOnFailure
+  )) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to load test json. ";
+    }
+    return false;
+  }
+  JSData result;
+  if (!result.readstring(testStrings, commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to parse test json. ";
+    }
+    return false;
+  }
+  if (result.theType != JSData::token::tokenArray) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Test json is not an array. ";
+    }
     return false;
   }
   outputCommands.Clear();
   outputResults.SetSize(0);
-  outputCommands.SetExpectedSize(this->GetNumBuiltInFunctions());
-  outputResults.Reserve(this->GetNumBuiltInFunctions());
-  std::string buffer;
-  while (theFileReader.positionInString < theFileReader.theString.size()) {
-    if (!theFileReader.GetStringEnclosedIn("input", buffer)) {
-      break;
+  for (int i = 0; i < result.theList.size; i ++) {
+    if (!Calculator::Test::AppendOneTest(result.theList[i], outputCommands, outputResults, commentsOnFailure)) {
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure << "Failed to extract input/output strings from: " << result.theList[i].ToString(false);
+      }
+      return false;
     }
-    outputCommands.AddOnTop(buffer);
-    if (!theFileReader.GetStringEnclosedIn("output", buffer)) {
-      return *this << "<hr>Failed to read result string number " << outputResults.size + 1 << ": is the test file corrupt?";
-    }
-    outputResults.AddOnTop(buffer);
-  }
-  if (outputCommands.size != outputResults.size || outputCommands.size == 0) {
-    return *this << "<hr>Corrupt test file: got " << outputCommands.size
-    << " commands and " << outputResults.size << " results, which should not happen. ";
   }
   return true;
 }
@@ -1758,17 +1796,31 @@ std::string Calculator::WriteFileToOutputFolderReturnLink(
   return FileOperations::WriteFileReturnHTMLLink(fileContent, fileNameVirtual, linkText);
 }
 
-bool Calculator::WriteTestStrings(List<std::string>& inputCommands, List<std::string>& inputResults) {
+bool Calculator::WriteTestStrings(
+  List<std::string>& inputCommands,
+  List<std::string>& inputResults,
+  std::stringstream* commentsOnFailure
+) {
   MacroRegisterFunctionWithName("Calculator::WriteTestStrings");
+  JSData result;
+  result.theType = JSData::token::tokenArray;
+  result.theList.SetSize(inputCommands.size);
   for (int i = 0; i < inputCommands.size; i ++) {
-    this->theTestFile << "Command " << i + 1 << ": <input>" << inputCommands[i] << "</input>"
-    << "<output>" << inputResults[i] << "</output>\n\n";
+    JSData nextEntry;
+    nextEntry["input"] = inputCommands[i];
+    nextEntry["output"] = inputResults[i];
+    result.theList[i] = nextEntry;
   }
-  this->theTestFile.flush();
-  return true;
+  return FileOperations::WriteFileVirual(
+    WebAPI::calculator::testFileNameVirtual,
+    result.ToString(false),
+    commentsOnFailure
+  );
 }
 
-bool Calculator::innerAutomatedTestSetKnownGoodCopy(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::innerAutomatedTestSetKnownGoodCopy(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("Calculator::innerAutomatedTestSetKnownGoodCopy");
   if (!global.UserDefaultHasAdminRights()) {
     return theCommands << "Function requires admin access. ";
@@ -1777,14 +1829,13 @@ bool Calculator::innerAutomatedTestSetKnownGoodCopy(Calculator& theCommands, con
   global.millisecondsMaxComputation = 30000000; //30k seconds: ok, we have admin access.
   List<std::string> inputStringsTest, outputStringsTestWithInit, outputStringsTestNoInit;
   std::stringstream out;
-  theCommands.theTestFileName = "automatedTest.txt";
-  if (!FileOperations::OpenFileVirtual(theCommands.theTestFile, "output/" + theCommands.theTestFileName, false, true, false)) {
-    global.fatal << "This is a programming error or worse: file " << theCommands.theTestFileName
-    << " does not exist but cannot be created. Something is very wrong. " << global.fatal;
-  }
+  std::stringstream commentsOnError;
+  // if (!FileOperations::WriteFileVirual(WebAPI::calculator::testFileNameVirtual, "", &commentsOnError)) {
+  //   global.fatal << "Failed to write to file test file: " << WebAPI::calculator::testFileNameVirtual << ". " << global.fatal;
+  // }
   double startTime = global.GetElapsedSeconds();
   theCommands.AutomatedTestRun(inputStringsTest, outputStringsTestWithInit, outputStringsTestNoInit);
-  theCommands.WriteTestStrings(inputStringsTest, outputStringsTestWithInit);
+  theCommands.WriteTestStrings(inputStringsTest, outputStringsTestWithInit, &commentsOnError);
   out << "Test run completed in " << global.GetElapsedSeconds() - startTime << " seconds.";
   return output.AssignValue(out.str(), theCommands);
 }
@@ -1794,22 +1845,15 @@ bool Calculator::innerAutomatedTest(Calculator& theCommands, const Expression& i
   if (!global.UserDefaultHasAdminRights()) {
     return theCommands << "Automated test requires admin access";
   }
+  (void) input;
   global.millisecondsMaxComputation = 30000000; //30k seconds, ok as we have admin access
   int64_t startTime = global.GetElapsedMilliseconds();
-  theCommands.theTestFileName = "automatedTest.txt";
-  if (!FileOperations::FileExistsVirtual("output/" + theCommands.theTestFileName)) {
-    return theCommands.innerAutomatedTestSetKnownGoodCopy(theCommands, input, output);
-  }
-  if (!FileOperations::OpenFileCreateIfNotPresentVirtual(theCommands.theTestFile, "ouput/" + theCommands.theTestFileName, false, false, false)) {
-    global.fatal << "This is a programming error or worse: failed to open an existing file: "
-    << theCommands.theTestFileName << ". Something is very wrong. " << global.fatal;
-  }
   List<std::string> knownResults;
   HashedList<std::string, MathRoutines::HashString> knownCommands;
   std::stringstream out;
-  if (!theCommands.ReadTestStrings(knownCommands, knownResults)) {
-    out << "Error: failed to load test strings: the test file " << theCommands.theTestFileName << " may be corrupt. ";
-    return output.AssignValue(out.str(), theCommands);
+  std::stringstream commentsOnFailure;
+  if (!Calculator::Test::LoadTestStrings(knownCommands, knownResults, &commentsOnFailure)) {
+    Calculator::innerAutomatedTestSetKnownGoodCopy(theCommands, input, output);
   }
   List<std::string> commandStrings, resultStringsWithInit, resultStringsNoInit;
   theCommands.AutomatedTestRun(commandStrings, resultStringsWithInit, resultStringsNoInit);

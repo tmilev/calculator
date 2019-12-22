@@ -1592,7 +1592,7 @@ public:
     return this->List<Object>::ToString(theFormat);
   }
   std::string ToString() const {
-    return this->List<Object>::ToString();
+    return this->::List<Object>::ToString();
   }
   void operator=(const HashedList<Object, hashFunction>& From) {
     if (&From == this) {

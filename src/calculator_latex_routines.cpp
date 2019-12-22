@@ -5,6 +5,7 @@
 #include "general_logging_global_variables.h"
 #include "web_api.h"
 #include "general_strings.h"
+#include "calculator_html_interpretation.h"
 
 static ProjectInformationInstance projectInfoCalculatorLaTeXRoutinesCPP(__FILE__, "LaTeX routines. ");
 
@@ -871,7 +872,6 @@ bool LaTeXcrawler::BuildOrFetchFromCachePDF(std::stringstream* commentsOnFailure
   return true;
 }
 
-#include "calculator_html_interpretation.h"
 bool LaTeXcrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
   MacroRegisterFunctionWithName("LaTeXcrawler::BuildTopicList");
   StateMaintainerCurrentFolder preserveCurrentFolder;

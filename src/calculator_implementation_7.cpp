@@ -8609,13 +8609,12 @@ void Calculator::AutomatedTestRun(
     reportStream << "<br>Testing expression:<br> " << outputCommandStrings[i]
     << "<br>Test progress: testing " << i + 1 << " out of " << outputCommandStrings.size << ". ";
     theReport.Report(reportStream.str());
-    theTester.reset();
-    theTester.CheckConsistencyAfterInitializationExpressionStackEmpty();
     theTester.initialize();
+    theTester.CheckConsistencyAfterInitialization();
     theTester.Evaluate(outputCommandStrings[i]);
     outputResultsWithInit[i] = theTester.theProgramExpression.ToString(&theFormat);
     reportStream << "<br>Result: " << theTester.theProgramExpression.ToString();
-    reportStream << "<br>Done in: " << global.GetElapsedSeconds()-startingTime << " seconds. ";
+    reportStream << "<br>Done in: " << global.GetElapsedSeconds() - startingTime << " seconds. ";
     theReport.Report(reportStream.str());
   }
 }

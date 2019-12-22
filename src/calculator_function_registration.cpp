@@ -1205,19 +1205,6 @@ void Calculator::initPredefinedInnerFunctions() {
     true
   );
   this->AddOperationInnerHandler(
-    "AutomatedTestSetKnownGoodCopy",
-    Calculator::innerAutomatedTestSetKnownGoodCopy,
-    "",
-    "Runs a big bad automated test of all built-in "
-    "functions to create a file containing a set of known good results.",
-    "AutomatedTestSetKnownGoodCopy 0",
-    false,
-    false,
-    "Calculator::innerAutomatedTestSetKnownGoodCopy",
-    "AutomatedTestSetKnownGoodCopy",
-    true
-  );
-  this->AddOperationInnerHandler(
     "AutomatedTestProblemInterpretation",
     CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation,
     "",
@@ -5725,19 +5712,19 @@ void Calculator::initPredefinedInnerFunctions() {
 }
 
 void Calculator::initPredefinedStandardOperations() {
-  //IMPORTANT.
-  //The order of registration of operation handlers for the same operation name
-  // defines the order in which operation
-  //handlers are called. Operations handlers registered first are executed first.
-  //The order only matters for different handlers of the same operation.
-  //This order is very important, as some of the
-  //handlers will act properly only if the preceding ones have been carried through
-  //(example: outerExtractBaseMultiplication requires outerAssociate).
-  //Note that one can easily transform the code so that the order does not matter.
-  //One can do that by ``packing'' the the correct order of operations into a super-function,
-  //or by making the corresponding handlers call each other as needed.
-  //A combination of these two was indeed the original design approach,
-  //and gradually evolved to what is used now.
+  // IMPORTANT.
+  // The order of registration of operation handlers for the same operation name
+  //  defines the order in which operation
+  // handlers are called. Operations handlers registered first are executed first.
+  // The order only matters for different handlers of the same operation.
+  // This order is very important, as some of the
+  // handlers will act properly only if the preceding ones have been carried through
+  // (example: outerExtractBaseMultiplication requires outerAssociate).
+  // Note that one can easily transform the code so that the order does not matter.
+  // One can do that by ``packing'' the the correct order of operations into a super-function,
+  // or by making the corresponding handlers call each other as needed.
+  // A combination of these two was indeed the original design approach,
+  // and gradually evolved to what is used now.
   this->AddOperationOuterHandler(
     ";",
     Calculator::outerMeltBrackets,
@@ -5776,7 +5763,6 @@ void Calculator::initPredefinedStandardOperations() {
     "%LogEvaluation\n({{a}}*{{b}})*{{c}}=a*(b*c);  ",
     true
   );
-
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddStringToString,
@@ -7464,7 +7450,7 @@ void Calculator::initPredefinedStandardOperations() {
     CalculatorFunctionsBinaryOps::innerPowerMatNumbersByLargeIntegerIfPossible,
     "",
     "Attempts to exponentiate matrix by a large power. ",
-    "X =\\begin{pmatrix} 0 & 1 \\\\ 1 &1\\end{pmatrix}; X^{-55!- 1}  ",
+    "X =\\begin{pmatrix} 1 & -1 \\\\ 4 & -3\\end{pmatrix}; X^{-55!- 1}  ",
     true,
     false,
     "CalculatorFunctionsBinaryOps::innerPowerMatNumbersByLargeIntegerIfPossible",
@@ -7924,6 +7910,7 @@ void Calculator::initPredefinedStandardOperations() {
     "x =:y;\ny;\nz;\nz=y;\nz ",
     true
   );
+
   std::stringstream StandardPowerStreamInfo, moreInfoOnIntegers;
   moreInfoOnIntegers
   << "LargeIntUnsigned::SquareRootOfCarryOverBound is "

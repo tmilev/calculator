@@ -43,7 +43,7 @@ bool FiniteGroup<elementSomeGroup>::ComputeAllElements(
 
 template <typename elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::ComputeAllElementsLargeGroup(bool andWords, int MaxElements) {
-  MacroRegisterFunctionWithName("Subgroup::ComputeAllElements");
+  MacroRegisterFunctionWithName("Subgroup::ComputeAllElementsLargeGroup");
   this->InitGenerators();
   if (this->generators.size == 0) {
     global.fatal << "Groups with zero generators are not allowed: if you wanted to create a trivial group, "
@@ -59,7 +59,7 @@ bool FiniteGroup<elementSomeGroup>::ComputeAllElementsLargeGroup(bool andWords, 
     this->theWords.LastObject()->SetSize(0);
   }
   ProgressReport theReport(1000, GlobalVariables::Progress::ReportType::general);
-  //Warning: not checking whether the generators have repetitions.
+  // Warning: not checking whether the generators have repetitions.
   for (int j = 0; j < this->theElements.size; j ++) {
     for (int i = 0; i < this->generators.size; i ++) {
       currentElement = this->generators[i] * this->theElements[j];

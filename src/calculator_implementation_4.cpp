@@ -22,6 +22,7 @@ Calculator::Calculator() {
   this->flagWriteLatexPlots = true;
   this->flagUseLnInsteadOfLog = false;
   this->flagPlotShowJavascriptOnly = false;
+  this->numberExpectedExpressionsAtInitialization = - 1;
 }
 
 MemorySaving<Calculator>& GlobalVariables::calculator() {
@@ -803,24 +804,33 @@ bool Calculator::RecursionDepthExceededHandleRoughly(const std::string& addition
   return true;
 }
 
-bool Calculator::CheckConsistencyAfterInitializationExpressionStackEmpty() {
+bool Calculator::CheckConsistencyAfterInitialization() {
   this->theExpressionContainer.GrandMasterConsistencyCheck();
   this->EvaluatedExpressionsStack.GrandMasterConsistencyCheck();
   this->cachedExpressions.GrandMasterConsistencyCheck();
+  if (this->numberExpectedExpressionsAtInitialization < 0) {
+    this->numberExpectedExpressionsAtInitialization = this->theExpressionContainer.size;
+  } else if (this->theExpressionContainer.size != this->numberExpectedExpressionsAtInitialization) {
+    global.fatal << "Expression container expected to have " << this->numberExpectedExpressionsAtInitialization
+    << " elements but instead it has " << this->theExpressionContainer.size
+    << ". Expression container: ";
+    for (int i = 0; i < this->theExpressionContainer.size; i ++) {
+      global.fatal << this->theExpressionContainer[i].ToString() << ", ";
+    }
+    global.fatal << global.fatal;
+  }
   if (
     this->cachedExpressions.size != 0 ||
     this->imagesCachedExpressions.size != 0 ||
-    this->EvaluatedExpressionsStack.size != 0 ||
-    this->theExpressionContainer.size != 0
+    this->EvaluatedExpressionsStack.size != 0
   ) {
     global.fatal << "This is a programming error: cached expressions, "
     << "images cached expressions, expression stack and expression container are supposed to be empty, but "
-    << " instead they contain respectively "
-    << this->cachedExpressions.size << ", " << this->imagesCachedExpressions.size << ", "
-    << this->EvaluatedExpressionsStack.size << " and "
-    << this->theExpressionContainer.size << " elements. " << global.fatal;
+    << "instead they contain respectively "
+    << this->cachedExpressions.size << ", " << this->imagesCachedExpressions.size << ", and"
+    << this->EvaluatedExpressionsStack.size << " elements. " << global.fatal;
   }
-  return true;
+  return this->theObjectContainer.CheckConsistencyAfterReset();
 }
 
 bool Calculator::innerFunctionToMatrix(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -1095,7 +1105,7 @@ bool Calculator::innerIsRational(Calculator& theCommands, const Expression& inpu
 
 bool Calculator::AppendOpandsReturnTrueIfOrderNonCanonical(const Expression& input, List<Expression>& output, int theOp) {
   RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
-  if (this->RecursionDeptH>this->MaxRecursionDeptH) {
+  if (this->RecursionDeptH > this->MaxRecursionDeptH) {
     return false;
   }
   bool result = false;
@@ -2737,6 +2747,67 @@ void ObjectContainer::resetPlots() {
 
 void ObjectContainer::resetSliders() {
   this->userInputBoxSliderDisplayed.initializeFillInObject(this->theUserInputTextBoxesWithValues.size(), false);
+}
+
+bool ObjectContainer::CheckConsistencyAfterReset() {
+  MacroRegisterFunctionWithName("ObjectContainer::CheckConsistencyAfterReset");
+  if (this->theWeylGroupElements.size != 0) {
+    global.fatal << "WeylGroupElements expected to be empty, got " << this->theWeylGroupElements.size << " elements. " << global.fatal;
+  }
+  if (this->theSSLieAlgebras.size() != 0) {
+    global.fatal << "theSSLieAlgebras expected to be empty, got " << this->theSSLieAlgebras.size() << " elements. " << global.fatal;
+  }
+  // MapReferences<DynkinType, SemisimpleSubalgebras> theSSSubalgebraS;
+  if (this->theWeylGroupReps.size != 0) {
+    global.fatal << "theWeylGroupReps expected to be empty, got " << this->theWeylGroupReps.size << " elements. " << global.fatal;
+  }
+  if (this->theWeylGroupVirtualReps.size != 0) {
+    global.fatal << "theWeylGroupVirtualReps expected to be empty, got " << this->theWeylGroupVirtualReps.size << " elements. " << global.fatal;
+  }
+  // ListReferences<ModuleSSalgebra<RationalFunctionOld> > theCategoryOmodules;
+  // ListReferences<SltwoSubalgebras> theSltwoSAs;
+  // HashedListReferences<ElementEllipticCurve<ElementZmodP> > EllipticCurveElementsZmodP;
+  // HashedListReferences<ElementEllipticCurve<Rational> > EllipticCurveElementsRational;
+  // HashedListReferences<ElementTensorsGeneralizedVermas<RationalFunctionOld> > theTensorElts;
+
+  if (this->thePolys.size != 0) {
+    global.fatal << "The rational polynomials are expected to be empty, have: " << this->thePolys.size << " elements instead. " << global.fatal;
+  }
+  // HashedListReferences<Polynomial<AlgebraicNumber> > thePolysOverANs;
+  // HashedListReferences<ElementWeylAlgebra<Rational> > theWeylAlgebraElements;
+  // HashedListReferences<ElementUniversalEnveloping<RationalFunctionOld> > theUEs;
+  // HashedListReferences<RationalFunctionOld> theRFs;
+  if (this->theRationals.size != 0) {
+    global.fatal << "Rationals expected to be empty, have: " << this->theRationals.size << " elements instead. " << global.fatal;
+  }
+  // HashedListReferences<charSSAlgMod<Rational> > theCharsSSLieAlgFD;
+  if (this->theDoubles.size != 1) {
+    global.fatal << "Doubles expected to be have exactly 1 element (namely, nan), have: " << this->theDoubles.size << " elements instead. " << global.fatal;
+  }
+  // HashedListReferences<std::string, MathRoutines::HashString> theStrings;
+  // HashedListReferences<std::string, MathRoutines::HashString> ExpressionNotation;
+  // HashedListReferences<Expression> ExpressionWithNotation;
+  // HashedListReferences<LittelmannPath> theLSpaths;
+  // HashedListReferences<MatrixTensor<Rational> > theMatTensorRats;
+  // HashedListReferences<ElementZmodP> theEltsModP;
+  // HashedListReferences<Weight<Rational> > theWeights;
+  // HashedListReferences<Weight<Polynomial<Rational> > > theWeightsPoly;
+  // ListReferences<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational > > theHyperoctahedralReps;
+  // ListReferences<Plot> thePlots;
+  // List<bool> userInputBoxSliderDisplayed;
+  // MapReferences<std::string, InputBox, MathRoutines::HashString> theUserInputTextBoxesWithValues;
+  // MapReferences<std::string, std::string, MathRoutines::HashString> graphicsScripts;
+  // AlgebraicClosureRationals theAlgebraicClosure;
+  if (this->theAlgebraicNumbers.size != 0) {
+    global.fatal << "Algebraic numbers expected to be empty, have: " << this->theAlgebraicNumbers.size << " elements instead. " << global.fatal;
+  }
+  // HashedListReferences<ElementHyperoctahedralGroupR2> theElementsHyperOctGroup;
+  // ListReferences<HyperoctahedralGroupData> theHyperOctahedralGroups;
+  // HashedListReferences<MonomialTensor<int, MathRoutines::IntUnsignIdentity> > theLittelmannOperators;
+  // WeylGroupData& GetWeylGroupDataCreateIfNotPresent(const DynkinType& input);
+  // SemisimpleLieAlgebra& GetLieAlgebraCreateIfNotPresent(const DynkinType& input);
+  // SemisimpleSubalgebras& GetSemisimpleSubalgebrasCreateIfNotPresent(const DynkinType& input);
+  return true;
 }
 
 void ObjectContainer::reset() {

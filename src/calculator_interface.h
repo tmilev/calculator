@@ -873,10 +873,8 @@ class ObjectContainer {
   // by various predefined function handlers.
 public:
   HashedListReferences<ElementWeylGroup> theWeylGroupElements;
-///////////////////////
   MapReferences<DynkinType, SemisimpleLieAlgebra> theSSLieAlgebras;
   MapReferences<DynkinType, SemisimpleSubalgebras> theSSSubalgebraS;
-////////////////////////
   HashedListReferences<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> > theWeylGroupReps;
   HashedListReferences<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> > theWeylGroupVirtualReps;
   ListReferences<ModuleSSalgebra<RationalFunctionOld> > theCategoryOmodules;
@@ -897,11 +895,6 @@ public:
   HashedListReferences<Expression> ExpressionWithNotation;
   HashedListReferences<LittelmannPath> theLSpaths;
   HashedListReferences<MatrixTensor<Rational> > theMatTensorRats;
-  //ListReferences<Matrix<double> > theMatDoubles;
-  //HashedListReferences<Matrix<Rational> > theMatRats;
-  //HashedListReferences<Matrix<AlgebraicNumber> > theMatsAlgebraic;
-  //HashedListReferences<Matrix<Polynomial<Rational> > > theMatPolyRational;
-  //HashedListReferences<Matrix<RationalFunctionOld> > theMatRFs;
   HashedListReferences<ElementZmodP> theEltsModP;
   HashedListReferences<Weight<Rational> > theWeights;
   HashedListReferences<Weight<Polynomial<Rational> > > theWeightsPoly;
@@ -910,12 +903,10 @@ public:
   List<bool> userInputBoxSliderDisplayed;
   MapReferences<std::string, InputBox, MathRoutines::HashString> theUserInputTextBoxesWithValues;
   MapReferences<std::string, std::string, MathRoutines::HashString> graphicsScripts;
-
   AlgebraicClosureRationals theAlgebraicClosure;
   HashedList<AlgebraicNumber> theAlgebraicNumbers;
   HashedListReferences<ElementHyperoctahedralGroupR2> theElementsHyperOctGroup;
   ListReferences<HyperoctahedralGroupData> theHyperOctahedralGroups;
-//  HashedList<DifferentialForm<Rational> > theDiffForm;
   HashedListReferences<MonomialTensor<int, MathRoutines::IntUnsignIdentity> > theLittelmannOperators;
   WeylGroupData& GetWeylGroupDataCreateIfNotPresent(const DynkinType& input);
   SemisimpleLieAlgebra& GetLieAlgebraCreateIfNotPresent(const DynkinType& input);
@@ -924,6 +915,7 @@ public:
   void reset();
   void resetSliders();
   void resetPlots();
+  bool CheckConsistencyAfterReset();
   std::string ToString();
   std::string ToStringJavascriptForUserInputBoxes();
 };
@@ -977,16 +969,6 @@ class Calculator {
     output.Comments << any;
     return output;
   }
-private:
-  Expression frequentConstantOne, frequentConstantTwo,
-  frequentConstantThree, frequentConstantFour,
-  frequentConstantFive, frequentConstantHalf,
-  frequentConstantMinusHalf,
-  frequentConstantZero,
-  frequentConstantMinusOne,
-  frequentEInfinity,
-  frequentEMInfinity;
-
 public:
   //Operations parametrize the expression elements.
   //Operations are the labels of the atom nodes of the expression tree.
@@ -1083,6 +1065,7 @@ public:
   int MaxRuleStacksCached;
   int NumErrors;
   int RuleStackCacheIndex;
+  int numberExpectedExpressionsAtInitialization;
   class EvaluationStats {
   public:
     int expressionEvaluated;
@@ -1183,8 +1166,6 @@ public:
   char DefaultWeylLetter;
   int DefaultWeylRank;
   std::string javaScriptDisplayingIndicator;
-  std::fstream theTestFile;
-  std::string theTestFileName;
   int numOutputFileS;
   std::string userLabel;
   //List<std::string> logEvaluationSteps;
@@ -1223,7 +1204,7 @@ public:
   bool IsNonBoundVarInContext(int inputOp);
   Function& GetFunctionHandlerFromNamedRule(const std::string& inputRuleName);
   bool CheckPredefinedFunctions();
-  bool CheckConsistencyAfterInitializationExpressionStackEmpty();
+  bool CheckConsistencyAfterInitialization();
   //to make operations read only, we make operations private and return const pointer to it.
   const HashedList<std::string, MathRoutines::HashString>& GetOperations() {
     return this->theAtoms;
@@ -1253,17 +1234,17 @@ public:
     (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size - decrease);
     return true;
   }
-  const Expression& EZero();
-  const Expression& EOne();
-  const Expression& ETwo();
-  const Expression& EThree();
-  const Expression& EFour();
-  const Expression& EFive();
-  const Expression& EMOne();
-  const Expression& EHalf();
-  const Expression& EMHalf();
-  const Expression& EInfinity();
-  const Expression& EMInfinity();
+  Expression EZero();
+  Expression EOne();
+  Expression ETwo();
+  Expression EThree();
+  Expression EFour();
+  Expression EFive();
+  Expression EMOne();
+  Expression EHalf();
+  Expression EMHalf();
+  Expression EInfinity();
+  Expression EMInfinity();
   void DoLogEvaluationIfNeedBe(Function& inputF);
   void LogPublicError(const std::string& theError);
   bool DecreaseStackExceptLast(int decrease);
@@ -1981,11 +1962,12 @@ public:
   static bool innerTimes(Calculator& theCommands, const Expression& input, Expression& output) {
     return theCommands.innerOperationBinary(theCommands, input, output, theCommands.opTimes());
   }
-  bool ReadTestStrings(
-    HashedList<std::string, MathRoutines::HashString>& outputCommands, List<std::string>& outputResults
-  );
   std::string WriteFileToOutputFolderReturnLink(const std::string& fileContent, const std::string& fileName, const std::string &linkText);
-  bool WriteTestStrings(List<std::string>& inputCommands, List<std::string>& inputResults);
+  bool WriteTestStrings(
+    List<std::string>& inputCommands,
+    List<std::string>& inputResults,
+    std::stringstream* commentsOnFailure
+  );
   static bool innerAutomatedTest(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAutomatedTestSetKnownGoodCopy(Calculator& theCommands, const Expression& input, Expression& output);
   int GetNumBuiltInFunctions();
@@ -2402,6 +2384,7 @@ public:
   );
   void initialize();
   void reset();
+  void resetFrequentConstants();
   void initPredefinedWordSplits();
   void initAtomsThatFreezeArguments();
   void initAtomsNonCacheable();
@@ -2451,7 +2434,19 @@ public:
   class Test {
   public:
     static bool All();
+    static bool LoadTestStrings(
+      HashedList<std::string, MathRoutines::HashString>& outputCommands,
+      List<std::string>& outputResults,
+      std::stringstream *commentsOnFailure
+    );
+    static bool AppendOneTest(
+      JSData &input,
+      HashedList<std::string, MathRoutines::HashString>& outputCommands,
+      List<std::string>& outputResults,
+      std::stringstream *commentsOnFailure
+    );
     static bool ParseDecimal(Calculator& ownerInitialized);
+    static bool BuiltInFunctionsABTest(Calculator& ownerInitialized);
   };
 };
 

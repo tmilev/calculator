@@ -8,6 +8,7 @@ bool Calculator::Test::All() {
   Calculator tester;
   tester.initialize();
   Calculator::Test::ParseDecimal(tester);
+  Calculator::Test::BuiltInFunctionsABTest(tester);
   return true;
 }
 
@@ -28,4 +29,8 @@ bool Calculator::Test::ParseDecimal(Calculator& ownerInitialized) {
   }
 
   return true;
+}
+
+bool Calculator::Test::BuiltInFunctionsABTest(Calculator& ownerInitialized) {
+
 }

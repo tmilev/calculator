@@ -87,6 +87,10 @@ public:
     static std::string operation;
     static std::string fetch;
   };
+  struct calculator {
+  public:
+    static std::string testFileNameVirtual;
+  };
   static std::string HeaderCacheControl;
   static std::string commentsServer;
   struct UserInfo {

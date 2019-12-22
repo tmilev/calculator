@@ -6401,6 +6401,7 @@ void ElementWeylGroup::MakeCanonical() {
   if (this->owner->rho.size == 0) {
     this->owner->ComputeRho(false);
   }
+  //global.Comments << "DEBUG: Rho computed. ";
   Vector<Rational> theVector;
   this->owner->ActOn(*this, this->owner->rho, theVector);
   this->MakeFromRhoImage(theVector, *this->owner);
@@ -6587,11 +6588,24 @@ Matrix<Rational> WeylGroupData::GetMatrixStandardRep(int elementIndex) const {
   return result;
 }
 
-void WeylGroupData::init() {
+void WeylGroupData::reset() {
+  this->FundamentalToSimpleCoords.init(0, 0);
+  this->SimpleToFundamentalCoords.init(0, 0);
+  this->MatrixSendsSimpleVectorsToEpsilonVectors.FreeMemory();
   this->flagFundamentalToSimpleMatricesAreComputed = false;
   this->flagIrrepsAreComputed = false;
   this->flagCharTableIsComputed = false;
-  this->MatrixSendsSimpleVectorsToEpsilonVectors.FreeMemory();
+
+  this->theDynkinType.MakeZero();
+  this->CartanSymmetric.init(0, 0);
+  this->CoCartanSymmetric.init(0, 0);
+  this->rho.SetSize(0);
+  this->rhoOrbit.Clear();
+  this->RootSystem.Clear();
+  this->RootsOfBorel.SetSize(0);
+  this->ccCarterLabels.SetSize(0);
+  this->irrepsCarterLabels.SetSize(0);
+
   this->theGroup.init();
   this->theGroup.specificDataPointer = this;
   this->theGroup.GetWordByFormula = this->GetWordByFormulaImplementation;
@@ -6599,7 +6613,6 @@ void WeylGroupData::init() {
   this->theGroup.ComputeCCSizesAndRepresentativesByFormula = nullptr;
   this->theGroup.AreConjugateByFormula = nullptr;
   this->theGroup.ComputeIrreducibleRepresentationsWithFormulas = nullptr;
-  //this->theGroup.CheckInitialization();
 }
 
 void WeylGroupData::ActOnAffineHyperplaneByGroupElement(
@@ -7100,7 +7113,7 @@ void WeylGroupData::ComputeCoCartanSymmetricFromCartanSymmetric() {
 }
 
 void WeylGroupData::MakeMeFromMyCartanSymmetric() {
-  this->init();
+  this->reset();
   this->GenerateRootSystem();
   DynkinDiagramRootSubalgebra theDynkinTypeComputer;
   Vectors<Rational> simpleBasis;
@@ -7126,7 +7139,7 @@ void WeylGroupData::InitGenerators() {
 }
 
 void WeylGroupData::MakeFromDynkinType(const DynkinType& inputType) {
-  this->init();
+  this->reset();
   this->theDynkinType = inputType;
   this->theDynkinType.GetCartanSymmetric(this->CartanSymmetric);
   this->theDynkinType.GetCoCartanSymmetric(this->CoCartanSymmetric);
@@ -7145,10 +7158,11 @@ void WeylGroupData::MakeFromDynkinType(const DynkinType& inputType) {
     }
   }
   this->InitGenerators();
+  this->theGroup.CheckInitialization();
 }
 
 void WeylGroupData::MakeFromDynkinTypeDefaultLengthKeepComponentOrder(const DynkinType& inputType) {
-  this->init();
+  this->reset();
   this->theDynkinType = inputType;
   this->theDynkinType.GetCartanSymmetricDefaultLengthKeepComponentOrder(this->CartanSymmetric);
   this->MakeFinalSteps();

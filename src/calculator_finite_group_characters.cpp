@@ -2176,7 +2176,9 @@ bool CalculatorFunctionsWeylGroup::innerLieAlgebraRhoWeight(Calculator& theComma
   return output.AssignValueWithContext(resultWeight, theContext, theCommands);
 }
 
-bool CalculatorFunctionsWeylGroup::innerTestSpechtModules(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsWeylGroup::innerTestSpechtModules(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerTestSpechtModules");
   int theSymmetricGroupRank = 0;
   if (!input.IsSmallInteger(&theSymmetricGroupRank)) {

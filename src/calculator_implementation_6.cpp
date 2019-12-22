@@ -648,6 +648,7 @@ bool CalculatorFunctionsGeneral::innerTestRSASign(
   std::string theHex;
   Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst(theElement.theValue, 0, theHex);
   out << "<br>Converted to hex:<br>" << theHex;
+  // global << "DEBUG: !!!!!!!!!!!!!!!!!Succeffully out of test RSA!!!!!!!!!!!!!!!!!!!" << logger::endL;
   return output.AssignValue(out.str(), theCommands);
 }
 

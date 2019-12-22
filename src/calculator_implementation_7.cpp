@@ -8580,16 +8580,19 @@ void Calculator::AutomatedTestRun(
   int numFunctionsToTest = this->GetNumBuiltInFunctions();
   outputCommandStrings.SetExpectedSize(numFunctionsToTest);
   outputCommandStrings.SetSize(0);
+  List<std::string> atomsTested;
   for (int i = 0; i < this->FunctionHandlers.size; i ++) {
     for (int j = 0; j < this->FunctionHandlers[i].size; j ++) {
       if (!this->FunctionHandlers[i][j].flagDontTestAutomatically) {
         outputCommandStrings.AddOnTop(this->FunctionHandlers[i][j].theExample);
+        atomsTested.AddOnTop(this->theAtoms[i]);
       }
     }
   }
   for (int i = 0; i < this->operationsCompositeHandlers.size; i ++) {
     for (int j = 0; j < this->operationsCompositeHandlers[i].size; j ++) {
       outputCommandStrings.AddOnTop(this->operationsCompositeHandlers[i][j].theExample);
+      atomsTested.AddOnTop(this->theAtoms[i]);
     }
   }
   outputResultsWithInit.SetSize(outputCommandStrings.size);
@@ -8600,8 +8603,10 @@ void Calculator::AutomatedTestRun(
   for (int i = 0; i < outputCommandStrings.size; i ++) {
     double startingTime = global.GetElapsedSeconds();
     std::stringstream reportStream;
-    reportStream << "<br>Testing expression:<br> " << outputCommandStrings[i]
-    << "<br>Test progress: testing " << i + 1 << " out of " << outputCommandStrings.size << ". ";
+    reportStream << "<br>Test progress: testing " << i + 1 << " out of " << outputCommandStrings.size << ". ";
+    reportStream << "<br>Testing expression:<br> " << outputCommandStrings[i];
+    global << logger::green << "Automated test: " << i << " out of "
+    << outputCommandStrings.size << ", atom: " << atomsTested[i] << logger::endL;
     theReport.Report(reportStream.str());
     theTester.initialize();
     theTester.CheckConsistencyAfterInitialization();

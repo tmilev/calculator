@@ -1262,7 +1262,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "RepresentElementHyperoctahedral(s, V)",
     true,
     false,
-    "CalculatorFunctionsWeylGroup::innerRepresentElementHyperOctahedral"
+    "CalculatorFunctionsWeylGroup::innerRepresentElementHyperOctahedral",
+    "RepresentElementHyperoctahedral",
+    false,
+    "",
+    true
   );
   this->AddOperationInnerHandler(
     "HyperOctahedralIrreps",
@@ -1273,7 +1277,10 @@ void Calculator::initPredefinedInnerFunctions() {
     true,
     false,
     "CalculatorFunctionsWeylGroup::innerHyperOctahedralAllModulesInducedFromSpechtModules",
-    "HyperOctahedralIrreps"
+    "HyperOctahedralIrreps",
+    false,
+    "",
+    true
   );
   this->AddOperationInnerHandler(
     "SpechtModule",
@@ -1284,7 +1291,10 @@ void Calculator::initPredefinedInnerFunctions() {
     true,
     false,
     "CalculatorFunctionsWeylGroup::innerSpechtModule",
-    "SpechtModule"
+    "SpechtModule",
+    false,
+    "",
+    true
   );
   this->AddOperationInnerHandler(
     "HyperOctahedralRepresentation",
@@ -1295,7 +1305,10 @@ void Calculator::initPredefinedInnerFunctions() {
     true,
     false,
     "CalculatorFunctionsWeylGroup::innerHyperOctahedralAllModulesInducedFromSpechtModules",
-    "HyperOctahedralRepresentation"
+    "HyperOctahedralRepresentation",
+    false,
+    "",
+    true
   );
   this->AddOperationInnerHandler(
     "HyperOctahedralGeneratorPrint",
@@ -2181,7 +2194,10 @@ void Calculator::initPredefinedInnerFunctions() {
     true,
     false,
     "CalculatorFunctionsWeylGroup::innerTestSpechtModules",
-    "TestSpechtModules"
+    "TestSpechtModules",
+    false,
+    "",
+    true
   );
   this->AddOperationInnerHandler(
     "MakeElementWeylGroup",

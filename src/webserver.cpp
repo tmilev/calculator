@@ -1424,8 +1424,10 @@ int WebWorker::GetIndexIfRunningWorkerId(
     // 1) worker id was created in a worker process that was fired up after the current
     // worker.
     // 2) server executable was restarted.
+    // Once a worker id is not found, we want to close the connection.
+    this->flagKeepAlive = false;
     indexOther = - 1;
-    outputComputationStatus[WebAPI::result::comments] = "WorkerId not found. ";
+    outputComputationStatus[WebAPI::result::comments] = "WorkerId " + workerId + " not found. ";
   }
   return indexOther;
 }

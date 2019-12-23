@@ -1911,11 +1911,12 @@ bool Calculator::innerAutomatedTest(Calculator& theCommands, const Expression& i
 
 int Calculator::GetNumBuiltInFunctions() {
   int result = 0;
-  for (int i = 0; i < this->FunctionHandlers.size; i ++) {
-    result += this->FunctionHandlers[i].size;
-  }
-  for (int i = 0; i < this->operationsCompositeHandlers.size; i ++) {
-    result += this->operationsCompositeHandlers[i].size;
+  for (int i = this->NumPredefinedAtoms - 1; i >= 0; i --) {
+    MemorySaving<Calculator::AtomHandler>& current = this->operations.theValues[i];
+    if (current.IsZeroPointer()) {
+      continue;
+    }
+    result += current.GetElement().handlers.size + current.GetElement().compositeHandlers.size;
   }
   return result;
 }

@@ -14,7 +14,15 @@ static ProjectInformationInstance projectInfoCalculatorFunctionRegistrationCPP(_
 // This file lists calculator functions and various hard-coded rules.
 
 void Calculator::initAdminFunctions() {
-  this->AddOperationInnerHandler(
+  Function::Options adminDefault, adminDisabled;
+  adminDefault.flagDontTestAutomatically = true;
+  adminDefault.adminOnly = true;
+  adminDefault.flagIsInner = true;
+  adminDisabled = adminDefault;
+  adminDisabled.disabledByUserDefault = true;
+  adminDisabled.disabledByUser = true;
+
+  this->AddOperationHandler(
     "StopServer",
     CalculatorFunctionsGeneral::innerStopServer,
     "",
@@ -23,17 +31,15 @@ void Calculator::initAdminFunctions() {
     "Disabled by default. "
     "Use to stop server remotely/test server service restart. ",
     "StopServer 0",
-    true,
-    false,
     "CalculatorDatabaseFunctions::innerStopServer",
     "StopServer",
-    true
+    adminDisabled
   );
 
   if (!global.flagDatabaseCompiled) {
     return;
   }
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "MongoFind",
     CalculatorDatabaseFunctions::innerExecuteMongoQuery,
     "",
@@ -41,22 +47,19 @@ void Calculator::initAdminFunctions() {
     "The database name is calculator (can't be modified). "
     "First argument: collection name. Second argument: query. ",
     "MongoFind(\"users\", \"{}\")",
-    true,
-    false,
     "CalculatorDatabaseFunctions::innerExecuteMongoQuery",
-    "MongoFind"
+    "MongoFind",
+    adminDefault
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "RepairDatabaseEmailRecords",
     CalculatorDatabaseFunctions::innerRepairDatabaseEmailRecords,
     "",
     "Repairs username/email mismatches. Admin use only. ",
     "TurnOnRules(RepairDatabaseEmailRecords); RepairDatabaseEmailRecords(0)",
-    false,
-    true,
     "DatabaseRoutines::innerRepairDatabaseEmailRecords",
     "RepairDatabaseEmailRecords",
-    true
+    adminDefault
   );
 }
 
@@ -75,18 +78,57 @@ void Calculator::initCalculusTestingFunctions() {
 /// and have been used too often.
 ///
 void Calculator::initPredefinedInnerFunctions() {
-  this->AddOperationInnerHandler(
+  Function::Options innerStandard;
+  innerStandard.flagIsInner = true;
+  Function::Options innerInvisible;
+  innerInvisible.flagIsInner = true;
+  innerInvisible.visible = false;
+  Function::Options innerStandardOffByDefault;
+  innerStandardOffByDefault.flagIsInner = true;
+  innerStandardOffByDefault.disabledByUser = true;
+  innerStandardOffByDefault.disabledByUserDefault = true;
+  Function::Options innerExperimental;
+  innerExperimental.flagIsInner = true;
+  innerExperimental.flagIsExperimental = true;
+  Function::Options innerInvisibleExperimental;
+  innerInvisibleExperimental.flagIsInner = true;
+  innerInvisibleExperimental.flagIsExperimental = true;
+  innerInvisibleExperimental.visible = false;
+
+  Function::Options innerInvisibleNoTest;
+  innerInvisibleNoTest.flagIsInner = true;
+  innerInvisibleNoTest.visible = false;
+  innerInvisibleNoTest.flagDontTestAutomatically = true;
+  Function::Options innerNoTest;
+  innerNoTest.flagIsInner = true;
+  innerNoTest.flagDontTestAutomatically = true;
+  Function::Options innerAdminNoTest;
+  innerAdminNoTest.flagIsInner = true;
+  innerAdminNoTest.flagDontTestAutomatically = true;
+  innerAdminNoTest.adminOnly = true;
+  Function::Options innerAdminNoTestExperimental;
+  innerAdminNoTestExperimental = innerAdminNoTest;
+  innerAdminNoTestExperimental.flagIsExperimental = true;
+  Function::Options innerAdminNoTestInvisibleOffByDefault;
+  innerAdminNoTestInvisibleOffByDefault.flagIsInner = true;
+  innerAdminNoTestInvisibleOffByDefault.flagDontTestAutomatically = true;
+  innerAdminNoTestInvisibleOffByDefault.adminOnly = true;
+  innerAdminNoTestInvisibleOffByDefault.visible = false;
+  innerAdminNoTestInvisibleOffByDefault.disabledByUser = true;
+  innerAdminNoTestInvisibleOffByDefault.disabledByUserDefault = true;
+
+
+  this->AddOperationHandler(
     "SetRandomSeed",
     CalculatorFunctionsGeneral::innerSetRandomSeed,
     "",
     "Sets the random seed of the calculator to the given integer value",
     "SetRandomSeed(123); RandomInteger(- 100,100); RandomInteger(- 100,100)",
-    true,
-    false,
     "CalculatorConversions::innerSetRandomSeed",
-    "SetRandomSeed"
+    "SetRandomSeed",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "SelectAtRandom",
     CalculatorFunctionsGeneral::innerSelectAtRandom,
     "",
@@ -94,12 +136,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "f=SelectAtRandom(\\sin, \\cos); "
     "g=SelectAtRandom(\\tan, \\cot, \\sec, \\csc);"
     "f{}g{}x",
-    true,
-    false,
     "CalculatorConversions::SelectAtRandom",
-    "SelectAtRandom"
+    "SelectAtRandom",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "RandomInteger",
     CalculatorFunctionsGeneral::innerRandomInteger,
     "",
@@ -114,12 +155,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "For non-overlapping intervals, the random "
     "number distribution should be approximately uniform.",
     "RandomInteger((-2,- 1), (2,5));",
-    true,
-    false,
     "CalculatorConversions::innerRandomInteger",
-    "RandomInteger"
+    "RandomInteger",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "TurnOffRules",
     CalculatorFunctionsGeneral::innerTurnOffRules,
     "",
@@ -132,67 +172,61 @@ void Calculator::initPredefinedInnerFunctions() {
     "b=1/t^3;"
     "TurnOnRules(\"ConvertShortDenominatorToNegativePower\");"
     "b",
-    true,
-    false,
     "CalculatorConversions::innerTurnOffRules",
-    "TurnOffRules"
+    "TurnOffRules",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "TurnOnRules",
     CalculatorFunctionsGeneral::innerTurnOnRules,
     "",
     "Turns on computational rules.",
     "TurnOffRules(\"sqrt\"); a = \\sqrt[4]{t}; TurnOnRules(\"sqrt\"); a",
-    true,
-    false,
     "CalculatorConversions::innerTurnOnRules",
-    "TurnOnRules"
+    "TurnOnRules",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "TurnOnApproximations",
     CalculatorFunctionsGeneral::innerTurnOnApproximations,
     "",
     "Turns on numerical approximations. Takes as input dummy argument. ",
     "TurnOffApproximations(0); ln(2); TurnOnApproximations(0); ln(2)",
-    true,
-    false,
     "CalculatorConversions::innerTurnOnRules",
-    "TurnOnApproximations"
+    "TurnOnApproximations",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "TurnOffApproximations",
     CalculatorFunctionsGeneral::innerTurnOffApproximations,
     "",
     "Turns on numerical approximations. Takes as input dummy argument. ",
     "TurnOffApproximations(0); ln(2); TurnOnApproximations(0); ln(2)",
-    true,
-    false,
     "CalculatorConversions::innerTurnOnRules",
-    "TurnOffApproximations"
+    "TurnOffApproximations",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "EvaluateSymbols",
     CalculatorHtmlFunctions::innerEvaluateSymbols,
     "",
     "Evaluates and replaces individual symbols/variables in LaTeX string. Leaves the rest of the string intact.",
     "x = 5; left = a; EvaluateSymbols(\"x^x +ax +a x +\\left(left \\right)\")",
-    true,
-    false,
     "CalculatorConversions::innerEvaluateSymbols",
-    "EvaluateSymbols"
+    "EvaluateSymbols",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "or",
     CalculatorFunctionsGeneral::innerOr,
     "",
     "Logical or.",
     "0 or 0; 0 or 1; 1 or 0; 1 or 1; a or 1; a or 0;",
-    true,
-    false,
     "CalculatorConversions::innerOr",
-    "or"
+    "or",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "or",
     CalculatorFunctionsGeneral::innerOrIdentical,
     "",
@@ -201,12 +235,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "Please note that mathematically equal objects may fail to be identical, for example "
     "a rational number 5 and an algebraic number 5. ",
     "a or b; a or a",
-    true,
-    false,
     "CalculatorConversions::innerOrIdentical",
-    "orIdentical"
+    "orIdentical",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "if",
     CalculatorFunctionsGeneral::innerIf,
     "",
@@ -214,57 +247,52 @@ void Calculator::initPredefinedInnerFunctions() {
     "then returns the second argument. If the first argument is false (equal to 0) "
     "returns the third argument. In any other situation the expression is not reduced. ",
     "if (1, x, y); if (0, x, y); if (2, x, y)",
-    true,
-    false,
     "CalculatorConversions::innerIf",
-    "if"
+    "if",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "and",
     CalculatorFunctionsGeneral::innerAnd,
     "",
     "Logical and. ",
     "0 and 0; 0 and 1; 1 and 0; 1 and 1; a and 1; a and 0;",
-    true,
-    false,
     "CalculatorConversions::innerAnd",
-    "and"
+    "and",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "ConvertElementZmodPToInteger",
     CalculatorFunctionsGeneral::innerConvertElementZmodPToInteger,
     "",
     "Converts element of Z mod p to an integer between 0 and p - 1. ",
     "5^(ConvertElementZmodPToInteger( 9 mod 7))",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerConvertElementZmodPToInteger",
-    "ConvertElementZmodPToInteger"
+    "ConvertElementZmodPToInteger",
+    innerStandard
   );
 
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "URLStringToNormalString",
     CalculatorFunctionsGeneral::innerUrlStringToNormalString,
     "",
     "Converts an url-encoded string to a normal string. ",
     "URLStringToNormalString(\"randomSeed%3d92742048%26submissionsAlgebraAnswer%3\")",
-    true,
-    false,
     "CalculatorConversions::innerUrlStringToNormalString",
-    "URLStringToNormalString"
+    "URLStringToNormalString",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "ConvertStringToURL",
     CalculatorFunctionsGeneral::innerStringToURL,
     "",
     "Converts a normal string to a url-encoded one. ",
     "ConvertStringToURL(\"+ %\")",
-    true,
-    false,
     "CalculatorConversions::innerStringToURL",
-    "ConvertStringToURL"
+    "ConvertStringToURL",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "URLKeyValuePairsDecode",
     CalculatorFunctionsGeneral::innerURLKeyValuePairsToNormalRecursive,
     "",
@@ -272,12 +300,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "All % signs are interpreted recursively "
     "as double, triple, ... url encoded strings and decoded accordingly.",
     "URLKeyValuePairsDecode(\"Problems%2fFunctions%2dcomposing%2dfractional%2dlinear%2d1.html=weight%3d3%26deadlines%3d%26&Problems%2fLimits%2dbasic%2dsubstitution%2d1.html=weight%3d3%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dinfinity%2dRF%2dequal%2ddeg%2d1.html=weight%3d2%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dminus%2dinfinity%2dRF%2dequal%2ddeg%2d1.html=weight%3d1%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dpm%2dinfinity%2dRF%2dnum%2ddeg%2dsmaller%2d1.html =weight%3d1%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dinfinity%2dRF%2ddeg%2dden%2dsmaller%2d1.html =weight%3d1%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dminus%2dinfinity%2dRF%2ddeg%2dden%2dsmaller%2d1.html =weight%3d5%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dminus%2dinfinity%2dRF%2ddeg%2dden%2dsmaller%2d2.html =weight%3d6%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dpm%2dinfinity%2dquotient%2dradical%2deven%2dpower%2dbasic % 2d1.html =weight%3d1%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dminus%2dinfinity%2dquotient%2dradical%2dodd%2dpower%2dbasic % 2d1.html =weight%3d1%26deadlines%3d%26&Homework%2fPrecalculus%2dPrerequisites%2dUMB%2d1.html = deadlines%3d%26&\")",
-    true,
-    false,
     "CalculatorConversions::innerUrlStringToNormalString",
-    "URLKeyValuePairsDecode"
+    "URLKeyValuePairsDecode",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "LoadFileIntoString",
     CalculatorConversions::innerLoadFileIntoString,
     "",
@@ -296,24 +323,23 @@ void Calculator::initPredefinedInnerFunctions() {
     "LoadFileIntoString(\"robots.txt\");\n"
     "LoadFileIntoString(\"freecalc/contributors.tex\");\n"
     "LoadFileIntoString(\"problems/default/Functions-composing-fractional-linear-1.html\")",
-    true,
-    false,
     "CalculatorConversions::innerLoadFileIntoString",
-    "LoadFileIntoString"
+    "LoadFileIntoString",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "InterpretProblem",
     CalculatorHtmlFunctions::innerInterpretProblem,
     "",
-    "Does as ExtractCalculatorExpressionFromHtml but in addition interprets the calculator commands. ",
+    "Does as ExtractCalculatorExpressionFromHtml but in "
+    "addition interprets the calculator commands. ",
     "InterpretProblem(LoadFileIntoString("
     "\"problems/default/Functions-composing-fractional-linear-1.html\"))",
-    true,
-    false,
     "CalculatorHtmlFunctions::innerInterpretProblem",
-    "InterpretProblem"
+    "InterpretProblem",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "ProblemGiveUp",
     CalculatorHtmlFunctions::innerInterpretProblemGiveUp,
     "",
@@ -321,35 +347,32 @@ void Calculator::initPredefinedInnerFunctions() {
     "The second argument must be the id of the answer. ",
     "ProblemGiveUp(LoadFileIntoString("
     "\"problems/Functions-composing-fractional-linear-1.html\"), AlgebraAnswer)",
-    true,
-    false,
     "CalculatorHtmlFunctions::innerInterpretProblemGiveUp",
-    "ProblemGiveUp"
+    "ProblemGiveUp",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "MakeInputBox",
     CalculatorHtmlFunctions::innerUserInputBox,
     "",
     "Creates an user input text box. ",
     "MakeInputBox(name = a, value = RandomInteger((- 5, - 1), (1, 5)));",
-    true,
-    false,
     "CalculatorHtmlFunctions::innerUserInputBox",
-    "MakeInputBox"
+    "MakeInputBox",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "SetInputBox",
     CalculatorHtmlFunctions::innerSetInputBox,
     "",
     "Sets value for input box that overrides the input box (no box is displayed). ",
     "SetInputBox(name =a, value =RandomInteger((-5,- 1), (1,5))); "
     "MakeInputBox(name =a)",
-    true,
-    false,
     "CalculatorHtmlFunctions::innerSetInputBox",
-    "SetInputBox"
+    "SetInputBox",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "ExtractCalculatorExpressionFromHtml",
     CalculatorHtmlFunctions::innerExtractCalculatorExpressionFromHtml,
     "",
@@ -359,13 +382,12 @@ void Calculator::initPredefinedInnerFunctions() {
     "the planned span class names are: \"calculator\", "
     "\"calculatorHidden\", \"calculatorAnswer\".",
     "ExtractCalculatorExpressionFromHtml(LoadFileIntoString("
-    "\"problems/default/Functions-composing-fractional-linear-1.html\"))",
-    true,
-    false,
+    "\"problems/Functions-composing-fractional-linear-1.html\"))",
     "CalculatorHtmlFunctions::innerExtractCalculatorExpressionFromHtml",
-    "ExtractCalculatorExpressionFromHtml"
+    "ExtractCalculatorExpressionFromHtml",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "TestCalculatorIndicator",
     CalculatorFunctionsGeneral::innerTestIndicator,
     "",
@@ -375,124 +397,107 @@ void Calculator::initPredefinedInnerFunctions() {
     "Use a large dummy comment to test that large outputs are piped correctly to the "
     "monitoring process. ",
     "TestCalculatorIndicator(1000, 200000)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerTestIndicator",
     "TestCalculatorIndicator",
-    false,
-    "",
-    true
+    innerNoTest,
+    ""
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "TestTopCommand",
     CalculatorFunctionsGeneral::innerTestTopCommand,
     "",
     "(This is not a mathematical function). Tests the top linux command. ",
     "TestTopOperation(1000)",
-    false,
-    true,
     "CalculatorFunctionsGeneral::innerTestTopCommand",
-    "TestTopCommand"
+    "TestTopCommand",
+    innerAdminNoTest
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Crash",
     CalculatorFunctionsGeneral::innerCrash,
     "",
     "Crashes the calculator: tests the "
     "crashing mechanism (are crash logs properly created, etc.). ",
     "Crash(0)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerCrash",
     "Crash",
-    false,
-    "",
-    true
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "CrashListOutOfBounds",
     CalculatorFunctionsGeneral::innerCrashByListOutOfBounds,
     "",
     "Crashes the calculator by attempting to use data out-of-bounds in a List data structure. ",
     "CrashListOutOfBounds(0)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerCrashByListOutOfBounds",
     "CrashListOutOfBounds",
-    false,
-    "",
-    true
+    innerNoTest
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "CrashVectorOutOfBounds",
     CalculatorFunctionsGeneral::innerCrashByVectorOutOfBounds,
     "",
     "Crashes the calculator by attempting to use data "
     "out-of-bounds in a std::vector.",
     "CrashVectorOutOfBounds(0)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerCrashByVectorOutOfBounds",
     "CrashVectorOutOfBounds",
-    false,
-    "",
-    true
+    innerNoTest
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PlotExpressionTree",
     CalculatorFunctionsGeneral::innerDrawExpressionGraph,
     "",
     "Draws the internal tree structure of an expression. Does not unfold built-in types.",
-    "PlotExpressionTree( e^x)"
+    "PlotExpressionTree( e^x)",
+    "CalculatorFunctionsGeneral::innerDrawExpressionGraph",
+    "PlotExpressionTree",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Thaw",
     CalculatorFunctionsGeneral::innerThaw,
     "",
     "If the argument is frozen, removes the top freeze command and returns the argument, "
     "else returns the argument unchanged.",
     "a =Freeze{}(1 + 1); Thaw a; c =Thaw(Freeze(a,b)); PlotExpressionTree c",
-    true,
-    false,
-    "CalculatorFunctionsGeneral::innerThaw"
-    "Thaw"
+    "CalculatorFunctionsGeneral::innerThaw",
+    "Thaw",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "LogEvaluationStepsHumanReadableNested",
     Calculator::innerLogEvaluationStepsHumanReadableNested,
     "",
     "Show a step-by step evaluation of the calculator. "
     "Some steps my be combined or omitted for improved human readability. ",
     "LogEvaluationStepsHumanReadableNested((x +2)(x +3))",
-    true,
-    false,
-    "CalculatorFunctionsGeneral::innerLogEvaluationStepsHumanReadableNested"
-    "LogEvaluationStepsHumanReadableNested"
+    "CalculatorFunctionsGeneral::innerLogEvaluationStepsHumanReadableNested",
+    "LogEvaluationStepsHumanReadableNested",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "LogEvaluationStepsHumanReadableMerged",
     Calculator::innerLogEvaluationStepsHumanReadableMerged,
     "",
     "Show a step-by step evaluation of the calculator. "
     "Some steps my be combined or omitted for improved human readability. ",
     "LogEvaluationStepsHumanReadableMerged((x +2)(x +3))",
-    true,
-    false,
-    "CalculatorFunctionsGeneral::innerLogEvaluationStepsHumanReadableMerged"
-    "LogEvaluationStepsHumanReadableMerged"
+    "CalculatorFunctionsGeneral::innerLogEvaluationStepsHumanReadableMerged",
+    "LogEvaluationStepsHumanReadableMerged",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PlotExpressionTreeFull",
     CalculatorFunctionsGeneral::innerDrawExpressionGraphFull,
     "",
     "Draws the internal tree structure of an expression. Unfolds built-in types. ",
     "PlotExpressionTreeFull( 1); PlotExpressionTree(1+ 1);PlotExpressionTree( Freeze{}(1 + 1));",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerDrawExpressionGraphFull",
-    "PlotExpressionTreeFull"
+    "PlotExpressionTreeFull",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Lispify",
     CalculatorFunctionsGeneral::innerLispify,
     "",
@@ -500,93 +505,85 @@ void Calculator::initPredefinedInnerFunctions() {
     "without completely unfolding the tree structure of "
     "expressions that represent a single mathematical entity.",
     "Lispify(e^x)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerLispify",
-    "Lispify"
+    "Lispify",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "FlattenCommandEnclosuresOneLayer",
     Calculator::innerFlattenCommandEnclosuresOneLayer,
     "",
     "Flattens command enclosures. ",
     "FlattenCommandEnclosuresOneLayer(CommandEnclosure{}(x =5; x); "
     "CommandEnclosure{}(y; x)  ) ",
-    true,
-    false,
     "Calculator::FlattenCommandEnclosuresOneLayer",
-    "FlattenCommandEnclosuresOneLayer"
+    "FlattenCommandEnclosuresOneLayer",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "LispifyFull",
     CalculatorFunctionsGeneral::innerLispifyFull,
     "",
     "Shows the complete internal tree structure of an expression "
     "(replacing the expression with a string).",
     "LispifyFull( e^x)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerLispifyFull",
-    "LispifyFull"
+    "LispifyFull",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "ChildExpression",
     CalculatorFunctionsGeneral::innerChildExpression,
     "",
     "If defined, returns the nth child of an expression.",
     "ChildExpression(e^x, 1); ChildExpression(e^x, 2); ChildExpression(e^x, 3)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerChildExpression",
-    "ChildExpression"
+    "ChildExpression",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "ToString",
     CalculatorFunctionsGeneral::innerExpressionToString,
     "",
     "Transforms an arbitrary expression to its string representation. "
     "The string representation is (supposed to be) LaTeX-compatible. ",
     "ToString( e^x); \n \"e^x\";\"The quick brown fox jumps over the lazy dog.\"",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerExpressionToString",
-    "ToString"
+    "ToString",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "ToUTF8String",
     CalculatorFunctionsGeneral::innerExpressionToUTF8String,
     "",
     "Transforms an arbitrary expression to its utf8-string representation. "
     "The string is supposed to look reasonable when drawn on a javascript canvas. ",
     "f= \\sin {}x / \\cos {}x; Plot(f, -\\pi/4, \\pi/4) + PlotLabel{}((1,1), \"y =\" + ToUTF8String(f))",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerExpressionToUTF8String",
-    "ToUTF8String"
+    "ToUTF8String",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "StringToAtom",
     CalculatorFunctionsGeneral::innerStringToAtom,
     "",
     "Transforms a string to an atom. ",
     "StringToAtom(\"The quick brown fox jumps over the lazy dog.\")",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerStringToAtom",
-    "StringToAtom"
+    "StringToAtom",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\"",
     CalculatorFunctionsGeneral::innerQuoteToString,
     "",
     "Creates a string. ",
     "\"The quick brown fox jumps over the lazy dog.\"",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerQuoteToString",
-    "QuoteToString"
+    "QuoteToString",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "TestBase64",
     CalculatorFunctionsGeneral::innerBase64ToCharToBase64Test,
     "",
@@ -594,12 +591,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "Output must be identical to input. ",
     "TestBase64(\"TheQuickBrownFoxJumpsOverTheLazyDog=\");\n"
     "TestBase64(\"TheQuickBrownFoxJumpsOverTheLazyDog\")",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerBase64ToCharToBase64Test",
-    "TestBase64"
+    "TestBase64",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "EllipticCurveOrderNIST",
     CalculatorFunctionsGeneral::innerNISTEllipticCurveOrder,
     "",
@@ -607,25 +603,23 @@ void Calculator::initPredefinedInnerFunctions() {
     "g = EllipticCurveGeneratorNIST(\"secp256k1\");\n"
     "order = EllipticCurveOrderNIST(\"secp256k1\");\n"
     "g^order",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerNISTEllipticCurveOrder",
-    "EllipticCurveOrderNIST"
+    "EllipticCurveOrderNIST",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "EllipticCurveGeneratorNIST",
     CalculatorFunctionsGeneral::innerNISTEllipticCurveGenerator,
     "",
     "Makes generator of a NIST curve. At present implemented for secp256k1 only. ",
     "g=EllipticCurveGeneratorNIST(\"secp256k1\");\n"
     "g^3; g^115792089237316195423570985008687907852837564279074904382605163141518161494337",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerNISTEllipticCurveGenerator",
-    "EllipticCurveGeneratorNIST"
+    "EllipticCurveGeneratorNIST",
+    innerStandard
   );
 
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "StringDifference",
     CalculatorFunctionsGeneral::innerStringDifference,
     "",
@@ -635,13 +629,12 @@ void Calculator::initPredefinedInnerFunctions() {
     "For more information, see "
     "https://en.wikipedia.org/wiki/Longest_common_subsequence_problem.",
     "StringDifference(\"XMJYAUZ\",\"MZJAWXU\")",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerStringDiff",
-    "StringDifference"
+    "StringDifference",
+    innerStandard
   );
 
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Slice",
     CalculatorFunctionsGeneral::innerSliceString,
     "",
@@ -653,35 +646,32 @@ void Calculator::initPredefinedInnerFunctions() {
     "Slice(a, 0,2);\n"
     "Slice(a,0,- 1);\n"
     "Slice(a,1)\n",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerSliceString",
-    "Slice"
+    "Slice",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "ConvertIntegerToBase58",
     CalculatorFunctionsGeneral::innerConvertIntegerUnsignedToBase58,
     "",
     "Converts an unsigned integer to base58. ",
     "theInt = ConvertHexToInteger(ConvertBase58ToHex(\"1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK\"));"
     "ConvertIntegerToBase58(theInt)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerConvertIntegerUnsignedToBase58",
-    "ConvertIntegerToBase58"
+    "ConvertIntegerToBase58",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "ConvertBase58ToHex",
     CalculatorFunctionsGeneral::innerConvertBase58ToHex,
     "",
     "Converts Base58 to hex. ",
     "ConvertBase58ToHex(\"1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK\");",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerConvertBase58ToHex",
-    "ConvertBase58ToHex"
+    "ConvertBase58ToHex",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "AESCBCEncrypt",
     CalculatorFunctionsCrypto::innerAES_CBC_256_Encrypt,
     "",
@@ -691,12 +681,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "key = ConvertHexToString \"603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4\";\n"
     "ConvertStringToHex AESCBCEncrypt(key, text);\n"
     "\"f58c4c04d6e5f1ba779eabfb5f7bfbd69cfc4e967edb808d679f777bc6702c7d39f23369a9d9bacfa530e26304231461b2eb05e2c39be9fcda6c19078c6a9d1b\";\n",
-    true,
-    false,
     "CalculatorFunctionsCrypto::innerAES_CBC_256_Encode",
-    "AESCBCEncrypt"
+    "AESCBCEncrypt",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "AESCBCDecrypt",
     CalculatorFunctionsCrypto::innerAES_CBC_256_Decrypt,
     "",
@@ -708,12 +697,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "\"f58c4c04d6e5f1ba779eabfb5f7bfbd69cfc4e967edb808d679f777bc6702c7d39f23369a9d9bacfa530e26304231461b2eb05e2c39be9fcda6c19078c6a9d1b\";\n"
     "ConvertStringToHex AESCBCDecrypt(ConvertHexToString key, ConvertHexToString cipherText);\n"
     "text",
-    true,
-    false,
     "CalculatorFunctionsCrypto::innerAES_CBC_256_Decrypt",
-    "AESCBCDecrypt"
+    "AESCBCDecrypt",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "AppendDoubleSha256Check",
     CalculatorFunctionsGeneral::innerAppendDoubleSha256Check,
     "",
@@ -723,23 +711,21 @@ void Calculator::initPredefinedInnerFunctions() {
     "B= ConvertHexToString(A);\n"
     "C= AppendDoubleSha256Check(B);\n"
     "D= ConvertStringToHex(C)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerAppendDoubleSha256Check",
-    "AppendDoubleSha256Check"
+    "AppendDoubleSha256Check",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "ConvertHexToBase58",
     CalculatorFunctionsGeneral::innerConvertHexToBase58,
     "",
     "Converts hex to base58. ",
     "ConvertHexToBase58(\"03aaf2d5530b1a5cbf80c248ca44635ac265f4104ffc5b76ef48f361c03b7f536f\");",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerConvertHexToBase58",
-    "ConvertHexToBase58"
+    "ConvertHexToBase58",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "CharToBase64",
     CalculatorFunctionsGeneral::innerCharToBase64,
     "",
@@ -756,12 +742,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "CharToBase64(\"easure.\");\n"
     "CharToBase64(\"asure.\");\n"
     "CharToBase64(\"sure.\");\n",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerCharToBase64",
-    "CharToBase64"
+    "CharToBase64",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "ConvertBase64ToString",
     CalculatorFunctionsGeneral::innerConvertBase64ToString,
     "",
@@ -769,45 +754,41 @@ void Calculator::initPredefinedInnerFunctions() {
     "ConvertBase64ToString("
     "\"k7qTF1hLeOdihfKG5IRnlb7us2FVo1pSC2r0DVLkYwRAQHMs4XatvGcdG81S64uoaqG4fZ9IHJNpZjqokojuX5VIwl6utBO9\""
     ");",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerConvertBase64ToString",
-    "ConvertBase64ToString"
+    "ConvertBase64ToString",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "LoadKnownCertificates",
     CalculatorFunctionsGeneral::innerLoadKnownCertificates,
     "",
     "Loads known security certificates from the <a href=\"/certificates-public/\">certificates-public/</a> folder. ",
     "LoadKnownCertificates(0);",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerLoadKnownCertificates",
-    "LoadKnownCertificates"
+    "LoadKnownCertificates",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "TestLoadPEMCertificate",
     CalculatorFunctionsGeneral::innerTestLoadPEMCertificates,
     "",
     "Tests the pem parsing functions. ",
     "TestLoadPEMCertificate(ConvertBase64ToString(LoadFileIntoString(\"test/certificate_self_signed.base64\")));\n",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerTestLoadPEMCertificates",
-    "TestLoadPEMCertificate"
+    "TestLoadPEMCertificate",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "TestLoadPEMPrivateKey",
     CalculatorFunctionsGeneral::innerTestLoadPEMPrivateKey,
     "",
     "Tests the pem private key functions. ",
     "TestLoadPEMPrivateKey(ConvertBase64ToString(LoadFileIntoString(\"test/private_key.base64\")));\n",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerTestLoadPEMPrivateKey",
-    "TestLoadPEMPrivateKey"
+    "TestLoadPEMPrivateKey",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "TestTLSMessageSequence",
     CalculatorFunctionsGeneral::innerTestTLSMessageSequence,
     "",
@@ -822,12 +803,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "ConvertHexToString("
     "LoadFileIntoString(\"test/message_client_ssl_0.hex\")"
     ")\n);\n",
-    true,
-    true,
     "CalculatorFunctionsGeneral::innerTestTLSMessageSequence",
-    "TestTLSMessageSequence"
+    "TestTLSMessageSequence",
+    innerExperimental
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "TestTLSDecodeSSLRecord",
     CalculatorFunctionsGeneral::innerTestTLSDecodeSSLRecord,
     "",
@@ -835,12 +815,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "%HideLHS\nTestTLSDecodeSSLRecord("
     "LoadFileIntoString(\"test/message_client_ssl_0.hex\")"
     ");\n",
-    true,
-    true,
     "CalculatorFunctionsGeneral::innerTestTLSDecodeSSLRecord",
-    "TestTLSDecodeSSLRecord"
+    "TestTLSDecodeSSLRecord",
+    innerExperimental
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "TestASN1Decode",
     CalculatorFunctionsGeneral::innerTestASN1Decode,
     "",
@@ -848,56 +827,51 @@ void Calculator::initPredefinedInnerFunctions() {
     "%HideLHS\n"
     "TestASN1Decode(ConvertBase64ToString(LoadFileIntoString(\"test/certificate_self_signed.base64\")));\n"
     "TestASN1Decode(ConvertBase64ToString(LoadFileIntoString(\"test/private_key.base64\")));\n",
-    true,
-    true,
     "CalculatorFunctionsGeneral::innerTestASN1Decode",
-    "TestASN1Decode"
+    "TestASN1Decode",
+    innerExperimental
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "X509CertificateServerBase64",
     CalculatorFunctionsGeneral::innerX509CertificateServer,
     "",
     "Returns the base 64 encoding of the X509 certificate of this server. ",
     "X509CertificateServerBase64 0; ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerX509certificateCrunch",
-    "X509CertificateServerBase64"
+    "X509CertificateServerBase64",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "X509CertificateDecode",
     CalculatorFunctionsGeneral::innerX509CertificateDecode,
     "",
     "Decodes raw X509 certificate to a string. ",
     "%HideLHS X509CertificateDecode ConvertBase64ToString X509CertificateServerBase64 0; ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerX509CertificateDecode",
-    "X509CertificateDecode"
+    "X509CertificateDecode",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "ShowKnownASNObjectIds",
     CalculatorFunctionsGeneral::innerShowKnownObjectIds,
     "",
     "Lists all abstract syntax one object ids hard-coded in the calculator.",
     "ShowKnownASNObjectIds 0",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerShowKnownObjectIds",
-    "ShowKnownASNObjectIds"
+    "ShowKnownASNObjectIds",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "JWTverifyAgainstKnownKeys",
     CalculatorFunctionsGeneral::innerJWTVerifyAgainstKnownKeys,
     "",
     "Tries to verify a Json Web Token.",
     "%HideLHS JWTverifyAgainstKnownKeys(\"\"); ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerJWTverifyAgainstKnownKeys",
-    "JWTverifyAgainstKnownKeys"
+    "JWTverifyAgainstKnownKeys",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "JWTVerifyRSA256",
     CalculatorFunctionsGeneral::innerJWTVerifyAgainstRSA256,
     "",
@@ -909,12 +883,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "modulus = \"ofgWCuLjybRlzo0tZWJjNiuSfb4p4fAkd_wWJcyQoTbji9k0l8W26mPddxHmfHQp-Vaw-4qPCJrcS2mJPMEzP1Pt0Bm4d4QlL-yRT-SFd2lZS-pCgNMsD1W_YpRPEwOWvG6b32690r2jZ47soMZo9wGzjb_7OMg0LOL-bSf63kpaSHSXndS5z5rexMdbBYUsLA9e-KXBdQOS-UTo7WTBEMa2R2CapHg665xsmtdVMTBQY4uDZlxvb3qCo5ZwKh9kG4LT6_I5IhlJH7aGhyxXFvUK-DWNmoudF8NAco9_h9iaGNj8q2ethFkMLs91kzk2PAcDTW9gb54h4FRWyuXpoQ\";\n"
     "exponent =\"AQAB\";\n"
     "JWTVerifyRSA256(token,modulus,exponent);",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerJWTVerifyAgainstRSA256",
-    "JWTVerifyRSA256"
+    "JWTVerifyRSA256",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Sha1",
     CalculatorFunctionsGeneral::innerSha1OfString,
     "",
@@ -922,47 +895,44 @@ void Calculator::initPredefinedInnerFunctions() {
     "The examples below are taken from Wikipedia. ",
     "Sha1(\"The quick brown fox jumps over the lazy dog\");\n"
     "Sha1(\"The quick brown fox jumps over the lazy cog\");",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerSha1OfString",
-    "Sha1"
+    "Sha1",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Sha224",
     CalculatorFunctionsGeneral::innerSha224OfString,
     "",
     "Converts characters to a sequence of bits and computes the sha224 hash value of those bits. "
     "Reference: Wikipedia. ",
     "Sha224(\"\");",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerSha224OfString",
-    "Sha224"
+    "Sha224",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
-  "LogarithmBaseNCeiling",
-  CalculatorFunctionsGeneral::innerLogarithmBaseNCeiling,
-  "",
-  "Returns ceiling(log_N (input)), i.e., the smallest integer "
-  "X for which input <= N^X. First argument = N = base, "
-  "second argument = input.",
-  "LogarithmBaseNCeiling(2, 951891382051282682454493);\n"
-  "log_2 951891382051282682454493;\n"
-  "x = LogarithmBaseNCeiling(2, 100! + 1);\n"
-  "2^x - (100!+1);\n"
-  "2^{x+1} - (100!+1);\n"
-  "y=LogarithmBaseNCeiling(10, 1000! + 1);\n"
-  "10^y - 1000! - 1; 10^{y+1} - 1000! - 1;\n"
-  "DoubleValue(log_2(1000!+1)) + 1;\n"
-  "LogarithmBaseNCeiling(2, 1);\n"
-  "LogarithmBaseNCeiling(-2, 1);\n"
-  "LogarithmBaseNCeiling(2, -1);\n",
-  true,
-  false,
-  "CalculatorFunctionsGeneral::innerLogarithmBaseNCeiling",
-  "LogarithmBaseNCeiling"
-);
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
+    "LogarithmBaseNCeiling",
+    CalculatorFunctionsGeneral::innerLogarithmBaseNCeiling,
+    "",
+    "Returns ceiling(log_N (input)), i.e., the smallest integer "
+    "X for which input <= N^X. First argument = N = base, "
+    "second argument = input.",
+    "LogarithmBaseNCeiling(2, 951891382051282682454493);\n"
+    "log_2 951891382051282682454493;\n"
+    "x = LogarithmBaseNCeiling(2, 100! + 1);\n"
+    "2^x - (100!+1);\n"
+    "2^{x+1} - (100!+1);\n"
+    "y=LogarithmBaseNCeiling(10, 1000! + 1);\n"
+    "10^y - 1000! - 1; 10^{y+1} - 1000! - 1;\n"
+    "DoubleValue(log_2(1000!+1)) + 1;\n"
+    "LogarithmBaseNCeiling(2, 1);\n"
+    "LogarithmBaseNCeiling(-2, 1);\n"
+    "LogarithmBaseNCeiling(2, -1);\n",
+    "CalculatorFunctionsGeneral::innerLogarithmBaseNCeiling",
+    "LogarithmBaseNCeiling",
+    innerStandard
+  );
+  this->AddOperationHandler(
     "TestRSASign",
     CalculatorFunctionsGeneral::innerTestRSASign,
     "",
@@ -981,39 +951,33 @@ void Calculator::initPredefinedInnerFunctions() {
     "619744890606270245172389068191436591061733904616135797"
     "438741188808884326847918800555526459128765065042606467"
     "292598531117932066982164093023)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerTestRSASign",
-    "TestRSASign"
+    "TestRSASign",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "GenerateRandomPrime",
     CalculatorFunctionsGeneral::innerGenerateRandomPrime,
     "",
     "Generate random prime. Argument = desired number of bytes, max 128. ",
     "GenerateRandomPrime(10)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerGenerateRandomPrime",
     "GenerateRandomPrime",
-    false,
-    "",
-    true
+    innerNoTest
   );
 
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "RSAEncrypt",
     CalculatorFunctionsGeneral::innerRSAEncrypt,
     "",
     "Encrypts with RSA. First argument: modulus. Second argument: (public) exponent. "
     "Third argument: message given as a large integer.",
     "RSAEncrypt(3233, 17, 65)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerRSAEncrypt",
-    "RSAEncrypt"
+    "RSAEncrypt",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Ripemd160",
     CalculatorFunctionsGeneral::innerRIPEMD160OfString,
     "",
@@ -1022,12 +986,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "\"37f332f68db77bd9d7edd4969571ad671cf9dd3b\";\n"
     "ConvertStringToHex Ripemd160(\"The quick brown fox jumps over the lazy cog\");\n"
     "\"132072df690933835eb8b6ad0b77e7b6f14acad7\";\n",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerRIPEMD160OfString",
-    "Ripemd160"
+    "Ripemd160",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "ShaThree256",
     CalculatorFunctionsGeneral::innerSha3_256OfString,
     "",
@@ -1040,12 +1003,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "\"7f5979fb78f082e8b1c676635db8795c4ac6faba03525fb708cb5fd68fd40c5e\";\n"
     "ConvertStringToHex Keccak256(\"testing\");\n"
     "\"5f16f4c7f149ac4f9510d9cf8cf384038ad348b3bcdc01915f95de12df9d1b02\";\n",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerSha3_256OfString",
-    "ShaThree256"
+    "ShaThree256",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Keccak256",
     CalculatorFunctionsGeneral::innerKeccak256OfString,
     "",
@@ -1059,12 +1021,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "\"7f5979fb78f082e8b1c676635db8795c4ac6faba03525fb708cb5fd68fd40c5e\";\n"
     "ConvertStringToHex Keccak256(\"testing\");\n"
     "\"5f16f4c7f149ac4f9510d9cf8cf384038ad348b3bcdc01915f95de12df9d1b02\";\n",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerKeccak256OfString",
-    "Keccak256"
+    "Keccak256",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Sha256",
     CalculatorFunctionsGeneral::innerSha256OfString,
     "",
@@ -1076,14 +1037,12 @@ void Calculator::initPredefinedInnerFunctions() {
     "ConvertStringToHex Sha256(\"abc\");\n"
     "\"ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad\";\n"
     "ConvertStringToHex Sha256(\"abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu\");\n"
-    "\"cf5b16a778af8380036ce59e7b0492370b249b11e8f07a51afac45037afee9d1\";\n"
-    ,
-    true,
-    false,
+    "\"cf5b16a778af8380036ce59e7b0492370b249b11e8f07a51afac45037afee9d1\";\n",
     "CalculatorFunctionsGeneral::innerSha256OfString",
-    "Sha256"
+    "Sha256",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Sha512",
     CalculatorFunctionsGeneral::innerSha512,
     "",
@@ -1096,136 +1055,115 @@ void Calculator::initPredefinedInnerFunctions() {
     "ConvertStringToHex Sha512(\"abc\");\n"
     "\"ddaf35a193617abacc417349ae20413112e6fa4e89a97ea20a9eeee64b55d39a2192992a274fc1a836ba3c23a3feebbd454d4423643ce80e2a9ac94fa54ca49f\";\n"
     "ConvertStringToHex Sha512(\"abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu\");\n"
-    "\"8e959b75dae313da8cf4f72814fc143f8f7779c6eb9f7fa17299aeadb6889018501d289e4900f7e4331b99dec4b5433ac7d329eeb6dd26545e96e55b874be909\";\n"
-    ,
-    true,
-    false,
+    "\"8e959b75dae313da8cf4f72814fc143f8f7779c6eb9f7fa17299aeadb6889018501d289e4900f7e4331b99dec4b5433ac7d329eeb6dd26545e96e55b874be909\";\n",
     "CalculatorFunctionsGeneral::innerSha512",
-    "Sha512"
+    "Sha512",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Sha256Verbose",
     CalculatorFunctionsGeneral::innerSha256OfStringVerbose,
     "",
     "Same as Sha256 but more verbose. ",
     "Sha256Verbose(\"\");",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerSha256OfStringVerbose",
-    "Sha256Verbose"
+    "Sha256Verbose",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "TestJSON",
     CalculatorFunctionsGeneral::innerTestJSON,
     "",
     "Tests the JSON parsing mechanism. Input: json string, use backslash escapes for "
     "backslashes and quotes.",
     "TestJSON(\"{a:1}\"); TestJSON(\"{\\\"a\\\":\\\"\\\\\\\"\\\"}\");",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerTestJSON",
-    "TestJSON"
+    "TestJSON",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "ConvertBase64ToHex",
     CalculatorFunctionsGeneral::innerBase64ToHex,
     "",
     "Converts base64 string to hexadecimal string. ",
     "ConvertBase64ToHex(\"AQAB\");",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerBase64ToHex",
-    "ConvertBase64ToHex"
+    "ConvertBase64ToHex",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "ConvertStringToHex",
     CalculatorFunctionsGeneral::innerConvertStringToHex,
     "",
     "Converts a bitstream (not necessarily UTF-8 encoded) to hex. ",
     "ConvertStringToHex(Sha256(Sha256(\"hello\")));",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerConvertStringToHex",
-    "ConvertStringToHex"
+    "ConvertStringToHex",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "ConvertHexToInteger",
     CalculatorFunctionsGeneral::innerHexToInteger,
     "",
     "Converts a hex string to an integer. ",
     "ConvertHexToInteger(Base64ToHex(\"AQAB\"));",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerHexToInteger",
-    "ConvertHexToInteger"
+    "ConvertHexToInteger",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "ConvertIntegerToHex",
     CalculatorFunctionsGeneral::innerIntegerToHex,
     "",
     "Converts an integer to hex string. ",
     "ConvertIntegerToHex(65537);",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerIntegerToHex",
-    "ConvertIntegerToHex"
+    "ConvertIntegerToHex",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "ConvertHexToString",
     CalculatorFunctionsGeneral::innerHexToString,
     "",
     "Converts a hex string to a string. ",
     "ConvertHexToString(\"3031300d060960864801650304020105000420\");",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerHexToString",
-    "ConvertHexToString"
+    "ConvertHexToString",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "FormatCPPCode",
     CalculatorFunctionsGeneral::innerFormatCPPSourceCode,
     "",
     "Format cpp code. ",
     "FormatCPPCode{}(\"src/database.cpp\")",
-    false,
-    false,
     "Calculator::innerFormatCPPSourceCode",
     "FormatCPPCode",
-    false,
-    "",
-    true
+    innerInvisibleNoTest
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "FormatCPPDirectory",
     CalculatorFunctionsGeneral::innerFormatCPPDirectory,
     "",
     "Format cpp directory. ",
     "FormatCPPDirectory{}(\"src/\")",
-    false,
-    false,
     "Calculator::innerFormatCPPDirectory",
     "FormatCPPDirectory",
-    false,
-    "",
-    true
+    innerInvisibleNoTest
   );
 
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "AutomatedTest",
     Calculator::innerAutomatedTest,
     "",
     "Runs a big bad automated test of all built in functions "
     "against a set of known good results. ",
     "AutomatedTest{}(0)",
-    false,
-    false,
     "Calculator::innerAutomatedTest",
     "AutomatedTest",
-    true,
-    "",
-    true
+    innerAdminNoTestInvisibleOffByDefault
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "AutomatedTestProblemInterpretation",
     CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation,
     "",
@@ -1235,24 +1173,21 @@ void Calculator::initPredefinedInnerFunctions() {
     "the automated test rule has to be activated first.</b> To activate the test, "
     "please first use the command: TurnOnRules(AutomatedTestProblemInterpretation).",
     "AutomatedTestProblemInterpretation{}(0,0,0)",
-    false,
-    false,
     "CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation",
     "AutomatedTestProblemInterpretation",
-    true
+    innerAdminNoTestInvisibleOffByDefault
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "!",
     CalculatorFunctionsGeneral::innerFactorial,
     "",
     "Factorial function. ",
     "5!",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerFactorial",
-    "Factorial"
+    "Factorial",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "RepresentElementHyperoctahedral",
     CalculatorFunctionsWeylGroup::innerRepresentElementHyperOctahedral,
     "",
@@ -1260,103 +1195,83 @@ void Calculator::initPredefinedInnerFunctions() {
     "V= HyperOctahedralRepresentation((1,1),1);\n"
     "s = MakeElementHyperOctahedral{}((1,2),1,0,0);\n"
     "RepresentElementHyperoctahedral(s, V)",
-    true,
-    false,
     "CalculatorFunctionsWeylGroup::innerRepresentElementHyperOctahedral",
     "RepresentElementHyperoctahedral",
-    false,
-    "",
-    true
+    innerAdminNoTest
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "HyperOctahedralIrreps",
     CalculatorFunctionsWeylGroup::innerHyperOctahedralAllModulesInducedFromSpechtModules,
     "",
     "Prints all modules induced from Specht modules. ",
     "HyperOctahedralIrreps(3)",
-    true,
-    false,
     "CalculatorFunctionsWeylGroup::innerHyperOctahedralAllModulesInducedFromSpechtModules",
     "HyperOctahedralIrreps",
-    false,
-    "",
-    true
+    innerAdminNoTest
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "SpechtModule",
     CalculatorFunctionsWeylGroup::innerSpechtModule,
     "",
     "Gets the Specht module of the partition. ",
     "SpechtModule((3,2,1))",
-    true,
-    false,
     "CalculatorFunctionsWeylGroup::innerSpechtModule",
     "SpechtModule",
-    false,
-    "",
-    true
+    innerAdminNoTest
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "HyperOctahedralRepresentation",
     CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation,
     "",
     "Gets one hyperoctahedral representation from two partitions. ",
     "HyperOctahedralRepresentation((1,1), (1))",
-    true,
-    false,
     "CalculatorFunctionsWeylGroup::innerHyperOctahedralAllModulesInducedFromSpechtModules",
     "HyperOctahedralRepresentation",
-    false,
-    "",
-    true
+    innerAdminNoTest
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "HyperOctahedralGeneratorPrint",
     CalculatorFunctionsWeylGroup::innerHyperOctahedralPrintGeneratorCommutationRelations,
     "",
     "Prints the generator commutation relations of a hyperoctahedral group. ",
     "HyperOctahedralGeneratorPrint(3)",
-    true,
-    false,
     "CalculatorFunctionsWeylGroup::innerHyperOctahedralPrintGeneratorCommutationRelations",
-    "HyperOctahedralGeneratorPrint"
+    "HyperOctahedralGeneratorPrint",
+    innerAdminNoTest
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PrintMacdonaldPolys",
     CalculatorFunctionsWeylGroup::innerMacdonaldPolys,
     "",
     "Prints macdonald polynomials from a semisimple type. ",
     "PrintMacdonaldPolys{}(B_3)",
-    true,
-    false,
     "CalculatorFunctionsWeylGroup::innerMacdonaldPolys",
-    "PrintMacdonaldPolys"
+    "PrintMacdonaldPolys",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Numerator",
     CalculatorFunctionsGeneral::innerNumerator,
     "",
     "If the expression is a fraction, returns the numerator, "
     "else returns the entire expression. ",
     "Numerator(a/b); Numerator(1+ 1/x)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerNumerator",
-    "Numerator"
+    "Numerator",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "ApplyToSubexpressionsRecurseThroughCalculusFunctions",
     CalculatorFunctionsGeneral::innerApplyToSubexpressionsRecurseThroughCalculusFunctions,
     "",
     "Applies a transformation, recursively to all subexpressions of "
     "a list of known functions. ",
     "ApplyToSubexpressionsRecurseThroughCalculusFunctions(Polynomialize, sin ((x + 1)^3))",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerApplyToSubexpressionsRecurseThroughCalculusFunctions",
-    "ApplyToSubexpressionsRecurseThroughCalculusFunctions"
+    "ApplyToSubexpressionsRecurseThroughCalculusFunctions",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "SubList",
     CalculatorFunctionsGeneral::innerSubList,
     "",
@@ -1364,12 +1279,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "condition given by the second argument. Use the bound "
     "variable syntax {{a}} to address the current element of the list.",
     "SubList{}((1,2,3,4), {{a}}>2)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerSubList",
-    "SubList"
+    "SubList",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "ApplyToList",
     CalculatorFunctionsGeneral::innerApplyToList,
     "",
@@ -1377,24 +1291,22 @@ void Calculator::initPredefinedInnerFunctions() {
     "SolveForX{}{{a}}=SolveFor(x,{{a}});\n"
     "SolveForX(x^2+2);\n"
     "ApplyToList(SolveForX,(x^2+ 1,x^2-x-2))",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerApplyToList",
-    "ApplyToList"
+    "ApplyToList",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Denominator",
     CalculatorFunctionsGeneral::innerDenominator,
     "",
     "If the expression is a fraction, returns the denominator, "
     "else returns 1. ",
     "Denominator(a/b); Denominator(1+ 1/x)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerDenominator",
-    "Denominator"
+    "Denominator",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Product",
     CalculatorFunctionsGeneral::innerMultiplySequence,
     "",
@@ -1405,12 +1317,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "This may not produce the result you expected for non-sequences, "
     "so use on sequences only. ",
     "Product(a,b); Product{}(Sequence{}a); Product(Sequence{}a); Product(a)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerMultiplySequence",
-    "Product"
+    "Product",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\sum",
     CalculatorFunctionsGeneral::innerSumSequence,
     "",
@@ -1421,12 +1332,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "This may not produce the result you expected for non-sequences, "
     "so use on sequences only. ",
     "\\sum(a,b); \\sum{}(Sequence{}a); \\sum(Sequence{}a); \\sum(a)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerSumSequence",
-    "\\sum"
+    "\\sum",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "MakeExpression",
     CalculatorConversions::innerExpressionFromBuiltInType,
     "",
@@ -1440,35 +1350,32 @@ void Calculator::initPredefinedInnerFunctions() {
     ");\n"
     "MakeExpression {}D-C;\n"
     "D-B;",
-    true,
-    false,
     "CalculatorConversions::innerExpressionFromBuiltInType",
-    "MakeExpression"
+    "MakeExpression",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Polynomial",
     CalculatorConversions::innerPolynomial<Rational>,
     "",
     "Creates a polynomial expression with rational coefficients. ",
     "Polynomial{}((x-2y+z- 1)^2(x +y-z));"
     "\nPolynomial{}(y^2)-(Polynomial{}y)^2",
-    true,
-    false,
     "CalculatorConversions::innerPolynomial",
-    "Polynomial"
+    "Polynomial",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PolynomialAlgebraicNumbers",
     CalculatorConversions::innerPolynomial<AlgebraicNumber>,
     "",
     "Creates a polynomial expression with algebraic number coefficients. ",
     "PolynomialAlgebraicNumbers{}((x +\\sqrt{2})^2 (\\sqrt{3}x-\\sqrt{5}));",
-    true,
-    false,
     "CalculatorConversions::innerPolynomial",
-    "PolynomialAlgebraicNumbers"
+    "PolynomialAlgebraicNumbers",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "ConvertAlgebraicNumberToMatrix",
     CalculatorFunctionsGeneral::innerConvertAlgebraicNumberToMatrix,
     "",
@@ -1480,34 +1387,31 @@ void Calculator::initPredefinedInnerFunctions() {
     "c = \\sqrt{6};\n"
     "C = ConvertAlgebraicNumberToMatrix(c);\n"
     "A\\otimes B",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerConvertAlgebraicNumberToMatrix",
-    "ConvertAlgebraicNumberToMatrix"
+    "ConvertAlgebraicNumberToMatrix",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "AlgebraicNumberFromPoly",
     CalculatorFunctionsGeneral::innerGetAlgebraicNumberFromMinPoly,
     "",
     "Creates an algebraic number that is a root of a polynomial with algebraic number coefficients. ",
     "AlgebraicNumberFromPoly{}(x^3+\\sqrt{2}x + 1);",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerGetAlgebraicNumberFromMinPoly",
-    "AlgebraicNumberFromPoly"
+    "AlgebraicNumberFromPoly",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PrincipalSlTwoIndex",
     CalculatorFunctionsGeneral::innerGetPrincipalSl2Index,
     "",
     "Gives the symmetric Cartan corresponding to a given dynkin type.",
     "PrincipalSlTwoIndex(G_2^3+D_4^2);",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerGetPrincipalSl2Index",
-    "PrincipalSlTwoIndex"
+    "PrincipalSlTwoIndex",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "DynkinIndicesSlTwoSubalgebras",
     CalculatorFunctionsGeneral::innerGetDynkinIndicesSlTwoSubalgebras,
     "",
@@ -1519,23 +1423,21 @@ void Calculator::initPredefinedInnerFunctions() {
     "DynkinIndicesSlTwoSubalgebras(2A_2+A_2^2);\n"
     "DynkinIndicesSlTwoSubalgebras(2A_2+A_2^7);\n"
     "DynkinIndicesSlTwoSubalgebras(2G_2+G_2^7+F_4+F_4^19);",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerGetDynkinIndicesSlTwoSubalgebras",
-    "DynkinIndicesSlTwoSubalgebras"
+    "DynkinIndicesSlTwoSubalgebras",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "CartanSymmetric",
     CalculatorFunctionsGeneral::innerGetSymmetricCartan,
     "",
     "Gives the symmetric Cartan corresponding to a given dynkin type.",
     "CartanSymmetric(e^7_6);",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerGetSymmetricCartan",
-    "CartanSymmetric"
+    "CartanSymmetric",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "GrowDynkinType",
     CalculatorFunctionsGeneral::innerGrowDynkinType,
     "",
@@ -1543,12 +1445,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "type inside an ambient Dynkin type. ",
     "GrowDynkinType(A^30_1+d^30_4, e_6);\n"
     "GrowDynkinType(g^35_2+B^30_2, e_6);",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerGrowDynkinType",
-    "GrowDynkinType"
+    "GrowDynkinType",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "IsDifferentialOneFormOneVariable",
     CalculatorFunctionsGeneral::innerIsDifferentialOneFormOneVariable,
     "",
@@ -1558,12 +1459,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "IsDifferentialOneFormOneVariable(x {\\text{d}} y );\n"
     "IsDifferentialOneFormOneVariable(\\frac{\\text{d} y}{y} );\n"
     "IsDifferentialOneFormOneVariable(1/(\\text{d} y) );",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerIsDifferentialOneFormOneVariable",
-    "IsDifferentialOneFormOneVariable"
+    "IsDifferentialOneFormOneVariable",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Polynomialize",
     CalculatorFunctionsGeneral::outerPolynomialize,
     "",
@@ -1572,12 +1472,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "A = Polynomialize(C); "
     "B=MakeExpression(Polynomial(C)); "
     "A-B",
-    true,
-    false,
     "CalculatorFunctionsGeneral::outerPolynomialize",
-    "Polynomialize"
+    "Polynomialize",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "IsAlgebraicRadical",
     CalculatorFunctionsGeneral::innerIsAlgebraicRadical,
     "",
@@ -1586,148 +1485,134 @@ void Calculator::initPredefinedInnerFunctions() {
     "IsAlgebraicRadical(\\sqrt{5+\\sqrt{2}}); "
     "IsAlgebraicRadical(\\sqrt{x}); "
     "IsAlgebraicRadical(\\sqrt{\\pi +e + 1})",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerIsAlgebraicRadical",
-    "IsAlgebraicRadical"
+    "IsAlgebraicRadical",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "IsReal",
     CalculatorFunctionsGeneral::innerIsReal,
     "",
     "Tests whether the expression is a real constant.  ",
     "IsReal(\\sqrt{5+\\sqrt{- 1}}); IsReal(\\sqrt{\\sqrt{5}- 1});\n"
     "IsReal(sqrt(\\sqrt{\\pi}-2) )",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerIsReal",
-    "IsReal"
+    "IsReal",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "IsConstant",
     CalculatorFunctionsGeneral::innerIsConstant,
     "",
     "Tests whether the expression is a constant.  ",
     "IsConstant(\\pi^2); IsConstant(1);IsConstant(x);\n"
     "IsConstant(e^{\\sin(\\pi^2+e +\\sqrt{2}+3)}  ); ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerIsConstant",
-    "IsConstant"
+    "IsConstant",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\int",
     CalculatorFunctionsGeneral::innerIntegrateDefiniteIntegral,
     "",
     "Integrates a definite integral.  ",
     "\\int_{1}^2 (x^2+x) dx ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerIntegrateDefiniteIntegral",
-    "DefiniteIntegral"
+    "DefiniteIntegral",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\int",
     CalculatorFunctionsGeneral::innerIntegratePowerByUncoveringParenthesisFirst,
     "",
     "Attempts to rearrange into standard polynomial form and then integrate.  ",
     "\\int  \\left( \\frac{x(x + 1) }{ 2} \\right)^2 dx ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerIntegratePowerByUncoveringParenthesisFirst",
-    "IntegrateAfterPolynomialization"
+    "IntegrateAfterPolynomialization",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\int",
     CalculatorFunctionsGeneral::innerIntegrateXnDiffX,
     "",
     "Integrates x^n dx. ",
     "\\int x dx ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerIntegrateXnDiffX",
-    "IntegratePowerRule"
+    "IntegratePowerRule",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\int",
     CalculatorFunctionsGeneral::innerIntegrateEpowerAxDiffX,
     "",
     "If a is a number, integrates e^{a x} dx. ",
     "\\int x dx ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerIntegrateEpowerAxDiffX",
-    "IntegrateEpowerX"
+    "IntegrateEpowerX",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\int",
     CalculatorFunctionsGeneral::innerIntegratePullConstant,
     "",
     "Pulls out constants from integrals  ",
     "\\int 2\\sqrt{2-x^2} dx ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerIntegratePullConstant",
-    "IntegratePullConstant"
+    "IntegratePullConstant",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\int",
     CalculatorFunctionsGeneral::innerIntegrateSqrtOneMinusXsquared,
     "",
     "Integrates \\int \\sqrt{a-x^2}dx, a > 0.",
     "\\int 2\\sqrt{2-x^2} dx ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerIntegrateSqrtOneminusXsquared",
-    "IntegrateSqrtOneminusXsquared"
+    "IntegrateSqrtOneminusXsquared",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\int",
     CalculatorFunctionsGeneral::innerIntegrateSqrtXsquaredMinusOne,
     "",
     "Integrates \\int \\sqrt{x^2-a}dx, a > 0.  ",
     "\\int 2\\sqrt{3x^2-5} dx ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerIntegrateSqrtXsquaredMinusOne",
-    "IntegrateSqrtXsquaredMinusOne"
+    "IntegrateSqrtXsquaredMinusOne",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\int",
     CalculatorFunctionsGeneral::innerIntegrateXpowerNePowerAx,
     "",
     "Integrates by parts \\int x^n e^{a x} dx, where n is a positive integer.  ",
     "\\int 2 x^{3} e^{5x} dx ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerIntegrateXpowerNePowerAx",
-    "IntegrateXpowerNePowerAx"
+    "IntegrateXpowerNePowerAx",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "^",
     CalculatorFunctionsGeneral::innerEulerFlaAsALaw,
     "",
     "Trigonometrizes an exponential expression using Euler's formula.  ",
     "TurnOnRules(\"EulerFormula\"); e^{i x}",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerEulerFlaAsALaw",
     "EulerFormula",
-    true
+    innerStandardOffByDefault
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "^",
     CalculatorFunctionsGeneral::innerPowerImaginaryUnit,
     "",
     "Raises imaginary unit to an integer power. ",
-    "TurnOnRules(\"PowerImaginaryUnit\");i^{-50!+ 1}; ",
-    true,
-    false,
+    "TurnOnRules(\"PowerImaginaryUnit\");\n"
+    "i^{-50!+ 1}; ",
     "CalculatorFunctionsGeneral::innerPowerImaginaryUnit",
     "PowerImaginaryUnit",
-    true
+    innerStandardOffByDefault
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "+",
     CalculatorFunctionsGeneral::innerTrigSumToTrigProduct,
     "",
@@ -1736,243 +1621,219 @@ void Calculator::initPredefinedInnerFunctions() {
     "sin(a) +sin(b); sin(b)-sin(a);\n"
     "-sin(b) +sin(a); -sin(b)-sin(a);\n"
     "cos(a) +cos(b); cos(a)-cos(b); -cos(a)-cos(b)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerTrigSumToTrigProduct",
     "TrigSumToTrigProduct",
-    true
+    innerStandardOffByDefault
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\sin",
     CalculatorFunctionsGeneral::innerSineOfAngleSumToTrig,
     "",
-    "Implementation of sin (a +b)=sin(a)cos(b) +cos(a)sin(b).",
-    "TurnOnRules(\"SineOfAngleSum\"); \\sin(a +b)",
-    true,
-    false,
+    "Implementation of sin (a + b) = sin(a) cos(b) + cos(a) sin(b).",
+    "TurnOnRules(\"SineOfAngleSum\"); \\sin(a + b)",
     "CalculatorFunctionsGeneral::innerSineOfAngleSumToTrig",
     "SineOfAngleSum",
-    true
+    innerStandardOffByDefault
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\cos",
     CalculatorFunctionsGeneral::innerCosineOfAngleSumToTrig,
     "",
     "Implementation of cos (a +b)= cos(a)cos(b)-sin(a)sin(b).",
     "TurnOnRules(\"CosineOfAngleSum\"); \\cos(a +b)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerCosineOfAngleSumToTrig",
     "CosineOfAngleSum",
-    true
+    innerStandardOffByDefault
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\sin",
     CalculatorFunctionsGeneral::innerConvertSinToExponent,
     "",
-    "Converts sine to exponent by sin(x)= (e^{i x}-e^{-ix})/(2i) ",
-    "TurnOnRules(\"ExpressSinViaExponent\", \"ExpressCosViaExponent\"); \\sin x; cos x",
-    true,
-    false,
+    "Converts sine to exponent by sin(x) = (e^{i x}-e^{-i x}) / (2i) ",
+    "TurnOnRules(\"ExpressSinViaExponent\", \"ExpressCosViaExponent\");\n"
+    "\\sin x;\n"
+    "cos x",
     "CalculatorFunctionsGeneral::innerConvertTrigToExponent",
     "ExpressSinViaExponent",
-    true
+    innerStandardOffByDefault
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\cos",
     CalculatorFunctionsGeneral::innerConvertCosToExponent,
     "",
-    "Converts cosine to exponent by cos(x)= (e^{i x}+e^{-ix})/(2) ",
-    "TurnOnRules(\"ExpressSinViaExponent\", \"ExpressCosViaExponent\"); \\sin x; cos x",
-    true,
-    false,
+    "Converts cosine to exponent by cos(x) = (e^{i x}+e^{-i x})/(2) ",
+    "TurnOnRules(\"ExpressSinViaExponent\", \"ExpressCosViaExponent\");\n"
+    "\\sin x;\n"
+    "cos x",
     "CalculatorFunctionsGeneral::innerConvertTrigToExponent",
     "ExpressCosViaExponent",
-    true
+    innerStandardOffByDefault
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\cos",
     CalculatorFunctionsGeneral::innerExploitCosEvenness,
     "",
-    "If a is negative, converts cos (a) to cos(-a).",
+    "If a is negative, converts cos (a) to cos(- a).",
     "TurnOnRules(\"ExploitCosEvenness\"); cos(-5x)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerExploitCosEvenness",
     "ExploitCosEvenness",
-    true
+    innerStandardOffByDefault
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\sin",
     CalculatorFunctionsGeneral::innerExploitSinOddness,
     "",
     "If a is negative, converts sin (a) to -sin(-a).",
     "TurnOnRules(\"ExploitSinOddness\"); sin(-5x)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerExploitSinOddness",
     "ExploitSinOddness",
-    true
+    innerStandardOffByDefault
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\int",
     CalculatorFunctionsGeneral::innerIntegrateSinPowerNCosPowerM,
     "",
     "Solves/transforms an integral of the form \\int \\sin^n x \\cos^m x. ",
     "\\int \\sin^{4}x \\cos^{6}x dx ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerIntegrateSinPowerNCosPowerM",
-    "IntegrateSinPowerNCosPowerM"
+    "IntegrateSinPowerNCosPowerM",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\int",
     CalculatorFunctionsGeneral::innerIntegrateTanPowerNSecPowerM,
     "",
     "Transforms an integral of the form \\int \\tan^n x \\sec^m x.  ",
     "TurnOffRules(\"ExpressTanViaSineCosine\", \"ExpressSecViaCosine\"); \\int \\tan^2 x \\sec^{2}x dx ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerIntegrateTanPowerNSecPowerM",
-    "IntegrateTanPowerNSecPowerM"
+    "IntegrateTanPowerNSecPowerM",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\int",
     CalculatorFunctionsGeneral::innerIntegrateSum,
     "",
     "If the integral is of the form \\int (A+B )dx, tries recursively to integrate A and B. "
     "If successful, integrates the sum in the obvious way.",
     "\\int (x + 1+\\sqrt{}2) dx ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerIntegrateSum",
-    "IntegrateSum"
+    "IntegrateSum",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\int",
     CalculatorFunctionsGeneral::innerIntegratePullImaginaryUnit,
     "",
     "Pulls out the imaginary unit in front of the integral. ",
     "\\int i 3 e^{i x} dx ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerIntegratePullImaginaryUnit",
-    "IntegratePullOutImaginaryUnit"
+    "IntegratePullOutImaginaryUnit",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Differentiate",
     CalculatorFunctionsGeneral::innerDifferentiateSqrt,
     "",
-    "Differentiation - square root function.  ",
+    "Differentiation - square root function. ",
     "d/dx(sqrt(x));",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerDifferentiateSqrt",
-    "DifferentiateSqrt"
+    "DifferentiateSqrt",
+    innerStandard
   );
   //the function integrating the building blocks must come in the exact order below:
   //else we risk infinite substitution cycle. The reasons are implementation-specific.
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\int",
     CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIa,
     "",
     "Integrates building block Ia.  ",
     "\\int  (\\frac{3}{(x/2- 1)} ) dx ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIa",
-    "IntegrateBlockIa"
+    "IntegrateBlockIa",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\int",
     CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIb,
     "",
     "Integrates building block Ib.  ",
     "\\int  (\\frac{2}{(3x- 1)^2} ) dx ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIb",
-    "IntegrateBlockIb"
+    "IntegrateBlockIb",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\int",
     CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIaandIIIa,
     "",
     "Integrates building blocks IIa and IIIa.  ",
     "\\int  (\\frac{3x +2}{x^2+x + 1} ) dx ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIaandIIIa",
-    "IntegrateBlockIIaIIIa"
+    "IntegrateBlockIIaIIIa",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\int",
     CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIIb,
     "",
     "Integrates building blocks IIIb.  ",
     "\\int  (\\frac{3x +2}{(x^2+x + 1)^2} ) dx ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIIb",
-    "IntegrateBlockIIIb"
+    "IntegrateBlockIIIb",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\int",
     CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIb,
     "",
     "Integrates building blocks IIb.  ",
     "\\int  (\\frac{3x +2}{(x^2+x + 1)^2} ) dx ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIb",
-    "IntegrateBlockIIb"
+    "IntegrateBlockIIb",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\int",
     CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlocks,
     "",
     "Attempts to split an integral of a rational function into building block integrals.  ",
     "\\int  \\frac{1}{x(x + 1)} dx ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlocks",
-    "IntegratePartialFractions"
+    "IntegratePartialFractions",
+    innerStandard
   );
 
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Differentiate",
     CalculatorFunctionsGeneral::innerDifferentiateTrigAndInverseTrig,
     "",
     "Differentiation - product rule. ",
     "Differentiate(x,  (\\sin x) \\cos x )",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerDifferentiateTrigAndInverseTrig",
-    "DifferentiateTrigAndInverseTrig"
+    "DifferentiateTrigAndInverseTrig",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Differentiate",
     CalculatorFunctionsGeneral::innerDifferentiateChainRule,
     "",
     "Differentiation - chain rule.  ",
     "Differentiate(x,  \\sin x^2 \\cos (\\sin x))",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerDifferentiateChainRule",
-    "DifferentiateChainRule"
+    "DifferentiateChainRule",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Differentiate",
     CalculatorFunctionsGeneral::innerDifferentiateAtimesB,
     "",
     "Differentiation - product rule.  ",
     "Differentiate(x, f*g )",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerDifferentiateAtimesB",
-    "DifferentiateProductRule"
+    "DifferentiateProductRule",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Differentiate",
     CalculatorFunctionsGeneral::innerDifferentiateAdivideBCommutative,
     "",
@@ -1982,78 +1843,71 @@ void Calculator::initPredefinedInnerFunctions() {
     "The commutative division rule is "
     "d/dx (f/g^n) = ((d/dx f) g- n f (d/dx g))/g^{n + 1}. ",
     "Differentiate(x, f/g ); Differentiate(x, f/g^5 ); Differentiate(x, f/g^n )",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerDifferentiateAdivideBCommutative",
-    "DifferentiateQuotientRule"
+    "DifferentiateQuotientRule",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Differentiate",
     CalculatorFunctionsGeneral::innerDifferentiateAplusB,
     "",
     "Differentiation - sum rule.  ",
-    "Differentiate(x, f+g )",
-    true,
-    false,
+    "Differentiate(x, f + g)",
     "CalculatorFunctionsGeneral::innerDifferentiateAplusB",
-    "DifferentiateSum"
+    "DifferentiateSum",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Differentiate",
     CalculatorFunctionsGeneral::innerDifferentiateConstant,
     "",
     "Differentiation - constant rule. ",
     "Differentiate(x, 5 ); d/dx \\sqrt{5}",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerDifferentiateConstant",
-    "DifferentiateConstant"
+    "DifferentiateConstant",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Differentiate",
     CalculatorFunctionsGeneral::innerDifferentiateX,
     "",
     "Differentiation - d/dx x = 1.",
     "Differentiate(x, x ); d/dx x",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerDifferentiateX",
-    "DifferentiateIdentity"
+    "DifferentiateIdentity",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Differentiate",
     CalculatorFunctionsGeneral::innerDifferentiateConstPower,
     "",
     "Differentiation - d/dx x^n = n x^{n- 1}.",
     "Differentiate(x, x^2 ); d/dx x^- 1; d/dt t^{\\sqrt{2}}; d/dc c^{DoubleValue 3.14}",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerDifferentiateConstPower",
-    "DifferentiateConstPower"
+    "DifferentiateConstPower",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Differentiate",
     CalculatorFunctionsGeneral::innerDifferentiateAPowerB,
     "",
     "Differentiation - d/dx a^b= d/dx(e^{b\\log a}) = a^b d/dx(b\\log a) .",
     "Differentiate(x, x^2 ); d/dx x^- 1; d/dt t^{\\sqrt{2}}; d/dc c^{DoubleValue 3.14}",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerDifferentiateAPowerB",
-    "DifferentiateApowerB"
+    "DifferentiateApowerB",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\times",
     CalculatorFunctionsGeneral::innerCrossProduct,
     "",
     "Cross product in IIId. Returns error if given two non-3d vectors.",
     "(1,-2,3 ) \\times( 1,- 1,- 1)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerCrossProduct",
-    "crossProduct"
+    "crossProduct",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "ElementWeylAlgebraDO",
     Calculator::innerElementWeylAlgebra,
     "",
@@ -2062,12 +1916,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "second argument - the dual polynomial expression. ",
     "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n"
     "x_{{i}}= Polynomial{}x_i; \n[\\partial_1, x_1]; \n\\partial_1 x_1; \nx_1\\partial_1",
-    true,
-    false,
     "Calculator::innerElementWeylAlgebra",
-    "ElementWeylAlgebraDO"
+    "ElementWeylAlgebraDO",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "ElementWeylAlgebraPoly",
     Calculator::innerPolynomialWithEWA,
     "",
@@ -2076,22 +1929,21 @@ void Calculator::initPredefinedInnerFunctions() {
     "x_{{i}}= ElementWeylAlgebraPoly{}(\\partial_i, x_i);\n"
     "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n"
     "\\partial_1 x_1",
-    true,
-    false,
     "Calculator::innerPolynomialWithEWA",
-    "ElementWeylAlgebraPoly"
+    "ElementWeylAlgebraPoly",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "MakeRationalFunction",
     CalculatorConversions::innerRationalFunction,
     "",
     "Creates a built-in rational function.",
     "MakeRationalFunction{}(x_1+MakeRationalFunction{}x_1+x_2)",
-    true,
-    false,
-    "CalculatorConversions::innerRationalFunction"
+    "CalculatorConversions::innerRationalFunction",
+    "MakeRationalFunction",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "MakeMatrix",
     CalculatorConversions::innerMakeMatrix,
     "",
@@ -2100,12 +1952,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "s_2=MakeMatrix{}((1,0,0,0), (- 1,- 1,- 1,0), (0,0,1,0), (0,0,0,1));\n"
     "s_3=MakeMatrix{}((1,0,0,0), (0,1,0,0), (0,-2,- 1,- 1), (0,0,0,1));\n"
     "s_4=MakeMatrix{}((1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,- 1,- 1)); ",
-    true,
-    false,
     "CalculatorConversions::innerMatrixRational",
-    "MakeMatrix"
+    "MakeMatrix",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "MakeMatrixTensorForm",
     CalculatorConversions::innerMatrixRationalTensorForm,
     "",
@@ -2114,23 +1965,21 @@ void Calculator::initPredefinedInnerFunctions() {
     "s_1 = MakeMatrixTensorForm{}("
     "(- 1,- 1, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1)"
     "); ",
-    true,
-    false,
     "CalculatorConversions::innerMatrixRationalTensorForm",
-    "MakeMatrixTensorForm"
+    "MakeMatrixTensorForm",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "MakeMatrixRFs",
     CalculatorConversions::innerMatrixRationalFunction,
     "",
     "Creates an internal c++ matrix structure from double list of polynomial functions. ",
     "s_1=MakeMatrixRFs{}((1-t, 2), (3, 2-t))",
-    true,
-    false,
     "CalculatorConversions::innerMatrixRationalFunction",
-    "MakeMatrixRFs"
+    "MakeMatrixRFs",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "FourierTransformDO",
     CalculatorFunctionsGeneral::innerFourierTransformEWA,
     "",
@@ -2144,12 +1993,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "a =x^3 + x\\partial; b = \\partial x + \\partial^3 + \\partial;\n"
     "[FourierTransformDO{}a,FourierTransformDO{}b]"
     "-FourierTransformDO{}[a,b]",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerFourierTransformEWA",
-    "FourierTransformDO"
+    "FourierTransformDO",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PerturbSplittingNormal",
     Calculator::innerPerturbSplittingNormal,
     "",
@@ -2180,50 +2028,43 @@ void Calculator::initPredefinedInnerFunctions() {
     "(1, 2, 2, 1),"
     "(1, 1, 2, 2), (1, 2, 3, 1), (1, 2, 2, 2), (1, 2, 3, 2), "
     "(1, 2, 4, 2), (1, 3, 4, 2), (2, 3, 4, 2)))",
-    true,
-    false,
     "Calculator::innerPerturbSplittingNormal",
-    "PerturbSplittingNormal"
+    "PerturbSplittingNormal",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "TestSpechtModules",
     CalculatorFunctionsWeylGroup::innerTestSpechtModules,
     "",
     "Tests all Specht modules of S_n, where n is the only argument taken by the function.",
     "TestSpechtModules(4); ",
-    true,
-    false,
     "CalculatorFunctionsWeylGroup::innerTestSpechtModules",
     "TestSpechtModules",
-    false,
-    "",
-    true
+    innerAdminNoTest
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "MakeElementWeylGroup",
     CalculatorFunctionsWeylGroup::innerWeylGroupElement,
     "",
     "Needs a group name and a list of generators",
     "s_{{i}}=MakeElementWeylGroup{}(A_2, i);\n(s_1+s_2)(2s_1+s_2)(3s_1+s_2)",
-    true,
-    false,
     "CalculatorFunctionsWeylGroup::innerWeylGroupElement",
-    "MakeElementWeylGroup"
+    "MakeElementWeylGroup",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "MakeElementHyperOctahedral",
     CalculatorConversions::innerMakeElementHyperOctahedral,
     "",
     "Needs a group name and a list of generators",
-    "s = MakeElementHyperOctahedral{}((1,2),1,0,0);\n"
-    "t = MakeElementHyperOctahedral{}((1,3),0,0,0);\n"
-    "s*t*s*t",
-    true,
-    false,
+    "s = MakeElementHyperOctahedral{}((1, 2), 1, 0, 0);\n"
+    "t = MakeElementHyperOctahedral{}((1, 3), 0, 0, 0);\n"
+    "s * t * s * t",
     "CalculatorConversions::innerMakeElementHyperOctahedral",
-    "MakeElementHyperOctahedral"
+    "MakeElementHyperOctahedral",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "WeylGroupClassicalSignMultiplicities",
     CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystemsFromKostkaNumbers,
     "",
@@ -2239,48 +2080,44 @@ void Calculator::initPredefinedInnerFunctions() {
     "WeylGroupClassicalSignMultiplicities{}(a_2);\n"
     "WeylGroupClassicalSignMultiplicities{}(a_3);\n"
     "WeylGroupClassicalSignMultiplicities{}(a_4);\n",
-    true,
-    false,
     "CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystemsFromKostkaNumbers",
-    "WeylGroupClassicalSignMultiplicities"
+    "WeylGroupClassicalSignMultiplicities",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "WeylGroupTauSignatures",
     CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems,
     "",
     "Prints the tau signatures of a Weyl group. See a common article by "
     "T. Folz-Donahue, S. Jackson, T. Milev, A. Noel. ",
     "WeylGroupTauSignatures{}(b_3);",
-    true,
-    true,
     "CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems",
-    "WeylGroupTauSignatures"
+    "WeylGroupTauSignatures",
+    innerAdminNoTestExperimental
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "WeylGroupConjugacyClassesFromAllElements",
     CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements,
     "",
     "For small ranks, computes the conjugacy classes of a Weyl "
     "group by enumerating all elements of the group. ",
     "WeylGroupConjugacyClassesFromAllElements{}(A_2);",
-    true,
-    true,
     "CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements",
-    "WeylGroupConjugacyClassesFromAllElements"
+    "WeylGroupConjugacyClassesFromAllElements",
+    innerAdminNoTestExperimental
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "WeylGroupOuterConjugacyClassesFromAllElements",
     CalculatorFunctionsWeylGroup::innerWeylGroupOuterConjugacyClassesFromAllElements,
     "",
     "Computes conjugacy classes, identifying classes that "
     "are conjugate using outer automorphisms. ",
     "WeylGroupOuterConjugacyClassesFromAllElements{}(D_4);",
-    true,
-    true,
     "CalculatorFunctionsWeylGroup::innerWeylGroupOuterConjugacyClassesFromAllElements",
-    "WeylGroupOuterConjugacyClassesFromAllElements"
+    "WeylGroupOuterConjugacyClassesFromAllElements",
+    innerAdminNoTestExperimental
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "WeylGroupConjugacyClassesRepresentatives",
     CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesRepresentatives,
     "",
@@ -2288,36 +2125,33 @@ void Calculator::initPredefinedInnerFunctions() {
     "Weyl group by comparing conjugacy classes invariants and by "
     "enumerating conjugacy class orbits. ",
     "WeylGroupConjugacyClassesRepresentatives{}(A_2);",
-    true,
-    true,
     "CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesRepresentatives",
-    "WeylGroupConjugacyClassesRepresentatives"
+    "WeylGroupConjugacyClassesRepresentatives",
+    innerAdminNoTestExperimental
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "WeylGroupConjugacyClasses",
     CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasseS,
     "",
     "Loads the conjugacy classes of a Weyl group (hard-coded), "
     "or computes them if rank<=6. ",
     "WeylGroupConjugacyClasses{}(f_4);",
-    true,
-    false,
     "CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasseS",
-    "WeylGroupConjugacyClasses"
+    "WeylGroupConjugacyClasses",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "WeylGroupCharTable",
     CalculatorFunctionsWeylGroup::innerWeylGroupLoadOrComputeCharTable,
     "",
     "Loads the character table of a Weyl group. "
     "The character tables are hard-coded.",
     "WeylGroupCharTable{}(b_3);",
-    true,
-    false,
     "CalculatorFunctionsWeylGroup::innerWeylGroupLoadOrComputeCharTable",
-    "WeylGroupCharTable"
+    "WeylGroupCharTable",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "WeylGroupIrrepsAndCharTableComputeFromScratch",
     CalculatorFunctionsWeylGroup::innerWeylGroupIrrepsAndCharTableComputeFromScratch,
     "",
@@ -2325,23 +2159,21 @@ void Calculator::initPredefinedInnerFunctions() {
     "Computes from scratch the irreducible representations "
     "and the character table of a Weyl group.",
     "WeylGroupIrrepsAndCharTableComputeFromScratch{}(b_3);",
-    true,
-    true,
     "CalculatorFunctionsWeylGroup::innerWeylGroupIrrepsAndCharTableComputeFromScratch",
-    "WeylGroupIrrepsAndCharTableComputeFromScratch"
+    "WeylGroupIrrepsAndCharTableComputeFromScratch",
+    innerAdminNoTestExperimental
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "WeylOrbitSize",
     CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSize,
     "",
     "Computes the size of a Weyl group orbit of a weight",
     "WeylOrbitSize(E_6, (3,3,3,7,7,11)); WeylOrbitSize(E_8, (3,3,3,7,7,11,13,13));",
-    true,
-    false,
     "CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSize",
-    "WeylOrbitSize"
+    "WeylOrbitSize",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "WeylOrbitSimpleCoords",
     CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSimple,
     "",
@@ -2349,12 +2181,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "First argument = type. Second argument = weight in simple coords. "
     "The orbit size is cut off at max 1920 elements (type D_5).",
     "WeylOrbitSimpleCoords{}(B_2, (y, y));",
-    true,
-    false,
     "CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSimple",
-    "WeylOrbitSimpleCoords"
+    "WeylOrbitSimpleCoords",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "WeylGroupOrbitOuterSimple",
     CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple,
     "",
@@ -2364,24 +2195,22 @@ void Calculator::initPredefinedInnerFunctions() {
     "First argument = type. Second argument = weight in simple coords. "
     "The orbit size is cut off at 1921*2 elements. ",
     "WeylGroupOrbitOuterSimple{}(D_4, (1,0,0,0))",
-    true,
-    false,
     "CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple",
-    "WeylGroupOrbitOuterSimple"
+    "WeylGroupOrbitOuterSimple",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "WeylOrbitFundCoords",
     CalculatorFunctionsWeylGroup::innerWeylGroupOrbitFund,
     "",
     "Generates a Weyl orbit printout from fundamental coords. "
     "First argument = type. Second argument = weight in fundamental coords. ",
     "WeylOrbitFundCoords{}(B_2, (y, 0));",
-    true,
-    false,
     "CalculatorFunctionsWeylGroup::innerWeylGroupOrbitFund",
-    "WeylOrbitFundCoords"
+    "WeylOrbitFundCoords",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "WeylOrbitFundRho",
     CalculatorFunctionsWeylGroup::innerWeylGroupOrbitFundRho,
     "",
@@ -2389,12 +2218,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "First argument = type. Second argument = weight in fundamental coords. "
     "Doing the rho-modified action. ",
     "WeylOrbitFundRho{}(B_2, (y, 0) )",
-    true,
-    false,
     "CalculatorFunctionsWeylGroup::innerWeylGroupOrbitFundRho",
-    "WeylOrbitFundRho"
+    "WeylOrbitFundRho",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "WeylRaiseToMaximallyDominant",
     CalculatorFunctionsWeylGroup::innerWeylNoOuterRaiseToMaximallyDominant,
     "",
@@ -2406,12 +2234,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "WeylRaiseToMaximallyDominant{}(F_4, (3, 6, 8, 4), (- 1, -3, -2, 0)  );\n"
     "WeylRaiseToMaximallyDominant{}(F_4, (3, 6, 8, 4), (0, -3, -4, -2)  );\n"
     "WeylRaiseToMaximallyDominant{}(F_4, (0, -3, -4, -2) , (3, 6, 8, 4)  );",
-    true,
-    false,
     "CalculatorFunctionsWeylGroup::innerWeylNoOuterRaiseToMaximallyDominant",
-    "WeylRaiseToMaximallyDominant"
+    "WeylRaiseToMaximallyDominant",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "MakeWeight",
     CalculatorFunctionsWeylGroup::innerLieAlgebraWeight,
     "",
@@ -2425,23 +2252,21 @@ void Calculator::initPredefinedInnerFunctions() {
     "\\varepsilon_1;\n"
     "\\psi_1;\n"
     "\\eta_3",
-    true,
-    false,
     "CalculatorFunctionsWeylGroup::innerLieAlgebraWeight",
-    "MakeWeight"
+    "MakeWeight",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "MakeRho",
     CalculatorFunctionsWeylGroup::innerLieAlgebraRhoWeight,
     "",
     "Makes the half-sum of the positive roots.",
     "\n\\rho =MakeRho(B_3);",
-    true,
-    false,
     "CalculatorFunctionsWeylGroup::innerLieAlgebraRhoWeight",
-    "MakeRho"
+    "MakeRho",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "IsOuterAuto",
     CalculatorFunctionsWeylGroup::innerIsOuterAutoWeylGroup,
     "",
@@ -2456,12 +2281,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "(0, 1, 0, 0, 0, -2),"
     "(0, 0, 0, 0, 0, - 1));"
     "IsOuterAuto{}(e_6,  A);",
-    true,
-    false,
     "CalculatorFunctionsWeylGroup::innerIsOuterAutoWeylGroup",
-    "IsOuterAuto"
+    "IsOuterAuto",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "WeylOuterRaiseToMaximallyDominant",
     CalculatorFunctionsWeylGroup::innerWeylOuterRaiseToMaximallyDominant,
     "",
@@ -2470,12 +2294,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "WeylOuterRaiseToMaximallyDominant{}(D_4,  (0, 0, 0, 1), (1, 0, 0, 0)  );\n"
     "WeylOuterRaiseToMaximallyDominant{}(D_4,  (1, 0, 0, 0), (0, 0, 1, 0)  );\n"
     "WeylOuterRaiseToMaximallyDominant{}(D_4,  (0, 0, 1, 0), (1, 0, 0, 0)  );\n",
-    true,
-    false,
     "CalculatorFunctionsWeylGroup::innerWeylOuterRaiseToMaximallyDominant",
-    "WeylOuterRaiseToMaximallyDominant"
+    "WeylOuterRaiseToMaximallyDominant",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "GenerateFiniteMultiplicativelyClosedSet",
     Calculator::innerGenerateMultiplicativelyClosedSet,
     "",
@@ -2487,12 +2310,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "s_2=MakeMatrix{}((1 , 0 , 0),(1 , - 1 , 1),(0 , 0 , 1));\n"
     "s_3=MakeMatrix{}((1 , 0 , 0),(0 , 1 , 0),(0 , 2 , - 1));\n"
     "GenerateFiniteMultiplicativelyClosedSet{}(48, s_1, s_2, s_3);",
-    true,
-    false,
     "Calculator::innerGenerateMultiplicativelyClosedSet",
-    "GenerateFiniteMultiplicativelyClosedSet"
+    "GenerateFiniteMultiplicativelyClosedSet",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "CartanSA",
     CalculatorFunctionsGeneral::innerConstructCartanSA,
     "",
@@ -2500,12 +2322,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "g_{{i}}= GetChevalleyGenerator{}(b_3, i);\n"
     "h_{{i}}= GetCartanGenerator{}(b_3, i);"
     "CartanSA(g_1+g_3, g_- 1+g_-3, g_2, g_-2);",
-    true,
-    true,
     "CalculatorFunctionsGeneral::innerConstructCartanSA",
-    "CartanSA"
+    "CartanSA",
+    innerAdminNoTestExperimental
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "GenerateVectorSpaceClosedWRTLieBracket",
     CalculatorFunctionsGeneral::innerGenerateVectorSpaceClosedWRTLieBracket,
     "",
@@ -2530,92 +2351,87 @@ void Calculator::initPredefinedInnerFunctions() {
     "q_{{i}}= GetChevalleyGenerator{}(F_4, i);\n"
     "s_2= -q_{-5}-q_{-6};\ns_1=q_{20}+q_{19};\n s_- 1= -q_{- 19}-q_{-20}\n; s_-2=2q_{6}+2q_{5};\n"
     "GenerateVectorSpaceClosedWRTLieBracket(52, s_1, s_2, s_- 1, s_-2);",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerGenerateVectorSpaceClosedWRTLieBracket",
-    "GenerateVectorSpaceClosedWRTLieBracket"
+    "GenerateVectorSpaceClosedWRTLieBracket",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "WeylGroupNaturalRep",
     CalculatorFunctionsWeylGroup::innerWeylGroupNaturalRep,
     "",
     "Gets the natural representation of the Weyl group.",
     "WeylGroupNaturalRep{}(B_3)",
-    true,
-    false,
     "CalculatorFunctionsWeylGroup::innerWeylGroupNaturalRep",
-    "WeylGroupNaturalRep"
+    "WeylGroupNaturalRep",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "WeylGroupGetOuterAutoGenerators",
     CalculatorFunctionsWeylGroup::innerWeylGroupOuterAutoGeneratorsPrint,
     "",
     "Gets the generators of the outer automorphism group (the group generated by "
     "the graph automorphisms of the Dynkin diagram.",
     "WeylGroupGetOuterAutoGenerators{}(2D_4)",
-    true,
-    false,
     "CalculatorFunctionsWeylGroup::innerWeylGroupOuterAutoGeneratorsPrint",
-    "WeylGroupGetOuterAutoGenerators"
+    "WeylGroupGetOuterAutoGenerators",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "MakeVirtualWeylGroupRepresentation",
     CalculatorFunctionsWeylGroup::innerMakeVirtualWeylRep,
     "",
     "Convert a representation into virtual one.",
     "MakeVirtualWeylGroupRepresentation{}(WeylGroupNaturalRep{}(B_3))",
-    true,
-    true,
     "CalculatorFunctionsWeylGroup::innerMakeVirtualWeylRep",
-    "MakeVirtualWeylGroupRepresentation"
+    "MakeVirtualWeylGroupRepresentation",
+    innerAdminNoTestExperimental
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "MinPolyMatrix",
     CalculatorFunctionsGeneral::innerMinPolyMatrix,
     "",
     "Computes the minimal polynomial of a matrix, provided that the matrix is not too large.",
-    "A =MakeMatrix{}((0,1), (- 1,0)); p =MinPolyMatrix{}A",
-    true,
-    false,
+    "A = MakeMatrix{}((0, 1), (- 1, 0));\n"
+    "p = MinPolyMatrix{}A",
     "CalculatorFunctionsGeneral::innerMinPolyMatrix",
-    "MinPolyMatrix"
+    "MinPolyMatrix",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "CharPoly",
     CalculatorFunctionsGeneral::innerCharPolyMatrix,
     "",
     "Computes the characteristic polynomial of a matrix (= det(A-q*Id)), "
     "provided that the matrix is not too large.",
     "A =\\begin{pmatrix}2 & 3& 5\\\\ 7& 11& 13\\\\ 17&19 &23\\end{pmatrix}; p =MinPolyMatrix{}A",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerCharPolyMatrix",
-    "CharPoly"
+    "CharPoly",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "MakeCharacterLieAlg",
     Calculator::innerCharacterSSLieAlgFD,
     "",
     "Creates character of a semisimple Lie algebra finite dimensional irreducible module. "
     "First argument gives type, second argument gives highest weight in fundamental coordinates.",
-    "x =MakeCharacterLieAlg{}(G_2, (1,0));\ny =MakeCharacterLieAlg{}(G_2, (0,1));\nx*y",
-    true,
-    false,
+    "x = MakeCharacterLieAlg{}(G_2, (1,0));\n"
+    "y = MakeCharacterLieAlg{}(G_2, (0,1));\n"
+    "x * y",
     "Calculator::innerCharacterSSLieAlgFD",
-    "MakeCharacterLieAlg"
+    "MakeCharacterLieAlg",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "GetLinks",
     Calculator::innerGetLinksToSimpleLieAlgerbas,
     "",
     "Gets simple Lie algebra links to the calculator.",
     "GetLinks{}0",
-    false,
-    false,
     "Calculator::innerGetLinksToSimpleLieAlgerbas",
-    "GetLinks"
+    "GetLinks",
+    innerInvisible
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "ConesIntersection",
     Calculator::innerConesIntersect,
     "",
@@ -2626,23 +2442,23 @@ void Calculator::initPredefinedInnerFunctions() {
     "the second cone is generated over Z_{&gt;= 0} (``non-strict cone'').",
     "v_1= (1, 2, 3 ); v_2= (1, 3, 2); v_3= (3,1,1); v_4= (-2,2, 2);\n"
     "ConesIntersection{}((v_1,v_2 ), (v_3,v_4 ));\nConesIntersection{}((v_1,v_2 ), (v_3,-v_4 ));",
-    true,
-    false,
     "Calculator::innerConesIntersect",
-    "ConesIntersection"
+    "ConesIntersection",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PrintRuleStack",
     CalculatorFunctionsGeneral::innerPrintRuleStack,
     "",
     "Prints the current rule stack",
-    "a =b; PrintRuleStack{}0; c = d; PrintRuleStack{}0; ",
-    true,
-    false,
+    "a = b;\n"
+    "PrintRuleStack{}0;\n"
+    "c = d; PrintRuleStack{}0; ",
     "CalculatorFunctionsGeneral::innerPrintRuleStack",
-    "PrintRuleStack"
+    "PrintRuleStack",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Crawl",
     CalculatorFunctionsGeneral::innerCrawlTexFile,
     "",
@@ -2651,12 +2467,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "originally designed for the purposes of the freecalc project "
     "as not been tested on any other projects, please use only for freecalc.",
     "Crawl(\"freecalc/homework/referenceallproblemsbycourse/calculusimasterproblemsheet.tex\")",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerCrawlTexFile",
-    "Crawl"
+    "Crawl",
+    innerAdminNoTest
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "BuildFreecalc",
     CalculatorFunctionsGeneral::innerBuildFreecalc,
     "",
@@ -2673,34 +2488,31 @@ void Calculator::initPredefinedInnerFunctions() {
     "BuildFreecalc(\"freecalc/homework/referenceallproblemsbycourse/calculusimasterproblemsheet.tex\");\n"
     "BuildFreecalc(\"freecalc/homework/referenceallproblemsbycourse/calculusiimasterproblemsheet.tex\");"
     "BuildFreecalc(\"freecalc/homework/referenceallproblemsbycourse/calculusiiimasterproblemsheet.tex\");",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerBuildFreecalc",
-    "BuildFreecalc"
+    "BuildFreecalc",
+    innerAdminNoTest
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "BuildFreecalcWithSlides",
     CalculatorFunctionsGeneral::innerBuildFreecalcSingleSlides,
     "",
     "Same as BuildFreeCalc but attempts to also build individual slides. ",
     "BuildFreecalcWithSlides (\"freecalc/lectures/referenceallproblemsbycourse/calculusimasterproblemsheet.tex\");",
-    true,
-    false,
     "CalculatorFunctionsGeneral::BuildFreecalcWithSlides",
-    "BuildFreecalcWithSlides"
+    "BuildFreecalcWithSlides",
+    innerAdminNoTest
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "BuildSlidesInTopicList",
     CalculatorFunctionsGeneral::innerBuildFreecalcSlidesOnTopic,
     "",
     "Builds all slides in the current topic list. Available to logged-in admins only. ",
     "BuildSlidesInTopicList (0);",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerBuildFreecalcSlidesOnTopic",
-    "BuildSlidesInTopicList"
+    "BuildSlidesInTopicList",
+    innerAdminNoTest
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "EnsureExpressionDependsOnlyOn",
     CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnStandard,
     "",
@@ -2709,12 +2521,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "Intended to warn users of potentially mistyped expressions. ",
     "EnsureExpressionDependsOnlyOn(\\sin (\\ln x) x y, x, y);\n"
     "EnsureExpressionDependsOnlyOn(\\sin (\\ln x) x y, x);",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnStandard",
-    "EnsureExpressionDependsOnlyOn"
+    "EnsureExpressionDependsOnlyOn",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "EnsureExpressionDependsMandatoryVariables",
     CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVariablesExcludeNamedConstants,
     "",
@@ -2723,267 +2534,245 @@ void Calculator::initPredefinedInnerFunctions() {
     "with mandatory variables, second with non-mandatory. ",
     "EnsureExpressionDependsMandatoryVariables(\\sin (\\ln x) x y, x, y); "
     "EnsureExpressionDependsMandatoryVariables(\\sin (\\ln x) x y,  (x,y,z) );",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVariables",
-    "EnsureExpressionDependsMandatoryVariables"
+    "EnsureExpressionDependsMandatoryVariables",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "EnsureExpressionDependsMandatoryVariablesIncludeNamedConstants",
     CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVariablesIncludeNamedConstants,
     "",
     "Same as EnsureExpressionDependsMandatoryVariables including named constants such as \\pi, e. ",
     "EnsureExpressionDependsMandatoryVariablesIncludeNamedConstants(2\\pi, \\pi, y);\n"
     "EnsureExpressionDependsMandatoryVariables(2, \\pi, none );",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVariables",
-    "EnsureExpressionDependsMandatoryVariablesIncludeNamedConstants"
+    "EnsureExpressionDependsMandatoryVariablesIncludeNamedConstants",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\log",
     CalculatorFunctionsGeneral::innerLog,
     "",
     "Logarithm function. Gives a decimal approximation of the natural "
     "logarithm provided the input is a double number. ",
     "\\log{}(e); \\log 10",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerLog",
-    "\\log"
+    "\\log",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "LogBase",
     CalculatorFunctionsGeneral::innerLogBaseNaturalToLn,
     "",
     "Converts \\log_e A to \\ln A. ",
     "\\log_e A",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerLogBaseNaturalToLn",
-    "LogBaseNaturalToLn"
+    "LogBaseNaturalToLn",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "LogBase",
     CalculatorFunctionsGeneral::innerLogBaseSimpleCases,
     "",
     "If the argument is a power of the base does the computation. ",
     "\\log_5 25; log_5 1; log_5 (1/5)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerLogBaseSimpleCases",
-    "LogBaseSimpleCases"
+    "LogBaseSimpleCases",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "LogBase",
     CalculatorFunctionsGeneral::innerLogBase,
     "",
     "Logarithm function (arbitrary base). Equivalent to "
     "\\log_{{a}} {{b}}= (\\log b)/(\\log a). ",
     "\\log_10 5; \\log _e 10; \\ln 10; \\log_a b",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerLogBase",
-    "LogBase"
+    "LogBase",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\arctan",
     CalculatorFunctionsGeneral::innerArctan,
     "",
     "Arctan function. Tries to evaluate the arctan function. ",
     "\\arctan(3/4)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerArctan",
-    "\\arctan"
+    "\\arctan",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\arcsin",
     CalculatorFunctionsGeneral::innerArcsinAlgebraic,
     "",
     "Arcsin function for special angles. ",
     "\\arcsin(1/2)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerArcsinAlgebraic",
-    "arcsinAlgebraic"
+    "arcsinAlgebraic",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\arccos",
     CalculatorFunctionsGeneral::innerArccosAlgebraic,
     "",
     "Arccos function for special angles. ",
     "\\arccos(\\sqrt{2}/2})",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerArccosAlgebraic",
-    "arccosAlgebraic"
+    "arccosAlgebraic",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\arccos",
     CalculatorFunctionsGeneral::innerArccos,
     "",
     "Arccos function. Tries to evaluate the arccos function. ",
     "\\arccos(3/4)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerArccos",
-    "\\arccos"
+    "\\arccos",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\arcsin",
     CalculatorFunctionsGeneral::innerArcsin,
     "",
     "Arcsin function. Tries to evaluate the arcsin function. ",
     "\\arcsin(3/4)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerArcsin",
-    "\\arcsin"
+    "\\arcsin",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "|",
     CalculatorFunctionsGeneral::innerAbs,
     "",
     "Absolute value function ",
     "|- 1|",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerAbs",
-    "AbsoluteValue"
+    "AbsoluteValue",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\sin",
     CalculatorFunctionsGeneral::innerSin,
     "",
     "Sine function. Evaluates to a decimal approximation if the input is a double number. ",
     "\\sin{}(3.1415)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerSin",
-    "Sine"
+    "Sine",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\cos",
     CalculatorFunctionsGeneral::innerCos,
     "",
     "Cosine function. Evaluates to a decimal approximation if the input is a double number. ",
     "\\cos{}(3.1415)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerCos",
-    "Cosine"
+    "Cosine",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\tan",
     CalculatorFunctionsGeneral::innerTan,
     "",
     "Tangent function. Substitutes \\tan{}{{x}}=\\sin{}x/\\cos x. ",
     "\\tan{}(3.1415); \\tan 1.570796327",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerTan",
-    "ExpressTanViaSineCosine"
+    "ExpressTanViaSineCosine",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\cot",
     CalculatorFunctionsGeneral::innerCot,
     "",
     "Tangent function. Substitutes \\tan{}{{x}}=\\cos{}x/\\sin x. ",
     "\\cot{}(3.1415); \\cot 1.570796327",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerCot",
-    "ExpressCotViaSineCosine"
+    "ExpressCotViaSineCosine",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\csc",
     CalculatorFunctionsGeneral::innerCsc,
     "",
     "Cosecant function. Substitutes \\csc{}{{x}}=1/\\sin x. ",
     "\\csc{}(3.1415); \\csc 1.570796327",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerCsc",
-    "ExpressCscViaSine"
+    "ExpressCscViaSine",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\sec",
     CalculatorFunctionsGeneral::innerSec,
     "",
     "Secant function. Substitutes \\sec{}{{x}}=1/\\sec x. ",
     "\\sec{}(3.1415); \\sec 1.570796327",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerSec",
-    "ExpressSecViaCosine"
+    "ExpressSecViaCosine",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Floor",
     CalculatorFunctionsGeneral::innerFloor,
     "",
     "Floor function.",
     "Floor(3/7)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerFloor",
-    "Floor"
+    "Floor",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Round",
     CalculatorFunctionsGeneral::innerRound,
     "",
     "Round function.",
     "Round(3/7)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerRound",
-    "Round"
+    "Round",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "DoubleValue",
     CalculatorFunctionsGeneral::innerEvaluateToDouble,
     "",
     "Double value of a rational number.",
     "DoubleValue{}(3/7)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerEvaluateToDouble",
-    "DoubleValue"
+    "DoubleValue",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "^",
     CalculatorFunctionsGeneral::innerDegreesToRadians,
     "",
     "Converts degrees to radians",
     "30^\\circ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerDegreesToRadians",
-    "DegreesToRadians"
+    "DegreesToRadians",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "ModP",
-    this->innerZmodP,
+    Calculator::innerZmodP,
     "",
     "Number modulo P. First argument = number, second argument = modulo.",
     "ModP{}(7, 3)",
-    true,
-    false
+    "Calculator::innerZmodP",
+    "ModP",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "AdCommonEigenspace",
     Calculator::innerAdCommonEigenSpaces,
     "",
     "Computes common eigenspace of the adjoint action of semisimple Lie "
     "algebra elements inside the semisimple Lie algebra. ",
     "AdCommonEigenspace{}(F_4, -5 (g_{9}) +3 (g_{13}) +5 (g_{16}) +4 (g_{10}), g_{14}+g_{22}+g_{20})",
-    true,
-    false,
     "Calculator::innerAdCommonEigenSpaces",
-    "AdCommonEigenspace"
+    "AdCommonEigenspace",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "AttemptExtendingEtoHEFwithHinCartan",
     Calculator::innerAttemptExtendingEtoHEFwithHinCartan,
     "",
@@ -2991,12 +2780,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "the rationals, such that the element H is in the "
     "ambient Cartan algebra. ",
     "AttemptExtendingEtoHEFwithHinCartan{}(F_4, g_1+2g_2+3g_3+4g_4)",
-    true,
-    false,
     "Calculator::innerAttemptExtendingEtoHEFwithHinCartan",
-    "AttemptExtendingEtoHEFwithHinCartan"
+    "AttemptExtendingEtoHEFwithHinCartan",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "IsPrimeMillerRabin",
     CalculatorFunctionsGeneral::innerIsPrimeMillerRabin,
     "",
@@ -3005,50 +2793,47 @@ void Calculator::initPredefinedInnerFunctions() {
     "IsPrimeMillerRabin(4256233);\n"
     "IsPrimeMillerRabin(49979687);\n"
     "IsPrimeMillerRabin(4256233 * 49979687)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerIsPrimeMillerRabin",
-    "IsPrimeMillerRabin"
+    "IsPrimeMillerRabin",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "IsPossiblyPrime",
     CalculatorFunctionsGeneral::innerIsPossiblyPrime,
     "",
     "Checks whether the number is "
     "prime by trial division first "
     "and by the Miller-Rabin test next.",
-    "A =100!+ 1; IsPrimeMillerRabin(A);\n"
+    "A =100!+ 1;\n"
+    "IsPrimeMillerRabin(A);\n"
     "IsPossiblyPrime(4256233);\n"
     "IsPossiblyPrime(49979687);\n"
     "IsPossiblyPrime(4256233 * 49979687)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerIsPossiblyPrime",
-    "IsPossiblyPrime"
+    "IsPossiblyPrime",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "GCD",
     CalculatorFunctionsGeneral::innerGCD,
     "",
     "Greatest common divisor of two integers.",
-    "GCD(100!+ 1, 101*103)",
-    true,
-    false,
+    "GCD(100!+ 1, 101 * 103)",
     "CalculatorFunctionsGeneral::innerGCD",
-    "GCD"
+    "GCD",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "LCM",
     CalculatorFunctionsGeneral::innerLCM,
     "",
     "Least common multiple of two integers.",
     "LCM(91, 1001)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerLCM",
-    "LCM"
+    "LCM",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "GCDPoly",
     Calculator::innerGCDPoly,
     "",
@@ -3064,12 +2849,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "4x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}- "
     "2x_{13}^{3}x_{17}x_{18}x_{20}x_{21}^{2}+2x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}- "
     "x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}  )",
-    true,
-    false,
     "Calculator::innerGCDPoly",
-    "GCDPoly"
+    "GCDPoly",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "LCMPoly",
     Calculator::innerLCMPoly,
     "",
@@ -3085,12 +2869,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "4x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}- "
     "2x_{13}^{3}x_{17}x_{18}x_{20}x_{21}^{2}+2x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}- "
     "x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}  )",
-    true,
-    false,
     "Calculator::innerLCMPoly",
-    "LCMPoly"
+    "LCMPoly",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Interpolate",
     Calculator::innerInterpolatePoly,
     "",
@@ -3099,12 +2882,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "((x_1, y_1),(x_2, y_2), ...,(x_n, y_n))",
     "Interpolate{}(1,0) ; Interpolate{}((1,0),(2,3));\n"
     "Interpolate{}((1,1), (2,2), (3, 4), (4, 8), (5, 16))",
-    true,
-    false,
     "Calculator::innerInterpolatePoly",
-    "Interpolate"
+    "Interpolate",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PolyDivRemainder",
     CalculatorFunctionsGeneral::innerPolynomialDivisionRemainder,
     "",
@@ -3112,48 +2894,44 @@ void Calculator::initPredefinedInnerFunctions() {
     "polynomial divided by a set of polynomials "
     "using the default monomial order (lexicographic).",
     "PolyDivRemainder{}(x^7+6x y+5x y^8+y^5, x +y^2- 1, y^3-x y);",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerPolynomialDivisionRemainder",
-    "PolyDivRemainder"
+    "PolyDivRemainder",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PolyDivQuotient",
     CalculatorFunctionsGeneral::innerPolynomialDivisionQuotient,
     "",
     "Returns the quotients of a "
     "polynomial divided by a set of polynomials using the default monomial order (lexicographic).",
     "PolyDivQuotient{}(x^7+6x y+5x y^8+y^5, x +y^2- 1, y^3-x y) ;",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerPolynomialDivisionRemainder",
-    "PolyDivQuotient"
+    "PolyDivQuotient",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PolyDivSlidesGrLex",
     CalculatorFunctionsGeneral::innerPolynomialDivisionSlidesGrLex,
     "",
     "Creates a slide with the polynomial disivion algorithm. "
     "First element = starting slide number.",
     "PolyDivSlidesGrLex{}(1, x^3 + x + 10, x +2) ; PolyDivSlidesGrLex{}(1,x + y + 10, x + 1, y - 1) ",
-    true,
-    false,
     "Calculator::innerPolynomialDivisionSlidesGrLex",
-    "PolyDivSlidesGrLex"
+    "PolyDivSlidesGrLex",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PolyDivStringGrLex",
     CalculatorFunctionsGeneral::innerPolynomialDivisionVerboseGrLex,
     "",
     "Prints a string representing division of "
     "a polynomial by a set of polynomials using gr lex order, for example, x^2 y^3 >x y^4, y^11>x^10. ",
     "PolyDivStringGrLex{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3- 1) ;",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerPolynomialDivisionVerboseGrLex",
-    "PolyDivStringGrLex"
+    "PolyDivStringGrLex",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PolyDivStringGrLexRev",
     CalculatorFunctionsGeneral::innerPolynomialDivisionVerboseGrLexRev,
     "",
@@ -3162,24 +2940,22 @@ void Calculator::initPredefinedInnerFunctions() {
     "equal total degrees compared by lex order with reversed order of the letters, "
     "for example, x y^4> x^2 y^3 , x^11>y^10. ",
     "PolyDivStringGrLexRev{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3- 1) ;",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerPolynomialDivisionVerboseGrLexRev",
-    "PolyDivStringGrLexRev"
+    "PolyDivStringGrLexRev",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PolyDivStringLex",
     CalculatorFunctionsGeneral::innerPolynomialDivisionVerboseLex,
     "",
     "Prints a string representing division of "
     "a polynomial by a set of polynomials using the lex order, for example, x^2 y^4 > x y^1000 > x y^2. ",
     "PolyDivStringLex{}(x^7 + 6 x y + 5x y^8 + y^5, x^2 + 2, y^3 - 1);",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerPolynomialDivisionVerboseLex",
-    "PolyDivStringLex"
+    "PolyDivStringLex",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PolyDivStringLexRev",
     CalculatorFunctionsGeneral::innerPolynomialDivisionVerboseLexRev,
     "",
@@ -3188,35 +2964,32 @@ void Calculator::initPredefinedInnerFunctions() {
     "order with reversed order of variables, "
     "for example, y^2 > x^1000 y > x y. ",
     "PolyDivStringLexRev{}(x^7 + 6x y + 5x y^8 + y^5, x^2 + 2, y^3- 1) ;",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerPolynomialDivisionVerboseLexRev",
-    "PolyDivStringLexRev"
+    "PolyDivStringLexRev",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "SuffixNotationForPostScript",
     Calculator::innerSuffixNotationForPostScript,
     "",
     "Suffix notation. for postscript, used to quickly generate pstricks drawings in LaTeX.",
-    "suffixNotationForPostScript{}((1/3 +a +b)*c)",
-    true,
-    false,
+    "suffixNotationForPostScript{}((1/3 + a + b) * c)",
     "Calculator::innerSuffixNotationForPostScript",
-    "SuffixNotationForPostScript"
+    "SuffixNotationForPostScript",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "MakeJavascriptExpression",
     CalculatorFunctionsGeneral::innerMakeJavascriptExpression,
     "",
     "Attempts to construct a javascript translation of the input. "
     "If not successful leaves the expression unchanged.",
     "MakeJavascriptExpression(a(b+c))",
-    true,
-    false,
     "Calculator::innerMakeJavascriptExpression",
-    "MakeJavascriptExpression"
+    "MakeJavascriptExpression",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "DFQEuler",
     CalculatorFunctionsGeneral::innerDFQsEulersMethod,
     "",
@@ -3227,12 +3000,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "fourth argument = number of approximating points, "
     "fifth and sixth argument = left and right endpoints.",
     "DFQEuler(x^2 + y^2 - 1, 0, 0, 1000, - 2.5, 2.5)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerDFQsEulersMethod",
-    "DFQEuler"
+    "DFQEuler",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "NewtonsMethod",
     CalculatorFunctionsGeneral::innerNewtonsMethod,
     "",
@@ -3242,34 +3014,31 @@ void Calculator::initPredefinedInnerFunctions() {
     "The last argument gives the number of iterations of the method. ",
     "NewtonsMethod(e^x - ( 200 sin{} x + x^7), 0, 10);\n"
     "NewtonsMethod(e^x = ( 200 sin{} x + x^7), 0, 10);",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerNewtonsMethod",
-    "NewtonsMethod"
+    "NewtonsMethod",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "FetchWebPageGET",
     CalculatorFunctionsGeneral::innerFetchWebPageGET,
     "",
     "Attempts to GET a web page. For logged-in admins only.",
     "FetchWebPageGET(\"www.googleapis.com\", \"https\", \"https://www.googleapis.com/oauth2/v3/certs\")",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerFetchWebPageGET",
-    "FetchWebPageGET"
+    "FetchWebPageGET",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "FetchWebPagePOST",
     CalculatorFunctionsGeneral::innerFetchWebPagePOST,
     "",
     "Attempts to fetch a web page via POST. For logged-in admins only.",
     "FetchWebPagePOST(\"www.googleapis.com\", \"https\", \"https://www.googleapis.com/oauth2/v3/certs\", \"\")",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerFetchWebPagePOST",
-    "FetchWebPagePOST"
+    "FetchWebPagePOST",
+    innerAdminNoTest
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "SendEmailWithMailGun",
     CalculatorFunctionsGeneral::innerSendEmailWithMailGun,
     "",
@@ -3285,24 +3054,22 @@ void Calculator::initPredefinedInnerFunctions() {
     "\"A testing email. \", "
     "\"[Do not reply] Test email. \""
     ")",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerSendEmailWithMailGun",
-    "SendEmailWithMailGun"
+    "SendEmailWithMailGun",
+    innerAdminNoTest
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "FetchKnownPublicKeys",
     CalculatorFunctionsGeneral::innerFetchKnownPublicKeys,
     "",
     "Updates known public keys. Requires admin privileges. "
     "At the moment, works for google public keys only. ",
     "FetchKnownPublicKeys(0)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerFetchKnownPublicKeys",
-    "FetchKnownPublicKeys"
+    "FetchKnownPublicKeys",
+    innerAdminNoTest
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PlotDirectionField",
     CalculatorFunctionsGeneral::innerPlotDirectionField,
     "",
@@ -3314,13 +3081,12 @@ void Calculator::initPredefinedInnerFunctions() {
     "of segments along the x axis and so on. Next argument: length of "
     "each direction line. "
     "Next arguments: color, line width. ",
-    "PlotDirectionField( (-y,x), (-2,-2),(2,2), (20,20),0.2, blue,1);",
-    true,
-    false,
+    "PlotDirectionField( (- y, x), (- 2, - 2), (2, 2), (20, 20), 0.2, blue, 1);",
     "CalculatorFunctionsGeneral::innerPlotDirectionField",
-    "PlotDirectionField"
+    "PlotDirectionField",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PlotPolar",
     CalculatorFunctionsGeneral::innerPlotPolarRfunctionTheta,
     "",
@@ -3332,12 +3098,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "PlotPolar(1+sin  t, 0, \\pi);\n"
     "PlotPolar((1 + 9/10 cos(8 t) ) (1 + 1/10 cos (24 t) )"
     "(9/10 + 5/100 cos (200 t)) (1 + sin t), 0, 2\\pi)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerPlotPolarRfunctionTheta",
-    "PlotPolar"
+    "PlotPolar",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PlotPolarExtended",
     CalculatorFunctionsGeneral::innerPlotPolarRfunctionThetaExtended,
     "",
@@ -3346,12 +3111,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "PlotPolarExtended(1+sin  t, 0, \\pi);\n"
     "PlotPolarExtended((1 + 9/10 cos(8 t) ) (1 + 1/10 cos (24 t) )\n"
     "(9/10 + 5/100 cos (200 t)) (1 + sin t), 0, 2\\pi)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerPlotPolarRfunctionThetaExtended",
-    "PlotPolarExtended"
+    "PlotPolarExtended",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "GaussianElimination",
     CalculatorFunctionsGeneral::innerGaussianEliminationMatrix,
     "",
@@ -3360,9 +3124,12 @@ void Calculator::initPredefinedInnerFunctions() {
     "GaussianElimination(\\begin{array}{cccccc} "
     "sqrt 1 & sqrt 2 & sqrt 3 & 1 & 0& 0\\\\ "
     "sqrt 4 & sqrt 5 & sqrt 6 & 0 &1&0\\\\ "
-    "sqrt 7 & sqrt 8 & sqrt 9 & 0 & 0 & 1 \\end{array})"
+    "sqrt 7 & sqrt 8 & sqrt 9 & 0 & 0 & 1 \\end{array})",
+    "CalculatorFunctionsGeneral::innerGaussianEliminationMatrix",
+    "GaussianElimination",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "UnivariatePartialFractionAlgrithm",
     CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicRealsAlgorithm,
     "",
@@ -3372,12 +3139,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "over the rationals. If this factorization "
     "yields quadratic and linear terms at the function succeeds, else fails.",
     "UnivariatePartialFractionAlgrithm(\\frac{x^11}{x^{8}-2x^{6}-2x^{5}+4x^{3}+x^{2}-2});",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicRealsAlgorithm",
-    "UnivariatePartialFractionAlgrithm"
+    "UnivariatePartialFractionAlgrithm",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "UnivariatePartialFractions",
     CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals,
     "",
@@ -3388,23 +3154,21 @@ void Calculator::initPredefinedInnerFunctions() {
     "A =\\frac{x^3}{x^{3}-x^2+2x^2-2};\n"
     "B=UnivariatePartialFractions(A);\n"
     "A-\\sum(B)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals",
-    "UnivariatePartialFractions"
+    "UnivariatePartialFractions",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "EqualityToArithmeticExpression",
     CalculatorFunctionsGeneral::innerEqualityToArithmeticExpression,
     "",
     "",
-    "EqualityToArithmeticExpression(a =b)",
-    true,
-    false,
+    "EqualityToArithmeticExpression(a = b)",
     "CalculatorFunctionsGeneral::innerEqualityToArithmeticExpression",
-    "EqualityToArithmeticExpression"
+    "EqualityToArithmeticExpression",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PointsImplicitly",
     CalculatorFunctionsGeneral::innerGetPointsImplicitly,
     "",
@@ -3412,13 +3176,12 @@ void Calculator::initPredefinedInnerFunctions() {
     "Same as plotImplicit but rather than plotting "
     "the curve returns the (x,y) pairs of points found. "
     "The output given as a nx2 matrix of floating point numbers. ",
-    "PointsImplicitly((x- 1) (y- 1)-((x- 1)^2(y- 1) + 1)^2, (-2, -2), (2, 2), (10,10), (400,400))",
-    true,
-    false,
+    "PointsImplicitly((x - 1) (y - 1) - ((x - 1) ^ 2 (y - 1) + 1) ^ 2, (- 2, - 2), (2, 2), (10, 10), (400, 400))",
     "CalculatorFunctionsGeneral::innerGetPointsImplicitly",
-    "PointsImplicitly"
+    "PointsImplicitly",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PlotImplicit",
     CalculatorFunctionsGeneral::innerPlotImplicitFunction,
     "",
@@ -3435,13 +3198,12 @@ void Calculator::initPredefinedInnerFunctions() {
     "The last argument is optional and gives an upper limit for the number "
     "of triangles to use (max =20000, default =2000). "
     "The triangle used to generate the implicit plot is algorithmically chosen.",
-    "PlotImplicit((x- 1) (y- 1)-((x- 1)^2(y- 1) + 1)^2, (-2, -2), (2, 2), (10,10))",
-    true,
-    false,
+    "PlotImplicit((x - 1) (y - 1) - ((x - 1)^2 (y - 1) + 1)^2, (- 2, - 2), (2, 2), (10, 10))",
     "CalculatorFunctionsGeneral::innerPlotImplicitFunction",
-    "PlotImplicit"
+    "PlotImplicit",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PlotImplicitShowGrid",
     CalculatorFunctionsGeneral::innerPlotImplicitShowGridFunction,
     "",
@@ -3449,36 +3211,33 @@ void Calculator::initPredefinedInnerFunctions() {
     "The yellow grid is the initial one (specified by the user), "
     "and the gray grid is obtained by a subdivision which depends on the concrete function.",
     "PlotImplicitShowGrid((x- 1) (y- 1)-((x- 1)^2(y- 1) + 1)^2, (-2, -2), (2, 2), (10,10))",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerPlotImplicitShowGridFunction",
-    "PlotImplicitShowGrid"
+    "PlotImplicitShowGrid",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PlotCoordinateSystem",
     CalculatorFunctionsGeneral::innerPlotCoordinateSystem,
     "",
     "Plots a 3d coordinate system, fitting in a box given by two opposite corners.  ",
-    "PlotCoordinateSystem((-3,-2,-3), (1,5, 4))",
-    true,
-    false,
+    "PlotCoordinateSystem((- 3, - 2, - 3), (1, 5, 4))",
     "CalculatorFunctionsGeneral::innerPlotCoordinateSystem",
-    "PlotCoordinateSystem"
+    "PlotCoordinateSystem",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PlotSetProjectionScreen",
     CalculatorFunctionsGeneral::innerPlotSetProjectionScreenBasis,
     "",
     "Set the projection screen. Input: two 3d vectors "
     "that give the 2d-basis of the viewing screen. ",
-    "PlotCoordinateSystem((-2,-2,-2), (2,2,2)) + "
-    "PlotSetProjectionScreen((1,0,-0.1),(0,1,-0.2))",
-    true,
-    false,
+    "PlotCoordinateSystem((- 2, - 2, - 2), (2, 2, 2)) + "
+    "PlotSetProjectionScreen((1, 0, - 0.1), (0, 1, - 0.2))",
     "CalculatorFunctionsGeneral::innerPlotSetProjectionScreenBasis",
-    "PlotSetProjectionScreen"
+    "PlotSetProjectionScreen",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PlotSurface",
     CalculatorFunctionsGeneral::innerPlotSurface,
     "",
@@ -3491,18 +3250,17 @@ void Calculator::initPredefinedInnerFunctions() {
     "uSegments = MakeInputBox(name = uSegments, value = 22, min = 8, max = 40);\n"
     "vSegments = MakeInputBox(name = vSegments, value = 4, min = 2, max = 10);\n"
     "PlotSurface(\n"
-    "(x, y, z), u\\in(0, 2\\pi), v\\in(-r,r), \n"
-    "color1=blue, color2= cyan, numSegments1=uSegments, numSegments2=vSegments\n"
+    "(x, y, z), u \\in (0, 2\\pi), v\\in(-r,r), \n"
+    "color1 = blue, color2 = cyan, numSegments1=uSegments, numSegments2=vSegments\n"
     ") + "
     "PlotSurface(\n"
     "( x + 2, z, y), u\\in(0, 2\\pi), v\\in(-r,r), \n"
     "color1=red, color2= pink, numSegments1=uSegments, numSegments2=vSegments); ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerPlotSurface",
-    "PlotSurface"
+    "PlotSurface",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PlotCurve",
     CalculatorFunctionsGeneral::innerPlotParametricCurve,
     "",
@@ -3516,57 +3274,52 @@ void Calculator::initPredefinedInnerFunctions() {
     "a = MakeInputBox(name = \"a\", value = 12, min = 1, max = 25);\n"
     "b = MakeInputBox(name = \"b\", value = 13, min = 1, max = 25);\n"
     "PlotFill(PlotCurve((sin(a t), cos(b t)), 0, 2\\pi, blue, 2, 2000), pink) ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerPlotParametricCurve",
-    "PlotCurve"
+    "PlotCurve",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PlotSegment",
     CalculatorFunctionsGeneral::innerPlotSegment,
     "",
     "Plots a segment connecting two points. ",
     "PlotSegment( (1,2), (3,4))",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerPlotSegment",
-    "PlotSegment"
+    "PlotSegment",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PlotMarkSegment",
     CalculatorFunctionsGeneral::innerPlotMarkSegment,
     "",
-    " Plots a segment mark. ",
-    "PlotSegment( (1,2), (3,4)) + PlotMarkSegment( (1,2), (3,4))",
-    true,
-    false,
+    "Plots a segment mark. ",
+    "PlotSegment((1, 2), (3,4)) + PlotMarkSegment((1, 2), (3, 4))",
     "CalculatorFunctionsGeneral::innerPlotMarkSegment",
-    "PlotMarkSegment"
+    "PlotMarkSegment",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PlotPath",
     CalculatorFunctionsGeneral::innerPlotPath,
     "",
     "Plots a straight segment path. The path should be enclosed in parentheses, and color must be indicated. ",
-    "PlotPath( ((0,0), (3,0), (3,4),(0,0)), blue)",
-    true,
-    false,
+    "PlotPath(((0, 0), (3, 0), (3, 4), (0, 0)), blue)",
     "CalculatorFunctionsGeneral::innerPlotPath",
-    "PlotPath"
+    "PlotPath",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PlotSetId",
     CalculatorFunctionsGeneral::innerPlotSetId,
     "",
     "Creates an empty plot with a given canvas id. "
     "If you add a nameless plot to a named one the the resulting plot acquires the canvas id. ",
     "PlotSetId( myId) +PlotCoordinateSystem((-3,-2,-3), (1,5, 4))",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerPlotSetId",
-    "PlotSetId"
+    "PlotSetId",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "MatchesPattern",
     CalculatorFunctionsGeneral::innerMatchesPattern,
     "",
@@ -3574,14 +3327,13 @@ void Calculator::initPredefinedInnerFunctions() {
     "Pattern parametric entries are indicated with the bound variable notation {{a}}. "
     "If the expression matches the pattern, the return is a command enclosure "
     "in which each of the variables is freed and assigned the matched value. ",
-    "MatchesPattern{}(a =b*10,a ={{c}}*b); "
-    "MatchesPattern{}(a =b*10, a =b*{{c}})",
-    true,
-    false,
+    "MatchesPattern{}(a = b * 10, a = {{c}} * b); "
+    "MatchesPattern{}(a = b * 10, a = b * {{c}})",
     "CalculatorFunctionsGeneral::innerMatchesPattern",
-    "MatchesPattern"
+    "MatchesPattern",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "GetVariablesExcludeNamedConstants",
     CalculatorFunctionsGeneral::innerGetFreeVariablesExcludeNamedConstants,
     "",
@@ -3591,12 +3343,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "reserved (to allow dealing with named constants, reserved keywords, etc.). ",
     "GetVariablesExcludeNamedConstants{}(e^x + x + 5 +\\arctan x + x *y + x^y + x^{y^z}); "
     "GetVariablesIncludeNamedConstants{}(e^x + x + 5 +\\arctan x + x *y + x^y + x^{y^z})",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerGetFreeVariablesExcludeNamedConstants",
-    "GetVariablesExcludeNamedConstants"
+    "GetVariablesExcludeNamedConstants",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "GetVariablesIncludeNamedConstants",
     CalculatorFunctionsGeneral::innerGetFreeVariablesIncludeNamedConstants,
     "",
@@ -3606,23 +3357,21 @@ void Calculator::initPredefinedInnerFunctions() {
     "reserved (to allow dealing with named constants, reserved keywords, etc.). ",
     "GetVariablesExcludeNamedConstants{}(e^x + x +5 +\\arctan x + x *y +x^y+x^{y^z}); "
     "GetVariablesIncludeNamedConstants{}(e^x + x +5 +\\arctan x + x *y +x^y+x^{y^z})",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerGetFreeVariablesIncludeNamedConstants",
-    "GetVariablesIncludeNamedConstants"
+    "GetVariablesIncludeNamedConstants",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PlotPoint",
     CalculatorFunctionsGeneral::innerPlotPoint,
     "",
     "<b>Calculus teaching function.</b> Plots a point from x and y coordinate. ",
     "PlotPoint{}((1,2),blue)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerPlotPoint",
-    "PlotPoint"
+    "PlotPoint",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Plot2D",
     CalculatorFunctionsGeneral::innerPlot2DoverIntervals,
     "",
@@ -3631,12 +3380,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "the second and third argument are extracted from each of the intervals. ",
     "%UseBracketForIntervals\n"
     "Plot2D{}(\\sin{}x +cos{}x, [0, \\pi]\\cup [2\\pi, 3\\pi), \"blue\",2,8)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerPlot2DoverIntervals",
-    "Plot2DoverIntervals"
+    "Plot2DoverIntervals",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Plot2D",
     CalculatorFunctionsGeneral::innerPlot2D,
     "",
@@ -3648,81 +3396,74 @@ void Calculator::initPredefinedInnerFunctions() {
     "Next argument gives number of sample points. "
     "Plots may be added together- adding plots superimposes the plots. ",
     "Plot2D{}(\\sin{}x +cos{}x, 0, 5, \"blue\",2,8)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerPlot2D",
-    "Plot2D"
+    "Plot2D",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "IsPlot",
     CalculatorFunctionsGeneral::innerIsPlot,
     "",
     "Returns 1 if the argument is a plot, 0 otherwise.",
     "%UseBracketForIntervals \n"
     "IsPlot( Plot2D{}(\\sin{}x +cos{}x, [0, \\pi]\\cup [2\\pi, 3\\pi), \"blue\",2,8))",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerIsPlot",
-    "IsPlot"
+    "IsPlot",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PlotFill",
     CalculatorFunctionsGeneral::innerPlotFill,
     "",
     "Fills a plot with color. ",
-    "PlotFill(Plot2D{}(sqrt(1-x^2), - 1, 1, \"blue\",2) + Plot2D(-sqrt(1-x^2),- 1,1), \"blue\")",
-    true,
-    false,
+    "PlotFill(Plot2D{}(sqrt(1 - x^2), - 1, 1, \"blue\", 2) + Plot2D(- sqrt(1 - x^2), - 1, 1), \"blue\")",
     "CalculatorFunctionsGeneral::innerPlotFill",
-    "PlotFill"
+    "PlotFill",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PlotRectangle",
     CalculatorFunctionsGeneral::innerPlotRectangle,
     "",
     "Plots a rectangle. "
     "Arguments format: "
     "PlotRectangle{}((lowerCornerLeftXcoord,  lowerCornerLeftXcoord), (width, height)).",
-    "PlotRectangle{}((1,2), (2,1))",
-    true,
-    false,
+    "PlotRectangle{}((1, 2), (2, 1))",
     "CalculatorFunctionsGeneral::innerPlotRectangle",
-    "PlotRectangle"
+    "PlotRectangle",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PlotGrid",
     CalculatorFunctionsGeneral::innerPlotGrid,
     "",
     "Tells the plot to show axes ticks. Takes as input dummy (non-used) argument. ",
     "PlotGrid{}(0)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerPlotGrid",
-    "PlotGrid"
+    "PlotGrid",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PlotRemoveCoordinateAxes",
     CalculatorFunctionsGeneral::innerPlotRemoveCoordinateAxes,
     "",
     "Removes the coordinate axes from a plot. ",
     "PlotRemoveCoordinateAxes{}(0)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerPlotRemoveCoordinateAxes",
-    "PlotRemoveCoordinateAxes"
+    "PlotRemoveCoordinateAxes",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PlotLabel",
     CalculatorFunctionsGeneral::innerPlotLabel,
     "",
     "Plots a label at a given position. Arguments format: PlotLabel((Xcoord, Ycoord), \"Label\"). ",
     "PlotLabel{}((1,1), \"(1,1)\")",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerPlotLabel",
-    "PlotLabel"
+    "PlotLabel",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PlotViewRectangle",
     CalculatorFunctionsGeneral::innerPlotViewRectangle,
     "",
@@ -3734,12 +3475,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "left corner of the viewing rectangle, "
     "the second argument gives the upper right corner.",
     "Plot2D{}(1/x, -30, 30, \"red\") + PlotViewRectangle((-5,-5), (5,5))",
-    true,
-    false,
     "CalculatorFunctionsGeneral::PlotViewRectangle",
-    "PlotViewRectangle"
+    "PlotViewRectangle",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PlotWindow",
     CalculatorFunctionsGeneral::innerPlotViewWindow,
     "",
@@ -3749,12 +3489,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "To modify the dimensions (in pixels) of another plot, "
     "add to it the PlotWindow ``plot''. ",
     "Plot2D{}(1/x, -30, 30, \"red\") + PlotWindow(400,400) + PlotViewRectangle((-5,-5), (5,5))",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerPlotWindow",
-    "PlotWindow"
+    "PlotWindow",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Plot2DWithBars",
     CalculatorFunctionsGeneral::innerPlot2DWithBars,
     "",
@@ -3762,12 +3501,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "functions with bars locked between the two functions, "
     "used to illustrate approximations to definite integrals.",
     "\nA =3/2- ((-3/4+ 1/4 (x))^{2});\nB= (1/4 (x))^{2}+2;\nPlot2DWithBars{}(A, B, 0, 5, 1)",
-    false,
-    true,
     "CalculatorFunctionsGeneral::innerPlot2DWithBars",
-    "Plot2DWithBars"
+    "Plot2DWithBars",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "CompareFunctionsNumerically",
     CalculatorFunctionsGeneral::innerCompareFunctionsNumerically,
     "",
@@ -3780,12 +3518,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "at a distance less than eps they are considered equal. ",
     "CompareFunctionsNumerically{}(arctan (x), arcsin(x/\\sqrt{x^2+ 1}),0, 5,50,0.0001);\n"
     "CompareFunctionsNumerically{}(e^x, 1+x +x^2/2+x^3/3!+x^4/4!+x^5/5!+x^6/6!,0, 5,50,0.0001)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerCompareFunctionsNumerically",
-    "CompareFunctionsNumerically"
+    "CompareFunctionsNumerically",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "CompareExpressionsNumerically",
     CalculatorFunctionsGeneral::innerCompareExpressionsNumerically,
     "",
@@ -3796,12 +3533,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "0.0001, x\\in(0,0.5), 20, y\\in(0,0.5), 20 );\n"
     "CompareExpressionsNumerically{}(\\arctan x + \\arctan y,"
     "\\arctan((x +y)/(1- x y)), 0.0001, x\\in(0,2), 20, y\\in(0,2), 20 );",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerCompareExpressionsNumerically",
-    "CompareExpressionsNumerically"
+    "CompareExpressionsNumerically",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "CompareExpressionsNumericallyAtPoints",
     CalculatorFunctionsGeneral::innerCompareExpressionsNumericallyAtPoints,
     "",
@@ -3821,36 +3557,33 @@ void Calculator::initPredefinedInnerFunctions() {
     "CompareExpressionsNumerically(a,b, 0.001, x\\in(0,5),10, y\\in (0,5),10);\n"
     "A = PointsImplicitly(theFun, (0,0),(4,4), (10,10), (400,400));\n"
     "CompareExpressionsNumericallyAtPoints(a,b, 0.01, (x,y)\\in A);",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerCompareExpressionsNumericallyAtPoints",
-    "CompareExpressionsNumericallyAtPoints"
+    "CompareExpressionsNumericallyAtPoints",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "IsInteger",
     Calculator::innerIsInteger,
     "",
     "If the argument has no bound variables, returns 1 if "
     "the argument is an integer, 0 otherwise. ",
     "IsInteger{}a;\nIsInteger{}1;\nf{}{{a}}=IsInteger{}a;\nf{}1;\nf{}b",
-    true,
-    false,
     "Calculator::innerIsInteger",
-    "IsInteger"
+    "IsInteger",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "IsEven",
     CalculatorFunctionsGeneral::innerIsEven,
     "",
     "If the argument has no bound variables, returns 1 if "
     "the argument is an even integer, 0 otherwise. ",
-    "i^{{n}}:if IsEven n = (- 1)^(n/2); i^100 ",
-    true,
-    false,
+    "i^{{n}} : if IsEven n = (- 1)^(n/2); i^100 ",
     "CalculatorFunctionsGeneral::innerIsEven",
-    "IsEven"
+    "IsEven",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "IsSquareFree",
     CalculatorFunctionsGeneral::innerIsSquareFree,
     "",
@@ -3859,12 +3592,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "(no primes in the decomposition of the integer "
     "appear with power greater than one) ",
     "IsSquareFree(6); IsSquareFree(12)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerIsSquareFree",
-    "IsSquareFree"
+    "IsSquareFree",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "IsPower",
     CalculatorFunctionsGeneral::innerIsPower,
     "",
@@ -3873,71 +3605,65 @@ void Calculator::initPredefinedInnerFunctions() {
     "(no primes in the decomposition of the integer "
     "appear with power greater than one) ",
     "IsPower(6); IsPower(8)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerIsPower",
-    "IsPower"
+    "IsPower",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "IsSquare",
     CalculatorFunctionsGeneral::innerIsSquare,
     "",
     "If the argument is an integer, returns 1 if the number is the square of an integer. ",
     "IsSquare(8); IsSquare(16); IsSquare(100);",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerIsSquare",
-    "IsSquare"
+    "IsSquare",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "[)",
     CalculatorFunctionsGeneral::innerIntervalLeftClosedFromSequence,
     "",
     "Internal data structure transformation: "
     "sequence ->left-closed interval.",
     "%UseBracketForIntervals PlotExpressionTree[1,2); PlotExpressionTree(1,2]; PlotExpressionTree[1,2];",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerIntervalToSequence",
-    "[)"
+    "[)",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "(]",
     CalculatorFunctionsGeneral::innerIntervalRightClosedFromSequence,
     "",
     "Internal data structure transformation: "
     "sequence ->right-closed interval.",
     "%UseBracketForIntervals PlotExpressionTree[1,2); PlotExpressionTree(1,2]; PlotExpressionTree[1,2];",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerIntervalToSequence",
-    "(]"
+    "(]",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "IntervalClosed",
     CalculatorFunctionsGeneral::innerIntervalClosedFromSequence,
     "",
     "Internal data structure transformation: "
     "sequence ->closed interval.",
     "%UseBracketForIntervals PlotExpressionTree[1,2); PlotExpressionTree(1,2]; PlotExpressionTree[1,2];",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerIntervalToSequence",
-    "IntervalClosed"
+    "IntervalClosed",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "IntervalOpen",
     CalculatorFunctionsGeneral::innerIntervalOpenFromSequence,
     "",
     "Internal data structure transformation: "
     "sequence ->open interval.",
     "%UseBracketForIntervals PlotExpressionTree (1,2); ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerIntervalOpenFromSequence",
-    "IntervalOpen"
+    "IntervalOpen",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "IsNonEmptySequence",
     CalculatorFunctionsGeneral::innerIsNonEmptySequence,
     "",
@@ -3948,14 +3674,13 @@ void Calculator::initPredefinedInnerFunctions() {
     "f{}{{a}}=IsInteger{}a;\n"
     "f{}1;\n"
     "f{}b",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerIsNonEmptySequence",
-    "IsNonEmptySequence"
+    "IsNonEmptySequence",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "IsRational",
-    this->innerIsRational,
+    Calculator::innerIsRational,
     "",
     "If the argument has no bound variables, returns 1 if "
     "the argument is an rational, 0 otherwise. ",
@@ -3963,9 +3688,12 @@ void Calculator::initPredefinedInnerFunctions() {
     "IsRational{}- 1;\n"
     "f{}{{a}}=IsRational{}a;\n"
     "IsRational{}1;\n"
-    "IsRational{}b"
+    "IsRational{}b",
+    "Calculator::innerIsRational",
+    "IsRational",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "not",
     Calculator::innerNot,
     "",
@@ -3973,23 +3701,21 @@ void Calculator::initPredefinedInnerFunctions() {
     "returns 1 if the argument is 0 and 1 the argument is non-zero. "
     "If the argument is not a small integer, does nothing. ",
     "not{}1;not{}a; not{}0; not{}(3==4)",
-    true,
-    false,
     "Calculator::innerNot",
-    "not"
+    "not",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "AllPartitions",
     CalculatorFunctionsGeneral::innerAllPartitions,
     "",
     "Prints all partitions of a positive number into a sum of positive integers. ",
     "AllPartitions(10) ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerAllPartitions",
-    "AllPartitions"
+    "AllPartitions",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "AllVectorPartitions",
     CalculatorFunctionsGeneral::innerAllVectorPartitions,
     "",
@@ -3997,13 +3723,12 @@ void Calculator::initPredefinedInnerFunctions() {
     "(first argument) using a given list of "
     "vectors (second argument). All partitioning "
     "vectors should have positive coordinates. ",
-    "AllVectorPartitions((10,11), ((1,2), (2,3), (4,5), (2,1), (3,2), (5,4))) ",
-    true,
-    false,
+    "AllVectorPartitions((10, 11), ((1,2 ), (2, 3), (4, 5), (2, 1), (3, 2), (5, 4))) ",
     "CalculatorFunctionsGeneral::innerAllVectorPartitions",
-    "AllVectorPartitions"
+    "AllVectorPartitions",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "AllSelectionsFixedRank",
     CalculatorFunctionsWeylGroup::innerAllSelectionsFixedRank,
     "",
@@ -4017,12 +3742,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "AllSelectionsFixedRank(0, (0,0,0));\n"
     "AllSelectionsFixedRank(2, 5);\n"
     "AllSelectionsFixedRank(2, 1);",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerAllSelectionsFixedRank",
-    "AllSelectionsFixedRank"
+    "AllSelectionsFixedRank",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "KostkaNumber",
     CalculatorFunctionsWeylGroup::innerKostkaNumber,
     "",
@@ -4032,12 +3756,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "Second argument = tableaux content = "
     "arbitrary tuple of positive integers. ",
     "KostkaNumber((3,2,1), (4,2)) ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerKostkaNumbers",
-    "KostkaNumber"
+    "KostkaNumber",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PrintNonNegativeVectorsLevel",
     Calculator::innerPrintZnEnumeration,
     "",
@@ -4046,12 +3769,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "Function meant for debugging purposes. "
     "First argument = dimension, second argument =grading level. ",
     "PrintNonNegativeVectorsLevel{}(4, 5);PrintNonNegativeVectorsLevel{}(4, 0); ",
-    true,
-    false,
     "Calculator::innerPrintZnEnumeration",
-    "PrintNonNegativeVectorsLevel"
+    "PrintNonNegativeVectorsLevel",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "SemisimpleLieAlgebra",
     CalculatorConversions::innerSSLieAlgebra,
     "",
@@ -4091,25 +3813,23 @@ void Calculator::initPredefinedInnerFunctions() {
     "g_{{i}}= GetChevalleyGenerator{}(SemisimpleLieAlgebra{}G_2, i);\n"
     "h_{{i}}= GetCartanGenerator{}(SemisimpleLieAlgebra{}G_2, i);\n"
     "[g_1,g_{- 1}]; \n[g_2, g_{-2}]; \n[h_{1}, g_6]; \n[h_2, g_{-6}]",
-    true,
-    false,
     "CalculatorConversions::innerSSLieAlgebra",
-    "SemisimpleLieAlgebra"
+    "SemisimpleLieAlgebra",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "WriteSemisimpleLieAlgebra",
     Calculator::innerWriteSSLieAlgebraToHD,
     "",
     "Writes semisimple Lie algebra structure constants to "
     "the output folder of the calculator. Available to logged-in admins only. ",
     "WriteSemisimpleLieAlgebra F_4",
-    true,
-    false,
     "Calculator::innerWriteToHDOrPrintSSLieAlgebra",
-    "WriteSemisimpleLieAlgebra"
+    "WriteSemisimpleLieAlgebra",
+    innerStandard
   );
 
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PrintSemisimpleLieAlgebra",
     Calculator::innerPrintSSLieAlgebraVerbose,
     "",
@@ -4120,12 +3840,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "a graphics of the root system. ",
     "PrintSemisimpleLieAlgebra{}(F_4);\n"
     "PrintSemisimpleLieAlgebra{}(2G^5_2+B_3);",
-    true,
-    false,
     "Calculator::innerPrintSSLieAlgebraVerbose",
-    "PrintSemisimpleLieAlgebra"
+    "PrintSemisimpleLieAlgebra",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PrecomputeSemisimpleLieAlgebraStructure",
     CalculatorFunctionsGeneral::innerPrecomputeSemisimpleLieAlgebraStructure,
     "",
@@ -4134,12 +3853,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "Argument gives a starting point (0 or negative to start at the beginning). "
     "Turn process monitoring on when using this function. ",
     "PrecomputeSemisimpleLieAlgebraStructure 0",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerPrecomputeSemisimpleLieAlgebraStructure",
-    "PrecomputeSemisimpleLieAlgebraStructure"
+    "PrecomputeSemisimpleLieAlgebraStructure",
+    innerAdminNoTest
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "GetChevalleyGenerator",
     Calculator::innerGetChevGen,
     "",
@@ -4155,12 +3873,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "ordered displayed by the "
     "PrintSemisimpleLieAlgebra function. ",
     "[GetChevalleyGenerator{}(G_2, 6), GetChevalleyGenerator{}(G_2, -6)]",
-    true,
-    false,
     "Calculator::innerGetChevGen",
-    "GetChevalleyGenerator"
+    "GetChevalleyGenerator",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "GetCartanGenerator",
     Calculator::innerGetCartanGen,
     "",
@@ -4176,12 +3893,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "with a coefficient of proportionality "
     "equal to 2/(simple root length squared) ).",
     "GetCartanGenerator{}(G_2, 1)",
-    true,
-    false,
     "Calculator::innerGetCartanGen",
-    "GetCartanGenerator"
+    "GetCartanGenerator",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "FunctionToMatrix",
     Calculator::innerFunctionToMatrix,
     "",
@@ -4189,23 +3905,21 @@ void Calculator::initPredefinedInnerFunctions() {
     "The first argument gives the function, "
     "the second argument the number of rows, the third- the number of columns.",
     "X =FunctionToMatrix{}(A,5,5);\n A{}({{a}},{{b}})=a/b;\n X; \\det {} X",
-    true,
-    false,
     "Calculator::innerFunctionToMatrix",
-    "FunctionToMatrix"
+    "FunctionToMatrix",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Transpose",
     Calculator::innerTranspose,
     "",
     "Transposes a matrix of expressions. ",
     "Transpose{}(1,2); (1,2)^t",
-    true,
-    false,
     "Calculator::innerTranspose",
-    "Transpose"
+    "Transpose",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\det",
     CalculatorFunctionsGeneral::innerDeterminant,
     "",
@@ -4215,12 +3929,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "X =FunctionToMatrix{}(A,5,5);\n "
     "A{}({{a}},{{b}})=1/(a +b);\n "
     "X; \\det {} X",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerDeterminant",
-    "Determinant"
+    "Determinant",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "DeterminantPolynomial",
     Calculator::innerDeterminantPolynomial,
     "",
@@ -4240,113 +3953,103 @@ void Calculator::initPredefinedInnerFunctions() {
     "x_{11} & x_{12} & x_{13} \\\\ "
     "x_{21} & x_{22} & x_{23} \\\\ "
     "x_{31} & x_{32} & x_{33} \\end{array} \\right) ",
-    true,
-    false,
     "Calculator::innerDeterminantPolynomial",
-    "DeterminantPolynomial"
+    "DeterminantPolynomial",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Length",
     CalculatorFunctionsGeneral::innerLength,
     "",
     "Returns the length of a sequence. ",
-    "Length(a,b) ",
-    true,
-    false,
+    "Length(a, b)",
     "CalculatorFunctionsGeneral::innerLength",
-    "Length"
+    "Length",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "GetMultiplicandList",
     CalculatorFunctionsGeneral::innerCollectMultiplicands,
     "",
     "Converts a sum to a sequence containing the summands. ",
     "GetMultiplicandList(a*b*c) ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerCollectMultiplicands",
-    "GetMultiplicandList"
+    "GetMultiplicandList",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "NormalizeIntervals",
     CalculatorFunctionsGeneral::innerNormalizeIntervals,
     "",
     "Sorts interval union. ",
-    "%UseBracketForIntervals\n NormalizeIntervals([2,3]\\cup [5,7]\\cup [- 1,- 1/2]);",
-    true,
-    false,
+    "%UseBracketForIntervals\n NormalizeIntervals([2,3] \\cup [5, 7] \\cup [- 1,- 1/2]);",
     "CalculatorFunctionsGeneral::innerNormalizeIntervals",
-    "NormalizeIntervals"
+    "NormalizeIntervals",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\cup",
     CalculatorFunctionsGeneral::innerUnionUnionIntervals,
     "",
     "In for the expression a \\cup (b\\cup c) the expression a\\cup b "
     "can be reduced to d, replaces a\\cup(b\\cup c) by a\\cup d. ",
     "%UseBracketForIntervals\n  [3,3]\\cup([3,7]\\cup [6,8]);",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerUnionUnionIntervals",
-    "UnionUnionIntervals"
+    "UnionUnionIntervals",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\cup",
     CalculatorFunctionsGeneral::innerUnionIntervals,
     "",
     "If the union of two intervals is one interval, replaces the interval. ",
     "%UseBracketForIntervals\n  [3,7]\\cup [6,8]);",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerUnionIntervals",
-    "UnionIntervals"
+    "UnionIntervals",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\cup",
     CalculatorFunctionsGeneral::innerUnionEmptySet,
     "",
     "Takes union with the empty set. ",
     "%UseBracketForIntervals\n"
-    "[3,7)\\cup \\emptyset;",
-    true,
-    false,
+    "[3, 7) \\cup \\emptyset;",
     "CalculatorFunctionsGeneral::innerUnionEmptySet",
-    "UnionEmptySet"
+    "UnionEmptySet",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\cap",
     CalculatorFunctionsGeneral::innerIntersectUnion,
     "",
     "Intersects with the empty set. ",
-    "%UseBracketForIntervals\n  ([3,7)\\cup (9,10))\\cap (4,8.5);",
-    true,
-    false,
+    "%UseBracketForIntervals\n([3, 7) \\cup (9, 10)) \\cap (4, 8.5);",
     "CalculatorFunctionsGeneral::innerIntersectUnion",
-    "IntersectUnion")
-  ;
-  this->AddOperationInnerHandler(
+    "IntersectUnion",
+    innerStandard
+  );
+  this->AddOperationHandler(
     "\\cap",
     CalculatorFunctionsGeneral::innerIntersectEmptySet,
     "",
     "Intersects with the empty set. ",
     "%UseBracketForIntervals\n  [3,7)\\cap \\emptyset;",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerIntersectEmptySet",
-    "InersectEmptySet"
+    "InersectEmptySet",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\cap",
     CalculatorFunctionsGeneral::innerIntersectIntervals,
     "",
     "Intersects two intervals. ",
-    "%UseBracketForIntervals\n  [3,7)\\cup [6,8);",
-    true,
-    false,
+    "%UseBracketForIntervals\n[3, 7) \\cup [6, 8);",
     "CalculatorFunctionsGeneral::innerIntersectIntervals",
-    "InersectIntervals"
+    "InersectIntervals",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "CompareIntervalsNumerically",
     CalculatorFunctionsGeneral::innerCompareIntervalsNumerically,
     "",
@@ -4356,12 +4059,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "Third argument: precisions to compare with. ",
     "%UseBracketForIntervals\n  CompareIntervalsNumerically"
     "([3,7)\\cup [8,9], [3,7.00000001)\\cup [7.9999999, 9], 0.0001);",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerCompareIntervalsNumerically",
-    "CompareIntervalsNumerically"
+    "CompareIntervalsNumerically",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "GetOpandList",
     CalculatorFunctionsGeneral::innerCollectOpands,
     "",
@@ -4371,91 +4073,83 @@ void Calculator::initPredefinedInnerFunctions() {
     "to make an arbitrary expresssion. ",
     "%UseBracketForIntervals\nGetOpandList(StringToAtom(\"\\otimes\"), a\\otimes b \\otimes c ); "
     "GetOpandList(StringToAtom(\"\\cup\"), [a,b]\\cup [c,d] \\cup [e,f] );",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerCollectOpands",
-    "GetOpandList"
+    "GetOpandList",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "GetSummandList",
     CalculatorFunctionsGeneral::innerCollectSummands,
     "",
     "Converts a sum to a sequence containing the summands. ",
     "GetSummandList(1+a +b) ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::outerGetSummands",
-    "GetSummandList"
+    "GetSummandList",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "GetSummand",
     CalculatorFunctionsGeneral::innerGetSummand,
     "",
     "Extracts the nth summand from a sum, "
     "<b>starts with the ZEROETH summand</b>. ",
     "GetSummand(\\sum_{n =1}^\\infty (- 1)^{2n + 1} x^{2n + 1}/(2n + 1)!, 5 ) ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerGetSummand",
-    "GetSummand"
+    "GetSummand",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "GetFirstSummandContaining",
     CalculatorFunctionsGeneral::innerGetFirstSummandContaining,
     "",
     "Extracts the first summand containing a subexpression. ",
     "GetFirstSummandContaining(a +b+\\sum_{n =1}^\\infty"
     "((- 1)^{2n + 1} x^{2n + 1}/(2n + 1)!), \\sum ) ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerGetFirstSummandContaining",
-    "GetFirstSummandContaining"
+    "GetFirstSummandContaining",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "RemoveDuplicates",
     CalculatorFunctionsGeneral::innerRemoveDuplicates,
     "",
     "Removes duplicates. ",
     "RemoveDuplicates(a,a,c,a,b,a,b,d) ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerRemoveDuplicates",
-    "RemoveDuplicates"
+    "RemoveDuplicates",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Sort",
     CalculatorFunctionsGeneral::innerSort,
     "",
     "Sorts a sequence. ",
     "Sort(x^2, x^3, x^1, x^{- 1}) ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerSort",
-    "Sort"
+    "Sort",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "SortDescending",
     CalculatorFunctionsGeneral::innerSortDescending,
     "",
     "Sorts a sequence in descending order.  ",
     "SortDescending(x^2, x^3, x^1, x^{- 1}) ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerSortDescending",
-    "SortDescending"
+    "SortDescending",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "BlocksOfCommutativity",
     CalculatorFunctionsGeneral::innerGetUserDefinedSubExpressions,
     "",
     "Returns subexpression blocks of commutativity. ",
     "BlocksOfCommutativity(\\sin x + x^2+ 3x y + 18x^{3/4 y}+\\sqrt{2}^{\\sqrt{2}c})",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerGetUserDefinedSubExpressions",
-    "BlocksOfCommutativity"
+    "BlocksOfCommutativity",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "HeighestWeightVector",
     CalculatorFunctionsGeneral::innerHWV,
     "",
@@ -4474,12 +4168,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "v_\\mu=HeighestWeightVector{} (A_3, (1,0,1),(0,0,0));\n"
     "v_\\lambda =HeighestWeightVector{}(B_3, (x_1,0,1),(1,0,0));\n"
     "h_1g_{- 1}v_\\lambda",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerHWV",
-    "HeighestWeightVector"
+    "HeighestWeightVector",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PrintModule",
     CalculatorFunctionsGeneral::innerPrintGenVermaModule,
     "",
@@ -4498,12 +4191,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "entries that are not non-negative integers "
     "in the positions in which the third argument has 1's. ",
     "PrintModule{} (G_2, (2,0),(0,0))",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerPrintGenVermaModule",
-    "PrintModule"
+    "PrintModule",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "HighestWeightTAAbf",
     CalculatorFunctionsGeneral::innerHWTAABF,
     "",
@@ -4519,12 +4211,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "Then define HighestWeightTAAbf(u_1,u_2)= Tr_M (P ( taa(u_1) u_2 ), "
     "where taa() is the transpose anti-automorphism of g. ",
     "g_{{a}}= GetChevalleyGenerator{} (G_2, a);\nHighestWeightTAAbf{}(g_{- 1} g_{-2}, g_{- 1}g_{-2}, (2,2))",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerHWTAABF",
-    "HighestWeightTAAbf"
+    "HighestWeightTAAbf",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "WeylDimFormula",
     CalculatorFunctionsGeneral::innerWeylDimFormula,
     "",
@@ -4533,12 +4224,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "Lie algebra in the form Type_Rank (e.g. E_6). "
     "The second argument gives the highest weight in fundamental coordinates. ",
     "WeylDimFormula{}(G_2, (x,0));\nWeylDimFormula{}(B_3, (x,0,0));",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerWeylDimFormula",
-    "WeylDimFormula"
+    "WeylDimFormula",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "AnimateLittelmannPaths",
     Calculator::innerAnimateLittelmannPaths,
     "",
@@ -4547,12 +4237,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "The first argument gives the type of the semisimple Lie algebra, "
     "the second gives the highest weight. ",
     "AnimateLittelmannPaths{}(G_2, (2,0));",
-    true,
-    false,
     "Calculator::innerAnimateLittelmannPaths",
-    "AnimateLittelmannPaths"
+    "AnimateLittelmannPaths",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "DecomposeInducingRepGenVermaModule",
     CalculatorFunctionsGeneral::innerDecomposeFDPartGeneralizedVermaModuleOverLeviPart,
     "",
@@ -4569,23 +4258,21 @@ void Calculator::initPredefinedInnerFunctions() {
     "gives the parabolic subalgebra with "
     "respect to whose Levi part we decompose.",
     "DecomposeInducingRepGenVermaModule{}(B_3,(0, 1,1),(1,0,0), (1,0,1))",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerDecomposeFDPartGeneralizedVermaModuleOverLeviPart",
-    "DecomposeInducingRepGenVermaModule"
+    "DecomposeInducingRepGenVermaModule",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Casimir",
     Calculator::innerCasimir,
     "",
     "Gives the Casimir element. ",
     "Casimir{}(G_2)",
-    true,
-    false,
     "Calculator::innerCasimir",
-    "Casimir"
+    "Casimir",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "CasimirWRTLevi",
     CalculatorFunctionsGeneral::innerCasimirWRTlevi,
     "",
@@ -4595,12 +4282,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "stands for simple root outside of the Levi "
     "component, 0 stands for simple root of the Levi component.",
     "CasimirWRTLevi{}(B_3, (1,0,0))",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerCasimirWRTlevi",
-    "CasimirWRTLevi"
+    "CasimirWRTLevi",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "HmmG2inB3",
     Calculator::innerEmbedG2inB3,
     "",
@@ -4609,12 +4295,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "in a paper by McGovern.",
     "g_{{a}}= GetChevalleyGenerator{} (G_2, a); "
     "HmmG2inB3{}(g_1);\nHmmG2inB3{}(g_2) ",
-    true,
-    false,
     "Calculator::innerEmbedG2inB3",
-    "HmmG2inB3"
+    "HmmG2inB3",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "DrawRootSystem",
     CalculatorFunctionsGeneral::innerDrawRootSystem,
     "",
@@ -4638,12 +4323,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "Clicking the obvious button creates a basis "
     "change animations ideal for presentations.",
     "DrawRootSystem{}(A_7, (1, 0 , 2, 2, 2, 0, 1), (1, 3, 2, 2, 2, 3, 1));",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerDrawRootSystem",
-    "DrawRootSystem"
+    "DrawRootSystem",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "DrawWeightSupportWithMults",
     CalculatorFunctionsGeneral::innerDrawWeightSupportWithMults,
     "",
@@ -4662,25 +4346,23 @@ void Calculator::initPredefinedInnerFunctions() {
     "Use only for *small* examples, "
     "else you might hang your browser. </b>",
     "DrawWeightSupportWithMults{}(B_3,(0,1,1));\n DrawWeightSupportWithMults{}(G_2,(1,0))",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerDrawWeightSupportWithMults",
-    "DrawWeightSupportWithMults"
+    "DrawWeightSupportWithMults",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "DrawWeightSupport",
     CalculatorFunctionsGeneral::innerDrawWeightSupport,
     "",
     "Same as DrawWeightSupportWithMults but displays no multiplicities. "
     "Same warning for hanging up your browser "
     "with javascript holds.",
-    "DrawWeightSupport{}(B_3,(1,1,1)); DrawWeightSupport{}(G_2,(1,2))",
-    true,
-    false,
+    "DrawWeightSupport{}(B_3, (1, 1, 1)); DrawWeightSupport{}(G_2, (1, 2))",
     "CalculatorFunctionsGeneral::innerDrawWeightSupport",
-    "DrawWeightSupport"
+    "DrawWeightSupport",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "SplitFDpartB3overG2CharsOnly",
     Calculator::innerSplitFDpartB3overG2CharsOnly,
     "",
@@ -4693,13 +4375,12 @@ void Calculator::initPredefinedInnerFunctions() {
     "The arguments which are not small integers "
     "indicate the non-selected "
     "roots of the inducing parabolic subalgebra of B_3. ",
-    "SplitFDpartB3overG2CharsOnly{}(x_1,2,0)",
-    true,
-    false,
+    "SplitFDpartB3overG2CharsOnly{}(x_1, 2, 0)",
     "Calculator::innerSplitFDpartB3overG2CharsOnly",
-    "SplitFDpartB3overG2CharsOnly"
+    "SplitFDpartB3overG2CharsOnly",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "SplitFDpartB3overG2",
     CalculatorFunctionsGeneral::innerSplitFDpartB3overG2,
     "",
@@ -4712,13 +4393,12 @@ void Calculator::initPredefinedInnerFunctions() {
     "The arguments which are not small integers "
     "indicate the non-selected roots of the inducing "
     "parabolic subalgebra of B_3. ",
-    "SplitFDpartB3overG2{}(x_1,1,0)",
-    false,
-    true,
+    "SplitFDpartB3overG2{}(x_1, 1, 0)",
     "CalculatorFunctionsGeneral::innerSplitFDpartB3overG2",
-    "SplitFDpartB3overG2"
+    "SplitFDpartB3overG2",
+    innerInvisibleExperimental
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PrintB3G2branchingTableCharsOnly",
     Calculator::innerPrintB3G2branchingTableCharsOnly,
     "",
@@ -4733,12 +4413,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "The expression given in that coordinate "
     "is used as the corresponding highest weight. ",
     "PrintB3G2branchingTableCharsOnly{}(2, (0,0,0)); PrintB3G2branchingTableCharsOnly{}(2, (x_1,0,0))",
-    true,
-    true,
     "Calculator::innerPrintB3G2branchingTableCharsOnly",
-    "PrintB3G2branchingTableCharsOnly"
+    "PrintB3G2branchingTableCharsOnly",
+    innerInvisibleExperimental
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PrintB3G2branchingTable",
     Calculator::innerPrintB3G2branchingTable,
     "",
@@ -4748,24 +4427,22 @@ void Calculator::initPredefinedInnerFunctions() {
     "values of 2 or more must be run off-line.",
     "PrintB3G2branchingTable{}(1, (0,0,0)); "
     "PrintB3G2branchingTable{}(1, (x_1,0,0))",
-    true,
-    true,
     "Calculator::innerPrintB3G2branchingTable",
-    "PrintB3G2branchingTable"
+    "PrintB3G2branchingTable",
+    innerInvisibleExperimental
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "SplitFDTensorGenericGeneralizedVerma",
     CalculatorFunctionsGeneral::innerSplitGenericGenVermaTensorFD,
     "",
     "Experimental, please don't use. Splits generic generalized "
     "Verma module tensor finite dimensional module. ",
     "SplitFDTensorGenericGeneralizedVerma{}(G_2, (1, 0), (x_1, x_2)); ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerSplitGenericGenVermaTensorFD",
-    "SplitFDTensorGenericGeneralizedVerma"
+    "SplitFDTensorGenericGeneralizedVerma",
+    innerAdminNoTestExperimental
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "WriteGenVermaAsDiffOperatorsUpToWeightLevel",
     CalculatorFunctionsGeneral::innerWriteGenVermaModAsDiffOperatorUpToLevel,
     "",
@@ -4778,12 +4455,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "The second argument gives the weight "
     "level to which the computation should be carried out",
     "WriteGenVermaAsDiffOperatorsUpToWeightLevel{}(B_3, 1, (0, 0, y)); ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerWriteGenVermaModAsDiffOperatorUpToLevel",
-    "WriteGenVermaAsDiffOperatorsUpToWeightLevel"
+    "WriteGenVermaAsDiffOperatorsUpToWeightLevel",
+    innerAdminNoTestExperimental
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "MapSemisimpleLieAlgebraInWeylAlgebraGeneratorOrder",
     Calculator::innerWriteGenVermaModAsDiffOperatorsGeneratorOrder,
     "",
@@ -4815,12 +4491,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "accepts further optional arguments, "
     "customizing the notation of the final printout.",
     "MapSemisimpleLieAlgebraInWeylAlgebraGeneratorOrder{}(B_3, (0,0,0), (0, 0, 1), x, \\partial, a); ",
-    true,
-    false,
     "Calculator::innerWriteGenVermaModAsDiffOperatorsGeneratorOrder",
-    "MapSemisimpleLieAlgebraInWeylAlgebraGeneratorOrder"
+    "MapSemisimpleLieAlgebraInWeylAlgebraGeneratorOrder",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "MapSemisimpleLieAlgebraInWeylAlgebra",
     Calculator::innerWriteGenVermaModAsDiffOperatorsNilOrderDescending,
     "",
@@ -4838,13 +4513,12 @@ void Calculator::initPredefinedInnerFunctions() {
     "the nil-order. Now this function sorts the "
     "elements of the nilradical in descending nil-order, "
     "that is, elements with higher nil-order come first.",
-    "MapSemisimpleLieAlgebraInWeylAlgebra{}(B_3, (0,0,0), (0, 0, 1), x, \\partial, a); ",
-    true,
-    false,
+    "MapSemisimpleLieAlgebraInWeylAlgebra{}(B_3, (0, 0, 0), (0, 0, 1), x, \\partial, a); ",
     "Calculator::innerWriteGenVermaModAsDiffOperatorsNilOrderDescending",
-    "MapSemisimpleLieAlgebraInWeylAlgebra"
+    "MapSemisimpleLieAlgebraInWeylAlgebra",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "MapSemisimpleLieAlgebraInWeylAlgebraAllGens",
     Calculator::innerWriteGenVermaModAsDiffOperatorsAllGensNilOrderDescending,
     "",
@@ -4875,12 +4549,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "nil-order given by the function "
     "MapSemisimpleLieAlgebraInWeylAlgebra.",
     "MapSemisimpleLieAlgebraInWeylAlgebraAllGens{}(B_3, (0,0,0), (0, 0, 1), x, \\partial, a); ",
-    true,
-    false,
     "Calculator::innerWriteGenVermaModAsDiffOperatorsAllGensNilOrderDescending",
-    "MapSemisimpleLieAlgebraInWeylAlgebraAllGens"
+    "MapSemisimpleLieAlgebraInWeylAlgebraAllGens",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "KLcoeffs",
     Calculator::innerKLcoeffs,
     "",
@@ -4901,61 +4574,56 @@ void Calculator::initPredefinedInnerFunctions() {
     "of R-polynomials and KL-polynomials in RAM memory at "
     "all times, unlike the other more efficient implementations).",
     "KLcoeffs{}(B_3)",
-    true,
-    false,
     "Calculator::innerKLcoeffs",
-    "KLcoeffs"
+    "KLcoeffs",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "RootSubsystem",
     Calculator::innerRootSubsystem,
     "",
     "Generates a root subsystem of a simple type. "
     "First argument indicates simple type, second, third,... arguments "
     "give the generating roots. ",
-    "RootSubsystem(F_4, (0,1,0,0), (0,0,1,0), (1,1,2,2))",
-    true,
-    false,
+    "RootSubsystem(F_4, (0, 1, 0, 0), (0, 0, 1, 0), (1, 1, 2, 2))",
     "Calculator::innerRootSubsystem",
-    "RootSubsystem"
+    "RootSubsystem",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PrintRootSubalgebras",
     CalculatorFunctionsGeneral::innerPrintRootSAs,
     "",
     "Prints sl(2) subalgebras and root subalgebras. "
     "The argument gives the type of the Lie algebra in the form Type_Rank (e.g. E_6).",
     "PrintRootSubalgebras(E_6)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerPrintRootSAs",
-    "PrintRootSubalgebras"
+    "PrintRootSubalgebras",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PrintRootSubalgebrasRecompute",
     CalculatorFunctionsGeneral::innerPrintRootSAsForceRecompute,
     "",
     "Same as printRootSubalgebras but forces recomputation. "
     "Use to recompute obsolete or interrupted output files.",
     "PrintRootSubalgebrasRecompute(b_3)",
-    false,
-    false,
     "CalculatorFunctionsGeneral::innerPrintRootSAsForceRecompute",
-    "PrintRootSubalgebrasRecompute"
+    "PrintRootSubalgebrasRecompute",
+    innerAdminNoTest
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PrintSlTwoSubalgebras",
     CalculatorFunctionsGeneral::innerPrintSltwos,
     "",
     "Prints sl(2) subalgebras and root subalgebras. "
     "The argument gives the type of the Lie algebra in the form Type_Rank (e.g. E_6).",
     "PrintSlTwoSubalgebras(g_2)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerPrintSltwos",
-    "PrintSlTwoSubalgebras"
+    "PrintSlTwoSubalgebras",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "ParabolicsInfoBruhatGraph",
     CalculatorFunctionsGeneral::innerParabolicWeylGroupsBruhatGraph,
     "",
@@ -4986,25 +4654,23 @@ void Calculator::initPredefinedInnerFunctions() {
     "no problem handling this function up to "
     "E_6 but LaTeX crashes trying to process the output. </b>",
     "parabolicsInfoBruhatGraph{}(B_3,(1,0,0),(1,0,0))",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerParabolicWeylGroupsBruhatGraph",
-    "ParabolicsInfoBruhatGraph"
+    "ParabolicsInfoBruhatGraph",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "TestMonomialBasisConjecture",
     Calculator::innerTestMonomialBaseConjecture,
     "",
-    "Tests the monomial basis conjecture from the Jackson-Milev paper. "
+    "Tests the monomial basis conjecture from a common work by Jackson and Milev paper. "
     "First argument gives rank bound. "
     "Second argument gives dimension bound. ",
     "TestMonomialBasisConjecture{}(2, 50)",
-    true,
-    false,
     "Calculator::innerTestMonomialBaseConjecture",
-    "TestMonomialBasisConjecture"
+    "TestMonomialBasisConjecture",
+    innerAdminNoTestExperimental
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "LSpath",
     Calculator::innerLSPath,
     "",
@@ -5012,12 +4678,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "The first argument gives the semisimple Lie algebra, "
     "the next arguments give the way-points of the path.",
     "LSpath{}(G_2, (0,0), (2,1) )",
-    true,
-    false,
     "Calculator::innerLSPath",
-    "LSpath"
+    "LSpath",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "LROdefine",
     Calculator::innerLittelmannOperator,
     "",
@@ -5026,12 +4691,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "If i is negative then the e_i root operator is defined to be "
     "the f_\\alpha operator.",
     "e_{{i}}= LROdefine_i; e_{- 1} e_{- 1} LSpath{}(G_2, (0,0), (2,1))",
-    true,
-    true,
     "Calculator::innerLittelmannOperator",
-    "LROdefine"
+    "LROdefine",
+    innerExperimental
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PrintProductDistancesModN",
     CalculatorFunctionsGeneral::innerFindProductDistanceModN,
     "",
@@ -5043,14 +4707,14 @@ void Calculator::initPredefinedInnerFunctions() {
     "whose product equals X mod N, where "
     "the elements are taken from the predefined "
     "list of positive integers given by the second argument.",
-    "PrintProductDistancesModN( 65537, "
-    "(97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122)) ",
-    false,
-    true,
+    "PrintProductDistancesModN(65537, "
+    "(97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122)"
+    ")",
     "CalculatorFunctionsGeneral::innerFindProductDistanceModN",
-    "PrintProductDistancesModN"
+    "PrintProductDistancesModN",
+    innerAdminNoTestInvisibleOffByDefault
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "SolveProductSumEquationOverSetModN",
     CalculatorFunctionsGeneral::innerSolveProductSumEquationOverSetModN,
     "",
@@ -5059,25 +4723,23 @@ void Calculator::initPredefinedInnerFunctions() {
     "predefined set of positive numbers. ",
     "SolveProductSumEquationOverSetModN(theMod =65537; theProduct =16628; theSum=1286; "
     "theSet = (97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122)) ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerFindProductDistanceModN",
-    "SolveProductSumEquationOverSetModN"
+    "SolveProductSumEquationOverSetModN",
+    innerAdminNoTestInvisibleOffByDefault
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "IsNilpotent",
     CalculatorFunctionsGeneral::innerIsNilpotent,
     "",
     "Computes whether a matrix is nilpotent. "
     "May/will be extended to work for an arbitrary object "
     "for which the term \"nilpotent\" makes sense. ",
-    "IsNilpotent{}((0,1),(0,0))",
-    true,
-    false,
+    "IsNilpotent{}((0, 1), (0, 0))",
     "CalculatorFunctionsGeneral::innerIsNilpotent",
-    "IsNilpotent"
+    "IsNilpotent",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "InvertMatrixVerbose",
     Calculator::innerInvertMatrixVerbose,
     "",
@@ -5085,53 +4747,50 @@ void Calculator::initPredefinedInnerFunctions() {
     "Inverts a matrix of rationals if invertible, "
     "in any other case generates an error. Makes a detailed "
     "printout of all Gaussian elimantion steps. ",
-    "InvertMatrixVerbose{}((1,2),(2,3))",
-    true,
-    false,
+    "InvertMatrixVerbose{}((1, 2), (2, 3))",
     "Calculator::innerInvertMatrixVerbose",
-    "InvertMatrixVerbose"
+    "InvertMatrixVerbose",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "InvertMatrix",
     CalculatorFunctionsGeneral::innerInvertMatrix,
     "",
     "Inverts a matrix of rationals or algebraic numbers if invertible. ",
     "X = MakeMatrix((1,2,1), (1,0,1), (- 1,1,0)); InvertMatrix X- X^{- 1}",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerInvertMatrix",
-    "InvertMatrix"
+    "InvertMatrix",
+    innerStandard
   );
-   //this->AddOperationInnerHandler
-   //("GramSchmidtAlgebraicVerbose",
-   //  CalculatorFunctionsGeneral::innerGramSchmidtVerbose, "",
-   // "(Attempts to) run Gram-Schmidt (over the algebraic numbers!) on a small matrix . The inputs are vector-rows.",
-   // "X = GramSchmidtAlgebraicVerbose((1,2,1), (1,0,1), (- 1,1,0)); InvertMatrix X- X^{- 1}",
-   // false, false,
-   // "CalculatorFunctionsGeneral::innerInvertMatrix",
-   // "InvertMatrix");
-  this->AddOperationInnerHandler(
+  //this->AddOperationHandler
+  //("GramSchmidtAlgebraicVerbose",
+  //  CalculatorFunctionsGeneral::innerGramSchmidtVerbose, "",
+  // "(Attempts to) run Gram-Schmidt (over the algebraic numbers!) on a small matrix . The inputs are vector-rows.",
+  // "X = GramSchmidtAlgebraicVerbose((1,2,1), (1,0,1), (- 1,1,0)); InvertMatrix X- X^{- 1}",
+  // false, false,
+  // "CalculatorFunctionsGeneral::innerInvertMatrix",
+  // "InvertMatrix");
+  this->AddOperationHandler(
     "Trace",
     CalculatorFunctionsGeneral::innerTrace,
     "",
     "Gets trace of a square matrix. ",
     "X = MakeMatrix((1,2,1), (1,0,1), (- 1,1,0)); Trace X",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerTrace",
-    "Trace"
+    "Trace",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "ReverseBytes",
     CalculatorFunctionsGeneral::innerReverseBytes,
     "",
     "Reverses the bytes of a string. Does not respect utf-8 encoding. ",
     "ReverseBytes{}(\"abc\")",
-    true,
-    false,
-    "Calculator::innerReverseBytes", "ReverseBytes"
+    "Calculator::innerReverseBytes",
+    "ReverseBytes",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Reverse",
     Calculator::innerReverseOrdeR,
     "",
@@ -5140,22 +4799,21 @@ void Calculator::initPredefinedInnerFunctions() {
     "the internal representation of the object in place "
     "and flips the order of all other children.",
     "Reverse{}(s_1 s_2 s_3 s_4 s_2 s_3 s_1 s_2 s_3 s_4 s_1 s_2 s_3 s_2 s_1)",
-    true,
-    false,
-    "Calculator::innerReverseOrdeR", "Reverse"
+    "Calculator::innerReverseOrdeR",
+    "Reverse",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "ReverseRecursively",
-    this->innerReverseOrderRecursively,
+    Calculator::innerReverseOrderRecursively,
     "",
     "Same as Reverse but will apply recursively to the children expressions as well.",
     "ReverseRecursively{}(s_1 s_2 s_3s_4s_2s_3s_1s_2s_3s_4s_1s_2s_3s_2s_1)",
-    true,
-    false,
     "Calculator::innerReverseOrderRecursively",
-    "ReverseRecursively"
+    "ReverseRecursively",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "SolveFor",
     CalculatorFunctionsGeneral::innerSolveUnivariatePolynomialWithRadicalsWRT,
     "",
@@ -5171,12 +4829,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "returned in a list (empty list for no solution). "
     "Solutions with multiplicity higher than one are repeated. ",
     "SolveFor(x, a x^2+b x +c); SolveFor(x, a x +b)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerSolveUnivariatePolynomialWithRadicalsWRT",
-    "SolveFor"
+    "SolveFor",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "FindOneSolutionSerreLikePolynomialSystem",
     CalculatorFunctionsGeneral::innerSolveSerreLikeSystemNoUpperLimit,
     "",
@@ -5222,12 +4879,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "x_{6}x_{15}+x_{5}x_{14}-x_{3}x_{13}, "
     "x_{5}x_{15}+x_{4}x_{14}-x_{2}x_{13}, "
     "x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}- 1)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerSolveSerreLikeSystemNoUpperLimit",
-    "FindOneSolutionSerreLikePolynomialSystem"
+    "FindOneSolutionSerreLikePolynomialSystem",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "FindOneSolutionSerreLikePolynomialSystemUpperLimit",
     CalculatorFunctionsGeneral::innerSolveSerreLikeSystemUpperLimit,
     "",
@@ -5255,25 +4911,23 @@ void Calculator::initPredefinedInnerFunctions() {
     "x_{6}x_{15}+x_{5}x_{14}-x_{3}x_{13}, "
     "x_{5}x_{15}+x_{4}x_{14}-x_{2}x_{13}, "
     "x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}- 1)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerSolveSerreLikeSystemUpperLimit",
-    "FindOneSolutionSerreLikePolynomialSystemUpperLimit"
+    "FindOneSolutionSerreLikePolynomialSystemUpperLimit",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "FindOneSolutionSerreLikePolynomialSystemAlgebraic",
     CalculatorFunctionsGeneral::innerSolveSerreLikeSystemAlgebraic,
     "",
     "Same as FindOneSolutionSerreLikePolynomialSystem "
     "but starts directly over algebraic closure. ",
     "FindOneSolutionSerreLikePolynomialSystemAlgebraic{}"
-    "(x^2+ 1, y x z - 1, z^2 x +y- 1, w u)",
-    true,
-    false,
+    "(x^2 + 1, y x z - 1, z^2 x + y - 1, w u)",
     "CalculatorFunctionsGeneral::innerSolveSerreLikeSystemAlgebraic",
-    "FindOneSolutionSerreLikePolynomialSystemAlgebraic"
+    "FindOneSolutionSerreLikePolynomialSystemAlgebraic",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit",
     CalculatorFunctionsGeneral::innerSolveSerreLikeSystemAlgebraicUpperLimit,
     "",
@@ -5282,12 +4936,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "polynomial computations that can be carried out.",
     "FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit{}"
     "(10000, x^2+ 1, y x z - 1, z^2 x +y- 1, w u)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerSolveSerreLikeSystemAlgebraicUpperLimit",
-    "FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit"
+    "FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "GroebnerLexUpperLimit",
     Calculator::innerGroebnerLex,
     "",
@@ -5359,35 +5012,32 @@ void Calculator::initPredefinedInnerFunctions() {
     "3. Return changedMainBucket.  <br><b>End of algorithm description.</b>",
     "GroebnerLexUpperLimit{}(10000, s^2+c^2+ 1, a-s^4, b-c^4 );\n"
     "GroebnerLexUpperLimit{}(5, s^2+c^2+ 1, a-s^4, b-c^4 );",
-    true,
-    false,
     "Calculator::innerGroebnerLex",
-    "GroebnerLexUpperLimit"
+    "GroebnerLexUpperLimit",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PolynomialRelationsUpperLimit",
     CalculatorFunctionsGeneral::innerPolynomialRelations,
     "",
     "Finds the relations between the polynomials.",
     "PolynomialRelationsUpperLimit{}(10000, s^2+c^2+ 1, s^4, c^4 );",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerPolynomialRelations",
-    "PolynomialRelationsUpperLimit"
+    "PolynomialRelationsUpperLimit",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "GroebnerRevLexUpperLimit",
     Calculator::innerGroebnerRevLex,
     "",
     "Same as GroebnerLexUpperLimit but uses reverse order on the variables (z<x).",
     "GroebnerRevLexUpperLimit{}(10000, s^2+c^2+ 1, a-s^4, b-c^4 );"
     "\nGroebnerRevLexUpperLimit{}(5, s^2+c^2+ 1, a-s^4, b-c^4 );",
-    true,
-    false,
     "Calculator::innerGroebnerRevLex",
-    "GroebnerRevLexUpperLimit"
+    "GroebnerRevLexUpperLimit",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "GroebnerGrLexUpperLimit",
     Calculator::innerGroebnerGrLex,
     "",
@@ -5408,12 +5058,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "the description of function GroebnerLexUpperLimit.",
     "GroebnerGrLexUpperLimit{}(10000, a^2+b^2+ 1, x-a^4, y-b^4 );\n "
     "GroebnerGrLexUpperLimit{}(5, a^2+b^2+ 1, x-a^4, y-b^4 )",
-    true,
-    false,
     "Calculator::innerGroebnerGrLex",
-    "GroebnerGrLexUpperLimit"
+    "GroebnerGrLexUpperLimit",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "ComputeFKFT",
     CalculatorFunctionsGeneral::innerComputePairingTablesAndFKFTsubalgebras,
     "",
@@ -5421,24 +5070,22 @@ void Calculator::initPredefinedInnerFunctions() {
     "to the most experimental, latest and greatest algorithm. "
     "Argument must be of type semisimple Lie subalgebras. ",
     "ComputeFKFT( ComputeSemisimpleSubalgebras(c_3))",
-    false,
-    false,
     "CalculatorFunctionsGeneral::innerComputePairingTablesAndFKFTsubalgebras",
-    "ComputeFKFT"
+    "ComputeFKFT",
+    innerAdminNoTestExperimental
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "ComputeSemisimpleSubalgebras",
     CalculatorFunctionsGeneral::innerComputeSemisimpleSubalgebras,
     "",
     "Computes the semisimple subalgebras of a semisimple "
     "Lie algebra and creates a data structure containing them. ",
     "ComputeSemisimpleSubalgebras(A_2)",
-    false,
-    false,
     "CalculatorFunctionsGeneral::innerComputeSemisimpleSubalgebras",
-    "ComputeSemisimpleSubalgebras"
+    "ComputeSemisimpleSubalgebras",
+    innerInvisible
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "CentralizerChains",
     CalculatorFunctionsGeneral::innerGetCentralizerChainsSemisimpleSubalgebras,
     "",
@@ -5448,61 +5095,55 @@ void Calculator::initPredefinedInnerFunctions() {
     "your own machine; don't use it on a public server. "
     "Creates a printout with centralizer chains of semisimple Lie subalgebras. ",
     "CentralizerChains (ComputeSemisimpleSubalgebras{}(B_3))",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerGetCentralizerChainsSemisimpleSubalgebras",
     "CentralizerChains",
-    true
+    innerAdminNoTest
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PrintSemisimpleSubalgebras",
     Calculator::innerPrintSSsubalgebrasRegular,
     "",
     "<b>This function is being developed and is not implemented fully yet.</b> "
     "Prints the semisimple subalgebras of a semisimple Lie algebra. ",
     "PrintSemisimpleSubalgebras(B_3)",
-    true,
-    false,
     "Calculator::innerPrintSSsubalgebrasRegular",
-    "PrintSemisimpleSubalgebras"
+    "PrintSemisimpleSubalgebras",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PrintSemisimpleSubalgebrasRecompute",
     Calculator::innerPrintSSsubalgebrasRecompute,
     "",
     "<b>This function is being developed and is not implemented fully yet.</b> "
     "Prints the semisimple subalgebras of a semisimple Lie algebra. ",
     "PrintSemisimpleSubalgebrasRecompute(C_3)",
-    false,
-    false,
     "Calculator::innerPrintSSsubalgebrasRecompute",
-    "PrintSemisimpleSubalgebrasRecompute"
+    "PrintSemisimpleSubalgebrasRecompute",
+    innerAdminNoTest
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PrintSemisimpleSubalgebrasNoCentralizers",
     Calculator::innerPrintSSsubalgebrasNoCentralizers,
     "",
     "<b>This function is being developed and is not implemented fully yet.</b> "
     "Prints the semisimple subalgebra candidates of a Lie algebra. ",
     "PrintSemisimpleSubalgebrasNoCentralizers(A_3)",
-    false,
-    false,
     "Calculator::innerPrintSSsubalgebrasNoCentralizers",
-    "PrintSemisimpleSubalgebrasNoCentralizers"
+    "PrintSemisimpleSubalgebrasNoCentralizers",
+    innerAdminNoTest
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "PrintSemisimpleSubalgebrasFull",
     Calculator::innerPrintSSsubalgebrasNilradicals,
     "",
     "<b>This function is being developed and is not implemented fully yet.</b>"
     "Prints the semisimple subalgebras of a semisimple Lie algebra. ",
     "PrintSemisimpleSubalgebrasFull{}(A_2)",
-    false,
-    false,
     "Calculator::innerPrintSSsubalgebrasNilradicals",
-    "PrintSemisimpleSubalgebrasFull"
+    "PrintSemisimpleSubalgebrasFull",
+    innerAdminNoTest
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "CanBeExtendedParabolicallyTo",
     CalculatorFunctionsGeneral::innerCanBeExtendedParabolicallyTo,
     "",
@@ -5514,12 +5155,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "CanBeExtendedParabolicallyTo(b_3, a_10);"
     "CanBeExtendedParabolicallyTo(c_2, c_10);"
     "CanBeExtendedParabolicallyTo(b_3+e_6+a_3, d_4+e_8+f_4)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerCanBeExtendedParabolicallyTo",
-    "CanBeExtendedParabolicallyTo"
+    "CanBeExtendedParabolicallyTo",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "EmbedSemisimpleInSemisimple",
     CalculatorFunctionsGeneral::innerEmbedSSalgInSSalg,
     "",
@@ -5527,24 +5167,22 @@ void Calculator::initPredefinedInnerFunctions() {
     "Records all intermediate subalgebras. ",
     "EmbedSemisimpleInSemisimple{}(G^3_2, B_3);"
     "EmbedSemisimpleInSemisimple{}(G_2, B_3)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerEmbedSSalgInSSalg",
-    "EmbedSemisimpleInSemisimple"
+    "EmbedSemisimpleInSemisimple",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "LoadSemisimpleSubalgebras",
     CalculatorConversions::innerLoadSemisimpleSubalgebras,
     "",
     "<b>This function is being developed and is not implemented fully yet.</b>"
     "Loads a semisimpleSubalgebra from expression. ",
     "LoadSemisimpleSubalgebras {}(EmbedSemisimpleInSemisimple{}(G_2, B_3))",
-    true,
-    false,
     "CalculatorConversions::innerLoadSemisimpleSubalgebras",
-    "LoadSemisimpleSubalgebras"
+    "LoadSemisimpleSubalgebras",
+    innerAdminNoTest
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "SltwoSubalgebra",
     CalculatorConversions::innerSlTwoSubalgebraPrecomputed,
     "",
@@ -5554,25 +5192,23 @@ void Calculator::initPredefinedInnerFunctions() {
     "+ 3 ((GetChevalleyGenerator, (B)_{3}, -2)), "
     "3 ((GetChevalleyGenerator, (B)_{3}, 3))\\\\ "
     "+6 ((GetChevalleyGenerator, (B)_{3}, 1))\\\\ "
-    "+ 10/3 ((GetChevalleyGenerator, (B)_{3}, 2)))",
-    true,
-    true,
+    "+ 10 / 3 ((GetChevalleyGenerator, (B)_{3}, 2)))",
     "CalculatorConversions::innerSlTwoSubalgebraPrecomputed",
-    "SltwoSubalgebra"
+    "SltwoSubalgebra",
+    innerAdminNoTest
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\sqrt",
     CalculatorFunctionsGeneral::innerSqrt,
     "",
     "Square root of a rational, "
     "implemented as algebraic extension of the rationals. ",
     "\\sqrt 2+\\sqrt 3;(\\sqrt{}2+\\sqrt{}3+\\sqrt{}6)^2",
-    true,
-    false,
     "Calculator::innerSqrt",
-    "sqrt"
+    "sqrt",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "FactorOutNumberContent",
     CalculatorFunctionsGeneral::innerFactorOutNumberContent,
     "",
@@ -5582,12 +5218,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "with leading coefficient positive. ",
     "TurnOffRules(\"DistributeMultiplication\",\"DistributeMultiplicationConstants\"); "
     "FactorOutNumberContent{}(3x +9t +27);",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerFactorOutNumberContent",
-    "FactorOutNumberContent"
+    "FactorOutNumberContent",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "FactorOneVarPolyOverRationals",
     Calculator::innerFactorPoly,
     "",
@@ -5602,12 +5237,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "as interpolated by Lagrange polynomials.",
     "FactorOneVarPolyOverRationals{}(x^{8}-44x^{6}+438x^{4}- 1292x^{2}+529);\n"
     "FactorOneVarPolyOverRationals{}(x^{8}+2x^{7}-3x^{6}-4x^{5}+6x^{4}+2x^{3}- 13x^{2}+ 1)",
-    true,
-    false,
     "Calculator::innerFactorPoly",
-    "FactorOneVarPolyOverRationals"
+    "FactorOneVarPolyOverRationals",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "FactorInteger",
     CalculatorFunctionsGeneral::innerFactorInteger,
     "",
@@ -5616,12 +5250,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "FactorInteger(1);\n"
     "FactorInteger(- 10);\n"
     "FactorInteger(0);",
-    true,
-    false,
     "Calculator::innerFactorInteger",
-    "FactorInteger"
+    "FactorInteger",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Freudenthal",
     Calculator::innerFreudenthalEval,
     "",
@@ -5631,12 +5264,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "the semisimple Lie algebra type, the second argument gives "
     "the highest weight in fundamental coordinates. ",
     "Freudenthal{}(B_3, (2,2,2))",
-    true,
-    false,
     "Calculator::innerFreudenthalEval",
-    "Freudenthal"
+    "Freudenthal",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Killing",
     Calculator::innerKillingForm,
     "",
@@ -5644,72 +5276,66 @@ void Calculator::initPredefinedInnerFunctions() {
     "h_{{i}}= GetCartanGenerator{}(F_1, i);"
     "KF{}({{i}},{{j}})=Killing{}(h_i, h_j);"
     "FunctionToMatrix(KF, 4, 4)",
-    true,
-    false,
     "Calculator::innerKillingForm",
-    "Killing"
+    "Killing",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "FreudenthalFull",
     Calculator::innerFreudenthalFull,
     "",
     "Computes the full character and prints it to screen. "
     "Argument format same as the Freudenthal function. ",
-    "FreudenthalFull{}(G_2, (2,1))",
-    true,
-    false,
+    "FreudenthalFull{}(G_2, (2, 1))",
     "Calculator::innerFreudenthalFull",
-    "FreudenthalFull"
+    "FreudenthalFull",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "CoefficientsPowersOf",
     CalculatorFunctionsGeneral::innerCoefficientsPowersOf,
     "",
     "Extracts the coefficients of the powers of the first argument in the second argument.",
     "CoefficientsPowersOf(x, a x^2+ b *3 x +c +\\pi +3)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerCoefficientsPowersOf",
-    "CoefficientsPowersOf"
+    "CoefficientsPowersOf",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "ConstantTerm",
     CalculatorFunctionsGeneral::innerConstTermRelative,
     "",
     "Extracts term constant relative to the variable in the first argument. ",
     "ConstantTerm(y,  x y x +3 +2z)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerConstTermRelative",
-    "ConstantTerm"
+    "ConstantTerm",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "CoefficientOf",
     CalculatorFunctionsGeneral::innerCoefficientOf,
     "",
     "Gets the coefficient of the first argument in the second. ",
-    "CoefficientOf(y, x*x*y+x*z*y*z+x*y*x)",
-    true,
-    false,
+    "CoefficientOf(y, x * x * y + x * z * y * z + x * y * x)",
     "CalculatorFunctionsGeneral::innerCoefficientOf",
-    "CoefficientOf"
+    "CoefficientOf",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "IsLinearOrConstantIn",
     CalculatorFunctionsGeneral::innerIsLinearOrConstantIn,
     "",
     "Returns one if the second argument is linear in the first. "
     "All variables are treated as non-constants. ",
-    "IsLinearOrConstantIn(x, x^2+ 1);\n"
-    "IsLinearOrConstantIn(x, x y+ 1);\n"
+    "IsLinearOrConstantIn(x, x^2 + 1);\n"
+    "IsLinearOrConstantIn(x, x y + 1);\n"
     "IsLinearOrConstantIn(x, x + 1);\n"
     "IsLinearOrConstantIn(x, x \\pi + 1);",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerIsLinearOrConstantIn",
-    "IsLinearOrConstantIn"
+    "IsLinearOrConstantIn",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "IsProductLinearOrConstantTermsIn",
     CalculatorFunctionsGeneral::innerIsProductLinearOrConstTermsIn,
     "",
@@ -5722,12 +5348,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "IsProductLinearOrConstantTermsIn(x, (x- 1)(x + 1));\n"
     "IsProductLinearOrConstantTermsIn(x, (2x + 1)(x \\pi + 1));\n"
     "IsProductLinearOrConstantTermsIn(x, (2x +y)(x \\pi + 1));\n",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerIsProductLinearOrConstTermsIn",
-    "IsProductLinearOrConstantTermsIn"
+    "IsProductLinearOrConstantTermsIn",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "IsProductTermsUpToPower",
     CalculatorFunctionsGeneral::innerIsProductTermsUpToPower,
     "",
@@ -5741,17 +5366,16 @@ void Calculator::initPredefinedInnerFunctions() {
     "IsProductTermsUpToPower(x, (x- 1)(x + 1));\n"
     "IsProductTermsUpToPower(x, (2x + 1)(x \\pi + 1));\n"
     "IsProductTermsUpToPower(x, (2x +y)(x \\pi + 1));\n",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerIsProductTermsUpToPower",
-    "IsProductTermsUpToPower"
+    "IsProductTermsUpToPower",
+    innerStandard
   );
 }
 
 void Calculator::initPredefinedStandardOperations() {
   // IMPORTANT.
   // The order of registration of operation handlers for the same operation name
-  //  defines the order in which operation
+  // defines the order in which operation
   // handlers are called. Operations handlers registered first are executed first.
   // The order only matters for different handlers of the same operation.
   // This order is very important, as some of the
@@ -5762,7 +5386,20 @@ void Calculator::initPredefinedStandardOperations() {
   // or by making the corresponding handlers call each other as needed.
   // A combination of these two was indeed the original design approach,
   // and gradually evolved to what is used now.
-  this->AddOperationOuterHandler(
+  Function::Options outerStandard;
+  outerStandard.flagIsInner = false;
+  Function::Options outerAdminInvisibleNoTest;
+  outerAdminInvisibleNoTest.flagIsInner = false;
+  outerAdminInvisibleNoTest.adminOnly = true;
+  outerAdminInvisibleNoTest.flagDontTestAutomatically = true;
+  Function::Options innerStandard;
+  innerStandard.flagIsInner = true;
+  Function::Options innerExperimentalNoTest;
+  innerExperimentalNoTest.flagIsInner = true;
+  innerExperimentalNoTest.flagIsExperimental = true;
+  innerExperimentalNoTest.flagDontTestAutomatically = true;
+
+  this->AddOperationHandler(
     ";",
     Calculator::outerMeltBrackets,
     "",
@@ -5784,13 +5421,15 @@ void Calculator::initPredefinedStandardOperations() {
     "Melt{}d;\n"
     "e;\n"
     "g;",
-    true
+    "Calculator::outerMeltBrackets",
+    "MeltBrackets",
+    outerStandard
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "=",
     Calculator::outerCheckRule,
     "",
-    "Checks whether the rule is of the form A =A, and substitutes "
+    "Checks whether the rule is of the form A = A, and substitutes "
     "the expression with an error if that is the case. "
     "This usually happens when a general rule is entered twice. "
     "In the following example, we try to redefine the associative rule "
@@ -5798,7 +5437,9 @@ void Calculator::initPredefinedStandardOperations() {
     "the left hand side of the below expression is substituted with a*(b*c), and thus the rule becomes "
     "a*(b*c)=a*(b*c), which clearly is infinite substitution.",
     "%LogEvaluation\n({{a}}*{{b}})*{{c}}=a*(b*c);  ",
-    true
+    "Calculator::outerCheckRule",
+    "CheckAutoEquality",
+    outerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
@@ -5807,10 +5448,9 @@ void Calculator::initPredefinedStandardOperations() {
     this->opString(),
     "Concatenates strings. ",
     "\"hello \"+ \"world\"",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerAddStringToString",
-    "AddStrings"
+    "AddStrings",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
@@ -5819,10 +5459,9 @@ void Calculator::initPredefinedStandardOperations() {
     this->opRational(),
     "Adds two rational numbers. ",
     "2 + 3",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerAddRatToRat",
-    "AddRationals"
+    "AddRationals",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
@@ -5831,9 +5470,9 @@ void Calculator::initPredefinedStandardOperations() {
     this->opEltZmodP(),
     "Adds elements of Z_p. ",
     "(2 mod 7) + 3",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat"
+    "CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat",
+    "AddRationalToElementZmodP",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
@@ -5842,9 +5481,9 @@ void Calculator::initPredefinedStandardOperations() {
     this->opRational(),
     "Adds elements of Z_p. ",
     "(2 mod 7) + 3",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat"
+    "CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat",
+    "AddElementZmodPToRational",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
@@ -5853,9 +5492,9 @@ void Calculator::initPredefinedStandardOperations() {
     this->opEltZmodP(),
     "Adds elements of Z_p. ",
     "(2 mod 7) + 3",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat"
+    "CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat",
+    "AddElementZmodPToElementZmodP",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
@@ -5864,9 +5503,9 @@ void Calculator::initPredefinedStandardOperations() {
     this->opAlgNumber(),
     "Adds two algebraic numbers. ",
     "\\sqrt {2}+ \\sqrt {3} + \\sqrt{6}",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber"
+    "CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber",
+    "AddAlgebraicNumberToAlgebraicNumber",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
@@ -5875,9 +5514,9 @@ void Calculator::initPredefinedStandardOperations() {
     this->opRational(),
     "Adds algebraic number to rational. ",
     "1/(\\sqrt {2}+ 1+\\sqrt{3}+\\sqrt{6})",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber"
+    "CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber",
+    "AddAlgebraicNumberToRational",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
@@ -5886,9 +5525,9 @@ void Calculator::initPredefinedStandardOperations() {
     this->opAlgNumber(),
     "Adds rational to algebraic number. ",
     "1/(1+\\sqrt {2}+\\sqrt{}6)",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber"
+    "CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber",
+    "AddRationalToAlgebraicNumber",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
@@ -5898,11 +5537,11 @@ void Calculator::initPredefinedStandardOperations() {
     "Adds double or rational to a double or rational approximately "
     "using the built-in cpp addition, returning double. ",
     "DoubleValue{}(3.14159265358979323846) + 1",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerAddDoubleOrRatToDoubleOrRat",
-    "AddDoubleToRational"
+    "AddDoubleToRational",
+    innerStandard
   );
+  // must come before outer plus:
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddPlotToPlot,
@@ -5910,23 +5549,21 @@ void Calculator::initPredefinedStandardOperations() {
     this->opCalculusPlot(),
     "Superimposes two plots. ",
     "Plot2D{}(sin{}(x), -5, 5) + Plot2D{}(1/sin{}(x ), 0.1, 3.041592654)",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerAddPlotToPlot",
-    "AddPlots"
-  );//must come before outer plus.
-  this->AddOperationInnerHandler(
+    "AddPlots",
+    innerStandard
+  );
+  this->AddOperationHandler(
     "ScaleToLeadingUnit",
     CalculatorFunctionsGeneral::innerScaleToLeadingUnit,
     "",
     "Rescales an expression over the rationals so that the leading term has coefficient 1. ",
     "ScaleToLeadingUnit(1/2 x + 1/3 y+ 1/7 a b)",
-    true,
-    false,
     "Calculator::innerScaleToLeadingUnit",
-    "ScaleToLeadingUnit"
+    "ScaleToLeadingUnit",
+    innerStandard
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "+",
     Calculator::outerPlus,
     "",
@@ -5934,36 +5571,32 @@ void Calculator::initPredefinedStandardOperations() {
     "proportional up to a rational number. "
     "Zero summands are removed, unless zero is the only term left. ",
     "1+a-2a_1+ 1/2+a_1",
-    true,
-    false,
     "Calculator::outerPlus",
     "AddTerms",
-    false,
+    outerStandard,
     "+"
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "+",
     CalculatorFunctionsGeneral::outerCombineFractionsCommutative,
     "",
     "Combines fractions on condition that all participants commute. "
     "Equivalent to {{a}}/{{b}}+{{c}}/{{d}}= (a *d+c*b)/(d*b); "
     "Please note that this transformation is not correct if b and d do not commute. ",
-    "a/b+c/d",
-    true,
-    false,
+    "a / b + c / d",
     "CalculatorFunctionsGeneral::outerCombineFractionsCommutative",
-    "CommonDenominator"
+    "CommonDenominator",
+    outerStandard
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "+",
     this->outerCombineFractions,
     "",
     "Combines fractions. Equivalent to {{a}}/{{b}}+{{c}}= (a +c*b)/b; ",
     "f{}{{x}}= (2x +3)/(2x + 1);\ng{}{{y}}= (y-2)/(y+3);\ng{}f{}z;\nf{}g{}z",
-    true,
-    false,
     "Calculator::outerCombineFractions",
-    "CommonDenominatorOneNonFraction"
+    "CommonDenominatorOneNonFraction",
+    outerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
@@ -5973,9 +5606,9 @@ void Calculator::initPredefinedStandardOperations() {
     "Adds two elements of tensor products of generalized Verma modules. ",
     "v=HeighestWeightVector{}(G_2, (1,0),(0,0));\n"
     "(3/4 v)\\otimes v-3/4 (v\\otimes v)",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerAddEltTensorToEltTensor"
+    "CalculatorFunctionsBinaryOps::innerAddEltTensorToEltTensor",
+    "AddElementTensorGeneralizedVermaModuleToElementTensorGeneralizedVermaModule",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
@@ -5984,9 +5617,9 @@ void Calculator::initPredefinedStandardOperations() {
     this->opPoly(),
     "Adds a rational to a polynomial. ",
     "1+Polynomial{}\\lambda; Polynomial{}\\lambda + 1",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly"
+    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly",
+    "AddRationalToPolynomial",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
@@ -5995,9 +5628,9 @@ void Calculator::initPredefinedStandardOperations() {
     this->opRational(),
     "Adds a polynomial to a rational. ",
     "1+Polynomial{}\\lambda; Polynomial{}\\lambda + 1",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly"
+    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly",
+    "AddPolynomialToRational",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
@@ -6005,10 +5638,11 @@ void Calculator::initPredefinedStandardOperations() {
     this->opPoly(),
     this->opPoly(),
     "Adds a polynomial to a polynomial. ",
-    "x =1+Polynomial{}\\lambda; x +x",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly"
+    "x = 1 + Polynomial{} \\lambda;\n"
+    "x + x",
+    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly",
+    "AddPolynomialToPolynomial",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
@@ -6016,10 +5650,10 @@ void Calculator::initPredefinedStandardOperations() {
     this->opPolyOverANs(),
     this->opPolyOverANs(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
-    "PolynomialAlgebraicNumbers(\\sqrt{12}x) +PolynomialAlgebraicNumbers(-\\sqrt{3}x)",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly"
+    "PolynomialAlgebraicNumbers(\\sqrt{12}x) + PolynomialAlgebraicNumbers(-\\sqrt{3}x)",
+    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly",
+    "AddPolynomialOverAlgebraicNumbersToPolynomialOverAlgebraicNumbers",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
@@ -6028,9 +5662,9 @@ void Calculator::initPredefinedStandardOperations() {
     this->opPolyOverANs(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
     "PolynomialAlgebraicNumbers(\\sqrt{12}) +PolynomialAlgebraicNumbers(\\sqrt{3}x)",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly"
+    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly",
+    "AddAlgebraicNumberToPolynomialOverAlgebraicNumbers",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
@@ -6039,9 +5673,9 @@ void Calculator::initPredefinedStandardOperations() {
     this->opAlgNumber(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
     "PolynomialAlgebraicNumbers(\\sqrt{12}x) +PolynomialAlgebraicNumbers(-\\sqrt{3})",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly"
+    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly",
+    "AddPolynomialOverAlgebraicNumbersToAlgebraicNumber",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
@@ -6049,10 +5683,10 @@ void Calculator::initPredefinedStandardOperations() {
     this->opRational(),
     this->opPolyOverANs(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
-    "1+PolynomialAlgebraicNumbers(\\sqrt{12}x)",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly"
+    "1 + PolynomialAlgebraicNumbers(\\sqrt{12}x)",
+    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly",
+    "AddRationalToPolynomialAlgebraicNumbers",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
@@ -6061,9 +5695,9 @@ void Calculator::initPredefinedStandardOperations() {
     this->opRational(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
     "PolynomialAlgebraicNumbers(\\sqrt{12}x) + 1",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly"
+    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly",
+    "AddPolynomialAlgebraicNumbersToRational",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
@@ -6072,8 +5706,9 @@ void Calculator::initPredefinedStandardOperations() {
     this->opAlgNumber(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
     "PolynomialAlgebraicNumbers(x) +\\sqrt{2}",
-    true,
-    false, "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly"
+    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly",
+    "AddPolynomialToAlgebraicNumber",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
@@ -6082,8 +5717,9 @@ void Calculator::initPredefinedStandardOperations() {
     this->opPolyOverANs(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
     "Polynomial{}x + PolynomialAlgebraicNumbers(\\sqrt{2}x)",
-    true,
-    false, "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly"
+    "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly",
+    "AddPolynomialToPolynomialAlgebraicNumbers",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
@@ -6091,11 +5727,10 @@ void Calculator::initPredefinedStandardOperations() {
     this->opPolyOverANs(),
     this->opPoly(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
-    "PolynomialAlgebraicNumbers(\\sqrt{2}x) +Polynomial{}x",
-    true,
-    false,
+    "PolynomialAlgebraicNumbers(\\sqrt{2}x) + Polynomial{}x",
     "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly",
-    "AddNumberOrPolyOverAlgebraicNumbersToPoly"
+    "AddPolynomialAlgebraicNumbersToPolynomial",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
@@ -6104,10 +5739,9 @@ void Calculator::initPredefinedStandardOperations() {
     this->opPoly(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
     "\\sqrt{2}+PolynomialAlgebraicNumbers(x)",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly",
-    "AddAlgebraicNumberToPoly"
+    "AddAlgebraicNumberToPolynomial",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
@@ -6117,9 +5751,9 @@ void Calculator::initPredefinedStandardOperations() {
     "Adds a rational or polynomial to element Weyl algebra. ",
     " \\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n"
     "x_{{i}}= Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA"
+    "CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA",
+    "AddRationalToElementWeylAlgebra",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
@@ -6127,11 +5761,11 @@ void Calculator::initPredefinedStandardOperations() {
     this->opPoly(),
     this->opElementWeylAlgebra(),
     "Adds a rational or polynomial to element Weyl algebra. ",
-    " \\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n"
+    "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n"
     "x_{{i}}= Polynomial{}x_i;\nx_i +\\partial_i +x_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA"
+    "CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA",
+    "AddPolynomialToElementWeylAlgebra",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
@@ -6141,9 +5775,9 @@ void Calculator::initPredefinedStandardOperations() {
     "Adds a rational or polynomial to element Weyl algebra. ",
     " \\partial_{{i}} = ElementWeylAlgebraDO{}(\\partial_i, x_i);\n"
     "x_{{i}}= Polynomial{}x_i;\nx_i +x_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA"
+    "CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA",
+    "AddElementWeylAlgebraToPolynomial",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
@@ -6153,9 +5787,9 @@ void Calculator::initPredefinedStandardOperations() {
     "Adds a rational or polynomial to element Weyl algebra. ",
     " \\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n"
     "x_{{i}}= Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA"
+    "CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA",
+    "AddElementWeylAlgebraToElementWeylAlgebra",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
@@ -6164,9 +5798,9 @@ void Calculator::initPredefinedStandardOperations() {
     this->opRationalFunction(),
     "Adds a rational function to a rational function. ",
     "WeylDimFormula{}(a_2, (0,3)) + WeylDimFormula{}(a_2, (3,0)) + 4 WeylDimFormula{}(a_2, (1,1)) ",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrRFToRatOrPolyOrRF"
+    "CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrRFToRatOrPolyOrRF",
+    "AddRationalFunctionToRationalFunction",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
@@ -6176,9 +5810,9 @@ void Calculator::initPredefinedStandardOperations() {
     "Adds double or rational to a double or rational approximately using the "
     "built-in cpp addition, returning double. ",
     "DoubleValue{}(3.14159265358979323846) + 1",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerAddDoubleOrRatToDoubleOrRat"
+    "CalculatorFunctionsBinaryOps::innerAddDoubleOrRatToDoubleOrRat",
+    "AddRationalToDouble",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
@@ -6188,9 +5822,9 @@ void Calculator::initPredefinedStandardOperations() {
     "Adds double or rational to a double or rational approximately using the built-in cpp "
     "addition, returning double. ",
     "DoubleValue{}(3.14159265358979323846) + 1",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerAddDoubleOrRatToDoubleOrRat"
+    "CalculatorFunctionsBinaryOps::innerAddDoubleOrRatToDoubleOrRat",
+    "AddDoubleToDouble",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
@@ -6199,11 +5833,11 @@ void Calculator::initPredefinedStandardOperations() {
     this->opWeightLieAlgPoly(),
     "Adds two weights. ",
     "\\lambda = Polynomial{}\\lambda; "
-    "\\varepsilon_{{a}}=MakeWeight{}(B_3, a, epsilon); "
-    "(1/2+\\lambda)\\varepsilon_1+ 1/2\\varepsilon_2+ 1/2\\varepsilon_3  ",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerAddWeightToWeight"
+    "\\varepsilon_{{a}} = MakeWeight{}(B_3, a, epsilon); "
+    "(1 / 2 + \\lambda) \\varepsilon_1 + 1 / 2 \\varepsilon_2+ 1 / 2 \\varepsilon_3  ",
+    "CalculatorFunctionsBinaryOps::innerAddWeightToWeight",
+    "AddWeightLieAlgebraPolynomialToWeightLieAlgebraPolynomial",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
@@ -6214,56 +5848,52 @@ void Calculator::initPredefinedStandardOperations() {
     "g_{{{i}}} = GetChevalleyGenerator{}(F_{1}, {{i}});\n"
     "h_{{{i}}} = GetCartanGenerator{}(F_{1}, {{i}});\n"
     "[g_{22}+g_{20}+g_{14},g_{- 14}+g_{-20}+g_{-22}]",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerAddUEToAny"
+    "CalculatorFunctionsBinaryOps::innerAddUEToAny",
+    "AddElementUniversalEnvelopingRationalFunctionCoefficientsToElementUniversalEnvelopingRationalFunctionCoefficients",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "+",
     CalculatorFunctionsBinaryOps::innerAddMatrixToMatrix,
     "",
     "Adds two matrices.",
-    "\\begin{pmatrix} 1& 2\\\\ 2& 3\\end{pmatrix}+\n"
-    "\\begin{pmatrix} 1& 3\\\\ 2& 3\\end{pmatrix}",
-    true,
-    false,
+    "\\begin{pmatrix} 1& 2 \\\\ 2 & 3\\end{pmatrix} + \n"
+    "\\begin{pmatrix} 1& 3 \\\\ 2 & 3\\end{pmatrix}",
     "CalculatorFunctionsBinaryOps::innerAddMatrixToMatrix",
-    "AddMatrices"
+    "AddMatrices",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\oplus",
     CalculatorFunctionsBinaryOps::innerDirectSumMatrixWithMatrix,
     "",
     "Direct sum of two matrices, non-commutative.",
     "\\begin{pmatrix} 1& 2\\\\ 2& 3\\end{pmatrix}\\oplus\n"
     "\\begin{pmatrix} - 1& 3\\\\ -2& -3\\end{pmatrix}",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerDirectSumMatrixWithMatrix",
-    "DirectSumMatrices"
+    "DirectSumMatrices",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix,
     "",
     "Multiplies matrices.",
     "\\begin{pmatrix} 1&  2 \\\\ 3& 5\\end{pmatrix}"
     "\\begin{pmatrix} 1& -2 \\\\ 3& 5\\end{pmatrix}",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix",
-    "MultiplyMatrixByMatrix"
+    "MultiplyMatrixByMatrix",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplySequenceByMatrix,
     "",
     "Multiplies matrices.",
     "(1,2)\\begin{pmatrix} 1& 2 \\\\ 3& 5\\end{pmatrix}",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerMultiplySequenceByMatrix",
-    "MultiplySequenceByMatrix"
+    "MultiplySequenceByMatrix",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
@@ -6278,9 +5908,9 @@ void Calculator::initPredefinedStandardOperations() {
     "v_{3}= (3, 1, 1);\n"
     "v_{4}= (-2, 2, 2);\n"
     "1/2v_{1}+ 1/2v_{2}+7/8v_{3}+ 13/16v_{4}",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerAddSequenceToSequence", "AddSequences"
+    "CalculatorFunctionsBinaryOps::innerAddSequenceToSequence",
+    "AddSequences",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
@@ -6288,100 +5918,95 @@ void Calculator::initPredefinedStandardOperations() {
     this->opMatTensorRat(),
     this->opMatTensorRat(),
     "Adds two matrices.",
-    "A =MakeMatrixTensorForm{}((5, 8), (3, 5)); 3A*A-A;",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerAddMatrixTensorToMatrixTensor"
+    "A = MakeMatrixTensorForm{}((5, 8), (3, 5)); 3A * A - A;",
+    "CalculatorFunctionsBinaryOps::innerAddMatrixTensorToMatrixTensor",
+    "AddMatrixTensorToMatrixTensor",
+    innerStandard
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "-",
     Calculator::outerMinus,
     "",
-    "Transforms a-b to a +(- 1)*b and -b to (- 1)*b. Equivalent to a rule "
+    "Transforms a - b to a +(- 1) * b and - b to (- 1) * b. Equivalent to a rule "
     "-{{b}}=MinusOne * b; {{a}}-{{b}}=a + MinusOne * b", "- 1 + (- 5)",
-    true,
-    false,
     "Calculator::outerMinus",
-    "Minus"
+    "Minus",
+    outerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "*",
     CalculatorFunctionsGeneral::innerInterpretAsDifferential,
     "",
     "If circumstances imply it, interprets an atom of the form dx as Differential {} x. ",
-    "(\\int x)dx; \\int x (1+x) dx; \\int_2^3 x dx; \\int_2^3 x(1+x)dx",
-    true,
-    false,
+    "(\\int x) dx; \\int x (1 + x) dx; \\int_2^3 x dx; \\int_2^3 x (1 + x) dx",
     "CalculatorFunctionsGeneral::innerInterpretAsDifferential",
-    "InterpretAsDifferential"
+    "InterpretAsDifferential",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "*",
     CalculatorFunctionsGeneral::innerIntegralOperator,
     "",
     "Transforms integral notation into an integral expression. ",
-    "(\\int x)dx; \\int x (1+x) dx; \\int_2^3 x dx; \\int_2^3 x(1+x)dx",
-    true,
-    false,
+    "(\\int x)dx;\n"
+    "\\int x (1+x) dx;\n"
+    "\\int_2^3 x dx;\n"
+    "\\int_2^3 x(1+x)dx",
     "CalculatorFunctionsGeneral::innerIntegralOperator",
-    "IntegralOperatorFromProduct"
+    "IntegralOperatorFromProduct",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "*",
     CalculatorFunctionsGeneral::innerSumTimesExpressionToSumOf,
     "",
     "Transforms \\sum\\limits_{b}^c* a to (\\sum\\limits_b^c){} a. ",
     "PlotExpressionTree(  \\sum\\limits_{b}^c);\n"
     "PlotExpressionTree( \\sum\\limits_{b}^c*a) ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerSumTimesExpressionToSumOf",
-    "SumProductNotationToOperator"
+    "SumProductNotationToOperator",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "/",
     CalculatorFunctionsGeneral::innerSumTimesExpressionToSumOf,
     "",
     "Transforms \\sum\\limits_{b}^c* a to (\\sum\\limits_b^c){} a. ",
     "PlotExpressionTree(  \\sum\\limits_{b}^c);\n"
     "PlotExpressionTree( \\sum\\limits_{b}^c*a) ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerSumTimesExpressionToSumOf",
-    "SumProductNotationToOperatorRelativeToDivision"
+    "SumProductNotationToOperatorRelativeToDivision",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "^",
     CalculatorFunctionsGeneral::innerHandleUnderscorePowerLimits,
     "",
     "Handles expressions of the form \\limits_a^b",
     "\\limits_a^b; \\limits^b_a",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerHandleUnderscorePowerLimits",
-    "LimitBoundaryNotationPower"
+    "LimitBoundaryNotationPower",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "_",
     CalculatorFunctionsGeneral::innerHandleUnderscorePowerLimits,
     "",
     "Handles expressions of the form \\limits_a^b",
     "\\limits_a^b; \\limits^b_a",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerHandleUnderscorePowerLimits",
-    "LimitBoundaryNotationUnderscore"
+    "LimitBoundaryNotationUnderscore",
+    innerStandard
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "*",
     CalculatorFunctionsGeneral::outerDifferentiateWRTxTimesAny,
     "",
-    "Replaces Differentiate{}(x)*a by Differentiate{}(x,a).",
+    "Replaces Differentiate{}(x)*a by Differentiate{}(x, a).",
     "d/dx (1/x) ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::outerDifferentiateWRTxTimesAny",
-    "DifferentiateLog"
+    "DifferentiateWithRespectToXTimeAny",
+    outerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -6389,12 +6014,12 @@ void Calculator::initPredefinedStandardOperations() {
     this->opElementHyperOctahedral(),
     this->opElementHyperOctahedral(),
     "Multiplies two elements of hyperoctahedral groups. ",
-    "s = MakeElementHyperOctahedral{}((1,2),1,0,0); "
-    "t = MakeElementHyperOctahedral{}((1,3),0,0,0); "
-    "s*t*s*t",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerMultiplyEltHypOctByEltHypOct"
+    "s = MakeElementHyperOctahedral{}((1, 2), 1, 0, 0); "
+    "t = MakeElementHyperOctahedral{}((1, 3), 0, 0, 0); "
+    "s * t * s * t",
+    "CalculatorFunctionsBinaryOps::innerMultiplyEltHypOctByEltHypOct",
+    "MultiplyElementHyperOctahedralByElementHyperOctahedral",
+    outerAdminInvisibleNoTest
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -6402,10 +6027,10 @@ void Calculator::initPredefinedStandardOperations() {
     this->opRational(),
     this->opEltZmodP(),
     "Multiplies elements of Z_p. ",
-    " (2 mod  7)*3",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerMultiplyEltZmodPorRatByEltZmodPorRat"
+    "(2 mod 7) * 3",
+    "CalculatorFunctionsBinaryOps::innerMultiplyEltZmodPorRatByEltZmodPorRat",
+    "MultiplyRationalByElementZmodP",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -6413,10 +6038,10 @@ void Calculator::initPredefinedStandardOperations() {
     this->opEltZmodP(),
     this->opEltZmodP(),
     "Multiplies elements of Z_p. ",
-    " (2 mod  7)*3",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerMultiplyEltZmodPorRatByEltZmodPorRat"
+    "(2 mod 7) * 3",
+    "CalculatorFunctionsBinaryOps::innerMultiplyEltZmodPorRatByEltZmodPorRat",
+    "MultiplyElementZmodPByElementZModP",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -6425,10 +6050,9 @@ void Calculator::initPredefinedStandardOperations() {
     this->opAlgNumber(),
     "Multiplies two algebraic numbers. ",
     "\\sqrt{}2(\\sqrt {2}* \\sqrt {3} +\\sqrt{}2)",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerMultiplyAlgebraicNumberByAlgebraicNumber",
-    "MultiplyAlgebraicByAlgebraic"
+    "MultiplyAlgebraicNumberByAlgebraicNumber",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -6437,10 +6061,9 @@ void Calculator::initPredefinedStandardOperations() {
     this->opAlgNumber(),
     "Multiplies two algebraic number by rational. ",
     "2(\\sqrt {2}+\\sqrt{}3)",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerMultiplyAlgebraicNumberByAlgebraicNumber",
-    "MultiplyRationalByAlgebraic"
+    "MultiplyRationalByAlgebraicNumber",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -6448,11 +6071,10 @@ void Calculator::initPredefinedStandardOperations() {
     this->opRational(),
     this->opRational(),
     "Multiplies two rationals. ",
-    "2*3",
-    true,
-    false,
+    "2 * 3",
     "CalculatorFunctionsBinaryOps::innerMultiplyRatByRat",
-    "MultiplyRationals"
+    "MultiplyRationals",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -6468,12 +6090,11 @@ void Calculator::initPredefinedStandardOperations() {
     "DoubleValue{}(z);\n"
     "DoubleValue{}(z) +DoubleValue{}(1)-DoubleValue{}(z);\n"
     "(z+ 1)-z;\n"
-    "y =101^200;\n"
+    "y = 101^200;\n"
     "DoubleValue(y)",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerMultiplyDoubleOrRatByDoubleOrRat",
-    "MultiplyDoubleByRational"
+    "MultiplyRationalByDouble",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -6486,9 +6107,9 @@ void Calculator::initPredefinedStandardOperations() {
     "DoubleValue{}(1/3)*3;\n"
     "DoubleValue{}((101)^{20});\n"
     "DoubleValue{}(DoubleValue{}((101)^{20}) + DoubleValue{}(1)) - DoubleValue{}(101^{20})",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerMultiplyDoubleOrRatByDoubleOrRat"
+    "CalculatorFunctionsBinaryOps::innerMultiplyDoubleOrRatByDoubleOrRat",
+    "MultiplyDoubleByRational",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -6501,9 +6122,9 @@ void Calculator::initPredefinedStandardOperations() {
     "DoubleValue{}(1/3)*3;\n"
     "DoubleValue{}((101)^{20});\n"
     "DoubleValue{}(DoubleValue{}((101)^{20}) +DoubleValue{}(1))-DoubleValue{}(101^{20})",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerMultiplyDoubleOrRatByDoubleOrRat"
+    "CalculatorFunctionsBinaryOps::innerMultiplyDoubleOrRatByDoubleOrRat",
+    "MultiplyDoubleByDouble",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -6511,10 +6132,10 @@ void Calculator::initPredefinedStandardOperations() {
     this->opWeylGroupElement(),
     this->opWeylGroupElement(),
     "Multiplies two Coxeter elements if possible. ",
-    "x =MakeElementWeylGroup{}(A_2, 1); x*x",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerMultiplyCoxeterEltByCoxeterElt"
+    "x = MakeElementWeylGroup{}(A_2, 1); x*x",
+    "CalculatorFunctionsBinaryOps::innerMultiplyCoxeterEltByCoxeterElt",
+    "MultiplyWeylGroupElementByWeylGroupElement",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -6526,10 +6147,10 @@ void Calculator::initPredefinedStandardOperations() {
     "page 142, exercise 9. ",
     "x = MakeCharacterLieAlg{}(G_2, (1,0));\n"
     "y = MakeCharacterLieAlg{}(G_2, (0,1));\n"
-    "x*y",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerMultiplyCharSSLieAlgByCharSSLieAlg"
+    "x * y",
+    "CalculatorFunctionsBinaryOps::innerMultiplyCharSSLieAlgByCharSSLieAlg",
+    "MultiplyCharacterSemisimpleLieAlgebraModuleBy",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -6540,9 +6161,9 @@ void Calculator::initPredefinedStandardOperations() {
     "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n"
     "x_{{i}}= Polynomial{}x_i;\n"
     "3\\partial_i",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA"
+    "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA",
+    "MultiplyRationalByElementWeylAlgebra",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -6553,9 +6174,9 @@ void Calculator::initPredefinedStandardOperations() {
     "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n"
     "x_{{i}}= Polynomial{}x_i;\n"
     "x_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA"
+    "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA",
+    "MultiplyPolynomialByElementWeylAlgebra",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -6565,11 +6186,11 @@ void Calculator::initPredefinedStandardOperations() {
     "Multiplies rational or polynomial or element Weyl algebra by rational or polynomial or element Weyl algebra. ",
     "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n"
     "x_{{i}}= Polynomial{}x_i;\n"
-    "a =x_1x_2;\n"
-    "b=\\partial_1\\partial_2; a b - b a -[a,b] ",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA"
+    "a = x_1 x_2;\n"
+    "b = \\partial_1 \\partial_2; a b - b a -[a,b] ",
+    "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA",
+    "MultiplyElementWeylAlgebraByElementWeylAlgebra",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -6580,9 +6201,9 @@ void Calculator::initPredefinedStandardOperations() {
     "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n"
     "x_{{i}}= Polynomial{}x_i;\n"
     "x_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA"
+    "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA",
+    "MultiplyElementWeylAlgebraByPolynomial",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -6593,9 +6214,9 @@ void Calculator::initPredefinedStandardOperations() {
     "2*Polynomial{}(a +b);\n"
     "Polynomial{}(a +b)/2;\n"
     "Polynomial{}((a +b)^3)*Polynomial{}((a +c)^3);",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly"
+    "CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly",
+    "MultiplyPolynomialByRational",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -6606,9 +6227,9 @@ void Calculator::initPredefinedStandardOperations() {
     "2*Polynomial{}(a + b);\n"
     "Polynomial{}(a + b)/2;\n"
     "Polynomial{}((a + b)^3) * Polynomial{}((a + c)^3);",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly"
+    "CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly",
+    "MultiplyRationalByPolynomial",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -6619,9 +6240,9 @@ void Calculator::initPredefinedStandardOperations() {
     "2*Polynomial{}(a +b);\n"
     "Polynomial{}(a +b)/2;\n"
     "Polynomial{}((a +b)^3) * Polynomial{}((a +c)^3);",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly"
+    "CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly",
+    "MultiplyPolynomialByPolynomial",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -6630,9 +6251,9 @@ void Calculator::initPredefinedStandardOperations() {
     this->opPolyOverANs(),
     "Multiplies two polynomials over the algebraic numbers. ",
     "PolynomialAlgebraicNumbers{}(\\sqrt{3}x)*PolynomialAlgebraicNumbers{}(\\sqrt{6}y);",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly"
+    "CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly",
+    "MultiplyPolynomialAlgebraicNumbersByPolynomialAlgebraicNumbers",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -6641,9 +6262,9 @@ void Calculator::initPredefinedStandardOperations() {
     this->opAlgNumber(),
     "Multiplies two polynomials over the algebraic numbers. ",
     "PolynomialAlgebraicNumbers{}(\\sqrt{3}x)*\\sqrt{6};",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly"
+    "CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly",
+    "MultiplyPolynomialAlgebraicNumbersByAlgebraicNumber",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -6652,9 +6273,9 @@ void Calculator::initPredefinedStandardOperations() {
     this->opPolyOverANs(),
     "Multiplies two polynomials over the algebraic numbers. ",
     "\\sqrt{6}*PolynomialAlgebraicNumbers{}(\\sqrt{3}x);",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly"
+    "CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly",
+    "MultiplyAlgebraicNumberByPolynomialAlgebraicNumbers",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -6663,9 +6284,9 @@ void Calculator::initPredefinedStandardOperations() {
     this->opPolyOverANs(),
     "Multiplies two polynomials over the algebraic numbers. ",
     "PolynomialAlgebraicNumbers{}(\\sqrt{3}x)*2;",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly"
+    "CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly",
+    "MultiplyRationalByPolynomialAlgebraicNumbers",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -6674,9 +6295,9 @@ void Calculator::initPredefinedStandardOperations() {
     this->opAlgNumber(),
     "Multiplies two polynomials over the algebraic numbers. ",
     "Polynomial{}(x)*\\sqrt{2};",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly"
+    "CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly",
+    "MultiplyPolynomialByAlgebraicNumber",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -6684,10 +6305,10 @@ void Calculator::initPredefinedStandardOperations() {
     this->opAlgNumber(),
     this->opPoly(),
     "Multiplies two polynomials over the algebraic numbers. ",
-    "\\sqrt{3}*PolynomialAlgebraicNumbers{}(x);",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly"
+    "\\sqrt{3} * PolynomialAlgebraicNumbers{}(x);",
+    "CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly",
+    "MultiplyAlgebraicNumberByPolynomial",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -6701,9 +6322,9 @@ void Calculator::initPredefinedStandardOperations() {
     "M*M*M;\n"
     "M*M*M*M;\n"
     "2*M",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerMultiplyMatrixTensorOrRationalByMatrixTensor"
+    "CalculatorFunctionsBinaryOps::innerMultiplyMatrixTensorOrRationalByMatrixTensor",
+    "MultiplyMatrixTensorByMatrixTensor",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -6717,10 +6338,9 @@ void Calculator::initPredefinedStandardOperations() {
     "M*M*M;\n"
     "M*M*M*M;\n"
     "2*M ",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerMultiplyMatrixTensorOrRationalByMatrixTensor",
-    "MultiplyMatrixTensorByMatrixTensor"
+    "MultiplyRationalByMatrixTensor",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -6729,16 +6349,14 @@ void Calculator::initPredefinedStandardOperations() {
     this->opWeylGroupVirtualRep(),
     "Tensor and decompose two virtual Weyl group representations. ",
     "W = WeylGroupNaturalRep{}(B_3);\n"
-    "V=MakeVirtualWeylGroupRepresentation{}W;\n"
+    "V = MakeVirtualWeylGroupRepresentation{}W;\n"
     "W\\otimes W;\n"
-    "V*V",
-    true,
-    true,
+    "V * V",
     "CalculatorFunctionsWeylGroup::innerTensorAndDecomposeWeylReps",
     "TensorAndDecomposeWeylGroupRepresentations",
-    true
+    innerExperimentalNoTest
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "*",
     Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY,
     "",
@@ -6748,21 +6366,20 @@ void Calculator::initPredefinedStandardOperations() {
     "(x>0)=1;\n"
     "x^{2/3}x^{1/2};\n"
     "(x^{1/2})^2;",
-    true,
-    false,
     "Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY",
-    "CombineExponents"
+    "CombineExponents",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "*",
     Calculator::innerMultiplyByOne,
     "",
     "Rule 1*{{anything}} = anything.",
-    "x*1;x*1-x ",
-    true,
-    false,
+    "x*1;\n"
+    "x*1-x ",
     "Calculator::innerMultiplyByOne",
-    "MultiplyByOne"
+    "MultiplyByOne",
+    innerStandard
   );
   this->AddOperationHandler(
     "*",
@@ -6771,14 +6388,9 @@ void Calculator::initPredefinedStandardOperations() {
     "Rule that commutes constants to the left-most positions. "
     "Provided that a is a constant number (built in) and b is not, replaces b*a by a*b. ",
     "x 6^{1/3}; (x 10^{1/2})^{1/3}",
-    true,
-    true,
-    false,
     "CalculatorFunctionsGeneral::outerCommuteConstants",
     "CommuteConstants",
-    false,
-    "",
-    false
+    outerStandard
   );
   this->AddOperationHandler(
     "*",
@@ -6786,27 +6398,21 @@ void Calculator::initPredefinedStandardOperations() {
     "",
     "If a and b are constants, replaces a^{c}b^c by (a b)^c.",
     "\\sqrt{}2 \\sqrt{}3",
-    true,
-    true,
-    false,
     "CalculatorFunctionsGeneral::outerMergeConstantRadicals",
     "MergeConstantRadicals",
-    false,
-    "",
-    false
+    outerStandard
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "*",
     Calculator::outerAssociate,
     "",
     "Associative law: reorders the multiplicative tree in standard form. ",
     "(a*b)*(c*(d*e)*f) - a*b*c*d* e *f;(a*b)*(c*(e * d)*f) - a*b*c*d* e *f",
-    true,
-    false,
     "Calculator::outerAssociate",
-    "AssociativeRule"
+    "AssociativeRule",
+    outerStandard
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "*",
     CalculatorFunctionsGeneral::outerCommuteAtimesBtimesCifUnivariate,
     "",
@@ -6814,12 +6420,11 @@ void Calculator::initPredefinedStandardOperations() {
     "1) a and and b depend on exactly one user-defined variable, "
     "2) a is not a constant and 3) a>b as an expression. ",
     "x(x + 1)^{- 1}x; x(y+ 1)^{- 1}x; (\\sin x ) x (\\cos x)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::outerCommuteAtimesBtimesCifUnivariate",
-    "CommuteAtimesBtimesCifUnivariate"
+    "CommuteAtimesBtimesCifUnivariate",
+    outerStandard
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "*",
     CalculatorFunctionsGeneral::outerCommuteAtimesBifUnivariate,
     "",
@@ -6827,56 +6432,52 @@ void Calculator::initPredefinedStandardOperations() {
     "1) a and and b depend on exactly one user-defined variable, "
     "2) a is not a constant and 3) a>b as an expression. ",
     "x(x + 1)^{- 1}x; x(y+ 1)^{- 1}x",
-    true,
-    false,
     "CalculatorFunctionsGeneral::outerCommuteAtimesBifUnivariate",
-    "CommuteIfUnivariate"
+    "CommuteIfUnivariate",
+    outerStandard
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "*",
     Calculator::outerExtractBaseMultiplication,
     "",
     "Pulls rationals in the front of multiplicative terms.",
     "2*((3*c)*(4*d)); 3*((a*(d-d))b*c)",
-    true,
-    false,
     "Calculator::outerExtractBaseMultiplication",
-    "ConstantExtraction"
+    "ConstantExtraction",
+    outerStandard
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "*",
     Calculator::outerAssociateTimesDivision,
     "",
     "Associative law w.r.t. division. ",
     "a*(b/c); (a*b)/c-a*(b/c)",
-    true,
-    false,
     "Calculator::outerAssociateTimesDivision",
-    "AssociateTimesDivision"
+    "AssociateTimesDivision",
+    outerStandard
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "*",
     Calculator::innerCancelMultiplicativeInverse,
     "",
     "Cancels multiplicative inverse. ",
     "(a*b)/b; (a/b)*b",
-    true,
-    false,
     "Calculator::innerCancelMultiplicativeInverse",
-    "CancelMultiplicativeInverse"
+    "CancelMultiplicativeInverse",
+    innerStandard
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "*",
     Calculator::outerDistributeTimes,
     "",
     "Distributive law (left and right).",
-    "(a +b)*c; \n a*(b+c)",
-    true,
-    false,
+    "(a +b)*c;\n"
+    "a*(b+c)",
     "Calculator::outerDistributeTimes",
-    "DistributeMultiplication"
+    "DistributeMultiplication",
+    outerStandard
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "*",
     Calculator::outerDistributeTimesConstant,
     "",
@@ -6886,21 +6487,22 @@ void Calculator::initPredefinedStandardOperations() {
     "the DistributeMultiplication rule is turned off "
     "(which is the intended use case of this rule).",
     "a(b+c); TurnOffRules(DistributeMultiplication); a(b+c); -5(b+c) ",
-    true,
-    false,
     "Calculator::outerDistributeTimes",
-    "DistributeMultiplicationConstants"
+    "DistributeMultiplicationConstants",
+    outerStandard
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "*",
     CalculatorFunctionsGeneral::outerDivideReplaceAdivBpowerItimesBpowerJ,
     "",
     "Rule: (a/x^t)x^s =a x^{s-t}.",
-    "(a/x) x^{- 1} ;(a/x^2) x^{3};(a/x) x^{3}; (a/x^2) x",
-    true,
-    false,
+    "(a/x) x^{- 1};\n"
+    "(a/x^2) x^{3};\n"
+    "(a/x) x^{3};\n"
+    "(a/x^2) x",
     "CalculatorFunctionsGeneral::outerDivideReplaceAdivBpowerItimesBpowerJ",
-    "DivideAdivBpowerItimesBpowerJ"
+    "DivideAdivBpowerItimesBpowerJ",
+    outerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -6910,10 +6512,9 @@ void Calculator::initPredefinedStandardOperations() {
     "Multiplies rational number by an element universal enveloping algebra.",
     "g_{{i}}= GetChevalleyGenerator{}(F_1, i); h_{{i}}= GetCartanGenerator{}(F_1, i);\n"
     "[g_{22}+g_{20}+g_{14},g_{17}-6/5g_{14}]",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerMultiplyAnyByUE",
-    "MultiplyRationalByUE"
+    "MultiplyRationalByUE",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -6924,10 +6525,9 @@ void Calculator::initPredefinedStandardOperations() {
     "g_{{i}}= GetChevalleyGenerator{}(F_1, i);"
     "h_{{i}}= GetCartanGenerator{}(F_1, i) ;\n"
     "[g_{22}+g_{20}+g_{14},g_{17}-6/5g_{14}]",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerMultiplyAnyByUE",
-    "MultiplyUEByUE"
+    "MultiplyUEByUE",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -6936,10 +6536,9 @@ void Calculator::initPredefinedStandardOperations() {
     this->opRationalFunction(),
     "Multiplies rational number by a rational function.",
     "WeylDimFormula{}(a_2, (0,3)) + WeylDimFormula{}(a_2, (3,0)) + 4 WeylDimFormula{}(a_2, (1,1)) ",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF",
-    "MultiplyRatOrPolyOrRFByRF"
+    "MultiplyRatOrPolyOrRFByRF",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -6953,10 +6552,9 @@ void Calculator::initPredefinedStandardOperations() {
     "X = G_2;\ng_{{i}}= GetChevalleyGenerator{}(X,i);\nh_{{i}}= GetCartanGenerator{}(X, i);\n"
     "v=HeighestWeightVector{}(G_2, (1,0),(0,0));\n"
     "2/5 v;\n(3/4 v)\\otimes v;\n3/4 (v\\otimes v);\n(3/4 v)\\otimes v-3/4 (v\\otimes v)",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor",
-    "MultiplyAnyByEltTensor"
+    "MultiplyAnyByEltTensor",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -6967,13 +6565,15 @@ void Calculator::initPredefinedStandardOperations() {
     "product of generalized Verma modules. "
     "Not fully tested and documented at the moment. "
     "Will get more documented in the future. ",
-    "X = G_2;\ng_{{i}}= GetChevalleyGenerator{}(X,i);\nh_{{i}}= GetCartanGenerator{}(X, i);\n"
-    "z= Polynomial{}y;\n"
-    "v=HeighestWeightVector{}(G_2, (z,1),(1,0));\n"
+    "X = G_2;\n"
+    "g_{{i}}= GetChevalleyGenerator{}(X,i);\n"
+    "h_{{i}}= GetCartanGenerator{}(X, i);\n"
+    "z = Polynomial{}y;\n"
+    "v = HeighestWeightVector{}(G_2, (z,1),(1,0));\n"
     "(2*z) v;\n",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor"
+    "CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor",
+    "MultiplyPolynomialByElementTensorGeneralVermaModule",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -6983,11 +6583,10 @@ void Calculator::initPredefinedStandardOperations() {
     "Multiplies two elements of elliptic curves.",
     "g = ElementEllipticCurveNormalForm(y^2 = x^3 - x +1, x = 3, y = 5);\n"
     "h = g^2;\n"
-    "h*g\n",
-    true,
-    false,
+    "h * g\n",
     "CalculatorFunctionsBinaryOps::innerMultiplyEllipticCurveElements",
-    "MultiplyEllipticCurveElementsRational"
+    "MultiplyEllipticCurveElementsRational",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -6997,13 +6596,11 @@ void Calculator::initPredefinedStandardOperations() {
     "Multiplies two elements of elliptic curves.",
     "g = ElementEllipticCurveNormalForm(y^2 = x^3 +x - 5, x = 3 mod 17, y = 5 mod 17);\n"
     "h = g^2;\n"
-    "h*g\n",
-    true,
-    false,
+    "h * g\n",
     "CalculatorFunctionsBinaryOps::innerMultiplyEllipticCurveElements",
-    "MultiplyEllipticCurveElementsOverZmodP"
+    "MultiplyEllipticCurveElementsOverZmodP",
+    innerStandard
   );
-
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor,
@@ -7018,10 +6615,9 @@ void Calculator::initPredefinedStandardOperations() {
     "z = Polynomial{}y;\n"
     "v = HeighestWeightVector{}(G_2, (z,1),(1,0));\n"
     "1/z v",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor",
-    "MultiplyAnyByTensor"
+    "MultiplyAnyByTensor",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -7035,9 +6631,9 @@ void Calculator::initPredefinedStandardOperations() {
     "X = G_2;\ng_{{i}}= GetChevalleyGenerator{}(X,i);\nh_{{i}}= GetCartanGenerator{}(X, i);\n"
     "z= Polynomial{}y;\nv=HeighestWeightVector{}(G_2, (z,1),(1,0));\n"
     "h_1 v; \nh_2 v;\n g_1 g_{- 1} v ",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor"
+    "CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor",
+    "MultiplyElementUniversalEnvelopingRationalFunctionByElementTensorGeneralizedVermaModule",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -7050,21 +6646,19 @@ void Calculator::initPredefinedStandardOperations() {
     "of elements of a field, so the latter interpretation might not be applicable).",
     "v_{1}= (1, 2, 3);\nv_{2}= (1, 3, 2);\nv_{3}= (3, 1, 1);\n"
     "v_{4}= (-2, 2, 2);\n1/2v_{1}+ 1/2v_{2}+7/8v_{3}+ 13/16v_{4}",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence",
-    "ScalarTimesSequence"
+    "ScalarTimesSequence",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarByMatrix,
     "",
     "Multiplies a rational number by a matrix",
     "2\\begin{pmatrix}  1& 2& 3\\\\2& 1& 0 \\end{pmatrix}",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarByMatrix",
-    "ScalarTimesMatrix"
+    "ScalarTimesMatrix",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -7073,10 +6667,11 @@ void Calculator::initPredefinedStandardOperations() {
     this->opSequence(),
     "Carries out multiplication between a double number on left "
     "and sequence on the right. Corresponds to multiplying a vector by a scalar.",
-    "%NumberColors\n(1 ,2)- DoubleValue{} 1 (2,3)",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence"
+    "%NumberColors\n"
+    "(1, 2) - DoubleValue{} 1 (2,3)",
+    "CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence",
+    "MultiplyDoubleBySequence",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -7085,9 +6680,9 @@ void Calculator::initPredefinedStandardOperations() {
     this->opSequence(),
     "Multiplies a double number on left and a sequence on the right.scalar.",
     "(1 ,2)- DoubleValue{} 1 (2,3)",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence"
+    "CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence",
+    "MultiplyAlgebraicNumberBySequence",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -7097,9 +6692,9 @@ void Calculator::initPredefinedStandardOperations() {
     "Carries out multiplication between a rational number on left "
     "and sequence on the right.",
     "x = Polynomial{}x; v=x*(1, 2, 3);",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence"
+    "CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence",
+    "MultiplyPolynomialBySequence",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -7107,11 +6702,14 @@ void Calculator::initPredefinedStandardOperations() {
     this->opWeylGroupElement(),
     this->opWeightLieAlgPoly(),
     "Element of Weyl group action on a weight. ",
-    "s_{{a}}=MakeElementWeylGroup(B_3, a); \\varepsilon_{{a}}=MakeWeight{}(B_3, a, epsilon);\n"
-    "x = Polynomial{}x; \\mu= x\\varepsilon_1; s_1s_2s_3s_2s_1 \\mu",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly"
+    "s_{{a}}=MakeElementWeylGroup(B_3, a);\n"
+    "\\varepsilon_{{a}} = MakeWeight{}(B_3, a, epsilon);\n"
+    "x = Polynomial{}x;\n"
+    "\\mu = x\\varepsilon_1;\n"
+    "s_1s_2s_3s_2s_1 \\mu",
+    "CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly",
+    "MultiplyWeylGroupElementByWeightLieAlgebraPolynomial",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -7122,9 +6720,9 @@ void Calculator::initPredefinedStandardOperations() {
     "on left and a weight on the right.",
     "\\varepsilon_{{a}}=MakeWeight{}(B_3, a, epsilon); "
     "x = Polynomial{}x; x\\varepsilon_1",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly"
+    "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly",
+    "MultiplyPolynomialByWeightLieAlgebraPolynomial",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
@@ -7135,76 +6733,71 @@ void Calculator::initPredefinedStandardOperations() {
     "on left and a weight on the right.",
     "\\varepsilon_{{a}}=MakeWeight{}(B_3, a, epsilon); "
     "x = Polynomial{}x; x\\varepsilon_1",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly"
+    "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly",
+    "MultiplyRaitonalByWeightLieAlgebraPolynomial",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\binom",
     CalculatorFunctionsBinaryOps::innerNChooseK,
     "",
     "Evaluates the binomial coefficient if possible.",
     "\\binom{8}{3} ",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerNChooseK",
-    "Binom"
+    "Binom",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "ElementEllipticCurveNormalForm",
     CalculatorFunctionsGeneral::innerElementEllipticCurveNormalForm,
     "",
     "Makes an elliptic curve from a cubic in normal form, generator letter and base point.",
     "ElementEllipticCurveNormalForm(y^2 = x^3 + x + 7, x = 3 mod 101, y = 21 mod 101);"
     "ElementEllipticCurveNormalForm(y^2 = x^3 - x + 1, x = 3, y = 5)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerElementEllipticCurveNormalForm",
-    "ElementEllipticCurveNormalForm"
+    "ElementEllipticCurveNormalForm",
+    innerStandard
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "mod",
     Calculator::innerZmodP,
     "",
     "Same as ModP but uses the mod notation.",
     "7 mod 3",
-    true,
-    false,
-    "Calculator::innerZmodP"
+    "Calculator::innerZmodP",
+    "mod",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\setminus",
     CalculatorFunctionsBinaryOps::innerSetMinus,
     "",
     "Removes the elements of the second set from the elements of the first set. "
     "The outputs will be sorted in ascending order.",
-    " (x,y,t)\\setminus Sequence{}x; (x,y)\\setminus (z,y)",
-    true,
-    false,
+    " (x,y,t) \\setminus Sequence{}x; (x,y)\\setminus (z,y)",
     "CalculatorFunctionsBinaryOps::innerSetMinus",
-    "\\setminus"
+    "\\setminus",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "Differential",
     CalculatorFunctionsGeneral::innerDifferentialStandardHandler,
     "",
     "Transforms Differential{}a to the standard internal form Differential {}(a, 1).",
-    " \\int \\theta {\\text d} \\theta",
-    true,
-    false,
+    "\\int \\theta {\\text d} \\theta",
     "CalculatorFunctionsBinaryOps::innerDifferentialStandardHandler",
-    "DifferentialStandardHandler"
+    "DifferentialStandardHandler",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "/",
     CalculatorFunctionsGeneral::innerIntegralOperator,
     "",
     "Transforms integral notation into an integral expression. ",
     "(\\int x)dx; \\int x (1+x) dx; \\int_2^3 x dx; \\int_2^3 x(1+x)dx",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerIntegralOperator",
-    "IntegralOperatorFromQuotient"
+    "IntegralOperatorFromQuotient",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "/",
@@ -7213,33 +6806,31 @@ void Calculator::initPredefinedStandardOperations() {
     this->opEltZmodP(),
     "Divides elements of Z/pZ. ",
     "(2 mod  7) / (3 mod 7)",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerDivideEltZmodPorRatByEltZmodPorRat"
+    "CalculatorFunctionsBinaryOps::innerDivideEltZmodPorRatByEltZmodPorRat",
+    "DivideElementZmodPByElementZModP",
+    innerStandard
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "/",
     CalculatorFunctionsGeneral::innerDiffdivDiffxToDifferentiation,
     "",
     "Replaces Differential / Differential {}x by Differentiate{}(x). "
     "Should also work on the notation (Differential y)/(Differential x). ",
     "Differential /Differential {}x x",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerDiffdivDiffxToDifferentiation",
-    "LeibnizDifferentialOperatorToDifferentialOperator"
+    "LeibnizDifferentialOperatorToDifferentialOperator",
+    innerStandard
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "/",
     CalculatorFunctionsGeneral::innerDdivDxToDiffDivDiffx,
     "",
     "Replaces d/dx by Differential /Differential{}x. "
     "Note that the variable of differentiation is expected to be the string following the d letter. ",
     "d/dx x",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerDdivDxToDiffDivDiffx",
-    "LeibnizDifferentialOperatorNotation"
+    "LeibnizDifferentialOperatorNotation",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "/",
@@ -7248,10 +6839,9 @@ void Calculator::initPredefinedStandardOperations() {
     this->opAlgNumber(),
     "Divides algebraic numbers. ",
     "1/(1+\\sqrt{}2+\\sqrt{}3+\\sqrt{}5+\\sqrt{}7)",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat",
-    "DivideAlgebraicByAlgebraic"
+    "DivideAlgebraicByAlgebraic",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "/",
@@ -7260,10 +6850,9 @@ void Calculator::initPredefinedStandardOperations() {
     this->opAlgNumber(),
     "Divides rational by algebraic number. ",
     "1/(\\sqrt{}2+\\sqrt{}3+\\sqrt{}5)",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat",
-    "DivideRationalByAlgebraic"
+    "DivideRationalByAlgebraic",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "/",
@@ -7272,55 +6861,57 @@ void Calculator::initPredefinedStandardOperations() {
     this->opRational(),
     "Divides algebraic number by rational. ",
     "(\\sqrt{}2+\\sqrt{}3+\\sqrt{}5)/5",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat",
-    "DivideAlgebraicByRational"
+    "DivideAlgebraicByRational",
+    innerStandard
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "/",
     CalculatorFunctionsGeneral::outerDivideByNumber,
     "",
     "If b is rational, algebraic, or double, substitutes (anything)/b with anything* (1/b).",
-    "6/15+(a +b)/5; a/\\sqrt{}2; x/DoubleValue{}10^10;x/DoubleValue{}5 ; 6/4+3/0",
-    true,
-    false,
+    "6/15+(a +b)/5;\n"
+    "a/\\sqrt{}2;\n"
+    "x/DoubleValue{}10^10;x/DoubleValue{}5;\n"
+    "6/4+3/0",
     "CalculatorFunctionsGeneral::outerDivideByNumber",
-    "DivideByNumber"
+    "DivideByNumber",
+    outerStandard
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "/",
     Calculator::innerSubZeroDivAnythingWithZero,
     "",
     "Provided that x is not equal to zero, substitutes 0/x with 0. ",
     "0/b; ",
-    true,
-    false,
-    "Calculator::innerSubZeroDivAnythingWithZero"
+    "Calculator::innerSubZeroDivAnythingWithZero",
+    "DivideZeroDivideByAnything",
+    innerStandard
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "/",
     CalculatorFunctionsGeneral::outerDivCancellations,
     "",
     "Division cancellations. Substitutes (a/b)/(a/d) with d/a and (a/b)/(c/b) with a/c. ",
     "(a/b)/(a/d); (a/b)/(c/b)",
-    true,
-    false,
-    "CalculatorFunctionsGeneral::outerDivCancellations"
+    "CalculatorFunctionsGeneral::outerDivCancellations",
+    "DivideCancellations",
+    outerStandard
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "/",
     CalculatorFunctionsGeneral::outerAssociateDivisionDivision,
     "",
     "Substitutes (a/b)/c =a/(c*b); a/(b/c)=a*c/b. "
     "Note the order of multiplication in the rules: this operation is safe "
     "and correct for non-commutative rings as well.",
-    "(a/b)/c; a/(b/c);",
-    true,
-    false,
-    "CalculatorFunctionsGeneral::outerAssociateDivisionDivision"
+    "(a/b)/c;\n"
+    "a/(b/c);",
+    "CalculatorFunctionsGeneral::outerAssociateDivisionDivision",
+    "AssociateDivisionDivision",
+    outerStandard
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "/",
     CalculatorFunctionsGeneral::outerAssociateAdivBdivCpowerD,
     "",
@@ -7328,20 +6919,20 @@ void Calculator::initPredefinedStandardOperations() {
     "Note the order of multiplication in the rules: this operation is safe and correct for "
     "non-commutative rings as well.",
     "a/(b/c)^d;",
-    true,
-    false,
-    "CalculatorFunctionsGeneral::outerAssociateAdivBdivCpowerD"
+    "CalculatorFunctionsGeneral::outerAssociateAdivBdivCpowerD",
+    "AssociateAdividedByBdividedByCpowerD",
+    outerStandard
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "/",
     CalculatorFunctionsGeneral::outerAtimesBpowerJplusEtcDivBpowerI,
     "",
     "Rule: (a_0 + a_1 x^{c_1}+ ... + a_n x^{c_n}) /x^t =a_0 x^{-t}+ a_1 x^{c_1-t}+...+a_n x^{c_n-t} ",
-    " (a x^{1/2} + b x )/x; (a x^{1/2} + b x )/x^2;",
-    true,
-    false,
+    "(a x^{1/2} + b x )/x;\n"
+    "(a x^{1/2} + b x )/x^2;",
     "CalculatorFunctionsGeneral::outerAtimesBpowerJplusEtcDivBpowerI",
-    "ConvertShortDenominatorToNegativePower"
+    "ConvertShortDenominatorToNegativePower",
+    outerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "/",
@@ -7350,10 +6941,9 @@ void Calculator::initPredefinedStandardOperations() {
     this->opRational(),
     "Divides two rational numbers. ",
     "4/6; 2/0;",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerDivideRatByRat",
-    "DivideRationalByRational"
+    "DivideRationalByRational",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "/",
@@ -7362,9 +6952,9 @@ void Calculator::initPredefinedStandardOperations() {
     this->opDouble(),
     "Divides doubles. ",
     "a = 0.5; b= 0.5; c = DoubleValue{}3.3; a/c; c/a; c/c",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerDivideDoubleByDouble"
+    "CalculatorFunctionsBinaryOps::innerDivideDoubleByDouble",
+    "DivideRationalByDouble",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "/",
@@ -7372,11 +6962,15 @@ void Calculator::initPredefinedStandardOperations() {
     this->opDouble(),
     this->opDouble(),
     "Divides doubles. ",
-    "a = 0.5; b= 0.5; c = DoubleValue{}3.3; a/c; c/a; c/c",
-    true,
-    false,
+    "a = 0.5;\n"
+    "b = 0.5;\n"
+    "c = DoubleValue{}3.3;\n"
+    "a/c;\n"
+    "c/a;\n"
+    "c/c",
     "CalculatorFunctionsBinaryOps::innerDivideDoubleByDouble",
-    "DivideDoubleByDouble"
+    "DivideDoubleByDouble",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "/",
@@ -7384,10 +6978,10 @@ void Calculator::initPredefinedStandardOperations() {
     this->opRational(),
     this->opPoly(),
     "Divides rational by polynomial (to get a rational function).",
-    "z= Polynomial{}(x^2+y^2);\n1/z",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly"
+    "z = Polynomial{}(x^2+y^2);\n1/z",
+    "CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly",
+    "DivideRationalByPolynomial",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "/",
@@ -7397,9 +6991,9 @@ void Calculator::initPredefinedStandardOperations() {
     "Divides polynomial by polynomial (to get a rational function). ",
     "Polynomial{}(-x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}+x_{2}+ 1)/\n"
     "Polynomial{}(x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}-x_{2}+ 1) ",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly"
+    "CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly",
+    "DividePolynomialByPolynomial",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "^",
@@ -7408,10 +7002,9 @@ void Calculator::initPredefinedStandardOperations() {
     this->opRational(),
     "Raises rational to power, provided the power is a small integer. ",
     "{3^3}^3; 3^{3^3}; 3^3^3; 0^3; 0^{-3}; ",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerPowerRationalByInteger",
-    "PowerIntegerByInteger"
+    "PowerIntegerByInteger",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "^",
@@ -7421,10 +7014,9 @@ void Calculator::initPredefinedStandardOperations() {
     "If a rational number is small enough to factor, reduces the "
     "rational exponents of the rational number. ",
     "\n%LogEvaluation (4/9)^{17/3}; (12/7)^{7/2}; 12^{2/3}; 12^{-2/3}; 5^{- 1/3}; 5^{- 1/3}-\\sqrt[3]{5^- 1} ; \\sqrt[20]{200!}",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactors",
-    "PowerRationalByRational"
+    "PowerRationalByRational",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "^",
@@ -7435,10 +7027,9 @@ void Calculator::initPredefinedStandardOperations() {
     "At the moment works with rational powers whose denominator is 2, "
     "may be extended to larger powers in the future. ",
     "\n%",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerPowerRationalByRationalOutputAlgebraic",
-    "PowerRationalByRationalOutputAlgebraic"
+    "PowerRationalByRationalOutputAlgebraic",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "^",
@@ -7451,24 +7042,22 @@ void Calculator::initPredefinedStandardOperations() {
     "f{}{{x}}=x^3+p x +q;\n"
     "Xcardano = ( -q/2+ (q^2/4+p^3/27)^(1/2))^(1/3) +( -q/2- (q^2/4+p^3/27)^(1/2))^(1/3);\n"
     "q = DoubleValue{}1; \np = DoubleValue{}1; \nXcardano; \nf{}x; \nf{}Xcardano   ",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerPowerDoubleOrRatToDoubleOrRat",
-    "PowerDoubleToDouble"
+    "PowerDoubleToDouble",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "^",
     CalculatorFunctionsBinaryOps::innerPowerSequenceOrMatrixByT,
     "",
     "Provided the exponent is t or T, calls the Transpose "
     "function on the base.",
     "X = (1,2)^t; X-Transpose{}(1,2); \\begin{pmatrix}1&2\\\\ 3& 5\\end{pmatrix}^t  ",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerPowerSequenceOrMatrixByT",
-    "TransposePowerNotation"
+    "TransposePowerNotation",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "^",
     CalculatorFunctionsBinaryOps::innerPowerMatNumbersBySmallInteger,
     "",
@@ -7480,69 +7069,67 @@ void Calculator::initPredefinedStandardOperations() {
     "If the power is 0 or negative and the determinant of "
     "the matrix is zero, returns error. ",
     "X =\\begin{pmatrix} 0 & 1 \\\\ 1 &1\\end{pmatrix}; X^5; X^{-5}  ",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger",
-    "PowerMatrixNumbersByInteger"
+    "PowerMatrixNumbersByInteger",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "^",
     CalculatorFunctionsBinaryOps::innerPowerMatNumbersByLargeIntegerIfPossible,
     "",
     "Attempts to exponentiate matrix by a large power. ",
     "X =\\begin{pmatrix} 1 & -1 \\\\ 4 & -3\\end{pmatrix}; X^{-55!- 1}  ",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerPowerMatNumbersByLargeIntegerIfPossible",
-    "PowerMatrixNumbersByLargeIntegerIfPossible"
+    "PowerMatrixNumbersByLargeIntegerIfPossible",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "^",
     CalculatorFunctionsBinaryOps::innerPowerMatExpressionsBySmallInteger,
     "",
     "Attempts to exponentiate a matrix of expressions, if the exponent is small. ",
     "X =\\begin{pmatrix} a & b \\\\ t +q &r\\end{pmatrix}; X^{2}  ",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerPowerMatExpressionsBySmallInteger",
-    "PowerMatrixNumbersBySmallIntegerIfPossible"
+    "PowerMatrixNumbersBySmallIntegerIfPossible",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "^",
     CalculatorFunctionsBinaryOps::innerPowerElementZmodPByInteger,
     "",
     "Raises an element of Z mod p to an integer power. ",
-    "a =3 mod 7; a^2",
-    true,
-    false,
+    "a = 3 mod 7; a^2",
     "CalculatorFunctionsGeneral::innerPowerElementZmodPByInteger",
-    "PowerElementZmodPToInteger"
+    "PowerElementZmodPToInteger",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "^",
     CalculatorFunctionsGeneral::innerPowerExponentToLog,
     "",
     "Replaces e^{\\ln x} by x.",
     "e^{\\ln x}; ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerPowerExponentToLog",
-    "PowerToLog"
+    "PowerToLog",
+    innerStandard
   );
   this->AddOperationHandler(
     "^",
     CalculatorFunctionsGeneral::innerPowerAnyToZero,
     "",
-    "Replaces p^0 by 1 if p is non-zero, and by an error message if p is zero.",
-    "A =x^0; x = 0; A; B=x^0; 0^0; ",
-    true,
-    true,
-    false,
+    "Replaces p^0 by 1. "
+    "Notice that 0^0 is defined to be 1."
+    "An explanation of that definition was given, among others, by "
+    "Donald Knuth; the argument boils down to making the "
+    "Newton binomial formula work for (a+0)^n. ",
+    "A = x^0;\n"
+    "x = 0;\n"
+    "A;\n"
+    "B=x^0;\n"
+    "0^0; ",
     "CalculatorFunctionsGeneral::innerPowerAnyToZero",
-    "PowerAnytoZero",
-    false,
-    "",
-    false
+    "PowerAnyToZero",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "^",
@@ -7551,9 +7138,9 @@ void Calculator::initPredefinedStandardOperations() {
     this->opRational(),
     "Raises poly to small integer power. ",
     "x = Polynomial{}x; y = Polynomial{}y;(x +2y+x y+x^2+3y^2)^3",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerPowerPolyBySmallInteger"
+    "CalculatorFunctionsBinaryOps::innerPowerPolyBySmallInteger",
+    "PowerPolynomialBySmallInteger",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "^",
@@ -7562,9 +7149,9 @@ void Calculator::initPredefinedStandardOperations() {
     this->opRational(),
     "Raises poly over algebraic numbers to small integer power. ",
     "x = Polynomial{}x; y = Polynomial{}y;(x +\\sqrt{2}y+x y+x^2+\\sqrt{3}y^2)^3",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerPowerAlgNumPolyBySmallInteger"
+    "CalculatorFunctionsBinaryOps::innerPowerAlgNumPolyBySmallInteger",
+    "PowerPolynomialAlgebraicNumbersBySmallInteger",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "^",
@@ -7574,10 +7161,9 @@ void Calculator::initPredefinedStandardOperations() {
     "Exponentiates an elliptic curve element by an integer. ",
     "g = ElementEllipticCurveNormalForm(y^2 = x^3 - x +1, x = 3, y = 5);\n"
     "g^2",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerPowerEllipticCuveElementByInteger",
-    "PowerEllipticCurveElementRationalByInteger"
+    "PowerEllipticCurveElementRationalByInteger",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "^",
@@ -7587,10 +7173,9 @@ void Calculator::initPredefinedStandardOperations() {
     "Exponentiates an elliptic curve element by an integer. ",
     "g = ElementEllipticCurveNormalForm(y^2 = x^3 - x +1, x = 3, y = 5);\n"
     "g^2",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerPowerEllipticCuveElementByInteger",
-    "PowerEllipticCurveElementZmodPByInteger"
+    "PowerEllipticCurveElementZmodPByInteger",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "^",
@@ -7603,10 +7188,9 @@ void Calculator::initPredefinedStandardOperations() {
     "c = 33/4;\n"
     "x = (-b+\\sqrt{}(b^2-4a c))/(2a);\n"
     "B= c+a x^{2}+b x;",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger",
-    "PowerAlgebraicNumberBySmallInteger"
+    "PowerAlgebraicNumberBySmallInteger",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "^",
@@ -7620,10 +7204,9 @@ void Calculator::initPredefinedStandardOperations() {
     "a^10;\n"
     "\\partial x^{3/2};\n"
     "\\partial^{3/2} x",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger",
-    "PowerElementWeylAlgebraBySmallInteger"
+    "PowerElementWeylAlgebraBySmallInteger",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "^",
@@ -7635,9 +7218,9 @@ void Calculator::initPredefinedStandardOperations() {
     "a single generator with coefficient 1, the exponent will be carried out formally. ",
     "g_{{i}}= GetChevalleyGenerator{}(G_2, i); h_{{i}}= GetCartanGenerator{}(G_2, i) ;"
     "\n (g_1+g_2)^2+ g_1^{1/2}",
-    true,
-    false,
-    "CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF"
+    "CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF",
+    "PowerElementUniversalEnvelopingBySmallInteger",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "^",
@@ -7649,10 +7232,9 @@ void Calculator::initPredefinedStandardOperations() {
     "raises (formally) the element of the UE to arbitrary polynomial power. ",
     "g_{{i}}= GetChevalleyGenerator{}(G_2, i); h_{{i}}= GetCartanGenerator{}(G_2, i) ;\n"
     "((((g_1)^{Polynomial{}x})^{Polynomial{}y}) +g_2)^2",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF",
-    "PowerUEelementToPolyPower"
+    "PowerUEelementToPolyPower",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "^",
@@ -7664,10 +7246,9 @@ void Calculator::initPredefinedStandardOperations() {
     "(formally) the element of the UE to arbitrary RF power. ",
     "g_{{i}}= GetChevalleyGenerator{}(G_2, i); h_{{i}}= GetCartanGenerator{}(G_2, i);\n "
     "((((g_1)^{Polynomial{}x})^{Polynomial{}y}) +g_2)^2",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF",
-    "PowerUEelementToRFPower"
+    "PowerUEelementToRFPower",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "^",
@@ -7681,12 +7262,11 @@ void Calculator::initPredefinedStandardOperations() {
     "f{}{{x}}=x^3+p x +q;\n"
     "Xcardano = ( -q/2+ (q^2/4+p^3/27)^(1/2))^(1/3) +( -q/2- (q^2/4+p^3/27)^(1/2))^(1/3);\n"
     "q= DoubleValue{}1; \np = DoubleValue{}1; \nXcardano; \nf{}x; \nf{}Xcardano   ",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerPowerDoubleOrRatToDoubleOrRat",
-    "PowerFloatingToPower"
+    "PowerFloatingToPower",
+    innerStandard
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "^",
     Calculator::innerAssociateExponentExponent,
     "",
@@ -7697,43 +7277,39 @@ void Calculator::initPredefinedStandardOperations() {
     "3) c is an integer;\n"
     "4) a evaluates to real (double), b and c are rational and b*c is an even integer. ",
     "(a^m)^n; ((ln(3))^m)^n; ((ln(0.5))^m)^n; (a^m)^2; (a^2)^m; (a^{1/2})^2; (a^{2})^{1/2}; (a>0)=1; (a^{2})^{1/2};",
-    true,
-    false,
     "Calculator::innerAssociateExponentExponent",
-    "PowerPowerToPower"
+    "PowerPowerToPower",
+    innerStandard
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "^",
     CalculatorFunctionsGeneral::innerDistributeExponent,
     "",
     "If a is a positive constant, substitutes (a*b)^c with a^c b^c.",
     "(a*b)^n; (\\sqrt(2)*b)^2",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerDistributeExponent",
-    "DistributeExponent"
+    "DistributeExponent",
+    innerStandard
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "\\sqrt",
     CalculatorFunctionsGeneral::innerDistributeSqrt,
     "",
     "If a is a positive constant, substitutes sqrt(a b) by sqrt(a) sqrt(b).",
     " TurnOffApproximations 0; \\sqrt{\\frac{676}{25} ln 3}",
-    true,
-    false,
     "Calculator::innerDistributeSqrt",
-    "innerDistributeSqrt"
+    "innerDistributeSqrt",
+    innerStandard
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "^",
     Calculator::outerPowerRaiseToFirst,
     "",
     "Realizes the tranformation {{anything}}^1=a. ",
-    "x^1+x^2; A^1",
-    true,
-    false,
+    "x^1 + x^2; A^1",
     "Calculator::outerPowerRaiseToFirst",
-    "PowerToOne"
+    "PowerToOne",
+    outerStandard
   );
   this->AddOperationHandler(
     "^",
@@ -7741,27 +7317,21 @@ void Calculator::initPredefinedStandardOperations() {
     "",
     "Replaces \\int_a^b by (\\int, a, b) .",
     "A =\\int_a^b; Lispify(A); PlotExpressionTree(A); ",
-    true,
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerIntegralUpperBound",
     "OperatorBoundsSuperscript",
-    false,
-    "",
-    false
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "_",
     CalculatorFunctionsGeneral::innerOperatorBounds,
     "",
     "Takes care of the integral superscript notation \\int^a ",
     "\\int^a_b f dx; \\int_a^b f dx",
-    true,
-    false,
     "Calculator::innerUnderscoreIntWithAny",
-    "OperatorBoundsUnderscore"
+    "OperatorBoundsUnderscore",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "_",
     CalculatorFunctionsGeneral::innerDereferenceSequenceOrMatrix,
     "",
@@ -7774,35 +7344,32 @@ void Calculator::initPredefinedStandardOperations() {
     "p(0,{{x}})= 0;\n"
     "p({{a}},{{x}} )= p(a- 1,x) + p(a, x-Denominations_a);\n"
     "p(11,100)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerDereferenceSequenceOrMatrix",
-    "DereferenceSequenceOrMatrix"
+    "DereferenceSequenceOrMatrix",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "_",
     CalculatorFunctionsGeneral::innerDereferenceInterval,
     "",
     "Dereferences an interval, as illustrated by the example. ",
     "%UseBracketForIntervals; [a,b)_1; (a,b]_2; [a,b]_1; ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerDereferenceInterval",
-    "DereferenceInterval"
+    "DereferenceInterval",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "_",
     CalculatorFunctionsGeneral::innerDereferenceSequenceStatements,
     "",
     "Dereferences a sequence of rules. "
     "The syntax is as illustrated by the example. ",
     "A = d/dx( \\sqrt(x +y)-4x^2y^2); (d/dx(y)= 0; A)_2;  ",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerDereferenceSequenceStatements",
-    "DereferenceSequenceStatements"
+    "DereferenceSequenceStatements",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\otimes",
     CalculatorFunctionsBinaryOps::innerTensorMatrixByMatrix,
     "",
@@ -7811,10 +7378,9 @@ void Calculator::initPredefinedStandardOperations() {
     "X =MakeMatrix{}P; Y =MakeMatrix{}Q;\n"
     "Z=MakeMatrixTensorForm{}P; W =MakeMatrixTensorForm{}Q;\n"
     "X\\otimes Y; Z\\otimes W",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerTensorMatrixByMatrix",
-    "MatrixTensorMatrix"
+    "MatrixTensorMatrix",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "\\otimes",
@@ -7828,78 +7394,72 @@ void Calculator::initPredefinedStandardOperations() {
     "z= Polynomial{}y;\nv=HeighestWeightVector{}(G_2, (z,1),(1,0));\n"
     "g_{- 1}(v\\otimes v);\n"
     "g_{- 1}g_{- 1}(v\\otimes v)",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerTensorEltTensorByEltTensor",
-    "TensorElementGeneralizedVermaModuleByElementGeneralizedVermaModule"
+    "TensorElementGeneralizedVermaModuleByElementGeneralizedVermaModule",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "[]",
     CalculatorFunctionsBinaryOps::innerLieBracketDistribute,
     "",
     "Implementation of the rules [{{a}}+{{b}},{{c}}] =[a,c] +[b,c] and  [{{c}},{{a}}+{{b}}] =[c,a] +[c,b]",
     " ",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerLieBracketDistribute",
-    "LieBracketDistribute"
+    "LieBracketDistribute",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "[]",
     CalculatorFunctionsBinaryOps::innerLieBracketExtractConstant,
     "",
     "Extracts constants from Lie brackets. ",
-    "[2a,3b] ",
-    true,
-    false,
+    "[2a, 3b]",
     "CalculatorFunctionsBinaryOps::innerLieBracketExtractConstant",
-    "LieBracketConstants"
+    "LieBracketConstants",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "[]",
     CalculatorFunctionsBinaryOps::innerLieBracketRatPolyOrEWAWithRatPolyOrEWA,
     "",
     "Lie bracket of elements of Weyl algebras = differential operators with polynomial coefficients. ",
     "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n"
     "x_{{i}}= Polynomial{}x_i; \n[\\partial_1, x_1]; ",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerLieBracketRatPolyOrEWAWithRatPolyOrEWA",
-    "LieBracketWeylAlgebraElements"
+    "LieBracketWeylAlgebraElements",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "[]",
     CalculatorFunctionsBinaryOps::innerLieBracketRatOrUEWithRatOrUE,
     "",
     "Lie bracket of elements of semisimple Lie algebra. ",
     "X =A_1;\ng_{{i}}= GetChevalleyGenerator{}(X,i);\n"
-    "h_{{i}}= GetCartanGenerator{}(X,i);\n[g_1,g_{- 1}] ",
-    true,
-    false,
+    "h_{{i}}= GetCartanGenerator{}(X,i);\n"
+    "[g_1,g_{- 1}] ",
     "CalculatorFunctionsBinaryOps::innerLieBracketRatOrUEWithRatOrUE",
-    "LieBracketSemisimpleLieAlgebras"
+    "LieBracketSemisimpleLieAlgebras",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "[]",
     CalculatorFunctionsBinaryOps::innerLieBracketSwapTermsIfNeeded,
     "",
     "Swaps terms in Lie brackets if needed. ",
-    "[b,a] ",
-    true,
-    false,
+    "[b, a]",
     "CalculatorFunctionsBinaryOps::innerLieBracketSwapTermsIfNeeded",
-    "LieBracketSwapTermsIfNeeded"
+    "LieBracketSwapTermsIfNeeded",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "[]",
     CalculatorFunctionsBinaryOps::innerLieBracketJacobiIdentityIfNeeded,
     "",
     "Extracts constants from Lie brackets. ",
     "[2a,3b] ",
-    true,
-    false,
     "CalculatorFunctionsBinaryOps::innerLieBracketExtractConstant",
-    "LieBracketJacobiIfNeeded"
+    "LieBracketJacobiIfNeeded",
+    innerStandard
   );
 
   this->AddOperationBinaryInnerHandlerWithTypes(
@@ -7910,7 +7470,9 @@ void Calculator::initPredefinedStandardOperations() {
     "Tensor product of two Weyl group reps. Does not decompose the tensor product. "
     "If you want decomposition, use V*V instead. ",
     "V = WeylGroupNaturalRep{}(B_3); V \\otimes V; V * V",
-    true
+    "CalculatorFunctionsWeylGroup::innerTensorWeylReps",
+    "TensorWeylGroupRepresentationByWeylGroupRepresentation",
+    innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "\\otimes",
@@ -7919,12 +7481,16 @@ void Calculator::initPredefinedStandardOperations() {
     this->opMatTensorRat(),
     "Same as tensor product of matrices but uses class MatrixTensor instead of class Matrix.",
     "P = ((0 , 2 ),(1 , 0)); Q= ((0 , 3 ),(1 , 0));\n"
-    "X =MakeMatrix{}P; Y =MakeMatrix{}Q;\n"
-    "Z=MakeMatrixTensorForm{}P; W =MakeMatrixTensorForm{}Q;\n"
+    "X = MakeMatrix{}P;\n"
+    "Y = MakeMatrix{}Q;\n"
+    "Z = MakeMatrixTensorForm{}P;\n"
+    "W = MakeMatrixTensorForm{}Q;\n"
     "X\\otimes Y; Z\\otimes W",
-    true
+    "CalculatorFunctionsBinaryOps::innerTensorMatByMatTensor",
+    "TensorMatrixTensorByMatrixTensor",
+    innerStandard
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "\\otimes",
     Calculator::outerTensor,
     "",
@@ -7936,9 +7502,11 @@ void Calculator::initPredefinedStandardOperations() {
     "v=HeighestWeightVector{}(X, (1,0),(0,0));\n"
     "g_{- 1}(v\\otimes v);\n"
     "g_{- 1}g_{- 1}(v\\otimes v); ",
-    true
+    "Calculator::outerTensor",
+    "TensorProductGeneralizedVermaModules",
+    outerAdminInvisibleNoTest
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "=:",
     Calculator::StandardIsDenotedBy,
     "",
@@ -7950,8 +7518,14 @@ void Calculator::initPredefinedStandardOperations() {
     "We note that subsequent occurrences of the expression a "
     "will first be replaced by b (as mandated by the a =b command), "
     "but then displayed on the screen as a.",
-    "x =:y;\ny;\nz;\nz=y;\nz ",
-    true
+    "x =:y;\n"
+    "y;\n"
+    "z;\n"
+    "z=y;\n"
+    "z",
+    "Calculator::StandardIsDenotedBy",
+    "StandardIsDenotedBy",
+    innerStandard
   );
 
   std::stringstream StandardPowerStreamInfo, moreInfoOnIntegers;
@@ -7988,7 +7562,7 @@ void Calculator::initPredefinedStandardOperations() {
   << LargeIntegerUnsigned::SquareRootOfCarryOverBound << "). "
   << HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(moreInfoOnIntegers.str());
 
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "<",
     CalculatorFunctionsGeneral::innerLessThan,
     "",
@@ -7996,11 +7570,11 @@ void Calculator::initPredefinedStandardOperations() {
     "replaces the expression by 1 if the left number "
     "is less than the right, else replaces the expression by 0.",
     "3 < 4; 5 < 4",
-    true,
-    false,
-    "CalculatorFunctionsGeneral::innerLessThan", "LessThan"
+    "CalculatorFunctionsGeneral::innerLessThan",
+    "LessThan",
+    innerStandard
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     ">",
     CalculatorFunctionsGeneral::innerGreaterThan,
     "",
@@ -8008,53 +7582,53 @@ void Calculator::initPredefinedStandardOperations() {
     "The following example shows an implementation of commutativity. ",
     "x_{{i}}*x_{{j}}*{{a}}:if i>j =x_j*x_i*a;\n x_{{i}}*x_{{j}}:if i>j =x_j*x_i;"
     "(x_2*x_1- x_1*x_3)(x_1x_5+x_5x_4x_2); x_5x_4x_3x_2x_1",
-    true,
-    false,
-    "CalculatorFunctionsGeneral::innerGreaterThan", "GreaterThan"
+    "CalculatorFunctionsGeneral::innerGreaterThan",
+    "GreaterThan",
+    innerStandard
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "Max",
     CalculatorFunctionsGeneral::innerMax,
     "",
     "Maximum function.",
-    "Max(-4,2)",
-    true,
-    false,
-    "CalculatorFunctionsGeneral::innerMax", "Max"
+    "Max(- 4,2)",
+    "CalculatorFunctionsGeneral::innerMax",
+    "Max",
+    innerStandard
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "Min",
     CalculatorFunctionsGeneral::innerMin,
     "",
     "Maximum function.",
-    "Min(-4,2)",
-    true,
-    false,
-    "CalculatorFunctionsGeneral::innerMin", "Min"
+    "Min(- 4,2)",
+    "CalculatorFunctionsGeneral::innerMin",
+    "Min",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\geq",
     CalculatorFunctionsGeneral::innerGreaterThanOrEqualTo,
     "",
     "Greater than or equal to operation. ",
-    "A = (2>=x); x =1; A",
-    true,
-    false,
+    "A = (2>=x);\n"
+    "x =1;\n"
+    "A",
     "Calculator::innerGreaterThanOrEqualTo",
-    "greaterThanOrEqualTo"
+    "greaterThanOrEqualTo",
+    innerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "\\leq",
     CalculatorFunctionsGeneral::innerLessThanOrEqualTo,
     "",
     "Transforms \\(a\\leq b\\) to \\(b\\geq a\\).",
     "a \\leq b",
-    true,
-    false,
     "Calculator::innerLessThanOrEqualTo",
-    "lessThanOrEqualTo"
+    "lessThanOrEqualTo",
+    innerStandard
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "==",
     CalculatorFunctionsGeneral::outerEqualEqual,
     "",
@@ -8071,23 +7645,23 @@ void Calculator::initPredefinedStandardOperations() {
     "IsEqualToX{}1;\n"
     "x =1;\n"
     "IsEqualToX{}1; z= \\sqrt{}1; z==1",
-    true,
-    false,
     "CalculatorFunctionsGeneral::outerEqualEqual",
-    "IsEqualTo"
+    "IsEqualTo",
+    outerStandard
   );
-  this->AddOperationInnerHandler(
+  this->AddOperationHandler(
     "===",
     CalculatorFunctionsGeneral::innerEqualEqualEqual,
     "",
     "Returns 1 if both sides have identical expression trees, 0 otherwise. ",
-    "2+3 == 5; Freeze{}(2+3) ==Freeze{}5; Freeze{}(2+3) ===Freeze{}5",
-    true,
-    false,
+    "2+3 == 5;\n"
+    "Freeze{}(2 + 3) == Freeze{}5;\n"
+    "Freeze{}(2 + 3) === Freeze{}5",
     "CalculatorFunctionsGeneral::innerEqualEqualEqual",
-    "IsEqualExpressionTree"
+    "IsEqualExpressionTree",
+    innerStandard
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "Contains",
     CalculatorFunctionsGeneral::innerContains,
     "",
@@ -8095,12 +7669,11 @@ void Calculator::initPredefinedStandardOperations() {
     "as a sub-expression, else returns 0. Function "
     "has not been optimized for speed, use with caution. ",
     "Contains ((\\arcsin x +\\cos x,5), \\arcsin )",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerContains",
-    "Contains"
+    "Contains",
+    innerStandard
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "ExpressionLeafs",
     CalculatorFunctionsGeneral::innerExpressionLeafs,
     "",
@@ -8109,12 +7682,11 @@ void Calculator::initPredefinedStandardOperations() {
     "Here, a ``leaf'' means either an atomic expression or a built-in type. "
     "Built-in types are not broken into atoms. ",
     "ExpressionLeafs ((\\arcsin x +\\cos x,5), \\arcsin )",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerExpressionLeafs",
-    "ExpressionLeafs"
+    "ExpressionLeafs",
+    innerStandard
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "Last",
     CalculatorFunctionsGeneral::innerLastElement,
     "",
@@ -8125,25 +7697,24 @@ void Calculator::initPredefinedStandardOperations() {
     "p{}((), {{n}})= 0;\n"
     "p{}({{x}},{{n}})= p{}(x, n-Last x) +p{}(RemoveLast x, n);\n"
     "p{}((1,2, 5, 10, 25,100), 100);",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerLastElement",
-    "Last"
+    "Last",
+    innerStandard
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "RemoveLast",
     CalculatorFunctionsGeneral::innerRemoveLastElement,
     "",
     "Returns a list with the last element removed, provided "
     "the argument has no bound variables. If the expression "
     "has bound variables does nothing.",
-    "X = (a,b,c); Y = (RemoveLast X)\\cup Sequence{}(last X)-X; ",
-    true,
-    false,
+    "X = (a,b,c);\n"
+    "Y = (RemoveLast X)\\cup Sequence{}(last X) - X;",
     "CalculatorFunctionsGeneral::innerRemoveLastElement",
-    "RemoveLast"
+    "RemoveLast",
+    innerStandard
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "\\cap",
     CalculatorFunctionsGeneral::innerIntersection,
     "",
@@ -8153,13 +7724,12 @@ void Calculator::initPredefinedStandardOperations() {
     "x = (a,b,c)\\cap (c, d, e);\n"
     "a = 1;\n"
     "d =1;\n"
-    "(a,b,c)\\cap (c, d, e); x",
-    true,
-    false,
+    "(a, b, c)\\cap (c, d, e); x",
     "CalculatorFunctionsGeneral::innerIntersection",
-    "\\cap"
+    "\\cap",
+    innerStandard
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "\\cup",
     CalculatorFunctionsGeneral::innerUnion,
     "",
@@ -8168,12 +7738,11 @@ void Calculator::initPredefinedStandardOperations() {
     "If a flag is set requesting that (a,b) is interpreted as an interval, does nothing if "
     "either of the two sequences has two elements.",
     "x\\cup (MakeSequence{} x \\cup MakeSequence{}x \\cup (a,b,x))",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerUnion",
-    "\\cup"
+    "\\cup",
+    innerStandard
   );
-  this->AddOperationOuterHandler(
+  this->AddOperationHandler(
     "\\sqcup",
     CalculatorFunctionsGeneral::innerUnionNoRepetition,
     "",
@@ -8181,170 +7750,152 @@ void Calculator::initPredefinedStandardOperations() {
     "with a list containing the union of all members; "
     "all repeating members are discarded.",
     "(x,y,x)\\sqcup(1,x,y,2)",
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerUnionNoRepetition",
-    "\\sqcup"
+    "\\sqcup",
+    innerStandard
   );
 }
 
 void Calculator::initPredefinedOperationsComposite() {
   MacroRegisterFunctionWithName("Calculator::initPredefinedOperationsComposite");
+  Function::Options compositeStandard;
+  compositeStandard.flagIsCompositeHandler = true;
+  compositeStandard.flagIsInner = true;
 
-  this->AddOperationComposite(
+  this->AddOperationHandler(
     "\\sum",
     CalculatorFunctionsGeneral::innerSumAsOperatorToSumInternalNotation,
     "",
     "Transforms (\\sum_a^b ){} n to \\sum_a^b n (internal notation). ",
-    "PlotExpressionTree(  Freeze(\\sum_a^b ){} n);\n"
-    "PlotExpressionTree( (\\sum_a^b ){} n) ",
-    true,
-    true,
-    false,
+    "PlotExpressionTree(Freeze(\\sum_a^b ){} n);\n"
+    "PlotExpressionTree((\\sum_a^b ){} n) ",
     "CalculatorFunctionsGeneral::innerSumAsOperatorToSumInternalNotation",
-    "SumAsOperator"
+    "SumAsOperator",
+    compositeStandard
   );
-  this->AddOperationComposite(
+  this->AddOperationHandler(
     "Matrix",
     CalculatorConversions::outerMatrixExpressionsToMatrixOfType,
     "",
     "If A is a non-typed matrix of expressions that can "
     "be converted to a typed matrix, carries out the type specialization. ",
     "%LogEvaluation\n"
-    "A= \\begin{pmatrix}\n"
+    "A = \\begin{pmatrix}\n"
     "1 & 2\\\\\n"
     "3 & 4\n"
     "\\end{pmatrix};\n"
-    "B=\\begin{pmatrix}\n"
+    "B = \\begin{pmatrix}\n"
     "a & 2\\\\\n"
     "3 & 4\n"
     "\\end{pmatrix};\n"
     "PlotExpressionTree A;\n"
     "PlotExpressionTree B",
-    true,
-    true,
-    false,
     "CalculatorConversions::outerMatrixExpressionsToMatrixOfType",
-    "MatrixTypeDeduction"
+    "MatrixTypeDeduction",
+    compositeStandard
   );
-  this->AddOperationComposite(
+  this->AddOperationHandler(
     "Rational",
     CalculatorFunctionsGeneral::innerConstantFunction,
     "",
     "If x is a constant, replaces x{}({{anything}})=x; ",
     "0{}3;2{}y;(\\sqrt{}2){}x;",
-    true,
-    true,
-    false,
-    "CalculatorFunctionsGeneral::innerConstantFunction", "ConstantFunction"
+    "CalculatorFunctionsGeneral::innerConstantFunction",
+    "ConstantFunction",
+    compositeStandard
   );
-  this->AddOperationComposite(
+  this->AddOperationHandler(
     "RationalFunction",
     CalculatorFunctionsGeneral::innerRationalFunctionSubstitution,
     "",
     "If x is a constant, replaces x{}({{anything}})=x; ",
     "0{}3;2{}y;(\\sqrt{}2){}x;",
-    true,
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerRationalFunctionSubstitution",
-    "RationalFunctionSubstitution"
+    "RationalFunctionSubstitution",
+    compositeStandard
   );
-  this->AddOperationComposite(
+  this->AddOperationHandler(
     "+",
     CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArgument,
     "",
     "Equivalent to (a +b){}x = (a{}x) +(b{}x) ",
     "(a +b){}x;",
-    true,
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArgument",
-    "CompositeArithmeticOperationEvaluatedOnArgumentAddition"
+    "CompositeArithmeticOperationEvaluatedOnArgumentAddition",
+    compositeStandard
   );
-  this->AddOperationComposite(
+  this->AddOperationHandler(
     "*",
     CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArgument,
     "",
     "Equivalent to (a*b){}x = (a{}x)*(b{}x) ",
     "(a*b){}x;",
-    true,
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArgument",
-    "CompositeArithmeticOperationEvaluatedOnArgumentMultiplication"
+    "CompositeArithmeticOperationEvaluatedOnArgumentMultiplication",
+    compositeStandard
   );
-  this->AddOperationComposite(
+  this->AddOperationHandler(
     "/",
     CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArgument,
     "",
     "Equivalent to (a/b){}x = (a{}x)/(b{}x) ",
     "(a/b){}x;",
-    true,
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArgument",
-    "CompositeArithmeticOperationEvaluatedOnArgumentDivision"
+    "CompositeArithmeticOperationEvaluatedOnArgumentDivision",
+    compositeStandard
   );
-  this->AddOperationComposite(
+  this->AddOperationHandler(
     "AlgebraicNumber",
     CalculatorFunctionsGeneral::innerConstantFunction,
     "",
     "If x is a constant, replaces x{}({{anything}})=x; ",
-    "0{}3;2{}y;(\\sqrt{}2){}x;",
-    true,
-    true,
-    false,
+    "0{}3;\n"
+    "2{}y;\n"
+    "(\\sqrt{}2){}x;",
     "CalculatorFunctionsGeneral::innerConstantFunction",
-    "ConstantFunction"
+    "ConstantFunctionAlgebraicNumber",
+    compositeStandard
   );
-  this->AddOperationComposite(
+  this->AddOperationHandler(
     "ElementWeylAlgebra",
     CalculatorFunctionsGeneral::innerCompositeEWAactOnPoly,
     "",
     "Differential operation acting on a polynomial. ",
     "x = ElementWeylAlgebraPoly{}(\\partial, x);\\partial = ElementWeylAlgebraDO{}(\\partial, x);\n"
     "\\partial{}(x); \\partial^{2}{}(x^3+x^2); x{}(x^2)",
-    true,
-    true,
-    false, "CalculatorFunctionsGeneral::innerCompositeEWAactOnPoly",
-    "EWAactOnPoly"
+    "CalculatorFunctionsGeneral::innerCompositeEWAactOnPoly",
+    "EWAactOnPoly",
+    compositeStandard
   );
-  this->AddOperationComposite(
+  this->AddOperationHandler(
     "*",
     CalculatorFunctionsGeneral::innerCompositeConstTimesAnyActOn,
     "",
     "Rule (a*f){}x = a*(f{}x), provided a is a constant. ",
     "(2\\sin){}x-2(\\sin x) ",
-    true,
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerCompositeConstTimesAnyActOn",
-    "ConstTimesAnyAction"
+    "ConstTimesAnyAction",
+    compositeStandard
   );
-  this->AddOperationComposite(
+  this->AddOperationHandler(
     "^",
     CalculatorFunctionsGeneral::innerCompositeApowerBevaluatedAtC,
     "",
     "Provided that n is not equal to - 1 and f is not a sequence, use the rule ({{f}}^{{n}}){}{{x}}= (f{}x)^n.",
     "\\tan^2 x; (f^-2) {}x ; (f^- 1){}x ",
-    true,
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerCompositeApowerBevaluatedAtC",
-    "ApowerBevaluatedAtC"
+    "ApowerBevaluatedAtC",
+    compositeStandard
   );
-  this->AddOperationComposite(
+  this->AddOperationHandler(
     "Differentiate",
     CalculatorFunctionsGeneral::innerCompositeDifferentiateLog,
     "",
     "Differentiates log.",
     "d/dx (\\log x)",
-    true,
-    true,
-    false,
     "CalculatorFunctionsGeneral::innerCompositeDifferentiateLog",
-    "DifferentiateLog"
+    "DifferentiateLog",
+    compositeStandard
   );
 }
 

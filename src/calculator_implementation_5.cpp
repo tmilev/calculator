@@ -546,7 +546,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateXpowerNePowerAx(
     if (!exponentPartE.StartsWith(theCommands.opThePower(), 3)) {
       continue;
     }
-    if (!exponentPartE[1].IsAtomGivenData(theCommands.opE())) {
+    if (!exponentPartE[1].IsOperationGiven(theCommands.opE())) {
       continue;
     }
     powerOfEE = exponentPartE[2];
@@ -705,7 +705,7 @@ bool CalculatorFunctionsGeneral::innerApplyToSubexpressionsRecurseThroughCalculu
   if (input.size() != 3) {
     return false;
   }
-  if (!input.StartsWithGivenAtom("ApplyToSubexpressionsRecurseThroughCalculusFunctions")) {
+  if (!input.StartsWithGivenOperation("ApplyToSubexpressionsRecurseThroughCalculusFunctions")) {
     return false;
   }
   const Expression& theArg = input[2];
@@ -937,8 +937,9 @@ bool CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnStandard(
 
 bool CalculatorFunctionsGeneral::innerRemoveDuplicates(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerRemoveDuplicates");
+  int operationRemoveDuplicated = theCommands.operations.GetIndexIMustContainTheObject("RemoveDuplicates");
   if (
-    !input.IsListStartingWithAtom(theCommands.theAtoms.GetIndexIMustContainTheObject("RemoveDuplicates")) &&
+    !input.IsListStartingWithAtom(operationRemoveDuplicated) &&
     !input.IsSequenceNElementS()
   ) {
     return false;
@@ -953,7 +954,7 @@ bool CalculatorFunctionsGeneral::innerRemoveDuplicates(Calculator& theCommands, 
 bool CalculatorFunctionsGeneral::innerSort(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSort");
   if (
-    !input.IsListStartingWithAtom(theCommands.theAtoms.GetIndexIMustContainTheObject("Sort")) &&
+    !input.IsListStartingWithAtom(theCommands.operations.GetIndexIMustContainTheObject("Sort")) &&
     !input.IsSequenceNElementS()
   ) {
     return false;
@@ -972,7 +973,7 @@ bool CalculatorFunctionsGeneral::innerSortDescending(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSortDescending");
   if (
-    !input.IsListStartingWithAtom(theCommands.theAtoms.GetIndexIMustContainTheObject("SortDescending")) &&
+    !input.IsListStartingWithAtom(theCommands.operations.GetIndexIMustContainTheObject("SortDescending")) &&
     !input.IsSequenceNElementS()
   ) {
     return false;
@@ -989,7 +990,7 @@ bool CalculatorFunctionsGeneral::innerSortDescending(
 bool CalculatorFunctionsGeneral::innerLength(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerLength");
   if (
-    input.IsListStartingWithAtom(theCommands.theAtoms.GetIndexIMustContainTheObject("Length")) ||
+    input.IsListStartingWithAtom(theCommands.operations.GetIndexIMustContainTheObject("Length")) ||
     input.IsSequenceNElementS()
   ) {
     return output.AssignValue(input.children.size - 1, theCommands);
@@ -1262,7 +1263,7 @@ bool CalculatorFunctionsGeneral::innerOperatorBounds(
       theLimitsE.AddChildAtomOnTop(theCommands.opIndefiniteIndicator());
     }
   }
-  if (input[1].IsAtomGivenData(theCommands.opUnderscore())) {
+  if (input[1].IsOperationGiven(theCommands.opUnderscore())) {
     theLimitsE.SetChilD(1, input[2]);
   } else {
     theLimitsE.SetChilD(2, input[2]);
@@ -1280,7 +1281,7 @@ bool CalculatorFunctionsGeneral::innerPowerExponentToLog(
   }
   const Expression& baseE = input[1];
   const Expression& powerE = input[2];
-  if (baseE.IsAtomGivenData(theCommands.opE())) {
+  if (baseE.IsOperationGiven(theCommands.opE())) {
     if (powerE.StartsWith(theCommands.opLog(), 2)) {
       output = powerE[1];
       return true;
@@ -1298,7 +1299,7 @@ bool CalculatorFunctionsGeneral::innerDistributeExponent(
   }
   const Expression& base = input[1];
   const Expression& exponentE = input[2];
-  if (exponentE.IsAtomGivenData(theCommands.opCirc())) {
+  if (exponentE.IsOperationGiven(theCommands.opCirc())) {
     return false;
   }
   if (!input[1].StartsWith(theCommands.opTimes(), 3)) {
@@ -1678,7 +1679,7 @@ bool CalculatorFunctionsGeneral::innerLogBaseNaturalToLn(Calculator& theCommands
   if (!input.StartsWith(theCommands.opLogBase(), 3)) {
     return false;
   }
-  if (!input[1].IsAtomGivenData(theCommands.opE())) {
+  if (!input[1].IsOperationGiven(theCommands.opE())) {
     return false;
   }
   return output.MakeOX(theCommands, theCommands.opLog(), input[2]);
@@ -1814,11 +1815,11 @@ bool CalculatorFunctionsGeneral::innerMakeJavascriptExpression(
   if (input == theCommands.EInfinity()) {
     return output.AssignValue<std::string>("\"infinity\"", theCommands);
   }
-  if (input.IsAtom(&atomString)) {
-    if (input.IsAtomGivenData(theCommands.opE())) {
+  if (input.IsOperation(&atomString)) {
+    if (input.IsOperationGiven(theCommands.opE())) {
       return output.AssignValue<std::string>(" 2.718281828 ", theCommands);
     }
-    if (input.IsAtomGivenData(theCommands.opPi())) {
+    if (input.IsOperationGiven(theCommands.opPi())) {
       return output.AssignValue<std::string>(" 3.141592654 ", theCommands);
     }
     if (input.theData >= theCommands.NumPredefinedAtoms) {

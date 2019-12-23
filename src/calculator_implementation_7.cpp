@@ -736,9 +736,9 @@ bool CalculatorFunctionsGeneral::innerExpressionToString(Calculator& theCommands
 
 bool CalculatorFunctionsGeneral::innerQuoteToString(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerQuoteToString");
-  std::string atomString;
-  if (input.IsAtom(&atomString)) {
-    return output.AssignValue(atomString, theCommands);
+  std::string operation;
+  if (input.IsOperation(&operation)) {
+    return output.AssignValue(operation, theCommands);
   }
   theCommands << "<b>Warning: this shouldn't happen: quote operation is applied to the non-atomic expression: "
   << input.ToString() << ". "
@@ -806,13 +806,13 @@ bool CalculatorFunctionsGeneral::innerLog(Calculator& theCommands, const Express
   }
   double theArgument;
   if (!input.EvaluatesToDouble(&theArgument)) {
-    if (input.IsAtomGivenData(theCommands.opE())) {
+    if (input.IsOperationGiven(theCommands.opE())) {
       return output.AssignValue(Rational(1), theCommands);
     }
     return false;
   }
   if (theArgument > 0) {
-    if (input.IsAtomGivenData(theCommands.opE())) {
+    if (input.IsOperationGiven(theCommands.opE())) {
       return output.AssignValue(Rational(1), theCommands);
     }
     return output.AssignValue(FloatingPoint::Log(theArgument), theCommands);
@@ -916,7 +916,7 @@ bool CalculatorFunctionsGeneral::innerAbs(Calculator& theCommands, const Express
 
 bool CalculatorFunctionsGeneral::innerSin(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSin");
-  if (input.IsAtomGivenData(theCommands.opPi())) {
+  if (input.IsOperationGiven(theCommands.opPi())) {
     return output.AssignValue(0, theCommands);
   }
   if (input.IsEqualToZero()) {
@@ -924,7 +924,7 @@ bool CalculatorFunctionsGeneral::innerSin(Calculator& theCommands, const Express
   }
   Rational piProportion;
   if (input.StartsWith(theCommands.opTimes(), 3)) {
-    if (input[2].IsAtomGivenData(theCommands.opPi())) {
+    if (input[2].IsOperationGiven(theCommands.opPi())) {
       if (input[1].IsOfType<Rational>(&piProportion)) {
         AlgebraicNumber algOutput;
         Rational ratOutput;
@@ -949,7 +949,7 @@ bool CalculatorFunctionsGeneral::innerSin(Calculator& theCommands, const Express
 
 bool CalculatorFunctionsGeneral::innerCos(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCos");
-  if (input.IsAtomGivenData(theCommands.opPi())) {
+  if (input.IsOperationGiven(theCommands.opPi())) {
     return output.AssignValue(- 1, theCommands);
   }
   if (input.IsEqualToZero()) {
@@ -957,7 +957,7 @@ bool CalculatorFunctionsGeneral::innerCos(Calculator& theCommands, const Express
   }
   Rational piProportion;
   if (input.StartsWith(theCommands.opTimes(), 3)) {
-    if (input[2].IsAtomGivenData(theCommands.opPi())) {
+    if (input[2].IsOperationGiven(theCommands.opPi())) {
       if (input[1].IsOfType<Rational>(&piProportion)) {
         AlgebraicNumber algOutput;
         Rational ratOutput;
@@ -2368,22 +2368,22 @@ bool CalculatorFunctionsGeneral::innerDifferentiateTrigAndInverseTrig(
   }
   const Expression& theArgument = input[2];
   //////////////////////
-  if (theArgument.IsAtomGivenData(theCommands.opSin())) {
+  if (theArgument.IsOperationGiven(theCommands.opSin())) {
     return output.MakeAtom(theCommands.opCos(), theCommands);
   }
-  if (theArgument.IsAtomGivenData(theCommands.opCos())) {
+  if (theArgument.IsOperationGiven(theCommands.opCos())) {
     Expression mOneE, sinE;
     mOneE.AssignValue<Rational>(- 1, theCommands);
     sinE.MakeAtom(theCommands.opSin(), theCommands);
     return output.MakeXOX(theCommands, theCommands.opTimes(), mOneE, sinE);
   }
-  if (theArgument.IsAtomGivenData(theCommands.opTan())) {
+  if (theArgument.IsOperationGiven(theCommands.opTan())) {
     Expression secE, twoE;
     secE.MakeAtom(theCommands.opSec(), theCommands);
     twoE.AssignValue(2, theCommands);
     return output.MakeXOX(theCommands, theCommands.opThePower(), secE, twoE);
   }
-  if (theArgument.IsAtomGivenData(theCommands.opCot())) {
+  if (theArgument.IsOperationGiven(theCommands.opCot())) {
     Expression cscE, twoE, cscSquared, mOneE;
     cscE.MakeAtom(theCommands.opCsc(), theCommands);
     twoE.AssignValue(2, theCommands);
@@ -2391,13 +2391,13 @@ bool CalculatorFunctionsGeneral::innerDifferentiateTrigAndInverseTrig(
     mOneE.AssignValue(- 1, theCommands);
     return output.MakeXOX(theCommands, theCommands.opTimes(), mOneE, cscSquared);
   }
-  if (theArgument.IsAtomGivenData(theCommands.opSec())) {
+  if (theArgument.IsOperationGiven(theCommands.opSec())) {
     Expression tanE, secE;
     tanE.MakeAtom(theCommands.opTan(), theCommands);
     secE.MakeAtom(theCommands.opSec(), theCommands);
     return output.MakeXOX(theCommands, theCommands.opTimes(), tanE, secE);
   }
-  if (theArgument.IsAtomGivenData(theCommands.opCsc())) {
+  if (theArgument.IsOperationGiven(theCommands.opCsc())) {
     Expression cotE, cscE, mOneE, cotTimesCscE;
     cotE.MakeAtom(theCommands.opCot(), theCommands);
     cscE.MakeAtom(theCommands.opCsc(), theCommands);
@@ -2405,7 +2405,7 @@ bool CalculatorFunctionsGeneral::innerDifferentiateTrigAndInverseTrig(
     cotTimesCscE.MakeXOX(theCommands, theCommands.opTimes(), cotE, cscE);
     return output.MakeXOX(theCommands, theCommands.opTimes(), mOneE, cotTimesCscE);
   }
-  if (theArgument.IsAtomGivenData(theCommands.opArcTan())) {
+  if (theArgument.IsOperationGiven(theCommands.opArcTan())) {
     Polynomial<Rational> onePlusXsquared;
     RationalFunctionOld oneOverOnePlusXsquared;
     onePlusXsquared.MakeMonomiaL(0, 2);
@@ -2416,7 +2416,7 @@ bool CalculatorFunctionsGeneral::innerDifferentiateTrigAndInverseTrig(
     theContext.ContextMakeContextWithOnePolyVar(theCommands, "x");
     return output.AssignValueWithContext(oneOverOnePlusXsquared, theContext, theCommands);
   }
-  if (theArgument.IsAtomGivenData(theCommands.opArcSin())) {
+  if (theArgument.IsOperationGiven(theCommands.opArcSin())) {
     Expression denE, theContext;
     theContext.ContextMakeContextWithOnePolyVar(theCommands, "x");
     RationalFunctionOld oneMinusXsquared;
@@ -2426,7 +2426,7 @@ bool CalculatorFunctionsGeneral::innerDifferentiateTrigAndInverseTrig(
     denE.AssignValueWithContext(oneMinusXsquared, theContext, theCommands);
     return output.MakeXOX(theCommands, theCommands.opThePower(), denE, theCommands.EMHalf());
   }
-  if (theArgument.IsAtomGivenData(theCommands.opArcCos())) {
+  if (theArgument.IsOperationGiven(theCommands.opArcCos())) {
     Expression denE, theContext;
     theContext.ContextMakeContextWithOnePolyVar(theCommands, "x");
     RationalFunctionOld oneMinusXsquared;
@@ -2452,7 +2452,7 @@ bool CalculatorFunctionsGeneral::innerCompositeDifferentiateLog(
   if (!input[0].StartsWith(theCommands.opDifferentiate(), 3)) {
     return false;
   }
-  if (!input[0][2].IsAtomGivenData(theCommands.opLog())) {
+  if (!input[0][2].IsOperationGiven(theCommands.opLog())) {
     return false;
   }
   theCommands.CheckInputNotSameAsOutput(input, output);
@@ -3272,7 +3272,7 @@ bool CalculatorFunctionsGeneral::innerInterpretAsDifferential(
   }
   const Expression& theDiffFormCandidateE = input[2];
   std::string theDiff;
-  if (theDiffFormCandidateE.IsAtom(&theDiff)) {
+  if (theDiffFormCandidateE.IsOperation(&theDiff)) {
     if (theDiff.size() > 1) {
       if (theDiff[0] == 'd') {
         Expression variableE, diffFormE;
@@ -3301,7 +3301,7 @@ bool CalculatorFunctionsGeneral::innerIntegralOperator(
     }
   }
   const Expression& integralE = input[1];
-  if (integralE.IsAtomGivenData(theCommands.opIntegral())) {
+  if (integralE.IsOperationGiven(theCommands.opIntegral())) {
     Expression integralOperatorE;
     integralOperatorE.reset(theCommands, 2);
     integralOperatorE.AddChildAtomOnTop(theCommands.opIntegral());
@@ -3613,7 +3613,7 @@ bool CalculatorFunctionsGeneral::innerPolynomialRelations(
 bool CalculatorFunctionsGeneral::outerPolynomialize(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPolynomialize");
   Expression thePolyE;
-  if (input.StartsWithGivenAtom("Polynomialize")) {
+  if (input.StartsWithGivenOperation("Polynomialize")) {
     return false;
   }
   if (input.HasBoundVariables()) {
@@ -3714,7 +3714,7 @@ bool CalculatorFunctionsGeneral::innerCoefficientsPowersOf(
 
 bool CalculatorFunctionsGeneral::innerConstTermRelative(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerConstTermRelative");
-  if (!input.StartsWithGivenAtom("ConstantTerm")) {
+  if (!input.StartsWithGivenOperation("ConstantTerm")) {
     return false;
   }
   Expression coeffExtractor, theCoeffs;
@@ -4589,7 +4589,7 @@ bool CalculatorFunctionsGeneral::innerPowerImaginaryUnit(Calculator& theCommands
   if (!input.StartsWith(theCommands.opThePower(), 3)) {
     return false;
   }
-  if (!input[1].IsAtomGivenData(theCommands.opImaginaryUnit())) {
+  if (!input[1].IsOperationGiven(theCommands.opImaginaryUnit())) {
     return false;
   }
   LargeInteger thePower;
@@ -4620,7 +4620,7 @@ bool CalculatorFunctionsGeneral::innerEulerFlaAsALaw(Calculator& theCommands, co
   if (!input.StartsWith(theCommands.opThePower(), 3)) {
     return false;
   }
-  if (!input[1].IsAtomGivenData(theCommands.opE())) {
+  if (!input[1].IsOperationGiven(theCommands.opE())) {
     return false;
   }
   Expression coefficientOfI, currentE;
@@ -4656,7 +4656,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateEpowerAxDiffX(
   if (!theFunNoCoeff.StartsWith(theCommands.opThePower(), 3)) {
     return false;
   }
-  if (!theFunNoCoeff[1].IsAtomGivenData(theCommands.opE())) {
+  if (!theFunNoCoeff[1].IsOperationGiven(theCommands.opE())) {
     return false;
   }
   Expression thePowerCoeff, thePowerNoCoeff;
@@ -4664,7 +4664,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateEpowerAxDiffX(
   if (thePowerNoCoeff != theVariableE) {
     if (thePowerNoCoeff.StartsWith(theCommands.opTimes(), 3)) {
       if (
-        thePowerNoCoeff[1].IsAtomGivenData(theCommands.opImaginaryUnit()) &&
+        thePowerNoCoeff[1].IsOperationGiven(theCommands.opImaginaryUnit()) &&
         thePowerNoCoeff[2] == theVariableE
       ) {
         output = thePowerNoCoeff[1] * (- 1) * theFunctionE / thePowerCoeff;
@@ -4692,7 +4692,7 @@ bool CalculatorFunctionsGeneral::innerDifferentiateSqrt(Calculator& theCommands,
     << input[1].ToString() << " - possible user typo?";
   }
   const Expression& theArgument = input[2];
-  if (!theArgument.IsAtomGivenData(theCommands.opSqrt())) {
+  if (!theArgument.IsOperationGiven(theCommands.opSqrt())) {
     return false;
   }
   Expression twoE(theCommands);
@@ -4770,10 +4770,10 @@ bool CalculatorFunctionsGeneral::innerDdivDxToDiffDivDiffx(Calculator& theComman
     return false;
   }
   std::string denominatorString,numeratorString;
-  if (!input[1].IsAtom(&numeratorString)) {
+  if (!input[1].IsOperation(&numeratorString)) {
     return false;
   }
-  if (!input[2].IsAtom(&denominatorString)) {
+  if (!input[2].IsOperation(&denominatorString)) {
     return false;
   }
   if (numeratorString != "d") {
@@ -5026,7 +5026,7 @@ void Expression::GetBlocksOfCommutativity(HashedListSpecialized<Expression>& inp
     return;
   }
   std::string whichOperation;
-  if ((*this)[0].IsAtom(&whichOperation)) {
+  if ((*this)[0].IsOperation(&whichOperation)) {
     if (this->owner->atomsThatAllowCommutingOfCompositesStartingWithThem.Contains(whichOperation)) {
       for (int i = 1; i < this->size(); i ++) {
         (*this)[i].GetBlocksOfCommutativity(inputOutputList);
@@ -5250,7 +5250,7 @@ bool CalculatorFunctionsGeneral::innerExpressionLeafs(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerExpressionLeafs");
   HashedList<Expression> theLeafs;
-  if (input.StartsWithGivenAtom("ExpressionLeafs")) {
+  if (input.StartsWithGivenOperation("ExpressionLeafs")) {
     for (int i = 1; i < input.size(); i ++) {
       if (!input[i].GetExpressionLeafs(theLeafs)) {
         return theCommands << "Failed to extract expression leafs from " << input.ToString() << ".";
@@ -5274,7 +5274,7 @@ bool CalculatorFunctionsGeneral::innerLastElement(Calculator& theCommands, const
   }
   std::string firstAtom;
   if (input.size() == 2) {
-    if (input[0].IsAtom(&firstAtom) ) {
+    if (input[0].IsOperation(&firstAtom) ) {
       if (firstAtom == "Last") {
         return CalculatorFunctionsGeneral::innerLastElement(theCommands, input[1], output);
       }
@@ -5300,7 +5300,7 @@ bool CalculatorFunctionsGeneral::innerRemoveLastElement(Calculator& theCommands,
   }
   std::string firstAtom;
   if (input.children.size == 2) {
-    if (input[0].IsAtom(&firstAtom)) {
+    if (input[0].IsOperation(&firstAtom)) {
       if (firstAtom == "removeLast") {
         return CalculatorFunctionsGeneral::innerRemoveLastElement(theCommands, input[1], output);
       }
@@ -8570,33 +8570,45 @@ bool CalculatorFunctionsGeneral::innerSolveProductSumEquationOverSetModN(
   return output.AssignValue(std::string("Couldn't find solution"), theCommands);
 }
 
+void Calculator::AutomatedTestRunPrepare(
+  List<std::string>& atomsTested,
+  List<std::string>& outputCommandStrings
+) {
+  MacroRegisterFunctionWithName("Calculator::AutomatedTestRunPrepare");
+  outputCommandStrings.SetSize(0);
+  for (int i = 0; i < this->NumPredefinedAtoms; i ++) {
+    MemorySaving<Calculator::AtomHandler>& currentPointer = this->operations.theValues[i];
+    if (currentPointer.IsZeroPointer()) {
+      continue;
+    }
+    Calculator::AtomHandler& current = currentPointer.GetElement();
+    List<Function>* currentHandler = &current.handlers;
+    for (int j = 0; j < 2; j ++) {
+      for (int k = 0; k < currentHandler->size; k ++) {
+        Function& currentFunction = (*currentHandler)[k];
+        if (currentFunction.options.flagDontTestAutomatically) {
+          continue;
+        }
+        outputCommandStrings.AddOnTop(currentFunction.theExample);
+        atomsTested.AddOnTop(this->operations.theKeys[i]);
+      }
+      currentHandler = &current.compositeHandlers;
+    }
+  }
+}
+
 void Calculator::AutomatedTestRun(
   List<std::string>& outputCommandStrings,
   List<std::string>& outputResultsWithInit,
   List<std::string>& outputResultsNoInit
 ) {
   MacroRegisterFunctionWithName("Calculator::AutomatedTestRun");
-  Calculator theTester;
-  int numFunctionsToTest = this->GetNumBuiltInFunctions();
-  outputCommandStrings.SetExpectedSize(numFunctionsToTest);
-  outputCommandStrings.SetSize(0);
   List<std::string> atomsTested;
-  for (int i = 0; i < this->FunctionHandlers.size; i ++) {
-    for (int j = 0; j < this->FunctionHandlers[i].size; j ++) {
-      if (!this->FunctionHandlers[i][j].flagDontTestAutomatically) {
-        outputCommandStrings.AddOnTop(this->FunctionHandlers[i][j].theExample);
-        atomsTested.AddOnTop(this->theAtoms[i]);
-      }
-    }
-  }
-  for (int i = 0; i < this->operationsCompositeHandlers.size; i ++) {
-    for (int j = 0; j < this->operationsCompositeHandlers[i].size; j ++) {
-      outputCommandStrings.AddOnTop(this->operationsCompositeHandlers[i][j].theExample);
-      atomsTested.AddOnTop(this->theAtoms[i]);
-    }
-  }
+  this->AutomatedTestRunPrepare(atomsTested, outputCommandStrings);
   outputResultsWithInit.SetSize(outputCommandStrings.size);
   outputResultsNoInit.SetSize(outputCommandStrings.size);
+
+  Calculator theTester;
   ProgressReport theReport;
   FormatExpressions theFormat;
   theFormat.flagExpressionIsFinal = true;
@@ -8906,7 +8918,7 @@ public:
     std::stringstream out;
     if (this->flagUseFullTree) {
       std::string atomName;
-      if (input.IsAtom(&atomName)) {
+      if (input.IsOperation(&atomName)) {
         if (atomName != "...") {
           out << input.theData;
         } else {
@@ -9210,7 +9222,7 @@ bool CalculatorFunctionsGeneral::innerTurnRulesOnOff(
   if (!input.StartsWith(theCommands.opTurnOffRules()) && !input.StartsWith(theCommands.opTurnOnRules())) {
     if (input.IsOfType<std::string>(&currentRule)) {
       rulesToConsider.AddOnTop(currentRule);
-    } else if (input.IsAtom(&currentRule)) {
+    } else if (input.IsOperation(&currentRule)) {
       rulesToConsider.AddOnTop(currentRule);
     } else {
       return theCommands << "Could not extract rule to turn off from " << input.ToString() << ". ";
@@ -9219,7 +9231,7 @@ bool CalculatorFunctionsGeneral::innerTurnRulesOnOff(
     for (int i = 1; i < input.size(); i ++) {
       if (input[i].IsOfType<std::string>(&currentRule)) {
         rulesToConsider.AddOnTop(currentRule);
-      } else if (input[i].IsAtom(&currentRule)) {
+      } else if (input[i].IsOperation(&currentRule)) {
         rulesToConsider.AddOnTop(currentRule);
       } else {
         return theCommands << "Could not extract rule to turn off from " << input[i].ToString() << ". ";
@@ -9354,7 +9366,7 @@ bool CalculatorFunctionsGeneral::innerSelectAtRandom(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSelectAtRandom");
-  if (!input.StartsWith(theCommands.theAtoms.GetIndex("SelectAtRandom"))) {
+  if (!input.StartsWith(theCommands.operations.GetIndex("SelectAtRandom"))) {
     output = input; //only one item to select from: returning the item
     return true;
   }

@@ -728,21 +728,25 @@ bool Calculator::innerDeterminantPolynomial(Calculator& theCommands, const Expre
 
 bool Calculator::innerTranspose(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerTranspose");
-  if (!input.IsSequenceNElementS() && !input.IsMatrix() && !input.StartsWithGivenAtom("Transpose")) {
+  if (
+    !input.IsSequenceNElementS() &&
+    !input.IsMatrix() &&
+    !input.StartsWithGivenOperation("Transpose")
+  ) {
     return false;
   }
   Matrix<Expression> theMat;
-  if (input.StartsWithGivenAtom("Transpose")) {
+  if (input.StartsWithGivenOperation("Transpose")) {
     theCommands.GetMatrixExpressionsFromArguments(input, theMat);
   } else {
     theCommands.GetMatrixExpressions(input, theMat);
   }
-  //The commented code used to be here. I don't remember why I added it, perhaps there was a solid reason?
-  //If the code is uncommented, then ((1,2),(3,5))^t will not be transposed according to expectation.
-  //If the commented code needs to be restored, please document why.
-  //if (input.IsSequenceNElementS())
-  //  if (theMat.NumRows !=1)
-  //    return false;
+  // The commented code used to be here. I don't remember why I added it, perhaps there was a solid reason?
+  // If the code is uncommented, then ((1,2),(3,5))^t will not be transposed according to expectation.
+  // If the commented code needs to be restored, please document why.
+  // if (input.IsSequenceNElementS())
+  //   if (theMat.NumRows !=1)
+  //     return false;
   theMat.Transpose();
   return output.AssignMatrixExpressions(theMat, theCommands, true, true);
 }
@@ -1806,7 +1810,7 @@ bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const
     return output.AssignValue(std::string("..."), theCommands);
   }
   std::string currentString;
-  if (input.IsAtom(&currentString)) {
+  if (input.IsOperation(&currentString)) {
     if (input.ToString() == "e") {
       return output.AssignValue<std::string>(" 2.718281828 ", theCommands);
     }
@@ -1888,7 +1892,9 @@ bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const
     return output.AssignValue(out.str(), theCommands);
   }
   Expression currentE;
-  bool useUsualOrder = !input[0].IsAtomGivenData(theCommands.opDivide()) && !input[0].IsAtomGivenData(theCommands.opThePower());
+  bool useUsualOrder =
+    !input[0].IsOperationGiven(theCommands.opDivide()) &&
+    !input[0].IsOperationGiven(theCommands.opThePower());
   if (useUsualOrder) {
     for (int i = input.size() - 1; i >= 1; i --) {
       if (!theCommands.innerSuffixNotationForPostScript(theCommands, input[i], currentE)) {
@@ -2345,7 +2351,7 @@ bool Calculator::innerLogEvaluationStepsHumanReadableNested(
   MacroRegisterFunctionWithName("Calculator::innerLogEvaluationStepsHumanReadableNested");
   Expression inputCopy = input;
   Expression outputTransformation;
-  if (inputCopy.StartsWithGivenAtom("LogEvaluationStepsHumanReadableNested")) {
+  if (inputCopy.StartsWithGivenOperation("LogEvaluationStepsHumanReadableNested")) {
     inputCopy.SetChildAtomValue(0, theCommands.opSequence());
   }
   bool notUsed = false;
@@ -2619,7 +2625,7 @@ bool Calculator::innerLogEvaluationStepsHumanReadableMerged(
   MacroRegisterFunctionWithName("Calculator::innerLogEvaluationStepsHumanReadableMerged");
   Expression inputCopy = input;
   Expression outputTransformation;
-  if (inputCopy.StartsWithGivenAtom("LogEvaluationStepsHumanReadableMerged")) {
+  if (inputCopy.StartsWithGivenOperation("LogEvaluationStepsHumanReadableMerged")) {
     inputCopy.SetChildAtomValue(0, theCommands.opSequence());
   }
   bool notUsed = false;

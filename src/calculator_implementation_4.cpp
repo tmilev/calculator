@@ -1647,7 +1647,7 @@ bool Calculator::outerPowerRaiseToFirst(Calculator& theCommands, const Expressio
   }
   if (
     input[1].StartsWith(theCommands.opIntegral(), 2) ||
-    input[1].IsAtomGivenData(theCommands.opIntegral())
+    input[1].IsOperationGiven(theCommands.opIntegral())
   ) {
     return false;
   }
@@ -1993,23 +1993,26 @@ SemisimpleLieAlgebra* Expression::GetAmbientSSAlgebraNonConstUseWithCaution() co
 }
 
 Function& Calculator::GetFunctionHandlerFromNamedRule(const std::string& inputNamedRule) {
-  int theIndex = this->namedRules.GetIndex(inputNamedRule);
-  if (theIndex == - 1) {
-    global.fatal << "Named rule " << inputNamedRule << " does not exist." << global.fatal;
+  const Calculator::NamedRuleLocation& current =
+  this->namedRules.GetValueConstCrashIfNotPresent(inputNamedRule);
+  const MemorySaving<Calculator::AtomHandler>& currentOperation =
+  this->operations.GetValueConstCrashIfNotPresent(current.containerOperation);
+  if (currentOperation.IsZeroPointer()) {
+    global.fatal << "Named rule " << inputNamedRule
+    << " registered with operation " << current.containerOperation
+    << " but the operation has no handlers. " << global.fatal;
   }
-  if (this->namedRulesLocations[theIndex][0] == 0) {
-    return this->FunctionHandlers[this->namedRulesLocations[theIndex][1]][this->namedRulesLocations[theIndex][2]];
+  if (current.isComposite) {
+    return currentOperation.GetElementConst().compositeHandlers[current.index];
   }
-  return this->operationsCompositeHandlers[this->namedRulesLocations[theIndex][1]][this->namedRulesLocations[theIndex][2]];
+  return currentOperation.GetElementConst().handlers[current.index];
 }
 
 int Calculator::AddOperationNoRepetitionOrReturnIndexFirst(const std::string& theOpName) {
-  int result = this->theAtoms.GetIndex(theOpName);
+  int result = this->operations.GetIndex(theOpName);
   if (result == - 1) {
-    this->theAtoms.AddOnTop(theOpName);
-    this->FunctionHandlers.SetSize(this->theAtoms.size);
-    this->FunctionHandlers.LastObject()->SetSize(0);
-    result = this->theAtoms.size - 1;
+    result = this->operations.size();
+    this->operations.GetValueCreate(theOpName);
   }
   return result;
 }
@@ -2020,12 +2023,42 @@ void Calculator::AddOperationBuiltInType(const std::string& theOpName) {
 }
 
 void Calculator::AddOperationNoRepetitionAllowed(const std::string& theOpName) {
-  if (this->GetOperations().Contains(theOpName)) {
+  if (this->operations.Contains(theOpName)) {
     global.fatal << "This is a programming error: operation " << theOpName << " already created. " << global.fatal;
   }
-  this->theAtoms.AddOnTop(theOpName);
-  this->FunctionHandlers.SetSize(this->theAtoms.size);
-  this->FunctionHandlers.LastObject()->SetSize(0);
+  this->operations.GetValueCreate(theOpName);
+}
+
+Function::Function() {
+  this->owner = nullptr;
+  this->resetExceptOwner();
+}
+
+Function::Function(
+  Calculator& inputOwner,
+  int inputIndexOperation,
+  const Expression::FunctionAddress& functionPointer,
+  Expression* inputArgTypes,
+  const std::string& description,
+  const std::string& inputExample,
+  const std::string& inputAdditionalIndentifier,
+  const std::string& inputCalculatorIdentifier,
+  const Options& inputOptions,
+  int inputIndexParentThatBansHandler
+) {
+  this->owner = nullptr;
+  this->reset(inputOwner);
+  this->indexOperation = inputIndexOperation;
+  this->options = inputOptions;
+  this->theFunction = functionPointer;
+  this->theDescription = description;
+  this->theExample = inputExample;
+  this->additionalIdentifier = inputAdditionalIndentifier;
+  this->calculatorIdentifier = inputCalculatorIdentifier;
+  if (inputArgTypes != nullptr) {
+    this->theArgumentTypes = *inputArgTypes;
+  }
+  this->indexOperationParentThatBansHandler = inputIndexParentThatBansHandler;
 }
 
 void Calculator::AddOperationBinaryInnerHandlerWithTypes(
@@ -2035,96 +2068,57 @@ void Calculator::AddOperationBinaryInnerHandlerWithTypes(
   int rightType,
   const std::string& opDescription,
   const std::string& opExample,
-  bool visible,
-  bool experimental,
   const std::string& inputAdditionalIdentifier,
   const std::string& inputCalculatorIdentifier,
-  bool dontTestAutomatically
+  const Function::Options& options
 ) {
-  int indexOp = this->theAtoms.GetIndex(theOpName);
+  int indexOp = this->operations.GetIndex(theOpName);
   if (indexOp == - 1) {
-    this->theAtoms.AddOnTop(theOpName);
-    indexOp = this->theAtoms.size - 1;
-    this->FunctionHandlers.SetSize(this->theAtoms.size);
-    this->FunctionHandlers.LastObject()->SetSize(0);
+    indexOp = this->operations.size();
+    this->operations.GetValueCreate(theOpName);
   }
   Function innerFunction(
     *this,
     indexOp,
-    this->FunctionHandlers[indexOp].size,
     innerHandler,
     nullptr,
     opDescription,
     opExample,
-    true,
-    visible,
-    experimental,
-    true,
-    false,
-    - 1,
-    dontTestAutomatically
+    inputAdditionalIdentifier,
+    inputCalculatorIdentifier,
+    options,
+    - 1
   );
   innerFunction.theArgumentTypes.reset(*this, 2);
   innerFunction.theArgumentTypes.AddChildAtomOnTop(leftType);
   innerFunction.theArgumentTypes.AddChildAtomOnTop(rightType);
-  innerFunction.additionalIdentifier = inputAdditionalIdentifier;
-  innerFunction.calculatorIdentifier = inputCalculatorIdentifier;
-  this->FunctionHandlers[indexOp].Reserve(10);
-  this->FunctionHandlers[indexOp].AddOnTop(innerFunction);
-  this->RegisterCalculatorFunctionIdentifier(innerFunction, indexOp, 0, this->FunctionHandlers[indexOp].size - 1);
+  this->RegisterCalculatorFunction(innerFunction, indexOp);
 }
 
-void Calculator::RegisterCalculatorFunctionIdentifier(
-  const Function& theFun, int indexOp, int functionType, int theFunIndex
-) {
-  MacroRegisterFunctionWithName("Calculator::RegisterCalculatorFunctionIdentifier");
+void Calculator::RegisterCalculatorFunction(Function &theFun, int indexOp) {
+  MacroRegisterFunctionWithName("Calculator::RegisterCalculatorFunction");
+  if (indexOp < 0 || indexOp >= this->operations.size()) {
+    global.fatal << "Invalid index operation: " << indexOp
+    << ", there are: " << this->operations.size()
+    << " operations total." << global.fatal;
+  }
+  MemorySaving<Calculator::AtomHandler>& handlerPointer = this->operations.theValues[indexOp];
+  Calculator::AtomHandler& handler = handlerPointer.GetElement();
+  if (theFun.options.flagIsCompositeHandler) {
+    theFun.indexInOperationHandlers = handler.compositeHandlers.size;
+    handler.compositeHandlers.AddOnTop(theFun);
+  } else {
+    theFun.indexInOperationHandlers = handler.handlers.size;
+    handler.handlers.AddOnTop(theFun);
+  }
   if (theFun.calculatorIdentifier == "") {
     return;
   }
-  int namedRuleIndex = this->namedRules.GetIndex(theFun.calculatorIdentifier);
-  if (namedRuleIndex == - 1) {
-    this->namedRules.AddOnTop(theFun.calculatorIdentifier);
-    this->namedRulesLocations.SetSize(this->namedRulesLocations.size + 1);
-    this->namedRulesLocations.LastObject()->SetSize(0);
-    namedRuleIndex = this->namedRules.size - 1;
-  }
-  List<int> triple;
-  triple.SetSize(3);
-  triple[0] = functionType;
-  triple[1] = indexOp;
-  triple[2] = theFunIndex;
-  this->namedRulesLocations[namedRuleIndex] = triple;
-}
-
-void Calculator::AddOperationOuterHandler(
-  const std::string& theOpName,
-  Expression::FunctionAddress outerHandler,
-  const std::string& opArgumentListIgnoredForTheTimeBeing,
-  const std::string& opDescription,
-  const std::string& opExample,
-  bool visible,
-  bool experimental,
-  const std::string& inputAdditionalIdentifier,
-  const std::string& inputCalculatorIdentifier,
-  bool inputDisabledByDefault,
-  const std::string& parentOpThatBansHandler,
-  bool dontTestAutomatically
-) {
-  this->AddOperationHandler(
-    theOpName,
-    outerHandler,
-    opArgumentListIgnoredForTheTimeBeing,
-    opDescription,
-    opExample,
-    false,
-    visible,
-    experimental,
-    inputAdditionalIdentifier,
-    inputCalculatorIdentifier,
-    inputDisabledByDefault,
-    parentOpThatBansHandler,
-    dontTestAutomatically
-  );
+  Calculator::NamedRuleLocation namedRule;
+  namedRule.containerOperation = this->operations.theKeys[indexOp];
+  namedRule.index = theFun.indexInOperationHandlers;
+  namedRule.isComposite = theFun.options.flagIsCompositeHandler;
+  this->namedRules.SetKeyValue(namedRule.containerOperation, namedRule);
 }
 
 void Calculator::AddOperationHandler(
@@ -2133,137 +2127,40 @@ void Calculator::AddOperationHandler(
   const std::string& opArgumentListIgnoredForTheTimeBeing,
   const std::string& opDescription,
   const std::string& opExample,
-  bool isInner,
-  bool visible,
-  bool experimental,
   const std::string& inputAdditionalIdentifier,
   const std::string& inputCalculatorIdentifier,
-  bool inputDisabledByDefault,
-  const std::string& parentOpThatBansHandler,
-  bool dontTestAutomatically
+  const Function::Options& options,
+  const std::string& parentOpThatBansHandler
 ) {
-  int indexOp = this->theAtoms.GetIndex(theOpName);
-  int indexParentOpThatBansHandler = - 1;
-  if (parentOpThatBansHandler != "") {
-    indexParentOpThatBansHandler = this->theAtoms.GetIndexIMustContainTheObject(parentOpThatBansHandler);
-  }
-  if (indexOp == - 1) {
-    this->theAtoms.AddOnTop(theOpName);
-    indexOp = this->theAtoms.size - 1;
-    this->FunctionHandlers.SetSize(this->theAtoms.size);
-    this->FunctionHandlers.LastObject()->SetSize(0);
-  }
   if (opArgumentListIgnoredForTheTimeBeing != "") {
     global.fatal << "This section of code is not implemented yet. Crashing to let you know. " << global.fatal;
   }
+  int indexOp = this->operations.GetIndex(theOpName);
+  if (indexOp == - 1) {
+    indexOp = this->operations.size();
+    this->operations.GetValueCreate(theOpName);
+  }
+  int indexParentOpThatBansHandler = this->operations.GetIndex(parentOpThatBansHandler);
   Function theFun(
     *this,
     indexOp,
-    this->FunctionHandlers[indexOp].size,
     handler,
     nullptr,
     opDescription,
     opExample,
-    isInner,
-    visible,
-    experimental,
-    false,
-    inputDisabledByDefault,
-    indexParentOpThatBansHandler,
-    dontTestAutomatically
+    inputAdditionalIdentifier,
+    inputCalculatorIdentifier,
+    options,
+    indexParentOpThatBansHandler
   );
   if (theFun.theFunction == nullptr || theFun.owner == nullptr) {
     global.fatal << "Function not initialized properly. " << global.fatal;
   }
-  theFun.additionalIdentifier = inputAdditionalIdentifier;
-  theFun.calculatorIdentifier = inputCalculatorIdentifier;
-
-  if (theOpName == "*" || theOpName == "+" || theOpName == "/" || theOpName == "\\otimes" || theOpName == "^") {
-    this->FunctionHandlers[indexOp].Reserve(100);
-  } else {
-    this->FunctionHandlers[indexOp].Reserve(10);
-  }
-  this->FunctionHandlers[indexOp].AddOnTop(theFun);
-  this->RegisterCalculatorFunctionIdentifier(theFun, indexOp, 0, this->FunctionHandlers[indexOp].size - 1);
-}
-
-void Calculator::AddOperationComposite(
-  const std::string& theOpName,
-  Expression::FunctionAddress handler,
-  const std::string& opArgumentListIgnoredForTheTimeBeing,
-  const std::string& opDescription,
-  const std::string& opExample,
-  bool isInner,
-  bool visible,
-  bool experimental,
-  const std::string& inputAdditionalIdentifier,
-  const std::string& inputCalculatorIdentifier
-) {
-  MacroRegisterFunctionWithName("Calculator::AddOperationComposite");
-  int theIndex = this->operationsComposite.GetIndex(theOpName);
-  if (opArgumentListIgnoredForTheTimeBeing != "") {
-    global.fatal << "This section of code is not implemented yet. Crashing to let you know. " << global.fatal;
-  }
-  if (theIndex == - 1) {
-    theIndex = this->operationsComposite.size;
-    this->operationsComposite.AddOnTop(theOpName);
-    this->operationsCompositeHandlers.SetSize(this->operationsCompositeHandlers.size + 1);
-    this->operationsCompositeHandlers.LastObject()->SetSize(0);
-  }
-  Function theFun(
-    *this,
-    theIndex,
-    this->operationsCompositeHandlers[theIndex].size,
-    handler,
-    nullptr,
-    opDescription,
-    opExample,
-    isInner,
-    visible,
-    experimental
-  );
-  theFun.additionalIdentifier = inputAdditionalIdentifier;
-  theFun.calculatorIdentifier = inputCalculatorIdentifier;
-  theFun.flagIsCompositeHandler = true;
-  this->operationsCompositeHandlers[theIndex].AddOnTop(theFun);
-  this->RegisterCalculatorFunctionIdentifier(theFun, theIndex, 1, this->operationsCompositeHandlers[theIndex].size - 1);
-}
-
-std::string Calculator::ElementToStringNonBoundVars() {
-  std::stringstream out;
-  std::string openTag1 = "<span style =\"color:#0000FF\">";
-  std::string closeTag1 = "</span>";
-  out << "<br>\n" << this->theAtoms.size << " atoms " << " (= " << this->NumPredefinedAtoms << " predefined atoms+ "
-  << this->theAtoms.size - this->NumPredefinedAtoms << " user-or-run-time defined). <br>Predefined: \n<br>\n";
-  for (int i = 0; i < this->theAtoms.size; i ++) {
-    out << openTag1 << this->theAtoms[i] << closeTag1;
-    if (this->FunctionHandlers[i].size > 0) {
-      out << " [handled by: ";
-      for (int j = 0; j < this->FunctionHandlers[i].size; j ++) {
-        out << std::hex << reinterpret_cast<unsigned long>(this->FunctionHandlers[i][j].theFunction);
-        if (this->FunctionHandlers[i][j].flagIsInner) {
-          out << "(inner)";
-        } else {
-          out << "(outer)";
-        }
-        if (j != this->FunctionHandlers[i].size - 1) {
-          out << ", ";
-        }
-      }
-      out << "]";
-    }
-    if (i != this->theAtoms.size - 1) {
-      out << ", ";
-      if (i == this->NumPredefinedAtoms - 1) {
-        out << "<br>user or run-time defined:\n<br>\n";
-      }
-    }
-  }
-  return out.str();
+  this->RegisterCalculatorFunction(theFun, indexOp);
 }
 
 bool Function::inputFitsMyInnerType(const Expression& input) {
-  if (!this->flagIsInner) {
+  if (!this->options.flagIsInner) {
     return false;
   }
   if (this->theArgumentTypes.children.size != 2) {
@@ -2282,15 +2179,16 @@ std::string Function::ToStringShort() const {
     return "(non-initialized)";
   }
   std::stringstream out;
-  if (this->flagIsCompositeHandler) {
-    out << "<span style =\"color:red\">" << this->owner->operationsComposite[this->indexOperation]
-    << " </span><span style =\"color:blue\">(composite)</span> ("
-    << this->indexAmongOperationHandlers + 1 << " out of "
-    << this->owner->operationsCompositeHandlers[this->indexOperation].size << ") ";
+  out << this->owner->operations.theKeys[this->indexOperation];
+  MemorySaving<Calculator::AtomHandler>& handlerPointer = this->owner->operations.theValues[this->indexOperation];
+  Calculator::AtomHandler& handler = handlerPointer.GetElement();
+  if (this->options.flagIsCompositeHandler) {
+    out << " (composite) ("
+    << this->indexInOperationHandlers + 1 << " out of "
+    << handler.compositeHandlers.size << ") ";
   } else {
-    out << "<span style =\"color:red\">" << this->owner->theAtoms[this->indexOperation]
-    << "</span> (" << this->indexAmongOperationHandlers + 1 << " out of "
-    << this->owner->FunctionHandlers[this->indexOperation].size << "). ";
+    out << "(" << this->indexInOperationHandlers + 1 << " out of "
+    << handler.handlers.size << "). ";
   }
   return out.str();
 }
@@ -2311,7 +2209,7 @@ std::string Function::ToStringSummary() const {
 }
 
 bool Function::ShouldBeApplied(int parentOpIfAvailable) {
-  if (this->flagDisabledByUser) {
+  if (this->options.disabledByUser) {
     return false;
   }
   if (parentOpIfAvailable < 0 || this->indexOperationParentThatBansHandler < 0) {
@@ -2328,23 +2226,23 @@ JSData Function::ToJSON() const {
     result[WebAPI::result::error] = "bad_owner";
     return result;
   }
-  if (this->flagIamVisible) {
+  if (this->options.visible) {
     result["visible"] = "true";
   } else {
     result["visible"] = "false";
   }
-  if (this->flagIsCompositeHandler) {
+  Calculator::AtomHandler& operationHandlers = this->owner->operations.theValues[this->indexOperation].GetElement();
+  result["number"] = this->indexInOperationHandlers + 1;
+  if (this->options.flagIsCompositeHandler) {
     result["composite"] = "true";
-    result["number"] = this->indexAmongOperationHandlers + 1;
-    result["total"] = this->owner->operationsCompositeHandlers[this->indexOperation].size;
-    result["atom"] = this->owner->operationsComposite[this->indexOperation];
+    result["total"] = operationHandlers.compositeHandlers.size;
+    result["atom"] = this->owner->operations.theKeys[this->indexOperation];
   } else {
     result["composite"] = "false";
-    result["number"] = this->indexAmongOperationHandlers + 1;
-    result["total"] = this->owner->FunctionHandlers[this->indexOperation].size;
-    result["atom"] = this->owner->theAtoms[this->indexOperation];
+    result["total"] = operationHandlers.handlers.size;
+    result["atom"] = this->owner->operations.theKeys[this->indexOperation];
   }
-  if (this->flagIsExperimental) {
+  if (this->options.flagIsExperimental) {
     result["experimental"] = "true";
   } else {
     result["experimental"] = "false";
@@ -2359,7 +2257,7 @@ JSData Function::ToJSON() const {
   std::stringstream functionAddress;
   functionAddress << std::hex << reinterpret_cast<unsigned long>(this->theFunction);
   result["memoryAddress"] = functionAddress.str();
-  if (this->flagIsInner) {
+  if (this->options.flagIsInner) {
     result["inner"] = "true";
   } else {
     result["inner"] = "false";
@@ -2371,7 +2269,7 @@ JSData Function::ToJSON() const {
 }
 
 std::string Function::ToStringFull() const {
-  if (!this->flagIamVisible) {
+  if (!this->options.visible) {
     return "";
   }
   if (this->owner == nullptr) {
@@ -2379,7 +2277,7 @@ std::string Function::ToStringFull() const {
   }
   std::stringstream out2;
   out2 << this->ToStringShort();
-  if (!this->flagIsExperimental) {
+  if (!this->options.flagIsExperimental) {
     std::stringstream out;
     out << this->theDescription;
     if (this->calculatorIdentifier != "") {
@@ -2392,7 +2290,7 @@ std::string Function::ToStringFull() const {
     // uintptr_t is only available in c++ 0x
     // Please fix if the following code is not portable:
     out << "Function memory address: " << std::hex << reinterpret_cast<unsigned long>(this->theFunction) << ". ";
-    if (!this->flagIsInner) {
+    if (!this->options.flagIsInner) {
       out << "This is a <b>``law''</b> - substitution takes place only if output expression is different from input. ";
     }
     if (this->theExample != "") {
@@ -2478,12 +2376,12 @@ void Calculator::WriteAutoCompleteKeyWordsToFile() {
 
 void Calculator::ComputeAutoCompleteKeyWords() {
   MacroRegisterFunctionWithName("Calculator::ComputeAutoCompleteKeyWords");
-  this->autoCompleteKeyWords.SetExpectedSize(this->theAtoms.size * 2);
-  for (int i = 0; i < this->theAtoms.size; i ++) {
-    this->autoCompleteKeyWords.AddOnTopNoRepetition(this->theAtoms[i]);
+  this->autoCompleteKeyWords.SetExpectedSize(this->operations.size() * 2);
+  for (int i = 0; i < this->operations.size(); i ++) {
+    this->autoCompleteKeyWords.AddOnTopNoRepetition(this->operations.theKeys[i]);
   }
-  for (int i = 0; i < this->namedRules.size; i ++) {
-    this->autoCompleteKeyWords.AddOnTopNoRepetition(this->namedRules[i]);
+  for (int i = 0; i < this->namedRules.size(); i ++) {
+    this->autoCompleteKeyWords.AddOnTopNoRepetition(this->namedRules.theKeys[i]);
   }
   for (int i = 0; i < this->controlSequences.size; i ++) {
     if (this->controlSequences[i].size() > 0) {
@@ -2622,16 +2520,15 @@ std::string Calculator::ToString() {
       out << ", ";
     }
   }
-  out << "<br>\n User or run-time defined atoms = " << this->theAtoms.size << " (= "
+  out << "<br>\n User or run-time defined atoms = " << this->operations.size() << " (= "
   << this->NumPredefinedAtoms << " predefined + "
-  << this->theAtoms.size-this->NumPredefinedAtoms << " user-defined):<br>\n";
-  for (int i = 0; i < this->theAtoms.size; i ++) {
-    out << "\n" << i << ": " << openTag1 << this->theAtoms[i] << closeTag1;
-    if (i != this->theAtoms.size - 1) {
+  << this->operations.size() - this->NumPredefinedAtoms << " user-defined):<br>\n";
+  for (int i = 0; i < this->operations.size(); i ++) {
+    out << "\n" << i << ": " << openTag1 << this->operations.theKeys[i] << closeTag1;
+    if (i != this->operations.size() - 1) {
       out << ", ";
     }
   }
-  out << this->ElementToStringNonBoundVars();
   out << "<hr>";
   out << "Children expressions (" << this->theExpressionContainer.size << " total): <br>";
   int numExpressionsToDisplay = this->theExpressionContainer.size;

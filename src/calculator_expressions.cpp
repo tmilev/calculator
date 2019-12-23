@@ -1193,14 +1193,14 @@ bool Expression::StartsWithFunctionWithComplexRange() const {
   return (*this)[0].IsKnownFunctionWithComplexRange();
 }
 
-bool Expression::StartsWithGivenAtom(const std::string& theAtom, int desiredChildren) const {
+bool Expression::StartsWithGivenOperation(const std::string& theOperation, int desiredChildren) const {
   if (this->owner == nullptr) {
     return false;
   }
   if (this->size() == 0) {
     return false;
   }
-  int theOpIndex = this->owner->theAtoms.GetIndex(theAtom);
+  int theOpIndex = this->owner->operations.GetIndex(theOperation);
   if (theOpIndex == - 1) {
     return false;
   }
@@ -1209,7 +1209,7 @@ bool Expression::StartsWithGivenAtom(const std::string& theAtom, int desiredChil
       return false;
     }
   }
-  return (*this)[0].IsAtomGivenData(theOpIndex);
+  return (*this)[0].IsOperationGiven(theOpIndex);
 }
 
 bool Expression::StartsWith(int theOp, int N) const {
@@ -1646,6 +1646,30 @@ bool Expression::GetBoundVariables(HashedList<Expression>& outputAccumulateBound
   return true;
 }
 
+bool Expression::AllowedAsFreeVariableAtom(const std::string &input) const {
+  return
+    input != "="              &&
+    input != ">"              &&
+    input != "\""             &&
+    input != "=="             &&
+    input != "<"              &&
+    input != "Sequence"       &&
+    input != "Matrix"         &&
+    input != "\\circ"         &&
+    input != "\\emptyset"     &&
+    input != "\\in"           &&
+    input != "\\cup"          &&
+    input != "\\infty"        &&
+    input != "IntervalClosed" &&
+    input != "IntervalOpen"   &&
+    input != "[)"             &&
+    input != "(]"             &&
+    input != "and"            &&
+    input != "or"             &&
+    input != "not"
+  ;
+}
+
 bool Expression::GetFreeVariables(HashedList<Expression>& outputAccumulateFreeVariables, bool excludeNamedConstants) const {
   MacroRegisterFunctionWithName("Expression::GetFreeVariables");
   if (this->owner == nullptr) {
@@ -1662,20 +1686,10 @@ bool Expression::GetFreeVariables(HashedList<Expression>& outputAccumulateFreeVa
     return true;
   }
   std::string atomName;
-  if (this->IsAtom(&atomName)) {
-    bool doAddExpression =!this->IsKnownFunctionWithComplexRange();
+  if (this->IsOperation(&atomName)) {
+    bool doAddExpression = !this->IsKnownFunctionWithComplexRange();
     if (doAddExpression) {
-      if (
-        atomName == "=" || atomName == ">" || atomName == "\"" || atomName == "==" ||
-        atomName == "<" || atomName == "Sequence" || atomName == "Matrix" ||
-        atomName == "\\circ" || atomName == "\\emptyset" || atomName == "\\in" ||
-        atomName == "\\cup" || atomName == "\\infty" || atomName == "IntervalClosed" ||
-        atomName == "IntervalOpen" ||
-        atomName == "[)" || atomName == "(]" || atomName == "and" || atomName == "or" ||
-        atomName == "not"
-      ) {
-        doAddExpression = false;
-      }
+      doAddExpression = this->AllowedAsFreeVariableAtom(atomName);
     }
     if (doAddExpression && excludeNamedConstants) {
       if (this->owner->knownDoubleConstants.Contains(*this)) {
@@ -1726,7 +1740,7 @@ bool Expression::IsIndefiniteIntegralfdx(
   if (!this->IsIntegraLfdx(differentialVariable, functionToIntegrate, integrationSet)) {
     return false;
   }
-  return integrationSet->IsAtomGivenData(this->owner->opIndefiniteIndicator());
+  return integrationSet->IsOperationGiven(this->owner->opIndefiniteIndicator());
 }
 
 bool Expression::IsDefiniteIntegralOverIntervalfdx(
@@ -2048,10 +2062,10 @@ bool Expression::IsConstantNumber() const {
   if (this->IsOfType<Rational>() || this->IsOfType<AlgebraicNumber>() || this->IsOfType<double>()) {
     return true;
   }
-  if (this->IsAtomGivenData(this->owner->opPi())) {
+  if (this->IsOperationGiven(this->owner->opPi())) {
     return true;
   }
-  if (this->IsAtomGivenData(this->owner->opE())) {
+  if (this->IsOperationGiven(this->owner->opE())) {
     return true;
   }
   if (this->StartsWithFunctionWithComplexRange()) {
@@ -2418,8 +2432,8 @@ bool Expression::GreaterThanNoCoeff(const Expression& other) const {
   }
   if (this->children.size == 0 && other.children.size == 0) {
     std::string leftS, rightS;
-    if (this->IsAtom(&leftS)) {
-      if (other.IsAtom(&rightS)) {
+    if (this->IsOperation(&leftS)) {
+      if (other.IsOperation(&rightS)) {
         return leftS > rightS;
       }
     }
@@ -2454,11 +2468,11 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
   MemorySaving<FormatExpressions> contextFormat;
   bool showContext = this->owner == nullptr ? false : owner->flagDisplayContext;
   if (this->IsAtom()) {
-    if (this->IsAtomGivenData(this->owner->opDifferential())) {
+    if (this->IsOperationGiven(this->owner->opDifferential())) {
       out << "{\\text{d}}";
-    } else if (this->IsAtomGivenData(this->owner->opPhantom())) {
+    } else if (this->IsOperationGiven(this->owner->opPhantom())) {
       out << "\\phantom{}";
-    } else if (this->owner->flagUseLnInsteadOfLog && this->IsAtomGivenData(this->owner->opLog())) {
+    } else if (this->owner->flagUseLnInsteadOfLog && this->IsOperationGiven(this->owner->opLog())) {
       out << "\\ln";
     } else if (this->theData < this->owner->GetOperations().size && this->theData >= 0) {
       out << this->owner->GetOperations()[this->theData];
@@ -2840,12 +2854,12 @@ bool Expression::NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost(cons
   }
   if (this->size() > 1) {
     const Expression& firstE = (*this)[0];
-    if (firstE.IsAtomGivenData(this->owner->opTimes())) {
+    if (firstE.IsOperationGiven(this->owner->opTimes())) {
       return
       (*this)[1].NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost() ||
       (*this)[1].NeedsParenthesisForMultiplication();
     }
-    if (firstE.IsAtomGivenData(this->owner->opThePower())) {
+    if (firstE.IsOperationGiven(this->owner->opThePower())) {
       return false;
     }
     if (this->StartsWith(this->owner->opBind())) {
@@ -2912,10 +2926,10 @@ bool Expression::NeedsParenthesisForMultiplication() const {
   }
   if (this->size() > 1) {
     const Expression& firstE = (*this)[0];
-    if (firstE.IsAtomGivenData(this->owner->opTimes())) {
+    if (firstE.IsOperationGiven(this->owner->opTimes())) {
       return false;
     }
-    if (firstE.IsAtomGivenData(this->owner->opThePower())) {
+    if (firstE.IsOperationGiven(this->owner->opThePower())) {
       const Expression& base = (*this)[1];
       if (base.children.size > 0) {
         if (base[0].IsAtomWhoseExponentsAreInterpretedAsFunction()) {
@@ -2977,7 +2991,7 @@ bool Calculator::innerFlattenCommandEnclosuresOneLayer(
         }
       }
       result.AddChildAtomOnTop(theCommands.opCommandEnclosureFinish());
-    } else if (input[i].StartsWithGivenAtom("MatchesPattern")) {
+    } else if (input[i].StartsWithGivenOperation("MatchesPattern")) {
       result.AddChildAtomOnTop(theCommands.opCommandEnclosureStart());
       result.AddChildOnTop(input[i]);
       result.AddChildAtomOnTop(theCommands.opCommandEnclosureFinish());
@@ -3100,7 +3114,7 @@ void Expression::ToStringOpTimes(
     global.fatal << "Bad call of tostring function. " << global.fatal;
   }
   std::string secondE = (*this)[2].ToString(theFormat);
-  if ((*this)[1].IsAtomGivenData(this->owner->opSqrt())) {
+  if ((*this)[1].IsOperationGiven(this->owner->opSqrt())) {
     // A malformed expression such as: "\sqrt 3" will be parsed as "sqrt * 3"
     // and later corrected to "\sqrt{3}".
     out << "\\sqrt{" << secondE << "}";
@@ -3304,8 +3318,8 @@ std::string Expression::ToString(
     } else {
       out << (*this)[0].ToString(theFormat) << "{}" << (*this)[1].ToString(theFormat);
     }
-  } else if (this->StartsWith(this->owner->opQuote(),2)) {
-    if ((*this)[1].IsAtom(&tempS)) {
+  } else if (this->StartsWith(this->owner->opQuote(), 2)) {
+    if ((*this)[1].IsOperation(&tempS)) {
       out << "\"" <<  tempS << "\"";
     } else {
       out << "(Corrupt string)";
@@ -3325,7 +3339,7 @@ std::string Expression::ToString(
       for (int i = 0; i < multiplicandsLeft.size; i ++) {
         if (
           multiplicandsLeft[i].StartsWith(this->owner->opIntegral()) ||
-          multiplicandsLeft[i].IsAtomGivenData(this->owner->opIntegral())
+          multiplicandsLeft[i].IsOperationGiven(this->owner->opIntegral())
         ) {
           doUseFrac = false;
           break;
@@ -3432,7 +3446,7 @@ std::string Expression::ToString(
       bool shouldProceed = firstE[0].IsAtomWhoseExponentsAreInterpretedAsFunction() &&
       !secondE.IsEqualToMOne() && secondE.IsRational();
       if (
-        shouldProceed && firstE[0].IsAtomGivenData(this->owner->opLog()) &&
+        shouldProceed && firstE[0].IsOperationGiven(this->owner->opLog()) &&
         this->owner->flagUseLnAbsInsteadOfLogForIntegrationNotation
       ) {
         shouldProceed = false;
@@ -3620,7 +3634,7 @@ std::string Expression::ToString(
         out
         << "_{" << (*this)[1][1].ToString(theFormat) << "}"
         << "^{" << (*this)[1][2].ToString(theFormat) << "}";
-      } else if ((*this)[1].IsAtomGivenData(this->owner->opIndefiniteIndicator())) {
+      } else if ((*this)[1].IsOperationGiven(this->owner->opIndefiniteIndicator())) {
         firstIndex = 2;
       } else {
         firstIndex = 1;
@@ -4011,36 +4025,46 @@ bool Expression::IsAtomNotInterpretedAsFunction(std::string* outputWhichAtom) co
   return this->owner->atomsNotInterpretedAsFunctions.Contains(this->owner->GetOperations()[this->theData]);
 }
 
-bool Expression::IsAtom(std::string* outputWhichOperation) const {
+bool Expression::IsAtom() const {
   if (this->owner == nullptr) {
     return false;
   }
-  if (this->IsLisT()) {
+  return !this->IsLisT();
+}
+
+bool Expression::IsOperation(std::string* outputWhichOperation) const {
+  int index = - 1;
+  if (!this->IsOperation(index)) {
     return false;
   }
   if (outputWhichOperation != nullptr) {
-    if (this->theData < 0 || this->theData>= this->owner->GetOperations().size) {
-      std::stringstream out;
-      out << "(data-atom:~" << this->theData << ")";
-      *outputWhichOperation = out.str();
-    } else {
-      *outputWhichOperation = this->owner->GetOperations()[this->theData];
-    }
+    *outputWhichOperation = this->owner->operations.theKeys[index];
   }
   return true;
 }
 
-bool Expression::IsAtomGivenData(const std::string& desiredAtom) const {
+bool Expression::IsOperation(int& outputWhichOperationIndex) const {
+  if (!this->IsAtom()) {
+    return false;
+  }
+  if (this->theData < 0 || this->theData >= this->owner->operations.size()) {
+    return false;
+  }
+  outputWhichOperationIndex = this->theData;
+  return true;
+}
+
+bool Expression::IsOperationGiven(const std::string& desiredAtom) const {
   if (this->IsLisT()) {
     return false;
   }
   if (this->owner == nullptr) {
     return false;
   }
-  return this->theData == this->owner->theAtoms.GetIndex(desiredAtom);
+  return this->theData == this->owner->operations.GetIndex(desiredAtom);
 }
 
-bool Expression::IsAtomGivenData(int desiredDataUseMinusOneForAny) const {
+bool Expression::IsOperationGiven(int desiredDataUseMinusOneForAny) const {
   if (this->IsLisT()) {
     return false;
   }
@@ -4168,10 +4192,10 @@ bool Expression::IsCacheableExpression() const {
     return true;
   }
   Calculator& theBoss = *this->owner;
-  if (this->theData < 0 || this->theData >= theBoss.theAtoms.size) {
+  if (this->theData < 0 || this->theData >= theBoss.operations.size()) {
     global.fatal << "This is a programming error: corrupted atom in Expression::IsCacheableExpression. " << global.fatal;
   }
-  return theBoss.atomsThatMustNotBeCached.Contains(theBoss.theAtoms[this->theData]);
+  return theBoss.atomsThatMustNotBeCached.Contains(theBoss.operations.theKeys[this->theData]);
 }
 
 bool Expression::IsBuiltInScalar() const {
@@ -4200,7 +4224,7 @@ bool Expression::IsBuiltInTypE(std::string* outputWhichOperation) const {
   if (!this->StartsWith()) {
     return false;
   }
-  if (!(*this)[0].IsAtom(&tempS)) {
+  if (!(*this)[0].IsOperation(&tempS)) {
     return false;
   }
   if (this->owner->GetBuiltInTypes().Contains(tempS)) {
@@ -4394,11 +4418,7 @@ bool Expression::operator==(int other) const {
 }
 
 bool Expression::operator==(const std::string& other) const {
-  std::string tempS;
-  if (!this->IsAtom(&tempS)) {
-    return false;
-  }
-  return tempS == other;
+  return this->IsOperationGiven(other);
 }
 
 std::string Expression::ToUTF8String(FormatExpressions* theFormat) const {
@@ -4412,14 +4432,14 @@ std::string Expression::ToUTF8String(FormatExpressions* theFormat) const {
     FormatExpressions tempFormat;
     tempFormat.flagUseFrac = false;
     return theRat.ToString(&tempFormat);
-  } else if (this->IsAtomGivenData(this->owner->opPi())) {
+  } else if (this->IsOperationGiven(this->owner->opPi())) {
     return "\\u03C0";
   } else if (this->StartsWith(this->owner->opPlus(), 3)) {
     return (*this)[1].ToUTF8String(theFormat) + "+" + (*this)[2].ToUTF8String(theFormat);
   } else if (this->StartsWith(this->owner->opTimes(), 3)) {
     std::string secondUTF8String = (*this)[2].ToUTF8String(theFormat);
     std::string secondString = (*this)[2].ToString(theFormat);
-    if ((*this)[1].IsAtomGivenData(this->owner->opSqrt())) {
+    if ((*this)[1].IsOperationGiven(this->owner->opSqrt())) {
       out << "sqrt(" << secondUTF8String << ")";
     } else {
       std::string firstE = (*this)[1].ToUTF8String(theFormat);

@@ -15,6 +15,9 @@ public:
   int GetIndex(const key& input) const {
     return this->theKeys.GetIndex(input);
   }
+  int GetIndexIMustContainTheObject(const key& input) const {
+    return this->theKeys.GetIndexIMustContainTheObject(input);
+  }
   bool Contains(const key& inputKey) const {
     return this->GetIndex(inputKey) != - 1;
   }

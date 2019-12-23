@@ -2114,7 +2114,7 @@ bool CalculatorFunctionsWeylGroup::innerLieAlgebraWeight(Calculator& theCommands
     return theCommands << "<hr>Failed to load semisimple Lie algebra";
   }
   std::string theCoordsString;
-  bool isGood = input[3].IsAtom(&theCoordsString);
+  bool isGood = input[3].IsOperation(&theCoordsString);
   if (isGood) {
     isGood = (theCoordsString == "epsilon") || (theCoordsString == "fundamental") || (theCoordsString == "simple");
   }

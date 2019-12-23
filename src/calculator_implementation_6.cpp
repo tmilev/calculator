@@ -249,7 +249,7 @@ bool CalculatorFunctionsGeneral::innerGetFirstSummandContaining(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGetFirstSummandContaining");
-  if (!input.StartsWithGivenAtom("GetFirstSummandContaining", 3)) {
+  if (!input.StartsWithGivenOperation("GetFirstSummandContaining", 3)) {
     return false;
   }
   List<Expression> theSummands;
@@ -265,7 +265,7 @@ bool CalculatorFunctionsGeneral::innerGetFirstSummandContaining(
 
 bool CalculatorFunctionsGeneral::innerGetSummand(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGetSummand");
-  if (!input.StartsWithGivenAtom("GetSummand", 3)) {
+  if (!input.StartsWithGivenOperation("GetSummand", 3)) {
     return false;
   }
   const Expression& theExpression = input[1];
@@ -789,7 +789,7 @@ bool CalculatorFunctionsGeneral::innerFactorInteger(Calculator& theCommands, con
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerFactorInteger");
   LargeInteger theLI;
   int upperBound = 30000;
-  int opFactorInteger = theCommands.theAtoms.GetIndexIMustContainTheObject("FactorInteger");
+  int opFactorInteger = theCommands.operations.GetIndexIMustContainTheObject("FactorInteger");
 
   if (input.StartsWith(opFactorInteger) && input.size() == 3) {
     if (!input[1].IsInteger(&theLI)) {
@@ -857,7 +857,7 @@ bool CalculatorFunctionsGeneral::innerFactorOutNumberContent(
   }
   theCF.Invert();
   if (theCF == 1 ) {
-    if (!input.StartsWithGivenAtom("FactorOutNumberContent")) {
+    if (!input.StartsWithGivenOperation("FactorOutNumberContent")) {
       output = input;
       return true;
     } else {
@@ -1119,7 +1119,7 @@ bool CalculatorFunctionsGeneral::innerDegreesToRadians(Calculator& theCommands, 
   if (!input.StartsWith(theCommands.opThePower(), 3)) {
     return false;
   }
-  if (!input[2].IsAtomGivenData("\\circ")) {
+  if (!input[2].IsOperationGiven("\\circ")) {
     return false;
   }
   Expression piE;
@@ -1570,11 +1570,11 @@ bool CalculatorFunctionsGeneral::innerUnionEmptySet(Calculator& theCommands, con
   if (!input.StartsWith(theCommands.opUnion(), 3)) {
     return false;
   }
-  if (input[1].IsAtomGivenData("\\emptyset")) {
+  if (input[1].IsOperationGiven("\\emptyset")) {
     output = input[2];
     return true;
   }
-  if (input[2].IsAtomGivenData("\\emptyset")) {
+  if (input[2].IsOperationGiven("\\emptyset")) {
     output = input[1];
     return true;
   }
@@ -1654,11 +1654,11 @@ bool CalculatorFunctionsGeneral::innerIntersectEmptySet(
   if (!input.StartsWith(theCommands.opIntersection(), 3)) {
     return false;
   }
-  if (input[1].IsAtomGivenData("\\emptyset")) {
+  if (input[1].IsOperationGiven("\\emptyset")) {
     output = input[1];
     return true;
   }
-  if (input[2].IsAtomGivenData("\\emptyset")) {
+  if (input[2].IsOperationGiven("\\emptyset")) {
     output = input[2];
     return true;
   }
@@ -1731,7 +1731,7 @@ bool CalculatorFunctionsGeneral::innerIsProductLinearOrConstTermsIn(
 bool CalculatorFunctionsGeneral::innerOrIdentical(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerOrIdentical");
   (void) theCommands;
-  if (!input.StartsWithGivenAtom("or", 3)) {
+  if (!input.StartsWithGivenOperation("or", 3)) {
     return false;
   }
   if (input[1] == input[2]) {
@@ -1894,7 +1894,7 @@ bool CalculatorFunctionsGeneral::innerExpressionToUTF8String(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerExpressionToUTF8String");
-  if (input.StartsWithGivenAtom("ToUTF8String")) {
+  if (input.StartsWithGivenOperation("ToUTF8String")) {
     Expression inputCopy = input;
     inputCopy.SetChildAtomValue(0, theCommands.opSequence());
     return output.AssignValue(inputCopy.ToUTF8String(), theCommands);
@@ -1965,7 +1965,7 @@ bool CalculatorFunctionsGeneral::innerIsProductTermsUpToPower(
 
 bool CalculatorFunctionsGeneral::innerScaleToLeadingUnit(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerScaleToLeadingUnit");
-  if (input.StartsWithGivenAtom("ScaleToLeadingUnit")) {
+  if (input.StartsWithGivenOperation("ScaleToLeadingUnit")) {
     return false;
   }
   MonomialCollection<Expression, Rational> theCollection;

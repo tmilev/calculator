@@ -13,11 +13,19 @@
 static ProjectInformationInstance projectInfoCalculatorTypedFunctionsCPP(__FILE__, "Calculator inner binary typed functions. ");
 
 bool Calculator::innerOperationBinary(
-  Calculator& theCommands, const Expression& input, Expression& output, int theOp
+  Calculator& theCommands,
+  const Expression& input,
+  Expression& output,
+  int theOp
 ) {
-  for (int i = 0; i < theCommands.FunctionHandlers[theOp].size; i ++) {
-    if (theCommands.FunctionHandlers[theOp][i].inputFitsMyInnerType(input)) {
-      if (theCommands.FunctionHandlers[theOp][i].theFunction(theCommands, input, output)) {
+  MemorySaving<Calculator::AtomHandler>& theOperation = theCommands.operations.theValues[theOp];
+  if (theOperation.IsZeroPointer()) {
+    return false;
+  }
+  List<Function>& handlers = theOperation.GetElement().handlers;
+  for (int i = 0; i < handlers.size; i ++) {
+    if (handlers[i].inputFitsMyInnerType(input)) {
+      if (handlers[i].theFunction(theCommands, input, output)) {
         return true;
       }
     }
@@ -1207,7 +1215,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerSequenceOrMatrixByT(
   if (!input[1].IsSequenceNElementS() && !input[1].IsMatrix()) {
     return false;
   }
-  if (!input[2].IsAtomGivenData("t")  && !input[2].IsAtomGivenData("T")) {
+  if (!input[2].IsOperationGiven("t")  && !input[2].IsOperationGiven("T")) {
     return false;
   }
   return theCommands.innerTranspose(theCommands, input[1], output);

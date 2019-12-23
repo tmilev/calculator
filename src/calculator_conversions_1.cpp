@@ -80,7 +80,7 @@ bool CalculatorConversions::innerDynkinSimpleType(
     return theCommands << "<hr>Couldn't extract first co-root length: " << theScale.ToString() << " is non-positive.";
   }
   std::string theTypeName;
-  if (!typeLetterE.IsAtom(&theTypeName)) {
+  if (!typeLetterE.IsOperation(&theTypeName)) {
     return theCommands << "I couldn't extract a type letter from " << typeLetterE.ToString();
   }
   if (theTypeName.size() != 1) {
@@ -834,7 +834,7 @@ bool CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
     }
     std::string theLetter;
     if (
-      !singleChevGenE[1].IsAtom(&theLetter) ||
+      !singleChevGenE[1].IsOperation(&theLetter) ||
       !singleChevGenE[2].IsSmallInteger(&theChevGen.theGeneratorIndex)
     ) {
       return theCommands << "<hr>Failed to convert summand "
@@ -912,7 +912,10 @@ bool CalculatorConversions::innerElementUE(
         return theCommands << "<hr>Failed to convert " << input.ToString() << " to polynomial.<hr>";
       }
       std::string theLetter;
-      if (!singleChevGenE[0].IsAtom(&theLetter) || !singleChevGenE[1].IsSmallInteger(&theChevGen.theGeneratorIndex)) {
+      if (
+        !singleChevGenE[0].IsOperation(&theLetter) ||
+        !singleChevGenE[1].IsSmallInteger(&theChevGen.theGeneratorIndex)
+      ) {
         return theCommands << "<hr>Failed to convert summand "
         << singleChevGenE.ToString() << " to Chevalley generator of "
         << owner.ToStringLieAlgebraName();

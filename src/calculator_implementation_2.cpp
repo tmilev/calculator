@@ -5,39 +5,49 @@
 
 static ProjectInformationInstance projectInfoCalculatorImplementation2CPP(__FILE__, "Calculator core evaluation engine. ");
 
+JSData Calculator::AtomHandler::ToJSON() {
+  JSData result;
+  JSData currentFunctionListDirect;;
+  currentFunctionListDirect.theType = JSData::token::tokenArray;
+  for (int i = 0; i < this->handlers.size; i ++) {
+    Function& currentHandler = this->handlers[i];
+    if (!currentHandler.options.visible) {
+      continue;
+    }
+    currentFunctionListDirect.theList.AddOnTop(currentHandler.ToJSON());
+  }
+  JSData currentFunctionListComposite;
+  currentFunctionListComposite.theType = JSData::token::tokenArray;
+  for (int i = 0; i < this->compositeHandlers.size; i ++) {
+    Function& currentHandler = this->compositeHandlers[i];
+    if (!currentHandler.options.visible) {
+      continue;
+    }
+    currentFunctionListComposite.theList.AddOnTop(currentHandler.ToJSON());
+  }
+  result["regular"] = currentFunctionListDirect;
+  result["composite"] = currentFunctionListComposite;
+  return result;
+}
+
 JSData Calculator::ToJSONFunctionHandlers() {
   MacroRegisterFunctionWithName("Calculator::ToJSONFunctionHandlers");
   JSData output;
   output.theType = JSData::token::tokenObject;
-  for (int currentAtomIndex = 0; currentAtomIndex < this->theAtoms.size; currentAtomIndex ++) {
-    const std::string& currentAtom = this->theAtoms[currentAtomIndex];
-    JSData currentAtomJSON, currentFunctionListDirect, currentFunctionListComposite;
-    currentAtomJSON.theType = JSData::token::tokenObject;
-    currentFunctionListDirect.theType = JSData::token::tokenArray;
-    currentFunctionListComposite.theType = JSData::token::tokenArray;
-    if (currentAtomIndex >= this->FunctionHandlers.size) {
-      global.fatal << "This shouldn't happen: bad atom index. " << global.fatal;
+  for (int i = 0; i < this->operations.size(); i ++) {
+    if (this->operations.theValues[i].IsZeroPointer()) {
+      continue;
     }
-    if (this->FunctionHandlers[currentAtomIndex].size > 0) {
-      for (int j = 0; j < this->FunctionHandlers[currentAtomIndex].size; j ++) {
-        if (this->FunctionHandlers[currentAtomIndex][j].flagIamVisible) {
-          currentFunctionListDirect[j] = this->FunctionHandlers[currentAtomIndex][j].ToJSON();
-        }
-      }
-    }
-    int indexCompositeHander = this->operationsComposite.GetIndex(currentAtom);
-    if (indexCompositeHander != - 1) {
-      for (int j = 0; j < this->operationsCompositeHandlers[indexCompositeHander].size; j ++) {
-        if (this->operationsCompositeHandlers[indexCompositeHander][j].flagIamVisible) {
-          currentFunctionListComposite[j] = this->operationsCompositeHandlers[indexCompositeHander][j].ToJSON();
-        }
-      }
-    }
-    currentAtomJSON["regular"] = currentFunctionListDirect;
-    currentAtomJSON["composite"] = currentFunctionListComposite;
-    output[currentAtom] = currentAtomJSON;
+    const std::string& operationName = this->operations.theKeys[i];
+    output[operationName] = this->operations.theValues[i].GetElement().ToJSON();
   }
   return output;
+}
+
+Calculator::NamedRuleLocation::NamedRuleLocation() {
+  this->containerOperation = "";
+  this->index = - 1;
+  this->isComposite = false;
 }
 
 Expression Calculator::EZero() {
@@ -88,20 +98,33 @@ Expression Calculator::EMInfinity() {
   return result;
 }
 
+std::string Calculator::AtomHandler::ToStringRuleStatusUser() {
+  std::stringstream out;
+  for (int i = 0; i < this->handlers.size; i ++) {
+    Function& currentHandler = this->handlers[i];
+    if (
+      currentHandler.options.disabledByUser ==
+      currentHandler.options.disabledByUserDefault
+    ) {
+      continue;
+    }
+    if (currentHandler.options.disabledByUser) {
+      out << currentHandler.calculatorIdentifier << " is <b>off</b>. ";
+    } else {
+      out << currentHandler.calculatorIdentifier << " is <b>on</b>. ";
+    }
+  }
+  return out.str();
+}
+
 std::string Calculator::ToStringRuleStatusUser() {
   MacroRegisterFunctionWithName("Calculator::ToStringRuleStatusUser");
   std::stringstream out;
-  for (int i = 0; i < this->FunctionHandlers.size; i ++) {
-    for (int j = 0; j < this->FunctionHandlers[i].size; j ++) {
-      Function& currentHandler = this->FunctionHandlers[i][j];
-      if (currentHandler.flagDisabledByUser != currentHandler.flagDisabledByUserDefaultValue) {
-        if (currentHandler.flagDisabledByUser) {
-          out << currentHandler.calculatorIdentifier << " is <b>off</b>. ";
-        } else {
-          out << currentHandler.calculatorIdentifier << " is <b>on</b>. ";
-        }
-      }
+  for (int i = 0; i < this->operations.size(); i ++) {
+    if (this->operations.theValues[i].IsZeroPointer()) {
+      continue;
     }
+    out << this->operations.theValues[i].GetElement().ToStringRuleStatusUser();
   }
   return out.str();
 }
@@ -121,6 +144,116 @@ void Calculator::DoLogEvaluationIfNeedBe(Function& inputF) {
   this->LastLogEvaluationTime = global.GetElapsedSeconds();
 }
 
+const List<Function>* Calculator::GetOperationCompositeHandlers(int theOp) {
+  if (theOp < 0 || theOp >= this->operations.size()) {
+    // Instead of crashing, we may instead return nullptr.
+    // TODO(tmilev): document why we are so harsh
+    // in the crash message.
+    // [note: I no longer remember the orginal rationale, if any].
+    global.fatal << "Corrupt atom index: " << theOp << global.fatal;
+  }
+  if (this->operations.theValues[theOp].IsZeroPointer()) {
+    return nullptr;
+  }
+  return &this->operations.theValues[theOp].GetElementConst().compositeHandlers;
+}
+
+const List<Function>* Calculator::GetOperationHandlers(int theOp) {
+  if (theOp < 0 || theOp >= this->operations.size()) {
+    // Instead of crashing, we may instead return nullptr.
+    // TODO(tmilev): document why we are so harsh
+    // in the crash message.
+    // [note: I no longer remember the original rationale, if any].
+    global.fatal << "Corrupt atom index: " << theOp << global.fatal;
+  }
+  if (this->operations.theValues[theOp].IsZeroPointer()) {
+    return nullptr;
+  }
+  return &this->operations.theValues[theOp].GetElementConst().handlers;
+}
+
+bool Calculator::outerStandardCompositeHandler(
+  Calculator &theCommands, const Expression &input, Expression &output, int opIndexParentIfAvailable
+) {
+  if (!input.IsLisT()) {
+    return false;
+  }
+  const Expression& functionNameNode = input[0];
+  if (!functionNameNode.StartsWith()) {
+    return false;
+  }
+  const List<Function>* theHandlers = theCommands.GetOperationCompositeHandlers(functionNameNode[0].theData);
+  if (theHandlers == nullptr) {
+    return false;
+  }
+  for (int i = 0; i < theHandlers->size; i ++) {
+    Function& currentHandler = (*theHandlers)[i];
+    if (currentHandler.ShouldBeApplied(opIndexParentIfAvailable)) {
+      if (currentHandler.theFunction(theCommands, input, output)) {
+        theCommands.DoLogEvaluationIfNeedBe(currentHandler);
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+bool Function::Apply(Calculator &theCommands, const Expression &input, Expression &output, int opIndexParentIfAvailable) {
+  if (!this->ShouldBeApplied(opIndexParentIfAvailable)) {
+    return false;
+  }
+  if (this->theFunction == nullptr) {
+    global.fatal << "Attempt to apply non-initialized function. " << global.fatal;
+  }
+  if (!this->options.flagIsInner) {
+    if (this->theFunction(theCommands, input, output)) {
+      if (output != input) {
+        output.CheckConsistency();
+        theCommands.DoLogEvaluationIfNeedBe(*this);
+        return true;
+      }
+    }
+    return false;
+  }
+  if (input.size() > 2) {
+    if (this->inputFitsMyInnerType(input)) {
+      if (this->theFunction(theCommands, input, output)) {
+        output.CheckConsistency();
+        theCommands.DoLogEvaluationIfNeedBe(*this);
+        return true;
+      }
+    }
+    return false;
+  }
+  if (input.size() == 2) {
+    if (this->inputFitsMyInnerType(input[1])) {
+      if (this->theFunction(theCommands, input[1], output)) {
+        output.CheckConsistency();
+        theCommands.DoLogEvaluationIfNeedBe(*this);
+        return true;
+      }
+    }
+    return false;
+  }
+  return false;
+}
+
+bool Calculator::outerStandardHandler(Calculator &theCommands, const Expression &input, Expression &output, int opIndexParentIfAvailable) {
+  const Expression& functionNameNode = input[0];
+  int operationIndex = - 1;
+  if (!functionNameNode.IsOperation(operationIndex)) {
+    return false;
+  }
+  const List<Function>& handlers = theCommands.operations.theValues[operationIndex].GetElement().handlers;
+  for (int i = 0; i < handlers.size; i ++) {
+    Function& currentFunction = handlers[i];
+    if (currentFunction.Apply(theCommands, input, output, opIndexParentIfAvailable)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 bool Calculator::outerStandardFunction(
   Calculator& theCommands, const Expression& input, Expression& output, int opIndexParentIfAvailable
 ) {
@@ -130,55 +263,11 @@ bool Calculator::outerStandardFunction(
   if (!input.IsLisT()) {
     return false;
   }
-  const Expression& functionNameNode = input[0];
-  if (functionNameNode.StartsWith()) {
-    const List<Function>* theHandlers = theCommands.GetOperationCompositeHandlers(functionNameNode[0].theData);
-    if (theHandlers != nullptr) {
-      for (int i = 0; i < theHandlers->size; i ++) {
-        if ((*theHandlers)[i].ShouldBeApplied(opIndexParentIfAvailable)) {
-          if ((*theHandlers)[i].theFunction(theCommands, input, output)) {
-            theCommands.DoLogEvaluationIfNeedBe((*theHandlers)[i]);
-            return true;
-          }
-        }
-      }
-    }
+  if (theCommands.outerStandardCompositeHandler(theCommands, input, output, opIndexParentIfAvailable)) {
+    return true;
   }
-  if (!functionNameNode.IsAtom()) {
-    return false;
-  }
-  for (int i = 0; i < theCommands.FunctionHandlers[functionNameNode.theData].size; i ++) {
-    Function& currentFunction = theCommands.FunctionHandlers[functionNameNode.theData][i];
-    if (!currentFunction.ShouldBeApplied(opIndexParentIfAvailable)) {
-      continue;
-    }
-    if (!currentFunction.flagIsInner) {
-      if (currentFunction.theFunction(theCommands, input, output)) {
-        if (output != input) {
-          output.CheckConsistency();
-          theCommands.DoLogEvaluationIfNeedBe(currentFunction);
-          return true;
-        }
-      }
-    } else {
-      if (input.children.size > 2) {
-        if (currentFunction.inputFitsMyInnerType(input)) {
-          if (currentFunction.theFunction(theCommands, input, output)) {
-            output.CheckConsistency();
-            theCommands.DoLogEvaluationIfNeedBe(currentFunction);
-            return true;
-          }
-        }
-      } else if (input.children.size == 2) {
-        if (currentFunction.inputFitsMyInnerType(input[1])) {
-          if (currentFunction.theFunction(theCommands, input[1], output)) {
-            output.CheckConsistency();
-            theCommands.DoLogEvaluationIfNeedBe(currentFunction);
-            return true;
-          }
-        }
-      }
-    }
+  if (theCommands.outerStandardHandler(theCommands, input, output, opIndexParentIfAvailable)) {
+    return true;
   }
   return false;
 }
@@ -277,7 +366,7 @@ void StateMaintainerCalculator::AddRule(const Expression& theRule) {
       if (!this->owner->namedRules.Contains(currentRule)) {
         continue;
       }
-      this->owner->GetFunctionHandlerFromNamedRule(currentRule).flagDisabledByUser =
+      this->owner->GetFunctionHandlerFromNamedRule(currentRule).options.disabledByUser =
       theRule.StartsWith(this->owner->opRulesOff());
     }
   }
@@ -341,7 +430,7 @@ StateMaintainerCalculator::~StateMaintainerCalculator() {
           continue;
         }
         Function& currentRule = this->owner->GetFunctionHandlerFromNamedRule(currentRuleName);
-        currentRule.flagDisabledByUser = currentRule.flagDisabledByUserDefaultValue;
+        currentRule.options.disabledByUser = currentRule.options.disabledByUserDefault;
         shouldUpdateRules = true;
       }
     }
@@ -353,14 +442,14 @@ StateMaintainerCalculator::~StateMaintainerCalculator() {
           Function& currentFun = this->owner->GetFunctionHandlerFromNamedRule(
             theRuleStack[i][j].GetValue<std::string>()
           );
-          currentFun.flagDisabledByUser = false;
+          currentFun.options.disabledByUser = false;
         }
       } else if (theRuleStack[i].StartsWith(this->owner->opRulesOff())) {
         for (int j = 1; j < theRuleStack[i].size(); j ++) {
           Function& currentFun = this->owner->GetFunctionHandlerFromNamedRule(
             theRuleStack[i][j].GetValue<std::string>()
           );
-          currentFun.flagDisabledByUser = true;
+          currentFun.options.disabledByUser = true;
         }
       }
     }
@@ -384,7 +473,7 @@ Expression Calculator::GetNewAtom() {
     for (char a = 'a'; a <= 'z'; a ++) {
       candidate = atomPrefix;
       candidate.push_back(a);
-      if (!this->theAtoms.Contains(candidate)) {
+      if (!this->operations.Contains(candidate)) {
         Expression result;
         result.MakeAtom(candidate, *this);
         return result;
@@ -541,20 +630,21 @@ bool Calculator::EvaluateExpression(
     if (doExpressionHistory) {
       theCommands.ExpressionHistoryAdd(output, - 1);
     }
-    if (output.IsAtom(&inputIfAtom)) {
+    if (output.IsOperation(&inputIfAtom)) {
       if (theCommands.atomsThatMustNotBeCached.Contains(inputIfAtom)) {
         outputIsNonCacheable = true;
       }
     }
-    //The following code enclosed in the if clause is too
-    //complicated/obfuscated for my taste
-    //and perhaps needs a rewrite. However, at the moment of writing, I see
-    //no better way of doing this, so here we go.
+    // The following code is too
+    // complicated/obfuscated for my taste
+    // and perhaps needs a rewrite.
+    // However, at the moment of writing, I see
+    // no better way of doing this, so here we go.
     if (outputIsNonCacheable) {
       if (indexInCache != - 1) {
-        //We "undo" the caching process by
-        //replacing the cached value with the minusOneExpression,
-        //which, having no context, will never match another expression.
+        // We "undo" the caching process by
+        // replacing the cached value with the minusOneExpression,
+        // which, having no context, will never match another expression.
         theCommands.cachedExpressions.SetObjectAtIndex(indexInCache, theCommands.EMOne());
       }
       indexInCache = - 1;

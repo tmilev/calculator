@@ -96,9 +96,7 @@ void Calculator::reset() {
   //this->logEvaluationSteps.SetSize(0);
   this->historyStack.SetSize(0);
   this->historyRuleNames.SetSize(0);
-  this->theAtoms.Clear();
-  this->operationsComposite.Clear();
-  this->operationsCompositeHandlers.SetSize(0);
+  this->operations.Clear();
   this->builtInTypes.Clear();
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.Clear();
   this->atomsThatFreezeArguments.Clear();
@@ -112,7 +110,6 @@ void Calculator::reset() {
   this->knownDoubleConstants.Clear();
   this->knownDoubleConstantValues.SetSize(0);
   this->knownOperationsInterpretedAsFunctionsMultiplicatively.Clear();
-  this->FunctionHandlers.SetSize(0);
 
   this->syntacticSouP.SetSize(0);
   this->syntacticStacK.SetSize(0);
@@ -143,12 +140,9 @@ void Calculator::initialize() {
   MacroRegisterFunctionWithName("Calculator::init");
   this->reset();
 
-  this->theAtoms.SetExpectedSize(1000);
-  this->FunctionHandlers.SetExpectedSize(1000);
+  this->operations.SetExpectedSize(1000);
   this->namedRules.SetExpectedSize(500);
   this->builtInTypes.SetExpectedSize(50);
-  this->operationsComposite.SetExpectedSize(50);
-  this->operationsCompositeHandlers.SetExpectedSize(50);
 
   this->formatVisibleStrings.flagExpressionIsFinal = true;
 
@@ -242,7 +236,7 @@ void Calculator::initialize() {
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot(" ");//empty token must always come first!!!!
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("{{}}");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("Variable");
-  this->controlSequences.AddOnTop(this->theAtoms);//all operations defined up to this point are also control sequences
+  this->controlSequences.AddOnTop(this->operations.theKeys);//all operations defined up to this point are also control sequences
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("Expression");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("Integer");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("{}");
@@ -340,27 +334,34 @@ void Calculator::initialize() {
   this->cachedRuleStacks.Clear();
   this->RuleStackCacheIndex = 0;
   this->cachedRuleStacks.AddOnTop(this->RuleStack);
-  this->NumPredefinedAtoms = this->theAtoms.size; //<-operations added up to this point are called ``operations''
+  this->NumPredefinedAtoms = this->operations.size(); //<-operations added up to this point are called ``operations''
   if (global.flagAutoUnitTest) {
-    this->CheckPredefinedFunctions();
+    this->CheckPredefinedFunctionNameRepetitions();
   }
   this->CheckConsistencyAfterInitialization();
-
 }
 
-bool Calculator::CheckPredefinedFunctions() {
+bool Calculator::CheckPredefinedFunctionNameRepetitions() {
   MacroRegisterFunctionWithName("Calculator::CheckPredefinedFunctions");
   HashedList<std::string, MathRoutines::HashString> ruleIds;
-  for (int i = 0; i < this->FunctionHandlers.size; i ++) {
-    for (int j = 0; j < this->FunctionHandlers[i].size; j ++) {
-      std::string& currentName = this->FunctionHandlers[i][j].calculatorIdentifier;
-      if (currentName == "") {
-        continue;
+  for (int i = 0; i < this->operations.size(); i ++) {
+    MemorySaving<Calculator::AtomHandler>& current = this->operations.theValues[i];
+    if (current.IsZeroPointer()) {
+      continue;
+    }
+    List<Function>* currentHandlers = &current.GetElement().handlers;
+    for (int j = 0; j < 2; j ++) {
+      for (int k = 0; k < currentHandlers->size; k ++) {
+        std::string& currentName = (*currentHandlers)[j].calculatorIdentifier;
+        if (currentName == "") {
+          continue;
+        }
+        if (ruleIds.Contains(currentName)) {
+          global.fatal << "Calculator identifier: " << currentName << " is not unique. ";
+        }
+        ruleIds.AddOnTopNoRepetitionMustBeNewCrashIfNot(currentName);
       }
-      if (ruleIds.Contains(currentName)) {
-        global.fatal << "Calculator identifier: " << currentName << " is not unique. ";
-      }
-      ruleIds.AddOnTopNoRepetitionMustBeNewCrashIfNot(currentName);
+      currentHandlers = &current.GetElement().compositeHandlers;
     }
   }
   return true;
@@ -908,7 +909,7 @@ void Calculator::ParseFillDictionary(const std::string& input, List<SyntacticEle
 }
 
 int Calculator::GetOperationIndexFromControlIndex(int controlIndex) {
-  return this->theAtoms.GetIndex(this->controlSequences[controlIndex]);
+  return this->operations.GetIndex(this->controlSequences[controlIndex]);
 }
 
 int Calculator::GetExpressionIndex() {
@@ -1025,7 +1026,7 @@ bool Calculator::ReplaceXXVXdotsXbyE_BOUND_XdotsX(int numXs) {
   int theBoundVar = theElt.theData.theData;
   if (this->IsNonBoundVarInContext(theBoundVar)) {
     std::stringstream out;
-    out << "Syntax error. In the same syntactic scope, the string " << this->theAtoms[theBoundVar]
+    out << "Syntax error. In the same syntactic scope, the string " << this->operations.theKeys[theBoundVar]
     << " is first used to denote a non-bound variable"
     << " but later to denote a bound variable. This is not allowed. ";
     theElt.errorString = out.str();
@@ -1363,7 +1364,7 @@ bool Calculator::ReplaceEOXbyEX() {
 bool Calculator::ReplaceVbyVdotsVAccordingToPredefinedWordSplits() {
   MacroRegisterFunctionWithName("Calculator::ReplaceVbyVdotsVAccordingToPredefinedWordSplits");
   SyntacticElement& theE = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1];
-  const std::string& currentVar = this->theAtoms[theE.theData.theData];
+  const std::string& currentVar = this->operations.theKeys[theE.theData.theData];
   if (!this->predefinedWordSplits.Contains(currentVar)) {
     global.fatal << "Predefined word splits array does not contain the variable: " << theE.theData.ToString()
     << ". This should not happen in the body of this function. " << global.fatal;
@@ -2087,7 +2088,7 @@ bool Calculator::ApplyOneRule() {
   }
   if (this->flagUsePredefinedWordSplits) {
     if (lastS == "Variable") {
-      if (this->predefinedWordSplits.Contains(this->theAtoms[lastE.theData.theData])) {
+      if (this->predefinedWordSplits.Contains(this->operations.theKeys[lastE.theData.theData])) {
         return this->ReplaceVbyVdotsVAccordingToPredefinedWordSplits();
       }
     }
@@ -2134,12 +2135,12 @@ bool Calculator::ApplyOneRule() {
     return this->ReplaceXXByEEmptySequence();
   }
   if (secondToLastS == "\\text" && lastS == "d") {
-    if (lastE.theData.IsAtomGivenData("d")) {
+    if (lastE.theData.IsOperationGiven("d")) {
       return this->ReplaceXXbyO(this->opDifferential());
     }
   }
   if (thirdToLastS == "\\text" && secondToLastS == "Expression") {
-    if (secondToLastE.theData.IsAtomGivenData("d")) {
+    if (secondToLastE.theData.IsOperationGiven("d")) {
       return this->ReplaceXXYbyOY(this->opDifferential());
     }
   }

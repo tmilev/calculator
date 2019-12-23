@@ -342,7 +342,7 @@ void Calculator::initialize() {
 }
 
 bool Calculator::CheckPredefinedFunctionNameRepetitions() {
-  MacroRegisterFunctionWithName("Calculator::CheckPredefinedFunctions");
+  MacroRegisterFunctionWithName("Calculator::CheckPredefinedFunctionNameRepetitions");
   HashedList<std::string, MathRoutines::HashString> ruleIds;
   for (int i = 0; i < this->operations.size(); i ++) {
     MemorySaving<Calculator::AtomHandler>& current = this->operations.theValues[i];
@@ -352,7 +352,7 @@ bool Calculator::CheckPredefinedFunctionNameRepetitions() {
     List<Function>* currentHandlers = &current.GetElement().handlers;
     for (int j = 0; j < 2; j ++) {
       for (int k = 0; k < currentHandlers->size; k ++) {
-        std::string& currentName = (*currentHandlers)[j].calculatorIdentifier;
+        std::string& currentName = (*currentHandlers)[k].calculatorIdentifier;
         if (currentName == "") {
           continue;
         }

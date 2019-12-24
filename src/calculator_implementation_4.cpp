@@ -2263,10 +2263,19 @@ bool Function::ShouldBeApplied(int parentOpIfAvailable) {
   if (this->options.disabledByUser) {
     return false;
   }
-  if (parentOpIfAvailable < 0 || this->indexOperationParentThatBansHandler < 0) {
-    return true;
+  bool parentIsGood = true;
+  if (parentOpIfAvailable >= 0 && this->indexOperationParentThatBansHandler >= 0) {
+    parentIsGood = (this->indexOperationParentThatBansHandler != parentOpIfAvailable);
   }
-  return this->indexOperationParentThatBansHandler != parentOpIfAvailable;
+  if (!parentIsGood) {
+    return false;
+  }
+  if (this->options.adminOnly) {
+    if (!global.UserDefaultHasAdminRights()) {
+      return (*this->owner) << "Rule " << this->calculatorIdentifier << " requires logged-in administrator account. ";
+    }
+  }
+  return true;
 }
 
 JSData Function::ToJSON() const {

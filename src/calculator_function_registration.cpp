@@ -80,35 +80,44 @@ void Calculator::initCalculusTestingFunctions() {
 void Calculator::initPredefinedInnerFunctions() {
   Function::Options innerStandard;
   innerStandard.flagIsInner = true;
+
   Function::Options innerInvisible;
   innerInvisible.flagIsInner = true;
   innerInvisible.visible = false;
+
   Function::Options innerStandardOffByDefault;
   innerStandardOffByDefault.flagIsInner = true;
   innerStandardOffByDefault.disabledByUser = true;
   innerStandardOffByDefault.disabledByUserDefault = true;
-  Function::Options innerExperimental;
-  innerExperimental.flagIsInner = true;
-  innerExperimental.flagIsExperimental = true;
-  Function::Options innerInvisibleExperimental;
-  innerInvisibleExperimental.flagIsInner = true;
-  innerInvisibleExperimental.flagIsExperimental = true;
-  innerInvisibleExperimental.visible = false;
 
   Function::Options innerInvisibleNoTest;
   innerInvisibleNoTest.flagIsInner = true;
   innerInvisibleNoTest.visible = false;
   innerInvisibleNoTest.flagDontTestAutomatically = true;
+
   Function::Options innerNoTest;
   innerNoTest.flagIsInner = true;
   innerNoTest.flagDontTestAutomatically = true;
+
+
+  Function::Options innerExperimental;
+  innerExperimental.flagIsInner = true;
+  innerExperimental.flagIsExperimental = true;
+
+  Function::Options innerInvisibleExperimental;
+  innerInvisibleExperimental.flagIsInner = true;
+  innerInvisibleExperimental.flagIsExperimental = true;
+  innerInvisibleExperimental.visible = false;
+
   Function::Options innerAdminNoTest;
   innerAdminNoTest.flagIsInner = true;
   innerAdminNoTest.flagDontTestAutomatically = true;
   innerAdminNoTest.adminOnly = true;
+
   Function::Options innerAdminNoTestExperimental;
   innerAdminNoTestExperimental = innerAdminNoTest;
   innerAdminNoTestExperimental.flagIsExperimental = true;
+
   Function::Options innerAdminNoTestInvisibleOffByDefault;
   innerAdminNoTestInvisibleOffByDefault.flagIsInner = true;
   innerAdminNoTestInvisibleOffByDefault.flagDontTestAutomatically = true;
@@ -421,7 +430,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Crash(0)",
     "CalculatorFunctionsGeneral::innerCrash",
     "Crash",
-    innerStandard
+    innerNoTest
   );
   this->AddOperationHandler(
     "CrashListOutOfBounds",
@@ -5169,7 +5178,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "EmbedSemisimpleInSemisimple{}(G_2, B_3)",
     "CalculatorFunctionsGeneral::innerEmbedSSalgInSSalg",
     "EmbedSemisimpleInSemisimple",
-    innerStandard
+    innerNoTest
   );
   this->AddOperationHandler(
     "LoadSemisimpleSubalgebras",

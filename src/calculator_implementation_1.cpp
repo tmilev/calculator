@@ -493,7 +493,6 @@ bool SemisimpleSubalgebras::ComputeStructureWriteFiles(
     << this->DisplayNameMainFile1WithPath << "\" target = \"_blank\">"
     << this->DisplayNameMainFile1NoPath << "</a>";
   }
-  std::cout << "DEBUG: I AM DONE DONE DONE! " << std::endl;
   return true;
 }
 

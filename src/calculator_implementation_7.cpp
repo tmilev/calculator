@@ -8570,12 +8570,9 @@ bool CalculatorFunctionsGeneral::innerSolveProductSumEquationOverSetModN(
   return output.AssignValue(std::string("Couldn't find solution"), theCommands);
 }
 
-void Calculator::AutomatedTestRunPrepare(
-  List<std::string>& atomsTested,
-  List<std::string>& outputCommandStrings
-) {
+void Calculator::AutomatedTestRunPrepare(Calculator::Test &test) {
   MacroRegisterFunctionWithName("Calculator::AutomatedTestRunPrepare");
-  outputCommandStrings.SetSize(0);
+  test.commands.Clear();
   for (int i = 0; i < this->NumPredefinedAtoms; i ++) {
     MemorySaving<Calculator::AtomHandler>& currentPointer = this->operations.theValues[i];
     if (currentPointer.IsZeroPointer()) {
@@ -8589,43 +8586,37 @@ void Calculator::AutomatedTestRunPrepare(
         if (currentFunction.options.flagDontTestAutomatically) {
           continue;
         }
-        outputCommandStrings.AddOnTop(currentFunction.theExample);
-        atomsTested.AddOnTop(this->operations.theKeys[i]);
+        Calculator::Test::OneTest oneTest;
+        oneTest.command = currentFunction.theExample;
+        oneTest.atom = this->operations.theKeys[i];
+        test.commands.SetKeyValue(oneTest.command, oneTest);
       }
       currentHandler = &current.compositeHandlers;
     }
   }
 }
 
-void Calculator::AutomatedTestRun(
-  List<std::string>& outputCommandStrings,
-  List<std::string>& outputResultsWithInit,
-  List<std::string>& outputResultsNoInit
-) {
+void Calculator::AutomatedTestRun(Calculator::Test &test) {
   MacroRegisterFunctionWithName("Calculator::AutomatedTestRun");
-  List<std::string> atomsTested;
-  this->AutomatedTestRunPrepare(atomsTested, outputCommandStrings);
-  outputResultsWithInit.SetSize(outputCommandStrings.size);
-  outputResultsNoInit.SetSize(outputCommandStrings.size);
-
+  this->AutomatedTestRunPrepare(test);
   Calculator theTester;
   ProgressReport theReport;
   FormatExpressions theFormat;
   theFormat.flagExpressionIsFinal = true;
-  for (int i = 0; i < outputCommandStrings.size; i ++) {
-    double startingTime = global.GetElapsedSeconds();
+  for (int i = test.startIndex; i < test.commands.size(); i ++) {
     std::stringstream reportStream;
-    reportStream << "<br>Test progress: testing " << i + 1 << " out of " << outputCommandStrings.size << ". ";
-    reportStream << "<br>Testing expression:<br> " << outputCommandStrings[i];
+    Calculator::Test::OneTest& currentTest = test.commands.theValues[i];
+    reportStream << "<br>Test progress: testing " << i + 1 << " out of " << test.commands.size() << ". ";
+    reportStream << "<br>Testing expression:<br> " << currentTest.command;
     global << logger::green << "Automated test: " << i << " out of "
-    << outputCommandStrings.size << ", atom: " << atomsTested[i] << logger::endL;
+    << test.commands.size() << ", atom: " << currentTest.command << logger::endL;
     theReport.Report(reportStream.str());
     theTester.initialize();
     theTester.CheckConsistencyAfterInitialization();
-    theTester.Evaluate(outputCommandStrings[i]);
-    outputResultsWithInit[i] = theTester.theProgramExpression.ToString(&theFormat);
+    theTester.Evaluate(currentTest.command);
+    currentTest.actualResult = theTester.theProgramExpression.ToString(&theFormat);
     reportStream << "<br>Result: " << theTester.theProgramExpression.ToString();
-    reportStream << "<br>Done in: " << global.GetElapsedSeconds() - startingTime << " seconds. ";
+    reportStream << "<br>Done in: " << global.GetElapsedSeconds() - test.startTime << " seconds. ";
     theReport.Report(reportStream.str());
   }
 }

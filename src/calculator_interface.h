@@ -1983,17 +1983,46 @@ public:
     List<std::string>& inputResults,
     std::stringstream* commentsOnFailure
   );
+  class Test {
+  public:
+    int64_t startTime;
+    int startIndex;
+    int inconsistencies;
+    int unknown;
+    class OneTest {
+    public:
+      std::string atom;
+      std::string command;
+      // empty string = not computed
+      std::string actualResult;
+      // empty string = not known
+      std::string expectedResult;
+    };
+    MapList<std::string, Calculator::Test::OneTest, MathRoutines::HashString> commands;
+    JSData storedResults;
+    Test();
+    std::string ProcessResults();
+    bool LoadTestStrings(
+      std::stringstream *commentsOnFailure
+    );
+    bool ProcessOneTest(
+      JSData& input
+    );
+    static bool All();
+    static bool NumberOfTestFunctions(Calculator& ownerInitialized);
+    static bool ParseDecimal(Calculator& ownerInitialized);
+    static bool BuiltInFunctionsABTest(Calculator& ownerInitialized);
+  };
   static bool innerAutomatedTest(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerAutomatedTestSetKnownGoodCopy(Calculator& theCommands, const Expression& input, Expression& output);
   int GetNumBuiltInFunctions();
   void AutomatedTestRunPrepare(
-    List<std::string>& atomsTested,
-    List<std::string>& outputCommandStrings
+    Calculator::Test& test
   );
   void AutomatedTestRun(
-    List<std::string>& outputCommandStrings,
-    List<std::string>& outputResultsWithInit,
-    List<std::string>& outputResultsNoInit
+    Calculator::Test& test
+  );
+  void AutomatedProcessResults(
+    Calculator::Test& test
   );
   static bool innerTranspose(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetElementWeylGroup(Calculator& theCommands, const Expression& input, Expression& output);
@@ -2399,24 +2428,6 @@ public:
   bool ShouldSplitOutsideQuotes(const std::string& left, char right);
   void ParseFillDictionary(const std::string& input, List<SyntacticElement>& output);
   void ParseFillDictionary(const std::string& input);
-  class Test {
-  public:
-    static bool All();
-    static bool LoadTestStrings(
-      HashedList<std::string, MathRoutines::HashString>& outputCommands,
-      List<std::string>& outputResults,
-      std::stringstream *commentsOnFailure
-    );
-    static bool AppendOneTest(
-      JSData &input,
-      HashedList<std::string, MathRoutines::HashString>& outputCommands,
-      List<std::string>& outputResults,
-      std::stringstream *commentsOnFailure
-    );
-    static bool NumberOfTestFunctions(Calculator& ownerInitialized);
-    static bool ParseDecimal(Calculator& ownerInitialized);
-    static bool BuiltInFunctionsABTest(Calculator& ownerInitialized);
-  };
 };
 
 class CalculatorConversions {

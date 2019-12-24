@@ -1721,32 +1721,32 @@ bool Calculator::innerEWAorPoly(Calculator& theCommands, const Expression& input
   return output.AssignValueWithContext(outputEWA, endContext, theCommands);
 }
 
-bool Calculator::Test::AppendOneTest(
-  JSData& input,
-  HashedList<std::string, MathRoutines::HashString>& outputCommands,
-  List<std::string>& outputResults,
-  std::stringstream* commentsOnFailure
-) {
+bool Calculator::Test::ProcessOneTest(JSData& input) {
   if (input["input"].theType != JSData::token::tokenString) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Input command is missing. ";
-    }
+    global << logger::red << "Input command is missing. " << logger::endL;
+    return false;
+  }
+  std::string command = input["input"].theString;
+  if (!this->commands.Contains(command)) {
+    std::stringstream reportStream;
+    reportStream << "Command " << command
+    << " not recognized. "
+    << "If the testing commands have recently changed, this is OK, "
+    << "otherwise, it isn't.";
+    global << logger::red << reportStream.str() << logger::endL;
     return false;
   }
   if (input["output"].theType != JSData::token::tokenString) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Expected output is missing. ";
-    }
+    global << logger::red << "Command: " << command
+    << " is missing its expected output. " << logger::endL;
     return false;
   }
-  outputCommands.AddOnTop(input["input"].theString);
-  outputResults.AddOnTop(input["output"].theString);
+  Calculator::Test::OneTest& currentTest = this->commands.GetValueCreate(command);
+  currentTest.expectedResult = input["output"].theString;
   return true;
 }
 
 bool Calculator::Test::LoadTestStrings(
-  HashedList<std::string, MathRoutines::HashString>& outputCommands,
-  List<std::string>& outputResults,
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("Calculator::LoadTestStrings");
@@ -1762,28 +1762,20 @@ bool Calculator::Test::LoadTestStrings(
     }
     return false;
   }
-  JSData result;
-  if (!result.readstring(testStrings, commentsOnFailure)) {
+  if (!this->storedResults.readstring(testStrings, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to parse test json. ";
     }
     return false;
   }
-  if (result.theType != JSData::token::tokenArray) {
+  if (this->storedResults.theType != JSData::token::tokenArray) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Test json is not an array. ";
     }
     return false;
   }
-  outputCommands.Clear();
-  outputResults.SetSize(0);
-  for (int i = 0; i < result.theList.size; i ++) {
-    if (!Calculator::Test::AppendOneTest(result.theList[i], outputCommands, outputResults, commentsOnFailure)) {
-      if (commentsOnFailure != nullptr) {
-        *commentsOnFailure << "Failed to extract input/output strings from: " << result.theList[i].ToString(false);
-      }
-      return false;
-    }
+  for (int i = 0; i < this->storedResults.theList.size; i ++) {
+    this->ProcessOneTest(this->storedResults.theList[i]);
   }
   return true;
 }
@@ -1818,26 +1810,11 @@ bool Calculator::WriteTestStrings(
   );
 }
 
-bool Calculator::innerAutomatedTestSetKnownGoodCopy(
-  Calculator& theCommands, const Expression& input, Expression& output
-) {
-  MacroRegisterFunctionWithName("Calculator::innerAutomatedTestSetKnownGoodCopy");
-  if (!global.UserDefaultHasAdminRights()) {
-    return theCommands << "Function requires admin access. ";
-  }
-  (void) input;//avoid unused variable warning, portable
-  global.millisecondsMaxComputation = 30000000; //30k seconds: ok, we have admin access.
-  List<std::string> inputStringsTest, outputStringsTestWithInit, outputStringsTestNoInit;
-  std::stringstream out;
-  std::stringstream commentsOnError;
-  // if (!FileOperations::WriteFileVirual(WebAPI::calculator::testFileNameVirtual, "", &commentsOnError)) {
-  //   global.fatal << "Failed to write to file test file: " << WebAPI::calculator::testFileNameVirtual << ". " << global.fatal;
-  // }
-  double startTime = global.GetElapsedSeconds();
-  theCommands.AutomatedTestRun(inputStringsTest, outputStringsTestWithInit, outputStringsTestNoInit);
-  theCommands.WriteTestStrings(inputStringsTest, outputStringsTestWithInit, &commentsOnError);
-  out << "Test run completed in " << global.GetElapsedSeconds() - startTime << " seconds.";
-  return output.AssignValue(out.str(), theCommands);
+Calculator::Test::Test() {
+  this->startIndex = 0;
+  this->startTime = global.GetElapsedMilliseconds();
+  this->inconsistencies = 0;
+  this->unknown = 0;
 }
 
 bool Calculator::innerAutomatedTest(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -1845,68 +1822,77 @@ bool Calculator::innerAutomatedTest(Calculator& theCommands, const Expression& i
   if (!global.UserDefaultHasAdminRights()) {
     return theCommands << "Automated test requires admin access";
   }
-  (void) input;
   global.millisecondsMaxComputation = 30000000; //30k seconds, ok as we have admin access
-  int64_t startTime = global.GetElapsedMilliseconds();
-  List<std::string> knownResults;
-  HashedList<std::string, MathRoutines::HashString> knownCommands;
-  std::stringstream out;
-  std::stringstream commentsOnFailure;
-  if (!Calculator::Test::LoadTestStrings(knownCommands, knownResults, &commentsOnFailure)) {
-    Calculator::innerAutomatedTestSetKnownGoodCopy(theCommands, input, output);
+  Calculator::Test test;
+  if (!input.IsSmallInteger(&test.startIndex)) {
+    return theCommands
+    << "Automated test takes as single "
+    << "argument the index of the first test. "
+    << "All tests with smaller indices will be ignored. ";
   }
-  List<std::string> commandStrings, resultStringsWithInit, resultStringsNoInit;
-  theCommands.AutomatedTestRun(commandStrings, resultStringsWithInit, resultStringsNoInit);
-  std::stringstream errorTableStream;
-  int numInconsistencies = 0;
-  List<std::string> newCommands;
-  for (int i = 0; i < commandStrings.size; i ++) {
-    if (!knownCommands.Contains(commandStrings[i])) {
-      newCommands.AddOnTop(commandStrings[i]);
-      if (knownCommands[i] == commandStrings[i]) {
-        global.fatal << "Known command result does not match current. " << global.fatal;
-      }
-      continue;
+  theCommands.AutomatedTestRun(test);
+  return output.AssignValue(test.ProcessResults(), theCommands);
+}
+
+std::string Calculator::Test::ProcessResults() {
+  std::stringstream commentsOnFailure, out;
+  if (!this->LoadTestStrings(&commentsOnFailure)) {
+    global << logger::red << "Failed to load test strings. " << logger::endL
+    << commentsOnFailure.str();
+    out << "Failed to load test strings. " << commentsOnFailure.str();
+  }
+  std::stringstream goodCommands, unknownCommands, badCommands;
+  this->inconsistencies = 0;
+  if (this->startIndex > 0) {
+    out << "<b style='color:red'>Not all commands were processed</b>";
+  }
+  for (int i = this->startIndex; i < this->commands.size(); i ++) {
+    Calculator::Test::OneTest& currentTest = this->commands.theValues[i];
+    std::stringstream currentLine;
+    currentLine << "<tr>";
+    currentLine << "<td>" << currentTest.atom << "</td>";
+    currentLine << "<td>" << this->commands.theKeys[i] << "</td>";
+    bool isBad = false;
+    bool isUknown = false;
+    if (currentTest.actualResult == currentTest.expectedResult) {
+      currentLine << "<td><b style='color:green'>OK</b></td>";
+    } else if (currentTest.expectedResult == "") {
+      currentLine << "<td><b style='color:orange'>expected result unknown (run test again)</b></td>";
+      isUknown = true;
+      this->unknown ++;
+    } else {
+      currentLine << "<td><b style='color:red'>unexpected result</b></td>"
+      << "<td>got: " << currentTest.actualResult << "</td>"
+      << "<td>expected: " << currentTest.expectedResult << "</td>"
+      ;
+      isBad = true;
+      this->inconsistencies ++;
     }
-    int theIndex = knownCommands.GetIndex(commandStrings[i]);
-    if (knownResults[theIndex] != resultStringsWithInit[i]) {
-      errorTableStream << "\n<tr><td>" << commandStrings[i] << "</td><td>"
-      << knownResults[theIndex] << "</td><td>" << resultStringsWithInit[i]
-      << "</td></tr>\n";
-      numInconsistencies ++;
+    currentLine << "</tr>";
+    if (isBad) {
+      badCommands << currentLine.str();
+    } else if (isUknown) {
+      unknownCommands << currentLine.str();
+    } else {
+      goodCommands << currentLine.str();
     }
   }
-  bool allWentGreat = true;
-  if (numInconsistencies > 0) {
+  if (this->inconsistencies > 0) {
     out << "<b style = 'color:red'>The test file results do not match the current results.</b> There were "
-    << numInconsistencies << " inconsistencies out of " << knownCommands.size
-    << " input strings. The inconsistent result table follows. "
-    << "\n<hr>\n<table><tr><td>Input</td><td>Desired result</td><td>Computed result</td></tr>"
-    << errorTableStream.str() << "</table>\n<hr>\n";
-    allWentGreat = false;
+    << this->inconsistencies << " inconsistencies. ";
+    out << "<table>" << badCommands.str() << "</table>";
   }
-  if (commandStrings.size != knownCommands.size || newCommands.size > 0) {
-    if (commandStrings.size != knownCommands.size) {
-      out << "There were " << knownCommands.size << " known commands read from the test file but the calculator has "
-      << commandStrings.size << " functions total. ";
-    }
-    if (newCommands.size > 0) {
-      out << "There were " << newCommands.size << " commands not recorded in the test file. The new commands follow. <br>";
-      for (int i = 0; i < newCommands.size; i ++) {
-        out << newCommands[i] << "<br>";
-      }
-    }
-    out << "The test file must be out of date. Please update it.<hr>";
-    allWentGreat = false;
+  if (this->unknown > 0) {
+    out << "<b style = 'color:orange'>There were " << this->inconsistencies
+    << " commands with no previous recorded results.</b>";
+    out << "<table>" << unknownCommands.str() << "</table>";
   }
-  if (allWentGreat) {
-    out << "<span style =\"color:blue\">All " << commandStrings.size
-    << " results coincide with previously recorded values.</span> ";
+  if (this->unknown == 0 && this->inconsistencies == 0) {
+    out << "<b style =\"color:green\">No inconsistencies or uknown computations.</b> ";
   }
-  out << "<br>The command for updating the test file is "
-  << HtmlRoutines::GetCalculatorComputationAnchor("AutomatedTestSetKnownGoodCopy 0");
-  out << "<br>Total time for the test: " << global.GetElapsedMilliseconds() - startTime << " ms. ";
-  return output.AssignValue(out.str(), theCommands);
+  out << "<table>" << goodCommands.str() << "</table>";
+  out << "<br>Total run time: " << global.GetElapsedMilliseconds() - this->startTime << " ms. ";
+  return out.str();
 }
 
 int Calculator::GetNumBuiltInFunctions() {

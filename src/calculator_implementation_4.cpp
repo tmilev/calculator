@@ -805,14 +805,36 @@ bool Calculator::RecursionDepthExceededHandleRoughly(const std::string& addition
   return true;
 }
 
+bool Calculator::CheckOperationHandlers() {
+  MacroRegisterFunctionWithName("Calculator::CheckOperationHandlers");
+  for (int i = 0; i < this->operations.size(); i ++) {
+    MemorySaving<Calculator::AtomHandler>& current = this->operations.theValues[i];
+    if (current.IsZeroPointer()) {
+      continue;
+    }
+    current.GetElement().CheckConsisitency();
+    Calculator::AtomHandler& allHandlers = current.GetElement();
+    for (int j = 0; j < allHandlers.compositeHandlers.size; j ++) {
+      allHandlers.compositeHandlers[j].CheckConsistency();
+    }
+    for (int j = 0; j < allHandlers.handlers.size; j ++) {
+      allHandlers.handlers[j].CheckConsistency();
+    }
+  }
+  return true;
+}
+
 bool Calculator::CheckConsistencyAfterInitialization() {
   this->theExpressionContainer.GrandMasterConsistencyCheck();
   this->EvaluatedExpressionsStack.GrandMasterConsistencyCheck();
   this->cachedExpressions.GrandMasterConsistencyCheck();
   if (this->numberExpectedExpressionsAtInitialization < 0) {
     this->numberExpectedExpressionsAtInitialization = this->theExpressionContainer.size;
-  } else if (this->theExpressionContainer.size != this->numberExpectedExpressionsAtInitialization) {
-    global.fatal << "Expression container expected to have " << this->numberExpectedExpressionsAtInitialization
+  } else if (
+    this->theExpressionContainer.size != this->numberExpectedExpressionsAtInitialization
+  ) {
+    global.fatal << "Expression container expected to have "
+    << this->numberExpectedExpressionsAtInitialization
     << " elements but instead it has " << this->theExpressionContainer.size
     << ". Expression container: ";
     for (int i = 0; i < this->theExpressionContainer.size; i ++) {
@@ -826,10 +848,13 @@ bool Calculator::CheckConsistencyAfterInitialization() {
     this->EvaluatedExpressionsStack.size != 0
   ) {
     global.fatal << "This is a programming error: cached expressions, "
-    << "images cached expressions, expression stack and expression container are supposed to be empty, but "
+    << "images cached expressions, expression stack and "
+    << "expression container are supposed to be empty, but "
     << "instead they contain respectively "
-    << this->cachedExpressions.size << ", " << this->imagesCachedExpressions.size << ", and"
-    << this->EvaluatedExpressionsStack.size << " elements. " << global.fatal;
+    << this->cachedExpressions.size << ", "
+    << this->imagesCachedExpressions.size << ", and "
+    << this->EvaluatedExpressionsStack.size
+    << " elements. " << global.fatal;
   }
   return this->theObjectContainer.CheckConsistencyAfterReset();
 }
@@ -2047,6 +2072,9 @@ Function::Function(
   int inputIndexParentThatBansHandler
 ) {
   this->owner = nullptr;
+  if (&this->options == &inputOptions) {
+    global.fatal << "Input options and target options have the same address. " << global.fatal;
+  }
   this->reset(inputOwner);
   this->indexOperation = inputIndexOperation;
   this->options = inputOptions;
@@ -2095,7 +2123,7 @@ void Calculator::AddOperationBinaryInnerHandlerWithTypes(
   this->RegisterCalculatorFunction(innerFunction, indexOp);
 }
 
-void Calculator::RegisterCalculatorFunction(Function &theFun, int indexOp) {
+void Calculator::RegisterCalculatorFunction(Function& theFun, int indexOp) {
   MacroRegisterFunctionWithName("Calculator::RegisterCalculatorFunction");
   if (indexOp < 0 || indexOp >= this->operations.size()) {
     global.fatal << "Invalid index operation: " << indexOp
@@ -2104,12 +2132,19 @@ void Calculator::RegisterCalculatorFunction(Function &theFun, int indexOp) {
   }
   MemorySaving<Calculator::AtomHandler>& handlerPointer = this->operations.theValues[indexOp];
   Calculator::AtomHandler& handler = handlerPointer.GetElement();
+  handler.CheckConsisitency();
   if (theFun.options.flagIsCompositeHandler) {
     theFun.indexInOperationHandlers = handler.compositeHandlers.size;
     handler.compositeHandlers.AddOnTop(theFun);
+    if (handler.compositeHandlers.size <= 0) {
+      global.fatal << "Composite handlers cannot be empty. " << global.fatal;
+    }
   } else {
     theFun.indexInOperationHandlers = handler.handlers.size;
     handler.handlers.AddOnTop(theFun);
+    if (handler.handlers.size <= 0) {
+      global.fatal << "Handlers cannot be empty. " << global.fatal;
+    }
   }
   if (theFun.calculatorIdentifier == "") {
     return;
@@ -2157,6 +2192,22 @@ void Calculator::AddOperationHandler(
     global.fatal << "Function not initialized properly. " << global.fatal;
   }
   this->RegisterCalculatorFunction(theFun, indexOp);
+}
+
+void Function::Options::reset() {
+  this->flagIsCompositeHandler    = false;
+  this->flagIsInner               = true ;
+  this->flagMayActOnBoundVars     = false;
+  this->visible                   = true ;
+  this->flagIsExperimental        = false;
+  this->disabledByUser            = false;
+  this->disabledByUserDefault     = false;
+  this->flagDontTestAutomatically = false;
+  this->adminOnly                 = false;
+}
+
+Function::Options::Options() {
+  this->reset();
 }
 
 bool Function::inputFitsMyInnerType(const Expression& input) {

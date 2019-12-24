@@ -337,6 +337,7 @@ void Calculator::initialize() {
   this->NumPredefinedAtoms = this->operations.size(); //<-operations added up to this point are called ``operations''
   if (global.flagAutoUnitTest) {
     this->CheckPredefinedFunctionNameRepetitions();
+    this->CheckOperationHandlers();
   }
   this->CheckConsistencyAfterInitialization();
 }

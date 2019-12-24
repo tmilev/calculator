@@ -656,17 +656,8 @@ class Function {
     bool disabledByUserDefault;
     bool flagDontTestAutomatically;
     bool adminOnly;
-    void reset() {
-      this->flagIsCompositeHandler    = false;
-      this->flagIsInner               = true ;
-      this->flagMayActOnBoundVars     = false;
-      this->visible                   = true ;
-      this->flagIsExperimental        = false;
-      this->disabledByUser            = false;
-      this->disabledByUserDefault     = false;
-      this->flagDontTestAutomatically = false;
-      this->adminOnly                 = false;
-    }
+    void reset();
+    Options();
   };
   Options options;
   Expression::FunctionAddress theFunction;
@@ -689,7 +680,6 @@ class Function {
   }
   void resetExceptOwner() {
     this->theFunction = nullptr;
-    this->theFunction = nullptr;
     this->indexInOperationHandlers = - 1;
     this->indexOperation = - 1;
     this->indexOperationParentThatBansHandler = - 1;
@@ -706,7 +696,7 @@ class Function {
     const std::string& inputExample,
     const std::string& inputAdditionalIndentifier,
     const std::string& inputCalculatorIdentifier,
-    const Options& inputOptions,
+    const Function::Options& inputOptions,
     int inputIndexParentThatBansHandler = - 1
   );
   static unsigned int HashFunction(const Function& input) {
@@ -716,6 +706,7 @@ class Function {
     return static_cast<unsigned int>(reinterpret_cast<uintptr_t>(this->theFunction));
   }
   bool Apply(Calculator& theCommands, const Expression& input, Expression& output, int opIndexParentIfAvailable);
+  bool CheckConsistency() const;
 };
 
 class SyntacticElement {
@@ -990,6 +981,10 @@ public:
     std::string atom;
     List<Function> handlers;
     List<Function> compositeHandlers;
+    bool flagDeallocated;
+    AtomHandler();
+    ~AtomHandler();
+    bool CheckConsisitency();
     JSData ToJSON();
     std::string ToStringRuleStatusUser();
   };
@@ -1228,6 +1223,7 @@ public:
   bool IsNonBoundVarInContext(int inputOp);
   Function& GetFunctionHandlerFromNamedRule(const std::string& inputRuleName);
   bool CheckPredefinedFunctionNameRepetitions();
+  bool CheckOperationHandlers();
   bool CheckConsistencyAfterInitialization();
   //to make operations read only, we make operations private and return const pointer to it.
   const HashedList<std::string, MathRoutines::HashString>& GetOperations() {
@@ -2417,6 +2413,7 @@ public:
       List<std::string>& outputResults,
       std::stringstream *commentsOnFailure
     );
+    static bool NumberOfTestFunctions(Calculator& ownerInitialized);
     static bool ParseDecimal(Calculator& ownerInitialized);
     static bool BuiltInFunctionsABTest(Calculator& ownerInitialized);
   };

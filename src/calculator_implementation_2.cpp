@@ -7,22 +7,16 @@ static ProjectInformationInstance projectInfoCalculatorImplementation2CPP(__FILE
 
 JSData Calculator::AtomHandler::ToJSON() {
   JSData result;
-  JSData currentFunctionListDirect;;
+  JSData currentFunctionListDirect;
   currentFunctionListDirect.theType = JSData::token::tokenArray;
   for (int i = 0; i < this->handlers.size; i ++) {
     Function& currentHandler = this->handlers[i];
-    if (!currentHandler.options.visible) {
-      continue;
-    }
     currentFunctionListDirect.theList.AddOnTop(currentHandler.ToJSON());
   }
   JSData currentFunctionListComposite;
   currentFunctionListComposite.theType = JSData::token::tokenArray;
   for (int i = 0; i < this->compositeHandlers.size; i ++) {
     Function& currentHandler = this->compositeHandlers[i];
-    if (!currentHandler.options.visible) {
-      continue;
-    }
     currentFunctionListComposite.theList.AddOnTop(currentHandler.ToJSON());
   }
   result["regular"] = currentFunctionListDirect;
@@ -39,9 +33,25 @@ JSData Calculator::ToJSONFunctionHandlers() {
       continue;
     }
     const std::string& operationName = this->operations.theKeys[i];
-    output[operationName] = this->operations.theValues[i].GetElement().ToJSON();
+    Calculator::AtomHandler& handlers = this->operations.theValues[i].GetElement();
+    output[operationName] = handlers.ToJSON();
   }
   return output;
+}
+
+Calculator::AtomHandler::AtomHandler() {
+  this->flagDeallocated = false;
+}
+
+Calculator::AtomHandler::~AtomHandler() {
+  this->flagDeallocated = true;
+}
+
+bool Calculator::AtomHandler::CheckConsisitency() {
+  if (this->flagDeallocated) {
+    global.fatal << "Use after free of Calculator::AtomHandler. " << global.fatal;
+  }
+  return true;
 }
 
 Calculator::NamedRuleLocation::NamedRuleLocation() {
@@ -198,6 +208,13 @@ bool Calculator::outerStandardCompositeHandler(
   return false;
 }
 
+bool Function::CheckConsistency() const {
+  if (this->options.visible != 0 && this->options.visible != 1) {
+    global.fatal << "Invalid visible flag: " << this->options.visible << global.fatal;
+  }
+  return true;
+}
+
 bool Function::Apply(Calculator &theCommands, const Expression &input, Expression &output, int opIndexParentIfAvailable) {
   if (!this->ShouldBeApplied(opIndexParentIfAvailable)) {
     return false;
@@ -251,6 +268,8 @@ bool Calculator::outerStandardHandler(Calculator &theCommands, const Expression 
     return false;
   }
   const List<Function>& handlers = theCommands.operations.theValues[operationIndex].GetElement().handlers;
+  global.Comments << "DEBUG: About to try applying. handlers: "
+  << handlers.size << "<br>";
   for (int i = 0; i < handlers.size; i ++) {
     Function& currentFunction = handlers[i];
     if (currentFunction.Apply(theCommands, input, output, opIndexParentIfAvailable)) {
@@ -266,8 +285,7 @@ bool Calculator::outerStandardFunction(
   MacroRegisterFunctionWithName("Calculator::outerStandardFunction");
   RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
   theCommands.CheckInputNotSameAsOutput(input, output);
-  global.Comments << "DEBUG: inside outer standard function, input: " << input.ToString() << logger::endL;
-
+  global.Comments << "DEBUG: inside outer standard function, input: " << input.ToString() << "<br>";
   if (!input.IsLisT()) {
     return false;
   }

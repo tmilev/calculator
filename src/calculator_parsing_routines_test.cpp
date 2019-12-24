@@ -7,8 +7,17 @@ static ProjectInformationInstance projectInfoCalculatorParsingRoutinesTestCPP(__
 bool Calculator::Test::All() {
   Calculator tester;
   tester.initialize();
+  Calculator::Test::NumberOfTestFunctions(tester);
   Calculator::Test::ParseDecimal(tester);
   Calculator::Test::BuiltInFunctionsABTest(tester);
+  return true;
+}
+
+bool Calculator::Test::NumberOfTestFunctions(Calculator& ownerInitialized) {
+  int numberOfBuiltInFunction = ownerInitialized.GetNumBuiltInFunctions();
+  if (numberOfBuiltInFunction <= 0) {
+    global.fatal << "Calculator built in functions: " << numberOfBuiltInFunction << global.fatal;
+  }
   return true;
 }
 

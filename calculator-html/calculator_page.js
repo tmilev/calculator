@@ -370,7 +370,6 @@ Calculator.prototype.submitComputationPartTwo = function(input) {
   var stringifiedHash = thePage.storage.getCleanedUpURL(urlCopy);
   document.getElementById("spanComputationLink").innerHTML = `<a href = '#${stringifiedHash}'>Link to your input</a>`;
   setTimeout(() => {
-    console.log("DEBUG: executing mq help calculator. ");
     initializeButtons.calculatorPanel.mQHelpCalculator();
   }, 0);
   var url = pathnames.urls.calculatorAPI;

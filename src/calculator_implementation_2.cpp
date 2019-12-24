@@ -222,7 +222,6 @@ bool Function::Apply(Calculator &theCommands, const Expression &input, Expressio
   if (this->theFunction == nullptr) {
     global.fatal << "Attempt to apply non-initialized function. " << global.fatal;
   }
-  global.Comments << "DEBUG: About to apply to ... " << input.ToString() << logger::endL;
   if (!this->options.flagIsInner) {
     if (this->theFunction(theCommands, input, output)) {
       if (output != input) {
@@ -235,7 +234,6 @@ bool Function::Apply(Calculator &theCommands, const Expression &input, Expressio
   }
   if (input.size() > 2) {
     if (this->inputFitsMyInnerType(input)) {
-      global.Comments << "DEBUG: About to eval: ... " << input.ToString() << logger::endL;
       if (this->theFunction(theCommands, input, output)) {
         output.CheckConsistency();
         theCommands.DoLogEvaluationIfNeedBe(*this);
@@ -246,7 +244,6 @@ bool Function::Apply(Calculator &theCommands, const Expression &input, Expressio
   }
   if (input.size() == 2) {
     if (this->inputFitsMyInnerType(input[1])) {
-      global.Comments << "DEBUG: About to eval: ... " << input.ToString() << logger::endL;
       if (this->theFunction(theCommands, input[1], output)) {
         output.CheckConsistency();
         theCommands.DoLogEvaluationIfNeedBe(*this);
@@ -268,8 +265,6 @@ bool Calculator::outerStandardHandler(Calculator &theCommands, const Expression 
     return false;
   }
   const List<Function>& handlers = theCommands.operations.theValues[operationIndex].GetElement().handlers;
-  global.Comments << "DEBUG: About to try applying. handlers: "
-  << handlers.size << "<br>";
   for (int i = 0; i < handlers.size; i ++) {
     Function& currentFunction = handlers[i];
     if (currentFunction.Apply(theCommands, input, output, opIndexParentIfAvailable)) {
@@ -285,7 +280,6 @@ bool Calculator::outerStandardFunction(
   MacroRegisterFunctionWithName("Calculator::outerStandardFunction");
   RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
   theCommands.CheckInputNotSameAsOutput(input, output);
-  global.Comments << "DEBUG: inside outer standard function, input: " << input.ToString() << "<br>";
   if (!input.IsLisT()) {
     return false;
   }

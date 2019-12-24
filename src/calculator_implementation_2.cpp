@@ -205,6 +205,7 @@ bool Function::Apply(Calculator &theCommands, const Expression &input, Expressio
   if (this->theFunction == nullptr) {
     global.fatal << "Attempt to apply non-initialized function. " << global.fatal;
   }
+  global.Comments << "DEBUG: About to apply to ... " << input.ToString() << logger::endL;
   if (!this->options.flagIsInner) {
     if (this->theFunction(theCommands, input, output)) {
       if (output != input) {
@@ -217,6 +218,7 @@ bool Function::Apply(Calculator &theCommands, const Expression &input, Expressio
   }
   if (input.size() > 2) {
     if (this->inputFitsMyInnerType(input)) {
+      global.Comments << "DEBUG: About to eval: ... " << input.ToString() << logger::endL;
       if (this->theFunction(theCommands, input, output)) {
         output.CheckConsistency();
         theCommands.DoLogEvaluationIfNeedBe(*this);
@@ -227,6 +229,7 @@ bool Function::Apply(Calculator &theCommands, const Expression &input, Expressio
   }
   if (input.size() == 2) {
     if (this->inputFitsMyInnerType(input[1])) {
+      global.Comments << "DEBUG: About to eval: ... " << input.ToString() << logger::endL;
       if (this->theFunction(theCommands, input[1], output)) {
         output.CheckConsistency();
         theCommands.DoLogEvaluationIfNeedBe(*this);
@@ -242,6 +245,9 @@ bool Calculator::outerStandardHandler(Calculator &theCommands, const Expression 
   const Expression& functionNameNode = input[0];
   int operationIndex = - 1;
   if (!functionNameNode.IsOperation(operationIndex)) {
+    return false;
+  }
+  if (theCommands.operations.theValues[operationIndex].IsZeroPointer()) {
     return false;
   }
   const List<Function>& handlers = theCommands.operations.theValues[operationIndex].GetElement().handlers;
@@ -260,6 +266,8 @@ bool Calculator::outerStandardFunction(
   MacroRegisterFunctionWithName("Calculator::outerStandardFunction");
   RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
   theCommands.CheckInputNotSameAsOutput(input, output);
+  global.Comments << "DEBUG: inside outer standard function, input: " << input.ToString() << logger::endL;
+
   if (!input.IsLisT()) {
     return false;
   }

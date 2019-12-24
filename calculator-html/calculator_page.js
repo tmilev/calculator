@@ -236,6 +236,9 @@ Calculator.prototype.writeResult = function(
   inputParsed,
   panelIdPairs,
 ) {
+  if (inputParsed.commentsGlobal !== "" && inputParsed.commentsGlobal !== undefined) {
+    buffer.write(inputParsed.commentsGlobal);
+  }
   if (inputParsed.result === undefined && inputParsed.comments !== undefined) {
     buffer.write(inputParsed.comments);
   }

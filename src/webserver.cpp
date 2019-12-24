@@ -2165,6 +2165,7 @@ int WebWorker::ProcessCompute() {
   }
   JSData result;
   result = theCalculator.ToJSONOutputAndSpecials();
+  result[WebAPI::result::commentsGlobal] = global.Comments.container.GetElement().str();
   this->WriteToBodyJSON(result);
   global.flagComputationCompletE = true;
   return 0;

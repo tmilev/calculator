@@ -999,11 +999,9 @@ JSData WebWorker::GetSignUpRequestResult() {
 }
 
 int WebWorker::WriteToBodyJSONAppendComments(JSData &result) {
-  std::string comments = global.Comments.container.GetElement().str();
+  std::string comments = global.Comments.getCurrentReset();
   if (comments != "") {
-    if (result[WebAPI::result::comments].theType == JSData::token::tokenString) {
-      comments = result[WebAPI::result::comments].theString + comments;
-    }
+    result[WebAPI::result::commentsGlobal] = comments;
   }
   if (comments != "") {
     result[WebAPI::result::comments] = comments;

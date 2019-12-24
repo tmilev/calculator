@@ -129,7 +129,7 @@ GlobalVariables::Crasher& GlobalVariables::Crasher::operator<<(const GlobalVaria
   std::cout << this->crashReportConsolE.str() << std::endl;
   JSData output;
   output[WebAPI::result::crashReport] = this->crashReportHtml.str();
-  output[WebAPI::result::comments] = global.Comments.container.GetElement().str();
+  output[WebAPI::result::comments] = global.Comments.getCurrentReset();
   global.WriteCrash(output);
   assert(false);
   return *this;

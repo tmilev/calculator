@@ -343,6 +343,7 @@ public:
   };
   Crasher fatal;
   class CommentsCurrentConnection {
+    MemorySaving<std::stringstream> container;
   public:
     template <typename theType>
     CommentsCurrentConnection& operator<<(const theType& comment) {
@@ -352,8 +353,11 @@ public:
     void resetComments() {
       this->container.FreeMemory();
     }
-    MemorySaving<std::stringstream> container;
-
+    std::string getCurrentReset() {
+      std::string result = this->container.GetElement().str();
+      this->resetComments();
+      return result;
+    }
   };
   CommentsCurrentConnection Comments;
   void JoinAllThreads();

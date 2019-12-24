@@ -754,8 +754,8 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
     << "\\hline$so(7)$-module & ~~~~~~ decomposition over $G_2$\\endhead \\hline\n<br>";
   } else {
     out << "Let " << HtmlRoutines::GetMathSpanPure("p\\subset so(7)") << " be the "
-    << theg2b3data.selInducing.ToString() << "-parabolic subalgebra"
-    << " and let " << HtmlRoutines::GetMathSpanPure("{p}'= p\\cap G_2")
+    << theg2b3data.selInducing.ToString() << "-parabolic subalgebra "
+    << "and let " << HtmlRoutines::GetMathSpanPure("{p}'= p\\cap G_2")
     << ". Then  " << HtmlRoutines::GetMathSpanPure("{p}'") << " is the "
     << theg2b3data.selSmallParSel.ToString() << "- parabolic subalgebra of G_2"
     << "<br> <table><tr><td>$so(7)$-highest weight</td>"
@@ -1063,7 +1063,9 @@ bool Calculator::innerPrintAllVectorPartitions(Calculator& theCommands, const Ex
   for (int i = 0; i < theHW.size; i ++) {
     if (!theHW[i].IsSmallInteger(&theHWint[i]) || theHW[i] < 0) {
       return output.MakeError(
-        "The input weight you gave is bad: it must consist of non-negative small integers", theCommands
+        "The input weight you gave is bad: "
+        "it must consist of non-negative small integers",
+        theCommands
       );
     }
   }
@@ -1149,7 +1151,7 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
   if (rankBound < 2 || rankBound > 100 || dimBound < 1 || dimBound > 10000) {
     return output.MakeError(
       "The rank bound must be an integer between 2 and 100, "
-      "and the dim bound must be an integer between 1 and 10000",
+      "and the dim bound must be an integer between 1 and 10000. ",
       theCommands
     );
   }
@@ -1311,7 +1313,9 @@ bool Calculator::innerLittelmannOperator(Calculator& theCommands, const Expressi
   int theIndex = 0;
   if (!input.IsSmallInteger(&theIndex)) {
     return output.MakeError(
-      "The argument of the Littelmann root operator is expected to be a small integer, instead you gave me" + input.ToString(),
+      "The argument of the Littelmann root operator is "
+      "expected to be a small integer, instead you gave me " +
+      input.ToString(),
       theCommands
     );
   }
@@ -1486,7 +1490,11 @@ bool Calculator::innerPrintZnEnumeration(Calculator& theCommands, const Expressi
   std::stringstream out2, out;
   LargeIntegerUnsigned gradeLarge = static_cast<unsigned>(grade);
   int counter = 0;
-  for (theSel.SetFirstInGradeLevel(gradeLarge); theSel.GetGrading() == gradeLarge; theSel.IncrementReturnFalseIfPastLast()) {
+  for (
+    theSel.SetFirstInGradeLevel(gradeLarge);
+    theSel.GetGrading() == gradeLarge;
+    theSel.IncrementReturnFalseIfPastLast()
+  ) {
     out2 << theSel.ToString() << "<br>";
     counter ++;
   }
@@ -1677,7 +1685,10 @@ bool Calculator::GetMatrixExpressions(
   }
   output.init(input.size() - 1, input[1].size() - 1);
   for (int i = 1; i < input.size(); i ++) {
-    if (input[i].IsSequenceNElementS(output.NumCols) || input[i].StartsWith(this->opIntervalOpen(), output.NumCols + 1)) {
+    if (
+      input[i].IsSequenceNElementS(output.NumCols) ||
+      input[i].StartsWith(this->opIntervalOpen(), output.NumCols + 1)
+    ) {
       for (int j = 1; j < input[i].size(); j ++) {
         output(i - 1, j - 1) = input[i][j];
       }
@@ -1706,7 +1717,9 @@ bool Calculator::innerEWAorPoly(Calculator& theCommands, const Expression& input
     !inputPolForm[1].IsOneLetterFirstDegree(&letterPol) ||
     letterDiff == letterPol
   ) {
-    return theCommands << "<hr>Failed to get different one-variable polynomials from input.  " << input.ToString();
+    return theCommands
+    << "<hr>Failed to get different one-variable polynomials from input. "
+    << input.ToString();
   }
   Expression endContext;
   endContext.MakeContextWithOnePolyVarOneDiffVar(
@@ -1750,6 +1763,15 @@ bool Calculator::Test::LoadTestStrings(
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("Calculator::LoadTestStrings");
+  if (!FileOperations::FileExistsVirtual(
+    WebAPI::calculator::testFileNameVirtual, false, false, nullptr
+  )) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Test json file does not exist. ";
+    }
+    this->flagTestResultsExist = false;
+    return false;
+  }
   std::string testStrings;
   if (!FileOperations::LoadFileToStringVirtual(
     WebAPI::calculator::testFileNameVirtual,
@@ -1788,19 +1810,16 @@ std::string Calculator::WriteFileToOutputFolderReturnLink(
   return FileOperations::WriteFileReturnHTMLLink(fileContent, fileNameVirtual, linkText);
 }
 
-bool Calculator::WriteTestStrings(
-  List<std::string>& inputCommands,
-  List<std::string>& inputResults,
-  std::stringstream* commentsOnFailure
-) {
+bool Calculator::Test::WriteTestStrings(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("Calculator::WriteTestStrings");
   JSData result;
   result.theType = JSData::token::tokenArray;
-  result.theList.SetSize(inputCommands.size);
-  for (int i = 0; i < inputCommands.size; i ++) {
+  result.theList.SetSize(this->commands.size());
+  for (int i = 0; i < this->commands.size(); i ++) {
     JSData nextEntry;
-    nextEntry["input"] = inputCommands[i];
-    nextEntry["output"] = inputResults[i];
+    nextEntry["input"] = this->commands.theKeys[i];
+    Calculator::Test::OneTest& output = this->commands.theValues[i];
+    nextEntry["output"] = output.actualResult;
     result.theList[i] = nextEntry;
   }
   return FileOperations::WriteFileVirual(
@@ -1810,11 +1829,14 @@ bool Calculator::WriteTestStrings(
   );
 }
 
-Calculator::Test::Test() {
+Calculator::Test::Test(Calculator& inputOwner) {
   this->startIndex = 0;
   this->startTime = global.GetElapsedMilliseconds();
   this->inconsistencies = 0;
   this->unknown = 0;
+  this->noTestSkips = 0;
+  this->owner = &inputOwner;
+  this->flagTestResultsExist = true;
 }
 
 bool Calculator::innerAutomatedTest(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -1823,28 +1845,38 @@ bool Calculator::innerAutomatedTest(Calculator& theCommands, const Expression& i
     return theCommands << "Automated test requires admin access";
   }
   global.millisecondsMaxComputation = 30000000; //30k seconds, ok as we have admin access
-  Calculator::Test test;
+  Calculator::Test test(theCommands);
   if (!input.IsSmallInteger(&test.startIndex)) {
     return theCommands
     << "Automated test takes as single "
     << "argument the index of the first test. "
     << "All tests with smaller indices will be ignored. ";
   }
-  theCommands.AutomatedTestRun(test);
-  return output.AssignValue(test.ProcessResults(), theCommands);
+  test.CalculatorTestRun();
+  return output.AssignValue(test.reportHtml, theCommands);
 }
 
-std::string Calculator::Test::ProcessResults() {
+bool Calculator::Test::ProcessResults() {
   std::stringstream commentsOnFailure, out;
   if (!this->LoadTestStrings(&commentsOnFailure)) {
     global << logger::red << "Failed to load test strings. " << logger::endL
     << commentsOnFailure.str();
-    out << "Failed to load test strings. " << commentsOnFailure.str();
+    out << "<b style='color:red'>Failed to load test strings. </b>" << commentsOnFailure.str();
+  }
+  if (!this->flagTestResultsExist) {
+    out << "<b style='color:green'>Writing new test strings into: " << WebAPI::calculator::testFileNameVirtual << ". </b>";
+    std::stringstream commentsOnFailure2;
+    if (!this->WriteTestStrings(&commentsOnFailure2)) {
+      global << logger::red << "Failed to write test strings. " << logger::endL
+      << commentsOnFailure2.str();
+      out << "<b style='color:red'>Write file failed. </b>" << commentsOnFailure2.str();
+    }
   }
   std::stringstream goodCommands, unknownCommands, badCommands;
   this->inconsistencies = 0;
   if (this->startIndex > 0) {
-    out << "<b style='color:red'>Not all commands were processed</b>";
+    out << "<b style='color:red'>Only " << this->commands.size() - this->startIndex
+    << " out of " << this->commands.size() << " processed. </b>";
   }
   for (int i = this->startIndex; i < this->commands.size(); i ++) {
     Calculator::Test::OneTest& currentTest = this->commands.theValues[i];
@@ -1857,7 +1889,7 @@ std::string Calculator::Test::ProcessResults() {
     if (currentTest.actualResult == currentTest.expectedResult) {
       currentLine << "<td><b style='color:green'>OK</b></td>";
     } else if (currentTest.expectedResult == "") {
-      currentLine << "<td><b style='color:orange'>expected result unknown (run test again)</b></td>";
+      currentLine << "<td><b style='color:orange'>expected result unknown</b></td>";
       isUknown = true;
       this->unknown ++;
     } else {
@@ -1877,14 +1909,31 @@ std::string Calculator::Test::ProcessResults() {
       goodCommands << currentLine.str();
     }
   }
+  if (this->noTestSkips > 0) {
+    out << this->noTestSkips << " functions were not tested. "
+    << "The kinds of functions not auto-tested are "
+    << "described in the comments of class Function::Options. ";
+  }
   if (this->inconsistencies > 0) {
-    out << "<b style = 'color:red'>The test file results do not match the current results.</b> There were "
-    << this->inconsistencies << " inconsistencies. ";
+    out << "<b style = 'color:red'>"
+    << "The test file results do not match the current results. </b>"
+    << "There were " << this->inconsistencies << " inconsistencies. "
+    << "If you think the current computations are correct, "
+    << "say, the expected results have changed since the last test run, "
+    << "erase file: "
+    << WebAPI::calculator::testFileNameVirtual
+    << " and rerun the present test to store the expected results. "
+    ;
     out << "<table>" << badCommands.str() << "</table>";
   }
   if (this->unknown > 0) {
-    out << "<b style = 'color:orange'>There were " << this->inconsistencies
-    << " commands with no previous recorded results.</b>";
+    out << "<b style = 'color:orange'>There were " << this->unknown
+    << " commands with no previous recorded results. </b>";
+    if (this->flagTestResultsExist) {
+      out
+      << "<b>Please erase file " << WebAPI::calculator::testFileNameVirtual
+      << " and rerun the present test to store the expected results.</b>";
+    }
     out << "<table>" << unknownCommands.str() << "</table>";
   }
   if (this->unknown == 0 && this->inconsistencies == 0) {
@@ -1892,7 +1941,8 @@ std::string Calculator::Test::ProcessResults() {
   }
   out << "<table>" << goodCommands.str() << "</table>";
   out << "<br>Total run time: " << global.GetElapsedMilliseconds() - this->startTime << " ms. ";
-  return out.str();
+  this->reportHtml = out.str();
+  return this->inconsistencies > 0;
 }
 
 int Calculator::GetNumBuiltInFunctions() {

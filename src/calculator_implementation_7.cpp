@@ -8570,11 +8570,14 @@ bool CalculatorFunctionsGeneral::innerSolveProductSumEquationOverSetModN(
   return output.AssignValue(std::string("Couldn't find solution"), theCommands);
 }
 
-void Calculator::AutomatedTestRunPrepare(Calculator::Test &test) {
-  MacroRegisterFunctionWithName("Calculator::AutomatedTestRunPrepare");
-  test.commands.Clear();
-  for (int i = 0; i < this->NumPredefinedAtoms; i ++) {
-    MemorySaving<Calculator::AtomHandler>& currentPointer = this->operations.theValues[i];
+void Calculator::Test::CalculatorTestPrepare() {
+  MacroRegisterFunctionWithName("Calculator::Test::CalculatorTestPrepare");
+  if (this->owner == nullptr) {
+    global.fatal << "Non-initialized calculator test. " << global.fatal;
+  }
+  this->commands.Clear();
+  for (int i = 0; i < this->owner->NumPredefinedAtoms; i ++) {
+    MemorySaving<Calculator::AtomHandler>& currentPointer = this->owner->operations.theValues[i];
     if (currentPointer.IsZeroPointer()) {
       continue;
     }
@@ -8583,42 +8586,44 @@ void Calculator::AutomatedTestRunPrepare(Calculator::Test &test) {
     for (int j = 0; j < 2; j ++) {
       for (int k = 0; k < currentHandler->size; k ++) {
         Function& currentFunction = (*currentHandler)[k];
-        if (currentFunction.options.flagDontTestAutomatically) {
+        if (currentFunction.options.dontTestAutomatically) {
+          this->noTestSkips ++;
           continue;
         }
         Calculator::Test::OneTest oneTest;
         oneTest.command = currentFunction.theExample;
-        oneTest.atom = this->operations.theKeys[i];
-        test.commands.SetKeyValue(oneTest.command, oneTest);
+        oneTest.atom = this->owner->operations.theKeys[i];
+        this->commands.SetKeyValue(oneTest.command, oneTest);
       }
       currentHandler = &current.compositeHandlers;
     }
   }
 }
 
-void Calculator::AutomatedTestRun(Calculator::Test &test) {
-  MacroRegisterFunctionWithName("Calculator::AutomatedTestRun");
-  this->AutomatedTestRunPrepare(test);
+bool Calculator::Test::CalculatorTestRun() {
+  MacroRegisterFunctionWithName("Calculator::Test::CalculatorTestRun");
+  this->CalculatorTestPrepare();
   Calculator theTester;
   ProgressReport theReport;
   FormatExpressions theFormat;
   theFormat.flagExpressionIsFinal = true;
-  for (int i = test.startIndex; i < test.commands.size(); i ++) {
+  for (int i = this->startIndex; i < this->commands.size(); i ++) {
     std::stringstream reportStream;
-    Calculator::Test::OneTest& currentTest = test.commands.theValues[i];
-    reportStream << "<br>Test progress: testing " << i + 1 << " out of " << test.commands.size() << ". ";
+    Calculator::Test::OneTest& currentTest = this->commands.theValues[i];
+    reportStream << "<br>Test progress: testing " << i + 1 << " out of " << this->commands.size() << ". ";
     reportStream << "<br>Testing expression:<br> " << currentTest.command;
     global << logger::green << "Automated test: " << i << " out of "
-    << test.commands.size() << ", atom: " << currentTest.command << logger::endL;
+    << this->commands.size() << ", atom: " << currentTest.command << logger::endL;
     theReport.Report(reportStream.str());
     theTester.initialize();
     theTester.CheckConsistencyAfterInitialization();
     theTester.Evaluate(currentTest.command);
     currentTest.actualResult = theTester.theProgramExpression.ToString(&theFormat);
     reportStream << "<br>Result: " << theTester.theProgramExpression.ToString();
-    reportStream << "<br>Done in: " << global.GetElapsedSeconds() - test.startTime << " seconds. ";
+    reportStream << "<br>Done in: " << global.GetElapsedSeconds() - this->startTime << " seconds. ";
     theReport.Report(reportStream.str());
   }
+  return this->ProcessResults();
 }
 
 bool CalculatorFunctionsGeneral::innerPrintRuleStack(

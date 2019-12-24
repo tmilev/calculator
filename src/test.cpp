@@ -7,7 +7,7 @@
 static ProjectInformationInstance projectInfoTestRoutinesCPP(__FILE__, "Testing routines. ");
 
 int mainTest(List<std::string>& inputArguments) {
-  std::cout << "\n!!!!!Enter main test\n";
+  global << "Testing ..." << logger::endL;
   (void) inputArguments;
   // theWebServer.InitializeGlobalVariables();
   JSData::Test::All();
@@ -18,6 +18,6 @@ int mainTest(List<std::string>& inputArguments) {
   Expression::Test::All();
   LargeIntegerUnsigned::Test::All();
   Calculator::Test::All();
-  std::cout << "!!!!!TEST Success\n";
+  global << logger::green << "All tests passed. " << logger::endL;
   return 0;
 }

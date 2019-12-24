@@ -15,7 +15,7 @@ static ProjectInformationInstance projectInfoCalculatorFunctionRegistrationCPP(_
 
 void Calculator::initAdminFunctions() {
   Function::Options adminDefault, adminDisabled;
-  adminDefault.flagDontTestAutomatically = true;
+  adminDefault.dontTestAutomatically = true;
   adminDefault.adminOnly = true;
   adminDefault.flagIsInner = true;
   adminDisabled = adminDefault;
@@ -93,16 +93,20 @@ void Calculator::initPredefinedInnerFunctions() {
   Function::Options innerInvisibleNoTest;
   innerInvisibleNoTest.flagIsInner = true;
   innerInvisibleNoTest.visible = false;
-  innerInvisibleNoTest.flagDontTestAutomatically = true;
+  innerInvisibleNoTest.dontTestAutomatically = true;
 
   Function::Options innerNoTest;
   innerNoTest.flagIsInner = true;
-  innerNoTest.flagDontTestAutomatically = true;
+  innerNoTest.dontTestAutomatically = true;
 
 
   Function::Options innerExperimental;
   innerExperimental.flagIsInner = true;
   innerExperimental.flagIsExperimental = true;
+
+  Function::Options innerNoTestExperimental;
+  innerNoTestExperimental = innerNoTest;
+  innerNoTestExperimental.flagIsExperimental = true;
 
   Function::Options innerInvisibleExperimental;
   innerInvisibleExperimental.flagIsInner = true;
@@ -111,7 +115,7 @@ void Calculator::initPredefinedInnerFunctions() {
 
   Function::Options innerAdminNoTest;
   innerAdminNoTest.flagIsInner = true;
-  innerAdminNoTest.flagDontTestAutomatically = true;
+  innerAdminNoTest.dontTestAutomatically = true;
   innerAdminNoTest.adminOnly = true;
 
   Function::Options innerAdminNoTestExperimental;
@@ -120,7 +124,7 @@ void Calculator::initPredefinedInnerFunctions() {
 
   Function::Options innerAdminNoTestInvisibleOffByDefault;
   innerAdminNoTestInvisibleOffByDefault.flagIsInner = true;
-  innerAdminNoTestInvisibleOffByDefault.flagDontTestAutomatically = true;
+  innerAdminNoTestInvisibleOffByDefault.dontTestAutomatically = true;
   innerAdminNoTestInvisibleOffByDefault.adminOnly = true;
   innerAdminNoTestInvisibleOffByDefault.visible = false;
   innerAdminNoTestInvisibleOffByDefault.disabledByUser = true;
@@ -166,7 +170,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "RandomInteger((-2,- 1), (2,5));",
     "CalculatorConversions::innerRandomInteger",
     "RandomInteger",
-    innerStandard
+    innerNoTest
   );
   this->AddOperationHandler(
     "TurnOffRules",
@@ -365,7 +369,7 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorHtmlFunctions::innerUserInputBox,
     "",
     "Creates an user input text box. ",
-    "MakeInputBox(name = a, value = RandomInteger((- 5, - 1), (1, 5)));",
+    "MakeInputBox(name = a, value = 3);",
     "CalculatorHtmlFunctions::innerUserInputBox",
     "MakeInputBox",
     innerStandard
@@ -375,8 +379,8 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorHtmlFunctions::innerSetInputBox,
     "",
     "Sets value for input box that overrides the input box (no box is displayed). ",
-    "SetInputBox(name =a, value =RandomInteger((-5,- 1), (1,5))); "
-    "MakeInputBox(name =a)",
+    "SetInputBox(name = a, value =  3); "
+    "MakeInputBox(name = a)",
     "CalculatorHtmlFunctions::innerSetInputBox",
     "SetInputBox",
     innerStandard
@@ -814,7 +818,7 @@ void Calculator::initPredefinedInnerFunctions() {
     ")\n);\n",
     "CalculatorFunctionsGeneral::innerTestTLSMessageSequence",
     "TestTLSMessageSequence",
-    innerExperimental
+    innerNoTestExperimental
   );
   this->AddOperationHandler(
     "TestTLSDecodeSSLRecord",
@@ -3035,7 +3039,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "FetchWebPageGET(\"www.googleapis.com\", \"https\", \"https://www.googleapis.com/oauth2/v3/certs\")",
     "CalculatorFunctionsGeneral::innerFetchWebPageGET",
     "FetchWebPageGET",
-    innerStandard
+    innerAdminNoTest
   );
   this->AddOperationHandler(
     "FetchWebPagePOST",
@@ -5400,13 +5404,13 @@ void Calculator::initPredefinedStandardOperations() {
   Function::Options outerAdminInvisibleNoTest;
   outerAdminInvisibleNoTest.flagIsInner = false;
   outerAdminInvisibleNoTest.adminOnly = true;
-  outerAdminInvisibleNoTest.flagDontTestAutomatically = true;
+  outerAdminInvisibleNoTest.dontTestAutomatically = true;
   Function::Options innerStandard;
   innerStandard.flagIsInner = true;
   Function::Options innerExperimentalNoTest;
   innerExperimentalNoTest.flagIsInner = true;
   innerExperimentalNoTest.flagIsExperimental = true;
-  innerExperimentalNoTest.flagDontTestAutomatically = true;
+  innerExperimentalNoTest.dontTestAutomatically = true;
 
   this->AddOperationHandler(
     ";",

@@ -2202,7 +2202,7 @@ void Function::Options::reset() {
   this->flagIsExperimental        = false;
   this->disabledByUser            = false;
   this->disabledByUserDefault     = false;
-  this->flagDontTestAutomatically = false;
+  this->dontTestAutomatically = false;
   this->adminOnly                 = false;
 }
 

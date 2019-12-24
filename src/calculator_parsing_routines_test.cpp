@@ -7,6 +7,7 @@ static ProjectInformationInstance projectInfoCalculatorParsingRoutinesTestCPP(__
 bool Calculator::Test::All() {
   Calculator tester;
   tester.initialize();
+  Calculator::Test::ParseAllExamples(tester);
   Calculator::Test::NumberOfTestFunctions(tester);
   Calculator::Test::ParseDecimal(tester);
   Calculator::Test::BuiltInFunctionsABTest(tester);
@@ -17,6 +18,15 @@ bool Calculator::Test::NumberOfTestFunctions(Calculator& ownerInitialized) {
   int numberOfBuiltInFunction = ownerInitialized.GetNumBuiltInFunctions();
   if (numberOfBuiltInFunction <= 0) {
     global.fatal << "Calculator built in functions: " << numberOfBuiltInFunction << global.fatal;
+  }
+  return true;
+}
+
+bool Calculator::Test::ParseAllExamples(Calculator& ownerInitialized) {
+  MacroRegisterFunctionWithName("Calculator::Test::ParseAllExamples");
+  List<std::string> toBeParsed;
+  for (int i = 0; i < ownerInitialized.NumPredefinedAtoms; i ++) {
+    MemorySaving<Calculator::AtomHandler>& operationPointer = ownerInitialized.operations.theValues[i];
   }
   return true;
 }
@@ -41,5 +51,9 @@ bool Calculator::Test::ParseDecimal(Calculator& ownerInitialized) {
 }
 
 bool Calculator::Test::BuiltInFunctionsABTest(Calculator& ownerInitialized) {
-
+  Calculator::Test test(ownerInitialized);
+  if (!test.CalculatorTestRun()) {
+    global.fatal << "Calculator AB test failed. " << global.fatal;
+  }
+  return true;
 }

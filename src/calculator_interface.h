@@ -654,7 +654,19 @@ class Function {
     bool flagIsExperimental;
     bool disabledByUser;
     bool disabledByUserDefault;
-    bool flagDontTestAutomatically;
+    // The dontTestAutomatically
+    // indicates that the function should not be auto-tested.
+    // This functions that are not auto-tested include the following.
+    // - The automated test trigger function.
+    // - Calculator functions that do not have reproducible results,
+    //   such as, for example, the GenerateRandomPrime function.
+    //   Note such C++ functions are not ``functions''
+    //   in the mathematical sense.
+    // - Functions that crash the calculator deliberately,
+    //   such as the Crash function.
+    // - Functions that run extra slowly.
+    // - Functions that are considered experimental / in development.
+    bool dontTestAutomatically;
     bool adminOnly;
     void reset();
     Options();
@@ -1978,17 +1990,17 @@ public:
     return theCommands.innerOperationBinary(theCommands, input, output, theCommands.opTimes());
   }
   std::string WriteFileToOutputFolderReturnLink(const std::string& fileContent, const std::string& fileName, const std::string &linkText);
-  bool WriteTestStrings(
-    List<std::string>& inputCommands,
-    List<std::string>& inputResults,
-    std::stringstream* commentsOnFailure
-  );
   class Test {
   public:
     int64_t startTime;
     int startIndex;
     int inconsistencies;
     int unknown;
+    // see Function::Options::
+    int noTestSkips;
+    Calculator* owner;
+    std::string reportHtml;
+    bool flagTestResultsExist;
     class OneTest {
     public:
       std::string atom;
@@ -2000,30 +2012,22 @@ public:
     };
     MapList<std::string, Calculator::Test::OneTest, MathRoutines::HashString> commands;
     JSData storedResults;
-    Test();
-    std::string ProcessResults();
-    bool LoadTestStrings(
-      std::stringstream *commentsOnFailure
-    );
-    bool ProcessOneTest(
-      JSData& input
-    );
+    Test(Calculator& inputOwner);
+    bool ProcessResults();
+    bool LoadTestStrings(std::stringstream *commentsOnFailure);
+    bool WriteTestStrings(std::stringstream* commentsOnFailure);
+    bool ProcessOneTest(JSData& input);
     static bool All();
     static bool NumberOfTestFunctions(Calculator& ownerInitialized);
     static bool ParseDecimal(Calculator& ownerInitialized);
+    static bool ParseAllExamples(Calculator& ownerInitialized);
     static bool BuiltInFunctionsABTest(Calculator& ownerInitialized);
+    void CalculatorTestPrepare();
+    void CalculatorTestProcessResults();
+    bool CalculatorTestRun();
   };
   static bool innerAutomatedTest(Calculator& theCommands, const Expression& input, Expression& output);
   int GetNumBuiltInFunctions();
-  void AutomatedTestRunPrepare(
-    Calculator::Test& test
-  );
-  void AutomatedTestRun(
-    Calculator::Test& test
-  );
-  void AutomatedProcessResults(
-    Calculator::Test& test
-  );
   static bool innerTranspose(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetElementWeylGroup(Calculator& theCommands, const Expression& input, Expression& output);
   static bool EvaluateCarryOutActionSSAlgebraOnGeneralizedVermaModule(

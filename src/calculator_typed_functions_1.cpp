@@ -18,7 +18,7 @@ bool Calculator::innerOperationBinary(
   Expression& output,
   int theOp
 ) {
-  MemorySaving<Calculator::AtomHandler>& theOperation = theCommands.operations.theValues[theOp];
+  MemorySaving<Calculator::OperationHandlers>& theOperation = theCommands.operations.theValues[theOp];
   if (theOperation.IsZeroPointer()) {
     return false;
   }

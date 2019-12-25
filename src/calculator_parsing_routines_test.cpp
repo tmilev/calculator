@@ -24,9 +24,28 @@ bool Calculator::Test::NumberOfTestFunctions(Calculator& ownerInitialized) {
 
 bool Calculator::Test::ParseAllExamples(Calculator& ownerInitialized) {
   MacroRegisterFunctionWithName("Calculator::Test::ParseAllExamples");
-  List<std::string> toBeParsed;
   for (int i = 0; i < ownerInitialized.NumPredefinedAtoms; i ++) {
-    MemorySaving<Calculator::AtomHandler>& operationPointer = ownerInitialized.operations.theValues[i];
+    MemorySaving<Calculator::OperationHandlers>& operationPointer =
+    ownerInitialized.operations.theValues[i];
+    if (operationPointer.IsZeroPointer()) {
+      continue;
+    }
+    Calculator::OperationHandlers& operationHandlers = operationPointer.GetElement();
+    List<Function> handlers = operationHandlers.mergeHandlers();
+    for (int i = 0; i < handlers.size; i ++) {
+      Function& currentHandler = handlers[i];
+      if (currentHandler.theExample == "") {
+        global.fatal << "Empty example for operation: "
+        << currentHandler.calculatorIdentifier << global.fatal;
+      }
+      Expression notUsed;
+      if (!ownerInitialized.Parse(currentHandler.theExample, notUsed)) {
+        global.fatal << "Failed to parse built-in example for rule: "
+        << currentHandler.calculatorIdentifier
+        << ". The example was: " << currentHandler.theExample << ". "
+        << global.fatal;
+      }
+    }
   }
   return true;
 }

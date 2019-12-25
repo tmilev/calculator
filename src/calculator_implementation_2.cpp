@@ -5,7 +5,7 @@
 
 static ProjectInformationInstance projectInfoCalculatorImplementation2CPP(__FILE__, "Calculator core evaluation engine. ");
 
-JSData Calculator::AtomHandler::ToJSON() {
+JSData Calculator::OperationHandlers::ToJSON() {
   JSData result;
   JSData currentFunctionListDirect;
   currentFunctionListDirect.theType = JSData::token::tokenArray;
@@ -33,21 +33,21 @@ JSData Calculator::ToJSONFunctionHandlers() {
       continue;
     }
     const std::string& operationName = this->operations.theKeys[i];
-    Calculator::AtomHandler& handlers = this->operations.theValues[i].GetElement();
+    Calculator::OperationHandlers& handlers = this->operations.theValues[i].GetElement();
     output[operationName] = handlers.ToJSON();
   }
   return output;
 }
 
-Calculator::AtomHandler::AtomHandler() {
+Calculator::OperationHandlers::OperationHandlers() {
   this->flagDeallocated = false;
 }
 
-Calculator::AtomHandler::~AtomHandler() {
+Calculator::OperationHandlers::~OperationHandlers() {
   this->flagDeallocated = true;
 }
 
-bool Calculator::AtomHandler::CheckConsisitency() {
+bool Calculator::OperationHandlers::CheckConsisitency() {
   if (this->flagDeallocated) {
     global.fatal << "Use after free of Calculator::AtomHandler. " << global.fatal;
   }
@@ -108,7 +108,14 @@ Expression Calculator::EMInfinity() {
   return result;
 }
 
-std::string Calculator::AtomHandler::ToStringRuleStatusUser() {
+List<Function> Calculator::OperationHandlers::mergeHandlers() {
+  List<Function> result;
+  result.AddListOnTop(this->handlers);
+  result.AddListOnTop(this->compositeHandlers);
+  return result;
+}
+
+std::string Calculator::OperationHandlers::ToStringRuleStatusUser() {
   std::stringstream out;
   for (int i = 0; i < this->handlers.size; i ++) {
     Function& currentHandler = this->handlers[i];

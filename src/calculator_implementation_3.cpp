@@ -1948,7 +1948,7 @@ bool Calculator::Test::ProcessResults() {
 int Calculator::GetNumBuiltInFunctions() {
   int result = 0;
   for (int i = this->NumPredefinedAtoms - 1; i >= 0; i --) {
-    MemorySaving<Calculator::AtomHandler>& current = this->operations.theValues[i];
+    MemorySaving<Calculator::OperationHandlers>& current = this->operations.theValues[i];
     if (current.IsZeroPointer()) {
       continue;
     }

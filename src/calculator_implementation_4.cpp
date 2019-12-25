@@ -808,12 +808,12 @@ bool Calculator::RecursionDepthExceededHandleRoughly(const std::string& addition
 bool Calculator::CheckOperationHandlers() {
   MacroRegisterFunctionWithName("Calculator::CheckOperationHandlers");
   for (int i = 0; i < this->operations.size(); i ++) {
-    MemorySaving<Calculator::AtomHandler>& current = this->operations.theValues[i];
+    MemorySaving<Calculator::OperationHandlers>& current = this->operations.theValues[i];
     if (current.IsZeroPointer()) {
       continue;
     }
     current.GetElement().CheckConsisitency();
-    Calculator::AtomHandler& allHandlers = current.GetElement();
+    Calculator::OperationHandlers& allHandlers = current.GetElement();
     for (int j = 0; j < allHandlers.compositeHandlers.size; j ++) {
       allHandlers.compositeHandlers[j].CheckConsistency();
     }
@@ -2020,7 +2020,7 @@ SemisimpleLieAlgebra* Expression::GetAmbientSSAlgebraNonConstUseWithCaution() co
 Function& Calculator::GetFunctionHandlerFromNamedRule(const std::string& inputNamedRule) {
   const Calculator::NamedRuleLocation& current =
   this->namedRules.GetValueConstCrashIfNotPresent(inputNamedRule);
-  const MemorySaving<Calculator::AtomHandler>& currentOperation =
+  const MemorySaving<Calculator::OperationHandlers>& currentOperation =
   this->operations.GetValueConstCrashIfNotPresent(current.containerOperation);
   if (currentOperation.IsZeroPointer()) {
     global.fatal << "Named rule " << inputNamedRule
@@ -2130,8 +2130,8 @@ void Calculator::RegisterCalculatorFunction(Function& theFun, int indexOp) {
     << ", there are: " << this->operations.size()
     << " operations total." << global.fatal;
   }
-  MemorySaving<Calculator::AtomHandler>& handlerPointer = this->operations.theValues[indexOp];
-  Calculator::AtomHandler& handler = handlerPointer.GetElement();
+  MemorySaving<Calculator::OperationHandlers>& handlerPointer = this->operations.theValues[indexOp];
+  Calculator::OperationHandlers& handler = handlerPointer.GetElement();
   handler.CheckConsisitency();
   if (theFun.options.flagIsCompositeHandler) {
     theFun.indexInOperationHandlers = handler.compositeHandlers.size;
@@ -2231,8 +2231,8 @@ std::string Function::ToStringShort() const {
   }
   std::stringstream out;
   out << this->owner->operations.theKeys[this->indexOperation];
-  MemorySaving<Calculator::AtomHandler>& handlerPointer = this->owner->operations.theValues[this->indexOperation];
-  Calculator::AtomHandler& handler = handlerPointer.GetElement();
+  MemorySaving<Calculator::OperationHandlers>& handlerPointer = this->owner->operations.theValues[this->indexOperation];
+  Calculator::OperationHandlers& handler = handlerPointer.GetElement();
   if (this->options.flagIsCompositeHandler) {
     out << " (composite) ("
     << this->indexInOperationHandlers + 1 << " out of "
@@ -2291,7 +2291,7 @@ JSData Function::ToJSON() const {
   } else {
     result["visible"] = "false";
   }
-  Calculator::AtomHandler& operationHandlers = this->owner->operations.theValues[this->indexOperation].GetElement();
+  Calculator::OperationHandlers& operationHandlers = this->owner->operations.theValues[this->indexOperation].GetElement();
   result["number"] = this->indexInOperationHandlers + 1;
   if (this->options.flagIsCompositeHandler) {
     result["composite"] = "true";

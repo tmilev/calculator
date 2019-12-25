@@ -215,7 +215,7 @@ bool CalculatorFunctionsGeneral::innerTestTLSDecodeSSLRecord(
     out << "<b style = 'color:red'>Failed to decode the record.</b> "
     << commentsOnFailure.str();
   }
-  out << testServer.lastReaD.ToHtml();
+  out << testServer.lastReaD.ToHtml(1);
 
   return output.AssignValue(out.str(), theCommands);
 }
@@ -8577,11 +8577,11 @@ void Calculator::Test::CalculatorTestPrepare() {
   }
   this->commands.Clear();
   for (int i = 0; i < this->owner->NumPredefinedAtoms; i ++) {
-    MemorySaving<Calculator::AtomHandler>& currentPointer = this->owner->operations.theValues[i];
+    MemorySaving<Calculator::OperationHandlers>& currentPointer = this->owner->operations.theValues[i];
     if (currentPointer.IsZeroPointer()) {
       continue;
     }
-    Calculator::AtomHandler& current = currentPointer.GetElement();
+    Calculator::OperationHandlers& current = currentPointer.GetElement();
     List<Function>* currentHandler = &current.handlers;
     for (int j = 0; j < 2; j ++) {
       for (int k = 0; k < currentHandler->size; k ++) {

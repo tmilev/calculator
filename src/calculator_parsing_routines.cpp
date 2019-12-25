@@ -346,7 +346,7 @@ bool Calculator::CheckPredefinedFunctionNameRepetitions() {
   MacroRegisterFunctionWithName("Calculator::CheckPredefinedFunctionNameRepetitions");
   HashedList<std::string, MathRoutines::HashString> ruleIds;
   for (int i = 0; i < this->operations.size(); i ++) {
-    MemorySaving<Calculator::AtomHandler>& current = this->operations.theValues[i];
+    MemorySaving<Calculator::OperationHandlers>& current = this->operations.theValues[i];
     if (current.IsZeroPointer()) {
       continue;
     }

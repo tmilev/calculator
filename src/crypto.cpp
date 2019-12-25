@@ -1620,10 +1620,11 @@ bool JSONWebToken::VerifyRSA256(
   if (!Crypto::ConvertBase64ToLargeUnsignedInt(this->signatureBase64, theSignatureInt, commentsOnFailure)) {
     return false;
   }
-  double timeStart = - 1;
-  if (commentsGeneral != nullptr) {
-    timeStart = global.GetElapsedSeconds();
-  }
+  // In order to have reproducible comments, we don't want to log time.
+  // double timeStart = - 1;
+  // if (commentsGeneral != nullptr) {
+  //   timeStart = global.GetElapsedSeconds();
+  // }
   if (theModulus == 0 || theExponent == 0) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "The modulus and the exponent must be non-zero. "
@@ -1632,10 +1633,12 @@ bool JSONWebToken::VerifyRSA256(
     return false;
   }
   LargeIntegerUnsigned RSAresult = Crypto::RSAencrypt(theModulus, theExponent, theSignatureInt);
-  if (commentsGeneral != nullptr) {
-    *commentsGeneral << "<br>RSA encryption took: "
-    << global.GetElapsedSeconds() - timeStart << " second(s).<br>";
-  }
+  // In order to have reproducible comments, we don't want to log time.
+  // if (commentsGeneral != nullptr) {
+  //
+  //   *commentsGeneral << "<br>RSA encryption took: "
+  //   << global.GetElapsedSeconds() - timeStart << " second(s).<br>";
+  // }
   std::string RSAresultBitstream, RSAresultLast32bytes;
   Crypto::ConvertLargeUnsignedIntToStringSignificantDigitsFirst(RSAresult, 0, RSAresultBitstream);
   if (RSAresultBitstream.size() > 32) {

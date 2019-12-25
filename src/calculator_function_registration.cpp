@@ -151,7 +151,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "f{}g{}x",
     "CalculatorConversions::SelectAtRandom",
     "SelectAtRandom",
-    innerStandard
+    innerNoTest
   );
   this->AddOperationHandler(
     "RandomInteger",
@@ -350,7 +350,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "\"problems/default/Functions-composing-fractional-linear-1.html\"))",
     "CalculatorHtmlFunctions::innerInterpretProblem",
     "InterpretProblem",
-    innerStandard
+    innerNoTest
   );
   this->AddOperationHandler(
     "ProblemGiveUp",
@@ -2629,7 +2629,7 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctionsGeneral::innerArccosAlgebraic,
     "",
     "Arccos function for special angles. ",
-    "\\arccos(\\sqrt{2}/2})",
+    "\\arccos(\\sqrt{2}/2)",
     "CalculatorFunctionsGeneral::innerArccosAlgebraic",
     "arccosAlgebraic",
     innerStandard
@@ -4006,7 +4006,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "",
     "In for the expression a \\cup (b\\cup c) the expression a\\cup b "
     "can be reduced to d, replaces a\\cup(b\\cup c) by a\\cup d. ",
-    "%UseBracketForIntervals\n  [3,3]\\cup([3,7]\\cup [6,8]);",
+    "%UseBracketForIntervals\n"
+    "[3, 3] \\cup ( [3, 7] \\cup [6, 8] );",
     "CalculatorFunctionsGeneral::innerUnionUnionIntervals",
     "UnionUnionIntervals",
     innerStandard
@@ -4016,7 +4017,8 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctionsGeneral::innerUnionIntervals,
     "",
     "If the union of two intervals is one interval, replaces the interval. ",
-    "%UseBracketForIntervals\n  [3,7]\\cup [6,8]);",
+    "%UseBracketForIntervals\n"
+    "[3,7] \\cup [6,8);",
     "CalculatorFunctionsGeneral::innerUnionIntervals",
     "UnionIntervals",
     innerStandard
@@ -5201,11 +5203,13 @@ void Calculator::initPredefinedInnerFunctions() {
     "",
     "<b>This function is being developed and is not implemented fully yet. </b>"
     "Loads an sl(2) subalgebra from expression. ",
-    "SltwoSubalgebra(B_{3},g_  +(B)_{3}, - 1)\\\\ "
-    "+ 3 ((GetChevalleyGenerator, (B)_{3}, -2)), "
-    "3 ((GetChevalleyGenerator, (B)_{3}, 3))\\\\ "
-    "+6 ((GetChevalleyGenerator, (B)_{3}, 1))\\\\ "
-    "+ 10 / 3 ((GetChevalleyGenerator, (B)_{3}, 2)))",
+    "SltwoSubalgebra(\n"
+    "B_{3},\n"
+    "3 GetChevalleyGenerator((B)_{3}, -2),\n"
+    "3 GetChevalleyGenerator( (B)_{3}, 3)\n"
+    "+ 6 GetChevalleyGenerator( (B)_{3}, 1)\n"
+    "+ 10 / 3 GetChevalleyGenerator( (B)_{3}, 2)\n"
+    ")",
     "CalculatorConversions::innerSlTwoSubalgebraPrecomputed",
     "SltwoSubalgebra",
     innerAdminNoTest
@@ -7039,7 +7043,7 @@ void Calculator::initPredefinedStandardOperations() {
     "If the rational power is small enough, converts to an algebraic number. "
     "At the moment works with rational powers whose denominator is 2, "
     "may be extended to larger powers in the future. ",
-    "\n%",
+    "54^{1/2}",
     "CalculatorFunctionsBinaryOps::innerPowerRationalByRationalOutputAlgebraic",
     "PowerRationalByRationalOutputAlgebraic",
     innerStandard
@@ -7350,13 +7354,20 @@ void Calculator::initPredefinedStandardOperations() {
     "",
     "Dereferences a sequence or a matrix. "
     "The syntax is as illustrated by the example. ",
-    "X = (a,b,c); X_1; X_2; X_3; X_4; X_j; j =3; X_j;\n"
+    "X = (a,b,c);\n"
+    "X_1;\n"
+    "X_2;\n"
+    "X_3;\n"
+    "X_4;\n"
+    "X_j;\n"
+    "j = 3;\n"
+    "X_j;\n"
     "Denominations = (1, 5, 10, 25,50, 100,200, 500, 1000, 2000, 5000);\n"
-    "p(0, 0 )=1;\n"
-    "p({{a}},{{x}}):if x<0= 0;\n"
-    "p(0,{{x}})= 0;\n"
-    "p({{a}},{{x}} )= p(a- 1,x) + p(a, x-Denominations_a);\n"
-    "p(11,100)",
+    "p (0, 0 )=1;\n"
+    "p ({{a}}, {{x}}):if (x < 0) = 0;\n"
+    "p (0, {{x}})= 0;\n"
+    "p ({{a}}, {{x}} )= p(a- 1,x) + p(a, x-Denominations_a);\n"
+    "p (11, 100)",
     "CalculatorFunctionsGeneral::innerDereferenceSequenceOrMatrix",
     "DereferenceSequenceOrMatrix",
     innerStandard
@@ -7366,7 +7377,10 @@ void Calculator::initPredefinedStandardOperations() {
     CalculatorFunctionsGeneral::innerDereferenceInterval,
     "",
     "Dereferences an interval, as illustrated by the example. ",
-    "%UseBracketForIntervals; [a,b)_1; (a,b]_2; [a,b]_1; ",
+    "%UseBracketForIntervals\n"
+    "[a, b)_1;\n"
+    "(a, b]_2;\n"
+    "[a, b]_1; ",
     "CalculatorFunctionsGeneral::innerDereferenceInterval",
     "DereferenceInterval",
     innerStandard
@@ -7415,8 +7429,9 @@ void Calculator::initPredefinedStandardOperations() {
     "[]",
     CalculatorFunctionsBinaryOps::innerLieBracketDistribute,
     "",
-    "Implementation of the rules [{{a}}+{{b}},{{c}}] =[a,c] +[b,c] and  [{{c}},{{a}}+{{b}}] =[c,a] +[c,b]",
-    " ",
+    "Implementation of the rules [{{a}}+{{b}},{{c}}] = [a, c] +[b, c] "
+    "and [{{c}},{{a}}+{{b}}] =[c,a] +[c,b]",
+    "[a+b, c]",
     "CalculatorFunctionsBinaryOps::innerLieBracketDistribute",
     "LieBracketDistribute",
     innerStandard
@@ -7593,8 +7608,10 @@ void Calculator::initPredefinedStandardOperations() {
     "",
     "Greater than: has similar action to the less than sign. "
     "The following example shows an implementation of commutativity. ",
-    "x_{{i}}*x_{{j}}*{{a}}:if i>j =x_j*x_i*a;\n x_{{i}}*x_{{j}}:if i>j =x_j*x_i;"
-    "(x_2*x_1- x_1*x_3)(x_1x_5+x_5x_4x_2); x_5x_4x_3x_2x_1",
+    "x_{{i}} * x_{{j}} * {{a}} :if(i > j) = x_j * x_i * a;\n"
+    "x_{{i}}*x_{{j}}: if (i > j) = x_j * x_i;\n"
+    "(x_2 * x_1 - x_1 * x_3)(x_1 x_5 + x_5 x_4 x_2);\n"
+    "x_5x_4x_3x_2x_1",
     "CalculatorFunctionsGeneral::innerGreaterThan",
     "GreaterThan",
     innerStandard
@@ -7649,10 +7666,10 @@ void Calculator::initPredefinedStandardOperations() {
     "Else evaluates to 1 if the left argument equals mathematically the right argument.",
     "%NumberColors\n  "
     "A = (a =3, b=4);\n"
-    "B= (a = (sqrt(3))^2, b=4 );\n"
-    "A ==B;\n"
-    "x ==y;\n"
-    "x ==1;\nIsEqualToX{} {{a}}=a ==x;\n"
+    "B = (a = (sqrt(3))^2, b = 4);\n"
+    "A == B;\n"
+    "x == y;\n"
+    "x == 1;\nIsEqualToX{}{{a}} = (a == x);\n"
     "IsEqualToX{}y;\n"
     "IsEqualToX{}x;\n"
     "IsEqualToX{}1;\n"
@@ -7705,11 +7722,11 @@ void Calculator::initPredefinedStandardOperations() {
     "",
     "Returns the last element of the expression, provided the argument has "
     "no bound variables. If the expression has bound variables does nothing.",
-    "p{}((), 0 )=1;\n"
-    "p{}({{x}}, {{n}}):if n<0= 0;\n"
-    "p{}((), {{n}})= 0;\n"
-    "p{}({{x}},{{n}})= p{}(x, n-Last x) +p{}(RemoveLast x, n);\n"
-    "p{}((1,2, 5, 10, 25,100), 100);",
+    "p{}((), 0) = 1;\n"
+    "p{}({{x}},{{n}}): if (n < 0) = 0;\n"
+    "p{}((), {{n}}) = 0;\n"
+    "p{}({{x}}, {{n}}) = p{}(x, n - Last x) +p{}(RemoveLast x, n);\n"
+    "p{}((1, 2, 5, 10, 25, 100), 100);",
     "CalculatorFunctionsGeneral::innerLastElement",
     "Last",
     innerStandard

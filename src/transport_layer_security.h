@@ -407,7 +407,7 @@ public:
   bool Decode(std::stringstream* commentsOnFailure);
   bool DecodeBody(std::stringstream* commentsOnFailure);
   std::string ToBytes() const;
-  std::string ToHtml();
+  std::string ToHtml(int id);
   std::string ToString() const;
   std::string ToStringType() const;
   JSData ToJSONSerialization();

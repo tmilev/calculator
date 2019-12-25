@@ -988,14 +988,15 @@ class Calculator {
     return output;
   }
 public:
-  class AtomHandler {
+  class OperationHandlers {
   public:
     std::string atom;
     List<Function> handlers;
     List<Function> compositeHandlers;
     bool flagDeallocated;
-    AtomHandler();
-    ~AtomHandler();
+    OperationHandlers();
+    ~OperationHandlers();
+    List<Function> mergeHandlers();
     bool CheckConsisitency();
     JSData ToJSON();
     std::string ToStringRuleStatusUser();
@@ -1003,7 +1004,7 @@ public:
 
   // Operations parametrize the expression elements.
   // Operations are the labels of the atom nodes of the expression tree.
-  MapReferences<std::string, MemorySaving<AtomHandler>, MathRoutines::HashString> operations;
+  MapReferences<std::string, MemorySaving<OperationHandlers>, MathRoutines::HashString> operations;
 
   HashedList<std::string, MathRoutines::HashString> atomsThatAllowCommutingOfCompositesStartingWithThem;
   HashedList<std::string, MathRoutines::HashString> atomsNotAllowingChainRule;

@@ -71,6 +71,7 @@ bool Calculator::Test::ParseDecimal(Calculator& ownerInitialized) {
 
 bool Calculator::Test::BuiltInFunctionsABTest(Calculator& ownerInitialized) {
   Calculator::Test test(ownerInitialized);
+  test.CalculatorTestPrepare();
   if (!test.CalculatorTestRun()) {
     global.fatal << "Calculator AB test failed. " << global.fatal;
   }

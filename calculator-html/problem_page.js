@@ -422,7 +422,7 @@ Problem.prototype.getNextProblemButton = function(
   nextProblemTag.href = `#${nextURL}`;
   nextProblemTag.addEventListener(
     "click", 
-    window.calculator.problemPage.selectCurrentProblem.bind(
+    selectCurrentProblem.bind(
       null, 
       this.nextProblemId, 
       hints.defaultRequest,
@@ -1338,7 +1338,7 @@ function updateProblemPageCallback(input, outputComponent) {
   }
   var theProblem = null;
   try {
-    theProblem = JSON.parse(input);
+    theProblem = miscellaneous.jsonUnescapeParse(input);
   } catch (e) {
     outputComponent.innerHTML = `Error parsing: ${e}. Failed to parse: ${input}`;
     thePage.cleanUpLoginSpan(outputComponent);
@@ -1359,10 +1359,13 @@ function updateProblemPageCallback(input, outputComponent) {
 }
 
 function updateProblemPage() {
-  setTimeout(() => { window.calculator.coursePage.selectCurrentCoursePage();}, 0);
+  setTimeout(() => { 
+    window.calculator.coursePage.selectCurrentCoursePage();
+  }, 0);
   var thePage = window.calculator.mainPage;
-  //thePage.pages.problemPage.flagLoaded is modified by the following functions:
-  // selectCurrentProblem, logout, callbackClone, the present function updateProblemPage
+  // thePage.pages.problemPage.flagLoaded is modified by the following 
+  // functions: selectCurrentProblem, logout, callbackClone,
+  // the present function updateProblemPage
   /**@type {Problem} */
   var theProblem = thePage.getCurrentProblem();
   if (thePage.pages.problemPage.flagLoaded) {

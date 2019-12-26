@@ -150,9 +150,16 @@ void QueryExact::SetLabelValue(const std::string& label, const std::string& desi
   this->nestedLabels[0] = label;
 }
 
-bool Database::FindOne(const QueryExact& query, JSData& output, std::stringstream* commentsOnFailure) {
+bool Database::FindOne(
+  const QueryExact& query, JSData& output, std::stringstream* commentsOnFailure
+) {
   if (global.flagDatabaseCompiled) {
-    return this->mongoDB.FindOneFromQueryString(query.collection, query.ToJSON().ToString(false), output, commentsOnFailure);
+    return this->mongoDB.FindOneFromQueryString(
+      query.collection,
+      query.ToJSON().ToString(nullptr),
+      output,
+      commentsOnFailure
+    );
   }
   if (commentsOnFailure != nullptr) {
     *commentsOnFailure << "Database::FindOne not implemented yet.";
@@ -278,7 +285,9 @@ void GlobalVariables::initModifiableDatabaseFields() {
   toWrite["modifiableFields"] = modifiableDataJSON;
   outputFile << "//File automatically generated. Please do not modify.\n";
   outputFile << "\"use strict\";\n";
-  outputFile << "var modifiableDatabaseData = " << toWrite.ToString(false, true) << ";\n";
+  outputFile << "var modifiableDatabaseData = "
+  << toWrite.ToString(&JSData::PrintOptions::NewLine())
+  << ";\n";
   outputFile << "module.exports = {modifiableDatabaseData};";
 }
 
@@ -439,7 +448,9 @@ std::string UserCalculator::ToString() {
     }
   }
   out << "<br>Deadline info: "
-  << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(this->deadlines.ToString(false));
+  << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(
+    this->deadlines.ToString(nullptr)
+  );
   return out.str();
 }
 
@@ -512,15 +523,24 @@ bool UserCalculatorData::LoadFromJSON(JSData& input) {
   this->actualAuthenticationToken         = input[DatabaseStrings::labelAuthenticationToken               ].theString;
   this->timeOfAuthenticationTokenCreation = input[DatabaseStrings::labelTimeOfAuthenticationTokenCreation ].theString;
   this->problemDataStrinG                 = input[DatabaseStrings::labelProblemDatA                       ].theString;
-  this->problemDataJSON                   = input[DatabaseStrings::labelProblemDataJSON                   ]       ;
+  this->problemDataJSON                   = input[DatabaseStrings::labelProblemDataJSON                   ]          ;
   this->actualHashedSaltedPassword        = input[DatabaseStrings::labelPassword                          ].theString;
   this->userRole                          = input[DatabaseStrings::labelUserRole                          ].theString;
-
   this->instructorInDB                    = input[DatabaseStrings::labelInstructor                        ].theString;
   this->semesterInDB                      = input[DatabaseStrings::labelSemester                          ].theString;
   this->sectionInDB                       = input[DatabaseStrings::labelSection                           ].theString;
   this->courseInDB                        = input[DatabaseStrings::labelCurrentCourses                    ].theString;
   this->sectionsTaught.SetSize(0);
+  // TODO(tmilev): Remove URL decoding.
+  // The layer of URL decoding is here because older
+  // versions of the calculator stored pass hashes as:
+  // percentEncode(base64Encode(raw_bytes)).
+  // The current version stores without % encoding:
+  // base64Encode(raw_bytes).
+  // Since the password hash is 32 bytes its base64 encoding ends in =
+  // which in turn means passwords stored by older version of the calculator
+  // have wrong endings.
+  this->actualHashedSaltedPassword = HtmlRoutines::ConvertURLStringToNormal(this->actualHashedSaltedPassword, false);
   JSData sectionsTaughtList = input[DatabaseStrings::labelSectionsTaught];
   if (sectionsTaughtList.theType == JSData::token::tokenArray) {
     for (int i = 0; i < sectionsTaughtList.theList.size; i ++) {
@@ -694,6 +714,11 @@ bool UserCalculator::AuthenticateWithUserNameAndPass(std::stringstream* comments
   MacroRegisterFunctionWithName("UserCalculator::Authenticate");
   (void) commentsOnFailure;
   this->ComputeHashedSaltedPassword();
+  global << logger::red << "DEBUG: authenticating with: "
+  << this->enteredHashedSaltedPassword
+  << "; actual pass hash: " << this->actualHashedSaltedPassword << logger::endL;
+  // TODO(tmilev): timing attacks on the comparison may be used to guess the
+  // length of the salted hashed password. Fix this with a proper HMAC comparison.
   return this->enteredHashedSaltedPassword == this->actualHashedSaltedPassword;
 }
 
@@ -1592,7 +1617,8 @@ bool Database::User::LoginViaGoogleTokenCreateNewAccountIfNeeded(
   }
   if (theData.GetValue("email").theType != JSData::token::tokenString) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Could not find email entry in the json data " << theData.ToString(true);
+      *commentsOnFailure << "Could not find email entry in the json data "
+      << theData.ToString(nullptr);
     }
     return false;
   }
@@ -1738,8 +1764,9 @@ void UserCalculator::ComputeHashedSaltedPassword() {
   this->usernameHashedPlusPassWordHashed.resize(Crypto::LengthSha3DefaultInBytes * 2);
   List<unsigned char> hasher;
   Crypto::computeSha3_256(this->enteredPassword, hasher);
-  //<-careful copying entered password around. We want to avoid leaving
-  //passwords in non-zeroed memory, even if properly freed (to the extent possible and practical).
+  // <-careful copying entered password around. We want to avoid leaving
+  // passwords in non-zeroed memory, even if properly
+  // freed (to the extent possible and practical).
   for (unsigned i = 0; i < Crypto::LengthSha3DefaultInBytes; i ++) {
     this->usernameHashedPlusPassWordHashed[i + Crypto::LengthSha3DefaultInBytes] = static_cast<char>(hasher[i]);
   }
@@ -1758,7 +1785,8 @@ bool UserCalculator::StoreToDB(bool doSetPassword, std::stringstream* commentsOn
     this->actualHashedSaltedPassword = this->enteredHashedSaltedPassword;
   }
   JSData setUser = this->ToJSON();
-
+  global << logger::red << "DEBUG: About to store: "
+  << setUser.ToString(nullptr) << logger::endL;
   return Database::get().UpdateOne(
     findUser, setUser, commentsOnFailure
   );
@@ -1789,6 +1817,6 @@ std::string UserCalculator::GetActivationAddressFromActivationToken(
   theJS[DatabaseStrings::labelEmail] = inputEmailUnsafe;
   theJS[DatabaseStrings::labelCurrentPage] = DatabaseStrings::labelPageActivateAccount;
   out << global.DisplayNameExecutableApp
-  << "#" << HtmlRoutines::ConvertStringToURLString(theJS.ToString(false), false);
+  << "#" << HtmlRoutines::ConvertStringToURLString(theJS.ToString(nullptr), false);
   return out.str();
 }

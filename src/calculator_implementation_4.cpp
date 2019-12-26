@@ -2408,7 +2408,7 @@ JSData Calculator::ToJSONOutputAndSpecials() {
 
 std::string Calculator::ToStringOutputAndSpecials() {
   MacroRegisterFunctionWithName("Calculator::ToStringOutputAndSpecials");
-  return this->ToJSONOutputAndSpecials().ToString(false);
+  return this->ToJSONOutputAndSpecials().ToString(nullptr);
 }
 
 void Calculator::WriteAutoCompleteKeyWordsToFile() {

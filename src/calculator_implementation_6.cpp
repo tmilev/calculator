@@ -149,13 +149,13 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation(
       global.SetWebInpuT(WebAPI::problem::fileName, theProblem.fileName);
       answerGeneration += WebAPIResponse::GetAnswerOnGiveUp(
         randomSeedCurrent, &currentAnswer, &answerGenerated
-      ).ToString(false) + "<hr>";
+      ).ToString(nullptr) + "<hr>";
       if (!answerGenerated) {
         break;
       }
       global.SetWebInpuT(currentKey, HtmlRoutines::ConvertStringToURLString(currentAnswer, false));
       solutionReport +=
-      WebAPIResponse::SubmitAnswersJSON(randomSeedCurrent, &answersWork, false).ToString(false) + "<hr>";
+      WebAPIResponse::SubmitAnswersJSON(randomSeedCurrent, &answersWork, false).ToString(nullptr) + "<hr>";
       if (!answersWork) {
         break;
       }
@@ -566,7 +566,7 @@ bool CalculatorFunctionsGeneral::innerTestJSON(Calculator& theCommands, const Ex
     return output.AssignValue(out.str(), theCommands);
   }
   out << "Input:<br>" << HtmlRoutines::ConvertStringToHtmlString(inputString, false) << "<hr>Output: <br>"
-  << theData.ToString(true);
+  << theData.ToString(nullptr);
   return output.AssignValue(out.str(), theCommands);
 }
 

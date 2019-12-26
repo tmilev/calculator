@@ -77,7 +77,7 @@ bool Database::FallBack::UpdateOneNoLocks(
   if (dataToMerge.theType != JSData::token::tokenObject) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "I only know how to merge objects, you gave me: "
-      << dataToMerge.ToString(false);
+      << dataToMerge.ToString(nullptr);
     }
     return false;
   }
@@ -165,7 +165,8 @@ bool Database::FallBack::FindIndexOneNoLocksMinusOneOnNotFound(
   int currentLocationIndex = currentIndex.locations.GetIndex(query.value.theString);
   if (currentLocationIndex == - 1) {
     if (commentsOnNotFound != nullptr ) {
-      *commentsOnNotFound << "Entry " << query.value.ToString(false) << " not found. " ;
+      *commentsOnNotFound << "Entry "
+      << query.value.ToString(nullptr) << " not found. " ;
     }
     return true;
   }
@@ -284,7 +285,12 @@ void Database::FallBack::IndexOneRecord(
 }
 
 bool Database::FallBack::StoreDatabase(std::stringstream* commentsOnFailure) {
-  return FileOperations::WriteFileVirualWithPermissions("database_fallback/database.json", this->reader.ToString(false), true, commentsOnFailure);
+  return FileOperations::WriteFileVirualWithPermissions(
+    "database_fallback/database.json",
+    this->reader.ToString(nullptr),
+    true,
+    commentsOnFailure
+  );
 }
 
 bool Database::FallBack::ReadDatabase(std::stringstream* commentsOnFailure) {

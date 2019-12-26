@@ -583,8 +583,8 @@ void UserCalculatorData::clearAuthenticationTokenAndPassword() {
 std::string UserCalculatorData::ToStringCourseInfo() {
   std::stringstream out;
   out << "Course name:\n" << this->courseComputed
-  << "\n<br>Deadline schema:\n" << this->deadlines.ToString(false)
-  << "\n<hr>Problem weight schema:\n" << this->problemWeights.ToString(false);
+  << "\n<br>Deadline schema:\n" << this->deadlines.ToString(nullptr)
+  << "\n<hr>Problem weight schema:\n" << this->problemWeights.ToString(nullptr);
   return out.str();
 }
 

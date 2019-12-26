@@ -242,7 +242,7 @@ bool MongoQuery::InsertOne(const JSData& incoming, std::stringstream* commentsOn
   if (this->query != nullptr) {
     global.fatal << "At this point of code, query is supposed to be 0. " << global.fatal;
   }
-  std::string incomingJSONString = incoming.ToString(true, false);
+  std::string incomingJSONString = incoming.ToString(nullptr);
   this->update = bson_new_from_json(
     reinterpret_cast<const uint8_t*>(incomingJSONString.c_str()),
     static_cast<signed>(incomingJSONString.size()),
@@ -355,7 +355,7 @@ bool MongoQuery::FindMultiple(
   MongoCollection theCollection(this->collectionName);
   if (commentsGeneralNonSensitive != nullptr && global.UserDefaultHasAdminRights()) {
     *commentsGeneralNonSensitive
-    << "Query: " << this->findQuery << ". Options: " << inputOptions.ToString(false, false);
+    << "Query: " << this->findQuery << ". Options: " << inputOptions.ToString(nullptr);
   }
   if (this->query != nullptr) {
     global.fatal << "At this point of code, query is supposed to be 0. " << global.fatal;
@@ -380,7 +380,7 @@ bool MongoQuery::FindMultiple(
     this->options = nullptr;
   }
   if (inputOptions.theType != JSData::token::tokenUndefined) {
-    std::string optionsString = inputOptions.ToString(false, false);
+    std::string optionsString = inputOptions.ToString(nullptr);
     this->options = bson_new_from_json(
       reinterpret_cast<const uint8_t*>(optionsString.c_str()),
       static_cast<signed>(optionsString.size()),
@@ -394,7 +394,9 @@ bool MongoQuery::FindMultiple(
       return false;
     }
   }
-  this->cursor = mongoc_collection_find_with_opts(theCollection.collection, this->query, this->options, nullptr);
+  this->cursor = mongoc_collection_find_with_opts(
+    theCollection.collection, this->query, this->options, nullptr
+  );
   if (this->cursor == nullptr) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Bad mongoDB cursor. ";
@@ -556,10 +558,10 @@ bool Database::FindFromJSONWithOptions(
   MacroRegisterFunctionWithName("Database::FindFromJSONWithOptions");
   (void) commentsGeneralNonSensitive;
 #ifdef MACRO_use_MongoDB
-  global << logger::blue << "Query input JSON: " << findQuery.ToString(true) << logger::endL;
+  global << logger::blue << "Query input JSON: " << findQuery.ToString(nullptr) << logger::endL;
   MongoQuery query;
   query.collectionName = collectionName;
-  query.findQuery = findQuery.ToString(true);
+  query.findQuery = findQuery.ToString(nullptr);
   query.maxOutputItems = maxOutputItems;
   bool result = query.FindMultiple(output, options, commentsOnFailure, commentsGeneralNonSensitive);
   if (totalItems != nullptr) {
@@ -591,7 +593,7 @@ bool Database::IsValidJSONMongoUpdateQuery(
   ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "JSData: "
-      << HtmlRoutines::ConvertStringToHtmlString(updateQuery.ToString(false), false)
+      << HtmlRoutines::ConvertStringToHtmlString(updateQuery.ToString(nullptr), false)
       << " expected to be a string, array or an object. ";
     }
     return false;
@@ -657,7 +659,7 @@ bool Database::Mongo::GetOrFindQuery(
   std::stringstream queryStream;
   queryStream << "{\"$or\": [";
   for (int i = 0; i < input.size; i ++) {
-    queryStream << input[i].ToJSON().ToString(false);
+    queryStream << input[i].ToJSON().ToString(nullptr);
     if (i < input.size - 1) {
       queryStream << ", ";
     }
@@ -702,12 +704,11 @@ bool Database::FindOneFromJSONWithProjection(
   const JSData& findQuery,
   const List<std::string>& fieldsToProjectTo,
   JSData& output,
-  std::stringstream* commentsOnFailure,
-  bool doEncodeFindFields
+  std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("Database::FindOneFromJSONWithOptions");
   JSData theProjection = Database::GetProjectionFromFieldNames(fieldsToProjectTo, 0);
-  std::string findQueryString = findQuery.ToString(doEncodeFindFields);
+  std::string findQueryString = findQuery.ToString(nullptr);
   return Database::FindOneFromQueryStringWithOptions(
     collectionName, findQueryString, theProjection, output, commentsOnFailure
   );
@@ -837,7 +838,7 @@ bool Database::DeleteOneEntry(const JSData& theEntry, std::stringstream* comment
   List<std::string>* labelTypes = nullptr;
   if (!isDeleteable(theEntry, &labelTypes, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Entry: " << theEntry.ToString(false, false) << " not deleteable.";
+      *commentsOnFailure << "Entry: " << theEntry.ToString(nullptr) << " not deleteable.";
     }
     return false;
   }
@@ -884,7 +885,7 @@ bool Database::DeleteOneEntryById(
   if (!this->FindOne(findQuery, foundItem, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Query: "
-      << findQuery.ToJSON().ToString(false, false) << " returned no hits in table: "
+      << findQuery.ToJSON().ToString(nullptr) << " returned no hits in table: "
       << findQuery.collection;
     }
     return false;
@@ -897,7 +898,7 @@ bool Database::DeleteOneEntryById(
     return false;
   }
   MongoQuery query;
-  query.findQuery = findQuery.ToJSON().ToString(false);
+  query.findQuery = findQuery.ToJSON().ToString(nullptr);
   query.collectionName = findQuery.collection;
   return query.RemoveOne(commentsOnFailure);
 #else
@@ -934,13 +935,12 @@ bool Database::DeleteOneEntryUnsetUnsecure(
     findQuery.ToJSON(),
     selectorsCombined,
     foundItem,
-    commentsOnFailure,
-    false
+    commentsOnFailure
   );
 
   if (!didFindItem) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Query: " << findQuery.ToJSON().ToString(false, false)
+      *commentsOnFailure << "Query: " << findQuery.ToJSON().ToString(nullptr)
       << " returned no hits in table: "
       << findQuery.collection;
     }
@@ -952,12 +952,12 @@ bool Database::DeleteOneEntryUnsetUnsecure(
   backUp["deleted"] = foundItem;
   if (!queryBackUp.InsertOne(backUp, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to insert backup: " << backUp.ToString(false);
+      *commentsOnFailure << "Failed to insert backup: " << backUp.ToString(nullptr);
     }
     return false;
   }
   MongoQuery query;
-  query.findQuery = findQuery.ToJSON().ToString(false);
+  query.findQuery = findQuery.ToJSON().ToString(nullptr);
   query.collectionName = findQuery.collection;
   std::stringstream updateQueryStream;
   updateQueryStream << "{\"$unset\": {\"" << selectorStream.str() << "\":\"\"}}";
@@ -989,7 +989,12 @@ bool Database::Mongo::UpdateOneFromQueryString(
   query.findQuery = findQuery;
   query.collectionName = collectionName;
   std::stringstream updateQueryStream;
-  updateQueryStream << "{\"$set\": " << updateQuery.ToString(true) << "}";
+  updateQueryStream << "{\"$set\": " << updateQuery.ToString(nullptr) << "}";
+  // global << logger::red << "DEBUG: updateQueryStream:\n"
+  // << updateQueryStream.str()
+  // << "\nfrom:\n"
+  // << updateQuery.ToString(false)
+  // << logger::endL;
   query.updateQuery = updateQueryStream.str();
   return query.UpdateOneWithOptions(commentsOnFailure);
 #else
@@ -1046,7 +1051,7 @@ bool Database::Mongo::UpdateOne(
   MacroRegisterFunctionWithName("Database::UpdateOneFromJSON");
   return Database::Mongo::UpdateOneFromQueryString(
     findQuery.collection,
-    findQuery.ToJSON().ToString(true),
+    findQuery.ToJSON().ToString(nullptr),
     updateQuery,
     commentsOnFailure
   );
@@ -1153,7 +1158,7 @@ bool Database::FetchTable(
     outputRows[i].SetSize(theLabels.size);
     for (int j = 0; j < theLabels.size; j ++) {
       if (rowsJSON[i].objects.Contains(theLabels[j])) {
-        outputRows[i][j] = rowsJSON[i].GetValue(theLabels[j]).ToString(false, false);
+        outputRows[i][j] = rowsJSON[i].GetValue(theLabels[j]).ToString(nullptr);
       } else {
         outputRows[i][j] = "";
       }

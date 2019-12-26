@@ -1438,7 +1438,7 @@ bool PublicKeyRSA::LoadFromJSON(JSData& input, std::stringstream* commentsOnFail
   MacroRegisterFunctionWithName("Certificate::LoadFromJSON");
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "<hr>Loading certificate from: "
-    << input.ToString(true);
+    << input.ToString(nullptr);
   }
   if (input.theType != JSData::token::tokenObject) {
     if (commentsOnFailure != nullptr) {
@@ -1507,9 +1507,9 @@ bool Crypto::LoadOneKnownCertificate(
   }
   if (!isGood) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "I expected an object with key 'keys'"
-      << " consisting of an array of public keys. Instead, I got: "
-      << certificateJSON.ToString(true);
+      *commentsOnFailure << "I expected an object with key 'keys' "
+      << "consisting of an array of public keys. Instead, I got: "
+      << certificateJSON.ToString(nullptr);
     }
     return false;
   }

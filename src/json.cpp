@@ -73,9 +73,18 @@ bool JSData::HasKey(const std::string& key) const {
   return this->GetKeyIndex(key) != - 1;
 }
 
-bool JSData::HasCompositeKeyOfType(const std::string& key, LargeIntegerUnsigned& output, std::stringstream* commentsOnFailure) const {
+bool JSData::HasCompositeKeyOfType(
+  const std::string& key,
+  LargeIntegerUnsigned& output,
+  std::stringstream* commentsOnFailure
+) const {
   JSData container;
-  if (!this->HasCompositeKeyOfTokeN(key, &container, JSData::token::tokenLargeInteger, commentsOnFailure)) {
+  if (!this->HasCompositeKeyOfTokeN(
+    key,
+    &container,
+    JSData::token::tokenLargeInteger,
+    commentsOnFailure
+  )) {
     return false;
   }
   if (container.theInteger.GetElement() < 0) {
@@ -129,9 +138,11 @@ bool JSData::HasCompositeKeyOfTokeN(
   }
   if (whichValue->theType != targetType) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Key: " << key << ", value: " << whichValue->ToString(false)
-      << " is of type " << static_cast<int>(whichValue->theType)
-      << " instead of the target one: " << static_cast<int>(targetType) << ". ";
+      *commentsOnFailure << "Key: " << key << ", value: "
+      << whichValue->ToString(nullptr) << " is of type "
+      << static_cast<int>(whichValue->theType)
+      << " instead of the target one: " << static_cast<int>(targetType)
+      << ". ";
     }
     return false;
   }
@@ -160,14 +171,16 @@ bool JSData::HasCompositeKey(const std::string& inputKeys, JSData* whichValue, s
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure << "The sub-object located before the key: " << keys[i] << " [all keys: "
           << keys.ToStringCommaDelimited() << "] "
-          << "is not an array, but is instead: " << currentData->ToString(false, true, true, true) << ". ";
+          << "is not an array, but is instead: "
+          << currentData->ToString(&JSData::PrintOptions::HTML())
+          << ". ";
         }
         return false;
       }
       if (currentData->theList.size <= theDigit) {
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure << "Key index: " << theDigit
-          << " is too large for current value: " << currentData->ToString(false, true, true, true);
+          << " is too large for current value: " << currentData->ToString(&JSData::PrintOptions::HTML());
         }
         return false;
       }
@@ -177,14 +190,14 @@ bool JSData::HasCompositeKey(const std::string& inputKeys, JSData* whichValue, s
     if (currentData->theType != JSData::token::tokenObject) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Value preceding key: " << keys[i]
-        << " is not of type object: " << currentData->ToString(false, true, true, true);
+        << " is not of type object: " << currentData->ToString(&JSData::PrintOptions::HTML());
       }
       return false;
     }
     if (!currentData->HasKey(keys[i])) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Key: " << keys[i]
-        << " not present in: " << currentData->ToString(false, true, true, true);
+        << " not present in: " << currentData->ToString(&JSData::PrintOptions::HTML());
       }
       return false;
     }
@@ -630,7 +643,8 @@ bool JSData::readstring(
       << "</a>"
       << "<br>Result:<br>\n ";
       for (int i = JSData::numEmptyTokensAtStart; i < readingStack.size; i ++) {
-        *commentsOnFailure << i << ": " << readingStack[i].ToString(true) << "\n<br>\n";
+        *commentsOnFailure << i << ": "
+        << readingStack[i].ToString(&JSData::PrintOptions::HTML()) << "\n<br>\n";
       }
     }
     return false;
@@ -641,7 +655,8 @@ bool JSData::readstring(
   bool result = this->IsValidElement();
   if (!result) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << this->ToString(false) << " does not appear to be valid json. ";
+      *commentsOnFailure << this->ToString(nullptr)
+      << " does not appear to be valid json. ";
     }
   }
   return result;
@@ -663,32 +678,66 @@ std::string JSData::EncodeKeyForMongo(const std::string& input) {
   return out.str();
 }
 
+JSData::PrintOptions::PrintOptions() {
+  this->useHTML = false;
+  this->useNewLine = false;
+  this->indentation = 0;
+  this->hexEncodeNonAsciiStrings = false;
+}
+
+const JSData::PrintOptions& JSData::PrintOptions::HexEncodeNonASCII() {
+  static JSData::PrintOptions result;
+  result.hexEncodeNonAsciiStrings = true;
+  return result;
+}
+
+const JSData::PrintOptions& JSData::PrintOptions::NewLine() {
+  static JSData::PrintOptions result;
+  result.useNewLine = true;
+  return result;
+}
+
+const JSData::PrintOptions& JSData::PrintOptions::HTML() {
+  static JSData::PrintOptions result;
+  result.useHTML = true;
+  return result;
+}
+
 template <typename somestream>
 somestream& JSData::IntoStream(
-  somestream& out, bool percentEncodeStrings, int indentation, bool useNewLine, bool useHTML, bool convertNonASCIIStringsToHex
+  somestream& out,
+  const JSData::PrintOptions* optionsIncoming
 ) const {
   //MacroRegisterFunctionWithName("JSData::IntoStream");
   std::string whiteSpaceOuter = "";
   std::string whiteSpaceInner = "";
-  for (int i = 0; i < indentation; i ++) {
-    if (useHTML) {
+  JSData::PrintOptions options;
+  if (optionsIncoming != nullptr) {
+    options.useHTML = optionsIncoming->useHTML;
+    options.useNewLine = optionsIncoming->useNewLine;
+    options.indentation = optionsIncoming->indentation;
+    options.hexEncodeNonAsciiStrings = optionsIncoming->hexEncodeNonAsciiStrings;
+  }
+
+  for (int i = 0; i < options.indentation; i ++) {
+    if (options.useHTML) {
       whiteSpaceOuter += "&nbsp;";
-    } else if (useNewLine) {
+    } else if (options.useNewLine) {
       whiteSpaceOuter += "  ";
     }
   }
-  if (useHTML) {
+  if (options.useHTML) {
     whiteSpaceInner = "&nbsp;";
-  } else if (useNewLine){
+  } else if (options.useNewLine){
     whiteSpaceInner = "  ";
   }
   std::string newLine = "";
-  if (useHTML) {
+  if (options.useHTML) {
     newLine = "\n<br>\n";
-  } else if (useNewLine) {
+  } else if (options.useNewLine) {
     newLine = "\n";
   }
-  indentation ++;
+  options.indentation ++;
   switch (this->theType) {
     case JSData::token::tokenNull:
       out << "null";
@@ -707,12 +756,12 @@ somestream& JSData::IntoStream(
       }
       return out;
     case JSData::token::tokenString:
-      if (convertNonASCIIStringsToHex) {
-        out << '"' << StringRoutines::ConvertStringToHexIfNonReadable(this->theString, 0, useHTML) << '"';
-      } else if (!percentEncodeStrings) {
+      if (!options.hexEncodeNonAsciiStrings) {
         out << '"' << StringRoutines::ConvertStringToJSONString(this->theString) << '"';
       } else {
-        out << '"' << HtmlRoutines::ConvertStringToURLString(this->theString, false) << '"';
+        out << '"' << StringRoutines::ConvertStringToJSONString(
+          StringRoutines::ConvertStringToHexIfNonReadable(this->theString, 0, false)
+        ) << '"';
       }
       return out;
     case JSData::token::tokenArray:
@@ -723,9 +772,7 @@ somestream& JSData::IntoStream(
       out << "[" << newLine;
       for (int i = 0; i < this->theList.size; i ++) {
         out << whiteSpaceInner << whiteSpaceOuter;
-        this->theList[i].IntoStream(
-          out, percentEncodeStrings, indentation, useNewLine, useHTML, convertNonASCIIStringsToHex
-        );
+        this->theList[i].IntoStream(out, &options);
         if (i != this->theList.size - 1) {
           out << "," << newLine;
         }
@@ -740,15 +787,9 @@ somestream& JSData::IntoStream(
       out << "{" << newLine;
       for (int i = 0; i < this->objects.size(); i ++) {
         out << whiteSpaceInner << whiteSpaceOuter;
-        if (!percentEncodeStrings) {
-          out << '"' << StringRoutines::ConvertStringToJSONString(this->objects.theKeys[i]) << '"';
-        } else {
-          out << '"' << JSData::EncodeKeyForMongo(this->objects.theKeys[i]) << '"';
-        }
+        out << '"' << StringRoutines::ConvertStringToJSONString(this->objects.theKeys[i]) << '"';
         out << ':';
-        this->objects.theValues[i].IntoStream(
-          out, percentEncodeStrings, indentation, useNewLine, useHTML, convertNonASCIIStringsToHex
-        );
+        this->objects.theValues[i].IntoStream(out, &options);
         if (i != this->objects.size() - 1) {
           out << "," << newLine;
         }
@@ -756,111 +797,111 @@ somestream& JSData::IntoStream(
       out << newLine << whiteSpaceOuter << '}';
       return out;
     case JSData::token::tokenOpenBrace:
-      if (useHTML) {
+      if (options.useHTML) {
         out << "<b>";
       }
       out << "{";
-      if (useHTML) {
+      if (options.useHTML) {
         out << "</b>";
       }
       return out;
     case JSData::token::tokenCloseBrace:
-      if (useHTML) {
+      if (options.useHTML) {
         out << "<b>";
       }
       out << "}";
-      if (useHTML) {
+      if (options.useHTML) {
         out << "</b>";
       }
       return out;
     case JSData::token::tokenOpenBracket:
-      if (useHTML) {
+      if (options.useHTML) {
         out << "<b>";
       }
       out << "[";
-      if (useHTML) {
+      if (options.useHTML) {
         out << "</b>";
       }
       return out;
     case JSData::token::tokenCloseBracket:
-      if (useHTML) {
+      if (options.useHTML) {
         out << "<b>";
       }
       out << "]";
-      if (useHTML) {
+      if (options.useHTML) {
         out << "</b>";
       }
       return out;
     case JSData::token::tokenColon:
-      if (useHTML) {
+      if (options.useHTML) {
         out << "<b>";
       }
       out << ":";
-      if (useHTML) {
+      if (options.useHTML) {
         out << "</b>";
       }
       return out;
     case JSData::token::tokenComma:
-      if (useHTML) {
+      if (options.useHTML) {
         out << "<b>";
       }
       out << ",";
-      if (useHTML) {
+      if (options.useHTML) {
         out << "</b>";
       }
       return out;
     case JSData::token::tokenUndefined:
-      if (useHTML) {
+      if (options.useHTML) {
         out << "<b>";
       }
       out << "null";
-      if (useHTML) {
+      if (options.useHTML) {
         out << "</b>";
       }
       return out;
     case JSData::token::tokenError:
-      if (useHTML) {
+      if (options.useHTML) {
         out << "<b>";
       }
       out << "error";
-      if (useHTML) {
+      if (options.useHTML) {
         out << "</b>";
       }
       return out;
     case JSData::token::tokenBackslash:
-      if (useHTML) {
+      if (options.useHTML) {
         out << "<b>";
       }
       out << "\\backslash";
-      if (useHTML) {
+      if (options.useHTML) {
         out << "</b>";
       }
       return out;
     case JSData::token::tokenQuoteUnclosedEscapeAtEnd:
-      if (useHTML) {
+      if (options.useHTML) {
         out << "<b>";
       }
       out << "\\QuoteUnclosedEscapeAtEnd";
-      if (useHTML) {
+      if (options.useHTML) {
         out << "</b>";
       }
       return out;
     case JSData::token::tokenQuoteUnclosedStandard:
-      if (useHTML) {
+      if (options.useHTML) {
         out << "<b>";
       }
       out << "\\tokenQuoteUnclosedStandard";
-      if (useHTML) {
+      if (options.useHTML) {
         out << "</b>";
       }
       return out;
 
     case JSData::token::tokenUnknown:
-      if (useHTML) {
+      if (options.useHTML) {
         out << "<b>";
       }
       out << "unknown";
-      if (useHTML) {
+      if (options.useHTML) {
         out << "</b>";
       }
       return out;
@@ -901,20 +942,13 @@ void JSData::reset(char inputType) {
   }
 }
 
-std::string JSData::ToString(
-  bool percentEncodeKeysIncludingDotsExcludingDollarSigns,
-  bool useNewLine,
-  bool useHTML,
-  bool convertNonASCIIStringsToHex
-) const {
+std::string JSData::ToString(const JSData::PrintOptions* options) const {
   std::stringstream out;
-  this->IntoStream(
-    out, percentEncodeKeysIncludingDotsExcludingDollarSigns, 0, useNewLine, useHTML, convertNonASCIIStringsToHex
-  );
+  this->IntoStream(out, options);
   return out.str();
 }
 
 std::ostream& operator<<(std::ostream& out, const JSData& data) {
-  return data.IntoStream(out, false, false);
+  return data.IntoStream(out, nullptr);
 }
 

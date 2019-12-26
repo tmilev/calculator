@@ -1145,8 +1145,9 @@ bool LoadOutputSubgroupsFromJSData(JSData& input, WeylGroupData& inputGroup, Lis
       readerSubgroup.flagIsExtendedParabolic = false;
       readerSubgroup.flagIsParabolic = false;
     } else {
-      global.fatal << "Corrupt JSon data, entry number " << i + 1 << ": the group labels are: "
-      << currentSGdata.theList[0].ToString(false) << global.fatal;
+      global.fatal << "Corrupt JSON data, entry number "
+      << i + 1 << ": the group labels are: "
+      << currentSGdata.theList[0].ToString(nullptr) << global.fatal;
     }
     std::string sgString = currentSGdata.theList[0].theList[1].theString;
     readerSubgroup.generatingSimpleRoots.SetSize(0);

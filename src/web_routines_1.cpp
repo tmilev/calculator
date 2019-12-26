@@ -1010,7 +1010,9 @@ int WebWorker::WriteToBodyJSONAppendComments(JSData &result) {
 }
 
 int WebWorker::WriteToBodyJSON(const JSData& result) {
-  std::string toWrite = HtmlRoutines::ConvertStringToHtmlString(result.ToString(false), false);
+  std::string toWrite = HtmlRoutines::ConvertStringToHtmlString(
+    result.ToString(nullptr), false
+  );
   if (toWrite.size() < 2000) {
     if (toWrite.find(WebAPIResponse::youHaveReachedTheBackend) != std::string::npos) {
       std::string sanitizedCalculatorApp = HtmlRoutines::ConvertStringToHtmlString(global.DisplayNameExecutableApp, false);

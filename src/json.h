@@ -100,21 +100,23 @@ public:
   void ExtractScalar(const std::string& json, int begin, int end);
   bool IsValidElement();
   void reset(char inputType = JSData::token::tokenUndefined);
-  std::string ToString(
-    bool percentEncodeKeysIncludingDotsExcludingDollarSigns,
-    bool useNewLine = false,
-    bool useHTML = false,
-    bool convertNonASCIIStringsToHex = false
-  ) const;
+  class PrintOptions {
+  public:
+    bool useNewLine;
+    bool hexEncodeNonAsciiStrings;
+    bool useHTML;
+    int indentation;
+    PrintOptions();
+    static const JSData::PrintOptions& NewLine();
+    static const JSData::PrintOptions& HTML();
+    static const PrintOptions& HexEncodeNonASCII();
+  };
+  std::string ToString(const JSData::PrintOptions* options) const;
   static std::string EncodeKeyForMongo(const std::string& input);
   template <typename somestream>
   somestream& IntoStream(
     somestream& out,
-    bool percentEncodeStrings,
-    int indentation = 0,
-    bool useNewLine = false,
-    bool useHTML = false,
-    bool convertNonASCIIStringsToHex = false
+    const JSData::PrintOptions* optionsIncoming
   ) const;
   bool TokenizePrependOneDummyElement(
     const std::string& input,

@@ -1824,7 +1824,7 @@ bool Calculator::Test::WriteTestStrings(std::stringstream* commentsOnFailure) {
   }
   return FileOperations::WriteFileVirual(
     WebAPI::calculator::testFileNameVirtual,
-    result.ToString(false),
+    result.ToString(nullptr),
     commentsOnFailure
   );
 }

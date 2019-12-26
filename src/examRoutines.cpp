@@ -94,7 +94,8 @@ bool CalculatorHTML::LoadProblemInfoFromJSONAppend(
       currentProblemValue.adminData.problemWeightsPerCoursE.SetKeyValue(currentCourse, currentWeight.theString);
     } else if (currentWeight.theType != JSData::token::tokenUndefined) {
       commentsOnFailure << "Could extract neither weight nor weights-per course from "
-      << currentWeight.ToString(false) << ". Your input was: " << inputJSON.ToString(false);
+      << currentWeight.ToString(nullptr)
+      << ". Your input was: " << inputJSON.ToString(nullptr);
       return false;
     }
     if (currentDeadlines.theType != JSData::token::tokenUndefined) {
@@ -681,7 +682,7 @@ bool CalculatorHtmlFunctions::innerInterpretProblemGiveUp(
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerInterpretProblemGiveUp");
   (void) input;
   return output.AssignValue(
-    WebAPIResponse::GetAnswerOnGiveUp(global.GetWebInput("randomSeed")).ToString(false), theCommands
+    WebAPIResponse::GetAnswerOnGiveUp(global.GetWebInput("randomSeed")).ToString(nullptr), theCommands
   );
 }
 

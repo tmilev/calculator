@@ -550,7 +550,7 @@ std::string WebWorker::GetDatabaseDeleteOneItem() {
     commentsStream << "Failed to parse input string. ";
     return commentsStream.str();
   }
-  commentsStream << "Parsed input string: " << inputParsed.ToString(false, false) << "\n";
+  commentsStream << "Parsed input string: " << inputParsed.ToString(nullptr) << "\n";
   if (Database::get().DeleteOneEntry(inputParsed, &commentsStream)) {
     return "success";
   }
@@ -1467,7 +1467,7 @@ void WebWorker::WriteAfterTimeoutCarbonCopy(
     fileNameCarbonCopy
   ) + ".json";
   std::stringstream commentsOnError;
-  bool success = FileOperations::WriteFileVirual(extraFilename, input.ToString(false), &commentsOnError);
+  bool success = FileOperations::WriteFileVirual(extraFilename, input.ToString(nullptr), &commentsOnError);
   if (!success) {
     global << logger::red << "Error writing optional file. " << commentsOnError.str() << logger::endL;
   }
@@ -1505,7 +1505,7 @@ void WebWorker::WriteAfterTimeoutPartTwo(
   result[WebAPI::result::status] = status;
   WebWorker& currentWorker = global.server().GetActiveWorker();
   result[WebAPI::result::workerIndex] = currentWorker.indexInParent;
-  std::string toWrite = result.ToString(false, false, false, false);
+  std::string toWrite = result.ToString(nullptr);
   currentWorker.writingReportFile.Lock();
   bool success = FileOperations::WriteFileVirualWithPermissions_AccessUltraSensitiveFoldersIfNeeded(
     "results/" + currentWorker.workerId,
@@ -1784,7 +1784,9 @@ void WebWorker::WrapUpConnection() {
   if (global.flagStopNeeded) {
     this->resultWork["stopNeeded"] = "true";
   }
-  this->pipeWorkerToServerControls.WriteOnceAfterEmptying(this->resultWork.ToString(false, false), false, false);
+  this->pipeWorkerToServerControls.WriteOnceAfterEmptying(
+    this->resultWork.ToString(nullptr), false, false
+  );
   if (global.flagServerDetailedLog) {
     global << "Detail: done with pipes, releasing resources. " << logger::endL;
   }
@@ -4533,8 +4535,8 @@ void WebServer::CheckMongoDBSetup() {
   if (global.configuration["mongoDBSetup"].theType != JSData::token::tokenUndefined) {
     return;
   }
-  global << "DEBUG: mongoDB token: " << static_cast<int>(global.configuration["mongoDBSetup"].theType) << logger::endL;
-  global << logger::yellow << "configuration so far: " << global.configuration.ToString(false) << logger::endL;
+  // global << "DEBUG: mongoDB token: " << static_cast<int>(global.configuration["mongoDBSetup"].theType) << logger::endL;
+  global << logger::yellow << "configuration so far: " << global.configuration.ToString(nullptr) << logger::endL;
   global.configuration["mongoDBSetup"] = "Attempting";
   global.ConfigurationStore();
   WebServer::FigureOutOperatingSystem();
@@ -4939,7 +4941,7 @@ bool GlobalVariables::ConfigurationLoad() {
 
 bool GlobalVariables::ConfigurationStore() {
   MacroRegisterFunctionWithName("GlobalVariables::ConfigurationStore");
-  std::string correctedConfiguration = global.configuration.ToString(false, true);
+  std::string correctedConfiguration = global.configuration.ToString(&JSData::PrintOptions::NewLine());
   if (correctedConfiguration == global.configurationFileContent) {
     return true;
   }

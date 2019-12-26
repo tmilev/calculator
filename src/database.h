@@ -270,13 +270,11 @@ public:
     std::stringstream* commentsOnFailure = nullptr,
     std::stringstream* commentsGeneralNonSensitive = nullptr
   );
-  static bool FindOneFromJSONWithProjection(
-    const std::string& collectionName,
+  static bool FindOneFromJSONWithProjection(const std::string& collectionName,
     const JSData& findQuery,
     const List<std::string>& fieldsToProjectTo,
     JSData& output,
-    std::stringstream* commentsOnFailure,
-    bool doEncodeFindFields
+    std::stringstream* commentsOnFailure
   );
   bool FindOne(
     const QueryExact& query,

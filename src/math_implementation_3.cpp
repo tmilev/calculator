@@ -10183,7 +10183,7 @@ std::string HtmlRoutines::ToHtmlTableRowsFromJSON(const JSData& input) {
     out << "</table>";
     return out.str();
   }
-  return input.ToString(false);
+  return input.ToString(nullptr);
 }
 
 std::string HtmlRoutines::ToHtmlTable(List<std::string>& labels, List<List<std::string> >& content, bool nestTables) {

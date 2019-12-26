@@ -46,7 +46,10 @@ class WebAPIResponse {
   static JSData GetTopicTableJSON();
   static JSData GetAnswerOnGiveUp();
   static JSData GetAnswerOnGiveUp(
-    const std::string& inputRandomSeed, std::string* outputNakedAnswer = nullptr, bool* outputDidSucceed = nullptr
+    const std::string& inputRandomSeed,
+    std::string* outputNakedAnswer = nullptr,
+    bool* outputDidSucceed = nullptr,
+    bool doIncludeTimeStats = true
   );
   static JSData GetSelectCourseJSON();
   static std::string GetScoresPage();

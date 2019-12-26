@@ -1387,7 +1387,10 @@ JSData WebAPIResponse::GetAnswerOnGiveUp() {
 }
 
 JSData WebAPIResponse::GetAnswerOnGiveUp(
-  const std::string& inputRandomSeed, std::string* outputNakedAnswer, bool* outputDidSucceed
+  const std::string& inputRandomSeed,
+  std::string* outputNakedAnswer,
+  bool* outputDidSucceed,
+  bool doIncludeTimeStats
 ) {
   MacroRegisterFunctionWithName("CalculatorHTML::GetAnswerOnGiveUp");
   StateMaintainer<bool> maintain(global.theProgress.flagBanProcessMonitoring);
@@ -1427,7 +1430,7 @@ JSData WebAPIResponse::GetAnswerOnGiveUp(
   std::string lastStudentAnswerID;
   MapList<std::string, std::string, MathRoutines::HashString>& theArgs = global.webArguments;
   for (int i = 0; i < theArgs.size(); i ++) {
-    StringRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID);
+    StringRoutines::StringBeginsWith(theArgs.theKeys[i], WebAPI::problem::calculatorAnswerPrefix, &lastStudentAnswerID);
   }
   int indexLastAnswerId = theProblem.GetAnswerIndex(lastStudentAnswerID);
   std::stringstream out;
@@ -1554,8 +1557,10 @@ JSData WebAPIResponse::GetAnswerOnGiveUp(
       isFirst = false;
     }
   }
-  int64_t ellapsedTime = global.GetElapsedMilliseconds() - startTimeInMilliseconds;
-  result[WebAPI::result::millisecondsComputation] = ellapsedTime;
+  if (doIncludeTimeStats) {
+    int64_t ellapsedTime = global.GetElapsedMilliseconds() - startTimeInMilliseconds;
+    result[WebAPI::result::millisecondsComputation] = ellapsedTime;
+  }
   if (global.UserDebugFlagOn() && global.UserDefaultHasAdminRights()) {
     out
     << "<hr><a href=\"" << global.DisplayNameExecutable

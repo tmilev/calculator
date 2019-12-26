@@ -81,6 +81,7 @@ public:
     static std::string problemLabel;
     static std::string content;
     static std::string commentsProblem;
+    static std::string calculatorAnswerPrefix;
   };
   struct databaseParameters {
     static std::string entryPoint;

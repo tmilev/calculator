@@ -356,10 +356,14 @@ void Calculator::initPredefinedInnerFunctions() {
     "ProblemGiveUp",
     CalculatorHtmlFunctions::innerInterpretProblemGiveUp,
     "",
-    "Gives the predefined answer to a problem. First argument must be a string with the problem. "
-    "The second argument must be the id of the answer. ",
-    "ProblemGiveUp(LoadFileIntoString("
-    "\"problems/Functions-composing-fractional-linear-1.html\"), AlgebraAnswer)",
+    "Gives the predefined answer to a problem. "
+    "First argument must be a string with the problem. "
+    "The second argument must be the id of the answer. "
+    "Third argument must be the random seed integer.",
+    "ProblemGiveUp("
+    "\"problems/Functions-composing-fractional-linear-1.html\", "
+    "\"AlgebraAnswer\", "
+    "\"123\")",
     "CalculatorHtmlFunctions::innerInterpretProblemGiveUp",
     "ProblemGiveUp",
     innerStandard

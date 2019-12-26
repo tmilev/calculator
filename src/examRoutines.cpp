@@ -680,10 +680,18 @@ bool CalculatorHtmlFunctions::innerInterpretProblemGiveUp(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerInterpretProblemGiveUp");
-  (void) input;
-  return output.AssignValue(
-    WebAPIResponse::GetAnswerOnGiveUp(global.GetWebInput("randomSeed")).ToString(nullptr), theCommands
-  );
+  if (input.size() != 4) {
+    return theCommands << "Expected 3 arguments: problem filename, answer id and randomSeed string. ";
+  }
+  std::string oldProblem = global.GetWebInput(WebAPI::problem::fileName);
+  std::string testedProblem = input[1].ToString();
+  global.SetWebInpuT(WebAPI::problem::fileName, testedProblem);
+  std::string randomSeed = input[3].ToString();
+  std::string answerId = input[2].ToString();
+  global.SetWebInpuT(WebAPI::problem::calculatorAnswerPrefix + answerId, "not used");
+  JSData result = WebAPIResponse::GetAnswerOnGiveUp(randomSeed, nullptr, nullptr, false);
+  global.SetWebInpuT(WebAPI::problem::fileName, oldProblem);
+  return output.AssignValue(result.ToString(nullptr), theCommands);
 }
 
 bool CalculatorHtmlFunctions::innerInterpretProblem(

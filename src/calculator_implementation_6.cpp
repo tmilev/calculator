@@ -565,7 +565,7 @@ bool CalculatorFunctionsGeneral::innerTestJSON(Calculator& theCommands, const Ex
   if (!theData.readstring(inputString, &out)) {
     return output.AssignValue(out.str(), theCommands);
   }
-  out << "Input:<br>" << HtmlRoutines::ConvertStringToHtmlString(inputString, false) << "<hr>Output: <br>"
+  out << "Input:<br>" << inputString << "<hr>Output: <br>"
   << theData.ToString(nullptr);
   return output.AssignValue(out.str(), theCommands);
 }

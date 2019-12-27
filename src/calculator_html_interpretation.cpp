@@ -129,8 +129,8 @@ JSData WebAPIResponse::GetProblemSolutionJSON() {
   return result;
 }
 
-std::string WebAPIResponse::GetSetProblemDatabaseInfoHtml() {
-  MacroRegisterFunctionWithName("WebAPIReponse::GetSetProblemDatabaseInfoHtml");
+std::string WebAPIResponse::SetProblemWeight() {
+  MacroRegisterFunctionWithName("WebAPIReponse::SetProblemWeight");
   if (!global.flagDatabaseCompiled) {
     return "Cannot modify problem weights (no database available)";
   }
@@ -139,30 +139,27 @@ std::string WebAPIResponse::GetSetProblemDatabaseInfoHtml() {
   }
   CalculatorHTML theProblem;
   std::string inputProblemInfo = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("mainInput"), false);
-  theProblem.topicListFileName = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("topicList"), false);
-  std::stringstream commentsOnFailure;
-  if (!theProblem.LoadAndParseTopicList(commentsOnFailure)) {
-    return "Failed to load topic list from file name: " + theProblem.topicListFileName + ". " + commentsOnFailure.str();
+  std::stringstream commentsOnFailure, out;
+  if (theProblem.MergeProblemWeightAndStore(inputProblemInfo, &commentsOnFailure)) {
+    out << "<span style =\"color:green\"><b>Modified. </b></span>";
+  } else {
+    out << "<span style =\"color:red\"><b>" << commentsOnFailure.str() << "</b></span>";
   }
-  theProblem.currentUseR.UserCalculatorData::operator=(global.userDefault);
-  std::stringstream out;
-  if (!theProblem.PrepareSectionList(commentsOnFailure)) {
-    out << "<span style =\"color:red\"><b>Failed to prepare section list. </b></span>" << commentsOnFailure.str();
-    return out.str();
+  return out.str();
+}
+
+std::string WebAPIResponse::SetProblemDeadline() {
+  MacroRegisterFunctionWithName("WebAPIReponse::SetProblemWeight");
+  if (!global.flagDatabaseCompiled) {
+    return "Cannot modify problem weights (no database available)";
   }
-  if (!theProblem.LoadProblemInfoFromJSONAppend(
-    theProblem.currentUseR.problemWeights, theProblem.currentUseR.theProblemData, out
-  )) {
-    out << "Failed to interpret the problem weight string. ";
-    return out.str();
+  if (!global.UserDefaultHasAdminRights()) {
+    return "<b>Only admins may set problem weights.</b>";
   }
-  if (!theProblem.LoadProblemInfoFromJSONAppend(
-    theProblem.currentUseR.deadlines, theProblem.currentUseR.theProblemData, out
-  )) {
-    out << "Failed to interpret the deadline string. ";
-    return out.str();
-  }
-  if (theProblem.MergeProblemInfoInDatabaseJSON(inputProblemInfo, commentsOnFailure)) {
+  CalculatorHTML theProblem;
+  std::string inputProblemInfo = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("mainInput"), false);
+  std::stringstream commentsOnFailure, out;
+  if (theProblem.MergeProblemDeadlineAndStore(inputProblemInfo, &commentsOnFailure)) {
     out << "<span style =\"color:green\"><b>Modified. </b></span>";
   } else {
     out << "<span style =\"color:red\"><b>" << commentsOnFailure.str() << "</b></span>";
@@ -1208,7 +1205,7 @@ JSData WebAPIResponse::SubmitAnswersJSON(
     if (theProblem.flagIsForReal) {
       std::stringstream comments;
       theUser.SetProblemData(theProblem.fileName, currentProblemData);
-      if (!theUser.StoreProblemDataToDatabaseJSON(&comments)) {
+      if (!theUser.StoreProblemData(theProblem.fileName, &comments)) {
         output << "<tr><td><b>This shouldn't happen and may be a bug: failed to store your answer in the database. "
         << CalculatorHTML::BugsGenericMessage << "</b><br>Comments: "
         << comments.str() << "</td></tr>";
@@ -1316,11 +1313,9 @@ std::string WebAPIResponse::AddTeachersSections() {
       DatabaseStrings::labelUsername,
       currentTeacher.username
     );
-    JSData setQuery;
-    setQuery[DatabaseStrings::labelSectionsTaught] = desiredSectionsList;
-    if (!Database::get().UpdateOne(
-      findQuery, setQuery, &out
-    )) {
+    QuerySet setQuery;
+    setQuery.value[DatabaseStrings::labelSectionsTaught] = desiredSectionsList;
+    if (!Database::get().UpdateOne(findQuery, setQuery, &out)) {
       out << "<span style =\"color:red\">Failed to store course info of instructor: " << theTeachers[i] << ". </span><br>";
     } else {
       out << "<span style =\"color:green\">Assigned " << theTeachers[i] << " to section(s): "
@@ -1933,14 +1928,14 @@ int ProblemData::getExpectedNumberOfAnswers(const std::string& problemName, std:
     findProblemInfo.theType = JSData::token::tokenArray;
     List<JSData> result;
     List<std::string> fields;
-    fields.AddOnTop(DatabaseStrings::labelProblemName);
+    fields.AddOnTop(DatabaseStrings::labelProblemFileName);
     fields.AddOnTop(DatabaseStrings::labelProblemTotalQuestions);
 
     if (Database::FindFromJSONWithProjection(
       DatabaseStrings::tableProblemInformation, findProblemInfo, result, fields, - 1, nullptr, &commentsOnFailure
     )) {
       for (int i = 0; i < result.size; i ++) {
-        const std::string& currentProblemName = result[i][DatabaseStrings::labelProblemName].theString;
+        const std::string& currentProblemName = result[i][DatabaseStrings::labelProblemFileName].theString;
         if (currentProblemName == "") {
           continue;
         }
@@ -1982,8 +1977,8 @@ int ProblemData::getExpectedNumberOfAnswers(const std::string& problemName, std:
   << "; number of answers: " << this->knownNumberOfAnswersFromHD << logger::endL;
   this->expectedNumberOfAnswersFromDB = this->knownNumberOfAnswersFromHD;
   JSData newDBentry;
-  QueryExact findEntry(DatabaseStrings::tableProblemInformation, DatabaseStrings::labelProblemName, problemName);
-  newDBentry[DatabaseStrings::labelProblemName] = problemName;
+  QueryExact findEntry(DatabaseStrings::tableProblemInformation, DatabaseStrings::labelProblemFileName, problemName);
+  newDBentry[DatabaseStrings::labelProblemFileName] = problemName;
   std::stringstream stringConverter;
   stringConverter << this->knownNumberOfAnswersFromHD;
   newDBentry[DatabaseStrings::labelProblemTotalQuestions] = stringConverter.str();
@@ -2155,8 +2150,10 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
     )) {
       continue;
     }
-    currentUserRecord.LoadProblemInfoFromJSONAppend(
-      theProblem.currentUseR.problemWeights, currentUserRecord.currentUseR.theProblemData, comments
+    currentUserRecord.MergeProblemWeight(
+      theProblem.currentUseR.problemWeights,
+      currentUserRecord.currentUseR.theProblemData,
+      &comments
     );
     currentUserRecord.currentUseR.ComputePointsEarned(theProblem.problemNamesNoTopics, &theProblem.topics.theTopics, comments);
     this->scoresBreakdown.LastObject()->Clear();

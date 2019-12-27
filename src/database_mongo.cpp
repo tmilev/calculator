@@ -15,7 +15,6 @@ JSData Database::GetStandardProjectors() {
   JSData result;
   JSData userProjector;
   userProjector[DatabaseStrings::labelProblemDataJSON] = 0;
-  userProjector[DatabaseStrings::labelProblemDatA] = 0;
   result[DatabaseStrings::tableUsers]["projection"] = userProjector;
   return result;
 }
@@ -268,11 +267,11 @@ bool MongoQuery::InsertOne(const JSData& incoming, std::stringstream* commentsOn
     << this->theError.message << logger::endL;
     return false;
   }
-  //char* bufferOutpurStringFormat = 0;
-  //bufferOutpurStringFormat = bson_as_canonical_extended_json(this->updateResult, NULL);
-  //std::string updateResultString(bufferOutpurStringFormat);
-  //bson_free(bufferOutpurStringFormat);
-  //global << logger::red << "Update result: " << updateResultString << logger::endL;
+  // char* bufferOutpurStringFormat = 0;
+  // bufferOutpurStringFormat = bson_as_canonical_extended_json(this->updateResult, NULL);
+  // std::string updateResultString(bufferOutpurStringFormat);
+  // bson_free(bufferOutpurStringFormat);
+  // global << logger::red << "Update result: " << updateResultString << logger::endL;
   return true;
 }
 
@@ -282,8 +281,9 @@ bool MongoQuery::UpdateOne(std::stringstream* commentsOnFailure, bool doUpsert) 
     return false;
   }
   MongoCollection theCollection(this->collectionName);
-//  global << "DEBUG: Update: " << this->findQuery << " to: "
-//  << this->updateQuery << " inside: " << this->collectionName << logger::endL;
+  global << "DEBUG: Update: " << this->findQuery << " to: "
+  << this->updateQuery << " inside: " << this->collectionName << ". Upsert: "
+  << doUpsert << logger::endL;
   if (this->query != nullptr) {
     global.fatal << "At this point of code, query is supposed to be 0. " << global.fatal;
   }
@@ -326,11 +326,11 @@ bool MongoQuery::UpdateOne(std::stringstream* commentsOnFailure, bool doUpsert) 
     << this->theError.message << logger::endL;
     return false;
   }
-  //char* bufferOutpurStringFormat = 0;
-  //bufferOutpurStringFormat = bson_as_canonical_extended_json(this->updateResult, NULL);
-  //std::string updateResultString(bufferOutpurStringFormat);
-  //bson_free(bufferOutpurStringFormat);
-  //global << logger::red << "Update result: " << updateResultString << logger::endL;
+  // char* bufferOutpurStringFormat = 0;
+  // bufferOutpurStringFormat = bson_as_canonical_extended_json(this->updateResult, NULL);
+  // std::string updateResultString(bufferOutpurStringFormat);
+  // bson_free(bufferOutpurStringFormat);
+  // global << logger::red << "Update result: " << updateResultString << logger::endL;
   return true;
 }
 
@@ -921,7 +921,7 @@ bool Database::DeleteOneEntryUnsetUnsecure(
 
   std::stringstream selectorStream;
   for (int i = 0; i < selector.size; i ++) {
-    selectorStream << JSData::EncodeKeyForMongo(selector[i]);
+    selectorStream << Database::ConvertStringToMongoKeyString(selector[i]);
     if (i != selector.size - 1) {
       selectorStream << ".";
     }
@@ -990,11 +990,6 @@ bool Database::Mongo::UpdateOneFromQueryString(
   query.collectionName = collectionName;
   std::stringstream updateQueryStream;
   updateQueryStream << "{\"$set\": " << updateQuery.ToString(nullptr) << "}";
-  // global << logger::red << "DEBUG: updateQueryStream:\n"
-  // << updateQueryStream.str()
-  // << "\nfrom:\n"
-  // << updateQuery.ToString(false)
-  // << logger::endL;
   query.updateQuery = updateQueryStream.str();
   return query.UpdateOneWithOptions(commentsOnFailure);
 #else
@@ -1010,7 +1005,7 @@ bool Database::Mongo::UpdateOneFromQueryString(
 
 bool Database::UpdateOneFromSome(
   const List<QueryExact>& findOrQueries,
-  const JSData& updateQuery,
+  const QuerySet& updateQuery,
   std::stringstream* commentsOnFailure
 ) {
   if (global.flagDatabaseCompiled) {
@@ -1024,7 +1019,7 @@ bool Database::UpdateOneFromSome(
 
 bool Database::Mongo::UpdateOneFromSome(
   const List<QueryExact>& findOrQueries,
-  const JSData& updateQuery,
+  const QuerySet& updateQuery,
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("Database::UpdateOneFromSomeJSON");
@@ -1039,22 +1034,51 @@ bool Database::Mongo::UpdateOneFromSome(
     return false;
   }
   return this->UpdateOneFromQueryString(
-    findOrQueries[0].collection, queryString, updateQuery, commentsOnFailure
+    findOrQueries[0].collection,
+    queryString,
+    updateQuery.ToJSON(),
+    commentsOnFailure
   );
+}
+
+QuerySet::QuerySet() {
+  this->value.theType = JSData::token::tokenObject;
+}
+
+QuerySet::QuerySet(const JSData& inputValue) {
+  this->value = inputValue;
+}
+
+JSData QuerySet::ToJSON() const {
+}
+
+JSData QuerySet::ToJSONSetMongo() const {
+
 }
 
 bool Database::Mongo::UpdateOne(
   const QueryExact& findQuery,
-  const JSData& updateQuery,
+  const QuerySet& updateQuery,
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("Database::UpdateOneFromJSON");
-  return Database::Mongo::UpdateOneFromQueryString(
+  global << "DEBUG: incoming update query: "
+  << updateQuery.ToJSONSetMongo().ToString(nullptr) << ". " << logger::endL;
+
+  if (!Database::Mongo::UpdateOneFromQueryString(
     findQuery.collection,
     findQuery.ToJSON().ToString(nullptr),
-    updateQuery,
+    updateQuery.ToJSONSetMongo(),
     commentsOnFailure
-  );
+  )) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to update one element. ";
+    }
+    global << "Failed to update element found by: "
+    << findQuery.ToJSON().ToString(nullptr)
+    << " with: " << updateQuery.ToJSONSetMongo().ToString(nullptr);
+  }
+  return true;
 }
 
 bool Database::User::LoadUserInfo(

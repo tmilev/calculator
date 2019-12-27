@@ -22,7 +22,7 @@ bool Database::FallBack::FindOneFromSome(
 
 bool Database::FallBack::UpdateOne(
   const QueryExact& findQuery,
-  const JSData& dataToMerge,
+  const QuerySet& dataToMerge,
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("DatabaseFallback::UpdateOneFromQueryString");
@@ -53,7 +53,7 @@ bool Database::FallBack::UpdateOne(
 
 bool Database::FallBack::UpdateOneNoLocks(
   const QueryExact& findQuery,
-  const JSData& dataToMerge,
+  const QuerySet& dataToMerge,
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("Database::FallBack::UpdateOneNoLocks");
@@ -61,7 +61,7 @@ bool Database::FallBack::UpdateOneNoLocks(
     return false;
   }
   int index = - 1;
-  if (!this->FindIndexOneNoLocksMinusOneOnNotFound(findQuery, index, commentsOnFailure)) {
+  if (!this->FindIndexOneNoLocksMinusOneNotFound(findQuery, index, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to find one entry. ";
     }
@@ -73,19 +73,15 @@ bool Database::FallBack::UpdateOneNoLocks(
     incoming.theType = JSData::token::tokenObject;
     this->reader[findQuery.collection].theList.AddOnTop(incoming);
   }
-  JSData& modified = this->reader[findQuery.collection][index];
-  if (dataToMerge.theType != JSData::token::tokenObject) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "I only know how to merge objects, you gave me: "
-      << dataToMerge.ToString(nullptr);
-    }
-    return false;
+  JSData* modified = &(this->reader[findQuery.collection][index]);
+  for (int i = 0; i < dataToMerge.nestedLabels.size; i ++) {
+    modified = &((*modified)[dataToMerge.nestedLabels[i]]);
   }
-  bool result = modified.MergeInMe(dataToMerge, commentsOnFailure);
-  if (!result && commentsOnFailure != nullptr) {
-    *commentsOnFailure << "Database merge failed. ";
+  (*modified) = dataToMerge.value;
+  for (int i = 0; i < dataToMerge.value.objects.size(); i ++) {
+    (*modified)[dataToMerge.value.objects.theKeys[i]] = dataToMerge.value.objects.theValues[i];
   }
-  return result;
+  return true;
 }
 
 bool Database::FallBack::FindOne(
@@ -99,7 +95,7 @@ bool Database::FallBack::FindOne(
     return false;
   }
   int index = - 1;
-  if (!this->FindIndexOneNoLocksMinusOneOnNotFound(query, index, commentsOnFailure)) {
+  if (!this->FindIndexOneNoLocksMinusOneNotFound(query, index, commentsOnFailure)) {
     return false;
   }
   if (index < 0) {
@@ -134,7 +130,7 @@ std::string Database::FallBack::ToStringIndices() const {
   return out.str();
 }
 
-bool Database::FallBack::FindIndexOneNoLocksMinusOneOnNotFound(
+bool Database::FallBack::FindIndexOneNoLocksMinusOneNotFound(
   const QueryExact& query,
   int& output,
   std::stringstream* commentsOnNotFound
@@ -155,7 +151,9 @@ bool Database::FallBack::FindIndexOneNoLocksMinusOneOnNotFound(
     }
     return false;
   }
-  Database::FallBack::Index& currentIndex = indices.GetValueCreate(key);
+  *commentsOnNotFound << "Not implemented yet. ";
+  return false;
+/*  Database::FallBack::Index& currentIndex = indices.GetValueCreate(key);
   if (query.value.theType != JSData::token::tokenString) {
     if (commentsOnNotFound != nullptr) {
       *commentsOnNotFound << "At the moment, only string value queries are supported.";
@@ -177,7 +175,7 @@ bool Database::FallBack::FindIndexOneNoLocksMinusOneOnNotFound(
     return true;
   }
   output = currentIndex.locations.theValues[currentLocationIndex][0];
-  return true;
+  return true;*/
 }
 
 bool Database::FallBack::FetchCollectionNames(

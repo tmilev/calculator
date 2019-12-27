@@ -10,8 +10,7 @@ var modifiableDatabaseData = {
     ],
     [
       "users",
-      "${number}",
-      "problemData"
+      "${number}"
     ],
     [
       "emailInfo",

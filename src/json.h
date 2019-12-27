@@ -112,7 +112,6 @@ public:
     static const PrintOptions& HexEncodeNonASCII();
   };
   std::string ToString(const JSData::PrintOptions* options) const;
-  static std::string EncodeKeyForMongo(const std::string& input);
   template <typename somestream>
   somestream& IntoStream(
     somestream& out,

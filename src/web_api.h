@@ -57,7 +57,8 @@ class WebAPIResponse {
   static std::string GetOnePageJS(bool appendBuildHash);
   static std::string GetScoresInCoursePage();
   static JSData submitAnswersPreviewJSON();
-  static std::string GetSetProblemDatabaseInfoHtml();
+  static std::string SetProblemDeadline();
+  static std::string SetProblemWeight();
   static std::string GetAccountsPage(const std::string& hostWebAddressWithPort);
   static JSData GetAccountsPageJSON(const std::string& hostWebAddressWithPort);
   static std::string GetAccountsPageBody(const std::string& hostWebAddressWithPort);

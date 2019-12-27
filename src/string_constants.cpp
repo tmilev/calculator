@@ -52,7 +52,8 @@ std::string WebAPI::request::calculatorHTML               = "/calculator-html"  
 std::string WebAPI::request::onePageJS                    = "/calculator-html/javascript_all_in_one.js";
 std::string WebAPI::request::onePageJSWithHash            = "/calculator-html/javascript_all_in_one.js";
 std::string WebAPI::request::calculatorPage               = "calculator"                  ;
-std::string WebAPI::request::setProblemData               = "setProblemData"              ;
+std::string WebAPI::request::setProblemWeight             = "setProblemWeight"            ;
+std::string WebAPI::request::setProblemDeadline           = "setProblemDeadline"          ;
 std::string WebAPI::request::changePassword               = "changePassword"              ;
 std::string WebAPI::request::activateAccountJSON          = "activateAccountJSON"         ;
 std::string WebAPI::request::serverStatusJSON             = "serverStatusJSON"            ;
@@ -94,8 +95,8 @@ std::string DatabaseStrings::labelUserId                            = "id"      
 std::string DatabaseStrings::labelUsername                          = "username"                   ;
 std::string DatabaseStrings::labelPassword                          = "password"                   ;
 std::string DatabaseStrings::labelUserRole                          = "userRole"                   ;
-std::string DatabaseStrings::labelProblemDatA                       = "problemData"                ;
 std::string DatabaseStrings::labelProblemDataJSON                   = "problemDataJSON"            ;
+std::string DatabaseStrings::labelProblemFileName                   = "problemFileName"            ;
 std::string DatabaseStrings::labelAuthenticationToken               = "authenticationToken"        ;
 std::string DatabaseStrings::labelActivationToken                   = "activationToken"            ;
 std::string DatabaseStrings::labelTimeOfActivationTokenCreation     = "activationTokenCreationTime";
@@ -117,11 +118,10 @@ std::string DatabaseStrings::labelSemester         = "semester"      ;
 
 std::string DatabaseStrings::tableProblemWeights       = "problemWeights"      ;
 std::string DatabaseStrings::labelProblemWeightsSchema = "problemWeightsSchema";
-std::string DatabaseStrings::labelProblemWeights       = "weight"              ;
+std::string DatabaseStrings::labelProblemWeight        = "weight"              ;
 
 std::string DatabaseStrings::tableProblemInformation    = "problemInformation"    ;
 std::string DatabaseStrings::labelProblemTotalQuestions = "problemsTotalQuestions";
-std::string DatabaseStrings::labelProblemName           = "problemName"           ;
 
 std::string DatabaseStrings::labelSectionsTaught = "sectionsTaught";
 

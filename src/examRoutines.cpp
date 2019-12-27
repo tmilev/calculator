@@ -55,55 +55,80 @@ CalculatorHTML::CalculatorHTML() {
   this->topics.owner = this;
 }
 
-bool CalculatorHTML::LoadProblemInfoFromJSONAppend(
+bool CalculatorHTML::MergeProblemWeight(
   const JSData& inputJSON,
-  MapList<std::string, ProblemData, MathRoutines::HashString>& outputProblemInfo,
-  std::stringstream& commentsOnFailure
+  MapList<std::string, ProblemData, MathRoutines::HashString>& outputAppendProblemInfo,
+  std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("DatabaseRoutines::LoadProblemInfoFromJSONAppend");
+  MacroRegisterFunctionWithName("DatabaseRoutines::LoadProblemWeightsAppend");
   (void) commentsOnFailure;
-  if (inputJSON.theType == JSData::token::tokenUndefined) {
+  if (inputJSON.theType != JSData::token::tokenObject) {
     return true;
   }
-  outputProblemInfo.SetExpectedSize(inputJSON.objects.size());
+  global << "DEBUG: Incoming problem input: " << inputJSON << logger::endL;
   ProblemData emptyData;
   std::string currentCourse = global.userDefault.courseComputed;
   for (int i = 0; i < inputJSON.objects.size(); i ++) {
+    std::string currentProblemName = inputJSON.objects.theKeys[i];
+    if (!FileOperations::FileExistsVirtual(currentProblemName, false, false, commentsOnFailure)) {
+      *commentsOnFailure << "Problem " << currentProblemName << " does not appear to exist. ";
+      return false;
+    }
+    JSData currentProblem = inputJSON.objects.theValues[i];
+    if (!outputAppendProblemInfo.Contains(currentProblemName)) {
+      outputAppendProblemInfo.SetKeyValue(currentProblemName, emptyData);
+    }
+    ProblemData& currentProblemValue = outputAppendProblemInfo.GetValueCreate(currentProblemName);
+    JSData& currentWeight = currentProblem[DatabaseStrings::labelProblemWeight];
+    if (currentWeight.theType == JSData::token::tokenString) {
+      currentProblemValue.adminData.problemWeightsPerCoursE.SetKeyValue(currentCourse, currentWeight.theString);
+    } else if (currentWeight.theType != JSData::token::tokenUndefined) {
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure << "Could extract neither weight from "
+        << currentWeight.ToString(nullptr) << ". Your input was: "
+        << inputJSON.ToString(nullptr);
+      }
+      return false;
+    }
+  }
+  return true;
+}
+
+bool CalculatorHTML::MergeProblemDeadline(
+  const JSData& inputJSON,
+  MapList<std::string, ProblemData, MathRoutines::HashString>& outputAppendProblemInfo,
+  std::stringstream *commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("DatabaseRoutines::LoadProblemWeightsAppend");
+  (void) commentsOnFailure;
+  if (inputJSON.theType != JSData::token::tokenObject) {
+    return true;
+  }
+  global << "DEBUG: Incoming problem input: " << inputJSON << logger::endL;
+  ProblemData emptyData;
+  for (int i = 0; i < inputJSON.objects.size(); i ++) {
     std::string currentProbName = inputJSON.objects.theKeys[i];
-    JSData& currentProblem = inputJSON.objects.theValues[i];
+    JSData currentProblem = inputJSON.objects.theValues[i];
     if (currentProbName == "") {
       continue;
     }
-    if (!outputProblemInfo.Contains(currentProbName)) {
-      outputProblemInfo.GetValueCreate(currentProbName) = emptyData;
+    if (!outputAppendProblemInfo.Contains(currentProbName)) {
+      outputAppendProblemInfo.SetKeyValue(currentProbName, emptyData);
     }
-    ProblemData& currentProblemValue = outputProblemInfo.GetValueCreate(currentProbName);
+    ProblemData& currentProblemValue = outputAppendProblemInfo.GetValueCreate(currentProbName);
     JSData& currentDeadlines = currentProblem[DatabaseStrings::labelDeadlines];
-    JSData& currentWeight = currentProblem[DatabaseStrings::labelProblemWeights];
-    if (currentWeight.theType == JSData::token::tokenObject) {
-      for (int j = 0; j < currentWeight.objects.size(); j ++) {
-        JSData& currentWeightValue = currentWeight.objects.theValues[j];
-        if (currentWeightValue.theType != JSData::token::tokenString) {
-          continue;
-        }
-        currentProblemValue.adminData.problemWeightsPerCoursE.SetKeyValue(
-          currentWeight.objects.theKeys[j], currentWeightValue.theString
-        );
-      }
-    } else if (currentWeight.theType == JSData::token::tokenString) {
-      currentProblemValue.adminData.problemWeightsPerCoursE.SetKeyValue(currentCourse, currentWeight.theString);
-    } else if (currentWeight.theType != JSData::token::tokenUndefined) {
-      commentsOnFailure << "Could extract neither weight nor weights-per course from "
-      << currentWeight.ToString(nullptr)
-      << ". Your input was: " << inputJSON.ToString(nullptr);
-      return false;
-    }
-    if (currentDeadlines.theType != JSData::token::tokenUndefined) {
+    if (currentDeadlines.theType == JSData::token::tokenObject) {
       for (int j = 0; j < currentDeadlines.objects.size(); j ++) {
         currentProblemValue.adminData.deadlinesPerSection.SetKeyValue(
-          currentDeadlines.objects.theKeys[j], currentDeadlines.objects.theValues[j].theString
+          currentDeadlines.objects.theKeys[j],
+          currentDeadlines.objects.theValues[j].theString
         );
       }
+    } else {
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure << "Unexpected deadline format. ";
+      }
+      return false;
     }
   }
   return true;
@@ -142,7 +167,7 @@ bool CalculatorHTML::LoadProblemInfoFromURLedInputAppend(
       currentKeyValues.GetValueCreate(DatabaseStrings::labelDeadlines), false
     );
     std::string problemWeightsCollectionString = HtmlRoutines::ConvertURLStringToNormal(
-      currentKeyValues.GetValueCreate(DatabaseStrings::labelProblemWeights), false
+      currentKeyValues.GetValueCreate(DatabaseStrings::labelProblemWeight), false
     );
     if (problemWeightsCollectionString != "") {
       if (!HtmlRoutines::ChopCGIString(problemWeightsCollectionString, problemWeightInfo, commentsOnFailure)) {
@@ -167,7 +192,7 @@ bool CalculatorHTML::LoadProblemInfoFromURLedInputAppend(
       }
     }
     std::string problemWeightString = StringRoutines::StringTrimWhiteSpace(
-      currentKeyValues.GetValueCreate(DatabaseStrings::labelProblemWeights)
+      currentKeyValues.GetValueCreate(DatabaseStrings::labelProblemWeight)
     );
     if (problemWeightString != "") {
       currentProblemValue.adminData.problemWeightsPerCoursE.SetKeyValue(
@@ -210,11 +235,12 @@ JSData CalculatorHTML::ToJSONDeadlines(
   return output;
 }
 
-JSData CalculatorHTML::ToJSONProblemWeights(
+QuerySet CalculatorHTML::ToQuerySetProblemWeights(
   MapList<std::string, ProblemData, MathRoutines::HashString>& inputProblemInfo
 ) {
-  MacroRegisterFunctionWithName("CalculatorHTML::ToJSONProblemWeights");
-  JSData output;
+  MacroRegisterFunctionWithName("CalculatorHTML::ToQuerySetProblemWeights");
+  QuerySet output;
+  output.nestedLabels.AddOnTop(DatabaseStrings::labelProblemWeight);
   for (int i = 0; i < inputProblemInfo.size(); i ++) {
     ProblemDataAdministrative& currentProblem = inputProblemInfo.theValues[i].adminData;
     if (currentProblem.problemWeightsPerCoursE.size() == 0) {
@@ -223,89 +249,22 @@ JSData CalculatorHTML::ToJSONProblemWeights(
     std::string currentProblemName = inputProblemInfo.theKeys[i];
     JSData currentProblemJSON;
     for (int j = 0; j < currentProblem.problemWeightsPerCoursE.size(); j ++) {
-      std::string currentWeight = StringRoutines::StringTrimWhiteSpace(currentProblem.problemWeightsPerCoursE.theValues[j]);
+      std::string currentWeight = StringRoutines::StringTrimWhiteSpace(
+        currentProblem.problemWeightsPerCoursE.theValues[j]
+      );
       if (currentWeight == "") {
         continue;
       }
-      std::string currentCourse = StringRoutines::StringTrimWhiteSpace(currentProblem.problemWeightsPerCoursE.theKeys[j]);
+      std::string currentCourse = StringRoutines::StringTrimWhiteSpace(
+        currentProblem.problemWeightsPerCoursE.theKeys[j]
+      );
       currentProblemJSON[currentCourse] = currentWeight;
     }
     JSData currentWeight;
-    currentWeight[DatabaseStrings::labelProblemWeights] = currentProblemJSON;
-    output[currentProblemName] = currentWeight;
+    currentWeight[DatabaseStrings::labelProblemWeight] = currentProblemJSON;
+    output.value[currentProblemName] = currentWeight;
   }
   return output;
-}
-
-bool Database::User::StoreProblemInfoToDatabase(
-  const UserCalculatorData& theUser, bool overwrite, std::stringstream& commentsOnFailure
-) {
-  MacroRegisterFunctionWithName("DatabaseRoutines::StoreProblemDatabaseInfo");
-  QueryExact findQueryWeights(
-    DatabaseStrings::tableProblemWeights,
-    DatabaseStrings::labelProblemWeightsSchema,
-    theUser.problemWeightSchema
-  );
-  QueryExact findQueryDeadlines(
-    DatabaseStrings::tableProblemWeights,
-    DatabaseStrings::labelDeadlinesSchema,
-    theUser.deadlineSchema
-  );
-  if (theUser.problemWeights.theType != JSData::token::tokenUndefined) {
-    if (overwrite) {
-      JSData queryWeights;
-      queryWeights[DatabaseStrings::labelProblemWeights] = theUser.problemWeights;
-      if (!this->owner->UpdateOne(
-        findQueryWeights,
-        queryWeights,
-        &commentsOnFailure
-      )) {
-        return false;
-      }
-    } else {
-      for (int i = 0; i < theUser.problemWeights.objects.size(); i ++) {
-        JSData adjust;
-        adjust[DatabaseStrings::labelProblemWeights][
-          theUser.problemWeights.objects.theKeys[i]
-        ] = theUser.problemWeights.objects.theValues[i];
-        if (!this->owner->UpdateOne(
-          findQueryWeights,
-          adjust,
-          &commentsOnFailure
-        )) {
-          return false;
-        }
-      }
-    }
-  }
-  if (theUser.deadlines.theType != JSData::token::tokenUndefined) {
-    if (overwrite) {
-      JSData setQueryDeadlines;
-      setQueryDeadlines[DatabaseStrings::labelDeadlines] = theUser.deadlines;
-      if (!this->owner->UpdateOne(
-        findQueryDeadlines,
-        setQueryDeadlines,
-        &commentsOnFailure
-      )) {
-        return false;
-      }
-    } else {
-      for (int i = 0; i < theUser.deadlines.objects.size(); i ++) {
-        JSData adjustLabels;
-        adjustLabels[DatabaseStrings::labelDeadlines][
-          theUser.deadlines.objects.theKeys[i]
-        ] = theUser.deadlines.objects.theValues[i];
-        if (!this->owner->UpdateOne(
-          findQueryDeadlines,
-          adjustLabels,
-          &commentsOnFailure
-        )) {
-          return false;
-        }
-      }
-    }
-  }
-  return true;
 }
 
 bool CalculatorHTML::MergeOneProblemAdminData(
@@ -353,22 +312,87 @@ bool CalculatorHTML::MergeOneProblemAdminData(
   return true;
 }
 
-bool CalculatorHTML::MergeProblemInfoInDatabaseJSON(
-  std::string& incomingProblemInfo, std::stringstream& commentsOnFailure
+bool CalculatorHTML::MergeProblemWeightAndStore(
+  std::string& incomingProblemInfo, std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("DatabaseRoutines::MergeProblemInfoInDatabase");
   JSData theProblemJSON;
-  if (!theProblemJSON.readstring(incomingProblemInfo, &commentsOnFailure)) {
+  if (!theProblemJSON.readstring(incomingProblemInfo, commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to parse your input. ";
+    }
     return false;
   }
+  global << "DEBUG: theProblemJSON: " << theProblemJSON.ToString(nullptr) << logger::endL;
   MapList<std::string, ProblemData, MathRoutines::HashString> incomingProblems;
-  if (!this->LoadProblemInfoFromJSONAppend(theProblemJSON, incomingProblems, commentsOnFailure)) {
-    commentsOnFailure << "Failed to parse your request";
+  if (!this->MergeProblemWeight(theProblemJSON, incomingProblems, commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to parse your request";
+    }
     return false;
   }
-  global.userDefault.problemWeights = this->ToJSONProblemWeights(incomingProblems);
-  global.userDefault.deadlines = this->ToJSONDeadlines(incomingProblems);
-  if (!Database::get().theUser.StoreProblemInfoToDatabase(global.userDefault, false, commentsOnFailure)) {
+  return this->StoreProblemWeights(incomingProblems, commentsOnFailure);
+}
+
+bool CalculatorHTML::MergeProblemDeadlineAndStore(
+  std::string& incomingProblemInfo, std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("DatabaseRoutines::MergeProblemDeadlineAndStore");
+  JSData theProblemJSON;
+  if (!theProblemJSON.readstring(incomingProblemInfo, commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to parse your input. ";
+    }
+    return false;
+  }
+  global << "DEBUG: theProblemJSON: " << theProblemJSON.ToString(nullptr) << logger::endL;
+  MapList<std::string, ProblemData, MathRoutines::HashString> incomingProblems;
+  if (!this->MergeProblemDeadline(theProblemJSON, incomingProblems, commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to parse your request";
+    }
+    return false;
+  }
+  return this->StoreProblemDeadlines(incomingProblems, commentsOnFailure);
+}
+
+bool CalculatorHTML::StoreProblemWeights(
+  MapList<std::string, ProblemData, MathRoutines::HashString>& toStore,
+  std::stringstream *commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("DatabaseRoutines::StoreProblemDatabaseInfo");
+  QueryExact weightFinder;
+  weightFinder.collection = DatabaseStrings::tableProblemWeights;
+  weightFinder.SetLabelValue(
+    DatabaseStrings::labelProblemWeightsSchema,
+    global.userDefault.problemWeightSchema
+  );
+  QuerySet updateQuery = this->ToQuerySetProblemWeights(toStore);
+  if (!Database::get().UpdateOne(weightFinder, updateQuery, commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to update weight schema. ";
+      global << logger::red
+      << "Failed to update weight schema with update query: "
+      << updateQuery.ToJSONSetMongo().ToString(nullptr) << logger::endL;
+    }
+    return false;
+  }
+  return true;
+}
+
+bool CalculatorHTML::StoreProblemDeadlines(
+  MapList<std::string, ProblemData, MathRoutines::HashString>& toStore,
+  std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("DatabaseRoutines::StoreProblemDatabaseInfo");
+  QueryExact deadlineSchema;
+  deadlineSchema.collection = DatabaseStrings::tableDeadlines;
+  deadlineSchema.SetLabelValue(DatabaseStrings::labelDeadlinesSchema, global.userDefault.deadlineSchema);
+  QuerySet updateQuery = this->ToJSONDeadlines(toStore);
+  if (!Database::get().UpdateOne(deadlineSchema, updateQuery, commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to update deadline schema. ";
+    }
     return false;
   }
   return true;
@@ -395,14 +419,14 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments) {
       return false;
     }
   }
-  if (!this->LoadProblemInfoFromJSONAppend(
-    this->currentUseR.problemWeights, this->currentUseR.theProblemData, comments
+  if (!this->MergeProblemWeight(
+    this->currentUseR.problemWeights, this->currentUseR.theProblemData, &comments
   )) {
     comments << "Failed to load problem weights. ";
     return false;
   }
-  if (!this->LoadProblemInfoFromJSONAppend(
-    this->currentUseR.deadlines, this->currentUseR.theProblemData, comments
+  if (!this->MergeProblemDeadline(
+    this->currentUseR.deadlines, this->currentUseR.theProblemData, &comments
   )) {
     comments << "Failed to load problem deadlines. ";
     return false;
@@ -2882,7 +2906,7 @@ bool CalculatorHTML::StoreRandomSeedCurrent(std::stringstream* commentsOnFailure
   }
   this->theProblemData.flagRandomSeedGiven = true;
   this->currentUseR.SetProblemData(this->fileName, this->theProblemData);
-  if (!this->currentUseR.StoreProblemDataToDatabaseJSON(commentsOnFailure)) {
+  if (!this->currentUseR.StoreProblemData(this->fileName, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "<b style =\"color:red\">"
       << "Error: failed to store problem in database. "

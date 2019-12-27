@@ -170,7 +170,7 @@ public:
   bool LoadFroM(const std::string& inputData, std::stringstream& commentsOnFailure);
   bool LoadFromJSON(const JSData& inputData, std::stringstream& commentsOnFailure);
   std::string StorE();
-  JSData StoreJSON();
+  JSData StoreJSON() const;
   std::string ToString() const;
   std::string ToStringAvailableAnswerIds();
 };
@@ -222,8 +222,7 @@ public:
   bool flagNewAuthenticationTokenComputedUserNeedsIt;
   bool InterpretDatabaseProblemDatA(const std::string& theInfo, std::stringstream& commentsOnFailure);
   bool InterpretDatabaseProblemDataJSON(const JSData& theData, std::stringstream& commentsOnFailure);
-  bool StoreProblemDataToDatabasE(std::stringstream& commentsOnFailure);
-  bool StoreProblemDataToDatabaseJSON(std::stringstream* commentsOnFailure);
+  bool StoreProblemData(const std::string& fileName, std::stringstream* commentsOnFailure);
   std::string GetSelectedRowEntry(const std::string& theKey);
   std::string GetMySQLclauseIdentifyingUserByEmailOrID();
   bool LoadFromDB(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral = nullptr);

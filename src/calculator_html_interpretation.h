@@ -324,25 +324,44 @@ public:
     const std::string& inputProblemName, ProblemData& inputProblemInfo, std::stringstream& commentsOnFailure
   );
   //bool MergeProblemInfoInDatabaseURLed(std::string& incomingProblemInfo, std::stringstream& commentsOnFailure);
-  bool MergeProblemInfoInDatabaseJSON(std::string& incomingProblemInfo, std::stringstream& commentsOnFailure);
+  bool MergeProblemWeightAndStore(
+    std::string& incomingProblemInfo, std::stringstream* commentsOnFailure
+  );
+  bool MergeProblemDeadlineAndStore(
+    std::string& incomingProblemInfo, std::stringstream* commentsOnFailure
+  );
+  bool MergeProblemWeight(
+    const JSData& inputJSON,
+    MapList<std::string, ProblemData, MathRoutines::HashString>& outputAppendProblemInfo,
+    std::stringstream* commentsOnFailure
+  );
+  bool MergeProblemDeadline(
+    const JSData& inputJSON,
+    MapList<std::string, ProblemData, MathRoutines::HashString>& outputAppendProblemInfo,
+    std::stringstream* commentsOnFailure
+  );
+  bool StoreProblemWeights(
+    MapList<std::string, ProblemData, MathRoutines::HashString>& toStore,
+    std::stringstream* commentsOnFailure
+  );
+  bool StoreProblemDeadlines(
+    MapList<std::string, ProblemData, MathRoutines::HashString>& toStore,
+    std::stringstream* commentsOnFailure
+  );
+
   bool LoadProblemInfoFromURLedInputAppend(
     const std::string& inputInfoString,
     MapList<std::string, ProblemData, MathRoutines::HashString>& outputProblemInfo,
     std::stringstream& commentsOnFailure
   );
-  bool LoadProblemInfoFromJSONAppend(
-    const JSData& inputJSON,
-    MapList<std::string, ProblemData, MathRoutines::HashString>& outputProblemInfo,
-    std::stringstream& commentsOnFailure
-  );
-  //  bool LoadDeadlineInfoFromJSONStringAppend
-  //  (const std::string& inputJSONString,
+  // bool LoadDeadlineInfoFromJSONStringAppend
+  // (const std::string& inputJSONString,
   //   MapLisT<std::string, ProblemData, MathRoutines::hashString>& outputDeadlineInfo,
   //   std::stringstream& commentsOnFailure);
   //void StoreDeadlineInfoIntoJSON
   //(JSData& outputData,
   // MapLisT<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo);
-  JSData ToJSONProblemWeights(MapList<std::string, ProblemData, MathRoutines::HashString>& inputProblemInfo);
+  QuerySet ToQuerySetProblemWeights(MapList<std::string, ProblemData, MathRoutines::HashString>& inputProblemInfo);
   JSData ToJSONDeadlines(MapList<std::string, ProblemData, MathRoutines::HashString>& inputProblemInfo);
   std::string ToStringDeadline(
     const std::string& topicID, bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline, bool isSection

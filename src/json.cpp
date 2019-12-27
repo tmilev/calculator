@@ -662,22 +662,6 @@ bool JSData::readstring(
   return result;
 }
 
-std::string JSData::EncodeKeyForMongo(const std::string& input) {
-  std::stringstream out;
-  for (unsigned int i = 0; i < input.size(); i ++) {
-    if (HtmlRoutines::IsRepresentedByItselfInURLs(input[i]) && input[i] != '.') {
-      out << input[i];
-    } else if (input[i] == '$') {
-      out << input[i];
-    } else {
-      out << "%";
-      int x = static_cast<signed>(input[i]);
-      out << std::hex << ((x / 16) % 16) << (x % 16) << std::dec;
-    }
-  }
-  return out.str();
-}
-
 JSData::PrintOptions::PrintOptions() {
   this->useHTML = false;
   this->useNewLine = false;

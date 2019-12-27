@@ -18,10 +18,21 @@ class QueryExact {
   QueryExact(const std::string& desiredCollection, const std::string& label, const std::string& desiredValue);
   QueryExact(const std::string& desiredCollection, const List<std::string>& desiredLabels, const std::string& desiredValue);
   void SetLabelValue(const std::string& label, const std::string& desiredValue);
+  void SetLabelsValue(const List<std::string>& labels, const std::string& desiredValue);
   std::string getCollectionAndLabel() const;
   std::string getLabel() const;
   JSData ToJSON() const;
   bool isEmpty() const;
+};
+
+class QuerySet {
+public:
+  List<std::string> nestedLabels;
+  JSData value;
+  QuerySet();
+  QuerySet(const JSData& inputValue);
+  JSData ToJSON() const;
+  JSData ToJSONSetMongo() const;
 };
 
 class Database {
@@ -64,10 +75,6 @@ public:
     );
     bool UserExists(const std::string& inputUsername, std::stringstream& comments);
     bool UserDefaultHasInstructorRights();
-
-    bool StoreProblemInfoToDatabase(
-      const UserCalculatorData& theUser, bool overwrite, std::stringstream& commentsOnFailure
-    );
 
     //TODO(tmilev): refactor down to database-only operations.
     static bool SendActivationEmail(
@@ -120,7 +127,7 @@ public:
     MapReferences<std::string, Database::FallBack::Index, MathRoutines::HashString> indices;
     bool UpdateOne(
       const QueryExact& findQuery,
-      const JSData& updateQuery,
+      const QuerySet &updateQuery,
       std::stringstream* commentsOnFailure = nullptr
     );
     bool FindOne(
@@ -131,15 +138,15 @@ public:
     // Return indicates query success / failure.
     // When the element isn't found but otherwise there were
     // no problems with the query, true will be returned with
-    // output set to - 1.
-    bool FindIndexOneNoLocksMinusOneOnNotFound(
+    // output set to [].
+    bool FindIndexOneNoLocksMinusOneNotFound(
       const QueryExact& query,
       int& output,
       std::stringstream* commentsOnNotFound
     );
     bool UpdateOneNoLocks(
       const QueryExact& findQuery,
-      const JSData& updateQuery,
+      const QuerySet& updateQuery,
       std::stringstream* commentsOnFailure = nullptr
     );
     bool FetchCollectionNames(
@@ -198,12 +205,12 @@ public:
     );
     bool UpdateOneFromSome(
       const List<QueryExact>& findOrQueries,
-      const JSData& updateQuery,
+      const QuerySet& updateQuery,
       std::stringstream* commentsOnFailure = nullptr
     );
     bool UpdateOne(
       const QueryExact& findQuery,
-      const JSData& updateQuery,
+      const QuerySet& updateQuery,
       std::stringstream* commentsOnFailure = nullptr
     );
     bool UpdateOneFromQueryString(
@@ -292,12 +299,12 @@ public:
   );
   bool UpdateOne(
     const QueryExact& findQuery,
-    const JSData& dataToMerge,
+    const QuerySet &dataToMerge,
     std::stringstream* commentsOnFailure = nullptr
   );
   bool UpdateOneFromSome(
     const List<QueryExact>& findOrQueries,
-    const JSData& updateQuery,
+    const QuerySet& updateQuery,
     std::stringstream* commentsOnFailure = nullptr
   );
   bool FetchCollectionNames(List<std::string>& output, std::stringstream* commentsOnFailure);
@@ -339,6 +346,18 @@ public:
   );
   static bool matchesPattern(const List<std::string>& fieldLabel, const List<std::string>& pattern);
   static JSData GetStandardProjectors();
+  static std::string ConvertStringToMongoKeyString(const std::string& input);
+  static bool ConvertJSONToJSONMongo(
+    const JSData& input,
+    JSData& output,
+    std::stringstream* commentsOnFailure
+  );
+  static bool ConvertJSONToJSONMongoRecursive(
+    const JSData& input,
+    JSData &output,
+    int recursionDepth,
+    std::stringstream* commentsOnFailure
+  );
   Database();
   ~Database();
 };

@@ -1911,17 +1911,16 @@ std::string WebWorker::GetChangePasswordPagePartOne(bool& outputDoShowPasswordCh
     return out.str();
   }
   QueryExact findEmail(DatabaseStrings::tableEmailInfo, DatabaseStrings::labelEmail, claimedEmail);
-  JSData emailInfo, userInfo;
-
-  if (!Database::get().FindOne(
-    findEmail, emailInfo, &out
-  )) {
-    out << "\n<b style =\"color:red\">Failed to fetch email activation token for email: "
+  JSData userInfo;
+  QuerySet emailInfo;
+  if (!Database::get().FindOne(findEmail, emailInfo.value, &out)) {
+    out << "\n<b style =\"color:red\">"
+    << "Failed to fetch email activation token for email: "
     << claimedEmail << " </b>";
     return out.str();
   }
-  usernameAssociatedWithToken = emailInfo[DatabaseStrings::labelUsernameAssociatedWithToken].theString;
-  actualEmailActivationToken = emailInfo[DatabaseStrings::labelActivationToken].theString;
+  usernameAssociatedWithToken = emailInfo.value[DatabaseStrings::labelUsernameAssociatedWithToken].theString;
+  actualEmailActivationToken = emailInfo.value[DatabaseStrings::labelActivationToken].theString;
   if (actualEmailActivationToken != claimedActivationToken) {
     out << "\n<b style =\"color:red\">Bad activation token. Could not activate your email. </b>";
     return out.str();
@@ -1930,11 +1929,11 @@ std::string WebWorker::GetChangePasswordPagePartOne(bool& outputDoShowPasswordCh
     out << "\n<b style =\"color:red\">Activation token was issued for another user. </b>";
     return out.str();
   }
-  emailInfo[DatabaseStrings::labelActivationToken] = "";
-  if (!Database::get().UpdateOne(
-    findEmail, emailInfo, &out
-  )) {
-    out << "\n<b style =\"color:red\">Could not reset the activation token (database is down?). </b>";
+  emailInfo.value[DatabaseStrings::labelActivationToken] = "";
+  if (!Database::get().UpdateOne(findEmail, emailInfo, &out)) {
+    out << "\n<b style =\"color:red\">"
+    << "Could not reset the activation token (database is down?). "
+    << "</b>";
     return out.str();
   }
   userInfo[DatabaseStrings::labelEmail] = claimedEmail;
@@ -2250,11 +2249,19 @@ int WebWorker::ProcessGetAuthenticationToken(const std::string& reasonForNoAuthe
   return this->WriteToBody(this->GetAuthenticationToken(reasonForNoAuthentication));
 }
 
-int WebWorker::ProcessSetProblemDatabaseInfo() {
+int WebWorker::ProcessSetProblemWeight() {
+  MacroRegisterFunctionWithName("WebWorker::ProcessSetProblemWeight");
+  this->SetHeaderOKNoContentLength("");
+  JSData result;
+  result[WebAPI::result::resultHtml] = WebAPIResponse::SetProblemWeight();
+  return this->WriteToBodyJSON(result);
+}
+
+int WebWorker::ProcessSetProblemDeadline() {
   MacroRegisterFunctionWithName("WebWorker::ProcessSetProblemDatabaseInfo");
   this->SetHeaderOKNoContentLength("");
   JSData result;
-  result[WebAPI::result::resultHtml] = WebAPIResponse::GetSetProblemDatabaseInfoHtml();
+  result[WebAPI::result::resultHtml] = WebAPIResponse::SetProblemDeadline();
   return this->WriteToBodyJSON(result);
 }
 
@@ -2852,8 +2859,10 @@ int WebWorker::ServeClient() {
     (!global.theProgress.flagBanProcessMonitoring)
   ) {
     return this->ProcessComputationIndicator();
-  } else if (global.userCalculatorRequestType == WebAPI::request::setProblemData) {
-    return this->ProcessSetProblemDatabaseInfo();
+  } else if (global.userCalculatorRequestType == WebAPI::request::setProblemWeight) {
+    return this->ProcessSetProblemWeight();
+  } else if (global.userCalculatorRequestType == WebAPI::request::setProblemDeadline) {
+    return this->ProcessSetProblemDeadline();
   } else if (global.userCalculatorRequestType == WebAPI::request::changePassword) {
     return this->ProcessChangePassword(argumentProcessingFailureComments.str());
   } else if (global.userCalculatorRequestType == WebAPI::request::activateAccountJSON) {
@@ -4115,7 +4124,7 @@ int Listener::Accept() {
       global << logger::green << "Connection candidate "
       << this->owner->NumConnectionsSoFar + 1 << ". "
       << "Connected via listening socket " << currentListeningSocket
-      << " on socket: " << result;
+      << " on socket: " << result << logger::endL;
       return result;
     } else {
       global << logger::red

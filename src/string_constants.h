@@ -10,7 +10,8 @@ public:
   static std::string app;
   struct request {
     static std::string calculatorPage;
-    static std::string setProblemData;
+    static std::string setProblemWeight;
+    static std::string setProblemDeadline;
     static std::string changePassword;
     static std::string examplesJSON;
     static std::string activateAccountJSON;
@@ -153,8 +154,8 @@ public:
 
   static std::string labelActivationToken;
   static std::string labelUserRole;
-  static std::string labelProblemDatA;
   static std::string labelProblemDataJSON;
+  static std::string labelProblemFileName;
   static std::string labelTimeOfActivationTokenCreation;
   static std::string labelTimeOfAuthenticationTokenCreation;
 
@@ -178,11 +179,10 @@ public:
   static std::string tableDeadlines;
   // problem weights info
   static std::string tableProblemWeights;
-  static std::string labelProblemWeights;
+  static std::string labelProblemWeight;
   // problem information
   static std::string tableProblemInformation;
   static std::string labelProblemTotalQuestions;
-  static std::string labelProblemName;
   // deleted fields
   static std::string anyFielD;
   static std::string labelFields;

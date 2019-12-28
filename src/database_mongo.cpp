@@ -439,12 +439,13 @@ bool MongoQuery::FindMultiple(
 }
 #endif
 
-std::string Database::Mongo::ConvertErrorToString(void *bson_error_t_pointer) {
+std::string Database::Mongo::ConvertErrorToString(void* bson_error_t_pointer) {
   std::stringstream out;
 #ifdef MACRO_use_MongoDB
   bson_error_t* error = static_cast<bson_error_t*>(bson_error_t_pointer);
   out << "Mongo message: " << error->message << ", code: " << error->code <<  ", domain: " << error->domain;
 #else
+  (void*) bson_error_t_pointer;
   out << "Mongo DB not compiled. ";
 #endif
   return out.str();

@@ -6,6 +6,18 @@
 #include "string_constants.h"
 // Avoid previous extern warning:
 static ProjectInformationInstance projectInfoDatabaseFallbackJSON(__FILE__, "No-database fallback using json file.");
+std::string Database::FallBack::databaseFilename = "database_fallback/database.json";
+
+
+bool Database::FallBack::DeleteDatabase(std::stringstream* commentsOnFailure) {
+  if (!FileOperations::WriteFileVirual(Database::FallBack::databaseFilename, "{}", commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to delete database. ";
+    }
+    return false;
+  }
+  return true;
+}
 
 bool Database::FallBack::FindOneFromSome(
   const List<QueryExact>& findOrQueries,
@@ -284,7 +296,7 @@ void Database::FallBack::IndexOneRecord(
 
 bool Database::FallBack::StoreDatabase(std::stringstream* commentsOnFailure) {
   return FileOperations::WriteFileVirualWithPermissions(
-    "database_fallback/database.json",
+    Database::FallBack::databaseFilename,
     this->reader.ToString(nullptr),
     true,
     commentsOnFailure

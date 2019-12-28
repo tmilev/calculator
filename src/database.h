@@ -119,6 +119,7 @@ public:
     HashedList<std::string, MathRoutines::HashString> knownIndices;
     JSData reader;
     bool flagDatabaseRead;
+    static std::string databaseFilename;
     class Index {
     public:
       // Collection A, label B is denoted as A.B.
@@ -131,6 +132,7 @@ public:
       std::string collectionAndLabel();
     };
     MapReferences<std::string, Database::FallBack::Index, MathRoutines::HashString> indices;
+    bool DeleteDatabase(std::stringstream* commentsOnFailure);
     bool UpdateOne(
       const QueryExact& findQuery,
       const QuerySet &updateQuery,
@@ -187,8 +189,10 @@ public:
     void* database;
     Database* owner;
     bool flagInitialized;
+    std::string ConvertErrorToString(void* bson_error_t_pointer);
     bool initialize();
     void shutdown();
+    bool DeleteDatabase(std::stringstream *commentsOnFailure);
     void CreateHashIndex(const std::string& collectionName, const std::string& theKey);
     bool FetchCollectionNames(
       List<std::string>& output, std::stringstream* commentsOnFailure
@@ -364,6 +368,17 @@ public:
     int recursionDepth,
     std::stringstream* commentsOnFailure
   );
+  bool DeleteDatabase(std::stringstream* commentsOnFailure);
+  class Test {
+  public:
+    void SetUp();
+    static bool All();
+    bool DeleteDatabase();
+    bool AdminAccountCreation();
+    void TearDown();
+    Test();
+    ~Test();
+  };
   Database();
   ~Database();
 };

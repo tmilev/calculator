@@ -143,6 +143,7 @@ SOURCES_RELATIVE_PATH=\
     crypto_sha3.cpp \
     crypto_test.cpp \
     database.cpp \
+    database_test.cpp \
     database_mongo.cpp \
     database_fallback_json.cpp \
     database_mongo_calculator.cpp \

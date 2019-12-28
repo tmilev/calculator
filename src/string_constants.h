@@ -142,9 +142,7 @@ public:
 class DatabaseStrings {
 public:
   // calculator credentials for database use
-  static std::string theDatabaseUser;
   static std::string theDatabaseName;
-  static std::string theDatabaseNameMongo;
   // user column names
   static std::string labelUserId;
   static std::string labelUsername;

@@ -3,6 +3,7 @@
 #include "calculator.h"
 #include "crypto.h"
 #include "webserver.h"
+#include "database.h"
 
 static ProjectInformationInstance projectInfoTestRoutinesCPP(__FILE__, "Testing routines. ");
 
@@ -10,6 +11,7 @@ int mainTest(List<std::string>& inputArguments) {
   global << "Testing ..." << logger::endL;
   (void) inputArguments;
   // theWebServer.InitializeGlobalVariables();
+  Database::Test::All();
   JSData::Test::All();
   ASNObject::initializeNonThreadSafe();
   PrivateKeyRSA::Test::All();

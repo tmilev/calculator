@@ -333,6 +333,13 @@ bool Database::FindOneFromSome(
   }
 }
 
+bool Database::DeleteDatabase(std::stringstream* commentsOnFailure) {
+  if (global.flagDatabaseCompiled) {
+    return this->mongoDB.DeleteDatabase(commentsOnFailure);
+  } else {
+    return this->theFallBack.DeleteDatabase(commentsOnFailure);
+  }
+}
 
 void Database::CreateHashIndex(
   const std::string& collectionName, const std::string& theKey

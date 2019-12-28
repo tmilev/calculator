@@ -157,5 +157,6 @@ SOURCES += \
     database_fallback_json.cpp \
     main.cpp \
     web_api.cpp \
-    json_test.cpp
+    json_test.cpp \
+    database_test.cpp
 

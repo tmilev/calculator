@@ -57,7 +57,7 @@ bool Database::Mongo::initialize() {
   this->client = mongoc_client_new("mongodb://localhost:27017");
   this->database = mongoc_client_get_database(
     static_cast<mongoc_client_t*>(this->client),
-    DatabaseStrings::theDatabaseNameMongo.c_str()
+    DatabaseStrings::theDatabaseName.c_str()
   );
 #endif
   return true;
@@ -106,7 +106,7 @@ MongoCollection::MongoCollection(const std::string& collectionName) {
   this->name = collectionName;
   this->collection = mongoc_client_get_collection(
     static_cast<mongoc_client_t*>(Database::get().mongoDB.client),
-    DatabaseStrings::theDatabaseNameMongo.c_str(),
+    DatabaseStrings::theDatabaseName.c_str(),
     this->name.c_str()
   );
 }
@@ -439,6 +439,45 @@ bool MongoQuery::FindMultiple(
 }
 #endif
 
+std::string Database::Mongo::ConvertErrorToString(void *bson_error_t_pointer) {
+  std::stringstream out;
+#ifdef MACRO_use_MongoDB
+  bson_error_t* error = static_cast<bson_error_t*>(bson_error_t_pointer);
+  out << "Mongo message: " << error->message << ", code: " << error->code <<  ", domain: " << error->domain;
+#else
+  out << "Mongo DB not compiled. ";
+#endif
+  return out.str();
+}
+
+bool Database::Mongo::DeleteDatabase(std::stringstream* commentsOnFailure) {
+  MacroRegisterFunctionWithName("Database::Mongo::DeleteDatabase");
+  if (DatabaseStrings::theDatabaseName != "calculatortest") {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "The only database allowed to be deleted is calculatortest. ";
+    }
+    return false;
+  }
+#ifdef MACRO_use_MongoDB
+  if (!this->initialize()) {
+    return false;
+  }
+  bson_error_t errorResult;
+  if (!mongoc_database_drop(static_cast<mongoc_database_t*>(this->database), &errorResult)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to drop database. " << this->ConvertErrorToString(&errorResult);
+    }
+    return false;
+  }
+  return true;
+#else
+  if (commentsOnFailure != nullptr) {
+    *commentsOnFailure << "Cannot delete database: not compiled with mongoDB support.";
+  }
+  return false;
+#endif
+}
+
 void Database::Mongo::CreateHashIndex(
   const std::string& collectionName, const std::string& theKey
 ) {
@@ -456,7 +495,7 @@ void Database::Mongo::CreateHashIndex(
     &query.theError
   );
   mongoc_database_write_command_with_opts(
-    static_cast<mongoc_database_t*>(database),
+    static_cast<mongoc_database_t*>(this->database),
     query.command,
     nullptr,
     query.updateResult,

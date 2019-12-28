@@ -104,9 +104,7 @@ std::string DatabaseStrings::labelTimeOfAuthenticationTokenCreation = "authentic
 std::string DatabaseStrings::labelEmail                             = "email"                      ;
 
 std::string DatabaseStrings::tableUsers           = "users"     ;
-std::string DatabaseStrings::theDatabaseUser      = "ace"       ;
-std::string DatabaseStrings::theDatabaseName      = "aceDB"     ;
-std::string DatabaseStrings::theDatabaseNameMongo = "calculator";
+std::string DatabaseStrings::theDatabaseName      = "calculator";
 std::string DatabaseStrings::tableDeadlines       = "deadlines" ;
 std::string DatabaseStrings::labelDeadlines       = "deadlines" ;
 

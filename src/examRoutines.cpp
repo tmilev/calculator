@@ -373,7 +373,7 @@ bool CalculatorHTML::StoreProblemWeights(
       *commentsOnFailure << "Failed to update weight schema. ";
       global << logger::red
       << "Failed to update weight schema with update query: "
-      << updateQuery.ToJSONSetMongo().ToString(nullptr) << logger::endL;
+      << updateQuery.ToStringDebug() << logger::endL;
     }
     return false;
   }

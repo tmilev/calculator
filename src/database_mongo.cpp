@@ -582,43 +582,6 @@ bool Database::FindFromJSONWithOptions(
 #endif
 }
 
-bool Database::IsValidJSONMongoUpdateQuery(
-  const JSData& updateQuery, std::stringstream* commentsOnFailure
-) {
-  MacroRegisterFunctionWithName("Database::IsValidJSONMongoUpdateQuery");
-  if (
-    updateQuery.theType != JSData::token::tokenString &&
-    updateQuery.theType != JSData::token::tokenObject &&
-    updateQuery.theType != JSData::token::tokenArray
-  ) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "JSData: "
-      << HtmlRoutines::ConvertStringToHtmlString(updateQuery.ToString(nullptr), false)
-      << " expected to be a string, array or an object. ";
-    }
-    return false;
-  }
-  if (updateQuery.theType == JSData::token::tokenObject) {
-    for (int i = 0; i < updateQuery.objects.size(); i ++) {
-      if (!Database::IsValidJSONMongoUpdateQuery(
-        updateQuery.objects.theValues[i], commentsOnFailure
-      )) {
-        return false;
-      }
-    }
-  }
-  if (updateQuery.theType == JSData::token::tokenArray) {
-    for (int i = 0; i < updateQuery.theList.size; i ++) {
-      if (!Database::IsValidJSONMongoUpdateQuery(
-        updateQuery.theList[i], commentsOnFailure
-      )) {
-        return false;
-      }
-    }
-  }
-  return true;
-}
-
 bool Database::Mongo::FindOneFromSome(
   const List<QueryExact>& findOrQueries,
   JSData& output,
@@ -977,20 +940,15 @@ bool Database::DeleteOneEntryUnsetUnsecure(
 bool Database::Mongo::UpdateOneFromQueryString(
   const std::string& collectionName,
   const std::string& findQuery,
-  const JSData& updateQuery,
+  const std::string& updateQuery,
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("Database::UpdateOneFromQueryString");
 #ifdef MACRO_use_MongoDB
-  if (!Database::IsValidJSONMongoUpdateQuery(updateQuery, commentsOnFailure)) {
-    return false;
-  }
   MongoQuery query;
   query.findQuery = findQuery;
   query.collectionName = collectionName;
-  std::stringstream updateQueryStream;
-  updateQueryStream << "{\"$set\": " << updateQuery.ToString(nullptr) << "}";
-  query.updateQuery = updateQueryStream.str();
+  query.updateQuery = updateQuery;
   return query.UpdateOneWithOptions(commentsOnFailure);
 #else
   (void) collectionName;
@@ -1033,10 +991,17 @@ bool Database::Mongo::UpdateOneFromSome(
     }
     return false;
   }
+  JSData setJSON;
+  if (!updateQuery.ToJSONSetMongo(setJSON, commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to extract set mongo json. ";
+    }
+    return false;
+  }
   return this->UpdateOneFromQueryString(
     findOrQueries[0].collection,
     queryString,
-    updateQuery.ToJSON(),
+    setJSON.ToString(nullptr),
     commentsOnFailure
   );
 }
@@ -1049,11 +1014,51 @@ QuerySet::QuerySet(const JSData& inputValue) {
   this->value = inputValue;
 }
 
-JSData QuerySet::ToJSON() const {
+std::string QuerySet::ToStringDebug() const {
+  std::stringstream out;
+  JSData jsonSetMongo;
+  if (!this->ToJSONSetMongo(jsonSetMongo, &out)) {
+    return out.str();
+  }
+  out << jsonSetMongo.ToString(nullptr);
+  return out.str();
 }
 
-JSData QuerySet::ToJSONSetMongo() const {
+bool QuerySet::ToJSONSetMongo(JSData& output, std::stringstream* commentsOnFailure) const {
+  JSData data;
+  if (!this->ToJSONMongo(data, commentsOnFailure)) {
+    return false;
+  }
+  output.reset(JSData::token::token::tokenObject);
+  output["$set"] = data;
+  return true;
+}
 
+bool QuerySet::ToJSONMongo(
+  JSData& output, std::stringstream* commentsOnFailure
+) const {
+  JSData converted;
+  if (!Database::ConvertJSONToJSONMongo(this->value, converted, commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to convert query to JSON. ";
+    }
+    return false;
+  }
+  if (converted.theType != JSData::token::tokenObject) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Query is not converted to an object. ";
+    }
+    return false;
+  }
+  output.reset(JSData::token::tokenObject);
+  std::string keyPrefix = QueryExact::getLabelFromNestedLabels(this->nestedLabels);
+  if (keyPrefix != "") {
+    keyPrefix += ".";
+  }
+  for (int i = 0; i < converted.objects.size(); i ++) {
+    output[keyPrefix + converted.objects.theKeys[i]] = converted.objects.theValues[i];
+  }
+  return true;
 }
 
 bool Database::Mongo::UpdateOne(
@@ -1063,12 +1068,15 @@ bool Database::Mongo::UpdateOne(
 ) {
   MacroRegisterFunctionWithName("Database::UpdateOneFromJSON");
   global << "DEBUG: incoming update query: "
-  << updateQuery.ToJSONSetMongo().ToString(nullptr) << ". " << logger::endL;
-
+  << updateQuery.ToStringDebug() << ". " << logger::endL;
+  JSData updateQueryJSON;
+  if (!updateQuery.ToJSONSetMongo(updateQueryJSON, commentsOnFailure)) {
+    return false;
+  }
   if (!Database::Mongo::UpdateOneFromQueryString(
     findQuery.collection,
     findQuery.ToJSON().ToString(nullptr),
-    updateQuery.ToJSONSetMongo(),
+    updateQueryJSON.ToString(nullptr),
     commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
@@ -1076,7 +1084,7 @@ bool Database::Mongo::UpdateOne(
     }
     global << "Failed to update element found by: "
     << findQuery.ToJSON().ToString(nullptr)
-    << " with: " << updateQuery.ToJSONSetMongo().ToString(nullptr);
+    << " with: " << updateQuery.ToStringDebug();
   }
   return true;
 }

@@ -135,15 +135,19 @@ JSData QueryExact::ToJSON() const {
   return result;
 }
 
-std::string QueryExact::getLabel() const {
+std::string QueryExact::getLabelFromNestedLabels(const List<std::string>& nestedLabels) {
   std::stringstream out;
-  for (int i = 0; i < this->nestedLabels.size; i ++) {
-    out << Database::ConvertStringToMongoKeyString(this->nestedLabels[i]);
-    if (i != this->nestedLabels.size - 1) {
+  for (int i = 0; i < nestedLabels.size; i ++) {
+    out << Database::ConvertStringToMongoKeyString(nestedLabels[i]);
+    if (i != nestedLabels.size - 1) {
       out << ".";
     }
   }
   return out.str();
+}
+
+std::string QueryExact::getLabel() const {
+  return this->getLabelFromNestedLabels(this->nestedLabels);
 }
 
 std::string QueryExact::getCollectionAndLabel() const {

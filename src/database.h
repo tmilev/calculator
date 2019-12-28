@@ -21,6 +21,7 @@ class QueryExact {
   void SetLabelsValue(const List<std::string>& labels, const std::string& desiredValue);
   std::string getCollectionAndLabel() const;
   std::string getLabel() const;
+  static std::string getLabelFromNestedLabels(const List<std::string>& nestedLabels);
   JSData ToJSON() const;
   bool isEmpty() const;
 };
@@ -31,8 +32,9 @@ public:
   JSData value;
   QuerySet();
   QuerySet(const JSData& inputValue);
-  JSData ToJSON() const;
-  JSData ToJSONSetMongo() const;
+  bool ToJSONMongo(JSData& output, std::stringstream* commentsOnFailure) const;
+  bool ToJSONSetMongo(JSData& output, std::stringstream* commentsOnFailure) const;
+  std::string ToStringDebug() const;
 };
 
 class Database {
@@ -216,7 +218,7 @@ public:
     bool UpdateOneFromQueryString(
       const std::string& collectionName,
       const std::string& findQuery,
-      const JSData& updateQuery,
+      const std::string& updateQuery,
       std::stringstream* commentsOnFailure = nullptr
     );
     Mongo();
@@ -291,10 +293,6 @@ public:
   bool FindOneFromSome(
     const List<QueryExact>& alternatives,
     JSData& output,
-    std::stringstream* commentsOnFailure = nullptr
-  );
-  static bool IsValidJSONMongoUpdateQuery(
-    const JSData& updateQuery,
     std::stringstream* commentsOnFailure = nullptr
   );
   bool UpdateOne(

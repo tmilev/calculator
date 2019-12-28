@@ -359,6 +359,13 @@ InputPanelData.prototype.submitOrPreviewAnswersCallback = function(outputCompone
     }
     resultHtml += inputParsed.resultHtml;
   }
+  var crashReport = inputParsed.crashReport;
+  if (crashReport !== undefined && crashReport !== null && crashReport) {
+    if (resultHtml !== "") {
+      resultHtml += "<br>";
+    }
+    resultHtml += crashReport;
+  }
   var timeComputation = inputParsed.timeComputation;
   if (timeComputation !== null && timeComputation !== undefined) {
     if (resultHtml !== "") {

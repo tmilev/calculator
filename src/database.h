@@ -20,8 +20,12 @@ class QueryExact {
   void SetLabelValue(const std::string& label, const std::string& desiredValue);
   void SetLabelsValue(const List<std::string>& labels, const std::string& desiredValue);
   std::string getCollectionAndLabel() const;
-  std::string getLabel() const;
-  static std::string getLabelFromNestedLabels(const List<std::string>& nestedLabels);
+  bool getLabel(std::string& output, std::stringstream* commentsOnFailure) const;
+  static bool getLabelFromNestedLabels(
+    const List<std::string>& nestedLabels,
+    std::string& output,
+    std::stringstream* commentsOnFailure
+  );
   JSData ToJSON() const;
   bool isEmpty() const;
 };
@@ -344,7 +348,11 @@ public:
   );
   static bool matchesPattern(const List<std::string>& fieldLabel, const List<std::string>& pattern);
   static JSData GetStandardProjectors();
-  static std::string ConvertStringToMongoKeyString(const std::string& input);
+  static bool ConvertStringToMongoKeyString(
+    const std::string& input,
+    std::string &output,
+    std::stringstream *commentsOnFailure
+  );
   static bool ConvertJSONToJSONMongo(
     const JSData& input,
     JSData& output,

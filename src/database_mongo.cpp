@@ -882,17 +882,13 @@ bool Database::DeleteOneEntryUnsetUnsecure(
   MacroRegisterFunctionWithName("Database::DeleteOneEntryUnsecure");
 #ifdef MACRO_use_MongoDB
 
-  std::stringstream selectorStream;
-  for (int i = 0; i < selector.size; i ++) {
-    selectorStream << Database::ConvertStringToMongoKeyString(selector[i]);
-    if (i != selector.size - 1) {
-      selectorStream << ".";
-    }
+  std::string selectorString;
+  if (!QueryExact::getLabelFromNestedLabels(selector, selectorString, commentsOnFailure)) {
+    return false;
   }
-
   JSData foundItem;
   List<std::string> selectorsCombined;
-  selectorsCombined.AddOnTop(selectorStream.str());
+  selectorsCombined.AddOnTop(selectorString);
   bool didFindItem = FindOneFromJSONWithProjection(
     findQuery.collection,
     findQuery.ToJSON(),
@@ -923,7 +919,7 @@ bool Database::DeleteOneEntryUnsetUnsecure(
   query.findQuery = findQuery.ToJSON().ToString(nullptr);
   query.collectionName = findQuery.collection;
   std::stringstream updateQueryStream;
-  updateQueryStream << "{\"$unset\": {\"" << selectorStream.str() << "\":\"\"}}";
+  updateQueryStream << "{\"$unset\": {\"" << selectorString << "\":\"\"}}";
   query.updateQuery = updateQueryStream.str();
   global << logger::red << "DEBUG: update query: " << logger::blue << query.updateQuery << logger::endL;
   return query.UpdateOneNoOptions(commentsOnFailure);
@@ -1040,7 +1036,8 @@ bool QuerySet::ToJSONMongo(
   JSData converted;
   if (!Database::ConvertJSONToJSONMongo(this->value, converted, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to convert query to JSON. ";
+      *commentsOnFailure << "Failed to convert: "
+      << this->value.ToString(nullptr) << " to JSON. ";
     }
     return false;
   }
@@ -1051,7 +1048,12 @@ bool QuerySet::ToJSONMongo(
     return false;
   }
   output.reset(JSData::token::tokenObject);
-  std::string keyPrefix = QueryExact::getLabelFromNestedLabels(this->nestedLabels);
+  std::string keyPrefix;
+  if (!QueryExact::getLabelFromNestedLabels(
+    this->nestedLabels, keyPrefix, commentsOnFailure
+  )) {
+    return false;
+  }
   if (keyPrefix != "") {
     keyPrefix += ".";
   }

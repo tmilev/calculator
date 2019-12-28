@@ -130,29 +130,52 @@ JSData QueryExact::ToJSON() const {
     result.theType = JSData::token::tokenNull;
     return result;
   }
+  std::string label;
+  std::stringstream commentsOnFailure;
+  if (!this->getLabel(label, &commentsOnFailure)) {
+    global << logger::red
+    << "Failed to convert find query to mongoDB encoding. " << commentsOnFailure.str() << logger::endL;
+    return result;
+  }
   result.theType = JSData::token::tokenObject;
-  result[this->getLabel()] = encodedKeys;
+  result[label] = encodedKeys;
   return result;
 }
 
-std::string QueryExact::getLabelFromNestedLabels(const List<std::string>& nestedLabels) {
+bool QueryExact::getLabelFromNestedLabels(
+  const List<std::string>& nestedLabels,
+  std::string& output,
+  std::stringstream* commentsOnFailure
+) {
   std::stringstream out;
   for (int i = 0; i < nestedLabels.size; i ++) {
-    out << Database::ConvertStringToMongoKeyString(nestedLabels[i]);
+    std::string currentKey;
+    if (!Database::ConvertStringToMongoKeyString(
+      nestedLabels[i], currentKey, commentsOnFailure
+    )) {
+      return false;
+    }
+    out << currentKey;
     if (i != nestedLabels.size - 1) {
       out << ".";
     }
   }
-  return out.str();
+  output = out.str();
+  return true;
 }
 
-std::string QueryExact::getLabel() const {
-  return this->getLabelFromNestedLabels(this->nestedLabels);
+bool QueryExact::getLabel(std::string& output, std::stringstream* commentsOnFailure) const {
+  return this->getLabelFromNestedLabels(this->nestedLabels, output, commentsOnFailure);
 }
 
 std::string QueryExact::getCollectionAndLabel() const {
   std::stringstream out;
-  out << this->collection << "." << this->getLabel();
+  std::string label;
+  std::stringstream commentsOnFailure;
+  if (!this->getLabel(label, &commentsOnFailure)) {
+    global << logger::red << "Failed to get label from query exact. " << commentsOnFailure.str() << logger::endL;
+  }
+  out << this->collection << "." << label;
   return out.str();
 }
 
@@ -168,12 +191,16 @@ void QueryExact::SetLabelValue(const std::string& label, const std::string& desi
 }
 
 bool Database::ConvertJSONToJSONMongoRecursive(
-  const JSData& input, JSData& output, int recursionDepth, std::stringstream* commentsOnFailure
+  const JSData& input,
+  JSData& output,
+  int recursionDepth,
+  std::stringstream* commentsOnFailure
 ) {
   static const int maxRecursionDepth = 100;
   if (recursionDepth > maxRecursionDepth) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Input json is too deeply nested, maximum depth: " << maxRecursionDepth << ". ";
+      *commentsOnFailure << "Input json is too deeply nested, maximum depth: "
+      << maxRecursionDepth << ". ";
     }
     return false;
   }
@@ -181,7 +208,9 @@ bool Database::ConvertJSONToJSONMongoRecursive(
   if (input.theType == JSData::token::tokenArray) {
     for (int i = 0; i < input.theList.size; i ++) {
       JSData nextItem;
-      if (!Database::ConvertJSONToJSONMongoRecursive(input.theList[i], nextItem, recursionDepth + 1, commentsOnFailure)) {
+      if (!Database::ConvertJSONToJSONMongoRecursive(
+        input.theList[i], nextItem, recursionDepth + 1, commentsOnFailure
+      )) {
         return false;
       }
       output.theList.AddOnTop(nextItem);
@@ -191,10 +220,19 @@ bool Database::ConvertJSONToJSONMongoRecursive(
   if (input.theType == JSData::token::tokenObject) {
     for (int i = 0; i < input.objects.size(); i ++) {
       JSData nextItem;
-      if (!Database::ConvertJSONToJSONMongoRecursive(input.objects.theValues[i], nextItem, recursionDepth + 1, commentsOnFailure)) {
+      if (!Database::ConvertJSONToJSONMongoRecursive(
+        input.objects.theValues[i],
+        nextItem, recursionDepth + 1,
+        commentsOnFailure
+      )) {
         return false;
       }
-      std::string theKey = Database::ConvertStringToMongoKeyString(input.objects.theKeys[i]);
+      std::string theKey;
+      if (!Database::ConvertStringToMongoKeyString(
+        input.objects.theKeys[i], theKey, commentsOnFailure
+      )) {
+        return false;
+      }
       output[theKey] = nextItem;
     }
     return true;
@@ -211,20 +249,31 @@ bool Database::ConvertJSONToJSONMongo(
   );
 }
 
-std::string Database::ConvertStringToMongoKeyString(const std::string& input) {
+bool Database::ConvertStringToMongoKeyString(
+  const std::string& input,
+  std::string& output,
+  std::stringstream* commentsOnFailure
+) {
   std::stringstream out;
   for (unsigned int i = 0; i < input.size(); i ++) {
-    if (HtmlRoutines::IsRepresentedByItselfInURLs(input[i]) && input[i] != '.') {
+    if (input[i] == '.') {
+      out << "%2e";
+    } else if (input[i] > 31 && input[i] < 127) {
       out << input[i];
     } else {
-      global.fatal << "Unexpected character " << input[i]
-      << " in database key. To avoid this error use simple data keys "
-      << "known at compile time. "
-      << "Keep arbtrairy data in leaf JSON nodes, "
-      << "where it will be addressed by value only. " << global.fatal;
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure << "Unexpected character "
+        << StringRoutines::ConvertByteToHex(static_cast<unsigned char>(input[i]))
+        << " in database key. To avoid this error use simple data keys "
+        << "known at compile time. "
+        << "Keep arbitrary data in leaf JSON nodes, "
+        << "where it will be addressed by value only. ";
+      }
+      return false;
     }
   }
-  return out.str();
+  output = out.str();
+  return true;
 }
 
 bool Database::FindOne(

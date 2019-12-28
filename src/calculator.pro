@@ -158,5 +158,6 @@ SOURCES += \
     main.cpp \
     web_api.cpp \
     json_test.cpp \
-    database_test.cpp
+    database_test.cpp \
+    global_test.cpp
 

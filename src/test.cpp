@@ -20,6 +20,7 @@ int mainTest(List<std::string>& inputArguments) {
   Expression::Test::All();
   LargeIntegerUnsigned::Test::All();
   Calculator::Test::All();
+  GlobalVariables::Test::All();
   global << logger::green << "All tests passed. " << logger::endL;
   return 0;
 }

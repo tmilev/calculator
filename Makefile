@@ -150,6 +150,7 @@ SOURCES_RELATIVE_PATH=\
     date_time_wrappers.cpp \
     examRoutines.cpp \
     global_objects.cpp \
+    global_test.cpp \
     html_snippets.cpp \
     json.cpp \
     json_test.cpp \

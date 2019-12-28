@@ -417,6 +417,11 @@ public:
   }
   WebServer& server();
   void MakeReport();
+  class Test {
+  public:
+    static bool All();
+    static bool Builds();
+  };
   /// @endcond
 };
 

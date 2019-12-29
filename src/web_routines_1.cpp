@@ -685,7 +685,6 @@ bool CalculatorFunctionsGeneral::innerFetchKnownPublicKeys(
 
 void WebCrawler::UpdatePublicKeys(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
   MacroRegisterFunctionWithName("WebCrawler::UpdatePublicKeys");
-  global << logger::blue << "DEBUG: About to update public keys ..." << logger::endL;
   this->serverToConnectTo  = "www.googleapis.com";
   this->portOrService      = "https";
   this->addressToConnectTo = "https://www.googleapis.com/oauth2/v3/certs";
@@ -693,7 +692,6 @@ void WebCrawler::UpdatePublicKeys(std::stringstream* commentsOnFailure, std::str
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "<hr>" << "Updating public keys <hr>";
   }
-  global << logger::blue << "DEBUG: about to fetch google public keys ..." << logger::endL;
   this->FetchWebPage(commentsOnFailure, commentsGeneral);
   if (this->bodyReceiveD == "") {
     global << logger::red << "Could not fetch the google public keys ..." << logger::endL;
@@ -702,7 +700,6 @@ void WebCrawler::UpdatePublicKeys(std::stringstream* commentsOnFailure, std::str
     }
     return;
   }
-  global << logger::blue << "DEBUG: GOT keys!!!..." << logger::endL;
   std::string googleKeysFileName = "certificates-public/google.txt";
   std::string googleKeysDebugFileName = "certificates-public/debug-google.txt";
   std::fstream googleKeysFile, googleKeysDebugFile;
@@ -879,22 +876,20 @@ bool WebCrawler::VerifyRecaptcha(
   JSData theJSparser;
   if (!theJSparser.readstring(response, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "<span style =\"color:red\">"
-      << "<b>" << "Failed to extract response token from captcha verification. "
+      *commentsOnFailure
+      << "<b style ='color:red'>" << "Failed to extract response token from captcha verification. "
       << "</b>"
       << "<br>The response string was: "
-      << response
-      << "</span>";
+      << response;
     }
     return 0;
   }
   if (!theJSparser.HasKey("success")) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
-      << "<span style =\"color:red\">"
-      << "<b>" << "Captcha failure: could not find key 'success'."
+      << "<b style ='color:red'>" << "Captcha failure: could not find key 'success'."
       << "</b>"
-      << "</span>";
+      ;
     }
     return false;
   }
@@ -971,12 +966,12 @@ JSData WebWorker::GetSignUpRequestResult() {
     result["comments"] = generalCommentsStream.str();
     return result;
   } else {
-    outputStream << "<span style =\"color:green\"><b>"
+    outputStream << "<b style ='color:green'>"
     << "Username ("
     << theUser.username
     << ") with email ("
     << theUser.email
-    << ") is available. </b></span>";
+    << ") is available. </b>";
   }
   if (!theUser.StoreToDB(false, &errorStream)) {
     errorStream << "Failed to store error stream. ";
@@ -1032,7 +1027,7 @@ int WebWorker::ProcessSignUP() {
 }
 
 void GlobalVariables::WriteCrash(const JSData& out) {
-  MacroRegisterFunctionWithName("WebWorker::WriteAfterTimeoutCrash");
+  MacroRegisterFunctionWithName("WebWorker::WriteCrash");
   int toDoFixRaceCondition;
   if (!global.theProgress.flagTimedOut) {
     this->WriteResponse(out);
@@ -1046,7 +1041,6 @@ void GlobalVariables::WriteCrash(const JSData& out) {
   );
   global.server().SignalActiveWorkerDoneReleaseEverything();
 }
-
 
 void GlobalVariables::WriteResponse(const JSData& out) {
   WebWorker& theWorker = global.server().GetActiveWorker();

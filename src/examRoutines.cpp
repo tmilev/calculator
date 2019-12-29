@@ -65,13 +65,17 @@ bool CalculatorHTML::MergeProblemWeight(
   if (inputJSON.theType != JSData::token::tokenObject) {
     return true;
   }
-  global << "DEBUG: Incoming problem input: " << inputJSON << logger::endL;
   ProblemData emptyData;
   std::string currentCourse = global.userDefault.courseComputed;
   for (int i = 0; i < inputJSON.objects.size(); i ++) {
     std::string currentProblemName = inputJSON.objects.theKeys[i];
-    if (!FileOperations::FileExistsVirtual(currentProblemName, false, false, commentsOnFailure)) {
-      *commentsOnFailure << "Problem " << currentProblemName << " does not appear to exist. ";
+    if (!FileOperations::FileExistsVirtualCustomizedReadOnly(
+      currentProblemName, commentsOnFailure
+    )) {
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure << "Problem "
+        << currentProblemName << " <b>does not appear to exist</b>. ";
+      }
       return false;
     }
     JSData currentProblem = inputJSON.objects.theValues[i];
@@ -104,7 +108,6 @@ bool CalculatorHTML::MergeProblemDeadline(
   if (inputJSON.theType != JSData::token::tokenObject) {
     return true;
   }
-  global << "DEBUG: Incoming problem input: " << inputJSON << logger::endL;
   ProblemData emptyData;
   for (int i = 0; i < inputJSON.objects.size(); i ++) {
     std::string currentProbName = inputJSON.objects.theKeys[i];
@@ -129,76 +132,6 @@ bool CalculatorHTML::MergeProblemDeadline(
         *commentsOnFailure << "Unexpected deadline format. ";
       }
       return false;
-    }
-  }
-  return true;
-}
-
-bool CalculatorHTML::LoadProblemInfoFromURLedInputAppend(
-  const std::string& inputInfoString,
-  MapList<std::string, ProblemData, MathRoutines::HashString>& outputProblemInfo,
-  std::stringstream& commentsOnFailure
-) {
-  MacroRegisterFunctionWithName("DatabaseRoutines::LoadProblemInfoFromURLedInputAppend");
-  MapList<std::string, std::string, MathRoutines::HashString>
-  CGIedProbs, currentKeyValues, sectionDeadlineInfo, problemWeightInfo;
-  if (!HtmlRoutines::ChopCGIString(inputInfoString, CGIedProbs, commentsOnFailure)) {
-    return false;
-  }
-  outputProblemInfo.SetExpectedSize(outputProblemInfo.size() + CGIedProbs.size());
-  std::string currentProbName, currentProbString;
-  ProblemData emptyData;
-  for (int i = 0; i < CGIedProbs.size(); i ++) {
-    currentProbName = StringRoutines::StringTrimWhiteSpace(
-      HtmlRoutines::ConvertURLStringToNormal(CGIedProbs.theKeys[i], false)
-    );
-    if (currentProbName == "") {
-      continue;
-    }
-    currentProbString = HtmlRoutines::ConvertURLStringToNormal(CGIedProbs.theValues[i], false);
-    if (!outputProblemInfo.Contains(currentProbName)) {
-      outputProblemInfo.GetValueCreate(currentProbName) = emptyData;
-    }
-    ProblemData& currentProblemValue = outputProblemInfo.GetValueCreate(currentProbName);
-    if (!HtmlRoutines::ChopCGIString(currentProbString, currentKeyValues, commentsOnFailure)) {
-      return false;
-    }
-    std::string deadlineString = HtmlRoutines::ConvertURLStringToNormal(
-      currentKeyValues.GetValueCreate(DatabaseStrings::labelDeadlines), false
-    );
-    std::string problemWeightsCollectionString = HtmlRoutines::ConvertURLStringToNormal(
-      currentKeyValues.GetValueCreate(DatabaseStrings::labelProblemWeight), false
-    );
-    if (problemWeightsCollectionString != "") {
-      if (!HtmlRoutines::ChopCGIString(problemWeightsCollectionString, problemWeightInfo, commentsOnFailure)) {
-        return false;
-      }
-      for (int j = 0; j < problemWeightInfo.size(); j ++) {
-        currentProblemValue.adminData.problemWeightsPerCoursE.SetKeyValue(
-          HtmlRoutines::ConvertURLStringToNormal(problemWeightInfo.theKeys[j], false),
-          HtmlRoutines::ConvertURLStringToNormal(problemWeightInfo.theValues[j], false)
-        );
-      }
-    }
-    if (deadlineString != "") {
-      if (!HtmlRoutines::ChopCGIString(deadlineString, sectionDeadlineInfo, commentsOnFailure)) {
-        return false;
-      }
-      for (int j = 0; j < sectionDeadlineInfo.size(); j ++) {
-        currentProblemValue.adminData.deadlinesPerSection.SetKeyValue(
-          HtmlRoutines::ConvertURLStringToNormal(sectionDeadlineInfo.theKeys[j], false),
-          HtmlRoutines::ConvertURLStringToNormal(sectionDeadlineInfo.theValues[j], false)
-        );
-      }
-    }
-    std::string problemWeightString = StringRoutines::StringTrimWhiteSpace(
-      currentKeyValues.GetValueCreate(DatabaseStrings::labelProblemWeight)
-    );
-    if (problemWeightString != "") {
-      currentProblemValue.adminData.problemWeightsPerCoursE.SetKeyValue(
-        HtmlRoutines::ConvertURLStringToNormal(global.userDefault.courseComputed, false),
-        HtmlRoutines::ConvertURLStringToNormal(problemWeightString, false)
-      );
     }
   }
   return true;
@@ -440,27 +373,35 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments) {
 }
 
 bool CalculatorHTML::LoadMe(
-  bool doLoadDatabase, const std::string& inputRandomSeed, std::stringstream* commentsOnFailure
+  bool doLoadDatabase,
+  const std::string& inputRandomSeed,
+  std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("CalculatorHTML::LoadMe");
   if (!FileOperations::GetPhysicalFileNameFromVirtualCustomizedReadOnly(
     this->fileName, this->RelativePhysicalFileNameWithFolder, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to get physical file name from " << this->fileName << ". ";
+      *commentsOnFailure << "Failed to get physical file name from "
+      << this->fileName << ". ";
     }
     return false;
   }
   (void) doLoadDatabase;
-  if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly(this->fileName, this->inputHtml, commentsOnFailure)) {
+  if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly(
+    this->fileName, this->inputHtml, commentsOnFailure
+  )) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "<br>User-input file name: <b>" << this->fileName << "</b>";
+      *commentsOnFailure << "<br>User-input file name: <b>" << this->fileName
+      << "</b>";
     }
     return false;
   }
   this->flagIsForReal = global.UserRequestRequiresLoadingRealExamData();
   if (global.flagDatabaseCompiled) {
-    this->topicListFileName = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("topicList"), false);
+    this->topicListFileName = HtmlRoutines::ConvertURLStringToNormal(
+      global.GetWebInput("topicList"), false
+    );
     if (doLoadDatabase) {
       std::stringstream errorStream;
       this->LoadDatabaseInfo(errorStream);
@@ -468,7 +409,9 @@ bool CalculatorHTML::LoadMe(
         *commentsOnFailure << errorStream.str();
       }
       for (int i = 0; i < this->topics.theTopics.size(); i ++) {
-        this->ComputeDeadlinesAllSectionsNoInheritance(this->topics.theTopics.theValues[i]);
+        this->ComputeDeadlinesAllSectionsNoInheritance(
+          this->topics.theTopics.theValues[i]
+        );
       }
     }
   }

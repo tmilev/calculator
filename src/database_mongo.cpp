@@ -420,21 +420,18 @@ bool MongoQuery::FindMultiple(
       break;
     }
   }
-
   output.SetSize(outputString.size);
   for (int i = 0; i < outputString.size; i ++) {
-    if (!output[i].readstring(outputString[i], commentsOnFailure)) {
-      global << logger::red << "Mongo/JSData error: failed to read string" << logger::endL;
+    JSData encoded;
+    if (!encoded.readstring(outputString[i], commentsOnFailure)) {
+      global << logger::red << "Mongo/JSData error: failed to parse JSON. " << logger::endL;
+      return false;
+    }
+    if (!Database::ConvertJSONMongoToJSON(encoded, output[i], commentsOnFailure)) {
+      global << logger::red << "Mongo/JSData error: failed to convert mongo JSON to JSON. " << logger::endL;
       return false;
     }
   }
-  //double timeAfterQuery = global.GetElapsedSeconds();
-  //double timeInMsDouble = (timeAfterQuery - timeBeforeQuery ) * 1000;
-  //double timeWithDBStart = (timeAfterQuery - timeBeforeDatabase) *1000 ;
-  //global << logger::green << "Time in ms: " << timeInMsDouble << logger::endL;
-  //global << logger::blue << "Time in ms INDCLUDING first connection: " << timeWithDBStart << logger::endL;
-  //global << logger::green << "DEBUG: Query successful. Output size: " << output.size << ". "
-  //<< output.ToStringCommaDelimited() << logger::endL;
   return true;
 }
 #endif
@@ -737,7 +734,9 @@ bool Database::FindOneFromQueryStringWithOptions(
   if (outputList.size == 0) {
     return false;
   }
-  output = outputList[0];
+
+  output  = outputList[0];
+
   return true;
 #else
   (void) collectionName;
@@ -922,10 +921,7 @@ bool Database::DeleteOneEntryUnsetUnsecure(
   MacroRegisterFunctionWithName("Database::DeleteOneEntryUnsecure");
 #ifdef MACRO_use_MongoDB
 
-  std::string selectorString;
-  if (!QueryExact::getLabelFromNestedLabels(selector, selectorString, commentsOnFailure)) {
-    return false;
-  }
+  std::string selectorString = QueryExact::getLabelFromNestedLabels(selector);
   JSData foundItem;
   List<std::string> selectorsCombined;
   selectorsCombined.AddOnTop(selectorString);
@@ -1088,12 +1084,9 @@ bool QuerySet::ToJSONMongo(
     return false;
   }
   output.reset(JSData::token::tokenObject);
-  std::string keyPrefix;
-  if (!QueryExact::getLabelFromNestedLabels(
-    this->nestedLabels, keyPrefix, commentsOnFailure
-  )) {
-    return false;
-  }
+  std::string keyPrefix = QueryExact::getLabelFromNestedLabels(
+    this->nestedLabels
+  );
   if (keyPrefix != "") {
     keyPrefix += ".";
   }
@@ -1109,8 +1102,6 @@ bool Database::Mongo::UpdateOne(
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("Database::UpdateOneFromJSON");
-  global << "DEBUG: incoming update query: "
-  << updateQuery.ToStringDebug() << ". " << logger::endL;
   JSData updateQueryJSON;
   if (!updateQuery.ToJSONSetMongo(updateQueryJSON, commentsOnFailure)) {
     return false;

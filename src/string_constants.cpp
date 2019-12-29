@@ -8,7 +8,6 @@ std::string WebAPI::HeaderCacheControl = "Cache-Control: max-age=129600000, publ
 
 std::string WebAPI::commentsServer = "commentsServer";
 
-std::string WebAPI::databaseParameters::entryPoint = "database"         ;
 std::string WebAPI::databaseParameters::labels     = "databaseLabels"   ;
 std::string WebAPI::databaseParameters::operation  = "databaseOperation";
 std::string WebAPI::databaseParameters::fetch      = "databaseFetch"    ;
@@ -45,6 +44,7 @@ std::string WebAPI::problem::calculatorAnswerPrefix = "calculatorAnswer"        
 
 
 std::string WebAPI::request::workerId    = WebAPI::result::workerId   ;
+std::string WebAPI::request::database                     = "database"                                 ;
 std::string WebAPI::request::userInfoJSON                 = "userInfoJSON"                             ;
 std::string WebAPI::request::examplesJSON                 = "calculatorExamplesJSON"                   ;
 std::string WebAPI::request::editPage                     = "editPageJSON"                             ;

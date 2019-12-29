@@ -895,7 +895,8 @@ Problem.prototype.modifyWeight = function() {
     weight: incomingPoints
   };
   var theURL = ""; 
-  theURL += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.setProblemData}&`;
+  theURL += `${pathnames.urls.calculatorAPI}?`;
+  theURL += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.setProblemWeight}&`;
   theURL += `${pathnames.urlFields.mainInput}=${encodeURIComponent(JSON.stringify(modifyObject))}`;
   submitRequests.submitGET({
     url: theURL,

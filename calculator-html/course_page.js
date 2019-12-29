@@ -21,7 +21,8 @@ function modifyDeadlines(incomingId) {
     jsonToSubmit[idDecoded].deadlines[currentSection] = theDates[counterDates].value;
   }
   var theURL = "";
-  theURL += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.setProblemData}&`;
+  theURL += `${pathnames.urls.calculatorAPI}?`;
+  theURL += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.setProblemDeadline}&`;
   theURL += `${pathnames.urlFields.mainInput}=${encodeURIComponent(JSON.stringify(jsonToSubmit))}`;
   submitRequests.submitGET({
     url: theURL,

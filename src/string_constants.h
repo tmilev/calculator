@@ -10,6 +10,7 @@ public:
   static std::string app;
   struct request {
     static std::string calculatorPage;
+    static std::string database;
     static std::string setProblemWeight;
     static std::string setProblemDeadline;
     static std::string changePassword;
@@ -85,7 +86,6 @@ public:
     static std::string calculatorAnswerPrefix;
   };
   struct databaseParameters {
-    static std::string entryPoint;
     static std::string labels;
     static std::string operation;
     static std::string fetch;

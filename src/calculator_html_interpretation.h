@@ -319,9 +319,15 @@ public:
   void InterpretNotByCalculatorNotAnswer(SyntacticElementHTML& inputOutput);
   void InterpretIfAnswer(SyntacticElementHTML& inputOutput);
   std::string GetDeadlineNoInheritance(const std::string& id);
-  std::string GetDeadline(const std::string& problemName, const std::string& sectionNumber, bool& outputIsInherited);
+  std::string GetDeadline(
+    const std::string& problemName,
+    const std::string& sectionNumber,
+    bool& outputIsInherited
+  );
   bool MergeOneProblemAdminData(
-    const std::string& inputProblemName, ProblemData& inputProblemInfo, std::stringstream& commentsOnFailure
+    const std::string& inputProblemName,
+    ProblemData& inputProblemInfo,
+    std::stringstream& commentsOnFailure
   );
   //bool MergeProblemInfoInDatabaseURLed(std::string& incomingProblemInfo, std::stringstream& commentsOnFailure);
   bool MergeProblemWeightAndStore(
@@ -347,12 +353,6 @@ public:
   bool StoreProblemDeadlines(
     MapList<std::string, ProblemData, MathRoutines::HashString>& toStore,
     std::stringstream* commentsOnFailure
-  );
-
-  bool LoadProblemInfoFromURLedInputAppend(
-    const std::string& inputInfoString,
-    MapList<std::string, ProblemData, MathRoutines::HashString>& outputProblemInfo,
-    std::stringstream& commentsOnFailure
   );
   // bool LoadDeadlineInfoFromJSONStringAppend
   // (const std::string& inputJSONString,

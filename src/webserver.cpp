@@ -2824,7 +2824,7 @@ int WebWorker::ServeClient() {
   }
   if (
     global.flagLoggedIn && global.UserDefaultHasAdminRights() &&
-    global.userCalculatorRequestType == WebAPI::databaseParameters::entryPoint
+    global.userCalculatorRequestType == WebAPI::request::database
   ) {
     return this->ProcessDatabaseJSON();
   } else if (

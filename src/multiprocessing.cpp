@@ -513,7 +513,6 @@ bool Pipe::ResetNoAllocation() {
       return false;
     }
   }
-  std::cout << "DEBUG: about to reset mutex pipe and metadata pipe.\n";
   if (
     this->metaData.ReadOnceIfFailThenCrash(false, true) &&
     this->theMutexPipe.ResetNoAllocation()

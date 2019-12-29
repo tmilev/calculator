@@ -167,7 +167,7 @@ public:
   ProblemData();
   bool CheckConsistency() const;
   bool CheckConsistencyMQids() const;
-  bool LoadFroM(const std::string& inputData, std::stringstream& commentsOnFailure);
+  bool LoadFromOldFormat(const std::string& inputData, std::stringstream& commentsOnFailure);
   bool LoadFromJSON(const JSData& inputData, std::stringstream& commentsOnFailure);
   std::string StorE();
   JSData StoreJSON() const;
@@ -198,13 +198,6 @@ public:
 
 class TopicElement;
 class UserCalculator : public UserCalculatorData {
-// Unsafe entries may contain arbitrary strings.
-// Safe entries, when enclosed with "" in ANSI mode are guaranteed to be valid safe Database identifiers.
-// In other words, safe entries are guaranteed to not allow bobby-tables-exploits-of-a-mom (https://xkcd.com/327/).
-// Users of this code should not touch any safe entries directly.
-// Instead users should only modify the unsafe entries.
-// Those are internally (and automatically) converted to safe entries (stored in the private variables below), and only then stored in
-// the database.
 public:
   MapList<std::string, ProblemData, MathRoutines::HashString> theProblemData;
   TimeWrapper authenticationCreationTime;
@@ -216,8 +209,6 @@ public:
     MapList<std::string, TopicElement, MathRoutines::HashString>* theTopics,
     std::stringstream& commentsOnFailure
   );
-  ProblemData& HasProblemData(const std::string& problemName);
-  ProblemData& GetProblemDataAddIfNotPresent(const std::string& problemName);
   void SetProblemData(const std::string& problemName, const ProblemData& inputData);
   bool flagNewAuthenticationTokenComputedUserNeedsIt;
   bool InterpretDatabaseProblemDatA(const std::string& theInfo, std::stringstream& commentsOnFailure);

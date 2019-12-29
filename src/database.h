@@ -20,12 +20,8 @@ class QueryExact {
   void SetLabelValue(const std::string& label, const std::string& desiredValue);
   void SetLabelsValue(const List<std::string>& labels, const std::string& desiredValue);
   std::string getCollectionAndLabel() const;
-  bool getLabel(std::string& output, std::stringstream* commentsOnFailure) const;
-  static bool getLabelFromNestedLabels(
-    const List<std::string>& nestedLabels,
-    std::string& output,
-    std::stringstream* commentsOnFailure
-  );
+  std::string getLabel() const;
+  static std::string getLabelFromNestedLabels(const List<std::string>& nestedLabels);
   JSData ToJSON() const;
   bool isEmpty() const;
 };
@@ -352,20 +348,22 @@ public:
   );
   static bool matchesPattern(const List<std::string>& fieldLabel, const List<std::string>& pattern);
   static JSData GetStandardProjectors();
-  static bool ConvertStringToMongoKeyString(
-    const std::string& input,
-    std::string &output,
-    std::stringstream *commentsOnFailure
+  static std::string ConvertStringToMongoKeyString(const std::string& input);
+  static bool ConvertJSONMongoToJSON(
+    const JSData& input,
+    JSData& output,
+    std::stringstream* commentsOnFailure = nullptr
   );
   static bool ConvertJSONToJSONMongo(
     const JSData& input,
     JSData& output,
-    std::stringstream* commentsOnFailure
+    std::stringstream* commentsOnFailure = nullptr
   );
-  static bool ConvertJSONToJSONMongoRecursive(
+  static bool ConvertJSONToJSONEncodeKeys(
     const JSData& input,
-    JSData &output,
+    JSData& output,
     int recursionDepth,
+    bool encodeOverDecode,
     std::stringstream* commentsOnFailure
   );
   bool DeleteDatabase(std::stringstream* commentsOnFailure);

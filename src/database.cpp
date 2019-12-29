@@ -124,58 +124,40 @@ bool QueryExact::isEmpty() const {
 JSData QueryExact::ToJSON() const {
   JSData result;
   JSData encodedKeys;
-  if (!Database::ConvertJSONToJSONMongo(this->value, encodedKeys, nullptr)) {
+  if (!Database::ConvertJSONToJSONMongo(this->value, encodedKeys)) {
     global << logger::red
     << "Failed to convert find query to mongoDB encoding. " << logger::endL;
     result.theType = JSData::token::tokenNull;
     return result;
   }
-  std::string label;
-  std::stringstream commentsOnFailure;
-  if (!this->getLabel(label, &commentsOnFailure)) {
-    global << logger::red
-    << "Failed to convert find query to mongoDB encoding. " << commentsOnFailure.str() << logger::endL;
-    return result;
-  }
   result.theType = JSData::token::tokenObject;
-  result[label] = encodedKeys;
+  result[this->getLabel()] = encodedKeys;
   return result;
 }
 
-bool QueryExact::getLabelFromNestedLabels(
-  const List<std::string>& nestedLabels,
-  std::string& output,
-  std::stringstream* commentsOnFailure
+std::string QueryExact::getLabelFromNestedLabels(
+  const List<std::string>& nestedLabels
 ) {
   std::stringstream out;
   for (int i = 0; i < nestedLabels.size; i ++) {
-    std::string currentKey;
-    if (!Database::ConvertStringToMongoKeyString(
-      nestedLabels[i], currentKey, commentsOnFailure
-    )) {
-      return false;
-    }
+    std::string currentKey = Database::ConvertStringToMongoKeyString(
+      nestedLabels[i]
+    );
     out << currentKey;
     if (i != nestedLabels.size - 1) {
       out << ".";
     }
   }
-  output = out.str();
-  return true;
+  return out.str();
 }
 
-bool QueryExact::getLabel(std::string& output, std::stringstream* commentsOnFailure) const {
-  return this->getLabelFromNestedLabels(this->nestedLabels, output, commentsOnFailure);
+std::string QueryExact::getLabel() const {
+  return this->getLabelFromNestedLabels(this->nestedLabels);
 }
 
 std::string QueryExact::getCollectionAndLabel() const {
   std::stringstream out;
-  std::string label;
-  std::stringstream commentsOnFailure;
-  if (!this->getLabel(label, &commentsOnFailure)) {
-    global << logger::red << "Failed to get label from query exact. " << commentsOnFailure.str() << logger::endL;
-  }
-  out << this->collection << "." << label;
+  out << this->collection << "." << this->getLabel();
   return out.str();
 }
 
@@ -190,10 +172,27 @@ void QueryExact::SetLabelValue(const std::string& label, const std::string& desi
   this->nestedLabels[0] = label;
 }
 
-bool Database::ConvertJSONToJSONMongoRecursive(
+bool Database::ConvertJSONToJSONMongo(
+  const JSData& input, JSData& output, std::stringstream* commentsOnFailure
+) {
+  return Database::ConvertJSONToJSONEncodeKeys(
+    input, output, 0, true, commentsOnFailure
+  );
+}
+
+bool Database::ConvertJSONMongoToJSON(
+  const JSData& input, JSData& output, std::stringstream* commentsOnFailure
+) {
+  return Database::ConvertJSONToJSONEncodeKeys(
+    input, output, 0, false, commentsOnFailure
+  );
+}
+
+bool Database::ConvertJSONToJSONEncodeKeys(
   const JSData& input,
   JSData& output,
   int recursionDepth,
+  bool encodeOverDecode,
   std::stringstream* commentsOnFailure
 ) {
   static const int maxRecursionDepth = 100;
@@ -208,8 +207,12 @@ bool Database::ConvertJSONToJSONMongoRecursive(
   if (input.theType == JSData::token::tokenArray) {
     for (int i = 0; i < input.theList.size; i ++) {
       JSData nextItem;
-      if (!Database::ConvertJSONToJSONMongoRecursive(
-        input.theList[i], nextItem, recursionDepth + 1, commentsOnFailure
+      if (!Database::ConvertJSONToJSONEncodeKeys(
+        input.theList[i],
+        nextItem,
+        recursionDepth + 1,
+        encodeOverDecode,
+        commentsOnFailure
       )) {
         return false;
       }
@@ -220,18 +223,22 @@ bool Database::ConvertJSONToJSONMongoRecursive(
   if (input.theType == JSData::token::tokenObject) {
     for (int i = 0; i < input.objects.size(); i ++) {
       JSData nextItem;
-      if (!Database::ConvertJSONToJSONMongoRecursive(
+      if (!Database::ConvertJSONToJSONEncodeKeys(
         input.objects.theValues[i],
-        nextItem, recursionDepth + 1,
+        nextItem,
+        recursionDepth + 1,
+        encodeOverDecode,
         commentsOnFailure
       )) {
         return false;
       }
       std::string theKey;
-      if (!Database::ConvertStringToMongoKeyString(
-        input.objects.theKeys[i], theKey, commentsOnFailure
-      )) {
-        return false;
+      if (encodeOverDecode) {
+        theKey = Database::ConvertStringToMongoKeyString(
+          input.objects.theKeys[i]
+        );
+      } else {
+        theKey = HtmlRoutines::ConvertURLStringToNormal(input.objects.theKeys[i], false);
       }
       output[theKey] = nextItem;
     }
@@ -241,39 +248,23 @@ bool Database::ConvertJSONToJSONMongoRecursive(
   return true;
 }
 
-bool Database::ConvertJSONToJSONMongo(
-  const JSData& input, JSData& output, std::stringstream* commentsOnFailure
-) {
-  return Database::ConvertJSONToJSONMongoRecursive(
-    input, output, 0, commentsOnFailure
-  );
-}
-
-bool Database::ConvertStringToMongoKeyString(
-  const std::string& input,
-  std::string& output,
-  std::stringstream* commentsOnFailure
+std::string Database::ConvertStringToMongoKeyString(
+  const std::string& input
 ) {
   std::stringstream out;
   for (unsigned int i = 0; i < input.size(); i ++) {
-    if (input[i] == '.') {
-      out << "%2e";
-    } else if (input[i] > 31 && input[i] < 127) {
+    if (
+      HtmlRoutines::IsRepresentedByItselfInURLs(input[i]) &&
+      input[i] != '.'
+    ) {
       out << input[i];
     } else {
-      if (commentsOnFailure != nullptr) {
-        *commentsOnFailure << "Unexpected character "
-        << StringRoutines::ConvertByteToHex(static_cast<unsigned char>(input[i]))
-        << " in database key. To avoid this error use simple data keys "
-        << "known at compile time. "
-        << "Keep arbitrary data in leaf JSON nodes, "
-        << "where it will be addressed by value only. ";
-      }
-      return false;
+      out << "%";
+      int x = input[i];
+      out << std::hex << ((x / 16) % 16) << (x % 16) << std::dec;
     }
   }
-  output = out.str();
-  return true;
+  return out.str();
 }
 
 bool Database::FindOne(
@@ -694,8 +685,8 @@ JSData UserCalculatorData::ToJSON() {
   result[DatabaseStrings::labelTimeOfAuthenticationTokenCreation ] = this->timeOfAuthenticationTokenCreation     ;
   result[DatabaseStrings::labelProblemDataJSON                   ] = this->problemDataJSON                       ;
   if (this->problemDataJSON.theType == JSData::token::tokenUndefined) {
-    result[DatabaseStrings::labelProblemDataJSON].theType = JSData::token::tokenArray;
-    result[DatabaseStrings::labelProblemDataJSON].theList.SetSize(0);
+    result[DatabaseStrings::labelProblemDataJSON].theType = JSData::token::tokenObject;
+    result[DatabaseStrings::labelProblemDataJSON].objects.Clear();
   }
   result[DatabaseStrings::labelPassword                          ] = this->actualHashedSaltedPassword            ;
   result[DatabaseStrings::labelUserRole                          ] = this->userRole                              ;
@@ -843,9 +834,6 @@ bool UserCalculator::AuthenticateWithUserNameAndPass(std::stringstream* comments
   MacroRegisterFunctionWithName("UserCalculator::Authenticate");
   (void) commentsOnFailure;
   this->ComputeHashedSaltedPassword();
-  global << logger::red << "DEBUG: authenticating with: "
-  << this->enteredHashedSaltedPassword
-  << "; actual pass hash: " << this->actualHashedSaltedPassword << logger::endL;
   // TODO(tmilev): timing attacks on the comparison may be used to guess the
   // length of the salted hashed password. Fix this with a proper HMAC comparison.
   return this->enteredHashedSaltedPassword == this->actualHashedSaltedPassword;
@@ -979,13 +967,8 @@ bool Database::User::SendActivationEmail(
   return result;
 }
 
-ProblemData& UserCalculator::GetProblemDataAddIfNotPresent(const std::string& problemName) {
-  MacroRegisterFunctionWithName("UserCalculator::GetProblemDataAddIfNotPresent");
-  return this->theProblemData.GetValueCreate(problemName);
-}
-
-bool ProblemData::LoadFroM(const std::string& inputData, std::stringstream& commentsOnFailure) {
-  MacroRegisterFunctionWithName("ProblemData::LoadFrom");
+bool ProblemData::LoadFromOldFormat(const std::string& inputData, std::stringstream& commentsOnFailure) {
+  MacroRegisterFunctionWithName("ProblemData::LoadFromOldFormat");
   MapList<std::string, std::string, MathRoutines::HashString> theMap;
   if (!HtmlRoutines::ChopCGIString(inputData, theMap, commentsOnFailure)) {
     return false;
@@ -1091,7 +1074,7 @@ bool UserCalculator::InterpretDatabaseProblemDatA(const std::string& theInfo, st
   ProblemData reader;
   std::string probNameNoWhiteSpace;
   for (int i = 0; i < theMap.size(); i ++) {
-    if (!reader.LoadFroM(HtmlRoutines::ConvertURLStringToNormal(theMap.theValues[i], false), commentsOnFailure)) {
+    if (!reader.LoadFromOldFormat(HtmlRoutines::ConvertURLStringToNormal(theMap.theValues[i], false), commentsOnFailure)) {
       result = false;
       continue;
     }
@@ -1106,23 +1089,27 @@ bool UserCalculator::InterpretDatabaseProblemDatA(const std::string& theInfo, st
 
 bool UserCalculator::InterpretDatabaseProblemDataJSON(const JSData& theData, std::stringstream& commentsOnFailure) {
   MacroRegisterFunctionWithName("UserCalculator::InterpretDatabaseProblemDataJSON");
+  global << "DEBUG: inside InterpretDatabaseProblemDataJSON, input: " << theData.ToString(nullptr) << logger::endL;
   this->theProblemData.Clear();
   this->theProblemData.SetExpectedSize(theData.objects.size());
   bool result = true;
   ProblemData reader;
-  std::string probNameNoWhiteSpace;
+  std::string problemNameNoWhiteSpace;
   for (int i = 0; i < theData.objects.size(); i ++) {
     if (!reader.LoadFromJSON(theData.objects.theValues[i], commentsOnFailure)) {
       result = false;
       continue;
     }
-    probNameNoWhiteSpace = StringRoutines::StringTrimWhiteSpace(
-      HtmlRoutines::ConvertURLStringToNormal(theData.objects.theKeys[i], false
-    ));
-    if (probNameNoWhiteSpace == "") {
+    problemNameNoWhiteSpace = StringRoutines::StringTrimWhiteSpace(
+      theData.objects.theKeys[i]
+    );
+    global << logger::red << "DEBUG: loaded problem file name: "
+    << problemNameNoWhiteSpace << " from data: " << theData.ToString() << " to get: "
+    << reader.ToString() << logger::endL;
+    if (problemNameNoWhiteSpace == "") {
       continue;
     }
-    this->theProblemData.SetKeyValue(probNameNoWhiteSpace, reader);
+    this->theProblemData.SetKeyValue(problemNameNoWhiteSpace, reader);
   }
   return result;
 }
@@ -1277,16 +1264,18 @@ List<QueryExact> UserCalculatorData::GetFindMeFromUserNameQuery() {
   return result;
 }
 
-bool UserCalculator::StoreProblemData(const std::string& fileName, std::stringstream* commentsOnFailure) {
-  MacroRegisterFunctionWithName("UserCalculator::StoreProblemDataToDatabaseJSON");
-  if (!this->theProblemData.Contains(fileName)) {
+bool UserCalculator::StoreProblemData(
+  const std::string& fileNamE, std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("UserCalculator::StoreProblemData");
+  if (!this->theProblemData.Contains(fileNamE)) {
     global.fatal << "I was asked to store fileName: "
-    << fileName << " but I have no record of it in my problem data map. " << global.fatal;
+    << fileNamE << " but I have no record of it in my problem data map. " << global.fatal;
   }
-  const ProblemData& problem = this->theProblemData.GetValueConstCrashIfNotPresent(fileName);
+  const ProblemData& problem = this->theProblemData.GetValueConstCrashIfNotPresent(fileNamE);
   QuerySet update;
   update.nestedLabels.AddOnTop(DatabaseStrings::labelProblemDataJSON);
-  update.value[fileName] = problem.StoreJSON();
+  update.value[fileNamE] = problem.StoreJSON();
   return Database::get().UpdateOneFromSome(
     this->GetFindMeFromUserNameQuery(), update, commentsOnFailure
   );
@@ -1898,8 +1887,6 @@ bool UserCalculator::StoreToDB(bool doSetPassword, std::stringstream* commentsOn
     this->actualHashedSaltedPassword = this->enteredHashedSaltedPassword;
   }
   JSData setUser = this->ToJSON();
-  global << logger::red << "DEBUG: About to store: "
-  << setUser.ToString(nullptr) << logger::endL;
   return Database::get().UpdateOne(
     findUser, setUser, commentsOnFailure
   );

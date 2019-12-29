@@ -339,6 +339,7 @@ public:
   bool MergeProblemWeight(
     const JSData& inputJSON,
     MapList<std::string, ProblemData, MathRoutines::HashString>& outputAppendProblemInfo,
+    bool checkFileExistence,
     std::stringstream* commentsOnFailure
   );
   bool MergeProblemDeadline(

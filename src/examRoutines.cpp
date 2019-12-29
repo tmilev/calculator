@@ -58,6 +58,7 @@ CalculatorHTML::CalculatorHTML() {
 bool CalculatorHTML::MergeProblemWeight(
   const JSData& inputJSON,
   MapList<std::string, ProblemData, MathRoutines::HashString>& outputAppendProblemInfo,
+  bool checkFileExistence,
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("DatabaseRoutines::LoadProblemWeightsAppend");
@@ -65,18 +66,21 @@ bool CalculatorHTML::MergeProblemWeight(
   if (inputJSON.theType != JSData::token::tokenObject) {
     return true;
   }
+  global << logger::green << "About to merge problem weight: " << inputJSON.ToString() << logger::endL;
   ProblemData emptyData;
   std::string currentCourse = global.userDefault.courseComputed;
   for (int i = 0; i < inputJSON.objects.size(); i ++) {
     std::string currentProblemName = inputJSON.objects.theKeys[i];
-    if (!FileOperations::FileExistsVirtualCustomizedReadOnly(
-      currentProblemName, commentsOnFailure
-    )) {
-      if (commentsOnFailure != nullptr) {
-        *commentsOnFailure << "Problem "
-        << currentProblemName << " <b>does not appear to exist</b>. ";
+    if (checkFileExistence) {
+      if (!FileOperations::FileExistsVirtualCustomizedReadOnly(
+        currentProblemName, commentsOnFailure
+      )) {
+        if (commentsOnFailure != nullptr) {
+          *commentsOnFailure << "Problem "
+          << currentProblemName << " <b>does not appear to exist</b>. ";
+        }
+        return false;
       }
-      return false;
     }
     JSData currentProblem = inputJSON.objects.theValues[i];
     if (!outputAppendProblemInfo.Contains(currentProblemName)) {
@@ -86,9 +90,24 @@ bool CalculatorHTML::MergeProblemWeight(
     JSData& currentWeight = currentProblem[DatabaseStrings::labelProblemWeight];
     if (currentWeight.theType == JSData::token::tokenString) {
       currentProblemValue.adminData.problemWeightsPerCoursE.SetKeyValue(currentCourse, currentWeight.theString);
-    } else if (currentWeight.theType != JSData::token::tokenUndefined) {
+    } else if (currentWeight.theType == JSData::token::tokenObject) {
+      for (int i = 0; i < currentWeight.objects.size(); i ++) {
+        if (currentWeight.objects.theValues[i].theType != JSData::token::tokenString) {
+          if (commentsOnFailure != nullptr) {
+            *commentsOnFailure << "Failed to extract weight from: "
+            << currentWeight.objects.theValues[i]
+            << " in weight: " << currentWeight.ToString();
+          }
+          return false;
+        }
+        currentProblemValue.adminData.problemWeightsPerCoursE.SetKeyValue(
+          currentWeight.objects.theKeys[i],
+          currentWeight.objects.theValues[i].theString
+        );
+      }
+    } else {
       if (commentsOnFailure != nullptr) {
-        *commentsOnFailure << "Could extract neither weight from "
+        *commentsOnFailure << "Could extract weight from "
         << currentWeight.ToString(nullptr) << ". Your input was: "
         << inputJSON.ToString(nullptr);
       }
@@ -258,7 +277,7 @@ bool CalculatorHTML::MergeProblemWeightAndStore(
   }
   global << "DEBUG: theProblemJSON: " << theProblemJSON.ToString(nullptr) << logger::endL;
   MapList<std::string, ProblemData, MathRoutines::HashString> incomingProblems;
-  if (!this->MergeProblemWeight(theProblemJSON, incomingProblems, commentsOnFailure)) {
+  if (!this->MergeProblemWeight(theProblemJSON, incomingProblems, true, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to parse your request";
     }
@@ -353,7 +372,10 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments) {
     }
   }
   if (!this->MergeProblemWeight(
-    this->currentUseR.problemWeights, this->currentUseR.theProblemData, &comments
+    this->currentUseR.problemWeights,
+    this->currentUseR.theProblemData,
+    false,
+    &comments
   )) {
     comments << "Failed to load problem weights. ";
     return false;

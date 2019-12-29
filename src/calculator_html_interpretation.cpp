@@ -2153,6 +2153,7 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
     currentUserRecord.MergeProblemWeight(
       theProblem.currentUseR.problemWeights,
       currentUserRecord.currentUseR.theProblemData,
+      false,
       &comments
     );
     currentUserRecord.currentUseR.ComputePointsEarned(theProblem.problemNamesNoTopics, &theProblem.topics.theTopics, comments);

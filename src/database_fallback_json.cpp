@@ -89,7 +89,6 @@ bool Database::FallBack::UpdateOneNoLocks(
   for (int i = 0; i < dataToMerge.nestedLabels.size; i ++) {
     modified = &((*modified)[dataToMerge.nestedLabels[i]]);
   }
-  (*modified) = dataToMerge.value;
   for (int i = 0; i < dataToMerge.value.objects.size(); i ++) {
     (*modified)[dataToMerge.value.objects.theKeys[i]] = dataToMerge.value.objects.theValues[i];
   }
@@ -107,7 +106,9 @@ bool Database::FallBack::FindOne(
     return false;
   }
   int index = - 1;
-  if (!this->FindIndexOneNoLocksMinusOneNotFound(query, index, commentsOnFailure)) {
+  if (!this->FindIndexOneNoLocksMinusOneNotFound(
+    query, index, commentsOnFailure
+  )) {
     return false;
   }
   if (index < 0) {
@@ -147,6 +148,7 @@ bool Database::FallBack::FindIndexOneNoLocksMinusOneNotFound(
   int& output,
   std::stringstream* commentsOnNotFound
 ) {
+  MacroRegisterFunctionWithName("Database::FallBack::FindIndexOneNoLocksMinusOneNotFound");
   output = - 1;
   if (!this->HasCollection(query.collection, commentsOnNotFound)) {
     if (commentsOnNotFound != nullptr) {
@@ -163,9 +165,7 @@ bool Database::FallBack::FindIndexOneNoLocksMinusOneNotFound(
     }
     return false;
   }
-  *commentsOnNotFound << "Not implemented yet. ";
-  return false;
-/*  Database::FallBack::Index& currentIndex = indices.GetValueCreate(key);
+  Database::FallBack::Index& currentIndex = indices.GetValueCreate(key);
   if (query.value.theType != JSData::token::tokenString) {
     if (commentsOnNotFound != nullptr) {
       *commentsOnNotFound << "At the moment, only string value queries are supported.";
@@ -187,7 +187,7 @@ bool Database::FallBack::FindIndexOneNoLocksMinusOneNotFound(
     return true;
   }
   output = currentIndex.locations.theValues[currentLocationIndex][0];
-  return true;*/
+  return true;
 }
 
 bool Database::FallBack::FetchCollectionNames(
@@ -205,6 +205,7 @@ bool Database::FallBack::FetchCollectionNames(
 bool Database::FallBack::HasCollection(
   const std::string& collection, std::stringstream* commentsOnFailure
 ) {
+  MacroRegisterFunctionWithName("Database::FallBack::HasCollection");
   if (Database::FallBack::knownCollectionS.Contains(collection)) {
     this->reader[collection].theType = JSData::token::tokenArray;
     return true;

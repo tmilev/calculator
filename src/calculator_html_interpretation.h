@@ -427,6 +427,10 @@ public:
   std::string ToStringContent();
   std::string ToStringParsingStack(List<SyntacticElementHTML>& theStack);
   CalculatorHTML();
+  class Test {
+  public:
+    bool All();
+  };
 };
 
 #endif

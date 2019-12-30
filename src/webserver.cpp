@@ -1300,73 +1300,6 @@ void WebWorker::SanitizeVirtualFileName() {
   }
 }
 
-int WebWorker::ProcessCalculatorExamplesJSON() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessCalculatorExamplesJSON");
-  global.WriteResponse(global.calculator().GetElement().ToJSONFunctionHandlers());
-  return 0;
-}
-
-int WebWorker::ProcessServerStatusJSON() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessServerStatusJSON");
-  this->SetHeaderOKNoContentLength("");
-  std::stringstream out;
-  out << " <table><tr><td style =\"vertical-align:top\">"
-  << this->parent->ToStringStatusAll() << "</td><td>"
-  << global.ToStringHTMLTopCommandLinuxSystem()
-  << "</td></tr></table>";
-  JSData outputJS;
-  outputJS[WebAPI::result::resultHtml] = out.str();
-  global.WriteResponse(outputJS);
-  return 0;
-}
-
-int WebWorker::ProcessUnpauseWorker() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessUnpauseWorker");
-  this->SetHeaderOKNoContentLength("");
-  JSData progressReader, result;
-  int indexWorker = this->GetIndexIfRunningWorkerId(progressReader);
-  if (indexWorker < 0) {
-    global.WriteResponse(progressReader);
-    return 0;
-  }
-  WebWorker& otherWorker = this->parent->theWorkers[indexWorker];
-  if (!otherWorker.PauseWorker.Unlock()) {
-    result[WebAPI::result::error] = "Failed to unpause process";
-  } else {
-    result[WebAPI::result::status] = "unpaused";
-  }
-  global.WriteResponse(result);
-  return 0;
-}
-
-int WebWorker::ProcessPauseWorker() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessPauseWorker");
-  this->SetHeaderOKNoContentLength("");
-  JSData progressReader, result;
-  int indexWorker = this->GetIndexIfRunningWorkerId(progressReader);
-  if (indexWorker < 0) {
-    global.WriteResponse(progressReader);
-    return 0;
-  }
-  WebWorker& otherWorker = this->parent->theWorkers[indexWorker];
-  if (otherWorker.PauseWorker.Lock()) {
-    result[WebAPI::result::status] = "paused";
-  } else {
-    result[WebAPI::result::error] = "Failed to pause process. ";
-  }
-  global.WriteResponse(result);
-  return 0;
-}
-
-int WebWorker::ProcessComputationIndicator() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessComputationIndicator");
-  this->SetHeaderOKNoContentLength("");
-  global << "Processing get request indicator." << logger::endL;
-  JSData result = this->ProcessComputationIndicatorJSData();
-  global.WriteResponse(result);
-  return 0;
-}
-
 int WebWorker::GetIndexIfRunningWorkerId(
   JSData& outputComputationStatus
 ) {
@@ -2042,418 +1975,10 @@ JSData WebWorker::SetEmail(const std::string& input) {
   return  result;
 }
 
-int WebWorker::ProcessChangePassword(const std::string& reasonForNoAuthentication) {
-  MacroRegisterFunctionWithName("WebWorker::ProcessChangePassword");
-  (void) reasonForNoAuthentication;
-  this->SetHeaderOKNoContentLength("");
-  JSData result;
-  if (!global.flagDatabaseCompiled) {
-    result[WebAPI::result::error] = "Database not compiled";
-    this->WriteToBodyJSON(result);
-    return 0;
-  }
-  UserCalculatorData& theUser = global.userDefault;
-  theUser.enteredAuthenticationToken = "";
-  if (!global.flagUsingSSLinCurrentConnection) {
-    result[WebAPI::result::error] = "Please use secure connection.";
-    return this->WriteToBodyJSON(result);
-  }
-  if (!global.flagLoggedIn) {
-    result[WebAPI::result::error] = "Please enter (old) password. " + reasonForNoAuthentication;
-    return this->WriteToBodyJSON(result);
-  }
-  std::string newPassword = HtmlRoutines::ConvertStringToURLString(
-    HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("newPassword"), true),
-    false
-  );
-  //<-Passwords are ONE-LAYER url-encoded
-  //<-INCOMING pluses in passwords MUST be decoded as spaces, this is how form.submit() works!
-  //<-Incoming pluses must be re-coded as spaces (%20).
-
-  std::string reenteredPassword = HtmlRoutines::ConvertStringToURLString(
-    HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("reenteredPassword"), true),
-    false
-  );
-  //<-Passwords are ONE-LAYER url-encoded
-  //<-INCOMING pluses in passwords MUST be decoded as spaces, this is how form.submit() works!
-  //<-Incoming pluses must be re-coded as spaces (%20).
-
-  std::string newEmail = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("email"), false);
-  if (newEmail != "") {
-    JSData notUsed;
-    QueryExact queryEmailTaken(DatabaseStrings::tableUsers, DatabaseStrings::labelEmail, newEmail);
-    if (Database::get().FindOne(
-      queryEmailTaken, notUsed, nullptr
-    )) {
-      result[WebAPI::result::error] = "It appears the email is already taken. ";
-      return this->WriteToBodyJSON(result);
-    }
-  }
-  if (newPassword == "" && reenteredPassword == "" && newEmail != "") {
-    result = this->SetEmail(newEmail);
-    return this->WriteToBodyJSON(result);
-  }
-  if (newPassword != reenteredPassword) {
-    result[WebAPI::result::error] = "Passwords don't match. ";
-    return this->WriteToBodyJSON(result);
-  }
-  std::stringstream commentsOnFailure;
-  std::string newAuthenticationToken;
-  if (!Database::get().theUser.SetPassword(
-    theUser.username,
-    newPassword,
-    newAuthenticationToken,
-    commentsOnFailure
-  )) {
-    result[WebAPI::result::error] = commentsOnFailure.str();
-    return this->WriteToBodyJSON(result);
-  }
-  JSData setQuery;
-  QueryExact findQuery(DatabaseStrings::tableUsers, DatabaseStrings::labelUsername, theUser.username);
-  setQuery[DatabaseStrings::labelActivationToken] = "activated";
-  if (!Database::get().UpdateOne(
-    findQuery, setQuery, &commentsOnFailure
-  )) {
-    result[WebAPI::result::error] = "Failed to set activationToken: " +commentsOnFailure.str();
-    return this->WriteToBodyJSON(result);
-  }
-  std::stringstream out;
-  out << "<b style = \"color:green\">Password change successful. </b>";
-  if (global.GetWebInput("doReload") != "false") {
-    out
-    << "<meta http-equiv=\"refresh\" content =\"0; url ='"
-    << global.DisplayNameExecutable  << "?request=logout"
-    << "&username="
-    << HtmlRoutines::ConvertStringToURLString(global.userDefault.username, false)
-    << "&activationToken = &authenticationToken = &"
-    << "'\" />";
-  }
-  result[WebAPI::result::comments] = out.str();
-  return this->WriteToBodyJSON(result);
-}
-
-int WebWorker::ProcessCompute() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessCompute");
-  this->SetHeaderOKNoContentLength("");
-  std::string monitoring = global.GetWebInput(WebAPI::request::monitoring);
-  if (monitoring == "false") {
-    global.theProgress.flagBanProcessMonitoring = true;
-    global.theProgress.flagReportAlloweD = false;
-  }
-  Calculator& theCalculator = global.calculator().GetElement();
-
-  theCalculator.inputString = HtmlRoutines::ConvertURLStringToNormal(
-    global.GetWebInput(WebAPI::request::calculatorInput),
-    false
-  );
-  global.WebServerReturnDisplayIndicatorCloseConnection = WebServer::OutputShowIndicatorOnTimeoutStatic;
-  global.initOutputReportAndCrashFileNames(
-    HtmlRoutines::ConvertStringToURLString(theCalculator.inputString, false),
-    theCalculator.inputString
-  );
-  ////////////////////////////////////////////////
-  //  the initialization below moved to the start of the web server!
-  //  theParser.init();
-  ////////////////////////////////////////////////
-  global.theProgress.flagReportAlloweD = true;
-  theCalculator.Evaluate(theCalculator.inputString);
-  global.theProgress.flagReportAlloweD = false;
-  if (global.flagRunningBuiltInWebServer) {
-    if (global.theProgress.flagTimedOut) {
-      this->WriteAfterTimeoutResult();
-      return 0;
-    }
-  }
-  JSData result;
-  result = theCalculator.ToJSONOutputAndSpecials();
-  result[WebAPI::result::commentsGlobal] = global.Comments.getCurrentReset();
-  this->WriteToBodyJSON(result);
-  global.flagComputationCompletE = true;
-  return 0;
-}
-
-int WebWorker::ProcessActivateAccount() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessActivateAccount");
-  this->SetHeaderOKNoContentLength("");
-  JSData result;
-  bool notUsed = false;
-  result[WebAPI::result::resultHtml] = WebWorker::GetChangePasswordPagePartOne(notUsed);
-  return this->WriteToBodyJSON(result);
-}
-
-int WebWorker::ProcessLogout() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessLogout");
-  this->SetHeaderOKNoContentLength("");
-  Database::get().theUser.LogoutViaDatabase();
-  return this->ProcessLoginUserInfo("Coming from logout");
-}
-
-int WebWorker::ProcessSelectCourseJSON() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessSelectCourseJSON");
-  this->SetHeaderOKNoContentLength("");
-  return this->WriteToBodyJSON(WebAPIResponse::GetSelectCourseJSON());
-}
-
-int WebWorker::ProcessTopicListJSON() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessTopicListJSON");
-  this->SetHeaderOKNoContentLength("");
-  JSData resultJSON = WebAPIResponse::GetTopicTableJSON();
-  return this->WriteToBodyJSONAppendComments(resultJSON);
-}
-
-int WebWorker::ProcessCalculatorOnePageJS(bool appendBuildHash) {
-  MacroRegisterFunctionWithName("WebWorker::ProcessCalculatorOnePageJS");
-  if (appendBuildHash) {
-    this->SetHeaderOKNoContentLength(WebAPI::HeaderCacheControl, "text/javascript");
-  } else {
-    this->SetHeaderOKNoContentLength("", "text/javascript");
-  }
-  return this->WriteToBody(WebAPIResponse::GetOnePageJS(appendBuildHash));
-}
-
-int WebWorker::ProcessApp(bool appendBuildHash) {
-  MacroRegisterFunctionWithName("WebWorker::ProcessApp");
-  this->SetHeaderOKNoContentLength("", "text/html");
-  if (global.server().RestartIsNeeded()) {
-    return 0;
-  }
-  return this->WriteToBody(WebAPIResponse::GetApp(appendBuildHash));
-}
-
-int WebWorker::ProcessLoginUserInfo(const std::string& comments) {
-  MacroRegisterFunctionWithName("WebWorker::ProcessLoginUserInfo");
-  this->SetHeaderOKNoContentLength("");
-  if (global.server().RestartIsNeeded()) {
-    return 0;
-  }
-  return this->WriteToBodyJSON(WebAPIResponse::GetJSONUserInfo(comments));
-}
-
-int WebWorker::ProcessTemplateJSON() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessTemplateJSON");
-  this->SetHeaderOKNoContentLength("");
-  JSData result;
-  result[WebAPI::result::resultHtml] = WebAPIResponse::GetJSONFromTemplate();
-  return this->WriteToBodyJSON(result);
-}
-
-int WebWorker::ProcessExamPageJSON() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessExamPageJSON");
-  this->SetHeaderOKNoContentLength("");
-  return this->WriteToBodyJSON(WebAPIResponse::GetExamPageJSON());
-}
-
 int WebWorker::ProcessGetAuthenticationToken(const std::string& reasonForNoAuthentication) {
   MacroRegisterFunctionWithName("WebWorker::ProcessGetAuthenticationToken");
   this->SetHeaderOKNoContentLength("");
   return this->WriteToBody(this->GetAuthenticationToken(reasonForNoAuthentication));
-}
-
-int WebWorker::ProcessSetProblemWeight() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessSetProblemWeight");
-  this->SetHeaderOKNoContentLength("");
-  JSData result;
-  result[WebAPI::result::resultHtml] = WebAPIResponse::SetProblemWeight();
-  return this->WriteToBodyJSON(result);
-}
-
-int WebWorker::ProcessSetProblemDeadline() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessSetProblemDatabaseInfo");
-  this->SetHeaderOKNoContentLength("");
-  JSData result;
-  result[WebAPI::result::resultHtml] = WebAPIResponse::SetProblemDeadline();
-  return this->WriteToBodyJSON(result);
-}
-
-int WebWorker::ProcessAddUserEmails() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessAddUserEmails");
-  this->SetHeaderOKNoContentLength("");
-  JSData result;
-  result[WebAPI::result::resultHtml] = this->GetAddUserEmails();
-  return this->WriteToBodyJSON(result);
-}
-
-int WebWorker::ProcessModifyPage() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessModifyPage");
-  this->SetHeaderOKNoContentLength("");
-  JSData result;
-  result[WebAPI::result::resultHtml] = WebAPIResponse::ModifyProblemReport();
-  return this->WriteToBodyJSON(result);
-}
-
-int WebWorker::ProcessAssignTeacherToSection() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessAssignTeacherToSection");
-  this->SetHeaderOKNoContentLength("");
-  JSData result;
-  result[WebAPI::result::resultHtml] = WebAPIResponse::AddTeachersSections();
-  return this->WriteToBodyJSON(result);
-}
-
-int WebWorker::ProcessScores() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessScores");
-  this->SetHeaderOKNoContentLength("");
-  JSData result;
-  result[WebAPI::result::resultHtml] = WebAPIResponse::GetScoresPage();
-  return this->WriteToBodyJSON(result);
-}
-
-int WebWorker::ProcessScoresInCoursePage() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessScoresInCoursePage");
-  this->SetHeaderOKNoContentLength("");
-  JSData result;
-  result[WebAPI::result::resultHtml] = WebAPIResponse::GetScoresInCoursePage();
-  return this->WriteToBodyJSON(result);
-}
-
-int WebWorker::ProcessAccountsJSON() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessAccountsJSON");
-  this->SetHeaderOKNoContentLength("");
-  return this->WriteToBodyJSON(WebAPIResponse::GetAccountsPageJSON(this->hostWithPort));
-}
-
-int WebWorker::ProcessDatabaseJSON() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessDatabaseJSON");
-  this->SetHeaderOKNoContentLength("");
-  return this->WriteToBodyJSON(this->GetDatabaseJSON());
-}
-
-int WebWorker::ProcessDatabaseDeleteEntry() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessDatabaseDeleteEntry");
-  this->SetHeaderOKNoContentLength("");
-  JSData result;
-  result[WebAPI::result::resultHtml] = this->GetDatabaseDeleteOneItem();
-  return this->WriteToBodyJSON(this->GetDatabaseJSON());
-}
-
-int WebWorker::ProcessDatabaseModifyEntry() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessDatabaseModifyEntry");
-  this->SetHeaderOKNoContentLength("");
-  JSData result;
-  result[WebAPI::result::error] = "WebWorker::ProcessDatabaseModifyEntry not implemented yet";
-  return this->WriteToBodyJSON(result);
-}
-
-int WebWorker::ProcessEditPageJSON() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessEditPageJSON");
-  this->SetHeaderOKNoContentLength("");
-  return this->WriteToBodyJSON(WebAPIResponse::GetEditPageJSON());
-}
-
-int WebWorker::ProcessSlidesOrHomeworkFromSource() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessSlidesOrHomeworkFromSource");
-  this->SetHeaderOKNoContentLength("");
-  LaTeXcrawler theCrawler;
-  for (int i = 0; i < global.webArguments.size(); i ++) {
-    std::string theKey = HtmlRoutines::ConvertURLStringToNormal(global.webArguments.theKeys[i], false);
-    if (theKey != WebAPI::problem::fileName && StringRoutines::StringBeginsWith(theKey, "file")) {
-      theCrawler.slideFileNamesVirtualWithPatH.AddOnTop(StringRoutines::StringTrimWhiteSpace(
-        HtmlRoutines::ConvertURLStringToNormal(global.webArguments.theValues[i], false)
-      ));
-    }
-    if (StringRoutines::StringBeginsWith(theKey, "isSolutionFile")) {
-      theCrawler.slideFilesExtraFlags.AddOnTop(StringRoutines::StringTrimWhiteSpace(
-        HtmlRoutines::ConvertURLStringToNormal(global.webArguments.theValues[i], false)
-      ));
-    }
-  }
-  if (theCrawler.slideFilesExtraFlags.size > theCrawler.slideFileNamesVirtualWithPatH.size) {
-    theCrawler.slideFilesExtraFlags.SetSize(theCrawler.slideFileNamesVirtualWithPatH.size);
-  } else {
-    for (int i = theCrawler.slideFilesExtraFlags.size; i < theCrawler.slideFileNamesVirtualWithPatH.size; i ++) {
-      theCrawler.slideFilesExtraFlags.AddOnTop("");
-    }
-  }
-  theCrawler.desiredPresentationTitle =
-  HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("title"), false);
-  std::stringstream comments;
-  if (global.GetWebInput("layout") == "printable") {
-    theCrawler.flagProjectorMode = false;
-  }
-  if (global.GetWebInput("answerKey") == "true") {
-    theCrawler.flagAnswerKey = true;
-  }
-  if (
-    global.userCalculatorRequestType == "homeworkFromSource" ||
-    global.userCalculatorRequestType == "homeworkSource"
-  ) {
-    theCrawler.flagHomeworkRatherThanSlides = true;
-  }
-  if (!theCrawler.BuildOrFetchFromCachePDF(&comments, &comments)) {
-    JSData result;
-    WebAPIResponse::GetJSDataUserInfo(result, comments.str());
-    this->flagDoAddContentLength = true;
-    this->WriteToBodyJSON(result);
-    return 0;
-  }
-  this->SetHeader("HTTP/1.0 200 OK", "Content-Type: application/pdf; Access-Control-Allow-Origin: *");
-  this->flagDoAddContentLength = true;
-  return this->WriteToBody(theCrawler.targetPDFbinaryContent);
-}
-
-int WebWorker::ProcessSlidesSource() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessSlidesSource");
-  this->SetHeaderOKNoContentLength("");
-  LaTeXcrawler theCrawler;
-  for (int i = 0; i < global.webArguments.size(); i ++) {
-    std::string theKey = HtmlRoutines::ConvertURLStringToNormal(global.webArguments.theKeys[i], false);
-    if (
-      theKey != WebAPI::problem::fileName && StringRoutines::StringBeginsWith(theKey, "file")
-    ) {
-      theCrawler.slideFileNamesVirtualWithPatH.AddOnTop(StringRoutines::StringTrimWhiteSpace(
-        HtmlRoutines::ConvertURLStringToNormal(global.webArguments.theValues[i], false)
-      ));
-    }
-  }
-  if (global.userCalculatorRequestType == "homeworkSource") {
-    theCrawler.flagHomeworkRatherThanSlides = true;
-  } else {
-    theCrawler.flagHomeworkRatherThanSlides = false;
-  }
-  theCrawler.desiredPresentationTitle =
-  HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("title"), false);
-  std::stringstream comments;
-  if (global.GetWebInput("layout") == "printable") {
-    theCrawler.flagProjectorMode = false;
-  }
-  if (global.GetWebInput("answerKey") == "false") {
-    theCrawler.flagAnswerKey = false;
-  } else {
-    theCrawler.flagAnswerKey = true;
-  }
-  theCrawler.flagSourceOnly = true;
-  theCrawler.flagCrawlTexSourcesRecursively = true;
-  if (!theCrawler.BuildOrFetchFromCachePDF(&comments, &comments)) {
-    this->flagDoAddContentLength = true;
-    comments << "Failed to build your slides. ";
-    return this->WriteToBodyJSON(WebAPIResponse::GetJSONUserInfo(comments.str()));
-  }
-  this->SetHeader("HTTP/1.0 200 OK", "Content-Type: application/x-latex; Access-Control-Allow-Origin: *");
-  this->flagDoAddContentLength = true;
-  return this->WriteToBody(theCrawler.targetLaTeX);
-}
-
-int WebWorker::ProcessClonePage() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessClonePage");
-  this->SetHeaderOKNoContentLength("");
-  return this->WriteToBodyJSON(this->GetClonePageResult());
-}
-
-int WebWorker::ProcessProblemGiveUp() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessProblemGiveUp");
-  this->SetHeaderOKNoContentLength("");
-  return this->WriteToBodyJSON(WebAPIResponse::GetAnswerOnGiveUp());
-}
-
-int WebWorker::ProcessProblemSolution() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessProblemSolution");
-  this->SetHeaderOKNoContentLength("");
-  return this->WriteToBodyJSON(WebAPIResponse::GetProblemSolutionJSON());
-}
-
-int WebWorker::ProcessSubmitAnswersPreview() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessSubmitAnswersPreview");
-  this->SetHeaderOKNoContentLength("");
-  return this->WriteToBodyJSON(WebAPIResponse::submitAnswersPreviewJSON());
 }
 
 JSData WebWorker::GetClonePageResult() {
@@ -2474,18 +1999,29 @@ std::string WebAPIResponse::ModifyProblemReport() {
     shouldProceed = global.flagUsingSSLinCurrentConnection;
   }
   if (!shouldProceed) {
-    return "<b>Modifying problems allowed only for logged-in admins under ssl connection. </b>";
+    return "<b>Modifying problems allowed only for "
+    "logged-in admins under ssl connection. </b>";
   }
-  std::string mainInput = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput(WebAPI::problem::fileContent), false);
-  std::string fileName = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput(WebAPI::problem::fileName), false);
+  std::string mainInput = HtmlRoutines::ConvertURLStringToNormal(
+    global.GetWebInput(WebAPI::problem::fileContent), false
+  );
+  std::string fileName = HtmlRoutines::ConvertURLStringToNormal(
+    global.GetWebInput(WebAPI::problem::fileName), false
+  );
   std::stringstream commentsOnFailure;
-  bool fileExists = FileOperations::FileExistsVirtualCustomizedReadOnly(fileName, &commentsOnFailure);
+  bool fileExists = FileOperations::FileExistsVirtualCustomizedReadOnly(
+    fileName, &commentsOnFailure
+  );
   std::fstream theFile;
   if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
     global.userDefault.instructorComputed = "default";
   }
-  if (!FileOperations::OpenFileVirtualCustomizedWriteOnly(theFile, fileName, false, true, false, &commentsOnFailure)) {
-    commentsOnFailure << "<b style =\"color:red\">Failed to open/create file: " << fileName << ". </b>";
+  if (!FileOperations::OpenFileVirtualCustomizedWriteOnly(
+    theFile, fileName, false, true, false, &commentsOnFailure
+  )) {
+    commentsOnFailure
+    << "<b style =\"color:red\">Failed to open/create file: "
+    << fileName << ". </b>";
     return commentsOnFailure.str();
   }
   theFile << mainInput;
@@ -2497,12 +2033,6 @@ std::string WebAPIResponse::ModifyProblemReport() {
   out << "<b style =\"color:green\">Wrote " << mainInput.size() << " bytes to file: "
   << fileName << ". </b>";
   return out.str();
-}
-
-int WebWorker::ProcessSubmitAnswers() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessSubmitAnswers");
-  this->SetHeaderOKNoContentLength("");
-  return this->WriteToBodyJSON(WebAPIResponse::SubmitAnswersJSON());
 }
 
 std::string WebAPIResponse::GetJavascriptCaptcha() {
@@ -2640,7 +2170,9 @@ bool WebWorker::CorrectRequestsAFTERLoginReturnFalseIfModified() {
 
 bool WebWorker::ProcessRedirectAwayFromWWW() {
   std::string addressNoWWW;
-  if (!StringRoutines::StringBeginsWith(global.hostWithPort, "www.", &addressNoWWW)) {
+  if (!StringRoutines::StringBeginsWith(
+    global.hostWithPort, "www.", &addressNoWWW
+  )) {
     return false;
   }
   std::stringstream newAddressStream, redirectHeaderStream;
@@ -2654,8 +2186,10 @@ bool WebWorker::ProcessRedirectAwayFromWWW() {
   redirectHeaderStream << "Location: " << newAddressStream.str();
   this->SetHeader("HTTP/1.0 301 Moved Permanently", redirectHeaderStream.str());
   std::stringstream out;
-  out << "<html><body>Please remove the www. from the address, it creates issues with authentication services. "
-  << "Click <a href=\"" << newAddressStream.str() << "\">here</a> if not redirected automatically. ";
+  out << "<html><body>Please remove the www. "
+  << "from the address, it creates issues with authentication services. "
+  << "Click <a href=\"" << newAddressStream.str()
+  << "\">here</a> if not redirected automatically. ";
   out << "</body></html>";
   this->WriteToBody(out.str());
   return true;
@@ -2679,14 +2213,20 @@ int WebWorker::ProcessLoginNeededOverUnsecureConnection() {
   if (this->hostNoPort != "") {
     redirectStream << "Location: " << newAddressStream.str();
     this->SetHeader("HTTP/1.0 301 Moved Permanently", redirectStream.str());
-    outBody << "<html><body>Address available through secure (SSL) connection only. "
-    << "Click <a href=\"" << newAddressStream.str() << "\">here</a> if not redirected automatically. ";
+    outBody
+    << "<html><body>Address available through secure (SSL) connection only. "
+    << "Click <a href=\"" << newAddressStream.str()
+    << "\">here</a> if not redirected automatically. ";
   } else {
     this->SetHeaderOKNoContentLength("");
-    outBody << "<html><body>Address available through secure (SSL) connection only. <br>"
-    << "<b style ='color:red'>In the web address, please change http to https. </b><br>"
-    << "Unfortunately, I can't redirect you automatically as your browser did not tell me "
-    << "under what domain name it sees me, and the server responds to multiple domain names. ";
+    outBody << "<html><body>Address available through "
+    << "secure (SSL) connection only. <br>"
+    << "<b style ='color:red'>In the web address, please "
+    << "change http to https. </b><br>"
+    << "Unfortunately, I can't redirect you automatically "
+    << "as your browser did not tell me "
+    << "under what domain name it sees me, and the "
+    << "server responds to multiple domain names. ";
 
   }
   outBody << "</body></html>";
@@ -2706,6 +2246,7 @@ int WebWorker::ServeClient() {
   global.userDefault.flagStopIfNoLogin = true;
   UserCalculatorData& theUser = global.userDefault;
   global.IndicatorStringOutputFunction = WebWorker::WriteAfterTimeoutProgressStatic;
+  this->response.reset(*this);
   if (
     this->requestTypE != this->requestGet &&
     this->requestTypE != this->requestPost &&
@@ -2715,7 +2256,8 @@ int WebWorker::ServeClient() {
       this->requestTypE != this->requestUnknown &&
       this->requestTypE != this->requestChunked
     ) {
-      global.fatal << "Something is wrong: request type does not have any of the expected values. " << global.fatal;
+      global.fatal << "Something is wrong: request type does "
+      << "not have any of the expected values. " << global.fatal;
     }
     this->ProcessUnknown();
     return 0;
@@ -2764,7 +2306,9 @@ int WebWorker::ServeClient() {
       << global.userCalculatorRequestType << ". ";
     }
   }
-  theUser.flagMustLogin = this->parent->RequiresLogin(global.userCalculatorRequestType, this->addressComputed);
+  theUser.flagMustLogin = this->parent->RequiresLogin(
+    global.userCalculatorRequestType, this->addressComputed
+  );
   if (!theUser.flagMustLogin) {
     comments << "Login not needed. ";
   }
@@ -2797,14 +2341,15 @@ int WebWorker::ServeClient() {
       global.userCalculatorRequestType != WebAPI::request::logout &&
       global.userCalculatorRequestType != WebAPI::request::login
     ) {
-      argumentProcessingFailureComments << this->ToStringAddressRequest() << " requires login. ";
+      argumentProcessingFailureComments << this->ToStringAddressRequest()
+      << " requires login. ";
     }
     argumentProcessingFailureComments << comments.str();
     global.CookiesToSetUsingHeaders.SetKeyValue("authenticationToken", "");
     if (argumentProcessingFailureComments.str() != "") {
       global.SetWebInpuT("authenticationToken", "");
     }
-    return this->ProcessLoginUserInfo(argumentProcessingFailureComments.str());
+    return this->response.ProcessLoginUserInfo(argumentProcessingFailureComments.str());
   }
   if (
     argumentProcessingFailureComments.str() != "" && (
@@ -2822,159 +2367,10 @@ int WebWorker::ServeClient() {
       global.CookiesToSetUsingHeaders.SetKeyValue("spoofHostName", global.hostNoPort);
     }
   }
-  if (
-    global.flagLoggedIn && global.UserDefaultHasAdminRights() &&
-    global.userCalculatorRequestType == WebAPI::request::database
-  ) {
-    return this->ProcessDatabaseJSON();
-  } else if (
-    global.flagLoggedIn &&
-    global.userCalculatorRequestType == "databaseDeleteOneEntry"
-  ) {
-    return this->ProcessDatabaseDeleteEntry();
-  } else if (
-    global.flagLoggedIn && global.UserDefaultHasAdminRights() &&
-    global.userCalculatorRequestType == "databaseModifyEntry"
-  ) {
-    return this->ProcessDatabaseModifyEntry();
-  } else if (global.flagLoggedIn && global.userCalculatorRequestType == "accountsJSON") {
-    return this->ProcessAccountsJSON();
-  } else if (global.userCalculatorRequestType == WebAPI::request::examplesJSON) {
-    return this->ProcessCalculatorExamplesJSON();
-  } else if (global.userCalculatorRequestType == WebAPI::request::serverStatusJSON) {
-    return this->ProcessServerStatusJSON();
-  }
-  if (
-    global.userCalculatorRequestType == WebAPI::request::pause &&
-    (!global.theProgress.flagBanProcessMonitoring)
-  ) {
-    return this->ProcessPauseWorker();
-  } else if (
-    global.userCalculatorRequestType == WebAPI::request::unpause &&
-    (!global.theProgress.flagBanProcessMonitoring)
-  ) {
-    return this->ProcessUnpauseWorker();
-  } else if (
-    global.userCalculatorRequestType == WebAPI::request::indicator &&
-    (!global.theProgress.flagBanProcessMonitoring)
-  ) {
-    return this->ProcessComputationIndicator();
-  } else if (global.userCalculatorRequestType == WebAPI::request::setProblemWeight) {
-    return this->ProcessSetProblemWeight();
-  } else if (global.userCalculatorRequestType == WebAPI::request::setProblemDeadline) {
-    return this->ProcessSetProblemDeadline();
-  } else if (global.userCalculatorRequestType == WebAPI::request::changePassword) {
-    return this->ProcessChangePassword(argumentProcessingFailureComments.str());
-  } else if (global.userCalculatorRequestType == WebAPI::request::activateAccountJSON) {
-    return this->ProcessActivateAccount();
-  } else if (global.userCalculatorRequestType == WebAPI::request::signUp) {
-    return this->ProcessSignUP();
-  } else if (global.userCalculatorRequestType == WebAPI::request::forgotLogin) {
-    return this->ProcessForgotLogin();
-  } else if (global.userCalculatorRequestType == WebAPI::request::login) {
-    return this->ProcessLoginUserInfo(comments.str());
-  } else if (global.userCalculatorRequestType == WebAPI::request::logout) {
-    return this->ProcessLogout();
-  } else if ((
-      global.userCalculatorRequestType == "addEmails"||
-      global.userCalculatorRequestType == "addUsers"
-    ) &&
-    global.flagLoggedIn
-  ) {
-    return this->ProcessAddUserEmails();
-  } else if (
-    global.userCalculatorRequestType == "setTeacher" &&
-    global.flagLoggedIn
-  ) {
-    return this->ProcessAssignTeacherToSection();
-  } else if ((
-      global.userCalculatorRequestType == WebAPI::request::submitAnswers ||
-      global.userCalculatorRequestType == WebAPI::request::submitExercise
-    ) &&
-    global.flagLoggedIn
-  ) {
-    return this->ProcessSubmitAnswers();
-  } else if (global.userCalculatorRequestType == "scores" && global.flagLoggedIn) {
-    return this->ProcessScores();
-  } else if (global.userCalculatorRequestType == "scoresInCoursePage" && global.flagLoggedIn) {
-    return this->ProcessScoresInCoursePage();
-  } else if (global.UserGuestMode() && global.userCalculatorRequestType == "submitExerciseNoLogin") {
-    return this->ProcessSubmitAnswers();
-  } else if ((
-      global.userCalculatorRequestType == WebAPI::request::problemGiveUp &&
-      global.flagLoggedIn
-    ) ||
-    global.userCalculatorRequestType == WebAPI::request::problemGiveUpNoLogin
-  ) {
-    return this->ProcessProblemGiveUp();
-  } else if ((
-      global.userCalculatorRequestType == "problemSolution" &&
-      global.flagLoggedIn
-    ) ||
-    global.userCalculatorRequestType == "problemSolutionNoLogin"
-  ) {
-    return this->ProcessProblemSolution();
-  } else if ((
-      global.userCalculatorRequestType == "submitAnswersPreview" ||
-      global.userCalculatorRequestType == "submitExercisePreview"
-    ) &&
-    global.flagLoggedIn
-  ) {
-    return this->ProcessSubmitAnswersPreview();
-  } else if (
-    global.userCalculatorRequestType == WebAPI::request::submitExercisePreviewNoLogin &&
-    global.UserGuestMode()
-  ) {
-    return this->ProcessSubmitAnswersPreview();
-  } else if (
-    global.userCalculatorRequestType == "scoredQuiz" ||
-    global.userCalculatorRequestType == "exercise" ||
-    global.userCalculatorRequestType == "exerciseNoLogin" ||
-    global.userCalculatorRequestType == "exerciseJSON" ||
-    global.userCalculatorRequestType == "scoredQuizJSON"
-  ) {
-    return this->ProcessExamPageJSON();
-  } else if (
-    global.userCalculatorRequestType == "templateJSON" ||
-    global.userCalculatorRequestType == WebAPI::request::templateJSONNoLogin
-  ) {
-    return this->ProcessTemplateJSON();
-  } else if (global.userCalculatorRequestType == WebAPI::request::userInfoJSON) {
-    comments << argumentProcessingFailureComments.str();
-    return this->ProcessLoginUserInfo(comments.str());
-  } else if (global.userCalculatorRequestType == WebAPI::request::editPage) {
-    return this->ProcessEditPageJSON();
-  } else if (global.userCalculatorRequestType == WebAPI::request::modifyPage) {
-    return this->ProcessModifyPage();
-  } else if (
-    global.userCalculatorRequestType == "slidesFromSource" ||
-    global.userCalculatorRequestType == "homeworkFromSource"
-  ) {
-    return this->ProcessSlidesOrHomeworkFromSource();
-  } else if (
-    global.userCalculatorRequestType == "slidesSource" ||
-    global.userCalculatorRequestType == "homeworkSource"
-  ) {
-    return this->ProcessSlidesSource();
-  } else if (global.userCalculatorRequestType == WebAPI::request::clonePage) {
-    return this->ProcessClonePage();
-  } else if (global.userCalculatorRequestType == WebAPI::request::compute) {
-    return this->ProcessCompute();
-  } else if (global.userCalculatorRequestType == WebAPI::request::selectCourseJSON) {
-    return this->ProcessSelectCourseJSON();
-  } else if (
-    global.userCalculatorRequestType == "topicListJSON" ||
-    global.userCalculatorRequestType == WebAPI::request::topicListJSONNoLogin
-  ) {
-    return this->ProcessTopicListJSON();
-  } else if (global.userCalculatorRequestType == WebAPI::app) {
-    return this->ProcessApp(true);
-  } else if (global.userCalculatorRequestType == WebAPI::appNoCache) {
-    return this->ProcessApp(false);
-  } else if ("/" + global.userCalculatorRequestType == WebAPI::request::onePageJS) {
-    return this->ProcessCalculatorOnePageJS(false);
-  } else if ("/" + global.userCalculatorRequestType == WebAPI::request::onePageJSWithHash) {
-    return this->ProcessCalculatorOnePageJS(true);
+  if (this->response.ServeResponseFalseIfUnrecognized(
+    argumentProcessingFailureComments, comments
+  )) {
+    return 0;
   }
   return this->ProcessFolderOrFile();
 }
@@ -3036,18 +2432,24 @@ void WebWorker::Release() {
   this->flagInUsE = false;
 }
 
-void WebWorker::GetIndicatorOnTimeout(JSData& output, const std::string& message) {
+void WebWorker::GetIndicatorOnTimeout(
+  JSData& output, const std::string& message
+) {
   MacroRegisterFunctionWithName("WebWorker::OutputShowIndicatorOnTimeout");
   MutexLockGuard theLock(this->PauseWorker.lockThreads.GetElement());
   global.theProgress.flagTimedOut = true;
-  global << logger::blue << "Computation timeout, sending progress indicator instead of output. " << logger::endL;
+  global << logger::blue
+  << "Computation timeout, sending progress indicator instead of output. "
+  << logger::endL;
   std::stringstream timeOutComments;
   output[WebAPI::result::timeOut] = true;
 
   timeOutComments << message;
   if (global.theProgress.flagBanProcessMonitoring) {
-    timeOutComments << "Monitoring computations is not allowed on this server.<br> "
-    << "Please note that monitoring computations is the default behavior, so the "
+    timeOutComments
+    << "Monitoring computations is not allowed on this server.<br> "
+    << "Please note that monitoring computations "
+    << "is the default behavior, so the "
     << "owners of the server must have explicitly banned monitoring. ";
     output[WebAPI::result::timeOutComments] = timeOutComments.str();
   } else {
@@ -3063,10 +2465,14 @@ void WebWorker::OutputShowIndicatorOnTimeout(const std::string& message) {
   JSData result;
   this->GetIndicatorOnTimeout(result, message);
   if (this->indexInParent < 0) {
-    global.fatal << "Index of worker is smaller than 0, this shouldn't happen. " << global.fatal;
+    global.fatal
+    << "Index of worker is smaller than 0, this shouldn't happen. "
+    << global.fatal;
   }
   this->WriteToBodyJSON(result);
-  this->WriteAfterTimeoutProgress(global.ToStringProgressReportNoThreadData(true), true);
+  this->WriteAfterTimeoutProgress(
+    global.ToStringProgressReportNoThreadData(true), true
+  );
   this->SendAllBytesWithHeaders();
   for (int i = 0; i < this->parent->theWorkers.size; i ++) {
     if (i != this->indexInParent) {
@@ -3108,13 +2514,15 @@ std::string WebWorker::ToStringStatus() const {
     } else {
       out << ", <b>in use</b>";
     }
-    out << ", <a href=\"calculator?request=monitor&mainInput=" << this->indexInParent + 1 << "\">monitor process "
+    out << ", <a href=\"calculator?request=monitor&mainInput="
+    << this->indexInParent + 1 << "\">monitor process "
     << this->indexInParent + 1 << "</a>";
   } else {
     out << ", not in use";
   }
   if (this->displayUserInput != "") {
-    out << ", user input: <span style =\"color:blue\">" << this->displayUserInput << "</span>";
+    out << ", user input: <span style =\"color:blue\">"
+    << this->displayUserInput << "</span>";
   }
   out << ", connection " << this->connectionID << ", process ID: ";
   if (this->ProcessPID != 0) {
@@ -3124,17 +2532,20 @@ std::string WebWorker::ToStringStatus() const {
   }
   out << ", socketID: ";
   if (this->connectedSocketID == - 1) {
-    out << "released in current process, value before release: " << this->connectedSocketIDLastValueBeforeRelease;
+    out << "released in current process, value before release: "
+    << this->connectedSocketIDLastValueBeforeRelease;
   } else {
     out << this->connectedSocketID;
   }
   out << ". ";
-  out << "Server time at last ping: " << this->millisecondsLastPingServerSideOnly << " milliseconds. ";
+  out << "Server time at last ping: "
+  << this->millisecondsLastPingServerSideOnly << " milliseconds. ";
   if (this->pingMessage != "") {
     out << " Message at last ping: " << this->pingMessage;
   }
   if (this->status != "") {
-    out << "<br><b style =\"color:red\">Status: " << this->status << "</b><br>";
+    out << "<br><b style =\"color:red\">Status: "
+    << this->status << "</b><br>";
   }
   out << "Pipes: " << this->pipeWorkerToServerControls.ToString()
   << ", " << this->pipeWorkerToServerTimerPing.ToString()
@@ -5379,11 +4790,11 @@ void WebWorker::QueueBytesForSendingNoHeadeR(const List<char>& bytesToSend, bool
   MacroRegisterFunctionWithName("WebWorker::QueueBytesForSendingNoHeadeR");
   (void) MustSendAll;
   this->remainingBytesToSenD.AddListOnTop(bytesToSend);
-//  if (this->remainingBytesToSend.size >=1024*512 || MustSendAll)
+//  if (this->remainingBytesToSend.size >= 1024 * 512 || MustSendAll)
 //    this->SendAllBytes();
 }
 
-int WebWorker::WriteToBody(const std::string& stringToSend) {
+bool WebWorker::WriteToBody(const std::string& stringToSend) {
   MacroRegisterFunctionWithName("WebWorker::WriteToBody");
   int oldSize = this->remainingBodyToSend.size;
   this->remainingBodyToSend.SetSize(
@@ -5392,7 +4803,7 @@ int WebWorker::WriteToBody(const std::string& stringToSend) {
   for (unsigned i = 0; i < stringToSend.size(); i ++) {
     this->remainingBodyToSend[static_cast<signed>(i) + oldSize] = stringToSend[i];
   }
-  return 0;
+  return true;
 }
 
 void WebWorker::QueueStringForSendingNoHeadeR(const std::string& stringToSend, bool MustSendAll) {

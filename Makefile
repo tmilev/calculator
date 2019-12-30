@@ -115,6 +115,8 @@ $(info [1;34mLinker flags part 2: $(LIBRARIES_INCLUDED_AT_THE_END)[0m)
 
 #if this is missing something, add it, or, ls | grep cpp | xargs echo
 SOURCES_RELATIVE_PATH=\
+    web_api.cpp \
+    webserver.cpp \
     abstract_syntax_notation_one_decoder.cpp \
     abstract_syntax_notation_one_decoder_test.cpp \
     calculator_conversions_1.cpp \
@@ -182,8 +184,6 @@ SOURCES_RELATIVE_PATH=\
     transport_layer_security_openssl.cpp \
     transport_layer_security_test.cpp \
     web_routines_1.cpp \
-    web_api.cpp \
-    webserver.cpp \
     webserver_fork.cpp
 
 SOURCES_RELATIVE_PATH_C=\

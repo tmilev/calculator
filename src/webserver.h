@@ -73,22 +73,13 @@ public:
   PipePrimitive pipeWorkerToServerControls;
   PipePrimitive pipeWorkerToServerTimerPing;
 
+  WebAPIResponse response;
   std::string error;
   void PrepareFullMessageHeaderAndFooter();
   std::string openIndentTag(const std::string& theTag);
   std::string closeIndentTag(const std::string& theTag);
-  int ProcessSetProblemWeight();
-  int ProcessSetProblemDeadline();
-  int ProcessSlidesOrHomeworkFromSource();
-  int ProcessSlidesSource();
-  int ProcessClonePage();
-  int ProcessModifyPage();
-  int ProcessAddUserEmails();
-  int ProcessServerStatusJSON();
-  int ProcessComputationIndicator();
   JSData ProcessComputationIndicatorJSData();
   int GetIndexIfRunningWorkerId(JSData& outputComputationStatus);
-  int ProcessEditPageJSON();
   int ProcessFolderOrFile();
   int ProcessFolder();
   int ProcessFile();
@@ -96,7 +87,6 @@ public:
   int ProcessFileCantOpen();
   int ProcessFileTooLarge(long fileSize);
 
-  int ProcessChangePassword(const std::string& reasonForNoAuthentication);
   JSData SetEmail(const std::string& input);
   bool DoSetEmail(
     UserCalculatorData& inputOutputUser,
@@ -104,36 +94,9 @@ public:
     std::stringstream* commentsGeneralNonSensitive,
     std::stringstream* commentsGeneralSensitive
   );
-  int ProcessDatabaseJSON();
-  int ProcessDatabaseDeleteEntry();
-  int ProcessDatabaseModifyEntry();
-  int ProcessAccountsJSON();
-  int ProcessActivateAccount();
-  int ProcessScores();
-  int ProcessApp(bool appendBuildHash);
-  int ProcessCalculatorOnePageJS(bool appendBuildHash);
-  int ProcessTopicListJSON();
-  int ProcessScoresInCoursePage();
-  int ProcessAssignTeacherToSection();
-  int ProcessExamPageJSON();
-  int ProcessTemplateJSON();
-  int ProcessLoginUserInfo(const std::string &comments);
-  int ProcessSelectCourseJSON();
-  int ProcessExamPageInterpreter();
   int ProcessGetAuthenticationToken(const std::string& reasonForNoAuthentication);
   int ProcessLoginNeededOverUnsecureConnection();
   bool ProcessRedirectAwayFromWWW();
-  int ProcessLogout();
-  int ProcessSignUP();
-  int ProcessForgotLogin();
-  int ProcessCompute();
-  int ProcessCalculatorExamplesJSON();
-  int ProcessSubmitAnswers();
-  int ProcessSubmitAnswersPreview();
-  int ProcessProblemGiveUp();
-  int ProcessProblemSolution();
-  int ProcessPauseWorker();
-  int ProcessUnpauseWorker();
   int ProcessUnknown();
   int Run();
   bool CheckConsistency();
@@ -160,8 +123,8 @@ public:
   void PauseIfRequested();
   // writes json to body, sanitizes.
   int WriteToBodyJSONAppendComments(JSData& result);
-  int WriteToBodyJSON(const JSData& result);
-  int WriteToBody(const std::string& bytesToAppend);
+  bool WriteToBodyJSON(const JSData& result);
+  bool WriteToBody(const std::string& bytesToAppend);
   void WriteAfterTimeoutResult();
   static void WriteAfterTimeoutString(
     const std::string& input,
@@ -210,9 +173,17 @@ public:
   JSData GetDatabaseJSON();
   std::string GetDatabaseDeleteOneItem();
   std::string GetAddUserEmails();
-  std::string GetHtmlHiddenInputs(bool includeUserName, bool includeAuthenticationToken);
-  void SetHeaderOKNoContentLength(const std::string& extraHeader, const std::string& contentType = "application/json");
-  void SetHeader(const std::string& httpResponseNoTermination, const std::string& remainingHeaderNoTermination);
+  std::string GetHtmlHiddenInputs(
+    bool includeUserName, bool includeAuthenticationToken
+  );
+  void SetHeaderOKNoContentLength(
+    const std::string& extraHeader,
+    const std::string& contentType = "application/json"
+  );
+  void SetHeader(
+    const std::string& httpResponseNoTermination,
+    const std::string& remainingHeaderNoTermination
+  );
 
   std::string GetHeaderConnectionClose();
   std::string GetHeaderConnectionKeepAlive();

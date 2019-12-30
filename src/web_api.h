@@ -23,16 +23,69 @@ public:
   std::string GetOnePageJSBrowserify();
 };
 
+class WebWorker;
+
 class WebAPIResponse {
   public:
+  WebWorker* owner;
   static std::string youHaveReachedTheBackend;
-  bool ServeResponseFalseIfUnrecognized();
+  WebAPIResponse();
+
+  bool ProcessDatabaseJSON();
+  bool ProcessDatabaseDeleteEntry();
+  bool ProcessDatabaseModifyEntry();
+  bool ProcessProblemGiveUp();
+  bool ProcessProblemSolution();
+  bool ProcessPauseWorker();
+  bool ProcessUnpauseWorker();
+  bool ProcessAccountsJSON();
+  bool ProcessCompute();
+  bool ProcessCalculatorExamplesJSON();
+  bool ProcessSubmitAnswers();
+  bool ProcessSubmitAnswersPreview();
+  bool ProcessServerStatusJSON();
+  bool ProcessSetProblemWeight();
+  bool ProcessSetProblemDeadline();
+  bool ProcessSlidesOrHomeworkFromSource();
+  bool ProcessSlidesSource();
+  bool ProcessClonePage();
+  bool ProcessModifyPage();
+  bool ProcessAddUserEmails();
+  bool ProcessComputationIndicator();
+
+  bool ProcessChangePassword(const std::string& reasonForNoAuthentication);
+  bool ProcessActivateAccount();
+  bool ProcessScores();
+  bool ProcessApp(bool appendBuildHash);
+  bool ProcessCalculatorOnePageJS(bool appendBuildHash);
+  bool ProcessTopicListJSON();
+  bool ProcessScoresInCoursePage();
+  bool ProcessAssignTeacherToSection();
+  bool ProcessExamPageJSON();
+  bool ProcessTemplateJSON();
+  bool ProcessLoginUserInfo(const std::string &comments);
+  bool ProcessSelectCourseJSON();
+  bool ProcessExamPageInterpreter();
+  bool ProcessLogout();
+  bool ProcessSignUP();
+  bool ProcessForgotLogin();
+  bool ProcessEditPageJSON();
+
+  void reset(WebWorker& inputOwner);
+  bool ServeResponseFalseIfUnrecognized(
+    std::stringstream& argumentProcessingFailureComments,
+    std::stringstream& comments
+  );
   static std::string GetHtmlTagWithManifest();
   static std::string ModifyProblemReport();
   static JSData ClonePageResult();
   static std::string AddTeachersSections();
   static std::string AddUserEmails(const std::string& hostWebAddressWithPort);
-  static JSData SubmitAnswersJSON(const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake);
+  static JSData SubmitAnswersJSON(
+    const std::string& inputRandomSeed,
+    bool* outputIsCorrect,
+    bool timeSafetyBrake
+  );
   static JSData SubmitAnswersJSON();
   static JSData GetProblemSolutionJSON();
   static JSData GetEditPageJSON();
@@ -64,18 +117,24 @@ class WebAPIResponse {
   static std::string GetAccountsPageBody(const std::string& hostWebAddressWithPort);
   static std::string ToStringAssignSection();
   static std::string ToStringUserDetails(
-    bool adminsOnly, List<JSData>& theUsers, const std::string& hostWebAddressWithPort
+    bool adminsOnly,
+    List<JSData>& theUsers,
+    const std::string& hostWebAddressWithPort
   );
   static std::string ToStringUserScores();
   static std::string ToStringUserDetailsTable(
-    bool adminsOnly, List<JSData>& theUsers, const std::string& hostWebAddressWithPort
+    bool adminsOnly,
+    List<JSData>& theUsers,
+    const std::string& hostWebAddressWithPort
   );
   static std::string ToStringCalculatorArgumentsHumanReadable();
   static std::string GetSanitizedComment(
     const Expression& input, FormatExpressions& theFormat, bool& resultIsPlot
   );
   static std::string GetCommentsInterpretation(
-    Calculator& theInterpreterWithAdvice, int indexShift, FormatExpressions& theFormat
+    Calculator& theInterpreterWithAdvice,
+    int indexShift,
+    FormatExpressions& theFormat
   );
 };
 
@@ -97,7 +156,9 @@ public:
   static void LoadStrings();
   static std::string gitRepository;
 
-  static std::string URLKeyValuePairsToNormalRecursiveHtml(const std::string& input, int recursionDepth = 0);
+  static std::string URLKeyValuePairsToNormalRecursiveHtml(
+    const std::string& input, int recursionDepth = 0
+  );
 
   static void ConvertURLStringToNormal(const std::string& input, std::string& output, bool replacePlusBySpace);
   static std::string ConvertURLStringToNormal(const std::string& input, bool replacePlusBySpace);
@@ -119,7 +180,9 @@ public:
   static std::string GetCalculatorComputationURL(const std::string& inputNoEncoding);
   static std::string GetCalculatorComputationAnchor(const std::string& inputNoEncoding);
   static std::string GetSliderSpanStartsHidden(
-    const std::string& content, const std::string& label = "Expand/collapse", const std::string& desiredID = ""
+    const std::string& content,
+    const std::string& label = "Expand/collapse",
+    const std::string& desiredID = ""
   );
   static std::string GetHtmlLinkToGithubRepo(const std::string& displayString);
   static std::string GetHtmlLinkFromProjectFileName(
@@ -168,7 +231,11 @@ public:
   static std::string GetMathMouseHover(const std::string& input, int upperNumChars = 10000);
   static std::string GetMathMouseHoverBeginArrayL(const std::string& input, int upperNumChars = 10000);
   static std::string GetStyleButtonLikeHtml();
-  static std::string GetHtmlButton(const std::string& buttonID, const std::string& theScript, const std::string& buttonText);
+  static std::string GetHtmlButton(
+    const std::string& buttonID,
+    const std::string& theScript,
+    const std::string& buttonText
+  );
   static std::string GetHtmlSpanHidableStartsHiddeN(
     const std::string& input,
     const std::string& labelExpandButton = "info expand/collapse",
@@ -200,7 +267,9 @@ public:
   static void ElementToStringTooltip(
     const std::string& input, const std::string& inputTooltip, std::string& output, bool useHtml
   );
-  static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, bool useHtml) {
+  static std::string ElementToStringTooltip(
+    const std::string& input, const std::string& inputTooltip, bool useHtml
+  ) {
     std::string result;
     HtmlRoutines::ElementToStringTooltip(input, inputTooltip, result, useHtml);
     return result;

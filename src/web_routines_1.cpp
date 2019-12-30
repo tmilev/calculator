@@ -921,6 +921,63 @@ bool WebCrawler::VerifyRecaptcha(
   return true;
 }
 
+bool WebAPIResponse::ProcessForgotLogin() {
+  MacroRegisterFunctionWithName("WebAPIResponse::ProcessForgotLogin");
+  this->owner->SetHeaderOKNoContentLength("");
+  JSData result;
+  if (!global.flagDatabaseCompiled) {
+    result[WebAPI::result::error] = "Error: database not running. ";
+    global.WriteResponse(result);
+    return true;
+  }
+  std::stringstream out;
+  if (!global.UserDefaultHasAdminRights()) {
+    Database::get().theUser.LogoutViaDatabase();
+  }
+  UserCalculator theUser;
+  theUser.email = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("email"), false);
+  WebCrawler theCrawler;
+  out << "<br><b> "
+  << "Please excuse our verbose technical messages. </b>"
+  << "<br><b>We are still testing our system; "
+  << "we will remove the technical garbage as soon as we are done. "
+  << "</b><br>\n";
+  if (!theCrawler.VerifyRecaptcha(&out, &out, nullptr)) {
+    result[WebAPI::result::comments] = out.str();
+    global.WriteResponse(result);
+    return true;
+  }
+  if (!theUser.Iexist(&out)) {
+    out << "<br><b style =\"color:red\">"
+    << "We failed to find your email: " << theUser.email << " in our records. "
+    << "</b>";
+    result[WebAPI::result::comments] = out.str();
+    global.WriteResponse(result);
+    return true;
+  }
+  if (!theUser.LoadFromDB(&out, &out)) {
+    out << "<br><b style='color:red'>"
+    << "Failed to fetch user info for email: " << theUser.email
+    << "</b>";
+    result[WebAPI::result::comments] = out.str();
+    global.WriteResponse(result);
+    return true;
+  }
+  out << "<b style =\"color:green\">"
+  << "Your email is on record. "
+  << "</b>";
+  if (!global.UserDefaultHasAdminRights()) {
+    this->owner->DoSetEmail(theUser, &out, &out, nullptr);
+  } else {
+    this->owner->DoSetEmail(theUser, &out, &out, &out);
+  }
+  out << "<br>Response time: " << global.GetElapsedSeconds() << " second(s); "
+  << global.GetElapsedSeconds() << " second(s) spent creating account. ";
+  result[WebAPI::result::comments] = out.str();
+  global.WriteResponse(result);
+  return true;
+}
+
 JSData WebWorker::GetSignUpRequestResult() {
   MacroRegisterFunctionWithName("WebWorker::GetSignUpRequestResult");
   JSData result;
@@ -1004,7 +1061,7 @@ int WebWorker::WriteToBodyJSONAppendComments(JSData &result) {
   return this->WriteToBodyJSON(result);
 }
 
-int WebWorker::WriteToBodyJSON(const JSData& result) {
+bool WebWorker::WriteToBodyJSON(const JSData& result) {
   std::string toWrite = HtmlRoutines::ConvertStringToHtmlString(
     result.ToString(nullptr), false
   );
@@ -1018,12 +1075,6 @@ int WebWorker::WriteToBodyJSON(const JSData& result) {
     }
   }  
   return this->WriteToBody(toWrite);
-}
-
-int WebWorker::ProcessSignUP() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessSignUP");
-  this->SetHeaderOKNoContentLength("");
-  return this->WriteToBodyJSON(this->GetSignUpRequestResult());
 }
 
 void GlobalVariables::WriteCrash(const JSData& out) {
@@ -1049,62 +1100,3 @@ void GlobalVariables::WriteResponse(const JSData& out) {
   theWorker.WriteToBodyJSON(out);
   theWorker.SendAllBytesWithHeaders();
 }
-
-int WebWorker::ProcessForgotLogin() {
-  MacroRegisterFunctionWithName("WebWorker::ProcessForgotLogin");
-  this->SetHeaderOKNoContentLength("");
-  JSData result;
-  if (!global.flagDatabaseCompiled) {
-    result[WebAPI::result::error] = "Error: database not running. ";
-    global.WriteResponse(result);
-    return 0;
-  }
-  std::stringstream out;
-  if (!global.UserDefaultHasAdminRights()) {
-    Database::get().theUser.LogoutViaDatabase();
-  }
-  UserCalculator theUser;
-  theUser.email = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("email"), false);
-  WebCrawler theCrawler;
-  out << "<br><b> "
-  << "Please excuse our verbose technical messages. </b>"
-  << "<br><b>We are still testing our system; "
-  << "we will remove the technical garbage as soon as we are done. "
-  << "</b><br>\n";
-  if (!theCrawler.VerifyRecaptcha(&out, &out, nullptr)) {
-    result[WebAPI::result::comments] = out.str();
-    global.WriteResponse(result);
-    return 0;
-  }
-  if (!theUser.Iexist(&out)) {
-    out << "<br><b style =\"color:red\">"
-    << "We failed to find your email: " << theUser.email << " in our records. "
-    << "</b>";
-    result[WebAPI::result::comments] = out.str();
-    global.WriteResponse(result);
-    return 0;
-  }
-  if (!theUser.LoadFromDB(&out, &out)) {
-    out << "<br><b style='color:red'>"
-    << "Failed to fetch user info for email: " << theUser.email
-    << "</b>";
-    result[WebAPI::result::comments] = out.str();
-    global.WriteResponse(result);
-    return 0;
-  }
-  out << "<b style =\"color:green\">"
-  << "Your email is on record. "
-  << "</b>";
-  if (!global.UserDefaultHasAdminRights()) {
-    this->DoSetEmail(theUser, &out, &out, nullptr);
-  } else {
-    this->DoSetEmail(theUser, &out, &out, &out);
-  }
-
-  out << "<br>Response time: " << global.GetElapsedSeconds() << " second(s); "
-  << global.GetElapsedSeconds() << " second(s) spent creating account. ";
-  result[WebAPI::result::comments] = out.str();
-  global.WriteResponse(result);
-  return 0;
-}
-

@@ -56,8 +56,6 @@ JSData WebAPIResponse::GetProblemSolutionJSON() {
     << "</b>";
     if (global.UserDebugFlagOn() && global.UserDefaultHasAdminRights()) {
       out << "<hr>" << theProblem.theProblemData.ToStringAvailableAnswerIds();
-      //out << "<hr>Client input: " << this->mainArgumentRAW << "<hr>";
-      out << WebAPIResponse::ToStringCalculatorArgumentsHumanReadable();
     }
     result[WebAPI::result::resultHtml] = out.str();
     result[WebAPI::result::millisecondsComputation] = global.GetElapsedMilliseconds() - startMilliseconds;
@@ -121,8 +119,7 @@ JSData WebAPIResponse::GetProblemSolutionJSON() {
     << "?request=calculator&mainInput="
     << HtmlRoutines::ConvertStringToURLString(answerCommandsNoEnclosures.str(), false)
     << "\">Input link</a>"
-    <<  "<br>" << theInterpreteR.outputString << "<hr>" << theInterpreteR.outputCommentsString
-    << "<hr>Raw input: " << WebAPIResponse::ToStringCalculatorArgumentsHumanReadable();
+    <<  "<br>" << theInterpreteR.outputString << "<hr>" << theInterpreteR.outputCommentsString;
   }
   result[WebAPI::result::resultHtml] = out.str();
   result[WebAPI::result::millisecondsComputation] = global.GetElapsedMilliseconds() - startMilliseconds;
@@ -868,12 +865,8 @@ JSData WebAPIResponse::GetExamPageJSON() {
   //<-must come after theFile.outputHtmlHeadNoTag
   errorAndDebugStream << theFile.outputDebugInformationBody;
   out << problemBody;
-  std::string commentsWebserver = WebAPIResponse::ToStringCalculatorArgumentsHumanReadable();
   std::string commentsProblem = errorAndDebugStream.str();
   output[WebAPI::problem::content] = HtmlRoutines::ConvertStringToURLString(out.str(), false);
-  if (commentsWebserver != "") {
-    output[WebAPI::commentsServer] = commentsWebserver;
-  }
   if (commentsProblem != "") {
     output[WebAPI::problem::commentsProblem] = commentsProblem;
   }
@@ -1134,7 +1127,7 @@ JSData WebAPIResponse::SubmitAnswersJSON(
   if (!(*outputIsCorrect)) {
     output << "<tr><td>";
     output << "<b style = 'color:red'>Your answer appears to be incorrect. </b>";
-    output << "DEBUG: randomSeed: " << inputRandomSeed;
+    // output << "DEBUG: randomSeed: " << inputRandomSeed;
     output << "</td></tr>";
     if (global.UserDefaultHasAdminRights() && global.UserDebugFlagOn()) {
       output << "<tr><td>Admin view internals. "
@@ -1441,7 +1434,6 @@ JSData WebAPIResponse::GetAnswerOnGiveUp(
     << "</b>";
     if (global.UserDebugFlagOn() && global.UserDefaultHasAdminRights()) {
       errorStream << "<hr>" << theProblem.theProblemData.ToStringAvailableAnswerIds();
-      errorStream << WebAPIResponse::ToStringCalculatorArgumentsHumanReadable();
     }
     result[WebAPI::result::millisecondsComputation] = global.GetElapsedMilliseconds() - startTimeInMilliseconds;
     result[WebAPI::result::error] = errorStream.str();
@@ -1571,9 +1563,8 @@ JSData WebAPIResponse::GetAnswerOnGiveUp(
     << "\">Calculator input no enclosures</a>"
     << theInterpreteR.outputString << "<hr>"
     << theInterpreteR.outputCommentsString
-    << "<hr>Raw input: <br>" << theInterpreteR.inputString;
+    << "<hr>Raw input: <br>" << global.ToStringCalculatorComputation(theInterpreteR.inputString);
   }
-  out << "DEBUG: randomSeed: " << inputRandomSeed;
   result[WebAPI::result::resultHtml] = out.str();
   return result;
 }
@@ -1683,10 +1674,8 @@ std::string WebAPIResponse::GetScoresPage() {
   CalculatorHTML thePage;
   thePage.LoadDatabaseInfo(out);
   std::string theScoresHtml = WebAPIResponse::ToStringUserScores();
-  std::string theDebugHtml = WebAPIResponse::ToStringCalculatorArgumentsHumanReadable();
   out << "<problemNavigation>" << thePage.ToStringProblemNavigation() << "</problemNavigation>";
   out << theScoresHtml;
-  out << theDebugHtml;
   out << "</body></html>";
   return out.str();
 }
@@ -1715,7 +1704,6 @@ std::string WebAPIResponse::GetAccountsPage(const std::string& hostWebAddressWit
   }
   out << accountsPageBody;
 //  out << "<calculatorNavigation>" << global.ToStringNavigation() << "</calculatorNavigation>\n";
-  out << WebAPIResponse::ToStringCalculatorArgumentsHumanReadable();
   out << "</body></html>";
   return out.str();
 }

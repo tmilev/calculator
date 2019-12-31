@@ -382,8 +382,6 @@ public:
   bool UserRequestMustBePromptedToLogInIfNotLoggedIn();
   void FallAsleep(int microseconds);
 
-  std::string ToStringCalcArgsNoNavigation(List<std::string>* tagsToExclude);
-
   static std::string GetDateForLogFiles();
   static std::string GetTimeGM();
   static std::string GetTimeLocal();
@@ -404,6 +402,8 @@ public:
   int CallSystemNoOutput(const std::string& systemCommand, bool logErrors);
   std::string CallSystemWithOutput(const std::string& systemCommand);
   void ChDir(const std::string& systemCommand);
+  std::string ToStringCalculatorComputation(const std::string& input);
+  std::string ToStringCalcArgsNoNavigation(List<std::string>* tagsToExclude);
   std::string ToStringHTMLTopCommandLinuxSystem();
   std::string ToStringFolderInfo() const;
   std::string ToStringThreadData(bool useHTML);

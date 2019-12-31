@@ -438,6 +438,17 @@ bool GlobalVariables::UserRequestMustBePromptedToLogInIfNotLoggedIn() {
   this->userCalculatorRequestType == "exercise";
 }
 
+std::string GlobalVariables::ToStringCalculatorComputation(const std::string& input) {
+  std::stringstream out;
+  JSData request;
+  request[WebAPI::request::requestAPI] = WebAPI::request::compute;
+  request[WebAPI::request::calculatorInput] = HtmlRoutines::ConvertStringToURLString(input, false);
+  request[WebAPI::request::currentPage] = WebAPI::request::calculatorPage;
+  out << "<a href = '" << global.DisplayNameExecutableApp << "#" << request.ToString() << "'>"
+  << HtmlRoutines::ConvertStringToHtmlString(input, true) << "</a>";
+  return out.str();
+}
+
 std::string GlobalVariables::ToStringCalcArgsNoNavigation(List<std::string>* tagsToExclude) {
   MacroRegisterFunctionWithName("GlobalVariables::ToStringCalcArgsNoNavigation");
   if (!this->flagLoggedIn && !this->UserGuestMode()) {

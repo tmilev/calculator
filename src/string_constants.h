@@ -9,6 +9,7 @@ public:
   static std::string appNoCache;
   static std::string app;
   struct request {
+    static std::string requestAPI;
     static std::string calculatorPage;
     static std::string database;
     static std::string setProblemWeight;
@@ -52,6 +53,7 @@ public:
     static std::string login;
     static std::string logout;
     static std::string signUp;
+    static std::string currentPage;
   };
   struct result {
     static std::string resultHtml;

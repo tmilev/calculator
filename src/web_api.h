@@ -127,7 +127,6 @@ class WebAPIResponse {
     List<JSData>& theUsers,
     const std::string& hostWebAddressWithPort
   );
-  static std::string ToStringCalculatorArgumentsHumanReadable();
   static std::string GetSanitizedComment(
     const Expression& input, FormatExpressions& theFormat, bool& resultIsPlot
   );

@@ -4648,47 +4648,6 @@ std::string WebServer::GetEnvironment(const std::string& envVarName) {
   return queryStringPtr;
 }
 
-std::string WebAPIResponse::ToStringCalculatorArgumentsHumanReadable() {
-  MacroRegisterFunctionWithName("WebWorker::ToStringCalculatorArgumentsHumanReadable");
-  if (!global.UserDebugFlagOn()) {
-    return "";
-  }
-  std::stringstream out;
-  out << "<hr>\n";
-  out << "Default user: " << HtmlRoutines::ConvertStringToHtmlString(global.userDefault.username, false);
-  if (global.flagLoggedIn) {
-    out << "\n<br>\nLogged in.";
-  }
-  out << "\n<br>\nAddress:\n" << HtmlRoutines::ConvertStringToHtmlString(global.server().GetActiveWorker().addressComputed, true);
-  out << "\n<br>\nRequest:\n" << global.userCalculatorRequestType;
-  if (global.UserDefaultHasAdminRights()) {
-    out << "\n<br>\n<b>User has admin rights</b>";
-  }
-  if (global.server().RequiresLogin(
-    global.userCalculatorRequestType, global.server().GetActiveWorker().addressComputed
-  )) {
-    out << "\n<br>\nAddress requires login. ";
-  } else {
-    out << "\n<br>\nAddress <b>does not</b> require any login. ";
-  }
-  out << "\n<hr>\n";
-  for (int i = 0; i < global.webArguments.size(); i ++) {
-    out << global.webArguments.theKeys[i] << ": "
-    << HtmlRoutines::ConvertStringToHtmlString(global.webArguments.theValues[i], true);
-    if (i != global.webArguments.size() - 1) {
-      out << "\n<br>\n";
-    }
-  }
-  out << "\n<hr>\n";
-  if (global.flagRunningBuiltInWebServer) {
-    out << "Sent with max cache: "
-    << global.server().addressStartsSentWithCacheMaxAge.ToStringCommaDelimited()
-    << "<hr>";
-    out << global.server().GetActiveWorker().ToStringMessageShort();
-  }
-  return out.str();
-}
-
 void WebWorker::PrepareFullMessageHeaderAndFooter() {
   MacroRegisterFunctionWithName("WebWorker::PrepareFullMessageHeaderAndFooter");
   this->remainingBytesToSenD.SetSize(0);

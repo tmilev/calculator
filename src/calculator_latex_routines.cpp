@@ -76,10 +76,10 @@ void LaTeXCrawler::BuildFreecalC() {
   MacroRegisterFunctionWithName("LaTeXcrawler::BuildFreecalc");
   StateMaintainerCurrentFolder preserveCurrentFolder;
   if (!global.UserDefaultHasAdminRights()) {
-    this->displayResult << "Build freecalc command allowed only for logged-in admins.";
+    this->displayResult << "Build freecalc command allowed only for logged-in administrators.";
     return;
   }
-  global.millisecondsMaxComputation = 50000000; //50k seconds: ok as we are admin.
+  global.millisecondsMaxComputation = 50000000; //50k seconds: ok as we are administrator.
   if (!this->ExtractFileNamesFromRelativeFileName(&this->errorStream)) {
     return;
   }

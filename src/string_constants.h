@@ -103,6 +103,7 @@ public:
   struct UserInfo {
     static std::string processMonitoring;
   };
+  static std::string userDefaultAdmin;
 };
 
 class Configuration {

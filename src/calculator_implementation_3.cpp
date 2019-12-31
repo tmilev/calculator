@@ -1842,7 +1842,7 @@ Calculator::Test::Test(Calculator& inputOwner) {
 bool Calculator::innerAutomatedTest(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerAutomatedTest");
   if (!global.UserDefaultHasAdminRights()) {
-    return theCommands << "Automated test requires admin access";
+    return theCommands << "Automated test requires administrator access";
   }
   global.millisecondsMaxComputation = 30000000; //30k seconds, ok as we have admin access
   Calculator::Test test(theCommands);

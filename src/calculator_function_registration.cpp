@@ -27,7 +27,7 @@ void Calculator::initAdminFunctions() {
     CalculatorFunctionsGeneral::innerStopServer,
     "",
     "Stops the server/kills the calculator for all users. "
-    "Requires admin rights. "
+    "Requires administator rights. "
     "Disabled by default. "
     "Use to stop server remotely/test server service restart. ",
     "StopServer 0",
@@ -43,7 +43,7 @@ void Calculator::initAdminFunctions() {
     "MongoFind",
     CalculatorDatabaseFunctions::innerExecuteMongoQuery,
     "",
-    "Executes a mongoDB query. Requires admin rights. "
+    "Executes a mongoDB query. Requires administator rights. "
     "The database name is calculator (can't be modified). "
     "First argument: collection name. Second argument: query. ",
     "MongoFind(\"users\", \"{}\")",
@@ -55,7 +55,7 @@ void Calculator::initAdminFunctions() {
     "RepairDatabaseEmailRecords",
     CalculatorDatabaseFunctions::innerRepairDatabaseEmailRecords,
     "",
-    "Repairs username/email mismatches. Admin use only. ",
+    "Repairs username/email mismatches. Administrator use only. ",
     "TurnOnRules(RepairDatabaseEmailRecords); RepairDatabaseEmailRecords(0)",
     "DatabaseRoutines::innerRepairDatabaseEmailRecords",
     "RepairDatabaseEmailRecords",
@@ -3077,7 +3077,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "FetchKnownPublicKeys",
     CalculatorFunctionsGeneral::innerFetchKnownPublicKeys,
     "",
-    "Updates known public keys. Requires admin privileges. "
+    "Updates known public keys. Requires administrator privileges. "
     "At the moment, works for google public keys only. ",
     "FetchKnownPublicKeys(0)",
     "CalculatorFunctionsGeneral::innerFetchKnownPublicKeys",

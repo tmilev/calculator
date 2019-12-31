@@ -112,7 +112,7 @@ bool TimeoutThread::HandleMaxComputationTime() {
   << " ms (twice the amount allowed for calculator interpretation). "
   << "<br>This restriction may be lifted "
   << "by restarting the server "
-  << "with a larger timeout limit (requires admin access via ssh). "
+  << "with a larger timeout limit (requires administrator access via ssh). "
   << "For example, the command:<br> "
   << "calculator/bin/calculator server 1000<br>"
   << "will restart the server with a timeout of 1000 seconds = 1000000 ms, "

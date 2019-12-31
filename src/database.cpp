@@ -66,7 +66,7 @@ bool Database::User::UserDefaultHasInstructorRights() {
     return false;
   }
   return
-    global.userDefault.userRole == UserCalculatorData::Roles::admin ||
+    global.userDefault.userRole == UserCalculator::Roles::administator ||
     global.userDefault.userRole == UserCalculator::Roles::instructor ||
     global.userDefault.userRole == UserCalculator::Roles::teacher;
 }
@@ -510,7 +510,7 @@ std::string ProblemData::ToString() const {
     }
     out << "<br>";
   }
-  out << "Admin data: " << this->adminData.ToString();
+  out << "Administrator data: " << this->adminData.ToString();
   return out.str();
 }
 
@@ -712,7 +712,7 @@ JSData UserCalculatorData::ToJSON() {
 
 bool UserCalculatorData::ComputeCourseInfo() {
   MacroRegisterFunctionWithName("UserCalculator::ComputeCourseInfo");
-  bool isAdmin = (this->userRole == UserCalculatorData::Roles::admin && this->username == global.userDefault.username);
+  bool isAdmin = (this->userRole == UserCalculator::Roles::administator && this->username == global.userDefault.username);
   if (
     global.UserStudentVieWOn() &&
     isAdmin &&
@@ -802,9 +802,9 @@ std::string UserCalculator::FirstLoginMessage() {
   std::stringstream out;
   if (global.flagRequestComingLocally) {
     out << "If this is your first run, set the username to "
-    << "admin and enter the password you desire. "
+    << "<b>default</b> and enter the password you desire. "
     << "The password will then be automatically set. "
-    << "To add further accounts login as admin and go to 'Accounts'. ";
+    << "To add further accounts login as <b>default</b> and go to 'Accounts'. ";
   }
   return out.str();
 }
@@ -1775,10 +1775,10 @@ bool Database::User::LoginNoDatabaseSupport(
   // (or have troubles accessing it for some reason)
   // can still use the admin functions of the calculator, for example,
   // modify problem files from the one-page app.
-  theUser.userRole = UserCalculatorData::Roles::admin;
+  theUser.userRole = UserCalculatorData::Roles::administator;
   theUser.actualAuthenticationToken = "compiledWithoutDatabaseSupport";
   if (commentsGeneral != nullptr) {
-    *commentsGeneral << "Automatic login as admin: calculator compiled without DB. ";
+    *commentsGeneral << "Automatic login as default: calculator compiled without DB. ";
   }
   return true;
 }
@@ -1835,18 +1835,22 @@ bool Database::User::LoginViaDatabase(
       }
     }
   }
-  if (userWrapper.username == "admin" && userWrapper.enteredPassword != "") {
+  if (
+    userWrapper.username == WebAPI::userDefaultAdmin &&
+    userWrapper.enteredPassword != ""
+  ) {
     if (!userWrapper.Iexist(nullptr)) {
       if (commentsOnFailure != nullptr) {
-        *commentsOnFailure << "<b>First login of user admin: setting admin password.</b> ";
+        *commentsOnFailure << "<b>First login of user default "
+        << "(= default administator account): setting password.</b> ";
       }
-      global << logger::yellow << "First login of user admin: setting admin password." << logger::endL;
+      global << logger::yellow << "First login of user default: setting password." << logger::endL;
       userWrapper.actualActivationToken = "activated";
-      userWrapper.userRole = "admin";
+      userWrapper.userRole = UserCalculator::Roles::administator;
       if (!userWrapper.StoreToDB(true, commentsOnFailure)) {
-        global << logger::red << "Failed to store admin pass to database. ";
+        global << logger::red << "Failed to store default's pass to database. ";
         if (commentsOnFailure != nullptr) {
-          *commentsOnFailure << "Failed to store admin pass to database. ";
+          *commentsOnFailure << "Failed to store default's pass to database. ";
           global << commentsOnFailure->str();
         }
       }

@@ -364,7 +364,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
     << "in the context of the current problem. "
     << "</b></span>";
     if (global.UserDefaultHasAdminRights() && global.UserDebugFlagOn()) {
-      out << "<br>Logged-in as admin with debug flag on => printing error details. "
+      out << "<br>Logged-in as administator with debug flag on => printing error details. "
       << theInterpreterWithAdvice.outputString << "<br>"
       << theInterpreterWithAdvice.outputCommentsString;
       out << "<hr><b>Calculator input:</b> "
@@ -1109,7 +1109,7 @@ JSData WebAPIResponse::SubmitAnswersJSON(
       output << isolatedInterpreter.outputString;
     }
     if (global.UserDebugFlagOn() && global.UserDefaultHasAdminRights()) {
-      output << "<hr><b>Admin view internals.</b><hr>"
+      output << "<hr><b>Administartor view internals.</b><hr>"
       << debugInputStream.str() << "<hr>"
       << theInterpreter.outputString
       << "<br>" << theInterpreter.outputCommentsString
@@ -1138,7 +1138,7 @@ JSData WebAPIResponse::SubmitAnswersJSON(
     output << "<b style = 'color:red'>Your answer appears to be incorrect. </b>";
     output << "</td></tr>";
     if (global.UserDefaultHasAdminRights() && global.UserDebugFlagOn()) {
-      output << "<tr><td>Admin view internals. "
+      output << "<tr><td>Administrator view internals. "
       << "<hr>" << debugInputStream.str()
       << "<br>The calculator output is: " << theInterpreter.outputString
       << "Comments: " << theInterpreter.Comments.str()
@@ -1624,7 +1624,7 @@ JSData WebAPIResponse::GetAccountsPageJSON(const std::string& hostWebAddressWith
     !global.flagLoggedIn ||
     !global.flagUsingSSLinCurrentConnection
   ) {
-    output[WebAPI::result::error] = "Must be logged-in admin over ssl.";
+    output[WebAPI::result::error] = "Must be logged-in administrator over ssl.";
     return output;
   }
   std::stringstream commentsOnFailure;
@@ -1634,7 +1634,7 @@ JSData WebAPIResponse::GetAccountsPageJSON(const std::string& hostWebAddressWith
   List<JSData> admins;
   long long totalStudents;
   findStudents[DatabaseStrings::labelInstructor] = global.userDefault.username;
-  findAdmins[DatabaseStrings::labelUserRole] = "admin";
+  findAdmins[DatabaseStrings::labelUserRole] = UserCalculator::Roles::administator;
   List<std::string> columnsToRetain;
   columnsToRetain.AddOnTop(DatabaseStrings::labelUsername);
   columnsToRetain.AddOnTop(DatabaseStrings::labelEmail);
@@ -1694,7 +1694,7 @@ std::string WebAPIResponse::GetAccountsPageBody(const std::string& hostWebAddres
   List<JSData> admins;
   long long totalStudents;
   findStudents[DatabaseStrings::labelInstructor] = global.userDefault.username;
-  findAdmins[DatabaseStrings::labelUserRole] = "admin";
+  findAdmins[DatabaseStrings::labelUserRole] = UserCalculator::Roles::administator;
   if (!Database::get().FindFromJSON(
     DatabaseStrings::tableUsers,
     findStudents,
@@ -1784,7 +1784,6 @@ std::string WebAPIResponse::ToStringUserDetailsTable(
     return "Compiled without database support. ";
   }
   std::stringstream out;
-  //std::string userRole = adminsOnly ? "admin" : "student";
   bool flagFilterCourse = (!adminsOnly) && (global.GetWebInput("filterAccounts") == "true");
   std::string currentCourse = HtmlRoutines::ConvertURLStringToNormal(
     global.GetWebInput("courseHome"), false
@@ -2451,7 +2450,7 @@ std::string WebAPIResponse::ToStringUserDetails(
     out << "<b>Adding emails not available (database not present).</b> ";
     return out.str();
   }
-  std::string userRole = adminsOnly ? "admin" : "student";
+  std::string userRole = adminsOnly ? UserCalculator::Roles::administator : "student";
   std::string idAddressTextarea = "inputAddUsers" + userRole;
   std::string idExtraTextarea = "inputAddExtraInfo" + userRole;
   std::string idOutput = "idOutput" + userRole;

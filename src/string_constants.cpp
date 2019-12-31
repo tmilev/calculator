@@ -7,6 +7,7 @@ std::string WebAPI::app = "app";
 std::string WebAPI::HeaderCacheControl = "Cache-Control: max-age=129600000, public";
 
 std::string WebAPI::commentsServer = "commentsServer";
+std::string WebAPI::userDefaultAdmin = "default";
 
 std::string WebAPI::databaseParameters::labels     = "databaseLabels"   ;
 std::string WebAPI::databaseParameters::operation  = "databaseOperation";

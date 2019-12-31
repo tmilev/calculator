@@ -13,7 +13,7 @@
 
 static ProjectInformationInstance projectInfoMathImplementation4CPP(__FILE__, "Math routines implementation. ");
 
-std::string UserCalculatorData::Roles::admin = "admin";
+std::string UserCalculatorData::Roles::administator = "admin";
 std::string UserCalculatorData::Roles::student = "student";
 std::string UserCalculatorData::Roles::instructor = "instructor";
 std::string UserCalculatorData::Roles::teacher = "teacher";

@@ -42,7 +42,7 @@ bool Database::Test::DeleteDatabase() {
 bool Database::Test::AdminAccountCreation() {
   MacroRegisterFunctionWithName("Database::Test::AdminAccountCreation");
   UserCalculatorData userData;
-  userData.username = "admin";
+  userData.username = WebAPI::userDefaultAdmin;
   userData.enteredPassword = "111";
   std::stringstream commentsOnFailure;
 

@@ -9210,18 +9210,24 @@ bool CalculatorFunctionsGeneral::innerIf(
 }
 
 bool CalculatorFunctionsGeneral::innerTurnRulesOnOff(
-  Calculator& theCommands, const Expression& input, Expression& output, bool turnOff
+  Calculator& theCommands,
+  const Expression& input,
+  Expression& output, bool turnOff
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTurnRulesOnOff");
   List<std::string> rulesToConsider;
   std::string currentRule;
-  if (!input.StartsWith(theCommands.opTurnOffRules()) && !input.StartsWith(theCommands.opTurnOnRules())) {
+  if (
+    !input.StartsWith(theCommands.opTurnOffRules()) &&
+    !input.StartsWith(theCommands.opTurnOnRules())
+  ) {
     if (input.IsOfType<std::string>(&currentRule)) {
       rulesToConsider.AddOnTop(currentRule);
     } else if (input.IsOperation(&currentRule)) {
       rulesToConsider.AddOnTop(currentRule);
     } else {
-      return theCommands << "Could not extract rule to turn off from " << input.ToString() << ". ";
+      return theCommands << "Could not extract rule to turn off from "
+      << input.ToString() << ". ";
     }
   } else {
     for (int i = 1; i < input.size(); i ++) {
@@ -9230,7 +9236,9 @@ bool CalculatorFunctionsGeneral::innerTurnRulesOnOff(
       } else if (input[i].IsOperation(&currentRule)) {
         rulesToConsider.AddOnTop(currentRule);
       } else {
-        return theCommands << "Could not extract rule to turn off from " << input[i].ToString() << ". ";
+        return theCommands
+        << "Could not extract rule to turn off from "
+        << input[i].ToString() << ". ";
       }
     }
   }
@@ -9239,7 +9247,9 @@ bool CalculatorFunctionsGeneral::innerTurnRulesOnOff(
   for (int i = 0; i < rulesToConsider.size; i ++) {
     if (!theCommands.namedRules.Contains(rulesToConsider[i])) {
       return theCommands << "Can't find named rule: " << rulesToConsider[i]
-      << ". Turn-off rules command failed. ";
+      << ". Turn-off rules command failed. "
+      << "DEBUG: all named rules: " << theCommands.namedRules.theKeys.ToStringCommaDelimited()
+      ;
     } else {
       rulesToSwitch.AddOnTopNoRepetition(rulesToConsider[i]);
     }

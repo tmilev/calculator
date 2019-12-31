@@ -1428,17 +1428,34 @@ bool Calculator::outerDistribute(
   bool constantsOnly
 ) {
   if (theCommands.outerLeftDistributeBracketIsOnTheLeft(
-    theCommands, input, output, theAdditiveOp, theMultiplicativeOp, constantsOnly
+    theCommands,
+    input,
+    output,
+    theAdditiveOp,
+    theMultiplicativeOp,
+    constantsOnly
   )) {
     return true;
   }
   return theCommands.outerRightDistributeBracketIsOnTheRight(
-    theCommands, input, output, theAdditiveOp, theMultiplicativeOp, constantsOnly
+    theCommands,
+    input,
+    output,
+    theAdditiveOp,
+    theMultiplicativeOp,
+    constantsOnly
   );
 }
 
 bool Calculator::outerDistributeTimes(Calculator& theCommands, const Expression& input, Expression& output) {
-  return Calculator::outerDistribute(theCommands, input, output,theCommands.opPlus(), theCommands.opTimes(), false);
+  return Calculator::outerDistribute(
+    theCommands,
+    input,
+    output,
+    theCommands.opPlus(),
+    theCommands.opTimes(),
+    false
+  );
 }
 
 bool Calculator::outerDistributeTimesConstant(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -2153,7 +2170,10 @@ void Calculator::RegisterCalculatorFunction(Function& theFun, int indexOp) {
   namedRule.containerOperation = this->operations.theKeys[indexOp];
   namedRule.index = theFun.indexInOperationHandlers;
   namedRule.isComposite = theFun.options.flagIsCompositeHandler;
-  this->namedRules.SetKeyValue(namedRule.containerOperation, namedRule);
+  this->namedRules.SetKeyValue(
+    theFun.calculatorIdentifier,
+    namedRule
+  );
 }
 
 void Calculator::AddOperationHandler(

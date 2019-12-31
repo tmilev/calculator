@@ -5236,7 +5236,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "must have integer relatively prime coefficients, "
     "with leading coefficient positive. ",
     "TurnOffRules(\"DistributeMultiplication\",\"DistributeMultiplicationConstants\"); "
-    "FactorOutNumberContent{}(3x +9t +27);",
+    "FactorOutNumberContent{}(3x + 9t + 27);",
     "CalculatorFunctionsGeneral::innerFactorOutNumberContent",
     "FactorOutNumberContent",
     innerStandard
@@ -6490,8 +6490,8 @@ void Calculator::initPredefinedStandardOperations() {
     Calculator::outerDistributeTimes,
     "",
     "Distributive law (left and right).",
-    "(a +b)*c;\n"
-    "a*(b+c)",
+    "(a + b) * c;\n"
+    "a * (b + c)",
     "Calculator::outerDistributeTimes",
     "DistributeMultiplication",
     outerStandard

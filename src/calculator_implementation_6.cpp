@@ -186,8 +186,6 @@ void CalculatorHTML::Test::OneProblemTest::Run() {
     this->errorInterpretation = commentsOnFailure.str();
     return;
   }
-  std::string answerGeneration;
-  std::string solutionReport;
   this->answers.SetSize(theProblem.theProblemData.theAnswers.size());
   this->flagAllBuiltInAnswersOK = true;
   global.SetWebInpuT(WebAPI::problem::fileName, theProblem.fileName);
@@ -213,14 +211,16 @@ void CalculatorHTML::Test::OneProblemTest::Run() {
       current.builtInAnswer, false
     );
     global.SetWebInpuT(current.answerIdWebAPI, current.builtInAnswerEncoded);
-    current.builtInAnswerSubmission = WebAPIResponse::SubmitAnswersJSON(
+    current.builtInAnswerReply = WebAPIResponse::SubmitAnswersJSON(
       randomSeedString.str(), &current.flagBuiltInWorks, false
     );
     if (!current.flagBuiltInWorks) {
       this->flagAllBuiltInAnswersOK = false;
-      commentsOnFailure << "<br>Built-in answer index: "
-      << current.builtInAnswer << " (index: " << j << ") does not work.<br>"
-      << current.builtInAnswerSubmission.ToString();
+      commentsOnFailure << "<br>Built-in answer of index: "
+      << j << " does not work:<br>"
+      << current.builtInAnswer
+      << "<hr>"
+      << current.builtInAnswerReply[WebAPI::result::resultHtml].theString;
       break;
     }
     global.webArguments.RemoveKey(current.answerIdWebAPI);

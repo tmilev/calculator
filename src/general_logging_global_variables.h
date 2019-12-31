@@ -402,7 +402,7 @@ public:
   int CallSystemNoOutput(const std::string& systemCommand, bool logErrors);
   std::string CallSystemWithOutput(const std::string& systemCommand);
   void ChDir(const std::string& systemCommand);
-  std::string ToStringCalculatorComputation(const std::string& input);
+  std::string ToStringCalculatorComputation(const std::string& computation, const std::string &display);
   std::string ToStringCalcArgsNoNavigation(List<std::string>* tagsToExclude);
   std::string ToStringHTMLTopCommandLinuxSystem();
   std::string ToStringFolderInfo() const;

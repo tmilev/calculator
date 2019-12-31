@@ -438,7 +438,7 @@ public:
         std::string builtInAnswer;
         std::string builtInAnswerEncoded;
         JSData builtInAnswerAPICall;
-        JSData builtInAnswerSubmission;
+        JSData builtInAnswerReply;
         bool flagBuiltInGenerated;
         bool flagBuiltInWorks;
         OneAnswer();

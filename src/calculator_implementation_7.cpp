@@ -9248,7 +9248,6 @@ bool CalculatorFunctionsGeneral::innerTurnRulesOnOff(
     if (!theCommands.namedRules.Contains(rulesToConsider[i])) {
       return theCommands << "Can't find named rule: " << rulesToConsider[i]
       << ". Turn-off rules command failed. "
-      << "DEBUG: all named rules: " << theCommands.namedRules.theKeys.ToStringCommaDelimited()
       ;
     } else {
       rulesToSwitch.AddOnTopNoRepetition(rulesToConsider[i]);

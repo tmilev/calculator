@@ -438,14 +438,22 @@ bool GlobalVariables::UserRequestMustBePromptedToLogInIfNotLoggedIn() {
   this->userCalculatorRequestType == "exercise";
 }
 
-std::string GlobalVariables::ToStringCalculatorComputation(const std::string& input) {
+std::string GlobalVariables::ToStringCalculatorComputation(
+  const std::string& computation,
+  const std::string& display
+) {
+  // global << logger::red
+  // << "DEBUG: working with: computation: " << logger::green
+  // << computation << logger::endL << logger::red
+  // << ", display: " << logger::blue << display << logger::endL;
   std::stringstream out;
   JSData request;
   request[WebAPI::request::requestAPI] = WebAPI::request::compute;
-  request[WebAPI::request::calculatorInput] = HtmlRoutines::ConvertStringToURLString(input, false);
+  request[WebAPI::request::calculatorInput] = computation;
   request[WebAPI::request::currentPage] = WebAPI::request::calculatorPage;
-  out << "<a href = '" << global.DisplayNameExecutableApp << "#" << request.ToString() << "'>"
-  << HtmlRoutines::ConvertStringToHtmlString(input, true) << "</a>";
+  out << "<a href = \"" << global.DisplayNameExecutableApp << "#"
+  << HtmlRoutines::ConvertStringToURLString(request.ToString(), false) << "\">";
+  out << HtmlRoutines::ConvertStringToHtmlString(display, true) << "</a>";
   return out.str();
 }
 

@@ -1069,11 +1069,9 @@ JSData WebAPIResponse::SubmitAnswersJSON(
   std::stringstream debugInputStream;
   if (global.UserDebugFlagOn() && global.UserDefaultHasAdminRights()) {
     debugInputStream
-    << "Input, no enclosures, direct link: "
-    << "<a href=\"" << global.DisplayNameExecutable
-    << "?request=calculator&mainInput="
-    << HtmlRoutines::ConvertStringToURLString(completedProblemStreamNoEnclosures.str(), false)
-    << "\">Input link</a>";
+    << global.ToStringCalculatorComputation(
+      completedProblemStreamNoEnclosures.str(), "Input, no enclosures. "
+    );
   }
   if (timeSafetyBrake) {
     global.millisecondsMaxComputation = global.GetElapsedMilliseconds() + 20000; // + 20 sec
@@ -1138,7 +1136,6 @@ JSData WebAPIResponse::SubmitAnswersJSON(
   if (!(*outputIsCorrect)) {
     output << "<tr><td>";
     output << "<b style = 'color:red'>Your answer appears to be incorrect. </b>";
-    // output << "DEBUG: randomSeed: " << inputRandomSeed;
     output << "</td></tr>";
     if (global.UserDefaultHasAdminRights() && global.UserDebugFlagOn()) {
       output << "<tr><td>Admin view internals. "
@@ -1505,14 +1502,12 @@ JSData WebAPIResponse::GetAnswerOnGiveUp(
   answerCommandsNoEnclosure << currentA.commandsNoEnclosureAnswerOnGiveUpOnly;
   theInterpreteR.Evaluate(answerCommands.str());
   if (theInterpreteR.syntaxErrors != "") {
-    out << "<span style =\"color:red\"><b>Failed to evaluate the default answer. "
-    << "Likely there is a bug with the problem. </b></span>";
+    out << "<b style ='color:red'>Failed to evaluate the default answer. "
+    << "Likely there is a bug with the problem. </b>";
     if (global.UserDefaultHasProblemComposingRights()) {
-      out << "<br>\n<a href=\"" << global.DisplayNameExecutable
-      << "?request=calculator&"
-      << "mainInput="
-      << HtmlRoutines::ConvertStringToURLString(answerCommandsNoEnclosure.str(), false)
-      << "\">Calculator input no enclosures</a>";
+      out << global.ToStringCalculatorComputation(
+        answerCommandsNoEnclosure.str(), "Calculator input no enclosures"
+      );
     }
     out << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
     << theInterpreteR.ToStringSyntacticStackHumanReadable(false, false);
@@ -1525,11 +1520,9 @@ JSData WebAPIResponse::GetAnswerOnGiveUp(
     out << "<b style =\"color:red\">Failed to evaluate the default answer. "
     << "Likely there is a bug with the problem. </b>";
     if (global.UserDefaultHasProblemComposingRights()) {
-      out << "<br>\n<a href=\"" << global.DisplayNameExecutable
-      << "?request=calculator&"
-      << "mainInput="
-      << HtmlRoutines::ConvertStringToURLString(answerCommandsNoEnclosure.str(), false)
-      << "\">Calculator input no enclosures</a>";
+      out << global.ToStringCalculatorComputation(
+        answerCommandsNoEnclosure.str(), "Calculator input no enclosures"
+      );
     }
     out << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
     << theInterpreteR.outputString
@@ -1603,14 +1596,16 @@ JSData WebAPIResponse::GetAnswerOnGiveUp(
   }
   if (global.UserDebugFlagOn() && global.UserDefaultHasAdminRights()) {
     out
-    << "<hr><a href=\"" << global.DisplayNameExecutable
-    << "?request=calculator&"
-    << "mainInput="
-    << HtmlRoutines::ConvertStringToURLString(answerCommandsNoEnclosure.str() ,false)
-    << "\">Calculator input no enclosures</a>"
-    << theInterpreteR.outputString << "<hr>"
+    << "<hr>"
+    << global.ToStringCalculatorComputation(
+      answerCommandsNoEnclosure.str(),
+      "Calculator input no enclosures"
+    );
+    out << theInterpreteR.outputString << "<hr>"
     << theInterpreteR.outputCommentsString
-    << "<hr>Raw input: <br>" << global.ToStringCalculatorComputation(theInterpreteR.inputString);
+    << "<hr>" << global.ToStringCalculatorComputation(
+      theInterpreteR.inputString, "Raw calculator input"
+    );
   }
   result[WebAPI::result::resultHtml] = out.str();
   return result;

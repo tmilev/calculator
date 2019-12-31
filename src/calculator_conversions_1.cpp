@@ -478,9 +478,7 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(
   theReport.Report(reportStream.str());
   outputSubalgebra.theWeylNonEmbedded = &
   theCommands.theObjectContainer.GetWeylGroupDataCreateIfNotPresent(theNonEmbeddedDynkinType);
-  theReport.Report("DEBUG: got to here!!!");
   outputSubalgebra.theWeylNonEmbedded->MakeFromDynkinType(theNonEmbeddedDynkinType);
-  theReport.Report("DEBUG: and to here!!!!");
   int theRank = owner.owner->GetRank();
   reportStream << "Extracting matrix of Cartan elements. ";
   theReport.Report(reportStream.str());

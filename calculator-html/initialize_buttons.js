@@ -292,6 +292,7 @@ function InputPanelData(input) {
   this.idVerificationSpan = input.idVerificationSpan;
   this.answerHighlight = input.answerHighlight;
   this.answerPanelId = input.answerPanelId;
+  this.randomSeed = input.randomSeed;
 
   this.htmlPureLatex = "";
   this.htmlButtonContainer = "";
@@ -348,12 +349,15 @@ InputPanelData.prototype.submitOrPreviewAnswersCallback = function(outputCompone
     outputComponent = document.getElementById(outputComponent);
   }
   var inputParsed = miscellaneous.jsonUnescapeParse(input);
-  
   var resultHtml = "";
   if (inputParsed.error !== undefined && inputParsed.error !== null && inputParsed.error !== "") {
     resultHtml += `<b style = 'color:red'>Error.</b> ${inputParsed.error}`; 
   }
-  if (inputParsed.resultHtml !== "" && inputParsed.resultHtml !== undefined && inputParsed.resultHtml !== null) {
+  if (
+    inputParsed.resultHtml !== "" && 
+    inputParsed.resultHtml !== undefined && 
+    inputParsed.resultHtml !== null
+  ) {
     if (resultHtml !== "") {
       resultHtml += "<br>";
     }
@@ -456,6 +460,9 @@ InputPanelData.prototype.submitGiveUp = function() {
     theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.problemGiveUp}&`;
   } else {
     theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.problemGiveUpNoLogin}&`;
+  }
+  if (currentProblem.randomSeed === undefined) {
+    throw("Random seed not supposed to be undefined. ");
   }
   theRequest += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`;
   this.submitOrPreviewAnswers(theRequest);

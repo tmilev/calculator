@@ -190,7 +190,10 @@ const List<Function>* Calculator::GetOperationHandlers(int theOp) {
 }
 
 bool Calculator::outerStandardCompositeHandler(
-  Calculator &theCommands, const Expression &input, Expression &output, int opIndexParentIfAvailable
+  Calculator &theCommands,
+  const Expression &input,
+  Expression &output,
+  int opIndexParentIfAvailable
 ) {
   if (!input.IsLisT()) {
     return false;
@@ -620,8 +623,6 @@ bool Calculator::EvaluateExpression(
       << theCommands.RuleStackCacheIndex << ": "
       << output.ToString() << " -> "
       << theCommands.imagesCachedExpressions[indexInCache].ToString();
-      //theCommands << "DEBUG: "
-      //<< theCommands.RuleStack.ToString();
     }
     output = theCommands.imagesCachedExpressions[indexInCache];
   } else {

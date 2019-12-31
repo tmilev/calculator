@@ -3955,7 +3955,6 @@ void WebServer::CheckMongoDBSetup() {
   if (global.configuration["mongoDBSetup"].theType != JSData::token::tokenUndefined) {
     return;
   }
-  // global << "DEBUG: mongoDB token: " << static_cast<int>(global.configuration["mongoDBSetup"].theType) << logger::endL;
   global << logger::yellow << "configuration so far: " << global.configuration.ToString(nullptr) << logger::endL;
   global.configuration["mongoDBSetup"] = "Attempting";
   global.ConfigurationStore();

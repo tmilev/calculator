@@ -9,7 +9,7 @@
 
 static ProjectInformationInstance projectInfoCalculatorLaTeXRoutinesCPP(__FILE__, "LaTeX routines. ");
 
-bool LaTeXcrawler::IsInCrawlableFolder(const std::string& folderName, std::stringstream* commentsOnFailure) {
+bool LaTeXCrawler::IsInCrawlableFolder(const std::string& folderName, std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("LaTeXcrawler::IsInCrawlableFolder");
   for (int i = 0; i < this->baseFoldersCrawlableFilesPhysical.size; i ++) {
     if (StringRoutines::StringBeginsWith(folderName, this->baseFoldersCrawlableFilesPhysical[i])) {
@@ -25,7 +25,7 @@ bool LaTeXcrawler::IsInCrawlableFolder(const std::string& folderName, std::strin
   return false;
 }
 
-void LaTeXcrawler::ComputeAllowedFolders() {
+void LaTeXCrawler::ComputeAllowedFolders() {
   MacroRegisterFunctionWithName("LaTeXcrawler::ComputeAllowedFolders");
   if (this->baseFoldersCrawlableFilesPhysical.size > 0) {
     return;
@@ -46,7 +46,7 @@ void LaTeXcrawler::ComputeAllowedFolders() {
   }
 }
 
-bool LaTeXcrawler::ExtractFileNamesFromRelativeFileName(std::stringstream* commentsOnFailure) {
+bool LaTeXCrawler::ExtractFileNamesFromRelativeFileName(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("LaTeXcrawler::ExtractFileNamesFromRelativeFileName");
   if (!FileOperations::IsOKfileNameVirtual(this->theFileNameToCrawlRelative)) {
     this->displayResult << "The folders below the file name contain dots. This is not allowed. ";
@@ -72,7 +72,7 @@ bool LaTeXcrawler::ExtractFileNamesFromRelativeFileName(std::stringstream* comme
   return true;
 }
 
-void LaTeXcrawler::BuildFreecalC() {
+void LaTeXCrawler::BuildFreecalC() {
   MacroRegisterFunctionWithName("LaTeXcrawler::BuildFreecalc");
   StateMaintainerCurrentFolder preserveCurrentFolder;
   if (!global.UserDefaultHasAdminRights()) {
@@ -421,7 +421,7 @@ void LaTeXcrawler::BuildFreecalC() {
   this->displayResult << executedCommands.str() << "<br>" << resultTable.str();
 }
 
-void LaTeXcrawler::Crawl() {
+void LaTeXCrawler::Crawl() {
   MacroRegisterFunctionWithName("LaTeXcrawler::Crawl");
   if (!this->ExtractFileNamesFromRelativeFileName(&this->displayResult)) {
     return;
@@ -451,7 +451,7 @@ void LaTeXcrawler::Crawl() {
   << "latexOutput.tex\">" << "latexOutput.tex" << "</a>";
 }
 
-LaTeXcrawler::LaTeXcrawler() {
+LaTeXCrawler::LaTeXCrawler() {
   this->flagBuildSingleSlides = false;
   this->flagProjectorMode = true;
   this->flagForceSlideRebuild = false;
@@ -465,16 +465,16 @@ LaTeXcrawler::LaTeXcrawler() {
   this->recursionDepth = 0;
 }
 
-void LaTeXcrawler::CrawlRecursive(std::stringstream& crawlingResult, const std::string& currentFileNamE) {
+void LaTeXCrawler::CrawlRecursive(std::stringstream& crawlingResult, const std::string& currentFileNamE) {
   MacroRegisterFunctionWithName("LaTeXcrawler::CrawlRecursive");
   RecursionDepthCounter theCounter(&this->recursionDepth);
   if (this->recursionDepth > 1000) {
     this->errorStream << "While crawling theFileToCrawl, reached max recursion depth of 1000";
     return;
   }
-  //this->crawlingResult << "%DEBUG: before error stream: opening: " << currentFileName << "\n";
-  if (this->errorStream.str() != "")
+  if (this->errorStream.str() != "") {
     return;
+  }
   ///////////
   /// ALERT
   /// potential security risk.
@@ -550,7 +550,7 @@ void LaTeXcrawler::CrawlRecursive(std::stringstream& crawlingResult, const std::
   }
 }
 
-bool LaTeXcrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
+bool LaTeXCrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
   MacroRegisterFunctionWithName("LaTeXcrawler::ExtractPresentationFileNames");
   (void) commentsGeneral;
   if (this->slideFileNamesVirtualWithPatH.size < 1) {
@@ -680,7 +680,7 @@ bool LaTeXcrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFai
   return true;
 }
 
-std::string LaTeXcrawler::AdjustDisplayTitle(const std::string& input, bool isHomework) {
+std::string LaTeXCrawler::AdjustDisplayTitle(const std::string& input, bool isHomework) {
   MacroRegisterFunctionWithName("LaTeXcrawler::AdjustDisplayTitle");
   std::string result = input;
   List<std::string> ignoredTags;
@@ -708,7 +708,7 @@ std::string LaTeXcrawler::AdjustDisplayTitle(const std::string& input, bool isHo
   return result;
 }
 
-bool LaTeXcrawler::BuildOrFetchFromCachePDF(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
+bool LaTeXCrawler::BuildOrFetchFromCachePDF(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
   MacroRegisterFunctionWithName("LaTeXcrawler::BuildOrFetchFromCachePDF");
   this->desiredPresentationTitle = this->AdjustDisplayTitle(this->desiredPresentationTitle, this->flagHomeworkRatherThanSlides);
   if (!this->ExtractPresentationFileNames(commentsOnFailure, commentsGeneral)) {
@@ -842,7 +842,6 @@ bool LaTeXcrawler::BuildOrFetchFromCachePDF(std::stringstream* commentsOnFailure
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "done!<br>";
   }
-  *commentsGeneral << "DEBUG: current dir: <b>" << FileOperations::GetCurrentFolder() << "</b><br>";
   currentSysCommand = "mkdir -p " + this->targetPDFLatexPath;
   std::string commandResult = global.CallSystemWithOutput(currentSysCommand);
   if (commentsGeneral != nullptr) {
@@ -872,7 +871,7 @@ bool LaTeXcrawler::BuildOrFetchFromCachePDF(std::stringstream* commentsOnFailure
   return true;
 }
 
-bool LaTeXcrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
+bool LaTeXCrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
   MacroRegisterFunctionWithName("LaTeXcrawler::BuildTopicList");
   StateMaintainerCurrentFolder preserveCurrentFolder;
   ProgressReport theReport;

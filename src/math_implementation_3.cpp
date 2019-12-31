@@ -6459,7 +6459,6 @@ void ElementWeylGroup::MakeCanonical() {
   if (this->owner->rho.size == 0) {
     this->owner->ComputeRho(false);
   }
-  //global.Comments << "DEBUG: Rho computed. ";
   Vector<Rational> theVector;
   this->owner->ActOn(*this, this->owner->rho, theVector);
   this->MakeFromRhoImage(theVector, *this->owner);

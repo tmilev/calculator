@@ -74,9 +74,6 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeLengthIncrementDataPointer(
     output.error = errorStream.str();
     return false;
   }
-  //std::cout << "DEBUG: length promised: " << output.lengthPromised
-  //<< "; data pointer: " << this->dataPointer
-  //<< " raw size: " << this->rawDatA->size << "\n";
   return true;
 }
 

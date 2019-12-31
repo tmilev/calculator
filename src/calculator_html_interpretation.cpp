@@ -1132,7 +1132,10 @@ JSData WebAPIResponse::SubmitAnswersJSON(
   FormatExpressions theFormat;
   output << "<table style = 'width:300px'>";
   if (!(*outputIsCorrect)) {
-    output << "<tr><td><b style = 'color:red'><b>Your answer appears to be incorrect. </b></td></tr>";
+    output << "<tr><td>";
+    output << "<b style = 'color:red'>Your answer appears to be incorrect. </b>";
+    output << "DEBUG: randomSeed: " << inputRandomSeed;
+    output << "</td></tr>";
     if (global.UserDefaultHasAdminRights() && global.UserDebugFlagOn()) {
       output << "<tr><td>Admin view internals. "
       << "<hr>" << debugInputStream.str()
@@ -1384,7 +1387,7 @@ JSData WebAPIResponse::GetAnswerOnGiveUp() {
 JSData WebAPIResponse::GetAnswerOnGiveUp(
   const std::string& inputRandomSeed,
   std::string* outputNakedAnswer,
-  bool* outputDidSucceed,
+  bool* answerGenerationSuccess,
   bool doIncludeTimeStats
 ) {
   MacroRegisterFunctionWithName("CalculatorHTML::GetAnswerOnGiveUp");
@@ -1393,14 +1396,15 @@ JSData WebAPIResponse::GetAnswerOnGiveUp(
   if (outputNakedAnswer != nullptr) {
     *outputNakedAnswer = "";
   }
-  if (outputDidSucceed != nullptr) {
-    *outputDidSucceed = false;
+  JSData result;
+  result[WebAPI::problem::answerGenerationSuccess] = "false";
+  if (answerGenerationSuccess != nullptr) {
+    *answerGenerationSuccess = false;
   }
   int64_t startTimeInMilliseconds = global.GetElapsedMilliseconds();
   CalculatorHTML theProblem;
   std::stringstream errorStream;
   theProblem.LoadCurrentProblemItem(false, inputRandomSeed, &errorStream);
-  JSData result;
   if (!theProblem.flagLoadedSuccessfully) {
     errorStream << "Problem name is: " << theProblem.fileName
     << " <b>Could not load problem, this may be a bug. "
@@ -1512,8 +1516,9 @@ JSData WebAPIResponse::GetAnswerOnGiveUp(
     if (outputNakedAnswer != nullptr) {
       *outputNakedAnswer = currentE.ToString(&theFormat);
     }
-    if (outputDidSucceed != nullptr) {
-      *outputDidSucceed = true;
+    result[WebAPI::problem::answerGenerationSuccess] = "true";
+    if (answerGenerationSuccess != nullptr) {
+      *answerGenerationSuccess = true;
     }
   } else {
     for (int j = 1; j < currentE.size(); j ++) {
@@ -1545,8 +1550,9 @@ JSData WebAPIResponse::GetAnswerOnGiveUp(
         if (outputNakedAnswer != nullptr) {
           *outputNakedAnswer = currentE[j].ToString(&theFormat);
         }
-        if (outputDidSucceed != nullptr) {
-          *outputDidSucceed = true;
+        result[WebAPI::problem::answerGenerationSuccess] = "true";
+        if (answerGenerationSuccess != nullptr) {
+          *answerGenerationSuccess = true;
         }
       }
       isFirst = false;
@@ -1567,6 +1573,7 @@ JSData WebAPIResponse::GetAnswerOnGiveUp(
     << theInterpreteR.outputCommentsString
     << "<hr>Raw input: <br>" << theInterpreteR.inputString;
   }
+  out << "DEBUG: randomSeed: " << inputRandomSeed;
   result[WebAPI::result::resultHtml] = out.str();
   return result;
 }
@@ -1950,8 +1957,6 @@ int ProblemData::getExpectedNumberOfAnswers(const std::string& problemName, std:
           continue;
         }
         global.problemExpectedNumberOfAnswers.SetKeyValue(currentProblemName, numAnswers);
-        //global << logger::green << "DEBUG: problem: " << currentProblemName
-        //<< " got number of answers from DB: " << numAnswers;
       }
     }
   }

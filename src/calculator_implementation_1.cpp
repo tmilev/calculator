@@ -1658,7 +1658,6 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner) {
   << canvasFunctionName << ";\n"
   << canvasFunctionName << "();\n"
   << "}\n";
-  //<< "console.log(\"DEBUG: Set canvas reset function to \" + "<< canvasFunctionName << ");\n"
   owner.theObjectContainer.graphicsScripts.SetKeyValue(this->GetCanvasName(), outScript.str());
   out << "<script language =\"javascript\">\n" << outScript.str() << "</script>";
   return out.str();

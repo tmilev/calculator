@@ -275,7 +275,6 @@ bool CalculatorHTML::MergeProblemWeightAndStore(
     }
     return false;
   }
-  global << "DEBUG: theProblemJSON: " << theProblemJSON.ToString(nullptr) << logger::endL;
   MapList<std::string, ProblemData, MathRoutines::HashString> incomingProblems;
   if (!this->MergeProblemWeight(theProblemJSON, incomingProblems, true, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
@@ -297,7 +296,6 @@ bool CalculatorHTML::MergeProblemDeadlineAndStore(
     }
     return false;
   }
-  global << "DEBUG: theProblemJSON: " << theProblemJSON.ToString(nullptr) << logger::endL;
   MapList<std::string, ProblemData, MathRoutines::HashString> incomingProblems;
   if (!this->MergeProblemDeadline(theProblemJSON, incomingProblems, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
@@ -4630,9 +4628,9 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle) {
     }
   }
   if (this->title == "") {
-    this->displayTitle = this->problemNumberString + "-" ;//+ "<br>DEBUG: "+this->ToString();
+    this->displayTitle = this->problemNumberString + "-" ;
   } else {
-    this->displayTitle = this->problemNumberString + titleWithLectureNumber;//+ "<br>DEBUG: "+this->ToString();
+    this->displayTitle = this->problemNumberString + titleWithLectureNumber;
   }
   if (this->video == "" || this->video == "-" || this->video == "--") {
     this->displayVideoLink = "";

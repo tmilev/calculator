@@ -551,7 +551,7 @@ bool WebAPIResponse::ProcessEditPageJSON() {
 bool WebAPIResponse::ProcessSlidesOrHomeworkFromSource() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessSlidesOrHomeworkFromSource");
   this->owner->SetHeaderOKNoContentLength("");
-  LaTeXcrawler theCrawler;
+  LaTeXCrawler theCrawler;
   for (int i = 0; i < global.webArguments.size(); i ++) {
     std::string theKey = HtmlRoutines::ConvertURLStringToNormal(global.webArguments.theKeys[i], false);
     if (theKey != WebAPI::problem::fileName && StringRoutines::StringBeginsWith(theKey, "file")) {
@@ -602,7 +602,7 @@ bool WebAPIResponse::ProcessSlidesOrHomeworkFromSource() {
 bool WebAPIResponse::ProcessSlidesSource() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessSlidesSource");
   this->owner->SetHeaderOKNoContentLength("");
-  LaTeXcrawler theCrawler;
+  LaTeXCrawler theCrawler;
   for (int i = 0; i < global.webArguments.size(); i ++) {
     std::string theKey = HtmlRoutines::ConvertURLStringToNormal(global.webArguments.theKeys[i], false);
     if (

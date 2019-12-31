@@ -718,9 +718,9 @@ bool UserCalculatorData::ComputeCourseInfo() {
     isAdmin &&
     global.GetWebInput("studentSection") != ""
   ) {
-    //<- warning, the user may not be
-    //fully logged-in yet so global.UserDefaultHasAdminRights()
-    //does not work right.
+    // <- warning, the user may not be
+    // fully logged-in yet so global.UserDefaultHasAdminRights()
+    // does not work right.
     this->sectionComputed = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("studentSection"), false);
   } else {
     this->sectionComputed = this->sectionInDB;
@@ -1089,7 +1089,6 @@ bool UserCalculator::InterpretDatabaseProblemDatA(const std::string& theInfo, st
 
 bool UserCalculator::InterpretDatabaseProblemDataJSON(const JSData& theData, std::stringstream& commentsOnFailure) {
   MacroRegisterFunctionWithName("UserCalculator::InterpretDatabaseProblemDataJSON");
-  global << "DEBUG: inside InterpretDatabaseProblemDataJSON, input: " << theData.ToString(nullptr) << logger::endL;
   this->theProblemData.Clear();
   this->theProblemData.SetExpectedSize(theData.objects.size());
   bool result = true;
@@ -1103,9 +1102,6 @@ bool UserCalculator::InterpretDatabaseProblemDataJSON(const JSData& theData, std
     problemNameNoWhiteSpace = StringRoutines::StringTrimWhiteSpace(
       theData.objects.theKeys[i]
     );
-    global << logger::red << "DEBUG: loaded problem file name: "
-    << problemNameNoWhiteSpace << " from data: " << theData.ToString() << " to get: "
-    << reader.ToString() << logger::endL;
     if (problemNameNoWhiteSpace == "") {
       continue;
     }

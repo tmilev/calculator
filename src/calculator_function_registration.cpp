@@ -1170,29 +1170,27 @@ void Calculator::initPredefinedInnerFunctions() {
   );
 
   this->AddOperationHandler(
-    "AutomatedTest",
+    "TestCalculatorAll",
     Calculator::innerAutomatedTest,
     "",
-    "Runs a big bad automated test of all built in functions "
+    "Runs an automated test of all built in functions "
     "against a set of known good results. ",
     "AutomatedTest{}(0)",
     "Calculator::innerAutomatedTest",
-    "AutomatedTest",
+    "TestCalculatorAll",
     innerAdminNoTestInvisibleOffByDefault
   );
   this->AddOperationHandler(
-    "AutomatedTestProblemInterpretation",
+    "TestProblemInterpretation",
     CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation,
     "",
-    "Runs a big bad automated test of all built in "
-    "problems located in the problems/default/ folder. "
-    "<b style ='color:red'>The example below will not work out of the box: "
-    "the automated test rule has to be activated first.</b> To activate the test, "
-    "please first use the command: TurnOnRules(AutomatedTestProblemInterpretation).",
-    "AutomatedTestProblemInterpretation{}(0,0,0)",
+    "Runs an automated test of all built in "
+    "problems located in the problems/default/ folder. ",
+    "TurnOnRules(AutomatedTestProblemInterpretation);\n"
+    "AutomatedTestProblemInterpretation{}(0, 0, 0)",
     "CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation",
     "AutomatedTestProblemInterpretation",
-    innerAdminNoTestInvisibleOffByDefault
+    innerAdminNoTest
   );
   this->AddOperationHandler(
     "!",

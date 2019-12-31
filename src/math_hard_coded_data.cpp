@@ -1418,7 +1418,8 @@ bool WeylGroupData::LoadConjugacyClassesHelper() {
     this->theGroup.sizePrivate += this->theGroup.conjugacyClasseS[i].size;
   }
   if (this->theGroup.sizePrivate != this->theGroup.GetSizeByFormula(this->theGroup)) {
-    global.fatal << "Corrupt hard-coded data: the size of the group does not work out according to formula. " << global.fatal;
+    global.fatal << "Corrupt hard-coded data: the size of the "
+    << "group does not work out according to formula. " << global.fatal;
   }
   this->theGroup.flagCCRepresentativesComputed = true;
   this->theGroup.flagCCsComputed = false;

@@ -82,6 +82,8 @@ public:
     static std::string failedToLoadProblem;
     static std::string problemLabel;
     static std::string content;
+    static std::string randomSeed;
+    static std::string answerGenerationSuccess;
     static std::string commentsProblem;
     static std::string calculatorAnswerPrefix;
   };

@@ -429,7 +429,52 @@ public:
   CalculatorHTML();
   class Test {
   public:
-    bool All();
+    class OneProblemTest {
+    public:
+      class OneAnswer {
+      public:
+        std::string answerId;
+        std::string answerIdWebAPI;
+        std::string builtInAnswer;
+        std::string builtInAnswerEncoded;
+        JSData builtInAnswerAPICall;
+        JSData builtInAnswerSubmission;
+        bool flagBuiltInGenerated;
+        bool flagBuiltInWorks;
+        OneAnswer();
+      };
+      std::string fileName;
+      std::string errorLoad;
+      std::string errorInterpretation;
+      std::string errorAnswers;
+      bool flagInterpretationSuccess;
+      bool flagAllBuiltInAnswersOK;
+      int randomSeed;
+      List<OneAnswer> answers;
+      OneProblemTest();
+      void Run();
+      std::string ToStringHTMLTableRow(int rowIndex);
+    };
+    int filesToInterpret;
+    int firstFileIndex;
+    int randomSeed;
+    bool flagCorrectedTotalFiles;
+    List<std::string> fileNamesAll;
+    List<std::string> fileExtensionsAll;
+    List<std::string> fileNames;
+    List<OneProblemTest> results;
+    std::string errorComments;
+    Test();
+    bool ComputeTotalFiles();
+    bool BuiltIn(
+      int inputFirstFileIndex,
+      int inputFilesToInterpret,
+      int inputRandomSeed
+    );
+    static bool BuiltInCrashOnFailure();
+    static bool All();
+    std::string ToHTMLBuiltIn();
+    std::string ToHTMLDebug();
   };
 };
 

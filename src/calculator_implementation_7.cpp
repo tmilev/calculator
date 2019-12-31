@@ -8294,7 +8294,7 @@ bool CalculatorFunctionsGeneral::innerCrawlTexFile(
   if (!input.IsOfType<std::string>()) {
     return theCommands << "<hr>Input " << input.ToString() << " is not of type string. ";
   }
-  LaTeXcrawler theCrawler;
+  LaTeXCrawler theCrawler;
   theCrawler.ownerCalculator = &theCommands;
   theCrawler.theFileNameToCrawlRelative = input.GetValue<std::string>();
   theCrawler.Crawl();
@@ -8311,7 +8311,7 @@ bool CalculatorFunctionsGeneral::innerBuildFreecalcSlidesOnTopic(
     return output.AssignValue(out.str(), theCommands);
   }
   (void) input;
-  LaTeXcrawler theCrawler;
+  LaTeXCrawler theCrawler;
   theCrawler.flagBuildSingleSlides = true;
   theCrawler.ownerCalculator = &theCommands;
   //theCrawler.topicListToBuild = input.GetValue<std::string>();
@@ -8332,7 +8332,7 @@ bool CalculatorFunctionsGeneral::innerBuildFreecalcSingleSlides(
   if (!input.IsOfType<std::string>()) {
     return theCommands << "<hr>Input " << input.ToString() << " is not of type string. ";
   }
-  LaTeXcrawler theCrawler;
+  LaTeXCrawler theCrawler;
   theCrawler.flagBuildSingleSlides = true;
   theCrawler.ownerCalculator = &theCommands;
   theCrawler.theFileNameToCrawlRelative = input.GetValue<std::string>();
@@ -8354,7 +8354,7 @@ bool CalculatorFunctionsGeneral::innerBuildFreecalc(
   if (!input.IsOfType<std::string>()) {
     return theCommands << "<hr>Input " << input.ToString() << " is not of type string. ";
   }
-  LaTeXcrawler theCrawler;
+  LaTeXCrawler theCrawler;
   theCrawler.flagBuildSingleSlides = false;
   theCrawler.ownerCalculator = &theCommands;
   theCrawler.theFileNameToCrawlRelative = input.GetValue<std::string>();

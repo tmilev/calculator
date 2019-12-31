@@ -6,7 +6,7 @@
 
 static ProjectInformationInstance projectInfoLaTeXRoutinesHeader(__FILE__, "Header, LaTeX routines. ");
 
-class LaTeXcrawler {
+class LaTeXCrawler {
   public:
   int recursionDepth;
   std::string theFileNameToCrawlPhysicalNoPathName;
@@ -72,7 +72,7 @@ class LaTeXcrawler {
   std::stringstream displayResult;
   std::stringstream errorStream;
   std::string ToString();
-  LaTeXcrawler();
+  LaTeXCrawler();
 };
 
 #endif

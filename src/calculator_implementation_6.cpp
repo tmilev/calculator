@@ -5,6 +5,7 @@
 #include "calculator_inner_typed_functions.h"
 #include "calculator_html_functions.h"
 #include "web_api.h"
+#include "math_general_implementation.h"
 #include "calculator_html_interpretation.h"
 #include "math_extra_drawing_variables.h"
 #include "math_general_polynomial_computations_advanced_implementation.h"
@@ -16,6 +17,277 @@
 #include <iomanip>
 
 static ProjectInformationInstance projectInfoCalculatorImplementation6CPP(__FILE__, "More calculator built-in functions. ");
+
+CalculatorHTML::Test::Test() {
+  this->filesToInterpret = 0;
+  this->randomSeed = 0;
+  this->firstFileIndex = 0;
+  this->flagCorrectedTotalFiles = false;
+}
+
+bool CalculatorHTML::Test::ComputeTotalFiles() {
+  MacroRegisterFunctionWithName("CalculatorHTML::Test::ComputeTotalFiles");
+  std::stringstream commentsOnFailure;
+  if (!FileOperations::GetFolderFileNamesVirtual(
+    "problems/default/",
+    this->fileNamesAll,
+    &this->fileExtensionsAll,
+    false,
+    false,
+    &commentsOnFailure
+  )) {
+    commentsOnFailure << "Failed to fetch problem files. ";
+    this->errorComments += commentsOnFailure.str();
+    return false;
+  }
+  this->fileNames.SetSize(0);
+  this->fileNames.SetExpectedSize(this->fileNames.size);
+  for (int i = 0; i < this->fileNamesAll.size; i ++) {
+    if (this->fileExtensionsAll[i] == ".html") {
+      this->fileNames.AddOnTop(this->fileNamesAll[i]);
+    }
+  }
+  return true;
+}
+
+std::string CalculatorHTML::Test::OneProblemTest::ToStringHTMLTableRow(int rowIndex) {
+  MacroRegisterFunctionWithName("CalculatorHTML::Test::OneProblemTest::ToStringHTMLTableRow");
+  std::stringstream out;
+  out << "<tr>";
+  out << "<td>" << rowIndex << ". </td>";
+  JSData request;
+  request[WebAPI::problem::fileName] = this->fileName;
+  request[WebAPI::problem::randomSeed] = this->randomSeed;
+  request["currentPage"] = "problemPage";
+  out << "<td>"
+  << "<a href='" << global.DisplayNameExecutableAppNoCache
+  << "#"
+  << request.ToString()
+  << "'>"
+  << this->fileName
+  << "</a>"
+  << "</td>";
+  if (this->errorLoad != "") {
+    out << "<td><b>Couldn't load.</b> "
+    << this->errorLoad << "</td>";
+    out << "</tr>";
+    return out.str();
+  }
+  out << "<td><b style = 'color:green'>Success</b></td>";
+  if (!this->flagInterpretationSuccess) {
+    out << "<td><b style ='color:red'>Failure.</b> "
+    << "Comments: " << this->errorInterpretation;
+    out << "</td></tr>";
+    return out.str();
+  }
+  out << "<td><b style = 'color:green'>Success</b></td>";
+  if (this->answers.size == 0) {
+    out << "<td><b style = 'color:red'>No built-in answer.</b></td>";
+  } else {
+    if (this->flagAllBuiltInAnswersOK) {
+      out << "<td><b style = 'color:green'>Success</b></td>";
+    } else {
+      out << "<td><b style = 'color:red'>Failure.</b></td>";
+      out << "<td>";
+      for (int i = 0; i < this->answers.size; i ++) {
+        out << this->answers[i].builtInAnswer;
+      }
+      if (this->errorAnswers != "") {
+        out << this->errorAnswers;
+      }
+      out << "</td>"
+      << "</tr>";
+      return out.str();
+    }
+  }
+  return out.str();
+}
+
+std::string CalculatorHTML::Test::ToHTMLDebug() {
+  std::stringstream out;
+  out << "File names all: " << this->fileNamesAll.ToStringCommaDelimited() << "<br>";
+  out << "Extensions all: " << this->fileExtensionsAll.ToStringCommaDelimited() << "<br>";
+  out << "File names extracted: " << this->fileNames.ToStringCommaDelimited();
+  return out.str();
+}
+
+std::string CalculatorHTML::Test::ToHTMLBuiltIn() {
+  std::stringstream tableBad, tableGood, out;
+  std::stringstream tableHeader;
+  tableHeader
+  << "<table>"
+  << "<tr>"
+  << "<th>Index</th>"
+  << "<th>Problem</th>"
+  << "<th>Load</th>"
+  << "<th>Interpret</th>"
+  << "<th>Answer OK?</th>"
+  << "</tr>";
+  tableBad << tableHeader.str();
+  tableGood << tableHeader.str();
+
+  int numberBad = 0;
+  for (int i = 0; i < this->results.size; i ++) {
+    std::string nextRow = this->results[i].ToStringHTMLTableRow(i);
+    bool isGood = true;
+    if (
+      !this->results[i].flagAllBuiltInAnswersOK ||
+      !this->results[i].flagInterpretationSuccess
+    ) {
+      numberBad ++;
+      isGood = false;
+    }
+    if (!isGood) {
+      tableBad << nextRow;
+    } else  {
+      tableGood << nextRow;
+    }
+  }
+  tableBad << "</table>";
+  tableGood << "</table>";
+  if (this->errorComments != "") {
+    out << this->errorComments << "<br>";
+  }
+  if (numberBad > 0) {
+    out << "<b style = 'color:red'> "
+    << numberBad << " bad problems</b>. ";
+  }
+  out << "Total problems: " << this->results.size << "<br>";
+  if (numberBad > 0) {
+    out << tableBad.str() << "<br>";
+  }
+  out << tableGood.str();
+  return out.str();
+}
+
+CalculatorHTML::Test::OneProblemTest::OneProblemTest() {
+  this->randomSeed = 0;
+  this->flagInterpretationSuccess = false;
+  this->flagAllBuiltInAnswersOK = false;
+}
+
+CalculatorHTML::Test::OneProblemTest::OneAnswer::OneAnswer() {
+  this->flagBuiltInWorks = false;
+  this->flagBuiltInGenerated = false;
+}
+
+void CalculatorHTML::Test::OneProblemTest::Run() {
+  CalculatorHTML theProblem;
+  std::stringstream commentsOnFailure;
+  std::stringstream randomSeedString;
+  randomSeedString << this->randomSeed;
+  theProblem.fileName = this->fileName;
+  if (!theProblem.LoadMe(false, randomSeedString.str(), &commentsOnFailure)) {
+    this->errorLoad = commentsOnFailure.str();
+    return;
+  }
+  this->flagInterpretationSuccess = theProblem.InterpretHtml(&commentsOnFailure);
+  if (!this->flagInterpretationSuccess) {
+    this->errorInterpretation = commentsOnFailure.str();
+    return;
+  }
+  std::string answerGeneration;
+  std::string solutionReport;
+  this->answers.SetSize(theProblem.theProblemData.theAnswers.size());
+  this->flagAllBuiltInAnswersOK = true;
+  global.SetWebInpuT(WebAPI::problem::fileName, theProblem.fileName);
+  for (int j = 0; j < this->answers.size; j ++) {
+    CalculatorHTML::Test::OneProblemTest::OneAnswer& current = this->answers[j];
+    current.answerId = theProblem.theProblemData.theAnswers.theValues[j].answerId;
+    current.answerIdWebAPI = "calculatorAnswer" + current.answerId;
+    global.SetWebInpuT(current.answerIdWebAPI, "1");
+    global.SetWebInpuT(WebAPI::problem::randomSeed, randomSeedString.str());
+    current.builtInAnswerAPICall = WebAPIResponse::GetAnswerOnGiveUp(
+      randomSeedString.str(),
+      &current.builtInAnswer,
+      &current.flagBuiltInGenerated,
+      false
+    );
+    if (!current.flagBuiltInGenerated) {
+      commentsOnFailure << "Failed to generate answer: " << current.answerId << "<br>";
+      commentsOnFailure << current.builtInAnswerAPICall.ToString();
+      this->flagAllBuiltInAnswersOK = false;
+      break;
+    }
+    current.builtInAnswerEncoded = HtmlRoutines::ConvertStringToURLString(
+      current.builtInAnswer, false
+    );
+    global.SetWebInpuT(current.answerIdWebAPI, current.builtInAnswerEncoded);
+    current.builtInAnswerSubmission = WebAPIResponse::SubmitAnswersJSON(
+      randomSeedString.str(), &current.flagBuiltInWorks, false
+    );
+    if (!current.flagBuiltInWorks) {
+      this->flagAllBuiltInAnswersOK = false;
+      commentsOnFailure << "<br>Built-in answer index: "
+      << current.builtInAnswer << " (index: " << j << ") does not work.<br>"
+      << current.builtInAnswerSubmission.ToString();
+      break;
+    }
+    global.webArguments.RemoveKey(current.answerIdWebAPI);
+  }
+  this->errorAnswers = commentsOnFailure.str();
+}
+
+bool CalculatorHTML::Test::BuiltIn(
+  int inputFirstFileIndex,
+  int inputFilesToInterpret,
+  int inputRandomSeed
+) {
+  MacroRegisterFunctionWithName("CalculatorHTML::Test::BuiltIn");
+  this->filesToInterpret = inputFilesToInterpret;
+  this->firstFileIndex = inputFirstFileIndex;
+  this->randomSeed = inputRandomSeed;
+
+  std::stringstream out;
+  ProgressReport theReport;
+  if (!this->ComputeTotalFiles()) {
+    return false;
+  }
+  if (this->firstFileIndex < 0) {
+    this->firstFileIndex = 0;
+  }
+  if (this->filesToInterpret <= 0 || this->filesToInterpret > this->fileNames.size) {
+    this->filesToInterpret = this->fileNames.size;
+  }
+  int lastIndex = this->firstFileIndex + this->filesToInterpret;
+  if (lastIndex > this->fileNames.size) {
+    lastIndex = this->fileNames.size;
+    this->filesToInterpret = lastIndex - this->firstFileIndex;
+    this->flagCorrectedTotalFiles = true;
+  }
+  bool result = true;
+  this->results.SetExpectedSize(this->filesToInterpret);
+  this->results.SetSize(0);
+  std::stringstream commentsOnFailure;
+  for (int i = firstFileIndex; i < lastIndex; i ++) {
+    this->results.SetSize(this->results.size + 1);
+    OneProblemTest& currentTest = *this->results.LastObject();
+    currentTest.fileName = "problems/" + this->fileNames[i];
+    currentTest.randomSeed = this->randomSeed;
+    std::stringstream reportStream;
+    reportStream << "Interpreting file "
+    << currentTest.fileName << " ("
+    << i
+    << " out of "
+    << this->fileNames.size
+    << "). Random seed: "
+    << this->randomSeed << ".";
+    theReport.Report(reportStream.str());
+    currentTest.Run();
+  }
+  this->errorComments += commentsOnFailure.str();
+  return result;
+}
+
+bool CalculatorHTML::Test::BuiltInCrashOnFailure() {
+  CalculatorHTML::Test tester;
+  std::stringstream commentsOnFailure;
+  if (!tester.BuiltIn(0, 0, 0)) {
+    global.fatal << "Built-in problem tests failed. "
+    << commentsOnFailure.str() << global.fatal;
+  }
+  return true;
+}
 
 bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation(
   Calculator& theCommands,
@@ -29,176 +301,22 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation(
   if (input.size() != 4) {
     return theCommands
     << "I expected three arguments: "
-    << "1) first problem number to test (1 or less = start at the beginning) "
-    << "2) number of tests to run (0 or less = run all) and "
-    << "3) number of tests to interpret. ";
+    << "1) index of first problem to test, where "
+    << "0 = start at beginning, 1 = start at second problem, etc.; "
+    << "2) number of problems to test (0 or less = test all) and "
+    << "3) desired random seed, integer; enter 0 if you "
+    << "have no preference. ";
   }
-  std::stringstream out;
-  ProgressReport theReport;
-  List<std::string> theFileNames, theFileTypes;
-  int numDesiredTests = 0;
-  int numSamples = 1;
-  int firstTestToRun = 1;
-  input[1].IsSmallInteger(&firstTestToRun);
-  input[2].IsSmallInteger(&numDesiredTests);
-  input[3].IsSmallInteger(&numSamples);
-  FileOperations::GetFolderFileNamesVirtual(
-    "problems/default/",
-    theFileNames,
-    &theFileTypes,
-    false
-  );
-  std::stringstream randSeedStreaM;
-  randSeedStreaM << theCommands.theObjectContainer.CurrentRandomSeed;
-  std::string randomSeedCurrent = randSeedStreaM.str();
-  out << "Random seed at start: " << randomSeedCurrent << "<br>";
-  if (numDesiredTests <= 0) {
-    numDesiredTests = theFileNames.size;
-  }
-  if (firstTestToRun < 1) {
-    firstTestToRun = 1;
-  }
-  int numInterpretations = 0;
-  int totalToInterpret = 0;
-  for (int i = 0; i < theFileNames.size; i ++) {
-    if (theFileTypes[i] == ".html") {
-      totalToInterpret ++;
-    }
-  }
-  totalToInterpret = MathRoutines::Minimum(numDesiredTests, totalToInterpret);
-  out << "Total to interpret: " << totalToInterpret << "<br>";
-  out << "<table>";
-  out << "<tr><th></th>"
-  << "<th>File name </th>"
-  << "<th>Loading</th>"
-  << "<th>Interpretation</th>"
-  << "<th>AnswerGeneration</th>"
-  << "<th>Accepting built in answer?</th>"
-  << "</tr>";
+  int desiredNumberOfTests = 0;
+  int firstFileIndex = 0;
+  int randomSeed = 0;
+  input[1].IsSmallInteger(&firstFileIndex);
+  input[2].IsSmallInteger(&desiredNumberOfTests);
+  input[3].IsSmallInteger(&randomSeed);
 
-  MapList<std::string, std::string, MathRoutines::HashString>&
-  globalKeys = global.webArguments;
-  for (int i = 0; i < theFileNames.size; i ++) {
-    if (numInterpretations >= numDesiredTests) {
-      break;
-    }
-    if (theFileTypes[i] != ".html") {
-      continue;
-    }
-    numInterpretations ++;
-    if (numInterpretations < firstTestToRun) {
-      continue;
-    }
-    std::stringstream reportStream;
-    reportStream << "Interpreting file "
-    << theFileNames[i] << " ("
-    << numInterpretations
-    << " out of "
-    << totalToInterpret
-    << "). Random seed: "
-    << randomSeedCurrent << ".";
-    theReport.Report(reportStream.str());
-    CalculatorHTML theProblem;
-    std::stringstream problemComments;
-    theProblem.fileName = "problems/" + theFileNames[i];
-    bool isGoodLoad = theProblem.LoadMe(false, randomSeedCurrent, &problemComments);
-    bool isGoodInterpretation = false;
-    out << "<tr>";
-    if (isGoodLoad) {
-      isGoodInterpretation = theProblem.InterpretHtml(&problemComments);
-    }
-    std::stringstream randSeedCurrentStream;
-    randSeedCurrentStream << theProblem.theProblemData.randomSeed;
-    randomSeedCurrent = randSeedCurrentStream.str();
-    out << "<td>" << numInterpretations << ". <td>";
-    out << "<td>"
-    << "<a href=\"" << global.DisplayNameExecutable
-    << "?request=exerciseNoLogin"
-    << "&"
-    << global.ToStringCalcArgsNoNavigation(nullptr)
-    << "fileName=" << theProblem.fileName << "&randomSeed="
-    << randomSeedCurrent << "\">"
-    << theFileNames[i]
-    << "</a>"
-    << "</td>";
-    if (!isGoodLoad) {
-      out << "<td><b>Couldn't load. </b>"
-      << problemComments.str() << "</td>";
-      out << "</tr>";
-      break;
-    } else {
-      out << "<td><span style =\"color:green\">Success</span></td>";
-    }
-    if (!isGoodInterpretation) {
-      out << "<td><span style =\"color:red\"><b>Failure.</b></span> "
-      << "Comments: " << problemComments.str();
-      out << "</td></tr>";
-      break;
-    } else {
-      out << "<td><span style =\"color:green\">Success</span></td>";
-    }
-    bool answerGenerated = false;
-    bool answersWork = false;
-    std::string answerGeneration;
-    std::string solutionReport;
-    for (int j = 0; j < theProblem.theProblemData.theAnswers.size(); j ++) {
-      std::string currentAnswer;
-      std::string currentKey = "calculatorAnswer" +
-      theProblem.theProblemData.theAnswers.theValues[j].answerId;
-      global.SetWebInpuT(currentKey, "1");
-      global.SetWebInpuT(WebAPI::problem::fileName, theProblem.fileName);
-      answerGeneration += WebAPIResponse::GetAnswerOnGiveUp(
-        randomSeedCurrent, &currentAnswer, &answerGenerated
-      ).ToString(nullptr) + "<hr>";
-      if (!answerGenerated) {
-        break;
-      }
-      global.SetWebInpuT(currentKey, HtmlRoutines::ConvertStringToURLString(currentAnswer, false));
-      solutionReport +=
-      WebAPIResponse::SubmitAnswersJSON(randomSeedCurrent, &answersWork, false).ToString(nullptr) + "<hr>";
-      if (!answersWork) {
-        break;
-      }
-      globalKeys.RemoveKey(currentKey);
-    }
-    if (!answerGenerated) {
-      if (theProblem.theProblemData.theAnswers.size() > 0) {
-        out << "<td><b style =\"color:red\">Failure.</b>";
-        out << "</td>"
-        << "<td>"
-        << answerGeneration
-        << "</td>"
-        << "</tr>";
-        break;
-      } else {
-        out << "<td><b style =\"color:brown\">No built-in answer.</b></td>";
-      }
-    } else {
-      out << "<td><span style =\"color:green\">Success</span></td>";
-    }
-    if (!answersWork) {
-      if (theProblem.theProblemData.theAnswers.size() > 0) {
-        out << "<td><b style = 'color:red'>Failure.</b>";
-        out << "</td></tr>";
-        break;
-      } else {
-        out << "<td>-</td>";
-      }
-    } else {
-      out << "<td><span style =\"color:green\">Success</span></td>";
-    }
-    if (numInterpretations <= numSamples) {
-      out << "<td><b>Problem</b><hr>" << theProblem.outputHtmlBodyNoTag
-      << "</td>";
-      out << "<td><b>Answer(s)</b><hr>" << answerGeneration
-      << "</td>";
-      out << "<td><b>Answer(s) confirmation(s)</b><hr>" << solutionReport
-      << "</td>";
-    }
-    out << "</tr>";
-  }
-  out << "</table>";
-  return output.AssignValue(out.str(), theCommands);
+  CalculatorHTML::Test tester;
+  tester.BuiltIn(firstFileIndex, desiredNumberOfTests, randomSeed);
+  return output.AssignValue(tester.ToHTMLBuiltIn(), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerIntervalClosedFromSequence(
@@ -648,7 +766,6 @@ bool CalculatorFunctionsGeneral::innerTestRSASign(
   std::string theHex;
   Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst(theElement.theValue, 0, theHex);
   out << "<br>Converted to hex:<br>" << theHex;
-  // global << "DEBUG: !!!!!!!!!!!!!!!!!Succeffully out of test RSA!!!!!!!!!!!!!!!!!!!" << logger::endL;
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -2128,7 +2245,6 @@ bool CalculatorFunctionsGeneral::innerElementEllipticCurveNormalForm(
     << curveContext.ContextGetPolynomialVariables().ToString();
   }
   MonomialP leadingMon = thePoly.GetMaxMonomial(MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest);
-  theCommands << "DEBUG: leading mon: " << leadingMon.ToString();
   int indexX = 0;
   int indexY = 1;
   if (leadingMon[indexX] != 3) {

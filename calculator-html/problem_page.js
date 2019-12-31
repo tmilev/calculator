@@ -51,6 +51,8 @@ ProblemCollection.prototype.CreateOrUpdateProblem = function(problemData) {
 ProblemCollection.prototype.getProblemByIdOrRegisterEmpty = function(
   label, fileName
 ) {
+  // normalize the label:
+  label = encodeURIComponent(decodeURIComponent(label));
   if (!(label in this.allProblems)) {
     var incoming = new Problem();
     incoming.initializeBasic({
@@ -84,6 +86,7 @@ function Problem() {
 }
 
 Problem.prototype.setRandomSeed = function(input) {
+  console.log(`Set random seed to: ${input}`);
   this.randomSeed = input;  
 }
 
@@ -255,6 +258,7 @@ Problem.prototype.initializeProblemContent = function(problemData) {
       idVerificationSpan:   currentVector.idVerificationSpan,
       flagAnswerPanel:      true,
       flagCalculatorPanel:  false,
+      randomSeed:           problemData.randomSeed,
     });
   }
   this.writeToHTML(ids.domElements.problemPageContentContainer);

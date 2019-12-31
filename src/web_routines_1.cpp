@@ -337,7 +337,6 @@ void WebCrawler::FetchWebPage(std::stringstream* commentsOnFailure, std::strings
   this->theTSL.openSSLData.CheckCanInitializeToClient();
   this->theTSL.initializeNonThreadSafeOnFirstCall(false);
 #ifdef MACRO_use_open_ssl
-  //global << logger::green  << "DEBUG: got to FetchWebPage start. " << logger::endL;
   this->lastTransaction = "";
   this->lastTransactionErrors = "";
   memset(&this->hints, 0, sizeof this->hints); // make sure the struct is empty
@@ -760,8 +759,6 @@ bool Crypto::VerifyJWTagainstKnownKeys(
   //This is system dependent and a lot of work-> not doing now, but will do
   //in the future as the need arises.
   JSONWebToken theToken;
-  //if (commentsGeneral!= 0)
-  //  *commentsGeneral << "DEBUG: inputToken: " << inputToken;
   if (!theToken.AssignString(inputToken, commentsOnFailure)) {
     return false;
   }
@@ -809,7 +806,6 @@ bool Crypto::VerifyJWTagainstKnownKeys(
     WebCrawler theCrawler;
     theCrawler.theTSL.openSSLData.name = "public key fetcher";
     theCrawler.UpdatePublicKeys(commentsOnFailure, commentsGeneral);
-    global << "DEBUG: Updated public keys!";
   }
   if (theIndex == - 1) {
     if (commentsOnFailure != nullptr) {

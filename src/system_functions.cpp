@@ -206,12 +206,9 @@ void TimeoutThread::Run() {
     // global.CheckConsistency();
     this->HandleMaxComputationTime();
     // global.CheckConsistency();
-    // std::cout << "DEBUG: before handle timeout\n";
     this->HandleComputationTimeout();
-    // std::cout << "DEBUG: before handle ping\n";
     // global.CheckConsistency();
     this->HandlePingServerIamAlive();
-    // std::cout << "DEBUG: before handle every thing\n";
     // global.CheckConsistency();
     if (this->HandleEverythingIsDone()) {
       break;

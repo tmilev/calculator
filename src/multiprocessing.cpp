@@ -501,7 +501,6 @@ std::string Pipe::ToString() const {
 
 bool Pipe::ResetNoAllocation() {
   bool oldReadEndBlocks = this->thePipe.flagReadEndBlocks;
-  std::cout << "DEBUG: oldReadEndBlocks: " << oldReadEndBlocks << "\n";
   if (oldReadEndBlocks) {
     if (!this->thePipe.SetReadNonBlocking(false, true)) {
       return false;
@@ -817,7 +816,6 @@ std::string logger::openTagHtml() {
 std::string logger::getStampShort() {
   std::stringstream out;
   out << "[" << global.logs.ToStringProcessType() << ", ";
-  // out << "||DEBUG: " << this->theFileName << "||";
   if (global.server().activeWorker != - 1) {
     out << "w: " << global.server().activeWorker << ", ";
   }

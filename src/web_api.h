@@ -101,7 +101,7 @@ class WebAPIResponse {
   static JSData GetAnswerOnGiveUp(
     const std::string& inputRandomSeed,
     std::string* outputNakedAnswer = nullptr,
-    bool* outputDidSucceed = nullptr,
+    bool* answerGenerationSuccess = nullptr,
     bool doIncludeTimeStats = true
   );
   static JSData GetSelectCourseJSON();

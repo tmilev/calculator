@@ -1694,7 +1694,6 @@ bool SSLRecord::DecodeBody(std::stringstream *commentsOnFailure) {
 bool TransportLayerSecurityServer::DecodeSSLRecord(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("TransportLayerSecurityServer::DecodeSSLRecord");
   if (!this->lastReaD.Decode(commentsOnFailure)) {
-    global << "DEBUG: one record decode error.\n" << this->lastReaD.ToString() << logger::endL;
     return false;
   }
   return true;

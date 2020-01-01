@@ -470,8 +470,8 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON(
     } else {
       out << "<b>Your random seed must have been reset. </b>";
     }
-    out << "<br><b style =\"color:red\">If the problem persists after a couple of page refreshes, "
-    << "it's a bug. Please take a screenshot and email the site admin/your instructor. </b>";
+    out << "<br><b style ='color:red'>If the problem persists after a couple of page refreshes, "
+    << "it's a bug. Please take a screenshot and email the site administrator/your instructor. </b>";
     out
     << "Generated in "
     << MathRoutines::ReducePrecision(global.GetElapsedSeconds() - startTime)
@@ -1269,8 +1269,10 @@ bool CalculatorHTML::PrepareSectionList(std::stringstream& commentsOnFailure) {
   }
   this->flagSectionsPrepared = true;
   if (
-    this->currentUseR.sectionsTaught.size == 0 ||
-    (this->currentUseR.userRole != "admin" && this->currentUseR.userRole != "teacher")
+    this->currentUseR.sectionsTaught.size == 0 || (
+      this->currentUseR.userRole != UserCalculator::Roles::administator &&
+      this->currentUseR.userRole != UserCalculator::Roles::teacher
+    )
   ) {
     if (this->currentUseR.sectionComputed != "") {
       this->databaseStudentSections.AddOnTop(this->currentUseR.sectionComputed);

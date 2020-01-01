@@ -1937,7 +1937,7 @@ bool WebWorker::DoSetEmail(
   theEmail.SendEmailWithMailGun(commentsOnFailure, commentsGeneralNonSensitive, commentsGeneralSensitive);
   if (commentsGeneralSensitive != nullptr) {
     if (global.UserDefaultHasAdminRights()) {
-      *commentsGeneralSensitive << "<hr>Content of sent email (admin view only):<br>"
+      *commentsGeneralSensitive << "<hr>Content of sent email (administrator view only):<br>"
       << HtmlRoutines::ConvertStringToHtmlString(theEmail.emailContent, true);
     }
   } else {
@@ -1968,7 +1968,7 @@ JSData WebWorker::SetEmail(const std::string& input) {
   }
   this->DoSetEmail(global.userDefault, &out, &out, adminOutputStream);
   if (global.UserDefaultHasAdminRights()) {
-    out << "<hr><b>Admin view only. </b>" << debugStream.str();
+    out << "<hr><b>Administrator view only. </b>" << debugStream.str();
   }
   out << "<br>Response time: " << global.GetElapsedSeconds() << " second(s).";
   result[WebAPI::result::comments] = out.str();
@@ -4413,7 +4413,7 @@ void GlobalVariables::ConfigurationProcess() {
     << logger::red << "WARNING: database disabled, " << logger::green
     << "no database operations permitted." << logger::endL
     << logger::red
-    << "Everyone gets logged-in as admin. " << logger::endL
+    << "Everyone gets logged-in as administrator. " << logger::endL
     << logger::purple << "************************" << logger::endL;
   }
   if (global.configuration[Configuration::serverAutoMonitor].isTrueRepresentationInJSON()) {

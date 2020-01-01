@@ -673,7 +673,7 @@ bool CalculatorFunctionsGeneral::innerFetchKnownPublicKeys(
   (void) input;
   std::stringstream out;
   if (!global.UserDefaultHasAdminRights()) {
-    out << "You need to be a logged-in admin to call this function. ";
+    out << "You need to be a logged-in administrator to call this function. ";
     return output.AssignValue(out.str(), theCommands);
   }
   WebCrawler theCrawler;

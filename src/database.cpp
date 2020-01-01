@@ -1426,7 +1426,7 @@ bool CalculatorDatabaseFunctions::innerRepairDatabaseEmailRecords(
     out << "Function available to logged-in admins only. ";
     return output.AssignValue(out.str(), theCommands);
   }
-  global.millisecondsMaxComputation = 20000000; //20k seconds, ok as this is admin-only.
+  global.millisecondsMaxComputation = 20000000; //20k seconds, ok as this is administrator-only.
   (void) input;//prevent unused parameter, portable
   out << "Testing/repairing database ... Comments:<br>";
   out << "NOT IMPLEMENTED YET";
@@ -1769,11 +1769,11 @@ bool Database::User::LoginNoDatabaseSupport(
     }
     return false;
   }
-  // When the database is disabled, we assume the user is an admin.
+  // When the database is disabled, we assume the user is an administrator.
   // The purpose of this is that
   // users who do not have a mongoDB installed
   // (or have troubles accessing it for some reason)
-  // can still use the admin functions of the calculator, for example,
+  // can still use the administrator functions of the calculator, for example,
   // modify problem files from the one-page app.
   theUser.userRole = UserCalculatorData::Roles::administator;
   theUser.actualAuthenticationToken = "compiledWithoutDatabaseSupport";

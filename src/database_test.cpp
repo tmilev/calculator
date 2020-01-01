@@ -47,7 +47,7 @@ bool Database::Test::AdminAccountCreation() {
   std::stringstream commentsOnFailure;
 
   if (!Database::get().theUser.LoginViaDatabase(userData, &commentsOnFailure)) {
-    global.fatal << "Failed to login as admin on an empty database. " << global.fatal;
+    global.fatal << "Failed to login as administrator on an empty database. " << global.fatal;
   }
   return true;
 }

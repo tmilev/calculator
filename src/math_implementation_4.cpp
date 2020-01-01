@@ -401,11 +401,14 @@ bool GlobalVariables::UserDefaultHasAdminRights() {
   if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
     return true;
   }
-  return this->flagLoggedIn && (this->userDefault.userRole == "admin");
+  return this->flagLoggedIn && (this->userDefault.userRole == UserCalculatorData::Roles::administator);
 }
 
 bool GlobalVariables::UserDefaultHasProblemComposingRights() {
-  return this->flagLoggedIn && (this->userDefault.userRole == "admin" || this->userDefault.userRole == "teacher");
+  return this->flagLoggedIn && (
+    this->userDefault.userRole == UserCalculatorData::Roles::administator ||
+    this->userDefault.userRole == UserCalculatorData::Roles::teacher
+  );
 }
 
 bool GlobalVariables::UserGuestMode() {

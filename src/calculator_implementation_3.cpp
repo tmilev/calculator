@@ -1844,7 +1844,7 @@ bool Calculator::innerAutomatedTest(Calculator& theCommands, const Expression& i
   if (!global.UserDefaultHasAdminRights()) {
     return theCommands << "Automated test requires administrator access";
   }
-  global.millisecondsMaxComputation = 30000000; //30k seconds, ok as we have admin access
+  global.millisecondsMaxComputation = 30000000; //30k seconds, ok as we have administrator access
   Calculator::Test test(theCommands);
   if (!input.IsSmallInteger(&test.startIndex)) {
     return theCommands

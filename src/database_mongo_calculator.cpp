@@ -8,7 +8,7 @@ bool CalculatorDatabaseFunctions::innerExecuteMongoQuery(
 ) {
   MacroRegisterFunctionWithName("CalculatorDatabaseFunctions::innerExecuteMongoQuery");
   if (!global.UserDefaultHasAdminRights()) {
-    return output.AssignValue(std::string("Admin rights needed for mongoDB queries. "), theCommands);
+    return output.AssignValue(std::string("Administrator rights needed for mongoDB queries. "), theCommands);
   }
   if (input.size() < 3) {
     return theCommands << "Expected at least 2 arguments: collection name and query. ";

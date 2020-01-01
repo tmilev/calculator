@@ -56,6 +56,7 @@ std::string CalculatorHTML::Test::OneProblemTest::ToStringHTMLTableRow(int rowIn
   out << "<tr>";
   out << "<td>" << rowIndex << ". </td>";
   JSData request;
+  request["problemFileName"] = this->fileName;
   request[WebAPI::problem::fileName] = this->fileName;
   request[WebAPI::problem::randomSeed] = this->randomSeed;
   request["currentPage"] = "problemPage";

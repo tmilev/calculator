@@ -3426,7 +3426,9 @@ void TopicElement::ComputeID(int elementIndex, TopicElementParser& owner) {
   if (this->problemFileName != "") {
     this->id = this->problemFileName;
     if (this->type != TopicElement::types::problem) {
-      global.fatal << "Type problem is the only type allowed to have non-empty file name. " << global.fatal;
+      global.fatal
+      << "Type problem is the only type allowed to have non-empty file name. "
+      << global.fatal;
     }
   } else {
     std::stringstream out;

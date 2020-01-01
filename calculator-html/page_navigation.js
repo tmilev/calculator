@@ -274,12 +274,6 @@ function StorageCalculator() {
         nameURL: "problemFileName",
         showInURLOnPages: pageNamesOnWhichToShowProblemURLs,
       }),
-      currentProblemId: new StorageVariable({
-        name: "currentProblemId",
-        nameLocalStorage: "currentProblemId",
-        nameURL: "currentProblemId",
-        showInURLOnPages: pageNamesOnWhichToShowProblemURLs,
-      }),
       exerciseType: new StorageVariable({
         name: "exerciseType",
         nameLocalStorage: "exerciseType",
@@ -854,9 +848,8 @@ Page.prototype.selectPage = function(inputPage) {
 }
 
 Page.prototype.getCurrentProblem = function() {
-  var label = this.storage.variables.currentCourse.currentProblemId.getValue();
-  var fileName = this.storage.variables.currentCourse.fileName.getValue();
-  return problemPage.allProblems.getProblemByIdOrRegisterEmpty(label, fileName);
+  var problemFileName = this.storage.variables.currentCourse.problemFileName.getValue();
+  return problemPage.allProblems.getProblemByIdOrRegisterEmpty(problemFileName);
 }
 
 Page.prototype.getProblemById = function(label) {

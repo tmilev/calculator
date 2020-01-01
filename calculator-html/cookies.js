@@ -1,9 +1,9 @@
 "use strict"
 function getCookie(cookieName) { 
-  var VPFcookie = document.cookie.split(";");
-  for (var i = 0; i < VPFcookie.length; i ++) { 
-    var x = VPFcookie[i].substr(0, VPFcookie[i].indexOf("="));
-    var y = VPFcookie[i].substr(VPFcookie[i].indexOf("=") + 1);
+  var cookie = document.cookie.split(";");
+  for (var i = 0; i < cookie.length; i ++) { 
+    var x = cookie[i].substr(0, cookie[i].indexOf("="));
+    var y = cookie[i].substr(cookie[i].indexOf("=") + 1);
     x = x.replace(/^\s+|\s+$/g,"");
     if (x === cookieName) {
       return unescape(y);

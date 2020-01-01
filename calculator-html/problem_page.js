@@ -42,6 +42,9 @@ ProblemCollection.prototype.resetTopicProblems = function() {
 /** @returns{Problem} */
 ProblemCollection.prototype.CreateOrUpdateProblem = function(problemData) {
   // theProblemId is percent encoded, safe to embed in html.
+  if (problemData.id.includes("%")) {
+    console.log("Unexpected percent sign in problem id");
+  }
   var theProblemId = encodeURIComponent(problemData.id);
   var currentProblem = this.getProblemByIdOrRegisterEmpty(theProblemId, "");
   currentProblem.initializeInfo(problemData, null);
@@ -49,15 +52,16 @@ ProblemCollection.prototype.CreateOrUpdateProblem = function(problemData) {
 }
 
 ProblemCollection.prototype.getProblemByIdOrRegisterEmpty = function(
-  label, fileName
+  problemFileName
 ) {
-  // normalize the label:
-  label = encodeURIComponent(decodeURIComponent(label));
+  // normalize the file name:
+  problemFileName = decodeURIComponent(problemFileName);
+  var label = encodeURIComponent(problemFileName);
   if (!(label in this.allProblems)) {
     var incoming = new Problem();
     incoming.initializeBasic({
       id: label,
-      fileName: fileName
+      fileName: problemFileName
     }); 
     this.allProblems[label] = incoming;
   }
@@ -66,7 +70,6 @@ ProblemCollection.prototype.getProblemByIdOrRegisterEmpty = function(
 
 function selectCurrentProblem(problemIdURLed, exerciseType) {
   var thePage = window.calculator.mainPage;
-  thePage.storage.variables.currentCourse.currentProblemId.setAndStore(problemIdURLed);
   thePage.storage.variables.currentCourse.problemFileName.setAndStore(decodeURIComponent(problemIdURLed));
   thePage.storage.variables.currentCourse.exerciseType.setAndStore(exerciseType);
   var theProblem = thePage.getCurrentProblem();
@@ -312,8 +315,7 @@ Problem.prototype.getAppAnchorRequestFileCourseTopics = function(
   var requestJSON = {
     currentPage: thePage.pages.problemPage.name,
     exerciseType: theExerciseType,
-    fileName: this.fileName,
-    currentProblemId: this.problemId,
+    problemFileName: this.fileName,
     courseHome: thePage.storage.variables.currentCourse.courseHome.getValue(),
     topicList: thePage.storage.variables.currentCourse.topicList.getValue(),
   };
@@ -1355,11 +1357,6 @@ function updateProblemPageCallback(input, outputComponent) {
   }
   /**@type {Problem} */
   var currentProblem = thePage.getCurrentProblem();
-  if (currentProblem === null || currentProblem === undefined) {
-    var problemId = thePage.storage.variables.currentCourse.currentProblemId.getValue();
-    allProblems.registerEmptyProblem(problemId)
-    currentProblem = thePage.getCurrentProblem();
-  }
   currentProblem.initializeProblemContent(theProblem);
 }
 

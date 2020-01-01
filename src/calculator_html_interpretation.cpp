@@ -67,7 +67,8 @@ JSData WebAPIResponse::GetProblemSolutionJSON() {
   theInterpreteR.flagPlotNoControls = true;
   theInterpreteR.flagWriteLatexPlots = false;
   if (!theProblem.PrepareCommands(&comments)) {
-    out << "<b>Failed to prepare calculator commands. </b> <br>Comments:<br>" << comments.str();
+    out << "<b>Failed to prepare calculator commands.</b>"
+    << "<br>Comments:<br>" << comments.str();
     result[WebAPI::result::resultHtml] = out.str();
     return result;
   }
@@ -84,8 +85,8 @@ JSData WebAPIResponse::GetProblemSolutionJSON() {
   << currentA.commandsSolutionOnly;
   theInterpreteR.Evaluate(answerCommands.str());
   if (theInterpreteR.syntaxErrors != "") {
-    out << "<span style =\"color:red\"><b>Failed to compose the solution. "
-    << "Likely there is a bug with the problem. </b></span>"
+    out << "<b style = 'color:red'>Failed to compose the solution. "
+    << "Likely there is a bug with the problem. </b>"
     << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
     << theInterpreteR.ToStringSyntacticStackHumanReadable(false, false);
     result[WebAPI::result::resultHtml] = out.str();
@@ -93,8 +94,8 @@ JSData WebAPIResponse::GetProblemSolutionJSON() {
     return result;
   }
   if (theInterpreteR.flagAbortComputationASAP) {
-    out << "<span style =\"color:red\"><b>Failed to compose the solution. "
-    << "Likely there is a bug with the problem. </b></span>"
+    out << "<b style = 'color:red'>Failed to compose the solution. "
+    << "Likely there is a bug with the problem. </b>"
     << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
     << theInterpreteR.outputString
     << theInterpreteR.outputCommentsString
@@ -138,9 +139,9 @@ std::string WebAPIResponse::SetProblemWeight() {
   std::string inputProblemInfo = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("mainInput"), false);
   std::stringstream commentsOnFailure, out;
   if (theProblem.MergeProblemWeightAndStore(inputProblemInfo, &commentsOnFailure)) {
-    out << "<span style =\"color:green\"><b>Modified. </b></span>";
+    out << "<b style = 'color:green'>Modified.</b>";
   } else {
-    out << "<span style =\"color:red\"><b>" << commentsOnFailure.str() << "</b></span>";
+    out << "<b style =\"color:red\">" << commentsOnFailure.str() << "</b>";
   }
   return out.str();
 }
@@ -157,9 +158,9 @@ std::string WebAPIResponse::SetProblemDeadline() {
   std::string inputProblemInfo = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("mainInput"), false);
   std::stringstream commentsOnFailure, out;
   if (theProblem.MergeProblemDeadlineAndStore(inputProblemInfo, &commentsOnFailure)) {
-    out << "<span style =\"color:green\"><b>Modified. </b></span>";
+    out << "<b style =\"color:green\">Modified. </b>";
   } else {
-    out << "<span style =\"color:red\"><b>" << commentsOnFailure.str() << "</b></span>";
+    out << "<b style =\"color:red\">" << commentsOnFailure.str() << "</b>";
   }
   return out.str();
 }
@@ -188,7 +189,10 @@ std::string WebAPIResponse::GetSanitizedComment(
   if (input.owner == nullptr) {
     return "";
   }
-  if (input.StartsWith(input.owner->opRulesOff()) || input.StartsWith(input.owner->opRulesOn())) {
+  if (
+    input.StartsWith(input.owner->opRulesOff()) ||
+    input.StartsWith(input.owner->opRulesOn())
+  ) {
     return "";
   }
   return input.ToString(&theFormat);
@@ -226,7 +230,7 @@ std::string WebAPIResponse::GetCommentsInterpretation(
 }
 
 JSData WebAPIResponse::submitAnswersPreviewJSON() {
-  MacroRegisterFunctionWithName("HtmlInterpretation::submitAnswersPreviewJSON");
+  MacroRegisterFunctionWithName("WebAPIResponse::submitAnswersPreviewJSON");
   double startTime = global.GetElapsedSeconds();
   std::string lastStudentAnswerID;
   std::string lastAnswer;
@@ -235,7 +239,9 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   global.webArguments;
   JSData result;
   for (int i = 0; i < theArgs.size(); i ++) {
-    if (StringRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID)) {
+    if (StringRoutines::StringBeginsWith(
+      theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID)
+    ) {
       lastAnswer = "(" + HtmlRoutines::ConvertURLStringToNormal(theArgs.theValues[i], false) + "); ";
     }
   }
@@ -359,10 +365,10 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
     return result;
   }
   if (theInterpreterWithAdvice.flagAbortComputationASAP) {
-    out << "<br><span style =\"color:red\"><b>"
+    out << "<br><b style = 'color:red'>"
     << "Something went wrong when interpreting your answer "
     << "in the context of the current problem. "
-    << "</b></span>";
+    << "</b>";
     if (global.UserDefaultHasAdminRights() && global.UserDebugFlagOn()) {
       out << "<br>Logged-in as administator with debug flag on => printing error details. "
       << theInterpreterWithAdvice.outputString << "<br>"
@@ -396,11 +402,11 @@ JSData WebAPIResponse::ClonePageResult() {
   MacroRegisterFunctionWithName("WebAPIReponse::ClonePageResult");
   JSData result;
   if (
-    !global.flagLoggedIn ||
-    !global.UserDefaultHasAdminRights() ||
-    !global.flagUsingSSLinCurrentConnection
+    ! global.flagLoggedIn ||
+    ! global.UserDefaultHasAdminRights() ||
+    ! global.flagUsingSSLinCurrentConnection
   ) {
-    result[WebAPI::result::error]= "Cloning problems allowed only for logged-in admins under ssl connection.";
+    result[WebAPI::result::error] = "Cloning problems allowed only for logged-in admins under ssl connection.";
     return result;
   }
   std::string fileNameTarget = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput(WebAPI::problem::fileNameTarget), false);
@@ -513,7 +519,7 @@ std::string WebAPIResponse::GetOnePageJS(bool appendBuildHash) {
   if (!FileOperations::LoadFileToStringVirtual(
     "/calculator-html/index.html", theInterpretation.htmlRaw, false, &errorStream
   )) {
-    out << "<html><body><b>Failed to load the application file. "
+    out << "<html><body><b>Failed to load the application file. </b>"
     << "Further comments follow. " << errorStream.str() << "</body></html>";
     return out.str();
   }
@@ -1517,7 +1523,7 @@ JSData WebAPIResponse::GetAnswerOnGiveUp(
     return result;
   }
   if (theInterpreteR.flagAbortComputationASAP) {
-    out << "<b style =\"color:red\">Failed to evaluate the default answer. "
+    out << "<b style = 'color:red'>Failed to evaluate the default answer. "
     << "Likely there is a bug with the problem. </b>";
     if (global.UserDefaultHasProblemComposingRights()) {
       out << global.ToStringCalculatorComputation(

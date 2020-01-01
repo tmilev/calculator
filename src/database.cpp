@@ -802,9 +802,9 @@ std::string UserCalculator::FirstLoginMessage() {
   std::stringstream out;
   if (global.flagRequestComingLocally) {
     out << "If this is your first run, set the username to "
-    << "<b>default</b> and enter the password you desire. "
+    << "default and enter the password you desire. "
     << "The password will then be automatically set. "
-    << "To add further accounts login as <b>default</b> and go to 'Accounts'. ";
+    << "To add further accounts login as default and go to 'Accounts'. ";
   }
   return out.str();
 }

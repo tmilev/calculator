@@ -666,7 +666,7 @@ std::string CalculatorHTML::ToStringProblemInfo(const std::string& theFileName, 
 bool CalculatorHtmlFunctions::innerInterpretProblemGiveUp(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerInterpretProblemGiveUp");
+  MacroRegisterFunctionWithName("CalculatorFunctions::innerInterpretProblemGiveUp");
   if (input.size() != 4) {
     return theCommands << "Expected 3 arguments: problem filename, answer id and randomSeed string. ";
   }
@@ -684,7 +684,7 @@ bool CalculatorHtmlFunctions::innerInterpretProblemGiveUp(
 bool CalculatorHtmlFunctions::innerInterpretProblem(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerInterpretProblem");
+  MacroRegisterFunctionWithName("CalculatorFunctions::innerInterpretProblem");
   CalculatorHTML theProblem;
   if (!input.IsOfType<std::string>(&theProblem.inputHtml)) {
     return theCommands << "Extracting calculator expressions from html takes as input strings. ";
@@ -1229,13 +1229,11 @@ bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::
   bool result = !theInterpreter.flagAbortComputationASAP && theInterpreter.syntaxErrors == "";
   if (!result && comments != nullptr) {
     *comments << "<br>Failed to interpret your file. "
-    << "<a href=\""
-    << global.DisplayNameExecutable
-    << "?request=calculator&mainInput="
-    << HtmlRoutines::ConvertStringToURLString(this->theProblemData.commandsGenerateProblemNoEnclosures, false)
-    << "\">Input link</a><br>"
-    << "The interpretation input was:<br> "
-    << this->theProblemData.commandsGenerateProblem << "<br>";
+    << global.ToStringCalculatorComputation(
+      this->theProblemData.commandsGenerateProblemNoEnclosures, "Failed commands:"
+    ) << "<br>"
+    << this->theProblemData.commandsGenerateProblem
+    << "<br>";
     if (global.UserDefaultHasAdminRights()) {
       *comments << "The result of the interpretation attempt is:<br>"
       << theInterpreter.outputString << "<br><b>Comments</b><br>"
@@ -2721,7 +2719,7 @@ std::string CalculatorHTML::CleanUpCommandString(const std::string& inputCommand
 bool CalculatorHtmlFunctions::innerExtractCalculatorExpressionFromHtml(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerExtractCalculatorExpressionFromHtml");
+  MacroRegisterFunctionWithName("CalculatorFunctions::innerExtractCalculatorExpressionFromHtml");
   CalculatorHTML theFile;
   if (!input.IsOfType<std::string>(&theFile.inputHtml)) {
     return theCommands << "Extracting calculator expressions from html takes as input strings. ";
@@ -2873,7 +2871,7 @@ bool CalculatorHTML::StoreRandomSeedCurrent(std::stringstream* commentsOnFailure
   this->currentUseR.SetProblemData(this->fileName, this->theProblemData);
   if (!this->currentUseR.StoreProblemData(this->fileName, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "<b style =\"color:red\">"
+      *commentsOnFailure << "<b style = 'color:red'>"
       << "Error: failed to store problem in database. "
       << "If you see this message, please take a screenshot and email your instructor. "
       << "</b>";

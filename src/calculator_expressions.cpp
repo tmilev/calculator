@@ -2949,7 +2949,7 @@ bool Expression::NeedsParenthesisForMultiplication() const {
 bool Calculator::innerFlattenCommandEnclosuresOneLayer(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerFlattenCommandEnclosuresOneLayer");
+  MacroRegisterFunctionWithName("CalculatorFunctions::innerFlattenCommandEnclosuresOneLayer");
   if (input.StartsWith(theCommands.opCommandEnclosure())) {
     if (input.size() <= 1) {
       return false;
@@ -3197,7 +3197,10 @@ void Expression::ToStringOpMultiplicative(
 }
 
 std::string Expression::ToString(
-  FormatExpressions* theFormat, Expression* startingExpression, bool unfoldCommandEnclosures, JSData* outputJS
+  FormatExpressions* theFormat,
+  Expression* startingExpression,
+  bool unfoldCommandEnclosures,
+  JSData* outputJS
 ) const {
   MacroRegisterFunctionWithName("Expression::ToString");
   MemorySaving<FormatExpressions> tempFormat;

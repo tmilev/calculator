@@ -13,7 +13,7 @@ public:
   static bool innerAES_CBC_256_Decrypt(Calculator& theCommands, const Expression& input, Expression& output);
 };
 
-class CalculatorFunctionsGeneral {
+class CalculatorFunctions {
 public:
   static bool LeftIntervalGreaterThanRight(const Expression& left, const Expression& right);
   static bool innerPrintRuleStack(Calculator& theCommands, const Expression& input, Expression& output);
@@ -174,12 +174,12 @@ public:
   static bool innerEnsureExpressionDependsOnlyOnMandatoryVariablesExcludeNamedConstants(
     Calculator& theCommands, const Expression& input, Expression& output
   ) {
-    return CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVariables(theCommands, input, output, true);
+    return CalculatorFunctions::innerEnsureExpressionDependsOnlyOnMandatoryVariables(theCommands, input, output, true);
   }
   static bool innerEnsureExpressionDependsOnlyOnMandatoryVariablesIncludeNamedConstants(
     Calculator& theCommands, const Expression& input, Expression& output
   ) {
-    return CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVariables(theCommands, input, output, false);
+    return CalculatorFunctions::innerEnsureExpressionDependsOnlyOnMandatoryVariables(theCommands, input, output, false);
   }
   static bool innerEnsureExpressionDependsOnlyOnStandard(Calculator& theCommands, const Expression& input, Expression& output);
 
@@ -490,13 +490,13 @@ public:
     Calculator& theCommands, const Expression& input, Expression& output, bool showSLtwos, bool MustRecompute
   );
   static bool innerPrintRootSAs(Calculator& theCommands, const Expression& input, Expression& output) {
-    return CalculatorFunctionsGeneral::innerRootSAsAndSltwos(theCommands, input, output, false, false);
+    return CalculatorFunctions::innerRootSAsAndSltwos(theCommands, input, output, false, false);
   }
   static bool innerPrintRootSAsForceRecompute(Calculator& theCommands, const Expression& input, Expression& output) {
-    return CalculatorFunctionsGeneral::innerRootSAsAndSltwos(theCommands, input, output, false, true);
+    return CalculatorFunctions::innerRootSAsAndSltwos(theCommands, input, output, false, true);
   }
   static bool innerPrintSltwos(Calculator& theCommands, const Expression& input, Expression& output) {
-    return CalculatorFunctionsGeneral::innerRootSAsAndSltwos(theCommands, input, output, true, false);
+    return CalculatorFunctions::innerRootSAsAndSltwos(theCommands, input, output, true, false);
   }
   static bool innerFindProductDistanceModN(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSolveProductSumEquationOverSetModN(Calculator& theCommands, const Expression& input, Expression& output);
@@ -507,22 +507,22 @@ public:
   static bool innerSolveSerreLikeSystemNoUpperLimit(
     Calculator& theCommands, const Expression& input, Expression& output
   ) {
-    return CalculatorFunctionsGeneral::innerSolveSerreLikeSystem(theCommands, input, output, false, false);
+    return CalculatorFunctions::innerSolveSerreLikeSystem(theCommands, input, output, false, false);
   }
   static bool innerSolveSerreLikeSystemUpperLimit(
     Calculator& theCommands, const Expression& input, Expression& output
   ) {
-    return CalculatorFunctionsGeneral::innerSolveSerreLikeSystem(theCommands, input, output, true, false);
+    return CalculatorFunctions::innerSolveSerreLikeSystem(theCommands, input, output, true, false);
   }
   static bool innerSolveSerreLikeSystemAlgebraic(
     Calculator& theCommands, const Expression& input, Expression& output
   ) {
-    return CalculatorFunctionsGeneral::innerSolveSerreLikeSystem(theCommands, input, output, false, true);
+    return CalculatorFunctions::innerSolveSerreLikeSystem(theCommands, input, output, false, true);
   }
   static bool innerSolveSerreLikeSystemAlgebraicUpperLimit(
     Calculator& theCommands, const Expression& input, Expression& output
   ) {
-    return CalculatorFunctionsGeneral::innerSolveSerreLikeSystem(theCommands, input, output, true, true);
+    return CalculatorFunctions::innerSolveSerreLikeSystem(theCommands, input, output, true, true);
   }
   static bool innerFetchWebPagePOST(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerFetchWebPageGET(Calculator& theCommands, const Expression& input, Expression& output);

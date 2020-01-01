@@ -2632,7 +2632,9 @@ std::string Calculator::ToString() {
       out << "<br>";
     }
   }
-  out2 << HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(out.str(), "info expand/collapse", "calculatorInternalDetails");
+  out2 << HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(
+    out.str(), "info expand/collapse", "calculatorInternalDetails"
+  );
   return out2.str();
 }
 

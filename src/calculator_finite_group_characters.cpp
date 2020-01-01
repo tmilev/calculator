@@ -1757,7 +1757,7 @@ bool SelectionFixedRankDifferentMaxMultiplicities::IncrementReturnFalseIfPastLas
 }
 
 bool CalculatorFunctionsWeylGroup::innerKostkaNumber(Calculator& theCommands, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerKostkaNumber");
+  MacroRegisterFunctionWithName("CalculatorFunctions::innerKostkaNumber");
   if (input.size() != 3) {
     return false;
   }
@@ -1779,7 +1779,7 @@ bool CalculatorFunctionsWeylGroup::innerKostkaNumber(Calculator& theCommands, co
 bool CalculatorFunctionsWeylGroup::innerAllSelectionsFixedRank(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerKostkaNumber");
+  MacroRegisterFunctionWithName("CalculatorFunctions::innerKostkaNumber");
   if (input.size() != 3) {
     return false;
   }

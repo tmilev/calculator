@@ -8,10 +8,10 @@
 
 static ProjectInformationInstance projectInfoCalculatorWebserverFunctionsCPP(__FILE__, "Calculator functions related to the web server.");
 
-bool CalculatorFunctionsGeneral::innerX509CertificateServer(
+bool CalculatorFunctions::innerX509CertificateServer(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerX509CertificateServer");
+  MacroRegisterFunctionWithName("CalculatorFunctions::innerX509CertificateServer");
   (void) input;
   //List<unsigned char> outputChars;
   //theWebServer.theTLS.theServer.certificate.WriteBytesASN1(outputChars);
@@ -20,10 +20,10 @@ bool CalculatorFunctionsGeneral::innerX509CertificateServer(
   return output.AssignValue(result, theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerX509CertificateDecode(
+bool CalculatorFunctions::innerX509CertificateDecode(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerX509CertificateDecode");
+  MacroRegisterFunctionWithName("CalculatorFunctions::innerX509CertificateDecode");
   std::string binary;
   if (!input.IsOfType(&binary)) {
     return output.MakeError("Input is not a string. ", theCommands);

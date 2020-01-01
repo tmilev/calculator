@@ -452,7 +452,7 @@ public:
       int randomSeed;
       List<OneAnswer> answers;
       OneProblemTest();
-      void Run();
+      bool Run();
       std::string ToStringHTMLTableRow(int rowIndex);
     };
     int filesToInterpret;
@@ -466,6 +466,13 @@ public:
     std::string errorComments;
     Test();
     bool ComputeTotalFiles();
+    static bool BuiltInMultiple(
+      int inputFirstFileIndex,
+      int inputFilesToInterpret,
+      int inputRandomSeed,
+      int numberOfRepetitions,
+      std::stringstream* comments
+    );
     bool BuiltIn(
       int inputFirstFileIndex,
       int inputFilesToInterpret,

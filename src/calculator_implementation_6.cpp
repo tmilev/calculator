@@ -167,6 +167,7 @@ CalculatorHTML::Test::OneProblemTest::OneProblemTest() {
   this->randomSeed = 0;
   this->flagInterpretationSuccess = false;
   this->flagAllBuiltInAnswersOK = false;
+  this->flagSuccess = false;
 }
 
 CalculatorHTML::Test::OneProblemTest::OneAnswer::OneAnswer() {
@@ -180,22 +181,23 @@ bool CalculatorHTML::Test::OneProblemTest::Run() {
   std::stringstream randomSeedStringStarting;
   randomSeedStringStarting << this->randomSeed;
   theProblem.fileName = this->fileName;
+  this->flagSuccess = false;
   if (!theProblem.LoadMe(false, randomSeedStringStarting.str(), &commentsOnFailure)) {
     this->errorLoad = commentsOnFailure.str();
-    return false;
+    return this->flagSuccess;
   }
   this->flagInterpretationSuccess = theProblem.InterpretHtml(&commentsOnFailure);
 
   if (!this->flagInterpretationSuccess) {
     this->errorInterpretation = commentsOnFailure.str();
-    return false;
+    return this->flagSuccess;
   }
   std::stringstream randomSeedStream;
   randomSeedStream << theProblem.theProblemData.randomSeed;
   this->answers.SetSize(theProblem.theProblemData.theAnswers.size());
   this->flagAllBuiltInAnswersOK = true;
   global.SetWebInpuT(WebAPI::problem::fileName, theProblem.fileName);
-  bool result = true;
+  this->flagSuccess = true;
   for (int j = 0; j < this->answers.size; j ++) {
     CalculatorHTML::Test::OneProblemTest::OneAnswer& current = this->answers[j];
     current.answerId = theProblem.theProblemData.theAnswers.theValues[j].answerId;
@@ -212,7 +214,7 @@ bool CalculatorHTML::Test::OneProblemTest::Run() {
       commentsOnFailure << "Failed to generate answer: " << current.answerId << "<br>";
       commentsOnFailure << current.builtInAnswerAPICall[WebAPI::result::resultHtml].theString;
       this->flagAllBuiltInAnswersOK = false;
-      result = false;
+      this->flagSuccess = false;
       break;
     }
     current.builtInAnswerEncoded = HtmlRoutines::ConvertStringToURLString(
@@ -229,13 +231,30 @@ bool CalculatorHTML::Test::OneProblemTest::Run() {
       << current.builtInAnswer
       << "<hr>"
       << current.builtInAnswerReply[WebAPI::result::resultHtml].theString;
-      result = false;
+      this->flagSuccess = false;
       break;
     }
     global.webArguments.RemoveKey(current.answerIdWebAPI);
   }
   this->errorAnswers = commentsOnFailure.str();
-  return result;
+  return this->flagSuccess;
+}
+
+std::string CalculatorHTML::Test::ToStringSummary() {
+  std::stringstream out;
+  out << "First file index: "
+  << this->firstFileIndex << ", inputFilesToInterpret: "
+  << this->filesToInterpret << " inputRandomSeed: "
+  << this->randomSeed
+  << ". ";
+  int firstFail = 0;
+  for (; firstFail < this->results.size; firstFail ++) {
+    if (!this->results[firstFail].flagSuccess) {
+      break;
+    }
+  }
+  out << "First failed index: " << firstFail << ".\n";
+  return out.str();
 }
 
 bool CalculatorHTML::Test::BuiltInMultiple(
@@ -258,8 +277,10 @@ bool CalculatorHTML::Test::BuiltInMultiple(
     CalculatorHTML::Test tester;
     if (!tester.BuiltIn(inputFirstFileIndex, inputFilesToInterpret, randomSeeds[i])) {
       if (comments != nullptr) {
-        *comments << "Failed run " << i + 1 << " out of " << numberOfRepetitions
+        *comments << "Failed run " << i + 1 << " out of " << numberOfRepetitions << ". "
         << tester.ToHTMLBuiltIn();
+        *comments << "Failed run " << i + 1 << " out of " << numberOfRepetitions << ". "
+        << tester.ToStringSummary();
       }
       return false;
     }
@@ -321,13 +342,29 @@ bool CalculatorHTML::Test::BuiltIn(
     << this->fileNames.size
     << "). Random seed: "
     << this->randomSeed << ".";
+    if (global.flagRunningConsoleTest) {
+      global << reportStream.str() << "\n" << logger::endL;
+    }
     theReport.Report(reportStream.str());
     if (!currentTest.Run()) {
       result = false;
     }
+    if (global.flagRunningConsoleTest) {
+      if (!currentTest.flagSuccess) {
+        global << logger::red << "Failure @ index: " << i << ".\n"
+        << logger::endL;
+      } else {
+        global << logger::red << "Success @ index: " << i << ".\n" << logger::endL;
+      }
+    }
   }
   this->errorComments += commentsOnFailure.str();
   return result;
+}
+
+bool CalculatorHTML::Test::All() {
+  CalculatorHTML::Test::BuiltInCrashOnFailure();
+  return true;
 }
 
 bool CalculatorHTML::Test::BuiltInCrashOnFailure() {

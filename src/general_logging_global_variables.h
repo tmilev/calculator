@@ -59,7 +59,6 @@ class logger {
   bool flagTagColorHtmlOpened;
   bool flagTagColorConsoleOpened;
   bool flagResetLogFileWhenTooLarge;
-  bool flagWriteImmediately;
   logger();
   void CheckLogSize();
   enum loggerSpecialSymbols{ endL, red, blue, yellow, green, purple, cyan, normalColor, orange};
@@ -434,20 +433,6 @@ logger& logger::doTheLogging(const theType& toBePrinted) {
 
   if (!this->flagStopWritingToFile) {
     this->bufferFile += out.str();
-    if (this->flagWriteImmediately) {
-      // <- Please do not use flagWriteImmediately
-      // unless it is an extremely time-sensitive logging
-      // issue such as investigating fork hangups.
-      this->theFile << this->bufferFile;
-      this->theFile.flush();
-      this->bufferFile.clear();
-    }
-  }
-  if (global.flagRunningBuiltInWebServer || global.flagRunningCommandLine) {
-    if (this->flagWriteImmediately) {
-      std::cout << this->bufferStandardOutput;
-      this->bufferStandardOutput.clear();
-    }
   }
   this->CheckLogSize();
   return *this;

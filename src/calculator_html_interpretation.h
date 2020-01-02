@@ -449,6 +449,7 @@ public:
       std::string errorAnswers;
       bool flagInterpretationSuccess;
       bool flagAllBuiltInAnswersOK;
+      bool flagSuccess;
       int randomSeed;
       List<OneAnswer> answers;
       OneProblemTest();
@@ -480,6 +481,7 @@ public:
     );
     static bool BuiltInCrashOnFailure();
     static bool All();
+    std::string ToStringSummary();
     std::string ToHTMLBuiltIn();
     std::string ToHTMLDebug();
   };

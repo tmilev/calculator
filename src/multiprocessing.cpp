@@ -644,7 +644,6 @@ logger::logger() {
   this->flagTagColorConsoleOpened = false;
   this->flagStopWritingToFile = true;
   this->flagResetLogFileWhenTooLarge = true;
-  this->flagWriteImmediately = false;
 }
 
 void logger::initializeIfNeeded() {
@@ -1023,11 +1022,7 @@ logger& logger::operator<<(const loggerSpecialSymbols& input) {
     case logger::cyan:
       this->currentColor = input;
       if (doUseColors) {
-        if (this->flagWriteImmediately) {
-          std::cout << this->openTagConsole();
-        } else {
-          this->bufferStandardOutput += this->openTagConsole();
-        }
+        this->bufferStandardOutput += this->openTagConsole();
       }
       if (this->flagStopWritingToFile) {
         return *this;
@@ -1036,11 +1031,7 @@ logger& logger::operator<<(const loggerSpecialSymbols& input) {
       return *this;
     case logger::normalColor:
       if (doUseColors) {
-        if (this->flagWriteImmediately) {
-          std::cout << this->closeTagConsole();
-        } else {
-          this->bufferStandardOutput += this->closeTagConsole();
-        }
+        this->bufferStandardOutput += this->closeTagConsole();
       }
       this->currentColor = logger::normalColor;
       if (this->flagStopWritingToFile) {

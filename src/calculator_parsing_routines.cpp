@@ -1027,9 +1027,10 @@ bool Calculator::ReplaceXXVXdotsXbyE_BOUND_XdotsX(int numXs) {
   int theBoundVar = theElt.theData.theData;
   if (this->IsNonBoundVarInContext(theBoundVar)) {
     std::stringstream out;
-    out << "Syntax error. In the same syntactic scope, the string " << this->operations.theKeys[theBoundVar]
-    << " is first used to denote a non-bound variable"
-    << " but later to denote a bound variable. This is not allowed. ";
+    out << "Syntax error. In the same syntactic scope, the string "
+    << this->operations.theKeys[theBoundVar]
+    << " is first used to denote a non-bound variable "
+    << "but later to denote a bound variable. This is not allowed. ";
     theElt.errorString = out.str();
     theElt.controlIndex = this->conError();
     this->DecreaseStackSetCharacterRangeS(numXs);
@@ -1233,7 +1234,7 @@ std::string Calculator::ToStringIsCorrectAsciiCalculatorString(const std::string
     List<int> ListInt;
     ListInt = theBadChars;
     out << "with respective code numbers: " << ListInt.ToStringCommaDelimited() << ". ";
-    out << " Perhaps you copy+pasted from webpage/pdf file or are using non-English keyboard setup? ";
+    out << "Perhaps you copy+pasted from webpage/pdf file or are using non-English keyboard setup? ";
   }
   return out.str();
 }
@@ -1375,10 +1376,13 @@ bool Calculator::ReplaceVbyVdotsVAccordingToPredefinedWordSplits() {
   this->PopTopSyntacticStack();
   *this << "Predefined symbol replacement: replacing "
   << currentVar << " with the sequence of symbols " << theSplit.ToStringCommaDelimited()
-  << ". If you do not want such replacements to take place you should add the %DontUsePredefinedWordSplits option"
-  << "  at the start of your input. "
-  << " The predefined symbol replacements are used to guard the user from accidental typos such as confusing  "
-  << " x y (the product of x and y) with xy (a single variable whose name contains the letters x and y). "
+  << ". If you do not want such replacements to take "
+  << "place you should add the %DontUsePredefinedWordSplits option "
+  << "at the start of your input. "
+  << "The predefined symbol replacements are used to guard "
+  << "the user from accidental typos such as confusing "
+  << "x y (the product of x and y) with xy "
+  << "(a single variable whose name contains the letters x and y). "
   ;
   for (int i = 0; i < theSplit.size; i ++) {
     newElt.theData.MakeAtom(this->AddOperationNoRepetitionOrReturnIndexFirst(theSplit[i]), *this);

@@ -737,7 +737,15 @@ bool CalculatorFunctions::innerExpressionToString(Calculator& theCommands, const
 bool CalculatorFunctions::innerQuoteToString(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerQuoteToString");
   std::string operation;
-  if (input.IsOperation(&operation)) {
+  if (input.size() != 2) {
+    theCommands << "<b>Warning: this shouldn't happen: "
+    << "quote operation is applied to an expression "
+    << "with wrong number of arguments. "
+    << "This may be a bug with the function "
+    << "Calculator::ParseFillDictionary.</b>";
+    return output.AssignValue(input.ToString(), theCommands);
+  }
+  if (input[1].IsOperation(&operation)) {
     return output.AssignValue(operation, theCommands);
   }
   theCommands << "<b>Warning: this shouldn't happen: quote operation is applied to the non-atomic expression: "
@@ -8593,6 +8601,7 @@ void Calculator::Test::CalculatorTestPrepare() {
         Calculator::Test::OneTest oneTest;
         oneTest.command = currentFunction.theExample;
         oneTest.atom = this->owner->operations.theKeys[i];
+        oneTest.functionAdditionalIdentifier = currentFunction.additionalIdentifier;
         this->commands.SetKeyValue(oneTest.command, oneTest);
       }
       currentHandler = &current.compositeHandlers;
@@ -8607,7 +8616,17 @@ bool Calculator::Test::CalculatorTestRun() {
   ProgressReport theReport;
   FormatExpressions theFormat;
   theFormat.flagExpressionIsFinal = true;
-  for (int i = this->startIndex; i < this->commands.size(); i ++) {
+  if (this->numberOfTests <= 0) {
+    this->numberOfTests = this->commands.size() - this->startIndex;
+    if (this->numberOfTests < 0) {
+      this->numberOfTests = 0;
+    }
+  }
+  this->lastIndexNotTested = this->startIndex + this->numberOfTests;
+  if (this->lastIndexNotTested > this->commands.size()) {
+    this->lastIndexNotTested = this->commands.size();
+  }
+  for (int i = this->startIndex; i < this->lastIndexNotTested; i ++) {
     std::stringstream reportStream;
     Calculator::Test::OneTest& currentTest = this->commands.theValues[i];
     reportStream << "<br>Test progress: testing " << i + 1 << " out of " << this->commands.size() << ". ";

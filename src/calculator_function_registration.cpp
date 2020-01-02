@@ -1206,9 +1206,12 @@ void Calculator::initPredefinedInnerFunctions() {
     "TestCalculatorAll",
     Calculator::innerAutomatedTest,
     "",
-    "Runs an automated test of all built in functions "
-    "against a set of known good results. ",
-    "TestCalculatorAll{}(0)",
+    "Runs an automated test of built in functions "
+    "against a set of known good results. "
+    "First argument = index of first test to run (0 = run all)."
+    "If positive, the second argument gives the number of tests to run. "
+    "Else, when the second argument is negative or zero, we run all tests. ",
+    "TestCalculatorAll{}(0, 0)",
     "Calculator::innerAutomatedTest",
     "TestCalculatorAll",
     innerAdminNoTest

@@ -1835,6 +1835,8 @@ Calculator::Test::Test(Calculator& inputOwner) {
   this->inconsistencies = 0;
   this->unknown = 0;
   this->noTestSkips = 0;
+  this->numberOfTests = 0;
+  this->lastIndexNotTested = 0;
   this->owner = &inputOwner;
   this->flagTestResultsExist = true;
 }
@@ -1844,13 +1846,20 @@ bool Calculator::innerAutomatedTest(Calculator& theCommands, const Expression& i
   if (!global.UserDefaultHasAdminRights()) {
     return theCommands << "Automated test requires administrator access";
   }
+  if (input.size() != 3) {
+    return theCommands << "Automated test only accepts a two arguments: "
+    << "index of first test to run and number of tests to run. ";
+  }
   global.millisecondsMaxComputation = 30000000; //30k seconds, ok as we have administrator access
   Calculator::Test test(theCommands);
-  if (!input.IsSmallInteger(&test.startIndex)) {
+  if (
+    !input[1].IsSmallInteger(&test.startIndex) ||
+    !input[2].IsSmallInteger(&test.numberOfTests)
+  ) {
     return theCommands
-    << "Automated test takes as single "
-    << "argument the index of the first test. "
-    << "All tests with smaller indices will be ignored. ";
+    << "Automated test takes two arguments: "
+    << "index of the first test to run and total number of tests to run after that. "
+    ;
   }
   test.CalculatorTestRun();
   return output.AssignValue(test.reportHtml, theCommands);
@@ -1874,16 +1883,22 @@ bool Calculator::Test::ProcessResults() {
   }
   std::stringstream goodCommands, unknownCommands, badCommands;
   this->inconsistencies = 0;
-  if (this->startIndex > 0) {
-    out << "<b style='color:red'>Only " << this->commands.size() - this->startIndex
+  if (
+    this->startIndex > 0 ||
+    this->lastIndexNotTested < this->commands.size()
+  ) {
+    out << "<b style='color:red'>Only " << this->numberOfTests
     << " out of " << this->commands.size() << " processed. </b>";
   }
-  for (int i = this->startIndex; i < this->commands.size(); i ++) {
+  for (int i = this->startIndex; i < this->lastIndexNotTested; i ++) {
     Calculator::Test::OneTest& currentTest = this->commands.theValues[i];
     std::stringstream currentLine;
     currentLine << "<tr>";
+    currentLine << "<td>" << i << "</td>";
+    currentLine << "<td style = 'min-width:200px'>" << currentTest.functionAdditionalIdentifier
+    << "</td>";
     currentLine << "<td>" << currentTest.atom << "</td>";
-    currentLine << "<td>" << this->commands.theKeys[i] << "</td>";
+    currentLine << "<td  style = 'min-width:200px'>" << global.ToStringCalculatorComputation(this->commands.theKeys[i], this->commands.theKeys[i]) << "</td>";
     bool isBad = false;
     bool isUknown = false;
     if (currentTest.actualResult == currentTest.expectedResult) {

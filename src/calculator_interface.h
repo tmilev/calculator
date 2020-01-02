@@ -1995,6 +1995,8 @@ public:
   public:
     int64_t startTime;
     int startIndex;
+    int numberOfTests;
+    int lastIndexNotTested;
     int inconsistencies;
     int unknown;
     // see Function::Options::
@@ -2005,6 +2007,7 @@ public:
     class OneTest {
     public:
       std::string atom;
+      std::string functionAdditionalIdentifier;
       std::string command;
       // empty string = not computed
       std::string actualResult;

@@ -348,19 +348,23 @@ bool CalculatorFunctions::innerAutomatedTestProblemInterpretation(
   if (!global.UserDefaultHasAdminRights()) {
     return theCommands << "Automated tests available to logged-in admins only. ";
   }
-  if (input.size() != 3) {
+  if (input.size() != 4) {
     return theCommands
     << "I expected two arguments: "
     << "1) index of first problem to test, where "
     << "0 = start at beginning, 1 = start at second problem, etc.; "
-    << "2) number of problems to test (0 or less = test all).";
+    << "2) number of problems to test (0 or less = test all); "
+    << "3) starting random seed, set to 0 if you don't know what this is. "
+    ;
   }
   int desiredNumberOfTests = 0;
   int firstFileIndex = 0;
+  int randomSeed = 0;
   input[1].IsSmallInteger(&firstFileIndex);
   input[2].IsSmallInteger(&desiredNumberOfTests);
+  input[3].IsSmallInteger(&randomSeed);
   std::stringstream comments;
-  CalculatorHTML::Test::BuiltInMultiple(firstFileIndex, desiredNumberOfTests, 0, 3, &comments);
+  CalculatorHTML::Test::BuiltInMultiple(firstFileIndex, desiredNumberOfTests, randomSeed, 3, &comments);
   return output.AssignValue(comments.str(), theCommands);
 }
 

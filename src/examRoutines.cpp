@@ -459,14 +459,16 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON(
   std::stringstream out;
   if (!this->InterpretHtml(commentsOnFailure)) {
     out << "<b>Failed to interpret file: " << this->fileName << "</b>. ";
-    out << "<br>We limit the number of generation attemps to 10 for performance reasons; "
+    out << "<br>We limit the number of generation attemps to "
+    << this->MaxInterpretationAttempts << " for performance reasons; "
     << "with bad luck, some finicky problems require more. "
+    << "Random seeds tried: "
+    << this->randomSeedsIfInterpretationFails.ToStringCommaDelimited()
     << "<br> <b>Please refresh the page.</b><br>";
     if (!this->flagIsForReal) {
       out
-      << "If you specified the problem through the 'problem link' link,"
-      << " please go back to the course page. Alternatively, remove the randomSeed=... "
-      << "portion of the page address and reload the page (with the randomSeed portion removed). ";
+      << "If you specified the problem through the 'problem link' link, "
+      << "please go back to the course page. ";
     } else {
       out << "<b>Your random seed must have been reset. </b>";
     }
@@ -1924,7 +1926,9 @@ bool CalculatorHTML::InterpretHtml(std::stringstream* comments) {
     }
     this->timePerAttempt.AddOnTop(global.GetElapsedSeconds() - startTime);
     if (this->NumAttemptsToInterpret >= this->MaxInterpretationAttempts && comments != nullptr) {
-      *comments << commentsOnLastFailure.str();
+      *comments << "Failed attempt " << this->NumAttemptsToInterpret
+      << " to interpret your file. Last interpretation failure follows. <br>"
+      << commentsOnLastFailure.str();
     }
   }
   if (comments != nullptr) {

@@ -253,13 +253,46 @@ void Calculator::initPredefinedInnerFunctions() {
     innerStandard
   );
   this->AddOperationHandler(
-    "if",
-    CalculatorFunctions::innerIf,
+    "IfStandard",
+    CalculatorFunctions::innerIfStandard,
     "",
-    "if function. Takes 3 arguments. If first argument is true (equal to 1) "
-    "then returns the second argument. If the first argument is false (equal to 0) "
-    "returns the third argument. In any other situation the expression is not reduced. ",
-    "if (1, x, y); if (0, x, y); if (2, x, y)",
+    "Standard if function. Takes 3 arguments. "
+    "If first argument is true (equal to 1) "
+    "then returns the second argument. "
+    "If the first argument is false (equal to 0) "
+    "returns the third argument. "
+    "In any other situation the expression is not reduced. "
+    "Important note: both outcome subexpression of IfStandard. "
+    "are evaluated, as illustrated by the built-in example. ",
+    "IfStandard (1, x, y);\n"
+    "IfStandard (0, x, y);\n"
+    "IfStandard (2, x, y)",
+    "CalculatorConversions::innerIfStandard",
+    "IfStandard",
+    innerStandard
+  );
+  this->AddOperationHandler(
+    "if",
+    CalculatorFunctions::innerIfFrozen,
+    "",
+    "Frozen if function. "
+    "Similar to the IfStandard function but does not "
+    "evaluate the second and third argument unless expected. "
+    "More precisely, "
+    "this function evaluates the first argument, "
+    "keeping the second and third argument frozen. "
+    "Then the first argument is compared to zero or one. "
+    "1) If it equals neither, the expression is not reduced further. "
+    "2) If the first argument equals one, "
+    "the expression is replaced with its second argument. "
+    "3) If the first argument equals zero, "
+    "the expression is replaced with its third argument.\n",
+    "if (1, x, y);\n"
+    "if (1, x, 1 / 0);\n"
+    "if (2 - 1, x, 1 / 0);\n"
+    "if (1 + 1, 1 / 0, 1 / 0);\n"
+    "if (0, x, 1 / 0);\n"
+    ,
     "CalculatorConversions::innerIf",
     "if",
     innerStandard
@@ -1188,12 +1221,16 @@ void Calculator::initPredefinedInnerFunctions() {
     "problems located in the problems/default/ folder. "
     "First argument = index of first problem to test. "
     "Second argument = number of problems to test. "
+    "Third argument = starting random seed. "
     "To test a particular problem, set the index of the "
     "first problem to that of your problem, and set the "
     "number of problems to test to 1. To find out the index"
     "of your problem, run the entire test array once and "
-    "the index of each problem file will be listed in the output.",
-    "TestProblemInterpretation{}(0, 0)",
+    "the index of each problem file will be listed in the output. "
+    "Until first error is seen, every test will be run a number of times, "
+    "3 at the time of writing. "
+    "The random seed will be incremented for each run. ",
+    "TestProblemInterpretation{}(0, 0, 0)",
     "CalculatorFunctions::innerAutomatedTestProblemInterpretation",
     "TestProblemInterpretation",
     innerAdminNoTest
@@ -8146,6 +8183,7 @@ void Calculator::initAtomsThatFreezeArguments() {
   this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("ElementWeylAlgebraDO"); //<-needed to facilitate civilized context handling
   this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("ElementWeylAlgebraPoly"); //<-needed to facilitate civilized context handling
   this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("Freeze");
+  this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("if");
   this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("Bind");
   this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogEvaluationStepsHumanReadableNested");
   this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogEvaluationStepsHumanReadableMerged");

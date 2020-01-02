@@ -9190,10 +9190,10 @@ bool CalculatorFunctions::innerOr(
   return false;
 }
 
-bool CalculatorFunctions::innerIf(
+bool CalculatorFunctions::innerIfStandard(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIf");
+  MacroRegisterFunctionWithName("CalculatorFunctions::innerIfStandard");
   (void) theCommands; //portable way of avoiding unused parameter warning
   if (input.size() != 4) {
     return false;
@@ -9203,6 +9203,37 @@ bool CalculatorFunctions::innerIf(
     return true;
   }
   if (input[1].IsEqualToZero()) {
+    output = input[3];
+    return true;
+  }
+  return false;
+}
+
+bool CalculatorFunctions::innerIfFrozen(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::innerIfFrozen");
+  (void) theCommands; //portable way of avoiding unused parameter warning
+  if (input.size() != 4) {
+    return false;
+  }
+  Expression firstArgument;
+  if (!theCommands.EvaluateExpression(theCommands, input[1], firstArgument)) {
+    return false;
+  }
+  if (input[1] != firstArgument) {
+    output.reset(theCommands);
+    output.AddChildAtomOnTop("if");
+    output.AddChildOnTop(firstArgument);
+    output.AddChildOnTop(input[2]);
+    output.AddChildOnTop(input[3]);
+    return true;
+  }
+  if (firstArgument.IsEqualToOne()) {
+    output = input[2];
+    return true;
+  }
+  if (firstArgument.IsEqualToZero()) {
     output = input[3];
     return true;
   }

@@ -377,7 +377,8 @@ public:
     return innerDrawExpressionGraphWithOptions(theCommands, input, output, true);
   }
 
-  static bool innerIf(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerIfStandard(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerIfFrozen(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerOr(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerOrIdentical(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAnd(Calculator& theCommands, const Expression& input, Expression& output);

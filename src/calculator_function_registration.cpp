@@ -816,7 +816,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "LoadKnownCertificates(0);",
     "CalculatorFunctions::innerLoadKnownCertificates",
     "LoadKnownCertificates",
-    innerStandard
+    innerAdminNoTest
   );
   this->AddOperationHandler(
     "TestLoadPEMCertificate",
@@ -1208,10 +1208,10 @@ void Calculator::initPredefinedInnerFunctions() {
     "",
     "Runs an automated test of all built in functions "
     "against a set of known good results. ",
-    "AutomatedTest{}(0)",
+    "TestCalculatorAll{}(0)",
     "Calculator::innerAutomatedTest",
     "TestCalculatorAll",
-    innerAdminNoTestInvisibleOffByDefault
+    innerAdminNoTest
   );
   this->AddOperationHandler(
     "TestProblemInterpretation",

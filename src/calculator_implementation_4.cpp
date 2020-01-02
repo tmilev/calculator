@@ -720,12 +720,13 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
   }
   latexReport << "\\end{longtable}";
   out << "</table>";
-  out << "<br>Multiplications needed to embed generators: " << totalMultiplications << ". ";
-  out << "<br>Additions needed to embed generators: " << totalAdditions << ". ";
-  out << "<br>Total time to embed generators: see comments. ";
+  out << "<br>Performance notes: see comments. ";
   //please keep this report in the comments section for reasons of reproducibility of the
   //string output!
-  theCommands << "<hr>Total time to embed generators invoked by command: " << input.ToString()
+  theCommands << "<hr>"
+  << "Multiplications needed to embed generators: " << totalMultiplications << ".<br>"
+  << "Additions needed to embed generators: " << totalAdditions << ".<br>"
+  << "Total time to embed generators invoked by command: " << input.ToString()
   << ": <br>" << totalTime << " seconds. ";
   out << reportCalculatorCommands.str();
   out << reportFourierTransformedCalculatorCommands.str();

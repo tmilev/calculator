@@ -182,6 +182,8 @@ public:
   bool flagRunningCommandLine;
   bool flagRunningConsoleTest;
   bool flagRunningBuiltInWebServer;
+
+  // bool flagTesting;
   //webserver flags and variables
   bool flagRunServerOnEmptyCommandLine;
   bool flagCachingInternalFilesOn;

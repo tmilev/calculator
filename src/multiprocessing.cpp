@@ -995,7 +995,11 @@ logger& logger::operator<<(const std::string& input) {
 logger& logger::operator<<(const loggerSpecialSymbols& input) {
   this->initializeIfNeeded();
   this->CheckLogSize();
-  bool doUseColors = global.flagRunningBuiltInWebServer || global.flagRunningCommandLine;
+  bool doUseColors =
+    global.flagRunningBuiltInWebServer ||
+    global.flagRunningCommandLine ||
+    global.flagRunningConsoleTest
+  ;
   switch (input) {
     case logger::endL:
       std::cout << this->getStampShort() << this->bufferStandardOutput;

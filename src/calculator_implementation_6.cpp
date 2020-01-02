@@ -182,6 +182,8 @@ bool CalculatorHTML::Test::OneProblemTest::Run() {
   randomSeedStringStarting << this->randomSeed;
   theProblem.fileName = this->fileName;
   this->flagSuccess = false;
+  StateMaintainer<MapList<std::string, std::string, MathRoutines::HashString> >
+  maintainArguments(global.webArguments);
   if (!theProblem.LoadMe(false, randomSeedStringStarting.str(), &commentsOnFailure)) {
     this->errorLoad = commentsOnFailure.str();
     return this->flagSuccess;
@@ -197,13 +199,13 @@ bool CalculatorHTML::Test::OneProblemTest::Run() {
   this->answers.SetSize(theProblem.theProblemData.theAnswers.size());
   this->flagAllBuiltInAnswersOK = true;
   global.SetWebInpuT(WebAPI::problem::fileName, theProblem.fileName);
+  global.SetWebInpuT(WebAPI::problem::randomSeed, randomSeedStream.str());
   this->flagSuccess = true;
   for (int j = 0; j < this->answers.size; j ++) {
     CalculatorHTML::Test::OneProblemTest::OneAnswer& current = this->answers[j];
     current.answerId = theProblem.theProblemData.theAnswers.theValues[j].answerId;
     current.answerIdWebAPI = "calculatorAnswer" + current.answerId;
     global.SetWebInpuT(current.answerIdWebAPI, "1");
-    global.SetWebInpuT(WebAPI::problem::randomSeed, randomSeedStream.str());
     current.builtInAnswerAPICall = WebAPIResponse::GetAnswerOnGiveUp(
       randomSeedStream.str(),
       &current.builtInAnswer,
@@ -343,7 +345,7 @@ bool CalculatorHTML::Test::BuiltIn(
     << "). Random seed: "
     << this->randomSeed << ".";
     if (global.flagRunningConsoleTest) {
-      global << reportStream.str() << "\n" << logger::endL;
+      global << reportStream.str() << logger::endL;
     }
     theReport.Report(reportStream.str());
     if (!currentTest.Run()) {
@@ -351,10 +353,13 @@ bool CalculatorHTML::Test::BuiltIn(
     }
     if (global.flagRunningConsoleTest) {
       if (!currentTest.flagSuccess) {
-        global << logger::red << "Failure @ index: " << i << ".\n"
+        global << logger::red << "Failure @ index: " << i << ". "
+        << "Elapsed ms: " << global.GetElapsedMilliseconds() << ". "
         << logger::endL;
       } else {
-        global << logger::red << "Success @ index: " << i << ".\n" << logger::endL;
+        global << logger::green << "Success @ index: " << i << ". "
+        << "Elapsed ms: " << global.GetElapsedMilliseconds() << ". "
+        << logger::endL;
       }
     }
   }

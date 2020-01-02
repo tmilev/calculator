@@ -12,6 +12,7 @@ int mainTest(List<std::string>& inputArguments) {
   global << "Testing ..." << logger::endL;
   (void) inputArguments;
   // theWebServer.InitializeGlobalVariables();
+  global.millisecondsMaxComputation = 100000000;
   CalculatorHTML::Test::All();
   Database::Test::All();
   JSData::Test::All();

@@ -190,9 +190,9 @@ const List<Function>* Calculator::GetOperationHandlers(int theOp) {
 }
 
 bool Calculator::outerStandardCompositeHandler(
-  Calculator &theCommands,
-  const Expression &input,
-  Expression &output,
+  Calculator& theCommands,
+  const Expression& input,
+  Expression& output,
   int opIndexParentIfAvailable
 ) {
   if (!input.IsLisT()) {
@@ -209,7 +209,7 @@ bool Calculator::outerStandardCompositeHandler(
   for (int i = 0; i < theHandlers->size; i ++) {
     Function& currentHandler = (*theHandlers)[i];
     if (currentHandler.ShouldBeApplied(opIndexParentIfAvailable)) {
-      if (currentHandler.theFunction(theCommands, input, output)) {
+      if (currentHandler.Apply(theCommands, input, output, opIndexParentIfAvailable)) {
         theCommands.DoLogEvaluationIfNeedBe(currentHandler);
         return true;
       }
@@ -225,7 +225,7 @@ bool Function::CheckConsistency() const {
   return true;
 }
 
-bool Function::Apply(Calculator &theCommands, const Expression &input, Expression &output, int opIndexParentIfAvailable) {
+bool Function::Apply(Calculator& theCommands, const Expression& input, Expression& output, int opIndexParentIfAvailable) {
   if (!this->ShouldBeApplied(opIndexParentIfAvailable)) {
     return false;
   }
@@ -242,25 +242,12 @@ bool Function::Apply(Calculator &theCommands, const Expression &input, Expressio
     }
     return false;
   }
-  if (input.size() > 2) {
-    if (this->inputFitsMyInnerType(input)) {
-      if (this->theFunction(theCommands, input, output)) {
-        output.CheckConsistency();
-        theCommands.DoLogEvaluationIfNeedBe(*this);
-        return true;
-      }
+  if (this->inputFitsMyInnerType(input)) {
+    if (this->theFunction(theCommands, input, output)) {
+      output.CheckConsistency();
+      theCommands.DoLogEvaluationIfNeedBe(*this);
+      return true;
     }
-    return false;
-  }
-  if (input.size() == 2) {
-    if (this->inputFitsMyInnerType(input[1])) {
-      if (this->theFunction(theCommands, input[1], output)) {
-        output.CheckConsistency();
-        theCommands.DoLogEvaluationIfNeedBe(*this);
-        return true;
-      }
-    }
-    return false;
   }
   return false;
 }

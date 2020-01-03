@@ -836,8 +836,11 @@ bool CalculatorFunctions::innerLog(Calculator& theCommands, const Expression& in
 
 bool CalculatorFunctions::innerFactorial(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerFactorial");
+  if (input.size() != 2) {
+    return false;
+  }
   int inputInt = - 1;
-  if (!input.IsIntegerFittingInInt(&inputInt)) {
+  if (!input[1].IsIntegerFittingInInt(&inputInt)) {
     return false;
   }
   if (inputInt < 0) {
@@ -1178,11 +1181,23 @@ bool CalculatorFunctions::innerSolveSerreLikeSystem(
   input.StartsWith(theCommands.GetOperations().GetIndexIMustContainTheObject("FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit"));
 
   if (useArguments) {
-    if (!theCommands.GetVectorFromFunctionArguments(input, thePolysRational, &theContext, 0, CalculatorConversions::innerPolynomial<Rational>)) {
+    if (!theCommands.GetVectorFromFunctionArguments(
+      input,
+      thePolysRational,
+      &theContext,
+      0,
+      CalculatorConversions::functionPolynomiaL<Rational>
+    )) {
       return output.MakeError("Failed to extract list of polynomials. ", theCommands);
     }
   } else {
-    if (!theCommands.GetVectoR(input, thePolysRational, &theContext, 0, CalculatorConversions::innerPolynomial<Rational>)) {
+    if (!theCommands.GetVectoR(
+      input,
+      thePolysRational,
+      &theContext,
+      0,
+      CalculatorConversions::functionPolynomiaL<Rational>
+    )) {
       return output.MakeError("Failed to extract list of polynomials. ", theCommands);
     }
   }
@@ -1253,8 +1268,11 @@ bool CalculatorFunctions::innerGetAlgebraicNumberFromMinPoly(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerGetAlgebraicNumberFromMinPoly");
   Expression polyE;
-  if (!CalculatorConversions::innerPolynomial<AlgebraicNumber>(theCommands, input, polyE)) {
-    return theCommands << "<hr>Failed to convert " << input.ToString() << " to polynomial. ";
+  if (!CalculatorConversions::innerPolynomiaL<AlgebraicNumber>(
+    theCommands, input, polyE
+  )) {
+    return theCommands << "<hr>Failed to convert "
+    << input.ToString() << " to polynomial. ";
   }
   Polynomial<AlgebraicNumber> thePoly;
   if (!polyE.IsOfType<Polynomial<AlgebraicNumber> >(&thePoly)) {
@@ -3587,7 +3605,11 @@ bool CalculatorFunctions::innerPolynomialRelations(
     output.children.AddOnTop(input.children[i]);
   }
   if (!theCommands.GetVectorFromFunctionArguments<Polynomial<Rational> >(
-    output, inputVector, &theContext, - 1, CalculatorConversions::innerPolynomial<Rational>
+    output,
+    inputVector,
+    &theContext,
+    - 1,
+    CalculatorConversions::functionPolynomiaL<Rational>
   )) {
     return output.MakeError("Failed to extract polynomial expressions", theCommands);
   }
@@ -3627,10 +3649,14 @@ bool CalculatorFunctions::outerPolynomialize(Calculator& theCommands, const Expr
   if (input.HasBoundVariables()) {
     return false;
   }
-  if (!CalculatorConversions::innerPolynomial<Rational>(theCommands, input, thePolyE)) {
+  if (!CalculatorConversions::innerPolynomiaL<Rational>(
+    theCommands, input, thePolyE
+  )) {
     return false;
   }
-  if (!CalculatorConversions::innerExpressionFromBuiltInType(theCommands, thePolyE, output)) {
+  if (!CalculatorConversions::innerExpressionFromBuiltInType(
+    theCommands, thePolyE, output
+  )) {
     return false;
   }
   return true;
@@ -4260,7 +4286,9 @@ bool CalculatorFunctions::innerIntegrateSinPowerNCosPowerM(
     return false;
   }
   Expression polynomializedFunctionE;
-  if (!CalculatorConversions::innerPolynomial<Rational>(theCommands, theFunctionE, polynomializedFunctionE)) {
+  if (!CalculatorConversions::functionPolynomiaL<Rational>(
+    theCommands, theFunctionE, polynomializedFunctionE
+  )) {
     return false;
   }
   if (!polynomializedFunctionE.IsOfType<Polynomial<Rational> >()) {
@@ -4398,7 +4426,9 @@ bool CalculatorFunctions::innerIntegrateTanPowerNSecPowerM(
     return false;
   }
   Expression polynomializedFunctionE;
-  if (!CalculatorConversions::innerPolynomial<Rational>(theCommands, theFunctionE, polynomializedFunctionE)) {
+  if (!CalculatorConversions::functionPolynomiaL<Rational>(
+    theCommands, theFunctionE, polynomializedFunctionE
+  )) {
     return false;
   }
   if (!polynomializedFunctionE.IsOfType<Polynomial<Rational> >()) {
@@ -4914,7 +4944,7 @@ bool CalculatorFunctions::outerAtimesBpowerJplusEtcDivBpowerI(
     return false;
   }
   MonomialCollection<Expression, Rational> numerators, numeratorsNew;
-  theCommands.CollectSummands(theCommands, input[1], numerators);
+  theCommands.functionCollectSummands(theCommands, input[1], numerators);
   numeratorsNew.SetExpectedSize(numerators.size());
   numeratorsNew.MakeZero();
   Expression numeratorMultiplicandLeft, numeratorMultiplicandRight, numeratorBaseRight, numeratorExponentRight;
@@ -6590,8 +6620,12 @@ bool CalculatorFunctions::innerGetCentralizerChainsSemisimpleSubalgebras(
 
 bool CalculatorFunctions::innerEvaluateToDouble(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Expression::innerEvaluateToDouble");
+  if (input.size() != 2) {
+    // One argument expected.
+    return false;
+  }
   double theValue = 0;
-  if (!input.EvaluatesToDouble(&theValue)) {
+  if (!input[1].EvaluatesToDouble(&theValue)) {
     return false;
   }
   return output.AssignValue(theValue, theCommands);
@@ -7251,7 +7285,11 @@ bool CalculatorFunctions::innerWriteGenVermaModAsDiffOperatorUpToLevel(
   Vector<Polynomial<Rational> > highestWeightFundCoords;
   Expression hwContext(theCommands);
   if (!theCommands.GetVectoR(
-    genVemaWeightNode, highestWeightFundCoords, &hwContext, theRank, CalculatorConversions::innerPolynomial<Rational>
+    genVemaWeightNode,
+    highestWeightFundCoords,
+    &hwContext,
+    theRank,
+    CalculatorConversions::functionPolynomiaL<Rational>
   )) {
     return theCommands
     << "Failed to convert the third argument of innerSplitGenericGenVermaTensorFD to a list of " << theRank

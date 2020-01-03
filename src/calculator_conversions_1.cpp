@@ -43,7 +43,17 @@ bool CalculatorConversions::innerLoadWeylGroup(Calculator& theCommands, const Ex
   return output.AssignValue(theSA.theWeyl, theCommands);
 }
 
-bool CalculatorConversions::innerDynkinSimpleType(
+bool CalculatorConversions::innerDynkinSimpleTypE(
+  Calculator& theCommands, const Expression& input, DynkinSimpleType& outputMon
+) {
+  MacroRegisterFunctionWithName("CalculatorConversions::innerDynkinSimpleTypE");
+  if (input.size() != 2) {
+    return theCommands << "Dynkin simple type function requires a single argument. ";
+  }
+  return CalculatorConversions::functionDynkinSimpleType(theCommands, input[1], outputMon);
+}
+
+bool CalculatorConversions::functionDynkinSimpleType(
   Calculator& theCommands, const Expression& input, DynkinSimpleType& outputMon
 ) {
   MacroRegisterFunctionWithName("CalculatorBuiltInTypeConversions::DeSerializeMon_DynkinSimpleType");
@@ -142,16 +152,19 @@ bool CalculatorConversions::innerDynkinSimpleType(
 }
 
 bool CalculatorConversions::innerDynkinType(Calculator& theCommands, const Expression& input, DynkinType& output) {
-  RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("Calculator::innerLoadDynkinType");
+  RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
+  if (input.size() != 2) {
+    return theCommands << "Dynkin type takes as input one argument. ";
+  }
   MonomialCollection<Expression, Rational> theType;
-  if (!theCommands.CollectSummands(theCommands, input, theType)) {
+  if (!theCommands.functionCollectSummands(theCommands, input[1], theType)) {
     return false;
   }
   DynkinSimpleType simpleComponent;
   output.MakeZero();
   for (int i = 0; i < theType.size(); i ++) {
-    if (!CalculatorConversions::innerDynkinSimpleType(theCommands, theType[i], simpleComponent)) {
+    if (!CalculatorConversions::functionDynkinSimpleType(theCommands, theType[i], simpleComponent)) {
       return false;
     }
     int theMultiplicity = - 1;
@@ -804,7 +817,7 @@ bool CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
   MacroRegisterFunctionWithName("CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers");
   Expression polyFormE;
   Polynomial<AlgebraicNumber> polyForm;
-  bool polyFormGood = CalculatorConversions::innerPolynomial<AlgebraicNumber>(theCommands, input, polyFormE);
+  bool polyFormGood = CalculatorConversions::functionPolynomiaL<AlgebraicNumber>(theCommands, input, polyFormE);
   if (polyFormGood) {
     polyFormGood = polyFormE.IsOfType<Polynomial<AlgebraicNumber> >(&polyForm);
   }
@@ -870,6 +883,10 @@ bool CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
 bool CalculatorConversions::innerElementUE(
   Calculator& theCommands, const Expression& input, Expression& output, SemisimpleLieAlgebra& owner
 ) {
+  MacroRegisterFunctionWithName("CalculatorConversions::innerElementUE");
+  if (input.size() != 2) {
+    return theCommands << "Universal enveloping algebra element expects a single argument. ";
+  }
   ChevalleyGenerator theChevGen;
   theChevGen.owner = &owner;
   ElementUniversalEnveloping<RationalFunctionOld> outputUE;
@@ -880,12 +897,12 @@ bool CalculatorConversions::innerElementUE(
   RationalFunctionOld currentMultiplicandRFpart;
   outputUE.MakeZero(owner);
   Expression polyE;
-  if (!CalculatorConversions::innerPolynomial<Rational>(theCommands, input, polyE)) {
-    return theCommands << "<hr>Failed to convert " << input.ToString() << " to polynomial.<hr>";
+  if (!CalculatorConversions::functionPolynomiaL<Rational>(theCommands, input[1], polyE)) {
+    return theCommands << "<hr>Failed to convert " << input[1].ToString() << " to polynomial.<hr>";
   }
   Polynomial<Rational> theP;
   if (polyE.IsError() || !polyE.IsOfType<Polynomial<Rational> >(&theP)) {
-    return theCommands << "<hr>Failed to convert " << input.ToString()
+    return theCommands << "<hr>Failed to convert " << input[1].ToString()
     << " to polynomial. Instead I got " << polyE.ToString() << ". <hr>";
   }
   Expression theContext = polyE.GetContext();
@@ -899,7 +916,7 @@ bool CalculatorConversions::innerElementUE(
     for (int i = 0; i < currentMon.GetMinNumVars(); i ++) {
       int thePower = - 1;
       if (!currentMon(i).IsSmallInteger(&thePower)) {
-        return theCommands << "<hr>Failed to convert one of the exponents appearing in " << input.ToString()
+        return theCommands << "<hr>Failed to convert one of the exponents appearing in " << input[1].ToString()
         << " to  a small integer polynomial.<hr>";
       }
       if (thePower == 0) {
@@ -907,7 +924,7 @@ bool CalculatorConversions::innerElementUE(
       }
       Expression singleChevGenE = theContext.ContextGetContextVariable(i);
       if (!singleChevGenE.IsListNElements(2)) {
-        return theCommands << "<hr>Failed to convert " << input.ToString() << " to polynomial.<hr>";
+        return theCommands << "<hr>Failed to convert " << input[1].ToString() << " to polynomial.<hr>";
       }
       std::string theLetter;
       if (
@@ -1120,12 +1137,15 @@ bool CalculatorConversions::innerRationalFunction(Calculator& theCommands, const
 
 bool CalculatorConversions::innerMatrixRational(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerMatrixRational");
+  if (input.size() != 2) {
+    return false;
+  }
   Matrix<Rational> outputMat;
-  if (input.IsMatrixGivenType<Rational>()) {
+  if (input[1].IsMatrixGivenType<Rational>()) {
     output = input;
     return true;
   }
-  if (!theCommands.GetMatriXFromArguments(input, outputMat, nullptr, - 1, nullptr)) {
+  if (!theCommands.GetMatriXFromArguments(input[1], outputMat, nullptr, - 1, nullptr)) {
     return theCommands << "<br>Failed to get matrix of rationals. ";
   }
   return output.AssignMatrix(outputMat, theCommands);

@@ -163,8 +163,17 @@ bool CalculatorFunctionsBinaryOps::innerDivideTypeByType(Calculator& theCommands
 }
 
 template <class coefficient>
-bool CalculatorConversions::innerPolynomial(Calculator& theCommands, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorConversions::innerPolynomial");
+bool CalculatorConversions::innerPolynomiaL(Calculator& theCommands, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorConversions::innerPolynomiaL");
+  if (input.size() != 2) {
+    return false;
+  }
+  return CalculatorConversions::functionPolynomiaL<coefficient>(theCommands, input[1], output);
+}
+
+template <class coefficient>
+bool CalculatorConversions::functionPolynomiaL(Calculator& theCommands, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorConversions::functionPolynomial");
   RecursionDepthCounter theRecursionCounter(&theCommands.RecursionDeptH);
   if (theCommands.RecursionDeptH > theCommands.MaxRecursionDeptH) {
     return theCommands << "Max recursion depth of " << theCommands.MaxRecursionDeptH
@@ -188,7 +197,7 @@ bool CalculatorConversions::innerPolynomial(Calculator& theCommands, const Expre
     theComputed.reset(theCommands, input.size());
     theComputed.AddChildOnTop(input[0]);
     for (int i = 1; i < input.size(); i ++) {
-      if (!CalculatorConversions::innerPolynomial<coefficient>(theCommands, input[i], theConverted)) {
+      if (!CalculatorConversions::functionPolynomiaL<coefficient>(theCommands, input[i], theConverted)) {
         return theCommands << "<hr>Failed to extract polynomial from " << input[i].ToString();
       }
       theComputed.AddChildOnTop(theConverted);
@@ -209,7 +218,7 @@ bool CalculatorConversions::innerPolynomial(Calculator& theCommands, const Expre
       if (i == 2) {
         summand *= - 1;
       }
-      if (!CalculatorConversions::innerPolynomial<coefficient>(theCommands, summand, theConverted)) {
+      if (!CalculatorConversions::functionPolynomiaL<coefficient>(theCommands, summand, theConverted)) {
         return theCommands << "<hr>Failed to extract polynomial from " << summand.ToString();
       }
       theComputed.AddChildOnTop(theConverted);
@@ -220,7 +229,7 @@ bool CalculatorConversions::innerPolynomial(Calculator& theCommands, const Expre
   int thePower = - 1;
   if (input.StartsWith(theCommands.opThePower(), 3)) {
     if (input[2].IsSmallInteger(&thePower)) {
-      if (!CalculatorConversions::innerPolynomial<coefficient>(theCommands, input[1], theConverted)) {
+      if (!CalculatorConversions::functionPolynomiaL<coefficient>(theCommands, input[1], theConverted)) {
         return theCommands << "<hr>Failed to extract polynomial from " << input[1].ToString() << ".";
       }
       Polynomial<coefficient> resultP = theConverted.GetValue<Polynomial<coefficient> >();

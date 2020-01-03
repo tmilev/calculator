@@ -1592,10 +1592,12 @@ bool Calculator::CollectOpandsAccumulate(
   return true;
 }
 
-bool Calculator::CollectSummands(
-  Calculator& theCommands, const Expression& input, MonomialCollection<Expression, Rational>& outputSum
+bool Calculator::functionCollectSummands(
+  Calculator& theCommands,
+  const Expression& input,
+  MonomialCollection<Expression, Rational>& outputSum
 ) {
-  MacroRegisterFunctionWithName("Calculator::CollectSummands");
+  MacroRegisterFunctionWithName("Calculator::functionCollectSummands");
   List<Expression> summands;
   theCommands.AppendSummandsReturnTrueIfOrderNonCanonical(input, summands);
   outputSum.MakeZero();
@@ -1735,7 +1737,7 @@ bool Calculator::outerPlus(Calculator& theCommands, const Expression& input, Exp
     return false;
   }
   MonomialCollection<Expression, Rational> theSum;
-  if (!theCommands.CollectSummands(theCommands, input, theSum)) {
+  if (!theCommands.functionCollectSummands(theCommands, input, theSum)) {
     return false;
   }
   theSum.QuickSortDescending();
@@ -1743,7 +1745,8 @@ bool Calculator::outerPlus(Calculator& theCommands, const Expression& input, Exp
     for (int i = 0; i < theSum.size(); i ++) {
       for (int j = i; j < theSum.size(); j ++) {
         if (theSum[i] > theSum[j] && theSum[j] > theSum[i]) {
-          global.fatal << "Faulty comparison: " << theSum[i].ToString() << " and " << theSum[j].ToString()
+          global.fatal << "Faulty comparison: "
+          << theSum[i].ToString() << " and " << theSum[j].ToString()
           << " are mutually greater than one another. " << global.fatal;
         }
       }
@@ -2861,11 +2864,15 @@ void ObjectContainer::reset() {
 }
 
 template <>
-bool CalculatorConversions::innerPolynomial<Rational>(Calculator& theCommands, const Expression& input, Expression& output);
+bool CalculatorConversions::functionPolynomiaL<Rational>(Calculator& theCommands, const Expression& input, Expression& output);
 
 bool Calculator::innerWriteGenVermaModAsDiffOperators(
-  Calculator& theCommands, const Expression& input, Expression& output, bool AllGenerators,
-  bool useNilWeight, bool ascending
+  Calculator& theCommands,
+  const Expression& input,
+  Expression& output,
+  bool AllGenerators,
+  bool useNilWeight,
+  bool ascending
 ) {
   MacroRegisterFunctionWithName("Calculator::innerWriteGenVermaModAsDiffOperators");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
@@ -2889,7 +2896,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperators(
     theParSel,
     theContext,
     theSSalgebra,
-    CalculatorConversions::innerPolynomial<Rational>)
+    CalculatorConversions::functionPolynomiaL<Rational>)
   ) {
     return output.MakeError("Failed to extract type, highest weight, parabolic selection", theCommands);
   }

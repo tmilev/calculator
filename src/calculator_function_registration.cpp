@@ -1417,22 +1417,22 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->AddOperationHandler(
     "Polynomial",
-    CalculatorConversions::innerPolynomial<Rational>,
+    CalculatorConversions::innerPolynomiaL<Rational>,
     "",
     "Creates a polynomial expression with rational coefficients. ",
     "Polynomial{}((x-2y+z- 1)^2(x +y-z));"
     "\nPolynomial{}(y^2)-(Polynomial{}y)^2",
-    "CalculatorConversions::innerPolynomial",
+    "CalculatorConversions::innerPolynomiaL",
     "Polynomial",
     innerStandard
   );
   this->AddOperationHandler(
     "PolynomialAlgebraicNumbers",
-    CalculatorConversions::innerPolynomial<AlgebraicNumber>,
+    CalculatorConversions::innerPolynomiaL<AlgebraicNumber>,
     "",
     "Creates a polynomial expression with algebraic number coefficients. ",
     "PolynomialAlgebraicNumbers{}((x +\\sqrt{2})^2 (\\sqrt{3}x-\\sqrt{5}));",
-    "CalculatorConversions::innerPolynomial",
+    "CalculatorConversions::innerPolynomiaL",
     "PolynomialAlgebraicNumbers",
     innerStandard
   );

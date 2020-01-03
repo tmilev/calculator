@@ -462,7 +462,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(
 
 
 template <>
-bool CalculatorConversions::innerPolynomial<Rational>(Calculator& theCommands, const Expression& input, Expression& output);
+bool CalculatorConversions::functionPolynomiaL<Rational>(Calculator& theCommands, const Expression& input, Expression& output);
 
 bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple(
   Calculator& theCommands, const Expression& input, Expression& output
@@ -484,7 +484,11 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple(
   Vector<Polynomial<Rational> > theHWfundCoords, theHWsimpleCoords;
   Expression theContext;
   if (!theCommands.GetVectoR(
-    vectorNode, theHWfundCoords, &theContext, theType.GetRank(), CalculatorConversions::innerPolynomial<Rational>
+    vectorNode,
+    theHWfundCoords,
+    &theContext,
+    theType.GetRank(),
+    CalculatorConversions::functionPolynomiaL<Rational>
   )) {
     return output.MakeError("Failed to extract highest weight", theCommands);
   }
@@ -544,13 +548,20 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSize(
   SemisimpleLieAlgebra* theSSalgebra = nullptr;
   Vector<Rational> theWeightRat;
   Expression theContextE;
-  if (theCommands.GetTypeWeight<Rational>(theCommands, input, theWeightRat, theContextE, theSSalgebra, nullptr)) {
+  if (theCommands.GetTypeWeight<Rational>(
+    theCommands, input, theWeightRat, theContextE, theSSalgebra, nullptr
+  )) {
     Rational result = theSSalgebra->theWeyl.GetOrbitSize(theWeightRat);
     return output.AssignValue(result, theCommands);
   }
   Vector<Polynomial<Rational> > theWeightPoly;
   if (theCommands.GetTypeWeight<Polynomial<Rational> >(
-    theCommands, input, theWeightPoly, theContextE, theSSalgebra,CalculatorConversions::innerPolynomial<Rational>
+    theCommands,
+    input,
+    theWeightPoly,
+    theContextE,
+    theSSalgebra,
+    CalculatorConversions::functionPolynomiaL<Rational>
   )) {
     Rational result = theSSalgebra->theWeyl.GetOrbitSize(theWeightPoly);
     return output.AssignValue(result, theCommands);
@@ -559,7 +570,11 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSize(
 }
 
 bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
-  Calculator& theCommands, const Expression& input, Expression& output, bool useFundCoords, bool useRho
+  Calculator& theCommands,
+  const Expression& input,
+  Expression& output,
+  bool useFundCoords,
+  bool useRho
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylOrbit");
   if (!input.IsListNElements(3)) {
@@ -569,7 +584,12 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
   Vector<Polynomial<Rational> > theWeight;
   Expression theContextE;
   if (!theCommands.GetTypeWeight(
-    theCommands, input, theWeight, theContextE, theSSalgebra, CalculatorConversions::innerPolynomial<Rational>
+    theCommands,
+    input,
+    theWeight,
+    theContextE,
+    theSSalgebra,
+    CalculatorConversions::functionPolynomiaL<Rational>
   )) {
     return false;
   }

@@ -151,14 +151,23 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
 }
 
 template <>
-bool CalculatorConversions::innerPolynomial<Rational>(Calculator& theCommands, const Expression& input, Expression& output);
+bool CalculatorConversions::functionPolynomiaL<Rational>(Calculator& theCommands, const Expression& input, Expression& output);
 
-bool Calculator::innerGCDOrLCMPoly(Calculator& theCommands, const Expression& input, Expression& output, bool doGCD) {
+bool Calculator::innerGCDOrLCMPoly(
+  Calculator& theCommands,
+  const Expression& input,
+  Expression& output,
+  bool doGCD
+) {
   MacroRegisterFunctionWithName("Calculator::innerGCDOrLCMPoly");
   Vector<Polynomial<Rational> > thePolys;
   Expression theContext(theCommands);
   if (!theCommands.GetVectorFromFunctionArguments(
-    input, thePolys, &theContext, 2, CalculatorConversions::innerPolynomial<Rational>
+    input,
+    thePolys,
+    &theContext,
+    2,
+    CalculatorConversions::functionPolynomiaL<Rational>
   )) {
     return output.MakeError("Failed to extract a list of 2 polynomials. ", theCommands);
   }
@@ -172,12 +181,18 @@ bool Calculator::innerGCDOrLCMPoly(Calculator& theCommands, const Expression& in
 }
 
 bool Calculator::GetListPolysVariableLabelsInLex(
-  const Expression& input, Vector<Polynomial<Rational> >& output, Expression& outputContext
+  const Expression& input,
+  Vector<Polynomial<Rational> >& output,
+  Expression& outputContext
 ) {
   MacroRegisterFunctionWithName("Calculator::GetListPolysVariableLabelsInLex");
   Expression theContextStart(*this);
   if (!this->GetVectorFromFunctionArguments(
-    input, output, &theContextStart, 0, CalculatorConversions::innerPolynomial<Rational>
+    input,
+    output,
+    &theContextStart,
+    0,
+    CalculatorConversions::functionPolynomiaL<Rational>
   )) {
     return false;
   }
@@ -612,7 +627,11 @@ bool Calculator::innerGroebner(
     }
   }
   if (!theCommands.GetVectorFromFunctionArguments<Polynomial<Rational> >(
-    output, inputVector, &theContext, - 1, CalculatorConversions::innerPolynomial<Rational>
+    output,
+    inputVector,
+    &theContext,
+    - 1,
+    CalculatorConversions::functionPolynomiaL<Rational>
   )) {
     return output.MakeError("Failed to extract polynomial expressions", theCommands);
   }
@@ -702,7 +721,11 @@ bool Calculator::innerDeterminantPolynomial(Calculator& theCommands, const Expre
   Matrix<Polynomial<Rational> > matPol;
   Expression theContext;
   if (!theCommands.GetMatriXFromArguments(
-    input, matPol, &theContext, - 1, CalculatorConversions::innerPolynomial<Rational>
+    input,
+    matPol,
+    &theContext,
+    - 1,
+    CalculatorConversions::functionPolynomiaL<Rational>
   )) {
     return theCommands << "<hr>Failed to convert the input to "
     << "matrix of polynomials. ";

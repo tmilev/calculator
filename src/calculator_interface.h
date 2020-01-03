@@ -2055,7 +2055,7 @@ public:
   );
   bool CollectOpands(const Expression& input, int theOp, List<Expression>& outputOpands);
   bool CollectOpandsAccumulate(const Expression& input, int theOp, List<Expression>& outputOpands);
-  static bool CollectSummands(
+  static bool functionCollectSummands(
     Calculator& theCommands,
     const Expression& input,
     MonomialCollection<Expression, Rational>& outputSum
@@ -2455,13 +2455,16 @@ public:
     SemisimpleLieAlgebra& owner
   );
   static bool innerDynkinType(Calculator& theCommands, const Expression& input, DynkinType& output);
-  static bool innerDynkinSimpleType(Calculator& theCommands, const Expression& input, DynkinSimpleType& output);
+  static bool innerDynkinSimpleTypE(Calculator& theCommands, const Expression& input, DynkinSimpleType& output);
+  static bool functionDynkinSimpleType(Calculator& theCommands, const Expression& input, DynkinSimpleType& output);
   static bool innerSlTwoSubalgebraPrecomputed(Calculator& theCommands, const Expression& input, slTwoSubalgebra& output);
   static bool innerLoadFromObject(Calculator& theCommands, const Expression& input, RationalFunctionOld& output);
   static bool innerAlgebraicNumber(Calculator& theCommands, const Expression& input, Expression& output);
+  template <class coefficient>
+  static bool innerPolynomiaL(Calculator& theCommands, const Expression& input, Expression& output);
   //conversions from expression tree to expression containing type
   template <class coefficient>
-  static bool innerPolynomial(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool functionPolynomiaL(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerRationalFunction(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerElementUE(
     Calculator& theCommands, const Expression& input, Expression& output, SemisimpleLieAlgebra& inputOwner

@@ -1399,13 +1399,14 @@ void Polynomial<coefficient>::GetValuesLagrangeInterpolandsAtConsecutivePoints(
 }
 
 template <>
-bool CalculatorConversions::innerPolynomial<Rational>(Calculator& theCommands, const Expression& input, Expression& output);
-
+bool CalculatorConversions::innerPolynomiaL<Rational>(Calculator& theCommands, const Expression& input, Expression& output);
+template <>
+bool CalculatorConversions::functionPolynomiaL<Rational>(Calculator& theCommands, const Expression& input, Expression& output);
 
 bool Calculator::innerFactorPoly(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerFactorPoly");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
-  if (!theCommands.CallCalculatorFunction(CalculatorConversions::innerPolynomial<Rational>, input, output)) {
+  if (!theCommands.CallCalculatorFunction(CalculatorConversions::innerPolynomiaL<Rational>, input, output)) {
     return false;
   }
   Expression theContext = output.GetContext();
@@ -1707,7 +1708,11 @@ bool Calculator::innerEWAorPoly(Calculator& theCommands, const Expression& input
   Vector<Polynomial<Rational> > inputPolForm;
   Expression startContext;
   if (!theCommands.GetVectorFromFunctionArguments(
-    input, inputPolForm, &startContext, 2, CalculatorConversions::innerPolynomial<Rational>
+    input,
+    inputPolForm,
+    &startContext,
+    2,
+    CalculatorConversions::functionPolynomiaL<Rational>
   )) {
     return theCommands << "<hr>Failed to extract polynomials from arguments of " << input.ToString();
   }
@@ -1908,7 +1913,7 @@ bool Calculator::Test::ProcessResults() {
       isUknown = true;
       this->unknown ++;
     } else {
-      currentLine << "<td><b style='color:red'>unexpected result</b></td>"
+      currentLine << "<td style = 'min-width:100px'><b style='color:red'>unexpected result</b></td>"
       << "<td>got: " << currentTest.actualResult << "</td>"
       << "<td>expected: " << currentTest.expectedResult << "</td>"
       ;

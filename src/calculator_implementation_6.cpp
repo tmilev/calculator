@@ -1054,9 +1054,12 @@ bool CalculatorFunctions::innerFactorOutNumberContent(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerFactorOutNumberContent");
+  if (input.size() != 2) {
+    return theCommands << "FactorOutNumberContent expects single argument. ";
+  }
   MonomialCollection<Expression, Rational> theV;
-  if (!theCommands.CollectSummands(theCommands, input, theV)) {
-    return theCommands << "Failed to extract summands from: " << input.ToString();
+  if (!theCommands.functionCollectSummands(theCommands, input[1], theV)) {
+    return theCommands << "Failed to extract summands from: " << input[1].ToString();
   }
   if (theV.IsEqualToZero()) {
     return output.AssignValue(0, theCommands);
@@ -1067,12 +1070,8 @@ bool CalculatorFunctions::innerFactorOutNumberContent(
   }
   theCF.Invert();
   if (theCF == 1 ) {
-    if (!input.StartsWithGivenOperation("FactorOutNumberContent")) {
-      output = input;
-      return true;
-    } else {
-      return false;
-    }
+    output = input[1];
+    return true;
   }
   Expression left, right;
   left.AssignValue(theCF, theCommands);
@@ -2181,12 +2180,12 @@ bool CalculatorFunctions::innerIsProductTermsUpToPower(
 
 bool CalculatorFunctions::innerScaleToLeadingUnit(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerScaleToLeadingUnit");
-  if (input.StartsWithGivenOperation("ScaleToLeadingUnit")) {
+  if (input.size() != 2) {
     return false;
   }
   MonomialCollection<Expression, Rational> theCollection;
-  theCommands.CollectSummands(theCommands, input, theCollection);
-  theCollection/= theCollection.GetLeadingCoefficient();
+  theCommands.functionCollectSummands(theCommands, input, theCollection);
+  theCollection /= theCollection.GetLeadingCoefficient();
   return output.MakeSum(theCommands, theCollection);
 }
 
@@ -2332,7 +2331,9 @@ bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
   }
   Expression thePolyE;
   Polynomial<Rational> thePoly;
-  if (!CalculatorConversions::innerPolynomial<Rational>(theCommands, theCurveE, thePolyE)) {
+  if (!CalculatorConversions::functionPolynomiaL<Rational>(
+    theCommands, theCurveE, thePolyE
+  )) {
     return theCommands << "Could not get polynomial from " << theCurveE.ToString();
   }
   if (!thePolyE.IsOfType(&thePoly)) {

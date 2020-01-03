@@ -899,14 +899,16 @@ bool Calculator::innerFunctionToMatrix(Calculator& theCommands, const Expression
   return output.AssignMatrixExpressions(resultMat, theCommands, true, true);
 }
 
-bool Calculator::innerGetChevGen(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::innerGetChevGen(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("Calculator::innerGetChevGen");
   if (input.size() != 3) {
     return false;
   }
   SemisimpleLieAlgebra* theSSalg;
   if (!theCommands.CallConversionFunctionReturnsNonConst(
-    CalculatorConversions::innerSemisimpleLieAlgebra, input[1], theSSalg
+    CalculatorConversions::functionSemisimpleLieAlgebra, input[1], theSSalg
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
@@ -914,7 +916,7 @@ bool Calculator::innerGetChevGen(Calculator& theCommands, const Expression& inpu
   if (!input[2].IsSmallInteger(&theIndex)) {
     return false;
   }
-  if (theIndex>theSSalg->GetNumPosRoots() || theIndex == 0 || theIndex < - theSSalg->GetNumPosRoots()) {
+  if (theIndex > theSSalg->GetNumPosRoots() || theIndex == 0 || theIndex < - theSSalg->GetNumPosRoots()) {
     return output.MakeError("Bad Chevalley-Weyl generator index.", theCommands);
   }
   ElementSemisimpleLieAlgebra<Rational> theElt;

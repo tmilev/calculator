@@ -414,10 +414,13 @@ bool CalculatorFunctions::innerIntervalClosedFromSequence(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerIntervalClosedFromSequence");
-  if (!input.IsSequenceNElementS(2)) {
+  if (input.size() != 2) {
     return false;
   }
-  output = input;
+  if (!input[1].IsSequenceNElementS(2)) {
+    return false;
+  }
+  output = input[1];
   return output.SetChildAtomValue(0, theCommands.opIntervalClosed());
 }
 
@@ -425,10 +428,13 @@ bool CalculatorFunctions::innerIntervalOpenFromSequence(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerIntervalOpenFromSequence");
-  if (!input.IsSequenceNElementS(2)) {
+  if (input.size() != 2) {
     return false;
   }
-  output = input;
+  if (!input[1].IsSequenceNElementS(2)) {
+    return false;
+  }
+  output = input[1];
   return output.SetChildAtomValue(0, theCommands.opIntervalOpen());
 }
 
@@ -436,10 +442,13 @@ bool CalculatorFunctions::innerIntervalRightClosedFromSequence(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerIntervalRightClosedFromSequence");
-  if (!input.IsSequenceNElementS()) {
+  if (input.size() != 2) {
     return false;
   }
-  output = input;
+  if (!input[1].IsSequenceNElementS()) {
+    return false;
+  }
+  output = input[1];
   return output.SetChildAtomValue(0, theCommands.opIntervalRightClosed());
 }
 
@@ -447,10 +456,13 @@ bool CalculatorFunctions::innerIntervalLeftClosedFromSequence(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerIntervalLeftClosedFromSequence");
-  if (!input.IsSequenceNElementS()) {
+  if (input.size() != 2) {
     return false;
   }
-  output = input;
+  if (!input[1].IsSequenceNElementS()) {
+    return false;
+  }
+  output = input[1];
   return output.SetChildAtomValue(0, theCommands.opIntervalLeftClosed());
 }
 
@@ -1691,6 +1703,7 @@ bool CalculatorFunctions::innerUnionIntervals(
   if (!makeUnion) {
     return false;
   }
+  global.Comments << "DEBUG: got to here. " << logger::endL;
   bool leftIsClosed = false;
   bool rightIsClosed = false;
   Expression leftFinal, rightFinal;
@@ -2183,8 +2196,9 @@ bool CalculatorFunctions::innerScaleToLeadingUnit(Calculator& theCommands, const
   if (input.size() != 2) {
     return false;
   }
+  const Expression& argument = input[1];
   MonomialCollection<Expression, Rational> theCollection;
-  theCommands.functionCollectSummands(theCommands, input, theCollection);
+  theCommands.functionCollectSummands(theCommands, argument, theCollection);
   theCollection /= theCollection.GetLeadingCoefficient();
   return output.MakeSum(theCommands, theCollection);
 }

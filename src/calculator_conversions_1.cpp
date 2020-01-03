@@ -417,10 +417,6 @@ bool CalculatorConversions::innerLoadKeysFromStatementList(
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerLoadKeysFromStatementList");
   output.Clear();
-  if (input.StartsWith(theCommands.opDefine(), 3)) {
-    output.SetKeyValue(input[1], input[2]);
-    return true;
-  }
   for (int i = 1; i < input.size(); i ++) {
     if (input[i].StartsWith(theCommands.opDefine(), 3)) {
       output.SetKeyValue(input[i][1], input[i][2]);
@@ -1028,7 +1024,16 @@ bool CalculatorConversions::innerElementUE(
   return output.AssignValueWithContext(outputUE, outputContext, theCommands);
 }
 
-bool CalculatorConversions::innerExpressionFromBuiltInType(
+bool CalculatorConversions::innerExpressionFromBuiltInTypE(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  if (input.size() != 2) {
+    return false;
+  }
+  return CalculatorConversions::functionExpressionFromBuiltInType(theCommands, input[1], output);
+}
+
+bool CalculatorConversions::functionExpressionFromBuiltInType(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromBuiltInType");
@@ -1285,7 +1290,13 @@ bool CalculatorConversions::innerMatrixRationalFunction(
   MacroRegisterFunctionWithName("CalculatorConversions::innerMatrixRationalFunction");
   Matrix<RationalFunctionOld> outputMat;
   Expression ContextE;
-  if (!theCommands.GetMatriXFromArguments(input, outputMat, &ContextE, - 1, CalculatorConversions::innerRationalFunction)) {
+  if (!theCommands.GetMatriXFromArguments(
+    input,
+    outputMat,
+    &ContextE,
+    - 1,
+    CalculatorConversions::innerRationalFunction
+  )) {
     return theCommands << "<hr>Failed to get matrix of rational functions. ";
   }
   output.AssignMatrix(outputMat, theCommands, &ContextE);
@@ -1293,16 +1304,24 @@ bool CalculatorConversions::innerMatrixRationalFunction(
   return true;
 }
 
-bool CalculatorConversions::innerLoadFileIntoString(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorConversions::innerLoadFileIntoString(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerLoadFileIntoString");
+  if (input.size() != 2) {
+    return false;
+  }
+  const Expression& argument = input[1];
   std::string theRelativeFileName;
-  if (!input.IsOfType<std::string>(&theRelativeFileName)) {
+  if (!argument.IsOfType<std::string>(&theRelativeFileName)) {
     theCommands << "Input of load file string command is supposed to be a string. "
     << "Converting your expression to a string and using that instead. ";
-    theRelativeFileName = input.ToString();
+    theRelativeFileName = argument.ToString();
   }
   std::string outputString;
-  if (!FileOperations::LoadFileToStringVirtual(theRelativeFileName, outputString, false, &theCommands.Comments)) {
+  if (!FileOperations::LoadFileToStringVirtual(
+    theRelativeFileName, outputString, false, &theCommands.Comments
+  )) {
     return false;
   }
   return output.AssignValue(outputString, theCommands);
@@ -1323,15 +1342,19 @@ bool CalculatorConversions::innerMakeElementHyperOctahedral(
   }
   List<int> oneCycle;
   if (!theCommands.GetVectoRInt(input[1], oneCycle)) {
-    return theCommands << "Failed to extract a cycle structure from the first argument of input: " << input.ToString();
+    return theCommands
+    << "Failed to extract a cycle structure from the first argument of input: "
+    << input.ToString();
   }
   for (int i = 0; i < oneCycle.size; i ++) {
     if (oneCycle[i] < 1) {
-      return theCommands << "Your input: " << input[1].ToString() << " had integers that were too small. ";
+      return theCommands << "Your input: " << input[1].ToString()
+      << " had integers that were too small. ";
     }
     oneCycle[i] --;
     if (oneCycle[i] > 1000) {
-      return theCommands << "Your input: " << input[1].ToString() << " had integers that were too large. ";
+      return theCommands << "Your input: " << input[1].ToString()
+      << " had integers that were too large. ";
     }
   }
   theElement.h.AddCycle(oneCycle);
@@ -1339,7 +1362,8 @@ bool CalculatorConversions::innerMakeElementHyperOctahedral(
     if (input[i].IsEqualToOne()) {
       theElement.k.ToggleBit(i - 2);
     } else if (!input[i].IsEqualToZero()) {
-      return theCommands << "Your input: " << input.ToString() << " had bit values that were not ones and zeroes.";
+      return theCommands << "Your input: " << input.ToString()
+      << " had bit values that were not ones and zeroes.";
     }
   }
   return output.AssignValue(theElement, theCommands);

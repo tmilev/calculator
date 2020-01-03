@@ -2376,14 +2376,17 @@ bool Calculator::innerLogEvaluationStepsHumanReadableNested(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("Calculator::innerLogEvaluationStepsHumanReadableNested");
-  Expression inputCopy = input;
+  if (input.size() != 2) {
+    return false;
+  }
+  Expression argument = input[1];
   Expression outputTransformation;
-  if (inputCopy.StartsWithGivenOperation("LogEvaluationStepsHumanReadableNested")) {
-    inputCopy.SetChildAtomValue(0, theCommands.opSequence());
+  if (argument.StartsWithGivenOperation("LogEvaluationStepsHumanReadableNested")) {
+    argument.SetChildAtomValue(0, theCommands.opSequence());
   }
   bool notUsed = false;
   theCommands.ExpressionHistoryStackAdd();
-  theCommands.EvaluateExpression(theCommands, inputCopy, outputTransformation, notUsed, - 1);
+  theCommands.EvaluateExpression(theCommands, argument, outputTransformation, notUsed, - 1);
   std::stringstream out;
   ListReferences<Expression>& currentStack = theCommands.historyStack.LastObject();
   for (int i = 0; i < currentStack.size; i ++) {
@@ -2650,14 +2653,17 @@ bool Calculator::innerLogEvaluationStepsHumanReadableMerged(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("Calculator::innerLogEvaluationStepsHumanReadableMerged");
-  Expression inputCopy = input;
+  if (input.size() != 2) {
+    return false;
+  }
+  Expression argument = input[1];
   Expression outputTransformation;
-  if (inputCopy.StartsWithGivenOperation("LogEvaluationStepsHumanReadableMerged")) {
-    inputCopy.SetChildAtomValue(0, theCommands.opSequence());
+  if (argument.StartsWithGivenOperation("LogEvaluationStepsHumanReadableMerged")) {
+    argument.SetChildAtomValue(0, theCommands.opSequence());
   }
   bool notUsed = false;
   theCommands.ExpressionHistoryStackAdd();
-  theCommands.EvaluateExpression(theCommands, inputCopy, outputTransformation, notUsed, - 1);
+  theCommands.EvaluateExpression(theCommands, argument, outputTransformation, notUsed, - 1);
   std::stringstream out;
   ListReferences<Expression>& currentStack = theCommands.historyStack.LastObject();
   for (int i = 0; i < currentStack.size; i ++) {

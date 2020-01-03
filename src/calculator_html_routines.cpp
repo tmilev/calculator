@@ -45,8 +45,12 @@ bool CalculatorHtmlFunctions::innerEvaluateSymbols(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorHtmlFunctions::innerEvaluateSymbols");
+  if (input.size() != 2) {
+    return false;
+  }
+  const Expression& argument = input[1];
   std::string theString;
-  if (!input.IsOfType(&theString)) {
+  if (!argument.IsOfType(&theString)) {
     return false;
   }
   List<SyntacticElement> theElts;

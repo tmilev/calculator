@@ -1133,8 +1133,12 @@ bool Expression::HasBoundVariables() const {
 }
 
 bool Calculator::innerNot(Calculator& theCommands, const Expression& input, Expression& output) {
+  if (input.size() != 2) {
+    return false;
+  }
+  const Expression& argument = input[1];
   int theInt;
-  if (!input.IsSmallInteger(&theInt)) {
+  if (!argument.IsSmallInteger(&theInt)) {
     return false;
   }
   if (theInt == 0) {
@@ -1144,10 +1148,14 @@ bool Calculator::innerNot(Calculator& theCommands, const Expression& input, Expr
 }
 
 bool Calculator::innerIsInteger(Calculator& theCommands, const Expression& input, Expression& output) {
-  if (input.HasBoundVariables()) {
+  if (input.size() != 2) {
     return false;
   }
-  if (input.IsInteger()) {
+  const Expression& argument = input[1];
+  if (argument.HasBoundVariables()) {
+    return false;
+  }
+  if (argument.IsInteger()) {
     output.AssignValue(1, theCommands);
   } else {
     output.AssignValue(0, theCommands);
@@ -1156,10 +1164,14 @@ bool Calculator::innerIsInteger(Calculator& theCommands, const Expression& input
 }
 
 bool Calculator::innerIsRational(Calculator& theCommands, const Expression& input, Expression& output) {
-  if (input.HasBoundVariables()) {
+  if (input.size() != 2) {
     return false;
   }
-  if (input.IsRational()) {
+  const Expression& argument = input[1];
+  if (argument.HasBoundVariables()) {
+    return false;
+  }
+  if (argument.IsRational()) {
     output.AssignValue(1, theCommands);
   } else {
     output.AssignValue(0, theCommands);
@@ -1167,7 +1179,9 @@ bool Calculator::innerIsRational(Calculator& theCommands, const Expression& inpu
   return true;
 }
 
-bool Calculator::AppendOpandsReturnTrueIfOrderNonCanonical(const Expression& input, List<Expression>& output, int theOp) {
+bool Calculator::AppendOpandsReturnTrueIfOrderNonCanonical(
+  const Expression& input, List<Expression>& output, int theOp
+) {
   RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   if (this->RecursionDeptH > this->MaxRecursionDeptH) {
     return false;

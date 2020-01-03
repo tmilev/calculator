@@ -188,7 +188,8 @@ public:
   static bool innerSumTimesExpressionToSumOf(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSumAsOperatorToSumInternalNotation(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerHandleUnderscorePowerLimits(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool outerPolynomialize(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool outerPolynomializE(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool functionPolynomialize(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerApplyToSubexpressionsRecurseThroughCalculusFunctions(
     Calculator& theCommands, const Expression& input, Expression& output
   );

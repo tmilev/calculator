@@ -682,8 +682,12 @@ bool CalculatorFunctions::innerURLKeyValuePairsToNormalRecursive(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerURLKeyValuePairsToNormalRecursive");
+  if (input.size() != 2) {
+    return false;
+  }
+  const Expression& argument = input[1];
   std::string theString;
-  if (!input.IsOfType<std::string>(&theString)) {
+  if (!argument.IsOfType<std::string>(&theString)) {
     return false;
   }
   return output.AssignValue(HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(theString), theCommands);
@@ -693,8 +697,12 @@ bool CalculatorFunctions::innerConvertElementZmodPToInteger(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerConvertElementZmodPToInteger");
+  if (input.size() != 2) {
+    return false;
+  }
+  const Expression& argument = input[1];
   ElementZmodP theElement;
-  if (!input.IsOfType<ElementZmodP>(&theElement)) {
+  if (!argument.IsOfType<ElementZmodP>(&theElement)) {
     return false;
   }
   return output.AssignValue(theElement.theValue, theCommands);
@@ -704,8 +712,12 @@ bool CalculatorFunctions::innerUrlStringToNormalString(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerUrlStringToNormalString");
+  if (input.size() != 2) {
+    return false;
+  }
+  const Expression& argument = input[1];
   std::string theString;
-  if (!input.IsOfType<std::string>(&theString)) {
+  if (!argument.IsOfType<std::string>(&theString)) {
     return false;
   }
   return output.AssignValue(HtmlRoutines::ConvertURLStringToNormal(theString, false), theCommands);
@@ -713,8 +725,12 @@ bool CalculatorFunctions::innerUrlStringToNormalString(
 
 bool CalculatorFunctions::innerStringToURL(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerStringToURL");
+  if (input.size() != 2) {
+    return false;
+  }
+  const Expression& argument = input[1];
   std::string theString;
-  if (!input.IsOfType<std::string>(&theString)) {
+  if (!argument.IsOfType<std::string>(&theString)) {
     return false;
   }
   return output.AssignValue(HtmlRoutines::ConvertStringToURLString(theString, false), theCommands);
@@ -722,8 +738,12 @@ bool CalculatorFunctions::innerStringToURL(Calculator& theCommands, const Expres
 
 bool CalculatorFunctions::innerStringToAtom(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerStringToAtom");
+  if (input.size() != 2) {
+    return false;
+  }
+  const Expression& argument = input[1];
   std::string theString;
-  if (!input.IsOfType(&theString)) {
+  if (!argument.IsOfType(&theString)) {
     return false;
   }
   return output.MakeAtom(theString, theCommands);
@@ -803,24 +823,27 @@ bool CalculatorFunctions::innerLogBase(Calculator& theCommands, const Expression
 
 bool CalculatorFunctions::innerLog(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerLog");
-  if (input.IsEqualToZero()) {
+  if (input.size() != 2) {
+    return false;
+  }
+  if (input[1].IsEqualToZero()) {
     return output.MakeError("Attempting to compute logarithm of zero.", theCommands, true);
   }
-  if (input.IsEqualToOne()) {
+  if (input[1].IsEqualToOne()) {
     return output.AssignValue(0, theCommands);
   }
   if (theCommands.flagNoApproximationS) {
     return false;
   }
   double theArgument;
-  if (!input.EvaluatesToDouble(&theArgument)) {
-    if (input.IsOperationGiven(theCommands.opE())) {
+  if (!input[1].EvaluatesToDouble(&theArgument)) {
+    if (input[1].IsOperationGiven(theCommands.opE())) {
       return output.AssignValue(Rational(1), theCommands);
     }
     return false;
   }
   if (theArgument > 0) {
-    if (input.IsOperationGiven(theCommands.opE())) {
+    if (input[1].IsOperationGiven(theCommands.opE())) {
       return output.AssignValue(Rational(1), theCommands);
     }
     return output.AssignValue(FloatingPoint::Log(theArgument), theCommands);
@@ -856,12 +879,16 @@ bool CalculatorFunctions::innerFactorial(Calculator& theCommands, const Expressi
 
 bool CalculatorFunctions::innerArctan(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerArctan");
-  if (input.IsEqualToOne()) {
+  if (input.size() != 2) {
+    return false;
+  }
+  const Expression& argument = input[1];
+  if (argument.IsEqualToOne()) {
     output.MakeAtom(theCommands.opPi(), theCommands);
     output /= theCommands.EFour();
     return true;
   }
-  if (input.IsEqualToMOne()) {
+  if (argument.IsEqualToMOne()) {
     output.MakeAtom(theCommands.opPi(), theCommands);
     output /= theCommands.EFour();
     output *= theCommands.EMOne();
@@ -871,7 +898,7 @@ bool CalculatorFunctions::innerArctan(Calculator& theCommands, const Expression&
     return false;
   }
   double theArgument;
-  if (!input.EvaluatesToDouble(&theArgument)) {
+  if (!argument.EvaluatesToDouble(&theArgument)) {
     return false;
   }
   return output.AssignValue(FloatingPoint::Arctan(theArgument), theCommands);
@@ -882,11 +909,15 @@ bool CalculatorFunctions::innerArccos(Calculator& theCommands, const Expression&
   if (theCommands.flagNoApproximationS) {
     return false;
   }
-  double theArgument;
-  if (!input.EvaluatesToDouble(&theArgument)) {
+  if (input.size() != 2) {
     return false;
   }
-  return output.AssignValue(FloatingPoint::Arccos(theArgument), theCommands);
+  const Expression& argument = input[1];
+  double doubleArgument;
+  if (!argument.EvaluatesToDouble(&doubleArgument)) {
+    return false;
+  }
+  return output.AssignValue(FloatingPoint::Arccos(doubleArgument), theCommands);
 }
 
 bool CalculatorFunctions::innerArcsin(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -903,23 +934,27 @@ bool CalculatorFunctions::innerArcsin(Calculator& theCommands, const Expression&
 
 bool CalculatorFunctions::innerAbs(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerAbs");
+  if (input.size() != 2) {
+    return false;
+  }
+  const Expression& argument = input[1];
   Rational theRat;
-  if (input.IsRational(&theRat)) {
+  if (argument.IsRational(&theRat)) {
     if (theRat < 0) {
       return output.AssignValue(- theRat, theCommands);
     }
     return output.AssignValue(theRat, theCommands);
   }
   double theDouble = 0;
-  if (input.EvaluatesToDouble(&theDouble)) {
+  if (argument.EvaluatesToDouble(&theDouble)) {
     if (theDouble < 0) {
       Expression moneE;
       moneE.AssignValue(- 1, theCommands);
-      output = input;
+      output = argument;
       output *= moneE;
       return true;
     }
-    output = input;
+    output = argument;
     return true;
   }
   return false;
@@ -927,16 +962,20 @@ bool CalculatorFunctions::innerAbs(Calculator& theCommands, const Expression& in
 
 bool CalculatorFunctions::innerSin(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSin");
-  if (input.IsOperationGiven(theCommands.opPi())) {
+  if (input.size() != 2) {
+    return false;
+  }
+  const Expression& argument = input[1];
+  if (argument.IsOperationGiven(theCommands.opPi())) {
     return output.AssignValue(0, theCommands);
   }
-  if (input.IsEqualToZero()) {
+  if (argument.IsEqualToZero()) {
     return output.AssignValue(0, theCommands);
   }
   Rational piProportion;
-  if (input.StartsWith(theCommands.opTimes(), 3)) {
-    if (input[2].IsOperationGiven(theCommands.opPi())) {
-      if (input[1].IsOfType<Rational>(&piProportion)) {
+  if (argument.StartsWith(theCommands.opTimes(), 3)) {
+    if (argument[2].IsOperationGiven(theCommands.opPi())) {
+      if (argument[1].IsOfType<Rational>(&piProportion)) {
         AlgebraicNumber algOutput;
         Rational ratOutput;
         if (algOutput.AssignSinRationalTimesPi(piProportion, theCommands.theObjectContainer.theAlgebraicClosure)) {
@@ -952,7 +991,7 @@ bool CalculatorFunctions::innerSin(Calculator& theCommands, const Expression& in
     return false;
   }
   double theArgument = 0;
-  if (!input.EvaluatesToDouble(&theArgument)) {
+  if (!argument.EvaluatesToDouble(&theArgument)) {
     return false;
   }
   return output.AssignValue(FloatingPoint::Sin(theArgument), theCommands);
@@ -960,16 +999,20 @@ bool CalculatorFunctions::innerSin(Calculator& theCommands, const Expression& in
 
 bool CalculatorFunctions::innerCos(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerCos");
-  if (input.IsOperationGiven(theCommands.opPi())) {
+  if (input.size() != 2) {
+    return false;
+  }
+  const Expression& argument = input[1];
+  if (argument.IsOperationGiven(theCommands.opPi())) {
     return output.AssignValue(- 1, theCommands);
   }
-  if (input.IsEqualToZero()) {
+  if (argument.IsEqualToZero()) {
     return output.AssignValue(1, theCommands);
   }
   Rational piProportion;
-  if (input.StartsWith(theCommands.opTimes(), 3)) {
-    if (input[2].IsOperationGiven(theCommands.opPi())) {
-      if (input[1].IsOfType<Rational>(&piProportion)) {
+  if (argument.StartsWith(theCommands.opTimes(), 3)) {
+    if (argument[2].IsOperationGiven(theCommands.opPi())) {
+      if (argument[1].IsOfType<Rational>(&piProportion)) {
         AlgebraicNumber algOutput;
         Rational ratOutput;
         if (algOutput.AssignCosRationalTimesPi(piProportion, theCommands.theObjectContainer.theAlgebraicClosure)) {
@@ -985,7 +1028,7 @@ bool CalculatorFunctions::innerCos(Calculator& theCommands, const Expression& in
     return false;
   }
   double theArgument = 0;
-  if (!input.EvaluatesToDouble(&theArgument)) {
+  if (!argument.EvaluatesToDouble(&theArgument)) {
     return false;
   }
   return output.AssignValue(FloatingPoint::Cos(theArgument), theCommands );
@@ -993,33 +1036,49 @@ bool CalculatorFunctions::innerCos(Calculator& theCommands, const Expression& in
 
 bool CalculatorFunctions::innerTan(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerTan");
+  if (input.size() != 2) {
+    return false;
+  }
+  const Expression& argument = input[1];
   Expression num, den;
-  num.MakeOX(theCommands, theCommands.opSin(), input);
-  den.MakeOX(theCommands, theCommands.opCos(), input);
+  num.MakeOX(theCommands, theCommands.opSin(), argument);
+  den.MakeOX(theCommands, theCommands.opCos(), argument);
   return output.MakeXOX(theCommands, theCommands.opDivide(), num, den);
 }
 
 bool CalculatorFunctions::innerCot(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerTan");
+  if (input.size() != 2) {
+    return false;
+  }
+  const Expression& argument = input[1];
   Expression num, den;
-  num.MakeOX(theCommands, theCommands.opCos(), input);
-  den.MakeOX(theCommands, theCommands.opSin(), input);
+  num.MakeOX(theCommands, theCommands.opCos(), argument);
+  den.MakeOX(theCommands, theCommands.opSin(), argument);
   return output.MakeXOX(theCommands, theCommands.opDivide(), num, den);
 }
 
 bool CalculatorFunctions::innerSec(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSec");
+  if (input.size() != 2) {
+    return false;
+  }
+  const Expression& argument = input[1];
   Expression num, den;
   num.AssignValue(1, theCommands);
-  den.MakeOX(theCommands, theCommands.opCos(), input);
+  den.MakeOX(theCommands, theCommands.opCos(), argument);
   return output.MakeXOX(theCommands, theCommands.opDivide(), num, den);
 }
 
 bool CalculatorFunctions::innerCsc(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerCsc");
+  if (input.size() != 2) {
+    return false;
+  }
+  const Expression& argument = input[1];
   Expression num, den;
   num.AssignValue(1, theCommands);
-  den.MakeOX(theCommands, theCommands.opSin(), input);
+  den.MakeOX(theCommands, theCommands.opSin(), argument);
   return output.MakeXOX(theCommands, theCommands.opDivide(), num, den);
 }
 
@@ -1510,11 +1569,11 @@ bool IntegralRFComputation::PreparePFExpressionSummands() {
       numRescaled /= numScale;
       currentCoefficient *= numScale;
       polyE.AssignValueWithContext(numRescaled, this->contextE, *this->owner);
-      if (!CalculatorConversions::innerExpressionFromBuiltInType(*this->owner, polyE, currentNum)) {
+      if (!CalculatorConversions::functionExpressionFromBuiltInType(*this->owner, polyE, currentNum)) {
         return false;
       }
       polyE.AssignValueWithContext(denRescaled, this->contextE, *this->owner);
-      if (!CalculatorConversions::innerExpressionFromBuiltInType(*this->owner, polyE, currentDenNoPowerMonic)) {
+      if (!CalculatorConversions::functionExpressionFromBuiltInType(*this->owner, polyE, currentDenNoPowerMonic)) {
         return false;
       }
       if (j != 0) {
@@ -1573,11 +1632,11 @@ bool IntegralRFComputation::IntegrateRF() {
       numRescaled /= numScale;
       currentCoefficient *= numScale;
       polyE.AssignValueWithContext(numRescaled, this->contextE, *this->owner);
-      if (!CalculatorConversions::innerExpressionFromBuiltInType(*this->owner, polyE, currentNum)) {
+      if (!CalculatorConversions::functionExpressionFromBuiltInType(*this->owner, polyE, currentNum)) {
         return false;
       }
       polyE.AssignValueWithContext(denRescaled, this->contextE, *this->owner);
-      if (!CalculatorConversions::innerExpressionFromBuiltInType(*this->owner, polyE, currentDenNoPowerMonic)) {
+      if (!CalculatorConversions::functionExpressionFromBuiltInType(*this->owner, polyE, currentDenNoPowerMonic)) {
         return false;
       }
       if (j != 0) {
@@ -3270,12 +3329,13 @@ bool CalculatorFunctions::innerDifferentialStandardHandler(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerDifferentialStandardHandler");
-  if (input.StartsWith(theCommands.opDifferential())) {
+  if (input.size() != 2) {
     return false;
   }
+  const Expression& argument = input[1];
   output.reset(theCommands);
   output.AddChildAtomOnTop(theCommands.opDifferential());
-  output.AddChildOnTop(input);
+  output.AddChildOnTop(argument);
   return output.AddChildRationalOnTop(1);
 }
 
@@ -3640,26 +3700,30 @@ bool CalculatorFunctions::innerPolynomialRelations(
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CalculatorFunctions::outerPolynomialize(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctions::functionPolynomialize(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerPolynomialize");
   Expression thePolyE;
-  if (input.StartsWithGivenOperation("Polynomialize")) {
-    return false;
-  }
   if (input.HasBoundVariables()) {
     return false;
   }
-  if (!CalculatorConversions::innerPolynomiaL<Rational>(
+  if (!CalculatorConversions::functionPolynomiaL<Rational>(
     theCommands, input, thePolyE
   )) {
     return false;
   }
-  if (!CalculatorConversions::innerExpressionFromBuiltInType(
+  if (!CalculatorConversions::functionExpressionFromBuiltInType(
     theCommands, thePolyE, output
   )) {
     return false;
   }
   return true;
+}
+
+bool CalculatorFunctions::outerPolynomializE(Calculator& theCommands, const Expression& input, Expression& output) {
+  if (input.size() != 2) {
+    return false;
+  }
+  return CalculatorFunctions::functionPolynomialize(theCommands, input[1], output);
 }
 
 bool CalculatorFunctions::innerIntegrateRationalFunctionSplitToBuidingBlocks(
@@ -4131,7 +4195,7 @@ bool CalculatorFunctions::innerIntegratePowerByUncoveringParenthesisFirst(
   if (!theFunctionE.StartsWith(theCommands.opThePower())) {
     return false;
   }
-  if (!CalculatorFunctions::outerPolynomialize(theCommands, theFunctionE, integrandE)) {
+  if (!CalculatorFunctions::functionPolynomialize(theCommands, theFunctionE, integrandE)) {
     return false;
   }
   if (integrandE == theFunctionE) {
@@ -5177,12 +5241,18 @@ bool CalculatorFunctions::innerComputeSemisimpleSubalgebras(
 
 bool CalculatorFunctions::innerLispify(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerLispify");
-  return output.AssignValue(input.ToStringSemiFull(), theCommands);
+  if (input.size() != 2) {
+    return false;
+  }
+  return output.AssignValue(input[1].ToStringSemiFull(), theCommands);
 }
 
 bool CalculatorFunctions::innerLispifyFull(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerLispifyFull");
-  return output.AssignValue(input.ToStringFull(), theCommands);
+  if (input.size() != 2) {
+    return false;
+  }
+  return output.AssignValue(input[1].ToStringFull(), theCommands);
 }
 
 bool CalculatorFunctions::innerMinPolyMatrix(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -5315,12 +5385,11 @@ bool CalculatorFunctions::innerLastElement(Calculator& theCommands, const Expres
     out << "Error: requesting the last element of the atom " << input.ToString();
     return output.MakeError(out.str(), theCommands, true);
   }
-  std::string firstAtom;
   if (input.size() == 2) {
-    if (input[0].IsOperation(&firstAtom) ) {
-      if (firstAtom == "Last") {
-        return CalculatorFunctions::innerLastElement(theCommands, input[1], output);
-      }
+    const Expression& sequenceCandidate = input[1];
+    if (sequenceCandidate.IsSequenceNElementS()) {
+      output = sequenceCandidate[sequenceCandidate.size() - 1];
+      return true;
     }
   }
   output = input[input.size() - 1];
@@ -5341,12 +5410,12 @@ bool CalculatorFunctions::innerRemoveLastElement(Calculator& theCommands, const 
     }
     return output.MakeError(out.str(), theCommands, true);
   }
-  std::string firstAtom;
-  if (input.children.size == 2) {
-    if (input[0].IsOperation(&firstAtom)) {
-      if (firstAtom == "removeLast") {
-        return CalculatorFunctions::innerRemoveLastElement(theCommands, input[1], output);
-      }
+  if (input.size() == 2) {
+    const Expression& sequenceCandidate = input[1];
+    if (sequenceCandidate.IsSequenceNElementS() && sequenceCandidate.size() > 1) {
+      output = sequenceCandidate;
+      output.children.RemoveLastObject();
+      return true;
     }
   }
   output = input;
@@ -7964,9 +8033,11 @@ bool Expression::EvaluatesToDouble(double* whichDouble) const {
   );
 }
 
-bool Expression::EvaluatesToDoubleUnderSubstitutions
-(const HashedList<Expression>& knownEs, const List<double>& valuesKnownEs,
- double* whichDouble) const {
+bool Expression::EvaluatesToDoubleUnderSubstitutions(
+  const HashedList<Expression>& knownEs,
+  const List<double>& valuesKnownEs,
+  double* whichDouble
+) const {
   MacroRegisterFunctionWithName("Expression::EvaluatesToDoubleUnderSubstitutions");
   if (this->owner == nullptr) {
     return false;
@@ -9251,8 +9322,12 @@ bool CalculatorFunctions::innerSetRandomSeed(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerRandomInteger");
+  if (input.size() != 2) {
+    return false;
+  }
+  const Expression& argument = input[1];
   int theInt = - 1;
-  if (!input.IsIntegerFittingInInt(& theInt)) {
+  if (!argument.IsIntegerFittingInInt(& theInt)) {
     return theCommands << "Failed to extract small integer";
   }
   std::stringstream out;

@@ -290,7 +290,9 @@ bool Calculator::outerStandardFunction(
 }
 
 bool Calculator::ExpressionMatchesPattern(
-  const Expression& thePattern, const Expression& input, MapList<Expression, Expression>& matchedExpressions,
+  const Expression& thePattern,
+  const Expression& input,
+  MapList<Expression, Expression>& matchedExpressions,
   std::stringstream* commentsGeneral
 ) {
   MacroRegisterFunctionWithName("Calculator::ExpressionMatchesPattern");
@@ -304,7 +306,7 @@ bool Calculator::ExpressionMatchesPattern(
     << "is a stack trace, however beware that the error might be in code preceding the stack loading. "
     << global.fatal;
   }
-  if (commentsGeneral!= nullptr) {
+  if (commentsGeneral != nullptr) {
     *commentsGeneral << " <hr> current input: " << input.ToString() << "<br>current pattern: " << thePattern.ToString();
     *commentsGeneral << "<br> current matched expressions: " << matchedExpressions.ToStringHtml();
   }
@@ -565,7 +567,10 @@ bool Calculator::EvaluateExpression(
   ProgressReport theReport;
   theCommands.stats.expressionEvaluated ++;
   theCommands.stats.callsSinceReport ++;
-  if (theCommands.stats.callsSinceReport >= theCommands.stats.maximumCallsBeforeReportGeneration) {
+  if (
+    theCommands.stats.callsSinceReport >=
+    theCommands.stats.maximumCallsBeforeReportGeneration
+  ) {
     theCommands.stats.callsSinceReport = 0;
     std::stringstream reportStream;
     reportStream << "Evaluating: " << input.ToString();
@@ -596,7 +601,7 @@ bool Calculator::EvaluateExpression(
     theCommands.flagAbortComputationASAP = true;
     return output.MakeError(errorStream.str(), theCommands);
   }
-  //bool logEvaluationStepsRequested = theCommands.logEvaluationSteps.size >0;
+  //bool logEvaluationStepsRequested = theCommands.logEvaluationSteps.size > 0;
   theCommands.EvaluatedExpressionsStack.AddOnTop(input);
   Expression theExpressionWithContext;
   theExpressionWithContext.reset(theCommands, 3);
@@ -895,7 +900,10 @@ bool Calculator::ProcessOneExpressionOnePatternOneSub(
 ) {
   MacroRegisterFunctionWithName("Calculator::ProcessOneExpressionOnePatternOneSub");
   RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
-  if (!thePattern.StartsWith(this->opDefine(), 3) && !thePattern.StartsWith(this->opDefineConditional(), 4)) {
+  if (
+    !thePattern.StartsWith(this->opDefine(), 3) &&
+    !thePattern.StartsWith(this->opDefineConditional(), 4)
+  ) {
     return false;
   }
   if (theLog != nullptr) {

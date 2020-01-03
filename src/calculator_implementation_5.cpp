@@ -1608,16 +1608,20 @@ bool CalculatorFunctions::innerPlotSegment(Calculator& theCommands, const Expres
 
 bool CalculatorFunctions::innerThaw(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerThaw");
-  if (!input.StartsWith(theCommands.opFreeze())) {
-    output = input;
+  if (input.size() < 2) {
+    return false;
+  }
+  const Expression& argument = input[1];
+  if (!argument.StartsWith(theCommands.opFreeze())) {
+    output = argument;
     return true;
   }
-  if (input.size() > 2) {
-    output = input;
+  if (argument.size() > 2) {
+    output = argument;
     return output.SetChildAtomValue(0, theCommands.opSequence());
   }
-  if (input.size() == 2) {
-    output = input[1];
+  if (argument.size() == 2) {
+    output = argument[1];
     return true;
   }
   return false;

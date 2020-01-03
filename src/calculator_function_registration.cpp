@@ -293,7 +293,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "if (1 + 1, 1 / 0, 1 / 0);\n"
     "if (0, x, 1 / 0);\n"
     ,
-    "CalculatorConversions::innerIf",
+    "CalculatorConversions::innerIfFrozen",
     "if",
     innerStandard
   );
@@ -365,8 +365,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "2) The file can be located in a folder in a level parallel to the project base "
     "- such folders are outside of the project folder - **provided that** "
     "the folder is white listed in the C++ code. ",
-    "LoadFileIntoString(\"output/test_cert.base64\");\n"
-    "LoadFileIntoString(\"robots.txt\");\n"
+    "LoadFileIntoString(\"test/certificate_self_signed.base64\");\n"
     "LoadFileIntoString(\"freecalc/contributors.tex\");\n"
     "LoadFileIntoString(\"problems/default/Functions-composing-fractional-linear-1.html\")",
     "CalculatorConversions::innerLoadFileIntoString",
@@ -1399,7 +1398,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->AddOperationHandler(
     "MakeExpression",
-    CalculatorConversions::innerExpressionFromBuiltInType,
+    CalculatorConversions::innerExpressionFromBuiltInTypE,
     "",
     "Creates expression from built-in polynomial. ",
     "MakeExpression(Polynomial{}((x-2y+z- 1)^2(x +y-z)));\n"
@@ -1411,7 +1410,7 @@ void Calculator::initPredefinedInnerFunctions() {
     ");\n"
     "MakeExpression {}D-C;\n"
     "D-B;",
-    "CalculatorConversions::innerExpressionFromBuiltInType",
+    "CalculatorConversions::innerExpressionFromBuiltInTypE",
     "MakeExpression",
     innerStandard
   );
@@ -1526,14 +1525,14 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->AddOperationHandler(
     "Polynomialize",
-    CalculatorFunctions::outerPolynomialize,
+    CalculatorFunctions::outerPolynomializE,
     "",
     "Polynomialize(a) is equivalent to MakeExpression(Polynomial(a)).",
     "C = (c a + a b +b c + 1 )^3;\n"
     "A = Polynomialize(C); "
     "B=MakeExpression(Polynomial(C)); "
     "A-B",
-    "CalculatorFunctions::outerPolynomialize",
+    "CalculatorFunctions::outerPolynomializE",
     "Polynomialize",
     innerStandard
   );
@@ -7770,6 +7769,13 @@ void Calculator::initPredefinedStandardOperations() {
     "",
     "Returns the last element of the expression, provided the argument has "
     "no bound variables. If the expression has bound variables does nothing.",
+    "Last(1,2);\n"
+    "Last((1, 2));\n"
+    "Last{}();\n"
+    "Last{}(());\n"
+    "a = (1,2);\n"
+    "Last a;\n"
+    "Last Sequence{}(a);\n"
     "p{}((), 0) = 1;\n"
     "p{}({{x}},{{n}}): if (n < 0) = 0;\n"
     "p{}((), {{n}}) = 0;\n"
@@ -7787,7 +7793,9 @@ void Calculator::initPredefinedStandardOperations() {
     "the argument has no bound variables. If the expression "
     "has bound variables does nothing.",
     "X = (a,b,c);\n"
-    "Y = (RemoveLast X)\\cup Sequence{}(last X) - X;",
+    "Y = (RemoveLast X)\\cup Sequence{}(Last X) - X;\n"
+    "RemoveLast{}(());\n"
+    "RemoveLast{}();\n",
     "CalculatorFunctions::innerRemoveLastElement",
     "RemoveLast",
     innerStandard

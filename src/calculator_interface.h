@@ -1337,6 +1337,7 @@ public:
   bool ReplaceC1C2Eby_C2ofC1E();
   bool ReplaceEOByE();
   bool ReplaceOEByE();
+  bool ReplaceOXXByEXX    ();
   bool ReplaceOXEByE      ();
   bool ReplaceOXEXByEX    ();
   bool ReplaceOXEEXByEX   ();
@@ -2576,7 +2577,8 @@ public:
     Expression& output,
     Expression* inputContext = nullptr
   );
-  static bool innerExpressionFromBuiltInType(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool functionExpressionFromBuiltInType(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerExpressionFromBuiltInTypE(Calculator& theCommands, const Expression& input, Expression& output);
   template <class coefficient>
   static bool innerExpressionFromPoly(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerExpressionFromRF(Calculator& theCommands, const Expression& input, Expression& output);

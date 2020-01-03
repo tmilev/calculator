@@ -545,6 +545,16 @@ bool Calculator::ReplaceOXEXByEX() {
   return this->DecreaseStackExceptLast(2);
 }
 
+bool Calculator::ReplaceOXXByEXX() {
+  SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3];
+  if (this->flagLogSyntaxRules) {
+    this->parsingLog += "[Rule: Calculator::ReplaceOXXByEXX]";
+  }
+  left.theData.MakeAtom(this->GetOperationIndexFromControlIndex(left.controlIndex), *this);
+  left.controlIndex = this->conExpression();
+  return true;
+}
+
 bool Calculator::ReplaceOXEByE() {
   SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1];
@@ -2152,13 +2162,13 @@ bool Calculator::ApplyOneRule() {
   if (thirdToLastS == "Integer" && secondToLastS == "." && lastS == "Integer") {
     return this->ReplaceIntegerDotIntegerByE();
   }
-  //there is an ambiguity on how should function application be associated
-  //Which is better: x{}y{}z= x{} (y{}z), or x{}y{}z= (x{}y){}z ?
-  //In our implementation, we choose x{}y{}z= x{} (y{}z). Although this is slightly harder to implement,
-  //it appears to be the more natural choice.
-//  if (fourthToLastS == "Expression" && thirdToLastS == "{}" && secondToLastS == "Expression"
-//      && this->AllowsApplyFunctionInPreceding(lastS) )
-//    return this->ReplaceEOEXByEX(secondToLastE.theData.format);
+  // there is an ambiguity on how should function application be associated
+  // Which is better: x{}y{}z = x{} (y{}z), or x{}y{}z = (x{}y){}z ?
+  // In our implementation, we choose x{}y{}z= x{} (y{}z). Although this is slightly harder to implement,
+  // it appears to be the more natural choice.
+  // if (fourthToLastS == "Expression" && thirdToLastS == "{}" && secondToLastS == "Expression"
+  //     && this->AllowsApplyFunctionInPreceding(lastS) )
+  //   return this->ReplaceEOEXByEX(secondToLastE.theData.format);
   if (
     fourthToLastS == "Expression" &&
     thirdToLastS == "{}" &&
@@ -2373,9 +2383,11 @@ bool Calculator::ApplyOneRule() {
   ) {
     this->ReplaceEEXBy_CofEE_X(this->conTimes());
     Expression impliedFunApplication;
-    if (this->outerTimesToFunctionApplication(*this,
-      (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2].theData, impliedFunApplication)
-    ) {
+    if (this->outerTimesToFunctionApplication(
+      *this,
+      (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2].theData,
+      impliedFunApplication
+    )) {
       (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2].theData = impliedFunApplication;
       if (this->flagLogSyntaxRules) {
         this->parsingLog += "[Rule: implied function application]";
@@ -2595,7 +2607,7 @@ bool Calculator::ApplyOneRule() {
     return this->ReplaceEOEXByEX();
   }
   if (thirdToLastS == "if" && secondToLastS == "Expression" && this->AllowsIfInPreceding(lastS)) {
-    return this->ReplaceOEXByEX();
+    return this->ReplaceOXXByEXX();
   }
   if (
     fourthToLastS == "Sequence" && thirdToLastS == "," &&

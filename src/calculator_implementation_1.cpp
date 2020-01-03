@@ -420,12 +420,17 @@ bool Calculator::innerPrintSSSubalgebras(
       global.WebServerReturnDisplayIndicatorCloseConnection("Triggered by printSemisimpleSubalgebras.");
     }
   }
+  if (input.size() != 2) {
+    return theCommands << "Semisimple Lie algebra expects a single argument. ";
+  }
   std::stringstream out;
   SemisimpleLieAlgebra* ownerSSPointer = nullptr;
-  bool isAlreadySubalgebrasObject = input.IsOfType<SemisimpleSubalgebras>();
+  bool isAlreadySubalgebrasObject = input[1].IsOfType<SemisimpleSubalgebras>();
   if (!isAlreadySubalgebrasObject) {
-    if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
-      CalculatorConversions::innerSSLieAlgebra, input, ownerSSPointer
+    if (!theCommands.CallConversionFunctionReturnsNonConst(
+      CalculatorConversions::functionSemisimpleLieAlgebra,
+      input[1],
+      ownerSSPointer
     )) {
       return output.MakeError("Error extracting Lie algebra.", theCommands);
     }
@@ -438,7 +443,7 @@ bool Calculator::innerPrintSSSubalgebras(
       << "Use the following printouts on your own risk.</b><br>";
     }
   } else {
-    ownerSSPointer = input.GetValue<SemisimpleSubalgebras>().owner;
+    ownerSSPointer = input[1].GetValue<SemisimpleSubalgebras>().owner;
   }
   if (ownerSSPointer == nullptr) {
     global.fatal << "Zero pointer to semisimple Lie algebra: this shouldn't happen. " << global.fatal;
@@ -529,8 +534,8 @@ bool Calculator::innerAttemptExtendingEtoHEFwithHinCartan(Calculator& theCommand
     return output.MakeError("Function takes 2 arguments - type and an element of the Lie algebra.", theCommands);
   }
   SemisimpleLieAlgebra* ownerSS = nullptr;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
-    CalculatorConversions::innerSSLieAlgebra, input[1], ownerSS
+  if (!theCommands.CallConversionFunctionReturnsNonConst(
+    CalculatorConversions::functionSemisimpleLieAlgebra, input[1], ownerSS
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
@@ -557,12 +562,13 @@ bool Calculator::innerAdCommonEigenSpaces(Calculator& theCommands, const Express
   MacroRegisterFunctionWithName("Calculator::innerAdCommonEigenSpaces");
   if (input.size() < 3) {
     return output.MakeError(
-      "Function ad common eigenspaces needs at least 2 arguments - type and at least one element of the algebra.", theCommands
+      "Function ad common eigenspaces needs at least 2 arguments - type and at least one element of the algebra.",
+      theCommands
     );
   }
   SemisimpleLieAlgebra* ownerSS;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
-    CalculatorConversions::innerSSLieAlgebra, input[1], ownerSS
+  if (!theCommands.CallConversionFunctionReturnsNonConst(
+    CalculatorConversions::functionSemisimpleLieAlgebra, input[1], ownerSS
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
@@ -2157,12 +2163,12 @@ bool Calculator::innerKillingForm(Calculator& theCommands, const Expression& inp
 
 bool Calculator::innerRootSubsystem(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerRootSubsystem");
-  if (input.children.size < 3) {
+  if (input.size() < 3) {
     return false;
   }
   SemisimpleLieAlgebra* theSSlieAlg = nullptr;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
-    CalculatorConversions::innerSSLieAlgebra, input[1], theSSlieAlg
+  if (!theCommands.CallConversionFunctionReturnsNonConst(
+    CalculatorConversions::functionSemisimpleLieAlgebra, input[1], theSSlieAlg
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }

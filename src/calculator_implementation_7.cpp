@@ -771,8 +771,8 @@ bool CalculatorFunctions::innerCasimirWRTlevi(Calculator& theCommands, const Exp
     return false;
   }
   SemisimpleLieAlgebra* theSSalg = nullptr;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
-    CalculatorConversions::innerSSLieAlgebra, input[1], theSSalg
+  if (!theCommands.CallConversionFunctionReturnsNonConst(
+    CalculatorConversions::functionSemisimpleLieAlgebra, input[1], theSSalg
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
@@ -4989,14 +4989,16 @@ bool CalculatorFunctions::innerGrowDynkinType(Calculator& theCommands, const Exp
   if (input.size() != 3) {
     return false;
   }
-  const Expression& theSmallerTypeE= input[1];
+  const Expression& theSmallerTypeE = input[1];
   DynkinType theSmallDynkinType;
-  if (!CalculatorConversions::innerDynkinType(theCommands, theSmallerTypeE, theSmallDynkinType)) {
+  if (!CalculatorConversions::functionDynkinType(
+    theCommands, theSmallerTypeE, theSmallDynkinType
+  )) {
     return false;
   }
   SemisimpleLieAlgebra* theSSalg = nullptr;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
-    CalculatorConversions::innerSSLieAlgebra, input[2], theSSalg
+  if (!theCommands.CallConversionFunctionReturnsNonConst(
+    CalculatorConversions::functionSemisimpleLieAlgebra, input[2], theSSalg
   )) {
     return output.MakeError("Error extracting ambient Lie algebra.", theCommands);
   }
@@ -5141,9 +5143,12 @@ bool CalculatorFunctions::innerComputeSemisimpleSubalgebras(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerComputeSemisimpleSubalgebras");
+  if (input.size() != 2) {
+    return theCommands << "Semisimple subalgebras function expects 1 argument. ";
+  }
   SemisimpleLieAlgebra* ownerSSPointer;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
-    CalculatorConversions::innerSSLieAlgebra, input, ownerSSPointer
+  if (!theCommands.CallConversionFunctionReturnsNonConst(
+    CalculatorConversions::functionSemisimpleLieAlgebra, input[1], ownerSSPointer
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
@@ -6703,24 +6708,28 @@ bool CalculatorFunctions::innerGetDynkinIndicesSlTwoSubalgebras(
 
 bool CalculatorFunctions::innerEmbedSSalgInSSalg(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerEmbedSSalgInSSalg");
-  if (!input.IsListNElements(3)) {
+  if (input.size() != 3) {
     return output.MakeError("I expect two arguments - the two semisimple subalgebras.", theCommands);
   }
   const Expression& EsmallSA = input[1];
   const Expression& ElargeSA = input[2];
-  SemisimpleLieAlgebra* theSmallSapointer = nullptr;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
-    CalculatorConversions::innerSSLieAlgebra, EsmallSA, theSmallSapointer
+  SemisimpleLieAlgebra* smallSubalgebraPointer = nullptr;
+  if (!theCommands.CallConversionFunctionReturnsNonConst(
+    CalculatorConversions::functionSemisimpleLieAlgebra,
+    EsmallSA,
+    smallSubalgebraPointer
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
-  SemisimpleLieAlgebra* thelargeSapointer = nullptr;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
-    CalculatorConversions::innerSSLieAlgebra, ElargeSA, thelargeSapointer
+  SemisimpleLieAlgebra* largeSubalgebraPointer = nullptr;
+  if (!theCommands.CallConversionFunctionReturnsNonConst(
+    CalculatorConversions::functionSemisimpleLieAlgebra,
+    ElargeSA,
+    largeSubalgebraPointer
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
-  SemisimpleLieAlgebra& ownerSS = *thelargeSapointer;
+  SemisimpleLieAlgebra& ownerSS = *largeSubalgebraPointer;
   std::stringstream out;
   if (ownerSS.GetRank() > 8) {
     out << "<b>This code is has been set to run up to ambient Lie algebra of rank 8. </b>";
@@ -6732,32 +6741,40 @@ bool CalculatorFunctions::innerEmbedSSalgInSSalg(Calculator& theCommands, const 
   theCommands.theObjectContainer.GetSemisimpleSubalgebrasCreateIfNotPresent(ownerSS.theWeyl.theDynkinType);
   theSSsubalgebras.ToStringExpressionString = CalculatorConversions::innerStringFromSemisimpleSubalgebras;
 
-  out << "Attempting to embed " << theSmallSapointer->theWeyl.theDynkinType.ToString() << " in " << ownerSS.ToStringLieAlgebraName();
+  out << "Attempting to embed "
+  << smallSubalgebraPointer->theWeyl.theDynkinType.ToString()
+  << " in " << ownerSS.ToStringLieAlgebraName();
   theSSsubalgebras.FindTheSSSubalgebrasFromScratch(
     ownerSS,
     theCommands.theObjectContainer.theAlgebraicClosure,
     theCommands.theObjectContainer.theSSLieAlgebras,
     theCommands.theObjectContainer.theSltwoSAs,
-    &theSmallSapointer->theWeyl.theDynkinType
+    &smallSubalgebraPointer->theWeyl.theDynkinType
   );
   return output.AssignValue(theSSsubalgebras, theCommands);
 }
 
 bool CalculatorFunctions::innerWeylDimFormula(Calculator& theCommands, const Expression& input, Expression& output) {
   RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
-  if (!input.IsListNElements(3)) {
+  if (input.size() != 3) {
     return output.MakeError("This function takes 2 arguments", theCommands);
   }
   SemisimpleLieAlgebra* theSSowner;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
-    CalculatorConversions::innerSSLieAlgebra, input[1], theSSowner
+  if (!theCommands.CallConversionFunctionReturnsNonConst(
+    CalculatorConversions::functionSemisimpleLieAlgebra,
+    input[1],
+    theSSowner
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
   Vector<RationalFunctionOld> theWeight;
   Expression newContext(theCommands);
   if (!theCommands.GetVectoR<RationalFunctionOld>(
-    input[2], theWeight, &newContext, theSSowner->GetRank(), CalculatorConversions::innerRationalFunction
+    input[2],
+    theWeight,
+    &newContext,
+    theSSowner->GetRank(),
+    CalculatorConversions::innerRationalFunction
   )) {
     return output.MakeError("Failed to convert the argument of the function to a highest weight vector", theCommands);
   }
@@ -6785,8 +6802,10 @@ bool CalculatorFunctions::innerDecomposeFDPartGeneralizedVermaModuleOverLeviPart
   const Expression& inducingParNode = input[3];
   const Expression& splittingParNode = input[4];
   SemisimpleLieAlgebra* ownerSSPointer = nullptr;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
-    CalculatorConversions::innerSSLieAlgebra, typeNode, ownerSSPointer
+  if (!theCommands.CallConversionFunctionReturnsNonConst(
+    CalculatorConversions::functionSemisimpleLieAlgebra,
+    typeNode,
+    ownerSSPointer
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
@@ -6844,11 +6863,19 @@ bool CalculatorFunctions::innerSplitFDpartB3overG2Init(
   return true;
 }
 
-bool CalculatorFunctions::innerParabolicWeylGroups(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctions::innerParabolicWeylGroups(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::innerParabolicWeylGroups");
+  if (input.size() != 2) {
+    return false;
+  }
   Selection selectionParSel;
   SemisimpleLieAlgebra* theSSPointer;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
-    CalculatorConversions::innerSSLieAlgebra, input, theSSPointer
+  if (!theCommands.CallConversionFunctionReturnsNonConst(
+    CalculatorConversions::functionSemisimpleLieAlgebra,
+    input[1],
+    theSSPointer
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
@@ -7278,7 +7305,9 @@ bool CalculatorFunctions::innerWriteGenVermaModAsDiffOperatorUpToLevel(
   Expression resultSSalgebraE;
   resultSSalgebraE = leftE;
   SemisimpleLieAlgebra* theSSalgebra;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, leftE, theSSalgebra)) {
+  if (!theCommands.CallConversionFunctionReturnsNonConst(
+    CalculatorConversions::functionSemisimpleLieAlgebra, leftE, theSSalgebra
+  )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
   int theRank = theSSalgebra->GetRank();
@@ -7388,8 +7417,8 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
   const Expression& genVemaWeightNode = input[3];
   const Expression& fdWeightNode = input[2];
   SemisimpleLieAlgebra* theSSalgebra;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
-    CalculatorConversions::innerSSLieAlgebra, leftE, theSSalgebra
+  if (!theCommands.CallConversionFunctionReturnsNonConst(
+    CalculatorConversions::functionSemisimpleLieAlgebra, leftE, theSSalgebra
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
@@ -7400,15 +7429,19 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
     genVemaWeightNode, highestWeightFundCoords, &hwContext, theRank, CalculatorConversions::innerRationalFunction
   )) {
     return theCommands
-    << "Failed to convert the third argument of innerSplitGenericGenVermaTensorFD to a list of " << theRank
-    << " polynomials. The second argument you gave is " << genVemaWeightNode.ToString() << ".";
+    << "Failed to convert the third argument of "
+    << "innerSplitGenericGenVermaTensorFD to a list of " << theRank
+    << " polynomials. The second argument you gave is "
+    << genVemaWeightNode.ToString() << ".";
   }
   Vector<Rational> theFDhw;
   if (!theCommands.GetVectoR<Rational>(fdWeightNode, theFDhw, nullptr, theRank, nullptr)) {
     return theCommands
-    << "Failed to convert the second argument of innerSplitGenericGenVermaTensorFD to a list of "
+    << "Failed to convert the second argument of "
+    << "innerSplitGenericGenVermaTensorFD to a list of "
     << theRank
-    << " rationals. The second argument you gave is " << fdWeightNode.ToString() << ".";
+    << " rationals. The second argument you gave is "
+    << fdWeightNode.ToString() << ".";
   }
   int theNumVars = hwContext.ContextGetNumContextVariables();
   RationalFunctionOld RFOne, RFZero;
@@ -8284,13 +8317,22 @@ bool CalculatorFunctions::innerTestIndicator(
 }
 
 bool CalculatorFunctions::innerRootSAsAndSltwos(
-  Calculator& theCommands, const Expression& input, Expression& output, bool showSLtwos, bool MustRecompute
+  Calculator& theCommands,
+  const Expression& input,
+  Expression& output,
+  bool showSLtwos,
+  bool MustRecompute
 ) {
   MacroRegisterFunctionWithName("Calculator::innerRootSAsAndSltwos");
+  if (input.size() != 2) {
+    return theCommands << "Root subalgebra / sl(2)-subalgebras function expects 1 argument. ";
+  }
   //bool showIndicator = true;
   SemisimpleLieAlgebra* ownerSS;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
-    CalculatorConversions::innerSSLieAlgebra, input, ownerSS
+  if (!theCommands.CallConversionFunctionReturnsNonConst(
+    CalculatorConversions::functionSemisimpleLieAlgebra,
+    input[1],
+    ownerSS
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
@@ -8758,8 +8800,10 @@ bool CalculatorFunctions::innerDrawWeightSupportWithMults(
   const Expression& typeNode = input[1];
   const Expression& hwNode = input[2];
   SemisimpleLieAlgebra* theSSalgpointer = nullptr;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
-    CalculatorConversions::innerSSLieAlgebra, typeNode, theSSalgpointer
+  if (!theCommands.CallConversionFunctionReturnsNonConst(
+    CalculatorConversions::functionSemisimpleLieAlgebra,
+    typeNode,
+    theSSalgpointer
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
@@ -8783,12 +8827,19 @@ bool CalculatorFunctions::innerDrawWeightSupportWithMults(
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CalculatorFunctions::innerDrawRootSystem(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctions::innerDrawRootSystem(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::innerDrawRootSystem");
+  if (input.size() < 2) {
+    return theCommands << "DrawRootSystem expects at least 1 argument. ";
+  }
   bool hasPreferredProjectionPlane = input.IsListNElements(4);
-  const Expression& typeNode = hasPreferredProjectionPlane ? input[1] : input;
   SemisimpleLieAlgebra* theAlgPointer;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
-    CalculatorConversions::innerSSLieAlgebra, typeNode, theAlgPointer
+  if (!theCommands.CallConversionFunctionReturnsNonConst(
+    CalculatorConversions::functionSemisimpleLieAlgebra,
+    input[1],
+    theAlgPointer
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
@@ -9167,8 +9218,10 @@ bool CalculatorFunctions::innerDrawWeightSupport(
   const Expression& typeNode = input[1];
   const Expression& hwNode = input[2];
   SemisimpleLieAlgebra* theAlgPointer;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
-    CalculatorConversions::innerSSLieAlgebra, typeNode, theAlgPointer
+  if (!theCommands.CallConversionFunctionReturnsNonConst(
+    CalculatorConversions::functionSemisimpleLieAlgebra,
+    typeNode,
+    theAlgPointer
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }

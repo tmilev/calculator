@@ -26,11 +26,27 @@ bool CalculatorConversions::innerExpressionFromChevalleyGenerator(
   return output.MakeXOX(theCommands, theCommands.opUnderscore(), generatorLetterE, generatorIndexE);
 }
 
-bool CalculatorConversions::innerSSLieAlgebra(Calculator& theCommands, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("Calculator::innerSSLieAlgebra");
+bool CalculatorConversions::functionSemisimpleLieAlgebra(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorConversions::functionSemisimpleLieAlgebra");
   SemisimpleLieAlgebra* dummySA;
-  CalculatorConversions::innerSSLieAlgebra(theCommands, input, output, dummySA);
-  return true;
+  return CalculatorConversions::functionSemisimpleLieAlgebra(
+    theCommands, input, output, dummySA
+  );
+}
+
+bool CalculatorConversions::innerSemisimpleLieAlgebra(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("Calculator::innerSemisimpleLieAlgebra");
+  if (input.size() != 2) {
+    return theCommands << "Semisimple Lie algebra expects a single argument. ";
+  }
+  SemisimpleLieAlgebra* dummySA;
+  return CalculatorConversions::functionSemisimpleLieAlgebra(
+    theCommands, input[1], output, dummySA
+  );
 }
 
 bool CalculatorConversions::innerLoadWeylGroup(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -157,14 +173,23 @@ bool CalculatorConversions::innerDynkinType(Calculator& theCommands, const Expre
   if (input.size() != 2) {
     return theCommands << "Dynkin type takes as input one argument. ";
   }
+  return CalculatorConversions::functionDynkinType(theCommands, input[1], output);
+}
+
+bool CalculatorConversions::functionDynkinType(
+  Calculator& theCommands, const Expression& input, DynkinType& output
+) {
+  MacroRegisterFunctionWithName("CalculatorConversions::functionDynkinType");
   MonomialCollection<Expression, Rational> theType;
-  if (!theCommands.functionCollectSummands(theCommands, input[1], theType)) {
+  if (!theCommands.functionCollectSummands(theCommands, input, theType)) {
     return false;
   }
   DynkinSimpleType simpleComponent;
   output.MakeZero();
   for (int i = 0; i < theType.size(); i ++) {
-    if (!CalculatorConversions::functionDynkinSimpleType(theCommands, theType[i], simpleComponent)) {
+    if (!CalculatorConversions::functionDynkinSimpleType(
+      theCommands, theType[i], simpleComponent
+    )) {
       return false;
     }
     int theMultiplicity = - 1;
@@ -181,32 +206,40 @@ bool CalculatorConversions::innerDynkinType(Calculator& theCommands, const Expre
   return !theType.IsEqualToZero();
 }
 
-bool CalculatorConversions::innerSSLieAlgebra(
-  Calculator& theCommands, const Expression& input, Expression& output, SemisimpleLieAlgebra*& outputPointer
+bool CalculatorConversions::functionSemisimpleLieAlgebra(
+  Calculator& theCommands,
+  const Expression& input,
+  Expression& output,
+  SemisimpleLieAlgebra*& outputPointer
 ) {
   RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
-  MacroRegisterFunctionWithName("Calculator::innerSSLieAlgebra");
+  MacroRegisterFunctionWithName("Calculator::functionSemisimpleLieAlgebra");
   DynkinType theDynkinType;
   outputPointer = nullptr;
-  if (!CalculatorConversions::innerDynkinType(theCommands, input, theDynkinType)) {
+  if (!CalculatorConversions::functionDynkinType(
+    theCommands, input, theDynkinType
+  )) {
     return theCommands << "Failed to extract Dynkin type from: " << input.ToString();
   }
   if (theDynkinType.GetRank() > 20) {
-    return theCommands << "I have been instructed to allow semisimple Lie algebras of rank 20 maximum. "
+    return theCommands
+    << "I have been instructed to allow semisimple Lie algebras of rank 20 maximum. "
     << "If you would like to relax this limitation edit file " << __FILE__
     << " line " << __LINE__ << ". Note that the Chevalley constant computation Reserves a dim(g)*dim(g) "
     << "table of RAM memory, which means the RAM memory rises with the 4^th power of rank(g). "
     << "You have been warned. Alternatively, you may want to implement a sparse structure constant table "
     << "(write me an email if you want to do that, I will help you). ";
   }
-  bool newlyCreated =!theCommands.theObjectContainer.theSSLieAlgebras.Contains(theDynkinType);
+  bool newlyCreated = !theCommands.theObjectContainer.theSSLieAlgebras.Contains(theDynkinType);
   outputPointer = &theCommands.theObjectContainer.GetLieAlgebraCreateIfNotPresent(theDynkinType);
   outputPointer->CheckConsistency();
   output.AssignValue(*outputPointer, theCommands);
   if (newlyCreated) {
     outputPointer->ComputeChevalleyConstants();
     Expression tempE;
-    theCommands.innerPrintSSLieAlgebra(theCommands, output, tempE, false);
+    theCommands.functionWriteToHDOrPrintSSLieAlgebra(
+      theCommands, output, tempE, false, false
+    );
     theCommands << tempE.GetValue<std::string>();
   }
   return true;
@@ -290,7 +323,9 @@ bool CalculatorConversions::innerSlTwoSubalgebraPrecomputed(
   }
   const Expression& theOwnerE = input[1];
   Expression tempE;
-  if (!CalculatorConversions::innerSSLieAlgebra(theCommands, theOwnerE, tempE, output.owner)) {
+  if (!CalculatorConversions::functionSemisimpleLieAlgebra(
+    theCommands, theOwnerE, tempE, output.owner
+  )) {
     return theCommands << "<hr>Failed to extract semisimple Lie algebra from " << theOwnerE.ToString()
     << " while extracting its sl(2) subalgebra.";
   }
@@ -600,7 +635,9 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
   std::stringstream reportStream;
   reportStream << "Extracting semisimple Lie algebra ... ";
   theReport.Report(reportStream.str());
-  if (!CalculatorConversions::innerSSLieAlgebra(theCommands, theAmbientTypeE, tempE, ownerSemisimple)) {
+  if (!CalculatorConversions::functionSemisimpleLieAlgebra(
+    theCommands, theAmbientTypeE, tempE, ownerSemisimple
+  )) {
     return theCommands << "<hr>Error loading semisimple subalgebras: "
     << "failed to extract ambient semisimple Lie algebra. ";
   }
@@ -630,7 +667,8 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
 
   for (int i = 1; i < theSAsE.children.size; i ++) {
     std::stringstream reportStream2;
-    reportStream2 << reportStream.str() << "Subalgebra " << i << " is being loaded from expression "
+    reportStream2 << reportStream.str() << "Subalgebra "
+    << i << " is being loaded from expression "
     << theSAsE[i].ToString() << ".";
     theReport.Report(reportStream2.str());
     CandidateSSSubalgebra currentCandidate;
@@ -654,7 +692,8 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
     theSAs.theSubalgebras.SetKeyValue(currentCandidate.theHs, currentCandidate);
     theSAs.theSubalgebras.theValues.LastObject().indexInOwner = theSAs.theSubalgebras.theValues.size - 1;
   }
-  reportStream << "Subalgebra loading done, total  " << theSAs.theSubalgebras.theValues.size << " subalgebras loaded. ";
+  reportStream << "Subalgebra loading done, total "
+  << theSAs.theSubalgebras.theValues.size << " subalgebras loaded. ";
   theReport.Report(reportStream.str());
   theSAs.ToStringExpressionString = CalculatorConversions::innerStringFromSemisimpleSubalgebras;
   if (!theSAs.LoadState(currentChainInt, numExploredTypes, numExploredHs, theCommands.Comments)) {
@@ -663,8 +702,10 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
   theSAs.flagAttemptToAdjustCentralizers = false;
   if (!theSAs.FindTheSSSubalgebrasContinue()) {
     std::stringstream out;
-    out << "<br>Failed to realize all subalgebras, computation aborted. The failure report follows. "
-    << theSAs.comments << "<br>The progress report for the entire computation follows.<br>"
+    out << "<br>Failed to realize all subalgebras, "
+    << "computation aborted. The failure report follows. "
+    << theSAs.comments << "<br>The progress report for the "
+    << "entire computation follows.<br>"
     << theSAs.ToStringProgressReport();
     return output.AssignValue(out.str(), theCommands);
   }

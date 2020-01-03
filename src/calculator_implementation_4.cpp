@@ -901,12 +901,12 @@ bool Calculator::innerFunctionToMatrix(Calculator& theCommands, const Expression
 
 bool Calculator::innerGetChevGen(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerGetChevGen");
-  if (!input.IsListNElements(3)) {
+  if (input.size() != 3) {
     return false;
   }
   SemisimpleLieAlgebra* theSSalg;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
-    CalculatorConversions::innerSSLieAlgebra, input[1], theSSalg
+  if (!theCommands.CallConversionFunctionReturnsNonConst(
+    CalculatorConversions::innerSemisimpleLieAlgebra, input[1], theSSalg
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
@@ -933,12 +933,13 @@ bool Calculator::innerGetChevGen(Calculator& theCommands, const Expression& inpu
 }
 
 bool Calculator::innerGetCartanGen(Calculator& theCommands, const Expression& input, Expression& output) {
-  if (!input.IsListNElements(3)) {
+  MacroRegisterFunctionWithName("Calculator::innerGetCartanGen");
+  if (input.size() != 3) {
     return false;
   }
   SemisimpleLieAlgebra* theSSalg = nullptr;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
-    CalculatorConversions::innerSSLieAlgebra, input[1], theSSalg
+  if (!theCommands.CallConversionFunctionReturnsNonConst(
+    CalculatorConversions::functionSemisimpleLieAlgebra, input[1], theSSalg
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
@@ -951,7 +952,11 @@ bool Calculator::innerGetCartanGen(Calculator& theCommands, const Expression& in
   if (!input[2].IsSmallInteger(&theIndex)) {
     return false;
   }
-  if (theIndex == 0 || theIndex > theSSalg->GetNumPosRoots() || theIndex < - theSSalg->GetNumPosRoots()) {
+  if (
+    theIndex == 0 ||
+    theIndex > theSSalg->GetNumPosRoots() ||
+    theIndex < - theSSalg->GetNumPosRoots()
+  ) {
     return output.MakeError("Bad Cartan subalgebra generator index.", theCommands);
   }
   ElementSemisimpleLieAlgebra<Rational> theElt;
@@ -967,10 +972,16 @@ bool Calculator::innerGetCartanGen(Calculator& theCommands, const Expression& in
 
 bool Calculator::innerKLcoeffs(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerKLcoeffs");
+  if (input.size() != 2) {
+    return theCommands
+    << "Kazhdan-Lusztig coefficients function expects 1 argument. ";
+  }
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   SemisimpleLieAlgebra* theSSalgebra = nullptr;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
-    CalculatorConversions::innerSSLieAlgebra, input, theSSalgebra
+  if (!theCommands.CallConversionFunctionReturnsNonConst(
+    CalculatorConversions::functionSemisimpleLieAlgebra,
+    input,
+    theSSalgebra
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
@@ -995,7 +1006,9 @@ bool Calculator::innerKLcoeffs(Calculator& theCommands, const Expression& input,
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expression& input, Expression& output, bool Verbose) {
+bool Calculator::innerPrintSSLieAlgebra(
+  Calculator& theCommands, const Expression& input, Expression& output, bool Verbose
+) {
   return Calculator::innerWriteToHDOrPrintSSLieAlgebra(theCommands, input, output, Verbose, false);
 }
 
@@ -1007,14 +1020,36 @@ bool Calculator::innerWriteSSLieAlgebraToHD(Calculator& theCommands, const Expre
 }
 
 bool Calculator::innerWriteToHDOrPrintSSLieAlgebra(
-  Calculator& theCommands, const Expression& input, Expression& output, bool Verbose, bool writeToHD
+  Calculator& theCommands,
+  const Expression& input,
+  Expression& output,
+  bool Verbose,
+  bool writeToHD
 ) {
-  MacroRegisterFunctionWithName("Calculator::innerPrintSSLieAlgebra");
+  MacroRegisterFunctionWithName("Calculator::innerWriteToHDOrPrintSSLieAlgebra");
 //  double startTimeDebug= global.GetElapsedSeconds();
-  SemisimpleLieAlgebra *tempSSpointer = nullptr;
+  if (input.size() != 2) {
+    return theCommands << "Print semisimple Lie algebras expects 1 argument. ";
+  }
+  return Calculator::functionWriteToHDOrPrintSSLieAlgebra(
+    theCommands, input[1], output, Verbose, writeToHD
+  );
+}
+
+bool Calculator::functionWriteToHDOrPrintSSLieAlgebra(
+  Calculator& theCommands,
+  const Expression& input,
+  Expression& output,
+  bool Verbose,
+  bool writeToHD
+) {
+  MacroRegisterFunctionWithName("Calculator::functionWriteToHDOrPrintSSLieAlgebra");
+  SemisimpleLieAlgebra* tempSSpointer = nullptr;
   input.CheckInitialization();
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
-    CalculatorConversions::innerSSLieAlgebra, input, tempSSpointer
+  if (!theCommands.CallConversionFunctionReturnsNonConst(
+    CalculatorConversions::functionSemisimpleLieAlgebra,
+    input,
+    tempSSpointer
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }

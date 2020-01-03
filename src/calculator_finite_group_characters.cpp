@@ -421,8 +421,10 @@ bool CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(
   }
   const Expression& theSSalgebraNode = input[1];
   SemisimpleLieAlgebra* theSSalgebra;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
-    CalculatorConversions::innerSSLieAlgebra, theSSalgebraNode, theSSalgebra
+  if (!theCommands.CallConversionFunctionReturnsNonConst(
+    CalculatorConversions::functionSemisimpleLieAlgebra,
+    theSSalgebraNode,
+    theSSalgebra
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
@@ -2095,9 +2097,12 @@ bool CalculatorFunctionsWeylGroup::innerMacdonaldPolys(Calculator& theCommands, 
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerMacdonaldPolys");
   //note that if input is list of 2 elements then input[0] is sequence atom, and your two elements are in fact
   //input[1] and input[2];
+  if (input.size() != 2) {
+    return theCommands << "Macdonald polynomials expects as input a single argument. ";
+  }
   SemisimpleLieAlgebra* thePointer = nullptr;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
-    CalculatorConversions::innerSSLieAlgebra, input, thePointer
+  if (!theCommands.CallConversionFunctionReturnsNonConst(
+    CalculatorConversions::functionSemisimpleLieAlgebra, input[1], thePointer
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
@@ -2130,7 +2135,9 @@ bool CalculatorFunctionsWeylGroup::innerLieAlgebraWeight(Calculator& theCommands
   }
   Expression tempE;
   SemisimpleLieAlgebra* theSSowner = nullptr;
-  if (!CalculatorConversions::innerSSLieAlgebra(theCommands, input[1], tempE, theSSowner)) {
+  if (!CalculatorConversions::functionSemisimpleLieAlgebra(
+    theCommands, input[1], tempE, theSSowner
+  )) {
     return theCommands << "<hr>Failed to load semisimple Lie algebra";
   }
   std::string theCoordsString;
@@ -2180,12 +2187,19 @@ bool CalculatorFunctionsWeylGroup::innerLieAlgebraWeight(Calculator& theCommands
   return output.AssignValueWithContext(resultWeight, theContext, theCommands);
 }
 
-bool CalculatorFunctionsWeylGroup::innerLieAlgebraRhoWeight(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsWeylGroup::innerLieAlgebraRhoWeight(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerLieAlgebraRhoWeight");
+  if (input.size() != 2) {
+    return theCommands << "Lie algebra rho weight expects a single argument. ";
+  }
   Weight<Polynomial<Rational> > resultWeight;
   SemisimpleLieAlgebra* theSSowner = nullptr;
   Expression tempE;
-  if (!CalculatorConversions::innerSSLieAlgebra(theCommands, input, tempE, theSSowner)) {
+  if (!CalculatorConversions::functionSemisimpleLieAlgebra(
+    theCommands, input[1], tempE, theSSowner
+  )) {
     return theCommands << "<hr>Failed to load semisimple Lie algebra. ";
   }
   theSSowner->CheckConsistency();
@@ -2388,19 +2402,17 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupElement(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylGroupElement");
-  if (input.children.size < 2) {
+  if (input.size() < 2) {
     return output.MakeError("Function WeylElement needs to know what group the element belongs to", theCommands);
   }
-  //note that if input is list of 2 elements then input[0] is sequence atom, and your two elements are in fact
-  //input[1] and input[2];
   SemisimpleLieAlgebra* thePointer;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
-    CalculatorConversions::innerSSLieAlgebra, input[1], thePointer
+  if (!theCommands.CallConversionFunctionReturnsNonConst(
+    CalculatorConversions::functionSemisimpleLieAlgebra, input[1], thePointer
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
   ElementWeylGroup theElt;
-  theElt.generatorsLastAppliedFirst.Reserve(input.children.size - 2);
+  theElt.generatorsLastAppliedFirst.Reserve(input.size() - 2);
   for (int i = 2; i < input.children.size; i ++) {
     int tmp;
     if (!input[i].IsSmallInteger(& tmp)) {
@@ -2421,7 +2433,9 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupElement(
   return output.AssignValue(theElt, theCommands);
 }
 
-bool Calculator::innerGenerateMultiplicativelyClosedSet(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::innerGenerateMultiplicativelyClosedSet(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("Calculator::innerGenerateMultiplicativelyClosedSet");
   if (input.size() <= 2) {
     return output.MakeError("I need at least two arguments - upper bound and at least one element to multiply. ", theCommands);

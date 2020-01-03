@@ -182,22 +182,33 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
   return (numTotalWeightsFound <= upperBoundDominantWeights);
 }
 
-bool Calculator::innerAnimateLittelmannPaths(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::innerAnimateLittelmannPaths(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("Calculator::innerAnimateLittelmannPaths");
   RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   if (!input.IsListNElements(3)) {
     return output.MakeError("This function takes 2 arguments", theCommands);
   }
   SemisimpleLieAlgebra* theSSowner = nullptr;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
-    CalculatorConversions::innerSSLieAlgebra, input[1], theSSowner
+  if (!theCommands.CallConversionFunctionReturnsNonConst(
+    CalculatorConversions::functionSemisimpleLieAlgebra, input[1], theSSowner
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
   Vector<Rational> theWeight;
   Expression tempContext(theCommands);
-  if (!theCommands.GetVectoR<Rational>(input[2], theWeight, &tempContext, theSSowner->GetRank(), nullptr)) {
-    return output.MakeError("Failed to convert the argument of the function to a highest weight vector", theCommands);
+  if (!theCommands.GetVectoR<Rational>(
+    input[2],
+    theWeight,
+    &tempContext,
+    theSSowner->GetRank(),
+    nullptr
+  )) {
+    return output.MakeError(
+      "Failed to convert the argument of the function to a highest weight vector",
+      theCommands
+    );
   }
   Vector<Rational> theWeightInSimpleCoords;
   theWeightInSimpleCoords = theSSowner->theWeyl.GetSimpleCoordinatesFromFundamental(theWeight);
@@ -209,10 +220,13 @@ bool Calculator::innerAnimateLittelmannPaths(Calculator& theCommands, const Expr
 }
 
 bool Calculator::innerCasimir(Calculator& theCommands, const Expression& input, Expression& output) {
-  RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
+  MacroRegisterFunctionWithName("Calculator::innerCasimir");
+  if (input.size() != 2) {
+    return theCommands << "Casimir function expects a single input. ";
+  }
   SemisimpleLieAlgebra* theSSalg = nullptr;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
-    CalculatorConversions::innerSSLieAlgebra, input, theSSalg
+  if (!theCommands.CallConversionFunctionReturnsNonConst(
+    CalculatorConversions::functionSemisimpleLieAlgebra, input[1], theSSalg
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
@@ -1042,13 +1056,13 @@ bool Calculator::innerJacobiSymbol(Calculator& theCommands, const Expression& in
 bool Calculator::innerPrintAllVectorPartitions(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerPrintAllVectorPartitions");
   RecursionDepthCounter theRecursion(&theCommands.RecursionDeptH);
-  if (!input.IsListNElements(3)) {
+  if (input.size() != 3) {
     return output.MakeError("Function innerPrintAllPartitions expects 2 arguments.", theCommands);
   }
 
   SemisimpleLieAlgebra* theSSowner;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
-    CalculatorConversions::innerSSLieAlgebra, input[1], theSSowner
+  if (!theCommands.CallConversionFunctionReturnsNonConst(
+    CalculatorConversions::functionSemisimpleLieAlgebra, input[1], theSSowner
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
@@ -1328,12 +1342,12 @@ bool Calculator::innerLittelmannOperator(Calculator& theCommands, const Expressi
 bool Calculator::innerLSPath(Calculator& theCommands, const Expression& input, Expression& output) {
   RecursionDepthCounter theRecutionIncrementer(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("Calculator::innerLSPath");
-  if (input.children.size < 3) {
+  if (input.size() < 3) {
     return output.MakeError("LSPath needs at least two arguments.", theCommands);
   }
   SemisimpleLieAlgebra* theSSowner;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(
-    CalculatorConversions::innerSSLieAlgebra, input[1], theSSowner
+  if (!theCommands.CallConversionFunctionReturnsNonConst(
+    CalculatorConversions::functionSemisimpleLieAlgebra, input[1], theSSowner
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
@@ -1899,21 +1913,21 @@ bool Calculator::Test::ProcessResults() {
     Calculator::Test::OneTest& currentTest = this->commands.theValues[i];
     std::stringstream currentLine;
     currentLine << "<tr>";
-    currentLine << "<td>" << i << "</td>";
-    currentLine << "<td style = 'min-width:200px'>" << currentTest.functionAdditionalIdentifier
+    currentLine << "<td style = 'min-width:25px;'>" << i << "</td>";
+    currentLine << "<td style = 'min-width:200px;'>" << currentTest.functionAdditionalIdentifier
     << "</td>";
     currentLine << "<td>" << currentTest.atom << "</td>";
-    currentLine << "<td  style = 'min-width:200px'>" << global.ToStringCalculatorComputation(this->commands.theKeys[i], this->commands.theKeys[i]) << "</td>";
+    currentLine << "<td  style = 'min-width:200px;'>" << global.ToStringCalculatorComputation(this->commands.theKeys[i], this->commands.theKeys[i]) << "</td>";
     bool isBad = false;
     bool isUknown = false;
     if (currentTest.actualResult == currentTest.expectedResult) {
-      currentLine << "<td><b style='color:green'>OK</b></td>";
+      currentLine << "<td><b style='color:green;'>OK</b></td>";
     } else if (currentTest.expectedResult == "") {
-      currentLine << "<td><b style='color:orange'>expected result unknown</b></td>";
+      currentLine << "<td><b style='color:orange;'>expected result unknown</b></td>";
       isUknown = true;
       this->unknown ++;
     } else {
-      currentLine << "<td style = 'min-width:100px'><b style='color:red'>unexpected result</b></td>"
+      currentLine << "<td style = 'min-width:100px;'><b style='color:red'>unexpected result</b></td>"
       << "<td>got: " << currentTest.actualResult << "</td>"
       << "<td>expected: " << currentTest.expectedResult << "</td>"
       ;

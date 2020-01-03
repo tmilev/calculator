@@ -3836,7 +3836,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->AddOperationHandler(
     "SemisimpleLieAlgebra",
-    CalculatorConversions::innerSSLieAlgebra,
+    CalculatorConversions::innerSemisimpleLieAlgebra,
     "",
     "Creates a semisimple Lie algebra. The semisimple Lie algebra "
     "is given via its Dynkin type. A simple Dynkin type is given by "
@@ -3874,7 +3874,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "g_{{i}}= GetChevalleyGenerator{}(SemisimpleLieAlgebra{}G_2, i);\n"
     "h_{{i}}= GetCartanGenerator{}(SemisimpleLieAlgebra{}G_2, i);\n"
     "[g_1,g_{- 1}]; \n[g_2, g_{-2}]; \n[h_{1}, g_6]; \n[h_2, g_{-6}]",
-    "CalculatorConversions::innerSSLieAlgebra",
+    "CalculatorConversions::innerSemisimpleLieAlgebra",
     "SemisimpleLieAlgebra",
     innerStandard
   );

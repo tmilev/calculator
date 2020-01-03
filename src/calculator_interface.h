@@ -1941,11 +1941,14 @@ public:
     }
     return output.IsOfType<theType>();
   }
+  // Return type is non-const, please use with caution.
   template <class theType>
-  bool CallConversionFunctionReturnsNonConstUseCarefully(
-    Expression::FunctionAddress theFun, const Expression& input, theType*& outputData
+  bool CallConversionFunctionReturnsNonConst(
+    Expression::FunctionAddress theFun,
+    const Expression& input,
+    theType*& outputData
   ) {
-    MacroRegisterFunctionWithName("Calculator::CallConversionFunctionReturnsNonConstUseCarefully");
+    MacroRegisterFunctionWithName("Calculator::CallConversionFunctionReturnsNonConst");
     Expression tempE;
     if (!this->ConvertToTypeUsingFunction<theType>(theFun, input, tempE)) {
       return false;
@@ -2219,6 +2222,9 @@ public:
   static bool innerWriteToHDOrPrintSSLieAlgebra(
     Calculator& theCommands, const Expression& input, Expression& output, bool Verbose, bool writeToHD
   );
+  static bool functionWriteToHDOrPrintSSLieAlgebra(
+    Calculator& theCommands, const Expression& input, Expression& output, bool Verbose, bool writeToHD
+  );
   static bool innerRootSubsystem(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerConesIntersect(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPerturbSplittingNormal(Calculator& theCommands, const Expression& input, Expression& output);
@@ -2455,6 +2461,7 @@ public:
     SemisimpleLieAlgebra& owner
   );
   static bool innerDynkinType(Calculator& theCommands, const Expression& input, DynkinType& output);
+  static bool functionDynkinType(Calculator& theCommands, const Expression& input, DynkinType& output);
   static bool innerDynkinSimpleTypE(Calculator& theCommands, const Expression& input, DynkinSimpleType& output);
   static bool functionDynkinSimpleType(Calculator& theCommands, const Expression& input, DynkinSimpleType& output);
   static bool innerSlTwoSubalgebraPrecomputed(Calculator& theCommands, const Expression& input, slTwoSubalgebra& output);
@@ -2535,12 +2542,17 @@ public:
   );
   //conversions from expression containing type to expression tree
   static bool innerStoreSemisimpleLieAlgebra(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerSSLieAlgebra(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerSSLieAlgebra(
+  static bool functionSemisimpleLieAlgebra(
+    Calculator& theCommands, const Expression& input, Expression& output
+  );
+  static bool functionSemisimpleLieAlgebra(
     Calculator& theCommands,
     const Expression& input,
     Expression& output,
     SemisimpleLieAlgebra*& outputSSalgebra
+  );
+  static bool innerSemisimpleLieAlgebra(
+    Calculator& theCommands, const Expression& input, Expression& output
   );
   static bool innerCandidateSAPrecomputed(
     Calculator& theCommands,
@@ -2787,22 +2799,24 @@ bool Calculator::GetTypeWeight(
   Expression::FunctionAddress ConversionFun
 ) {
   MacroRegisterFunctionWithName("Calculator::GetTypeWeight");
-  if (!input.IsListNElements(3)) {
-    theCommands
+  if (input.size() != 3) {
+    return theCommands
     << "Function TypeHighestWeightParabolic is expected to have two arguments: "
     << "Semisimple  algebra type, highest weight in simple coordinates. ";
-    return false;
   }
   const Expression& leftE = input[1];
   const Expression& middleE = input[2];
-  if (!Calculator::CallConversionFunctionReturnsNonConstUseCarefully(
-    CalculatorConversions::innerSSLieAlgebra, leftE, ambientSSalgebra
+  if (!Calculator::CallConversionFunctionReturnsNonConst(
+    CalculatorConversions::functionSemisimpleLieAlgebra,
+    leftE,
+    ambientSSalgebra
   )) {
     theCommands << "Error extracting Lie algebra from " << leftE.ToString();
     return false;
   }
   if (!theCommands.GetVectoR<coefficient>(
-    middleE, outputWeightSimpleCoords, &outputWeightContext, ambientSSalgebra->GetRank(), ConversionFun
+    middleE,
+    outputWeightSimpleCoords, &outputWeightContext, ambientSSalgebra->GetRank(), ConversionFun
   )) {
     theCommands << "Failed to convert the second argument of HWV to a list of " << ambientSSalgebra->GetRank()
     << " polynomials. The second argument you gave is " << middleE.ToString() << ".";
@@ -2837,8 +2851,10 @@ bool Calculator::GetTypeHighestWeightParabolic(
   }
   const Expression& leftE = input[1];
   const Expression& middleE = input[2];
-  if (!Calculator::CallConversionFunctionReturnsNonConstUseCarefully(
-    CalculatorConversions::innerSSLieAlgebra, leftE, ambientSSalgebra
+  if (!Calculator::CallConversionFunctionReturnsNonConst(
+    CalculatorConversions::functionSemisimpleLieAlgebra,
+    leftE,
+    ambientSSalgebra
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
@@ -2850,7 +2866,9 @@ bool Calculator::GetTypeHighestWeightParabolic(
     ConversionFun
   )) {
     std::stringstream tempStream;
-    tempStream << "Failed to convert the second argument of HWV to a list of " << ambientSSalgebra->GetRank()
+    tempStream
+    << "Failed to convert the second argument of HWV to a list of "
+    << ambientSSalgebra->GetRank()
     << " polynomials. The second argument you gave is " << middleE.ToString() << ".";
     return output.MakeError(tempStream.str(), theCommands);
   }

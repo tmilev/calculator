@@ -2025,8 +2025,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "",
     "Same as MakeMatrix but uses different c++ implementation "
     "(class MatrixTensor instead of class Matrix). ",
-    "s_1 = MakeMatrixTensorForm{}("
-    "(- 1,- 1, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1)"
+    "s_1 = MakeMatrixTensorForm{}(\n"
+    "(- 1,- 1, 0, 0),\n"
+    "(0, 1, 0, 0),\n"
+    "(0, 0, 1, 0),\n"
+    "(0, 0, 0, 1)\n"
     "); ",
     "CalculatorConversions::innerMatrixRationalTensorForM",
     "MakeMatrixTensorForm",
@@ -6401,12 +6404,12 @@ void Calculator::initPredefinedStandardOperations() {
     this->opRational(),
     this->opMatTensorRat(),
     "Multiplies rational by matrix tensor form. ",
-    "M=MakeMatrixTensorForm{}((1,1), (0,1));\n"
+    "M = MakeMatrixTensorForm{}((1, 3, 5), (- 1, 1, 0), (2, 2, 7));\n"
     "M;\n"
-    "M*M;\n"
-    "M*M*M;\n"
-    "M*M*M*M;\n"
-    "2*M ",
+    "M * M;\n"
+    "M * M * M;\n"
+    "M * M * M * M;\n"
+    "2 * M ",
     "CalculatorFunctionsBinaryOps::innerMultiplyMatrixTensorOrRationalByMatrixTensor",
     "MultiplyRationalByMatrixTensor",
     innerStandard

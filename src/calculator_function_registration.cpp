@@ -4259,7 +4259,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "The second argument is allowed to have "
     "entries that are not non-negative integers "
     "in the positions in which the third argument has 1's. ",
-    "PrintModule{} (G_2, (2,0),(0,0))",
+    "PrintModule{}(G_2, (2, 0), (0, 0))",
     "CalculatorFunctions::innerPrintGenVermaModule",
     "PrintModule",
     innerStandard
@@ -4305,7 +4305,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Presented first on the seminar in Charles University Prague. "
     "The first argument gives the type of the semisimple Lie algebra, "
     "the second gives the highest weight. ",
-    "AnimateLittelmannPaths{}(G_2, (2,0));",
+    "AnimateLittelmannPaths{}(G_2, (2, 0));",
     "Calculator::innerAnimateLittelmannPaths",
     "AnimateLittelmannPaths",
     innerStandard
@@ -4326,7 +4326,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "to which we induce. The last argument "
     "gives the parabolic subalgebra with "
     "respect to whose Levi part we decompose.",
-    "DecomposeInducingRepGenVermaModule{}(B_3,(0, 1,1),(1,0,0), (1,0,1))",
+    "DecomposeInducingRepGenVermaModule{}(B_3, (0, 1, 1), (1, 0, 0), (1, 0, 1))",
     "CalculatorFunctions::innerDecomposeFDPartGeneralizedVermaModuleOverLeviPart",
     "DecomposeInducingRepGenVermaModule",
     innerStandard
@@ -4391,7 +4391,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "below the graphics. "
     "Clicking the obvious button creates a basis "
     "change animations ideal for presentations.",
-    "DrawRootSystem{}(A_7, (1, 0 , 2, 2, 2, 0, 1), (1, 3, 2, 2, 2, 3, 1));",
+    "DrawRootSystem{}(A_7, (1, 0 , 2, 2, 2, 0, 1), (1, 3, 2, 2, 2, 3, 1))",
     "CalculatorFunctions::innerDrawRootSystem",
     "DrawRootSystem",
     innerStandard
@@ -4414,7 +4414,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "is very javascript-processor-intensive. "
     "Use only for *small* examples, "
     "else you might hang your browser. </b>",
-    "DrawWeightSupportWithMults{}(B_3,(0,1,1));\n DrawWeightSupportWithMults{}(G_2,(1,0))",
+    "DrawWeightSupportWithMults{}(B_3, (0, 1, 1));\n"
+    "DrawWeightSupportWithMults{}(G_2, (1, 0))",
     "CalculatorFunctions::innerDrawWeightSupportWithMults",
     "DrawWeightSupportWithMults",
     innerStandard
@@ -4426,7 +4427,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "Same as DrawWeightSupportWithMults but displays no multiplicities. "
     "Same warning for hanging up your browser "
     "with javascript holds.",
-    "DrawWeightSupport{}(B_3, (1, 1, 1)); DrawWeightSupport{}(G_2, (1, 2))",
+    "DrawWeightSupport{}(B_3, (1, 1, 1));\n"
+    "DrawWeightSupport{}(G_2, (1, 2))",
     "CalculatorFunctions::innerDrawWeightSupport",
     "DrawWeightSupport",
     innerStandard
@@ -4444,7 +4446,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "The arguments which are not small integers "
     "indicate the non-selected "
     "roots of the inducing parabolic subalgebra of B_3. ",
-    "SplitFDpartB3overG2CharsOnly{}(x_1, 2, 0)",
+    "SplitFDpartB3overG2CharsOnly(x_1, 2, 0)",
     "Calculator::innerSplitFDpartB3overG2CharsOnly",
     "SplitFDpartB3overG2CharsOnly",
     innerStandard
@@ -4816,7 +4818,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Inverts a matrix of rationals if invertible, "
     "in any other case generates an error. Makes a detailed "
     "printout of all Gaussian elimantion steps. ",
-    "InvertMatrixVerbose{}((1, 2), (2, 3))",
+    "InvertMatrixVerbose((1, 2), (2, 3))",
     "Calculator::innerInvertMatrixVerbose",
     "InvertMatrixVerbose",
     innerStandard
@@ -4861,20 +4863,20 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->AddOperationHandler(
     "Reverse",
-    Calculator::innerReverseOrdeR,
+    Calculator::innerReverseOrder,
     "",
     "Reverses order of elements. This operation will reverse products, lists, etc. "
     "More precisely, the command leaves the fist child in "
     "the internal representation of the object in place "
     "and flips the order of all other children.",
     "Reverse{}(s_1 s_2 s_3 s_4 s_2 s_3 s_1 s_2 s_3 s_4 s_1 s_2 s_3 s_2 s_1)",
-    "Calculator::innerReverseOrdeR",
+    "Calculator::innerReverseOrder",
     "Reverse",
     innerStandard
   );
   this->AddOperationHandler(
     "ReverseRecursively",
-    Calculator::innerReverseOrderRecursively,
+    Calculator::innerReverseOrderRecursivelY,
     "",
     "Same as Reverse but will apply recursively to the children expressions as well.",
     "ReverseRecursively{}(s_1 s_2 s_3s_4s_2s_3s_1s_2s_3s_4s_1s_2s_3s_2s_1)",
@@ -4906,7 +4908,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "FindOneSolutionSerreLikePolynomialSystem",
     CalculatorFunctions::innerSolveSerreLikeSystemNoUpperLimit,
     "",
-    "Attempts to heuristically solve a system of polynomial of equations over the rationals. "
+    "Attempts to heuristically solve a system "
+    "of polynomial of equations over the rationals. "
     "The input system of equations can be arbitrary, "
     "however it is assumed that the system is Serre-like, i.e., comes "
     "from the Serre relations governing the embedding "
@@ -4939,15 +4942,15 @@ void Calculator::initPredefinedInnerFunctions() {
     "x_{11}x_{21}+x_{10}x_{20}-x_{8}x_{19}, "
     "x_{9}x_{21}+x_{8}x_{20}+x_{7}x_{19}- 1, "
     "x_{12}x_{18}+2x_{11}x_{17}-x_{10}x_{16}+2x_{9}x_{15}-2x_{8}x_{14}-x_{7}x_{13}, "
-    "x_{6}x_{18}-x_{4}x_{16}-2x_{2}x_{14}-x_{1}x_{13}+ 1, "
+    "x_{6}x_{18}-x_{4}x_{16}-2x_{2}x_{14} - x_{1}x_{13} + 1, "
     "x_{5}x_{18}+x_{4}x_{17}+x_{2}x_{15}, "
     "x_{3}x_{18}+x_{2}x_{17}-x_{1}x_{15}, "
     "x_{6}x_{17}+x_{5}x_{16}+x_{3}x_{14}, "
-    "x_{5}x_{17}+x_{4}x_{16}+x_{2}x_{14}- 1, "
+    "x_{5}x_{17}+x_{4}x_{16}+x_{2}x_{14} - 1, "
     "x_{3}x_{17}+x_{2}x_{16}-x_{1}x_{14}, "
     "x_{6}x_{15}+x_{5}x_{14}-x_{3}x_{13}, "
     "x_{5}x_{15}+x_{4}x_{14}-x_{2}x_{13}, "
-    "x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}- 1)",
+    "x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13} - 1)",
     "CalculatorFunctions::innerSolveSerreLikeSystemNoUpperLimit",
     "FindOneSolutionSerreLikePolynomialSystem",
     innerStandard
@@ -4975,11 +4978,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "x_{5}x_{18}+x_{4}x_{17}+x_{2}x_{15}, "
     "x_{3}x_{18}+x_{2}x_{17}-x_{1}x_{15}, "
     "x_{6}x_{17}+x_{5}x_{16}+x_{3}x_{14}, "
-    "x_{5}x_{17}+x_{4}x_{16}+x_{2}x_{14}- 1, "
+    "x_{5}x_{17}+x_{4}x_{16}+x_{2}x_{14} - 1, "
     "x_{3}x_{17}+x_{2}x_{16}-x_{1}x_{14}, "
     "x_{6}x_{15}+x_{5}x_{14}-x_{3}x_{13}, "
     "x_{5}x_{15}+x_{4}x_{14}-x_{2}x_{13}, "
-    "x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}- 1)",
+    "x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13} - 1)",
     "CalculatorFunctions::innerSolveSerreLikeSystemUpperLimit",
     "FindOneSolutionSerreLikePolynomialSystemUpperLimit",
     innerStandard
@@ -4990,7 +4993,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "",
     "Same as FindOneSolutionSerreLikePolynomialSystem "
     "but starts directly over algebraic closure. ",
-    "FindOneSolutionSerreLikePolynomialSystemAlgebraic{}"
+    "FindOneSolutionSerreLikePolynomialSystemAlgebraic"
     "(x^2 + 1, y x z - 1, z^2 x + y - 1, w u)",
     "CalculatorFunctions::innerSolveSerreLikeSystemAlgebraic",
     "FindOneSolutionSerreLikePolynomialSystemAlgebraic",
@@ -5003,8 +5006,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "Same as FindOneSolutionSerreLikePolynomialSystemAlgebraic "
     "but the first argument gives upper limits to the number of "
     "polynomial computations that can be carried out.",
-    "FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit{}"
-    "(10000, x^2+ 1, y x z - 1, z^2 x +y- 1, w u)",
+    "FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit"
+    "(10000, x^2+ 1, y x z - 1, z^2 x +y - 1, w u)",
     "CalculatorFunctions::innerSolveSerreLikeSystemAlgebraicUpperLimit",
     "FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit",
     innerStandard
@@ -5314,7 +5317,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->AddOperationHandler(
     "FactorInteger",
-    CalculatorFunctions::innerFactorInteger,
+    CalculatorFunctions::innerFactorIntegeR,
     "",
     "Factors an integer, assuming the integer is small enough. ",
     "FactorInteger(10001011);\n"

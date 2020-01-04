@@ -844,7 +844,6 @@ public:
   bool flagDivAlreadyDisplayed;
   bool flagIncludeCoordinateSystem;
   int dimension;
-  static int canvasCounteR;
   int priorityViewRectangle; // 0 or less: compute the view Window. If this quantity is greater than zero,
   int priorityWindow; // 0 or less: compute the view Window. If this quantity is greater than zero,
   // the user-given bounding box will overwrite any computations.
@@ -856,7 +855,7 @@ public:
 
   std::string ToStringDebug();
   std::string GetPlotHtml(Calculator& owner);
-  void ComputeCanvasNameIfNecessary();
+  void ComputeCanvasNameIfNecessary(int& canvasCounter);
   std::string commonCanvasSetup();
   std::string GetPlotHtml3d_New(Calculator& owner);
   std::string GetPlotHtml2d_New(Calculator& owner);
@@ -930,6 +929,7 @@ public:
   SemisimpleLieAlgebra& GetLieAlgebraCreateIfNotPresent(const DynkinType& input);
   SemisimpleSubalgebras& GetSemisimpleSubalgebrasCreateIfNotPresent(const DynkinType& input);
   int CurrentRandomSeed;
+  int canvasPlotCounter;
   void reset();
   void resetSliders();
   void resetPlots();
@@ -1980,8 +1980,9 @@ public:
     Calculator& theCommands, const Expression& input, Expression& output
   );
 
-  static bool innerReverseOrdeR(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerReverseOrderRecursively(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerReverseOrder(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerReverseOrderRecursivelY(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool functionReverseOrderRecursively(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPolynomialWithEWA(Calculator& theCommands, const Expression& input, Expression& output) {
     return theCommands.innerEWAorPoly(theCommands, input, output, true);
   }

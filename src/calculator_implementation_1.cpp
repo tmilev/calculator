@@ -1069,7 +1069,7 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner) {
   MacroRegisterFunctionWithName("Plot::GetPlotHtml3d_New");
   owner.flagHasGraphics = true;
   std::stringstream outContent, outScript;
-  this->ComputeCanvasNameIfNecessary();
+  this->ComputeCanvasNameIfNecessary(owner.theObjectContainer.canvasPlotCounter);
   if (!owner.flagPlotShowJavascriptOnly) {
     outContent << "<canvas width =\"" << this->DesiredHtmlWidthInPixels
     << "\" height =\"" << this->DesiredHtmlHeightInPixels << "\" "
@@ -1090,7 +1090,8 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner) {
   << "}\n";
   outScript << "function " << canvasFunctionName << "() {\n";
   for (int i = 0; i < this->boxesThatUpdateMe.size; i ++) {
-    InputBox& currentBox = owner.theObjectContainer.theUserInputTextBoxesWithValues.GetValueCreate(this->boxesThatUpdateMe[i]);
+    InputBox& currentBox = owner.theObjectContainer.
+    theUserInputTextBoxesWithValues.GetValueCreate(this->boxesThatUpdateMe[i]);
     outScript << " window.calculator.drawing.plotUpdaters['"
     << currentBox.GetSliderName() << "'] =" << "'" << this->GetCanvasName() << "'"
     << ";\n";
@@ -1325,8 +1326,6 @@ std::string Plot::GetPlotHtml(Calculator& owner) {
   }
 }
 
-int Plot::canvasCounteR = 0;
-
 std::string PlotObject::GetJavascriptParametricCurve2D(
   std::string& outputPlotInstantiationJS, const std::string& canvasName, int& funCounter
 ) {
@@ -1518,13 +1517,13 @@ std::string PlotObject::ToStringPointsList() {
   return out.str();
 }
 
-void Plot::ComputeCanvasNameIfNecessary() {
+void Plot::ComputeCanvasNameIfNecessary(int& canvasCounter) {
   if (this->GetCanvasName() != "") {
     return;
   }
-  this->canvasCounteR ++;
+  canvasCounter ++;
   std::stringstream canvasNameStream;
-  canvasNameStream << "theCanvas" << this->canvasCounteR;
+  canvasNameStream << "theCanvas" << canvasCounter;
   this->SetCanvasName(canvasNameStream.str());
 }
 
@@ -1535,7 +1534,7 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner) {
     return "[plot alredy displayed]";
   }
   this->flagDivAlreadyDisplayed = true;
-  this->ComputeCanvasNameIfNecessary();
+  this->ComputeCanvasNameIfNecessary(owner.theObjectContainer.canvasPlotCounter);
   std::stringstream out;
   if (this->priorityViewRectangle <= 0) {
     this->ComputeAxesAndBoundingBox();
@@ -2044,23 +2043,34 @@ bool Calculator::innerConesIntersect(Calculator& theCommands, const Expression& 
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool Calculator::innerReverseOrderRecursively(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::innerReverseOrderRecursivelY(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerReverseOrderRecursively");
+  if (input.size() < 2) {
+    return false;
+  }
+  Expression toReverse;
+  if (input.size() == 2) {
+    toReverse = input[1];
+  } else {
+    toReverse = input;
+    toReverse.SetChildAtomValue(0, theCommands.opSequence());
+  }
+  return theCommands.functionReverseOrderRecursively(theCommands, toReverse, output);
+}
+
+bool Calculator::functionReverseOrderRecursively(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   if (!input.IsSuitableForRecursion()) {
     output = input;
     return true;
-  }
-  if (input[0] == "ReverseRecursively") {
-    Expression tempE = input;
-    tempE.SetChildAtomValue(0, theCommands.opSequence());
-    return theCommands.innerReverseOrderRecursively(theCommands, tempE, output);
   }
   output.reset(theCommands, input.size());
   output.AddChildOnTop(input[0]);
   for (int i = input.size() - 1; i >= 1; i --) {
     Expression currentE = input[i];
     Expression reversedCurrentE;
-    if (!theCommands.innerReverseOrderRecursively(theCommands,  currentE, reversedCurrentE)) {
+    if (!theCommands.functionReverseOrderRecursively(theCommands,  currentE, reversedCurrentE)) {
       return false;
     }
     output.AddChildOnTop(reversedCurrentE);
@@ -2068,21 +2078,26 @@ bool Calculator::innerReverseOrderRecursively(Calculator& theCommands, const Exp
   return true;
 }
 
-bool Calculator::innerReverseOrdeR(Calculator& theCommands, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("Calculator::innerReverse");
+bool Calculator::innerReverseOrder(Calculator& theCommands, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("Calculator::innerReverseOrder");
   if (!input.IsSuitableForRecursion()) {
     output = input;
     return true;
   }
-  if (input[0] == "Reverse") {
-    Expression tempE = input;
-    tempE.SetChildAtomValue(0, theCommands.opSequence());
-    return theCommands.innerReverseOrdeR(theCommands, tempE, output);
+  if (input.size() < 2) {
+    return false;
   }
-  output.reset(theCommands, input.size());
-  output.AddChildOnTop(input[0]);
-  for (int i = input.size() - 1; i >= 1; i --) {
-    output.AddChildOnTop(input[i]);
+  Expression toReverse;
+  if (input.size() == 2) {
+    toReverse = input[1];
+  } else {
+    toReverse = input;
+    toReverse.SetChildAtomValue(0, theCommands.opSequence());
+  }
+  output.reset(theCommands, toReverse.size());
+  output.AddChildOnTop(toReverse[0]);
+  for (int i = toReverse.size() - 1; i >= 1; i --) {
+    output.AddChildOnTop(toReverse[i]);
   }
   return true;
 }

@@ -982,7 +982,7 @@ bool Calculator::innerKLcoeffs(Calculator& theCommands, const Expression& input,
   SemisimpleLieAlgebra* theSSalgebra = nullptr;
   if (!theCommands.CallConversionFunctionReturnsNonConst(
     CalculatorConversions::functionSemisimpleLieAlgebra,
-    input,
+    input[1],
     theSSalgebra
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
@@ -2797,6 +2797,7 @@ std::string ObjectContainer::ToStringJavascriptForUserInputBoxes() {
 }
 
 void ObjectContainer::resetPlots() {
+  this->canvasPlotCounter = 0;
   for (int i = 0; i < this->thePlots.size; i ++) {
     this->thePlots[i].flagDivAlreadyDisplayed = false;
   }
@@ -2809,17 +2810,21 @@ void ObjectContainer::resetSliders() {
 bool ObjectContainer::CheckConsistencyAfterReset() {
   MacroRegisterFunctionWithName("ObjectContainer::CheckConsistencyAfterReset");
   if (this->theWeylGroupElements.size != 0) {
-    global.fatal << "WeylGroupElements expected to be empty, got " << this->theWeylGroupElements.size << " elements. " << global.fatal;
+    global.fatal << "WeylGroupElements expected to be empty, got "
+    << this->theWeylGroupElements.size << " elements. " << global.fatal;
   }
   if (this->theSSLieAlgebras.size() != 0) {
-    global.fatal << "theSSLieAlgebras expected to be empty, got " << this->theSSLieAlgebras.size() << " elements. " << global.fatal;
+    global.fatal << "theSSLieAlgebras expected to be empty, got "
+    << this->theSSLieAlgebras.size() << " elements. " << global.fatal;
   }
   // MapReferences<DynkinType, SemisimpleSubalgebras> theSSSubalgebraS;
   if (this->theWeylGroupReps.size != 0) {
-    global.fatal << "theWeylGroupReps expected to be empty, got " << this->theWeylGroupReps.size << " elements. " << global.fatal;
+    global.fatal << "theWeylGroupReps expected to be empty, got "
+    << this->theWeylGroupReps.size << " elements. " << global.fatal;
   }
   if (this->theWeylGroupVirtualReps.size != 0) {
-    global.fatal << "theWeylGroupVirtualReps expected to be empty, got " << this->theWeylGroupVirtualReps.size << " elements. " << global.fatal;
+    global.fatal << "theWeylGroupVirtualReps expected to be empty, got "
+    << this->theWeylGroupVirtualReps.size << " elements. " << global.fatal;
   }
   // ListReferences<ModuleSSalgebra<RationalFunctionOld> > theCategoryOmodules;
   // ListReferences<SltwoSubalgebras> theSltwoSAs;
@@ -2912,6 +2917,9 @@ void ObjectContainer::reset() {
   this->EllipticCurveElementsRational.Clear();
    //Setting up a random seed.
   srand (static_cast<unsigned>(this->CurrentRandomSeed));
+  this->canvasPlotCounter = 0;
+  this->resetPlots();
+  this->resetSliders();
 }
 
 template <>

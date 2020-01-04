@@ -1046,8 +1046,16 @@ bool CalculatorFunctions::innerIsPower(Calculator& theCommands, const Expression
   return output.AssignValue(result, theCommands);
 }
 
-bool CalculatorFunctions::innerFactorInteger(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctions::innerFactorIntegeR(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerFactorInteger");
+  if (input.size() != 2) {
+    return false;
+  }
+  return CalculatorFunctions::functionFactorInteger(theCommands, input[1], output);
+}
+
+bool CalculatorFunctions::functionFactorInteger(Calculator& theCommands, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::functionFactorInteger");
   LargeInteger theLI;
   int upperBound = 30000;
   int opFactorInteger = theCommands.operations.GetIndexIMustContainTheObject("FactorInteger");

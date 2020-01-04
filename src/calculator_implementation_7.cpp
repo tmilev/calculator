@@ -3724,11 +3724,18 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool Calculator::innerInvertMatrixVerbose(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::innerInvertMatrixVerbose(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("Calculator::innerInvertMatrixVerbose");
+  Expression converted;
+  if (!CalculatorConversions::innerMakeMatrix(theCommands, input, converted)) {
+    return theCommands << "Failed to get matrix from: " << input.ToString();
+  }
+
   Matrix<Rational> mat, outputMat, tempMat;
   if (!theCommands.functionGetMatrix(
-    input, mat, nullptr, - 1, nullptr
+    converted, mat
   )) {
     return CalculatorFunctions::innerInvertMatrixRFsVerbose(theCommands, input, output);
   }
@@ -3754,15 +3761,18 @@ bool Calculator::innerInvertMatrixVerbose(Calculator& theCommands, const Express
       if (tempI != NumFoundPivots) {
         mat.SwitchTwoRows(NumFoundPivots, tempI);
         outputMat.SwitchTwoRows (NumFoundPivots, tempI);
-        out << "<br>switch row " << NumFoundPivots + 1 << " and row " << tempI + 1 << ": ";
+        out << "<br>switch row " << NumFoundPivots + 1
+        << " and row " << tempI + 1 << ": ";
         tempMat = mat;
         tempMat.AppendMatrixOnTheRight(outputMat);
-        out << "<br>" << HtmlRoutines::GetMathSpanPure(outputMat.ToString(&theFormat));
+        out << "<br>"
+        << HtmlRoutines::GetMathSpanPure(outputMat.ToString(&theFormat));
       }
       tempElement = mat.elements[NumFoundPivots][i];
       tempElement.Invert();
       if (tempElement != 1) {
-        out << "<br> multiply row " << NumFoundPivots + 1 << " by " << tempElement << ": ";
+        out << "<br> multiply row " << NumFoundPivots + 1
+        << " by " << tempElement << ": ";
       }
       mat.RowTimesScalar(NumFoundPivots, tempElement);
       outputMat.RowTimesScalar(NumFoundPivots, tempElement);
@@ -3801,10 +3811,12 @@ bool Calculator::innerInvertMatrixVerbose(Calculator& theCommands, const Express
   }
   if (NumFoundPivots < mat.NumRows) {
     out << "<br>Matrix to the right of the vertical line not "
-    << "transformed to the identity matrix => starting matrix is not invertible. ";
+    << "transformed to the identity matrix => "
+    << "starting matrix is not invertible. ";
   } else {
-    out << "<br>The inverse of the starting matrix can be read off on the matrix to the left of the id matrix: "
-    << HtmlRoutines::GetMathSpanPure(output.ToString(&theFormat));
+    out << "<br>The inverse of the starting matrix can "
+    << "be read off on the matrix to the left of the id matrix: "
+    << HtmlRoutines::GetMathSpanPure(outputMat.ToString(&theFormat));
   }
   return output.AssignValue(out.str(), theCommands);
 }
@@ -5512,8 +5524,11 @@ bool CalculatorFunctions::innerCharPolyMatrix(
 
 bool CalculatorFunctions::innerReverseBytes(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerReverseBytes");
+  if (input.size() != 2) {
+    return false;
+  }
   std::string inputString;
-  if (!input.IsOfType<std::string>(&inputString)) {
+  if (!input[1].IsOfType(&inputString)) {
     return false;
   }
   std::string result;
@@ -7118,7 +7133,11 @@ bool CalculatorFunctions::innerDecomposeFDPartGeneralizedVermaModuleOverLeviPart
 ) {
   RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   if (!input.IsListNElements(5)) {
-    return output.MakeError("Function fDecomposeFDPartGeneralizedVermaModuleOverLeviPart expects 4 arguments.", theCommands);
+    return output.MakeError(
+      "Function decompose finite-dimensional part of "
+      "generalized Verma over Levi expects 4 arguments.",
+      theCommands
+    );
   }
   const Expression& typeNode = input[1];
   const Expression& weightNode = input[2];

@@ -242,7 +242,11 @@ bool Calculator::innerCasimir(Calculator& theCommands, const Expression& input, 
 }
 
 bool Calculator::innerEmbedG2inB3(Calculator& theCommands, const Expression& input, Expression& output) {
-  output = input;
+  if (input.size() != 2) {
+    return false;
+  }
+
+  output = input[1];
   if (!output.IsOfType < ElementUniversalEnveloping<RationalFunctionOld> >()) {
     return output.MakeError("Failed to convert argument to element of the Universal enveloping algebra. ", theCommands);
   }

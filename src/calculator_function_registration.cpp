@@ -576,7 +576,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "",
     "Shows the complete internal tree structure of an expression "
     "(replacing the expression with a string).",
-    "LispifyFull( e^x)",
+    "LispifyFull(e^x)",
     "CalculatorFunctions::innerLispifyFull",
     "LispifyFull",
     innerStandard
@@ -3047,12 +3047,12 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->AddOperationHandler(
     "MakeJavascriptExpression",
-    CalculatorFunctions::innerMakeJavascriptExpression,
+    CalculatorFunctions::innerMakeJavascriptExpressioN,
     "",
     "Attempts to construct a javascript translation of the input. "
     "If not successful leaves the expression unchanged.",
     "MakeJavascriptExpression(a(b+c))",
-    "Calculator::innerMakeJavascriptExpression",
+    "Calculator::innerMakeJavascriptExpressioN",
     "MakeJavascriptExpression",
     innerStandard
   );
@@ -3227,9 +3227,9 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->AddOperationHandler(
     "EqualityToArithmeticExpression",
-    CalculatorFunctions::innerEqualityToArithmeticExpression,
+    CalculatorFunctions::innerEqualityToArithmeticExpressioN,
     "",
-    "",
+    "Transforms the equality a = b to the arithmetic expression a - b.",
     "EqualityToArithmeticExpression(a = b)",
     "CalculatorFunctions::innerEqualityToArithmeticExpression",
     "EqualityToArithmeticExpression",
@@ -3287,7 +3287,7 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctions::innerPlotCoordinateSystem,
     "",
     "Plots a 3d coordinate system, fitting in a box given by two opposite corners.  ",
-    "PlotCoordinateSystem((- 3, - 2, - 3), (1, 5, 4))",
+    "PlotCoordinateSystem((- 3, - 2, - 3), (1, 5, 4));",
     "CalculatorFunctions::innerPlotCoordinateSystem",
     "PlotCoordinateSystem",
     innerStandard
@@ -3298,8 +3298,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "",
     "Set the projection screen. Input: two 3d vectors "
     "that give the 2d-basis of the viewing screen. ",
-    "PlotCoordinateSystem((- 2, - 2, - 2), (2, 2, 2)) + "
-    "PlotSetProjectionScreen((1, 0, - 0.1), (0, 1, - 0.2))",
+    "PlotCoordinateSystem((- 2, - 2, - 2), (2, 2, 2))\n"
+    "+ PlotSetProjectionScreen((1, 0, - 0.1), (0, 1, - 0.2))",
     "CalculatorFunctions::innerPlotSetProjectionScreenBasis",
     "PlotSetProjectionScreen",
     innerStandard
@@ -3317,12 +3317,12 @@ void Calculator::initPredefinedInnerFunctions() {
     "uSegments = MakeInputBox(name = uSegments, value = 22, min = 8, max = 40);\n"
     "vSegments = MakeInputBox(name = vSegments, value = 4, min = 2, max = 10);\n"
     "PlotSurface(\n"
-    "(x, y, z), u \\in (0, 2\\pi), v\\in(-r,r), \n"
-    "color1 = blue, color2 = cyan, numSegments1=uSegments, numSegments2=vSegments\n"
+    "(x, y, z), u \\in (0, 2\\pi), v \\in (- r, r), \n"
+    "color1 = blue, color2 = cyan, numSegments1 = uSegments, numSegments2 = vSegments\n"
     ") + "
     "PlotSurface(\n"
-    "( x + 2, z, y), u\\in(0, 2\\pi), v\\in(-r,r), \n"
-    "color1=red, color2= pink, numSegments1=uSegments, numSegments2=vSegments); ",
+    "( x + 2, z, y), u \\in (0, 2 \\pi), v \\ in(- r,r), \n"
+    "color1 = red, color2 = pink, numSegments1 = uSegments, numSegments2 = vSegments); ",
     "CalculatorFunctions::innerPlotSurface",
     "PlotSurface",
     innerStandard
@@ -3381,7 +3381,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "",
     "Creates an empty plot with a given canvas id. "
     "If you add a nameless plot to a named one the the resulting plot acquires the canvas id. ",
-    "PlotSetId( myId) +PlotCoordinateSystem((-3,-2,-3), (1,5, 4))",
+    "PlotSetId(myId) + PlotCoordinateSystem((- 3, - 2, - 3), (1, 5, 4))",
     "CalculatorFunctions::innerPlotSetId",
     "PlotSetId",
     innerStandard
@@ -3890,7 +3890,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "",
     "Writes semisimple Lie algebra structure constants to "
     "the output folder of the calculator. Available to logged-in admins only. ",
-    "WriteSemisimpleLieAlgebra F_4",
+    "WriteSemisimpleLieAlgebra(F_4)",
     "Calculator::innerWriteToHDOrPrintSSLieAlgebra",
     "WriteSemisimpleLieAlgebra",
     innerStandard
@@ -3906,7 +3906,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "In addition, this function creates "
     "a graphics of the root system. ",
     "PrintSemisimpleLieAlgebra{}(F_4);\n"
-    "PrintSemisimpleLieAlgebra{}(2G^5_2+B_3);",
+    "PrintSemisimpleLieAlgebra{}(2 G^5_2 + B_3);",
     "Calculator::innerPrintSSLieAlgebraVerbose",
     "PrintSemisimpleLieAlgebra",
     innerStandard

@@ -32,7 +32,8 @@ public:
   static bool innerTurnOnApproximations(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTurnOffApproximations(Calculator& theCommands, const Expression& input, Expression& output);
 
-  static bool innerEqualityToArithmeticExpression(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerEqualityToArithmeticExpressioN(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool functionEqualityToArithmeticExpression(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerRandomInteger(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSelectAtRandom(Calculator& theCommands, const Expression& input, Expression& output);
@@ -392,7 +393,8 @@ public:
     Calculator& theCommands, const Expression& input, Expression& output
   );
 
-  static bool innerMakeJavascriptExpression(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMakeJavascriptExpressioN(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool functionMakeJavascriptExpression(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotCoordinateSystem(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotSetProjectionScreenBasis(Calculator& theCommands, const Expression& input, Expression& output);
 

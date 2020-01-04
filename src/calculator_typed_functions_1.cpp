@@ -862,6 +862,9 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatNumbersByLargeIntegerIfPossible(
   if (!input.StartsWith(theCommands.opThePower(), 3)) {
     return false;
   }
+  if (!input[1].IsMatrix()) {
+    return false;
+  }
   LargeInteger largePower;
   if (!input[2].IsInteger(&largePower)) {
     return false;
@@ -918,7 +921,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatNumbersByLargeIntegerIfPossible(
     idMat.MakeIdMatrix(baseAlg.NumRows);
     MathRoutines::RaiseToPower(baseAlg, largePower, idMat);
     return output.AssignMatrix(baseAlg, theCommands);
-  }
+  }  
   return false;
 }
 

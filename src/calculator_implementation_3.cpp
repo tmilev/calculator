@@ -1474,13 +1474,20 @@ bool Calculator::innerZmodP(Calculator& theCommands, const Expression& input, Ex
 
 bool Calculator::innerInterpolatePoly(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerInterpolatePoly");
+  if (input.size() < 2) {
+    return false;
+  }
+  Expression convertedE;
+  if (!CalculatorConversions::innerMakeMatrix(theCommands, input, convertedE)) {
+    return false;
+  }
   Matrix<Rational> pointsOfInterpoly;
   if (!theCommands.functionGetMatrix(
-    input, pointsOfInterpoly, nullptr, 2
+    convertedE, pointsOfInterpoly, nullptr, 2
   )) {
     return theCommands
     << "<hr>Failed to extract points of interpolation from "
-    << input.ToString();
+    << convertedE.ToString();
   }
   Polynomial<Rational> interPoly;
   Vector<Rational> theArgs, theValues;
@@ -1927,7 +1934,7 @@ bool Calculator::Test::ProcessResults() {
     bool isBad = false;
     bool isUknown = false;
     if (currentTest.actualResult == currentTest.expectedResult) {
-      currentLine << "<td><b style='color:green;'>OK</b></td>";
+      currentLine << "<td style = 'min-width:30px;'><b style='color:green;'>OK</b></td>";
     } else if (currentTest.expectedResult == "") {
       currentLine << "<td><b style='color:orange;'>expected result unknown</b></td>";
       isUknown = true;

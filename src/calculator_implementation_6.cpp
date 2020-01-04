@@ -628,13 +628,13 @@ bool CalculatorFunctions::innerPlotDirectionOrVectorField(
   thePlotObj.manifoldImmersion = input[1];
   Expression jsConverterE;
   if (input.size() >= 6) {
-    if (CalculatorFunctions::innerMakeJavascriptExpression(theCommands, input[5], jsConverterE)) {
+    if (CalculatorFunctions::functionMakeJavascriptExpression(theCommands, input[5], jsConverterE)) {
       thePlotObj.defaultLengthJS = jsConverterE.ToString();
     } else {
       return theCommands << "Failed to extract javascript from " << input[5].ToString();
     }
   }
-  if (CalculatorFunctions::innerMakeJavascriptExpression(theCommands, thePlotObj.manifoldImmersion, jsConverterE)) {
+  if (CalculatorFunctions::functionMakeJavascriptExpression(theCommands, thePlotObj.manifoldImmersion, jsConverterE)) {
     thePlotObj.manifoldImmersionJS = jsConverterE.ToString();
     thePlotObj.manifoldImmersion.HasInputBoxVariables(&thePlot.boxesThatUpdateMe);
   } else {
@@ -660,15 +660,21 @@ bool CalculatorFunctions::innerPlotDirectionOrVectorField(
     thePlotObj.variablesInPlayJS[i] = thePlotObj.variablesInPlay[i].ToString();
   }
   thePlotObj.thePlotType = "plotDirectionField";
-  if (!input[4].IsSequenceNElementS(2) && !input[4].StartsWith(theCommands.opIntervalOpen(), 3)) {
+  if (
+    !input[4].IsSequenceNElementS(2) &&
+    !input[4].StartsWith(theCommands.opIntervalOpen(), 3)
+  ) {
     return theCommands
     << "<hr>Could not extract a list of elements for the "
     << "number of segments from: " << input[4].ToString();
   }
   thePlotObj.numSegmenTsJS.SetSize(2);
   for (int i = 0; i < 2; i ++) {
-    if (!CalculatorFunctions::innerMakeJavascriptExpression(theCommands, input[4][i + 1], jsConverterE)) {
-      return theCommands << "Failed to convert " << input[4][i + 1].ToString() << " to javascript. ";
+    if (!CalculatorFunctions::functionMakeJavascriptExpression(
+      theCommands, input[4][i + 1], jsConverterE
+    )) {
+      return theCommands << "Failed to convert "
+      << input[4][i + 1].ToString() << " to javascript. ";
     }
     thePlotObj.numSegmenTsJS[i] = jsConverterE.ToString();
   }
@@ -955,8 +961,11 @@ bool CalculatorFunctions::innerSendEmailWithMailGun(
 
 bool CalculatorFunctions::innerIsSquare(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerIsSquare");
+  if (input.size() != 2) {
+    return false;
+  }
   LargeInteger theLI;
-  if (!input.IsInteger(&theLI)) {
+  if (!input[1].IsInteger(&theLI)) {
     return false;
   }
   if (theLI < 0) {
@@ -982,8 +991,11 @@ bool CalculatorFunctions::innerIsSquare(Calculator& theCommands, const Expressio
 
 bool CalculatorFunctions::innerIsSquareFree(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerIsSquareFree");
+  if (input.size() != 2) {
+    return false;
+  }
   LargeInteger theLI;
-  if (!input.IsInteger(&theLI)) {
+  if (!input[1].IsInteger(&theLI)) {
     return false;
   }
   List<int> theMults;
@@ -1003,8 +1015,11 @@ bool CalculatorFunctions::innerIsSquareFree(Calculator& theCommands, const Expre
 
 bool CalculatorFunctions::innerIsPower(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerIsPower");
+  if (input.size() != 2) {
+    return false;
+  }
   LargeInteger theLI;
-  if (!input.IsInteger(&theLI)) {
+  if (!input[1].IsInteger(&theLI)) {
     return false;
   }
   if (theLI.IsEqualToZero()) {
@@ -1012,8 +1027,11 @@ bool CalculatorFunctions::innerIsPower(Calculator& theCommands, const Expression
   }
   List<int> theMults;
   List<LargeInteger> theFactors;
-  if (!theLI.value.FactorReturnFalseIfFactorizationIncomplete(theFactors, theMults, 0, &theCommands.Comments)) {
-    return theCommands << "Failed to factor: " << theLI.ToString() << " (may be too large?).";
+  if (!theLI.value.FactorReturnFalseIfFactorizationIncomplete(
+    theFactors, theMults, 0, &theCommands.Comments
+  )) {
+    return theCommands << "Failed to factor: "
+    << theLI.ToString() << " (may be too large?).";
   }
   int result = 1;
   if (theMults.size > 0) {
@@ -1208,8 +1226,12 @@ bool CalculatorFunctions::innerPolynomialDivisionQuotient(
 
 bool CalculatorFunctions::innerArccosAlgebraic(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerArccosAlgebraic");
+  if (input.size() != 2) {
+    return false;
+  }
+  const Expression& argumentE = input[1];
   Rational theRat;
-  if (input.IsRational(&theRat)) {
+  if (argumentE.IsRational(&theRat)) {
     if (theRat == 1) {
       return output.AssignValue(0, theCommands);
     }
@@ -1234,7 +1256,7 @@ bool CalculatorFunctions::innerArccosAlgebraic(Calculator& theCommands, const Ex
     }
   }
   AlgebraicNumber argument, candidate;
-  if (input.IsOfType<AlgebraicNumber>(&argument)) {
+  if (argumentE.IsOfType<AlgebraicNumber>(&argument)) {
     candidate.AssignRationalQuadraticRadical(Rational(1, 2), theCommands.theObjectContainer.theAlgebraicClosure);
     if (candidate == argument) {
       output.MakeAtom(theCommands.opPi(), theCommands);
@@ -1265,10 +1287,16 @@ bool CalculatorFunctions::innerArccosAlgebraic(Calculator& theCommands, const Ex
   return false;
 }
 
-bool CalculatorFunctions::innerArcsinAlgebraic(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctions::innerArcsinAlgebraic(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerArcsinAlgebraic");
+  if (input.size() != 2) {
+    return false;
+  }
+  const Expression& argumentE = input[1];
   Rational theRat;
-  if (input.IsRational(&theRat)) {
+  if (argumentE.IsRational(&theRat)) {
     if (theRat == 1) {
       output.MakeAtom(theCommands.opPi(), theCommands);
       output /= 2;
@@ -1294,8 +1322,10 @@ bool CalculatorFunctions::innerArcsinAlgebraic(Calculator& theCommands, const Ex
     }
   }
   AlgebraicNumber argument, candidate;
-  if (input.IsOfType<AlgebraicNumber>(&argument)) {
-    candidate.AssignRationalQuadraticRadical(Rational(1, 2), theCommands.theObjectContainer.theAlgebraicClosure);
+  if (argumentE.IsOfType<AlgebraicNumber>(&argument)) {
+    candidate.AssignRationalQuadraticRadical(
+      Rational(1, 2), theCommands.theObjectContainer.theAlgebraicClosure
+    );
     if (candidate == argument) {
       output.MakeAtom(theCommands.opPi(), theCommands);
       output /= 4;
@@ -1307,7 +1337,9 @@ bool CalculatorFunctions::innerArcsinAlgebraic(Calculator& theCommands, const Ex
       output /= - 4;
       return true;
     }
-    candidate.AssignRationalQuadraticRadical(Rational(3, 4), theCommands.theObjectContainer.theAlgebraicClosure);
+    candidate.AssignRationalQuadraticRadical(
+      Rational(3, 4), theCommands.theObjectContainer.theAlgebraicClosure
+    );
     if (candidate == argument) {
       output.MakeAtom(theCommands.opPi(), theCommands);
       output /= 3;
@@ -1471,8 +1503,11 @@ bool CalculatorFunctions::innerCollectMultiplicands(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::outerCollectSummands");
+  if (input.size() != 2) {
+    return false;
+  }
   List<Expression> theList;
-  theCommands.AppendOpandsReturnTrueIfOrderNonCanonical(input, theList, theCommands.opTimes());
+  theCommands.AppendOpandsReturnTrueIfOrderNonCanonical(input[1], theList, theCommands.opTimes());
   return output.MakeSequence(theCommands, &theList);
 }
 
@@ -1480,8 +1515,11 @@ bool CalculatorFunctions::innerCollectSummands(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerCollectSummands");
+  if (input.size() != 2) {
+    return false;
+  }
   List<Expression> theList;
-  theCommands.AppendSummandsReturnTrueIfOrderNonCanonical(input, theList);
+  theCommands.AppendSummandsReturnTrueIfOrderNonCanonical(input[1], theList);
   return output.MakeSequence(theCommands, &theList);
 }
 
@@ -1805,8 +1843,11 @@ bool CalculatorFunctions::innerNormalizeIntervals(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::outerNormalizeIntervals");
+  if (input.size() != 2) {
+    return false;
+  }
   List<Expression> outputList;
-  if (!theCommands.CollectOpands(input, theCommands.opUnion(), outputList)) {
+  if (!theCommands.CollectOpands(input[1], theCommands.opUnion(), outputList)) {
     return false;
   }
   outputList.QuickSortAscending(CalculatorFunctions::LeftIntervalGreaterThanRight);
@@ -2273,7 +2314,7 @@ bool CalculatorFunctions::innerNewtonsMethod(Calculator& theCommands, const Expr
     return false;
   }
   Expression theFun;
-  if (!CalculatorFunctions::innerEqualityToArithmeticExpression(theCommands, input[1], theFun)) {
+  if (!CalculatorFunctions::functionEqualityToArithmeticExpression(theCommands, input[1], theFun)) {
     theFun = input[1];
   }
   HashedList<Expression> theVars;
@@ -2310,7 +2351,7 @@ bool CalculatorFunctions::innerNewtonsMethod(Calculator& theCommands, const Expr
   theSub.SetKeyValue("y", theCommands.GetNewAtom());
   theSub.SetKeyValue("startingPoint", input[2]);
   theSub.SetKeyValue("numIterations", input[3]);
-
+  global.Comments << "DEBUG: Got to this point. ";
   return output.AssignStringParsed(
     "(NewtonMap{}{{a}} = DoubleValue( (iteratedMap =x- f/ Differentiate{}(x, f); x ={{a}}; iteratedMap )_3); "
     "y_{0} = startingPoint;"
@@ -2373,7 +2414,7 @@ bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
     }
   }
   Expression theCurveE;
-  if (!CalculatorFunctions::innerEqualityToArithmeticExpression(theCommands, input[1], theCurveE)) {
+  if (!CalculatorFunctions::functionEqualityToArithmeticExpression(theCommands, input[1], theCurveE)) {
     return theCommands << "Could not get arithmetic expression from: " << input[1].ToString()
     << ". I was expecting a cubic equality.";
   }

@@ -726,10 +726,13 @@ bool Calculator::innerDeterminantPolynomial(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("Calculator::innerDeterminantPolynomial");
+  if (input.size() != 2) {
+    return false;
+  }
   Matrix<Polynomial<Rational> > matPol;
   Expression theContext;
   if (!theCommands.functionGetMatrix(
-    input,
+    input[1],
     matPol,
     &theContext,
     - 1,

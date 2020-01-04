@@ -492,6 +492,9 @@ Expression Calculator::GetNewAtom() {
     for (char a = 'a'; a <= 'z'; a ++) {
       candidate = atomPrefix;
       candidate.push_back(a);
+      if (candidate == "d") {
+        continue;
+      }
       if (!this->operations.Contains(candidate)) {
         Expression result;
         result.MakeAtom(candidate, *this);

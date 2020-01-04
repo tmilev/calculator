@@ -1008,11 +1008,14 @@ bool CalculatorFunctions::innerArccos(Calculator& theCommands, const Expression&
 
 bool CalculatorFunctions::innerArcsin(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerArcsin");
+  if (input.size() != 2) {
+    return false;
+  }
   if (theCommands.flagNoApproximationS) {
     return false;
   }
   double theArgument;
-  if (!input.EvaluatesToDouble(&theArgument)) {
+  if (!input[1].EvaluatesToDouble(&theArgument)) {
     return false;
   }
   return output.AssignValue(FloatingPoint::Arcsin(theArgument), theCommands);
@@ -3103,8 +3106,11 @@ bool CalculatorFunctions::innerGetFreeVariablesIncludeNamedConstants(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerGetFreeVariables");
+  if (input.size() != 2) {
+    return false;
+  }
   HashedList<Expression> outputList;
-  if (!input.GetFreeVariables(outputList, false)) {
+  if (!input[1].GetFreeVariables(outputList, false)) {
     return theCommands << "Function GetFreeVariables failed, this shouldn't happen. ";
   }
   return output.MakeSequence(theCommands, &outputList);
@@ -3114,8 +3120,11 @@ bool CalculatorFunctions::innerGetFreeVariablesExcludeNamedConstants(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerGetFreeVariables");
+  if (input.size() != 2) {
+    return false;
+  }
   HashedList<Expression> outputList;
-  if (!input.GetFreeVariables(outputList, true)) {
+  if (!input[1].GetFreeVariables(outputList, true)) {
     return theCommands << "Function GetFreeVariables failed, this shouldn't happen.";
   }
   return output.MakeSequence(theCommands, &outputList);
@@ -3422,11 +3431,15 @@ bool CalculatorFunctions::innerCompositeArithmeticOperationEvaluatedOnArgument(
 
 bool CalculatorFunctions::innerIsEven(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerIsEven");
-  if (input.HasBoundVariables()) {
+  if (input.size() != 2) {
+    return false;
+  }
+  const Expression& argument = input[1];
+  if (argument.HasBoundVariables()) {
     return false;
   }
   LargeInteger theInt;
-  if (!input.IsInteger(&theInt)) {
+  if (!argument.IsInteger(&theInt)) {
     return output.AssignValue(0, theCommands);
   }
   if (theInt.IsEven()) {
@@ -5382,8 +5395,11 @@ bool CalculatorFunctions::innerGetUserDefinedSubExpressions(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerGetUserDefinedSubExpressions");
+  if (input.size() != 2) {
+    return false;
+  }
   HashedListSpecialized<Expression> theList;
-  input.GetBlocksOfCommutativity(theList);
+  input[1].GetBlocksOfCommutativity(theList);
   return output.MakeSequence(theCommands, &theList);
 }
 
@@ -5793,8 +5809,11 @@ bool LargeIntegerUnsigned::IsPossiblyPrime(int timesToRunMillerRabin, bool tryDi
 
 bool CalculatorFunctions::innerIsPossiblyPrime(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerIsPossiblyPrime");
+  if (input.size() != 2) {
+    return false;
+  }
   LargeInteger theInt;
-  if (!input.IsInteger(&theInt)) {
+  if (!input[1].IsInteger(&theInt)) {
     return false;
   }
   bool resultBool = theInt.value.IsPossiblyPrime(10, true, &theCommands.Comments);
@@ -5807,8 +5826,11 @@ bool CalculatorFunctions::innerIsPossiblyPrime(Calculator& theCommands, const Ex
 
 bool CalculatorFunctions::innerIsPrimeMillerRabin(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerIsPrimeMillerRabin");
+  if (input.size() != 2) {
+    return false;
+  }
   LargeInteger theInt;
-  if (!input.IsInteger(&theInt)) {
+  if (!input[1].IsInteger(&theInt)) {
     return false;
   }
   bool resultBool = theInt.value.IsPossiblyPrimeMillerRabiN(10, &theCommands.Comments);
@@ -6157,7 +6179,10 @@ bool CalculatorFunctions::innerPlotFill(Calculator& theCommands, const Expressio
 
 bool CalculatorFunctions::innerIsPlot(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerIsPlot");
-  if (input.IsOfType<Plot>()) {
+  if (input.size() != 2) {
+    return false;
+  }
+  if (input[1].IsOfType<Plot>()) {
     return output.AssignValue(1, theCommands);
   }
   return output.AssignValue(0, theCommands);
@@ -6278,7 +6303,7 @@ bool CalculatorFunctions::innerPlot2D(Calculator& theCommands, const Expression&
   std::string theVarString = thePlotObj.variablesInPlayJS[0];
   Expression jsConverterE;
   thePlotObj.thePlotType = "plotFunction";
-  if (CalculatorFunctions::innerMakeJavascriptExpression(
+  if (CalculatorFunctions::functionMakeJavascriptExpression(
     theCommands, thePlotObj.coordinateFunctionsE[0], jsConverterE
   )) {
     thePlotObj.coordinateFunctionsJS[0] = jsConverterE.ToString();
@@ -6286,7 +6311,7 @@ bool CalculatorFunctions::innerPlot2D(Calculator& theCommands, const Expression&
   } else {
     thePlotObj.thePlotType = "plotFunctionPrecomputed";
   }
-  if (CalculatorFunctions::innerMakeJavascriptExpression(
+  if (CalculatorFunctions::functionMakeJavascriptExpression(
     theCommands, thePlotObj.leftPtE, jsConverterE
   )) {
     thePlotObj.leftPtJS = jsConverterE.ToString();
@@ -6294,7 +6319,7 @@ bool CalculatorFunctions::innerPlot2D(Calculator& theCommands, const Expression&
   } else {
     thePlotObj.thePlotType = "plotFunctionPrecomputed";
   }
-  if (CalculatorFunctions::innerMakeJavascriptExpression(
+  if (CalculatorFunctions::functionMakeJavascriptExpression(
     theCommands, thePlotObj.rightPtE, jsConverterE
   )) {
     thePlotObj.rightPtJS = jsConverterE.ToString();
@@ -6304,7 +6329,7 @@ bool CalculatorFunctions::innerPlot2D(Calculator& theCommands, const Expression&
   }
   thePlotObj.numSegmenTsJS.SetSize(1);
   thePlotObj.numSegmenTsJS[0] = "200";
-  if (CalculatorFunctions::innerMakeJavascriptExpression(
+  if (CalculatorFunctions::functionMakeJavascriptExpression(
     theCommands, thePlotObj.numSegmentsE, jsConverterE
   )) {
     thePlotObj.numSegmenTsJS[0] = jsConverterE.ToString();
@@ -6381,7 +6406,7 @@ bool CalculatorFunctions::innerPlotPoint(Calculator& theCommands, const Expressi
   thePlot.thePointsJS.init(thePlot.thePointS.NumRows, thePlot.thePointS.NumCols);
   for (int i = 0; i < thePlot.thePointS.NumRows; i ++) {
     for (int j = 0; j < thePlot.thePointS.NumCols; j ++) {
-      if (!CalculatorFunctions::innerMakeJavascriptExpression(
+      if (!CalculatorFunctions::functionMakeJavascriptExpression(
         theCommands, thePlot.thePointS(i, j), jsConverterE
       )) {
         return theCommands << "Failed to extract coordinate " << i + 1 << " from: "
@@ -6767,7 +6792,7 @@ bool CalculatorFunctions::innerPlotParametricCurve(
   thePlot.thePlotType = "parametricCurve";
   thePlot.coordinateFunctionsJS.SetSize(thePlot.dimension);
   for (int i = 0; i < thePlot.dimension; i ++) {
-    if (CalculatorFunctions::innerMakeJavascriptExpression(
+    if (CalculatorFunctions::functionMakeJavascriptExpression(
       theCommands,
       thePlot.coordinateFunctionsE[i],
       converterE
@@ -6781,7 +6806,7 @@ bool CalculatorFunctions::innerPlotParametricCurve(
   }
   thePlot.numSegmenTsJS.SetSize(1);
   thePlot.numSegmenTsJS[0] = "200";
-  if (CalculatorFunctions::innerMakeJavascriptExpression(
+  if (CalculatorFunctions::functionMakeJavascriptExpression(
     theCommands, thePlot.numSegmentsE, converterE
   )) {
     thePlot.numSegmenTsJS[0] = converterE.ToString();
@@ -6790,13 +6815,17 @@ bool CalculatorFunctions::innerPlotParametricCurve(
     theCommands << "Failed to convert: "
     << thePlot.numSegmentsE << " to js. ";
   }
-  if (CalculatorFunctions::innerMakeJavascriptExpression(theCommands, thePlot.paramLowE, converterE)) {
+  if (CalculatorFunctions::functionMakeJavascriptExpression(
+    theCommands, thePlot.paramLowE, converterE
+  )) {
     thePlot.paramLowJS = converterE.ToString();
   } else {
     thePlot.thePlotType = "parametricCurvePrecomputed";
     theCommands << "Failed to convert: " << thePlot.paramLowE << " to js. ";
   }
-  if (CalculatorFunctions::innerMakeJavascriptExpression(theCommands, thePlot.paramHighE, converterE)) {
+  if (CalculatorFunctions::functionMakeJavascriptExpression(
+    theCommands, thePlot.paramHighE, converterE
+  )) {
     thePlot.paramHighJS = converterE.ToString();
   } else {
     thePlot.thePlotType = "parametricCurvePrecomputed";
@@ -7297,12 +7326,18 @@ bool CalculatorFunctions::innerParabolicWeylGroupsBruhatGraph(Calculator& theCom
 
 bool CalculatorFunctions::innerAllPartitions(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerAllPartitions");
+  if (input.size() != 2) {
+    return false;
+  }
   int theRank = - 1;
-  if (!input.IsSmallInteger(&theRank)) {
+  if (!input[1].IsSmallInteger(&theRank)) {
     return false;
   }
   if (theRank > 33 || theRank < 0) {
-    return theCommands << "Partitions printouts are limited from n = 0 to n =33, your input was: " << input.ToString();
+    return theCommands
+    << "Partitions printouts are limited "
+    << "from n = 0 to n = 33, your input was: "
+    << input[1].ToString();
   }
   List<Partition> thePartitions;
   Partition::GetPartitions(thePartitions, theRank);
@@ -9792,10 +9827,21 @@ bool CalculatorFunctions::innerTurnOnRules(
   return CalculatorFunctions::innerTurnRulesOnOff(theCommands, input, output, false);
 }
 
-bool CalculatorFunctions::innerEqualityToArithmeticExpression(
+bool CalculatorFunctions::innerEqualityToArithmeticExpressioN(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerEqualityToArithmeticExpression");
+  MacroRegisterFunctionWithName("CalculatorFunctions::innerEqualityToArithmeticExpressioN");
+  if (input.size() != 2) {
+    return false;
+  }
+  const Expression& argument = input[1];
+  return CalculatorFunctions::functionEqualityToArithmeticExpression(theCommands, argument, output);
+}
+
+bool CalculatorFunctions::functionEqualityToArithmeticExpression(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::functionEqualityToArithmeticExpression");
   if (!input.StartsWith(theCommands.opDefine(), 3)) {
     return false;
   }

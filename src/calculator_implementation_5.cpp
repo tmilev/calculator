@@ -895,24 +895,19 @@ bool CalculatorFunctions::innerSumSequence(
   if (input.size() < 1) {
     return false;
   }
-  if (input.StartsWith(theCommands.opLimitBoundary())) {
-    return false;
-  }
-  if (
-    !input.StartsWith(theCommands.opSum()) &&
-    !input.StartsWith(theCommands.opSequence())
-  ) {
-    return false;
-  }
   if (input.size() == 1) {
     return output.AssignValue(0, theCommands);
   }
   if (input[1].StartsWith(theCommands.opLimitBoundary())) {
     return false;
   }
+  const Expression* sequenceToSum = &input;
+  if (input[1].IsSequenceNElementS()) {
+    sequenceToSum = &input[1];
+  }
   List<Expression> theTerms;
-  for (int i = 1; i < input.size(); i ++) {
-    theTerms.AddOnTop(input[i]);
+  for (int i = 1; i < sequenceToSum->size(); i ++) {
+    theTerms.AddOnTop((*sequenceToSum)[i]);
   }
   return output.MakeSum(theCommands, theTerms);
 }
@@ -1214,7 +1209,7 @@ bool CalculatorFunctions::innerSolveUnivariatePolynomialWithRadicalsWRT(
     }
   } else {
     Expression convertedEqualityE, convertedSimplifiedEqualityE;
-    if (!CalculatorFunctions::innerEqualityToArithmeticExpression(theCommands, modifiedInput[2], convertedEqualityE)) {
+    if (!CalculatorFunctions::functionEqualityToArithmeticExpression(theCommands, modifiedInput[2], convertedEqualityE)) {
       return theCommands << "Failed to interpret the equality " << modifiedInput[2].ToString();
     }
     if (!Calculator::EvaluateExpression(theCommands, convertedEqualityE, convertedSimplifiedEqualityE)) {
@@ -1438,13 +1433,16 @@ bool CalculatorFunctions::innerFloor(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerFloor");
+  if (input.size() != 2) {
+    return false;
+  }
   Rational theRat;
-  if (input.IsOfType<Rational>(&theRat)) {
+  if (input[1].IsOfType<Rational>(&theRat)) {
     theRat.AssignFloor();
     return output.AssignValue(theRat, theCommands);
   }
   double theDouble = 0;
-  if (input.EvaluatesToDouble(&theDouble)) {
+  if (input[1].EvaluatesToDouble(&theDouble)) {
     return output.AssignValue(static_cast<int>(std::floor(theDouble)), theCommands);
   }
   return false;
@@ -1478,8 +1476,11 @@ bool CalculatorFunctions::innerRound(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerRound");
+  if (input.size() != 2) {
+    return false;
+  }
   Rational theRat;
-  if (input.IsOfType<Rational>(&theRat)) {
+  if (input[1].IsOfType<Rational>(&theRat)) {
     Rational result = theRat;
     result.AssignFloor();
     if (theRat - result >= Rational(1, 2)) {
@@ -1488,8 +1489,10 @@ bool CalculatorFunctions::innerRound(
     return output.AssignValue(result, theCommands);
   }
   double theDouble = 0;
-  if (input.EvaluatesToDouble(&theDouble)) {
-    return output.AssignValue(static_cast<int>(std::round(theDouble)), theCommands);
+  if (input[1].EvaluatesToDouble(&theDouble)) {
+    return output.AssignValue(
+      static_cast<int>(std::round(theDouble)), theCommands
+    );
   }
   return false;
 }
@@ -1845,10 +1848,20 @@ std::string InputBox::GetUserInputBox() const {
   return out.str();
 }
 
-bool CalculatorFunctions::innerMakeJavascriptExpression(
+bool CalculatorFunctions::innerMakeJavascriptExpressioN(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerMakeJavascriptExpression");
+  MacroRegisterFunctionWithName("CalculatorFunctions::innerMakeJavascriptExpressioN");
+  if (input.size() != 2) {
+    return false;
+  }
+  return CalculatorFunctions::functionMakeJavascriptExpression(theCommands, input[1], output);
+}
+
+bool CalculatorFunctions::functionMakeJavascriptExpression(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::functionMakeJavascriptExpression");
   RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
   if (theCommands.RecursionDepthExceededHandleRoughly()) {
     return false;
@@ -1910,7 +1923,7 @@ bool CalculatorFunctions::innerMakeJavascriptExpression(
   if (input.StartsWith(theCommands.opSequence()) || input.StartsWith(theCommands.opIntervalOpen())) {
     out << "[";
     for (int i = 1; i < input.size(); i ++) {
-      if (!CalculatorFunctions::innerMakeJavascriptExpression(theCommands, input[i], opE)) {
+      if (!CalculatorFunctions::functionMakeJavascriptExpression(theCommands, input[i], opE)) {
         return output.AssignValue("(Failed to convert " + input[i].ToString() + ")", theCommands);
       }
       out << opE.ToString();
@@ -1927,7 +1940,7 @@ bool CalculatorFunctions::innerMakeJavascriptExpression(
     Expression* currentE = &opE;
     std::string* currentString = &opString;
     for (int i = 0; i < input.size(); i ++) {
-      if (!CalculatorFunctions::innerMakeJavascriptExpression(theCommands, input[i], *currentE)) {
+      if (!CalculatorFunctions::functionMakeJavascriptExpression(theCommands, input[i], *currentE)) {
         return output.AssignValue("(Failed to convert " + input[i].ToString() + ")", theCommands);
       }
       if (!currentE->IsOfType(currentString)) {
@@ -2115,7 +2128,7 @@ bool CalculatorFunctions::innerPlotSurface(Calculator& theCommands, const Expres
   Expression jsConverter;
   for (int i = 1; i < thePlot.manifoldImmersion.size(); i ++) {
     thePlot.coordinateFunctionsE[i - 1] = thePlot.manifoldImmersion[i];
-    bool isGood = CalculatorFunctions::innerMakeJavascriptExpression(
+    bool isGood = CalculatorFunctions::functionMakeJavascriptExpression(
       theCommands, thePlot.coordinateFunctionsE[i - 1], jsConverter
     );
     if (isGood) {
@@ -2138,7 +2151,7 @@ bool CalculatorFunctions::innerPlotSurface(Calculator& theCommands, const Expres
         continue;
       }
       for (int j = 0; j < 2; j ++) {
-        bool isGood = CalculatorFunctions::innerMakeJavascriptExpression(
+        bool isGood = CalculatorFunctions::functionMakeJavascriptExpression(
           theCommands, input[i][2][j + 1], jsConverter
         );
         if (isGood) {
@@ -2168,7 +2181,9 @@ bool CalculatorFunctions::innerPlotSurface(Calculator& theCommands, const Expres
         continue;
       }
       Expression expressionToConvert = theKeys.GetValueCreate(keysToConvert.theKeys[i]);
-      bool isGood = CalculatorFunctions::innerMakeJavascriptExpression(theCommands, expressionToConvert, jsConverter);
+      bool isGood = CalculatorFunctions::functionMakeJavascriptExpression(
+        theCommands, expressionToConvert, jsConverter
+      );
       if (isGood) {
         isGood = jsConverter.IsOfType<std::string>(&keysToConvert.theValues[i]);
       }

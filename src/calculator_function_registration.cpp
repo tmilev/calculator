@@ -392,10 +392,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "First argument must be a string with the problem. "
     "The second argument must be the id of the answer. "
     "Third argument must be the random seed integer.",
-    "ProblemGiveUp("
-    "\"problems/Functions-composing-fractional-linear-1.html\", "
-    "\"AlgebraAnswer\", "
-    "\"123\")",
+    "ProblemGiveUp(\n"
+    "\"problems/Functions-composing-fractional-linear-1.html\",\n"
+    "\"AlgebraAnswer\",\n"
+    "\"123\"\n"
+    ")",
     "CalculatorHtmlFunctions::innerInterpretProblemGiveUp",
     "ProblemGiveUp",
     innerStandard
@@ -560,12 +561,12 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->AddOperationHandler(
     "FlattenCommandEnclosuresOneLayer",
-    Calculator::innerFlattenCommandEnclosuresOneLayer,
+    Calculator::innerFlattenCommandEnclosuresOneLayeR,
     "",
     "Flattens command enclosures. ",
     "FlattenCommandEnclosuresOneLayer(CommandEnclosure{}(x =5; x); "
     "CommandEnclosure{}(y; x)  ) ",
-    "Calculator::FlattenCommandEnclosuresOneLayer",
+    "Calculator::innerFlattenCommandEnclosuresOneLayeR",
     "FlattenCommandEnclosuresOneLayer",
     innerStandard
   );
@@ -605,9 +606,10 @@ void Calculator::initPredefinedInnerFunctions() {
     "ToUTF8String",
     CalculatorFunctions::innerExpressionToUTF8String,
     "",
-    "Transforms an arbitrary expression to its utf8-string representation. "
+    "Transforms an arbitrary expression to a utf8-string representation. "
     "The string is supposed to look reasonable when drawn on a javascript canvas. ",
-    "f= \\sin {}x / \\cos {}x; Plot(f, -\\pi/4, \\pi/4) + PlotLabel{}((1,1), \"y =\" + ToUTF8String(f))",
+    "f = \\sin {}x / \\cos {}x;\n"
+    "Plot(f, -\\pi/4, \\pi/4) + PlotLabel{}((1,1), \"y =\" + ToUTF8String(f))",
     "CalculatorFunctions::innerExpressionToUTF8String",
     "ToUTF8String",
     innerStandard
@@ -730,7 +732,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "key = ConvertHexToString \"603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4\";\n"
     "ConvertStringToHex AESCBCEncrypt(key, text);\n"
     "\"f58c4c04d6e5f1ba779eabfb5f7bfbd69cfc4e967edb808d679f777bc6702c7d39f23369a9d9bacfa530e26304231461b2eb05e2c39be9fcda6c19078c6a9d1b\";\n",
-    "CalculatorFunctionsCrypto::innerAES_CBC_256_Encode",
+    "CalculatorFunctionsCrypto::innerAES_CBC_256_Encrypt",
     "AESCBCEncrypt",
     innerStandard
   );
@@ -861,9 +863,9 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctions::innerTestTLSDecodeSSLRecord,
     "",
     "Decodes a client hello. ",
-    "%HideLHS\nTestTLSDecodeSSLRecord("
-    "LoadFileIntoString(\"test/message_client_ssl_0.hex\")"
-    ");\n",
+    "%HideLHS\nTestTLSDecodeSSLRecord(\n"
+    "LoadFileIntoString(\"test/message_client_ssl_0.hex\")\n"
+    ")",
     "CalculatorFunctions::innerTestTLSDecodeSSLRecord",
     "TestTLSDecodeSSLRecord",
     innerExperimental
@@ -888,14 +890,16 @@ void Calculator::initPredefinedInnerFunctions() {
     "X509CertificateServerBase64 0; ",
     "CalculatorFunctions::innerX509certificateCrunch",
     "X509CertificateServerBase64",
-    innerStandard
+    innerNoTest
   );
   this->AddOperationHandler(
     "X509CertificateDecode",
     CalculatorFunctions::innerX509CertificateDecode,
     "",
     "Decodes raw X509 certificate to a string. ",
-    "%HideLHS X509CertificateDecode ConvertBase64ToString X509CertificateServerBase64 0; ",
+    "%HideLHS\n"
+    "X509CertificateDecode ConvertBase64ToString\n"
+    "LoadFileIntoString(\"test/certificate_self_signed.pem\")",
     "CalculatorFunctions::innerX509CertificateDecode",
     "X509CertificateDecode",
     innerStandard
@@ -911,14 +915,14 @@ void Calculator::initPredefinedInnerFunctions() {
     innerStandard
   );
   this->AddOperationHandler(
-    "JWTverifyAgainstKnownKeys",
+    "JWTVerifyAgainstKnownKeys",
     CalculatorFunctions::innerJWTVerifyAgainstKnownKeys,
     "",
     "Tries to verify a Json Web Token.",
     "%HideLHS JWTverifyAgainstKnownKeys(\"\"); ",
     "CalculatorFunctions::innerJWTverifyAgainstKnownKeys",
-    "JWTverifyAgainstKnownKeys",
-    innerStandard
+    "JWTVerifyAgainstKnownKeys",
+    innerAdminNoTest
   );
   this->AddOperationHandler(
     "JWTVerifyRSA256",
@@ -1371,12 +1375,11 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctions::innerMultiplySequence,
     "",
     "Returns the product of the elements in a sequence. "
-    "When used on non-sequences, the function "
-    "will ignore the first element and "
-    "return the product of the remaining elements. "
-    "This may not produce the result you expected for non-sequences, "
-    "so use on sequences only. ",
-    "Product(a,b); Product{}(Sequence{}a); Product(Sequence{}a); Product(a)",
+    "When used with zero arguments, returns 1.",
+    "Product(a, b);\n"
+    "Product{}(Sequence{}a);\n"
+    "Product(Sequence{}a);\n"
+    "Product(a)",
     "CalculatorFunctions::innerMultiplySequence",
     "Product",
     innerStandard
@@ -1386,12 +1389,12 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctions::innerSumSequence,
     "",
     "Returns the sum of the elements in a sequence. "
-    "When used on non-sequences, the function "
-    "will ignore the first element and "
-    "return the product of the remaining elements. "
-    "This may not produce the result you expected for non-sequences, "
-    "so use on sequences only. ",
-    "\\sum(a,b); \\sum{}(Sequence{}a); \\sum(Sequence{}a); \\sum(a)",
+    "When used with one element, will return that element. ",
+    "\\sum(a, b);\n"
+    "\\sum();\n"
+    "\\sum{}(Sequence{}a);\n"
+    "\\sum(Sequence{}a);\n"
+    "\\sum(a)",
     "CalculatorFunctions::innerSumSequence",
     "\\sum",
     innerStandard
@@ -1856,8 +1859,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "\\int",
     CalculatorFunctions::innerIntegrateRationalFunctionSplitToBuidingBlocks,
     "",
-    "Attempts to split an integral of a rational function into building block integrals.  ",
-    "\\int  \\frac{1}{x(x + 1)} dx ",
+    "Attempts to split an integral of a rational function into building block integrals. ",
+    "\\int \\frac{1}{x(x + 1)} dx ",
     "CalculatorFunctions::innerIntegrateRationalFunctionSplitToBuidingBlocks",
     "IntegratePartialFractions",
     innerStandard
@@ -1995,11 +1998,11 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->AddOperationHandler(
     "MakeRationalFunction",
-    CalculatorConversions::innerRationalFunction,
+    CalculatorConversions::innerRationalFunctioN,
     "",
     "Creates a built-in rational function.",
     "MakeRationalFunction{}(x_1+MakeRationalFunction{}x_1+x_2)",
-    "CalculatorConversions::innerRationalFunction",
+    "CalculatorConversions::innerRationalFunctioN",
     "MakeRationalFunction",
     innerStandard
   );
@@ -2008,24 +2011,24 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorConversions::innerMakeMatrix,
     "",
     "Creates an internal c++ matrix structure from double list of rationals. ",
-    "s_1=MakeMatrix{}((- 1,- 1,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1));\n"
-    "s_2=MakeMatrix{}((1,0,0,0), (- 1,- 1,- 1,0), (0,0,1,0), (0,0,0,1));\n"
-    "s_3=MakeMatrix{}((1,0,0,0), (0,1,0,0), (0,-2,- 1,- 1), (0,0,0,1));\n"
-    "s_4=MakeMatrix{}((1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,- 1,- 1)); ",
+    "s_1 = MakeMatrix{}((- 1,- 1, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1));\n"
+    "s_2 = MakeMatrix{}((1, 0, 0, 0), (- 1, - 1, - 1,0), (0, 0, 1, 0), (0, 0, 0, 1));\n"
+    "s_3 = MakeMatrix{}((1, 0, 0, 0), (0, 1, 0, 0), (0, - 2, - 1, - 1), (0, 0, 0, 1));\n"
+    "s_4 = MakeMatrix{}((1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, - 1, - 1)); ",
     "CalculatorConversions::innerMatrixRational",
     "MakeMatrix",
     innerStandard
   );
   this->AddOperationHandler(
     "MakeMatrixTensorForm",
-    CalculatorConversions::innerMatrixRationalTensorForm,
+    CalculatorConversions::innerMatrixRationalTensorForM,
     "",
     "Same as MakeMatrix but uses different c++ implementation "
     "(class MatrixTensor instead of class Matrix). ",
     "s_1 = MakeMatrixTensorForm{}("
     "(- 1,- 1, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1)"
     "); ",
-    "CalculatorConversions::innerMatrixRationalTensorForm",
+    "CalculatorConversions::innerMatrixRationalTensorForM",
     "MakeMatrixTensorForm",
     innerStandard
   );
@@ -2033,8 +2036,9 @@ void Calculator::initPredefinedInnerFunctions() {
     "MakeMatrixRFs",
     CalculatorConversions::innerMatrixRationalFunction,
     "",
-    "Creates an internal c++ matrix structure from double list of polynomial functions. ",
-    "s_1=MakeMatrixRFs{}((1-t, 2), (3, 2-t))",
+    "Creates an internal C++ matrix structure "
+    "from double list of polynomial functions. ",
+    "s_1 = MakeMatrixRFs{}((1 - t, 2), (3, 2 - t))",
     "CalculatorConversions::innerMatrixRationalFunction",
     "MakeMatrixRFs",
     innerStandard
@@ -2340,7 +2344,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "(0, 0, 0, 1, 0, -3),"
     "(0, 1, 0, 0, 0, -2),"
     "(0, 0, 0, 0, 0, - 1));"
-    "IsOuterAuto{}(e_6,  A);",
+    "IsOuterAuto{}(e_6, A);",
     "CalculatorFunctionsWeylGroup::innerIsOuterAutoWeylGroup",
     "IsOuterAuto",
     innerStandard
@@ -2793,11 +2797,11 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->AddOperationHandler(
     "DoubleValue",
-    CalculatorFunctions::innerEvaluateToDouble,
+    CalculatorFunctions::innerEvaluateToDoublE,
     "",
     "Double value of a rational number.",
     "DoubleValue{}(3/7)",
-    "CalculatorFunctions::innerEvaluateToDouble",
+    "CalculatorFunctions::innerEvaluateToDoublE",
     "DoubleValue",
     innerStandard
   );
@@ -3116,7 +3120,7 @@ void Calculator::initPredefinedInnerFunctions() {
     ")",
     "CalculatorFunctions::innerSendEmailWithMailGun",
     "SendEmailWithMailGun",
-    innerAdminNoTest
+    innerAdminNoTestInvisibleOffByDefault
   );
   this->AddOperationHandler(
     "FetchKnownPublicKeys",
@@ -3205,7 +3209,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->AddOperationHandler(
     "UnivariatePartialFractions",
-    CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicReals,
+    CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicRealS,
     "",
     "Attempts to splits a univariate rational function into partial "
     "fractions over the real algebraic numbers. "
@@ -3214,7 +3218,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "A =\\frac{x^3}{x^{3}-x^2+2x^2-2};\n"
     "B=UnivariatePartialFractions(A);\n"
     "A-\\sum(B)",
-    "CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicReals",
+    "CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicRealS",
     "UnivariatePartialFractions",
     innerStandard
   );
@@ -5982,7 +5986,8 @@ void Calculator::initPredefinedStandardOperations() {
     this->opMatTensorRat(),
     this->opMatTensorRat(),
     "Adds two matrices.",
-    "A = MakeMatrixTensorForm{}((5, 8), (3, 5)); 3A * A - A;",
+    "A = MakeMatrixTensorForm{}((5, 8), (3, 5));\n"
+    "3A * A - A;",
     "CalculatorFunctionsBinaryOps::innerAddMatrixTensorToMatrixTensor",
     "AddMatrixTensorToMatrixTensor",
     innerStandard
@@ -6380,12 +6385,12 @@ void Calculator::initPredefinedStandardOperations() {
     this->opMatTensorRat(),
     this->opMatTensorRat(),
     "Multiplies matrix rational by matrix tensor. ",
-    "M=MakeMatrixTensorForm{}((1,1), (0,1));\n"
+    "M = MakeMatrixTensorForm{}((1, 1), (0, 1));\n"
     "M;\n"
-    "M*M;\n"
-    "M*M*M;\n"
-    "M*M*M*M;\n"
-    "2*M",
+    "M * M;\n"
+    "M * M * M;\n"
+    "M * M * M * M;\n"
+    "2 * M",
     "CalculatorFunctionsBinaryOps::innerMultiplyMatrixTensorOrRationalByMatrixTensor",
     "MultiplyMatrixTensorByMatrixTensor",
     innerStandard
@@ -7448,10 +7453,14 @@ void Calculator::initPredefinedStandardOperations() {
     CalculatorFunctionsBinaryOps::innerTensorMatrixByMatrix,
     "",
     "Tensor product of two matrices.",
-    "P = ((0 , 2 ),(1 , 0)); Q= ((0 , 3 ),(1 , 0));\n"
-    "X =MakeMatrix{}P; Y =MakeMatrix{}Q;\n"
-    "Z=MakeMatrixTensorForm{}P; W =MakeMatrixTensorForm{}Q;\n"
-    "X\\otimes Y; Z\\otimes W",
+    "P = ((0, 2 ), (1, 0));\n"
+    "Q = ((0, 3 ), (1, 0));\n"
+    "X = MakeMatrix{}P;\n"
+    "Y = MakeMatrix{}Q;\n"
+    "Z = MakeMatrixTensorForm{}P;\n"
+    "W = MakeMatrixTensorForm{}Q;\n"
+    "X\\otimes Y;\n"
+    "Z\\otimes W",
     "CalculatorFunctionsBinaryOps::innerTensorMatrixByMatrix",
     "MatrixTensorMatrix",
     innerStandard
@@ -7555,12 +7564,14 @@ void Calculator::initPredefinedStandardOperations() {
     this->opMatTensorRat(),
     this->opMatTensorRat(),
     "Same as tensor product of matrices but uses class MatrixTensor instead of class Matrix.",
-    "P = ((0 , 2 ),(1 , 0)); Q= ((0 , 3 ),(1 , 0));\n"
+    "P = ((0 , 2 ),(1 , 0));\n"
+    "Q = ((0 , 3 ),(1 , 0));\n"
     "X = MakeMatrix{}P;\n"
     "Y = MakeMatrix{}Q;\n"
     "Z = MakeMatrixTensorForm{}P;\n"
     "W = MakeMatrixTensorForm{}Q;\n"
-    "X\\otimes Y; Z\\otimes W",
+    "X \\otimes Y;\n"
+    "Z\\otimes W",
     "CalculatorFunctionsBinaryOps::innerTensorMatByMatTensor",
     "TensorMatrixTensorByMatrixTensor",
     innerStandard

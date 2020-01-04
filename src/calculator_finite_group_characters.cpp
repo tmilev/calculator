@@ -432,14 +432,18 @@ bool CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(
   theHWs.SetSize(input.children.size - 2);
   bool isGood = true;
   for (int i = 2; i < input.size(); i ++) {
-    if (!theCommands.GetVectoR<Rational>(input[i], theHWs[i - 2], nullptr, theSSalgebra->GetRank())) {
+    if (!theCommands.GetVectoR<Rational>(
+      input[i], theHWs[i - 2], nullptr, theSSalgebra->GetRank()
+    )) {
       isGood = false;
       break;
     }
   }
   if (!isGood && input.children.size == 3) {
     Matrix<Rational> theHWsMatForm;
-    if (theCommands.GetMatrix(input[2], theHWsMatForm, nullptr, theSSalgebra->GetRank())) {
+    if (theCommands.functionGetMatrix(
+      input[2], theHWsMatForm, nullptr, theSSalgebra->GetRank()
+    )) {
       theHWsMatForm.GetVectorsFromRows(theHWs);
       isGood = true;
     }
@@ -479,7 +483,9 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple(
   if (theSSalgebraNode.IsOfType<SemisimpleLieAlgebra>()) {
     theType = theSSalgebraNode.GetValue<SemisimpleLieAlgebra>().theWeyl.theDynkinType;
   } else {
-    if (!CalculatorConversions::innerDynkinType(theCommands, theSSalgebraNode, theType)) {
+    if (!CalculatorConversions::functionDynkinType(
+      theCommands, theSSalgebraNode, theType
+    )) {
       return false;
     }
   }
@@ -506,8 +512,11 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple(
   HashedList<Vector<Polynomial<Rational> > > outputOrbit;
   WeylGroupAutomorphisms theOuterAutos;
   theOuterAutos.theWeyl = &theWeyl;
-  if (!theOuterAutos.GenerateOuterOrbit(theHWs, outputOrbit, &theOuterAutos.allElements, 1921 * 2)) {
-    out << "Failed to generate the entire orbit (maybe too large?), generated the first " << outputOrbit.size
+  if (!theOuterAutos.GenerateOuterOrbit(
+    theHWs, outputOrbit, &theOuterAutos.allElements, 1921 * 2
+  )) {
+    out << "Failed to generate the entire orbit "
+    << "(maybe too large?), generated the first " << outputOrbit.size
     << " elements only.";
   } else {
     out << "The orbit has " << outputOrbit.size << " elements.";
@@ -938,7 +947,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOuterAutoGeneratorsPrint(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylGroupOuterAutoGeneratorsPrint");
   DynkinType theType;
-  if (!CalculatorConversions::innerDynkinType(theCommands, input, theType)) {
+  if (!CalculatorConversions::innerDynkinTypE(theCommands, input, theType)) {
     return output.MakeError("Failed to extract Dynkin type from argument. ", theCommands);
   }
   std::stringstream out, outCommand;
@@ -1937,20 +1946,20 @@ bool CalculatorFunctionsWeylGroup::innerDecomposeWeylRep(Calculator& theCommands
   return output.AssignValue(outputRep, theCommands);
 }
 
-bool CalculatorFunctionsWeylGroup::innerIsOuterAutoWeylGroup(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsWeylGroup::innerIsOuterAutoWeylGroup(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerIsOuterAutoWeylGroup");
-  if (input.children.size != 3) {
+  if (input.size() != 3) {
     return theCommands << "<hr>IsOuterAuto expects 2 arguments.";
   }
   DynkinType theType;
-  if (!CalculatorConversions::innerDynkinType(theCommands, input[1], theType)) {
+  if (!CalculatorConversions::functionDynkinType(theCommands, input[1], theType)) {
     return theCommands << "<hr>Failed to get Dynkin type from argument. " << input[1].ToString();
   }
   Matrix<Rational> theMat;
-  if (!input[2].IsMatrixGivenType<Rational>(nullptr, nullptr, &theMat)) {
-    if (!theCommands.GetMatrix(input[2], theMat)) {
-      return theCommands << "<hr>Failed to get matrix from argument. " << input[2].ToString();
-    }
+  if (!theCommands.functionGetMatrix(input[2], theMat)) {
+    return theCommands << "<hr>Failed to get matrix from argument. " << input[2].ToString();
   }
   if (theMat.NumCols != theMat.NumRows || theMat.NumCols != theType.GetRank()) {
     theCommands << "<hr>Extracted Dynkin type " << theType.ToString() << " is of rank " << theType.GetRank()

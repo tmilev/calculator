@@ -905,18 +905,24 @@ bool Expression::ConvertToType<RationalFunctionOld>(Expression& output) const {
   if (this->IsOfType<Rational>()) {
     RationalFunctionOld resultRF;
     resultRF.MakeConst(this->GetValue<Rational>());
-    return output.AssignValueWithContext(resultRF, this->GetContext(), *this->owner);
+    return output.AssignValueWithContext(
+      resultRF, this->GetContext(), *this->owner
+    );
   }
   if (this->IsOfType<Polynomial<Rational> >()) {
     RationalFunctionOld resultRF;
     resultRF = this->GetValue<Polynomial<Rational> >();
-    return output.AssignValueWithContext(resultRF, this->GetContext(), *this->owner);
+    return output.AssignValueWithContext(
+      resultRF, this->GetContext(), *this->owner
+    );
   }
   if (this->IsOfType<RationalFunctionOld>()) {
     output = *this;
     return true;
   }
-  (*this->owner) << "<hr>ConvertToType_RationalFunctionOld: Failed to convert " << this->ToString() << " to rational function. ";
+  (*this->owner)
+  << "<hr>ConvertToType_RationalFunctionOld: Failed to convert "
+  << this->ToString() << " to rational function. ";
   return false;
 }
 
@@ -1343,9 +1349,9 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext) {
     }
     return this->AssignValueWithContext(theWeight, inputOutputMinContext, *this->owner);
   }
-  if (this->IsMatrixGivenType<RationalFunctionOld>()) {
+  if (this->IsMatrixOfType<RationalFunctionOld>()) {
     Matrix<RationalFunctionOld> newMat;
-    this->IsMatrixGivenType<RationalFunctionOld>(nullptr, nullptr, &newMat);
+    this->owner->functionGetMatrix(*this, newMat, &newContext);
     PolynomialSubstitution<Rational> subPolyPart;
     myOldContext.ContextGetPolySubFromSuperContextNoFailure<Rational>(newContext, subPolyPart);
     for (int i = 0; i < newMat.NumRows; i ++) {
@@ -2725,12 +2731,12 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
   } else if (this->IsOfType<LittelmannPath>()) {
     out << this->GetValue<LittelmannPath>().ToString();
     result = true;
-  } else if (this->IsMatrixGivenType<RationalFunctionOld>()) {
+  } else if (this->IsMatrixOfType<RationalFunctionOld>()) {
     this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
     contextFormat.GetElement().flagUseHTML = false;
     contextFormat.GetElement().flagUseLatex = true;
     Matrix<RationalFunctionOld> theMat;
-    this->IsMatrixGivenType(nullptr, nullptr, &theMat);
+    this->owner->functionGetMatrix(*this, theMat);
     out << theMat.ToString(&contextFormat.GetElement());
     result = true;
   } else if (this->IsOfType<ElementWeylAlgebra<Rational> >()) {
@@ -2946,7 +2952,18 @@ bool Expression::NeedsParenthesisForMultiplication() const {
   return false;
 }
 
-bool Calculator::innerFlattenCommandEnclosuresOneLayer(
+bool Calculator::innerFlattenCommandEnclosuresOneLayeR(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  if (input.size() != 2) {
+    return false;
+  }
+  return Calculator::functionFlattenCommandEnclosuresOneLayer(
+    theCommands, input[1], output
+  );
+}
+
+bool Calculator::functionFlattenCommandEnclosuresOneLayer(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerFlattenCommandEnclosuresOneLayer");
@@ -3220,8 +3237,8 @@ std::string Expression::ToString(
   if (startingExpression != nullptr && unfoldCommandEnclosures) {
     Expression newStart, newMe;
     if (
-      this->owner->innerFlattenCommandEnclosuresOneLayer(*this->owner, *this, newMe) &&
-      this->owner->innerFlattenCommandEnclosuresOneLayer(*this->owner, *startingExpression, newStart)
+      this->owner->functionFlattenCommandEnclosuresOneLayer(*this->owner, *this, newMe) &&
+      this->owner->functionFlattenCommandEnclosuresOneLayer(*this->owner, *startingExpression, newStart)
     ) {
       return newMe.ToString(theFormat, &newStart, false, outputJS);
     }

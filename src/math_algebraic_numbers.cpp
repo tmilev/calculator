@@ -359,7 +359,10 @@ void AlgebraicClosureRationals::GetMultiplicationBy(
   this->GetAdditionTo(input, inputAdditiveForm);
   MatrixTensor<Rational> currentMat;
   for (int i = 0; i < inputAdditiveForm.size(); i ++) {
-    if (inputAdditiveForm[i].theIndex < 0 || inputAdditiveForm[i].theIndex >= this->theBasisMultiplicative.size) {
+    if (
+      inputAdditiveForm[i].theIndex < 0 ||
+      inputAdditiveForm[i].theIndex >= this->theBasisMultiplicative.size
+    ) {
       global.fatal << "This is a programming error: element " << input.ToString()
       << " has bad index, namely, " << inputAdditiveForm[i].theIndex
       << ". The algebraic closure is: " << this->ToString() << ". " << global.fatal;

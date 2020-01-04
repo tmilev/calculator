@@ -741,23 +741,25 @@ void WebCrawler::UpdatePublicKeys(std::stringstream* commentsOnFailure, std::str
 }
 
 bool Crypto::VerifyJWTagainstKnownKeys(
-  const std::string& inputToken, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
+  const std::string& inputToken,
+  std::stringstream* commentsOnFailure,
+  std::stringstream* commentsGeneral
 ) {
   MacroRegisterFunctionWithName("Crypto::VerifyJWTagainstKnownKeys");
-  //This function is slightly insecure.
-  //If an attacker hijacks a machine connecting the server to the outside
-  //and impersonates google
-  //the attacker would be able to impersonate another user.
-  //Since we are reloading the google keys for
-  //every JWT key we fail to find in our cache,
-  //this could happen more easily
-  //than if we were storing the google keys until their expiry date.
-  //To solve this problem, we need to
-  //ensure that the google public keys are authentic.
-  //For that we need to leverage the built-in web of trust of
-  //the host system (pgp keys, etc.).
-  //This is system dependent and a lot of work-> not doing now, but will do
-  //in the future as the need arises.
+  // This function is slightly insecure.
+  // If an attacker hijacks a machine connecting the server to the outside
+  // and impersonates google
+  // the attacker would be able to impersonate another user.
+  // Since we are reloading the google keys for
+  // every JWT key we fail to find in our cache,
+  // this could happen more easily
+  // than if we were storing the google keys until their expiry date.
+  // To solve this problem, we need to
+  // ensure that the google public keys are authentic.
+  // For that we need to leverage the built-in web of trust of
+  // the host system (pgp keys, etc.).
+  // This is system dependent and a lot of work-> not doing now, but will do
+  // in the future as the need arises.
   JSONWebToken theToken;
   if (!theToken.AssignString(inputToken, commentsOnFailure)) {
     return false;

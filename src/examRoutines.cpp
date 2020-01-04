@@ -680,7 +680,11 @@ bool CalculatorHtmlFunctions::innerInterpretProblemGiveUp(
   global.SetWebInpuT(WebAPI::problem::calculatorAnswerPrefix + answerId, "not used");
   JSData result = WebAPIResponse::GetAnswerOnGiveUp(randomSeed, nullptr, nullptr, false);
   global.SetWebInpuT(WebAPI::problem::fileName, oldProblem);
-  return output.AssignValue(result.ToString(nullptr), theCommands);
+  std::stringstream out;
+  out << WebAPI::problem::answerGenerationSuccess
+  << ":" << result[WebAPI::problem::answerGenerationSuccess] << "<br>";
+  out << "<br>resultHTML:<br>" << result[WebAPI::result::resultHtml].theString;
+  return output.AssignValue(out.str(), theCommands);
 }
 
 bool CalculatorHtmlFunctions::innerInterpretProblem(

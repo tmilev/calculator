@@ -81,8 +81,12 @@ public:
   static bool innerKeccak256OfString(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSha256OfStringVerbose(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSha1OfString(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerHashString(
-    Calculator& theCommands, const Expression& input, Expression& output, const std::string& hashId, bool verbose
+  static bool functionHashString(
+    Calculator& theCommands,
+    const Expression& input,
+    Expression& output,
+    const std::string& hashId,
+    bool verbose
   );
   static bool innerTestJSON(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerBase64ToHex(Calculator& theCommands, const Expression& input, Expression& output );
@@ -432,7 +436,8 @@ public:
 
 
   static bool innerDegreesToRadians(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerEvaluateToDouble(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerEvaluateToDoublE(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool functionEvaluateToDouble(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerEmbedSSalgInSSalg(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerWeylDimFormula(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDecomposeCharGenVerma(Calculator& theCommands, const Expression& input, Expression& output);
@@ -485,7 +490,8 @@ public:
   static bool innerSplitToPartialFractionsOverAlgebraicRealsAlgorithm(
     Calculator& theCommands, const Expression& input, Expression& output
   );
-  static bool innerSplitToPartialFractionsOverAlgebraicReals(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerSplitToPartialFractionsOverAlgebraicRealS(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool functionSplitToPartialFractionsOverAlgebraicReals(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTestTopCommand(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTestIndicator(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerRootSAsAndSltwos(

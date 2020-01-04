@@ -52,7 +52,7 @@ bool CalculatorConversions::innerSemisimpleLieAlgebra(
 bool CalculatorConversions::innerLoadWeylGroup(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerLoadWeylGroup");
   DynkinType theType;
-  if (!CalculatorConversions::innerDynkinType(theCommands, input, theType)) {
+  if (!CalculatorConversions::innerDynkinTypE(theCommands, input, theType)) {
     return false;
   }
   SemisimpleLieAlgebra& theSA = theCommands.theObjectContainer.GetLieAlgebraCreateIfNotPresent(theType);
@@ -167,8 +167,8 @@ bool CalculatorConversions::functionDynkinSimpleType(
   return true;
 }
 
-bool CalculatorConversions::innerDynkinType(Calculator& theCommands, const Expression& input, DynkinType& output) {
-  MacroRegisterFunctionWithName("Calculator::innerLoadDynkinType");
+bool CalculatorConversions::innerDynkinTypE(Calculator& theCommands, const Expression& input, DynkinType& output) {
+  MacroRegisterFunctionWithName("Calculator::innerDynkinTypE");
   RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   if (input.size() != 2) {
     return theCommands << "Dynkin type takes as input one argument. ";
@@ -514,8 +514,11 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(
   theReport.Report(reportStream.str());
   outputSubalgebra.owner = &owner;
   DynkinType theNonEmbeddedDynkinType;
-  if (!CalculatorConversions::innerDynkinType(theCommands, DynkinTypeE, theNonEmbeddedDynkinType)) {
-    return theCommands << "<hr>Failed to load dynkin type of candidate subalgebra from "
+  if (!CalculatorConversions::functionDynkinType(
+    theCommands, DynkinTypeE, theNonEmbeddedDynkinType
+  )) {
+    return theCommands
+    << "<hr>Failed to load dynkin type of candidate subalgebra from "
     << DynkinTypeE.ToString() << "<hr>";
   }
   reportStream << "Non embedded Dynkin type: " << DynkinTypeE.ToString() << ". ";
@@ -527,7 +530,7 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(
   reportStream << "Extracting matrix of Cartan elements. ";
   theReport.Report(reportStream.str());
   Matrix<Rational> theHs;
-  if (!theCommands.GetMatrix(ElementsCartanE, theHs, nullptr, theRank, nullptr)) {
+  if (!theCommands.functionGetMatrix(ElementsCartanE, theHs, nullptr, theRank, nullptr)) {
     return theCommands << "<hr>Failed to load Cartan elements for candidate subalgebra of type "
     << outputSubalgebra.theWeylNonEmbedded->theDynkinType << "<hr>";
   }
@@ -1042,10 +1045,10 @@ bool CalculatorConversions::functionExpressionFromBuiltInType(
     return true;
   }
   if (input.IsOfType<Polynomial<Rational> >()) {
-    return CalculatorConversions::innerExpressionFromPoly<Rational>(theCommands, input, output);
+    return CalculatorConversions::functionExpressionFromPoly<Rational>(theCommands, input, output);
   }
   if (input.IsOfType<Polynomial<AlgebraicNumber> >()) {
-    return CalculatorConversions::innerExpressionFromPoly<AlgebraicNumber>(theCommands, input, output);
+    return CalculatorConversions::functionExpressionFromPoly<AlgebraicNumber>(theCommands, input, output);
   }
   if (input.IsOfType<RationalFunctionOld>()) {
     return CalculatorConversions::innerExpressionFromRF(theCommands, input, output);
@@ -1104,8 +1107,20 @@ bool CalculatorConversions::innerExpressionFromRF(
 template <>
 bool Expression::ConvertToType<RationalFunctionOld>(Expression& output) const;
 
-bool CalculatorConversions::innerRationalFunction(Calculator& theCommands, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorConversions::innerRationalFunction");
+bool CalculatorConversions::innerRationalFunctioN(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorConversions::innerRationalFunctioN");
+  if (input.size() != 2) {
+    return false;
+  }
+  return CalculatorConversions::functionRationalFunction(theCommands, input[1], output);
+}
+
+bool CalculatorConversions::functionRationalFunction(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorConversions::functionRationalFunction");
   Expression intermediate(theCommands);
   if (
     input.StartsWith(theCommands.opPlus(), 3) ||
@@ -1114,8 +1129,8 @@ bool CalculatorConversions::innerRationalFunction(Calculator& theCommands, const
   ) {
     Expression leftE, rightE;
     if (
-      !CalculatorConversions::innerRationalFunction(theCommands, input[1], leftE) ||
-      !CalculatorConversions::innerRationalFunction(theCommands, input[2], rightE)
+      !CalculatorConversions::functionRationalFunction(theCommands, input[1], leftE) ||
+      !CalculatorConversions::functionRationalFunction(theCommands, input[2], rightE)
     ) {
       return theCommands << "<hr> Failed to convert " << input[1].ToString()
       << " and " << input[2].ToString() << " to rational function. ";
@@ -1129,13 +1144,19 @@ bool CalculatorConversions::innerRationalFunction(Calculator& theCommands, const
     intermediate.AddChildOnTop(leftE);
     intermediate.AddChildOnTop(rightE);
     if (input.StartsWith(theCommands.opPlus())) {
-      return CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrRFToRatOrPolyOrRF(theCommands, intermediate, output);
+      return CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrRFToRatOrPolyOrRF(
+        theCommands, intermediate, output
+      );
     }
     if (input.StartsWith(theCommands.opTimes())) {
-      return CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF(theCommands, intermediate, output);
+      return CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF(
+        theCommands, intermediate, output
+      );
     }
     if (input.StartsWith(theCommands.opDivide())) {
-      return CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly(theCommands, intermediate, output);
+      return CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly(
+        theCommands, intermediate, output
+      );
     }
     global.fatal << "This line of code should never be reached, something has gone wrong." << global.fatal;
   }
@@ -1143,7 +1164,7 @@ bool CalculatorConversions::innerRationalFunction(Calculator& theCommands, const
   if (input.StartsWith(theCommands.opThePower(), 3) ) {
     if (input[2].IsSmallInteger(&theSmallPower)) {
       Expression leftE;
-      if (!CalculatorConversions::innerRationalFunction(theCommands, input[1], leftE)) {
+      if (!CalculatorConversions::functionRationalFunction(theCommands, input[1], leftE)) {
         return theCommands << "<hr>CalculatorConversions::innerRationalFunction: failed to convert "
         << input[1].ToString() << " to rational function. ";
       }
@@ -1181,36 +1202,41 @@ bool CalculatorConversions::innerRationalFunction(Calculator& theCommands, const
   return output.AssignValueWithContext(theRF, theContext, theCommands);
 }
 
-bool CalculatorConversions::innerMatrixRational(Calculator& theCommands, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorConversions::innerMatrixRational");
-  if (input.size() != 2) {
-    return false;
-  }
+bool CalculatorConversions::functionMatrixRational(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorConversions::functionMatrixRational");
   Matrix<Rational> outputMat;
-  if (input[1].IsMatrixGivenType<Rational>()) {
-    output = input;
-    return true;
-  }
-  if (!theCommands.GetMatriXFromArguments(input[1], outputMat, nullptr, - 1, nullptr)) {
+  if (!theCommands.functionGetMatrix(input, outputMat, nullptr, - 1, nullptr)) {
     return theCommands << "<br>Failed to get matrix of rationals. ";
   }
   return output.AssignMatrix(outputMat, theCommands);
 }
 
-bool CalculatorConversions::innerMatrixRationalTensorForm(
+bool CalculatorConversions::innerMatrixRationalTensorForM(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("Calculator::innerMatrixRationalTensorForm");
-  if (!input.IsMatrixGivenType<Rational>()) {
-    if (!CalculatorConversions::innerMatrixRational(theCommands, input, output)) {
-      return false;
-    }
-  }
-  if (!input.IsMatrixGivenType<Rational>()) {
-    return false;
+  MacroRegisterFunctionWithName("Calculator::innerMatrixRationalTensorForM");
+  if (!CalculatorConversions::innerMakeMatrix(theCommands, input, output)) {
+    return theCommands << "Failed to extract matrix of rationals. ";
   }
   Matrix<Rational> matRat;
-  input.IsMatrixGivenType(nullptr, nullptr, &matRat);
+  if (!theCommands.functionGetMatrix(output, matRat)) {
+    return false;
+  }
+  MatrixTensor<Rational> outputMatTensor;
+  outputMatTensor = matRat;
+  return output.AssignValue(outputMatTensor, theCommands);
+}
+
+bool CalculatorConversions::functionMatrixRationalTensorForm(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("Calculator::functionMatrixRationalTensorForm");
+  Matrix<Rational> matRat;
+  if (!theCommands.functionGetMatrix(input, matRat)) {
+    return false;
+  }
   MatrixTensor<Rational> outputMatTensor;
   outputMatTensor = matRat;
   return output.AssignValue(outputMatTensor, theCommands);
@@ -1253,17 +1279,10 @@ bool CalculatorConversions::outerMatrixExpressionsToMatrixOfType(
   return false;
 }
 
-bool CalculatorConversions::innerMakeMatrix(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorConversions::innerMakeMatrix(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerMakeMatrix");
-  if (CalculatorConversions::innerMatrixRational(theCommands, input, output)) {
-    return true;
-  }
-  if (CalculatorConversions::innerMatrixAlgebraic(theCommands, input, output)) {
-    return true;
-  }
-  if (CalculatorConversions::innerMatrixDouble(theCommands, input, output)) {
-    return true;
-  }
   Matrix<Expression> outMat;
   if (theCommands.GetMatrixExpressionsFromArguments(input, outMat)) {
     return output.AssignMatrixExpressions(outMat, theCommands, true, true);
@@ -1271,15 +1290,13 @@ bool CalculatorConversions::innerMakeMatrix(Calculator& theCommands, const Expre
   return false;
 }
 
-bool CalculatorConversions::innerMatrixAlgebraic(Calculator& theCommands, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorConversions::innerMatrixAlgebraic");
+bool CalculatorConversions::functionMatrixAlgebraic(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorConversions::functionMatrixAlgebraic");
   Matrix<AlgebraicNumber> outputMat;
-  if (input.IsMatrixGivenType<AlgebraicNumber>()) {
-    output = input;
-    return true;
-  }
-  if (!theCommands.GetMatriXFromArguments(input, outputMat, nullptr, - 1, CalculatorConversions::innerAlgebraicNumber)) {
-    return theCommands << "<br>Failed to get matrix of algebraic numbers. ";
+  if (!theCommands.functionGetMatrix(input, outputMat)) {
+    return false;
   }
   return output.AssignMatrix(outputMat, theCommands);
 }
@@ -1287,15 +1304,23 @@ bool CalculatorConversions::innerMatrixAlgebraic(Calculator& theCommands, const 
 bool CalculatorConversions::innerMatrixRationalFunction(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::innerMatrixRationalFunction");
+  return CalculatorConversions::functionMatrixRationalFunction(
+    theCommands, input, output
+  );
+}
+
+bool CalculatorConversions::functionMatrixRationalFunction(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorConversions::functionMatrixRationalFunction");
   Matrix<RationalFunctionOld> outputMat;
   Expression ContextE;
-  if (!theCommands.GetMatriXFromArguments(
+  if (!theCommands.functionGetMatrix(
     input,
     outputMat,
     &ContextE,
     - 1,
-    CalculatorConversions::innerRationalFunction
+    CalculatorConversions::functionRationalFunction
   )) {
     return theCommands << "<hr>Failed to get matrix of rational functions. ";
   }

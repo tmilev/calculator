@@ -722,11 +722,13 @@ bool Calculator::innerGroebner(
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool Calculator::innerDeterminantPolynomial(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::innerDeterminantPolynomial(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("Calculator::innerDeterminantPolynomial");
   Matrix<Polynomial<Rational> > matPol;
   Expression theContext;
-  if (!theCommands.GetMatriXFromArguments(
+  if (!theCommands.functionGetMatrix(
     input,
     matPol,
     &theContext,
@@ -1984,10 +1986,10 @@ bool Calculator::innerConesIntersect(Calculator& theCommands, const Expression& 
   Matrix<Rational> coneStrictMatForm;
   Vectors<Rational> coneNonStrictGens;
   Vectors<Rational> coneStrictGens;
-  if (!theCommands.GetMatrix(input[1], coneStrictMatForm)) {
+  if (!theCommands.functionGetMatrix(input[1], coneStrictMatForm)) {
     return theCommands << "Failed to extract matrix from the first argument, " << input[1].ToString();
   }
-  if (!theCommands.GetMatrix(input[2], coneNonStrictMatForm)) {
+  if (!theCommands.functionGetMatrix(input[2], coneNonStrictMatForm)) {
     return theCommands << "Failed to extract matrix from the second argument, " << input[2].ToString();
   }
   std::stringstream out;
@@ -2221,11 +2223,15 @@ bool Calculator::innerPerturbSplittingNormal(Calculator& theCommands, const Expr
   }
   Matrix<Rational> theMat;
   Vectors<Rational> NonStrictCone, VectorsToPerturbRelativeTo;
-  if (!theCommands.GetMatrix(input[2], theMat, nullptr, splittingNormal.size, nullptr)) {
+  if (!theCommands.functionGetMatrix(
+    input[2], theMat, nullptr, splittingNormal.size, nullptr
+  )) {
     return output.MakeError("Failed to extract matrix from second argument. ", theCommands);
   }
   NonStrictCone.AssignMatrixRows(theMat);
-  if (!theCommands.GetMatrix(input[3], theMat, nullptr, splittingNormal.size, nullptr)) {
+  if (!theCommands.functionGetMatrix(
+    input[3], theMat, nullptr, splittingNormal.size, nullptr
+  )) {
     return output.MakeError("Failed to extract matrix from third argument. ", theCommands);
   }
   VectorsToPerturbRelativeTo.AssignMatrixRows(theMat);

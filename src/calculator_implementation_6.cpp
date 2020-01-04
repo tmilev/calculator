@@ -721,10 +721,13 @@ bool CalculatorFunctions::innerJWTVerifyAgainstKnownKeys(
   if (!global.UserDefaultHasAdminRights()) {
     return theCommands << "This function is only available to logged-in admins. ";
   }
-  if (!input.IsOfType<std::string>()) {
+  if (input.size() != 2) {
     return false;
   }
-  const std::string& inputString = input.GetValue<std::string>();
+  std::string inputString;
+  if (!input[1].IsOfType(&inputString)) {
+    return false;
+  }
   std::stringstream out;
   Crypto::VerifyJWTagainstKnownKeys(inputString, &out, &out);
   return output.AssignValue(out.str(), theCommands);
@@ -732,9 +735,12 @@ bool CalculatorFunctions::innerJWTVerifyAgainstKnownKeys(
 
 bool CalculatorFunctions::innerHexToString(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerHexToString");
+  if (input.size() != 2) {
+    return false;
+  }
   std::string inputString;
-  if (!input.IsOfType(&inputString)) {
-    inputString = input.ToString();
+  if (!input[1].IsOfType(&inputString)) {
+    inputString = input[1].ToString();
   }
   std::string result;
   std::stringstream commentsOnFailure;
@@ -746,8 +752,11 @@ bool CalculatorFunctions::innerHexToString(Calculator& theCommands, const Expres
 
 bool CalculatorFunctions::innerIntegerToHex(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerIntegerToHex");
+  if (input.size() != 2) {
+    return false;
+  }
   LargeInteger theLI;
-  if (!input.IsInteger(&theLI)) {
+  if (!input[1].IsInteger(&theLI)) {
     return false;
   }
   if (theLI < 0) {
@@ -763,8 +772,11 @@ bool CalculatorFunctions::innerIntegerToHex(Calculator& theCommands, const Expre
 
 bool CalculatorFunctions::innerHexToInteger(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerHexToInteger");
+  if (input.size() != 2) {
+    return false;
+  }
   std::string inputString;
-  if (!input.IsOfType(&inputString)) {
+  if (!input[1].IsOfType(&inputString)) {
     return false;
   }
   LargeIntegerUnsigned result;
@@ -779,9 +791,12 @@ bool CalculatorFunctions::innerHexToInteger(Calculator& theCommands, const Expre
 
 bool CalculatorFunctions::innerTestJSON(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerTestJSON");
+  if (input.size() != 2) {
+    return false;
+  }
   std::string inputString;
-  if (!input.IsOfType(&inputString)) {
-    inputString = input.ToString();
+  if (!input[1].IsOfType(&inputString)) {
+    inputString = input[1].ToString();
   }
   JSData theData;
   std::stringstream out;
@@ -795,9 +810,12 @@ bool CalculatorFunctions::innerTestJSON(Calculator& theCommands, const Expressio
 
 bool CalculatorFunctions::innerBase64ToHex(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerBase64ToHex");
+  if (input.size() != 2) {
+    return false;
+  }
   std::string inputString;
-  if (!input.IsOfType(&inputString)) {
-    inputString = input.ToString();
+  if (!input[1].IsOfType(&inputString)) {
+    inputString = input[1].ToString();
   }
   std::string result, bitStream;
   if (!Crypto::ConvertBase64ToString(inputString, bitStream, &theCommands.Comments, &theCommands.Comments)) {
@@ -811,8 +829,11 @@ bool CalculatorFunctions::innerGenerateRandomPrime(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerGenerateRandomPrime");
+  if (input.size() != 2) {
+    return false;
+  }
   int numberOfBytes = 0;
-  if (!input.IsSmallInteger(&numberOfBytes)) {
+  if (!input[1].IsSmallInteger(&numberOfBytes)) {
     return false;
   }
   int maxNumberOfBytes = 128;
@@ -1703,7 +1724,6 @@ bool CalculatorFunctions::innerUnionIntervals(
   if (!makeUnion) {
     return false;
   }
-  global.Comments << "DEBUG: got to here. " << logger::endL;
   bool leftIsClosed = false;
   bool rightIsClosed = false;
   Expression leftFinal, rightFinal;
@@ -1973,14 +1993,18 @@ bool CalculatorFunctions::innerSineOfAngleSumToTrig(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSineOfAngleSumToTrig");
-  if (!input.StartsWith(theCommands.opPlus(), 3)) {
+  if (input.size() != 2) {
+    return false;
+  }
+  const Expression& argument = input[1];
+  if (!argument.StartsWith(theCommands.opPlus(), 3)) {
     return false;
   }
   Expression sinA, sinB, cosA, cosB;
-  sinA.MakeOX(theCommands, theCommands.opSin(), input[1]);
-  sinB.MakeOX(theCommands, theCommands.opSin(), input[2]);
-  cosA.MakeOX(theCommands, theCommands.opCos(), input[1]);
-  cosB.MakeOX(theCommands, theCommands.opCos(), input[2]);
+  sinA.MakeOX(theCommands, theCommands.opSin(), argument[1]);
+  sinB.MakeOX(theCommands, theCommands.opSin(), argument[2]);
+  cosA.MakeOX(theCommands, theCommands.opCos(), argument[1]);
+  cosB.MakeOX(theCommands, theCommands.opCos(), argument[2]);
   output = sinA * cosB + cosA * sinB;
   return true;
 }
@@ -2057,14 +2081,18 @@ bool CalculatorFunctions::innerCosineOfAngleSumToTrig(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerCosineOfAngleSumToTrig");
-  if (!input.StartsWith(theCommands.opPlus(), 3)) {
+  if (input.size() != 2) {
+    return false;
+  }
+  const Expression& argument = input[1];
+  if (!argument.StartsWith(theCommands.opPlus(), 3)) {
     return false;
   }
   Expression sinA, sinB, cosA, cosB;
-  sinA.MakeOX(theCommands, theCommands.opSin(), input[1]);
-  sinB.MakeOX(theCommands, theCommands.opSin(), input[2]);
-  cosA.MakeOX(theCommands, theCommands.opCos(), input[1]);
-  cosB.MakeOX(theCommands, theCommands.opCos(), input[2]);
+  sinA.MakeOX(theCommands, theCommands.opSin(), argument[1]);
+  sinB.MakeOX(theCommands, theCommands.opSin(), argument[2]);
+  cosA.MakeOX(theCommands, theCommands.opCos(), argument[1]);
+  cosB.MakeOX(theCommands, theCommands.opCos(), argument[2]);
   output = cosA * cosB - sinA * sinB;
   return true;
 }
@@ -2106,13 +2134,19 @@ bool CalculatorFunctions::innerDistributeSqrt(Calculator& theCommands, const Exp
 
 bool CalculatorFunctions::innerIsAlgebraicRadical(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerIsAlgebraicRadical");
-  int result = static_cast<int>(input.IsAlgebraicRadical());
+  if (input.size() != 2) {
+    return false;
+  }
+  int result = static_cast<int>(input[1].IsAlgebraicRadical());
   return output.AssignValue(result, theCommands);
 }
 
 bool CalculatorFunctions::innerIsReal(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerIsReal");
-  if (!input.EvaluatesToDouble()) {
+  if (input.size() != 2) {
+    return false;
+  }
+  if (!input[1].EvaluatesToDouble()) {
     return output.AssignValue(0, theCommands);
   }
   return output.AssignValue(1, theCommands);
@@ -2122,12 +2156,12 @@ bool CalculatorFunctions::innerExpressionToUTF8String(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerExpressionToUTF8String");
-  if (input.StartsWithGivenOperation("ToUTF8String")) {
-    Expression inputCopy = input;
-    inputCopy.SetChildAtomValue(0, theCommands.opSequence());
-    return output.AssignValue(inputCopy.ToUTF8String(), theCommands);
+  if (input.size() > 2) {
+    Expression argumentSequence = input;
+    argumentSequence.SetChildAtomValue(0, theCommands.opSequence());
+    return output.AssignValue(argumentSequence.ToUTF8String(), theCommands);
   }
-  return output.AssignValue(input.ToUTF8String(), theCommands);
+  return output.AssignValue(input[1].ToUTF8String(), theCommands);
 }
 
 bool CalculatorFunctions::innerIsProductTermsUpToPower(
@@ -2499,8 +2533,11 @@ bool CalculatorFunctions::innerTestASN1Decode(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerTestASN1Decode");
+  if (input.size() != 2) {
+    return false;
+  }
   std::string data;
-  if (!input.IsOfType<std::string>(&data)) {
+  if (!input[1].IsOfType(&data)) {
     return false;
   }
   AbstractSyntaxNotationOneSubsetDecoder theDecoder;

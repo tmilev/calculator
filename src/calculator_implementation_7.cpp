@@ -63,7 +63,6 @@ bool MathRoutines::GenerateVectorSpaceClosedWRTOperation(
 template <>
 bool Expression::ConvertsToType<ElementSemisimpleLieAlgebra<AlgebraicNumber> >(ElementSemisimpleLieAlgebra<AlgebraicNumber>* whichElement) const;
 
-
 bool CalculatorFunctions::innerConstructCartanSA(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerConstructCartanSA");
   SubalgebraSemisimpleLieAlgebra theSA;
@@ -105,7 +104,7 @@ bool CalculatorFunctions::innerGenerateVectorSpaceClosedWRTLieBracket(
   MacroRegisterFunctionWithName("CalculatorFunctions::innerGenerateVectorSpaceClosedWRTLieBracket");
   Vector<ElementWeylAlgebra<Rational> > theOps;
   Expression theContext;
-  if (!(input.size() > 1)) {
+  if (input.size() <= 1) {
     return false;
   }
   int upperBound = - 1;
@@ -179,8 +178,11 @@ bool CalculatorFunctions::innerTestLoadPEMCertificates(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerTestLoadPEMCertificates");
+  if (input.size() != 2) {
+    return false;
+  }
   std::string binaryString;
-  if (!input.IsOfType(&binaryString)) {
+  if (!input[1].IsOfType(&binaryString)) {
     return false;
   }
   X509Certificate theCertificate;
@@ -198,14 +200,19 @@ bool CalculatorFunctions::innerTestLoadPEMCertificates(
 bool CalculatorFunctions::innerTestTLSDecodeSSLRecord(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerTestTLSDecodeClientHello");
+  MacroRegisterFunctionWithName("CalculatorFunctions::innerTestTLSDecodeSSLRecord");
+  if (input.size() != 2) {
+    return false;
+  }
   std::string inputString;
-  if (!input.IsOfType(&inputString)) {
+  if (!input[1].IsOfType(&inputString)) {
     return false;
   }
   TransportLayerSecurityServer testServer;
   std::stringstream commentsOnFailure;
-  if (!Crypto::ConvertHexToListUnsignedChar(inputString, testServer.lastReaD.incomingBytes, &commentsOnFailure)) {
+  if (!Crypto::ConvertHexToListUnsignedChar(
+    inputString, testServer.lastReaD.incomingBytes, &commentsOnFailure
+  )) {
     return theCommands << commentsOnFailure.str();
   }
   testServer.initialize();
@@ -267,8 +274,11 @@ bool CalculatorFunctions::innerTestLoadPEMPrivateKey(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerTestLoadPEMPrivateKey");
+  if (input.size() != 2) {
+    return  false;
+  }
   std::string privateKeyString;
-  if (!input.IsOfType(&privateKeyString)) {
+  if (!input[1].IsOfType(&privateKeyString)) {
     return false;
   }
   List<unsigned char> privateKeyBytes;
@@ -302,66 +312,92 @@ bool CalculatorFunctions::innerSha1OfString(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSha1OfString");
-  return CalculatorFunctions::innerHashString(theCommands, input, output, "SHA1", false);
+  if (input.size() != 2) {
+    return false;
+  }
+  return CalculatorFunctions::functionHashString(
+    theCommands, input[1], output, "SHA1", false
+  );
 }
 
 bool CalculatorFunctions::innerSha256OfString(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSha256OfString");
-  return CalculatorFunctions::innerHashString(theCommands, input, output, "SHA256", false);
+  if (input.size() != 2) {
+    return false;
+  }
+  return CalculatorFunctions::functionHashString(theCommands, input[1], output, "SHA256", false);
 }
 
 bool CalculatorFunctions::innerSha512(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSha512String");
-  return CalculatorFunctions::innerHashString(theCommands, input, output, "SHA512", false);
+  if (input.size() != 2) {
+    return false;
+  }
+  return CalculatorFunctions::functionHashString(theCommands, input[1], output, "SHA512", false);
 }
 
 bool CalculatorFunctions::innerSha256OfStringVerbose(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSha256OfString");
-  return CalculatorFunctions::innerHashString(theCommands, input, output, "SHA256", true);
+  if (input.size() != 2) {
+    return false;
+  }
+  return CalculatorFunctions::functionHashString(theCommands, input[1], output, "SHA256", true);
 }
 
 bool CalculatorFunctions::innerSha224OfString(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSha224OfString");
-  return CalculatorFunctions::innerHashString(theCommands, input, output, "SHA224", false);
+  if (input.size() != 2) {
+    return false;
+  }
+  return CalculatorFunctions::functionHashString(theCommands, input[1], output, "SHA224", false);
 }
 
 bool CalculatorFunctions::innerRIPEMD160OfString(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerRIPEMD160OfString");
-  return CalculatorFunctions::innerHashString(theCommands, input, output, "RIPEMD160", false);
+  if (input.size() != 2) {
+    return false;
+  }
+  return CalculatorFunctions::functionHashString(theCommands, input[1], output, "RIPEMD160", false);
 }
 
 bool CalculatorFunctions::innerSha3_256OfString(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSha3_256OfString");
-  return CalculatorFunctions::innerHashString(theCommands, input, output, "SHA3_256", false);
+  if (input.size() != 2) {
+    return false;
+  }
+  return CalculatorFunctions::functionHashString(theCommands, input[1], output, "SHA3_256", false);
 }
 
 bool CalculatorFunctions::innerKeccak256OfString(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerKeccak256OfString");
-  return CalculatorFunctions::innerHashString(theCommands, input, output, "KECCAK256", false);
+  if (input.size() != 2) {
+    return false;
+  }
+  return CalculatorFunctions::functionHashString(theCommands, input[1], output, "KECCAK256", false);
 }
 
-bool CalculatorFunctions::innerHashString(
+bool CalculatorFunctions::functionHashString(
   Calculator& theCommands,
   const Expression& input,
   Expression& output,
   const std::string& hashId,
   bool verbose
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerHashString");
+  MacroRegisterFunctionWithName("CalculatorFunctions::functionHashString");
   std::string inputString;
   if (!input.IsOfType(&inputString)) {
     return false;
@@ -416,11 +452,14 @@ bool CalculatorFunctions::innerConvertBase64ToString(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerConvertBase64ToString");
-  std::string theString, result;
-  if (!input.IsOfType<std::string>(&theString)) {
-    theString = input.ToString();
+  if (input.size() != 2) {
+    return false;
   }
-  if (!Crypto::ConvertBase64ToString(theString, result, &theCommands.Comments)) {
+  std::string inputString, result;
+  if (!input[1].IsOfType(&inputString)) {
+    inputString = input[1].ToString();
+  }
+  if (!Crypto::ConvertBase64ToString(inputString, result, &theCommands.Comments)) {
     return false;
   }
   return output.AssignValue(result, theCommands);
@@ -430,14 +469,18 @@ bool CalculatorFunctions::innerNISTEllipticCurveOrder(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerNISTEllipticCurveGenerator");
-  if (!input.IsOfType<std::string>()) {
+  if (input.size() != 2) {
+    return false;
+  }
+  std::string inputString;
+  if (!input[1].IsOfType(&inputString)) {
     return theCommands
     << "Function NISTEllipticCurveGenerator takes as input a string with an EC curve name. "
     << "Available curve names: secp256k1";
   }
   LargeIntegerUnsigned result;
   if (!EllipticCurveWeierstrassNormalForm::GetOrderNISTCurve(
-    input.GetValue<std::string>(), result, &theCommands.Comments
+    inputString, result, &theCommands.Comments
   )) {
     return false;
   }
@@ -453,13 +496,17 @@ bool CalculatorFunctions::innerNISTEllipticCurveGenerator(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerNISTEllipticCurveGenerator");
-  if (!input.IsOfType<std::string>()) {
+  if (input.size() != 2) {
+    return false;
+  }
+  std::string inputString;
+  if (!input[1].IsOfType(&inputString)) {
     return theCommands
     << "Function NISTEllipticCurveGenerator takes as input a string with an EC curve name. "
     << "Available curve names: secp256k1";
   }
   ElementEllipticCurve<ElementZmodP> generator;
-  if (!generator.MakeGeneratorNISTCurve(input.GetValue<std::string>(), &theCommands.Comments)) {
+  if (!generator.MakeGeneratorNISTCurve(inputString, &theCommands.Comments)) {
     return false;
   }
   Expression theContext;
@@ -529,8 +576,11 @@ bool CalculatorFunctions::innerConvertIntegerUnsignedToBase58(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerConvertIntegerUnsignedToBase58");
+  if (input.size() != 2) {
+    return false;
+  }
   LargeInteger theInt;
-  if (!input.IsInteger(&theInt)) {
+  if (!input[1].IsInteger(&theInt)) {
     return false;
   }
   if (theInt < 0) {
@@ -545,8 +595,11 @@ bool CalculatorFunctions::innerAppendDoubleSha256Check(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerAppendSha256Check");
+  if (input.size() != 2) {
+    return false;
+  }
   std::string inputString;
-  if (!input.IsOfType(&inputString)) {
+  if (!input[1].IsOfType(&inputString)) {
     return false;
   }
   std::string outputString;
@@ -575,7 +628,6 @@ bool CalculatorFunctionsCrypto::innerAES_CBC_256_Decrypt(
     return theCommands << comments.str();
   }
   return output.AssignValue(cipherText, theCommands);
-
 }
 
 bool CalculatorFunctionsCrypto::innerAES_CBC_256_Encrypt(
@@ -605,12 +657,17 @@ bool CalculatorFunctions::innerConvertBase58ToHex(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerConvertBase58ToHex");
-  if (!input.IsOfType<std::string>()) {
+  if (input.size() != 2) {
     return false;
   }
-  const std::string& inputString = input.GetValue<std::string>();
+  std::string inputString;
+  if (!input[1].IsOfType(&inputString)) {
+    return false;
+  }
   std::string outputString;
-  if (!Crypto::ConvertBase58ToHexSignificantDigitsFirst(inputString, outputString, &theCommands.Comments)) {
+  if (!Crypto::ConvertBase58ToHexSignificantDigitsFirst(
+    inputString, outputString, &theCommands.Comments
+  )) {
     return theCommands << "Failed to convert " << inputString << " to hex. ";
   }
   return output.AssignValue(outputString, theCommands);
@@ -620,10 +677,13 @@ bool CalculatorFunctions::innerConvertHexToBase58(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerConvertHexToBase58");
-  if (!input.IsOfType<std::string>()) {
+  if (input.size() != 2) {
     return false;
   }
-  const std::string& inputString = input.GetValue<std::string>();
+  std::string inputString;
+  if (!input[1].IsOfType(&inputString)) {
+    return false;
+  }
   LargeIntegerUnsigned outputInteger;
   std::string outputString;
   int numLeadingZeroBytes = 0;
@@ -638,21 +698,28 @@ bool CalculatorFunctions::innerConvertStringToHex(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerConvertStringToHex");
-  if (!input.IsOfType<std::string>()) {
+  if (input.size() != 2) {
     return false;
   }
-  return output.AssignValue(Crypto::ConvertStringToHex(input.GetValue<std::string>(), 0, false), theCommands);
+  std::string inputString;
+  if (!input[1].IsOfType(&inputString)) {
+    return false;
+  }
+  return output.AssignValue(Crypto::ConvertStringToHex(inputString, 0, false), theCommands);
 }
 
 bool CalculatorFunctions::innerCharToBase64(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerCharToBase64");
-  if (!input.IsOfType<std::string>()) {
+  if (input.size() != 2) {
+    return false;
+  }
+  std::string inputString;
+  if (!input[1].IsOfType(&inputString)) {
     return false;
   }
   List<unsigned char> theBitStream;
-  const std::string& inputString = input.GetValue<std::string>();
   theBitStream = inputString;
   return output.AssignValue(Crypto::ConvertListUnsignedCharsToBase64(theBitStream, false), theCommands);
 }
@@ -660,19 +727,23 @@ bool CalculatorFunctions::innerCharToBase64(
 bool CalculatorFunctions::innerBase64ToCharToBase64Test(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerBase64ToCharSequence");
-  if (!input.IsOfType<std::string>()) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::innerBase64ToCharToBase64Test");
+  if (input.size() != 2) {
+    return false;
+  }
+  std::string inputString;
+  if (!input[1].IsOfType(&inputString)) {
     return false;
   }
   List<unsigned char> theBitStream;
-  if (!Crypto::ConvertBase64ToBitStream(input.GetValue<std::string>(), theBitStream, &theCommands.Comments)) {
+  if (!Crypto::ConvertBase64ToBitStream(inputString, theBitStream, &theCommands.Comments)) {
     return false;
   }
   std::stringstream out;
   std::string theConvertedBack = Crypto::ConvertListUnsignedCharsToBase64(theBitStream, false);
-  out << "Original string: " << input.GetValue<std::string>()
+  out << "Original string: " << inputString
   << "<br>Converted to bitstream and back: " << theConvertedBack;
-  if (theConvertedBack != input.GetValue<std::string>()) {
+  if (theConvertedBack != inputString) {
     out << "<br><b>The input is not the same as the output!</b>";
   }
   return output.AssignValue(out.str(), theCommands);
@@ -749,9 +820,14 @@ bool CalculatorFunctions::innerStringToAtom(Calculator& theCommands, const Expre
   return output.MakeAtom(theString, theCommands);
 }
 
-bool CalculatorFunctions::innerExpressionToString(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctions::innerExpressionToString(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerExpressionToString");
-  return output.AssignValue(input.ToString(), theCommands);
+  if (input.size() != 2) {
+    return false;
+  }
+  return output.AssignValue(input[1].ToString(), theCommands);
 }
 
 bool CalculatorFunctions::innerQuoteToString(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -768,23 +844,33 @@ bool CalculatorFunctions::innerQuoteToString(Calculator& theCommands, const Expr
   if (input[1].IsOperation(&operation)) {
     return output.AssignValue(operation, theCommands);
   }
-  theCommands << "<b>Warning: this shouldn't happen: quote operation is applied to the non-atomic expression: "
+  theCommands
+  << "<b>Warning: this shouldn't happen: quote operation "
+  << "is applied to the non-atomic expression: "
   << input.ToString() << ". "
   << "This may be a bug with the function Calculator::ParseFillDictionary. </b>";
   return output.AssignValue(input.ToString(), theCommands);
 }
 
-bool CalculatorFunctions::innerFourierTransformEWA(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctions::innerFourierTransformEWA(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerFourierTransformEWA");
-  if (!input.IsOfType<ElementWeylAlgebra<Rational> >()) {
+  if (input.size() != 2) {
+    return false;
+  }
+  const Expression& argument = input[1];
+  if (!argument.IsOfType<ElementWeylAlgebra<Rational> >()) {
     return false;
   }
   ElementWeylAlgebra<Rational> theElt;
-  input.GetValue<ElementWeylAlgebra<Rational> >().FourierTransform(theElt);
-  return output.AssignValueWithContext(theElt, input.GetContext(), theCommands);
+  argument.GetValue<ElementWeylAlgebra<Rational> >().FourierTransform(theElt);
+  return output.AssignValueWithContext(theElt, argument.GetContext(), theCommands);
 }
 
-bool CalculatorFunctions::innerCasimirWRTlevi(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctions::innerCasimirWRTlevi(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerCasimir");
   RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   if (!input.IsListNElements(3)) {
@@ -1294,13 +1380,13 @@ bool CalculatorFunctions::innerSolveSerreLikeSystem(
   if (theComputation.flagSystemProvenToHaveNoSolution) {
     out << "<br>The system does not have a solution. ";
   } else if (theComputation.flagSystemProvenToHaveSolution) {
-    out << "<br>System proven to have solution.";
+    out << "<br>System proven to have solution. ";
   }
   if (!theComputation.flagSystemProvenToHaveNoSolution) {
     if (theComputation.flagSystemSolvedOverBaseField) {
       out << "<br>One solution follows. " << theComputation.ToStringSerreLikeSolution();
     } else {
-      out << " However, I was unable to find such a solution: my heuristics are not good enough.";
+      out << "However, I was unable to find such a solution: my heuristics are not good enough.";
     }
   }
   return output.AssignValue(out.str(), theCommands);
@@ -1310,9 +1396,14 @@ bool CalculatorFunctions::innerConvertAlgebraicNumberToMatrix(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerConvertAlgebraicNumberToMatrix");
+  if (input.size() != 2) {
+    return false;
+  }
+  const Expression& argument = input[1];
   AlgebraicNumber theNumber;
-  if (!input.IsOfType(&theNumber)) {
-    return theCommands << "Failed to convert " << input.ToString() << " to algebraic number. ";
+  if (!argument.IsOfType(&theNumber)) {
+    return theCommands << "Failed to convert "
+    << argument.ToString() << " to algebraic number. ";
   }
   int dimension = theNumber.owner->GetDimensionOverTheRationals();
   MatrixTensor<Rational> numberMatrixTensor;
@@ -1592,9 +1683,15 @@ bool IntegralRFComputation::PreparePFExpressionSummands() {
   }
   if (!this->quotientRat.IsEqualToZero()) {
     Expression currentPFpolyForm;
-    currentPFpolyForm.AssignValueWithContext(this->quotientRat, this->contextE, *this->owner);
-    if (!CalculatorConversions::innerExpressionFromPoly<Rational>(*this->owner, currentPFpolyForm, currentPFWithCoeff)) {
-      *this->owner << "<br>Something is wrong: failed to convert polynomial " << currentPFpolyForm.ToString()
+    currentPFpolyForm.AssignValueWithContext(
+      this->quotientRat, this->contextE, *this->owner
+    );
+    if (!CalculatorConversions::functionExpressionFromPoly<Rational>(
+      *this->owner, currentPFpolyForm, currentPFWithCoeff
+    )) {
+      *this->owner
+      << "<br>Something is wrong: failed to convert polynomial "
+      << currentPFpolyForm.ToString()
       << " to expression. This shouldn't happen. ";
       return false;
     }
@@ -1661,9 +1758,14 @@ bool IntegralRFComputation::IntegrateRF() {
   }
   if (!this->quotientRat.IsEqualToZero()) {
     Expression currentIntegrandPolyForm;
-    currentIntegrandPolyForm.AssignValueWithContext(this->quotientRat, this->contextE, *this->owner);
-    if (!CalculatorConversions::innerExpressionFromPoly<Rational>(*this->owner, currentIntegrandPolyForm, currentIntegrand)) {
-      *this->owner << "<br>Something is wrong: failed to convert polynomial " << currentIntegrandPolyForm.ToString()
+    currentIntegrandPolyForm.AssignValueWithContext(
+      this->quotientRat, this->contextE, *this->owner
+    );
+    if (!CalculatorConversions::functionExpressionFromPoly<Rational>(
+      *this->owner, currentIntegrandPolyForm, currentIntegrand
+    )) {
+      *this->owner << "<br>Something is wrong: failed to convert polynomial "
+      << currentIntegrandPolyForm.ToString()
       << " to expression. This shouldn't happen. ";
       return false;
     }
@@ -2065,12 +2167,23 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
   return true;
 }
 
-bool CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicReals(
+bool CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicRealS(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  if (input.size() != 2) {
+    return false;
+  }
+  return CalculatorFunctions::functionSplitToPartialFractionsOverAlgebraicReals(
+    theCommands, input[1], output
+  );
+}
+
+bool CalculatorFunctions::functionSplitToPartialFractionsOverAlgebraicReals(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicReals");
   IntegralRFComputation theComputation(&theCommands);
-  bool isGood = CalculatorConversions::innerRationalFunction(theCommands, input, theComputation.inpuTE);
+  bool isGood = CalculatorConversions::functionRationalFunction(theCommands, input, theComputation.inpuTE);
   if (isGood) {
     isGood = theComputation.inpuTE.IsOfType<RationalFunctionOld>();
   }
@@ -2101,7 +2214,7 @@ bool CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicRealsAlgorith
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicReals");
   IntegralRFComputation theComputation(&theCommands);
-  bool isGood = CalculatorConversions::innerRationalFunction(theCommands, input, theComputation.inpuTE);
+  bool isGood = CalculatorConversions::innerRationalFunctioN(theCommands, input, theComputation.inpuTE);
   if (isGood) {
     isGood = theComputation.inpuTE.IsOfType<RationalFunctionOld>();
   }
@@ -2124,16 +2237,23 @@ bool CalculatorFunctions::innerGaussianEliminationMatrix(
 ) {
   MacroRegisterFunctionWithName("innerGaussianEliminationMatrix");
   Expression theConverted;
-  if (!CalculatorConversions::innerMatrixAlgebraic(theCommands, input, theConverted)) {
-    return theCommands << "<hr>Failed to extract algebraic number matrix from " << input.ToString();
+  if (!CalculatorConversions::innerMakeMatrix(
+    theCommands, input, theConverted
+  )) {
+    return theCommands
+    << "<hr>Failed to extract algebraic number matrix from "
+    << input.ToString() << ". ";
   }
   Matrix<AlgebraicNumber> theMat;
-  if (!theConverted.IsMatrixGivenType<AlgebraicNumber>(nullptr, nullptr, &theMat)) {
-    return theCommands << "<hr>Failed to extract algebraic number matrix, got intermediate conversion to: "
+  if (!theCommands.functionGetMatrix(theConverted, theMat)) {
+    return theCommands
+    << "<hr>Failed to extract algebraic number matrix, "
+    << "got intermediate conversion to: "
     << theConverted.ToString();
   }
   if (theMat.NumRows < 2) {
-    return theCommands << "<hr>The matrix I got as input had only 1 row. Possible user typo?";
+    return theCommands
+    << "<hr>The matrix I got as input had only 1 row. Possible user typo?";
   }
   std::stringstream out;
   FormatExpressions theFormat;
@@ -3102,16 +3222,23 @@ bool CalculatorFunctions::innerCompareExpressionsNumericallyAtPoints(
   }
   for (int i = 0; i < theFreeVars.size; i ++) {
     if (!varsGiven.Contains(theFreeVars[i])) {
-      return theCommands << "The expression depends on  " << theFreeVars[i].ToString()
+      return theCommands << "The expression depends on "
+      << theFreeVars[i].ToString()
       << " but I no value given for that expression. ";
     }
   }
   const Expression& thePointsE = input[4][2];
   Matrix<double> thePoints;
-  if (!theCommands.GetMatrix(
-    thePointsE, thePoints, nullptr, varsGiven.size, CalculatorFunctions::innerEvaluateToDouble
+  if (!theCommands.functionGetMatrix(
+    thePointsE,
+    thePoints,
+    nullptr,
+    varsGiven.size,
+    CalculatorFunctions::functionEvaluateToDouble
   )) {
-    return theCommands << "Failed to extract list of points from: " << thePointsE.ToString();
+    return theCommands
+    << "Failed to extract list of points from: "
+    << thePointsE.ToString();
   }
   HashedList<Expression> knownEs = theCommands.knownDoubleConstants;
   List<double> knownValues = theCommands.knownDoubleConstantValues;
@@ -3308,13 +3435,20 @@ bool CalculatorFunctions::innerIsEven(Calculator& theCommands, const Expression&
   return output.AssignValue(0, theCommands);
 }
 
-bool CalculatorFunctions::innerIsConstant(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctions::innerIsConstant(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerIsConstant");
-  int result = static_cast<int>(input.IsConstantNumber());
+  if (input.size() != 2) {
+    return false;
+  }
+  int result = static_cast<int>(input[1].IsConstantNumber());
   return output.AssignValue(result, theCommands);
 }
 
-bool CalculatorFunctions::innerIsNonEmptySequence(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctions::innerIsNonEmptySequence(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerIsNonEmptySequence");
   if (input.HasBoundVariables()) {
     return false;
@@ -3343,7 +3477,13 @@ bool CalculatorFunctions::innerIsDifferentialOneFormOneVariable(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerIsDifferentialOneFormOneVariable");
-  return output.AssignValue(static_cast<int>(input.IsDifferentialOneFormOneVariablE()), theCommands);
+  if (input.size() != 2) {
+    return false;
+  }
+  return output.AssignValue(
+    static_cast<int>(input[1].IsDifferentialOneFormOneVariablE()),
+    theCommands
+  );
 }
 
 bool CalculatorFunctions::innerInterpretAsDifferential(
@@ -3443,21 +3583,29 @@ bool CalculatorFunctions::innerRationalFunctionSubstitution(
   return CalculatorConversions::innerExpressionFromRF(theCommands, ResultRationalForm, output);
 }
 
-bool CalculatorFunctions::innerInvertMatrixRFsVerbose(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("Calculator::innerInvertMatrixVerbose");
-  Matrix<RationalFunctionOld> mat, outputMat, tempMat;
-  Expression theContext;
-  if (!input.IsMatrixGivenType<RationalFunctionOld>(nullptr, nullptr, &mat)) {
+  Matrix<RationalFunctionOld> theMatrix, outputMat, extendedMatrix;
+  Expression theContext, converted;
+  if (!CalculatorConversions::innerMatrixRationalFunction(
+    theCommands, input, converted
+  )) {
     return output.MakeError("Failed to extract matrix. ", theCommands);
   }
-  theContext = input.GetContext();
-  if (mat.NumRows != mat.NumCols || mat.NumCols < 1) {
+  if (theCommands.functionGetMatrix(converted, theMatrix)) {
+    return theCommands << "Failed to get matrix of rational functions. ";
+  }
+  theContext = converted.GetContext();
+  if (theMatrix.NumRows != theMatrix.NumCols || theMatrix.NumCols < 1) {
     std::stringstream out;
-    out << "The matrix " << mat.ToString( ) << " has " << mat.NumCols << " columns and " << mat.NumRows << " rows. "
+    out << "The matrix " << theMatrix.ToString( ) << " has "
+    << theMatrix.NumCols << " columns and " << theMatrix.NumRows << " rows. "
     << "The matrix is not square.";
     return output.MakeError(out.str(), theCommands);
   }
-  outputMat.MakeIdMatrix(mat.NumRows);
+  outputMat.MakeIdMatrix(theMatrix.NumRows);
   int tempI;
   int NumFoundPivots = 0;
   std::stringstream out, outLaTeX;
@@ -3468,28 +3616,29 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(Calculator& theCommands, c
   theFormat.flagUseLatex = true;
   theFormat.flagUseHTML = false;
   theFormat.flagUseFrac = true;
-  theFormat.MatrixColumnVerticalLineIndex = mat.NumCols - 1;
-  out << "Computing " << HtmlRoutines::GetMathSpanPure(mat.ToString(&theFormat) + "^{- 1}");
-  tempMat = mat;
-  tempMat.AppendMatrixOnTheRight(outputMat);
-  out << "<br>" << HtmlRoutines::GetMathSpanPure(tempMat.ToString(&theFormat)) ;
+  theFormat.MatrixColumnVerticalLineIndex = theMatrix.NumCols - 1;
+  out << "Computing "
+  << HtmlRoutines::GetMathSpanPure(theMatrix.ToString(&theFormat) + "^{- 1}");
+  extendedMatrix = theMatrix;
+  extendedMatrix.AppendMatrixOnTheRight(outputMat);
+  out << "<br>" << HtmlRoutines::GetMathSpanPure(extendedMatrix.ToString(&theFormat)) ;
   outLaTeX << "\\begin{tabular}{ll}";
-  outLaTeX << "$" << tempMat.ToString(& theFormat) << "$";
+  outLaTeX << "$" << extendedMatrix.ToString(& theFormat) << "$";
 
-  for (int i = 0; i < mat.NumCols; i ++) {
-    tempI = mat.FindPivot(i, NumFoundPivots);
+  for (int i = 0; i < theMatrix.NumCols; i ++) {
+    tempI = theMatrix.FindPivot(i, NumFoundPivots);
     if (tempI != - 1) {
       if (tempI != NumFoundPivots) {
-        mat.SwitchTwoRows(NumFoundPivots, tempI);
+        theMatrix.SwitchTwoRows(NumFoundPivots, tempI);
         outputMat.SwitchTwoRows (NumFoundPivots, tempI);
         out << "<br>Swap row " << NumFoundPivots + 1 << " and row " << tempI + 1 << ": ";
         outLaTeX << "& Swap row " << NumFoundPivots + 1 << " and row " << tempI + 1 << ". ";
-        tempMat = mat;
-        tempMat.AppendMatrixOnTheRight(outputMat);
+        extendedMatrix = theMatrix;
+        extendedMatrix.AppendMatrixOnTheRight(outputMat);
         out << "<br>" << HtmlRoutines::GetMathSpanPure(outputMat.ToString(&theFormat));
         outLaTeX << "\\\\" << "$" << outputMat.ToString(&theFormat) << "$";
       }
-      tempElement = mat.elements[NumFoundPivots][i];
+      tempElement = theMatrix(NumFoundPivots, i);
       tempElement.Invert();
       if (tempElement != 1) {
         out << "<br> multiply row number " << NumFoundPivots + 1 << " by "
@@ -3497,21 +3646,21 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(Calculator& theCommands, c
         outLaTeX << "& multiply row number " << NumFoundPivots + 1 << " by $"
         << tempElement.ToString(&theFormat) << "$. \\\\";
       }
-      mat.RowTimesScalar(NumFoundPivots, tempElement);
+      theMatrix.RowTimesScalar(NumFoundPivots, tempElement);
       outputMat.RowTimesScalar(NumFoundPivots, tempElement);
       if (tempElement != 1) {
-        tempMat = mat;
-        tempMat.AppendMatrixOnTheRight(outputMat);
-        out << HtmlRoutines::GetMathSpanPure(tempMat.ToString(&theFormat));
-        outLaTeX << "$" << tempMat.ToString(&theFormat) << "$";
+        extendedMatrix = theMatrix;
+        extendedMatrix.AppendMatrixOnTheRight(outputMat);
+        out << HtmlRoutines::GetMathSpanPure(extendedMatrix.ToString(&theFormat));
+        outLaTeX << "$" << extendedMatrix.ToString(&theFormat) << "$";
       }
       bool found = false;
-      for (int j = 0; j<mat.NumRows; j ++) {
+      for (int j = 0; j < theMatrix.NumRows; j ++) {
         if (j != NumFoundPivots) {
-          if (!mat.elements[j][i].IsEqualToZero()) {
-            tempElement = mat.elements[j][i];
+          if (!theMatrix.elements[j][i].IsEqualToZero()) {
+            tempElement = theMatrix.elements[j][i];
             tempElement.Minus();
-            mat.AddTwoRows(NumFoundPivots, j, i, tempElement);
+            theMatrix.AddTwoRows(NumFoundPivots, j, i, tempElement);
             outputMat.AddTwoRows(NumFoundPivots, j, 0, tempElement);
             if (!found) {
               out << "<br>";
@@ -3533,23 +3682,29 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(Calculator& theCommands, c
         out << ": <br> ";
         outLaTeX << "\\end{tabular}";
         outLaTeX << "\\\\";
-        tempMat = mat;
-        tempMat.AppendMatrixOnTheRight(outputMat);
-        out << HtmlRoutines::GetMathSpanPure(tempMat.ToString(&theFormat));
-        outLaTeX << "$" << tempMat.ToString(&theFormat) << "$";
+        extendedMatrix = theMatrix;
+        extendedMatrix.AppendMatrixOnTheRight(outputMat);
+        out << HtmlRoutines::GetMathSpanPure(extendedMatrix.ToString(&theFormat));
+        outLaTeX << "$" << extendedMatrix.ToString(&theFormat) << "$";
       }
       NumFoundPivots ++;
     }
   }
   outLaTeX << "\\end{tabular}";
   theFormat.MatrixColumnVerticalLineIndex = - 1;
-  if (NumFoundPivots < mat.NumRows) {
-    out << "<br>Matrix to the right of the vertical line not transformed to the identity matrix => starting matrix is not invertible. ";
-    outLaTeX << "Matrix to the right of the vertical line not transformed to the identity matrix => starting matrix is not invertible. ";
+  if (NumFoundPivots < theMatrix.NumRows) {
+    out << "<br>Matrix to the right of the vertical line not "
+    << "transformed to the identity matrix => "
+    << "starting matrix is not invertible. ";
+    outLaTeX << "Matrix to the right of the vertical line "
+    << "not transformed to the identity matrix => "
+    << "starting matrix is not invertible. ";
   } else {
-    out << "<br>The inverse of the starting matrix can be read off on the matrix to the left of the id matrix: "
+    out << "<br>The inverse of the starting matrix "
+    << "can be read off on the matrix to the left of the id matrix: "
     << HtmlRoutines::GetMathSpanPure(outputMat.ToString(&theFormat));
-    outLaTeX << " The inverse matrix can now be read off as the matrix to the left of the identity matrix: $"
+    outLaTeX << " The inverse matrix can now be read off as the matrix "
+    << "to the left of the identity matrix: $"
     << outputMat.ToString(&theFormat) << "$";
   }
   out << "Output in LaTeX: <br><br>" << outLaTeX.str();
@@ -3559,7 +3714,9 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(Calculator& theCommands, c
 bool Calculator::innerInvertMatrixVerbose(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerInvertMatrixVerbose");
   Matrix<Rational> mat, outputMat, tempMat;
-  if (!theCommands.GetMatriXFromArguments<Rational>(input, mat, nullptr, - 1, nullptr)) {
+  if (!theCommands.functionGetMatrix(
+    input, mat, nullptr, - 1, nullptr
+  )) {
     return CalculatorFunctions::innerInvertMatrixRFsVerbose(theCommands, input, output);
   }
   if (mat.NumRows != mat.NumCols || mat.NumCols < 1) {
@@ -3729,18 +3886,23 @@ bool CalculatorFunctions::outerPolynomializE(Calculator& theCommands, const Expr
 bool CalculatorFunctions::innerIntegrateRationalFunctionSplitToBuidingBlocks(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerIntegrateRationalFunctionSplitToBuidingBlocks");
+  MacroRegisterFunctionWithName("CalculatorFunctions::functionIntegrateRationalFunctionSplitToBuidingBlocks");
   Expression theFunctionE, theVariableE, integrationSetE;
   if (!input.IsIndefiniteIntegralfdx(&theVariableE, &theFunctionE, &integrationSetE)) {
     return false;
   }
   IntegralRFComputation theComputation(&theCommands);
-  if (!CalculatorConversions::innerRationalFunction(theCommands, theFunctionE, theComputation.inpuTE)) {
-    return theCommands << "<hr>Call of function CalculatorConversions::innerRationalFunction failed, input was: "
+  if (!CalculatorConversions::functionRationalFunction(
+    theCommands, theFunctionE, theComputation.inpuTE
+  )) {
+    return theCommands
+    << "<hr>Call of function CalculatorConversions::innerRationalFunction "
+    << "failed, input was: "
     << theFunctionE.ToString();
   }
   if (!theComputation.inpuTE.IsOfType<RationalFunctionOld>()) {
-    return theCommands << "<hr>CalculatorFunctions::innerIntegrateRationalFunctionSplitToBuidingBlocks: "
+    return theCommands
+    << "<hr>CalculatorFunctions::innerIntegrateRationalFunctionSplitToBuidingBlocks: "
     << "failed to convert "
     << theFunctionE.ToString() << " to rational function. "
     << "Attempt to converted expression yielded: " << theComputation.inpuTE.ToString();
@@ -4626,8 +4788,12 @@ bool CalculatorFunctions::innerExploitCosEvenness(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerExploitCosEvenness");
+  if (input.size() != 2) {
+    return false;
+  }
+  const Expression& argument = input[1];
   Expression cfE, nonCFpart;
-  input.GetCoefficientMultiplicandForm(cfE, nonCFpart);
+  argument.GetCoefficientMultiplicandForm(cfE, nonCFpart);
   Rational theRat;
   if (!cfE.IsRational(&theRat)) {
     return false;
@@ -4644,8 +4810,12 @@ bool CalculatorFunctions::innerExploitSinOddness(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerExploitSinOddness");
+  if (input.size() != 2) {
+    return false;
+  }
+  const Expression& argument = input[1];
   Expression cfE, nonCFpart;
-  input.GetCoefficientMultiplicandForm(cfE, nonCFpart);
+  argument.GetCoefficientMultiplicandForm(cfE, nonCFpart);
   Rational theRat;
   if (!cfE.IsRational(&theRat)) {
     return false;
@@ -4660,12 +4830,18 @@ bool CalculatorFunctions::innerExploitSinOddness(
   return true;
 }
 
-bool CalculatorFunctions::innerConvertSinToExponent(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctions::innerConvertSinToExponent(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerConvertSinToExponent");
+  if (input.size() != 2) {
+    return false;
+  }
+  const Expression& argument = input[1];
   Expression eE, iE, exponentArgument, minusExponentArgument, leftE, rightE;
   eE.MakeAtom(theCommands.opE(), theCommands);
   iE.MakeAtom(theCommands.opImaginaryUnit(), theCommands);
-  exponentArgument = iE * input;
+  exponentArgument = iE * argument;
   minusExponentArgument = exponentArgument * (- 1);
   leftE.MakeXOX(theCommands, theCommands.opThePower(), eE, exponentArgument);
   rightE.MakeXOX(theCommands, theCommands.opThePower(), eE, minusExponentArgument);
@@ -4673,12 +4849,18 @@ bool CalculatorFunctions::innerConvertSinToExponent(Calculator& theCommands, con
   return true;
 }
 
-bool CalculatorFunctions::innerConvertCosToExponent(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctions::innerConvertCosToExponent(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerConvertCosToExponent");
+  if (input.size() != 2) {
+    return false;
+  }
+  const Expression& argument = input[1];
   Expression eE, iE, exponentArgument, minusExponentArgument, leftE, rightE;
   eE.MakeAtom(theCommands.opE(), theCommands);
   iE.MakeAtom(theCommands.opImaginaryUnit(), theCommands);
-  exponentArgument = iE * input;
+  exponentArgument = iE * argument;
   minusExponentArgument = exponentArgument * (- 1);
   leftE.MakeXOX(theCommands, theCommands.opThePower(), eE, exponentArgument);
   rightE.MakeXOX(theCommands, theCommands.opThePower(), eE, minusExponentArgument);
@@ -4717,7 +4899,9 @@ bool CalculatorFunctions::innerPowerImaginaryUnit(Calculator& theCommands, const
   return false; //<-this shouldn't happen
 }
 
-bool CalculatorFunctions::innerEulerFlaAsALaw(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctions::innerEulerFlaAsALaw(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerEulerFlaAsALaw");
   if (!input.StartsWith(theCommands.opThePower(), 3)) {
     return false;
@@ -5255,16 +5439,24 @@ bool CalculatorFunctions::innerLispifyFull(Calculator& theCommands, const Expres
   return output.AssignValue(input[1].ToStringFull(), theCommands);
 }
 
-bool CalculatorFunctions::innerMinPolyMatrix(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctions::innerMinPolyMatrix(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerMinPolyMatrix");
-  if (!output.IsMatrixGivenType<Rational>()) {
-    if (!CalculatorConversions::innerMatrixRational(theCommands, input, output)) {
-      return false;
-    }
+  if (input.size() != 2) {
+    return false;
+  }
+  const Expression& argument = input[1];
+  if (!CalculatorConversions::functionMatrixRational(
+    theCommands, argument, output
+  )) {
+    return false;
   }
   Matrix<Rational> theMat;
-  if (!output.IsMatrixGivenType<Rational>(nullptr, nullptr, &theMat)) {
-    return theCommands << "<hr>Minimal poly computation: could not convert " << input.ToString() << " to rational matrix.";
+  if (!theCommands.functionGetMatrix(argument, theMat)) {
+    return theCommands
+    << "<hr>Minimal poly computation: could not convert "
+    << argument.ToString() << " to rational matrix.";
   }
   if (theMat.NumRows != theMat.NumCols || theMat.NumRows <= 0) {
     return output.MakeError("Error: matrix is not square.", theCommands, true);
@@ -5277,16 +5469,19 @@ bool CalculatorFunctions::innerMinPolyMatrix(Calculator& theCommands, const Expr
   return output.AssignValue(theMinPoly.ToString(&tempF), theCommands);
 }
 
-bool CalculatorFunctions::innerCharPolyMatrix(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctions::innerCharPolyMatrix(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerMinPolyMatrix");
-  if (!output.IsMatrixGivenType<Rational>()) {
-    if (!CalculatorConversions::innerMatrixRational(theCommands, input, output)) {
-      return false;
-    }
+  if (input.size() != 2) {
+    return false;
   }
+  const Expression& argument = input[1];
   Matrix<Rational> theMat;
-  if (!output.IsMatrixGivenType<Rational>(nullptr, nullptr, &theMat)) {
-    return theCommands << "<hr>Characteristic poly computation: could not convert " << input.ToString() << " to rational matrix.";
+  if (!theCommands.functionGetMatrix(argument, theMat)) {
+    return theCommands
+    << "<hr>Characteristic poly computation: could not convert "
+    << input.ToString() << " to rational matrix.";
   }
   if (theMat.NumRows != theMat.NumCols || theMat.NumRows <= 0) {
     return output.MakeError("Error: matrix is not square.", theCommands, true);
@@ -5313,31 +5508,49 @@ bool CalculatorFunctions::innerReverseBytes(Calculator& theCommands, const Expre
   return output.AssignValue(result, theCommands);
 }
 
-bool CalculatorFunctions::innerTrace(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctions::innerTrace(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerTrace");
+  if (input.size() != 2) {
+    return false;
+  }
   Matrix<Rational> theMat;
-  if (input.IsMatrixGivenType<Rational>(nullptr, nullptr, &theMat)) {
+  if (theCommands.functionGetMatrix(input[1], theMat)) {
     if (!theMat.IsSquare()) {
-      return output.MakeError("Error: attempting to get trace of non-square matrix. ", theCommands, true);
+      return output.MakeError(
+        "Error: attempting to get trace of non-square matrix. ",
+        theCommands,
+        true
+      );
     }
     return output.AssignValue(theMat.GetTrace(), theCommands);
   }
   Matrix<RationalFunctionOld> theMatRF;
-  if (input.IsMatrixGivenType<RationalFunctionOld>(nullptr, nullptr, &theMatRF)) {
+  if (theCommands.functionGetMatrix(input[1], theMatRF)) {
     if (!theMatRF.IsSquare()) {
-      return output.MakeError("Error: attempting to get trace of non-square matrix. ", theCommands, true);
+      return output.MakeError(
+        "Error: attempting to get trace of non-square matrix. ",
+        theCommands,
+        true
+      );
     }
     return output.AssignValue(theMatRF.GetTrace(), theCommands);
   }
   Matrix<Expression> theMatExp;
-  if (!theCommands.GetMatrixExpressionsFromArguments(input, theMatExp)) {
+  if (!theCommands.GetMatrixExpressionsFromArguments(input[1], theMatExp)) {
     return false;
   }
   if (!theMat.IsSquare()) {
-    return output.MakeError("Error: attempting to get trace of non-square matrix. ", theCommands, true);
+    return output.MakeError(
+      "Error: attempting to get trace of non-square matrix. ",
+      theCommands,
+      true
+    );
   }
   if (theMat.NumRows == 1) {
-    theCommands << "Requested trace of 1x1 matrix: possible interpretation of a scalar as a 1x1 matrix. Trace not taken. ";
+    theCommands << "Requested trace of 1x1 matrix: possible "
+    << "interpretation of a scalar as a 1x1 matrix. Trace not taken. ";
     return false;
   }
   output = theMat.GetTrace();
@@ -5606,22 +5819,27 @@ bool CalculatorFunctions::innerIsPrimeMillerRabin(Calculator& theCommands, const
   return output.AssignValue(result, theCommands);
 }
 
-bool CalculatorFunctions::innerIsNilpotent(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctions::innerIsNilpotent(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerIsNilpotent");
+  Expression converted;
+  if (!CalculatorConversions::innerMakeMatrix(theCommands, input, converted)) {
+    return false;
+  }
+  bool found = false;
   Matrix<Rational> theMat;
   MatrixTensor<Rational> theMatTensor;
-  bool found = false;
-  if (input.IsMatrixGivenType<Rational>(nullptr, nullptr, &theMat)) {
+  if (theCommands.functionGetMatrix(converted, theMat)) {
     found = true;
     theMatTensor = theMat;
   } else if (input.IsOfType<MatrixTensor<Rational> >(&theMatTensor)) {
     found = true;
-  } else if (theCommands.GetMatriXFromArguments<Rational>(input, theMat, nullptr, - 1, nullptr)) {
-    theMatTensor = theMat;
-    found = true;
   }
   if (!found) {
-    return output.MakeError("Failed to extract matrix with rational coefficients", theCommands);
+    return output.MakeError(
+      "Failed to extract matrix with rational coefficients", theCommands
+    );
   }
   if (theMatTensor.IsNilpotent()) {
     return output.AssignValue(1, theCommands);
@@ -5632,16 +5850,13 @@ bool CalculatorFunctions::innerIsNilpotent(Calculator& theCommands, const Expres
 bool CalculatorFunctions::innerInvertMatrix(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerInvertMatrix");
   Matrix<Rational> theMat;
-  bool matRatWorks = false;
-  if (input.IsMatrixGivenType(nullptr, nullptr, &theMat)) {
-    matRatWorks = true;
+  Expression converted;
+  if (!CalculatorConversions::innerMakeMatrix(
+    theCommands, input, converted
+  )) {
+    return theCommands << "Failed to extract matrix from input. ";
   }
-  if (!matRatWorks) {
-    if (theCommands.GetMatriXFromArguments(input, theMat, nullptr, - 1, nullptr)) {
-      matRatWorks = true;
-    }
-  }
-  if (matRatWorks) {
+  if (theCommands.functionGetMatrix(converted, theMat)) {
     if (theMat.NumRows != theMat.NumCols || theMat.NumCols < 1) {
       return output.MakeError("The matrix is not square", theCommands, true);
     }
@@ -5652,27 +5867,18 @@ bool CalculatorFunctions::innerInvertMatrix(Calculator& theCommands, const Expre
     return output.AssignMatrix(theMat, theCommands);
   }
   Matrix<AlgebraicNumber> theMatAlg;
-  bool matAlgWorks = false;
-  if (input.IsMatrixGivenType<AlgebraicNumber>(nullptr, nullptr, &theMatAlg)) {
-    matAlgWorks = true;
+  if (theCommands.functionGetMatrix(input, theMatAlg)) {
+    return theCommands << "<hr>Failed to extract algebraic number matrix from: "
+    << input.ToString();
   }
-  if (!matAlgWorks) {
-    if (theCommands.GetMatriXFromArguments(input, theMatAlg, nullptr, - 1, nullptr)) {
-      matAlgWorks = true;
-    }
+  if (theMatAlg.NumRows != theMatAlg.NumCols || theMatAlg.NumCols < 1) {
+    return output.MakeError("The matrix is not square", theCommands, true);
   }
-  if (matAlgWorks) {
-    if (theMatAlg.NumRows != theMatAlg.NumCols || theMatAlg.NumCols < 1) {
-      return output.MakeError("The matrix is not square", theCommands, true);
-    }
-    if (theMatAlg.GetDeterminant() == 0) {
-      return output.MakeError("Matrix determinant is zero.", theCommands, true);
-    }
-    theMatAlg.Invert();
-    return output.AssignMatrix(theMatAlg, theCommands);
+  if (theMatAlg.GetDeterminant() == 0) {
+    return output.MakeError("Matrix determinant is zero.", theCommands, true);
   }
-  return theCommands << "<hr>Failed to extract algebraic number matrix from: "
-  << input.ToString();
+  theMatAlg.Invert();
+  return output.AssignMatrix(theMatAlg, theCommands);
 }
 
 bool CalculatorFunctions::innerDFQsEulersMethod(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -6692,14 +6898,25 @@ bool CalculatorFunctions::innerGetCentralizerChainsSemisimpleSubalgebras(
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CalculatorFunctions::innerEvaluateToDouble(Calculator& theCommands, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("Expression::innerEvaluateToDouble");
+bool CalculatorFunctions::innerEvaluateToDoublE(Calculator& theCommands, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("Expression::innerEvaluateToDoublE");
   if (input.size() != 2) {
     // One argument expected.
     return false;
   }
   double theValue = 0;
   if (!input[1].EvaluatesToDouble(&theValue)) {
+    return false;
+  }
+  return output.AssignValue(theValue, theCommands);
+}
+
+bool CalculatorFunctions::functionEvaluateToDouble(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("Expression::functionEvaluateToDouble");
+  double theValue = 0;
+  if (!input.EvaluatesToDouble(&theValue)) {
     return false;
   }
   return output.AssignValue(theValue, theCommands);
@@ -6721,8 +6938,8 @@ bool CalculatorFunctions::innerCanBeExtendedParabolicallyTo(
   }
   DynkinType smallType, targetType;
   if (
-    !CalculatorConversions::innerDynkinType(theCommands, input[1], smallType) ||
-    !CalculatorConversions::innerDynkinType(theCommands, input[2], targetType)
+    !CalculatorConversions::functionDynkinType(theCommands, input[1], smallType) ||
+    !CalculatorConversions::functionDynkinType(theCommands, input[2], targetType)
   ) {
     return theCommands << "Failed to convert arguments of " << input.ToString() << " to two DynkinType's.";
   }
@@ -6732,7 +6949,7 @@ bool CalculatorFunctions::innerCanBeExtendedParabolicallyTo(
 bool CalculatorFunctions::innerGetSymmetricCartan(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerGetSymmetricCartan");
   DynkinType theType;
-  if (!CalculatorConversions::innerDynkinType(theCommands, input, theType)) {
+  if (!CalculatorConversions::innerDynkinTypE(theCommands, input, theType)) {
     return theCommands << "Failed to convert " << input.ToString() << " to DynkinType.";
   }
   std::stringstream out;
@@ -6747,8 +6964,9 @@ bool CalculatorFunctions::innerGetSymmetricCartan(Calculator& theCommands, const
 bool CalculatorFunctions::innerGetPrincipalSl2Index(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerGetPrincipalSl2Index");
   DynkinType theType;
-  if (!CalculatorConversions::innerDynkinType(theCommands, input, theType)) {
-    return theCommands << "Failed to convert " << input.ToString() << " to DynkinType.";
+  if (!CalculatorConversions::innerDynkinTypE(theCommands, input, theType)) {
+    return theCommands << "Failed to convert "
+    << input.ToString() << " to DynkinType.";
   }
   return output.AssignValue(theType.GetPrincipalSlTwoCSInverseScale(), theCommands);
 }
@@ -6758,11 +6976,14 @@ bool CalculatorFunctions::innerGetDynkinIndicesSlTwoSubalgebras(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerGetDynkinIndicesSlTwoSubalgebras");
   DynkinType theType;
-  if (!CalculatorConversions::innerDynkinType(theCommands, input, theType)) {
-    return theCommands << "Failed to convert " << input.ToString() << " to DynkinType.";
+  if (!CalculatorConversions::innerDynkinTypE(theCommands, input, theType)) {
+    return theCommands << "Failed to convert "
+    << input.ToString() << " to DynkinType.";
   }
   if (theType.GetRank() > 20) {
-    return theCommands << "Getting absolute Dynkin indices of sl(2)-subalgebras is restricted up to rank 20 "
+    return theCommands
+    << "Getting absolute Dynkin indices of sl(2)-subalgebras "
+    << "is restricted up to rank 20 "
     << "(for computational feasibility reasons). ";
   }
   List<List<Rational> > bufferIndices;
@@ -6843,9 +7064,12 @@ bool CalculatorFunctions::innerWeylDimFormula(Calculator& theCommands, const Exp
     theWeight,
     &newContext,
     theSSowner->GetRank(),
-    CalculatorConversions::innerRationalFunction
+    CalculatorConversions::functionRationalFunction
   )) {
-    return output.MakeError("Failed to convert the argument of the function to a highest weight vector", theCommands);
+    return output.MakeError(
+      "Failed to convert the argument of the function to a highest weight vector",
+      theCommands
+    );
   }
   RationalFunctionOld rfOne;
   rfOne.MakeOne();
@@ -6854,7 +7078,8 @@ bool CalculatorFunctions::innerWeylDimFormula(Calculator& theCommands, const Exp
   newContext.ContextGetFormatExpressions(theFormat);
   theWeightInSimpleCoords = theSSowner->theWeyl.GetSimpleCoordinatesFromFundamental(theWeight);
   theCommands << "<br>Weyl dim formula input: simple coords: "
-  << theWeightInSimpleCoords.ToString(&theFormat) << ", fundamental coords: " << theWeight.ToString(&theFormat);
+  << theWeightInSimpleCoords.ToString(&theFormat)
+  << ", fundamental coords: " << theWeight.ToString(&theFormat);
   RationalFunctionOld tempRF = theSSowner->theWeyl.WeylDimFormulaSimpleCoords(theWeightInSimpleCoords);
   return output.AssignValueWithContext(tempRF, newContext, theCommands);
 }
@@ -6885,7 +7110,11 @@ bool CalculatorFunctions::innerDecomposeFDPartGeneralizedVermaModuleOverLeviPart
   int theDim = ownerSS.GetRank();
   Expression finalContext;
   if (!theCommands.GetVectoR<RationalFunctionOld>(
-    weightNode, theWeightFundCoords, &finalContext, theDim, CalculatorConversions::innerRationalFunction
+    weightNode,
+    theWeightFundCoords,
+    &finalContext,
+    theDim,
+    CalculatorConversions::functionRationalFunction
   )) {
     return output.MakeError("Failed to extract highest weight from the second argument.", theCommands);
   }
@@ -6917,7 +7146,11 @@ bool CalculatorFunctions::innerSplitFDpartB3overG2Init(
     return output.MakeError("Splitting the f.d. part of a B_3-representation over G_2 requires 3 arguments", theCommands);
   }
   if (!theCommands.GetVectorFromFunctionArguments<RationalFunctionOld>(
-    input, theG2B3Data.theWeightFundCoords, &outputContext, 3, CalculatorConversions::innerRationalFunction
+    input,
+    theG2B3Data.theWeightFundCoords,
+    &outputContext,
+    3,
+    CalculatorConversions::functionRationalFunction
   )) {
     output.MakeError("Failed to extract highest weight in fundamental coordinates. ", theCommands);
   }
@@ -6974,7 +7207,7 @@ bool CalculatorFunctions::innerParabolicWeylGroupsBruhatGraph(Calculator& theCom
     parabolicSel,
     hwContext,
     theSSalgPointer,
-    CalculatorConversions::innerRationalFunction
+    CalculatorConversions::functionRationalFunction
   )) {
     return output.MakeError("Failed to extract highest weight vector data", theCommands);
   } else {
@@ -7094,14 +7327,21 @@ bool CalculatorFunctions::innerAllVectorPartitions(Calculator& theCommands, cons
     return theCommands << "<hr>Failed to extract vector from " << theVectorE.ToString();
   }
   Matrix<Rational> vectorsMatForm;
-  if (!theCommands.GetMatrix(thePartitioningVectorsE, vectorsMatForm, nullptr, thePartition.goalVector.size)) {
-    return theCommands << "<hr>Failed to extract list of vectors from " << thePartitioningVectorsE.ToString();
+  if (!theCommands.functionGetMatrix(
+    thePartitioningVectorsE,
+    vectorsMatForm,
+    nullptr,
+    thePartition.goalVector.size
+  )) {
+    return theCommands << "<hr>Failed to extract list of vectors from "
+    << thePartitioningVectorsE.ToString();
   }
   Vectors<Rational> theInputVectors;
   theInputVectors.AssignMatrixRows(vectorsMatForm);
   for (int i = 0; i < theInputVectors.size; i ++) {
     if (!theInputVectors[i].IsPositive()) {
-      return theCommands << "<hr>Input vector " << theInputVectors[i].ToString() << " is non-positive";
+      return theCommands << "<hr>Input vector "
+      << theInputVectors[i].ToString() << " is non-positive";
     }
   }
   if (!thePartition.init(theInputVectors, thePartition.goalVector)) {
@@ -7129,11 +7369,11 @@ bool CalculatorFunctions::innerDeterminant(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerDeterminant");
   Matrix<Rational> matRat;
-  bool isMatRat = input.IsMatrixGivenType(nullptr, nullptr, &matRat);
-  if (!isMatRat) {
-    isMatRat = theCommands.GetMatriXFromArguments(input, matRat, nullptr, 0, nullptr);
+  if (input.size() != 2) {
+    return false;
   }
-  if (isMatRat) {
+  const Expression& argument = input[1];
+  if (theCommands.functionGetMatrix(argument, matRat)) {
     if (matRat.NumRows == matRat.NumCols) {
       if (matRat.NumRows > 100) {
         return theCommands << "<hr>I have been instructed not to compute "
@@ -7146,68 +7386,78 @@ bool CalculatorFunctions::innerDeterminant(
     } else {
       theCommands << "Requesting to compute determinant of the non-square "
       << matRat.NumRows << " by "
-      << matRat.NumCols << " matrix: " << input.ToString();
+      << matRat.NumCols << " matrix: " << argument.ToString();
       return output.MakeError(
         "Requesting to compute determinant of non-square matrix. ", theCommands, true
       );
     }
   }
   Matrix<AlgebraicNumber> matAlg;
-  bool isMatAlg = input.IsMatrixGivenType(nullptr, nullptr, &matAlg);
-  if (!isMatAlg) {
-    isMatAlg = theCommands.GetMatriXFromArguments(input, matAlg, nullptr, 0, nullptr);
-  }
-  if (isMatAlg) {
+  if (theCommands.functionGetMatrix(argument, matAlg)) {
     if (matAlg.NumRows == matAlg.NumCols) {
       if (matAlg.NumRows > 100) {
-        return theCommands << "<hr>I have been instructed not to compute determinants "
+        return theCommands
+        << "<hr>I have been instructed not to compute determinants "
         << "of algebraic number matrices larger than 100 x 100 "
-        << ", and your matrix had " << matAlg.NumRows << " rows. " << "To lift the restriction "
-        << "edit function located in file " << __FILE__ << ", line " << __LINE__ << ". ";
+        << ", and your matrix had " << matAlg.NumRows
+        << " rows. " << "To lift the restriction "
+        << "edit function located in file "
+        << __FILE__ << ", line " << __LINE__ << ". ";
       }
       return output.AssignValue(matAlg.GetDeterminant(), theCommands);
     } else {
       theCommands << "Requesting to compute determinant of the non-square "
       << matRat.NumRows << " by "
-      << matRat.NumCols << " matrix: " << input.ToString();
-      return output.MakeError("Requesting to compute determinant of non-square matrix. ", theCommands, true);
+      << matRat.NumCols << " matrix: " << argument.ToString();
+      return output.MakeError(
+        "Requesting to compute determinant of non-square matrix. ",
+        theCommands,
+        true
+      );
     }
   }
   Matrix<RationalFunctionOld> matRF;
   Expression theContext;
-  if (!input.IsMatrixGivenType(nullptr, nullptr, &matRF)) {
-    if (!theCommands.GetMatriXFromArguments(input, matRF, &theContext, - 1, CalculatorConversions::innerRationalFunction)) {
-      return theCommands << "<hr>I have been instructed to only compute determinants of matrices whose entries are "
-      << " rational functions or rationals, and I failed to convert your matrix to either type. "
-      << " If this is not how you expect this function to act, correct it: the code is located in  "
-      << " file " << __FILE__ << ", line " << __LINE__ << ". ";
-    }
-  } else {
-    theContext = input.GetContext();
+  if (!theCommands.functionGetMatrix(
+      argument,
+      matRF,
+      &theContext,
+      - 1,
+      CalculatorConversions::functionRationalFunction
+  )) {
+    return theCommands
+    << "<hr>I have been instructed to only compute "
+    << "determinants of matrices whose entries are "
+    << "rational functions or rationals, and "
+    << "I failed to convert your matrix to either type. "
+    << "If this is not how you expect this function to act, "
+    << "correct it: the code is located in "
+    << "file " << __FILE__ << ", line " << __LINE__ << ". ";
   }
-  if (matRF.NumRows == matRF.NumCols) {
-    if (matRF.NumRows > 50) {
-      return theCommands << "I have been instructed not to "
-      << "compute determinants of matrices of rational functions larger than "
-      << "50 x 50, and your matrix had " << matRF.NumRows
-      << " rows. To lift the restriction edit function located in file "
-      << __FILE__ << ", line " << __LINE__ << ". ";
-    }
-    RationalFunctionOld theDet = matRF.GetDeterminant();
-    return output.AssignValueWithContext(theDet, theContext, theCommands);
-  } else {
+  if (matRF.NumRows != matRF.NumCols) {
     theCommands << "Requesting to compute determinant of the non-square "
     << matRat.NumRows << " by "
-    << matRat.NumCols << " matrix: " << input.ToString();
+    << matRat.NumCols << " matrix: " << argument.ToString();
     return output.MakeError(
-      "Requesting to compute determinant of non-square matrix given by: " + input.ToString(),
+      "Requesting to compute determinant of non-square matrix given by: " + argument.ToString(),
       theCommands,
       true
     );
   }
+  if (matRF.NumRows > 20) {
+    return theCommands << "I have been instructed not to "
+    << "compute determinants of matrices of rational functions larger than "
+    << "20 x 20, and your matrix had " << matRF.NumRows
+    << " rows. To lift the restriction edit function located in file "
+    << __FILE__ << ", line " << __LINE__ << ". ";
+  }
+  RationalFunctionOld theDet = matRF.GetDeterminant();
+  return output.AssignValueWithContext(theDet, theContext, theCommands);
 }
 
-bool CalculatorFunctions::innerDecomposeCharGenVerma(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctions::innerDecomposeCharGenVerma(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("CalculatorFunctions::innerDecomposeCharGenVerma");
   Expression theContext;
@@ -7223,7 +7473,7 @@ bool CalculatorFunctions::innerDecomposeCharGenVerma(Calculator& theCommands, co
     parSel,
     theContext,
     theSSlieAlg,
-    CalculatorConversions::innerRationalFunction
+    CalculatorConversions::functionRationalFunction
   )) {
    return false;
   }
@@ -7233,7 +7483,8 @@ bool CalculatorFunctions::innerDecomposeCharGenVerma(Calculator& theCommands, co
   std::stringstream out;
   FormatExpressions theFormat;
   theContext.ContextGetFormatExpressions(theFormat);
-  out << "<br>Highest weight: " << theHWfundcoords.ToString(&theFormat) << "<br>Parabolic selection: " << parSel.ToString();
+  out << "<br>Highest weight: " << theHWfundcoords.ToString(&theFormat)
+  << "<br>Parabolic selection: " << parSel.ToString();
   theHWFundCoordsFDPart = theHWfundcoords;
   for (int i = 0; i < parSel.CardinalitySelection; i ++) {
     theHWFundCoordsFDPart[parSel.elements[i]] = 0;
@@ -7256,7 +7507,8 @@ bool CalculatorFunctions::innerDecomposeCharGenVerma(Calculator& theCommands, co
   List<ElementWeylGroup> theWeylElements;
   theSub.GetGroupElementsIndexedAsAmbientGroup(theWeylElements);
   Vector<RationalFunctionOld> currentHW;
-  out << "<br>Orbit modified with small rho: <table><tr><td>Simple coords</td><td>Fund coords</td></tr>";
+  out << "<br>Orbit modified with small rho: "
+  << "<table><tr><td>Simple coords</td><td>Fund coords</td></tr>";
   for (int i = 0; i < theWeyl.theGroup.theElements.size; i ++) {
     currentHW = theHWsimpCoords;
     currentHW += theSub.GetRho();
@@ -7321,7 +7573,9 @@ bool CalculatorFunctions::innerDecomposeCharGenVerma(Calculator& theCommands, co
   return output.AssignValue<std::string>(out.str(), theCommands);
 }
 
-bool CalculatorFunctions::innerPrintGenVermaModule(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctions::innerPrintGenVermaModule(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerPrintGenVermaModule");
   Selection selectionParSel;
   Vector<RationalFunctionOld> theHWfundcoords;
@@ -7335,7 +7589,7 @@ bool CalculatorFunctions::innerPrintGenVermaModule(Calculator& theCommands, cons
     selectionParSel,
     hwContext,
     theSSalgebra,
-    CalculatorConversions::innerRationalFunction
+    CalculatorConversions::functionRationalFunction
   )) {
     return output.MakeError("Failed to extract highest weight vector data", theCommands);
   } else {
@@ -7344,7 +7598,13 @@ bool CalculatorFunctions::innerPrintGenVermaModule(Calculator& theCommands, cons
     }
   }
   if (!theCommands.innerHWVCommon(
-    theCommands, output, theHWfundcoords, selectionParSel, hwContext, theSSalgebra, false
+    theCommands,
+    output,
+    theHWfundcoords,
+    selectionParSel,
+    hwContext,
+    theSSalgebra,
+    false
   )) {
     return output.MakeError("Failed to create Generalized Verma module", theCommands);
   }
@@ -7460,7 +7720,7 @@ bool CalculatorFunctions::innerHWV(Calculator& theCommands, const Expression& in
     selectionParSel,
     hwContext,
     theSSalgebra,
-    CalculatorConversions::innerRationalFunction
+    CalculatorConversions::functionRationalFunction
   )) {
     return output.MakeError("Failed to extract highest weight vector data", theCommands);
   } else {
@@ -7468,7 +7728,14 @@ bool CalculatorFunctions::innerHWV(Calculator& theCommands, const Expression& in
       return true;
     }
   }
-  return theCommands.innerHWVCommon(theCommands, output, theHWfundcoords, selectionParSel, hwContext, theSSalgebra);
+  return theCommands.innerHWVCommon(
+    theCommands,
+    output,
+    theHWfundcoords,
+    selectionParSel,
+    hwContext,
+    theSSalgebra
+  );
 }
 
 bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
@@ -7495,7 +7762,11 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
   Vector<RationalFunctionOld> highestWeightFundCoords;
   Expression hwContext(theCommands);
   if (!theCommands.GetVectoR<RationalFunctionOld>(
-    genVemaWeightNode, highestWeightFundCoords, &hwContext, theRank, CalculatorConversions::innerRationalFunction
+    genVemaWeightNode,
+    highestWeightFundCoords,
+    &hwContext,
+    theRank,
+    CalculatorConversions::functionRationalFunction
   )) {
     return theCommands
     << "Failed to convert the third argument of "
@@ -7748,9 +8019,15 @@ bool CalculatorFunctions::innerHWTAABF(Calculator& theCommands, const Expression
   const Expression& weightExpression = input[3];
   Vector<RationalFunctionOld> weight;
   if (!theCommands.GetVectoR<RationalFunctionOld>(
-    weightExpression, weight, &finalContext, constSSalg.GetRank(), CalculatorConversions::innerRationalFunction
+    weightExpression,
+    weight,
+    &finalContext,
+    constSSalg.GetRank(),
+    CalculatorConversions::functionRationalFunction
   )) {
-    return theCommands << "<hr>Failed to obtain highest weight from the third argument which is " << weightExpression.ToString();
+    return theCommands
+    << "<hr>Failed to obtain highest weight from the third argument which is "
+    << weightExpression.ToString();
   }
   if (!leftMerged.SetContextAtLeastEqualTo(finalContext) || !rightMerged.SetContextAtLeastEqualTo(finalContext)) {
     return output.MakeError(

@@ -1475,8 +1475,12 @@ bool Calculator::innerZmodP(Calculator& theCommands, const Expression& input, Ex
 bool Calculator::innerInterpolatePoly(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerInterpolatePoly");
   Matrix<Rational> pointsOfInterpoly;
-  if (!theCommands.GetMatriXFromArguments(input, pointsOfInterpoly, nullptr, 2)) {
-    return theCommands << "<hr>Failed to extract points of interpolation from " << input.ToString();
+  if (!theCommands.functionGetMatrix(
+    input, pointsOfInterpoly, nullptr, 2
+  )) {
+    return theCommands
+    << "<hr>Failed to extract points of interpolation from "
+    << input.ToString();
   }
   Polynomial<Rational> interPoly;
   Vector<Rational> theArgs, theValues;
@@ -1488,7 +1492,9 @@ bool Calculator::innerInterpolatePoly(Calculator& theCommands, const Expression&
   return output.AssignValueWithContext(interPoly, theContext, theCommands);
 }
 
-bool Calculator::innerPrintZnEnumeration(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::innerPrintZnEnumeration(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("Calculator::innerPrintZnEnumeration");
   if (!input.IsListNElements(3)) {
     return false;
@@ -1916,8 +1922,8 @@ bool Calculator::Test::ProcessResults() {
     currentLine << "<td style = 'min-width:25px;'>" << i << "</td>";
     currentLine << "<td style = 'min-width:200px;'>" << currentTest.functionAdditionalIdentifier
     << "</td>";
-    currentLine << "<td>" << currentTest.atom << "</td>";
-    currentLine << "<td  style = 'min-width:200px;'>" << global.ToStringCalculatorComputation(this->commands.theKeys[i], this->commands.theKeys[i]) << "</td>";
+    currentLine << "<td style = 'min-width:45px;'>" << currentTest.atom << "</td>";
+    currentLine << "<td style = 'min-width:200px;'>" << global.ToStringCalculatorComputation(this->commands.theKeys[i], this->commands.theKeys[i]) << "</td>";
     bool isBad = false;
     bool isUknown = false;
     if (currentTest.actualResult == currentTest.expectedResult) {
@@ -1928,8 +1934,8 @@ bool Calculator::Test::ProcessResults() {
       this->unknown ++;
     } else {
       currentLine << "<td style = 'min-width:100px;'><b style='color:red'>unexpected result</b></td>"
-      << "<td>got: " << currentTest.actualResult << "</td>"
-      << "<td>expected: " << currentTest.expectedResult << "</td>"
+      << "<td class = 'cellCalculatorResult'>got: " << currentTest.actualResult << "</td>"
+      << "<td class = 'cellCalculatorResult'>expected: " << currentTest.expectedResult << "</td>"
       ;
       isBad = true;
       this->inconsistencies ++;
@@ -1958,7 +1964,7 @@ bool Calculator::Test::ProcessResults() {
     << WebAPI::calculator::testFileNameVirtual
     << " and rerun the present test to store the expected results. "
     ;
-    out << "<table>" << badCommands.str() << "</table>";
+    out << "<table class = 'tableCalculatorOutput'>" << badCommands.str() << "</table>";
   }
   if (this->unknown > 0) {
     out << "<b style = 'color:orange'>There were " << this->unknown

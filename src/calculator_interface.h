@@ -236,8 +236,8 @@ private:
   bool IsPowerOfAtomWhoseExponentsAreInterpretedAsFunction() const;
   bool IsAtomNotInterpretedAsFunction(std::string* outputWhichAtom = nullptr) const;
   bool IsMatrix(int* outputNumRows = nullptr, int* outputNumCols = nullptr) const;
-  template <typename theType>
-  bool IsMatrixGivenType(int* outputNumRows = nullptr, int* outputNumCols = nullptr, Matrix<theType>* outputMat = nullptr) const;
+  template<class theType>
+  bool IsMatrixOfType(int* outputNumRows = nullptr, int* outputNumCols = nullptr) const;
 
   bool IsAtom() const;
   bool IsOperationGiven(const std::string& desiredAtom) const;
@@ -2074,7 +2074,10 @@ public:
   static bool innerCancelMultiplicativeInverse(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAssociateExponentExponent(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerAssociateTimesDivision(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerFlattenCommandEnclosuresOneLayer(
+  static bool innerFlattenCommandEnclosuresOneLayeR(
+    Calculator& theCommands, const Expression& input, Expression& output
+  );
+  static bool functionFlattenCommandEnclosuresOneLayer(
     Calculator& theCommands, const Expression& input, Expression& output
   );
   static bool innerMultiplyAtoXtimesAtoYequalsAtoXplusY(
@@ -2112,21 +2115,7 @@ public:
   );
   static bool EvaluateIf(Calculator& theCommands, const Expression& input, Expression& output);
   template<class theType>
-  bool GetMatriXFromArguments(
-    const Expression& theExpression,
-    Matrix<theType>& outputMat,
-    Expression* inputOutputStartingContext = nullptr,
-    int targetNumColsNonMandatory = - 1,
-    Expression::FunctionAddress conversionFunction = nullptr
-  ) {
-    Expression tempE = theExpression;
-    if (tempE.IsLisT()) {
-      tempE.SetChildAtomValue(0, this->opSequence());
-    }
-    return this->GetMatrix(tempE, outputMat, inputOutputStartingContext, targetNumColsNonMandatory, conversionFunction);
-  }
-  template<class theType>
-  bool GetMatrix(
+  bool functionGetMatrix(
     const Expression& input,
     Matrix<theType>& outputMat,
     Expression* inputOutputStartingContext = nullptr,
@@ -2461,7 +2450,7 @@ public:
     ElementSemisimpleLieAlgebra<AlgebraicNumber>& output,
     SemisimpleLieAlgebra& owner
   );
-  static bool innerDynkinType(Calculator& theCommands, const Expression& input, DynkinType& output);
+  static bool innerDynkinTypE(Calculator& theCommands, const Expression& input, DynkinType& output);
   static bool functionDynkinType(Calculator& theCommands, const Expression& input, DynkinType& output);
   static bool innerDynkinSimpleTypE(Calculator& theCommands, const Expression& input, DynkinSimpleType& output);
   static bool functionDynkinSimpleType(Calculator& theCommands, const Expression& input, DynkinSimpleType& output);
@@ -2473,7 +2462,8 @@ public:
   //conversions from expression tree to expression containing type
   template <class coefficient>
   static bool functionPolynomiaL(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerRationalFunction(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerRationalFunctioN(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool functionRationalFunction(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerElementUE(
     Calculator& theCommands, const Expression& input, Expression& output, SemisimpleLieAlgebra& inputOwner
   );
@@ -2481,11 +2471,13 @@ public:
     Calculator& theCommands, const Expression& input, Expression& output
   );
   static bool innerMakeMatrix(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMatrixDouble(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMatrixAlgebraic(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMatrixRational(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool functionMatrixDouble(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool functionMatrixAlgebraic(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool functionMatrixRational(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMatrixRationalFunction(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMatrixRationalTensorForm(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool functionMatrixRationalFunction(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMatrixRationalTensorForM(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool functionMatrixRationalTensorForm(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLoadFileIntoString(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerMakeElementHyperOctahedral(Calculator& theCommands, const Expression& input, Expression& output);
@@ -2580,7 +2572,7 @@ public:
   static bool functionExpressionFromBuiltInType(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerExpressionFromBuiltInTypE(Calculator& theCommands, const Expression& input, Expression& output);
   template <class coefficient>
-  static bool innerExpressionFromPoly(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool functionExpressionFromPoly(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerExpressionFromRF(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerExpressionFromUE(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerExpressionFrom(Calculator& theCommands, const MonomialP& input, Expression& output);
@@ -2622,10 +2614,10 @@ bool Calculator::GetVectoR(
 }
 
 template <class coefficient>
-bool CalculatorConversions::innerExpressionFromPoly(
+bool CalculatorConversions::functionExpressionFromPoly(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromPoly");
+  MacroRegisterFunctionWithName("CalculatorConversions::functionExpressionFromPoly");
   if (!input.IsOfType<Polynomial<coefficient> >()) {
     return false;
   }
@@ -2635,32 +2627,74 @@ bool CalculatorConversions::innerExpressionFromPoly(
 }
 
 template <class theType>
-bool Calculator::GetMatrix(
+bool Expression::IsMatrixOfType(int* outputNumRows, int* outputNumCols) const {
+  if (!this->IsMatrix()) {
+    return false;
+  }
+  if (!(*this)[0].StartsWith(this->owner->opMatriX(), 2)) {
+    return false;
+  }
+  if (!(*this)[0][1].IsOperationGiven(this->GetTypeOperation<theType>())) {
+    return false;
+  }
+  const Expression& rows = (*this)[1];
+  if (!rows.IsSequenceNElementS()) {
+    return false;
+  }
+  if (rows.size() < 2) {
+    return false;
+  }
+  const Expression& firstRow = rows[1];
+  if (!firstRow.IsSequenceNElementS()) {
+    return false;
+  }
+  if (firstRow.size() < 2) {
+    return false;
+  }
+  if (outputNumRows != nullptr) {
+    *outputNumRows = rows.size() - 1;
+  }
+  if (outputNumCols != nullptr) {
+    *outputNumCols = firstRow.size() - 1;
+  }
+  return true;
+}
+
+template <class theType>
+bool Calculator::functionGetMatrix(
   const Expression& input,
   Matrix<theType>& outputMat,
   Expression* inputOutputStartingContext,
   int targetNumColsNonMandatory,
   Expression::FunctionAddress conversionFunction
 ) {
-  MacroRegisterFunctionWithName("Calculator::GetMatrix");
-  Matrix<Expression> nonConvertedEs;
-  if (!this->GetMatrixExpressions(input, nonConvertedEs, - 1, targetNumColsNonMandatory)) {
-    return *this << "Failed to extract matrix of expressions from " << input.ToString();
+  MacroRegisterFunctionWithName("Calculator::functionGetMatrix");
+  Matrix<Expression> nonConvertedEs, convertedEs;
+  if (!this->GetMatrixExpressions(
+    input, nonConvertedEs, - 1, targetNumColsNonMandatory
+  )) {
+    return *this << "Failed to extract matrix of expressions from "
+    << input.ToString();
   }
-  Matrix<Expression> convertedEs;
   convertedEs.init(nonConvertedEs.NumRows, nonConvertedEs.NumCols);
   Expression theContext;
   theContext.MakeEmptyContext(*this);
   if (inputOutputStartingContext != nullptr) {
     if (inputOutputStartingContext->IsContext()) {
-      theContext =*inputOutputStartingContext;
+      theContext = *inputOutputStartingContext;
     }
   }
-  for (int i = 0; i <nonConvertedEs.NumRows; i ++) {
-    for (int j = 0; j<nonConvertedEs.NumCols; j ++) {
-      if (!this->ConvertToTypeUsingFunction<theType>(conversionFunction, nonConvertedEs(i, j), convertedEs(i, j))) {
+  for (int i = 0; i < nonConvertedEs.NumRows; i ++) {
+    for (int j = 0; j < nonConvertedEs.NumCols; j ++) {
+      if (!this->ConvertToTypeUsingFunction<theType>(
+        conversionFunction, nonConvertedEs(i, j), convertedEs(i, j)
+      )) {
         if (!nonConvertedEs(i, j).ConvertToType<theType>(convertedEs.elements[i][j])) {
-          return false;
+          return
+          *this << "Failed to convert matrix element: "
+          << "row: " << i << ", column: "
+          << j << ", expression: "
+          << nonConvertedEs(i, j).ToString() << ". ";
         }
       }
       theContext.ContextMergeContexts(theContext, convertedEs(i, j).GetContext(), theContext);
@@ -2669,7 +2703,12 @@ bool Calculator::GetMatrix(
   for (int i = 0; i < convertedEs.NumRows; i ++) {
     for (int j = 0; j < convertedEs.NumCols; j ++) {
       if (!convertedEs(i, j).::Expression::SetContextAtLeastEqualTo(theContext)) {
-        return false;
+          return
+          *this << "Failed to set context to matrix element: "
+          << "row: " << i << ", column: "
+          << j << ", expression: "
+          << convertedEs.elements[i][j].ToString()
+          << ". ";
       }
     }
   }
@@ -2922,33 +2961,9 @@ bool Expression::AssignMatrix(
       theMatEs(i, j) = currentElt;
     }
   }
-  return this->AssignMatrixExpressions(theMatEs, owner, reduceOneRowToSequenceAndOneByOneToNonMatrix, false);
-}
-
-template <typename theType>
-bool Expression::IsMatrixGivenType(int* outputNumRows, int* outputNumCols, Matrix<theType>* outputMat) const {
-  MacroRegisterFunctionWithName("Expression::IsMatrixGivenType");
-  int numRows = - 1, numCols = - 1;
-  if (outputNumRows == nullptr) {
-    outputNumRows = &numRows;
-  }
-  if (outputNumCols == nullptr) {
-    outputNumCols = &numCols;
-  }
-  if (!this->IsMatrix(outputNumRows, outputNumCols)) {
-    return false;
-  }
-  if (!(*this)[0].StartsWith(this->owner->opMatriX(), 2)) {
-    return false;
-  }
-  if (!(*this)[0][1].IsOperationGiven(this->GetTypeOperation<theType>())) {
-    return false;
-  }
-  if (outputMat == 0) {
-    return true;
-  }
-  this->owner->GetMatrix(*this, *outputMat);
-  return true;
+  return this->AssignMatrixExpressions(
+    theMatEs, owner, reduceOneRowToSequenceAndOneByOneToNonMatrix, false
+  );
 }
 
 template <class coefficient>

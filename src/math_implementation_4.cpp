@@ -445,10 +445,6 @@ std::string GlobalVariables::ToStringCalculatorComputation(
   const std::string& computation,
   const std::string& display
 ) {
-  // global << logger::red
-  // << "DEBUG: working with: computation: " << logger::green
-  // << computation << logger::endL << logger::red
-  // << ", display: " << logger::blue << display << logger::endL;
   std::stringstream out;
   JSData request;
   request[WebAPI::request::requestAPI] = WebAPI::request::compute;

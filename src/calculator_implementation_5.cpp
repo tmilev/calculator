@@ -324,20 +324,38 @@ void MeshTriangles::ComputeImplicitPlot() {
 }
 
 bool Calculator::GetMatrixDoubles(const Expression& input, Matrix<double>& output, int DesiredNumcols) {
-  return this->GetMatrix<double>(
-    input, output, nullptr, DesiredNumcols, CalculatorFunctions::innerEvaluateToDouble
+  return this->functionGetMatrix<double>(
+    input,
+    output,
+    nullptr,
+    DesiredNumcols,
+    CalculatorFunctions::functionEvaluateToDouble
   );
 }
 
-bool Calculator::GetVectorDoubles(const Expression& input, Vector<double>& output, int DesiredDimensionNonMandatory) {
-  return this->GetVectoR(input, output, nullptr, DesiredDimensionNonMandatory, CalculatorFunctions::innerEvaluateToDouble);
+bool Calculator::GetVectorDoubles(
+  const Expression& input,
+  Vector<double>& output,
+  int DesiredDimensionNonMandatory
+) {
+  return this->GetVectoR(
+    input,
+    output,
+    nullptr,
+    DesiredDimensionNonMandatory,
+    CalculatorFunctions::functionEvaluateToDouble
+  );
 }
 
 bool Calculator::GetVectorDoublesFromFunctionArguments(
   const Expression& input, Vector<double>& output, int DesiredDimensionNonMandatory
 ) {
   return this->GetVectorFromFunctionArguments(
-    input, output, nullptr, DesiredDimensionNonMandatory, CalculatorFunctions::innerEvaluateToDouble
+    input,
+    output,
+    nullptr,
+    DesiredDimensionNonMandatory,
+    CalculatorFunctions::functionEvaluateToDouble
   );
 }
 
@@ -453,16 +471,26 @@ bool CalculatorFunctions::innerPlotImplicitFunctionFull(
   return output.AssignValue(theMesh.thePlot, theCommands);
 }
 
-bool CalculatorConversions::innerMatrixDouble(Calculator& theCommands, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorConversions::innerMatrixDouble");
+bool CalculatorConversions::functionMatrixDouble(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorConversions::functionMatrixDouble");
   Matrix<double> theMat;
-  if (!theCommands.GetMatrix(input, theMat, nullptr, 0, CalculatorFunctions::innerEvaluateToDouble)) {
-    return theCommands << "<br>Failed to get matrix of algebraic numbers. ";
+  if (!theCommands.functionGetMatrix(
+    input,
+    theMat,
+    nullptr,
+    0,
+    CalculatorFunctions::functionEvaluateToDouble
+  )) {
+    return theCommands << "<br>Failed to get matrix of doubles. ";
   }
   return output.AssignMatrix(theMat, theCommands);
 }
 
-bool CalculatorFunctions::innerIntegratePullConstant(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctions::innerIntegratePullConstant(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerIntegratePullConstant");
   Expression theFunctionE, theVariableE, theSetE;
   if (!input.IsIndefiniteIntegralfdx(&theVariableE, &theFunctionE, &theSetE)) {
@@ -741,30 +769,38 @@ bool CalculatorFunctions::innerApplyToSubexpressionsRecurseThroughCalculusFuncti
 
 bool CalculatorFunctions::innerNumerator(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerNumerator");
+  if (input.size() != 2) {
+    return false;
+  }
+  const Expression& argument = input[1];
   Rational theRat;
-  if (input.IsRational(&theRat)) {
+  if (argument.IsRational(&theRat)) {
     return output.AssignValue(Rational(theRat.GetNumerator()), theCommands);
   }
-  if (input.StartsWith(theCommands.opDivide())) {
-    if (input.size() > 1) {
-      output = input[1];
+  if (argument.StartsWith(theCommands.opDivide())) {
+    if (argument.size() > 1) {
+      output = argument[1];
       return true;
     }
   }
-  output = input;
+  output = argument;
   return true;
 }
 
 bool CalculatorFunctions::innerDenominator(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerDenominator");
+  if (input.size() != 2) {
+    return false;
+  }
+  const Expression& argument = input[1];
   Rational theRat, theDen;
-  if (input.IsRational(&theRat)) {
+  if (argument.IsRational(&theRat)) {
     theDen = theRat.GetDenominator();
     return output.AssignValue(theDen, theCommands);
   }
-  if (input.StartsWith(theCommands.opDivide())) {
-    if (input.children.size > 2) {
-      output = input[2];
+  if (argument.StartsWith(theCommands.opDivide())) {
+    if (argument.size() > 2) {
+      output = argument[2];
       return true;
     }
   }
@@ -862,11 +898,14 @@ bool CalculatorFunctions::innerSumSequence(
   if (input.StartsWith(theCommands.opLimitBoundary())) {
     return false;
   }
-  if (!input.StartsWith(theCommands.opSum()) && !input.StartsWith(theCommands.opSequence())) {
+  if (
+    !input.StartsWith(theCommands.opSum()) &&
+    !input.StartsWith(theCommands.opSequence())
+  ) {
     return false;
   }
   if (input.size() == 1) {
-    return output.AssignValue(1, theCommands);
+    return output.AssignValue(0, theCommands);
   }
   if (input[1].StartsWith(theCommands.opLimitBoundary())) {
     return false;
@@ -1429,7 +1468,9 @@ bool CalculatorFunctions::innerLogarithmBaseNCeiling(
   if (!input[2].IsIntegerNonNegative(&argument)) {
     return theCommands << "Failed to extract positive intger from second argument. ";
   }
-  int result = argument.LogarithmBaseNCeiling(smallInt);
+  int result = static_cast<int>(
+    argument.LogarithmBaseNCeiling(static_cast<unsigned>(smallInt))
+  );
   return output.AssignValue(result, theCommands);
 }
 

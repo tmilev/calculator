@@ -3321,7 +3321,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "color1 = blue, color2 = cyan, numSegments1 = uSegments, numSegments2 = vSegments\n"
     ") + "
     "PlotSurface(\n"
-    "( x + 2, z, y), u \\in (0, 2 \\pi), v \\ in(- r,r), \n"
+    "( x + 2, z, y), u \\in (0, 2 \\pi), v \\in (- r,r), \n"
     "color1 = red, color2 = pink, numSegments1 = uSegments, numSegments2 = vSegments); ",
     "CalculatorFunctions::innerPlotSurface",
     "PlotSurface",

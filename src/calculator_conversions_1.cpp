@@ -383,16 +383,16 @@ bool CalculatorConversions::innerAlgebraicNumber(Calculator& theCommands, const 
   return false;
 }
 
-bool CalculatorConversions::innerLoadKeysFromStatementList(
+bool CalculatorConversions::innerLoadKeysFromStatementLisT(
   Calculator& theCommands,
   const Expression& input,
   MapList<std::string, Expression, MathRoutines::HashString>& output,
   std::stringstream* commentsOnFailure,
   bool allowFailure
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::innerLoadKeysFromStatementList");
+  MacroRegisterFunctionWithName("CalculatorConversions::innerLoadKeysFromStatementLisT");
   MapList<Expression, Expression> outputExpressionFormat;
-  if (!CalculatorConversions::innerLoadKeysFromStatementList(
+  if (!CalculatorConversions::innerLoadKeysFromStatementLisT(
     theCommands, input, outputExpressionFormat, commentsOnFailure, allowFailure
   )) {
     return false;
@@ -408,14 +408,14 @@ bool CalculatorConversions::innerLoadKeysFromStatementList(
   return true;
 }
 
-bool CalculatorConversions::innerLoadKeysFromStatementList(
+bool CalculatorConversions::innerLoadKeysFromStatementLisT(
   Calculator& theCommands,
   const Expression& input,
   MapList<Expression, Expression>& output,
   std::stringstream* commentsOnFailure,
   bool allowFailure
 ) {
-  MacroRegisterFunctionWithName("CalculatorConversions::innerLoadKeysFromStatementList");
+  MacroRegisterFunctionWithName("CalculatorConversions::innerLoadKeysFromStatementLisT");
   output.Clear();
   for (int i = 1; i < input.size(); i ++) {
     if (input[i].StartsWith(theCommands.opDefine(), 3)) {

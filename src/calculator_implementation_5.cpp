@@ -2144,7 +2144,7 @@ bool CalculatorFunctions::innerPlotSurface(Calculator& theCommands, const Expres
     if (input[i].StartsWith(theCommands.opIn(), 3)) {
       int theIndex = thePlot.variablesInPlay.GetIndex(input[i][1]);
       if (theIndex < 0 || theIndex > 2) {
-        //theIndex>2 should never happen
+        // theIndex > 2 should never happen
         continue;
       }
       if (input[i][2].size() != 3) {
@@ -2165,7 +2165,9 @@ bool CalculatorFunctions::innerPlotSurface(Calculator& theCommands, const Expres
     }
   }
   MapList<std::string, Expression, MathRoutines::HashString> theKeys;
-  if (CalculatorConversions::innerLoadKeysFromStatementList(theCommands, input, theKeys, &theCommands.Comments, true)) {
+  if (CalculatorConversions::innerLoadKeysFromStatementLisT(
+    theCommands, input, theKeys, &theCommands.Comments, true
+  )) {
     if (theKeys.Contains("color1")) {
       thePlot.colorUV = theKeys.GetValueCreate("color1").ToString();
     }

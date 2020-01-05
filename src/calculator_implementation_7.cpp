@@ -6090,7 +6090,9 @@ bool CalculatorFunctions::innerPlotViewWindow(
     widthHeight[0] = 100;
     widthHeight[1] = 100;
     MapList<std::string, Expression, MathRoutines::HashString> theMap;
-    if (!CalculatorConversions::innerLoadKeysFromStatementList(theCommands, input, theMap, nullptr, false)) {
+    if (!CalculatorConversions::innerLoadKeysFromStatementLisT(
+      theCommands, input, theMap, nullptr, false
+    )) {
       isGood = false;
     } else {
       if (theMap.Contains("width")) {

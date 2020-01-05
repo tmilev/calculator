@@ -2500,14 +2500,14 @@ public:
   static bool innerLoadKey(
     Calculator& theCommands, const Expression& inputStatementList, const std::string& inputKey, Expression& output
   );
-  static bool innerLoadKeysFromStatementList(
+  static bool innerLoadKeysFromStatementLisT(
     Calculator& theCommands,
     const Expression& input,
     MapList<std::string, Expression, MathRoutines::HashString>& output,
     std::stringstream* commentsOnFailure = nullptr,
     bool allowFailure = false
   );
-  static bool innerLoadKeysFromStatementList(
+  static bool innerLoadKeysFromStatementLisT(
     Calculator& theCommands,
     const Expression& input,
     MapList<Expression, Expression>& output,

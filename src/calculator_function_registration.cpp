@@ -4199,7 +4199,10 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctions::innerSort,
     "",
     "Sorts a sequence. ",
-    "Sort(x^2, x^3, x^1, x^{- 1}) ",
+    "Sort(x^2, x^3, x^1, x^{- 1});\n"
+    "Sort(3,2,1,4,3);\n"
+    "Sort((3,2,3,1));\n"
+    "Sort{}((3,2,3,1));\n",
     "CalculatorFunctions::innerSort",
     "Sort",
     innerStandard

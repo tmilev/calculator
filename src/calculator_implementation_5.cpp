@@ -987,16 +987,21 @@ bool CalculatorFunctions::innerRemoveDuplicates(Calculator& theCommands, const E
 
 bool CalculatorFunctions::innerSort(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSort");
-  if (
-    !input.IsListStartingWithAtom(theCommands.operations.GetIndexIMustContainTheObject("Sort")) &&
-    !input.IsSequenceNElementS()
-  ) {
+  if (!input.IsListStartingWithAtom(
+    theCommands.operations.GetIndexIMustContainTheObject("Sort")
+  )) {
     return false;
   }
   List<Expression> sortedExpressions;
-  sortedExpressions.Reserve(input.size() - 1);
-  for (int i = 1; i < input.size(); i ++) {
-    sortedExpressions.AddOnTop(input[i]);
+  const Expression* toBeSorted = &input;
+  if (input.size() == 2) {
+    if (input[1].IsSequenceNElementS()) {
+      toBeSorted = &(input[1]);
+    }
+  }
+  sortedExpressions.Reserve(toBeSorted->size() - 1);
+  for (int i = 1; i < toBeSorted->size(); i ++) {
+    sortedExpressions.AddOnTop((*toBeSorted)[i]);
   }
   sortedExpressions.QuickSortAscending();
   return output.MakeSequence(theCommands, &sortedExpressions);

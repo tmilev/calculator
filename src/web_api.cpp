@@ -81,8 +81,8 @@ bool WebAPIResponse::ServeResponseFalseIfUnrecognized(
   } else if (global.userCalculatorRequestType == WebAPI::request::logout) {
     return this->ProcessLogout();
   } else if ((
-      global.userCalculatorRequestType == "addEmails"||
-      global.userCalculatorRequestType == "addUsers"
+      global.userCalculatorRequestType == WebAPI::request::addEmails ||
+      global.userCalculatorRequestType == WebAPI::request::addUsers
     ) &&
     global.flagLoggedIn
   ) {
@@ -670,4 +670,3 @@ bool WebAPIResponse::ProcessSubmitAnswers() {
   this->owner->SetHeaderOKNoContentLength("");
   return this->owner->WriteToBodyJSON(WebAPIResponse::SubmitAnswersJSON());
 }
-

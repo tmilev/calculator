@@ -54,6 +54,10 @@ public:
     static std::string logout;
     static std::string signUp;
     static std::string currentPage;
+    static std::string addUsers;
+    static std::string addEmails;
+    static std::string userList;
+    static std::string passwordList;
   };
   struct result {
     static std::string resultHtml;
@@ -202,6 +206,8 @@ public:
   static std::string labelPageActivateAccount;
   static std::string labelCalculatorRequest;
   static std::string labelCalculatorInput;
+  // errors
+  static std::string errorDatabaseDisableD;
 };
 
 #endif

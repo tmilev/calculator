@@ -2,6 +2,7 @@
 const submitRequests = require("./submit_requests");
 const ids = require("./ids_dom_elements");
 const pathnames = require("./pathnames");
+const miscellaneous = require("./miscellaneous");
 
 function getAccountsTable(inputAccounts) {
   var result = "";
@@ -47,11 +48,15 @@ function updateAccountsPageCallback(input, notUsed) {
   var outputComponentStudents = document.getElementById("idOutputStudents");
   var parsedUserInfo = null;
   try {
-    parsedUserInfo = JSON.parse(input);
+    parsedUserInfo =  miscellaneous.jsonUnescapeParse(input);
     var admins = parsedUserInfo["admins"];
     var students = parsedUserInfo["students"];
-    outputComponentAdmin.innerHTML = getAccountsTable(admins);
-    outputComponentStudents.innerHTML = getAccountsTable(students);
+    if (parsedUserInfo.error !== undefined && parsedUserInfo.error !== "") {
+      outputComponentAdmin.innerHTML = parsedUserInfo.error;
+    } else {
+      outputComponentAdmin.innerHTML = getAccountsTable(admins);
+      outputComponentStudents.innerHTML = getAccountsTable(students);
+    }
   } catch (e) {
     outputComponentStudents.innerHTML = e;
     console.log(e);
@@ -62,7 +67,7 @@ function callbackAddEmailsOrUsers(input, outputComponent) {
   if (typeof outputComponent == "string") {
     outputComponent = document.getElementById(outputComponent);
   }
-  outputComponent.innerHTML = decodeURIComponent(input);
+  outputComponent.innerHTML = miscellaneous.jsonParseGetHtmlStandard(decodeURIComponent(input));
 }
 
 function addEmailsOrUsers(

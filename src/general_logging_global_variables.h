@@ -200,7 +200,6 @@ public:
   bool flagCrashInitiated;
 
   bool flagDatabaseCompiled;
-  bool flagDatabaseUseFallback;
   bool flagDisableDatabaseLogEveryoneAsAdmin;
   bool flagServerAutoMonitor;
 

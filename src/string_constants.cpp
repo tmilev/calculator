@@ -90,6 +90,10 @@ std::string WebAPI::request::slidesFromSource             = "slidesFromSource"  
 std::string WebAPI::request::homeworkFromSource           = "homeworkFromSource"          ;
 std::string WebAPI::request::slidesSource                 = "slidesSource"                ;
 std::string WebAPI::request::homeworkSource               = "homeworkSource"              ;
+std::string WebAPI::request::addUsers                     = "addUsers"                    ;
+std::string WebAPI::request::addEmails                    = "addEmails"                   ;
+std::string WebAPI::request::userList                     = "userList"                    ;
+std::string WebAPI::request::passwordList                 = "passwordList"                ;
 
 std::string WebAPI::UserInfo::processMonitoring = "processMonitoring";
 
@@ -145,6 +149,8 @@ std::string DatabaseStrings::labelCalculatorRequest   = "calculatorRequest";
 std::string DatabaseStrings::labelCalculatorInput     = "calculatorInput"  ;
 std::string DatabaseStrings::labelPageAccount         = "account"          ;
 std::string DatabaseStrings::labelPageActivateAccount = "activateAccount"  ;
+
+std::string DatabaseStrings::errorDatabaseDisableD    = "Database disabled explicitly by server configuration. ";
 
 std::string Configuration::processMonitoringBanned                  = "processMonitoringBanned"                 ;
 std::string Configuration::monitorPingTime                          = "monitorPingTime"                         ;

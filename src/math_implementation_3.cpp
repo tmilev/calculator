@@ -153,7 +153,6 @@ GlobalVariables::GlobalVariables() {
   this->flagRunServerOnEmptyCommandLine = false;
   this->flagRequestComingLocally = false;
   this->flagDatabaseCompiled = false;
-  this->flagDatabaseUseFallback = false;
   this->flagServerAutoMonitor = true;
   this->flagDisableDatabaseLogEveryoneAsAdmin = false;
 

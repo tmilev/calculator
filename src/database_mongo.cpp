@@ -593,6 +593,12 @@ bool Database::FindFromJSONWithOptions(
   std::stringstream* commentsGeneralNonSensitive
 ) {
   MacroRegisterFunctionWithName("Database::FindFromJSONWithOptions");
+  if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Database::FindFromJSONWithOptions fail. " << DatabaseStrings::errorDatabaseDisableD;
+    }
+    return false;
+  }
   (void) commentsGeneralNonSensitive;
 #ifdef MACRO_use_MongoDB
   global << logger::blue << "Query input JSON: " << findQuery.ToString(nullptr) << logger::endL;

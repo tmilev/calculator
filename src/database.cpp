@@ -297,12 +297,11 @@ bool Database::UpdateOne(
   }
   if (global.flagDatabaseCompiled) {
     return this->mongoDB.UpdateOne(findQuery, dataToMerge, commentsOnFailure);
-  } else if (global.flagDatabaseUseFallback) {
+  } else if (!global.flagDisableDatabaseLogEveryoneAsAdmin) {
     return this->theFallBack.UpdateOne(findQuery, dataToMerge, commentsOnFailure);
   }
-
   if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "UpdateOne fail: no DB compiled and fallback is disabled. ";
+    *commentsOnFailure << "Database::UpdateOne fail: no DB compiled and fallback is disabled. ";
   }
   return false;
 }
@@ -314,11 +313,12 @@ bool Database::FindOneFromSome(
 ) {
   if (global.flagDatabaseCompiled) {
     return this->mongoDB.FindOneFromSome(findOrQueries, output, commentsOnFailure);
-  } else if (global.flagDatabaseUseFallback) {
+  } else if (!global.flagDisableDatabaseLogEveryoneAsAdmin) {
     return this->theFallBack.FindOneFromSome(findOrQueries, output, commentsOnFailure);
   } else {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Find one from some failed: fallback database disabled. ";
+      *commentsOnFailure << "Database::FindOneFromSome failed. "
+      << DatabaseStrings::errorDatabaseDisableD;
     }
     return false;
   }
@@ -335,9 +335,10 @@ bool Database::DeleteDatabase(std::stringstream* commentsOnFailure) {
 void Database::CreateHashIndex(
   const std::string& collectionName, const std::string& theKey
 ) {
+  MacroRegisterFunctionWithName("Database::CreateHashIndex");
   if (global.flagDatabaseCompiled) {
     this->mongoDB.CreateHashIndex(collectionName, theKey);
-  } else if (global.flagDatabaseUseFallback) {
+  } else if (!global.flagDisableDatabaseLogEveryoneAsAdmin) {
     this->theFallBack.CreateHashIndex(collectionName, theKey);
   }
 }
@@ -372,7 +373,6 @@ bool Database::initializeServer() {
   if (global.flagDatabaseCompiled) {
     return true;
   }
-  global.flagDatabaseUseFallback = true;
   global << logger::red << "Calculator compiled without (mongoDB) database support. "
   << logger::green << "Using " << logger::red
   << "**SLOW** " << logger::green << "fall-back JSON storage." << logger::endL;
@@ -1294,7 +1294,8 @@ bool Database::User::AddUsersFromEmails(
   StringRoutines::StringSplitDefaultDelimiters(userPasswords, thePasswords);
   if (thePasswords.size > 0) {
     if (thePasswords.size != theEmails.size) {
-      comments << "Different number of usernames/emails and passwords: " << theEmails.size << " emails and "
+      comments << "Different number of usernames/emails and passwords: "
+      << theEmails.size << " emails and "
       << thePasswords.size << " passwords. "
       << "If you want to enter usernames without password, you need to leave the password input box empty. ";
       return false;

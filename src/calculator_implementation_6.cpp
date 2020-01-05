@@ -337,12 +337,13 @@ bool CalculatorHTML::Test::BuiltIn(
     currentTest.fileName = "problems/" + this->fileNames[i];
     currentTest.randomSeed = this->randomSeed;
     std::stringstream reportStream;
-    reportStream << "Interpreting file "
-    << currentTest.fileName << " ("
+    reportStream << "File: "
     << i
     << " out of "
     << this->fileNames.size
-    << "). Random seed: "
+    << ". "
+    << currentTest.fileName
+    << ". Random seed: "
     << this->randomSeed << ".";
     if (global.flagRunningConsoleTest) {
       global << reportStream.str() << logger::endL;

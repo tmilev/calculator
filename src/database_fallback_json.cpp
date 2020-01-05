@@ -38,11 +38,11 @@ bool Database::FallBack::UpdateOne(
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("DatabaseFallback::UpdateOneFromQueryString");
-  if (!global.flagDatabaseUseFallback) {
+  if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
-      << "DatabaseFallback::UpdateOneFromQueryString: "
-      << "fallback db disabled and project compiled without mongoDB support. ";
+      << "Database::FallBack::UpdateOne failed. "
+      << DatabaseStrings::errorDatabaseDisableD;
     }
     return false;
   }

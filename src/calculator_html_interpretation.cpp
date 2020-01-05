@@ -782,7 +782,7 @@ void WebAPIResponse::GetJSDataUserInfo(JSData& outputAppend, const std::string& 
   MacroRegisterFunctionWithName("WebAPIReponse::GetJSDataUserInfo");
   outputAppend["linkApp"] = WebAPIResponse::youHaveReachedTheBackend;
   outputAppend[WebAPI::result::loginDisabledEveryoneIsAdmin] = global.flagDisableDatabaseLogEveryoneAsAdmin;
-  outputAppend[WebAPI::result::useFallbackDatabase] = global.flagDatabaseUseFallback;
+  outputAppend[WebAPI::result::useFallbackDatabase] = !global.flagDatabaseCompiled;
   if (comments != "") {
     outputAppend[WebAPI::result::comments] = HtmlRoutines::ConvertStringToHtmlString(comments, false);
   }
@@ -1362,12 +1362,19 @@ std::string WebAPIResponse::AddUserEmails(const std::string& hostWebAddressWithP
   MacroRegisterFunctionWithName("WebAPIReponse::AddUserEmails");
   (void) hostWebAddressWithPort;
   std::stringstream out;
-  if (!global.UserDefaultHasAdminRights() || !global.flagUsingSSLinCurrentConnection) {
+  if (
+    !global.UserDefaultHasAdminRights() ||
+    !global.flagUsingSSLinCurrentConnection
+  ) {
     out << "<b>Only admins may add users, under ssl connection. </b>";
     return out.str();
   }
-  std::string inputEmails = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("userList"), false);
-  std::string userPasswords = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("passwordList"), false);
+  std::string inputEmails = HtmlRoutines::ConvertURLStringToNormal(
+    global.GetWebInput(WebAPI::request::userList), false
+  );
+  std::string userPasswords = HtmlRoutines::ConvertURLStringToNormal(
+    global.GetWebInput(WebAPI::request::passwordList), false
+  );
   std::string userGroup =
   StringRoutines::StringTrimWhiteSpace(HtmlRoutines::ConvertURLStringToNormal(
     global.GetWebInput(DatabaseStrings::labelSection), false
@@ -1375,11 +1382,8 @@ std::string WebAPIResponse::AddUserEmails(const std::string& hostWebAddressWithP
   std::string userRole = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("userRole"), false);
 
   if (inputEmails == "") {
-    out << "<b>No emails to add</b>";
+    out << "AddUserEmails failed: <b>No emails to add</b>";
     return out.str();
-  }
-  if (!global.flagDatabaseCompiled) {
-    return "<b>no database present.</b>";
   }
   std::stringstream comments;
   bool sentEmails = true;
@@ -1394,18 +1398,18 @@ std::string WebAPIResponse::AddUserEmails(const std::string& hostWebAddressWithP
     << numNewUsers << " new users and " << numUpdatedUsers
     << " user updates. </span> User roles: " << userRole;
   } else
-    out << "<span style =\"color:red\">Failed to add all users.</span>"
+    out << "<b style = 'color:red'>Failed to add all users.</b>"
     << " Errors follow. <hr>"
     << comments.str() << "<hr>";
   if (doSendEmails) {
     if (sentEmails) {
-      out << "<span style =\"color:green\">"
+      out << "<b style = 'color:green'>"
       << "Activation emails successfully sent. "
-      << "</span>";
+      << "</b>";
     } else {
-      out << "<span style =\"color:red\">"
+      out << "<b style ='color:red'>"
       << "Failed to send all activation emails. "
-      << "</span>";
+      << "</b>";
     }
   }
   return out.str();
@@ -1621,8 +1625,8 @@ JSData WebAPIResponse::GetAccountsPageJSON(const std::string& hostWebAddressWith
   MacroRegisterFunctionWithName("WebAPIReponse::GetAccountsPageJSON");
   (void) hostWebAddressWithPort;
   JSData output;
-  if (!global.flagDatabaseCompiled) {
-    output[WebAPI::result::error] = "Database not available (cannot get accounts). ";
+  if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
+    output[WebAPI::result::error] = "Database disabled (cannot get accounts). ";
     return output;
   }
   if (

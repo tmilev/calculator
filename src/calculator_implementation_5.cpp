@@ -1023,13 +1023,17 @@ bool CalculatorFunctions::innerSortDescending(
 
 bool CalculatorFunctions::innerLength(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerLength");
-  if (
-    input.IsListStartingWithAtom(theCommands.operations.GetIndexIMustContainTheObject("Length")) ||
-    input.IsSequenceNElementS()
-  ) {
-    return output.AssignValue(input.children.size - 1, theCommands);
+  if (!input.IsListStartingWithAtom(
+    theCommands.operations.GetIndexIMustContainTheObject("Length")
+  )) {
+    return false;
   }
-  return false;
+  if (input.size() == 2) {
+    if (input[1].IsSequenceNElementS()) {
+      return output.AssignValue(input[1].size() - 1, theCommands);
+    }
+  }
+  return output.AssignValue(input.size() - 1, theCommands);
 }
 
 bool CalculatorFunctions::innerEnsureExpressionDependsOnlyOnMandatoryVariables(
@@ -2941,7 +2945,8 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionLaTeXSlide() {
         this->uncoverAllMonsSubtracands[i],
         true
       );
-      out << "\\\\\\cline{" << this->firstNonZeroIndicesPerIntermediateSubtracand[i] * 2 + 2
+      out << "\\\\\\cline{"
+      << this->firstNonZeroIndicesPerIntermediateSubtracand[i] * 2 + 2
       << "-" << this->allMonomials.size * 2 + 1 << "}";
       out << "}";
     }
@@ -2965,7 +2970,9 @@ bool CalculatorFunctions::innerPolynomialDivisionSlidesGrLex(
     return output.MakeError("Failed to extract list of polynomials. ", theCommands);
   }
   if (thePolys.size < 3) {
-    return theCommands << "Function takes at least 3 inputs: index of first slide, dividend, divisor(s).";
+    return theCommands
+    << "Function takes at least 3 inputs: "
+    << "index of first slide, dividend, divisor(s).";
   }
   GroebnerBasisComputation<Rational> theGB;
   theGB.flagDoLogDivision = true;

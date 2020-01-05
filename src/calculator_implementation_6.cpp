@@ -54,13 +54,13 @@ std::string CalculatorHTML::Test::OneProblemTest::ToStringHTMLTableRow(int rowIn
   MacroRegisterFunctionWithName("CalculatorHTML::Test::OneProblemTest::ToStringHTMLTableRow");
   std::stringstream out;
   out << "<tr>";
-  out << "<td>" << rowIndex << ". </td>";
+  out << "<td style = 'min-width:25px'>" << rowIndex << ". </td>";
   JSData request;
   request["problemFileName"] = this->fileName;
   request[WebAPI::problem::fileName] = this->fileName;
   request[WebAPI::problem::randomSeed] = this->randomSeed;
   request["currentPage"] = "problemPage";
-  out << "<td>"
+  out << "<td style = 'min-width:200px'>"
   << "<a href='" << global.DisplayNameExecutableAppNoCache
   << "#"
   << request.ToString()
@@ -69,27 +69,27 @@ std::string CalculatorHTML::Test::OneProblemTest::ToStringHTMLTableRow(int rowIn
   << "</a>"
   << "</td>";
   if (this->errorLoad != "") {
-    out << "<td><b>Couldn't load.</b> "
+    out << "<td style = 'min-width:300px'><b>Couldn't load.</b> "
     << this->errorLoad << "</td>";
     out << "</tr>";
     return out.str();
   }
-  out << "<td><b style = 'color:green'>Success</b></td>";
+  out << "<td style = 'min-width:60px'><b style = 'color:green'>Success</b></td>";
   if (!this->flagInterpretationSuccess) {
-    out << "<td><b style ='color:red'>Failure.</b> "
+    out << "<td style = 'min-width:400px'><b style ='color:red'>Failure.</b> "
     << "Comments: " << this->errorInterpretation;
     out << "</td></tr>";
     return out.str();
   }
-  out << "<td><b style = 'color:green'>Success</b></td>";
+  out << "<td style = 'min-width:60px'><b style = 'color:green'>Success</b></td>";
   if (this->answers.size == 0) {
     out << "<td><b style = 'color:red'>No built-in answer.</b></td>";
   } else {
     if (this->flagAllBuiltInAnswersOK) {
-      out << "<td><b style = 'color:green'>Success</b></td>";
+      out << "<td style = 'min-width:60px'><b style = 'color:green'>Success</b></td>";
     } else {
-      out << "<td><b style = 'color:red'>Failure.</b></td>";
-      out << "<td>";
+      out << "<td style = 'min-width:60px'><b style = 'color:red'>Failure.</b></td>";
+      out << "<td style = 'min-width:400px'>";
       for (int i = 0; i < this->answers.size; i ++) {
         out << this->answers[i].builtInAnswer;
       }

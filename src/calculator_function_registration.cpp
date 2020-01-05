@@ -4029,7 +4029,13 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctions::innerLength,
     "",
     "Returns the length of a sequence. ",
-    "Length(a, b)",
+    "Length{}();\n"
+    "Length(a, b);\n"
+    "Length{}((a,b));\n"
+    "Length{}(a,b);\n"
+    "Length{}(a);\n"
+    "Length{}(Sequence{}a);\n"
+    "Length{}(Sequence{}(a,b));\n",
     "CalculatorFunctions::innerLength",
     "Length",
     innerStandard

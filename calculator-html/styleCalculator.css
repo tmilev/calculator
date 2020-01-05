@@ -14,7 +14,10 @@
 calculatorExampleInfo {
   display: block;
   transition: all 1s;
+  word-break: normal;
+  white-space: normal;
   opacity: 1;
+  max-width: 500px;
 }
 
 calculatorAtom {

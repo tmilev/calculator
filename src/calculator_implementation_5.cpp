@@ -1018,9 +1018,15 @@ bool CalculatorFunctions::innerSortDescending(
     return false;
   }
   List<Expression> sortedExpressions;
-  sortedExpressions.Reserve(input.children.size - 1);
-  for (int i = 1; i < input.children.size; i ++) {
-    sortedExpressions.AddOnTop(input[i]);
+  const Expression* toBeSorted = &input;
+  if (input.size() == 2) {
+    if (input[1].IsSequenceNElementS()) {
+      toBeSorted = &(input[1]);
+    }
+  }
+  sortedExpressions.Reserve(toBeSorted->size() - 1);
+  for (int i = 1; i < toBeSorted->size(); i ++) {
+    sortedExpressions.AddOnTop((*toBeSorted)[i]);
   }
   sortedExpressions.QuickSortDescending();
   return output.MakeSequence(theCommands, &sortedExpressions);

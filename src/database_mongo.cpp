@@ -615,7 +615,9 @@ bool Database::FindFromJSONWithOptions(
   query.collectionName = collectionName;
   query.findQuery = findQuery.ToString(nullptr);
   query.maxOutputItems = maxOutputItems;
-  bool result = query.FindMultiple(output, options, commentsOnFailure, commentsGeneralNonSensitive);
+  bool result = query.FindMultiple(
+    output, options.ToJSON(), commentsOnFailure, commentsGeneralNonSensitive
+  );
   if (totalItems != nullptr) {
     *totalItems = query.totalItems;
   }
@@ -745,7 +747,9 @@ bool Database::FindOneFromQueryStringWithOptions(
   query.findQuery = findQuery;
   query.maxOutputItems = 1;
   List<JSData> outputList;
-  query.FindMultiple(outputList, options, commentsOnFailure, commentsGeneralNonSensitive);
+  query.FindMultiple(
+    outputList, options.ToJSON(), commentsOnFailure, commentsGeneralNonSensitive
+  );
   if (outputList.size == 0) {
     return false;
   }
@@ -929,7 +933,7 @@ bool Database::DeleteOneEntryById(
 }
 
 bool Database::DeleteOneEntryUnsetUnsecure(
-  const QueryExact &findQuery,
+  const QueryExact& findQuery,
   List<std::string>& selector,
   std::stringstream* commentsOnFailure
 ) {
@@ -938,12 +942,13 @@ bool Database::DeleteOneEntryUnsetUnsecure(
 
   std::string selectorString = QueryExact::getLabelFromNestedLabels(selector);
   JSData foundItem;
-  List<std::string> selectorsCombined;
-  selectorsCombined.AddOnTop(selectorString);
+  QueryResultOptions options;
+  options.fieldsToProjectTo.AddListOnTop(selector);
+  options.fieldsToProjectTo.AddOnTop(selectorString);
   bool didFindItem = FindOneFromJSONWithProjection(
     findQuery.collection,
     findQuery.ToJSON(),
-    selectorsCombined,
+    options,
     foundItem,
     commentsOnFailure
   );

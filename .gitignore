@@ -19,6 +19,7 @@ LogFiles*
 
 database-backups*
 database_fallback/*
+test/test_database.json
 
 bin/*
 calculator

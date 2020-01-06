@@ -1697,10 +1697,7 @@ bool EmailRoutines::IsOKEmail(const std::string& input, std::stringstream* comme
 }
 
 EmailRoutines::EmailRoutines() {
-  this->fromEmail = "calculator.todor.milev@gmail.com";
-  //this->ccEmail ="todor.milev@gmail.com";
   this->smtpWithPort = "smtp.gmail.com:587";
-  this->fromEmailAuth = Crypto::ConvertStringToBase64URL("A good day to use a computer algebra system");
 }
 
 bool Database::User::LoginViaGoogleTokenCreateNewAccountIfNeeded(
@@ -1715,7 +1712,7 @@ bool Database::User::LoginViaGoogleTokenCreateNewAccountIfNeeded(
   if (!global.flagDatabaseCompiled) {
     return Database::User::LoginNoDatabaseSupport(theUseR, commentsGeneral);
   }
-  MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeeded");
+  MacroRegisterFunctionWithName("Database::User::LoginViaGoogleTokenCreateNewAccountIfNeeded");
   UserCalculator userWrapper;
   userWrapper.::UserCalculatorData::operator=(theUseR);
   if (userWrapper.enteredGoogleToken == "") {

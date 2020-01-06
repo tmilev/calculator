@@ -8,8 +8,8 @@
 static ProjectInformationInstance projectInfoDatabaseFallbackJSON(__FILE__, "No-database fallback using json file.");
 std::string Database::FallBack::databaseFilename = "database_fallback/database.json";
 
-
 bool Database::FallBack::DeleteDatabase(std::stringstream* commentsOnFailure) {
+  this->reader.reset(JSData::token::tokenObject);
   if (!FileOperations::WriteFileVirual(Database::FallBack::databaseFilename, "{}", commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to delete database. ";
@@ -271,7 +271,7 @@ bool Database::FallBack::ReadAndIndexDatabase(std::stringstream* commentsOnFailu
       this->IndexOneRecord(currentCollection.theList[i], i, collection);
     }
   }
-  global << "Database indexed. " << this->ToStringIndices() << logger::endL;
+  // global << "Database indexed. " << this->ToStringIndices() << logger::endL;
   return true;
 }
 
@@ -307,13 +307,13 @@ bool Database::FallBack::StoreDatabase(std::stringstream* commentsOnFailure) {
 bool Database::FallBack::ReadDatabase(std::stringstream* commentsOnFailure) {
   std::string theDatabase;
   if (!FileOperations::LoadFileToStringVirtual(
-    "database_fallback/database.json", theDatabase, true, commentsOnFailure
+    Database::FallBack::databaseFilename, theDatabase, true, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Database load failed. ";
     }
     if (!FileOperations::FileExistsVirtual(
-      "database_fallback/database.json",
+      Database::FallBack::databaseFilename,
       true,
       false,
       commentsOnFailure
@@ -324,5 +324,6 @@ bool Database::FallBack::ReadDatabase(std::stringstream* commentsOnFailure) {
     }
     return false;
   }
+  global << "Database size: " << logger::blue << theDatabase.size() << logger::endL;
   return this->reader.readstring(theDatabase, commentsOnFailure);
 }

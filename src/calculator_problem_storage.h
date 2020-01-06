@@ -179,8 +179,6 @@ class EmailRoutines {
 public:
   std::string subject;
   std::string ccEmail;
-  std::string fromEmail;
-  std::string fromEmailAuth;
   std::string toEmail;
   std::string emailContent;
   std::string smtpWithPort;

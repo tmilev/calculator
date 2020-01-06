@@ -16,6 +16,7 @@ Database::Test::~Test() {
 void Database::Test::SetUp() {
   global.flagServerForkedIntoWorker = true;
   DatabaseStrings::theDatabaseName = "calculatortest";
+  Database::FallBack::databaseFilename = "test/test_database.json";
 }
 
 void Database::Test::TearDown() {

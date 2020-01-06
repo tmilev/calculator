@@ -11,11 +11,11 @@
 
 static ProjectInformationInstance projectInfoDatabaseMongoCPP(__FILE__, "Database mongoDB.");
 
-JSData Database::GetStandardProjectors() {
-  JSData result;
-  JSData userProjector;
-  userProjector[DatabaseStrings::labelProblemDataJSON] = 0;
-  result[DatabaseStrings::tableUsers]["projection"] = userProjector;
+QueryResultOptions Database::GetStandardProjectors(const std::string& collectionName) {
+  QueryResultOptions result;
+  if (collectionName == DatabaseStrings::tableUsers) {
+    result.fieldsProjectedAway.AddOnTop(DatabaseStrings::labelProblemDataJSON);
+  }
   return result;
 }
 
@@ -531,17 +531,19 @@ bool Database::FindFromString(
   (void) totalItems;
   return false;
 #endif
-
 }
 
-JSData Database::GetProjectionFromFieldNames(
-  const List<std::string>& fieldsToProjectTo, int offset
-) {
-  MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::GetProjectionFromFieldNames");
-  JSData result;
-  JSData fields;
-  for (int i = offset; i < fieldsToProjectTo.size; i ++) {
-    fields[fieldsToProjectTo[i]] = 1;
+void QueryResultOptions::MakeProjection(const List<std::string>& fields) {
+  this->fieldsToProjectTo = fields;
+}
+
+JSData QueryResultOptions::ToJSON() const {
+  JSData result, fields;
+  for (int i = 0; i < this->fieldsToProjectTo.size; i ++) {
+    fields[this->fieldsToProjectTo[i]] = 1;
+  }
+  for (int i = 0; i < this->fieldsProjectedAway.size; i ++) {
+    fields[this->fieldsProjectedAway[i]] = 0;
   }
   result["projection"] = fields;
   return result;
@@ -556,11 +558,13 @@ bool Database::FindFromJSONWithProjection(
   long long* totalItems,
   std::stringstream* commentsOnFailure
 ) {
+  QueryResultOptions options;
+  options.MakeProjection(fieldsToProjectTo);
   return Database::FindFromJSONWithOptions(
     collectionName,
     findQuery,
     output,
-    Database::GetProjectionFromFieldNames(fieldsToProjectTo, 0),
+    options,
     maxOutputItems,
     totalItems,
     commentsOnFailure
@@ -575,10 +579,15 @@ bool Database::FindFromJSON(
   long long* totalItems,
   std::stringstream* commentsOnFailure
 ) {
-  JSData options;
-  options.theType = JSData::token::tokenUndefined;
+  QueryResultOptions options;
   return Database::FindFromJSONWithOptions(
-    collectionName, findQuery, output, options, maxOutputItems, totalItems, commentsOnFailure
+    collectionName,
+    findQuery,
+    output,
+    options,
+    maxOutputItems,
+    totalItems,
+    commentsOnFailure
   );
 }
 
@@ -586,7 +595,7 @@ bool Database::FindFromJSONWithOptions(
   const std::string& collectionName,
   const JSData& findQuery,
   List<JSData>& output,
-  const JSData& options,
+  const QueryResultOptions& options,
   int maxOutputItems,
   long long* totalItems,
   std::stringstream* commentsOnFailure,
@@ -682,8 +691,7 @@ bool Database::Mongo::FindOneFromQueryString(
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("Database::FindOneFromQueryString");
-  JSData options;
-  options.theType = JSData::token::tokenUndefined;
+  QueryResultOptions options;
   return Database::FindOneFromQueryStringWithOptions(
     collectionName, findQuery, options, output, commentsOnFailure
   );
@@ -696,10 +704,12 @@ bool Database::FindOneFromQueryStringWithProjection(
   JSData& output,
   std::stringstream* commentsOnFailure
 ) {
+  QueryResultOptions options;
+  options.MakeProjection(fieldsToProjectTo);
   return Database::FindOneFromQueryStringWithOptions(
     collectionName,
     findQuery,
-    Database::GetProjectionFromFieldNames(fieldsToProjectTo, 0),
+    options,
     output,
     commentsOnFailure
   );
@@ -708,22 +718,21 @@ bool Database::FindOneFromQueryStringWithProjection(
 bool Database::FindOneFromJSONWithProjection(
   const std::string& collectionName,
   const JSData& findQuery,
-  const List<std::string>& fieldsToProjectTo,
+  const QueryResultOptions& options,
   JSData& output,
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("Database::FindOneFromJSONWithOptions");
-  JSData theProjection = Database::GetProjectionFromFieldNames(fieldsToProjectTo, 0);
   std::string findQueryString = findQuery.ToString(nullptr);
   return Database::FindOneFromQueryStringWithOptions(
-    collectionName, findQueryString, theProjection, output, commentsOnFailure
+    collectionName, findQueryString, options, output, commentsOnFailure
   );
 }
 
 bool Database::FindOneFromQueryStringWithOptions(
   const std::string& collectionName,
   const std::string& findQuery,
-  const JSData& options,
+  const QueryResultOptions& options,
   JSData& output,
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneralNonSensitive
@@ -1278,13 +1287,11 @@ JSData Database::ToJSONFetchItem(const List<std::string>& labelStrings) {
   std::stringstream out;
   std::string currentTable = labelStrings[0];
   result["currentTable"] = currentTable;
-  JSData projector, findQuery;
+  JSData findQuery;
   findQuery.theType = JSData::token::tokenObject;
-  projector.theType = JSData::token::tokenObject;
   findQuery[DatabaseStrings::labelIdMongo][DatabaseStrings::objectSelectorMongo] = labelStrings[1];
-  if (labelStrings.size > 2) {
-    projector = Database::GetProjectionFromFieldNames(labelStrings, 2);
-  }
+  QueryResultOptions projector;
+  labelStrings.Slice(2, labelStrings.size - 2,  projector.fieldsToProjectTo);
   List<JSData> rowsJSON;
   long long totalItems = 0;
   std::stringstream comments;
@@ -1333,11 +1340,9 @@ JSData Database::ToJSONDatabaseCollection(const std::string& currentTable) {
     }
     return result;
   }
-  JSData allProjectors, projector, findQuery;
-  allProjectors = Database::GetStandardProjectors();
-  if (allProjectors.HasKey(currentTable)) {
-    projector = allProjectors[currentTable];
-  }
+  JSData findQuery;
+  QueryResultOptions projector;
+  projector = Database::GetStandardProjectors(currentTable);
   findQuery.theType = JSData::token::tokenObject;
   List<JSData> rowsJSON;
   long long totalItems = 0;

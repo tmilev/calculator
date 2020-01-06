@@ -37,6 +37,15 @@ public:
   std::string ToStringDebug() const;
 };
 
+class QueryResultOptions {
+public:
+  List<std::string> fieldsToProjectTo;
+  List<std::string> fieldsProjectedAway;
+  JSData ToJSON() const;
+  void MakeProjection(const List<std::string>& fields);
+
+};
+
 class Database {
 public:
   bool flagInitializedServer;
@@ -258,7 +267,7 @@ public:
     const std::string& collectionName,
     const JSData& findQuery,
     List<JSData>& output,
-    const JSData& options,
+    const QueryResultOptions &options,
     int maxOutputItems = - 1,
     long long* totalItems = nullptr,
     std::stringstream* commentsOnFailure = nullptr,
@@ -271,21 +280,18 @@ public:
     JSData& output,
     std::stringstream* commentsOnFailure = nullptr
   );
-  static JSData GetProjectionFromFieldNames(
-    const List<std::string>& fieldsToProjectTo,
-    int offset
-  );
   static bool FindOneFromQueryStringWithOptions(
     const std::string& collectionName,
     const std::string& findQuery,
-    const JSData& options,
+    const QueryResultOptions& options,
     JSData& output,
     std::stringstream* commentsOnFailure = nullptr,
     std::stringstream* commentsGeneralNonSensitive = nullptr
   );
-  static bool FindOneFromJSONWithProjection(const std::string& collectionName,
+  static bool FindOneFromJSONWithProjection(
+    const std::string& collectionName,
     const JSData& findQuery,
-    const List<std::string>& fieldsToProjectTo,
+    const QueryResultOptions &options,
     JSData& output,
     std::stringstream* commentsOnFailure
   );
@@ -347,7 +353,7 @@ public:
     std::stringstream* commentsOnFailure
   );
   static bool matchesPattern(const List<std::string>& fieldLabel, const List<std::string>& pattern);
-  static JSData GetStandardProjectors();
+  static QueryResultOptions GetStandardProjectors(const std::string& collectionName);
   static std::string ConvertStringToMongoKeyString(const std::string& input);
   static bool ConvertJSONMongoToJSON(
     const JSData& input,

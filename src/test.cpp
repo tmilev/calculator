@@ -25,6 +25,7 @@ public:
 
 int mainTest(List<std::string>& inputArguments) {
   Test tester;
+  inputArguments.SliceInPlace(2, inputArguments.size - 2);
   tester.initialize(inputArguments);
   tester.Run();
   return 0;
@@ -58,7 +59,7 @@ void Test::Run() {
 
 }
 
-bool Test::ShouldTest(const std::string &testSuite) {
+bool Test::ShouldTest(const std::string& testSuite) {
   if (this->flagTestAll) {
     return true;
   }
@@ -67,6 +68,7 @@ bool Test::ShouldTest(const std::string &testSuite) {
 
 void Test::initialize(List<std::string>& inputArguments) {
   this->inputs = inputArguments;
+  global << "and input arguments are: " << inputArguments.ToStringCommaDelimited() << logger::endL;
   if (
     this->inputs.size == 0 ||
     this->inputs.Contains(Test::Suites::all)

@@ -267,21 +267,40 @@ std::string Database::ConvertStringToMongoKeyString(
   return out.str();
 }
 
+bool Database::FindOneWithOptions(
+  const QueryExact &query,
+  const QueryResultOptions &options,
+  JSData &output,
+  std::stringstream *commentsOnFailure,
+  std::stringstream *commentsGeneralNonSensitive
+) {
+  MacroRegisterFunctionWithName("Database::FindOneWithOptions");
+  if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Database::FindOneWithOptions failed. "
+      << DatabaseStrings::errorDatabaseDisableD;
+    }
+    return false;
+  }
+  (void) commentsGeneralNonSensitive;
+  if (global.flagDatabaseCompiled) {
+    return Database::get().mongoDB.FindOneWithOptions(
+      query, options, output, commentsOnFailure, commentsGeneralNonSensitive
+    );
+  }
+  (void) output;
+  (void) options;
+  if (commentsOnFailure != nullptr) {
+    *commentsOnFailure << "Database::FindOneWithOptions: project compiled without mongoDB support. ";
+  }
+  return false;
+}
+
 bool Database::FindOne(
   const QueryExact& query, JSData& output, std::stringstream* commentsOnFailure
 ) {
-  if (global.flagDatabaseCompiled) {
-    return this->mongoDB.FindOneFromQueryString(
-      query.collection,
-      query.ToJSON().ToString(nullptr),
-      output,
-      commentsOnFailure
-    );
-  }
-  if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "Database::FindOne not implemented yet.";
-  }
-  return false;
+  QueryResultOptions emptyOptions;
+  return this->FindOneWithOptions(query,emptyOptions, output, commentsOnFailure, nullptr);
 }
 
 bool Database::UpdateOne(

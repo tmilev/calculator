@@ -202,11 +202,12 @@ public:
     bool FetchCollectionNames(
       List<std::string>& output, std::stringstream* commentsOnFailure
     );
-    static bool FindOneFromQueryString(
-      const std::string& collectionName,
-      const std::string& findQuery,
+    static bool FindOneWithOptions(
+      const QueryExact& query,
+      const QueryResultOptions& options,
       JSData& output,
-      std::stringstream* commentsOnFailure = nullptr
+      std::stringstream* commentsOnFailure,
+      std::stringstream* commentsGeneralNonSensitive = nullptr
     );
     static bool FindOneFromSome(
       const List<QueryExact>& findOrQueries,
@@ -273,27 +274,12 @@ public:
     std::stringstream* commentsOnFailure = nullptr,
     std::stringstream* commentsGeneralNonSensitive = nullptr
   );
-  static bool FindOneFromQueryStringWithProjection(
-    const std::string& collectionName,
-    const std::string& findQuery,
-    const List<std::string>& fieldsToProjectTo,
-    JSData& output,
-    std::stringstream* commentsOnFailure = nullptr
-  );
-  static bool FindOneFromQueryStringWithOptions(
-    const std::string& collectionName,
-    const std::string& findQuery,
+  bool FindOneWithOptions(
+    const QueryExact& query,
     const QueryResultOptions& options,
     JSData& output,
-    std::stringstream* commentsOnFailure = nullptr,
+    std::stringstream* commentsOnFailure,
     std::stringstream* commentsGeneralNonSensitive = nullptr
-  );
-  static bool FindOneFromJSONWithProjection(
-    const std::string& collectionName,
-    const JSData& findQuery,
-    const QueryResultOptions &options,
-    JSData& output,
-    std::stringstream* commentsOnFailure
   );
   bool FindOne(
     const QueryExact& query,

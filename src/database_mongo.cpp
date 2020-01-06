@@ -138,7 +138,13 @@ public:
     List<JSData>& output,
     const JSData& inputOptions,
     std::stringstream* commentsOnFailure,
-    std::stringstream *commentsGeneralNonSensitive
+    std::stringstream* commentsGeneralNonSensitive
+  );
+  bool FindOne(
+    JSData& output,
+    const JSData& inputOptions,
+    std::stringstream* commentsOnFailure,
+    std::stringstream* commentsGeneralNonSensitive
   );
   bool UpdateOneWithOptions(std::stringstream* commentsOnFailure);
   bool RemoveOne(std::stringstream* commentsOnFailure);
@@ -340,6 +346,28 @@ bool MongoQuery::UpdateOneNoOptions(std::stringstream* commentsOnFailure) {
 
 bool MongoQuery::UpdateOneWithOptions(std::stringstream* commentsOnFailure) {
   return this->UpdateOne(commentsOnFailure, true);
+}
+
+bool MongoQuery::FindOne(
+  JSData& output,
+  const JSData& inputOptions,
+  std::stringstream* commentsOnFailure,
+  std::stringstream* commentsGeneralNonSensitive
+) {
+  List<JSData> outputsMultiple;
+  if (!this->FindMultiple(
+    outputsMultiple,
+    inputOptions,
+    commentsOnFailure,
+    commentsGeneralNonSensitive
+  )) {
+    return false;
+  }
+  if (outputsMultiple.size < 1) {
+    return false;
+  }
+  output = outputsMultiple[0];
+  return true;
 }
 
 bool MongoQuery::FindMultiple(
@@ -642,28 +670,33 @@ bool Database::Mongo::FindOneFromSome(
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("Database::FindOneFromSome");
-  std::string theQuery;
-  if (!Database::Mongo::GetOrFindQuery(findOrQueries, theQuery, commentsOnFailure)) {
+  #ifdef MACRO_use_MongoDB
+  MongoQuery query;
+  if (!Database::Mongo::GetOrFindQuery(findOrQueries, query.findQuery, commentsOnFailure)) {
     return false;
   }
-  std::string collectionName;
   for (int i = 0; i < findOrQueries.size; i ++) {
     if (i == 0) {
-      collectionName = findOrQueries[i].collection;
+      query.collectionName = findOrQueries[i].collection;
       continue;
     }
-    if (collectionName != findOrQueries[i].collection) {
+    if (query.collectionName != findOrQueries[i].collection) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure
         << "Not allowed: or-queries involve different collections: "
-        << collectionName << " and " << findOrQueries[i].collection << ". ";
+        << query.collectionName << " and " << findOrQueries[i].collection << ". ";
       }
       return false;
     }
   }
-  return Database::Mongo::FindOneFromQueryString(
-    collectionName, theQuery, output, commentsOnFailure
-  );
+  JSData emptyOptions;
+  return query.FindOne(output,emptyOptions, commentsOnFailure, nullptr);
+  #else
+  if (commentsOnFailure != nullptr) {
+    *commentsOnFailure << "MongoDB not compiled in where it should be. ";
+  }
+  return false;
+  #endif
 }
 
 bool Database::Mongo::GetOrFindQuery(
@@ -686,68 +719,20 @@ bool Database::Mongo::GetOrFindQuery(
   return true;
 }
 
-bool Database::Mongo::FindOneFromQueryString(
-  const std::string& collectionName,
-  const std::string& findQuery,
-  JSData& output,
-  std::stringstream* commentsOnFailure
-) {
-  MacroRegisterFunctionWithName("Database::FindOneFromQueryString");
-  QueryResultOptions options;
-  return Database::FindOneFromQueryStringWithOptions(
-    collectionName, findQuery, options, output, commentsOnFailure
-  );
-}
-
-bool Database::FindOneFromQueryStringWithProjection(
-  const std::string& collectionName,
-  const std::string& findQuery,
-  const List<std::string>& fieldsToProjectTo,
-  JSData& output,
-  std::stringstream* commentsOnFailure
-) {
-  QueryResultOptions options;
-  options.MakeProjection(fieldsToProjectTo);
-  return Database::FindOneFromQueryStringWithOptions(
-    collectionName,
-    findQuery,
-    options,
-    output,
-    commentsOnFailure
-  );
-}
-
-bool Database::FindOneFromJSONWithProjection(
-  const std::string& collectionName,
-  const JSData& findQuery,
-  const QueryResultOptions& options,
-  JSData& output,
-  std::stringstream* commentsOnFailure
-) {
-  MacroRegisterFunctionWithName("Database::FindOneFromJSONWithOptions");
-  std::string findQueryString = findQuery.ToString(nullptr);
-  return Database::FindOneFromQueryStringWithOptions(
-    collectionName, findQueryString, options, output, commentsOnFailure
-  );
-}
-
-bool Database::FindOneFromQueryStringWithOptions(
-  const std::string& collectionName,
-  const std::string& findQuery,
+bool Database::Mongo::FindOneWithOptions(
+  const QueryExact& query,
   const QueryResultOptions& options,
   JSData& output,
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneralNonSensitive
 ) {
-  MacroRegisterFunctionWithName("Database::FindOneFromQueryStringWithOptions");
-  (void) commentsGeneralNonSensitive;
 #ifdef MACRO_use_MongoDB
-  MongoQuery query;
-  query.collectionName = collectionName;
-  query.findQuery = findQuery;
-  query.maxOutputItems = 1;
+  MongoQuery mongoQuery;
+  mongoQuery.collectionName = query.collection;
+  mongoQuery.findQuery = query.ToJSON().ToString();
+  mongoQuery.maxOutputItems = 1;
   List<JSData> outputList;
-  query.FindMultiple(
+  mongoQuery.FindMultiple(
     outputList, options.ToJSON(), commentsOnFailure, commentsGeneralNonSensitive
   );
   if (outputList.size == 0) {
@@ -758,12 +743,12 @@ bool Database::FindOneFromQueryStringWithOptions(
 
   return true;
 #else
-  (void) collectionName;
-  (void) findQuery;
-  (void) output;
+  (void) query;
   (void) options;
+  (void) output;
+  (void) commentsGeneralNonSensitive;
   if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "FindOneFromQueryStringWithOptions: project compiled without mongoDB support. ";
+    *commentsOnFailure << "Database::Mongo::FindOneWithOptions failed. No mongoDB support. ";
   }
   return false;
 #endif
@@ -937,7 +922,7 @@ bool Database::DeleteOneEntryUnsetUnsecure(
   List<std::string>& selector,
   std::stringstream* commentsOnFailure
 ) {
-  MacroRegisterFunctionWithName("Database::DeleteOneEntryUnsecure");
+  MacroRegisterFunctionWithName("Database::DeleteOneEntryUnsetUnsecure");
 #ifdef MACRO_use_MongoDB
 
   std::string selectorString = QueryExact::getLabelFromNestedLabels(selector);
@@ -945,12 +930,12 @@ bool Database::DeleteOneEntryUnsetUnsecure(
   QueryResultOptions options;
   options.fieldsToProjectTo.AddListOnTop(selector);
   options.fieldsToProjectTo.AddOnTop(selectorString);
-  bool didFindItem = FindOneFromJSONWithProjection(
-    findQuery.collection,
-    findQuery.ToJSON(),
+  bool didFindItem = Database::get().FindOneWithOptions(
+    findQuery,
     options,
     foundItem,
-    commentsOnFailure
+    commentsOnFailure,
+    nullptr
   );
 
   if (!didFindItem) {

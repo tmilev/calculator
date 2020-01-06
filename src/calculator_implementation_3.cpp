@@ -1860,7 +1860,7 @@ bool Calculator::Test::WriteTestStrings(std::stringstream* commentsOnFailure) {
   }
   return FileOperations::WriteFileVirual(
     WebAPI::calculator::testFileNameVirtual,
-    result.ToString(nullptr),
+    result.ToString(&JSData::PrintOptions::NewLine()),
     commentsOnFailure
   );
 }
@@ -1909,7 +1909,8 @@ bool Calculator::Test::ProcessResults() {
     out << "<b style='color:red'>Failed to load test strings. </b>" << commentsOnFailure.str();
   }
   if (!this->flagTestResultsExist) {
-    out << "<b style='color:green'>Writing new test strings into: " << WebAPI::calculator::testFileNameVirtual << ". </b>";
+    out << "<b style='color:green'>Writing new test strings into: "
+    << WebAPI::calculator::testFileNameVirtual << ". </b>";
     std::stringstream commentsOnFailure2;
     if (!this->WriteTestStrings(&commentsOnFailure2)) {
       global << logger::red << "Failed to write test strings. " << logger::endL

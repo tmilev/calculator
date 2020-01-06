@@ -255,8 +255,6 @@ public:
     Progress();
   };
   Progress theProgress;
-  MutexRecursiveWrapper infoIsInitialized;
-  MutexRecursiveWrapper outputAfterTimeout;
   ListReferences<std::thread>theThreads;
   ListReferences<ThreadData> theThreadData;
   ListReferences<ListReferences<stackInfo> > CustomStackTrace;
@@ -310,9 +308,7 @@ public:
 
   MutexRecursiveWrapper MutexWebWorkerPipeWriteLock;
   MutexRecursiveWrapper MutexWebWorkerPipeReadLock;
-  MutexRecursiveWrapper MutexWebWorkerStaticFiasco;
-  MutexRecursiveWrapper MutexRegisterFunctionStaticFiasco;
-  MutexRecursiveWrapper MutexParallelComputingStaticFiasco;
+  MutexRecursiveWrapper MutexParallelComputingCrash;
   MutexRecursiveWrapper MutexProgressReportinG;
   MutexRecursiveWrapper MutexRegisterNewThread;
 

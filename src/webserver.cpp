@@ -376,6 +376,22 @@ ProgressReportWebServer::~ProgressReportWebServer() {
   this->flagDeallocated = true;
 }
 
+std::string ProgressReportWebServer::computeStatusCriticalSection(const std::string& inputStatus) {
+  MacroRegisterFunctionWithName("ProgressReportWebServer::SetStatusCriticalSection");
+  MutexLockGuard safety(global.MutexProgressReportinG);
+  if (this->indexProgressReport >= global.server().theProgressReports.size) {
+    global.server().theProgressReports.SetSize(this->indexProgressReport + 1);
+  }
+  global.server().theProgressReports[this->indexProgressReport] = inputStatus;
+  std::stringstream out;
+  for (int i = 0; i < global.server().theProgressReports.size; i ++) {
+    if (global.server().theProgressReports[i] != "") {
+      out << "<br>" << global.server().theProgressReports[i];
+    }
+  }
+  return out.str();
+}
+
 void ProgressReportWebServer::SetStatus(const std::string& inputStatus) {
   MacroRegisterFunctionWithName("ProgressReportWebServer::SetStatus");
   if (global.flagComputationFinishedAllOutputSentClosing || !this->flagServerExists) {
@@ -385,22 +401,8 @@ void ProgressReportWebServer::SetStatus(const std::string& inputStatus) {
     return;
   }
   global.server().CheckConsistency();
-  MutexRecursiveWrapper& safetyFirst = global.MutexWebWorkerStaticFiasco;
-  safetyFirst.LockMe();
-  if (this->indexProgressReport >= global.server().theProgressReports.size) {
-    global.server().theProgressReports.SetSize(this->indexProgressReport + 1);
-  }
-  global.server().theProgressReports[this->indexProgressReport] = inputStatus;
   std::stringstream toBePiped;
-  for (int i = 0; i < global.server().theProgressReports.size; i ++) {
-    if (global.server().theProgressReports[i] != "") {
-      toBePiped << "<br>" << global.server().theProgressReports[i];
-    }
-  }
-  safetyFirst.UnlockMe();
-  if (!global.flagRunningBuiltInWebServer) {
-    return;
-  }
+  toBePiped << this->computeStatusCriticalSection(inputStatus);
   global.server().GetActiveWorker().pipeWorkerToWorkerStatus.WriteOnceAfterEmptying(toBePiped.str(), false, false);
 }
 

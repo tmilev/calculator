@@ -339,7 +339,8 @@ class ProgressReportWebServer {
   static bool flagServerExists;
   ProgressReportWebServer(const std::string& inputStatus);
   ProgressReportWebServer();
-  void SetStatus (const std::string& inputStatus);
+  void SetStatus(const std::string& inputStatus);
+  std::string computeStatusCriticalSection(const std::string& inputStatus);
   ~ProgressReportWebServer();
 };
 

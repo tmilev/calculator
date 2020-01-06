@@ -9,16 +9,18 @@
 static ProjectInformationInstance projectInfoMultitaskingCPP(__FILE__, "Multitasking implementation.");
 
 void ParallelComputing::CheckPointerCounters() {
-  if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList) {
-    MutexRecursiveWrapper& tempMutex =
-    global.MutexParallelComputingStaticFiasco;
-    tempMutex.LockMe();
+  if (ParallelComputing::GlobalPointerCounter > ParallelComputing::cgiLimitRAMuseNumPointersInList) {
+    /////////////////////////////////////////////////
+    // *** Deadlock alert: critical section start ***
+    global.MutexParallelComputingCrash.LockMe();
     if (ParallelComputing::flagUngracefulExitInitiated) {
-      tempMutex.UnlockMe();
+      global.MutexParallelComputingCrash.UnlockMe();
       return;
     }
     ParallelComputing::flagUngracefulExitInitiated = true;
-    tempMutex.UnlockMe();
+    global.MutexParallelComputingCrash.UnlockMe();
+    // *** Deadlock alert: critical section end ***
+    /////////////////////////////////////////////////
     global.fatal << "This may or may not be an error: the number of pointers "
     << "allocated by the program exceeded the allowed <b>limit of "
     << ParallelComputing::cgiLimitRAMuseNumPointersInList
@@ -231,7 +233,7 @@ std::string ThreadData::ToStringHtml() const {
   } else {
     out << "Thread ";
   }
-  out << "<span style =\"color:red\">";
+  out << "<span style = 'color:red'>";
   if (this->name == "") {
     out << "(thread name not set)";
   } else {

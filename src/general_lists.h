@@ -495,7 +495,7 @@ public:
 template <typename basicType>
 class StateMaintainer {
 public:
-  basicType *toMaintain;
+  basicType* toMaintain;
   basicType contentAtStart;
   StateMaintainer(basicType& inputToMaintain) {
     this->toMaintain = &inputToMaintain;

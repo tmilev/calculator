@@ -131,7 +131,7 @@ GlobalVariables::Crasher& GlobalVariables::Crasher::operator<<(const GlobalVaria
   JSData output;
   output[WebAPI::result::crashReport] = this->crashReportHtml.str();
   output[WebAPI::result::comments] = global.Comments.getCurrentReset();
-  global.theProgress.WriteCrash(output);
+  global.theProgress.WriteResponse(output, true);
   assert(false);
   return *this;
 }

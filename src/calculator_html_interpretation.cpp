@@ -965,7 +965,7 @@ JSData WebAPIResponse::SubmitAnswersJSON(
   const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake
 ) {
   MacroRegisterFunctionWithName("WebAPIReponse::submitAnswers");
-  global.theProgress.BanMonitoring();
+  global.theProgress.DisallowReport();
 
   std::stringstream output, errorStream, comments;
   JSData result;
@@ -1430,8 +1430,8 @@ JSData WebAPIResponse::GetAnswerOnGiveUp(
   bool doIncludeTimeStats
 ) {
   MacroRegisterFunctionWithName("CalculatorHTML::GetAnswerOnGiveUp");
-  StateMaintainer<bool> maintain(global.theProgress.flagBanProcessMonitoring);
-  global.theProgress.flagBanProcessMonitoring = true;
+  GlobalVariables::Progress::StateMaintainer maintain(global.theProgress);
+  global.theProgress.DisallowReport();
   if (outputNakedAnswer != nullptr) {
     *outputNakedAnswer = "";
   }

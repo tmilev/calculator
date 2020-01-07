@@ -126,22 +126,22 @@ public:
   int WriteToBodyJSONAppendComments(JSData& result);
   bool WriteToBodyJSON(const JSData& result);
   bool WriteToBody(const std::string& bytesToAppend);
-  static void WriteAfterTimeoutString(
+  void WriteAfterTimeoutString(
     const std::string& input,
     const std::string& status,
     const std::string& fileNameCarbonCopy
   );
-  static void WriteAfterTimeoutJSON(
+  void WriteAfterTimeoutJSON(
     const JSData& input,
     const std::string& status,
     const std::string& fileNameCarbonCopy
   );
-  static void WriteAfterTimeoutPartTwo(
+  void WriteAfterTimeoutPartTwo(
     JSData& result,
     const std::string& status,
     const std::string& fileNameCarbonCopy
   );
-  static void WriteAfterTimeoutCarbonCopy(
+  void WriteAfterTimeoutCarbonCopy(
     const JSData& input,
     const std::string& fileNameCarbonCopy
   );
@@ -328,18 +328,6 @@ public:
   static std::string GetEnvironment(const std::string& envVarName);
   static int main(int argc, char** argv);
   static int mainCommandLine();
-};
-
-class ProgressReportWebServer {
-  public:
-  int indexProgressReport;
-  bool flagDeallocated;
-  static bool flagServerExists;
-  ProgressReportWebServer(const std::string& inputStatus);
-  ProgressReportWebServer();
-  void SetStatus(const std::string& inputStatus);
-  std::string computeStatusCriticalSection(const std::string& inputStatus);
-  ~ProgressReportWebServer();
 };
 
 #endif // WEBSERVER_H

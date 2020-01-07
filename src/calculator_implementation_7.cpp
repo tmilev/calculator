@@ -8653,17 +8653,14 @@ bool CalculatorFunctions::innerTestIndicator(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerTestIndicator");
-  if (global.theProgress.flagBanProcessMonitoring) {
+  if (global.theProgress.flagBanProcessMonitorinG) {
     std::stringstream out;
-    if (
-      global.configuration.GetValue(
-        Configuration::processMonitoringBanned
-      ).isTrueRepresentationInJSON()
-    ) {
-      out << "The server's admins have explicitly banned monitoring. ";
-    } else {
-      out << "Process monitoring turned off by user. ";
-    }
+    out << "The server's admins have explicitly banned monitoring. ";
+    return output.AssignValue(out.str(), theCommands);
+  }
+  if (!global.theProgress.flagReportDesired) {
+    std::stringstream out;
+    out << "Process monitoring turned off by user. ";
     return output.AssignValue(out.str(), theCommands);
   }
   if (input.size() < 3) {
@@ -8700,11 +8697,7 @@ bool CalculatorFunctions::innerTestIndicator(
   for (unsigned i = 0; i < static_cast<unsigned>(dummyCommentSize); i ++) {
     dummyComment[i] = 'a';
   }
-  if (global.WebServerReturnDisplayIndicatorCloseConnection != nullptr) {
-    global.WebServerReturnDisplayIndicatorCloseConnection("Triggered by test indicator. ");
-  } else {
-    theCommands << "WebServerReturnDisplayIndicatorCloseConnection is zero. ";
-  }
+  global.theProgress.Initiate("Triggered by test indicator. ");
   ProgressReport theReport;
   for (int i = 0; i < numRuns; i ++) {
     std::stringstream reportStream;

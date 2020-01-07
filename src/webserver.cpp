@@ -354,57 +354,7 @@ void WebWorker::SendAllBytesHttpSSL() {
   global << "... done." << logger::endL;
 }
 
-bool ProgressReportWebServer::flagServerExists = true;
 const int WebServer::maxNumPendingConnections = 1000000;
-
-ProgressReportWebServer::ProgressReportWebServer(const std::string& inputStatus) {
-  this->flagDeallocated = false;
-  this->indexProgressReport = global.server().theProgressReports.size;
-  this->SetStatus(inputStatus);
-}
-
-ProgressReportWebServer::ProgressReportWebServer() {
-  this->flagDeallocated = false;
-  this->indexProgressReport = global.server().theProgressReports.size;
-}
-
-ProgressReportWebServer::~ProgressReportWebServer() {
-  if (!this->flagServerExists) {
-    return;
-  }
-  global.server().theProgressReports.SetSize(this->indexProgressReport);
-  this->flagDeallocated = true;
-}
-
-std::string ProgressReportWebServer::computeStatusCriticalSection(const std::string& inputStatus) {
-  MacroRegisterFunctionWithName("ProgressReportWebServer::SetStatusCriticalSection");
-  MutexLockGuard safety(global.MutexProgressReportinG);
-  if (this->indexProgressReport >= global.server().theProgressReports.size) {
-    global.server().theProgressReports.SetSize(this->indexProgressReport + 1);
-  }
-  global.server().theProgressReports[this->indexProgressReport] = inputStatus;
-  std::stringstream out;
-  for (int i = 0; i < global.server().theProgressReports.size; i ++) {
-    if (global.server().theProgressReports[i] != "") {
-      out << "<br>" << global.server().theProgressReports[i];
-    }
-  }
-  return out.str();
-}
-
-void ProgressReportWebServer::SetStatus(const std::string& inputStatus) {
-  MacroRegisterFunctionWithName("ProgressReportWebServer::SetStatus");
-  if (global.flagComputationFinishedAllOutputSentClosing || !this->flagServerExists) {
-    return;
-  }
-  if (!global.flagRunningBuiltInWebServer) {
-    return;
-  }
-  global.server().CheckConsistency();
-  std::stringstream toBePiped;
-  toBePiped << this->computeStatusCriticalSection(inputStatus);
-  global.server().GetActiveWorker().pipeWorkerToWorkerStatus.WriteOnceAfterEmptying(toBePiped.str(), false, false);
-}
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr* sa) {
@@ -810,22 +760,6 @@ std::string WebWorker::GetHtmlHiddenInputs(bool includeUserName, bool includeAut
   return out.str();
 }
 
-void GlobalVariables::Progress::Report(const std::string &input) {
-  MacroRegisterFunctionWithName("GlobalVariables::Progress::Report");
-  MutexLockGuard guard(global.MutexProgressReportinG);
-  return global.server().GetActiveWorker().WriteAfterTimeoutProgress(input, false);
-}
-
-void GlobalVariables::Progress::Initiate(const std::string& message) {
-  MacroRegisterFunctionWithName("GlobalVariables::Progress::Initiate");
-  MutexLockGuard guard(global.MutexProgressReportinG);
-  if (global.theProgress.flagTimedOut) {
-    return;
-  }
-  global.theProgress.flagTimedOut = true;
-  global.server().GetActiveWorker().WriteAfterTimeoutShowIndicator(message);
-
-}
 
 void WebWorker::WriteAfterTimeoutProgress(const std::string& input, bool forceFileWrite) {
   this->PauseIfRequested();
@@ -841,15 +775,6 @@ void WebWorker::WriteAfterTimeoutProgress(const std::string& input, bool forceFi
     input,
     WebAPI::result::running,
     global.RelativePhysicalNameOptionalProgressReport
-  );
-}
-
-void GlobalVariables::Progress::WriteResponseAfterTimeout(const JSData &out) {
-  MacroRegisterFunctionWithName("WebWorker::WriteAfterTimeoutResultStatic");
-  WebWorker::WriteAfterTimeoutJSON(
-    global.calculator().GetElement().ToJSONOutputAndSpecials(),
-    "finished",
-    global.RelativePhysicalNameOptionalResult
   );
 }
 
@@ -1796,7 +1721,7 @@ std::string WebWorker::GetMIMEtypeFromFileExtension(const std::string& fileExten
 int WebWorker::ProcessUnknown() {
   MacroRegisterFunctionWithName("WebWorker::ProcessUnknown");
   this->SetHeader("HTTP/1.0 501 Method Not Implemented", "Content-Type: text/html");
-  global.WriteResponse(WebAPIResponse::GetJSONUserInfo("Unknown request"));
+  global.theProgress.WriteResponse(WebAPIResponse::GetJSONUserInfo("Unknown request"), false);
   return 0;
 }
 
@@ -2446,12 +2371,16 @@ void WebWorker::GetIndicatorOnTimeout(
   output[WebAPI::result::timeOut] = true;
 
   timeOutComments << message;
-  if (global.theProgress.flagBanProcessMonitoring) {
+  if (global.theProgress.flagBanProcessMonitorinG) {
     timeOutComments
     << "Monitoring computations is not allowed on this server.<br> "
     << "Please note that monitoring computations "
     << "is the default behavior, so the "
     << "owners of the server must have explicitly banned monitoring. ";
+    output[WebAPI::result::timeOutComments] = timeOutComments.str();
+  } else if (global.theProgress.flagReportDesired){
+    timeOutComments
+    << "Monitoring computations not desired by user. ";
     output[WebAPI::result::timeOutComments] = timeOutComments.str();
   } else {
     output[WebAPI::result::workerId] = this->workerId;
@@ -2460,10 +2389,8 @@ void WebWorker::GetIndicatorOnTimeout(
 }
 
 void WebWorker::WriteAfterTimeoutShowIndicator(const std::string& message) {
-  MacroRegisterFunctionWithName("WebWorker::OutputShowIndicatorOnTimeout");
-  MutexLockGuard guard(global.MutexProgressReportinG);
+  MacroRegisterFunctionWithName("WebWorker::WriteAfterTimeoutShowIndicator");
   global << "Long computation, about to display indicator. " << logger::endL;
-  global.theProgress.flagTimedOut = true;
   JSData result;
   this->GetIndicatorOnTimeout(result, message);
   if (this->indexInParent < 0) {
@@ -2512,7 +2439,7 @@ std::string WebWorker::ToStringStatus() const {
   }
   if (this->flagInUsE) {
     if (this->parent->activeWorker == this->indexInParent) {
-      out << ", <b style =\"color:green\">current process</b>";
+      out << ", <b style ='color:green'>current process</b>";
     } else {
       out << ", <b>in use</b>";
     }
@@ -2523,7 +2450,7 @@ std::string WebWorker::ToStringStatus() const {
     out << ", not in use";
   }
   if (this->displayUserInput != "") {
-    out << ", user input: <span style =\"color:blue\">"
+    out << ", user input: <span style = 'color:blue'>"
     << this->displayUserInput << "</span>";
   }
   out << ", connection " << this->connectionID << ", process ID: ";
@@ -2569,7 +2496,6 @@ bool WebServer::CheckConsistency() {
 void WebServer::ReleaseEverything() {
 
   this->theTLS.Free();
-  ProgressReportWebServer::flagServerExists = false;
   for (int i = 0; i < this->theWorkers.size; i ++) {
     this->theWorkers[i].Release();
   }
@@ -3823,7 +3749,7 @@ int WebWorker::Run() {
       this->flagEncounteredErrorWhileServingFile ||
       global.flagRestartNeeded ||
       global.flagStopNeeded ||
-      global.theProgress.flagTimedOut
+      global.theProgress.TimedOut()
     ) {
       break;
     }
@@ -4310,7 +4236,7 @@ extern int mainTest(List<std::string>& remainingArgs);
 
 void WebServer::TurnProcessMonitoringOn() {
   MacroRegisterFunctionWithName("WebServer::TurnProcessMonitoringOn");
-  global.theProgress.flagBanProcessMonitoring = false;
+  global.theProgress.flagBanProcessMonitorinG = false;
   global.configuration[Configuration::processMonitoringBanned] = false;
   global
   << logger::yellow << "Process monitoring IS ON, reply in: " << logger::green
@@ -4323,7 +4249,7 @@ void WebServer::TurnProcessMonitoringOff() {
   << logger::green << "************************" << logger::endL
   << logger::red << "Process monitoring is now off. " << logger::endL
   << logger::green << "************************" << logger::endL;
-  global.theProgress.flagBanProcessMonitoring = true;
+  global.theProgress.flagBanProcessMonitorinG = true;
   global.millisecondsReplyAfterComputation = 0;
   global.configuration[Configuration::processMonitoringBanned] = true;
 }
@@ -4601,8 +4527,7 @@ int WebServer::main(int argc, char **argv) {
 }
 
 int WebServer::mainCommandLine() {
-  MacroRegisterFunctionWithName("main_command_input");
-  global.IndicatorStringOutputFunction = HtmlRoutines::MakeStdCoutReport;
+  MacroRegisterFunctionWithName("WebServer::mainCommandLine");
   Calculator& theCalculator = global.calculator().GetElement();
   theCalculator.initialize();
   if (global.programArguments.size > 1) {

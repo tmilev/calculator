@@ -120,7 +120,13 @@ class logger {
 // This causes a nasty and difficult to catch
 // crash before main.
 class GlobalVariables {
+  MutexRecursiveWrapper MutexReturnBytes;
 public:
+  MutexRecursiveWrapper MutexWebWorkerPipeWriteLock;
+  MutexRecursiveWrapper MutexWebWorkerPipeReadLock;
+  MutexRecursiveWrapper MutexParallelComputingCrash;
+  MutexRecursiveWrapper MutexRegisterNewThread;
+
   GlobalVariables();
   ~GlobalVariables();
   class LogData {
@@ -232,10 +238,23 @@ public:
   // progress report flags:
   class Progress {
   private:
-    bool flagBanProcessMonitoring;
     bool flagTimedOut;
     bool flagReportAllowed;
   public:
+    bool flagReportDesired;
+    bool flagBanProcessMonitorinG;
+    class StateMaintainer {
+    public:
+      GlobalVariables::Progress* owner;
+      bool flagReportAllowed;
+      StateMaintainer(GlobalVariables::Progress& inputOwner) {
+        this->owner = &inputOwner;
+        this->flagReportAllowed = this->owner->flagReportAllowed;
+      }
+      ~StateMaintainer() {
+        this->owner->flagReportAllowed = this->flagReportAllowed;
+      }
+    };
     class ReportType {
     public:
       static const int general = 0;
@@ -248,19 +267,15 @@ public:
     // The functions below lock one another out.
     void Report(const std::string& input);
     void Initiate(const std::string& message);
-    void WriteResponseBeforeTimeout(const JSData& out);
-    void WriteResponseAfterTimeout(const JSData& out);
     // Respond functions end here.
 
     // returns true
-    bool WriteCrash(const JSData& out);
-    // returns true
-    bool WriteResponse(const JSData& out);
+    bool WriteResponse(const JSData& out, bool isCrash);
 
     bool MonitoringAllowed();
     bool ReportAllowed(int type = Progress::ReportType::general);
-    void BanMonitoring();
-    void AllowMonitoring();
+    void DisallowReport();
+    void AllowReport();
     bool TimedOut();
     Progress();
   };
@@ -315,12 +330,6 @@ public:
   std::string DisplayNameExecutableAppNoCache;
 
   std::string IPAdressCaller;
-
-  MutexRecursiveWrapper MutexWebWorkerPipeWriteLock;
-  MutexRecursiveWrapper MutexWebWorkerPipeReadLock;
-  MutexRecursiveWrapper MutexParallelComputingCrash;
-  MutexRecursiveWrapper MutexProgressReportinG;
-  MutexRecursiveWrapper MutexRegisterNewThread;
 
   MemorySaving<Matrix<Rational> > matIdMatrix;
   MemorySaving<Matrix<Rational> > matOneColumn;

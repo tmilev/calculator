@@ -925,8 +925,7 @@ bool WebAPIResponse::ProcessForgotLogin() {
   JSData result;
   if (!global.flagDatabaseCompiled) {
     result[WebAPI::result::error] = "Error: database not running. ";
-    global.theProgress.WriteResponse(result);
-    return true;
+    return global.theProgress.WriteResponse(result, false);
   }
   std::stringstream out;
   if (!global.UserDefaultHasAdminRights()) {
@@ -942,26 +941,23 @@ bool WebAPIResponse::ProcessForgotLogin() {
   << "</b><br>\n";
   if (!theCrawler.VerifyRecaptcha(&out, &out, nullptr)) {
     result[WebAPI::result::comments] = out.str();
-    global.theProgress.WriteResponse(result);
-    return true;
+    return global.theProgress.WriteResponse(result, false);
   }
   if (!theUser.Iexist(&out)) {
     out << "<br><b style =\"color:red\">"
     << "We failed to find your email: " << theUser.email << " in our records. "
     << "</b>";
     result[WebAPI::result::comments] = out.str();
-    global.theProgress.WriteResponse(result);
-    return true;
+    return global.theProgress.WriteResponse(result, false);
   }
   if (!theUser.LoadFromDB(&out, &out)) {
     out << "<br><b style='color:red'>"
     << "Failed to fetch user info for email: " << theUser.email
     << "</b>";
     result[WebAPI::result::comments] = out.str();
-    global.theProgress.WriteResponse(result);
-    return true;
+    return global.theProgress.WriteResponse(result, false);
   }
-  out << "<b style =\"color:green\">"
+  out << "<b style ='color:green'>"
   << "Your email is on record. "
   << "</b>";
   if (!global.UserDefaultHasAdminRights()) {
@@ -972,8 +968,7 @@ bool WebAPIResponse::ProcessForgotLogin() {
   out << "<br>Response time: " << global.GetElapsedSeconds() << " second(s); "
   << global.GetElapsedSeconds() << " second(s) spent creating account. ";
   result[WebAPI::result::comments] = out.str();
-  global.theProgress.WriteResponse(result);
-  return true;
+  return global.theProgress.WriteResponse(result, false);
 }
 
 JSData WebWorker::GetSignUpRequestResult() {
@@ -1075,31 +1070,44 @@ bool WebWorker::WriteToBodyJSON(const JSData& result) {
   return this->WriteToBody(toWrite);
 }
 
-void GlobalVariables::Progress::WriteResponseAfterTimeout(const JSData& out) {
-
-}
-
-bool GlobalVariables::Progress::WriteCrash(const JSData& out) {
-  MacroRegisterFunctionWithName("WebWorker::WriteCrash");
-  int toDoFixRaceCondition;
-  global << logger::red << "Crashing AFTER timeout!" << logger::endL;
-  if (global.theProgress.TimedOut()) {
-    this->WriteResponseAfterTimeout(out);
-  } else {
-    this->WriteResponseBeforeTimeout(out);
+bool GlobalVariables::Progress::WriteResponse(const JSData& out, bool isCrash) {
+  MutexLockGuard guard(global.MutexReturnBytes);
+  MacroRegisterFunctionWithName("WebWorker::WriteResponse");
+  WebWorker& worker = global.server().GetActiveWorker();
+  worker.SetHeaderOKNoContentLength("");
+  std::string status = "finished";
+  if (isCrash) {
+    status = "crash";
   }
-
-
-  global.server().GetActiveWorker().WriteAfterTimeoutJSON(
-    out, "crash", ""
-  );
-  global.server().SignalActiveWorkerDoneReleaseEverything();
+  if (this->flagTimedOut) {
+    worker.WriteAfterTimeoutJSON(
+      out,
+      status,
+      global.RelativePhysicalNameOptionalResult
+    );
+  } else {
+    JSData copy = out;
+    worker.WriteToBodyJSONAppendComments(copy);
+    worker.SendAllBytesWithHeaders();
+  }
+  if (isCrash) {
+    global.server().SignalActiveWorkerDoneReleaseEverything();
+  }
+  return true;
 }
 
-void GlobalVariables::WriteResponse(const JSData& out) {
-  WebWorker& theWorker = global.server().GetActiveWorker();
-  theWorker.SetHeaderOKNoContentLength("");
+void GlobalVariables::Progress::Report(const std::string &input) {
+  MutexLockGuard guard(global.MutexReturnBytes);
+  MacroRegisterFunctionWithName("GlobalVariables::Progress::Report");
+  return global.server().GetActiveWorker().WriteAfterTimeoutProgress(input, false);
+}
 
-  theWorker.WriteToBodyJSON(out);
-  theWorker.SendAllBytesWithHeaders();
+void GlobalVariables::Progress::Initiate(const std::string& message) {
+  MutexLockGuard guard(global.MutexReturnBytes);
+  MacroRegisterFunctionWithName("GlobalVariables::Progress::Initiate");
+  if (global.theProgress.flagTimedOut) {
+    return;
+  }
+  global.theProgress.flagTimedOut = true;
+  global.server().GetActiveWorker().WriteAfterTimeoutShowIndicator(message);
 }

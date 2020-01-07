@@ -106,16 +106,25 @@ bool GlobalVariables::Progress::TimedOut() {
 }
 
 bool GlobalVariables::Progress::MonitoringAllowed() {
-  return !this->flagBanProcessMonitoring;
+  return !this->flagBanProcessMonitorinG && this->flagReportAllowed;
 }
 
 bool GlobalVariables::Progress::ReportAllowed(int type) {
   (void) type;
-  return !this->flagBanProcessMonitoring && this->flagReportAllowed && this->flagTimedOut;
+  return this->MonitoringAllowed() && this->flagTimedOut && this->flagReportDesired;
+}
+
+void GlobalVariables::Progress::AllowReport() {
+  this->flagReportAllowed = true;
+}
+
+void GlobalVariables::Progress::DisallowReport() {
+  this->flagReportAllowed = false;
 }
 
 GlobalVariables::Progress::Progress() {
-  this->flagBanProcessMonitoring = true;
+  this->flagBanProcessMonitorinG = false;
+  this->flagReportDesired = false;
   this->flagTimedOut = false;
   this->flagReportAllowed = false;
  }
@@ -148,7 +157,7 @@ GlobalVariables::GlobalVariables() {
   this->flagSSLIsAvailable = false;
 
   this->millisecondsNoPingBeforeChildIsPresumedDead = 10000;
-  this->MutexProgressReportinG.mutexName = "ProgressReport";
+  this->MutexReturnBytes.mutexName = "WriteBytesLock";
   this->flagCachingInternalFilesOn = true;
   this->flagRunServerOnEmptyCommandLine = false;
   this->flagRequestComingLocally = false;

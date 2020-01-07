@@ -49,20 +49,11 @@ bool WebAPIResponse::ServeResponseFalseIfUnrecognized(
   } else if (global.userCalculatorRequestType == WebAPI::request::serverStatusJSON) {
     return this->ProcessServerStatusJSON();
   }
-  if (
-    global.userCalculatorRequestType == WebAPI::request::pause &&
-    (!global.theProgress.flagBanProcessMonitoring)
-  ) {
+  if (global.userCalculatorRequestType == WebAPI::request::pause) {
     return this->ProcessPauseWorker();
-  } else if (
-    global.userCalculatorRequestType == WebAPI::request::unpause &&
-    (!global.theProgress.flagBanProcessMonitoring)
-  ) {
+  } else if (global.userCalculatorRequestType == WebAPI::request::unpause) {
     return this->ProcessUnpauseWorker();
-  } else if (
-    global.userCalculatorRequestType == WebAPI::request::indicator &&
-    (!global.theProgress.flagBanProcessMonitoring)
-  ) {
+  } else if (global.userCalculatorRequestType == WebAPI::request::indicator) {
     return this->ProcessComputationIndicator();
   } else if (global.userCalculatorRequestType == WebAPI::request::setProblemWeight) {
     return this->ProcessSetProblemWeight();
@@ -186,7 +177,7 @@ bool WebAPIResponse::ServeResponseFalseIfUnrecognized(
 
 bool WebAPIResponse::ProcessCalculatorExamplesJSON() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessCalculatorExamplesJSON");
-  global.WriteResponse(global.calculator().GetElement().ToJSONFunctionHandlers());
+  global.theProgress.WriteResponse(global.calculator().GetElement().ToJSONFunctionHandlers());
   return true;
 }
 
@@ -200,8 +191,7 @@ bool WebAPIResponse::ProcessServerStatusJSON() {
   << "</td></tr></table>";
   JSData outputJS;
   outputJS[WebAPI::result::resultHtml] = out.str();
-  global.WriteResponse(outputJS);
-  return true;
+  return global.theProgress.WriteResponse(outputJS);
 }
 
 bool WebAPIResponse::ProcessUnpauseWorker() {
@@ -210,8 +200,7 @@ bool WebAPIResponse::ProcessUnpauseWorker() {
   JSData progressReader, result;
   int indexWorker = this->owner->GetIndexIfRunningWorkerId(progressReader);
   if (indexWorker < 0) {
-    global.WriteResponse(progressReader);
-    return true;
+    return global.theProgress.WriteResponse(progressReader);
   }
   WebWorker& otherWorker = this->owner->parent->theWorkers[indexWorker];
   if (!otherWorker.PauseWorker.Unlock()) {
@@ -219,8 +208,7 @@ bool WebAPIResponse::ProcessUnpauseWorker() {
   } else {
     result[WebAPI::result::status] = "unpaused";
   }
-  global.WriteResponse(result);
-  return true;
+  return global.theProgress.WriteResponse(result);
 }
 
 bool WebAPIResponse::ProcessPauseWorker() {
@@ -229,8 +217,7 @@ bool WebAPIResponse::ProcessPauseWorker() {
   JSData progressReader, result;
   int indexWorker = this->owner->GetIndexIfRunningWorkerId(progressReader);
   if (indexWorker < 0) {
-    global.WriteResponse(progressReader);
-    return true;
+    return global.theProgress.WriteResponse(progressReader);
   }
   WebWorker& otherWorker = this->owner->parent->theWorkers[indexWorker];
   if (otherWorker.PauseWorker.Lock()) {
@@ -238,8 +225,7 @@ bool WebAPIResponse::ProcessPauseWorker() {
   } else {
     result[WebAPI::result::error] = "Failed to pause process. ";
   }
-  global.WriteResponse(result);
-  return true;
+  return global.theProgress.WriteResponse(result);
 }
 
 bool WebAPIResponse::ProcessComputationIndicator() {
@@ -247,8 +233,7 @@ bool WebAPIResponse::ProcessComputationIndicator() {
   this->owner->SetHeaderOKNoContentLength("");
   global << "Processing get request indicator." << logger::endL;
   JSData result = this->owner->ProcessComputationIndicatorJSData();
-  global.WriteResponse(result);
-  return true;
+  return global.theProgress.WriteResponse(result);
 }
 
 bool WebAPIResponse::ProcessSignUP() {
@@ -350,18 +335,13 @@ bool WebAPIResponse::ProcessChangePassword(const std::string& reasonForNoAuthent
 bool WebAPIResponse::ProcessCompute() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessCompute");
   this->owner->SetHeaderOKNoContentLength("");
-  std::string monitoring = global.GetWebInput(WebAPI::request::monitoring);
-  if (monitoring == "false") {
-    global.theProgress.flagBanProcessMonitoring = true;
-    global.theProgress.flagReportAlloweD = false;
-  }
+  bool monitoringDesired = (global.GetWebInput(WebAPI::request::monitoring) != "false");
   Calculator& theCalculator = global.calculator().GetElement();
 
   theCalculator.inputString = HtmlRoutines::ConvertURLStringToNormal(
     global.GetWebInput(WebAPI::request::calculatorInput),
     false
   );
-  global.WebServerReturnDisplayIndicatorCloseConnection = WebServer::OutputShowIndicatorOnTimeoutStatic;
   global.initOutputReportAndCrashFileNames(
     HtmlRoutines::ConvertStringToURLString(theCalculator.inputString, false),
     theCalculator.inputString
@@ -370,15 +350,11 @@ bool WebAPIResponse::ProcessCompute() {
   //  the initialization below moved to the start of the web server!
   //  theParser.init();
   ////////////////////////////////////////////////
-  global.theProgress.flagReportAlloweD = true;
-  theCalculator.Evaluate(theCalculator.inputString);
-  global.theProgress.flagReportAlloweD = false;
-  if (global.flagRunningBuiltInWebServer) {
-    if (global.theProgress.flagTimedOut) {
-      this->owner->WriteAfterTimeoutResult();
-      return true;
-    }
+  if (monitoringDesired) {
+    global.theProgress.AllowMonitoring();
   }
+  theCalculator.Evaluate(theCalculator.inputString);
+  global.theProgress.BanMonitoring();
   JSData result;
   result = theCalculator.ToJSONOutputAndSpecials();
   result[WebAPI::result::commentsGlobal] = global.Comments.getCurrentReset();

@@ -2514,9 +2514,7 @@ bool CalculatorFunctions::innerPrecomputeSemisimpleLieAlgebraStructure(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerPrecomputeSemisimpleLieAlgebraStructure");
   if (!global.theProgress.flagBanProcessMonitoring) {
-    if (global.WebServerReturnDisplayIndicatorCloseConnection != nullptr) {
-      global.WebServerReturnDisplayIndicatorCloseConnection("Triggered by innerPrecomputeSemisimpleLieAlgebraStructure.");
-    }
+    global.IndicatorInitiate("Triggered by innerPrecomputeSemisimpleLieAlgebraStructure.");
   }
   (void) input;
   List<DynkinType> theTypes;

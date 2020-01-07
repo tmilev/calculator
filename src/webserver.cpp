@@ -810,18 +810,24 @@ std::string WebWorker::GetHtmlHiddenInputs(bool includeUserName, bool includeAut
   return out.str();
 }
 
-void WebWorker::WriteAfterTimeoutProgressStatic(const std::string& input) {
+void GlobalVariables::Progress::Report(const std::string &input) {
+  MacroRegisterFunctionWithName("GlobalVariables::Progress::Report");
+  MutexLockGuard guard(global.MutexProgressReportinG);
   return global.server().GetActiveWorker().WriteAfterTimeoutProgress(input, false);
 }
 
-void WebWorker::WriteAfterTimeoutProgress(const std::string& input, bool forceFileWrite) {
-  if (
-    !global.theProgress.flagReportAlloweD ||
-    !global.theProgress.flagTimedOut ||
-    global.theProgress.flagBanProcessMonitoring
-  ) {
+void GlobalVariables::Progress::Initiate(const std::string& message) {
+  MacroRegisterFunctionWithName("GlobalVariables::Progress::Initiate");
+  MutexLockGuard guard(global.MutexProgressReportinG);
+  if (global.theProgress.flagTimedOut) {
     return;
   }
+  global.theProgress.flagTimedOut = true;
+  global.server().GetActiveWorker().WriteAfterTimeoutShowIndicator(message);
+
+}
+
+void WebWorker::WriteAfterTimeoutProgress(const std::string& input, bool forceFileWrite) {
   this->PauseIfRequested();
   MacroRegisterFunctionWithName("WebWorker::WriteAfterTimeoutProgress");
   if (!this->workerToWorkerRequestIndicator.ReadOnceIfFailThenCrash(false, true)) {
@@ -838,8 +844,8 @@ void WebWorker::WriteAfterTimeoutProgress(const std::string& input, bool forceFi
   );
 }
 
-void WebWorker::WriteAfterTimeoutResult() {
-  MacroRegisterFunctionWithName("WebWorker::WriteComputationResult");
+void GlobalVariables::Progress::WriteResponseAfterTimeout(const JSData &out) {
+  MacroRegisterFunctionWithName("WebWorker::WriteAfterTimeoutResultStatic");
   WebWorker::WriteAfterTimeoutJSON(
     global.calculator().GetElement().ToJSONOutputAndSpecials(),
     "finished",
@@ -1370,10 +1376,6 @@ int WebWorker::GetIndexIfRunningWorkerId(
 JSData WebWorker::ProcessComputationIndicatorJSData() {
   MacroRegisterFunctionWithName("WebWorker::ProcessComputationIndicatorJSData");
   // Timer thread will no longer time us out.
-  StateMaintainer<bool> maintainReport(global.theProgress.flagReportAlloweD);
-  StateMaintainer<bool> maintainProcess(global.theProgress.flagBanProcessMonitoring);
-  global.theProgress.flagReportAlloweD = false;
-  global.theProgress.flagBanProcessMonitoring = true;
   JSData result;
   std::stringstream commentsOnFailure;
   if (!this->flagUsingSSLInWorkerProcess) {
@@ -2247,7 +2249,6 @@ int WebWorker::ServeClient() {
   global.userDefault.flagMustLogin = true;
   global.userDefault.flagStopIfNoLogin = true;
   UserCalculatorData& theUser = global.userDefault;
-  global.IndicatorStringOutputFunction = WebWorker::WriteAfterTimeoutProgressStatic;
   this->response.reset(*this);
   if (
     this->requestTypE != this->requestGet &&
@@ -2437,9 +2438,7 @@ void WebWorker::Release() {
 void WebWorker::GetIndicatorOnTimeout(
   JSData& output, const std::string& message
 ) {
-  MacroRegisterFunctionWithName("WebWorker::OutputShowIndicatorOnTimeout");
-  MutexLockGuard theLock(this->PauseWorker.lockThreads.GetElement());
-  global.theProgress.flagTimedOut = true;
+  MacroRegisterFunctionWithName("WebWorker::GetIndicatorOnTimeout");
   global << logger::blue
   << "Computation timeout, sending progress indicator instead of output. "
   << logger::endL;
@@ -2460,8 +2459,9 @@ void WebWorker::GetIndicatorOnTimeout(
   }
 }
 
-void WebWorker::OutputShowIndicatorOnTimeout(const std::string& message) {
+void WebWorker::WriteAfterTimeoutShowIndicator(const std::string& message) {
   MacroRegisterFunctionWithName("WebWorker::OutputShowIndicatorOnTimeout");
+  MutexLockGuard guard(global.MutexProgressReportinG);
   global << "Long computation, about to display indicator. " << logger::endL;
   global.theProgress.flagTimedOut = true;
   JSData result;
@@ -2567,13 +2567,12 @@ bool WebServer::CheckConsistency() {
 }
 
 void WebServer::ReleaseEverything() {
+
   this->theTLS.Free();
   ProgressReportWebServer::flagServerExists = false;
   for (int i = 0; i < this->theWorkers.size; i ++) {
     this->theWorkers[i].Release();
   }
-  global.WebServerReturnDisplayIndicatorCloseConnection = nullptr;
-  global.IndicatorStringOutputFunction = nullptr;
   this->activeWorker = - 1;
   if (global.flagServerDetailedLog) {
     global << logger::red << "Detail: "
@@ -2594,11 +2593,6 @@ void WebServer::ReleaseEverything() {
 
 WebServer::~WebServer() {
   this->flagDeallocated = true;
-}
-
-void WebServer::OutputShowIndicatorOnTimeoutStatic(const std::string& message) {
-  MacroRegisterFunctionWithName("WebServer::OutputShowIndicatorOnTimeoutStatic");
-  global.server().GetActiveWorker().OutputShowIndicatorOnTimeout(message);
 }
 
 void WebServer::FlushActiveWorker() {

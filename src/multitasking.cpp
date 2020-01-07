@@ -40,11 +40,6 @@ void MutexRecursiveWrapper::CheckConsistency() {
 }
 
 void MutexRecursiveWrapper::initConstructorCallOnly() {
-  //  static bool allowToRun = true;
-  //  while (!allowToRun)
-  //  {}
-  //  allowToRun = false;
-
   this->flagDeallocated = false;
   this->flagInitialized = false;
   this->flagUnsafeFlagForDebuggingIsLocked = false;

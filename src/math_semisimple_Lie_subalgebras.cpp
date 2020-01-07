@@ -996,7 +996,7 @@ void SemisimpleSubalgebras::FindTheSSSubalgebrasInit() {
   if (this->owner == nullptr) {
     global.fatal << "<hr>Owner of semisimple subalgebras is zero" << global.fatal;
   }
-  if (global.theProgress.flagReportAlloweD) {
+  if (global.theProgress.ReportAllowed()) {
     this->fileNameToLogComments = "LogFileComments_" +
     FileOperations::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) +
     ".html";

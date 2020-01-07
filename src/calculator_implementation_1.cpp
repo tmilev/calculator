@@ -415,10 +415,8 @@ bool Calculator::innerPrintSSSubalgebras(
       return theCommands << "Only logged-in admins allowed to force-recompute semisimple subalgebras. ";
     }
   }
-  if (!global.theProgress.flagBanProcessMonitoring) {
-    if (global.WebServerReturnDisplayIndicatorCloseConnection != nullptr) {
-      global.WebServerReturnDisplayIndicatorCloseConnection("Triggered by printSemisimpleSubalgebras.");
-    }
+  if (global.theProgress.ReportAllowed()) {
+    global.theProgress.Initiate("Triggered by printSemisimpleSubalgebras.");
   }
   if (input.size() != 2) {
     return theCommands << "Semisimple Lie algebra expects a single argument. ";

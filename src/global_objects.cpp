@@ -44,7 +44,6 @@ void InitializeGlobalObjects() {
   global.logs.logType = GlobalVariables::LogData::type::server;
   global.flagIsChildProcess = false;
   InitializeTimeR();
-  global.IndicatorStringOutputFunction = nullptr;
   global.pointerCallSystemNoOutput = &CallSystemWrapperNoOutput;
   global.pointerCallSystemWithOutput = &CallSystemWrapperReturnStandardOutput;
   global.pointerCallChDir = &CallChDirWrapper;

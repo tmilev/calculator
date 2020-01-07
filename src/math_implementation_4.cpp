@@ -50,6 +50,7 @@ GlobalVariables::Crasher& GlobalVariables::Crasher::operator<<(const GlobalVaria
     std::cout << "Recursion within the crashing mechanism detected. "
     << "Something is very wrong. "
     << this->crashReportConsolE.str() << std::endl;
+    std::exit(- 1);
     assert(false);
   }
   this->crashReportConsolE << this->crashReport.str();
@@ -130,7 +131,7 @@ GlobalVariables::Crasher& GlobalVariables::Crasher::operator<<(const GlobalVaria
   JSData output;
   output[WebAPI::result::crashReport] = this->crashReportHtml.str();
   output[WebAPI::result::comments] = global.Comments.getCurrentReset();
-  global.WriteCrash(output);
+  global.theProgress.WriteCrash(output);
   assert(false);
   return *this;
 }
@@ -503,14 +504,16 @@ std::string GlobalVariables::GetWebInput(const std::string& inputName) {
 
 void GlobalVariables::MakeReport() {
   MacroRegisterFunctionWithName("GlobalVariables::MakeReport");
-  if (this->IndicatorStringOutputFunction == nullptr) {
+  if (!global.theProgress.ReportAllowed()) {
     return;
   }
+  std::string reportString;
   if (this->flagRunningCommandLine || this->flagRunningConsoleTest) {
-    this->MakeReport(this->ToStringProgressReportConsole());
+    reportString = this->ToStringProgressReportConsole();
   } else {
-    this->MakeReport(this->ToStringProgressReportNoThreadData(true));
+    reportString = this->ToStringProgressReportNoThreadData(true);
   }
+  this->theProgress.Report(reportString);
 }
 
 void GlobalVariables::initOutputReportAndCrashFileNames(

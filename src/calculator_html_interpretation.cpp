@@ -786,7 +786,7 @@ void WebAPIResponse::GetJSDataUserInfo(JSData& outputAppend, const std::string& 
   if (comments != "") {
     outputAppend[WebAPI::result::comments] = HtmlRoutines::ConvertStringToHtmlString(comments, false);
   }
-  if (!global.theProgress.flagBanProcessMonitoring) {
+  if (global.theProgress.MonitoringAllowed()) {
     outputAppend[WebAPI::UserInfo::processMonitoring] = "true";
     outputAppend[Configuration::millisecondsReplyAfterComputation] = static_cast<double>(global.millisecondsReplyAfterComputation);
   } else {
@@ -965,8 +965,8 @@ JSData WebAPIResponse::SubmitAnswersJSON(
   const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake
 ) {
   MacroRegisterFunctionWithName("WebAPIReponse::submitAnswers");
-  StateMaintainer<bool> maintain(global.theProgress.flagBanProcessMonitoring);
-  global.theProgress.flagBanProcessMonitoring = true;
+  global.theProgress.BanMonitoring();
+
   std::stringstream output, errorStream, comments;
   JSData result;
   double startTime = global.GetElapsedSeconds();

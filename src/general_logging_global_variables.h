@@ -161,13 +161,6 @@ public:
   int (*pointerCallSystemNoOutput)(const std::string& theSystemCommand);
   std::string (*pointerCallSystemWithOutput)(const std::string& theSystemCommand);
   void (*pointerCallChDir)(const std::string& theDirectoryName);
-  // Possible non-null values:
-  // WebWorker::WriteAfterTimeoutProgressStatic
-  void (*IndicatorStringOutputFunction)(const std::string& input);
-  // Possible non-null values:
-  // WebServer::OutputShowIndicatorOnTimeoutStatic
-  void (*WebServerReturnDisplayIndicatorCloseConnection)(const std::string& message);
-  void (*WebServerTimerPing)(int64_t pingTime);
   //  double MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit;
   MemorySaving<Calculator>& calculator();
 
@@ -238,6 +231,10 @@ public:
   bool flagDeallocated;
   // progress report flags:
   class Progress {
+  private:
+    bool flagBanProcessMonitoring;
+    bool flagTimedOut;
+    bool flagReportAllowed;
   public:
     class ReportType {
     public:
@@ -247,11 +244,24 @@ public:
       static const int fileInputOutput = 3;
       static const int largeIntegerArithmetic = 4;
     };
-    bool ReportAlloweD(int type = Progress::ReportType::general);
-    bool ReportBanneD();
-    bool flagBanProcessMonitoring;
-    bool flagTimedOut;
-    bool flagReportAlloweD;
+    // Respond functions start here.
+    // The functions below lock one another out.
+    void Report(const std::string& input);
+    void Initiate(const std::string& message);
+    void WriteResponseBeforeTimeout(const JSData& out);
+    void WriteResponseAfterTimeout(const JSData& out);
+    // Respond functions end here.
+
+    // returns true
+    bool WriteCrash(const JSData& out);
+    // returns true
+    bool WriteResponse(const JSData& out);
+
+    bool MonitoringAllowed();
+    bool ReportAllowed(int type = Progress::ReportType::general);
+    void BanMonitoring();
+    void AllowMonitoring();
+    bool TimedOut();
     Progress();
   };
   Progress theProgress;
@@ -357,9 +367,6 @@ public:
   };
   CommentsCurrentConnection Comments;
   void JoinAllThreads();
-  void WriteResponse(const JSData& out);
-  void WriteCrash(const JSData& out);
-
   bool ConfigurationStore();
   bool ConfigurationLoad();
   void ConfigurationProcess();
@@ -406,11 +413,6 @@ public:
   std::string ToStringProgressReportNoThreadData(bool useHTML);
   std::string ToStringProgressReportWithThreadData(bool useHTML);
   std::string ToStringProgressReportConsole();
-  void MakeReport(const std::string& input) {
-    if (this->IndicatorStringOutputFunction != nullptr) {
-      this->IndicatorStringOutputFunction(input);
-    }
-  }
   WebServer& server();
   void MakeReport();
   class Test {

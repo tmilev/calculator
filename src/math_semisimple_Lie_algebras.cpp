@@ -767,7 +767,7 @@ bool SemisimpleLieAlgebra::GetConstantOrHElement(
 }
 
 void SemisimpleLieAlgebra::MakeChevalleyTestReport(int i, int j, int k, int Total) {
-  if (global.IndicatorStringOutputFunction == nullptr) {
+  if (!global.theProgress.ReportAllowed()) {
     return;
   }
   std::stringstream out2, out3;

@@ -101,20 +101,23 @@ void GlobalVariables::ChDir(const std::string& systemCommand) {
   }
 }
 
-bool GlobalVariables::Progress::ReportBanneD() {
-  return this->flagBanProcessMonitoring;
+bool GlobalVariables::Progress::TimedOut() {
+  return this->flagTimedOut;
 }
 
-bool GlobalVariables::Progress::ReportAlloweD(int type) {
+bool GlobalVariables::Progress::MonitoringAllowed() {
+  return !this->flagBanProcessMonitoring;
+}
+
+bool GlobalVariables::Progress::ReportAllowed(int type) {
   (void) type;
-  return !this->flagBanProcessMonitoring && this->flagReportAlloweD;
+  return !this->flagBanProcessMonitoring && this->flagReportAllowed && this->flagTimedOut;
 }
 
 GlobalVariables::Progress::Progress() {
-  this->flagTimedOut = false;
   this->flagBanProcessMonitoring = true;
   this->flagTimedOut = false;
-  this->flagReportAlloweD = false;
+  this->flagReportAllowed = false;
  }
 
 GlobalVariables::GlobalVariables() {
@@ -125,9 +128,6 @@ GlobalVariables::GlobalVariables() {
   this->flagIsChildProcess = false;
   this->flagRestartNeeded = false;
   this->flagStopNeeded = false;
-  this->IndicatorStringOutputFunction = nullptr;
-  this->WebServerReturnDisplayIndicatorCloseConnection = nullptr;
-  this->WebServerTimerPing = nullptr;
   this->millisecondsMaxComputation = 100000; //100 seconds
   this->millisecondOffset = 0;
   this->millisecondsComputationStart = - 1;
@@ -164,7 +164,14 @@ GlobalVariables::GlobalVariables() {
 void GlobalVariables::WriteSourceCodeFilesJS() {
   this->theSourceCodeFiles().QuickSortAscending();
   std::fstream theFile;
-  FileOperations::OpenFileCreateIfNotPresentVirtual(theFile, "/calculator-html/src/source_code_files.js", false, true, false, false);
+  FileOperations::OpenFileCreateIfNotPresentVirtual(
+    theFile,
+    "/calculator-html/src/source_code_files.js",
+    false,
+    true,
+    false,
+    false
+  );
   theFile << "var theCPPsourceCodeFiles = [";
   for (int i = 0; i < this->theSourceCodeFiles().size; i ++) {
     if (i != 0) {
@@ -217,10 +224,7 @@ void ProgressReport::Report(const std::string& theReport) {
 
 void ProgressReport::init() {
   this->flagInitialized = false;
-  if (global.theProgress.ReportBanneD()) {
-    return;
-  }
-  if (!global.theProgress.ReportAlloweD()) {
+  if (!global.theProgress.ReportAllowed()) {
     return;
   }
   if (global.fatal.flagCrashInitiateD) {
@@ -4240,7 +4244,7 @@ int PartFraction::ControlLineSizeStringPolys(std::string& output, FormatExpressi
 }
 
 void PartFractions::MakeProgressReportSplittingMainPart() {
-  if (global.IndicatorStringOutputFunction == nullptr) {
+  if (!global.theProgress.ReportAllowed()) {
     return;
   }
   std::stringstream out1, out2, out3;
@@ -4272,7 +4276,7 @@ void PartFractions::MakeProgressReportSplittingMainPart() {
 
 void PartFractions::MakeProgressVPFcomputation() {
   this->NumProcessedForVPFfractions ++;
-  if (global.IndicatorStringOutputFunction == nullptr) {
+  if (!global.theProgress.ReportAllowed()) {
     return;
   }
   std::stringstream out2;

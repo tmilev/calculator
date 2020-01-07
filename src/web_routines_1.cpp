@@ -925,7 +925,7 @@ bool WebAPIResponse::ProcessForgotLogin() {
   JSData result;
   if (!global.flagDatabaseCompiled) {
     result[WebAPI::result::error] = "Error: database not running. ";
-    global.WriteResponse(result);
+    global.theProgress.WriteResponse(result);
     return true;
   }
   std::stringstream out;
@@ -942,7 +942,7 @@ bool WebAPIResponse::ProcessForgotLogin() {
   << "</b><br>\n";
   if (!theCrawler.VerifyRecaptcha(&out, &out, nullptr)) {
     result[WebAPI::result::comments] = out.str();
-    global.WriteResponse(result);
+    global.theProgress.WriteResponse(result);
     return true;
   }
   if (!theUser.Iexist(&out)) {
@@ -950,7 +950,7 @@ bool WebAPIResponse::ProcessForgotLogin() {
     << "We failed to find your email: " << theUser.email << " in our records. "
     << "</b>";
     result[WebAPI::result::comments] = out.str();
-    global.WriteResponse(result);
+    global.theProgress.WriteResponse(result);
     return true;
   }
   if (!theUser.LoadFromDB(&out, &out)) {
@@ -958,7 +958,7 @@ bool WebAPIResponse::ProcessForgotLogin() {
     << "Failed to fetch user info for email: " << theUser.email
     << "</b>";
     result[WebAPI::result::comments] = out.str();
-    global.WriteResponse(result);
+    global.theProgress.WriteResponse(result);
     return true;
   }
   out << "<b style =\"color:green\">"
@@ -972,7 +972,7 @@ bool WebAPIResponse::ProcessForgotLogin() {
   out << "<br>Response time: " << global.GetElapsedSeconds() << " second(s); "
   << global.GetElapsedSeconds() << " second(s) spent creating account. ";
   result[WebAPI::result::comments] = out.str();
-  global.WriteResponse(result);
+  global.theProgress.WriteResponse(result);
   return true;
 }
 
@@ -1075,15 +1075,20 @@ bool WebWorker::WriteToBodyJSON(const JSData& result) {
   return this->WriteToBody(toWrite);
 }
 
-void GlobalVariables::WriteCrash(const JSData& out) {
+void GlobalVariables::Progress::WriteResponseAfterTimeout(const JSData& out) {
+
+}
+
+bool GlobalVariables::Progress::WriteCrash(const JSData& out) {
   MacroRegisterFunctionWithName("WebWorker::WriteCrash");
   int toDoFixRaceCondition;
-  if (!global.theProgress.flagTimedOut) {
-    this->WriteResponse(out);
-    return;
+  global << logger::red << "Crashing AFTER timeout!" << logger::endL;
+  if (global.theProgress.TimedOut()) {
+    this->WriteResponseAfterTimeout(out);
+  } else {
+    this->WriteResponseBeforeTimeout(out);
   }
 
-  global << logger::red << "Crashing AFTER timeout!" << logger::endL;
 
   global.server().GetActiveWorker().WriteAfterTimeoutJSON(
     out, "crash", ""

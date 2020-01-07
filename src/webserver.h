@@ -118,14 +118,14 @@ public:
     int recursionDepth = 0
   );
   bool ExtractArgumentsFromCookies(std::stringstream& argumentProcessingFailureComments);
+  void WriteAfterTimeoutShowIndicator(const std::string& message);
   void WriteAfterTimeoutProgress(const std::string& input, bool forceFileWrite);
-  static void WriteAfterTimeoutProgressStatic(const std::string& input);
+  ///////
   void PauseIfRequested();
   // writes json to body, sanitizes.
   int WriteToBodyJSONAppendComments(JSData& result);
   bool WriteToBodyJSON(const JSData& result);
   bool WriteToBody(const std::string& bytesToAppend);
-  void WriteAfterTimeoutResult();
   static void WriteAfterTimeoutString(
     const std::string& input,
     const std::string& status,
@@ -145,7 +145,6 @@ public:
     const JSData& input,
     const std::string& fileNameCarbonCopy
   );
-  void OutputShowIndicatorOnTimeout(const std::string& message);
   void GetIndicatorOnTimeout(JSData &output, const std::string& message);
   void QueueStringForSendingNoHeadeR(const std::string& stringToSend, bool MustSendAll = false);
   void QueueBytesForSendingNoHeadeR(const List<char>& bytesToSend, bool MustSendAll = false);
@@ -297,7 +296,6 @@ public:
   static void Release(int& theDescriptor);
   static void SignalActiveWorkerDoneReleaseEverything();
   static void FlushActiveWorker();
-  static void OutputShowIndicatorOnTimeoutStatic(const std::string &message);
   static void fperror_sigaction[[noreturn]](int signal);
   void ReapChildren();
   static void Signal_SIGCHLD_handler(int s);

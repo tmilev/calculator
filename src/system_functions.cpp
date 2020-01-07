@@ -43,11 +43,8 @@ public:
   void reset();
   void Run();
   bool HandleComputationTimer();
-  bool HandleComputationCompleteStandard();
-  bool HandleTimerSignalToServer();
   bool HandleMaxComputationTime();
   bool HandleEverythingIsDone();
-  bool HandlePingServerIamAlive();
   bool HandleComputationTimeout();
 };
 
@@ -64,22 +61,6 @@ bool TimeoutThread::HandleComputationTimer() {
   return false;
 }
 
-bool TimeoutThread::HandleComputationCompleteStandard() {
-  //if (global.flagComputationCompletE)
-  //  theReport1.SetStatus("Starting timer cycle break: computation is complete.");
-  return false;
-}
-
-bool TimeoutThread::HandleTimerSignalToServer() {
-  if (this->counter % 20 != 0) {
-    return false;
-  }
-//  std::stringstream reportStream;
-//  reportStream << "Timer: " << this->elapsedtime << " seconds elapsed since the timer was launched.";
-//  theReport1.SetStatus(reportStream.str());
-  return false;
-}
-
 bool TimeoutThread::HandleMaxComputationTime() {
   if (global.millisecondsMaxComputation <= 0) {
     return false;
@@ -93,7 +74,6 @@ bool TimeoutThread::HandleMaxComputationTime() {
   if (global.flagComputationCompletE) {
     return false;
   }
-  //theReport2.SetStatus("Starting timer cycle break: computation time too long.");
   if (!global.flagComputationStarted) {
     global.fatal << "Something has gone wrong. Computation has not started, yet " << this->elapsedTimeInMilliseconds
     << " ms have already passed."
@@ -133,6 +113,7 @@ bool TimeoutThread::HandleMaxComputationTime() {
 }
 
 bool TimeoutThread::HandleComputationTimeout() {
+  MacroRegisterFunctionWithName("TimerThreadData::HandleComputationTimeout");
   if (!global.flagRunningBuiltInWebServer) {
     return false;
   }
@@ -145,39 +126,12 @@ bool TimeoutThread::HandleComputationTimeout() {
   if (this->elapsedComputationTimeInMilliseconds <= global.millisecondsReplyAfterComputation) {
     return false;
   }
-  if (!global.theProgress.ReportAlloweD()) {
-    return false;
-  }
-  MacroRegisterFunctionWithName("TimerThreadData::HandleComputationTimeout");
-  if (global.WebServerReturnDisplayIndicatorCloseConnection == nullptr) {
-    return false;
-  }
-  if (global.theProgress.flagTimedOut) {
-    return false;
-  }
-  global.theProgress.flagTimedOut = true;
-  // theReport2.SetStatus("Starting timer cycle displaying time out explanation.");
-  // Possible values for global.WebServerReturnDisplayIndicatorCloseConnection:
-  // 1) nullptr
-  // 2) WebServer::OutputShowIndicatorOnTimeoutStatic
-  global.WebServerReturnDisplayIndicatorCloseConnection("Triggered by timer thread.");
-  //theReport2.SetStatus("Starting timer cycle displaying time out indicator done, continuing timer cycle.");
+  global.theProgress.Initiate("Triggered by timer thread.");
   return false;
 }
 
 bool TimeoutThread::HandleEverythingIsDone() {
   return global.flagComputationFinishedAllOutputSentClosing;
-}
-
-bool TimeoutThread::HandlePingServerIamAlive() {
-  if (global.flagComputationFinishedAllOutputSentClosing) {
-    return true;
-  }
-  if (global.WebServerTimerPing == nullptr) {
-    return false;
-  }
-  global.WebServerTimerPing(this->elapsedTimeInMilliseconds);
-  return false;
 }
 
 TimeoutThread::TimeoutThread() {
@@ -199,17 +153,12 @@ void TimeoutThread::Run() {
     global.CheckConsistency();
     this->HandleComputationTimer();
     global.FallAsleep(this->intervalBetweenChecksInMilliseconds);
-    // global.CheckConsistency();
-    this->HandleComputationCompleteStandard();
-    // global.CheckConsistency();
-    this->HandleTimerSignalToServer();
-    // global.CheckConsistency();
-    this->HandleMaxComputationTime();
-    // global.CheckConsistency();
     this->HandleComputationTimeout();
-    // global.CheckConsistency();
-    this->HandlePingServerIamAlive();
-    // global.CheckConsistency();
+    // Will crash if max computation time is exceeded.
+    // This loop will never be exited;
+    // the program will terminate wit
+    this->HandleMaxComputationTime();
+    // Only standard exit of the loop.
     if (this->HandleEverythingIsDone()) {
       break;
     }

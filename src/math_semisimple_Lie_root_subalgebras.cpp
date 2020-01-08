@@ -433,7 +433,7 @@ void rootSubalgebra::MakeProgressReportGenAutos(int progress, int outOf, int fou
 
 void rootSubalgebra::MakeProgressReportPossibleNilradicalComputation(rootSubalgebras& owner) {
   MacroRegisterFunctionWithName("rootSubalgebra::MakeProgressReportPossibleNilradicalComputation");
-  if (!global.theProgress.ReportAllowed()) {
+  if (!global.theResponse.ReportAllowed()) {
     return;
   }
   ProgressReport report1, report2, report3, report4, report5;
@@ -470,7 +470,7 @@ void rootSubalgebra::GenerateKmodMultTable(List<List<List<int> > >& output, List
   << "\n<br>\nwith centralizer " << this->theCentralizerDiagram.ToString();
   ProgressReport theReport;
   theReport.Report(out.str());
-  ProgressReport theReport2(10, GlobalVariables::Progress::ReportType::general);
+  ProgressReport theReport2(10, GlobalVariables::Response::ReportType::general);
   for (int i = 0; i < this->Modules.size; i ++) {
     output[i].SetSize(this->Modules.size);
     for (int j = 0; j < this->Modules.size; j ++) {
@@ -3519,7 +3519,7 @@ void rootSubalgebras::ComputeActionNormalizerOfCentralizerIntersectNilradical(
       int tempI = theRootSA.GetIndexKmoduleContainingRoot(tempRoot);
       this->ActionsNormalizerCentralizerNilradical[i][j] = tempI;
     }
-    if (global.theProgress.ReportAllowed()) {
+    if (global.theResponse.ReportAllowed()) {
       std::stringstream out;
       out << "Computing action of element " << i + 1 << " out of " << theSubgroup.allElements.size;
       theReport.Report(out.str());

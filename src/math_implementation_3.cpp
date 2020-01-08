@@ -101,28 +101,28 @@ void GlobalVariables::ChDir(const std::string& systemCommand) {
   }
 }
 
-bool GlobalVariables::Progress::TimedOut() {
+bool GlobalVariables::Response::TimedOut() {
   return this->flagTimedOut;
 }
 
-bool GlobalVariables::Progress::MonitoringAllowed() {
+bool GlobalVariables::Response::MonitoringAllowed() {
   return !this->flagBanProcessMonitorinG && this->flagReportAllowed;
 }
 
-bool GlobalVariables::Progress::ReportAllowed(int type) {
+bool GlobalVariables::Response::ReportAllowed(int type) {
   (void) type;
   return this->MonitoringAllowed() && this->flagTimedOut && this->flagReportDesired;
 }
 
-void GlobalVariables::Progress::AllowReport() {
+void GlobalVariables::Response::AllowReport() {
   this->flagReportAllowed = true;
 }
 
-void GlobalVariables::Progress::DisallowReport() {
+void GlobalVariables::Response::DisallowReport() {
   this->flagReportAllowed = false;
 }
 
-GlobalVariables::Progress::Progress() {
+GlobalVariables::Response::Response() {
   this->flagBanProcessMonitorinG = false;
   this->flagReportDesired = false;
   this->flagTimedOut = false;
@@ -233,7 +233,7 @@ void ProgressReport::Report(const std::string& theReport) {
 
 void ProgressReport::init() {
   this->flagInitialized = false;
-  if (!global.theProgress.ReportAllowed()) {
+  if (!global.theResponse.ReportAllowed()) {
     return;
   }
   if (global.fatal.flagCrashInitiateD) {
@@ -249,7 +249,7 @@ void ProgressReport::init() {
   global.progressReportStrings[this->threadIndex].AddOnTop(std::string(""));
   this->ticks = 0;
   this->ticksPerReport = 1;
-  this->reportType = GlobalVariables::Progress::ReportType::general;
+  this->reportType = GlobalVariables::Response::ReportType::general;
 }
 
 ProgressReport::~ProgressReport() {
@@ -4253,7 +4253,7 @@ int PartFraction::ControlLineSizeStringPolys(std::string& output, FormatExpressi
 }
 
 void PartFractions::MakeProgressReportSplittingMainPart() {
-  if (!global.theProgress.ReportAllowed()) {
+  if (!global.theResponse.ReportAllowed()) {
     return;
   }
   std::stringstream out1, out2, out3;
@@ -4285,7 +4285,7 @@ void PartFractions::MakeProgressReportSplittingMainPart() {
 
 void PartFractions::MakeProgressVPFcomputation() {
   this->NumProcessedForVPFfractions ++;
-  if (!global.theProgress.ReportAllowed()) {
+  if (!global.theResponse.ReportAllowed()) {
     return;
   }
   std::stringstream out2;

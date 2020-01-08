@@ -131,7 +131,7 @@ GlobalVariables::Crasher& GlobalVariables::Crasher::operator<<(const GlobalVaria
   JSData output;
   output[WebAPI::result::crashReport] = this->crashReportHtml.str();
   output[WebAPI::result::comments] = global.Comments.getCurrentReset();
-  global.theProgress.WriteResponse(output, true);
+  global.theResponse.WriteResponse(output, true);
   assert(false);
   return *this;
 }
@@ -504,7 +504,7 @@ std::string GlobalVariables::GetWebInput(const std::string& inputName) {
 
 void GlobalVariables::MakeReport() {
   MacroRegisterFunctionWithName("GlobalVariables::MakeReport");
-  if (!global.theProgress.ReportAllowed()) {
+  if (!global.theResponse.ReportAllowed()) {
     return;
   }
   std::string reportString;
@@ -513,7 +513,7 @@ void GlobalVariables::MakeReport() {
   } else {
     reportString = this->ToStringProgressReportNoThreadData(true);
   }
-  this->theProgress.Report(reportString);
+  this->theResponse.Report(reportString);
 }
 
 void GlobalVariables::initOutputReportAndCrashFileNames(
@@ -1654,7 +1654,7 @@ void GeneralizedVermaModuleCharacters::WriteToFile(std::fstream& output) {
   this->preferredBasisChangE.WriteToFile(output);
   this->preferredBasisChangeInversE.WriteToFile(output);
   this->theExtendedIntegralLatticeMatForM.WriteToFile(output);
-  ProgressReport theReport(1, GlobalVariables::Progress::ReportType::fileInputOutput);
+  ProgressReport theReport(1, GlobalVariables::Response::ReportType::fileInputOutput);
   this->theMaxComputation.WriteToFile(output);
   this->GmodKnegativeWeightS.WriteToFile(output);
   this->GmodKNegWeightsBasisChanged.WriteToFile(output);

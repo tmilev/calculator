@@ -58,7 +58,7 @@ bool FiniteGroup<elementSomeGroup>::ComputeAllElementsLargeGroup(bool andWords, 
     this->theWords.SetSize(1);
     this->theWords.LastObject()->SetSize(0);
   }
-  ProgressReport theReport(1000, GlobalVariables::Progress::ReportType::general);
+  ProgressReport theReport(1000, GlobalVariables::Response::ReportType::general);
   // Warning: not checking whether the generators have repetitions.
   for (int j = 0; j < this->theElements.size; j ++) {
     for (int i = 0; i < this->generators.size; i ++) {
@@ -788,7 +788,7 @@ bool WeylGroupAutomorphisms::GenerateOuterOrbit(
   ElementWeylGroupAutomorphisms currentElt;
   int numElementsToReserve = MathRoutines::Minimum(UpperLimitNumElements, 1000000);
   output.SetExpectedSize(numElementsToReserve);
-  ProgressReport theReport(3000, GlobalVariables::Progress::ReportType::general);
+  ProgressReport theReport(3000, GlobalVariables::Response::ReportType::general);
   simpleReflectionOrOuterAutomorphism theGen;
   if (outputSubset != nullptr) {
     currentElt.MakeID(*this);
@@ -930,7 +930,7 @@ bool WeylGroupData::GenerateOrbit(
     outputSubset->Clear();
     outputSubset->AddOnTop(currentElt);
   }
-  ProgressReport theReport(1000, GlobalVariables::Progress::ReportType::general);
+  ProgressReport theReport(1000, GlobalVariables::Response::ReportType::general);
   simpleReflection theGen;
   for (int i = 0; i < output.size; i ++) {
     for (int j = 0; j < this->CartanSymmetric.NumRows; j ++) {

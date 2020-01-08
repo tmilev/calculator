@@ -11,8 +11,8 @@ void Matrix<coefficient>::ComputeDeterminantOverwriteMatrix(
 ) {
   MacroRegisterFunctionWithName("Matrix::ComputeDeterminantOverwriteMatrix");
   bool doReport = this->NumCols > 10 && this->NumRows > 10 && this->NumCols * this->NumRows >= 400;
-  ProgressReport theReport(1, GlobalVariables::Progress::ReportType::gaussianElimination);
-  ProgressReport theReport2(400, GlobalVariables::Progress::ReportType::gaussianElimination);
+  ProgressReport theReport(1, GlobalVariables::Response::ReportType::gaussianElimination);
+  ProgressReport theReport2(400, GlobalVariables::Response::ReportType::gaussianElimination);
   int tempI;
   output = theRingOne;
   coefficient tempRat;
@@ -132,7 +132,7 @@ void MathRoutines::RaiseToPower(
     return;
   }
   ProgressReport reportOne;
-  ProgressReport reportTwo(32, GlobalVariables::Progress::ReportType::general);
+  ProgressReport reportTwo(32, GlobalVariables::Response::ReportType::general);
   coefficient squares;
   squares = theElement;
   if (thePowerCopy < 4) {
@@ -194,7 +194,7 @@ void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy(
     maxNumMonsFinal = 2000000;
   int totalMonPairs = 0;
   ProgressReport theReport1;
-  ProgressReport theReport2(400, GlobalVariables::Progress::ReportType::monomialAlgebraProduct);
+  ProgressReport theReport2(400, GlobalVariables::Response::ReportType::monomialAlgebraProduct);
   if (theReport1.TickAndWantReport()) {
     totalMonPairs = other.size() * this->size();
     std::stringstream reportStream;
@@ -236,7 +236,7 @@ void Matrix<coefficient>::GaussianEliminationEuclideanDomain(
   bool (*comparisonGEQFunction) (const coefficient& left, const coefficient& right)
 ) {
   MacroRegisterFunctionWithName("Matrix_Element::GaussianEliminationEuclideanDomain");
-  ProgressReport theReport(1, GlobalVariables::Progress::ReportType::gaussianElimination);
+  ProgressReport theReport(1, GlobalVariables::Response::ReportType::gaussianElimination);
   if (otherMatrix == this) {
     global.fatal << "This is a programming error: the Carbon copy in the Gaussian elimination "
     << "coincides with the matrix which we are row-reducing "
@@ -363,8 +363,8 @@ void Vectors<coefficient>::SelectABasisInSubspace(
     return;
   }
   MacroRegisterFunctionWithName("Vectors::SelectABasisInSubspace");
-  ProgressReport reportTask(1, GlobalVariables::Progress::ReportType::gaussianElimination);
-  ProgressReport reportProgress(200, GlobalVariables::Progress::ReportType::gaussianElimination);
+  ProgressReport reportTask(1, GlobalVariables::Response::ReportType::gaussianElimination);
+  ProgressReport reportProgress(200, GlobalVariables::Response::ReportType::gaussianElimination);
   int theDim = input[0].size;
   if (reportTask.TickAndWantReport()) {
     std::stringstream reportStream;
@@ -421,7 +421,7 @@ bool List<Object>::ReadFromFile(std::fstream& input, int UpperLimitForDebugPurpo
     CappedListSize = UpperLimitForDebugPurposes;
   }
   this->SetSize(CappedListSize);
-  ProgressReport theReport(30, GlobalVariables::Progress::ReportType::fileInputOutput);
+  ProgressReport theReport(30, GlobalVariables::Response::ReportType::fileInputOutput);
   for (int i = 0; i < CappedListSize; i ++) {
     this->TheObjects[i].ReadFromFile(input);
     if (theReport.TickAndWantReport()) {
@@ -442,7 +442,7 @@ bool List<Object>::ReadFromFile(std::fstream& input, int UpperLimitForDebugPurpo
 
 template <typename coefficient>
 void Matrix<coefficient>::AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, const coefficient& scalar) {
-  ProgressReport theReport (10, GlobalVariables::Progress::ReportType::gaussianElimination);
+  ProgressReport theReport (10, GlobalVariables::Response::ReportType::gaussianElimination);
   coefficient tempElement;
   for (int i = StartColIndex; i < this->NumCols; i ++) {
     tempElement = this->elements[fromRowIndex][i];
@@ -490,7 +490,7 @@ void Matrix<coefficient>::GaussianEliminationByRows(
   }
   bool formatAsLinearSystem = theFormat == nullptr ? false : theFormat->flagFormatMatrixAsLinearSystem;
   bool useHtmlInReport = theFormat == nullptr ? true : theFormat->flagUseHTML;
-  ProgressReport theReport(100, GlobalVariables::Progress::ReportType::gaussianElimination);
+  ProgressReport theReport(100, GlobalVariables::Response::ReportType::gaussianElimination);
   if (humanReadableReport != nullptr) {
     if (useHtmlInReport) {
       *humanReadableReport << "\n\n\n\n<table><tr><td style =\"border-bottom:3pt solid black;\">System status</td>"

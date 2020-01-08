@@ -235,8 +235,7 @@ public:
   bool flagComputationStarted;
   bool flagComputationFinishedAllOutputSentClosing;
   bool flagDeallocated;
-  // progress report flags:
-  class Progress {
+  class Response {
   private:
     bool flagTimedOut;
     bool flagReportAllowed;
@@ -245,9 +244,9 @@ public:
     bool flagBanProcessMonitorinG;
     class StateMaintainer {
     public:
-      GlobalVariables::Progress* owner;
+      GlobalVariables::Response* owner;
       bool flagReportAllowed;
-      StateMaintainer(GlobalVariables::Progress& inputOwner) {
+      StateMaintainer(GlobalVariables::Response& inputOwner) {
         this->owner = &inputOwner;
         this->flagReportAllowed = this->owner->flagReportAllowed;
       }
@@ -273,13 +272,13 @@ public:
     bool WriteResponse(const JSData& incoming, bool isCrash = false);
 
     bool MonitoringAllowed();
-    bool ReportAllowed(int type = Progress::ReportType::general);
+    bool ReportAllowed(int type = Response::ReportType::general);
     void DisallowReport();
     void AllowReport();
     bool TimedOut();
-    Progress();
+    Response();
   };
-  Progress theProgress;
+  Response theResponse;
   ListReferences<std::thread>theThreads;
   ListReferences<ThreadData> theThreadData;
   ListReferences<ListReferences<stackInfo> > CustomStackTrace;

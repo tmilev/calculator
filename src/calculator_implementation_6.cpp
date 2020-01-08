@@ -2360,7 +2360,6 @@ bool CalculatorFunctions::innerNewtonsMethod(Calculator& theCommands, const Expr
   theSub.SetKeyValue("y", theCommands.GetNewAtom());
   theSub.SetKeyValue("startingPoint", input[2]);
   theSub.SetKeyValue("numIterations", input[3]);
-  global.Comments << "DEBUG: Got to this point. ";
   return output.AssignStringParsed(
     "(NewtonMap{}{{a}} = DoubleValue( (iteratedMap =x- f/ Differentiate{}(x, f); x ={{a}}; iteratedMap )_3); "
     "y_{0} = startingPoint;"
@@ -2513,8 +2512,8 @@ bool CalculatorFunctions::innerPrecomputeSemisimpleLieAlgebraStructure(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerPrecomputeSemisimpleLieAlgebraStructure");
-  if (!global.theProgress.ReportAllowed()) {
-    global.theProgress.Initiate("Triggered by innerPrecomputeSemisimpleLieAlgebraStructure.");
+  if (!global.theResponse.ReportAllowed()) {
+    global.theResponse.Initiate("Triggered by innerPrecomputeSemisimpleLieAlgebraStructure.");
   }
   (void) input;
   List<DynkinType> theTypes;

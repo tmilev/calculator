@@ -925,7 +925,7 @@ bool WebAPIResponse::ProcessForgotLogin() {
   JSData result;
   if (!global.flagDatabaseCompiled) {
     result[WebAPI::result::error] = "Error: database not running. ";
-    return global.theProgress.WriteResponse(result, false);
+    return global.theResponse.WriteResponse(result, false);
   }
   std::stringstream out;
   if (!global.UserDefaultHasAdminRights()) {
@@ -941,21 +941,21 @@ bool WebAPIResponse::ProcessForgotLogin() {
   << "</b><br>\n";
   if (!theCrawler.VerifyRecaptcha(&out, &out, nullptr)) {
     result[WebAPI::result::comments] = out.str();
-    return global.theProgress.WriteResponse(result, false);
+    return global.theResponse.WriteResponse(result, false);
   }
   if (!theUser.Iexist(&out)) {
     out << "<br><b style =\"color:red\">"
     << "We failed to find your email: " << theUser.email << " in our records. "
     << "</b>";
     result[WebAPI::result::comments] = out.str();
-    return global.theProgress.WriteResponse(result, false);
+    return global.theResponse.WriteResponse(result, false);
   }
   if (!theUser.LoadFromDB(&out, &out)) {
     out << "<br><b style='color:red'>"
     << "Failed to fetch user info for email: " << theUser.email
     << "</b>";
     result[WebAPI::result::comments] = out.str();
-    return global.theProgress.WriteResponse(result, false);
+    return global.theResponse.WriteResponse(result, false);
   }
   out << "<b style ='color:green'>"
   << "Your email is on record. "
@@ -968,7 +968,7 @@ bool WebAPIResponse::ProcessForgotLogin() {
   out << "<br>Response time: " << global.GetElapsedSeconds() << " second(s); "
   << global.GetElapsedSeconds() << " second(s) spent creating account. ";
   result[WebAPI::result::comments] = out.str();
-  return global.theProgress.WriteResponse(result, false);
+  return global.theResponse.WriteResponse(result, false);
 }
 
 JSData WebWorker::GetSignUpRequestResult() {
@@ -1059,11 +1059,10 @@ bool WebWorker::WriteToBodyJSOn(const JSData& result) {
   return this->WriteToBody(toWrite);
 }
 
-bool GlobalVariables::Progress::WriteResponse(const JSData& incoming, bool isCrash) {
+bool GlobalVariables::Response::WriteResponse(const JSData& incoming, bool isCrash) {
   MutexLockGuard guard(global.MutexReturnBytes);
   MacroRegisterFunctionWithName("WebWorker::WriteResponse");
   WebWorker& worker = global.server().GetActiveWorker();
-  worker.SetHeaderOKNoContentLength("");
   std::string status = "finished";
   if (isCrash) {
     status = "crash";
@@ -1080,6 +1079,7 @@ bool GlobalVariables::Progress::WriteResponse(const JSData& incoming, bool isCra
       global.RelativePhysicalNameOptionalResult
     );
   } else {
+    worker.SetHeaderOKNoContentLength("");
     worker.WriteToBodyJSOn(output);
     worker.SendPending();
   }
@@ -1089,21 +1089,21 @@ bool GlobalVariables::Progress::WriteResponse(const JSData& incoming, bool isCra
   return true;
 }
 
-void GlobalVariables::Progress::Report(const std::string &input) {
+void GlobalVariables::Response::Report(const std::string &input) {
   MutexLockGuard guard(global.MutexReturnBytes);
   MacroRegisterFunctionWithName("GlobalVariables::Progress::Report");
   return global.server().GetActiveWorker().WriteAfterTimeoutProgress(input, false);
 }
 
-void GlobalVariables::Progress::Initiate(const std::string& message) {
+void GlobalVariables::Response::Initiate(const std::string& message) {
   MutexLockGuard guard(global.MutexReturnBytes);
   MacroRegisterFunctionWithName("GlobalVariables::Progress::Initiate");
-  if (global.theProgress.ReportAllowed()) {
+  if (global.theResponse.ReportAllowed()) {
     return;
   }
-  if (global.theProgress.flagTimedOut) {
+  if (global.theResponse.flagTimedOut) {
     return;
   }
-  global.theProgress.flagTimedOut = true;
+  global.theResponse.flagTimedOut = true;
   global.server().GetActiveWorker().WriteAfterTimeoutShowIndicator(message);
 }

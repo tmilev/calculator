@@ -126,7 +126,7 @@ bool TimeoutThread::HandleComputationTimeout() {
   if (this->elapsedComputationTimeInMilliseconds <= global.millisecondsReplyAfterComputation) {
     return false;
   }
-  global.theProgress.Initiate("Triggered by timer thread.");
+  global.theResponse.Initiate("Triggered by timer thread.");
   return false;
 }
 

@@ -1283,15 +1283,17 @@ int WebWorker::GetIndexIfRunningWorkerId(
     global.fatal << "Corrupt index worker: indexOther: " << indexOther
     << "; indexFromFile: " << indexFromFile << ". " << global.fatal;
   }
-  if (indexOther >= this->parent->workerIds.size()) {
+  if (indexOther >= this->parent->theWorkers.size) {
     // Possible causes of this situation:
     // 1) worker id was created in a worker process that was fired up after the current
     // worker.
     // 2) server executable was restarted.
     // Once a worker id is not found, we want to close the connection.
+    std::stringstream out;
+    out << "WorkerId has too large of an index: " << indexOther << ". " << workerId  << " not found. ";
+    outputComputationStatus[WebAPI::result::comments] = out.str();
     this->flagKeepAlive = false;
     indexOther = - 1;
-    outputComputationStatus[WebAPI::result::comments] = "WorkerId " + workerId + " not found. ";
   }
   return indexOther;
 }
@@ -1308,6 +1310,7 @@ JSData WebWorker::ProcessComputationIndicatorJSData() {
   }
   int otherIndex = this->GetIndexIfRunningWorkerId(result);
   if (otherIndex < 0) {
+    this->flagKeepAlive = false;
     return result;
   }
   WebWorker& otherWorker = this->parent->theWorkers[otherIndex];
@@ -1416,7 +1419,7 @@ int WebWorker::ProcessFolder() {
     << " </b>";
     JSData result;
     result[WebAPI::result::error] = outError.str();
-    global.theProgress.WriteResponse(result);
+    global.theResponse.WriteResponse(result);
     return 0;
   }
   outPage << "Browsing folder: "
@@ -1426,8 +1429,7 @@ int WebWorker::ProcessFolder() {
   for (int i = 0; i < theFileNames.size; i ++) {
     std::stringstream currentStream;
     bool isDir = (theFileTypes[i] == ".d");
-    currentStream << "<a href=\"" << HtmlRoutines::ConvertStringToURLString(this->addressGetOrPost, false)
-    << HtmlRoutines::ConvertStringToURLString(theFileNames[i], false);
+    currentStream << "<a href=\"" << HtmlRoutines::ConvertStringToURLString(theFileNames[i], false);
     if (isDir) {
       currentStream << "/";
     }
@@ -1694,7 +1696,7 @@ std::string WebWorker::MIMETypeFromFileExtension(const std::string& fileExtensio
 int WebWorker::ProcessUnknown() {
   MacroRegisterFunctionWithName("WebWorker::ProcessUnknown");
   this->SetHeader("HTTP/1.0 501 Method Not Implemented", "Content-Type: text/html");
-  global.theProgress.WriteResponse(WebAPIResponse::GetJSONUserInfo("Unknown request"), false);
+  global.theResponse.WriteResponse(WebAPIResponse::GetJSONUserInfo("Unknown request"), false);
   return 0;
 }
 
@@ -2299,7 +2301,7 @@ int WebWorker::ProcessFolderOrFile() {
     << "are not allowed to start with dots. There may be additional restrictions "
     << "on file names added for security reasons.";
     result[WebAPI::result::error] = out.str();
-    return global.theProgress.WriteResponse(result);
+    return global.theResponse.WriteResponse(result);
   }
   if (FileOperations::IsFolderUnsecure(this->RelativePhysicalFileNamE)) {
     return this->ProcessFolder();
@@ -2346,14 +2348,14 @@ void WebWorker::GetIndicatorOnTimeout(
   output[WebAPI::result::timeOut] = true;
 
   timeOutComments << message;
-  if (global.theProgress.flagBanProcessMonitorinG) {
+  if (global.theResponse.flagBanProcessMonitorinG) {
     timeOutComments
     << "Monitoring computations is not allowed on this server.<br> "
     << "Please note that monitoring computations "
     << "is the default behavior, so the "
     << "owners of the server must have explicitly banned monitoring. ";
     output[WebAPI::result::timeOutComments] = timeOutComments.str();
-  } else if (!global.theProgress.flagReportDesired){
+  } else if (!global.theResponse.flagReportDesired){
     timeOutComments
     << "Monitoring computations not desired by user. ";
     output[WebAPI::result::timeOutComments] = timeOutComments.str();
@@ -3723,7 +3725,7 @@ bool WebWorker::RunOnce() {
     (!this->flagKeepAlive) ||
     global.flagRestartNeeded ||
     global.flagStopNeeded ||
-    global.theProgress.TimedOut()
+    global.theResponse.TimedOut()
   ) {
     return false;
   }
@@ -4222,7 +4224,7 @@ extern int mainTest(List<std::string>& remainingArgs);
 
 void WebServer::TurnProcessMonitoringOn() {
   MacroRegisterFunctionWithName("WebServer::TurnProcessMonitoringOn");
-  global.theProgress.flagBanProcessMonitorinG = false;
+  global.theResponse.flagBanProcessMonitorinG = false;
   global.configuration[Configuration::processMonitoringBanned] = false;
   global
   << logger::yellow << "Process monitoring IS ON, reply in: " << logger::green
@@ -4235,7 +4237,7 @@ void WebServer::TurnProcessMonitoringOff() {
   << logger::green << "************************" << logger::endL
   << logger::red << "Process monitoring is now off. " << logger::endL
   << logger::green << "************************" << logger::endL;
-  global.theProgress.flagBanProcessMonitorinG = true;
+  global.theResponse.flagBanProcessMonitorinG = true;
   global.millisecondsReplyAfterComputation = 0;
   global.configuration[Configuration::processMonitoringBanned] = true;
 }

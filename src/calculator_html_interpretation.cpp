@@ -786,7 +786,7 @@ void WebAPIResponse::GetJSDataUserInfo(JSData& outputAppend, const std::string& 
   if (comments != "") {
     outputAppend[WebAPI::result::comments] = HtmlRoutines::ConvertStringToHtmlString(comments, false);
   }
-  if (global.theProgress.MonitoringAllowed()) {
+  if (global.theResponse.MonitoringAllowed()) {
     outputAppend[WebAPI::UserInfo::processMonitoring] = "true";
     outputAppend[Configuration::millisecondsReplyAfterComputation] = static_cast<double>(global.millisecondsReplyAfterComputation);
   } else {
@@ -965,7 +965,7 @@ JSData WebAPIResponse::SubmitAnswersJSON(
   const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake
 ) {
   MacroRegisterFunctionWithName("WebAPIReponse::submitAnswers");
-  global.theProgress.DisallowReport();
+  global.theResponse.DisallowReport();
 
   std::stringstream output, errorStream, comments;
   JSData result;
@@ -1430,8 +1430,8 @@ JSData WebAPIResponse::GetAnswerOnGiveUp(
   bool doIncludeTimeStats
 ) {
   MacroRegisterFunctionWithName("CalculatorHTML::GetAnswerOnGiveUp");
-  GlobalVariables::Progress::StateMaintainer maintain(global.theProgress);
-  global.theProgress.DisallowReport();
+  GlobalVariables::Response::StateMaintainer maintain(global.theResponse);
+  global.theResponse.DisallowReport();
   if (outputNakedAnswer != nullptr) {
     *outputNakedAnswer = "";
   }

@@ -30,8 +30,8 @@ bool MathRoutines::GenerateVectorSpaceClosedWRTOperation(
   MacroRegisterFunctionWithName("MathRoutines::GenerateVectorSpaceClosedWRTOperation");
   inputOutputElts[0].GaussianEliminationByRowsDeleteZeroRows(inputOutputElts);
   theType theOpResult;
-  ProgressReport theReport1(1, GlobalVariables::Progress::ReportType::gaussianElimination);
-  ProgressReport theReport2(20, GlobalVariables::Progress::ReportType::gaussianElimination);
+  ProgressReport theReport1(1, GlobalVariables::Response::ReportType::gaussianElimination);
+  ProgressReport theReport2(20, GlobalVariables::Response::ReportType::gaussianElimination);
   if (theReport1.TickAndWantReport()) {
     theReport1.Report("Extending vector space to closed with respect to binary operation. ");
   }
@@ -8653,12 +8653,12 @@ bool CalculatorFunctions::innerTestIndicator(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerTestIndicator");
-  if (global.theProgress.flagBanProcessMonitorinG) {
+  if (global.theResponse.flagBanProcessMonitorinG) {
     std::stringstream out;
     out << "The server's admins have explicitly banned monitoring. ";
     return output.AssignValue(out.str(), theCommands);
   }
-  if (!global.theProgress.flagReportDesired) {
+  if (!global.theResponse.flagReportDesired) {
     std::stringstream out;
     out << "Process monitoring turned off by user. ";
     return output.AssignValue(out.str(), theCommands);
@@ -8697,7 +8697,7 @@ bool CalculatorFunctions::innerTestIndicator(
   for (unsigned i = 0; i < static_cast<unsigned>(dummyCommentSize); i ++) {
     dummyComment[i] = 'a';
   }
-  global.theProgress.Initiate("Triggered by test indicator. ");
+  global.theResponse.Initiate("Triggered by test indicator. ");
   ProgressReport theReport;
   for (int i = 0; i < numRuns; i ++) {
     std::stringstream reportStream;

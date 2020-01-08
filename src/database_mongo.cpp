@@ -287,9 +287,6 @@ bool MongoQuery::UpdateOne(std::stringstream* commentsOnFailure, bool doUpsert) 
     return false;
   }
   MongoCollection theCollection(this->collectionName);
-  global << "DEBUG: Update: " << this->findQuery << " to: "
-  << this->updateQuery << " inside: " << this->collectionName << ". Upsert: "
-  << doUpsert << logger::endL;
   if (this->query != nullptr) {
     global.fatal << "At this point of code, query is supposed to be 0. " << global.fatal;
   }

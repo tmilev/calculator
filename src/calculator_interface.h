@@ -2408,7 +2408,9 @@ public:
   bool ExtractExpressions(Expression& outputExpression, std::string* outputErrors);
   void EvaluateCommands();
   bool TimedOut();
-  static bool EvaluateExpression(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool EvaluateExpression(
+    Calculator& theCommands, const Expression& input, Expression& output
+  );
   static bool EvaluateExpression(
     Calculator& theCommands,
     const Expression& input,

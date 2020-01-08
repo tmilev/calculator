@@ -338,7 +338,12 @@ bool WebAPIResponse::ProcessChangePassword(const std::string& reasonForNoAuthent
 bool WebAPIResponse::ProcessCompute() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessCompute");
   this->owner->SetHeaderOKNoContentLength("");
-  global.theResponse.flagReportDesired = (global.GetWebInput(WebAPI::request::monitoring) != "false");
+  global.theResponse.flagReportDesired = true;
+  if (global.GetWebInput(WebAPI::request::monitoring) == "false") {
+    global.theResponse.flagReportDesired = false;
+  } else {
+    global.theResponse.flagReportDesired = true;
+  }
   Calculator& theCalculator = global.calculator().GetElement();
 
   theCalculator.inputString = HtmlRoutines::ConvertURLStringToNormal(
@@ -643,7 +648,7 @@ bool WebAPIResponse::ProcessProblemSolution() {
 bool WebAPIResponse::ProcessSubmitAnswersPreview() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessSubmitAnswersPreview");
   this->owner->SetHeaderOKNoContentLength("");
-  return global.theResponse.WriteResponse(WebAPIResponse::submitAnswersPreviewJSON());
+  return global.theResponse.WriteResponse(WebAPIResponse::SubmitAnswersPreviewJSON());
 }
 
 bool WebAPIResponse::ProcessSubmitAnswers() {

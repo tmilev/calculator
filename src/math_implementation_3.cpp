@@ -124,7 +124,7 @@ void GlobalVariables::Response::DisallowReport() {
 
 GlobalVariables::Response::Response() {
   this->flagBanProcessMonitorinG = false;
-  this->flagReportDesired = false;
+  this->flagReportDesired = true;
   this->flagTimedOut = false;
   this->flagReportAllowed = false;
  }

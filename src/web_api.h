@@ -86,8 +86,12 @@ class WebAPIResponse {
     bool* outputIsCorrect,
     bool timeSafetyBrake
   );
+
+  static JSData SubmitAnswersPreviewJSON();
   static JSData SubmitAnswersJSON();
   static JSData GetProblemSolutionJSON();
+  static JSData GetAnswerOnGiveUp();
+
   static JSData GetEditPageJSON();
   static std::string GetJavascriptCaptcha();
   static std::string GetCaptchaDiv();
@@ -99,19 +103,24 @@ class WebAPIResponse {
     JSData& outputAppend, const std::string& comments
   );
   static JSData GetTopicTableJSON();
-  static JSData GetAnswerOnGiveUp();
+
   static JSData GetAnswerOnGiveUp(
     const std::string& inputRandomSeed,
     std::string* outputNakedAnswer = nullptr,
     bool* answerGenerationSuccess = nullptr,
     bool doIncludeTimeStats = true
   );
+  static std::string GetCommentsInterpretation(
+    Calculator& theInterpreterWithAdvice,
+    int indexShift,
+    FormatExpressions& theFormat
+  );
+
   static JSData GetSelectCourseJSON();
   static std::string GetScoresPage();
   static std::string GetApp(bool appendBuildHash);
   static std::string GetOnePageJS(bool appendBuildHash);
   static std::string GetScoresInCoursePage();
-  static JSData submitAnswersPreviewJSON();
   static std::string SetProblemDeadline();
   static std::string SetProblemWeight();
   static std::string GetAccountsPage(
@@ -135,11 +144,6 @@ class WebAPIResponse {
   );
   static std::string GetSanitizedComment(
     const Expression& input, FormatExpressions& theFormat, bool& resultIsPlot
-  );
-  static std::string GetCommentsInterpretation(
-    Calculator& theInterpreterWithAdvice,
-    int indexShift,
-    FormatExpressions& theFormat
   );
 };
 

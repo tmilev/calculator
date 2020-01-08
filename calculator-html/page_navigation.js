@@ -319,6 +319,7 @@ function StorageCalculator() {
         name: "monitoring",
         nameLocalStorage: "monitoring",
         nameURL: "monitoring", 
+        nameCookie: "debugFlag",
         callbackOnValueChange: mainPage().setMonitoringComponent.bind(mainPage()),
         showInURLByDefault: true,
       }),

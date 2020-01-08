@@ -12,6 +12,9 @@ static ProjectInformationInstance projectInfoInstanceHtmlInterpretationInterface
 
 JSData WebAPIResponse::GetProblemSolutionJSON() {
   MacroRegisterFunctionWithName("WebAPIReponse::GetProblemSolution");
+  if (!global.UserDefaultHasAdminRights()) {
+    global.theResponse.DisallowReport();
+  }
   int64_t startMilliseconds = global.GetElapsedMilliseconds();
   CalculatorHTML theProblem;
   std::stringstream out, errorStream;
@@ -229,8 +232,11 @@ std::string WebAPIResponse::GetCommentsInterpretation(
   return out.str();
 }
 
-JSData WebAPIResponse::submitAnswersPreviewJSON() {
+JSData WebAPIResponse::SubmitAnswersPreviewJSON() {
   MacroRegisterFunctionWithName("WebAPIResponse::submitAnswersPreviewJSON");
+  if (!global.UserDefaultHasAdminRights()) {
+    global.theResponse.DisallowReport();
+  }
   double startTime = global.GetElapsedSeconds();
   std::string lastStudentAnswerID;
   std::string lastAnswer;
@@ -965,7 +971,9 @@ JSData WebAPIResponse::SubmitAnswersJSON(
   const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake
 ) {
   MacroRegisterFunctionWithName("WebAPIReponse::submitAnswers");
-  global.theResponse.DisallowReport();
+  if (!global.UserDefaultHasAdminRights()) {
+    global.theResponse.DisallowReport();
+  }
 
   std::stringstream output, errorStream, comments;
   JSData result;
@@ -1431,7 +1439,9 @@ JSData WebAPIResponse::GetAnswerOnGiveUp(
 ) {
   MacroRegisterFunctionWithName("CalculatorHTML::GetAnswerOnGiveUp");
   GlobalVariables::Response::StateMaintainer maintain(global.theResponse);
-  global.theResponse.DisallowReport();
+  if (!global.UserDefaultHasAdminRights()) {
+    global.theResponse.DisallowReport();
+  }
   if (outputNakedAnswer != nullptr) {
     *outputNakedAnswer = "";
   }
@@ -2323,8 +2333,9 @@ std::string WebAPIResponse::GetScoresInCoursePage() {
 
 std::string WebAPIResponse::ToStringUserScores() {
   MacroRegisterFunctionWithName("WebAPIReponse::ToStringUserScores");
-  if (!global.UserDefaultHasAdminRights())
+  if (!global.UserDefaultHasAdminRights()) {
     return "only admins are allowed to view scores";
+  }
   if (!global.flagDatabaseCompiled) {
     return "Error: database not running. ";
   }

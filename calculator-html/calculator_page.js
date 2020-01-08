@@ -391,7 +391,9 @@ Calculator.prototype.getQueryStringSubmitStringAsMainInput = function(theString,
     inputParams += `${pathnames.urlFields.debugFlag}=true&`;
   }
   if (thePage.storage.variables.calculator.monitoring.value === "false") {
-    inputParams += `${pathnames.urlFields.requests.monitoring}=false&`
+    inputParams += `${pathnames.urlFields.requests.monitoring}=false&`;
+  } else {
+    inputParams += `${pathnames.urlFields.requests.monitoring}=true&`;
   }
   return inputParams;
 }

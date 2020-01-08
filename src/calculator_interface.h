@@ -2121,7 +2121,8 @@ public:
     Matrix<theType>& outputMat,
     Expression* inputOutputStartingContext = nullptr,
     int targetNumColsNonMandatory = - 1,
-    Expression::FunctionAddress conversionFunction = nullptr
+    Expression::FunctionAddress conversionFunction = nullptr,
+    std::stringstream* commentsOnError = nullptr
   );
   template <class theType>
   bool GetVectorFromFunctionArguments(
@@ -2669,15 +2670,19 @@ bool Calculator::functionGetMatrix(
   Matrix<theType>& outputMat,
   Expression* inputOutputStartingContext,
   int targetNumColsNonMandatory,
-  Expression::FunctionAddress conversionFunction
+  Expression::FunctionAddress conversionFunction,
+  std::stringstream* commentsOnError
 ) {
   MacroRegisterFunctionWithName("Calculator::functionGetMatrix");
   Matrix<Expression> nonConvertedEs, convertedEs;
   if (!this->GetMatrixExpressions(
     input, nonConvertedEs, - 1, targetNumColsNonMandatory
   )) {
-    return *this << "Failed to extract matrix of expressions from "
-    << input.ToString();
+    if (commentsOnError != nullptr) {
+      *commentsOnError << "Failed to extract matrix of expressions from "
+      << input.ToString();
+    }
+    return false;
   }
   convertedEs.init(nonConvertedEs.NumRows, nonConvertedEs.NumCols);
   Expression theContext;
@@ -2693,11 +2698,15 @@ bool Calculator::functionGetMatrix(
         conversionFunction, nonConvertedEs(i, j), convertedEs(i, j)
       )) {
         if (!nonConvertedEs(i, j).ConvertToType<theType>(convertedEs.elements[i][j])) {
-          return
-          *this << "Failed to convert matrix element: "
-          << "row: " << i << ", column: "
-          << j << ", expression: "
-          << nonConvertedEs(i, j).ToString() << ". ";
+          if (commentsOnError != nullptr) {
+            *commentsOnError << "Failed to convert matrix element: "
+            << "row: " << i << ", column: "
+            << j << ", expression: "
+            << nonConvertedEs(i, j).ToString() << ". "
+            //<< "DEBUG: " << global.fatal.GetStackTraceEtcErrorMessageHTML()
+            ;
+          }
+          return false;
         }
       }
       theContext.ContextMergeContexts(theContext, convertedEs(i, j).GetContext(), theContext);
@@ -2706,12 +2715,15 @@ bool Calculator::functionGetMatrix(
   for (int i = 0; i < convertedEs.NumRows; i ++) {
     for (int j = 0; j < convertedEs.NumCols; j ++) {
       if (!convertedEs(i, j).::Expression::SetContextAtLeastEqualTo(theContext)) {
-          return
-          *this << "Failed to set context to matrix element: "
+        if (commentsOnError != nullptr) {
+          *commentsOnError
+          << "Failed to set context to matrix element: "
           << "row: " << i << ", column: "
           << j << ", expression: "
           << convertedEs.elements[i][j].ToString()
           << ". ";
+        }
+        return false;
       }
     }
   }

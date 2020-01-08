@@ -6103,7 +6103,7 @@ void Calculator::initPredefinedStandardOperations() {
     "s * t * s * t",
     "CalculatorFunctionsBinaryOps::innerMultiplyEltHypOctByEltHypOct",
     "MultiplyElementHyperOctahedralByElementHyperOctahedral",
-    outerAdminInvisibleNoTest
+    innerExperimentalNoTest
   );
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",

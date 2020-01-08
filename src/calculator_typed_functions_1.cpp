@@ -1705,7 +1705,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplySequenceByMatrix(
 bool CalculatorFunctionsBinaryOps::innerTensorMatrixByMatrix(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  if (!input.StartsWith(theCommands.opTensor())) {
+  if (!input.StartsWith(theCommands.opTensor(), 3)) {
     return false;
   }
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerTensorMatrixByMatrix");

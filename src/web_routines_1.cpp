@@ -1043,18 +1043,7 @@ JSData WebWorker::GetSignUpRequestResult() {
   return result;
 }
 
-int WebWorker::WriteToBodyJSONAppendComments(JSData &result) {
-  std::string comments = global.Comments.getCurrentReset();
-  if (comments != "") {
-    result[WebAPI::result::commentsGlobal] = comments;
-  }
-  if (comments != "") {
-    result[WebAPI::result::comments] = comments;
-  }
-  return this->WriteToBodyJSON(result);
-}
-
-bool WebWorker::WriteToBodyJSON(const JSData& result) {
+bool WebWorker::WriteToBodyJSOn(const JSData& result) {
   std::string toWrite = HtmlRoutines::ConvertStringToHtmlString(
     result.ToString(nullptr), false
   );
@@ -1070,7 +1059,7 @@ bool WebWorker::WriteToBodyJSON(const JSData& result) {
   return this->WriteToBody(toWrite);
 }
 
-bool GlobalVariables::Progress::WriteResponse(const JSData& out, bool isCrash) {
+bool GlobalVariables::Progress::WriteResponse(const JSData& incoming, bool isCrash) {
   MutexLockGuard guard(global.MutexReturnBytes);
   MacroRegisterFunctionWithName("WebWorker::WriteResponse");
   WebWorker& worker = global.server().GetActiveWorker();
@@ -1079,19 +1068,23 @@ bool GlobalVariables::Progress::WriteResponse(const JSData& out, bool isCrash) {
   if (isCrash) {
     status = "crash";
   }
+  JSData output = incoming;
+  std::string comments = global.Comments.getCurrentReset();
+  if (comments != "") {
+    output[WebAPI::result::commentsGlobal] = comments;
+  }
   if (this->flagTimedOut) {
     worker.WriteAfterTimeoutJSON(
-      out,
+      output,
       status,
       global.RelativePhysicalNameOptionalResult
     );
   } else {
-    JSData copy = out;
-    worker.WriteToBodyJSONAppendComments(copy);
-    worker.SendAllBytesWithHeaders();
+    worker.WriteToBodyJSOn(output);
+    worker.SendPending();
   }
   if (isCrash) {
-    global.server().SignalActiveWorkerDoneReleaseEverything();
+    global.server().WrapUp();
   }
   return true;
 }
@@ -1105,6 +1098,9 @@ void GlobalVariables::Progress::Report(const std::string &input) {
 void GlobalVariables::Progress::Initiate(const std::string& message) {
   MutexLockGuard guard(global.MutexReturnBytes);
   MacroRegisterFunctionWithName("GlobalVariables::Progress::Initiate");
+  if (global.theProgress.ReportAllowed()) {
+    return;
+  }
   if (global.theProgress.flagTimedOut) {
     return;
   }

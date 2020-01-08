@@ -567,7 +567,7 @@ std::string CalculatorHTML::ToStringLinkCurrentAdmin(
   }
   std::stringstream out;
   out << "<a class =\"linkStandardButtonLike\" href=\"" << global.DisplayNameExecutable << "?request="
-  << global.userCalculatorRequestType << "&";
+  << global.requestType << "&";
   std::string urledProblem = HtmlRoutines::ConvertStringToURLString(this->fileName, false);
   List<std::string> randomSeedContainer;
   randomSeedContainer.AddOnTop("randomSeed");
@@ -1363,8 +1363,8 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
   int numCorrectSubmissions = currentA.numCorrectSubmissions;
   int numSubmissions = currentA.numSubmissions;
   if (
-    global.userCalculatorRequestType == "scoredQuiz" ||
-    global.userCalculatorRequestType == "scoredQuizJSON"
+    global.requestType == "scoredQuiz" ||
+    global.requestType == "scoredQuizJSON"
   ) {
     if (numCorrectSubmissions > 0) {
       verifyStream << "<b style =\"color:green\">Correctly answered: \\("
@@ -2895,8 +2895,8 @@ void CalculatorHTML::ComputeProblemLabel() {
   }
   if (
     this->flagIsExamHome ||
-    global.userCalculatorRequestType == "template" ||
-    global.userCalculatorRequestType == "templateNoLogin"
+    global.requestType == "template" ||
+    global.requestType == "templateNoLogin"
   ) {
     return;
   }
@@ -2942,8 +2942,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   std::stringstream outBody;
   std::stringstream outHeadPt2;
   this->flagIsExamHome =
-  global.userCalculatorRequestType == "template" ||
-  global.userCalculatorRequestType == "templateNoLogin";
+  global.requestType == "template" ||
+  global.requestType == "templateNoLogin";
   this->theProblemData.randomSeed = static_cast<unsigned>(this->randomSeedsIfInterpretationFails[
     this->NumAttemptsToInterpret - 1
   ]);
@@ -2961,8 +2961,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   std::string problemLabel = "";
   if (
     !this->flagIsExamHome &&
-    global.userCalculatorRequestType != "template" &&
-    global.userCalculatorRequestType != "templateNoLogin"
+    global.requestType != "template" &&
+    global.requestType != "templateNoLogin"
   ) {
     if (this->topics.theTopics.Contains(this->fileName)) {
       TopicElement& current = this->topics.theTopics.GetValueCreate(this->fileName);
@@ -2975,8 +2975,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   }
   if (
     this->flagIsExamProblem && this->flagIsForReal && !this->flagIsExamHome &&
-    global.userCalculatorRequestType != "template" &&
-    global.userCalculatorRequestType != "templateNoLogin"
+    global.requestType != "template" &&
+    global.requestType != "templateNoLogin"
   ) {
     if (global.flagDatabaseCompiled) {
       bool problemAlreadySolved = false;
@@ -2999,10 +2999,10 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     }
   } else if (
     !this->flagIsExamHome && !this->flagIsForReal &&
-    global.userCalculatorRequestType != "template" &&
-    global.userCalculatorRequestType != "templateNoLogin" &&
-    global.userCalculatorRequestType != "templateJSON" &&
-    global.userCalculatorRequestType != "templateJSONNoLogin"
+    global.requestType != "template" &&
+    global.requestType != "templateNoLogin" &&
+    global.requestType != "templateJSON" &&
+    global.requestType != "templateJSONNoLogin"
   ) {
     if (!this->flagUseJSON) {
       outBody << "<b style =\"color:green\">Scores not recorded. </b>"
@@ -3141,13 +3141,13 @@ std::string CalculatorHTML::ToStringProblemNavigation() const {
   std::string calcArgsNoPassExamDetails =
   global.ToStringCalcArgsNoNavigation(&randomSeedContainer);
   if (this->flagIsExamProblem) {
-    if (global.userCalculatorRequestType == "exercise") {
+    if (global.requestType == "exercise") {
       out << "<a href=\"" << global.DisplayNameExecutable << "?request=scoredQuiz&"
       << this->ToStringCalculatorArgumentsForProblem("scoredQuiz", studentView)
       << "\">" << this->stringScoredQuizzes << "</a>" << linkSeparator;
       out << "<b style =\"color:green\">" << this->stringPracticE
       << "</b>" << linkSeparator;
-    } else if (global.userCalculatorRequestType == "scoredQuiz") {
+    } else if (global.requestType == "scoredQuiz") {
       out << "<b style =\"color:brown\">"
       << this->stringScoredQuizzes << "</b>" << linkSeparator;
       out << "<a href=\"" << global.DisplayNameExecutable
@@ -3163,7 +3163,7 @@ std::string CalculatorHTML::ToStringProblemNavigation() const {
     } else {
       if (indexInParent > 0) {
         out << "<a href=\"" << global.DisplayNameExecutable << "?request="
-        << global.userCalculatorRequestType;
+        << global.requestType;
         out << "&" << calcArgsNoPassExamDetails
         << "studentView=" << studentView << "&";
         if (global.GetWebInput("studentSection") != "") {
@@ -3178,7 +3178,7 @@ std::string CalculatorHTML::ToStringProblemNavigation() const {
       }
       if (indexInParent < this->problemNamesNoTopics.size - 1) {
         out << "<a href=\"" << global.DisplayNameExecutable << "?request="
-        << global.userCalculatorRequestType;
+        << global.requestType;
         out << "&" << calcArgsNoPassExamDetails
         << "studentView=" << studentView << "&";
         if (global.GetWebInput("studentSection") != "") {
@@ -3194,11 +3194,11 @@ std::string CalculatorHTML::ToStringProblemNavigation() const {
     }
   }
   if (this->flagIsExamProblem &&(
-    global.userCalculatorRequestType == "exercise" ||
-    global.userCalculatorRequestType == "exerciseNoLogin"
+    global.requestType == "exercise" ||
+    global.requestType == "exerciseNoLogin"
   )) {
     out << "<a href=\"" << global.DisplayNameExecutable
-    << "?request=" << global.userCalculatorRequestType << "&"
+    << "?request=" << global.requestType << "&"
     << this->ToStringCalculatorArgumentsForProblem(exerciseRequest, studentView, "", true)
     << "\">" << this->stringProblemLink << " (#"
     << this->theProblemData.randomSeed << ")</a>" << linkBigSeparator;
@@ -3207,7 +3207,7 @@ std::string CalculatorHTML::ToStringProblemNavigation() const {
     if (global.UserStudentVieWOn()) {
       out << "<a href=\"" << global.DisplayNameExecutable << "?"
       << this->ToStringCalculatorArgumentsForProblem(
-        global.userCalculatorRequestType,
+        global.requestType,
         "false",
         HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("studentSection"), false)
       ) << "\">Admin view</a>" << linkSeparator;
@@ -3219,7 +3219,7 @@ std::string CalculatorHTML::ToStringProblemNavigation() const {
         out << "<b>Student View</b>";
       } else {
         out << "<a href=\"" << global.DisplayNameExecutable << "?"
-        << this->ToStringCalculatorArgumentsForProblem(global.userCalculatorRequestType, "true", "")
+        << this->ToStringCalculatorArgumentsForProblem(global.requestType, "true", "")
         << "\">Student view</a>";
       }
     } else {
@@ -3237,7 +3237,7 @@ std::string CalculatorHTML::ToStringProblemNavigation() const {
         } else {
           out << "<a href=\"" << global.DisplayNameExecutable << "?"
           << this->ToStringCalculatorArgumentsForProblem(
-            global.userCalculatorRequestType, "true", this->databaseStudentSections[i]
+            global.requestType, "true", this->databaseStudentSections[i]
           ) << "\">" << this->databaseStudentSections[i] << " </a>";
         }
         if (i != this->databaseStudentSections.size - 1) {
@@ -4330,7 +4330,7 @@ bool CalculatorHTML::ComputeTopicListAndPointsEarned(std::stringstream& comments
     this->flagIncludeStudentScores =
     global.UserDefaultHasAdminRights() &&
     !global.UserStudentVieWOn() &&
-    global.userCalculatorRequestType != "templateNoLogin";
+    global.requestType != "templateNoLogin";
     HashedList<std::string, MathRoutines::HashString> gradableProblems;
     for (int i = 0; i < this->topics.theTopics.size(); i ++) {
       if (this->topics.theTopics.theValues[i].type == TopicElement::types::problem) {
@@ -4689,7 +4689,7 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle) {
   if (
     global.UserDefaultHasAdminRights() &&
     !global.UserStudentVieWOn() &&
-    global.userCalculatorRequestType != "templateNoLogin"
+    global.requestType != "templateNoLogin"
   ) {
     if (this->displayDeadlinE == "") {
       this->displayDeadlinE += "Deadline";

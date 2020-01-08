@@ -1824,9 +1824,9 @@ bool Database::User::LoginViaDatabase(
   }
   if (userWrapper.enteredActivationToken != "") {
     if (
-      global.userCalculatorRequestType == WebAPI::request::changePassword ||
-      global.userCalculatorRequestType == "changePasswordPage" ||
-      global.userCalculatorRequestType == WebAPI::request::activateAccountJSON
+      global.requestType == WebAPI::request::changePassword ||
+      global.requestType == "changePasswordPage" ||
+      global.requestType == WebAPI::request::activateAccountJSON
     ) {
       if (
         userWrapper.actualActivationToken != "activated" &&
@@ -1847,7 +1847,7 @@ bool Database::User::LoginViaDatabase(
     } else {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Activation token entered but the user request type: "
-        << global.userCalculatorRequestType
+        << global.requestType
         << " does not allow login with activation token. ";
       }
     }

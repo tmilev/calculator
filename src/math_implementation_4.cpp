@@ -417,11 +417,11 @@ bool GlobalVariables::UserGuestMode() {
     return true;
   }
   return
-  this->userCalculatorRequestType == "exerciseNoLogin" ||
-  this->userCalculatorRequestType == WebAPI::request::problemGiveUpNoLogin ||
-  this->userCalculatorRequestType == WebAPI::request::submitExerciseNoLogin ||
-  this->userCalculatorRequestType == WebAPI::request::submitExercisePreviewNoLogin ||
-  this->userCalculatorRequestType == "templateNoLogin";
+  this->requestType == "exerciseNoLogin" ||
+  this->requestType == WebAPI::request::problemGiveUpNoLogin ||
+  this->requestType == WebAPI::request::submitExerciseNoLogin ||
+  this->requestType == WebAPI::request::submitExercisePreviewNoLogin ||
+  this->requestType == "templateNoLogin";
 }
 
 bool GlobalVariables::UserRequestRequiresLoadingRealExamData() {
@@ -429,17 +429,17 @@ bool GlobalVariables::UserRequestRequiresLoadingRealExamData() {
     return false;
   }
   return this->flagLoggedIn && (
-    this->userCalculatorRequestType == "scoredQuiz" ||
-    this->userCalculatorRequestType == "scoredQuizJSON" ||
-    this->userCalculatorRequestType == "submitAnswers" ||
-    this->userCalculatorRequestType == "submitAnswersPreview"
+    this->requestType == "scoredQuiz" ||
+    this->requestType == "scoredQuizJSON" ||
+    this->requestType == "submitAnswers" ||
+    this->requestType == "submitAnswersPreview"
   );
 }
 
 bool GlobalVariables::UserRequestMustBePromptedToLogInIfNotLoggedIn() {
   return
-  this->userCalculatorRequestType == "scoredQuiz" ||
-  this->userCalculatorRequestType == "exercise";
+  this->requestType == "scoredQuiz" ||
+  this->requestType == "exercise";
 }
 
 std::string GlobalVariables::ToStringCalculatorComputation(

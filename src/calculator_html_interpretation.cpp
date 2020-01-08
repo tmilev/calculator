@@ -855,7 +855,7 @@ JSData WebAPIResponse::GetExamPageJSON() {
   MacroRegisterFunctionWithName("WebAPIReponse::GetExamPageJSON");
   std::stringstream out;
   JSData output;
-  if (!global.flagLoggedIn && global.userCalculatorRequestType == "scoredQuizJSON") {
+  if (!global.flagLoggedIn && global.requestType == "scoredQuizJSON") {
     output[WebAPI::result::error] = "Scored quiz requires login";
     return output;
   }
@@ -1387,7 +1387,7 @@ std::string WebAPIResponse::AddUserEmails(const std::string& hostWebAddressWithP
   }
   std::stringstream comments;
   bool sentEmails = true;
-  bool doSendEmails = global.userCalculatorRequestType == "sendEmails" ?  true : false;
+  bool doSendEmails = global.requestType == "sendEmails" ?  true : false;
   int numNewUsers = 0;
   int numUpdatedUsers = 0;
   bool createdUsers = Database::get().theUser.AddUsersFromEmails(

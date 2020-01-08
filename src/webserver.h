@@ -15,6 +15,7 @@ public:
   int ProcessPID;
   std::string workerId;
   int numberOfReceivesCurrentConnection;
+  int lastResult;
   int64_t millisecondsServerAtWorkerStart;
   int64_t millisecondsLastPingServerSideOnly;
   int64_t millisecondsAfterSelect;
@@ -50,8 +51,6 @@ public:
   bool flagDoAddContentLength;
   bool flagUsingSSLInWorkerProcess;
   bool flagDidSendAll;
-  bool flagAllBytesSentUsingFile;
-  bool flagEncounteredErrorWhileServingFile;
   List<std::string> theMessageHeaderStrings;
   MapList<std::string, std::string, MathRoutines::HashString> requestHeaders;
   int ContentLength;
@@ -98,7 +97,10 @@ public:
   int ProcessLoginNeededOverUnsecureConnection();
   bool ProcessRedirectAwayFromWWW();
   int ProcessUnknown();
+  bool RunInitialize();
   int Run();
+  bool RunOnce();
+  bool FailReceiveReturnFalse();
   bool CheckConsistency();
 
   bool IsFileServedRaw();
@@ -123,8 +125,7 @@ public:
   ///////
   void PauseIfRequested();
   // writes json to body, sanitizes.
-  int WriteToBodyJSONAppendComments(JSData& result);
-  bool WriteToBodyJSON(const JSData& result);
+  bool WriteToBodyJSOn(const JSData& result);
   bool WriteToBody(const std::string& bytesToAppend);
   void WriteAfterTimeoutString(
     const std::string& input,
@@ -149,19 +150,20 @@ public:
   void QueueStringForSendingNoHeadeR(const std::string& stringToSend, bool MustSendAll = false);
   void QueueBytesForSendingNoHeadeR(const List<char>& bytesToSend, bool MustSendAll = false);
   bool ShouldDisplayLoginPage();
-  void SendAllAndWrapUp();
-  void WrapUpConnection();
+  void WrapUpConnectioN();
   void ResetMutexProcesses();
   void reset();
   void resetMessageComponentsExceptRawMessage();
   void resetConnection();
   void Release();
   void ReleaseKeepInUseFlag();
-  void SendAllBytesWithHeaders();
-  void SendAllBytesNoHeaders();
+  bool EnsureAllBytesSent();
+  void SendPending();
+  void SendAllBytesNoHeaderS();
   void SendAllBytesHttp();
   void SendAllBytesHttpSSL();
-  std::string GetMIMEtypeFromFileExtension(const std::string& fileExtension);
+  std::string MIMETypeFromFileExtension(const std::string& fileExtension);
+  std::string HeaderFromFileExtension(const std::string& fileExtension);
 
   std::string GetChangePasswordPagePartOne(bool& outputDoShowPasswordChangeField);
   JSData GetClonePageResult();
@@ -247,6 +249,7 @@ public:
   List<std::string> addressStartsSentWithCacheMaxAge;
   HashedList<std::string, MathRoutines::HashString> addressStartsInterpretedAsCalculatorRequest;
 
+  MapList<std::string, std::string, MathRoutines::HashString> MIMETypes;
   int activeWorker;
   int64_t timeLastExecutableModification;
   ListReferences<std::string> theProgressReports;
@@ -269,6 +272,7 @@ public:
   void InitializeMainRequests();
   void InitializeMainAddresses();
   void InitializeMainFoldersInstructorSpecific();
+  void initializeMainMIMETypes();
 
   void MarkChildNotInUse(int childIndex);
   bool RequiresLogin(const std::string& inputRequest, const std::string& inputAddress);
@@ -294,8 +298,7 @@ public:
   WebWorker& GetActiveWorker();
   static void WorkerTimerPing(int64_t pingTime);
   static void Release(int& theDescriptor);
-  static void SignalActiveWorkerDoneReleaseEverything();
-  static void FlushActiveWorker();
+  static void WrapUp();
   static void fperror_sigaction[[noreturn]](int signal);
   void ReapChildren();
   static void Signal_SIGCHLD_handler(int s);

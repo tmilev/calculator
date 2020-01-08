@@ -270,7 +270,7 @@ public:
     // Respond functions end here.
 
     // returns true
-    bool WriteResponse(const JSData& out, bool isCrash);
+    bool WriteResponse(const JSData& incoming, bool isCrash = false);
 
     bool MonitoringAllowed();
     bool ReportAllowed(int type = Progress::ReportType::general);
@@ -291,7 +291,7 @@ public:
   UserCalculatorData userDefault;
   MapList<std::string, int, MathRoutines::HashString> problemExpectedNumberOfAnswers;
 
-  std::string userCalculatorRequestType;
+  std::string requestType;
 
   std::string configurationFileContent;
   JSData configuration;

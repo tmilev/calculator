@@ -238,7 +238,7 @@ bool WebWorker::ReceiveAllHttpSSL() {
     return false;
   }
   this->remainingBytesToSenD = std::string("HTTP/1.0 100 Continue\r\n\r\n");
-  this->SendAllBytesNoHeaders();
+  this->SendAllBytesNoHeaderS();
   this->remainingBytesToSenD.SetSize(0);
   std::string bufferString;
   while (static_cast<signed>(this->messageBody.size()) < this->ContentLength) {
@@ -442,11 +442,9 @@ void WebWorker::resetConnection() {
   global.flagLoggedIn = false;
   global.flagLogInAttempted = false;
   global.webArguments.Clear();
-  global.userCalculatorRequestType = "";
+  global.requestType = "";
   global.userInputStringIfAvailable = "";
   global.userInputStringRAWIfAvailable = "";
-  this->flagAllBytesSentUsingFile = false;
-  this->flagEncounteredErrorWhileServingFile = false;
 }
 
 void WebWorker::resetMessageComponentsExceptRawMessage() {
@@ -674,8 +672,8 @@ bool WebWorker::LoginProcedure(std::stringstream& argumentProcessingFailureComme
     return !theUser.flagMustLogin;
   }
   bool changingPass =
-  global.userCalculatorRequestType == WebAPI::request::changePassword ||
-  global.userCalculatorRequestType == WebAPI::request::activateAccountJSON;
+  global.requestType == WebAPI::request::changePassword ||
+  global.requestType == WebAPI::request::activateAccountJSON;
 
   if (changingPass) {
     theUser.enteredAuthenticationToken = "";
@@ -1034,7 +1032,7 @@ bool WebWorker::ReceiveAllHttp() {
     return false;
   }
   this->remainingBytesToSenD = std::string("HTTP/1.0 100 Continue\r\n\r\n");
-  this->SendAllBytesNoHeaders();
+  this->SendAllBytesNoHeaderS();
   this->remainingBytesToSenD.SetSize(0);
   std::string bufferString;
   while ( static_cast<signed>(this->messageBody.size()) < this->ContentLength) {
@@ -1389,8 +1387,8 @@ void WebWorker::WriteAfterTimeoutPartTwo(
 int WebWorker::ProcessFolder() {
   MacroRegisterFunctionWithName("WebWorker::ProcessFolder");
   this->SetHeaderOKNoContentLength("");
-  std::stringstream out;
-  out << "<html><body>";
+  std::stringstream outPage, outError;
+  outPage << "<html><body>";
   if (this->RelativePhysicalFileNamE.size() > 0) {
     if (this->RelativePhysicalFileNamE[this->RelativePhysicalFileNamE.size() - 1] != '/') {
       this->RelativePhysicalFileNamE.push_back('/');
@@ -1402,25 +1400,33 @@ int WebWorker::ProcessFolder() {
     }
   }
   if (this->flagFileNameSanitized) {
-    out << "<hr>The virtual file name I extracted was: " << HtmlRoutines::ConvertStringToHtmlString(this->VirtualFileName, false)
+    std::stringstream sanitization;
+    sanitization << "<hr>The virtual file name I extracted was: "
+    << HtmlRoutines::ConvertStringToHtmlString(this->VirtualFileName, false)
     << "<br>However, I do not allow folder names that contain dots. "
-    << "Therefore I have sanitized the main address to: " << HtmlRoutines::ConvertStringToHtmlString(this->RelativePhysicalFileNamE, false);
+    << "Therefore I have sanitized the main address to: "
+    << HtmlRoutines::ConvertStringToHtmlString(this->RelativePhysicalFileNamE, false);
+    outPage << sanitization.str();
+    outError << sanitization.str();
   }
   List<std::string> theFileNames, theFileTypes;
   if (!FileOperations::GetFolderFileNamesUnsecure(this->RelativePhysicalFileNamE, theFileNames, &theFileTypes)) {
-    out << "<b>Failed to open directory with physical address "
+    outError << "<b>Failed to open directory with physical address "
     << HtmlRoutines::ConvertStringToHtmlString(this->RelativePhysicalFileNamE, false)
-    << " </b></body></html>";
-    this->WriteToBody(out.str());
+    << " </b>";
+    JSData result;
+    result[WebAPI::result::error] = outError.str();
+    global.theProgress.WriteResponse(result);
     return 0;
   }
-  out << "Browsing folder: " << HtmlRoutines::ConvertStringToHtmlString(this->addressGetOrPost, false) << "<br>Virtual name: "
+  outPage << "Browsing folder: "
+  << HtmlRoutines::ConvertStringToHtmlString(this->addressGetOrPost, false) << "<br>Virtual name: "
   << HtmlRoutines::ConvertStringToHtmlString(this->VirtualFileName, false) << "<hr>";
-  List<std::string> theFolderNamesHtml, theFileNamesHtml;
+  List<std::string> folderLinksSanitized, fileLinksSanitized;
   for (int i = 0; i < theFileNames.size; i ++) {
     std::stringstream currentStream;
     bool isDir = (theFileTypes[i] == ".d");
-    currentStream << "<a href=\"" << HtmlRoutines::ConvertStringToHtmlString(this->addressGetOrPost, false)
+    currentStream << "<a href=\"" << HtmlRoutines::ConvertStringToURLString(this->addressGetOrPost, false)
     << HtmlRoutines::ConvertStringToURLString(theFileNames[i], false);
     if (isDir) {
       currentStream << "/";
@@ -1431,21 +1437,23 @@ int WebWorker::ProcessFolder() {
     }
     currentStream << "</a><br>";
     if (isDir) {
-      theFolderNamesHtml.AddOnTop(currentStream.str());
+      folderLinksSanitized.AddOnTop(currentStream.str());
     } else {
-      theFileNamesHtml.AddOnTop(currentStream.str());
+      fileLinksSanitized.AddOnTop(currentStream.str());
     }
   }
-  theFolderNamesHtml.QuickSortAscending();
-  theFileNamesHtml.QuickSortAscending();
-  for (int i = 0; i < theFolderNamesHtml.size; i ++) {
-    out << HtmlRoutines::ConvertStringToHtmlString(theFolderNamesHtml[i], false);
+  folderLinksSanitized.QuickSortAscending();
+  fileLinksSanitized.QuickSortAscending();
+  for (int i = 0; i < folderLinksSanitized.size; i ++) {
+    outPage << folderLinksSanitized[i];
   }
-  for (int i = 0; i < theFileNamesHtml.size; i ++) {
-    out << HtmlRoutines::ConvertStringToHtmlString(theFileNamesHtml[i], false);
+  for (int i = 0; i < fileLinksSanitized.size; i ++) {
+    outPage << fileLinksSanitized[i];
   }
-  out << "\n</body></html>";
-  this->WriteToBody(out.str());
+  outPage << "\n</body></html>";
+  this->SetHeaderOKNoContentLength("", "text/html");
+  this->WriteToBody(outPage.str());
+  this->SendPending();
   return 0;
 }
 
@@ -1474,13 +1482,11 @@ int WebWorker::ProcessFileDoesntExist() {
   << HtmlRoutines::ConvertStringToHtmlString(this->VirtualFileName, true)
   << "<br><b>Computed relative physical file name:</b> "
   << HtmlRoutines::ConvertStringToHtmlString(this->RelativePhysicalFileNamE, true);
-  out << "<br><b>Request:</b> " << global.userCalculatorRequestType;
-  out << "<hr><hr><hr>Message details:<br>"
-  << this->ToStringMessageFull();
+  out << "<br><b>Request:</b> " << HtmlRoutines::ConvertStringToHtmlString(global.requestType, true);
   out << "</body></html>";
-  this->flagEncounteredErrorWhileServingFile = true;
   this->WriteToBody(out.str());
-  return 0;
+  this->SendPending();
+  return - 1;
 }
 
 int WebWorker::ProcessFileCantOpen() {
@@ -1497,11 +1503,10 @@ int WebWorker::ProcessFileCantOpen() {
   out << "<br><b>File display name: </b>"
   << this->addressGetOrPost
   << "<br><b>Virtual file name: </b>"
-  << this->VirtualFileName
-  << "</body></html>";
+  << this->VirtualFileName;
   JSData result;
   result[WebAPI::result::error] = out.str();
-  return this->WriteToBodyJSON(result);
+  return this->WriteToBodyJSOn(result);
 }
 
 int WebWorker::ProcessFileTooLarge(long fileSize) {
@@ -1513,7 +1518,7 @@ int WebWorker::ProcessFileTooLarge(long fileSize) {
   << " bytes.";
   JSData result;
   result[WebAPI::result::error] = out.str();
-  return this->WriteToBodyJSON(result);
+  return this->WriteToBodyJSOn(result);
 }
 
 int WebWorker::ProcessFile() {
@@ -1534,7 +1539,7 @@ int WebWorker::ProcessFile() {
   }
   std::stringstream theHeader;
   theHeader << "HTTP/1.0 200 OK\r\n"
-  << this->GetMIMEtypeFromFileExtension(fileExtension)
+  << this->HeaderFromFileExtension(fileExtension)
   << "Access-Control-Allow-Origin: *\r\n";
   for (int i = 0; i < this->parent->addressStartsSentWithCacheMaxAge.size; i ++) {
     if (StringRoutines::StringBeginsWith(this->VirtualFileName, this->parent->addressStartsSentWithCacheMaxAge[i])) {
@@ -1552,9 +1557,7 @@ int WebWorker::ProcessFile() {
   theHeader << "\r\n";
   this->QueueStringForSendingNoHeadeR(theHeader.str());
   if (this->requestTypE == this->requestHead) {
-    this->SendAllBytesNoHeaders();
-    this->flagAllBytesSentUsingFile = true;
-    this->flagEncounteredErrorWhileServingFile = false;
+    this->SendAllBytesNoHeaderS();
     return 0;
   }
   const int bufferSize = 64 * 1024;
@@ -1569,9 +1572,7 @@ int WebWorker::ProcessFile() {
     theFile.read(this->bufferFileIO.TheObjects, this->bufferFileIO.size);
     numBytesRead = theFile.gcount();
   }
-  this->SendAllBytesNoHeaders();
-  this->flagAllBytesSentUsingFile = true;
-  this->flagEncounteredErrorWhileServingFile = false;
+  this->SendAllBytesNoHeaderS();
   return 0;
 }
 
@@ -1594,8 +1595,6 @@ void WebWorker::reset() {
   this->flagKeepAlive = false;
   this->flagDidSendAll = false;
   this->flagUsingSSLInWorkerProcess = false;
-  this->flagAllBytesSentUsingFile = false;
-  this->flagEncounteredErrorWhileServingFile = false;
   global.flagUsingSSLinCurrentConnection = false;
   global.flagLoggedIn = false;
   global.userDefault.reset();
@@ -1633,7 +1632,7 @@ bool WebWorker::IsFileExtensionOfBinaryFile(const std::string& fileExtension) {
   return false;
 }
 
-void WebWorker::WrapUpConnection() {
+void WebWorker::WrapUpConnectioN() {
   MacroRegisterFunctionWithName("WebWorker::WrapUpConnection");
   if (global.flagServerDetailedLog) {
     global << "Detail: wrapping up connection. " << logger::endL;
@@ -1660,16 +1659,6 @@ void WebWorker::WrapUpConnection() {
   global.JoinAllThreads();
 }
 
-void WebWorker::SendAllAndWrapUp() {
-  MacroRegisterFunctionWithName("WebWorker::SendAllAndWrapUp");
-  if (!this->IamActive()) {
-    global << logger::red << "Signal done called on non-active worker" << logger::endL;
-    return;
-  }
-  this->SendAllBytesWithHeaders();
-  this->WrapUpConnection();
-}
-
 WebWorker::~WebWorker() {
   // Workers are not allowed to release resources in the destructor:
   // a Worker's destructor is called when expanding List<WebWorker>.
@@ -1677,45 +1666,29 @@ WebWorker::~WebWorker() {
   this->flagDeallocated = true;
 }
 
-std::string WebWorker::GetMIMEtypeFromFileExtension(const std::string& fileExtension) {
+std::string WebWorker::HeaderFromFileExtension(const std::string& fileExtension) {
+  std::stringstream out;
+  out << "Content-Type: " << this->MIMETypeFromFileExtension(fileExtension) << "\r\n";
+  return out.str();
+}
+
+void WebServer::initializeMainMIMETypes() {
+  this->MIMETypes.SetKeyValue(".html", "text/html"                    );
+  this->MIMETypes.SetKeyValue(".php" , "text/html"                    );
+  this->MIMETypes.SetKeyValue(".txt" , "text/plain"                   );
+  this->MIMETypes.SetKeyValue(".png" , "image/png"                    );
+  this->MIMETypes.SetKeyValue(".js"  , "text/javascript"              );
+  this->MIMETypes.SetKeyValue(".ico" , "image/x-icon"                 );
+  this->MIMETypes.SetKeyValue(".css" , "text/css"                     );
+  this->MIMETypes.SetKeyValue(".eot" , "application/vnd.ms-fontobject");
+  this->MIMETypes.SetKeyValue(".ttf" , "application/octet-stream"     );
+  this->MIMETypes.SetKeyValue(".svg" , "image/svg+xml"                );
+  this->MIMETypes.SetKeyValue(".woff", "application/font-woff"        );
+}
+
+std::string WebWorker::MIMETypeFromFileExtension(const std::string& fileExtension) {
   MacroRegisterFunctionWithName("WebWorker::GetMIMEtypeFromFileExtension");
-  if (fileExtension == ".html") {
-    return "Content-Type: text/html\r\n";
-  }
-  if (fileExtension == ".php") {
-    return "Content-Type: text/html\r\n";
-  }
-  if (fileExtension == ".txt") {
-    return "Content-Type: text/plain\r\n";
-  }
-  if (fileExtension == ".png") {
-    return "Content-Type: image/png\r\n";
-  }
-  if (fileExtension == ".js") {
-    return "Content-Type: text/javascript\r\n";
-  }
-  if (fileExtension == ".ico") {
-    return "Content-Type: image/x-icon\r\n";
-  }
-  if (fileExtension == ".css") {
-    return "Content-Type: text/css\r\n";
-  }
-  if (fileExtension == ".eot") {
-    return "Content-Type: application/vnd.ms-fontobject\r\n";
-  }
-  if (fileExtension == ".ttf") {
-    return "Content-Type: application/octet-stream\r\n";
-  }
-  if (fileExtension == ".svg") {
-    return "Content-Type: image/svg+xml\r\n";
-  }
-  if (fileExtension == ".appcache") {
-    return "Content-Type: text/cache-manifest\r\n";
-  }
-  if (fileExtension == ".woff") {
-    return "Content-Type: application/font-woff\r\n";
-  }
-  return "Content-Type: application/octet-stream\r\n";
+  return this->parent->MIMETypes.GetValue(fileExtension, "application/octet-stream");
 }
 
 int WebWorker::ProcessUnknown() {
@@ -1726,13 +1699,13 @@ int WebWorker::ProcessUnknown() {
 }
 
 bool WebWorker::ShouldDisplayLoginPage() {
-  if (global.userCalculatorRequestType == "login") {
+  if (global.requestType == "login") {
     return true;
   }
   if (
     global.flagUsingSSLinCurrentConnection &&
     !global.flagLoggedIn &&
-    global.userCalculatorRequestType != "calculator"
+    global.requestType != "calculator"
   ) {
     return true;
   }
@@ -1992,17 +1965,17 @@ bool WebWorker::CorrectRequestsBEFORELoginReturnFalseIfModified() {
   if (!global.flagSSLIsAvailable) {
     if (
       this->addressComputed == global.DisplayNameExecutable &&
-      global.userCalculatorRequestType == ""
+      global.requestType == ""
     ) {
       this->addressComputed = global.DisplayNameExecutable;
-      global.userCalculatorRequestType = "calculator";
+      global.requestType = "calculator";
       stateNotModified = false;
     }
   }
   if (this->addressComputed == "/" || this->addressComputed == "") {
     this->addressComputed = global.DisplayNameExecutableApp; //was: global.DisplayNameExecutable;
-    global.userCalculatorRequestType = WebAPI::app;
-    //global.userCalculatorRequestType = "selectCourse";
+    global.requestType = WebAPI::app;
+    //global.requestType = "selectCourse";
     stateNotModified = false;
   }
   return stateNotModified;
@@ -2015,15 +1988,15 @@ bool WebWorker::RedirectIfNeeded(std::stringstream& argumentProcessingFailureCom
     return false;
   }
   if (
-    global.userCalculatorRequestType == WebAPI::request::changePassword ||
-    global.userCalculatorRequestType == WebAPI::request::activateAccountJSON
+    global.requestType == WebAPI::request::changePassword ||
+    global.requestType == WebAPI::request::activateAccountJSON
   ) {
     return false;
   }
   std::stringstream redirectedAddress;
   if (this->addressComputed == global.DisplayNameExecutable) {
     redirectedAddress << global.DisplayNameExecutable << "?request="
-    << global.userCalculatorRequestType << "&";
+    << global.requestType << "&";
   } else {
     redirectedAddress << this->addressComputed << "?";
   }
@@ -2069,21 +2042,21 @@ bool WebWorker::CorrectRequestsAFTERLoginReturnFalseIfModified() {
   if (!global.flagSSLIsAvailable) {
     if (
       this->addressComputed == global.DisplayNameExecutable &&
-      global.userCalculatorRequestType == ""
+      global.requestType == ""
     ) {
       this->addressComputed = global.DisplayNameExecutable;
-      global.userCalculatorRequestType = WebAPI::app;
+      global.requestType = WebAPI::app;
       stateNotModified = false;
     }
   }
   if (global.flagLoggedIn) {
     if (
       this->addressComputed == global.DisplayNameExecutable &&
-      global.userCalculatorRequestType == ""
+      global.requestType == ""
     ) {
       shouldFallBackToDefaultPage = true;
     } else if (
-      global.userCalculatorRequestType == "template" &&
+      global.requestType == "template" &&
       global.GetWebInput("courseHome") == ""
     ) {
       shouldFallBackToDefaultPage = true;
@@ -2091,7 +2064,7 @@ bool WebWorker::CorrectRequestsAFTERLoginReturnFalseIfModified() {
   }
   if (shouldFallBackToDefaultPage) {
     this->addressComputed = global.DisplayNameExecutableApp;
-    global.userCalculatorRequestType = WebAPI::app;
+    global.requestType = WebAPI::app;
     stateNotModified = false;
   }
   return stateNotModified;
@@ -2203,9 +2176,9 @@ int WebWorker::ServeClient() {
   if (!this->ExtractArgumentsFromCookies(argumentProcessingFailureComments)) {
     this->flagArgumentsAreOK = false;
   }
-  global.userCalculatorRequestType = "";
+  global.requestType = "";
   if (this->addressComputed == global.DisplayNameExecutable) {
-    global.userCalculatorRequestType = global.GetWebInput("request");
+    global.requestType = global.GetWebInput("request");
   }
   std::stringstream comments;
   comments << "Address, request computed: ";
@@ -2215,8 +2188,8 @@ int WebWorker::ServeClient() {
     comments << "[empty]";
   }
   comments << ", ";
-  if (global.userCalculatorRequestType != "") {
-    comments << HtmlRoutines::ConvertStringToHtmlString(global.userCalculatorRequestType, false);
+  if (global.requestType != "") {
+    comments << HtmlRoutines::ConvertStringToHtmlString(global.requestType, false);
   } else {
     comments << "[empty]";
   }
@@ -2226,16 +2199,16 @@ int WebWorker::ServeClient() {
     comments << this->ToStringAddressRequest() << ": modified before login. ";
   }
   if (global.server().addressStartsInterpretedAsCalculatorRequest.Contains(this->addressComputed)) {
-    global.userCalculatorRequestType = this->addressComputed;
+    global.requestType = this->addressComputed;
     std::string correctedRequest;
-    if (StringRoutines::StringBeginsWith(global.userCalculatorRequestType, "/", &correctedRequest)) {
-      global.userCalculatorRequestType = correctedRequest;
+    if (StringRoutines::StringBeginsWith(global.requestType, "/", &correctedRequest)) {
+      global.requestType = correctedRequest;
       comments << "Address was interpretted as request, so your request was set to: "
-      << global.userCalculatorRequestType << ". ";
+      << global.requestType << ". ";
     }
   }
   theUser.flagMustLogin = this->parent->RequiresLogin(
-    global.userCalculatorRequestType, this->addressComputed
+    global.requestType, this->addressComputed
   );
   if (!theUser.flagMustLogin) {
     comments << "Login not needed. ";
@@ -2260,14 +2233,14 @@ int WebWorker::ServeClient() {
     theUser.flagMustLogin
   );
   if (theUser.flagStopIfNoLogin) {
-    if (global.userCalculatorRequestType == WebAPI::request::changePassword) {
+    if (global.requestType == WebAPI::request::changePassword) {
       theUser.flagStopIfNoLogin = false;
     }
   }
   if (theUser.flagStopIfNoLogin) {
     if (
-      global.userCalculatorRequestType != WebAPI::request::logout &&
-      global.userCalculatorRequestType != WebAPI::request::login
+      global.requestType != WebAPI::request::logout &&
+      global.requestType != WebAPI::request::login
     ) {
       argumentProcessingFailureComments << this->ToStringAddressRequest()
       << " requires login. ";
@@ -2282,7 +2255,7 @@ int WebWorker::ServeClient() {
   if (
     argumentProcessingFailureComments.str() != "" && (
       theUser.flagMustLogin ||
-      global.userCalculatorRequestType == WebAPI::request::userInfoJSON
+      global.requestType == WebAPI::request::userInfoJSON
     )
   ) {
     global.SetWebInpuT("error", argumentProcessingFailureComments.str());
@@ -2318,13 +2291,15 @@ int WebWorker::ProcessFolderOrFile() {
   )) {
     this->SetHeader("HTTP/1.0 404 Object not found", "Content-Type: text/html");
     std::stringstream out;
-    out << "<html><body>File name: "
+    JSData result;
+    out << "File name: "
     << HtmlRoutines::ConvertStringToHtmlStringRestrictSize(this->VirtualFileName, false, 1000)
     << " <b style = 'color:red'>deemed unsafe</b>. "
     << "Please note that folder names are not allowed to contain dots and file names "
     << "are not allowed to start with dots. There may be additional restrictions "
-    << "on file names added for security reasons.</body></html>";
-    return this->WriteToBody(out.str());
+    << "on file names added for security reasons.";
+    result[WebAPI::result::error] = out.str();
+    return global.theProgress.WriteResponse(result);
   }
   if (FileOperations::IsFolderUnsecure(this->RelativePhysicalFileNamE)) {
     return this->ProcessFolder();
@@ -2378,7 +2353,7 @@ void WebWorker::GetIndicatorOnTimeout(
     << "is the default behavior, so the "
     << "owners of the server must have explicitly banned monitoring. ";
     output[WebAPI::result::timeOutComments] = timeOutComments.str();
-  } else if (global.theProgress.flagReportDesired){
+  } else if (!global.theProgress.flagReportDesired){
     timeOutComments
     << "Monitoring computations not desired by user. ";
     output[WebAPI::result::timeOutComments] = timeOutComments.str();
@@ -2398,11 +2373,11 @@ void WebWorker::WriteAfterTimeoutShowIndicator(const std::string& message) {
     << "Index of worker is smaller than 0, this shouldn't happen. "
     << global.fatal;
   }
-  this->WriteToBodyJSON(result);
+  this->WriteToBodyJSOn(result);
   this->WriteAfterTimeoutProgress(
     global.ToStringProgressReportNoThreadData(true), true
   );
-  this->SendAllBytesWithHeaders();
+  this->SendPending();
   for (int i = 0; i < this->parent->theWorkers.size; i ++) {
     if (i != this->indexInParent) {
       this->parent->theWorkers[i].Release();
@@ -2423,10 +2398,10 @@ std::string WebWorker::ToStringAddressRequest() const {
   }
   out << "; ";
   out << " request = ";
-  if (global.userCalculatorRequestType == "") {
+  if (global.requestType == "") {
     out << "[empty]";
   } else {
-    out << global.userCalculatorRequestType;
+    out << global.requestType;
   }
   return out.str();
 }
@@ -2494,7 +2469,6 @@ bool WebServer::CheckConsistency() {
 }
 
 void WebServer::ReleaseEverything() {
-
   this->theTLS.Free();
   for (int i = 0; i < this->theWorkers.size; i ++) {
     this->theWorkers[i].Release();
@@ -2519,10 +2493,6 @@ void WebServer::ReleaseEverything() {
 
 WebServer::~WebServer() {
   this->flagDeallocated = true;
-}
-
-void WebServer::FlushActiveWorker() {
-  global.server().GetActiveWorker().SendAllBytesWithHeaders();
 }
 
 WebServer::WebServer() {
@@ -2592,12 +2562,12 @@ WebWorker& WebServer::GetActiveWorker() {
   return this->theWorkers[this->activeWorker];
 }
 
-void WebServer::SignalActiveWorkerDoneReleaseEverything() {
-  MacroRegisterFunctionWithName("WebServer::SignalActiveWorkerDoneReleaseEverything");
+void WebServer::WrapUp() {
+  MacroRegisterFunctionWithName("WebServer::WrapUp");
   if (global.server().activeWorker == - 1) {
     return;
   }
-  global.server().GetActiveWorker().SendAllAndWrapUp();
+  global.server().GetActiveWorker().WrapUpConnectioN();
   global.server().activeWorker = - 1;
 }
 
@@ -3675,9 +3645,7 @@ void WebServer::ComputeSSLFlags() {
   this->GetActiveWorker().flagUsingSSLInWorkerProcess = global.flagUsingSSLinCurrentConnection;
 }
 
-int WebWorker::Run() {
-  MacroRegisterFunctionWithName("WebWorker::Run");
-
+bool WebWorker::RunInitialize() {
   global.millisecondOffset = this->millisecondsAfterSelect;
   this->CheckConsistency();
   if (this->connectedSocketID == - 1) {
@@ -3694,75 +3662,92 @@ int WebWorker::Run() {
     std::stringstream commentsOnFailure;
     if (!global.server().SSLServerSideHandShake(&commentsOnFailure)) {
       global.flagUsingSSLinCurrentConnection = false;
-      this->parent->SignalActiveWorkerDoneReleaseEverything();
+      this->parent->WrapUp();
       this->parent->ReleaseEverything();
       global << logger::red << "Ssl fail #: " << this->parent->NumConnectionsSoFar << logger::endL;
       global << commentsOnFailure.str() << logger::endL;
-      return - 1;
+      return false;
     }
   }
   if (global.flagSSLIsAvailable && global.flagUsingSSLinCurrentConnection) {
     global << logger::green << "ssl success #: " << this->parent->NumConnectionsSoFar << ". " << logger::endL;
   }
   /////////////////////////////////////////////////////////////////////////
-  int result = 0;
   this->numberOfReceivesCurrentConnection = 0;
-  while (true) {
-    StateMaintainerCurrentFolder preserveCurrentFolder;
-    this->flagAllBytesSentUsingFile = false;
-    this->flagEncounteredErrorWhileServingFile = false;
-    if (!this->ReceiveAll()) {
-      bool sslWasOK = true;
-      if (global.flagSSLIsAvailable) {
-        sslWasOK = (this->error == TransportLayerSecurityOpenSSL::errors::errorWantRead);
-      }
-      if (this->numberOfReceivesCurrentConnection > 0 && sslWasOK) {
-        global << logger::green << "Connection timed out after successfully receiving "
-        << this->numberOfReceivesCurrentConnection << " times. " << logger::endL;
-        result = 0;
-        break;
-      }
-      global << logger::red << "Failed to receive all with error: " << this->error;
-      result = - 1;
-      break;
-    }
-    if (this->numberOfReceivesCurrentConnection > 0) {
-      global.calculator().FreeMemory();
-      global.calculator().GetElement().initialize();
-      global.Comments.resetComments();
-      global << logger::blue << "Created new calculator for connection: "
-      << this->numberOfReceivesCurrentConnection << logger::endL;
-    }
-    if (this->messageHead.size() == 0) {
-      break;
-    }
-    result = this->ServeClient();
-    if (this->connectedSocketID == - 1) {
-      break;
-    }
-    if (!this->flagAllBytesSentUsingFile) {
-      this->SendAllBytesWithHeaders();
-    }
-    this->numberOfReceivesCurrentConnection ++;
-    if (
-      (!this->flagKeepAlive) ||
-      this->flagEncounteredErrorWhileServingFile ||
-      global.flagRestartNeeded ||
-      global.flagStopNeeded ||
-      global.theProgress.TimedOut()
-    ) {
-      break;
-    }
-    // The function call needs security audit.
-    this->resetConnection();
-    global << logger::blue << "Received " << this->numberOfReceivesCurrentConnection
-    << " times on this connection, waiting for more. "
-    << logger::endL;
-    global.millisecondOffset += global.GetElapsedMilliseconds();
-    this->parent->WorkerTimerPing(global.millisecondOffset);
+  return  true;
+}
+
+bool WebWorker::FailReceiveReturnFalse() {
+  bool sslWasOK = true;
+  if (global.flagSSLIsAvailable) {
+    sslWasOK = (this->error == TransportLayerSecurityOpenSSL::errors::errorWantRead);
   }
-  this->WrapUpConnection();
-  return result;
+  if (this->numberOfReceivesCurrentConnection > 0 && sslWasOK) {
+    global << logger::green << "Connection timed out after successfully receiving "
+    << this->numberOfReceivesCurrentConnection << " times. " << logger::endL;
+    this->lastResult = 0;
+    return false;
+  }
+  global << logger::red << "Failed to receive all with error: " << this->error;
+  this->lastResult = - 1;
+  return false;
+}
+
+bool WebWorker::RunOnce() {
+  this->lastResult = 0;
+  StateMaintainerCurrentFolder preserveCurrentFolder;
+  if (!this->ReceiveAll()) {
+    return this->FailReceiveReturnFalse();
+  }
+  if (this->numberOfReceivesCurrentConnection > 0) {
+    global.calculator().FreeMemory();
+    global.calculator().GetElement().initialize();
+    global.Comments.resetComments();
+    global << logger::blue << "Created new calculator for connection: "
+    << this->numberOfReceivesCurrentConnection << logger::endL;
+  }
+  if (this->messageHead.size() == 0) {
+    global << logger::red << "Empty message head. " << logger::endL;
+    if (this->numberOfReceivesCurrentConnection == 0) {
+      this->lastResult = - 1;
+    }
+    return false;
+  }
+  this->lastResult = this->ServeClient();
+  if (this->lastResult == - 1) {
+    return false;
+  }
+  this->EnsureAllBytesSent();
+  this->numberOfReceivesCurrentConnection ++;
+  if (
+    (!this->flagKeepAlive) ||
+    global.flagRestartNeeded ||
+    global.flagStopNeeded ||
+    global.theProgress.TimedOut()
+  ) {
+    return false;
+  }
+  // The function call needs security audit.
+  this->resetConnection();
+  global << logger::blue << "Received " << this->numberOfReceivesCurrentConnection
+  << " times on this connection, waiting for more. "
+  << logger::endL;
+  global.millisecondOffset += global.GetElapsedMilliseconds();
+  this->parent->WorkerTimerPing(global.millisecondOffset);
+  return true;
+}
+
+int WebWorker::Run() {
+  MacroRegisterFunctionWithName("WebWorker::Run");
+  if (!this->RunInitialize()) {
+    this->lastResult = - 1;
+    return this->lastResult;
+  }
+  while (this->RunOnce()) {
+  }
+  this->parent->WrapUp();
+  this->parent->ReleaseEverything();
+  return this->lastResult;
 }
 
 void WebServer::Release(int& theDescriptor) {
@@ -4230,6 +4215,7 @@ void WebServer::InitializeMainAll() {
   this->InitializeMainFoldersInstructorSpecific();
   this->InitializeMainRequests();
   this->InitializeMainAddresses();
+  this->initializeMainMIMETypes();
 }
 
 extern int mainTest(List<std::string>& remainingArgs);
@@ -4597,10 +4583,31 @@ void WebWorker::PrepareFullMessageHeaderAndFooter() {
   this->remainingBodyToSend.SetSize(0);
 }
 
-void WebWorker::SendAllBytesWithHeaders() {
-  MacroRegisterFunctionWithName("WebWorker::SendAllBytesWithHeaders");
+bool WebWorker::EnsureAllBytesSent() {
+  if (
+    this->remainingBytesToSenD.size == 0 &&
+    this->remainingBodyToSend.size == 0 &&
+    this->remainingHeaderToSend.size == 0
+  ) {
+    return true;
+  }
+  global << logger::red << "This should not happen: not all bytes have been processed. " << logger::endL;
+  global << logger::red << "Type: " << logger::blue << global.requestType
+  << ", address: " << this->addressComputed << logger::endL;
+  global << logger::red << "Remaining header: " << logger::red
+  << this->remainingHeaderToSend.ToStringCommaDelimited() << logger::endL;
+  global << logger::red << "Remaining body size: " << logger::blue
+  << this->remainingBodyToSend.size << logger::endL;
+  global << logger::red << "Remaining bytes: " << logger::blue
+  << this->remainingBytesToSenD.size << logger::endL;
+  this->SendPending();
+  return false;
+}
+
+void WebWorker::SendPending() {
+  MacroRegisterFunctionWithName("WebWorker::SendPending");
   this->PrepareFullMessageHeaderAndFooter();
-  this->SendAllBytesNoHeaders();
+  this->SendAllBytesNoHeaderS();
 }
 
 void WebWorker::SendAllBytesHttp() {
@@ -4697,7 +4704,7 @@ void WebWorker::QueueStringForSendingNoHeadeR(const std::string& stringToSend, b
   }
 }
 
-void WebWorker::SendAllBytesNoHeaders() {
+void WebWorker::SendAllBytesNoHeaderS() {
   MacroRegisterFunctionWithName("WebWorker::SendAllBytesNoHeaders");
   if (global.flagUsingSSLinCurrentConnection) {
     this->SendAllBytesHttpSSL();

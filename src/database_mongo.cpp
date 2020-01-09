@@ -319,7 +319,6 @@ bool MongoQuery::UpdateOne(std::stringstream* commentsOnFailure, bool doUpsert) 
   this->updateResult = bson_new();
   bool result = false;
   if (doUpsert) {
-    global << logger::blue << "DEBUG: about update with upsert: " << this->ToStringDebug() << logger::endL;
     result = mongoc_collection_update_one(
       theCollection.collection,
       this->query,
@@ -433,8 +432,6 @@ bool MongoQuery::FindMultiple(
       return false;
     }
   }
-  global << "DEBUG: Database name: " << DatabaseStrings::theDatabaseName << logger::endL;
-  global << "DEBUG: fire up query: " << this->ToStringDebug() << logger::endL;
   this->cursor = mongoc_collection_find_with_opts(
     theCollection.collection, this->query, this->options, nullptr
   );
@@ -983,7 +980,6 @@ bool Database::DeleteOneEntryUnsetUnsecure(
   std::stringstream updateQueryStream;
   updateQueryStream << "{\"$unset\": {\"" << selectorString << "\":\"\"}}";
   query.updateQuery = updateQueryStream.str();
-  global << logger::red << "DEBUG: update query: " << logger::blue << query.updateQuery << logger::endL;
   return query.UpdateOneNoOptions(commentsOnFailure);
 #else
   (void) findQuery;
@@ -1128,9 +1124,6 @@ bool Database::Mongo::UpdateOne(
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("Database::UpdateOneFromJSON");
-  global << logger::orange << "DEBUG: about to update one, find query: "
-  << findQuery.ToJSON().ToString()
-  << ", update query: " << updateQuery.ToStringDebug() << logger::endL;
   JSData updateQueryJSON;
   if (!updateQuery.ToJSONSetMongo(updateQueryJSON, commentsOnFailure)) {
     return false;
@@ -1266,7 +1259,6 @@ JSData Database::ToJSONDatabaseFetch(const std::string& incomingLabels) {
   JSData result;
   JSData labels;
   std::stringstream commentsOnFailure;
-  global << logger::red << "DEBUG: incomingLabels: " << incomingLabels << logger::endL;
   if (!labels.readstring(incomingLabels, &commentsOnFailure)) {
     commentsOnFailure << "Failed to parse labels from: "
     << StringRoutines::StringTrimToLengthForDisplay(incomingLabels, 100);
@@ -1334,7 +1326,6 @@ JSData Database::ToJSONFetchItem(const List<std::string>& labelStrings) {
 
 JSData Database::ToJSONDatabaseCollection(const std::string& currentTable) {
   MacroRegisterFunctionWithName("Database::ToJSONDatabaseCollection");
-  global << logger::blue << "DEBUG: fetching DB collection: " << currentTable << logger::endL;
   JSData result;
   std::stringstream out;
   result["currentTable"] = currentTable;
@@ -1354,10 +1345,8 @@ JSData Database::ToJSONDatabaseCollection(const std::string& currentTable) {
     } else {
       result["error"] = out.str();
     }
-    global << "DEBUG: about to return: " << result.ToString() << logger::endL;
     return result;
   }
-  global << "DEBUG: got to here return: " << result.ToString() << logger::endL;
   JSData findQuery;
   QueryResultOptions projector;
   projector = Database::GetStandardProjectors(currentTable);
@@ -1374,10 +1363,8 @@ JSData Database::ToJSONDatabaseCollection(const std::string& currentTable) {
     currentTable, findQuery, rowsJSON, projector, 200, &totalItems, &out, commentsPointer
   )) {
     result["error"] = out.str();
-    global << "DEBUG: about to return: " << result.ToString() << logger::endL;
     return result;
   }
-  global << "DEBUG: got to before rows json, rowsJSON.size: " << rowsJSON.size << logger::endL;
   if (rowsJSON.size == 0) {
     result = Database::ToJSONDatabaseCollection("");
     if (flagDebuggingAdmin) {
@@ -1387,10 +1374,8 @@ JSData Database::ToJSONDatabaseCollection(const std::string& currentTable) {
       result["commentsOnFirstQuery"] = commentsPointer->str();
       result["currentTableRawOriginal"] = currentTable;
     }
-    global << "DEBUG: about to return: " << result.ToString() << logger::endL;
     return result;
   }
-  global << "DEBUG: about to return: " << result.ToString() << logger::endL;
   JSData theRows;
   theRows.theType = JSData::token::tokenArray;
   theRows.theList = rowsJSON;

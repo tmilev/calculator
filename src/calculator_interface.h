@@ -2703,7 +2703,6 @@ bool Calculator::functionGetMatrix(
             << "row: " << i << ", column: "
             << j << ", expression: "
             << nonConvertedEs(i, j).ToString() << ". "
-            //<< "DEBUG: " << global.fatal.GetStackTraceEtcErrorMessageHTML()
             ;
           }
           return false;

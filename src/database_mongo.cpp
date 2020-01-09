@@ -151,6 +151,7 @@ public:
   bool UpdateOne(std::stringstream* commentsOnFailure, bool doUpsert);
   bool InsertOne(const JSData& incoming, std::stringstream* commentsOnFailure);
   bool UpdateOneNoOptions(std::stringstream* commentsOnFailure);
+  std::string ToStringDebug();
   // Abbreviation to get the default database.
   Database::Mongo& getDB() {
     return Database::get().mongoDB;
@@ -238,6 +239,13 @@ bool MongoQuery::RemoveOne(std::stringstream* commentsOnFailure) {
   return true;
 }
 
+std::string MongoQuery::ToStringDebug() {
+  std::stringstream out;
+  out << this->collectionName << ", " << this->findQuery << ", "
+  << this->updateQuery << ", " << this->optionsQuery;
+  return out.str();
+}
+
 bool MongoQuery::InsertOne(const JSData& incoming, std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("MongoQuery::InsertOne");
   if (!Database::get().mongoDB.initialize()) {
@@ -291,7 +299,7 @@ bool MongoQuery::UpdateOne(std::stringstream* commentsOnFailure, bool doUpsert) 
     global.fatal << "At this point of code, query is supposed to be 0. " << global.fatal;
   }
   this->query = bson_new_from_json(
-    reinterpret_cast<const uint8_t*>( this->findQuery.c_str()),
+    reinterpret_cast<const uint8_t*>(this->findQuery.c_str()),
     static_cast<signed>(this->findQuery.size()),
     &this->theError
   );
@@ -311,8 +319,14 @@ bool MongoQuery::UpdateOne(std::stringstream* commentsOnFailure, bool doUpsert) 
   this->updateResult = bson_new();
   bool result = false;
   if (doUpsert) {
+    global << logger::blue << "DEBUG: about update with upsert: " << this->ToStringDebug() << logger::endL;
     result = mongoc_collection_update_one(
-      theCollection.collection, this->query, this->update, this->options, this->updateResult, &this->theError
+      theCollection.collection,
+      this->query,
+      this->update,
+      this->options,
+      this->updateResult,
+      &this->theError
     );
   } else {
     result = mongoc_collection_update_one(
@@ -419,6 +433,8 @@ bool MongoQuery::FindMultiple(
       return false;
     }
   }
+  global << "DEBUG: Database name: " << DatabaseStrings::theDatabaseName << logger::endL;
+  global << "DEBUG: fire up query: " << this->ToStringDebug() << logger::endL;
   this->cursor = mongoc_collection_find_with_opts(
     theCollection.collection, this->query, this->options, nullptr
   );
@@ -564,13 +580,19 @@ void QueryResultOptions::MakeProjection(const List<std::string>& fields) {
 
 JSData QueryResultOptions::ToJSON() const {
   JSData result, fields;
+  result.reset(JSData::token::tokenObject);
+  bool found = false;
   for (int i = 0; i < this->fieldsToProjectTo.size; i ++) {
     fields[this->fieldsToProjectTo[i]] = 1;
+    found = true;
   }
   for (int i = 0; i < this->fieldsProjectedAway.size; i ++) {
     fields[this->fieldsProjectedAway[i]] = 0;
+    found = true;
   }
-  result["projection"] = fields;
+  if (found) {
+    result["projection"] = fields;
+  }
   return result;
 }
 
@@ -635,11 +657,13 @@ bool Database::FindFromJSONWithOptions(
   }
   (void) commentsGeneralNonSensitive;
 #ifdef MACRO_use_MongoDB
-  global << logger::blue << "Query input JSON: " << findQuery.ToString(nullptr) << logger::endL;
   MongoQuery query;
   query.collectionName = collectionName;
   query.findQuery = findQuery.ToString(nullptr);
   query.maxOutputItems = maxOutputItems;
+  global << logger::blue << "Query input JSON: " << query.ToStringDebug()
+  << ", options: " << options.ToJSON().ToString()
+  << logger::endL;
   bool result = query.FindMultiple(
     output, options.ToJSON(), commentsOnFailure, commentsGeneralNonSensitive
   );
@@ -1104,6 +1128,9 @@ bool Database::Mongo::UpdateOne(
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("Database::UpdateOneFromJSON");
+  global << logger::orange << "DEBUG: about to update one, find query: "
+  << findQuery.ToJSON().ToString()
+  << ", update query: " << updateQuery.ToStringDebug() << logger::endL;
   JSData updateQueryJSON;
   if (!updateQuery.ToJSONSetMongo(updateQueryJSON, commentsOnFailure)) {
     return false;
@@ -1239,6 +1266,7 @@ JSData Database::ToJSONDatabaseFetch(const std::string& incomingLabels) {
   JSData result;
   JSData labels;
   std::stringstream commentsOnFailure;
+  global << logger::red << "DEBUG: incomingLabels: " << incomingLabels << logger::endL;
   if (!labels.readstring(incomingLabels, &commentsOnFailure)) {
     commentsOnFailure << "Failed to parse labels from: "
     << StringRoutines::StringTrimToLengthForDisplay(incomingLabels, 100);
@@ -1306,6 +1334,7 @@ JSData Database::ToJSONFetchItem(const List<std::string>& labelStrings) {
 
 JSData Database::ToJSONDatabaseCollection(const std::string& currentTable) {
   MacroRegisterFunctionWithName("Database::ToJSONDatabaseCollection");
+  global << logger::blue << "DEBUG: fetching DB collection: " << currentTable << logger::endL;
   JSData result;
   std::stringstream out;
   result["currentTable"] = currentTable;
@@ -1325,8 +1354,10 @@ JSData Database::ToJSONDatabaseCollection(const std::string& currentTable) {
     } else {
       result["error"] = out.str();
     }
+    global << "DEBUG: about to return: " << result.ToString() << logger::endL;
     return result;
   }
+  global << "DEBUG: got to here return: " << result.ToString() << logger::endL;
   JSData findQuery;
   QueryResultOptions projector;
   projector = Database::GetStandardProjectors(currentTable);
@@ -1343,8 +1374,10 @@ JSData Database::ToJSONDatabaseCollection(const std::string& currentTable) {
     currentTable, findQuery, rowsJSON, projector, 200, &totalItems, &out, commentsPointer
   )) {
     result["error"] = out.str();
+    global << "DEBUG: about to return: " << result.ToString() << logger::endL;
     return result;
   }
+  global << "DEBUG: got to before rows json, rowsJSON.size: " << rowsJSON.size << logger::endL;
   if (rowsJSON.size == 0) {
     result = Database::ToJSONDatabaseCollection("");
     if (flagDebuggingAdmin) {
@@ -1354,8 +1387,10 @@ JSData Database::ToJSONDatabaseCollection(const std::string& currentTable) {
       result["commentsOnFirstQuery"] = commentsPointer->str();
       result["currentTableRawOriginal"] = currentTable;
     }
+    global << "DEBUG: about to return: " << result.ToString() << logger::endL;
     return result;
   }
+  global << "DEBUG: about to return: " << result.ToString() << logger::endL;
   JSData theRows;
   theRows.theType = JSData::token::tokenArray;
   theRows.theList = rowsJSON;

@@ -144,7 +144,7 @@ std::string WebAPIResponse::SetProblemWeight() {
   if (theProblem.MergeProblemWeightAndStore(inputProblemInfo, &commentsOnFailure)) {
     out << "<b style = 'color:green'>Modified.</b>";
   } else {
-    out << "<b style =\"color:red\">" << commentsOnFailure.str() << "</b>";
+    out << "<b style = 'color:red'>" << commentsOnFailure.str() << "</b>";
   }
   return out.str();
 }

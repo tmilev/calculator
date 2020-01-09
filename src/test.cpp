@@ -15,6 +15,8 @@ public:
     static const std::string all;
     static const std::string database;
     static const std::string problems;
+    static const std::string topicLists;
+    static const std::string topiclists;
   };
   HashedList<std::string, MathRoutines::HashString> inputs;
   bool flagTestAll;
@@ -34,6 +36,8 @@ int mainTest(List<std::string>& inputArguments) {
 const std::string Test::Suites::all = "all";
 const std::string Test::Suites::database = "database";
 const std::string Test::Suites::problems = "problems";
+const std::string Test::Suites::topicLists = "topicLists";
+const std::string Test::Suites::topiclists = "topiclists";
 
 void Test::Run() {
   global << "Testing ..." << logger::endL;
@@ -54,6 +58,12 @@ void Test::Run() {
     LargeIntegerUnsigned::Test::All();
     Calculator::Test::All();
     GlobalVariables::Test::All();
+  }
+  if (
+    this->ShouldTest(Test::Suites::topicLists) ||
+    this->ShouldTest(Test::Suites::topiclists)
+  ) {
+    TopicElementParser::Test::All();
   }
   global << logger::green << "All tests passed. " << logger::endL;
 

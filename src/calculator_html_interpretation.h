@@ -56,10 +56,19 @@ public:
   void InsertTopicBundle(TopicLine& input);
   bool CheckInitialization();
   bool CheckConsistencyParsed();
+  bool CheckNoErrors(std::stringstream* commentsOnFailure);
+  bool CheckProblemsOpen(std::stringstream* commentsOnFailure);
   void AddTopic(TopicElement& inputElt, int index);
   std::string ToString() const;
   void initializeElementTypes();
   TopicLine ExtractLine(const std::string& inputNonTrimmed);
+  class Test {
+  public:
+    std::stringstream comments;
+    static bool All();
+    static bool DefaultTopicListsOKCrashOnFailure();
+    bool DefaultTopicListsOK();
+  };
 };
 
 class TopicElement {
@@ -152,7 +161,11 @@ public:
     output << theElt.ToString();
     return output;
   }
-  std::string GetItemStart(CalculatorHTML& owner, bool doIncludeScoreButton, bool plainStyle);
+  bool IsError();
+  bool ProblemOpensIfAvailable(std::stringstream* commentsOnFailure);
+  std::string GetItemStart(
+    CalculatorHTML& owner, bool doIncludeScoreButton, bool plainStyle
+  );
   std::string ToStringStudentScoreButton();
   std::string ToString() const;
   JSData ToJSON(CalculatorHTML& owner);
@@ -372,6 +385,7 @@ public:
   void ComputeDeadlineModifyButton(TopicElement& inputOutput, bool problemAlreadySolved, bool isProblemGroup);
   JSData ToStringTopicListJSON();
   std::string ToStringProblemInfo(const std::string& theFileName, const std::string& stringToDisplay = "");
+  static std::string ToStringLinkFromProblem(const std::string& theFileName, bool practiceMode = true, int randomSeed = - 1);
   std::string ToStringLinkFromFileName(const std::string& theFileName);
   std::string ToStringLinkCurrentAdmin(const std::string& displayString, bool setDebugFlag, bool includeRandomSeed);
   std::string ToStringCalculatorProblemSourceFromFileName(const std::string& theFileName);
@@ -485,6 +499,29 @@ public:
     std::string ToHTMLBuiltIn();
     std::string ToHTMLDebug();
   };
+};
+
+class Course {
+public:
+  std::string courseTemplate;
+  std::string courseTopicsNoFolder;
+  std::string title;
+  std::string flagRoughDraft;
+  bool IsEmpty();
+  void reset();
+  std::string courseTopicsWithFolder();
+  std::string ToString() const;
+  JSData ToJSON() const;
+};
+
+class CourseList {
+public:
+  List<Course> theCourses;
+  std::string errorMessage;
+  bool LoadFromString(const std::string& input);
+  std::string ToHtml();
+  bool Load();
+  JSData ToJSON();
 };
 
 #endif

@@ -89,7 +89,9 @@ function Problem() {
 }
 
 Problem.prototype.setRandomSeed = function(input) {
-  console.log(`Set random seed to: ${input}`);
+  if (input === undefined) {
+    input = null;
+  }
   this.randomSeed = input;  
 }
 

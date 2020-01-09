@@ -1102,11 +1102,11 @@ void GlobalVariables::Response::Initiate(const std::string& message) {
   MutexLockGuard guard(global.MutexReturnBytes);
   MacroRegisterFunctionWithName("GlobalVariables::Progress::Initiate");
   if (!global.theResponse.MonitoringAllowed()) {
-    global << logger::red <<"DEBUG: monitoring not allowed :(" << logger::endL;
+    global << logger::red << "DEBUG: monitoring not allowed. " << logger::endL;
     return;
   }
   if (!global.theResponse.flagReportDesired) {
-    global << logger::red <<"DEBUG: monitoring not DESIRED :(" << logger::endL;
+    global << logger::red << "DEBUG: monitoring not DESIRED. " << logger::endL;
     return;
   }
   global.theResponse.flagTimedOut = true;

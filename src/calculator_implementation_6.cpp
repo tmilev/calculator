@@ -50,23 +50,41 @@ bool CalculatorHTML::Test::ComputeTotalFiles() {
   return true;
 }
 
+std::string CalculatorHTML::ToStringLinkFromProblem(
+  const std::string& theFileName,
+  bool practiceMode,
+  int randomSeed
+) {
+  JSData request;
+  request[WebAPI::problem::fileName] = theFileName;
+  request[WebAPI::frontend::problemFileName] = theFileName;
+  std::stringstream randomSeedStream;
+  randomSeedStream << randomSeed;
+  request[WebAPI::problem::randomSeed] = randomSeedStream.str();
+  request[WebAPI::problem::fileName] = theFileName;
+  request[WebAPI::frontend::currentPage] = WebAPI::frontend::problemPage;
+  if (practiceMode) {
+    request[WebAPI::frontend::exerciseType] = WebAPI::frontend::exercise  ;
+  } else  {
+    request[WebAPI::frontend::exerciseType] = WebAPI::frontend::scoredQuiz;
+  }
+  std::stringstream out;
+  out << "<a href='" << global.DisplayNameExecutableAppNoCache
+  << "#"
+  << request.ToString()
+  << "'>"
+  << theFileName
+  << "</a>";
+  return  out.str();
+}
+
 std::string CalculatorHTML::Test::OneProblemTest::ToStringHTMLTableRow(int rowIndex) {
   MacroRegisterFunctionWithName("CalculatorHTML::Test::OneProblemTest::ToStringHTMLTableRow");
   std::stringstream out;
   out << "<tr>";
   out << "<td style = 'min-width:25px'>" << rowIndex << ". </td>";
-  JSData request;
-  request["problemFileName"] = this->fileName;
-  request[WebAPI::problem::fileName] = this->fileName;
-  request[WebAPI::problem::randomSeed] = this->randomSeed;
-  request["currentPage"] = "problemPage";
-  out << "<td style = 'min-width:200px'>"
-  << "<a href='" << global.DisplayNameExecutableAppNoCache
-  << "#"
-  << request.ToString()
-  << "'>"
-  << this->fileName
-  << "</a>"
+  out << "<td style = 'min-width:200px'>";
+  out << CalculatorHTML::ToStringLinkFromProblem(this->fileName)
   << "</td>";
   if (this->errorLoad != "") {
     out << "<td style = 'min-width:300px'><b>Couldn't load.</b> "
@@ -368,6 +386,54 @@ bool CalculatorHTML::Test::BuiltIn(
   return result;
 }
 
+bool TopicElementParser::Test::All() {
+  std::stringstream comments;
+  TopicElementParser::Test::DefaultTopicListsOKCrashOnFailure();
+  return true;
+}
+
+bool TopicElementParser::Test::DefaultTopicListsOKCrashOnFailure() {
+  TopicElementParser::Test tester;
+  if (!tester.DefaultTopicListsOK()) {
+    global.fatal << "Topic list tests failed. " << tester.comments.str() << global.fatal;
+  }
+  return false;
+}
+
+bool TopicElementParser::Test::DefaultTopicListsOK() {
+  MacroRegisterFunctionWithName("TopicElementParser::Test::DefaultTopicListsOK");
+  CourseList courses;
+  if (!courses.Load()) {
+    this->comments << "Failed to load the list of available courses. "
+    << courses.errorMessage;
+    return false;
+  }
+  for (int i = 0; i < courses.theCourses.size; i ++) {
+    CalculatorHTML owner;
+    owner.topicListFileName = courses.theCourses[i].courseTopicsWithFolder();
+    if (!owner.LoadAndParseTopicList(this->comments)) {
+      this->comments << "Failed to load course "
+      << owner.topicListFileName << ". ";
+      return false;
+    }
+    if (!owner.topics.CheckNoErrors(&this->comments)) {
+      this->comments << "Errors in topic list: "
+      << owner.topicListFileName << ". ";
+      return false;
+    }
+    if (!owner.topics.CheckProblemsOpen(&this->comments)) {
+      this->comments << "Not all problems open correctly in topic list: "
+      << owner.topicListFileName << ". ";
+      return false;
+    }
+    this->comments << "Topic list: "
+    << owner.topicListFileName << " with "
+    << owner.topics.theTopics.size()
+    << " topics <b style = 'color:green'>looks ok</b>.<br>";
+  }
+  return true;
+}
+
 bool CalculatorHTML::Test::All() {
   CalculatorHTML::Test::BuiltInCrashOnFailure();
   return true;
@@ -382,12 +448,27 @@ bool CalculatorHTML::Test::BuiltInCrashOnFailure() {
   return true;
 }
 
-bool CalculatorFunctions::innerAutomatedTestProblemInterpretation(
+bool CalculatorFunctions::innerTestTopicListProblems(
   Calculator& theCommands,
   const Expression& input,
   Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerAutomatedTestProblemInterpretation");
+  MacroRegisterFunctionWithName("CalculatorFunctions::innerTestTopicListProblems");
+  if (!global.UserDefaultHasAdminRights()) {
+    return theCommands << "Topic list tests available to logged-in admins only. ";
+  }
+  (void) input;
+  TopicElementParser::Test tester;
+  tester.DefaultTopicListsOK();
+  return output.AssignValue(tester.comments, theCommands);
+}
+
+bool CalculatorFunctions::innerTestProblemInterpretation(
+  Calculator& theCommands,
+  const Expression& input,
+  Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::innerTestProblemInterpretation");
   if (!global.UserDefaultHasAdminRights()) {
     return theCommands << "Automated tests available to logged-in admins only. ";
   }

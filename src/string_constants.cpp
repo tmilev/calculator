@@ -95,6 +95,14 @@ std::string WebAPI::request::addEmails                    = "addEmails"         
 std::string WebAPI::request::userList                     = "userList"                    ;
 std::string WebAPI::request::passwordList                 = "passwordList"                ;
 
+std::string WebAPI::frontend::currentPage     = "currentPage"    ;
+std::string WebAPI::frontend::problemFileName = "problemFileName";
+std::string WebAPI::frontend::problemPage     = "problemPage"    ;
+std::string WebAPI::frontend::exercise        = "exerciseJSON"   ;
+std::string WebAPI::frontend::exerciseType    = "exerciseType"   ;
+std::string WebAPI::frontend::scoredQuiz      = "scoredQuizJSON" ;
+
+
 std::string WebAPI::UserInfo::processMonitoring = "processMonitoring";
 
 std::string WebAPI::calculator::testFileNameVirtual = "test/automated_test_known_inputs_outputs.json";

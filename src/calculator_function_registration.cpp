@@ -1220,8 +1220,18 @@ void Calculator::initPredefinedInnerFunctions() {
     innerAdminNoTest
   );
   this->AddOperationHandler(
+    "TestTopicListProblems",
+    CalculatorFunctions::innerTestTopicListProblems,
+    "",
+    "Tests whether all files given in the default topic lists open properly. ",
+    "TestTopicListProblems 0",
+    "CalculatorFunctions::innerTestTopicListProblems",
+    "TestTopicListProblems",
+    innerAdminNoTest
+  );
+  this->AddOperationHandler(
     "TestProblemInterpretation",
-    CalculatorFunctions::innerAutomatedTestProblemInterpretation,
+    CalculatorFunctions::innerTestProblemInterpretation,
     "",
     "Runs an automated test of built in "
     "problems located in the problems/default/ folder. "
@@ -1237,7 +1247,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "3 at the time of writing. "
     "The random seed will be incremented for each run. ",
     "TestProblemInterpretation{}(0, 0, 0)",
-    "CalculatorFunctions::innerAutomatedTestProblemInterpretation",
+    "CalculatorFunctions::innerTestProblemInterpretation",
     "TestProblemInterpretation",
     innerAdminNoTest
   );

@@ -580,62 +580,45 @@ std::string WebAPIResponse::GetApp(bool appendBuildHash) {
   return theInterpretation.htmlJSbuild;
 }
 
-class Course {
-public:
-  std::string courseTemplate;
-  std::string courseTopics;
-  std::string title;
-  std::string flagRoughDraft;
-  bool IsEmpty();
-  void reset();
-  std::string ToString() const;
-  JSData ToJSON() const;
-};
-
 JSData Course::ToJSON() const {
   JSData result;
   result["title"] = this->title;
-  result["courseHome"] = "coursetemplates/" + this->courseTemplate;
-  result["topicList"] = "topiclists/" + this->courseTopics;
+  result["courseHome"] = Configuration::courseTemplates + this->courseTemplate;
+  result["topicList"] = Configuration::topicLists + this->courseTopicsNoFolder;
   if (this->flagRoughDraft != "") {
     result["roughDraft"] = this->flagRoughDraft;
   }
   return result;
 }
 
+std::string Course::courseTopicsWithFolder() {
+  return Configuration::topicLists + this->courseTopicsNoFolder;
+}
+
 std::string Course::ToString() const {
   std::stringstream out;
   out << "Html: " << this->courseTemplate
-  << "\n" << "Topics: " << this->courseTopics;
+  << "\n" << "Topics: " << this->courseTopicsNoFolder;
   return out.str();
 }
 
 bool Course::IsEmpty() {
-  return this->courseTemplate == "" && this->courseTopics == "" && this->title == "";
+  return this->courseTemplate == "" && this->courseTopicsNoFolder == "" && this->title == "";
 }
 
 void Course::reset() {
   this->courseTemplate = "";
-  this->courseTopics = "";
+  this->courseTopicsNoFolder = "";
   this->title = "";
   this->flagRoughDraft = "";
 }
-
-class CourseList {
-public:
-  List<Course> theCourses;
-  void LoadFromString(const std::string& input, std::stringstream* commentsOnFailure);
-  std::string ToHtml();
-
-};
 
 std::string CourseList::ToHtml() {
   return this->theCourses.ToString();
 }
 
-void CourseList::LoadFromString(const std::string& input, std::stringstream* commentsOnFailure) {
+bool CourseList::LoadFromString(const std::string& input) {
   MacroRegisterFunctionWithName("CourseList::LoadFromString");
-  (void) commentsOnFailure;
   std::stringstream tableReader(input);
   std::string currentLine, currentArgument;
   Course current;
@@ -648,11 +631,11 @@ void CourseList::LoadFromString(const std::string& input, std::stringstream* com
       current.courseTemplate = StringRoutines::StringTrimWhiteSpace(currentArgument);
     }
     if (StringRoutines::StringBeginsWith(currentLine, "Topics:", &currentArgument)) {
-      if (current.courseTopics != "") {
+      if (current.courseTopicsNoFolder != "") {
         this->theCourses.AddOnTop(current);
         current.reset();
       }
-      current.courseTopics = StringRoutines::StringTrimWhiteSpace(currentArgument);
+      current.courseTopicsNoFolder = StringRoutines::StringTrimWhiteSpace(currentArgument);
     }
     if (StringRoutines::StringBeginsWith(currentLine, "Title:", &currentArgument)) {
       if (current.title != "") {
@@ -672,33 +655,40 @@ void CourseList::LoadFromString(const std::string& input, std::stringstream* com
   if (!current.IsEmpty()) {
     this->theCourses.AddOnTop(current);
   }
+  return true;
+}
+
+bool CourseList::Load() {
+  std::string theTopicFile;
+  std::stringstream commentsOnFailure;
+  if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly(
+    "/coursesavailable/default.txt", theTopicFile, &commentsOnFailure
+  )) {
+    commentsOnFailure << "Failed to fetch available courses from /coursesavailable/default.txt. ";
+    this->errorMessage = commentsOnFailure.str();
+    return false;
+  }
+  return this->LoadFromString(theTopicFile);
+}
+
+JSData CourseList::ToJSON() {
+  JSData output;
+  if (this->errorMessage != "") {
+    output[WebAPI::result::error] = this->errorMessage;
+  }
+  output["courses"].theType = JSData::token::tokenArray;
+  for (int i = 0; i < this->theCourses.size; i ++) {
+    Course& currentCourse = this->theCourses[i];
+    output["courses"].theList.AddOnTop(currentCourse.ToJSON());
+  }
+  return output;
 }
 
 JSData WebAPIResponse::GetSelectCourseJSON() {
   MacroRegisterFunctionWithName("WebAPIReponse::GetSelectCourseJSON");
-  JSData output;
-  std::stringstream comments;
-  std::string coursesAvailableList = "/coursesavailable/default.txt";
-  std::string theTopicFile;
-  std::stringstream commentsOnFailure;
-  std::string temp;
-  FileOperations::GetPhysicalFileNameFromVirtualCustomizedReadOnly(coursesAvailableList, temp, &commentsOnFailure);
-  if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly(
-    "/coursesavailable/default.txt", theTopicFile, &commentsOnFailure
-  )) {
-    comments << "Failed to fetch available courses from /coursesavailable/default.txt. "
-    << commentsOnFailure.str();
-    output[WebAPI::result::error] = comments.str();
-    return output;
-  }
   CourseList theCourses;
-  theCourses.LoadFromString(theTopicFile, &comments);
-  output["courses"].theType = JSData::token::tokenArray;
-  for (int i = 0; i < theCourses.theCourses.size; i ++) {
-    Course& currentCourse = theCourses.theCourses[i];
-    output["courses"].theList.AddOnTop(currentCourse.ToJSON());
-  }
-  return output;
+  theCourses.Load();
+  return theCourses.ToJSON();
 }
 
 std::string WebAPIResponse::GetHtmlTagWithManifest() {

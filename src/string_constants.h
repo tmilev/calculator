@@ -78,6 +78,14 @@ public:
     static std::string loginDisabledEveryoneIsAdmin;
     static std::string useFallbackDatabase;
   };
+  struct frontend {
+    static std::string problemFileName;
+    static std::string problemPage;
+    static std::string currentPage;
+    static std::string exerciseType;
+    static std::string scoredQuiz;
+    static std::string exercise;
+  };
   struct problem {
     static std::string title;
     static std::string fileName;

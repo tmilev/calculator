@@ -3506,6 +3506,7 @@ void TopicElement::reset() {
 }
 
 bool TopicElementParser::CheckConsistencyParsed() {
+  MacroRegisterFunctionWithName("TopicElementParser::CheckConsistencyParsed");
   for (int i = 0; i < this->theTopics.size(); i ++) {
     if (this->theTopics.theValues[i].type == TopicElement::types::problem) {
       if (this->theTopics.theValues[i].immediateChildren.size > 0) {
@@ -3516,7 +3517,53 @@ bool TopicElementParser::CheckConsistencyParsed() {
     }
   }
   return true;
+}
 
+bool TopicElementParser::CheckNoErrors(std::stringstream* commentsOnFailure) {
+  MacroRegisterFunctionWithName("TopicElementParser::CheckNoErrors");
+  for (int i = 0; i < this->theTopics.size(); i ++) {
+    TopicElement& current = this->theTopics.theValues[i];
+    if (current.IsError()) {
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure << "Element index "
+        << i << " has an error. " << current.ToString();
+      }
+      return false;
+    }
+  }
+  return true;
+}
+
+bool TopicElement::IsError() {
+  return this->type == TopicElement::types::error;
+}
+
+bool TopicElement::ProblemOpensIfAvailable(std::stringstream* commentsOnFailure) {
+  if (this->problemFileName == "") {
+    return true;
+  }
+  bool result = FileOperations::FileExistsVirtualCustomizedReadOnly(
+    this->problemFileName, commentsOnFailure
+  );
+  if (!result && commentsOnFailure != nullptr) {
+    *commentsOnFailure << "File "
+    << CalculatorHTML::ToStringLinkFromProblem(this->problemFileName)
+    << " does not appear to exist. ";
+  }
+  return result;
+}
+
+bool TopicElementParser::CheckProblemsOpen(
+  std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("TopicElementParser::CheckProblemsOpen");
+  for (int i = 0; i < this->theTopics.size(); i ++) {
+    TopicElement& current = this->theTopics.theValues[i];
+    if (!current.ProblemOpensIfAvailable(commentsOnFailure)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool TopicElementParser::CheckInitialization() {

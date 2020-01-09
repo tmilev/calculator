@@ -21,7 +21,8 @@ public:
   static bool innerCrash(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCrashByListOutOfBounds(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCrashByVectorOutOfBounds(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerAutomatedTestProblemInterpretation(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerTestProblemInterpretation(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerTestTopicListProblems(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPrecomputeSemisimpleLieAlgebraStructure(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerTurnRulesOnOff(Calculator& theCommands, const Expression& input, Expression& output, bool turnOff);

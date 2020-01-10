@@ -3213,6 +3213,26 @@ void Expression::ToStringOpMultiplicative(
   }
 }
 
+std::string Expression::ToStringTreeHtml(int depth) const {
+  std::stringstream out;
+  for (int i = 0; i < depth; i ++) {
+    out << "-";
+  }
+  if (depth > 100) {
+    out << "..." << "<br>";
+    return out.str();
+  }
+  std::string data;
+  if (this->ToStringData(data)) {
+    out << data << "<br>";
+    return out.str();
+  }
+  for (int i = 0; i < this->size(); i ++) {
+    out << (*this)[i].ToStringTreeHtml(depth + 1);
+  }
+  return out.str();
+}
+
 std::string Expression::ToString(
   FormatExpressions* theFormat,
   Expression* startingExpression,

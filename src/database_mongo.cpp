@@ -710,6 +710,8 @@ bool Database::Mongo::FindOneFromSome(
   JSData emptyOptions;
   return query.FindOne(output,emptyOptions, commentsOnFailure, nullptr);
   #else
+  (void) output;
+  (void) findOrQueries;
   if (commentsOnFailure != nullptr) {
     *commentsOnFailure << "MongoDB not compiled in where it should be. ";
   }

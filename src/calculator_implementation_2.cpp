@@ -573,7 +573,7 @@ Calculator::EvaluateLoop::EvaluateLoop(Calculator& inputOwner) {
 void Calculator::EvaluateLoop::InitializeOneRun(Expression& output) {
   this->numberOfTransformations ++;
   if (this->flagRecordHistory) {
-    this->owner->ExpressionHistoryAdd(output, - 1);
+    this->owner->ExpressionHistoryAdd(output, 0);
   }
   std::string atomValue;
   if (output.IsOperation(&atomValue)) {
@@ -681,7 +681,7 @@ bool Calculator::EvaluateLoop::EvaluateChildren(
       }
       Expression lastHistory = maintainRuleStack.GetCurrentHistory();
       this->owner->ExpressionHistoryPop();
-      this->owner->ExpressionHistoryAdd(lastHistory, i);
+      this->owner->ExpressionHistoryAdd(lastHistory, i + 1);
     }
     // If the child is non-cache-able, so is the current one.
     // Once evaluation has passed through a non-cacheable expression,
@@ -718,7 +718,7 @@ void Calculator::EvaluateLoop::AccountHistoryAfterChildrenEvaluation(
   }
   if (this->flagRecordCurrentHistory) {
     maintainRuleStack.GetCurrentHistoryRuleNames() = "Sub-expression simplification";
-    this->owner->ExpressionHistoryAdd(output, - 1);
+    this->owner->ExpressionHistoryAdd(output, 0);
     return;
   }
   if (

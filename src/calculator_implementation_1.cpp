@@ -2358,13 +2358,13 @@ void Calculator::ExpressionHistoryAddEmptyHistory() {
   this->historyRuleNames.LastObject().LastObject() = "";
 }
 
-void Calculator::ExpressionHistoryAdd(Expression& theExpression, int expressionLabel) {
+void Calculator::ExpressionHistoryAdd(Expression& theExpression, int level) {
   MacroRegisterFunctionWithName("Calculator::ExpressionHistoryAdd");
   Expression theHistoryE;
   theHistoryE.reset(*this);
   theHistoryE.AddChildAtomOnTop(this->opSequence());
   Expression indexE;
-  indexE.AssignValue(expressionLabel, *this);
+  indexE.AssignValue(level, *this);
   theHistoryE.AddChildOnTop(indexE);
   theHistoryE.AddChildOnTop(theExpression);
   Expression ruleNameE;
@@ -2510,7 +2510,7 @@ bool ExpressionHistoryEnumerator::initialize() {
     this->errorStream << "Expression history element is not a sequence. ";
     return false;
   }
-  if (!this->theHistory[1][1].IsEqualToMOne()) {
+  if (!this->theHistory[1][1].IsEqualToZero()) {
     this->errorStream << "Expression history element at start is not labeled by - 1. ";
     return false;
   }
@@ -2660,9 +2660,11 @@ bool ExpressionHistoryEnumerator::IncrementReturnFalseIfPastLast() {
 std::string ExpressionHistoryEnumerator::ToStringDebug() {
   MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::ToStringDebug");
   std::stringstream out;
-  out << "Current state: " << this->currentState.ToString()
-  << "<br>";
-  out << "Current subtree: " << this->currentSubTree.ToString();
+  out << "History:<hr>" << this->theHistory.ToStringTreeHtml(- 1) << "<hr>";
+  out << "" << this->theHistory.ToStringSemiFull() << "<hr>";
+  // out << "Current state: " << this->currentState.ToString()
+  // << "<br>";
+  // out << "Current subtree: " << this->currentSubTree.ToString();
 
   return out.str();
 }

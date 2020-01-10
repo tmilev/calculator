@@ -496,6 +496,7 @@ private:
   void ToStringOpTimes(std::stringstream& out, FormatExpressions* theFormat) const;
   void ToStringOpMultiplicative(std::stringstream& out, const std::string& operation, FormatExpressions* theFormat) const;
 
+  std::string ToStringTreeHtml(int depth) const;
   std::string ToString(
     FormatExpressions* theFormat = nullptr,
     Expression* startingExpression = nullptr,
@@ -1224,7 +1225,7 @@ public:
 
   void ExpressionHistoryPop();
   void ExpressionHistoryAddEmptyHistory();
-  void ExpressionHistoryAdd(Expression& theExpression, int expressionLabel);
+  void ExpressionHistoryAdd(Expression& theExpression, int level);
   void ExpressionHistoryStackAdd();
   void ExpressionHistoryStackPop();
   void RegisterCalculatorFunction(Function& theFun, int indexOp);

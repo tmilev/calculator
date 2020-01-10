@@ -1877,13 +1877,15 @@ Calculator::Test::Test(Calculator& inputOwner) {
   this->flagTestResultsExist = true;
 }
 
-bool Calculator::innerAutomatedTest(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::innerAutomatedTest(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("Calculator::innerAutomatedTest");
   if (!global.UserDefaultHasAdminRights()) {
     return theCommands << "Automated test requires administrator access";
   }
   if (input.size() != 3) {
-    return theCommands << "Automated test only accepts a two arguments: "
+    return theCommands << "Automated test expects two arguments: "
     << "index of first test to run and number of tests to run. ";
   }
   global.millisecondsMaxComputation = 30000000; //30k seconds, ok as we have administrator access

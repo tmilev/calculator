@@ -19,7 +19,7 @@ public:
   TreeNode(): owner(0), parent(- 1), myIndex(- 1) {
    
   }
-  bool CheckInitialization() {
+  bool CheckInitialization() const {
     if (this->owner == nullptr) {
       global.fatal << "Tree node without parent. " << global.fatal;
     }
@@ -27,26 +27,17 @@ public:
   }
   void AddChild(const data& inputData);
   void RemoveAllChildren();
-  TreeNode<data>& GetChild(int i);
-  std::string ToStringTextFormat(int indentation);
+  const TreeNode<data>& GetChild(int i) const;
+  std::string ToStringHTML(int indentation) const;
 };
 
 template <typename data>
 class Tree {
 public:
   ListReferences<TreeNode<data> > theNodes;
-  void ResetAddRoot(const data& inputData) {
-    this->reset();
-    this->theNodes.SetSize(1);
-    this->theNodes[0].owner = this;
-    this->theNodes[0].children.SetSize(0);
-    this->theNodes[0].theData = inputData;
-    this->theNodes[0].myIndex = 0;
-    this->theNodes[0].parent = - 1;
-  }
-  void reset() {
-    this->theNodes.SetSize(0);
-  }
+  void ResetAddRoot(const data& inputData);
+  void reset();
+  std::string ToString() const;
 };
 
 
@@ -76,13 +67,13 @@ void TreeNode<data>::RemoveAllChildren() {
 }
 
 template <typename data>
-TreeNode<data>& TreeNode<data>::GetChild(int i) {
+const TreeNode<data>& TreeNode<data>::GetChild(int i) const {
   this->CheckInitialization();
   return this->owner->theNodes[this->children[i]];
 }
 
 template <typename data>
-std::string TreeNode<data>::ToStringTextFormat(int indentation) {
+std::string TreeNode<data>::ToStringHTML(int indentation) const {
   std::stringstream out;
   for (int i = 0; i < indentation; i ++) {
     out << "&nbsp;";
@@ -94,9 +85,35 @@ std::string TreeNode<data>::ToStringTextFormat(int indentation) {
   }
   indentation += 2;
   for (int i = 0; i < this->children.size; i ++) {
-    out << "<br>" << this->GetChild(i).ToStringTextFormat(indentation);
+    out << "<br>" << this->GetChild(i).ToStringHTML(indentation);
   }
   return out.str();
 }
 
+template <typename data>
+void Tree<data>::ResetAddRoot(const data& inputData) {
+  this->reset();
+  this->theNodes.SetSize(1);
+  this->theNodes[0].owner = this;
+  this->theNodes[0].children.SetSize(0);
+  this->theNodes[0].theData = inputData;
+  this->theNodes[0].myIndex = 0;
+  this->theNodes[0].parent = - 1;
+}
+
+template <typename data>
+void Tree<data>::reset() {
+  this->theNodes.SetSize(0);
+}
+
+template <typename data>
+std::string Tree<data>::ToString() const {
+  if (this->theNodes.size == 0) {
+    return "[empty tree]";
+  }
+  std::stringstream out;
+  out << "Tree with " << this->theNodes.size << " elements. <br>";
+  out << this->theNodes[0].ToStringHTML(0);
+  return out.str();
+}
 #endif

@@ -2423,7 +2423,9 @@ bool Calculator::innerLogEvaluationStepsHumanReadableNested(
 
 class HistorySubExpression {
 public:
-  friend std::ostream& operator << (std::ostream& output, const HistorySubExpression& theH) {
+  friend std::ostream& operator << (
+    std::ostream& output, const HistorySubExpression& theH
+  ) {
     if (theH.currentE == nullptr) {
       output << "(no expression)";
     } else {
@@ -2466,7 +2468,11 @@ public:
     return true;
   }
   std::string ToStringExpressionHistoryMerged();
-  Expression GetExpression(TreeNode<HistorySubExpression>& currentNode, List<std::string>& outputRuleNames);
+  std::string ToStringDebug();
+  Expression GetExpression(
+    const TreeNode<HistorySubExpression>& currentNode,
+    List<std::string>& outputRuleNames
+  );
   void ComputeAll();
 };
 
@@ -2478,13 +2484,13 @@ bool ExpressionHistoryEnumerator::initialize() {
   this->rulesToBeIgnored.Clear();
   this->rulesToBeIgnored.AddOnTop("CommuteIfUnivariate");
   this->rulesDisplayNamesMap.Clear();
-  this->rulesDisplayNamesMap.SetKeyValue("Minus","");
-  this->rulesDisplayNamesMap.SetKeyValue("DistributeMultiplication","");
-  this->rulesDisplayNamesMap.SetKeyValue("MultiplyRationals","");
-  this->rulesDisplayNamesMap.SetKeyValue("ConstantExtraction","");
-  this->rulesDisplayNamesMap.SetKeyValue("MultiplyByOne","");
-  this->rulesDisplayNamesMap.SetKeyValue("AddTerms","");
-  this->rulesDisplayNamesMap.SetKeyValue("AssociativeRule","");
+  this->rulesDisplayNamesMap.SetKeyValue("Minus", "");
+  this->rulesDisplayNamesMap.SetKeyValue("DistributeMultiplication", "");
+  this->rulesDisplayNamesMap.SetKeyValue("MultiplyRationals", "");
+  this->rulesDisplayNamesMap.SetKeyValue("ConstantExtraction", "");
+  this->rulesDisplayNamesMap.SetKeyValue("MultiplyByOne", "");
+  this->rulesDisplayNamesMap.SetKeyValue("AddTerms", "");
+  this->rulesDisplayNamesMap.SetKeyValue("AssociativeRule", "");
   this->initialized = true;
   this->CheckInitialization();
   if (!this->theHistory.StartsWith(this->owner->opExpressionHistory()) || this->theHistory.size() < 2) {
@@ -2511,7 +2517,7 @@ bool ExpressionHistoryEnumerator::initialize() {
 }
 
 Expression ExpressionHistoryEnumerator::GetExpression(
-  TreeNode<HistorySubExpression>& currentNode, List<std::string>& outputRuleNames
+  const TreeNode<HistorySubExpression>& currentNode, List<std::string>& outputRuleNames
 ) {
   MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::GetExpression");
   Expression result;
@@ -2640,6 +2646,16 @@ bool ExpressionHistoryEnumerator::IncrementReturnFalseIfPastLast() {
   return result;
 }
 
+std::string ExpressionHistoryEnumerator::ToStringDebug() {
+  MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::ToStringDebug");
+  std::stringstream out;
+  out << "Current state: " << this->currentState.ToString()
+  << "<br>";
+  out << "Current subtree: " << this->currentSubTree.ToString();
+
+  return out.str();
+}
+
 std::string ExpressionHistoryEnumerator::ToStringExpressionHistoryMerged() {
   std::stringstream out;
   out << this->errorStream.str();
@@ -2675,14 +2691,14 @@ bool Calculator::innerLogEvaluationStepsHumanReadableMerged(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("Calculator::innerLogEvaluationStepsHumanReadableMerged");
-  if (input.size() != 2) {
-    return false;
-  }
-  Expression argument = input[1];
-  Expression outputTransformation;
-  if (argument.StartsWithGivenOperation("LogEvaluationStepsHumanReadableMerged")) {
+  Expression argument;
+  if (input.size() == 2) {
+    argument = input[1];
+  } else {
+    argument = input;
     argument.SetChildAtomValue(0, theCommands.opSequence());
   }
+  Expression outputTransformation;
   bool notUsed = false;
   theCommands.ExpressionHistoryStackAdd();
   theCommands.EvaluateExpression(theCommands, argument, outputTransformation, notUsed, - 1);
@@ -2700,6 +2716,7 @@ bool Calculator::innerLogEvaluationStepsHumanReadableMerged(
     if (i != currentStack.size - 1) {
       out << "<hr>";
     }
+    // out << "<hr>DEBUG: " << theHistoryEnumerator.ToStringDebug();
   }
   theCommands.ExpressionHistoryStackPop();
   return output.AssignValue(out.str(), theCommands);

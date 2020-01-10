@@ -558,6 +558,288 @@ bool Calculator::TimedOut() {
   return true;
 }
 
+Calculator::EvaluateLoop::EvaluateLoop(Calculator& inputOwner) {
+  this->owner = &inputOwner;
+  this->opIndexParent = - 1;
+  this->isNonCacheable = false;
+  this->numberOfTransformations = 0;
+  this->flagRecordHistory = false;
+  this->flagRecordCurrentHistory = false;
+  this->indexInCache = - 1;
+  this->reductionOccurred = false;
+  this->historyStackSizeAtChildEvaluatoinStart = - 1;
+}
+
+void Calculator::EvaluateLoop::InitializeOneRun(Expression& output) {
+  this->numberOfTransformations ++;
+  if (this->flagRecordHistory) {
+    this->owner->ExpressionHistoryAdd(output, - 1);
+  }
+  std::string atomValue;
+  if (output.IsOperation(&atomValue)) {
+    if (this->owner->atomsThatMustNotBeCached.Contains(atomValue)) {
+      this->isNonCacheable = true;
+    }
+  }
+  // The following code is too
+  // complicated/obfuscated for my taste
+  // and perhaps needs a rewrite.
+  // However, at the moment of writing, I see
+  // no better way of doing this, so here we go.
+  if (this->isNonCacheable) {
+    if (this->indexInCache != - 1) {
+      // We "undo" the caching process by
+      // replacing the cached value with the minusOneExpression,
+      // which, having no context, will never match another expression.
+      this->owner->cachedExpressions.SetObjectAtIndex(this->indexInCache, this->owner->EMOne());
+    }
+    this->indexInCache = - 1;
+  }
+  if (this->indexInCache != - 1) {
+    this->owner->imagesCachedExpressions[indexInCache] = output;
+  }
+}
+
+bool Calculator::EvaluateLoop::HasErrors(Expression& output) {
+  if (this->owner->TimedOut()) {
+    return true;
+  }
+  if (
+    this->numberOfTransformations >
+    this->owner->MaxAlgTransformationsPerExpression
+  ) {
+    if (!this->owner->flagMaxTransformationsErrorEncountered) {
+      std::stringstream out;
+      out << " While simplifying " << output.ToString(&this->owner->formatVisibleStrings)
+      << "<br>Maximum number of algebraic transformations of "
+      << this->owner->MaxAlgTransformationsPerExpression << " exceeded.";
+      output.MakeError(out.str(), *this->owner);
+      this->reductionOccurred = true;
+      this->owner->flagAbortComputationASAP = true;
+      this->owner->flagMaxTransformationsErrorEncountered = true;
+    }
+    return true;
+  }
+  return false;
+}
+
+void Calculator::EvaluateLoop::ReportChildEvaluation(Expression& output, int childIndex) {
+  if (!this->theReport.TickAndWantReport()) {
+    return;
+  }
+  std::stringstream reportStream;
+  reportStream << "Substitution rules so far:";
+  for (int j = 1; j < childIndex; j ++) {
+    if (
+      output[j].StartsWith(this->owner->opDefine()) ||
+      output[j].StartsWith(this->owner->opDefineConditional())
+    ) {
+      reportStream << "<br>" << StringRoutines::StringShortenInsertDots(
+        output[j].ToString(), 100
+      );
+   }
+  }
+  reportStream << "<br>Evaluating:<br><b>"
+  << StringRoutines::StringShortenInsertDots(output[childIndex].ToString(), 100) << "</b>";
+  theReport.Report(reportStream.str());
+}
+
+bool Calculator::EvaluateLoop::EvaluateChildren(
+  Expression &output, StateMaintainerCalculator& maintainRuleStack
+) {
+  this->flagRecordCurrentHistory = false;
+  this->historyStackSizeAtChildEvaluatoinStart = - 1;
+  if (this->flagRecordHistory) {
+    this->historyStackSizeAtChildEvaluatoinStart = maintainRuleStack.GetCurrentHistory().size();
+  }
+  if (output.IsFrozen()) {
+    return true;
+  }
+  int indexOp = - 1;
+  if (output.size() > 0) {
+    if (output[0].IsAtom()) {
+      indexOp = output[0].theData;
+    }
+  }
+  Expression oldChild, childEvaluation;
+  for (int i = 0; i < output.size(); i ++) {
+    if (i > 0) {
+      this->ReportChildEvaluation(output, i);
+    }
+    bool childIsNonCacheable = false;
+    if (this->flagRecordHistory) {
+      oldChild = output[i];
+    }
+    if (this->owner->EvaluateExpression(
+      *this->owner, output[i], childEvaluation, childIsNonCacheable, indexOp
+    )) {
+      output.SetChilD(i, childEvaluation);
+    }
+    if (this->flagRecordHistory) {
+      if (childEvaluation != oldChild) {
+        this->flagRecordCurrentHistory = true;
+      }
+      Expression lastHistory = maintainRuleStack.GetCurrentHistory();
+      this->owner->ExpressionHistoryPop();
+      this->owner->ExpressionHistoryAdd(lastHistory, i);
+    }
+    // If the child is non-cache-able, so is the current one.
+    // Once evaluation has passed through a non-cacheable expression,
+    // our expression is no longer cache-able.
+    if (childIsNonCacheable) {
+      this->isNonCacheable = true;
+    }
+    if (output[i].IsError()) {
+      this->owner->flagAbortComputationASAP = true;
+      return false;
+    }
+    if (output.StartsWith(this->owner->opEndStatement())) {
+      if (!this->owner->AccountRule(output[i], maintainRuleStack)) {
+        std::stringstream out;
+        out
+        << "Failed to account rule: " << output[i].ToString()
+        << ". Most likely the cause is too deeply nested recursion. ";
+        output.MakeError(out.str(), *this->owner);
+        this->owner->flagAbortComputationASAP = true;
+      }
+    }
+    if (this->owner->flagAbortComputationASAP) {
+      return false;
+    }
+  }
+  return  true;
+}
+
+void Calculator::EvaluateLoop::AccountHistoryAfterChildrenEvaluation(Expression& output, StateMaintainerCalculator& maintainRuleStack) {
+  if (!this->flagRecordHistory) {
+    return;
+  }
+  if (this->flagRecordCurrentHistory) {
+    maintainRuleStack.GetCurrentHistoryRuleNames() = "Sub-expression simplification";
+    this->owner->ExpressionHistoryAdd(output, - 1);
+    return;
+  }
+  if (
+    this->historyStackSizeAtChildEvaluatoinStart >
+    maintainRuleStack.GetCurrentHistory().size()
+  ) {
+    global.fatal << "Error: we have historyStackSizeAtStart = "
+    << this->historyStackSizeAtChildEvaluatoinStart
+    << " yet the expression history has size: "
+    << maintainRuleStack.GetCurrentHistory().size()
+    << "<br>Expression history so far: "
+    << maintainRuleStack.GetCurrentHistory().ToString()
+    << global.fatal;
+  }
+  maintainRuleStack.GetCurrentHistory().children.SetSize(
+    this->historyStackSizeAtChildEvaluatoinStart
+  );
+}
+
+bool Calculator::EvaluateLoop::UserDefinedEvaluation(Expression& output) {
+  MacroRegisterFunctionWithName("Calculator::EvaluateLoop::UserDefinedEvaluation");
+  Expression beforePatternMatch;
+  for (
+    int i = 0;
+    i < this->owner->RuleStack.size() && !this->owner->flagAbortComputationASAP;
+    i ++
+  ) {
+    const Expression& currentPattern = this->owner->RuleStack[i];
+    this->owner->TotalNumPatternMatchedPerformed ++;
+    if (this->owner->flagLogEvaluatioN) {
+      beforePatternMatch = output;
+    }
+    MapList<Expression, Expression> bufferPairs;
+    std::stringstream* theLog = this->owner->flagLogPatternMatching ? &this->owner->Comments : nullptr;
+    if (this->owner->ProcessOneExpressionOnePatternOneSub(
+      currentPattern, output, bufferPairs, theLog
+    )) {
+      this->reductionOccurred = true;
+      if (this->owner->flagLogEvaluatioN) {
+        *this->owner
+        << "<hr>Rule cache index: " << this->owner->RuleStackCacheIndex
+        << "<br>Rule: " << currentPattern.ToString() << "<br>"
+        << HtmlRoutines::GetMathSpanPure(beforePatternMatch.ToString())
+        << " -> " << HtmlRoutines::GetMathSpanPure(output.ToString());
+      }
+      return true;
+    }
+  }
+  return false;
+}
+
+bool Calculator::EvaluateLoop::BuiltInEvaluation(Expression& output) {
+  Expression result;
+  if (!this->owner->outerStandardFunction(
+    *this->owner, output, result, this->opIndexParent
+  )) {
+    return false;
+  }
+  this->reductionOccurred = true;
+  if (this->owner->flagLogEvaluatioN) {
+    *this->owner << "<br>Rule context identifier: " << this->owner->RuleStackCacheIndex
+    << "<br>" << HtmlRoutines::GetMathMouseHover(output.ToString()) << " -> "
+    << HtmlRoutines::GetMathMouseHover(result.ToString());
+  }
+  output = result;
+  return true;
+}
+
+bool Calculator::EvaluateLoop::ReduceOnce(Expression& output) {
+  MacroRegisterFunctionWithName("EvaluateExpressionLoopBody");
+  StateMaintainerCalculator maintainRuleStack(*(this->owner));
+  this->InitializeOneRun(output);
+  if (this->HasErrors(output)) {
+    return false;
+  }
+  if (!this->EvaluateChildren(output, maintainRuleStack)) {
+    return false;
+  }
+  this->AccountHistoryAfterChildrenEvaluation(output, maintainRuleStack);
+  if (this->owner->flagAbortComputationASAP) {
+    return false;
+  }
+  if (this->BuiltInEvaluation(output)) {
+    return true;
+  }
+  if (this->UserDefinedEvaluation(output)) {
+    return true;
+  }
+  return false;
+}
+
+void Calculator::EvaluateLoop::LookUpCache(const Expression& input, Expression& output) {
+  this->owner->EvaluatedExpressionsStack.AddOnTop(input);
+  Expression theExpressionWithContext;
+  theExpressionWithContext.reset(*this->owner, 3);
+  theExpressionWithContext.AddChildAtomOnTop(this->owner->opSequence());
+  theExpressionWithContext.AddChildValueOnTop(this->owner->RuleStackCacheIndex);
+  theExpressionWithContext.AddChildOnTop(input);
+  this->indexInCache = this->owner->cachedExpressions.GetIndex(theExpressionWithContext);
+  if (this->indexInCache != - 1) {
+    if (this->owner->flagLogCache) {
+      *this->owner << "<hr>Cache hit with state identifier "
+      << this->owner->RuleStackCacheIndex << ": "
+      << output.ToString() << " -> "
+      << this->owner->imagesCachedExpressions[this->indexInCache].ToString();
+    }
+    output = this->owner->imagesCachedExpressions[this->indexInCache];
+    return;
+  }
+  if (
+    this->owner->cachedExpressions.size > this->owner->MaxCachedExpressionPerRuleStack ||
+    output.IsBuiltInTypE() ||
+    output.IsBuiltInAtom()
+  ) {
+    return;
+
+  }
+  this->owner->cachedExpressions.AddOnTop(theExpressionWithContext);
+  this->indexInCache = this->owner->cachedExpressions.size - 1;
+  this->owner->imagesCachedExpressions.SetSize(this->indexInCache + 1);
+  this->owner->imagesCachedExpressions.LastObject()->MakeError("Error: not computed yet.", *this->owner);
+}
+
 bool Calculator::EvaluateExpression(
   Calculator& theCommands,
   const Expression& input,
@@ -567,9 +849,10 @@ bool Calculator::EvaluateExpression(
 ) {
   RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("Calculator::EvaluateExpression");
-  ProgressReport theReport;
   theCommands.stats.expressionEvaluated ++;
   theCommands.stats.callsSinceReport ++;
+  Calculator::EvaluateLoop state(theCommands);
+  state.opIndexParent = opIndexParentIfAvailable;
   if (
     theCommands.stats.callsSinceReport >=
     theCommands.stats.maximumCallsBeforeReportGeneration
@@ -577,7 +860,7 @@ bool Calculator::EvaluateExpression(
     theCommands.stats.callsSinceReport = 0;
     std::stringstream reportStream;
     reportStream << "Evaluating: " << input.ToString();
-    theReport.Report(reportStream.str());
+    state.theReport.Report(reportStream.str());
   }
   if (theCommands.flagLogFullTreeCrunching && theCommands.RecursionDeptH < 3) {
     theCommands << "<br>";
@@ -605,215 +888,19 @@ bool Calculator::EvaluateExpression(
     return output.MakeError(errorStream.str(), theCommands);
   }
   //bool logEvaluationStepsRequested = theCommands.logEvaluationSteps.size > 0;
-  theCommands.EvaluatedExpressionsStack.AddOnTop(input);
-  Expression theExpressionWithContext;
-  theExpressionWithContext.reset(theCommands, 3);
-  theExpressionWithContext.AddChildAtomOnTop(theCommands.opSequence());
-  theExpressionWithContext.AddChildValueOnTop(theCommands.RuleStackCacheIndex);
-  theExpressionWithContext.AddChildOnTop(input);
-  int indexInCache = theCommands.cachedExpressions.GetIndex(theExpressionWithContext);
-  if (indexInCache != - 1) {
-    if (theCommands.flagLogCache) {
-      theCommands << "<hr>Cache hit with state identifier "
-      << theCommands.RuleStackCacheIndex << ": "
-      << output.ToString() << " -> "
-      << theCommands.imagesCachedExpressions[indexInCache].ToString();
-    }
-    output = theCommands.imagesCachedExpressions[indexInCache];
-  } else {
-    bool shouldCache =
-    theCommands.cachedExpressions.size<theCommands.MaxCachedExpressionPerRuleStack &&
-    !output.IsBuiltInTypE() && !output.IsBuiltInAtom();
-    if (shouldCache) {
-      theCommands.cachedExpressions.AddOnTop(theExpressionWithContext);
-      indexInCache = theCommands.cachedExpressions.size - 1;
-      theCommands.imagesCachedExpressions.SetSize(indexInCache + 1);
-      theCommands.imagesCachedExpressions.LastObject()->reset(theCommands);
-      theCommands.imagesCachedExpressions.LastObject()->MakeError("Error: not computed yet.", theCommands);
-    }
-  }
-  //reduction phase:
-  bool ReductionOcurred = true;
-  int counterNumTransformations = 0;
-  Expression transformationE(theCommands);
-  Expression beforePatternMatch;
-  std::string inputIfAtom;
+  state.LookUpCache(input, output);
+  // reduction phase:
   outputIsNonCacheable = false;
   //////////////////////////////////
 
-  MemorySaving<Expression> oldChild;
   bool doExpressionHistory = (theCommands.historyStack.size > 0);
   if (doExpressionHistory) {
     theCommands.ExpressionHistoryAddEmptyHistory();
   }
-  while (ReductionOcurred && !theCommands.flagAbortComputationASAP) {
-    StateMaintainerCalculator theRuleStackMaintainer(theCommands);
-    ReductionOcurred = false;
-    counterNumTransformations ++;
-    if (doExpressionHistory) {
-      theCommands.ExpressionHistoryAdd(output, - 1);
-    }
-    if (output.IsOperation(&inputIfAtom)) {
-      if (theCommands.atomsThatMustNotBeCached.Contains(inputIfAtom)) {
-        outputIsNonCacheable = true;
-      }
-    }
-    // The following code is too
-    // complicated/obfuscated for my taste
-    // and perhaps needs a rewrite.
-    // However, at the moment of writing, I see
-    // no better way of doing this, so here we go.
-    if (outputIsNonCacheable) {
-      if (indexInCache != - 1) {
-        // We "undo" the caching process by
-        // replacing the cached value with the minusOneExpression,
-        // which, having no context, will never match another expression.
-        theCommands.cachedExpressions.SetObjectAtIndex(indexInCache, theCommands.EMOne());
-      }
-      indexInCache = - 1;
-    }
-    if (indexInCache != - 1) {
-      theCommands.imagesCachedExpressions[indexInCache] = output;
-    }
-    //////------Handling naughty expressions------
-    if (theCommands.TimedOut()) {
-      break;
-    }
-    if (counterNumTransformations > theCommands.MaxAlgTransformationsPerExpression) {
-      if (!theCommands.flagMaxTransformationsErrorEncountered) {
-        std::stringstream out;
-        out << " While simplifying " << output.ToString(&theCommands.formatVisibleStrings)
-        << "<br>Maximum number of algebraic transformations of "
-        << theCommands.MaxAlgTransformationsPerExpression << " exceeded.";
-        output.MakeError(out.str(), theCommands);
-        theCommands.flagAbortComputationASAP = true;
-        theCommands.flagMaxTransformationsErrorEncountered = true;
-      }
-      break;
-    }
-    //////------End of handling naughty expressions------
-    //bool foundError = false;
-    /////-------Children evaluation-------
-    bool HistoryShouldBeRecorded = false;
-    int historyStackSizeAtStart = - 1;
-    if (doExpressionHistory) {
-      historyStackSizeAtStart = theRuleStackMaintainer.GetCurrentHistory().size();
-    }
-    if (!output.IsFrozen()) {
-      int indexOp = - 1;
-      if (output.size() > 0) {
-        if (output[0].IsAtom()) {
-          indexOp = output[0].theData;
-        }
-      }
-      for (int i = 0; i < output.size() && !theCommands.flagAbortComputationASAP; i ++) {
-        if (i > 0) {
-          if (theReport.TickAndWantReport()) {
-            std::stringstream reportStream;
-            reportStream << "Substitution rules so far:";
-            for (int j = 1; j < i; j ++) {
-              if (
-                output[j].StartsWith(theCommands.opDefine()) ||
-                output[j].StartsWith(theCommands.opDefineConditional())
-              ) {
-                reportStream << "<br>" << StringRoutines::StringShortenInsertDots(
-                  output[j].ToString(), 100
-                );
-              }
-            }
-            reportStream << "<br>Evaluating:<br><b>"
-            << StringRoutines::StringShortenInsertDots(output[i].ToString(), 100) << "</b>";
-            theReport.Report(reportStream.str());
-          }
-        }
-        bool childIsNonCacheable = false;
-        if (doExpressionHistory) {
-          oldChild.GetElement() = output[i];
-        }
-        if (theCommands.EvaluateExpression(theCommands, output[i], transformationE, childIsNonCacheable, indexOp)) {
-          output.SetChilD(i, transformationE);
-        }
-        if (doExpressionHistory) {
-          if (transformationE != oldChild.GetElement()) {
-            HistoryShouldBeRecorded = true;
-          }
-          Expression lastHistory = theRuleStackMaintainer.GetCurrentHistory();
-          theCommands.ExpressionHistoryPop();
-          theCommands.ExpressionHistoryAdd(lastHistory, i);
-        }
-        //important: here we check if the child is non-cache-able.
-        if (childIsNonCacheable) {
-          outputIsNonCacheable = true;
-        }
-        if (output[i].IsError()) {
-          theCommands.flagAbortComputationASAP = true;
-          break;
-        }
-        if (output.StartsWith(theCommands.opEndStatement())) {
-          if (!theCommands.AccountRule(output[i], theRuleStackMaintainer)) {
-            std::stringstream out;
-            out << "Failed to account rule: " << output[i].ToString()
-            << ". Most likely the cause is too deeply nested recursion. ";
-            output.MakeError(out.str(), theCommands);
-            theCommands.flagAbortComputationASAP = true;
-            break;
-          }
-        }
-      }
-    }
-    if (doExpressionHistory) {
-      if (HistoryShouldBeRecorded) {
-        theRuleStackMaintainer.GetCurrentHistoryRuleNames() = "Sub-expression simplification";
-        theCommands.ExpressionHistoryAdd(output, - 1);
-      } else {
-        if (historyStackSizeAtStart > theRuleStackMaintainer.GetCurrentHistory().size()) {
-          global.fatal << "Error: we have historyStackSizeAtStart = " << historyStackSizeAtStart
-          << " yet the expression history has size: "
-          << theRuleStackMaintainer.GetCurrentHistory().size()
-          << "<br>Expression history so far: "
-          << theRuleStackMaintainer.GetCurrentHistory().ToString()
-          << global.fatal;
-        }
-        theRuleStackMaintainer.GetCurrentHistory().children.SetSize(historyStackSizeAtStart);
-      }
-    }
-    /////-------Children evaluation end-------
-    if (theCommands.flagAbortComputationASAP) {
-      break;
-    }
-    /////-------Built-in evaluation-------
-    if (theCommands.outerStandardFunction(theCommands, output, transformationE, opIndexParentIfAvailable)) {
-      ReductionOcurred = true;
-      if (theCommands.flagLogEvaluatioN) {
-        theCommands << "<br>Rule context identifier: " << theCommands.RuleStackCacheIndex
-        << "<br>" << HtmlRoutines::GetMathMouseHover(output.ToString()) << " -> "
-        << HtmlRoutines::GetMathMouseHover(transformationE.ToString());
-      }
-      output = transformationE;
-      continue;
-    }
-    /////-------Built-in evaluation end-------
-    /////-------User-defined pattern matching------
-    for (int i = 0; i < theCommands.RuleStack.size() && !theCommands.flagAbortComputationASAP; i ++) {
-      const Expression& currentPattern = theCommands.RuleStack[i];
-      theCommands.TotalNumPatternMatchedPerformed ++;
-      if (theCommands.flagLogEvaluatioN) {
-        beforePatternMatch = output;
-      }
-      MapList<Expression, Expression> bufferPairs;
-      std::stringstream* theLog = theCommands.flagLogPatternMatching ? &theCommands.Comments : nullptr;
-      if (theCommands.ProcessOneExpressionOnePatternOneSub(currentPattern, output, bufferPairs, theLog)) {
-        ReductionOcurred = true;
-        if (theCommands.flagLogEvaluatioN) {
-          theCommands << "<hr>Rule cache index: " << theCommands.RuleStackCacheIndex
-          << "<br>Rule: " << currentPattern.ToString()
-          << "<br>" << HtmlRoutines::GetMathSpanPure(beforePatternMatch.ToString()) << " -> "
-          << HtmlRoutines::GetMathSpanPure(output.ToString());
-        }
-        break;
-      }
-    }
-/////-------User-defined pattern matching end------
+  // EvaluateExpression is called recusively
+  // inside state.EvaluateChildren
+  // inside state.ReduceOnce.
+  while (state.ReduceOnce(output)) {
   }
   theCommands.EvaluatedExpressionsStack.RemoveLastObject();
   if (theCommands.flagLogFullTreeCrunching && theCommands.RecursionDeptH < 3) {
@@ -940,7 +1027,7 @@ bool Calculator::ProcessOneExpressionOnePatternOneSub(
 
 bool Calculator::Parse(const std::string& input, Expression& output) {
   List<SyntacticElement> syntacticSoup, syntacticStack;
-  return this->ParseAndExtractExpressions(input, output, syntacticSoup, syntacticStack, 0);
+  return this->ParseAndExtractExpressions(input, output, syntacticSoup, syntacticStack, nullptr);
 }
 
 bool Calculator::ParseAndExtractExpressions(

@@ -2412,7 +2412,8 @@ bool Calculator::innerLogEvaluationStepsHumanReadableNested(
   std::stringstream out;
   ListReferences<Expression>& currentStack = theCommands.historyStack.LastObject();
   for (int i = 0; i < currentStack.size; i ++) {
-    out << "Stack " << i + 1 << ":<br>" << currentStack[i].ToStringExpressionHistoryRecursiveNested();
+    out << "Stack " << i + 1 << ":<br>"
+    << currentStack[i].ToStringExpressionHistoryRecursiveNested();
     if (i != currentStack.size - 1) {
       out << "<hr>";
     }
@@ -2493,11 +2494,19 @@ bool ExpressionHistoryEnumerator::initialize() {
   this->rulesDisplayNamesMap.SetKeyValue("AssociativeRule", "");
   this->initialized = true;
   this->CheckInitialization();
-  if (!this->theHistory.StartsWith(this->owner->opExpressionHistory()) || this->theHistory.size() < 2) {
-    this->errorStream << "Expression history does not start with the right atom. ";
+  if (
+    !this->theHistory.StartsWith(this->owner->opExpressionHistory()) ||
+    this->theHistory.size() < 2
+  ) {
+    this->errorStream << "Expression history: "
+    << this->theHistory.ToString()
+    << " does not start with the right atom.";
     return false;
   }
-  if (!this->theHistory[1].StartsWith(this->owner->opSequence()) || this->theHistory[1].size() < 3) {
+  if (
+    !this->theHistory[1].StartsWith(this->owner->opSequence()) ||
+    this->theHistory[1].size() < 3
+  ) {
     this->errorStream << "Expression history element is not a sequence. ";
     return false;
   }
@@ -2525,7 +2534,7 @@ Expression ExpressionHistoryEnumerator::GetExpression(
     currentNode.theData.lastActiveSubexpression< currentNode.theData.currentE->size() &&
     currentNode.theData.lastActiveSubexpression >= 0
   ) {
-    const Expression& currentRuleSequence =(*currentNode.theData.currentE)[currentNode.theData.lastActiveSubexpression];
+    const Expression& currentRuleSequence = (*currentNode.theData.currentE)[currentNode.theData.lastActiveSubexpression];
     if (currentRuleSequence.size() > 3) {
       std::string ruleName = currentRuleSequence[3].ToString();
       if (ruleName != "" && ruleName != "Sub-expression simplification") {
@@ -2614,7 +2623,9 @@ bool ExpressionHistoryEnumerator::IncrementRecursivelyReturnFalseIfPastLast(
         nextChild.lastActiveSubexpression = 0;
         currentNode.AddChild(nextChild);
         currentNode.theData.lastActiveSubexpression = nextGoodIndex;
-        this->IncrementRecursivelyReturnFalseIfPastLast(this->currentSubTree.theNodes[*currentNode.children.LastObject()]);
+        this->IncrementRecursivelyReturnFalseIfPastLast(
+          this->currentSubTree.theNodes[*currentNode.children.LastObject()]
+        );
         if (currentE[nextGoodIndex][1].IsEqualToMOne()) {
           didWork = true;
           break;
@@ -2716,7 +2727,7 @@ bool Calculator::innerLogEvaluationStepsHumanReadableMerged(
     if (i != currentStack.size - 1) {
       out << "<hr>";
     }
-    // out << "<hr>DEBUG: " << theHistoryEnumerator.ToStringDebug();
+    out << "<hr>DEBUG: " << theHistoryEnumerator.ToStringDebug();
   }
   theCommands.ExpressionHistoryStackPop();
   return output.AssignValue(out.str(), theCommands);

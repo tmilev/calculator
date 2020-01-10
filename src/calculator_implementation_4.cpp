@@ -2647,7 +2647,7 @@ std::string Calculator::ToString() {
   out2 << "<hr><b>Further calculator details.</b>";
   out << "<br><b>Object container information</b>. "
   << "The object container is the data structure storing all c++ built-in data types "
-  << " requested by the user<br> " << this->theObjectContainer.ToString();
+  << "requested by the user<br> " << this->theObjectContainer.ToString();
   out << "<hr>Control sequences (" << this->controlSequences.size << " total):\n<br>\n";
   for (int i = 0; i < this->controlSequences.size; i ++) {
     out << openTag1 << this->controlSequences[i] << closeTag1;

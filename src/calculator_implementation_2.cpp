@@ -567,7 +567,7 @@ Calculator::EvaluateLoop::EvaluateLoop(Calculator& inputOwner) {
   this->flagRecordCurrentHistory = false;
   this->indexInCache = - 1;
   this->reductionOccurred = false;
-  this->historyStackSizeAtChildEvaluatoinStart = - 1;
+  this->historyStackSizeAtChildEvaluationStart = - 1;
 }
 
 void Calculator::EvaluateLoop::InitializeOneRun(Expression& output) {
@@ -648,9 +648,9 @@ bool Calculator::EvaluateLoop::EvaluateChildren(
   Expression &output, StateMaintainerCalculator& maintainRuleStack
 ) {
   this->flagRecordCurrentHistory = false;
-  this->historyStackSizeAtChildEvaluatoinStart = - 1;
+  this->historyStackSizeAtChildEvaluationStart = - 1;
   if (this->flagRecordHistory) {
-    this->historyStackSizeAtChildEvaluatoinStart = maintainRuleStack.GetCurrentHistory().size();
+    this->historyStackSizeAtChildEvaluationStart = maintainRuleStack.GetCurrentHistory().size();
   }
   if (output.IsFrozen()) {
     return true;
@@ -710,7 +710,9 @@ bool Calculator::EvaluateLoop::EvaluateChildren(
   return  true;
 }
 
-void Calculator::EvaluateLoop::AccountHistoryAfterChildrenEvaluation(Expression& output, StateMaintainerCalculator& maintainRuleStack) {
+void Calculator::EvaluateLoop::AccountHistoryAfterChildrenEvaluation(
+  Expression& output, StateMaintainerCalculator& maintainRuleStack
+) {
   if (!this->flagRecordHistory) {
     return;
   }
@@ -720,11 +722,11 @@ void Calculator::EvaluateLoop::AccountHistoryAfterChildrenEvaluation(Expression&
     return;
   }
   if (
-    this->historyStackSizeAtChildEvaluatoinStart >
+    this->historyStackSizeAtChildEvaluationStart >
     maintainRuleStack.GetCurrentHistory().size()
   ) {
     global.fatal << "Error: we have historyStackSizeAtStart = "
-    << this->historyStackSizeAtChildEvaluatoinStart
+    << this->historyStackSizeAtChildEvaluationStart
     << " yet the expression history has size: "
     << maintainRuleStack.GetCurrentHistory().size()
     << "<br>Expression history so far: "
@@ -732,7 +734,7 @@ void Calculator::EvaluateLoop::AccountHistoryAfterChildrenEvaluation(Expression&
     << global.fatal;
   }
   maintainRuleStack.GetCurrentHistory().children.SetSize(
-    this->historyStackSizeAtChildEvaluatoinStart
+    this->historyStackSizeAtChildEvaluationStart
   );
 }
 
@@ -808,7 +810,9 @@ bool Calculator::EvaluateLoop::ReduceOnce(Expression& output) {
   return false;
 }
 
-void Calculator::EvaluateLoop::LookUpCache(const Expression& input, Expression& output) {
+void Calculator::EvaluateLoop::LookUpCache(
+  const Expression& input, Expression& output
+) {
   this->owner->EvaluatedExpressionsStack.AddOnTop(input);
   Expression theExpressionWithContext;
   theExpressionWithContext.reset(*this->owner, 3);
@@ -893,8 +897,8 @@ bool Calculator::EvaluateExpression(
   outputIsNonCacheable = false;
   //////////////////////////////////
 
-  bool doExpressionHistory = (theCommands.historyStack.size > 0);
-  if (doExpressionHistory) {
+  state.flagRecordHistory = (theCommands.historyStack.size > 0);
+  if (state.flagRecordHistory) {
     theCommands.ExpressionHistoryAddEmptyHistory();
   }
   // EvaluateExpression is called recusively

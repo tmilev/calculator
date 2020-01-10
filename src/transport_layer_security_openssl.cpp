@@ -471,11 +471,11 @@ bool TransportLayerSecurityOpenSSL::HandShakeIamClientNoSocketCleanup(
   }
   if (this->flagSSLHandshakeSuccessful) {
     if (commentsGeneral != nullptr) {
-      *commentsGeneral << "<span style =\"color:green\">SSL handshake successful.</span>\n<br>\n";
+      *commentsGeneral << "<span style ='color:green'>SSL handshake successful.</span>\n<br>\n";
     }
   } else {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "<span style =\"color:red\">SSL handshake failed.</span>\n<br>\n";
+      *commentsOnFailure << "<span style ='color:red'>SSL handshake failed.</span>\n<br>\n";
     }
     return false;
   }

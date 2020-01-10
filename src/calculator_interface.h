@@ -2426,7 +2426,7 @@ public:
     int opIndexParent;
     int numberOfTransformations;
     int indexInCache;
-    int historyStackSizeAtChildEvaluatoinStart;
+    int historyStackSizeAtChildEvaluationStart;
     ProgressReport theReport;
     bool flagRecordHistory;
     bool flagRecordCurrentHistory;
@@ -2440,7 +2440,9 @@ public:
     bool EvaluateChildren(Expression& output, StateMaintainerCalculator& maintainRuleStack);
     void ReportChildEvaluation(Expression& output, int childIndex);
 
-    void AccountHistoryAfterChildrenEvaluation(Expression& output, StateMaintainerCalculator &maintainRuleStack);
+    void AccountHistoryAfterChildrenEvaluation(
+      Expression& output, StateMaintainerCalculator& maintainRuleStack
+    );
     void LookUpCache(const Expression& input, Expression& output);
   };
   void Evaluate(const std::string& theInput);

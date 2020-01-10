@@ -283,7 +283,6 @@ public:
   static void ConvertBitStreamToString(const List<unsigned char>& input, std::string& output);
   static void ConvertStringToListBytes(const std::string& input, List<unsigned char>& output);
   static void ConvertStringToListBytesSigned(const std::string& input, List<char>& output);
-  static void ConvertUint32toBigendianStringAppendResult(uint32_t& input, std::string& outputAppend);
   static void ConvertUint64toBigendianStringAppendResult(uint64_t input, std::string& outputAppend);
   static void ConvertUint64toBigendianListUnsignedCharAppendResult(
     uint64_t input, List<unsigned char>& outputAppend

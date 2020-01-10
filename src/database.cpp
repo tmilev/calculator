@@ -863,8 +863,9 @@ bool UserCalculator::ResetAuthenticationToken(std::stringstream* commentsOnFailu
   TimeWrapper now;
   now.AssignLocalTime();
   std::stringstream out;
-  out << now.theTimeStringNonReadable << rand();
-  this->actualAuthenticationToken = Crypto::computeSha3_256OutputBase64URL(out.str());
+  List<unsigned char> authenticationToken;
+  Crypto::GetRandomBytesSecureInternalMayLeaveTracesInMemory(authenticationToken, 20);
+  this->actualAuthenticationToken = Crypto::ConvertListUnsignedCharsToBase64(authenticationToken, true);
   QueryExact findUser(
     DatabaseStrings::tableUsers,
     DatabaseStrings::labelUsername,
@@ -1141,12 +1142,7 @@ bool UserCalculator::ComputeAndStoreActivationToken(std::stringstream* commentsO
   MacroRegisterFunctionWithName("UserCalculator::ComputeAndStoreActivationToken");
   TimeWrapper now;
   now.AssignLocalTime();
-  // activation token randomness strength: rand() has some randomness in it
-  // and so does the timer, so the add up (actually, multiply).
-  // This is not a very strong protection for the time being, but as activation tokens are supposed to be
-  // one-time use this should present no practical danger.
   List<unsigned char> activationToken;
-
   Crypto::GetRandomBytesSecureInternalMayLeaveTracesInMemory(activationToken, 16);
   this->actualActivationToken = Crypto::ConvertListUnsignedCharsToBase64(activationToken, true);
   QueryExact findUserQuery(DatabaseStrings::tableUsers, DatabaseStrings::labelUsername, this->username);

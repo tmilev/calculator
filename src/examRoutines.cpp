@@ -1902,13 +1902,13 @@ bool CalculatorHTML::InterpretHtml(std::stringstream* comments) {
   this->randomSeedsIfInterpretationFails.SetSize(this->MaxInterpretationAttempts);
   if (!this->theProblemData.flagRandomSeedGiven) {
     srand(1003 + static_cast<unsigned>(time(nullptr)));
-    this->randomSeedsIfInterpretationFails[0] = (103 + rand()) % 100000000;
+    this->randomSeedsIfInterpretationFails[0] = (103 + global.unsecureRandomGenerator.GetRandomInteger32bit()) % 100000000;
   } else {
     this->randomSeedsIfInterpretationFails[0] = static_cast<int>(this->theProblemData.randomSeed);
   }
   srand(static_cast<unsigned>(this->randomSeedsIfInterpretationFails[0]));
   for (int i = 1; i < this->randomSeedsIfInterpretationFails.size; i ++) {
-    this->randomSeedsIfInterpretationFails[i] = (103 + rand()) % 100000000;
+    this->randomSeedsIfInterpretationFails[i] = (103 + global.unsecureRandomGenerator.GetRandomInteger32bit()) % 100000000;
   }
   this->timePerAttempt.SetSize(0);
   this->timeIntermediatePerAttempt.SetSize(0);

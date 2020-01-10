@@ -568,6 +568,7 @@ void Crypto::ConvertUint32ToString(const List<uint32_t>& input, std::string& out
     output[i * 4 + 3] = static_cast<char>( input[static_cast<int>(i)] % 256         );
   }
 }
+
 std::string Crypto::ConvertIntToHex(int input, int significantBytes) {
   return Crypto::ConvertUintToHex(static_cast<unsigned int>(input), significantBytes);
 }
@@ -1700,4 +1701,43 @@ bool JSONWebToken::AssignString(const std::string& other, std::stringstream* com
     return false;
   }
   return true;
+}
+
+List<unsigned char>& UnsecureRandomGenerator::state() {
+  static List<unsigned char> stateContainer;
+  return stateContainer;
+}
+
+UnsecureRandomGenerator::UnsecureRandomGenerator() {
+  this->randomSeed = 0;
+  this->randomNumbersGenerated = 0;
+  this->bytesConsumed = 0;
+  this->SetRandomSeed(0);
+}
+
+void UnsecureRandomGenerator::SetRandomSeed(int inputRandomSeed) {
+  this->randomSeed = inputRandomSeed;
+  this->randomNumbersGenerated = 0;
+  this->bytesConsumed = 0;
+  this->state().SetSize(4);
+  unsigned int randomSeedUnsigned = static_cast<unsigned int>(this->randomSeed);
+  this->state()[0] = static_cast<unsigned char>( randomSeedUnsigned / 16777216    );
+  this->state()[1] = static_cast<unsigned char>((randomSeedUnsigned / 65536) % 256);
+  this->state()[2] = static_cast<unsigned char>((randomSeedUnsigned / 256) % 256  );
+  this->state()[3] = static_cast<unsigned char>( randomSeedUnsigned % 256         );
+  Crypto::computeSha256(this->state(), this->state());
+}
+
+int UnsecureRandomGenerator::GetRandomInteger32bit() {
+  if (this->bytesConsumed + 4 >= this->state().size) {
+    Crypto::computeSha256(this->state(), this->state());
+    this->bytesConsumed = 0;
+  }
+  int result = 0;
+  for (int i = 0; i < 4; i ++) {
+    result *= 256;
+    result += this->state()[this->bytesConsumed + i];
+  }
+  this->bytesConsumed += 4;
+  return result;
 }

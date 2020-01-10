@@ -152,6 +152,17 @@ typedef void (*drawTextFunction)(double X1, double Y1, const char* theText, int 
 typedef void (*drawCircleFunction)(double X1, double Y1, double radius, unsigned long thePenStyle, int ColorIndex);
 typedef void (*drawClearScreenFunction)();
 
+class UnsecureRandomGenerator {
+public:
+  int randomSeed;
+  int64_t randomNumbersGenerated;
+  int bytesConsumed;
+  List<unsigned char>& state();
+  void SetRandomSeed(int inputRandomSeed);
+  int GetRandomInteger32bit();
+  UnsecureRandomGenerator();
+};
+
 class MathRoutines {
 public:
   template <class coefficient>

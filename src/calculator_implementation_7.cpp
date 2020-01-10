@@ -9914,8 +9914,10 @@ bool CalculatorFunctions::innerRandomInteger(
     accum = nextAccum;
   }
   if (!found) {
-    return theCommands << "<hr>Failed to generate a random number: this shouldn't happen - perhaps the requested "
-    << " interval was too large. ";
+    return theCommands << "<hr>Failed to generate a random number: "
+    << "this shouldn't happen - perhaps the requested "
+    << "interval(s) were too large. The generated random integer was: "
+    << generatedRandomInt << " and the intervals were: " << theIntervals;
   }
   return output.AssignValue(resultRandomValue, theCommands);
 }

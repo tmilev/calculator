@@ -1728,12 +1728,12 @@ void UnsecureRandomGenerator::SetRandomSeed(int inputRandomSeed) {
   Crypto::computeSha256(this->state(), this->state());
 }
 
-int UnsecureRandomGenerator::GetRandomInteger32bit() {
+unsigned int UnsecureRandomGenerator::GetRandomInteger32bit() {
   if (this->bytesConsumed + 4 >= this->state().size) {
     Crypto::computeSha256(this->state(), this->state());
     this->bytesConsumed = 0;
   }
-  int result = 0;
+  unsigned int result = 0;
   for (int i = 0; i < 4; i ++) {
     result *= 256;
     result += this->state()[this->bytesConsumed + i];

@@ -14,21 +14,29 @@ static ProjectInformationInstance projectInfoGeneralListsHeader(__FILE__, "Heade
 // Convention on Hash functions.
 // 1. C++ objects that represent mathematically equal objects
 //    are allowed to have different bit representations in RAM memory.
-// 2. Mathematically equal objects must have their object::HashFunction return identical
-//    values, even if the objects have bitwise different representations in RAM.
+// 2. Mathematically equal objects must
+//    have their object::HashFunction return identical
+//    values, even if the objects have bitwise different
+//    representations in RAM.
 // 3. Mathematical objects representing 0 in an abelian group
 //    must have their hash function return 0.
 //
-// In particular, zero rational numbers, zero polynomials/monomial collections/elements
+// In particular, zero rational numbers,
+// zero polynomials/monomial collections/elements
 // of semisimple Lie algebras, etc. must have their hash functions return 0.
 // Motivation: for speed purposes, it is not desirable to fix unique
 // bitwise representations in RAM memory for mathematically equal objects.
 // For example, this means that monomials in a polynomial do not
-// need to be ordered in a specific order. Yet polynomials can be quickly compared by
-// computing their hash functions. Here, as an example we may give two 1-million monomial polynomials
-// (computed, say, by adding two 0.5 million monomial polynomials in two different orders). The
-// polynomials' monomials are ordered differently, yet the polynomials can quickly be compared.
-// Note that sorting N monomials of an arbitrary polynomial is at best O(N log(N) ) operations, while
+// need to be ordered in a specific order.
+// Yet polynomials can be quickly compared by
+// computing their hash functions. Here, as an example
+// we may give two 1-million monomial polynomials
+// (computed, say, by adding two 0.5 million monomial polynomials
+// in two different orders). The
+// polynomials' monomials are ordered differently,
+// yet the polynomials can quickly be compared.
+// Note that sorting N monomials of an arbitrary polynomial
+// is at best O(N log(N) ) operations, while
 // computing the hash functions is only O(N) operations.
 
 //used for hashing various things.
@@ -159,7 +167,7 @@ public:
   int bytesConsumed;
   List<unsigned char>& state();
   void SetRandomSeed(int inputRandomSeed);
-  int GetRandomInteger32bit();
+  unsigned int GetRandomInteger32bit();
   UnsecureRandomGenerator();
 };
 

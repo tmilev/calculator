@@ -2417,7 +2417,7 @@ public:
   class EvaluateLoop {
   public:
     Calculator* owner;
-    bool isNonCacheable;
+    bool flagIsNonCacheable;
     int opIndexParent;
     int numberOfTransformations;
     int indexInCache;
@@ -2437,6 +2437,7 @@ public:
     void LookUpCache();
     bool SetOutput(const Expression& input);
     void AccountHistory();
+    bool CheckInitialization();
     void AccountHistoryChildTransformation(const Expression& transformedChild, const Expression& childHistory, int childIndex);
   };
   void Evaluate(const std::string& theInput);

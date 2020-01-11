@@ -539,7 +539,7 @@ bool Calculator::TimedOut() {
 Calculator::EvaluateLoop::EvaluateLoop(Calculator& inputOwner) {
   this->owner = &inputOwner;
   this->opIndexParent = - 1;
-  this->isNonCacheable = false;
+  this->flagIsNonCacheable = false;
   this->numberOfTransformations = 0;
   this->indexInCache = - 1;
   this->reductionOccurred = false;
@@ -572,39 +572,61 @@ void Calculator::EvaluateLoop::AccountHistoryChildTransformation(
 }
 
 void Calculator::EvaluateLoop::AccountHistory() {
+  MacroRegisterFunctionWithName("Calculator::EvaluateLoop::AccountHistory");
+  this->CheckInitialization();
   if (this->history == nullptr) {
     return;
   }
+  global.Comments << "DEBUG: Got to here. pt 1<br>";
   Expression incomingHistory;
+
   if (this->history->size() > 0) {
+    global.Comments << "DEBUG: Got to here. pt 1.4<br>";
     const Expression& lastHistory = (*this->history)[this->history->size() - 1];
-    if (lastHistory[1] == *this->outpuT) {
+    global.Comments << "DEBUG: Got to here. pt 1.5<br>";
+    if (lastHistory.size() < 2) {
+      global.fatal << "Unexpected history expression: "
+      << lastHistory.ToString() << global.fatal;
+    }
+    if (lastHistory[1] == *(this->outpuT)) {
       // Expression hasn't changed since last assignment.
       return;
     }
   }
+  global.Comments << "DEBUG: Got to here. pt 2<br>";
   if (this->history->size() == 0) {
+    this->history->reset(*(this->owner));
     this->history->AddChildAtomOnTop(this->owner->opExpressionHistory());
   }
-  incomingHistory.MakeOX(*this->owner, this->owner->opExpressionHistorySet(), *this->outpuT);
+  global.Comments << "DEBUG: Got to here. pt 3<br>";
+  incomingHistory.MakeOX(*this->owner, this->owner->opExpressionHistorySet(), *(this->outpuT));
+  global.Comments << "DEBUG: Got to here. pt 4<br>";
+  incomingHistory.CheckConsistency();
+  global.Comments << "DEBUG: Got to here. pt 4.5<br>";
   this->history->AddChildOnTop(incomingHistory);
+  global.Comments << "DEBUG: Got to here. pt 5<br>";
 }
 
 bool Calculator::EvaluateLoop::SetOutput(const Expression& input) {
+  MacroRegisterFunctionWithName("Calculator::EvaluateLoop::SetOutput");
   if (this->outpuT == nullptr) {
     global.fatal << "Non-initialized evaluation loop. " << global.fatal;
   }
+  input.CheckConsistency();
   *(this->outpuT) = input;
+  global.Comments << "DEBUG: check output again. ";
+  this->outpuT->CheckConsistency();
   this->AccountHistory();
   return true;
 }
 
 void Calculator::EvaluateLoop::InitializeOneRun() {
+  MacroRegisterFunctionWithName("Calculator::EvaluateLoop::InitializeOneRun");
   this->numberOfTransformations ++;
   std::string atomValue;
   if (this->outpuT->IsOperation(&atomValue)) {
     if (this->owner->atomsThatMustNotBeCached.Contains(atomValue)) {
-      this->isNonCacheable = true;
+      this->flagIsNonCacheable = true;
     }
   }
   // The following code is too
@@ -612,7 +634,7 @@ void Calculator::EvaluateLoop::InitializeOneRun() {
   // and perhaps needs a rewrite.
   // However, at the moment of writing, I see
   // no better way of doing this, so here we go.
-  if (this->isNonCacheable) {
+  if (this->flagIsNonCacheable) {
     if (this->indexInCache != - 1) {
       // We "undo" the caching process by
       // replacing the cached value with the minusOneExpression,
@@ -629,6 +651,7 @@ void Calculator::EvaluateLoop::InitializeOneRun() {
 }
 
 bool Calculator::EvaluateLoop::OutputHasErrors() {
+  MacroRegisterFunctionWithName("Calculator::EvaluateLoop::OutputHasErrors");
   if (this->owner->TimedOut()) {
     return true;
   }
@@ -676,6 +699,7 @@ void Calculator::EvaluateLoop::ReportChildEvaluation(Expression& output, int chi
 bool Calculator::EvaluateLoop::EvaluateChildren(
   StateMaintainerCalculator& maintainRuleStack
 ) {
+  MacroRegisterFunctionWithName("Calculator::EvaluateLoop::EvaluateChildren");
   if (this->outpuT->IsFrozen()) {
     return true;
   }
@@ -688,7 +712,7 @@ bool Calculator::EvaluateLoop::EvaluateChildren(
   Expression childEvaluation, historyContainer;
   Expression* historyChild = nullptr;
   if (this->history != nullptr) {
-    this->history = &historyContainer;
+    historyChild = &historyContainer;
   }
   for (int i = 0; i < this->outpuT->size(); i ++) {
     if (i > 0) {
@@ -713,7 +737,7 @@ bool Calculator::EvaluateLoop::EvaluateChildren(
     // Once evaluation has passed through a non-cacheable expression,
     // our expression is no longer cache-able.
     if (childIsNonCacheable) {
-      this->isNonCacheable = true;
+      this->flagIsNonCacheable = true;
     }
     if ((*this->outpuT)[i].IsError()) {
       this->owner->flagAbortComputationASAP = true;
@@ -770,16 +794,25 @@ bool Calculator::EvaluateLoop::UserDefinedEvaluation() {
   return false;
 }
 
+bool Calculator::EvaluateLoop::CheckInitialization() {
+  if (this->owner == nullptr || this->outpuT == nullptr) {
+    global.fatal << "Non-initialized evaluation loop. " << global.fatal;
+  }
+  return true;
+}
+
 bool Calculator::EvaluateLoop::BuiltInEvaluation() {
+  MacroRegisterFunctionWithName("Calculator::EvaluateLoop::BuiltInEvaluation");
+  this->CheckInitialization();
   Expression result;
   if (!this->owner->outerStandardFunction(
-    *this->owner, *(this->outpuT), result, this->opIndexParent
+    *(this->owner), *(this->outpuT), result, this->opIndexParent
   )) {
     return false;
   }
   this->reductionOccurred = true;
   if (this->owner->flagLogEvaluatioN) {
-    *this->owner << "<br>Rule context identifier: "
+    *(this->owner) << "<br>Rule context identifier: "
     << this->owner->RuleStackCacheIndex
     << "<br>" << HtmlRoutines::GetMathMouseHover(this->outpuT->ToString())
     << " -> " << HtmlRoutines::GetMathMouseHover(result.ToString());
@@ -788,8 +821,9 @@ bool Calculator::EvaluateLoop::BuiltInEvaluation() {
 }
 
 bool Calculator::EvaluateLoop::ReduceOnce() {
-  MacroRegisterFunctionWithName("EvaluateExpressionLoopBody");
+  MacroRegisterFunctionWithName("Calculator::EvaluateLoop::ReduceOnce");
   StateMaintainerCalculator maintainRuleStack(*(this->owner));
+  this->CheckInitialization();
   this->InitializeOneRun();
   if (this->OutputHasErrors()) {
     return false;
@@ -898,13 +932,13 @@ bool Calculator::EvaluateExpression(
   //bool logEvaluationStepsRequested = theCommands.logEvaluationSteps.size > 0;
   state.LookUpCache();
   // reduction phase:
-  outputIsNonCacheable = false;
   //////////////////////////////////
   // EvaluateExpression is called recusively
   // inside state.EvaluateChildren
   // inside state.ReduceOnce.
   while (state.ReduceOnce()) {
   }
+  outputIsNonCacheable = state.flagIsNonCacheable;
   theCommands.EvaluatedExpressionsStack.RemoveLastObject();
   if (theCommands.flagLogFullTreeCrunching && theCommands.RecursionDeptH < 3) {
     theCommands << "<br>";

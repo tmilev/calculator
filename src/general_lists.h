@@ -166,7 +166,7 @@ public:
   int64_t randomNumbersGenerated;
   int bytesConsumed;
   List<unsigned char>& state();
-  void SetRandomSeed(int inputRandomSeed);
+  void SetRandomSeed(int32_t inputRandomSeed);
   unsigned int GetRandomInteger32bit();
   UnsecureRandomGenerator();
 };

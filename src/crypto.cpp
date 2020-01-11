@@ -1715,7 +1715,11 @@ UnsecureRandomGenerator::UnsecureRandomGenerator() {
   this->SetRandomSeed(0);
 }
 
-void UnsecureRandomGenerator::SetRandomSeed(int inputRandomSeed) {
+void UnsecureRandomGenerator::SetRandomSeed(int32_t inputRandomSeed) {
+  if (inputRandomSeed < 0) {
+    inputRandomSeed *= - 1;
+  }
+  inputRandomSeed %= 1000000000;
   this->randomSeed = inputRandomSeed;
   this->randomNumbersGenerated = 0;
   this->bytesConsumed = 0;

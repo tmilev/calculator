@@ -897,7 +897,14 @@ void Calculator::EvaluateLoop::LookUpCache() {
       << this->outpuT->ToString() << " -> "
       << this->owner->imagesCachedExpressions[this->indexInCache].ToString();
     }
-    this->SetOutput(this->owner->imagesCachedExpressions[this->indexInCache], nullptr, "Computed elsewhere");
+    std::stringstream comment;
+    if (this->history != nullptr) {
+      comment << "Previously computed that \\("
+      << this->outpuT->ToString() << " = "
+      << this->owner->imagesCachedExpressions[this->indexInCache].ToString()
+      << "\\)";
+    }
+    this->SetOutput(this->owner->imagesCachedExpressions[this->indexInCache], nullptr, comment.str());
     return;
   }
   if (

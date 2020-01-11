@@ -490,8 +490,6 @@ private:
   std::string ToStringFull() const;
   std::string ToStringAllSlidersInExpression() const;
   std::string ToUTF8String(FormatExpressions* theFormat = nullptr) const;
-  bool GetListExpressionsFromExpressionHistoryRecursiveNested(Expression& outputAppend) const;
-  std::string ToStringExpressionHistoryRecursiveNested();
 
   void ToStringOpTimes(std::stringstream& out, FormatExpressions* theFormat) const;
   void ToStringOpMultiplicative(std::stringstream& out, const std::string& operation, FormatExpressions* theFormat) const;
@@ -1968,11 +1966,17 @@ public:
     MapList<Expression, Expression>& matchedExpressions,
     std::stringstream* commentsGeneral = nullptr
   );
-  static bool innerLogEvaluationStepsHumanReadableNested(
+  static bool innerLogEvaluationStepsDebug(
+    Calculator& theCommands, const Expression& input, Expression& output
+  );
+  static bool innerLogEvaluationSteps(
     Calculator& theCommands, const Expression& input, Expression& output
   );
   static bool innerLogEvaluationStepsHumanReadableMerged(
-    Calculator& theCommands, const Expression& input, Expression& output
+    Calculator& theCommands,
+    const Expression& input,
+    Expression& output,
+    bool doDebug
   );
 
   static bool innerReverseOrder(Calculator& theCommands, const Expression& input, Expression& output);
@@ -1990,7 +1994,11 @@ public:
   static bool innerTimes(Calculator& theCommands, const Expression& input, Expression& output) {
     return theCommands.innerOperationBinary(theCommands, input, output, theCommands.opTimes());
   }
-  std::string WriteFileToOutputFolderReturnLink(const std::string& fileContent, const std::string& fileName, const std::string &linkText);
+  std::string WriteFileToOutputFolderReturnLink(
+    const std::string& fileContent,
+    const std::string& fileName,
+    const std::string& linkText
+  );
   class Test {
   public:
     int64_t startTime;
@@ -2760,7 +2768,10 @@ bool Calculator::functionGetMatrix(
 }
 
 template <class coefficient>
-bool Expression::MakeSum(Calculator& theCommands, const MonomialCollection<Expression, coefficient>& theSum) {
+bool Expression::MakeSum(
+  Calculator& theCommands,
+  const MonomialCollection<Expression, coefficient>& theSum
+) {
   MacroRegisterFunctionWithName("Expression::MakeSum");
   Expression oneE; //used to record the constant term
   oneE.AssignValue<Rational>(1, theCommands);
@@ -2785,9 +2796,14 @@ bool Expression::MakeSum(Calculator& theCommands, const MonomialCollection<Expre
   if (summandsWithCoeff.size < 5) {
     for (int i = 0; i < summandsWithCoeff.size; i ++) {
       for (int j = i; j < summandsWithCoeff.size; j ++) {
-        if (summandsWithCoeff[i] > summandsWithCoeff[j] && summandsWithCoeff[j] > summandsWithCoeff[i]) {
-          global.fatal << "This is a programming error: bad comparison function: each of the expressions "
-          << summandsWithCoeff[i].ToString() << " and " << summandsWithCoeff[j].ToString()
+        if (
+          summandsWithCoeff[i] > summandsWithCoeff[j] &&
+          summandsWithCoeff[j] > summandsWithCoeff[i]
+        ) {
+          global.fatal << "This is a programming error: bad comparison "
+          << "function: each of the expressions "
+          << summandsWithCoeff[i].ToString()
+          << " and " << summandsWithCoeff[j].ToString()
           << " is reported to be greater than the other. " << global.fatal;
         }
       }
@@ -2804,7 +2820,9 @@ int Expression::AddObjectReturnIndex(const theType& inputValue) const {
 }
 
 template <class theType>
-bool Expression::AssignValueWithContext(const theType& inputValue, const Expression& theContext, Calculator& owner) {
+bool Expression::AssignValueWithContext(
+  const theType& inputValue, const Expression& theContext, Calculator& owner
+) {
   this->reset(owner, 3);
   this->AddChildAtomOnTop(this->GetTypeOperation<theType>());
   this->AddChildOnTop(theContext);
@@ -2842,7 +2860,9 @@ bool Expression::AssignValue(const theType& inputValue, Calculator& owner) {
 }
 
 template <class theType>
-bool Expression::MergeContextsMyArumentsAndConvertThem(Expression& output, std::stringstream* commentsOnFailure) const {
+bool Expression::MergeContextsMyArumentsAndConvertThem(
+  Expression& output, std::stringstream* commentsOnFailure
+) const {
   MacroRegisterFunctionWithName("Expression::MergeContextsMyArumentsAndConvertThem");
   this->CheckInitialization();
   Expression mergedContexts;
@@ -2878,7 +2898,7 @@ bool Calculator::GetTypeWeight(
   if (input.size() != 3) {
     return theCommands
     << "Function TypeHighestWeightParabolic is expected to have two arguments: "
-    << "Semisimple  algebra type, highest weight in simple coordinates. ";
+    << "Semisimple algebra type, highest weight in simple coordinates. ";
   }
   const Expression& leftE = input[1];
   const Expression& middleE = input[2];
@@ -2892,17 +2912,27 @@ bool Calculator::GetTypeWeight(
   }
   if (!theCommands.GetVectoR<coefficient>(
     middleE,
-    outputWeightSimpleCoords, &outputWeightContext, ambientSSalgebra->GetRank(), ConversionFun
+    outputWeightSimpleCoords,
+    &outputWeightContext,
+    ambientSSalgebra->GetRank(),
+    ConversionFun
   )) {
-    theCommands << "Failed to convert the second argument of HWV to a list of " << ambientSSalgebra->GetRank()
-    << " polynomials. The second argument you gave is " << middleE.ToString() << ".";
+    theCommands << "Failed to convert the second "
+    << "argument of HWV to a list of " << ambientSSalgebra->GetRank()
+    << " polynomials. The second argument you gave is "
+    << middleE.ToString() << ".";
     return false;
   }
-  if (!theCommands.theObjectContainer.theSSLieAlgebras.Contains(ambientSSalgebra->theWeyl.theDynkinType)) {
-    global.fatal << "This is a programming error: " << ambientSSalgebra->ToStringLieAlgebraName()
+  if (!theCommands.theObjectContainer.theSSLieAlgebras.Contains(
+    ambientSSalgebra->theWeyl.theDynkinType
+  )) {
+    global.fatal << "This is a programming error: "
+    << ambientSSalgebra->ToStringLieAlgebraName()
     << " contained object container more than once. " << global.fatal;
   }
-  int algebraIndex = theCommands.theObjectContainer.theSSLieAlgebras.GetIndex(ambientSSalgebra->theWeyl.theDynkinType);
+  int algebraIndex = theCommands.theObjectContainer.theSSLieAlgebras.GetIndex(
+    ambientSSalgebra->theWeyl.theDynkinType
+  );
   outputWeightContext.ContextSetSSLieAlgebrA(algebraIndex, theCommands);
   return true;
 }
@@ -2920,7 +2950,8 @@ bool Calculator::GetTypeHighestWeightParabolic(
 ) {
   if (!input.IsListNElements(4) && !input.IsListNElements(3)) {
     return output.MakeError(
-      "Function TypeHighestWeightParabolic is expected to have two or three arguments: "
+      "Function TypeHighestWeightParabolic is "
+      "expected to have two or three arguments: "
       "SS algebra type, highest weight, [optional] parabolic selection. ",
       theCommands
     );
@@ -2945,16 +2976,26 @@ bool Calculator::GetTypeHighestWeightParabolic(
     tempStream
     << "Failed to convert the second argument of HWV to a list of "
     << ambientSSalgebra->GetRank()
-    << " polynomials. The second argument you gave is " << middleE.ToString() << ".";
+    << " polynomials. The second argument you gave is "
+    << middleE.ToString() << ".";
     return output.MakeError(tempStream.str(), theCommands);
   }
   if (input.IsListNElements(4)) {
     Vector<Rational> parabolicSel;
     const Expression& rightE = input[3];
-    if (!theCommands.GetVectoR<Rational>(rightE, parabolicSel, &outputHWContext, ambientSSalgebra->GetRank(), nullptr)) {
+    if (!theCommands.GetVectoR<Rational>(
+      rightE,
+      parabolicSel,
+      &outputHWContext,
+      ambientSSalgebra->GetRank(),
+      nullptr
+    )) {
       std::stringstream tempStream;
-      tempStream << "Failed to convert the third argument of HWV to a list of " << ambientSSalgebra->GetRank()
-      << " rationals. The third argument you gave is " << rightE.ToString() << ".";
+      tempStream
+      << "Failed to convert the third argument of HWV to a list of "
+      << ambientSSalgebra->GetRank()
+      << " rationals. The third argument you gave is "
+      << rightE.ToString() << ".";
       return output.MakeError(tempStream.str(), theCommands);
     }
     outputInducingSel = parabolicSel;
@@ -2966,11 +3007,17 @@ bool Calculator::GetTypeHighestWeightParabolic(
       }
     }
   }
-  if (!theCommands.theObjectContainer.theSSLieAlgebras.Contains(ambientSSalgebra->theWeyl.theDynkinType)) {
-    global.fatal << "This is a programming error: " << ambientSSalgebra->ToStringLieAlgebraName()
-    << " contained object container more than once. " << global.fatal;
+  if (!theCommands.theObjectContainer.theSSLieAlgebras.Contains(
+    ambientSSalgebra->theWeyl.theDynkinType
+  )) {
+    global.fatal << "This is a programming error: "
+    << ambientSSalgebra->ToStringLieAlgebraName()
+    << " contained object container more than once. "
+    << global.fatal;
   }
-  int algebraIndex = theCommands.theObjectContainer.theSSLieAlgebras.GetIndex(ambientSSalgebra->theWeyl.theDynkinType);
+  int algebraIndex = theCommands.theObjectContainer.theSSLieAlgebras.GetIndex(
+    ambientSSalgebra->theWeyl.theDynkinType
+  );
   outputHWContext.ContextSetSSLieAlgebrA(algebraIndex, theCommands);
   return true;
 }
@@ -3003,15 +3050,20 @@ bool Expression::AssignMatrix(
 
 template <class coefficient>
 bool CalculatorConversions::innerExpressionFromPoly(
-  Calculator& theCommands, const Polynomial<coefficient>& input, Expression& output, Expression* inputContext
+  Calculator& theCommands,
+  const Polynomial<coefficient>& input,
+  Expression& output,
+  Expression* inputContext
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromPoly");
   MonomialCollection<Expression, coefficient> theTerms;
   Expression currentBase, currentPower, currentTerm, currentMultTermE;
   if (!input.IsConstant() && inputContext == nullptr) {
-    theCommands << "While converting polynomial to expression, I was given no variable names. Using the "
+    theCommands << "While converting polynomial to expression, "
+    << "I was given no variable names. Using the "
     << "default variable names x_1, x_2, ... "
-    << "Please make sure you are not using those variables for other purposes.";
+    << "Please make sure you are not using those "
+    << "variables for other purposes.";
   }
   for (int i = 0; i < input.size(); i ++) {
     if (input[i].IsConstant()) {
@@ -3033,7 +3085,9 @@ bool CalculatorConversions::innerExpressionFromPoly(
           currentMultTermE = currentBase;
         } else {
           currentPower.AssignValue(input[i](j), theCommands);
-          currentMultTermE.MakeXOX(theCommands, theCommands.opThePower(), currentBase, currentPower);
+          currentMultTermE.MakeXOX(
+            theCommands, theCommands.opThePower(), currentBase, currentPower
+          );
         }
         if (!found) {
           currentTerm = currentMultTermE;

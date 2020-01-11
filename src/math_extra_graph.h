@@ -2,15 +2,17 @@
 #define vpfGraphHeaderAlreadyDefined
 #include "math_general.h"
 static ProjectInformationInstance projectInfoGraphsHeader(
-  __FILE__, "Header file, graphs, work in progress."
+  __FILE__, "Header file, graphs."
 );
 
-// a bit of graph theory
-// a graph is stored as a continuous block, indexed as *(data + v*max_edges), after which
-// point is up to max_edges vertices.  If the vertices aren't a dense collection of integers,
-// there will need to be a hashmap somewhere to get a dense collection of integers
 
 class GraphOLD {
+  // This type of graph is stored as a continuous block,
+  // indexed as *(data + v * max_edges), after which
+  // point is up to max_edges vertices.
+  // If the vertices aren't a dense collection of integers,
+  // there will need to be a hashmap
+  // somewhere to get a dense collection of integers
 public:
   GraphOLD(int max_vertices, int max_edges);
   int vertices;
@@ -48,12 +50,17 @@ public:
     return false;
   }
   bool operator==(const GraphEdge& other) const {
-    return this->vStart == other.vStart && this->vEnd == other.vEnd &&
+    return
+    this->vStart == other.vStart &&
+    this->vEnd == other.vEnd &&
     this->label == other.label;
   }
 };
 
-class Graph {
+// An oriented graph represented as a collection
+// of nodes and edges.
+// Edges and nodes are stored independently.
+class GraphWeightedLabeledEdges {
 public:
   int numNodes;
   int groupMaxSize;
@@ -67,7 +74,7 @@ public:
   List<int> positionInDisplayGroup;
   List<int> displayGroupIndices;
   List<int> connectedComponentSizes;
-  Graph(): numNodes(- 1), groupMaxSize(- 1){}
+  GraphWeightedLabeledEdges(): numNodes(- 1), groupMaxSize(- 1){}
   bool CheckConsistency() const;
   void AddEdge(int i, int j);
   void ComputeEdgesPerNodesNoMultiplicities();

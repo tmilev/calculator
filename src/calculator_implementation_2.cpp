@@ -577,13 +577,9 @@ void Calculator::EvaluateLoop::AccountHistory() {
   if (this->history == nullptr) {
     return;
   }
-  global.Comments << "DEBUG: Got to here. pt 1<br>";
   Expression incomingHistory;
-
   if (this->history->size() > 0) {
-    global.Comments << "DEBUG: Got to here. pt 1.4<br>";
     const Expression& lastHistory = (*this->history)[this->history->size() - 1];
-    global.Comments << "DEBUG: Got to here. pt 1.5<br>";
     if (lastHistory.size() < 2) {
       global.fatal << "Unexpected history expression: "
       << lastHistory.ToString() << global.fatal;
@@ -593,18 +589,13 @@ void Calculator::EvaluateLoop::AccountHistory() {
       return;
     }
   }
-  global.Comments << "DEBUG: Got to here. pt 2<br>";
   if (this->history->size() == 0) {
     this->history->reset(*(this->owner));
     this->history->AddChildAtomOnTop(this->owner->opExpressionHistory());
   }
-  global.Comments << "DEBUG: Got to here. pt 3<br>";
   incomingHistory.MakeOX(*this->owner, this->owner->opExpressionHistorySet(), *(this->outpuT));
-  global.Comments << "DEBUG: Got to here. pt 4<br>";
   incomingHistory.CheckConsistency();
-  global.Comments << "DEBUG: Got to here. pt 4.5<br>";
   this->history->AddChildOnTop(incomingHistory);
-  global.Comments << "DEBUG: Got to here. pt 5<br>";
 }
 
 bool Calculator::EvaluateLoop::SetOutput(const Expression& input) {
@@ -754,7 +745,7 @@ bool Calculator::EvaluateLoop::EvaluateChildren(
       return false;
     }
   }
-  return  true;
+  return true;
 }
 
 bool Calculator::EvaluateLoop::UserDefinedEvaluation() {

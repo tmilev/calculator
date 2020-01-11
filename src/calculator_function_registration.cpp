@@ -516,25 +516,24 @@ void Calculator::initPredefinedInnerFunctions() {
     innerStandard
   );
   this->AddOperationHandler(
-    "LogEvaluationStepsHumanReadableNested",
-    Calculator::innerLogEvaluationStepsHumanReadableNested,
+    "LogEvaluationStepsDebug",
+    Calculator::innerLogEvaluationStepsDebug,
     "",
-    "Show a step-by step evaluation of the calculator. "
-    "Some steps my be combined or omitted for improved human readability. ",
-    "LogEvaluationStepsHumanReadableNested((x +2)(x +3))",
-    "CalculatorFunctions::innerLogEvaluationStepsHumanReadableNested",
-    "LogEvaluationStepsHumanReadableNested",
+    "Creates an expression evaluation tree. Intended for debugging the system. ",
+    "LogEvaluationStepsDebug((x +2)(x +3))",
+    "CalculatorFunctions::innerLogEvaluationStepsDebug",
+    "LogEvaluationStepsDebug",
     innerStandard
   );
   this->AddOperationHandler(
-    "LogEvaluationStepsHumanReadableMerged",
-    Calculator::innerLogEvaluationStepsHumanReadableMerged,
+    "LogEvaluationSteps",
+    Calculator::innerLogEvaluationSteps,
     "",
     "Show a step-by step evaluation of the calculator. "
     "Some steps my be combined or omitted for improved human readability. ",
-    "LogEvaluationStepsHumanReadableMerged((x +2)(x +3))",
-    "CalculatorFunctions::innerLogEvaluationStepsHumanReadableMerged",
-    "LogEvaluationStepsHumanReadableMerged",
+    "LogEvaluationSteps((x +2)(x +3))",
+    "CalculatorFunctions::innerLogEvaluationSteps",
+    "LogEvaluationSteps",
     innerStandard
   );
   this->AddOperationHandler(
@@ -8234,6 +8233,6 @@ void Calculator::initAtomsThatFreezeArguments() {
   this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("Freeze");
   this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("if");
   this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("Bind");
-  this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogEvaluationStepsHumanReadableNested");
-  this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogEvaluationStepsHumanReadableMerged");
+  this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogEvaluationSteps");
+  this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogEvaluationStepsDebug");
 }

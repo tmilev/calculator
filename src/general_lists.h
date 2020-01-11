@@ -547,12 +547,12 @@ public:
   }
 };
 
-//The below class is to be used together with List.
-//The purpose of the class is to save up RAM memory use.
-//This is the "light" version it is to be used for storage purposes only.
-//To use it as a normal List simply copy it to a buffer List and there
-//use the full functionality of List.
-//Then copy the buffer List back to the light version to store to RAM.
+// The below class is to be used together with List.
+// The purpose of the class is to save up RAM memory use.
+// This is the "light" version it is to be used for storage purposes only.
+// To use it as a normal List simply copy it to a buffer List and there
+// use the full functionality of List.
+// Then copy the buffer List back to the light version to store to RAM.
 template <class Object>
 class ListLight {
 private:
@@ -731,9 +731,9 @@ std::iostream& operator>>(std::iostream& input, List<Object>& theList) {
   return input;
 }
 
-//List serves the same purpose as std::vector
-//List is not thread safe!!!!
-//Lists are used in the implementation of mutexes!!!
+// List serves the same purpose as std::vector
+// List is not thread safe!!!!
+// Lists are used in the implementation of mutexes!!!
 template <class Object>
 class List {
   friend std::ostream& operator<< <Object>(std::ostream& output, const List<Object>& theList);
@@ -898,7 +898,7 @@ public:
     this->RemoveIndexShiftDown(index);
     return result;
   }
-  //The following function returns false if the comparison operator failed!!!!
+  // The following function returns false if the comparison operator failed!!!!
   template <class compareClass, class carbonCopyType = Object>
   bool QuickSortAscendingCustom(compareClass& theCompareror, List<carbonCopyType>* carbonCopy = nullptr) {
     return this->QuickSortAscendingCustomRecursive(0, this->size - 1, theCompareror, carbonCopy);
@@ -912,10 +912,10 @@ public:
     }
     return result;
   }
-  //The below function is required to pReserve the order of elements given by theSelection.elements.
+  // The below function is required to pReserve the order of elements given by theSelection.elements.
   void SubSelection(const Selection& theSelection, List<Object>& output);
-  //If comparison function is not specified, QuickSortAscending uses operator>, else it uses the given
-  //comparison function
+  // If comparison function is not specified, QuickSortAscending uses operator>, else it uses the given
+  // comparison function
   template <class otherType = Object>
   void QuickSortAscending(List<Object>::OrderLeftGreaterThanRight theOrder = nullptr, List<otherType>* carbonCopy = nullptr) {
     MathRoutines::QuickSortAscending(*this, theOrder, carbonCopy);
@@ -1530,9 +1530,12 @@ public:
     }
     if (inputSize > this->size) {
       fatalCrash(
-        "SetSize is allowed for hashed lists only when resizing the hashed list to smaller. "
-        "This is because if I was to resize to larger, I would have to allocate non-initialized "
-        "objects, and those will have to be rehashed which does not make sense. "
+        "SetSize is allowed for hashed lists only when "
+        "resizing the hashed list to smaller. "
+        "This is because if I was to resize to larger, "
+        "I would have to allocate non-initialized "
+        "objects, and those will have to be rehashed "
+        "which does not make sense. "
       );
     }
     for (int i = this->size - 1; i >= inputSize; i --) {
@@ -1662,9 +1665,9 @@ public:
   void operator=(const List<Object>& other) {
     this->::HashTemplate<Object, List<Object>, hashFunction>::operator=(other);
   }
-  //Note The following function specializations are declared entirely in order to
-  //facilitate autocomplete in my current IDE. If I find a better autocompletion
-  //IDE the following should be removed.
+  // Note The following function specializations are declared entirely in order to
+  // facilitate autocomplete in my current IDE. If I find a better autocompletion
+  // IDE the following should be removed.
   void AddOnTopNoRepetition(const List<Object>& theList) {
     this->::HashTemplate<Object, List<Object>, hashFunction>::AddOnTopNoRepetition(theList);
   }
@@ -1723,8 +1726,8 @@ public:
   }
 };
 
-//class used to avoid a gcc compiler bug.
-//This class should probably be removed as soon as the bug is resolved.
+// class used to avoid a gcc compiler bug.
+// This class should probably be removed as soon as the bug is resolved.
 template <class Object>
 class HashedListSpecialized: public HashedList<Object, Object::HashFunction> {
 };
@@ -1880,7 +1883,8 @@ template<class Object>
 void List<Object>::SwapTwoIndices(int index1, int index2) {
   if (index1 < 0 || index1 >= this->size || index2 < 0 || index2 >= this->size) {
     std::stringstream commentsOnCrash;
-    commentsOnCrash << "This is a programming error: requested elements with indices "
+    commentsOnCrash
+    << "This is a programming error: requested elements with indices "
     << index1 << " and " << index2 << " in a list that has "
     << this->size << " elements. ";
     fatalCrash(commentsOnCrash.str());
@@ -1902,8 +1906,8 @@ void List<Object>::CycleIndices(const List<int>& cycle) {
   for (int i = 0; i < cycle.size; i ++) {
     if ((cycle[i] >= this->size) || (cycle[i] < 0)) {
       std::stringstream commentsOnCrash;
-      commentsOnCrash << "Programming error: request to cycle indices " << cycle
-      << " in list of " << this->size << " elements.";
+      commentsOnCrash << "Programming error: request to cycle indices "
+      << cycle << " in list of " << this->size << " elements.";
       fatalCrash(commentsOnCrash.str());
     }
   }
@@ -2074,7 +2078,8 @@ Object* List<Object>::LastObject() const {
   // <-Registering stack trace forbidden! Multithreading deadlock alert.
   if (this->size <= 0) {
     std::stringstream commentsOnCrash;
-    commentsOnCrash << "This is a programming error: trying to fetch the last object of an array with "
+    commentsOnCrash << "This is a programming error: "
+    << "trying to fetch the last object of an array with "
     << this->size << " elements. ";
     fatalCrash(commentsOnCrash.str());
   }
@@ -2248,7 +2253,8 @@ void List<Object>::ExpandArrayOnTop(int increase) {
     newArray = new Object[this->ActualSize + increase];
   } catch (std::bad_alloc&) {
     std::stringstream commentsOnCrash;
-    commentsOnCrash << "Memory allocation failure: failed to allocate " << this->ActualSize + increase << " objects. ";
+    commentsOnCrash << "Memory allocation failure: failed to allocate "
+    << this->ActualSize + increase << " objects. ";
     fatalCrash(commentsOnCrash.str());
   }
 #ifdef AllocationLimitsSafeguard
@@ -2258,13 +2264,13 @@ void List<Object>::ExpandArrayOnTop(int increase) {
   for (int i = 0; i < this->size; i ++) {
     newArray[i] = this->TheObjects[i];
   }
-  Object* oldPointer = this->TheObjects; //<-store the old memory block
-  this->TheObjects = newArray;//<-replace TheObjects with newArray
-  delete [] oldPointer;//<-only then we delete the non-used memory.
-  //The above looks complicated but is safe:
-  //if another thread jumps and requests operator[]
-  //on our list exactly between the two instructions above
-  //we are safe with this implementation.
+  Object* oldPointer = this->TheObjects; // <-store the old memory block
+  this->TheObjects = newArray; // <-replace TheObjects with newArray
+  delete [] oldPointer; // <-only then we delete the non-used memory.
+  // The above looks complicated but is safe:
+  // if another thread jumps and requests operator[]
+  // on our list exactly between the two instructions above
+  // we are safe with this implementation.
 #ifdef AllocationLimitsSafeguard
   ParallelComputing::GlobalPointerCounter -= this->ActualSize;
   ParallelComputing::CheckPointerCounters();
@@ -2294,7 +2300,8 @@ void List<Object>::AddOnTop(const Object& o) {
   // <-Registering stack trace forbidden! Multithreading deadlock alert.
   if (this->size > this->ActualSize) {
     std::stringstream commentsOnCrash;
-    commentsOnCrash << "This is a programming error: the actual size of the list is "
+    commentsOnCrash
+    << "This is a programming error: the actual size of the list is "
     << this->ActualSize << " but this->size equals " << this->size
     << ". ";
     fatalCrash(commentsOnCrash.str());

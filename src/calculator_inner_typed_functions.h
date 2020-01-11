@@ -185,7 +185,8 @@ bool CalculatorConversions::functionPolynomiaL(Calculator& theCommands, const Ex
   }
   if (input.IsOfType<coefficient>() || input.IsOfType<Rational>()) {
     if (!input.ConvertToType<Polynomial<coefficient> >(output)) {
-      global.fatal << "This is a programming error: failed to convert coefficient to polynomial. " << global.fatal;
+      global.fatal << "This is a programming error: "
+      << "failed to convert coefficient to polynomial. " << global.fatal;
     }
     return true;
   }
@@ -198,7 +199,8 @@ bool CalculatorConversions::functionPolynomiaL(Calculator& theCommands, const Ex
     theComputed.AddChildOnTop(input[0]);
     for (int i = 1; i < input.size(); i ++) {
       if (!CalculatorConversions::functionPolynomiaL<coefficient>(theCommands, input[i], theConverted)) {
-        return theCommands << "<hr>Failed to extract polynomial from " << input[i].ToString();
+        return theCommands << "<hr>Failed to extract polynomial from "
+        << input[i].ToString();
       }
       theComputed.AddChildOnTop(theConverted);
     }
@@ -238,8 +240,8 @@ bool CalculatorConversions::functionPolynomiaL(Calculator& theCommands, const Ex
         if (!resultP.IsConstant(&theConst)) {
           theCommands << "<hr>Failed to extract polynomial from  "
           << input.ToString() << " because the exponent was negative. "
-          << "Please make sure that this is not a typo."
-          << " I am treating " << input.ToString() << " as a single variable. ";
+          << "Please make sure that this is not a typo. "
+          << "I am treating " << input.ToString() << " as a single variable. ";
           Polynomial<coefficient> JustAmonomial;
           JustAmonomial.MakeMonomiaL(0, 1, 1);
           Expression theContext;
@@ -252,7 +254,10 @@ bool CalculatorConversions::functionPolynomiaL(Calculator& theCommands, const Ex
       }
       if (thePower == 0) {
         if (resultP.IsEqualToZero()) {
-          return output.MakeError("Error: 0^0 is undefined in the present version of the calculator. ", theCommands);
+          return output.MakeError(
+            "Error: 0^0 is undefined in the present version of the calculator. ",
+            theCommands
+          );
         }
       }
       resultP.RaiseToPower(thePower);

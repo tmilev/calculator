@@ -642,11 +642,11 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
   bool useMathTag = outputOrbit.size < 150;
   Matrix<Rational> epsCoordMat;
   theWeyl.theDynkinType.GetEpsilonMatrix(epsCoordMat);
-  Graph integralPositiveRootReflectionGraph;
+  GraphWeightedLabeledEdges integralPositiveRootReflectionGraph;
   integralPositiveRootReflectionGraph.numNodes = outputOrbit.size;
   integralPositiveRootReflectionGraph.nodeLabels.SetSize(outputOrbit.size);
   theFormat.flagUseFrac = true;
-  for (int i = 0; i <outputOrbit.size; i ++) {
+  for (int i = 0; i < outputOrbit.size; i ++) {
     integralPositiveRootReflectionGraph.nodeLabels[i] =
     "$" + theWeyl.GetEpsilonCoords(outputOrbit[i]).ToStringEpsilonFormat(&theFormat) + "$ = $" +
     theWeyl.GetFundamentalCoordinatesFromSimple(outputOrbit[i]).ToStringLetterFormat("\\psi") + "$";

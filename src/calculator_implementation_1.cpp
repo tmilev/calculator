@@ -2347,53 +2347,6 @@ std::string Expression::ToStringExpressionHistoryRecursiveNested() {
   return out.str();
 }
 
-void Calculator::ExpressionHistoryAddEmptyHistory() {
-  MacroRegisterFunctionWithName("Calculator::ExpressionHistoryAddEmptyHistory");
-  ListReferences<Expression>& currentExpressionHistoryStack = this->historyStack.LastObject();
-  currentExpressionHistoryStack.SetSize(currentExpressionHistoryStack.size + 1);
-  Expression& currentExpressionHistory = currentExpressionHistoryStack.LastObject();
-  currentExpressionHistory.reset(*this);
-  currentExpressionHistory.AddChildAtomOnTop(this->opExpressionHistory());
-  this->historyRuleNames.LastObject().SetSize(currentExpressionHistoryStack.size);
-  this->historyRuleNames.LastObject().LastObject() = "";
-}
-
-void Calculator::ExpressionHistoryAdd(Expression& theExpression, int level) {
-  MacroRegisterFunctionWithName("Calculator::ExpressionHistoryAdd");
-  Expression theHistoryE;
-  theHistoryE.reset(*this);
-  theHistoryE.AddChildAtomOnTop(this->opSequence());
-  Expression indexE;
-  indexE.AssignValue(level, *this);
-  theHistoryE.AddChildOnTop(indexE);
-  theHistoryE.AddChildOnTop(theExpression);
-  Expression ruleNameE;
-  ruleNameE.AssignValue(this->historyRuleNames.LastObject().LastObject() , *this);
-  theHistoryE.AddChildOnTop(ruleNameE);
-  this->historyRuleNames.LastObject().LastObject() = "";
-  this->historyStack.LastObject().LastObject().AddChildOnTop(theHistoryE);
-}
-
-void Calculator::ExpressionHistoryPop() {
-  MacroRegisterFunctionWithName("Calculator::ExpressionHistoryPop");
-  this->historyStack.LastObject().SetSize(this->historyStack.LastObject().size - 1);
-  this->historyRuleNames.LastObject().SetSize(this->historyStack.LastObject().size);
-}
-
-void Calculator::ExpressionHistoryStackAdd() {
-  MacroRegisterFunctionWithName("Calculator::ExpressionHistoryStackAdd");
-  this->historyStack.SetSize(this->historyStack.size + 1);
-  this->historyStack.LastObject().SetSize(0);
-  this->historyRuleNames.SetSize(this->historyStack.size);
-  this->historyRuleNames.LastObject().SetSize(0);
-}
-
-void Calculator::ExpressionHistoryStackPop() {
-  MacroRegisterFunctionWithName("Calculator::ExpressionHistoryStackPop");
-  this->historyStack.SetSize(this->historyStack.size - 1);
-  this->historyRuleNames.SetSize(this->historyStack.size);
-}
-
 bool Calculator::innerLogEvaluationStepsHumanReadableNested(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
@@ -2407,18 +2360,10 @@ bool Calculator::innerLogEvaluationStepsHumanReadableNested(
     argument.SetChildAtomValue(0, theCommands.opSequence());
   }
   bool notUsed = false;
-  theCommands.ExpressionHistoryStackAdd();
-  theCommands.EvaluateExpression(theCommands, argument, outputTransformation, notUsed, - 1);
+  Expression history;
+  theCommands.EvaluateExpression(theCommands, argument, outputTransformation, notUsed, - 1, &history);
   std::stringstream out;
-  ListReferences<Expression>& currentStack = theCommands.historyStack.LastObject();
-  for (int i = 0; i < currentStack.size; i ++) {
-    out << "Stack " << i + 1 << ":<br>"
-    << currentStack[i].ToStringExpressionHistoryRecursiveNested();
-    if (i != currentStack.size - 1) {
-      out << "<hr>";
-    }
-  }
-  theCommands.ExpressionHistoryStackPop();
+  out << history.ToStringExpressionHistoryRecursiveNested();
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -2713,24 +2658,19 @@ bool Calculator::innerLogEvaluationStepsHumanReadableMerged(
   }
   Expression outputTransformation;
   bool notUsed = false;
-  theCommands.ExpressionHistoryStackAdd();
-  theCommands.EvaluateExpression(theCommands, argument, outputTransformation, notUsed, - 1);
+  ExpressionHistoryEnumerator history;
+  theCommands.EvaluateExpression(
+    theCommands,
+    argument,
+    outputTransformation,
+    notUsed,
+    - 1,
+    &history.theHistory
+  );
   std::stringstream out;
-  ListReferences<Expression>& currentStack = theCommands.historyStack.LastObject();
-  for (int i = 0; i < currentStack.size; i ++) {
-    if (currentStack.size > 1) {
-      out << "Stack " << i + 1 << ":<br>";
-    }
-    ExpressionHistoryEnumerator theHistoryEnumerator;
-    theHistoryEnumerator.theHistory = currentStack[i];
-    theHistoryEnumerator.owner = &theCommands;
-    theHistoryEnumerator.ComputeAll();
-    out << theHistoryEnumerator.ToStringExpressionHistoryMerged();
-    if (i != currentStack.size - 1) {
-      out << "<hr>";
-    }
-    out << "<hr>DEBUG: " << theHistoryEnumerator.ToStringDebug();
-  }
-  theCommands.ExpressionHistoryStackPop();
+  history.owner = &theCommands;
+  history.ComputeAll();
+  out << history.ToStringExpressionHistoryMerged();
+  out << "<hr>DEBUG: " << history.ToStringDebug();
   return output.AssignValue(out.str(), theCommands);
 }

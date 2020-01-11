@@ -1216,11 +1216,6 @@ public:
     return false;
   }
 
-  void ExpressionHistoryPop();
-  void ExpressionHistoryAddEmptyHistory();
-  void ExpressionHistoryAdd(Expression& theExpression, int level);
-  void ExpressionHistoryStackAdd();
-  void ExpressionHistoryStackPop();
   void RegisterCalculatorFunction(Function& theFun, int indexOp);
   std::string ToStringSemismipleLieAlgebraLinksFromHD(
     const DynkinType& theType, FormatExpressions* theFormat = nullptr
@@ -2428,21 +2423,17 @@ public:
     int indexInCache;
     ProgressReport theReport;
     bool reductionOccurred;
-    Expression* output;
+    Expression* outpuT;
     Expression* history;
     Expression currentChild;
     bool ReduceOnce();
-    bool BuiltInEvaluation(Expression& output);
-    bool UserDefinedEvaluation(Expression& output);
-    void InitializeOneRun(Expression& output);
-    bool HasErrors(Expression& output);
+    bool BuiltInEvaluation();
+    bool UserDefinedEvaluation();
+    void InitializeOneRun();
+    bool OutputHasErrors();
     EvaluateLoop(Calculator& inputOwner);
-    bool EvaluateChildren(Expression& output, StateMaintainerCalculator& maintainRuleStack);
+    bool EvaluateChildren(StateMaintainerCalculator& maintainRuleStack);
     void ReportChildEvaluation(Expression& output, int childIndex);
-
-    void AccountHistoryAfterChildrenEvaluation(
-      Expression& output, StateMaintainerCalculator& maintainRuleStack
-    );
     void LookUpCache();
     bool SetOutput(const Expression& input);
     void AccountHistory();

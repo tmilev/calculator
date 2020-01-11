@@ -972,11 +972,6 @@ public:
   Calculator* owner;
   int startingRuleStackIndex;
   int startingRuleStackSize;
-  int historyOuterSize; //<-outermost layer of expression history
-  int historyMiddleSize; //<- inner layer of expression history
-  //int historyInnerSize; //<- inner-most layer of expression history
-  std::string& GetCurrentHistoryRuleNames();
-  Expression& GetCurrentHistory();
   StateMaintainerCalculator(Calculator& inputBoss);
   void AddRule(const Expression& theRule);
   ~StateMaintainerCalculator();
@@ -1089,8 +1084,6 @@ public:
   HashedList<Expression> knownDoubleConstants;
   List<double> knownDoubleConstantValues;
 
-  ListReferences<ListReferences<Expression> > historyStack;
-  ListReferences<ListReferences<std::string> > historyRuleNames;
   List<Expression> buffer1, buffer2;
   int MaxRecursionDeptH;
   int RecursionDeptH;
@@ -1655,6 +1648,12 @@ public:
   }
   int opExpressionHistory() {
     return this->operations.GetIndexIMustContainTheObject("ExpressionHistory");
+  }
+  int opExpressionHistorySet() {
+    return this->operations.GetIndexIMustContainTheObject("ExpressionHistorySet");
+  }
+  int opExpressionHistorySetChild() {
+    return this->operations.GetIndexIMustContainTheObject("ExpressionHistorySetChild");
   }
   int opQuote() {
     return this->operations.GetIndexIMustContainTheObject("\"");
@@ -2413,12 +2412,12 @@ public:
   static bool EvaluateExpression(
     Calculator& theCommands, const Expression& input, Expression& output
   );
-  static bool EvaluateExpression(
-    Calculator& theCommands,
+  static bool EvaluateExpression(Calculator& theCommands,
     const Expression& input,
-    Expression& output,
+    Expression& outpuT,
     bool& outputIsCacheable,
-    int opIndexParentIfAvailable
+    int opIndexParentIfAvailable,
+    Expression *outputHistory
   );
   class EvaluateLoop {
   public:
@@ -2427,12 +2426,12 @@ public:
     int opIndexParent;
     int numberOfTransformations;
     int indexInCache;
-    int historyStackSizeAtChildEvaluationStart;
     ProgressReport theReport;
-    bool flagRecordHistory;
-    bool flagRecordCurrentHistory;
     bool reductionOccurred;
-    bool ReduceOnce(Expression& output);
+    Expression* output;
+    Expression* history;
+    Expression currentChild;
+    bool ReduceOnce();
     bool BuiltInEvaluation(Expression& output);
     bool UserDefinedEvaluation(Expression& output);
     void InitializeOneRun(Expression& output);
@@ -2444,7 +2443,10 @@ public:
     void AccountHistoryAfterChildrenEvaluation(
       Expression& output, StateMaintainerCalculator& maintainRuleStack
     );
-    void LookUpCache(const Expression& input, Expression& output);
+    void LookUpCache();
+    bool SetOutput(const Expression& input);
+    void AccountHistory();
+    void AccountHistoryChildTransformation(const Expression& transformedChild, const Expression& childHistory, int childIndex);
   };
   void Evaluate(const std::string& theInput);
   bool ParseAndExtractExpressions(

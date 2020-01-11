@@ -8051,6 +8051,8 @@ void Calculator::initPredefinedStandardOperationsWithoutHandler() {
   this->AddOperationNoRepetitionAllowed("CommandEnclosureStart");
   this->AddOperationNoRepetitionAllowed("CommandEnclosureFinish");
   this->AddOperationNoRepetitionAllowed("ExpressionHistory");
+  this->AddOperationNoRepetitionAllowed("ExpressionHistorySet");
+  this->AddOperationNoRepetitionAllowed("ExpressionHistorySetChild");
 }
 
 void Calculator::initAtomsNonCacheable() {

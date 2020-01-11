@@ -147,9 +147,6 @@ std::string Calculator::ToStringRuleStatusUser() {
 }
 
 void Calculator::DoLogEvaluationIfNeedBe(Function& inputF) {
-  if (this->historyStack.size > 0) {
-    this->historyRuleNames.LastObject().LastObject() = inputF.calculatorIdentifier;
-  }
   if (!this->flagLogEvaluatioN) {
     return;
   }
@@ -402,23 +399,8 @@ void StateMaintainerCalculator::AddRule(const Expression& theRule) {
   }
 }
 
-Expression& StateMaintainerCalculator::GetCurrentHistory() {
-  MacroRegisterFunctionWithName("StateMaintainerCalculator::GetCurrentHistory");
-  return this->owner->historyStack[this->historyOuterSize- 1][this->historyMiddleSize- 1];
-}
-
-std::string& StateMaintainerCalculator::GetCurrentHistoryRuleNames() {
-  MacroRegisterFunctionWithName("StateMaintainerCalculator::GetCurrentHistoryRuleNames");
-  return this->owner->historyRuleNames[this->historyOuterSize - 1][this->historyMiddleSize - 1];
-}
-
 StateMaintainerCalculator::StateMaintainerCalculator(Calculator& inputBoss) {
   this->owner = &inputBoss;
-  this->historyOuterSize = inputBoss.historyStack.size;
-  this->historyMiddleSize = - 1;
-  if (inputBoss.historyStack.size > 0) {
-    this->historyMiddleSize = inputBoss.historyStack.LastObject().size;
-  }
   this->startingRuleStackIndex = inputBoss.RuleStackCacheIndex;
   this->startingRuleStackSize = inputBoss.RuleStack.size();
 }
@@ -426,12 +408,6 @@ StateMaintainerCalculator::StateMaintainerCalculator(Calculator& inputBoss) {
 StateMaintainerCalculator::~StateMaintainerCalculator() {
   if (this->owner == nullptr) {
     return;
-  }
-  this->owner->historyStack.SetSize(this->historyOuterSize);
-  this->owner->historyRuleNames.SetSize(this->historyOuterSize);
-  if (this->owner->historyStack.size > 0) {
-    this->owner->historyStack.LastObject().SetSize(this->historyMiddleSize);
-    this->owner->historyRuleNames.LastObject().SetSize(this->historyMiddleSize);
   }
   Expression& theRuleStack = this->owner->RuleStack;
   std::string currentRuleName;
@@ -536,7 +512,7 @@ bool Calculator::EvaluateExpression(
 ) {
   MacroRegisterFunctionWithName("Calculator::EvaluateExpression");
   bool notUsed = false;
-  return theCommands.EvaluateExpression(theCommands, input, output, notUsed, - 1);
+  return theCommands.EvaluateExpression(theCommands, input, output, notUsed, - 1, nullptr);
 }
 
 bool Calculator::TimedOut() {
@@ -563,18 +539,66 @@ Calculator::EvaluateLoop::EvaluateLoop(Calculator& inputOwner) {
   this->opIndexParent = - 1;
   this->isNonCacheable = false;
   this->numberOfTransformations = 0;
-  this->flagRecordHistory = false;
-  this->flagRecordCurrentHistory = false;
   this->indexInCache = - 1;
   this->reductionOccurred = false;
-  this->historyStackSizeAtChildEvaluationStart = - 1;
+  this->history = nullptr;
+  this->output = nullptr;
+}
+
+void Calculator::EvaluateLoop::AccountHistoryChildTransformation(
+  const Expression& transformedChild,
+  const Expression& childHistory,
+  int childIndex
+) {
+  if (this->history == nullptr) {
+    // History is not recorded.
+    return;
+  }
+  if (this->currentChild == transformedChild) {
+    // Child hasn't changed.
+    return;
+  }
+  Expression incomingHistory, indexE;
+  indexE.AssignValue(childIndex, *this->owner);
+  incomingHistory.MakeXOX(
+    *this->owner,
+    this->owner->opExpressionHistorySetChild(),
+    indexE,
+    childHistory
+  );
+  this->history->AddChildOnTop(incomingHistory);
+}
+
+void Calculator::EvaluateLoop::AccountHistory() {
+  if (this->history == nullptr) {
+    return;
+  }
+  Expression incomingHistory;
+  if (this->history->size() > 0) {
+    const Expression& lastHistory = (*this->history)[this->history->size() - 1];
+    if (lastHistory[1] == *this->output) {
+      // Expression hasn't changed since last assignment.
+      return;
+    }
+  }
+  if (this->history->size() == 0) {
+    this->history->AddChildAtomOnTop(this->owner->opExpressionHistory());
+  }
+  incomingHistory.MakeOX(*this->owner, this->owner->opExpressionHistorySet(), *this->output);
+  this->history->AddChildOnTop(incomingHistory);
+}
+
+bool Calculator::EvaluateLoop::SetOutput(const Expression& input) {
+  if (this->output == nullptr) {
+    global.fatal << "Non-initialized evaluation loop. " << global.fatal;
+  }
+  *this->output = input;
+  this->AccountHistory();
+  return  true;
 }
 
 void Calculator::EvaluateLoop::InitializeOneRun(Expression& output) {
   this->numberOfTransformations ++;
-  if (this->flagRecordHistory) {
-    this->owner->ExpressionHistoryAdd(output, 0);
-  }
   std::string atomValue;
   if (output.IsOperation(&atomValue)) {
     if (this->owner->atomsThatMustNotBeCached.Contains(atomValue)) {
@@ -647,11 +671,6 @@ void Calculator::EvaluateLoop::ReportChildEvaluation(Expression& output, int chi
 bool Calculator::EvaluateLoop::EvaluateChildren(
   Expression &output, StateMaintainerCalculator& maintainRuleStack
 ) {
-  this->flagRecordCurrentHistory = false;
-  this->historyStackSizeAtChildEvaluationStart = - 1;
-  if (this->flagRecordHistory) {
-    this->historyStackSizeAtChildEvaluationStart = maintainRuleStack.GetCurrentHistory().size();
-  }
   if (output.IsFrozen()) {
     return true;
   }
@@ -661,28 +680,30 @@ bool Calculator::EvaluateLoop::EvaluateChildren(
       indexOp = output[0].theData;
     }
   }
-  Expression oldChild, childEvaluation;
+  Expression childEvaluation, historyContainer;
+  Expression* historyChild = nullptr;
+  if (this->history != nullptr) {
+    this->history = &historyContainer;
+  }
   for (int i = 0; i < output.size(); i ++) {
     if (i > 0) {
       this->ReportChildEvaluation(output, i);
     }
     bool childIsNonCacheable = false;
-    if (this->flagRecordHistory) {
-      oldChild = output[i];
+    if (this->history != nullptr) {
+      this->currentChild = output[i];
     }
     if (this->owner->EvaluateExpression(
-      *this->owner, output[i], childEvaluation, childIsNonCacheable, indexOp
+      *this->owner,
+      output[i],
+      childEvaluation,
+      childIsNonCacheable,
+      indexOp,
+      historyChild
     )) {
       output.SetChilD(i, childEvaluation);
     }
-    if (this->flagRecordHistory) {
-      if (childEvaluation != oldChild) {
-        this->flagRecordCurrentHistory = true;
-      }
-      Expression lastHistory = maintainRuleStack.GetCurrentHistory();
-      this->owner->ExpressionHistoryPop();
-      this->owner->ExpressionHistoryAdd(lastHistory, i + 1);
-    }
+    this->AccountHistoryChildTransformation(childEvaluation, historyContainer, i);
     // If the child is non-cache-able, so is the current one.
     // Once evaluation has passed through a non-cacheable expression,
     // our expression is no longer cache-able.
@@ -718,7 +739,7 @@ void Calculator::EvaluateLoop::AccountHistoryAfterChildrenEvaluation(
   }
   if (this->flagRecordCurrentHistory) {
     maintainRuleStack.GetCurrentHistoryRuleNames() = "Sub-expression simplification";
-    this->owner->ExpressionHistoryAdd(output, 0);
+    this->owner->ExpressionHistoryAdd(output, - 1);
     return;
   }
   if (
@@ -787,7 +808,7 @@ bool Calculator::EvaluateLoop::BuiltInEvaluation(Expression& output) {
   return true;
 }
 
-bool Calculator::EvaluateLoop::ReduceOnce(Expression& output) {
+bool Calculator::EvaluateLoop::ReduceOnce() {
   MacroRegisterFunctionWithName("EvaluateExpressionLoopBody");
   StateMaintainerCalculator maintainRuleStack(*(this->owner));
   this->InitializeOneRun(output);
@@ -810,9 +831,7 @@ bool Calculator::EvaluateLoop::ReduceOnce(Expression& output) {
   return false;
 }
 
-void Calculator::EvaluateLoop::LookUpCache(
-  const Expression& input, Expression& output
-) {
+void Calculator::EvaluateLoop::LookUpCache() {
   this->owner->EvaluatedExpressionsStack.AddOnTop(input);
   Expression theExpressionWithContext;
   theExpressionWithContext.reset(*this->owner, 3);
@@ -847,15 +866,21 @@ void Calculator::EvaluateLoop::LookUpCache(
 bool Calculator::EvaluateExpression(
   Calculator& theCommands,
   const Expression& input,
-  Expression& output,
+  Expression& outpuT,
   bool& outputIsNonCacheable,
-  int opIndexParentIfAvailable
+  int opIndexParentIfAvailable,
+  Expression* outputHistory
 ) {
   RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("Calculator::EvaluateExpression");
   theCommands.stats.expressionEvaluated ++;
   theCommands.stats.callsSinceReport ++;
   Calculator::EvaluateLoop state(theCommands);
+  state.output = &outpuT;
+  state.history = outputHistory;
+  if (state.history != nullptr) {
+    state.history->reset(theCommands);
+  }
   state.opIndexParent = opIndexParentIfAvailable;
   if (
     theCommands.stats.callsSinceReport >=
@@ -878,8 +903,8 @@ bool Calculator::EvaluateExpression(
   if (theCommands.RecursionDepthExceededHandleRoughly()) {
     return theCommands << " Evaluating expression: " << input.ToString() << " aborted. ";
   }
-  output = input;
-  if (output.IsError()) {
+  state.SetOutput(input);
+  if (state.output->IsError()) {
     theCommands.flagAbortComputationASAP = true;
     return true;
   }
@@ -889,7 +914,9 @@ bool Calculator::EvaluateExpression(
     << input.ToString()
     << " but I have already seen that expression in the expression stack. ";
     theCommands.flagAbortComputationASAP = true;
-    return output.MakeError(errorStream.str(), theCommands);
+    Expression errorE;
+    errorE.MakeError(errorStream.str(), theCommands);
+    return state.SetOutput(errorE);
   }
   //bool logEvaluationStepsRequested = theCommands.logEvaluationSteps.size > 0;
   state.LookUpCache(input, output);

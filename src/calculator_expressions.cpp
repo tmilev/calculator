@@ -3215,16 +3215,20 @@ void Expression::ToStringOpMultiplicative(
 
 std::string Expression::ToStringTreeHtml(int depth) const {
   std::stringstream out;
-  for (int i = 0; i < depth; i ++) {
-    out << "-";
-  }
   if (depth > 100) {
-    out << "..." << "<br>";
+    out << "<br>...";
     return out.str();
   }
   std::string data;
   if (this->ToStringData(data)) {
-    out << data << "<br>";
+    out << "<br>";
+    for (int i = 0; i < depth; i ++) {
+      out << "_";
+    }
+    if (data == "" && this->IsOfType<std::string>()) {
+      out << "[empty string]";
+    }
+    out << data;
     return out.str();
   }
   for (int i = 0; i < this->size(); i ++) {

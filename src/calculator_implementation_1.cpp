@@ -2510,7 +2510,7 @@ bool ExpressionHistoryEnumerator::initialize() {
     this->errorStream << "Expression history element is not a sequence. ";
     return false;
   }
-  if (!this->theHistory[1][1].IsEqualToZero()) {
+  if (!this->theHistory[1][1].IsEqualToMOne()) {
     this->errorStream << "Expression history element at start is not labeled by - 1. ";
     return false;
   }

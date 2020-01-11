@@ -612,10 +612,7 @@ bool Calculator::EvaluateLoop::SetOutput(const Expression& input) {
   if (this->outpuT == nullptr) {
     global.fatal << "Non-initialized evaluation loop. " << global.fatal;
   }
-  input.CheckConsistency();
   *(this->outpuT) = input;
-  global.Comments << "DEBUG: check output again. ";
-  this->outpuT->CheckConsistency();
   this->AccountHistory();
   return true;
 }

@@ -2531,7 +2531,9 @@ bool ExpressionHistoryEnumerator::IncrementRecursivelyReturnFalseIfPastLast(
   MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::IncrementRecursivelyReturnFalseIfPastLast");
   bool didWork = false;
   for (int i = 0; i < currentNode.children.size; i ++) {
-    if (this->IncrementRecursivelyReturnFalseIfPastLast(this->currentSubTree.theNodes[currentNode.children[i]])) {
+    if (this->IncrementRecursivelyReturnFalseIfPastLast(
+      this->currentSubTree.theNodes[currentNode.children[i]]
+    )) {
       didWork = true;
     }
   }
@@ -2578,7 +2580,9 @@ bool ExpressionHistoryEnumerator::IncrementRecursivelyReturnFalseIfPastLast(
       }
     }
     for (int i = 0; i < currentNode.children.size; i ++) {
-      if (this->IncrementRecursivelyReturnFalseIfPastLast(this->currentSubTree.theNodes[currentNode.children[i]])) {
+      if (this->IncrementRecursivelyReturnFalseIfPastLast(
+        this->currentSubTree.theNodes[currentNode.children[i]]
+      )) {
         didWork = true;
       }
     }

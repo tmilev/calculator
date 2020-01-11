@@ -716,7 +716,7 @@ class Function {
   unsigned int HashFunction() const {
     return static_cast<unsigned int>(reinterpret_cast<uintptr_t>(this->theFunction));
   }
-  bool Apply(Calculator& theCommands, const Expression& input, Expression& output, int opIndexParentIfAvailable);
+  bool Apply(Calculator& theCommands, const Expression& input, Expression& output, int opIndexParentIfAvailable, Function **outputHandler);
   bool CheckConsistency() const;
 };
 
@@ -2046,13 +2046,25 @@ public:
     Calculator& theCommands, const Expression& input, Expression& output
   );
   static bool outerStandardFunction(
-    Calculator& theCommands, const Expression& input, Expression& output, int opIndexParentIfAvailable
+    Calculator& theCommands,
+    const Expression& input,
+    Expression& output,
+    int opIndexParentIfAvailable,
+    Function **outputHandler
   );
   static bool outerStandardCompositeHandler(
-    Calculator& theCommands, const Expression& input, Expression& output, int opIndexParentIfAvailable
+    Calculator& theCommands,
+    const Expression& input,
+    Expression& output,
+    int opIndexParentIfAvailable,
+    Function** outputHandler
   );
   static bool outerStandardHandler(
-    Calculator& theCommands, const Expression& input, Expression& output, int opIndexParentIfAvailable
+    Calculator& theCommands,
+    const Expression& input,
+    Expression& output,
+    int opIndexParentIfAvailable,
+    Function** outputHandler
   );
   static bool outerPlus(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerPowerRaiseToFirst(Calculator& theCommands, const Expression& input, Expression& output);
@@ -2443,10 +2455,14 @@ public:
     bool EvaluateChildren(StateMaintainerCalculator& maintainRuleStack);
     void ReportChildEvaluation(Expression& output, int childIndex);
     void LookUpCache();
-    bool SetOutput(const Expression& input);
-    void AccountHistory();
+    bool SetOutput(
+      const Expression& input, Function* handler, const std::string& info
+    );
+    void AccountHistory(Function *handler, const std::string &info);
     bool CheckInitialization();
-    void AccountHistoryChildTransformation(const Expression& transformedChild, const Expression& childHistory, int childIndex);
+    void AccountHistoryChildTransformation(
+      const Expression& transformedChild, const Expression& childHistory, int childIndex
+    );
   };
   void Evaluate(const std::string& theInput);
   bool ParseAndExtractExpressions(

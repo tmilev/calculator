@@ -2509,7 +2509,10 @@ bool ExpressionHistoryEnumerator::ProcessTransformation(
   this->rulesNames.SetSize(this->rulesNames.size + 1);
   this->rulesNames.LastObject()->SetSize(0);
   if (current.size() >= 3) {
-    this->rulesNames.LastObject()->AddOnTop(current[2].ToString());
+    std::string incoming = current[2].ToString();
+    if (incoming != "") {
+      this->rulesNames.LastObject()->AddOnTop(incoming);
+    }
   }
   return true;
 }

@@ -190,7 +190,8 @@ bool Calculator::outerStandardCompositeHandler(
   Calculator& theCommands,
   const Expression& input,
   Expression& output,
-  int opIndexParentIfAvailable
+  int opIndexParentIfAvailable,
+  Function** outputHandler
 ) {
   if (!input.IsLisT()) {
     return false;
@@ -206,7 +207,9 @@ bool Calculator::outerStandardCompositeHandler(
   for (int i = 0; i < theHandlers->size; i ++) {
     Function& currentHandler = (*theHandlers)[i];
     if (currentHandler.ShouldBeApplied(opIndexParentIfAvailable)) {
-      if (currentHandler.Apply(theCommands, input, output, opIndexParentIfAvailable)) {
+      if (currentHandler.Apply(
+        theCommands, input, output, opIndexParentIfAvailable, outputHandler
+      )) {
         theCommands.DoLogEvaluationIfNeedBe(currentHandler);
         return true;
       }
@@ -222,7 +225,13 @@ bool Function::CheckConsistency() const {
   return true;
 }
 
-bool Function::Apply(Calculator& theCommands, const Expression& input, Expression& output, int opIndexParentIfAvailable) {
+bool Function::Apply(
+  Calculator& theCommands,
+  const Expression& input,
+  Expression& output,
+  int opIndexParentIfAvailable,
+  Function** outputHandler
+) {
   if (!this->ShouldBeApplied(opIndexParentIfAvailable)) {
     return false;
   }
@@ -234,6 +243,9 @@ bool Function::Apply(Calculator& theCommands, const Expression& input, Expressio
       if (output != input) {
         output.CheckConsistency();
         theCommands.DoLogEvaluationIfNeedBe(*this);
+        if (outputHandler != nullptr) {
+          *outputHandler = this;
+        }
         return true;
       }
     }
@@ -243,13 +255,22 @@ bool Function::Apply(Calculator& theCommands, const Expression& input, Expressio
     if (this->theFunction(theCommands, input, output)) {
       output.CheckConsistency();
       theCommands.DoLogEvaluationIfNeedBe(*this);
+      if (outputHandler != nullptr) {
+        *outputHandler = this;
+      }
       return true;
     }
   }
   return false;
 }
 
-bool Calculator::outerStandardHandler(Calculator &theCommands, const Expression &input, Expression &output, int opIndexParentIfAvailable) {
+bool Calculator::outerStandardHandler(
+  Calculator& theCommands,
+  const Expression& input,
+  Expression& output,
+  int opIndexParentIfAvailable,
+  Function** outputHandler
+) {
   const Expression& functionNameNode = input[0];
   int operationIndex = - 1;
   if (!functionNameNode.IsOperation(operationIndex)) {
@@ -261,7 +282,9 @@ bool Calculator::outerStandardHandler(Calculator &theCommands, const Expression 
   const List<Function>& handlers = theCommands.operations.theValues[operationIndex].GetElement().handlers;
   for (int i = 0; i < handlers.size; i ++) {
     Function& currentFunction = handlers[i];
-    if (currentFunction.Apply(theCommands, input, output, opIndexParentIfAvailable)) {
+    if (currentFunction.Apply(
+      theCommands, input, output, opIndexParentIfAvailable, outputHandler
+    )) {
       return true;
     }
   }
@@ -269,7 +292,11 @@ bool Calculator::outerStandardHandler(Calculator &theCommands, const Expression 
 }
 
 bool Calculator::outerStandardFunction(
-  Calculator& theCommands, const Expression& input, Expression& output, int opIndexParentIfAvailable
+  Calculator& theCommands,
+  const Expression& input,
+  Expression& output,
+  int opIndexParentIfAvailable,
+  Function** outputHandler
 ) {
   MacroRegisterFunctionWithName("Calculator::outerStandardFunction");
   RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
@@ -277,10 +304,14 @@ bool Calculator::outerStandardFunction(
   if (!input.IsLisT()) {
     return false;
   }
-  if (theCommands.outerStandardCompositeHandler(theCommands, input, output, opIndexParentIfAvailable)) {
+  if (theCommands.outerStandardCompositeHandler(
+    theCommands, input, output, opIndexParentIfAvailable, outputHandler
+  )) {
     return true;
   }
-  if (theCommands.outerStandardHandler(theCommands, input, output, opIndexParentIfAvailable)) {
+  if (theCommands.outerStandardHandler(
+    theCommands, input, output, opIndexParentIfAvailable, outputHandler
+  )) {
     return true;
   }
   return false;
@@ -571,7 +602,7 @@ void Calculator::EvaluateLoop::AccountHistoryChildTransformation(
   this->history->AddChildOnTop(incomingHistory);
 }
 
-void Calculator::EvaluateLoop::AccountHistory() {
+void Calculator::EvaluateLoop::AccountHistory(Function* handler, const std::string& info) {
   MacroRegisterFunctionWithName("Calculator::EvaluateLoop::AccountHistory");
   this->CheckInitialization();
   if (this->history == nullptr) {
@@ -593,18 +624,33 @@ void Calculator::EvaluateLoop::AccountHistory() {
     this->history->reset(*(this->owner));
     this->history->AddChildAtomOnTop(this->owner->opExpressionHistory());
   }
-  incomingHistory.MakeOX(*this->owner, this->owner->opExpressionHistorySet(), *(this->outpuT));
+  std::stringstream description;
+  if (handler != nullptr) {
+    description << handler->calculatorIdentifier;
+  } else {
+    description << info;
+  }
+  Expression extraInformation;
+  extraInformation.AssignValue(description.str(), *this->owner);
+  incomingHistory.MakeXOX(
+    *this->owner,
+    this->owner->opExpressionHistorySet(),
+    *(this->outpuT),
+    extraInformation
+  );
   incomingHistory.CheckConsistency();
   this->history->AddChildOnTop(incomingHistory);
 }
 
-bool Calculator::EvaluateLoop::SetOutput(const Expression& input) {
+bool Calculator::EvaluateLoop::SetOutput(
+  const Expression& input, Function* handler, const std::string& info
+) {
   MacroRegisterFunctionWithName("Calculator::EvaluateLoop::SetOutput");
   if (this->outpuT == nullptr) {
     global.fatal << "Non-initialized evaluation loop. " << global.fatal;
   }
   *(this->outpuT) = input;
-  this->AccountHistory();
+  this->AccountHistory(handler, info);
   return true;
 }
 
@@ -767,7 +813,11 @@ bool Calculator::EvaluateLoop::UserDefinedEvaluation() {
     if (this->owner->ProcessOneExpressionOnePatternOneSub(
       currentPattern, afterPatternMatch, bufferPairs, theLog
     )) {
-      this->SetOutput(afterPatternMatch);
+      std::stringstream substitutionComment;
+      if (this->history == nullptr) {
+        substitutionComment << "User-defined substition: " << currentPattern.ToString();
+      }
+      this->SetOutput(afterPatternMatch, nullptr, substitutionComment.str());
       this->reductionOccurred = true;
       if (this->owner->flagLogEvaluatioN) {
         *this->owner
@@ -793,8 +843,9 @@ bool Calculator::EvaluateLoop::BuiltInEvaluation() {
   MacroRegisterFunctionWithName("Calculator::EvaluateLoop::BuiltInEvaluation");
   this->CheckInitialization();
   Expression result;
+  Function* handlerContainer = nullptr;
   if (!this->owner->outerStandardFunction(
-    *(this->owner), *(this->outpuT), result, this->opIndexParent
+    *(this->owner), *(this->outpuT), result, this->opIndexParent, &handlerContainer
   )) {
     return false;
   }
@@ -805,7 +856,7 @@ bool Calculator::EvaluateLoop::BuiltInEvaluation() {
     << "<br>" << HtmlRoutines::GetMathMouseHover(this->outpuT->ToString())
     << " -> " << HtmlRoutines::GetMathMouseHover(result.ToString());
   }
-  return this->SetOutput(result);
+  return this->SetOutput(result, handlerContainer, "");
 }
 
 bool Calculator::EvaluateLoop::ReduceOnce() {
@@ -846,7 +897,7 @@ void Calculator::EvaluateLoop::LookUpCache() {
       << this->outpuT->ToString() << " -> "
       << this->owner->imagesCachedExpressions[this->indexInCache].ToString();
     }
-    this->SetOutput(this->owner->imagesCachedExpressions[this->indexInCache]);
+    this->SetOutput(this->owner->imagesCachedExpressions[this->indexInCache], nullptr, "Computed elsewhere");
     return;
   }
   if (
@@ -902,7 +953,7 @@ bool Calculator::EvaluateExpression(
   if (theCommands.RecursionDepthExceededHandleRoughly()) {
     return theCommands << " Evaluating expression: " << input.ToString() << " aborted. ";
   }
-  state.SetOutput(input);
+  state.SetOutput(input, nullptr, "");
   if (state.outpuT->IsError()) {
     theCommands.flagAbortComputationASAP = true;
     return true;
@@ -915,7 +966,7 @@ bool Calculator::EvaluateExpression(
     theCommands.flagAbortComputationASAP = true;
     Expression errorE;
     errorE.MakeError(errorStream.str(), theCommands);
-    return state.SetOutput(errorE);
+    return state.SetOutput(errorE, nullptr, "Error");
   }
   //bool logEvaluationStepsRequested = theCommands.logEvaluationSteps.size > 0;
   state.LookUpCache();

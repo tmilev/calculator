@@ -160,7 +160,7 @@ typedef void (*drawTextFunction)(double X1, double Y1, const char* theText, int 
 typedef void (*drawCircleFunction)(double X1, double Y1, double radius, unsigned long thePenStyle, int ColorIndex);
 typedef void (*drawClearScreenFunction)();
 
-class UnsecureRandomGenerator {
+class UnsecurePseudoRandomGenerator {
 public:
   int randomSeed;
   int64_t randomNumbersGenerated;
@@ -168,7 +168,7 @@ public:
   List<unsigned char>& state();
   void SetRandomSeed(int32_t inputRandomSeed);
   unsigned int GetRandomInteger32bit();
-  UnsecureRandomGenerator();
+  UnsecurePseudoRandomGenerator();
 };
 
 class MathRoutines {

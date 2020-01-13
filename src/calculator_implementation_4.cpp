@@ -2916,7 +2916,7 @@ void ObjectContainer::reset() {
   this->EllipticCurveElementsZmodP.Clear();
   this->EllipticCurveElementsRational.Clear();
    //Setting up a random seed.
-  global.unsecureRandomGenerator.SetRandomSeed(this->CurrentRandomSeed);
+  global.unsecurePseudoRandomGenerator.SetRandomSeed(this->CurrentRandomSeed);
   this->canvasPlotCounter = 0;
   this->resetPlots();
   this->resetSliders();

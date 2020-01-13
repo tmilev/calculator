@@ -1703,19 +1703,19 @@ bool JSONWebToken::AssignString(const std::string& other, std::stringstream* com
   return true;
 }
 
-List<unsigned char>& UnsecureRandomGenerator::state() {
+List<unsigned char>& UnsecurePseudoRandomGenerator::state() {
   static List<unsigned char> stateContainer;
   return stateContainer;
 }
 
-UnsecureRandomGenerator::UnsecureRandomGenerator() {
+UnsecurePseudoRandomGenerator::UnsecurePseudoRandomGenerator() {
   this->randomSeed = 0;
   this->randomNumbersGenerated = 0;
   this->bytesConsumed = 0;
   this->SetRandomSeed(0);
 }
 
-void UnsecureRandomGenerator::SetRandomSeed(int32_t inputRandomSeed) {
+void UnsecurePseudoRandomGenerator::SetRandomSeed(int32_t inputRandomSeed) {
   if (inputRandomSeed < 0) {
     inputRandomSeed *= - 1;
   }
@@ -1732,7 +1732,7 @@ void UnsecureRandomGenerator::SetRandomSeed(int32_t inputRandomSeed) {
   Crypto::computeSha256(this->state(), this->state());
 }
 
-unsigned int UnsecureRandomGenerator::GetRandomInteger32bit() {
+unsigned int UnsecurePseudoRandomGenerator::GetRandomInteger32bit() {
   if (this->bytesConsumed + 4 >= this->state().size) {
     Crypto::computeSha256(this->state(), this->state());
     this->bytesConsumed = 0;

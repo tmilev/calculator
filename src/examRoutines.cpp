@@ -1902,14 +1902,14 @@ bool CalculatorHTML::InterpretHtml(std::stringstream* comments) {
   this->randomSeedsIfInterpretationFails.SetSize(this->MaxInterpretationAttempts);
   if (!this->theProblemData.flagRandomSeedGiven) {
     int randomSeedFromTime = static_cast<signed>(time(nullptr));
-    global.unsecureRandomGenerator.SetRandomSeed(103 + randomSeedFromTime);
-    this->randomSeedsIfInterpretationFails[0] = (103 + global.unsecureRandomGenerator.GetRandomInteger32bit()) % 100000000;
+    global.unsecurePseudoRandomGenerator.SetRandomSeed(103 + randomSeedFromTime);
+    this->randomSeedsIfInterpretationFails[0] = (103 + global.unsecurePseudoRandomGenerator.GetRandomInteger32bit()) % 100000000;
   } else {
     this->randomSeedsIfInterpretationFails[0] = static_cast<int>(this->theProblemData.randomSeed);
   }
-  global.unsecureRandomGenerator.SetRandomSeed(this->randomSeedsIfInterpretationFails[0] + 1);
+  global.unsecurePseudoRandomGenerator.SetRandomSeed(this->randomSeedsIfInterpretationFails[0] + 1);
   for (int i = 1; i < this->randomSeedsIfInterpretationFails.size; i ++) {
-    this->randomSeedsIfInterpretationFails[i] = (103 + global.unsecureRandomGenerator.GetRandomInteger32bit()) % 100000000;
+    this->randomSeedsIfInterpretationFails[i] = (103 + global.unsecurePseudoRandomGenerator.GetRandomInteger32bit()) % 100000000;
   }
   this->timePerAttempt.SetSize(0);
   this->timeIntermediatePerAttempt.SetSize(0);

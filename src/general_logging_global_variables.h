@@ -281,7 +281,7 @@ public:
   // Do not use for cryptographic purposes.
   // Intended use:
   // generate random numbers for mathematical problems/education.
-  UnsecureRandomGenerator unsecureRandomGenerator;
+  UnsecurePseudoRandomGenerator unsecurePseudoRandomGenerator;
   Response theResponse;
   ListReferences<std::thread>theThreads;
   ListReferences<ThreadData> theThreadData;

@@ -9658,7 +9658,7 @@ bool CalculatorFunctions::innerSetRandomSeed(
   }
   std::stringstream out;
   theCommands.theObjectContainer.CurrentRandomSeed = theInt;
-  global.unsecureRandomGenerator.SetRandomSeed(theInt);
+  global.unsecurePseudoRandomGenerator.SetRandomSeed(theInt);
   out << "Successfully set random seed to: " << static_cast<unsigned>(theInt);
   return output.AssignValue(out.str(), theCommands);
 }
@@ -9894,7 +9894,7 @@ bool CalculatorFunctions::innerRandomInteger(
   if (accum == 0) {
     global.fatal << "This shouldn't happen: accum should not be zero at this point. " << global.fatal;
   }
-  int generatedRandomInt = global.unsecureRandomGenerator.GetRandomInteger32bit() % accum;
+  int generatedRandomInt = global.unsecurePseudoRandomGenerator.GetRandomInteger32bit() % accum;
   int resultRandomValue = theIntervals[0][0];
   bool found = false;
   accum = 0;
@@ -9937,7 +9937,7 @@ bool CalculatorFunctions::innerSelectAtRandom(
     output = input[1]; //only one item to select from: return that item
     return true;
   }
-  int randomIndex = (global.unsecureRandomGenerator.GetRandomInteger32bit() % (input.size() - 1)) + 1;
+  int randomIndex = (global.unsecurePseudoRandomGenerator.GetRandomInteger32bit() % (input.size() - 1)) + 1;
   if (randomIndex < 0 || randomIndex > input.size() - 1) {
     randomIndex = input.size() - 1;
   }

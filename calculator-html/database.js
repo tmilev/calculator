@@ -120,10 +120,14 @@ function updateDatabasePageCallback(incoming, output) {
   } catch (e) {
     labels = [""];
   }
-  var theParsed = JSON.parse(incoming);
+  var theParsed = miscellaneous.jsonUnescapeParse(incoming);
   var theOutput = document.getElementById(ids.domElements.divDatabaseOutput);
-  if ("error" in theParsed) {
-    theOutput.innerHTML = `<b style = 'color:red'>Error.</b> ${JSON.stringify(theParsed.error)}`;
+  if (
+    theParsed.error !== undefined && 
+    theParsed.error != null && 
+    theParsed.error != ""
+    ) {
+    theOutput.innerHTML = miscellaneous.jsonParseGetHtmlStandard(incoming);
   } else if ("rows" in theParsed) {
     var transformer = new jsonToHtml.JSONToHTML();
     for (var i = 0; i < theParsed.rows.length; i ++) {

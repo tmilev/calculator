@@ -467,7 +467,7 @@ JSData WebWorker::GetDatabaseJSON() {
     result[WebAPI::result::error] = "Only logged-in admins can access database. ";
     return result;
   }
-  if (global.flagDatabaseCompiled) {
+  if (!global.flagDisableDatabaseLogEveryoneAsAdmin) {
     std::string operation = global.GetWebInput(WebAPI::databaseParameters::operation);
     std::string labels = HtmlRoutines::ConvertURLStringToNormal(
       global.GetWebInput(WebAPI::databaseParameters::labels), false

@@ -194,7 +194,7 @@ bool Database::FallBack::FetchCollectionNames(
   List<std::string>& output, std::stringstream* commentsOnFailure
 ) {
   MutexProcessLockGuard guardDB(this->access);
-  if (this->ReadDatabase(commentsOnFailure)) {
+  if (!this->ReadDatabase(commentsOnFailure)) {
     return false;
   }
   output.SetSize(0);

@@ -3,6 +3,7 @@
 #ifndef vpfHeaderMathVectors_h_already_included
 #define vpfHeaderMathVectors_h_already_included
 
+#include "general_logging_global_variables.h"
 #include "math_large_integers.h"
 static ProjectInformationInstance projectInfoMathVectorsHeader(__FILE__, "Header, vectors and related machinery. ");
 class SelectionWithMultiplicities;

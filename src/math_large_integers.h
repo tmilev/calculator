@@ -411,110 +411,14 @@ private:
     output << theRat.ToString();
     return output;
   }
-  friend std::istream& operator >> (std::istream& input, const Rational& output) {
-    (void) output;
-    global.fatal << "This line of code should not be running. " << global.fatal;
-    return input;
-  }
   friend Rational operator*(int left, const Rational& right) {
     return Rational (left) * right;
   }
   friend bool operator<(int left, const Rational& right) {
     return Rational(left) < right;
   }
-  inline bool TryToAddQuickly(int OtherNum, int OtherDen) {
-    int OtherNumAbs, thisNumAbs;
-    if (this->DenShort <= 0 || OtherDen <= 0) {
-      global.fatal << "This is a programming error: trying to add corrupt rational number(s) with denominators "
-      << this->DenShort << " and " << OtherDen
-      << ". The cause of the error should be in some of the calling functions. " << global.fatal;
-    }
-    if (OtherNum < 0) {
-      OtherNumAbs = - OtherNum;
-    } else {
-      OtherNumAbs = OtherNum;
-    }
-    if (this->NumShort < 0) {
-      thisNumAbs = - this->NumShort;
-    } else {
-      thisNumAbs = this->NumShort;
-    }
-    if (
-      this->Extended != nullptr ||
-      thisNumAbs >= LargeIntegerUnsigned::SquareRootOfCarryOverBound ||
-      this->DenShort >= LargeIntegerUnsigned::SquareRootOfCarryOverBound ||
-      OtherNumAbs >= LargeIntegerUnsigned::SquareRootOfCarryOverBound ||
-      OtherDen >= LargeIntegerUnsigned::SquareRootOfCarryOverBound
-    ) {
-      return false;
-    }
-    int N = this->NumShort * OtherDen + this->DenShort * OtherNum;
-    int D = this->DenShort * OtherDen;
-    if (N == 0) {
-      this->NumShort = 0;
-      this->DenShort = 1;
-      MacroIncrementCounter(Rational::TotalSmallAdditions);
-      return true;
-    }
-    int tempGCD = 0;
-    if (N > 0) {
-      tempGCD = Rational::gcd(N, D);
-    } else {
-      tempGCD = Rational::gcd(- N, D);
-    }
-    this->NumShort = N / tempGCD;
-    this->DenShort = D / tempGCD;
-    MacroIncrementCounter(Rational::TotalSmallAdditions);
-    return true;
-  }
-  inline bool TryToMultiplyQuickly(int OtherNum, int OtherDen) {
-    int OtherNumAbs, thisNumAbs;
-    if (this->DenShort <= 0 || OtherDen <= 0) {
-      if (DenShort == 0 || OtherDen == 0) {
-        global.fatal << "This is a programming error: division by zero. ";
-      } else {
-        global.fatal << "This is a programming error during rational number multiplication: "
-        << "corrupt rational number denominator. ";
-      }
-      global.fatal << global.fatal;
-    }
-    if (OtherNum < 0) {
-      OtherNumAbs = - OtherNum;
-    } else {
-      OtherNumAbs = OtherNum;
-    }
-    if (this->NumShort < 0) {
-      thisNumAbs = - this->NumShort;
-    } else {
-      thisNumAbs = this->NumShort;
-    }
-    if (
-      this->Extended != nullptr ||
-      thisNumAbs >= LargeIntegerUnsigned::SquareRootOfCarryOverBound ||
-      this->DenShort >= LargeIntegerUnsigned::SquareRootOfCarryOverBound ||
-      OtherNumAbs >= LargeIntegerUnsigned::SquareRootOfCarryOverBound ||
-      OtherDen >= LargeIntegerUnsigned::SquareRootOfCarryOverBound
-    ) {
-      return false;
-    }
-    int N = this->NumShort * OtherNum;
-    int D = this->DenShort * OtherDen;
-    if (N == 0) {
-      this->NumShort = 0;
-      this->DenShort = 1;
-    } else {
-      int tempGCD = 0;
-      if (N > 0) {
-        tempGCD = Rational::gcd(N, D);
-      } else {
-        tempGCD = Rational::gcd(- N, D);
-      }
-      this->NumShort = N / static_cast<signed int>(tempGCD);
-      this->DenShort = D / tempGCD;
-    }
-    MacroIncrementCounter(Rational::TotalSmallMultiplications);
-    return true;
-  }
+  bool TryToAddQuickly(int OtherNum, int OtherDen);
+  bool TryToMultiplyQuickly(int OtherNum, int OtherDen);
   void AllocateExtended() {
     if (this->Extended != nullptr) {
       return;
@@ -818,21 +722,7 @@ public:
     }
   }
   double GetDoubleValue() const;
-  int floorIfSmall() {
-    if (this->Extended == nullptr) {
-      if (NumShort < 0) {
-        if (DenShort != 1) {
-          return (this->NumShort / this->DenShort) - 1;
-        } else {
-          return this->NumShort / this->DenShort;
-        }
-      } else {
-        return this->NumShort / this->DenShort;
-      }
-    }
-    global.fatal << "This piece of code should not be reached. " << global.fatal;
-    return - 1;
-  }
+  int floorIfSmall();
   void MakeZero() {
     this->NumShort = 0;
     this->DenShort = 1;

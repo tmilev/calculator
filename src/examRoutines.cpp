@@ -1901,12 +1901,13 @@ bool CalculatorHTML::InterpretHtml(std::stringstream* comments) {
   this->MaxInterpretationAttempts = 25;
   this->randomSeedsIfInterpretationFails.SetSize(this->MaxInterpretationAttempts);
   if (!this->theProblemData.flagRandomSeedGiven) {
-    srand(1003 + static_cast<unsigned>(time(nullptr)));
+    int randomSeedFromTime = static_cast<signed>(time(nullptr));
+    global.unsecureRandomGenerator.SetRandomSeed(103 + randomSeedFromTime);
     this->randomSeedsIfInterpretationFails[0] = (103 + global.unsecureRandomGenerator.GetRandomInteger32bit()) % 100000000;
   } else {
     this->randomSeedsIfInterpretationFails[0] = static_cast<int>(this->theProblemData.randomSeed);
   }
-  srand(static_cast<unsigned>(this->randomSeedsIfInterpretationFails[0]));
+  global.unsecureRandomGenerator.SetRandomSeed(this->randomSeedsIfInterpretationFails[0] + 1);
   for (int i = 1; i < this->randomSeedsIfInterpretationFails.size; i ++) {
     this->randomSeedsIfInterpretationFails[i] = (103 + global.unsecureRandomGenerator.GetRandomInteger32bit()) % 100000000;
   }
@@ -2974,7 +2975,9 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     }
   }
   if (
-    this->flagIsExamProblem && this->flagIsForReal && !this->flagIsExamHome &&
+    this->flagIsExamProblem &&
+    this->flagIsForReal &&
+    !this->flagIsExamHome &&
     global.requestType != "template" &&
     global.requestType != "templateNoLogin"
   ) {

@@ -582,7 +582,9 @@ bool WebAPIResponse::ProcessSlidesOrHomeworkFromSource() {
   }
   this->owner->SetHeader("HTTP/1.0 200 OK", "Content-Type: application/pdf; Access-Control-Allow-Origin: *");
   this->owner->flagDoAddContentLength = true;
-  return this->owner->WriteToBody(theCrawler.targetPDFbinaryContent);
+  this->owner->WriteToBody(theCrawler.targetPDFbinaryContent);
+  this->owner->SendPending();
+  return true;
 }
 
 bool WebAPIResponse::ProcessSlidesSource() {

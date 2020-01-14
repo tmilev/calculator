@@ -338,12 +338,10 @@ void GlobalVariables::initFoldersProjectBase(const std::string& inputPhysicalExe
   this->PhysicalPathProjectBase = FileOperations::GetCurrentFolder() + "/";
 }
 
-void GlobalVariables::initDefaultFolderAndFileNames(
-  const std::string& inputPhysicalExecutable
-) {
-  this->initFoldersProjectBase(inputPhysicalExecutable);
+void GlobalVariables::initDefaultFolderAndFileNames() {
+  this->initFoldersProjectBase(global.PathProjectBaseUserInputOrDeduced);
   this->PhysicalNameFolderExecutable = this->PhysicalPathProjectBase + "bin/";
-  this->PhysicalNameExecutableNoPath = FileOperations::GetFileNameFromFileNameWithPath(inputPhysicalExecutable);
+  this->PhysicalNameExecutableNoPath = FileOperations::GetFileNameFromFileNameWithPath(global.PathProjectBaseUserInputOrDeduced);
   this->PhysicalNameExecutableWithPath = this->PhysicalNameFolderExecutable + this->PhysicalNameExecutableNoPath;
   this->PhysicalPathHtmlFolder = this->PhysicalPathProjectBase + "../public_html/";
   this->PhysicalPathServerBase = this->PhysicalPathHtmlFolder;

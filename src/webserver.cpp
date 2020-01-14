@@ -3852,16 +3852,7 @@ void WebServer::AnalyzeMainArgumentsTimeString(const std::string& timeLimitStrin
   }
 }
 
-void WebServer::AnalyzeMainArguments(int argC, char **argv) {
-  MacroRegisterFunctionWithName("WebServer::AnalyzeMainArguments");
-  if (argC < 0) {
-    argC = 0;
-  }
-  global.programArguments.SetSize(argC);
-  for (int i = 0; i < argC; i ++) {
-    global.programArguments[i] = argv[i];
-    //std::cout << "Argument " << i + 1 << ": " << global.programArguments[i] << "\n";
-  }
+void WebServer::InitializeBuildFlags() {
   ////////////////////////////////////////////////////
   global.flagRunningCommandLine = false;
   global.flagRunningConsoleTest = false;
@@ -3873,44 +3864,52 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv) {
   #endif
   global.flagRunningBuiltInWebServer = false;
   ////////////////////////////////////////////////////
+}
+
+void WebServer::AnalyzeMainArguments(int argC, char **argv) {
+  MacroRegisterFunctionWithName("WebServer::AnalyzeMainArguments");
+  if (argC < 0) {
+    argC = 0;
+  }
+  global.programArguments.SetSize(argC);
+  for (int i = 0; i < argC; i ++) {
+    global.programArguments[i] = argv[i];
+    //std::cout << "Argument " << i + 1 << ": " << global.programArguments[i] << "\n";
+  }
   if (argC == 0) {
     global.flagRunningCommandLine = true;
     return;
   }
-  global.initDefaultFolderAndFileNames(global.programArguments[0]);
+  global.PathProjectBaseUserInputOrDeduced = global.programArguments[0];
   if (argC < 2) {
     global.flagRunningCommandLine = true;
     return;
   }
-  std::string& secondArgument = global.programArguments[1];
-  if (secondArgument == "server") {
-    global.flagRunningBuiltInWebServer = true;
-    if (argC == 2) {
+  std::string timeLimitString;
+  for (int i = 1; i < global.programArguments.size; i ++) {
+    const std::string& current = global.programArguments[i];
+    if (current == "server") {
+      global.flagRunningBuiltInWebServer = true;
+      if (i + 1 < global.programArguments.size) {
+        i ++;
+        timeLimitString = global.programArguments[i];
+        WebServer::AnalyzeMainArgumentsTimeString(timeLimitString);
+        continue;
+      }
+    }
+    if (current == "test") {
+      global.flagRunningConsoleTest = true;
+      global.flagRunningBuiltInWebServer = false;
       return;
     }
-    bool doRestart = false;
-    std::string timeLimitString = "";
-    std::string& thirdArgument = global.programArguments[2];
-    if (thirdArgument == "restart") {
-      doRestart = true;
-      if (argC > 3) {
-        timeLimitString = global.programArguments[3];
+    if (current == "path") {
+      if (i + 1 < global.programArguments.size) {
+        i ++;
+        global.PathProjectBaseUserInputOrDeduced = global.programArguments[i];
+        continue;
       }
-    } else {
-      timeLimitString = thirdArgument;
     }
-    WebServer::AnalyzeMainArgumentsTimeString(timeLimitString);
-    if (doRestart) {
-      global.server().StopKillAll(true);
-    }
-    return;
   }
-  ////////////////////////////////
-  if (secondArgument == "test") {
-    global.flagRunningConsoleTest = true;
-    return;
-  }
-  global.flagRunningCommandLine = true;
 }
 
 void WebServer::InitializeMainHashes() {
@@ -4276,12 +4275,17 @@ int WebServer::main(int argc, char **argv) {
   // we need to initialize first the folder locations relative to the executable.
   MacroRegisterFunctionWithName("main");
   try {
-    // Most basic initializations (timer, ...).
+    // Initializations basic (timer, ...).
     InitializeGlobalObjects();
-    // Initializes folder locations needed by logging facilities.
-    FileOperations::InitializeFoldersSensitive();
+    // Initializations of build flags.
+    global.server().WebServer::InitializeBuildFlags();
     // Process executable arguments.
     global.server().AnalyzeMainArguments(argc, argv);
+    // Initializes server base path.
+    global.initDefaultFolderAndFileNames();
+    // Initializes folder locations needed by logging facilities.
+    FileOperations::InitializeFoldersSensitive();
+
     global << logger::green << "Project base folder: "
     << logger::blue << global.PhysicalPathProjectBase
     << logger::endL;

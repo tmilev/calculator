@@ -313,6 +313,8 @@ public:
   std::string RelativePhysicalNameOptionalProgressReport;
   std::string RelativePhysicalNameOptionalResult;
 
+  std::string PathProjectBaseUserInputOrDeduced;
+
   std::string PhysicalPathProjectBase;
   std::string PhysicalPathServerBase;
   std::string PhysicalPathHtmlFolder;
@@ -400,7 +402,7 @@ public:
   std::string GetWebInput(const std::string& inputName);
   void init();
   void initModifiableDatabaseFields();
-  void initDefaultFolderAndFileNames(const std::string& inputPhysicalExecutable);
+  void initDefaultFolderAndFileNames();
   void initFoldersProjectBase(const std::string& inputPhysicalExecutable);
   void initOutputReportAndCrashFileNames(
     const std::string& inputUserStringRAW,

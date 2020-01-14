@@ -128,7 +128,6 @@ GlobalVariables::Response::Response() {
  }
 
 GlobalVariables::GlobalVariables() {
-  std::cout << "DEBUG: Inside global variables init.\n";
   this->flagDeallocated = false;
   this->flagAutoUnitTest = false;
   this->flagNotAllocated = false;

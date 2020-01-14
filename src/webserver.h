@@ -158,8 +158,6 @@ public:
   bool EnsureAllBytesSent();
   void SendPending();
   void SendAllBytesNoHeaderS();
-  void SendAllBytesHttp();
-  void SendAllBytesHttpSSL();
   std::string MIMETypeFromFileExtension(const std::string& fileExtension);
   std::string HeaderFromFileExtension(const std::string& fileExtension);
 
@@ -193,8 +191,6 @@ public:
   bool IamActive();
   bool ReceiveAll();
   void AttemptUnknownRequestErrorCorrection();
-  bool ReceiveAllHttp();
-  bool ReceiveAllHttpSSL();
   bool RequireSSL();
   enum requestTypes {requestUnknown, requestGet, requestPost, requestHead, requestChunked};
   std::string ToStringAddressRequest() const;

@@ -105,17 +105,6 @@ bool WebWorker::CheckConsistency() {
   return true;
 }
 
-bool WebWorker::ReceiveAll() {
-  MacroRegisterFunctionWithName("WebWorker::ReceiveAll");
-  if (this->connectedSocketID == - 1) {
-    global.fatal << "Attempting to receive on a socket with ID equal to - 1. " << global.fatal;
-  }
-  if (global.flagUsingSSLinCurrentConnection) {
-    return this->ReceiveAllHttpSSL();
-  }
-  return this->ReceiveAllHttp();
-}
-
 std::string WebWorker::openIndentTag(const std::string& theTag) {
   std::stringstream out;
   for (int i = 0; i < this->indentationLevelHTML; i ++) {
@@ -165,14 +154,8 @@ bool WebServer::SSLServerSideHandShake(std::stringstream* commentsOnFailure) {
   return this->theTLS.HandShakeIamServer(this->GetActiveWorker().connectedSocketID, commentsOnFailure);
 }
 
-bool WebWorker::ReceiveAllHttpSSL() {
-  MacroRegisterFunctionWithName("WebWorker::ReceiveAllHttpSSL");
-  if (!global.flagUsingSSLinCurrentConnection) {
-    return true;
-  }
-  if (!global.flagSSLIsAvailable) {
-    return false;
-  }
+bool WebWorker::ReceiveAll() {
+  MacroRegisterFunctionWithName("WebWorker::ReceiveAll");
   this->messageBody = "";
   this->messageHead = "";
   this->requestTypE = this->requestUnknown;
@@ -187,12 +170,11 @@ bool WebWorker::ReceiveAllHttpSSL() {
   int numFailedReceives = 0;
   int maxNumFailedReceives = 2;
   double numSecondsAtStart = global.GetElapsedSeconds();
-  int numBytesInBuffer = - 1;
+  int numBytesInBuffer = 0;
   List<char>& readBuffer = this->parent->theTLS.readBuffer;
   while (true) {
-    numBytesInBuffer = this->parent->theTLS.SSLRead(
-      &errorString, nullptr, true
-    );
+    numBytesInBuffer = this->parent->theTLS.readOnce(this->connectedSocketID, &errorString, nullptr, true);
+
     //int64_t readTime = global.GetElapsedMilliseconds() - msBeforesslread;
     if (numBytesInBuffer >= 0) {
       //if (numBytesInBuffer > 0 && numBytesInBuffer <= (signed) reader.size) {
@@ -205,7 +187,7 @@ bool WebWorker::ReceiveAllHttpSSL() {
       } else {
         std::stringstream out;
         out
-        << "WebWorker::ReceiveAllHttpSSL on socket "
+        << "WebWorker::ReceiveAll on socket "
         << this->connectedSocketID
         << " failed (so far "
         << numFailedReceives << " fails). "
@@ -245,14 +227,17 @@ bool WebWorker::ReceiveAllHttpSSL() {
   this->remainingBytesToSenD.SetSize(0);
   std::string bufferString;
   while (static_cast<signed>(this->messageBody.size()) < this->ContentLength) {
-    if (global.GetElapsedSeconds() - numSecondsAtStart > 180) {
-      this->error = "Receiving bytes timed out (180 seconds).";
+    if (global.GetElapsedSeconds() - numSecondsAtStart > 5) {
+      this->error = "Receiving bytes timed out (5 seconds).";
       global << this->error << logger::endL;
       this->displayUserInput = this->error;
       return false;
     }
-    numBytesInBuffer = this->parent->theTLS.SSLRead(
-      &errorString, nullptr, true
+    numBytesInBuffer = this->parent->theTLS.readOnce(
+      this->connectedSocketID,
+      &errorString,
+      nullptr,
+      true
     );
     if (numBytesInBuffer == 0) {
       this->error = "While trying to fetch message-body, received 0 bytes. " +
@@ -293,23 +278,10 @@ bool WebWorker::ReceiveAllHttpSSL() {
   return true;
 }
 
-void WebWorker::SendAllBytesHttpSSL() {
-  MacroRegisterFunctionWithName("WebWorker::SendAllBytesHttpSSL");
-  if (this->remainingBytesToSenD.size == 0) {
-    return;
-  }
+void WebWorker::SendAllBytesNoHeaderS() {
+  MacroRegisterFunctionWithName("WebWorker::SendAllBytesNoHeaderS");
   this->CheckConsistency();
-  if (!global.flagUsingSSLinCurrentConnection) {
-    global.fatal
-    << "Error: WebWorker::SendAllBytesHttpSSL called "
-    << "while flagUsingSSLinCurrentConnection is set to false. "
-    << global.fatal;
-  }
-  if (this->connectedSocketID == - 1) {
-    global << logger::red << "Socket::SendAllBytes failed: connectedSocketID = - 1." << logger::endL;
-    return;
-  }
-  global << "SSL Worker " << this->indexInParent + 1
+  global << "Worker " << this->indexInParent + 1
   << " sending " << this->remainingBytesToSenD.size << " bytes in chunks of: ";
   double startTime = global.GetElapsedSeconds();
   struct timeval tv; //<- code involving tv taken from stackexchange
@@ -326,7 +298,8 @@ void WebWorker::SendAllBytesHttpSSL() {
       << logger::endL;
       return;
     }
-    int numBytesSent = this->parent->theTLS.SSLWrite(
+    int numBytesSent = this->parent->theTLS.writeOnce(
+      this->connectedSocketID,
       this->remainingBytesToSenD,
       &errorString,
       nullptr,
@@ -947,155 +920,6 @@ void WebWorker::AttemptUnknownRequestErrorCorrection() {
   << "Unrecognized message head, length: " << this->messageHead.size() << ".\n";
   global << logger::red << "Message body length: " << this->messageBody.size() << ". ";
   global << logger::endL;
-}
-
-bool WebWorker::ReceiveAllHttp() {
-  MacroRegisterFunctionWithName("WebWorker::ReceiveAllHttp");
-  this->messageBody = "";
-  this->messageHead = "";
-  this->requestTypE = this->requestUnknown;
-  unsigned const int bufferSize = 60000;
-  char buffer[bufferSize];
-  if (this->connectedSocketID == - 1) {
-    global.fatal << "Attempting to receive on a socket with ID equal to - 1. " << global.fatal;
-  }
-  struct timeval tv; //<- code involving tv taken from stackexchange
-  tv.tv_sec = 5;  // 5 Secs Timeout
-  tv.tv_usec = 0;  // Not init'ing this can cause strange errors
-  setsockopt(this->connectedSocketID, SOL_SOCKET, SO_RCVTIMEO, static_cast<void*>(&tv), sizeof(timeval));
-  double numSecondsAtStart = global.GetElapsedSeconds();
-  ssize_t numBytesInBuffer = recv(
-    this->connectedSocketID, &buffer, bufferSize - 1, 0
-  );
-  int numFailedReceives = 0;
-  bool result = true;
-  while (
-    numBytesInBuffer < 0 ||
-    numBytesInBuffer > static_cast<signed>(bufferSize)
-  ) {
-    std::stringstream out;
-    numFailedReceives ++;
-    out
-    << "WebWorker::ReceiveAllHttp on socket " << this->connectedSocketID
-    << " failed (so far "
-    << numFailedReceives << " fails). "
-    << "Return value: " << numBytesInBuffer
-    << ". Error description: "
-    << this->parent->ToStringLastErrorDescription();
-    if (numFailedReceives > 5) {
-      out
-      << ". 5+ failed receives so far, aborting. ";
-      this->displayUserInput = out.str();
-      this->error = out.str();
-      global << out.str() << logger::endL;
-      numBytesInBuffer = 0;
-      result = false;
-      break;
-    }
-    global << logger::orange << out.str() << "\n";
-    //std::string bufferCopy(buffer, bufferSize);
-    global << "Number of bytes in buffer so far: " << bufferSize;
-    global << logger::endL;
-    numBytesInBuffer = recv(this->connectedSocketID, &buffer, bufferSize - 1, 0);
-  }
-  this->messageHead.assign(buffer, static_cast<unsigned>(numBytesInBuffer));
-  if (numBytesInBuffer == 0) {
-    return true;
-  }
-  this->ParseMessageHead();
-  if (this->requestTypE == WebWorker::requestTypes::requestPost) {
-    this->displayUserInput = "POST " + this->addressGetOrPost;
-  } else if (this->requestTypE == WebWorker::requestTypes::requestGet) {
-    this->displayUserInput = "GET " + this->addressGetOrPost;
-  } else if (this->requestTypE == WebWorker::requestTypes::requestHead) {
-    this->displayUserInput = "HEAD " + this->addressGetOrPost;
-  } else if (this->requestTypE == WebWorker::requestTypes::requestChunked) {
-    this->displayUserInput = "GET or POST **chunked** " + this->addressGetOrPost;
-  } else {
-    this->displayUserInput = "UNKNOWN REQUEST " + this->addressGetOrPost;
-  }
-  if (this->ContentLength <= 0) {
-    if (this->requestTypE == this->requestUnknown) {
-      this->AttemptUnknownRequestErrorCorrection();
-    }
-    return true;
-  }
-  if (this->messageBody.size() == static_cast<unsigned>(this->ContentLength)) {
-    if (this->requestTypE == this->requestUnknown) {
-      this->AttemptUnknownRequestErrorCorrection();
-    }
-    return true;
-  }
-  this->messageBody.clear();//<-needed else the length error check won't work out.
-  if (this->ContentLength > 10000000) {
-    this->CheckConsistency();
-    error = "Content-length parsed to be more than 10 million bytes, aborting.";
-    global << this->error << logger::endL;
-    this->displayUserInput = this->error;
-    return false;
-  }
-  this->remainingBytesToSenD = std::string("HTTP/1.0 100 Continue\r\n\r\n");
-  this->SendAllBytesNoHeaderS();
-  this->remainingBytesToSenD.SetSize(0);
-  std::string bufferString;
-  while ( static_cast<signed>(this->messageBody.size()) < this->ContentLength) {
-    if (global.GetElapsedSeconds() - numSecondsAtStart > 180) {
-      this->error = "Receiving bytes timed out (180 seconds).";
-      global << this->error << logger::endL;
-      this->displayUserInput = this->error;
-      return false;
-    }
-    numBytesInBuffer = recv(this->connectedSocketID, &buffer, bufferSize - 1, 0);
-    if (numBytesInBuffer == 0) {
-      this->error = "While trying to fetch message-body, received 0 bytes. " +
-      this->parent->ToStringLastErrorDescription();
-      global << this->error << logger::endL;
-      this->displayUserInput = this->error;
-      return false;
-    }
-    if (numBytesInBuffer < 0) {
-      if (
-        errno == EAGAIN ||
-        errno == EWOULDBLOCK ||
-        errno == EINTR ||
-        errno == EIO || // errno == ENOBUFS ||
-        errno == ENOMEM
-      ) {
-        continue;
-      }
-      this->error = "Error fetching message body: " + this->parent->ToStringLastErrorDescription();
-      global << logger::red << this->error << logger::endL;
-      this->displayUserInput = this->error;
-      return false;
-    }
-    bufferString.assign(buffer, static_cast<unsigned>(numBytesInBuffer));
-    this->messageBody += bufferString;
-  }
-  if (static_cast<signed>(this->messageBody.size()) != this->ContentLength) {
-    if (this->requestTypE != this->requestChunked) {
-      global << logger::red
-      << "Message body is of length: " << this->messageBody.size()
-      << " yet this->ContentLength equals: "
-      << this->ContentLength
-      << ". Perhaps very long headers got truncated? "
-      << logger::endL;
-      this->messageHead += this->messageBody;
-      this->ParseMessageHead();
-      this->AttemptUnknownRequestErrorCorrection();
-    }
-  }
-  if (static_cast<signed>(this->messageBody.size()) != this->ContentLength) {
-    std::stringstream out;
-    out << "The message-body received by me had length "
-    << this->messageBody.size()
-    << " yet I expected a message of length "
-    << this->ContentLength << ". The message body was: "
-    << this->messageBody;
-    this->error = out.str();
-    global << out.str() << logger::endL;
-    this->AttemptUnknownRequestErrorCorrection();
-  }
-  return result;
 }
 
 void WebWorker::ExtractHostInfo() {
@@ -3277,15 +3101,18 @@ bool WebServer::initBindToPorts() {
     return false;
   }
   global << "Running at: " << logger::yellow << "http://localhost:" << this->portHTTP << logger::endL;
-  if (global.server().theTLS.flagBuiltInTLSAvailable) {
+  bool flagBuiltInTLSAvailable = false;
+  if (flagBuiltInTLSAvailable) {
     if (!this->initBindToOnePort(this->portHTTPSBuiltIn, this->listeningSocketHTTPSBuiltIn)) {
       return false;
     }
   }
-  if (!this->initBindToOnePort(this->portHTTPSOpenSSL, this->listeningSocketHTTPSOpenSSL)) {
-    return false;
+  if (global.flagSSLIsAvailable) {
+    if (!this->initBindToOnePort(this->portHTTPSOpenSSL, this->listeningSocketHTTPSOpenSSL)) {
+      return false;
+    }
+    global << "Running at: " << logger::yellow << "https://localhost:" << this->portHTTPSOpenSSL << logger::endL;
   }
-  global << "Running at: " << logger::yellow << "https://localhost:" << this->portHTTPSOpenSSL << logger::endL;
   return true;
 }
 
@@ -4399,10 +4226,6 @@ void GlobalVariables::ConfigurationProcess() {
   } else {
     WebServer::TurnProcessMonitoringOn();
   }
-  if (global.configuration[Configuration::builtInTLSAvailable].isTrueRepresentationInJSON()) {
-    global << logger::red << "Experimental: " << logger::blue << "using built-in TLS library. " << logger::endL;
-    TransportLayerSecurity::flagBuiltInTLSAvailable = true;
-  }
   if (global.configuration[Configuration::monitorPingTime].isIntegerFittingInInt(
     &global.server().WebServerPingIntervalInSeconds
   )) {
@@ -4447,7 +4270,6 @@ void WebServer::CheckInstallation() {
 }
 
 int WebServer::main(int argc, char **argv) {
-std::cout << "DEBUG: made it to start of main.\n";
   global.init();
   global.InitThreadsExecutableStart();
   // use of loggers forbidden before calling global.server().AnalyzeMainArguments(...):
@@ -4616,68 +4438,6 @@ void WebWorker::SendPending() {
   this->SendAllBytesNoHeaderS();
 }
 
-void WebWorker::SendAllBytesHttp() {
-  MacroRegisterFunctionWithName("WebWorker::SendAllBytesHttp");
-  if (this->remainingBytesToSenD.size == 0) {
-    return;
-  }
-  this->CheckConsistency();
-  this->flagDidSendAll = true;
-  if (this->connectedSocketID == - 1) {
-    global << logger::red << "Socket::SendAllBytes failed: connectedSocketID = - 1." << logger::endL;
-    return;
-  }
-  global << "Sending " << this->remainingBytesToSenD.size << " bytes in chunks of: ";
-  double startTime = global.GetElapsedSeconds();
-  struct timeval tv; //<- code involving tv taken from stackexchange
-  tv.tv_sec = 5; // 5 Secs Timeout
-  tv.tv_usec = 0; // Not init'ing this can cause strange errors
-  int numTimesRunWithoutSending = 0;
-  int timeOutInSeconds = 20;
-  setsockopt(this->connectedSocketID, SOL_SOCKET, SO_SNDTIMEO, static_cast<void*>(&tv), sizeof(timeval));
-  while (this->remainingBytesToSenD.size > 0) {
-    if (global.GetElapsedSeconds() - startTime > timeOutInSeconds) {
-      global << "WebWorker::SendAllBytes failed: more than " << timeOutInSeconds << " seconds have elapsed. "
-      << logger::endL;
-      return;
-    }
-    int numBytesSent = static_cast<int>(send(
-      this->connectedSocketID,
-      &this->remainingBytesToSenD[0],
-      static_cast<unsigned>( this->remainingBytesToSenD.size),
-      0
-    ));
-    if (numBytesSent < 0) {
-      if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR || errno == EIO) {
-        global << "WebWorker::SendAllBytes failed. Error: "
-        << this->parent->ToStringLastErrorDescription() << logger::endL;
-      }
-      return;
-    }
-    if (numBytesSent == 0) {
-      numTimesRunWithoutSending ++;
-    } else {
-      numTimesRunWithoutSending = 0;
-    }
-    global << numBytesSent;
-    this->remainingBytesToSenD.SliceInPlace(
-      numBytesSent,
-      this->remainingBytesToSenD.size - numBytesSent
-    );
-    if (this->remainingBytesToSenD.size > 0) {
-      global << ", ";
-    }
-    if (numTimesRunWithoutSending > 3) {
-      global << "WebWorker::SendAllBytes failed: send function went through 3 cycles without "
-      << "sending any bytes. "
-      << logger::endL;
-      return;
-    }
-    global << logger::endL;
-  }
-  global << "All bytes sent. " << logger::endL;
-}
-
 void WebWorker::QueueBytesForSendingNoHeadeR(const List<char>& bytesToSend, bool MustSendAll) {
   MacroRegisterFunctionWithName("WebWorker::QueueBytesForSendingNoHeadeR");
   (void) MustSendAll;
@@ -4708,13 +4468,4 @@ void WebWorker::QueueStringForSendingNoHeadeR(const std::string& stringToSend, b
   for (unsigned i = 0; i < stringToSend.size(); i ++) {
     this->remainingBytesToSenD[static_cast<signed>(i) + oldSize] = stringToSend[i];
   }
-}
-
-void WebWorker::SendAllBytesNoHeaderS() {
-  MacroRegisterFunctionWithName("WebWorker::SendAllBytesNoHeaders");
-  if (global.flagUsingSSLinCurrentConnection) {
-    this->SendAllBytesHttpSSL();
-    return;
-  }
-  this->SendAllBytesHttp();
 }

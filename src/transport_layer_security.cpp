@@ -37,8 +37,6 @@ TransportLayerSecurity::TransportLayerSecurity() {
 TransportLayerSecurity::~TransportLayerSecurity() {
 }
 
-bool TransportLayerSecurity::flagBuiltInTLSAvailable = false;
-
 void TransportLayerSecurity::initializeNonThreadSafePartsCommon() {
   ASNObject::initializeNonThreadSafe();
 }
@@ -51,7 +49,8 @@ void TransportLayerSecurity::initializeNonThreadSafeOnFirstCall(bool IamServer) 
   this->initializeNonThreadSafePartsCommon();
   if (IamServer) {
     this->openSSLData.initSSLServer();
-    if (this->flagBuiltInTLSAvailable) {
+    bool flagBuiltInTLSAvailable = false;
+    if (flagBuiltInTLSAvailable) {
       this->theServer.initialize();
       if (global.flagAutoUnitTest) {
         global << logger::yellow
@@ -79,7 +78,8 @@ bool TransportLayerSecurity::initSSLKeyFiles(std::stringstream* commentsOnFailur
   if (!this->openSSLData.initSSLKeyFiles()) {
     return false;
   }
-  if (!this->flagBuiltInTLSAvailable) {
+  bool flagBuiltInTLSAvailable = false;
+  if (!flagBuiltInTLSAvailable) {
     return true;
   }
   if (!this->initSSLKeyFilesInternal(commentsOnFailure)) {
@@ -100,13 +100,20 @@ bool TransportLayerSecurity::SSLReadLoop(
   bool includeNoErrorInComments
 ) {
   MacroRegisterFunctionWithName("TransportLayerSecurity::SSLReadLoop");
+  if (!global.flagUsingSSLinCurrentConnection || !global.flagSSLIsAvailable) {
+    if (commentsGeneral != nullptr) {
+      *commentsGeneral << "Error in ssl read loop: ssl not available in current connection. ";
+    }
+    return false;
+  }
   this->readBuffer.SetSize(this->readBufferStandardSize);
   output = "";
   int i = 0;
   std::string next;
   int numBytes = - 1;
   for (i = 0; i < numTries; i ++) {
-    numBytes = this->SSLRead(
+    numBytes = this->readOnce(
+      - 1,
       outputError,
       commentsGeneral,
       includeNoErrorInComments
@@ -147,7 +154,8 @@ bool TransportLayerSecurity::SSLWriteLoop(
   int i = 0;
   int numBytes = - 1;
   for (i = 0; i < numTries; i ++) {
-    numBytes = this->SSLWrite(
+    numBytes = this->writeOnce(
+      - 1,
       this->writeBuffer,
       outputError,
       commentsGeneral,
@@ -1980,29 +1988,42 @@ bool TransportLayerSecurity::HandShakeIamClientNoSocketCleanup(
   return this->openSSLData.HandShakeIamClientNoSocketCleanup(inputSocketID, commentsOnFailure, commentsGeneral);
 }
 
-int TransportLayerSecurity::SSLRead(
+int TransportLayerSecurity::readOnce(
+  int socket,
   std::string* outputError,
   std::stringstream* commentsGeneral,
   bool includeNoErrorInComments
 ) {
-  MacroRegisterFunctionWithName("TransportLayerSecurity::SSLRead");
+  MacroRegisterFunctionWithName("TransportLayerSecurity::readOnce");
+
+  bool useSSL = global.flagUsingSSLinCurrentConnection && global.flagSSLIsAvailable;
+
+
   this->readBuffer.SetSize(this->readBufferStandardSize);
-  if (!this->flagUseBuiltInTlS) {
-    return this->openSSLData.SSLRead(readBuffer, outputError, commentsGeneral, includeNoErrorInComments);
+  int result = - 1;
+
+  if (useSSL) {
+    result = this->openSSLData.SSLRead(readBuffer, outputError, commentsGeneral, includeNoErrorInComments);
   } else {
-    global.fatal << "SSL read not implemented yet. " << global.fatal;
-    return - 1;
+    result = static_cast<int>(recv(
+      socket,
+      this->readBuffer.TheObjects,
+      static_cast<size_t>(readBuffer.size - 1), 0
+    ));
   }
+  return result;
 }
 
-int TransportLayerSecurity::SSLWrite(
+int TransportLayerSecurity::writeOnce(
+  int socket,
   List<char>& writeBuffer,
   std::string* outputError,
   std::stringstream* commentsGeneral,
   std::stringstream* commentsOnError,
   bool includeNoErrorInComments
 ) {
-  if (!this->flagUseBuiltInTlS) {
+  bool useSSL = global.flagUsingSSLinCurrentConnection && global.flagSSLIsAvailable;
+  if (useSSL) {
     return this->openSSLData.SSLWrite(
       writeBuffer,
       outputError,
@@ -2011,7 +2032,17 @@ int TransportLayerSecurity::SSLWrite(
       includeNoErrorInComments
     );
   } else {
-    global.fatal << "Not implemented yet. " << global.fatal;
-    return - 1;
+    if (socket < 0) {
+      if (commentsOnError != nullptr) {
+        *commentsOnError << "Negative socket not allowed. ";
+      }
+      return - 1;
+    }
+    return static_cast<int>(send(
+      socket,
+      &writeBuffer[0],
+      static_cast<unsigned>(writeBuffer.size),
+      0
+    ));
   }
 }

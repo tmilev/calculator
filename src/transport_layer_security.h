@@ -533,7 +533,6 @@ public:
 
 class TransportLayerSecurity {
 public:
-  static bool flagBuiltInTLSAvailable;
   bool flagInitializedPrivateKey;
   bool flagIsServer;
   bool flagInitialized;
@@ -555,7 +554,9 @@ public:
   // First call of function (with any member function) is not thread safe (must be called in a single thread).
   // Once the first function call returns, the function becomes thread-safe for all members.
   void initializeNonThreadSafeOnFirstCall(bool IamServer);
-  int SSLRead(std::string* outputError,
+  int readOnce(
+    int socket,
+    std::string* outputError,
     std::stringstream* commentsGeneral,
     bool includeNoErrorInComments
   );
@@ -574,7 +575,8 @@ public:
     std::stringstream* commentsGeneral,
     bool includeNoErrorInComments
   );
-  int SSLWrite(
+  int writeOnce(
+    int socket,
     List<char>& writeBuffer,
     std::string* outputError,
     std::stringstream* commentsGeneral,

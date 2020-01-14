@@ -7,8 +7,6 @@
 #include "calculator_problem_storage.h"
 #include <ctime>
 
-static ProjectInformationInstance projectInfoHtmlInterpretationHeader(__FILE__, "Html interpretation.");
-
 class CalculatorHTML;
 class TopicElement;
 

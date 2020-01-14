@@ -5,8 +5,6 @@
 #include "macros.h"
 #include <ctime>
 
-static ProjectInformationInstance projectInfoHeaderDateAndtimeWrappersHeader(__FILE__, "Date and time wrapper classes. ");
-
 class TimeWrapper {
 public:
   tm timeGM;

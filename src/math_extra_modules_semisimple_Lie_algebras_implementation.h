@@ -5,10 +5,6 @@
 #include "math_extra_modules_semisimple_Lie_algebras.h"
 #include "math_extra_drawing_variables.h"
 
-static ProjectInformationInstance projectInfoModulesSemisimpleLieAlgebrasImplementationHeader(
-  __FILE__, "Implementation header, generalized Verma modules. "
-);
-
 template<class coefficient>
 Rational ModuleSSalgebra<coefficient>::hwTrace(
   const Pair<MonomialTensor<int, MathRoutines::IntUnsignIdentity>,

@@ -54,16 +54,8 @@
 //-----------------Preprocessor macros end-------------------
 //-----------------------------------------------------------
 
-class ProjectInformationInstance {
-  public:
-  ProjectInformationInstance(const char* fileName, const std::string& fileDescription);
-};
 class GlobalVariables;
 extern GlobalVariables global;
-
-static ProjectInformationInstance projectInfoMacrosHeader(
-  __FILE__, "Header, External includes + macros. Macro/build configuration."
-);
 
 class StdoutClass {
 public:

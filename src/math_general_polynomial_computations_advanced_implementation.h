@@ -5,7 +5,6 @@
 
 #include "math_general_polynomial_computations_basic_implementation.h"
 #include "math_extra_algebraic_numbers.h"
-static ProjectInformationInstance projectInfoPolynomialComputationsImplementationHeader(__FILE__, "Implementation header, polynomial computations, more advanced. ");
 
 template <class coefficient>
 bool GroebnerBasisComputation<coefficient>::WrapUpGroebnerOnExceedingComputationLimit(

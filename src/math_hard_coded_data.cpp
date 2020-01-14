@@ -3,8 +3,6 @@
 #include "math_extra_symmetric_groups_and_generalizations.h"
 #include "json.h"
 
-static ProjectInformationInstance projectInfoHardCodedDataCPP(__FILE__, "Hard-coded data loading");
-
 void ElementWeylGroup::MakeFromReadableReflections(
   WeylGroupData& input, bool dontMakeCanonical_SET_TRUE_ON_YOUR_OWN_RISK, const std::string& inputReflections
 ) {

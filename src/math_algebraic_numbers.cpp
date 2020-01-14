@@ -5,8 +5,6 @@
 #include "math_subsets_selections.h"
 #include "math_general_implementation.h"
 
-static ProjectInformationInstance projectInfoAlgebraicNumbersCPP(__FILE__, "Algebraic numbers. ");
-
 std::string MonomialVector::ToString(FormatExpressions* theFormat) const {
   if (theFormat != nullptr) {
     if (this->theIndex < theFormat->vectorSpaceEiBasisNames.size && this->theIndex >= 0) {

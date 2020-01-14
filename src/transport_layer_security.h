@@ -6,8 +6,6 @@
 #include "math_extra_elliptic_curves.h"
 #include "math_extra_algebraic_numbers.h"
 
-static ProjectInformationInstance projectInfoInstanceTransportLayerSecurityHeader(__FILE__, "TLS/ssl header.");
-
 // installation of these headers in ubuntu:
 // sudo apt-get install libssl-dev
 // on opensuse:

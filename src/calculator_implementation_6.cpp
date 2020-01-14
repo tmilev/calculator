@@ -16,8 +16,6 @@
 #include "string_constants.h"
 #include <iomanip>
 
-static ProjectInformationInstance projectInfoCalculatorImplementation6CPP(__FILE__, "More calculator built-in functions. ");
-
 CalculatorHTML::Test::Test() {
   this->filesToInterpret = 0;
   this->randomSeed = 0;
@@ -286,9 +284,9 @@ bool CalculatorHTML::Test::BuiltInMultiple(
 ) {
   List<int> randomSeeds;
   randomSeeds.SetSize(numberOfRepetitions);
+  ProgressReport theReport;
   for (int i = 0; i < numberOfRepetitions; i ++) {
     randomSeeds[i] = inputRandomSeed + i;
-    ProgressReport theReport;
     std::stringstream reportStream;
     reportStream << "Testing problems, round "
     << i + 1 << " out of " << numberOfRepetitions
@@ -349,20 +347,26 @@ bool CalculatorHTML::Test::BuiltIn(
   this->results.SetExpectedSize(this->filesToInterpret);
   this->results.SetSize(0);
   std::stringstream commentsOnFailure;
+  int badSoFar = 0;
   for (int i = this->firstFileIndex; i < lastIndex; i ++) {
     this->results.SetSize(this->results.size + 1);
     OneProblemTest& currentTest = *this->results.LastObject();
     currentTest.fileName = "problems/" + this->fileNames[i];
     currentTest.randomSeed = this->randomSeed;
     std::stringstream reportStream;
+    if (badSoFar > 0) {
+      reportStream << "<b style = 'color:red'>Found " << badSoFar << " bad files so far. </b><br>";
+    }
     reportStream << "File: "
     << i
     << " out of "
     << this->fileNames.size
-    << ". "
+    << ". ";
+    reportStream
     << currentTest.fileName
     << ". Random seed: "
     << this->randomSeed << ".";
+
     if (global.flagRunningConsoleTest) {
       global << reportStream.str() << logger::endL;
     }
@@ -370,12 +374,15 @@ bool CalculatorHTML::Test::BuiltIn(
     if (!currentTest.Run()) {
       result = false;
     }
-    if (global.flagRunningConsoleTest) {
-      if (!currentTest.flagSuccess) {
+    if (!currentTest.flagSuccess) {
+      badSoFar ++;
+      if (global.flagRunningConsoleTest) {
         global << logger::red << "Failure @ index: " << i << ". "
         << "Elapsed ms: " << global.GetElapsedMilliseconds() << ". "
-        << logger::endL;
-      } else {
+        << logger::endL;        
+      }
+    } else {
+      if (global.flagRunningConsoleTest) {
         global << logger::green << "Success @ index: " << i << ". "
         << "Elapsed ms: " << global.GetElapsedMilliseconds() << ". "
         << logger::endL;
@@ -480,6 +487,9 @@ bool CalculatorFunctions::innerTestProblemInterpretation(
     << "2) number of problems to test (0 or less = test all); "
     << "3) starting random seed, set to 0 if you don't know what this is. "
     ;
+  }
+  if (global.theResponse.MonitoringAllowed()) {
+    global.theResponse.Initiate("Triggered by innerTestProblemInterpretation.");
   }
   int desiredNumberOfTests = 0;
   int firstFileIndex = 0;
@@ -2593,7 +2603,7 @@ bool CalculatorFunctions::innerPrecomputeSemisimpleLieAlgebraStructure(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerPrecomputeSemisimpleLieAlgebraStructure");
-  if (!global.theResponse.ReportAllowed()) {
+  if (!global.theResponse.MonitoringAllowed()) {
     global.theResponse.Initiate("Triggered by innerPrecomputeSemisimpleLieAlgebraStructure.");
   }
   (void) input;

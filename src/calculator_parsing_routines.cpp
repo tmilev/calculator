@@ -2,8 +2,6 @@
 // For additional information refer to the file "calculator.h".
 #include "calculator.h"
 
-static ProjectInformationInstance projectInfoCalculatorParsingRoutinesCPP(__FILE__, "Calculator input parsing routines. ");
-
 SyntacticElement Calculator::GetEmptySyntacticElement() {
   SyntacticElement result;
   result.controlIndex = this->controlSequences.GetIndex(" ");

@@ -3,8 +3,6 @@
 #include "database.h"
 #include "string_constants.h"
 
-static ProjectInformationInstance projectInfoDatabaseTestCPP(__FILE__, "Database test code. ");
-
 Database::Test::Test() {
   this->SetUp();
 }

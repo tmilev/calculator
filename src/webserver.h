@@ -4,8 +4,6 @@
 #include "system_functions_global_objects.h"
 #include "transport_layer_security.h"
 
-static ProjectInformationInstance projectInfoInstanceWebServerHeader(__FILE__, "Web server classes declarations.");
-
 class WebServer;
 
 class WebWorker {

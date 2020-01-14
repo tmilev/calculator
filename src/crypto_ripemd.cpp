@@ -46,8 +46,6 @@
 #include <stdint.h>
 #include <string.h>
 
-static ProjectInformationInstance project_RIPEMD160_implementation(__FILE__, "Ripemd160 implementation");
-
 bool Crypto::flagRIPEMDBigEndian = false;
 
 class Ripemd160State {

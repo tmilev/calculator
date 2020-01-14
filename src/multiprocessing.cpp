@@ -6,10 +6,6 @@
 #include <netdb.h> //<-addrinfo and related data structures defined here
 #include "webserver.h"
 
-static ProjectInformationInstance projectInfoInstanceWebServerInterProcessLogisticsImplementation(
-  __FILE__, "Web server interprocess communication implementation."
-);
-
 std::string MutexProcess::currentProcessName = "S: ";
 
 void MutexProcess::Release(int& theDescriptor) {

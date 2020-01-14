@@ -2,7 +2,6 @@
 // For additional information refer to the file "calculator.h".
 
 #include "general_logging_global_variables.h"
-static ProjectInformationInstance projectInfoCalculatorGlobalTest(__FILE__, "Global tests.");
 
 bool GlobalVariables::Test::All() {
   GlobalVariables::Test::Builds();

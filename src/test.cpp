@@ -6,8 +6,6 @@
 #include "database.h"
 #include "calculator_html_interpretation.h"
 
-static ProjectInformationInstance projectInfoTestRoutinesCPP(__FILE__, "Testing routines. ");
-
 class Test {
 public:
   class Suites{

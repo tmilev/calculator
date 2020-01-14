@@ -7,10 +7,6 @@
 #include "math_extra_Lie_theory_extras.h" // error: invalid use of incomplete type ‘struct branchingData’
 #include "math_extra_drawing_variables.h"
 
-static ProjectInformationInstance projectInfoSemisimpleLieAlgebrasImplementationHeader(
-  __FILE__, "Implementation header, semisimple Lie algebra routines. "
-);
-
 template <class coefficient>
 std::string Weight<coefficient>::ToString(FormatExpressions* theFormat) const {
   std::stringstream out;

@@ -30,5 +30,4 @@
 #include "math_extra_semisimple_Lie_algebras.h"
 #include "math_extra_finite_groups.h"
 #include "calculator_interface.h"
-static ProjectInformationInstance projectInfoCalculatorHeader(__FILE__, "Wrapper header file (includes everything).");
 #endif

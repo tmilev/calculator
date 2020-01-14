@@ -1,9 +1,6 @@
 #ifndef vpfTreeHeaderAlreadyDefined
 #define vpfTreeHeaderAlreadyDefined
 #include "math_general.h"
-static ProjectInformationInstance projectInfoTreesHeader(
-  __FILE__, "Header file, trees."
-);
 
 template<typename data>
 class Tree;

@@ -12,8 +12,6 @@
 #include <sys/prctl.h> //<- prctl here
 #include <signal.h> // <-signals here
 
-static ProjectInformationInstance projectInfoInstanceWebServer(__FILE__, "Web server fork.");
-
 void WebServer::initializeRandomBytes() {
   static bool alreadyRan = false;
   if (alreadyRan) {

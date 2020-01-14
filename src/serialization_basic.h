@@ -2,7 +2,6 @@
 #define SERIALIZATION_BASIC_ALREADY_DEFINED
 #include "general_lists.h"
 #include "json.h"
-static ProjectInformationInstance projectInfoSerializationBasic(__FILE__, "Byte-level serialization routines. ");
 
 class Serialization {
 public:

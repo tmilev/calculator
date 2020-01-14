@@ -19,8 +19,6 @@
 #include "transport_layer_security.h"
 #include "string_constants.h"
 
-static ProjectInformationInstance projectInfoCalculatorImplementation7CPP(__FILE__, "Calculator built-in functions. ");
-
 template <class theType>
 bool MathRoutines::GenerateVectorSpaceClosedWRTOperation(
   List<theType>& inputOutputElts,
@@ -9894,7 +9892,7 @@ bool CalculatorFunctions::innerRandomInteger(
   if (accum == 0) {
     global.fatal << "This shouldn't happen: accum should not be zero at this point. " << global.fatal;
   }
-  int generatedRandomInt = global.unsecurePseudoRandomGenerator.GetRandomInteger32bit() % accum;
+  int generatedRandomInt = static_cast<signed>(global.unsecurePseudoRandomGenerator.GetRandomLessThanBillion()) % accum;
   int resultRandomValue = theIntervals[0][0];
   bool found = false;
   accum = 0;
@@ -9937,7 +9935,7 @@ bool CalculatorFunctions::innerSelectAtRandom(
     output = input[1]; //only one item to select from: return that item
     return true;
   }
-  int randomIndex = (global.unsecurePseudoRandomGenerator.GetRandomInteger32bit() % (input.size() - 1)) + 1;
+  int randomIndex = (global.unsecurePseudoRandomGenerator.GetRandomPositiveLessThanBillion() % (input.size() - 1)) + 1;
   if (randomIndex < 0 || randomIndex > input.size() - 1) {
     randomIndex = input.size() - 1;
   }

@@ -17,8 +17,6 @@
 #include "calculator_problem_storage.h"
 #include "string_constants.h"
 
-static ProjectInformationInstance projectInfoWebRoutines1CPP(__FILE__, "Calculator web routines. ");
-
 class WebCrawler {
 public:
   TransportLayerSecurity theTSL;
@@ -174,7 +172,7 @@ void WebServerMonitor::Restart() {
   theFile.flush();
   std::stringstream killServerChildrenCommand;
   killServerChildrenCommand << "pkill -9 -P " << this->pidServer;
-  global  << "Terminating server children with command: " << killServerChildrenCommand.str() << logger::endL;
+  global << "Terminating server children with command: " << killServerChildrenCommand.str() << logger::endL;
   global.CallSystemNoOutput(killServerChildrenCommand.str(), true);
   global << logger::red << "Terminating server with pid: " << this->pidServer << logger::endL;
   WebServer::TerminateProcessId(this->pidServer);

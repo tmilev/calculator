@@ -4,9 +4,6 @@
 #define vpfHeader1General8DatabaseSystemIndependent_already_included
 
 #include "general_lists.h"
-static ProjectInformationInstance projectInfoGeneralDatabaseSystemIndependentHeader(
-  __FILE__, "Header, system independent database data structures. "
-);
 #include "json.h"
 
 class QueryExact;

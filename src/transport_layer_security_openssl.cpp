@@ -14,8 +14,6 @@
 #include <openssl/err.h>
 #endif
 
-static ProjectInformationInstance projectInfoInstanceTransportLayerSecurityOpenSSLImplementation(__FILE__, "Contains all openSSL-related implementation.");
-
 std::string TransportLayerSecurityOpenSSL::errors::errorWantRead = "SSL_ERROR_WANT_READ";
 bool TransportLayerSecurityOpenSSL::flagSSLlibraryInitialized = false;
 

@@ -7,8 +7,6 @@
 #include "general_database_system_independent.h"
 #include "multiprocessing.h"
 
-static ProjectInformationInstance projectInfoDatabaseH(__FILE__, "Database interface header. ");
-
 class QueryExact {
   public:
   std::string collection;

@@ -5,7 +5,7 @@
 
 #include "general_logging_global_variables.h"
 #include "math_large_integers.h"
-static ProjectInformationInstance projectInfoMathVectorsHeader(__FILE__, "Header, vectors and related machinery. ");
+
 class SelectionWithMultiplicities;
 class Selection;
 

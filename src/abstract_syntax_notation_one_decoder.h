@@ -5,8 +5,6 @@
 #include "json.h"
 #include "serialization_basic.h"
 
-static ProjectInformationInstance projectInfoAbstractSyntaxNotationOneDecoderHeader(__FILE__, "Abstract syntax notation one (ASN-1) header file. ");
-
 // ASNElements can be either composites or atoms.
 //
 // 1) The composites are:

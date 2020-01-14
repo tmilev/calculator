@@ -7,8 +7,6 @@
 #include "general_strings.h"
 #include "calculator_html_interpretation.h"
 
-static ProjectInformationInstance projectInfoCalculatorLaTeXRoutinesCPP(__FILE__, "LaTeX routines. ");
-
 bool LaTeXCrawler::IsInCrawlableFolder(const std::string& folderName, std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("LaTeXcrawler::IsInCrawlableFolder");
   for (int i = 0; i < this->baseFoldersCrawlableFilesPhysical.size; i ++) {

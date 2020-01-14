@@ -6,7 +6,6 @@
 #include "general_lists.h"
 #include "math_vectors.h"
 #include "general_memory_saving.h"
-static ProjectInformationInstance projectInfoMathSubsetsSelectionsHeader(__FILE__, "Header, selections, subsets, etc. ");
 
 class Selection {
 public:

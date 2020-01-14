@@ -2,10 +2,6 @@
 #define vpfCharacterHeaderCalculatorInterface
 #include "calculator.h"
 
-static ProjectInformationInstance projectInfoCharactersCalculatorInterfaceHeader(
-  __FILE__, "Header, calculator built-in functions for Weyl groups."
-);
-
 class CalculatorFunctionsWeylGroup {
 public:
   static bool innerWeylOrbit(Calculator& theCommands, const Expression& input, Expression& output, bool useFundCoords, bool useRho);

@@ -1,10 +1,6 @@
 #ifndef vpfGraphHeaderAlreadyDefined
 #define vpfGraphHeaderAlreadyDefined
 #include "math_general.h"
-static ProjectInformationInstance projectInfoGraphsHeader(
-  __FILE__, "Header file, graphs."
-);
-
 
 class GraphOLD {
   // This type of graph is stored as a continuous block,

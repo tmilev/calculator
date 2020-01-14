@@ -5,8 +5,6 @@
 #include "math_general.h"
 #include "math_extra_universal_enveloping.h"
 
-static ProjectInformationInstance projectInfoMathImplementation1CPP(__FILE__, "Math routines implementation. ");
-
 void SemisimpleLieAlgebra::GetChevalleyGeneratorAsLieBracketsSimpleGens(
   int generatorIndex,
   List<int>& outputIndicesFormatAd0Ad1Ad2etc,

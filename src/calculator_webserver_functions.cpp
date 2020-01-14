@@ -6,8 +6,6 @@
 #include "system_functions_global_objects.h"
 ///////////////////////////////////
 
-static ProjectInformationInstance projectInfoCalculatorWebserverFunctionsCPP(__FILE__, "Calculator functions related to the web server.");
-
 bool CalculatorFunctions::innerX509CertificateServer(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {

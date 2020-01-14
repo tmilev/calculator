@@ -2,9 +2,6 @@
 #define CALCULATOR_DATABASE_MONGO_HEADER_ALREADY_INCLUDED
 
 #include "calculator_interface.h"
-static ProjectInformationInstance projectInfoCalculatorDatabaseMongoHeader(
-  __FILE__, "Header, calculator<->mongoDB interface. "
-);
 
 class CalculatorDatabaseFunctions {
 public:

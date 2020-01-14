@@ -10,8 +10,6 @@
 #include "string_constants.h"
 #include <dirent.h>
 
-static ProjectInformationInstance projectInfoMathImplementation3CPP(__FILE__, "Math routines implementation. ");
-
 // The below gives upper limit to the amount of pointers
 // that are allowed to be allocated by the program. Can be changed dynamically.
 // Used to guard the web server from abuse.
@@ -109,7 +107,7 @@ bool GlobalVariables::Response::MonitoringAllowed() {
   return !this->flagBanProcessMonitorinG && this->flagReportAllowed;
 }
 
-bool GlobalVariables::Response::ReportAllowed(int type) {
+bool GlobalVariables::Response::ReportDesired(int type) {
   (void) type;
   return this->MonitoringAllowed() && this->flagTimedOut && this->flagReportDesired;
 }
@@ -130,6 +128,7 @@ GlobalVariables::Response::Response() {
  }
 
 GlobalVariables::GlobalVariables() {
+  std::cout << "DEBUG: Inside global variables init.\n";
   this->flagDeallocated = false;
   this->flagAutoUnitTest = false;
   this->flagNotAllocated = false;
@@ -164,37 +163,6 @@ GlobalVariables::GlobalVariables() {
   this->flagDatabaseCompiled = false;
   this->flagServerAutoMonitor = true;
   this->flagDisableDatabaseLogEveryoneAsAdmin = false;
-
-  this->logs.worker.theFileName = "/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logCommon.html";
-  this->logs.server.theFileName = "/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/global.html";
-  this->logs.serverMonitor.theFileName = "/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/global.html";
-}
-
-void GlobalVariables::WriteSourceCodeFilesJS() {
-  this->theSourceCodeFiles().QuickSortAscending();
-  std::fstream theFile;
-  FileOperations::OpenFileCreateIfNotPresentVirtual(
-    theFile,
-    "/calculator-html/src/source_code_files.js",
-    false,
-    true,
-    false,
-    false
-  );
-  theFile << "var theCPPsourceCodeFiles = [";
-  for (int i = 0; i < this->theSourceCodeFiles().size; i ++) {
-    if (i != 0) {
-      theFile << ", ";
-    }
-    theFile << "\"" << this->theSourceCodeFiles()[i] << "\"";
-  }
-  theFile << "];";
-}
-
-HashedList<FileInformation>& GlobalVariables::theSourceCodeFiles() {
-  static HashedList<FileInformation> avoidingTheStaticInitializationOrderFiasco;
-  avoidingTheStaticInitializationOrderFiasco.SetExpectedSize(200);
-  return avoidingTheStaticInitializationOrderFiasco;
 }
 
 bool ProgressReport::TickAndWantReport() {
@@ -233,7 +201,7 @@ void ProgressReport::Report(const std::string& theReport) {
 
 void ProgressReport::init() {
   this->flagInitialized = false;
-  if (!global.theResponse.ReportAllowed()) {
+  if (!global.theResponse.MonitoringAllowed()) {
     return;
   }
   if (global.fatal.flagCrashInitiateD) {
@@ -267,10 +235,6 @@ ProgressReport::~ProgressReport() {
     return;
   }
   global.progressReportStrings[this->threadIndex].size --;
-}
-
-ProjectInformationInstance::ProjectInformationInstance(const char* fileName, const std::string& fileDescription) {
-  FileInformation::AddProjectInfo(fileName, fileDescription);
 }
 
 RegisterFunctionCall::RegisterFunctionCall(const char* fileName, int line, const std::string& functionName) {
@@ -4253,7 +4217,7 @@ int PartFraction::ControlLineSizeStringPolys(std::string& output, FormatExpressi
 }
 
 void PartFractions::MakeProgressReportSplittingMainPart() {
-  if (!global.theResponse.ReportAllowed()) {
+  if (!global.theResponse.MonitoringAllowed()) {
     return;
   }
   std::stringstream out1, out2, out3;
@@ -4285,7 +4249,7 @@ void PartFractions::MakeProgressReportSplittingMainPart() {
 
 void PartFractions::MakeProgressVPFcomputation() {
   this->NumProcessedForVPFfractions ++;
-  if (!global.theResponse.ReportAllowed()) {
+  if (!global.theResponse.MonitoringAllowed()) {
     return;
   }
   std::stringstream out2;

@@ -1,9 +1,6 @@
 #include "json.h"
 #include "math_general.h"
 
-
-static ProjectInformationInstance projectInfoJSONTestCPP(__FILE__, "Unit tests, JSON.");
-
 bool JSData::Test::All() {
   MacroRegisterFunctionWithName("JSData::Test::All");
   JSData::Test::TestRecode();

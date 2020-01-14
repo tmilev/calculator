@@ -32,8 +32,6 @@ NOTE:   String length must be evenly divisible by 16byte (str_len % 16 == 0)
 */
 #include "crypto.h"
 
-static ProjectInformationInstance projectInfoCrypto_AES_implementation(__FILE__, "AES implementation.");
-
 class AESContext {
 public:
   static const int blockLength = 16;

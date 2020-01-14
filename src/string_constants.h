@@ -2,8 +2,6 @@
 #define vpfWEBAPI_HEADER_H
 #include "macros.h"
 
-static ProjectInformationInstance projectInfoStringConstantsHeader(__FILE__, "Header, web api strings. ");
-
 class WebAPI {
 public:
   static std::string appNoCache;

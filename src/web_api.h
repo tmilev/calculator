@@ -6,8 +6,6 @@
 #include "general_maps.h"
 #include "general_list_references.h"
 
-static ProjectInformationInstance projectInfoHtmlSnippetsHeader(__FILE__, "Html snippets header.");
-
 class JSData;
 
 class BuilderApplication {
@@ -150,7 +148,7 @@ class WebAPIResponse {
 class HtmlRoutines {
 public:
 public:
-  static MapList<std::string, std::string, MathRoutines::HashString> preLoadedFiles;
+  static MapList<std::string, std::string, MathRoutines::HashString>& preLoadedFiles();
   static std::stringstream outputStream;
   static int GlobalMathSpanID;
   static int GlobalCanvasID;

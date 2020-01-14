@@ -6,8 +6,6 @@
 #include "math_extra_algebraic_numbers.h"
 #include <iomanip>
 
-static ProjectInformationInstance projectInfoCryptoFile1(__FILE__, "SHA- 1 and base64 implementation.");
-
 void Crypto::GetRandomBytesSecureInternal(ListZeroAfterUse<unsigned char>& output, int numberOfBytesMax32) {
   return Crypto::GetRandomBytesSecureInternalMayLeaveTracesInMemory(output.data, numberOfBytesMax32);
 }
@@ -1732,7 +1730,11 @@ void UnsecurePseudoRandomGenerator::SetRandomSeed(int32_t inputRandomSeed) {
   Crypto::computeSha256(this->state(), this->state());
 }
 
-unsigned int UnsecurePseudoRandomGenerator::GetRandomInteger32bit() {
+signed UnsecurePseudoRandomGenerator::GetRandomPositiveLessThanBillion() {
+  return static_cast<signed>(this->GetRandomLessThanBillion());
+}
+
+unsigned int UnsecurePseudoRandomGenerator::GetRandomLessThanBillion() {
   if (this->bytesConsumed + 4 >= this->state().size) {
     Crypto::computeSha256(this->state(), this->state());
     this->bytesConsumed = 0;
@@ -1743,5 +1745,6 @@ unsigned int UnsecurePseudoRandomGenerator::GetRandomInteger32bit() {
     result += this->state()[this->bytesConsumed + i];
   }
   this->bytesConsumed += 4;
+  result %= 1000000000;
   return result;
 }

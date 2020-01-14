@@ -4,8 +4,6 @@
 #include "math_general_polynomial_computations_basic_implementation.h"
 #include "math_extra_drawing_variables.h"
 
-static ProjectInformationInstance projectInfoMathSemisimpleLieAlgebrasCPP(__FILE__, "Semisimple Lie algebras. ");
-
 std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat) {
   MacroRegisterFunctionWithName("SemisimpleLieAlgebra::ToString");
   std::stringstream out;
@@ -767,7 +765,7 @@ bool SemisimpleLieAlgebra::GetConstantOrHElement(
 }
 
 void SemisimpleLieAlgebra::MakeChevalleyTestReport(int i, int j, int k, int Total) {
-  if (!global.theResponse.ReportAllowed()) {
+  if (!global.theResponse.ReportDesired()) {
     return;
   }
   std::stringstream out2, out3;

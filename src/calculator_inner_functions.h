@@ -4,9 +4,6 @@
 #define vpfHeader6_2InnerFns
 #include "calculator_interface.h"
 
-static ProjectInformationInstance projectInfoCalculatorInnerFunctionsHeader(__FILE__, "Header, calculator built-in functions. ");
-
-
 class CalculatorFunctionsCrypto {
 public:
   static bool innerAES_CBC_256_Encrypt(Calculator& theCommands, const Expression& input, Expression& output);

@@ -8,8 +8,6 @@
 #include "general_maps.h"
 
 
-static ProjectInformationInstance projectInfoJsonHeader(__FILE__, "JSON header.");
-
 //struct JSHashData;
 class Rational;
 template <typename coefficient>

@@ -5,9 +5,6 @@
 
 #include "math_general.h"
 #include "math_extra_algebraic_numbers.h"
-static ProjectInformationInstance projectInfoWeylAlgebrasImplementationHeader(
-  __FILE__, "Implementation header, Weyl algebra routines. "
-);
 
 template <class coefficient>
 bool ElementWeylAlgebra<coefficient>::IsPolynomial(Polynomial<coefficient>* whichPoly) const {

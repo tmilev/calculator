@@ -5,10 +5,6 @@
 #include "math_extra_elliptic_curves.h"
 #include "math_extra_algebraic_numbers.h"
 
-static ProjectInformationInstance projectInfoEllipticCurvesImplementationHeader(
-  __FILE__, "Implementation header, elliptic curves. "
-);
-
 template <typename coefficient>
 unsigned int ElementEllipticCurve<coefficient>::HashFunction(const ElementEllipticCurve<coefficient>& input) {
   if (input.flagInfinity) {

@@ -13,8 +13,6 @@
 #include <cmath>
 #include <cfloat>
 
-static ProjectInformationInstance projectInfoCalculatorImplementation1CPP(__FILE__, "Calculator built-in functions. ");
-
 template<class Element>
 bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(
   Matrix<Element>& matA, Matrix<Element>& matb, Vector<Element>* outputSolution
@@ -415,7 +413,7 @@ bool Calculator::innerPrintSSSubalgebras(
       return theCommands << "Only logged-in admins allowed to force-recompute semisimple subalgebras. ";
     }
   }
-  if (global.theResponse.ReportAllowed()) {
+  if (global.theResponse.MonitoringAllowed()) {
     global.theResponse.Initiate("Triggered by printSemisimpleSubalgebras.");
   }
   if (input.size() != 2) {

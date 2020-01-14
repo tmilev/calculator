@@ -5,8 +5,6 @@
 #include "crypto.h"
 #include "math_extra_algebraic_numbers.h"
 
-static ProjectInformationInstance projectInfoAbstractSyntaxNotationOneDecoderImplementationTest(__FILE__, "Test routines for abstract syntax notation one (ASN-1).");
-
 bool PrivateKeyRSA::Test::All() {
   PrivateKeyRSA::Test::LoadFromPEMFile();
   PrivateKeyRSA::Test::LoadFromPEM();

@@ -9,8 +9,6 @@
 #include "string_constants.h"
 #include "general_strings.h"
 
-static ProjectInformationInstance projectInfoDatabaseMongoCPP(__FILE__, "Database mongoDB.");
-
 QueryResultOptions Database::GetStandardProjectors(const std::string& collectionName) {
   QueryResultOptions result;
   if (collectionName == DatabaseStrings::tableUsers) {

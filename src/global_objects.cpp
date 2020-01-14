@@ -7,9 +7,8 @@
 #include "general_logging_global_variables.h"
 #include "general_time_date.h"
 
-static ProjectInformationInstance projectInfoCalculatorGlobal(__FILE__, "Global objects");
-
 GlobalVariables global;
+
 std::string GlobalVariables::GetDateForLogFiles() {
   static std::string tempDate;
   if (tempDate != "") {

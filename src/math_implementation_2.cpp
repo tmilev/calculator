@@ -5,8 +5,6 @@
 #include "math_general.h"
 #include "math_extra_algebraic_numbers.h"
 
-static ProjectInformationInstance projectInfoMathImplementation2CPP(__FILE__, "Math routines implementation. ");
-
 void LargeIntegerUnsigned::AssignString(const std::string& input) {
   if (input.size() < 10) {
     unsigned int x = static_cast<unsigned>(std::atoi(input.c_str()));

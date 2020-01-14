@@ -7,9 +7,10 @@
 #include <iomanip>
 #include "string_constants.h"
 
-static ProjectInformationInstance projectInfoInstanceHtmlSnippets(__FILE__, "Html Snippets.");
-
-MapList<std::string, std::string, MathRoutines::HashString> HtmlRoutines::preLoadedFiles;
+MapList<std::string, std::string, MathRoutines::HashString>& HtmlRoutines::preLoadedFiles() {
+  static MapList<std::string, std::string, MathRoutines::HashString> result;
+  return result;
+}
 
 std::string HtmlRoutines::gitRepository = "https://github.com/tmilev/calculator";
 
@@ -72,7 +73,7 @@ std::string HtmlRoutines::GetMathSpanBeginArrayL(const std::string& input, int u
 }
 
 void HtmlRoutines::LoadStrings() {
-  if (HtmlRoutines::preLoadedFiles.size() > 0) {
+  if (HtmlRoutines::preLoadedFiles().size() > 0) {
     return;
   }
   HtmlRoutines::GetMathQuillStyleSheeTWithTags();
@@ -83,16 +84,16 @@ void HtmlRoutines::LoadStrings() {
 }
 
 const std::string& HtmlRoutines::GetJavascriptAceEditorScriptWithTags() {
-  if (HtmlRoutines::preLoadedFiles.Contains("AceEditor")) {
-    return HtmlRoutines::preLoadedFiles.GetValueCreateNoInit("AceEditor");
+  if (HtmlRoutines::preLoadedFiles().Contains("AceEditor")) {
+    return HtmlRoutines::preLoadedFiles().GetValueCreateNoInit("AceEditor");
   }
   std::stringstream out;
   out << "<script type =\"text/javascript\" src =\""
   << FileOperations::GetVirtualNameWithHash("/html-common/ace/src-min/ace.js")
   << "\" charset =\"utf-8\"></script>";
   out << HtmlRoutines::GetJavascriptAddScriptTags("/html-common/ace-editor-settings.js");
-  HtmlRoutines::preLoadedFiles.SetKeyValue("AceEditor", out.str());
-  return HtmlRoutines::preLoadedFiles.GetValueCreateNoInit("AceEditor");
+  HtmlRoutines::preLoadedFiles().SetKeyValue("AceEditor", out.str());
+  return HtmlRoutines::preLoadedFiles().GetValueCreateNoInit("AceEditor");
 }
 
 const std::string& HtmlRoutines::GetFile(
@@ -103,8 +104,8 @@ const std::string& HtmlRoutines::GetFile(
   MacroRegisterFunctionWithName("HtmlRoutines::GetFile");
   std::string theID = fileNameVirtual + additionalBeginTag + additionalEndTag;
   if (global.flagCachingInternalFilesOn) {
-    if (HtmlRoutines::preLoadedFiles.GetValueCreate(theID) != "") {
-      return HtmlRoutines::preLoadedFiles.GetValueCreate(theID);
+    if (HtmlRoutines::preLoadedFiles().GetValueCreate(theID) != "") {
+      return HtmlRoutines::preLoadedFiles().GetValueCreate(theID);
     }
   }
   std::stringstream out, commentsOnFailure;
@@ -117,8 +118,8 @@ const std::string& HtmlRoutines::GetFile(
     out << "<b style =\"color:red\">Failed to load file: " << fileNameVirtual
     << ". Comments: " << commentsOnFailure.str() << "</b>";
   }
-  HtmlRoutines::preLoadedFiles.SetKeyValue(theID, out.str());
-  return HtmlRoutines::preLoadedFiles.GetValueCreateNoInit(theID);
+  HtmlRoutines::preLoadedFiles().SetKeyValue(theID, out.str());
+  return HtmlRoutines::preLoadedFiles().GetValueCreateNoInit(theID);
 }
 
 const std::string& HtmlRoutines::GetJavascriptAddScriptTags(const std::string& fileNameVirtual) {
@@ -355,8 +356,8 @@ std::string HtmlRoutines::GetJavascriptMathjax(const std::string& baseFolder) {
   out << "<script type =\"text/javascript\" src = '" << baseFolder << "MathJax-2.7-latest/MathJax.js?config=TeX-AMS_HTML-full'>"
   << "</script>\n";
   out << "<script src =\"" << baseFolder << mathjaxSetupScript << "\"></script>";
-  HtmlRoutines::preLoadedFiles.SetKeyValue("MathJax", out.str());
-  return HtmlRoutines::preLoadedFiles.GetValueCreateNoInit("MathJax");
+  HtmlRoutines::preLoadedFiles().SetKeyValue("MathJax", out.str());
+  return HtmlRoutines::preLoadedFiles().GetValueCreateNoInit("MathJax");
 }
 
 bool HtmlRoutines::AccountOneInputCGIString(

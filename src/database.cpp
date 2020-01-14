@@ -9,8 +9,6 @@
 #include "calculator_problem_storage.h"
 #include "string_constants.h"
 
-static ProjectInformationInstance projectInfoDatabaseCPP(__FILE__, "Database-related code. ");
-
 bool Database::User::SetPassword(
   const std::string& inputUsername,
   const std::string& inputNewPassword,
@@ -397,6 +395,12 @@ bool Database::initializeServer() {
   << "**SLOW** " << logger::green << "fall-back JSON storage." << logger::endL;
   this->theFallBack.initialize();
   return true;
+}
+
+void GlobalVariables::init() {
+  this->logs.worker.theFileName = "/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logCommon.html";
+  this->logs.server.theFileName = "/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/global.html";
+  this->logs.serverMonitor.theFileName = "/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/global.html";
 }
 
 void GlobalVariables::initModifiableDatabaseFields() {

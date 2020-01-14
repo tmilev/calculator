@@ -5,8 +5,6 @@
 #include "math_general.h"
 #include "math_extra_semisimple_Lie_algebras.h"
 
-static ProjectInformationInstance projectInfoModulesSemisimpleLieAlgebrasHeader(__FILE__, "Header, generalized Verma modules. ");
-
 template <class coefficient>
 class ModuleSSalgebra {
   List<MatrixTensor<coefficient> > actionsGeneratorsMaT;

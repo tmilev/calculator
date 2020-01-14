@@ -7,8 +7,6 @@
 #include "crypto.h"
 #include "abstract_syntax_notation_one_decoder.h"
 
-static ProjectInformationInstance projectInfoInstanceTransportLayerSecurityTest(__FILE__, "TSL/ssl implementation.");
-
 std::string SSLRecord::Test::sampleClientHelloHex =
 "1603010200010001fc03031e70e7e6d1ccf06a234cf5b6f4c207609d824787e70a63808cacbe5fb2b67ea1"
 "202ae1460ab9498ccc0b624b4eb0f859a840d98724873a214a64c8b0b09c431cc6"

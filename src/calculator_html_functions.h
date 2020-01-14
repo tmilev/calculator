@@ -2,7 +2,6 @@
 #define calculator_html_functions_H
 
 #include "calculator_interface.h"
-static ProjectInformationInstance projectInfocClculatorHtmlFunctionsHeader(__FILE__, "Header, calculator html functions. ");
 
 class Answer;
 

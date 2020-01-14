@@ -5,7 +5,6 @@
 
 #include "math_extra_finite_groups.h"
 #include "math_general_polynomial_computations_advanced_implementation.h"
-static ProjectInformationInstance projectInfoFiniteGroupsImplementationHeader(__FILE__, "Implementation header, finite groups. ");
 
 template <class coefficient>
 std::string FinitelyGeneratedMatrixMonoid<coefficient>::ToString(FormatExpressions* theFormat) const {

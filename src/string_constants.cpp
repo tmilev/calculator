@@ -1,7 +1,5 @@
 #include "string_constants.h"
 
-static ProjectInformationInstance projectInfoStringConstantsCPP(__FILE__, "String constants");
-
 std::string WebAPI::appNoCache = "appNoCache";
 std::string WebAPI::app = "app";
 std::string WebAPI::HeaderCacheControl = "Cache-Control: max-age=129600000, public";

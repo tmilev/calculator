@@ -16,8 +16,6 @@
 #include "math_extra_latex_routines.h"
 #include <sys/resource.h> //<- for setrlimit(...) function. Restricts the time the executable can run.
 
-static ProjectInformationInstance projectInfoInstanceWebServer(__FILE__, "Web server implementation.");
-
 WebServer& GlobalVariables::server() {
   static WebServer theServer;
   return theServer;
@@ -38,7 +36,13 @@ public:
   void blockSignals();
   void unblockSignals();
   void initializeSignals();
+  static SignalsInfrastructure& theSignals();
 };
+
+SignalsInfrastructure& SignalsInfrastructure::theSignals() {
+  static SignalsInfrastructure result;
+  return result;
+}
 
 SignalsInfrastructure::SignalsInfrastructure() {
   this->flagSignalsAreBlocked = false;
@@ -46,16 +50,15 @@ SignalsInfrastructure::SignalsInfrastructure() {
   this->flagInitialized = false;
 }
 
-static SignalsInfrastructure theSignals;
 //sigset_t SignalSetToBlockWhileHandlingSIGCHLD;
 
 //This class locks/unlocks all signals within its scope
 class SignalLock {
   SignalLock() {
-    theSignals.blockSignals();
+    SignalsInfrastructure::theSignals().blockSignals();
   }
   ~SignalLock() {
-    theSignals.unblockSignals();
+    SignalsInfrastructure::theSignals().unblockSignals();
   }
 };
 
@@ -2848,7 +2851,7 @@ void WebServer::StopKillAll[[noreturn]](bool attemptToRestart) {
   for (int i = 0; i < this->theWorkers.size; i ++) {
     this->TerminateChildSystemCall(i);
   }
-  theSignals.unblockSignals();
+  SignalsInfrastructure::theSignals().unblockSignals();
   global << "Waiting for child processes to exit. " << logger::endL;
   int workersStillInUse = 0;
   int waitAttempts = 0;
@@ -3030,7 +3033,7 @@ void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress)
     }
   }
   theTimes.QuickSortAscending(nullptr, &theIndices);
-  if (!theSignals.flagSignalsAreBlocked) {
+  if (!SignalsInfrastructure::theSignals().flagSignalsAreBlocked) {
     global.fatal << "Signals must be blocked at this point of code. " << global.fatal;
   }
   for (int j = 0; j < theTimes.size; j ++) {
@@ -3287,7 +3290,7 @@ bool WebServer::initBindToPorts() {
 }
 
 void WebServer::initializeSignals() {
-  theSignals.initializeSignals();
+  SignalsInfrastructure::theSignals().initializeSignals();
 }
 
 void SignalsInfrastructure::initializeSignals() {
@@ -3489,7 +3492,6 @@ int WebServer::Run() {
   global.calculator().GetElement().ComputeAutoCompleteKeyWords();
   global.calculator().GetElement().WriteAutoCompleteKeyWordsToFile();
   this->WriteVersionJSFile();
-  // global.WriteSourceCodeFilesJS();
   global.initModifiableDatabaseFields();
   HtmlRoutines::LoadStrings();
   this->theTLS.initializeNonThreadSafeOnFirstCall(true);
@@ -3506,9 +3508,9 @@ int WebServer::Run() {
   while (true) {
     // main accept() loop
     theListener.zeroSocketSet();
-    theSignals.unblockSignals();
+    SignalsInfrastructure::theSignals().unblockSignals();
     theListener.Select();
-    theSignals.blockSignals();
+    SignalsInfrastructure::theSignals().blockSignals();
     if (global.flagServerDetailedLog) {
       global << logger::green << "Detail: select success. " << logger::endL;
     }
@@ -3607,7 +3609,7 @@ int WebServer::Run() {
         << "Time elapsed: " << global.GetElapsedSeconds()
         << " second(s). Calling sigprocmask. " << logger::endL;
       }
-      theSignals.unblockSignals();
+      SignalsInfrastructure::theSignals().unblockSignals();
       if (global.flagServerDetailedLog) {
         global << logger::green << "Detail: sigprocmask success, running... " << logger::endL;
       }
@@ -4445,6 +4447,8 @@ void WebServer::CheckInstallation() {
 }
 
 int WebServer::main(int argc, char **argv) {
+std::cout << "DEBUG: made it to start of main.\n";
+  global.init();
   global.InitThreadsExecutableStart();
   // use of loggers forbidden before calling global.server().AnalyzeMainArguments(...):
   // we need to initialize first the folder locations relative to the executable.

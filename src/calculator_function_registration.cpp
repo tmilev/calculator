@@ -10,7 +10,6 @@
 #include "database.h"
 #include "calculator_database_mongo.h"
 
-static ProjectInformationInstance projectInfoCalculatorFunctionRegistrationCPP(__FILE__, "List of calculator functions. ");
 // This file lists calculator functions and various hard-coded rules.
 
 void Calculator::initAdminFunctions() {

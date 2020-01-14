@@ -5,8 +5,6 @@
 
 #include "math_general.h"
 
-static ProjectInformationInstance projectInfoMathExtraDrawingVariablesHeader(__FILE__, "Header, drawing routines. ");
-
 class DrawOperations {
 private:
   void changeBasisPReserveAngles(double newX, double newY);

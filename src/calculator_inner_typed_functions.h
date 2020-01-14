@@ -5,8 +5,6 @@
 
 #include "calculator_interface.h"
 
-static ProjectInformationInstance projectInfoCalculatorTypedFunctionsHeader(__FILE__, "Header, calculator inner binary typed functions. ");
-
 class CalculatorFunctionsBinaryOps {
 public:
   template <class theType>

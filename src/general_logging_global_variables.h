@@ -8,8 +8,6 @@
 #include "general_database_system_independent.h"
 #include <thread>
 
-static ProjectInformationInstance projectInfoHeaderLoggingRoutines(__FILE__, "Logging routines, global variables. ");
-
 // Forward-declared class webserver.
 class WebServer;
 
@@ -93,10 +91,10 @@ class logger {
 // All global objects except instances of ProjectInformationInstance are
 // to be members of variable:
 //
-// GlobalVariables global.
+// GlobalVariables&global.().
 //
 // No other global variables allowed: if you see any, they should be refactored
-// and folded into global.
+// and folded into global.).
 //
 // Discussion.
 //
@@ -272,7 +270,7 @@ public:
     bool WriteResponse(const JSData& incoming, bool isCrash = false);
 
     bool MonitoringAllowed();
-    bool ReportAllowed(int type = Response::ReportType::general);
+    bool ReportDesired(int type = Response::ReportType::general);
     void DisallowReport();
     void AllowReport();
     bool TimedOut();
@@ -382,8 +380,6 @@ public:
   bool ConfigurationStore();
   bool ConfigurationLoad();
   void ConfigurationProcess();
-  static HashedList<FileInformation>& theSourceCodeFiles();
-  void WriteSourceCodeFilesJS();
   int GetGlobalTimeInSeconds();
   int64_t GetElapsedMilliseconds();
   double GetElapsedSeconds() {
@@ -402,6 +398,7 @@ public:
   static std::string GetTimeLocal();
   void SetWebInpuT(const std::string& inputName, const std::string& inputValue);
   std::string GetWebInput(const std::string& inputName);
+  void init();
   void initModifiableDatabaseFields();
   void initDefaultFolderAndFileNames(const std::string& inputPhysicalExecutable);
   void initFoldersProjectBase(const std::string& inputPhysicalExecutable);

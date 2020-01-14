@@ -4,8 +4,6 @@
 #define vpfHeader11_HeaderEllipticCurves
 #include "math_general.h"
 
-static ProjectInformationInstance projectInfoEllipticCurvesHeader(__FILE__, "Header, elliptic curves. ");
-
 class EllipticCurveWeierstrassNormalForm {
 public:
   LargeInteger linearCoefficient;

@@ -5,8 +5,6 @@
 #include "math_extra_semisimple_Lie_algebras_implementation.h"
 #include "math_extra_finite_groups_implementation.h"
 
-static ProjectInformationInstance projectInfoMathSemisimpleLieRootSubalgebrasCPP(__FILE__, "Root and sl(2) subalgebras of semisimple Lie algebras. ");
-
 void rootSubalgebra::GetCoxeterElement(Matrix<Rational>& output) {
   int theDim = this->GetAmbientWeyl().GetDim();
   output.MakeIdMatrix(theDim);
@@ -433,7 +431,7 @@ void rootSubalgebra::MakeProgressReportGenAutos(int progress, int outOf, int fou
 
 void rootSubalgebra::MakeProgressReportPossibleNilradicalComputation(rootSubalgebras& owner) {
   MacroRegisterFunctionWithName("rootSubalgebra::MakeProgressReportPossibleNilradicalComputation");
-  if (!global.theResponse.ReportAllowed()) {
+  if (!global.theResponse.MonitoringAllowed()) {
     return;
   }
   ProgressReport report1, report2, report3, report4, report5;
@@ -3519,7 +3517,7 @@ void rootSubalgebras::ComputeActionNormalizerOfCentralizerIntersectNilradical(
       int tempI = theRootSA.GetIndexKmoduleContainingRoot(tempRoot);
       this->ActionsNormalizerCentralizerNilradical[i][j] = tempI;
     }
-    if (global.theResponse.ReportAllowed()) {
+    if (global.theResponse.MonitoringAllowed()) {
       std::stringstream out;
       out << "Computing action of element " << i + 1 << " out of " << theSubgroup.allElements.size;
       theReport.Report(out.str());

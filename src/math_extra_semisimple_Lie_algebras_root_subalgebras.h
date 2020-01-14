@@ -5,10 +5,6 @@
 
 #include "math_extra_semisimple_Lie_algebras.h"
 
-static ProjectInformationInstance projectInfoSemisimpleLieAlgevraRootSubalgebrasHeader(
-  __FILE__, "Header, root and sl2 subalgebras of semisimple Lie algebras. "
-);
-
 class coneRelation {
 public:
   Vectors<Rational> Alphas;

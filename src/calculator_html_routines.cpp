@@ -5,8 +5,6 @@
 #include "calculator_inner_typed_functions.h"
 #include "calculator_html_functions.h"
 
-static ProjectInformationInstance projectInfoCalculatorHtmlRoutinesCPP(__FILE__, "Calculator html functions implementation. ");
-
 bool CalculatorHtmlFunctions::innerUserInputBox(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {

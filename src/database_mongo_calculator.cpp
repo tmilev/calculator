@@ -1,8 +1,6 @@
 #include "calculator_database_mongo.h"
 #include "database.h"
 
-static ProjectInformationInstance projectInfoDatabaseMongoCalculatorInterfaceCPP(__FILE__, "Database mongo-calculator interface.");
-
 bool CalculatorDatabaseFunctions::innerExecuteMongoQuery(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {

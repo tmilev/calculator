@@ -6,10 +6,6 @@
 #include <iomanip>
 #include "string_constants.h"
 
-static ProjectInformationInstance projectInfoInstanceHtmlInterpretationInterfaceImplementation(
-  __FILE__, "Routines for calculus teaching: calculator exam mode."
-);
-
 JSData WebAPIResponse::GetProblemSolutionJSON() {
   MacroRegisterFunctionWithName("WebAPIReponse::GetProblemSolution");
   if (!global.UserDefaultHasAdminRights()) {

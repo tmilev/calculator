@@ -5,10 +5,6 @@
 #include "math_general.h"
 #include "math_extra_Lie_theory_extras.h"
 
-static ProjectInformationInstance projectInfoMathExtraUniversalEnvelopingHeader(
-  __FILE__, "Header, universal enveloping algebras. "
-);
-
 template <class coefficient>
 class MonomialUniversalEnveloping : public MonomialTensor<coefficient> {
 private:

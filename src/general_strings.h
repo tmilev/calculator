@@ -6,8 +6,6 @@
 #include "general_lists.h"
 #include "general_memory_saving.h"
 
-static ProjectInformationInstance headerGeneralStringsProjectInformation(__FILE__, "Header, string operations. ");
-
 template <typename coefficient>
 class Matrix;
 

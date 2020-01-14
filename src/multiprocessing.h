@@ -6,10 +6,6 @@
 #include "math_general.h"
 #include "system_functions_global_objects.h"
 
-static ProjectInformationInstance projectInfoInstanceWebServerInterProcessLogisticsHeader(
-  __FILE__, "Web server: inter-process communication/logistics."
-);
-
 // This is a basic wrapper around linux unnamed pipes.
 class PipePrimitive {
 public:

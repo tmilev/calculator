@@ -6,7 +6,6 @@
 #include "math_extra_symmetric_groups_and_generalizations.h"
 #include "math_extra_graph.h"
 #include "math_general_implementation.h"
-static ProjectInformationInstance projectInfoMathFiniteGroupCharactersCPP(__FILE__, "Finite group characters sandbox. Work in progress. ");
 
 template<>
 List<ElementWeylGroup>::OrderLeftGreaterThanRight FormatExpressions::GetMonOrder<ElementWeylGroup>() {

@@ -5,9 +5,6 @@
 
 #include "math_extra_semisimple_Lie_algebras.h"
 //#include "math_extra_universal_enveloping.h"
-static ProjectInformationInstance projectInfoLieTheoryMiscellaneousHeader(
-  __FILE__, "Header, Lie theory, miscellaneous. "
-);
 
 //the following data is isolated in a struct because it is
 //way too large a lump to pass separately

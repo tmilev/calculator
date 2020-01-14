@@ -4,8 +4,6 @@
 #define vpfHeader1_HeaderLaTeXRoutines
 #include "general_list_references.h"
 
-static ProjectInformationInstance projectInfoLaTeXRoutinesHeader(__FILE__, "Header, LaTeX routines. ");
-
 class LaTeXCrawler {
   public:
   int recursionDepth;

@@ -2,8 +2,6 @@
 // For additional information refer to the file "calculator.h".
 #include "calculator.h"
 
-static ProjectInformationInstance projectInfoCalculatorExpressionsTestCPP(__FILE__, "Calculator expression test. ");
-
 bool Expression::Test::All() {
   Calculator tester;
   tester.initialize();

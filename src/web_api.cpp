@@ -10,8 +10,6 @@
 #include "calculator_problem_storage.h"
 #include "math_extra_latex_routines.h"
 
-static ProjectInformationInstance projectInfoWebApiCPP(__FILE__, "Web api.");
-
 std::string WebAPIResponse::youHaveReachedTheBackend = "You've reached the calculator's backend. ";
 
 WebAPIResponse::WebAPIResponse() {

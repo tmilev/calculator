@@ -11,8 +11,6 @@
 #include "system_functions_global_objects.h"
 #include "string_constants.h"
 
-static ProjectInformationInstance projectInfoMathImplementation4CPP(__FILE__, "Math routines implementation. ");
-
 std::string UserCalculatorData::Roles::administator = "admin";
 std::string UserCalculatorData::Roles::student = "student";
 std::string UserCalculatorData::Roles::instructor = "instructor";
@@ -504,7 +502,7 @@ std::string GlobalVariables::GetWebInput(const std::string& inputName) {
 
 void GlobalVariables::MakeReport() {
   MacroRegisterFunctionWithName("GlobalVariables::MakeReport");
-  if (!global.theResponse.ReportAllowed()) {
+  if (!global.theResponse.MonitoringAllowed()) {
     return;
   }
   std::string reportString;
@@ -536,15 +534,13 @@ void GlobalVariables::initOutputReportAndCrashFileNames(
 }
 
 void FileInformation::AddProjectInfo(const std::string& fileName, const std::string& fileDescription) {
+
   FileInformation theInfo;
   theInfo.FileName = fileName;
   theInfo.FileDescription = fileDescription;
-  if (global.flagNotAllocated) {
-    std::cout << "The global variables are not allocated: "
-    << "this is the static initialization order fiasco at work! ";
-    assert(false);//cannot crash with mechanisms: nothing works yet!
-  }
-  global.theSourceCodeFiles().AddOnTopNoRepetition(theInfo);
+  std::cout << "DEBUG: file, description: " << fileName << ", " << fileDescription << "\n";
+  // This has been deprecated due to initialization order racing:
+  // GlobalVariables::theSourceCodeFiles().AddOnTopNoRepetition(theInfo);
 }
 
 UserCalculatorData::UserCalculatorData() {

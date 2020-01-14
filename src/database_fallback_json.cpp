@@ -4,8 +4,7 @@
 #include "general_logging_global_variables.h"
 #include "database.h"
 #include "string_constants.h"
-// Avoid previous extern warning:
-static ProjectInformationInstance projectInfoDatabaseFallbackJSON(__FILE__, "No-database fallback using json file.");
+
 std::string Database::FallBack::databaseFilename = "database_fallback/database.json";
 
 bool Database::FallBack::DeleteDatabase(std::stringstream* commentsOnFailure) {

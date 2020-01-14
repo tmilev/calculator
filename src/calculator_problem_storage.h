@@ -6,8 +6,6 @@
 #include "general_time_date.h"
 #include "general_database_system_independent.h"
 
-static ProjectInformationInstance projectInfoCalculatorProblemStorage(__FILE__, "Problem storage data.");
-
 class SyntacticElementHTML {
 public:
   int indexInOwner;

@@ -11,8 +11,6 @@
 #include "math_extra_semisimple_Lie_algebras_implementation.h"
 #include "string_constants.h"
 
-static ProjectInformationInstance projectInfoCalculatorImplementation3CPP(__FILE__, "Calculator built-in functions. ");
-
 // If you get the C++ multiple definition error:
 // - Try moving template *EXPLICIT* specializations (i.e. template <>)
 //   to the *beginning* (!) of .cpp files.

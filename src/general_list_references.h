@@ -4,9 +4,6 @@
 #define vpfHeader3_already_included
 
 #include "general_lists.h"
-static ProjectInformationInstance projectInfoGeneralListReferencesHeader(
-  __FILE__, "Header, ListReferences and HashedListReferences implementation. "
-);
 
 // class ListReferences is to be used in the same way as class List.
 // The essential difference between ListReferences and List is in the way the objects are

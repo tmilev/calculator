@@ -4,8 +4,6 @@
 #include "math_general.h"
 #include <math.h>
 
-static ProjectInformationInstance projectInfoFloatingPointCPP(__FILE__, "Built in c++ floating point routines wrapper.");
-
 double FloatingPoint::Sqrt(double argument) {
   return ::sqrt(argument);
 }

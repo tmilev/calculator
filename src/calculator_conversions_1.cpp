@@ -5,7 +5,6 @@
 #include "calculator_inner_typed_functions.h"
 #include "math_general_polynomial_computations_basic_implementation.h"
 #include "math_extra_universal_enveloping_implementation.h" // undefined reference to `ElementUniversalEnveloping<RationalFunctionOld>::MakeZero(SemisimpleLieAlgebra&)'
-static ProjectInformationInstance projectInfoCalculatorConversionsCPP(__FILE__, "C++ object <-> calculator expression conversions.");
 
 bool CalculatorConversions::innerExpressionFromChevalleyGenerator(
   Calculator& theCommands, const ChevalleyGenerator& input, Expression& output
@@ -712,18 +711,11 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
   return output.AssignValue(theSAs, theCommands);
 }
 
-extern Calculator tempCalculator;
-Calculator tempCalculator; //<-needs a rewrite
 std::string CalculatorConversions::innerStringFromSemisimpleSubalgebras(SemisimpleSubalgebras& input) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerStringFromSemisimpleSubalgebras");
-  static bool staticFirstRun = true; //<-this needs a rewrite
-  if (staticFirstRun) {
-    staticFirstRun = false;
-    tempCalculator.initialize();
-  }
   Expression tempE;
   FormatExpressions theFormat;
-  CalculatorConversions::innerStoreSemisimpleSubalgebras(tempCalculator, input, tempE);
+  CalculatorConversions::innerStoreSemisimpleSubalgebras(global.calculator().GetElement(), input, tempE);
   theFormat.flagUseHTML = true;
   return tempE.ToString(&theFormat);
 }

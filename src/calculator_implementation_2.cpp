@@ -3,8 +3,6 @@
 #include "calculator.h"
 #include "string_constants.h"
 
-static ProjectInformationInstance projectInfoCalculatorImplementation2CPP(__FILE__, "Calculator core evaluation engine. ");
-
 JSData Calculator::OperationHandlers::ToJSON() {
   JSData result;
   JSData currentFunctionListDirect;

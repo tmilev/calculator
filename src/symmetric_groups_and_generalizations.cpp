@@ -3,10 +3,6 @@
 #include "math_general_polynomial_computations_advanced_implementation.h"
 #include "math_extra_symmetric_groups_and_generalizations.h"
 
-static ProjectInformationInstance projectInfoSymmetricGroupsAndGeneralizations(
-  __FILE__, "Symmetric groups and generalizations, work in progress by Thomas. "
-);
-
 // conjugacy classes of type P are of size |Sn|/P.Fulton61z()
 int Partition::Fulton61z() const {
   int acc = 1;

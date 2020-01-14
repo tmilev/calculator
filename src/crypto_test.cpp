@@ -1,7 +1,5 @@
 #include "crypto.h"
 
-static ProjectInformationInstance projectInfoCryptoFile2(__FILE__, "Tests for crypto functions.");
-
 bool Crypto::Test::All() {
   Crypto::Test::Sha256();
   return true;

@@ -3,8 +3,6 @@
 #include "math_general.h"
 #include "crypto.h"
 
-static ProjectInformationInstance projectInfoMathImplementationTest(__FILE__, "Math routines tests. ");
-
 bool LargeIntegerUnsigned::Test::SerializationToHex(const LargeIntegerUnsigned& input) {
   MacroRegisterFunctionWithName("LargeIntUnsigned::Test::SerializationToHex");
   std::string resultCryptoHex, resultByteSerializationHex;

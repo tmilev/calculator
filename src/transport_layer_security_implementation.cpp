@@ -9,8 +9,6 @@
 
 #include <unistd.h> //<- close, open defined here
 
-static ProjectInformationInstance projectInfoInstanceTransportLayerSecurityImplementationInternal(__FILE__, "TSL/ssl implementation playground.");
-
 bool TransportLayerSecurity::LoadPEMCertificate(std::stringstream* commentsOnFailure) {
   std::string certificateContent;
   if (!FileOperations::LoadFileToStringVirtual_AccessUltraSensitiveFoldersIfNeeded(

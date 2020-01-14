@@ -11,10 +11,6 @@
 #include "database.h"
 #include "string_constants.h"
 
-static ProjectInformationInstance projectInfoWebServerExamAndTeachingRoutinesCustomCode(
-  __FILE__, "Routines for calculus teaching: calculator exam mode. Shared code. "
-);
-
 std::string CalculatorHTML::stringScoredQuizzes = "Quiz";
 std::string CalculatorHTML::stringPracticE = "Practice";
 std::string CalculatorHTML::stringProblemLink = "Problem";
@@ -1903,13 +1899,13 @@ bool CalculatorHTML::InterpretHtml(std::stringstream* comments) {
   if (!this->theProblemData.flagRandomSeedGiven) {
     int randomSeedFromTime = static_cast<signed>(time(nullptr));
     global.unsecurePseudoRandomGenerator.SetRandomSeed(103 + randomSeedFromTime);
-    this->randomSeedsIfInterpretationFails[0] = (103 + global.unsecurePseudoRandomGenerator.GetRandomInteger32bit()) % 100000000;
+    this->randomSeedsIfInterpretationFails[0] = (103 + global.unsecurePseudoRandomGenerator.GetRandomLessThanBillion()) % 100000000;
   } else {
     this->randomSeedsIfInterpretationFails[0] = static_cast<int>(this->theProblemData.randomSeed);
   }
   global.unsecurePseudoRandomGenerator.SetRandomSeed(this->randomSeedsIfInterpretationFails[0] + 1);
   for (int i = 1; i < this->randomSeedsIfInterpretationFails.size; i ++) {
-    this->randomSeedsIfInterpretationFails[i] = (103 + global.unsecurePseudoRandomGenerator.GetRandomInteger32bit()) % 100000000;
+    this->randomSeedsIfInterpretationFails[i] = (103 + global.unsecurePseudoRandomGenerator.GetRandomLessThanBillion()) % 100000000;
   }
   this->timePerAttempt.SetSize(0);
   this->timeIntermediatePerAttempt.SetSize(0);
@@ -1932,7 +1928,9 @@ bool CalculatorHTML::InterpretHtml(std::stringstream* comments) {
     this->timePerAttempt.AddOnTop(global.GetElapsedSeconds() - startTime);
     if (this->NumAttemptsToInterpret >= this->MaxInterpretationAttempts && comments != nullptr) {
       *comments << "Failed attempt " << this->NumAttemptsToInterpret
-      << " to interpret your file. Last interpretation failure follows. <br>"
+      << " to interpret your file. Attempted random seeds: "
+      << this->randomSeedsIfInterpretationFails.ToStringCommaDelimited()
+      << "Last interpretation failure follows. <br>"
       << commentsOnLastFailure.str();
     }
   }

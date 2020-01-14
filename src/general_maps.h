@@ -5,7 +5,6 @@
 
 #include "general_lists.h"
 #include "general_list_references.h"
-static ProjectInformationInstance projectInfoGeneralMapsHeader(__FILE__, "Header, Map implementation. ");
 
 template <class listType, class key, class value, unsigned int hashFunction(const key&) = key::HashFunction>
 class MapTemplate {

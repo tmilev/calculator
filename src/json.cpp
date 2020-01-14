@@ -4,8 +4,6 @@
 #include <sys/stat.h>
 #include <cassert>
 
-static ProjectInformationInstance projectInfoJSONHeader(__FILE__, "Implementation JSON.");
-
 void JSData::operator=(const LargeInteger& other) {
   this->reset();
   this->theType = JSData::token::tokenLargeInteger;

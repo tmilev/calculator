@@ -6,9 +6,6 @@
 #include "general_lists.h"
 #include "general_list_references.h"
 #include "general_maps.h"
-static ProjectInformationInstance projectInfoGeneralFileOperationsEncodingsHeader(
-  __FILE__, "Header, file routines, encodings and more. "
-);
 
 class FileOperations {
 public:

@@ -7,8 +7,6 @@
 #include "math_extra_semisimple_Lie_algebras_implementation.h"
 #include "math_extra_finite_groups_implementation.h"
 
-static ProjectInformationInstance projectInfoSemisimpleSubalgebrasOfSemisimpleLieAlgebrasCPP(__FILE__, "Semisimple subalgebras of the semisimple Lie algebras. ");
-
 template<>
 List<DynkinSimpleType>::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<DynkinSimpleType>() {
@@ -996,7 +994,7 @@ void SemisimpleSubalgebras::FindTheSSSubalgebrasInit() {
   if (this->owner == nullptr) {
     global.fatal << "<hr>Owner of semisimple subalgebras is zero" << global.fatal;
   }
-  if (global.theResponse.ReportAllowed()) {
+  if (global.theResponse.MonitoringAllowed()) {
     this->fileNameToLogComments = "LogFileComments_" +
     FileOperations::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) +
     ".html";

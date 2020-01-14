@@ -8,8 +8,6 @@
 #include <algorithm>
 #include <string.h>
 
-static ProjectInformationInstance projectInfoGeneralListsHeader(__FILE__, "Header, general routines. ");
-
 // IMPORTANT.
 // Convention on Hash functions.
 // 1. C++ objects that represent mathematically equal objects
@@ -166,9 +164,10 @@ public:
   int64_t randomNumbersGenerated;
   int bytesConsumed;
   List<unsigned char>& state();
-  void SetRandomSeed(int32_t inputRandomSeed);
-  unsigned int GetRandomInteger32bit();
   UnsecurePseudoRandomGenerator();
+  void SetRandomSeed(int inputRandomSeed);
+  unsigned int GetRandomLessThanBillion();
+  signed GetRandomPositiveLessThanBillion();
 };
 
 class MathRoutines {

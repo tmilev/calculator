@@ -6,8 +6,6 @@
 #include "json.h"
 #include "abstract_syntax_notation_one_decoder.h"
 
-static ProjectInformationInstance projectInfoCryptoHeader(__FILE__, "Crypto class declaration.");
-
 class PublicKeyRSA {
 public:
   static const unsigned int defaultExponent = 65537;

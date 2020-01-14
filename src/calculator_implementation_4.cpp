@@ -13,8 +13,6 @@
 #include <cmath>
 #include <cfloat>
 
-static ProjectInformationInstance projectInfoCalculatorParserCPP(__FILE__, "Calculator parser, implementation. ");
-
 Calculator::Calculator() {
   this->numOutputFileS = 0;
   this->flagHideLHS = false;

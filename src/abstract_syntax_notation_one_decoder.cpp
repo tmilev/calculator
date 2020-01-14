@@ -8,10 +8,6 @@
 #include "serialization_basic.h"
 #include "transport_layer_security.h"
 
-static ProjectInformationInstance projectInfoAbstractSyntaxNotationOneDecoderImplementation(
-  __FILE__, "Abstract syntax notation one (ASN-1) implementation. "
-);
-
 // Putting this in the header file currently breaks the linking for this particular tag.
 // Appears to be a compiler/linker bug (?).
 const unsigned char AbstractSyntaxNotationOneSubsetDecoder::tags::null0x05 = 5;

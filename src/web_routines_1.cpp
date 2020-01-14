@@ -1094,17 +1094,16 @@ void GlobalVariables::Response::Report(const std::string &input) {
 }
 
 void GlobalVariables::Response::Initiate(const std::string& message) {
+  // TODO(tmilev): investigate the performance of this snippet
   if (global.theResponse.flagTimedOut) {
     return;
   }
   MutexLockGuard guard(global.MutexReturnBytes);
   MacroRegisterFunctionWithName("GlobalVariables::Progress::Initiate");
   if (!global.theResponse.MonitoringAllowed()) {
-    global << logger::red << "DEBUG: monitoring not allowed. " << logger::endL;
     return;
   }
   if (!global.theResponse.flagReportDesired) {
-    global << logger::red << "DEBUG: monitoring not DESIRED. " << logger::endL;
     return;
   }
   global.theResponse.flagTimedOut = true;

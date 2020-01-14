@@ -317,7 +317,6 @@ public:
 
   std::string PhysicalPathProjectBase;
   std::string PhysicalPathServerBase;
-  std::string PhysicalPathHtmlFolder;
   std::string PhysicalNameFolderExecutable;
   std::string PhysicalNameExecutableNoPath;
   std::string PhysicalNameExecutableWithPath;

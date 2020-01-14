@@ -1426,7 +1426,13 @@ bool FileOperations::GetPhysicalFileNameFromVirtual(
       }
     }
   }
-  output = global.PhysicalPathHtmlFolder + inputCopy;
+  output = global.PhysicalPathServerBase + "public_html";
+  if (inputCopy.size() > 0) {
+    if (inputCopy[0] != '/') {
+      output += "/";
+    }
+  }
+  output += inputCopy;
   return true;
 }
 

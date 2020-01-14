@@ -382,8 +382,6 @@ std::string WebWorker::ToStringMessageShort() const {
   << HtmlRoutines::ConvertStringToHtmlString(global.PhysicalPathProjectBase, false);
   out << lineBreak << "\nPhysical address server base:\n"
   << HtmlRoutines::ConvertStringToHtmlString(global.PhysicalPathServerBase, false);
-  out << lineBreak << "\nPhysical address output folder:\n"
-  << HtmlRoutines::ConvertStringToHtmlString(global.PhysicalPathHtmlFolder, false);
   out << "<hr>";
   if (this->flagKeepAlive) {
     out << "<br><b>Keeping alive.</b><br>";
@@ -1288,6 +1286,9 @@ int WebWorker::ProcessFolder() {
 
 int WebWorker::ProcessFileDoesntExist() {
   this->SetHeader("HTTP/1.0 404 Object not found", "Content-Type: text/html");
+  // WARNING: cross-site scripting danger. Pay attention when editing.
+  // Use ConvertStringToHtmlString to sanitize strings.
+  // Never return non-sanitized user input back to the user.
   std::stringstream out;
   out << "<html>"
   << "<body>";
@@ -1311,8 +1312,10 @@ int WebWorker::ProcessFileDoesntExist() {
   << HtmlRoutines::ConvertStringToHtmlString(this->VirtualFileName, true)
   << "<br><b>Computed relative physical file name:</b> "
   << HtmlRoutines::ConvertStringToHtmlString(this->RelativePhysicalFileNamE, true);
-  out << "<br><b>Request:</b> " << HtmlRoutines::ConvertStringToHtmlString(global.requestType, true);
+  out << "<br><b>Request:</b> "
+  << HtmlRoutines::ConvertStringToHtmlString(global.requestType, true);
   out << "</body></html>";
+  // End of WARNING: cross-site scripting danger.
   this->WriteToBody(out.str());
   this->SendPending();
   return - 1;

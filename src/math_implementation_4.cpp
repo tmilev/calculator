@@ -227,7 +227,6 @@ std::string GlobalVariables::ToStringFolderInfo() const {
   out << "<br>Physical path server base: " << this->PhysicalPathServerBase;
   out << "<br>Diplay name executable: " << this->DisplayNameExecutable;
   out << "<br>Physical name folder below executable: " << this->PhysicalNameFolderExecutable;
-  out << "<br>Physical path output folder: " << this->PhysicalPathHtmlFolder;
   out << "<br>Display path output folder: " << this->DisplayPathOutputFolder;
   return out.str();
 }
@@ -343,8 +342,7 @@ void GlobalVariables::initDefaultFolderAndFileNames() {
   this->PhysicalNameFolderExecutable = this->PhysicalPathProjectBase + "bin/";
   this->PhysicalNameExecutableNoPath = FileOperations::GetFileNameFromFileNameWithPath(global.PathProjectBaseUserInputOrDeduced);
   this->PhysicalNameExecutableWithPath = this->PhysicalNameFolderExecutable + this->PhysicalNameExecutableNoPath;
-  this->PhysicalPathHtmlFolder = this->PhysicalPathProjectBase + "../public_html/";
-  this->PhysicalPathServerBase = this->PhysicalPathHtmlFolder;
+  this->PhysicalPathServerBase = this->PhysicalPathProjectBase;
   this->DisplayPathOutputFolder = "/output/";
 
   this->DisplayNameExecutable = "/cgi-bin/" + this->PhysicalNameExecutableNoPath;

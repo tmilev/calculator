@@ -118,7 +118,7 @@ void Calculator::reset() {
   this->EvaluatedExpressionsStack.Clear();
   this->theCruncherIds.Clear();
   this->theCruncherS.SetSize(0);
-  this->syntaxErrors ="";
+  this->syntaxErrors = "";
   this->evaluationErrors.SetSize(0);
   this->CurrentSyntacticStacK = &this->syntacticStacK;
   this->CurrrentSyntacticSouP = &this->syntacticSouP;

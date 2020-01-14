@@ -72,3 +72,11 @@ double FloatingPoint::Floor(double argument) {
 double FloatingPoint::Power(double base, double exponent) {
   return pow(base, exponent);
 }
+
+unsigned int MathRoutines::HashDouble(const double& input) {
+  if (std::isnan(input)) {
+    return 5;
+  }
+  return static_cast<unsigned>(input * 10000);
+}
+

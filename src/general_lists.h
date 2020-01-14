@@ -318,9 +318,7 @@ public:
     return result;
   }
   static double ReducePrecision(double x);
-  inline static unsigned int HashDouble(const double& input) {
-    return static_cast<unsigned>(input * 10000);
-  }
+  static unsigned int HashDouble(const double& input);
   static unsigned int HashVectorDoubles(const Vector<double>& input);
   static unsigned int HashListDoubles(const List<double>& input);
   static unsigned int HashListInts(const List<int>& input);

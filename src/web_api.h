@@ -17,6 +17,7 @@ public:
   List<std::string> jsFileNames;
   List<std::string> jsFileContents;
 
+  bool FileNameAllowedToBeMissing(const std::string& input);
   void BuildHtmlJSpage(bool appendBuildHash);
   std::string GetOnePageJSBrowserify();
 };

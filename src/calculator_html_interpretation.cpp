@@ -513,6 +513,13 @@ void BuilderApplication::BuildHtmlJSpage(bool appendBuildHash) {
   this->htmlJSbuild = outFirstPart.str();
 }
 
+bool BuilderApplication::FileNameAllowedToBeMissing(const std::string& input) {
+  if (input == "/calculator-html/external/build/output-min.js") {
+    return true;
+  }
+  return  false;
+}
+
 std::string WebAPIResponse::GetOnePageJS(bool appendBuildHash) {
   MacroRegisterFunctionWithName("WebAPIReponse::GetOnePageJS");
   BuilderApplication theInterpretation;
@@ -534,7 +541,16 @@ std::string WebAPIResponse::GetOnePageJS(bool appendBuildHash) {
       false,
       &errorStream
     )) {
-      return errorStream.str();
+      if (!theInterpretation.FileNameAllowedToBeMissing(theInterpretation.jsFileNames[i])) {
+        errorStream << "Failed to load javascript file: " << theInterpretation.jsFileNames[i];
+        return errorStream.str();
+      }
+      std::stringstream moduleNotFound;
+      moduleNotFound << "console.log(\"File '"
+      << theInterpretation.jsFileNames[i] << "' not found. "
+      << "Failure to find that file has been "
+      << "specifically white-listed as ok. \");";
+      theInterpretation.jsFileContents[i] = moduleNotFound.str();
     }
   }
   return theInterpretation.GetOnePageJSBrowserify();

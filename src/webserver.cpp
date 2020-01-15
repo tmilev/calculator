@@ -4286,6 +4286,9 @@ int WebServer::main(int argc, char **argv) {
     global.server().AnalyzeMainArguments(argc, argv);
     // Initializes server base path.
     global.initDefaultFolderAndFileNames();
+    // Ensure the server path coincides with the current
+    // directory:
+    global.ChDir(global.PathProjectBaseUserInputOrDeduced);
     // Initializes folder locations needed by logging facilities.
     FileOperations::InitializeFoldersSensitive();
 

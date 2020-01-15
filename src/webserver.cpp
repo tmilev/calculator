@@ -4295,6 +4295,10 @@ int WebServer::main(int argc, char **argv) {
     global << logger::green << "Project base folder: "
     << logger::blue << global.PhysicalPathProjectBase
     << logger::endL;
+    global << logger::green << "Current folder: "
+    << logger::blue << FileOperations::GetCurrentFolder()
+    << logger::endL;
+
     // Compute configuration file location.
     // Load the configuration file.
     global.ConfigurationLoad();

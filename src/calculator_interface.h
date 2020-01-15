@@ -499,6 +499,21 @@ private:
     bool unfoldCommandEnclosures = true,
     JSData* outputJS = nullptr
   ) const;
+  bool ToStringDivide(
+    std::stringstream& out,
+    FormatExpressions* theFormat
+  ) const;
+  bool ToStringPower(
+    std::stringstream& out,
+    FormatExpressions* theFormat
+  ) const;
+  bool ToStringEndStatement(
+    std::stringstream& out,
+    Expression* startingExpression,
+    JSData* outputJS,
+    FormatExpressions* theFormat
+  ) const;
+
   JSData ToJSData(FormatExpressions* theFormat, const Expression& startingExpression) const;
   static unsigned int HashFunction(const Expression& input) {
     return input.HashFunction();

@@ -15,6 +15,7 @@ public:
     static const std::string problems;
     static const std::string topicLists;
     static const std::string topiclists;
+    static const std::string calculator;
   };
   HashedList<std::string, MathRoutines::HashString> inputs;
   bool flagTestAll;
@@ -36,6 +37,7 @@ const std::string Test::Suites::database = "database";
 const std::string Test::Suites::problems = "problems";
 const std::string Test::Suites::topicLists = "topicLists";
 const std::string Test::Suites::topiclists = "topiclists";
+const std::string Test::Suites::calculator = "calculator";
 
 void Test::Run() {
   global << "Testing ..." << logger::endL;
@@ -46,6 +48,9 @@ void Test::Run() {
   if (this->ShouldTest(Test::Suites::problems)) {
     CalculatorHTML::Test::All();
   }
+  if (this->ShouldTest(Test::Suites::calculator)) {
+    Calculator::Test::All();
+  }
   if (this->flagTestAll) {
     JSData::Test::All();
     ASNObject::initializeNonThreadSafe();
@@ -54,7 +59,6 @@ void Test::Run() {
     X509Certificate::Test::All();
     Expression::Test::All();
     LargeIntegerUnsigned::Test::All();
-    Calculator::Test::All();
     GlobalVariables::Test::All();
   }
   if (

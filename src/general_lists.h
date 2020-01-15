@@ -513,13 +513,19 @@ class StateMaintainer {
 public:
   basicType* toMaintain;
   basicType contentAtStart;
+  StateMaintainer() {
+    this->toMaintain = nullptr;
+  }
   StateMaintainer(basicType& inputToMaintain) {
+    this->initialize(inputToMaintain);
+  }
+  void initialize(basicType& inputToMaintain) {
     this->toMaintain = &inputToMaintain;
     this->contentAtStart = inputToMaintain;
   }
   ~StateMaintainer() {
     if (this->toMaintain == nullptr) {
-      fatalCrash("Non-initialized state maintainer. ");
+      return;
     }
     *(this->toMaintain) = this->contentAtStart;
     this->toMaintain = nullptr;

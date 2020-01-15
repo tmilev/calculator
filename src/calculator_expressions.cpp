@@ -3235,6 +3235,247 @@ std::string Expression::ToStringTreeHtml(int depth) const {
   return out.str();
 }
 
+bool Expression::ToStringDivide(
+  std::stringstream& out,
+  FormatExpressions* theFormat
+) const {
+  if (!this->StartsWith(this->owner->opDivide(), 3)) {
+    return false;
+  }
+  bool doUseFrac = this->owner->flagUseFracInRationalLaTeX;
+  if (
+    doUseFrac &&
+    ((*this)[1].StartsWith(this->owner->opTimes()) || (*this)[1].StartsWith(this->owner->opDivide()))
+  ) {
+    List<Expression> multiplicandsLeft;
+    this->GetMultiplicandsDivisorsRecursive(multiplicandsLeft, 0);
+    for (int i = 0; i < multiplicandsLeft.size; i ++) {
+      if (
+        multiplicandsLeft[i].StartsWith(this->owner->opIntegral()) ||
+        multiplicandsLeft[i].IsOperationGiven(this->owner->opIntegral())
+      ) {
+        doUseFrac = false;
+        break;
+      }
+    }
+  }
+  if (!doUseFrac) {
+    std::string firstE = (*this)[1].ToString(theFormat);
+    std::string secondE = (*this)[2].ToString(theFormat);
+    bool firstNeedsBrackets =
+      !((*this)[1].IsListStartingWithAtom(this->owner->opTimes()) ||
+      (*this)[1].IsListStartingWithAtom(this->owner->opDivide()));
+    bool secondNeedsBrackets = true;
+    if ((*this)[2].IsOfType<Rational>()) {
+      if ((*this)[2].GetValue<Rational>().IsInteger()) {
+        secondNeedsBrackets = false;
+      }
+    }
+    if (firstNeedsBrackets) {
+      out << "(" << firstE << ")";
+    } else {
+      out << firstE;
+    }
+    out << "/";
+    if (secondNeedsBrackets) {
+      out << "(" << secondE << ")";
+    } else {
+      out << secondE;
+    }
+  } else {
+    StateMaintainer<bool> maintain;
+    if (theFormat != nullptr) {
+      maintain.initialize(theFormat->flagExpressionNewLineAllowed);
+      theFormat->flagExpressionNewLineAllowed = false;
+    }
+    std::string firstE = (*this)[1].ToString(theFormat);
+    std::string secondE = (*this)[2].ToString(theFormat);
+    out << "\\frac{" << firstE << "}{" << secondE << "}";
+  }
+  return true;
+}
+
+bool Expression::ToStringPower(
+  std::stringstream& out,
+  FormatExpressions* theFormat
+) const {
+  if (!this->StartsWith(this->owner->opThePower(), 3)) {
+    return false;
+  }
+  bool involvesExponentsInterpretedAsFunctions = false;
+  const Expression& firstE = (*this)[1];
+  const Expression& secondE = (*this)[2];
+  if (firstE.StartsWith(- 1, 2)) {
+    bool shouldProceed = firstE[0].IsAtomWhoseExponentsAreInterpretedAsFunction() &&
+    !secondE.IsEqualToMOne() && secondE.IsRational();
+    if (
+      shouldProceed && firstE[0].IsOperationGiven(this->owner->opLog()) &&
+      this->owner->flagUseLnAbsInsteadOfLogForIntegrationNotation
+    ) {
+      shouldProceed = false;
+    }
+    if (shouldProceed) {
+      involvesExponentsInterpretedAsFunctions = true;
+      Expression newFunE;
+      newFunE.MakeXOX(*this->owner, this->owner->opThePower(), firstE[0], (*this)[2]);
+      newFunE.CheckConsistency();
+      out << "{" << newFunE.ToString(theFormat) << "}{}";
+      if (
+        firstE[1].NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost() ||
+        firstE[1].StartsWith(this->owner->opTimes())
+      ) {
+        out << "\\left(" << firstE[1].ToString(theFormat) << "\\right)";
+      } else {
+        out << firstE[1].ToString(theFormat);
+      }
+    }
+  }
+  if (!involvesExponentsInterpretedAsFunctions) {
+    bool isSqrt = false;
+    if ((*this)[2].IsOfType<Rational>()) {
+      if ((*this)[2].GetValue<Rational>().IsEqualTo(Rational(1, 2))) {
+        isSqrt = true;
+      }
+    }
+    if (isSqrt) {
+      out << "\\sqrt{" << (*this)[1].ToString(theFormat) << "}";
+    } else {
+      std::string secondEstr = (*this)[2].ToString(theFormat);
+      std::string firstEstr = (*this)[1].ToString(theFormat);
+      if ((*this)[1].NeedsParenthesisForBaseOfExponent()) {
+        bool useBigParenthesis = true;
+        if ((*this)[1].StartsWith(this->owner->opDivide())) {
+          useBigParenthesis = true;
+        }
+        if (useBigParenthesis) {
+          out << "\\left(";
+        } else {
+          out << "(";
+        }
+        out << firstEstr;
+        if (useBigParenthesis) {
+          out << "\\right)";
+        } else {
+          out << ")";
+        }
+      } else {
+        out << firstEstr;
+      }
+      out << "^{" << secondEstr << "}";
+    }
+  }
+  return true;
+}
+
+bool Expression::ToStringEndStatement(
+  std::stringstream& out,
+  Expression* startingExpression,
+  JSData* outputJS,
+  FormatExpressions* theFormat
+) const {
+  if (!this->IsListStartingWithAtom(this->owner->opEndStatement())) {
+    return false;
+  }
+  bool isFinal = false;
+  if (theFormat != nullptr) {
+    isFinal = theFormat->flagExpressionIsFinal;
+  }
+  bool createTable = (startingExpression != nullptr);
+  bool createSingleTable = false;
+  if (createTable == false && theFormat != nullptr && !global.flagRunningCommandLine) {
+    createSingleTable = theFormat->flagMakingExpressionTableWithLatex;
+    theFormat->flagMakingExpressionTableWithLatex = false;
+  }
+  if (!createSingleTable && !createTable && this->size() > 2) {
+    out << "(";
+  }
+  if (createSingleTable) {
+    out << "<table class =\"tableCalculatorOutput\">";
+  }
+  std::string currentInput, currentOutput;
+  if (outputJS != nullptr) {
+    (*outputJS)["input"].theType = JSData::token::tokenArray;
+    (*outputJS)["output"].theType = JSData::token::tokenArray;
+  }
+  for (int i = 1; i < this->size(); i ++) {
+    const Expression currentE = (*this)[i];
+    if (createTable) {
+      out << "<tr><td class =\"cellCalculatorInput\">";
+      if (!this->owner->flagHideLHS) {
+        if (i < (*startingExpression).size()) {
+          currentInput = HtmlRoutines::GetMathSpanPure((*startingExpression)[i].ToString(theFormat));
+        } else {
+          currentInput = "No matching starting expression - possible use of the Melt keyword.";
+        }
+      } else {
+        currentInput = "...";
+      }
+      out << currentInput;
+      if (outputJS != nullptr) {
+        (*outputJS)["input"][i - 1] = currentInput;
+      }
+      if (i != this->size() - 1) {
+        out << ";";
+      }
+      out << "</td><td class =\"cellCalculatorResult\">";
+      if ((*this)[i].IsOfType<std::string>() && isFinal) {
+        currentOutput = StringRoutines::ConvertStringToCalculatorDisplay(currentE.GetValue<std::string>());
+      } else if ((
+          currentE.HasType<Plot> () ||
+          currentE.IsOfType<SemisimpleSubalgebras>() ||
+          currentE.IsOfType<WeylGroupData>() ||
+          currentE.IsOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >()
+        ) && isFinal
+      ) {
+        currentOutput = currentE.ToString(theFormat);
+      } else {
+        currentOutput = HtmlRoutines::GetMathSpanPure(currentE.ToString(theFormat), 1700);
+      }
+      currentOutput += currentE.ToStringAllSlidersInExpression();
+      if (outputJS != nullptr) {
+        (*outputJS)["output"][i - 1] = currentOutput;
+      }
+      out << currentOutput;
+      out << "</td></tr>";
+    } else {
+      bool addLatexDelimiter = true;
+      std::stringstream outWithDelimiter;
+      if (createSingleTable) {
+        out << "<tr><td>\n";
+        addLatexDelimiter = !currentE.HasType<Plot>();
+        if (addLatexDelimiter) {
+          outWithDelimiter << "\\(";
+        }
+      }
+      outWithDelimiter << currentE.ToString(theFormat);
+      if (createSingleTable && addLatexDelimiter) {
+        outWithDelimiter << "\\)";
+      }
+      outWithDelimiter << currentE.ToStringAllSlidersInExpression();
+      out << outWithDelimiter.str();
+      if (outputJS != nullptr) {
+        (*outputJS)["output"][i] = outWithDelimiter.str();
+      }
+      if (createSingleTable) {
+        out << "</td><tr>\n";
+      }
+      if (i != this->size() - 1 && !createSingleTable) {
+        out << ";";
+      }
+    }
+    if (theFormat != nullptr) {
+      theFormat->flagExpressionIsFinal = isFinal;
+    }
+  }
+  if (createSingleTable) {
+    out << "</table>";
+  }
+  if (!createSingleTable && !createTable && this->size() > 2) {
+    out << ")";
+  }
+  return true;
+}
+
 std::string Expression::ToString(
   FormatExpressions* theFormat,
   Expression* startingExpression,
@@ -3272,7 +3513,6 @@ std::string Expression::ToString(
   std::stringstream out;
   bool isFinal = theFormat->flagExpressionIsFinal;
   bool allowNewLine = theFormat->flagExpressionNewLineAllowed;
-  bool oldAllowNewLine = allowNewLine;
   bool useFrac = this->owner->flagUseFracInRationalLaTeX;
   if (
     !this->IsOfType<std::string>() &&
@@ -3370,58 +3610,7 @@ std::string Expression::ToString(
     out << (*this)[1].ToString(theFormat) << " :if \\left("
     << (*this)[2].ToString(theFormat) << "\\right)="
     << (*this)[3].ToString(theFormat);
-  } else if (this->StartsWith(this->owner->opDivide(), 3)) {
-    bool doUseFrac = this->owner->flagUseFracInRationalLaTeX;
-    if (
-      doUseFrac &&
-      ((*this)[1].StartsWith(this->owner->opTimes()) || (*this)[1].StartsWith(this->owner->opDivide()))
-    ) {
-      List<Expression> multiplicandsLeft;
-      this->GetMultiplicandsDivisorsRecursive(multiplicandsLeft, 0);
-      for (int i = 0; i < multiplicandsLeft.size; i ++) {
-        if (
-          multiplicandsLeft[i].StartsWith(this->owner->opIntegral()) ||
-          multiplicandsLeft[i].IsOperationGiven(this->owner->opIntegral())
-        ) {
-          doUseFrac = false;
-          break;
-        }
-      }
-    }
-    if (!doUseFrac) {
-      std::string firstE = (*this)[1].ToString(theFormat);
-      std::string secondE = (*this)[2].ToString(theFormat);
-      bool firstNeedsBrackets =
-        !((*this)[1].IsListStartingWithAtom(this->owner->opTimes()) ||
-        (*this)[1].IsListStartingWithAtom(this->owner->opDivide()));
-      bool secondNeedsBrackets = true;
-      if ((*this)[2].IsOfType<Rational>()) {
-        if ((*this)[2].GetValue<Rational>().IsInteger()) {
-          secondNeedsBrackets = false;
-        }
-      }
-      if (firstNeedsBrackets) {
-        out << "(" << firstE << ")";
-      } else {
-        out << firstE;
-      }
-      out << "/";
-      if (secondNeedsBrackets) {
-        out << "(" << secondE << ")";
-      } else {
-        out << secondE;
-      }
-    } else {
-      if (theFormat != nullptr) {
-        theFormat->flagExpressionNewLineAllowed = false;
-      }
-      std::string firstE = (*this)[1].ToString(theFormat);
-      std::string secondE = (*this)[2].ToString(theFormat);
-      out << "\\frac{" << firstE << "}{" << secondE << "}";
-      if (theFormat != nullptr) {
-        theFormat->flagExpressionNewLineAllowed = oldAllowNewLine;
-      }
-    }
+  } else if (this->ToStringDivide(out, theFormat)) {
   } else if (this->StartsWith(this->owner->opTensor(), 3)) {
     this->ToStringOpMultiplicative(out, "\\otimes", theFormat);
   } else if (this->StartsWith(this->owner->opIn(), 3)) {
@@ -3480,69 +3669,7 @@ std::string Expression::ToString(
     }
   } else if (this->StartsWith(this->owner->opAbsoluteValue(), 2)) {
     out << "\\left|" << (*this)[1].ToString(theFormat) << "\\right|";
-  } else if (this->StartsWith(this->owner->opThePower(), 3)) {
-    bool involvesExponentsInterpretedAsFunctions = false;
-    const Expression& firstE = (*this)[1];
-    const Expression& secondE = (*this)[2];
-    if (firstE.StartsWith(- 1, 2)) {
-      bool shouldProceed = firstE[0].IsAtomWhoseExponentsAreInterpretedAsFunction() &&
-      !secondE.IsEqualToMOne() && secondE.IsRational();
-      if (
-        shouldProceed && firstE[0].IsOperationGiven(this->owner->opLog()) &&
-        this->owner->flagUseLnAbsInsteadOfLogForIntegrationNotation
-      ) {
-        shouldProceed = false;
-      }
-      if (shouldProceed) {
-        involvesExponentsInterpretedAsFunctions = true;
-        Expression newFunE;
-        newFunE.MakeXOX(*this->owner, this->owner->opThePower(), firstE[0], (*this)[2]);
-        newFunE.CheckConsistency();
-        out << "{" << newFunE.ToString(theFormat) << "}{}";
-        if (
-          firstE[1].NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost() ||
-          firstE[1].StartsWith(this->owner->opTimes())
-        ) {
-          out << "\\left(" << firstE[1].ToString(theFormat) << "\\right)";
-        } else {
-          out << firstE[1].ToString(theFormat);
-        }
-      }
-    }
-    if (!involvesExponentsInterpretedAsFunctions) {
-      bool isSqrt = false;
-      if ((*this)[2].IsOfType<Rational>()) {
-        if ((*this)[2].GetValue<Rational>().IsEqualTo(Rational(1, 2))) {
-          isSqrt = true;
-        }
-      }
-      if (isSqrt) {
-        out << "\\sqrt{" << (*this)[1].ToString(theFormat) << "}";
-      } else {
-        std::string secondEstr = (*this)[2].ToString(theFormat);
-        std::string firstEstr = (*this)[1].ToString(theFormat);
-        if ((*this)[1].NeedsParenthesisForBaseOfExponent()) {
-          bool useBigParenthesis = true;
-          if ((*this)[1].StartsWith(this->owner->opDivide())) {
-            useBigParenthesis = true;
-          }
-          if (useBigParenthesis) {
-            out << "\\left(";
-          } else {
-            out << "(";
-          }
-          out << firstEstr;
-          if (useBigParenthesis) {
-            out << "\\right)";
-          } else {
-            out << ")";
-          }
-        } else {
-          out << firstEstr;
-        }
-        out << "^{" << secondEstr << "}";
-      }
-    }
+  } else if (this->ToStringPower(out, theFormat)) {
   } else if (this->StartsWith(this->owner->opPlus())) {
     if (this->children.size < 3) {
       global.fatal << "Plus operation takes at least 2 arguments, whereas this expression has "
@@ -3800,100 +3927,7 @@ std::string Expression::ToString(
     }
   } else if (this->IsListStartingWithAtom(this->owner->opUnionNoRepetition())) {
     out << (*this)[1].ToString(theFormat) << "\\sqcup " << (*this)[2].ToString(theFormat);
-  } else if (this->IsListStartingWithAtom(this->owner->opEndStatement())) {
-    bool createTable = (startingExpression != nullptr);
-    bool createSingleTable = false;
-    if (createTable == false && theFormat != nullptr && !global.flagRunningCommandLine) {
-      createSingleTable = theFormat->flagMakingExpressionTableWithLatex;
-      theFormat->flagMakingExpressionTableWithLatex = false;
-    }
-    if (!createSingleTable && !createTable && this->size() > 2) {
-      out << "(";
-    }
-    if (createSingleTable) {
-      out << "<table class =\"tableCalculatorOutput\">";
-    }
-    std::string currentInput, currentOutput;
-    if (outputJS != nullptr) {
-      (*outputJS)["input"].theType = JSData::token::tokenArray;
-      (*outputJS)["output"].theType = JSData::token::tokenArray;
-    }
-    for (int i = 1; i < this->size(); i ++) {
-      const Expression currentE = (*this)[i];
-      if (createTable) {
-        out << "<tr><td class =\"cellCalculatorInput\">";
-        if (!this->owner->flagHideLHS) {
-          if (i < (*startingExpression).size()) {
-            currentInput = HtmlRoutines::GetMathSpanPure((*startingExpression)[i].ToString(theFormat));
-          } else {
-            currentInput = "No matching starting expression - possible use of the Melt keyword.";
-          }
-        } else {
-          currentInput = "...";
-        }
-        out << currentInput;
-        if (outputJS != nullptr) {
-          (*outputJS)["input"][i - 1] = currentInput;
-        }
-        if (i != this->size() - 1) {
-          out << ";";
-        }
-        out << "</td><td class =\"cellCalculatorResult\">";
-        if ((*this)[i].IsOfType<std::string>() && isFinal) {
-          currentOutput = StringRoutines::ConvertStringToCalculatorDisplay(currentE.GetValue<std::string>());
-        } else if ((
-            currentE.HasType<Plot> () ||
-            currentE.IsOfType<SemisimpleSubalgebras>() ||
-            currentE.IsOfType<WeylGroupData>() ||
-            currentE.IsOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >()
-          ) && isFinal
-        ) {
-          currentOutput = currentE.ToString(theFormat);
-        } else {
-          currentOutput = HtmlRoutines::GetMathSpanPure(currentE.ToString(theFormat), 1700);
-        }
-        currentOutput += currentE.ToStringAllSlidersInExpression();
-        if (outputJS != nullptr) {
-          (*outputJS)["output"][i - 1] = currentOutput;
-        }
-        out << currentOutput;
-        out << "</td></tr>";
-      } else {
-        bool addLatexDelimiter = true;
-        std::stringstream outWithDelimiter;
-        if (createSingleTable) {
-          out << "<tr><td>\n";
-          addLatexDelimiter = !currentE.HasType<Plot>();
-          if (addLatexDelimiter) {
-            outWithDelimiter << "\\(";
-          }
-        }
-        outWithDelimiter << currentE.ToString(theFormat);
-        if (createSingleTable && addLatexDelimiter) {
-          outWithDelimiter << "\\)";
-        }
-        outWithDelimiter << currentE.ToStringAllSlidersInExpression();
-        out << outWithDelimiter.str();
-        if (outputJS != nullptr) {
-          (*outputJS)["output"][i] = outWithDelimiter.str();
-        }
-        if (createSingleTable) {
-          out << "</td><tr>\n";
-        }
-        if (i != this->size() - 1 && !createSingleTable) {
-          out << ";";
-        }
-      }
-      if (theFormat != nullptr) {
-        theFormat->flagExpressionIsFinal = isFinal;
-      }
-    }
-    if (createSingleTable) {
-      out << "</table>";
-    }
-    if (!createSingleTable && !createTable && this->size() > 2) {
-      out << ")";
-    }
+  } else if (this->ToStringEndStatement(out, startingExpression, outputJS, theFormat)) {
   } else if (this->StartsWith(this->owner->opError(), 2)) {
     this->owner->NumErrors ++;
     out << "(Error~ " << this->owner->NumErrors << ":~ see~ comments)";

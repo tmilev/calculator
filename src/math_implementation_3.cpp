@@ -1050,10 +1050,14 @@ void FileOperations::InitializeFoldersNonSensitive() {
   // to compute the folder locations below.
 
   std::string HTMLCommonFolder = global.configuration[Configuration::HTMLCommon].theString;
-  List<List<std::string> > links = FileOperations::FolderVirtualLinksDefault();
+  List<List<std::string> >& links = FileOperations::FolderVirtualLinksDefault();
   for (int i = 0; i < links.size; i ++) {
     std::string& key = links[i][0];
-    std::string& value = links[i][1];
+    std::string value = global.configuration.GetValue(key).theString;
+    if (value == "") {
+      global.fatal << logger::red << "Unexpected empty folder mapping: key: "
+      << key << ", value: " << value << global.fatal;
+    }
     folderSubstitutionsNonSensitive.SetKeyValue(key, value);
     folderSubstitutionsNonSensitive.SetKeyValue("/" + key, value);
   }

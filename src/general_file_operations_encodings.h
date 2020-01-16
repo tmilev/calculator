@@ -174,7 +174,8 @@ public:
     bool accessSensitiveFolders = false,
     bool accessUltraSensitiveFolders = false
   );
-  static bool OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(std::fstream& theFile,
+  static bool OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(
+    std::fstream& theFile,
     const std::string& theFileName,
     bool OpenInAppendMode,
     bool truncate,

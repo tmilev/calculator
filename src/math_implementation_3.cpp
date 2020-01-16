@@ -1009,9 +1009,14 @@ List<List<std::string> >& FileOperations::InitializeFolderVirtualLinksDefaults()
   // Substitution order matters, earlier substitutions are processed first.
   // Once a substitution is found, no more substitutions are carried out.
   result = List<List<std::string> >({
-    List<std::string>({Configuration::HTMLCommon                , "html-common/"                               }),
+
+    List<std::string>({Configuration::HTMLAceSrcMin             , "html-common/ace/src-min/"                   }),
+    List<std::string>({Configuration::HTMLJQueryMinified        , "html-common/jquery/jquery.min.js"           }),
+    List<std::string>({Configuration::HTMLJQueryUI              , "html-common/jquery_ui/"                     }),
+    List<std::string>({Configuration::HTMLMathQuill             , "html-common/mathquill/"                     }),
     List<std::string>({Configuration::HTMLCommonFonts           , "html-common/fonts"                          }),
     List<std::string>({Configuration::HTMLCommonFont            , "html-common/fonts"                          }),
+    List<std::string>({Configuration::HTMLCommon                , "html-common/"                               }),
     List<std::string>({Configuration::calculatorHTML            , "calculator-html/"                           }),
     List<std::string>({Configuration::publicHTML                , "public_html/"                               }),
     List<std::string>({Configuration::certificatesPublic        , "certificates-public/"                       }),

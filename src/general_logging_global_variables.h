@@ -88,13 +88,16 @@ class logger {
   logger& doTheLogging(const theType& toBePrinted);
 };
 
-// All global objects except instances of ProjectInformationInstance are
-// to be members of variable:
+// All global objects are either
+// 1) fields of variable:  GlobalVariables& global
+// or
+// 2) are returned as results of static functions calls along the pattern below.
 //
-// GlobalVariables&global.().
+// object& getObject() { static object result; result result; }
 //
-// No other global variables allowed: if you see any, they should be refactored
-// and folded into global.).
+// or
+// 3) are small static objects without constructors/destructors.
+//    Those include global strings, integers and timeval structures.
 //
 // Discussion.
 //

@@ -174,6 +174,11 @@ std::string Configuration::mathJaxSetup                             = "mathJaxSe
 std::string Configuration::HTMLCommon                 = "html-common/"                                         ;
 std::string Configuration::HTMLCommonFonts            = "html-common/fonts"                                    ;
 std::string Configuration::HTMLCommonFont             = "html-common/font"                                     ;
+std::string Configuration::HTMLJQueryMinified         = "html-common/jquery/jquery.min.js"                     ;
+std::string Configuration::HTMLAceSrcMin              = "html-common/ace/src-min/"                             ;
+std::string Configuration::HTMLJQueryUI               = "html-common/jquery_ui/"                               ;
+std::string Configuration::HTMLMathQuill              = "html-common/mathquill/"                               ;
+
 std::string Configuration::calculatorHTML             = "calculator-html/"                                     ;
 std::string Configuration::publicHTML                 = "public_html/"                                         ;
 std::string Configuration::certificatesPublic         = "certificates-public/"                                 ;

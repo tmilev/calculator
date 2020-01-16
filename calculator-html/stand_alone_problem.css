@@ -133,8 +133,8 @@ sectionSelection {
 }
 
 button.buttonNavigationStandard {
-  width: 25px; 
-  height: 21.2px; 
+  width: 25px;
+  height: 21.2px;
   padding: 0;
   box-shadow: var(--box-shadow-default);
   border: none;
@@ -340,7 +340,7 @@ button.buttonStandard {
   text-align: left;
   outline: none;
   font-size: medium;
-  transition: 0.6s; 
+  transition: 0.6s;
 }
 
 button.buttonStandard:hover {
@@ -361,7 +361,7 @@ button.buttonSaveEdit {
   text-align: center;
   outline: none;
   font-size: medium;
-  transition: 0.6s; 
+  transition: 0.6s;
 }
 
 button.buttonSaveEdit:hover {
@@ -380,7 +380,7 @@ button.buttonClone {
   text-align: center;
   outline: none;
   font-size: medium;
-  transition: 0.6s; 
+  transition: 0.6s;
 }
 
 button.buttonClone:hover {
@@ -699,7 +699,7 @@ textarea.currentFileNameArea {
   height: 25px;
   margin-bottom: -8px;
   overflow-x: hidden;
-} 
+}
 
 div.divOnePageApp {
   /* class assigned to main one page container at run time. */
@@ -746,7 +746,7 @@ div.divMenuSeparator {
 }
 
 div.headChapter {
-  padding-bottom: 10px; 
+  padding-bottom: 10px;
   padding-left: 0;
   margin-left: 0;
   margin-right: 0;
@@ -757,7 +757,7 @@ div.headChapter {
 }
 
 div.bodyChapter {
-  padding: 0px; 
+  padding: 0px;
   margin: 0px;
   display: block;
   width: 100%;
@@ -767,7 +767,7 @@ div.bodyChapter {
 }
 
 div.headSection {
-  padding-bottom: 10px; 
+  padding-bottom: 10px;
   margin-left: 0;
   margin-right: 0;
   padding-bottom: 5px;
@@ -777,7 +777,7 @@ div.headSection {
 }
 
 div.bodySection {
-  padding: 0px; 
+  padding: 0px;
   margin: 0px;
   display: block;
   width: 100%;
@@ -787,7 +787,7 @@ div.bodySection {
 }
 
 div.headSubsection {
-  padding-bottom: 10px; 
+  padding-bottom: 10px;
   margin-left: 0;
   margin-right: 0;
   padding-bottom: 5px;
@@ -797,7 +797,7 @@ div.headSubsection {
 }
 
 div.bodySubsection {
-  padding: 0px; 
+  padding: 0px;
   margin: 0px;
   width: 100%;
   display: block;
@@ -1043,7 +1043,7 @@ span.problemLinkSelectedQuiz {
   -webkit-border-radius: 3px;
   border-radius: 3px;
   font-weight: bold;
-  text-decoration: none;  
+  text-decoration: none;
 }
 
 a.problemLinkQuiz {
@@ -1058,7 +1058,7 @@ a.problemLinkQuiz {
   text-decoration: none;
 }
 
-a.problemLinkQuiz:hover { 
+a.problemLinkQuiz:hover {
   background-color: Orange;
 }
 
@@ -1121,7 +1121,7 @@ a.linkForgotLoginPass {
   transition: 0.6s;
 }
 
-a.linkForgotLoginPass:hover { 
+a.linkForgotLoginPass:hover {
   background-color: Orange;
 }
 
@@ -1138,7 +1138,7 @@ a.linkSignUp {
   transition: 0.6s;
 }
 
-a.linkSignUp:hover { 
+a.linkSignUp:hover {
   background-color: LawnGreen;
 }
 
@@ -1165,7 +1165,7 @@ div.divProfilePictureContainerExpanded {
   max-height: 96px;
   transition: all 1s;
   margin-left: auto;
-  margin-right: auto;  
+  margin-right: auto;
 }
 
 div.divProfilePictureContainerCollapsed {
@@ -1176,7 +1176,7 @@ div.divProfilePictureContainerCollapsed {
 
 img {
   transition: all 1;
-  width: 100%; 
+  width: 100%;
   object-fit: scale-down;
   /*object-fit: contain;*/
 }
@@ -1281,7 +1281,7 @@ button.buttonSignUp {
   transition: 1.5s;
 }
 
-button.buttonSignUp:hover { 
+button.buttonSignUp:hover {
   background-color: lightgreen;
 }
 
@@ -1320,8 +1320,8 @@ button.buttonSelectPage:hover {
 }
 
 button.buttonMQ {
-  width: 30px; 
-  height: 30px; 
+  width: 30px;
+  height: 30px;
   border: none;
   border-radius: 3px;
   transition: all 2s;
@@ -1410,7 +1410,7 @@ span.currentCourseIndicator {
   transition: all 1s;
 }
 
-#divEditorAce { 
+#divEditorAce {
   height: 500px;
   font-size: 100%;
 }

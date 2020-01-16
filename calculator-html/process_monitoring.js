@@ -12,7 +12,7 @@ function Monitor() {
   this.timeOutOldCounter = 0;
   this.timeOutCounter = 0;
   /**@type{string} */
-  this.currentWorkerId = ""; 
+  this.currentWorkerId = "";
   this.currentTimeOutHandler = null;
   this.ownerCalculator = null;
 }
@@ -30,8 +30,8 @@ Monitor.prototype.start = function(
   this.progressReport();
 }
 
-Monitor.prototype.progressReport = function() { 
-  // Process monitor is started by 
+Monitor.prototype.progressReport = function() {
+  // Process monitor is started by
   if (this.isFinished) {
     return;
   }
@@ -46,7 +46,7 @@ Monitor.prototype.progressReport = function() {
   submitRequests.submitGET({
     url: sURL,
     progress: ids.domElements.spanProgressCalculatorInput,
-    callback: this.callbackPauseRequest.bind(this), 
+    callback: this.callbackPauseRequest.bind(this),
   });
   this.clearTimeout();
   this.currentTimeOutHandler = setTimeout(this.progressReport.bind(this), this.timeIncrement * 1000);
@@ -88,9 +88,9 @@ Monitor.prototype.callbackPauseRequest = function(input, output) {
     indicatorButton.innerHTML = "Continue";
   } else {
     if (status === "noReport") {
-      progressReportContent += "No report on last ping. "; 
+      progressReportContent += "No report on last ping. ";
     } else if (status === "unpaused") {
-      progressReportContent += "Recently unpaused.";       
+      progressReportContent += "Recently unpaused.";
     } else {
       doUpdateCalculatorPage = true;
     }

@@ -1,29 +1,29 @@
 /**
- * This file needs to function as stand-alone javascript 
+ * This file needs to function as stand-alone javascript
  * as well be used as a commonJS module included via
  * require('panels.js')).
  * Please don't require(...) any modules from this file.
  **/
 "use strict";
 
-function modifyHeightForTimeout(currentButtonPanel, newHeight) { 
+function modifyHeightForTimeout(currentButtonPanel, newHeight) {
   currentButtonPanel.style.maxHeight = newHeight;
   currentButtonPanel.style.height    = newHeight;
 }
 
-function toggleHeight(currentButton, currentPanelID) { 
+function toggleHeight(currentButton, currentPanelID) {
   var currentPanel = document.getElementById(currentPanelID);
   if (currentPanel === null) {
     return;
   }
   currentPanel.buttonThatModifiesMe = currentButton;
-  if (currentPanel.startingMaxHeight === undefined || currentPanel.startingMaxHeight === null) { 
+  if (currentPanel.startingMaxHeight === undefined || currentPanel.startingMaxHeight === null) {
     currentPanel.startingMaxHeight = window.getComputedStyle(currentPanel).height;
     currentPanel.style.maxHeight = currentPanel.startingMaxHeight;
     currentPanel.style.height = currentPanel.startingMaxHeight;
   }
   var currentContainer = currentPanel;
-  while (true) { 
+  while (true) {
     currentContainer = currentContainer.parentNode;
     //console.log("processing "+ currentContainer.tagName +"."+ currentContainer.className);
     if (!currentContainer.className.startsWith("body")) {
@@ -37,43 +37,43 @@ function toggleHeight(currentButton, currentPanelID) {
     currentPanel.style.display = "";
   }
   if (currentPanel.transitionState === "collapsing" ||
-      currentPanel.transitionState === "collapsed") { 
+      currentPanel.transitionState === "collapsed") {
     currentPanel.transitionState = "expanding";
     currentButton.innerHTML = "&#9660;";
   } else if (
     currentPanel.transitionState === null || currentPanel.transitionState === undefined ||
     currentPanel.transitionState === "expanding" || currentPanel.transitionState === "expanded"
-  ) { 
+  ) {
     currentPanel.transitionState = "collapsing";
     currentButton.innerHTML = "&#9656;";
   }
   currentPanel.addEventListener("transitionend", transitionDone);
   setTimeout(
-    function() { 
+    function() {
       toggleHeightForTimeout(currentPanel);
     }, 0
   );
 }
 
-function transitionDone(event) { 
+function transitionDone(event) {
   this.removeEventListener("transitionend", transitionDone);
-  if (this.transitionState === "collapsing") { 
+  if (this.transitionState === "collapsing") {
     this.style.display = "none";
     this.transitionState = "collapsed";
     window.frontend.thePage.storeOneCollapsiblePanelSettings(this, true);
-  } else if (this.transitionState === "expanding") { 
+  } else if (this.transitionState === "expanding") {
     this.style.display = "";
     this.transitionState = "expanded";
     window.frontend.thePage.storeOneCollapsiblePanelSettings(this, false);
   }
 }
 
-function toggleHeightForTimeout(currentPanel) { 
-  if (currentPanel.transitionState === "expanding") { 
+function toggleHeightForTimeout(currentPanel) {
+  if (currentPanel.transitionState === "expanding") {
     currentPanel.style.maxHeight = currentPanel.startingMaxHeight;
     currentPanel.style.height = currentPanel.startingMaxHeight;
     currentPanel.style.opacity = "1";
-  } else if (currentPanel.transitionState === "collapsing") { 
+  } else if (currentPanel.transitionState === "collapsing") {
     currentPanel.style.opacity = "0";
     currentPanel.style.maxHeight = "0px";
     currentPanel.style.height = "0px";
@@ -114,8 +114,8 @@ function toggleMenu() {
 }
 
 function PanelExpandable(
-  container, 
-  /** @type {Boolean} */ 
+  container,
+  /** @type {Boolean} */
   resetPanel,
 ) {
   this.attributes = {
@@ -170,7 +170,7 @@ PanelExpandable.prototype.initialize = function(container, resetPanel) {
     this.container = document.getElementById(this.container);
   }
   this.containerId = this.container.id;
-  if (resetPanel !== true) { 
+  if (resetPanel !== true) {
     for (var label in this.attributes) {
       var incoming = this.container.getAttribute(label);
       this.attributes[label] = incoming;
@@ -202,16 +202,16 @@ PanelExpandable.prototype.setStatusToBeCalledThroughTimeout = function() {
 }
 
 function doToggleContent(progressId) {
-  var thePanel = new PanelExpandable(progressId); 
+  var thePanel = new PanelExpandable(progressId);
   thePanel.doToggleContent();
 }
 
 PanelExpandable.prototype.doToggleContent = function() {
   if (this.attributes.panelStatus === "collapsed") {
-    document.getElementById(this.attributes.expandedMarkerId).innerHTML = "&#9662;";    
+    document.getElementById(this.attributes.expandedMarkerId).innerHTML = "&#9662;";
     this.attributes.panelStatus = "expanded";
   } else {
-    document.getElementById(this.attributes.expandedMarkerId).innerHTML = "&#9666;";    
+    document.getElementById(this.attributes.expandedMarkerId).innerHTML = "&#9666;";
     this.attributes.panelStatus = "collapsed";
   }
   this.container.setAttribute("panelStatus", this.attributes.panelStatus);
@@ -223,10 +223,10 @@ var numberOfButtonToggleProgressReport = 0;
 PanelExpandable.prototype.initializeProgressPanel = function() {
   for (var label in this.attributes) {
     this.container.setAttribute(label, this.attributes[label]);
-  }  
+  }
   var spanContainer = document.createElement("span");
   var spanContent = "";
-  spanContent += `<span id = "${this.attributes.panelLabelId}"></span><button id = "${this.attributes.buttonId}" `; 
+  spanContent += `<span id = "${this.attributes.panelLabelId}"></span><button id = "${this.attributes.buttonId}" `;
   spanContent += `class = "buttonProgress accordionLikeIndividual" `;
   spanContent += `onclick = "window.calculator.panels.doToggleContent('${this.containerId}');">`;
   spanContent += `<span id = "${this.attributes.expandedMarkerId}">&#9666;</span>`;

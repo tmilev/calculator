@@ -7,7 +7,7 @@ const miscellaneous = require('./miscellaneous');
 const panels = require('./panels');
 
 function clickDatabaseTable(currentCollection) {
-  window.calculator.mainPage.storage.variables.database.labels.setAndStore(JSON.stringify(currentCollection)); 
+  window.calculator.mainPage.storage.variables.database.labels.setAndStore(JSON.stringify(currentCollection));
   updateDatabasePage();
 }
 
@@ -56,13 +56,13 @@ function fetchProblemData() {
     url: theURL,
     progress: ids.domElements.spanProgressReportGeneral,
     callback: callbackFetchProblemData.bind(null, this),
-  });  
+  });
 }
 
 function deleteDatabaseItemCallback(
   /**@type {JSONToHTML} */
-  transformer, 
-  deletedItem, 
+  transformer,
+  deletedItem,
   labels,
   input,
   output,
@@ -72,8 +72,8 @@ function deleteDatabaseItemCallback(
 
 function deleteDatabaseItem(
   /**@type {JSONToHTML} */
-  transformer, 
-  input, 
+  transformer,
+  input,
   labels,
 ) {
   var finalSelector = {
@@ -84,7 +84,7 @@ function deleteDatabaseItem(
     url: theURL,
     callback: deleteDatabaseItemCallback.bind(null, transformer, input, labels),
     progress: ids.domElements.spanProgressReportGeneral
-  });  
+  });
 }
 
 function bounceString(input) {
@@ -123,8 +123,8 @@ function updateDatabasePageCallback(incoming, output) {
   var theParsed = miscellaneous.jsonUnescapeParse(incoming);
   var theOutput = document.getElementById(ids.domElements.divDatabaseOutput);
   if (
-    theParsed.error !== undefined && 
-    theParsed.error != null && 
+    theParsed.error !== undefined &&
+    theParsed.error != null &&
     theParsed.error != ""
     ) {
     theOutput.innerHTML = miscellaneous.jsonParseGetHtmlStandard(incoming);
@@ -138,7 +138,7 @@ function updateDatabasePageCallback(incoming, output) {
     transformer.bindButtons();
   } else {
     for (var counterCollection = 0; counterCollection < theParsed.collections.length; counterCollection ++) {
-      var currentCollection = theParsed.collections[counterCollection]; 
+      var currentCollection = theParsed.collections[counterCollection];
       var linkHTML = "";
       var urlObjectIncoming = miscellaneous.deepCopy(thePage.storage.urlObject);
       urlObjectIncoming.databaseLabels = currentCollection;

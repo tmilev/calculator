@@ -23,8 +23,8 @@ ForgotLogin.prototype.forgotLoginPage = function() {
   thePage.selectPage(thePage.pages.forgotLogin.name);
 }
 
-ForgotLogin.prototype.submitForgotPassword = function() {  
-  if (grecaptcha === undefined || grecaptcha === null) { 
+ForgotLogin.prototype.submitForgotPassword = function() {
+  if (grecaptcha === undefined || grecaptcha === null) {
     document.getElementById('signUpResult').innerHTML = "<span style ='color:red'><b>The google captcha script appears to be missing (no Internet?). </b></span>";
     return false;
   }
@@ -33,7 +33,7 @@ ForgotLogin.prototype.submitForgotPassword = function() {
   theURL += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.forgotLogin}&`
   theURL += `${pathnames.urlFields.email}=${desiredEmailEncoded}&`;
   var theToken = grecaptcha.getResponse(recaptchaIdForForgotLogin);
-  if (theToken === '' || theToken === null)  { 
+  if (theToken === '' || theToken === null)  {
     document.getElementById('forgotLoginResult').innerHTML = "<span style ='color:red'><b>Please don't forget to solve the captcha. </b></span>";
     return false;
   }

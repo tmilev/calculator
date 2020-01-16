@@ -46,9 +46,9 @@ var counterToggleButtons = 0;
 function getToggleButton(
   /**@type {JSONToHTML} */
   transformer,
-  /**@type {String} */ 
+  /**@type {String} */
   panelId,
-  input, 
+  input,
   label,
 ) {
   transformer.panelInformation.push({
@@ -87,12 +87,12 @@ JSONToHTML.prototype.getOptionFromLabel = function(
 var numberOfButtonsGenerated = 0;
 
 JSONToHTML.prototype.getButtonFromLabels = function(
-  input, 
+  input,
   /**@type {String} */
   panelId,
-  inputTransformed, 
+  inputTransformed,
   /**@type {String[]} */
-  currentLabels, 
+  currentLabels,
   /**@type {Function} */
   clickHandler,
 ) {
@@ -110,7 +110,7 @@ JSONToHTML.prototype.getButtonFromLabels = function(
 }
 
 JSONToHTML.prototype.getSingleEntry = function(
-  input, 
+  input,
   /**@type {String[]} */
   currentLabels,
   /**@type {String[]} */
@@ -127,7 +127,7 @@ JSONToHTML.prototype.getSingleEntry = function(
   counterToggleButtons ++;
   var panelId = `panelFromJSONFormatter${counterToggleButtons}`;
   if (typeof currentOption.clickHandler === "function") {
-    inputTransformed = this.getButtonFromLabels(  
+    inputTransformed = this.getButtonFromLabels(
       input, panelId, inputTransformed, currentLabels, currentOption.clickHandler
     );
   }
@@ -138,19 +138,19 @@ JSONToHTML.prototype.getSingleEntry = function(
 }
 
 JSONToHTML.prototype.getTableHorizontallyLaidFromJSON = function(
-  input, 
+  input,
   /**@type {String[]} */
-  currentLabels, 
+  currentLabels,
   /**@type {String[]} */
-  currentLabelsGeneralized, 
+  currentLabelsGeneralized,
   /**@type {BufferCalculator} */
   output,
 ) {
-  var inputType = typeof input; 
+  var inputType = typeof input;
   if (inputType === "string" || inputType === "number" || inputType === "boolean") {
     output.write(this.getSingleEntry(input, currentLabels, currentLabelsGeneralized));
     return;
-  }  
+  }
   if (Array.isArray(input)) {
     this.getTableHorizontallyLaidFromArray(input, currentLabels, currentLabelsGeneralized, output);
     return;
@@ -163,12 +163,12 @@ JSONToHTML.prototype.getTableHorizontallyLaidFromJSON = function(
   }
 }
 
-JSONToHTML.prototype.getTableHorizontallyLaidFromArray = function(  
-  input, 
-  /**@type {String[]} */ 
-  currentLabels, 
+JSONToHTML.prototype.getTableHorizontallyLaidFromArray = function(
+  input,
   /**@type {String[]} */
-  currentLabelsGeneralized, 
+  currentLabels,
+  /**@type {String[]} */
+  currentLabelsGeneralized,
   /**@type {BufferCalculator} */
   output,
 ) {
@@ -192,17 +192,17 @@ JSONToHTML.prototype.getTableHorizontallyLaidFromArray = function(
     var item = input[counterInput];
     output.write(`<tr><td><tiny>${counterInput}</tiny></td><td>`);
     this.getTableHorizontallyLaidFromJSON(item, newLabels, newLabelsGeneralized, output);
-    output.write(`</td></tr>`); 
+    output.write(`</td></tr>`);
   }
   output.write("</table>");
 }
 
-JSONToHTML.prototype.getTableHorizontallyLaidFromObject = function(  
-  input, 
+JSONToHTML.prototype.getTableHorizontallyLaidFromObject = function(
+  input,
   /**@type {String[]} */
-  currentLabels, 
+  currentLabels,
   /**@type {String[]} */
-  currentLabelsGeneralized, 
+  currentLabelsGeneralized,
   /**@type {BufferCalculator} */
   output,
 ) {
@@ -217,7 +217,7 @@ JSONToHTML.prototype.getTableHorizontallyLaidFromObject = function(
     newLabelsGeneralized = currentLabelsGeneralized.slice();
     newLabels.push("");
   }
-  output.write("<table class = 'tableJSONItem'>"); 
+  output.write("<table class = 'tableJSONItem'>");
   for (item in input) {
     if (hasLabels) {
       newLabels[newLabels.length - 1] = item;
@@ -238,7 +238,7 @@ JSONToHTML.prototype.getTableHorizontallyLaidFromObject = function(
       output.write(getDeleteButtonFromLabels(newLabels, tableName, tableLabel));
       output.write(`</td>`);
     }
-    output.write(`</tr>`); 
+    output.write(`</tr>`);
   }
   output.write("</table>");
 }
@@ -299,7 +299,7 @@ JSONToHTML.prototype.bindButtons = function() {
   for (var i = 0; i < this.panelInformation.length; i ++) {
     var currentInfo = this.panelInformation[i];
     var currentPanel = new panels.PanelExpandable(currentInfo.panelId, false);
-    currentPanel.matchPanelStatus();  
+    currentPanel.matchPanelStatus();
   }
 }
 
@@ -314,16 +314,16 @@ JSONToHTML.prototype.transformObjectToRows = function(input) {
 }
 
 JSONToHTML.prototype.getTableFromObject = function(
-  input, 
+  input,
   optionsConstant,
-  /**@type {{table: String, forceRowLayout: Boolean}} */ 
+  /**@type {{table: String, forceRowLayout: Boolean}} */
   optionsModified,
 ) {
   this.inputParsed = input;
   this.optionsConstant = {};
   if ((typeof optionsConstant) === "object" && optionsConstant !== null) {
     this.optionsConstant = optionsConstant;
-  } 
+  }
   if (optionsModified === null || typeof optionsModified !== "object") {
     optionsModified = {};
   }
@@ -335,7 +335,7 @@ JSONToHTML.prototype.getTableFromObject = function(
     forceRowLayout = true;
   }
   if (typeof this.inputParsed === "string") {
-    this.inputParsed = input.replace(/[\r\n]/g, " "); 
+    this.inputParsed = input.replace(/[\r\n]/g, " ");
     if (this.inputParsed[0] !== "{" && this.inputParsed[0] !== "[" && input[0] !== "\"") {
       this.inputParsed = `"${this.inputParsed}"`;
     }
@@ -361,7 +361,7 @@ JSONToHTML.prototype.getTableFromObject = function(
 }
 
 JSONToHTML.prototype.getHtmlFromArray = function(
-  inputJSON, 
+  inputJSON,
   /**@type {BufferCalculator} */
   output,
 ) {
@@ -369,7 +369,7 @@ JSONToHTML.prototype.getHtmlFromArray = function(
     return;
   }
   this.labelsRows = getLabelsRows(inputJSON);
-  if (this.labelsRows === null) { 
+  if (this.labelsRows === null) {
     this.getTableHorizontallyLaidFromJSON(inputJSON, [], [], output);
     return;
   }
@@ -391,9 +391,9 @@ JSONToHTML.prototype.getHtmlFromArray = function(
     }
     output.write(`<td><tiny>${counterRow}</tiny></td>`);
     for (var counterColumn = 0; counterColumn < this.labelsRows.labels.length; counterColumn ++) {
-      var labelsGeneralized = []; 
+      var labelsGeneralized = [];
       var labels = [];
-      if (this.tableName !== "") { 
+      if (this.tableName !== "") {
         labels.push(this.tableName);
         labelsGeneralized.push(this.tableName);
       }

@@ -47,21 +47,21 @@ function toggleDeadline(deadlineId, panelId, button) {
   }
 }
 
-function toggleProblemWeights() { 
+function toggleProblemWeights() {
   var theWeights = document.getElementsByClassName('panelProblemWeights');
   var theButtons = document.getElementsByClassName('accordionLikeProblemWeight');
-  for (var i = 0; i < theWeights.length; i ++) { 
-    if (!problemWeightsVisible) { 
+  for (var i = 0; i < theWeights.length; i ++) {
+    if (!problemWeightsVisible) {
       theWeights[i].style.opacity = '1';
       theWeights[i].style.maxHeight = '200px';
-    } else { 
+    } else {
       theWeights[i].style.opacity = '0';
       theWeights[i].style.maxHeight = '0';
     }
   }
   for (var i = 0; i < theButtons.length; i ++) {
     var currentProblem = problemPage.allProblems.getProblemById(theButtons[i].name);
-    if (!problemWeightsVisible) { 
+    if (!problemWeightsVisible) {
       theButtons[i].innerHTML = `${currentProblem.toStringProblemWeight()} &#9660;`;
     } else {
       theButtons[i].innerHTML = `${currentProblem.toStringProblemWeight()} &#9666;`;
@@ -71,7 +71,7 @@ function toggleProblemWeights() {
 }
 
 function afterLoadCoursePage(incoming, result) {
-  var courseBody = document.getElementById(ids.domElements.divCurrentCourseBody); 
+  var courseBody = document.getElementById(ids.domElements.divCurrentCourseBody);
   var coursePage = document.getElementById(ids.domElements.divCurrentCourse);
   courseBody.innerHTML = miscellaneous.jsonParseGetHtmlStandard(incoming);
   var titleElements = courseBody.getElementsByTagName('title');
@@ -90,7 +90,7 @@ function afterLoadCoursePage(incoming, result) {
   loadTopicList(problemPage.processLoadedTopicsWriteToCoursePage);
 }
 
-function loadTopicList(callback) { 
+function loadTopicList(callback) {
   var thePage = window.calculator.mainPage;
   var topicListRequest = "topicListJSONNoLogin";
   if (thePage.isLoggedIn()) {
@@ -118,11 +118,11 @@ function selectCurrentCoursePage() {
   var incomingCourse = storageVariables.currentCourse.courseHome.getValue();
   var incomingTopicList = storageVariables.currentCourse.topicList.getValue();
   if (
-    incomingCourse === null || 
-    incomingCourse === "" || 
+    incomingCourse === null ||
+    incomingCourse === "" ||
     incomingCourse === undefined
   ) {
-    var courseBody = document.getElementById(ids.domElements.divCurrentCourseBody); 
+    var courseBody = document.getElementById(ids.domElements.divCurrentCourseBody);
     var temporarySelectCourseId = "buttonTemporarySelectCourse";
     var courseBodyHTML = `<button id = '${temporarySelectCourseId}' `;
     courseBodyHTML += `class = "buttonSelectPage buttonSlowTransition buttonFlash" style = "width:150px" `;

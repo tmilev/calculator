@@ -20,9 +20,9 @@ function AbstractSyntaxOne() {
 }
 
 AbstractSyntaxOne.prototype.initializeAnnotation = function(
-  inputBinaryHex, 
-  inputInterpretation, 
-  /**@type {string} */ 
+  inputBinaryHex,
+  inputInterpretation,
+  /**@type {string} */
   inputIdAnnotation,
 ) {
   this.idAnnotation = inputIdAnnotation;
@@ -36,7 +36,7 @@ AbstractSyntaxOne.prototype.initializeAnnotation = function(
 
 function attachTooltip(
   /**@type {HTMLElement} */
-  element, 
+  element,
   /**@string {string} */
   tooltipHTML,
 ) {
@@ -55,20 +55,20 @@ function showToolTip(
   tooltipElement.style.visibility = "visible";
 }
 
-function hideToolTip(  
+function hideToolTip(
   /**@type {HTMLElement} */
   tooltipElement,
 ) {
-  tooltipElement.style.visibility = "hidden";  
+  tooltipElement.style.visibility = "hidden";
 }
 
 /**
  * @typedef {{
- *  body: string, 
- *  children: Array, 
- *  error: string, 
- *  lengthEncoding: string, 
- *  lengthPromised: number, 
+ *  body: string,
+ *  children: Array,
+ *  error: string,
+ *  lengthEncoding: string,
+ *  lengthPromised: number,
  *  type: string,
  *  tag: string,
  *  startByteOriginal: string,
@@ -77,8 +77,8 @@ function hideToolTip(
 */
 
 AbstractSyntaxOne.prototype.appendAnnotation = function(
-  /**@type {HTMLElement} */ 
-  container, 
+  /**@type {HTMLElement} */
+  container,
   /**@type  {ASNElement}*/
   currentInterpretation,
 ) {
@@ -88,7 +88,7 @@ AbstractSyntaxOne.prototype.appendAnnotation = function(
   currentElement.classList.add("abstractSyntaxOneElement");
   var elementLeadingByte = document.createElement("SPAN");
   currentInterpretation.dom.leadingByte = elementLeadingByte;
-  elementLeadingByte.classList.add("abstractSyntaxOneLeadingByte"); 
+  elementLeadingByte.classList.add("abstractSyntaxOneLeadingByte");
   elementLeadingByte.innerHTML = currentInterpretation.startByteOriginal;
   var tooltipLeadingByte = `Type: ${currentInterpretation.type}`;
   tooltipLeadingByte += `<br>Leading byte: ${currentInterpretation.startByteOriginal}`;
@@ -104,7 +104,7 @@ AbstractSyntaxOne.prototype.appendAnnotation = function(
     tooltipLeadingByte += `Comment: ${currentInterpretation.comment}`;
   }
   attachTooltip(
-    elementLeadingByte, 
+    elementLeadingByte,
     tooltipLeadingByte,
   );
 
@@ -129,7 +129,7 @@ AbstractSyntaxOne.prototype.appendAnnotation = function(
     for (var i = 0; i < currentInterpretation.children.length; i ++) {
       var interpretation = currentInterpretation.children[i];
       this.appendAnnotation(elementBody, interpretation);
-    }  
+    }
   } else if (currentInterpretation.body !== undefined && currentInterpretation.body !== null) {
     var elementHex = document.createElement("SPAN");
     elementHex.innerHTML = currentInterpretation.body;
@@ -146,13 +146,13 @@ AbstractSyntaxOne.prototype.appendAnnotation = function(
       }
       tooltipBody += `Comment: ${currentInterpretation.comment}`;
     }
-  
+
     if (tooltipBody !== "") {
       attachTooltip(elementBody, tooltipBody);
     }
-  } 
+  }
   if (
-    currentInterpretation.error !== null && 
+    currentInterpretation.error !== null &&
     currentInterpretation.error !== undefined
   ) {
     var errorElement = document.createElement("SPAN");
@@ -165,13 +165,13 @@ AbstractSyntaxOne.prototype.appendAnnotation = function(
     errorElement.innerHTML = `[no content] ${JSON.stringify(currentInterpretation)}`;
     elementBody.appendChild(noContent);
   }
-  currentElement.appendChild(elementBody);  
+  currentElement.appendChild(elementBody);
   container.appendChild(currentElement);
 }
 
 AbstractSyntaxOne.prototype.mouseOverAbstractSyntaxOneElement = function(
   annotation,
-  /**@type {HTMLElement} */ 
+  /**@type {HTMLElement} */
   annotationTreeElement,
 ) {
   annotation.leadingByte.style.backgroundColor = "gray";
@@ -182,7 +182,7 @@ AbstractSyntaxOne.prototype.mouseOverAbstractSyntaxOneElement = function(
 
 AbstractSyntaxOne.prototype.mouseOutAbstractSyntaxOneElement = function(
   annotation,
-  /**@type {HTMLElement} */ 
+  /**@type {HTMLElement} */
   annotationTreeElement,
 ) {
   annotation.leadingByte.style.backgroundColor = "";
@@ -191,9 +191,9 @@ AbstractSyntaxOne.prototype.mouseOutAbstractSyntaxOneElement = function(
   annotationTreeElement.style.backgroundColor = "";
 }
 
-AbstractSyntaxOne.prototype.appendAnnotationTree = function(  
-  /**@type {HTMLElement} */ 
-  container, 
+AbstractSyntaxOne.prototype.appendAnnotationTree = function(
+  /**@type {HTMLElement} */
+  container,
   /**@type  {ASNElement}*/
   currentInterpretation,
 ) {
@@ -202,11 +202,11 @@ AbstractSyntaxOne.prototype.appendAnnotationTree = function(
   var currentHead = document.createElement("SPAN");
   var headHTML = `<b>${currentInterpretation.type}</b>`;
   if (
-    currentInterpretation.numberOfChildren !== undefined && 
+    currentInterpretation.numberOfChildren !== undefined &&
     currentInterpretation.numberOfChildren !== 0
   ) {
     headHTML += ` [${currentInterpretation.numberOfChildren} elements]`;
-  } 
+  }
   if (currentInterpretation.interpretation !== undefined) {
     headHTML += " " + miscellaneous.shortenString(15, currentInterpretation.interpretation);
   }
@@ -224,20 +224,20 @@ AbstractSyntaxOne.prototype.appendAnnotationTree = function(
   for (var counter = 0; counter < elementsToAttachTo.length; counter ++) {
     var theElement = elementsToAttachTo[counter];
     theElement.addEventListener(
-      'mouseover', 
+      'mouseover',
       this.mouseOverAbstractSyntaxOneElement.bind(
-        this, 
-        annotationElementPeer, 
+        this,
+        annotationElementPeer,
         currentElement,
-      ) 
+      )
     );
     theElement.addEventListener(
-      'mouseout', 
+      'mouseout',
       this.mouseOutAbstractSyntaxOneElement.bind(
-        this, 
-        annotationElementPeer, 
+        this,
+        annotationElementPeer,
         currentElement,
-      ) 
+      )
     );
   }
   container.appendChild(currentElement);
@@ -260,11 +260,11 @@ AbstractSyntaxOne.prototype.annotate = function() {
   this.DOMElementAnnotationContainer.appendChild(theTable);
   this.positionInBinary = 0;
   this.appendAnnotation(
-    this.DOMElementAnnotation, 
+    this.DOMElementAnnotation,
     this.interpretation
   );
-  this.appendAnnotationTree(    
-    this.DOMElementAnnotationTree, 
+  this.appendAnnotationTree(
+    this.DOMElementAnnotationTree,
     this.interpretation
   );
 }
@@ -319,13 +319,13 @@ AnnotatedBytes.prototype.stackOnTop = function() {
 
 function StackElement(
   /** @type {number} */
-  offset, 
+  offset,
   /** @type {number} */
-  length, 
+  length,
   /** @type {string} */
-  label, 
+  label,
   /** @type {HTMLElement} */
-  dom, 
+  dom,
   /** @type {Array<string>} */
   currentBody
 ) {
@@ -396,7 +396,7 @@ AnnotatedBytes.prototype.writeMessageToDOM = function(
 
 TransportLayerSecurityServer.prototype.displayMessages = function(
   /**@type {string} */
-  outputId, 
+  outputId,
   input,
 ) {
   var outputElement = document.getElementById(outputId);
@@ -475,20 +475,20 @@ TransportLayerSecurityServer.prototype.displayMessages = function(
 
 function abstractSyntaxNotationAnnotate(binaryHex, interpretation, id) {
   var annotation = new AbstractSyntaxOne();
-  annotation.initializeAnnotation(binaryHex, interpretation, id); 
+  annotation.initializeAnnotation(binaryHex, interpretation, id);
   annotation.annotate();
 }
 
-function displayTransportLayerSecurity(  
+function displayTransportLayerSecurity(
   /**@type {string} */
-  outputId, 
+  outputId,
   input,
 ) {
   var theServer = new TransportLayerSecurityServer();
   theServer.displayMessages(outputId, input);
 }
 
-function writeSessionToDOM( 
+function writeSessionToDOM(
   session,
   /**@type {HTMLElement} */
   outputElement,
@@ -518,13 +518,13 @@ function writeSessionToDOM(
   newChild.innerHTML = htmlContent;
   outputElement.appendChild(newChild);
   var algorithmSpecs = document.createElement("SPAN");
-  jsonToHtml.writeJSONtoDOMComponent(session.algorithmSpecifications, algorithmSpecs);  
-  outputElement.appendChild(algorithmSpecs);  
+  jsonToHtml.writeJSONtoDOMComponent(session.algorithmSpecifications, algorithmSpecs);
+  outputElement.appendChild(algorithmSpecs);
 }
 
 function displaySSLRecord(
   /**@type {string} */
-  outputId, 
+  outputId,
   input,
 ) {
   var outputElement = document.getElementById(outputId);

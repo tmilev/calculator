@@ -1,7 +1,7 @@
 "use strict"
-function getCookie(cookieName) { 
+function getCookie(cookieName) {
   var cookie = document.cookie.split(";");
-  for (var i = 0; i < cookie.length; i ++) { 
+  for (var i = 0; i < cookie.length; i ++) {
     var x = cookie[i].substr(0, cookie[i].indexOf("="));
     var y = cookie[i].substr(cookie[i].indexOf("=") + 1);
     x = x.replace(/^\s+|\s+$/g,"");
@@ -12,7 +12,7 @@ function getCookie(cookieName) {
   return "";
 }
 
-function setCookie(theName, theValue, expiryDays, secure) { 
+function setCookie(theName, theValue, expiryDays, secure) {
   var expiryDate = new Date();
   expiryDate.setDate(expiryDate.getDate() + expiryDays);
   if (theValue === true) {

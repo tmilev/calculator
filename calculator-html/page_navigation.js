@@ -1,6 +1,6 @@
 "use strict";
 const selectCourse = require('./select_course');
-const coursePage = require('./course_page'); 
+const coursePage = require('./course_page');
 const problemPage = require('./problem_page');
 const editPage = require("./edit_page");
 const database = require('./database');
@@ -55,8 +55,8 @@ User.prototype.hideProfilePicture = function() {
 
 User.prototype.makeFromUserInfo = function(inputData) {
   var thePage = window.calculator.mainPage;
-  // Please note: the authentication token is silently set through the cookie headers. 
-  // Please do not take explicit action as 
+  // Please note: the authentication token is silently set through the cookie headers.
+  // Please do not take explicit action as
   // inputdata.authenticationToken may not contain the authentication token.
   // not ok: thePage.storage.variables.user.authenticationToken.setAndStore(inputData.authenticationToken);
   thePage.storage.variables.user.name.setAndStore(inputData.username);
@@ -87,13 +87,13 @@ function StorageVariable(
   /**@type {Function} */
   this.callbackOnValueChange = null;
   var labelsToRead = [
-    "nameURL", 
-    "nameCookie", 
-    "nameLocalStorage", 
-    "associatedDOMId", 
-    "type", 
-    "secure", 
-    "callbackOnValueChange", 
+    "nameURL",
+    "nameCookie",
+    "nameLocalStorage",
+    "associatedDOMId",
+    "type",
+    "secure",
+    "callbackOnValueChange",
     "showInURLByDefault",
     "showInURLOnPages",
   ];
@@ -153,8 +153,8 @@ StorageVariable.prototype.loadMe = function(hashParsed) {
 }
 
 StorageVariable.prototype.storeMePersistent = function(
-  /**@type {boolean} */ 
-  updateURL, 
+  /**@type {boolean} */
+  updateURL,
 ) {
   if (mainPage().flagProblemPageOnly) {
     console.log("WARNING: Using local storage in stand-alone mode.")
@@ -180,9 +180,9 @@ StorageVariable.prototype.storeMePersistent = function(
 }
 
 StorageVariable.prototype.storeMe = function(
-  /**@type {boolean} */ 
-  updateURL, 
-  /**@type {boolean} */ 
+  /**@type {boolean} */
+  updateURL,
+  /**@type {boolean} */
   updateAssociatedInput,
 ) {
   this.storeMePersistent(updateURL);
@@ -194,10 +194,10 @@ StorageVariable.prototype.storeMe = function(
 }
 
 StorageVariable.prototype.setAndStore = function(
-  newValue, 
-  /**@type {Boolean} */ 
-  updateURL, 
-  /**@type {Boolean} */ 
+  newValue,
+  /**@type {Boolean} */
+  updateURL,
+  /**@type {Boolean} */
   updateAssociatedInput,
 ) {
   if (updateURL === undefined) {
@@ -210,7 +210,7 @@ StorageVariable.prototype.setAndStore = function(
     if (this.callbackOnValueChange !== null && this.callbackOnValueChange !== undefined) {
       //calling function with timeout ensures the current function sequence is finished first.
       setTimeout(() => {
-        this.callbackOnValueChange(this.value);        
+        this.callbackOnValueChange(this.value);
       }, 0);
     }
   }
@@ -226,7 +226,7 @@ var pageNamesOnWhichToShowProblemURLs = {
 function StorageCalculator() {
   this.variables = {
     currentPage: new StorageVariable({
-      name: "currentPage", 
+      name: "currentPage",
       nameLocalStorage: "currentPage", //<- when given and non-empty, local storage will be used to store variable
       nameCookie: "", //<- when given and non-empty, cookies will be used to store variable
       nameURL: "currentPage", //<- when given and non-empty, url will be used to store variable
@@ -235,9 +235,9 @@ function StorageCalculator() {
     }),
     database: {
       labels: new StorageVariable({
-        name: "databaseLabels", 
+        name: "databaseLabels",
         nameLocalStorage: "databaseLabels"
-      }), 
+      }),
     },
     editor: {
       currentlyEditedPage: new StorageVariable({
@@ -282,43 +282,43 @@ function StorageCalculator() {
       randomSeed: new StorageVariable({
         name: "randomSeed",
         nameURL: "randomSeed",
-        // Since this variable has no local storage outside of the URL, 
-        // to avoid wiping the variable while normalizing the URL, 
+        // Since this variable has no local storage outside of the URL,
+        // to avoid wiping the variable while normalizing the URL,
         // we need to keep it displayed there by default.
         showInURLOnPages: pageNamesOnWhichToShowProblemURLs,
       }),
     },
     flagDebug: new StorageVariable({
-      name: "debugFlag", 
-      nameURL: "debugFlag", 
+      name: "debugFlag",
+      nameURL: "debugFlag",
       nameCookie: "debugFlag",
       secure: false,
       callbackOnValueChange: mainPage().onDebugValueChange.bind(mainPage()),
     }),
     flagStudentView: new StorageVariable({
-      name: "studentView", 
-      nameURL: "studentView", 
+      name: "studentView",
+      nameURL: "studentView",
       nameCookie: "studentView",
       secure: true,
       callbackOnValueChange: mainPage().onStudentViewChange.bind(mainPage()),
     }),
     calculator: {
       input: new StorageVariable({
-        name: "calculatorInput", 
+        name: "calculatorInput",
         nameURL: "calculatorInput",
         associatedDOMId: ids.domElements.inputMain,
         callbackOnValueChange: calculatorPage.calculator.submitComputationPartTwo.bind(calculatorPage.calculator),
         showInURLByDefault: true,
       }),
       request: new StorageVariable({
-        name: "calculatorRequest", 
-        nameURL: "calculatorRequest", 
+        name: "calculatorRequest",
+        nameURL: "calculatorRequest",
         nameLocalStorage: "calculatorRequest",
       }),
       monitoring: new StorageVariable({
         name: "monitoring",
         nameLocalStorage: "monitoring",
-        nameURL: "monitoring", 
+        nameURL: "monitoring",
         nameCookie: "monitoring",
         callbackOnValueChange: mainPage().setMonitoringComponent.bind(mainPage()),
         showInURLByDefault: true,
@@ -333,8 +333,8 @@ function StorageCalculator() {
         name: "googleToken",
       }),
       name: new StorageVariable({
-        name: "username", 
-        nameCookie: "username", 
+        name: "username",
+        nameCookie: "username",
         nameURL: "username",
       }),
       authenticationToken: new StorageVariable({
@@ -377,8 +377,8 @@ StorageCalculator.prototype.getCleanedUpURL = function(input) {
   }
   if (!isGood) {
     stringifiedInput = encodeURIComponent(stringifiedInput);
-  }  
-  return stringifiedInput; 
+  }
+  return stringifiedInput;
 }
 
 StorageCalculator.prototype.parseURL = function() {
@@ -402,19 +402,19 @@ StorageCalculator.prototype.loadSettings = function() {
 }
 
 StorageCalculator.prototype.loadSettingsRecursively = function(
-  /**@type {StorageVariable} */ 
-  currentStorage, 
+  /**@type {StorageVariable} */
+  currentStorage,
   inputHashParsed,
 ) {
   if (currentStorage instanceof StorageVariable) {
     currentStorage.loadMe(inputHashParsed);
     return;
-  } 
+  }
   if (typeof currentStorage === "object") {
     for (var subLabel in currentStorage) {
       this.loadSettingsRecursively(currentStorage[subLabel], inputHashParsed);
     }
-  }  
+  }
 }
 
 StorageCalculator.prototype.computeURLRecursively = function(currentStorage, recursionDepth) {
@@ -426,7 +426,7 @@ StorageCalculator.prototype.computeURLRecursively = function(currentStorage, rec
   }
   var result = {};
   if (currentStorage instanceof StorageVariable) {
-    var urlName = currentStorage.nameURL; 
+    var urlName = currentStorage.nameURL;
     if (urlName === undefined || urlName === null || urlName === "") {
       return null;
     }
@@ -443,7 +443,7 @@ StorageCalculator.prototype.computeURLRecursively = function(currentStorage, rec
       return null;
     }
     if (currentStorage.value === null || currentStorage.value == undefined || currentStorage.value == "") {
-      return null;  
+      return null;
     }
     result[urlName] = currentStorage.value;
     return result;
@@ -466,7 +466,7 @@ StorageCalculator.prototype.setURL = function () {
   var incomingHash = this.getCleanedUpURL(this.urlObject);
   if (incomingHash !== this.currentHash) {
     window.location.hash = incomingHash;
-  } 
+  }
 }
 
 function Page() {
@@ -474,14 +474,14 @@ function Page() {
   this.pages = {
     login: {
       name: "login", //<-for autocomplete
-      id: "divLoginPage", 
+      id: "divLoginPage",
       menuButtonId: "buttonLoginPage",
       container: null,
       selectFunction: null,
       initialized: false,
     },
     selectCourse : {
-      name: "selectCourse", 
+      name: "selectCourse",
       id: "divSelectCourse",
       menuButtonId: "buttonSelectCourse",
       container: null,
@@ -664,11 +664,11 @@ Page.prototype.initializeCalculatorPagePartOne = function() {
   //Initialize global variables
   //////////////////////////////////////
   //////////////////////////////////////
-  this.theCourses = {}; 
+  this.theCourses = {};
   this.logoutRequestFromUrl = null;
   this.locationRequestFromUrl = null;
-  this.storage.loadSettings(); 
-  this.hashHistory = []; 
+  this.storage.loadSettings();
+  this.hashHistory = [];
   this.lastKnownGoodProblemFileName = "";
   this.user = new User();
   this.aceEditorAutoCompletionWordList = [];
@@ -724,7 +724,7 @@ Page.prototype.onStudentViewChange = function () {
     spanView.innerHTML = "Student view";
     for (var counterSections = 0; counterSections < this.user.sectionsTaught.length; counterSections ++) {
       radioHTML += `<br><label class = "containerRadioButton">`;
-      radioHTML += `<input type = "radio" name = "radioSection" onchange = "window.calculator.mainPage.sectionSelect(${counterSections});" `; 
+      radioHTML += `<input type = "radio" name = "radioSection" onchange = "window.calculator.mainPage.sectionSelect(${counterSections});" `;
       var counterFromStorage = parseInt(this.storage.variables.currentSectionComputed.getValue());
       if (counterSections === counterFromStorage) {
         radioHTML += "checked = 'true'";
@@ -775,7 +775,7 @@ Page.prototype.studentView = function () {
 function Script() {
   this.id = "";
   this.content = "";
-} 
+}
 
 function AllScripts() {
   /**@{Script[]} */
@@ -879,7 +879,7 @@ Page.prototype.setMonitoringComponent = function () {
   var monitoring = this.storage.variables.calculator.monitoring.value;
   if (monitoring !== "false") {
     monitoring = "true";
-  } 
+  }
   var monitorResult = document.getElementById(ids.domElements.monitoring.spanStatus);
   if (monitoring === "true") {
     monitorResult.innerHTML = "Monitor <b style = 'color:red'>on</b>";
@@ -893,7 +893,7 @@ Page.prototype.setMonitoringComponent = function () {
 
 }
 /**
- * @returns {Page} 
+ * @returns {Page}
  * */
 function mainPage () {
   return window.calculator.mainPage;

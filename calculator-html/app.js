@@ -43,7 +43,7 @@ function initializeGlobals() {
   window.calculator = Object.assign(window.calculator, incomingGlobals);
   if (window.calculator.flagRunMainPage === undefined) {
     window.calculator.flagRunMainPage = true;
-  }  
+  }
 }
 
 function loadGlobals() {

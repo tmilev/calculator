@@ -62,7 +62,7 @@ ProblemCollection.prototype.getProblemByIdOrRegisterEmpty = function(
     incoming.initializeBasic({
       id: label,
       fileName: problemFileName
-    }); 
+    });
     this.allProblems[label] = incoming;
   }
   return this.allProblems[label];
@@ -92,38 +92,38 @@ Problem.prototype.setRandomSeed = function(input) {
   if (input === undefined) {
     input = null;
   }
-  this.randomSeed = input;  
+  this.randomSeed = input;
 }
 
 Problem.prototype.setRandomSeedFromEnvironment = function() {
-  var currentCourse = window.calculator.mainPage.storage.variables.currentCourse; 
+  var currentCourse = window.calculator.mainPage.storage.variables.currentCourse;
   this.flagForReal = (currentCourse.exerciseType.getValue() !== pathnames.urlFields.exerciseJSON);
   var incomingRandomSeed = currentCourse.randomSeed.getValue();
   if (incomingRandomSeed === "" || incomingRandomSeed === null || incomingRandomSeed === undefined) {
     if (!this.flagForReal) {
       return;
     }
-  } 
-  this.setRandomSeed(incomingRandomSeed);  
+  }
+  this.setRandomSeed(incomingRandomSeed);
   currentCourse.randomSeed.value = "";
-} 
+}
 
 Problem.prototype.initializeBasic = function(problemData) {
   /**ProblemId is percent encoded, safe to embed in html. */
   this.problemId = encodeURIComponent(problemData.id);
-  /**@type {string}  
-   * This id is for problem navigation only, does not include the entire panel. 
+  /**@type {string}
+   * This id is for problem navigation only, does not include the entire panel.
   */
   this.idNavigationProblemNotEntirePanel = `navigationPanel${this.problemId}`;
   /**@type {InputPanelData[]} */
-  this.answers = [];  
+  this.answers = [];
   this.title = problemData.title;
   this.fileName = problemData.fileName;
   if (this.fileName === undefined || this.fileName === null) {
     this.fileName = "";
   }
   if (window.calculator.mainPage.flagProblemPageOnly) {
-    this.flagForReal = false;       
+    this.flagForReal = false;
   } else {
     this.setRandomSeedFromEnvironment();
   }
@@ -134,7 +134,7 @@ Problem.prototype.initializeInfo = function(problemData, inputParentIdURLed) {
   this.decodedProblem = "";
   this.commentsProblem = "";
   this.parentIdURLed = inputParentIdURLed;
-  
+
   this.problemLabel = "";
   this.previousProblemId = "";
   this.nextProblemId = "";
@@ -165,18 +165,18 @@ Problem.prototype.initializeInfo = function(problemData, inputParentIdURLed) {
   this.badProblemExplanation = [];
   if (problemData.deadlines !== undefined) {
     this.deadlines = problemData.deadlines;
-  } 
+  }
   if (problemData.deadline !== undefined) {
     this.deadlineString = problemData.deadline;
   }
   if (this.fileName !== "") {
     this.previousProblemId = allProblems.previousProblemId;
     if (
-      this.previousProblemId !== null && 
-      this.previousProblemId !== undefined && 
+      this.previousProblemId !== null &&
+      this.previousProblemId !== undefined &&
       this.previousProblemId !== ""
     ) {
-      var previousProblem = allProblems.allProblems[this.previousProblemId]; 
+      var previousProblem = allProblems.allProblems[this.previousProblemId];
       previousProblem.nextProblemId = this.problemId;
     }
     allProblems.previousProblemId = this.problemId;
@@ -239,7 +239,7 @@ Problem.prototype.initializeProblemContent = function(problemData) {
   var answerVectors = problemData["answers"];
   if (answerVectors === undefined) {
     this.writeToHTML(ids.domElements.problemPageContentContainer);
-    return;    
+    return;
   }
   this.flagForReal = problemData["forReal"];
   this.setRandomSeed(problemData.randomSeed);
@@ -270,7 +270,7 @@ Problem.prototype.initializeProblemContent = function(problemData) {
   this.scriptIds = [];
   for (var scriptLabel in problemData.scripts) {
     var newLabel = encodeURIComponent(this.problemId + "_" + scriptLabel);
-    this.scriptIds.push(newLabel); 
+    this.scriptIds.push(newLabel);
     var scriptContent = decodeURIComponent(problemData.scripts[scriptLabel]);
     window.calculator.mainPage.scriptInjector.injectScript(newLabel, scriptContent);
   }
@@ -278,7 +278,7 @@ Problem.prototype.initializeProblemContent = function(problemData) {
 
 function getCalculatorURLRequestFileCourseTopicsFromStorage() {
   var thePage = window.calculator.mainPage;
-  var currentCourse = thePage.storage.variables.currentCourse; 
+  var currentCourse = thePage.storage.variables.currentCourse;
   var exerciseType = currentCourse.exerciseType.getValue();
   if (exerciseType === "" || exerciseType === null || exerciseType === undefined) {
     exerciseType = pathnames.urlFields.exerciseJSON;
@@ -293,8 +293,8 @@ function getCalculatorURLRequestFileCourseTopicsFromStorage() {
   result += `${pathnames.urlFields.request}=${exerciseType}&fileName=${fileName}&`;
   result += `topicList=${topicList}&courseHome=${courseHome}&`;
   if (
-    environmentRandomSeed !== null && 
-    environmentRandomSeed !== "" && 
+    environmentRandomSeed !== null &&
+    environmentRandomSeed !== "" &&
     environmentRandomSeed !== undefined
   ) {
     result += `randomSeed=${environmentRandomSeed}&`;
@@ -305,7 +305,7 @@ function getCalculatorURLRequestFileCourseTopicsFromStorage() {
 
 Problem.prototype.getAppAnchorRequestFileCourseTopics = function(
   /**@type {boolean} */
-  isScoredQuiz, 
+  isScoredQuiz,
   /**@type {boolean} */
   includeRandomSeed,
 ) {
@@ -323,8 +323,8 @@ Problem.prototype.getAppAnchorRequestFileCourseTopics = function(
   };
   if (includeRandomSeed) {
     if (
-      this.randomSeed !== "" && 
-      this.randomSeed !== null && 
+      this.randomSeed !== "" &&
+      this.randomSeed !== null &&
       this.randomSeed !== undefined
     ) {
       requestJSON["randomSeed"] = this.randomSeed;
@@ -338,8 +338,8 @@ Problem.prototype.getAppAnchorRequestFileCourseTopics = function(
 Problem.prototype.getCalculatorURLFileCourseTopics = function() {
   var thePage = window.calculator.mainPage;
   return this.getCalculatorURLInput(
-    this.fileName, 
-    thePage.storage.variables.currentCourse.courseHome.getValue(), 
+    this.fileName,
+    thePage.storage.variables.currentCourse.courseHome.getValue(),
     thePage.storage.variables.currentCourse.topicList.getValue(),
   );
 }
@@ -377,8 +377,8 @@ Problem.prototype.getCalculatorURLRequestInput = function(
   var result = "";
   result += this.getCalculatorURLRequestPartOne(isScoredQuiz) + "&";
   result += this.getCalculatorURLInput(
-    inputFileName, 
-    inputCourseHome, 
+    inputFileName,
+    inputCourseHome,
     inputTopicList,
   );
   return result;
@@ -417,22 +417,22 @@ Problem.prototype.getNextProblemButton = function(
   hints
 ) {
   if (
-    this.nextProblemId === null || 
-    this.nextProblemId === "" || 
+    this.nextProblemId === null ||
+    this.nextProblemId === "" ||
     this.nextProblemId === undefined
   ) {
     return document.createTextNode("");
   }
-  var nextProblem = allProblems.getProblemById(this.nextProblemId); 
+  var nextProblem = allProblems.getProblemById(this.nextProblemId);
   var nextURL = nextProblem.getAppAnchorRequestFileCourseTopics(hints.isScoredQuiz, false);
   var nextProblemTag = document.createElement("a");
   nextProblemTag.className = hints.linkType;
   nextProblemTag.href = `#${nextURL}`;
   nextProblemTag.addEventListener(
-    "click", 
+    "click",
     selectCurrentProblem.bind(
-      null, 
-      this.nextProblemId, 
+      null,
+      this.nextProblemId,
       hints.defaultRequest,
     )
   );
@@ -446,21 +446,21 @@ Problem.prototype.getPreviousProblemButton = function(
   hints
 ) {
   if (
-    this.previousProblemId === null || 
-    this.previousProblemId === "" || 
+    this.previousProblemId === null ||
+    this.previousProblemId === "" ||
     this.previousProblemId === undefined
   ) {
     return document.createTextNode("");
   }
-  var previousProblem = allProblems.getProblemById(this.previousProblemId); 
+  var previousProblem = allProblems.getProblemById(this.previousProblemId);
   var previousURL = previousProblem.getAppAnchorRequestFileCourseTopics(hints.isScoredQuiz, false);
   var previousLink = document.createElement("a");
   previousLink.className = hints.linkType;
   previousLink.href = `#${previousURL}`;
   previousLink.addEventListener(
     "click", window.calculator.problemPage.selectCurrentProblem.bind(
-      null, 
-      this.previousProblemId, 
+      null,
+      this.previousProblemId,
       hints.defaultRequest,
     )
   );
@@ -501,7 +501,7 @@ Problem.prototype.getProblemNavigationContent = function() {
     selectedPracticeTag.innerHTML = "Practice";
     result.push(selectedPracticeTag)
   }
-  if (!this.flagForReal && thePage.user.flagLoggedIn) { 
+  if (!this.flagForReal && thePage.user.flagLoggedIn) {
     var quizURL = this.getAppAnchorRequestFileCourseTopics(true, false);
     var quizTag = document.createElement("a");
     quizTag.className = "problemLinkQuiz";
@@ -565,7 +565,7 @@ Problem.prototype.onePanelComputeHtmlElements = function(/**@type {InputPanelDat
     } else {
       thePanel.htmlButtonSolution = "";
     }
-  } 
+  }
   thePanel.htmlButtonSubmit = `<button class = "buttonSubmit" id = "${thePanel.idButtonSubmit}">Submit</button>`;
   thePanel.htmlButtonInterpret = `<button class = "buttonPreview" id = "${thePanel.idButtonInterpret}">Interpret</button>`;
   thePanel.htmlPureLatex = `<button class = "accordion">details</button>`;
@@ -656,11 +656,11 @@ Problem.prototype.onePanel = function(/**@type {InputPanelData} */ thePanel) {
   }
   this.onePanelComputeHtmlElements(thePanel);
   if (!thePanel.flagGenerateQuestionAndAnswerField) {
-    var mqSpan = document.getElementById(thePanel.idMQSpanLocation); 
+    var mqSpan = document.getElementById(thePanel.idMQSpanLocation);
     mqSpan.innerHTML = thePanel.htmlMQFieldEnclosure;
   }
   var panelContent = "";
-  if (thePanel.layoutVertical === true) { 
+  if (thePanel.layoutVertical === true) {
     panelContent += "<table><tr>";
     if (thePanel.flagGenerateQuestionAndAnswerField) {
       panelContent += `<td>${this.onePanelQuestionAndAnswerField(thePanel)}</td>`;
@@ -691,22 +691,22 @@ Problem.prototype.onePanel = function(/**@type {InputPanelData} */ thePanel) {
   theElement = document.getElementById(thePanel.idButtonInterpret);
   theElement.addEventListener('click', interpretHandlerBound);
   document.getElementById(thePanel.idButtonInterpret).addEventListener(
-    'click', 
+    'click',
     thePanel.submitPreview.bind(thePanel)
   );
   document.getElementById(thePanel.idButtonSubmit).addEventListener(
-    'click', 
+    'click',
     thePanel.submitAnswers.bind(thePanel)
   );
   if (this.flagForReal !== true && thePanel.htmlButtonAnswer !== "") {
-    var buttonAnswer = document.getElementById(thePanel.idButtonAnswer); 
+    var buttonAnswer = document.getElementById(thePanel.idButtonAnswer);
     buttonAnswer.addEventListener(
-      'click', 
+      'click',
       thePanel.submitGiveUp.bind(thePanel)
     );
   }
   if (
-    thePanel.idButtonSolution !== undefined && 
+    thePanel.idButtonSolution !== undefined &&
     thePanel.idButtonSolution !== null &&
     thePanel.idButtonSolution !== ""
   ) {
@@ -721,13 +721,13 @@ Problem.prototype.onePanel = function(/**@type {InputPanelData} */ thePanel) {
 }
 
 function ProblemNavigation() {
-  /**@type{Problem} */ 
+  /**@type{Problem} */
   this.currentProblem = null;
 
 }
 
 ProblemNavigation.prototype.setCurrentProblemAndUpdate = function(
-  /**@type{Problem} */ 
+  /**@type{Problem} */
   inputProblem,
 ) {
   this.currentProblem = inputProblem;
@@ -741,13 +741,13 @@ ProblemNavigation.prototype.writeToHTML = function() {
 
   var problemTitle = document.createElement("DIV");
   problemTitle.className = "problemTitle";
-  
+
   var problemTitleContainer = document.createElement("DIV");
   problemTitleContainer.className = "problemTitleContainer";
   problemTitle.appendChild(problemTitleContainer);
   if (
-    this.currentProblem.problemLabel !== undefined && 
-    this.currentProblem.problemLabel !== "" && 
+    this.currentProblem.problemLabel !== undefined &&
+    this.currentProblem.problemLabel !== "" &&
     this.currentProblem.problemLabel !== null
   ) {
     problemTitleContainer.appendChild(document.createTextNode(this.currentProblem.problemLabel));
@@ -761,7 +761,7 @@ ProblemNavigation.prototype.writeToHTML = function() {
   }
 
   if (
-    this.currentProblem.links !== undefined && 
+    this.currentProblem.links !== undefined &&
     this.currentProblem.links !== null
   ) {
     if (this.currentProblem.links.slides !== null) {
@@ -786,7 +786,7 @@ Problem.prototype.writeToHTML = function(outputElement) {
   var contentArray = [];
   miscellaneousFrontend.appendHtmlToArray(contentArray, this.badProblemExplanation);
   var problemBody = document.createElement("span");
-  problemBody.innerHTML = this.decodedProblem + this.commentsProblem 
+  problemBody.innerHTML = this.decodedProblem + this.commentsProblem
   contentArray.push(problemBody);
   miscellaneousFrontend.appendHtml(outputElement, contentArray);
   for (var counterAnswers = 0;  counterAnswers < this.answers.length; counterAnswers ++) {
@@ -869,7 +869,7 @@ Problem.prototype.toStringDeadlinePanel = function() {
       result += `value = "${this.deadlines[counterGroup]}"`;
     }
     result += `></input></td></tr>`;
-  } 
+  }
   result += "</table>";
   //console.log("Problem data problem: " + JSON.stringify(this.fileName));
   //console.log("Problem data title: " + JSON.stringify(this.title));
@@ -879,7 +879,7 @@ Problem.prototype.toStringDeadlinePanel = function() {
   return result;
 }
 
-Problem.prototype.toHTMLWeights = function() { 
+Problem.prototype.toHTMLWeights = function() {
   var result = "";
   result += "<span class = 'panelProblemWeights' style = 'opacity: 1; max-height: 200px;'>";
   result += `Pts: <textarea class = 'textareaStudentPoints' rows = '1' cols = '2' id = '${this.idTextareaPoints}'>`;
@@ -902,7 +902,7 @@ Problem.prototype.modifyWeight = function() {
   modifyObject[idDecoded] = {
     weight: incomingPoints
   };
-  var theURL = ""; 
+  var theURL = "";
   theURL += `${pathnames.urls.calculatorAPI}?`;
   theURL += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.setProblemWeight}&`;
   theURL += `${pathnames.urlFields.mainInput}=${encodeURIComponent(JSON.stringify(modifyObject))}`;
@@ -929,7 +929,7 @@ Problem.prototype.getProblemWeightContent = function(inputRow) {
     content.innerHTML = this.toStringProblemWeight();
     return [content];
   }
-  var pointsString = ""; 
+  var pointsString = "";
   pointsString += `<button class = 'accordionLikeProblemWeight' onclick = "window.calculator.coursePage.toggleProblemWeights()" `;
   pointsString += `name = "${this.problemId}">${this.toStringProblemWeight()} &#9666;</button>`;
   var problemWeightString = this.toHTMLWeights();
@@ -942,12 +942,12 @@ Problem.prototype.isSolvedForSure = function () {
     return false;
   }
   if (
-    this.correctlyAnswered >= this.totalQuestions && 
+    this.correctlyAnswered >= this.totalQuestions &&
     this.totalQuestions !== undefined &&
     this.totalQuestions !== 0
   ) {
     return true;
-  } 
+  }
   return false;
 }
 
@@ -971,7 +971,7 @@ Problem.prototype.toStringProblemWeight = function() {
       result += ` = ${points} pts`;
       if (this.correctlyAnswered < this.totalQuestions) {
         color = "red";
-      } 
+      }
     } else {
       result += ` = ? pts`;
     }
@@ -991,18 +991,18 @@ function convertStringToLaTeXFileName(input) {
 }
 
 var linkSpecs = {
-  slidesProjector: { 
+  slidesProjector: {
     request: pathnames.urlFields.requests.slidesFromSource,
     name: "Slides",
     extension: ".pdf",
     options: "layout=projector&",
-  }, 
+  },
   slidesPrintable: {
     request: pathnames.urlFields.requests.slidesFromSource,
     name: "Printable",
     extension: ".pdf",
     options: "layout=printable&",
-  }, 
+  },
   slidesTex: {
     request: pathnames.urlFields.requests.sourceSlides,
     name: ".tex",
@@ -1010,19 +1010,19 @@ var linkSpecs = {
     options: "",
     download: true,
     adminView: true,
-  }, 
+  },
   homeworkWithAnswers: {
     request: pathnames.urlFields.requests.homeworkFromSource,
     extension: ".pdf",
     name: "HW",
     options: "answerKey=true&",
-  }, 
+  },
   homeworkNoAnswers: {
     request: pathnames.urlFields.requests.homeworkFromSource,
     name: "HW+answ.",
     extension: ".pdf",
     options: "answerKey=false&",
-  }, 
+  },
   homeworkTex: {
     request: pathnames.urlFields.requests.sourceHomework,
     name: ".tex",
@@ -1036,7 +1036,7 @@ var linkSpecs = {
 /** @returns{HTMLElement} */
 Problem.prototype.getLinkFromSpec = function(
   /**@type {{request: string, name: string, extension: string, options: string, download: boolean}} */
-  linkSpec, 
+  linkSpec,
   /**@type {string} */
   query
 ) {
@@ -1092,7 +1092,7 @@ Problem.prototype.getProblemMaterialLinks = function() {
     for (var counter in linkSlides) {
       this.links.slides.push(this.getLinkFromSpec(linkSpecs[linkSlides[counter]], this.querySlides));
     }
-  } 
+  }
   miscellaneousFrontend.appendHtmlToArray(result, this.links.slides);
   if (this.queryHomework !== "" && this.queryHomework !== null && this.queryHomework !== undefined) {
     for (var counter in linkHomework) {
@@ -1122,10 +1122,10 @@ Problem.prototype.getHTMLOneProblemTr = function (
       nextElement.className = "problemLinkQuiz";
       nextElement.href = `#${this.getAppAnchorRequestFileCourseTopics(true)}`;
       nextElement.addEventListener(
-        "click", 
+        "click",
         window.calculator.problemPage.selectCurrentProblem.bind(
-          null, 
-          this.problemId, 
+          null,
+          this.problemId,
           "scoredQuizJSON",
         ),
       );
@@ -1154,7 +1154,7 @@ Problem.prototype.getHTMLProblems = function () {
   nextElement.className = "bodySubsection";
   var table = document.createElement("table");
   nextElement.appendChild(table);
-  table.className = "topicList";  
+  table.className = "topicList";
   for (var counterSubSection = 0; counterSubSection < this.childrenIds.length; counterSubSection ++) {
     var currentProblem = allProblems.getProblemById(this.childrenIds[counterSubSection]);
     var row = table.insertRow(- 1);
@@ -1171,7 +1171,7 @@ Problem.prototype.getHTMLSubSection = function() {
   nextElement.innerHTML = `${this.problemNumberString} ${this.title} ${this.toStringDeadlineContainer()}`;
   result.push(nextElement);
   miscellaneousFrontend.appendHtmlToArray(result, this.getHTMLProblems());
-  return result;  
+  return result;
 }
 
 Problem.prototype.isProblemContainer = function() {
@@ -1192,7 +1192,7 @@ Problem.prototype.getHTMLSection = function() {
   if (this.type === "Section") {
     var sectionElement = document.createElement("div");
     sectionElement.className = "headSection";
-    sectionElement.innerHTML = `${this.problemNumberString} ${this.title} ${this.toStringDeadlineContainer()}`; 
+    sectionElement.innerHTML = `${this.problemNumberString} ${this.title} ${this.toStringDeadlineContainer()}`;
     result.push(sectionElement);
   }
   var nextElement = document.createElement("div");
@@ -1210,7 +1210,7 @@ Problem.prototype.getHTMLSection = function() {
   } else {
     miscellaneousFrontend.appendHtml(nextElement, this.getHTMLSubSection());
   }
-  return result;  
+  return result;
 }
 
 /**@returns{HTMLElement[]} */
@@ -1234,7 +1234,7 @@ Problem.prototype.toHTMLChapter =  function() {
       miscellaneousFrontend.appendHtml(bodyChapterElement, currentSection.getHTMLSection());
     }
   }
-  result.push(bodyChapterElement); 
+  result.push(bodyChapterElement);
   return result;
 }
 
@@ -1242,7 +1242,7 @@ Problem.prototype.toHTMLChapter =  function() {
 function getHTMLfromTopics() {
   var result = [];
   for (var label in allProblems.theChapterIds) {
-    var currentProblem = allProblems.getProblemById(label); 
+    var currentProblem = allProblems.getProblemById(label);
     result.push(currentProblem.toHTMLChapter());
   }
   if (allProblems.theTopics.comments !== undefined && allProblems.theTopics.comments !== null) {
@@ -1250,7 +1250,7 @@ function getHTMLfromTopics() {
     comments.innerHTML = "<hr>" + allProblems.theTopics.comments;
     result.push(comments);
   }
-  
+
   return result;
 }
 
@@ -1263,12 +1263,12 @@ function initializeDatePickers() {
 
 function initializeProblemWeightsAndDeadlines() {
   var theWeights = document.getElementsByClassName('panelProblemWeights');
-  for (var i = 0; i < theWeights.length; i ++) { 
+  for (var i = 0; i < theWeights.length; i ++) {
     //theScores[i].style.transition ='opacity 1s linear';
     theWeights[i].style.maxHeight = '0px';
   }
   var theDeadlines = document.getElementsByClassName('panelDeadlines');
-  for (var i = 0; i < theDeadlines.length; i ++) { 
+  for (var i = 0; i < theDeadlines.length; i ++) {
     //theScores[i].style.transition ='opacity 1s linear';
     theDeadlines[i].style.maxHeight = '0px';
   }
@@ -1283,13 +1283,13 @@ function writeEditCoursePagePanel() {
   var topicList = thePage.storage.variables.currentCourse.topicList.getValue();
   panel.appendChild(editPage.getEditPanel(topicList));
   if (
-    allProblems.theTopics.topicBundleFile !== undefined && 
+    allProblems.theTopics.topicBundleFile !== undefined &&
     allProblems.theTopics.topicBundleFile !== null &&
     allProblems.theTopics.topicBundleFile !== ""
   ) {
     for (
-      var counterTopicBundle = 0; 
-      counterTopicBundle < allProblems.theTopics.topicBundleFile.length; 
+      var counterTopicBundle = 0;
+      counterTopicBundle < allProblems.theTopics.topicBundleFile.length;
       counterTopicBundle ++
     ) {
       var nextToEdit = allProblems.theTopics.topicBundleFile[counterTopicBundle];
@@ -1309,12 +1309,12 @@ function processLoadedTopics(incomingTopics, result) {
 }
 
 function processLoadedTopicsWriteToEditPage(incomingTopics, result) {
-  processLoadedTopics(incomingTopics, result);  
+  processLoadedTopics(incomingTopics, result);
   editPage.selectEditPage(null);
 }
 
 function processLoadedTopicsWriteToCoursePage(incomingTopics, result) {
-  processLoadedTopics(incomingTopics, result);  
+  processLoadedTopics(incomingTopics, result);
   writeTopicsToCoursePage();
 }
 
@@ -1363,11 +1363,11 @@ function updateProblemPageCallback(input, outputComponent) {
 }
 
 function updateProblemPage() {
-  setTimeout(() => { 
+  setTimeout(() => {
     window.calculator.coursePage.selectCurrentCoursePage();
   }, 0);
   var thePage = window.calculator.mainPage;
-  // thePage.pages.problemPage.flagLoaded is modified by the following 
+  // thePage.pages.problemPage.flagLoaded is modified by the following
   // functions: selectCurrentProblem, logout, callbackClone,
   // the present function updateProblemPage
   /**@type {Problem} */
@@ -1377,33 +1377,33 @@ function updateProblemPage() {
       var problemNavigation = document.getElementById(theProblem.idNavigationProblemNotEntirePanel);
       if (problemNavigation !== null) {
         problemNavigation.innerHTML = "";
-        var updatedContent = theProblem.getProblemNavigationContent();        
+        var updatedContent = theProblem.getProblemNavigationContent();
         for (var i = 0; i < updatedContent.length; i ++) {
           problemNavigation.appendChild(updatedContent[i]);
-        } 
+        }
       }
     }
     return;
   }
   var theURL;
-  if (theProblem !== undefined && theProblem !== null) { 
+  if (theProblem !== undefined && theProblem !== null) {
     theURL = `${pathnames.urls.calculatorAPI}?${theProblem.getCalculatorURLRequestFileCourseTopics(theProblem.flagForReal)}`;
   } else {
     var fileName = thePage.storage.variables.currentCourse.fileName.getValue();
     if (fileName === "" || fileName === undefined || fileName === null) {
-      var courseBody = document.getElementById(ids.domElements.problemPageContentContainer); 
+      var courseBody = document.getElementById(ids.domElements.problemPageContentContainer);
       var temporarySelectProblem = "buttonTemporarySelectProblem";
       var selectProblemHtml = "";
       selectProblemHtml += `Problems are selected from the <button id = '${temporarySelectProblem}'`;
-      selectProblemHtml += `class = "buttonSelectPage buttonSlowTransition buttonFlash" style = "width:150px"`; 
+      selectProblemHtml += `class = "buttonSelectPage buttonSlowTransition buttonFlash" style = "width:150px"`;
       selectProblemHtml += `onclick = "window.calculator.mainPage.selectPage('currentCourse')">Current course</button>`;
       selectProblemHtml += "<br>To select a problem, click Practice or Quiz within the course page. ";
       courseBody.innerHTML = selectProblemHtml;
       setTimeout(() => {
         document.getElementById(temporarySelectProblem).classList.remove("buttonFlash");
       }, 100);
-      return; 
-    } 
+      return;
+    }
     theURL = getCalculatorURLRequestFileCourseTopicsFromStorage();
   }
   thePage.pages.problemPage.flagLoaded = true;

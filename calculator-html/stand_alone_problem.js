@@ -11,13 +11,13 @@ function StandAloneProblem() {
   this.problem = null;
   /**@type{string} */
   this.containerId = "";
-  /**@type{HTMLElement} */ 
+  /**@type{HTMLElement} */
   this.containerElement = null;
-  /**@type{HTMLElement} */ 
+  /**@type{HTMLElement} */
   this.problemElement = null;
-  /**@type{HTMLElement} */ 
+  /**@type{HTMLElement} */
   this.navigationElement = null;
-  /**@type{HTMLElement} */ 
+  /**@type{HTMLElement} */
   this.editPageElement = null;
   /**@type{HTMLElement} */
   this.progressReportGeneral = null;
@@ -79,7 +79,7 @@ StandAloneProblem.prototype.ensureTagsExist = function(input, tag) {
     var desiredId = input[label];
     this[label] = document.getElementById(desiredId);
     if (this[label] === null) {
-      var newElement = document.createElement(tag); 
+      var newElement = document.createElement(tag);
       newElement.setAttribute("id", desiredId);
       this[label] = newElement;
       this.containerElement.appendChild(newElement);
@@ -93,17 +93,17 @@ StandAloneProblem.prototype.initCommon = function(input) {
     console.log("No output component id supplied.");
     return;
   }
-  var thePage = window.calculator.mainPage; 
+  var thePage = window.calculator.mainPage;
   thePage.flagProblemPageOnly = true;
   if (
-    input.hardCodedServerAddress !== "" && 
-    input.hardCodedServerAddress !== null && 
+    input.hardCodedServerAddress !== "" &&
+    input.hardCodedServerAddress !== null &&
     input.hardCodedServerAddress !== undefined
   ) {
     window.calculator.hardCodedServerAddress = input.hardCodedServerAddress;
   }
   this.containerId = input.id;
-  this.containerElement = document.getElementById(this.containerId); 
+  this.containerElement = document.getElementById(this.containerId);
   if (this.containerElement === null) {
     console.log(`Failed to find the supplied id. ${this.containerId}`);
     return;
@@ -115,24 +115,24 @@ StandAloneProblem.prototype.initCommon = function(input) {
   this.problemFileName = "problems/Find-function-inverse-fractional-linear-1.html";
   var fileNameCookies = thePage.storage.variables.currentCourse.problemFileName.loadMe();
   if (
-    fileNameCookies !== "" && 
-    fileNameCookies !== undefined && 
+    fileNameCookies !== "" &&
+    fileNameCookies !== undefined &&
     fileNameCookies !== null
   ) {
     this.problemFileName = fileNameCookies;
   }
   // overrides from input
   var tags = [
-    "courseHome", 
-    "topicList", 
+    "courseHome",
+    "topicList",
     "topicBundles",
-    "problemFileName", 
+    "problemFileName",
   ];
   for (var i = 0; i < tags.length; i ++) {
     var label = tags[i];
     if (
-      input[label] !== undefined && 
-      input[label] !== "" && 
+      input[label] !== undefined &&
+      input[label] !== "" &&
       input[label] !== null
     ) {
       this[label] = input[label];
@@ -142,19 +142,19 @@ StandAloneProblem.prototype.initCommon = function(input) {
 
 StandAloneProblem.prototype.initAndEdit = function (input) {
   this.initCommon(input);
-  this.ensureSpansExist({ 
+  this.ensureSpansExist({
     spanButtonPreviousEdit: ids.domElements.spanButtonPreviousEdit,
   });
   this.ensureButtonsExist({
     saveEdit: ids.domElements.buttonSaveEdit,
   });
-  this.ensureSpansExist({ 
+  this.ensureSpansExist({
     spanButtonNextEdit: ids.domElements.spanButtonNextEdit,
   });
   this.ensureTextAreasExist({
     textAreaEditPage: ids.domElements.textAreaTopicListEntry,
   });
-  this.ensureSpansExist({ 
+  this.ensureSpansExist({
     spanButtonNextEdit: ids.domElements.spanSubmitEditPageReport,
   });
   this.ensureSpansExist({
@@ -184,12 +184,12 @@ StandAloneProblem.prototype.initAndRun = function (input) {
   });
   this.problem = problemPage.allProblems.CreateOrUpdateProblem({
     id: encodeURIComponent(this.problemFileName),
-  }); 
+  });
   var theURL = `${pathnames.urls.calculatorAPI}?${this.problem.getCalculatorURLRequestInput(false, this.problemFileName, this.courseHome, this.topicList)}`;
   submitRequests.submitGET({
     url: theURL,
     callback: this.updateProblemCallback.bind(this),
-  });  
+  });
 }
 
 var standAloneProblem = new StandAloneProblem();

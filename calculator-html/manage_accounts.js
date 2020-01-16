@@ -71,8 +71,8 @@ function callbackAddEmailsOrUsers(input, outputComponent) {
 }
 
 function addEmailsOrUsers(
-  idEmailList, problemCollectionName, 
-  idOutput, userRole, idUserGroup, 
+  idEmailList, problemCollectionName,
+  idOutput, userRole, idUserGroup,
   idPasswords, requestType
 ) {
   var spanEmailList = document.getElementById(idEmailList);
@@ -95,10 +95,10 @@ function addEmailsOrUsers(
 }
 
 function getTeachersStudentsCallback(input, output) {
-  document.getElementById(output).innerHTML = input; 
+  document.getElementById(output).innerHTML = input;
 }
 
-function getTeachersStudents() { 
+function getTeachersStudents() {
   var theURL = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.setTeacher}&`;
   var inputSections = document.getElementById('inputSections').value;
   var inputTeachers = document.getElementById('inputSetTeacher').value;

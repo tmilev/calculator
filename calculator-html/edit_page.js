@@ -32,7 +32,7 @@ function ctrlSPressAceEditorHandler(event) {
 /**@returns {HTMLElement[]} */
 function getClonePanel(
   /**@type{string} */
-  fileNameSource, 
+  fileNameSource,
   /**@type{string} */
   fileNameTarget
 ) {
@@ -45,7 +45,7 @@ function getClonePanel(
   var table = document.createElement("table");
   var row = table.insertRow(- 1);
   var cellClone = row.insertCell(- 1);
-  
+
   // result += "<table><tr><td>";
   var buttonClone = document.createElement("button");
   buttonClone.className = "buttonClone";
@@ -232,8 +232,8 @@ function getPreviousEditButton(problemId) {
 /** @returns {HTMLElement} */
 function getNavigationEditButton(problemId, contentHTML) {
   if (
-    problemId === null || 
-    problemId === "" || 
+    problemId === null ||
+    problemId === "" ||
     problemId === undefined
   ) {
     return document.createTextNode("");
@@ -243,7 +243,7 @@ function getNavigationEditButton(problemId, contentHTML) {
     "click", selectEditPage.bind(null, problemId)
   );
   navigationButton.className = "buttonNavigationStandard";
-  navigationButton.innerHTML = contentHTML; 
+  navigationButton.innerHTML = contentHTML;
   return navigationButton;
 }
 
@@ -263,14 +263,14 @@ function writeNextPreviousEditButton(currentlyEditedPage) {
     nextButtonSpan.innerHTML = "";
     nextButtonSpan.appendChild(getNextEditButton(problem.nextProblemId));
   }
-} 
+}
 
 function selectEditPage(currentlyEditedPage) {
   var thePage = window.calculator.mainPage;
-  if (currentlyEditedPage === undefined || currentlyEditedPage === null) { 
+  if (currentlyEditedPage === undefined || currentlyEditedPage === null) {
     currentlyEditedPage = thePage.storage.variables.editor.currentlyEditedPage.getValue();
   }
-  if (currentlyEditedPage === undefined || currentlyEditedPage === null) { 
+  if (currentlyEditedPage === undefined || currentlyEditedPage === null) {
     currentlyEditedPage = "/coursesavailable/default.txt";
   }
   thePage.storage.variables.editor.currentlyEditedPage.setAndStore(currentlyEditedPage);
@@ -295,7 +295,7 @@ function selectEditPage(currentlyEditedPage) {
 }
 
 function toggleClonePanel(button) {
-  var thePanel = button.nextElementSibling; 
+  var thePanel = button.nextElementSibling;
   if (thePanel.style.maxHeight === '200px') {
     thePanel.style.opacity = '0';
     thePanel.style.maxHeight = '0';
@@ -310,7 +310,7 @@ function toggleClonePanel(button) {
 module.exports = {
   storeEditedPage,
   toggleClonePanel,
-  selectEditPage, 
+  selectEditPage,
   getEditPanel,
   getClonePanel,
   handleClone,

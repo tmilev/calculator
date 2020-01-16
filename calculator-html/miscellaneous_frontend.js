@@ -1,6 +1,6 @@
 "use strict";
 
-function switchMenu(obj) { 
+function switchMenu(obj) {
   var el = document.getElementById(obj);
   if (el.classList.contains("hiddenClass")) {
     el.classList.remove("hiddenClass");
@@ -9,17 +9,17 @@ function switchMenu(obj) {
   }
 }
 
-function hideItem(obj) { 
+function hideItem(obj) {
   document.getElementById(obj).style.display = "none";
 }
 
-function showItem(obj) { 
+function showItem(obj) {
   document.getElementById(obj).style.display = "";
 }
 
 function appendHtml(
   /** @type{HTMLElement}*/
-  targetToAppendTo, 
+  targetToAppendTo,
   /** @type{HTMLElement|HTMLElement[]}*/
   contentToAppend,
 ) {
@@ -44,7 +44,7 @@ function appendHtml(
 
 function appendHtmlToArray(
   /** @type{HTMLElement[]}*/
-  targetArray, 
+  targetArray,
   /** @type{HTMLElement|HTMLElement[]}*/
   contentToAppend,
 ) {

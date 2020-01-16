@@ -50,7 +50,7 @@ getLatexLink = function() {
 latexifyLink = function(inputURL) {
   var result = "";
   result += "\\href{";
-  for (var i = 0; i < inputURL.length; i ++) { 
+  for (var i = 0; i < inputURL.length; i ++) {
     if (inputURL[i] == '%') {
       result += "\\%";
     } else if (inputURL[i] == '_') {
@@ -81,8 +81,8 @@ function recordProgressStarted(progress, address, isPost, timeStarted) {
   addressSpreadOut = addressSpreadOut.split("=").join("= ");
   addressSpreadOut = addressSpreadOut.split("?").join("? ");
   censoredAddressStarts = [
-    pathnames.urlFields.newPassword, 
-    pathnames.urlFields.reenteredPassword, 
+    pathnames.urlFields.newPassword,
+    pathnames.urlFields.reenteredPassword,
     pathnames.urlFields.password,
   ];
   for (var i = 0; i < censoredAddressStarts.length; i ++) {
@@ -120,7 +120,7 @@ function recordResult(resultText, resultSpan) {
 
 function correctAddress(inputURL) {
   if (
-    inputURL.startsWith("http://") || 
+    inputURL.startsWith("http://") ||
     inputURL.startsWith("https://")
   ) {
     return inputURL;
@@ -175,9 +175,9 @@ function submitGET(
 
 function responseStandard(
   /**@type {XMLHttpRequest} */
-  request, 
+  request,
   /**@type {Function} */
-  callback, 
+  callback,
   /**@type {String|HTMLElement} */
   result,
   /**@type {String|HTMLElement} */

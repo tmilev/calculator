@@ -20,7 +20,7 @@ var oldLastWord;
 var lastWordStart;
 var ignoreOninput;
 
-function initializeAutocomplete() { 
+function initializeAutocomplete() {
   if (AutocompleteIsInitialized) {
     return true;
   }
@@ -51,14 +51,14 @@ function initializeAutocomplete() {
 }
 
 //displayDictionary();
-function displayDictionary() { 
+function displayDictionary() {
   var result;
   result ="";
   counter = 0;
-  for (var i in theAutocompleteDictionaryByKey) { 
+  for (var i in theAutocompleteDictionaryByKey) {
     result += i + " " + theAutocompleteDictionaryByKey[i] + " <br />";
     counter ++;
-    if (counter >= 15) { 
+    if (counter >= 15) {
       result += "... displaying first 15 out of a total of " + Object.keys(theAutocompleteDictionaryByKey).length + " words in the dictionary.";
       break;
     }
@@ -66,8 +66,8 @@ function displayDictionary() {
   autocompleteDebugWindow.innerHTML = result;
 }
 
-function isSeparator(theChar) { 
-  switch (theChar) { 
+function isSeparator(theChar) {
+  switch (theChar) {
     case '+':
     case ' ':
     case ',':
@@ -83,12 +83,12 @@ function isSeparator(theChar) {
   }
 }
 
-function getLastWord() { 
+function getLastWord() {
   var theLastWordReversed;
   theLastWordReversed = "";
   var cursorPosition = theText.selectionEnd;
   lastWordStart = - 1;
-  for (var i = cursorPosition - 1; i >= 0; i --) { 
+  for (var i = cursorPosition - 1; i >= 0; i --) {
     if (isSeparator(theText.value[i])) {
       break;
     }
@@ -110,15 +110,15 @@ function getLastWord() {
 //  autocompleteDebugWindow.innerHTML= theLastWord+ "<br>cursorPosition ="+ cursorPosition + "<br>theText.selectionEnd =" +theText.selectionEnd+  "theText.selectionStart ="+theText.selectionStart + "<br>DebugCounter ="+DebugCounter;
 }
 
-function clearAutocompleteTab() { 
+function clearAutocompleteTab() {
   theAutoComplete.innerHTML="";
-//  theAutoCompleteHints.style.visibility ="hidden";  
+//  theAutoCompleteHints.style.visibility ="hidden";
   indexInAutocomplete = - 1;
   theSuggestions.length = 0;
   theSuggestionsHighlighted.length = 0;
 }
 
-function suggestWord() { 
+function suggestWord() {
   if (!initializeAutocomplete()) {
     return;
   }
@@ -129,16 +129,16 @@ function suggestWord() {
   oldLastWord = theLastWord;
   theSuggestions.length = 0;
   theSuggestionsHighlighted.length = 0;
-  if (theLastWord == "") { 
+  if (theLastWord == "") {
     clearAutocompleteTab();
     return;
   }
-  if (theLastWord.length < minLengthAutocompleteTrigger) { 
+  if (theLastWord.length < minLengthAutocompleteTrigger) {
     clearAutocompleteTab();
     return;
-  }  
-  for (var i = 0; i < theAutocompleteDictionary.length; i ++) { 
-    if (theLastWord == theAutocompleteDictionary[i]) { 
+  }
+  for (var i = 0; i < theAutocompleteDictionary.length; i ++) {
+    if (theLastWord == theAutocompleteDictionary[i]) {
       clearAutocompleteTab();
       return;
     }
@@ -151,16 +151,16 @@ function suggestWord() {
     currentString += "<b>" + theLastWord + "</b>" + theAutocompleteDictionary[i].substr(startpos + theLastWord.length);
     theSuggestions.push(theAutocompleteDictionary[i]);
     theSuggestionsHighlighted.push(currentString);
-  }      
+  }
   if (theSuggestions.length > 0)
     theAutoCompleteHints.style.visibility = "visible";
   indexInAutocomplete = 0;
   displaySuggestions();
 }
 
-function displaySuggestions() { 
+function displaySuggestions() {
   theAutoComplete.innerHTML = "";
-  if (theSuggestionsHighlighted.length > 0) { 
+  if (theSuggestionsHighlighted.length > 0) {
     if (indexInAutocomplete < 0) {
       indexInAutocomplete = theSuggestionsHighlighted.length - 1;
     }
@@ -171,14 +171,14 @@ function displaySuggestions() {
   for (var i = 0; i < theSuggestionsHighlighted.length; i ++) {
     if (i === indexInAutocomplete) {
       theAutoComplete.innerHTML += "<span style ='background:silver'>" + theSuggestionsHighlighted[i] + "</span><br>";
-    } else {  
+    } else {
       theAutoComplete.innerHTML += theSuggestionsHighlighted[i] + "<br>";
     }
   }
   //theAutoComplete.innerHTML+="theindex: " + indexInAutocomplete;
 }
 
-function replaceLastWord() { 
+function replaceLastWord() {
   if (theSuggestions.length <= 0) {
     return;
   }
@@ -190,7 +190,7 @@ function replaceLastWord() {
   setCursorPosition(lastWordStart + theSuggestions[indexInAutocomplete].length + 1);
 }
 
-function arrowAction(event) { 
+function arrowAction(event) {
   if (event.ctrlKey !== true) {
     return;
   }
@@ -201,7 +201,7 @@ function arrowAction(event) {
     indexInAutocomplete --;
   } else if (event.keyCode === 40) {//down arrow
     indexInAutocomplete ++;
-  } else { 
+  } else {
     return;
   }
   displaySuggestions();
@@ -210,7 +210,7 @@ function arrowAction(event) {
 //  event.cancelBubble = true;
 }
 
-function accountWordAtCursor(amount) { 
+function accountWordAtCursor(amount) {
   getLastWord();
   if (theLastWord === "" || theLastWord === null) {
     return;
@@ -224,13 +224,13 @@ function accountWordAtCursor(amount) {
   displayDictionary();
 }
 
-function setCursorPosition(caretPos) { 
-  if (theText.createTextRange) { 
+function setCursorPosition(caretPos) {
+  if (theText.createTextRange) {
     var range = theText.createTextRange();
     range.move('character', caretPos);
     range.select();
-  } else { 
-    if (theText.selectionStart) { 
+  } else {
+    if (theText.selectionStart) {
       theText.focus();
       theText.setSelectionRange(caretPos, caretPos);
     } else {

@@ -52,7 +52,7 @@ var urlFields = {
   },
   teachersAndSections: "teachersAndSections",
   mainInput: "mainInput",
-  requestEditPage: "editPageJSON", 
+  requestEditPage: "editPageJSON",
   calculatorCompute: "compute",
   database: {
     operation: "databaseOperation",
@@ -77,7 +77,7 @@ var urlFields = {
   submitExerciseNoLogin: "submitExerciseNoLogin",
   submitAnswersPreview: "submitAnswersPreview",
   submitExercisePreviewNoLogin: "submitExercisePreviewNoLogin",
-  submitExercisePreview: "submitExercisePreview",  
+  submitExercisePreview: "submitExercisePreview",
   accountsJSON: "accountsJSON",
   signUp: "signUp",
   username: "username",

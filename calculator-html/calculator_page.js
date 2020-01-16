@@ -24,8 +24,8 @@ function Calculator() {
   processMonitoring.monitor.ownerCalculator = this;
 }
 
-function createSelectionNoFocus(field, start, end) { 
-  if (field.createTextRange) { 
+function createSelectionNoFocus(field, start, end) {
+  if (field.createTextRange) {
     var selRange = field.createTextRange();
     selRange.collapse(true);
     selRange.moveStart('character', start);
@@ -33,7 +33,7 @@ function createSelectionNoFocus(field, start, end) {
     selRange.select();
     field.focus();
     calculatorMQfield.focus();
-  } else if (field.setSelectionRange) { 
+  } else if (field.setSelectionRange) {
     field.focus();
     field.setSelectionRange(start, end);
     calculatorMQfield.focus();
@@ -66,7 +66,7 @@ Calculator.prototype.addListenersToInputBoxes = function() {
   }
 }
 
-Calculator.prototype.updateSliderToInputBox =  function(boxName, sliderName) { 
+Calculator.prototype.updateSliderToInputBox =  function(boxName, sliderName) {
   var theBoxes = document.getElementsByName(boxName);
   var theSliders = document.getElementsByName(sliderName);
   var sliderValue = theSliders[0].value;
@@ -74,9 +74,9 @@ Calculator.prototype.updateSliderToInputBox =  function(boxName, sliderName) {
     theBoxes[i].value = sliderValue;
   }
   var plodtId = drawing.plotUpdaters[sliderName];
-  if (plodtId !== undefined) { 
+  if (plodtId !== undefined) {
     var theCanvas = drawing.canvases[plodtId];
-    if (theCanvas !== undefined) { 
+    if (theCanvas !== undefined) {
       if (theCanvas.canvasResetFunction !== null) {
         theCanvas.canvasResetFunction();
       }
@@ -84,18 +84,18 @@ Calculator.prototype.updateSliderToInputBox =  function(boxName, sliderName) {
   }
 }
 
-function createSelection(field, start, end) { 
-  if (field.createTextRange) { 
+function createSelection(field, start, end) {
+  if (field.createTextRange) {
     var selRange = field.createTextRange();
     selRange.collapse(true);
     selRange.moveStart('character', start);
     selRange.moveEnd('character', end);
     selRange.select();
     field.focus();
-  } else if (field.setSelectionRange) { 
+  } else if (field.setSelectionRange) {
     field.focus();
     field.setSelectionRange(start, end);
-  } else if (field.selectionStart !== undefined) { 
+  } else if (field.selectionStart !== undefined) {
     field.selectionStart = start;
     field.selectionEnd = end;
     field.focus();
@@ -155,7 +155,7 @@ Calculator.prototype.processExamples = function(inputJSONtext) {
   }
 }
 
-Calculator.prototype.submitCalculatorInputOnEnter = function (event) { 
+Calculator.prototype.submitCalculatorInputOnEnter = function (event) {
   if (event.keyCode !== 13 || !event.shiftKey) {
     return;
   }
@@ -209,12 +209,12 @@ Calculator.prototype.getComputationLink = function(input) {
 }
 
 Calculator.prototype.writeErrorsAndCrashes = function(
-  /**@type {BufferCalculator} */ 
+  /**@type {BufferCalculator} */
   buffer,
   inputParsed,
 ) {
   if (
-    inputParsed.error !== undefined && 
+    inputParsed.error !== undefined &&
     inputParsed.error !== null &&
     inputParsed.error !== ""
   ) {
@@ -222,7 +222,7 @@ Calculator.prototype.writeErrorsAndCrashes = function(
     buffer.write(inputParsed.error);
   }
   if (
-    inputParsed.crashReport !== undefined && 
+    inputParsed.crashReport !== undefined &&
     inputParsed.crashReport !== null &&
     inputParsed.crashReport !== ""
   ) {
@@ -231,7 +231,7 @@ Calculator.prototype.writeErrorsAndCrashes = function(
 }
 
 Calculator.prototype.writeResult = function(
-  /**@type {BufferCalculator} */ 
+  /**@type {BufferCalculator} */
   buffer,
   inputParsed,
   panelIdPairs,
@@ -276,9 +276,9 @@ Calculator.prototype.writeResult = function(
     buffer.write(`<tr>`);
     buffer.write(`<td class = "cellCalculatorInput"> <div id = "${inputPanelId}"></div></td>`);
     buffer.write(`<td class = "cellCalculatorResult"><div id = "${outputPanelId}"></div></td>`);
-    buffer.write(`</tr>`);    
+    buffer.write(`</tr>`);
   }
-  buffer.write(`</table>`);  
+  buffer.write(`</table>`);
   buffer.write(`</td><td><div class = "containerComments">`);
   if (inputParsed.performance !== undefined) {
     buffer.write(inputParsed.performance);
@@ -296,7 +296,7 @@ Calculator.prototype.writeResult = function(
   }
   buffer.write(`</tr></table>`);
   if (inputParsed.parsingLog !== undefined) {
-    buffer.write(inputParsed.parsingLog); 
+    buffer.write(inputParsed.parsingLog);
   }
 }
 
@@ -332,7 +332,7 @@ Calculator.prototype.afterWriteOutput = function() {
   this.inputBoxToSliderUpdaters = {};
   this.canvases = {};
   thePage.pages.calculator.sciptIds = [];
-  for (var i = 0; i < incomingScripts.length; i ++) { 
+  for (var i = 0; i < incomingScripts.length; i ++) {
     var newId = `calculatorMainPageId_${i}`;
     thePage.pages.calculator.sciptIds.push(newId);
     thePage.injectScript(newId, incomingScripts[i].innerHTML);
@@ -341,7 +341,7 @@ Calculator.prototype.afterWriteOutput = function() {
   mathjax.typeSetSoft(ids.domElements.spanCalculatorMainOutput);
 }
 
-Calculator.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function(input, output) { 
+Calculator.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function(input, output) {
   this.parsedComputation = null;
   var inputHtml = null;
   this.panelIdPairs = [];
@@ -358,11 +358,11 @@ Calculator.prototype.defaultOnLoadInjectScriptsAndProcessLaTeX = function(input,
   }
   var spanVerification = document.getElementById(ids.domElements.spanCalculatorMainOutput);
   spanVerification.innerHTML = inputHtml;
-  this.afterWriteOutput();  
+  this.afterWriteOutput();
 }
 
 Calculator.prototype.submitComputationPartTwo = function(input) {
-  //<- this function is called by a callback trigerred when calling 
+  //<- this function is called by a callback trigerred when calling
   //thePage.storage.variables.calculator.input.setAndStore(...)
   var thePage = window.calculator.mainPage;
   var urlCopy = Object.assign({}, thePage.storage.urlObject);

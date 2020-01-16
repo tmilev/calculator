@@ -1,6 +1,6 @@
 "use strict"
 
-function selectElementContents(el) { 
+function selectElementContents(el) {
   var range = document.createRange();
   range.selectNodeContents(el);
   var sel = window.getSelection();
@@ -21,15 +21,15 @@ function typeSetSoft(element) {
   if (typeof element === "string") {
     element = document.getElementById(element);
   }
-  MathJax.Hub.Queue(["Typeset", MathJax.Hub, element]);  
+  MathJax.Hub.Queue(["Typeset", MathJax.Hub, element]);
 }
 
-function showTex(originalTex, item, event) { 
+function showTex(originalTex, item, event) {
   if (item['calculatorTexShown'] === undefined) {
     item['calculatorTexShown'] = false;
   }
   item['calculatorTexShown'] = !item['calculatorTexShown'];
-  if (!item['calculatorTexShown']) { 
+  if (!item['calculatorTexShown']) {
     item.parentNode.removeChild(item.nextSibling);
     return;
   }
@@ -44,7 +44,7 @@ function showTex(originalTex, item, event) {
   // MathJax.Menu.ShowSource.Text(originalTex||"No Original Source to Show", event);
 }
 
-function configureMathJaxForCalculator() { 
+function configureMathJaxForCalculator() {
   // mathjax configuration comes before loading the mathjax script, as requested by the documentation.
   MathJax.Hub.Config({
     extensions: ["tex2jax.js"],
@@ -74,11 +74,11 @@ function configureMathJaxForCalculator() {
     //  It calls on the MathJax.Menu code, so make sure that is loaded and
     //  if not, load it and call the double-click handler again afterward.
     //
-    EVENT.DblClick = function(event) { 
-      if (MENU) { 
+    EVENT.DblClick = function(event) {
+      if (MENU) {
         var jax = HUB.getJaxFor(this);
         showTex(jax.originalText, this, event);
-      } else { 
+      } else {
         MathJax.Callback.Queue(["Require", MathJax.Ajax, "[MathJax]/extensions/MathMenu.js"], ["DblClick", this, {}]);
       }
       return EVENT.False(event);
@@ -88,7 +88,7 @@ function configureMathJaxForCalculator() {
     //  and disable the zoom trigger menu item.
     //  Also set the MENU item so that it will be available above.
     //
-    if (MENUSETTINGS.zoom === "Double-Click") { 
+    if (MENUSETTINGS.zoom === "Double-Click") {
       MENUSETTINGS.zoom = "None";
     }
     MathJax.Hub.Register.StartupHook("MathMenu Ready", function () {
@@ -149,11 +149,11 @@ function configureMathJaxForCalculator() {
         }
         cls = ("MathJax_Input " + (cls || "")).replace(/ +$/,"");
         var input = HTML.Element("input", {
-          type: "text", 
-          name: inputName, 
-//          id: id, 
-          size: size, 
-          className: cls, 
+          type: "text",
+          name: inputName,
+//          id: id,
+          size: size,
+          className: cls,
           value: val
         });
         input.setAttribute("xmlns","http://www.w3.org/1999/xhtml");
@@ -171,7 +171,7 @@ function configureMathJaxForCalculator() {
     window.calculator.browserifier.hardCodedServerAddress !== null
   ) {
     address += window.calculator.browserifier.hardCodedServerAddress;
-  } 
+  }
   address += window.calculator.browserifier.calculatorHtmlBaseFolder;
   address += "mathjax-calculator-setup.js";
   MathJax.Ajax.loadComplete(address);

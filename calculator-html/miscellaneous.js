@@ -8,7 +8,7 @@ function shortenString(charsOnEachSide, input) {
   return `${input.slice(0, charsOnEachSide)}...${input.slice(input.length - charsOnEachSide, input.length)}`;
 }
 
-function deepCopy(from) { 
+function deepCopy(from) {
   if (typeof from !== "object") {
     return from;
   }
@@ -17,7 +17,7 @@ function deepCopy(from) {
     if (typeof from[label] === "object") {
       result[label] = deepCopy(from[label])
       continue;
-    } 
+    }
     result[label] = from[label];
   }
   return result;

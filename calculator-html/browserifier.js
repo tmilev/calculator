@@ -21,7 +21,7 @@ Browserifier.prototype.require = function (inputFileName) {
 
 Browserifier.prototype.browserifyAndRun = function() {
   createBrowserifier();
-  var expectedStart = "/calculator-html/"; 
+  var expectedStart = "/calculator-html/";
   for (var fileName in theJSContent) {
     var newFileName = "";
     if (!fileName.startsWith(expectedStart)) {
@@ -37,14 +37,14 @@ Browserifier.prototype.browserifyAndRun = function() {
 Browserifier.prototype.browserifyRunInId = function(input) {
   createBrowserifier();
   window.calculator.flagRunMainPage = false;
-  window.calculator.browserifier.browserifyAndRun(); 
+  window.calculator.browserifier.browserifyAndRun();
   window.calculator.standAloneProblem.standAloneProblem.initAndRun(input);
 }
 
 Browserifier.prototype.browserifyEditInId = function(input) {
   createBrowserifier();
   window.calculator.flagRunMainPage = false;
-  window.calculator.browserifier.browserifyAndRun(); 
+  window.calculator.browserifier.browserifyAndRun();
   window.calculator.standAloneProblem.standAloneProblem.initAndEdit(input);
 }
 

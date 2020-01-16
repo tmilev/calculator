@@ -1,6 +1,6 @@
 "use strict";
 /**
- * File needs to function as stand-alone javascript 
+ * File needs to function as stand-alone javascript
  * as well be used as a commonJS module included via
  * require('graphics_n_dimension.js')).
  * Please don't require(...) any modules from this file.
@@ -40,17 +40,17 @@ function GraphicsNDimensions(inputIdCanvas, inputIdInfo, inputIdHighlightInfo) {
   this.graphicsUnit = 0;
   this.selectedBasisIndex = - 1;
   this.selectedHighlightIndex = - 1;
-  /** 
+  /**
    * @type {Object<string, Object<string, boolean> >}
-   * Keys are indices of groups currently highlighted. 
-   * Values are arrays with indices 
+   * Keys are indices of groups currently highlighted.
+   * Values are arrays with indices
    * within each group over which the mouse is located. */
 
   this.currentHighlightIndices = {};
   this.flagAllowMovingCoordinateSystemFromArbitraryClick = true;
 
   this.vOrthogonalSelected = [];
-  this.vProjectionNormalizedSelected = []; 
+  this.vProjectionNormalizedSelected = [];
 
   this.angleScreenChange = 0;
   this.angleCuttingChange = 0;
@@ -80,7 +80,7 @@ function GraphicsNDimensions(inputIdCanvas, inputIdInfo, inputIdHighlightInfo) {
   this.mousePositionScreen = [0, 0];
   this.mousePositionScreenClicked = [0, 0];
   this.shiftScreenCoordinatesClicked = [0, 0];
-  
+
   collectionGraphicsNDimensions[this.idCanvas] = this;
   this.clickTolerance = 5;
   this.textShift = [- 3, - 4];
@@ -105,7 +105,7 @@ function toStringVector(vector) {
     result += vector[i].toFixed(2);
     if (i !== vector.length - 1) {
       result += ", ";
-    } 
+    }
   }
   result += ")";
   return result;
@@ -138,7 +138,7 @@ GraphicsNDimensions.prototype.getInfoHTML = function() {
 
 GraphicsNDimensions.prototype.writeInfo = function() {
   var info = this.getInfoHTML();
-  var panelInfoElement = document.getElementById(this.idPlaneInfo); 
+  var panelInfoElement = document.getElementById(this.idPlaneInfo);
   panelInfoElement.innerHTML = info;
 }
 
@@ -146,8 +146,8 @@ GraphicsNDimensions.prototype.initInfo = function () {
   var infoHTML = "";
   infoHTML += "<div style = 'height:300px; overflow-y: scroll;'>";
   for (var i = 0; i < 2; i ++) {
-    this.idsBasis[i] = []; 
-    for (var j = 0; j < this.dimension; j ++) { 
+    this.idsBasis[i] = [];
+    for (var j = 0; j < this.dimension; j ++) {
       this.idsBasis[i][j] = `${this.idCanvas}textEbasis_${i}_${j}`;
       infoHTML += `<textarea rows = "1" cols = "2" id = "${this.idsBasis[i][j]}"></textarea>`;
     }
@@ -167,9 +167,9 @@ GraphicsNDimensions.prototype.initInfo = function () {
     this.panelInfo.setPanelContent(infoHTML);
     this.panelInfo.doToggleContent();
     this.panelInfo.matchPanelStatus();
-  } 
+  }
 }
-  
+
 GraphicsNDimensions.prototype.snapShotLaTeX = function() {
   var textComponent = document.getElementById(`${this.idCanvas}snapShotLateXspan`);
   var result = "";
@@ -177,7 +177,7 @@ GraphicsNDimensions.prototype.snapShotLaTeX = function() {
   result += `\n%\\usepackage{pst-plot}<br>\n\\begin{document}<br>\n`;
   result += `\\psset{xunit = 0.01cm, yunit = 0.01cm} <br>\n\\begin{pspicture}(0,0)(1,1)\n`;
   ComputeProjections();
-  for (var counterDrawOperation = 0; counterDrawOperation < this.drawOperations.length; counterDrawOperation ++) { 
+  for (var counterDrawOperation = 0; counterDrawOperation < this.drawOperations.length; counterDrawOperation ++) {
     result += this.drawOperations[counterDrawOperation].getLaTeXOperation();
   }
   result += "\\end{pspicture}<br>";
@@ -212,7 +212,7 @@ GraphicsNDimensions.prototype.drawCircle = function(position, color, radius, fra
     this.idCanvas, {
       location: position,
       colorFill: color,
-      radius: radius, 
+      radius: radius,
       frameId: frameId,
       frameIndex: frameIndex
   }));
@@ -284,8 +284,8 @@ GraphicsNDimensions.prototype.getBilinearFormInput = function () {
   result += "gives the scalar product of e_i and e_j. If you enter a degenerate or non-positive definite ";
   result += "symmetric bilinear form the javascript might crash. You are expected to enter ";
   result += "a symmetric strictly positive definite matrix. <br> \n";
-  for (var counterRow = 0; counterRow < this.theBilinearForm.length; counterRow ++) { 
-    for (var counterColumn = 0; counterColumn < this.theBilinearForm[counterRow].NumCols; counterColumn ++) { 
+  for (var counterRow = 0; counterRow < this.theBilinearForm.length; counterRow ++) {
+    for (var counterColumn = 0; counterColumn < this.theBilinearForm[counterRow].NumCols; counterColumn ++) {
       var idBilinearForm = `${this.idCanvas}textBilinearForm_${i}_${j}`;
       result += `<textarea rows = "1" cols = "2" id = "${idBilinearForm}" `;
       result += `onChange = "setBilinearForm('this.idCanvas', ${counterRow}, ${counterColumn})">`;
@@ -431,7 +431,7 @@ DrawPath.prototype.drawNoFinish = function() {
   canvas.moveTo(vector[0], vector[1]);
   for (var counterPoints = 1; counterPoints < this.points.length; counterPoints ++) {
     owner.computeScreenCoordinates(this.points[counterPoints], vector);
-    canvas.lineTo(vector[0], vector[1]);    
+    canvas.lineTo(vector[0], vector[1]);
   }
   canvas.stroke();
 }
@@ -504,8 +504,8 @@ DrawCircleAtVector.prototype.drawNoFinish = function() {
   canvas.fillStyle = this.colorFill;
   owner.computeScreenCoordinates(this.location, this.locationScreenCoordinates);
   canvas.beginPath();
-  canvas.arc( 
-    this.locationScreenCoordinates[0], 
+  canvas.arc(
+    this.locationScreenCoordinates[0],
     this.locationScreenCoordinates[1],
     this.radius,
     0, 2 * Math.PI
@@ -618,7 +618,7 @@ GraphicsNDimensions.prototype.pointsAreWithinClickTolerance = function(x1, y1, x
     Math.abs(y1 - y2) > this.clickTolerance
   ) {
     return false;
-  } 
+  }
   return true;
 }
 
@@ -643,19 +643,19 @@ function addVectorTimesScalar(vector, other, scalar) {
   }
 }
 
-GraphicsNDimensions.prototype.scalarProduct = function(vector1, vector2) { 
+GraphicsNDimensions.prototype.scalarProduct = function(vector1, vector2) {
   var result = 0;
   for (var i = 0; i < this.dimension; i ++) {
     for (var j = 0; j < this.dimension; j ++) {
       result += vector1[i] * vector2[j] * this.theBilinearForm[i][j];
-    } 
+    }
   }
   return result;
 }
 
 GraphicsNDimensions.prototype.makeScreenBasisOrthonormal = function() {
   addVectorTimesScalar(
-    this.screenBasis[1], 
+    this.screenBasis[1],
     this.screenBasis[0],
     - this.scalarProduct(this.screenBasis[0], this.screenBasis[1]) /
     this.scalarProduct(this.screenBasis[0], this.screenBasis[0])
@@ -690,11 +690,11 @@ GraphicsNDimensions.prototype.ComputeProjectionsSpecialVectors = function() {
   }
 }
 
-function getAngleFromXandY(x, y) { 
+function getAngleFromXandY(x, y) {
   return Math.atan2(y, x);
 }
 
-function getAngleScreenChange(newX, newY, oldX, oldY) { 
+function getAngleScreenChange(newX, newY, oldX, oldY) {
   var result = getAngleFromXandY(newX, newY) - getAngleFromXandY(oldX, oldY);
   var topBound = Math.PI;
   var bottomBound = - Math.PI;
@@ -717,15 +717,15 @@ GraphicsNDimensions.prototype.rotateInPlane = function(
   addVectorTimesScalar(result, orthonormalBasis1, - scalarProductWithBasis1);
   addVectorTimesScalar(result, orthonormalBasis2, - scalarProductWithBasis2);
   addVectorTimesScalar(
-    result, 
-    orthonormalBasis1, 
-    scalarProductWithBasis1 * Math.cos(angle) - 
+    result,
+    orthonormalBasis1,
+    scalarProductWithBasis1 * Math.cos(angle) -
     scalarProductWithBasis2 * Math.sin(angle)
   );
   addVectorTimesScalar(
-    result, 
-    orthonormalBasis2, 
-    scalarProductWithBasis1 * Math.sin(angle) + 
+    result,
+    orthonormalBasis2,
+    scalarProductWithBasis1 * Math.sin(angle) +
     scalarProductWithBasis2 * Math.cos(angle)
   );
   for (var i = 0; i < inputOutput.length; i ++) {
@@ -743,7 +743,7 @@ GraphicsNDimensions.prototype.changeBasis = function() {
   var oldY = this.projectionSelectedAtSelection[1] - this.shiftScreenCoordinates[1];
   newX /= this.graphicsUnit;
   newY /= this.graphicsUnit;
-  oldX /= this.graphicsUnit; 
+  oldX /= this.graphicsUnit;
   oldY /= this.graphicsUnit;
   if (newX * newX + newY * newY <= 0.03) {
     return;
@@ -755,14 +755,14 @@ GraphicsNDimensions.prototype.changeBasis = function() {
   this.screenBasis[0] = this.screenBasisAtSelection[0].slice();
   this.screenBasis[1] = this.screenBasisAtSelection[1].slice();
   this.rotateInPlane(
-    this.screenBasis[0], 
-    this.screenBasisAtSelection[0], this.screenBasisAtSelection[1], 
+    this.screenBasis[0],
+    this.screenBasisAtSelection[0], this.screenBasisAtSelection[1],
     this.angleScreenChange
   );
   this.rotateInPlane(
     this.screenBasis[1],
-    this.screenBasisAtSelection[0], this.screenBasisAtSelection[1], 
-    this.angleScreenChange    
+    this.screenBasisAtSelection[0], this.screenBasisAtSelection[1],
+    this.angleScreenChange
   );
   if (this.dimension <= 2) {
     return;
@@ -776,7 +776,7 @@ GraphicsNDimensions.prototype.changeBasis = function() {
   if (xCuttingNew * xCuttingNew > hypothenuseSquared) {
     xCuttingNew = Math.sqrt(hypothenuseSquared) - 0.01;
   }
-  var yCuttingNew = Math.sqrt(hypothenuseSquared - xCuttingNew * xCuttingNew);  
+  var yCuttingNew = Math.sqrt(hypothenuseSquared - xCuttingNew * xCuttingNew);
   //if (newX * oldX + newY * oldY < 0) {
   //  xCuttingNew *= - 1;
   //}
@@ -794,12 +794,12 @@ GraphicsNDimensions.prototype.changeBasis = function() {
   }
 
   this.rotateInPlane(
-    this.screenBasis[0], 
+    this.screenBasis[0],
     this.vProjectionNormalizedSelected, this.vOrthogonalSelected,
     this.angleCuttingChange
   );
   this.rotateInPlane(
-    this.screenBasis[1], 
+    this.screenBasis[1],
     this.vProjectionNormalizedSelected, this.vOrthogonalSelected,
     this.angleCuttingChange
   );
@@ -876,8 +876,8 @@ GraphicsNDimensions.prototype.clickCanvas = function(event) {
   if (!this.flagAllowMovingCoordinateSystemFromArbitraryClick) {
     if (this.pointsAreWithinClickTolerance(posx, posy, 0, 0)) {
       this.selectedBasisIndex = - 2;
-    } 
-  } else { 
+    }
+  } else {
     this.selectedBasisIndex = - 2;
   }
   if (this.selectedBasisIndex === - 2) {
@@ -886,7 +886,7 @@ GraphicsNDimensions.prototype.clickCanvas = function(event) {
   }
   for (var i = 0; i < this.basisCircles.length; i ++) {
     if (this.pointsAreWithinClickTolerance(
-      this.mousePositionScreenClicked[0], this.mousePositionScreenClicked[1], 
+      this.mousePositionScreenClicked[0], this.mousePositionScreenClicked[1],
       this.projectionsBasisCircles[i][0], this.projectionsBasisCircles[i][1]
     )) {
       this.selectIndex(i);
@@ -1046,10 +1046,10 @@ GraphicsNDimensions.prototype.initFromObject = function(input) {
     var currentOperation = input.drawObjects[i];
     if (currentOperation.operation === "circleAtVector") {
       this.drawCircle(
-        currentOperation.location, 
-        currentOperation.color, 
-        currentOperation.radius, 
-        currentOperation.frameId, 
+        currentOperation.location,
+        currentOperation.color,
+        currentOperation.radius,
+        currentOperation.frameId,
         currentOperation.frameIndex
       );
     } else if (currentOperation.operation === "segment") {
@@ -1063,10 +1063,10 @@ GraphicsNDimensions.prototype.initFromObject = function(input) {
       this.drawText(currentOperation.location, currentOperation.text, currentOperation.color);
     } else if (currentOperation.operation === "path") {
       this.drawPath(
-        currentOperation.points, 
-        currentOperation.color, 
-        currentOperation.lineWidth, 
-        currentOperation.frameId, 
+        currentOperation.points,
+        currentOperation.color,
+        currentOperation.lineWidth,
+        currentOperation.frameId,
         currentOperation.frameIndex
       );
     }
@@ -1144,13 +1144,13 @@ function testA4(idCanvas, idSpanInformation) {
   for (var counter = 0; counter < labeledVectors.length; counter ++) {
     var minDistance = 10;
     for (var secondCounter = counter + 1; secondCounter < labeledVectors.length; secondCounter ++) {
-      var newDistance = theA4.scalarProduct(labeledVectors[counter], labeledVectors[secondCounter]); 
+      var newDistance = theA4.scalarProduct(labeledVectors[counter], labeledVectors[secondCounter]);
       if (newDistance < minDistance && newDistance > 0) {
         minDistance = newDistance;
       }
     }
     for (var secondCounter = counter + 1; secondCounter < labeledVectors.length; secondCounter ++) {
-      var theDistance = theA4.scalarProduct(labeledVectors[counter], labeledVectors[secondCounter]); 
+      var theDistance = theA4.scalarProduct(labeledVectors[counter], labeledVectors[secondCounter]);
       if (theDistance != minDistance) {
         continue;
       }

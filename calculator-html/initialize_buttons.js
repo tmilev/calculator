@@ -11,21 +11,21 @@ var calculatorLeftPosition = 0;
 var calculatorRightPosition = 0;
 
 var keyWordsKnownToMathQuill = [
-  'sqrt', 
-  'frac', 
-  'cdot', 
-  'left', 
-  'right', 
-  'infty', 
-  'otimes', 
-  'times', 
-  'oplus', 
+  'sqrt',
+  'frac',
+  'cdot',
+  'left',
+  'right',
+  'infty',
+  'otimes',
+  'times',
+  'oplus',
   'pmatrix',
-  'int', 
-  'begin', 
-  'end', 
-  'alpha', 
-  'pi', 
+  'int',
+  'begin',
+  'end',
+  'alpha',
+  'pi',
   'beta',
   'cup',
   'cap',
@@ -35,19 +35,19 @@ var studentScoresInHomePage = [];
 var charsToSplit = ['x','y'];
 var panelsCollapseStatus = {};
 var calculatorSeparatorLeftDelimiters = {
-  '(': true, 
+  '(': true,
   '{': true
 };
 var calculatorSeparatorRightDelimiters = {
-  ')': true, 
+  ')': true,
   '}': true
 };
 var startingCharacterSectionUnderMathQuillEdit = '';
 var panelDataRegistry = {};
 
-function processMathQuillLatex(theText) { 
+function processMathQuillLatex(theText) {
   for (var i = 0; i < theText.length; i ++) {
-    if (i + 1 < theText.length) { 
+    if (i + 1 < theText.length) {
       if ((theText[i] === '_' || theText[i] === '^') && theText[i + 1] !== '{') {
         theText = theText.slice(0, i + 1) + '{' + theText[i + 1] + '}' + theText.slice(i + 2);
       }
@@ -57,14 +57,14 @@ function processMathQuillLatex(theText) {
     }
   }
   if (charsToSplit !== undefined) {
-    for (var i = 0; i < theText.length - 1; i ++) { 
+    for (var i = 0; i < theText.length - 1; i ++) {
       for (var j = 0; j < charsToSplit.length; j ++) {
         if (
-          theText[i] === charsToSplit[j] && theText[i + 1] !== ' ' && 
-          theText[i + 1] !== '\\' && theText[i + 1] !== '+' && 
-          theText[i + 1] !== '*' && theText[i + 1] !== '/' && 
+          theText[i] === charsToSplit[j] && theText[i + 1] !== ' ' &&
+          theText[i + 1] !== '\\' && theText[i + 1] !== '+' &&
+          theText[i + 1] !== '*' && theText[i + 1] !== '/' &&
           theText[i + 1] !== '-' && theText[i + 1] !== '='
-        ) { 
+        ) {
           if (theText[i] === 'x') {
             if (theText.slice(i - 5, i + 1) === 'matrix') {
               continue;
@@ -92,7 +92,7 @@ function MathQuillCommandButton(inputCommand, inputLabel, inputAdditionalStyle, 
   this.id = "";
   if (!this.isComposite) {
     this.id = this.theCommand;
-  } else { 
+  } else {
     this.id = "";
     for (var i = 0; i < inputCommand.length; i ++) {
       this.id += inputCommand[i];
@@ -104,7 +104,7 @@ function MathQuillCommandButton(inputCommand, inputLabel, inputAdditionalStyle, 
     this.doWriteInsteadOfCmd = false;
   }
   this.idEscaped = "";
-  for (var i = 0; i < this.id.length; i ++) { 
+  for (var i = 0; i < this.id.length; i ++) {
     this.idEscaped += this.id[i];
     if (this.id[i] === '\\') {
       this.idEscaped += "\\";
@@ -129,14 +129,14 @@ MathQuillCommandButton.prototype.getButton = function (inputPanel) {
 
 MathQuillCommandButton.prototype.clickFunction = function (inputPanel) {
   var currentMathField = inputPanel.mqObject;
-  if (!this.isComposite) { 
+  if (!this.isComposite) {
     if (!this.doWriteInsteadOfCmd) {
       currentMathField.cmd(this.theCommand);
     } else {
       currentMathField.write(this.theCommand);
     }
-  } else { 
-    for (var i = 0; i < this.theCommand.length; i ++) { 
+  } else {
+    for (var i = 0; i < this.theCommand.length; i ++) {
       var doCMD = !this.doWriteInsteadOfCmd;
       if (!doCMD) {
         if (
@@ -161,7 +161,7 @@ MathQuillCommandButton.prototype.clickFunction = function (inputPanel) {
   event.preventDefault();
 }
 
-function mathQuillCommandButton(inputCommand, inputLabel, additionalStyle, doWriteInsteadOfCmdInput, inputExtraDirection) { 
+function mathQuillCommandButton(inputCommand, inputLabel, additionalStyle, doWriteInsteadOfCmdInput, inputExtraDirection) {
   var commandObject = new MathQuillCommandButton(
     inputCommand, inputLabel, additionalStyle, doWriteInsteadOfCmdInput, inputExtraDirection
   );
@@ -226,7 +226,7 @@ mathQuillCommandButton("\\mathbf{i}", "i", "font-weight: bold");
 mathQuillCommandButton("\\mathbf{j}", "j", "font-weight: bold");
 mathQuillCommandButton("\\mathbf{k}", "k", "font-weight: bold");
 
-function accountCalculatorDelimiterReturnMustEndSelection(character, calculatorSeparatorCounts) { 
+function accountCalculatorDelimiterReturnMustEndSelection(character, calculatorSeparatorCounts) {
   if (character in calculatorSeparatorLeftDelimiters) {
     calculatorSeparatorCounts.leftSeparators ++;
   }
@@ -236,13 +236,13 @@ function accountCalculatorDelimiterReturnMustEndSelection(character, calculatorS
   return calculatorSeparatorCounts.leftSeparators > calculatorSeparatorCounts.rightSeparators;
 }
 
-function initializeAccordionButtons() { 
+function initializeAccordionButtons() {
   ///initializing accordions
   if (localStorage !== undefined) {
-    if (localStorage.panels !== undefined) { 
+    if (localStorage.panels !== undefined) {
       panelsCollapseStatus = JSON.parse(localStorage.panels)
       var theProps = Object.getOwnPropertyNames(panelsCollapseStatus);
-      for (var i = 0; i < theProps.length; i ++) { 
+      for (var i = 0; i < theProps.length; i ++) {
         var current = panelsCollapseStatus[theProps[i]];
         if (current.isCollapsed) {
           panels.toggleHeight(document.getElementById(current.button), theProps[i]);
@@ -251,9 +251,9 @@ function initializeAccordionButtons() {
     }
   }
   var acc = document.getElementsByClassName("accordion");
-  for (i = 0; i < acc.length; i ++) { 
-    acc[i].onclick = function() { 
-      if (this.firstLoad === undefined) { 
+  for (i = 0; i < acc.length; i ++) {
+    acc[i].onclick = function() {
+      if (this.firstLoad === undefined) {
         this.firstLoad = true;
         var theDeadlines = this.nextElementSibling.getElementsByClassName("modifyDeadlineInput");
         for (var j = 0; j < theDeadlines.length; j ++) {
@@ -267,11 +267,11 @@ function initializeAccordionButtons() {
   }
 }
 
-function initializeButtons() { 
+function initializeButtons() {
   initializeAccordionButtons();
 }
 
-function initializeCalculatorPage() { 
+function initializeCalculatorPage() {
   calculatorPanel.initialize();
 }
 
@@ -351,11 +351,11 @@ InputPanelData.prototype.submitOrPreviewAnswersCallback = function(outputCompone
   var inputParsed = miscellaneous.jsonUnescapeParse(input);
   var resultHtml = "";
   if (inputParsed.error !== undefined && inputParsed.error !== null && inputParsed.error !== "") {
-    resultHtml += `<b style = 'color:red'>Error.</b> ${inputParsed.error}`; 
+    resultHtml += `<b style = 'color:red'>Error.</b> ${inputParsed.error}`;
   }
   if (
-    inputParsed.resultHtml !== "" && 
-    inputParsed.resultHtml !== undefined && 
+    inputParsed.resultHtml !== "" &&
+    inputParsed.resultHtml !== undefined &&
     inputParsed.resultHtml !== null
   ) {
     if (resultHtml !== "") {
@@ -402,7 +402,7 @@ InputPanelData.prototype.submitOrPreviewAnswers = function(requestQuery) {
   var theURL = "";
   theURL += `${pathnames.urls.calculatorAPI}?${requestQuery}&`;
   theURL += `calculatorAnswer${this.idPureLatex}=${encodeURIComponent(studentAnswer)}&`;
-  theURL += `${pathnames.urlFields.problem.fileName}=${this.problemId}&`;  
+  theURL += `${pathnames.urlFields.problem.fileName}=${this.problemId}&`;
   submitRequests.submitGET({
     url: theURL,
     progress: ids.domElements.spanProgressReportGeneral,
@@ -430,7 +430,7 @@ InputPanelData.prototype.showSolution = function() {
       theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.problemSolutionNoLogin}&`;
     }
     theRequest += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`;
-  } 
+  }
   this.submitOrPreviewAnswers(theRequest);
 }
 
@@ -447,7 +447,7 @@ InputPanelData.prototype.submitAnswers = function() {
     }
   } else {
     theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.submitExerciseNoLogin}&`;
-    theRequest += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`;  
+    theRequest += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`;
   }
   this.submitOrPreviewAnswers(theRequest);
 }
@@ -477,7 +477,7 @@ InputPanelData.prototype.submitPreview = function() {
       theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.submitAnswersPreview}&`;
     } else {
       theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.submitExercisePreview}&`;
-      theRequest += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`; 
+      theRequest += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`;
     }
   } else {
     theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.submitExercisePreviewNoLogin}&`;
@@ -548,7 +548,7 @@ InputPanelData.prototype.initialize = function() {
   this.initializePartTwo(false);
 }
 
-function isSeparatorCharacter(theChar) { 
+function isSeparatorCharacter(theChar) {
   if (theChar[0] >= 'a' && theChar[0] <= 'z') {
     return false;
   }
@@ -558,9 +558,9 @@ function isSeparatorCharacter(theChar) {
   return true;
 }
 
-InputPanelData.prototype.chopStrings = function() { 
+InputPanelData.prototype.chopStrings = function() {
   var mqCommentsSpan = document.getElementById(this.idMQcomments);
-  if (calculatorRightPosition - calculatorLeftPosition > 1000) { 
+  if (calculatorRightPosition - calculatorLeftPosition > 1000) {
     this.flagCalculatorMQStringIsOK = false;
     mqCommentsSpan.innerHTML = "<span style ='color:red'><b>Formula too big </b></span>";
     return;
@@ -574,7 +574,7 @@ InputPanelData.prototype.chopStrings = function() {
   this.calculatorRightString = calculatorInput.value.substring(calculatorRightPosition + 1);
 }
 
-function isKeyWordStartKnownToMathQuill(input) { 
+function isKeyWordStartKnownToMathQuill(input) {
   for (var i = 0; i < keyWordsKnownToMathQuill.length; i ++) {
     if (keyWordsKnownToMathQuill[i].startsWith(input)) {
       return true;
@@ -583,7 +583,7 @@ function isKeyWordStartKnownToMathQuill(input) {
   return false;
 }
 
-function isKeyWordEndKnownToMathQuill(input) { 
+function isKeyWordEndKnownToMathQuill(input) {
   for (var i = 0; i < keyWordsKnownToMathQuill.length; i ++) {
     if (keyWordsKnownToMathQuill[i].endsWith(input)) {
       return true;
@@ -592,7 +592,7 @@ function isKeyWordEndKnownToMathQuill(input) {
   return false;
 }
 
-InputPanelData.prototype.getSemiColumnEnclosure = function() { 
+InputPanelData.prototype.getSemiColumnEnclosure = function() {
   var startPos = this.selectionEnd;
   var calculatorInput = document.getElementById(this.idPureLatex);
   for (; startPos > 0 && startPos < calculatorInput.value.length; startPos --) {
@@ -607,22 +607,22 @@ InputPanelData.prototype.getSemiColumnEnclosure = function() {
   var lastSeparator = startPos;
   var lastWord = '';
   var currentChar = 'a';
-  for (; rightPos < calculatorInput.value.length - 1; rightPos ++) { 
+  for (; rightPos < calculatorInput.value.length - 1; rightPos ++) {
     currentChar = calculatorInput.value[rightPos];
-    if (currentChar === ';') { 
+    if (currentChar === ';') {
       if (rightPos > 0) {
         rightPos --;
       }
       break;
     }
-    if (isSeparatorCharacter(currentChar)) { 
+    if (isSeparatorCharacter(currentChar)) {
       lastWord = '';
       lastSeparator = rightPos;
     } else {
       lastWord += currentChar;
     }
     if (lastWord.length > 3) {
-      if (!isKeyWordStartKnownToMathQuill(lastWord)) { 
+      if (!isKeyWordStartKnownToMathQuill(lastWord)) {
         rightPos = lastSeparator;
         break;
       }
@@ -635,24 +635,24 @@ InputPanelData.prototype.getSemiColumnEnclosure = function() {
   var leftPos = rightPos - 1;
   lastWord = '';
   lastSeparator = rightPos;
-  for (; leftPos > 0; leftPos --) { 
+  for (; leftPos > 0; leftPos --) {
     currentChar = calculatorInput.value[leftPos];
-    if (currentChar === ';') { 
+    if (currentChar === ';') {
       leftPos ++;
       break;
     }
-    if (accountCalculatorDelimiterReturnMustEndSelection(calculatorInput.value[leftPos], calculatorSeparatorCounts)) { 
+    if (accountCalculatorDelimiterReturnMustEndSelection(calculatorInput.value[leftPos], calculatorSeparatorCounts)) {
       leftPos ++;
       break;
     }
-    if (isSeparatorCharacter(currentChar)) { 
+    if (isSeparatorCharacter(currentChar)) {
       lastWord = '';
       lastSeparator = leftPos;
-    } else { 
+    } else {
       lastWord = currentChar + lastWord;
     }
     if (lastWord.length > 3) {
-      if (!isKeyWordEndKnownToMathQuill(lastWord)) { 
+      if (!isKeyWordEndKnownToMathQuill(lastWord)) {
         leftPos = lastSeparator;
         break;
       }
@@ -674,13 +674,13 @@ InputPanelData.prototype.getSemiColumnEnclosure = function() {
   this.chopStrings();
 }
 
-InputPanelData.prototype.initializePartTwo = function(forceShowAll) { 
+InputPanelData.prototype.initializePartTwo = function(forceShowAll) {
   var currentButtonPanel = document.getElementById(this.idButtonContainer);
   var buttonsNonSplit = currentButtonPanel.attributes.buttons.value.toLowerCase();
   var buttonArray = buttonsNonSplit.split(/(?:,| ) +/);
   //console.log(buttonArray);
   var buttonBindings = [];
-  function addCommand(theCmd) { 
+  function addCommand(theCmd) {
     buttonBindings.push(MathQuillCommandButtonCollection[theCmd]);
   }
   var noOptions = false;
@@ -699,7 +699,7 @@ InputPanelData.prototype.initializePartTwo = function(forceShowAll) {
       noOptions = true;
     }
   }
-  if (buttonArray.indexOf("algebra") > - 1 || noOptions || includeAll) { 
+  if (buttonArray.indexOf("algebra") > - 1 || noOptions || includeAll) {
     addCommand("+");
     addCommand("-");
     addCommand("*");
@@ -711,7 +711,7 @@ InputPanelData.prototype.initializePartTwo = function(forceShowAll) {
     addCommand("(");
     addCommand(")");
   }
-  if (buttonArray.indexOf("trig") > - 1 || includeAll) { 
+  if (buttonArray.indexOf("trig") > - 1 || includeAll) {
     addCommand("sin");
     addCommand("cos");
     addCommand("tan");
@@ -729,7 +729,7 @@ InputPanelData.prototype.initializePartTwo = function(forceShowAll) {
     buttonArray.indexOf("inverse_trigonometry") > - 1 ||
     buttonArray.indexOf("inverse-trigonometry") > - 1 ||
     includeAll
-  ) { 
+  ) {
     addCommand("arcsin");
     addCommand("arccos");
     addCommand("arctan");
@@ -745,21 +745,21 @@ InputPanelData.prototype.initializePartTwo = function(forceShowAll) {
   }
   if (
     buttonArray.indexOf("brackets") > - 1 ||
-    buttonArray.indexOf("intervals") > - 1 || 
+    buttonArray.indexOf("intervals") > - 1 ||
     includeAll
-  ) { 
+  ) {
     addCommand("[");
     addCommand("]");
   }
-  if (buttonArray.indexOf("complex") > - 1 || buttonArray.indexOf("imaginary") > - 1 || includeAll) { 
+  if (buttonArray.indexOf("complex") > - 1 || buttonArray.indexOf("imaginary") > - 1 || includeAll) {
     addCommand("i");
   }
-  if (buttonArray.indexOf("variables") > - 1 || includeAll) { 
+  if (buttonArray.indexOf("variables") > - 1 || includeAll) {
     addCommand("x");
     addCommand("y");
     addCommand("=");
   }
-  if (buttonArray.indexOf("logarithms") > - 1 || noOptions || includeAll) { 
+  if (buttonArray.indexOf("logarithms") > - 1 || noOptions || includeAll) {
     addCommand("log_");
     addCommand("_");
     addCommand("ln");
@@ -782,30 +782,30 @@ InputPanelData.prototype.initializePartTwo = function(forceShowAll) {
     addCommand(" DNE ");
   }
   if (buttonArray.indexOf("sum") > - 1 ||
-      buttonArray.indexOf("series") > - 1 || noOptions || includeAll) { 
+      buttonArray.indexOf("series") > - 1 || noOptions || includeAll) {
     addCommand("binom");
     addCommand("!");
     addCommand("sum");
   }
-  if (noOptions || includeAll) { 
+  if (noOptions || includeAll) {
     addCommand("circ");
   }
   if (buttonArray.indexOf("interval") > - 1 || buttonArray.indexOf("intervals") > - 1 ||
       buttonArray.indexOf("or") > - 1 || noOptions || includeAll) {
     addCommand(" or ");
   }
-  if (buttonArray.indexOf("interval") > - 1 || buttonArray.indexOf("intervals") > - 1 || noOptions || includeAll) { 
+  if (buttonArray.indexOf("interval") > - 1 || buttonArray.indexOf("intervals") > - 1 || noOptions || includeAll) {
     addCommand("cup");
     addCommand("in");
     addCommand("emptyset");
   }
-  if (buttonArray.indexOf("matrix") > - 1 || buttonArray.indexOf("matrices") > - 1 || (includeAll && window.calculator.MathQuillHasMatrixSupport)) { 
+  if (buttonArray.indexOf("matrix") > - 1 || buttonArray.indexOf("matrices") > - 1 || (includeAll && window.calculator.MathQuillHasMatrixSupport)) {
     addCommand("\\begin{pmatrix} \\\\ \\end{pmatrix}");
     addCommand("\\begin{pmatrix} \\\\ \\\\ \\end{pmatrix}");
     addCommand("\\begin{pmatrix} & \\\\ & \\end{pmatrix}");
     addCommand("\\begin{pmatrix} & & \\\\ & & \\\\ & & \\end{pmatrix}");
   }
-  if (buttonArray.indexOf("angle") > - 1 || buttonArray.indexOf("angles") > - 1 || noOptions || includeAll) { 
+  if (buttonArray.indexOf("angle") > - 1 || buttonArray.indexOf("angles") > - 1 || noOptions || includeAll) {
     addCommand("pi");
     addCommand("^circ");
     addCommand("alpha");
@@ -820,13 +820,13 @@ InputPanelData.prototype.initializePartTwo = function(forceShowAll) {
     buttonArray.indexOf("newtonmethod") > - 1 ||
     buttonArray.indexOf("newton") > - 1 ||
     includeAll
-  ) { 
+  ) {
     addCommand("NewtonsMethod (,,)");
   }
   var theContent = "<table>";
   var numButtonsPerLine = 4;
-  for (var j = 0; j < buttonBindings.length; j ++) { 
-    if (j % numButtonsPerLine === 0) { 
+  for (var j = 0; j < buttonBindings.length; j ++) {
+    if (j % numButtonsPerLine === 0) {
       if (j !== 0) {
         theContent += "</tr>";
       }
@@ -846,10 +846,10 @@ InputPanelData.prototype.initializePartTwo = function(forceShowAll) {
   currentButtonPanel.innerHTML = theContent;
   var toggleElement = document.getElementById(this.idExpandCollapseToggle);
   toggleElement.addEventListener(
-    'click', 
+    'click',
     clickExpandPanel.bind(
-      null, 
-      this.idButtonContainer, 
+      null,
+      this.idButtonContainer,
       !forceShowAll && !includeAll,
     )
   );
@@ -858,11 +858,11 @@ InputPanelData.prototype.initializePartTwo = function(forceShowAll) {
       'click', buttonBindings[j].clickFunction.bind(buttonBindings[j], this)
     );
   }
-  if (oldHeight !== 0 && oldHeight !== "0px") { 
+  if (oldHeight !== 0 && oldHeight !== "0px") {
     var newHeight = window.getComputedStyle(currentButtonPanel).height;
     currentButtonPanel.style.maxHeight = oldHeight ;
     currentButtonPanel.style.height = oldHeight ;
-    setTimeout(function() { 
+    setTimeout(function() {
       panels.modifyHeightForTimeout(currentButtonPanel, newHeight)
     }, 0);
   }

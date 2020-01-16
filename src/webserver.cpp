@@ -1325,6 +1325,8 @@ int WebWorker::ProcessFileCantOpen() {
   this->SetHeaderOKNoContentLength("");
   std::stringstream out;
   out << "Error: file appears to exist but I could not open it. ";
+  global << logger::yellow << "Can't open file. "
+  << logger::red << strerror(errno) << logger::endL;
   if (this->flagFileNameSanitized) {
     out << "You requested virtual file: "
     << this->VirtualFileName
@@ -1332,10 +1334,10 @@ int WebWorker::ProcessFileCantOpen() {
     << "Therefore I have sanitized the address to a relative physical address: "
     << this->RelativePhysicalFileNamE;
   }
-  out << "<br><b>File display name: </b>"
+  out << "File display name: "
   << this->addressGetOrPost
-  << "<br><b>Virtual file name: </b>"
-  << this->VirtualFileName;
+  << ". Virtual file name: "
+  << this->VirtualFileName << ". ";
   JSData result;
   result[WebAPI::result::error] = out.str();
   return this->WriteToBodyJSOn(result);

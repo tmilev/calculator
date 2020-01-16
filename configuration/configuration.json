@@ -32,5 +32,9 @@
   "LaTeX-materials/":"../LaTeX-materials/",
   "slides-video/":"../slides-video/",
   "freecalc/":"../freecalc/",
-  "favicon.ico":"calculator-html/favicon.ico"
+  "favicon.ico":"calculator-html/favicon.ico",
+  "html-common/jquery/jquery.min.js":"html-common/jquery/jquery.min.js",
+  "html-common/mathquill/":"html-common/mathquill/",
+  "html-common/jquery_ui/":"html-common/jquery_ui/",
+  "html-common/ace/src-min/":"html-common/ace/src-min/"
 }

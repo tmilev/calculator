@@ -3094,46 +3094,6 @@ void Calculator::initPredefinedInnerFunctions() {
     innerStandard
   );
   this->AddOperationHandler(
-    "FetchWebPageGET",
-    CalculatorFunctions::innerFetchWebPageGET,
-    "",
-    "Attempts to GET a web page. For logged-in admins only.",
-    "FetchWebPageGET(\"www.googleapis.com\", \"https\", \"https://www.googleapis.com/oauth2/v3/certs\")",
-    "CalculatorFunctions::innerFetchWebPageGET",
-    "FetchWebPageGET",
-    innerAdminNoTest
-  );
-  this->AddOperationHandler(
-    "FetchWebPagePOST",
-    CalculatorFunctions::innerFetchWebPagePOST,
-    "",
-    "Attempts to fetch a web page via POST. For logged-in admins only.",
-    "FetchWebPagePOST(\"www.googleapis.com\", \"https\", \"https://www.googleapis.com/oauth2/v3/certs\", \"\")",
-    "CalculatorFunctions::innerFetchWebPagePOST",
-    "FetchWebPagePOST",
-    innerAdminNoTest
-  );
-  this->AddOperationHandler(
-    "SendEmailWithMailGun",
-    CalculatorFunctions::innerSendEmailWithMailGun,
-    "",
-    "Sends an email from the calculator via mailgun. Requires external setup with "
-    "www.mailgun.com. "
-    "The function is available to logged-in admins only. "
-    "The email sender is noreply@mail2.YOURDOMAINNAME. "
-    "First argument = recepient email, "
-    "second argument = content, "
-    "third argument = subject. ",
-    "SendEmailWithMailGun("
-    "\"todor.milev@gmail.com\","
-    "\"A testing email. \", "
-    "\"[Do not reply] Test email. \""
-    ")",
-    "CalculatorFunctions::innerSendEmailWithMailGun",
-    "SendEmailWithMailGun",
-    innerAdminNoTestInvisibleOffByDefault
-  );
-  this->AddOperationHandler(
     "FetchKnownPublicKeys",
     CalculatorFunctions::innerFetchKnownPublicKeys,
     "",
@@ -5489,6 +5449,11 @@ void Calculator::initPredefinedStandardOperations() {
   innerExperimentalNoTest.flagIsInner = true;
   innerExperimentalNoTest.flagIsExperimental = true;
   innerExperimentalNoTest.dontTestAutomatically = true;
+  Function::Options innerNoTestInvisibleExperimental;
+  innerNoTestInvisibleExperimental.flagIsInner = true;
+  innerNoTestInvisibleExperimental.flagIsExperimental = true;
+  innerNoTestInvisibleExperimental.dontTestAutomatically = true;
+  innerNoTestInvisibleExperimental.visible = false;
 
   this->AddOperationHandler(
     ";",
@@ -7601,7 +7566,7 @@ void Calculator::initPredefinedStandardOperations() {
   );
   this->AddOperationHandler(
     "\\otimes",
-    Calculator::outerTensor,
+    Calculator::outerTensorProductStandard,
     "",
     "Please do note use (or use at your own risk): this is work-in-progress. "
     "Will be documented when implemented and tested. Tensor product of "
@@ -7612,8 +7577,8 @@ void Calculator::initPredefinedStandardOperations() {
     "g_{- 1}(v\\otimes v);\n"
     "g_{- 1}g_{- 1}(v\\otimes v); ",
     "Calculator::outerTensor",
-    "TensorProductGeneralizedVermaModules",
-    outerAdminInvisibleNoTest
+    "TensorProductStandard",
+    innerNoTestInvisibleExperimental
   );
   this->AddOperationHandler(
     "=:",

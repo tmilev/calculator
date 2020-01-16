@@ -1200,9 +1200,9 @@ bool Calculator::AppendOpandsReturnTrueIfOrderNonCanonical(
   return result;
 }
 
-bool Calculator::outerTensor(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::outerTensorProductStandard(Calculator& theCommands, const Expression& input, Expression& output) {
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
-  MacroRegisterFunctionWithName("Calculator::StandardTensor");
+  MacroRegisterFunctionWithName("Calculator::outerTensorProductStandard");
   if (theCommands.outerDistribute(theCommands, input, output, theCommands.opPlus(), theCommands.opTensor())) {
     return true;
   }

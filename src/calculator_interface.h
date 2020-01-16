@@ -2093,7 +2093,7 @@ public:
     const Expression& input,
     MonomialCollection<Expression, Rational>& outputSum
   );
-  static bool outerTensor(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool outerTensorProductStandard(Calculator& theCommands, const Expression& input, Expression& output);
   static bool StandardIsDenotedBy(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerMinus(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerCombineFractions(Calculator& theCommands, const Expression& input, Expression& output);

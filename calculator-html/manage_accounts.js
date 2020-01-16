@@ -71,9 +71,13 @@ function callbackAddEmailsOrUsers(input, outputComponent) {
 }
 
 function addEmailsOrUsers(
-  idEmailList, problemCollectionName,
-  idOutput, userRole, idUserGroup,
-  idPasswords, requestType
+  idEmailList,
+  problemCollectionName,
+  idOutput,
+  userRole,
+  idUserGroup,
+  idPasswords,
+  requestType
 ) {
   var spanEmailList = document.getElementById(idEmailList);
   var spanUserGroup = document.getElementById(idUserGroup);

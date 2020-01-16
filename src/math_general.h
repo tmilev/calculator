@@ -1915,6 +1915,7 @@ public:
   int MaxMatrixDisplayedRows;
   int MaxLinesPerPage;
   int MatrixColumnVerticalLineIndex;
+  static int ExpressionLineBreak;
   //  bool flagMatrixStarted;
   //  bool flagMatrixRowStarted;
   bool flagPassCustomCoeffMonSeparatorToCoeffs;

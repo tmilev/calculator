@@ -489,7 +489,9 @@ private:
   std::string ToStringAllSlidersInExpression() const;
   std::string ToUTF8String(FormatExpressions* theFormat = nullptr) const;
 
-  void ToStringOpTimes(std::stringstream& out, FormatExpressions* theFormat) const;
+  bool ToStringPlus(std::stringstream& out, FormatExpressions* theFormat) const;
+  bool ToStringDirectSum(std::stringstream& out, FormatExpressions* theFormat) const;
+  bool ToStringOpTimes(std::stringstream& out, FormatExpressions* theFormat) const;
   void ToStringOpMultiplicative(std::stringstream& out, const std::string& operation, FormatExpressions* theFormat) const;
 
   std::string ToStringTreeHtml(int depth) const;

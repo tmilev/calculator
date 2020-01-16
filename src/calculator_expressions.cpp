@@ -3122,18 +3122,18 @@ JSData Expression::ToJSData(FormatExpressions* theFormat, const Expression& star
   return result;
 }
 
-void Expression::ToStringOpTimes(
+bool Expression::ToStringOpTimes(
   std::stringstream& out, FormatExpressions *theFormat
 ) const {
   if (!this->StartsWith(this->owner->opTimes(), 3)) {
-    global.fatal << "Bad call of tostring function. " << global.fatal;
+    return false;
   }
   std::string secondE = (*this)[2].ToString(theFormat);
   if ((*this)[1].IsOperationGiven(this->owner->opSqrt())) {
     // A malformed expression such as: "\sqrt 3" will be parsed as "sqrt * 3"
     // and later corrected to "\sqrt{3}".
     out << "\\sqrt{" << secondE << "}";
-    return;
+    return true;
   }
   std::string firstE = (*this)[1].ToString(theFormat);
   bool firstNeedsBrackets = (*this)[1].NeedsParenthesisForMultiplication();
@@ -3180,6 +3180,7 @@ void Expression::ToStringOpTimes(
   } else {
     out << secondE;
   }
+  return true;
 }
 
 void Expression::ToStringOpMultiplicative(
@@ -3476,6 +3477,80 @@ bool Expression::ToStringEndStatement(
   return true;
 }
 
+int FormatExpressions::ExpressionLineBreak = 50;
+
+bool Expression::ToStringPlus(std::stringstream& out, FormatExpressions* theFormat) const {
+  if (!this->StartsWith(this->owner->opPlus())) {
+    return false;
+  }
+  if (this->children.size < 3) {
+    global.fatal << "Plus operation takes at least 2 arguments, whereas this expression has "
+    << this->children.size - 1 << " arguments. " << global.fatal;
+  }
+  const Expression& left = (*this)[1];
+  const Expression& right = (*this)[2];
+  std::string leftString;
+  if (left.NeedsParenthesisForAddition()) {
+    leftString = "\\left(" + left.ToString(theFormat) + "\\right)";
+  } else {
+    leftString = left.ToString(theFormat);
+  }
+  out << leftString;
+  bool allowNewLine = false;
+  if (theFormat != nullptr) {
+    allowNewLine = theFormat->flagExpressionNewLineAllowed;
+  }
+  bool useFrac = this->owner->flagUseFracInRationalLaTeX;
+  if (allowNewLine && !useFrac && leftString.size() > static_cast<unsigned>(FormatExpressions::ExpressionLineBreak)) {
+    out << "\\\\\n";
+  }
+  std::string rightString = right.NeedsParenthesisForAddition() ?
+  ("\\left(" + right.ToString(theFormat) + "\\right)") : right.ToString(theFormat);
+  if (rightString.size() > 0) {
+    if (rightString[0] != '-') {
+      out << "+";
+    }
+  }
+  out << rightString;
+  return  true;
+}
+
+bool Expression::ToStringDirectSum(std::stringstream& out, FormatExpressions* theFormat) const {
+  if (!this->IsListStartingWithAtom(this->owner->opDirectSum())) {
+    return false;
+  }
+  if (this->children.size < 3) {
+    global.fatal << "Direct sum operation takes at least 2 arguments, whereas this expression has "
+    << this->children.size << " arguments. " << global.fatal;
+  }
+  const Expression& left = (*this)[1];
+  const Expression& right = (*this)[2];
+  std::string leftString;
+  if (left.NeedsParenthesisForAddition()) {
+    leftString = "\\left(" + left.ToString(theFormat) + "\\right)";
+  } else {
+    leftString = left.ToString(theFormat);
+  }
+  out << leftString;
+  bool allowNewLine = false;
+  if (theFormat != nullptr) {
+    allowNewLine = theFormat->flagExpressionNewLineAllowed;
+  }
+  bool useFrac = this->owner->flagUseFracInRationalLaTeX;
+  if (allowNewLine && !useFrac && leftString.size() > static_cast<unsigned>(FormatExpressions::ExpressionLineBreak)) {
+    out << "\\\\\n";
+  }
+  std::string rightString = right.NeedsParenthesisForAddition() ?
+  ("\\left(" + right.ToString(theFormat) + "\\right)") : right.ToString(theFormat);
+  if (rightString.size() > 0) {
+    if (rightString[0] != '-') {
+      out << "\\oplus ";
+    }
+  }
+  out << rightString;
+  return true;
+}
+
 std::string Expression::ToString(
   FormatExpressions* theFormat,
   Expression* startingExpression,
@@ -3513,7 +3588,6 @@ std::string Expression::ToString(
   std::stringstream out;
   bool isFinal = theFormat->flagExpressionIsFinal;
   bool allowNewLine = theFormat->flagExpressionNewLineAllowed;
-  bool useFrac = this->owner->flagUseFracInRationalLaTeX;
   if (
     !this->IsOfType<std::string>() &&
     !this->StartsWith(this->owner->opEndStatement())
@@ -3524,7 +3598,6 @@ std::string Expression::ToString(
       theFormat->flagUseQuotes = false;
     }
   }
-  int lineBreak = 50;
   int charCounter = 0;
   std::string tempS;
   if (outputJS != nullptr) {
@@ -3645,8 +3718,7 @@ std::string Expression::ToString(
     << "}^{"
     << (*this)[2].ToString(theFormat)
     << "}";
-  } else if (this->StartsWith(this->owner->opTimes(), 3)) {
-    this->ToStringOpTimes(out, theFormat);
+  } else if (this->ToStringOpTimes(out, theFormat)) {
   } else if (this->StartsWith(this->owner->opCrossProduct())) {
     this->ToStringOpMultiplicative(out, "\\times", theFormat);
   } else if (this->StartsWith(this->owner->opSqrt(), 3)) {
@@ -3670,56 +3742,8 @@ std::string Expression::ToString(
   } else if (this->StartsWith(this->owner->opAbsoluteValue(), 2)) {
     out << "\\left|" << (*this)[1].ToString(theFormat) << "\\right|";
   } else if (this->ToStringPower(out, theFormat)) {
-  } else if (this->StartsWith(this->owner->opPlus())) {
-    if (this->children.size < 3) {
-      global.fatal << "Plus operation takes at least 2 arguments, whereas this expression has "
-      << this->children.size - 1 << " arguments. " << global.fatal;
-    }
-    const Expression& left = (*this)[1];
-    const Expression& right = (*this)[2];
-    std::string leftString;
-    if (left.NeedsParenthesisForAddition()) {
-      leftString = "\\left(" + left.ToString(theFormat) + "\\right)";
-    } else {
-      leftString = left.ToString(theFormat);
-    }
-    out << leftString;
-    if (allowNewLine && !useFrac && leftString.size() > static_cast<unsigned>(lineBreak)) {
-      out << "\\\\\n";
-    }
-    std::string rightString = right.NeedsParenthesisForAddition() ?
-    ("\\left(" + right.ToString(theFormat) + "\\right)") : right.ToString(theFormat);
-    if (rightString.size() > 0) {
-      if (rightString[0] != '-') {
-        out << "+";
-      }
-    }
-    out << rightString;
-  } else if (this->IsListStartingWithAtom(this->owner->opDirectSum())) {
-    if (this->children.size < 3) {
-      global.fatal << "Direct sum operation takes at least 2 arguments, whereas this expression has "
-      << this->children.size << " arguments. " << global.fatal;
-    }
-    const Expression& left = (*this)[1];
-    const Expression& right = (*this)[2];
-    std::string leftString;
-    if (left.NeedsParenthesisForAddition()) {
-      leftString = "\\left(" + left.ToString(theFormat) + "\\right)";
-    } else {
-      leftString = left.ToString(theFormat);
-    }
-    out << leftString;
-    if (allowNewLine && !useFrac && leftString.size() > static_cast<unsigned>(lineBreak)) {
-      out << "\\\\\n";
-    }
-    std::string rightString = right.NeedsParenthesisForAddition() ?
-    ("\\left(" + right.ToString(theFormat) + "\\right)") : right.ToString(theFormat);
-    if (rightString.size() > 0) {
-      if (rightString[0] != '-') {
-        out << "\\oplus ";
-      }
-    }
-    out << rightString;
+  } else if (this->ToStringPlus(out, theFormat)) {
+  } else if (this->ToStringDirectSum(out, theFormat)){
   } else if (this->StartsWith(this->owner->opMinus(), 2)) {
     if ((*this)[1].StartsWith(this->owner->opPlus()) || (*this)[1].StartsWith(this->owner->opMinus())) {
       out << "-\\left(" << (*this)[1].ToString(theFormat) << "\\right)";

@@ -698,7 +698,7 @@ drawCoordinateAxesTwoD.prototype.drawNoFinish = function(theCanvas, startByMovin
   theSurface.lineWidth =1;
   var left = lowLeft[0];
   var right = topRight[0];
-  var bottom= lowLeft[1];
+  var bottom = lowLeft[1];
   var top = topRight[1];
   theSurface.beginPath();
   var theCoords = theCanvas.coordsMathScreenToScreen([0, bottom]);

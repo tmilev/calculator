@@ -30,10 +30,10 @@ function reloadPage(reason, time) {
     time = 0;
   }
   var timeRemaining = time / 1000;
-  document.getElementById("spanLoginStatus").innerHTML = `${reason} [in ${timeRemaining} (s)]`; 
+  document.getElementById("spanLoginStatus").innerHTML = `${reason} [in ${timeRemaining} (s)]`;
   if (time <= 0) {
     doReload();
-  } else { 
+  } else {
     reloadPageTimer = setTimeout(reloadPage.bind(null, reason, time - 1000), 1000);
   }
 }
@@ -60,7 +60,7 @@ function logoutPartTwo() {
   var thePage = window.calculator.mainPage;
   if (oldUserRole === "admin") {
     reloadPage("<b>Logging out admin: mandatory page reload. </b>", 0);
-  } else { 
+  } else {
     var loginStatus = "";
     loginStatus += `<b><a href='#' onclick = "window.calculator.login.reloadPage('<b>User requested reload. </b>', 0);">Reload page</a>`;
     loginStatus += ` for complete logout (when <span style='color:red'>using public computer</span>).</b>`;
@@ -68,7 +68,7 @@ function logoutPartTwo() {
     showLoginCalculatorButtons();
     toggleAccountPanels();
     setAdminPanels();
-    thePage.selectPage(thePage.pages.login.name);  
+    thePage.selectPage(thePage.pages.login.name);
   }
 }
 
@@ -133,18 +133,18 @@ function loginWithServerCallback(incomingString, result) {
   var parsedAuthentication = JSON.parse(incomingString);
   resetPagesNeedingReload();
   if (parsedAuthentication["status"] === "logged in") {
-    success = true;  
-  } 
+    success = true;
+  }
   var loginInfo = "";
   if (
-    parsedAuthentication[pathnames.urlFields.requests.loginDisabledEveryoneIsAdmin] === "true" || 
+    parsedAuthentication[pathnames.urlFields.requests.loginDisabledEveryoneIsAdmin] === "true" ||
     parsedAuthentication[pathnames.urlFields.requests.loginDisabledEveryoneIsAdmin] === true
   ) {
-    parsedAuthentication[pathnames.urlFields.username] = "anonymous"; 
+    parsedAuthentication[pathnames.urlFields.username] = "anonymous";
     parsedAuthentication[pathnames.urlFields.userRole] = "admin";
     loginInfo += "<b style = 'color:red'>DB inactive,<br>everyone is admin.</b>"
     success = true;
-  } 
+  }
   var loginExtraInfo = document.getElementById(ids.domElements.divLoginPanelExtraInfo);
   loginExtraInfo.innerHTML = loginInfo;
   if (
@@ -179,7 +179,7 @@ function loginWithServerCallback(incomingString, result) {
   }
 }
 
-function onGoogleSignIn(googleUser) { 
+function onGoogleSignIn(googleUser) {
   var theToken = googleUser.getAuthResponse().id_token;
   var thePage = window.calculator.mainPage;
   thePage.user.googleToken = theToken;
@@ -207,7 +207,7 @@ function initGoogleLogin() {
   }
 
   gapi.load('auth2', function() {
-    //auth2Google = 
+    //auth2Google =
     gapi.auth2.init({
       client_id: '538605306594-n43754vb0m48ir84g8vp5uj2u7klern3.apps.googleusercontent.com',
       // Scopes to request in addition to 'profile' and 'email'
@@ -218,7 +218,7 @@ function initGoogleLogin() {
       prompt: "select_account",
       onsuccess: onGoogleSignIn,
       onfailure: null
-    });  
+    });
   });
 }
 
@@ -296,7 +296,7 @@ function init() {
 module.exports = {
   resetPagesNeedingReload,
   reloadPage,
-  init, 
+  init,
   logoutGoogle,
   logout,
   loginTry,

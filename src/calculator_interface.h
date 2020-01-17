@@ -489,9 +489,22 @@ private:
   std::string ToStringAllSlidersInExpression() const;
   std::string ToUTF8String(FormatExpressions* theFormat = nullptr) const;
 
+  bool ToStringLnAbsoluteInsteadOfLogarithm(std::stringstream& out, FormatExpressions* theFormat) const;
+  bool ToStringDifferential2(std::stringstream& out, FormatExpressions* theFormat) const;
+  bool ToStringDifferential3(std::stringstream& out, FormatExpressions* theFormat) const;
+  bool ToStringDifferentiate(std::stringstream& out, FormatExpressions* theFormat) const;
+  bool ToStringDefine(std::stringstream& out, FormatExpressions* theFormat) const;
   bool ToStringPlus(std::stringstream& out, FormatExpressions* theFormat) const;
+  bool ToStringMatrix(std::stringstream& out, FormatExpressions* theFormat) const;
+  bool ToStringSequence(std::stringstream& out, FormatExpressions* theFormat) const;
+  bool ToStringSumOrIntegral(std::stringstream& out, FormatExpressions* theFormat) const;
   bool ToStringDirectSum(std::stringstream& out, FormatExpressions* theFormat) const;
+  bool ToStringLimit(std::stringstream& out, FormatExpressions* theFormat) const;
   bool ToStringOpTimes(std::stringstream& out, FormatExpressions* theFormat) const;
+  bool ToStringSqrt(std::stringstream& out, FormatExpressions* theFormat) const;
+  bool ToStringUnion(std::stringstream& out, FormatExpressions* theFormat) const;
+  bool ToStringMinus3(std::stringstream& out, FormatExpressions* theFormat) const;
+  bool ToStringMinus2(std::stringstream& out, FormatExpressions* theFormat) const;
   void ToStringOpMultiplicative(std::stringstream& out, const std::string& operation, FormatExpressions* theFormat) const;
 
   std::string ToStringTreeHtml(int depth) const;
@@ -508,6 +521,16 @@ private:
   bool ToStringPower(
     std::stringstream& out,
     FormatExpressions* theFormat
+  ) const;
+  bool ToStringGeneral(
+    std::stringstream& out,
+    FormatExpressions* theFormat
+  ) const;
+  std::string ToStringWithStartingExpression(
+    FormatExpressions* theFormat,
+    Expression* startingExpression,
+    std::stringstream& out,
+    JSData* outputJS
   ) const;
   bool ToStringEndStatement(
     std::stringstream& out,

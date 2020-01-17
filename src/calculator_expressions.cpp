@@ -3368,6 +3368,38 @@ bool Expression::ToStringPower(
   return true;
 }
 
+bool Expression::ToStringGeneral(
+  std::stringstream& out, FormatExpressions* theFormat
+) const {
+  if (this->size() < 2) {
+    return false;
+  }
+  out << (*this)[0].ToString(theFormat);
+  bool needParenthesis = true;
+  if (this->size() == 2) {
+    if ((*this)[0].IsAtomWhoseExponentsAreInterpretedAsFunction()) {
+      needParenthesis = !(*this)[1].IsAtom();
+    }
+    if ((*this)[0].IsPowerOfAtomWhoseExponentsAreInterpretedAsFunction()) {
+      needParenthesis = !(*this)[1].IsAtom();
+    }
+  }
+  out << "{}";
+  if (needParenthesis) {
+    out << "\\left(";
+  }
+  for (int i = 1; i < this->children.size; i ++) {
+    out << (*this)[i].ToString(theFormat);
+    if (i != this->children.size - 1) {
+      out << ", ";
+    }
+  }
+  if (needParenthesis) {
+    out << "\\right)";
+  }
+  return true;
+}
+
 bool Expression::ToStringEndStatement(
   std::stringstream& out,
   Expression* startingExpression,
@@ -3551,6 +3583,375 @@ bool Expression::ToStringDirectSum(std::stringstream& out, FormatExpressions* th
   return true;
 }
 
+bool Expression::ToStringSequence(
+  std::stringstream& out, FormatExpressions* theFormat
+) const {
+  if (!this->IsListStartingWithAtom(this->owner->opSequence())) {
+    return false;
+  }
+  if (this->size() == 2) {
+    out << "{Sequence{}";
+  }
+  out << "\\left(";
+  int charCounter = 0;
+  bool allowNewLine = false;
+  if (theFormat != nullptr) {
+    allowNewLine = theFormat->flagExpressionNewLineAllowed;
+  }
+  for (int i = 1; i < this->size(); i ++) {
+    std::string currentChildString = (*this)[i].ToString(theFormat);
+    out << currentChildString;
+    charCounter += currentChildString.size();
+    if (i != this->children.size - 1) {
+      out << ", ";
+      if (theFormat != nullptr) {
+        if (allowNewLine && charCounter > 50) {
+          if (theFormat->flagUseLatex) {
+            out << "\\\\\n";
+          }
+          if (theFormat->flagUseHTML) {
+            out << "\n<br>\n";
+          }
+        }
+      }
+    }
+    charCounter %= 50;
+  }
+  out << "\\right)";
+  if (this->size() == 2) {
+    out << "}";
+  }
+  return true;
+}
+
+bool Expression::ToStringMatrix(std::stringstream& out, FormatExpressions* theFormat) const {
+  if (!this->IsMatrix()) {
+    return false;
+  }
+  if (theFormat->flagUseLatex && !theFormat->flagUsePmatrix) {
+    out << "\\left(";
+  }
+  if (!theFormat->flagUsePmatrix) {
+    int numCols = this->GetNumCols();
+    out << "\\begin{array}{";
+    for (int i = 0; i < numCols; i ++) {
+      out << "c";
+    }
+    out << "} ";
+  } else {
+    out << "\\begin{pmatrix}";
+  }
+  for (int i = 1; i < this->size(); i ++) {
+    for (int j = 1; j < (*this)[i].size(); j ++) {
+      out << (*this)[i][j].ToString(theFormat);
+      if (j != (*this)[i].size() - 1) {
+        out << " & ";
+      }
+    }
+    if (i != this->size() - 1) {
+      out << "\\\\ \n";
+    }
+  }
+  if (theFormat->flagUsePmatrix) {
+    out << " \\end{pmatrix}";
+  } else {
+    out << " \\end{array}";
+  }
+  if (theFormat->flagUseLatex && !theFormat->flagUsePmatrix) {
+    out << "\\right)";
+  }
+  return true;
+}
+
+bool Expression::ToStringDefine(std::stringstream &out, FormatExpressions *theFormat) const {
+  if (!this->StartsWith(this->owner->opDefine(), 3)) {
+    return false;
+  }
+  std::string firstE  = (*this)[1].ToString(theFormat);
+  std::string secondE = (*this)[2].ToString(theFormat);
+  if (
+    (*this)[1].IsListStartingWithAtom(this->owner->opDefine()) ||
+    (*this)[1].IsListStartingWithAtom(this->owner->opGreaterThan()) ||
+    (*this)[1].IsListStartingWithAtom(this->owner->opGreaterThanOrEqualTo()) ||
+    (*this)[1].IsListStartingWithAtom(this->owner->opLessThan()) ||
+    (*this)[1].IsListStartingWithAtom(this->owner->opLessThanOrEqualTo())
+  ) {
+    out << "\\left(" << firstE << "\\right)";
+  } else {
+    out << firstE;
+  }
+  out << "=";
+  if ((*this)[2].IsListStartingWithAtom(this->owner->opDefine())) {
+    out << "\\left(" << secondE << "\\right)";
+  } else {
+    out << secondE;
+  }
+  return true;
+}
+
+bool Expression::ToStringLnAbsoluteInsteadOfLogarithm(
+  std::stringstream& out, FormatExpressions* theFormat
+) const {
+  if (
+    !this->owner->flagUseLnAbsInsteadOfLogForIntegrationNotation ||
+    !this->StartsWith(this->owner->opLog(), 2)
+  ) {
+    return false;
+  }
+  std::string theArg = (*this)[1].ToString(theFormat);
+  if (!StringRoutines::StringBeginsWith(theArg, "\\left|")) {
+    out << "\\ln \\left|" << theArg << "\\right|";
+  } else {
+    out << "\\ln " << theArg;
+  }
+  return true;
+}
+
+bool Expression::ToStringDifferential2(
+  std::stringstream& out, FormatExpressions* theFormat
+) const {
+  if (!this->StartsWith(this->owner->opDifferential(), 3)) {
+    return false;
+  }
+  bool needsParen = (*this)[2].NeedsParenthesisForMultiplication() ||
+  (*this)[2].NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost();
+  if ((*this)[2].StartsWith(this->owner->opDivide())) {
+    needsParen = false;
+  }
+  bool rightNeedsParen = (!(*this)[1].IsAtom()) && (!(*this)[1].IsBuiltInTypE());
+  std::string theCoeff = (*this)[2].ToString(theFormat);
+  if (theCoeff == "1") {
+    needsParen = false;
+    theCoeff = "";
+  }
+  if (needsParen) {
+    out << "\\left(";
+  }
+  out << theCoeff;
+  if (needsParen) {
+    out << "\\right)";
+  }
+  out << " {\\text{d}} ";
+  if (rightNeedsParen) {
+    out << "\\left(";
+  }
+  out << (*this)[1].ToString(theFormat);
+  if (rightNeedsParen) {
+    out << "\\right)";
+  }
+  return true;
+}
+
+bool Expression::ToStringDifferentiate(
+  std::stringstream &out, FormatExpressions *theFormat
+) const {
+  if (!this->StartsWith(this->owner->opDifferentiate(), 3)) {
+    return false;
+  }
+  out << "\\frac{\\text{d}} ";
+  if ((*this)[2].NeedsParenthesisForMultiplication()) {
+    out << "\\left(" << (*this)[2].ToString(theFormat)
+    << "\\right)";
+  } else {
+    out << (*this)[2].ToString(theFormat);
+  }
+  out << "}{{\\text{d}} "
+  << (*this)[1].ToString(theFormat) << "}";
+  return true;
+}
+
+bool Expression::ToStringDifferential3(
+  std::stringstream& out, FormatExpressions* theFormat
+) const {
+  if (!this->StartsWith(this->owner->opDifferential(), 2)) {
+    return false;
+  }
+  bool needsParen = (!(*this)[1].IsAtom()) && (!(*this)[1].IsBuiltInTypE());
+  out << "{\\text{d}}{}";
+  if (needsParen) {
+    out << "\\left(";
+  }
+  out << (*this)[1].ToString(theFormat);
+  if (needsParen) {
+    out << "\\right)";
+  }
+  return true;
+}
+
+bool Expression::ToStringSqrt(
+  std::stringstream& out, FormatExpressions* theFormat
+) const {
+  if (!this->StartsWith(this->owner->opSqrt(), 3)) {
+    return false;
+  }
+  int thePower = 0;
+  bool hasPowerTwo = (*this)[1].IsSmallInteger(&thePower);
+  if (hasPowerTwo) {
+    hasPowerTwo = (thePower == 2);
+  }
+  if (hasPowerTwo) {
+    out << "\\sqrt{" << (*this)[2].ToString(theFormat) << "}";
+  } else {
+    out << "\\sqrt[" << (*this)[1].ToString(theFormat)
+    << "]{" << (*this)[2].ToString(theFormat) << "}";
+  }
+  return true;
+}
+
+bool Expression::ToStringSumOrIntegral(
+  std::stringstream& out, FormatExpressions* theFormat
+) const {
+  if (
+    !this->StartsWith(this->owner->opSum()) &&
+    !this->StartsWith(this->owner->opIntegral())
+  ) {
+    return false;
+  }
+  std::string opString = (*this)[0].ToString(theFormat);
+  out << opString << " ";
+  int firstIndex = 2;
+  if (this->size() >= 2) {
+    if ((*this)[1].StartsWith(this->owner->opLimitBoundary(), 3)) {
+      out
+      << "_{" << (*this)[1][1].ToString(theFormat) << "}"
+      << "^{" << (*this)[1][2].ToString(theFormat) << "}";
+    } else if ((*this)[1].IsOperationGiven(this->owner->opIndefiniteIndicator())) {
+      firstIndex = 2;
+    } else {
+      firstIndex = 1;
+    }
+  }
+  if (this->size() <= firstIndex + 1) {
+    if (this->size() == firstIndex + 1) {
+      out << (*this)[firstIndex].ToString(theFormat);
+    }
+  } else {
+    out << "(";
+    for (int i = firstIndex; i < this->size(); i ++) {
+      out << (*this)[i].ToString(theFormat);
+      if (i != this->size() - 1) {
+        out << ", ";
+      }
+    }
+    out << ")";
+  }
+  return true;
+}
+
+bool Expression::ToStringLimit(
+  std::stringstream& out, FormatExpressions* theFormat
+) const {
+  if (!this->StartsWith(this->owner->opLimit(), 3)) {
+    return false;
+  }
+  out << "\\lim_{";
+  if (!(*this)[1].IsSequenceNElementS()) {
+    out << (*this)[1].ToString(theFormat);
+  } else {
+    for (int i = 1; i < (*this)[1].size(); i ++) {
+      out << (*this)[1][i].ToString(theFormat);
+      if (i != (*this)[1].size() - 1) {
+        out << ", ";
+      }
+    }
+  }
+  out << "}" << (*this)[2].ToString(theFormat);
+  return false;
+}
+
+bool Expression::ToStringUnion(
+  std::stringstream& out, FormatExpressions* theFormat
+) const {
+  if (!this->IsListStartingWithAtom(this->owner->opUnion()) || this->size() != 3) {
+    return false;
+  }
+  if ((*this)[1].StartsWith(this->owner->opIntersection())) {
+    out << "\\left(" << (*this)[1].ToString(theFormat) <<  "\\right)"
+    << "\\cup " << (*this)[2].ToString(theFormat);
+  } else {
+    out << (*this)[1].ToString(theFormat) << "\\cup " << (*this)[2].ToString(theFormat);
+  }
+  return true;
+}
+
+std::string Expression::ToStringWithStartingExpression(
+  FormatExpressions* theFormat,
+  Expression* startingExpression,
+  std::stringstream& out,
+  JSData* outputJS
+) const {
+  std::stringstream outTrue;
+  std::string input, output;
+  bool isFinal = true;
+  if (theFormat != nullptr) {
+    isFinal = theFormat->flagExpressionIsFinal;
+  }
+  outTrue << "<table class =\"tableCalculatorOutput\">";
+  outTrue << "<tr><th>Input</th><th>Result</th></tr>";
+  if (this->IsListStartingWithAtom(this->owner->opEndStatement())) {
+    outTrue << out.str();
+  } else {
+    input = HtmlRoutines::GetMathSpanPure(startingExpression->ToString(theFormat), 1700);
+    outTrue << "<tr><td class =\"cellCalculatorInput\">" << input << "</td>";
+    if ((
+        this->IsOfType<std::string>() ||
+        this->IsOfType<Plot>() ||
+        this->IsOfType<SemisimpleSubalgebras>() ||
+        this->IsOfType<WeylGroupData>()
+      ) && isFinal
+    ) {
+      output = out.str();
+    } else {
+      output = HtmlRoutines::GetMathSpanPure(out.str(), 1700);
+    }
+    outTrue << "<td class =\"cellCalculatorResult\">" << output << "</td></tr>";
+    if (outputJS != nullptr) {
+      (*outputJS)["input"] = input;
+      (*outputJS)["output"] = output;
+    }
+  }
+  outTrue << "</table>";
+  return outTrue.str();
+}
+
+bool Expression::ToStringMinus3(
+  std::stringstream& out, FormatExpressions* theFormat
+) const {
+  if (!this->StartsWith(this->owner->opMinus(), 3)) {
+    return false;
+  }
+  if (this->children.size != 3) {
+    global.fatal << "This is a programming error: "
+    << "the minus function expects 1 or 2 arguments, "
+    << "instead there are " << this->children.size - 1
+    << ". " << global.fatal;
+  }
+  out << (*this)[1].ToString(theFormat) << "-";
+  if ((*this)[2].StartsWith(this->owner->opPlus()) || (*this)[2].StartsWith(this->owner->opMinus())) {
+    out << "\\left(" << (*this)[2].ToString(theFormat) << "\\right)";
+  } else {
+    out << (*this)[2].ToString(theFormat);
+  }
+  return true;
+}
+
+bool Expression::ToStringMinus2(
+  std::stringstream& out, FormatExpressions* theFormat
+) const {
+  if (!this->StartsWith(this->owner->opMinus(), 2)) {
+    return false;
+  }
+  if (
+    (*this)[1].StartsWith(this->owner->opPlus()) ||
+    (*this)[1].StartsWith(this->owner->opMinus())
+  ) {
+    out << "-\\left(" << (*this)[1].ToString(theFormat) << "\\right)";
+  } else {
+    out << "-" << (*this)[1].ToString(theFormat);
+  }
+  return true;
+}
+
 std::string Expression::ToString(
   FormatExpressions* theFormat,
   Expression* startingExpression,
@@ -3586,8 +3987,6 @@ std::string Expression::ToString(
     return owner->theObjectContainer.ExpressionNotation[notationIndex];
   }
   std::stringstream out;
-  bool isFinal = theFormat->flagExpressionIsFinal;
-  bool allowNewLine = theFormat->flagExpressionNewLineAllowed;
   if (
     !this->IsOfType<std::string>() &&
     !this->StartsWith(this->owner->opEndStatement())
@@ -3598,45 +3997,16 @@ std::string Expression::ToString(
       theFormat->flagUseQuotes = false;
     }
   }
-  int charCounter = 0;
   std::string tempS;
   if (outputJS != nullptr) {
     outputJS->reset();
   }
   if (this->ToStringData(tempS, theFormat)) {
     out << tempS;
-  } else if (this->StartsWith(this->owner->opDefine(), 3)) {
-    std::string firstE  = (*this)[1].ToString(theFormat);
-    std::string secondE = (*this)[2].ToString(theFormat);
-    if (
-      (*this)[1].IsListStartingWithAtom(this->owner->opDefine()) ||
-      (*this)[1].IsListStartingWithAtom(this->owner->opGreaterThan()) ||
-      (*this)[1].IsListStartingWithAtom(this->owner->opGreaterThanOrEqualTo()) ||
-      (*this)[1].IsListStartingWithAtom(this->owner->opLessThan()) ||
-      (*this)[1].IsListStartingWithAtom(this->owner->opLessThanOrEqualTo())
-    ) {
-      out << "\\left(" << firstE << "\\right)";
-    } else {
-      out << firstE;
-    }
-    out << "=";
-    if ((*this)[2].IsListStartingWithAtom(this->owner->opDefine())) {
-      out << "\\left(" << secondE << "\\right)";
-    } else {
-      out << secondE;
-    }
+  } else if (this->ToStringDefine(out, theFormat)) {
   } else if (this->IsListStartingWithAtom(this->owner->opIsDenotedBy())) {
     out << (*this)[1].ToString(theFormat) << "=:" << (*this)[2].ToString(theFormat);
-  } else if (
-    this->owner->flagUseLnAbsInsteadOfLogForIntegrationNotation &&
-    this->StartsWith(this->owner->opLog(), 2)
-  ) {
-    std::string theArg = (*this)[1].ToString(theFormat);
-    if (!StringRoutines::StringBeginsWith(theArg, "\\left|")) {
-      out << "\\ln \\left|" << theArg << "\\right|";
-    } else {
-      out << "\\ln " << theArg;
-    }
+  } else if (this->ToStringLnAbsoluteInsteadOfLogarithm(out, theFormat) ) {
   } else if (this->StartsWith(this->owner->opLogBase(), 3)) {
     out << "\\log_{" << (*this)[1].ToString(theFormat) << "}"
     << "\\left(" << (*this)[2].ToString(theFormat) << "\\right)";
@@ -3675,7 +4045,7 @@ std::string Expression::ToString(
     }
   } else if (this->StartsWith(this->owner->opQuote(), 2)) {
     if ((*this)[1].IsOperation(&tempS)) {
-      out << "\"" <<  tempS << "\"";
+      out << "\"" << tempS << "\"";
     } else {
       out << "(Corrupt string)";
     }
@@ -3721,18 +4091,7 @@ std::string Expression::ToString(
   } else if (this->ToStringOpTimes(out, theFormat)) {
   } else if (this->StartsWith(this->owner->opCrossProduct())) {
     this->ToStringOpMultiplicative(out, "\\times", theFormat);
-  } else if (this->StartsWith(this->owner->opSqrt(), 3)) {
-    int thePower = 0;
-    bool hasPowerTwo = (*this)[1].IsSmallInteger(&thePower);
-    if (hasPowerTwo) {
-      hasPowerTwo = (thePower == 2);
-    }
-    if (hasPowerTwo) {
-      out << "\\sqrt{" << (*this)[2].ToString(theFormat) << "}";
-    } else {
-      out << "\\sqrt[" << (*this)[1].ToString(theFormat)
-      << "]{" << (*this)[2].ToString(theFormat) << "}";
-    }
+  } else if (this->ToStringSqrt(out, theFormat)) {
   } else if (this->StartsWith(this->owner->opFactorial(), 2)) {
     if ((*this)[1].NeedsParenthesisForBaseOfExponent()) {
       out << "\\left(" << (*this)[1].ToString(theFormat) << "\\right) !";
@@ -3744,204 +4103,38 @@ std::string Expression::ToString(
   } else if (this->ToStringPower(out, theFormat)) {
   } else if (this->ToStringPlus(out, theFormat)) {
   } else if (this->ToStringDirectSum(out, theFormat)){
-  } else if (this->StartsWith(this->owner->opMinus(), 2)) {
-    if ((*this)[1].StartsWith(this->owner->opPlus()) || (*this)[1].StartsWith(this->owner->opMinus())) {
-      out << "-\\left(" << (*this)[1].ToString(theFormat) << "\\right)";
-    } else {
-      out << "-" << (*this)[1].ToString(theFormat);
-    }
+  } else if (this->ToStringMinus2(out, theFormat)) {
   } else if (this->StartsWith(this->owner->opSqrt(), 2)) {
     out << "\\sqrt{" << (*this)[1].ToString(theFormat) << "}";
-  } else if (this->StartsWith(this->owner->opMinus(), 3)) {
-    if (!(this->children.size == 3)) {
-      global.fatal << "This is a programming error: "
-      << "the minus function expects 1 or 2 arguments, "
-      << "instead there are " << this->children.size - 1
-      << ". " << global.fatal;
-    }
-    out << (*this)[1].ToString(theFormat) << "-";
-    if ((*this)[2].StartsWith(this->owner->opPlus()) || (*this)[2].StartsWith(this->owner->opMinus())) {
-      out << "\\left(" << (*this)[2].ToString(theFormat) << "\\right)";
-    } else {
-      out << (*this)[2].ToString(theFormat);
-    }
+  } else if (this->ToStringMinus3(out, theFormat)) {
   } else if (this->StartsWith(this->owner->opBind(), 2)) {
     out << "{{" << (*this)[1].ToString(theFormat) << "}}";
   } else if (this->IsListStartingWithAtom(this->owner->opEqualEqual())) {
     out << (*this)[1].ToString(theFormat) << "==" << (*this)[2].ToString(theFormat);
   } else if (this->IsListStartingWithAtom(this->owner->opEqualEqualEqual())) {
     out << (*this)[1].ToString(theFormat) << "===" << (*this)[2].ToString(theFormat);
-  } else if (this->StartsWith(this->owner->opDifferentiate(), 3)) {
-    out << "\\frac{\\text{d}} ";
-    if ((*this)[2].NeedsParenthesisForMultiplication()) {
-      out << "\\left(" << (*this)[2].ToString(theFormat)
-      << "\\right)";
-    } else {
-      out << (*this)[2].ToString(theFormat);
-    }
-    out << "}{{\\text{d}} "
-    << (*this)[1].ToString(theFormat)  << "}";
-  } else if (this->StartsWith(this->owner->opDifferential(), 3)) {
-    bool needsParen = (*this)[2].NeedsParenthesisForMultiplication() ||
-    (*this)[2].NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost();
-    if ((*this)[2].StartsWith(this->owner->opDivide())) {
-      needsParen = false;
-    }
-    bool rightNeedsParen = (!(*this)[1].IsAtom()) && (!(*this)[1].IsBuiltInTypE());
-    std::string theCoeff = (*this)[2].ToString(theFormat);
-    if (theCoeff == "1") {
-      needsParen = false;
-      theCoeff = "";
-    }
-    if (needsParen) {
-      out << "\\left(";
-    }
-    out << theCoeff;
-    if (needsParen) {
-      out << "\\right)";
-    }
-    out << " {\\text{d}} ";
-    if (rightNeedsParen) {
-      out << "\\left(";
-    }
-    out << (*this)[1].ToString(theFormat);
-    if (rightNeedsParen) {
-      out << "\\right)";
-    }
-  } else if (this->StartsWith(this->owner->opDifferential(), 2)) {
-    bool needsParen = (!(*this)[1].IsAtom()) && (!(*this)[1].IsBuiltInTypE());
-    out << "{\\text{d}}{}";
-    if (needsParen) {
-      out << "\\left(";
-    }
-    out << (*this)[1].ToString(theFormat);
-    if (needsParen) {
-      out << "\\right)";
-    }
-  } else if (this->StartsWith(this->owner->opSum()) || this->StartsWith(this->owner->opIntegral())) {
-    std::string opString = (*this)[0].ToString(theFormat);
-    out << opString << " ";
-    int firstIndex = 2;
-    if (this->size() >= 2) {
-      if ((*this)[1].StartsWith(this->owner->opLimitBoundary(), 3)) {
-        out
-        << "_{" << (*this)[1][1].ToString(theFormat) << "}"
-        << "^{" << (*this)[1][2].ToString(theFormat) << "}";
-      } else if ((*this)[1].IsOperationGiven(this->owner->opIndefiniteIndicator())) {
-        firstIndex = 2;
-      } else {
-        firstIndex = 1;
-      }
-    }
-    if (this->size() <= firstIndex + 1) {
-      if (this->size() == firstIndex + 1) {
-        out << (*this)[firstIndex].ToString(theFormat);
-      }
-    } else {
-      out << "(";
-      for (int i = firstIndex; i < this->size(); i ++) {
-        out << (*this)[i].ToString(theFormat);
-        if (i != this->size() - 1) {
-          out << ", ";
-        }
-      }
-      out << ")";
-    }
+  } else if (this->ToStringDifferentiate(out, theFormat)) {
+  } else if (this->ToStringDifferential2(out, theFormat)) {
+  } else if (this->ToStringDifferential3(out, theFormat)) {
+  } else if (this->ToStringSumOrIntegral(out, theFormat)) {
   } else if (this->IsListStartingWithAtom(this->owner->opGreaterThan())) {
     out << (*this)[1].ToString(theFormat) << "&gt;" << (*this)[2].ToString(theFormat);
   } else if (this->IsListStartingWithAtom(this->owner->opGreaterThanOrEqualTo())) {
     out << (*this)[1].ToString(theFormat) << "\\geq " << (*this)[2].ToString(theFormat);
   } else if (this->IsListStartingWithAtom(this->owner->opLessThanOrEqualTo())) {
     out << (*this)[1].ToString(theFormat) << "\\leq " << (*this)[2].ToString(theFormat);
-  } else if (this->StartsWith(this->owner->opLimit(), 3)) {
-    out << "\\lim_{";
-    if (!(*this)[1].IsSequenceNElementS()) {
-      out << (*this)[1].ToString(theFormat);
-    } else {
-      for (int i = 1; i < (*this)[1].size(); i ++) {
-        out << (*this)[1][i].ToString(theFormat);
-        if (i != (*this)[1].size() - 1) {
-          out << ", ";
-        }
-      }
-    }
-    out << "}" << (*this)[2].ToString(theFormat);
+  } else if (this->ToStringLimit(out, theFormat)) {
   } else if (this->IsListStartingWithAtom(this->owner->opLimitProcess())) {
     out << (*this)[1].ToString(theFormat) << " \\to " << (*this)[2].ToString(theFormat);
   } else if (this->IsListStartingWithAtom(this->owner->opLessThan())) {
     out << (*this)[1].ToString(theFormat) << "&lt;" << (*this)[2].ToString(theFormat);
-  } else if (this->IsMatrix()) {
-    if (theFormat->flagUseLatex && !theFormat->flagUsePmatrix) {
-      out << "\\left(";
-    }
-    if (!theFormat->flagUsePmatrix) {
-      int numCols = this->GetNumCols();
-      out << "\\begin{array}{";
-      for (int i = 0; i < numCols; i ++) {
-        out << "c";
-      }
-      out << "} ";
-    } else {
-      out << "\\begin{pmatrix}";
-    }
-    for (int i = 1; i < this->size(); i ++) {
-      for (int j = 1; j < (*this)[i].size(); j ++) {
-        out << (*this)[i][j].ToString(theFormat);
-        if (j != (*this)[i].size() - 1) {
-          out << " & ";
-        }
-      }
-      if (i != this->size() - 1) {
-        out << "\\\\ \n";
-      }
-    }
-    if (theFormat->flagUsePmatrix) {
-      out << " \\end{pmatrix}";
-    } else {
-      out << " \\end{array}";
-    }
-    if (theFormat->flagUseLatex && !theFormat->flagUsePmatrix) {
-      out << "\\right)";
-    }
-  } else if (this->IsListStartingWithAtom(this->owner->opSequence())) {
-    if (this->size() == 2) {
-      out << "{Sequence{}";
-    }
-    out << "\\left(";
-    for (int i = 1; i < this->size(); i ++) {
-      std::string currentChildString = (*this)[i].ToString(theFormat);
-      out << currentChildString;
-      charCounter += currentChildString.size();
-      if (i != this->children.size - 1) {
-        out << ", ";
-        if (theFormat != nullptr) {
-          if (allowNewLine && charCounter > 50) {
-            if (theFormat->flagUseLatex) {
-              out << "\\\\\n";
-            }
-            if (theFormat->flagUseHTML) {
-              out << "\n<br>\n";
-            }
-          }
-        }
-      }
-      charCounter %= 50;
-    }
-    out << "\\right)";
-    if (this->size() == 2) {
-      out << "}";
-    }
+  } else if (this->ToStringMatrix(out, theFormat)) {
+  } else if (this->ToStringSequence(out, theFormat)) {
   } else if (this->IsListStartingWithAtom(this->owner->opLieBracket())) {
     out << "[" << (*this)[1].ToString(theFormat) << "," << (*this)[2].ToString(theFormat) << "]";
   } else if (this->IsListStartingWithAtom(this->owner->opMod())) {
     out << (*this)[1].ToString(theFormat) << " mod " << (*this)[2].ToString(theFormat);
-  } else if (this->IsListStartingWithAtom(this->owner->opUnion()) && this->size() == 3) {
-    if ((*this)[1].StartsWith(this->owner->opIntersection())) {
-      out << "\\left(" << (*this)[1].ToString(theFormat) <<  "\\right)"
-      << "\\cup " << (*this)[2].ToString(theFormat);
-    } else {
-      out << (*this)[1].ToString(theFormat) << "\\cup " << (*this)[2].ToString(theFormat);
-    }
+  } else if (this->ToStringUnion(out, theFormat)) {
   } else if (this->IsListStartingWithAtom(this->owner->opIntersection()) && this->size() == 3) {
     if ((*this)[1].StartsWith(this->owner->opUnion())) {
       out << "\\left(" << (*this)[1].ToString(theFormat) << "\\right)"
@@ -3959,60 +4152,12 @@ std::string Expression::ToString(
     << this->owner->NumErrors << ". " << (*this)[1].ToString(theFormat);
   } else if (this->size() == 1) {
     out << (*this)[0].ToString(theFormat);
-  } else if (this->size() >= 2) {
-    out << (*this)[0].ToString(theFormat);
-    bool needParenthesis = true;
-    if (this->size() == 2) {
-      if ((*this)[0].IsAtomWhoseExponentsAreInterpretedAsFunction()) {
-        needParenthesis = !(*this)[1].IsAtom();
-      }
-      if ((*this)[0].IsPowerOfAtomWhoseExponentsAreInterpretedAsFunction()) {
-        needParenthesis = !(*this)[1].IsAtom();
-      }
-    }
-    out << "{}";
-    if (needParenthesis) {
-      out << "\\left(";
-    }
-    for (int i = 1; i < this->children.size; i ++) {
-      out << (*this)[i].ToString(theFormat);
-      if (i != this->children.size - 1) {
-        out << ", ";
-      }
-    }
-    if (needParenthesis) {
-      out << "\\right)";
-    }
+  } else if (this->ToStringGeneral(out, theFormat)) {
   } else { //<-not sure if this case is possible
     out << "(ProgrammingError:NotDocumented)";
   }
-  std::string input, output;
   if (startingExpression != nullptr) {
-    std::stringstream outTrue;
-    outTrue << "<table class =\"tableCalculatorOutput\">";
-    outTrue << "<tr><th>Input</th><th>Result</th></tr>";
-    if (this->IsListStartingWithAtom(this->owner->opEndStatement())) {
-      outTrue << out.str();
-    } else {
-      input = HtmlRoutines::GetMathSpanPure(startingExpression->ToString(theFormat), 1700);
-      outTrue << "<tr><td class =\"cellCalculatorInput\">" << input << "</td>";
-      if ((
-          this->IsOfType<std::string>() || this->IsOfType<Plot>() ||
-          this->IsOfType<SemisimpleSubalgebras>() || this->IsOfType<WeylGroupData>()
-        ) && isFinal
-      ) {
-        output = out.str();
-      } else {
-        output = HtmlRoutines::GetMathSpanPure(out.str(), 1700);
-      }
-      outTrue << "<td class =\"cellCalculatorResult\">" << output << "</td></tr>";
-      if (outputJS != nullptr) {
-        (*outputJS)["input"] = input;
-        (*outputJS)["output"] = output;
-      }
-    }
-    outTrue << "</table>";
-    return outTrue.str();
+    return this->ToStringWithStartingExpression(theFormat, startingExpression, out, outputJS);
   }
   if (outputJS != nullptr) {
     if (outputJS->theType == JSData::token::tokenUndefined) {

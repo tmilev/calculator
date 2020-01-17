@@ -4346,7 +4346,7 @@ int WebServer::main(int argc, char **argv) {
       return global.server().Run();
     } else if (global.flagRunningConsoleTest) {
       return mainTest(global.programArguments);
-    } else if (global.flagRunningCommandLine) {
+    } else {
       return WebServer::mainCommandLine();
     }
   } catch (...) {

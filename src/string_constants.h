@@ -140,6 +140,7 @@ public:
   static std::string HTMLAceSrcMin             ;
   static std::string HTMLJQueryUI              ;
   static std::string HTMLMathQuill             ;
+  static std::string HTMLMathQuillFonts        ;
 
   static std::string HTMLCommonFont            ;
   static std::string publicHTML                ;

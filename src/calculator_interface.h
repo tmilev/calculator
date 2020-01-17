@@ -502,6 +502,13 @@ private:
   bool ToStringLimit(std::stringstream& out, FormatExpressions* theFormat) const;
   bool ToStringOpTimes(std::stringstream& out, FormatExpressions* theFormat) const;
   bool ToStringSqrt(std::stringstream& out, FormatExpressions* theFormat) const;
+  bool ToStringOr(std::stringstream& out, FormatExpressions* theFormat) const;
+  bool ToStringIntervalOpen(std::stringstream& out, FormatExpressions* theFormat) const;
+  bool ToStringIntervalLeftClosed(std::stringstream& out, FormatExpressions* theFormat) const;
+  bool ToStringIntervalRightClosed(std::stringstream& out, FormatExpressions* theFormat) const;
+  bool ToStringIntervalClosed(std::stringstream& out, FormatExpressions* theFormat) const;
+
+  bool ToStringFactorial(std::stringstream& out, FormatExpressions* theFormat) const;
   bool ToStringUnion(std::stringstream& out, FormatExpressions* theFormat) const;
   bool ToStringMinus3(std::stringstream& out, FormatExpressions* theFormat) const;
   bool ToStringMinus2(std::stringstream& out, FormatExpressions* theFormat) const;

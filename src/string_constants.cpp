@@ -178,6 +178,7 @@ std::string Configuration::HTMLJQueryMinified         = "html-common/jquery/jque
 std::string Configuration::HTMLAceSrcMin              = "html-common/ace/src-min/"                             ;
 std::string Configuration::HTMLJQueryUI               = "html-common/jquery_ui/"                               ;
 std::string Configuration::HTMLMathQuill              = "html-common/mathquill/"                               ;
+std::string Configuration::HTMLMathQuillFonts         = "html-common/mathquill/fonts/"                         ;
 
 std::string Configuration::calculatorHTML             = "calculator-html/"                                     ;
 std::string Configuration::publicHTML                 = "public_html/"                                         ;

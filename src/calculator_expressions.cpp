@@ -3778,6 +3778,18 @@ bool Expression::ToStringDifferential3(
   return true;
 }
 
+bool Expression::ToStringFactorial(std::stringstream &out, FormatExpressions *theFormat) const {
+  if (!this->StartsWith(this->owner->opFactorial(), 2)) {
+    return false;
+  }
+  if ((*this)[1].NeedsParenthesisForBaseOfExponent()) {
+    out << "\\left(" << (*this)[1].ToString(theFormat) << "\\right) !";
+  } else {
+    out << (*this)[1].ToString(theFormat) << "!";
+  }
+  return true;
+}
+
 bool Expression::ToStringSqrt(
   std::stringstream& out, FormatExpressions* theFormat
 ) const {
@@ -3856,7 +3868,7 @@ bool Expression::ToStringLimit(
     }
   }
   out << "}" << (*this)[2].ToString(theFormat);
-  return false;
+  return true;
 }
 
 bool Expression::ToStringUnion(
@@ -3952,6 +3964,96 @@ bool Expression::ToStringMinus2(
   return true;
 }
 
+bool Expression::ToStringOr(
+  std::stringstream& out, FormatExpressions* theFormat
+) const {
+  (void) theFormat;
+  if (!this->StartsWith(this->owner->opOr(), 3)) {
+    return false;
+  }
+  if (!(*this)[1].IsSequenceNElementS()) {
+    out << "\\left(" << (*this)[1] << "\\right)";
+  } else {
+    out << (*this)[1];
+  }
+  out << "\\ or\\ ";
+  if (!(*this)[2].IsSequenceNElementS()) {
+    out << "\\left(" << (*this)[2] << "\\right)";
+  } else {
+    out << (*this)[2];
+  }
+  return true;
+}
+
+bool Expression::ToStringIntervalOpen(
+  std::stringstream& out, FormatExpressions* theFormat
+) const {
+  if (!this->StartsWith(this->owner->opIntervalOpen(), 3)) {
+    return false;
+  }
+  if (!this->owner->flagUseBracketsForIntervals) {
+    out << "IntervalOpen{}";
+  }
+  out << "\\left(" << (*this)[1].ToString(theFormat) << ", "
+  << (*this)[2].ToString(theFormat) << "\\right)";
+  return true;
+}
+
+bool Expression::ToStringIntervalLeftClosed(std::stringstream& out, FormatExpressions* theFormat) const {
+  if (this->StartsWith(this->owner->opIntervalLeftClosed(), 2)) {
+    if ((*this)[1].IsSequenceNElementS(2)) {
+      out << "\\left[" << (*this)[1][1] << ", " << (*this)[1][2] << "\\right)";
+    } else {
+      out << (*this)[0].ToString(theFormat) << "{}" << (*this)[1].ToString(theFormat);
+    }
+    return true;
+  }
+  if (this->StartsWith(this->owner->opIntervalLeftClosed(), 3)) {
+    out << "\\left[" << (*this)[1].ToString(theFormat) << ", "
+    << (*this)[2].ToString(theFormat) << "\\right)";
+    return true;
+  }
+  return false;
+}
+
+bool Expression::ToStringIntervalRightClosed(std::stringstream& out, FormatExpressions* theFormat) const {
+  if (
+    this->StartsWith(this->owner->opIntervalRightClosed(), 3)
+  ) {
+    out << "\\left(" << (*this)[1].ToString(theFormat) << ", "
+    << (*this)[2].ToString(theFormat) << "\\right]";
+    return true;
+  }
+  if (this->StartsWith(this->owner->opIntervalRightClosed(), 2)) {
+    if ((*this)[1].IsSequenceNElementS(2)) {
+      out << "\\left(" << (*this)[1][1] << ", " << (*this)[1][2] << "\\right]";
+    } else {
+      out << (*this)[0].ToString(theFormat) << "{}" << (*this)[1].ToString(theFormat);
+    }
+    return true;
+  }
+  return false;
+}
+
+bool Expression::ToStringIntervalClosed(
+  std::stringstream& out, FormatExpressions* theFormat
+) const {
+  if (this->StartsWith(this->owner->opIntervalClosed(), 2)) {
+    if ((*this)[1].IsSequenceNElementS(2)) {
+      out << "\\left[" << (*this)[1][1] << ", " << (*this)[1][2] << "\\right]";
+    } else {
+      out << (*this)[0].ToString(theFormat) << "{}" << (*this)[1].ToString(theFormat);
+    }
+    return true;
+  }
+  if (this->StartsWith(this->owner->opIntervalClosed(), 3)) {
+    out << "\\left[" << (*this)[1].ToString(theFormat) << ", "
+    << (*this)[2].ToString(theFormat) << "\\right]";
+    return true;
+  }
+  return false;
+}
+
 std::string Expression::ToString(
   FormatExpressions* theFormat,
   Expression* startingExpression,
@@ -4010,46 +4112,17 @@ std::string Expression::ToString(
   } else if (this->StartsWith(this->owner->opLogBase(), 3)) {
     out << "\\log_{" << (*this)[1].ToString(theFormat) << "}"
     << "\\left(" << (*this)[2].ToString(theFormat) << "\\right)";
-  } else if (this->StartsWith(this->owner->opIntervalOpen(), 3)) {
-    if (!this->owner->flagUseBracketsForIntervals) {
-      out << "IntervalOpen{}";
-    }
-    out << "\\left(" << (*this)[1].ToString(theFormat) << ", "
-    << (*this)[2].ToString(theFormat) << "\\right)";
-  } else if (this->StartsWith(this->owner->opIntervalClosed(), 3)) {
-    out << "\\left[" << (*this)[1].ToString(theFormat) << ", "
-    << (*this)[2].ToString(theFormat) << "\\right]";
-  } else if (this->StartsWith(this->owner->opIntervalLeftClosed(), 3)) {
-    out << "\\left[" << (*this)[1].ToString(theFormat) << ", "
-    << (*this)[2].ToString(theFormat) << "\\right)";
-  } else if (this->StartsWith(this->owner->opIntervalRightClosed(), 3)) {
-    out << "\\left(" << (*this)[1].ToString(theFormat) << ", "
-    << (*this)[2].ToString(theFormat) << "\\right]";
-  } else if (this->StartsWith(this->owner->opIntervalLeftClosed(), 2)) {
-    if ((*this)[1].IsSequenceNElementS(2)) {
-      out << "\\left[" << (*this)[1][1] << ", " << (*this)[1][2] << "\\right)";
-    } else {
-      out << (*this)[0].ToString(theFormat) << "{}" << (*this)[1].ToString(theFormat);
-    }
-  } else if (this->StartsWith(this->owner->opIntervalClosed(), 2)) {
-    if ((*this)[1].IsSequenceNElementS(2)) {
-      out << "\\left[" << (*this)[1][1] << ", " << (*this)[1][2] << "\\right]";
-    } else {
-      out << (*this)[0].ToString(theFormat) << "{}" << (*this)[1].ToString(theFormat);
-    }
-  } else if (this->StartsWith(this->owner->opIntervalRightClosed(), 2)) {
-    if ((*this)[1].IsSequenceNElementS(2)) {
-      out << "\\left(" << (*this)[1][1] << ", " << (*this)[1][2] << "\\right]";
-    } else {
-      out << (*this)[0].ToString(theFormat) << "{}" << (*this)[1].ToString(theFormat);
-    }
+  } else if (this->ToStringIntervalOpen(out, theFormat)) {
+  } else if (this->ToStringIntervalRightClosed(out, theFormat)) {
+  } else if (this->ToStringIntervalLeftClosed(out, theFormat)) {
+  } else if (this->ToStringIntervalClosed(out, theFormat)) {
   } else if (this->StartsWith(this->owner->opQuote(), 2)) {
     if ((*this)[1].IsOperation(&tempS)) {
       out << "\"" << tempS << "\"";
     } else {
       out << "(Corrupt string)";
     }
-  } else if (this->StartsWith(this->owner->opDefineConditional(),4)) {
+  } else if (this->StartsWith(this->owner->opDefineConditional(), 4)) {
     out << (*this)[1].ToString(theFormat) << " :if \\left("
     << (*this)[2].ToString(theFormat) << "\\right)="
     << (*this)[3].ToString(theFormat);
@@ -4059,18 +4132,7 @@ std::string Expression::ToString(
   } else if (this->StartsWith(this->owner->opIn(), 3)) {
     out << (*this)[1].ToString(theFormat) << "\\in "
     << (*this)[2].ToString(theFormat);
-  } else if (this->StartsWith(this->owner->opOr(), 3)) {
-    if (!(*this)[1].IsSequenceNElementS()) {
-      out << "\\left(" << (*this)[1] << "\\right)";
-    } else {
-      out << (*this)[1];
-    }
-    out << "\\ or\\ ";
-    if (!(*this)[2].IsSequenceNElementS()) {
-      out << "\\left(" << (*this)[2] << "\\right)";
-    } else {
-      out << (*this)[2];
-    }
+  } else if (this->ToStringOr(out, theFormat)) {
   } else if (this->StartsWith(this->owner->opAnd(), 3)) {
     out << "\\left(" << (*this)[1] << "\\right)" << " and "
     << "\\left(" << (*this)[2] << "\\right)" ;
@@ -4092,12 +4154,7 @@ std::string Expression::ToString(
   } else if (this->StartsWith(this->owner->opCrossProduct())) {
     this->ToStringOpMultiplicative(out, "\\times", theFormat);
   } else if (this->ToStringSqrt(out, theFormat)) {
-  } else if (this->StartsWith(this->owner->opFactorial(), 2)) {
-    if ((*this)[1].NeedsParenthesisForBaseOfExponent()) {
-      out << "\\left(" << (*this)[1].ToString(theFormat) << "\\right) !";
-    } else {
-      out << (*this)[1].ToString(theFormat) << "!";
-    }
+  } else if (this->ToStringFactorial(out, theFormat)) {
   } else if (this->StartsWith(this->owner->opAbsoluteValue(), 2)) {
     out << "\\left|" << (*this)[1].ToString(theFormat) << "\\right|";
   } else if (this->ToStringPower(out, theFormat)) {

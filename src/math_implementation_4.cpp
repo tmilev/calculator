@@ -1381,12 +1381,12 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex() {
 /*
   for (int i = 0; i < this->thePfs.theChambersOld.size; i ++)
     if (this->thePfs.theChambersOld.TheObjects[i] != 0) {
-      QuasiPolynomial& currentQPNoSub= this->theQPsNonSubstituted.TheObjects[i];
+      QuasiPolynomial& currentQPNoSub = this->theQPsNonSubstituted.TheObjects[i];
       this->theQPsSubstituted.TheObjects[i].SetSize(this->theLinearOperators.size);
       this->thePfs.GetVectorPartitionFunction(currentQPNoSub, this->thePfs.theChambersOld.TheObjects[i]->InternalPoint);
       out << "\nChamber " << i + 1 << " with internal point " << this->thePfs.theChambersOld.TheObjects[i]->InternalPoint.ToString() << " the quasipoly is: " << currentQPNoSub.ToString(false, false);
       for (int k = 0; k< this->theLinearOperators.size; k++) {
-        QuasiPolynomial& currentQPSub= this->theQPsSubstituted.TheObjects[i].TheObjects[k];
+        QuasiPolynomial& currentQPSub = this->theQPsSubstituted.TheObjects[i].TheObjects[k];
         std::stringstream tempStream;
         tempStream << "Processing chamber " << i + 1 << " linear operator " << k+ 1;
         global.theIndicatorVariables.ProgressReportStrings[0] = tempStream.str();

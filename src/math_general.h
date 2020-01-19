@@ -665,7 +665,8 @@ public:
     List<Vector<coefficient> >& output
   ) const {
     if (this->NumCols != standOnTheRightAsVectorRow.size) {
-      global.fatal << "This is a programming error: attempting to multiply a matrix, standing on the left, with "
+      global.fatal << "This is a programming error: "
+      << "attempting to multiply a matrix, standing on the left, with "
       << this->NumCols << " columns, by a matrix, standing on the right, with "
       << standOnTheRightAsVectorRow.size << " rows. "
       << global.fatal;
@@ -859,9 +860,11 @@ public:
   }
   coefficient& operator()(int i, int j) const {
     if (i < 0 || i >= this->NumRows || j < 0 || j >= this->NumCols) {
-      global.fatal << "This is a programming error: requesting row, column indexed by "
+      global.fatal
+      << "This is a programming error: requesting row, column indexed by "
       << i << " and " << j << " but I am a matrix with "
-      << this->NumRows << " rows and " << this->NumCols << " colums. " << global.fatal;
+      << this->NumRows << " rows and " << this->NumCols
+      << " colums. " << global.fatal;
     }
     return this->elements[i][j];
   }
@@ -1132,7 +1135,8 @@ public:
     if (this->NumRows != right.NumRows || this->NumCols != right.NumCols) {
       global.fatal << "This is a programming error: attempting to subtract from matrix with "
       << this->NumRows << " rows and " << this->NumCols
-      << " columns a matrix with " << right.NumRows << " rows and " << right.NumCols << " columns. " << global.fatal;
+      << " columns a matrix with " << right.NumRows << " rows and "
+      << right.NumCols << " columns. " << global.fatal;
     }
     for (int i = 0; i < this->NumRows; i ++) {
       for (int j = 0; j < this->NumCols; j ++) {
@@ -1182,7 +1186,7 @@ public:
   // 0 1 0 0 0
   // 0 0 0 1 0
   // 0 0 0 0 0
-  //In the Gaussian elimination below, we define non-pivot points to be indices of the columns
+  // In the Gaussian elimination below, we define non-pivot points to be indices of the columns
   // that do not have a pivot 1 in them.
   // In the above example, the third (index 2) and fifth (index 4) columns do not have a pivot 1 in them.
   void GaussianEliminationByRows(

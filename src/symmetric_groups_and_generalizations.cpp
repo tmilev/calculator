@@ -31,11 +31,11 @@ int acc = 1;
       counts[numdex] += 1;
     }
   }
-  for (int i = 0; i <nums.size; i ++) {
+  for (int i = 0; i < nums.size; i ++) {
     int acci = 1;
-    for (int j = 0; j<counts[i]; j ++)
+    for (int j = 0; j < counts[i]; j ++)
       acci *= nums[i];
-    for (int j =1; j<counts[i]; j ++)
+    for (int j = 1; j < counts[i]; j ++)
       acci *= j;
     acc *= acci;
   }
@@ -46,7 +46,7 @@ int& Partition::operator[](int i) const {
   return p[i];
 }
 
-void Partition::FromListInt(const List<int> &in, int lastElement) {
+void Partition::FromListInt(const List<int>& in, int lastElement) {
   this->n = 0;
   this->p.SetSize(0);
   int l = - 1;
@@ -55,7 +55,7 @@ void Partition::FromListInt(const List<int> &in, int lastElement) {
     lastElement = in.size;
   }
   bool needsSorting = false;
-  for (; i <lastElement; i ++) {
+  for (; i < lastElement; i ++) {
     if (in[i] < 0) {
       global.fatal << "Partitions should not have negative numbers in them. " << global.fatal;
     }
@@ -1036,7 +1036,7 @@ void ElementHyperoctahedralGroup::GetCharacteristicPolyStandardRepresentation(Po
   }
   M.init(n, n);
   M.MakeZero();
-  for (int i = 0; i <n; i ++) {
+  for (int i = 0; i < n; i ++) {
     int a = this->p*i;
     M.elements[i][a] = (this->s[i])?- 1:1; // ahaha 0 is false
   }
@@ -1116,18 +1116,18 @@ std::string ElementHyperoctahedralGroup::ToString(FormatExpressions* unused) con
   this->GetSizeByFormula = HyperoctahedralGroup::GetSizeByFormulaImplementation;
   this->N = n;
   this->generators.SetSize(n- 1+n);
-  for (int i = 0; i <n- 1; i ++) {
+  for (int i = 0; i < n- 1; i ++) {
     this->generators[i].p.AddTransposition(i,i + 1);
     this->generators[i].s.SetSize(n);
-    for (int j = 0; j<n; j ++)
+    for (int j = 0; j < n; j ++)
       this->generators[i].s[j] = false;
   }
-  for (int i = 0; i <n; i ++) {
-    this->generators[i +n- 1].s.SetSize(n);
-    for (int j = 0; j<n; j ++) {
-      this->generators[i +n- 1].s[j] = false;
+  for (int i = 0; i < n; i ++) {
+    this->generators[i + n - 1].s.SetSize(n);
+    for (int j = 0; j < n; j ++) {
+      this->generators[i + n - 1].s[j] = false;
     }
-    this->generators[i +n- 1].s[i] = true;
+    this->generators[i + n - 1].s[i] = true;
   }
 }
 
@@ -1321,7 +1321,7 @@ void HyperoctahedralGroup::SomeModuleOfPartititons(const Partition& positive, co
   for (int i = 0; i <subsn->generators.size; i ++)
     global.Comments << i << " " << subsn->generators[i] << " " << PxM.superGeneratorSubWordExists[i] << " "
              << PxM.superGeneratorSubWords[i].ToStringCommaDelimited() << '\n';
-  for (int i = 0; i <PxM.generators.size; i ++)
+  for (int i = 0; i < PxM.generators.size; i ++)
     global.Comments << i << " " << PxM.generators[i] << '\n';
   //PxM.CosetRepresentativeEnumerator = HyperoctahedralGroup::ParabolicSubgroupCosetRepresentativeEnumerator;
   PxM.GetWordByFormula = MissingGeneratorsSubgroupElementGetWord<PermutationGroup, PermutationR2>;
@@ -1338,9 +1338,9 @@ void HyperoctahedralGroup::SomeModuleOfPartititons(const Partition& positive, co
   else
     kid.MakeID(negm[0]);
   int i = 0;
-  for (int pi = 0; pi <pozm.size; i ++, pi ++)
+  for (int pi = 0; pi < pozm.size; i ++, pi ++)
     pxmr.generatorS[i].AssignTensorProduct(pozm[pi], kid);
-  for (int ni = 0; ni <negm.size; i ++, ni ++) {
+  for (int ni = 0; ni < negm.size; i ++, ni ++) {
     pxmr.generatorS[i].AssignTensorProduct(hid, negm[ni]);
     pxmr.generatorS[i] *= - 1;
   }
@@ -1357,7 +1357,7 @@ void HyperoctahedralGroup::SomeModuleOfPartititons(const Partition& positive, co
 
 void HyperoctahedralGroup::AllSpechtModules() {
   int N = this->GetN();
-  for (int p = 0; p<=N; p++) {
+  for (int p = 0; p <= N; p++) {
     List<Partition> nps;
     Partition::GetPartitions(nps,p);
     for (int npi = 0; npi <nps.size; npi ++) {

@@ -1511,7 +1511,7 @@ bool rootSubalgebra::LinCombToString(
     return false;
   }
   std::stringstream out;
-  std::string tempS=alphaRoot.ToString();
+  std::string tempS = alphaRoot.ToString();
   out << "(" << tempS << ")&$";
   out << coeff << "\\alpha_" << theDimension + 1;
   for (int i = 0; i < theDimension; i ++) {
@@ -1797,7 +1797,7 @@ void rootSubalgebra::GeneratePossibleNilradicals(
   if (useParabolicsInNilradical) {
     this->flagFirstRoundCounting = false;
     ParabolicsGenerator.init(this->SimpleBasisCentralizerRoots.size);
-    for (int i = 0; i <numCycles; i ++, ParabolicsGenerator.incrementSelection()) {
+    for (int i = 0; i < numCycles; i ++, ParabolicsGenerator.incrementSelection()) {
       tempSel.init(this->Modules.size);
       for (int j = 0; j < this->CentralizerRoots.size; j ++) {
         if (this->rootIsInNilradicalParabolicCentralizer(ParabolicsGenerator, this->CentralizerRoots[j])) {
@@ -1973,16 +1973,16 @@ bool rootSubalgebra::GenerateIsomorphismsPreservingBorel(
   permComponentsCentralizer.initPermutation(tempList, tempSize);
   int tempI1;
   int NumAutos;
-  tempI1= permComponents.TotalNumSubsetsMustBeSmalInt();
+  tempI1 = permComponents.TotalNumSubsetsMustBeSmalInt();
   NumAutos = tempAutos.TotalNumSubsetsMustBeSmalInt();
-  int tempI2= permComponentsCentralizer.TotalNumSubsetsMustBeSmalInt();
+  int tempI2 = permComponentsCentralizer.TotalNumSubsetsMustBeSmalInt();
   int NumAutosCentralizer = tempAutosCentralizer.TotalNumSubsetsMustBeSmalInt();
   permComponents.GetPermutationLthElementIsTheImageofLthIndex(tempPermutation1);
   permComponentsCentralizer.GetPermutationLthElementIsTheImageofLthIndex(tempPermutation2);
   for (int i = 0; i < tempI1; i ++) {
     for (int j = 0; j < tempI2; j ++) {
-      for (int k = 0; k<NumAutos; k++) {
-        for (int l = 0; l<NumAutosCentralizer; l ++) {
+      for (int k = 0; k < NumAutos; k++) {
+        for (int l = 0; l < NumAutosCentralizer; l ++) {
           isoDomain.size = 0; isoRange.size = 0;
           this->theDynkinDiagram.GetMapFromPermutation(
             isoDomain, isoRange, tempPermutation1, DiagramAutomorphisms, tempAutos, right.theDynkinDiagram
@@ -2035,7 +2035,7 @@ void rootSubalgebra::DoKRootsEnumeration() {
 
 void rootSubalgebra::DoKRootsEnumerationRecursively(int indexEnumeration) {
   int theRank = this->theKComponentRanks[indexEnumeration];
-  int numRuns =MathRoutines::NChooseK(this->PosRootsKConnectedComponents[indexEnumeration].size, theRank);
+  int numRuns = MathRoutines::NChooseK(this->PosRootsKConnectedComponents[indexEnumeration].size, theRank);
   this->theKEnumerations[indexEnumeration].initNoMemoryAllocation();
   for (int i = 0; i < numRuns; i ++) {
     this->theKEnumerations[indexEnumeration].incrementSelectionFixedCardinality(theRank);

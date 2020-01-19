@@ -3511,7 +3511,7 @@ void Vector<coefficient>::PerturbNormalRelativeToVectorsInGeneralPosition(
   const Vectors<Rational>& NonStrictConeNonPositiveScalar, const List<Vector<Rational> >& VectorsToBeInGeneralPosition
 ) {
   MacroRegisterFunctionWithName("Vectors::PerturbSplittingNormal");
-  for (int i = 0; i <NonStrictConeNonPositiveScalar.size; i ++) {
+  for (int i = 0; i < NonStrictConeNonPositiveScalar.size; i ++) {
     if (this->ScalarEuclidean(NonStrictConeNonPositiveScalar[i]) < 0) {
       global.fatal << "This is a programming error: the splitting normal " << this->ToString()
       << " is supposed to have non-negative scalar product with the vector "

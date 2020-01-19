@@ -3972,7 +3972,7 @@ void PartFraction::ReduceMonomialByMonomial(PartFractions& owner, int myIndex, V
           tempFrac.Coefficient.AddMonomial(this->Coefficient[k], 1);
           tempFrac.ComputeOneCheckSum(owner, tempDiff, owner.AmbientDimension);
         }
-        for (int l = 0; l<numSummands; l ++) {
+        for (int l = 0; l < numSummands; l ++) {
           tempFrac.AssignDenominatorOnly(*this);
           if (this->flagAnErrorHasOccurredTimeToPanic)
             thePowers.ComputeDebugString();
@@ -11872,7 +11872,7 @@ void Cone::TransformToWeylProjective(ConeComplex& owner) {
   this->Externalwalls.Reserve(owner.WeylChamber.size +this->Externalwalls.size);
   Vectors<Rational> newExternalWalls;
   owner.GetWeylChamberWallsForCharacterComputation(newExternalWalls);
-  for (int i = 0; i <newExternalWalls.size; i ++) {
+  for (int i = 0; i < newExternalWalls.size; i ++) {
     newWall.normal = newExternalWalls[i];
     this->Externalwalls.AddOnTop(newWall);
   }
@@ -12175,7 +12175,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParamDegenerate
   ConeLatticeAndShift tempCLS;
   Vectors<Rational> newNormals = this->theProjectivizedCone.Normals;
   Rational firstCoordNewNormal;
-  for (int i = 0; i <newNormals.size; i ++) {
+  for (int i = 0; i < newNormals.size; i ++) {
     firstCoordNewNormal = newNormals[i][0];
     newNormals[i].ShiftToTheLeftOnePos();
     newNormals[i] += preferredNormal * firstCoordNewNormal;

@@ -5130,7 +5130,8 @@ bool CalculatorFunctions::outerMergeConstantRadicals(
     return false;
   }
   if (
-    !input[2][1].IsOfType<Rational>() && !input[2][1].IsOfType<AlgebraicNumber>() &&
+    !input[2][1].IsOfType<Rational>() &&
+    !input[2][1].IsOfType<AlgebraicNumber>() &&
     !input[2][1].IsOfType<double>()
   ) {
     return false;
@@ -5181,7 +5182,9 @@ bool CalculatorFunctions::outerDivideReplaceAdivBpowerItimesBpowerJ(
 }
 
 bool Expression::SplitProduct(
-  int numDesiredMultiplicandsLeft, Expression& outputLeftMultiplicand, Expression& outputRightMultiplicand
+  int numDesiredMultiplicandsLeft,
+  Expression& outputLeftMultiplicand,
+  Expression& outputRightMultiplicand
 ) const {
   MacroRegisterFunctionWithName("Expression::SplitProduct");
   if (numDesiredMultiplicandsLeft <= 0) {
@@ -5223,7 +5226,12 @@ bool CalculatorFunctions::outerAtimesBpowerJplusEtcDivBpowerI(
   mOneE.AssignValue(- 1, theCommands);
   for (int i = 0; i < numerators.size(); i ++) {
     if (numerators[i].IsConstantNumber()) {
-      newNumSummandRightPart.MakeXOX(theCommands, theCommands.opThePower(), denominatorBase, mOneE * denominatorExponent);
+      newNumSummandRightPart.MakeXOX(
+        theCommands,
+        theCommands.opThePower(),
+        denominatorBase,
+        mOneE * denominatorExponent
+      );
       newNumSummand = numerators[i] * newNumSummandRightPart;
       numeratorsNew.AddMonomial(newNumSummand, numerators.theCoeffs[i]);
       continue;
@@ -5302,7 +5310,10 @@ bool CalculatorFunctions::innerGrowDynkinType(Calculator& theCommands, const Exp
   } else {
     CandidateSSSubalgebra tempCandidate;
     out << " can grow to the following types. <br>";
-    out << "<table border =\"1\"><td>Larger type</td><td>Root injection</td><td>Highest weight module containing new simple generator</td></tr>";
+    out << "<table border =\"1\">"
+    << "<td>Larger type</td>"
+    << "<td>Root injection</td>"
+    << "<td>Highest weight module containing new simple generator</td></tr>";
     for (int i = 0; i < largerTypes.size; i ++) {
       out << "<tr><td>" << largerTypes[i].ToString() << "</td>";
       out << "<td>";
@@ -5378,8 +5389,8 @@ bool Expression::MakeSequenceCommands(Calculator& owner, List<std::string>& inpu
   Expression currentStatement, currentKey;
   if (inputValues.size != inputKeys.size) {
     global.fatal << "This is a programming error: I am asked to create a "
-    << "sequence of statements but I was given different"
-    << " number of keys and expressions." << global.fatal;
+    << "sequence of statements but I was given different "
+    << "number of keys and expressions." << global.fatal;
   }
   for (int i = 0; i < inputValues.size; i ++) {
     currentKey.MakeAtom(inputKeys[i], owner);

@@ -473,9 +473,9 @@ public:
 
   ElementZ2N operator*(const ElementZ2N right) const {
     ElementZ2N out;
-    out.bits.SetSize(MathRoutines::Maximum(this->bits.size,right.bits.size));
+    out.bits.SetSize(MathRoutines::Maximum(this->bits.size, right.bits.size));
     int i = 0;
-    for (; i < MathRoutines::Minimum(this->bits.size,right.bits.size); i ++) {
+    for (; i < MathRoutines::Minimum(this->bits.size, right.bits.size); i ++) {
       out.bits[i] = this->bits[i] != right.bits[i];
     }
     for (; i < this->bits.size; i ++) {
@@ -504,7 +504,7 @@ public:
 
   // an ElementZ2N is its own inverse.  When it comes time to template ElementZmN
   // with class ElementZ2N: public ElementZmN<2>, this will need to be replaced with
-  // x → m-x
+  // x -> m - x
   void Invert() {
   }
 
@@ -831,7 +831,7 @@ public:
           }
           stack[frame_pointer].program_counter = pcpositions::firstout;
           frame_pointer ++;
-          stack[frame_pointer].c = stack[frame_pointer- 1].c - 1;
+          stack[frame_pointer].c = stack[frame_pointer - 1].c - 1;
           stack[frame_pointer].program_counter = pcpositions::beginning;
           break;
         case firstout:
@@ -974,8 +974,9 @@ public:
 
   GeneratorProductOfGenerators& operator++() {
     while (true) {
-      if (frame_pointer == - 1)
-        return  *this; // seriously tho what the f*** does this even mean
+      if (this->frame_pointer == - 1) {
+        return *this;
+      }
       switch(stack[frame_pointer].program_counter) {
         case pcpositions::beginning:
         generators[frame_pointer].ResetIteration();
@@ -1076,8 +1077,8 @@ public:
 
   GeneratorElementsSnxSnOnIndicesAndIndices& operator++() {
     while (true) {
-      if (frame_pointer == - 1) {
-        return *this; // seriously tho what the f*** does this even mean
+      if (this->frame_pointer == - 1) {
+        return *this;
       }
       switch (stack[frame_pointer].program_counter) {
       case pcpositions::beginning:
@@ -1088,7 +1089,7 @@ public:
           stack[frame_pointer].program_counter = pcpositions::end;
           break;
         }
-        { // permi is a block local variable, so no "jump to case label crosses initialization" error lol
+        {
           PermutationR2 permi = *(generators[frame_pointer]);
           if (frame_pointer == 0) {
             stack[frame_pointer].subprod = permi;
@@ -1303,14 +1304,14 @@ void Partition::SpechtModuleMatricesOfPermutations(List<Matrix<scalar> >& out, c
     stuffing[i] = i;
   }
   this->FillTableau(initialTableau, stuffing);
-  MonomialTensor<int,MathRoutines::IntUnsignIdentity> tm1;
+  MonomialTensor<int, MathRoutines::IntUnsignIdentity> tm1;
   tm1.generatorsIndices.SetSize(n);
   tm1.Powers.SetSize(n);
   for (int i = 0; i < n; i ++) {
     tm1.generatorsIndices[i] = i;
     tm1.Powers[i] = 1;
   }
-  ElementMonomialAlgebra<MonomialTensor<int,MathRoutines::IntUnsignIdentity>,scalar> t1, t2;
+  ElementMonomialAlgebra<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, scalar> t1, t2;
   t1.AddMonomial(tm1,1);
   initialTableau.YoungSymmetrizerAction(t2, t1);
   List<ElementMonomialAlgebra<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, scalar> > basisvs;

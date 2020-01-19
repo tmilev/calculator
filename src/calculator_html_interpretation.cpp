@@ -711,56 +711,6 @@ std::string WebAPIResponse::GetHtmlTagWithManifest() {
   return out.str();
 }
 
-std::string WebAPIResponse::GetPageFromTemplate() {
-  MacroRegisterFunctionWithName("WebAPIReponse::GetPageFromTemplate");
-  std::stringstream out;
-  CalculatorHTML thePage;
-  std::stringstream comments;
-  thePage.fileName = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("courseHome"), false);
-  if (!thePage.LoadMe(true, global.GetWebInput("randomSeed"), &comments)) {
-    out << "<html>"
-    << "<head>" << HtmlRoutines::GetCSSLinkCalculator("/") << "</head>"
-    << "<body>";
-    out
-    << "<b>Failed to load file: "
-    << global.GetWebInput("courseHome") << ". </b>"
-    << "<br>Comments:<br> " << comments.str();
-    out << "</body></html>";
-    return out.str();
-  }
-  if (!thePage.InterpretHtml(&comments)) {
-    out << "<html>"
-    << "<head>"
-    << HtmlRoutines::GetCSSLinkCalculator("/")
-    << "</head>"
-    << "<body>";
-    out
-    << "<b>Failed to interpret as template the following file: "
-    << global.GetWebInput("courseHome") << ". </b>"
-    << "<br>Comments:<br> " << comments.str();
-    out << "</body></html>";
-    return out.str();
-  }
-  out << WebAPIResponse::GetHtmlTagWithManifest();
-  out << "<!-- File automatically generated from template: "
-  << global.GetWebInput(WebAPI::problem::fileName)
-  << ".-->\n";
-  out << "<head><!-- tag added automatically; user-specified head tag ignored-->\n";
-  out << thePage.outputHtmlHeadNoTag;
-  out << "</head><!-- tag added automatically; user-specified head tag ignored-->\n";
-  out << "<body" //<< ">"
-  << " onload =\"loadSettings();";
-  out << " initializeButtonsCommon(); ";
-  out << "\"><!-- tag added automatically; user-specified body tag ignored-->\n";
-  if (thePage.flagDoPrependProblemNavigationBar) {
-    out << thePage.outputProblemNavigatioN;
-  }
-  out << thePage.outputHtmlBodyNoTag;
-  out << "</body><!-- tag added automatically; user-specified body tag ignored-->\n";
-  out << "</html><!-- tag added automatically; user-specified html tag ignored-->\n";
-  return out.str();
-}
-
 JSData WebAPIResponse::GetTopicTableJSON() {
   MacroRegisterFunctionWithName("WebAPIReponse::GetTopicTableJSON");
   std::stringstream out;
@@ -1755,46 +1705,10 @@ std::string WebAPIResponse::GetAccountsPageBody(const std::string& hostWebAddres
 std::string WebAPIResponse::GetScoresPage() {
   MacroRegisterFunctionWithName("WebWorker::GetScoresPage");
   std::stringstream out;
-  out << "<html>"
-  << "<head>"
-  << HtmlRoutines::GetCSSLinkCalculator("/")
-  << "<link rel =\"stylesheet\" href=\"/calculator-html/styleScorePage.css\">"
-  << "</head>"
-  << "<body onload =\"loadSettings();\">\n";
   CalculatorHTML thePage;
   thePage.LoadDatabaseInfo(out);
   std::string theScoresHtml = WebAPIResponse::ToStringUserScores();
-  out << "<problemNavigation>" << thePage.ToStringProblemNavigation() << "</problemNavigation>";
   out << theScoresHtml;
-  out << "</body></html>";
-  return out.str();
-}
-
-std::string WebAPIResponse::GetAccountsPage(const std::string& hostWebAddressWithPort) {
-  MacroRegisterFunctionWithName("WebWorker::GetAccountsPage");
-  std::stringstream out;
-  out << "<html>"
-  << "<head>"
-  << HtmlRoutines::GetCSSLinkCalculator("/")
-  //<< HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile()
-  << "</head>"
-  << "<body onload =\"loadSettings();\">\n";
-  bool isOK = global.flagLoggedIn && global.UserDefaultHasAdminRights();
-  std::string accountsPageBody;
-  if (isOK) {
-    accountsPageBody = WebAPIResponse::GetAccountsPageBody(hostWebAddressWithPort);
-  }
-  CalculatorHTML thePage;
-  thePage.LoadDatabaseInfo(out);
-  out << "<problemNavigation>" << thePage.ToStringProblemNavigation() << "</problemNavigation>";
-  if (!isOK) {
-    out << "<b>Viewing accounts is allowed for logged-in admins only</b>"
-    << "</body></html>";
-    return out.str();
-  }
-  out << accountsPageBody;
-//  out << "<calculatorNavigation>" << global.ToStringNavigation() << "</calculatorNavigation>\n";
-  out << "</body></html>";
   return out.str();
 }
 
@@ -1992,8 +1906,8 @@ std::string WebAPIResponse::ToStringAssignSection() {
   out << "placeholder =\"email or user list, comma, space or ; separated\">";
   out << "</textarea>";
   out << "<textarea width =\"500px\" ";
-  out << "id =\"" << idExtraTextarea << "\"";
-  out << " placeholder =\"list of sections\">";
+  out << "id =\"" << idExtraTextarea << "\" ";
+  out << "placeholder =\"list of sections\">";
   out << "</textarea>";
   out << "<br>";
   out

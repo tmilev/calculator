@@ -267,17 +267,17 @@ bool WebAPIResponse::ProcessChangePassword(const std::string& reasonForNoAuthent
     HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("newPassword"), true),
     false
   );
-  //<-Passwords are ONE-LAYER url-encoded
-  //<-INCOMING pluses in passwords MUST be decoded as spaces, this is how form.submit() works!
-  //<-Incoming pluses must be re-coded as spaces (%20).
+  // <-Passwords are ONE-LAYER url-encoded
+  // <-INCOMING pluses in passwords MUST be decoded as spaces, this is how form.submit() works!
+  // <-Incoming pluses must be re-coded as spaces (%20).
 
   std::string reenteredPassword = HtmlRoutines::ConvertStringToURLString(
     HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("reenteredPassword"), true),
     false
   );
-  //<-Passwords are ONE-LAYER url-encoded
-  //<-INCOMING pluses in passwords MUST be decoded as spaces, this is how form.submit() works!
-  //<-Incoming pluses must be re-coded as spaces (%20).
+  // <-Passwords are ONE-LAYER url-encoded
+  // <-INCOMING pluses in passwords MUST be decoded as spaces, this is how form.submit() works!
+  // <-Incoming pluses must be re-coded as spaces (%20).
 
   std::string newEmail = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("email"), false);
   if (newEmail != "") {
@@ -329,7 +329,7 @@ bool WebAPIResponse::ProcessChangePassword(const std::string& reasonForNoAuthent
     << "&activationToken = &authenticationToken = &"
     << "'\" />";
   }
-  result[WebAPI::result::comments] = out.str();
+  result[WebAPI::result::resultHtml] = out.str();
   return global.theResponse.WriteResponse(result);
 }
 

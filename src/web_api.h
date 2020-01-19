@@ -95,7 +95,6 @@ class WebAPIResponse {
   static std::string GetJavascriptCaptcha();
   static std::string GetCaptchaDiv();
   static JSData GetExamPageJSON();
-  static std::string GetPageFromTemplate();
   static std::string GetJSONFromTemplate();
   static JSData GetJSONUserInfo(const std::string& comments);
   static void GetJSDataUserInfo(
@@ -122,9 +121,6 @@ class WebAPIResponse {
   static std::string GetScoresInCoursePage();
   static std::string SetProblemDeadline();
   static std::string SetProblemWeight();
-  static std::string GetAccountsPage(
-    const std::string& hostWebAddressWithPort
-  );
   static JSData GetAccountsPageJSON(const std::string& hostWebAddressWithPort);
   static std::string GetAccountsPageBody(
     const std::string& hostWebAddressWithPort

@@ -3,9 +3,10 @@ const ids = require("./ids_dom_elements");
 const submitRequests = require("./submit_requests");
 const pathnames = require("./pathnames");
 const login = require('./login');
+const miscellaneous = require('./miscellaneous');
 
 function submitChangePassRequestCallback(result, outputComponent) {
-  outputComponent = document.getElementById("spanVerification").innerHTML = result;
+  outputComponent = document.getElementById("spanVerification").innerHTML = miscellaneous.jsonParseGetHtmlStandard(result);
   document.getElementById("inputPassword").value = document.getElementById("inputNewPasswordInAccount").value;
   document.getElementById("inputOldPasswordInAccount").value = "";
   document.getElementById("inputNewPasswordInAccount").value = "";

@@ -2706,6 +2706,9 @@ std::string StringRoutines::ConvertStringToCalculatorDisplay(
   }
   std::stringstream out;
   out << "ConvertHexToString{}\"" << converted << "\"";
+  out << "<br>\""
+  << StringRoutines::ConvertStringToJavascriptString(input)
+  << "\"";
   return out.str();
 }
 

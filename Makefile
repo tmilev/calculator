@@ -140,9 +140,6 @@ SOURCES_RELATIVE_PATH=\
     calculator_typed_functions_1.cpp \
     calculator_webserver_functions.cpp \
     crypto.cpp \
-    crypto_aes.cpp \
-    crypto_ripemd.cpp \
-    crypto_sha3.cpp \
     crypto_test.cpp \
     database.cpp \
     database_test.cpp \
@@ -186,14 +183,27 @@ SOURCES_RELATIVE_PATH=\
     web_routines_1.cpp \
     webserver_fork.cpp
 
+SOURCES_PUBLIC_DOMAIN_RELATIVE_PATH_CPP=\
+    crypto_public_domain_aes.cpp \
+    crypto_public_domain_ripemd.cpp \
+    crypto_public_domain_sha3.cpp
+
+
 SOURCES_RELATIVE_PATH_C=\
 
 SOURCES_RELATIVE_PATH_CC=\
 
+OBJECTS=
 
-OBJECTS=$(addprefix bin/, $(SOURCES_RELATIVE_PATH:.cpp=.o))
+ifneq ($(noPublicDomain), 1) 
+OBJECTS+=$(addprefix bin/, $(SOURCES_PUBLIC_DOMAIN_RELATIVE_PATH_CPP:.cpp=.o))
+endif
+
+OBJECTS+=$(addprefix bin/, $(SOURCES_RELATIVE_PATH:.cpp=.o))
 OBJECTS+=$(addprefix bin/, $(SOURCES_RELATIVE_PATH_C:.c=.o))
 OBJECTS+=$(addprefix bin/, $(SOURCES_RELATIVE_PATH_CC:.cc=.o))
+
+
 DEPENDENCIES=$(OBJECTS:.o=.d)
 DIRECTORIES=$(dir $(OBJECTS))
 

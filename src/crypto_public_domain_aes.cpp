@@ -30,7 +30,7 @@ NOTE:   String length must be evenly divisible by 16byte (str_len % 16 == 0)
         For AES192/256 the key size is proportionally larger.
 
 */
-#include "crypto.h"
+#include "crypto_public_domain.h"
 
 class AESContext {
 public:
@@ -504,7 +504,7 @@ void AESContext::AES_CTR_xcrypt_buffer(uint8_t* buf, uint32_t length) {
   }
 }
 
-bool Crypto::decryptAES_CBC_256(
+bool CryptoPublicDomain::decryptAES_CBC_256(
   const std::string& inputKey,
   const std::string& inputCipherText,
   List<unsigned char>& output,
@@ -527,7 +527,7 @@ bool Crypto::decryptAES_CBC_256(
     for (int i = 0; i < numberOfBytesToPad; i ++) {
       newInput.push_back(0);
     }
-    return Crypto::decryptAES_CBC_256(inputKey, inputCipherText, output, commentsOnFailure);
+    return CryptoPublicDomain::decryptAES_CBC_256(inputKey, inputCipherText, output, commentsOnFailure);
   }
   AESContext context;
   context.AES_init_ctx(reinterpret_cast<const uint8_t*>(inputKey.c_str()));
@@ -536,32 +536,32 @@ bool Crypto::decryptAES_CBC_256(
   return true;
 }
 
-bool Crypto::decryptAES_CBC_256(
+bool CryptoPublicDomain::decryptAES_CBC_256(
   const std::string& inputKey, const std::string& inputCipherText, std::string& output, std::stringstream* commentsOnFailure
 ) {
   List<unsigned char> outputList;
-  if (!Crypto::decryptAES_CBC_256(inputKey, inputCipherText, outputList, commentsOnFailure)) {
+  if (!CryptoPublicDomain::decryptAES_CBC_256(inputKey, inputCipherText, outputList, commentsOnFailure)) {
     return false;
   }
   output.assign(reinterpret_cast<char *>(outputList.TheObjects), static_cast<unsigned>(outputList.size));
   return true;
 }
 
-bool Crypto::encryptAES_CBC_256(
+bool CryptoPublicDomain::encryptAES_CBC_256(
   const std::string& inputKey,
   const std::string& inputPlainText,
   std::string& output,
   std::stringstream* commentsOnFailure
 ) {
   List<unsigned char> outputList;
-  if (!Crypto::encryptAES_CBC_256(inputKey, inputPlainText, outputList, commentsOnFailure)) {
+  if (!CryptoPublicDomain::encryptAES_CBC_256(inputKey, inputPlainText, outputList, commentsOnFailure)) {
     return false;
   }
   output.assign(reinterpret_cast<char *>(outputList.TheObjects), static_cast<unsigned>(outputList.size));
   return true;
 }
 
-bool Crypto::encryptAES_CBC_256(
+bool CryptoPublicDomain::encryptAES_CBC_256(
   const std::string& inputKey,
   const std::string& inputPlainText,
   List<unsigned char>& output,
@@ -584,7 +584,7 @@ bool Crypto::encryptAES_CBC_256(
     for (unsigned i = 0; i < numberOfBytesToPad; i ++) {
       newInput.push_back(static_cast<char>(numberOfBytesToPad));
     }
-    return Crypto::encryptAES_CBC_256(inputKey, newInput, output, commentsOnFailure);
+    return CryptoPublicDomain::encryptAES_CBC_256(inputKey, newInput, output, commentsOnFailure);
   }
   AESContext context;
   context.AES_init_ctx(reinterpret_cast<const uint8_t *>(inputKey.c_str()));

@@ -1842,7 +1842,9 @@ bool CalculatorFunctions::innerLogBaseSimpleCases(
 }
 
 std::string InputBox::GetSliderName() const {
-  return this->name + Crypto::computeSha3_256OutputBase64URL(this->name);
+  List<unsigned char> hex;
+  Crypto::computeSha256(this->name, hex);
+  return this->name + "_" + Crypto::ConvertListUnsignedCharsToHex(hex);
 }
 
 std::string InputBox::GetUserInputBox() const {

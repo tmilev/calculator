@@ -85,7 +85,8 @@ HEADERS += \
     general_strings.h \
     database_fallback_json.h \
     calculator_problem_storage.h \
-    calculator_problem_storage.h
+    calculator_problem_storage.h \
+    crypto_public_domain.h
 
 
 SOURCES += \
@@ -110,9 +111,9 @@ SOURCES += \
     calculator_typed_functions_1.cpp \
     calculator_webserver_functions.cpp \
     crypto.cpp \
-    crypto_aes.cpp \
-    crypto_ripemd.cpp \
-    crypto_sha3.cpp \
+    crypto_public_domain_aes.cpp \
+    crypto_public_domain_ripemd.cpp \
+    crypto_public_domain_sha3.cpp \
     crypto_test.cpp \
     database.cpp \
     database_mongo.cpp \
@@ -159,5 +160,8 @@ SOURCES += \
     web_api.cpp \
     json_test.cpp \
     database_test.cpp \
-    global_test.cpp
+    global_test.cpp \
+    crypto_public_domain_sha3.cpp \
+    crypto_public_domain_ripemd.cpp \
+    crypto_public_domain_aes.cpp
 

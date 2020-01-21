@@ -419,14 +419,15 @@ bool CalculatorFunctions::functionHashString(
       Crypto::computeSha224(inputString, theSha1Uint);
     }
     Crypto::ConvertUint32ToUcharBigendian(theSha1Uint, hashUChar);
-  } else if (hashId == "RIPEMD160") {
-    Crypto::computeRIPEMD160(inputString, hashUChar);
   } else if (hashId == "SHA3_256") {
     Crypto::computeSha3_256(inputString, hashUChar);
   } else if (hashId == "KECCAK256") {
     Crypto::computeKeccak3_256(inputString, hashUChar);
   } else if (hashId == "SHA512") {
     Crypto::computeSha512(inputString, hashUChar);
+  } else if (hashId == "RIPEMD160") {
+    int fixme;
+    // Crypto::computeRIPEMD160(inputString, hashUChar);
   }
   if (verbose) {
     std::string theSha1base64string, theSha1base64URLstring;
@@ -621,7 +622,10 @@ bool CalculatorFunctionsCrypto::innerAES_CBC_256_Decrypt(
   }
   std::string cipherText;
   std::stringstream comments;
-  bool result = Crypto::decryptAES_CBC_256(key, text, cipherText, &comments);
+
+  int fixme;
+  bool result;
+  // bool result = Crypto::decryptAES_CBC_256(key, text, cipherText, &comments);
   if (!result) {
     return theCommands << comments.str();
   }
@@ -644,7 +648,8 @@ bool CalculatorFunctionsCrypto::innerAES_CBC_256_Encrypt(
   }
   std::string cipherText;
   std::stringstream comments;
-  bool result = Crypto::encryptAES_CBC_256(key, text, cipherText, &comments);
+  int fixme, result;
+  // bool result = Crypto::encryptAES_CBC_256(key, text, cipherText, &comments);
   if (!result) {
     return theCommands << comments.str();
   }

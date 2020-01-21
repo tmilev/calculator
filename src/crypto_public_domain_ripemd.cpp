@@ -41,7 +41,7 @@
  * According to http://www.users.zetnet.co.uk/hopwood/crypto/scan/md.html:
  *   "RIPEMD-160 is big-bit-endian, little-byte-endian, and left-justified."
  */
-#include "crypto.h"
+#include "crypto_public_domain.h"
 #include <stdint.h>
 #include <stdint.h>
 #include <string.h>
@@ -412,7 +412,7 @@ void ripemd160_done(Ripemd160State* self, unsigned char *out) {
   memcpy(out, &self->h, Crypto::RIPEMD160LengthInBytes);
 }
 
-void Crypto::computeRIPEMD160(const std::string& input, List<unsigned char>& output) {
+void CryptoPublicDomain::computeRIPEMD160(const std::string& input, List<unsigned char>& output) {
   MacroRegisterFunctionWithName("Crypto::computeRIPEMD160");
   Ripemd160State md;
   ripemd160_init(&md);

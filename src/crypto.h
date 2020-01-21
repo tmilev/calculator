@@ -1,3 +1,5 @@
+// The current file is licensed under the license terms found in the main header file "calculator.h".
+// For additional information refer to the file "calculator.h".
 #ifndef header_crypto_was_already_defined
 #define header_crypto_was_already_defined
 #include "general_lists.h"
@@ -308,6 +310,9 @@ public:
   static void computeSha256(const std::string& input, std::string& output);
   static void computeSha512(const List<unsigned char>& input, List<uint64_t>& output);
   static void computeSha512(const List<unsigned char>& input, List<unsigned char>& output);
+  static std::string computeSha3_256OutputBase64URL(const std::string& input);
+  static void computeKeccak3_256(const std::string& input, List<unsigned char>& output);
+  static void computeSha3_256(const std::string& input, List<unsigned char>& output);
   static void ConvertListUint32ToLargeIntegerUnsignedLittleEndian(List<uint32_t>& input, LargeIntegerUnsigned& output);
   static LargeIntegerUnsigned RSAencrypt(
     const LargeIntegerUnsigned& theModulus, const LargeInteger& theExponent, const LargeInteger& theMessage
@@ -343,34 +348,6 @@ public:
     const std::string& inputToken,
     std::stringstream* commentsOnFailure,
     std::stringstream* commentsGeneral
-  );
-  static void computeRIPEMD160(const std::string& input, List<unsigned char>& output);
-  static std::string computeSha3_256OutputBase64URL(const std::string& input);
-  static void computeSha3_256(const std::string& input, List<unsigned char>& output);
-  static void computeKeccak3_256(const std::string& input, List<unsigned char>& output);
-  static bool encryptAES_CBC_256(
-    const std::string& inputKey,
-    const std::string& inputPlainText,
-    List<unsigned char>& output,
-    std::stringstream *commentsOnFailure
-  );
-  static bool encryptAES_CBC_256(
-    const std::string& inputKey,
-    const std::string& inputPlainText,
-    std::string& output,
-    std::stringstream *commentsOnFailure
-  );
-  static bool decryptAES_CBC_256(
-    const std::string& inputKey,
-    const std::string& inputCipherText,
-    List<unsigned char>& output,
-    std::stringstream* commentsOnFailure
-  );
-  static bool decryptAES_CBC_256(
-    const std::string& inputKey,
-    const std::string& inputCipherText,
-    std::string& output,
-    std::stringstream* commentsOnFailure
   );
   // Every call of this function acquires additional randomness from the system's timer.
   static void GetRandomBytesSecureInternal(ListZeroAfterUse<unsigned char>& output, int numberOfBytesMax32);

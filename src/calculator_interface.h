@@ -1072,8 +1072,10 @@ public:
   HashedList<std::string, MathRoutines::HashString> atomsNotInterpretedAsFunctions;
   HashedList<std::string, MathRoutines::HashString> atomsThatMustNotBeCached;
   HashedList<std::string, MathRoutines::HashString> autoCompleteKeyWords;
-
   HashedList<std::string, MathRoutines::HashString> stringsThatSplitIfFollowedByDigit;
+
+
+
 
   MapList<std::string, List<std::string>, MathRoutines::HashString> predefinedWordSplits;
   class NamedRuleLocation {

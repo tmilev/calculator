@@ -163,5 +163,6 @@ SOURCES += \
     global_test.cpp \
     crypto_public_domain_sha3.cpp \
     crypto_public_domain_ripemd.cpp \
-    crypto_public_domain_aes.cpp
+    crypto_public_domain_aes.cpp \
+    crypto_sha3.cpp
 

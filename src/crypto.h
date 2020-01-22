@@ -363,6 +363,35 @@ public:
   // Shorter strings should hash faster, so
   // timing attacks on this should reveal differences in string lengths.
   static bool HaveEqualHashes(const std::string& left, const std::string& right);
+  class External {
+  public:
+    void (*computeRIPEMD160) (const std::string& input, List<unsigned char>& output);
+    bool (*encryptAES_CBC_256) (
+      const std::string& inputKey,
+      const std::string& inputPlainText,
+      List<unsigned char>& output,
+      std::stringstream *commentsOnFailure
+    );
+    bool (*decryptAES_CBC_256) (
+      const std::string& inputKey,
+      const std::string& inputCipherText,
+      List<unsigned char>& output,
+      std::stringstream* commentsOnFailure
+    );
+    bool encryptAES_CBC_256_string (
+      const std::string& inputKey,
+      const std::string& inputPlainText,
+      std::string& output,
+      std::stringstream *commentsOnFailure
+    );
+    bool decryptAES_CBC_256_string (
+      const std::string& inputKey,
+      const std::string& inputCipherText,
+      std::string& output,
+      std::stringstream* commentsOnFailure
+    );
+  };
+  static Crypto::External& externalCrypto();
 };
 
 class JSONWebToken {

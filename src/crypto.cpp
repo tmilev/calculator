@@ -1,3 +1,5 @@
+// The current file is licensed under the license terms found in the main header file "calculator.h".
+// For additional information refer to the file "calculator.h".
 #include "crypto.h"
 #include "math_general_implementation.h"
 #include "general_list_references.h"
@@ -1747,4 +1749,54 @@ unsigned int UnsecurePseudoRandomGenerator::GetRandomLessThanBillion() {
   this->bytesConsumed += 4;
   result %= 1000000000;
   return result;
+}
+
+Crypto::External& Crypto::externalCrypto() {
+  static Crypto::External result;
+  return result;
+}
+
+bool Crypto::External::decryptAES_CBC_256_string(
+  const std::string& inputKey,
+  const std::string& inputCipherText,
+  std::string& output,
+  std::stringstream* commentsOnFailure
+) {
+  if (this->decryptAES_CBC_256 == nullptr) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Non-vanilla version of the calculator: AES support not compiled. "
+      << "AES is supported by the vanilla version at github.com. ";
+    }
+    return  false;
+  }
+  List<unsigned char> outputList;
+  if (!this->decryptAES_CBC_256(inputKey, inputCipherText, outputList, commentsOnFailure)) {
+    return false;
+  }
+  output.assign(reinterpret_cast<char *>(outputList.TheObjects), static_cast<unsigned>(outputList.size));
+  return true;
+}
+
+bool Crypto::External::encryptAES_CBC_256_string(
+  const std::string& inputKey,
+  const std::string& inputPlainText,
+  std::string& output,
+  std::stringstream* commentsOnFailure
+) {
+  if (this->encryptAES_CBC_256 == nullptr) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Non-vanilla version of the calculator: AES support not compiled. "
+      << "AES is supported by the vanilla version at github.com. ";
+    }
+    return  false;
+  }
+  List<unsigned char> outputList;
+  if (!this->encryptAES_CBC_256(inputKey, inputPlainText, outputList, commentsOnFailure)) {
+    return false;
+  }
+  output.assign(reinterpret_cast<char*>(outputList.TheObjects), static_cast<unsigned>(outputList.size));
+  return true;
+
 }

@@ -18,24 +18,12 @@ public:
     List<unsigned char>& output,
     std::stringstream *commentsOnFailure
   );
-  static bool encryptAES_CBC_256(
-    const std::string& inputKey,
-    const std::string& inputPlainText,
-    std::string& output,
-    std::stringstream *commentsOnFailure
-  );
   static bool decryptAES_CBC_256(
     const std::string& inputKey,
     const std::string& inputCipherText,
     List<unsigned char>& output,
     std::stringstream* commentsOnFailure
   );
-  static bool decryptAES_CBC_256(
-    const std::string& inputKey,
-    const std::string& inputCipherText,
-    std::string& output,
-    std::stringstream* commentsOnFailure
-  );
-
+  CryptoPublicDomain();
 };
 #endif // header_crypto_public_domain_was_already_defined

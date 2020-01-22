@@ -113,6 +113,7 @@ SOURCES += \
     crypto.cpp \
     crypto_public_domain_aes.cpp \
     crypto_public_domain_ripemd.cpp \
+    crypto_public_domain.cpp \
     crypto_test.cpp \
     database.cpp \
     database_mongo.cpp \

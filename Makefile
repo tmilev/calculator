@@ -186,7 +186,8 @@ SOURCES_RELATIVE_PATH=\
 
 SOURCES_PUBLIC_DOMAIN_RELATIVE_PATH_CPP=\
     crypto_public_domain_aes.cpp \
-    crypto_public_domain_ripemd.cpp
+    crypto_public_domain_ripemd.cpp \
+    crypto_public_domain.cpp 
 
 
 SOURCES_RELATIVE_PATH_C=\

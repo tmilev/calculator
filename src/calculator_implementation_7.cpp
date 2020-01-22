@@ -410,6 +410,7 @@ bool CalculatorFunctions::functionHashString(
   }
   List<unsigned char> hashUChar;
   List<uint32_t> theSha1Uint;
+  Crypto::External& externalCrypto = Crypto::externalCrypto();
   if (hashId == "SHA1" || hashId == "SHA256" || hashId == "SHA224") {
     if (hashId == "SHA1") {
       Crypto::computeSha1(inputString, theSha1Uint);
@@ -426,8 +427,13 @@ bool CalculatorFunctions::functionHashString(
   } else if (hashId == "SHA512") {
     Crypto::computeSha512(inputString, hashUChar);
   } else if (hashId == "RIPEMD160") {
-    int fixme;
-    // Crypto::computeRIPEMD160(inputString, hashUChar);
+    if (externalCrypto.computeRIPEMD160 == nullptr) {
+      return theCommands
+      << "You are running a non-vanilla version of the calculator "
+      << "that is missing ripemd160 support. "
+      << "Check out the vanilla version of the calculator at github.com.";
+    }
+    externalCrypto.computeRIPEMD160(inputString, hashUChar);
   }
   if (verbose) {
     std::string theSha1base64string, theSha1base64URLstring;
@@ -622,10 +628,9 @@ bool CalculatorFunctionsCrypto::innerAES_CBC_256_Decrypt(
   }
   std::string cipherText;
   std::stringstream comments;
-
-  int fixme;
-  bool result;
-  // bool result = Crypto::decryptAES_CBC_256(key, text, cipherText, &comments);
+  bool result = Crypto::externalCrypto().decryptAES_CBC_256_string(
+    key, text, cipherText, &comments
+  );
   if (!result) {
     return theCommands << comments.str();
   }
@@ -648,8 +653,9 @@ bool CalculatorFunctionsCrypto::innerAES_CBC_256_Encrypt(
   }
   std::string cipherText;
   std::stringstream comments;
-  int fixme, result;
-  // bool result = Crypto::encryptAES_CBC_256(key, text, cipherText, &comments);
+  bool result = Crypto::externalCrypto().encryptAES_CBC_256_string(
+    key, text, cipherText, &comments
+  );
   if (!result) {
     return theCommands << comments.str();
   }

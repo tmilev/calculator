@@ -1,6 +1,5 @@
 #include "crypto.h"
 
-
 // Reference:
 // Wikipedia's page on SHA3:
 // https://en.wikipedia.org/wiki/SHA-3
@@ -8,13 +7,17 @@ class Sha3 {
 public:
   static const int numberOfSpongeWords = 25;
   static const int numberOfKeccakRounds = 24;
+  static const unsigned triangularNumbers[24];
+  static const uint64_t roundEndXORConstants[24];
+  static const unsigned powersOfA[24];
+
   // The portion of the input message that we didn't consume yet.
   bool flagUseKeccak;
   uint64_t saved;
   union {
     // Keccak's state
     uint64_t stateStorage[Sha3::numberOfSpongeWords];
-    uint8_t sb[Sha3::numberOfSpongeWords * 8];
+    uint8_t stateBytes[Sha3::numberOfSpongeWords * 8];
   };
   // 0..7--the next byte after the set one (starts from 0; 0--none are buffered)
   unsigned byteIndex;
@@ -32,8 +35,10 @@ public:
   void update(void const* inputBuffer, size_t length);
   void finalize();
   Sha3();
-  void transform(uint64_t* state25Elements);
-  void OneRoundTheta(uint64_t* state25Elements);
+  void transform();
+  void Theta();
+  void PiOfRho();
+  void Chi();
   void reset();
   void sha3_Init256();
   void sha3_Init384();
@@ -54,63 +59,101 @@ Sha3::Sha3() {
 // however, they are helpful to verify the implementation.
 // SHA3_USE_KECCAK only changes one line of code in Finalize.
 
-static const uint64_t keccakf_rndc[24] = {
-  0x0000000000000001UL, 0x0000000000008082UL,
-  0x800000000000808aUL, 0x8000000080008000UL,
-  0x000000000000808bUL, 0x0000000080000001UL,
-  0x8000000080008081UL, 0x8000000000008009UL,
-  0x000000000000008aUL, 0x0000000000000088UL,
-  0x0000000080008009UL, 0x000000008000000aUL,
-  0x000000008000808bUL, 0x800000000000008bUL,
-  0x8000000000008089UL, 0x8000000000008003UL,
-  0x8000000000008002UL, 0x8000000000000080UL,
-  0x000000000000800aUL, 0x800000008000000aUL,
-  0x8000000080008081UL, 0x8000000000008080UL,
-  0x0000000080000001UL, 0x8000000080008008UL
+const uint64_t Sha3::roundEndXORConstants[24] = {
+  0x0000000000000001UL,
+  0x0000000000008082UL,
+  0x800000000000808aUL,
+  0x8000000080008000UL,
+  0x000000000000808bUL,
+  0x0000000080000001UL,
+  0x8000000080008081UL,
+  0x8000000000008009UL,
+  0x000000000000008aUL,
+  0x0000000000000088UL,
+  0x0000000080008009UL,
+  0x000000008000000aUL,
+  0x000000008000808bUL,
+  0x800000000000008bUL,
+  0x8000000000008089UL,
+  0x8000000000008003UL,
+  0x8000000000008002UL,
+  0x8000000000000080UL,
+  0x000000000000800aUL,
+  0x800000008000000aUL,
+  0x8000000080008081UL,
+  0x8000000000008080UL,
+  0x0000000080000001UL,
+  0x8000000080008008UL
 };
 
-static const unsigned keccakf_rotc[24] ={
-  1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 2, 14, 27, 41, 56, 8, 25, 43, 62,
-  18, 39, 61, 20, 44
+const unsigned Sha3::triangularNumbers[24] = {
+  1,  3,  6, 10, 15, 21, 28, 36, 45, 55,  2, 14, 27, 41, 56,  8, 25, 43, 62, 18, 39, 61, 20, 44
 };
 
-static const unsigned keccakf_piln[24] = {
-  10, 7, 11, 17, 18, 3, 5, 16, 8, 21, 24, 4, 15, 23, 19, 13, 12, 2, 20,
-  14, 22, 9, 6, 1
+// Let A be the matrix:
+// ( 3 2 )
+// ( 1 0 )
+// and let v be the vector-column:
+// ( 0 )
+// ( 1 ).
+// Then powersOfA[i] equals 5w_0 + w_1 where
+// w_0, w_1 are the entries of the vector-column w =
+// ( w_0 )
+// ( w_1 )
+// computed by w = A^{i+1} * v.
+const unsigned Sha3::powersOfA[24] = {
+  10, 7, 11, 17, 18,  3,  5, 16,  8, 21, 24,  4, 15, 23, 19, 13, 12,  2, 20, 14, 22,  9,  6,  1
 };
 
-void Sha3::transform(uint64_t *state25Elements) {
-  uint64_t t, bc[5];
-  for (int round = 0; round < Sha3::numberOfKeccakRounds; round ++) {
-    // Theta
-    for (int i = 0; i < 5; i ++) {
-      bc[i] = state25Elements[i] xor state25Elements[i + 5] xor state25Elements[i + 10] xor state25Elements[i + 15] xor state25Elements[i + 20];
-    }
-    for (int i = 0; i < 5; i ++) {
-      t = bc[(i + 4) % 5] ^ Sha3::RotateLeft(bc[(i + 1) % 5], 1);
-      for (int j = 0; j < 25; j += 5) {
-        state25Elements[j + i] ^= t;
-      }
-    }
-    // Rho Pi
-    t = state25Elements[1];
-    for (int i = 0; i < 24; i ++) {
-      int j = static_cast<int>(keccakf_piln[i]);
-      bc[0] = state25Elements[j];
-      state25Elements[j] = Sha3::RotateLeft(t, keccakf_rotc[i]);
-      t = bc[0];
-    }
-    // Chi
+void Sha3::Theta() {
+  uint64_t columnXORed[5];
+  for (int i = 0; i < 5; i ++) {
+    columnXORed[i] =
+    this->stateStorage[i] xor
+    this->stateStorage[i + 5] xor
+    this->stateStorage[i + 10] xor
+    this->stateStorage[i + 15] xor
+    this->stateStorage[i + 20];
+  }
+  for (int i = 0; i < 5; i ++) {
+    uint64_t t = columnXORed[(i + 4) % 5] xor Sha3::RotateLeft(columnXORed[(i + 1) % 5], 1);
     for (int j = 0; j < 25; j += 5) {
-      for(int i = 0; i < 5; i ++) {
-        bc[i] = state25Elements[j + i];
-      }
-      for(int i = 0; i < 5; i ++) {
-        state25Elements[j + i] ^= (~bc[(i + 1) % 5]) & bc[(i + 2) % 5];
-      }
+      this->stateStorage[j + i] ^= t;
     }
+  }
+}
+
+void Sha3::PiOfRho() {
+  uint64_t x, y;
+  x = this->stateStorage[1];
+  for (int i = 0; i < 24; i ++) {
+    int j = Sha3::powersOfA[i];
+    y = this->stateStorage[j];
+    this->stateStorage[j] = Sha3::RotateLeft(x, Sha3::triangularNumbers[i]);
+    x = y;
+  }
+
+}
+
+void Sha3::Chi() {
+  uint64_t combined[5];
+  for (int j = 0; j < 25; j += 5) {
+    for(int i = 0; i < 5; i ++) {
+      combined[i] = this->stateStorage[j + i];
+    }
+    for(int i = 0; i < 5; i ++) {
+      this->stateStorage[j + i] ^= (compl combined[(i + 1) % 5]) & combined[(i + 2) % 5];
+    }
+  }
+}
+
+void Sha3::transform() {
+  for (int round = 0; round < Sha3::numberOfKeccakRounds; round ++) {
+    this->Theta();
+    this->PiOfRho();
+    this->Chi();
     // Iota
-    state25Elements[0] ^= keccakf_rndc[round];
+    this->stateStorage[0] ^= Sha3::roundEndXORConstants[round];
   }
 }
 
@@ -120,7 +163,7 @@ void Sha3::reset() {
   this->flagUseKeccak = false;
   int spongeWordsSizeInBytes = Sha3::numberOfSpongeWords * 8;
   for (int i = 0; i < spongeWordsSizeInBytes; i ++) {
-    this->sb[i] = 0;
+    this->stateBytes[i] = 0;
   }
   this->wordIndex = 0;
   this->saved = 0;
@@ -184,7 +227,7 @@ void Sha3::sha3_Update(void const* bufIn, size_t len) {
     this->byteIndex = 0;
     this->saved = 0;
     if (++ this->wordIndex == (Sha3::numberOfSpongeWords - this->capacityWords)) {
-      this->transform(this->stateStorage);
+      this->transform();
       this->wordIndex = 0;
     }
   }
@@ -206,7 +249,7 @@ void Sha3::sha3_Update(void const* bufIn, size_t len) {
     (static_cast<uint64_t>(buf[7]) << 8 * 7);
     this->stateStorage[this->wordIndex] ^= t;
     if (++ this->wordIndex == (Sha3::numberOfSpongeWords - this->capacityWords)) {
-      this->transform(this->stateStorage);
+      this->transform();
       this->wordIndex = 0;
     }
   }
@@ -233,36 +276,33 @@ void Sha3::finalize() {
   // 2) Padding with the single byte 0x81 = binary(10000001) = 129.
 
   if (!this->flagUseKeccak) {
-  // Append 2-bit suffix 01, per SHA-3 spec. Instead of 1 for padding we
-  // use 1 << 2 below. The 0x02 below corresponds to the suffix 01.
-  // Overall, we feed 0, then 1, and finally 1 to start padding. Without
-  // M || 01, we would simply use 1 to start padding.
+    // Append 2-bit suffix 01, per SHA-3 spec. Instead of 1 for padding we
+    // use 1 << 2 below. The 0x02 below corresponds to the suffix 01.
+    // Overall, we feed 0, then 1, and finally 1 to start padding. Without
+    // M || 01, we would simply use 1 to start padding.
     // SHA3 version
     this->stateStorage[this->wordIndex] ^= (this->saved ^ (static_cast<uint64_t>(static_cast<uint64_t>(0x02 | (1 << 2)) << ((this->byteIndex) * 8))));
   } else {
-    // For testing the "pure" Keccak version
+    // Original Keccak.
     this->stateStorage[this->wordIndex] ^= (this->saved ^ (static_cast<uint64_t>(static_cast<uint64_t>(1) << (this->byteIndex * 8))));
   }
   this->stateStorage[Sha3::numberOfSpongeWords - this->capacityWords - 1] ^= 0x8000000000000000UL;
-  this->transform(this->stateStorage);
-  // Return first bytes of the ctx->s. This conversion is not needed for
-  // little-endian platforms e.g. wrap with #if !defined(__BYTE_ORDER__)
-  // || !defined(__ORDER_LITTLE_ENDIAN__) || __BYTE_ORDER__!=__ORDER_LITTLE_ENDIAN__
-  //    ... the conversion below ...
-  //
+  this->transform();
+  // Return first bytes. This conversion is not needed for
+  // little-endian platforms.
   {
     unsigned i;
     for (i = 0; i < Sha3::numberOfSpongeWords; i ++) {
       const unsigned t1  = static_cast<uint32_t>(this->stateStorage[i]);
       const unsigned t2  = static_cast<uint32_t>((this->stateStorage[i] >> 16) >> 16);
-      this->sb[i * 8 + 0] = static_cast<uint8_t>(t1);
-      this->sb[i * 8 + 1] = static_cast<uint8_t>(t1 >> 8);
-      this->sb[i * 8 + 2] = static_cast<uint8_t>(t1 >> 16);
-      this->sb[i * 8 + 3] = static_cast<uint8_t>(t1 >> 24);
-      this->sb[i * 8 + 4] = static_cast<uint8_t>(t2);
-      this->sb[i * 8 + 5] = static_cast<uint8_t>(t2 >> 8);
-      this->sb[i * 8 + 6] = static_cast<uint8_t>(t2 >> 16);
-      this->sb[i * 8 + 7] = static_cast<uint8_t>(t2 >> 24);
+      this->stateBytes[i * 8 + 0] = static_cast<uint8_t>(t1);
+      this->stateBytes[i * 8 + 1] = static_cast<uint8_t>(t1 >> 8);
+      this->stateBytes[i * 8 + 2] = static_cast<uint8_t>(t1 >> 16);
+      this->stateBytes[i * 8 + 3] = static_cast<uint8_t>(t1 >> 24);
+      this->stateBytes[i * 8 + 4] = static_cast<uint8_t>(t2);
+      this->stateBytes[i * 8 + 5] = static_cast<uint8_t>(t2 >> 8);
+      this->stateBytes[i * 8 + 6] = static_cast<uint8_t>(t2 >> 16);
+      this->stateBytes[i * 8 + 7] = static_cast<uint8_t>(t2 >> 24);
     }
   }
 }
@@ -295,7 +335,7 @@ std::string Sha3::getResultString() {
   std::string result;
   result.resize(32);
   for (unsigned i = 0; i < 32; i ++) {
-    result[i] = static_cast<char>(this->sb[i]);
+    result[i] = static_cast<char>(this->stateBytes[i]);
   }
   return result;
 }
@@ -303,7 +343,7 @@ std::string Sha3::getResultString() {
 void Sha3::getResultVector(List<unsigned char>& output) {
   output.SetSize(32);
   for (int i = 0; i < 32; i ++) {
-    output[i] = this->sb[i];
+    output[i] = this->stateBytes[i];
   }
 }
 

@@ -140,6 +140,7 @@ SOURCES_RELATIVE_PATH=\
     calculator_typed_functions_1.cpp \
     calculator_webserver_functions.cpp \
     crypto.cpp \
+    crypto_sha3.cpp \
     crypto_test.cpp \
     database.cpp \
     database_test.cpp \
@@ -185,8 +186,7 @@ SOURCES_RELATIVE_PATH=\
 
 SOURCES_PUBLIC_DOMAIN_RELATIVE_PATH_CPP=\
     crypto_public_domain_aes.cpp \
-    crypto_public_domain_ripemd.cpp \
-    crypto_public_domain_sha3.cpp
+    crypto_public_domain_ripemd.cpp
 
 
 SOURCES_RELATIVE_PATH_C=\

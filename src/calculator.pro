@@ -113,7 +113,6 @@ SOURCES += \
     crypto.cpp \
     crypto_public_domain_aes.cpp \
     crypto_public_domain_ripemd.cpp \
-    crypto_public_domain_sha3.cpp \
     crypto_test.cpp \
     database.cpp \
     database_mongo.cpp \
@@ -161,7 +160,6 @@ SOURCES += \
     json_test.cpp \
     database_test.cpp \
     global_test.cpp \
-    crypto_public_domain_sha3.cpp \
     crypto_public_domain_ripemd.cpp \
     crypto_public_domain_aes.cpp \
     crypto_sha3.cpp

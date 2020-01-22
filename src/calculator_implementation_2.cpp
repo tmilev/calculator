@@ -1158,7 +1158,7 @@ void Calculator::EvaluateCommands() {
   MacroRegisterFunctionWithName("Calculator::EvaluateCommands");
   std::stringstream out;
   if (this->syntaxErrors != "") {
-    if (!global.flagRunningCommandLine) {
+    if (!global.flagRunningConsoleRegular) {
       out << "<hr><b>Syntax errors encountered</b><br>";
     } else {
       out << logger::consoleRed() << "Syntax errors encountered: " << logger::consoleNormal();
@@ -1171,7 +1171,7 @@ void Calculator::EvaluateCommands() {
   this->flagAbortComputationASAP = false;
   this->Comments.clear();
   ProgressReport theReport;
-  if (!global.flagRunningCommandLine) {
+  if (!global.flagRunningConsoleRegular) {
     theReport.Report("Evaluating expressions, current expression stack:\n");
   }
   this->EvaluateExpression(*this, this->theProgramExpression, this->theProgramExpression);
@@ -1186,7 +1186,7 @@ void Calculator::EvaluateCommands() {
   global.theDefaultFormat.GetElement().flagIncludeExtraHtmlDescriptionsInPlots = !this->flagPlotNoControls;
   global.theDefaultFormat.GetElement().flagLatexDetailsInHtml = this->flagWriteLatexPlots;
   global.theDefaultFormat.GetElement().flagExpressionIsFinal = true;
-  if (global.flagRunningCommandLine) {
+  if (global.flagRunningConsoleRegular) {
     global.theDefaultFormat.GetElement().flagUseQuotes = false;
     global.theDefaultFormat.GetElement().flagExpressionIsFinal = true;
     if (global.programArguments.size > 1) {
@@ -1242,7 +1242,7 @@ void Calculator::EvaluateCommands() {
   }
   this->outputCommentsString = commentsStream.str();
   this->outputJS[WebAPI::result::comments] = this->outputCommentsString;
-  if (global.flagRunningCommandLine && this->Comments.str() != "") {
+  if (global.flagRunningConsoleRegular && this->Comments.str() != "") {
     this->outputString += this->outputCommentsString;
   }
 }

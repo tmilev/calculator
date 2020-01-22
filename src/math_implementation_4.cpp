@@ -502,7 +502,7 @@ void GlobalVariables::MakeReport() {
     return;
   }
   std::string reportString;
-  if (this->flagRunningCommandLine || this->flagRunningConsoleTest) {
+  if (this->flagRunningConsoleRegular || this->flagRunningConsoleTest) {
     reportString = this->ToStringProgressReportConsole();
   } else {
     reportString = this->ToStringProgressReportNoThreadData(true);

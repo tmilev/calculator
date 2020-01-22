@@ -3859,7 +3859,7 @@ void WebServer::AnalyzeMainArgumentsTimeString(const std::string& timeLimitStrin
 
 void WebServer::InitializeBuildFlags() {
   ////////////////////////////////////////////////////
-  global.flagRunningCommandLine = false;
+  global.flagRunningConsoleRegular = false;
   global.flagRunningConsoleTest = false;
   #ifdef MACRO_use_open_ssl
   global.flagSSLIsAvailable = true;
@@ -3881,13 +3881,12 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv) {
     global.programArguments[i] = argv[i];
     //std::cout << "Argument " << i + 1 << ": " << global.programArguments[i] << "\n";
   }
+  global.flagRunningConsoleRegular = true;
   if (argC == 0) {
-    global.flagRunningCommandLine = true;
     return;
   }
   global.PathProjectBaseUserInputOrDeduced = global.programArguments[0];
   if (argC < 2) {
-    global.flagRunningCommandLine = true;
     return;
   }
   std::string timeLimitString;
@@ -3895,6 +3894,8 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv) {
     const std::string& current = global.programArguments[i];
     if (current == "server") {
       global.flagRunningBuiltInWebServer = true;
+      global.flagRunningConsoleRegular = false;
+      global.flagRunningConsoleTest = false;
       if (i + 1 < global.programArguments.size) {
         i ++;
         timeLimitString = global.programArguments[i];
@@ -3904,6 +3905,7 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv) {
     }
     if (current == "test") {
       global.flagRunningConsoleTest = true;
+      global.flagRunningConsoleRegular = false;
       global.flagRunningBuiltInWebServer = false;
       return;
     }
@@ -4163,7 +4165,7 @@ void GlobalVariables::ConfigurationProcess() {
     global.flagServerAutoMonitor = true;
   } else {
     global.flagServerAutoMonitor = false;
-    if (!global.flagRunningCommandLine) {
+    if (!global.flagRunningConsoleRegular && !global.flagRunningConsoleTest) {
       global
       << logger::red << "WARNING: server auto-monitoring is off. " << logger::endL;
     }
@@ -4199,7 +4201,7 @@ void GlobalVariables::ConfigurationProcess() {
     "runServerOnEmptyCommandLine"
   ].isTrueRepresentationInJSON();
   if (
-    global.flagRunningCommandLine &&
+    global.flagRunningConsoleRegular &&
     global.programArguments.size == 1 &&
     global.flagRunServerOnEmptyCommandLine
   ) {
@@ -4207,7 +4209,7 @@ void GlobalVariables::ConfigurationProcess() {
     << "runServerOnEmptyCommandLine is set to true => Starting server with default configuration. "
     << logger::endL;
     global.flagRunningBuiltInWebServer = true;
-    global.flagRunningCommandLine = false;
+    global.flagRunningConsoleRegular = false;
     global.millisecondsMaxComputation = 30000; // 30 seconds, default
   }
   int reader = 0;

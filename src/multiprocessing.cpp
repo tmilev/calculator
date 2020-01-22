@@ -993,7 +993,7 @@ logger& logger::operator<<(const loggerSpecialSymbols& input) {
   this->CheckLogSize();
   bool doUseColors =
     global.flagRunningBuiltInWebServer ||
-    global.flagRunningCommandLine ||
+    global.flagRunningConsoleRegular ||
     global.flagRunningConsoleTest
   ;
   switch (input) {

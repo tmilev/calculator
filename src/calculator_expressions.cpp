@@ -3415,7 +3415,7 @@ bool Expression::ToStringEndStatement(
   }
   bool createTable = (startingExpression != nullptr);
   bool createSingleTable = false;
-  if (createTable == false && theFormat != nullptr && !global.flagRunningCommandLine) {
+  if (createTable == false && theFormat != nullptr && !global.flagRunningConsoleRegular) {
     createSingleTable = theFormat->flagMakingExpressionTableWithLatex;
     theFormat->flagMakingExpressionTableWithLatex = false;
   }

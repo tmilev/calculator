@@ -179,7 +179,7 @@ public:
 
   //  bool flagLogInterProcessCommunication;
   //flags: what mode are we running in?
-  bool flagRunningCommandLine;
+  bool flagRunningConsoleRegular;
   bool flagRunningConsoleTest;
   bool flagRunningBuiltInWebServer;
 

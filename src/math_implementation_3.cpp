@@ -146,7 +146,7 @@ GlobalVariables::GlobalVariables() {
   this->flagComputationCompletE = false;
   this->flagComputationFinishedAllOutputSentClosing = false;
   this->flagRunningConsoleTest = false;
-  this->flagRunningCommandLine = false;
+  this->flagRunningConsoleRegular = false;
   this->flagRunningBuiltInWebServer = false;
   this->flagLoggedIn = false;
   this->flagLogInAttempted = false;

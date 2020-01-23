@@ -365,7 +365,6 @@ void Calculator::initPredefinedInnerFunctions() {
     "- such folders are outside of the project folder - **provided that** "
     "the folder is white listed in the C++ code. ",
     "LoadFileIntoString(\"test/certificate_self_signed.base64\");\n"
-    "LoadFileIntoString(\"freecalc/contributors.tex\");\n"
     "LoadFileIntoString(\"problems/default/Functions-composing-fractional-linear-1.html\")",
     "CalculatorConversions::innerLoadFileIntoString",
     "LoadFileIntoString",

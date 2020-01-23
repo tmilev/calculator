@@ -165,7 +165,7 @@ public:
   int bytesConsumed;
   List<unsigned char>& state();
   UnsecurePseudoRandomGenerator();
-  void SetRandomSeed(int inputRandomSeed);
+  void SetRandomSeed(int32_t inputRandomSeed);
   unsigned int GetRandomLessThanBillion();
   signed GetRandomPositiveLessThanBillion();
 };

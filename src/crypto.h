@@ -233,6 +233,7 @@ public:
   );
   static std::string ConvertIntToHex(int input, int significantBytes);
   static std::string ConvertUintToHex(unsigned int input, int significantBytes);
+  static std::string ConvertUint64ToHex(uint64_t input);
   static bool ConvertHexToString(
     const std::string& input, std::string& output, std::stringstream* commentsOnFailure
   );

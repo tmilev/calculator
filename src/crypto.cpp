@@ -579,6 +579,12 @@ std::string Crypto::ConvertUintToHex(unsigned int input, int significantBytes) {
   return out.str();
 }
 
+std::string Crypto::ConvertUint64ToHex(uint64_t input) {
+  std::stringstream out;
+  out << std::hex << std::setfill('0') << std::setw(2 * 8) << input;
+  return out.str();
+}
+
 bool Crypto::ConvertHexToListUnsignedChar(const std::string& input, List<unsigned char>& output, std::stringstream* commentsOnFailure) {
   std::string outputString;
   if (!Crypto::ConvertHexToString(input, outputString, commentsOnFailure)) {

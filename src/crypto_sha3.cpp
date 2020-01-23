@@ -9,7 +9,7 @@ public:
   static const int numberOfKeccakRounds = 24;
   static const unsigned triangularNumbers[24];
   static const uint64_t roundEndXORConstants[24];
-  static const unsigned powersOfA[24];
+  static const signed powersOfA[24];
 
   // The portion of the input message that we didn't consume yet.
   bool flagUseKeccak;
@@ -20,22 +20,22 @@ public:
     uint8_t stateBytes[Sha3::numberOfSpongeWords * 8];
   };
   // 0..7--the next byte after the set one (starts from 0; 0--none are buffered)
-  unsigned byteIndex;
+  int byteIndex;
 
   // 0..24--the next word to integrate input (starts from 0)
-  unsigned wordIndex;
+  signed wordIndex;
   // The double size of the hash output in words (e.g. 16 for Keccak 512)
-  unsigned capacityWords;
+  signed capacityWords;
   std::string computeSha3_256(const std::string& input);
   void getResultVector(List<unsigned char>& output);
   std::string getResultString();
   void init();
-  void update(List<unsigned char>& input);
   void update(const std::string& input);
-  void update(void const* inputBuffer, size_t length);
+  void update(List<unsigned char> &input);
   void finalize();
   Sha3();
   void transform();
+  void transformIfFilledUp();
   void Theta();
   void PiOfRho();
   void Chi();
@@ -43,7 +43,7 @@ public:
   void sha3_Init256();
   void sha3_Init384();
   void sha3_Init512();
-  void sha3_Update(void const *bufIn, size_t len);
+  std::string ToStringState();
   static uint64_t RotateLeft(uint64_t x, unsigned y) {
     return ((x << y) | (x >> ((sizeof(uint64_t) * 8) - y)));
   }
@@ -101,7 +101,7 @@ const unsigned Sha3::triangularNumbers[24] = {
 // ( w_0 )
 // ( w_1 )
 // computed by w = A^{i+1} * v.
-const unsigned Sha3::powersOfA[24] = {
+const signed Sha3::powersOfA[24] = {
   10, 7, 11, 17, 18,  3,  5, 16,  8, 21, 24,  4, 15, 23, 19, 13, 12,  2, 20, 14, 22,  9,  6,  1
 };
 
@@ -148,6 +148,7 @@ void Sha3::Chi() {
 }
 
 void Sha3::transform() {
+  // global << "DEBUG:\n" << this->ToStringState();
   for (int round = 0; round < Sha3::numberOfKeccakRounds; round ++) {
     this->Theta();
     this->PiOfRho();
@@ -187,81 +188,40 @@ void Sha3::sha3_Init512() {
   this->capacityWords = 2 * 512 / (8 * sizeof(uint64_t));
 }
 
-void Sha3::sha3_Update(void const* bufIn, size_t len) {
-  /* 0...7 -- how much is needed to have a word */
-  unsigned old_tail = (8 - this->byteIndex) & 7;
-  size_t words;
-  unsigned tail;
-  size_t i;
-  const uint8_t* buf = static_cast<const uint8_t *>(bufIn);
-  if (this->byteIndex >= 8) {
-    global.fatal << "Internal sha3 computation error: byteIndex too large: " << this->byteIndex << global.fatal;
-  }
-  if (this->wordIndex >= (sizeof(this->stateStorage) / sizeof(this->stateStorage[0]))) {
-    global.fatal << "Internal sha3 computation error: wordIndex too large: " << this->wordIndex << global.fatal;
-  }
-  if (len < old_tail) {
-    // Have no complete word or haven't started the word yet.
-    // Endian-independent code follows:
-    while (len --) {
-      this->saved |= static_cast<uint64_t>(*(buf ++)) << ((this->byteIndex ++) * 8);
-    }
-    if (this->byteIndex >= 8) {
-      global.fatal << "Internal sha3 computation error. " << global.fatal;
-    }
+void Sha3::transformIfFilledUp() {
+  if (this->byteIndex < 8) {
     return;
   }
-  if (old_tail) {
-    // will have one word to process
-    // endian-independent code follows:
-    len -= old_tail;
-    while (old_tail --) {
-      this->saved |= static_cast<uint64_t>(*(buf ++)) << ((this->byteIndex ++) * 8);
-    }
+  this->byteIndex = 0;
+  this->stateStorage[this->wordIndex] ^= this->saved;
+  this->saved = 0;
+  this->wordIndex ++;
+  if (this->wordIndex < Sha3::numberOfSpongeWords - this->capacityWords) {
+    return;
+  }
+  this->wordIndex = 0;
+  this->transform();
+}
 
-    // now ready to add saved to the sponge
-    this->stateStorage[this->wordIndex] ^= this->saved;
-    if (this->byteIndex != 8) {
-      global.fatal << "Internal sha3 computation error. " << global.fatal;
+std::string Sha3::ToStringState() {
+  std::stringstream out;
+  out << "SHA3 state:\n";
+  int intermediate = Sha3::numberOfSpongeWords - this->capacityWords;
+  for (int i = 0; i < Sha3::numberOfSpongeWords; i ++) {
+    if (i == intermediate) {
+      out << "----------------\n";
     }
-    this->byteIndex = 0;
-    this->saved = 0;
-    if (++ this->wordIndex == (Sha3::numberOfSpongeWords - this->capacityWords)) {
-      this->transform();
-      this->wordIndex = 0;
-    }
+    out << Crypto::ConvertUint64ToHex(this->stateStorage[i]) << "\n";
   }
-  // now work in full words directly from input
-  if (this->byteIndex != 0) {
-    global.fatal << "Internal sha3 computation error. " << global.fatal;
-  }
-  words = len / sizeof(uint64_t);
-  tail = static_cast<unsigned>(len - words * sizeof(uint64_t));
-  for (i = 0; i < words; i ++, buf += sizeof(uint64_t)) {
-    const uint64_t t =
-     static_cast<uint64_t>(buf[0]) |
-    (static_cast<uint64_t>(buf[1]) << 8 * 1) |
-    (static_cast<uint64_t>(buf[2]) << 8 * 2) |
-    (static_cast<uint64_t>(buf[3]) << 8 * 3) |
-    (static_cast<uint64_t>(buf[4]) << 8 * 4) |
-    (static_cast<uint64_t>(buf[5]) << 8 * 5) |
-    (static_cast<uint64_t>(buf[6]) << 8 * 6) |
-    (static_cast<uint64_t>(buf[7]) << 8 * 7);
-    this->stateStorage[this->wordIndex] ^= t;
-    if (++ this->wordIndex == (Sha3::numberOfSpongeWords - this->capacityWords)) {
-      this->transform();
-      this->wordIndex = 0;
-    }
-  }
-  // finally, save the partial word
-  if (!(this->byteIndex == 0 && tail < 8)) {
-    global.fatal << "Internal sha3 computation error. " << global.fatal;
-  }
-  while (tail --) {
-    this->saved |= static_cast<uint64_t>(*(buf ++)) << ((this->byteIndex ++) * 8);
-  }
-  if (this->byteIndex >= 8) {
-    global.fatal << "Internal sha3 computation error. " << global.fatal;
+  return out.str();
+}
+
+void Sha3::update(List<unsigned char>& input) {
+  for (int i = 0; i < input.size; i ++) {
+    int bitsToPad = this->byteIndex * 8;
+    this->saved += (static_cast<uint64_t>(input[i]) << bitsToPad);
+    this->byteIndex ++;
+    this->transformIfFilledUp();
   }
 }
 
@@ -312,21 +272,15 @@ void Sha3::init() {
 }
 
 void Sha3::update(const std::string& input) {
-  this->update(input.c_str(), input.size());
-}
-
-void Sha3::update(List<unsigned char>& input) {
-  this->update(input.TheObjects, static_cast<unsigned>(input.size));
-}
-
-void Sha3::update(const void* inputBuffer, size_t length) {
-  this->sha3_Update(inputBuffer, length);
+  List<unsigned char> inputChar;
+  inputChar = input;
+  this->update(inputChar);
 }
 
 std::string Sha3::computeSha3_256(const std::string& input) {
   this->flagUseKeccak = false;
   this->init();
-  this->update(input.c_str(), input.size());
+  this->update(input);
   this->finalize();
   return this->getResultString();
 }
@@ -357,7 +311,7 @@ void Crypto::computeKeccak3_256(const std::string& input, List<unsigned char>& o
   Sha3 theHasher;
   theHasher.flagUseKeccak = true;
   theHasher.init();
-  theHasher.update(input.c_str(), input.size());
+  theHasher.update(input);
   theHasher.finalize();
   theHasher.getResultVector(output);
 }
@@ -366,7 +320,7 @@ void Crypto::computeSha3_256(const std::string& input, List<unsigned char>& outp
   Sha3 theHasher;
   theHasher.flagUseKeccak = false;
   theHasher.init();
-  theHasher.update(input.c_str(), input.size());
+  theHasher.update(input);
   theHasher.finalize();
   theHasher.getResultVector(output);
 }

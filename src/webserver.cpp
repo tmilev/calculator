@@ -1128,7 +1128,14 @@ JSData WebWorker::ProcessComputationIndicatorJSData() {
   // Timer thread will no longer time us out.
   JSData result;
   std::stringstream commentsOnFailure;
-  if (!this->flagUsingSSLInWorkerProcess) {
+  bool allowed = true;
+  if (
+    !this->flagUsingSSLInWorkerProcess &&
+    !global.flagDisableDatabaseLogEveryoneAsAdmin
+  ) {
+    allowed = false;
+  }
+  if (!allowed) {
     commentsOnFailure << "Monitoring allowed only over https. ";
     result[WebAPI::result::error] = commentsOnFailure.str();
     return result;

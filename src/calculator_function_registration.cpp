@@ -1046,12 +1046,17 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctions::innerSha3_256OfString,
     "",
     "SHA3 of input string, 256 bit version. See the wikipedia page on SHA3. ",
-    "ConvertStringToHex ShaThree256(\"abc\");\n"
-    "\"3a985da74fe225b2045c172d6bd390bd855f086e3e9d525b46bfe24511431532\";\n"
+    "%HideLHS\n"
     "ConvertStringToHex ShaThree256(\"\");\n"
     "\"a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a\";\n"
+    "ConvertStringToHex ShaThree256(\"abc\");\n"
+    "\"3a985da74fe225b2045c172d6bd390bd855f086e3e9d525b46bfe24511431532\";\n"
     "ConvertStringToHex ShaThree256(\"testing\");\n"
     "\"7f5979fb78f082e8b1c676635db8795c4ac6faba03525fb708cb5fd68fd40c5e\";\n"
+    "ConvertStringToHex ShaThree256\"abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq\";\n"
+    "\"41c0dba2a9d6240849100376a8235e2c82e1b9998a999e21db32dd97496d3376\";\n"
+    "ConvertStringToHex ShaThree256\"abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu\";\n"
+    "\"916f6061fe879741ca6469b43971dfdb28b1a32dc36cb3254e812be27aad1d18\";\n"
     "ConvertStringToHex Keccak256(\"testing\");\n"
     "\"5f16f4c7f149ac4f9510d9cf8cf384038ad348b3bcdc01915f95de12df9d1b02\";\n",
     "CalculatorFunctions::innerSha3_256OfString",

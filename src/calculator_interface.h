@@ -512,8 +512,14 @@ private:
   static bool ToStringPlus(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
   static bool ToStringMatrix(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
   static bool ToStringSequence(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
+  static bool ToStringLieBracket(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
   static bool ToStringSumOrIntegral(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
+  static bool ToStringGreaterThan(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
+  static bool ToStringGreaterThanOrEqualTo(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
+  static bool ToStringLessThanOrEqualTo(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
   static bool ToStringDirectSum(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
+  static bool ToStringLimitProcess(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
+  static bool ToStringLessThan(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
   static bool ToStringLimit(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
   static bool ToStringOpTimes(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
   static bool ToStringSqrt2(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
@@ -528,6 +534,13 @@ private:
   static bool ToStringUnion(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
   static bool ToStringMinus3(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
   static bool ToStringMinus2(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
+  static bool ToStringIntersection(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
+  static bool ToStringUnionNoRepetition(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
+  static bool ToStringEqualEqual(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
+  static bool ToStringEqualEqualEqual(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
+  static bool ToStringError(
+    const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+  );
   void ToStringOpMultiplicative(std::stringstream& out, const std::string& operation, FormatExpressions* theFormat) const;
 
   std::string ToStringTreeHtml(int depth) const;
@@ -669,7 +682,7 @@ private:
   Expression operator*(const Expression& other);
   Expression operator/(const Expression& other);
   void operator*=(const Expression& other);
-//  Rational GetConstantTerm() const;
+  // Rational GetConstantTerm() const;
   bool IsEqualToMathematically(const Expression& other) const;
   bool operator==(int other) const;
   bool operator==(const Expression& other) const;
@@ -680,7 +693,7 @@ private:
   bool operator!=(const Expression& other) const {
     return ! (*this == other);
   }
-//  void operator=(const Expression& other);
+  // void operator=(const Expression& other);
   bool operator>(const Expression& other) const;
   bool GreaterThanNoCoeff(const Expression& other) const;
   void SubstituteRecursively(MapList<Expression, Expression>& theSubs);
@@ -1073,9 +1086,6 @@ public:
   HashedList<std::string, MathRoutines::HashString> atomsThatMustNotBeCached;
   HashedList<std::string, MathRoutines::HashString> autoCompleteKeyWords;
   HashedList<std::string, MathRoutines::HashString> stringsThatSplitIfFollowedByDigit;
-
-
-
 
   MapList<std::string, List<std::string>, MathRoutines::HashString> predefinedWordSplits;
   class NamedRuleLocation {

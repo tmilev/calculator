@@ -104,9 +104,9 @@ void WebServerMonitor::Monitor(int pidServer) {
   this->pidServer = pidServer;
   MacroRegisterFunctionWithName("Monitor");
   int maxNumPingFailures = 3;
-  //warning: setting global.server().WebServerPingIntervalInSeconds to more than 1000
-  //may overflow the variable int microsecondsToSleep.
-  //global.server().WebServerPingIntervalInSeconds=1000;
+  // warning: setting global.server().WebServerPingIntervalInSeconds to more than 1000
+  // may overflow the variable int microsecondsToSleep.
+  // global.server().WebServerPingIntervalInSeconds=1000;
   int microsecondsToSleep = 1000000 * global.server().WebServerPingIntervalInSeconds;//
   if (global.server().WebServerPingIntervalInSeconds > 30) {
     global << logger::red << "**********WARNING**************"

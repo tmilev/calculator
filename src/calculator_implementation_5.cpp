@@ -453,7 +453,8 @@ bool MeshTriangles::ComputePoints(
     }
   }
   this->ComputeImplicitPlot();
-  theCommands << "Evaluated function in: " << this->numGoodEvaluations << " points and failed to evaluate it at: "
+  theCommands << "Evaluated function in: "
+  << this->numGoodEvaluations << " points and failed to evaluate it at: "
   << this->numBadEvaluations << " points. ";
   return true;
 }
@@ -561,7 +562,7 @@ bool CalculatorFunctions::innerIntegrateXpowerNePowerAx(
   if (!theFunctionE.StartsWith(theCommands.opTimes(), 3)) {
     return false;
   }
-  Expression exponentPartE = theFunctionE[1];//<- note: the seemingly odd order is intentional!
+  Expression exponentPartE = theFunctionE[1]; //<- note: the seemingly odd order is intentional!
   Expression polyPartE = theFunctionE[2]; //<- note: the seemingly odd order is intentional!
   Expression powerOfXE, powerOfEE;
   Expression aE, bE;//exponent is of form aX+b

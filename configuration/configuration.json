@@ -10,7 +10,7 @@
   "builtInTLSAvailable":null,
   "monitorPingTime":10,
   "gitRepository":"https://github.com/tmilev/calculator",
-  "portHTTP":"8155",
+  "portHTTP":"8156",
   "portHTTPSOpenSSL":"8166",
   "portHTTPSBuiltIn":"8177",
   "html-common/":"html-common/",

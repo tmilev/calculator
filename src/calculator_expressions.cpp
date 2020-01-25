@@ -3824,6 +3824,69 @@ bool Expression::ToStringSqrt3(
   return true;
 }
 
+bool Expression::ToStringGreaterThan(
+  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+) {
+  if (!input.IsListStartingWithAtom(input.owner->opGreaterThan())) {
+    return false;
+  }
+  out << input[1].ToString(theFormat) << "&gt;" << input[2].ToString(theFormat);
+  return true;
+}
+
+bool Expression::ToStringLessThanOrEqualTo(
+  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+) {
+  if (!input.IsListStartingWithAtom(input.owner->opLessThanOrEqualTo())) {
+    return false;
+  }
+  out << input[1].ToString(theFormat) << "\\leq " << input[2].ToString(theFormat);
+  return true;
+}
+
+bool Expression::ToStringLessThan(
+  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+) {
+  if (!input.IsListStartingWithAtom(input.owner->opLessThan())) {
+    return false;
+  }
+  out << input[1].ToString(theFormat) << "&lt;" << input[2].ToString(theFormat);
+  return true;
+}
+
+bool Expression::ToStringLimitProcess(
+  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+) {
+  if (!input.IsListStartingWithAtom(input.owner->opLimitProcess())) {
+    return false;
+  }
+  out << input[1].ToString(theFormat) << " \\to " << input[2].ToString(theFormat);
+  return true;
+}
+
+bool Expression::ToStringGreaterThanOrEqualTo(
+  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+) {
+  if (!input.IsListStartingWithAtom(input.owner->opGreaterThanOrEqualTo())) {
+    return false;
+  }
+  out << input[1].ToString(theFormat) << "\\geq " << input[2].ToString(theFormat);
+  return true;
+}
+
+bool Expression::ToStringError(
+  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+) {
+  if (!input.StartsWith(input.owner->opError(), 2)) {
+    return false;
+  }
+  input.owner->NumErrors ++;
+  out << "(Error~ " << input.owner->NumErrors << ":~ see~ comments)";
+  input.owner->Comments << "<br>Error "
+  << input.owner->NumErrors << ". " << input[1].ToString(theFormat);
+  return true;
+}
+
 bool Expression::ToStringSumOrIntegral(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
@@ -3896,6 +3959,31 @@ bool Expression::ToStringUnion(
     << "\\cup " << input[2].ToString(theFormat);
   } else {
     out << input[1].ToString(theFormat) << "\\cup " << input[2].ToString(theFormat);
+  }
+  return true;
+}
+
+bool Expression::ToStringUnionNoRepetition(
+  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+) {
+  if (!input.IsListStartingWithAtom(input.owner->opUnionNoRepetition())) {
+    return false;
+  }
+  out << input[1].ToString(theFormat) << "\\sqcup " << input[2].ToString(theFormat);
+  return true;
+}
+
+bool Expression::ToStringIntersection(
+  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+) {
+  if (!input.IsListStartingWithAtom(input.owner->opIntersection()) || input.size() != 3) {
+    return false;
+  }
+  if (input[1].StartsWith(input.owner->opUnion())) {
+    out << "\\left(" << input[1].ToString(theFormat) << "\\right)"
+    << "\\cap " << input[2].ToString(theFormat);
+  } else {
+    out << input[1].ToString(theFormat) << "\\cap " << input[2].ToString(theFormat);
   }
   return true;
 }
@@ -4240,6 +4328,36 @@ bool Expression::ToStringMod(
   return true;
 }
 
+bool Expression::ToStringLieBracket(
+  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+) {
+  if (!input.IsListStartingWithAtom(input.owner->opLieBracket())) {
+    return false;
+  }
+  out << "[" << input[1].ToString(theFormat) << "," << input[2].ToString(theFormat) << "]";
+  return true;
+}
+
+bool Expression::ToStringEqualEqual(
+  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+) {
+  if (!input.IsListStartingWithAtom(input.owner->opEqualEqual())) {
+    return false;
+  }
+  out << input[1].ToString(theFormat) << "==" << input[2].ToString(theFormat);
+  return true;
+}
+
+bool Expression::ToStringEqualEqualEqual(
+  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
+) {
+  if (!input.IsListStartingWithAtom(input.owner->opEqualEqualEqual())) {
+    return false;
+  }
+  out << input[1].ToString(theFormat) << "===" << input[2].ToString(theFormat);
+  return true;
+}
+
 std::string Expression::ToString(
   FormatExpressions* theFormat,
   Expression* startingExpression,
@@ -4322,46 +4440,27 @@ std::string Expression::ToString(
   } else if (this->ToStringSqrt2(*this, out, theFormat)) {
   } else if (this->ToStringMinus3(*this, out, theFormat)) {
   } else if (this->ToStringBind(*this, out, theFormat)) {
-  } else if (this->IsListStartingWithAtom(this->owner->opEqualEqual())) {
-    out << (*this)[1].ToString(theFormat) << "==" << (*this)[2].ToString(theFormat);
-  } else if (this->IsListStartingWithAtom(this->owner->opEqualEqualEqual())) {
-    out << (*this)[1].ToString(theFormat) << "===" << (*this)[2].ToString(theFormat);
+  } else if (this->ToStringEqualEqual(*this, out, theFormat)) {
+  } else if (this->ToStringEqualEqualEqual(*this, out, theFormat)) {
   } else if (this->ToStringDifferentiate(*this, out, theFormat)) {
   } else if (this->ToStringDifferential2(*this, out, theFormat)) {
   } else if (this->ToStringDifferential3(*this, out, theFormat)) {
   } else if (this->ToStringSumOrIntegral(*this, out, theFormat)) {
-  } else if (this->IsListStartingWithAtom(this->owner->opGreaterThan())) {
-    out << (*this)[1].ToString(theFormat) << "&gt;" << (*this)[2].ToString(theFormat);
-  } else if (this->IsListStartingWithAtom(this->owner->opGreaterThanOrEqualTo())) {
-    out << (*this)[1].ToString(theFormat) << "\\geq " << (*this)[2].ToString(theFormat);
-  } else if (this->IsListStartingWithAtom(this->owner->opLessThanOrEqualTo())) {
-    out << (*this)[1].ToString(theFormat) << "\\leq " << (*this)[2].ToString(theFormat);
+  } else if (this->ToStringGreaterThan(*this, out, theFormat)) {
+  } else if (this->ToStringGreaterThanOrEqualTo(*this, out, theFormat)) {
+  } else if (this->ToStringLessThanOrEqualTo(*this, out, theFormat)) {
   } else if (this->ToStringLimit(*this, out, theFormat)) {
-  } else if (this->IsListStartingWithAtom(this->owner->opLimitProcess())) {
-    out << (*this)[1].ToString(theFormat) << " \\to " << (*this)[2].ToString(theFormat);
-  } else if (this->IsListStartingWithAtom(this->owner->opLessThan())) {
-    out << (*this)[1].ToString(theFormat) << "&lt;" << (*this)[2].ToString(theFormat);
+  } else if (this->ToStringLimitProcess(*this, out, theFormat)) {
+  } else if (this->ToStringLessThan(*this, out, theFormat)) {
   } else if (this->ToStringMatrix(*this, out, theFormat)) {
   } else if (this->ToStringSequence(*this, out, theFormat)) {
-  } else if (this->IsListStartingWithAtom(this->owner->opLieBracket())) {
-    out << "[" << (*this)[1].ToString(theFormat) << "," << (*this)[2].ToString(theFormat) << "]";
+  } else if (this->ToStringLieBracket(*this, out, theFormat)) {
   } else if (this->ToStringMod(*this, out, theFormat)) {
   } else if (this->ToStringUnion(*this, out, theFormat)) {
-  } else if (this->IsListStartingWithAtom(this->owner->opIntersection()) && this->size() == 3) {
-    if ((*this)[1].StartsWith(this->owner->opUnion())) {
-      out << "\\left(" << (*this)[1].ToString(theFormat) << "\\right)"
-      << "\\cap " << (*this)[2].ToString(theFormat);
-    } else {
-      out << (*this)[1].ToString(theFormat) << "\\cap " << (*this)[2].ToString(theFormat);
-    }
-  } else if (this->IsListStartingWithAtom(this->owner->opUnionNoRepetition())) {
-    out << (*this)[1].ToString(theFormat) << "\\sqcup " << (*this)[2].ToString(theFormat);
+  } else if (this->ToStringIntersection(*this, out, theFormat)) {
+  } else if (this->ToStringUnionNoRepetition(*this, out, theFormat)) {
   } else if (this->ToStringEndStatement(out, startingExpression, outputJS, theFormat)) {
-  } else if (this->StartsWith(this->owner->opError(), 2)) {
-    this->owner->NumErrors ++;
-    out << "(Error~ " << this->owner->NumErrors << ":~ see~ comments)";
-    this->owner->Comments << "<br>Error "
-    << this->owner->NumErrors << ". " << (*this)[1].ToString(theFormat);
+  } else if (this->ToStringError(*this, out, theFormat)) {
   } else if (this->size() == 1) {
     out << (*this)[0].ToString(theFormat);
   } else if (this->ToStringGeneral(out, theFormat)) {

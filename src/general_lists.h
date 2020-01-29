@@ -1747,31 +1747,6 @@ public:
   }
 };
 
-class FileInformation {
-  friend std::ostream& operator<<(std::ostream& output, const FileInformation& theFI) {
-    output << theFI.ToString();
-    return output;
-  }
-  public:
-  std::string FileName;
-  std::string FileDescription;
-  std::string ToString() const {
-    std::stringstream out;
-    out << "file: " << this->FileName << ", description: " << this->FileDescription;
-    return out.str();
-  }
-  bool operator>(const FileInformation& other) {
-    return this->FileName>other.FileName;
-  }
-  bool operator==(const FileInformation& other) const {
-    return this->FileName == other.FileName;
-  }
-  static unsigned int HashFunction(const FileInformation& input) {
-    return MathRoutines::HashString(input.FileName);
-  }
-  static void AddProjectInfo(const std::string& fileName, const std::string& fileDescription);
-};
-
 class ProgressReport {
 public:
   int currentLevel;

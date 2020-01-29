@@ -529,16 +529,6 @@ void GlobalVariables::initOutputReportAndCrashFileNames(
   this->RelativePhysicalNameCrashReport = "crash_" + inputAbbreviated + ".html";
 }
 
-void FileInformation::AddProjectInfo(const std::string& fileName, const std::string& fileDescription) {
-
-  FileInformation theInfo;
-  theInfo.FileName = fileName;
-  theInfo.FileDescription = fileDescription;
-  std::cout << "DEBUG: file, description: " << fileName << ", " << fileDescription << "\n";
-  // This has been deprecated due to initialization order racing:
-  // GlobalVariables::theSourceCodeFiles().AddOnTopNoRepetition(theInfo);
-}
-
 UserCalculatorData::UserCalculatorData() {
   this->approximateHoursSinceLastTokenWasIssued = - 1;
   this->flagEnteredAuthenticationToken = false;
@@ -712,12 +702,12 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent) {
     global.fatal << "This is a programming error: currentComponent is empty which is impossible. " << global.fatal;
   }
   if (this->numberOfThreeValencyNodes(indexComponent) == 1) {
-    //type D or E
-    //in type D first comes the triple node, then the long string, then the one-root strings
-    //the long string is oriented with the end that is connected to the triple node having
-    //smaller index
-    //in type E similarly the longest string comes first oriented with the root that is
-    //linked to the triple node having smaller index
+    // type D or E
+    // in type D first comes the triple node, then the long string, then the one-root strings
+    // the long string is oriented with the end that is connected to the triple node having
+    // smaller index
+    // in type E similarly the longest string comes first oriented with the root that is
+    // linked to the triple node having smaller index
     // then comes the second longest string (oriented in the same fashion)
     // and last the one-root string
     Vector<Rational> tripleNode;
@@ -810,9 +800,9 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent) {
       MathRoutines::swap(length1, length2);
       MathRoutines::swap(numLength1, numLength2);
       currentEnds.SwapTwoIndices(0, 1);
-    }//<-so far we made sure the first length is long
-    //By convention, in types G and C, in the Dynkin diagram the long root comes last
-    //This is handled at the very end of this function (outside all the if clauses).
+    } // <-so far we made sure the first length is long
+    // By convention, in types G and C, in the Dynkin diagram the long root comes last
+    // This is handled at the very end of this function (outside all the if clauses).
     if (numLength1 == numLength2) {
       //B2, C2, F4 or G2
       if (numLength1 == 2) {
@@ -834,7 +824,7 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent) {
       }
     }
   }
-  //The following code ensures the Dynkin diagram is properly ordered
+  // The following code ensures the Dynkin diagram is properly ordered
   currentComponent.SwapTwoIndices(0, currentEnds[0]);
   for (int i = 0; i < currentComponent.size; i ++) {
     for (int j = i + 1; j < currentComponent.size; j ++) {
@@ -844,9 +834,9 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent) {
       }
     }
   }
-  //so far we made sure the entire component is one properly ordered string, starting with the long root.
+  // so far we made sure the entire component is one properly ordered string, starting with the long root.
   if (outputType.theLetter == 'G' || outputType.theLetter == 'C' ) {
-    currentComponent.ReverseOrderElements();//<-in G_2 and C_n the short root comes first so we need to reverse elements.
+    currentComponent.ReverseOrderElements(); // <-in G_2 and C_n the short root comes first so we need to reverse elements.
   }
 }
 
@@ -904,7 +894,9 @@ void DynkinDiagramRootSubalgebra::ComputeDiagramInputIsSimple(const Vectors<Rati
   DynkinType tempType;
   this->GetDynkinType(tempType);
   if (tempType.IsEqualToZero() && simpleBasisInput.size != 0) {
-    global.fatal << "Dynkin type of zero but the roots generating the type are: " << simpleBasisInput.ToString() << global.fatal;
+    global.fatal
+    << "Dynkin type of zero but the roots generating the type are: "
+    << simpleBasisInput.ToString() << global.fatal;
   }
 }
 
@@ -930,7 +922,9 @@ bool DynkinDiagramRootSubalgebra::IsGreaterThan(DynkinDiagramRootSubalgebra& rig
     return false;
   }
   if (this->SimpleComponentTypes.size != this->SimpleBasesConnectedComponents.size) {
-    global.fatal << "Simple component types do not match number of connected components. " << global.fatal;
+    global.fatal
+    << "Simple component types do "
+    << "not match number of connected components. " << global.fatal;
   }
   for (int i = 0; i < this->SimpleComponentTypes.size; i ++) {
     if (this->SimpleBasesConnectedComponents[i].size > right.SimpleBasesConnectedComponents[i].size) {
@@ -1156,8 +1150,10 @@ int DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes(int indexComponent) {
       currentComponent.GetGramMatrix(theGram, &this->AmbientBilinearForm);
       global.fatal << "This is a programming error: corrupt simple basis corresponding to "
       << "Dynkin diagram: the Dynkin diagram should have nodes with"
-      << " valency at most 3, but this diagram has node with valency " << counter << ". The current component is: "
-      << currentComponent.ToString() << ". The corresponding Symmetric Cartan is: "
+      << " valency at most 3, but this diagram has node with valency "
+      << counter << ". The current component is: "
+      << currentComponent.ToString()
+      << ". The corresponding Symmetric Cartan is: "
       << theGram.ToString() << ". " << global.fatal;
     }
     if (counter == 3) {
@@ -1170,14 +1166,17 @@ int DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes(int indexComponent) {
     }
   }
   if (result > 1) {
-    global.fatal << "numEnds variable equals: " << numEnds << ", number of three-nodes equals: "
+    global.fatal << "numEnds variable equals: " << numEnds
+    << ", number of three-nodes equals: "
     << result << "; this should not happen. The bilinear form is: "
     << this->AmbientBilinearForm.ToString() << global.fatal;
   }
   if (result == 1) {
     if (numEnds != 3) {
-      global.fatal << "numEnds variable equals: " << numEnds << ", number of three-nodes equals: "
-      << result << "; this should not happen. The bilinear form is: " << this->AmbientBilinearForm.ToString() << global.fatal;
+      global.fatal << "numEnds variable equals: " << numEnds
+      << ", number of three-nodes equals: "
+      << result << "; this should not happen. The bilinear form is: "
+      << this->AmbientBilinearForm.ToString() << global.fatal;
     }
   } else {
     if (numEnds > 2) {

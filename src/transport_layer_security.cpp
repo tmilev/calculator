@@ -1558,7 +1558,7 @@ JSData TransportLayerSecurityServer::Session::ToJSON() {
   result[TransportLayerSecurityServer::Session::JSLabels::myRandomBytes                    ] = Crypto::ConvertListUnsignedCharsToHex(this->myRandomBytes);
   result[TransportLayerSecurityServer::Session::JSLabels::OCSPrequest                      ] = this->flagRequestOnlineCertificateStatusProtocol;
   result[TransportLayerSecurityServer::Session::JSLabels::signedCertificateTimestampRequest] = this->flagRequestSignedCertificateTimestamp;
-  result[TransportLayerSecurityServer::Session::JSLabels::ellipticCurveId                  ] = this->chosenEllipticCurve;
+  result[TransportLayerSecurityServer::Session::JSLabels::ellipticCurveId                  ] = static_cast<int>(this->chosenEllipticCurve);
   result[TransportLayerSecurityServer::Session::JSLabels::ellipticCurveName                ] = this->chosenEllipticCurveName;
   result[TransportLayerSecurityServer::Session::JSLabels::bytesToSign                      ] = Crypto::ConvertListUnsignedCharsToHex(this->bytesToSign);
   JSData ciphers;
@@ -1903,6 +1903,7 @@ TransportLayerSecurityServer::Session::Session() {
   this->socketId = - 1;
   this->owner = nullptr;
   this->chosenCipher = 0;
+  this->chosenEllipticCurve = 0;
   this->flagRequestOnlineCertificateStatusProtocol = false;
   this->flagRequestSignedCertificateTimestamp = false;
 }

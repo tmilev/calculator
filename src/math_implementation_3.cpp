@@ -1998,7 +1998,7 @@ std::string StringRoutines::Differ::DifferenceHTML() {
 }
 
 StringRoutines::Differ::Differ() {
-  this->MaxMatrixSize = 10000000;
+  this->MaxMatrixSize = 200000000;
   this->currentCommonStringLength = 0;
 }
 

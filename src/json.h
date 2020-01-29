@@ -70,7 +70,6 @@ public:
   JSData();
   ~JSData();
   JSData(const JSData& other);
-  JSData(const char* other);
   bool isEqualTo(const std::string& other);
   void operator=(const JSData& other);
   void operator=(const List<JSData>& other);

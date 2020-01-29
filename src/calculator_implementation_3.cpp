@@ -1918,7 +1918,7 @@ bool Calculator::Test::ProcessResults() {
       out << "<b style='color:red'>Write file failed. </b>" << commentsOnFailure2.str();
     }
   }
-  std::stringstream goodCommands, unknownCommands, badCommands;
+  std::stringstream goodCommands, unknownCommands, badCommands, badCommandsConsole;
   this->inconsistencies = 0;
   if (
     this->startIndex > 0 ||
@@ -1929,12 +1929,15 @@ bool Calculator::Test::ProcessResults() {
   }
   for (int i = this->startIndex; i < this->lastIndexNotTested; i ++) {
     Calculator::Test::OneTest& currentTest = this->commands.theValues[i];
-    std::stringstream currentLine;
+    std::stringstream currentLine, currentLineConsole;
     currentLine << "<tr>";
     currentLine << "<td style = 'min-width:25px;'>" << i << "</td>";
+    currentLineConsole << "Test " << i << "\n";
     currentLine << "<td style = 'min-width:200px;'>" << currentTest.functionAdditionalIdentifier
     << "</td>";
+    currentLineConsole << "Function " << currentTest.functionAdditionalIdentifier << ", atom: " << currentTest.atom << "\n";
     currentLine << "<td style = 'min-width:45px;'>" << currentTest.atom << "</td>";
+    currentLineConsole << "Ran:\n" << this->commands.theKeys[i] << "\n";
     currentLine << "<td style = 'min-width:200px;'>" << global.ToStringCalculatorComputation(this->commands.theKeys[i], this->commands.theKeys[i]) << "</td>";
     bool isBad = false;
     bool isUknown = false;
@@ -1945,16 +1948,21 @@ bool Calculator::Test::ProcessResults() {
       isUknown = true;
       this->unknown ++;
     } else {
+      StringRoutines::Differ theDiffer;
+      theDiffer.left = HtmlRoutines::ConvertStringToHtmlString(currentTest.actualResult, false);
+      theDiffer.right = HtmlRoutines::ConvertStringToHtmlString(currentTest.expectedResult, false);
       currentLine << "<td style = 'min-width:100px;'><b style='color:red'>unexpected result</b></td>"
-      << "<td class = 'cellCalculatorResult'>got: " << currentTest.actualResult << "</td>"
-      << "<td class = 'cellCalculatorResult'>expected: " << currentTest.expectedResult << "</td>"
+      << "<td class = 'cellCalculatorResult'>" << theDiffer.DifferenceHTML() << "</td>"
       ;
+      currentLineConsole << "Got:\n" << currentTest.actualResult << "\n";
+      currentLineConsole << "Expected:\n" << currentTest.expectedResult << "\n";
       isBad = true;
       this->inconsistencies ++;
     }
     currentLine << "</tr>";
     if (isBad) {
       badCommands << currentLine.str();
+      badCommandsConsole << currentLineConsole.str();
     } else if (isUknown) {
       unknownCommands << currentLine.str();
     } else {
@@ -1977,14 +1985,20 @@ bool Calculator::Test::ProcessResults() {
     << " and rerun the present test to store the expected results. "
     ;
     out << "<table class = 'tableCalculatorOutput'>" << badCommands.str() << "</table>";
+    global << logger::red << "There were " << this->inconsistencies << " inconsistencies. " << logger::endL;
+    global << badCommandsConsole.str() << logger::endL;
   }
   if (this->unknown > 0) {
     out << "<b style = 'color:orange'>There were " << this->unknown
     << " commands with no previous recorded results. </b>";
+    global << logger::orange << "There were " << this->unknown
+    << " commands with no previous recorded results." << logger::endL;
     if (this->flagTestResultsExist) {
       out
-      << "<b>Please erase file " << WebAPI::calculator::testFileNameVirtual
+      << "<b>Erase file " << WebAPI::calculator::testFileNameVirtual
       << " and rerun the present test to store the expected results.</b>";
+      global << logger::yellow << "Erase file " << WebAPI::calculator::testFileNameVirtual
+      << " and rerun the present test to store the expected results.";
     }
     out << "<table>" << unknownCommands.str() << "</table>";
   }
@@ -1994,7 +2008,7 @@ bool Calculator::Test::ProcessResults() {
   out << "<table>" << goodCommands.str() << "</table>";
   out << "<br>Total run time: " << global.GetElapsedMilliseconds() - this->startTime << " ms. ";
   this->reportHtml = out.str();
-  return this->inconsistencies > 0;
+  return this->inconsistencies == 0;
 }
 
 int Calculator::GetNumBuiltInFunctions() {

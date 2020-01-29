@@ -71,7 +71,8 @@ bool Calculator::Test::BuiltInFunctionsABTest(Calculator& ownerInitialized) {
   Calculator::Test test(ownerInitialized);
   test.CalculatorTestPrepare();
   if (!test.CalculatorTestRun()) {
-    global.fatal << "Calculator AB test failed. " << global.fatal;
+    global.fatal << "Calculator AB test failed with " << test.inconsistencies
+    << " inconsistencies." << global.fatal;
   }
   return true;
 }

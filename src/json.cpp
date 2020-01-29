@@ -895,11 +895,6 @@ somestream& JSData::IntoStream(
   return out;
 }
 
-JSData::JSData(const char* other) {
-  this->reset();
-  this->operator=(other);
-}
-
 JSData::JSData(const JSData& other) {
   this->operator=(other);
 }

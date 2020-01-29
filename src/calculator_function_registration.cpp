@@ -223,7 +223,9 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorHtmlFunctions::innerEvaluateSymbols,
     "",
     "Evaluates and replaces individual symbols/variables in LaTeX string. Leaves the rest of the string intact.",
-    "x = 5; left = a; EvaluateSymbols(\"x^x +ax +a x +\\left(left \\right)\")",
+    "x = 5;\n"
+    "left = a;\n"
+    "EvaluateSymbols(\"x^x +ax +a x +\\left(left \\right)\")",
     "CalculatorConversions::innerEvaluateSymbols",
     "EvaluateSymbols",
     innerStandard

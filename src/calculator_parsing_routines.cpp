@@ -1857,7 +1857,7 @@ bool Calculator::ExtractExpressions(Expression& outputExpression, std::string* o
   MacroRegisterFunctionWithName("Calculator::ExtractExpressions");
   //std::string lookAheadToken;
   std::stringstream errorLog;
-  (*this->CurrentSyntacticStacK).Reserve((*this->CurrrentSyntacticSouP).size +this->numEmptyTokensStart);
+  (*this->CurrentSyntacticStacK).Reserve((*this->CurrrentSyntacticSouP).size + this->numEmptyTokensStart);
   (*this->CurrentSyntacticStacK).SetSize(this->numEmptyTokensStart);
   for (int i = 0; i < this->numEmptyTokensStart; i ++) {
     (*this->CurrentSyntacticStacK)[i] = this->GetEmptySyntacticElement();
@@ -1904,7 +1904,7 @@ bool Calculator::ExtractExpressions(Expression& outputExpression, std::string* o
         << " times without advancing to the next syntactic element in the syntactic soup. "
         << "If this is indeed an expression which requires that "
         << "many application of a single parsing rule, "
-        << "then you should modify function Calculator::ExtractExpressions"
+        << "then you should modify function Calculator::ExtractExpressions. "
         << global.fatal;
       }
     }

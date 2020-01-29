@@ -367,7 +367,7 @@ Calculator.prototype.submitComputationPartTwo = function(input) {
   var thePage = window.calculator.mainPage;
   var urlCopy = Object.assign({}, thePage.storage.urlObject);
   urlCopy.inputFocus = true;
-  var stringifiedHash = thePage.storage.getCleanedUpURL(urlCopy);
+  var stringifiedHash = thePage.storage.getPercentEncodedURL(urlCopy);
   document.getElementById("spanComputationLink").innerHTML = `<a href = '#${stringifiedHash}'>Link to your input</a>`;
   setTimeout(() => {
     initializeButtons.calculatorPanel.mQHelpCalculator();

@@ -364,6 +364,11 @@ function StorageCalculator() {
 }
 
 /**@returns {String} */
+StorageCalculator.prototype.getPercentEncodedURL = function(input) {
+  return encodeURIComponent(JSON.stringify(input));
+}
+
+/**@returns {String} */
 StorageCalculator.prototype.getCleanedUpURL = function(input) {
   var stringifiedInput = JSON.stringify(input);
   var isGood = true;

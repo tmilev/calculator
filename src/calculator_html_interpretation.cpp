@@ -788,6 +788,7 @@ std::string WebAPIResponse::GetJSONFromTemplate() {
   CalculatorHTML thePage;
   thePage.flagUseJSON = true;
   std::stringstream comments;
+  global.Comments << "DEBUG: and course home is: " << global.GetWebInput("courseHome");
   thePage.fileName = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("courseHome"), false);
   if (!thePage.LoadMe(true, global.GetWebInput("randomSeed"), &comments)) {
     out << "<b>Failed to load file: "

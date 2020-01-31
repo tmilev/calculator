@@ -358,8 +358,8 @@ function StorageCalculator() {
       callbackOnValueChange: themes.theme.doChangeTheme.bind(themes.theme),
     }),
   };
-  this.oldHash = "";
-  this.currentHash = "";
+  this.currentHashRaw = "";
+  this.currenTHashDecoded = "";
   this.urlObject = {};
 }
 
@@ -387,17 +387,18 @@ StorageCalculator.prototype.getCleanedUpURL = function(input) {
 }
 
 StorageCalculator.prototype.parseURL = function() {
-  this.oldHash = this.currentHash;
   try {
-    this.currentHash = decodeURIComponent(window.location.hash);
-    if (this.currentHash.startsWith('#')) {
-      this.currentHash = this.currentHash.slice(1);
+    if (this.currentHashRaw === window.location.hash) {
+      return;
     }
-    if (this.oldHash !== this.currentHash && this.currentHash !== "") {
-      this.urlObject = JSON.parse(this.currentHash);
+    this.currentHashRaw = window.location.hash;
+    this.currenTHashDecoded = decodeURIComponent(this.currentHashRaw);
+    if (this.currenTHashDecoded.startsWith('#')) {
+      this.currenTHashDecoded = this.currenTHashDecoded.slice(1);
     }
+    this.urlObject = JSON.parse(this.currenTHashDecoded);
   } catch (e) {
-    console.log(`Failed to parse your url hash ${this.currentHash} obtained from ${window.location.hash}. ${e}`);
+    console.log(`Failed to parse your url hash ${this.currenTHashDecoded} obtained from ${window.location.hash}. ${e}`);
   }
 }
 
@@ -469,6 +470,7 @@ StorageCalculator.prototype.computeURLRecursively = function(currentStorage, rec
 StorageCalculator.prototype.setURL = function () {
   this.urlObject = this.computeURLRecursively(this.variables);
   var incomingHash = this.getPercentEncodedURL(this.urlObject);
+
   if (incomingHash !== this.currentHash) {
     window.location.hash = incomingHash;
   }

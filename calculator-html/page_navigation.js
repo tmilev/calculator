@@ -388,7 +388,9 @@ StorageCalculator.prototype.getCleanedUpURL = function(input) {
 
 StorageCalculator.prototype.parseURL = function() {
   try {
-    if (this.currentHashRaw === window.location.hash) {
+    if (
+      this.currentHashRaw === window.location.hash
+    ) {
       return;
     }
     this.currentHashRaw = window.location.hash;
@@ -396,7 +398,11 @@ StorageCalculator.prototype.parseURL = function() {
     if (this.currenTHashDecoded.startsWith('#')) {
       this.currenTHashDecoded = this.currenTHashDecoded.slice(1);
     }
-    this.urlObject = JSON.parse(this.currenTHashDecoded);
+    if (this.currenTHashDecoded === "") {
+      this.urlObject = {};
+    } else {
+      this.urlObject = JSON.parse(this.currenTHashDecoded);
+    }
   } catch (e) {
     console.log(`Failed to parse your url hash ${this.currenTHashDecoded} obtained from ${window.location.hash}. ${e}`);
   }
@@ -857,6 +863,13 @@ Page.prototype.selectPage = function(inputPage) {
 
 Page.prototype.getCurrentProblem = function() {
   var problemFileName = this.storage.variables.currentCourse.problemFileName.getValue();
+  if (
+    problemFileName === "" || 
+    problemFileName === null || 
+    problemFileName === undefined
+  ) {
+    return null;
+  }
   return problemPage.allProblems.getProblemByIdOrRegisterEmpty(problemFileName);
 }
 

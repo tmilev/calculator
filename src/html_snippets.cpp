@@ -149,11 +149,11 @@ const std::string& HtmlRoutines::GetCSSAddStyleTags(const std::string& fileNameV
 }
 
 const std::string& HtmlRoutines::GetMathQuillStyleSheeTWithTags() {
-  return HtmlRoutines::GetCSSAddStyleTags("/html-common/mathquill.css");
+  return HtmlRoutines::GetCSSAddStyleTags("/html-common/mathquill/mathquill.css");
 }
 
 const std::string HtmlRoutines::GetMathQuillStyleSheetLink() {
-  return HtmlRoutines::GetCSSLink("/html-common/mathquill.css");
+  return HtmlRoutines::GetCSSLink("/html-common/mathquill/mathquill.css");
 }
 
 const std::string HtmlRoutines::GetCSSLinkCalculator(const std::string& relativeTo) {

@@ -331,7 +331,7 @@ Problem.prototype.getAppAnchorRequestFileCourseTopics = function(
     }
   }
   var thePage = window.calculator.mainPage;
-  var stringifiedHash = thePage.storage.getCleanedUpURL(requestJSON);
+  var stringifiedHash = thePage.storage.getPercentEncodedURL(requestJSON);
   return stringifiedHash;
 }
 

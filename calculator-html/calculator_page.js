@@ -204,7 +204,7 @@ Calculator.prototype.getComputationLink = function(input) {
     calculatorInput: input,
   };
   var thePage = window.calculator.mainPage;
-  var stringifiedHash = thePage.storage.getCleanedUpURL(theURL);
+  var stringifiedHash = thePage.storage.s(theURL);
   return stringifiedHash;
 }
 

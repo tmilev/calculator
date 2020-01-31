@@ -468,7 +468,7 @@ StorageCalculator.prototype.computeURLRecursively = function(currentStorage, rec
 
 StorageCalculator.prototype.setURL = function () {
   this.urlObject = this.computeURLRecursively(this.variables);
-  var incomingHash = this.getCleanedUpURL(this.urlObject);
+  var incomingHash = this.getPercentEncodedURL(this.urlObject);
   if (incomingHash !== this.currentHash) {
     window.location.hash = incomingHash;
   }

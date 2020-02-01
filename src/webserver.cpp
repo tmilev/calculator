@@ -1898,7 +1898,7 @@ bool WebWorker::CorrectRequestsAFTERLoginReturnFalseIfModified() {
       shouldFallBackToDefaultPage = true;
     } else if (
       global.requestType == "template" &&
-      global.GetWebInput("courseHome") == ""
+      global.GetWebInput(WebAPI::problem::courseHome) == ""
     ) {
       shouldFallBackToDefaultPage = true;
     }

@@ -748,9 +748,9 @@ bool UserCalculatorData::ComputeCourseInfo() {
   } else {
     this->sectionComputed = this->sectionInDB;
   }
-  if (isAdmin && global.GetWebInput("courseHome") != "") {
+  if (isAdmin && global.GetWebInput(WebAPI::problem::courseHome) != "") {
     this->courseComputed =
-    HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("courseHome"), false);
+    HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput(WebAPI::problem::courseHome), false);
   } else {
     this->courseComputed = this->courseInDB;
   }
@@ -796,7 +796,7 @@ JSData ProblemData::StoreJSON() const {
   JSData result;
   result.theType = JSData::token::tokenObject;
   if (this->flagRandomSeedGiven) {
-    result["randomSeed"] = std::to_string(this->randomSeed);
+    result[WebAPI::problem::randomSeed] = std::to_string(this->randomSeed);
   }
   for (int i = 0; i < this->theAnswers.size(); i ++) {
     Answer& currentA = this->theAnswers.theValues[i];
@@ -1002,8 +1002,8 @@ bool ProblemData::LoadFromOldFormat(const std::string& inputData, std::stringstr
   this->totalNumSubmissions = 0;
   this->flagRandomSeedGiven = false;
   if (global.UserRequestRequiresLoadingRealExamData()) {
-    if (theMap.Contains("randomSeed")) {
-      this->randomSeed = static_cast<unsigned>(atoi(theMap.GetValueCreate("randomSeed").c_str()));
+    if (theMap.Contains(WebAPI::problem::randomSeed)) {
+      this->randomSeed = static_cast<unsigned>(atoi(theMap.GetValueCreate(WebAPI::problem::randomSeed).c_str()));
       this->flagRandomSeedGiven = true;
     }
   }
@@ -1011,7 +1011,7 @@ bool ProblemData::LoadFromOldFormat(const std::string& inputData, std::stringstr
   bool result = true;
   MapList<std::string, std::string, MathRoutines::HashString> currentQuestionMap;
   for (int i = 0; i < theMap.size(); i ++) {
-    if (theMap.theKeys[i] == "randomSeed") {
+    if (theMap.theKeys[i] == WebAPI::problem::randomSeed) {
       continue;
     }
     this->AddEmptyAnswerIdOnTop(HtmlRoutines::ConvertURLStringToNormal(theMap.theKeys[i], false));
@@ -1050,9 +1050,9 @@ bool ProblemData::LoadFromJSON(const JSData& inputData, std::stringstream& comme
   this->totalNumSubmissions = 0;
   this->flagRandomSeedGiven = false;
   if (global.UserRequestRequiresLoadingRealExamData()) {
-    if (inputData.objects.Contains("randomSeed")) {
+    if (inputData.objects.Contains(WebAPI::problem::randomSeed)) {
       this->randomSeed = static_cast<unsigned>(atoi(
-        inputData.objects.GetValueConstCrashIfNotPresent("randomSeed").theString.c_str()
+        inputData.objects.GetValueConstCrashIfNotPresent(WebAPI::problem::randomSeed).theString.c_str()
       ));
       this->flagRandomSeedGiven = true;
     }
@@ -1060,7 +1060,7 @@ bool ProblemData::LoadFromJSON(const JSData& inputData, std::stringstream& comme
   this->theAnswers.Clear();
   bool result = true;
   for (int i = 0; i < inputData.objects.size(); i ++) {
-    if (inputData.objects.theKeys[i] == "randomSeed") {
+    if (inputData.objects.theKeys[i] == WebAPI::problem::randomSeed) {
       continue;
     }
     this->AddEmptyAnswerIdOnTop(HtmlRoutines::ConvertURLStringToNormal(inputData.objects.theKeys[i], false));
@@ -1328,7 +1328,7 @@ bool Database::User::AddUsersFromEmails(
   for (int i = 0; i < theEmails.size; i ++) {
     currentUser.reset();
     currentUser.username = theEmails[i];
-    currentUser.courseInDB = global.GetWebInput("courseHome");
+    currentUser.courseInDB = global.GetWebInput(WebAPI::problem::courseHome);
     currentUser.sectionInDB = userGroup;
     currentUser.instructorInDB = global.userDefault.username;
     currentUser.email = theEmails[i];

@@ -475,10 +475,11 @@ StorageCalculator.prototype.computeURLRecursively = function(currentStorage, rec
 
 StorageCalculator.prototype.setURL = function () {
   this.urlObject = this.computeURLRecursively(this.variables);
-  var incomingHash = this.getPercentEncodedURL(this.urlObject);
+  var incomingHashRaw = this.getPercentEncodedURL(this.urlObject);
 
-  if (incomingHash !== this.currentHash) {
-    window.location.hash = incomingHash;
+  if (incomingHashRaw !== this.currentHashRaw) {
+    window.location.hash = incomingHashRaw;
+    this.currentHashRaw = incomingHashRaw;
   }
 }
 
@@ -864,8 +865,8 @@ Page.prototype.selectPage = function(inputPage) {
 Page.prototype.getCurrentProblem = function() {
   var problemFileName = this.storage.variables.currentCourse.problemFileName.getValue();
   if (
-    problemFileName === "" || 
-    problemFileName === null || 
+    problemFileName === "" ||
+    problemFileName === null ||
     problemFileName === undefined
   ) {
     return null;

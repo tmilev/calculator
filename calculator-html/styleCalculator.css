@@ -1124,21 +1124,22 @@ a.linkSignUp:hover {
   background-color: LawnGreen;
 }
 
-a.courseLink {
+button.courseButton {
   display: inline-block;
   margin:  10px;
-  padding: 3px;
+  padding: 10px;
   background-color: #ccffcc;
+  border: none;
   -moz-border-radius: 7px;
   -webkit-border-radius: 7px;
   font-weight: bold;
   font-size: 2em;
   border-radius: 7px;
-  transition: 0.6s;
+  transition: 1.2s;
   text-decoration: none;
 }
 
-a.courseLink:hover {
+button.courseButton:hover {
   background-color: LawnGreen;
 }
 

@@ -1142,7 +1142,7 @@ a.linkSignUp:hover {
   background-color: LawnGreen;
 }
 
-a.courseLink {
+button.courseButton {
   display: inline-block;
   margin:  10px;
   padding: 3px;
@@ -1156,7 +1156,7 @@ a.courseLink {
   text-decoration: none;
 }
 
-a.courseLink:hover {
+a.courseButton:hover {
   background-color: LawnGreen;
 }
 

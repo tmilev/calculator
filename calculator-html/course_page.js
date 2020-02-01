@@ -97,9 +97,11 @@ function loadTopicList(callback) {
     topicListRequest = "topicListJSON";
   }
   var topicName = thePage.storage.variables.currentCourse.topicList.getValue();
+  var courseHome = thePage.storage.variables.currentCourse.courseHome.getValue();
   var theURL = "";
   theURL += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${topicListRequest}&`;
   theURL += `${pathnames.urlFields.problem.topicList}=${topicName}&`;
+  theURL += `${pathnames.urlFields.problem.courseHome}=${courseHome}&`;
   submitRequests.submitGET({
     url: theURL,
     callback: callback,
@@ -130,7 +132,7 @@ function selectCurrentCoursePage() {
     courseBody.innerHTML = courseBodyHTML;
     setTimeout(() => {
       document.getElementById(temporarySelectCourseId).classList.remove("buttonFlash");
-    }, 100);
+    }, 0);
     return;
   }
   if (lastLoadedCourse.courseHome === incomingCourse && lastLoadedCourse.topicList === incomingTopicList) {
@@ -143,8 +145,12 @@ function selectCurrentCoursePage() {
   if (thePage.user.flagLoggedIn) {
     topicRequest = "templateJSON";
   }
+  var theURL = "";
+  theURL += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${topicRequest}&`;
+  theURL += `${pathnames.urlFields.problem.courseHome}=${incomingCourse}&`;
+  theURL += `${pathnames.urlFields.problem.topicList}=${incomingTopicList}`;
   submitRequests.submitGET({
-    url: `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${topicRequest}`,
+    url: theURL,
     callback: afterLoadCoursePage,
     progress: ids.domElements.spanProgressReportGeneral
   });

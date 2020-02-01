@@ -115,8 +115,8 @@ const std::string& HtmlRoutines::GetFile(
   } else {
     global << logger::red << "File: "
     << fileNameVirtual << " not found. " << commentsOnFailure.str() << logger::endL;
-    out << "<b style =\"color:red\">Failed to load file: " << fileNameVirtual
-    << ". Comments: " << commentsOnFailure.str() << "</b>";
+    out << "<b style =\"color:red\">Failed to load file: [" << fileNameVirtual
+    << "]. Comments: " << commentsOnFailure.str() << "</b>";
   }
   HtmlRoutines::preLoadedFiles().SetKeyValue(theID, out.str());
   return HtmlRoutines::preLoadedFiles().GetValueCreateNoInit(theID);

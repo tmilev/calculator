@@ -1136,7 +1136,10 @@ JSData WebWorker::ProcessComputationIndicatorJSData() {
     allowed = false;
   }
   if (!allowed) {
-    commentsOnFailure << "Monitoring allowed only over https. ";
+    commentsOnFailure << "Monitoring allowed only "
+    << "1) over https or "
+    << "2) when flag disableDatabaseLogEveryoneAsAdmin is set to true "
+    << "using file configuration/configuration.json.";
     result[WebAPI::result::error] = commentsOnFailure.str();
     return result;
   }
@@ -4294,8 +4297,11 @@ int WebServer::main(int argc, char **argv) {
     // Initializations of build flags.
     global.server().WebServer::InitializeBuildFlags();
     // Process executable arguments.
+    // May set the value of
+    // global.PathProjectBaseUserInputOrDeduced
     global.server().AnalyzeMainArguments(argc, argv);
-    // Initializes server base path.
+    // Initializes server base path
+    // using global.PathProjectBaseUserInputOrDeduced.
     global.initDefaultFolderAndFileNames();
     // Ensure the server path coincides with the current
     // directory:
@@ -4318,7 +4324,8 @@ int WebServer::main(int argc, char **argv) {
     global.ConfigurationProcess();
     // Store back the config file if it changed.
     global.ConfigurationStore();
-    global << "Computation timeout: " << logger::red << global.millisecondsMaxComputation << " ms." << logger::endL;
+    global << "Computation timeout: " << logger::red
+    << global.millisecondsMaxComputation << " ms." << logger::endL;
 
     if (!Database::get().initializeServer()) {
       global.fatal << "Failed to initialize database. " << global.fatal;

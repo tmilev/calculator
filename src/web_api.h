@@ -261,8 +261,6 @@ public:
   static const std::string& GetJavascriptMathQuillMatrixSupporTWithTags();
   static const std::string GetJavascriptMathQuillMatrixSupportLink();
 
-  static std::string GetJavascriptMathQuillDefaultFull();
-  static std::string GetJavascriptMathQuillMatrixSupportFull();
   static std::string GetJavascriptVariable(const std::string& theVar);
 
   static std::string GetMathSpanPure(

@@ -712,7 +712,6 @@ Page.prototype.initializeCalculatorPagePartTwo = function() {
 }
 
 Page.prototype.sectionSelect = function(sectionNumber) {
-  //console.log(`DEBUG: section select: ${sectionNumber}`);
   this.storage.variables.currentSectionComputed.setAndStore(sectionNumber);
   this.user.sectionComputed = this.user.sectionsTaught[sectionNumber];
   var deadlineSpans = document.getElementsByClassName(ids.domElements.classSpanDeadlineContainer);

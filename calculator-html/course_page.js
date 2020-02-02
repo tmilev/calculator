@@ -138,7 +138,6 @@ function selectCurrentCoursePage() {
   if (lastLoadedCourse.courseHome === incomingCourse && lastLoadedCourse.topicList === incomingTopicList) {
     return;
   }
-  console.log(`DEBUG: setting course home to ${incomingCourse}`);
   lastLoadedCourse.courseHome = incomingCourse;
   lastLoadedCourse.topicList = incomingTopicList;
   var topicRequest = "templateJSONNoLogin";

@@ -148,7 +148,6 @@ void Sha3::Chi() {
 }
 
 void Sha3::transform() {
-  // global << "DEBUG:\n" << this->ToStringState();
   for (int round = 0; round < Sha3::numberOfKeccakRounds; round ++) {
     this->Theta();
     this->PiOfRho();

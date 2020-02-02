@@ -1333,7 +1333,6 @@ CanvasTwoD.prototype.canvasClick = function (screenX, screenY) {
   this.selectedElement = "origin";
   //else
   //  this.selectedElement ="";
-  //console.log("DEBUG: flag show performance hardcoded. ");
   if (this.flagShowPerformance) {
     this.logStatus();
   }
@@ -2688,7 +2687,6 @@ function vectorToString(vector) {
 }
 
 Canvas.prototype.infoMouseCompute = function() {
-  //console.log('DEBUG: show log performance set to true');
   if (!this.flagShowPerformance) {
     return;
   }

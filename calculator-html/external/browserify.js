@@ -35,7 +35,6 @@ function doUglify() {
 //      throw err;
 //    }
 //    console.log(`Proceeding to uglify into: ` + outputUglified.green);
-//    //console.log(`DEBUG: About to minify:` + data.toString());
 //    //var options = { warnings: true };
 //    //var code = {outputUglified: data.toString()};
 //    var minifiedOutput = UglifyJS.minify(data.toString());

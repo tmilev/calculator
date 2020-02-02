@@ -186,46 +186,23 @@ const std::string HtmlRoutines::GetJavascriptLinkGraphicsNDimensions(const std::
 }
 
 const std::string& HtmlRoutines::GetJavascriptMathQuillDefaulTWithTags() {
-  return  HtmlRoutines::GetJavascriptAddScriptTags("/html-common/mathquill.min.js");
+  return  HtmlRoutines::GetJavascriptAddScriptTags("/html-common/mathquill/mathquill.min.js");
 }
 
 const std::string HtmlRoutines::GetJavascriptMathQuillDefaultLink() {
-  return  HtmlRoutines::GetJavascriptLink("/html-common/mathquill.min.js");
+  return HtmlRoutines::GetJavascriptLink("/html-common/mathquill/mathquill.min.js");
 }
 
 const std::string& HtmlRoutines::GetJavascriptMathQuillMatrixSupporTWithTags() {
-  return  HtmlRoutines::GetJavascriptAddScriptTags("/html-common/mathquill.min.js");
+  return  HtmlRoutines::GetJavascriptAddScriptTags("/html-common/mathquill/mathquill.min.js");
 }
 
 const std::string HtmlRoutines::GetJavascriptMathQuillMatrixSupportLink() {
-  return  HtmlRoutines::GetJavascriptLink("/html-common/mathquill.min.js");
-}
-
-std::string HtmlRoutines::GetJavascriptMathQuillDefaultFull() {
-  std::stringstream out;
-  out << "<script src =\""
-  << FileOperations::GetVirtualNameWithHash("/html-common/jquery.min.js")
-  << "\"></script>\n"
-  << HtmlRoutines::GetJavascriptMathQuillDefaultLink() << "\n"
-  << "<script type =\"text/javascript\">"
-  << "var globalMQ = MathQuill.getInterface(2); "
-  << "var MathQuillHasMatrixSupport = false;"
-  << "</script>";
-  return out.str();
+  return  HtmlRoutines::GetJavascriptLink("/html-common/mathquill/mathquill.min.js");
 }
 
 const std::string& HtmlRoutines::GetJavascriptBrowserifier() {
   return HtmlRoutines::GetJavascriptAddScriptTags("/calculator-html/browserifier.js");
-}
-
-std::string HtmlRoutines::GetJavascriptMathQuillMatrixSupportFull() {
-  std::stringstream out;
-  out << "<script src =\"/html-common/jquery.min.js\"></script>\n"
-  << HtmlRoutines::GetJavascriptMathQuillMatrixSupportLink() << "\n"
-  << "<script type =\"text/javascript\">"
-  << "var globalMQ = MathQuill.getInterface(2); var MathQuillHasMatrixSupport = true;"
-  << "</script>";
-  return out.str();
 }
 
 std::string HtmlRoutines::GetCalculatorComputationURL(const std::string& inputNoEncoding) {

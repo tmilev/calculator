@@ -718,10 +718,6 @@ JSData WebAPIResponse::GetTopicTableJSON() {
   std::stringstream comments;
   thePage.fileName = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput(WebAPI::problem::courseHome), false);
   thePage.topicListFileName = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput(WebAPI::problem::topicList), false);
-  global.Comments << "DEBUG: and course, topic list: "
-  << global.GetWebInput(WebAPI::problem::courseHome)
-  << ", " << global.GetWebInput(WebAPI::problem::topicList);
-
   JSData result;
   if (!thePage.LoadAndParseTopicList(out)) {
     out << "Failed to load and parse topic list.";

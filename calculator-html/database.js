@@ -39,7 +39,6 @@ function callbackFetchProblemData(button, input, output) {
   //thePanel.attributes.panelStatus = "collapsed";
   thePanel.doToggleContent();
   thePanel.matchPanelStatus();
-  //console.log("DEBUG: parsed input: " + JSON.stringify(inputParsed));
 }
 
 function fetchProblemData() {
@@ -50,8 +49,6 @@ function fetchProblemData() {
   theURL += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.database}&`;
   theURL += `${pathnames.urlFields.database.operation}=${pathnames.urlFields.database.fetch}&`;
   theURL += `${pathnames.urlFields.database.labels}=${labelsString}&`;
-  console.log("DEBUG: labelString: " + labelsString);
-  console.log(" URL: " + theURL);
   submitRequests.submitGET({
     url: theURL,
     progress: ids.domElements.spanProgressReportGeneral,

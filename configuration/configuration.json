@@ -37,5 +37,5 @@
   "html-common/mathquill/":"html-common/mathquill/",
   "html-common/jquery_ui/":"html-common/jquery_ui/",
   "html-common/ace/src-min/":"html-common/ace/src-min/",
-  "html-common/mathquill/fonts/":"html-common/fonts/"
+  "html-common/mathquill/fonts/":"html-common/mathquill/fonts/"
 }

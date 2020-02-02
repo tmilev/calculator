@@ -33,11 +33,7 @@ public:
   someFiniteGroup* G;
   Vector<coefficient> data;
   ClassFunction(): G(nullptr) {
-  } //the syntax :G(0) initializes the pointer G with 0.
-  //Although there may be a minor speed penalty
-  //(such a speed penalty is system dependent and possibly
-  //even hardware dependent),
-  //it is worth it to initialize all pointers with 0.
+  }
   void MakeZero(someFiniteGroup& inputWeyl);
   bool IsEqualToZero() const {
     return this->data.IsEqualToZero();
@@ -239,8 +235,6 @@ public:
     if (this->flagDeallocated) {
       global.fatal << "This is a programming error: use after free of Finite group. " << global.fatal;
     }
-    //if (this == 0)
-    //  global.fatal << "Finite group this pointer is zero. " << global.fatal;
     return true;
   }
   bool CheckInitialization() const;
@@ -340,11 +334,6 @@ public:
   // auto M = G.GetEmptyRationalRepresentation()
   GroupRepresentation<FiniteGroup<elementSomeGroup>, Rational> GetEmptyRationalRepresentation();
 
-  // This is a problem, not everything can have a ToString, but things need ToString(globalVariables) called
-  // Personally, I think the output class should have scalars special cased and all MilevObject types have
-  // their own ToString, which is exclusively called from the output class's operator<<, and the formatting
-  // parts of globalVariables are carried by the object of the output class that is surreptitiously passed
-  // around.  I mean, not that left shifting some random object by a string is a good design anyway
   friend std::ostream& operator<<(std::ostream& out, FiniteGroup<elementSomeGroup>& data) {
     out << data.ToString(0);
     return out;
@@ -1268,7 +1257,7 @@ public:
     out.theCharacteR = this->theCharacteR;
     return out;
   }
-  //Note:  The group representation types compute the hash value from the character,
+  // Note:  The group representation types compute the hash value from the character,
   // in which the order of the conjugacy classes determines the value
   // If you compare hash values from two groups which calculated their conjugacy classes in a different way,
   // you must ensure they are in the same order, or hashing won't work as expected.
@@ -1315,7 +1304,7 @@ void GroupRepresentation<someGroup, coefficient>::ComputeCharacter() const {
     Matrix<coefficient> M;
     M.MakeID(this->generatorS[0]);
     List<int> ccirWord;
-    //    this->GetMatrixOfElement(this->ownerGroup->conjugacyClasseS[cci].representative);
+    // this->GetMatrixOfElement(this->ownerGroup->conjugacyClasseS[cci].representative);
     this->ownerGroup->GetWord(this->ownerGroup->conjugacyClasseS[cci].representative, ccirWord);
     for (int i = 0; i < ccirWord.size; i ++) {
       M *= this->generatorS[ccirWord[i]];
@@ -1326,9 +1315,8 @@ void GroupRepresentation<someGroup, coefficient>::ComputeCharacter() const {
   this->flagCharacterIsComputed = true;
 }
 
-// this is not mathematical but collating order
-// the intention is to sort in reverse order within dimensions, according to
-// the usual way character tables are displayed
+// We aim to sort in reverse order within dimensions, according to
+// the usual way character tables are displayed.
 template <typename someGroup, typename coefficient>
 bool GroupRepresentation<someGroup, coefficient>::operator>(const GroupRepresentation<someGroup, coefficient>& right) const {
   if (!this->flagCharacterIsComputed) {
@@ -1422,7 +1410,7 @@ public:
     this->reset();
   }
   GroupRepresentation<somegroup, coefficient> MakeOtherGroupRepresentationClass() const;
-  //Note:  The group representation types compute the hash value from the character,
+  // Note:  The group representation types compute the hash value from the character,
   // in which the order of the conjugacy classes determines the value
   // If you compare hash values from two groups which calculated their conjugacy classes in a different way,
   // you must ensure they are in the same order, or hashing won't work as expected.
@@ -1945,14 +1933,14 @@ public:
   // WeylGroupData ElementS;
   List<ElementWeylGroup> RepresentativesQuotientAmbientOrder;
   Vectors<Rational> simpleRootsInner;
-  //Each element of the group is a list of inner and outer generators.
-  //The inner generators are reflections with
-  //respect to the fixed set of roots contained in this->simpleRootsInner.
-  //The outer generators are linear operators mapping
-  //the vector space of the root system onto itself.
-  //Here, outer automorphism are recorded using type Vectors<Rational>.
-  //Here, the i^th automorphism entry gives the image
-  //of the i^th simple inner root.
+  // Each element of the group is a list of inner and outer generators.
+  // The inner generators are reflections with
+  // respect to the fixed set of roots contained in this->simpleRootsInner.
+  // The outer generators are linear operators mapping
+  // the vector space of the root system onto itself.
+  // Here, outer automorphism are recorded using type Vectors<Rational>.
+  // Here, the i^th automorphism entry gives the image
+  // of the i^th simple inner root.
   List<Vectors<Rational> > ExternalAutomorphisms;
   HashedList<Vector<Rational> > RootSubsystem;
   Vectors<Rational> RootsOfBorel;
@@ -2235,9 +2223,9 @@ public:
   UDPolynomial(const UDPolynomial<coefficient>& other) {
     this->data = other.data;
   }
-  //UDPolynomial<coefficient> operator+(const UDPolynomial<coefficient>& right) const;
+  // UDPolynomial<coefficient> operator+(const UDPolynomial<coefficient>& right) const;
   void operator+=(const UDPolynomial<coefficient>& right);
-  //UDPolynomial<coefficient> operator-(const UDPolynomial<coefficient>& right) const;
+  // UDPolynomial<coefficient> operator-(const UDPolynomial<coefficient>& right) const;
   void operator-=(const UDPolynomial<coefficient>& right);
   UDPolynomial<coefficient> operator*(const UDPolynomial<coefficient>& right) const;
   //  UDPolynomial<coefficient> operator*(const coefficient& right) const;
@@ -2246,8 +2234,8 @@ public:
     *this = (*this) * other;
   }
   UDPolynomial<coefficient> TimesXn(int n) const;
-// Quick divisibility test
-// bool DivisibleBy(const UDPolynomial<coefficient>& divisor) const;
+  // Quick divisibility test
+  // bool DivisibleBy(const UDPolynomial<coefficient>& divisor) const;
   struct DivisionResult<UDPolynomial<coefficient> > DivideBy(const UDPolynomial<coefficient>& right) const;
   UDPolynomial<coefficient> operator/(const UDPolynomial<coefficient>& divisor) const;
   UDPolynomial<coefficient> operator%(const UDPolynomial<coefficient>& divisor) const;

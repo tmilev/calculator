@@ -8,7 +8,7 @@
 
 class Test {
 public:
-  class Suites{
+  class Suites {
   public:
     static const std::string all;
     static const std::string database;
@@ -80,7 +80,7 @@ bool Test::ShouldTest(const std::string& testSuite) {
 
 void Test::initialize(List<std::string>& inputArguments) {
   this->inputs = inputArguments;
-  global << "and input arguments are: " << inputArguments.ToStringCommaDelimited() << logger::endL;
+  global << "Input arguments: " << inputArguments.ToStringCommaDelimited() << logger::endL;
   if (
     this->inputs.size == 0 ||
     this->inputs.Contains(Test::Suites::all)

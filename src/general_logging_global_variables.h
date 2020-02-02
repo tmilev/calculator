@@ -104,20 +104,22 @@ class logger {
 // Please pay attention to the static initialization order fiasco.
 // The fiasco states that global objects (allocated before main)
 // may be allocated in an unexpected order.
-// In particular an object allocated before main cannot
-// assume that the constructor of global
-// object has already been called.
-// In particular one should avoid declaring objects at global scope as
-// the constructors of those may rely on the global object.
-// A possible "horror" scenario: the programmer decides to register a stack trace
-// in the constructor of an object. That runs just fine.
+// In particular an object X allocated before main cannot
+// assume that the constructor of another global
+// object Y has already been called, even if the
+// constructor of X calls Y.something().
+// A possible "horror" scenario: the programmer decides
+// to register a stack trace in the constructor of an object X.
+// Stack traces are stored inside the global object
+// GlobalVariables global.
+// That runs just fine.
 // One year later, the programmer decides to
-// declare a global object of that type,
-// and again everything runs just fine as global
-// happens to be initialized before that object.
+// make X a global object,
+// and again everything runs just fine as object global
+// happens to be initialized before X.
 // Finally, two years later, the same programmer
-// decides to declare a global object of the same type in
-// a file initialized before the declaration of global.
+// decides to declare a global object Y of the same type in
+// a file initialized before object global.
 // This causes a nasty and difficult to catch
 // crash before main.
 class GlobalVariables {
@@ -178,13 +180,13 @@ public:
   int64_t millisecondsComputationStart;
 
   //  bool flagLogInterProcessCommunication;
-  //flags: what mode are we running in?
+  // flags: what mode are we running in?
   bool flagRunningConsoleRegular;
   bool flagRunningConsoleTest;
   bool flagRunningBuiltInWebServer;
 
   // bool flagTesting;
-  //webserver flags and variables
+  // webserver flags and variables
   bool flagRunServerOnEmptyCommandLine;
   bool flagCachingInternalFilesOn;
   bool flagServerDetailedLog;

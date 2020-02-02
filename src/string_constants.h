@@ -75,6 +75,7 @@ public:
     static std::string millisecondsComputation;
     static std::string loginDisabledEveryoneIsAdmin;
     static std::string useFallbackDatabase;
+    static std::string httpsSupport;
   };
   struct frontend {
     static std::string problemFileName;

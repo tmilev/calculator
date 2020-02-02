@@ -407,6 +407,10 @@ bool TopicElementParser::Test::DefaultTopicListsOKCrashOnFailure() {
   return false;
 }
 
+bool TopicElementParser::Test::DefaultPdfsOK() {
+
+}
+
 bool TopicElementParser::Test::DefaultTopicListsOK() {
   MacroRegisterFunctionWithName("TopicElementParser::Test::DefaultTopicListsOK");
   CourseList courses;

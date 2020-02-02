@@ -145,15 +145,24 @@ function loginWithServerCallback(incomingString, result) {
     loginInfo += "<b style = 'color:red'>DB inactive,<br>everyone is admin.</b>"
     success = true;
   }
-  var loginExtraInfo = document.getElementById(ids.domElements.divLoginPanelExtraInfo);
-  loginExtraInfo.innerHTML = loginInfo;
+  if (
+    parsedAuthentication[pathnames.urlFields.request.httpsSupport] !== "true" &&
+    parsedAuthentication[pathnames.urlFields.request.httpsSupport] !== true
+  ) {
+    if (loginInfo !== "") {
+      loginInfo += "<br>";
+    }
+    loginInfo += "<b style = 'color:red'>Https off.</b>";
+  }
   if (
     parsedAuthentication[pathnames.urlFields.requests.useFallbackDatabase] === "true" ||
     parsedAuthentication[pathnames.urlFields.requests.useFallbackDatabase] === true
   ) {
     var databaseInfo = document.getElementById(ids.domElements.divLoginPanelDatabaseInfo);
-    databaseInfo.innerHTML = "<b style = 'color:red'>Fallback database</b>";
+    databaseInfo.innerHTML = "<b style = 'color:red'>Fallback database.</b>";
   }
+  var loginExtraInfo = document.getElementById(ids.domElements.divLoginPanelExtraInfo);
+  loginExtraInfo.innerHTML = loginInfo;
   if (success) {
     thePage.user.makeFromUserInfo(parsedAuthentication);
     toggleAccountPanels();

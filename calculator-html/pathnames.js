@@ -15,6 +15,7 @@ var urlFields = {
     userInfoJSON: "userInfoJSON",
     loginDisabledEveryoneIsAdmin: "loginDisabledEveryoneIsAdmin",
     useFallbackDatabase: "useFallbackDatabase",
+    httpsSupport: "httpsSupport",
     indicator: "indicator",
     pause: "pause",
     unpause: "unpause",

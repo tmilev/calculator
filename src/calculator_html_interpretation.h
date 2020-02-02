@@ -65,6 +65,8 @@ public:
     std::stringstream comments;
     static bool All();
     static bool DefaultTopicListsOKCrashOnFailure();
+    static bool DefaultPdfsOKCrashOnFailure();
+    bool DefaultPdfsOK();
     bool DefaultTopicListsOK();
   };
 };

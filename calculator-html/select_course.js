@@ -38,17 +38,16 @@ function afterLoadSelectCoursePage(incomingPage, result) {
         continue;
       }
     }
-    var editAnchor = document.createElement("a");
-    editAnchor.className = "courseLink";
-    editAnchor.addEventListener("click", selectCourse.bind(null, counterCourses));
-    editAnchor.href = "#";
-    var editAnchorInternal = "";
-    editAnchorInternal += `${currentCourse.title}`;
+    var editButton = document.createElement("button");
+    editButton.className = "courseButton";
+    editButton.addEventListener("click", selectCourse.bind(null, counterCourses));
+    var editButtonInternal = "";
+    editButtonInternal += `${currentCourse.title}`;
     if (isRoughDraft) {
-      editAnchorInternal += "<b style = 'color:red; font-size: x-small'>rough draft</b>";
+      editButtonInternal += "<b style = 'color:red; font-size: x-small'>rough draft</b>";
     }
-    editAnchor.innerHTML = editAnchorInternal;
-    courseContainer.appendChild(editAnchor);
+    editButton.innerHTML = editButtonInternal;
+    courseContainer.appendChild(editButton);
     if (counterCourses != thePage.theCourses.length - 1) {
       courseContainer.appendChild(document.createElement("br"));
     }

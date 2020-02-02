@@ -1245,12 +1245,12 @@ function getHTMLfromTopics() {
     var currentProblem = allProblems.getProblemById(label);
     result.push(currentProblem.toHTMLChapter());
   }
-  if (allProblems.theTopics.comments !== undefined && allProblems.theTopics.comments !== null) {
-    var comments = document.createElement("span");
-    comments.innerHTML = "<hr>" + allProblems.theTopics.comments;
-    result.push(comments);
+  var extraHtml = miscellaneousFrontend.HTMLFromCommentsAndErrors(allProblems.theTopics);
+  if (extraHtml !== "") {
+    var extraNode = document.createElement("span");
+    extraNode.innerHTML = extraHtml;
+    result.push(extraNode);
   }
-
   return result;
 }
 
@@ -1302,6 +1302,9 @@ function processLoadedTopics(incomingTopics, result) {
   allProblems.previousProblemId = null;
   allProblems.resetTopicProblems();
   allProblems.theTopics = miscellaneous.jsonUnescapeParse(incomingTopics);
+  if (!Array.isArray(allProblems.theTopics["children"]) ) {
+    return;
+  }
   for (var counterChapter = 0; counterChapter < allProblems.theTopics["children"].length; counterChapter ++) {
     var currentChapter = allProblems.theTopics["children"][counterChapter];
     allProblems.CreateOrUpdateProblem(currentChapter);
@@ -1321,9 +1324,9 @@ function processLoadedTopicsWriteToCoursePage(incomingTopics, result) {
 function writeTopicsToCoursePage() {
   var thePage = window.calculator.mainPage;
   var topicsElements = document.getElementsByTagName("topicList");
-  if (topicsElements.length === 0) {
-    return;
-  }
+  // if (topicsElements.length === 0) {
+  //  return;
+  // }
   writeEditCoursePagePanel();
   var htmlContentElements = getHTMLfromTopics();
   miscellaneousFrontend.appendHtml(topicsElements[0], htmlContentElements);

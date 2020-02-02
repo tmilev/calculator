@@ -15,7 +15,7 @@ JSData WebAPIResponse::GetProblemSolutionJSON() {
   CalculatorHTML theProblem;
   std::stringstream out, errorStream;
   JSData result;
-  theProblem.LoadCurrentProblemItem(false, global.GetWebInput("randomSeed"), &errorStream);
+  theProblem.LoadCurrentProblemItem(false, global.GetWebInput(WebAPI::problem::randomSeed), &errorStream);
   if (!theProblem.flagLoadedSuccessfully) {
     out << "Problem name is: " << theProblem.fileName
     << " <b>Could not load problem, this may be a bug. "
@@ -31,7 +31,7 @@ JSData WebAPIResponse::GetProblemSolutionJSON() {
     result[WebAPI::result::resultHtml] = out.str();
     return result;
   }
-  if (global.GetWebInput("randomSeed") == "") {
+  if (global.GetWebInput(WebAPI::problem::randomSeed) == "") {
     out << "<b>I could not figure out the exercise problem (missing random seed). </b>";
     result[WebAPI::result::resultHtml] = out.str();
     return result;
@@ -253,7 +253,7 @@ JSData WebAPIResponse::SubmitAnswersPreviewJSON() {
   std::stringstream errorStream, comments;
   theProblem.LoadCurrentProblemItem(
     global.UserRequestRequiresLoadingRealExamData(),
-    global.GetWebInput("randomSeed"),
+    global.GetWebInput(WebAPI::problem::randomSeed),
     &errorStream
   );
   if (!theProblem.flagLoadedSuccessfully) {
@@ -595,8 +595,8 @@ std::string WebAPIResponse::GetApp(bool appendBuildHash) {
 JSData Course::ToJSON() const {
   JSData result;
   result["title"] = this->title;
-  result["courseHome"] = Configuration::courseTemplates + this->courseTemplate;
-  result["topicList"] = Configuration::topicLists + this->courseTopicsNoFolder;
+  result[WebAPI::problem::courseHome] = Configuration::courseTemplates + this->courseTemplate;
+  result[WebAPI::problem::topicList] = Configuration::topicLists + this->courseTopicsNoFolder;
   if (this->flagRoughDraft != "") {
     result["roughDraft"] = this->flagRoughDraft;
   }
@@ -716,19 +716,21 @@ JSData WebAPIResponse::GetTopicTableJSON() {
   std::stringstream out;
   CalculatorHTML thePage;
   std::stringstream comments;
-  thePage.fileName = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("courseHome"), false);
-  thePage.topicListFileName = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("topicList"), false);
+  thePage.fileName = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput(WebAPI::problem::courseHome), false);
+  thePage.topicListFileName = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput(WebAPI::problem::topicList), false);
+  global.Comments << "DEBUG: and course, topic list: "
+  << global.GetWebInput(WebAPI::problem::courseHome)
+  << ", " << global.GetWebInput(WebAPI::problem::topicList);
+
   JSData result;
   if (!thePage.LoadAndParseTopicList(out)) {
     out << "Failed to load and parse topic list.";
     result[WebAPI::result::error] = out.str();
     return result;
   }
-  if (!thePage.LoadMe(true, global.GetWebInput("randomSeed"), &comments)) {
-    comments << "\"Failed to load file: "
-    << global.GetWebInput("courseHome") << ""
-    << "<br>Comments:<br> " << comments.str();
-    comments << "\"";
+  if (!thePage.LoadMe(true, global.GetWebInput(WebAPI::problem::randomSeed), &comments)) {
+    comments << "While loading topic table, failed to load file: ["
+    << global.GetWebInput(WebAPI::problem::courseHome) << "].";
     result[WebAPI::result::comments] = comments.str();
     return result;
   }
@@ -788,17 +790,16 @@ std::string WebAPIResponse::GetJSONFromTemplate() {
   CalculatorHTML thePage;
   thePage.flagUseJSON = true;
   std::stringstream comments;
-  global.Comments << "DEBUG: and course home is: " << global.GetWebInput("courseHome");
-  thePage.fileName = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("courseHome"), false);
-  if (!thePage.LoadMe(true, global.GetWebInput("randomSeed"), &comments)) {
+  thePage.fileName = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput(WebAPI::problem::courseHome), false);
+  if (!thePage.LoadMe(true, global.GetWebInput(WebAPI::problem::randomSeed), &comments)) {
     out << "<b>Failed to load file: "
-    << global.GetWebInput("courseHome") << ". </b>"
+    << global.GetWebInput(WebAPI::problem::courseHome) << ". </b>"
     << "<br>Comments:<br> " << comments.str();
     return out.str();
   }
   if (!thePage.InterpretHtml(&comments)) {
     out << "<b>Failed to interpret as template the following file: "
-    << global.GetWebInput("courseHome") << ". </b>"
+    << global.GetWebInput(WebAPI::problem::courseHome) << ". </b>"
     << "<br>Comments:<br> " << comments.str();
     return out.str();
   }
@@ -824,7 +825,7 @@ JSData WebAPIResponse::GetExamPageJSON() {
   std::stringstream errorAndDebugStream;
   std::string problemBody = theFile.LoadAndInterpretCurrentProblemItemJSON(
     global.UserRequestRequiresLoadingRealExamData(),
-    global.GetWebInput("randomSeed"),
+    global.GetWebInput(WebAPI::problem::randomSeed),
     &errorAndDebugStream
   );
   //<-must come after theFile.outputHtmlHeadNoTag
@@ -854,7 +855,7 @@ JSData WebAPIResponse::GetExamPageJSON() {
     if (!theFile.flagIsForReal) {
       std::stringstream randomSeedStream;
       randomSeedStream << theFile.theProblemData.randomSeed;
-      output["randomSeed"] = randomSeedStream.str();
+      output[WebAPI::problem::randomSeed] = randomSeedStream.str();
     }
   }
   return output;
@@ -873,10 +874,10 @@ JSData WebAPIResponse::GetEditPageJSON() {
   CalculatorHTML theFile;
   theFile.LoadFileNames();
   std::stringstream failureStream;
-  if (!theFile.LoadMe(false, global.GetWebInput("randomSeed"), &failureStream)) {
+  if (!theFile.LoadMe(false, global.GetWebInput(WebAPI::problem::randomSeed), &failureStream)) {
     std::stringstream errorStream;
-    errorStream << " <b>Failed to load file: "
-    << theFile.fileName << ", perhaps the file does not exist. </b>"
+    errorStream << " <b>Failed to load file: ["
+    << theFile.fileName << "], perhaps the file does not exist. </b>"
     << failureStream.str();
     output[WebAPI::result::error] = errorStream.str();
     return output;
@@ -917,7 +918,7 @@ JSData WebAPIResponse::GetEditPageJSON() {
 }
 
 JSData WebAPIResponse::SubmitAnswersJSON() {
-  return WebAPIResponse::SubmitAnswersJSON(global.GetWebInput("randomSeed"), nullptr, true);
+  return WebAPIResponse::SubmitAnswersJSON(global.GetWebInput(WebAPI::problem::randomSeed), nullptr, true);
 }
 
 JSData WebAPIResponse::SubmitAnswersJSON(
@@ -1381,7 +1382,7 @@ const std::string CalculatorHTML::BugsGenericMessage =
 "with a short explanation to the administrator of the web site. ";
 
 JSData WebAPIResponse::GetAnswerOnGiveUp() {
-  return WebAPIResponse::GetAnswerOnGiveUp(global.GetWebInput("randomSeed"));
+  return WebAPIResponse::GetAnswerOnGiveUp(global.GetWebInput(WebAPI::problem::randomSeed));
 }
 
 JSData WebAPIResponse::GetAnswerOnGiveUp(
@@ -1723,7 +1724,7 @@ std::string WebAPIResponse::ToStringUserDetailsTable(
   std::stringstream out;
   bool flagFilterCourse = (!adminsOnly) && (global.GetWebInput("filterAccounts") == "true");
   std::string currentCourse = HtmlRoutines::ConvertURLStringToNormal(
-    global.GetWebInput("courseHome"), false
+    global.GetWebInput(WebAPI::problem::courseHome), false
   );
   if (flagFilterCourse) {
     out << "<br>Displaying only students in course: <b style =\"color:blue\">"
@@ -2140,7 +2141,7 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
   this->numStudentsSolvedNothingInTopic.initializeFillInObject(this->theProblem.topics.theTopics.size(), 0);
   bool ignoreSectionsIdontTeach = true;
   this->currentSection = global.userDefault.sectionComputed;
-  this->currentCourse = global.GetWebInput("courseHome");
+  this->currentCourse = global.GetWebInput(WebAPI::problem::courseHome);
   if (global.GetWebInput("request") == "scoresInCoursePage") {
     this->currentSection = StringRoutines::StringTrimWhiteSpace(
       HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("mainInput"), false)
@@ -2396,7 +2397,7 @@ std::string WebAPIResponse::ToStringUserDetails(
   out << "<ul><li>Add <b>" << userRole << "(s)</b> here.</li> ";
   out << "<li>Added/updated users will have their current course set to: <br>"
   << "<span class =\"currentCourseIndicator\">"
-  << HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("courseHome"), false)
+  << HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput(WebAPI::problem::courseHome), false)
   << "</span></li>"
   << "<li>To change course use the select course link in the top panel.</li>"
   << "<li>List users with a comma/space bar/new line/tab/semicolumn separated list. </li>"

@@ -39,7 +39,10 @@ var urlFields = {
     resultHtml: "resultHtml",
     crashReport: "crashReport",
     error: "error",
+    // comments for the specific task:
     comments: "comments",
+    // global comments, usually used for debugging:
+    commentsGlobal: "commentsGlobal",
   },
   problem: {
     failedToLoadProblem: "Failed to load problem.",
@@ -47,6 +50,7 @@ var urlFields = {
     content: "content",
     debugInformation: "debugInformation",
     fileName: "fileName",
+    courseHome: "courseHome",
     fileNameTarget: "fileNameTarget",
     topicList: "topicList",
   },

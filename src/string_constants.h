@@ -87,6 +87,8 @@ public:
   struct problem {
     static std::string title;
     static std::string fileName;
+    static std::string courseHome;
+    static std::string topicList;
     static std::string fileNameTarget;
     static std::string fileContent;
     static std::string idProblem; //<- a little more specific than just id, easier to string-search

@@ -33,6 +33,8 @@ std::string WebAPI::problem::fileContent             = "fileContent"            
 std::string WebAPI::problem::title                   = "title"                   ;
 std::string WebAPI::problem::fileName                = "fileName"                ;
 std::string WebAPI::problem::fileNameTarget          = "fileNameTarget"          ;
+std::string WebAPI::problem::courseHome              = "courseHome"              ;
+std::string WebAPI::problem::topicList               = "topicList"               ;
 std::string WebAPI::problem::idProblem               = "id"                      ;
 std::string WebAPI::problem::deadlineSingle          = "deadline"                ;
 std::string WebAPI::problem::failedToLoadProblem     = "Failed to load problem. ";
@@ -43,7 +45,7 @@ std::string WebAPI::problem::calculatorAnswerPrefix  = "calculatorAnswer"       
 std::string WebAPI::problem::answerGenerationSuccess = "generationSuccess"       ;
 std::string WebAPI::problem::randomSeed              = "randomSeed"              ;
 
-std::string WebAPI::request::workerId    = WebAPI::result::workerId   ;
+std::string WebAPI::request::workerId                     = WebAPI::result::workerId                   ;
 std::string WebAPI::request::database                     = "database"                                 ;
 std::string WebAPI::request::userInfoJSON                 = "userInfoJSON"                             ;
 std::string WebAPI::request::examplesJSON                 = "calculatorExamplesJSON"                   ;

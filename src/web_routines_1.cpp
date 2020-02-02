@@ -988,19 +988,19 @@ JSData WebWorker::GetSignUpRequestResult() {
   WebCrawler theCrawler;
   if (!theCrawler.VerifyRecaptcha(&errorStream, &generalCommentsStream, nullptr)) {
     result["error"] = errorStream.str();
-    result["comments"] = generalCommentsStream.str();
+    result[WebAPI::result::comments] = generalCommentsStream.str();
     return result;
   }
   if (theUser.username == "") {
     errorStream << "Empty username not allowed. ";
     result["error"] = errorStream.str();
-    result["comments"] = generalCommentsStream.str();
+    result[WebAPI::result::comments] = generalCommentsStream.str();
     return result;
   }
   if (!EmailRoutines::IsOKEmail(theUser.email, &generalCommentsStream)) {
     errorStream << "Your email address does not appear to be valid. ";
     result["error"] = errorStream.str();
-    result["comments"] = generalCommentsStream.str();
+    result[WebAPI::result::comments] = generalCommentsStream.str();
     return result;
   }
   if (theUser.Iexist(&generalCommentsStream)) {
@@ -1011,7 +1011,7 @@ JSData WebWorker::GetSignUpRequestResult() {
     << theUser.email
     << ") you requested is already taken.";
     result["error"] = errorStream.str();
-    result["comments"] = generalCommentsStream.str();
+    result[WebAPI::result::comments] = generalCommentsStream.str();
     return result;
   } else {
     outputStream << "<b style ='color:green'>"
@@ -1024,7 +1024,7 @@ JSData WebWorker::GetSignUpRequestResult() {
   if (!theUser.StoreToDB(false, &errorStream)) {
     errorStream << "Failed to store error stream. ";
     result["error"] = errorStream.str();
-    result["comments"] = generalCommentsStream.str();
+    result[WebAPI::result::comments] = generalCommentsStream.str();
     result[WebAPI::result::resultLabel] = outputStream.str();
     return result;
   }
@@ -1036,7 +1036,7 @@ JSData WebWorker::GetSignUpRequestResult() {
   //adminOutputStream = &generalCommentsStream;
   this->DoSetEmail(theUser, &errorStream, &generalCommentsStream, adminOutputStream);
   result["error"] = errorStream.str();
-  result["comments"] = generalCommentsStream.str();
+  result[WebAPI::result::comments] = generalCommentsStream.str();
   result[WebAPI::result::resultHtml] = outputStream.str();
   return result;
 }

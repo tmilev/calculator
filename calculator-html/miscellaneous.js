@@ -30,6 +30,9 @@ function jsonParseGetHtmlStandard(input) {
   if (parsed[pathnames.urlFields.result.resultHtml] !== undefined) {
     result += parsed[pathnames.urlFields.result.resultHtml];
   }
+  if (parsed[pathnames.urlFields.result.commentsGlobal] !== undefined) {
+    result += parsed[pathnames.urlFields.result.commentsGlobal];
+  }
   var lookForComments = false;
   if (parsed[pathnames.urlFields.result.error] !== undefined) {
     result += `<b style='color:red'>Error.</b> ${parsed[pathnames.urlFields.result.error]}`;

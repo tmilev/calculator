@@ -1,4 +1,5 @@
 "use strict";
+var pathnames = require("./pathnames");
 
 function switchMenu(obj) {
   var el = document.getElementById(obj);
@@ -67,9 +68,26 @@ function appendHtmlToArray(
   throw (`Could not recognize the html content ${contentToAppend}`);
 }
 
+function HTMLFromCommentsAndErrors(input) {
+  var extraTags = [
+    pathnames.urlFields.result.comments,
+    pathnames.urlFields.result.error,
+    pathnames.urlFields.result.commentsGlobal,
+  ];
+  var resultHTML = "";
+  for (var i = 0; i < extraTags.length; i ++) {
+    var current = input[extraTags[i]];
+    if (current === undefined || current === null || current === "") {
+      continue;
+    }
+    resultHTML += "<hr>" + current;
+  }
+  return resultHTML;
+}
 
 module.exports = {
   switchMenu,
   appendHtml,
   appendHtmlToArray,
+  HTMLFromCommentsAndErrors,
 };

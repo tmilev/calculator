@@ -408,15 +408,15 @@ bool CalculatorHTML::LoadMe(
     this->fileName, this->inputHtml, commentsOnFailure
   )) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "<br>User-input file name: <b>" << this->fileName
-      << "</b>";
+      *commentsOnFailure << "<br>User-input file name: [<b>" << this->fileName
+      << "</b>]. ";
     }
     return false;
   }
   this->flagIsForReal = global.UserRequestRequiresLoadingRealExamData();
   if (global.flagDatabaseCompiled) {
     this->topicListFileName = HtmlRoutines::ConvertURLStringToNormal(
-      global.GetWebInput("topicList"), false
+      global.GetWebInput(WebAPI::problem::topicList), false
     );
     if (doLoadDatabase) {
       std::stringstream errorStream;
@@ -485,8 +485,8 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON(
 
 void CalculatorHTML::LoadFileNames() {
   this->fileName = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput(WebAPI::problem::fileName), false);
-  this->courseHome = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("courseHome"), false);
-  this->topicListFileName = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("topicList"), false);
+  this->courseHome = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput(WebAPI::problem::courseHome), false);
+  this->topicListFileName = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput(WebAPI::problem::topicList), false);
 }
 
 void CalculatorHTML::LoadCurrentProblemItem(
@@ -520,7 +520,7 @@ bool CalculatorHTML::IsStateModifierApplyIfYes(SyntacticElementHTML& inputElt) {
   if (tagClass == "setCalculatorExamHome") {
     this->flagIsExamHome = true;
     this->flagIsExamProblem = false;
-    global.SetWebInpuT("courseHome", HtmlRoutines::ConvertStringToURLString(this->fileName, false));
+    global.SetWebInpuT(WebAPI::problem::courseHome, HtmlRoutines::ConvertStringToURLString(this->fileName, false));
   }
   if (tagClass == "setCalculatorExamProblem") {
     this->flagIsExamHome = false;
@@ -566,7 +566,7 @@ std::string CalculatorHTML::ToStringLinkCurrentAdmin(
   << global.requestType << "&";
   std::string urledProblem = HtmlRoutines::ConvertStringToURLString(this->fileName, false);
   List<std::string> randomSeedContainer;
-  randomSeedContainer.AddOnTop("randomSeed");
+  randomSeedContainer.AddOnTop(WebAPI::problem::randomSeed);
   out << "fileName=" << urledProblem << "&"
   << global.ToStringCalcArgsNoNavigation(&randomSeedContainer);
   if (includeRandomSeed) {
@@ -1881,7 +1881,7 @@ void CalculatorHTML::FigureOutCurrentProblemList(std::stringstream& comments) {
     return;
   }
   this->flagParentInvestigated = true;
-  this->topicListFileName = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("topicList"), false);
+  this->topicListFileName = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput(WebAPI::problem::topicList), false);
   this->LoadAndParseTopicList(comments);
 }
 
@@ -3003,7 +3003,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     global.requestType != "template" &&
     global.requestType != "templateNoLogin" &&
     global.requestType != "templateJSON" &&
-    global.requestType != "templateJSONNoLogin"
+    global.requestType != WebAPI::request::templateJSONNoLogin
   ) {
     if (!this->flagUseJSON) {
       outBody << "<b style =\"color:green\">Scores not recorded. </b>"
@@ -3138,7 +3138,7 @@ std::string CalculatorHTML::ToStringProblemNavigation() const {
     << "?request=login\">Log in</a> " << linkSeparator;
   }
   List<std::string> randomSeedContainer;
-  randomSeedContainer.AddOnTop("randomSeed");
+  randomSeedContainer.AddOnTop(WebAPI::problem::randomSeed);
   std::string calcArgsNoPassExamDetails =
   global.ToStringCalcArgsNoNavigation(&randomSeedContainer);
   if (this->flagIsExamProblem) {
@@ -3269,54 +3269,22 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem(
   std::stringstream out;
   out << "request=" << requestType << "&";
   List<std::string> excludedTags;
-  excludedTags.AddOnTop("randomSeed");
+  excludedTags.AddOnTop(WebAPI::problem::randomSeed);
   out << global.ToStringCalcArgsNoNavigation(&excludedTags)
-  << "courseHome=" << global.GetWebInput("courseHome") << "&";
+  << "courseHome=" << global.GetWebInput(WebAPI::problem::courseHome) << "&";
   if (this->fileName != "") {
     out << WebAPI::problem::fileName << "=" << HtmlRoutines::ConvertStringToURLString(this->fileName, false) << "&";
   } else {
     out << WebAPI::problem::fileName << "=" << HtmlRoutines::ConvertStringToURLString(global.GetWebInput(WebAPI::problem::fileName), false)
     << "&";
   }
-  out << "topicList=" << global.GetWebInput("topicList") << "&";
+  out << "topicList=" << global.GetWebInput(WebAPI::problem::topicList) << "&";
   out << "studentView=" << studentView << "&";
   if (studentSection != "") {
     out << "studentSection=" << HtmlRoutines::ConvertStringToURLString(studentSection, false) << "&";
   }
   if (includeRandomSeedIfAppropriate) {
     out << "randomSeed=" << this->theProblemData.randomSeed << "&";
-  }
-  return out.str();
-}
-
-std::string CalculatorHTML::GetEditPageButton(const std::string& desiredFileName, bool includeCloneButton) {
-  MacroRegisterFunctionWithName("CalculatorHTML::GetEditPageButton");
-  std::stringstream out;
-  out << "\n<a class =\"linkStandardButtonLike\" href=\""
-  << global.DisplayNameExecutable << "?request=editPage&";
-  std::string urledProblem = HtmlRoutines::ConvertStringToURLString(desiredFileName, false);
-  std::stringstream refStreamNoRequest;
-  std::string spanCloningAttemptResultID = "spanCloningAttemptResultID" + desiredFileName;
-  std::string clonePageAreaID = "clonePageAreaID" + desiredFileName;
-  //  out << "cleaned up link: " << cleaneduplink;
-  //  out << "<br>urled link: " <<  urledProblem;
-  refStreamNoRequest << global.ToStringCalcArgsNoNavigation(nullptr)
-  << "fileName=" << urledProblem << "&"
-  << "topicList=" << HtmlRoutines::ConvertStringToURLString(this->topicListFileName, false) << "&"
-  << "courseHome=" << global.GetWebInput("courseHome") << "&";
-  out << refStreamNoRequest.str() << "\">" << "Edit" << "</a>";
-  out << "<textarea class =\"currentFileNameArea\" id =\"" << clonePageAreaID << "\" cols =\""
-  << desiredFileName.size() + 7 << "\">" << desiredFileName << "</textarea>\n";
-  if (includeCloneButton) {
-    out
-    << "<button class =\"buttonClone\" onclick=\""
-    << "submitStringAsMainInput(document.getElementById('"
-    << clonePageAreaID << "').value, '" << spanCloningAttemptResultID << "', 'clonePage'"
-    << ", '"
-    << spanCloningAttemptResultID
-    << "'"
-    << ");"
-    << "\" >Clone</button> <span id =\"" << spanCloningAttemptResultID << "\"></span>";
   }
   return out.str();
 }

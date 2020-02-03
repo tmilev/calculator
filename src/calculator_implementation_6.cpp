@@ -396,6 +396,8 @@ bool CalculatorHTML::Test::BuiltIn(
 bool TopicElementParser::Test::All() {
   std::stringstream comments;
   TopicElementParser::Test::DefaultTopicListsOKCrashOnFailure();
+  int turnOnPdfChecksWhenReady;
+  // TopicElementParser::Test::DefaultPdfsOKCrashOnFailure();
   return true;
 }
 
@@ -407,8 +409,36 @@ bool TopicElementParser::Test::DefaultTopicListsOKCrashOnFailure() {
   return false;
 }
 
-bool TopicElementParser::Test::DefaultPdfsOK() {
+bool TopicElementParser::Test::DefaultPdfsOKCrashOnFailure() {
+  TopicElementParser::Test tester;
+  if (!tester.DefaultPdfsOK()) {
+    global.fatal << "Default pdfs are broken. " << tester.comments.str() << global.fatal;
+  }
+  return false;
+}
 
+bool TopicElementParser::Test::DefaultPdfsOK() {
+ MacroRegisterFunctionWithName("TopicElementParser::Test::DefaultPdfsOK");
+  CourseList courses;
+  if (!courses.Load()) {
+    this->comments << "Failed to load the list of available courses. "
+    << courses.errorMessage;
+    return false;
+  }
+  for (int i = 0; i < courses.theCourses.size; i ++) {
+    CalculatorHTML owner;
+    owner.topicListFileName = courses.theCourses[i].courseTopicsWithFolder();
+    if (!owner.LoadAndParseTopicList(this->comments)) {
+      this->comments << "Failed to load course "
+      << owner.topicListFileName << ". ";
+      return false;
+    }
+    if (!owner.topics.CheckTopicPdfs(&this->comments)) {
+      this->comments << "Topic pdf check failed. ";
+      return false;
+    }
+  }
+  return true;
 }
 
 bool TopicElementParser::Test::DefaultTopicListsOK() {

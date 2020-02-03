@@ -281,6 +281,16 @@ bool JSData::isTrueRepresentationInJSON() {
   return this->theString == "true";
 }
 
+bool JSData::isString(std::string* whichString) {
+  if (!this->theType == JSData::token::tokenString) {
+    return false;
+  }
+  if (whichString != nullptr) {
+    *whichString = this->theString;
+  }
+  return true;
+}
+
 bool JSData::isListOfStrings(List<std::string>* whichStrings) {
   if (this->theType != JSData::token::tokenArray) {
     return false;

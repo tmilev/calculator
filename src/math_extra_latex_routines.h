@@ -3,9 +3,18 @@
 #ifndef vpfHeader1_HeaderLaTeXRoutines
 #define vpfHeader1_HeaderLaTeXRoutines
 #include "general_list_references.h"
+#include "json.h"
 
 class LaTeXCrawler {
   public:
+  class Slides {
+  public:
+    std::string title;
+    List<std::string> filesToCrawl;
+    JSData ToJSON();
+    bool FromJSON(JSData& input, std::stringstream* commentsOnFailure);
+    bool FromString(const std::string& input, std::stringstream* commentsOnFailure);
+  };
   int recursionDepth;
   std::string theFileNameToCrawlPhysicalNoPathName;
   std::string theFileNameToCrawlPhysicalWithPath;

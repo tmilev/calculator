@@ -141,7 +141,7 @@ bool WebAPIResponse::ServeResponseFalseIfUnrecognized(
   } else if (global.requestType == WebAPI::request::modifyPage) {
     return this->ProcessModifyPage();
   } else if (
-    global.requestType == "slidesFromSource" ||
+    global.requestType == WebAPI::request::slidesSource ||
     global.requestType == "homeworkFromSource"
   ) {
     return this->ProcessSlidesOrHomeworkFromSource();
@@ -535,6 +535,7 @@ bool WebAPIResponse::ProcessEditPageJSON() {
 bool WebAPIResponse::ProcessSlidesOrHomeworkFromSource() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessSlidesOrHomeworkFromSource");
   this->owner->SetHeaderOKNoContentLength("");
+
   LaTeXCrawler theCrawler;
   for (int i = 0; i < global.webArguments.size(); i ++) {
     std::string theKey = HtmlRoutines::ConvertURLStringToNormal(global.webArguments.theKeys[i], false);

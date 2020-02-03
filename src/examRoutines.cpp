@@ -3374,9 +3374,11 @@ std::string CalculatorHTML::ToStringProblemScoreShort(const std::string& theFile
     outputAlreadySolved = (percentSolved == 1);
     if (!outputAlreadySolved) {
       if (!theProbData.flagProblemWeightIsOK) {
-        out << "<b style =\"color:brown\">" << percentSolved << " out of " << problemWeight.str() << "</b>";
+        out << "<b style =\"color:brown\">" << percentSolved
+        << " out of " << problemWeight.str() << "</b>";
       } else {
-        out << "<b style =\"color:red\">" << totalPoints << " out of " << problemWeight.str() << "</b>";
+        out << "<b style =\"color:red\">" << totalPoints
+        << " out of " << problemWeight.str() << "</b>";
       }
     } else {
       if (!theProbData.flagProblemWeightIsOK) {
@@ -3507,6 +3509,20 @@ bool TopicElement::IsError() {
   return this->type == TopicElement::types::error;
 }
 
+bool TopicElement::PdfSlidesOpenIfAvailable(std::stringstream* commentsOnFailure) {
+
+}
+
+bool TopicElement::PdfHomeworkOpensIfAvailable(std::stringstream* commentsOnFailure) {
+
+}
+
+bool TopicElement::PdfsOpenIfAvailable(std::stringstream* commentsOnFailure) {
+  return
+  this->PdfSlidesOpenIfAvailable(commentsOnFailure) &&
+  this->PdfHomeworkOpensIfAvailable(commentsOnFailure);
+}
+
 bool TopicElement::ProblemOpensIfAvailable(std::stringstream* commentsOnFailure) {
   if (this->problemFileName == "") {
     return true;
@@ -3529,6 +3545,19 @@ bool TopicElementParser::CheckProblemsOpen(
   for (int i = 0; i < this->theTopics.size(); i ++) {
     TopicElement& current = this->theTopics.theValues[i];
     if (!current.ProblemOpensIfAvailable(commentsOnFailure)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool TopicElementParser::CheckTopicPdfs(
+  std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("TopicElementParser::CheckTopicPdfs");
+  for (int i = 0; i < this->theTopics.size(); i ++) {
+    TopicElement& current = this->theTopics.theValues[i];
+    if (!current.PdfsOpenIfAvailable(commentsOnFailure)) {
       return false;
     }
   }
@@ -4587,26 +4616,69 @@ void TopicElement::ComputeHomework(CalculatorHTML& owner) {
   this->queryHomework = homeworkStream.str();
 }
 
+JSData LaTeXCrawler::Slides::ToJSON() {
+  JSData result;
+  result["slideTitle"] = this->title;
+  JSData theFiles;
+  theFiles.theType = JSData::token::tokenArray;
+  JSData fileName;
+  fileName.theType = JSData::token::tokenString;
+  for (int i = 0; i < this->filesToCrawl.size; i ++) {
+    fileName.theString = this->filesToCrawl[i];
+    theFiles.theList.AddOnTop(fileName);
+  }
+  result["files"] = theFiles;
+  return result;
+}
+
+bool LaTeXCrawler::Slides::FromJSON(
+  JSData& input, std::stringstream* commentsOnFailure
+) {
+  if (!input["slideTitle"].isString(&this->title)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "slideTitle entry missing or not a string. ";
+    }
+    return false;
+  }
+  if (!input["files"].isListOfStrings(&this->filesToCrawl)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "files entry missing or not a list of strings. ";
+    }
+    return false;
+  }
+  return  true;
+}
+
+bool LaTeXCrawler::Slides::FromString(
+  const std::string& input, std::stringstream* commentsOnFailure
+) {
+  std::string decoded;
+  HtmlRoutines::ConvertURLStringToNormal(input, decoded, false);
+  JSData parsed;
+  if (!parsed.readstring(decoded, commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to parse your input in LaTeXCrawler::Slides::FromString. ";
+    }
+    return false;
+  }
+  return this->FromJSON(parsed, commentsOnFailure);
+}
+
+JSData TopicElement::ComputeSlidesJSON(CalculatorHTML& owner) {
+  LaTeXCrawler::Slides theSlides;
+  theSlides.filesToCrawl.AddListOnTop(owner.slidesSourcesHeaders);
+  theSlides.filesToCrawl.AddListOnTop(this->sourceSlides);
+  theSlides.title = this->title;
+  return theSlides.ToJSON();
+}
+
 void TopicElement::ComputeSlides(CalculatorHTML& owner) {
   MacroRegisterFunctionWithName("TopicElement::ComputeSlides");
   if (this->sourceSlides.size == 0) {
     return;
   }
-  std::stringstream sourcesStream;
-  sourcesStream << "title=" << HtmlRoutines::ConvertStringToURLString(this->title, false) << "&";
-
-  int sourceSlidesCounter = 0;
-  for (int i = 0; i < owner.slidesSourcesHeaders.size; i ++) {
-    sourceSlidesCounter ++;
-    sourcesStream << "file" << sourceSlidesCounter
-    << "=" << HtmlRoutines::ConvertStringToURLString(owner.slidesSourcesHeaders[i], false) << "&";
-  }
-  for (int i = 0; i < this->sourceSlides.size; i ++) {
-    sourceSlidesCounter ++;
-    sourcesStream << "file" << sourceSlidesCounter
-    << "=" << HtmlRoutines::ConvertStringToURLString(this->sourceSlides[i], false) << "&";
-  }
-  this->querySlides = sourcesStream.str();
+  JSData resultJSON = this->ComputeSlidesJSON(owner);
+  this->querySlides = "slides=" + HtmlRoutines::ConvertStringToURLString(resultJSON.ToString(), false);
 }
 
 void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle) {

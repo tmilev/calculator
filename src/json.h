@@ -93,6 +93,7 @@ public:
   bool isIntegerFittingInInt(int* whichInteger);
   bool isTrueRepresentationInJSON();
   bool isListOfStrings(List<std::string>* whichStrings);
+  bool isString(std::string* whichString);
   // parsing
   void ExtractScalar(const std::string& json, int begin, int end);
   bool IsValidElement();

@@ -56,6 +56,7 @@ public:
   bool CheckConsistencyParsed();
   bool CheckNoErrors(std::stringstream* commentsOnFailure);
   bool CheckProblemsOpen(std::stringstream* commentsOnFailure);
+  bool CheckTopicPdfs(std::stringstream* commentsOnFailure);
   void AddTopic(TopicElement& inputElt, int index);
   std::string ToString() const;
   void initializeElementTypes();
@@ -163,6 +164,9 @@ public:
   }
   bool IsError();
   bool ProblemOpensIfAvailable(std::stringstream* commentsOnFailure);
+  bool PdfsOpenIfAvailable(std::stringstream* commentsOnFailure);
+  bool PdfSlidesOpenIfAvailable(std::stringstream* commentsOnFailure);
+  bool PdfHomeworkOpensIfAvailable(std::stringstream* commentsOnFailure);
   std::string GetItemStart(
     CalculatorHTML& owner, bool doIncludeScoreButton, bool plainStyle
   );
@@ -171,6 +175,7 @@ public:
   JSData ToJSON(CalculatorHTML& owner);
   std::string GetItemFinish(CalculatorHTML& owner);
   void ComputeSlides(CalculatorHTML& owner);
+  JSData ComputeSlidesJSON(CalculatorHTML& owner);
   void ComputeHomework(CalculatorHTML& owner);
   void ComputeLinks(CalculatorHTML& owner, bool plainStyle);
   TopicElement();

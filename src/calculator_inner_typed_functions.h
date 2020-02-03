@@ -137,7 +137,8 @@ bool CalculatorFunctionsBinaryOps::innerAddTypeToType(Calculator& theCommands, c
   if (!input.MergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged, &theCommands.Comments)) {
     return false;
   }
-  theType result = inputContextsMerged[1].GetValue<theType>();
+  theType result;
+  result = inputContextsMerged[1].GetValue<theType>();
   result += inputContextsMerged[2].GetValue<theType>();
   return output.AssignValueWithContext(result, inputContextsMerged[1].GetContext(), theCommands);
 }

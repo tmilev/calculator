@@ -2223,6 +2223,10 @@ public:
   UDPolynomial(const UDPolynomial<coefficient>& other) {
     this->data = other.data;
   }
+  UDPolynomial& operator=(const UDPolynomial<coefficient>& other) {
+    this->data = other.data;
+    return *this;
+  }
   // UDPolynomial<coefficient> operator+(const UDPolynomial<coefficient>& right) const;
   void operator+=(const UDPolynomial<coefficient>& right);
   // UDPolynomial<coefficient> operator-(const UDPolynomial<coefficient>& right) const;
@@ -2233,6 +2237,7 @@ public:
   void operator*=(const UDPolynomial<coefficient>& other) {
     *this = (*this) * other;
   }
+
   UDPolynomial<coefficient> TimesXn(int n) const;
   // Quick divisibility test
   // bool DivisibleBy(const UDPolynomial<coefficient>& divisor) const;

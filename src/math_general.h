@@ -6097,7 +6097,6 @@ public:
 class PartFractions: public MonomialCollection<PartFraction, Polynomial<LargeInteger> > {
   bool splitPartial();
   void initCommon();
-  PartFractions(const PartFractions& other);
 public:
   int AmbientDimension;
   int IndexLowestNonProcessed;
@@ -6226,6 +6225,9 @@ class DynkinSimpleType {
   int theRank;
   Rational CartanSymmetricInverseScale;
   DynkinSimpleType(): theLetter('X'), theRank(- 1), CartanSymmetricInverseScale(0) {
+  }
+  DynkinSimpleType(const DynkinSimpleType& other) {
+    *this = other;
   }
   DynkinSimpleType(char inputChar, int inputRank, const Rational& inputScale = 1) :
     theLetter(inputChar), theRank(inputRank), CartanSymmetricInverseScale(inputScale) {
@@ -6645,9 +6647,12 @@ public:
   bool IsEqualToZero() const {
     return this->Waypoints.size == 0;
   }
-  void operator=(const LittelmannPath& other) {
+  LittelmannPath();
+  LittelmannPath(const LittelmannPath& other);
+  LittelmannPath& operator=(const LittelmannPath& other) {
     this->Waypoints = other.Waypoints;
     this->owner = other.owner;
+    return *this;
   }
   bool operator==(const LittelmannPath& other) const {
     return this->Waypoints == other.Waypoints;

@@ -419,7 +419,7 @@ bool CalculatorFunctionsBinaryOps::innerTensorEltTensorByEltTensor(
   )) {
     return false;
   }
-  ElementTensorsGeneralizedVermas<RationalFunctionOld>
+  ElementTensorsGeneralizedVermas<RationalFunctionOld> resultTensor;
   resultTensor = inputConverted[1].GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >();
   resultTensor.TensorOnTheRight(inputConverted[2].GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >());
   return output.AssignValueWithContext(resultTensor, inputConverted[1].GetContext(), theCommands);
@@ -741,8 +741,8 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyLRObyLSPath(
   }
   LittelmannPath result = rightCopy.GetValue<LittelmannPath>();
   WeylGroupData& theWeyl = *result.owner;
-  MonomialTensor<int, MathRoutines::IntUnsignIdentity> theLRO =
-  output.GetValue<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >();
+  MonomialTensor<int, MathRoutines::IntUnsignIdentity> theLRO;
+  theLRO = output.GetValue<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >();
   for (int i = theLRO.generatorsIndices.size - 1; i >= 0; i --) {
     if (
       theLRO.generatorsIndices[i] == 0 ||

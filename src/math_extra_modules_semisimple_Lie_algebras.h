@@ -315,10 +315,11 @@ public:
   unsigned int HashFunction() const {
     return this->::MonomialCollection<MonomialTensorGeneralizedVermas<coefficient>, coefficient >::HashFunction();
   }
-  void operator=(const ElementTensorsGeneralizedVermas<coefficient>& other) {
+  ElementTensorsGeneralizedVermas<coefficient>& operator=(const ElementTensorsGeneralizedVermas<coefficient>& other) {
     this->::MonomialCollection<MonomialTensorGeneralizedVermas<coefficient>, coefficient>::operator=(other);
+    return *this;
   }
-  void operator=(const ElementSumGeneralizedVermas<coefficient>& other);
+  ElementTensorsGeneralizedVermas<coefficient>& operator=(const ElementSumGeneralizedVermas<coefficient>& other);
   static unsigned int HashFunction(const ElementTensorsGeneralizedVermas<coefficient>& input) {
     return input.HashFunction();
   }

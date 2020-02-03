@@ -58,10 +58,7 @@ Rational ModuleSSalgebra<coefficient>::hwTrace(
       summand -= oldRight.Powers[i];
       if (!summand.IsEqualToZero()) {
         summand *= this->hwTrace(
-          static_cast<
-            const Pair<MonomialTensor<int, MathRoutines::IntUnsignIdentity>,
-            MonomialTensor<int, MathRoutines::IntUnsignIdentity> >
-          >(newPair), theProgressReport
+          newPair, theProgressReport
         );
       }
       summand *= oldRight.Powers[i];
@@ -1062,13 +1059,16 @@ void ElementTensorsGeneralizedVermas<coefficient>::Substitution(
 }
 
 template <class coefficient>
-void ElementTensorsGeneralizedVermas<coefficient>::operator=(const ElementSumGeneralizedVermas<coefficient>& other) {
+ElementTensorsGeneralizedVermas<coefficient>& ElementTensorsGeneralizedVermas<
+  coefficient
+>::operator=(const ElementSumGeneralizedVermas<coefficient>& other) {
   this->MakeZero();
   MonomialTensorGeneralizedVermas<coefficient> theMon;
   for (int i = 0; i < other.size(); i ++) {
     theMon = other[i];
     this->AddMonomial(theMon, other.theCoeffs[i]);
   }
+  return *this;
 }
 
 template <class coefficient>

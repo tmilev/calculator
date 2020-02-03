@@ -7687,7 +7687,8 @@ bool CalculatorFunctions::innerPrintGenVermaModule(
   if (output.IsError()) {
     return true;
   }
-  ElementTensorsGeneralizedVermas<RationalFunctionOld> theElt = output.GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >();
+  ElementTensorsGeneralizedVermas<RationalFunctionOld> theElt;
+  theElt = output.GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >();
   ModuleSSalgebra<RationalFunctionOld>& theModule = *theElt[0].theMons[0].owner;
   return output.AssignValue(theModule.ToString(), theCommands);
 }

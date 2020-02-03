@@ -1331,8 +1331,8 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext) {
     return this->AssignValueWithContext(newRF, inputOutputMinContext, *this->owner);
   }
   if (this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >()) {
-    ElementTensorsGeneralizedVermas<RationalFunctionOld> newETGV =
-    this->GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >();
+    ElementTensorsGeneralizedVermas<RationalFunctionOld> newETGV;
+    newETGV = this->GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >();
     PolynomialSubstitution<Rational> subPolyPart;
     myOldContext.ContextGetPolySubFromSuperContextNoFailure(newContext, subPolyPart);
     newETGV.Substitution(subPolyPart, this->owner->theObjectContainer.theCategoryOmodules);

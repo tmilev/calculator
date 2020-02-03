@@ -22,7 +22,7 @@ class Vector: public List<coefficient> {
   friend std::ostream& operator<< <coefficient>(std::ostream& output, const Vector<coefficient>& theVector);
 public:
   Vector(){}
-  Vector(const Vector<coefficient>& other):List<coefficient>(other) {
+  Vector(const Vector<coefficient>& other): List<coefficient>(other) {
     *this = other;
   }
   template <class otherCoeff>
@@ -527,22 +527,37 @@ public:
   void operator=(const std::string& input) {
     this->AssignString(input);
   }
-  template <class otherType>
-  void operator=(const Vector<otherType>& other) {
-    if (this == reinterpret_cast<const Vector<coefficient>*>(&other)) {
-      return;
+  // The following function is required else
+  // some compilers generate warning:
+  // 'implicitly declared Vector<Rational>& Vector<Rational>::operator=(...) is deprecated'
+  Vector<coefficient>& operator=(const Vector<coefficient>& other) {
+    if (this == &other) {
+      return *this;
     }
     this->SetSize(other.size);
     for (int i = 0; i < other.size; i ++) {
       this->TheObjects[i] = other[i];
     }
+    return *this;
   }
   template <class otherType>
-  void operator=(const List<otherType>& other) {
+  Vector<coefficient>& operator=(const Vector<otherType>& other) {
+    if (this == reinterpret_cast<const Vector<coefficient>*>(&other)) {
+      return *this;
+    }
     this->SetSize(other.size);
     for (int i = 0; i < other.size; i ++) {
       this->TheObjects[i] = other[i];
     }
+    return *this;
+  }
+  template <class otherType>
+  Vector<coefficient>& operator=(const List<otherType>& other) {
+    this->SetSize(other.size);
+    for (int i = 0; i < other.size; i ++) {
+      this->TheObjects[i] = other[i];
+    }
+    return *this;
   }
   void operator=(const Selection& other);
   void operator=(const SelectionWithMultiplicities& other);

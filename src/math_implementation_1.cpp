@@ -873,6 +873,14 @@ std::string branchingData::GetStringCasimirProjector(int theIndex, const Rationa
   return formulaStream1.str();
 }
 
+LittelmannPath::LittelmannPath() {
+  this->owner = nullptr;
+}
+
+LittelmannPath::LittelmannPath(const LittelmannPath& other) {
+  *this = other;
+}
+
 bool LittelmannPath::IsAdaptedString(MonomialTensor<int, MathRoutines::IntUnsignIdentity>& theString) {
   LittelmannPath tempPath = *this;
   LittelmannPath tempPath2;

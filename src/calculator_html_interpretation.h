@@ -164,9 +164,9 @@ public:
   }
   bool IsError();
   bool ProblemOpensIfAvailable(std::stringstream* commentsOnFailure);
-  bool PdfsOpenIfAvailable(std::stringstream* commentsOnFailure);
-  bool PdfSlidesOpenIfAvailable(std::stringstream* commentsOnFailure);
-  bool PdfHomeworkOpensIfAvailable(std::stringstream* commentsOnFailure);
+  bool PdfsOpenIfAvailable(CalculatorHTML& owner, std::stringstream* commentsOnFailure);
+  bool PdfSlidesOpenIfAvailable(CalculatorHTML& owner, std::stringstream* commentsOnFailure);
+  bool PdfHomeworkOpensIfAvailable(CalculatorHTML& owner, std::stringstream* commentsOnFailure);
   std::string GetItemStart(
     CalculatorHTML& owner, bool doIncludeScoreButton, bool plainStyle
   );

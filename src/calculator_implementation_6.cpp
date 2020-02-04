@@ -396,8 +396,7 @@ bool CalculatorHTML::Test::BuiltIn(
 bool TopicElementParser::Test::All() {
   std::stringstream comments;
   TopicElementParser::Test::DefaultTopicListsOKCrashOnFailure();
-  int turnOnPdfChecksWhenReady;
-  // TopicElementParser::Test::DefaultPdfsOKCrashOnFailure();
+  TopicElementParser::Test::DefaultPdfsOKCrashOnFailure();
   return true;
 }
 

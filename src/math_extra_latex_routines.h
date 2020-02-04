@@ -66,12 +66,14 @@ class LaTeXCrawler {
   bool flagSourceOnly;
   bool flagDoChangeDirs;
   bool flagCrawlTexSourcesRecursively;
+  bool flagPDFExists;
   static std::string AdjustDisplayTitle(const std::string& input, bool isHomework);
   bool IsInCrawlableFolder(const std::string& folderName, std::stringstream* commentsOnFailure);
   void ComputeAllowedFolders();
   bool ExtractFileNamesFromRelativeFileName(std::stringstream* commentsOnFailure);
-  bool ExtractPresentationFileNames(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
+  bool ExtractFileNames(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   void Crawl();
+  bool ExtractFileNamesPdfExists(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   bool BuildOrFetchFromCachePDF(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   bool BuildTopicList(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   void BuildFreecalC();

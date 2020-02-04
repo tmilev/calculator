@@ -461,6 +461,7 @@ LaTeXCrawler::LaTeXCrawler() {
   this->flagSourceOnly = false;
   this->ownerCalculator = nullptr;
   this->recursionDepth = 0;
+  this->flagPDFExists = false;
 }
 
 void LaTeXCrawler::CrawlRecursive(std::stringstream& crawlingResult, const std::string& currentFileNamE) {
@@ -548,7 +549,7 @@ void LaTeXCrawler::CrawlRecursive(std::stringstream& crawlingResult, const std::
   }
 }
 
-bool LaTeXCrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
+bool LaTeXCrawler::ExtractFileNames(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
   MacroRegisterFunctionWithName("LaTeXcrawler::ExtractPresentationFileNames");
   (void) commentsGeneral;
   if (this->slideFileNamesVirtualWithPatH.size < 1) {
@@ -706,23 +707,30 @@ std::string LaTeXCrawler::AdjustDisplayTitle(const std::string& input, bool isHo
   return result;
 }
 
-bool LaTeXCrawler::BuildOrFetchFromCachePDF(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
-  MacroRegisterFunctionWithName("LaTeXcrawler::BuildOrFetchFromCachePDF");
+bool LaTeXCrawler::ExtractFileNamesPdfExists(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
   this->desiredPresentationTitle = this->AdjustDisplayTitle(this->desiredPresentationTitle, this->flagHomeworkRatherThanSlides);
-  if (!this->ExtractPresentationFileNames(commentsOnFailure, commentsGeneral)) {
+  if (!this->ExtractFileNames(commentsOnFailure, commentsGeneral)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "While building pdf, failed to extract file names. ";
     }
     return false;
   }
-  bool pdfExists = FileOperations::FileExistsVirtual(this->targetPDFFileNameWithPathVirtual, false, false, commentsOnFailure);
-  if (!this->flagForceSlideRebuild && pdfExists && !this->flagSourceOnly) {
+  this->flagPDFExists = FileOperations::FileExistsVirtual(this->targetPDFFileNameWithPathVirtual, false, false, commentsOnFailure);
+  return true;
+}
+
+bool LaTeXCrawler::BuildOrFetchFromCachePDF(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
+  MacroRegisterFunctionWithName("LaTeXcrawler::BuildOrFetchFromCachePDF");
+  if (!this->ExtractFileNamesPdfExists(commentsOnFailure, commentsGeneral)) {
+    return false;
+  }
+  if (!this->flagForceSlideRebuild && this->flagPDFExists && !this->flagSourceOnly) {
     return FileOperations::LoadFileToStringVirtual(
       this->targetPDFFileNameWithPathVirtual, this->targetPDFbinaryContent, false, commentsOnFailure
     );
   }
   if (!global.UserDefaultHasAdminRights() || global.flagDisableDatabaseLogEveryoneAsAdmin) {
-    if (!pdfExists || !this->flagSourceOnly) {
+    if (!this->flagPDFExists || !this->flagSourceOnly) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Pdf of slides not created. Only logged-in admins can compile pdfs. "
         << "Computed file name: "

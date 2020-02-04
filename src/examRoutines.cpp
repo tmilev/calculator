@@ -3509,18 +3509,26 @@ bool TopicElement::IsError() {
   return this->type == TopicElement::types::error;
 }
 
-bool TopicElement::PdfSlidesOpenIfAvailable(std::stringstream* commentsOnFailure) {
-
+bool TopicElement::PdfSlidesOpenIfAvailable(CalculatorHTML& owner, std::stringstream* commentsOnFailure) {
+  LaTeXCrawler theCrawler;
+  theCrawler.desiredPresentationTitle = this->displayTitle;
+  theCrawler.slideFileNamesVirtualWithPatH.AddListOnTop(owner.slidesSourcesHeaders);
+  theCrawler.slideFileNamesVirtualWithPatH.AddListOnTop(this->sourceSlides);
+  if (!theCrawler.ExtractFileNamesPdfExists(commentsOnFailure, commentsOnFailure)) {
+    return false;
+  }
+  return theCrawler.flagPDFExists;
 }
 
-bool TopicElement::PdfHomeworkOpensIfAvailable(std::stringstream* commentsOnFailure) {
-
+bool TopicElement::PdfHomeworkOpensIfAvailable(CalculatorHTML& owner, std::stringstream* commentsOnFailure) {
+  bool implementSoon;
+  return true;
 }
 
-bool TopicElement::PdfsOpenIfAvailable(std::stringstream* commentsOnFailure) {
+bool TopicElement::PdfsOpenIfAvailable(CalculatorHTML& owner, std::stringstream* commentsOnFailure) {
   return
-  this->PdfSlidesOpenIfAvailable(commentsOnFailure) &&
-  this->PdfHomeworkOpensIfAvailable(commentsOnFailure);
+  this->PdfSlidesOpenIfAvailable(owner, commentsOnFailure) &&
+  this->PdfHomeworkOpensIfAvailable(owner, commentsOnFailure);
 }
 
 bool TopicElement::ProblemOpensIfAvailable(std::stringstream* commentsOnFailure) {
@@ -3555,9 +3563,10 @@ bool TopicElementParser::CheckTopicPdfs(
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("TopicElementParser::CheckTopicPdfs");
+  this->CheckInitialization();
   for (int i = 0; i < this->theTopics.size(); i ++) {
     TopicElement& current = this->theTopics.theValues[i];
-    if (!current.PdfsOpenIfAvailable(commentsOnFailure)) {
+    if (!current.PdfsOpenIfAvailable(*this->owner, commentsOnFailure)) {
       return false;
     }
   }

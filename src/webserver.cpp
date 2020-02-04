@@ -3980,9 +3980,9 @@ void WebServer::InitializeMainRequests() {
   this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::topicListJSONNoLogin);
   this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::problemGiveUpNoLogin);
   this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::problemSolutionNoLogin);
-  this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::slidesFromSource);
   this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::homeworkFromSource);
-  this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::slidesSource);
+  this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::slides::source);
+  this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::slides::pdfFromSource);
   this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::homeworkSource);
   this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::submitExerciseNoLogin);
   this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::submitExercisePreviewNoLogin);

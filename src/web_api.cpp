@@ -141,12 +141,12 @@ bool WebAPIResponse::ServeResponseFalseIfUnrecognized(
   } else if (global.requestType == WebAPI::request::modifyPage) {
     return this->ProcessModifyPage();
   } else if (
-    global.requestType == WebAPI::request::slidesSource ||
+    global.requestType == WebAPI::request::slides::pdfFromSource ||
     global.requestType == "homeworkFromSource"
   ) {
     return this->ProcessSlidesOrHomeworkFromSource();
   } else if (
-    global.requestType == "slidesSource" ||
+    global.requestType == WebAPI::request::slides::source ||
     global.requestType == "homeworkSource"
   ) {
     return this->ProcessSlidesSource();
@@ -537,13 +537,15 @@ bool WebAPIResponse::ProcessSlidesOrHomeworkFromSource() {
   this->owner->SetHeaderOKNoContentLength("");
 
   LaTeXCrawler theCrawler;
+  JSData resultOnError;
+  std::stringstream commentsOnFailure;
+  if (!theCrawler.initializeFromGlobalVariables(&commentsOnFailure)) {
+    commentsOnFailure << "Failed to process slides or homework from source. ";
+    resultOnError[WebAPI::result::error] = commentsOnFailure.str();
+    return global.theResponse.WriteResponse(resultOnError);
+  }
   for (int i = 0; i < global.webArguments.size(); i ++) {
     std::string theKey = HtmlRoutines::ConvertURLStringToNormal(global.webArguments.theKeys[i], false);
-    if (theKey != WebAPI::problem::fileName && StringRoutines::StringBeginsWith(theKey, "file")) {
-      theCrawler.slideFileNamesVirtualWithPatH.AddOnTop(StringRoutines::StringTrimWhiteSpace(
-        HtmlRoutines::ConvertURLStringToNormal(global.webArguments.theValues[i], false)
-      ));
-    }
     if (StringRoutines::StringBeginsWith(theKey, "isSolutionFile")) {
       theCrawler.slideFilesExtraFlags.AddOnTop(StringRoutines::StringTrimWhiteSpace(
         HtmlRoutines::ConvertURLStringToNormal(global.webArguments.theValues[i], false)
@@ -557,8 +559,6 @@ bool WebAPIResponse::ProcessSlidesOrHomeworkFromSource() {
       theCrawler.slideFilesExtraFlags.AddOnTop("");
     }
   }
-  theCrawler.desiredPresentationTitle =
-  HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("title"), false);
   std::stringstream comments;
   if (global.GetWebInput("layout") == "printable") {
     theCrawler.flagProjectorMode = false;
@@ -573,10 +573,10 @@ bool WebAPIResponse::ProcessSlidesOrHomeworkFromSource() {
     theCrawler.flagHomeworkRatherThanSlides = true;
   }
   if (!theCrawler.BuildOrFetchFromCachePDF(&comments, &comments)) {
-    JSData result;
-    WebAPIResponse::GetJSDataUserInfo(result, comments.str());
+    resultOnError["targetPdfFileName"] = theCrawler.targetPDFLatexPath;
+    resultOnError[WebAPI::result::error] = comments.str();
     this->owner->flagDoAddContentLength = true;
-    global.theResponse.WriteResponse(result);
+    global.theResponse.WriteResponse(resultOnError);
     return true;
   }
   this->owner->SetHeader("HTTP/1.0 200 OK", "Content-Type: application/pdf; Access-Control-Allow-Origin: *");
@@ -586,27 +586,35 @@ bool WebAPIResponse::ProcessSlidesOrHomeworkFromSource() {
   return true;
 }
 
+bool LaTeXCrawler::initializeFromGlobalVariables(std::stringstream* commentsOnFailure) {
+  LaTeXCrawler::Slides theSlides;
+  std::string slideSpecification = global.webArguments.GetValue("slides", "");
+  if (!theSlides.FromString(slideSpecification, commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to initialize slides from global inputs. ";
+    }
+    return false;
+  }
+  this->slideFileNamesVirtualWithPatH.AddListOnTop(theSlides.filesToCrawl);
+  this->desiredPresentationTitle = theSlides.title;
+  return true;
+}
+
 bool WebAPIResponse::ProcessSlidesSource() {
   MacroRegisterFunctionWithName("WebAPIResponse::ProcessSlidesSource");
   this->owner->SetHeaderOKNoContentLength("");
   LaTeXCrawler theCrawler;
-  for (int i = 0; i < global.webArguments.size(); i ++) {
-    std::string theKey = HtmlRoutines::ConvertURLStringToNormal(global.webArguments.theKeys[i], false);
-    if (
-      theKey != WebAPI::problem::fileName && StringRoutines::StringBeginsWith(theKey, "file")
-    ) {
-      theCrawler.slideFileNamesVirtualWithPatH.AddOnTop(StringRoutines::StringTrimWhiteSpace(
-        HtmlRoutines::ConvertURLStringToNormal(global.webArguments.theValues[i], false)
-      ));
-    }
+  JSData result;
+  std::stringstream commentsOnFailure;
+  if (!theCrawler.initializeFromGlobalVariables(&commentsOnFailure)) {
+    result[WebAPI::result::error] = commentsOnFailure.str();
+    return global.theResponse.WriteResponse(result);
   }
   if (global.requestType == "homeworkSource") {
     theCrawler.flagHomeworkRatherThanSlides = true;
   } else {
     theCrawler.flagHomeworkRatherThanSlides = false;
   }
-  theCrawler.desiredPresentationTitle =
-  HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput("title"), false);
   std::stringstream comments;
   if (global.GetWebInput("layout") == "printable") {
     theCrawler.flagProjectorMode = false;
@@ -621,7 +629,8 @@ bool WebAPIResponse::ProcessSlidesSource() {
   if (!theCrawler.BuildOrFetchFromCachePDF(&comments, &comments)) {
     this->owner->flagDoAddContentLength = true;
     comments << "Failed to build your slides. ";
-    return global.theResponse.WriteResponse(WebAPIResponse::GetJSONUserInfo(comments.str()));
+    result[WebAPI::result::error] = comments.str();
+    return global.theResponse.WriteResponse(result);
   }
   this->owner->SetHeader("HTTP/1.0 200 OK", "Content-Type: application/x-latex; Access-Control-Allow-Origin: *");
   this->owner->flagDoAddContentLength = true;

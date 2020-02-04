@@ -87,14 +87,17 @@ std::string WebAPI::request::templateNoLogin              = "templateNoLogin"   
 std::string WebAPI::request::templateJSONNoLogin          = "templateJSONNoLogin"         ;
 std::string WebAPI::request::topicListJSONNoLogin         = "topicListJSONNoLogin"        ;
 std::string WebAPI::request::problemSolutionNoLogin       = "problemSolutionNoLogin"      ;
-std::string WebAPI::request::slidesFromSource             = "slidesFromSource"            ;
 std::string WebAPI::request::homeworkFromSource           = "homeworkFromSource"          ;
-std::string WebAPI::request::slidesSource                 = "slidesSource"                ;
 std::string WebAPI::request::homeworkSource               = "homeworkSource"              ;
 std::string WebAPI::request::addUsers                     = "addUsers"                    ;
 std::string WebAPI::request::addEmails                    = "addEmails"                   ;
 std::string WebAPI::request::userList                     = "userList"                    ;
 std::string WebAPI::request::passwordList                 = "passwordList"                ;
+
+std::string WebAPI::request::slides::source               = "slidesSource"                ;
+std::string WebAPI::request::slides::pdfFromSource        = "slidesFromSource"            ;
+std::string WebAPI::request::slides::title                = "slideTitle"                  ;
+std::string WebAPI::request::slides::files                = "files"                       ;
 
 std::string WebAPI::frontend::currentPage     = "currentPage"    ;
 std::string WebAPI::frontend::problemFileName = "problemFileName";

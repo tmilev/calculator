@@ -4652,6 +4652,12 @@ bool LaTeXCrawler::Slides::FromJSON(
 bool LaTeXCrawler::Slides::FromString(
   const std::string& input, std::stringstream* commentsOnFailure
 ) {
+  if (input == "") {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Slide specification string is empty. ";
+    }
+    return false;
+  }
   std::string decoded;
   HtmlRoutines::ConvertURLStringToNormal(input, decoded, false);
   JSData parsed;

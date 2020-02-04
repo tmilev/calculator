@@ -76,6 +76,7 @@ class LaTeXCrawler {
   bool BuildTopicList(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   void BuildFreecalC();
   void CrawlRecursive(std::stringstream& crawlingResult, const std::string& currentFileName);
+  bool initializeFromGlobalVariables(std::stringstream* commentsOnFailure);
   std::stringstream displayResult;
   std::stringstream errorStream;
   std::string ToString();

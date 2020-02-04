@@ -36,9 +36,14 @@ public:
     static std::string topicListJSONNoLogin;
     static std::string problemGiveUpNoLogin;
     static std::string problemSolutionNoLogin;
-    static std::string slidesFromSource;
     static std::string homeworkFromSource;
-    static std::string slidesSource;
+    struct slides {
+    public:
+      static std::string source;
+      static std::string pdfFromSource;
+      static std::string title;
+      static std::string files;
+    };
     static std::string homeworkSource;
     static std::string submitAnswers;
     static std::string modifyPage;

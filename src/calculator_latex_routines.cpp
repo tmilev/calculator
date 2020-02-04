@@ -585,10 +585,10 @@ bool LaTeXCrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFai
       }
       return false;
     }
-    if (global.UserDefaultHasAdminRights()) {
+    if (global.UserDefaultHasAdminRights() && !global.flagDisableDatabaseLogEveryoneAsAdmin) {
       if (!FileOperations::FileExistsVirtual(this->slideFileNamesVirtualWithPatH[i], false, false)) {
         if (commentsOnFailure != nullptr) {
-          *commentsOnFailure << "Failed to find file: " << this->slideFileNamesVirtualWithPatH[i] << "<br>";
+          *commentsOnFailure << "Failed to find file: " << this->slideFileNamesVirtualWithPatH[i] << ". ";
         }
         return false;
       }
@@ -711,7 +711,7 @@ bool LaTeXCrawler::BuildOrFetchFromCachePDF(std::stringstream* commentsOnFailure
   this->desiredPresentationTitle = this->AdjustDisplayTitle(this->desiredPresentationTitle, this->flagHomeworkRatherThanSlides);
   if (!this->ExtractPresentationFileNames(commentsOnFailure, commentsGeneral)) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to extract file names. ";
+      *commentsOnFailure << "While building pdf, failed to extract file names. ";
     }
     return false;
   }
@@ -721,11 +721,11 @@ bool LaTeXCrawler::BuildOrFetchFromCachePDF(std::stringstream* commentsOnFailure
       this->targetPDFFileNameWithPathVirtual, this->targetPDFbinaryContent, false, commentsOnFailure
     );
   }
-  if (!global.UserDefaultHasAdminRights()) {
+  if (!global.UserDefaultHasAdminRights() || global.flagDisableDatabaseLogEveryoneAsAdmin) {
     if (!pdfExists || !this->flagSourceOnly) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Pdf of slides not created. Only logged-in admins can compile pdfs. "
-        << "Computed file name: <br>"
+        << "Computed file name: "
         << HtmlRoutines::ConvertStringToHtmlString(this->targetPDFFileNameWithPathVirtual, false);
       }
       return false;

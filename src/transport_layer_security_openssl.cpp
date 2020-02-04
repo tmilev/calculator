@@ -39,11 +39,9 @@ void TransportLayerSecurityOpenSSL::FreeEverythingShutdownSSL() {
 }
 
 void TransportLayerSecurityOpenSSL::FreeContext() {
-#ifdef  MACRO_use_open_ssl
-
-  if (this->context != nullptr && this->name != "") {
-    global << logger::blue << "DEBUG: Freeing openSSL context: " << this->name << ". " << logger::endL;
-  }
+#ifdef MACRO_use_open_ssl
+  // if (this->context != nullptr && this->name != "") {
+  // }
   SSL_CTX_free (this->context);
 #endif // MACRO_use_open_ssl
   this->context = nullptr;
@@ -600,7 +598,9 @@ int TransportLayerSecurityOpenSSL::SSLWrite(
 #endif
 }
 
-bool TransportLayerSecurityOpenSSL::HandShakeIamServer(int inputSocketID, std::stringstream* commentsOnFailure) {
+bool TransportLayerSecurityOpenSSL::HandShakeIamServer(
+  int inputSocketID, std::stringstream* commentsOnFailure
+) {
   MacroRegisterFunctionWithName("WebServer::HandShakeIamServer");
   (void) inputSocketID;
   (void) commentsOnFailure;

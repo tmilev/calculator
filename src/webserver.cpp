@@ -3895,7 +3895,7 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv) {
   if (argC == 0) {
     return;
   }
-  global.PathProjectBaseUserInputOrDeduced = global.programArguments[0];
+  global.PathExecutableUserInputOrDeduced = FileOperations::GetPathFromFileNameWithPath(global.programArguments[0]);
   if (argC < 2) {
     return;
   }
@@ -3919,10 +3919,10 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv) {
       global.flagRunningBuiltInWebServer = false;
       return;
     }
-    if (current == "path") {
+    if (current == "path_executable") {
       if (i + 1 < global.programArguments.size) {
         i ++;
-        global.PathProjectBaseUserInputOrDeduced = global.programArguments[i];
+        global.PathExecutableUserInputOrDeduced = global.programArguments[i];
         continue;
       }
     }
@@ -4305,7 +4305,7 @@ int WebServer::main(int argc, char **argv) {
     global.initDefaultFolderAndFileNames();
     // Ensure the server path coincides with the current
     // directory:
-    global.ChDir(global.PathProjectBaseUserInputOrDeduced);
+    global.ChDir(global.PhysicalPathProjectBase);
     // Initializes folder locations needed by logging facilities.
     FileOperations::InitializeFoldersSensitive();
 

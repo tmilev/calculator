@@ -318,7 +318,7 @@ public:
   std::string RelativePhysicalNameOptionalProgressReport;
   std::string RelativePhysicalNameOptionalResult;
 
-  std::string PathProjectBaseUserInputOrDeduced;
+  std::string PathExecutableUserInputOrDeduced;
 
   std::string PhysicalPathProjectBase;
   std::string PhysicalPathServerBase;

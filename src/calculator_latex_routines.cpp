@@ -719,7 +719,9 @@ bool LaTeXCrawler::ExtractFileNamesPdfExists(std::stringstream* commentsOnFailur
   return true;
 }
 
-bool LaTeXCrawler::BuildOrFetchFromCachePDF(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
+bool LaTeXCrawler::BuildOrFetchFromCachePDF(
+  std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
+) {
   MacroRegisterFunctionWithName("LaTeXcrawler::BuildOrFetchFromCachePDF");
   if (!this->ExtractFileNamesPdfExists(commentsOnFailure, commentsGeneral)) {
     return false;
@@ -732,7 +734,9 @@ bool LaTeXCrawler::BuildOrFetchFromCachePDF(std::stringstream* commentsOnFailure
   if (!global.UserDefaultHasAdminRights() || global.flagDisableDatabaseLogEveryoneAsAdmin) {
     if (!this->flagPDFExists || !this->flagSourceOnly) {
       if (commentsOnFailure != nullptr) {
-        *commentsOnFailure << "Pdf of slides not created. Only logged-in admins can compile pdfs. "
+        *commentsOnFailure
+        << "Pdf of slides not created. "
+        << "Only logged-in admins can compile pdfs. "
         << "Computed file name: "
         << HtmlRoutines::ConvertStringToHtmlString(this->targetPDFFileNameWithPathVirtual, false);
       }
@@ -767,7 +771,8 @@ bool LaTeXCrawler::BuildOrFetchFromCachePDF(std::stringstream* commentsOnFailure
   if (this->flagDoChangeDirs) {
     global.ChDir(this->workingFilePathPhysical);
     if (commentsGeneral != nullptr) {
-      *commentsGeneral << "Changed directory. Current: <b style = 'color:blue'>" << FileOperations::GetCurrentFolder() << "</b><br>";
+      *commentsGeneral << "Changed directory. Current: "
+      << "<b style = 'color:blue'>" << FileOperations::GetCurrentFolder() << "</b><br>";
     }
   }
   if (this->flagCrawlTexSourcesRecursively) {

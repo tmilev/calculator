@@ -5636,6 +5636,40 @@ std::string DynkinSimpleType::ToString(FormatExpressions* theFormat) const {
   return out.str();
 }
 
+void DynkinSimpleType::MakeArbitrary(
+  char inputLetter,
+  int inputRank,
+  const Rational& inputLengthFirstCorRootSquared
+) {
+  if ((
+      inputLetter != 'A' && inputLetter != 'B' && inputLetter != 'C' && inputLetter != 'D' &&
+      inputLetter != 'E' && inputLetter != 'F' && inputLetter != 'G'
+    ) || inputRank <= 0
+  ) {
+    global.fatal << "This is a programming error. "
+    << "Requested to create a simple Dynkin type of type "
+    << inputLetter << " and rank "
+    << inputRank << ". This is not allowed: I only accept types "
+    << "A, B, C, D, E, F and G and non-negative ranks. "
+    << global.fatal;
+  }
+  if (inputLetter == 'G') {
+    inputRank = 2;
+  }
+  if (inputLetter == 'F') {
+    inputRank = 4;
+  }
+  if (inputLetter == 'E' && inputRank > 8) {
+    inputRank = 8;
+  }
+  if (inputRank == 1) {
+    inputLetter = 'A';
+  }
+  this->theRank = inputRank;
+  this->theLetter = inputLetter;
+  this->CartanSymmetricInverseScale = inputLengthFirstCorRootSquared;
+}
+
 int DynkinSimpleType::GetRootSystemSize() const {
   switch (this->theLetter) {
     case 'A':

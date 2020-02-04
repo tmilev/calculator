@@ -3517,6 +3517,12 @@ bool TopicElement::PdfSlidesOpenIfAvailable(CalculatorHTML& owner, std::stringst
   if (!theCrawler.ExtractFileNamesPdfExists(commentsOnFailure, commentsOnFailure)) {
     return false;
   }
+  std::string actualOutput;
+  FileOperations::GetPhysicalFileNameFromVirtual(theCrawler.targetPDFFileNameWithPathVirtual, actualOutput, false, false, nullptr);
+  global << "Physical filename: " << actualOutput << logger::endL;
+  if (!theCrawler.flagPDFExists && commentsOnFailure != nullptr) {
+    *commentsOnFailure << "Could not find file: " << theCrawler.targetPDFFileNameWithPathVirtual << ". ";
+  }
   return theCrawler.flagPDFExists;
 }
 

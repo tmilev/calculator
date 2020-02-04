@@ -338,9 +338,9 @@ void GlobalVariables::initFoldersProjectBase(const std::string& inputPhysicalExe
 }
 
 void GlobalVariables::initDefaultFolderAndFileNames() {
-  this->initFoldersProjectBase(global.PathProjectBaseUserInputOrDeduced);
-  this->PhysicalNameFolderExecutable = this->PhysicalPathProjectBase + "bin/";
-  this->PhysicalNameExecutableNoPath = FileOperations::GetFileNameFromFileNameWithPath(global.PathProjectBaseUserInputOrDeduced);
+  this->initFoldersProjectBase(global.PathExecutableUserInputOrDeduced);
+  this->PhysicalNameFolderExecutable = this->PhysicalPathProjectBase;
+  this->PhysicalNameExecutableNoPath = FileOperations::GetFileNameFromFileNameWithPath(global.PathExecutableUserInputOrDeduced);
   this->PhysicalNameExecutableWithPath = this->PhysicalNameFolderExecutable + this->PhysicalNameExecutableNoPath;
   this->PhysicalPathServerBase = this->PhysicalPathProjectBase;
   this->DisplayPathOutputFolder = "/output/";

@@ -1060,6 +1060,12 @@ bool WebWorker::WriteToBodyJSOn(const JSData& result) {
 bool GlobalVariables::Response::WriteResponse(const JSData& incoming, bool isCrash) {
   MutexLockGuard guard(global.MutexReturnBytes);
   MacroRegisterFunctionWithName("WebWorker::WriteResponse");
+  if (!global.flagRunningBuiltInWebServer) {
+    if (!isCrash) {
+      global << incoming.ToString();
+    }
+    return true;
+  }
   WebWorker& worker = global.server().GetActiveWorker();
   std::string status = "finished";
   if (isCrash) {

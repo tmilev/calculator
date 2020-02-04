@@ -6159,7 +6159,10 @@ public:
   void ComputeDebugStringNoNumerator();
   void ComputeDebugStringWithVPfunction();
   void ComputePolyCorrespondingToOneMonomial(
-    QuasiPolynomial& outputQP, int monomialIndex, Vectors<Rational>& normals, Lattice& theLattice
+    QuasiPolynomial& outputQP,
+    int monomialIndex,
+    Vectors<Rational>& normals,
+    Lattice& theLattice
   );
   void ComputeDebugStringBasisChange();
   bool initFromRoots(Vectors<Rational>& input);
@@ -6172,7 +6175,10 @@ public:
   bool splitClassicalRootSystem(bool ShouldElongate, Vector<Rational>* Indicator);
   bool split(Vector<Rational>* Indicator);
   void ComputeKostantFunctionFromWeylGroup(
-    char WeylGroupLetter, int WeylGroupNumber, QuasiPolynomial& output, Vector<Rational>* ChamberIndicator
+    char WeylGroupLetter,
+    int WeylGroupNumber,
+    QuasiPolynomial& output,
+    Vector<Rational>* ChamberIndicator
   );
   bool IsHigherThanWRTWeight(
     const Vector<Rational>& left, const Vector<Rational>& r, const Vector<Rational>& theWeights
@@ -6208,7 +6214,7 @@ public:
   }
   PartFractions();
   int SizeWithoutDebugString();
-  bool CheckForMinimalityDecompositionWithRespectToRoot(Vector<Rational>  *theRoot);
+  bool CheckForMinimalityDecompositionWithRespectToRoot(Vector<Rational>* theRoot);
   void MakeProgressReportSplittingMainPart();
   void MakeProgressReportRemovingRedundantRoots();
   void MakeProgressReportUncoveringBrackets();
@@ -6245,33 +6251,11 @@ class DynkinSimpleType {
   int GetSSAlgDim() const {
     return this->GetRootSystemSize() + this->theRank;
   }
-  void MakeArbitrary(char inputLetter, int inputRank, Rational inputLengthFirstCorRootSquared) {
-    if ((
-        inputLetter != 'A' && inputLetter != 'B' && inputLetter != 'C' && inputLetter != 'D' &&
-        inputLetter != 'E' && inputLetter != 'F' && inputLetter != 'G'
-      ) || inputRank <= 0
-    ) {
-      global.fatal << "This is a programming error. Requested to create a simple Dynkin type of type "
-      << inputLetter << " and rank "
-      << inputRank << ". This is not allowed: I only accept types A, B, C, D, E, F and G and non-negative ranks. "
-      << global.fatal;
-    }
-    if (inputLetter == 'G') {
-      inputRank = 2;
-    }
-    if (inputLetter == 'F') {
-      inputRank = 4;
-    }
-    if (inputLetter == 'E' && inputRank > 8) {
-      inputRank = 8;
-    }
-    if (inputRank == 1) {
-      inputLetter = 'A';
-    }
-    this->theRank = inputRank;
-    this->theLetter = inputLetter;
-    this->CartanSymmetricInverseScale = inputLengthFirstCorRootSquared;
-  }
+  void MakeArbitrary(
+    char inputLetter,
+    int inputRank,
+    const Rational& inputLengthFirstCorRootSquared
+  );
   Rational GetPrincipalSlTwoCSInverseScale() const;
   void GetCoCartanSymmetric(Matrix<Rational>& output) const;
   void GetCartanSymmetric(Matrix<Rational>& output) const;
@@ -6392,7 +6376,9 @@ public:
   int GetMult(int SimpleTypeIdentifier) const {
     int result = 0;
     if (!this->theCoeffs[SimpleTypeIdentifier].IsSmallInteger(&result)) {
-      global.fatal << "This is a programming error: Dynkin type has multiplicity that is not a small integer " << global.fatal;
+      global.fatal << "This is a programming error: "
+      << "Dynkin type has multiplicity that is not a small integer. "
+      << global.fatal;
     }
     return result;
   }

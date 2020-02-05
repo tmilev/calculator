@@ -3510,6 +3510,18 @@ bool TopicElement::IsError() {
 }
 
 bool TopicElement::PdfSlidesOpenIfAvailable(CalculatorHTML& owner, std::stringstream* commentsOnFailure) {
+  if (
+    this->type != TopicElement::types::chapter &&
+    this->type != TopicElement::types::section &&
+    this->type != TopicElement::types::topic &&
+    this->type != TopicElement::types::title &&
+    this->type != TopicElement::types::problem
+  ) {
+    return true;
+  }
+  if (this->sourceSlides.size == 0) {
+    return true;
+  }
   LaTeXCrawler theCrawler;
   theCrawler.desiredPresentationTitle = this->displayTitle;
   theCrawler.slideFileNamesVirtualWithPatH.AddListOnTop(owner.slidesSourcesHeaders);
@@ -3519,6 +3531,7 @@ bool TopicElement::PdfSlidesOpenIfAvailable(CalculatorHTML& owner, std::stringst
   }
   std::string actualOutput;
   FileOperations::GetPhysicalFileNameFromVirtual(theCrawler.targetPDFFileNameWithPathVirtual, actualOutput, false, false, nullptr);
+  global << "DEBUG: title: " << this->displayTitle << "; " << logger::endL;
   global << "Physical filename: " << actualOutput << logger::endL;
   if (!theCrawler.flagPDFExists && commentsOnFailure != nullptr) {
     *commentsOnFailure << "Could not find file: " << theCrawler.targetPDFFileNameWithPathVirtual << ". ";

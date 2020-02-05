@@ -3895,7 +3895,7 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv) {
   if (argC == 0) {
     return;
   }
-  global.PathExecutableUserInputOrDeduced = FileOperations::GetPathFromFileNameWithPath(global.programArguments[0]);
+  global.PathExecutableUserInputOrDeduced = global.programArguments[0];
   if (argC < 2) {
     return;
   }
@@ -4315,7 +4315,6 @@ int WebServer::main(int argc, char **argv) {
     global << logger::green << "Current folder: "
     << logger::blue << FileOperations::GetCurrentFolder()
     << logger::endL;
-
     // Compute configuration file location.
     // Load the configuration file.
     global.ConfigurationLoad();

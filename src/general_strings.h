@@ -77,9 +77,13 @@ public:
     int currentCommonStringLength;
     static std::string DifferenceHTMLStatic(
       const std::string& inputLeft,
-      const std::string& inputRight
+      const std::string& inputRight,
+      const std::string& labelLeft,
+      const std::string& labelRight
     );
-    std::string DifferenceHTML();
+    std::string DifferenceHTML(
+      const std::string& labelLeft, const std::string& labelRight
+    );
     bool ComputeDifference(std::stringstream* commentsOnFailure);
     void ComputeLongestSubsequenceMatrix();
     void ComputeBestStartingIndices(int& outputIndexLeft, int& outputIndexRight);

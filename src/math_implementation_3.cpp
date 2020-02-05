@@ -247,8 +247,8 @@ RegisterFunctionCall::RegisterFunctionCall(const char* fileName, int line, const
   stackTop.fileName = fileName;
   stackTop.line = line;
   stackTop.functionName = functionName;
-  if (theStack.size > 20000) {
-    global.fatal << "Stack too deep: 20000 layers. " << global.fatal;
+  if (theStack.size > 200000) {
+    global.fatal << "Stack too deep: 200000 layers. " << global.fatal;
   }
 }
 
@@ -1954,15 +1954,20 @@ unsigned int MathRoutines::HashVectorDoubles(const Vector<double>& input) {
 }
 
 std::string StringRoutines::Differ::DifferenceHTMLStatic(
-  const std::string& inputLeft, const std::string& inputRight
+  const std::string& inputLeft,
+  const std::string& inputRight,
+  const std::string& labelLeft,
+  const std::string& labelRight
 ) {
   StringRoutines::Differ theDiffer;
   theDiffer.left = inputLeft;
   theDiffer.right = inputRight;
-  return theDiffer.DifferenceHTML();
+  return theDiffer.DifferenceHTML(labelLeft, labelRight);
 }
 
-std::string StringRoutines::Differ::DifferenceHTML() {
+std::string StringRoutines::Differ::DifferenceHTML(
+  const std::string& labelLeft, const std::string& labelRight
+) {
   MacroRegisterFunctionWithName("StringRoutines::Differ::DifferenceHTML");
   std::stringstream leftOut, rightOut, commentsOnFailure;
   if (!this->ComputeDifference(&commentsOnFailure)) {
@@ -1989,9 +1994,9 @@ std::string StringRoutines::Differ::DifferenceHTML() {
     }
   }
   std::stringstream out;
-  out << "<span class = 'abstractSyntaxOneAnnotation'>";
+  out << "<span class = 'abstractSyntaxOneAnnotation'><b>" << labelLeft << "</b><br>";
   out << leftOut.str();
-  out << "<br>";
+  out << "<hr><b>" << labelRight << "</b><br>";
   out << rightOut.str();
   out << "</span>";
   return out.str();

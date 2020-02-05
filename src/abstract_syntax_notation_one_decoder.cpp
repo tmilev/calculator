@@ -1510,7 +1510,7 @@ std::string X509Certificate::ToStringTestEncode() {
   this->WriteBytesASN1(recoded, nullptr);
   std::string recodedHex = Crypto::ConvertListUnsignedCharsToHex(recoded);
   out << "Original, recoded binary source:<br>"
-  << StringRoutines::Differ::DifferenceHTMLStatic(sourceHex, recodedHex);
+  << StringRoutines::Differ::DifferenceHTMLStatic(sourceHex, recodedHex, "sourceHex", "recodedHex");
   return out.str();
 }
 

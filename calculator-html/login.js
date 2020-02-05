@@ -146,8 +146,8 @@ function loginWithServerCallback(incomingString, result) {
     success = true;
   }
   if (
-    parsedAuthentication[pathnames.urlFields.request.httpsSupport] !== "true" &&
-    parsedAuthentication[pathnames.urlFields.request.httpsSupport] !== true
+    parsedAuthentication[pathnames.urlFields.requests.httpsSupport] !== "true" &&
+    parsedAuthentication[pathnames.urlFields.requests.httpsSupport] !== true
   ) {
     if (loginInfo !== "") {
       loginInfo += "<br>";

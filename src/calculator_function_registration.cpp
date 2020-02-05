@@ -5138,7 +5138,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "ComputeSemisimpleSubalgebras(A_2)",
     "CalculatorFunctions::innerComputeSemisimpleSubalgebras",
     "ComputeSemisimpleSubalgebras",
-    innerInvisible
+    innerInvisibleNoTest
   );
   this->AddOperationHandler(
     "CentralizerChains",

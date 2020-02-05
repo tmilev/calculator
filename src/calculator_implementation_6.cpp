@@ -2724,7 +2724,7 @@ bool CalculatorFunctions::innerTestASN1Decode(
     result.WriteBytesUpdatePromisedLength(recoded);
     std::string originalHex = Crypto::ConvertStringToHex(data, 0, false);
     std::string recodedHex = Crypto::ConvertListUnsignedCharsToHex(recoded);
-    out << StringRoutines::Differ::DifferenceHTMLStatic(originalHex, recodedHex);
+    out << StringRoutines::Differ::DifferenceHTMLStatic(originalHex, recodedHex, "original", "recoded");
     out << theDecoder.ToStringAnnotateBinary();
   }
   return output.AssignValue(out.str(), theCommands);

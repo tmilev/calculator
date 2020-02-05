@@ -1952,7 +1952,8 @@ bool Calculator::Test::ProcessResults() {
       theDiffer.left = HtmlRoutines::ConvertStringToHtmlString(currentTest.actualResult, false);
       theDiffer.right = HtmlRoutines::ConvertStringToHtmlString(currentTest.expectedResult, false);
       currentLine << "<td style = 'min-width:100px;'><b style='color:red'>unexpected result</b></td>"
-      << "<td class = 'cellCalculatorResult'>" << theDiffer.DifferenceHTML() << "</td>"
+      << "<td class = 'cellCalculatorResult'>"
+      << theDiffer.DifferenceHTML("actual", "expected") << "</td>"
       ;
       currentLineConsole << "Got:\n" << currentTest.actualResult << "\n";
       currentLineConsole << "Expected:\n" << currentTest.expectedResult << "\n";

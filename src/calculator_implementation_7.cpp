@@ -535,7 +535,12 @@ bool CalculatorFunctions::innerStringDifference(
   if (!input[1].IsOfType(&left) || !input[2].IsOfType(&right)) {
     return false;
   }
-  return output.AssignValue(StringRoutines::Differ::DifferenceHTMLStatic(left, right), theCommands);
+  return output.AssignValue(
+    StringRoutines::Differ::DifferenceHTMLStatic(
+      left, right, "left", "right"
+    ),
+    theCommands
+  );
 }
 
 bool CalculatorFunctions::innerSliceString(Calculator& theCommands, const Expression& input, Expression& output) {

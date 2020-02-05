@@ -3481,7 +3481,8 @@ bool TopicElementParser::CheckConsistencyParsed() {
   for (int i = 0; i < this->theTopics.size(); i ++) {
     if (this->theTopics.theValues[i].type == TopicElement::types::problem) {
       if (this->theTopics.theValues[i].immediateChildren.size > 0) {
-        global.fatal << "Topic element: " << this->theTopics.theValues[i].ToString()
+        global.fatal << "Topic element: "
+        << this->theTopics.theValues[i].ToString()
         << " has non-zero immediate children. " << global.fatal;
         return false;
       }
@@ -3509,7 +3510,9 @@ bool TopicElement::IsError() {
   return this->type == TopicElement::types::error;
 }
 
-bool TopicElement::PdfSlidesOpenIfAvailable(CalculatorHTML& owner, std::stringstream* commentsOnFailure) {
+bool TopicElement::PdfSlidesOpenIfAvailable(
+  CalculatorHTML& owner, std::stringstream* commentsOnFailure
+) {
   if (
     this->type != TopicElement::types::chapter &&
     this->type != TopicElement::types::section &&
@@ -3523,18 +3526,22 @@ bool TopicElement::PdfSlidesOpenIfAvailable(CalculatorHTML& owner, std::stringst
     return true;
   }
   LaTeXCrawler theCrawler;
-  theCrawler.desiredPresentationTitle = this->displayTitle;
+  theCrawler.desiredPresentationTitle = this->title;
   theCrawler.slideFileNamesVirtualWithPatH.AddListOnTop(owner.slidesSourcesHeaders);
   theCrawler.slideFileNamesVirtualWithPatH.AddListOnTop(this->sourceSlides);
+  theCrawler.flagProjectorMode = true;
+  theCrawler.flagHomeworkRatherThanSlides = false;
   if (!theCrawler.ExtractFileNamesPdfExists(commentsOnFailure, commentsOnFailure)) {
     return false;
   }
   std::string actualOutput;
-  FileOperations::GetPhysicalFileNameFromVirtual(theCrawler.targetPDFFileNameWithPathVirtual, actualOutput, false, false, nullptr);
-  global << "DEBUG: title: " << this->displayTitle << "; " << logger::endL;
+  FileOperations::GetPhysicalFileNameFromVirtual(
+    theCrawler.targetPDFFileNameWithPathVirtual, actualOutput, false, false, nullptr
+  );
   global << "Physical filename: " << actualOutput << logger::endL;
   if (!theCrawler.flagPDFExists && commentsOnFailure != nullptr) {
-    *commentsOnFailure << "Could not find file: " << theCrawler.targetPDFFileNameWithPathVirtual << ". ";
+    *commentsOnFailure << "Could not find file: "
+    << theCrawler.targetPDFFileNameWithPathVirtual << ". ";
   }
   return theCrawler.flagPDFExists;
 }

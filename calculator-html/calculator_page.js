@@ -204,7 +204,7 @@ Calculator.prototype.getComputationLink = function(input) {
     calculatorInput: input,
   };
   var thePage = window.calculator.mainPage;
-  var stringifiedHash = thePage.storage.s(theURL);
+  var stringifiedHash = thePage.storage.getPercentEncodedURL(theURL);
   return stringifiedHash;
 }
 

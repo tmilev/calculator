@@ -3881,6 +3881,11 @@ void WebServer::InitializeBuildFlags() {
   ////////////////////////////////////////////////////
 }
 
+std::string MainFlags::server = "server";
+std::string MainFlags::pathExecutable = "path_executable";
+std::string MainFlags::configurationFile = "configuration_file";
+std::string MainFlags::test = "test";
+
 void WebServer::AnalyzeMainArguments(int argC, char **argv) {
   MacroRegisterFunctionWithName("WebServer::AnalyzeMainArguments");
   if (argC < 0) {
@@ -3902,7 +3907,7 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv) {
   std::string timeLimitString;
   for (int i = 1; i < global.programArguments.size; i ++) {
     const std::string& current = global.programArguments[i];
-    if (current == "server") {
+    if (current == MainFlags::server) {
       global.flagRunningBuiltInWebServer = true;
       global.flagRunningConsoleRegular = false;
       global.flagRunningConsoleTest = false;
@@ -3913,16 +3918,24 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv) {
         continue;
       }
     }
-    if (current == "test") {
+    if (current == MainFlags::test) {
       global.flagRunningConsoleTest = true;
       global.flagRunningConsoleRegular = false;
       global.flagRunningBuiltInWebServer = false;
+      global.configurationFileName = "/configuration/configuration_for_testing.json";
       return;
     }
-    if (current == "path_executable") {
+    if (current == MainFlags::pathExecutable) {
       if (i + 1 < global.programArguments.size) {
         i ++;
         global.PathExecutableUserInputOrDeduced = global.programArguments[i];
+        continue;
+      }
+    }
+    if (current == MainFlags::configurationFile) {
+      if (i + 1 < global.programArguments.size) {
+        i ++;
+        global.configurationFileName = global.programArguments[i];
         continue;
       }
     }
@@ -4090,14 +4103,16 @@ void WebServer::TurnProcessMonitoringOff() {
 bool GlobalVariables::ConfigurationLoad() {
   MacroRegisterFunctionWithName("GlobalVariables::ConfigurationLoad");
   std::stringstream out;
-  std::string configurationFileName = "/configuration/configuration.json";
+  if (this->configurationFileName == "") {
+    this->configurationFileName = "/configuration/configuration.json";
+  }
   if (!FileOperations::LoadFileToStringVirtual(
-    configurationFileName, global.configurationFileContent, true, &out
+    this->configurationFileName, global.configurationFileContent, true, &out
   )) {
     global << logger::yellow << "Failed to read configuration file. " << out.str() << logger::endL;
     std::string computedPhysicalFileName;
     if (FileOperations::GetPhysicalFileNameFromVirtual(
-      configurationFileName, computedPhysicalFileName, true, false, nullptr
+      this->configurationFileName, computedPhysicalFileName, true, false, nullptr
     )) {
       global << logger::yellow << "Computed configuration file name: "
       << logger::blue << computedPhysicalFileName << logger::endL;
@@ -4105,7 +4120,7 @@ bool GlobalVariables::ConfigurationLoad() {
     return false;
   }
   if (!global.configuration.readstring(
-    global.configurationFileContent, &out
+    this->configurationFileContent, &out
   )) {
     global << logger::red << "Failed to read configuration. " << out.str() << logger::endL;
     return false;
@@ -4120,14 +4135,13 @@ bool GlobalVariables::ConfigurationStore() {
     return true;
   }
   std::fstream configurationFile;
-  std::string configFileNameVirtual = "configuration/configuration.json";
   if (!FileOperations::OpenFileCreateIfNotPresentVirtual(
-    configurationFile, configFileNameVirtual, false, true, false, true
+    configurationFile, this->configurationFileName, false, true, false, true
   )) {
-    global << logger::red << "Could not open file: " << configFileNameVirtual << logger::endL;
+    global << logger::red << "Could not open file: " << this->configurationFileName << logger::endL;
     std::string configFileNamePhysical;
     if (FileOperations::GetPhysicalFileNameFromVirtual(
-      configFileNameVirtual, configFileNamePhysical, true, false, nullptr
+      this->configurationFileName, configFileNamePhysical, true, false, nullptr
     )) {
       global << logger::red << "Physical file name configuration: "
       << logger::blue << configFileNamePhysical << logger::endL;

@@ -2,6 +2,14 @@
 #define vpfWEBAPI_HEADER_H
 #include "macros.h"
 
+class MainFlags {
+public:
+  static std::string server;
+  static std::string pathExecutable;
+  static std::string configurationFile;
+  static std::string test;
+};
+
 class WebAPI {
 public:
   static std::string appNoCache;

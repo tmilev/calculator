@@ -205,6 +205,8 @@ public:
   bool flagDisableDatabaseLogEveryoneAsAdmin;
   bool flagServerAutoMonitor;
 
+  std::string configurationFileName;
+
   std::string buildVersionSimple;
   std::string buildHeadHashWithServerTime;
   std::string OperatingSystem;

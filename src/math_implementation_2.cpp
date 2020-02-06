@@ -1958,6 +1958,9 @@ bool Rational::AssignStringFailureAllowed(const std::string& input) {
     if (MathRoutines::isADigit(input[positionInString])) {
       break;
     }
+    if (MathRoutines::isALatinLetter(input[positionInString])) {
+      return false;
+    }
   }
   for (; positionInString < input.size(); positionInString ++) {
     if (MathRoutines::isADigit(input[positionInString], &ReaderDigit)) {

@@ -3708,7 +3708,6 @@ void WebServer::CheckMongoDBSetup() {
   if (global.configuration["mongoDBSetup"].theType != JSData::token::tokenUndefined) {
     return;
   }
-  global << logger::yellow << "configuration so far: " << global.configuration.ToString(nullptr) << logger::endL;
   global.configuration["mongoDBSetup"] = "Attempting";
   global.ConfigurationStore();
   WebServer::FigureOutOperatingSystem();
@@ -3850,12 +3849,14 @@ void WebServer::CheckMathJaxSetup() {
   global.CallSystemNoOutput(moveCommand.str(), true);
 }
 
-void WebServer::AnalyzeMainArgumentsTimeString(const std::string& timeLimitString) {
+bool WebServer::AnalyzeMainArgumentsTimeString(const std::string& timeLimitString) {
   if (timeLimitString == "") {
-    return;
+    return false;
   }
   Rational timeLimit;
-  timeLimit.AssignString(timeLimitString);
+  if (!timeLimit.AssignStringFailureAllowed(timeLimitString)) {
+    return false;
+  }
   int timeLimitInt = 0;
   if (timeLimit.IsIntegerFittingInInt(&timeLimitInt)) {
     global.millisecondsMaxComputation = timeLimitInt;
@@ -3865,6 +3866,7 @@ void WebServer::AnalyzeMainArgumentsTimeString(const std::string& timeLimitStrin
       global.millisecondsMaxComputation *= 1000;
     }
   }
+  return  true;
 }
 
 void WebServer::InitializeBuildFlags() {
@@ -3888,6 +3890,7 @@ std::string MainFlags::test = "test";
 
 void WebServer::AnalyzeMainArguments(int argC, char **argv) {
   MacroRegisterFunctionWithName("WebServer::AnalyzeMainArguments");
+  global.configurationCommandLine.reset(JSData::token::tokenObject);
   if (argC < 0) {
     argC = 0;
   }
@@ -3904,18 +3907,24 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv) {
   if (argC < 2) {
     return;
   }
+  HashedList<std::string, MathRoutines::HashString> commandLineConfigurations;
+  commandLineConfigurations.AddOnTop(List<std::string> ({
+    Configuration::portHTTP,
+    Configuration::portHTTPSOpenSSL
+  }));
   std::string timeLimitString;
   for (int i = 1; i < global.programArguments.size; i ++) {
-    const std::string& current = global.programArguments[i];
+    std::string current = StringRoutines::StringTrimWhiteSpace(global.programArguments[i]);
     if (current == MainFlags::server) {
       global.flagRunningBuiltInWebServer = true;
       global.flagRunningConsoleRegular = false;
       global.flagRunningConsoleTest = false;
       if (i + 1 < global.programArguments.size) {
-        i ++;
-        timeLimitString = global.programArguments[i];
-        WebServer::AnalyzeMainArgumentsTimeString(timeLimitString);
-        continue;
+        timeLimitString = global.programArguments[i + 1];
+        if (WebServer::AnalyzeMainArgumentsTimeString(timeLimitString)) {
+          i ++;
+          continue;
+        }
       }
     }
     if (current == MainFlags::test) {
@@ -3936,6 +3945,13 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv) {
       if (i + 1 < global.programArguments.size) {
         i ++;
         global.configurationFileName = global.programArguments[i];
+        continue;
+      }
+    }
+    if (commandLineConfigurations.Contains(current)) {
+      if (i + 1 < global.programArguments.size) {
+        i ++;
+        global.configurationCommandLine[current] = global.programArguments[i];
         continue;
       }
     }
@@ -4130,6 +4146,10 @@ bool GlobalVariables::ConfigurationLoad() {
 
 bool GlobalVariables::ConfigurationStore() {
   MacroRegisterFunctionWithName("GlobalVariables::ConfigurationStore");
+  if (global.configurationCommandLine.objects.size() > 0) {
+    global << logger::yellow << "Command-line overrides in the present configuration: configuration file not stored. ";
+    return true;
+  }
   std::string correctedConfiguration = global.configuration.ToString(&JSData::PrintOptions::NewLine());
   if (correctedConfiguration == global.configurationFileContent) {
     return true;
@@ -4158,6 +4178,12 @@ bool GlobalVariables::ConfigurationStore() {
 
 void GlobalVariables::ConfigurationProcess() {
   MacroRegisterFunctionWithName("GlobalVariables::ConfigurationProcess");
+  for (int i = 0; i < global.configurationCommandLine.objects.size(); i ++) {
+    global.configuration.SetKeyValue(
+      global.configurationCommandLine.objects.theKeys[i],
+      global.configurationCommandLine.objects.theValues[i]
+    );
+  }
   global.flagServerDetailedLog = global.configuration[
     Configuration::serverDetailedLog
   ].isTrueRepresentationInJSON();

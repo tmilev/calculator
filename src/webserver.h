@@ -260,7 +260,7 @@ public:
   static void CheckUnzipInstall();
   static void CheckFreecalcSetup();
   static void AnalyzeMainArguments(int argC, char** argv);
-  static void AnalyzeMainArgumentsTimeString(const std::string& timeLimitString);
+  static bool AnalyzeMainArgumentsTimeString(const std::string& timeLimitString);
   void InitializeBuildFlags();
   void InitializeMainAll();
   void InitializeMainHashes();

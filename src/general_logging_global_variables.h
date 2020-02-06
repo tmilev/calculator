@@ -205,8 +205,6 @@ public:
   bool flagDisableDatabaseLogEveryoneAsAdmin;
   bool flagServerAutoMonitor;
 
-  std::string configurationFileName;
-
   std::string buildVersionSimple;
   std::string buildHeadHashWithServerTime;
   std::string OperatingSystem;
@@ -301,8 +299,21 @@ public:
 
   std::string requestType;
 
+  // location of the configuration file. Can be overridden with command line flags.
+  std::string configurationFileName;
   std::string configurationFileContent;
+  // The configuration is computed by merging a configuration file
+  // with commandline configuration flags.
+  // If a configuration file is missing, defaults will be chosen.
+  //
+  // On condition that there were no command line configuration options,
+  // the configuration file will be reformatted/corrected if needed.
   JSData configuration;
+  // Configuration coming from command line.
+  // Does not affect the configuration file defaults:
+  // the configuration file is stored before
+  // the command-line configurations are merged in.
+  JSData configurationCommandLine;
   JSData timeStats;
   List<List<std::string> > databaseModifiableFields;
   PauseThread theLocalPauseController;

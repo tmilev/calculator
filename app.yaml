@@ -1,2 +1,10 @@
 runtime: custom
 env: flex
+
+network:
+  instance_tag: default
+  name: default
+  forwarded_ports:
+    - 80:8156
+    - 8156
+

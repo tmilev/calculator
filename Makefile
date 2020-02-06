@@ -40,13 +40,7 @@ OPTIMIZATION_FLAGS=
 CFLAGS=-Wpedantic -Wall -Wextra -std=c++0x $(OPTIMIZATION_FLAGS) -c
 LDFLAGS=-pthread $(OPTIMIZATION_FLAGS)
 LIBRARIES_INCLUDED_AT_THE_END=
-
-ifeq ($(hsa), 1)
-	CXX=/home/user/gcc/bin/g++
-	LDFLAGS+=-L/home/user/gcc/lib64 -Wl -rpath /home/user/gcc/lib64 -L/opt/hsa/lib -L/usr/local/lib -lhsa-runtime64 -lhsakmt
-else
-	CXX=g++
-endif
+CXX=g++
 
 ifeq ($(llvm), 1)
 	CXX=clang-3.8
@@ -61,8 +55,25 @@ endif
 
 ########################
 ########################
-##We include mysql and ssl depending on their availability
-##This code may need more work in the future
+## We include mysql and ssl depending on their availability
+## This code may need more work in the future
+ifeq ($(noMongo), 1)
+$(info [1;31mNo mongo requested.[0m) 
+else
+mongoLocation =
+ifneq ($(wildcard /usr/local/lib/libmongoc-1.0.so),)#location of mongoC in Ubuntu
+  CFLAGS+=-I/usr/local/include/libmongoc-1.0 -I/usr/local/include/libbson-1.0
+  mongoLocation=/usr/local/
+endif
+ifneq ($(mongoLocation),)
+  CFLAGS+=-DMACRO_use_MongoDB
+#  LDFLAGS+= -L/usr/local/lib
+  LIBRARIES_INCLUDED_AT_THE_END+=-L/usr/local/lib -lmongoc-1.0 -lbson-1.0
+$(info [1;32mMongo found.[0m) 
+else
+$(info [1;31mNOT FOUND: Mongo.[0m The calculator will run without a database and proper login.) 
+endif
+endif
 
 ifeq ($(nossl), 1)
 $(info [1;33mNo openssl requested.[0m) 
@@ -81,29 +92,11 @@ ifneq ($(wildcard /usr/lib/x86_64-linux-gnu/libssl.so),)#location of ssl in Ubun
   sslLocation=found
 endif
 ifneq ($(sslLocation),)
-  CFLAGS+= -DMACRO_use_open_ssl 
-  LIBRARIES_INCLUDED_AT_THE_END+=-lssl -lcrypto#WARNING believe it or not, the libraries must come AFTER the executable name
+  CFLAGS+=-DMACRO_use_open_ssl 
+  LIBRARIES_INCLUDED_AT_THE_END+=-lssl -lcrypto # WARNING believe it or not, the libraries must come AFTER the executable name
 $(info [1;32mOpenssl found.[0m) 
 else
 $(info [1;31mNOT FOUND: Openssl.[0m I will attempt to install it once the calculator is compiled.) 
-endif
-endif
-
-ifeq ($(noMongo), 1)
-$(info [1;31mNo mongo requested.[0m) 
-else
-mongoLocation =
-ifneq ($(wildcard /usr/local/lib/libmongoc-1.0.so),)#location of mongoC in Ubuntu
-  CFLAGS+=-I/usr/local/include/libmongoc-1.0 -I/usr/local/include/libbson-1.0
-  mongoLocation=/usr/local/
-endif
-ifneq ($(mongoLocation),)
-  CFLAGS+=-DMACRO_use_MongoDB
-#  LDFLAGS+= -L/usr/local/lib
-  LIBRARIES_INCLUDED_AT_THE_END+=-L/usr/local/lib -lmongoc-1.0 -lbson-1.0
-$(info [1;32mMongo found.[0m) 
-else
-$(info [1;31mNOT FOUND: Mongo.[0m The calculator will run without a database and proper login.) 
 endif
 endif
 ########################

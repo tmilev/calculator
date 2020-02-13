@@ -15,6 +15,10 @@ std::string CalculatorHTML::stringScoredQuizzes = "Quiz";
 std::string CalculatorHTML::stringPracticE = "Practice";
 std::string CalculatorHTML::stringProblemLink = "Problem";
 
+std::string SyntacticElementHTML::Tags::calculator = "calculator";
+std::string SyntacticElementHTML::Tags::calculatorHidden = "calculatorHidden";
+std::string SyntacticElementHTML::Tags::calculatorSolution = "calculatorSolution";
+
 CalculatorHTML::CalculatorHTML() {
   this->NumAttemptsToInterpret = 0;
   this->NumAnswerIdsMathquilled = 0;
@@ -935,7 +939,7 @@ bool SyntacticElementHTML::IsSolution() {
     return false;
   }
   std::string tagClass = this->GetKeyValue("class");
-  return tagClass == "calculatorSolution";
+  return tagClass == SyntacticElementHTML::Tags::calculatorSolution;
 }
 
 bool SyntacticElementHTML::IsAnswerOnGiveUp() {
@@ -974,7 +978,7 @@ bool SyntacticElementHTML::IsAnswerElement(std::string* desiredAnswerId) {
   tagClass == "calculatorMQField" ||
   tagClass == "calculatorMQButtonPanel" ||
   tagClass == "calculatorAnswerVerification" ||
-  tagClass == "calculatorSolution";
+  tagClass == SyntacticElementHTML::Tags::calculatorSolution;
   if (result && desiredAnswerId != nullptr) {
     *desiredAnswerId = this->GetKeyValue("name");
   }
@@ -2093,7 +2097,7 @@ void CalculatorHTML::initBuiltInSpanClasses() {
   }
   if (this->calculatorClasses.size == 0) {
     this->calculatorClasses.AddOnTop("calculator");
-    this->calculatorClasses.AddOnTop("calculatorSolution");
+    this->calculatorClasses.AddOnTop(SyntacticElementHTML::Tags::calculatorSolution);
     this->calculatorClasses.AddOnTop("calculatorShowToUserOnly");
     this->calculatorClasses.AddOnTop("calculatorHidden");
     this->calculatorClasses.AddOnTop("calculatorCommentsBeforeInterpretation");
@@ -2208,7 +2212,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments) {
       secondToLast == "/" && last.syntacticRole == ">"
     ) {
       tagClass = thirdToLast.GetKeyValue("class");
-      if (tagClass == "calculatorSolution") {
+      if (tagClass == SyntacticElementHTML::Tags::calculatorSolution) {
         thirdToLast.syntacticRole = "<calculatorSolution>";
       } else if (this->calculatorClasses.Contains(tagClass)) {
         thirdToLast.syntacticRole = "command";
@@ -2318,7 +2322,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments) {
       eltsStack.RemoveLastObject();
       continue;
     }
-    if (thirdToLast.syntacticRole == "<calculatorSolution>" &&(
+    if (thirdToLast.syntacticRole == "<calculatorSolution>" && (
       secondToLast.syntacticRole == "" ||
       secondToLast.syntacticRole == "command" ||
       secondToLast.syntacticRole == "<"
@@ -2387,8 +2391,13 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments) {
     if (secondToLast.syntacticRole == "<openTag" && last.syntacticRole == ">") {
       tagClass = secondToLast.GetKeyValue("class");
       tag = secondToLast.tag;
-      if (tagClass == "calculatorSolution" || tag == "calculatorSolution") {
+      if (
+        tagClass == SyntacticElementHTML::Tags::calculatorSolution ||
+        tag == SyntacticElementHTML::Tags::calculatorSolution
+      ) {
         secondToLast.syntacticRole = "<calculatorSolution>";
+        secondToLast.tag = SyntacticElementHTML::Tags::calculatorSolution;
+        secondToLast.SetKeyValue("class", SyntacticElementHTML::Tags::calculatorSolution);
       } else if (this->calculatorClasses.Contains(tagClass) || this->calculatorClasses.Contains(tag)) {
         secondToLast.syntacticRole = "<openTagCalc>";
         if (this->calculatorClasses.Contains(tag)) {
@@ -2401,7 +2410,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments) {
       } else if (this->SetTagClassFromOpenTag(secondToLast)) {
         secondToLast.syntacticRole = "command";
       } else {
-        secondToLast.content =secondToLast.ToStringOpenTag("");
+        secondToLast.content = secondToLast.ToStringOpenTag("");
         if (global.UserDefaultHasProblemComposingRights() && comments != nullptr) {
           if (StringRoutines::StringBeginsWith(tagClass, "calculator")) {
             if (!this->calculatorClasses.Contains(tagClass)) {
@@ -2565,7 +2574,7 @@ bool CalculatorHTML::PrepareAnswerElements(std::stringstream &comments) {
       if (tagClass == "calculatorButtonSolution") {
         currentA.flagAutoGenerateButtonSolution = false;
       }
-      if (tagClass == "calculatorSolution") {
+      if (tagClass == SyntacticElementHTML::Tags::calculatorSolution) {
         currentA.flagSolutionFound = true;
       }
       if (tagClass == "calculatorMQField") {

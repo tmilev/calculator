@@ -8,6 +8,12 @@
 
 class SyntacticElementHTML {
 public:
+  struct Tags{
+  public:
+    static std::string calculator;
+    static std::string calculatorHidden;
+    static std::string calculatorSolution;
+  };
   int indexInOwner;
   int commandIndex;
   std::string syntacticRole;

@@ -267,12 +267,22 @@ function writeNextPreviousEditButton(currentlyEditedPage) {
 
 function selectEditPage(currentlyEditedPage) {
   var thePage = window.calculator.mainPage;
-  if (
-    currentlyEditedPage === undefined || 
-    currentlyEditedPage === null || 
-    currentlyEditedPage === ""
-  ) {
-    currentlyEditedPage = thePage.storage.variables.editor.currentlyEditedPage.getValue();
+  var storageVariables = thePage.storage.variables;
+  var fileNameSources = [
+    storageVariables.editor.currentlyEditedPage,
+    storageVariables.currentCourse.problemFileName,
+    storageVariables.currentCourse.fileName,
+    storageVariables.currentCourse.courseHome,
+    storageVariables.currentCourse.topicList,
+  ];
+  for (var i = 0; i < fileNameSources.length; i ++) {
+    if (
+      (typeof currentlyEditedPage) === "string" &&
+      currentlyEditedPage !== ""
+    ) {
+      break;
+    }
+    currentlyEditedPage = fileNameSources[i].getValue();
   }
   if (
     currentlyEditedPage === undefined || 
@@ -281,7 +291,7 @@ function selectEditPage(currentlyEditedPage) {
   ) {
     currentlyEditedPage = "/coursesavailable/default.txt";
   }
-  thePage.storage.variables.editor.currentlyEditedPage.setAndStore(currentlyEditedPage);
+  storageVariables.editor.currentlyEditedPage.setAndStore(currentlyEditedPage);
   if (!thePage.flagProblemPageOnly) {
     if (thePage.storage.variables.currentPage.getValue() !== thePage.pages.editPage.name) {
       thePage.selectPage(thePage.pages.editPage.name);

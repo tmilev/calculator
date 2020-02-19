@@ -2145,6 +2145,53 @@ bool CalculatorFunctionsBinaryOps::innerAddMatrixToMatrix(
   return output.AssignMatrixExpressions(leftMat, theCommands, false, true);
 }
 
+bool CalculatorFunctionsBinaryOps::innerAugmentMatrixToTheRight(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAugmentMatrixToTheRight");
+  if (input.size() != 3) {
+    return false;
+  }
+  Matrix<Expression> leftMat, rightMat;
+  if (
+    !theCommands.GetMatrixExpressions(input[1], leftMat) ||
+    !theCommands.GetMatrixExpressions(input[2], rightMat)
+  ) {
+    return false;
+  }
+  if (leftMat.NumRows != rightMat.NumRows) {
+    return theCommands << "Cannot augment the left matrix with: " << leftMat.NumRows
+    << " rows to the right by a matrix with a different number of rows: "
+    << rightMat.NumRows << ". ";
+  }
+  leftMat.AppendMatrixOnTheRight(rightMat);
+  return output.AssignMatrixExpressions(leftMat, theCommands, false, false);
+}
+
+bool CalculatorFunctionsBinaryOps::innerAugmentMatrixBelow(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAugmentMatrixBelow");
+  if (input.size() != 3) {
+    return false;
+  }
+  Matrix<Expression> leftMat, rightMat;
+  if (
+    !theCommands.GetMatrixExpressions(input[1], leftMat) ||
+    !theCommands.GetMatrixExpressions(input[2], rightMat)
+  ) {
+    return false;
+  }
+  if (leftMat.NumRows != rightMat.NumRows) {
+    return theCommands << "Cannot augment the left matrix with: " << leftMat.NumRows
+    << " rows to the right by a matrix with a different number of rows: "
+    << rightMat.NumRows << ". ";
+  }
+  leftMat.AppendMatrixToTheBottom(rightMat);
+  return output.AssignMatrixExpressions(leftMat, theCommands, false, false);
+
+}
+
 bool CalculatorFunctionsBinaryOps::innerDirectSumMatrixWithMatrix(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {

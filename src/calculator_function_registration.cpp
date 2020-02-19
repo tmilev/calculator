@@ -5925,6 +5925,31 @@ void Calculator::initPredefinedStandardOperations() {
     "AddMatrices",
     innerStandard
   );
+
+  this->AddOperationHandler(
+    "AugmentMatrixToTheRight",
+    CalculatorFunctionsBinaryOps::innerAugmentMatrixToTheRight,
+    "",
+    "Augments matrix to the right with another matrix. "
+    "Pastes the content of the second matrix to the right of the first matrix."
+    "The matrices must have the same number of rows. ",
+    "AugmentMatrixToTheRight( ((1,1),(2,2)), ((0,0),(1,1)))",
+    "CalculatorFunctionsBinaryOps::innerAugmentMatrixToTheRight",
+    "AugmentMatrixToTheRight",
+    innerStandard
+  );
+  this->AddOperationHandler(
+    "AugmentMatrixBelow",
+    CalculatorFunctionsBinaryOps::innerAugmentMatrixBelow,
+    "",
+    "Augments matrix below by another matrix. "
+    "Pastes the content of the second matrix below the first matrix."
+    "The matrices must have the same number of columns. ",
+    "AugmentMatrixBelow( ((1,1),(2,2)), ((0,0),(1,1)))",
+    "CalculatorFunctionsBinaryOps::innerAugmentMatrixBelow",
+    "AugmentMatrixBelow",
+    innerStandard
+  );
   this->AddOperationHandler(
     "\\oplus",
     CalculatorFunctionsBinaryOps::innerDirectSumMatrixWithMatrix,

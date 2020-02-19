@@ -267,10 +267,18 @@ function writeNextPreviousEditButton(currentlyEditedPage) {
 
 function selectEditPage(currentlyEditedPage) {
   var thePage = window.calculator.mainPage;
-  if (currentlyEditedPage === undefined || currentlyEditedPage === null) {
+  if (
+    currentlyEditedPage === undefined || 
+    currentlyEditedPage === null || 
+    currentlyEditedPage === ""
+  ) {
     currentlyEditedPage = thePage.storage.variables.editor.currentlyEditedPage.getValue();
   }
-  if (currentlyEditedPage === undefined || currentlyEditedPage === null) {
+  if (
+    currentlyEditedPage === undefined || 
+    currentlyEditedPage === null || 
+    currentlyEditedPage === ""
+  ) {
     currentlyEditedPage = "/coursesavailable/default.txt";
   }
   thePage.storage.variables.editor.currentlyEditedPage.setAndStore(currentlyEditedPage);
@@ -286,7 +294,7 @@ function selectEditPage(currentlyEditedPage) {
   theTopicTextArea.cols = currentlyEditedPage.length + 15;
 
   var theURL = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requestEditPage}&`;
-  theURL += `fileName=${thePage.storage.variables.editor.currentlyEditedPage.getValue()}`;
+  theURL += `${pathnames.urlFields.problem.fileName}=${thePage.storage.variables.editor.currentlyEditedPage.getValue()}`;
   submitRequests.submitGET({
     url: theURL,
     callback: selectEditPageCallback,

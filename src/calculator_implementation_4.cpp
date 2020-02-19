@@ -1650,7 +1650,7 @@ bool Calculator::functionCollectSummands(
   List<Expression> summands;
   theCommands.AppendSummandsReturnTrueIfOrderNonCanonical(input, summands);
   outputSum.MakeZero();
-  MonomialCollection<Expression, AlgebraicNumber> sumOverAlgNums;
+  MonomialCollection<Expression, AlgebraicNumber> sumOverAlgebraicNumbers;
   MonomialCollection<Expression, double> sumOverDoubles;
   Rational coeffRat = 1;
   AlgebraicNumber coeffAlg = 1;
@@ -1669,7 +1669,7 @@ bool Calculator::functionCollectSummands(
           outputSum.AddMonomial(summands[i][2], coeffRat);
           continue;
         }
-        sumOverAlgNums.AddMonomial(summands[i][2], coeffAlg);
+        sumOverAlgebraicNumbers.AddMonomial(summands[i][2], coeffAlg);
         continue;
       } else if (summands[i][1].IsOfType<double>(&coeffDouble)) {
         sumOverDoubles.AddMonomial(summands[i][2], coeffDouble);
@@ -1691,11 +1691,11 @@ bool Calculator::functionCollectSummands(
     doubleSum.MakeSum(theCommands, sumOverDoubles);
     outputSum.AddMonomial(doubleSum, 1);
   }
-  if (!sumOverAlgNums.IsEqualToZero()) {
-    sumOverAlgNums.QuickSortDescending();
-    Expression algSum;
-    algSum.MakeSum(theCommands, sumOverAlgNums);
-    outputSum.AddMonomial(algSum, 1);
+  if (!sumOverAlgebraicNumbers.IsEqualToZero()) {
+    sumOverAlgebraicNumbers.QuickSortDescending();
+    Expression algebraicSum;
+    algebraicSum.MakeSum(theCommands, sumOverAlgebraicNumbers);
+    outputSum.AddMonomial(algebraicSum, 1);
   }
   outputSum.QuickSortDescending();
   return !hasNAN;
@@ -1873,7 +1873,7 @@ void Expression::operator-=(const Expression& other) {
   if (this->owner == nullptr && other.owner == nullptr) {
     this->theData -= other.theData;
     if (this->theData != 1 && this->theData != 0) {
-      global.fatal << "Attempting to subtract non-initialized expressions" << global.fatal;
+      global.fatal << "Attempt to subtract non-initialized expressions. " << global.fatal;
     }
     return;
   }
@@ -1887,7 +1887,7 @@ void Expression::operator-=(const Expression& other) {
     this->AssignValue(this->theData, *other.owner);
   }
   if (this->owner != other.owner) {
-    global.fatal << "Error: adding expressions with different owners. " << global.fatal;
+    global.fatal << "Error: attempt to add expressions with different owners. " << global.fatal;
   }
   Expression resultE;
   resultE.MakeXOX(*this->owner, this->owner->opMinus(), *this, other);
@@ -1906,11 +1906,11 @@ Expression Expression::operator*(int other) {
   MacroRegisterFunctionWithName("Expression::operator*");
   Expression result;
   if (this->owner == nullptr) {
-    //perhaps we should allow the code below for convenience: really
-    //hard to judge if the convenience is worth it, or whether it will cause hard-to-detect bugs.
-    //Rational resultRat = this->theData;
-    //resultRat*= other;
-    //if (resultRat.IsSmallInteger(&result.theData))
+    // perhaps we should allow the code below for convenience: really
+    // hard to judge if the convenience is worth it, or whether it will cause hard-to-detect bugs.
+    // Rational resultRat = this->theData;
+    // resultRat*= other;
+    // if (resultRat.IsSmallInteger(&result.theData))
     //  return result;
     global.fatal << "Multiplying non-initialized expression with data: "
     << this->theData << " by integer " << other << " is not allowed. "
@@ -2119,7 +2119,8 @@ void Calculator::AddOperationBuiltInType(const std::string& theOpName) {
 
 void Calculator::AddOperationNoRepetitionAllowed(const std::string& theOpName) {
   if (this->operations.Contains(theOpName)) {
-    global.fatal << "This is a programming error: operation " << theOpName << " already created. " << global.fatal;
+    global.fatal << "This is a programming error: operation "
+    << theOpName << " already created. " << global.fatal;
   }
   this->operations.GetValueCreate(theOpName);
 }

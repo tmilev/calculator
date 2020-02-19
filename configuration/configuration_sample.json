@@ -1,7 +1,7 @@
 {
   "serverDetailedLog":null,
   "autoUnitTest":null,
-  "disableDatabaseLogEveryoneAsAdmin":null,
+  "disableDatabaseLogEveryoneAsAdmin":true,
   "serverAutoMonitor":null,
   "serverRAMCachingOff":null,
   "runServerOnEmptyCommandLine":null,

@@ -2396,7 +2396,6 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments) {
         tag == SyntacticElementHTML::Tags::calculatorSolution
       ) {
         secondToLast.syntacticRole = "<calculatorSolution>";
-        secondToLast.tag = SyntacticElementHTML::Tags::calculatorSolution;
         secondToLast.SetKeyValue("class", SyntacticElementHTML::Tags::calculatorSolution);
       } else if (this->calculatorClasses.Contains(tagClass) || this->calculatorClasses.Contains(tag)) {
         secondToLast.syntacticRole = "<openTagCalc>";

@@ -251,30 +251,42 @@ bool AlgebraicClosureRationals::ReduceMe() {
   if (this->flagIsQuadraticRadicalExtensionRationals) {
     return true;
   }
-  global.Comments << "DEBUG: and the chosen generator is: z = "
-  << this->GeneratingElemenT.ToString();
+  global.Comments
+  << "DEBUG: and the chosen generator is: z = "
+  << this->GeneratingElemenT.ToString() << "<br>";
   Polynomial<Rational> theMinPoly, smallestFactor;
   theMinPoly.AssignMinPoly(this->GeneratingElementMatForm);
   int theDim = this->theBasisMultiplicative.size;
   List<Polynomial<Rational> > theFactors;
   bool mustBeTrue = theMinPoly.FactorMe(theFactors, nullptr);
   if (!mustBeTrue) {
-    global.fatal << "This is a programming error: failed to factor polynomial " << theMinPoly.ToString() << global.fatal;
+    global.fatal
+    << "This is a programming error: failed to factor polynomial "
+    << theMinPoly.ToString() << global.fatal;
   }
   smallestFactor = theFactors[0];
   if (smallestFactor.TotalDegreeInt() == theDim) {
     return true;
   }
-  MatrixTensor<Rational> theBasisChangeMat, theBasisChangeMatInverse;
-  theBasisChangeMat.AssignVectorsToColumns(this->theGeneratingElementPowersBasis);
-  theBasisChangeMatInverse = theBasisChangeMat;
-  theBasisChangeMatInverse.Invert();
+  MatrixTensor<Rational> basisChangeMatrix, basisChangeInverseMatrix;
+  basisChangeMatrix.AssignVectorsToColumns(this->theGeneratingElementPowersBasis);
+  basisChangeInverseMatrix = basisChangeMatrix;
+  basisChangeInverseMatrix.Invert();
+  global.Comments << "DEBUG: generating element powers: " << this->theGeneratingElementPowersBasis.ToString() << "<br>";
+  global.Comments << "DEBUG: basis change matrix: " << basisChangeMatrix.ToStringMatForm();
+  global.Comments << "DEBUG: inverse basis change matrix: " << basisChangeInverseMatrix.ToStringMatForm();
+
+
   Polynomial<Rational> zToTheNth, remainderAfterReduction, tempP;
   MatrixTensor<Rational> theProjection;
   int smallestFactorDegree = - 1;
   if (!smallestFactor.TotalDegree().IsSmallInteger(&smallestFactorDegree)) {
-    global.fatal << "This is a programming error: " << smallestFactor.ToString()
-    << " has non-integral exponent, which should be impossible in the current context. " << global.fatal;
+    global.fatal
+    << "This is a programming error: "
+    << smallestFactor.ToString()
+    << " has non-integral exponent, which should be "
+    << "impossible in the current context. "
+    << global.fatal;
   }
   theProjection.MakeZero();
   for (int i = 0; i < smallestFactorDegree; i ++) {
@@ -642,15 +654,20 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(const Polynomial<AlgebraicNumb
   if (degreeMinPoly * startingDim > 10000 || startingDim > 10000 || degreeMinPoly > 10000) {
     global.Comments << "<hr>Adjoining root of minimial polynomial failed: "
     << "the current field extension dimension over the rationals is "
-    << startingDim << ", the degree of the minimial polynomial is " << degreeMinPoly
+    << startingDim << ", the degree of the minimial polynomial is "
+    << degreeMinPoly
     << ", yielding expected final dimension "
-    << startingDim << "*" << degreeMinPoly << " = " << startingDim * degreeMinPoly
+    << startingDim << "*" << degreeMinPoly << " = "
+    << startingDim * degreeMinPoly
     << " over the rationals. The calculator is hard-coded "
     << "to accept dimension over the rationals no larger than 10000 "
     << "- multiplication in such a field corresponds to a "
-    << "10000x10000 matrix (100 000 000 entries). "
-    << "If you do indeed want to carry out such large computations, you need to "
-    << "compile the calculator on your own, modifying file " << __FILE__ << ", line " << __LINE__ << ".";
+    << "10000x10000 matrix "
+    << "(100 000 000 entries, expected in general to be dense). "
+    << "If you do indeed want to carry out "
+    << "such large computations, you need to "
+    << "compile the calculator on your own, modifying file "
+    << __FILE__ << ", line " << __LINE__ << ".";
     return false;
   }
   global.Comments << "DEBUG: Adjoin roots of: " << minPoly.ToString() << "<hr>";
@@ -680,10 +697,12 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(const Polynomial<AlgebraicNumb
       if (relRowIndex == - 1 || relColIndex == - 1) {
         global.fatal << "This is a programming error: non initialized monomial. " << global.fatal;
       }
-      theGenMat.AddMonomial(MonomialMatrix(
+      theGenMat.AddMonomial(
+        MonomialMatrix(
           currentMon.TotalDegreeInt() * startingDim + relRowIndex,
           startingDim * (degreeMinPoly - 1) + relColIndex
-        ), currentCoeffMatForm.theCoeffs[j]
+        ),
+        currentCoeffMatForm.theCoeffs[j]
       );
     }
   }
@@ -732,8 +751,10 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(const Polynomial<AlgebraicNumb
     global.fatal << "This is a programming error. The number z = "
     << outputRoot.ToString() << " was just adjoined to the base field; z "
     << "was given by requesting that it has minimial polynomial "
-    << minPoly.ToString() << ", however, substituting z back in to the minimal polynomial "
-    << "does not yield zero, rather yields " << substitutedMinPoly.ToString() << ". " << global.fatal;
+    << minPoly.ToString()
+    << ", however, substituting z back in to the minimal polynomial "
+    << "does not yield zero, rather yields "
+    << substitutedMinPoly.ToString() << ". " << global.fatal;
   }
   return true;
 }
@@ -1090,7 +1111,7 @@ void AlgebraicNumber::RadicalMeDefault(int theRad) {
 
 std::string AlgebraicClosureRationals::ToString(FormatExpressions* theFormat) const {
   MacroRegisterFunctionWithName("AlgebraicClosureRationals::ToString");
-  (void) theFormat;//remove unused parameter warning, portable.
+  (void) theFormat;
   std::stringstream out;
   FormatExpressions tempFormat;
   tempFormat.flagUseHTML = false;

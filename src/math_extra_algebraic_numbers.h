@@ -170,9 +170,19 @@ class AlgebraicNumber {
   std::string ToString(FormatExpressions* theFormat = nullptr) const;
 };
 
+// The algebraic closure of the rationals is
+// represented as a series of nested extensions of the rationals:
+// Rationals = Q = A_0 <= A_1 <= A_2 <= ...
+// Each extension A_i comes with a basis e_{i, 1}, e_{i, 2}, ...
+// Here, we explicitly allow the basis to be linearly dependent.
+// In particular, we explicitly allow that there exist an extension for which
+// the next extension has fewer basis vectors.
+// The latter case automatically implies the
+// basis of the preceding extension was redundant.
 class AlgebraicClosureRationals {
 public:
   List<MatrixTensor<Rational> > theBasisMultiplicative;
+
   List<List<VectorSparse<Rational> > > theBasesAdditive;
 
   MatrixTensor<Rational> GeneratingElementTensorForm;

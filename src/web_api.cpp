@@ -572,7 +572,7 @@ bool WebAPIResponse::ProcessSlidesOrHomeworkFromSource() {
   ) {
     theCrawler.flagHomeworkRatherThanSlides = true;
   }
-  if (!theCrawler.BuildOrFetchFromCachePDF(&comments, &comments) || true) {
+  if (!theCrawler.BuildOrFetchFromCachePDF(&comments, &comments)) {
     resultOnError["targetPdfFileName"] = theCrawler.targetPDFFileNameWithPathVirtual;
     resultOnError[WebAPI::result::error] = comments.str();
     this->owner->flagDoAddContentLength = true;

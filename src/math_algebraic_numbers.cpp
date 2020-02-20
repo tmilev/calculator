@@ -197,7 +197,7 @@ bool AlgebraicClosureRationals::MergeRadicals(const List<LargeInteger>& theRadic
 }
 
 void AlgebraicClosureRationals::RegisterNewBasis(const MatrixTensor<Rational>& theInjection) {
-  //VectorSparse<Rational> eltVectorForm;
+  // VectorSparse<Rational> eltVectorForm;
   for (int j = 0; j < this->theBasesAdditive.size; j ++) {
     for (int i = 0; i < this->theBasesAdditive[j].size; i ++) {
       theInjection.ActOnVectorColumn(this->theBasesAdditive[j][i]);
@@ -246,11 +246,13 @@ void AlgebraicClosureRationals::ChooseGeneratingElement() {
 }
 
 bool AlgebraicClosureRationals::ReduceMe() {
-  MacroRegisterFunctionWithName("AlgebraicExtensionRationals::ReduceMe");
+  MacroRegisterFunctionWithName("AlgebraicClosureRationals::ReduceMe");
   this->ChooseGeneratingElement();
   if (this->flagIsQuadraticRadicalExtensionRationals) {
     return true;
   }
+  global.Comments << "DEBUG: and the chosen generator is: z = "
+  << this->GeneratingElemenT.ToString();
   Polynomial<Rational> theMinPoly, smallestFactor;
   theMinPoly.AssignMinPoly(this->GeneratingElementMatForm);
   int theDim = this->theBasisMultiplicative.size;
@@ -284,9 +286,12 @@ bool AlgebraicClosureRationals::ReduceMe() {
     for (int j = 0; j < remainderAfterReduction.size(); j ++) {
       int theIndex = - 1;
       remainderAfterReduction[j](0).IsSmallInteger(&theIndex);
-      theProjection.AddMonomial(MonomialMatrix(theIndex, i),remainderAfterReduction.theCoeffs[j]);
+      theProjection.AddMonomial(MonomialMatrix(theIndex, i), remainderAfterReduction.theCoeffs[j]);
     }
   }
+  global.Comments << "DEBUG: The projection: "
+  << theProjection.ToStringMatForm() << "<br>"
+  << "Generator min poly factors: " << theFactors.ToStringCommaDelimited() << "<br>";
   this->theBasisMultiplicative.SetSize(smallestFactorDegree);
   MonomialMatrix tempM;
   for (int i = 0; i < this->theBasisMultiplicative.size; i ++) {
@@ -295,7 +300,7 @@ bool AlgebraicClosureRationals::ReduceMe() {
       zToTheNth.MakeMonomiaL(0, i + j, 1, 1);
       zToTheNth.DivideBy(smallestFactor, tempP, remainderAfterReduction);
       for (int k = 0; k < remainderAfterReduction.size(); k ++) {
-        int theIndex = - 666;
+        int theIndex = - 1;
         remainderAfterReduction[k](0).IsSmallInteger(&theIndex);
         tempM.vIndex = theIndex;
         tempM.dualIndex = j;
@@ -312,6 +317,7 @@ bool AlgebraicClosureRationals::ReduceMe() {
   this->GetMultiplicationBy(this->GeneratingElemenT, this->GeneratingElementTensorForm);
   this->GeneratingElementTensorForm.GetMatrix(this->GeneratingElementMatForm, this->theBasisMultiplicative.size);
   this->RegisterNewBasis(theProjection);
+  global.Comments << this->ToString();
   return true;
 }
 
@@ -647,6 +653,7 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(const Polynomial<AlgebraicNumb
     << "compile the calculator on your own, modifying file " << __FILE__ << ", line " << __LINE__ << ".";
     return false;
   }
+  global.Comments << "DEBUG: Adjoin roots of: " << minPoly.ToString() << "<hr>";
   theGenMat.MakeZero();
   for (int i = 0; i < degreeMinPoly - 1; i ++) {
     for (int j = 0; j < startingDim; j ++) {
@@ -687,6 +694,7 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(const Polynomial<AlgebraicNumb
   theGenMatPower.MakeId(degreeMinPoly);
   for (int i = 0; i < startingDim; i ++) {
     finalBasis[i].AssignTensorProduct(theGenMatPower, this->theBasisMultiplicative[i]);
+    global.Comments << "DEBUG: final basis " << i + 1 << ": " << finalBasis[i].ToStringMatForm() << "<br>";
   }
   this->theBasisMultiplicative = finalBasis;
   theBasisMultiplicative.SetSize(finalDim);
@@ -695,6 +703,8 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(const Polynomial<AlgebraicNumb
     for (int j = 0; j < startingDim; j ++) {
       this->theBasisMultiplicative[i * startingDim + j] = theGenMatPower;
       this->theBasisMultiplicative[i * startingDim + j] *= finalBasis[j];
+      global.Comments << "DEBUG: final basis next: "
+      << this->theBasisMultiplicative[i * startingDim + j].ToStringMatForm() << "<br>";
     }
     if (i != degreeMinPoly - 1) {
       theGenMatPower *= theGenMat;
@@ -711,17 +721,19 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(const Polynomial<AlgebraicNumb
     *this = backUpCopy;
     return false;
   }
-  //Sanity check code here:
+  // Sanity check code here:
   PolynomialSubstitution<AlgebraicNumber> theSub;
   theSub.SetSize(1);
   theSub[0].MakeConst(outputRoot);
-  minPoly.Substitution(theSub);
-  if (!minPoly.IsEqualToZero()) {
-    global.fatal << "This is a programming error. The number z="
+  Polynomial<AlgebraicNumber> substitutedMinPoly;
+  substitutedMinPoly = minPoly;
+  substitutedMinPoly.Substitution(theSub);
+  if (!substitutedMinPoly.IsEqualToZero()) {
+    global.fatal << "This is a programming error. The number z = "
     << outputRoot.ToString() << " was just adjoined to the base field; z "
     << "was given by requesting that it has minimial polynomial "
     << minPoly.ToString() << ", however, substituting z back in to the minimal polynomial "
-    << "does not yield zero, rather yields " << minPoly.ToString() << ". " << global.fatal;
+    << "does not yield zero, rather yields " << substitutedMinPoly.ToString() << ". " << global.fatal;
   }
   return true;
 }

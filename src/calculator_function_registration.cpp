@@ -1473,7 +1473,9 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctions::innerGetAlgebraicNumberFromMinPoly,
     "",
     "Creates an algebraic number that is a root of a polynomial with algebraic number coefficients. ",
-    "AlgebraicNumberFromPoly{}(x^3+\\sqrt{2}x + 1);",
+    "AlgebraicNumberFromPoly{}(x^3+\\sqrt{2}x + 1);\n"
+    "AlgebraicNumberFromPoly{}(x^2 - (3+2sqrt(2));\n"
+    "AlgebraicNumberFromPoly{}(x^3 - (7+5sqrt(2));\n",
     "CalculatorFunctions::innerGetAlgebraicNumberFromMinPoly",
     "AlgebraicNumberFromPoly",
     innerStandard

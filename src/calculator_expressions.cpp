@@ -2599,7 +2599,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     contextFormat.GetElement().flagUseHTML = false;
     if (this->GetValue<MatrixTensor<Rational> >().GetMinNumColsNumRows() < 20) {
       out << "MatrixRationalsTensorForm{}("
-      << this->GetValue<MatrixTensor<Rational> > ().ToStringMatForm(&contextFormat.GetElement())
+      << this->GetValue<MatrixTensor<Rational> > ().ToStringMatrixForm(&contextFormat.GetElement())
       << ")";
     } else {
       out << this->GetValue<MatrixTensor<Rational> >().ToString();

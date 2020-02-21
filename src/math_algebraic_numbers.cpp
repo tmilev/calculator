@@ -268,13 +268,13 @@ bool AlgebraicClosureRationals::ReduceMe() {
   if (smallestFactor.TotalDegreeInt() == theDim) {
     return true;
   }
-  MatrixTensor<Rational> basisChangeMatrix, basisChangeInverseMatrix;
-  basisChangeMatrix.AssignVectorsToColumns(this->theGeneratingElementPowersBasis);
-  basisChangeInverseMatrix = basisChangeMatrix;
-  basisChangeInverseMatrix.Invert();
+  MatrixTensor<Rational> generatorPowers, generatorPowersInverse;
+  generatorPowers.AssignVectorsToColumns(this->theGeneratingElementPowersBasis);
+  generatorPowersInverse = generatorPowers;
+  generatorPowersInverse.Invert();
   global.Comments << "DEBUG: generating element powers: " << this->theGeneratingElementPowersBasis.ToString() << "<br>";
-  global.Comments << "DEBUG: basis change matrix: " << basisChangeMatrix.ToStringMatForm();
-  global.Comments << "DEBUG: inverse basis change matrix: " << basisChangeInverseMatrix.ToStringMatForm();
+  global.Comments << "DEBUG: basis change matrix: " << generatorPowers.ToStringMatrixForm();
+  global.Comments << "DEBUG: inverse basis change matrix: " << generatorPowersInverse.ToStringMatrixForm();
 
 
   Polynomial<Rational> zToTheNth, remainderAfterReduction, tempP;
@@ -302,23 +302,29 @@ bool AlgebraicClosureRationals::ReduceMe() {
     }
   }
   global.Comments << "DEBUG: The projection: "
-  << theProjection.ToStringMatForm() << "<br>"
+  << theProjection.ToStringMatrixForm() << "<br>"
   << "Generator min poly factors: " << theFactors.ToStringCommaDelimited() << "<br>";
-  this->theBasisMultiplicative.SetSize(smallestFactorDegree);
-  MonomialMatrix tempM;
-  for (int i = 0; i < this->theBasisMultiplicative.size; i ++) {
-    this->theBasisMultiplicative[i].MakeZero();
-    for (int j = 0; j < this->theBasisMultiplicative.size; j ++) {
+
+  List<MatrixTensor<Rational> > correctedBasisMultiplicative;
+  correctedBasisMultiplicative.SetSize(smallestFactorDegree);
+  MonomialMatrix currentMonomial;
+  for (int i = 0; i < correctedBasisMultiplicative.size; i ++) {
+    correctedBasisMultiplicative[i] = generatorPowers;
+    correctedBasisMultiplicative[i] *= this->theBasisMultiplicative[i];
+    correctedBasisMultiplicative[i] *= generatorPowersInverse;
+    for (int j = 0; j < correctedBasisMultiplicative.size; j ++) {
       zToTheNth.MakeMonomiaL(0, i + j, 1, 1);
       zToTheNth.DivideBy(smallestFactor, tempP, remainderAfterReduction);
       for (int k = 0; k < remainderAfterReduction.size(); k ++) {
         int theIndex = - 1;
         remainderAfterReduction[k](0).IsSmallInteger(&theIndex);
-        tempM.vIndex = theIndex;
-        tempM.dualIndex = j;
-        this->theBasisMultiplicative[i].AddMonomial(tempM, remainderAfterReduction.theCoeffs[k]);
+        currentMonomial.vIndex = theIndex;
+        currentMonomial.dualIndex = j;
+        correctedBasisMultiplicative[i].AddMonomial(currentMonomial, remainderAfterReduction.theCoeffs[k]);
       }
     }
+    correctedBasisMultiplicative[i].MultiplyOnTheLeft(generatorPowersInverse);
+    correctedBasisMultiplicative[i] *= generatorPowers;
   }
   this->GeneratingElemenT.owner = this;
   if (this->theBasisMultiplicative.size > 1) {
@@ -333,7 +339,9 @@ bool AlgebraicClosureRationals::ReduceMe() {
   return true;
 }
 
-void AlgebraicClosureRationals::GetAdditionTo(const AlgebraicNumber& input, VectorSparse<Rational>& output) {
+void AlgebraicClosureRationals::GetAdditionTo(
+  const AlgebraicNumber& input, VectorSparse<Rational>& output
+) {
   MacroRegisterFunctionWithName("AlgebraicClosureRationals::GetAdditionTo");
   if (&output == &input.theElT) {
     AlgebraicNumber anCopy = input;
@@ -346,8 +354,13 @@ void AlgebraicClosureRationals::GetAdditionTo(const AlgebraicNumber& input, Vect
     }
     return;
   }
-  if (input.basisIndex < 0 || input.basisIndex >= this->theBasesAdditive.size) {
-    global.Comments << "This is a programming error: element has basis index " << input.basisIndex << ". "
+  if (
+    input.basisIndex < 0 ||
+    input.basisIndex >= this->theBasesAdditive.size
+  ) {
+    global.Comments
+    << "This is a programming error: element has basis index "
+    << input.basisIndex << ". "
     << global.fatal.GetStackTraceEtcErrorMessageHTML();
   }
   if (input.basisIndex == this->theBasesAdditive.size - 1) {
@@ -357,12 +370,21 @@ void AlgebraicClosureRationals::GetAdditionTo(const AlgebraicNumber& input, Vect
   output.MakeZero();
   for (int i = 0; i < input.theElT.size(); i ++) {
     int currentIndex = input.theElT[i].theIndex;
-    if (currentIndex < 0 || currentIndex >= this->theBasesAdditive[input.basisIndex].size) {
-      global.fatal << "This is a programming error: I am getting basis index "
-      << input.basisIndex << " with current index " << currentIndex
-      << ". A printout of the algebraic closure follows. " << this->ToString() << global.fatal;
+    if (
+      currentIndex < 0 ||
+      currentIndex >= this->theBasesAdditive[input.basisIndex].size
+    ) {
+      global.fatal
+      << "This is a programming error: I am getting basis index "
+      << input.basisIndex
+      << " with current index " << currentIndex
+      << ". A printout of the algebraic closure follows. "
+      << this->ToString() << global.fatal;
     }
-    output.AddOtherTimesConst(this->theBasesAdditive[input.basisIndex][currentIndex], input.theElT.theCoeffs[i]);
+    output.AddOtherTimesConst(
+      this->theBasesAdditive[input.basisIndex][currentIndex],
+      input.theElT.theCoeffs[i]
+    );
   }
 }
 
@@ -713,7 +735,7 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(const Polynomial<AlgebraicNumb
   theGenMatPower.MakeId(degreeMinPoly);
   for (int i = 0; i < startingDim; i ++) {
     finalBasis[i].AssignTensorProduct(theGenMatPower, this->theBasisMultiplicative[i]);
-    global.Comments << "DEBUG: final basis " << i + 1 << ": " << finalBasis[i].ToStringMatForm() << "<br>";
+    global.Comments << "DEBUG: final basis " << i + 1 << ": " << finalBasis[i].ToStringMatrixForm() << "<br>";
   }
   this->theBasisMultiplicative = finalBasis;
   theBasisMultiplicative.SetSize(finalDim);
@@ -723,7 +745,7 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(const Polynomial<AlgebraicNumb
       this->theBasisMultiplicative[i * startingDim + j] = theGenMatPower;
       this->theBasisMultiplicative[i * startingDim + j] *= finalBasis[j];
       global.Comments << "DEBUG: final basis next: "
-      << this->theBasisMultiplicative[i * startingDim + j].ToStringMatForm() << "<br>";
+      << this->theBasisMultiplicative[i * startingDim + j].ToStringMatrixForm() << "<br>";
     }
     if (i != degreeMinPoly - 1) {
       theGenMatPower *= theGenMat;
@@ -1144,7 +1166,7 @@ std::string AlgebraicClosureRationals::ToString(FormatExpressions* theFormat) co
     } else {
       theFlaStream << " e_{" << i + 1 << "}";
     }
-    theFlaStream << "=" << this->theBasisMultiplicative[i].ToStringMatForm(&tempFormat);
+    theFlaStream << "=" << this->theBasisMultiplicative[i].ToStringMatrixForm(&tempFormat);
     out << HtmlRoutines::GetMathSpanPure(theFlaStream.str());
     if (i != this->theBasisMultiplicative.size - 1) {
       out << ",  ";

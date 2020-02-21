@@ -956,9 +956,9 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOuterAutoGeneratorsPrint(
   tempFormat.flagUseHTML = false;
   for (int i = 0; i <groupGeneratedByMatrices.theGenerators.size; i ++) {
     outCommand << "<br>s_{" << i + 1
-    << "}=MatrixRationals" << groupGeneratedByMatrices.theGenerators[i].ToStringMatForm(&tempFormat) << ";";
+    << "}=MatrixRationals" << groupGeneratedByMatrices.theGenerators[i].ToStringMatrixForm(&tempFormat) << ";";
     out << "<br>s_" << i + 1 << " = "
-    << HtmlRoutines::GetMathSpanPure(groupGeneratedByMatrices.theGenerators[i].ToStringMatForm(&tempFormat));
+    << HtmlRoutines::GetMathSpanPure(groupGeneratedByMatrices.theGenerators[i].ToStringMatrixForm(&tempFormat));
   }
   outCommand << "<br>GenerateFiniteMultiplicativelyClosedSet(1000, ";
   for (int i = 0; i < groupGeneratedByMatrices.theGenerators.size; i ++) {
@@ -982,7 +982,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOuterAutoGeneratorsPrint(
         std::stringstream elementNameStream;
         elementNameStream << "t_" << i + 1;
         out << "<tr><td>" << HtmlRoutines::GetMathMouseHover(elementNameStream.str())<< "</td><td>"
-        << HtmlRoutines::GetMathMouseHover(groupGeneratedByMatrices.theElements[i].ToStringMatForm(&tempFormat)) << "</td></tr>";
+        << HtmlRoutines::GetMathMouseHover(groupGeneratedByMatrices.theElements[i].ToStringMatrixForm(&tempFormat)) << "</td></tr>";
       }
       out << "</table>";
     }

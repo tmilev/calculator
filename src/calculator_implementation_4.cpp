@@ -253,12 +253,12 @@ void quasiDiffOp<coefficient>::FourierTransformDiffPartOnly(quasiDiffOp<coeffici
   quasiDiffMon theMon;
   for (int i = 0; i < this->size(); i ++) {
     startDO.MakeZero();
-    startDO.AddMonomial((*this)[i].theWeylMon, this->theCoeffs[i]);
+    startDO.AddMonomial((*this)[i].theWeylMon, this->coefficients[i]);
     startDO.FourierTransform(finalDO);
     for (int j = 0; j < finalDO.size(); j ++) {
       theMon.theMatMon = (*this)[i].theMatMon;
       theMon.theWeylMon = finalDO[j];
-      output.AddMonomial(theMon, finalDO.theCoeffs[j]);
+      output.AddMonomial(theMon, finalDO.coefficients[j]);
     }
   }
 }
@@ -267,7 +267,7 @@ template <class coefficient>
 void quasiDiffOp<coefficient>::GetEWAsetMatrixPartsToId(ElementWeylAlgebra<coefficient>& output) const {
   output.MakeZero();
   for (int i = 0; i < this->size(); i ++) {
-    output.AddMonomial((*this)[i].theWeylMon, this->theCoeffs[i]);
+    output.AddMonomial((*this)[i].theWeylMon, this->coefficients[i]);
   }
 }
 
@@ -346,16 +346,16 @@ void quasiDiffOp<coefficient>::operator*=(const quasiDiffOp<coefficient>& stands
   output.MakeZero();
   for (int j = 0; j < standsOnTheRight.size(); j ++) {
     rightElt.MakeZero();
-    rightElt.AddMonomial(standsOnTheRight[j].theWeylMon, standsOnTheRight.theCoeffs[j]);
+    rightElt.AddMonomial(standsOnTheRight[j].theWeylMon, standsOnTheRight.coefficients[j]);
     for (int i = 0; i < this->size(); i ++) {
       leftElt.MakeZero();
-      leftElt.AddMonomial((*this)[i].theWeylMon, this->theCoeffs[i]);
+      leftElt.AddMonomial((*this)[i].theWeylMon, this->coefficients[i]);
       outputMon.theMatMon = (*this)[i].theMatMon;
       outputMon.theMatMon *= standsOnTheRight[j].theMatMon;
       leftElt *= rightElt;
       for (int k = 0; k < leftElt.size(); k ++) {
         outputMon.theWeylMon = leftElt[k];
-        output.AddMonomial(outputMon, leftElt.theCoeffs[k]);
+        output.AddMonomial(outputMon, leftElt.coefficients[k]);
       }
     }
   }
@@ -377,7 +377,7 @@ std::string quasiDiffOp<coefficient>::ToString(FormatExpressions* theFormat) con
   for (int i = 0; i < this->size(); i ++) {
     const quasiDiffMon& currentMon = (*this)[i];
     tempP.MakeZero();
-    tempP.AddMonomial(currentMon.theWeylMon, this->theCoeffs[i]);
+    tempP.AddMonomial(currentMon.theWeylMon, this->coefficients[i]);
     reordered.AddMonomial(currentMon.theMatMon, tempP);
   }
   std::string result = reordered.ToString(theFormat);
@@ -455,17 +455,17 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator(
       tempMat1 = this->GetActionGeneratorIndeX(currentMon.generatorsIndices[j]);
       tempMT.MakeZero();
       for (int k = 0; k < tempMat1.size(); k ++) {
-        if (tempMat1.theCoeffs[k].expressionType == RationalFunctionOld::typeRationalFunction) {
+        if (tempMat1.coefficients[k].expressionType == RationalFunctionOld::typeRationalFunction) {
           return false;
         }
-        tempMat1.theCoeffs[k].GetNumerator(tempP1);
+        tempMat1.coefficients[k].GetNumerator(tempP1);
         tempMT.AddMonomial(tempMat1[k], tempP1);
       }
       MathRoutines::RaiseToPower(tempMT, thePower, idMT);
       endoPart *= tempMT;
     }
     exponentContribution.MakeOne();
-    theCoeff = result.theCoeffs[i];
+    theCoeff = result.coefficients[i];
     for (int j = 0; j < indicesNilrad.size; j ++) {
       currentMon.Powers[j].GetConstantTerm(currentShift);
       ElementWeylAlgebra<Rational>::GetStandardOrderDiffOperatorCorrespondingToNraisedTo(
@@ -485,17 +485,17 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator(
       }
       weylPartSummand = exponentContribution;
       weylPartSummand *= eulerOperatorContribution;
-      weylPartSummand *= theCoeff.theCoeffs[l];
+      weylPartSummand *= theCoeff.coefficients[l];
       for (int j = 0; j < weylPartSummand.size(); j ++) {
         for (int k = 0; k < endoPart.size(); k ++) {
           monQDO.theMatMon = endoPart[k];
           monQDO.theWeylMon = weylPartSummand[j];
-          Polynomial<Rational>& currentEndoCoeff = endoPart.theCoeffs[k];
+          Polynomial<Rational>& currentEndoCoeff = endoPart.coefficients[k];
           for (int m = 0; m < currentEndoCoeff.size(); m ++) {
             monQDO2 = monQDO;
             monQDO2.theWeylMon.polynomialPart *= currentEndoCoeff[m];
-            tempRat = currentEndoCoeff.theCoeffs[m];
-            tempRat *= weylPartSummand.theCoeffs[j];
+            tempRat = currentEndoCoeff.coefficients[m];
+            tempRat *= weylPartSummand.coefficients[j];
             output.AddMonomial(monQDO2, tempRat);
           }
         }

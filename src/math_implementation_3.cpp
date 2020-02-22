@@ -4124,7 +4124,7 @@ int PartFractions::ElementToStringBasisChange(
   }
   int LastCutOff = 0;
   for (int i = 0; i < this->size(); i ++) {
-    if (this->theCoeffs[i].size() > 0 ) {
+    if (this->coefficients[i].size() > 0 ) {
       if (LatexFormat) {
         out << "&&";
       }
@@ -4173,7 +4173,7 @@ int PartFractions::ElementToStringBasisChangeOutputToFile(std::fstream& output, 
   }
   int LastCutOff = 0;
   for (int i = 0; i < this->size(); i ++) {
-    if (this->theCoeffs[i].size() > 0 ) {
+    if (this->coefficients[i].size() > 0 ) {
       if (LatexFormat) {
         output << "&&";
       }
@@ -4286,7 +4286,7 @@ void PartFractions::ComputeOneCheckSum(Rational& output) {
   for (int i = 0; i < this->size(); i ++) {
     Rational currentCheckSum, tempRat;
     (*this)[i].ComputeOneCheckSuM(*this, currentCheckSum, this->AmbientDimension);
-    (*this)[i].EvaluateIntPoly(this->theCoeffs[i], CheckSumRoot, tempRat);
+    (*this)[i].EvaluateIntPoly(this->coefficients[i], CheckSumRoot, tempRat);
     currentCheckSum *= tempRat;
     output += (tempRat);
     if (this->flagMakingProgressReport) {
@@ -5128,7 +5128,7 @@ void DynkinType::GetOuterAutosGeneratorsActOnVectorColumn(List<MatrixTensor<Rati
   output.SetSize(0);
   int numRowsSoFar = 0;
   for (int i = 0; i < this->size(); i ++) {
-    if (!this->theCoeffs[i].IsSmallInteger(&currentMult)) {
+    if (!this->coefficients[i].IsSmallInteger(&currentMult)) {
       global.fatal << "This is not supposed to happen in function "
       << "DynkinType::GetOuterAutosGeneratorsActOnVectorColumn." << global.fatal;
     }
@@ -5351,7 +5351,7 @@ bool DynkinType::IsSimple(char* outputtype, int* outputRank, Rational* outputLen
   if (this->size() != 1) {
     return false;
   }
-  if (this->theCoeffs[0] != 1) {
+  if (this->coefficients[0] != 1) {
     return false;
   }
   const DynkinSimpleType& theMon = (*this)[0];
@@ -5371,7 +5371,7 @@ int DynkinType::GetNumSimpleComponentsOfGivenRank(int desiredRank) const {
   Rational result = 0;
   for (int i = 0; i < this->size(); i ++) {
     if ((*this)[i].theRank == desiredRank) {
-      result += this->theCoeffs[i];
+      result += this->coefficients[i];
     }
   }
   int output = 0;
@@ -5385,7 +5385,7 @@ int DynkinType::GetNumSimpleComponentsOfGivenRank(int desiredRank) const {
 int DynkinType::GetNumSimpleComponents() const {
   Rational result = 0;
   for (int i = 0; i < this->size(); i ++) {
-    result += this->theCoeffs[i];
+    result += this->coefficients[i];
   }
   int output = 0;
   if (!result.IsSmallInteger(&output)) {
@@ -5398,7 +5398,7 @@ int DynkinType::GetNumSimpleComponents() const {
 Rational DynkinType::GetRankRational() const {
   Rational result = 0;
   for (int i = 0; i < this->size(); i ++) {
-    result += this->theCoeffs[i] * (*this)[i].theRank;
+    result += this->coefficients[i] * (*this)[i].theRank;
   }
   return result;
 }
@@ -8492,7 +8492,7 @@ void KLpolys::ComputeKLcoefficients() {
       this->theKLcoeffs[i][j] = 0;
       if (this->IndexGEQIndex(j, i)) {
         for (int k = 0; k < currentPoly.size(); k ++) {
-          this->theKLcoeffs[i][j] += currentPoly.theCoeffs[k];
+          this->theKLcoeffs[i][j] += currentPoly.coefficients[k];
         }
       }
     }
@@ -8615,7 +8615,7 @@ void KLpolys::ComputeKLxy(int x, int y) {
       for (int j = 0; j < this->theRPolys[x][i].size(); j ++) {
         tempM = this->theRPolys[x][i][j];
         tempM.Invert();
-        tempP1.AddMonomial(tempM, this->theRPolys[x][i].theCoeffs[j]);
+        tempP1.AddMonomial(tempM, this->theRPolys[x][i].coefficients[j]);
       }
       int tempI;
       if ((
@@ -8653,7 +8653,7 @@ void KLpolys::ComputeKLxy(int x, int y) {
       tempM = Accum[i];
       tempM[0].Minus();
       tempM[0] += lengthDiff;
-      this->theKLPolys[x][y].AddMonomial(tempM, Accum.theCoeffs[i]);
+      this->theKLPolys[x][y].AddMonomial(tempM, Accum.coefficients[i]);
     }
   }
 }
@@ -8737,7 +8737,7 @@ LargeInteger PartFraction::EvaluateIntPolyAtOne(Polynomial<LargeInteger>& input)
   LargeInteger result;
   result.MakeZero();
   for (int i = 0; i < input.size(); i ++) {
-    result += input.theCoeffs[i];
+    result += input.coefficients[i];
   }
   return result;
 }
@@ -9492,7 +9492,7 @@ void PartFraction::GetVectorPartitionFunction(
   output.MakeZeroLatTiceZn(owner.AmbientDimension);
   for (int i = 0; i < theCoeff.size(); i ++) {
     this->ComputePolyCorrespondingToOneMonomial(shiftedPoly, theCoeff[i], theNormals, theLattice);
-    shiftedPoly *= theCoeff.theCoeffs[i];
+    shiftedPoly *= theCoeff.coefficients[i];
     output += shiftedPoly;
   }
 }
@@ -9520,7 +9520,7 @@ bool PartFractions::GetVectorPartitionFunction(QuasiPolynomial& output, Vector<R
   for (int i = 0; i < this->size(); i ++) {
     if ((*this)[i].rootIsInFractionCone(*this, &newIndicator)) {
       const PartFraction& currentPF = (*this)[i];
-      currentPF.GetVectorPartitionFunction(*this, this->theCoeffs[i], tempQP);
+      currentPF.GetVectorPartitionFunction(*this, this->coefficients[i], tempQP);
       output += tempQP;
       this->MakeProgressVPFcomputation();
     }
@@ -10210,9 +10210,9 @@ bool Cone::GetRootFromLPolyConstantTermGoesToLastVariable(Polynomial<Rational>& 
   for (int i = 0; i < inputLPoly.size(); i ++) {
     int theIndex;
     if (inputLPoly[i].::MonomialP::IsOneLetterFirstDegree(&theIndex)) {
-      output[theIndex] = inputLPoly.theCoeffs[i];
+      output[theIndex] = inputLPoly.coefficients[i];
     } else {
-      *output.LastObject() = inputLPoly.theCoeffs[i];
+      *output.LastObject() = inputLPoly.coefficients[i];
     }
   }
   return true;
@@ -10534,7 +10534,7 @@ bool slTwoInSlN::ComputeInvariantsOfDegree(
         if (indexInResult == - 1) {
           tempMat.elements[currentRow][k] = 0;
         } else {
-          tempMat.elements[currentRow][k] = tempP.theCoeffs[indexInResult];
+          tempMat.elements[currentRow][k] = tempP.coefficients[indexInResult];
         }
       }
     }
@@ -11338,7 +11338,7 @@ void RationalFunctionOld::ReduceRFToPoly() {
     return;
   }
   if (this->Denominator.GetElement().IsConstant()) {
-    this->Numerator.GetElement() /= this->Denominator.GetElement().theCoeffs[0];
+    this->Numerator.GetElement() /= this->Denominator.GetElement().coefficients[0];
     this->Denominator.FreeMemory();
     this->expressionType = this->typePoly;
   }
@@ -13094,7 +13094,7 @@ bool ConeComplex::findMaxLFOverConeProjective(
     for (int j = 0; j < currentPoly.size(); j ++) {
       for (int k = 0; k < theDim; k ++) {
         if (currentPoly[j](k) == 1) {
-          newWall[k] = currentPoly.theCoeffs[j];
+          newWall[k] = currentPoly.coefficients[j];
           break;
         }
       }

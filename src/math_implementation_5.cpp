@@ -766,7 +766,7 @@ void HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism(
   output.MakeZero();
   for (int i = 0; i < input.size(); i ++) {
     int currentIndex = input[i].theGeneratorIndex;
-    output += this->imagesAllChevalleyGenerators[currentIndex] * input.theCoeffs[i];
+    output += this->imagesAllChevalleyGenerators[currentIndex] * input.coefficients[i];
   }
 }
 
@@ -790,7 +790,7 @@ bool HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism(
   output.MakeZero(this->theRange());
   ElementUniversalEnveloping<RationalFunctionOld> tempElt;
   for (int i = 0; i < input.size(); i ++) {
-    if (!this->ApplyHomomorphism(input[i], input.theCoeffs[i], tempElt)) {
+    if (!this->ApplyHomomorphism(input[i], input.coefficients[i], tempElt)) {
       return false;
     }
     output += tempElt;
@@ -1853,7 +1853,7 @@ void RationalFunctionOld::SimplifyLeadingCoefficientOnly() {
   if (this->expressionType != this->typeRationalFunction) {
     return;
   }
-  Rational tempRat = this->Denominator.GetElement().theCoeffs[
+  Rational tempRat = this->Denominator.GetElement().coefficients[
     this->Denominator.GetElement().GetIndexMaxMonomialLexicographicLastVariableStrongest()
   ];
   tempRat.Invert();
@@ -1926,7 +1926,7 @@ void SemisimpleLieAlgebraOrdered::GetLinearCombinationFrom(
   theCoeffs.MakeZero(this->theOwner->GetNumGenerators());
   for (int i = 0; i < input.size(); i ++) {
     int theIndex = input[i].theGeneratorIndex;
-    theCoeffs[this->theOwner->GetGeneratorFromRootIndex(theIndex)] = input.theCoeffs[i];
+    theCoeffs[this->theOwner->GetGeneratorFromRootIndex(theIndex)] = input.coefficients[i];
   }
   int numPosRoots = this->theOwner->GetNumPosRoots();
   Vector<Rational> tempH = input.GetCartanPart();
@@ -1983,7 +1983,7 @@ void SemisimpleLieAlgebraOrdered::initDefaultOrder(SemisimpleLieAlgebra& owner) 
 template <class coefficient>
 bool ElementSemisimpleLieAlgebra<coefficient>::MustUseBracketsWhenDisplayingMeRaisedToPower() {
   if (this->size == 1) {
-    if (this->theCoeffs[0] == 1) {
+    if (this->coefficients[0] == 1) {
       return false;
     }
   }
@@ -1993,7 +1993,7 @@ bool ElementSemisimpleLieAlgebra<coefficient>::MustUseBracketsWhenDisplayingMeRa
 template <class coefficient>
 bool ElementSemisimpleLieAlgebra<coefficient>::IsACoeffOneChevalleyGenerator() {
   if (this->size == 1) {
-    return this->theCoeffs[0] == 1;
+    return this->coefficients[0] == 1;
   }
   return false;
 }

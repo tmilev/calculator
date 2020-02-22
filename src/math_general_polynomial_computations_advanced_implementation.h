@@ -105,9 +105,9 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasis(List
           theReport2.Report(reportStream.str());
         }
         this->bufPoly = currentLeft;
-        this->bufPoly.MultiplyBy(this->SoPolyLeftShift, currentRight.theCoeffs[rightIndex]);
+        this->bufPoly.MultiplyBy(this->SoPolyLeftShift, currentRight.coefficients[rightIndex]);
         this->SoPolyBuf= currentRight;
-        this->SoPolyBuf.MultiplyBy(this->SoPolyRightShift, currentLeft.theCoeffs[leftIndex]);
+        this->SoPolyBuf.MultiplyBy(this->SoPolyRightShift, currentLeft.coefficients[leftIndex]);
         this->SoPolyBuf -= this->bufPoly;
 //        this->RemainderDivisionWithRespectToBasis
 //        (this->SoPolyBuf, &this->remainderDivision, global, i);
@@ -314,7 +314,7 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasisImpro
     this->theBasiS[i].ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
     int theIndex = this->theBasiS[i].GetIndexMaxMonomial(this->theMonOrdeR);
     this->leadingMons.AddOnTop(this->theBasiS[i][theIndex]);
-    this->leadingCoeffs.AddOnTop(this->theBasiS[i].theCoeffs[theIndex]);
+    this->leadingCoeffs.AddOnTop(this->theBasiS[i].coefficients[theIndex]);
   }
   if (this->theBasiS.size <= 0) {
     global.fatal << "This is a programming error: transforming to Groebner basis not allowed for empty basis. " << global.fatal;
@@ -370,7 +370,7 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasisImpro
           this->theBasiS.AddOnTop(outputRemainder);
           int theIndexMaxMon = this->theBasiS.LastObject()->GetIndexMaxMonomial(this->theMonOrdeR);
           this->leadingMons.AddOnTop((*this->theBasiS.LastObject())[theIndexMaxMon]);
-          this->leadingCoeffs.AddOnTop(this->theBasiS.LastObject()->theCoeffs[theIndexMaxMon]);
+          this->leadingCoeffs.AddOnTop(this->theBasiS.LastObject()->coefficients[theIndexMaxMon]);
           for (int i = 0; i < this->theBasiS.size - 1; i ++) {
             indexPairs.AddOnTop(PairInts(i, this->theBasiS.size - 1));
           }
@@ -480,7 +480,7 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis(
     bool divisionOcurred = false;
     int i = 0;
     int indexLeadingMonRemainder = currentRemainder.GetIndexMaxMonomial(this->thePolynomialOrder.theMonOrder);
-    leadingMonCoeff = currentRemainder.theCoeffs[indexLeadingMonRemainder];
+    leadingMonCoeff = currentRemainder.coefficients[indexLeadingMonRemainder];
     highestMonCurrentDivHighestMonOther = currentRemainder[indexLeadingMonRemainder];
     while (i < this->theBasiS.size && !divisionOcurred) {
       MonomialP& highestMonBasis = this->leadingMons[i];
@@ -613,7 +613,7 @@ bool GroebnerBasisComputation<coefficient>::AddRemainderToBasis() {
       if (shouldAddHere) {
         this->theBasiS[i] = this->remainderDivision;
         this->leadingMons[i] = theNewLeadingMon;
-        this->leadingCoeffs[i] = this->remainderDivision.theCoeffs[indexMaxMon];
+        this->leadingCoeffs[i] = this->remainderDivision.coefficients[indexMaxMon];
         break;
       } else {
         this->theBasiS[i] = this->theBasiS[i - 1];
@@ -624,7 +624,7 @@ bool GroebnerBasisComputation<coefficient>::AddRemainderToBasis() {
   } else {
     this->theBasiS.AddOnTop(this->remainderDivision);
     this->leadingMons.AddOnTop(theNewLeadingMon);
-    this->leadingCoeffs.AddOnTop(this->remainderDivision.theCoeffs[indexMaxMon]);
+    this->leadingCoeffs.AddOnTop(this->remainderDivision.coefficients[indexMaxMon]);
   }
 //  this->theBasiS.AddOnTop(this->remainderDivision);
 //  this->leadingMons.AddOnTop(theNewLeadingMon);
@@ -682,7 +682,7 @@ void GroebnerBasisComputation<coefficient>::initForDivisionAlone(List<Polynomial
       << this->theBasiS.ToString() << global.fatal;
     }
     this->leadingMons[i] = curPoly[theIndex];
-    this->leadingCoeffs[i] = curPoly.theCoeffs[theIndex];
+    this->leadingCoeffs[i] = curPoly.coefficients[theIndex];
   }
   this->NumberGBComputations = 0;
 }
@@ -729,7 +729,9 @@ bool GroebnerBasisComputation<coefficient>::GetOneVarPolySolution(
   if (this->theAlgebraicClosurE == 0) {
     return false;
   }
-  if (!theAN.ConstructFromMinPoly(thePoly, *this->theAlgebraicClosurE)) {
+  if (!theAN.ConstructFromMinPoly(
+    thePoly, *this->theAlgebraicClosurE, nullptr
+  )) {
     return false;
   }
   outputSolution = theAN;
@@ -755,7 +757,7 @@ bool GroebnerBasisComputation<coefficient>::HasImpliedSubstitutions(
       if (indexTempM == - 1) {
         continue;
       }
-      theCF = tempP.theCoeffs[indexTempM];
+      theCF = tempP.coefficients[indexTempM];
       tempP.SubtractMonomial(tempM, theCF);
       bool isGood = true;
       for (int k = 0; k < tempP.size(); k ++) {

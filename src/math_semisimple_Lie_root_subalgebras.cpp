@@ -2581,7 +2581,7 @@ void slTwoSubalgebra::initHEFSystemFromECoeffs(
       int lowerIndex = - 1;
       int higherIndex = - 1;
       Polynomial<Rational>& currentPoly = outputSystemToBeSolved[i];
-      Rational& currentCoeff = currentPoly.theCoeffs[j];
+      Rational& currentCoeff = currentPoly.coefficients[j];
       for (int k = 0; k < numberVariables; k ++) {
         if (currentPoly[j](k) == 1) {
           if (k < halfNumberVariables) {

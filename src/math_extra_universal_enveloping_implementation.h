@@ -112,7 +112,7 @@ void ElementUniversalEnveloping<coefficient>::ModOutVermaRelations(
   for (int i = 0; i < this->size(); i ++) {
     tempMon = (*this)[i];
     tempMon.ModOutVermaRelations(acquiredCoeff, subHiGoesToIthElement, theRingUnit, theRingZero);
-    acquiredCoeff *= this->theCoeffs[i];
+    acquiredCoeff *= this->coefficients[i];
     output.AddMonomial(tempMon, acquiredCoeff);
   }
   this->operator=(output);
@@ -125,7 +125,7 @@ void ElementUniversalEnveloping<coefficient>::LieBracketOnTheLeft(const ElementS
     return;
   }
   ElementUniversalEnveloping<coefficient> tempElt1, tempElt2;
-  tempElt1.AssignElementLieAlgebra(left, *this->owner, this->theCoeffs[0].GetOne());
+  tempElt1.AssignElementLieAlgebra(left, *this->owner, this->coefficients[0].GetOne());
   tempElt2 = *this;
   tempElt2.LieBracketOnTheRight(tempElt1, *this);
 }
@@ -164,7 +164,7 @@ bool ElementUniversalEnveloping<coefficient>::AdjointRepresentationAction(
     if (!(*this)[i].AdjointRepresentationAction(input, summand)) {
       return false;
     }
-    summand *= this->theCoeffs[i];
+    summand *= this->coefficients[i];
     output += summand;
   }
   return true;
@@ -304,7 +304,7 @@ void MonomialUniversalEnveloping<coefficient>::CommuteAnBtoBAnPlusLowerOrder(
       int theNewGeneratorIndex = adAToTheIthOfB[i].theGeneratorIndex;
       tempMon = startMon;
       incomingAcquiredCoefficienT = acquiredCoefficienT;
-      incomingAcquiredCoefficienT *= adAToTheIthOfB.theCoeffs[i];
+      incomingAcquiredCoefficienT *= adAToTheIthOfB.coefficients[i];
       tempMon.MultiplyByGeneratorPowerOnTheRight(theNewGeneratorIndex, theRingUnit);
       tempMon.MultiplyByGeneratorPowerOnTheRight(leftGeneratorIndeX, theLeftPoweR);
       tempMon.MultiplyByGeneratorPowerOnTheRight(rightGeneratorIndeX, theRightPoweR);
@@ -365,7 +365,7 @@ void MonomialUniversalEnveloping<coefficient>::CommuteABntoBnAPlusLowerOrder(
       tempMon = startMon;
       tempMon.MultiplyByGeneratorPowerOnTheRight(rightGeneratorIndex, theRightPower);
       incomingAcquiredCoefficient = acquiredCoefficient;
-      incomingAcquiredCoefficient *= adResult.theCoeffs[i];
+      incomingAcquiredCoefficient *= adResult.coefficients[i];
       tempMon.MultiplyByGeneratorPowerOnTheRight(theNewGeneratorIndex, theRingUnit);
       for (int i = theIndeX + 2; i < this->generatorsIndices.size; i ++) {
         tempMon.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices[i], this->Powers[i]);
@@ -409,7 +409,7 @@ bool ElementUniversalEnveloping<coefficient>::ApplyTransposeAntiAutoOnMe() {
   this->CheckNumCoeffsConsistency();
   for (int i = 0; i < this->size(); i ++) {
     const MonomialUniversalEnveloping<coefficient>& currentMon = (*this)[i];
-    theCoeff = this->theCoeffs[i];
+    theCoeff = this->coefficients[i];
     tempMon.owner = currentMon.owner;
     tempMon.Powers.size = 0;
     tempMon.generatorsIndices.size = 0;
@@ -476,7 +476,7 @@ bool ElementUniversalEnveloping<coefficient>::HWTAAbilinearForm(
   for (int j = 0; j < TAleft.size(); j ++) {
     intermediateAccum = startingElt;
     const MonomialUniversalEnveloping<coefficient>& leftMon = TAleft[j];
-    leftMonCoeff = TAleft.theCoeffs[j];
+    leftMonCoeff = TAleft.coefficients[j];
     int thePower;
     for (int i = leftMon.Powers.size - 1; i >= 0; i --) {
       if (leftMon.Powers[i].IsSmallInteger(&thePower)) {
@@ -513,7 +513,7 @@ bool ElementUniversalEnveloping<coefficient>::HWTAAbilinearForm(
     Accum += intermediateAccum;
     int theIndex = intermediateAccum.theMonomials.GetIndex(constMon);
     if (theIndex != - 1) {
-      output += intermediateAccum.theCoeffs[theIndex];
+      output += intermediateAccum.coefficients[theIndex];
     }
   }
   if (logStream != nullptr) {
@@ -573,7 +573,7 @@ void ElementUniversalEnveloping<coefficient>::Substitution(const PolynomialSubst
   for (int i = 0; i < this->size(); i ++) {
     theMon = (*this)[i];
     theMon.Substitution(theSub);
-    tempCF = this->theCoeffs[i];
+    tempCF = this->coefficients[i];
     tempCF.Substitution(theSub);
     output.AddMonomial(theMon, tempCF);
   }
@@ -735,7 +735,7 @@ void ElementUniversalEnveloping<coefficient>::SubstitutionCoefficients(
   coefficient tempCF;
   for (int i = 0; i < this->size; i ++) {
     currentMon = this->TheObjects[i];
-    this->theCoeffs[i].Substitution(theSub);
+    this->coefficients[i].Substitution(theSub);
     endResult.AddMonomial(currentMon, tempCF);
   }
   endResult.Simplify(theRingUnit, theRingZero);
@@ -804,7 +804,7 @@ bool ElementUniversalEnveloping<coefficient>::GetLieAlgebraElementIfPossible(
       return false;
     }
     Rational theConst;
-    if (!this->theCoeffs[i].IsConstant(&theConst)) {
+    if (!this->coefficients[i].IsConstant(&theConst)) {
       return false;
     }
     tempChevalley.MakeGenerator(*this->owner, tempMon.generatorsIndices[0]);
@@ -826,7 +826,7 @@ void ElementUniversalEnveloping<coefficient>::AssignElementLieAlgebra(
   coefficient tempCF;
   for (int i = 0; i < input.size(); i ++) {
     tempCF = theRingUnit; //<- to facilitate implicit type conversion: theRingUnit does not have to be of type Rational
-    tempCF *= input.theCoeffs[i];//<- to facilitate implicit type conversion: theRingUnit does not have to be of type Rational
+    tempCF *= input.coefficients[i];//<- to facilitate implicit type conversion: theRingUnit does not have to be of type Rational
     tempMon.generatorsIndices[0] = input[i].theGeneratorIndex;
     this->AddMonomial(tempMon, tempCF);
   }
@@ -856,7 +856,7 @@ void ElementUniversalEnveloping<coefficient>::GetCoordinateFormOfSpanOfElements(
     ElementUniversalEnveloping& currentElt = theElements[i];
     for (int j = 0; j < currentElt.size; j ++) {
       MonomialUniversalEnveloping<coefficient>& currentMon = currentElt[j];
-      current[outputCorrespondingMonomials.GetIndex(currentMon)] = currentElt.theCoeffs[j];
+      current[outputCorrespondingMonomials.GetIndex(currentMon)] = currentElt.coefficients[j];
     }
   }
 }
@@ -1041,7 +1041,7 @@ void ElementUniversalEnveloping<coefficient>::MultiplyBy(
   for (int i = 0; i < this->size; i ++) {
     tempMon = (*this)[i];
     tempMon *= standsOnTheRight;
-    newCoeff = this->theCoeffs[i];
+    newCoeff = this->coefficients[i];
     newCoeff *= theCoeff;
     output.AddMonomial(tempMon, newCoeff);
   }
@@ -1061,7 +1061,7 @@ void ElementUniversalEnveloping<coefficient>::RaiseToPower(int thePower) {
   if (this->size() == 0) {
     return;
   }
-  this->MakeConst(this->theCoeffs[0].GetOne(), *this->owner);
+  this->MakeConst(this->coefficients[0].GetOne(), *this->owner);
   for (int i = 0; i < thePower; i ++) {
     this->operator*=(buffer);
   }
@@ -1850,7 +1850,7 @@ bool ElementUniversalEnvelopingOrdered<coefficient>::AssignElementUniversalEnvel
   this->MakeZero(owner);
   for (int i = 0; i < input.size; i ++) {
     if (!tempElt.AssignMonomialUniversalEnveloping(
-      input.TheObjects[i], input.theCoeffs[i], owner, theRingUnit, theRingZero
+      input.TheObjects[i], input.coefficients[i], owner, theRingUnit, theRingZero
     )) {
       return false;
     }

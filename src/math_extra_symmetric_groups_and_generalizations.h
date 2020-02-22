@@ -1429,7 +1429,7 @@ void PermutationR2::ActOnTensor(
     MonomialTensor<int, MathRoutines::IntUnsignIdentity> tmpout, tmpin;
     tmpin = in.theMonomials[i];
     this->ActOnMonomialTensor(tmpout, tmpin);
-    out.AddMonomial(tmpout, in.theCoeffs[i]);
+    out.AddMonomial(tmpout, in.coefficients[i]);
   }
 }
 

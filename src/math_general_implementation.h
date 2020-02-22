@@ -216,8 +216,8 @@ void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy(
       }
       bufferMon = (*this)[j];
       bufferMon *= other[i];
-      theCoeff = this->theCoeffs[j];
-      theCoeff *= other.theCoeffs[i];
+      theCoeff = this->coefficients[j];
+      theCoeff *= other.coefficients[i];
       bufferPoly.AddMonomial(bufferMon, theCoeff);
       ParallelComputing::SafePointDontCallMeFromDestructors();
     }

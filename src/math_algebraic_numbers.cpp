@@ -191,16 +191,17 @@ bool AlgebraicClosureRationals::MergeRadicals(const List<LargeInteger>& theRadic
       this->theBasisMultiplicative[this->GetIndexFromRadicalSelection(largerFieldSel)]
     );
   } while (largerFieldSel.IncrementReturnFalseIfPastLast());
-  this->RegisterNewBasis(currentInjection);
+  this->RegisterNewBasis(&currentInjection);
   this->ComputeDisplayStringsFromRadicals();
   return true;
 }
 
-void AlgebraicClosureRationals::RegisterNewBasis(const MatrixTensor<Rational>& theInjection) {
-  // VectorSparse<Rational> eltVectorForm;
-  for (int j = 0; j < this->theBasesAdditive.size; j ++) {
-    for (int i = 0; i < this->theBasesAdditive[j].size; i ++) {
-      theInjection.ActOnVectorColumn(this->theBasesAdditive[j][i]);
+void AlgebraicClosureRationals::RegisterNewBasis(const MatrixTensor<Rational>* theInjection) {
+  if (theInjection != nullptr) {
+    for (int j = 0; j < this->theBasesAdditive.size; j ++) {
+      for (int i = 0; i < this->theBasesAdditive[j].size; i ++) {
+        theInjection->ActOnVectorColumn(this->theBasesAdditive[j][i]);
+      }
     }
   }
   this->theBasesAdditive.SetSize(this->theBasesAdditive.size + 1);
@@ -211,7 +212,7 @@ void AlgebraicClosureRationals::RegisterNewBasis(const MatrixTensor<Rational>& t
 }
 
 void AlgebraicClosureRationals::ChooseGeneratingElement() {
-  MacroRegisterFunctionWithName("AlgebraicExtensionRationals::ChooseGeneratingElement");
+  MacroRegisterFunctionWithName("AlgebraicClosureRationals::ChooseGeneratingElement");
   SelectionPositiveIntegers theSel;
   int DimOverRationals = this->theBasisMultiplicative.size;
   theSel.init(DimOverRationals);
@@ -234,7 +235,7 @@ void AlgebraicClosureRationals::ChooseGeneratingElement() {
     do {
       this->GeneratingElementMatForm.ActOnVectorColumn(currentVect);
       this->theGeneratingElementPowersBasis.AddOnTop(currentVect);
-      if (this->theGeneratingElementPowersBasis.size >this->theGeneratingElementPowersBasis.GetRankOfSpanOfElements()) {
+      if (this->theGeneratingElementPowersBasis.size > this->theGeneratingElementPowersBasis.GetRankOfSpanOfElements()) {
         this->theGeneratingElementPowersBasis.SetSize(this->theGeneratingElementPowersBasis.size - 1);
         break;
       }
@@ -245,7 +246,10 @@ void AlgebraicClosureRationals::ChooseGeneratingElement() {
   }
 }
 
-bool AlgebraicClosureRationals::ReduceMe() {
+bool AlgebraicClosureRationals::ReduceMe(
+  std::stringstream* commentsOnFailure,
+  int dimensionBeforeExtension
+) {
   MacroRegisterFunctionWithName("AlgebraicClosureRationals::ReduceMe");
   this->ChooseGeneratingElement();
   if (this->flagIsQuadraticRadicalExtensionRationals) {
@@ -298,43 +302,41 @@ bool AlgebraicClosureRationals::ReduceMe() {
     for (int j = 0; j < remainderAfterReduction.size(); j ++) {
       int theIndex = - 1;
       remainderAfterReduction[j](0).IsSmallInteger(&theIndex);
-      theProjection.AddMonomial(MonomialMatrix(theIndex, i), remainderAfterReduction.theCoeffs[j]);
+      theProjection.AddMonomial(
+        MonomialMatrix(theIndex, i),
+        remainderAfterReduction.coefficients[j]
+      );
     }
   }
-  global.Comments << "DEBUG: The projection: "
+  global.Comments << "DEBUG: The projection in generator coordinates: "
   << theProjection.ToStringMatrixForm() << "<br>"
-  << "Generator min poly factors: " << theFactors.ToStringCommaDelimited() << "<br>";
+  << "Generator min poly factors: "
+  << theFactors.ToStringCommaDelimited() << "<br>";
 
-  List<MatrixTensor<Rational> > correctedBasisMultiplicative;
-  correctedBasisMultiplicative.SetSize(smallestFactorDegree);
-  MonomialMatrix currentMonomial;
-  for (int i = 0; i < correctedBasisMultiplicative.size; i ++) {
-    correctedBasisMultiplicative[i] = generatorPowers;
-    correctedBasisMultiplicative[i] *= this->theBasisMultiplicative[i];
-    correctedBasisMultiplicative[i] *= generatorPowersInverse;
-    for (int j = 0; j < correctedBasisMultiplicative.size; j ++) {
-      zToTheNth.MakeMonomiaL(0, i + j, 1, 1);
-      zToTheNth.DivideBy(smallestFactor, tempP, remainderAfterReduction);
-      for (int k = 0; k < remainderAfterReduction.size(); k ++) {
-        int theIndex = - 1;
-        remainderAfterReduction[k](0).IsSmallInteger(&theIndex);
-        currentMonomial.vIndex = theIndex;
-        currentMonomial.dualIndex = j;
-        correctedBasisMultiplicative[i].AddMonomial(currentMonomial, remainderAfterReduction.theCoeffs[k]);
-      }
-    }
-    correctedBasisMultiplicative[i].MultiplyOnTheLeft(generatorPowersInverse);
-    correctedBasisMultiplicative[i] *= generatorPowers;
+  List<MatrixTensor<Rational> > conjugatedBasis, projectedBasis;
+  conjugatedBasis.SetSize(this->theBasisMultiplicative.size);
+  projectedBasis.SetSize(this->theBasisMultiplicative.size);
+  for (int i = 0; i < conjugatedBasis.size; i ++) {
+    conjugatedBasis[i] = generatorPowersInverse;
+    conjugatedBasis[i] *= this->theBasisMultiplicative[i];
+    conjugatedBasis[i] *= generatorPowers;
+    global.Comments << "DEBUG: Conjugated element " << i << ": "
+    << conjugatedBasis[i].ToStringMatrixForm();
+    projectedBasis[i] = theProjection;
+    projectedBasis[i] *= conjugatedBasis[i];
+    global.Comments << "DEBUG: projected basis " << i << ": "
+    << projectedBasis[i].ToStringMatrixForm();
   }
-  this->GeneratingElemenT.owner = this;
-  if (this->theBasisMultiplicative.size > 1) {
-    this->GeneratingElemenT.theElT.MaKeEi(1, 1);
-  } else {
-    this->GeneratingElemenT.theElT.MaKeEi(0, 1);
-  }
-  this->GetMultiplicationBy(this->GeneratingElemenT, this->GeneratingElementTensorForm);
-  this->GeneratingElementTensorForm.GetMatrix(this->GeneratingElementMatForm, this->theBasisMultiplicative.size);
-  this->RegisterNewBasis(theProjection);
+  projectedBasis.SetSize(smallestFactorDegree);
+  this->theBasisMultiplicative = projectedBasis;
+  this->ChooseGeneratingElement();
+  this->GetMultiplicationBy(
+    this->GeneratingElemenT, this->GeneratingElementTensorForm
+  );
+  this->GeneratingElementTensorForm.GetMatrix(
+    this->GeneratingElementMatForm, this->theBasisMultiplicative.size
+  );
+  this->RegisterNewBasis(nullptr);
   global.Comments << this->ToString();
   return true;
 }
@@ -350,7 +352,7 @@ void AlgebraicClosureRationals::GetAdditionTo(
   }
   if (input.owner == nullptr) {
     if (input.theElT.size() > 0) {
-      output.MaKeEi(0, input.theElT.theCoeffs[0]);
+      output.MaKeEi(0, input.theElT.coefficients[0]);
     }
     return;
   }
@@ -383,7 +385,7 @@ void AlgebraicClosureRationals::GetAdditionTo(
     }
     output.AddOtherTimesConst(
       this->theBasesAdditive[input.basisIndex][currentIndex],
-      input.theElT.theCoeffs[i]
+      input.theElT.coefficients[i]
     );
   }
 }
@@ -406,7 +408,7 @@ void AlgebraicClosureRationals::GetMultiplicationBy(
       << ". The algebraic closure is: " << this->ToString() << ". " << global.fatal;
     }
     currentMat = this->theBasisMultiplicative[inputAdditiveForm[i].theIndex];
-    currentMat *= inputAdditiveForm.theCoeffs[i];
+    currentMat *= inputAdditiveForm.coefficients[i];
     output += currentMat;
   }
 }
@@ -416,13 +418,13 @@ Rational AlgebraicNumber::GetDenominatorRationalPart() const {
     if (this->theElT.IsEqualToZero()) {
       return 1;
     }
-    return this->theElT.theCoeffs[0].GetDenominator();
+    return this->theElT.coefficients[0].GetDenominator();
   }
   VectorSparse<Rational> theEltAdditive;
   this->owner->GetAdditionTo(*this, theEltAdditive);
   LargeIntegerUnsigned resultLCM = 1;
   for (int i = 0; i < theEltAdditive.size(); i ++) {
-    resultLCM = LargeIntegerUnsigned::lcm(resultLCM, theEltAdditive.theCoeffs[i].GetDenominator());
+    resultLCM = LargeIntegerUnsigned::lcm(resultLCM, theEltAdditive.coefficients[i].GetDenominator());
   }
   return resultLCM;
 }
@@ -454,28 +456,28 @@ bool AlgebraicNumber::AssignCosRationalTimesPi(const Rational& input, AlgebraicC
   }
   if (halfFracPart == Rational(1, 12)) {
     AlgebraicNumber sqrt6, sqrt2;
-    sqrt6.AssignRationalQuadraticRadical(6, inputOwner);
-    sqrt2.AssignRationalQuadraticRadical(2, inputOwner);
+    sqrt6.AssignRationalQuadraticRadical(6, inputOwner, nullptr);
+    sqrt2.AssignRationalQuadraticRadical(2, inputOwner, nullptr);
     *this = sqrt6 + sqrt2;
     *this /= 4 * sign;
     return true;
   }
   if (halfFracPart == Rational(5, 12)) {
     AlgebraicNumber sqrt6, sqrt2;
-    sqrt6.AssignRationalQuadraticRadical(6, inputOwner);
-    sqrt2.AssignRationalQuadraticRadical(2, inputOwner);
+    sqrt6.AssignRationalQuadraticRadical(6, inputOwner, nullptr);
+    sqrt2.AssignRationalQuadraticRadical(2, inputOwner, nullptr);
     *this = sqrt6 - sqrt2;
     *this /= 4 * sign;
     return true;
   }
   if (halfFracPart == Rational(1, 6)) {
-    this->AssignRationalQuadraticRadical(3, inputOwner);
+    this->AssignRationalQuadraticRadical(3, inputOwner, nullptr);
     *this /= 2;
     *this *= sign;
     return true;
   }
   if (halfFracPart == Rational(1, 4)) {
-    this->AssignRationalQuadraticRadical(2, inputOwner);
+    this->AssignRationalQuadraticRadical(2, inputOwner, nullptr);
     *this /= 2;
     *this *= sign;
     return true;
@@ -500,18 +502,18 @@ Rational AlgebraicNumber::GetNumeratorRationalPart() const {
     if (this->theElT.IsEqualToZero()) {
       return 0;
     }
-    return this->theElT.theCoeffs[0].GetNumerator();
+    return this->theElT.coefficients[0].GetNumerator();
   }
   VectorSparse<Rational> theEltAdditive;
   this->owner->GetAdditionTo(*this, theEltAdditive);
   LargeInteger resultGCD = 1;
   LargeIntegerUnsigned tempR;
   if (theEltAdditive.size() > 0) {
-    resultGCD = theEltAdditive.theCoeffs[0].GetNumerator();
+    resultGCD = theEltAdditive.coefficients[0].GetNumerator();
   }
   for (int i = 1; i < theEltAdditive.size(); i ++) {
     tempR = resultGCD.value;
-    LargeIntegerUnsigned::gcd(tempR, theEltAdditive.theCoeffs[i].GetNumerator().value, resultGCD.value);
+    LargeIntegerUnsigned::gcd(tempR, theEltAdditive.coefficients[i].GetNumerator().value, resultGCD.value);
   }
   return resultGCD;
 }
@@ -536,7 +538,7 @@ bool AlgebraicNumber::operator==(const Rational& other) const {
   if (this->theElT[0].theIndex != 0) {
     return false;
   }
-  return this->theElT.theCoeffs[0] == other;
+  return this->theElT.coefficients[0] == other;
 }
 
 bool AlgebraicNumber::NeedsParenthesisForMultiplication() const {
@@ -561,7 +563,7 @@ bool AlgebraicNumber::NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost
   if (additiveForm.size() != 1) {
     return true;
   }
-  return additiveForm.theCoeffs[0].NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost();
+  return additiveForm.coefficients[0].NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost();
 }
 
 bool AlgebraicNumber::CheckNonZeroOwner() const {
@@ -572,9 +574,13 @@ bool AlgebraicNumber::CheckNonZeroOwner() const {
   return true;
 }
 
-bool AlgebraicNumber::ConstructFromMinPoly(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicClosureRationals& inputOwner) {
+bool AlgebraicNumber::ConstructFromMinPoly(
+  const Polynomial<AlgebraicNumber>& thePoly,
+  AlgebraicClosureRationals& inputOwner,
+  std::stringstream* commentsOnFailure
+) {
   MacroRegisterFunctionWithName("AlgebraicNumber::ConstructFromMinPoly");
-  return inputOwner.AdjoinRootMinPoly(thePoly, *this);
+  return inputOwner.AdjoinRootMinPoly(thePoly, *this, commentsOnFailure);
 }
 
 void AlgebraicClosureRationals::reset() {
@@ -597,7 +603,9 @@ void AlgebraicClosureRationals::reset() {
 }
 
 bool AlgebraicClosureRationals::AdjoinRootQuadraticPolyToQuadraticRadicalExtension(
-  const Polynomial<AlgebraicNumber>& thePoly, AlgebraicNumber& outputRoot
+  const Polynomial<AlgebraicNumber>& thePoly,
+  AlgebraicNumber& outputRoot,
+  std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("AlgebraicClosureRationals::AdjoinRootQuadraticPolyToQuadraticRadicalExtension");
   if (thePoly.TotalDegree() != 2 || !this->flagIsQuadraticRadicalExtensionRationals) {
@@ -609,7 +617,7 @@ bool AlgebraicClosureRationals::AdjoinRootQuadraticPolyToQuadraticRadicalExtensi
   minPoly.MakeZero();
   Rational currentCF, theLinearTermCFdividedByTwo, theConstTermShifted;
   for (int i = 0; i < algNumPoly.size(); i ++) {
-    if (!algNumPoly.theCoeffs[i].IsRational(&currentCF)) {
+    if (!algNumPoly.coefficients[i].IsRational(&currentCF)) {
       return false;
     } else {
       minPoly.AddMonomial(algNumPoly[i], currentCF);
@@ -621,7 +629,9 @@ bool AlgebraicClosureRationals::AdjoinRootQuadraticPolyToQuadraticRadicalExtensi
   minPoly.GetConstantTerm(theConstTermShifted);
   theConstTermShifted -= theLinearTermCFdividedByTwo*theLinearTermCFdividedByTwo;
   theConstTermShifted *= - 1;
-  if (!outputRoot.AssignRationalQuadraticRadical(theConstTermShifted, *this)) {
+  if (!outputRoot.AssignRationalQuadraticRadical(
+    theConstTermShifted, *this, commentsOnFailure
+  )) {
     return false;
   }
   outputRoot -= theLinearTermCFdividedByTwo;
@@ -658,45 +668,55 @@ void AlgebraicClosureRationals::ConvertPolyDependingOneVariableToPolyDependingOn
   output.Substitution(theSub);
 }
 
-bool AlgebraicClosureRationals::AdjoinRootMinPoly(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicNumber& outputRoot) {
+bool AlgebraicClosureRationals::AdjoinRootMinPoly(
+  const Polynomial<AlgebraicNumber>& thePoly,
+  AlgebraicNumber& outputRoot,
+  std::stringstream* commentsOnFailure
+) {
   MacroRegisterFunctionWithName("AlgebraicClosureRationals::AdjoinRootMinPoly");
-  if (this->AdjoinRootQuadraticPolyToQuadraticRadicalExtension(thePoly, outputRoot)) {
+  if (this->AdjoinRootQuadraticPolyToQuadraticRadicalExtension(thePoly, outputRoot, commentsOnFailure)) {
     return true;
   }
   Polynomial<AlgebraicNumber> minPoly;
   this->ConvertPolyDependingOneVariableToPolyDependingOnFirstVariableNoFail(thePoly, minPoly);
   int indexMaxMonMinPoly = minPoly.GetIndexMaxMonomial();
-  AlgebraicNumber leadingCF = minPoly.theCoeffs[indexMaxMonMinPoly];
+  AlgebraicNumber leadingCF = minPoly.coefficients[indexMaxMonMinPoly];
   minPoly /= leadingCF;
   AlgebraicClosureRationals backUpCopy;
   backUpCopy = *this;
   MatrixTensor<Rational> theGenMat;
   int degreeMinPoly = minPoly.TotalDegreeInt();
-  int startingDim = this->theBasisMultiplicative.size;
-  if (degreeMinPoly * startingDim > 10000 || startingDim > 10000 || degreeMinPoly > 10000) {
-    global.Comments << "<hr>Adjoining root of minimial polynomial failed: "
-    << "the current field extension dimension over the rationals is "
-    << startingDim << ", the degree of the minimial polynomial is "
-    << degreeMinPoly
-    << ", yielding expected final dimension "
-    << startingDim << "*" << degreeMinPoly << " = "
-    << startingDim * degreeMinPoly
-    << " over the rationals. The calculator is hard-coded "
-    << "to accept dimension over the rationals no larger than 10000 "
-    << "- multiplication in such a field corresponds to a "
-    << "10000x10000 matrix "
-    << "(100 000 000 entries, expected in general to be dense). "
-    << "If you do indeed want to carry out "
-    << "such large computations, you need to "
-    << "compile the calculator on your own, modifying file "
-    << __FILE__ << ", line " << __LINE__ << ".";
+  int startingDimension = this->theBasisMultiplicative.size;
+  if (
+    degreeMinPoly * startingDimension > 10000 ||
+    startingDimension > 10000 ||
+    degreeMinPoly > 10000
+  ) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "<hr>Adjoining root of minimial polynomial failed: "
+      << "the current field extension dimension over the rationals is "
+      << startingDimension << ", the degree of the minimial polynomial is "
+      << degreeMinPoly
+      << ", yielding expected final dimension "
+      << startingDimension << "*" << degreeMinPoly << " = "
+      << startingDimension * degreeMinPoly
+      << " over the rationals. The calculator is hard-coded "
+      << "to accept dimension over the rationals no larger than 10000 "
+      << "- multiplication in such a field corresponds to a "
+      << "10000x10000 matrix "
+      << "(100 000 000 entries, expected in general to be dense). "
+      << "If you do indeed want to carry out "
+      << "such large computations, you need to "
+      << "compile the calculator on your own, modifying file "
+      << __FILE__ << ", line " << __LINE__ << ".";
+    }
     return false;
   }
   global.Comments << "DEBUG: Adjoin roots of: " << minPoly.ToString() << "<hr>";
   theGenMat.MakeZero();
   for (int i = 0; i < degreeMinPoly - 1; i ++) {
-    for (int j = 0; j < startingDim; j ++) {
-      theGenMat.AddMonomial(MonomialMatrix((i + 1) * startingDim + j, i * startingDim + j), 1);
+    for (int j = 0; j < startingDimension; j ++) {
+      theGenMat.AddMonomial(MonomialMatrix((i + 1) * startingDimension + j, i * startingDimension + j), 1);
     }
   }
   Polynomial<AlgebraicNumber> minusMinPolyMinusMaxMon = minPoly;
@@ -704,13 +724,13 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(const Polynomial<AlgebraicNumb
     MonomialP::LeftIsGEQTotalDegThenLexicographicLastVariableStrongest
   );
   const MonomialP maxMon = minusMinPolyMinusMaxMon[indexMaxMon];
-  AlgebraicNumber maxMonCoeff = minusMinPolyMinusMaxMon.theCoeffs[indexMaxMon];
+  AlgebraicNumber maxMonCoeff = minusMinPolyMinusMaxMon.coefficients[indexMaxMon];
   minusMinPolyMinusMaxMon.SubtractMonomial(maxMon, maxMonCoeff);
   minusMinPolyMinusMaxMon /= maxMonCoeff;
   minusMinPolyMinusMaxMon /= - 1;
   MatrixTensor<Rational> currentCoeffMatForm;
   for (int i = 0; i < minusMinPolyMinusMaxMon.size(); i ++) {
-    AlgebraicNumber& currentCoeff = minusMinPolyMinusMaxMon.theCoeffs[i];
+    AlgebraicNumber& currentCoeff = minusMinPolyMinusMaxMon.coefficients[i];
     const MonomialP& currentMon = minusMinPolyMinusMaxMon[i];
     this->GetMultiplicationBy(currentCoeff, currentCoeffMatForm);
     for (int j = 0; j < currentCoeffMatForm.size(); j ++) {
@@ -721,19 +741,19 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(const Polynomial<AlgebraicNumb
       }
       theGenMat.AddMonomial(
         MonomialMatrix(
-          currentMon.TotalDegreeInt() * startingDim + relRowIndex,
-          startingDim * (degreeMinPoly - 1) + relColIndex
+          currentMon.TotalDegreeInt() * startingDimension + relRowIndex,
+          startingDimension * (degreeMinPoly - 1) + relColIndex
         ),
-        currentCoeffMatForm.theCoeffs[j]
+        currentCoeffMatForm.coefficients[j]
       );
     }
   }
-  int finalDim = degreeMinPoly * startingDim;
+  int finalDim = degreeMinPoly * startingDimension;
   List<MatrixTensor<Rational> > finalBasis;
   finalBasis.SetSize(this->theBasisMultiplicative.size);
   MatrixTensor<Rational> theGenMatPower;
   theGenMatPower.MakeId(degreeMinPoly);
-  for (int i = 0; i < startingDim; i ++) {
+  for (int i = 0; i < startingDimension; i ++) {
     finalBasis[i].AssignTensorProduct(theGenMatPower, this->theBasisMultiplicative[i]);
     global.Comments << "DEBUG: final basis " << i + 1 << ": " << finalBasis[i].ToStringMatrixForm() << "<br>";
   }
@@ -741,24 +761,22 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(const Polynomial<AlgebraicNumb
   theBasisMultiplicative.SetSize(finalDim);
   theGenMatPower = theGenMat;
   for (int i = 1; i < degreeMinPoly; i ++) {
-    for (int j = 0; j < startingDim; j ++) {
-      this->theBasisMultiplicative[i * startingDim + j] = theGenMatPower;
-      this->theBasisMultiplicative[i * startingDim + j] *= finalBasis[j];
+    for (int j = 0; j < startingDimension; j ++) {
+      this->theBasisMultiplicative[i * startingDimension + j] = theGenMatPower;
+      this->theBasisMultiplicative[i * startingDimension + j] *= finalBasis[j];
       global.Comments << "DEBUG: final basis next: "
-      << this->theBasisMultiplicative[i * startingDim + j].ToStringMatrixForm() << "<br>";
+      << this->theBasisMultiplicative[i * startingDimension + j].ToStringMatrixForm() << "<br>";
     }
     if (i != degreeMinPoly - 1) {
       theGenMatPower *= theGenMat;
     }
   }
-  MatrixTensor<Rational> theInjection;
-  theInjection.MakeId(startingDim);
-  this->RegisterNewBasis(theInjection);
+  this->RegisterNewBasis(nullptr);
   outputRoot.owner = this;
-  outputRoot.theElT.MaKeEi(startingDim);
+  outputRoot.theElT.MaKeEi(startingDimension);
   outputRoot.basisIndex = this->theBasesAdditive.size - 1;
   this->flagIsQuadraticRadicalExtensionRationals = false;
-  if (!this->ReduceMe()) {
+  if (!this->ReduceMe(commentsOnFailure, startingDimension)) {
     *this = backUpCopy;
     return false;
   }
@@ -796,7 +814,7 @@ void AlgebraicNumber::Invert() {
       << "so it must be rational, but it appears to be not. "
       << "Its theElt vector is: " << this->theElT.ToString() << global.fatal;
     }
-    this->theElT.theCoeffs[0].Invert();
+    this->theElT.coefficients[0].Invert();
     return;
   }
   MatrixTensor<Rational> theInverted;
@@ -901,7 +919,7 @@ bool AlgebraicNumber::CheckConsistency() const {
     if (!this->IsRational()) {
       for (int i = 0; i < this->theElT.size(); i ++) {
         global.Comments << "<br>index: " << this->theElT[i].theIndex << ", coefficient: "
-        << this->theElT.theCoeffs[i];
+        << this->theElT.coefficients[i];
       }
       global.fatal << "Detected non-rational algebraic number with zero owner. " << global.fatal;
     }
@@ -925,7 +943,7 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other) {
       this->theElT.MakeZero();
       return;
     }
-    this->theElT *= other.theElT.theCoeffs[0];
+    this->theElT *= other.theElT.coefficients[0];
     return;
   }
   if (this->owner == nullptr) {
@@ -1023,7 +1041,7 @@ bool AlgebraicNumber::EvaluatesToDouble(double* outputWhichDouble) const {
   for (int i = 0; i < this->theElT.size(); i ++) {
     this->owner->GetRadicalSelectionFromIndex(this->theElT[i].theIndex, currentRadicalSelection);
     if (outputWhichDouble != nullptr) {
-      currentMultiplicand = this->theElT.theCoeffs[i].GetDoubleValue();
+      currentMultiplicand = this->theElT.coefficients[i].GetDoubleValue();
     }
     for (int j = 0; j < currentRadicalSelection.CardinalitySelection; j ++) {
       if (this->owner->theQuadraticRadicals[currentRadicalSelection.elements[j]] < 0) {
@@ -1043,7 +1061,11 @@ bool AlgebraicNumber::EvaluatesToDouble(double* outputWhichDouble) const {
   return true;
 }
 
-bool AlgebraicNumber::AssignRationalQuadraticRadical(const Rational& inpuT, AlgebraicClosureRationals& inputOwner) {
+bool AlgebraicNumber::AssignRationalQuadraticRadical(
+  const Rational& inpuT,
+  AlgebraicClosureRationals& inputOwner,
+  std::stringstream* commentsOnFailure
+) {
   MacroRegisterFunctionWithName("AlgebraicNumber::AssignRationalRadical");
   this->CheckConsistency();
   if (inpuT == 0) {
@@ -1053,7 +1075,7 @@ bool AlgebraicNumber::AssignRationalQuadraticRadical(const Rational& inpuT, Alge
     Polynomial<AlgebraicNumber> minPoly;
     minPoly.MakeMonomiaL(0, 2);
     minPoly -= inpuT;
-    bool result = this->ConstructFromMinPoly(minPoly, inputOwner);
+    bool result = this->ConstructFromMinPoly(minPoly, inputOwner, commentsOnFailure);
     if (result) {
       this->CheckConsistency();
     }
@@ -1069,7 +1091,9 @@ bool AlgebraicNumber::AssignRationalQuadraticRadical(const Rational& inpuT, Alge
   squareFreeInput *= absoluteInput.GetDenominator();
   List<LargeInteger> primeFactors;
   List<int> theMults;
-  if (!squareFreeInput.value.FactorReturnFalseIfFactorizationIncomplete(primeFactors, theMults, 0, nullptr)) {
+  if (!squareFreeInput.value.FactorReturnFalseIfFactorizationIncomplete(
+    primeFactors, theMults, 0, nullptr
+  )) {
     return false;
   }
   squareFreeInput.value = 1;
@@ -1131,28 +1155,22 @@ void AlgebraicNumber::RadicalMeDefault(int theRad) {
   this->minPolyIndex = this->theRegistry->theMinPolys.AddNoRepetitionOrReturnIndexFirst(newMinPoly);*/
 }
 
-std::string AlgebraicClosureRationals::ToString(FormatExpressions* theFormat) const {
-  MacroRegisterFunctionWithName("AlgebraicClosureRationals::ToString");
+std::string AlgebraicClosureRationals::ToStringQuadraticRadical(FormatExpressions *theFormat) const {
   (void) theFormat;
   std::stringstream out;
-  FormatExpressions tempFormat;
-  tempFormat.flagUseHTML = false;
-  tempFormat.flagUseLatex = true;
-  if (this->theBasisMultiplicative.size == 1) {
-    out << HtmlRoutines::GetMathSpanPure("\\mathbb Q");
-    return out.str();
-  }
-  if (this->flagIsQuadraticRadicalExtensionRationals) {
-    out << "\\mathbb Q[";
-    for (int i = 0; i < this->theQuadraticRadicals.size; i ++) {
-      out << "\\sqrt{" << this->theQuadraticRadicals[i].ToString() << "}";
-      if (i != this->theQuadraticRadicals.size - 1) {
-        out << ", ";
-      }
+  out << "\\mathbb Q[";
+  for (int i = 0; i < this->theQuadraticRadicals.size; i ++) {
+    out << "\\sqrt{" << this->theQuadraticRadicals[i].ToString() << "}";
+    if (i != this->theQuadraticRadicals.size - 1) {
+      out << ", ";
     }
-    out << "]";
-    return HtmlRoutines::GetMathSpanPure(out.str());
   }
+  out << "]";
+  return HtmlRoutines::GetMathSpanPure(out.str());
+}
+
+std::string AlgebraicClosureRationals::ToStringFull(FormatExpressions* theFormat) const {
+  std::stringstream out;
   out << "Dimension over the rationals: " << this->theBasisMultiplicative.size << ". Multiplicative basis follows. ";
   for (int i = 0; i < this->theBasisMultiplicative.size; i ++) {
     out << "<br>";
@@ -1166,7 +1184,7 @@ std::string AlgebraicClosureRationals::ToString(FormatExpressions* theFormat) co
     } else {
       theFlaStream << " e_{" << i + 1 << "}";
     }
-    theFlaStream << "=" << this->theBasisMultiplicative[i].ToStringMatrixForm(&tempFormat);
+    theFlaStream << "=" << this->theBasisMultiplicative[i].ToStringMatrixForm(theFormat);
     out << HtmlRoutines::GetMathSpanPure(theFlaStream.str());
     if (i != this->theBasisMultiplicative.size - 1) {
       out << ",  ";
@@ -1175,19 +1193,37 @@ std::string AlgebraicClosureRationals::ToString(FormatExpressions* theFormat) co
   if (this->flagIsQuadraticRadicalExtensionRationals) {
     out << "<br>Generating element not selected. ";
   } else {
-    out << "<br>Generating element: " << HtmlRoutines::GetMathSpanPure(this->GeneratingElementMatForm.ToString(&tempFormat));
+    out << "<br>Generating element: " << HtmlRoutines::GetMathSpanPure(this->GeneratingElementMatForm.ToString(theFormat));
   }
   out << "<br>There are " << this->theBasesAdditive.size << " registered old bases. ";
   for (int i = 0; i < this->theBasesAdditive.size; i ++) {
     out << "<hr>Basis " << i + 1 << " has " << this->theBasesAdditive[i].size << " elements: ";
     for (int j = 0; j < this->theBasesAdditive[i].size; j ++) {
-      out << HtmlRoutines::GetMathSpanPure(this->theBasesAdditive[i][j].ToString(&tempFormat));
+      out << HtmlRoutines::GetMathSpanPure(this->theBasesAdditive[i][j].ToString(theFormat));
       if (j != this->theBasesAdditive[i].size - 1) {
         out << ", ";
       }
     }
   }
   return out.str();
+
+}
+
+std::string AlgebraicClosureRationals::ToString(FormatExpressions* theFormat) const {
+  MacroRegisterFunctionWithName("AlgebraicClosureRationals::ToStringQuadraticRadical");
+  (void) theFormat;
+  std::stringstream out;
+  FormatExpressions tempFormat;
+  tempFormat.flagUseHTML = false;
+  tempFormat.flagUseLatex = true;
+  if (this->theBasisMultiplicative.size == 1) {
+    out << HtmlRoutines::GetMathSpanPure("\\mathbb Q");
+    return out.str();
+  }
+  if (this->flagIsQuadraticRadicalExtensionRationals) {
+    return this->ToStringQuadraticRadical(&tempFormat);
+  }
+  return this->ToStringFull(&tempFormat);
 }
 
 bool AlgebraicNumber::IsRational(Rational* whichRational) const {
@@ -1201,7 +1237,7 @@ bool AlgebraicNumber::IsRational(Rational* whichRational) const {
     if (this->theElT[i].theIndex != 0) {
       return false;
     } else if (whichRational != nullptr) {
-      *whichRational = this->theElT.theCoeffs[i];
+      *whichRational = this->theElT.coefficients[i];
     }
   }
   return true;
@@ -1216,7 +1252,7 @@ std::string AlgebraicNumber::ToString(FormatExpressions* theFormat) const {
     if (this->theElT.IsEqualToZero()) {
       return "0";
     }
-    return this->theElT.theCoeffs[0].ToString(theFormat);
+    return this->theElT.coefficients[0].ToString(theFormat);
   }
   std::stringstream out;
   FormatExpressions tempFormat;
@@ -1327,7 +1363,7 @@ void ElementZmodP::ScaleToIntegralMinHeightAndGetPoly(
   theCF.theModulus = newModulo;
   output.MakeZero();
   for (int i = 0; i < input.size(); i ++) {
-    theCF = input.theCoeffs[i];
+    theCF = input.coefficients[i];
     output.AddMonomial(input[i], theCF);
   }
 }

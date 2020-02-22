@@ -1469,15 +1469,31 @@ void Calculator::initPredefinedInnerFunctions() {
     innerStandard
   );
   this->AddOperationHandler(
-    "AlgebraicNumberFromPoly",
+    "PrintAlgebraicClosureStatus",
+    CalculatorFunctions::innerPrintAlgebraicClosureStatus,
+    "",
+    "Prints in human-redable form the state of the ambient algebraic closure. ",
+    "AlgebraicNumberFromPolynomial(x^2-6);\n"
+    "PrintAlgebraicClosureStatus 0;\n"
+    "AlgebraicNumberFromPolynomial(x^2-2);\n"
+    "PrintAlgebraicClosureStatus 0;\n"
+    "AlgebraicNumberFromPolynomial(x^2-3);\n"
+    "PrintAlgebraicClosureStatus 0;\n",
+    "CalculatorFunctions::innerPrintAlgebraicClosureStatus",
+    "PrintAlgebraicClosureStatus",
+    innerStandard
+  );
+  this->AddOperationHandler(
+    "AlgebraicNumberFromPolynomial",
     CalculatorFunctions::innerGetAlgebraicNumberFromMinPoly,
     "",
     "Creates an algebraic number that is a root of a polynomial with algebraic number coefficients. ",
-    "AlgebraicNumberFromPoly{}(x^2 - (3+2sqrt(2)));\n"
-    "AlgebraicNumberFromPoly{}(x^3 - (7+5sqrt(2)));\n"
-    "AlgebraicNumberFromPoly{}(x^3+\\sqrt{2}x + 1);\n",
+    "AlgebraicNumberFromPolynomial{}(x^2 - 4);\n"
+    "AlgebraicNumberFromPolynomial{}(x^2 - (3+2sqrt(2)));\n"
+    "AlgebraicNumberFromPolynomial{}(x^3 - (7+5sqrt(2)));\n"
+    "AlgebraicNumberFromPolynomial{}(x^3+\\sqrt{2}x + 1);\n",
     "CalculatorFunctions::innerGetAlgebraicNumberFromMinPoly",
-    "AlgebraicNumberFromPoly",
+    "AlgebraicNumberFromPolynomial",
     innerStandard
   );
   this->AddOperationHandler(
@@ -8059,6 +8075,7 @@ void Calculator::initAtomsNonCacheable() {
   this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("GenerateRandomPrime");
   this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("TurnOffApproximations");
   this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("TurnOnApproximations");
+  this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("PrintAlgebraicClosureStatus");
 //  this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("PrintRuleStack");
 }
 

@@ -2872,11 +2872,11 @@ bool Expression::MakeSum(
   for (int i = 0; i < theSum.size(); i ++) {
     Expression& current = summandsWithCoeff[i];
     if (theSum[i] == oneE) {
-      current.AssignValue(theSum.theCoeffs[i], theCommands);
-    } else if (!(theSum.theCoeffs[i] == 1)) {
+      current.AssignValue(theSum.coefficients[i], theCommands);
+    } else if (!(theSum.coefficients[i] == 1)) {
       current.reset(theCommands, 3);
       current.AddChildAtomOnTop(theCommands.opTimes());
-      current.AddChildValueOnTop(theSum.theCoeffs[i]);
+      current.AddChildValueOnTop(theSum.coefficients[i]);
       current.AddChildOnTop(theSum[i]);
     } else {
       current = theSum[i];
@@ -3157,7 +3157,7 @@ bool CalculatorConversions::innerExpressionFromPoly(
   for (int i = 0; i < input.size(); i ++) {
     if (input[i].IsConstant()) {
       currentTerm.AssignValue(1, theCommands);
-      theTerms.AddMonomial(currentTerm, input.theCoeffs[i]);
+      theTerms.AddMonomial(currentTerm, input.coefficients[i]);
       continue;
     }
     bool found = false;
@@ -3186,7 +3186,7 @@ bool CalculatorConversions::innerExpressionFromPoly(
         found = true;
       }
     }
-    theTerms.AddMonomial(currentTerm, input.theCoeffs[i]);
+    theTerms.AddMonomial(currentTerm, input.coefficients[i]);
   }
   return output.MakeSum(theCommands, theTerms);
 }

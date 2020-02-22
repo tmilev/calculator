@@ -1436,7 +1436,9 @@ bool CalculatorFunctions::innerSqrt(Calculator& theCommands, const Expression& i
   }
   AlgebraicNumber theNumber;
   if (!theNumber.AssignRationalQuadraticRadical(
-    rationalValue, theCommands.theObjectContainer.theAlgebraicClosure
+    rationalValue,
+    theCommands.theObjectContainer.theAlgebraicClosure,
+    &theCommands.Comments
   )) {
     return false;
   }
@@ -2292,10 +2294,10 @@ std::string GroebnerBasisComputation<coefficient>::GetPolynomialStringSpacedMono
     }
     if (this->theFormat.flagUseLatex) {
       out << HtmlRoutines::GetMathSpanPure(
-        Polynomial<Rational>::GetBlendCoeffAndMon(thePoly[theIndex], thePoly.theCoeffs[theIndex], found, &this->theFormat)
+        Polynomial<Rational>::GetBlendCoeffAndMon(thePoly[theIndex], thePoly.coefficients[theIndex], found, &this->theFormat)
       );
     } else {
-      out << Polynomial<Rational>::GetBlendCoeffAndMon(thePoly[theIndex], thePoly.theCoeffs[theIndex], found, &this->theFormat);
+      out << Polynomial<Rational>::GetBlendCoeffAndMon(thePoly[theIndex], thePoly.coefficients[theIndex], found, &this->theFormat);
     }
     found = true;
     if (useHighlightStyle) {
@@ -2451,7 +2453,7 @@ std::string GroebnerBasisComputation<coefficient>::GetPolynomialStringSpacedMono
       out << "\\color{" << *highlightColor << "}{";
     }
     out << Polynomial<Rational>::GetBlendCoeffAndMon(
-      thePoly[theIndex], thePoly.theCoeffs[theIndex], found, &this->theFormat
+      thePoly[theIndex], thePoly.coefficients[theIndex], found, &this->theFormat
     );
     found = true;
     if (useHighlightStyle) {
@@ -2560,7 +2562,7 @@ std::string GroebnerBasisComputation<coefficient>::GetSpacedMonomialsWithHighlig
     countMons ++;
     std::string monWithSign =
     Polynomial<Rational>::GetBlendCoeffAndMon(
-      thePoly[theIndex], thePoly.theCoeffs[theIndex], true, &this->theFormat
+      thePoly[theIndex], thePoly.coefficients[theIndex], true, &this->theFormat
     );
     std::string sign = monWithSign.substr(0, 1);
     std::string monNoSign = monWithSign.substr(1);
@@ -2659,7 +2661,7 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
   );
   int indexCurrentRemainderLeadingMoN = currentRemainder.GetIndexMaxMonomial(this->thePolynomialOrder.theMonOrder);
   const MonomialP& maxMonCurrentRemainder = currentRemainder.theMonomials [indexCurrentRemainderLeadingMoN];
-  coefficient leadingCFCurrentRemainder = currentRemainder.theCoeffs[indexCurrentRemainderLeadingMoN];
+  coefficient leadingCFCurrentRemainder = currentRemainder.coefficients[indexCurrentRemainderLeadingMoN];
   int indexCurrentRemainderLeadingMonInAllMons = this->allMonomials.GetIndex(maxMonCurrentRemainder);
   this->highlightMonsDivisors[indexCurrentDivisor][indexCurrentDivisorLeadingMonInAllMons].AddOnTop(currentSlideNumber);
   this->highlightMonsRemainders[remainderIndex][indexCurrentRemainderLeadingMonInAllMons].AddOnTop(currentSlideNumber);
@@ -2684,7 +2686,7 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
   << currentSlideNumber + 1 << "}{"
   << "$" << currentRemainder.GetBlendCoeffAndMon(
     currentDivisor.theMonomials[indexCurrentDivisorLeadingMoN],
-    currentDivisor.theCoeffs[indexCurrentDivisorLeadingMoN],
+    currentDivisor.coefficients[indexCurrentDivisorLeadingMoN],
     false,
     &this->theFormat
   )
@@ -2720,7 +2722,7 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
   << "}{$"
   << currentQuotient.GetBlendCoeffAndMon(
     currentQuotient.theMonomials[indexCurrentQuotientMoN],
-    currentQuotient.theCoeffs[indexCurrentQuotientMoN],
+    currentQuotient.coefficients[indexCurrentQuotientMoN],
     false,
     &this->theFormat
   )

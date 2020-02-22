@@ -812,7 +812,7 @@ ElementWeylGroupRing<coefficient> ActOnGroupRing(
   ElementWeylGroupRing<coefficient> out;
   out.MakeZero();
   for (int i = 0; i < v.size(); i ++) {
-    out.AddMonomial(v.theCoeffs[i], theElement * v[i]);
+    out.AddMonomial(v.coefficients[i], theElement * v[i]);
   }
   return out;
 }

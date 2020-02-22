@@ -1430,6 +1430,19 @@ bool CalculatorFunctions::innerConvertAlgebraicNumberToMatrix(
   return output.AssignMatrix(result, theCommands);
 }
 
+bool CalculatorFunctions::innerPrintAlgebraicClosureStatus(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  (void) input;
+  FormatExpressions theFormat;
+  theFormat.flagUseHTML = false;
+  theFormat.flagUseLatex = true;
+  return output.AssignValue(
+    theCommands.theObjectContainer.theAlgebraicClosure.ToStringFull(&theFormat),
+    theCommands
+  );
+}
+
 bool CalculatorFunctions::innerGetAlgebraicNumberFromMinPoly(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
@@ -1451,8 +1464,11 @@ bool CalculatorFunctions::innerGetAlgebraicNumberFromMinPoly(
     << ", which is not in one variable.";
   }
   AlgebraicNumber theAN;
-  if (!theAN.ConstructFromMinPoly(thePoly, theCommands.theObjectContainer.theAlgebraicClosure)) {
-    return false;
+  std::stringstream commentsOnFailure;
+  if (!theAN.ConstructFromMinPoly(
+    thePoly, theCommands.theObjectContainer.theAlgebraicClosure, &commentsOnFailure
+  )) {
+    return theCommands << "Failed to construct minimal polynomial. " << commentsOnFailure.str();
   }
   return output.AssignValue(theAN, theCommands);
 }
@@ -1541,7 +1557,7 @@ void Polynomial<coefficient>::GetPolyWithPolyCoeff(
       }
     }
     currentCF.MakeZero();
-    currentCF.AddMonomial(coeffPart, this->theCoeffs[i]);
+    currentCF.AddMonomial(coeffPart, this->coefficients[i]);
     output.AddMonomial(polyPart, currentCF);
   }
 }
@@ -1575,9 +1591,9 @@ bool Polynomial<coefficient>::GetLinearSystemFromLinearPolys(
   for (int i = 0; i < theLinPolys.size; i ++) {
     for (int j = 0; j < theLinPolys[i].size(); j ++) {
       if (theLinPolys[i][j].IsLinearNoConstantTerm(&theLetter)) {
-        homogenousPart(i, theLetter) = theLinPolys[i].theCoeffs[j];
+        homogenousPart(i, theLetter) = theLinPolys[i].coefficients[j];
       } else if (theLinPolys[i][j].IsConstant()) {
-        constTerms(i, 0) = theLinPolys[i].theCoeffs[j];
+        constTerms(i, 0) = theLinPolys[i].coefficients[j];
         constTerms(i, 0) *= - 1;
       } else {
         return false;
@@ -1669,11 +1685,11 @@ bool IntegralRFComputation::PreparePFExpressionSummands() {
       }
       denRescaled = this->theDenominatorFactorsWithMults[i];
       numRescaled = this->theNumerators[i][j];
-      currentCoefficient = denRescaled.theCoeffs[denRescaled.GetIndexMaxMonomial()];
+      currentCoefficient = denRescaled.coefficients[denRescaled.GetIndexMaxMonomial()];
       currentCoefficient.Invert();
       denRescaled *= currentCoefficient;
       MathRoutines::RaiseToPower(currentCoefficient, j + 1, AlgebraicNumber(1));
-      numScale = numRescaled.theCoeffs[numRescaled.GetIndexMaxMonomial()];
+      numScale = numRescaled.coefficients[numRescaled.GetIndexMaxMonomial()];
       numRescaled /= numScale;
       currentCoefficient *= numScale;
       polyE.AssignValueWithContext(numRescaled, this->contextE, *this->owner);
@@ -1738,11 +1754,11 @@ bool IntegralRFComputation::IntegrateRF() {
       }
       denRescaled = this->theDenominatorFactorsWithMults[i];
       numRescaled = this->theNumerators[i][j];
-      currentCoefficient = denRescaled.theCoeffs[denRescaled.GetIndexMaxMonomial()];
+      currentCoefficient = denRescaled.coefficients[denRescaled.GetIndexMaxMonomial()];
       currentCoefficient.Invert();
       denRescaled *= currentCoefficient;
       MathRoutines::RaiseToPower(currentCoefficient, j + 1, AlgebraicNumber(1));
-      numScale = numRescaled.theCoeffs[numRescaled.GetIndexMaxMonomial()];
+      numScale = numRescaled.coefficients[numRescaled.GetIndexMaxMonomial()];
       numRescaled /= numScale;
       currentCoefficient *= numScale;
       polyE.AssignValueWithContext(numRescaled, this->contextE, *this->owner);
@@ -1846,8 +1862,8 @@ void IntegralRFComputation::PrepareFormatExpressions() {
   int varCounter = 0;
   for (int i = 0; i < this->theDenominatorFactorsWithMults.size(); i ++) {
     int tempSize = - 1;
-    this->theDenominatorFactorsWithMults.theCoeffs[i].IsSmallInteger(&tempSize);
-    for (int k = 0; k < this->theDenominatorFactorsWithMults.theCoeffs[i]; k ++) {
+    this->theDenominatorFactorsWithMults.coefficients[i].IsSmallInteger(&tempSize);
+    for (int k = 0; k < this->theDenominatorFactorsWithMults.coefficients[i]; k ++) {
       rfStream << "\\frac{";
       if (this->theDenominatorFactorsWithMults[i].TotalDegree() > 1) {
         polyStream << "(";
@@ -1876,7 +1892,7 @@ void IntegralRFComputation::PrepareFormatExpressions() {
         polyStream << ")";
       }
       for (int j = 0; j < this->theDenominatorFactorsWithMults.size(); j ++) {
-        Rational theExp = this->theDenominatorFactorsWithMults.theCoeffs[j];
+        Rational theExp = this->theDenominatorFactorsWithMults.coefficients[j];
         if (j == i) {
           theExp -= k + 1;
         }
@@ -1898,7 +1914,7 @@ void IntegralRFComputation::PrepareFormatExpressions() {
       }
       rfStream << "}";
       if (
-        ((this->theDenominatorFactorsWithMults.theCoeffs[i] - 1) != k) ||
+        ((this->theDenominatorFactorsWithMults.coefficients[i] - 1) != k) ||
         (i != this->theDenominatorFactorsWithMults.size() - 1)
       ) {
         rfStream << "+";
@@ -1924,9 +1940,9 @@ void IntegralRFComputation::PrepareNumerators() {
   this->theNumerators.SetSize(this->theDenominatorFactorsWithMults.size());
   for (int i = 0; i < this->theDenominatorFactorsWithMults.size(); i ++) {
     int tempSize = - 1;
-    this->theDenominatorFactorsWithMults.theCoeffs[i].IsSmallInteger(&tempSize);
+    this->theDenominatorFactorsWithMults.coefficients[i].IsSmallInteger(&tempSize);
     this->theNumerators[i].SetSize(tempSize);
-    for (int k = 0; k < this->theDenominatorFactorsWithMults.theCoeffs[i]; k ++) {
+    for (int k = 0; k < this->theDenominatorFactorsWithMults.coefficients[i]; k ++) {
       currentSummand.MakeZero();
       this->theNumerators[i][k].MakeZero();
       for (int j = 0; j < this->theDenominatorFactorsWithMults[i].TotalDegree(); j ++) {
@@ -1937,7 +1953,7 @@ void IntegralRFComputation::PrepareNumerators() {
         currentSummand.AddMonomial(currentMon, 1);
       }
       for (int j = 0; j < this->theDenominatorFactorsWithMults.size(); j ++) {
-        Rational theExp = this->theDenominatorFactorsWithMults.theCoeffs[j];
+        Rational theExp = this->theDenominatorFactorsWithMults.coefficients[j];
         if (j == i) {
           theExp -= k + 1;
         }
@@ -1957,7 +1973,7 @@ void IntegralRFComputation::PrepareFinalAnswer() {
   MacroRegisterFunctionWithName("IntegralRFComputation::PrepareFinalAnswer");
   std::stringstream rfComputedStream, answerFinalStream;
   for (int i = 0; i < theDenominatorFactorsWithMults.size(); i ++) {
-    for (int k = 0; k < theDenominatorFactorsWithMults.theCoeffs[i]; k ++) {
+    for (int k = 0; k < theDenominatorFactorsWithMults.coefficients[i]; k ++) {
       rfComputedStream << "\\frac{" << this->theNumerators[i][k].ToString(&this->currentFormaT) << "}";
       rfComputedStream << "{";
       rfComputedStream << "(" << theDenominatorFactorsWithMults[i].ToString(&this->currentFormaT) << ")";
@@ -1966,7 +1982,7 @@ void IntegralRFComputation::PrepareFinalAnswer() {
       }
       rfComputedStream << "}";
       if (
-        ((theDenominatorFactorsWithMults.theCoeffs[i] - 1) != k) ||
+        ((theDenominatorFactorsWithMults.coefficients[i] - 1) != k) ||
         (i != theDenominatorFactorsWithMults.size() - 1)
       ) {
         rfComputedStream << "+";
@@ -2100,20 +2116,20 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
     currentSecondDegreePolyAlgebraic = currentSecondDegreePoly;
     if (currentSecondDegreePoly.TotalDegree() != 2) {
       this->theDenominatorFactorsWithMults.AddMonomial(
-        currentSecondDegreePolyAlgebraic, theDenominatorFactorsWithMultsCopy.theCoeffs[i]
+        currentSecondDegreePolyAlgebraic, theDenominatorFactorsWithMultsCopy.coefficients[i]
       );
       continue;
     }
     Rational theDiscriminant = currentSecondDegreePoly.GetDiscriminant();
     if (theDiscriminant < 0) {
       this->theDenominatorFactorsWithMults.AddMonomial(
-        currentSecondDegreePolyAlgebraic, theDenominatorFactorsWithMultsCopy.theCoeffs[i]
+        currentSecondDegreePolyAlgebraic, theDenominatorFactorsWithMultsCopy.coefficients[i]
       );
       continue;
     }
     AlgebraicNumber theDiscriminantSqrt;
     if (!theDiscriminantSqrt.AssignRationalQuadraticRadical(
-      theDiscriminant, this->owner->theObjectContainer.theAlgebraicClosure
+      theDiscriminant, this->owner->theObjectContainer.theAlgebraicClosure, &this->printoutPFsHtml
     )) {
       this->printoutPFsHtml << "Failed to take radical of " << theDiscriminant.ToString() << " (radical too large?).";
       return false;
@@ -2125,10 +2141,10 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
     b.CheckConsistency();
     currentLinPoly.MakeMonomiaL(0, 1);
     currentLinPoly -= (- b + theDiscriminantSqrt) / (a * 2);
-    this->theDenominatorFactorsWithMults.AddMonomial(currentLinPoly, theDenominatorFactorsWithMultsCopy.theCoeffs[i]);
+    this->theDenominatorFactorsWithMults.AddMonomial(currentLinPoly, theDenominatorFactorsWithMultsCopy.coefficients[i]);
     currentLinPoly.MakeMonomiaL(0, 1);
     currentLinPoly -= (- b - theDiscriminantSqrt) / (a * 2);
-    this->theDenominatorFactorsWithMults.AddMonomial(currentLinPoly, theDenominatorFactorsWithMultsCopy.theCoeffs[i]);
+    this->theDenominatorFactorsWithMults.AddMonomial(currentLinPoly, theDenominatorFactorsWithMultsCopy.coefficients[i]);
     additionalMultiple *= a;
   }
   this->theDenominatorFactorsWithMults.QuickSortAscending();
@@ -2150,7 +2166,7 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
   << "\\[" << univariateThatMustDie.ToString(&this->currentFormaT) << "\\]";
   this->printoutPFsHtml << "<br>Here, by ``vanish'', we mean that the coefficients in front of the powers of x must vanish.";
   Matrix<AlgebraicNumber> theSystemHomogeneous, theSystemHomogeneousForLaTeX, theConstTerms, theConstTermsForLaTeX;
-  Polynomial<AlgebraicNumber>::GetLinearSystemFromLinearPolys(univariateThatMustDie.theCoeffs, theSystemHomogeneous, theConstTerms);
+  Polynomial<AlgebraicNumber>::GetLinearSystemFromLinearPolys(univariateThatMustDie.coefficients, theSystemHomogeneous, theConstTerms);
   theSystemHomogeneousForLaTeX = theSystemHomogeneous;
   theConstTermsForLaTeX = theConstTerms;
   this->currentFormaT.flagFormatMatrixAsLinearSystem = true;
@@ -2168,7 +2184,7 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
     theSub[i].MakeConst(theConstTerms(i - 1, 0));
   }
   for (int i = 0; i < theDenominatorFactorsWithMults.size(); i ++) {
-    for (int k = 0; k < theDenominatorFactorsWithMults.theCoeffs[i]; k ++) {
+    for (int k = 0; k < theDenominatorFactorsWithMults.coefficients[i]; k ++) {
       this->theNumerators[i][k].Substitution(theSub);
     }
   }
@@ -4004,7 +4020,7 @@ bool CalculatorFunctions::innerCoefficientsPowersOf(
     if (theIndex == - 1) {
       currentCF.AssignValue(0, theCommands);
     } else {
-      currentCF = theCFs.theCoeffs[theIndex];
+      currentCF = theCFs.coefficients[theIndex];
     }
     theCFsIncludingZeros.AddOnTop(currentCF);
   }
@@ -4631,7 +4647,7 @@ bool CalculatorFunctions::innerIntegrateSinPowerNCosPowerM(
       currentIntegrandSinePart.MakeXOX(theCommands, theCommands.opThePower(), currentE, powerE);
       powerE.AssignValue(powerCosine, theCommands);
       currentIntegrandCosinePart.MakeXOX(theCommands, theCommands.opThePower(), newVarE, powerE);
-      currentCF.AssignValue(- theTrigPoly.theCoeffs[i], theCommands);
+      currentCF.AssignValue(- theTrigPoly.coefficients[i], theCommands);
       currentCF /= theTrigArgCoeff;
       currentSubE.MakeXOX(theCommands, theCommands.opDefine(), newVarE, theCosE);
     } else if (powerCosine % 2 == 1) {
@@ -4640,7 +4656,7 @@ bool CalculatorFunctions::innerIntegrateSinPowerNCosPowerM(
       currentIntegrandCosinePart.MakeXOX(theCommands, theCommands.opThePower(), currentE, powerE);
       powerE.AssignValue(powerSine, theCommands);
       currentIntegrandSinePart.MakeXOX(theCommands, theCommands.opThePower(), newVarE, powerE);
-      currentCF.AssignValue(theTrigPoly.theCoeffs[i], theCommands);
+      currentCF.AssignValue(theTrigPoly.coefficients[i], theCommands);
       currentCF /= theTrigArgCoeff;
       currentSubE.MakeXOX(theCommands, theCommands.opDefine(), newVarE, theSinE);
     } else {
@@ -4650,7 +4666,7 @@ bool CalculatorFunctions::innerIntegrateSinPowerNCosPowerM(
       currentE = (oneE + theCosDoubleE) / twoE;
       powerE.AssignValue(powerCosine / 2, theCommands);
       currentIntegrandCosinePart.MakeXOX(theCommands, theCommands.opThePower(), currentE, powerE);
-      currentCF.AssignValue(theTrigPoly.theCoeffs[i], theCommands);
+      currentCF.AssignValue(theTrigPoly.coefficients[i], theCommands);
       currentIntegrandNonPolynomializedE = currentCF * currentIntegrandSinePart * currentIntegrandCosinePart;
       currentIntegrandE.reset(theCommands);
       currentIntegrandE.AddChildAtomOnTop("Polynomialize");
@@ -4768,7 +4784,7 @@ bool CalculatorFunctions::innerIntegrateTanPowerNSecPowerM(
       currentIntegrandTanPart.MakeXOX(theCommands, theCommands.opThePower(), currentE, powerE);
       powerE.AssignValue(powerSec - 1, theCommands);
       currentIntegrandSecPart.MakeXOX(theCommands, theCommands.opThePower(), newVarE, powerE);
-      currentCF.AssignValue(theTrigPoly.theCoeffs[i], theCommands);
+      currentCF.AssignValue(theTrigPoly.coefficients[i], theCommands);
       currentCF /= theTrigArgCoeff;
       currentSubE.MakeXOX(theCommands, theCommands.opDefine(), newVarE, theSecE);
     } else if (powerSec % 2 == 0) {
@@ -4777,7 +4793,7 @@ bool CalculatorFunctions::innerIntegrateTanPowerNSecPowerM(
       currentIntegrandSecPart.MakeXOX(theCommands, theCommands.opThePower(), currentE, powerE);
       powerE.AssignValue(powerTan, theCommands);
       currentIntegrandTanPart.MakeXOX(theCommands, theCommands.opThePower(), newVarE, powerE);
-      currentCF.AssignValue(theTrigPoly.theCoeffs[i], theCommands);
+      currentCF.AssignValue(theTrigPoly.coefficients[i], theCommands);
       currentCF /= theTrigArgCoeff;
       currentSubE.MakeXOX(theCommands, theCommands.opDefine(), newVarE, theTanE);
     } else {
@@ -5249,14 +5265,14 @@ bool CalculatorFunctions::outerAtimesBpowerJplusEtcDivBpowerI(
         mOneE * denominatorExponent
       );
       newNumSummand = numerators[i] * newNumSummandRightPart;
-      numeratorsNew.AddMonomial(newNumSummand, numerators.theCoeffs[i]);
+      numeratorsNew.AddMonomial(newNumSummand, numerators.coefficients[i]);
       continue;
     }
     numerators[i].GetBaseExponentForm(numeratorBaseRight, numeratorExponentRight);
     if (numeratorBaseRight == denominatorBase) {
       newNumExponent.MakeXOX(theCommands, theCommands.opMinus(), numeratorExponentRight, denominatorExponent);
       newNumSummand.MakeXOX(theCommands, theCommands.opThePower(), denominatorBase, newNumExponent);
-      numeratorsNew.AddMonomial(newNumSummand, numerators.theCoeffs[i]);
+      numeratorsNew.AddMonomial(newNumSummand, numerators.coefficients[i]);
       continue;
     }
     bool isGood = false;
@@ -5268,7 +5284,7 @@ bool CalculatorFunctions::outerAtimesBpowerJplusEtcDivBpowerI(
       newNumExponent.MakeXOX(theCommands, theCommands.opMinus(), numeratorExponentRight, denominatorExponent);
       newNumSummandRightPart.MakeXOX(theCommands, theCommands.opThePower(), denominatorBase, newNumExponent);
       newNumSummand.MakeXOX(theCommands, theCommands.opTimes(), numeratorMultiplicandLeft, newNumSummandRightPart);
-      numeratorsNew.AddMonomial(newNumSummand, numerators.theCoeffs[i]);
+      numeratorsNew.AddMonomial(newNumSummand, numerators.coefficients[i]);
       isGood = true;
       break;
     }

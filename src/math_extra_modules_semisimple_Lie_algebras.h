@@ -266,10 +266,10 @@ public:
   ) const;
   void MultiplyBy(const ElementTensorsGeneralizedVermas<coefficient>& standsOnTheRight);
   bool IsHWV() const {
-    if (this->theCoeffs.size != 1) {
+    if (this->coefficients.size != 1) {
       return false;
     }
-    if (!this->theCoeffs[0].IsEqualToOne()) {
+    if (!this->coefficients[0].IsEqualToOne()) {
       return false;
     }
     return (*this)[0].IsHWV();

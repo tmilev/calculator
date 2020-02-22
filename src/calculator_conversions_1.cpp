@@ -192,12 +192,12 @@ bool CalculatorConversions::functionDynkinType(
       return false;
     }
     int theMultiplicity = - 1;
-    if (!theType.theCoeffs[i].IsSmallInteger(&theMultiplicity)) {
+    if (!theType.coefficients[i].IsSmallInteger(&theMultiplicity)) {
       theMultiplicity = - 1;
     }
     if (theMultiplicity < 0) {
       return theCommands << "<hr>Failed to convert the coefficient "
-      << theType.theCoeffs[i] << " of " << theType[i].ToString()
+      << theType.coefficients[i] << " of " << theType[i].ToString()
       << " to a small positive integer. ";
     }
     output.AddMonomial(simpleComponent, theMultiplicity);
@@ -280,7 +280,7 @@ bool CalculatorConversions::innerExpressionFromElementSemisimpleLieAlgebraRation
   Expression currentMon;
   for (int i = 0; i < input.size(); i ++) {
     CalculatorConversions::innerExpressionFromChevalleyGenerator(theCommands, input[i], currentMon);
-    theMons.AddMonomial(currentMon, input.theCoeffs[i]);
+    theMons.AddMonomial(currentMon, input.coefficients[i]);
   }
   return output.MakeSum(theCommands, theMons);
 }
@@ -294,7 +294,7 @@ bool CalculatorConversions::innerExpressionFromDynkinType(
   Expression currentMon;
   for (int i = 0; i < input.size(); i ++) {
     CalculatorConversions::innerExpressionFromDynkinSimpleType(theCommands, input[i], currentMon);
-    theMons.AddMonomial(currentMon, input.theCoeffs[i]);
+    theMons.AddMonomial(currentMon, input.coefficients[i]);
   }
   return output.MakeSum(theCommands, theMons);
 }
@@ -308,7 +308,7 @@ bool CalculatorConversions::innerExpressionFromElementSemisimpleLieAlgebraAlgebr
   Expression currentMon;
   for (int i = 0; i < input.size(); i ++) {
     CalculatorConversions::innerExpressionFromChevalleyGenerator(theCommands, input[i], currentMon);
-    theMons.AddMonomial(currentMon, input.theCoeffs[i]);
+    theMons.AddMonomial(currentMon, input.coefficients[i]);
   }
   return output.MakeSum(theCommands, theMons);
 }
@@ -811,7 +811,7 @@ bool CalculatorConversions::innerExpressionFromUE(
     if (!CalculatorConversions::innerExpressionFromMonomialUE(theCommands, input[i], currentMonE, inputContext)) {
       return theCommands << "<hr>Failed to store " << input.ToString();
     }
-    theUEE.AddMonomial(currentMonE, input.theCoeffs[i]);
+    theUEE.AddMonomial(currentMonE, input.coefficients[i]);
   }
   return output.MakeSum(theCommands, theUEE);
 }
@@ -830,8 +830,8 @@ bool CalculatorConversions::innerElementSemisimpleLieAlgebraRationalCoeffs(
     return theCommands << "<hr> Failed to obtain semisimple Lie algebra element from "
     << input.ToString() << ". ";
   }
-  for (int i = 0; i < outputAlgebraic.theCoeffs.size; i ++) {
-    if (!outputAlgebraic.theCoeffs[i].IsRational()) {
+  for (int i = 0; i < outputAlgebraic.coefficients.size; i ++) {
+    if (!outputAlgebraic.coefficients[i].IsRational()) {
       return theCommands << "<hr>From input: " << input.ToString() << ", I managed to extract element: "
       << outputAlgebraic.ToString() << " but that appears to not have rational coefficients.";
     }
@@ -890,14 +890,14 @@ bool CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
       if (theChevGen.theGeneratorIndex < 0 || theChevGen.theGeneratorIndex >= owner.GetNumGenerators()) {
         isGood = false;
       }
-      output.AddMonomial(theChevGen, polyForm.theCoeffs[j]);
+      output.AddMonomial(theChevGen, polyForm.coefficients[j]);
     } else if (theLetter == "h") {
       int theRootIndex = owner.GetRootIndexFromDisplayIndex(theChevGen.theGeneratorIndex);
       if (theRootIndex < 0) {
         isGood = false;
       } else {
         currentElt.MakeHgenerator(owner.theWeyl.RootSystem[theRootIndex], owner);
-        currentElt *= polyForm.theCoeffs[j];
+        currentElt *= polyForm.coefficients[j];
         output += currentElt;
       }
     } else {
@@ -943,7 +943,7 @@ bool CalculatorConversions::innerElementUE(
   outputPolyVars.AddChildAtomOnTop(theCommands.opPolynomialVariables());
   for (int j = 0; j < theP.size(); j ++) {
     const MonomialP& currentMon = theP[j];
-    currentSummand.MakeConst(theP.theCoeffs[j], owner);
+    currentSummand.MakeConst(theP.coefficients[j], owner);
     currentMultiplicandRFpartMon.MakeOne();
     for (int i = 0; i < currentMon.GetMinNumVars(); i ++) {
       int thePower = - 1;

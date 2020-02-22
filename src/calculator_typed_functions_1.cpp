@@ -836,7 +836,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerPolyBySmallInteger(
     if (base.size() == 1) {
       Polynomial<Rational> outputPoly;
       MonomialP theMon = base[0];
-      Rational theCF = base.theCoeffs[0];
+      Rational theCF = base.coefficients[0];
       theCF.RaiseToPower(thePower);
       theMon.RaiseToPower(thePower);
       outputPoly.MakeZero();
@@ -1053,13 +1053,22 @@ bool CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger(
   if (input[2].IsRational(&powerRat)) {
     if (powerRat.GetDenominator() == 2) {
       if (base.IsRational(&baseRat)) {
-        if (base.AssignRationalQuadraticRadical(baseRat, theCommands.theObjectContainer.theAlgebraicClosure)) {
+        if (base.AssignRationalQuadraticRadical(
+          baseRat,
+          theCommands.theObjectContainer.theAlgebraicClosure,
+          &theCommands.Comments
+        )) {
           base.CheckConsistency();
           output = input;
           Expression newPower, newBase;
           newPower.AssignValue(powerRat * 2, theCommands);
           newBase.AssignValue(base, theCommands);
-          return output.MakeXOX(theCommands, theCommands.opThePower(), newBase, newPower);
+          return output.MakeXOX(
+            theCommands,
+            theCommands.opThePower(),
+            newBase,
+            newPower
+          );
         }
       }
     }
@@ -1105,7 +1114,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger(
     bool isMon = true;
     if (base.size() != 1) {
       isMon = false;
-    } else if (base.theCoeffs[0] != 1) {
+    } else if (base.coefficients[0] != 1) {
       isMon = false;
     }
     if (!isMon) {

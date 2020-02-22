@@ -16,7 +16,7 @@ bool ElementWeylAlgebra<coefficient>::IsPolynomial(Polynomial<coefficient>* whic
       return false;
     }
     if (whichPoly != 0) {
-      whichPoly->AddMonomial((*this)[i].polynomialPart, this->theCoeffs[i]);
+      whichPoly->AddMonomial((*this)[i].polynomialPart, this->coefficients[i]);
     }
   }
   return true;
@@ -137,8 +137,8 @@ void ElementWeylAlgebra<coefficient>::MultiplyOnTheLeft(const  ElementWeylAlgebr
   for (int j = 0; j < standsOnTheLeft.size(); j ++) {
     for (int i = 0; i < this->size(); i ++) {
       this->MultiplyTwoMonomials(standsOnTheLeft[j], (*this)[i], buffer);
-      currentCF = standsOnTheLeft.theCoeffs[j];
-      currentCF *= this->theCoeffs[i];
+      currentCF = standsOnTheLeft.coefficients[j];
+      currentCF *= this->coefficients[i];
       buffer *= currentCF;
       Accum += buffer;
     }
@@ -155,8 +155,8 @@ void ElementWeylAlgebra<coefficient>::operator*=(const ElementWeylAlgebra& stand
   for (int j = 0; j < standsOnTheRight.size(); j ++) {
     for (int i = 0; i < this->size(); i ++) {
       this->MultiplyTwoMonomials((*this)[i], standsOnTheRight[j], buffer);
-      currentCF = this->theCoeffs[i];
-      currentCF *= standsOnTheRight.theCoeffs[j];
+      currentCF = this->coefficients[i];
+      currentCF *= standsOnTheRight.coefficients[j];
       buffer *= currentCF;
       Accum += buffer;
     }
@@ -311,9 +311,9 @@ bool ElementWeylAlgebra<coefficient>::Substitution(
       for (int k = 0; k < DOpart.size(); k ++) {
         theMon.polynomialPart = polyPart[j];
         theMon.differentialPart = DOpart[k];
-        theNewCoeff = this->theCoeffs[i];
-        theNewCoeff *= polyPart.theCoeffs[j];
-        theNewCoeff *= DOpart.theCoeffs[k];
+        theNewCoeff = this->coefficients[i];
+        theNewCoeff *= polyPart.coefficients[j];
+        theNewCoeff *= DOpart.coefficients[k];
         output.AddMonomial(theMon, theNewCoeff);
       }
     }
@@ -342,7 +342,7 @@ void ElementWeylAlgebra<coefficient>::FourierTransform(ElementWeylAlgebra<coeffi
     }
     theMon.differentialPart = currentMon.polynomialPart;
     theMon.polynomialPart = currentMon.differentialPart;
-    theCoeff = this->theCoeffs[i];
+    theCoeff = this->coefficients[i];
     if (totalDeg.IsEven()) {
       theCoeff *= - 1;
     }
@@ -361,8 +361,8 @@ bool ElementWeylAlgebra<coefficient>::ActOnPolynomial(Polynomial<Rational>& theP
       const MonomialP& currentPolMon = thePoly[j];
       const MonomialWeylAlgebra& currentOpMon = (*this)[i];
       resultMon = currentPolMon;
-      coeff = thePoly.theCoeffs[j];
-      coeff *= this->theCoeffs[i];
+      coeff = thePoly.coefficients[j];
+      coeff *= this->coefficients[i];
       for (int k = 0; k < currentOpMon.GetMinNumVars(); k ++) {
         int numDiff = 0;
         if (!currentOpMon.differentialPart(k).IsSmallInteger(&numDiff)) {

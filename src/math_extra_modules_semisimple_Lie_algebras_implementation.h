@@ -295,7 +295,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight(
       return false;
     }
     for (int j = 0; j < tempHashedRoots.size; j ++) {
-      bufferCoeff = this->theCoeffs[i];
+      bufferCoeff = this->coefficients[i];
       tempMon.weightFundamentalCoordS = theWeyL.GetFundamentalCoordinatesFromSimple(tempHashedRoots[j]);
       bufferCoeff *= tempMults[j];
       charAmbientFDWeyl.AddMonomial(tempMon, bufferCoeff);
@@ -320,7 +320,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight(
     for (int k = 0; k < orbitDom.size; k ++) {
       if (outputWeylSub.IsDominantWeight(orbitDom[k])) {
         tempMon.weightFundamentalCoordS = theWeyL.GetFundamentalCoordinatesFromSimple(orbitDom[k]);
-        remainingCharDominantLevi.AddMonomial(tempMon, charAmbientFDWeyl.theCoeffs[i]);
+        remainingCharDominantLevi.AddMonomial(tempMon, charAmbientFDWeyl.coefficients[i]);
       }
     }
   }
@@ -341,7 +341,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight(
         }
       }
     }
-    highestCoeff = remainingCharDominantLevi.theCoeffs[remainingCharDominantLevi.theMonomials.GetIndex(localHighest)];
+    highestCoeff = remainingCharDominantLevi.coefficients[remainingCharDominantLevi.theMonomials.GetIndex(localHighest)];
     output.AddMonomial(localHighest, highestCoeff);
     if (!outputWeylSub.FreudenthalEvalIrrepIsWRTLeviPart(
       localHighest.weightFundamentalCoordS, tempHashedRoots, tempMults, tempS, 10000
@@ -371,7 +371,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight(
       tempRoot = theWeyL.GetSimpleCoordinatesFromFundamental(output[i].weightFundamentalCoordS).GetVectorRational();
       outputWeylSub.DrawContour(tempRoot, theDV, "#a0a000", 1000);
       std::stringstream tempStream;
-      tempStream << output.theCoeffs[i].ToString();
+      tempStream << output.coefficients[i].ToString();
       theDV.drawTextAtVectorBufferRational(tempRoot, tempStream.str(), "black");
     }
     out << "<hr>" << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyL.GetDim());
@@ -875,7 +875,7 @@ void ModuleSSalgebra<coefficient>::CheckConsistency() {
       otherOutput.MakeZero();
       for (int k = 0; k < outputGen.size(); k ++) {
         tempMat = this->GetActionGeneratorIndeX(outputGen[k].theGeneratorIndex);
-        tempMat *= outputGen.theCoeffs[k];
+        tempMat *= outputGen.coefficients[k];
         otherOutput += tempMat;
       }
       diffMat = otherOutput;
@@ -1051,7 +1051,7 @@ void ElementTensorsGeneralizedVermas<coefficient>::Substitution(
   for (int i = 0; i < this->size(); i ++) {
     currentMon = (*this)[i];
     currentMon.Substitution(theSub, theMods);
-    tempCF = this->theCoeffs[i];
+    tempCF = this->coefficients[i];
     tempCF.Substitution(theSub);
     output.AddMonomial(currentMon, tempCF);
   }
@@ -1066,7 +1066,7 @@ ElementTensorsGeneralizedVermas<coefficient>& ElementTensorsGeneralizedVermas<
   MonomialTensorGeneralizedVermas<coefficient> theMon;
   for (int i = 0; i < other.size(); i ++) {
     theMon = other[i];
-    this->AddMonomial(theMon, other.theCoeffs[i]);
+    this->AddMonomial(theMon, other.coefficients[i]);
   }
   return *this;
 }
@@ -1093,13 +1093,13 @@ bool ElementTensorsGeneralizedVermas<coefficient>::MultiplyOnTheLeft(
         if (j == 0) {
           tempOutput.MakeZero();
         }
-        tempOutput.AddMonomial(currentSingleMon, this->theCoeffs[j]);
+        tempOutput.AddMonomial(currentSingleMon, this->coefficients[j]);
       }
       tempOutput.MultiplyMeByUEEltOnTheLeft(theUE);
       output = tempOutput;
       return true;
     }
-    buffer *= theUE.theCoeffs[i];
+    buffer *= theUE.coefficients[i];
     output += buffer;
   }
   return true;
@@ -1180,8 +1180,8 @@ void ElementTensorsGeneralizedVermas<coefficient>::MultiplyByElementLieAlg(
       tempElt.AddMonomial(currentMon.theMons[j], theRingUnit);
       tempElt.MultiplyMeByUEEltOnTheLeft(theGenerator);
       for (int k = 0; k < tempElt.size(); k ++) {
-        currentCoeff = this->theCoeffs[i];
-        currentCoeff *= tempElt.theCoeffs[k];
+        currentCoeff = this->coefficients[i];
+        currentCoeff *= tempElt.coefficients[k];
         monActedOn = accumMon;
         monActedOn *= tempElt[k];
         for (int l = j + 1; l < currentMon.theMons.size; l ++) {
@@ -1213,8 +1213,8 @@ void ElementTensorsGeneralizedVermas<coefficient>::TensorOnTheRight(
     for (int j = 0; j < this->size(); j ++) {
       bufferMon = (*this)[j];
       bufferMon *= right[i];
-      theCoeff = this->theCoeffs[j];
-      theCoeff *= right.theCoeffs[i];
+      theCoeff = this->coefficients[j];
+      theCoeff *= right.coefficients[i];
       output.AddMonomial(bufferMon, theCoeff);
       ParallelComputing::SafePointDontCallMeFromDestructors();
     }

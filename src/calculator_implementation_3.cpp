@@ -425,7 +425,7 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg(
     currentOp.MakeZero();
     for (int j = 0; j < currentElt.size(); j ++) {
       tempMat = this->GetActionGeneratorIndeX(currentElt[j].theGeneratorIndex);
-      tempMat *= currentElt.theCoeffs[j];
+      tempMat *= currentElt.coefficients[j];
       currentOp += tempMat;
     }
     std::stringstream tempStream3;
@@ -599,7 +599,7 @@ bool Calculator::innerPrintB3G2branchingIntermediate(
     RationalFunctionOld numEigenVectors;
     numEigenVectors = rfZero;
     for (int j = 0; j < theG2B3Data.theSmallCharFDpart.size(); j ++) {
-      numEigenVectors += theG2B3Data.theSmallCharFDpart.theCoeffs[j];
+      numEigenVectors += theG2B3Data.theSmallCharFDpart.coefficients[j];
     }
     theG2B3Data.theFormat.CustomPlusSign = "";
     int eigenIndexcounter = 0;
@@ -610,9 +610,9 @@ bool Calculator::innerPrintB3G2branchingIntermediate(
     }
     for (int k = 0; k < theG2B3Data.theSmallCharFDpart.size(); k ++) {
       charSSAlgMod<RationalFunctionOld> tempChar;
-      tempChar.AddMonomial(theG2B3Data.theSmallCharFDpart[k], theG2B3Data.theSmallCharFDpart.theCoeffs[k]);
+      tempChar.AddMonomial(theG2B3Data.theSmallCharFDpart[k], theG2B3Data.theSmallCharFDpart.coefficients[k]);
       int multiplicity = 0;
-      theG2B3Data.theSmallCharFDpart.theCoeffs[k].IsSmallInteger(&multiplicity);
+      theG2B3Data.theSmallCharFDpart.coefficients[k].IsSmallInteger(&multiplicity);
       for (int counter = 0; counter < multiplicity; counter ++, eigenIndexcounter ++) {
         out << "<tr>";
         if (k == 0 && counter == 0) {
@@ -822,8 +822,8 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
     Vector<RationalFunctionOld> leftWeightSimple, leftWeightDual, rightWeightSimple, rightWeightDual;
     theCentralChars.Clear();
     for (int i = 0; i < outputChar.size(); i ++) {
-      if (!outputChar.theCoeffs[i].IsEqualToOne()) {
-        out << outputChar.theCoeffs[i].ToString() << " x ";
+      if (!outputChar.coefficients[i].IsEqualToOne()) {
+        out << outputChar.coefficients[i].ToString() << " x ";
       }
       simpleCoordinates = theg2b3data.WeylFDSmall.AmbientWeyl->GetSimpleCoordinatesFromFundamental(
         outputChar[i].weightFundamentalCoordS
@@ -906,7 +906,7 @@ bool ElementSumGeneralizedVermas<coefficient>::ExtractElementUE(
     }
     tempMon = currentMon.theMonCoeffOne;
     tempMon *= currentMon.GetOwner().theGeneratingWordsNonReduced[currentMon.indexFDVector];
-    output.AddMonomial(tempMon, this->theCoeffs[i]);
+    output.AddMonomial(tempMon, this->coefficients[i]);
   }
   return true;
 }
@@ -985,7 +985,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
     if (theG2CasimirCopy.IsEqualToZero()) {
       theG2B3Data.theChars[i] = 0;
     } else {
-      theG2B3Data.theChars[i] = theG2CasimirCopy.theCoeffs[0];
+      theG2B3Data.theChars[i] = theG2CasimirCopy.coefficients[0];
     }
   }
   theG2B3Data.theEigenVectorsLevi.SetSize(theG2B3Data.g2Weights.size);

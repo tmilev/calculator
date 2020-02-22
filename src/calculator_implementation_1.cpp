@@ -650,7 +650,7 @@ bool Calculator::innerGroebner(
     for (int i = 0; i < inputVector.size; i ++) {
       inputVectorZmodP[i].MakeZero();
       for (int j = 0; j < inputVector[i].size(); j ++) {
-        tempElt = inputVector[i].theCoeffs[j];
+        tempElt = inputVector[i].coefficients[j];
         inputVectorZmodP[i].AddMonomial(inputVector[i][j], tempElt);
       }
     }

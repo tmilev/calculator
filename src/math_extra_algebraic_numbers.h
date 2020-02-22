@@ -84,13 +84,21 @@ class AlgebraicNumber {
   void operator=(int other) {
     *this = Rational(other);
   }
-  bool ConstructFromMinPoly(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicClosureRationals& inputOwner);
-  bool ConstructFromMinPoly(const Polynomial<Rational>& thePoly, AlgebraicClosureRationals& inputOwner) {
+  bool ConstructFromMinPoly(
+    const Polynomial<AlgebraicNumber>& thePoly,
+    AlgebraicClosureRationals& inputOwner,
+    std::stringstream* commentsOnFailure
+  );
+  bool ConstructFromMinPoly(
+    const Polynomial<Rational>& thePoly,
+    AlgebraicClosureRationals& inputOwner,
+    std::stringstream* commentsOnFailure
+  ) {
     Polynomial<AlgebraicNumber> polyConverted;
     polyConverted = thePoly;
-    return this->ConstructFromMinPoly(polyConverted, inputOwner);
+    return this->ConstructFromMinPoly(polyConverted, inputOwner, commentsOnFailure);
   }
-  bool AssignRationalQuadraticRadical(const Rational& inpuT, AlgebraicClosureRationals& inputOwner);
+  bool AssignRationalQuadraticRadical(const Rational& inpuT, AlgebraicClosureRationals& inputOwner, std::stringstream *commentsOnFailure);
   void AssignRational(const Rational& input, AlgebraicClosureRationals& inputOwner);
   Rational GetDenominatorRationalPart() const;
   Rational GetNumeratorRationalPart() const;
@@ -195,7 +203,7 @@ public:
   List<std::string> DisplayNamesBasisElements;
   void AddNewBasis();
 
-  void RegisterNewBasis(const MatrixTensor<Rational>& theInjection);
+  void RegisterNewBasis(const MatrixTensor<Rational>* theInjection);
   void reset();
   bool CheckConsistency() const;
   AlgebraicClosureRationals() {
@@ -203,7 +211,10 @@ public:
   }
   bool MergeRadicals(const List<LargeInteger>& theRadicals);
   void ChooseGeneratingElement();
-  bool ReduceMe();
+  bool ReduceMe(
+    std::stringstream* commentsOnFailure,
+    int dimensionBeforeExtension
+  );
   void ComputeDisplayStringsFromRadicals();
   bool GetRadicalSelectionFromIndex(int inputIndex, Selection& theSel);
   int GetDimensionOverTheRationals() const;
@@ -214,11 +225,19 @@ public:
   void ConvertPolyDependingOneVariableToPolyDependingOnFirstVariableNoFail(
     const Polynomial<AlgebraicNumber>& input, Polynomial<AlgebraicNumber>& output
   );
-  bool AdjoinRootMinPoly(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicNumber& outputRoot);
-  bool AdjoinRootQuadraticPolyToQuadraticRadicalExtension(
-    const Polynomial<AlgebraicNumber>& thePoly, AlgebraicNumber& outputRoot
+  bool AdjoinRootMinPoly(
+    const Polynomial<AlgebraicNumber>& thePoly,
+    AlgebraicNumber& outputRoot,
+    std::stringstream* commentsOnFailure
   );
+  bool AdjoinRootQuadraticPolyToQuadraticRadicalExtension(
+    const Polynomial<AlgebraicNumber>& thePoly,
+    AlgebraicNumber& outputRoot,
+    std::stringstream* commentsOnFailure
+  );
+  std::string ToStringQuadraticRadical(FormatExpressions* theFormat = nullptr) const;
   std::string ToString(FormatExpressions* theFormat = nullptr) const;
+  std::string ToStringFull(FormatExpressions* theFormat = nullptr) const;
   bool splitToPartialFractionsOverRealAlgebraicNumbers(
     RationalFunctionOld& inputRF,
     List<Polynomial<AlgebraicNumber> >& outputNumerators,

@@ -1390,7 +1390,11 @@ bool CalculatorFunctions::innerArccosAlgebraic(Calculator& theCommands, const Ex
   }
   AlgebraicNumber argument, candidate;
   if (argumentE.IsOfType<AlgebraicNumber>(&argument)) {
-    candidate.AssignRationalQuadraticRadical(Rational(1, 2), theCommands.theObjectContainer.theAlgebraicClosure);
+    candidate.AssignRationalQuadraticRadical(
+      Rational(1, 2),
+      theCommands.theObjectContainer.theAlgebraicClosure,
+      nullptr
+    );
     if (candidate == argument) {
       output.MakeAtom(theCommands.opPi(), theCommands);
       output /= 4;
@@ -1403,7 +1407,11 @@ bool CalculatorFunctions::innerArccosAlgebraic(Calculator& theCommands, const Ex
       output *= 3;
       return true;
     }
-    candidate.AssignRationalQuadraticRadical(Rational(3, 4), theCommands.theObjectContainer.theAlgebraicClosure);
+    candidate.AssignRationalQuadraticRadical(
+      Rational(3, 4),
+      theCommands.theObjectContainer.theAlgebraicClosure,
+      nullptr
+    );
     if (candidate == argument) {
       output.MakeAtom(theCommands.opPi(), theCommands);
       output /= 6;
@@ -1457,7 +1465,9 @@ bool CalculatorFunctions::innerArcsinAlgebraic(
   AlgebraicNumber argument, candidate;
   if (argumentE.IsOfType<AlgebraicNumber>(&argument)) {
     candidate.AssignRationalQuadraticRadical(
-      Rational(1, 2), theCommands.theObjectContainer.theAlgebraicClosure
+      Rational(1, 2),
+      theCommands.theObjectContainer.theAlgebraicClosure,
+      nullptr
     );
     if (candidate == argument) {
       output.MakeAtom(theCommands.opPi(), theCommands);
@@ -1471,7 +1481,9 @@ bool CalculatorFunctions::innerArcsinAlgebraic(
       return true;
     }
     candidate.AssignRationalQuadraticRadical(
-      Rational(3, 4), theCommands.theObjectContainer.theAlgebraicClosure
+      Rational(3, 4),
+      theCommands.theObjectContainer.theAlgebraicClosure,
+      nullptr
     );
     if (candidate == argument) {
       output.MakeAtom(theCommands.opPi(), theCommands);

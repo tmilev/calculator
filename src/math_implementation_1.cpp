@@ -585,7 +585,7 @@ bool ElementUniversalEnveloping<coefficient>::ApplyMinusTransposeAutoOnMe() {
   coefficient theCoeff;
   for (int i = 0; i < this->size; i ++) {
     MonomialUniversalEnveloping<coefficient>& currentMon = this->TheObjects[i];
-    theCoeff = this->theCoeffs[i];
+    theCoeff = this->coefficients[i];
     tempMon.owner = currentMon.owner;
     tempMon.Powers.size = 0;
     tempMon.generatorsIndices.size = 0;
@@ -643,7 +643,7 @@ bool ElementUniversalEnveloping<coefficient>::HWMTAbilinearForm(
     }
     intermediateAccum.ModOutVermaRelations(&global, subHiGoesToIthElement, theRingUnit, theRingZero);
     MonomialUniversalEnveloping<coefficient>& rightMon = MTright[j];
-    coefficient& rightMonCoeff = MTright.theCoeffs[j];
+    coefficient& rightMonCoeff = MTright.coefficients[j];
     int thePower;
     for (int i = rightMon.Powers.size - 1; i >= 0; i --) {
       if (rightMon.Powers[i].IsSmallInteger(&thePower)) {
@@ -679,7 +679,7 @@ bool ElementUniversalEnveloping<coefficient>::HWMTAbilinearForm(
     Accum += intermediateAccum;
     int theIndex = intermediateAccum.GetIndex(constMon);
     if (theIndex != - 1) {
-      output += intermediateAccum.theCoeffs[theIndex];
+      output += intermediateAccum.coefficients[theIndex];
     }
   }
   if (logStream != nullptr) {
@@ -725,7 +725,7 @@ bool ElementUniversalEnveloping<coefficient>::ConvertToRationalCoeff(ElementUniv
   for (int i = 0; i < this->size; i ++) {
     MonomialUniversalEnveloping<coefficient>& currentMon = this->TheObjects[i];
     tempMon.MakeOne(*this->owner);
-    if (!this->theCoeffs[i].IsConstant(theCoeff)) {
+    if (!this->coefficients[i].IsConstant(theCoeff)) {
       return false;
     }
     for (int j = 0; j < currentMon.Powers.size; j ++) {

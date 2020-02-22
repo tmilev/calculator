@@ -138,12 +138,12 @@ void Polynomial<coefficient>::ScaleToIntegralNoGCDCoeffs() {
   LargeIntegerUnsigned tempInt1, accumNum, accumDen;
   LargeInteger tempInt2;
   accumDen.MakeOne();
-  accumNum = this->theCoeffs[0].GetNumerator().value;
+  accumNum = this->coefficients[0].GetNumerator().value;
   for (int i = 0; i < this->size(); i ++) {
     if ((*this)[i].IsGEQLexicographicLastVariableStrongest((*this)[indexHighestMon])) {
       indexHighestMon = i;
     }
-    Rational& tempRat = this->theCoeffs[i];
+    Rational& tempRat = this->coefficients[i];
     tempInt1 = tempRat.GetDenominator();
     tempInt2 = tempRat.GetNumerator();
     LargeIntegerUnsigned::lcm(tempInt1, accumDen, accumDen);
@@ -151,7 +151,7 @@ void Polynomial<coefficient>::ScaleToIntegralNoGCDCoeffs() {
   }
   Rational theMultiple;
   theMultiple.MakeOne();
-  if (this->theCoeffs[indexHighestMon].IsNegative()) {
+  if (this->coefficients[indexHighestMon].IsNegative()) {
     theMultiple.MakeMOne();
   }
   theMultiple.MultiplyByLargeIntUnsigned(accumDen);
@@ -183,7 +183,7 @@ bool Polynomial<coefficient>::Substitution(const List<Polynomial<coefficient> >&
     if (!(*this)[i].SubstitutioN(TheSubstitution, TempPoly)) {
       return false;
     }
-    TempPoly *= this->theCoeffs[i];
+    TempPoly *= this->coefficients[i];
     Accum += TempPoly;
   }
   *this = Accum;
@@ -230,7 +230,7 @@ coefficient Polynomial<coefficient>::Evaluate(const Vector<coefficient>& input) 
   coefficient output = 0;
   for (int i = 0; i < this->size(); i ++) {
     const MonomialP& currentMon = (*this)[i];
-    coefficient accum = this->theCoeffs[i];
+    coefficient accum = this->coefficients[i];
     coefficient tempElt;
     for (int j = 0; j < currentMon.GetMinNumVars(); j ++) {
       int numCycles = 0;
@@ -278,7 +278,7 @@ void Polynomial<coefficient>::SetNumVariablesSubDeletedVarsByOne(int newNumVars)
     for (int j = 0; j < newNumVars; j ++) {
       tempM[j] = (*this)[i](j);
     }
-    Accum.AddMonomial(tempM, this->theCoeffs[i]);
+    Accum.AddMonomial(tempM, this->coefficients[i]);
   }
   this->operator=(Accum);
 }
@@ -303,7 +303,7 @@ void Polynomial<coefficient>::ShiftVariableIndicesToTheRight(int VarIndexShift) 
     for (int j = 0; j < oldNumVars; j ++) {
       tempM[j + VarIndexShift] = (*this)[i](j);
     }
-    Accum.AddMonomial(tempM, this->theCoeffs[i]);
+    Accum.AddMonomial(tempM, this->coefficients[i]);
   }
   *this = Accum;
 }
@@ -336,7 +336,7 @@ Matrix<coefficient> Polynomial<coefficient>::EvaluateUnivariatePoly(const Matrix
     if (!isPositive) {
       tempElt.Invert();
     }
-    tempElt *= this->theCoeffs[i];
+    tempElt *= this->coefficients[i];
     output += tempElt;
   }
   return output;
@@ -371,8 +371,8 @@ bool Polynomial<coefficient>::IsProportionalTo(
   if (indexInOther == - 1) {
     return false;
   }
-  TimesMeEqualsOther = other.theCoeffs[indexInOther];
-  TimesMeEqualsOther /= this->theCoeffs[0];
+  TimesMeEqualsOther = other.coefficients[indexInOther];
+  TimesMeEqualsOther /= this->coefficients[0];
   Polynomial<coefficient> tempP;
   tempP = *this;
   tempP *= TimesMeEqualsOther;
@@ -440,8 +440,8 @@ void Polynomial<coefficient>::DivideBy(
     if (!tempMon.HasPositiveOrZeroExponents()) {
       break;
     }
-    coefficient tempCoeff = outputRemainder.theCoeffs[remainderMaxMonomial];
-    tempCoeff /= tempInput.theCoeffs[inputMaxMonomial] ;
+    coefficient tempCoeff = outputRemainder.coefficients[remainderMaxMonomial];
+    tempCoeff /= tempInput.coefficients[inputMaxMonomial] ;
     outputQuotient.AddMonomial(tempMon, tempCoeff);
     tempP = tempInput;
     tempP.MultiplyBy(tempMon, tempCoeff);
@@ -556,7 +556,7 @@ void Polynomial<coefficient>::GetConstantTerm(coefficient& output, const coeffic
   if (i == - 1) {
     output = theRingZero;
   } else {
-    output = this->theCoeffs[i];
+    output = this->coefficients[i];
   }
 }
 
@@ -568,7 +568,7 @@ void Polynomial<coefficient>::GetCoeffInFrontOfLinearTermVariableIndex(int index
   if (i == - 1) {
     output = 0;
   } else {
-    output = this->theCoeffs[i];
+    output = this->coefficients[i];
   }
 }
 
@@ -601,7 +601,7 @@ bool Polynomial<coefficient>::FindOneVarRatRoots(List<Rational>& output) {
     return true;
   }
   int indexHighest = this->GetIndexMaxMonomialLexicographicLastVariableStrongest();
-  highestTerm = this->theCoeffs[indexHighest];
+  highestTerm = this->coefficients[indexHighest];
   if (!highestTerm.IsSmallInteger() || !lowestTerm.IsSmallInteger()) {
     return false;
   }
@@ -770,7 +770,7 @@ bool PolynomialOrder<coefficient>::CompareLeftGreaterThanRight(
   if (difference.IsEqualToZero()) {
     return false;
   }
-  if (difference.theCoeffs[difference.GetIndexMaxMonomial(this->theMonOrder)] > 0) {
+  if (difference.coefficients[difference.GetIndexMaxMonomial(this->theMonOrder)] > 0) {
     return true;
   }
   return false;

@@ -154,7 +154,7 @@ bool charSSAlgMod<coefficient>::FreudenthalEvalMeFullCharacter(
     int orbitSize = theOrbit.size;
     for (int j = 0; j < orbitSize; j ++) {
       tempMon.weightFundamentalCoordS = this->GetOwner()->theWeyl.GetFundamentalCoordinatesFromSimple(theOrbit[j]);
-      outputCharOwnerSetToZero.AddMonomial(tempMon, domChar.theCoeffs[i]);
+      outputCharOwnerSetToZero.AddMonomial(tempMon, domChar.coefficients[i]);
     }
   }
   return true;
@@ -172,7 +172,7 @@ void charSSAlgMod<coefficient>::GetDual(charSSAlgMod<coefficient>& output) const
   for (int i = 0; i < this->size(); i ++) {
     tempM = (*this)[i];
     tempM.weightFundamentalCoordS.Minus();
-    output.AddMonomial(tempM, this->theCoeffs[i]);
+    output.AddMonomial(tempM, this->coefficients[i]);
   }
 }
 
@@ -230,7 +230,7 @@ bool charSSAlgMod<coefficient>::FreudenthalEvalMeDominantWeightsOnly(
     }
     for (int j = 0; j < currentWeights.size; j ++) {
       tempMon.weightFundamentalCoordS = this->GetOwner()->theWeyl.GetFundamentalCoordinatesFromSimple(currentWeights[j]);
-      bufferCoeff = this->theCoeffs[i];
+      bufferCoeff = this->coefficients[i];
       bufferCoeff *= currentMults[j];
       outputCharOwnerSetToZero.AddMonomial(tempMon, bufferCoeff);
     }
@@ -258,7 +258,7 @@ void SemisimpleLieAlgebra::GetAd(Matrix<coefficient>& output, ElementSemisimpleL
     theGen.MakeGenerator(i, *this);
     this->LieBracket(e, theGen, theResult);
     for (int j = 0; j < theResult.size(); j ++) {
-      output(theResult[j].theGeneratorIndex, i) = theResult.theCoeffs[j];
+      output(theResult[j].theGeneratorIndex, i) = theResult.coefficients[j];
     }
   }
 }
@@ -305,8 +305,8 @@ void SemisimpleLieAlgebra::LieBracket(
   for (int i = 0; i < g1.size(); i ++) {
     for (int j = 0; j < g2.size(); j ++) {
       buffer = this->theLiebrackets.elements[g1[i].theGeneratorIndex][g2[j].theGeneratorIndex];
-      theCoeff = g1.theCoeffs[i];
-      theCoeff *= g2.theCoeffs[j];
+      theCoeff = g1.coefficients[i];
+      theCoeff *= g2.coefficients[j];
       buffer *= theCoeff;
       output += buffer;
     }
@@ -342,7 +342,7 @@ Vector<coefficient> ElementSemisimpleLieAlgebra<coefficient>::GetCartanPart() co
     tempGen.MakeGenerator(*owner, i + numPosRoots);
     int currentIndex = this->theMonomials.GetIndex(tempGen);
     if (currentIndex != - 1) {
-      result[i] += this->theCoeffs[currentIndex];
+      result[i] += this->coefficients[currentIndex];
     }
   }
   return result;
@@ -356,7 +356,7 @@ void ElementSemisimpleLieAlgebra<coefficient>::ElementToVectorNegativeRootSpaces
   }
   output.MakeZero(this->GetOwner()->GetNumGenerators());
   for (int i = 0; i < this->size(); i ++) {
-    output[(*this)[i].theGeneratorIndex] = this->theCoeffs[i];
+    output[(*this)[i].theGeneratorIndex] = this->coefficients[i];
   }
 }
 
@@ -436,7 +436,7 @@ bool charSSAlgMod<coefficient>::DrawMe(
       convertor = finalWeights[j].GetVectorRational();
       theDrawingVars.drawCircleAtVectorBufferRational(convertor, "black", 3);
       if (useMults) {
-        theDrawingVars.drawTextAtVectorBufferRational(convertor, CharCartan.theCoeffs[i].ToString(), "black");
+        theDrawingVars.drawTextAtVectorBufferRational(convertor, CharCartan.coefficients[i].ToString(), "black");
       }
     }
   }
@@ -465,7 +465,7 @@ void charSSAlgMod<coefficient>::DrawMeAssumeCharIsOverCartan(
     actualWeight = actualAmbientWeyl.GetSimpleCoordinatesFromFundamental((*this)[j].weightFundamentalCoordS);
     actualWeightRationalPart = actualWeight.GetVectorRational(); // <-type conversion here!
     theDrawingVars.drawCircleAtVectorBufferRational(actualWeightRationalPart, "black", 5);
-    theDrawingVars.drawTextAtVectorBufferRational(actualWeightRationalPart, this->theCoeffs[j].ToString(), "black");
+    theDrawingVars.drawTextAtVectorBufferRational(actualWeightRationalPart, this->coefficients[j].ToString(), "black");
   }
 }
 
@@ -502,8 +502,8 @@ std::string charSSAlgMod<coefficient>::MultiplyBy(const charSSAlgMod& other) {
       if (potentialError != "") {
         return potentialError;
       }
-      theCF = this->theCoeffs[i];
-      theCF *= other.theCoeffs[j];
+      theCF = this->coefficients[i];
+      theCF *= other.coefficients[j];
       summand *= theCF;
       result += summand;
     }
@@ -544,7 +544,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
       return false;
     }
     for (int j = 0; j < tempHashedRoots.size; j ++) {
-      bufferCoeff = this->theCoeffs[i];
+      bufferCoeff = this->coefficients[i];
       tempMon.weightFundamentalCoordS = theWeyL.GetFundamentalCoordinatesFromSimple(tempHashedRoots[j]);
       tempMon.owner = this->GetOwner();
       bufferCoeff *= tempMults[j];
@@ -568,7 +568,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
     for (int k = 0; k < orbitDom.size; k ++) {
       if (WeylFDSmallAsSubInLarge.IsDominantWeight(orbitDom[k])) {
         tempMon.weightFundamentalCoordS = theWeyL.GetFundamentalCoordinatesFromSimple(orbitDom[k]);
-        remainingCharDominantLevI.AddMonomial(tempMon, charAmbientFDWeyl.theCoeffs[i]);
+        remainingCharDominantLevI.AddMonomial(tempMon, charAmbientFDWeyl.coefficients[i]);
       }
     }
   }
@@ -589,7 +589,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
     }
     tempMon.owner = &theSmallAlgebra;
     tempMon.weightFundamentalCoordS = fundCoordsSmaller;
-    remainingCharProjected.AddMonomial(tempMon, remainingCharDominantLevI.theCoeffs[i]);
+    remainingCharProjected.AddMonomial(tempMon, remainingCharDominantLevI.coefficients[i]);
   }
   Vector<coefficient> simpleGeneratorBaseField;
   output.MakeZero();
@@ -609,7 +609,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
         }
       }
     }
-    highestCoeff = remainingCharProjected.theCoeffs[remainingCharProjected.theMonomials.GetIndex(localHighest)];
+    highestCoeff = remainingCharProjected.coefficients[remainingCharProjected.theMonomials.GetIndex(localHighest)];
     output.AddMonomial(localHighest, highestCoeff);
     if (!WeylFDSmall.FreudenthalEvalIrrepIsWRTLeviPart(
       localHighest.weightFundamentalCoordS, tempHashedRoots, tempMults, tempS, 10000
@@ -643,7 +643,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
         output[i].weightFundamentalCoordS
       ).GetVectorRational();
       std::stringstream tempStream;
-      tempStream << output.theCoeffs[i].ToString();
+      tempStream << output.coefficients[i].ToString();
       theDV1.drawTextAtVectorBufferRational(tempRoot, tempStream.str(), "black");
       for (int j = 1; j < WeylFDSmall.AmbientWeyl->theGroup.theElements.size; j ++) {
         tempRoot2 = tempRoot;

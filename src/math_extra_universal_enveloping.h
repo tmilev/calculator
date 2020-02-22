@@ -199,7 +199,7 @@ public:
   int GetMinNumVars() const {
     int result = 0;
     for (int i = 0; i < this->size; i ++) {
-      result = MathRoutines::Maximum(result, this->theCoeffs[i].GetMinNumVars());
+      result = MathRoutines::Maximum(result, this->coefficients[i].GetMinNumVars());
       result = MathRoutines::Maximum(result, (*this)[i].GetMinNumVars());
     }
     return result;
@@ -244,7 +244,7 @@ public:
     if (this->size() != 1) {
       return false;
     }
-    if (!this->theCoeffs[0].IsEqualToOne()) {
+    if (!this->coefficients[0].IsEqualToOne()) {
       return false;
     }
     return (*this)[0].generatorsIndices.size == 1;
@@ -282,7 +282,7 @@ public:
     coefficient theCoeff;
     for (int i = 0; i < other.size; i ++) {
       tempMon = other[i];
-      theCoeff = other.theCoeffs[i];
+      theCoeff = other.coefficients[i];
       this->AddMonomial(tempMon, theCoeff);
     }
   }

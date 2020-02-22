@@ -67,13 +67,13 @@ std::string SemisimpleLieAlgebra::ToStringLieAlgebraNameNonTechnicalHTML() const
   std::stringstream out;
   const DynkinType& theType = this->theWeyl.theDynkinType;
   for (int indexType = 0; indexType < theType.size(); indexType ++) {
-    if (!(theType.theCoeffs[indexType] > 0)) {
+    if (!(theType.coefficients[indexType] > 0)) {
       global.fatal << "Simple constituents must appear with positive coefficient. " << global.fatal;
     }
     const DynkinSimpleType& currentSimpleType = theType[indexType];
-    for (int indexIsotypic = 0; indexIsotypic < theType.theCoeffs[indexType]; indexIsotypic ++) {
+    for (int indexIsotypic = 0; indexIsotypic < theType.coefficients[indexType]; indexIsotypic ++) {
       out << currentSimpleType.ToStringNonTechnicalName(nullptr);
-      if (indexIsotypic + 1 < theType.theCoeffs[indexType]) {
+      if (indexIsotypic + 1 < theType.coefficients[indexType]) {
         out << "\\oplus";
       }
     }
@@ -105,17 +105,17 @@ bool SemisimpleLieAlgebra::AttempTFindingHEF(
   this->LieBracket(inputOutputH, inputOutputE, mustBeZero);
   mustBeZero -= inputOutputE * 2;
   for (int i = 0; i < mustBeZero.size(); i ++) {
-    theSystem.AddOnTop(mustBeZero.theCoeffs[i]);
+    theSystem.AddOnTop(mustBeZero.coefficients[i]);
   }
   this->LieBracket(inputOutputH, inputOutputF, mustBeZero);
   mustBeZero += inputOutputF * 2;
   for (int i = 0; i < mustBeZero.size(); i ++) {
-    theSystem.AddOnTop(mustBeZero.theCoeffs[i]);
+    theSystem.AddOnTop(mustBeZero.coefficients[i]);
   }
   this->LieBracket(inputOutputE, inputOutputF, mustBeZero);
   mustBeZero -= inputOutputH;
   for (int i = 0; i < mustBeZero.size(); i ++) {
-    theSystem.AddOnTop(mustBeZero.theCoeffs[i]);
+    theSystem.AddOnTop(mustBeZero.coefficients[i]);
   }
   if (logStream != nullptr) {
     *logStream << "The system to solve: ";
@@ -1656,7 +1656,7 @@ bool SemisimpleSubalgebras::CentralizersComputedToHaveUnsuitableNilpotentOrbits(
   List<int> theMults;
   theMults.SetSize(currentType.size());
   for (int i = 0; i < currentType.size(); i ++) {
-    if (!currentType.theCoeffs[i].IsSmallInteger(& theMults[i])) {
+    if (!currentType.coefficients[i].IsSmallInteger(& theMults[i])) {
       global.fatal << "This is not supposed to happen: "
       << "Dynkin type with multiplicity that doesn't fit in a small int. "
       << global.fatal;
@@ -2085,7 +2085,7 @@ bool DynkinType::IsTypeA_1() const {
   if (this->size() != 1) {
     return false;
   }
-  if (this->theCoeffs[0] != 1) {
+  if (this->coefficients[0] != 1) {
     return false;
   }
   if ((*this)[0].theRank != 1) {
@@ -2104,7 +2104,7 @@ void DynkinType::GetDynkinTypeWithDefaultScales(DynkinType& output) const {
   DynkinSimpleType tempType;
   for (int i = 0; i < this->size(); i ++) {
     tempType.MakeArbitrary((*this)[i].theLetter, (*this)[i].theRank, 1);
-    output.AddMonomial(tempType, this->theCoeffs[i]);
+    output.AddMonomial(tempType, this->coefficients[i]);
   }
 }
 
@@ -2226,7 +2226,7 @@ Rational DynkinType::GetPrincipalSlTwoCSInverseScale() const {
   MacroRegisterFunctionWithName("DynkinType::GetPrincipalSlTwoCSInverseScale");
   Rational result = 0;
   for (int i = 0; i < this->size(); i ++) {
-    result += this->theCoeffs[i] * (*this)[i].GetPrincipalSlTwoCSInverseScale();
+    result += this->coefficients[i] * (*this)[i].GetPrincipalSlTwoCSInverseScale();
   }
   return result;
 }
@@ -4148,7 +4148,7 @@ void CandidateSSSubalgebra::GetGenericPosGenLinearCombination(
 void CandidateSSSubalgebra::AddToSystem(const ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& elementThatMustVanish) {
   Polynomial<AlgebraicNumber> thePoly;
   for (int i = 0; i < elementThatMustVanish.size(); i ++) {
-    thePoly = elementThatMustVanish.theCoeffs[i];
+    thePoly = elementThatMustVanish.coefficients[i];
     thePoly.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
     this->theSystemToSolve.AddOnTopNoRepetition(thePoly);
   }
@@ -4237,7 +4237,7 @@ bool CandidateSSSubalgebra::ComputeChar(bool allowBadCharacter) {
       global.fatal << "This is a programming error: while decomposing ambient Lie algebra over the candidate subalgebra, I got "
       << "that there is no extreme weight. This is impossible: something has gone very wrong. " << global.fatal;
     }
-    if (accumChar.theCoeffs[currentIndex] < 0) {
+    if (accumChar.coefficients[currentIndex] < 0) {
       return false;
     }
     for (int i = 0; i < accumChar[currentIndex].weightFundamentalCoordS.size; i ++) {
@@ -4248,8 +4248,8 @@ bool CandidateSSSubalgebra::ComputeChar(bool allowBadCharacter) {
     freudenthalChar.MakeZero();
     tempMon =accumChar[currentIndex];
     tempMon.owner = nonEmbeddedMe;
-    freudenthalChar.AddMonomial(tempMon, accumChar.theCoeffs[currentIndex]);
-    this->theCharNonPrimalFundCoords.AddMonomial(accumChar[currentIndex], accumChar.theCoeffs[currentIndex]);
+    freudenthalChar.AddMonomial(tempMon, accumChar.coefficients[currentIndex]);
+    this->theCharNonPrimalFundCoords.AddMonomial(accumChar[currentIndex], accumChar.coefficients[currentIndex]);
     std::string tempS;
     bool tempBool = freudenthalChar.FreudenthalEvalMeFullCharacter(outputChar, - 1, &tempS);
     if (!tempBool && !allowBadCharacter) {
@@ -4493,7 +4493,7 @@ bool slTwoSubalgebra::ModuleDecompositionLeftFitsIntoRight(
   MacroRegisterFunctionWithName("slTwoSubalgebra::ModuleDecompositionLeftFitsIntoRight");
   charSSAlgMod<Rational> moduleDifference = moduleDecompoRight - moduleDecompoLeft;
   for (int i = 0; i < moduleDifference.size(); i ++) {
-    if (moduleDifference.theCoeffs[i] < 0) {
+    if (moduleDifference.coefficients[i] < 0) {
       return false;
     }
   }
@@ -6111,7 +6111,7 @@ void DynkinType::ScaleFirstCoRootSquaredLength(const Rational& multiplyCoRootSqu
   for (int i = 0; i < this->size(); i ++) {
     tempType = (*this)[i];
     tempType.CartanSymmetricInverseScale *= multiplyCoRootSquaredLengthBy;
-    result.AddMonomial(tempType, this->theCoeffs[i]);
+    result.AddMonomial(tempType, this->coefficients[i]);
   }
   *this = result;
 }
@@ -6781,7 +6781,7 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other
   theDifference = other.theWeylNonEmbedded->theDynkinType;
   theDifference -= this->theWeylNonEmbedded->theDynkinType;
   for (int i = 0; i < theDifference.size(); i ++) {
-    if (theDifference.theCoeffs[i] < 0) {
+    if (theDifference.coefficients[i] < 0) {
       return false;
     }
   }
@@ -7018,10 +7018,10 @@ bool DynkinType::operator>(const DynkinType& other) const {
     return false;
   }
   DynkinSimpleType highestSimpleTypeDifference = difference[0];
-  Rational maxComponentDifferenceMult = difference.theCoeffs[0];
+  Rational maxComponentDifferenceMult = difference.coefficients[0];
   for (int i = 1; i < difference.size(); i ++) {
     if (difference[i] > highestSimpleTypeDifference) {
-      maxComponentDifferenceMult = difference.theCoeffs[i];
+      maxComponentDifferenceMult = difference.coefficients[i];
       highestSimpleTypeDifference = difference[i];
     }
   }

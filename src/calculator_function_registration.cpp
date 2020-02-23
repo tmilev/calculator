@@ -7443,7 +7443,7 @@ void Calculator::initPredefinedStandardOperations() {
     "",
     "Dereferences a sequence or a matrix. "
     "The syntax is as illustrated by the example. ",
-    "X = (a,b,c);\n"
+    "X = (a, b, c);\n"
     "X_1;\n"
     "X_2;\n"
     "X_3;\n"
@@ -7480,7 +7480,8 @@ void Calculator::initPredefinedStandardOperations() {
     "",
     "Dereferences a sequence of rules. "
     "The syntax is as illustrated by the example. ",
-    "A = d/dx( \\sqrt(x +y)-4x^2y^2); (d/dx(y)= 0; A)_2;  ",
+    "A = d/dx( \\sqrt(x + y) - 4x^2y^2);\n"
+    "(d/dx(y)= 0; A)_2;  ",
     "CalculatorFunctions::innerDereferenceSequenceStatements",
     "DereferenceSequenceStatements",
     innerStandard
@@ -7510,8 +7511,11 @@ void Calculator::initPredefinedStandardOperations() {
     "Tensor product of two generalized Verma modules. "
     "Not fully tested and documented at the moment. "
     "Will get more documented in the future. ",
-    "X = G_2;\ng_{{i}}= GetChevalleyGenerator{}(X,i);\nh_{{i}}= GetCartanGenerator{}(X, i);\n"
-    "z= Polynomial{}y;\nv=HeighestWeightVector{}(G_2, (z,1),(1,0));\n"
+    "X = G_2;\n"
+    "g_{{i}} = GetChevalleyGenerator{}(X,i);\n"
+    "h_{{i}}= GetCartanGenerator{}(X, i);\n"
+    "z= Polynomial{}y;\n"
+    "v=HeighestWeightVector{}(G_2, (z,1), (1,0));\n"
     "g_{- 1}(v\\otimes v);\n"
     "g_{- 1}g_{- 1}(v\\otimes v)",
     "CalculatorFunctionsBinaryOps::innerTensorEltTensorByEltTensor",

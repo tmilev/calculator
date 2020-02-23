@@ -881,14 +881,19 @@ void ModuleSSalgebra<coefficient>::CheckConsistency() {
       diffMat = otherOutput;
       diffMat -= output;
       if (!diffMat.IsEqualToZero()) {
-        global.fatal << "<br>[" << left.ToString() << ", " << right.ToString() << "] = "
+        global.fatal
+        << "<br>[" << left.ToString() << ", " << right.ToString() << "] = "
         << output.ToString() << "<br> [" << leftGen.ToString()
-        << ", " << rightGen.ToString() << "] = " << outputGen.ToString() << "<br> "
+        << ", " << rightGen.ToString() << "] = " << outputGen.ToString()
+        << "<br>"
         << outputGen.ToString() << "->" << otherOutput.ToString()
-        << "<br>This is a programming error: something is wrong with the algorithm, a check fails! " << global.fatal;
+        << "<br>This is a programming error: "
+        << "something is wrong with the algorithm, a check fails! "
+        << global.fatal;
       } else {
         std::stringstream tempStream;
-        tempStream << "tested index" << i + 1 << " out of " << this->GetOwner().GetNumGenerators()
+        tempStream << "tested index " << i + 1
+        << " out of " << this->GetOwner().GetNumGenerators()
         << ", " << j + 1 << " out of " << this->GetOwner().GetNumGenerators();
         theReport.Report(tempStream.str());
       }
@@ -930,13 +935,19 @@ void ModuleSSalgebra<coefficient>::ExpressAsLinearCombinationHomogenousElement(
   const coefficient& theRingZero
 ) {
   Vector <coefficient> theScalarProducts;
-  List<MonomialUniversalEnveloping<coefficient> >& inputBasis = this->theGeneratingWordsGrouppedByWeight[indexInputBasis];
+  List<MonomialUniversalEnveloping<coefficient> >& inputBasis =
+  this->theGeneratingWordsGrouppedByWeight[indexInputBasis];
   theScalarProducts.SetSize(inputBasis.size);
 
   for (int i = 0; i < inputBasis.size; i ++) {
     std::stringstream tempStream;
     inputHomogeneous.HWTAAbilinearForm(
-      inputBasis[i], theScalarProducts[i], &subHiGoesToIthElement, theRingUnit, theRingZero, &tempStream
+      inputBasis[i],
+      theScalarProducts[i],
+      &subHiGoesToIthElement,
+      theRingUnit,
+      theRingZero,
+      &tempStream
     );
   }
   this->theBilinearFormsInverted[indexInputBasis].ActOnVectorColumn(theScalarProducts, theRingZero);
@@ -957,10 +968,10 @@ void ModuleSSalgebra<coefficient>::reset() {
   this->ComputedGeneratorActions.init(0);
   this->owner = nullptr;
   this->theGeneratingWordsNonReduced.Clear();
-  //Note: for some reason, the linker fails to resolve without the explicit template
-  //specialization below.
-  //[Update:] made a bug report on this in the gcc bug tracker.
-  //This issue has officially been recognized as a gcc bug. Hope to get a fix soon.
+  // Note: for some reason, the linker fails to resolve without the explicit template
+  // specialization below.
+  // [Update:] made a bug report on this in the gcc bug tracker.
+  // This issue has officially been recognized as a gcc bug. Hope to get a fix soon.
   this->theGeneratingWordsNonReducedInt.Clear();
   this->theGeneratingWordsWeightsPlusWeightFDpart.SetSize(0);
   this->thePaths.SetSize(0);
@@ -1020,7 +1031,8 @@ void ModuleSSalgebra<coefficient>::GetAdActionHomogenousElT(
     int theIndex = this->theModuleWeightsSimpleCoords.GetIndex(targetWeight);
     for (int j = 0; j < currentWordList.size; j ++) {
       std::stringstream progressStream;
-      progressStream << "Computing action of " << generatorString << " on weight layer " << i + 1
+      progressStream << "Computing action of "
+      << generatorString << " on weight layer " << i + 1
       << " out of " << this->theGeneratingWordsGrouppedByWeight.size
       << ", word " << j + 1 << " out of " << currentWordList.size << "...";
       theReport.Report(progressStream.str());
@@ -1042,7 +1054,8 @@ void ModuleSSalgebra<coefficient>::GetAdActionHomogenousElT(
 
 template <class coefficient>
 void ElementTensorsGeneralizedVermas<coefficient>::Substitution(
-  const PolynomialSubstitution<Rational>& theSub, ListReferences<ModuleSSalgebra<coefficient> >& theMods
+  const PolynomialSubstitution<Rational>& theSub,
+  ListReferences<ModuleSSalgebra<coefficient> >& theMods
 ) {
   ElementTensorsGeneralizedVermas<coefficient> output;
   MonomialTensorGeneralizedVermas<coefficient> currentMon;
@@ -1131,19 +1144,7 @@ bool ElementTensorsGeneralizedVermas<coefficient>::MultiplyOnTheLeft(
   if (&output == this) {
     global.fatal << "Output equals input, this is not supposed to happen. " << global.fatal;
   }
-  //int commentmewhendone;
-  //static int problemCounter = 0;
-  //problemCounter ++;
-  //output.checkConsistency();
-  //std::string debugString;
-  //if (problemCounter ==44)
-  //{ debugString= this->ToString();
-  //}
-  //this->checkConsistency();
-  ////
   output = *this;
-  ////
-  //output.checkConsistency();
   ElementTensorsGeneralizedVermas<coefficient> buffer;
   for (int i = theUE.Powers.size - 1; i >= 0; i --) {
     int thePower;
@@ -1231,13 +1232,18 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
   SemisimpleLieAlgebra& theAlgebrA = *this->owner;
   WeylGroupData& theWeyl = theAlgebrA.theWeyl;
   std::stringstream out;
-  out << "<br>Semisimple Lie algebra acting on generalized Verma module: " << theAlgebrA.ToStringLieAlgebraName() << ".";
-  out << "<br>Parabolic selection: " << this->parabolicSelectionNonSelectedAreElementsLevi.ToString();
+  out << "<br>Semisimple Lie algebra acting on generalized Verma module: "
+  << theAlgebrA.ToStringLieAlgebraName() << ".";
+  out << "<br>Parabolic selection: "
+  << this->parabolicSelectionNonSelectedAreElementsLevi.ToString();
   out << "<br>Highest weight of Generalized Verma module in fundamental coordinates: "
   << this->theHWFundamentalCoordsBaseField.ToString();
-  out << "<br>In simple coordinates: " << this->theHWSimpleCoordSBaseField.ToString();
-  out << "<br>Finite dimensional part h. w. fundamental coordinates: " << this->theHWFDpartFundamentalCoordS.ToString();
-  out << "<br>Finite dimensinoal part h. w. simple coords: " << this->theHWFDpartSimpleCoordS.ToString();
+  out << "<br>In simple coordinates: "
+  << this->theHWSimpleCoordSBaseField.ToString();
+  out << "<br>Finite dimensional part h. w. fundamental coordinates: "
+  << this->theHWFDpartFundamentalCoordS.ToString();
+  out << "<br>Finite dimensinoal part h. w. simple coords: "
+  << this->theHWFDpartSimpleCoordS.ToString();
   out << "<br>Inducing module character (over the Cartan subalgebra): ";
   FormatExpressions latexFormat;
   latexFormat.flagUseLatex = true;
@@ -1271,22 +1277,27 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
   out << "</table>";
 
   out << "<br>Character: " << this->theChaR.ToString();
-  out << "<br>Computed generator actions (" << this->ComputedGeneratorActions.CardinalitySelection << " out of "
+  out << "<br>Computed generator actions ("
+  << this->ComputedGeneratorActions.CardinalitySelection << " out of "
   << this->actionsGeneratorsMaT.size << " computed actions) follow. "
   << "Note that generator actions are computed on demand, only the simple "
   << "Chevalley generators are computed by default. ";
-  out << "<table><tr><td>Generator </td><td>Action</td></tr>";
+  out << "<table><tr><td>Generator</td><td>Action</td></tr>";
   ElementSemisimpleLieAlgebra<Rational> tempSSElt;
   for (int i = 0; i < this->actionsGeneratorsMaT.size; i ++) {
     if (this->ComputedGeneratorActions.selected[i]) {
       tempSSElt.MakeGenerator(i, theAlgebrA);
       out << "<tr>";
-      out << "<td>" << HtmlRoutines::GetMathMouseHover(tempSSElt.ToString(theFormat)) << "</td>";
+      out << "<td>"
+      << HtmlRoutines::GetMathMouseHover(tempSSElt.ToString(theFormat))
+      << "</td>";
       out << "<td>";
       if (this->GetDim() < 28) {
         Matrix<coefficient> outputMat;
         this->actionsGeneratorsMaT[i].GetMatrix(outputMat, this->GetDim());
-        out << HtmlRoutines::GetMathMouseHover(outputMat.ToString(&latexFormat), 5000) << " = ";
+        out
+        << HtmlRoutines::GetMathMouseHover(outputMat.ToString(&latexFormat), 5000)
+        << " = ";
         out << this->actionsGeneratorsMaT[i].ToString();
       } else {
         out << this->actionsGeneratorsMaT[i].ToString();
@@ -1308,7 +1319,8 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
     List<MonomialUniversalEnveloping<coefficient> >& currentList = this->theGeneratingWordsGrouppedByWeight[k];
     for (int i = 0; i < currentList.size; i ++) {
       MonomialUniversalEnveloping<coefficient>& currentElt = currentList[i];
-      out << "<br>monomial " << i + 1 << ": " << currentElt.ToString(&global.theDefaultFormat.GetElement());
+      out << "<br>monomial " << i + 1 << ": "
+      << currentElt.ToString(&global.theDefaultFormat.GetElement());
     }
     out << "; Matrix of Shapovalov form associated to current weight level: <br> "
     << theBF.ToString(&global.theDefaultFormat.GetElement());
@@ -1332,11 +1344,14 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
     }
   }
   if (isBad) {
-    out << "<br>Error: the Littelmann-path induced monomials do not give a monomial basis. ";
+    out << "<br>Error: the Littelmann-path induced "
+    << "monomials do not give a monomial basis. ";
   }
   out << "<br>Cached Shapovalov products before generator action computation: "
-  << this->cachedPairs.size << ". Dimension : " << this->GetDim();
-  out << "<br>Cached Shapovalov products final: " << this->cachedPairs.size << "; dimension : " << this->GetDim();
+  << this->cachedPairs.size << ". Dimension : "
+  << this->GetDim();
+  out << "<br>Cached Shapovalov products final: "
+  << this->cachedPairs.size << "; dimension : " << this->GetDim();
   return out.str();
 }
 #endif

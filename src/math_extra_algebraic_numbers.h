@@ -7,7 +7,7 @@
 
 class AlgebraicClosureRationals;
 class AlgebraicNumber {
-  friend std::ostream& operator <<(std::ostream& output, const AlgebraicNumber& theNumber) {
+  friend std::ostream& operator<<(std::ostream& output, const AlgebraicNumber& theNumber) {
     output << theNumber.ToString();
     return output;
   }
@@ -98,7 +98,11 @@ class AlgebraicNumber {
     polyConverted = thePoly;
     return this->ConstructFromMinPoly(polyConverted, inputOwner, commentsOnFailure);
   }
-  bool AssignRationalQuadraticRadical(const Rational& inpuT, AlgebraicClosureRationals& inputOwner, std::stringstream *commentsOnFailure);
+  bool AssignRationalQuadraticRadical(
+    const Rational& inpuT,
+    AlgebraicClosureRationals& inputOwner,
+    std::stringstream* commentsOnFailure
+  );
   void AssignRational(const Rational& input, AlgebraicClosureRationals& inputOwner);
   Rational GetDenominatorRationalPart() const;
   Rational GetNumeratorRationalPart() const;
@@ -182,16 +186,19 @@ class AlgebraicNumber {
 // represented as a series of nested extensions of the rationals:
 // Rationals = Q = A_0 <= A_1 <= A_2 <= ...
 // Each extension A_i comes with a basis e_{i, 1}, e_{i, 2}, ...
-// Here, we explicitly allow the basis to be linearly dependent.
-// In particular, we explicitly allow that there exist an extension for which
-// the next extension has fewer basis vectors.
-// The latter case automatically implies the
-// basis of the preceding extension was redundant.
 class AlgebraicClosureRationals {
 public:
-  List<MatrixTensor<Rational> > theBasisMultiplicative;
+  // Basis over the rationals of the latest algebraic extension.
+  List<MatrixTensor<Rational> > latestBasis;
 
-  List<List<VectorSparse<Rational> > > theBasesAdditive;
+  // Injections of earlier rational number bases
+  // into the latest basis.
+  // The [i][j]-th element refers to the image basis element e_{i, j},
+  // i.e., the j^th basis element of the i^th [extension A_i].
+  // More precisely, the [i][j]-th element of the map below describes the image of
+  // e_{i, j} when injected down to the latest extension A_n, with
+  // coordinates relative to the latest basis e_{n, 1}, ..., e_{n, n}.
+  List<List<VectorSparse<Rational> > > basisInjections;
 
   MatrixTensor<Rational> GeneratingElementTensorForm;
   Matrix<Rational> GeneratingElementMatForm;
@@ -202,8 +209,7 @@ public:
   HashedList<LargeInteger> theQuadraticRadicals;
   List<std::string> DisplayNamesBasisElements;
   void AddNewBasis();
-
-  void RegisterNewBasis(const MatrixTensor<Rational>* theInjection);
+  void RegisterNewBasis(const MatrixTensor<Rational>* injectionNullForIdentity);
   void reset();
   bool CheckConsistency() const;
   AlgebraicClosureRationals() {
@@ -219,7 +225,9 @@ public:
   bool GetRadicalSelectionFromIndex(int inputIndex, Selection& theSel);
   int GetDimensionOverTheRationals() const;
   static int GetIndexFromRadicalSelection(const Selection& theSel);
-  void GetMultiplicativeOperatorFromRadicalSelection(const Selection& theSel, MatrixTensor<Rational>& outputOp);
+  void GetMultiplicativeOperatorFromRadicalSelection(
+    const Selection& theSel, MatrixTensor<Rational>& outputOp
+  );
   void GetMultiplicationBy(const AlgebraicNumber& input, MatrixTensor<Rational>& output);
   void GetAdditionTo(const AlgebraicNumber& input, VectorSparse<Rational>& output);
   void ConvertPolyDependingOneVariableToPolyDependingOnFirstVariableNoFail(
@@ -297,7 +305,9 @@ public:
   bool operator/=(const ElementZmodP& den);
   bool operator/=(const LargeInteger& den);
   void ScaleToIntegralMinHeightAndGetPoly(
-    const Polynomial<Rational>& input, Polynomial<ElementZmodP>& output, const LargeIntegerUnsigned& newModulo
+    const Polynomial<Rational>& input,
+    Polynomial<ElementZmodP>& output,
+    const LargeIntegerUnsigned& newModulo
   );
 };
 #endif

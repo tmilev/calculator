@@ -233,7 +233,10 @@ void AlgebraicClosureRationals::ChooseGeneratingElement() {
     do {
       this->GeneratingElementMatForm.ActOnVectorColumn(currentVect);
       this->theGeneratingElementPowersBasis.AddOnTop(currentVect);
-      if (this->theGeneratingElementPowersBasis.size > this->theGeneratingElementPowersBasis.GetRankOfSpanOfElements()) {
+      if (
+        this->theGeneratingElementPowersBasis.size >
+        this->theGeneratingElementPowersBasis.GetRankOfSpanOfElements()
+      ) {
         this->theGeneratingElementPowersBasis.SetSize(this->theGeneratingElementPowersBasis.size - 1);
         break;
       }
@@ -274,13 +277,14 @@ bool AlgebraicClosureRationals::ReduceMe(
   generatorPowers.AssignVectorsToColumns(this->theGeneratingElementPowersBasis);
   generatorPowersInverse = generatorPowers;
   generatorPowersInverse.Invert();
+  global.Comments << "DEBUG: field at reduction start: " << this->ToStringFull();
   global.Comments << "DEBUG: generating element powers: " << this->theGeneratingElementPowersBasis.ToString() << "<br>";
   global.Comments << "DEBUG: basis change matrix: " << generatorPowers.ToStringMatrixForm();
   global.Comments << "DEBUG: inverse basis change matrix: " << generatorPowersInverse.ToStringMatrixForm();
 
 
   Polynomial<Rational> zToTheNth, remainderAfterReduction, tempP;
-  MatrixTensor<Rational> theProjection;
+  MatrixTensor<Rational> projectionGeneratorCoordinates;
   int smallestFactorDegree = - 1;
   if (!smallestFactor.TotalDegree().IsSmallInteger(&smallestFactorDegree)) {
     global.fatal
@@ -290,9 +294,9 @@ bool AlgebraicClosureRationals::ReduceMe(
     << "impossible in the current context. "
     << global.fatal;
   }
-  theProjection.MakeZero();
+  projectionGeneratorCoordinates.MakeZero();
   for (int i = 0; i < smallestFactorDegree; i ++) {
-    theProjection.AddMonomial(MonomialMatrix(i, i), 1);
+    projectionGeneratorCoordinates.AddMonomial(MonomialMatrix(i, i), 1);
   }
   for (int i = smallestFactorDegree; i < theDim; i ++) {
     zToTheNth.MakeMonomiaL(0, i, 1, 1);
@@ -300,33 +304,47 @@ bool AlgebraicClosureRationals::ReduceMe(
     for (int j = 0; j < remainderAfterReduction.size(); j ++) {
       int theIndex = - 1;
       remainderAfterReduction[j](0).IsSmallInteger(&theIndex);
-      theProjection.AddMonomial(
+      projectionGeneratorCoordinates.AddMonomial(
         MonomialMatrix(theIndex, i),
         remainderAfterReduction.coefficients[j]
       );
     }
   }
   global.Comments << "DEBUG: The projection in generator coordinates: "
-  << theProjection.ToStringMatrixForm() << "<br>"
+  << projectionGeneratorCoordinates.ToStringMatrixForm() << "<br>"
   << "Generator min poly factors: "
   << theFactors.ToStringCommaDelimited() << "<br>";
 
-  List<MatrixTensor<Rational> > conjugatedBasis, projectedBasis;
-  conjugatedBasis.SetSize(this->latestBasis.size);
-  projectedBasis.SetSize(this->latestBasis.size);
-  for (int i = 0; i < conjugatedBasis.size; i ++) {
-    conjugatedBasis[i] = generatorPowersInverse;
-    conjugatedBasis[i] *= this->latestBasis[i];
-    conjugatedBasis[i] *= generatorPowers;
-    global.Comments << "DEBUG: Conjugated element " << i << ": "
-    << conjugatedBasis[i].ToStringMatrixForm();
-    projectedBasis[i] = theProjection;
-    projectedBasis[i] *= conjugatedBasis[i];
-    global.Comments << "DEBUG: projected basis " << i << ": "
-    << projectedBasis[i].ToStringMatrixForm();
+  List<MatrixTensor<Rational> > basisNonRestricted, newBasis;
+  basisNonRestricted.SetSize(this->latestBasis.size);
+  for (int i = 0; i < basisNonRestricted.size; i ++) {
+    basisNonRestricted[i] = generatorPowersInverse;
+    basisNonRestricted[i] = projectionGeneratorCoordinates;
+    basisNonRestricted[i] *= this->latestBasis[i];
+    basisNonRestricted[i] *= generatorPowers;
+    global.Comments << "DEBUG: newBasis element " << i << ": "
+    << basisNonRestricted[i].ToStringMatrixForm();
   }
-  projectedBasis.SetSize(smallestFactorDegree);
-  this->latestBasis = projectedBasis;
+  newBasis.SetSize(smallestFactorDegree);
+  for (int i = 0; i < newBasis.size; i ++) {
+    newBasis[i].MakeZero();
+    MatrixTensor<Rational>& current = basisNonRestricted[i];
+    for (int j = 0; j < current.size(); j ++) {
+      const MonomialMatrix& currentMonomial = current[j];
+      if (currentMonomial.dualIndex >= smallestFactorDegree) {
+        continue;
+      }
+      newBasis[i].AddMonomial(currentMonomial, current.coefficients[j]);
+    }
+  }
+  this->latestBasis = newBasis;
+  MatrixTensor<Rational> injection;
+  injection = projectionGeneratorCoordinates;
+  injection *= generatorPowersInverse;
+  global.Comments << "DEBUG: and the injection is: " << injection.ToStringMatrixForm();
+  this->RegisterNewBasis(&injection);
+
+
   this->ChooseGeneratingElement();
   this->GetMultiplicationBy(
     this->GeneratingElemenT, this->GeneratingElementTensorForm
@@ -334,7 +352,6 @@ bool AlgebraicClosureRationals::ReduceMe(
   this->GeneratingElementTensorForm.GetMatrix(
     this->GeneratingElementMatForm, this->latestBasis.size
   );
-  this->RegisterNewBasis(nullptr);
   global.Comments << this->ToString();
   return true;
 }
@@ -757,7 +774,7 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(
   theGenMatPower.MakeId(degreeMinPoly);
   for (int i = 0; i < startingDimension; i ++) {
     finalBasis[i].AssignTensorProduct(theGenMatPower, this->latestBasis[i]);
-    global.Comments << "DEBUG: final basis " << i + 1 << ": " << finalBasis[i].ToStringMatrixForm() << "<br>";
+    // global.Comments << "DEBUG: final basis " << i + 1 << ": " << finalBasis[i].ToStringMatrixForm() << "<br>";
   }
   this->latestBasis = finalBasis;
   this->latestBasis.SetSize(finalDim);
@@ -766,8 +783,8 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(
     for (int j = 0; j < startingDimension; j ++) {
       this->latestBasis[i * startingDimension + j] = theGenMatPower;
       this->latestBasis[i * startingDimension + j] *= finalBasis[j];
-      global.Comments << "DEBUG: final basis next: "
-      << this->latestBasis[i * startingDimension + j].ToStringMatrixForm() << "<br>";
+      // global.Comments << "DEBUG: final basis next: "
+      // << this->latestBasis[i * startingDimension + j].ToStringMatrixForm() << "<br>";
     }
     if (i != degreeMinPoly - 1) {
       theGenMatPower *= theGenMat;

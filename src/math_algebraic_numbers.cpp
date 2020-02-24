@@ -187,21 +187,35 @@ bool AlgebraicClosureRationals::MergeRadicals(const List<LargeInteger>& theRadic
       this->latestBasis[this->GetIndexFromRadicalSelection(largerFieldSel)]
     );
   } while (largerFieldSel.IncrementReturnFalseIfPastLast());
-  this->RegisterNewBasis(&currentInjection);
+  this->InjectOldBases(&currentInjection);
+  this->AppendAdditiveEiBasis();
   this->ComputeDisplayStringsFromRadicals();
   return true;
 }
 
-void AlgebraicClosureRationals::RegisterNewBasis(
+void AlgebraicClosureRationals::AssignDefaultBasisDisplayNames() {
+  this->DisplayNamesBasisElements.SetSize(this->latestBasis.size);
+  int extensionNumber = this->basisInjections.size;
+  for (int i = 1; i < this->latestBasis.size; i ++) {
+    std::stringstream basisVector;
+    basisVector << "e_{" << extensionNumber << ", " << i << "}";
+    this->DisplayNamesBasisElements[i] = basisVector.str();
+  }
+}
+
+void AlgebraicClosureRationals::InjectOldBases(
   const MatrixTensor<Rational>* injectionNullForIdentity
 ) {
-  if (injectionNullForIdentity != nullptr) {
-    for (int j = 0; j < this->basisInjections.size; j ++) {
-      for (int i = 0; i < this->basisInjections[j].size; i ++) {
-        injectionNullForIdentity->ActOnVectorColumn(this->basisInjections[j][i]);
-      }
+  if (injectionNullForIdentity == nullptr) {
+    return;
+  }
+  for (int j = 0; j < this->basisInjections.size; j ++) {
+    for (int i = 0; i < this->basisInjections[j].size; i ++) {
+      injectionNullForIdentity->ActOnVectorColumn(this->basisInjections[j][i]);
     }
   }
+}
+void AlgebraicClosureRationals::AppendAdditiveEiBasis() {
   this->basisInjections.SetSize(this->basisInjections.size + 1);
   this->basisInjections.LastObject()->SetSize(this->latestBasis.size);
   for (int i = 0; i < this->latestBasis.size; i ++) {
@@ -338,11 +352,12 @@ bool AlgebraicClosureRationals::ReduceMe(
     }
   }
   this->latestBasis = newBasis;
+  this->AssignDefaultBasisDisplayNames();
   MatrixTensor<Rational> injection;
   injection = projectionGeneratorCoordinates;
   injection *= generatorPowersInverse;
   global.Comments << "DEBUG: and the injection is: " << injection.ToStringMatrixForm();
-  this->RegisterNewBasis(&injection);
+  this->InjectOldBases(&injection);
 
 
   this->ChooseGeneratingElement();
@@ -767,7 +782,7 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(
       );
     }
   }
-  int finalDim = degreeMinPoly * startingDimension;
+  int finalDimension = degreeMinPoly * startingDimension;
   List<MatrixTensor<Rational> > finalBasis;
   finalBasis.SetSize(this->latestBasis.size);
   MatrixTensor<Rational> theGenMatPower;
@@ -777,7 +792,7 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(
     // global.Comments << "DEBUG: final basis " << i + 1 << ": " << finalBasis[i].ToStringMatrixForm() << "<br>";
   }
   this->latestBasis = finalBasis;
-  this->latestBasis.SetSize(finalDim);
+  this->latestBasis.SetSize(finalDimension);
   theGenMatPower = theGenMat;
   for (int i = 1; i < degreeMinPoly; i ++) {
     for (int j = 0; j < startingDimension; j ++) {
@@ -790,7 +805,7 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(
       theGenMatPower *= theGenMat;
     }
   }
-  this->RegisterNewBasis(nullptr);
+  this->AppendAdditiveEiBasis();
   outputRoot.owner = this;
   outputRoot.theElT.MaKeEi(startingDimension);
   outputRoot.basisIndex = this->basisInjections.size - 1;
@@ -813,7 +828,9 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(
     << minPoly.ToString()
     << ", however, substituting z back in to the minimal polynomial "
     << "does not yield zero, rather yields "
-    << substitutedMinPoly.ToString() << ". " << global.fatal;
+    << substitutedMinPoly.ToString() << ". "
+    << "The algebraic closure printout follows. "
+    << this->ToStringFull() << global.fatal;
   }
   return true;
 }
@@ -1226,6 +1243,7 @@ std::string AlgebraicClosureRationals::ToStringFull(FormatExpressions* theFormat
       }
     }
   }
+  out << "<br>";
   return out.str();
 }
 

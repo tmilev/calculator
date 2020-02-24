@@ -209,7 +209,9 @@ public:
   HashedList<LargeInteger> theQuadraticRadicals;
   List<std::string> DisplayNamesBasisElements;
   void AddNewBasis();
-  void RegisterNewBasis(const MatrixTensor<Rational>* injectionNullForIdentity);
+  void InjectOldBases(const MatrixTensor<Rational>* injectionNullForIdentity);
+  void AppendAdditiveEiBasis();
+  void AssignDefaultBasisDisplayNames();
   void reset();
   bool CheckConsistency() const;
   AlgebraicClosureRationals() {

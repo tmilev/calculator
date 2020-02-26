@@ -107,9 +107,12 @@ private:
   // This explains our choice of keeping all children of an expression as a reference to
   // an ever-growing collection of Expressions.
   // If a single instance of Calculator is to run over long periods of time,
-  // it is possible that not all such expressions are in use, and we run out of RAM memory.
+  // it is possible that not all such expressions are in use, and we run out of RAM memory
+  // due to our fault [bad], rather than because the
+  // user requested a large computation [good].
   // If that is to happen, some sort of garbage collection will have to be implemented.
-  // However, for the current calculator purposes, no such danger exists.
+  // However, currently the calculator resets after each user-facing operation, so
+  // this should not present a practical problem.
   public:
   Calculator* owner;
   int theData;

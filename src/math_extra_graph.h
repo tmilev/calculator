@@ -42,7 +42,7 @@ public:
   unsigned int HashFunction() const {
     return static_cast<unsigned>(this->vStart) + static_cast<unsigned>(this->vEnd) * SomeRandomPrimes[0];
   }
-  static bool IsMonEqualToZero() {
+  static bool IsZeroMonomial() {
     return false;
   }
   bool operator==(const GraphEdge& other) const {

@@ -208,7 +208,6 @@ public:
   bool flagIsQuadraticRadicalExtensionRationals;
   HashedList<LargeInteger> theQuadraticRadicals;
   List<std::string> DisplayNamesBasisElements;
-  void AddNewBasis();
   void InjectOldBases(const MatrixTensor<Rational>* injectionNullForIdentity);
   void AppendAdditiveEiBasis();
   void AssignDefaultBasisDisplayNames();
@@ -218,11 +217,8 @@ public:
     this->reset();
   }
   bool MergeRadicals(const List<LargeInteger>& theRadicals);
-  void ChooseGeneratingElement();
-  bool ReduceMe(
-    std::stringstream* commentsOnFailure,
-    int dimensionBeforeExtension
-  );
+  bool ChooseGeneratingElement(int attemptsLimitZeroForNone, std::stringstream* commentsOnFailure);
+  bool ReduceMe(std::stringstream* commentsOnFailure);
   void ComputeDisplayStringsFromRadicals();
   bool GetRadicalSelectionFromIndex(int inputIndex, Selection& theSel);
   int GetDimensionOverTheRationals() const;
@@ -258,6 +254,10 @@ public:
 
 class ElementZmodP {
 public:
+  friend std::ostream& operator<<(std::ostream& output, const ElementZmodP& input) {
+    output << input.ToString();
+    return output;
+  }
   LargeIntegerUnsigned theModulus;
   LargeIntegerUnsigned theValue;
   bool flagDeallocated;

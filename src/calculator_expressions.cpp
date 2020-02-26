@@ -1957,7 +1957,7 @@ bool Expression::IsEqualToMOne() const {
   return false;
 }
 
-bool Expression::IsMonEqualToZero() const {
+bool Expression::IsZeroMonomial() const {
   return this->IsEqualToZero();
 }
 

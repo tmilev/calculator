@@ -197,8 +197,8 @@ class quasiDiffMon {
   unsigned int HashFunction() const {
     return HashFunction(*this);
   }
-  bool IsMonEqualToZero() const {
-    return this->theMatMon.IsMonEqualToZero();
+  bool IsZeroMonomial() const {
+    return this->theMatMon.IsZeroMonomial();
   }
   bool operator==(const quasiDiffMon& other) const {
     return this->theWeylMon == other.theWeylMon && this->theMatMon == other.theMatMon;

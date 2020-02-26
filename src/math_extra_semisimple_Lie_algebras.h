@@ -295,7 +295,7 @@ class Weight {
 public:
   SemisimpleLieAlgebra* owner;
   Vector<coefficient> weightFundamentalCoordS;
-  static bool IsMonEqualToZero() {
+  static bool IsZeroMonomial() {
     return false;
   }
   friend std::ostream& operator << (std::ostream& output, const Weight<coefficient>& input) {

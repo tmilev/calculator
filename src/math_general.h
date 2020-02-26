@@ -47,7 +47,7 @@ public:
     return output;
   }
   bool CheckInitialization() const;
-  static bool IsMonEqualToZero() {
+  static bool IsZeroMonomial() {
     return false;
   }
   static unsigned int HashFunction(const ChevalleyGenerator& input) {
@@ -87,7 +87,7 @@ public:
   bool IsEqualToOne() const {
     return this->generatorsIndices.size == 0;
   }
-  bool IsMonEqualToZero() const {
+  bool IsZeroMonomial() const {
     return false;
   }
   void operator=(List<int>& other) {
@@ -258,7 +258,7 @@ class MonomialWrapper {
   static unsigned int HashFunction(const MonomialWrapper& input) {
     return hashFunction(input.theObject);
   }
-  bool IsMonEqualToZero() const {
+  bool IsZeroMonomial() const {
     return false;
   }
   bool operator==(const MonomialWrapper& other) const {
@@ -338,7 +338,7 @@ public:
     }
     return true;
   }
-  static bool IsMonEqualToZero() {
+  static bool IsZeroMonomial() {
     return false;
   }
   void ExponentMeBy(const Rational& theExp);
@@ -1964,7 +1964,7 @@ class MonomialWeylAlgebra {
     output << theMon.ToString();
     return output;
   }
-  static bool IsMonEqualToZero() {
+  static bool IsZeroMonomial() {
     return false;
   }
   bool IsConstant() const {
@@ -2146,22 +2146,25 @@ public:
     return result;
   }
   bool CleanupMonIndex(int theIndex) {
-    if (theIndex != - 1) {
-      if (this->coefficients[theIndex] == 0) {
-        if (this->flagDeallocated) {
-          global.fatal << "Use after free or race condition on monomial collection. " << global.fatal;
-        }
-        bool oldFlagDeallocated = this->flagDeallocated;
-        this->flagDeallocated = true;
-        this->theMonomials.RemoveIndexSwapWithLast(theIndex);
-        this->coefficients.RemoveIndexSwapWithLast(theIndex);
-        this->flagDeallocated = oldFlagDeallocated;
-        return true;
-      }
+    if (theIndex == - 1) {
+      return false;
     }
-    return false;
+    // Note: operator != is not required to be defined for our coefficients; operator == is.
+    bool coefficientIsZero = (this->coefficients[theIndex] == 0);
+    if (!coefficientIsZero) {
+      return false;
+    }
+    if (this->flagDeallocated) {
+      global.fatal << "Use after free or race condition on monomial collection. " << global.fatal;
+    }
+    bool oldFlagDeallocated = this->flagDeallocated;
+    this->flagDeallocated = true;
+    this->theMonomials.RemoveIndexSwapWithLast(theIndex);
+    this->coefficients.RemoveIndexSwapWithLast(theIndex);
+    this->flagDeallocated = oldFlagDeallocated;
+    return true;
   }
-  int AddMonomialNoCoeffCleanUpReturnsCoeffIndex(const templateMonomial& inputMon, const coefficient& inputCoeff);
+  int AddMonomialNoCoeffCleanUpReturnsCoeffIndex(const templateMonomial& inputMonomial, const coefficient& inputCoefficient);
   template <class MonomialCollectionTemplate>
   static void GaussianEliminationByRows(
     List<MonomialCollectionTemplate>& theList,
@@ -2591,7 +2594,7 @@ class MonomialVector {
   void MakeEi(int inputIndex) {
     this->theIndex = inputIndex;
   }
-  static bool IsMonEqualToZero() {
+  static bool IsZeroMonomial() {
     return false;
   }
   bool operator>(const MonomialVector& other) const {
@@ -2719,7 +2722,7 @@ public:
     this->GetConstantTerm(result, theRingZero);
     return result;
   }
-  static bool IsMonEqualToZero() {
+  static bool IsZeroMonomial() {
     return false;
   }
   static void GetValuesLagrangeInterpolandsAtConsecutivePoints(
@@ -4110,10 +4113,10 @@ void MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRow
 
 template <class templateMonomial, class coefficient>
 int MonomialCollection<templateMonomial, coefficient>::AddMonomialNoCoeffCleanUpReturnsCoeffIndex(
-  const templateMonomial& inputMon, const coefficient& inputCoeff
+  const templateMonomial& inputMonomial, const coefficient& inputCoefficient
 ) {
   this->CheckConsistency();
-  if (inputCoeff == 0 || inputMon.IsMonEqualToZero()) {
+  if (inputCoefficient == 0 || inputMonomial.IsZeroMonomial()) {
     return - 1;
   }
   if (this->flagDeallocated) {
@@ -4121,19 +4124,18 @@ int MonomialCollection<templateMonomial, coefficient>::AddMonomialNoCoeffCleanUp
   }
   bool oldFlagDeallocated = this->flagDeallocated;
   this->flagDeallocated = true;
-  int j = this->theMonomials.GetIndex(inputMon);
+  int j = this->theMonomials.GetIndex(inputMonomial);
   if (j >= this->size()) {
     global.fatal << "Error: function GetIndex evaluated on "
-    << inputMon << " with hash function "
-    << inputMon.HashFunction(inputMon)
+    << inputMonomial << " with hash function "
+    << inputMonomial.HashFunction(inputMonomial)
     << " returns index " << j << " but I have only "
-    << this->size() << " elements. ";
-    global.fatal << global.fatal;
+    << this->size() << " elements. " << global.fatal;
   }
   if (j == - 1) {
-    this->theMonomials.AddOnTop(inputMon);
-    this->coefficients.AddOnTop(inputCoeff);
-    j = this->size() - 1;
+    j = this->size();
+    this->theMonomials.AddOnTop(inputMonomial);
+    this->coefficients.AddOnTop(inputCoefficient);
   } else {
     if (j >= this->coefficients.size) {
       global.fatal << "This is a programming error. "
@@ -4141,7 +4143,7 @@ int MonomialCollection<templateMonomial, coefficient>::AddMonomialNoCoeffCleanUp
       << " when number of coefficients is "
       << this->coefficients.size <<  ". " << global.fatal;
     }
-    this->coefficients[j] += inputCoeff;
+    this->coefficients[j] += inputCoefficient;
   }
   this->flagDeallocated = oldFlagDeallocated;
   return j;
@@ -4151,7 +4153,7 @@ template <class templateMonomial, class coefficient>
 int MonomialCollection<templateMonomial, coefficient>::SubtractMonomialNoCoeffCleanUpReturnsCoeffIndex(
   const templateMonomial& inputMon, const coefficient& inputCoeff
 ) {
-  if (inputCoeff.IsEqualToZero() || inputMon.IsMonEqualToZero()) {
+  if (inputCoeff.IsEqualToZero() || inputMon.IsZeroMonomial()) {
     return - 1;
   }
   int j = this->theMonomials.GetIndex(inputMon);
@@ -5635,7 +5637,7 @@ public:
     global.fatal << " Not implemented, please fix. " << global.fatal;
     return output;
   }
-  static bool IsMonEqualToZero() {
+  static bool IsZeroMonomial() {
     return false;
   }
   bool RemoveRedundantShortRootsClassicalRootSystem(
@@ -6284,7 +6286,7 @@ class DynkinSimpleType {
   unsigned int HashFunction() const {
     return this->HashFunction(*this);
   }
-  bool IsMonEqualToZero() const {
+  bool IsZeroMonomial() const {
     return false;
   }
   void GetAutomorphismActingOnVectorColumn(MatrixTensor<Rational>& output, int AutoIndex) const;
@@ -6764,7 +6766,7 @@ class MonomialMatrix {
   bool CheckConsistency() const {
     return true;
   }
-  bool IsMonEqualToZero() const {
+  bool IsZeroMonomial() const {
     return !this->IsId && this->vIndex == - 1 && this->dualIndex == - 1;
   }
   bool operator==(const MonomialMatrix& other) const {
@@ -7209,7 +7211,7 @@ class MonomialGeneralizedVerma {
   }
 
   std::string ToString(FormatExpressions* theFormat = nullptr, bool includeV = true) const;
-  static bool IsMonEqualToZero() {
+  static bool IsZeroMonomial() {
     return false;
   }
   bool operator==(const MonomialGeneralizedVerma<coefficient>& other) const {
@@ -7304,7 +7306,7 @@ public:
     output << input.ToString();
     return output;
   }
-  static bool IsMonEqualToZero() {
+  static bool IsZeroMonomial() {
     return false;
   }
   int GetNumVars() {

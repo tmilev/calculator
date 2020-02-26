@@ -20,7 +20,7 @@ public:
   bool IsConstant() const {
     return this->IsEqualToOne();
   }
-  static bool IsMonEqualToZero() {
+  static bool IsZeroMonomial() {
     return false;
   }
   bool AdjointRepresentationAction(

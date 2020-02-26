@@ -237,7 +237,9 @@ bool AlgebraicClosureRationals::ChooseGeneratingElement(
   int attemptsSoFar = 0;
   if (this->basisInjections.size > 1) {
     int indexToSkipFirst = this->basisInjections[this->basisInjections.size - 2].size - 1;
-    theSel.theInts.MakeEi(DimensionOverRationals, indexToSkipFirst);
+    if (indexToSkipFirst < DimensionOverRationals) {
+      theSel.theInts.MakeEi(DimensionOverRationals, indexToSkipFirst);
+    }
   }
   for (theSel.IncrementReturnFalseIfPastLast(); ; theSel.IncrementReturnFalseIfPastLast()) {
     attemptsSoFar ++;
@@ -373,14 +375,13 @@ bool AlgebraicClosureRationals::ReduceMe(std::stringstream* commentsOnFailure) {
     newBasis[i].RaiseToPower(i);
   }
   this->latestBasis = newBasis;
-  this->AssignDefaultBasisDisplayNames();
   MatrixTensor<Rational> injection;
   injection = projectionGeneratorCoordinates;
   injection *= generatorPowersInverse;
   global.Comments << "DEBUG: and the injection is: " << injection.ToStringMatrixForm();
-  this->basisInjections.SetSize(this->basisInjections.size - 1);
   this->InjectOldBases(&injection);
   this->AppendAdditiveEiBasis();
+  this->AssignDefaultBasisDisplayNames();
 
   global.Comments << "DEBUG: got to here! ";
   global.Comments << "<hr> So far the field is: " << this->ToStringFull();
@@ -702,8 +703,8 @@ bool AlgebraicClosureRationals::AdjoinRootQuadraticPolyToQuadraticRadicalExtensi
   checkSub[0].MakeConst(outputRoot);
   algNumPoly.Substitution(checkSub);
   if (!algNumPoly.IsEqualToZero()) {
-    global.fatal << "This is a programming error. The number z=" << outputRoot.ToString()
-    << " was just adjoined to the base field; z "
+    global.fatal << "This is a programming error. The number z = " << outputRoot.ToString()
+    << " was just adjoined to a quadratic radical extension of the rationals; z "
     << "was given by requesting that it has minimial polynomial " << algNumPoly.ToString()
     << ", however, substituting z back in to the minimal polynomial "
     << "does not yield zero, rather yields " << algNumPoly.ToString() << ". " << global.fatal;
@@ -1326,8 +1327,36 @@ std::string AlgebraicNumber::ToString(FormatExpressions* theFormat) const {
   VectorSparse<Rational> theAdditiveVector;
   this->owner->GetAdditionTo(*this, theAdditiveVector);
   out << theAdditiveVector.ToString(&tempFormat); //<< "~ in~ the~ field~ " << this->owner->ToString();
+  if (this->basisIndex < this->owner->basisInjections.size - 1 && global.UserDebugFlagOn()) {
+    out << "[=" << this->ToStringNonInjected() << "]";
+  }
   return out.str();
 }
+
+std::string AlgebraicNumber::ToStringNonInjected(FormatExpressions* theFormat) const {
+  if (this->owner == nullptr) {
+    if (this->theElT.IsEqualToZero()) {
+      return "0";
+    }
+    return this->theElT.coefficients[0].ToString(theFormat);
+  }
+  std::stringstream out;
+  FormatExpressions tempFormat;
+  int dimension = this->owner->basisInjections[this->basisIndex].size;
+  tempFormat.vectorSpaceEiBasisNames.SetSize(dimension);
+
+  for (int i = 0; i < dimension; i ++) {
+    std::stringstream letter;
+    letter << "e_{" << this->basisIndex + 1 << ", " << i+1 << "}";
+    tempFormat.vectorSpaceEiBasisNames[i] = letter.str();
+  }
+  if (theFormat != nullptr) {
+    tempFormat.flagUseFrac = theFormat->flagUseFrac;
+  }
+  out << this->theElT.ToString(&tempFormat); //<< "~ in~ the~ field~ " << this->owner->ToString();
+  return out.str();
+}
+
 
 bool AlgebraicNumber::operator==(const AlgebraicNumber& other) const {
   Rational ratValue;

@@ -180,6 +180,7 @@ class AlgebraicNumber {
   }
   bool operator>(const AlgebraicNumber& other) const;
   std::string ToString(FormatExpressions* theFormat = nullptr) const;
+  std::string ToStringNonInjected(FormatExpressions* theFormat = nullptr) const;
 };
 
 // The algebraic closure of the rationals is

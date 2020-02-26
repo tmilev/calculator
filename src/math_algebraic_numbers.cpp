@@ -351,12 +351,14 @@ bool AlgebraicClosureRationals::ReduceMe(std::stringstream* commentsOnFailure) {
   MatrixTensor<Rational> generatorProjected;
   Rational leadingCoefficient = smallestFactor.GetLeadingCoefficient();
   global.Comments << "DEBUG: smallest factor: " << smallestFactor.ToString() << ". <br>";
-  for (int i = 0; i < smallestFactorDegree - 1; i ++) {
+  for (int i = 0; i < smallestFactorDegree; i ++) {
     MonomialMatrix termBelowMainDiagonal, termInLastColumn;
-    termBelowMainDiagonal.MakeEij(i + 1, i);
-    generatorProjected.AddMonomial(termBelowMainDiagonal, 1);
+    if (i + 1 < smallestFactorDegree) {
+      termBelowMainDiagonal.MakeEij(i + 1, i);
+      generatorProjected.AddMonomial(termBelowMainDiagonal, 1);
+    }
     termInLastColumn.MakeEij(i, smallestFactorDegree - 1);
-    Rational coefficientLastColumn = smallestFactor.GetMonomialCoefficient(MonomialP(0, i));
+    Rational coefficientLastColumn = - smallestFactor.GetMonomialCoefficient(MonomialP(0, i));
     coefficientLastColumn /= leadingCoefficient;
     global.Comments << "DEBUG: coefficient " << i << ": " << coefficientLastColumn
     << ", monomial: " << termInLastColumn << ", monomial is zero: " << termInLastColumn.IsZeroMonomial() << ". <br>";
@@ -427,11 +429,14 @@ void AlgebraicClosureRationals::GetAdditionTo(
   // The map in the last element of oldBasesInjectedIntoLatest
   // is the identity as it describes the map of the latest basis
   // into itself.
-  if (input.basisIndex == this->latestBasis.size - 1) {
+  if (input.basisIndex == this->basisInjections.size - 1) {
     output = input.theElT;
     return;
   }
   output.MakeZero();
+  global.Comments << "<hr>Injecting from basis index "
+  << input.basisIndex << " into " << this->basisInjections.size - 1
+  << ". Getting addition from: " << input.theElT.ToString();
   for (int i = 0; i < input.theElT.size(); i ++) {
     int currentIndex = input.theElT[i].theIndex;
     if (
@@ -450,6 +455,7 @@ void AlgebraicClosureRationals::GetAdditionTo(
       input.theElT.coefficients[i]
     );
   }
+  global.Comments << " to get: " << output.ToString() << "<hr>";
 }
 
 void AlgebraicClosureRationals::GetMultiplicationBy(

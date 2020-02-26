@@ -228,13 +228,17 @@ bool AlgebraicClosureRationals::ChooseGeneratingElement(
 ) {
   MacroRegisterFunctionWithName("AlgebraicClosureRationals::ChooseGeneratingElement");
   SelectionPositiveIntegers theSel;
-  int DimOverRationals = this->latestBasis.size;
-  theSel.init(DimOverRationals);
+  int DimensionOverRationals = this->latestBasis.size;
+  theSel.init(DimensionOverRationals);
   this->theGeneratingElementPowersBasis.SetSize(0);
   Vector<Rational> currentVect;
   this->GeneratingElemenT.owner = this;
   this->GeneratingElemenT.basisIndex = this->basisInjections.size - 1;
   int attemptsSoFar = 0;
+  if (this->basisInjections.size > 1) {
+    int indexToSkipFirst = this->basisInjections[this->basisInjections.size - 2].size - 1;
+    theSel.theInts.MakeEi(DimensionOverRationals, indexToSkipFirst);
+  }
   for (theSel.IncrementReturnFalseIfPastLast(); ; theSel.IncrementReturnFalseIfPastLast()) {
     attemptsSoFar ++;
     if (attemptsLimitZeroForNone > 0 && attemptsSoFar > attemptsLimitZeroForNone) {
@@ -253,9 +257,9 @@ bool AlgebraicClosureRationals::ChooseGeneratingElement(
       this->GeneratingElemenT.theElT.AddMonomial(tempV, theSel.theInts[i]);
     }
     this->GetMultiplicationBy(this->GeneratingElemenT, this->GeneratingElementTensorForm);
-    this->GeneratingElementTensorForm.GetMatrix(this->GeneratingElementMatForm, DimOverRationals);
+    this->GeneratingElementTensorForm.GetMatrix(this->GeneratingElementMatForm, DimensionOverRationals);
     this->theGeneratingElementPowersBasis.SetSize(0);
-    currentVect.MakeEi(DimOverRationals, 0);
+    currentVect.MakeEi(DimensionOverRationals, 0);
     this->theGeneratingElementPowersBasis.AddOnTop(currentVect);
     do {
       this->GeneratingElementMatForm.ActOnVectorColumn(currentVect);
@@ -268,7 +272,7 @@ bool AlgebraicClosureRationals::ChooseGeneratingElement(
         break;
       }
     } while (true);
-    if (this->theGeneratingElementPowersBasis.size == DimOverRationals) {
+    if (this->theGeneratingElementPowersBasis.size == DimensionOverRationals) {
       break;
     }
   }

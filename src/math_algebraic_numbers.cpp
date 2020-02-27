@@ -281,7 +281,33 @@ bool AlgebraicClosureRationals::ChooseGeneratingElement(
   return true;
 }
 
-bool AlgebraicClosureRationals::ReduceMe(std::stringstream* commentsOnFailure) {
+void AlgebraicClosureRationals::ContractLastTwoBasesIfNeeded(
+  VectorSparse<Rational>* targetInCaseOfContraction,
+  VectorSparse<Rational>* imageTarget
+) {
+  MacroRegisterFunctionWithName("AlgebraicClosureRationals::ContractLastTwoBasesIfNeeded");
+  if (this->basisInjections.size < 3) {
+    return;
+  }
+  if (
+    this->basisInjections[this->basisInjections.size - 3].size !=
+    this->basisInjections[this->basisInjections.size - 1].size
+  ) {
+    return;
+  }
+  // We have established that our current basis has the same size as the one two levels down.
+  // This means we first extended the field, found that the extension was reducible
+  // and reduced. Finally, the resulting reduced basis was of the exact same size as the original.
+  if (targetInCaseOfContraction != nullptr) {
+
+  }
+}
+
+bool AlgebraicClosureRationals::ReduceMe(
+  VectorSparse<Rational>* targetInCaseOfContraction,
+  VectorSparse<Rational>* imageTarget,
+  std::stringstream* commentsOnFailure
+) {
   MacroRegisterFunctionWithName("AlgebraicClosureRationals::ReduceMe");
   if (!this->ChooseGeneratingElement(1000, commentsOnFailure)) {
     return false;
@@ -365,6 +391,7 @@ bool AlgebraicClosureRationals::ReduceMe(std::stringstream* commentsOnFailure) {
   this->InjectOldBases(&injection);
   this->AppendAdditiveEiBasis();
   this->AssignDefaultBasisDisplayNames();
+  this->ContractLastTwoBasesIfNeeded(targetInCaseOfContraction, imageTarget);
   if (!this->ChooseGeneratingElement(1000, commentsOnFailure)) {
     return false;
   }
@@ -813,7 +840,16 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(
   outputRoot.theElT.MaKeEi(startingDimension);
   outputRoot.basisIndex = this->basisInjections.size - 1;
   this->flagIsQuadraticRadicalExtensionRationals = false;
-  if (!this->ReduceMe(commentsOnFailure)) {
+  // Suppose the minimal polynomial we are adjoining is
+  // a_0 x^n + a_1 x^{n-1} + ...
+  // If, after reduction, the field is contracted to the original,
+  // this means that the polynomial was really not minimal
+  // and had a linear factor over the base field. In that
+  // case, we may declare the base field root of that polynomial to be
+  // the solution of our polynomial and so we want to know the image of
+  // x as that will give us the solution in question.
+  VectorSparse<Rational> generator, imageGenerator;
+  if (!this->ReduceMe(&generator, &imageGenerator, commentsOnFailure)) {
     *this = backUpCopy;
     return false;
   }

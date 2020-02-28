@@ -252,11 +252,11 @@ bool AlgebraicClosureRationals::ChooseGeneratingElement(
       << attemptsSoFar << " attempts so far, limit: " << attemptsLimitZeroForNone << ". ";
       return false;
     }
-    this->GeneratingElemenT.theElT.MakeZero();
+    this->GeneratingElemenT.element.MakeZero();
     for (int i = 0; i < theSel.theInts.size; i ++) {
       MonomialVector tempV;
       tempV.MakeEi(i);
-      this->GeneratingElemenT.theElT.AddMonomial(tempV, theSel.theInts[i]);
+      this->GeneratingElemenT.element.AddMonomial(tempV, theSel.theInts[i]);
     }
     this->GetMultiplicationBy(this->GeneratingElemenT, this->GeneratingElementTensorForm);
     this->GeneratingElementTensorForm.GetMatrix(this->GeneratingElementMatForm, DimensionOverRationals);
@@ -286,7 +286,6 @@ void AlgebraicClosureRationals::ContractBasesIfRedundant(
   AlgebraicNumber* outputImageGenerator
 ) {
   MacroRegisterFunctionWithName("AlgebraicClosureRationals::ContractBasesIfRedundant");
-  global.Comments << "DBEUG: GOT TO HERE";
   if (
     previousCopy.latestBasis.size != this->latestBasis.size ||
     this->basisInjections.size < 3
@@ -297,16 +296,12 @@ void AlgebraicClosureRationals::ContractBasesIfRedundant(
     *this = previousCopy;
     return;
   }
-  this->GetAdditionTo(*outputImageGenerator, outputImageGenerator->theElT);
+  this->GetAdditionTo(*outputImageGenerator, outputImageGenerator->element);
   MatrixTensor<Rational> reverseMap;
-  global.Comments << "DBEUG: GOT TO HERE. Addition to: " << outputImageGenerator->theElT.ToString();
 
   reverseMap.AssignVectorsToColumns(this->basisInjections[this->basisInjections.size - 3]);
-  global.Comments << "DBEUG: GOT TO HERE. reverse map: " << reverseMap.ToStringMatrixForm();
   reverseMap.Invert();
-  global.Comments << "DBEUG: GOT TO HERE pt 2. reverse map: " << reverseMap.ToStringMatrixForm();
-  reverseMap.ActOnVectorColumn(outputImageGenerator->theElT);
-  global.Comments << "DBEUG: GOT TO HERE pt 3. reverse map: " << reverseMap.ToStringMatrixForm();
+  reverseMap.ActOnVectorColumn(outputImageGenerator->element);
   outputImageGenerator->basisIndex = this->basisInjections.size - 3;
   *this = previousCopy;
 }
@@ -413,14 +408,14 @@ void AlgebraicClosureRationals::GetAdditionTo(
   const AlgebraicNumber& input, VectorSparse<Rational>& output
 ) {
   MacroRegisterFunctionWithName("AlgebraicClosureRationals::GetAdditionTo");
-  if (&output == &input.theElT) {
+  if (&output == &input.element) {
     AlgebraicNumber anCopy = input;
     this->GetAdditionTo(anCopy, output);
     return;
   }
   if (input.owner == nullptr) {
-    if (input.theElT.size() > 0) {
-      output.MaKeEi(0, input.theElT.coefficients[0]);
+    if (input.element.size() > 0) {
+      output.MaKeEi(0, input.element.coefficients[0]);
     }
     return;
   }
@@ -438,12 +433,12 @@ void AlgebraicClosureRationals::GetAdditionTo(
   // is the identity as it describes the map of the latest basis
   // into itself.
   if (input.basisIndex == this->basisInjections.size - 1) {
-    output = input.theElT;
+    output = input.element;
     return;
   }
   output.MakeZero();
-  for (int i = 0; i < input.theElT.size(); i ++) {
-    int currentIndex = input.theElT[i].theIndex;
+  for (int i = 0; i < input.element.size(); i ++) {
+    int currentIndex = input.element[i].theIndex;
     if (
       currentIndex < 0 ||
       currentIndex >= this->basisInjections[input.basisIndex].size
@@ -457,7 +452,7 @@ void AlgebraicClosureRationals::GetAdditionTo(
     }
     output.AddOtherTimesConst(
       this->basisInjections[input.basisIndex][currentIndex],
-      input.theElT.coefficients[i]
+      input.element.coefficients[i]
     );
   }
 }
@@ -487,10 +482,10 @@ void AlgebraicClosureRationals::GetMultiplicationBy(
 
 Rational AlgebraicNumber::GetDenominatorRationalPart() const {
   if (this->owner == nullptr) {
-    if (this->theElT.IsEqualToZero()) {
+    if (this->element.IsEqualToZero()) {
       return 1;
     }
-    return this->theElT.coefficients[0].GetDenominator();
+    return this->element.coefficients[0].GetDenominator();
   }
   VectorSparse<Rational> theEltAdditive;
   this->owner->GetAdditionTo(*this, theEltAdditive);
@@ -571,10 +566,10 @@ bool AlgebraicNumber::AssignCosRationalTimesPi(const Rational& input, AlgebraicC
 
 Rational AlgebraicNumber::GetNumeratorRationalPart() const {
   if (this->owner == nullptr) {
-    if (this->theElT.IsEqualToZero()) {
+    if (this->element.IsEqualToZero()) {
       return 0;
     }
-    return this->theElT.coefficients[0].GetNumerator();
+    return this->element.coefficients[0].GetNumerator();
   }
   VectorSparse<Rational> theEltAdditive;
   this->owner->GetAdditionTo(*this, theEltAdditive);
@@ -601,16 +596,16 @@ unsigned int AlgebraicNumber::HashFunction() const {
 }
 
 bool AlgebraicNumber::operator==(const Rational& other) const {
-  if (this->theElT.IsEqualToZero()) {
+  if (this->element.IsEqualToZero()) {
     return other == 0;
   }
-  if (this->theElT.size() != 1) {
+  if (this->element.size() != 1) {
     return false;
   }
-  if (this->theElT[0].theIndex != 0) {
+  if (this->element[0].theIndex != 0) {
     return false;
   }
-  return this->theElT.coefficients[0] == other;
+  return this->element.coefficients[0] == other;
 }
 
 bool AlgebraicNumber::NeedsParenthesisForMultiplication() const {
@@ -671,7 +666,7 @@ void AlgebraicClosureRationals::reset() {
   this->GeneratingElementTensorForm.MakeId(1);
   this->GeneratingElementMatForm.MakeIdMatrix(1);
   this->GeneratingElemenT.owner = this;
-  this->GeneratingElemenT.theElT.MaKeEi(0);
+  this->GeneratingElemenT.element.MaKeEi(0);
 }
 
 bool AlgebraicClosureRationals::AdjoinRootQuadraticPolyToQuadraticRadicalExtension(
@@ -842,7 +837,7 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(
   }
   this->AppendAdditiveEiBasis();
   outputRoot.owner = this;
-  outputRoot.theElT.MaKeEi(startingDimension);
+  outputRoot.element.MaKeEi(startingDimension);
   outputRoot.basisIndex = this->basisInjections.size - 1;
   this->flagIsQuadraticRadicalExtensionRationals = false;
   if (!this->ReduceMe(commentsOnFailure)) {
@@ -885,19 +880,19 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(
 void AlgebraicNumber::Invert() {
   MacroRegisterFunctionWithName("AlgebraicNumber::Invert");
   if (this->owner == nullptr) {
-    if (this->theElT.IsEqualToZero()) {
+    if (this->element.IsEqualToZero()) {
       global.fatal << "This is a programming error: division by zero. " << global.fatal;
     }
-    bool isGood = (this->theElT.size() == 1);
+    bool isGood = (this->element.size() == 1);
     if (isGood) {
-      isGood = (this->theElT[0].theIndex == 0);
+      isGood = (this->element[0].theIndex == 0);
     }
     if (!isGood) {
       global.fatal << "This is a programming error: Algebraic number has no owner, "
       << "so it must be rational, but it appears to be not. "
-      << "Its theElt vector is: " << this->theElT.ToString() << global.fatal;
+      << "Its theElt vector is: " << this->element.ToString() << global.fatal;
     }
-    this->theElT.coefficients[0].Invert();
+    this->element.coefficients[0].Invert();
     return;
   }
   MatrixTensor<Rational> theInverted;
@@ -906,8 +901,8 @@ void AlgebraicNumber::Invert() {
   theInverted.GetMatrix(tempMat2, this->owner->latestBasis.size);
   tempMat2.Invert();
   theInverted = tempMat2;
-  this->theElT.MaKeEi(0);
-  theInverted.ActOnVectorColumn(this->theElT);
+  this->element.MaKeEi(0);
+  theInverted.ActOnVectorColumn(this->element);
   this->basisIndex = this->owner->basisInjections.size - 1;
 }
 
@@ -919,7 +914,7 @@ void AlgebraicNumber::operator/=(const AlgebraicNumber& other) {
 }
 
 void AlgebraicNumber::operator*=(const Rational& other) {
-  this->theElT *= other;
+  this->element *= other;
 }
 
 bool AlgebraicNumber::CheckCommonOwner(const AlgebraicNumber& other) const {
@@ -938,7 +933,7 @@ void AlgebraicNumber::operator-=(const AlgebraicNumber& other) {
   MacroRegisterFunctionWithName("AlgebraicNumber::operator=");
   this->CheckCommonOwner(other);
   if (this->basisIndex == other.basisIndex) {
-    this->theElT -= other.theElT;
+    this->element -= other.element;
     return;
   }
   AlgebraicClosureRationals* theOwner = this->owner;
@@ -950,11 +945,11 @@ void AlgebraicNumber::operator-=(const AlgebraicNumber& other) {
     << "with zero owners but different basis indices. " << global.fatal;
   }
   VectorSparse<Rational> AdditiveFormOther;
-  theOwner->GetAdditionTo(*this, this->theElT);
+  theOwner->GetAdditionTo(*this, this->element);
   theOwner->GetAdditionTo(other, AdditiveFormOther);
   this->owner = theOwner;
   this->basisIndex = theOwner->basisInjections.size - 1;
-  this->theElT -= AdditiveFormOther;
+  this->element -= AdditiveFormOther;
 }
 
 void AlgebraicNumber::operator+=(const AlgebraicNumber& other) {
@@ -981,16 +976,16 @@ void AlgebraicNumber::operator+=(const AlgebraicNumber& other) {
     this->owner = theOwner;
     this->CheckConsistency();
     other.CheckConsistency();
-    this->theElT += other.theElT;
+    this->element += other.element;
     this->CheckConsistency();
     return;
   }
   VectorSparse<Rational> AdditiveFormOther;
-  theOwner->GetAdditionTo(*this, this->theElT);
+  theOwner->GetAdditionTo(*this, this->element);
   theOwner->GetAdditionTo(other, AdditiveFormOther);
   this->owner = theOwner;
   this->basisIndex = theOwner->basisInjections.size - 1;
-  this->theElT += AdditiveFormOther;
+  this->element += AdditiveFormOther;
   this->CheckConsistency();
 }
 
@@ -1000,9 +995,9 @@ bool AlgebraicNumber::CheckConsistency() const {
   }
   if (this->owner == nullptr) {
     if (!this->IsRational()) {
-      for (int i = 0; i < this->theElT.size(); i ++) {
-        global.Comments << "<br>index: " << this->theElT[i].theIndex << ", coefficient: "
-        << this->theElT.coefficients[i];
+      for (int i = 0; i < this->element.size(); i ++) {
+        global.Comments << "<br>index: " << this->element[i].theIndex << ", coefficient: "
+        << this->element.coefficients[i];
       }
       global.fatal << "Detected non-rational algebraic number with zero owner. " << global.fatal;
     }
@@ -1023,22 +1018,22 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other) {
   this->CheckConsistency();
   if (other.owner == nullptr) {
     if (other.IsEqualToZero()) {
-      this->theElT.MakeZero();
+      this->element.MakeZero();
       return;
     }
-    this->theElT *= other.theElT.coefficients[0];
+    this->element *= other.element.coefficients[0];
     return;
   }
   if (this->owner == nullptr) {
-    if (this->theElT.IsEqualToZero()) {
+    if (this->element.IsEqualToZero()) {
       return;
     }
-    Rational tempRat = this->theElT.GetMonomialCoefficient(MonomialVector(0));
+    Rational tempRat = this->element.GetMonomialCoefficient(MonomialVector(0));
     *this = other;
     *this *= tempRat;
     return;
   }
-  bool doReport = (this->theElT.size() * other.theElT.size() > 100);
+  bool doReport = (this->element.size() * other.element.size() > 100);
   ProgressReport theReport;
   if (doReport) {
     std::stringstream reportStream;
@@ -1055,8 +1050,8 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other) {
   rightMat.CheckConsistencyGrandMaster();
   leftMat *= rightMat;
   this->basisIndex = this->owner->basisInjections.size - 1;
-  this->theElT.MaKeEi(0);
-  leftMat.ActOnVectorColumn(this->theElT);
+  this->element.MaKeEi(0);
+  leftMat.ActOnVectorColumn(this->element);
 }
 
 void AlgebraicNumber::SqrtMeDefault() {
@@ -1069,13 +1064,13 @@ bool AlgebraicNumber::operator>(const AlgebraicNumber& other) const {
     return left > right;
   }
   this->CheckCommonOwner(other);
-  return this->theElT > other.theElT;
+  return this->element > other.element;
 }
 
 void AlgebraicNumber::AssignRational(const Rational& input, AlgebraicClosureRationals& inputOwner) {
   this->basisIndex = 0;
   this->owner = &inputOwner;
-  this->theElT.MaKeEi(0, input);
+  this->element.MaKeEi(0, input);
 }
 
 bool AlgebraicNumber::IsExpressedViaLatestBasis() const {
@@ -1092,7 +1087,7 @@ void AlgebraicNumber::ExpressViaLatestBasis() {
   if (this->basisIndex == this->owner->basisInjections.size - 1) {
     return;
   }
-  this->owner->GetAdditionTo(*this, this->theElT);
+  this->owner->GetAdditionTo(*this, this->element);
   this->basisIndex = this->owner->basisInjections.size - 1;
 }
 
@@ -1121,10 +1116,10 @@ bool AlgebraicNumber::EvaluatesToDouble(double* outputWhichDouble) const {
   }
   Selection currentRadicalSelection;
   double currentMultiplicand = 0;
-  for (int i = 0; i < this->theElT.size(); i ++) {
-    this->owner->GetRadicalSelectionFromIndex(this->theElT[i].theIndex, currentRadicalSelection);
+  for (int i = 0; i < this->element.size(); i ++) {
+    this->owner->GetRadicalSelectionFromIndex(this->element[i].theIndex, currentRadicalSelection);
     if (outputWhichDouble != nullptr) {
-      currentMultiplicand = this->theElT.coefficients[i].GetDoubleValue();
+      currentMultiplicand = this->element.coefficients[i].GetDoubleValue();
     }
     for (int j = 0; j < currentRadicalSelection.CardinalitySelection; j ++) {
       if (this->owner->theQuadraticRadicals[currentRadicalSelection.elements[j]] < 0) {
@@ -1217,8 +1212,8 @@ bool AlgebraicNumber::AssignRationalQuadraticRadical(
   }
   this->owner = &inputOwner;
   this->basisIndex = this->owner->basisInjections.size - 1;
-  this->theElT.MaKeEi(this->owner->GetIndexFromRadicalSelection(FactorSel));
-  this->theElT *= squareRootRationalPart;
+  this->element.MaKeEi(this->owner->GetIndexFromRadicalSelection(FactorSel));
+  this->element *= squareRootRationalPart;
   this->CheckConsistency();
   return true;
 }
@@ -1318,26 +1313,26 @@ bool AlgebraicNumber::IsRational(Rational* whichRational) const {
     }
     return true;
   }
-  for (int i = 0; i < this->theElT.size(); i ++) {
-    if (this->theElT[i].theIndex != 0) {
+  for (int i = 0; i < this->element.size(); i ++) {
+    if (this->element[i].theIndex != 0) {
       return false;
     } else if (whichRational != nullptr) {
-      *whichRational = this->theElT.coefficients[i];
+      *whichRational = this->element.coefficients[i];
     }
   }
   return true;
 }
 
 bool AlgebraicNumber::IsEqualToZero() const {
-  return this->theElT.IsEqualToZero();
+  return this->element.IsEqualToZero();
 }
 
 std::string AlgebraicNumber::ToString(FormatExpressions* theFormat) const {
   if (this->owner == nullptr) {
-    if (this->theElT.IsEqualToZero()) {
+    if (this->element.IsEqualToZero()) {
       return "0";
     }
-    return this->theElT.coefficients[0].ToString(theFormat);
+    return this->element.coefficients[0].ToString(theFormat);
   }
   std::stringstream out;
   FormatExpressions tempFormat;
@@ -1356,10 +1351,10 @@ std::string AlgebraicNumber::ToString(FormatExpressions* theFormat) const {
 
 std::string AlgebraicNumber::ToStringNonInjected(FormatExpressions* theFormat) const {
   if (this->owner == nullptr) {
-    if (this->theElT.IsEqualToZero()) {
+    if (this->element.IsEqualToZero()) {
       return "0";
     }
-    return this->theElT.coefficients[0].ToString(theFormat);
+    return this->element.coefficients[0].ToString(theFormat);
   }
   std::stringstream out;
   FormatExpressions tempFormat;
@@ -1374,7 +1369,7 @@ std::string AlgebraicNumber::ToStringNonInjected(FormatExpressions* theFormat) c
   if (theFormat != nullptr) {
     tempFormat.flagUseFrac = theFormat->flagUseFrac;
   }
-  out << this->theElT.ToString(&tempFormat); //<< "~ in~ the~ field~ " << this->owner->ToString();
+  out << this->element.ToString(&tempFormat); //<< "~ in~ the~ field~ " << this->owner->ToString();
   return out.str();
 }
 
@@ -1399,7 +1394,7 @@ bool AlgebraicNumber::operator==(const AlgebraicNumber& other) const {
   }
   this->CheckNonZeroOwner();
   if (this->basisIndex == other.basisIndex) {
-    return this->theElT == other.theElT;
+    return this->element == other.element;
   }
   VectorSparse<Rational> leftAdditive, rightAdditive;
   this->owner->GetAdditionTo(*this, leftAdditive);
@@ -1416,7 +1411,7 @@ void AlgebraicNumber::operator=(const Polynomial<AlgebraicNumber>& other) {
 
 void AlgebraicNumber::operator=(const Rational& other) {
   this->owner = nullptr;
-  this->theElT.MaKeEi(0, other);
+  this->element.MaKeEi(0, other);
   this->basisIndex = 0;
 }
 

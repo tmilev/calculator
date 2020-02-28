@@ -22,7 +22,7 @@ class AlgebraicNumber {
   public:
   AlgebraicClosureRationals* owner;
   int basisIndex;
-  VectorSparse<Rational> theElT;
+  VectorSparse<Rational> element;
   bool flagDeallocated;
   AlgebraicNumber(): owner(nullptr), basisIndex(0), flagDeallocated(false) {}
   AlgebraicNumber(const Rational& other): owner(nullptr), basisIndex(0), flagDeallocated(false) {
@@ -51,7 +51,7 @@ class AlgebraicNumber {
     return input.HashFunction();
   }
   LargeIntegerUnsigned GetNumerator() const {
-    return this->theElT.FindGCDCoefficientNumeratorsOverRationals().GetNumerator().value;
+    return this->element.FindGCDCoefficientNumeratorsOverRationals().GetNumerator().value;
   }
   LargeIntegerUnsigned GetDenominator() const {
     return this->GetDenominatorRationalPart().GetDenominator();
@@ -78,7 +78,7 @@ class AlgebraicNumber {
   void operator= (const AlgebraicNumber& other) {
     this->basisIndex = other.basisIndex;
     this->owner = other.owner;
-    this->theElT = other.theElT;
+    this->element = other.element;
   }
   void operator=(const Rational& other);
   void operator=(int other) {
@@ -138,7 +138,7 @@ class AlgebraicNumber {
     return !(*this == other);
   }
   void Minus() {
-    this->theElT *= - 1;
+    this->element *= - 1;
   }
   void operator= (const Polynomial<AlgebraicNumber>& other);
   AlgebraicNumber operator+(const AlgebraicNumber& other) const {

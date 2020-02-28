@@ -7018,6 +7018,15 @@ public:
     }
   }
   template <class otherType>
+  void AssignVectorsToColumns(const List<VectorSparse<otherType> >& inputVectors) {
+    this->MakeZero();
+    for (int i = 0; i < inputVectors.size; i ++) {
+      for (int j = 0; j < inputVectors[i].size(); j ++) {
+        this->AddMonomial(MonomialMatrix(inputVectors[i][j].theIndex, i), inputVectors[i].coefficients[j]);
+      }
+    }
+  }
+  template <class otherType>
   void AssignVectorsToRows(const List<VectorSparse<otherType> >& inputVectors) {
     this->MakeZero();
     for (int i = 0; i < inputVectors.size; i ++) {

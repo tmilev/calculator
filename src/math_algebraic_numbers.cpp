@@ -281,31 +281,37 @@ bool AlgebraicClosureRationals::ChooseGeneratingElement(
   return true;
 }
 
-void AlgebraicClosureRationals::ContractLastTwoBasesIfNeeded(
-  VectorSparse<Rational>* targetInCaseOfContraction,
-  VectorSparse<Rational>* imageTarget
+void AlgebraicClosureRationals::ContractBasesIfRedundant(
+  AlgebraicClosureRationals& previousCopy,
+  AlgebraicNumber* outputImageGenerator
 ) {
-  MacroRegisterFunctionWithName("AlgebraicClosureRationals::ContractLastTwoBasesIfNeeded");
-  if (this->basisInjections.size < 3) {
-    return;
-  }
+  MacroRegisterFunctionWithName("AlgebraicClosureRationals::ContractBasesIfRedundant");
+  global.Comments << "DBEUG: GOT TO HERE";
   if (
-    this->basisInjections[this->basisInjections.size - 3].size !=
-    this->basisInjections[this->basisInjections.size - 1].size
+    previousCopy.latestBasis.size != this->latestBasis.size ||
+    this->basisInjections.size < 3
   ) {
     return;
   }
-  // We have established that our current basis has the same size as the one two levels down.
-  // This means we first extended the field, found that the extension was reducible
-  // and reduced. Finally, the resulting reduced basis was of the exact same size as the original.
-  if (targetInCaseOfContraction != nullptr) {
-
+  if (outputImageGenerator == nullptr) {
+    *this = previousCopy;
+    return;
   }
+  this->GetAdditionTo(*outputImageGenerator, outputImageGenerator->theElT);
+  MatrixTensor<Rational> reverseMap;
+  global.Comments << "DBEUG: GOT TO HERE. Addition to: " << outputImageGenerator->theElT.ToString();
+
+  reverseMap.AssignVectorsToColumns(this->basisInjections[this->basisInjections.size - 3]);
+  global.Comments << "DBEUG: GOT TO HERE. reverse map: " << reverseMap.ToStringMatrixForm();
+  reverseMap.Invert();
+  global.Comments << "DBEUG: GOT TO HERE pt 2. reverse map: " << reverseMap.ToStringMatrixForm();
+  reverseMap.ActOnVectorColumn(outputImageGenerator->theElT);
+  global.Comments << "DBEUG: GOT TO HERE pt 3. reverse map: " << reverseMap.ToStringMatrixForm();
+  outputImageGenerator->basisIndex = this->basisInjections.size - 3;
+  *this = previousCopy;
 }
 
 bool AlgebraicClosureRationals::ReduceMe(
-  VectorSparse<Rational>* targetInCaseOfContraction,
-  VectorSparse<Rational>* imageTarget,
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("AlgebraicClosureRationals::ReduceMe");
@@ -374,7 +380,7 @@ bool AlgebraicClosureRationals::ReduceMe(
     coefficientLastColumn /= leadingCoefficient;
     generatorProjected.AddMonomial(termInLastColumn, coefficientLastColumn);
     if (coefficientLastColumn != 0 && generatorProjected.IsEqualToZero()) {
-      global.fatal << " zero generator shouldnt happen. "<< global.fatal;
+      global.fatal << "We shouldn't have zero generator. " << global.fatal;
     }
   }
   newBasis.SetSize(smallestFactorDegree);
@@ -391,7 +397,6 @@ bool AlgebraicClosureRationals::ReduceMe(
   this->InjectOldBases(&injection);
   this->AppendAdditiveEiBasis();
   this->AssignDefaultBasisDisplayNames();
-  this->ContractLastTwoBasesIfNeeded(targetInCaseOfContraction, imageTarget);
   if (!this->ChooseGeneratingElement(1000, commentsOnFailure)) {
     return false;
   }
@@ -840,6 +845,10 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(
   outputRoot.theElT.MaKeEi(startingDimension);
   outputRoot.basisIndex = this->basisInjections.size - 1;
   this->flagIsQuadraticRadicalExtensionRationals = false;
+  if (!this->ReduceMe(commentsOnFailure)) {
+    *this = backUpCopy;
+    return false;
+  }
   // Suppose the minimal polynomial we are adjoining is
   // a_0 x^n + a_1 x^{n-1} + ...
   // If, after reduction, the field is contracted to the original,
@@ -848,11 +857,10 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(
   // case, we may declare the base field root of that polynomial to be
   // the solution of our polynomial and so we want to know the image of
   // x as that will give us the solution in question.
-  VectorSparse<Rational> generator, imageGenerator;
-  if (!this->ReduceMe(&generator, &imageGenerator, commentsOnFailure)) {
-    *this = backUpCopy;
-    return false;
-  }
+  this->ContractBasesIfRedundant(backUpCopy, &outputRoot);
+  global.Comments << "DEBUG: And the output root is: " << outputRoot.ToString();
+
+
   // Sanity check code here:
   PolynomialSubstitution<AlgebraicNumber> theSub;
   theSub.SetSize(1);

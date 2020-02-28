@@ -219,14 +219,10 @@ public:
   }
   bool MergeRadicals(const List<LargeInteger>& theRadicals);
   bool ChooseGeneratingElement(int attemptsLimitZeroForNone, std::stringstream* commentsOnFailure);
-  bool ReduceMe(
-    VectorSparse<Rational>* targetInCaseOfContraction,
-    VectorSparse<Rational>* imageTarget,
-    std::stringstream* commentsOnFailure
-  );
-  void ContractLastTwoBasesIfNeeded(
-    VectorSparse<Rational>* targetInCaseOfContraction,
-    VectorSparse<Rational>* imageTarget
+  bool ReduceMe(std::stringstream* commentsOnFailure);
+  void ContractBasesIfRedundant(
+    AlgebraicClosureRationals& previousCopy,
+    AlgebraicNumber* outputImageGenerator
   );
   void ComputeDisplayStringsFromRadicals();
   bool GetRadicalSelectionFromIndex(int inputIndex, Selection& theSel);

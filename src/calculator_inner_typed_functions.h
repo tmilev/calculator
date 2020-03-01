@@ -97,6 +97,7 @@ public:
   static bool innerPowerPolyBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerAlgNumPolyBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerAlgebraicNumberBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerRadicalAlgebraicNumberPositiveDefault(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerEWABySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerElementUEbyRatOrPolyOrRF(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerDoubleOrRatToDoubleOrRat(Calculator& theCommands, const Expression& input, Expression& output);

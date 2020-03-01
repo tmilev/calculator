@@ -333,7 +333,8 @@ public:
   static void MakeStdCoutReport(const std::string& input);
   static void MakeReportIndicatorFile(const std::string& input);
   static std::string ToHtmlTable(
-    List<std::string>& labels, List<List<std::string> >& content,
+    List<std::string>& labels,
+    List<List<std::string> >& content,
     bool nestTables
   );
   static std::string ToHtmlTableRowsFromStringContainingJSON(

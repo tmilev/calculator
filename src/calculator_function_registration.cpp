@@ -498,8 +498,9 @@ void Calculator::initPredefinedInnerFunctions() {
     "PlotExpressionTree",
     CalculatorFunctions::innerDrawExpressionGraph,
     "",
-    "Draws the internal tree structure of an expression. Does not unfold built-in types.",
-    "PlotExpressionTree( e^x)",
+    "Draws the internal tree structure of an expression. "
+    "Does not unfold built-in types.",
+    "PlotExpressionTree(e^x)",
     "CalculatorFunctions::innerDrawExpressionGraph",
     "PlotExpressionTree",
     innerStandard
@@ -541,7 +542,9 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctions::innerDrawExpressionGraphFull,
     "",
     "Draws the internal tree structure of an expression. Unfolds built-in types. ",
-    "PlotExpressionTreeFull( 1); PlotExpressionTree(1+ 1);PlotExpressionTree( Freeze{}(1 + 1));",
+    "PlotExpressionTreeFull(1);\n"
+    "PlotExpressionTree(1 + 1);\n"
+    "PlotExpressionTree(Freeze{}(1 + 1));",
     "CalculatorFunctions::innerDrawExpressionGraphFull",
     "PlotExpressionTreeFull",
     innerStandard
@@ -563,8 +566,8 @@ void Calculator::initPredefinedInnerFunctions() {
     Calculator::innerFlattenCommandEnclosuresOneLayeR,
     "",
     "Flattens command enclosures. ",
-    "FlattenCommandEnclosuresOneLayer(CommandEnclosure{}(x =5; x); "
-    "CommandEnclosure{}(y; x)  ) ",
+    "FlattenCommandEnclosuresOneLayer(CommandEnclosure{}(x = 5; x); "
+    "CommandEnclosure{}(y; x))",
     "Calculator::innerFlattenCommandEnclosuresOneLayeR",
     "FlattenCommandEnclosuresOneLayer",
     innerStandard
@@ -7294,6 +7297,19 @@ void Calculator::initPredefinedStandardOperations() {
     "c = 33/4;\n"
     "x = (-b+\\sqrt{}(b^2-4a c))/(2a);\n"
     "B= c+a x^{2}+b x;",
+    "CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger",
+    "PowerAlgebraicNumberBySmallInteger",
+    innerStandard
+  );
+  this->AddOperationBinaryInnerHandlerWithTypes(
+    "^",
+    CalculatorFunctionsBinaryOps::innerRadicalAlgebraicNumberPositiveDefault,
+    this->opAlgNumber(),
+    this->opRational(),
+    "Takes the radical of an algebraic number, if the algebraic number is a positive number"
+    "that whose radical lies in the underlying algebraic closure.",
+    "\\sqrt{3+2\\sqrt[2]{2}};\n"
+    "(7-5\\sqrt{2})^{7/3}",
     "CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger",
     "PowerAlgebraicNumberBySmallInteger",
     innerStandard

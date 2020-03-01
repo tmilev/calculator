@@ -106,7 +106,7 @@ class AlgebraicNumber {
   void AssignRational(const Rational& input, AlgebraicClosureRationals& inputOwner);
   Rational GetDenominatorRationalPart() const;
   Rational GetNumeratorRationalPart() const;
-  void SqrtMeDefault();
+  void SqrtMeDefault(std::stringstream* commentsOnError);
   bool IsSmallInteger(int* whichInteger) const {
     Rational theRat;
     if (!this->IsRational(&theRat)) {
@@ -121,7 +121,7 @@ class AlgebraicNumber {
     }
     return theRat.IsInteger(whichInteger);
   }
-  void RadicalMeDefault(int theRad);
+  bool RadicalMeDefault(int radical, std::stringstream* commentsOnError);
   void Invert();
   bool EvaluatesToDouble(double* outputWhichDouble) const;
   void operator/=(const AlgebraicNumber& other);
@@ -236,7 +236,7 @@ public:
   void ConvertPolyDependingOneVariableToPolyDependingOnFirstVariableNoFail(
     const Polynomial<AlgebraicNumber>& input, Polynomial<AlgebraicNumber>& output
   );
-  bool AdjoinRootMinPoly(
+  bool AdjoinRootMinimalPolynomial(
     const Polynomial<AlgebraicNumber>& thePoly,
     AlgebraicNumber& outputRoot,
     std::stringstream* commentsOnFailure
@@ -255,6 +255,9 @@ public:
     List<Polynomial<AlgebraicNumber> >& outputDenominators,
     std::stringstream* reportStream = nullptr
   );
+  AlgebraicNumber One();
+  AlgebraicNumber Zero();
+  AlgebraicNumber fromRational(const Rational& input);
 };
 
 class ElementZmodP {
@@ -311,7 +314,7 @@ public:
   void operator=(const Rational& other);
   bool operator/=(const ElementZmodP& den);
   bool operator/=(const LargeInteger& den);
-  void ScaleToIntegralMinHeightAndGetPoly(
+  void ScaleToIntegralMinimalHeightAndGetPoly(
     const Polynomial<Rational>& input,
     Polynomial<ElementZmodP>& output,
     const LargeIntegerUnsigned& newModulo

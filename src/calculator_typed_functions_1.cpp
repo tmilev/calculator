@@ -1037,6 +1037,70 @@ bool CalculatorFunctionsBinaryOps::innerPowerAlgNumPolyBySmallInteger(
   return output.AssignValueWithContext(base, input[1].GetContext(), theCommands);
 }
 
+bool CalculatorFunctionsBinaryOps::innerRadicalAlgebraicNumberPositiveDefault(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerRadicalAlgebraicNumberPositiveDefault");
+  theCommands.CheckInputNotSameAsOutput(input, output);
+  if (!input.IsListNElements(3)) {
+    return false;
+  }
+  AlgebraicNumber base;
+  if (!input[1].IsOfType(&base)) {
+    return false;
+  }
+  if (base.IsRational()) {
+    // We let other rules handle the case of a rational argument.
+    return false;
+  }
+  Rational power;
+  if (!input[2].IsOfType(&power)) {
+    // exponent is not rational.
+    return false;
+  }
+  LargeInteger radicalLarge = power.GetDenominator();
+  LargeInteger powerIntegral = power.GetNumerator();
+  int radical = 0;
+  int powerSmallInteger = 0;
+  if (
+    !radicalLarge.IsIntegerFittingInInt(&radical) ||
+    !powerIntegral.IsIntegerFittingInInt(&powerSmallInteger)
+  ) {
+    // radical is too large.
+    return false;
+  }
+  if (radical <= 1) {
+    // not really a radical
+    return false;
+  }
+  int maximumRadicalAllowed = 6;
+  if (radical > maximumRadicalAllowed) {
+    // max 6th radical allowed.
+    theCommands << "Not attempting to reduce radical: larger than maximum of "
+    << maximumRadicalAllowed << ". ";
+    return false;
+  }
+  if (powerIntegral > LargeIntegerUnsigned::SquareRootOfCarryOverBound) {
+    // power too large
+    return false;
+  }
+  AlgebraicClosureRationals fieldCopy;
+  fieldCopy = theCommands.theObjectContainer.theAlgebraicClosure;
+  AlgebraicNumber baseCopy;
+  baseCopy = base;
+  baseCopy.owner = &fieldCopy;
+  if (!baseCopy.RadicalMeDefault(radical, &theCommands.Comments)) {
+    return false;
+  }
+  if (fieldCopy.basisInjections.size != theCommands.theObjectContainer.theAlgebraicClosure.basisInjections.size) {
+    // the radical does not below to the base field;
+    return false;
+  }
+  baseCopy.owner = &theCommands.theObjectContainer.theAlgebraicClosure;
+  MathRoutines::RaiseToPower(baseCopy, powerIntegral, baseCopy.owner->One());
+  return output.AssignValue(baseCopy, theCommands);
+}
+
 bool CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {

@@ -647,7 +647,9 @@ bool AlgebraicNumber::ConstructFromMinPoly(
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("AlgebraicNumber::ConstructFromMinPoly");
-  return inputOwner.AdjoinRootMinPoly(thePoly, *this, commentsOnFailure);
+  return inputOwner.AdjoinRootMinimalPolynomial(
+    thePoly, *this, commentsOnFailure
+  );
 }
 
 void AlgebraicClosureRationals::reset() {
@@ -735,13 +737,15 @@ void AlgebraicClosureRationals::ConvertPolyDependingOneVariableToPolyDependingOn
   output.Substitution(theSub);
 }
 
-bool AlgebraicClosureRationals::AdjoinRootMinPoly(
+bool AlgebraicClosureRationals::AdjoinRootMinimalPolynomial(
   const Polynomial<AlgebraicNumber>& thePoly,
   AlgebraicNumber& outputRoot,
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("AlgebraicClosureRationals::AdjoinRootMinPoly");
-  if (this->AdjoinRootQuadraticPolyToQuadraticRadicalExtension(thePoly, outputRoot, commentsOnFailure)) {
+  if (this->AdjoinRootQuadraticPolyToQuadraticRadicalExtension(
+    thePoly, outputRoot, commentsOnFailure
+  )) {
     return true;
   }
   Polynomial<AlgebraicNumber> minPoly;
@@ -853,7 +857,7 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(
   // the solution of our polynomial and so we want to know the image of
   // x as that will give us the solution in question.
   this->ContractBasesIfRedundant(backUpCopy, &outputRoot);
-  global.Comments << "DEBUG: And the output root is: " << outputRoot.ToString();
+  // global.Comments << "DEBUG: And the output root is: " << outputRoot.ToString();
 
 
   // Sanity check code here:
@@ -1054,8 +1058,8 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other) {
   leftMat.ActOnVectorColumn(this->element);
 }
 
-void AlgebraicNumber::SqrtMeDefault() {
-  this->RadicalMeDefault(2);
+void AlgebraicNumber::SqrtMeDefault(std::stringstream* commentsOnError) {
+  this->RadicalMeDefault(2, commentsOnError);
 }
 
 bool AlgebraicNumber::operator>(const AlgebraicNumber& other) const {
@@ -1218,22 +1222,39 @@ bool AlgebraicNumber::AssignRationalQuadraticRadical(
   return true;
 }
 
-void AlgebraicNumber::RadicalMeDefault(int theRad) {
-  (void) theRad;
-  global.fatal << "Not implemented yet!" << global.fatal;
-/*  MatrixTensor<Rational> theRadicalOp;
-  theRadicalOp.MakeZero();
-  MonomialTensor tempM;
-  for (int i = 0; i < this->GetMinPoly().size; i ++) {
-    tempM= this->GetMinPoly()[i];
-    tempM.ExponentMeBy(theRad);
-    newMinPoly.AddMonomial(tempM, this->GetMinPoly().theCoeffs[i]);
+bool AlgebraicNumber::RadicalMeDefault(
+  int radical, std::stringstream* commentsOnError
+) {
+  MacroRegisterFunctionWithName("AlgebraicNumber::RadicalMeDefault");
+  if (this->owner == 0) {
+    if (commentsOnError != nullptr) {
+      *commentsOnError << "Failed to extract radical: algebraic closure is missing. ";
+    }
+    return false;
   }
-  this->rootIndex = 0;
-  this->minPolyIndex = this->theRegistry->theMinPolys.AddNoRepetitionOrReturnIndexFirst(newMinPoly);*/
+  AlgebraicNumber result, one, minusOne;
+  one.AssignRational(1, *this->owner);
+  minusOne.AssignRational(- 1, *this->owner);
+  Polynomial<AlgebraicNumber> thePolynomial;
+  thePolynomial.AddConstant(*this * minusOne);
+  MonomialP leadingMonomial;
+  leadingMonomial.MakeEi(0, radical);
+  thePolynomial.AddMonomial(leadingMonomial, one);
+  if (!this->owner->AdjoinRootMinimalPolynomial(
+    thePolynomial, result, commentsOnError
+  )) {
+    if (commentsOnError != nullptr) {
+      *commentsOnError << "Failed to extend algebraic closure field. ";
+    }
+    return false;
+  }
+  *this = result;
+  return true;
 }
 
-std::string AlgebraicClosureRationals::ToStringQuadraticRadical(FormatExpressions *theFormat) const {
+std::string AlgebraicClosureRationals::ToStringQuadraticRadical(
+  FormatExpressions *theFormat
+) const {
   (void) theFormat;
   std::stringstream out;
   out << "\\mathbb Q[";
@@ -1289,8 +1310,18 @@ std::string AlgebraicClosureRationals::ToStringFull(FormatExpressions* theFormat
   return out.str();
 }
 
+AlgebraicNumber AlgebraicClosureRationals::One() {
+  return this->fromRational(1);
+}
+
+AlgebraicNumber AlgebraicClosureRationals::fromRational(const Rational& input) {
+  AlgebraicNumber result(input);
+  result.owner = this;
+  return result;
+}
+
 std::string AlgebraicClosureRationals::ToString(FormatExpressions* theFormat) const {
-  MacroRegisterFunctionWithName("AlgebraicClosureRationals::ToStringQuadraticRadical");
+  MacroRegisterFunctionWithName("AlgebraicClosureRationals::ToString");
   (void) theFormat;
   std::stringstream out;
   FormatExpressions tempFormat;
@@ -1460,8 +1491,10 @@ void ElementZmodP::operator=(const LargeInteger& other) {
   }
 }
 
-void ElementZmodP::ScaleToIntegralMinHeightAndGetPoly(
-  const Polynomial<Rational>& input, Polynomial<ElementZmodP>& output, const LargeIntegerUnsigned& newModulo
+void ElementZmodP::ScaleToIntegralMinimalHeightAndGetPoly(
+  const Polynomial<Rational>& input,
+  Polynomial<ElementZmodP>& output,
+  const LargeIntegerUnsigned& newModulo
 ) {
   Polynomial<Rational> rescaled;
   rescaled = input;
@@ -1502,7 +1535,8 @@ void ElementZmodP::CheckEqualModuli(const ElementZmodP& other) {
   if (this->theModulus != other.theModulus) {
     global.fatal << "This is a programming error: attempting to make an operation "
     << "with two elemetns of Z mod P with different moduli, "
-    << this->theModulus.ToString() << " and " << other.theModulus.ToString() << ". " << global.fatal;
+    << this->theModulus.ToString() << " and "
+    << other.theModulus.ToString() << ". " << global.fatal;
   }
 }
 

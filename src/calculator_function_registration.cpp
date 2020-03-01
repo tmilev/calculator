@@ -977,12 +977,13 @@ void Calculator::initPredefinedInnerFunctions() {
     "x = LogarithmBaseNCeiling(2, 100! + 1);\n"
     "2^x - (100!+1);\n"
     "2^{x+1} - (100!+1);\n"
-    "y=LogarithmBaseNCeiling(10, 1000! + 1);\n"
-    "10^y - 1000! - 1; 10^{y+1} - 1000! - 1;\n"
-    "DoubleValue(log_2(1000!+1)) + 1;\n"
+    "y = LogarithmBaseNCeiling(10, 1000! + 1);\n"
+    "10^y - 1000! - 1;\n"
+    "10^{y + 1} - 1000! - 1;\n"
+    "DoubleValue(log_2(1000! + 1)) + 1;\n"
     "LogarithmBaseNCeiling(2, 1);\n"
-    "LogarithmBaseNCeiling(-2, 1);\n"
-    "LogarithmBaseNCeiling(2, -1);\n",
+    "LogarithmBaseNCeiling(- 2, 1);\n"
+    "LogarithmBaseNCeiling(2, - 1);\n",
     "CalculatorFunctions::innerLogarithmBaseNCeiling",
     "LogarithmBaseNCeiling",
     innerStandard
@@ -1136,7 +1137,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "",
     "Tests the JSON parsing mechanism. Input: json string, use backslash escapes for "
     "backslashes and quotes.",
-    "TestJSON(\"{a:1}\"); TestJSON(\"{\\\"a\\\":\\\"\\\\\\\"\\\"}\");",
+    "TestJSON(\"{a:1}\");\n"
+    "TestJSON(\"{\\\"a\\\":\\\"\\\\\\\"\\\"}\");",
     "CalculatorFunctions::innerTestJSON",
     "TestJSON",
     innerStandard
@@ -1247,7 +1249,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Third argument = starting random seed. "
     "To test a particular problem, set the index of the "
     "first problem to that of your problem, and set the "
-    "number of problems to test to 1. To find out the index"
+    "number of problems to test to 1. To find out the index "
     "of your problem, run the entire test array once and "
     "the index of each problem file will be listed in the output. "
     "Until first error is seen, every test will be run a number of times, "
@@ -1273,8 +1275,8 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctionsWeylGroup::innerRepresentElementHyperOctahedral,
     "",
     "Represents element of hyperoctahedral into a representation. ",
-    "V= HyperOctahedralRepresentation((1,1),1);\n"
-    "s = MakeElementHyperOctahedral{}((1,2),1,0,0);\n"
+    "V = HyperOctahedralRepresentation((1, 1), 1);\n"
+    "s = MakeElementHyperOctahedral{}((1, 2), 1, 0, 0);\n"
     "RepresentElementHyperoctahedral(s, V)",
     "CalculatorFunctionsWeylGroup::innerRepresentElementHyperOctahedral",
     "RepresentElementHyperoctahedral",
@@ -1295,7 +1297,7 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctionsWeylGroup::innerSpechtModule,
     "",
     "Gets the Specht module of the partition. ",
-    "SpechtModule((3,2,1))",
+    "SpechtModule((3, 2, 1))",
     "CalculatorFunctionsWeylGroup::innerSpechtModule",
     "SpechtModule",
     innerAdminNoTest
@@ -1305,7 +1307,7 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation,
     "",
     "Gets one hyperoctahedral representation from two partitions. ",
-    "HyperOctahedralRepresentation((1,1), (1))",
+    "HyperOctahedralRepresentation((1, 1), (1))",
     "CalculatorFunctionsWeylGroup::innerHyperOctahedralAllModulesInducedFromSpechtModules",
     "HyperOctahedralRepresentation",
     innerAdminNoTest
@@ -1359,7 +1361,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "Extracts a sub-list that contains all elements that satisfy a "
     "condition given by the second argument. Use the bound "
     "variable syntax {{a}} to address the current element of the list.",
-    "SubList{}((1,2,3,4), {{a}}>2)",
+    "SubList{}((1, 2, 3, 4), {{a}} > 2)",
     "CalculatorFunctions::innerSubList",
     "SubList",
     innerStandard
@@ -1369,9 +1371,9 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctions::innerApplyToList,
     "",
     "Applies a transformation to each element of a list. ",
-    "SolveForX{}{{a}}=SolveFor(x,{{a}});\n"
-    "SolveForX(x^2+2);\n"
-    "ApplyToList(SolveForX,(x^2+ 1,x^2-x-2))",
+    "SolveForX{}{{a}} = SolveFor(x, {{a}});\n"
+    "SolveForX(x^2 + 2);\n"
+    "ApplyToList(SolveForX,(x^2 + 1, x^2 - x - 2))",
     "CalculatorFunctions::innerApplyToList",
     "ApplyToList",
     innerStandard
@@ -1421,15 +1423,15 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorConversions::innerExpressionFromBuiltInTypE,
     "",
     "Creates expression from built-in polynomial. ",
-    "MakeExpression(Polynomial{}((x-2y+z- 1)^2(x +y-z)));\n"
-    "A = \\frac{64 x^{2} y x y+ 16 x y- y}{-32 x^{2} y x^{2}-8 x^{2}+x};"
-    "B = MakeRationalFunction(A);"
-    "C = MakeExpression B;"
+    "MakeExpression(Polynomial{}((x - 2y + z - 1)^2(x + y - z)));\n"
+    "A = \\frac{64 x^{2} y x y + 16 x y - y}{- 32 x^{2} y x^{2} - 8 x^{2} + x};\n"
+    "B = MakeRationalFunction(A);\n"
+    "C = MakeExpression B;\n"
     "D = MakeRationalFunction {}("
-    "\\frac{-2x^{3}y^{2}-\\frac{x y }{2}+\\frac{y }{32}}{x^{4}y +\\frac{x^{2}}{4}-\\frac{x }{32}}"
+    "\\frac{- 2x^{3}y^{2} - \\frac{x y}{2} + \\frac{y }{32}}{x^{4}y + \\frac{x^{2}}{4} - \\frac{x}{32}}"
     ");\n"
-    "MakeExpression {}D-C;\n"
-    "D-B;",
+    "MakeExpression {}D - C;\n"
+    "D - B;",
     "CalculatorConversions::innerExpressionFromBuiltInTypE",
     "MakeExpression",
     innerStandard
@@ -1450,7 +1452,7 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorConversions::innerPolynomiaL<AlgebraicNumber>,
     "",
     "Creates a polynomial expression with algebraic number coefficients. ",
-    "PolynomialAlgebraicNumbers{}((x +\\sqrt{2})^2 (\\sqrt{3}x-\\sqrt{5}));",
+    "PolynomialAlgebraicNumbers{}((x + \\sqrt{2})^2 (\\sqrt{3}x - \\sqrt{5}));",
     "CalculatorConversions::innerPolynomiaL",
     "PolynomialAlgebraicNumbers",
     innerStandard
@@ -1466,7 +1468,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "B = ConvertAlgebraicNumberToMatrix(b);\n"
     "c = \\sqrt{6};\n"
     "C = ConvertAlgebraicNumberToMatrix(c);\n"
-    "A\\otimes B",
+    "A \\otimes B",
     "CalculatorFunctions::innerConvertAlgebraicNumberToMatrix",
     "ConvertAlgebraicNumberToMatrix",
     innerStandard
@@ -1476,11 +1478,11 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctions::innerPrintAlgebraicClosureStatus,
     "",
     "Prints in human-redable form the state of the ambient algebraic closure. ",
-    "AlgebraicNumberFromPolynomial(x^2-6);\n"
+    "AlgebraicNumberFromPolynomial(x^2 - 6);\n"
     "PrintAlgebraicClosureStatus 0;\n"
-    "AlgebraicNumberFromPolynomial(x^2-2);\n"
+    "AlgebraicNumberFromPolynomial(x^2 - 2);\n"
     "PrintAlgebraicClosureStatus 0;\n"
-    "AlgebraicNumberFromPolynomial(x^2-3);\n"
+    "AlgebraicNumberFromPolynomial(x^2 - 3);\n"
     "PrintAlgebraicClosureStatus 0;\n",
     "CalculatorFunctions::innerPrintAlgebraicClosureStatus",
     "PrintAlgebraicClosureStatus",
@@ -1492,9 +1494,9 @@ void Calculator::initPredefinedInnerFunctions() {
     "",
     "Creates an algebraic number that is a root of a polynomial with algebraic number coefficients. ",
     "AlgebraicNumberFromPolynomial{}(x^2 - 4);\n"
-    "AlgebraicNumberFromPolynomial{}(x^2 - (3+2sqrt(2)));\n"
-    "AlgebraicNumberFromPolynomial{}(x^3 - (7+5sqrt(2)));\n"
-    "AlgebraicNumberFromPolynomial{}(x^3+\\sqrt{2}x + 1);\n",
+    "AlgebraicNumberFromPolynomial{}(x^2 - (3 + 2sqrt(2)));\n"
+    "AlgebraicNumberFromPolynomial{}(x^3 - (7 + 5sqrt(2)));\n"
+    "AlgebraicNumberFromPolynomial{}(x^3 + \\sqrt{2}x + 1);\n",
     "CalculatorFunctions::innerGetAlgebraicNumberFromMinPoly",
     "AlgebraicNumberFromPolynomial",
     innerStandard
@@ -1504,7 +1506,7 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctions::innerGetPrincipalSl2Index,
     "",
     "Gives the symmetric Cartan corresponding to a given dynkin type.",
-    "PrincipalSlTwoIndex(G_2^3+D_4^2);",
+    "PrincipalSlTwoIndex(G_2^3 + D_4^2);",
     "CalculatorFunctions::innerGetPrincipalSl2Index",
     "PrincipalSlTwoIndex",
     innerStandard
@@ -1552,11 +1554,11 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctions::innerIsDifferentialOneFormOneVariable,
     "",
     "Tests whether the expression is a differential form in one variable.  ",
-    "IsDifferentialOneFormOneVariable(Differential x );\n"
-    "IsDifferentialOneFormOneVariable({\\text{d}} x );\n"
-    "IsDifferentialOneFormOneVariable(x {\\text{d}} y );\n"
-    "IsDifferentialOneFormOneVariable(\\frac{\\text{d} y}{y} );\n"
-    "IsDifferentialOneFormOneVariable(1/(\\text{d} y) );",
+    "IsDifferentialOneFormOneVariable(Differential x);\n"
+    "IsDifferentialOneFormOneVariable({\\text{d}} x);\n"
+    "IsDifferentialOneFormOneVariable(x {\\text{d}} y);\n"
+    "IsDifferentialOneFormOneVariable(\\frac{\\text{d} y}{y});\n"
+    "IsDifferentialOneFormOneVariable(1/(\\text{d} y));",
     "CalculatorFunctions::innerIsDifferentialOneFormOneVariable",
     "IsDifferentialOneFormOneVariable",
     innerStandard
@@ -1566,10 +1568,10 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctions::outerPolynomializE,
     "",
     "Polynomialize(a) is equivalent to MakeExpression(Polynomial(a)).",
-    "C = (c a + a b +b c + 1 )^3;\n"
+    "C = (c a + a b + b c + 1)^3;\n"
     "A = Polynomialize(C); "
-    "B=MakeExpression(Polynomial(C)); "
-    "A-B",
+    "B = MakeExpression(Polynomial(C)); "
+    "A - B",
     "CalculatorFunctions::outerPolynomializE",
     "Polynomialize",
     innerStandard
@@ -1580,9 +1582,9 @@ void Calculator::initPredefinedInnerFunctions() {
     "",
     "Tests whether the expression is an algebraic expression "
     "obtained using radicals and the four arithmetic operations.  ",
-    "IsAlgebraicRadical(\\sqrt{5+\\sqrt{2}}); "
+    "IsAlgebraicRadical(\\sqrt{5 + \\sqrt{2}}); "
     "IsAlgebraicRadical(\\sqrt{x}); "
-    "IsAlgebraicRadical(\\sqrt{\\pi +e + 1})",
+    "IsAlgebraicRadical(\\sqrt{\\pi + e + 1})",
     "CalculatorFunctions::innerIsAlgebraicRadical",
     "IsAlgebraicRadical",
     innerStandard
@@ -1592,8 +1594,8 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctions::innerIsReal,
     "",
     "Tests whether the expression is a real constant.  ",
-    "IsReal(\\sqrt{5+\\sqrt{- 1}}); IsReal(\\sqrt{\\sqrt{5}- 1});\n"
-    "IsReal(sqrt(\\sqrt{\\pi}-2) )",
+    "IsReal(\\sqrt{5 + \\sqrt{- 1}}); IsReal(\\sqrt{\\sqrt{5} - 1});\n"
+    "IsReal(sqrt(\\sqrt{\\pi} - 2) )",
     "CalculatorFunctions::innerIsReal",
     "IsReal",
     innerStandard
@@ -1604,7 +1606,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "",
     "Tests whether the expression is a constant.  ",
     "IsConstant(\\pi^2); IsConstant(1);IsConstant(x);\n"
-    "IsConstant(e^{\\sin(\\pi^2+e +\\sqrt{2}+3)}  ); ",
+    "IsConstant(e^{\\sin(\\pi^2 + e +\\sqrt{2} + 3)}); ",
     "CalculatorFunctions::innerIsConstant",
     "IsConstant",
     innerStandard
@@ -1624,7 +1626,7 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctions::innerIntegratePowerByUncoveringParenthesisFirst,
     "",
     "Attempts to rearrange into standard polynomial form and then integrate.  ",
-    "\\int  \\left( \\frac{x(x + 1) }{ 2} \\right)^2 dx ",
+    "\\int \\left( \\frac{x(x + 1)}{2} \\right)^2 dx ",
     "CalculatorFunctions::innerIntegratePowerByUncoveringParenthesisFirst",
     "IntegrateAfterPolynomialization",
     innerStandard
@@ -1694,7 +1696,8 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctions::innerEulerFlaAsALaw,
     "",
     "Trigonometrizes an exponential expression using Euler's formula.  ",
-    "TurnOnRules(\"EulerFormula\"); e^{i x}",
+    "TurnOnRules(\"EulerFormula\");\n"
+    "e^{i x}",
     "CalculatorFunctions::innerEulerFlaAsALaw",
     "EulerFormula",
     innerStandardOffByDefault
@@ -1716,9 +1719,13 @@ void Calculator::initPredefinedInnerFunctions() {
     "",
     "Implementation of sum-to-product trig rules. ",
     "TurnOnRules(\"TrigSumToTrigProduct\");\n"
-    "sin(a) +sin(b); sin(b)-sin(a);\n"
-    "-sin(b) +sin(a); -sin(b)-sin(a);\n"
-    "cos(a) +cos(b); cos(a)-cos(b); -cos(a)-cos(b)",
+    "sin(a) + sin(b);\n"
+    "sin(b) - sin(a);\n"
+    "- sin(b) + sin(a);\n"
+    "- sin(b) - sin(a);\n"
+    "cos(a) + cos(b);\n"
+    "cos(a) - cos(b);\n"
+    "- cos(a) - cos(b)",
     "CalculatorFunctions::innerTrigSumToTrigProduct",
     "TrigSumToTrigProduct",
     innerStandardOffByDefault
@@ -1737,8 +1744,9 @@ void Calculator::initPredefinedInnerFunctions() {
     "\\cos",
     CalculatorFunctions::innerCosineOfAngleSumToTrig,
     "",
-    "Implementation of cos (a +b)= cos(a)cos(b)-sin(a)sin(b).",
-    "TurnOnRules(\"CosineOfAngleSum\"); \\cos(a +b)",
+    "Implementation of cos (a + b) = cos(a)cos(b) - sin(a)sin(b).",
+    "TurnOnRules(\"CosineOfAngleSum\");\n"
+    "\\cos(a + b)",
     "CalculatorFunctions::innerCosineOfAngleSumToTrig",
     "CosineOfAngleSum",
     innerStandardOffByDefault
@@ -1747,7 +1755,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "\\sin",
     CalculatorFunctions::innerConvertSinToExponent,
     "",
-    "Converts sine to exponent by sin(x) = (e^{i x}-e^{-i x}) / (2i) ",
+    "Converts sine to exponent by sin(x) = (e^{i x} - e^{- i x}) / (2 i) ",
     "TurnOnRules(\"ExpressSinViaExponent\", \"ExpressCosViaExponent\");\n"
     "\\sin x;\n"
     "cos x",
@@ -1759,7 +1767,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "\\cos",
     CalculatorFunctions::innerConvertCosToExponent,
     "",
-    "Converts cosine to exponent by cos(x) = (e^{i x}+e^{-i x})/(2) ",
+    "Converts cosine to exponent by cos(x) = (e^{i x} + e^{- i x}) / 2 ",
     "TurnOnRules(\"ExpressSinViaExponent\", \"ExpressCosViaExponent\");\n"
     "\\sin x;\n"
     "cos x",
@@ -1772,7 +1780,8 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctions::innerExploitCosEvenness,
     "",
     "If a is negative, converts cos (a) to cos(- a).",
-    "TurnOnRules(\"ExploitCosEvenness\"); cos(-5x)",
+    "TurnOnRules(\"ExploitCosEvenness\");\n"
+    "cos(- 5x)",
     "CalculatorFunctions::innerExploitCosEvenness",
     "ExploitCosEvenness",
     innerStandardOffByDefault
@@ -1782,7 +1791,8 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctions::innerExploitSinOddness,
     "",
     "If a is negative, converts sin (a) to -sin(-a).",
-    "TurnOnRules(\"ExploitSinOddness\"); sin(-5x)",
+    "TurnOnRules(\"ExploitSinOddness\");\n"
+    "sin(- 5x)",
     "CalculatorFunctions::innerExploitSinOddness",
     "ExploitSinOddness",
     innerStandardOffByDefault
@@ -1801,8 +1811,9 @@ void Calculator::initPredefinedInnerFunctions() {
     "\\int",
     CalculatorFunctions::innerIntegrateTanPowerNSecPowerM,
     "",
-    "Transforms an integral of the form \\int \\tan^n x \\sec^m x.  ",
-    "TurnOffRules(\"ExpressTanViaSineCosine\", \"ExpressSecViaCosine\"); \\int \\tan^2 x \\sec^{2}x dx ",
+    "Transforms an integral of the form \\int \\tan^n x \\sec^m x.",
+    "TurnOffRules(\"ExpressTanViaSineCosine\", \"ExpressSecViaCosine\");\n"
+    "\\int \\tan^2 x \\sec^{2}x dx ",
     "CalculatorFunctions::innerIntegrateTanPowerNSecPowerM",
     "IntegrateTanPowerNSecPowerM",
     innerStandard
@@ -1845,7 +1856,7 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIa,
     "",
     "Integrates building block Ia.  ",
-    "\\int  (\\frac{3}{(x/2- 1)} ) dx ",
+    "\\int (\\frac{3}{(x / 2 - 1)}) dx ",
     "CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIa",
     "IntegrateBlockIa",
     innerStandard
@@ -1855,7 +1866,7 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIb,
     "",
     "Integrates building block Ib.  ",
-    "\\int  (\\frac{2}{(3x- 1)^2} ) dx ",
+    "\\int (\\frac{2}{(3x- 1)^2}) dx ",
     "CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIb",
     "IntegrateBlockIb",
     innerStandard
@@ -1865,7 +1876,7 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIaandIIIa,
     "",
     "Integrates building blocks IIa and IIIa.  ",
-    "\\int  (\\frac{3x +2}{x^2+x + 1} ) dx ",
+    "\\int (\\frac{3x + 2}{x^2 + x + 1}) dx ",
     "CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIaandIIIa",
     "IntegrateBlockIIaIIIa",
     innerStandard
@@ -1875,7 +1886,7 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIIb,
     "",
     "Integrates building blocks IIIb.  ",
-    "\\int  (\\frac{3x +2}{(x^2+x + 1)^2} ) dx ",
+    "\\int (\\frac{3x + 2}{(x^2 + x + 1)^2}) dx ",
     "CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIIb",
     "IntegrateBlockIIIb",
     innerStandard
@@ -1885,7 +1896,7 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIb,
     "",
     "Integrates building blocks IIb.  ",
-    "\\int  (\\frac{3x +2}{(x^2+x + 1)^2} ) dx ",
+    "\\int (\\frac{3x + 2}{(x^2 + x + 1)^2}) dx ",
     "CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIb",
     "IntegrateBlockIIb",
     innerStandard
@@ -1906,7 +1917,7 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctions::innerDifferentiateTrigAndInverseTrig,
     "",
     "Differentiation - product rule. ",
-    "Differentiate(x,  (\\sin x) \\cos x )",
+    "Differentiate(x, (\\sin x) \\cos x )",
     "CalculatorFunctions::innerDifferentiateTrigAndInverseTrig",
     "DifferentiateTrigAndInverseTrig",
     innerStandard
@@ -1916,7 +1927,7 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctions::innerDifferentiateChainRule,
     "",
     "Differentiation - chain rule.  ",
-    "Differentiate(x,  \\sin x^2 \\cos (\\sin x))",
+    "Differentiate(x, \\sin x^2 \\cos (\\sin x))",
     "CalculatorFunctions::innerDifferentiateChainRule",
     "DifferentiateChainRule",
     innerStandard
@@ -1926,7 +1937,7 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctions::innerDifferentiateAtimesB,
     "",
     "Differentiation - product rule.  ",
-    "Differentiate(x, f*g )",
+    "Differentiate(x, f * g)",
     "CalculatorFunctions::innerDifferentiateAtimesB",
     "DifferentiateProductRule",
     innerStandard
@@ -1939,8 +1950,10 @@ void Calculator::initPredefinedInnerFunctions() {
     "For the time being differentiation is assumed to be over commutative rings. "
     "This might change in the future. "
     "The commutative division rule is "
-    "d/dx (f/g^n) = ((d/dx f) g- n f (d/dx g))/g^{n + 1}. ",
-    "Differentiate(x, f/g ); Differentiate(x, f/g^5 ); Differentiate(x, f/g^n )",
+    "d/dx (f/g^n) = ((d/dx f) g - n f (d/dx g))/g^{n + 1}. ",
+    "Differentiate(x, f / g);\n"
+    "Differentiate(x, f / g^5);\n"
+    "Differentiate(x, f / g^n)",
     "CalculatorFunctions::innerDifferentiateAdivideBCommutative",
     "DifferentiateQuotientRule",
     innerStandard
@@ -1960,7 +1973,8 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctions::innerDifferentiateConstant,
     "",
     "Differentiation - constant rule. ",
-    "Differentiate(x, 5 ); d/dx \\sqrt{5}",
+    "Differentiate(x, 5 );\n"
+    "d/dx \\sqrt{5}",
     "CalculatorFunctions::innerDifferentiateConstant",
     "DifferentiateConstant",
     innerStandard
@@ -1970,7 +1984,8 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctions::innerDifferentiateX,
     "",
     "Differentiation - d/dx x = 1.",
-    "Differentiate(x, x ); d/dx x",
+    "Differentiate(x, x )\n;"
+    "d/dx x",
     "CalculatorFunctions::innerDifferentiateX",
     "DifferentiateIdentity",
     innerStandard
@@ -1979,8 +1994,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "Differentiate",
     CalculatorFunctions::innerDifferentiateConstPower,
     "",
-    "Differentiation - d/dx x^n = n x^{n- 1}.",
-    "Differentiate(x, x^2 ); d/dx x^- 1; d/dt t^{\\sqrt{2}}; d/dc c^{DoubleValue 3.14}",
+    "Differentiation - d/dx x^n = n x^{n - 1}.",
+    "Differentiate(x, x^2 );\n"
+    "d/dx x^- 1;\n"
+    "d/dt t^{\\sqrt{2}};\n"
+    "d/dc c^{DoubleValue 3.14}",
     "CalculatorFunctions::innerDifferentiateConstPower",
     "DifferentiateConstPower",
     innerStandard
@@ -1989,8 +2007,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "Differentiate",
     CalculatorFunctions::innerDifferentiateAPowerB,
     "",
-    "Differentiation - d/dx a^b= d/dx(e^{b\\log a}) = a^b d/dx(b\\log a) .",
-    "Differentiate(x, x^2 ); d/dx x^- 1; d/dt t^{\\sqrt{2}}; d/dc c^{DoubleValue 3.14}",
+    "Differentiation - d/dx a^b = d/dx(e^{b\\log a}) = a^b d/dx(b\\log a) .",
+    "Differentiate(x, x^2);\n"
+    "d/dx x^- 1;\n"
+    "d/dt t^{\\sqrt{2}};\n"
+    "d/dc c^{DoubleValue 3.14}",
     "CalculatorFunctions::innerDifferentiateAPowerB",
     "DifferentiateApowerB",
     innerStandard
@@ -2000,7 +2021,7 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctions::innerCrossProduct,
     "",
     "Cross product in IIId. Returns error if given two non-3d vectors.",
-    "(1,-2,3 ) \\times( 1,- 1,- 1)",
+    "(1, - 2, 3) \\times ( 1, - 1, - 1)",
     "CalculatorFunctions::innerCrossProduct",
     "crossProduct",
     innerStandard
@@ -2012,8 +2033,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "Creates element of a Weyl algebra = polynomial coefficient differential operator. "
     "First argument denotes differential operator letter, "
     "second argument - the dual polynomial expression. ",
-    "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n"
-    "x_{{i}}= Polynomial{}x_i; \n[\\partial_1, x_1]; \n\\partial_1 x_1; \nx_1\\partial_1",
+    "\\partial_{{i}} = ElementWeylAlgebraDO{}(\\partial_i, x_i);\n"
+    "x_{{i}} = Polynomial{}x_i;\n"
+    "[\\partial_1, x_1];\n"
+    "\\partial_1 x_1;\n"
+    "x_1\\partial_1",
     "Calculator::innerElementWeylAlgebra",
     "ElementWeylAlgebraDO",
     innerStandard
@@ -2024,8 +2048,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "",
     "Creates a monomial from the second argument whose differential "
     "operator letter is the first argument. ",
-    "x_{{i}}= ElementWeylAlgebraPoly{}(\\partial_i, x_i);\n"
-    "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n"
+    "x_{{i}} = ElementWeylAlgebraPoly{}(\\partial_i, x_i);\n"
+    "\\partial_{{i}} = ElementWeylAlgebraDO{}(\\partial_i, x_i);\n"
     "\\partial_1 x_1",
     "Calculator::innerPolynomialWithEWA",
     "ElementWeylAlgebraPoly",
@@ -2036,7 +2060,7 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorConversions::innerRationalFunctioN,
     "",
     "Creates a built-in rational function.",
-    "MakeRationalFunction{}(x_1+MakeRationalFunction{}x_1+x_2)",
+    "MakeRationalFunction{}(x_1 + MakeRationalFunction{}x_1 + x_2)",
     "CalculatorConversions::innerRationalFunctioN",
     "MakeRationalFunction",
     innerStandard
@@ -2047,7 +2071,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "",
     "Creates an internal c++ matrix structure from double list of rationals. ",
     "s_1 = MakeMatrix{}((- 1,- 1, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1));\n"
-    "s_2 = MakeMatrix{}((1, 0, 0, 0), (- 1, - 1, - 1,0), (0, 0, 1, 0), (0, 0, 0, 1));\n"
+    "s_2 = MakeMatrix{}((1, 0, 0, 0), (- 1, - 1, - 1, 0), (0, 0, 1, 0), (0, 0, 0, 1));\n"
     "s_3 = MakeMatrix{}((1, 0, 0, 0), (0, 1, 0, 0), (0, - 2, - 1, - 1), (0, 0, 0, 1));\n"
     "s_4 = MakeMatrix{}((1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, - 1, - 1)); ",
     "CalculatorConversions::innerMatrixRational",
@@ -2092,9 +2116,10 @@ void Calculator::initPredefinedInnerFunctions() {
     "variables plus the degrees of the differential variables. ",
     "x = ElementWeylAlgebraPoly{}(\\partial, x);\n"
     "\\partial = ElementWeylAlgebraDO{}(\\partial, x);\n"
-    "a =x^3 + x\\partial; b = \\partial x + \\partial^3 + \\partial;\n"
-    "[FourierTransformDO{}a,FourierTransformDO{}b]"
-    "-FourierTransformDO{}[a,b]",
+    "a =x^3 + x\\partial;\n"
+    "b = \\partial x + \\partial^3 + \\partial;\n"
+    "[FourierTransformDO{}a, FourierTransformDO{}b]"
+    "- FourierTransformDO{}[a, b]",
     "CalculatorFunctions::innerFourierTransformEWA",
     "FourierTransformDO",
     innerStandard
@@ -2149,7 +2174,8 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctionsWeylGroup::innerWeylGroupElement,
     "",
     "Needs a group name and a list of generators",
-    "s_{{i}}=MakeElementWeylGroup{}(A_2, i);\n(s_1+s_2)(2s_1+s_2)(3s_1+s_2)",
+    "s_{{i}} = MakeElementWeylGroup{}(A_2, i);\n"
+    "(s_1 + s_2)(2s_1 + s_2)(3s_1 + s_2)",
     "CalculatorFunctionsWeylGroup::innerWeylGroupElement",
     "MakeElementWeylGroup",
     innerStandard
@@ -2270,7 +2296,8 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSize,
     "",
     "Computes the size of a Weyl group orbit of a weight",
-    "WeylOrbitSize(E_6, (3,3,3,7,7,11)); WeylOrbitSize(E_8, (3,3,3,7,7,11,13,13));",
+    "WeylOrbitSize(E_6, (3, 3, 3, 7, 7, 11));\n"
+    "WeylOrbitSize(E_8, (3, 3, 3, 7, 7, 11, 13, 13));",
     "CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSize",
     "WeylOrbitSize",
     innerStandard
@@ -2296,7 +2323,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "under the Weyl group extended with the outer automoprhisms of the Weyl group. "
     "First argument = type. Second argument = weight in simple coords. "
     "The orbit size is cut off at 1921*2 elements. ",
-    "WeylGroupOrbitOuterSimple{}(D_4, (1,0,0,0))",
+    "WeylGroupOrbitOuterSimple{}(D_4, (1, 0, 0, 0))",
     "CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple",
     "WeylGroupOrbitOuterSimple",
     innerStandard
@@ -2333,9 +2360,9 @@ void Calculator::initPredefinedInnerFunctions() {
     "raised as much as possible without changing the preceding, "
     "alrady raised,  vectors. First argument = type. "
     "Second argument = weight in simple coords. ",
-    "WeylRaiseToMaximallyDominant{}(F_4, (3, 6, 8, 4), (- 1, -3, -2, 0)  );\n"
-    "WeylRaiseToMaximallyDominant{}(F_4, (3, 6, 8, 4), (0, -3, -4, -2)  );\n"
-    "WeylRaiseToMaximallyDominant{}(F_4, (0, -3, -4, -2) , (3, 6, 8, 4)  );",
+    "WeylRaiseToMaximallyDominant{}(F_4, (3, 6, 8, 4), (- 1, - 3, - 2, 0));\n"
+    "WeylRaiseToMaximallyDominant{}(F_4, (3, 6, 8, 4), (0, - 3, - 4, - 2));\n"
+    "WeylRaiseToMaximallyDominant{}(F_4, (0, - 3, - 4, - 2) , (3, 6, 8, 4));",
     "CalculatorFunctionsWeylGroup::innerWeylNoOuterRaiseToMaximallyDominant",
     "WeylRaiseToMaximallyDominant",
     innerStandard
@@ -2363,7 +2390,7 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctionsWeylGroup::innerLieAlgebraRhoWeight,
     "",
     "Makes the half-sum of the positive roots.",
-    "\n\\rho =MakeRho(B_3);",
+    "\\rho = MakeRho(B_3);",
     "CalculatorFunctionsWeylGroup::innerLieAlgebraRhoWeight",
     "MakeRho",
     innerStandard
@@ -2377,10 +2404,10 @@ void Calculator::initPredefinedInnerFunctions() {
     "Second argument = matrix linear operator corresponding written in simple basis. ",
     "A = MakeMatrix"
     "((1, 0, 0, 0, 0, - 1),"
-    "(0, 0, 0, 0, 1, -2),"
-    "(0, 0, 1, 0, 0, -2),"
-    "(0, 0, 0, 1, 0, -3),"
-    "(0, 1, 0, 0, 0, -2),"
+    "(0, 0, 0, 0, 1, - 2),"
+    "(0, 0, 1, 0, 0, - 2),"
+    "(0, 0, 0, 1, 0, - 3),"
+    "(0, 1, 0, 0, 0, - 2),"
     "(0, 0, 0, 0, 0, - 1));"
     "IsOuterAuto{}(e_6, A);",
     "CalculatorFunctionsWeylGroup::innerIsOuterAutoWeylGroup",
@@ -2392,10 +2419,10 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctionsWeylGroup::innerWeylOuterRaiseToMaximallyDominant,
     "",
     "Same as WeylRaiseToMaximallyDominant but uses outer Weyl group automorphisms as well.",
-    "WeylOuterRaiseToMaximallyDominant{}(D_4,  (1, 0, 0, 0), (0, 0, 0, 1)  );\n"
-    "WeylOuterRaiseToMaximallyDominant{}(D_4,  (0, 0, 0, 1), (1, 0, 0, 0)  );\n"
-    "WeylOuterRaiseToMaximallyDominant{}(D_4,  (1, 0, 0, 0), (0, 0, 1, 0)  );\n"
-    "WeylOuterRaiseToMaximallyDominant{}(D_4,  (0, 0, 1, 0), (1, 0, 0, 0)  );\n",
+    "WeylOuterRaiseToMaximallyDominant{}(D_4, (1, 0, 0, 0), (0, 0, 0, 1));\n"
+    "WeylOuterRaiseToMaximallyDominant{}(D_4, (0, 0, 0, 1), (1, 0, 0, 0));\n"
+    "WeylOuterRaiseToMaximallyDominant{}(D_4, (1, 0, 0, 0), (0, 0, 1, 0));\n"
+    "WeylOuterRaiseToMaximallyDominant{}(D_4, (0, 0, 1, 0), (1, 0, 0, 0));\n",
     "CalculatorFunctionsWeylGroup::innerWeylOuterRaiseToMaximallyDominant",
     "WeylOuterRaiseToMaximallyDominant",
     innerStandard
@@ -2408,9 +2435,9 @@ void Calculator::initPredefinedInnerFunctions() {
     "Generates a finite multiplicatively closed set of at most upper_bound elements, "
     "or returns error indicating the multiplicatively closed "
     "set is larger than the upper bound.",
-    "s_1=MakeMatrix{}((- 1 , 1 , 0),(0 , 1 , 0),(0 , 0 , 1));\n"
-    "s_2=MakeMatrix{}((1 , 0 , 0),(1 , - 1 , 1),(0 , 0 , 1));\n"
-    "s_3=MakeMatrix{}((1 , 0 , 0),(0 , 1 , 0),(0 , 2 , - 1));\n"
+    "s_1=MakeMatrix{}((- 1, 1, 0), (0, 1, 0), (0, 0, 1));\n"
+    "s_2=MakeMatrix{}((1, 0, 0), (1, - 1, 1), (0, 0, 1));\n"
+    "s_3=MakeMatrix{}((1, 0, 0), (0, 1, 0), (0, 2, - 1));\n"
     "GenerateFiniteMultiplicativelyClosedSet{}(48, s_1, s_2, s_3);",
     "Calculator::innerGenerateMultiplicativelyClosedSet",
     "GenerateFiniteMultiplicativelyClosedSet",
@@ -2421,9 +2448,9 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctions::innerConstructCartanSA,
     "",
     "Generates a Cartan subalgebra, code is still experimental.",
-    "g_{{i}}= GetChevalleyGenerator{}(b_3, i);\n"
-    "h_{{i}}= GetCartanGenerator{}(b_3, i);"
-    "CartanSA(g_1+g_3, g_- 1+g_-3, g_2, g_-2);",
+    "g_{{i}} = GetChevalleyGenerator{}(b_3, i);\n"
+    "h_{{i}} = GetCartanGenerator{}(b_3, i);\n"
+    "CartanSA(g_1 + g_3, g_-1 + g_-3, g_2, g_-2);",
     "CalculatorFunctions::innerConstructCartanSA",
     "CartanSA",
     innerAdminNoTestExperimental
@@ -2438,20 +2465,23 @@ void Calculator::initPredefinedInnerFunctions() {
     "The remaining arguments must be differential operators. "
     "The output is a vector space basis printout. "
     "Fails if the dimension of the vector space is larger than the upper bound.",
-    "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n"
-    "x_{{i}}= ElementWeylAlgebraPoly{}(\\partial_i, x_i); "
-    "g_1= (-x_{5} \\partial_{5}^{2}-x_{4} \\partial_{4} \\partial_{5}  -x_{3} \\partial_{3} \\partial_{5} "
-    "-x_{2} \\partial_{2} \\partial_{5}  +x_{1} \\partial_{2} \\partial_{4} +x_{1} \\partial_{3}^{2});\n"
-    "g_- 1=x_5;\n"
-    "g_2=x_{5} \\partial_{4} -x_{2} \\partial_{1} ;\n"
-    "g_-2= (x_{4} \\partial_{5} -x_{1} \\partial_{2} );\n"
-    "g_3= (2x_{4} \\partial_{3} -x_{3} \\partial_{2} );\n"
-    "g_-3= (x_{3} \\partial_{4} -2x_{2} \\partial_{3} );\n"
+    "\\partial_{{i}} = ElementWeylAlgebraDO{}(\\partial_i, x_i);\n"
+    "x_{{i}} = ElementWeylAlgebraPoly{}(\\partial_i, x_i); "
+    "g_1 = (- x_{5} \\partial_{5}^{2} - x_{4} \\partial_{4} \\partial_{5}  - x_{3} \\partial_{3} \\partial_{5} "
+    "- x_{2} \\partial_{2} \\partial_{5} + x_{1} \\partial_{2} \\partial_{4} +x_{1} \\partial_{3}^{2});\n"
+    "g_- 1 = x_5;\n"
+    "g_2 = x_{5} \\partial_{4} - x_{2} \\partial_{1};\n"
+    "g_-2 = (x_{4} \\partial_{5} - x_{1} \\partial_{2});\n"
+    "g_3 = (2x_{4} \\partial_{3} - x_{3} \\partial_{2});\n"
+    "g_-3 = (x_{3} \\partial_{4} - 2x_{2} \\partial_{3});\n"
     "GenerateVectorSpaceClosedWRTLieBracket{}(50, g_1, g_- 1, g_2, g_-2, g_3, g_-3);\n"
-    "GenerateVectorSpaceClosedWRTLieBracket{}(50,g_1,g_2, g_-2, g_3, g_-3);\n"
-    "GenerateVectorSpaceClosedWRTLieBracket{}(50,g_1, g_- 1, g_2, g_-2, g_3);\n"
-    "q_{{i}}= GetChevalleyGenerator{}(F_4, i);\n"
-    "s_2= -q_{-5}-q_{-6};\ns_1=q_{20}+q_{19};\n s_- 1= -q_{- 19}-q_{-20}\n; s_-2=2q_{6}+2q_{5};\n"
+    "GenerateVectorSpaceClosedWRTLieBracket{}(50, g_1, g_2, g_-2, g_3, g_-3);\n"
+    "GenerateVectorSpaceClosedWRTLieBracket{}(50, g_1, g_- 1, g_2, g_-2, g_3);\n"
+    "q_{{i}} = GetChevalleyGenerator{}(F_4, i);\n"
+    "s_2 = - q_{- 5} - q_{-6};\n"
+    "s_1 = q_{20} + q_{19};\n"
+    "s_- 1 = - q_{- 19} - q_{- 20};\n"
+    "s_-2 = 2q_{6} + 2q_{5};\n"
     "GenerateVectorSpaceClosedWRTLieBracket(52, s_1, s_2, s_- 1, s_-2);",
     "CalculatorFunctions::innerGenerateVectorSpaceClosedWRTLieBracket",
     "GenerateVectorSpaceClosedWRTLieBracket",
@@ -2516,8 +2546,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "",
     "Creates character of a semisimple Lie algebra finite dimensional irreducible module. "
     "First argument gives type, second argument gives highest weight in fundamental coordinates.",
-    "x = MakeCharacterLieAlg{}(G_2, (1,0));\n"
-    "y = MakeCharacterLieAlg{}(G_2, (0,1));\n"
+    "x = MakeCharacterLieAlg{}(G_2, (1, 0));\n"
+    "y = MakeCharacterLieAlg{}(G_2, (0, 1));\n"
     "x * y",
     "Calculator::innerCharacterSSLieAlgFD",
     "MakeCharacterLieAlg",
@@ -2542,8 +2572,12 @@ void Calculator::initPredefinedInnerFunctions() {
     "The output is a string report of the operation. "
     "The first cone is generated over Z_{&gt;} (``strict cone'') "
     "the second cone is generated over Z_{&gt;= 0} (``non-strict cone'').",
-    "v_1= (1, 2, 3 ); v_2= (1, 3, 2); v_3= (3,1,1); v_4= (-2,2, 2);\n"
-    "ConesIntersection{}((v_1,v_2 ), (v_3,v_4 ));\nConesIntersection{}((v_1,v_2 ), (v_3,-v_4 ));",
+    "v_1 = (1, 2, 3);\n"
+    "v_2 = (1, 3, 2);\n"
+    "v_3 = (3, 1, 1);\n"
+    "v_4 = (- 2, 2, 2);\n"
+    "ConesIntersection{}((v_1, v_2), (v_3, v_4 ));\n"
+    "ConesIntersection{}((v_1, v_2), (v_3, - v_4));",
     "Calculator::innerConesIntersect",
     "ConesIntersection",
     innerStandard
@@ -2584,11 +2618,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "parallel to the calculator project folder "
     "(i.e, we have folders /vectorpartition and /freecalc next to one another). "
     "The folders are given relative to the /freecalc base.",
-    "BuildFreecalc (\"freecalc/lectures/referencelectures/calculusi.tex\");\n"
+    "BuildFreecalc(\"freecalc/lectures/referencelectures/calculusi.tex\");\n"
     "BuildFreecalc(\"freecalc/lectures/referencelectures/calculusii.tex\");\n"
     "BuildFreecalc(\"freecalc/lectures/referencelectures/calculusiiimultivariable.tex\");\n"
     "BuildFreecalc(\"freecalc/homework/referenceallproblemsbycourse/calculusimasterproblemsheet.tex\");\n"
-    "BuildFreecalc(\"freecalc/homework/referenceallproblemsbycourse/calculusiimasterproblemsheet.tex\");"
+    "BuildFreecalc(\"freecalc/homework/referenceallproblemsbycourse/calculusiimasterproblemsheet.tex\");\n"
     "BuildFreecalc(\"freecalc/homework/referenceallproblemsbycourse/calculusiiimasterproblemsheet.tex\");",
     "CalculatorFunctions::innerBuildFreecalc",
     "BuildFreecalc",
@@ -2599,7 +2633,7 @@ void Calculator::initPredefinedInnerFunctions() {
     CalculatorFunctions::innerBuildFreecalcSingleSlides,
     "",
     "Same as BuildFreeCalc but attempts to also build individual slides. ",
-    "BuildFreecalcWithSlides (\"freecalc/lectures/referenceallproblemsbycourse/calculusimasterproblemsheet.tex\");",
+    "BuildFreecalcWithSlides(\"freecalc/lectures/referenceallproblemsbycourse/calculusimasterproblemsheet.tex\");",
     "CalculatorFunctions::BuildFreecalcWithSlides",
     "BuildFreecalcWithSlides",
     innerAdminNoTest

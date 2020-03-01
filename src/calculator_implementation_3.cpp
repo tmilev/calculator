@@ -1894,8 +1894,8 @@ bool Calculator::innerAutomatedTest(
   ) {
     return theCommands
     << "Automated test takes two arguments: "
-    << "index of the first test to run and total number of tests to run after that. "
-    ;
+    << "index of the first test to run and total "
+    << "number of tests to run after that. ";
   }
   test.CalculatorTestRun();
   return output.AssignValue(test.reportHtml, theCommands);

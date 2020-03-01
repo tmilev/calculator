@@ -361,7 +361,7 @@ bool GlobalVariables::UserSecureNonAdminOperationsAllowed() {
 }
 
 bool GlobalVariables::UserDebugFlagOn() {
-  return global.GetWebInput("debugFlag") == "true";
+  return global.GetWebInput(WebAPI::request::debugFlag) == "true";
 }
 
 bool GlobalVariables::UserStudentVieWOn() {

@@ -2088,6 +2088,7 @@ public:
     Calculator* owner;
     std::string reportHtml;
     bool flagTestResultsExist;
+    std::string debugFlagAtStart;
     class OneTest {
     public:
       std::string atom;

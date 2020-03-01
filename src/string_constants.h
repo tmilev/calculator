@@ -28,6 +28,7 @@ public:
     static std::string onePageJSWithHash;
     static std::string userInfoJSON;
     static std::string editPage;
+    static std::string debugFlag;
     static std::string selectCourseJSON;
     static std::string serverStatusJSON;
     static std::string clonePage;
@@ -123,6 +124,7 @@ public:
   struct calculator {
   public:
     static std::string testFileNameVirtual;
+
   };
   static std::string HeaderCacheControl;
   static std::string commentsServer;

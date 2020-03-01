@@ -61,6 +61,7 @@ std::string WebAPI::request::setProblemWeight             = "setProblemWeight"  
 std::string WebAPI::request::setProblemDeadline           = "setProblemDeadline"          ;
 std::string WebAPI::request::changePassword               = "changePassword"              ;
 std::string WebAPI::request::activateAccountJSON          = "activateAccountJSON"         ;
+std::string WebAPI::request::debugFlag                    = "debugFlag"                   ;
 std::string WebAPI::request::serverStatusJSON             = "serverStatusJSON"            ;
 std::string WebAPI::request::selectCourseJSON             = "selectCourseJSON"            ;
 std::string WebAPI::request::compute                      = "compute"                     ;

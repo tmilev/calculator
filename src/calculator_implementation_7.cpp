@@ -9130,6 +9130,8 @@ void Calculator::Test::CalculatorTestPrepare() {
 
 bool Calculator::Test::CalculatorTestRun() {
   MacroRegisterFunctionWithName("Calculator::Test::CalculatorTestRun");
+  this->debugFlagAtStart = global.GetWebInput(WebAPI::request::debugFlag);
+  global.SetWebInpuT(WebAPI::request::debugFlag, "false");
   this->CalculatorTestPrepare();
   Calculator theTester;
   ProgressReport theReport;
@@ -9161,6 +9163,7 @@ bool Calculator::Test::CalculatorTestRun() {
     reportStream << "<br>Done in: " << global.GetElapsedSeconds() - this->startTime << " seconds. ";
     theReport.Report(reportStream.str());
   }
+  global.SetWebInpuT(WebAPI::request::debugFlag, this->debugFlagAtStart);
   return this->ProcessResults();
 }
 

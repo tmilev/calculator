@@ -52,6 +52,10 @@ public:
       static std::string pdfFromSource;
       static std::string title;
       static std::string files;
+      static std::string isSolution;
+      static std::string content;
+      static std::string queryHomework;
+      static std::string slideFilename;
     };
     static std::string homeworkSource;
     static std::string submitAnswers;

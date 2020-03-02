@@ -44,6 +44,23 @@ void LaTeXCrawler::ComputeAllowedFolders() {
   }
 }
 
+LaTeXCrawler::FileWithOption::FileWithOption() {
+  this->isSolution = false;
+}
+
+LaTeXCrawler::FileWithOption::FileWithOption(const std::string& input) {
+  this->fileName = input;
+  this->isSolution = false;
+}
+
+void LaTeXCrawler::AddSlidesOnTop(List<std::string>& inputSlides) {
+  for (int i = 0; i < inputSlides.size; i ++) {
+    LaTeXCrawler::FileWithOption file;
+    file.fileName = inputSlides[i];
+    this->slideFileNamesVirtualWithPatH.AddOnTop(file);
+  }
+}
+
 bool LaTeXCrawler::ExtractFileNamesFromRelativeFileName(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("LaTeXcrawler::ExtractFileNamesFromRelativeFileName");
   if (!FileOperations::IsOKfileNameVirtual(this->theFileNameToCrawlRelative)) {
@@ -561,41 +578,41 @@ bool LaTeXCrawler::ExtractFileNames(std::stringstream* commentsOnFailure, std::s
   this->slideFileNamesWithLatexPathNoExtension.initializeFillInObject(this->slideFileNamesVirtualWithPatH.size, "");
   this->latexSnippets.initializeFillInObject(this->slideFileNamesVirtualWithPatH.size, "");
   for (int i = 0; i < this->slideFileNamesVirtualWithPatH.size; i ++) {
-    if (StringRoutines::StringBeginsWith(this->slideFileNamesVirtualWithPatH[i], "LaTeX: ", &this->latexSnippets[i])) {
+    if (StringRoutines::StringBeginsWith(this->slideFileNamesVirtualWithPatH[i].fileName, "LaTeX: ", &this->latexSnippets[i])) {
       if (i == 0) {
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure << "Found LaTeX snippet without a header file. "
-          << this->slideFileNamesVirtualWithPatH[i] << "<br>";
+          << this->slideFileNamesVirtualWithPatH[i].fileName << "<br>";
         }
         return false;
       }
       continue;
     }
-    if (!StringRoutines::StringEndsWith(this->slideFileNamesVirtualWithPatH[i], ".tex")) {
-      this->slideFileNamesVirtualWithPatH[i] += ".tex";
+    if (!StringRoutines::StringEndsWith(this->slideFileNamesVirtualWithPatH[i].fileName, ".tex")) {
+      this->slideFileNamesVirtualWithPatH[i].fileName += ".tex";
     }
-    if (!FileOperations::IsFileNameSafeForSystemCommands(this->slideFileNamesVirtualWithPatH[i], commentsOnFailure)) {
+    if (!FileOperations::IsFileNameSafeForSystemCommands(this->slideFileNamesVirtualWithPatH[i].fileName, commentsOnFailure)) {
       if (commentsOnFailure != nullptr) {
-        *commentsOnFailure << "Found unsafe slide name: " << this->slideFileNamesVirtualWithPatH[i] << "<br>";
+        *commentsOnFailure << "Found unsafe slide name: " << this->slideFileNamesVirtualWithPatH[i].fileName << "<br>";
       }
       return false;
     }
-    if (!FileOperations::IsOKfileNameVirtual(this->slideFileNamesVirtualWithPatH[i], false, commentsOnFailure)) {
+    if (!FileOperations::IsOKfileNameVirtual(this->slideFileNamesVirtualWithPatH[i].fileName, false, commentsOnFailure)) {
       if (commentsOnFailure != nullptr) {
-        *commentsOnFailure << "Found invalid slide name: " << this->slideFileNamesVirtualWithPatH[i] << "<br>";
+        *commentsOnFailure << "Found invalid slide name: " << this->slideFileNamesVirtualWithPatH[i].fileName << "<br>";
       }
       return false;
     }
     if (global.UserDefaultHasAdminRights() && !global.flagDisableDatabaseLogEveryoneAsAdmin) {
-      if (!FileOperations::FileExistsVirtual(this->slideFileNamesVirtualWithPatH[i], false, false)) {
+      if (!FileOperations::FileExistsVirtual(this->slideFileNamesVirtualWithPatH[i].fileName, false, false)) {
         if (commentsOnFailure != nullptr) {
-          *commentsOnFailure << "Failed to find file: " << this->slideFileNamesVirtualWithPatH[i] << ". ";
+          *commentsOnFailure << "Failed to find file: " << this->slideFileNamesVirtualWithPatH[i].fileName << ". ";
         }
         return false;
       }
     }
     FileOperations::GetFileExtensionWithDot(
-      this->slideFileNamesVirtualWithPatH[i], &this->slideFileNamesWithLatexPathNoExtension[i]
+      this->slideFileNamesVirtualWithPatH[i].fileName, &this->slideFileNamesWithLatexPathNoExtension[i]
     );
     if (StringRoutines::StringBeginsWith(this->slideFileNamesWithLatexPathNoExtension[i], "freecalc", nullptr)) {
       this->slideFileNamesWithLatexPathNoExtension[i] = "../../" + this->slideFileNamesWithLatexPathNoExtension[i];
@@ -604,7 +621,7 @@ bool LaTeXCrawler::ExtractFileNames(std::stringstream* commentsOnFailure, std::s
       this->slideFileNamesWithLatexPathNoExtension[i] = "../../" + this->slideFileNamesWithLatexPathNoExtension[i];
     }
   }
-  this->headerFileNameWithPathVirtual = this->slideFileNamesVirtualWithPatH[0];
+  this->headerFileNameWithPathVirtual = this->slideFileNamesVirtualWithPatH[0].fileName;
   this->headerFilePathVirtual = FileOperations::GetPathFromFileNameWithPath(this->headerFileNameWithPathVirtual);
   this->headerFileNameNoPath = FileOperations::GetFileNameFromFileNameWithPath(this->headerFileNameWithPathVirtual);
   this->headerPathBelowFileNameVirtual = this->headerFilePathVirtual;
@@ -633,11 +650,11 @@ bool LaTeXCrawler::ExtractFileNames(std::stringstream* commentsOnFailure, std::s
   this->workingFileNameNoPathPDF = "workingfile" + this->headerFileNameNoPathNoExtension + ".pdf";
   std::string firstSignificantSlideName = "";
   if (this->slideFileNamesVirtualWithPatH.size >= 1) {
-    firstSignificantSlideName = this->slideFileNamesVirtualWithPatH[0];
+    firstSignificantSlideName = this->slideFileNamesVirtualWithPatH[0].fileName;
   }
   for (int i = 1; i < this->slideFileNamesVirtualWithPatH.size; i ++) {
     if (this->latexSnippets[i] == "") {
-      firstSignificantSlideName = this->slideFileNamesVirtualWithPatH[i];
+      firstSignificantSlideName = this->slideFileNamesVirtualWithPatH[i].fileName;
       break;
     }
   }
@@ -813,13 +830,7 @@ bool LaTeXCrawler::BuildOrFetchFromCachePDF(
     for (int i = 1; i < this->slideFileNamesVirtualWithPatH.size; i ++) {
       if (this->latexSnippets[i] == "") {
         if (this->flagHomeworkRatherThanSlides) {
-          bool doIncludeItem = true;
-          if (i < this->slideFilesExtraFlags.size) {
-            if (this->slideFilesExtraFlags[i] == "true") {
-              doIncludeItem = false;
-            }
-          }
-          if (doIncludeItem) {
+          if (!this->slideFileNamesVirtualWithPatH[i].isSolution) {
             crawlingResult << "\\item\n";
           }
         }
@@ -860,13 +871,15 @@ bool LaTeXCrawler::BuildOrFetchFromCachePDF(
   currentSysCommand = "mkdir -p " + this->targetPDFLatexPath;
   std::string commandResult = global.CallSystemWithOutput(currentSysCommand);
   if (commentsGeneral != nullptr) {
-    *commentsGeneral << "Executed command: " << currentSysCommand << " ... to get result: " << commandResult << "<br>";
+    *commentsGeneral << "Executed command: " << currentSysCommand
+    << " ... to get result: " << commandResult << "<br>";
   }
   if (this->targetVideoLatexPath!= "") {
     currentSysCommand = "mkdir -p " + this->targetVideoLatexPath;
     std::string commandResult = global.CallSystemWithOutput(currentSysCommand);
     if (commentsGeneral != nullptr) {
-      *commentsGeneral << "Executed command: " << currentSysCommand << " ... to get result: " << commandResult << "<br>";
+      *commentsGeneral << "Executed command: " << currentSysCommand
+      << " ... to get result: " << commandResult << "<br>";
     }
   }
   currentSysCommand = "mv " + this->workingFileNameNoPathPDF + " " + this->targetPDFFileNameWithLatexPath;
@@ -912,29 +925,32 @@ bool LaTeXCrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
   }
   bool result = true;
   int numProcessed = 0;
-  this->slideFileNamesVirtualWithPatH.AddListOnTop(topicParser.sourcesHomeworkHeaders);
-  this->slideFilesExtraFlags.initializeFillInObject(this->slideFileNamesVirtualWithPatH.size, "");
-  for (int i = 0; i < topicParser.topics.theTopics.size()
-//        && numProcessed < 0
-        ; i ++) {
+  this->slideFileNamesVirtualWithPatH.SetSize(topicParser.sourcesHomeworkHeaders.size);
+  for (int i = 0; i < topicParser.sourcesHomeworkHeaders.size; i ++) {
+    this->slideFileNamesVirtualWithPatH[i].fileName = topicParser.sourcesHomeworkHeaders[i];
+    this->slideFileNamesVirtualWithPatH[i].isSolution = false;
+  }
+  for (int i = 0; i < topicParser.topics.theTopics.size(); i ++) {
     TopicElement& currentElt = topicParser.topics.theTopics.theValues[i];
     if (currentElt.sourceHomework.size == 0) {
       continue;
     }
     std::stringstream reportStream;
     numProcessed ++;
-    reportStream << "Processing homework pdfs: " << numProcessed << " out of " << numSlidePairsToBuild << ". ";
+    reportStream << "Processing homework pdfs: "
+    << numProcessed << " out of " << numSlidePairsToBuild << ". ";
     theReport.Report(reportStream.str());
 
-    this->slideFileNamesVirtualWithPatH.SetSize(topicParser.sourcesHomeworkHeaders.size);
-    this->slideFilesExtraFlags.SetSize(topicParser.sourcesHomeworkHeaders.size);
-    this->slideFileNamesVirtualWithPatH.AddListOnTop(currentElt.sourceHomework);
-    for (int i = 0; i < currentElt.sourceHomeworkIsSolution.size; i ++) {
-      std::string currentFlag = "false";
-      if (currentElt.sourceHomeworkIsSolution[i]) {
-        currentFlag = "true";
+    for (int i = 0; i < currentElt.sourceHomework.size; i ++) {
+      LaTeXCrawler::FileWithOption file;
+      file.fileName = currentElt.sourceHomework[i];
+      file.isSolution = false;
+      if (i < currentElt.sourceHomeworkIsSolution.size) {
+        if (currentElt.sourceHomeworkIsSolution[i]) {
+          file.isSolution = true;
+        }
       }
-      this->slideFilesExtraFlags.AddOnTop(currentFlag);
+      this->slideFileNamesVirtualWithPatH.AddOnTop(file);
     }
     this->desiredPresentationTitle = currentElt.title;
     this->flagForceSlideRebuild = true;
@@ -961,24 +977,23 @@ bool LaTeXCrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
   }
 
   this->slideFileNamesVirtualWithPatH.SetSize(0);
-
   numProcessed = 0;
-  this->slideFileNamesVirtualWithPatH.AddListOnTop(topicParser.slidesSourcesHeaders);
-  for (int i = 0; i < topicParser.topics.theTopics.size()
-//        && numProcessed < 2
-        ; i ++) {
+  this->AddSlidesOnTop(topicParser.slidesSourcesHeaders);
+  for (int i = 0; i < topicParser.topics.theTopics.size(); i ++) {
     TopicElement& currentElt = topicParser.topics.theTopics.theValues[i];
     if (currentElt.sourceSlides.size == 0) {
       continue;
     }
     std::stringstream reportStream;
     numProcessed ++;
-    reportStream << "Processing lecture slides: " << numProcessed << " out of " << numSlidePairsToBuild << ". ";
-    reportStream << "<br>Slide file names: " << this->slideFileNamesVirtualWithPatH.ToStringCommaDelimited();
+    reportStream << "Processing lecture slides: "
+    << numProcessed << " out of " << numSlidePairsToBuild << ". ";
+    reportStream << "<br>Slide file names: "
+    << this->slideFileNamesVirtualWithPatH.ToStringCommaDelimited();
     theReport.Report(reportStream.str());
 
     this->slideFileNamesVirtualWithPatH.SetSize(topicParser.slidesSourcesHeaders.size);
-    this->slideFileNamesVirtualWithPatH.AddListOnTop(currentElt.sourceSlides);
+    this->AddSlidesOnTop(currentElt.sourceSlides);
     this->desiredPresentationTitle = currentElt.title;
     this->flagForceSlideRebuild = true;
     this->flagProjectorMode = false;

@@ -177,6 +177,7 @@ public:
   void ComputeSlides(CalculatorHTML& owner);
   JSData ComputeSlidesJSON(CalculatorHTML& owner);
   void ComputeHomework(CalculatorHTML& owner);
+  JSData ComputeHomeworkJSON(CalculatorHTML& owner);
   void ComputeLinks(CalculatorHTML& owner, bool plainStyle);
   TopicElement();
   void MakeError(const std::string& message);

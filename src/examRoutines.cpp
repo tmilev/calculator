@@ -3535,8 +3535,9 @@ bool TopicElement::PdfSlidesOpenIfAvailable(
   }
   LaTeXCrawler theCrawler;
   theCrawler.desiredPresentationTitle = this->title;
-  theCrawler.slideFileNamesVirtualWithPatH.AddListOnTop(owner.slidesSourcesHeaders);
-  theCrawler.slideFileNamesVirtualWithPatH.AddListOnTop(this->sourceSlides);
+
+  theCrawler.AddSlidesOnTop(owner.slidesSourcesHeaders);
+  theCrawler.AddSlidesOnTop(this->sourceSlides);
   theCrawler.flagProjectorMode = true;
   theCrawler.flagHomeworkRatherThanSlides = false;
   if (!theCrawler.ExtractFileNamesPdfExists(commentsOnFailure, commentsOnFailure)) {
@@ -4628,67 +4629,75 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput) {
   this->topicListJavascriptWithTag = topicListJS.str();
 }
 
-void TopicElement::ComputeHomework(CalculatorHTML& owner) {
-  MacroRegisterFunctionWithName("TopicElement::ComputeHomework");
-  if (this->sourceHomework.size == 0) {
-    return;
+JSData LaTeXCrawler::FileWithOption::ToJSON() {
+  JSData result;
+  result[WebAPI::request::slides::slideFilename] = this->fileName;
+  if (this->isSolution) {
+    result[WebAPI::request::slides::isSolution] = "true";
   }
-  std::stringstream homeworkStream;
-  homeworkStream << "title=" << HtmlRoutines::ConvertStringToURLString(this->title, false) << "&";
-  int sourceHomeworkCounter = 0;
-  for (int i = 0; i < owner.sourcesHomeworkHeaders.size; i ++) {
-    sourceHomeworkCounter ++;
-    homeworkStream << "file" << sourceHomeworkCounter
-    << "=" << HtmlRoutines::ConvertStringToURLString(owner.sourcesHomeworkHeaders[i], false) << "&isSolutionFile"
-    << sourceHomeworkCounter << "=false&";
-  }
-  for (int i = 0; i < this->sourceHomework.size; i ++) {
-    sourceHomeworkCounter ++;
-    homeworkStream << "file" << sourceHomeworkCounter
-    << "=" << HtmlRoutines::ConvertStringToURLString(this->sourceHomework[i], false) << "&";
-    if (i < this->sourceHomeworkIsSolution.size) {
-      if (this->sourceHomeworkIsSolution[i]) {
-        homeworkStream << "isSolutionFile" << sourceHomeworkCounter << "=true&";
-      } else {
-        homeworkStream << "isSolutionFile" << sourceHomeworkCounter << "=false&";
-      }
-    } else {
-      homeworkStream << "ERROR=ThisShouldNotBeGenerated&";
+  return result;
+}
+
+bool LaTeXCrawler::FileWithOption::fromJSON(JSData& input, std::stringstream* commentsOnFailure) {
+  JSData& file = input[WebAPI::request::slides::slideFilename];
+  if (file.theType != JSData::token::tokenString) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "While parsing file, failed to find key: " << WebAPI::request::slides::slideFilename << ". ";
     }
+    return false;
   }
-  this->queryHomework = homeworkStream.str();
+  this->fileName = file.theString;
+  this->isSolution = false;
+  if (input[WebAPI::request::slides::isSolution].theString == "true") {
+    this->isSolution = true;
+  }
+  return true;
+}
+
+void LaTeXCrawler::Slides::AddSlidesOnTop(const List<std::string>& input) {
+  for (int i = 0; i < input.size; i ++) {
+    this->filesToCrawl.AddOnTop(LaTeXCrawler::FileWithOption(input[i]));
+  }
 }
 
 JSData LaTeXCrawler::Slides::ToJSON() {
   JSData result;
-  result["slideTitle"] = this->title;
+  result[WebAPI::request::slides::title] = this->title;
   JSData theFiles;
   theFiles.theType = JSData::token::tokenArray;
-  JSData fileName;
-  fileName.theType = JSData::token::tokenString;
   for (int i = 0; i < this->filesToCrawl.size; i ++) {
-    fileName.theString = this->filesToCrawl[i];
-    theFiles.theList.AddOnTop(fileName);
+    theFiles.theList.AddOnTop(this->filesToCrawl[i].ToJSON());
   }
-  result["files"] = theFiles;
+  result[WebAPI::request::slides::files] = theFiles;
   return result;
 }
 
 bool LaTeXCrawler::Slides::FromJSON(
   JSData& input, std::stringstream* commentsOnFailure
 ) {
-  if (!input["slideTitle"].isString(&this->title)) {
+  if (!input[WebAPI::request::slides::title].isString(&this->title)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "slideTitle entry missing or not a string. ";
     }
     return false;
   }
-  if (!input["files"].isListOfStrings(&this->filesToCrawl)) {
+  JSData& files = input[WebAPI::request::slides::files];
+  if (files.theType != JSData::token::tokenArray) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "files entry missing or not a list of strings. ";
+      *commentsOnFailure << "files entry missing or not a list. ";
     }
     return false;
   }
+  this->filesToCrawl.SetSize(files.theList.size);
+  for (int i = 0; i < files.theList.size; i ++) {
+    if (!this->filesToCrawl[i].fromJSON(files.theList[i], commentsOnFailure)) {
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure << "Failed to extract file from entry index " << i << ". ";
+      }
+      return false;
+    }
+  }
+
   return  true;
 }
 
@@ -4706,7 +4715,8 @@ bool LaTeXCrawler::Slides::FromString(
   JSData parsed;
   if (!parsed.readstring(decoded, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to parse your input in LaTeXCrawler::Slides::FromString. ";
+      *commentsOnFailure << "Failed to parse your input in "
+      << "LaTeXCrawler::Slides::FromString. ";
     }
     return false;
   }
@@ -4715,11 +4725,37 @@ bool LaTeXCrawler::Slides::FromString(
 
 JSData TopicElement::ComputeSlidesJSON(CalculatorHTML& owner) {
   LaTeXCrawler::Slides theSlides;
-  theSlides.filesToCrawl.AddListOnTop(owner.slidesSourcesHeaders);
-  theSlides.filesToCrawl.AddListOnTop(this->sourceSlides);
+  theSlides.AddSlidesOnTop(owner.slidesSourcesHeaders);
+  theSlides.AddSlidesOnTop(this->sourceSlides);
   theSlides.title = this->title;
   return theSlides.ToJSON();
 }
+
+JSData TopicElement::ComputeHomeworkJSON(CalculatorHTML& owner) {
+  LaTeXCrawler::Slides theSlides;
+  theSlides.AddSlidesOnTop(owner.sourcesHomeworkHeaders);
+  for (int i = 0; i < this->sourceHomework.size; i ++) {
+    LaTeXCrawler::FileWithOption file;
+    file.fileName = this->sourceHomework[i];
+    if (i < this->sourceHomeworkIsSolution.size) {
+      file.isSolution = this->sourceHomeworkIsSolution[i];
+    }
+    theSlides.filesToCrawl.AddOnTop(file);
+  }
+  theSlides.title = this->title;
+  return theSlides.ToJSON();
+}
+
+
+void TopicElement::ComputeHomework(CalculatorHTML& owner) {
+  MacroRegisterFunctionWithName("TopicElement::ComputeHomework");
+  if (this->sourceHomework.size == 0) {
+    return;
+  }
+  JSData resultJSON = this->ComputeHomeworkJSON(owner);
+  this->queryHomework = WebAPI::request::slides::content + "=" + HtmlRoutines::ConvertStringToURLString(resultJSON.ToString(), false);
+}
+
 
 void TopicElement::ComputeSlides(CalculatorHTML& owner) {
   MacroRegisterFunctionWithName("TopicElement::ComputeSlides");
@@ -4727,7 +4763,7 @@ void TopicElement::ComputeSlides(CalculatorHTML& owner) {
     return;
   }
   JSData resultJSON = this->ComputeSlidesJSON(owner);
-  this->querySlides = "slides=" + HtmlRoutines::ConvertStringToURLString(resultJSON.ToString(), false);
+  this->querySlides = WebAPI::request::slides::content + "=" + HtmlRoutines::ConvertStringToURLString(resultJSON.ToString(), false);
 }
 
 void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle) {
@@ -4782,7 +4818,8 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle) {
   if (this->video == "" || this->video == "-" || this->video == "--") {
     this->displayVideoLink = "";
   } else {
-    this->displayVideoLink = "<a href=\"" + this->video + "\" class =\"videoLink\" class =\"videoLink\" target =\"_blank\">Video</a>";
+    this->displayVideoLink = "<a href=\"" + this->video +
+    "\" class ='videoLink' class = 'videoLink' target = '_blank'>Video</a>";
   }
   if (this->videoHandwritten == "" || this->videoHandwritten == "-" || this->videoHandwritten == "--") {
     this->displayVideoHandwrittenLink = "";
@@ -4894,7 +4931,7 @@ JSData TopicElement::ToJSON(CalculatorHTML& owner) {
     output["querySlides"] = this->querySlides;
   }
   if (this->queryHomework != "") {
-    output["queryHomework"] = this->queryHomework;
+    output[WebAPI::request::slides::queryHomework] = this->queryHomework;
   }
   output[DatabaseStrings::labelDeadlines] = this->deadlinesPerSectioN;
   if (!global.UserDefaultHasProblemComposingRights()) {

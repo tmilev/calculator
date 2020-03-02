@@ -7,10 +7,27 @@
 
 class LaTeXCrawler {
   public:
-  class Slides {
+  struct FileWithOption {
+  public:
+    friend std::ostream& operator<<(std::ostream& output, const FileWithOption& file) {
+      output << file.fileName;
+      if (file.isSolution) {
+        output << "[solution]";
+      }
+      return output;
+    }
+    std::string fileName;
+    bool isSolution;
+    bool fromJSON(JSData& input, std::stringstream* commentsOnFailure);
+    JSData ToJSON();
+    FileWithOption();
+    FileWithOption(const std::string& input);
+  };
+  struct Slides {
   public:
     std::string title;
-    List<std::string> filesToCrawl;
+    List<LaTeXCrawler::FileWithOption> filesToCrawl;
+    void AddSlidesOnTop(const List<std::string>& input);
     JSData ToJSON();
     bool FromJSON(JSData& input, std::stringstream* commentsOnFailure);
     bool FromString(const std::string& input, std::stringstream* commentsOnFailure);
@@ -51,8 +68,7 @@ class LaTeXCrawler {
   List<std::string> theLectureNumbers;
   List<std::string> theLectureDesiredNames;
   List<std::string> slideTexInputCommands;
-  List<std::string> slideFilesExtraFlags;
-  List<std::string> slideFileNamesVirtualWithPatH;
+  List<LaTeXCrawler::FileWithOption> slideFileNamesVirtualWithPatH;
   List<std::string> slideFileNamesWithLatexPathNoExtension;
   List<std::string> slideFileNamesVirtualNoPathNoExtensioN;
   List<std::string> latexSnippets;
@@ -67,6 +83,7 @@ class LaTeXCrawler {
   bool flagDoChangeDirs;
   bool flagCrawlTexSourcesRecursively;
   bool flagPDFExists;
+  void AddSlidesOnTop(List<std::string>& inputSlides);
   static std::string AdjustDisplayTitle(const std::string& input, bool isHomework);
   bool IsInCrawlableFolder(const std::string& folderName, std::stringstream* commentsOnFailure);
   void ComputeAllowedFolders();

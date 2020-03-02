@@ -33,7 +33,7 @@ public:
   friend bool operator<(int left, const LargeIntegerUnsigned& right) {
     return right > left;
   }
-  friend std::ostream& operator << (std::ostream& output, const LargeIntegerUnsigned& theLIU) {
+  friend std::ostream& operator<<(std::ostream& output, const LargeIntegerUnsigned& theLIU) {
     output << theLIU.ToString();
     return output;
   }

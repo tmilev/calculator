@@ -1015,13 +1015,13 @@ var linkSpecs = {
     request: pathnames.urlFields.requests.homeworkFromSource,
     extension: ".pdf",
     name: "HW",
-    options: "answerKey=true&",
+    options: "answerKey=false&",
   },
   homeworkNoAnswers: {
     request: pathnames.urlFields.requests.homeworkFromSource,
     name: "HW+answ.",
     extension: ".pdf",
-    options: "answerKey=false&",
+    options: "answerKey=true&",
   },
   homeworkTex: {
     request: pathnames.urlFields.requests.sourceHomework,

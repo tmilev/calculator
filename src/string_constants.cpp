@@ -99,6 +99,10 @@ std::string WebAPI::request::slides::source               = "slidesSource"      
 std::string WebAPI::request::slides::pdfFromSource        = "slidesFromSource"            ;
 std::string WebAPI::request::slides::title                = "slideTitle"                  ;
 std::string WebAPI::request::slides::files                = "files"                       ;
+std::string WebAPI::request::slides::content              = "content"                     ;
+std::string WebAPI::request::slides::queryHomework        = "queryHomework"               ;
+std::string WebAPI::request::slides::isSolution           = "isSolution"                  ;
+std::string WebAPI::request::slides::slideFilename        = "slideFilename"               ;
 
 std::string WebAPI::frontend::currentPage     = "currentPage"    ;
 std::string WebAPI::frontend::problemFileName = "problemFileName";
@@ -106,7 +110,6 @@ std::string WebAPI::frontend::problemPage     = "problemPage"    ;
 std::string WebAPI::frontend::exercise        = "exerciseJSON"   ;
 std::string WebAPI::frontend::exerciseType    = "exerciseType"   ;
 std::string WebAPI::frontend::scoredQuiz      = "scoredQuizJSON" ;
-
 
 std::string WebAPI::UserInfo::processMonitoring = "processMonitoring";
 

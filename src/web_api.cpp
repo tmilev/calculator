@@ -544,21 +544,6 @@ bool WebAPIResponse::ProcessSlidesOrHomeworkFromSource() {
     resultOnError[WebAPI::result::error] = commentsOnFailure.str();
     return global.theResponse.WriteResponse(resultOnError);
   }
-  for (int i = 0; i < global.webArguments.size(); i ++) {
-    std::string theKey = HtmlRoutines::ConvertURLStringToNormal(global.webArguments.theKeys[i], false);
-    if (StringRoutines::StringBeginsWith(theKey, "isSolutionFile")) {
-      theCrawler.slideFilesExtraFlags.AddOnTop(StringRoutines::StringTrimWhiteSpace(
-        HtmlRoutines::ConvertURLStringToNormal(global.webArguments.theValues[i], false)
-      ));
-    }
-  }
-  if (theCrawler.slideFilesExtraFlags.size > theCrawler.slideFileNamesVirtualWithPatH.size) {
-    theCrawler.slideFilesExtraFlags.SetSize(theCrawler.slideFileNamesVirtualWithPatH.size);
-  } else {
-    for (int i = theCrawler.slideFilesExtraFlags.size; i < theCrawler.slideFileNamesVirtualWithPatH.size; i ++) {
-      theCrawler.slideFilesExtraFlags.AddOnTop("");
-    }
-  }
   std::stringstream comments;
   if (global.GetWebInput("layout") == "printable") {
     theCrawler.flagProjectorMode = false;
@@ -588,10 +573,10 @@ bool WebAPIResponse::ProcessSlidesOrHomeworkFromSource() {
 
 bool LaTeXCrawler::initializeFromGlobalVariables(std::stringstream* commentsOnFailure) {
   LaTeXCrawler::Slides theSlides;
-  std::string slideSpecification = global.webArguments.GetValue("slides", "");
+  std::string slideSpecification = global.webArguments.GetValue(WebAPI::request::slides::content, "");
   if (!theSlides.FromString(slideSpecification, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to initialize slides from global inputs. ";
+      *commentsOnFailure << "Failed to initialize slides from global inputs: key: " << WebAPI::request::slides::content << " is missing. ";
     }
     return false;
   }

@@ -3556,8 +3556,37 @@ bool TopicElement::PdfSlidesOpenIfAvailable(
 }
 
 bool TopicElement::PdfHomeworkOpensIfAvailable(CalculatorHTML& owner, std::stringstream* commentsOnFailure) {
-  bool implementSoon;
-  return true;
+  if (
+    this->type != TopicElement::types::chapter &&
+    this->type != TopicElement::types::section &&
+    this->type != TopicElement::types::topic &&
+    this->type != TopicElement::types::title &&
+    this->type != TopicElement::types::problem
+  ) {
+    return true;
+  }
+  if (this->sourceHomework.size == 0) {
+    return true;
+  }
+  LaTeXCrawler theCrawler;
+  theCrawler.desiredPresentationTitle = this->title;
+
+  theCrawler.AddSlidesOnTop(owner.sourcesHomeworkHeaders);
+  theCrawler.AddSlidesOnTop(this->sourceHomework);
+  theCrawler.flagHomeworkRatherThanSlides = true;
+  if (!theCrawler.ExtractFileNamesPdfExists(commentsOnFailure, commentsOnFailure)) {
+    return false;
+  }
+  std::string actualOutput;
+  FileOperations::GetPhysicalFileNameFromVirtual(
+    theCrawler.targetPDFFileNameWithPathVirtual, actualOutput, false, false, nullptr
+  );
+  global << "Physical filename: " << actualOutput << logger::endL;
+  if (!theCrawler.flagPDFExists && commentsOnFailure != nullptr) {
+    *commentsOnFailure << "Could not find file: "
+    << theCrawler.targetPDFFileNameWithPathVirtual << ". ";
+  }
+  return theCrawler.flagPDFExists;
 }
 
 bool TopicElement::PdfsOpenIfAvailable(CalculatorHTML& owner, std::stringstream* commentsOnFailure) {

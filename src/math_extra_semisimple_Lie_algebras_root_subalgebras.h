@@ -19,8 +19,6 @@ public:
   DynkinDiagramRootSubalgebra theDiagramRelAndK;
   std::string DebugString;
   std::string stringConnectedComponents;
-  void ReadFromFile(std::fstream& input, rootSubalgebras& owner);
-  void WriteToFile(std::fstream& output);
   void ComputeTheDiagramAndDiagramRelAndK(rootSubalgebra& owner);
   void ComputeDiagramRelAndK(rootSubalgebra& owner);
   void FixRepeatingRoots(Vectors<Rational>& theRoots, List<Rational>& coeffs);
@@ -299,8 +297,6 @@ public:
     int indexInOwner
   );
   void GeneratePossibleNilradicalsInit(List<Selection>& impliedSelections, int& parabolicsCounter);
-  void WriteToFileNilradicalGeneration(std::fstream& output);
-  void ReadFromFileNilradicalGeneration(std::fstream& input, rootSubalgebras& owner);
   bool ConeConditionHolds(rootSubalgebras& owner, int indexInOwner, bool doExtractRelations);
   bool ConeConditionHolds(
     rootSubalgebras& owner,
@@ -418,10 +414,6 @@ public:
     List<rootSubalgebra>& bufferSAs, int RecursionDepth
   );
   void SortDescendingOrderBySSRank();
-  void WriteToDefaultFileNilradicalGeneration();
-  bool ReadFromDefaultFileNilradicalGeneration();
-  void WriteToFileNilradicalGeneration(std::fstream& output);
-  void ReadFromFileNilradicalGeneration(std::fstream& input);
   void ElementToStringRootSpaces(std::string& output, bool includeMatrixForm, Vectors<Rational>& input);
   void ElementToStringConeConditionNotSatisfying(std::string& output, bool includeMatrixForm);
   void ElementToStringCentralizerIsomorphisms(std::string& output, bool useLatex, bool useHtml, int fromIndex, int NumToProcess);

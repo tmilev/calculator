@@ -977,7 +977,7 @@ bool Calculator::EvaluateExpression(
   state.LookUpCache();
   // reduction phase:
   //////////////////////////////////
-  // EvaluateExpression is called recusively
+  // EvaluateExpression is called recursively
   // inside state.EvaluateChildren
   // inside state.ReduceOnce.
   while (state.ReduceOnce()) {

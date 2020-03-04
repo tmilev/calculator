@@ -398,45 +398,6 @@ void Vectors<coefficient>::SelectABasisInSubspace(
   }
 }
 
-template <class Object>
-bool List<Object>::ReadFromFile(std::fstream& input, int UpperLimitForDebugPurposes) {
-  std::string tempS;
-  int ActualListSize; int NumWordsBeforeTag;
-  XML::ReadThroughFirstOpenTag(input, NumWordsBeforeTag, this->GetXMLClassName());
-  if (NumWordsBeforeTag != 0) {
-    global.fatal << "Bad file input. " << global.fatal;
-  }
-  input >> tempS >> ActualListSize;
-  if (tempS != "size:") {
-    global.fatal << "Failed to read list. " << global.fatal;
-  }
-  if (tempS != "size:") {
-    return false;
-  }
-  int CappedListSize = ActualListSize;
-  if (UpperLimitForDebugPurposes > 0 && UpperLimitForDebugPurposes < CappedListSize) {
-    CappedListSize = UpperLimitForDebugPurposes;
-  }
-  this->SetSize(CappedListSize);
-  ProgressReport theReport(30, GlobalVariables::Response::ReportType::fileInputOutput);
-  for (int i = 0; i < CappedListSize; i ++) {
-    this->TheObjects[i].ReadFromFile(input);
-    if (theReport.TickAndWantReport()) {
-      std::stringstream report;
-      report << "Reading object number " << i + 1 << " out of " << ActualListSize;
-      if (CappedListSize < ActualListSize) {
-        report << " capped at " << CappedListSize;
-      }
-      theReport.Report(report.str());
-    }
-  }
-  bool tempBool = XML::ReadEverythingPassedTagOpenUntilTagClose(input, NumWordsBeforeTag, this->GetXMLClassName());
-  if (!tempBool) {
-    global.fatal << "Bad input file. " << global.fatal;
-  }
-  return true;
-}
-
 template <typename coefficient>
 void Matrix<coefficient>::AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, const coefficient& scalar) {
   ProgressReport theReport (10, GlobalVariables::Response::ReportType::gaussianElimination);

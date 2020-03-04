@@ -324,9 +324,6 @@ public:
     }
     return this->monBody[i];
   }
-  static std::string GetXMLClassName() {
-    return "MonomialP";
-  }
   unsigned  int HashFunction() const {
     return this->monBody.HashFunction();
   }
@@ -503,10 +500,6 @@ public:
   void operator=(const MonomialP& other) {
     this->monBody = other.monBody;
   }
-  void ReadFromFile(std::fstream& input);
-  void WriteToFile(std::fstream& output) const {
-    this->monBody.WriteToFile(output);
-  }
 };
 
 template <typename coefficient>
@@ -537,11 +530,6 @@ public:
     return true;
   }
   void Resize(int r, int c, bool PReserveValues, const coefficient* TheRingZero = nullptr);
-  static std::string GetXMLClassName() {
-    std::string result = "Matrix_";
-    result.append(coefficient::GetXMLClassName());
-    return result;
-  }
   Matrix(): NumRows(0), ActualNumRows(0), NumCols(0), ActualNumCols(0), elements(nullptr), flagDeallocated(false) {
   }
   Matrix(const Matrix<coefficient>& other):
@@ -1516,47 +1504,6 @@ ParallelComputing::GlobalPointerCounter -= this->ActualNumRows * this->ActualNum
   this->ActualNumCols = 0;
 }
 
-template <typename Element>
-void Matrix<Element>::WriteToFile(std::fstream& output) {
-  output << XML::GetOpenTagNoInputCheckAppendSpacE(this->GetXMLClassName());
-  output << "r: " << this->NumRows << " c: " << this->NumCols << "\n";
-  for (int i = 0; i < this->NumRows; i ++) {
-    for (int j = 0; j < this->NumCols; j ++) {
-      this->elements[i][j].WriteToFile(output);
-      output << " ";
-    }
-    output << "\n";
-  }
-  output << XML::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName());
-}
-
-template <typename Element>
-bool Matrix<Element>::ReadFromFile(std::fstream& input) {
-  int r, c;
-  std::string tempS;
-  int NumReadWords;
-  XML::ReadThroughFirstOpenTag(input, NumReadWords, this->GetXMLClassName());
-  if (NumReadWords != 0) {
-    global.fatal << "While reading matrix, encountered fatal error. " << global.fatal;
-  }
-  input >> tempS >> r >> tempS >> c;
-  if (tempS != "c:") {
-    global.fatal << "Bad matrix file. " << global.fatal;
-    return false;
-  }
-  this->init(r, c);
-  for (int i = 0; i < this->NumRows; i ++) {
-    for (int j = 0; j < this->NumCols; j ++) {
-      this->elements[i][j].ReadFromFile(input);
-    }
-  }
-  XML::ReadEverythingPassedTagOpenUntilTagClose(input, NumReadWords, this->GetXMLClassName());
-  if (NumReadWords != 0) {
-    global.fatal << "Bad matrix file: not enough words read. " << global.fatal;
-  }
-  return true;
-}
-
 template <typename coefficient>
 bool Matrix<coefficient>::Invert() {
   if (this->NumCols != this->NumRows) {
@@ -2052,11 +1999,6 @@ public:
   }
   bool NeedsParenthesisForMultiplication() const {
     return this->size() > 1;
-  }
-  static std::string GetXMLClassName() {
-    std::string result = "MonomialCollection_";
-    result.append(templateMonomial::GetXMLClassName());
-    return result;
   }
   std::string ToString(FormatExpressions* theFormat = nullptr) const;
   int size() const {
@@ -3775,58 +3717,6 @@ bool MonomialCollection<templateMonomial, coefficient>::operator==(
 }
 
 template <class templateMonomial, class coefficient>
-void MonomialCollection<templateMonomial, coefficient>::WriteToFile(std::fstream& output) {
-  output << XML::GetOpenTagNoInputCheckAppendSpacE(this->GetXMLClassName());
-  output << " numMons: " << this->size();
-  for (int i = 0; i < this->size(); i ++) {
-    output << " ";
-    if (i > 0) {
-      if (!this->coefficients[i].BeginsWithMinus()) {
-        output << "+ ";
-      }
-    }
-    this->coefficients[i].WriteToFile(output);
-    const templateMonomial& tempM = (*this)[i];
-    tempM.WriteToFile(output);
-  }
-  output << XML::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName()) << "\n";
-}
-
-template <class templateMonomial, class coefficient>
-bool MonomialCollection<templateMonomial, coefficient>::ReadFromFile(std::fstream& input) {
-  int numReadWords, targetSize;
-  XML::ReadThroughFirstOpenTag(input, numReadWords, this->GetXMLClassName());
-  std::string ReaderString;
-  bool result = true;
-  input >> ReaderString >> targetSize;
-  if (ReaderString != "numMons:" ) {
-    global.fatal << "Bad monomial collection in file. " << global.fatal;
-    return false;
-  }
-  this->MakeZero();
-  templateMonomial tempM;
-  this->SetExpectedSize(targetSize);
-  input.ignore();
-  coefficient theCoeff;
-  for (int i = 0; i < targetSize; i ++) {
-    if (input.peek() == '+') {
-      input >> ReaderString;
-    }
-    theCoeff.ReadFromFile(input);
-    tempM.ReadFromFile(input);
-    if (!result) {
-      break;
-    }
-    this->AddMonomial(tempM, theCoeff);
-  }
-  XML::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, this->GetXMLClassName());
-  if (numReadWords != 0) {
-    global.fatal << "Trailing words while reading monomial collection. " << global.fatal;
-  }
-  return result;
-}
-
-template <class templateMonomial, class coefficient>
 bool MonomialCollection<templateMonomial, coefficient>::IsEqualToZero() const {
   return this->size() == 0;
 }
@@ -4347,21 +4237,6 @@ void Matrix<coefficient>::NonPivotPointsToEigenVector(
       output[i] = theRingUnit;
     }
   }
-}
-
-template <class Object>
-void List<Object>::WriteToFile(std::fstream& output, int UpperLimitForDebugPurposes) const {
-  int NumWritten = this->size;
-  if (UpperLimitForDebugPurposes > 0 && UpperLimitForDebugPurposes < NumWritten) {
-    NumWritten = UpperLimitForDebugPurposes;
-  }
-  output << XML::GetOpenTagNoInputCheckAppendSpacE(this->GetXMLClassName());
-  output << "size: " << NumWritten << "\n";
-  for (int i = 0; i < NumWritten; i ++) {
-    this->TheObjects[i].WriteToFile(output);
-    output << "\n";
-  }
-  output << XML::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName()) << "\n";
 }
 
 template<class coefficient>
@@ -5443,9 +5318,6 @@ std::string MonomialCollection<templateMonomial, coefficient>::ToString(FormatEx
 class Lattice {
   void TestGaussianEliminationEuclideanDomainRationals(Matrix<Rational>& output);
 public:
-  static const std::string GetXMLClassName() {
-    return "Lattice";
-  }
   Matrix<Rational> basisRationalForm;
   Matrix<LargeInteger> basis;
   LargeIntegerUnsigned Den;
@@ -5554,9 +5426,6 @@ public:
 
 class QuasiPolynomial {
 public:
-  static std::string GetXMLClassName() {
-    return "Quasipolynomial";
-  }
   int GetNumVars() const {
     return this->AmbientLatticeReduced.basis.NumRows;
   }
@@ -5603,8 +5472,6 @@ public:
   ) const;
   void operator+=(const QuasiPolynomial& other);
   QuasiPolynomial(){}
-  void WriteToFile(std::fstream& output);
-  bool ReadFromFile(std::fstream& input);
   QuasiPolynomial(const QuasiPolynomial& other) {
     this->operator=(other);
   }
@@ -5822,9 +5689,6 @@ class Cone {
     return output;
   }
 public:
-  static const std::string GetXMLClassName() {
-    return "Cone";
-  }
   bool flagIsTheZeroCone;
   Vectors<Rational> Vertices;
   Vectors<Rational> Normals;
@@ -5932,8 +5796,6 @@ public:
     Vector<Rational>& normal2,
     Vector<Rational>& output
   );
-  bool ReadFromFile(std::fstream& output);
-  void WriteToFile(std::fstream& output);
   void operator=(const Cone& other) {
     //this->flagHasSufficientlyManyVertices = other.flagHasSufficientlyManyVertices;
     this->flagIsTheZeroCone = other.flagIsTheZeroCone;
@@ -5965,9 +5827,6 @@ public:
 
 class ConeLatticeAndShift {
   public:
-  static std::string GetXMLClassName() {
-    return "ConeLatticeShift";
-  }
   Cone theProjectivizedCone;
   Lattice theLattice;
   Vector<Rational> theShift;
@@ -6649,9 +6508,6 @@ public:
 
 class ConeLatticeAndShiftMaxComputation {
 public:
-  static const std::string GetXMLClassName() {
-    return "ConeLatticeAndShiftMaxComputation";
-  }
   int numNonParaM;
   int numProcessedNonParam;
   List<ConeComplex> complexStartingPerRepresentative;
@@ -6678,8 +6534,6 @@ public:
   void FindExtremaParametricStep3();
   void FindExtremaParametricStep4();
   void FindExtremaParametricStep5();
-  void WriteToFile(std::fstream& output);
-  bool ReadFromFile(std::fstream& input, int UpperLimitDebugPurposes);
 };
 
 class PiecewiseQuasipolynomial {

@@ -34,13 +34,6 @@ std::string MonomialWeylAlgebra::ToString(FormatExpressions* theFormat) const {
   return out.str();
 }
 
-void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::WriteToFile(std::fstream& output) {
-  output << "generator_reflections: ";
-  this->simpleRootsInner.WriteToFile(output);
-  output << "\nouter_generators: ";
-  this->ExternalAutomorphisms.WriteToFile(output);
-}
-
 Vector<Rational> SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::GetRho() {
   Vector<Rational> result;
   this->RootsOfBorel.sum(result, this->AmbientWeyl->GetDim());
@@ -56,14 +49,6 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
   this->ActByElement(input, startBasis, imageBasis);
   outputMatrix.AssignVectorsToRows(imageBasis);
   outputMatrix.Transpose();
-}
-
-void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::ReadFromFile(std::fstream& input) {
-  std::string tempS;
-  input >> tempS;
-  this->simpleRootsInner.ReadFromFile(input);
-  input >> tempS;
-  this->ExternalAutomorphisms.ReadFromFile(input);
 }
 
 bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::ComputeSubGroupFromGeneratingReflections(
@@ -424,27 +409,6 @@ void DrawingVariables::drawString(
     );
     theDrawData.outputWidth += static_cast<int>(static_cast<double>(theFontSize) / 1.15);
   }
-}
-
-void WeylGroupData::WriteToFile(std::fstream& output) {
-  global.fatal << "WeylGroupData::WriteToFile Not implemented yet due to a regression. " << global.fatal;
-//  output << this->WeylLetter << " " << this->CartanSymmetric.NumRows << "\n";
-  output << "Long_root_length: ";
-//  this->lengthLongestRootSquared.WriteToFile(output);
-  output << "\n";
-  this->CartanSymmetric.WriteToFile(output);
-}
-
-void WeylGroupData::ReadFromFile(std::fstream& input) {
-  std::string tempS;
-  input >> tempS;
-  global.fatal << "WeylGroupData::ReadFromFile is not implemented yet (due to a regression)." << global.fatal;
-  //input >> this->WeylLetter >> tempI >> tempS;
-  if (tempS != "Long_root_length:") {
-    global.fatal << "Failed to read weyl group data from file. " << global.fatal;
-  }
-//  this->lengthLongestRootSquared.ReadFromFile(input);
-  this->CartanSymmetric.ReadFromFile(input);
 }
 
 void SemisimpleLieAlgebra::ComputeOneAutomorphism(Matrix<Rational>& outputAuto, bool useNegativeRootsFirst) {
@@ -2575,10 +2539,6 @@ bool MonomialP::IsDivisibleBy(const MonomialP& other) const {
     }
   }
   return true;
-}
-
-void MonomialP::ReadFromFile(std::fstream& input) {
-  this->monBody.ReadFromFile(input);
 }
 
 bool MonomialP::operator==(const MonomialP& other) const {

@@ -13,9 +13,6 @@ public:
   List<bool> selected;
   int MaxSize;
   int CardinalitySelection;
-  static std::string GetXMLClassName() {
-    return "Selection";
-  }
   void AddSelectionAppendNewIndex(int index);
   void RemoveLastSelection();
   void RemoveSelection(int index) {

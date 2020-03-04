@@ -98,9 +98,6 @@ Vector<coefficient> branchingData::ProjectWeight(Vector<coefficient>& input) {
 
 class GeneralizedVermaModuleCharacters {
 public:
-  inline static const std::string GetXMLClassName() {
-    return "GeneralizedVermaCharacters";
-  }
   PauseThread thePauseControlleR;
   List<Matrix<Rational> > theLinearOperators;
   // the first k variables correspond to the Cartan of the smaller Lie algebra
@@ -152,26 +149,6 @@ public:
   std::string PrepareReport();
   GeneralizedVermaModuleCharacters();
   bool CheckInitialization() const;
-  void ReadFromDefaultFile();
-  void WriteToDefaultFile();
-  void WriteToFile(std::fstream& output);
-  bool ReadFromFile(std::fstream& input) {
-    std::string tempS;
-    int numReadWords;
-    Vector<Rational>  parSel;
-    parSel = this->ParabolicLeviPartRootSpacesZeroStandsForSelected;
-    input >> tempS >> this->computationPhase;
-    if (tempS != "ComputationPhase:") {
-      global.fatal << "Reading generalized characters from file failed. " << global.fatal;
-    }
-    bool result = true;
-    if (this->computationPhase != 0) {
-      result = this->ReadFromFileNoComputationPhase(input);
-    }
-    XML::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, this->GetXMLClassName());
-    return result;
-  }
-  bool ReadFromFileNoComputationPhase(std::fstream& input);
   std::string PrepareReportOneCone(FormatExpressions& theFormat, const Cone& theCone);
   void GetProjection(int indexOperator, const Vector<Rational>& input, Vector<Rational> & output);
   void SplitByMultiplicityFreeWall(Cone& theCone, ConeComplex& output);

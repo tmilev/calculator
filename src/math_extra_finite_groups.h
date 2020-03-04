@@ -858,8 +858,6 @@ public:
   }
 //  int GetNumRootsFromFormula();
   void GenerateRootSystem();
-  void WriteToFile(std::fstream& output);
-  void ReadFromFile(std::fstream& input);
   void ActOnAffineHyperplaneByGroupElement(int index, affineHyperplane<Rational>& output, bool RhoAction, bool UseMinusRho);
   void ProjectOnTwoPlane(Vector<Rational>& orthonormalBasisVector1, Vector<Rational>& orthonormalBasisVector2);
   void GetLowestElementInOrbit(
@@ -2043,8 +2041,6 @@ public:
   void ActByNonSimpleElement(int index, const Vectors<coefficient>& input, Vectors<coefficient>& output) const {
     this->ActByElement(this->allElements[index], input, output);
   }
-  void WriteToFile(std::fstream& output);
-  void ReadFromFile(std::fstream& input);
 };
 
 template <typename coefficient>

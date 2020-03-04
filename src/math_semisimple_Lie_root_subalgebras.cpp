@@ -1688,23 +1688,6 @@ WeylGroupAutomorphisms& rootSubalgebra::GetAmbientWeylAutomorphisms() const {
   return this->ownEr->theWeylGroupAutomorphisms;
 }
 
-void rootSubalgebra::WriteToFileNilradicalGeneration(std::fstream& output) {
-  output << "Simple_basis_k: ";
-  this->SimpleBasisK.WriteToFile(output);
-}
-
-void rootSubalgebra::ReadFromFileNilradicalGeneration(std::fstream& input, rootSubalgebras& inputOwner) {
-  std::string tempS;
-  input >> tempS;
-  if (tempS != "Simple_basis_k:") {
-    global.fatal << "Failed to read simple basis of k. " << global.fatal;
-  }
-  this->SimpleBasisK.ReadFromFile(input);
-  this->genK=(this->SimpleBasisK);
-  this->ownEr = &inputOwner;
-  this->ComputeEssentialS();
-}
-
 bool rootSubalgebra::LinCombToStringDistinguishedIndex(
   int distinguished, Vector<Rational>& alphaRoot, int coeff, Vector<Rational>& linComb, std::string& output
 ) {
@@ -3071,75 +3054,6 @@ std::string rootSubalgebras::ToString(FormatExpressions* theFormat) {
   return this->ToStringDynkinTableHTML(theFormat);
 }
 
-bool rootSubalgebras::ReadFromDefaultFileNilradicalGeneration() {
-  std::fstream theFile;
-  if (FileOperations::OpenFileCreateIfNotPresentVirtual(
-    theFile, "output/theNilradicalsGenerator.txt", false, false, false
-  )) {
-    theFile.seekg(0);
-    this->ReadFromFileNilradicalGeneration(theFile);
-    return true;
-  }
-  return false;
-}
-
-void rootSubalgebras::WriteToDefaultFileNilradicalGeneration() {
-  std::fstream theFile;
-  FileOperations::OpenFileCreateIfNotPresentVirtual(theFile, "output/theNilradicalsGenerator.txt", false, true, false);
-  this->WriteToFileNilradicalGeneration(theFile);
-}
-
-void rootSubalgebras::WriteToFileNilradicalGeneration(std::fstream& output) {
-  this->GetOwnerWeyl().WriteToFile(output);
-  output << "Number_subalgebras: " << this->theSubalgebras.size << "\n";
-  //////////////////////////////////////////////////////////////////////////////////////
-  output << "Index_current_SA_nilradicals_generation: " << this->IndexCurrentSANilradicalsGeneration << "\n";
-  output << "Num_SAs_to_be_processed: " << this->NumReductiveRootSAsToBeProcessedNilradicalsGeneration << "\n";
-  output << "Parabolics_counter_nilradical_generation: " << this->parabolicsCounterNilradicalGeneration << "\n";
-  output << "Num_SAs_processed: " << this->NumSubalgebrasProcessed << "\n";
-  output << "Num_cone_condition_failures: " << this->NumConeConditionFailures << "\n";
-  output << "Implied_selections: ";
-  this->ImpiedSelectionsNilradical.WriteToFile(output);
-  output << "Counters_nilradicals_generation: ";
-  output << this->CountersNilradicalsGeneration;
-  output << "\nRecursion_depth: " << this->RecursionDepthNilradicalsGeneration << "\n";
-  ////////////////////////////////////////////////////////////////////////////////////////
-  for (int  i = 0; i < this->theSubalgebras.size; i ++) {
-    this->theSubalgebras[i].WriteToFileNilradicalGeneration(output);
-  }
-  this->theGoodRelations.WriteToFile(output);
-  this->theBadRelations.WriteToFile(output);
-}
-
-void rootSubalgebras::ReadFromFileNilradicalGeneration(std::fstream& input) {
-  std::string tempS; int tempI;
-  this->GetOwnerWeyl().ReadFromFile(input);
-  this->GetOwnerWeyl().ComputeRho(true);
-  input >> tempS >> tempI;
-  if (tempS != "Number_subalgebras:") {
-    global.fatal << "Error loading nilradical generation file. " << global.fatal;
-  }
-  this->theSubalgebras.SetSize(tempI);
-  //////////////////////////////////////////////////////////////////////////////////////
-  input >> tempS >> this->IndexCurrentSANilradicalsGeneration;
-  input >> tempS >> this->NumReductiveRootSAsToBeProcessedNilradicalsGeneration;
-  input >> tempS >> this->parabolicsCounterNilradicalGeneration;
-  input >> tempS >> this->NumSubalgebrasProcessed;
-  input >> tempS >> this->NumConeConditionFailures;
-  input >> tempS;
-  this->ImpiedSelectionsNilradical.ReadFromFile(input);
-  input >> tempS;
-  input >> this->CountersNilradicalsGeneration;
-  input >> tempS >> this->RecursionDepthNilradicalsGeneration;
-  /////////////////////////////////////////////////////////////////////////////////////
-  for (int i = 0; i < this->theSubalgebras.size; i ++) {
-    this->theSubalgebras[i].ReadFromFileNilradicalGeneration(input, *this);
-  }
-  this->theGoodRelations.ReadFromFile(input, *this);
-  this->theBadRelations.ReadFromFile(input, *this);
-  this->flagNilradicalComputationInitialized = true;
-}
-
 void rootSubalgebras::ElementToStringCentralizerIsomorphisms(
   std::string& output, bool useLatex, bool useHtml, int fromIndex, int NumToProcess
 ) {
@@ -4427,32 +4341,6 @@ bool coneRelation::leftSortedBiggerThanOrEqualToRight(List<int>& left, List<int>
   return true;
 }
 
-void coneRelation::WriteToFile(std::fstream& output) {
-  this->AlphaCoeffs.WriteToFile(output);
-  this->Alphas.WriteToFile(output);
-  output << this->AlphaKComponents;
-  this->BetaCoeffs.WriteToFile(output);
-  this->Betas.WriteToFile(output);
-  output << this->BetaKComponents;
-  output << "Index_owner_root_SA: " << this->IndexOwnerRootSubalgebra << " ";
-}
-
-void coneRelation::ReadFromFile(std::fstream& input, rootSubalgebras& owner) {
-  std::string tempS;
-  this->AlphaCoeffs.ReadFromFile(input);
-  this->Alphas.ReadFromFile(input);
-  input >> this->AlphaKComponents;
-  this->BetaCoeffs.ReadFromFile(input);
-  this->Betas.ReadFromFile(input);
-  input >> this->BetaKComponents;
-  input >> tempS >> this->IndexOwnerRootSubalgebra;
-  if (tempS != "Index_owner_root_SA:") {
-    global.fatal << "Error loading cone relation from file. " << global.fatal;
-  }
-  this->ComputeTheDiagramAndDiagramRelAndK(owner.theSubalgebras[this->IndexOwnerRootSubalgebra]);
-  this->ComputeDebugString(owner, true, true);
-}
-
 bool coneRelation::GenerateAutomorphisms(coneRelation& right) {
   /*if (this->DebugString.length() !=right.DebugString.length())
     return false;
@@ -4544,22 +4432,3 @@ void coneRelations::ToString(std::string& output, rootSubalgebras& owners, bool 
   }
   output = out.str();
 }
-
-void coneRelations::WriteToFile(std::fstream& output) {
-  output << "num_rels: " << this->size << "\n";
-  for (int i = 0; i < this->size; i ++) {
-    this->TheObjects[i].WriteToFile(output);
-  }
-}
-
-void coneRelations::ReadFromFile(std::fstream& input, rootSubalgebras& owner) {
-  std::string tempS; int tempI;
-  this->Clear();
-  input >> tempS >> tempI;
-  coneRelation tempRel;
-  for (int i = 0; i < tempI; i ++) {
-    tempRel.ReadFromFile(input, owner);
-    this->AddRelationNoRepetition(tempRel, owner);
-  }
-}
-

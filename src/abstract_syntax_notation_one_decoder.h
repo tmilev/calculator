@@ -184,6 +184,7 @@ public:
     unsigned char inputContentTag
   );
   // static initialization order fiasco guard:
+  // The function is thread-safe after returning once.
   static MapList<std::string, ASNObject, MathRoutines::HashString>& NamesToObjectIdsNonThreadSafe();
   static MapList<List<unsigned char>, ASNObject, MathRoutines::HashListUnsignedChars>& ObjectIdsToNames();
   static void initializeNonThreadSafe();

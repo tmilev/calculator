@@ -185,6 +185,8 @@ bool CalculatorFunctions::innerTestLoadPEMCertificates(
   }
   X509Certificate theCertificate;
   std::stringstream errorStream, resultStream;
+  // May not be initialized if unit testing. Safe after the first run.
+  ASNObject::NamesToObjectIdsNonThreadSafe();
   bool success = theCertificate.LoadFromASNEncoded(binaryString, &errorStream);
   if (!success) {
     resultStream << "Failed to load asn encoded certificate.<br>";

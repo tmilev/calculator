@@ -1566,11 +1566,6 @@ void GeneralizedVermaModuleCharacters::IncrementComputation(Vector<Rational>& pa
   std::stringstream out;
   this->thePauseControlleR.InitComputation();
   this->ParabolicLeviPartRootSpacesZeroStandsForSelected = parabolicSel;
-  if ((false)) {
-    if (this->UpperLimitChambersForDebugPurposes == 0 || this->theLinearOperators.size == 0) {
-      this->ReadFromDefaultFile();
-    }
-  }
   switch (this->computationPhase) {
     case 0:
 //      this->theParser.theHmm.MakeG2InB3(this->theParser);
@@ -1617,79 +1612,7 @@ void GeneralizedVermaModuleCharacters::IncrementComputation(Vector<Rational>& pa
       break;
   }
   this->computationPhase ++;
-  if (this->computationPhase > 8) {
-  }
-  if (this->UpperLimitChambersForDebugPurposes <= 0) {
-    if (this->computationPhase < 30) {
-      this->WriteToDefaultFile();
-    }
-  }
   this->thePauseControlleR.ExitComputation();
-}
-
-void GeneralizedVermaModuleCharacters::WriteToFile(std::fstream& output) {
-  output << XML::GetOpenTagNoInputCheckAppendSpacE(this->GetXMLClassName());
-  output << "ComputationPhase: " << this->computationPhase << "\n";
-  output << "NumProcessedConesParam: " << this->NumProcessedConesParam << "\n";
-  output << "NumProcessedExtremaEqualOne: " << this->NumProcessedExtremaEqualOne << "\n";
-  output << "NormalConstAdjustment: ";
-  this->NonIntegralOriginModificationBasisChanged.WriteToFile(output);
-  output << "\n";
-  output << "ChamberIndicatorHighestWeightLargerAlgebra: ";
-  this->ParabolicLeviPartRootSpacesZeroStandsForSelected.WriteToFile(output);
-  this->ParabolicSelectionSmallerAlgebra.WriteToFile(output);
-  output << "\n";
-  this->WeylLarger->WriteToFile(output);
-  this->WeylSmaller->WriteToFile(output);
-  this->preferredBasiS.WriteToFile(output);
-  this->preferredBasisChangE.WriteToFile(output);
-  this->preferredBasisChangeInversE.WriteToFile(output);
-  this->theExtendedIntegralLatticeMatForM.WriteToFile(output);
-  ProgressReport theReport(1, GlobalVariables::Response::ReportType::fileInputOutput);
-  this->theMaxComputation.WriteToFile(output);
-  this->GmodKnegativeWeightS.WriteToFile(output);
-  this->GmodKNegWeightsBasisChanged.WriteToFile(output);
-  this->theLinearOperators.WriteToFile(output);
-  this->theLinearOperatorsExtended.WriteToFile(output);
-  this->PreimageWeylChamberLargerAlgebra.WriteToFile(output);
-  this->PreimageWeylChamberSmallerAlgebra.WriteToFile(output);
-  this->WeylChamberSmallerAlgebra.WriteToFile(output);
-  if (theReport.TickAndWantReport()) {
-    theReport.Report("Writing QP's non-subbed... ");
-  }
-  this->theQPsNonSubstituted.WriteToFile(output);
-  if (theReport.TickAndWantReport()) {
-    theReport.Report("Writing QP's subbed... ");
-  }
-  output << XML::GetOpenTagNoInputCheckAppendSpacE("QPsSubbed");
-  this->theQPsSubstituted.WriteToFile(output);
-  output << XML::GetCloseTagNoInputCheckAppendSpacE("QPsSubbed");
-  if (theReport.TickAndWantReport()) {
-    theReport.Report("Writing small data... ");
-  }
-  output << XML::GetOpenTagNoInputCheckAppendSpacE("theMultiplicities");
-  this->theMultiplicities.WriteToFile(output, this->UpperLimitChambersForDebugPurposes);
-  output << XML::GetCloseTagNoInputCheckAppendSpacE("theMultiplicities");
-  //  this->theMultiplicitiesExtremaCandidates.WriteToFile(output);
-  this->theCoeffs.WriteToFile(output);
-  this->theTranslationS.WriteToFile(output);
-  this->theTranslationsProjectedBasisChanged.WriteToFile(output);
-  this->thePfs.WriteToFile(output);
-  //  this->paramSubChambers.WriteToFile(output);
-  //  this->nonParamVertices.WriteToFile(output);
-  if (theReport.TickAndWantReport()) {
-    theReport.Report("Writing param chamber complex... ");
-  }
-  this->projectivizedParamComplex.WriteToFile(output);
-  if (theReport.TickAndWantReport()) {
-    theReport.Report("Writing projectivized chamber complex... ");
-  }
-  this->smallerAlgebraChamber.WriteToFile(output, this->UpperLimitChambersForDebugPurposes);
-  this->projectivizedChambeR.WriteToFile(output, this->UpperLimitChambersForDebugPurposes);
-  if (theReport.TickAndWantReport()) {
-    theReport.Report("Writing to file done...");
-  }
-  output << XML::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName());
 }
 
 GeneralizedVermaModuleCharacters::GeneralizedVermaModuleCharacters() {
@@ -2125,76 +2048,6 @@ std::string GeneralizedVermaModuleCharacters::PrepareReportOneCone(FormatExpress
   }
   out1 << "\\end{tabular}";
   return out1.str();
-}
-
-bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase(std::fstream& input) {
-  std::string tempS;
-  ProgressReport theReport;
-  input >> tempS >> this->NumProcessedConesParam;
-  input >> tempS >> this->NumProcessedExtremaEqualOne;
-  input >> tempS;
-  int numReadWords;
-  if (tempS != "NormalConstAdjustment:") {
-    global.fatal << "Unexpected identifier while reading from file. " << global.fatal;
-    return false;
-  }
-  this->NonIntegralOriginModificationBasisChanged.ReadFromFile(input);
-  input >> tempS;
-  this->ParabolicLeviPartRootSpacesZeroStandsForSelected.ReadFromFile(input);
-  this->ParabolicSelectionSmallerAlgebra.ReadFromFile(input);
-  this->WeylLarger->ReadFromFile(input);
-  this->WeylSmaller->ReadFromFile(input);
-  this->preferredBasiS.ReadFromFile(input);
-  this->preferredBasisChangE.ReadFromFile(input);
-  this->preferredBasisChangeInversE.ReadFromFile(input);
-  this->theExtendedIntegralLatticeMatForM.ReadFromFile(input);
-  theReport.Report("Loading param subchambers cone form... ");
-  this->theMaxComputation.ReadFromFile(input, this->UpperLimitChambersForDebugPurposes);
-  theReport.Report("Loading more pieces of data... ");
-  this->GmodKnegativeWeightS.ReadFromFile(input);
-  this->GmodKNegWeightsBasisChanged.ReadFromFile(input);
-  this->theLinearOperators.ReadFromFile(input);
-  this->theLinearOperatorsExtended.ReadFromFile(input);
-  this->PreimageWeylChamberLargerAlgebra.ReadFromFile(input);
-  this->PreimageWeylChamberSmallerAlgebra.ReadFromFile(input);
-  this->WeylChamberSmallerAlgebra.ReadFromFile(input);
-  this->theQPsNonSubstituted.ReadFromFile(input);
-  XML::ReadThroughFirstOpenTag(input, numReadWords, "QPsSubbed");
-  this->theQPsSubstituted.ReadFromFile(input);
-  XML::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, "QPsSubbed");
-  theReport.Report("Loading multiplicities... ");
-  XML::ReadThroughFirstOpenTag(input, numReadWords, "theMultiplicities");
-  this->theMultiplicities.ReadFromFile(input, this->UpperLimitChambersForDebugPurposes);
-  XML::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, "theMultiplicities");
-  this->theCoeffs.ReadFromFile(input);
-  this->theTranslationS.ReadFromFile(input);
-  this->theTranslationsProjectedBasisChanged.ReadFromFile(input);
-  theReport.Report("Loading partial fractions... ");
-//  this->thePfs.ReadFromFile(input);
-  theReport.Report("Loading projectivized param complex... ");
-  this->projectivizedParamComplex.ReadFromFile(input);
-  theReport.Report("Loading the complex... ");
-  this->smallerAlgebraChamber.ReadFromFile(input, this->UpperLimitChambersForDebugPurposes);
-  this->projectivizedChambeR.ReadFromFile(input, this->UpperLimitChambersForDebugPurposes);
-  theReport.Report("Loading complete... ");
-  return true;
-}
-
-void GeneralizedVermaModuleCharacters::ReadFromDefaultFile() {
-  std::fstream input;
-  if (!FileOperations::FileExistsVirtual("output/GenVermaComputation.txt")) {
-    this->computationPhase = 0;
-    return;
-  }
-  FileOperations::OpenFileCreateIfNotPresentVirtual(input, "output/GenVermaComputation.txt", false, false, false);
-  this->ReadFromFile(input);
-  input.close();
-}
-
-void GeneralizedVermaModuleCharacters::WriteToDefaultFile() {
-  std::fstream output;
-  FileOperations::OpenFileCreateIfNotPresentVirtual(output, "output/GenVermaComputation.txt", false, true, false);
-  this->WriteToFile(output);
 }
 
 std::string GeneralizedVermaModuleCharacters::ElementToStringMultiplicitiesReport() {

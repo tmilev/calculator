@@ -32,10 +32,6 @@ public:
   Vector(const Selection& other) {
     *this = other;
   }
-  inline static std::string GetXMLClassName() {
-    std::string result = "Vector_" + coefficient::GetXMLClassName();
-    return result;
-  }
   std::string ToString(FormatExpressions* theFormat = nullptr) const {
     std::stringstream out;
     out.precision(5);

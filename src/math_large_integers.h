@@ -171,9 +171,6 @@ class LargeInteger {
 public:
   signed char sign;
   LargeIntegerUnsigned value;
-  inline static const std::string GetXMLClassName() {
-    return "LInt";
-  }
   void operator*=(const LargeInteger& x) {
     this->sign *= x.sign;
     this->value.MultiplyBy(x.value);
@@ -452,9 +449,6 @@ private:
   }
   bool ShrinkExtendedPartIfPossible();
 public:
-  inline static std::string GetXMLClassName(){
-    return "Rational";
-  }
   int NumShort;
   //the requirement that the below be unsigned caused a huge problem, so I
   //changed it back to int. Grrrrr.

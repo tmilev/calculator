@@ -136,7 +136,6 @@ class FormatExpressions;
 struct IndicatorWindowVariables;
 class DrawingVariables;
 class DrawOperations;
-class XML;
 struct CGI;
 
 // The calculator parsing routines:
@@ -469,37 +468,6 @@ private:
   }
 };
 
-class XML {
-private:
-  static std::string GetOpenTagNoInputCheck(const std::string& tagNameNoSpacesNoForbiddenCharacters);
-  static std::string GetCloseTagNoInputCheck(const std::string& tagNameNoSpacesNoForbiddenCharacters);
-public:
-  std::string theString;
-  unsigned positionInString;
-  XML();
-  bool ReadFromFile(std::fstream& inputFile);
-  static std::string GetOpenTagNoInputCheckAppendSpacE(const std::string& tagNameNoSpacesNoForbiddenCharacters);
-  static std::string GetCloseTagNoInputCheckAppendSpacE(const std::string& tagNameNoSpacesNoForbiddenCharacters);
-  static bool ReadThroughFirstOpenTag(
-    std::istream& streamToMoveIn,
-    const std::string& tagNameNoSpacesNoForbiddenCharacters
-  );
-  static bool ReadEverythingPassedTagOpenUntilTagClose(
-    std::istream& streamToMoveIn, const std::string& tagNameNoSpacesNoForbiddenCharacters
-  );
-  static bool ReadThroughFirstOpenTag(
-    std::istream& streamToMoveIn,
-    int& NumReadWordsExcludingTag,
-    const std::string& tagNameNoSpacesNoForbiddenCharacters
-  );
-  static bool ReadEverythingPassedTagOpenUntilTagClose(
-    std::istream& streamToMoveIn,
-    int& NumReadWordsExcludingTag,
-    const std::string& tagNameNoSpacesNoForbiddenCharacters
-  );
-  bool GetStringEnclosedIn(const std::string& theTagName, std::string& outputString);
-};
-
 class DrawElementInputOutput {
 public:
   int TopLeftCornerX;
@@ -796,11 +764,6 @@ public:
     }
     return true;
   }
-  static std::string GetXMLClassName() {
-    std::string result = "List_";
-    result.append(Object::GetXMLClassName());
-    return result;
-  }
   int GetNewSizeRelativeToExpectedSize(int expectedSize) const {
     // <-Registering stack trace forbidden! Multithreading deadlock alert.
     if (expectedSize == 1) {
@@ -1087,9 +1050,6 @@ public:
   void Rotate(int r) {
     std::rotate(this->TheObjects, this->TheObjects + r, this->TheObjects + (this->size - 1));
   }
-  bool ReadFromFile(std::fstream& input, int UpperLimitForDebugPurposes = - 1);
-  void WriteToFile(std::fstream& output, int UpperLimitForDebugPurposes = - 1) const;
-//  bool Contains(Object& o){return this->Contains(o) != - 1; };
   int SizeWithoutObjects() const;
   Object* LastObject() const;// <-Registering stack trace forbidden! Multithreading deadlock alert.
   void ReleaseMemory();
@@ -1279,11 +1239,6 @@ private:
 protected:
   List<List<int> > TheHashedArrays;
 public:
-  static std::string GetXMLClassName() {
-    std::string result = "HashedList_";
-    result.append(Object::GetXMLClassName());
-    return result;
-  }
   unsigned int GetHash(const Object& input) const {
     unsigned int result = hashFunction(input);
     result %= this->TheHashedArrays.size;

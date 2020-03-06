@@ -23,7 +23,6 @@ CalculatorHTML::CalculatorHTML() {
   this->NumAttemptsToInterpret = 0;
   this->NumAnswerIdsMathquilled = 0;
   this->MaxInterpretationAttempts = 25;
-  this->flagUseJSON = false;
   this->flagLoadedSuccessfully = false;
   this->flagIsExamHome = false;
   this->flagIsExamProblem = false;
@@ -878,7 +877,6 @@ bool SyntacticElementHTML::IsInterpretedNotByCalculator() {
   tagClass == "calculatorExamProblem" || tagClass == "calculatorExamIntermediate" ||
   tagClass == "calculatorAnswer" || tagClass == "calculatorManageClass" ||
   tagClass == "generateTopicTable" ||
-  tagClass == "generateLectureMaterials" ||
   tagClass == "calculatorJavascript" ||
   tagClass == "accountInformationLinks" ||
   tagClass == "generateTableOfContents" ||
@@ -1353,12 +1351,6 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
   currentA.idButtonInterpret = "buttonInterpret" + answerId;
   currentA.idButtonAnswer = "buttonAnswer" + answerId;
   currentA.idButtonSolution = "buttonSolution" + answerId;
-  if (!this->flagUseJSON) {
-    inputOutput.defaultKeysIfMissing.AddOnTop("onkeyup");
-    inputOutput.defaultValuesIfMissing.AddOnTop(
-      currentA.javascriptPreviewAnswer + currentA.MQUpdateFunction + "();"
-    );
-  }
   std::stringstream verifyStream;
   int numCorrectSubmissions = currentA.numCorrectSubmissions;
   int numSubmissions = currentA.numSubmissions;
@@ -1410,8 +1402,6 @@ void CalculatorHTML::InterpretNotByCalculatorNotAnswer(SyntacticElementHTML& inp
     this->InterpretManageClass(inputOutput);
   } else if (tagClass == "generateTopicTable") {
     this->InterpretTopicList(inputOutput);
-  } else if (tagClass == "generateLectureMaterials") {
-    this->InterpretLectureMaterials(inputOutput);
   } else if (tagClass == "generateTableOfContents") {
     this->InterpretTableOfContents(inputOutput);
   } else if (tagClass == "accountInformationLinks") {
@@ -2113,7 +2103,6 @@ void CalculatorHTML::initBuiltInSpanClasses() {
     this->calculatorClasses.AddOnTop("setCalculatorExamProblem");
     this->calculatorClasses.AddOnTop("setCalculatorExamHome");
     this->calculatorClasses.AddOnTop("generateTopicTable");
-    this->calculatorClasses.AddOnTop("generateLectureMaterials");
     this->calculatorClasses.AddOnTop("generateTableOfContents");
     this->calculatorClasses.AddOnTop("accountInformationLinks");
     this->calculatorClasses.AddOnTop("calculatorJavascript");
@@ -2996,26 +2985,6 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
         }
       }
       this->outputDeadlineString = this->ToStringDeadline(this->fileName, problemAlreadySolved, true, true);
-      if (!this->flagUseJSON) {
-        if (this->outputDeadlineString == "") {
-          outBody << "<b style =\"color:orange\">No deadline yet but scores are recorded. </b>";
-        } else {
-          outBody << "<b style =\"color:brown\">Scores are recorded. </b>";
-        }
-        outBody << problemLabel;
-        outBody << this->outputDeadlineString << "\n<hr>\n";
-      }
-    }
-  } else if (
-    !this->flagIsExamHome && !this->flagIsForReal &&
-    global.requestType != "template" &&
-    global.requestType != "templateNoLogin" &&
-    global.requestType != "templateJSON" &&
-    global.requestType != WebAPI::request::templateJSONNoLogin
-  ) {
-    if (!this->flagUseJSON) {
-      outBody << "<b style =\"color:green\">Scores not recorded. </b>"
-      << problemLabel << "<hr>";
     }
   }
   //////////////////////////////
@@ -4189,241 +4158,7 @@ void CalculatorHTML::InterpretJavascripts(SyntacticElementHTML& inputOutput) {
   }
 }
 
-std::string TopicElement::GetItemFinish(CalculatorHTML& owner) {
-  std::stringstream out;
-  if (this->type == TopicElement::types::chapter) {
-    if (owner.flagTopicTableStarted) {
-      out << "\n</tbody>\n</table>\n</div><!--bodyItem-->";
-    }
-    if (owner.flagTopicSubSectionStarted) {
-      out << "\n</div><!--bodySubsection-->";
-    }
-    if (owner.flagTopicSectionStarted) {
-      out << "\n</div><!--bodySection-->";
-    }
-    if (owner.flagTopicChapterStarted) {
-      out << "\n</div><!--bodyChapter-->";
-    }
-    owner.flagTopicSectionStarted = false;
-    owner.flagTopicSubSectionStarted = false;
-    owner.flagTopicTableStarted = false;
-  }
-  if (this->type == TopicElement::types::section) {
-    if (owner.flagTopicTableStarted) {
-      out << "\n</tbody>\n</table>\n</div><!--bodyItem-->";
-    }
-    if (owner.flagTopicSubSectionStarted) {
-      out << "\n</div><!--bodySubsection-->";
-    }
-    if (owner.flagTopicSectionStarted) {
-      out << "\n</div><!--bodySection-->";
-    }
-    owner.flagTopicSubSectionStarted = false;
-    owner.flagTopicTableStarted = false;
-  }
-  if (this->type == TopicElement::types::topic) {
-    if (owner.flagTopicTableStarted) {
-      out << "\n</tbody>\n</table>\n</div><!--bodyItem-->";
-    }
-    if (owner.flagTopicSubSectionStarted) {
-      out << "\n</div><!--bodySubsection-->";
-    }
-    owner.flagTopicTableStarted = false;
-  }
-  return out.str();
-}
-
-std::string TopicElement::GetItemStart(CalculatorHTML& owner, bool doIncludeScoreButton, bool plainStyle) {
-  std::stringstream out;
-  out << this->GetItemFinish(owner);
-  std::string theClass;
-  if (this->type == TopicElement::types::chapter) {
-    theClass = "Chapter";
-    owner.flagTopicChapterStarted = true;
-    owner.flagTopicSectionStarted = false;
-    owner.flagTopicSubSectionStarted = false;
-    owner.flagTopicTableStarted = false;
-  } else if (this->type == TopicElement::types::section) {
-    theClass = "Section";
-    if (!owner.flagTopicChapterStarted) {
-      out << "\n<div class =\"bodyChapter\">";
-    }
-    owner.flagTopicChapterStarted = true;
-    owner.flagTopicSectionStarted = true;
-    owner.flagTopicSubSectionStarted = false;
-    owner.flagTopicTableStarted = false;
-  } else if (this->type == TopicElement::types::topic) {
-    theClass = "Subsection";
-    if (!owner.flagTopicChapterStarted) {
-      out << "\n<div class =\"bodyChapter\">";
-    }
-    if (!owner.flagTopicSectionStarted) {
-      out << "\n<div class =\"bodySection\">";
-    }
-    owner.flagTopicChapterStarted = true;
-    owner.flagTopicSectionStarted = true;
-    owner.flagTopicSubSectionStarted = true;
-    owner.flagTopicTableStarted = false;
-  } else {
-    if (!owner.flagTopicTableStarted) {
-      if (!owner.flagTopicChapterStarted) {
-        out << "\n<div class =\"bodyChapter\">";
-      }
-      if (!owner.flagTopicSectionStarted) {
-        out << "\n<div class =\"bodySection\">";
-      }
-      if (!owner.flagTopicSubSectionStarted) {
-        out << "\n<div class =\"bodySubsection\">";
-      }
-      owner.flagTopicChapterStarted = true;
-      owner.flagTopicSectionStarted = true;
-      owner.flagTopicSubSectionStarted = true;
-      owner.flagTopicTableStarted = true;
-      out
-      << "\n<div class =\"bodyItem\">"
-      << "\n<table class =\"topicList\">";
-      out << "\n<colgroup><col><col><col><col><col></colgroup>";
-      out << "\n<tbody>\n";
-      if (!plainStyle) {
-        out
-        << "\n<tr> <th>Sub-Topic</th>"
-        << "<th>Resource Links</th>"
-        << "<th>Current Score</th>"
-        << "<th>Deadlines</th>"
-        << "</tr>";
-      }
-    }
-    out << "<tr class =\"calculatorProblem\" "
-    << "id =\"" << this->idBase64 << "\"" << ">\n";
-    out << "  <td>\n";
-    out << this->displayTitle;
-    out << "  </td>\n";
-    out << "  <td>\n" << this->displayResourcesLinks << "</td>";
-    out << "<td>";
-    out << this->displayProblemLink;
-    out << "  </td>\n";
-    out << "  <td>";
-    if (this->problemFileName == "") {
-      out << "-";
-    } else {
-      out << this->displayScore;
-    }
-    out << "  </td>\n";
-    out << "  <td class =\"deadlineCell\">\n" << this->displayDeadlinE << " </td>\n";
-    out << "</tr>\n";
-    return out.str();
-  }
-  out << "\n<div class =\"head" << theClass << "\" "
-  << "id =\"" << this->idBase64 << "\"" << ">";
-  out << "\n<table class =\"tableItem\">";
-  out << "<colgroup><col><col><col><col><col></colgroup>\n";
-  out << "<tr>"
-  << "<td>" << this->displayTitle;
-  out << "<button id =\"buttonToggle" << this->idBase64
-  << "\" class =\"buttonToggleTopics\" onclick=\"toggleHeight(this, 'body" << this->idBase64 << "');\">&#9650;</button>";
-  out  << "</td>";
-  out << "<td>" << this->displayResourcesLinks << "</td>";
-  out << "<td></td>";
-  if (doIncludeScoreButton) {
-    out << "<td>" << this->ToStringStudentScoreButton() << "</td>";
-  } else {
-    out << "<td></td>";
-  }
-  out << "<td class = \"deadlineCell\">" << this->displayDeadlinE << "</td>";
-  out << "</tr></table></div>\n";
-  out << "<div class = \"body" << theClass << "\" id = \"body" << this->idBase64 << "\">";
-  return out.str();
-}
-
 int TopicElement::scoreButtonCounter = 0;
-
-std::string TopicElement::ToStringStudentScoreButton() {
-  std::stringstream out;
-  out << "<button class =\"studentScoresButton\" "
-  << "onclick=\"toggleStudentScores"
-  << "('studentScoresLoadReport" << TopicElement::scoreButtonCounter << "', "
-  << "'scoresInCoursePage',"
-  << "'studentScoresLoadReport"
-  << TopicElement::scoreButtonCounter << "');\">"
-  << "Scores</button>";
-  return out.str();
-}
-
-std::string CalculatorHTML::GetSectionSelector() {
-  if (
-    !global.UserDefaultHasProblemComposingRights() ||
-    global.UserStudentVieWOn()
-  ) {
-    return "";
-  }
-  if (!global.flagDatabaseCompiled) {
-    return "";
-  }
-  std::stringstream out;
-  out << "<sectionSelection>Sections: ";
-  for (int i = 0; i < this->databaseStudentSections.size; i ++) {
-    out << "<input type =\"radio\" name =\"sectionSelector\" "
-    << "onclick=\"populateTopicList("
-    << "'"
-    << this->databaseStudentSections[i]
-    << "'"
-    << ");\"";
-    if (this->databaseStudentSections[i] == this->currentUseR.sectionComputed) {
-      out << "checked";
-    }
-    out <<  ">"
-    << this->databaseStudentSections[i]
-    << "</input>";
-  }
-  out << "</sectionSelection>\n";
-  return out.str();
-}
-
-void CalculatorHTML::InterpretLectureMaterials(SyntacticElementHTML& inputOutput) {
-  MacroRegisterFunctionWithName("CalculatorHTML::InterpretLectureMaterials");
-  std::stringstream out;
-  if (this->flagUseJSON) {
-    inputOutput.interpretedCommand = "<lectureList></lectureList>";
-    return;
-  }
-  if (!this->LoadAndParseTopicList(out)) {
-    inputOutput.interpretedCommand = out.str();
-    return;
-  }
-  bool plainStyle = (inputOutput.GetKeyValue("topicListStyle") == "plain");
-  out << "<div class = \"headChapter\">Lecture materials "
-  << "<button id = \"buttonToggleCourseInfo\" class = \"buttonToggleTopics\" "
-  << "onclick = \"toggleHeight(this,'tableWithLectureMaterialsFull')\">&#9650;</button>"
-  << "<span style = \"font-weight:normal; font-size:small\">(&larr; click to (un)hide)</span><br>\n"
-  << "</div>";
-  out
-  << "\n<div class =\"bodyChapter\" id =\"tableWithLectureMaterialsFull\">"
-  << "\n<table class =\"lectureMaterials\">";
-  out << "\n<colgroup><col><col><col></colgroup>";
-  out << "\n<tbody>\n";
-  if (!plainStyle) {
-    out
-    << "\n<tr><th>Sub-Topic</th>"
-    << "<th>Resource Links</th>"
-    << "</tr>";
-  }
-  this->topicLectureCounter = 0;
-  for (int i = 0; i < this->topics.theTopics.size(); i ++) {
-    TopicElement currentTopic = this->topics.theTopics.theValues[i];
-    currentTopic.ComputeLinks(*this, plainStyle);
-    if (!currentTopic.flagHasLectureTag) {
-      continue;
-    }
-    out << "<tr>"
-    << "<td>" << currentTopic.displayTitle << "</td>"
-    << "<td>" << currentTopic.displayResourcesLinks << "</td>"
-    << "<td>" << "<a href=\"#" << currentTopic.idBase64 << "\">" << "Go to section</a>" << "</td>"
-    << "</tr>";
-  }
-  out << "</table></div>";
-  this->topicLectureCounter = 0;
-  inputOutput.interpretedCommand = out.str();
-}
 
 bool CalculatorHTML::ComputeTopicListAndPointsEarned(std::stringstream& commentsOnFailure) {
   MacroRegisterFunctionWithName("CalculatorHTML::ComputeTopicListAndPointsEarned");
@@ -4431,18 +4166,10 @@ bool CalculatorHTML::ComputeTopicListAndPointsEarned(std::stringstream& comments
     return false;
   }
   if (!this->LoadDatabaseInfo(commentsOnFailure)) {
-    if (!this->flagUseJSON) {
-      commentsOnFailure << "<span style =\"color:red\">Could not load your problem history.</span> <br>";
-    } else {
-      commentsOnFailure << "Error loading problem history. ";
-    }
+    commentsOnFailure << "Error loading problem history. ";
   }
   if (!this->PrepareSectionList(commentsOnFailure)) {
-    if (!this->flagUseJSON) {
-      commentsOnFailure << "<span style =\"color:red\">Error preparing section list.</span> <br>";
-    } else {
-      commentsOnFailure << "Error preparing section list. ";
-    }
+    commentsOnFailure << "Error preparing section list. ";
   }
   if (global.flagDatabaseCompiled) {
     this->flagIncludeStudentScores =
@@ -4468,194 +4195,7 @@ bool CalculatorHTML::ComputeTopicListAndPointsEarned(std::stringstream& comments
 
 void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput) {
   MacroRegisterFunctionWithName("CalculatorHTML::InterpretTopicList");
-  if (this->flagUseJSON) {
-    inputOutput.interpretedCommand = "<topicList></topicList>";
-    return;
-  }
-  std::stringstream out;
-  if (!this->ComputeTopicListAndPointsEarned(out)) {
-    inputOutput.interpretedCommand = out.str();
-    return;
-  }
-  std::stringstream outFinal, outHead;
-  if (global.flagDatabaseCompiled) {
-    if (this->currentUseR.pointsMax != 0) {
-      double percent = 100 * this->currentUseR.pointsEarned.GetDoubleValue() /
-      this->currentUseR.pointsMax.GetDoubleValue();
-      outHead.precision(2);
-      outHead << "<panelStudentScores>Total score: "
-      << std::fixed << percent << "% = ";
-      outHead << std::fixed << this->currentUseR.pointsEarned.GetDoubleValue()
-      << " out of " << this->currentUseR.pointsMax.GetDoubleValue()
-      << " points earned.</panelStudentScores>"
-      << "<button id =\"buttonToggleCourseInfo\" class =\"buttonToggleTopics\" "
-      << "onclick=\"toggleHeight(this,'bodyCourseInformation')\">&#9650;</button><br>\n";
-      outHead << "<div class =\"bodySection\" id = \"bodyCourseInformation\">"
-      << "<small>Includes problems without deadline, but not problems without weights.<br> "
-      << "If a problem is assigned a new weight, your % score may drop. </small><br>";
-      outHead << "<panelCourseInfo>" << this->currentUseR.ToStringCourseInfo() << "</panelCourseInfo></div><br>";
-    }
-  }
-  out << "<panelProblemLinkStyleSelection>Problem links open in: ";
-  out << "<input type =\"radio\" name =\"problemLinkStyleSelector\" onclick=\"setProblemLinkStyle('accordion');\" ";
-  if (global.GetWebInput("problemLinkStyle") == "accordion") {
-    out << "checked";
-  }
-  out << ">same tab, under topics</input>";
-  out << "<input type =\"radio\" name =\"problemLinkStyleSelector\" onclick=\"setProblemLinkStyle('sameWindow');\" ";
-  if (global.GetWebInput("problemLinkStyle") == "sameWindow") {
-    out << "checked";
-  }
-  out << ">same tab, replace topics</input>";
-  out << "<input type =\"radio\" name =\"problemLinkStyleSelector\" onclick=\"setProblemLinkStyle('newWindow');\" ";
-  if (global.GetWebInput("problemLinkStyle") == "newWindow") {
-    out << "checked";
-  }
-  out << ">new tab</input>"
-  << ". </panelProblemLinkStyleSelection>";
-  bool plainStyle = (inputOutput.GetKeyValue("topicListStyle") == "plain");
-  std::string desiredChapter = HtmlRoutines::ConvertURLStringToNormal(
-    global.GetWebInput("chapter"), false
-  );
-  std::string currentChapter = "";
-  out << "\n\n\n<!--Topic list automatically generated from topic list: "
-  << this->topicListFileName
-  << ".-->";
-  this->flagTopicChapterStarted = false;
-  this->flagTopicSectionStarted = false;
-  this->flagTopicSubSectionStarted = false;
-  this->flagTopicTableStarted = false;
-  for (int i = 0; i < this->topics.theTopics.size(); i ++) {
-    TopicElement& currentElt = this->topics.theTopics.theValues[i];
-    if (currentElt.type == TopicElement::types::texHeader) {
-      continue;
-    }
-    if (currentElt.type == TopicElement::types::chapter) {
-      currentChapter = currentElt.title;
-    }
-    if (desiredChapter != "") {
-      if (currentChapter != desiredChapter) {
-        continue;
-      }
-    }
-    currentElt.ComputeLinks(*this, plainStyle);
-    out << currentElt.GetItemStart(*this, this->flagIncludeStudentScores, plainStyle);
-  }
-  TopicElement finishChapter;
-  finishChapter.type = TopicElement::types::chapter;
-  out << finishChapter.GetItemFinish(*this);
-  this->NumVideosFound = this->NumVideosHandwrittenFound + this->NumVideosWithSlidesFound;
-  outHead << "<panelStudentScores>Calculator build " << global.buildVersionSimple << ". The course contains "
-  << this->NumProblemsFound << " problem templates, "
-  << this->NumSlidesFound << " slides (printable + projector mode counted as a single slide) and "
-  << this->NumVideosFound << " = " << this->NumVideosWithSlidesFound << " with-slide + "
-  << this->NumVideosHandwrittenFound << " handwritten videos.</panelStudentScores><br>";
-  outFinal << outHead.str() << out.str();
-  inputOutput.interpretedCommand = outFinal.str();
-  std::stringstream topicListJS;
-  topicListJS << "<script type =\"text/javascript\">";
-
-  topicListJS << "var currentStudentSection =";
-  if (global.flagDatabaseCompiled) {
-    topicListJS << "'" << this->currentUseR.sectionComputed << "'" << ";\n";
-  } else {
-    topicListJS << "''" << ";\n";
-  }
-  topicListJS << "var studentSections =[";
-  for (int i = 0; i < this->databaseStudentSections.size; i ++) {
-    topicListJS
-    << "'"
-    << HtmlRoutines::ConvertStringToURLString(this->databaseStudentSections[i], false)
-    << "'";
-    if (i != this->databaseStudentSections.size - 1) {
-      topicListJS << ", ";
-    }
-  }
-  topicListJS << "];\n";
-  topicListJS << "var listTopics =[";
-  for (int i = 0; i < this->topics.theTopics.size(); i ++) {
-    TopicElement& currentE = this->topics.theTopics.theValues[i];
-    if (currentE.type == TopicElement::types::texHeader) {
-      continue;
-    }
-    topicListJS << "{id: '" << currentE.idBase64 << "', ";
-    topicListJS << "type: '";
-    if (currentE.type == TopicElement::types::chapter) {
-      topicListJS << "chapter";
-    } else if (currentE.type == TopicElement::types::section) {
-      topicListJS << "section";
-    } else if (currentE.type == TopicElement::types::topic) {
-      topicListJS << "subSection";
-    } else if (currentE.type == TopicElement::types::error) {
-      topicListJS << "error";
-    } else {
-      topicListJS << "problem";
-    }
-    topicListJS << "', ";
-    //////////////////////////////////////////////////
-    topicListJS << "idButton: '" << currentE.idDeadlineButton << "', ";
-    //////////////////////////////////////////////////
-    topicListJS << "deadlines: {";
-    bool found = false;
-    for (int j = 0; j < currentE.deadlinesPerSectioN.size; j ++) {
-      if (currentE.deadlinesPerSectioN[j] == "") {
-        continue;
-      }
-      if (found) {
-        topicListJS << ", ";
-      }
-      found = true;
-      topicListJS << "'" << this->databaseStudentSections[j] << "': "
-      << "'" << currentE.deadlinesPerSectioN[j] << "'";
-    }
-    topicListJS << "}, ";
-    //////////////////////////////////////////////////
-    topicListJS << "deadlinesFormatted: {";
-    found = false;
-    for (int j = 0; j < currentE.deadlinesPerSectionFormatted.size; j ++) {
-      if (currentE.deadlinesPerSectionFormatted[j] == "") {
-        continue;
-      }
-      if (found) {
-        topicListJS << ", ";
-      }
-      found = true;
-      topicListJS << "'" << this->databaseStudentSections[j] << "': "
-      << "'" << currentE.deadlinesPerSectionFormatted[j] << "'";
-    }
-    topicListJS << "}, ";
-    ////////////////////////////
-    topicListJS << "isInherited: {";
-    for (int j = 0; j < currentE.deadlinesAreInherited.size; j ++) {
-      topicListJS << "'" << this->databaseStudentSections[j] << "': ";
-      if (currentE.deadlinesAreInherited[j]) {
-        topicListJS << "true";
-      } else {
-        topicListJS << "false";
-      }
-      if (j != currentE.deadlinesAreInherited.size - 1) {
-        topicListJS << ", ";
-      }
-    }
-    topicListJS << "}, ";
-    //////////////////////////////////////////////////
-    topicListJS << "immediateChildren: [";
-    for (int j = 0; j < currentE.immediateChildren.size; j ++) {
-      topicListJS << currentE.immediateChildren[j];
-      if (j != currentE.immediateChildren.size - 1) {
-        topicListJS << ", ";
-      }
-    }
-    topicListJS << "]";
-    //////////////////////////////////////////////////
-    topicListJS << "}";
-    if (i != this->topics.theTopics.size() - 1) {
-      topicListJS << ", ";
-    }
-  }
-  topicListJS << "];\n";
-  topicListJS << "</script>";
-  this->topicListJavascriptWithTag = topicListJS.str();
+  inputOutput.interpretedCommand = "<topicList></topicList>";
 }
 
 JSData LaTeXCrawler::FileWithOption::ToJSON() {
@@ -4726,7 +4266,6 @@ bool LaTeXCrawler::Slides::FromJSON(
       return false;
     }
   }
-
   return  true;
 }
 
@@ -4904,19 +4443,6 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle) {
       this->type == TopicElement::types::section ||
       this->type == TopicElement::types::chapter
     );
-    //std::stringstream titleAndDeadlineStream;
-    //titleAndDeadlineStream
-    //<< "<span class =\"deadlineAndTitleContainer\">"
-    //<< "<span class =\"titleContainer\">" << this->displayTitle
-    //<< "</span>"
-    //<< "&nbsp;&nbsp;<span style =\"font-weight:normal; font-size: medium\">"
-    //<< this->displaySlidesLink
-    //<< "</span>"
-    //<< "" << this->displayDeadlinE << "</span>"
-    //<< "</span>"
-    //
-    //;
-    //this->displayTitleWithDeadline = titleAndDeadlineStream.str();
   }
   std::stringstream displayResourcesLinksStream;
   displayResourcesLinksStream

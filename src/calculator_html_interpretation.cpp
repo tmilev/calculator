@@ -785,7 +785,6 @@ std::string WebAPIResponse::GetJSONFromTemplate() {
   MacroRegisterFunctionWithName("WebAPIReponse::GetJSONFromTemplate");
   std::stringstream out;
   CalculatorHTML thePage;
-  thePage.flagUseJSON = true;
   std::stringstream comments;
   thePage.fileName = HtmlRoutines::ConvertURLStringToNormal(global.GetWebInput(WebAPI::problem::courseHome), false);
   if (!thePage.LoadMe(true, global.GetWebInput(WebAPI::problem::randomSeed), &comments)) {
@@ -818,7 +817,6 @@ JSData WebAPIResponse::GetExamPageJSON() {
   }
   CalculatorHTML theFile;
   theFile.flagDoPrependProblemNavigationBar = false;
-  theFile.flagUseJSON = true;
   std::stringstream errorAndDebugStream;
   std::string problemBody = theFile.LoadAndInterpretCurrentProblemItemJSON(
     global.UserRequestRequiresLoadingRealExamData(),

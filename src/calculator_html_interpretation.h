@@ -167,13 +167,8 @@ public:
   bool PdfsOpenIfAvailable(CalculatorHTML& owner, std::stringstream* commentsOnFailure);
   bool PdfSlidesOpenIfAvailable(CalculatorHTML& owner, std::stringstream* commentsOnFailure);
   bool PdfHomeworkOpensIfAvailable(CalculatorHTML& owner, std::stringstream* commentsOnFailure);
-  std::string GetItemStart(
-    CalculatorHTML& owner, bool doIncludeScoreButton, bool plainStyle
-  );
-  std::string ToStringStudentScoreButton();
   std::string ToString() const;
   JSData ToJSON(CalculatorHTML& owner);
-  std::string GetItemFinish(CalculatorHTML& owner);
   void ComputeSlides(CalculatorHTML& owner);
   JSData ComputeSlidesJSON(CalculatorHTML& owner);
   void ComputeHomework(CalculatorHTML& owner);
@@ -223,7 +218,6 @@ public:
   bool flagTopicSectionStarted;
   bool flagTopicSubSectionStarted;
   bool flagTopicChapterStarted;
-  bool flagUseJSON;
   double timeToParseHtml;
   List<double> timePerAttempt;
   List<List<double> > timeIntermediatePerAttempt;
@@ -297,7 +291,6 @@ public:
   bool LoadMe(bool doLoadDatabase, const std::string& inputRandomSeed, std::stringstream* commentsOnFailure);
   bool LoadAndParseTopicList(std::stringstream& comments);
   bool LoadDatabaseInfo(std::stringstream& comments);
-  std::string GetSectionSelector();
   std::string CleanUpFileName(const std::string& inputLink);
   void initAutocompleteExtras();
   void initBuiltInSpanClasses();
@@ -404,7 +397,6 @@ public:
   void InterpretManageClass(SyntacticElementHTML& inputOutput);
   void InterpretTopicList(SyntacticElementHTML& inputOutput);
   bool ComputeTopicListAndPointsEarned(std::stringstream& commentsOnFailure);
-  void InterpretLectureMaterials(SyntacticElementHTML& inputOutput);
   void InterpretTableOfContents(SyntacticElementHTML& inputOutput);
   void InterpretProblemNavigationBar(SyntacticElementHTML& inputOutput);
   void InterpretAccountInformationLinks(SyntacticElementHTML& inputOutput);

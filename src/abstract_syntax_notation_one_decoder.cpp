@@ -1185,6 +1185,9 @@ std::string ASNObject::ToString() const {
 }
 
 std::string ASNObject::ToStringAllRecognizedObjectIds() {
+  MacroRegisterFunctionWithName("ASNObject::ToStringAllRecognizedObjectIds");
+  // This function is safe after the first run, which should have already happened, unless we are unit-testing.
+  ASNObject::NamesToObjectIdsNonThreadSafe();
   std::stringstream out;
   out << "<table>";
   for (int i = 0; i < ASNObject::ObjectIdsToNames().size(); i ++) {

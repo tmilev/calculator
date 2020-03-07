@@ -18,6 +18,8 @@ std::string CalculatorHTML::stringProblemLink = "Problem";
 std::string SyntacticElementHTML::Tags::calculator = "calculator";
 std::string SyntacticElementHTML::Tags::calculatorHidden = "calculatorHidden";
 std::string SyntacticElementHTML::Tags::calculatorSolution = "calculatorSolution";
+std::string SyntacticElementHTML::Tags::calculatorExamProblem = "calculatorExamProblem";
+std::string SyntacticElementHTML::Tags::calculatorAnswer = "calculatorAnswer";
 
 CalculatorHTML::CalculatorHTML() {
   this->NumAttemptsToInterpret = 0;
@@ -874,8 +876,8 @@ bool SyntacticElementHTML::IsInterpretedNotByCalculator() {
   }
   std::string tagClass = this->GetKeyValue("class");
   return
-  tagClass == "calculatorExamProblem" || tagClass == "calculatorExamIntermediate" ||
-  tagClass == "calculatorAnswer" || tagClass == "calculatorManageClass" ||
+  tagClass == SyntacticElementHTML::Tags::calculatorExamProblem || tagClass == "calculatorExamIntermediate" ||
+  tagClass == SyntacticElementHTML::Tags::calculatorAnswer || tagClass == "calculatorManageClass" ||
   tagClass == "generateTopicTable" ||
   tagClass == "calculatorJavascript" ||
   tagClass == "accountInformationLinks" ||
@@ -907,7 +909,7 @@ bool SyntacticElementHTML::IsAnswer() {
   if (this->syntacticRole != "command") {
     return false;
   }
-  return this->GetKeyValue("class") == "calculatorAnswer";
+  return this->GetKeyValue("class") == SyntacticElementHTML::Tags::calculatorAnswer;
 }
 
 bool SyntacticElementHTML::IsCalculatorCommand() {
@@ -1386,7 +1388,7 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
 void CalculatorHTML::InterpretIfAnswer(SyntacticElementHTML& inputOutput) {
   MacroRegisterFunctionWithName("CalculatorHTML::InterpretIfAnswer");
   std::string tagClass = inputOutput.GetTagClass();
-  if (tagClass != "calculatorAnswer") {
+  if (tagClass != SyntacticElementHTML::Tags::calculatorAnswer) {
     return;
   }
   this->InterpretGenerateStudentAnswerButton(inputOutput);
@@ -1396,7 +1398,7 @@ void CalculatorHTML::InterpretNotByCalculatorNotAnswer(SyntacticElementHTML& inp
   MacroRegisterFunctionWithName("CalculatorHTML::InterpretNotByCalculatorNotAnswer");
   std::string tagClass = inputOutput.GetTagClass();
   //std::string tag= inputOutput.tag;
-  if (tagClass == "calculatorExamProblem" || tagClass == "calculatorExamIntermediate") {
+  if (tagClass == SyntacticElementHTML::Tags::calculatorExamProblem || tagClass == "calculatorExamIntermediate") {
     this->InterpretGenerateLink(inputOutput);
   } else if (tagClass == "calculatorManageClass") {
     this->InterpretManageClass(inputOutput);
@@ -2092,10 +2094,10 @@ void CalculatorHTML::initBuiltInSpanClasses() {
     this->calculatorClasses.AddOnTop("calculatorHidden");
     this->calculatorClasses.AddOnTop("calculatorCommentsBeforeInterpretation");
     this->calculatorClasses.AddOnTop("calculatorCommentsBeforeSubmission");
-    this->calculatorClasses.AddOnTop("calculatorAnswer");
+    this->calculatorClasses.AddOnTop(SyntacticElementHTML::Tags::calculatorAnswer);
     this->calculatorClasses.AddOnTop("calculatorAnswerOnGiveUp");
     this->calculatorClasses.AddOnTop("calculatorExamIntermediate");
-    this->calculatorClasses.AddOnTop("calculatorExamProblem");
+    this->calculatorClasses.AddOnTop(SyntacticElementHTML::Tags::calculatorExamProblem);
     this->calculatorClasses.AddOnTop("calculatorNavigationHere");
     this->calculatorClasses.AddOnTop("calculatorProblemNavigationHere");
     this->calculatorClasses.AddOnTop("calculatorEditPageHere");
@@ -2435,7 +2437,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments) {
     if (eltsStack[i].syntacticRole != "") {
       needNewTag = true;
     }
-    if (eltsStack[i].GetTagClass() == "calculatorAnswer") {
+    if (eltsStack[i].GetTagClass() == SyntacticElementHTML::Tags::calculatorAnswer) {
       if (eltsStack[i].GetKeyValue("mqMatrices") == "true") {
         this->flagMathQuillWithMatrices = true;
       }

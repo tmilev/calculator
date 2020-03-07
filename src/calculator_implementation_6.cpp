@@ -220,7 +220,7 @@ bool CalculatorHTML::Test::OneProblemTest::Run() {
   for (int j = 0; j < this->answers.size; j ++) {
     CalculatorHTML::Test::OneProblemTest::OneAnswer& current = this->answers[j];
     current.answerId = theProblem.theProblemData.theAnswers.theValues[j].answerId;
-    current.answerIdWebAPI = "calculatorAnswer" + current.answerId;
+    current.answerIdWebAPI = WebAPI::problem::calculatorAnswerPrefix + current.answerId;
     global.SetWebInpuT(current.answerIdWebAPI, "1");
     current.builtInAnswerAPICall = WebAPIResponse::GetAnswerOnGiveUp(
       randomSeedStream.str(),

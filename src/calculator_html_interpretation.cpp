@@ -46,7 +46,7 @@ JSData WebAPIResponse::GetProblemSolutionJSON() {
   std::string lastStudentAnswerID;
   MapList<std::string, std::string, MathRoutines::HashString>& theArgs = global.webArguments;
   for (int i = 0; i < theArgs.size(); i ++) {
-    StringRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID);
+    StringRoutines::StringBeginsWith(theArgs.theKeys[i], WebAPI::problem::calculatorAnswerPrefix, &lastStudentAnswerID);
   }
   int indexLastAnswerId = theProblem.GetAnswerIndex(lastStudentAnswerID);
   if (indexLastAnswerId == - 1) {
@@ -229,7 +229,7 @@ std::string WebAPIResponse::GetCommentsInterpretation(
 }
 
 JSData WebAPIResponse::SubmitAnswersPreviewJSON() {
-  MacroRegisterFunctionWithName("WebAPIResponse::submitAnswersPreviewJSON");
+  MacroRegisterFunctionWithName("WebAPIResponse::SubmitAnswersPreviewJSON");
   if (!global.UserDefaultHasAdminRights()) {
     global.theResponse.DisallowReport();
   }
@@ -242,7 +242,7 @@ JSData WebAPIResponse::SubmitAnswersPreviewJSON() {
   JSData result;
   for (int i = 0; i < theArgs.size(); i ++) {
     if (StringRoutines::StringBeginsWith(
-      theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID)
+      theArgs.theKeys[i], WebAPI::problem::calculatorAnswerPrefix, &lastStudentAnswerID)
     ) {
       lastAnswer = "(" + HtmlRoutines::ConvertURLStringToNormal(theArgs.theValues[i], false) + "); ";
     }
@@ -954,7 +954,7 @@ JSData WebAPIResponse::SubmitAnswersJSON(
   int answerIdIndex = - 1;
   for (int i = 0; i < theArgs.size(); i ++) {
     if (StringRoutines::StringBeginsWith(
-      theArgs.theKeys[i], "calculatorAnswer", &studentAnswerNameReader
+      theArgs.theKeys[i], WebAPI::problem::calculatorAnswerPrefix, &studentAnswerNameReader
     )) {
       int newAnswerIndex = theProblem.GetAnswerIndex(studentAnswerNameReader);
       if (answerIdIndex == - 1) {

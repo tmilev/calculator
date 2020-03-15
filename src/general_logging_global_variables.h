@@ -181,6 +181,7 @@ public:
 
   //  bool flagLogInterProcessCommunication;
   // flags: what mode are we running in?
+  bool flagRunningConsoleHelp;
   bool flagRunningConsoleRegular;
   bool flagRunningConsoleTest;
   bool flagRunningBuiltInWebServer;

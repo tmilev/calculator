@@ -325,6 +325,7 @@ public:
   static void TurnProcessMonitoringOff();
   static std::string GetEnvironment(const std::string& envVarName);
   static int main(int argc, char** argv);
+  static int mainConsoleHelp();
   static int mainCommandLine();
 };
 

@@ -160,7 +160,9 @@ std::string SemisimpleLieAlgebra::ToStringMenuStructurePages(
 
 }
 
-std::string SemisimpleLieAlgebra::ToHTMLCalculator(bool Verbose, bool writeToHD, bool flagWriteLatexPlots) {
+std::string SemisimpleLieAlgebra::ToHTMLCalculator(
+  bool Verbose, bool writeToHD, bool flagWriteLatexPlots
+) {
   MacroRegisterFunctionWithName("SemisimpleLieAlgebra::ToHTMLCalculator");
   WeylGroupData& theWeyl = this->theWeyl;
   std::stringstream out;
@@ -181,7 +183,7 @@ std::string SemisimpleLieAlgebra::ToHTMLCalculator(bool Verbose, bool writeToHD,
     << "A basis of the plane was computed as explained by the website of John Stembridge. "
     << "<br>The darker red dots can be dragged with the mouse to rotate the picture."
     << "<br>The grey lines are the edges of the Weyl chamber.<br>"
-    << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
+    << theDV.GetHtmlDiv(theWeyl.GetDim());
     out << theWeyl.ToStringRootsAndRootReflections();
     out << " The resulting Lie bracket pairing table follows. <hr> "
     << this->ToString(&global.theDefaultFormat.GetElement());

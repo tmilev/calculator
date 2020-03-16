@@ -309,6 +309,7 @@ public:
   static void computeSha256(const List<unsigned char>& input, List<uint32_t>& output);
   static void computeSha256(const List<unsigned char>& input, List<unsigned char>& output);
   static void computeSha256(const std::string& input, std::string& output);
+  static std::string computeSha256(const std::string& input);
   static void computeSha512(const List<unsigned char>& input, List<uint64_t>& output);
   static void computeSha512(const List<unsigned char>& input, List<unsigned char>& output);
   static std::string computeSha3_256OutputBase64URL(const std::string& input);

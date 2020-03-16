@@ -365,8 +365,10 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight(
     std::string tempS;
     this->DrawMeNoMults(tempS, theDV, 10000);
     Vector<Rational> tempRoot;
-    out << "<hr>In the following weight visualization, a yellow line is drawn if the corresponding weights are "
-    << " simple reflections of one another, with respect to a simple root of the Levi part of the parabolic subalgebra. ";
+    out << "<hr>In the following weight visualization, "
+    << "a yellow line is drawn if the corresponding weights are "
+    << "simple reflections of one another, "
+    << "with respect to a simple root of the Levi part of the parabolic subalgebra. ";
     for (int i = 0; i < output.size(); i ++) {
       tempRoot = theWeyL.GetSimpleCoordinatesFromFundamental(output[i].weightFundamentalCoordS).GetVectorRational();
       outputWeylSub.DrawContour(tempRoot, theDV, "#a0a000", 1000);
@@ -374,7 +376,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight(
       tempStream << output.coefficients[i].ToString();
       theDV.drawTextAtVectorBufferRational(tempRoot, tempStream.str(), "black");
     }
-    out << "<hr>" << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyL.GetDim());
+    out << "<hr>" << theDV.GetHtmlDiv(theWeyL.GetDim());
     *Report = out.str();
   }
   return true;
@@ -609,7 +611,7 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW(
   this->theHWSimpleCoordSBaseField = theWeyl.GetSimpleCoordinatesFromFundamental(this->theHWFundamentalCoordsBaseField);
   this->theChaR.MakeFromWeight(this->theHWSimpleCoordSBaseField, this->owner);
 
-  int startingNumRationalOperations =
+  unsigned long long startingNumRationalOperations =
   Rational::TotalLargeAdditions +
   Rational::TotalSmallAdditions +
   Rational::TotalLargeMultiplications +
@@ -1309,7 +1311,7 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
   DrawingVariables theDV;
   this->theCharOverH.DrawMeAssumeCharIsOverCartan(theWeyl, theDV);
   out << " A picture of the weight support follows. "
-  << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
+  << theDV.GetHtmlDiv(theWeyl.GetDim());
 
   bool isBad = false;
   for (int k = 0; k < this->theBilinearFormsAtEachWeightLevel.size; k ++) {

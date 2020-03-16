@@ -23,6 +23,7 @@ test/test_database.json
 
 bin/*
 calculator
+output/crash_test.html
 
 testFileWritePermissionsSSsas.txt
 

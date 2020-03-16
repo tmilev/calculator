@@ -226,7 +226,6 @@ public:
   bool flagUseGraphicsOld;
   Vectors<Rational> FillUserDefinedProjection;
   int Selected;
-  static int NumHtmlGraphics;
   int textX;
   int textY;
   int fontSizeNormal;
@@ -265,7 +264,6 @@ public:
   int GetActualTextStyleFromFlagsAnd(int inputTextStyle);
 
   std::string GetHtmlDiv(int theDimension);
-  std::string GetHtmlFromDrawOperationsCreateDivWithUniqueName(int theDimension);
   void drawString(DrawElementInputOutput& theDrawData, const std::string& input, int theFontSize, int theTextStyle);
   void drawCoordSystemDirectlly(DrawingVariables& TDV, int theDimension, std::fstream* LatexOutFile);
   void drawCoordSystemBuffer(DrawingVariables& TDV, int theDimension);

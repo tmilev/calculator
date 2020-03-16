@@ -35,7 +35,6 @@ Rational PartFractions::CheckSum;
 Rational PartFraction::CheckSum;
 Rational PartFraction::CheckSum2;
 
-int DrawingVariables::NumHtmlGraphics = 0;
 int HtmlRoutines::GlobalMathSpanID = 0;
 int HtmlRoutines::GlobalCanvasID = 0;
 int HtmlRoutines::GlobalGeneralPurposeID = 0;
@@ -9384,7 +9383,7 @@ std::string PartFractions::DoTheFullComputationReturnLatexFileString(
 //  this->theChambersOld.thePauseController.ExitComputation();
   DrawingVariables theDVs;
   this->theChambers.DrawMeProjective(nullptr, true, theDVs, theFormat);
-  outHtml << theDVs.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->AmbientDimension);
+  outHtml << theDVs.GetHtmlDiv(this->AmbientDimension);
   Vector<Rational> tempRoot;
   tempRoot.MakeZero(this->AmbientDimension);
   global.fatal << "not implemented yet" << global.fatal;
@@ -10241,7 +10240,7 @@ std::string ConeComplex::DrawMeToHtmlLastCoordAffine(DrawingVariables& theDrawin
   bool isBad = false;
   isBad = this->DrawMeLastCoordAffine(true, theDrawingVariables, theFormat);
   std::stringstream out;
-  out << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim() - 1);
+  out << theDrawingVariables.GetHtmlDiv(this->GetDim() - 1);
   if (isBad) {
     out << "<hr>" << "found cones which I can't draw<hr>";
   }
@@ -10253,7 +10252,7 @@ std::string ConeComplex::DrawMeToHtmlProjective(DrawingVariables& theDrawingVari
   bool isGood = true;
   isGood = this->DrawMeProjective(nullptr, true, theDrawingVariables, theFormat);
   std::stringstream out;
-  out << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim());
+  out << theDrawingVariables.GetHtmlDiv(this->GetDim());
   if (!isGood) {
     out << "<hr>" << "found cones which I can't draw<hr>";
   }
@@ -10389,7 +10388,7 @@ std::string Cone::DrawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariab
   if (foundBadVertex) {
     out << "<br>The cone does not lie in the upper half-space. ";
   } else {
-    out << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim() - 1);
+    out << theDrawingVariables.GetHtmlDiv(this->GetDim() - 1);
   }
   out << "<br>" << this->ToString(&theFormat);
   return out.str();
@@ -10469,7 +10468,7 @@ std::string Cone::DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, 
   theDrawingVariables.theBuffer.MakeMeAStandardBasis(this->GetDim());
   this->DrawMeProjective(nullptr, true, theDrawingVariables, theFormat);
   theDrawingVariables.drawCoordSystemBuffer(theDrawingVariables, this->GetDim());
-  out << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim());
+  out << theDrawingVariables.GetHtmlDiv(this->GetDim());
   out << "<br>" << this->ToString(&theFormat);
   return out.str();
 }
@@ -11406,13 +11405,10 @@ Rational PiecewiseQuasipolynomial::EvaluateInputProjectivized(const Vector<Ratio
             global.Comments << "<br><b>Point of failure: " << AffineInput.ToString() << "</b>";
             //this->DrawMe(tempDV);
             this->theProjectivizedComplex.DrawMeLastCoordAffine(true, tempDV, tempFormat);
-            tempDV.NumHtmlGraphics = 5;
             tempDV.theBuffer.drawCircleAtVectorBufferRational(AffineInput, "black", 5);
             tempDV.theBuffer.drawCircleAtVectorBufferRational(AffineInput, "black", 10);
             tempDV.theBuffer.drawCircleAtVectorBufferRational(AffineInput, "red", 4);
-            global.Comments << "<br> <script src =\"http://ajax.googleapis.com/ajax/libs/dojo/1.6.1/dojo/dojo.xd.js\" "
-            << "type =\"text/javascript\"></script>\n";
-            global.Comments << tempDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->theProjectivizedComplex.GetDim() - 1);
+            global.Comments << tempDV.GetHtmlDiv(this->theProjectivizedComplex.GetDim() - 1);
           }
           firstFail = false;
         }

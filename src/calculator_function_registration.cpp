@@ -7344,8 +7344,8 @@ void Calculator::initPredefinedStandardOperations() {
     "that whose radical lies in the underlying algebraic closure.",
     "\\sqrt{3+2\\sqrt[2]{2}};\n"
     "(7-5\\sqrt{2})^{7/3}",
-    "CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger",
-    "PowerAlgebraicNumberBySmallInteger",
+    "CalculatorFunctionsBinaryOps::innerRadicalAlgebraicNumberPositiveDefault",
+    "RadicalAlgebraicNumberPositiveDefault",
     innerStandard
   );
   this->AddOperationBinaryInnerHandlerWithTypes(

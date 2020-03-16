@@ -3,6 +3,7 @@
 #include "general_lists.h"
 #include "math_general.h"
 #include "math_extra_drawing_variables.h"
+#include "crypto.h"
 
 std::string CreateJavaScriptVectors(Vectors<double>& inputVectors, const std::string& arrayName, bool useVar) {
   MacroRegisterFunctionWithName("CreateStaticJavaScriptVectorsArrayWithProjection");
@@ -105,21 +106,7 @@ std::string CreateStaticJavaScriptTextArray(List<std::string>& theLabels, const 
 }
 
 std::string DrawingVariables::GetHtmlDiv(int theDimension) {
-  std::stringstream out;
-  this->NumHtmlGraphics ++;
-  std::string idCanvas = "idCanvasNDimensionalGraphics" + std::to_string(this->NumHtmlGraphics);
-  std::string idHighlightInformation = "idHighlightInfoNDimensionalGraphics" + std::to_string(this->NumHtmlGraphics);
-  std::string idSpanInformation = "idCanvasInfoNDimensionalGraphics" + std::to_string(this->NumHtmlGraphics);
-  std::string graphicsVar = "drawGraphics" + std::to_string(this->NumHtmlGraphics);
-  out << "<canvas width = '" << this->DefaultHtmlWidth << "' "
-  << "height = '" << this->DefaultHtmlHeight << "'"
-  << " id = '" << idCanvas << "'>Canvas not supported</canvas><br>";
-  out << "<div id = '" << idHighlightInformation << "'></div><br>";
-  out << "<span id = '" << idSpanInformation << "'></span><br>";
   JSData theData;
-  theData["idCanvas"] = idCanvas;
-  theData["idSpanInformation"] = idSpanInformation;
-  theData["idHighlightInformation"] = idHighlightInformation;
   theData["widthHTML"] = this->DefaultHtmlWidth;
   theData["heightHTML"] = this->DefaultHtmlHeight;
   theData["screenBasis"] = this->theBuffer.BasisProjectionPlane;
@@ -131,13 +118,25 @@ std::string DrawingVariables::GetHtmlDiv(int theDimension) {
   theData[drawObjects].theType = JSData::token::tokenArray;
   theData[drawObjects].theList = this->theBuffer.theOperations;
   theData["dimension"] = theDimension;
+
+  std::string graphicsId = Crypto::ConvertStringToHex(Crypto::computeSha256(theData.ToString()), 0, false);
+  std::string idCanvas = "idCanvasNDimensionalGraphics" + graphicsId;
+  std::string idHighlightInformation = "idHighlightInfoNDimensionalGraphics" + graphicsId;
+  std::string idSpanInformation = "idCanvasInfoNDimensionalGraphics" + graphicsId;
+  theData["idCanvas"] = idCanvas;
+  theData["idSpanInformation"] = idSpanInformation;
+  theData["idHighlightInformation"] = idHighlightInformation;
+
+  std::stringstream out;
+  std::string graphicsVar = "drawGraphics" + graphicsId;
+  out << "<canvas width = '" << this->DefaultHtmlWidth << "' "
+  << "height = '" << this->DefaultHtmlHeight << "'"
+  << " id = '" << idCanvas << "'>Canvas not supported</canvas><br>";
+  out << "<div id = '" << idHighlightInformation << "'></div><br>";
+  out << "<span id = '" << idSpanInformation << "'></span><br>";
   out << "<script>\n";
   out << "var " << graphicsVar << " = " << theData.ToString(nullptr) << ";\n";
   out << "window.calculator.graphicsNDimensions.createGraphicsFromObject(" << graphicsVar << ");\n";
   out << "</script>";
   return out.str();
-}
-
-std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(int theDimension) {
-  return this->GetHtmlDiv(theDimension);
 }

@@ -1169,6 +1169,12 @@ void Crypto::computeSha224(const List<unsigned char>& input, List<uint32_t>& out
   return Crypto::computeSha2xx(input, output, true);
 }
 
+std::string Crypto::computeSha256(const std::string& input) {
+  std::string output;
+  Crypto::computeSha256(input, output);
+  return output;
+}
+
 void Crypto::computeSha256(const std::string& input, std::string& output) {
   List<unsigned char> inputList, outputList;
   inputList = input;

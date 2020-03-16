@@ -9267,7 +9267,7 @@ bool CalculatorFunctions::innerDrawWeightSupportWithMults(
   DrawingVariables theDV;
   std::string report;
   theChar.DrawMeWithMults(report, theDV, 10000);
-  out << report << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
+  out << report << theDV.GetHtmlDiv(theWeyl.GetDim());
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -9316,7 +9316,7 @@ bool CalculatorFunctions::innerDrawRootSystem(
     theDV.flagFillUserDefinedProjection = true;
     theDV.FillUserDefinedProjection = preferredProjectionPlane;
   }
-  out << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
+  out << theDV.GetHtmlDiv(theWeyl.GetDim());
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -9685,7 +9685,7 @@ bool CalculatorFunctions::innerDrawWeightSupport(
   DrawingVariables theDV;
   std::string report;
   theChar.DrawMeNoMults(report, theDV, 10000);
-  out << report << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
+  out << report << theDV.GetHtmlDiv(theWeyl.GetDim());
   out << "<br>A table with the weights of the character follows. <br>";
   out << theChar.ToStringFullCharacterWeightsTable();
   return output.AssignValue(out.str(), theCommands);

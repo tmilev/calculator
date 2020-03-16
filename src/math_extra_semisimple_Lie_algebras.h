@@ -375,7 +375,11 @@ class charSSAlgMod : public MonomialCollection<Weight<coefficient>, coefficient>
   }
   void GetDual(charSSAlgMod<coefficient>& output) const;
   void MakeFromWeight(const Vector<coefficient>& inputWeightSimpleCoords, SemisimpleLieAlgebra* inputOwner);
-  bool SplitCharOverRedSubalg(std::string* Report, charSSAlgMod& output, branchingData& inputData);
+  bool SplitCharOverRedSubalg(
+    std::string* Report,
+    charSSAlgMod& output,
+    branchingData& inputData
+  );
   bool GetDominantCharacterWRTsubalgebra(
     charSSAlgMod& outputCharOwnerSetToZero, std::string& outputDetails, int upperBoundNumDominantWeights
   );

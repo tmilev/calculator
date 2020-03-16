@@ -513,7 +513,9 @@ std::string charSSAlgMod<coefficient>::MultiplyBy(const charSSAlgMod& other) {
 }
 
 template <class coefficient>
-bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, charSSAlgMod& output, branchingData& inputData) {
+bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(
+  std::string* Report, charSSAlgMod& output, branchingData& inputData
+) {
   if (this->IsEqualToZero()) {
     return false;
   }
@@ -651,7 +653,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
         theDV1.drawCircleAtVectorBufferRational(tempRoot2, "#a00000", 5);
       }
     }
-    out << "<hr>" << theDV1.GetHtmlFromDrawOperationsCreateDivWithUniqueName(WeylFDSmall.AmbientWeyl->GetDim());
+    out << "<hr>" << theDV1.GetHtmlDiv(WeylFDSmall.AmbientWeyl->GetDim());
     *Report = out.str();
   }
   return true;

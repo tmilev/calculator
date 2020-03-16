@@ -84,8 +84,17 @@ bool Calculator::Test::BuiltInFunctionsABTest(Calculator& ownerInitialized) {
   Calculator::Test test(ownerInitialized);
   test.CalculatorTestPrepare();
   if (!test.CalculatorTestRun()) {
-    global.fatal << "Calculator AB test failed with " << test.inconsistencies
-    << " inconsistencies." << global.fatal;
+    std::stringstream crashFileWriteReport;
+    std::stringstream crashFile;
+    crashFile << "<html><link "
+    << "type = 'text/css' "
+    << "rel = 'stylesheet' "
+    << "href = '../calculator-html/styleCalculator.css'>"
+    << "<body>" << test.reportHtml << "</body></html>";
+
+    FileOperations::WriteFileVirual("output/crash_test.html", crashFile.str(), &crashFileWriteReport);
+    global.fatal << crashFileWriteReport.str() << "Calculator AB test failed with " << test.inconsistencies
+    << " inconsistencies. See report html in file output/crash_test.html. " << global.fatal;
   }
   return true;
 }

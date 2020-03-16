@@ -306,9 +306,9 @@ std::string LittelmannPath::GenerateOrbitAndAnimate() {
     }
   }
   out << "<br>Animation of the Littelmann paths follows. ";
-  out << animated.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->owner->GetDim());
+  out << animated.GetHtmlDiv(this->owner->GetDim());
   out << "<br>Here are all Littelmann paths drawn simultaneously. ";
-  out << collapsed.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->owner->GetDim());
+  out << collapsed.GetHtmlDiv(this->owner->GetDim());
   out << "Littelmann paths in simple coordinates given in the order in which they are generated ("
   << theOrbit.size << " total):<br>";
   out << "<table>";
@@ -1743,7 +1743,9 @@ bool Calculator::innerEWAorPoly(Calculator& theCommands, const Expression& input
     2,
     CalculatorConversions::functionPolynomiaL<Rational>
   )) {
-    return theCommands << "<hr>Failed to extract polynomials from arguments of " << input.ToString();
+    return theCommands
+    << "<hr>Failed to extract polynomials from arguments of "
+    << input.ToString();
   }
   int letterDiff = 0, letterPol = 0;
   if (
@@ -1757,7 +1759,9 @@ bool Calculator::innerEWAorPoly(Calculator& theCommands, const Expression& input
   }
   Expression endContext;
   endContext.MakeContextWithOnePolyVarOneDiffVar(
-    theCommands, startContext.ContextGetContextVariable(letterPol), startContext.ContextGetContextVariable(letterDiff)
+    theCommands,
+    startContext.ContextGetContextVariable(letterPol),
+    startContext.ContextGetContextVariable(letterDiff)
   );
   ElementWeylAlgebra<Rational> outputEWA;
   if (assignPoly) {

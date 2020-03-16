@@ -1516,7 +1516,7 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
     Accum += theSubbedPoly;
   }
   Accum.DrawMe(drawOps, 10, &smallWeylChamber, &highestWeightSmallAlgBasisChanged);
-  out << drawOps.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
+  out << drawOps.GetHtmlDiv(2);
   out << Accum.ToString(false, true);
   return out.str();
 }

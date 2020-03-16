@@ -51,6 +51,12 @@ bool SSLRecord::Test::SerializationClientHello(TransportLayerSecurityServer& tes
   return true;
 }
 
+bool SSLRecord::Test::All() {
+  MacroRegisterFunctionWithName("SSLRecord::Test::All");
+  SSLRecord::Test::Serialization();
+  return true;
+}
+
 bool SSLRecord::Test::Serialization() {
   MacroRegisterFunctionWithName("SSLRecord::Test::Serialization");
 

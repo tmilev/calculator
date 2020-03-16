@@ -4187,17 +4187,6 @@ void GlobalVariables::ConfigurationProcess() {
   global.flagServerDetailedLog = global.configuration[
     Configuration::serverDetailedLog
   ].isTrueRepresentationInJSON();
-  global.flagAutoUnitTest = global.configuration[
-    Configuration::autoUnitTest
-  ].isTrueRepresentationInJSON();
-  if (global.flagAutoUnitTest) {
-    global
-    << logger::purple << "************************" << logger::endL
-    << logger::yellow << "Auto-unit tests are ON. "
-    << logger::red << "This will slow down the calculator boot by a tiny amount. "
-    << logger::endL
-    << logger::purple << "************************" << logger::endL;
-  }
   global.flagDisableDatabaseLogEveryoneAsAdmin = global.configuration[
     Configuration::disableDatabaseLogEveryoneAsAdmin
   ].isTrueRepresentationInJSON();

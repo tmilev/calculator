@@ -164,6 +164,7 @@ SOURCES_RELATIVE_PATH=\
     math_semisimple_Lie_subalgebras.cpp \
     multiprocessing.cpp \
     multitasking.cpp \
+    random_system.cpp \
     source_code_formatter.cpp \
     string_constants.cpp \
     symmetric_groups_and_generalizations.cpp \

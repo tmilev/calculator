@@ -212,9 +212,6 @@ public:
   std::string hostNoPort;
 
   bool flagRequestComingLocally;
-  // Various unit tests will be run on calculator boot if this is true:
-  bool flagAutoUnitTest;
-
   // internal infrastructure flags
   bool flagServerForkedIntoWorker;
   bool flagNotAllocated;

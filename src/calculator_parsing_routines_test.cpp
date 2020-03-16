@@ -5,10 +5,23 @@
 bool Calculator::Test::All() {
   Calculator tester;
   tester.initialize();
+  Calculator::Test::CheckBuiltInInitializations(tester);
   Calculator::Test::ParseAllExamples(tester);
   Calculator::Test::NumberOfTestFunctions(tester);
   Calculator::Test::ParseDecimal(tester);
   Calculator::Test::BuiltInFunctionsABTest(tester);
+  return true;
+}
+
+bool Calculator::Test::CheckBuiltInInitializations(Calculator& ownerInitialized) {
+  if (!ownerInitialized.CheckPredefinedFunctionNameRepetitions()) {
+    global.fatal << "Predefined function name repetitions." << global.fatal;
+    return false;
+  }
+  if (!ownerInitialized.CheckOperationHandlers()) {
+    global.fatal << "Operation handler checks failed." << global.fatal;
+    return false;
+  }
   return true;
 }
 

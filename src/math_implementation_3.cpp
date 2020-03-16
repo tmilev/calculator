@@ -129,7 +129,6 @@ GlobalVariables::Response::Response() {
 
 GlobalVariables::GlobalVariables() {
   this->flagDeallocated = false;
-  this->flagAutoUnitTest = false;
   this->flagNotAllocated = false;
   this->flagCertificatesAreOfficiallySigned = false;
   this->flagIsChildProcess = false;

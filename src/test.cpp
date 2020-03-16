@@ -13,6 +13,7 @@ public:
     static const std::string all;
     static const std::string database;
     static const std::string problems;
+    static const std::string crypto;
     static const std::string topicLists;
     static const std::string topiclists;
     static const std::string calculator;
@@ -35,6 +36,7 @@ int mainTest(List<std::string>& inputArguments) {
 const std::string Test::Suites::all = "all";
 const std::string Test::Suites::database = "database";
 const std::string Test::Suites::problems = "problems";
+const std::string Test::Suites::crypto = "crypto";
 const std::string Test::Suites::topicLists = "topicLists";
 const std::string Test::Suites::topiclists = "topiclists";
 const std::string Test::Suites::calculator = "calculator";
@@ -51,12 +53,16 @@ void Test::Run() {
   if (this->ShouldTest(Test::Suites::calculator)) {
     Calculator::Test::All();
   }
-  if (this->flagTestAll) {
-    JSData::Test::All();
+  if (this->ShouldTest(Test::Suites::crypto)) {
     ASNObject::initializeNonThreadSafe();
+    Crypto::Random::initializeRandomBytes();
     PrivateKeyRSA::Test::All();
     Crypto::Test::All();
     X509Certificate::Test::All();
+    SSLRecord::Test::All();
+  }
+  if (this->flagTestAll) {
+    JSData::Test::All();
     Expression::Test::All();
     LargeIntegerUnsigned::Test::All();
     GlobalVariables::Test::All();

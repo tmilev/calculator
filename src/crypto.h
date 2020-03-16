@@ -350,17 +350,21 @@ public:
     std::stringstream* commentsOnFailure,
     std::stringstream* commentsGeneral
   );
-  // Every call of this function acquires additional randomness from the system's timer.
-  static void GetRandomBytesSecureInternal(ListZeroAfterUse<unsigned char>& output, int numberOfBytesMax32);
-  static void GetRandomBytesSecureInternalMayLeaveTracesInMemory(List<unsigned char>& output, int numberOfBytesMax32);
-  // Forget previous random bytes and the entropy of additionalRandomness.
-  // We expect the extra entropy from sources such as the system timer, so
-  // additionalRandomness is expected to contain considerably less
-  // entropy than 64 bits.
-  static void acquireAdditionalRandomness(int64_t additionalRandomness);
+  class Random {
+    public:
+    static void initializeRandomBytes();
+    // Every call of this function acquires additional randomness from the system's timer.
+    static void GetRandomBytesSecureInternal(ListZeroAfterUse<unsigned char>& output, int numberOfBytesMax32);
+    static void GetRandomBytesSecureInternalMayLeaveTracesInMemory(List<unsigned char>& output, int numberOfBytesMax32);
+    // Forget previous random bytes and the entropy of additionalRandomness.
+    // We expect the extra entropy from sources such as the system timer, so
+    // additionalRandomness is expected to contain considerably less
+    // entropy than 64 bits.
+    static void acquireAdditionalRandomness(int64_t additionalRandomness);
 
-  static void GetRandomLargeIntegerSecure(LargeIntegerUnsigned& output, int numBytes);
-  static void GetRandomLargePrime(LargeIntegerUnsigned& output, int numBytes);
+    static void GetRandomLargeIntegerSecure(LargeIntegerUnsigned& output, int numBytes);
+    static void GetRandomLargePrime(LargeIntegerUnsigned& output, int numBytes);
+  };
   // Shorter strings should hash faster, so
   // timing attacks on this should reveal differences in string lengths.
   static bool HaveEqualHashes(const std::string& left, const std::string& right);

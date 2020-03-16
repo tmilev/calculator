@@ -8,11 +8,11 @@
 #include "math_extra_algebraic_numbers.h"
 #include <iomanip>
 
-void Crypto::GetRandomBytesSecureInternal(ListZeroAfterUse<unsigned char>& output, int numberOfBytesMax32) {
-  return Crypto::GetRandomBytesSecureInternalMayLeaveTracesInMemory(output.data, numberOfBytesMax32);
+void Crypto::Random::GetRandomBytesSecureInternal(ListZeroAfterUse<unsigned char>& output, int numberOfBytesMax32) {
+  return Crypto::Random::GetRandomBytesSecureInternalMayLeaveTracesInMemory(output.data, numberOfBytesMax32);
 }
 
-void Crypto::acquireAdditionalRandomness(int64_t additionalRandomness) {
+void Crypto::Random::acquireAdditionalRandomness(int64_t additionalRandomness) {
   if (
     static_cast<unsigned>(global.randomBytesCurrent.size) <
     global.maximumExtractedRandomBytes
@@ -25,8 +25,8 @@ void Crypto::acquireAdditionalRandomness(int64_t additionalRandomness) {
   Crypto::computeSha512(global.randomBytesCurrent, global.randomBytesCurrent);
 }
 
-void Crypto::GetRandomBytesSecureInternalMayLeaveTracesInMemory(List<unsigned char>& output, int numberOfBytesMax32) {
-  Crypto::acquireAdditionalRandomness(global.GetElapsedMilliseconds());
+void Crypto::Random::GetRandomBytesSecureInternalMayLeaveTracesInMemory(List<unsigned char>& output, int numberOfBytesMax32) {
+  Crypto::Random::acquireAdditionalRandomness(global.GetElapsedMilliseconds());
   if (static_cast<unsigned>(numberOfBytesMax32) > global.maximumExtractedRandomBytes) {
     global.fatal << "Not allowed to extract more than " << global.maximumExtractedRandomBytes << " bytes of randomness. " << global.fatal;
   }
@@ -40,8 +40,8 @@ bool Crypto::HaveEqualHashes(const std::string& left, const std::string& right) 
   return leftSHA == rightSHA;
 }
 
-void Crypto::GetRandomLargePrime(LargeIntegerUnsigned& output, int numBytes) {
-  Crypto::GetRandomLargeIntegerSecure(output, numBytes);
+void Crypto::Random::GetRandomLargePrime(LargeIntegerUnsigned& output, int numBytes) {
+  Crypto::Random::GetRandomLargeIntegerSecure(output, numBytes);
   if (output.IsEven()) {
     output ++;
   }
@@ -53,9 +53,9 @@ void Crypto::GetRandomLargePrime(LargeIntegerUnsigned& output, int numBytes) {
   }
 }
 
-void Crypto::GetRandomLargeIntegerSecure(LargeIntegerUnsigned& output, int numBytes) {
+void Crypto::Random::GetRandomLargeIntegerSecure(LargeIntegerUnsigned& output, int numBytes) {
   ListZeroAfterUse<unsigned char> randomBytes;
-  Crypto::GetRandomBytesSecureInternal(randomBytes, numBytes);
+  Crypto::Random::GetRandomBytesSecureInternal(randomBytes, numBytes);
   Crypto::ConvertListUnsignedCharsToLargeUnsignedIntegerBigEndian(randomBytes.data, output);
 }
 

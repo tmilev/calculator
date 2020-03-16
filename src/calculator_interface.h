@@ -2111,6 +2111,8 @@ public:
     static bool ParseDecimal(Calculator& ownerInitialized);
     static bool ParseAllExamples(Calculator& ownerInitialized);
     static bool BuiltInFunctionsABTest(Calculator& ownerInitialized);
+
+    static bool CheckBuiltInInitializations(Calculator& ownerInitialized);
     void CalculatorTestPrepare();
     void CalculatorTestProcessResults();
     bool CalculatorTestRun();

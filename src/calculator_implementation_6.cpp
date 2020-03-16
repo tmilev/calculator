@@ -974,7 +974,7 @@ bool CalculatorFunctions::innerGenerateRandomPrime(
     << minNumberOfBytes << ", you requested: " << numberOfBytes << ". ";
   }
   LargeIntegerUnsigned result;
-  Crypto::GetRandomLargePrime(result, numberOfBytes);
+  Crypto::Random::GetRandomLargePrime(result, numberOfBytes);
   return output.AssignValue(result, theCommands);
 }
 

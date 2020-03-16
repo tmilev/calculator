@@ -144,12 +144,12 @@ public:
   static std::string processMonitoringTriggerTime            ;
   static std::string millisecondsReplyAfterComputation       ;
   static std::string builtInTLSAvailable                     ;
+  static std::string dontUseOpenSSL                          ;
   static std::string serverAutoMonitor                       ;
   static std::string monitorPingTime                         ;
   static std::string disableDatabaseLogEveryoneAsAdmin       ;
   static std::string serverDetailedLog                       ;
   static std::string gitRepository                           ;
-  static std::string autoUnitTest                            ;
   static std::string mathJaxSetup                            ;
   static std::string portHTTP                                ;
   static std::string portHTTPSOpenSSL                        ;

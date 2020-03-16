@@ -52,15 +52,6 @@ void TransportLayerSecurity::initializeNonThreadSafeOnFirstCall(bool IamServer) 
     bool flagBuiltInTLSAvailable = false;
     if (flagBuiltInTLSAvailable) {
       this->theServer.initialize();
-      if (global.flagAutoUnitTest) {
-        global << logger::yellow
-        << "Testing cryptographic functions ..." << logger::endL;
-        SSLRecord::Test::Serialization();
-        Crypto::Test::Sha256();
-        PrivateKeyRSA::Test::All();
-        X509Certificate::Test::All();
-        global << logger::green << "Cryptographic tests done." << logger::endL;
-      }
     }
   } else {
     this->openSSLData.initSSLClient();
@@ -1752,7 +1743,7 @@ void SSLContent::PrepareServerHello2Certificate() {
 bool TransportLayerSecurityServer::Session::ComputeAndSignEphemerealKey(std::stringstream* commentsOnError) {
   MacroRegisterFunctionWithName("TransportLayerSecurityServer::Session::ComputeAndSignEphemerealKey");
   (void) commentsOnError;
-  Crypto::GetRandomLargeIntegerSecure(this->ephemerealPrivateKey, 32);
+  Crypto::Random::GetRandomLargeIntegerSecure(this->ephemerealPrivateKey, 32);
   this->chosenEllipticCurve = CipherSuiteSpecification::EllipticCurveSpecification::secp256k1;
   this->chosenEllipticCurveName = "secp256k1";
   this->bytesToSign.SetSize(0);
@@ -1929,7 +1920,7 @@ void TransportLayerSecurityServer::Session::initialize() {
   this->chosenSignatureAlgorithm = 0;
   this->chosenEllipticCurve = 0;
   this->chosenEllipticCurveName = "";
-  Crypto::GetRandomBytesSecureInternalMayLeaveTracesInMemory(
+  Crypto::Random::GetRandomBytesSecureInternalMayLeaveTracesInMemory(
     this->myRandomBytes, SSLContent::LengthRandomBytesInSSLHello
   );
   this->ephemerealPrivateKey = 0;

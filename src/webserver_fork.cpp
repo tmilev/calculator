@@ -2,38 +2,11 @@
 // For additional information refer to the file "calculator.h".
 #include "webserver.h"
 #include <unistd.h>
-#include "crypto.h"
-// sys/random.h is missing from older distros/kernels.
-// #include <sys/random.h>
-// Used in place of sys/random.h:
-#include <syscall.h> // <- SYS_getrandom defined here.
-#include <linux/random.h> // <- GRND_NONBLOCK defined here.
-#include <unistd.h> // <- syscall defined here.
 #include <sys/prctl.h> //<- prctl here
 #include <signal.h> // <-signals here
 
 void WebServer::initializeRandomBytes() {
-  static bool alreadyRan = false;
-  if (alreadyRan) {
-    global.fatal << "Random bytes initialization allowed only once. " << global.fatal;
-  }
-  if (global.numberOfRandomBytes > 256) {
-    global.fatal << "The number of system random bytes must not exceed 256. " << global.fatal;
-  }
-  List<unsigned char>& output = global.randomBytesCurrent;
-  output.SetSize(static_cast<signed>(global.numberOfRandomBytes));
-  // According to the
-  // documentation of getrandom, the following call
-  // must not block or return fewer than the requested bytes in Linux
-  // when the number of bytes is less than 256.
-  int generatedBytes = static_cast<int>(
-    syscall(SYS_getrandom, output.TheObjects, static_cast<unsigned>(output.size), GRND_NONBLOCK)
-    // Does not compile on older linux systems:
-    // getrandom(output.TheObjects, static_cast<unsigned>(output.size), 0)
-  );
-  if (generatedBytes != output.size) {
-    global.fatal << "Failed to get the necessary number of random bytes. " << global.fatal;
-  }
+  Crypto::Random::initializeRandomBytes();
 }
 
 bool WebServer::CreateProcessMutex() {
@@ -53,7 +26,7 @@ bool WebServer::CreateProcessMutex() {
 
 void WebServer::ComputeActiveWorkerId() {
   List<unsigned char> incomingId;
-  Crypto::GetRandomBytesSecureInternalMayLeaveTracesInMemory(incomingId, 32);
+  Crypto::Random::GetRandomBytesSecureInternalMayLeaveTracesInMemory(incomingId, 32);
   WebWorker& worker = this->GetActiveWorker();
   if (worker.workerId != "") {
     this->workerIds.RemoveKey(worker.workerId);
@@ -95,7 +68,7 @@ int WebServer::Fork() {
   if (result > 0) {
     // Parent process.
     // Forget previous random bytes, and gain a little extra entropy:
-    Crypto::acquireAdditionalRandomness(millisecondsAtFork);
+    Crypto::Random::acquireAdditionalRandomness(millisecondsAtFork);
   } else if (result == 0) {
     global.logs.logType = GlobalVariables::LogData::type::worker;
 
@@ -103,7 +76,7 @@ int WebServer::Fork() {
     // lose 256 bits of entropy from the server:
     global.randomBytesCurrent.SetSize(static_cast<signed>(global.maximumExtractedRandomBytes));
     // Forget previous random bytes, and gain a little extra entropy:
-    Crypto::acquireAdditionalRandomness(millisecondsAtFork);
+    Crypto::Random::acquireAdditionalRandomness(millisecondsAtFork);
 
     // Set death signal of the parent trigger death signal of the child.
     // If the parent process was killed before the prctl executed,

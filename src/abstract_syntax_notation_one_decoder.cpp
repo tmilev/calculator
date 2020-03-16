@@ -1709,8 +1709,8 @@ bool PrivateKeyRSA::GenerateRandom(std::stringstream* commentsOnFailure, int num
     }
     return false;
   }
-  Crypto::GetRandomLargePrime(this->primeOne, numberOfBytes);
-  Crypto::GetRandomLargePrime(this->primeTwo, numberOfBytes);
+  Crypto::Random::GetRandomLargePrime(this->primeOne, numberOfBytes);
+  Crypto::Random::GetRandomLargePrime(this->primeTwo, numberOfBytes);
   return this->ComputeFromTwoPrimes(this->primeOne, this->primeTwo, false, commentsOnFailure);
 }
 

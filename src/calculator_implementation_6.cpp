@@ -1325,11 +1325,11 @@ bool CalculatorFunctions::innerPolynomialDivisionQuotient(
 ) {
   MacroRegisterFunctionWithName("Calculator::innerPolynomialDivisionQuotient");
   Expression theContext;
-  Vector<Polynomial<Rational> > thePolys;
-  if (!theCommands.GetListPolysVariableLabelsInLex(input, thePolys, theContext)) {
+  Vector<Polynomial<AlgebraicNumber> > thePolys;
+  if (!theCommands.GetListPolynomialVariableLabelsLexicographic(input, thePolys, theContext)) {
     return output.MakeError("Failed to extract list of polynomials. ", theCommands);
   }
-  GroebnerBasisComputation<Rational> theGB;
+  GroebnerBasisComputation<AlgebraicNumber> theGB;
   theGB.flagStoreQuotients = true;
   theGB.theBasiS.SetSize(thePolys.size - 1);
   for (int i = 1; i < thePolys.size; i ++) {
@@ -1338,7 +1338,7 @@ bool CalculatorFunctions::innerPolynomialDivisionQuotient(
     }
     theGB.theBasiS[i - 1] = thePolys[i];
   }
-  Polynomial<Rational> outputRemainder;
+  Polynomial<AlgebraicNumber> outputRemainder;
   theGB.initForDivisionAlone(theGB.theBasiS);
   theGB.RemainderDivisionWithRespectToBasis(thePolys[0], &outputRemainder, - 1);
   Expression currentE, thePolyE;

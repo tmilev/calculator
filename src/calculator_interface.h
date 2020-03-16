@@ -2270,8 +2270,10 @@ public:
   static bool innerGCDPoly(Calculator& theCommands, const Expression& input, Expression& output) {
     return theCommands.innerGCDOrLCMPoly(theCommands, input, output, true);
   }
-  bool GetListPolysVariableLabelsInLex(
-    const Expression& input, Vector<Polynomial<Rational> >& output, Expression& outputContext
+  bool GetListPolynomialVariableLabelsLexicographic(
+    const Expression& input,
+    Vector<Polynomial<AlgebraicNumber> >& output,
+    Expression& outputContext
   );
   static bool innerPrintAllVectorPartitions(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPrintB3G2branchingTableCharsOnly(

@@ -178,12 +178,12 @@ bool Calculator::innerGCDOrLCMPoly(
   return output.AssignValueWithContext(outputP, theContext, theCommands);
 }
 
-bool Calculator::GetListPolysVariableLabelsInLex(
+bool Calculator::GetListPolynomialVariableLabelsLexicographic(
   const Expression& input,
-  Vector<Polynomial<Rational> >& output,
+  Vector<Polynomial<AlgebraicNumber> > &output,
   Expression& outputContext
 ) {
-  MacroRegisterFunctionWithName("Calculator::GetListPolysVariableLabelsInLex");
+  MacroRegisterFunctionWithName("Calculator::GetListPolynomialVariableLabelsLexicographic");
   Expression theContextStart(*this);
   if (!this->GetVectorFromFunctionArguments(
     input,
@@ -204,10 +204,16 @@ bool Calculator::GetListPolysVariableLabelsInLex(
     theVars.AddOnTop(theContextStart.ContextGetContextVariable(i));
   }
   theVars.QuickSortAscending();
-  PolynomialSubstitution<Rational> theSub;
+  PolynomialSubstitution<AlgebraicNumber> theSub;
   theSub.SetSize(numVars);
   for (int i = 0; i < theSub.size; i ++) {
-    theSub[i].MakeMonomiaL(theVars.GetIndex(theContextStart.ContextGetContextVariable(i)), 1, 1, numVars);
+    int currentIndex = theVars.GetIndex(theContextStart.ContextGetContextVariable(i));
+    theSub[i].MakeMonomiaL(
+      currentIndex,
+      1,
+      this->theObjectContainer.theAlgebraicClosure.One(),
+      numVars
+    );
   }
   outputContext.MakeEmptyContext(*this);
   Expression PolyVarsE, tempE;
@@ -219,7 +225,7 @@ bool Calculator::GetListPolysVariableLabelsInLex(
     PolyVarsE.AddChildOnTop(theVars[i]);
   }
   for (int i = 0; i < output.size; i ++) {
-    Polynomial<Rational>& currentP = output[i];
+    Polynomial<AlgebraicNumber>& currentP = output[i];
     currentP.Substitution(theSub);
   }
   return outputContext.AddChildOnTop(PolyVarsE);

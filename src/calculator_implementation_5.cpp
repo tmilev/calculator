@@ -2266,61 +2266,16 @@ class QRFactorizationComputation{
 //  << input.ToString();
 //}
 
-template<class coefficient>
-std::string GroebnerBasisComputation<coefficient>::GetPolynomialStringSpacedMonomialsHtml(
-  const Polynomial<coefficient>& thePoly,
-  const std::string& extraStyle,
-  List<MonomialP>* theHighLightedMons
-) {
-  std::stringstream out;
-  bool found = false;
-  int countMons = 0;
-  for (int i = 0; i < this->allMonomials.size; i ++) {
-    int theIndex = thePoly.theMonomials.GetIndex(this->allMonomials[i]);
-    if (theIndex == - 1) {
-      out << "<td" << extraStyle << ">" << "</td>";
-      continue;
-    }
-    countMons ++;
-    bool useHighlightStyle = false;
-    if (theHighLightedMons != nullptr) {
-      if (theHighLightedMons->Contains(this->allMonomials[i])) {
-        useHighlightStyle = true;
-      }
-    }
-    out << "<td" << extraStyle << ">";
-    if (useHighlightStyle) {
-      out << "<span style =\"color:red\">";
-    }
-    if (this->theFormat.flagUseLatex) {
-      out << HtmlRoutines::GetMathSpanPure(
-        Polynomial<Rational>::GetBlendCoeffAndMon(thePoly[theIndex], thePoly.coefficients[theIndex], found, &this->theFormat)
-      );
-    } else {
-      out << Polynomial<Rational>::GetBlendCoeffAndMon(thePoly[theIndex], thePoly.coefficients[theIndex], found, &this->theFormat);
-    }
-    found = true;
-    if (useHighlightStyle) {
-      out << "</span>";
-    }
-    out << "</td>";
-  }
-  if (countMons != thePoly.size()) {
-    out << "<td><b>Programming ERROR!</b></td>";
-  }
-  return out.str();
-}
-
 bool CalculatorFunctions::innerPolynomialDivisionRemainder(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("Calculator::innerPolynomialDivisionRemainder");
   Expression theContext;
-  Vector<Polynomial<Rational> > thePolys;
-  if (!theCommands.GetListPolysVariableLabelsInLex(input, thePolys, theContext)) {
+  Vector<Polynomial<AlgebraicNumber> > thePolys;
+  if (!theCommands.GetListPolynomialVariableLabelsLexicographic(input, thePolys, theContext)) {
     return output.MakeError("Failed to extract list of polynomials. ", theCommands);
   }
-  GroebnerBasisComputation<Rational> theGB;
+  GroebnerBasisComputation<AlgebraicNumber> theGB;
   theGB.theBasiS.SetSize(thePolys.size - 1);
   for (int i = 1; i < thePolys.size; i ++) {
     if (thePolys[i].IsEqualToZero()) {
@@ -2328,7 +2283,7 @@ bool CalculatorFunctions::innerPolynomialDivisionRemainder(
     }
     theGB.theBasiS[i - 1] = thePolys[i];
   }
-  Polynomial<Rational> outputRemainder;
+  Polynomial<AlgebraicNumber> outputRemainder;
   theGB.initForDivisionAlone(theGB.theBasiS);
   theGB.RemainderDivisionWithRespectToBasis(thePolys[0], &outputRemainder, - 1);
   Expression thePolyE;
@@ -2379,11 +2334,11 @@ bool CalculatorFunctions::innerPolynomialDivisionVerbose(
 ) {
   MacroRegisterFunctionWithName("Calculator::innerPolynomialDivisionVerbose");
   Expression theContext;
-  Vector<Polynomial<Rational> > thePolys;
-  if (!theCommands.GetListPolysVariableLabelsInLex(input, thePolys, theContext)) {
+  Vector<Polynomial<AlgebraicNumber> > thePolys;
+  if (!theCommands.GetListPolynomialVariableLabelsLexicographic(input, thePolys, theContext)) {
     return output.MakeError("Failed to extract list of polynomials. ", theCommands);
   }
-  GroebnerBasisComputation<Rational> theGB;
+  GroebnerBasisComputation<AlgebraicNumber> theGB;
   theGB.flagDoLogDivision = true;
   theGB.flagStoreQuotients = true;
   theGB.theBasiS.SetSize(thePolys.size - 1);
@@ -2410,64 +2365,6 @@ bool CalculatorFunctions::innerPolynomialDivisionVerbose(
   out << theGB.GetDivisionStringHtml();
   out << latexOutput.str();
   return output.AssignValue(out.str(), theCommands);
-}
-
-template<class coefficient>
-std::string GroebnerBasisComputation<coefficient>::GetPolynomialStringSpacedMonomialsLaTeX(
-  const Polynomial<coefficient>& thePoly,
-  std::string* highlightColor,
-  List<MonomialP>* theHighLightedMons,
-  int* firstNonZeroIndex
-) {
-  MacroRegisterFunctionWithName("GroebnerBasisComputation::GetPolynomialStringSpacedMonomialsLaTeX");
-  std::stringstream out;
-  bool found = false;
-  int countMons = 0;
-  if (firstNonZeroIndex != nullptr) {
-    *firstNonZeroIndex = - 1;
-  }
-  for (int i = 0; i < this->allMonomials.size; i ++) {
-    int theIndex = thePoly.theMonomials.GetIndex(this->allMonomials[i]);
-    if (theIndex == - 1) {
-      if (i != this->allMonomials.size - 1) {
-        out << "&";
-      }
-      continue;
-    }
-    if (firstNonZeroIndex != nullptr) {
-      if (*firstNonZeroIndex == - 1) {
-        *firstNonZeroIndex = i;
-      }
-    }
-    countMons ++;
-    bool useHighlightStyle = false;
-    if (highlightColor != nullptr) {
-      if (theHighLightedMons != nullptr) {
-        if (theHighLightedMons->Contains(this->allMonomials[i])) {
-          useHighlightStyle = true;
-        }
-      }
-    }
-    out << "$";
-    if (useHighlightStyle) {
-      out << "\\color{" << *highlightColor << "}{";
-    }
-    out << Polynomial<Rational>::GetBlendCoeffAndMon(
-      thePoly[theIndex], thePoly.coefficients[theIndex], found, &this->theFormat
-    );
-    found = true;
-    if (useHighlightStyle) {
-      out << "}\\color{black}";
-    }
-    out << "$ ";
-    if (i != this->allMonomials.size - 1) {
-      out << "& ";
-    }
-  }
-  if (countMons != thePoly.size()) {
-    out << " Programming ERROR!";
-  }
-  return out.str();
 }
 
 template <class coefficient>
@@ -2561,7 +2458,7 @@ std::string GroebnerBasisComputation<coefficient>::GetSpacedMonomialsWithHighlig
     }
     countMons ++;
     std::string monWithSign =
-    Polynomial<Rational>::GetBlendCoeffAndMon(
+    Polynomial<coefficient>::GetBlendCoeffAndMon(
       thePoly[theIndex], thePoly.coefficients[theIndex], true, &this->theFormat
     );
     std::string sign = monWithSign.substr(0, 1);
@@ -2787,8 +2684,8 @@ template <class coefficient>
 std::string GroebnerBasisComputation<coefficient>::GetDivisionLaTeXSlide() {
   MacroRegisterFunctionWithName("GroebnerBasisComputation::GetDivisionLaTeXSlide");
   std::stringstream out;
-  List<Polynomial<Rational> >& theRemainders = this->intermediateRemainders.GetElement();
-  List<Polynomial<Rational> >& theSubtracands = this->intermediateSubtractands.GetElement();
+  List<Polynomial<coefficient> >& theRemainders = this->intermediateRemainders.GetElement();
+  List<Polynomial<coefficient> >& theSubtracands = this->intermediateSubtractands.GetElement();
   this->theFormat.thePolyMonOrder = this->thePolynomialOrder.theMonOrder;
   bool oneDivisor = (this->theBasiS.size == 1);
   this->allMonomials.Clear();
@@ -2979,8 +2876,8 @@ bool CalculatorFunctions::innerPolynomialDivisionSlidesGrLex(
 ) {
   MacroRegisterFunctionWithName("Calculator::innerPolynomialDivisionSlidesGrLex");
   Expression theContext;
-  Vector<Polynomial<Rational> > thePolys;
-  if (!theCommands.GetListPolysVariableLabelsInLex(input, thePolys, theContext)) {
+  Vector<Polynomial<AlgebraicNumber> > thePolys;
+  if (!theCommands.GetListPolynomialVariableLabelsLexicographic(input, thePolys, theContext)) {
     return output.MakeError("Failed to extract list of polynomials. ", theCommands);
   }
   if (thePolys.size < 3) {
@@ -2988,7 +2885,7 @@ bool CalculatorFunctions::innerPolynomialDivisionSlidesGrLex(
     << "Function takes at least 3 inputs: "
     << "index of first slide, dividend, divisor(s).";
   }
-  GroebnerBasisComputation<Rational> theGB;
+  GroebnerBasisComputation<AlgebraicNumber> theGB;
   theGB.flagDoLogDivision = true;
   theGB.flagStoreQuotients = true;
   theGB.theBasiS.SetSize(thePolys.size - 2);

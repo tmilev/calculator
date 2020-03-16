@@ -672,7 +672,7 @@ void GroebnerBasisComputation<coefficient>::initForDivisionAlone(List<Polynomial
   this->leadingMons.SetSize(inputOutpuT.size);
   this->leadingCoeffs.SetSize(inputOutpuT.size);
   for (int i = 0; i < this->theBasiS.size; i ++) {
-    Polynomial<Rational>& curPoly = theBasiS[i];
+    Polynomial<coefficient>& curPoly = theBasiS[i];
     int theIndex = curPoly.GetIndexMaxMonomial(this->thePolynomialOrder.theMonOrder);
     if (theIndex == - 1) {
       global.fatal << "This is a programming error: initialization for polynomial "

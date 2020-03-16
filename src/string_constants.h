@@ -8,6 +8,7 @@ public:
   static std::string pathExecutable;
   static std::string configurationFile;
   static std::string test;
+  static std::string help;
 };
 
 class WebAPI {

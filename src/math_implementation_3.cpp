@@ -147,6 +147,7 @@ GlobalVariables::GlobalVariables() {
   this->flagRunningConsoleTest = false;
   this->flagRunningConsoleRegular = false;
   this->flagRunningBuiltInWebServer = false;
+  this->flagRunningConsoleHelp = false;
   this->flagLoggedIn = false;
   this->flagLogInAttempted = false;
   this->flagServerDetailedLog = false;

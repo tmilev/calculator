@@ -54,9 +54,11 @@ http://localhost:8155
 This completes the setup and your first run.
 
 ### Prerequisites
-1. **OS**. For now, we support **Linux only**. Windows and Mac OS support could be added in the future (depending on resources). We have explicit support for the following distros.
-- Ubuntu   (all systems using the apt package manager should work too, but that hasn't been tested).
-- I no longer support CentOS as I no longer have access to a CentOS system. However, I did run calculator-algebra.org on CentOS for a while, and, last I tested, the system worked on CentOS out-of-the-box.
+1. **OS**. For now, we support **Linux only**. Windows and Mac OS support could be added in the future (depending on resources). 
+- Ubuntu (all systems using the apt package manager should work too, but that hasn't been tested). The site
+calculator-algebra.org runs Ubuntu and compiles out of the box. We expect all versions after 14.04 to work out-of-the-box. 
+- calculator-algebra.org was ran on CentOS 6 for a while and worked out-of-the-box.
+- The calculator was successfully built and ran on a Windows 10 Linux subsystem. This was a single run on localhost.
 - We will add your Linux flavor upon request. We may need your help with your package manager. 
 2. **git**. needed to download the source. 
 3. **unzip**. Used to unzip [Mathjax](https://www.mathjax.org/), a method to display math formulas in the web browser. Without this, math formulas will not display correctly.
@@ -113,8 +115,3 @@ and the public info in (copy+paste contents):
 ```
 certificates/recaptcha-public.txt
 ```
-
-## Authors
-The following people have contributed code directly.
-- **Todor Milev** (project mastermind)
-- **Thomas-Folz Donahue**

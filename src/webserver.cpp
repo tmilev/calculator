@@ -3884,6 +3884,7 @@ void WebServer::InitializeBuildFlags() {
 }
 
 std::string MainFlags::server = "server";
+std::string MainFlags::help = "help";
 std::string MainFlags::pathExecutable = "path_executable";
 std::string MainFlags::configurationFile = "configuration_file";
 std::string MainFlags::test = "test";
@@ -3926,6 +3927,10 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv) {
           continue;
         }
       }
+    }
+    if (current == MainFlags::help && i == 1) {
+      global.flagRunningConsoleHelp = true;
+      return;
     }
     if (current == MainFlags::test) {
       global.flagRunningConsoleTest = true;
@@ -4329,6 +4334,9 @@ int WebServer::main(int argc, char **argv) {
     // May set the value of
     // global.PathProjectBaseUserInputOrDeduced
     global.server().AnalyzeMainArguments(argc, argv);
+    if (global.flagRunningConsoleHelp) {
+      return WebServer::mainConsoleHelp();
+    }
     // Initializes server base path
     // using global.PathProjectBaseUserInputOrDeduced.
     global.initDefaultFolderAndFileNames();
@@ -4398,6 +4406,24 @@ int WebServer::main(int argc, char **argv) {
   }
   global.fatal << "This point of code is not supposed to be reachable. " << global.fatal;
   return - 1;
+}
+
+int WebServer::mainConsoleHelp() {
+  std::cout << "All flags are optional.\n";
+  std::cout << "Run the server with:\n";
+  std::cout << "calculator " << MainFlags::server << " [[max_seconds_per_computation]] " << MainFlags::configurationFile << " [[configuration_file_name]]"
+  << MainFlags::pathExecutable << " [[custom_path_to_run_from]]" << "\n";
+  std::cout << "Examples:\n";
+  std::cout << "Run as server with defaults:\n";
+  std::cout << "./calculator\n";
+  std::cout << "Run as server with custom computation timeout:\n";
+  std::cout << "./calculator server 200\n";
+  std::cout << "Run as server with custom timeout, custom base path and custom configuration file:\n";
+  std::cout << "./calculator " << MainFlags::server << " 50 " << MainFlags::configurationFile << " \"./configuration/configuration.json\" "
+  << MainFlags::pathExecutable  << " \"./\"" << "\n";
+  std::cout << "Run unit tests with:\n";
+  std::cout << "calculator " << MainFlags::test << "\n";
+  return 0;
 }
 
 int WebServer::mainCommandLine() {

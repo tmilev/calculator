@@ -64,6 +64,14 @@ public:
   static std::string StringShortenInsertDots(const std::string& inputString, int maxNumChars);
   static bool isASCIICharacterVisible(char input);
   class Differ {
+  private:
+    std::string DifferenceHTMLPartTwo(
+      const std::string& preamble,
+      const std::string& labelLeft,
+      const std::string& labelRight,
+      const std::string& outputLeft,
+      const std::string& outputRight
+    );
   public:
     MemorySaving<Matrix<int> > matrixLongestCommonSubsequence;
     std::string left;
@@ -82,7 +90,8 @@ public:
       const std::string& labelRight
     );
     std::string DifferenceHTML(
-      const std::string& labelLeft, const std::string& labelRight
+      const std::string& labelLeft,
+      const std::string& labelRight
     );
     bool ComputeDifference(std::stringstream* commentsOnFailure);
     void ComputeLongestSubsequenceMatrix();

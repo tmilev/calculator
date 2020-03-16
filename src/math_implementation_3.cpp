@@ -1796,17 +1796,20 @@ std::string StringRoutines::Differ::DifferenceHTMLStatic(
   StringRoutines::Differ theDiffer;
   theDiffer.left = inputLeft;
   theDiffer.right = inputRight;
-  return theDiffer.DifferenceHTML(labelLeft, labelRight);
+  return theDiffer.DifferenceHTML(
+    labelLeft, labelRight
+  );
 }
 
 std::string StringRoutines::Differ::DifferenceHTML(
-  const std::string& labelLeft, const std::string& labelRight
+  const std::string& labelLeft,
+  const std::string& labelRight
 ) {
   MacroRegisterFunctionWithName("StringRoutines::Differ::DifferenceHTML");
   std::stringstream leftOut, rightOut, commentsOnFailure;
   if (!this->ComputeDifference(&commentsOnFailure)) {
-    leftOut << "Failed to compute string difference. " << commentsOnFailure.str();
-    return leftOut.str();
+    commentsOnFailure << "<b style='color:red'>Failed to compute string difference.</b><br>";
+    this->DifferenceHTMLPartTwo(commentsOnFailure.str(), labelLeft, labelRight, this->left, this->right);
   }
   for (int i = 0; i < this->leftResult.size; i ++) {
     std::string leftS = this->leftResult[i];
@@ -1827,11 +1830,22 @@ std::string StringRoutines::Differ::DifferenceHTML(
       }
     }
   }
+  return this->DifferenceHTMLPartTwo("", labelLeft, labelRight, leftOut.str(), rightOut.str());
+}
+
+std::string StringRoutines::Differ::DifferenceHTMLPartTwo(
+  const std::string& preamble,
+  const std::string& labelLeft,
+  const std::string& labelRight,
+  const std::string& outputLeft,
+  const std::string& outputRight
+) {
   std::stringstream out;
+  out << preamble;
   out << "<span class = 'abstractSyntaxOneAnnotation'><b>" << labelLeft << "</b><br>";
-  out << leftOut.str();
+  out << outputLeft;
   out << "<hr><b>" << labelRight << "</b><br>";
-  out << rightOut.str();
+  out << outputRight;
   out << "</span>";
   return out.str();
 }

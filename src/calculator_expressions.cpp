@@ -1957,10 +1957,6 @@ bool Expression::IsEqualToMOne() const {
   return false;
 }
 
-bool Expression::IsZeroMonomial() const {
-  return this->IsEqualToZero();
-}
-
 bool Expression::IsEqualToZero() const {
   if (this->IsOfType<Rational>()) {
     return this->GetValue<Rational>().IsEqualToZero();

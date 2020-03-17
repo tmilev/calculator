@@ -187,8 +187,9 @@ void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy(
   this->CheckConsistency();
   other.CheckConsistency();
   int maxNumMonsFinal = this->size() * other.size();
-  if (maxNumMonsFinal > 2000000)
+  if (maxNumMonsFinal > 2000000) {
     maxNumMonsFinal = 2000000;
+  }
   int totalMonPairs = 0;
   ProgressReport theReport1;
   ProgressReport theReport2(400, GlobalVariables::Response::ReportType::monomialAlgebraProduct);
@@ -223,6 +224,68 @@ void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy(
     }
   }
   output = bufferPoly;
+}
+
+template<class coefficient>
+void MatrixTensor<coefficient>::RaiseToPower(int power) {
+  if (power <= 0) {
+    global.fatal << "MatrixTensor::RaiseToPower is currently implemented for positive integer power only. " << global.fatal;
+  }
+  MatrixTensor<coefficient> id;
+  id.MakeIdSpecial();
+  MathRoutines::RaiseToPower(*this, power, id);
+}
+
+template <class coefficient>
+void MatrixTensor<coefficient>::operator*=(
+  const MatrixTensor<coefficient>& other
+) {
+  MacroRegisterFunctionWithName("MatrixTensor::MultiplyBy");
+  if (other.IsEqualToZero()) {
+    this->MakeZero();
+    return;
+  }
+  this->CheckConsistency();
+  other.CheckConsistency();
+  int maxNumMonsFinal = this->size() * other.size();
+  if (maxNumMonsFinal > 2000000) {
+    maxNumMonsFinal = 2000000;
+  }
+  int totalMonPairs = 0;
+  ProgressReport theReport1;
+  ProgressReport theReport2(400, GlobalVariables::Response::ReportType::monomialAlgebraProduct);
+  if (theReport1.TickAndWantReport()) {
+    totalMonPairs = other.size() * this->size();
+    std::stringstream reportStream;
+    reportStream << "Large matrix monomial computation: " << this->size() << " x "
+    << other.size() << "=" << totalMonPairs << " monomials:\n<br>\n"
+    << this->ToString() << " times " << other.ToString();
+    theReport1.Report(reportStream.str());
+  }
+  MatrixTensor<coefficient> result;
+  result.SetExpectedSize(maxNumMonsFinal);
+  coefficient currentCoefficient;
+  MonomialMatrix currentMonomial;
+  for (int i = 0; i < other.size(); i ++) {
+    for (int j = 0; j < this->size(); j ++) {
+      if (theReport2.TickAndWantReport()) {
+        std::stringstream reportStream2;
+        reportStream2 << "Multiplying monomials: "
+        << i + 1 << " out of " << other.size() << " by " << j + 1
+        << " out of " << this->size() << ". ";
+        theReport2.Report(reportStream2.str());
+      }
+      currentMonomial = (*this)[j];
+      currentMonomial *= other[i];
+      if (currentMonomial.IsZeroMonomial()) {
+        continue;
+      }
+      currentCoefficient = this->coefficients[j];
+      currentCoefficient *= other.coefficients[i];
+      result.AddMonomial(currentMonomial, currentCoefficient);
+    }
+  }
+  *this = result;
 }
 
 template <class coefficient>

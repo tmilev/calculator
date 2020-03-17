@@ -412,7 +412,6 @@ private:
     return this->GetAmbientSSAlgebraNonConstUseWithCaution();
   }
   bool IsEqualToZero() const;
-  bool IsZeroMonomial() const;
   bool IsEqualToOne() const;
   bool IsEqualToTwo() const;
   bool IsEqualToHalf() const;

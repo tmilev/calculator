@@ -38,9 +38,6 @@ public:
   bool IsEqualToZero() const {
     return this->data.IsEqualToZero();
   }
-  bool IsZeroMonomial() const {
-    return this->data.IsEqualToZero();
-  }
   coefficient InnerProduct(const ClassFunction& other) const;
   coefficient Norm() const;
   ClassFunction operator*(const ClassFunction& other) const;
@@ -481,9 +478,6 @@ public:
     ElementWeylGroup result = *this;
     result *= other;
     return result;
-  }
-  static bool IsZeroMonomial() {
-    return false;
   }
   void GetCycleStructure(VectorSparse<Rational>& outputIndexIsCycleSizeCoordinateIsCycleMult) const;
   Vector<Rational> operator*(const Vector<Rational>& v) const;

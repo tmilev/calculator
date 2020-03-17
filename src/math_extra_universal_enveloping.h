@@ -20,9 +20,6 @@ public:
   bool IsConstant() const {
     return this->IsEqualToOne();
   }
-  static bool IsZeroMonomial() {
-    return false;
-  }
   bool AdjointRepresentationAction(
     const ElementUniversalEnveloping<coefficient>& input, ElementUniversalEnveloping<coefficient>& output
   ) const;

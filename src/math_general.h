@@ -47,9 +47,6 @@ public:
     return output;
   }
   bool CheckInitialization() const;
-  static bool IsZeroMonomial() {
-    return false;
-  }
   static unsigned int HashFunction(const ChevalleyGenerator& input) {
     return static_cast<unsigned>(input.theGeneratorIndex);
   }
@@ -86,9 +83,6 @@ public:
   std::string ToString(FormatExpressions* theFormat = nullptr) const;
   bool IsEqualToOne() const {
     return this->generatorsIndices.size == 0;
-  }
-  bool IsZeroMonomial() const {
-    return false;
   }
   void operator=(List<int>& other) {
     this->generatorsIndices.Reserve(other.size);
@@ -226,7 +220,7 @@ public:
         i = 1;
       }
     }
-    for (; i <standsOnTheRight.generatorsIndices.size; i ++) {
+    for (; i < standsOnTheRight.generatorsIndices.size; i ++) {
       this->Powers.AddOnTop(standsOnTheRight.Powers[i]);
       this->generatorsIndices.AddOnTop(standsOnTheRight.generatorsIndices[i]);
     }
@@ -257,9 +251,6 @@ class MonomialWrapper {
   }
   static unsigned int HashFunction(const MonomialWrapper& input) {
     return hashFunction(input.theObject);
-  }
-  bool IsZeroMonomial() const {
-    return false;
   }
   bool operator==(const MonomialWrapper& other) const {
     return this->theObject == other.theObject;
@@ -334,9 +325,6 @@ public:
       }
     }
     return true;
-  }
-  static bool IsZeroMonomial() {
-    return false;
   }
   void ExponentMeBy(const Rational& theExp);
   // Warning: HashFunction must return the same result
@@ -1911,9 +1899,6 @@ class MonomialWeylAlgebra {
     output << theMon.ToString();
     return output;
   }
-  static bool IsZeroMonomial() {
-    return false;
-  }
   bool IsConstant() const {
     return this->polynomialPart.IsConstant() && this->differentialPart.IsConstant();
   }
@@ -2205,7 +2190,7 @@ public:
       }
     }
   }
-  int SubtractMonomialNoCoeffCleanUpReturnsCoeffIndex(const templateMonomial& inputMon, const coefficient& inputCoeff);
+  int SubtractMonomialNoCoeffCleanUpReturnsCoefficientIndex(const templateMonomial& inputMon, const coefficient& inputCoeff);
   void CleanUpZeroCoeffs() {
     for (int i = 0; i < this->size; i ++) {
       if (this->CleanupMonIndex(i)) {
@@ -2229,7 +2214,7 @@ public:
     }
   }
   void SubtractMonomial(const templateMonomial& inputMon, const coefficient& inputCoeff) {
-    this->CleanupMonIndex(this->SubtractMonomialNoCoeffCleanUpReturnsCoeffIndex(inputMon, inputCoeff));
+    this->CleanupMonIndex(this->SubtractMonomialNoCoeffCleanUpReturnsCoefficientIndex(inputMon, inputCoeff));
   }
   coefficient GetMonomialCoefficient(const templateMonomial& inputMon) const {
     int theIndex = this->theMonomials.GetIndex(inputMon);
@@ -2539,9 +2524,6 @@ class MonomialVector {
   void MakeEi(int inputIndex) {
     this->theIndex = inputIndex;
   }
-  static bool IsZeroMonomial() {
-    return false;
-  }
   bool operator>(const MonomialVector& other) const {
     return this->theIndex > other.theIndex;
   }
@@ -2666,9 +2648,6 @@ public:
     coefficient result;
     this->GetConstantTerm(result, theRingZero);
     return result;
-  }
-  static bool IsZeroMonomial() {
-    return false;
   }
   static void GetValuesLagrangeInterpolandsAtConsecutivePoints(
     Vector<Rational>& inputConsecutivePointsOfInterpolation,
@@ -4009,7 +3988,7 @@ int MonomialCollection<templateMonomial, coefficient>::AddMonomialNoCoeffCleanUp
   const templateMonomial& inputMonomial, const coefficient& inputCoefficient
 ) {
   this->CheckConsistency();
-  if (inputCoefficient == 0 || inputMonomial.IsZeroMonomial()) {
+  if (inputCoefficient == 0) {
     return - 1;
   }
   if (this->flagDeallocated) {
@@ -4043,10 +4022,10 @@ int MonomialCollection<templateMonomial, coefficient>::AddMonomialNoCoeffCleanUp
 }
 
 template <class templateMonomial, class coefficient>
-int MonomialCollection<templateMonomial, coefficient>::SubtractMonomialNoCoeffCleanUpReturnsCoeffIndex(
+int MonomialCollection<templateMonomial, coefficient>::SubtractMonomialNoCoeffCleanUpReturnsCoefficientIndex(
   const templateMonomial& inputMon, const coefficient& inputCoeff
 ) {
-  if (inputCoeff.IsEqualToZero() || inputMon.IsZeroMonomial()) {
+  if (inputCoeff.IsEqualToZero()) {
     return - 1;
   }
   int j = this->theMonomials.GetIndex(inputMon);
@@ -5511,9 +5490,6 @@ public:
     global.fatal << " Not implemented, please fix. " << global.fatal;
     return output;
   }
-  static bool IsZeroMonomial() {
-    return false;
-  }
   bool RemoveRedundantShortRootsClassicalRootSystem(
     PartFractions& owner, Vector<Rational>* Indicator, Polynomial<LargeInteger>& buffer1, int theDimension
   );
@@ -6152,9 +6128,6 @@ class DynkinSimpleType {
   unsigned int HashFunction() const {
     return this->HashFunction(*this);
   }
-  bool IsZeroMonomial() const {
-    return false;
-  }
   void GetAutomorphismActingOnVectorColumn(MatrixTensor<Rational>& output, int AutoIndex) const;
   Rational GetDefaultCoRootLengthSquared(int rootIndex) const;
   Rational GetDefaultRootLengthSquared(int rootIndex) const;
@@ -6688,7 +6661,7 @@ class MonomialMatrix {
 };
 
 template <class coefficient>
-class MatrixTensor: public ElementMonomialAlgebra<MonomialMatrix, coefficient> {
+class MatrixTensor: public MonomialCollection<MonomialMatrix, coefficient> {
 public:
   void MakeIdSpecial() {
     this->MakeZero();
@@ -6734,7 +6707,14 @@ public:
     return theMat.GetDeterminant();
   }
   void DirectSumWith(const MatrixTensor<coefficient>& other);
-  void GetVectorsSparseFromRowsIncludeZeroRows(List<VectorSparse<coefficient> >& output, int MinNumRows = - 1);
+  void RaiseToPower(int power);
+  void operator*=(const MatrixTensor<coefficient>& other);
+  void operator*=(const coefficient& other) {
+    return this->::MonomialCollection<MonomialMatrix, coefficient>::operator*=(other);
+  }
+  void GetVectorsSparseFromRowsIncludeZeroRows(
+    List<VectorSparse<coefficient> >& output, int MinNumRows = - 1
+  );
   bool IsID() const {
     int theDim = this->GetMinNumColsNumRows();
     Selection theSel;
@@ -7081,9 +7061,6 @@ class MonomialGeneralizedVerma {
   }
 
   std::string ToString(FormatExpressions* theFormat = nullptr, bool includeV = true) const;
-  static bool IsZeroMonomial() {
-    return false;
-  }
   bool operator==(const MonomialGeneralizedVerma<coefficient>& other) const {
     if (this->indexFDVector == other.indexFDVector && this->owner == other.owner) {
       return this->theMonCoeffOne == other.theMonCoeffOne;
@@ -7175,9 +7152,6 @@ public:
   friend std::ostream& operator << (std::ostream& output, const MonomialTensorGeneralizedVermas<coefficient>& input) {
     output << input.ToString();
     return output;
-  }
-  static bool IsZeroMonomial() {
-    return false;
   }
   int GetNumVars() {
     return this->Coefficient.GetNumVars();

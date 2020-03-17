@@ -2354,7 +2354,10 @@ public:
   }
 
   static std::string GetBlendCoeffAndMon(
-    const templateMonomial& inputMon, coefficient& inputCoeff, bool addPlusToFront, FormatExpressions* theFormat = nullptr
+    const templateMonomial& inputMonomial,
+    coefficient& inputCoefficient,
+    bool addPlusToFront,
+    FormatExpressions* theFormat = nullptr
   );
   void CheckNumCoeffsConsistency() const {
     if (this->coefficients.size != this->theMonomials.size) {
@@ -5164,43 +5167,48 @@ std::string Matrix<coefficient>::ToStringPlainText(bool jsonFormat) const {
 
 template <class templateMonomial, class coefficient>
 std::string MonomialCollection<templateMonomial, coefficient>::GetBlendCoeffAndMon(
-  const templateMonomial& inputMon,
-  coefficient& inputCoeff,
+  const templateMonomial& inputMonomial,
+  coefficient& inputCoefficient,
   bool addPlusToFront,
   FormatExpressions* theFormat
 ) {
   std::stringstream out;
-  std::string coeffStr = inputCoeff.ToString(theFormat);
-  if (inputMon.IsConstant()) {
-    if (coeffStr[0] != '-' && addPlusToFront) {
-      out << "+" << coeffStr;
+  std::string coefficientString = inputCoefficient.ToString(theFormat);
+  if (inputMonomial.IsConstant()) {
+    if (coefficientString[0] != '-' && addPlusToFront) {
+      out << "+" << coefficientString;
     } else {
-      out << coeffStr;
+      out << coefficientString;
     }
     return out.str();
   }
-  std::string monString = inputMon.ToString(theFormat);
-  if (coeffStr == "1") {
+  std::string monString = inputMonomial.ToString(theFormat);
+  if (inputCoefficient.NeedsParenthesisForMultiplication()) {
+    coefficientString = "\\left(" + coefficientString + "\\right)";
+  }
+  if (coefficientString == "1") {
     if (addPlusToFront) {
       out << "+";
     }
     out << monString;
     return out.str();
   }
-  if (coeffStr == "- 1" || coeffStr == "-1") {
+  if (coefficientString == "- 1" || coefficientString == "-1") {
     out << "-" << monString;
     return out.str();
   }
-  if (coeffStr[0] != '-' && addPlusToFront) {
-    out << "+" << coeffStr << monString;
+  if (coefficientString[0] != '-' && addPlusToFront) {
+    out << "+" << coefficientString << monString;
   } else {
-    out << coeffStr << monString;
+    out << coefficientString << monString;
   }
   return out.str();
 }
 
 template <class templateMonomial, class coefficient>
-std::string MonomialCollection<templateMonomial, coefficient>::ToString(FormatExpressions* theFormat) const {
+std::string MonomialCollection<templateMonomial, coefficient>::ToString(
+  FormatExpressions* theFormat
+) const {
   if (this->size() == 0) {
     return "0";
   }
@@ -5216,7 +5224,6 @@ std::string MonomialCollection<templateMonomial, coefficient>::ToString(FormatEx
   typename List<templateMonomial>::OrderLeftGreaterThanRight
   theOrder = (theFormat == nullptr) ? 0 : theFormat->GetMonOrder<templateMonomial>();
   sortedMons.QuickSortDescending(theOrder);
-  // out << "(hash: " << this->HashFunction() << ")";
   int cutOffCounter = 0;
   bool useCustomPlus = false;
   bool useCustomTimes = false;
@@ -5237,7 +5244,7 @@ std::string MonomialCollection<templateMonomial, coefficient>::ToString(FormatEx
     templateMonomial& currentMon = sortedMons[i];
     coefficient& currentCoeff = this->coefficients[this->theMonomials.GetIndex(currentMon)];
     if (currentCoeff.NeedsParenthesisForMultiplication()) {
-      tempS1 = "(" + currentCoeff.ToString(theFormat) + ")";
+      tempS1 = "\\left(" + currentCoeff.ToString(theFormat) + "\\right)";
     } else {
       tempS1 = currentCoeff.ToString(theFormat);
     }

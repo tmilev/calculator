@@ -921,14 +921,24 @@ std::string GroebnerBasisComputation<coefficient>::GetPolynomialStringSpacedMono
     }
     out << "<td" << extraStyle << ">";
     if (useHighlightStyle) {
-      out << "<span style =\"color:red\">";
+      out << "<span style ='color:red'>";
     }
     if (this->theFormat.flagUseLatex) {
-      out << HtmlRoutines::GetMathSpanPure(
-        Polynomial<coefficient>::GetBlendCoeffAndMon(thePoly[theIndex], thePoly.coefficients[theIndex], found, &this->theFormat)
+      std::string monomialWithCoefficient = Polynomial<coefficient>::GetBlendCoeffAndMon(
+        thePoly[theIndex],
+        thePoly.coefficients[theIndex],
+        found,
+        &this->theFormat
       );
+
+      out << HtmlRoutines::GetMathSpanPure(monomialWithCoefficient);
     } else {
-      out << Polynomial<coefficient>::GetBlendCoeffAndMon(thePoly[theIndex], thePoly.coefficients[theIndex], found, &this->theFormat);
+      out << Polynomial<coefficient>::GetBlendCoeffAndMon(
+        thePoly[theIndex],
+        thePoly.coefficients[theIndex],
+        found,
+        &this->theFormat
+      );
     }
     found = true;
     if (useHighlightStyle) {
@@ -949,7 +959,7 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionStringHtml() {
   List<Polynomial<coefficient> >& theRemainders = this->intermediateRemainders.GetElement();
   List<Polynomial<coefficient> >& theSubtracands = this->intermediateSubtractands.GetElement();
   this->theFormat.thePolyMonOrder = this->thePolynomialOrder.theMonOrder;
-  std::string underlineStyle = " style =\"white-space: nowrap; border-bottom:1px solid black;\"";
+  std::string underlineStyle = " style ='white-space: nowrap; border-bottom:1px solid black;'";
   this->allMonomials.Clear();
   this->allMonomials.AddOnTopNoRepetition(this->startingPoly.GetElement().theMonomials);
   for (int i = 0; i < theRemainders.size; i ++) {
@@ -964,28 +974,26 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionStringHtml() {
   out << this->ToStringLetterOrder(false);
   out << "<br>";
   out << theRemainders.size << " division steps total.<br>";
-  out << "<table style =\"white-space: nowrap; border:1px solid black;\">";
+  out << "<table style ='white-space: nowrap; border:1px solid black;'>";
   out << "<tr><td " << underlineStyle << "><b>Remainder:</b></td>";
   out << this->GetPolynomialStringSpacedMonomialsHtml(
     this->remainderDivision, underlineStyle, &this->remainderDivision.theMonomials
   )
   << "</td></tr>";
-  out << "<tr><td style =\"border-right:1px solid black;\"><b>Divisor(s)</b></td><td colspan =\""
-  << this->allMonomials.size + 1 << "\"><b>Quotient(s) </b></td>"
+  out << "<tr><td style ='border-right:1px solid black;'><b>Divisor(s)</b></td><td colspan ='"
+  << this->allMonomials.size + 1 << "'><b>Quotient(s) </b></td>"
   << "</tr>";
   for (int i = 0; i < this->theBasiS.size; i ++) {
-    //if (i == this->theBasiS.size - 1)
-    //    else
     out << "<tr>";
-    out << "<td style =\"border-right:1px solid black; border-bottom: 1px solid gray;\">";
+    out << "<td style ='border-right:1px solid black; border-bottom: 1px solid gray;'>";
     if (this->theFormat.flagUseLatex) {
       out << HtmlRoutines::GetMathSpanPure(this->theBasiS[i].ToString(&this->theFormat), - 1);
     } else {
       out << this->theBasiS[i].ToString(&this->theFormat);
     }
     out << "</td>";
-    out << "<td style =\"border-bottom:1px solid gray;\" colspan =\""
-    << this->allMonomials.size + 1 << "\">";
+    out << "<td style ='border-bottom:1px solid gray;' colspan ='"
+    << this->allMonomials.size + 1 << "'>";
     out << HtmlRoutines::GetMathSpanPure(this->theQuotients[i].ToString(&this->theFormat));
     out << "</td></tr>";
   }

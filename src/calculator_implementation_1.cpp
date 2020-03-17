@@ -190,7 +190,7 @@ bool Calculator::GetListPolynomialVariableLabelsLexicographic(
     output,
     &theContextStart,
     0,
-    CalculatorConversions::functionPolynomiaL<Rational>
+    CalculatorConversions::functionPolynomiaL<AlgebraicNumber>
   )) {
     return false;
   }

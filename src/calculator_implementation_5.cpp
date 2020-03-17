@@ -2314,7 +2314,10 @@ bool CalculatorFunctions::innerPolynomialDivisionVerboseLex(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   return CalculatorFunctions::innerPolynomialDivisionVerbose(
-    theCommands, input, output, MonomialP::LeftGreaterThanLexicographicLastVariableStrongest
+    theCommands,
+    input,
+    output,
+    MonomialP::LeftGreaterThanLexicographicLastVariableStrongest
   );
 }
 
@@ -2335,8 +2338,13 @@ bool CalculatorFunctions::innerPolynomialDivisionVerbose(
   MacroRegisterFunctionWithName("Calculator::innerPolynomialDivisionVerbose");
   Expression theContext;
   Vector<Polynomial<AlgebraicNumber> > thePolys;
-  if (!theCommands.GetListPolynomialVariableLabelsLexicographic(input, thePolys, theContext)) {
-    return output.MakeError("Failed to extract list of polynomials. ", theCommands);
+  if (!theCommands.GetListPolynomialVariableLabelsLexicographic(
+    input, thePolys, theContext
+  )) {
+    return output.MakeError(
+      "Failed to extract list of polynomials. ",
+      theCommands
+    );
   }
   GroebnerBasisComputation<AlgebraicNumber> theGB;
   theGB.flagDoLogDivision = true;
@@ -2348,7 +2356,6 @@ bool CalculatorFunctions::innerPolynomialDivisionVerbose(
     }
     theGB.theBasiS[i - 1] = thePolys[i];
   }
-//  Polynomial<Rational> outputRemainder;
   theGB.initForDivisionAlone(theGB.theBasiS);
   theGB.thePolynomialOrder.theMonOrder = theMonOrder;
   theGB.RemainderDivisionWithRespectToBasis(thePolys[0], &theGB.remainderDivision, - 1);
@@ -2357,7 +2364,8 @@ bool CalculatorFunctions::innerPolynomialDivisionVerbose(
   theGB.theFormat.flagUseFrac = true;
   std::stringstream latexOutput;
   latexOutput << "<br>In latex: <br>"
-  << "\\documentclass{article}\\usepackage{longtable}\\usepackage{xcolor}\\usepackage{multicol}"
+  << "\\documentclass{article}\\usepackage{longtable}"
+  << "\\usepackage{xcolor}\\usepackage{multicol}"
   << "\\begin{document} "
   << theGB.GetDivisionStringLaTeX()
   << "\\end{document}";

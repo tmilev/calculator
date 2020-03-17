@@ -224,8 +224,6 @@ std::string HtmlRoutines::GetCalculatorComputationAnchor(const std::string& inpu
 
 std::string HtmlRoutines::GetMathSpanPure(const std::string& input, int upperNumChars) {
   std::stringstream out;
-  //  int dirtylittleHAckHEre;
-  //  upperNumChars =1;
   if (input.size() > static_cast<unsigned>(upperNumChars) && upperNumChars > 0) {
     out << "<b>LaTeX output is longer than " << upperNumChars
     << " characters and I dare not use mathjax. Here is the output as plain LaTeX.</b> " << input;

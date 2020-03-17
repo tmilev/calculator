@@ -1516,9 +1516,17 @@ public:
   bool ReplaceXXByEmptyString();
   bool ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence();
   bool ReplaceXXbyE();
-  bool GetMatrixExpressions(const Expression& input, Matrix<Expression>& output, int desiredNumRows = - 1, int desiredNumCols = - 1);
+  bool GetMatrixExpressions(
+    const Expression& input,
+    Matrix<Expression>& output,
+    int desiredNumRows = - 1,
+    int desiredNumCols = - 1
+  );
   bool GetMatrixExpressionsFromArguments(
-    const Expression& input, Matrix<Expression>& output, int desiredNumRows = - 1, int desiredNumCols = - 1
+    const Expression& input,
+    Matrix<Expression>& output,
+    int desiredNumRows = - 1,
+    int desiredNumCols = - 1
   );
   void MakeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output);
   bool ReplaceXXVXdotsXbyE_BOUND_XdotsX(int numXs);
@@ -1610,9 +1618,6 @@ public:
   int opEltZmodP() {
     return this->operations.GetIndexIMustContainTheObject("EltZmodP");
   }
-  //int opApplyFunction()
-  //{ return this->operations.GetIndexIMustContainTheObject("{}");
-  //}
   int opIsDenotedBy() {
     return this->operations.GetIndexIMustContainTheObject("=:");
   }
@@ -1994,7 +1999,6 @@ public:
       << global.fatal;
     }
   }
-//  bool OrderMultiplicationTreeProperly(int commandIndex, Expression& theExpression);
   template <class theType>
   bool ConvertToTypeUsingFunction(Expression::FunctionAddress theFun, const Expression& input, Expression& output) {
     MacroRegisterFunctionWithName("Calculator::ConvertToTypeUsingFunction");
@@ -2357,10 +2361,6 @@ public:
     bool useModZp = false
   );
   static bool innerKLcoeffs(Calculator& theCommands, const Expression& input, Expression& output);
-  //  static bool innerSSLieAlgebra
-  //  (Calculator& theCommands, const Expression& input, Expression& output)
-  //  { return theCommands.innerSSLieAlgebra(theCommands, input, output, false);
-  //  }
   static bool innerSplitFDpartB3overG2old(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSplitFDpartB3overG2inner(Calculator& theCommands, branchingData& theG2B3Data, Expression& output);
   static bool innerLittelmannOperator(Calculator& theCommands, const Expression& input, Expression& output);
@@ -2567,7 +2567,7 @@ public:
 class CalculatorConversions {
 public:
   ////////////////////Conversion from expression tree/////////////////////////////////
-  //conversions from expression tree to type
+  // conversions from expression tree to type
   static bool innerElementSemisimpleLieAlgebraRationalCoeffs(
     Calculator& theCommands,
     const Expression& input,
@@ -2828,8 +2828,7 @@ bool Calculator::functionGetMatrix(
             *commentsOnError << "Failed to convert matrix element: "
             << "row: " << i << ", column: "
             << j << ", expression: "
-            << nonConvertedEs(i, j).ToString() << ". "
-            ;
+            << nonConvertedEs(i, j).ToString() << ". ";
           }
           return false;
         }

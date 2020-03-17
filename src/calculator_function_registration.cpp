@@ -3086,7 +3086,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "",
     "Prints a string representing division of "
     "a polynomial by a set of polynomials using the lex order, for example, x^2 y^4 > x y^1000 > x y^2. ",
-    "PolyDivStringLex{}(x^7 + 6 x y + 5x y^8 + y^5, x^2 + 2, y^3 - 1);",
+    "PolyDivStringLex{}(x^7 + 6 x y + 5x y^8 + y^5, x^2 + 2, y^3 - 1);\n"
+    "PolyDivStringLex{}(x^7 + \\sqrt{2} x + 1, \\sqrt{3}x^2 + 2x + 1)",
     "CalculatorFunctions::innerPolynomialDivisionVerboseLex",
     "PolyDivStringLex",
     innerStandard

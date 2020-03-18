@@ -117,7 +117,7 @@ template <class coefficient>
 class Vectors;
 class MonomialP;
 template <class templateMonomial, class coefficient>
-class MonomialCollection;
+class LinearCombination;
 template <class coefficient>
 class Polynomial;
 template <class coefficient>

@@ -340,7 +340,7 @@ public:
 };
 
 template <class coefficient>
-class charSSAlgMod : public MonomialCollection<Weight<coefficient>, coefficient> {
+class charSSAlgMod : public LinearCombination<Weight<coefficient>, coefficient> {
   public:
   void CheckConsistency() const {
     if (this->size() == 0) {
@@ -368,7 +368,7 @@ class charSSAlgMod : public MonomialCollection<Weight<coefficient>, coefficient>
     return this->HashFunction(*this);
   }
   static unsigned int HashFunction(const charSSAlgMod<coefficient>& input) {
-    return input.::MonomialCollection<Weight<coefficient>, coefficient>::HashFunction(input);
+    return input.::LinearCombination<Weight<coefficient>, coefficient>::HashFunction(input);
   }
   void GetDual(charSSAlgMod<coefficient>& output) const;
   void MakeFromWeight(const Vector<coefficient>& inputWeightSimpleCoords, SemisimpleLieAlgebra* inputOwner);
@@ -422,7 +422,7 @@ class charSSAlgMod : public MonomialCollection<Weight<coefficient>, coefficient>
     return output;
   }
   void operator*=(const coefficient& other) {
-    this->::MonomialCollection<Weight<coefficient>, coefficient>::operator*=(other);
+    this->::LinearCombination<Weight<coefficient>, coefficient>::operator*=(other);
   }
 };
 

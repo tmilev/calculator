@@ -1475,7 +1475,7 @@ public:
 };
 
 template <class somegroup, class coefficient>
-class VirtualRepresentation : public MonomialCollection<ClassFunction<somegroup, coefficient>, Rational> {
+class VirtualRepresentation : public LinearCombination<ClassFunction<somegroup, coefficient>, Rational> {
 public:
   void operator*= (const VirtualRepresentation<somegroup, coefficient>& other);
   void AssignRep(const GroupRepresentationCarriesAllMatrices<somegroup, Rational>& other);
@@ -1484,7 +1484,7 @@ public:
     return input.HashFunction();
   }
   unsigned int HashFunction() const {
-    return this->::MonomialCollection<ClassFunction<somegroup, coefficient>, Rational>::HashFunction();
+    return this->::LinearCombination<ClassFunction<somegroup, coefficient>, Rational>::HashFunction();
   }
 };
 

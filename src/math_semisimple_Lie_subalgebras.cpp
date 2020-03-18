@@ -359,7 +359,7 @@ std::string SemisimpleSubalgebras::GetDisplayFileNameFKFTNilradicals(int ActualI
 }
 
 std::string DynkinType::ToString(FormatExpressions* theFormat) const {
-  return this->::MonomialCollection<DynkinSimpleType, Rational>::ToString(theFormat);
+  return this->::LinearCombination<DynkinSimpleType, Rational>::ToString(theFormat);
 }
 
 void SemisimpleSubalgebras::CheckFileWritePermissions() {
@@ -2634,24 +2634,24 @@ void CandidateSSSubalgebra::ExtendToModule(List<ElementSemisimpleLieAlgebra<Alge
 }
 
 template <class templateMonomial, class coefficient>
-template <class MonomialCollectionTemplate>
-void MonomialCollection<templateMonomial, coefficient>::IntersectVectorSpaces(
-  const List<MonomialCollectionTemplate>& vectorSpace1,
-  const List<MonomialCollectionTemplate>& vectorSpace2,
-  List<MonomialCollectionTemplate>& outputIntersection,
+template <class LinearCombinationTemplate>
+void LinearCombination<templateMonomial, coefficient>::IntersectVectorSpaces(
+  const List<LinearCombinationTemplate>& vectorSpace1,
+  const List<LinearCombinationTemplate>& vectorSpace2,
+  List<LinearCombinationTemplate>& outputIntersection,
   HashedList<templateMonomial>* seedMonomials
 ) {
   MacroRegisterFunctionWithName("MonomialCollection::IntersectVectorSpaces");
-  List<MonomialCollectionTemplate> theVspaces =vectorSpace1;
-  List<MonomialCollectionTemplate> vectorSpace2eliminated =vectorSpace2;
-  MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRowsDeleteZeroRows(vectorSpace2eliminated, nullptr, seedMonomials);
-  MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRowsDeleteZeroRows(theVspaces, nullptr, seedMonomials);
+  List<LinearCombinationTemplate> theVspaces =vectorSpace1;
+  List<LinearCombinationTemplate> vectorSpace2eliminated =vectorSpace2;
+  LinearCombination<templateMonomial, coefficient>::GaussianEliminationByRowsDeleteZeroRows(vectorSpace2eliminated, nullptr, seedMonomials);
+  LinearCombination<templateMonomial, coefficient>::GaussianEliminationByRowsDeleteZeroRows(theVspaces, nullptr, seedMonomials);
   Matrix<coefficient> theLinCombiMat;
   int firstSpaceDim = theVspaces.size;
   theLinCombiMat.MakeIdMatrix(theVspaces.size +vectorSpace2eliminated.size);
   theVspaces.AddListOnTop(vectorSpace2eliminated);
   vectorSpace2eliminated = theVspaces;
-  MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRows(theVspaces, nullptr, seedMonomials, &theLinCombiMat);
+  LinearCombination<templateMonomial, coefficient>::GaussianEliminationByRows(theVspaces, nullptr, seedMonomials, &theLinCombiMat);
   int dimResult = 0;
   for (int i = theVspaces.size - 1; i >= 0; i --) {
     if (theVspaces[i].IsEqualToZero()) {
@@ -2662,7 +2662,7 @@ void MonomialCollection<templateMonomial, coefficient>::IntersectVectorSpaces(
   }
   outputIntersection.SetSize(dimResult);
   int counter = - 1;
-  MonomialCollectionTemplate tempMCT;
+  LinearCombinationTemplate tempMCT;
   for (int i = theVspaces.size - 1; i >= 0; i --) {
     if (!theVspaces[i].IsEqualToZero()) {
       break;
@@ -3863,8 +3863,8 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart(
     this->HighestVectors.SetSize(this->Modules.size);
     this->HighestVectors.LastObject()->SetSize(0);
     this->HighestWeightsPrimal.AddOnTop(tempHWs[i]);
-    if (MonomialCollection<ChevalleyGenerator, Rational>::VectorSpacesIntersectionIsNonTrivial(tempModules[i], this->theBasis)) {
-      MonomialCollection<ChevalleyGenerator, AlgebraicNumber>::IntersectVectorSpaces(
+    if (LinearCombination<ChevalleyGenerator, Rational>::VectorSpacesIntersectionIsNonTrivial(tempModules[i], this->theBasis)) {
+      LinearCombination<ChevalleyGenerator, AlgebraicNumber>::IntersectVectorSpaces(
         tempModules[i], this->theBasis, *this->HighestVectors.LastObject()
       );
       if (this->HighestVectors.LastObject()->size != 1) {
@@ -3884,7 +3884,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart(
         for (int j = 0; j < tempModules[i].size; j ++) {
           this->HighestVectors.LastObject()->AddOnTop(tempModules[i][j]);
           if (
-            MonomialCollection<ChevalleyGenerator, Rational>::GetRankOfSpanOfElements(*this->HighestVectors.LastObject()) <
+            LinearCombination<ChevalleyGenerator, Rational>::GetRankOfSpanOfElements(*this->HighestVectors.LastObject()) <
             this->HighestVectors.LastObject()->size
           ) {
             this->HighestVectors.LastObject()->RemoveLastObject();

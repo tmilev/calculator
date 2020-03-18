@@ -1647,7 +1647,7 @@ public:
   std::string stringRationalFunctionPartialFractionLatex;
   std::string stringFinalAnswer;
   std::string stringDenominatorFactors;
-  MonomialCollection<Polynomial<AlgebraicNumber>, Rational> theDenominatorFactorsWithMults;
+  LinearCombination<Polynomial<AlgebraicNumber>, Rational> theDenominatorFactorsWithMults;
   List<List<Polynomial<AlgebraicNumber> > > theNumerators;
   List<Expression> thePFSummands;
   List<Expression> theIntegralSummands;
@@ -2103,7 +2103,7 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
     this->printoutPFsHtml << "<br>Here is a detailed long polynomial division:<br> ";
     this->printoutPFsHtml << theGB.GetDivisionStringHtml();
   }
-  MonomialCollection<Polynomial<Rational>, Rational> theDenominatorFactorsWithMultsCopy;
+  LinearCombination<Polynomial<Rational>, Rational> theDenominatorFactorsWithMultsCopy;
   theDenominatorFactorsWithMultsCopy.MakeZero();
   for (int i = 0; i < this->theFactors.size; i ++) {
     theDenominatorFactorsWithMultsCopy.AddMonomial(this->theFactors[i], 1);
@@ -5251,7 +5251,7 @@ bool CalculatorFunctions::outerAtimesBpowerJplusEtcDivBpowerI(
   if (!denominatorBase.DivisionByMeShouldBeWrittenInExponentForm()) {
     return false;
   }
-  MonomialCollection<Expression, Rational> numerators, numeratorsNew;
+  LinearCombination<Expression, Rational> numerators, numeratorsNew;
   theCommands.functionCollectSummands(theCommands, input[1], numerators);
   numeratorsNew.SetExpectedSize(numerators.size());
   numeratorsNew.MakeZero();

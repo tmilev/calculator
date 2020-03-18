@@ -2766,7 +2766,7 @@ std::string FormatExpressions::GetPolyLetter(int index) const {
 }
 
 bool PartFraction::reduceOnceTotalOrderMethod(
-  MonomialCollection<PartFraction, Polynomial<LargeInteger> >& output, PartFractions& owner
+  LinearCombination<PartFraction, Polynomial<LargeInteger> >& output, PartFractions& owner
 ) {
   for (int i = 0; i < this->IndicesNonZeroMults.size; i ++) {
     for (int j = 0; j < this->IndicesNonZeroMults.size; j ++) {
@@ -2791,7 +2791,7 @@ bool PartFraction::reduceOnceTotalOrderMethod(
 
 bool PartFraction::reduceOnceGeneralMethodNoOSBasis(
   PartFractions& owner,
-  MonomialCollection<PartFraction, Polynomial<LargeInteger> >& output,
+  LinearCombination<PartFraction, Polynomial<LargeInteger> >& output,
   Vectors<Rational>& bufferVectors,
   Matrix<Rational>& bufferMat
 ) {
@@ -2831,7 +2831,7 @@ bool PartFraction::reduceOnceGeneralMethodNoOSBasis(
 
 bool PartFraction::ReduceOnceGeneralMethod(
   PartFractions& owner,
-  MonomialCollection<PartFraction, Polynomial<LargeInteger> >& output,
+  LinearCombination<PartFraction, Polynomial<LargeInteger> >& output,
   Vectors<Rational>& bufferVectors,
   Matrix<Rational>& bufferMat
 ) {
@@ -3074,7 +3074,7 @@ int PartFraction::ComputeGainingMultiplicityIndexInLinearRelation(
 
 bool PartFraction::DecomposeFromLinRelation(
   Matrix<Rational>& theLinearRelation,
-  MonomialCollection<PartFraction, Polynomial<LargeInteger> >& output,
+  LinearCombination<PartFraction, Polynomial<LargeInteger> >& output,
   bool flagUsingOSbasis,
   List<Vector<Rational> >& startingVectors
 ) {
@@ -3205,7 +3205,7 @@ void PartFraction::ApplyGeneralizedSzenesVergneFormulA(
   List<int>& theCoefficients,
   int GainingMultiplicityIndex,
   int ElongationGainingMultiplicityIndex,
-  MonomialCollection<PartFraction, Polynomial<LargeInteger> >& output,
+  LinearCombination<PartFraction, Polynomial<LargeInteger> >& output,
   List<Vector<Rational> >& startingVectors
 ) {
   PartFraction tempFrac;
@@ -3274,7 +3274,7 @@ void PartFraction::ApplySzenesVergneFormulA(
   List<int>& theElongations,
   int GainingMultiplicityIndex,
   int ElongationGainingMultiplicityIndex,
-  MonomialCollection<PartFraction, Polynomial<LargeInteger> >& output
+  LinearCombination<PartFraction, Polynomial<LargeInteger> >& output
 ) {
   PartFraction tempFrac;
   tempFrac.RelevanceIsComputed = false;
@@ -3311,7 +3311,7 @@ void PartFraction::decomposeAMinusNB(
   int indexB,
   int n,
   int indexAminusNB,
-  MonomialCollection<PartFraction, Polynomial<LargeInteger> >& output,
+  LinearCombination<PartFraction, Polynomial<LargeInteger> >& output,
   PartFractions& owner
 ) {
   PartFraction tempFrac;
@@ -3577,7 +3577,7 @@ bool PartFractions::splitPartial() {
   std::stringstream out;
   std::string tempS;
   PartFraction currentFrac;
-  MonomialCollection<PartFraction, Polynomial<LargeInteger> > buffer;
+  LinearCombination<PartFraction, Polynomial<LargeInteger> > buffer;
   PartFractions reducedForGood;
   Polynomial<LargeInteger> currentCoeff;
   reducedForGood.MakeZero();

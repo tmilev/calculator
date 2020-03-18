@@ -179,7 +179,7 @@ bool CalculatorConversions::functionDynkinType(
   Calculator& theCommands, const Expression& input, DynkinType& output
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::functionDynkinType");
-  MonomialCollection<Expression, Rational> theType;
+  LinearCombination<Expression, Rational> theType;
   if (!theCommands.functionCollectSummands(theCommands, input, theType)) {
     return false;
   }
@@ -275,7 +275,7 @@ bool CalculatorConversions::innerExpressionFromElementSemisimpleLieAlgebraRation
   Calculator& theCommands, const ElementSemisimpleLieAlgebra<Rational>& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerStoreElementSemisimpleLieAlgebraRational");
-  MonomialCollection<Expression, Rational> theMons;
+  LinearCombination<Expression, Rational> theMons;
   theMons.MakeZero();
   Expression currentMon;
   for (int i = 0; i < input.size(); i ++) {
@@ -289,7 +289,7 @@ bool CalculatorConversions::innerExpressionFromDynkinType(
   Calculator& theCommands, const DynkinType& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromDynkinType");
-  MonomialCollection<Expression, AlgebraicNumber> theMons;
+  LinearCombination<Expression, AlgebraicNumber> theMons;
   theMons.MakeZero();
   Expression currentMon;
   for (int i = 0; i < input.size(); i ++) {
@@ -303,7 +303,7 @@ bool CalculatorConversions::innerExpressionFromElementSemisimpleLieAlgebraAlgebr
   Calculator& theCommands, const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromElementSemisimpleLieAlgebraAlgebraicNumbers");
-  MonomialCollection<Expression, AlgebraicNumber> theMons;
+  LinearCombination<Expression, AlgebraicNumber> theMons;
   theMons.MakeZero();
   Expression currentMon;
   for (int i = 0; i < input.size(); i ++) {
@@ -804,7 +804,7 @@ bool CalculatorConversions::innerExpressionFromUE(
   Expression* inputContext
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromUE");
-  MonomialCollection<Expression, RationalFunctionOld> theUEE;
+  LinearCombination<Expression, RationalFunctionOld> theUEE;
   theUEE.MakeZero();
   Expression currentMonE;
   for (int i = 0; i < input.size(); i ++) {

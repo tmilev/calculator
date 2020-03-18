@@ -274,7 +274,7 @@ private:
   // IMPORTANT. The default monomial order, implemented by operator>, is the graded lexicographic
   // last variable strongest order. Other monomial orders are not referred by operator>, but
   // by their explicit names.
-  // Note that the MonomialCollection::ToString method uses the FormatExpressions::thePolyMonOrder
+  // Note that the LinearCombination::ToString method uses the FormatExpressions::thePolyMonOrder
   // to sort monomials when displaying polynomials to the screen.
   List<Rational> monBody;
 public:
@@ -1954,32 +1954,32 @@ std::iostream& operator <<(std::iostream& output, const Polynomial<coefficient>&
 }
 
 template <class templateMonomial, class coefficient>
-std::ostream& operator<<(std::ostream& output, const MonomialCollection<templateMonomial, coefficient>& theCollection);
+std::ostream& operator<<(std::ostream& output, const LinearCombination<templateMonomial, coefficient>& theCollection);
 
 template <class templateMonomial, class coefficient>
-class MonomialCollection {
+class LinearCombination {
 private:
   void AddOnTop(const MonomialP& tempP);//<-to guard the now unsafe base class method
   void Clear();//<-to guard the now unsafe base class method
   friend std::ostream& operator<< <templateMonomial, coefficient>(
-    std::ostream& output, const MonomialCollection<templateMonomial, coefficient>& theCollection
+    std::ostream& output, const LinearCombination<templateMonomial, coefficient>& theCollection
   );
 public:
   HashedList<templateMonomial> theMonomials;
   List<coefficient> coefficients;
   bool flagDeallocated;
-  MonomialCollection() {
+  LinearCombination() {
     this->flagDeallocated = false;
   }
-  MonomialCollection(const MonomialCollection& other) {
+  LinearCombination(const LinearCombination& other) {
     this->flagDeallocated = false;
     this->operator=(other);
   }
-  void operator=(const MonomialCollection& other) {
+  void operator=(const LinearCombination& other) {
     this->theMonomials = other.theMonomials;
     this->coefficients = other.coefficients;
   }
-  ~MonomialCollection() {
+  ~LinearCombination() {
     this->flagDeallocated = true;
   }
   bool NeedsParenthesisForMultiplication() const {
@@ -1989,10 +1989,10 @@ public:
   int size() const {
     return this->theMonomials.size;
   }
-  //BIG FAT WARNING
-  //the hash function of Monomial collection must return the same value for
+  // BIG FAT WARNING
+  // the hash function of Monomial collection must return the same value for
   // monomial collections whose monomials are permuted!
-  static unsigned int HashFunction(const MonomialCollection<templateMonomial, coefficient>& input) {
+  static unsigned int HashFunction(const LinearCombination<templateMonomial, coefficient>& input) {
     unsigned int result = 0;
     for (int i = 0; i < input.size(); i ++) {
       result += input.coefficients[i].HashFunction() * input[i].HashFunction();
@@ -2015,7 +2015,7 @@ public:
     this->theMonomials.RemoveIndexSwapWithLast(index);
     this->coefficients.RemoveIndexSwapWithLast(index);
   }
-  void AddOtherTimesConst(MonomialCollection<templateMonomial, coefficient>& other, const coefficient& theConst);
+  void AddOtherTimesConst(LinearCombination<templateMonomial, coefficient>& other, const coefficient& theConst);
   void PopMonomial(int index, templateMonomial& outputMon, coefficient& outputCoeff) {
     outputMon = (*this)[index];
     outputCoeff = this->coefficients[index];
@@ -2092,66 +2092,66 @@ public:
     return true;
   }
   int AddMonomialNoCoeffCleanUpReturnsCoeffIndex(const templateMonomial& inputMonomial, const coefficient& inputCoefficient);
-  template <class MonomialCollectionTemplate>
+  template <class LinearCombinationTemplate>
   static void GaussianEliminationByRows(
-    List<MonomialCollectionTemplate>& theList,
+    List<LinearCombinationTemplate>& theList,
     bool *IHaveMadeARowSwitch = nullptr,
     HashedList<templateMonomial>* seedMonomials = nullptr,
     Matrix<coefficient>* carbonCopyMatrix = nullptr,
-    List<MonomialCollectionTemplate>* carbonCopyList = nullptr
+    List<LinearCombinationTemplate>* carbonCopyList = nullptr
   );
-  template <class MonomialCollectionTemplate>
+  template <class LinearCombinationTemplate>
   static void IntersectVectorSpaces(
-    const List<MonomialCollectionTemplate>& vectorSpace1,
-    const List<MonomialCollectionTemplate>& vectorSpace2,
-    List<MonomialCollectionTemplate>& outputIntersection, HashedList<templateMonomial>* seedMonomials = nullptr
+    const List<LinearCombinationTemplate>& vectorSpace1,
+    const List<LinearCombinationTemplate>& vectorSpace2,
+    List<LinearCombinationTemplate>& outputIntersection, HashedList<templateMonomial>* seedMonomials = nullptr
   );
-  template <class MonomialCollectionTemplate>
+  template <class LinearCombinationTemplate>
   static int GetRankIntersectionVectorSpaces(
-    List<MonomialCollectionTemplate>& vectorSpace1,
-    List<MonomialCollectionTemplate>& vectorSpace2,
+    List<LinearCombinationTemplate>& vectorSpace1,
+    List<LinearCombinationTemplate>& vectorSpace2,
     HashedList<templateMonomial>* seedMonomials = nullptr
   ) {
-    List<MonomialCollectionTemplate> listCopy = vectorSpace1;
+    List<LinearCombinationTemplate> listCopy = vectorSpace1;
     listCopy.AddListOnTop(vectorSpace2);
     return vectorSpace1.size + vectorSpace2.size -
-    MonomialCollection<templateMonomial, coefficient>::GetRankOfSpanOfElements(listCopy, seedMonomials);
+    LinearCombination<templateMonomial, coefficient>::GetRankOfSpanOfElements(listCopy, seedMonomials);
   }
-  template <class MonomialCollectionTemplate>
+  template <class LinearCombinationTemplate>
   static bool VectorSpacesIntersectionIsNonTrivial(
-    List<MonomialCollectionTemplate>& vectorSpace1,
-    List<MonomialCollectionTemplate>& vectorSpace2,
+    List<LinearCombinationTemplate>& vectorSpace1,
+    List<LinearCombinationTemplate>& vectorSpace2,
     HashedList<templateMonomial>* seedMonomials = nullptr
   ) {
-    return 0 != MonomialCollection<templateMonomial, coefficient>::GetRankIntersectionVectorSpaces(
+    return 0 != LinearCombination<templateMonomial, coefficient>::GetRankIntersectionVectorSpaces(
       vectorSpace1, vectorSpace2, seedMonomials
     );
   }
-  template <class MonomialCollectionTemplate>
+  template <class LinearCombinationTemplate>
   static bool LinSpanContains(
-    const List<MonomialCollectionTemplate>& theList,
-    const MonomialCollectionTemplate& input,
+    const List<LinearCombinationTemplate>& theList,
+    const LinearCombinationTemplate& input,
     HashedList<templateMonomial>* seedMonomials = nullptr
   ) {
-    List<MonomialCollectionTemplate> listCopy = theList;
-    MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRowsDeleteZeroRows(
+    List<LinearCombinationTemplate> listCopy = theList;
+    LinearCombination<templateMonomial, coefficient>::GaussianEliminationByRowsDeleteZeroRows(
       listCopy, 0, seedMonomials
     );
     int startSpanSize = listCopy.size;
     listCopy.AddOnTop(input);
-    MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRowsDeleteZeroRows(
+    LinearCombination<templateMonomial, coefficient>::GaussianEliminationByRowsDeleteZeroRows(
       listCopy, 0, seedMonomials
     );
     return listCopy.size == startSpanSize;
   }
-  template <class MonomialCollectionTemplate>
+  template <class LinearCombinationTemplate>
   static bool LinSpanContainsGetFirstLinearCombination(
-    const List<MonomialCollectionTemplate>& theList,
-    const MonomialCollectionTemplate& input,
+    const List<LinearCombinationTemplate>& theList,
+    const LinearCombinationTemplate& input,
     Vector<coefficient>& outputFirstLinearCombination,
     HashedList<templateMonomial>* seedMonomials = nullptr
   );
-  bool HasRationalCoeffs(MonomialCollection<templateMonomial, Rational>* outputConversionToRationals = nullptr) {
+  bool HasRationalCoeffs(LinearCombination<templateMonomial, Rational>* outputConversionToRationals = nullptr) {
     Rational tempRat;
     Rational* theCF = nullptr;
     if (outputConversionToRationals != nullptr) {
@@ -2169,21 +2169,21 @@ public:
     }
     return true;
   }
-  template <class MonomialCollectionTemplate>
+  template <class LinearCombinationTemplate>
   static int GetRankOfSpanOfElements(
-    List<MonomialCollectionTemplate>& theList, HashedList<templateMonomial>* seedMonomials = nullptr
+    List<LinearCombinationTemplate>& theList, HashedList<templateMonomial>* seedMonomials = nullptr
   ) {
-    List<MonomialCollectionTemplate> listCopy = theList;
-    MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRowsDeleteZeroRows(listCopy, 0, seedMonomials);
+    List<LinearCombinationTemplate> listCopy = theList;
+    LinearCombination<templateMonomial, coefficient>::GaussianEliminationByRowsDeleteZeroRows(listCopy, 0, seedMonomials);
     return listCopy.size;
   }
-  template <class MonomialCollectionTemplate>
+  template <class LinearCombinationTemplate>
   static void GaussianEliminationByRowsDeleteZeroRows(
-    List<MonomialCollectionTemplate >& theList,
+    List<LinearCombinationTemplate >& theList,
     bool *IvemadeARowSwitch = nullptr,
     HashedList<templateMonomial>* seedMonomials = nullptr
   ) {
-    MonomialCollectionTemplate::GaussianEliminationByRows(theList, IvemadeARowSwitch, seedMonomials);
+    LinearCombinationTemplate::GaussianEliminationByRows(theList, IvemadeARowSwitch, seedMonomials);
     for (int j = theList.size - 1; j >= 0; j --) {
       if (theList[j].IsEqualToZero()) {
         theList.size --;
@@ -2223,15 +2223,15 @@ public:
     }
     return this->coefficients[theIndex];
   }
-  bool operator>(const MonomialCollection<templateMonomial, coefficient>& other) const {
+  bool operator>(const LinearCombination<templateMonomial, coefficient>& other) const {
     if (this->size() > other.size()) {
       return true;
     }
     if (this->size() < other.size()) {
       return false;
     }
-    MonomialCollection<templateMonomial, coefficient> leftCopy = *this;
-    MonomialCollection<templateMonomial, coefficient> rightCopy = other;
+    LinearCombination<templateMonomial, coefficient> leftCopy = *this;
+    LinearCombination<templateMonomial, coefficient> rightCopy = other;
     leftCopy.QuickSortAscending();
     rightCopy.QuickSortAscending();
     for (int i = leftCopy.size() - 1; i >= 0; i --) {
@@ -2384,31 +2384,31 @@ public:
     }
   }
   bool ReadFromFile(std::fstream& input);
-  bool operator!=(const MonomialCollection<templateMonomial, coefficient>& other) const {
+  bool operator!=(const LinearCombination<templateMonomial, coefficient>& other) const {
     return !(*this == other);
   }
-  bool operator==(const MonomialCollection<templateMonomial, coefficient>& other) const;
+  bool operator==(const LinearCombination<templateMonomial, coefficient>& other) const;
   bool operator==(int x) const;
-  void operator+=(const MonomialCollection<templateMonomial, coefficient>& other);
-  MonomialCollection<templateMonomial, coefficient> operator*(const coefficient& other) const {
-    MonomialCollection<templateMonomial, coefficient> result = *this;
+  void operator+=(const LinearCombination<templateMonomial, coefficient>& other);
+  LinearCombination<templateMonomial, coefficient> operator*(const coefficient& other) const {
+    LinearCombination<templateMonomial, coefficient> result = *this;
     result *= other;
     return result;
   }
 //  void operator+=(const templateMonomial& m)
 //  { this->AddMonomial(m, 1);
 //  }
-  MonomialCollection<templateMonomial, coefficient> operator-(
-    const MonomialCollection<templateMonomial, coefficient>& other
+  LinearCombination<templateMonomial, coefficient> operator-(
+    const LinearCombination<templateMonomial, coefficient>& other
   ) const {
-    MonomialCollection<templateMonomial, coefficient> output = *this;
+    LinearCombination<templateMonomial, coefficient> output = *this;
     output -= other;
     return output;
   }
-  MonomialCollection<templateMonomial, coefficient> operator+(
-    const MonomialCollection<templateMonomial, coefficient>& other
+  LinearCombination<templateMonomial, coefficient> operator+(
+    const LinearCombination<templateMonomial, coefficient>& other
   ) const {
-    MonomialCollection<templateMonomial, coefficient> output = *this;
+    LinearCombination<templateMonomial, coefficient> output = *this;
     output += other;
     return output;
   }
@@ -2444,24 +2444,24 @@ public:
     this->SubtractMonomial(tempM, other);
   }
   template <class OtherType>
-  void AssignOtherType(const MonomialCollection<templateMonomial, coefficient>& other) {
+  void AssignOtherType(const LinearCombination<templateMonomial, coefficient>& other) {
     this->::HashedList<templateMonomial>::operator=(other);
     this->coefficients.SetSize(other.size);
     for (int i = 0; i < other.size; i ++) {
       this->coefficients[i] = other.coefficients[i];
     }
   }
-  void operator-=(const MonomialCollection<templateMonomial, coefficient>& other) {
+  void operator-=(const LinearCombination<templateMonomial, coefficient>& other) {
     this->SubtractOtherTimesCoeff(other);
   }
   void SubtractOtherTimesCoeff(
-    const MonomialCollection<templateMonomial, coefficient>& other,
+    const LinearCombination<templateMonomial, coefficient>& other,
     coefficient* inputcf = nullptr
   );
   template <class otherType>
   void operator/=(const otherType& other) {
     if (other == 0) {
-      global.fatal << "This is a programming error. A MonomialCollection division "
+      global.fatal << "This is a programming error. A LinearCombination division "
       << "by zero has been requested: division by zero error should "
       << "be handled before calling operator/=. " << global.fatal;
       return;
@@ -2494,7 +2494,7 @@ public:
     this->AddMonomial(otherCopy, 1);
   }
   template<class otherType>
-  void operator=(const MonomialCollection<templateMonomial, otherType>& other) {
+  void operator=(const LinearCombination<templateMonomial, otherType>& other) {
     this->coefficients = other.coefficients;
     this->theMonomials = other.theMonomials;
   }
@@ -2530,7 +2530,7 @@ class MonomialVector {
 };
 
 template <class coefficient>
-class VectorSparse : public MonomialCollection<MonomialVector, coefficient> {
+class VectorSparse : public LinearCombination<MonomialVector, coefficient> {
   public:
   void MaKeEi(int NonZeroIndex, const coefficient& theCoeff = 1) {
     this->MakeZero();
@@ -2546,12 +2546,12 @@ class VectorSparse : public MonomialCollection<MonomialVector, coefficient> {
     return result;
   }
   bool operator>(const VectorSparse<coefficient>& other) const {
-    return this->::MonomialCollection<MonomialVector, coefficient>::operator>(other);
+    return this->::LinearCombination<MonomialVector, coefficient>::operator>(other);
   }
 };
 
 template <class templateMonomial, class coefficient>
-class ElementMonomialAlgebra: public MonomialCollection<templateMonomial, coefficient> {
+class ElementMonomialAlgebra: public LinearCombination<templateMonomial, coefficient> {
   public:
   void MultiplyBy(
     const ElementMonomialAlgebra<templateMonomial, coefficient>& other,
@@ -2578,7 +2578,7 @@ class ElementMonomialAlgebra: public MonomialCollection<templateMonomial, coeffi
     this->MultiplyBy(other, *this, bufferPoly, bufferMon);
   }
   void operator*=(const coefficient& other) {
-    this->::MonomialCollection<templateMonomial, coefficient>::operator*=(other);
+    this->::LinearCombination<templateMonomial, coefficient>::operator*=(other);
   }
   void RaiseToPower(
     int d,
@@ -2616,10 +2616,10 @@ public:
   static bool flagAnErrorHasOccuredTimeToPanic;
   //to avoid code::blocks parsing problems (remove when code::blocks learns to parse parent classes:
   void AddMonomial(const MonomialP& inputMon, const coefficient& inputCoeff) {
-    this->::MonomialCollection<MonomialP, coefficient>::AddMonomial(inputMon, inputCoeff);
+    this->::LinearCombination<MonomialP, coefficient>::AddMonomial(inputMon, inputCoeff);
   }
   unsigned int HashFunction() const {
-    return this->::MonomialCollection<MonomialP, coefficient>::HashFunction();
+    return this->::LinearCombination<MonomialP, coefficient>::HashFunction();
   }
   static unsigned int HashFunction(const Polynomial<coefficient>& input) {
     return input.HashFunction();
@@ -3007,7 +3007,7 @@ public:
     this->SubtractMonomial(tempMon, other);
   }
   void operator-=(const Polynomial<coefficient>& other) {
-    this->::MonomialCollection<MonomialP, coefficient>::operator-=(other);
+    this->::LinearCombination<MonomialP, coefficient>::operator-=(other);
   }
   void operator*=(const MonomialP& other) {
     Polynomial<coefficient> otherP;
@@ -3030,21 +3030,21 @@ public:
     tempMe.DivideBy(other, *this, tempRemainder);
   }
   void operator/=(int other) {
-    this->::MonomialCollection<MonomialP, coefficient>::operator/= (other);
+    this->::LinearCombination<MonomialP, coefficient>::operator/= (other);
   }
   void operator/=(const coefficient& other) {
-    this->::MonomialCollection<MonomialP, coefficient>::operator/= (other);
+    this->::LinearCombination<MonomialP, coefficient>::operator/= (other);
   }
   template <class otherType>
   void operator*=(const otherType& other) {
-    this->::MonomialCollection<MonomialP, coefficient>::operator*= (other);
+    this->::LinearCombination<MonomialP, coefficient>::operator*= (other);
   }
   void operator=(const Polynomial<coefficient>& other) {
-    this->::MonomialCollection<MonomialP, coefficient>::operator=(other);
+    this->::LinearCombination<MonomialP, coefficient>::operator=(other);
   }
   template<class otherType>
   void operator=(const Polynomial<otherType>& other) {
-    this->::MonomialCollection<MonomialP, coefficient>::operator=(other);
+    this->::LinearCombination<MonomialP, coefficient>::operator=(other);
   }
   void operator=(const coefficient& other) {
     this->MakeConst(other);
@@ -3057,7 +3057,7 @@ public:
   template <class otherType>
   void AssignOtherType(const Polynomial<otherType>& other) {
     this->NumVars = other.NumVars;
-    this->::MonomialCollection<MonomialP, coefficient>::AssignOtherType(other);
+    this->::LinearCombination<MonomialP, coefficient>::AssignOtherType(other);
   }
 };
 
@@ -3668,7 +3668,7 @@ public:
 };
 
 template <class templateMonomial, class coefficient>
-bool MonomialCollection<templateMonomial, coefficient>::operator==(int x) const {
+bool LinearCombination<templateMonomial, coefficient>::operator==(int x) const {
   if (x == 0) {
     return this->size() == 0;
   }
@@ -3680,8 +3680,8 @@ bool MonomialCollection<templateMonomial, coefficient>::operator==(int x) const 
 }
 
 template <class templateMonomial, class coefficient>
-bool MonomialCollection<templateMonomial, coefficient>::operator==(
-  const MonomialCollection<templateMonomial, coefficient>& other
+bool LinearCombination<templateMonomial, coefficient>::operator==(
+  const LinearCombination<templateMonomial, coefficient>& other
 ) const {
   if (this->coefficients.size != other.coefficients.size) {
     return false;
@@ -3699,12 +3699,12 @@ bool MonomialCollection<templateMonomial, coefficient>::operator==(
 }
 
 template <class templateMonomial, class coefficient>
-bool MonomialCollection<templateMonomial, coefficient>::IsEqualToZero() const {
+bool LinearCombination<templateMonomial, coefficient>::IsEqualToZero() const {
   return this->size() == 0;
 }
 
 template <class templateMonomial, class coefficient>
-bool MonomialCollection<templateMonomial, coefficient>::IsInteger(LargeInteger* whichInteger) const {
+bool LinearCombination<templateMonomial, coefficient>::IsInteger(LargeInteger* whichInteger) const {
   if (this->size() > 1) {
     return false;
   }
@@ -3722,7 +3722,7 @@ bool MonomialCollection<templateMonomial, coefficient>::IsInteger(LargeInteger* 
 }
 
 template <class templateMonomial, class coefficient>
-bool MonomialCollection<templateMonomial, coefficient>::IsSmallInteger(int* whichInteger) const {
+bool LinearCombination<templateMonomial, coefficient>::IsSmallInteger(int* whichInteger) const {
   if (this->size() > 1) {
     return false;
   }
@@ -3740,13 +3740,13 @@ bool MonomialCollection<templateMonomial, coefficient>::IsSmallInteger(int* whic
 }
 
 template <class templateMonomial, class coefficient>
-void MonomialCollection<templateMonomial, coefficient>::GetVectorMonsAscending(Vector<coefficient>& result) {
+void LinearCombination<templateMonomial, coefficient>::GetVectorMonsAscending(Vector<coefficient>& result) {
   this->QuickSortAscending();
   result = this->coefficients;
 }
 
 template <class templateMonomial, class coefficient>
-void MonomialCollection<templateMonomial, coefficient>::GetVectorMonsDescending(Vector<coefficient>& result) {
+void LinearCombination<templateMonomial, coefficient>::GetVectorMonsDescending(Vector<coefficient>& result) {
   this->QuickSortDescending();
   result = this->coefficients;
 }
@@ -3780,15 +3780,15 @@ void Polynomial<coefficient>::MakeLinPolyFromRootNoConstantTerm(const Vector<Rat
 }
 
 template <class templateMonomial, class coefficient>
-void MonomialCollection<templateMonomial, coefficient>::SubtractOtherTimesCoeff(
-  const MonomialCollection<templateMonomial, coefficient>& other, coefficient* inputcf
+void LinearCombination<templateMonomial, coefficient>::SubtractOtherTimesCoeff(
+  const LinearCombination<templateMonomial, coefficient>& other, coefficient* inputcf
 ) {
   if (this == &other) {
     if (inputcf == nullptr) {
       this->MakeZero();
       return;
     }
-    MonomialCollection<templateMonomial, coefficient> otherNew = other;
+    LinearCombination<templateMonomial, coefficient> otherNew = other;
     this->SubtractOtherTimesCoeff(otherNew, inputcf);
     return;
   }
@@ -3805,8 +3805,8 @@ void MonomialCollection<templateMonomial, coefficient>::SubtractOtherTimesCoeff(
 }
 
 template <class templateMonomial, class coefficient>
-void MonomialCollection<templateMonomial, coefficient>::AddOtherTimesConst(
-  MonomialCollection<templateMonomial, coefficient>& other, const coefficient& theConst
+void LinearCombination<templateMonomial, coefficient>::AddOtherTimesConst(
+  LinearCombination<templateMonomial, coefficient>& other, const coefficient& theConst
 ) {
   this->SetExpectedSize(other.size() + this->size());
   coefficient tempCF;
@@ -3819,8 +3819,8 @@ void MonomialCollection<templateMonomial, coefficient>::AddOtherTimesConst(
 }
 
 template <class templateMonomial, class coefficient>
-void MonomialCollection<templateMonomial, coefficient>::operator+=(
-  const MonomialCollection<templateMonomial, coefficient>& other
+void LinearCombination<templateMonomial, coefficient>::operator+=(
+  const LinearCombination<templateMonomial, coefficient>& other
 ) {
   this->SetExpectedSize(other.size() + this->size());
   for (int i = 0; i < other.size(); i ++) {
@@ -3830,7 +3830,7 @@ void MonomialCollection<templateMonomial, coefficient>::operator+=(
 }
 
 template <class templateMonomial, class coefficient>
-bool MonomialCollection<templateMonomial, coefficient>::HasGEQMonomial(templateMonomial& m, int& WhichIndex) {
+bool LinearCombination<templateMonomial, coefficient>::HasGEQMonomial(templateMonomial& m, int& WhichIndex) {
   for (int i = 0; i < this->size; i ++) {
     if (this->TheObjects[i].IsGEQpartialOrder(m)) {
       WhichIndex = i;
@@ -3842,20 +3842,20 @@ bool MonomialCollection<templateMonomial, coefficient>::HasGEQMonomial(templateM
 }
 
 template <class templateMonomial, class coefficient>
-template <class MonomialCollectionTemplate>
-bool MonomialCollection<templateMonomial, coefficient>::LinSpanContainsGetFirstLinearCombination(
-  const List<MonomialCollectionTemplate>& theList,
-  const MonomialCollectionTemplate& input,
+template <class LinearCombinationTemplate>
+bool LinearCombination<templateMonomial, coefficient>::LinSpanContainsGetFirstLinearCombination(
+  const List<LinearCombinationTemplate>& theList,
+  const LinearCombinationTemplate& input,
   Vector<coefficient>& outputFirstLinearCombination,
   HashedList<templateMonomial>* seedMonomials
 ) {
-  List<MonomialCollectionTemplate> listCopy = theList;
+  List<LinearCombinationTemplate> listCopy = theList;
   Matrix<coefficient> theRowOperations;
   theRowOperations.MakeIdMatrix(theList.size);
-  MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRows(
+  LinearCombination<templateMonomial, coefficient>::GaussianEliminationByRows(
     listCopy, 0, seedMonomials, &theRowOperations
   );
-  MonomialCollectionTemplate remainderFromInput = input;
+  LinearCombinationTemplate remainderFromInput = input;
   templateMonomial currentMon;
   coefficient CFminMon, CFinRemainder;
   outputFirstLinearCombination.MakeZero(listCopy.size);
@@ -3877,15 +3877,15 @@ bool MonomialCollection<templateMonomial, coefficient>::LinSpanContainsGetFirstL
 }
 
 template <class templateMonomial, class coefficient>
-template <class MonomialCollectionTemplate>
-void MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRows(
-  List<MonomialCollectionTemplate>& theList,
+template <class LinearCombinationTemplate>
+void LinearCombination<templateMonomial, coefficient>::GaussianEliminationByRows(
+  List<LinearCombinationTemplate>& theList,
   bool *IHaveMadeARowSwitch,
   HashedList<templateMonomial>* seedMonomials,
   Matrix<coefficient>* carbonCopyMatrix,
-  List<MonomialCollectionTemplate>* carbonCopyList
+  List<LinearCombinationTemplate>* carbonCopyList
 ) {
-  MacroRegisterFunctionWithName("MonomialCollection::GaussianEliminationByRows");
+  MacroRegisterFunctionWithName("LinearCombination::GaussianEliminationByRows");
   if (carbonCopyMatrix != 0) {
     if (carbonCopyMatrix->NumRows != theList.size) {
       global.fatal << "This is a programming error: carbon copy matrix has "
@@ -3944,7 +3944,7 @@ void MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRow
         *IHaveMadeARowSwitch = true;
       }
     }
-    MonomialCollection<templateMonomial, coefficient>& currentPivot = theList[currentRowIndex];
+    LinearCombination<templateMonomial, coefficient>& currentPivot = theList[currentRowIndex];
     int colIndex = currentPivot.theMonomials.GetIndex(currentMon);
     if (colIndex == - 1) {
       global.fatal << "This is a programming error. An internal check at the "
@@ -3963,7 +3963,7 @@ void MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRow
     }
     for (int j = 0; j < theList.size; j ++) {
       if (j != currentRowIndex) {
-        MonomialCollection<templateMonomial, coefficient>& currentOther = theList[j];
+        LinearCombination<templateMonomial, coefficient>& currentOther = theList[j];
         int otherColIndex = currentOther.theMonomials.GetIndex(currentMon);
         if (otherColIndex != - 1) {
           tempCF = currentOther.coefficients[otherColIndex];
@@ -3984,7 +3984,7 @@ void MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRow
 }
 
 template <class templateMonomial, class coefficient>
-int MonomialCollection<templateMonomial, coefficient>::AddMonomialNoCoeffCleanUpReturnsCoeffIndex(
+int LinearCombination<templateMonomial, coefficient>::AddMonomialNoCoeffCleanUpReturnsCoeffIndex(
   const templateMonomial& inputMonomial, const coefficient& inputCoefficient
 ) {
   this->CheckConsistency();
@@ -4022,7 +4022,7 @@ int MonomialCollection<templateMonomial, coefficient>::AddMonomialNoCoeffCleanUp
 }
 
 template <class templateMonomial, class coefficient>
-int MonomialCollection<templateMonomial, coefficient>::SubtractMonomialNoCoeffCleanUpReturnsCoefficientIndex(
+int LinearCombination<templateMonomial, coefficient>::SubtractMonomialNoCoeffCleanUpReturnsCoefficientIndex(
   const templateMonomial& inputMon, const coefficient& inputCoeff
 ) {
   if (inputCoeff.IsEqualToZero()) {
@@ -4320,7 +4320,7 @@ bool CompleX<coefficient>::IsEqualToZero() const {
 }
 
 template<class coefficient>
-class ElementSemisimpleLieAlgebra : public MonomialCollection<ChevalleyGenerator, coefficient> {
+class ElementSemisimpleLieAlgebra : public LinearCombination<ChevalleyGenerator, coefficient> {
 public:
   bool CheckConsistency() const {
     if (this->size() == 0) {
@@ -4396,14 +4396,14 @@ public:
   bool MustUseBracketsWhenDisplayingMeRaisedToPower();
   unsigned int HashFunction() const {
     return this->indexOfOwnerAlgebra * SomeRandomPrimes[0] +
-    this->::MonomialCollection<ChevalleyGenerator, Rational>::HashFunction() * SomeRandomPrimes[1];
+    this->::LinearCombination<ChevalleyGenerator, Rational>::HashFunction() * SomeRandomPrimes[1];
   }
   static unsigned int HashFunction(const ElementSemisimpleLieAlgebra& input) {
     return input.HashFunction();
   }
   template<class otherElement>
   void operator=(const otherElement& other) {
-    this->::MonomialCollection<ChevalleyGenerator, coefficient>::operator=(other);
+    this->::LinearCombination<ChevalleyGenerator, coefficient>::operator=(other);
   }
   Vector<Rational> GetRootIMustBeWeight() const;
 };
@@ -5145,7 +5145,7 @@ std::string Matrix<coefficient>::ToStringPlainText(bool jsonFormat) const {
 }
 
 template <class templateMonomial, class coefficient>
-std::string MonomialCollection<templateMonomial, coefficient>::GetBlendCoeffAndMon(
+std::string LinearCombination<templateMonomial, coefficient>::GetBlendCoeffAndMon(
   const templateMonomial& inputMonomial,
   coefficient& inputCoefficient,
   bool addPlusToFront,
@@ -5185,13 +5185,13 @@ std::string MonomialCollection<templateMonomial, coefficient>::GetBlendCoeffAndM
 }
 
 template <class templateMonomial, class coefficient>
-std::string MonomialCollection<templateMonomial, coefficient>::ToString(
+std::string LinearCombination<templateMonomial, coefficient>::ToString(
   FormatExpressions* theFormat
 ) const {
   if (this->size() == 0) {
     return "0";
   }
-  MacroRegisterFunctionWithName("MonomialCollection::ToString");
+  MacroRegisterFunctionWithName("LinearCombination::ToString");
   std::stringstream out;
   std::string tempS1, tempS2;
   List<templateMonomial> sortedMons;
@@ -5538,12 +5538,12 @@ public:
     int indexB,
     int n,
     int indexAminusNB,
-    MonomialCollection<PartFraction, Polynomial<LargeInteger> >& output,
+    LinearCombination<PartFraction, Polynomial<LargeInteger> >& output,
     PartFractions& owner
   );
   bool DecomposeFromLinRelation(
     Matrix<Rational>& theLinearRelation,
-    MonomialCollection<PartFraction, Polynomial<LargeInteger> >& output,
+    LinearCombination<PartFraction, Polynomial<LargeInteger> >& output,
     bool flagUsingOSbasis,
     List<Vector<Rational> >& startingVectors
   );
@@ -5562,7 +5562,7 @@ public:
     List<int>& theElongations,
     int GainingMultiplicityIndex,
     int ElongationGainingMultiplicityIndex,
-    MonomialCollection<PartFraction, Polynomial<LargeInteger> >& output
+    LinearCombination<PartFraction, Polynomial<LargeInteger> >& output
   );
   void ApplyGeneralizedSzenesVergneFormulA(
     List<int>& theSelectedIndices,
@@ -5570,24 +5570,24 @@ public:
     List<int>& theCoefficients,
     int GainingMultiplicityIndex,
     int ElongationGainingMultiplicityIndex,
-    MonomialCollection<PartFraction,
+    LinearCombination<PartFraction,
     Polynomial<LargeInteger> >& output,
     List<Vector<Rational> >& startingVectors
   );
   bool CheckForOrlikSolomonAdmissibility(List<int>& theSelectedIndices);
   bool reduceOnceTotalOrderMethod(
-    MonomialCollection<PartFraction, Polynomial<LargeInteger> >& output, PartFractions& owner
+    LinearCombination<PartFraction, Polynomial<LargeInteger> >& output, PartFractions& owner
   );
   bool reduceOnceGeneralMethodNoOSBasis(
     PartFractions& owner,
-    MonomialCollection<PartFraction,
+    LinearCombination<PartFraction,
     Polynomial<LargeInteger> >& output,
     Vectors<Rational>& bufferVectors,
     Matrix<Rational>& bufferMat
   );
   bool ReduceOnceGeneralMethod(
     PartFractions& owner,
-    MonomialCollection<PartFraction,
+    LinearCombination<PartFraction,
     Polynomial<LargeInteger> >& output,
     Vectors<Rational>& bufferVectors,
     Matrix<Rational>& bufferMat
@@ -5938,7 +5938,7 @@ public:
   }
 };
 
-class PartFractions: public MonomialCollection<PartFraction, Polynomial<LargeInteger> > {
+class PartFractions: public LinearCombination<PartFraction, Polynomial<LargeInteger> > {
   bool splitPartial();
   void initCommon();
 public:
@@ -6167,7 +6167,7 @@ class DynkinSimpleType {
 //but rather have a monomial collection as a private member.
 //Many important operations with Dynkin types require fixed order of monomials,
 //which may impose this reorganization.
-class DynkinType: public MonomialCollection<DynkinSimpleType, Rational> {
+class DynkinType: public LinearCombination<DynkinSimpleType, Rational> {
 public:
   void GetLettersTypesMults(
     List<char>* outputLetters = nullptr,
@@ -6188,10 +6188,10 @@ public:
     List<MatrixTensor<Rational> >& output, const DynkinSimpleType& theType, int multiplicity
   );
   unsigned int HashFunction() const {
-    return this->MonomialCollection<DynkinSimpleType, Rational>::HashFunction();
+    return this->LinearCombination<DynkinSimpleType, Rational>::HashFunction();
   }
   static unsigned int HashFunction(const DynkinType& input) {
-    return MonomialCollection<DynkinSimpleType, Rational>::HashFunction(input);
+    return LinearCombination<DynkinSimpleType, Rational>::HashFunction(input);
   }
   void GetOuterAutosGeneratorsActOnVectorColumn(List<MatrixTensor<Rational> >& output);
   bool IsSimple(char* outputtype = nullptr, int* outputRank = nullptr, Rational* outputLength = nullptr) const;
@@ -6273,10 +6273,10 @@ public:
   );
   bool HasExceptionalComponent() const;
   bool operator>(const DynkinType& other) const;
-  void operator=(const MonomialCollection<DynkinSimpleType, Rational>& other) {
-    this->::MonomialCollection<DynkinSimpleType, Rational>::operator=(other);
+  void operator=(const LinearCombination<DynkinSimpleType, Rational>& other) {
+    this->::LinearCombination<DynkinSimpleType, Rational>::operator=(other);
   }
-  DynkinType operator-(const MonomialCollection<DynkinSimpleType, Rational>& other) {
+  DynkinType operator-(const LinearCombination<DynkinSimpleType, Rational>& other) {
     DynkinType result = *this;
     result -= other;
     return result;
@@ -6366,10 +6366,10 @@ public:
 };
 
 template <class coefficient>
-class ElementWeylAlgebra : public MonomialCollection<MonomialWeylAlgebra, coefficient> {
+class ElementWeylAlgebra : public LinearCombination<MonomialWeylAlgebra, coefficient> {
 public:
   unsigned int HashFunction() const {
-    return this->::MonomialCollection<MonomialWeylAlgebra, coefficient>::HashFunction();
+    return this->::LinearCombination<MonomialWeylAlgebra, coefficient>::HashFunction();
   }
   static unsigned int HashFunction(const ElementWeylAlgebra& input) {
     return input.HashFunction();
@@ -6424,7 +6424,7 @@ public:
   }
   void operator=(const std::string& input);
   void operator*=(const coefficient& other) {
-    this->MonomialCollection<MonomialWeylAlgebra, coefficient>::operator*=(other);
+    this->LinearCombination<MonomialWeylAlgebra, coefficient>::operator*=(other);
   }
   void operator*=(const ElementWeylAlgebra& other);
   bool IsLetter(char theLetter);
@@ -6661,7 +6661,7 @@ class MonomialMatrix {
 };
 
 template <class coefficient>
-class MatrixTensor: public MonomialCollection<MonomialMatrix, coefficient> {
+class MatrixTensor: public LinearCombination<MonomialMatrix, coefficient> {
 public:
   void MakeIdSpecial() {
     this->MakeZero();
@@ -6710,7 +6710,7 @@ public:
   void RaiseToPower(int power);
   void operator*=(const MatrixTensor<coefficient>& other);
   void operator*=(const coefficient& other) {
-    return this->::MonomialCollection<MonomialMatrix, coefficient>::operator*=(other);
+    return this->::LinearCombination<MonomialMatrix, coefficient>::operator*=(other);
   }
   void GetVectorsSparseFromRowsIncludeZeroRows(
     List<VectorSparse<coefficient> >& output, int MinNumRows = - 1
@@ -6957,14 +6957,14 @@ public:
     inputOutput = output;
   }
   unsigned int HashFunction() const {
-    return this->::MonomialCollection<MonomialMatrix, coefficient>::HashFunction();
+    return this->::LinearCombination<MonomialMatrix, coefficient>::HashFunction();
   }
   static unsigned int HashFunction(const MatrixTensor<coefficient>& input) {
     return input.HashFunction();
   }
   template<class otherClass>
   void operator=(const otherClass& other) {
-    this->::MonomialCollection<MonomialMatrix, coefficient>::operator=(other);
+    this->::LinearCombination<MonomialMatrix, coefficient>::operator=(other);
   }
   MatrixTensor<coefficient> operator+(const MatrixTensor<coefficient>& rightM) const {
     MatrixTensor output;
@@ -7111,11 +7111,11 @@ class MonomialGeneralizedVerma {
 };
 
 template<class coefficient>
-class ElementSumGeneralizedVermas : public MonomialCollection<MonomialGeneralizedVerma<coefficient>, coefficient> {
+class ElementSumGeneralizedVermas : public LinearCombination<MonomialGeneralizedVerma<coefficient>, coefficient> {
 public:
   void MultiplyMeByUEEltOnTheLeft(const ElementUniversalEnveloping<coefficient>& theUE);
   unsigned int HashFunction() const {
-    return this->MonomialCollection<MonomialGeneralizedVerma<coefficient>, coefficient >::HashFunction();
+    return this->LinearCombination<MonomialGeneralizedVerma<coefficient>, coefficient >::HashFunction();
   }
   static unsigned int HashFunction(const ElementSumGeneralizedVermas<coefficient>& input) {
     return input.HashFunction();
@@ -7140,7 +7140,7 @@ public:
   }
   bool ExtractElementUE(ElementUniversalEnveloping<coefficient>& output, SemisimpleLieAlgebra& theOwner);
   void operator=(const ElementSumGeneralizedVermas<coefficient>& other) {
-    this->::MonomialCollection<MonomialGeneralizedVerma<coefficient>, coefficient>::operator=(other);
+    this->::LinearCombination<MonomialGeneralizedVerma<coefficient>, coefficient>::operator=(other);
   }
 };
 
@@ -7428,7 +7428,7 @@ std::string MonomialGeneralizedVerma<coefficient>::ToString(FormatExpressions* t
 }
 
 template <class templateMonomial, class coefficient>
-std::ostream& operator<<(std::ostream& output, const MonomialCollection<templateMonomial, coefficient>& theCollection) {
+std::ostream& operator<<(std::ostream& output, const LinearCombination<templateMonomial, coefficient>& theCollection) {
   if (theCollection.size() == 0) {
     output << "0";
     return output;

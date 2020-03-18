@@ -10,9 +10,9 @@
 #include "math_extra_finite_groups.h"
 #include "math_extra_finite_groups_implementation.h"
 
-// dense bases for sparse spaces
+// Dense bases for sparse spaces
 // should this carry around the
-// List<MonomialCollection<templateMonomial, coefficient> >
+// List<LinearCombination<templateMonomial, coefficient> >
 // it came from?
 template <class templateVector, class templateMonomial, class coefficient>
 class SparseSubspaceBasis {

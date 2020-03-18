@@ -221,15 +221,15 @@ std::string quasiDiffMon::ToString(FormatExpressions* theFormat) const {
 }
 
 template <class coefficient>
-class quasiDiffOp : public MonomialCollection<quasiDiffMon, coefficient> {
+class quasiDiffOp : public LinearCombination<quasiDiffMon, coefficient> {
 public:
   std::string ToString(FormatExpressions* theFormat = nullptr) const;
   void GenerateBasisLieAlgebra(List<quasiDiffOp<coefficient> >& theElts, FormatExpressions* theFormat = nullptr);
   void operator*=(const quasiDiffOp<coefficient>& standsOnTheRight);
-  void operator=(const  MonomialCollection<quasiDiffMon, coefficient>& other) {
-    this->MonomialCollection<quasiDiffMon, coefficient>::operator=(other);
+  void operator=(const LinearCombination<quasiDiffMon, coefficient>& other) {
+    this->LinearCombination<quasiDiffMon, coefficient>::operator=(other);
   }
-  void LieBracketMeOnTheRight(const MonomialCollection<quasiDiffMon, coefficient>& standsOnTheRight) {
+  void LieBracketMeOnTheRight(const LinearCombination<quasiDiffMon, coefficient>& standsOnTheRight) {
     quasiDiffOp<coefficient> tempRight;
     tempRight = standsOnTheRight;
     MathRoutines::LieBracket(*this, tempRight, *this);
@@ -292,7 +292,7 @@ void quasiDiffOp<coefficient>::GenerateBasisLieAlgebra(
   MacroRegisterFunctionWithName("quasiDiffOp<coefficient>::GenerateBasisLieAlgebra");
   ProgressReport theReport;
   HashedList<quasiDiffMon> bufferMons;
-  List< MonomialCollection<quasiDiffMon, coefficient> > theEltsConverted;
+  List< LinearCombination<quasiDiffMon, coefficient> > theEltsConverted;
   theEltsConverted = theElts;
   this->GaussianEliminationByRows(theEltsConverted);
   quasiDiffOp tempQDO;
@@ -366,7 +366,7 @@ std::string quasiDiffOp<coefficient>::ToString(FormatExpressions* theFormat) con
     combineWeylPart = theFormat->flagQuasiDiffOpCombineWeylPart;
   }
   if (!combineWeylPart) {
-    return this->MonomialCollection<quasiDiffMon, coefficient>::ToString(theFormat);
+    return this->LinearCombination<quasiDiffMon, coefficient>::ToString(theFormat);
   }
   MatrixTensor<ElementWeylAlgebra<Rational> > reordered;
   reordered.MakeZero();
@@ -382,7 +382,7 @@ std::string quasiDiffOp<coefficient>::ToString(FormatExpressions* theFormat) con
     global.fatal << "This is likely a programming error (crashing at any rate): "
     << "I have a non-zero quasidifferential operator "
     << " with non-properly formatted LaTeX string "
-    << this->MonomialCollection<quasiDiffMon, coefficient>::ToString(theFormat)
+    << this->LinearCombination<quasiDiffMon, coefficient>::ToString(theFormat)
     << ", however its properly formatted string is 0. "
     << "Probably there is something wrong with the initializations of the monomials of the qdo. " << global.fatal;
   }
@@ -1641,14 +1641,14 @@ bool Calculator::CollectOpandsAccumulate(
 bool Calculator::functionCollectSummands(
   Calculator& theCommands,
   const Expression& input,
-  MonomialCollection<Expression, Rational>& outputSum
+  LinearCombination<Expression, Rational>& outputSum
 ) {
   MacroRegisterFunctionWithName("Calculator::functionCollectSummands");
   List<Expression> summands;
   theCommands.AppendSummandsReturnTrueIfOrderNonCanonical(input, summands);
   outputSum.MakeZero();
-  MonomialCollection<Expression, AlgebraicNumber> sumOverAlgebraicNumbers;
-  MonomialCollection<Expression, double> sumOverDoubles;
+  LinearCombination<Expression, AlgebraicNumber> sumOverAlgebraicNumbers;
+  LinearCombination<Expression, double> sumOverDoubles;
   Rational coeffRat = 1;
   AlgebraicNumber coeffAlg = 1;
   double coeffDouble = 1;
@@ -1782,7 +1782,7 @@ bool Calculator::outerPlus(Calculator& theCommands, const Expression& input, Exp
   if (!input.StartsWith(theCommands.opPlus())) {
     return false;
   }
-  MonomialCollection<Expression, Rational> theSum;
+  LinearCombination<Expression, Rational> theSum;
   if (!theCommands.functionCollectSummands(theCommands, input, theSum)) {
     return false;
   }

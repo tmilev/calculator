@@ -35,7 +35,7 @@ void Calculator::initAdminFunctions() {
     adminDisabled
   );
 
-  if (!global.flagDatabaseCompiled) {
+  if (!global.flagDatabaseCompiled || global.flagRunningConsoleTest) {
     return;
   }
   this->AddOperationHandler(
@@ -8098,7 +8098,6 @@ void Calculator::initPredefinedStandardOperationsWithoutHandler() {
   this->AddOperationNoRepetitionAllowed("\\infty");
   this->AddOperationNoRepetitionAllowed("\\phantom");
   this->AddOperationNoRepetitionAllowed("CommandEnclosure");
-  this->AddOperationNoRepetitionAllowed("MonomialCollection");
   this->AddOperationNoRepetitionAllowed("MonomialPoly");
   this->AddOperationNoRepetitionAllowed("Melt");
   this->AddOperationNoRepetitionAllowed("Bind");

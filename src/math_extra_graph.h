@@ -58,7 +58,7 @@ public:
   int numNodes;
   int groupMaxSize;
   List<std::string> nodeLabels;
-  MonomialCollection<GraphEdge, Rational> theEdges;
+  LinearCombination<GraphEdge, Rational> theEdges;
   List<List<int> > edgesPerNodeNoMultiplicities;
   List<List<int> > nodeGroupsForDisplay;
   List<List<List<int> > > connectedComponents;

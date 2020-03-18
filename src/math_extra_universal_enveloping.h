@@ -174,7 +174,7 @@ public:
   void AssignElementLieAlgebra(
     const ElementSemisimpleLieAlgebra<Rational>& input, SemisimpleLieAlgebra& inputOwner, const coefficient& theRingUnit = 1
   );
-  bool GetWithSimpleGeneratorsOnly(MonomialCollection<MonomialTensor<coefficient>, coefficient>& output);
+  bool GetWithSimpleGeneratorsOnly(LinearCombination<MonomialTensor<coefficient>, coefficient>& output);
   void MakeOneGenerator(int theIndex, SemisimpleLieAlgebra& inputOwner, const coefficient& theRingUnit);
   void MakeOneGeneratorCoeffOne(int theIndex, SemisimpleLieAlgebra& inputOwners, const coefficient& theRingUnit = 1);
   void MakeOneGeneratorCoeffOne(int theIndex, int numVars, SemisimpleLieAlgebra& inputOwner);
@@ -223,7 +223,7 @@ public:
     return input.HashFunction();
   }
   unsigned int HashFunction() const {
-    return this->::MonomialCollection<MonomialUniversalEnveloping<coefficient>, coefficient>::HashFunction();
+    return this->::LinearCombination<MonomialUniversalEnveloping<coefficient>, coefficient>::HashFunction();
   }
   template<class CoefficientTypeQuotientField>
   static bool GetBasisFromSpanOfElements(
@@ -287,17 +287,17 @@ public:
     this->MakeConst(other, 0, *this->owner);
   }
   void operator=(const ElementUniversalEnveloping<coefficient>& other) {
-    this->::MonomialCollection<MonomialUniversalEnveloping<coefficient>, coefficient>::operator=(other);
+    this->::LinearCombination<MonomialUniversalEnveloping<coefficient>, coefficient>::operator=(other);
     this->owner = other.owner;
   }
   void operator*=(const ElementUniversalEnveloping<coefficient>& standsOnTheRight);
   void operator*=(const coefficient& other) {
-    this->::MonomialCollection<MonomialUniversalEnveloping<coefficient>, coefficient>
+    this->::LinearCombination<MonomialUniversalEnveloping<coefficient>, coefficient>
     ::operator*=(other);
   }
   template<class otherType>
   void operator/=(const otherType& other) {
-    this->::MonomialCollection<MonomialUniversalEnveloping<coefficient>, coefficient>
+    this->::LinearCombination<MonomialUniversalEnveloping<coefficient>, coefficient>
     ::operator/=(other);
   }
   ElementUniversalEnveloping<coefficient>(): owner(nullptr) {

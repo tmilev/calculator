@@ -440,7 +440,7 @@ private:
     const Expression& theVariable
   );
   template<class coefficient>
-  bool MakeSum(Calculator& theCommands, const MonomialCollection<Expression, coefficient>& theSum);
+  bool MakeSum(Calculator& theCommands, const LinearCombination<Expression, coefficient>& theSum);
   bool MakeSum(Calculator& theCommands, const List<Expression>& theSum);
   bool MakeProducT(Calculator& owner, const List<Expression>& theMultiplicands);
   bool MakeProducT(Calculator& owner, const Expression& left, const Expression& right);
@@ -1692,9 +1692,6 @@ public:
   int opLisT() {
     return this->operations.GetIndexIMustContainTheObject("");
   }
-  int opMonomialCollection() {
-    return this->operations.GetIndexIMustContainTheObject("MonomialCollection");
-  }
   int opMonomialPoly() {
     return this->operations.GetIndexIMustContainTheObject("MonomialPoly");
   }
@@ -2160,7 +2157,7 @@ public:
   static bool functionCollectSummands(
     Calculator& theCommands,
     const Expression& input,
-    MonomialCollection<Expression, Rational>& outputSum
+    LinearCombination<Expression, Rational>& outputSum
   );
   static bool outerTensorProductStandard(Calculator& theCommands, const Expression& input, Expression& output);
   static bool StandardIsDenotedBy(Calculator& theCommands, const Expression& input, Expression& output);
@@ -2865,7 +2862,7 @@ bool Calculator::functionGetMatrix(
 template <class coefficient>
 bool Expression::MakeSum(
   Calculator& theCommands,
-  const MonomialCollection<Expression, coefficient>& theSum
+  const LinearCombination<Expression, coefficient>& theSum
 ) {
   MacroRegisterFunctionWithName("Expression::MakeSum");
   Expression oneE; //used to record the constant term
@@ -3151,7 +3148,7 @@ bool CalculatorConversions::innerExpressionFromPoly(
   Expression* inputContext
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromPoly");
-  MonomialCollection<Expression, coefficient> theTerms;
+  LinearCombination<Expression, coefficient> theTerms;
   Expression currentBase, currentPower, currentTerm, currentMultTermE;
   if (!input.IsConstant() && inputContext == nullptr) {
     theCommands << "While converting polynomial to expression, "

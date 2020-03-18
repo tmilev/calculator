@@ -1241,7 +1241,7 @@ bool CalculatorFunctions::innerFactorOutNumberContent(
   if (input.size() != 2) {
     return theCommands << "FactorOutNumberContent expects single argument. ";
   }
-  MonomialCollection<Expression, Rational> theV;
+  LinearCombination<Expression, Rational> theV;
   if (!theCommands.functionCollectSummands(theCommands, input[1], theV)) {
     return theCommands << "Failed to extract summands from: " << input[1].ToString();
   }
@@ -2417,7 +2417,7 @@ bool CalculatorFunctions::innerScaleToLeadingUnit(Calculator& theCommands, const
     return false;
   }
   const Expression& argument = input[1];
-  MonomialCollection<Expression, Rational> theCollection;
+  LinearCombination<Expression, Rational> theCollection;
   theCommands.functionCollectSummands(theCommands, argument, theCollection);
   theCollection /= theCollection.GetLeadingCoefficient();
   return output.MakeSum(theCommands, theCollection);

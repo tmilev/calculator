@@ -1022,7 +1022,7 @@ void ElementUniversalEnvelopingOrdered<coefficient>::SubstitutionCoefficients(Po
 
 template <class coefficient>
 void ElementUniversalEnveloping<coefficient>::MakeZero(SemisimpleLieAlgebra& inputOwner) {
-  this->::MonomialCollection<MonomialUniversalEnveloping<coefficient>, coefficient >::MakeZero();
+  this->::LinearCombination<MonomialUniversalEnveloping<coefficient>, coefficient >::MakeZero();
   this->owner = &inputOwner;
 }
 

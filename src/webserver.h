@@ -228,7 +228,7 @@ public:
   long long NumSuccessfulSelectsSoFar;
   bool flagReapingChildren;
   TransportLayerSecurity theTLS;
-  MonomialCollection<MonomialWrapper<std::string, MathRoutines::HashString>, LargeInteger> currentlyConnectedAddresses;
+  LinearCombination<MonomialWrapper<std::string, MathRoutines::HashString>, LargeInteger> currentlyConnectedAddresses;
   std::string portHTTP;
   std::string portHTTPSOpenSSL;
   std::string portHTTPSBuiltIn;

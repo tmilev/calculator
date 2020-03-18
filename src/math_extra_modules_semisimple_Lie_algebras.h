@@ -241,7 +241,7 @@ public:
 
 template<class coefficient>
 class ElementTensorsGeneralizedVermas :
-public MonomialCollection<MonomialTensorGeneralizedVermas<coefficient>, coefficient> {
+public LinearCombination<MonomialTensorGeneralizedVermas<coefficient>, coefficient> {
 public:
   bool MultiplyOnTheLeft(
     const ElementUniversalEnveloping<coefficient>& theUE,
@@ -313,10 +313,10 @@ public:
     return theAnswer;
   }
   unsigned int HashFunction() const {
-    return this->::MonomialCollection<MonomialTensorGeneralizedVermas<coefficient>, coefficient >::HashFunction();
+    return this->::LinearCombination<MonomialTensorGeneralizedVermas<coefficient>, coefficient >::HashFunction();
   }
   ElementTensorsGeneralizedVermas<coefficient>& operator=(const ElementTensorsGeneralizedVermas<coefficient>& other) {
-    this->::MonomialCollection<MonomialTensorGeneralizedVermas<coefficient>, coefficient>::operator=(other);
+    this->::LinearCombination<MonomialTensorGeneralizedVermas<coefficient>, coefficient>::operator=(other);
     return *this;
   }
   ElementTensorsGeneralizedVermas<coefficient>& operator=(const ElementSumGeneralizedVermas<coefficient>& other);

@@ -2694,7 +2694,7 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionLaTeXSlide() {
   std::stringstream out;
   List<Polynomial<coefficient> >& theRemainders = this->intermediateRemainders.GetElement();
   List<Polynomial<coefficient> >& theSubtracands = this->intermediateSubtractands.GetElement();
-  this->theFormat.thePolyMonOrder = this->thePolynomialOrder.theMonOrder;
+  this->theFormat.monomialOrder = this->thePolynomialOrder.theMonOrder;
   bool oneDivisor = (this->theBasiS.size == 1);
   this->allMonomials.Clear();
   this->allMonomials.AddOnTopNoRepetition(this->startingPoly.GetElement().theMonomials);

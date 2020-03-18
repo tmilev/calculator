@@ -3118,8 +3118,8 @@ JSData Expression::ToJSData(FormatExpressions* theFormat, const Expression& star
   return result;
 }
 
-bool Expression::ToStringOpTimes(
-const Expression& input, std::stringstream& out, FormatExpressions *theFormat
+bool Expression::ToStringTimes(
+  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (!input.StartsWith(input.owner->opTimes(), 3)) {
     return false;
@@ -3140,12 +3140,18 @@ const Expression& input, std::stringstream& out, FormatExpressions *theFormat
     }
   }
   bool mustHaveTimes = false;
-  if (firstE == "-1" || firstE == "- 1") {
-    firstE = "-";
-    firstNeedsBrackets = false;
+  bool collapseUnits = true;
+  if (theFormat != nullptr) {
+    collapseUnits = !theFormat->flagDontCollalpseProductsByUnits;
   }
-  if (firstE == "1") {
-    firstE = "";
+  if (collapseUnits) {
+    if (firstE == "-1" || firstE == "- 1") {
+      firstE = "-";
+      firstNeedsBrackets = false;
+    }
+    if (firstE == "1") {
+      firstE = "";
+    }
   }
   if (firstNeedsBrackets) {
     out << "\\left(" << firstE << "\\right)";
@@ -3405,10 +3411,12 @@ bool Expression::ToStringEndStatement(
   if (!this->IsListStartingWithAtom(this->owner->opEndStatement())) {
     return false;
   }
-  bool isFinal = false;
-  if (theFormat != nullptr) {
-    isFinal = theFormat->flagExpressionIsFinal;
+  MemorySaving<FormatExpressions> temporaryFormat;
+  if (theFormat == nullptr) {
+    theFormat = &temporaryFormat.GetElement();
+    theFormat->flagExpressionIsFinal = true;
   }
+  bool isFinal = theFormat->flagExpressionIsFinal;
   bool createTable = (startingExpression != nullptr);
   bool createSingleTable = false;
   if (createTable == false && theFormat != nullptr && !global.flagRunningConsoleRegular) {
@@ -3432,6 +3440,7 @@ bool Expression::ToStringEndStatement(
       out << "<tr><td class =\"cellCalculatorInput\">";
       if (!this->owner->flagHideLHS) {
         if (i < (*startingExpression).size()) {
+          theFormat->flagDontCollalpseProductsByUnits = true;
           currentInput = HtmlRoutines::GetMathSpanPure((*startingExpression)[i].ToString(theFormat));
         } else {
           currentInput = "No matching starting expression - possible use of the Melt keyword.";
@@ -3456,8 +3465,10 @@ bool Expression::ToStringEndStatement(
           currentE.IsOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >()
         ) && isFinal
       ) {
+        theFormat->flagDontCollalpseProductsByUnits = false;
         currentOutput = currentE.ToString(theFormat);
       } else {
+        theFormat->flagDontCollalpseProductsByUnits = false;
         currentOutput = HtmlRoutines::GetMathSpanPure(currentE.ToString(theFormat), 1700);
       }
       currentOutput += currentE.ToStringAllSlidersInExpression();
@@ -3505,8 +3516,6 @@ bool Expression::ToStringEndStatement(
   return true;
 }
 
-int FormatExpressions::ExpressionLineBreak = 50;
-
 bool Expression::ToStringPlus(const Expression& input, std::stringstream& out, FormatExpressions* theFormat) {
   if (!input.StartsWith(input.owner->opPlus())) {
     return false;
@@ -3532,8 +3541,10 @@ bool Expression::ToStringPlus(const Expression& input, std::stringstream& out, F
   if (allowNewLine && !useFrac && leftString.size() > static_cast<unsigned>(FormatExpressions::ExpressionLineBreak)) {
     out << "\\\\\n";
   }
-  std::string rightString = right.NeedsParenthesisForAddition() ?
-  ("\\left(" + right.ToString(theFormat) + "\\right)") : right.ToString(theFormat);
+  std::string rightString = right.ToString(theFormat);
+  if (right.NeedsParenthesisForAddition()) {
+    rightString = "\\left(" + right.ToString(theFormat) + "\\right)";
+  }
   if (rightString.size() > 0) {
     if (rightString[0] != '-') {
       out << "+";
@@ -3993,15 +4004,24 @@ std::string Expression::ToStringWithStartingExpression(
   std::stringstream outTrue;
   std::string input, output;
   bool isFinal = true;
-  if (theFormat != nullptr) {
-    isFinal = theFormat->flagExpressionIsFinal;
+  MemorySaving<FormatExpressions> tempFormat;
+  if (theFormat == nullptr) {
+    theFormat = &tempFormat.GetElement();
+    theFormat->flagExpressionIsFinal = true;
   }
+  isFinal = theFormat->flagExpressionIsFinal;
   outTrue << "<table class =\"tableCalculatorOutput\">";
   outTrue << "<tr><th>Input</th><th>Result</th></tr>";
   if (this->IsListStartingWithAtom(this->owner->opEndStatement())) {
     outTrue << out.str();
   } else {
+    if (theFormat != nullptr) {
+      theFormat->flagDontCollalpseProductsByUnits = true;
+    }
     input = HtmlRoutines::GetMathSpanPure(startingExpression->ToString(theFormat), 1700);
+    if (theFormat != nullptr) {
+      theFormat->flagDontCollalpseProductsByUnits = false;
+    }
     outTrue << "<tr><td class =\"cellCalculatorInput\">" << input << "</td>";
     if ((
         this->IsOfType<std::string>() ||
@@ -4424,7 +4444,7 @@ std::string Expression::ToString(
   } else if (this->ToStringUnderscore(*this, out, theFormat)) {
   } else if (this->ToStringSetMinus(*this, out, theFormat)) {
   } else if (this->ToStringLimitBoundary(*this, out, theFormat)) {
-  } else if (this->ToStringOpTimes(*this, out, theFormat)) {
+  } else if (this->ToStringTimes(*this, out, theFormat)) {
   } else if (this->ToStringCrossProduct(*this, out, theFormat)) {
   } else if (this->ToStringSqrt3(*this, out, theFormat)) {
   } else if (this->ToStringFactorial(*this, out, theFormat)) {

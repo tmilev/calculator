@@ -676,7 +676,7 @@ bool Calculator::innerGroebner(
   } else {
     theGroebnerComputation.thePolynomialOrder.theMonOrder = MonomialP::LeftGreaterThanLexicographicLastVariableWeakest;
   }
-  theGroebnerComputation.theFormat.thePolyMonOrder = theGroebnerComputation.thePolynomialOrder.theMonOrder;
+  theGroebnerComputation.theFormat.monomialOrder = theGroebnerComputation.thePolynomialOrder.theMonOrder;
   theGroebnerComputation.MaxNumGBComputations = upperBoundComputations;
   bool success = theGroebnerComputation.TransformToReducedGroebnerBasis(outputGroebner);
   std::stringstream out;

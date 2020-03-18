@@ -523,7 +523,7 @@ private:
   static bool ToStringLimitProcess(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
   static bool ToStringLessThan(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
   static bool ToStringLimit(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
-  static bool ToStringOpTimes(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
+  static bool ToStringTimes(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
   static bool ToStringSqrt2(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
   static bool ToStringSqrt3(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
   static bool ToStringOr(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);

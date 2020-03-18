@@ -2643,7 +2643,7 @@ FormatExpressions::GetMonOrder<MonomialWrapper<std::string, MathRoutines::HashSt
 
 template<>
 List<MonomialP>::OrderLeftGreaterThanRight FormatExpressions::GetMonOrder<MonomialP>() {
-  return this->thePolyMonOrder;
+  return this->monomialOrder;
 }
 
 template<>
@@ -2733,7 +2733,7 @@ FormatExpressions::FormatExpressions() {
   this->MaxLinesPerPage = 40;
   this->NumAmpersandsPerNewLineForLaTeX = 0;
   this->MaxRecursionDepthPerExpression = 500;
-  this->thePolyMonOrder = nullptr;
+  this->monomialOrder = nullptr;
   this->flagExpressionIsFinal = true;
   this->flagExpressionNewLineAllowed = false;
   this->flagIncludeLieAlgebraTypes = true;
@@ -2748,6 +2748,7 @@ FormatExpressions::FormatExpressions() {
   this->flagSuppressOneIn1overXtimesY = true;
   this->flagFormatMatrixAsLinearSystem = false;
   this->flagIncludeExtraHtmlDescriptionsInPlots = true;
+  this->flagDontCollalpseProductsByUnits = false;
   this->flagSuppressLongMatrices = true;
   this->flagLatexDetailsInHtml = false;
   this->flagUseQuotes = true;

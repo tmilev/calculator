@@ -840,7 +840,7 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionStringLaTeX() {
   std::stringstream out;
   List<Polynomial<coefficient> >& theRemainders = this->intermediateRemainders.GetElement();
   List<Polynomial<coefficient> >& theSubtracands = this->intermediateSubtractands.GetElement();
-  this->theFormat.thePolyMonOrder = this->thePolynomialOrder.theMonOrder;
+  this->theFormat.monomialOrder = this->thePolynomialOrder.theMonOrder;
   std::string HighlightedColor = "red";
   this->allMonomials.AddOnTopNoRepetition(this->startingPoly.GetElement().theMonomials);
   for (int i = 0; i < theRemainders.size; i ++) {
@@ -958,7 +958,7 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionStringHtml() {
   std::stringstream out;
   List<Polynomial<coefficient> >& theRemainders = this->intermediateRemainders.GetElement();
   List<Polynomial<coefficient> >& theSubtracands = this->intermediateSubtractands.GetElement();
-  this->theFormat.thePolyMonOrder = this->thePolynomialOrder.theMonOrder;
+  this->theFormat.monomialOrder = this->thePolynomialOrder.theMonOrder;
   std::string underlineStyle = " style ='white-space: nowrap; border-bottom:1px solid black;'";
   this->allMonomials.Clear();
   this->allMonomials.AddOnTopNoRepetition(this->startingPoly.GetElement().theMonomials);

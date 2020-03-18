@@ -274,7 +274,7 @@ private:
   // IMPORTANT. The default monomial order, implemented by operator>, is the graded lexicographic
   // last variable strongest order. Other monomial orders are not referred by operator>, but
   // by their explicit names.
-  // Note that the LinearCombination::ToString method uses the FormatExpressions::thePolyMonOrder
+  // Note that the LinearCombination::ToString method uses the FormatExpressions::monomialOrder
   // to sort monomials when displaying polynomials to the screen.
   List<Rational> monBody;
 public:
@@ -1854,9 +1854,8 @@ public:
   int MaxMatrixDisplayedRows;
   int MaxLinesPerPage;
   int MatrixColumnVerticalLineIndex;
-  static int ExpressionLineBreak;
-  //  bool flagMatrixStarted;
-  //  bool flagMatrixRowStarted;
+  static const int ExpressionLineBreak = 50;
+  bool flagDontCollalpseProductsByUnits;
   bool flagPassCustomCoeffMonSeparatorToCoeffs;
   bool flagMakingExpressionTableWithLatex;
   bool flagUseLatex;
@@ -1884,7 +1883,7 @@ public:
   bool flagLatexDetailsInHtml;
   bool flagUseQuotes;
   char AmbientWeylLetter;
-  List<MonomialP>::OrderLeftGreaterThanRight thePolyMonOrder;
+  List<MonomialP>::OrderLeftGreaterThanRight monomialOrder;
   template <typename templateMonomial>
   typename List<templateMonomial>::OrderLeftGreaterThanRight GetMonOrder();
   std::string GetPolyLetter(int index) const;

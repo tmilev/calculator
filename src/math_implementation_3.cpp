@@ -12631,7 +12631,7 @@ bool RationalFunctionOld::GetRelations(
     currentPoly -= currentGenerator;
   }
   GroebnerBasisComputation<Rational> theComputation;
-  theComputation.thePolynomialOrder.theMonOrder = MonomialP::LeftIsGEQLexicographicLastVariableWeakest;
+  theComputation.thePolynomialOrder.theMonOrder = MonomialP::Left_isGEQ_leftToRight_firstGEQ;
   if (!theComputation.TransformToReducedGroebnerBasis(theGroebnerBasis)) {
     comments << "Failed to find Groebner basis";
     return false;

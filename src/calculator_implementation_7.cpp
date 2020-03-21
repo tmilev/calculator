@@ -1386,7 +1386,7 @@ bool CalculatorFunctions::innerSolveSerreLikeSystem(
   theComputation.MaxNumGBComputations = upperLimit;
   theComputation.MaxNumSerreSystemComputationsPreferred = upperLimit;
   theComputation.thePolynomialOrder.theMonOrder =
-  MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest;
+  MonomialP::Left_greaterThan_totalDegree_rightToLeft_firstSmaller;
   theComputation.theAlgebraicClosurE = &theCommands.theObjectContainer.theAlgebraicClosure;
   theComputation.flagTryDirectlySolutionOverAlgebraicClosure = startWithAlgebraicClosure;
   global.theDefaultFormat.GetElement() = theComputation.theFormat;
@@ -2094,7 +2094,7 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
     theGB.theBasiS.SetSize(1);
     theGB.theBasiS[0] = this->theDen;
     theGB.theFormat = this->currentFormaT;
-    theGB.thePolynomialOrder.theMonOrder = MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest;
+    theGB.thePolynomialOrder.theMonOrder = MonomialP::Left_greaterThan_totalDegree_rightToLeft_firstSmaller;
     theGB.initForDivisionAlone(theGB.theBasiS);
     Polynomial<Rational> theNumCopy = this->theNum;
     theGB.RemainderDivisionWithRespectToBasis(theNumCopy, &theGB.remainderDivision, - 1);

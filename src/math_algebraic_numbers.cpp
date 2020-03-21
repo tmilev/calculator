@@ -790,9 +790,7 @@ bool AlgebraicClosureRationals::AdjoinRootMinimalPolynomial(
     }
   }
   Polynomial<AlgebraicNumber> minusMinPolyMinusMaxMon = minPoly;
-  int indexMaxMon = minusMinPolyMinusMaxMon.GetIndexMaxMonomial(
-    MonomialP::LeftIsGEQTotalDegThenLexicographicLastVariableStrongest
-  );
+  int indexMaxMon = minusMinPolyMinusMaxMon.GetIndexMaxMonomial();
   const MonomialP maxMon = minusMinPolyMinusMaxMon[indexMaxMon];
   AlgebraicNumber maxMonCoeff = minusMinPolyMinusMaxMon.coefficients[indexMaxMon];
   minusMinPolyMinusMaxMon.SubtractMonomial(maxMon, maxMonCoeff);

@@ -2352,8 +2352,8 @@ public:
     Calculator& theCommands,
     const Expression& input,
     Expression& output,
-    bool useGr,
-    bool useRevLex = false,
+    bool useGraded,
+    bool useReverseLexicographic = false,
     bool useModZp = false
   );
   static bool innerKLcoeffs(Calculator& theCommands, const Expression& input, Expression& output);

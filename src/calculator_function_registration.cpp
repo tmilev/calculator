@@ -3094,7 +3094,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->AddOperationHandler(
     "PolyDivStringLexRev",
-    CalculatorFunctions::innerPolynomialDivisionVerboseLexRev,
+    CalculatorFunctions::innerPolynomialDivisionVerboseLexicographicReversed,
     "",
     "Prints a string representing division of "
     "a polynomial by a set of polynomials using the lex "

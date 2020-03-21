@@ -412,32 +412,50 @@ public:
     }
     return - 1;
   }
+
+
+  // "Reverse lexicographic" order.
   bool IsGEQpartialOrder(MonomialP& m);
-  static bool LeftIsGEQLexicographicLastVariableStrongest(const MonomialP& left, const MonomialP& right) {
-    return left.IsGEQLexicographicLastVariableStrongest(right);
+
+  static bool Left_isGEQ_rightToLeft_firstGEQ(const MonomialP& left, const MonomialP& right) {
+    return left.IsGEQ_rightToLeft_firstGEQ(right);
   }
-  static bool LeftGreaterThanLexicographicLastVariableStrongest(const MonomialP& left, const MonomialP& right) {
+
+  static bool Left_isGEQ_rightToLeft_firstLEQ(const MonomialP& left, const MonomialP& right) {
+    return left.IsGEQ_rightToLeft_firstLEQ(right);
+  }
+
+  // "Reverse lexicographic" order.
+  static bool Left_greaterThan_rightToLeft_firstLEQ(const MonomialP& left, const MonomialP& right) {
     if (left == right) {
       return false;
     }
-    return left.IsGEQLexicographicLastVariableStrongest(right);
+    return left.IsGEQ_rightToLeft_firstLEQ(right);
   }
-  static bool LeftGreaterThanLexicographicLastVariableWeakest(const MonomialP& left, const MonomialP& right) {
+
+  // "Lexicographic" order.
+  static bool Left_greaterThan_leftToRight_firstGEQ(const MonomialP& left, const MonomialP& right) {
     if (left == right) {
       return false;
     }
-    return left.IsGEQLexicographicLastVariableWeakest(right);
+    return left.IsGEQ_leftToRight_firstGEQ(right);
   }
-  static bool LeftIsGEQLexicographicLastVariableWeakest(const MonomialP& left, const MonomialP& right) {
-    return left.IsGEQLexicographicLastVariableWeakest(right);
+
+  // "Lexicographic" order.
+  static bool Left_isGEQ_leftToRight_firstGEQ(const MonomialP& left, const MonomialP& right) {
+    return left.IsGEQ_leftToRight_firstGEQ(right);
   }
-  static bool LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest(const MonomialP& left, const MonomialP& right) {
+
+  // "Graded reverse lexicographic" order.
+  static bool Left_greaterThan_totalDegree_rightToLeft_firstSmaller(const MonomialP& left, const MonomialP& right) {
     if (left == right) {
       return false;
     }
-    return left.IsGEQTotalDegThenLexicographicLastVariableStrongest(right);
+    return left.IsGEQ_totalDegree_rightToLeft_firstLEQ(right);
   }
-  static bool LeftGreaterThanTotalDegThenLexicographicLastVariableWeakest(const MonomialP& left, const MonomialP& right) {
+
+  // "Graded lexicographic" order.
+  static bool Left_greaterThan_totalDegree_leftToRight_firstGreater(const MonomialP& left, const MonomialP& right) {
     if (left == right) {
       return false;
     }
@@ -447,14 +465,45 @@ public:
     if (left.TotalDegree() < right.TotalDegree()) {
       return false;
     }
-    return left.IsGEQLexicographicLastVariableWeakest(right);
+    return left.IsGEQ_totalDegree_leftToRight_firstGEQ(right);
   }
-  static bool LeftIsGEQTotalDegThenLexicographicLastVariableStrongest(const MonomialP& left, const MonomialP& right) {
-    return left.IsGEQTotalDegThenLexicographicLastVariableStrongest(right);
+
+  bool IsGEQ_leftToRight(const MonomialP& other, bool trueIfThisGreater) const;
+  bool IsGEQ_rightToLeft(const MonomialP& other, bool trueIfThisGreater) const;
+
+  // The "lexicographic order" follows. If computing with n variables, the "lexicographic order"
+  // coincides with the infinite-alphabet dictionary of all words with length n, where
+  // each letter is given by the variable exponent.
+  // In other words, the lexicographic order for x^2 y^0 z^3 is the "lexicographic" order
+  // of the triple [2,0,3].
+  // This is confusing, as it is completely different from the "dictionary order" in which
+  // the monomial x^2 y^0 z^3 = x x z z z would be placed. For example,
+  // x^3 y^3 z > x y^2 z^3 because [3, 3, 0] > [1, 2, 3].
+  // However, the word formed by the letters in the monomial are "dictionary-ordered"
+  // in the opposite order.
+  // x x x y y y z <  x y y z z z.
+  // This has lead to lots of confusion in previous version, so we have dropped the
+  // term "lexicographic" in all places except the end-user facing calculator commands.
+  bool IsGEQ_leftToRight_firstGEQ(const MonomialP& other) const {
+    return this->IsGEQ_leftToRight(other, true);
   }
-  bool IsGEQLexicographicLastVariableStrongest(const MonomialP& other) const;
-  bool IsGEQLexicographicLastVariableWeakest(const MonomialP& other) const;
-  bool IsGEQTotalDegThenLexicographicLastVariableStrongest(const MonomialP& other) const;
+  bool IsGEQ_rightToLeft_firstGEQ(const MonomialP& other) const {
+    return this->IsGEQ_rightToLeft(other, true);
+  }
+  bool IsGEQ_leftToRight_firstLEQ(const MonomialP& other) const {
+    return this->IsGEQ_leftToRight(other, false);
+  }
+  // The "reverse lexicographic" order follows. We compare right to left.
+  // If the comparisons are decisive, we reverse the boolean.
+  bool IsGEQ_rightToLeft_firstLEQ(const MonomialP& other) const {
+    return this->IsGEQ_rightToLeft(other, false);
+  }
+  // The "graded lexicographic" order follows.
+  bool IsGEQ_totalDegree_leftToRight_firstGEQ(const MonomialP& other) const;
+  // The "graded reverse lexicographic" order follows.
+  bool IsGEQ_totalDegree_rightToLeft_firstLEQ(const MonomialP& other) const;
+
+
   void SetNumVariablesSubDeletedVarsByOne(int newNumVars);
   bool IsConstant() const {
     for (int i = 0; i < this->monBody.size; i ++) {
@@ -2732,7 +2781,7 @@ public:
       return 1;
     }
     Rational result = this->ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
-    if (this->coefficients[this->GetIndexMaxMonomialLexicographicLastVariableStrongest()].IsNegative()) {
+    if (this->coefficients[this->IndexMaximumMonomial_rightToLeft_firstGEQ()].IsNegative()) {
       *this *= - 1;
       result *= - 1;
     }
@@ -2898,8 +2947,12 @@ public:
     }
     return result;
   }
-  int GetIndexMaxMonomialLexicographicLastVariableStrongest() const {
-    return this->GetIndexMaxMonomial(MonomialP::LeftGreaterThanLexicographicLastVariableStrongest);
+  int IndexMaximumMonomial_rightToLeft_firstGEQ() const {
+    return this->GetIndexMaxMonomial(MonomialP::Left_greaterThan_leftToRight_firstGEQ);
+  }
+
+  int IndexMaximumMonomial_rightToLeft_firstLEQ() const {
+    return this->GetIndexMaxMonomial(MonomialP::Left_greaterThan_rightToLeft_firstLEQ);
   }
 //  void ComponentInFrontOfVariableToPower(int VariableIndex, ListPointers<Polynomial<coefficient> >& output, int UpToPower);
   int GetMaxPowerOfVariableIndex(int VariableIndex);
@@ -2945,8 +2998,8 @@ public:
     if (this->TotalDegree() < other.TotalDegree()) {
       return false;
     }
-    int thisMaxMonIndex = this->GetIndexMaxMonomialLexicographicLastVariableStrongest();
-    int otherMaxMonIndex = other.GetIndexMaxMonomialLexicographicLastVariableStrongest();
+    int thisMaxMonIndex = this->IndexMaximumMonomial_rightToLeft_firstGEQ();
+    int otherMaxMonIndex = other.IndexMaximumMonomial_rightToLeft_firstGEQ();
     if ((*this)[thisMaxMonIndex] > other[otherMaxMonIndex]) {
       return true;
     }

@@ -119,7 +119,7 @@ public:
   );
   static bool innerPolynomialDivisionVerboseGrLex(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPolynomialDivisionVerboseGrLexRev(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPolynomialDivisionVerboseLexRev(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPolynomialDivisionVerboseLexicographicReversed(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPolynomialDivisionVerboseLex(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerGenerateVectorSpaceClosedWRTLieBracket(Calculator& theCommands, const Expression& input, Expression& output);

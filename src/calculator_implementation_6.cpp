@@ -2577,7 +2577,7 @@ bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
     return theCommands << "Expected 2 context variables in " << theCurveE.ToString() << ", got: "
     << curveContext.ContextGetPolynomialVariables().ToString();
   }
-  MonomialP leadingMon = thePoly.GetMaxMonomial(MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest);
+  MonomialP leadingMon = thePoly.GetMaxMonomial(MonomialP::Left_greaterThan_rightToLeft_firstLEQ);
   int indexX = 0;
   int indexY = 1;
   if (leadingMon[indexX] != 3) {

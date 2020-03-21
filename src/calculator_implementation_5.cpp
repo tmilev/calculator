@@ -2298,7 +2298,7 @@ bool CalculatorFunctions::innerPolynomialDivisionVerboseGrLex(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   return CalculatorFunctions::innerPolynomialDivisionVerbose(
-    theCommands, input, output, MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest
+    theCommands, input, output, MonomialP::Left_greaterThan_totalDegree_leftToRight_firstGreater
   );
 }
 
@@ -2306,7 +2306,7 @@ bool CalculatorFunctions::innerPolynomialDivisionVerboseGrLexRev(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   return CalculatorFunctions::innerPolynomialDivisionVerbose(
-    theCommands, input, output, MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableWeakest
+    theCommands, input, output, MonomialP::Left_greaterThan_totalDegree_leftToRight_firstGreater
   );
 }
 
@@ -2317,15 +2317,15 @@ bool CalculatorFunctions::innerPolynomialDivisionVerboseLex(
     theCommands,
     input,
     output,
-    MonomialP::LeftGreaterThanLexicographicLastVariableStrongest
+    MonomialP::Left_greaterThan_leftToRight_firstGEQ
   );
 }
 
-bool CalculatorFunctions::innerPolynomialDivisionVerboseLexRev(
+bool CalculatorFunctions::innerPolynomialDivisionVerboseLexicographicReversed(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   return CalculatorFunctions::innerPolynomialDivisionVerbose(
-    theCommands, input, output, MonomialP::LeftGreaterThanLexicographicLastVariableWeakest
+    theCommands, input, output, MonomialP::Left_greaterThan_rightToLeft_firstLEQ
   );
 }
 
@@ -2907,7 +2907,7 @@ bool CalculatorFunctions::innerPolynomialDivisionSlidesGrLex(
     return theCommands << "Failed to extract integer from first argument";
   }
   theGB.initForDivisionAlone(theGB.theBasiS);
-  theGB.thePolynomialOrder.theMonOrder = MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest;
+  theGB.thePolynomialOrder.theMonOrder = MonomialP::Left_greaterThan_totalDegree_rightToLeft_firstSmaller;
   theGB.RemainderDivisionWithRespectToBasis(thePolys[1], &theGB.remainderDivision, - 1);
   theContext.ContextGetFormatExpressions(theGB.theFormat);
   theGB.theFormat.flagUseLatex = true;

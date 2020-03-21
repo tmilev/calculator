@@ -140,7 +140,7 @@ void Polynomial<coefficient>::ScaleToIntegralNoGCDCoeffs() {
   accumDen.MakeOne();
   accumNum = this->coefficients[0].GetNumerator().value;
   for (int i = 0; i < this->size(); i ++) {
-    if ((*this)[i].IsGEQLexicographicLastVariableStrongest((*this)[indexHighestMon])) {
+    if ((*this)[i].IsGEQ_totalDegree_leftToRight_firstGEQ((*this)[indexHighestMon])) {
       indexHighestMon = i;
     }
     Rational& tempRat = this->coefficients[i];
@@ -406,8 +406,8 @@ void Polynomial<coefficient>::DivideBy(
   tempInput = inputDivisor;
   outputRemainder.ScaleToPositiveMonomials(scaleRemainder);
   tempInput.ScaleToPositiveMonomials(scaleInput);
-  int remainderMaxMonomial = outputRemainder.GetIndexMaxMonomialLexicographicLastVariableStrongest();
-  int inputMaxMonomial = tempInput.GetIndexMaxMonomialLexicographicLastVariableStrongest();
+  int remainderMaxMonomial = outputRemainder.IndexMaximumMonomial_rightToLeft_firstGEQ() ;
+  int inputMaxMonomial = tempInput.IndexMaximumMonomial_rightToLeft_firstGEQ();
   outputQuotient.MakeZero();
   if (remainderMaxMonomial == - 1) {
     return;
@@ -431,7 +431,7 @@ void Polynomial<coefficient>::DivideBy(
     << tempInput.size() << "  monomials. I am attempting to divide "
     << this->ToString() << " by " << inputDivisor.ToString() << ". " << global.fatal;
   }
-  while (outputRemainder[remainderMaxMonomial].IsGEQLexicographicLastVariableStrongest(tempInput[inputMaxMonomial])) {
+  while (outputRemainder[remainderMaxMonomial].IsGEQ_rightToLeft_firstGEQ(tempInput[inputMaxMonomial])) {
     if (remainderMaxMonomial >= outputRemainder.size()) {
       global.fatal << "Remainder max monomial too large. " << global.fatal;
     }
@@ -446,7 +446,7 @@ void Polynomial<coefficient>::DivideBy(
     tempP = tempInput;
     tempP.MultiplyBy(tempMon, tempCoeff);
     outputRemainder -= tempP;
-    remainderMaxMonomial = outputRemainder.GetIndexMaxMonomialLexicographicLastVariableStrongest();
+    remainderMaxMonomial = outputRemainder.IndexMaximumMonomial_rightToLeft_firstGEQ();
     if (remainderMaxMonomial == - 1) {
       break;
     }
@@ -600,7 +600,7 @@ bool Polynomial<coefficient>::FindOneVarRatRoots(List<Rational>& output) {
   if (this->IsConstant()) {
     return true;
   }
-  int indexHighest = this->GetIndexMaxMonomialLexicographicLastVariableStrongest();
+  int indexHighest = this->IndexMaximumMonomial_rightToLeft_firstGEQ();
   highestTerm = this->coefficients[indexHighest];
   if (!highestTerm.IsSmallInteger() || !lowestTerm.IsSmallInteger()) {
     return false;

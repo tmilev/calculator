@@ -1534,7 +1534,9 @@ void RationalFunctionOld::operator=(const RationalFunctionOld& other) {
 }
 
 void RationalFunctionOld::lcm(
-  const Polynomial<Rational>& left, const Polynomial<Rational>& right, Polynomial<Rational>& output
+  const Polynomial<Rational>& left,
+  const Polynomial<Rational>& right,
+  Polynomial<Rational>& output
 ) {
   MacroRegisterFunctionWithName("RationalFunctionOld::lcm");
   Polynomial<Rational> leftTemp, rightTemp, tempP;
@@ -1556,7 +1558,7 @@ void RationalFunctionOld::lcm(
   theBasis.AddOnTop(rightTemp);
   MemorySaving<GroebnerBasisComputation<Rational> > bufComp;
   GroebnerBasisComputation<Rational> theComp;
-  theComp.thePolynomialOrder.theMonOrder =MonomialP::LeftIsGEQLexicographicLastVariableStrongest;
+  theComp.thePolynomialOrder.theMonOrder = MonomialP::Left_isGEQ_rightToLeft_firstGEQ;
   theComp.MaxNumGBComputations = - 1;
   if (!theComp.TransformToReducedGroebnerBasis(theBasis)) {
     global.fatal << "Transformation to reduced Groebner basis is not allowed to fail in this function. " << global.fatal;
@@ -1564,7 +1566,8 @@ void RationalFunctionOld::lcm(
   int maxMonNoTIndex = - 1;
   Rational MaxTotalDeg;
   for (int i = 0; i < theBasis.size; i ++) {
-    const MonomialP& currentMon = theBasis[i][theBasis[i].GetIndexMaxMonomialLexicographicLastVariableStrongest()];
+  int indexMaximumMonomial = theBasis[i].IndexMaximumMonomial_rightToLeft_firstGEQ();
+    const MonomialP& currentMon = theBasis[i][indexMaximumMonomial];
     if (currentMon(theNumVars) == 0) {
       if (maxMonNoTIndex == - 1) {
         MaxTotalDeg= currentMon.TotalDegree();
@@ -1818,7 +1821,7 @@ void RationalFunctionOld::SimplifyLeadingCoefficientOnly() {
     return;
   }
   Rational tempRat = this->Denominator.GetElement().coefficients[
-    this->Denominator.GetElement().GetIndexMaxMonomialLexicographicLastVariableStrongest()
+    this->Denominator.GetElement().IndexMaximumMonomial_rightToLeft_firstGEQ()
   ];
   tempRat.Invert();
   this->Denominator.GetElement() *= tempRat;
@@ -2523,7 +2526,7 @@ bool MonomialP::operator>(const MonomialP& other) const {
   if (this->monBody == other.monBody) {
     return false;
   }
-  return this->IsGEQTotalDegThenLexicographicLastVariableStrongest(other);
+  return this->IsGEQ_totalDegree_rightToLeft_firstLEQ(other);
 }
 
 bool MonomialP::IsDivisibleBy(const MonomialP& other) const {
@@ -2561,21 +2564,21 @@ bool MonomialP::operator==(const MonomialP& other) const {
   return true;
 }
 
-bool MonomialP::IsGEQLexicographicLastVariableStrongest(const MonomialP& other) const {
+bool MonomialP::IsGEQ_rightToLeft(const MonomialP &other, bool trueIfThisGreater) const {
   for (int i = other.monBody.size - 1; i >= this->monBody.size; i --) {
     if (other.monBody[i] > 0) {
-      return false;
+      return !trueIfThisGreater;
     }
     if (other.monBody[i] < 0) {
-      return true;
+      return trueIfThisGreater;
     }
   }
   for (int i = this->monBody.size - 1; i >= other.monBody.size; i --) {
     if (this->monBody[i] > 0) {
-      return true;
+      return trueIfThisGreater;
     }
     if (this->monBody[i] < 0) {
-      return false;
+      return !trueIfThisGreater;
     }
   }
   int highestIndex = MathRoutines::Minimum(this->GetMinNumVars(), other.GetMinNumVars()) - 1;
@@ -2590,43 +2593,53 @@ bool MonomialP::IsGEQLexicographicLastVariableStrongest(const MonomialP& other) 
   return true;
 }
 
-bool MonomialP::IsGEQLexicographicLastVariableWeakest(const MonomialP& other) const {
+bool MonomialP::IsGEQ_leftToRight(const MonomialP &other, bool trueIfThisGreater) const {
   int commonSize = MathRoutines::Minimum(this->GetMinNumVars(), other.GetMinNumVars());
   for (int i = 0; i < commonSize; i ++) {
     if (this->monBody[i] > other.monBody[i]) {
-      return true;
+      return trueIfThisGreater;
     }
     if (this->monBody[i] < other.monBody[i]) {
-      return false;
+      return !trueIfThisGreater;
     }
   }
   for (int i = this->monBody.size; i < other.monBody.size; i ++) {
     if (other.monBody[i] > 0) {
-      return false;
+      return !trueIfThisGreater;
     }
     if (other.monBody[i] < 0) {
-      return true;
+      return trueIfThisGreater;
     }
   }
   for (int i = other.monBody.size; i < this->monBody.size; i ++) {
     if (this->monBody[i] > 0) {
-      return true;
+      return trueIfThisGreater;
     }
     if (this->monBody[i] < 0) {
-      return false;
+      return !trueIfThisGreater;
     }
   }
   return true;
 }
 
-bool MonomialP::IsGEQTotalDegThenLexicographicLastVariableStrongest(const MonomialP& other) const {
+bool MonomialP::IsGEQ_totalDegree_rightToLeft_firstLEQ(const MonomialP& other) const {
   if (this->TotalDegree() > other.TotalDegree()) {
     return true;
   }
   if (this->TotalDegree() < other.TotalDegree()) {
     return false;
   }
-  return this->IsGEQLexicographicLastVariableStrongest(other);
+  return this->IsGEQ_rightToLeft_firstLEQ(other);
+}
+
+bool MonomialP::IsGEQ_totalDegree_leftToRight_firstGEQ(const MonomialP& other) const {
+  if (this->TotalDegree() > other.TotalDegree()) {
+    return true;
+  }
+  if (this->TotalDegree() < other.TotalDegree()) {
+    return false;
+  }
+  return this->IsGEQ_leftToRight_firstGEQ(other);
 }
 
 bool MonomialP::IsGEQpartialOrder(MonomialP& m) {

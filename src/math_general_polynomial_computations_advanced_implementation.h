@@ -634,7 +634,8 @@ bool GroebnerBasisComputation<coefficient>::AddRemainderToBasis() {
 
 template <class coefficient>
 GroebnerBasisComputation<coefficient>::GroebnerBasisComputation() {
-  this->thePolynomialOrder.theMonOrder = MonomialP::LeftIsGEQLexicographicLastVariableStrongest;
+  // "Graded reverse lexicographic" order.
+  this->thePolynomialOrder.theMonOrder = MonomialP::Left_greaterThan_rightToLeft_firstLEQ;
 
   this->RecursionCounterSerreLikeSystem = 0;
   this->NumVarsToSolveForStarT = - 1;

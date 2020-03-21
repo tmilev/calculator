@@ -599,7 +599,12 @@ bool Calculator::innerAdCommonEigenSpaces(Calculator& theCommands, const Express
 }
 
 bool Calculator::innerGroebner(
-  Calculator& theCommands, const Expression& input, Expression& output, bool useGr, bool useRevLex, bool useModZp
+  Calculator& theCommands,
+  const Expression& input,
+  Expression& output,
+  bool useGraded,
+  bool useReverseLexicographic,
+  bool useModZp
 ) {
   MacroRegisterFunctionWithName("Calculator::innerGroebner");
   Vector<Polynomial<Rational> > inputVector;
@@ -665,16 +670,14 @@ bool Calculator::innerGroebner(
   List<Polynomial<AlgebraicNumber> > outputGroebner, outputGroebner2;
   outputGroebner = inputVector;
   outputGroebner2 = inputVector;
-  if (useGr) {
-    if (!useRevLex) {
-      theGroebnerComputation.thePolynomialOrder.theMonOrder = MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest;
-    } else {
-      theGroebnerComputation.thePolynomialOrder.theMonOrder = MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableWeakest;
-    }
-  } else if (!useRevLex) {
-    theGroebnerComputation.thePolynomialOrder.theMonOrder = MonomialP::LeftGreaterThanLexicographicLastVariableStrongest;
-  } else {
-    theGroebnerComputation.thePolynomialOrder.theMonOrder = MonomialP::LeftGreaterThanLexicographicLastVariableWeakest;
+  if (useGraded && !useReverseLexicographic) {
+    theGroebnerComputation.thePolynomialOrder.theMonOrder = MonomialP::Left_greaterThan_totalDegree_leftToRight_firstGreater;
+  } else if (useGraded && useReverseLexicographic) {
+    theGroebnerComputation.thePolynomialOrder.theMonOrder = MonomialP::Left_greaterThan_totalDegree_rightToLeft_firstSmaller;
+  } else if (!useGraded && !useReverseLexicographic) {
+    theGroebnerComputation.thePolynomialOrder.theMonOrder = MonomialP::Left_greaterThan_leftToRight_firstGEQ;
+  } else if (!useGraded && useReverseLexicographic){
+    theGroebnerComputation.thePolynomialOrder.theMonOrder = MonomialP::Left_greaterThan_rightToLeft_firstLEQ;
   }
   theGroebnerComputation.theFormat.monomialOrder = theGroebnerComputation.thePolynomialOrder.theMonOrder;
   theGroebnerComputation.MaxNumGBComputations = upperBoundComputations;
@@ -685,7 +688,7 @@ bool Calculator::innerGroebner(
   for (int i = 0; i < theContext.ContextGetNumContextVariables(); i ++) {
     out << theContext.ContextGetContextVariable(i).ToString();
     if (i != theContext.ContextGetNumContextVariables() - 1) {
-      out << (useRevLex ? "&gt;": "&lt;");
+      out << "&lt;";
     }
   }
   out << "<br>Starting basis (" << inputVector.size  << " elements): ";

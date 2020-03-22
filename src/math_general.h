@@ -433,6 +433,14 @@ public:
     return left.IsGEQ_rightToLeft_firstLEQ(right);
   }
 
+  // "Lexicographic" order in reverse.
+  static bool Left_greaterThan_rightToLeft_firstGEQ(const MonomialP& left, const MonomialP& right) {
+    if (left == right) {
+      return false;
+    }
+    return left.IsGEQ_rightToLeft_firstGEQ(right);
+  }
+
   // "Lexicographic" order.
   static bool Left_greaterThan_leftToRight_firstGEQ(const MonomialP& left, const MonomialP& right) {
     if (left == right) {

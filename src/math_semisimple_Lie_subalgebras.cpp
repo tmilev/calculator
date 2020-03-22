@@ -126,7 +126,7 @@ bool SemisimpleLieAlgebra::AttempTFindingHEF(
   theComputation.MaxNumSerreSystemComputationsPreferred = 4001;
   theComputation.MaxNumGBComputations = 2001;
   theComputation.thePolynomialOrder.theMonOrder =
-  MonomialP::Left_greaterThan_rightToLeft_firstLEQ;
+  MonomialP::Left_greaterThan_rightToLeft_firstGEQ;
   theComputation.SolveSerreLikeSystem(theSystem);
   if (!theComputation.flagSystemSolvedOverBaseField) {
     if (logStream != nullptr) {

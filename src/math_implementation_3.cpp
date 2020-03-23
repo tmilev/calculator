@@ -3159,7 +3159,7 @@ bool PartFraction::ReduceMeOnce(
     for (int i = 0; i < this->IndicesNonZeroMults.size; i ++) {
       for (int j = 0; j < this->TheObjects[IndicesNonZeroMults[i]].Multiplicities.size; j ++) {
         this->TheObjects[IndicesNonZeroMults[i]].GetPolyDenominator(denominator, j, startingVectors[IndicesNonZeroMults[i]]);
-        outputCoeff.DivideBy(denominator, quotient, remainderDivision);
+        outputCoeff.DivideBy(denominator, quotient, remainderDivision, MonomialP::orderDefault());
         if (remainderDivision.IsEqualToZero()) {
           this->DecreasePowerOneFrac(IndicesNonZeroMults[i], 1);
           outputCoeff = quotient;

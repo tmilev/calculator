@@ -2419,7 +2419,7 @@ bool CalculatorFunctions::innerScaleToLeadingUnit(Calculator& theCommands, const
   const Expression& argument = input[1];
   LinearCombination<Expression, Rational> theCollection;
   theCommands.functionCollectSummands(theCommands, argument, theCollection);
-  theCollection /= theCollection.GetLeadingCoefficient();
+  theCollection /= theCollection.GetCoefficientMaximalMonomial(nullptr);
   return output.MakeSum(theCommands, theCollection);
 }
 
@@ -2577,10 +2577,12 @@ bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
     return theCommands << "Expected 2 context variables in " << theCurveE.ToString() << ", got: "
     << curveContext.ContextGetPolynomialVariables().ToString();
   }
-  MonomialP leadingMon = thePoly.GetMaxMonomial(MonomialP::Left_greaterThan_rightToLeft_firstLEQ);
+  MonomialP leadingMonomial;
+  List<MonomialP>::OrderLeftGreaterThanRight monomialOrder = MonomialP::Left_greaterThan_rightToLeft_firstLEQ;
+  thePoly.GetIndexMaximalMonomial(&leadingMonomial, nullptr, monomialOrder);
   int indexX = 0;
   int indexY = 1;
-  if (leadingMon[indexX] != 3) {
+  if (leadingMonomial[indexX] != 3) {
     MathRoutines::swap(indexX, indexY);
   }
   Expression xE = xDefE[1];

@@ -689,7 +689,7 @@ bool Calculator::innerPrintB3G2branchingIntermediate(
             theG2B3Data.theShapovalovProducts[eigenIndexcounter].GetNumerator(tempP);
             tempP.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
             latexTable2 << "$\\begin{array}{l}" << tempP.ToString(&theG2B3Data.theFormat) << "\\end{array}$ & ";
-            if (tempP.FindOneVarRatRoots(tempList)) {
+            if (tempP.FindOneVariableRationalRoots(tempList)) {
               tempList2.AddOnTopNoRepetition(tempList);
               out << "<td>Rational roots: " << tempList.ToString() << "</td>";
               latexTable2 << tempList2.ToString();

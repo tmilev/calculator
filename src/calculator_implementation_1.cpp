@@ -169,13 +169,13 @@ bool Calculator::innerGCDOrLCMPoly(
   )) {
     return output.MakeError("Failed to extract a list of 2 polynomials. ", theCommands);
   }
-  Polynomial<Rational> outputP;
+  Polynomial<Rational> outputPolynomial;
   if (doGCD) {
-    RationalFunctionOld::gcd(thePolys[0], thePolys[1], outputP);
+    RationalFunctionOld::gcd(thePolys[0], thePolys[1], outputPolynomial);
   } else {
-    RationalFunctionOld::lcm(thePolys[0], thePolys[1], outputP);
+    RationalFunctionOld::lcm(thePolys[0], thePolys[1], outputPolynomial);
   }
-  return output.AssignValueWithContext(outputP, theContext, theCommands);
+  return output.AssignValueWithContext(outputPolynomial, theContext, theCommands);
 }
 
 bool Calculator::GetListPolynomialVariableLabelsLexicographic(

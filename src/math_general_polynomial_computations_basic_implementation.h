@@ -384,70 +384,70 @@ template <class coefficient>
 void Polynomial<coefficient>::DivideBy(
   const Polynomial<coefficient>& inputDivisor,
   Polynomial<coefficient>& outputQuotient,
-  Polynomial<coefficient>& outputRemainder
+  Polynomial<coefficient>& outputRemainder,
+  List<MonomialP>::OrderLeftGreaterThanRight monomialOrder
 ) const {
   MacroRegisterFunctionWithName("Polynomial::DivideBy");
+  if (monomialOrder == nullptr) {
+    global.fatal << "Non-initialized monomial pointer not allowed. " << global.fatal;
+  }
+  if (inputDivisor.IsEqualToZero()) {
+    global.fatal << "Division by zero polynomial. " << global.fatal;
+  }
   if (
     &outputRemainder == this ||
     &outputQuotient == this ||
     &outputRemainder == &inputDivisor ||
     &outputQuotient == &inputDivisor
   ) {
-    Polynomial<coefficient> newQuot, newRemaind;
-    this->DivideBy(inputDivisor, newQuot, newRemaind);
-    outputQuotient = newQuot;
-    outputRemainder = newRemaind;
+    Polynomial<coefficient> newQuotient, newRemainder;
+    this->DivideBy(inputDivisor, newQuotient, newRemainder, monomialOrder);
+    outputQuotient = newQuotient;
+    outputRemainder = newRemainder;
     return;
   }
   outputRemainder = *this;
-  MonomialP scaleRemainder;
-  MonomialP scaleInput;
-  Polynomial tempInput;
-  tempInput = inputDivisor;
+  MonomialP scaleRemainder, scaleInput;
+  Polynomial<coefficient> divisorShiftedExponents = inputDivisor;
   outputRemainder.ScaleToPositiveMonomials(scaleRemainder);
-  tempInput.ScaleToPositiveMonomials(scaleInput);
-  int remainderMaxMonomial = outputRemainder.IndexMaximumMonomial_rightToLeft_firstGEQ() ;
-  int inputMaxMonomial = tempInput.IndexMaximumMonomial_rightToLeft_firstGEQ();
+  divisorShiftedExponents.ScaleToPositiveMonomials(scaleInput);
+  MonomialP remainderLeadingMonomial;
+  coefficient remainderLeadingCoefficient;
+  int remainderLeadingIndex = outputRemainder.GetIndexMaximalMonomial(
+    &remainderLeadingMonomial, &remainderLeadingCoefficient, monomialOrder
+  );
+  global.Comments << "DEBUG: remainderMaxMonomial: "
+  << remainderLeadingMonomial.ToString() << "<br>";
+  MonomialP leadingMonomialShiftedDivisor;
+  coefficient leadingCoefficientShiftedDivisor;
+  divisorShiftedExponents.GetIndexMaximalMonomial(
+    &leadingMonomialShiftedDivisor, &leadingCoefficientShiftedDivisor, monomialOrder
+  );
   outputQuotient.MakeZero();
-  if (remainderMaxMonomial == - 1) {
+  if (remainderLeadingIndex == - 1) {
     return;
   }
   outputQuotient.SetExpectedSize(this->size());
-  MonomialP tempMon;
-  int numVars = MathRoutines::Maximum(this->GetMinNumVars(), inputDivisor.GetMinNumVars());
-  tempMon.MakeOne(numVars);
-  Polynomial<coefficient> tempP;
-  tempP.SetExpectedSize(this->size());
-  //if (this->flagAnErrorHasOccuredTimeToPanic)
-  //{ this->ComputeDebugString();
-   // tempInput.ComputeDebugString();
-  //}
-  if (remainderMaxMonomial >= outputRemainder.size()) {
-    global.fatal << "Remainder max monomial too large. " << global.fatal;
-  }
-  if (inputMaxMonomial >= tempInput.size() || inputMaxMonomial < 0) {
-    global.fatal << "This is a programming error: the index of the maximal input monomial is "
-    << inputMaxMonomial << " while the polynomial has "
-    << tempInput.size() << "  monomials. I am attempting to divide "
-    << this->ToString() << " by " << inputDivisor.ToString() << ". " << global.fatal;
-  }
-  while (outputRemainder[remainderMaxMonomial].IsGEQ_rightToLeft_firstGEQ(tempInput[inputMaxMonomial])) {
-    if (remainderMaxMonomial >= outputRemainder.size()) {
-      global.fatal << "Remainder max monomial too large. " << global.fatal;
-    }
-    tempMon = outputRemainder[remainderMaxMonomial];
-    tempMon /= tempInput[inputMaxMonomial];
-    if (!tempMon.HasPositiveOrZeroExponents()) {
+  MonomialP quotientMonomial;
+  Polynomial<coefficient> subtracand;
+  subtracand.SetExpectedSize(this->size());
+  while (monomialOrder(remainderLeadingMonomial, leadingMonomialShiftedDivisor)) {
+    global.Comments << "DEBUG: max monomial remainder: " << remainderLeadingMonomial.ToString() << "<br>";
+    quotientMonomial = remainderLeadingMonomial;
+    quotientMonomial /= leadingMonomialShiftedDivisor;
+    if (!quotientMonomial.HasPositiveOrZeroExponents()) {
       break;
     }
-    coefficient tempCoeff = outputRemainder.coefficients[remainderMaxMonomial];
-    tempCoeff /= tempInput.coefficients[inputMaxMonomial] ;
-    outputQuotient.AddMonomial(tempMon, tempCoeff);
-    tempP = tempInput;
-    tempP.MultiplyBy(tempMon, tempCoeff);
-    outputRemainder -= tempP;
-    remainderMaxMonomial = outputRemainder.IndexMaximumMonomial_rightToLeft_firstGEQ();
-    if (remainderMaxMonomial == - 1) {
+    coefficient quotientCoefficient = remainderLeadingCoefficient;
+    quotientCoefficient /= leadingCoefficientShiftedDivisor;
+    outputQuotient.AddMonomial(quotientMonomial, quotientCoefficient);
+    subtracand = divisorShiftedExponents;
+    subtracand.MultiplyBy(quotientMonomial, quotientCoefficient);
+    outputRemainder -= subtracand;
+    int remainderIndex = outputRemainder.GetIndexMaximalMonomial(
+      &remainderLeadingMonomial, &remainderLeadingCoefficient, monomialOrder
+    );
+    if (remainderIndex == - 1) {
       break;
     }
   }
@@ -573,8 +573,9 @@ void Polynomial<coefficient>::GetCoeffInFrontOfLinearTermVariableIndex(int index
 }
 
 template<class coefficient>
-bool Polynomial<coefficient>::FindOneVarRatRoots(List<Rational>& output) {
+bool Polynomial<coefficient>::FindOneVariableRationalRoots(List<Rational>& output) {
   MacroRegisterFunctionWithName("Polynomial::FindOneVarRatRoots");
+  List<MonomialP>::OrderLeftGreaterThanRight monomialOrder = MonomialP::orderDefault();
   if (this->GetMinNumVars() > 1) {
     return false;
   }
@@ -585,14 +586,14 @@ bool Polynomial<coefficient>::FindOneVarRatRoots(List<Rational>& output) {
   Polynomial<coefficient> myCopy;
   myCopy = *this;
   myCopy.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
-  Rational lowestTerm, highestTerm;
+  Rational lowestTerm, highestCoefficient;
   this->GetConstantTerm(lowestTerm);
   if (lowestTerm == 0) {
     Polynomial<Rational> x1, tempP;
     x1.MakeMonomiaL(0, 1, 1);
-    myCopy.DivideBy(x1, myCopy, tempP);
+    myCopy.DivideBy(x1, myCopy, tempP, monomialOrder);
     List<Rational> tempList;
-    bool result = myCopy.FindOneVarRatRoots(tempList);
+    bool result = myCopy.FindOneVariableRationalRoots(tempList);
     output.AddOnTop(0);
     output.AddListOnTop(tempList);
     return result;
@@ -600,9 +601,8 @@ bool Polynomial<coefficient>::FindOneVarRatRoots(List<Rational>& output) {
   if (this->IsConstant()) {
     return true;
   }
-  int indexHighest = this->IndexMaximumMonomial_rightToLeft_firstGEQ();
-  highestTerm = this->coefficients[indexHighest];
-  if (!highestTerm.IsSmallInteger() || !lowestTerm.IsSmallInteger()) {
+  highestCoefficient = this->GetCoefficientMaximalMonomial(monomialOrder);
+  if (!highestCoefficient.IsSmallInteger() || !lowestTerm.IsSmallInteger()) {
     return false;
   }
   Vector<Rational> tempV;
@@ -610,7 +610,7 @@ bool Polynomial<coefficient>::FindOneVarRatRoots(List<Rational>& output) {
   tempV.SetSize(1);
   List<int> divisorsH, divisorsS;
   LargeInteger hT, lT;
-  hT = highestTerm.GetNumerator();
+  hT = highestCoefficient.GetNumerator();
   lT = lowestTerm.GetNumerator();
   if (!hT.GetDivisors(divisorsH, false) || !lT.GetDivisors(divisorsS, true)) {
     return false;
@@ -622,10 +622,10 @@ bool Polynomial<coefficient>::FindOneVarRatRoots(List<Rational>& output) {
       if (val == 0) {
         Polynomial<Rational> divisor, tempP;
         divisor.MakeDegreeOne(1, 0, 1, - tempV[0]);
-        myCopy.DivideBy(divisor, myCopy, tempP);
+        myCopy.DivideBy(divisor, myCopy, tempP, monomialOrder);
         output.AddOnTop(tempV[0]);
         List<Rational> tempList;
-        bool result = myCopy.FindOneVarRatRoots(tempList);
+        bool result = myCopy.FindOneVariableRationalRoots(tempList);
         output.AddListOnTop(tempList);
         return result;
       }
@@ -635,8 +635,7 @@ bool Polynomial<coefficient>::FindOneVarRatRoots(List<Rational>& output) {
 }
 
 template <class coefficient>
-bool Polynomial<coefficient>::
-FactorMeOutputIsADivisor(Polynomial<Rational>& output, std::stringstream* comments) {
+bool Polynomial<coefficient>::FactorMeOutputIsADivisor(Polynomial<Rational>& output, std::stringstream* comments) {
   MacroRegisterFunctionWithName("Polynomial_CoefficientType::FactorMeOutputIsADivisor");
   if (this->GetMinNumVars() > 1) {
     return false;
@@ -747,7 +746,7 @@ FactorMeOutputIsADivisor(Polynomial<Rational>& output, std::stringstream* commen
         continue;
       }
       output.Interpolate(Vector<Rational>(PointsOfInterpolationLeft), Vector<Rational>(theValuesAtPointsLeft));
-      this->DivideBy(output, quotient, remainder);
+      this->DivideBy(output, quotient, remainder, MonomialP::orderDefault());
       if (!remainder.IsEqualToZero()) {
         continue;
       }
@@ -770,7 +769,8 @@ bool PolynomialOrder<coefficient>::CompareLeftGreaterThanRight(
   if (difference.IsEqualToZero()) {
     return false;
   }
-  if (difference.coefficients[difference.GetIndexMaxMonomial(this->theMonOrder)] > 0) {
+  coefficient leading = difference.GetCoefficientMaximalMonomial(this->theMonOrder);
+  if (leading > 0) {
     return true;
   }
   return false;

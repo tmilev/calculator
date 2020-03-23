@@ -1678,27 +1678,28 @@ bool IntegralRFComputation::PreparePFExpressionSummands() {
   currentDen, currentPFnoCoeff, currentPFWithCoeff,
   coeffE;
   this->thePFSummands.SetSize(0);
-  Polynomial<AlgebraicNumber> denRescaled, numRescaled;
+  Polynomial<AlgebraicNumber> denominatorRescaled, numeratorRescaled;
   AlgebraicNumber currentCoefficient, numScale;
+  List<MonomialP>::OrderLeftGreaterThanRight monomialOrder = MonomialP::orderDefault();
   for (int i = 0; i < this->theNumerators.size; i ++) {
     for (int j = 0; j < this->theNumerators[i].size; j ++) {
       if (this->theNumerators[i][j].IsEqualToZero()) {
         continue;
       }
-      denRescaled = this->theDenominatorFactorsWithMults[i];
-      numRescaled = this->theNumerators[i][j];
-      currentCoefficient = denRescaled.coefficients[denRescaled.GetIndexMaxMonomial()];
+      denominatorRescaled = this->theDenominatorFactorsWithMults[i];
+      numeratorRescaled = this->theNumerators[i][j];
+      denominatorRescaled.GetIndexMaximalMonomial(nullptr, &currentCoefficient, monomialOrder);
       currentCoefficient.Invert();
-      denRescaled *= currentCoefficient;
+      denominatorRescaled *= currentCoefficient;
       MathRoutines::RaiseToPower(currentCoefficient, j + 1, AlgebraicNumber(1));
-      numScale = numRescaled.coefficients[numRescaled.GetIndexMaxMonomial()];
-      numRescaled /= numScale;
+      numeratorRescaled.GetIndexMaximalMonomial(nullptr, &numScale, monomialOrder);
+      numeratorRescaled /= numScale;
       currentCoefficient *= numScale;
-      polyE.AssignValueWithContext(numRescaled, this->contextE, *this->owner);
+      polyE.AssignValueWithContext(numeratorRescaled, this->contextE, *this->owner);
       if (!CalculatorConversions::functionExpressionFromBuiltInType(*this->owner, polyE, currentNum)) {
         return false;
       }
-      polyE.AssignValueWithContext(denRescaled, this->contextE, *this->owner);
+      polyE.AssignValueWithContext(denominatorRescaled, this->contextE, *this->owner);
       if (!CalculatorConversions::functionExpressionFromBuiltInType(*this->owner, polyE, currentDenNoPowerMonic)) {
         return false;
       }
@@ -1749,6 +1750,7 @@ bool IntegralRFComputation::IntegrateRF() {
   this->theIntegralSummands.SetSize(0);
   Polynomial<AlgebraicNumber> denRescaled, numRescaled;
   AlgebraicNumber currentCoefficient, numScale;
+  List<MonomialP>::OrderLeftGreaterThanRight monomialOrder = MonomialP::orderDefault();
   for (int i = 0; i < this->theNumerators.size; i ++) {
     for (int j = 0; j < this->theNumerators[i].size; j ++) {
       if (this->theNumerators[i][j].IsEqualToZero()) {
@@ -1756,11 +1758,11 @@ bool IntegralRFComputation::IntegrateRF() {
       }
       denRescaled = this->theDenominatorFactorsWithMults[i];
       numRescaled = this->theNumerators[i][j];
-      currentCoefficient = denRescaled.coefficients[denRescaled.GetIndexMaxMonomial()];
+      currentCoefficient = denRescaled.GetCoefficientMaximalMonomial(monomialOrder);
       currentCoefficient.Invert();
       denRescaled *= currentCoefficient;
       MathRoutines::RaiseToPower(currentCoefficient, j + 1, AlgebraicNumber(1));
-      numScale = numRescaled.coefficients[numRescaled.GetIndexMaxMonomial()];
+      numScale = numRescaled.GetCoefficientMaximalMonomial(monomialOrder);
       numRescaled /= numScale;
       currentCoefficient *= numScale;
       polyE.AssignValueWithContext(numRescaled, this->contextE, *this->owner);
@@ -2042,7 +2044,6 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
   MacroRegisterFunctionWithName("IntegralRFComputation::ComputePartialFractionDecomposition");
   this->CheckConsistency();
   this->contextE = this->inpuTE.GetContext();
-
   this->contextE.ContextGetFormatExpressions(this->currentFormaT);
   if (
     this->theRF.GetMinNumVars() < 1 ||
@@ -2079,14 +2080,23 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
     this->printoutPFsHtml << "There were factors (over the rationals) of degree greater than 2. I surrender. ";
     return false;
   }
+  List<MonomialP>::OrderLeftGreaterThanRight monomialOrder = MonomialP::orderDefault();
   this->currentFormaT.flagUseFrac = true;
-  this->theNum.DivideBy(this->theDen, this->quotientRat, this->remainderRat);
+  this->theNum.DivideBy(
+    this->theDen,
+    this->quotientRat,
+    this->remainderRat,
+    monomialOrder
+  );
   needPolyDivision = !this->quotientRat.IsEqualToZero();
   if (needPolyDivision) {
     this->printoutPFsHtml << "<br>The numerator "
     << HtmlRoutines::GetMathSpanPure(this->theNum.ToString(&this->currentFormaT))
-    << " divided by the denominator " << HtmlRoutines::GetMathSpanPure(theDen.ToString(&this->currentFormaT)) << " yields "
-    << HtmlRoutines::GetMathSpanPure(this->quotientRat.ToString(&this->currentFormaT)) << " with remainder "
+    << " divided by the denominator "
+    << HtmlRoutines::GetMathSpanPure(theDen.ToString(&this->currentFormaT))
+    << " yields "
+    << HtmlRoutines::GetMathSpanPure(this->quotientRat.ToString(&this->currentFormaT))
+    << " with remainder "
     << HtmlRoutines::GetMathSpanPure(this->remainderRat.ToString(&this->currentFormaT)) << ". ";
     GroebnerBasisComputation<Rational> theGB;
     theGB.flagDoLogDivision = true;
@@ -2094,7 +2104,7 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
     theGB.theBasiS.SetSize(1);
     theGB.theBasiS[0] = this->theDen;
     theGB.theFormat = this->currentFormaT;
-    theGB.thePolynomialOrder.theMonOrder = MonomialP::Left_greaterThan_totalDegree_rightToLeft_firstSmaller;
+    theGB.thePolynomialOrder.theMonOrder = monomialOrder;
     theGB.initForDivisionAlone(theGB.theBasiS);
     Polynomial<Rational> theNumCopy = this->theNum;
     theGB.RemainderDivisionWithRespectToBasis(theNumCopy, &theGB.remainderDivision, - 1);
@@ -2131,9 +2141,14 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
     }
     AlgebraicNumber theDiscriminantSqrt;
     if (!theDiscriminantSqrt.AssignRationalQuadraticRadical(
-      theDiscriminant, this->owner->theObjectContainer.theAlgebraicClosure, &this->printoutPFsHtml
+      theDiscriminant,
+      this->owner->theObjectContainer.theAlgebraicClosure,
+      &this->printoutPFsHtml
     )) {
-      this->printoutPFsHtml << "Failed to take radical of " << theDiscriminant.ToString() << " (radical too large?).";
+      this->printoutPFsHtml
+      << "Failed to take radical of "
+      << theDiscriminant.ToString()
+      << " (radical too large?).";
       return false;
     }
     theDiscriminantSqrt.CheckConsistency();
@@ -2150,8 +2165,11 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
     additionalMultiple *= a;
   }
   this->theDenominatorFactorsWithMults.QuickSortAscending();
-  this->printoutPFsHtml << "<br><br>I need to find " << HtmlRoutines::GetMathSpanPure("A_i") << "'s so that I have the equality of rational functions: ";
-  this->printoutPFsLatex << "We need to find $A_i$'s so that we have the following equality of rational functions. ";
+  this->printoutPFsHtml << "<br><br>I need to find "
+  << HtmlRoutines::GetMathSpanPure("A_i")
+  << "'s so that I have the equality of rational functions: ";
+  this->printoutPFsLatex
+  << "We need to find $A_i$'s so that we have the following equality of rational functions. ";
   this->PrepareNumerators();
   this->PrepareFormatExpressions();
   this->printoutPFsHtml << HtmlRoutines::GetMathSpanPure(this->stringRationalFunctionLatex, - 1);

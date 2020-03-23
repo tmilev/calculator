@@ -469,7 +469,7 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator(
         currentShift, j + varShift, oneIndexContribution, negativeExponentDenominatorContribution
       );
       exponentContribution *= oneIndexContribution;
-      theCoeff.DivideBy(negativeExponentDenominatorContribution, theCoeff, tempP1);
+      theCoeff.DivideBy(negativeExponentDenominatorContribution, theCoeff, tempP1, MonomialP::orderDefault());
       if (!tempP1.IsEqualToZero()) {
         global.fatal << "This is a mathematical error! "
         << "Something is very wrong with embedding semisimple Lie algebras in Weyl algebras. "

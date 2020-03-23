@@ -413,6 +413,8 @@ public:
     return - 1;
   }
 
+  static List<MonomialP>::OrderLeftGreaterThanRight orderDefault();
+  static List<MonomialP>::OrderLeftGreaterThanRight orderForGCD();
 
   // "Reverse lexicographic" order.
   bool IsGEQpartialOrder(MonomialP& m);
@@ -2105,27 +2107,45 @@ public:
       }
     }
   }
-  void GetMaxMonomial(templateMonomial& outputMon, coefficient& outputCF) const {
-    if (this->IsEqualToZero()) {
-      global.fatal << "This is a programming error: calling GetMinMon "
-      << "on a zero monomial collection is forbidden. " << global.fatal;
+
+  coefficient GetCoefficientMaximalMonomial(typename List<templateMonomial>::OrderLeftGreaterThanRight monomialOrder) {
+    coefficient result;
+    this->GetIndexMaximalMonomial(nullptr, &result, monomialOrder);
+    return result;
+  }
+
+  templateMonomial GetMaximalMonomial(typename List<templateMonomial>::OrderLeftGreaterThanRight monomialOrder) {
+    templateMonomial result;
+    this->GetIndexMaximalMonomial(&result, nullptr, monomialOrder);
+    return result;
+  }
+
+  int GetIndexMaximalMonomial(
+    templateMonomial* outputMonomial,
+    coefficient* outputCoefficient,
+    typename List<templateMonomial>::OrderLeftGreaterThanRight monomialOrder = nullptr
+  ) const {
+    if (this->size() == 0) {
+      return - 1;
     }
-    outputMon = (*this)[0];
-    outputCF = this->coefficients[0];
+    int result = 0;
     for (int i = 1; i < this->size(); i ++) {
-      if ((*this)[i] > outputMon) {
-        outputMon = (*this)[i];
-        outputCF = this->coefficients[i];
+      if (monomialOrder != nullptr) {
+        if (monomialOrder((*this)[i], this->theMonomials[result])) {
+          result = i;
+        }
+      } else {
+        if ((*this)[i] > this->theMonomials[result]) {
+          result = i;
+        }
       }
     }
-  }
-  coefficient GetLeadingCoefficient() const {
-    if (this->IsEqualToZero()) {
-      return 0;
+    if (outputMonomial != nullptr) {
+      *outputMonomial = this->theMonomials[result];
     }
-    templateMonomial tempM;
-    coefficient result;
-    this->GetMaxMonomial(tempM, result);
+    if (outputCoefficient != nullptr) {
+      *outputCoefficient = this->coefficients[result];
+    }
     return result;
   }
   bool CleanupMonIndex(int theIndex) {
@@ -2364,7 +2384,7 @@ public:
   }
   Rational ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedByLeadingCoefficientPositive() {
     Rational result = this->ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
-    if (this->GetLeadingCoefficient() < 0) {
+    if (this->GetCoefficientMaximalMonomial(nullptr) < 0) {
       (*this) *= - 1;
       result *= - 1;
     }
@@ -2716,7 +2736,7 @@ public:
   ) const;
   bool FactorMe(List<Polynomial<Rational> >& outputFactors, std::stringstream* comments) const;
   void Interpolate(const Vector<coefficient>& thePoints, const Vector<coefficient>& ValuesAtThePoints);
-  bool FindOneVarRatRoots(List<Rational>& output);
+  bool FindOneVariableRationalRoots(List<Rational>& output);
   coefficient GetDiscriminant();
   void GetCoeffInFrontOfLinearTermVariableIndex(int index, coefficient& output);
   void MakeMonomiaL(int LetterIndex, const Rational& Power, const coefficient& Coeff = 1, int ExpectedNumVars = 0) {
@@ -2789,7 +2809,8 @@ public:
       return 1;
     }
     Rational result = this->ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
-    if (this->coefficients[this->IndexMaximumMonomial_rightToLeft_firstGEQ()].IsNegative()) {
+    int indexMaximalMonomial = this->GetIndexMaximalMonomial(nullptr, nullptr, MonomialP::orderDefault());
+    if (this->coefficients[indexMaximalMonomial].IsNegative()) {
       *this *= - 1;
       result *= - 1;
     }
@@ -2804,10 +2825,10 @@ public:
   ) const;
   void ScaleToIntegralNoGCDCoeffs();
   void TimesInteger(int a);
-  void DivideBy(
-    const Polynomial<coefficient>& inputDivisor,
+  void DivideBy(const Polynomial<coefficient>& inputDivisor,
     Polynomial<coefficient>& outputQuotient,
-    Polynomial<coefficient>& outputRemainder
+    Polynomial<coefficient>& outputRemainder,
+    List<MonomialP>::OrderLeftGreaterThanRight monomialOrder
   ) const;
   void DivideByConstant(const coefficient& r);
   void AddConstant(const coefficient& theConst) {
@@ -2934,30 +2955,6 @@ public:
     const Polynomial<coefficient>& other, coefficient& TimesMeEqualsOther, const coefficient& theRingUnit
   ) const;
   void DrawElement(DrawElementInputOutput& theDrawData, FormatExpressions& PolyFormatLocal);
-  const MonomialP& GetMaxMonomial(List<MonomialP>::OrderLeftGreaterThanRight theMonOrder = nullptr) const {
-    return (*this)[this->GetIndexMaxMonomial(theMonOrder)];
-  }
-  int GetIndexMaxMonomial(List<MonomialP>::OrderLeftGreaterThanRight theMonOrder = nullptr) const {
-    if (this->size() == 0) {
-      return - 1;
-    }
-    int result = 0;
-    for (int i = 1; i < this->size(); i ++) {
-      if (theMonOrder != nullptr) {
-        if (theMonOrder((*this)[i], (*this)[result])) {
-          result = i;
-        }
-      } else {
-        if ((*this)[i] > (*this)[result]) {
-          result = i;
-        }
-      }
-    }
-    return result;
-  }
-  int IndexMaximumMonomial_rightToLeft_firstGEQ() const {
-    return this->GetIndexMaxMonomial(MonomialP::Left_greaterThan_leftToRight_firstGEQ);
-  }
 
   int IndexMaximumMonomial_rightToLeft_firstLEQ() const {
     return this->GetIndexMaxMonomial(MonomialP::Left_greaterThan_rightToLeft_firstLEQ);
@@ -3006,12 +3003,14 @@ public:
     if (this->TotalDegree() < other.TotalDegree()) {
       return false;
     }
-    int thisMaxMonIndex = this->IndexMaximumMonomial_rightToLeft_firstGEQ();
-    int otherMaxMonIndex = other.IndexMaximumMonomial_rightToLeft_firstGEQ();
-    if ((*this)[thisMaxMonIndex] > other[otherMaxMonIndex]) {
+    MonomialP thisMaximalMonomial, otherMaximalMonomial;
+    List<MonomialP>::OrderLeftGreaterThanRight monomialOrder = MonomialP::orderDefault();
+    int thisMaxMonIndex = this->GetIndexMaximalMonomial(&thisMaximalMonomial, nullptr, monomialOrder);
+    int otherMaxMonIndex = other.GetIndexMaximalMonomial(&otherMaximalMonomial, nullptr, monomialOrder);
+    if (thisMaximalMonomial > otherMaximalMonomial) {
       return true;
     }
-    if (other[otherMaxMonIndex] > (*this)[thisMaxMonIndex]) {
+    if (otherMaximalMonomial > thisMaximalMonomial) {
       return false;
     }
     if (this->coefficients[thisMaxMonIndex] > other.coefficients[otherMaxMonIndex]) {
@@ -3081,13 +3080,13 @@ public:
   Polynomial<coefficient> operator%(const Polynomial<coefficient>& other) {
     Polynomial<coefficient> temp;
     Polynomial<coefficient> result;
-    this->DivideBy(other, temp, result);
+    this->DivideBy(other, temp, result, MonomialP::orderDefault());
     return result;
   }
   void operator/=(const Polynomial<coefficient>& other) {
     Polynomial<coefficient> tempMe = *this;
     Polynomial<coefficient> tempRemainder;
-    tempMe.DivideBy(other, *this, tempRemainder);
+    tempMe.DivideBy(other, *this, tempRemainder, MonomialP::orderDefault());
   }
   void operator/=(int other) {
     this->::LinearCombination<MonomialP, coefficient>::operator/= (other);
@@ -3415,7 +3414,7 @@ class GroebnerBasisComputation {
   );
   bool AddRemainderToBasis();
   bool GetOneVarPolySolution(const Polynomial<coefficient>& thePoly, coefficient& outputSolution);
-   //Criterion from Cox, Little, O'Shea:
+   // Criterion from Cox, Little, O'Shea:
   static bool CriterionCLOsh(
     HashedListSpecialized<Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignIdentity> >& thePairs,
     List<MonomialP>& theLeadingMons,
@@ -3494,7 +3493,7 @@ public:
     }
     return false;
   }
-  bool FindOneVarRatRoots(List<Rational>& output);
+  bool FindOneVariableRationalRoots(List<Rational>& output);
   Rational GetDenominatorRationalPart() {
     Polynomial<Rational> Num;
     this->GetNumerator(Num);
@@ -3709,13 +3708,16 @@ public:
     List<Polynomial<Rational> >& outputRelations,
     std::stringstream& comments
   );
-  static bool gcdQuicK(
+  static bool gcdQuick(
     const Polynomial<Rational>& left, const Polynomial<Rational>& right, Polynomial<Rational>& output
   );
   static void ScaleClearDenominator(List<RationalFunctionOld>& input, Vector<Polynomial<Rational> >& output);
   static void gcd(const Polynomial<Rational>& left, const Polynomial<Rational>& right, Polynomial<Rational>& output);
-  static void lcm(const Polynomial<Rational>& left, const Polynomial<Rational>& right,
-  Polynomial<Rational>& output);
+  static void lcm(
+    const Polynomial<Rational>& left,
+    const Polynomial<Rational>& right,
+    Polynomial<Rational>& output
+  );
   void operator-=(int other) {
     *this -= static_cast<Rational>(other);
   }

@@ -66,12 +66,14 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasis(List
       return this->WrapUpGroebnerOnExceedingComputationLimit(inputOutpuT);
     }
   }
-//  this->flagBasisGuaranteedToGenerateIdeal = true;
+  //this->flagBasisGuaranteedToGenerateIdeal = true;
   if (this->theBasiS.size == 1) {
     return this->WrapUpOnGroebnerBasisSuccess(inputOutpuT);
   }
   bool changed = true;
   int SpolyDepth = 0;
+  MonomialP leftHighestMonomial, rightHighestMonomial;
+  coefficient leftHighestCoefficient, rightHighestCoefficient;
   while (changed) {
     SpolyDepth ++;
     changed = false;
@@ -79,19 +81,25 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasis(List
       for (int j = i + 1; j < this->theBasiS.size && i < this->theBasiS.size; j ++) {
         Polynomial<coefficient>& currentLeft = this->theBasiS[i];
         Polynomial<coefficient>& currentRight = this->theBasiS[j];
-        int leftIndex = currentLeft.GetIndexMaxMonomial(this->thePolynomialOrder.theMonOrder);
-        int rightIndex = currentRight.GetIndexMaxMonomial(this->thePolynomialOrder.theMonOrder);
-        const MonomialP& leftHighestMon = currentLeft[leftIndex];
-        const MonomialP& rightHighestMon = currentRight[rightIndex];
-        int numVars = MathRoutines::Maximum(leftHighestMon.GetMinNumVars(), rightHighestMon.GetMinNumVars());
+        currentLeft.GetIndexMaximalMonomial(
+          &leftHighestMonomial,
+          &leftHighestCoefficient,
+          this->thePolynomialOrder.theMonOrder
+        );
+        currentRight.GetIndexMaximalMonomial(
+          &rightHighestMonomial,
+          &rightHighestCoefficient,
+          this->thePolynomialOrder.theMonOrder
+        );
+        int numVars = MathRoutines::Maximum(leftHighestMonomial.GetMinNumVars(), rightHighestMonomial.GetMinNumVars());
         this->SoPolyLeftShift.MakeOne(numVars);
         this->SoPolyRightShift.MakeOne(numVars);
         for (int k = 0; k < numVars; k ++) {
-          if (leftHighestMon(k) > rightHighestMon(k)) {
-            this->SoPolyRightShift[k] = leftHighestMon(k) - rightHighestMon(k);
+          if (leftHighestMonomial(k) > rightHighestMonomial(k)) {
+            this->SoPolyRightShift[k] = leftHighestMonomial(k) - rightHighestMonomial(k);
             this->SoPolyLeftShift[k] = 0;
           } else {
-            this->SoPolyLeftShift[k] = rightHighestMon(k) - leftHighestMon(k);
+            this->SoPolyLeftShift[k] = leftHighestMonomial(k) - rightHighestMonomial(k);
             this->SoPolyRightShift[k] = 0;
           }
         }
@@ -105,17 +113,10 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasis(List
           theReport2.Report(reportStream.str());
         }
         this->bufPoly = currentLeft;
-        this->bufPoly.MultiplyBy(this->SoPolyLeftShift, currentRight.coefficients[rightIndex]);
+        this->bufPoly.MultiplyBy(this->SoPolyLeftShift, rightHighestCoefficient);
         this->SoPolyBuf= currentRight;
-        this->SoPolyBuf.MultiplyBy(this->SoPolyRightShift, currentLeft.coefficients[leftIndex]);
+        this->SoPolyBuf.MultiplyBy(this->SoPolyRightShift, leftHighestCoefficient);
         this->SoPolyBuf -= this->bufPoly;
-//        this->RemainderDivisionWithRespectToBasis
-//        (this->SoPolyBuf, &this->remainderDivision, global, i);
-        //if (!this->remainderDivision.IsEqualToZero())
-        //  this->basisCandidates.AddOnTop(this->remainderDivision);
-        //if (this->basisCandidates.size >this->theBasiS.size)
-        //  if (this->AddPolysAndReduceBasis(global))
-        //    changed = true;
         this->basisCandidates.AddOnTop(this->SoPolyBuf);
         this->NumberGBComputations ++;
         if (this->MaxNumGBComputations > 0) {
@@ -123,11 +124,6 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasis(List
             return this->WrapUpGroebnerOnExceedingComputationLimit(inputOutpuT);
           }
         }
-//        if (this->AddPolyAndReduceBasis(global))
-//        { i = 0;
-//          j = - 1;
-//          changed = true;
-//        }
       }
     }
     if (this->AddPolysAndReduceBasis()) {
@@ -160,15 +156,16 @@ template <class coefficient>
 int GroebnerBasisComputation<coefficient>::SelectPolyIndexToAddNext() {
   MacroRegisterFunctionWithName("GroebnerBasisComputation::SelectPolyIndexToAddNext");
   int result = this->basisCandidates.size - 1;
+  MonomialP left, right;
   for (int i = this->basisCandidates.size - 2; i >= 0; i --) {
     if (this->basisCandidates[result].size() > this->basisCandidates[i].size()) {
       result = i;
     } else if (
       this->basisCandidates[result].size() == this->basisCandidates[i].size()) {
-      if (this->basisCandidates[i].GetMaxMonomial(this->thePolynomialOrder.theMonOrder) >
-        this->basisCandidates[result].GetMaxMonomial(this->thePolynomialOrder.theMonOrder)
-      ) {
-          result = i;
+      left = this->basisCandidates[i].GetMaximalMonomial(this->thePolynomialOrder.theMonOrder);
+      right = this->basisCandidates[result].GetMaximalMonomial(this->thePolynomialOrder.theMonOrder);
+      if (left > right) {
+        result = i;
       }
     }
   }
@@ -479,9 +476,11 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis(
   while (!currentRemainder.IsEqualToZero()) {
     bool divisionOcurred = false;
     int i = 0;
-    int indexLeadingMonRemainder = currentRemainder.GetIndexMaxMonomial(this->thePolynomialOrder.theMonOrder);
-    leadingMonCoeff = currentRemainder.coefficients[indexLeadingMonRemainder];
-    highestMonCurrentDivHighestMonOther = currentRemainder[indexLeadingMonRemainder];
+    int indexLeadingMonRemainder = currentRemainder.GetIndexMaximalMonomial(
+      &highestMonCurrentDivHighestMonOther,
+      &leadingMonCoeff,
+      this->thePolynomialOrder.theMonOrder
+    );
     while (i < this->theBasiS.size && !divisionOcurred) {
       MonomialP& highestMonBasis = this->leadingMons[i];
       bool shouldDivide = (i == basisIndexToIgnore) ? false : highestMonCurrentDivHighestMonOther.IsDivisibleBy(highestMonBasis);
@@ -602,18 +601,26 @@ bool GroebnerBasisComputation<coefficient>::AddRemainderToBasis() {
     return false;
   }
   this->remainderDivision.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
-  int indexMaxMon = this->remainderDivision.GetIndexMaxMonomial(this->thePolynomialOrder.theMonOrder);
-  const MonomialP& theNewLeadingMon = this->remainderDivision[indexMaxMon];
+  MonomialP theNewLeadingMon;
+  coefficient remainderLeadingCoefficient;
+  this->remainderDivision.GetIndexMaximalMonomial(
+    &theNewLeadingMon,
+    &remainderLeadingCoefficient,
+    this->thePolynomialOrder.theMonOrder
+  );
   if (this->flagDoSortBasis) {
     this->theBasiS.SetSize(this->theBasiS.size + 1);
     this->leadingMons.SetSize(this->theBasiS.size);
     this->leadingCoeffs.SetSize(this->theBasiS.size);
     for (int i = theBasiS.size - 1; i >= 0; i --) {
-      bool shouldAddHere = (i == 0) ? true: theNewLeadingMon > this->theBasiS[i - 1].GetMaxMonomial(this->thePolynomialOrder.theMonOrder);
+      bool shouldAddHere = true;
+      if (i > 0) {
+        shouldAddHere = (theNewLeadingMon > this->theBasiS[i - 1].GetMaximalMonomial(this->thePolynomialOrder.theMonOrder));
+      }
       if (shouldAddHere) {
         this->theBasiS[i] = this->remainderDivision;
         this->leadingMons[i] = theNewLeadingMon;
-        this->leadingCoeffs[i] = this->remainderDivision.coefficients[indexMaxMon];
+        this->leadingCoeffs[i] = remainderLeadingCoefficient;
         break;
       } else {
         this->theBasiS[i] = this->theBasiS[i - 1];
@@ -624,11 +631,8 @@ bool GroebnerBasisComputation<coefficient>::AddRemainderToBasis() {
   } else {
     this->theBasiS.AddOnTop(this->remainderDivision);
     this->leadingMons.AddOnTop(theNewLeadingMon);
-    this->leadingCoeffs.AddOnTop(this->remainderDivision.coefficients[indexMaxMon]);
+    this->leadingCoeffs.AddOnTop(remainderLeadingCoefficient);
   }
-//  this->theBasiS.AddOnTop(this->remainderDivision);
-//  this->leadingMons.AddOnTop(theNewLeadingMon);
-//  this->leadingCoeffs.AddOnTop(this->remainderDivision.theCoeffs[indexMaxMon]);
   return true;
 }
 
@@ -674,7 +678,11 @@ void GroebnerBasisComputation<coefficient>::initForDivisionAlone(List<Polynomial
   this->leadingCoeffs.SetSize(inputOutpuT.size);
   for (int i = 0; i < this->theBasiS.size; i ++) {
     Polynomial<coefficient>& curPoly = theBasiS[i];
-    int theIndex = curPoly.GetIndexMaxMonomial(this->thePolynomialOrder.theMonOrder);
+    int theIndex = curPoly.GetIndexMaximalMonomial(
+      &this->leadingMons[i],
+      &this->leadingCoeffs[i],
+      this->thePolynomialOrder.theMonOrder
+    );
     if (theIndex == - 1) {
       global.fatal << "This is a programming error: initialization for polynomial "
       << "division with respect to at least one zero polynomial. "
@@ -682,8 +690,6 @@ void GroebnerBasisComputation<coefficient>::initForDivisionAlone(List<Polynomial
       << "Here is the current basis by which we need to divide. "
       << this->theBasiS.ToString() << global.fatal;
     }
-    this->leadingMons[i] = curPoly[theIndex];
-    this->leadingCoeffs[i] = curPoly.coefficients[theIndex];
   }
   this->NumberGBComputations = 0;
 }

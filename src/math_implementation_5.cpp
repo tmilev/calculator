@@ -1406,14 +1406,14 @@ RationalFunctionOld RationalFunctionOld::GetOne() const {
   return tempRat;
 }
 
-bool RationalFunctionOld::FindOneVarRatRoots(List<Rational>& output) {
+bool RationalFunctionOld::FindOneVariableRationalRoots(List<Rational>& output) {
   if (this->expressionType == this->typeRational) {
     output.SetSize(0);
     return true;
   }
   Polynomial<Rational> tempP;
   this->GetNumerator(tempP);
-  return tempP.FindOneVarRatRoots(output);
+  return tempP.FindOneVariableRationalRoots(output);
 }
 
 std::string RationalFunctionOld::ToString(FormatExpressions* theFormat) const {
@@ -1455,31 +1455,44 @@ std::string RationalFunctionOld::ToString(FormatExpressions* theFormat) const {
 }
 
 void RationalFunctionOld::gcd(
-  const Polynomial<Rational>& left, const Polynomial<Rational>& right, Polynomial<Rational>& output
+  const Polynomial<Rational>& left,
+  const Polynomial<Rational>& right,
+  Polynomial<Rational>& output
 ) {
-  if (RationalFunctionOld::gcdQuicK(left, right, output)) {
+  if (RationalFunctionOld::gcdQuick(left, right, output)) {
     return;
   }
   MacroRegisterFunctionWithName("RationalFunctionOld::gcd");
-  Polynomial<Rational> lcmBuf, prodBuf, remBuf;
-  RationalFunctionOld::lcm(left, right, lcmBuf);
-  prodBuf = left;
-  prodBuf *= right;
-  prodBuf.DivideBy(lcmBuf, output, remBuf);
-  if (!remBuf.IsEqualToZero() || output.IsEqualToZero()) {
-    global.fatal << "This is a programming error. <br>While computing the gcd of left ="
-    << left.ToString() << " <br>and right ="
-    << right.ToString() << " <br>I got that left*right = " << prodBuf.ToString()
-    << "<br>, and that lcm(left,right)="
-    << lcmBuf.ToString() << " <br>but at the same time right*left divided by lcm (left, right) equals <br>"
+  Polynomial<Rational> leastCommonMultipleBuffer, productBuffer, remainderBuffer;
+  RationalFunctionOld::lcm(left, right, leastCommonMultipleBuffer);
+  productBuffer = left;
+  productBuffer *= right;
+  productBuffer.DivideBy(
+    leastCommonMultipleBuffer,
+    output,
+    remainderBuffer,
+    MonomialP::orderForGCD()
+  );
+  if (!remainderBuffer.IsEqualToZero() || output.IsEqualToZero()) {
+    global.fatal
+    << "This is a programming error. <br>While computing the gcd of left = "
+    << left.ToString() << " <br>and right = "
+    << right.ToString() << " <br>I got that left * right = "
+    << productBuffer.ToString()
+    << "<br>, and that lcm(left, right) = "
+    << leastCommonMultipleBuffer.ToString()
+    << " <br>but at the same time right * left divided by lcm (left, right) equals<br>"
     << output.ToString()
-    << "<br> with remainder " << remBuf.ToString()
-    << ", which is imposible. <br>The Groebner basis follows. <br>" << global.fatal;
+    << "<br> with remainder " << remainderBuffer.ToString()
+    << ", which is imposible.<br>The Groebner basis follows. <br>"
+    << global.fatal;
   }
   output.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
 }
 
-void RationalFunctionOld::MakeOneLetterMoN(int theIndex, const Rational& theCoeff, int ExpectedNumVars) {
+void RationalFunctionOld::MakeOneLetterMoN(
+  int theIndex, const Rational& theCoeff, int ExpectedNumVars
+) {
   if (theIndex < 0) {
     global.fatal << "This is a programming error: I am asked to create "
     << "Monomial which has a variable of negative index " << theIndex << ". " << global.fatal;
@@ -1558,29 +1571,32 @@ void RationalFunctionOld::lcm(
   theBasis.AddOnTop(rightTemp);
   MemorySaving<GroebnerBasisComputation<Rational> > bufComp;
   GroebnerBasisComputation<Rational> theComp;
-  theComp.thePolynomialOrder.theMonOrder = MonomialP::Left_isGEQ_rightToLeft_firstGEQ;
+  theComp.thePolynomialOrder.theMonOrder = MonomialP::orderForGCD();
   theComp.MaxNumGBComputations = - 1;
   if (!theComp.TransformToReducedGroebnerBasis(theBasis)) {
-    global.fatal << "Transformation to reduced Groebner basis is not allowed to fail in this function. " << global.fatal;
+    global.fatal << "Transformation to reduced "
+    << "Groebner basis is not allowed to fail in this function. " << global.fatal;
   }
+  // global.Comments << "DEBUG poly status: " << theComp.theBasiS.ToStringCommaDelimited();
   int maxMonNoTIndex = - 1;
-  Rational MaxTotalDeg;
+  Rational maximalTotalDegree;
+  MonomialP currentLeading;
   for (int i = 0; i < theBasis.size; i ++) {
-  int indexMaximumMonomial = theBasis[i].IndexMaximumMonomial_rightToLeft_firstGEQ();
-    const MonomialP& currentMon = theBasis[i][indexMaximumMonomial];
-    if (currentMon(theNumVars) == 0) {
+    theBasis[i].GetIndexMaximalMonomial(&currentLeading, nullptr, theComp.thePolynomialOrder.theMonOrder);
+    if (currentLeading(theNumVars) == 0) {
       if (maxMonNoTIndex == - 1) {
-        MaxTotalDeg= currentMon.TotalDegree();
+        maximalTotalDegree = currentLeading.TotalDegree();
         maxMonNoTIndex = i;
       }
-      if (MaxTotalDeg < currentMon.TotalDegree()) {
-        MaxTotalDeg = currentMon.TotalDegree();
+      if (maximalTotalDegree < currentLeading.TotalDegree()) {
+        maximalTotalDegree = currentLeading.TotalDegree();
         maxMonNoTIndex = i;
       }
     }
   }
   if (maxMonNoTIndex == - 1) {
-    global.fatal << "This is a programming error: failed to obtain lcm of two rational functions. The list of polynomials is: ";
+    global.fatal << "This is a programming error: failed to obtain "
+    << "the least common multiple of two polynomials. The list of polynomials is: ";
     for (int i = 0; i < theBasis.size; i ++) {
       global.fatal << theBasis[i].ToString() << ", ";
     }
@@ -1621,12 +1637,12 @@ void RationalFunctionOld::operator*=(const Polynomial<Rational>& other) {
   }
   RationalFunctionOld::gcd(this->Denominator.GetElement(), other, theGCD);
   this->Numerator.GetElement() *= other;
-  this->Numerator.GetElement().DivideBy(theGCD, theResult, tempP);
+  this->Numerator.GetElement().DivideBy(theGCD, theResult, tempP, MonomialP::orderForGCD());
   if (!tempP.IsEqualToZero()) {
     global.fatal << "Polynomial equal to zero not allowed here. " << global.fatal;
   }
   this->Numerator.GetElement() = theResult;
-  this->Denominator.GetElement().DivideBy(theGCD, theResult, tempP);
+  this->Denominator.GetElement().DivideBy(theGCD, theResult, tempP, MonomialP::orderForGCD());
   if (!tempP.IsEqualToZero()) {
     global.fatal << "Polynomial not equal to zero. " << global.fatal;
   }
@@ -1723,22 +1739,22 @@ void RationalFunctionOld::operator*=(const RationalFunctionOld& other) {
   }
   RationalFunctionOld::gcd(other.Denominator.GetElementConst(), this->Numerator.GetElement(), theGCD1);
   RationalFunctionOld::gcd(this->Denominator.GetElement(), other.Numerator.GetElementConst(), theGCD2);
-  this->Numerator.GetElement().DivideBy(theGCD1, tempP1, tempP2);
+  this->Numerator.GetElement().DivideBy(theGCD1, tempP1, tempP2, MonomialP::orderForGCD());
   this->Numerator.GetElement() = tempP1;
   if (!tempP2.IsEqualToZero()) {
     global.fatal << "Polynomial equal to zero not allowed here. " << global.fatal;
   }
-  other.Denominator.GetElementConst().DivideBy(theGCD1, tempP1, tempP2);
+  other.Denominator.GetElementConst().DivideBy(theGCD1, tempP1, tempP2, MonomialP::orderForGCD());
   if (!tempP2.IsEqualToZero()) {
     global.fatal << "Polynomial must not be zero here. " << global.fatal;
   }
   this->Denominator.GetElement() *= tempP1;
-  this->Denominator.GetElement().DivideBy(theGCD2, tempP1, tempP2);
+  this->Denominator.GetElement().DivideBy(theGCD2, tempP1, tempP2, MonomialP::orderForGCD());
   if (!tempP2.IsEqualToZero()) {
     global.fatal << "Polynomial must not be zero here. " << global.fatal;
   }
   this->Denominator.GetElement() = tempP1;
-  other.Numerator.GetElementConst().DivideBy(theGCD2, tempP1, tempP2);
+  other.Numerator.GetElementConst().DivideBy(theGCD2, tempP1, tempP2, MonomialP::orderForGCD());
   if (!tempP2.IsEqualToZero()) {
     global.fatal << "Polynomial must not be zero here. " << global.fatal;
   }
@@ -1806,9 +1822,9 @@ void RationalFunctionOld::Simplify() {
         << " and " << this->Denominator.GetElement().ToString()
         << " I got 0, which is impossible. " << global.fatal;
       }
-      this->Numerator.GetElement().DivideBy(theGCD, tempP, tempP2);
+      this->Numerator.GetElement().DivideBy(theGCD, tempP, tempP, MonomialP::orderDefault());
       this->Numerator.GetElement() = tempP;
-      this->Denominator.GetElement().DivideBy(theGCD, tempP, tempP2);
+      this->Denominator.GetElement().DivideBy(theGCD, tempP, tempP2, MonomialP::orderDefault());
       this->Denominator.GetElement() = tempP;
     }
   }
@@ -1820,16 +1836,17 @@ void RationalFunctionOld::SimplifyLeadingCoefficientOnly() {
   if (this->expressionType != this->typeRationalFunction) {
     return;
   }
-  Rational tempRat = this->Denominator.GetElement().coefficients[
-    this->Denominator.GetElement().IndexMaximumMonomial_rightToLeft_firstGEQ()
-  ];
-  tempRat.Invert();
-  this->Denominator.GetElement() *= tempRat;
-  this->Numerator.GetElement() *= tempRat;
+  Rational leadingCoefficientInverted;
+  this->Denominator.GetElement().GetIndexMaximalMonomial(
+    nullptr, &leadingCoefficientInverted, MonomialP::orderDefault()
+  );
+  leadingCoefficientInverted.Invert();
+  this->Denominator.GetElement() *= leadingCoefficientInverted;
+  this->Numerator.GetElement() *= leadingCoefficientInverted;
   if (this->Denominator.GetElement().IsEqualToOne()) {
     this->expressionType = this->typePoly;
-    if (this->Numerator.GetElement().IsConstant(&tempRat)) {
-      this->ratValue = tempRat;
+    if (this->Numerator.GetElement().IsConstant(&leadingCoefficientInverted)) {
+      this->ratValue = leadingCoefficientInverted;
       this->expressionType = this->typeRational;
     }
   }
@@ -2019,22 +2036,24 @@ void ElementSemisimpleLieAlgebra<coefficient>::GetBasisFromSpanOfElements(
 
 }
 
-bool RationalFunctionOld::gcdQuicK(
-  const Polynomial<Rational>& left, const Polynomial<Rational>& right, Polynomial<Rational>& output
+bool RationalFunctionOld::gcdQuick(
+  const Polynomial<Rational>& left,
+  const Polynomial<Rational>& right,
+  Polynomial<Rational>& output
 ) {
   if (left.TotalDegree() > 1 && right.TotalDegree() > 1) {
     return false;
   }
   Polynomial<Rational> quotient, remainder;
   if (left.TotalDegree() > right.TotalDegree()) {
-    left.DivideBy(right, quotient, remainder);
+    left.DivideBy(right, quotient, remainder, MonomialP::orderDefault());
     if (remainder.IsEqualToZero()) {
       output = right;
     } else {
       output.MakeOne(left.GetMinNumVars());
     }
   } else {
-    right.DivideBy(left, quotient, remainder);
+    right.DivideBy(left, quotient, remainder, MonomialP::orderDefault());
     if (remainder.IsEqualToZero()) {
       output = left;
     } else {
@@ -2591,6 +2610,14 @@ bool MonomialP::IsGEQ_rightToLeft(const MonomialP &other, bool trueIfThisGreater
     }
   }
   return true;
+}
+
+List<MonomialP>::OrderLeftGreaterThanRight MonomialP::orderDefault() {
+  return MonomialP::Left_greaterThan_totalDegree_leftToRight_firstGreater;
+}
+
+List<MonomialP>::OrderLeftGreaterThanRight MonomialP::orderForGCD() {
+  return MonomialP::Left_greaterThan_rightToLeft_firstGEQ;
 }
 
 bool MonomialP::IsGEQ_leftToRight(const MonomialP &other, bool trueIfThisGreater) const {

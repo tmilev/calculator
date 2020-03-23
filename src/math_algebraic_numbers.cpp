@@ -351,7 +351,7 @@ bool AlgebraicClosureRationals::ReduceMe(
   }
   for (int i = smallestFactorDegree; i < theDim; i ++) {
     zToTheNth.MakeMonomiaL(0, i, 1, 1);
-    zToTheNth.DivideBy(smallestFactor, tempP, remainderAfterReduction);
+    zToTheNth.DivideBy(smallestFactor, tempP, remainderAfterReduction, MonomialP::orderDefault());
     for (int j = 0; j < remainderAfterReduction.size(); j ++) {
       int theIndex = - 1;
       remainderAfterReduction[j](0).IsSmallInteger(&theIndex);
@@ -363,7 +363,7 @@ bool AlgebraicClosureRationals::ReduceMe(
   }
   List<MatrixTensor<Rational> > newBasis;
   MatrixTensor<Rational> generatorProjected;
-  Rational leadingCoefficient = smallestFactor.GetLeadingCoefficient();
+  Rational leadingCoefficient = smallestFactor.GetCoefficientMaximalMonomial(nullptr);
   for (int i = 0; i < smallestFactorDegree; i ++) {
     MonomialMatrix termBelowMainDiagonal, termInLastColumn;
     if (i + 1 < smallestFactorDegree) {
@@ -692,7 +692,8 @@ bool AlgebraicClosureRationals::AdjoinRootQuadraticPolyToQuadraticRadicalExtensi
       minPoly.AddMonomial(algNumPoly[i], currentCF);
     }
   }
-  minPoly /= minPoly.GetMonomialCoefficient(minPoly.GetMaxMonomial());
+  List<MonomialP>::OrderLeftGreaterThanRight monomialOrder = MonomialP::orderDefault();
+  minPoly /= minPoly.GetCoefficientMaximalMonomial(monomialOrder);
   minPoly.GetCoeffInFrontOfLinearTermVariableIndex(0, theLinearTermCFdividedByTwo);
   theLinearTermCFdividedByTwo /= 2;
   minPoly.GetConstantTerm(theConstTermShifted);
@@ -750,9 +751,9 @@ bool AlgebraicClosureRationals::AdjoinRootMinimalPolynomial(
   }
   Polynomial<AlgebraicNumber> minPoly;
   this->ConvertPolyDependingOneVariableToPolyDependingOnFirstVariableNoFail(thePoly, minPoly);
-  int indexMaxMonMinPoly = minPoly.GetIndexMaxMonomial();
-  AlgebraicNumber leadingCF = minPoly.coefficients[indexMaxMonMinPoly];
-  minPoly /= leadingCF;
+  List<MonomialP>::OrderLeftGreaterThanRight monomialOrder = MonomialP::orderDefault();
+  AlgebraicNumber leadingCoefficient = minPoly.GetCoefficientMaximalMonomial(monomialOrder);
+  minPoly /= leadingCoefficient;
   AlgebraicClosureRationals backUpCopy;
   backUpCopy = *this;
   MatrixTensor<Rational> theGenMat;
@@ -789,17 +790,19 @@ bool AlgebraicClosureRationals::AdjoinRootMinimalPolynomial(
       theGenMat.AddMonomial(MonomialMatrix((i + 1) * startingDimension + j, i * startingDimension + j), 1);
     }
   }
-  Polynomial<AlgebraicNumber> minusMinPolyMinusMaxMon = minPoly;
-  int indexMaxMon = minusMinPolyMinusMaxMon.GetIndexMaxMonomial();
-  const MonomialP maxMon = minusMinPolyMinusMaxMon[indexMaxMon];
-  AlgebraicNumber maxMonCoeff = minusMinPolyMinusMaxMon.coefficients[indexMaxMon];
-  minusMinPolyMinusMaxMon.SubtractMonomial(maxMon, maxMonCoeff);
-  minusMinPolyMinusMaxMon /= maxMonCoeff;
-  minusMinPolyMinusMaxMon /= - 1;
+  Polynomial<AlgebraicNumber> minusMinimalPolynomialMinusMaximalMonomial = minPoly;
+  MonomialP leadingMonomial;
+  AlgebraicNumber leadingCoefficientModified;
+  minusMinimalPolynomialMinusMaximalMonomial.GetIndexMaximalMonomial(
+    &leadingMonomial, &leadingCoefficientModified, monomialOrder
+  );
+  minusMinimalPolynomialMinusMaximalMonomial.SubtractMonomial(leadingMonomial, leadingCoefficientModified);
+  minusMinimalPolynomialMinusMaximalMonomial /= leadingCoefficientModified;
+  minusMinimalPolynomialMinusMaximalMonomial *= - 1;
   MatrixTensor<Rational> currentCoeffMatForm;
-  for (int i = 0; i < minusMinPolyMinusMaxMon.size(); i ++) {
-    AlgebraicNumber& currentCoeff = minusMinPolyMinusMaxMon.coefficients[i];
-    const MonomialP& currentMon = minusMinPolyMinusMaxMon[i];
+  for (int i = 0; i < minusMinimalPolynomialMinusMaximalMonomial.size(); i ++) {
+    AlgebraicNumber& currentCoeff = minusMinimalPolynomialMinusMaximalMonomial.coefficients[i];
+    const MonomialP& currentMon = minusMinimalPolynomialMinusMaximalMonomial[i];
     this->GetMultiplicationBy(currentCoeff, currentCoeffMatForm);
     for (int j = 0; j < currentCoeffMatForm.size(); j ++) {
       int relRowIndex = currentCoeffMatForm[j].vIndex;
@@ -1224,7 +1227,7 @@ bool AlgebraicNumber::RadicalMeDefault(
   int radical, std::stringstream* commentsOnError
 ) {
   MacroRegisterFunctionWithName("AlgebraicNumber::RadicalMeDefault");
-  if (this->owner == 0) {
+  if (this->owner == nullptr) {
     if (commentsOnError != nullptr) {
       *commentsOnError << "Failed to extract radical: algebraic closure is missing. ";
     }

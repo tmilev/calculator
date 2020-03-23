@@ -2560,13 +2560,18 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
   Polynomial<coefficient>& currentRemainder = this->intermediateRemainders.GetElement()[remainderIndex];
   int indexCurrentDivisor = this->intermediateSelectedDivisors.GetElement()[remainderIndex];
   Polynomial<coefficient>& currentDivisor = this->theBasiS[indexCurrentDivisor];
-  int indexCurrentDivisorLeadingMoN = currentDivisor.GetIndexMaxMonomial(this->thePolynomialOrder.theMonOrder);
-  int indexCurrentDivisorLeadingMonInAllMons = this->allMonomials.GetIndex(
-    currentDivisor.theMonomials[indexCurrentDivisorLeadingMoN]
+  MonomialP divisorLeadingMonomial;
+  int indexCurrentDivisorLeadingMoN = currentDivisor.GetIndexMaximalMonomial(
+    &divisorLeadingMonomial, nullptr, this->thePolynomialOrder.theMonOrder
   );
-  int indexCurrentRemainderLeadingMoN = currentRemainder.GetIndexMaxMonomial(this->thePolynomialOrder.theMonOrder);
-  const MonomialP& maxMonCurrentRemainder = currentRemainder.theMonomials [indexCurrentRemainderLeadingMoN];
-  coefficient leadingCFCurrentRemainder = currentRemainder.coefficients[indexCurrentRemainderLeadingMoN];
+  int indexCurrentDivisorLeadingMonInAllMons = this->allMonomials.GetIndex(
+    divisorLeadingMonomial
+  );
+  MonomialP maxMonCurrentRemainder;
+  coefficient leadingCFCurrentRemainder;
+  currentRemainder.GetIndexMaximalMonomial(
+    &maxMonCurrentRemainder, &leadingCFCurrentRemainder, this->thePolynomialOrder.theMonOrder
+  );
   int indexCurrentRemainderLeadingMonInAllMons = this->allMonomials.GetIndex(maxMonCurrentRemainder);
   this->highlightMonsDivisors[indexCurrentDivisor][indexCurrentDivisorLeadingMonInAllMons].AddOnTop(currentSlideNumber);
   this->highlightMonsRemainders[remainderIndex][indexCurrentRemainderLeadingMonInAllMons].AddOnTop(currentSlideNumber);
@@ -2742,8 +2747,10 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionLaTeXSlide() {
     this->ComputeHighLightsFromRemainder(i, currentSlideNumer);
   }
   for (int i = 0; i < theSubtracands.size; i ++) {
-    this->firstNonZeroIndicesPerIntermediateSubtracand[i] = this->allMonomials.GetIndex(
-      theSubtracands[i].GetMaxMonomial(this->thePolynomialOrder.theMonOrder)
+    this->firstNonZeroIndicesPerIntermediateSubtracand[i] = theSubtracands[i].GetIndexMaximalMonomial(
+      nullptr,
+      nullptr,
+      this->thePolynomialOrder.theMonOrder
     );
   }
   this->theFormat.flagUseLatex = true;

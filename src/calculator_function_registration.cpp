@@ -2977,7 +2977,10 @@ void Calculator::initPredefinedInnerFunctions() {
     "The divisor is scaled so that all coefficients are relatively prime integers, "
     "and so that the leading monomial under the graded lexicographic order (x_2>x_1, etc.) "
     "has positive coefficient.",
-    "GCDPoly{}(-x_{13}^{2}x_{15}^{3}x_{21}^{2}x_{22}-2x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+ "
+    "GCDPoly( (a^2-b^2)(a^3-b^3), (a^4-b^4)(a^5-b^5));\n"
+    "GCDPoly{}("
+    "-x_{13}^{2}x_{15}^{3}x_{21}^{2}x_{22}"
+    "-2x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+ "
     "2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}+2x_{13}^{2}x_{15}^{2}x_{17}x_{20}x_{21}^{2}+ "
     "x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}-x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}+ "
     "x_{13}^{2}x_{15}x_{17}^{2}x_{19}x_{21}^{2}, "

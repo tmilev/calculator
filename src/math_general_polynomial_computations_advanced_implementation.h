@@ -84,12 +84,12 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasis(List
         currentLeft.GetIndexLeadingMonomial(
           &leftHighestMonomial,
           &leftHighestCoefficient,
-          this->thePolynomialOrder.theMonOrder
+          &this->thePolynomialOrder.theMonOrder
         );
         currentRight.GetIndexLeadingMonomial(
           &rightHighestMonomial,
           &rightHighestCoefficient,
-          this->thePolynomialOrder.theMonOrder
+          &this->thePolynomialOrder.theMonOrder
         );
         int numVars = MathRoutines::Maximum(leftHighestMonomial.GetMinNumVars(), rightHighestMonomial.GetMinNumVars());
         this->SoPolyLeftShift.MakeOne(numVars);
@@ -162,8 +162,8 @@ int GroebnerBasisComputation<coefficient>::SelectPolyIndexToAddNext() {
       result = i;
     } else if (
       this->basisCandidates[result].size() == this->basisCandidates[i].size()) {
-      left = this->basisCandidates[i].GetLeadingMonomial(this->thePolynomialOrder.theMonOrder);
-      right = this->basisCandidates[result].GetLeadingMonomial(this->thePolynomialOrder.theMonOrder);
+      left = this->basisCandidates[i].GetLeadingMonomial(&this->thePolynomialOrder.theMonOrder);
+      right = this->basisCandidates[result].GetLeadingMonomial(&this->thePolynomialOrder.theMonOrder);
       if (left > right) {
         result = i;
       }
@@ -405,7 +405,7 @@ std::string GroebnerBasisComputation<coefficient>::ToStringLetterOrder(bool addD
   for (int i = 0; i < theVars.size; i ++) {
     theVars[i].MakeEi(i, 1);
   }
-  theVars.QuickSortAscending(this->thePolynomialOrder.theMonOrder);
+  theVars.QuickSortAscending(&this->thePolynomialOrder.theMonOrder);
   FormatExpressions tempFormat = this->theFormat;
   if (addDollars) {
     out << "$";
@@ -477,7 +477,7 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis(
     int indexLeadingMonRemainder = currentRemainder.GetIndexLeadingMonomial(
       &highestMonCurrentDivHighestMonOther,
       &leadingMonCoeff,
-      this->thePolynomialOrder.theMonOrder
+      &this->thePolynomialOrder.theMonOrder
     );
     while (i < this->theBasiS.size && !divisionOcurred) {
       MonomialP& highestMonBasis = this->leadingMons[i];
@@ -569,7 +569,7 @@ bool GroebnerBasisComputation<coefficient>::AddRemainderToBasis() {
   this->remainderDivision.GetIndexLeadingMonomial(
     &theNewLeadingMon,
     &remainderLeadingCoefficient,
-    this->thePolynomialOrder.theMonOrder
+    &this->thePolynomialOrder.theMonOrder
   );
   if (this->flagDoSortBasis) {
     this->theBasiS.SetSize(this->theBasiS.size + 1);
@@ -578,7 +578,9 @@ bool GroebnerBasisComputation<coefficient>::AddRemainderToBasis() {
     for (int i = theBasiS.size - 1; i >= 0; i --) {
       bool shouldAddHere = true;
       if (i > 0) {
-        shouldAddHere = (theNewLeadingMon > this->theBasiS[i - 1].GetLeadingMonomial(this->thePolynomialOrder.theMonOrder));
+        shouldAddHere = (theNewLeadingMon > this->theBasiS[i - 1].GetLeadingMonomial(
+          &this->thePolynomialOrder.theMonOrder
+        ));
       }
       if (shouldAddHere) {
         this->theBasiS[i] = this->remainderDivision;
@@ -644,7 +646,7 @@ void GroebnerBasisComputation<coefficient>::initForDivisionAlone(List<Polynomial
     int theIndex = curPoly.GetIndexLeadingMonomial(
       &this->leadingMons[i],
       &this->leadingCoeffs[i],
-      this->thePolynomialOrder.theMonOrder
+      &this->thePolynomialOrder.theMonOrder
     );
     if (theIndex == - 1) {
       global.fatal << "This is a programming error: initialization for polynomial "

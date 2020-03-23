@@ -351,7 +351,7 @@ bool AlgebraicClosureRationals::ReduceMe(
   }
   for (int i = smallestFactorDegree; i < theDim; i ++) {
     zToTheNth.MakeMonomiaL(0, i, 1, 1);
-    zToTheNth.DivideBy(smallestFactor, tempP, remainderAfterReduction, MonomialP::orderDefault());
+    zToTheNth.DivideBy(smallestFactor, tempP, remainderAfterReduction, &MonomialP::orderDefault());
     for (int j = 0; j < remainderAfterReduction.size(); j ++) {
       int theIndex = - 1;
       remainderAfterReduction[j](0).IsSmallInteger(&theIndex);
@@ -692,7 +692,7 @@ bool AlgebraicClosureRationals::AdjoinRootQuadraticPolyToQuadraticRadicalExtensi
       minPoly.AddMonomial(algNumPoly[i], currentCF);
     }
   }
-  List<MonomialP>::OrderLeftGreaterThanRight monomialOrder = MonomialP::orderDefault();
+  List<MonomialP>::Comparator* monomialOrder = &MonomialP::orderDefault();
   minPoly /= minPoly.GetLeadingCoefficient(monomialOrder);
   minPoly.GetCoeffInFrontOfLinearTermVariableIndex(0, theLinearTermCFdividedByTwo);
   theLinearTermCFdividedByTwo /= 2;
@@ -751,7 +751,7 @@ bool AlgebraicClosureRationals::AdjoinRootMinimalPolynomial(
   }
   Polynomial<AlgebraicNumber> minPoly;
   this->ConvertPolyDependingOneVariableToPolyDependingOnFirstVariableNoFail(thePoly, minPoly);
-  List<MonomialP>::OrderLeftGreaterThanRight monomialOrder = MonomialP::orderDefault();
+  List<MonomialP>::Comparator* monomialOrder = &MonomialP::orderDefault();
   AlgebraicNumber leadingCoefficient = minPoly.GetLeadingCoefficient(monomialOrder);
   minPoly /= leadingCoefficient;
   AlgebraicClosureRationals backUpCopy;

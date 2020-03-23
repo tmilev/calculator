@@ -8,7 +8,7 @@
 #include "math_general_implementation.h"
 
 template<>
-List<ElementWeylGroup>::OrderLeftGreaterThanRight FormatExpressions::GetMonOrder<ElementWeylGroup>() {
+List<ElementWeylGroup>::Comparator* FormatExpressions::GetMonOrder<ElementWeylGroup>() {
   return nullptr;
 }
 

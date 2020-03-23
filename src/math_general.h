@@ -413,8 +413,9 @@ public:
     return - 1;
   }
 
-  static List<MonomialP>::OrderLeftGreaterThanRight orderDefault();
-  static List<MonomialP>::OrderLeftGreaterThanRight orderForGCD();
+  static List<MonomialP>::Comparator& orderDefault();
+  static List<MonomialP>::Comparator& orderForGCD();
+  static List<MonomialP>::Comparator& orderLeftToRightDegreeThenGreaterThan();
 
   // "Reverse lexicographic" order.
   bool IsGEQpartialOrder(MonomialP& m);
@@ -1942,9 +1943,9 @@ public:
   bool flagLatexDetailsInHtml;
   bool flagUseQuotes;
   char AmbientWeylLetter;
-  List<MonomialP>::OrderLeftGreaterThanRight monomialOrder;
+  List<MonomialP>::Comparator monomialOrder;
   template <typename templateMonomial>
-  typename List<templateMonomial>::OrderLeftGreaterThanRight GetMonOrder();
+  typename List<templateMonomial>::Comparator* GetMonOrder();
   std::string GetPolyLetter(int index) const;
   FormatExpressions();
 };
@@ -2057,12 +2058,12 @@ public:
     }
     return result;
   }
-  void QuickSortAscending(typename List<templateMonomial>::OrderLeftGreaterThanRight theOrder = nullptr) {
+  void QuickSortAscending(typename List<templateMonomial>::Comparator* theOrder = nullptr) {
     List<templateMonomial> theSortedMons = this->theMonomials;
     theSortedMons.QuickSortAscending(theOrder, &this->coefficients);
     this->theMonomials = theSortedMons;
   }
-  void QuickSortDescending(typename List<templateMonomial>::OrderLeftGreaterThanRight theOrder = nullptr) {
+  void QuickSortDescending(typename List<templateMonomial>::Comparator* theOrder = nullptr) {
     List<templateMonomial> theSortedMons = this->theMonomials;
     theSortedMons.QuickSortDescending(theOrder, &this->coefficients);
     this->theMonomials = theSortedMons;
@@ -2108,13 +2109,13 @@ public:
     }
   }
 
-  coefficient GetLeadingCoefficient(typename List<templateMonomial>::OrderLeftGreaterThanRight monomialOrder) {
+  coefficient GetLeadingCoefficient(const typename List<templateMonomial>::Comparator* monomialOrder) {
     coefficient result;
     this->GetIndexLeadingMonomial(nullptr, &result, monomialOrder);
     return result;
   }
 
-  templateMonomial GetLeadingMonomial(typename List<templateMonomial>::OrderLeftGreaterThanRight monomialOrder) {
+  templateMonomial GetLeadingMonomial(const typename List<templateMonomial>::Comparator* monomialOrder) {
     templateMonomial result;
     this->GetIndexLeadingMonomial(&result, nullptr, monomialOrder);
     return result;
@@ -2123,15 +2124,20 @@ public:
   int GetIndexLeadingMonomial(
     templateMonomial* outputMonomial,
     coefficient* outputCoefficient,
-    typename List<templateMonomial>::OrderLeftGreaterThanRight monomialOrder = nullptr
+    const typename List<templateMonomial>::Comparator* monomialOrder = nullptr
   ) const {
     if (this->size() == 0) {
       return - 1;
     }
     int result = 0;
+    if (monomialOrder != nullptr) {
+      if (monomialOrder->leftGreaterThanRight == nullptr) {
+        monomialOrder = nullptr;
+      }
+    }
     for (int i = 1; i < this->size(); i ++) {
       if (monomialOrder != nullptr) {
-        if (monomialOrder((*this)[i], this->theMonomials[result])) {
+        if (monomialOrder->greaterThan((*this)[i], this->theMonomials[result])) {
           result = i;
         }
       } else {
@@ -2674,7 +2680,7 @@ class ElementMonomialAlgebra: public LinearCombination<templateMonomial, coeffic
 template<class coefficient>
 class PolynomialOrder {
   public:
-  List<MonomialP>::OrderLeftGreaterThanRight theMonOrder;
+  List<MonomialP>::Comparator theMonOrder;
   bool CompareLeftGreaterThanRight(const Polynomial<coefficient>& left, const Polynomial<coefficient>& right) const;
 };
 
@@ -2809,7 +2815,7 @@ public:
       return 1;
     }
     Rational result = this->ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
-    int indexMaximalMonomial = this->GetIndexLeadingMonomial(nullptr, nullptr, MonomialP::orderDefault());
+    int indexMaximalMonomial = this->GetIndexLeadingMonomial(nullptr, nullptr, &MonomialP::orderDefault());
     if (this->coefficients[indexMaximalMonomial].IsNegative()) {
       *this *= - 1;
       result *= - 1;
@@ -2825,10 +2831,11 @@ public:
   ) const;
   void ScaleToIntegralNoGCDCoeffs();
   void TimesInteger(int a);
-  void DivideBy(const Polynomial<coefficient>& inputDivisor,
+  void DivideBy(
+    const Polynomial<coefficient>& inputDivisor,
     Polynomial<coefficient>& outputQuotient,
     Polynomial<coefficient>& outputRemainder,
-    List<MonomialP>::OrderLeftGreaterThanRight monomialOrder
+    List<MonomialP>::Comparator* monomialOrder
   ) const;
   void DivideByConstant(const coefficient& r);
   void AddConstant(const coefficient& theConst) {
@@ -3004,9 +3011,9 @@ public:
       return false;
     }
     MonomialP thisMaximalMonomial, otherMaximalMonomial;
-    List<MonomialP>::OrderLeftGreaterThanRight monomialOrder = MonomialP::orderDefault();
-    int thisMaxMonIndex = this->GetIndexLeadingMonomial(&thisMaximalMonomial, nullptr, monomialOrder);
-    int otherMaxMonIndex = other.GetIndexLeadingMonomial(&otherMaximalMonomial, nullptr, monomialOrder);
+    List<MonomialP>::Comparator& monomialOrder = MonomialP::orderDefault();
+    int thisMaxMonIndex = this->GetIndexLeadingMonomial(&thisMaximalMonomial, nullptr, &monomialOrder);
+    int otherMaxMonIndex = other.GetIndexLeadingMonomial(&otherMaximalMonomial, nullptr, &monomialOrder);
     if (thisMaximalMonomial > otherMaximalMonomial) {
       return true;
     }
@@ -3080,19 +3087,19 @@ public:
   Polynomial<coefficient> operator%(const Polynomial<coefficient>& other) {
     Polynomial<coefficient> temp;
     Polynomial<coefficient> result;
-    this->DivideBy(other, temp, result, MonomialP::orderDefault());
+    this->DivideBy(other, temp, result, &MonomialP::orderDefault());
     return result;
   }
   void operator/=(const Polynomial<coefficient>& other) {
     Polynomial<coefficient> tempMe = *this;
     Polynomial<coefficient> tempRemainder;
-    tempMe.DivideBy(other, *this, tempRemainder, MonomialP::orderDefault());
+    tempMe.DivideBy(other, *this, tempRemainder, &MonomialP::orderDefault());
   }
   void operator/=(int other) {
-    this->::LinearCombination<MonomialP, coefficient>::operator/= (other);
+    this->::LinearCombination<MonomialP, coefficient>::operator/=(other);
   }
   void operator/=(const coefficient& other) {
-    this->::LinearCombination<MonomialP, coefficient>::operator/= (other);
+    this->::LinearCombination<MonomialP, coefficient>::operator/=(other);
   }
   template <class otherType>
   void operator*=(const otherType& other) {
@@ -5262,7 +5269,7 @@ std::string LinearCombination<templateMonomial, coefficient>::ToString(
   // You need to implement FormatExpressions::GetMonOrder<templateMonomial>()
   // and make it return 0 (or a pointer to a monomial order, should you
   // wish to use a custom one.
-  typename List<templateMonomial>::OrderLeftGreaterThanRight
+  typename List<templateMonomial>::Comparator*
   theOrder = (theFormat == nullptr) ? 0 : theFormat->GetMonOrder<templateMonomial>();
   sortedMons.QuickSortDescending(theOrder);
   int cutOffCounter = 0;

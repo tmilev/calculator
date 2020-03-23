@@ -46,7 +46,7 @@ Expression operator-(const Expression& left, const Expression& right) {
 //here and nowhere else (discovered through extremely painful experimentation).
 
 template < >
-List<Expression>::OrderLeftGreaterThanRight
+List<Expression>::Comparator*
 FormatExpressions::GetMonOrder<Expression>() {
   return nullptr;
 }

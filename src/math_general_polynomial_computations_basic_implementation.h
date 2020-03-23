@@ -385,7 +385,7 @@ void Polynomial<coefficient>::DivideBy(
   const Polynomial<coefficient>& inputDivisor,
   Polynomial<coefficient>& outputQuotient,
   Polynomial<coefficient>& outputRemainder,
-  List<MonomialP>::OrderLeftGreaterThanRight monomialOrder
+  typename List<MonomialP>::Comparator* monomialOrder
 ) const {
   MacroRegisterFunctionWithName("Polynomial::DivideBy");
   if (monomialOrder == nullptr) {
@@ -416,12 +416,14 @@ void Polynomial<coefficient>::DivideBy(
   int remainderLeadingIndex = outputRemainder.GetIndexLeadingMonomial(
     &remainderLeadingMonomial, &remainderLeadingCoefficient, monomialOrder
   );
-  global.Comments << "DEBUG: remainderMaxMonomial: "
+  global.Comments << "<br>DEBUG: remainderMaxMonomial: "
   << remainderLeadingMonomial.ToString() << "<br>";
   MonomialP leadingMonomialShiftedDivisor;
   coefficient leadingCoefficientShiftedDivisor;
   divisorShiftedExponents.GetIndexLeadingMonomial(
-    &leadingMonomialShiftedDivisor, &leadingCoefficientShiftedDivisor, monomialOrder
+    &leadingMonomialShiftedDivisor,
+    &leadingCoefficientShiftedDivisor,
+    monomialOrder
   );
   outputQuotient.MakeZero();
   if (remainderLeadingIndex == - 1) {
@@ -431,7 +433,10 @@ void Polynomial<coefficient>::DivideBy(
   MonomialP quotientMonomial;
   Polynomial<coefficient> subtracand;
   subtracand.SetExpectedSize(this->size());
-  while (monomialOrder(remainderLeadingMonomial, leadingMonomialShiftedDivisor)) {
+  global.Comments << "<br>DEBUG: first monomial comparison: "
+  << remainderLeadingMonomial.ToString() << ", " << leadingMonomialShiftedDivisor.ToString()
+  << "<br>";
+  while (monomialOrder->greaterThanOrEqualTo(remainderLeadingMonomial, leadingMonomialShiftedDivisor)) {
     global.Comments << "DEBUG: max monomial remainder: " << remainderLeadingMonomial.ToString() << "<br>";
     quotientMonomial = remainderLeadingMonomial;
     quotientMonomial /= leadingMonomialShiftedDivisor;
@@ -575,7 +580,7 @@ void Polynomial<coefficient>::GetCoeffInFrontOfLinearTermVariableIndex(int index
 template<class coefficient>
 bool Polynomial<coefficient>::FindOneVariableRationalRoots(List<Rational>& output) {
   MacroRegisterFunctionWithName("Polynomial::FindOneVarRatRoots");
-  List<MonomialP>::OrderLeftGreaterThanRight monomialOrder = MonomialP::orderDefault();
+  List<MonomialP>::Comparator* monomialOrder = &MonomialP::orderDefault();
   if (this->GetMinNumVars() > 1) {
     return false;
   }
@@ -746,7 +751,7 @@ bool Polynomial<coefficient>::FactorMeOutputIsADivisor(Polynomial<Rational>& out
         continue;
       }
       output.Interpolate(Vector<Rational>(PointsOfInterpolationLeft), Vector<Rational>(theValuesAtPointsLeft));
-      this->DivideBy(output, quotient, remainder, MonomialP::orderDefault());
+      this->DivideBy(output, quotient, remainder, &MonomialP::orderDefault());
       if (!remainder.IsEqualToZero()) {
         continue;
       }
@@ -769,7 +774,7 @@ bool PolynomialOrder<coefficient>::CompareLeftGreaterThanRight(
   if (difference.IsEqualToZero()) {
     return false;
   }
-  coefficient leading = difference.GetLeadingCoefficient(this->theMonOrder);
+  coefficient leading = difference.GetLeadingCoefficient(&this->theMonOrder);
   if (leading > 0) {
     return true;
   }
@@ -851,7 +856,7 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionStringLaTeX() {
   }
   //List<std::string> basisColorStyles;
   //basisColorStyles.SetSize(this->theBasiS.size);
-  this->allMonomials.QuickSortDescending(this->thePolynomialOrder.theMonOrder);
+  this->allMonomials.QuickSortDescending(&this->thePolynomialOrder.theMonOrder);
   this->theFormat.flagUseLatex = true;
   out << this->ToStringLetterOrder(true);
   out << theRemainders.size << " division steps total.";
@@ -970,7 +975,7 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionStringHtml() {
   }
   //List<std::string> basisColorStyles;
   //basisColorStyles.SetSize(this->theBasiS.size);
-  this->allMonomials.QuickSortDescending(this->thePolynomialOrder.theMonOrder);
+  this->allMonomials.QuickSortDescending(&this->thePolynomialOrder.theMonOrder);
   out << this->ToStringLetterOrder(false);
   out << "<br>";
   out << theRemainders.size << " division steps total.<br>";

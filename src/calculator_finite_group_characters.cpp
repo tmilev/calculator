@@ -8,7 +8,7 @@
 #include "math_extra_universal_enveloping_implementation.h"
 
 template<>
-List<ClassFunction<WeylGroupData::WeylGroupBase, Rational> >::OrderLeftGreaterThanRight
+List<ClassFunction<WeylGroupData::WeylGroupBase, Rational> >::Comparator*
 FormatExpressions::GetMonOrder<ClassFunction<WeylGroupData::WeylGroupBase, Rational> >() {
   return nullptr;
 }

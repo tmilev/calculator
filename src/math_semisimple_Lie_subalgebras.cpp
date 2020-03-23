@@ -8,7 +8,7 @@
 #include "math_extra_finite_groups_implementation.h"
 
 template<>
-List<DynkinSimpleType>::OrderLeftGreaterThanRight
+List<DynkinSimpleType>::Comparator*
 FormatExpressions::GetMonOrder<DynkinSimpleType>() {
   return nullptr;
 }

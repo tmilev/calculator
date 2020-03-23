@@ -1680,7 +1680,7 @@ bool IntegralRFComputation::PreparePFExpressionSummands() {
   this->thePFSummands.SetSize(0);
   Polynomial<AlgebraicNumber> denominatorRescaled, numeratorRescaled;
   AlgebraicNumber currentCoefficient, numScale;
-  List<MonomialP>::OrderLeftGreaterThanRight monomialOrder = MonomialP::orderDefault();
+  List<MonomialP>::Comparator* monomialOrder = &MonomialP::orderDefault();
   for (int i = 0; i < this->theNumerators.size; i ++) {
     for (int j = 0; j < this->theNumerators[i].size; j ++) {
       if (this->theNumerators[i][j].IsEqualToZero()) {
@@ -1750,7 +1750,7 @@ bool IntegralRFComputation::IntegrateRF() {
   this->theIntegralSummands.SetSize(0);
   Polynomial<AlgebraicNumber> denRescaled, numRescaled;
   AlgebraicNumber currentCoefficient, numScale;
-  List<MonomialP>::OrderLeftGreaterThanRight monomialOrder = MonomialP::orderDefault();
+  List<MonomialP>::Comparator* monomialOrder = &MonomialP::orderDefault();
   for (int i = 0; i < this->theNumerators.size; i ++) {
     for (int j = 0; j < this->theNumerators[i].size; j ++) {
       if (this->theNumerators[i][j].IsEqualToZero()) {
@@ -2080,13 +2080,13 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
     this->printoutPFsHtml << "There were factors (over the rationals) of degree greater than 2. I surrender. ";
     return false;
   }
-  List<MonomialP>::OrderLeftGreaterThanRight monomialOrder = MonomialP::orderDefault();
+  List<MonomialP>::Comparator monomialOrder = MonomialP::orderDefault();
   this->currentFormaT.flagUseFrac = true;
   this->theNum.DivideBy(
     this->theDen,
     this->quotientRat,
     this->remainderRat,
-    monomialOrder
+   & monomialOrder
   );
   needPolyDivision = !this->quotientRat.IsEqualToZero();
   if (needPolyDivision) {

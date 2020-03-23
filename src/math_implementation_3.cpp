@@ -2636,77 +2636,77 @@ unsigned int Selection::HashFunction() const {
 //Format expression monomial orders (for the ToString() function follow.
 
 template<>
-List<MonomialWrapper<std::string, MathRoutines::HashString> >::OrderLeftGreaterThanRight
+List<MonomialWrapper<std::string, MathRoutines::HashString> >::Comparator*
 FormatExpressions::GetMonOrder<MonomialWrapper<std::string, MathRoutines::HashString> >() {
   return nullptr;
 }
 
 template<>
-List<MonomialP>::OrderLeftGreaterThanRight FormatExpressions::GetMonOrder<MonomialP>() {
-  return this->monomialOrder;
+List<MonomialP>::Comparator* FormatExpressions::GetMonOrder<MonomialP>() {
+  return &this->monomialOrder;
 }
 
 template<>
-List<Polynomial<AlgebraicNumber> >::OrderLeftGreaterThanRight FormatExpressions::GetMonOrder<Polynomial<AlgebraicNumber> >() {
+List<Polynomial<AlgebraicNumber> >::Comparator* FormatExpressions::GetMonOrder<Polynomial<AlgebraicNumber> >() {
   return nullptr;
 }
 
 template<>
-List<MonomialVector>::OrderLeftGreaterThanRight
+List<MonomialVector>::Comparator*
 FormatExpressions::GetMonOrder<MonomialVector>() {
   return nullptr;
 }
 
 template<>
-List<MonomialWeylAlgebra>::OrderLeftGreaterThanRight
+List<MonomialWeylAlgebra>::Comparator*
 FormatExpressions::GetMonOrder<MonomialWeylAlgebra>() {
   return nullptr;
 }
 
 template<>
-List<MonomialUniversalEnveloping<RationalFunctionOld> >::OrderLeftGreaterThanRight
+List<MonomialUniversalEnveloping<RationalFunctionOld> >::Comparator*
 FormatExpressions::GetMonOrder<MonomialUniversalEnveloping<RationalFunctionOld> >() {
   return nullptr;
 }
 
 template<>
-List<MonomialGeneralizedVerma<RationalFunctionOld> >::OrderLeftGreaterThanRight
+List<MonomialGeneralizedVerma<RationalFunctionOld> >::Comparator*
 FormatExpressions::GetMonOrder<MonomialGeneralizedVerma<RationalFunctionOld> >() {
   return nullptr;
 }
 
 template<>
-List<ChevalleyGenerator >::OrderLeftGreaterThanRight
+List<ChevalleyGenerator >::Comparator*
 FormatExpressions::GetMonOrder<ChevalleyGenerator>() {
   return nullptr;
 }
 
 template<>
-List<MonomialMatrix>::OrderLeftGreaterThanRight
+List<MonomialMatrix>::Comparator*
 FormatExpressions::GetMonOrder<MonomialMatrix>() {
   return nullptr;
 }
 
 template<>
-List<MonomialUniversalEnveloping<Rational> >::OrderLeftGreaterThanRight
+List<MonomialUniversalEnveloping<Rational> >::Comparator*
 FormatExpressions::GetMonOrder<MonomialUniversalEnveloping<Rational> >() {
   return nullptr;
 }
 
 template<>
-List<MonomialTensorGeneralizedVermas<RationalFunctionOld> >::OrderLeftGreaterThanRight
+List<MonomialTensorGeneralizedVermas<RationalFunctionOld> >::Comparator*
 FormatExpressions::GetMonOrder<MonomialTensorGeneralizedVermas<RationalFunctionOld> >() {
   return nullptr;
 }
 
 template<>
-List<quasiDiffMon>::OrderLeftGreaterThanRight
+List<quasiDiffMon>::Comparator*
 FormatExpressions::GetMonOrder<quasiDiffMon>() {
   return nullptr;
 }
 
 template<>
-List<MonomialUniversalEnveloping<Polynomial<Rational> > >::OrderLeftGreaterThanRight
+List<MonomialUniversalEnveloping<Polynomial<Rational> > >::Comparator*
 FormatExpressions::GetMonOrder<MonomialUniversalEnveloping<Polynomial<Rational> > >() {
   return nullptr;
 }
@@ -3159,7 +3159,7 @@ bool PartFraction::ReduceMeOnce(
     for (int i = 0; i < this->IndicesNonZeroMults.size; i ++) {
       for (int j = 0; j < this->TheObjects[IndicesNonZeroMults[i]].Multiplicities.size; j ++) {
         this->TheObjects[IndicesNonZeroMults[i]].GetPolyDenominator(denominator, j, startingVectors[IndicesNonZeroMults[i]]);
-        outputCoeff.DivideBy(denominator, quotient, remainderDivision, MonomialP::orderDefault());
+        outputCoeff.DivideBy(denominator, quotient, remainderDivision, &MonomialP::orderDefault());
         if (remainderDivision.IsEqualToZero()) {
           this->DecreasePowerOneFrac(IndicesNonZeroMults[i], 1);
           outputCoeff = quotient;

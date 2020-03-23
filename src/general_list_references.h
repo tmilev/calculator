@@ -133,9 +133,9 @@ public:
   Object& LastObject() const {
     return (*this)[this->size - 1];
   }
-  template <class otherType = Object>
-  void QuickSortAscending(bool theOrder(const Object& left, const Object& right) = 0, List<otherType>* carbonCopy = 0) {
-    MathRoutines::QuickSortAscending(*this, theOrder, carbonCopy);
+  template <class otherList = List<Object> >
+  void QuickSortAscending(const typename List<Object>::Comparator* order = nullptr, otherList* carbonCopy = nullptr) {
+    List<Object>::QuickSortAscending(*this, order, carbonCopy);
   }
   ListReferences():flagDeallocated(false), size(0) {
   }
@@ -151,7 +151,7 @@ void ListReferences<Object>::AllocateElements(int newSize) {
     std::stringstream commentsOnCrash;
     commentsOnCrash << "This is a programming error: requested to set negative size "
     << newSize << " of List of References. If a "
-    << " List is to be set empty, then one should call SetSize(0), "
+    << "List is to be set empty, then one should call SetSize(0), "
     << "rather than provide a negative argument to SetSize.";
     fatalCrash(commentsOnCrash.str());
   }

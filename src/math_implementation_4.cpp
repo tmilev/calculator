@@ -610,13 +610,13 @@ std::string UserCalculatorData::ToStringUnsecure() {
 }
 
 template<>
-List<Weight<RationalFunctionOld> >::OrderLeftGreaterThanRight
+List<Weight<RationalFunctionOld> >::Comparator*
 FormatExpressions::GetMonOrder<Weight<RationalFunctionOld> >() {
   return nullptr;
 }
 
 template<>
-List<Weight<Rational> >::OrderLeftGreaterThanRight
+List<Weight<Rational> >::Comparator*
 FormatExpressions::GetMonOrder<Weight<Rational> >() {
   return nullptr;
 }

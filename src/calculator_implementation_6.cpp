@@ -1995,7 +1995,8 @@ bool CalculatorFunctions::innerNormalizeIntervals(
   if (!theCommands.CollectOpands(input[1], theCommands.opUnion(), outputList)) {
     return false;
   }
-  outputList.QuickSortAscending(CalculatorFunctions::LeftIntervalGreaterThanRight);
+  List<Expression>::Comparator order(CalculatorFunctions::LeftIntervalGreaterThanRight);
+  outputList.QuickSortAscending(&order);
   return output.MakeXOXOdotsOX(theCommands, theCommands.opUnion(), outputList);
 }
 
@@ -2041,8 +2042,9 @@ bool CalculatorFunctions::innerCompareIntervalsNumerically(
   if (leftList.size != rightList.size) {
     return output.AssignValue(0, theCommands);
   }
-  leftList.QuickSortAscending(CalculatorFunctions::LeftIntervalGreaterThanRight);
-  rightList.QuickSortAscending(CalculatorFunctions::LeftIntervalGreaterThanRight);
+  List<Expression>::Comparator order(CalculatorFunctions::LeftIntervalGreaterThanRight);
+  leftList.QuickSortAscending(&order);
+  rightList.QuickSortAscending(&order);
   for (int i = 0; i < leftList.size; i ++) {
     if (leftList[i] == rightList[i]) {
       continue;
@@ -2578,8 +2580,8 @@ bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
     << curveContext.ContextGetPolynomialVariables().ToString();
   }
   MonomialP leadingMonomial;
-  List<MonomialP>::OrderLeftGreaterThanRight monomialOrder = MonomialP::Left_greaterThan_rightToLeft_firstLEQ;
-  thePoly.GetIndexLeadingMonomial(&leadingMonomial, nullptr, monomialOrder);
+  List<MonomialP>::Comparator monomialOrder(MonomialP::Left_greaterThan_rightToLeft_firstLEQ);
+  thePoly.GetIndexLeadingMonomial(&leadingMonomial, nullptr, &monomialOrder);
   int indexX = 0;
   int indexY = 1;
   if (leadingMonomial[indexX] != 3) {

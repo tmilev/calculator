@@ -354,118 +354,8 @@ public:
       return 0;
     }
   }
-  template <class templateList, typename objectType, class otherList>
-  static void QuickSortAscending(
-    templateList& theList,
-    bool theOrder(const objectType& left, const objectType& right) = 0,
-    otherList* carbonCopy = 0
-  ) {
-    if (carbonCopy != 0) {
-      if (carbonCopy->size != theList.size) {
-        std::stringstream crashComments;
-        crashComments << "Programming error: requesting quicksort with carbon copy on a list with "
-        << theList.size << " elements, but the but the carbon copy has "
-        << carbonCopy->size << " elements. ";
-        fatalCrash(crashComments.str());
-      }
-    }
-    if (theList.size == 0) {
-      return;
-    }
-    if (theOrder == 0) {
-      MathRoutines::QuickSortAscendingNoOrder(theList, 0, theList.size - 1, carbonCopy);
-    } else {
-      MathRoutines::QuickSortAscendingOrder(theList, 0, theList.size - 1, theOrder, carbonCopy);
-    }
-  }
   static bool ParseListInt(const std::string& input, List<int>& result, std::stringstream* commentsOnFailure);
-  static void ParseListIntCrashOnFailure(const std::string& input, List<int>& result);
-  template <class templateList, typename objectType, class otherList>
-  static void QuickSortDescending(
-    templateList& theList,
-    bool theOrder(const objectType& left, const objectType& right) = 0,
-    otherList* carbonCopy = 0
-  ) {
-    MathRoutines::QuickSortAscending(theList, theOrder, carbonCopy);
-    theList.ReverseOrderElements();
-    if (carbonCopy != 0) {
-      carbonCopy->ReverseOrderElements();
-    }
-  }
-private:
-  template <class templateList, typename objectType, class otherList>
-  static void QuickSortAscendingOrder(
-    templateList& theList,
-    int BottomIndex,
-    int TopIndex,
-    bool theOrder(const objectType& left, const objectType& right),
-    otherList* carbonCopy
-  ) {
-    if (TopIndex <= BottomIndex) {
-      return;
-    }
-    int HighIndex = TopIndex;
-    for (int LowIndex = BottomIndex + 1; LowIndex <= HighIndex; LowIndex ++) {
-      if (theOrder(theList[LowIndex],(theList[BottomIndex]))) {
-        theList.SwapTwoIndices(LowIndex, HighIndex);
-        if (carbonCopy != 0) {
-          carbonCopy->SwapTwoIndices(LowIndex, HighIndex);
-        }
-        LowIndex --;
-        HighIndex --;
-      }
-    }
-    if (theOrder(theList[HighIndex], theList[BottomIndex])) {
-      if (HighIndex == BottomIndex) {
-        std::stringstream crashStream;
-        crashStream << "This is a programming error. "
-        << "The programmer has given me a bad strict order: the order claims that object "
-        << theList[HighIndex] << " of index "
-        << HighIndex << " is strictly greater than itself which is not allowed for strict orders. "
-        << "Maybe the programmer has given a "
-        << "non-strict order instead of strict one by mistake? ";
-        fatalCrash(crashStream.str());
-      }
-      HighIndex --;
-    }
-    theList.SwapTwoIndices(BottomIndex, HighIndex);
-    if (carbonCopy != 0) {
-      carbonCopy->SwapTwoIndices(BottomIndex, HighIndex);
-    }
-    MathRoutines::QuickSortAscendingOrder(theList, BottomIndex, HighIndex - 1, theOrder, carbonCopy);
-    MathRoutines::QuickSortAscendingOrder(theList, HighIndex + 1, TopIndex, theOrder, carbonCopy);
-  }
-  template <class templateList, class otherList>
-  static void QuickSortAscendingNoOrder(
-    templateList& theList,
-    int BottomIndex,
-    int TopIndex,
-    otherList* carbonCopy
-  ) {
-    if (TopIndex <= BottomIndex) {
-      return;
-    }
-    int HighIndex = TopIndex;
-    for (int LowIndex = BottomIndex + 1; LowIndex <= HighIndex; LowIndex ++) {
-      if (theList[LowIndex] > theList[BottomIndex]) {
-        theList.SwapTwoIndices(LowIndex, HighIndex);
-        if (carbonCopy != 0) {
-          carbonCopy->SwapTwoIndices(LowIndex, HighIndex);
-        }
-        LowIndex --;
-        HighIndex --;
-      }
-    }
-    if (theList[HighIndex] > theList[BottomIndex]) {
-      HighIndex --;
-    }
-    theList.SwapTwoIndices(BottomIndex, HighIndex);
-    if (carbonCopy != 0) {
-      carbonCopy->SwapTwoIndices(BottomIndex, HighIndex);
-    }
-    MathRoutines::QuickSortAscendingNoOrder(theList, BottomIndex, HighIndex - 1, carbonCopy);
-    MathRoutines::QuickSortAscendingNoOrder(theList, HighIndex + 1, TopIndex, carbonCopy);
-  }
+  static void ParseListIntCrashOnFailure(const std::string& input, List<int>& result);  
 };
 
 class DrawElementInputOutput {
@@ -710,7 +600,41 @@ class List {
   friend std::ostream& operator<< <Object>(std::ostream& output, const List<Object>& theList);
   friend std::iostream& operator>> <Object>(std::iostream& input, List<Object>& theList);
 public:
-  typedef bool (*OrderLeftGreaterThanRight) (const Object& left, const Object& right);
+  class Comparator {
+  public:
+    bool (*leftGreaterThanRight) (const Object& left, const Object& right);
+    Comparator() {
+      this->leftGreaterThanRight = nullptr;
+    }
+    Comparator(bool (*inputLeftGreaterThanRight)(const Object& left, const Object& right)) {
+      this->setComparison(inputLeftGreaterThanRight);
+    }
+    bool CheckConsistency() const {
+      if (this->leftGreaterThanRight == nullptr) {
+        return true;
+      }
+      Object nonInitialized;
+      if (this->leftGreaterThanRight(nonInitialized, nonInitialized)) {
+        fatalCrash("Order function is not strict. ");
+      }
+      return true;
+    }
+    void setComparison(bool (*inputLeftGreaterThanRight)(const Object& left, const Object& right)) {
+      this->leftGreaterThanRight = inputLeftGreaterThanRight;
+    }
+    bool greaterThan(const Object& left, const Object& right) const {
+      if (this->leftGreaterThanRight == nullptr) {
+        fatalCrash("Non-initialized comparison function.");
+      }
+      return this->leftGreaterThanRight(left, right);
+    }
+    bool greaterThanOrEqualTo(const Object& left, const Object& right) const {
+      if (this->greaterThan(left, right)) {
+        return true;
+      }
+      return left == right;
+    }
+  };
 private:
   friend class ListZeroAfterUse<Object>;
   friend class Polynomial<Rational>;
@@ -878,17 +802,142 @@ public:
     }
     return result;
   }
-  // The below function is required to pReserve the order of elements given by theSelection.elements.
+  // The function below is required to reserve the order of elements given by theSelection.elements.
   void SubSelection(const Selection& theSelection, List<Object>& output);
-  // If comparison function is not specified, QuickSortAscending uses operator>, else it uses the given
+  // If comparison function is not specified, QuickSortAscending uses operator >, else it uses the given
   // comparison function
   template <class otherType = Object>
-  void QuickSortAscending(List<Object>::OrderLeftGreaterThanRight theOrder = nullptr, List<otherType>* carbonCopy = nullptr) {
-    MathRoutines::QuickSortAscending(*this, theOrder, carbonCopy);
+  void QuickSortAscending(
+    const List<Object>::Comparator* theOrder = nullptr,
+    List<otherType>* carbonCopy = nullptr
+  ) {
+    List<Object>::QuickSortAscending<List<Object>, List<otherType> >(*this, theOrder, carbonCopy);
   }
+
   template <class otherType = Object>
-  void QuickSortDescending(List<Object>::OrderLeftGreaterThanRight theOrder = nullptr, List<otherType>* carbonCopy = nullptr) {
-    MathRoutines::QuickSortDescending(*this, theOrder, carbonCopy);
+  void QuickSortDescending(
+    const List<Object>::Comparator* theOrder = nullptr,
+    List<otherType>* carbonCopy = nullptr
+  ) {
+    List<Object>::QuickSortDescending<List<Object>, List<otherType> >(*this, theOrder, carbonCopy);
+  }
+
+  template <class templateList, class otherList>
+  static void QuickSortAscending(
+    templateList& theList,
+    const typename List<Object>::Comparator* order = nullptr,
+    otherList* carbonCopy = nullptr
+  ) {
+    if (carbonCopy != 0) {
+      if (carbonCopy->size != theList.size) {
+        std::stringstream crashComments;
+        crashComments << "Programming error: requesting quicksort with carbon copy on a list with "
+        << theList.size << " elements, but the but the carbon copy has "
+        << carbonCopy->size << " elements. ";
+        fatalCrash(crashComments.str());
+      }
+    }
+    if (theList.size == 0) {
+      return;
+    }
+    if (order == nullptr) {
+      List<Object>::QuickSortAscendingNoOrder(theList, 0, theList.size - 1, carbonCopy);
+    } else {
+      List<Object>::QuickSortAscendingOrder<templateList, otherList>(
+        theList, 0, theList.size - 1, *order, carbonCopy
+      );
+    }
+  }
+
+  template <class templateList, class otherList>
+  static void QuickSortDescending(
+    templateList& theList,
+    const List<Object>::Comparator* order = nullptr,
+    otherList* carbonCopy = 0
+  ) {
+    List<Object>::QuickSortAscending<templateList, otherList>(theList, order, carbonCopy);
+    theList.ReverseOrderElements();
+    if (carbonCopy != 0) {
+      carbonCopy->ReverseOrderElements();
+    }
+  }
+
+  template <class templateList, class otherList>
+  static void QuickSortAscendingOrder(
+    templateList& theList,
+    int BottomIndex,
+    int TopIndex,
+    const List<Object>::Comparator& order,
+    otherList* carbonCopy
+  ) {
+    if (TopIndex <= BottomIndex) {
+      return;
+    }
+    int HighIndex = TopIndex;
+    for (int LowIndex = BottomIndex + 1; LowIndex <= HighIndex; LowIndex ++) {
+      if (order.greaterThan(theList[LowIndex], (theList[BottomIndex]))) {
+        theList.SwapTwoIndices(LowIndex, HighIndex);
+        if (carbonCopy != 0) {
+          carbonCopy->SwapTwoIndices(LowIndex, HighIndex);
+        }
+        LowIndex --;
+        HighIndex --;
+      }
+    }
+    if (order.greaterThan(theList[HighIndex], theList[BottomIndex])) {
+      if (HighIndex == BottomIndex) {
+        std::stringstream crashStream;
+        crashStream << "This is a programming error. "
+        << "The programmer has given me a bad strict order: the order claims that object "
+        << theList[HighIndex] << " of index "
+        << HighIndex << " is strictly greater than itself which is not allowed for strict orders. "
+        << "Maybe the programmer has given a "
+        << "non-strict order instead of strict one by mistake? ";
+        fatalCrash(crashStream.str());
+      }
+      HighIndex --;
+    }
+    theList.SwapTwoIndices(BottomIndex, HighIndex);
+    if (carbonCopy != 0) {
+      carbonCopy->SwapTwoIndices(BottomIndex, HighIndex);
+    }
+    List<Object>::QuickSortAscendingOrder<templateList, otherList>(
+      theList, BottomIndex, HighIndex - 1, order, carbonCopy
+    );
+    List<Object>::QuickSortAscendingOrder<templateList, otherList>(
+      theList, HighIndex + 1, TopIndex, order, carbonCopy
+    );
+  }
+  template <class templateList, class otherList>
+  static void QuickSortAscendingNoOrder(
+    templateList& theList,
+    int BottomIndex,
+    int TopIndex,
+    otherList* carbonCopy
+  ) {
+    if (TopIndex <= BottomIndex) {
+      return;
+    }
+    int HighIndex = TopIndex;
+    for (int LowIndex = BottomIndex + 1; LowIndex <= HighIndex; LowIndex ++) {
+      if (theList[LowIndex] > theList[BottomIndex]) {
+        theList.SwapTwoIndices(LowIndex, HighIndex);
+        if (carbonCopy != 0) {
+          carbonCopy->SwapTwoIndices(LowIndex, HighIndex);
+        }
+        LowIndex --;
+        HighIndex --;
+      }
+    }
+    if (theList[HighIndex] > theList[BottomIndex]) {
+      HighIndex --;
+    }
+    theList.SwapTwoIndices(BottomIndex, HighIndex);
+    if (carbonCopy != 0) {
+      carbonCopy->SwapTwoIndices(BottomIndex, HighIndex);
+    }
+    List<Object>::QuickSortAscendingNoOrder(theList, BottomIndex, HighIndex - 1, carbonCopy);
+    List<Object>::QuickSortAscendingNoOrder(theList, HighIndex + 1, TopIndex, carbonCopy);
   }
   bool HasACommonElementWith(List<Object>& right);
   void SwapTwoIndices(int index1, int index2);
@@ -1539,7 +1588,7 @@ public:
   }
   template<typename otherType = int>
   void QuickSortAscending(
-    typename List<Object>::OrderLeftGreaterThanRight theOrder = nullptr,
+    typename List<Object>::Comparator* theOrder = nullptr,
     List<otherType>* carbonCopy = nullptr
   ) {
     List<Object> theList;
@@ -1549,7 +1598,7 @@ public:
   }
   template<typename otherType>
   void QuickSortDescending(
-    typename List<Object>::OrderLeftGreaterThanRight theOrder = nullptr,
+    typename List<Object>::Comparator* theOrder = nullptr,
     List<otherType>* carbonCopy = nullptr
   ) {
     List<Object> theList;
@@ -1667,14 +1716,14 @@ public:
   }
   template <typename otherType = int>
   void QuickSortAscending(
-    typename List<Object>::OrderLeftGreaterThanRight theOrder = nullptr,
+    typename List<Object>::Comparator* theOrder = nullptr,
     List<otherType>* carbonCopy = nullptr
   ) {
     this->::HashTemplate<Object, List<Object>, hashFunction>::QuickSortAscending(theOrder, carbonCopy);
   }
   template <typename otherType = int>
   void QuickSortDescending(
-    typename List<Object>::OrderLeftGreaterThanRight theOrder = nullptr,
+    typename List<Object>::Comparator* theOrder = nullptr,
     List<otherType>* carbonCopy = nullptr
   ) {
     this->::HashTemplate<Object, List<Object>, hashFunction>::QuickSortDescending(theOrder, carbonCopy);

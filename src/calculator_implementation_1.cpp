@@ -451,7 +451,7 @@ bool Calculator::innerPrintSSSubalgebras(
     global.fatal << "Zero pointer to semisimple Lie algebra: this shouldn't happen. " << global.fatal;
   }
   SemisimpleLieAlgebra& ownerLieAlgebra = *ownerSSPointer;
-  std::string dynkinString = ownerSSPointer->theWeyl.theDynkinType.ToString();;
+  std::string dynkinString = ownerSSPointer->theWeyl.theDynkinType.ToString();
   global.RelativePhysicalNameOptionalProgressReport = "progress_subalgebras_" + dynkinString;
   global.RelativePhysicalNameOptionalResult = "result_subalgebras_" + dynkinString;
   SemisimpleSubalgebras& theSubalgebras =
@@ -671,13 +671,21 @@ bool Calculator::innerGroebner(
   outputGroebner = inputVector;
   outputGroebner2 = inputVector;
   if (useGraded && !useReverseLexicographic) {
-    theGroebnerComputation.thePolynomialOrder.theMonOrder = MonomialP::Left_greaterThan_totalDegree_leftToRight_firstGreater;
+    theGroebnerComputation.thePolynomialOrder.theMonOrder.setComparison(
+      MonomialP::Left_greaterThan_totalDegree_leftToRight_firstGreater
+    );
   } else if (useGraded && useReverseLexicographic) {
-    theGroebnerComputation.thePolynomialOrder.theMonOrder = MonomialP::Left_greaterThan_totalDegree_rightToLeft_firstSmaller;
+    theGroebnerComputation.thePolynomialOrder.theMonOrder.setComparison(
+      MonomialP::Left_greaterThan_totalDegree_rightToLeft_firstSmaller
+    );
   } else if (!useGraded && !useReverseLexicographic) {
-    theGroebnerComputation.thePolynomialOrder.theMonOrder = MonomialP::Left_greaterThan_leftToRight_firstGEQ;
+    theGroebnerComputation.thePolynomialOrder.theMonOrder.setComparison(
+      MonomialP::Left_greaterThan_leftToRight_firstGEQ
+    );
   } else if (!useGraded && useReverseLexicographic){
-    theGroebnerComputation.thePolynomialOrder.theMonOrder = MonomialP::Left_greaterThan_rightToLeft_firstLEQ;
+    theGroebnerComputation.thePolynomialOrder.theMonOrder.setComparison(
+      MonomialP::Left_greaterThan_rightToLeft_firstLEQ
+    );
   }
   theGroebnerComputation.theFormat.monomialOrder = theGroebnerComputation.thePolynomialOrder.theMonOrder;
   theGroebnerComputation.MaxNumGBComputations = upperBoundComputations;
@@ -1902,7 +1910,7 @@ bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const
   }
   std::stringstream out;
   out.precision(7);
-  bool hasDoubleValue = false;;
+  bool hasDoubleValue = false;
   double theDoubleValue = - 1;
   Rational theRat;
   if (input.IsOfType<Rational>(&theRat)) {

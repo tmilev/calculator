@@ -115,7 +115,7 @@ public:
     Calculator& theCommands,
     const Expression& input,
     Expression& output,
-    List<MonomialP>::OrderLeftGreaterThanRight theMonOrder
+    List<MonomialP>::Comparator* theMonOrder
   );
   static bool innerPolynomialDivisionVerboseGrLex(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPolynomialDivisionVerboseGrLexRev(Calculator& theCommands, const Expression& input, Expression& output);

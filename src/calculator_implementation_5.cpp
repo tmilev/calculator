@@ -2298,34 +2298,44 @@ bool CalculatorFunctions::innerPolynomialDivisionVerboseGrLex(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   return CalculatorFunctions::innerPolynomialDivisionVerbose(
-    theCommands, input, output, MonomialP::Left_greaterThan_totalDegree_leftToRight_firstGreater
+    theCommands, input, output, &MonomialP::orderLeftToRightDegreeThenGreaterThan()
   );
 }
 
 bool CalculatorFunctions::innerPolynomialDivisionVerboseGrLexRev(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
+  List<MonomialP>::Comparator order(
+    MonomialP::Left_greaterThan_rightToLeft_firstLEQ
+  );
   return CalculatorFunctions::innerPolynomialDivisionVerbose(
-    theCommands, input, output, MonomialP::Left_greaterThan_totalDegree_leftToRight_firstGreater
+    theCommands, input, output, &order
   );
 }
 
 bool CalculatorFunctions::innerPolynomialDivisionVerboseLex(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
+  List<MonomialP>::Comparator order(
+    MonomialP::Left_greaterThan_leftToRight_firstGEQ
+  );
+
   return CalculatorFunctions::innerPolynomialDivisionVerbose(
     theCommands,
     input,
     output,
-    MonomialP::Left_greaterThan_leftToRight_firstGEQ
+    &order
   );
 }
 
 bool CalculatorFunctions::innerPolynomialDivisionVerboseLexicographicReversed(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
+  List<MonomialP>::Comparator order(
+    MonomialP::Left_greaterThan_rightToLeft_firstGEQ
+  );
   return CalculatorFunctions::innerPolynomialDivisionVerbose(
-    theCommands, input, output, MonomialP::Left_greaterThan_rightToLeft_firstLEQ
+    theCommands, input, output, &order
   );
 }
 
@@ -2333,7 +2343,7 @@ bool CalculatorFunctions::innerPolynomialDivisionVerbose(
   Calculator& theCommands,
   const Expression& input,
   Expression& output,
-  List<MonomialP>::OrderLeftGreaterThanRight theMonOrder
+  List<MonomialP>::Comparator* theMonOrder
 ) {
   MacroRegisterFunctionWithName("Calculator::innerPolynomialDivisionVerbose");
   Expression theContext;
@@ -2357,7 +2367,9 @@ bool CalculatorFunctions::innerPolynomialDivisionVerbose(
     theGB.theBasiS[i - 1] = thePolys[i];
   }
   theGB.initForDivisionAlone(theGB.theBasiS);
-  theGB.thePolynomialOrder.theMonOrder = theMonOrder;
+  if (theMonOrder != nullptr) {
+    theGB.thePolynomialOrder.theMonOrder = *theMonOrder;
+  }
   theGB.RemainderDivisionWithRespectToBasis(thePolys[0], &theGB.remainderDivision, - 1);
   theContext.ContextGetFormatExpressions(theGB.theFormat);
   theGB.theFormat.flagUseLatex = true;
@@ -2562,7 +2574,7 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
   Polynomial<coefficient>& currentDivisor = this->theBasiS[indexCurrentDivisor];
   MonomialP divisorLeadingMonomial;
   int indexCurrentDivisorLeadingMoN = currentDivisor.GetIndexLeadingMonomial(
-    &divisorLeadingMonomial, nullptr, this->thePolynomialOrder.theMonOrder
+    &divisorLeadingMonomial, nullptr, &this->thePolynomialOrder.theMonOrder
   );
   int indexCurrentDivisorLeadingMonInAllMons = this->allMonomials.GetIndex(
     divisorLeadingMonomial
@@ -2570,7 +2582,7 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
   MonomialP maxMonCurrentRemainder;
   coefficient leadingCFCurrentRemainder;
   currentRemainder.GetIndexLeadingMonomial(
-    &maxMonCurrentRemainder, &leadingCFCurrentRemainder, this->thePolynomialOrder.theMonOrder
+    &maxMonCurrentRemainder, &leadingCFCurrentRemainder, &this->thePolynomialOrder.theMonOrder
   );
   int indexCurrentRemainderLeadingMonInAllMons = this->allMonomials.GetIndex(maxMonCurrentRemainder);
   this->highlightMonsDivisors[indexCurrentDivisor][indexCurrentDivisorLeadingMonInAllMons].AddOnTop(currentSlideNumber);
@@ -2720,7 +2732,7 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionLaTeXSlide() {
     constMon.MakeOne();
     this->allMonomials.AddOnTopNoRepetition(constMon);
   }
-  this->allMonomials.QuickSortDescending(this->thePolynomialOrder.theMonOrder);
+  this->allMonomials.QuickSortDescending(&this->thePolynomialOrder.theMonOrder);
   List<List<int> > dummyListList;
   List<int> dummyList;
   dummyListList.SetSize(this->allMonomials.size);
@@ -2750,7 +2762,7 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionLaTeXSlide() {
     this->firstNonZeroIndicesPerIntermediateSubtracand[i] = theSubtracands[i].GetIndexLeadingMonomial(
       nullptr,
       nullptr,
-      this->thePolynomialOrder.theMonOrder
+      &this->thePolynomialOrder.theMonOrder
     );
   }
   this->theFormat.flagUseLatex = true;

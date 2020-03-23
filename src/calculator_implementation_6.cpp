@@ -2419,7 +2419,7 @@ bool CalculatorFunctions::innerScaleToLeadingUnit(Calculator& theCommands, const
   const Expression& argument = input[1];
   LinearCombination<Expression, Rational> theCollection;
   theCommands.functionCollectSummands(theCommands, argument, theCollection);
-  theCollection /= theCollection.GetCoefficientMaximalMonomial(nullptr);
+  theCollection /= theCollection.GetLeadingCoefficient(nullptr);
   return output.MakeSum(theCommands, theCollection);
 }
 
@@ -2579,7 +2579,7 @@ bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
   }
   MonomialP leadingMonomial;
   List<MonomialP>::OrderLeftGreaterThanRight monomialOrder = MonomialP::Left_greaterThan_rightToLeft_firstLEQ;
-  thePoly.GetIndexMaximalMonomial(&leadingMonomial, nullptr, monomialOrder);
+  thePoly.GetIndexLeadingMonomial(&leadingMonomial, nullptr, monomialOrder);
   int indexX = 0;
   int indexY = 1;
   if (leadingMonomial[indexX] != 3) {

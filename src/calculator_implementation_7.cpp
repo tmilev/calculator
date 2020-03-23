@@ -1688,11 +1688,11 @@ bool IntegralRFComputation::PreparePFExpressionSummands() {
       }
       denominatorRescaled = this->theDenominatorFactorsWithMults[i];
       numeratorRescaled = this->theNumerators[i][j];
-      denominatorRescaled.GetIndexMaximalMonomial(nullptr, &currentCoefficient, monomialOrder);
+      denominatorRescaled.GetIndexLeadingMonomial(nullptr, &currentCoefficient, monomialOrder);
       currentCoefficient.Invert();
       denominatorRescaled *= currentCoefficient;
       MathRoutines::RaiseToPower(currentCoefficient, j + 1, AlgebraicNumber(1));
-      numeratorRescaled.GetIndexMaximalMonomial(nullptr, &numScale, monomialOrder);
+      numeratorRescaled.GetIndexLeadingMonomial(nullptr, &numScale, monomialOrder);
       numeratorRescaled /= numScale;
       currentCoefficient *= numScale;
       polyE.AssignValueWithContext(numeratorRescaled, this->contextE, *this->owner);
@@ -1758,11 +1758,11 @@ bool IntegralRFComputation::IntegrateRF() {
       }
       denRescaled = this->theDenominatorFactorsWithMults[i];
       numRescaled = this->theNumerators[i][j];
-      currentCoefficient = denRescaled.GetCoefficientMaximalMonomial(monomialOrder);
+      currentCoefficient = denRescaled.GetLeadingCoefficient(monomialOrder);
       currentCoefficient.Invert();
       denRescaled *= currentCoefficient;
       MathRoutines::RaiseToPower(currentCoefficient, j + 1, AlgebraicNumber(1));
-      numScale = numRescaled.GetCoefficientMaximalMonomial(monomialOrder);
+      numScale = numRescaled.GetLeadingCoefficient(monomialOrder);
       numRescaled /= numScale;
       currentCoefficient *= numScale;
       polyE.AssignValueWithContext(numRescaled, this->contextE, *this->owner);

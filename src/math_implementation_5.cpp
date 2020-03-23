@@ -1582,7 +1582,7 @@ void RationalFunctionOld::lcm(
   Rational maximalTotalDegree;
   MonomialP currentLeading;
   for (int i = 0; i < theBasis.size; i ++) {
-    theBasis[i].GetIndexMaximalMonomial(&currentLeading, nullptr, theComp.thePolynomialOrder.theMonOrder);
+    theBasis[i].GetIndexLeadingMonomial(&currentLeading, nullptr, theComp.thePolynomialOrder.theMonOrder);
     if (currentLeading(theNumVars) == 0) {
       if (maxMonNoTIndex == - 1) {
         maximalTotalDegree = currentLeading.TotalDegree();
@@ -1837,7 +1837,7 @@ void RationalFunctionOld::SimplifyLeadingCoefficientOnly() {
     return;
   }
   Rational leadingCoefficientInverted;
-  this->Denominator.GetElement().GetIndexMaximalMonomial(
+  this->Denominator.GetElement().GetIndexLeadingMonomial(
     nullptr, &leadingCoefficientInverted, MonomialP::orderDefault()
   );
   leadingCoefficientInverted.Invert();

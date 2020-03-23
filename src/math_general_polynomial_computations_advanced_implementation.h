@@ -81,12 +81,12 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasis(List
       for (int j = i + 1; j < this->theBasiS.size && i < this->theBasiS.size; j ++) {
         Polynomial<coefficient>& currentLeft = this->theBasiS[i];
         Polynomial<coefficient>& currentRight = this->theBasiS[j];
-        currentLeft.GetIndexMaximalMonomial(
+        currentLeft.GetIndexLeadingMonomial(
           &leftHighestMonomial,
           &leftHighestCoefficient,
           this->thePolynomialOrder.theMonOrder
         );
-        currentRight.GetIndexMaximalMonomial(
+        currentRight.GetIndexLeadingMonomial(
           &rightHighestMonomial,
           &rightHighestCoefficient,
           this->thePolynomialOrder.theMonOrder
@@ -162,8 +162,8 @@ int GroebnerBasisComputation<coefficient>::SelectPolyIndexToAddNext() {
       result = i;
     } else if (
       this->basisCandidates[result].size() == this->basisCandidates[i].size()) {
-      left = this->basisCandidates[i].GetMaximalMonomial(this->thePolynomialOrder.theMonOrder);
-      right = this->basisCandidates[result].GetMaximalMonomial(this->thePolynomialOrder.theMonOrder);
+      left = this->basisCandidates[i].GetLeadingMonomial(this->thePolynomialOrder.theMonOrder);
+      right = this->basisCandidates[result].GetLeadingMonomial(this->thePolynomialOrder.theMonOrder);
       if (left > right) {
         result = i;
       }
@@ -476,7 +476,7 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis(
   while (!currentRemainder.IsEqualToZero()) {
     bool divisionOcurred = false;
     int i = 0;
-    int indexLeadingMonRemainder = currentRemainder.GetIndexMaximalMonomial(
+    int indexLeadingMonRemainder = currentRemainder.GetIndexLeadingMonomial(
       &highestMonCurrentDivHighestMonOther,
       &leadingMonCoeff,
       this->thePolynomialOrder.theMonOrder
@@ -603,7 +603,7 @@ bool GroebnerBasisComputation<coefficient>::AddRemainderToBasis() {
   this->remainderDivision.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
   MonomialP theNewLeadingMon;
   coefficient remainderLeadingCoefficient;
-  this->remainderDivision.GetIndexMaximalMonomial(
+  this->remainderDivision.GetIndexLeadingMonomial(
     &theNewLeadingMon,
     &remainderLeadingCoefficient,
     this->thePolynomialOrder.theMonOrder
@@ -615,7 +615,7 @@ bool GroebnerBasisComputation<coefficient>::AddRemainderToBasis() {
     for (int i = theBasiS.size - 1; i >= 0; i --) {
       bool shouldAddHere = true;
       if (i > 0) {
-        shouldAddHere = (theNewLeadingMon > this->theBasiS[i - 1].GetMaximalMonomial(this->thePolynomialOrder.theMonOrder));
+        shouldAddHere = (theNewLeadingMon > this->theBasiS[i - 1].GetLeadingMonomial(this->thePolynomialOrder.theMonOrder));
       }
       if (shouldAddHere) {
         this->theBasiS[i] = this->remainderDivision;
@@ -678,7 +678,7 @@ void GroebnerBasisComputation<coefficient>::initForDivisionAlone(List<Polynomial
   this->leadingCoeffs.SetSize(inputOutpuT.size);
   for (int i = 0; i < this->theBasiS.size; i ++) {
     Polynomial<coefficient>& curPoly = theBasiS[i];
-    int theIndex = curPoly.GetIndexMaximalMonomial(
+    int theIndex = curPoly.GetIndexLeadingMonomial(
       &this->leadingMons[i],
       &this->leadingCoeffs[i],
       this->thePolynomialOrder.theMonOrder

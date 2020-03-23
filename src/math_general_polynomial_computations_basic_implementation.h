@@ -413,14 +413,14 @@ void Polynomial<coefficient>::DivideBy(
   divisorShiftedExponents.ScaleToPositiveMonomials(scaleInput);
   MonomialP remainderLeadingMonomial;
   coefficient remainderLeadingCoefficient;
-  int remainderLeadingIndex = outputRemainder.GetIndexMaximalMonomial(
+  int remainderLeadingIndex = outputRemainder.GetIndexLeadingMonomial(
     &remainderLeadingMonomial, &remainderLeadingCoefficient, monomialOrder
   );
   global.Comments << "DEBUG: remainderMaxMonomial: "
   << remainderLeadingMonomial.ToString() << "<br>";
   MonomialP leadingMonomialShiftedDivisor;
   coefficient leadingCoefficientShiftedDivisor;
-  divisorShiftedExponents.GetIndexMaximalMonomial(
+  divisorShiftedExponents.GetIndexLeadingMonomial(
     &leadingMonomialShiftedDivisor, &leadingCoefficientShiftedDivisor, monomialOrder
   );
   outputQuotient.MakeZero();
@@ -444,7 +444,7 @@ void Polynomial<coefficient>::DivideBy(
     subtracand = divisorShiftedExponents;
     subtracand.MultiplyBy(quotientMonomial, quotientCoefficient);
     outputRemainder -= subtracand;
-    int remainderIndex = outputRemainder.GetIndexMaximalMonomial(
+    int remainderIndex = outputRemainder.GetIndexLeadingMonomial(
       &remainderLeadingMonomial, &remainderLeadingCoefficient, monomialOrder
     );
     if (remainderIndex == - 1) {
@@ -601,7 +601,7 @@ bool Polynomial<coefficient>::FindOneVariableRationalRoots(List<Rational>& outpu
   if (this->IsConstant()) {
     return true;
   }
-  highestCoefficient = this->GetCoefficientMaximalMonomial(monomialOrder);
+  highestCoefficient = this->GetLeadingCoefficient(monomialOrder);
   if (!highestCoefficient.IsSmallInteger() || !lowestTerm.IsSmallInteger()) {
     return false;
   }
@@ -769,7 +769,7 @@ bool PolynomialOrder<coefficient>::CompareLeftGreaterThanRight(
   if (difference.IsEqualToZero()) {
     return false;
   }
-  coefficient leading = difference.GetCoefficientMaximalMonomial(this->theMonOrder);
+  coefficient leading = difference.GetLeadingCoefficient(this->theMonOrder);
   if (leading > 0) {
     return true;
   }

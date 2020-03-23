@@ -363,7 +363,7 @@ bool AlgebraicClosureRationals::ReduceMe(
   }
   List<MatrixTensor<Rational> > newBasis;
   MatrixTensor<Rational> generatorProjected;
-  Rational leadingCoefficient = smallestFactor.GetCoefficientMaximalMonomial(nullptr);
+  Rational leadingCoefficient = smallestFactor.GetLeadingCoefficient(nullptr);
   for (int i = 0; i < smallestFactorDegree; i ++) {
     MonomialMatrix termBelowMainDiagonal, termInLastColumn;
     if (i + 1 < smallestFactorDegree) {
@@ -693,7 +693,7 @@ bool AlgebraicClosureRationals::AdjoinRootQuadraticPolyToQuadraticRadicalExtensi
     }
   }
   List<MonomialP>::OrderLeftGreaterThanRight monomialOrder = MonomialP::orderDefault();
-  minPoly /= minPoly.GetCoefficientMaximalMonomial(monomialOrder);
+  minPoly /= minPoly.GetLeadingCoefficient(monomialOrder);
   minPoly.GetCoeffInFrontOfLinearTermVariableIndex(0, theLinearTermCFdividedByTwo);
   theLinearTermCFdividedByTwo /= 2;
   minPoly.GetConstantTerm(theConstTermShifted);
@@ -752,7 +752,7 @@ bool AlgebraicClosureRationals::AdjoinRootMinimalPolynomial(
   Polynomial<AlgebraicNumber> minPoly;
   this->ConvertPolyDependingOneVariableToPolyDependingOnFirstVariableNoFail(thePoly, minPoly);
   List<MonomialP>::OrderLeftGreaterThanRight monomialOrder = MonomialP::orderDefault();
-  AlgebraicNumber leadingCoefficient = minPoly.GetCoefficientMaximalMonomial(monomialOrder);
+  AlgebraicNumber leadingCoefficient = minPoly.GetLeadingCoefficient(monomialOrder);
   minPoly /= leadingCoefficient;
   AlgebraicClosureRationals backUpCopy;
   backUpCopy = *this;
@@ -793,7 +793,7 @@ bool AlgebraicClosureRationals::AdjoinRootMinimalPolynomial(
   Polynomial<AlgebraicNumber> minusMinimalPolynomialMinusMaximalMonomial = minPoly;
   MonomialP leadingMonomial;
   AlgebraicNumber leadingCoefficientModified;
-  minusMinimalPolynomialMinusMaximalMonomial.GetIndexMaximalMonomial(
+  minusMinimalPolynomialMinusMaximalMonomial.GetIndexLeadingMonomial(
     &leadingMonomial, &leadingCoefficientModified, monomialOrder
   );
   minusMinimalPolynomialMinusMaximalMonomial.SubtractMonomial(leadingMonomial, leadingCoefficientModified);

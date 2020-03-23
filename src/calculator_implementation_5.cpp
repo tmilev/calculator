@@ -2561,7 +2561,7 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
   int indexCurrentDivisor = this->intermediateSelectedDivisors.GetElement()[remainderIndex];
   Polynomial<coefficient>& currentDivisor = this->theBasiS[indexCurrentDivisor];
   MonomialP divisorLeadingMonomial;
-  int indexCurrentDivisorLeadingMoN = currentDivisor.GetIndexMaximalMonomial(
+  int indexCurrentDivisorLeadingMoN = currentDivisor.GetIndexLeadingMonomial(
     &divisorLeadingMonomial, nullptr, this->thePolynomialOrder.theMonOrder
   );
   int indexCurrentDivisorLeadingMonInAllMons = this->allMonomials.GetIndex(
@@ -2569,7 +2569,7 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
   );
   MonomialP maxMonCurrentRemainder;
   coefficient leadingCFCurrentRemainder;
-  currentRemainder.GetIndexMaximalMonomial(
+  currentRemainder.GetIndexLeadingMonomial(
     &maxMonCurrentRemainder, &leadingCFCurrentRemainder, this->thePolynomialOrder.theMonOrder
   );
   int indexCurrentRemainderLeadingMonInAllMons = this->allMonomials.GetIndex(maxMonCurrentRemainder);
@@ -2747,7 +2747,7 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionLaTeXSlide() {
     this->ComputeHighLightsFromRemainder(i, currentSlideNumer);
   }
   for (int i = 0; i < theSubtracands.size; i ++) {
-    this->firstNonZeroIndicesPerIntermediateSubtracand[i] = theSubtracands[i].GetIndexMaximalMonomial(
+    this->firstNonZeroIndicesPerIntermediateSubtracand[i] = theSubtracands[i].GetIndexLeadingMonomial(
       nullptr,
       nullptr,
       this->thePolynomialOrder.theMonOrder

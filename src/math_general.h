@@ -2108,19 +2108,19 @@ public:
     }
   }
 
-  coefficient GetCoefficientMaximalMonomial(typename List<templateMonomial>::OrderLeftGreaterThanRight monomialOrder) {
+  coefficient GetLeadingCoefficient(typename List<templateMonomial>::OrderLeftGreaterThanRight monomialOrder) {
     coefficient result;
-    this->GetIndexMaximalMonomial(nullptr, &result, monomialOrder);
+    this->GetIndexLeadingMonomial(nullptr, &result, monomialOrder);
     return result;
   }
 
-  templateMonomial GetMaximalMonomial(typename List<templateMonomial>::OrderLeftGreaterThanRight monomialOrder) {
+  templateMonomial GetLeadingMonomial(typename List<templateMonomial>::OrderLeftGreaterThanRight monomialOrder) {
     templateMonomial result;
-    this->GetIndexMaximalMonomial(&result, nullptr, monomialOrder);
+    this->GetIndexLeadingMonomial(&result, nullptr, monomialOrder);
     return result;
   }
 
-  int GetIndexMaximalMonomial(
+  int GetIndexLeadingMonomial(
     templateMonomial* outputMonomial,
     coefficient* outputCoefficient,
     typename List<templateMonomial>::OrderLeftGreaterThanRight monomialOrder = nullptr
@@ -2384,7 +2384,7 @@ public:
   }
   Rational ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedByLeadingCoefficientPositive() {
     Rational result = this->ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
-    if (this->GetCoefficientMaximalMonomial(nullptr) < 0) {
+    if (this->GetLeadingCoefficient(nullptr) < 0) {
       (*this) *= - 1;
       result *= - 1;
     }
@@ -2809,7 +2809,7 @@ public:
       return 1;
     }
     Rational result = this->ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
-    int indexMaximalMonomial = this->GetIndexMaximalMonomial(nullptr, nullptr, MonomialP::orderDefault());
+    int indexMaximalMonomial = this->GetIndexLeadingMonomial(nullptr, nullptr, MonomialP::orderDefault());
     if (this->coefficients[indexMaximalMonomial].IsNegative()) {
       *this *= - 1;
       result *= - 1;
@@ -3005,8 +3005,8 @@ public:
     }
     MonomialP thisMaximalMonomial, otherMaximalMonomial;
     List<MonomialP>::OrderLeftGreaterThanRight monomialOrder = MonomialP::orderDefault();
-    int thisMaxMonIndex = this->GetIndexMaximalMonomial(&thisMaximalMonomial, nullptr, monomialOrder);
-    int otherMaxMonIndex = other.GetIndexMaximalMonomial(&otherMaximalMonomial, nullptr, monomialOrder);
+    int thisMaxMonIndex = this->GetIndexLeadingMonomial(&thisMaximalMonomial, nullptr, monomialOrder);
+    int otherMaxMonIndex = other.GetIndexLeadingMonomial(&otherMaximalMonomial, nullptr, monomialOrder);
     if (thisMaximalMonomial > otherMaximalMonomial) {
       return true;
     }

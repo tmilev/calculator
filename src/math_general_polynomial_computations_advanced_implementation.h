@@ -99,7 +99,7 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasis(List
             this->SoPolyRightShift[k] = leftHighestMonomial(k) - rightHighestMonomial(k);
             this->SoPolyLeftShift[k] = 0;
           } else {
-            this->SoPolyLeftShift[k] = leftHighestMonomial(k) - rightHighestMonomial(k);
+            this->SoPolyLeftShift[k] = rightHighestMonomial(k) - leftHighestMonomial(k);
             this->SoPolyRightShift[k] = 0;
           }
         }
@@ -437,7 +437,7 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis(
   ) {
     global.fatal << "This is a programming error: the input, the output and "
     << "the buffer member object must be pairwise distinct when carrying out "
-    << " multi-polynomial division. " << global.fatal;
+    << "multi-polynomial division. " << global.fatal;
   }
   if (this->flagStoreQuotients) {
     this->theQuotients.SetSize(this->theBasiS.size);
@@ -453,7 +453,6 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis(
   ProgressReport theReport;
   if (this->flagDoProgressReport) {
     theReportStart.Report("Computing remainder division");
-    //+     inputOutput.ToString(&global->theDefaultFormat) + " mod " +theBasiS.ToString(&global->theDefaultFormat));
   }
   outputRemainder->MakeZero();
   Polynomial<coefficient>& currentRemainder = inputOutput;
@@ -471,7 +470,6 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis(
     this->intermediateRemainders.GetElement().AddOnTop(currentRemainder);
     this->intermediateHighlightedMons.GetElement().SetSize(1);
     this->intermediateHighlightedMons.GetElement().LastObject()->SetSize(0);
-//    this->intermedi
   }
   while (!currentRemainder.IsEqualToZero()) {
     bool divisionOcurred = false;
@@ -515,46 +513,22 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis(
             out << ", with a limit of " << this->MaxNumGBComputations << " operations. ";
           }
           out << "\n<br>Number of intermediate remainders: "
-          << numIntermediateRemainders << "\n<br> Highest mon of current remainder: "
+          << numIntermediateRemainders << "\n<br> Highest remainder monomial: "
           << currentRemainder[indexLeadingMonRemainder].ToString()
-          << ". \n<br>Current index we are dividing by: " << i + 1
+          << ".\n<br>Current index we are dividing by: " << i + 1
           << " out of " << this->theBasiS.size << "\n<br>"
           << currentRemainder.size() << " monomials in current remainder."
           << "\n<br>" << outputRemainder->size() << " monomials in output remainder.";
           theReport.Report(out.str());
         }
-/*        if (this->NumberOfComputations>this->MaxNumGBComputations+ 1000) {
-          global.Comments << "<br>Dividing "
-          << currentRemainder.ToString()
-          <<  " by " << theBasiS[i].ToString() << "<br>i.e. subtracting "
-          << this->bufPoly.ToString() ;
-          Polynomial<Rational> currentRemainder1;
-          currentRemainder1= currentRemainder;
-          currentRemainder1-= this->bufPoly;
-          global.Comments << " I must get: " << currentRemainder1.ToString();
-        }*/
-        //global.Comments << " <hr>Subtracting " << this->bufPoly.ToString()
-        //<< " from " << currentRemainder.ToString();
         currentRemainder -= this->bufPoly;
-        //global.Comments << " to get " << currentRemainder.ToString();
         if (this->flagDoLogDivision) {
           this->intermediateRemainders.GetElement().AddOnTop(currentRemainder);
           List<MonomialP> empty;
           this->intermediateHighlightedMons.GetElement().AddOnTop(empty);
         }
         divisionOcurred = true;
-/*        if (this->NumberOfComputations>this->MaxNumGBComputations+ 1000) {
-          global.Comments << "<br>Result:<br> " << currentRemainder.ToString()
-          << "<br>Current divisor index: " << i + 1;
-          if (this->NumberOfComputations>this->MaxNumGBComputations+ 1010)
-            crash
-            << "<br>This may or may not be a programming error. While handling computation excess limit, "
-            << " I got that NumberOfComputations is much larger than MaxNumGBComputations. "
-            << " I have no explanation for this issue right now, so I am crashing to let you know "
-            << " something is fishy. " << global.fatal;
-        }*/
         this->NumberGBComputations++;
-        //global.Comments << " to get " << currentRemainder.ToString(&global->theDefaultFormat);
       } else {
         i ++;
       }
@@ -566,13 +540,6 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis(
       }
       currentRemainder.PopMonomial(indexLeadingMonRemainder);
       this->NumberGBComputations ++;
-      /*if (this->NumberGBComputations>this->MaxNumGBComputations+ 1000)
-        crash
-        << "This may or may not be a programming error. While handling computation excess limit, "
-        << " I got that NumberGBComputations is much larger than MaxNumGBComputations. "
-        << " I have no explanation for this issue right now, so I am crashing to let you know "
-        << " something is fishy. " << "<br>Current remainder:<br> " << currentRemainder.ToString() << global.fatal;
-        */
       if (this->flagDoProgressReport) {
         std::stringstream out;
         out << "Number of intermediate remainders: "
@@ -582,13 +549,9 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis(
         << " monomials in current remainder.\n<br>"
         << outputRemainder->size() << " monomials in output remainder.";
         theReport.Report(out.str());
-          //global.Comments << out.str();
       }
     }
   }
-//  global.Comments << " <br>final remainder: "
-//  << outputRemainder.ToString(&global->theDefaultFormat)
-//  << "<hr>";
 }
 
 template <class coefficient>

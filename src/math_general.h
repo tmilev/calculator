@@ -498,8 +498,14 @@ public:
     this->monBody = other.monBody;
   }
   class Test {
+
   public:
     static bool All();
+    static bool TestMonomialOrdersSatisfyTheDefinitionOne(
+      const MonomialP& mustBeSmaller,
+      const MonomialP& mustBeLarger,
+      List<MonomialP>::Comparator& order
+    );
     static bool TestMonomialOrdersSatisfyTheDefinition();
   };
 };

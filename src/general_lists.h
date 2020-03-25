@@ -603,6 +603,7 @@ public:
   class Comparator {
   public:
     bool (*leftGreaterThanRight) (const Object& left, const Object& right);
+    std::string name;
     Comparator() {
       this->leftGreaterThanRight = nullptr;
     }

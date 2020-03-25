@@ -2254,6 +2254,7 @@ bool CalculatorFunctions::innerPolynomialDivisionRemainder(
     return output.MakeError("Failed to extract list of polynomials. ", theCommands);
   }
   GroebnerBasisComputation<AlgebraicNumber> theGB;
+  theGB.flagStoreQuotients = true;
   theGB.theBasiS.SetSize(thePolys.size - 1);
   for (int i = 1; i < thePolys.size; i ++) {
     if (thePolys[i].IsEqualToZero()) {

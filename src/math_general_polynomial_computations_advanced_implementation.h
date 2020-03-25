@@ -451,7 +451,11 @@ void GroebnerBasisComputation<coefficient>::OneDivisonSubStepWithBasis(
   }
   this->bufPoly.MultiplyBy(quotientMonomial, quotientCoefficient);
   if (this->flagStoreQuotients) {
+  global.Comments << "DEBUG: storing quotient mon: " << quotientMonomial.ToString() << "<br>";
     this->theQuotients[index].AddMonomial(quotientMonomial, quotientCoefficient);
+  } else {
+    global.Comments << "DEBUG: NOT STORING mon: " << quotientMonomial.ToString() << "<br>";
+
   }
   if (this->flagDoLogDivision) {
     this->intermediateSubtractands.GetElement().AddOnTop(this->bufPoly);
@@ -692,6 +696,7 @@ void GroebnerBasisComputation<coefficient>::initializeForDivision(
     << "I cannot transform an empty list to a Groebner basis. "
     << global.fatal;
   }
+  global.Comments << "DEBUG: And store quotients is:" << this->flagStoreQuotients;
   this->theBasiS = inputOutput;
   this->leadingMons.SetSize(inputOutput.size);
   this->leadingCoeffs.SetSize(inputOutput.size);

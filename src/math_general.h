@@ -5242,9 +5242,7 @@ std::string LinearCombination<templateMonomial, coefficient>::ToString(
   // wish to use a custom one.
   typename List<templateMonomial>::Comparator*
   theOrder = (theFormat == nullptr) ? 0 : theFormat->GetMonOrder<templateMonomial>();
-  global.Comments << "DEBUG: About to quicksort descending.<br>";
   sortedMons.QuickSortDescending(theOrder);
-  global.Comments << "DEBUG: About to quicksort descending. DONE<br>";
   int cutOffCounter = 0;
   bool useCustomPlus = false;
   bool useCustomTimes = false;

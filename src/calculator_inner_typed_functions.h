@@ -185,6 +185,13 @@ bool CalculatorConversions::functionPolynomiaL(Calculator& theCommands, const Ex
     output = input;
     return true;
   }
+  if (input.IsOfType<Polynomial<Rational> >()) {
+    Polynomial<Rational> thePolynomial;
+    Polynomial<coefficient> converted;
+    input.IsOfType(&thePolynomial);
+    converted = thePolynomial;
+    return output.AssignValueWithContext(converted, input.GetContext(), theCommands);
+  }
   if (input.IsOfType<coefficient>() || input.IsOfType<Rational>()) {
     if (!input.ConvertToType<Polynomial<coefficient> >(output)) {
       global.fatal << "This is a programming error: "

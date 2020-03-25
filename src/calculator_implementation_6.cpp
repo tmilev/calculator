@@ -1338,9 +1338,14 @@ bool CalculatorFunctions::innerPolynomialDivisionQuotient(
     }
     theGB.theBasiS[i - 1] = thePolys[i];
   }
+  global.Comments << "DEBUG divide polys " << thePolys.ToStringCommaDelimited() << "<br>";
   Polynomial<AlgebraicNumber> outputRemainder;
   theGB.initializeForDivision(theGB.theBasiS);
+  global.Comments << "DEBUG And the quotient flag: " << theGB.flagStoreQuotients << "<br>";
   theGB.RemainderDivisionByBasis(thePolys[0], &outputRemainder, - 1);
+  global.Comments << "DEBUG divide:: " << thePolys[0].ToString() << "<br>";
+  global.Comments << "DEBUG And the gb: " << theGB.theQuotients.ToStringCommaDelimited() << "<br>";
+  global.Comments << "DEBUG And the basis: " << theGB.theBasiS.ToStringCommaDelimited() << "<br>";
   Expression currentE, thePolyE;
   List<Expression> theList;
   for (int i = 0; i < theGB.theQuotients.size; i ++) {

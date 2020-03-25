@@ -181,7 +181,7 @@ bool Calculator::innerGCDOrLCMPoly(
 
 bool Calculator::GetListPolynomialVariableLabelsLexicographic(
   const Expression& input,
-  Vector<Polynomial<AlgebraicNumber> > &output,
+  Vector<Polynomial<AlgebraicNumber> >& output,
   Expression& outputContext
 ) {
   MacroRegisterFunctionWithName("Calculator::GetListPolynomialVariableLabelsLexicographic");
@@ -195,6 +195,7 @@ bool Calculator::GetListPolynomialVariableLabelsLexicographic(
   )) {
     return false;
   }
+  global.Comments << "DEBUG: and hte output so far: " << output.ToString() << "<hr>";
   if (output.size < 2) {
     return false;
   }

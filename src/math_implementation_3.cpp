@@ -2754,6 +2754,7 @@ FormatExpressions::FormatExpressions() {
   this->flagUseQuotes = true;
   this->MaxMatrixDisplayedRows = 20;
   this->MaxMatrixLineLength = 20;
+  this->monomialOrder.leftGreaterThanRight = MonomialP::orderDefault().leftGreaterThanRight;
 }
 
 std::string FormatExpressions::GetPolyLetter(int index) const {

@@ -3302,6 +3302,7 @@ class GroebnerBasisComputation {
   int MaxNumGBComputations;
   int MaxNumBasisReductionComputations;
   int firstIndexLatexSlide;
+  int numberOfIntermediateRemainders;
   //bool flagBasisGuaranteedToGenerateIdeal;
   bool flagUseTheMonomialBranchingOptimization;
   bool flagDoProgressReport;
@@ -3401,6 +3402,19 @@ class GroebnerBasisComputation {
     Polynomial<coefficient>& inputOutput,
     Polynomial<coefficient>* outputRemainder = 0,
     int basisIndexToIgnore = - 1
+  );
+  bool OneDivisonStepWithRespectToBasis(
+    Polynomial<coefficient>& currentRemainder,
+    Polynomial<coefficient>* remainderResult,
+    int basisIndexToIgnore,
+    ProgressReport* report
+  );
+  void OneDivisonSubStepWithRespectToBasis(
+    Polynomial<coefficient>& remainder,
+    const MonomialP& leadingMonomial,
+    const coefficient& leadingCoefficient,
+    int index,
+    ProgressReport* theReport
   );
   std::string ToStringCalculatorInputFromSystem(const List<Polynomial<coefficient> >& inputSystem);
   void SolveSerreLikeSystem(List<Polynomial<coefficient> >& inputSystem);

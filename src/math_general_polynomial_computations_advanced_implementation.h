@@ -423,6 +423,104 @@ std::string GroebnerBasisComputation<coefficient>::ToStringLetterOrder(bool addD
 }
 
 template <class coefficient>
+void GroebnerBasisComputation<coefficient>::OneDivisonSubStepWithRespectToBasis(
+  Polynomial<coefficient>& remainder,
+  const MonomialP& leadingMonomial,
+  const coefficient& leadingCoefficient,
+  int index,
+  ProgressReport* theReport
+) {
+  const MonomialP& leadingMonomialBasis = this->leadingMons[index];
+  const coefficient& leadingCoefficientBasis = this->leadingCoeffs[index];
+  MonomialP quotientMonomial = leadingMonomial;
+  quotientMonomial /= leadingMonomialBasis;
+  if (!quotientMonomial.HasPositiveOrZeroExponents()) {
+    global.fatal << "This is a programming error: the pivot monomial "
+    << "in the polynomial division algorithm has negative exponent(s). "
+    << "This is not allowed. " << global.fatal;
+  }
+  if (this->flagDoLogDivision) {
+    this->intermediateHighestMonDivHighestMon.GetElement().AddOnTop(quotientMonomial);
+    this->intermediateSelectedDivisors.GetElement().AddOnTop(index);
+  }
+  this->bufPoly = this->theBasiS[index];
+  coefficient quotientCoefficient = leadingCoefficient;
+  quotientCoefficient /= leadingCoefficientBasis;
+  if (this->flagDoLogDivision) {
+    this->intermediateCoeffs.GetElement().AddOnTop(quotientCoefficient);
+  }
+  this->bufPoly.MultiplyBy(quotientMonomial, quotientCoefficient);
+  if (this->flagStoreQuotients) {
+    this->theQuotients[index].AddMonomial(quotientMonomial, quotientCoefficient);
+  }
+  if (this->flagDoLogDivision) {
+    this->intermediateSubtractands.GetElement().AddOnTop(this->bufPoly);
+  }
+  if (this->flagDoProgressReport && theReport != nullptr) {
+    std::stringstream out;
+    out << "Total number of polynomial operations so far: " << this->NumberGBComputations;
+    if (this->MaxNumGBComputations > 0) {
+      out << ", with a limit of " << this->MaxNumGBComputations << " operations. ";
+    }
+    out << "\n<br>Number of intermediate remainders: "
+    << this->numberOfIntermediateRemainders << "\n<br> Highest remainder monomial: "
+    << leadingMonomial.ToString()
+    << ".\n<br>"
+    << "Dividing by the leading monomial " << leadingMonomialBasis.ToString()
+    << " of basis element: " << index + 1
+    << " out of " << this->theBasiS.size << "\n<br>"
+    << remainder.size() << " monomials in current remainder.";
+    theReport->Report(out.str());
+  }
+  remainder -= this->bufPoly;
+  if (this->flagDoLogDivision) {
+    this->intermediateRemainders.GetElement().AddOnTop(remainder);
+    List<MonomialP> empty;
+    this->intermediateHighlightedMons.GetElement().AddOnTop(empty);
+  }
+  this->NumberGBComputations++;
+}
+
+template <class coefficient>
+bool GroebnerBasisComputation<coefficient>::OneDivisonStepWithRespectToBasis(
+  Polynomial<coefficient>& currentRemainder,
+  Polynomial<coefficient>* remainderResult,
+  int basisIndexToIgnore,
+  ProgressReport* report
+) {
+  MacroRegisterFunctionWithName("GroebnerBasisComputation::OneDivisonStepWithRespectToBasis");
+  MonomialP highestMonomial;
+  coefficient leadingCoefficient;
+  int indexLeadingMonomial = currentRemainder.GetIndexLeadingMonomial(
+    &highestMonomial,
+    &leadingCoefficient,
+    &this->thePolynomialOrder.theMonOrder
+  );
+
+  for (int i = 0; i < this->theBasiS.size; i ++) {
+    if (i == basisIndexToIgnore) {
+      continue;
+    }
+    MonomialP& highestMonomialBasis = this->leadingMons[i];
+    if (!highestMonomial.IsDivisibleBy(highestMonomialBasis)) {
+      continue;
+    }
+    this->numberOfIntermediateRemainders ++;
+    this->OneDivisonSubStepWithRespectToBasis(currentRemainder, highestMonomial, leadingCoefficient, i, report);
+    return true;
+  }
+  if (remainderResult != nullptr) {
+    remainderResult->AddMonomial(highestMonomial, leadingCoefficient);
+  }
+  if (this->flagDoLogDivision) {
+    (*this->intermediateHighlightedMons.GetElement().LastObject()).AddOnTop(highestMonomial);
+  }
+  currentRemainder.PopMonomial(indexLeadingMonomial);
+  this->NumberGBComputations ++;
+  return false;
+}
+
+template <class coefficient>
 void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis(
   Polynomial<coefficient>& inputOutput,
   Polynomial<coefficient>* outputRemainder,
@@ -449,10 +547,11 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis(
   if (outputRemainder == 0) {
     outputRemainder = &tempPoly.GetElement();
   }
-  ProgressReport theReportStart;
-  ProgressReport theReport;
+  ProgressReport reportHeader;
+  ProgressReport reportRemainderSoFar;
+  ProgressReport reportBody;
   if (this->flagDoProgressReport) {
-    theReportStart.Report("Computing remainder division");
+    reportHeader.Report("Computing remainder division");
   }
   outputRemainder->MakeZero();
   Polynomial<coefficient>& currentRemainder = inputOutput;
@@ -460,8 +559,6 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis(
     this->startingPoly.GetElement() = currentRemainder;
   }
   coefficient leadingMonCoeff;
-  MonomialP& highestMonCurrentDivHighestMonOther = this->bufferMoN1;
-  int numIntermediateRemainders = 0;
   if (this->flagDoLogDivision) {
     this->intermediateCoeffs.GetElement().size = 0;
     this->intermediateRemainders.GetElement().size = 0;
@@ -472,84 +569,25 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis(
     this->intermediateHighlightedMons.GetElement().LastObject()->SetSize(0);
   }
   while (!currentRemainder.IsEqualToZero()) {
-    bool divisionOcurred = false;
-    int i = 0;
-    int indexLeadingMonRemainder = currentRemainder.GetIndexLeadingMonomial(
-      &highestMonCurrentDivHighestMonOther,
-      &leadingMonCoeff,
-      &this->thePolynomialOrder.theMonOrder
-    );
-    while (i < this->theBasiS.size && !divisionOcurred) {
-      MonomialP& highestMonBasis = this->leadingMons[i];
-      bool shouldDivide = (i == basisIndexToIgnore) ? false : highestMonCurrentDivHighestMonOther.IsDivisibleBy(highestMonBasis);
-      if (shouldDivide) {
-        numIntermediateRemainders ++;
-        highestMonCurrentDivHighestMonOther /= highestMonBasis;
-        if (!highestMonCurrentDivHighestMonOther.HasPositiveOrZeroExponents()) {
-          global.fatal << "This is a programming error: the pivot monomial "
-          << "in the polynomial division algorithm has negative exponent(s). "
-          << "This is not allowed. " << global.fatal;
-        }
-        if (this->flagDoLogDivision) {
-          this->intermediateHighestMonDivHighestMon.GetElement().AddOnTop(highestMonCurrentDivHighestMonOther);
-          this->intermediateSelectedDivisors.GetElement().AddOnTop(i);
-        }
-        this->bufPoly = this->theBasiS[i];
-        leadingMonCoeff /= this->leadingCoeffs[i];
-        if (this->flagDoLogDivision) {
-          this->intermediateCoeffs.GetElement().AddOnTop(leadingMonCoeff);
-        }
-        this->bufPoly.MultiplyBy(highestMonCurrentDivHighestMonOther, leadingMonCoeff);
-        if (this->flagStoreQuotients) {
-          this->theQuotients[i].AddMonomial(highestMonCurrentDivHighestMonOther, leadingMonCoeff);
-        }
-        if (this->flagDoLogDivision) {
-          this->intermediateSubtractands.GetElement().AddOnTop(this->bufPoly);
-        }
-        if (this->flagDoProgressReport) {
-          std::stringstream out;
-          out << "Total number of polynomial operations so far: " << this->NumberGBComputations;
-          if (this->MaxNumGBComputations > 0) {
-            out << ", with a limit of " << this->MaxNumGBComputations << " operations. ";
-          }
-          out << "\n<br>Number of intermediate remainders: "
-          << numIntermediateRemainders << "\n<br> Highest remainder monomial: "
-          << currentRemainder[indexLeadingMonRemainder].ToString()
-          << ".\n<br>Current index we are dividing by: " << i + 1
-          << " out of " << this->theBasiS.size << "\n<br>"
-          << currentRemainder.size() << " monomials in current remainder."
-          << "\n<br>" << outputRemainder->size() << " monomials in output remainder.";
-          theReport.Report(out.str());
-        }
-        currentRemainder -= this->bufPoly;
-        if (this->flagDoLogDivision) {
-          this->intermediateRemainders.GetElement().AddOnTop(currentRemainder);
-          List<MonomialP> empty;
-          this->intermediateHighlightedMons.GetElement().AddOnTop(empty);
-        }
-        divisionOcurred = true;
-        this->NumberGBComputations++;
-      } else {
-        i ++;
-      }
+    this->numberOfIntermediateRemainders = 0;
+    while (this->OneDivisonStepWithRespectToBasis(
+      currentRemainder,
+      outputRemainder,
+      basisIndexToIgnore,
+      &reportBody
+    )) {
     }
-    if (!divisionOcurred) {
-      outputRemainder->AddMonomial(highestMonCurrentDivHighestMonOther, leadingMonCoeff);
-      if (this->flagDoLogDivision) {
-        (*this->intermediateHighlightedMons.GetElement().LastObject()).AddOnTop(highestMonCurrentDivHighestMonOther);
+    if (this->flagDoProgressReport) {
+      std::stringstream out;
+      out << "Last extracted remainder monomial took: "
+      << this->numberOfIntermediateRemainders << " polynomial divisions. "
+      << "\n<br>" << currentRemainder.size()
+      << " monomials in working remainder.";
+      if (outputRemainder != nullptr) {
+        out <<  "<br>" << outputRemainder->size()
+        << " monomials in the final output remainder.";
       }
-      currentRemainder.PopMonomial(indexLeadingMonRemainder);
-      this->NumberGBComputations ++;
-      if (this->flagDoProgressReport) {
-        std::stringstream out;
-        out << "Number of intermediate remainders: "
-        << numIntermediateRemainders
-        << "\n<br> Highest mon of current remainder is no longer reducible. "
-        << "\n<br>" << currentRemainder.size()
-        << " monomials in current remainder.\n<br>"
-        << outputRemainder->size() << " monomials in output remainder.";
-        theReport.Report(out.str());
-      }
+      reportRemainderSoFar.Report(out.str());
     }
   }
 }
@@ -604,7 +642,7 @@ bool GroebnerBasisComputation<coefficient>::AddRemainderToBasis() {
 template <class coefficient>
 GroebnerBasisComputation<coefficient>::GroebnerBasisComputation() {
   // "Graded reverse lexicographic" order.
-  this->thePolynomialOrder.theMonOrder = MonomialP::Left_greaterThan_rightToLeft_firstLEQ;
+  this->thePolynomialOrder.theMonOrder.leftGreaterThanRight = MonomialP::Left_greaterThan_rightToLeft_firstLEQ;
 
   this->RecursionCounterSerreLikeSystem = 0;
   this->NumVarsToSolveForStarT = - 1;
@@ -612,6 +650,7 @@ GroebnerBasisComputation<coefficient>::GroebnerBasisComputation() {
   this->NumberSerreSystemComputations = 0;
   this->NumberSerreVariablesOneGenerator = - 1;
   this->NumberGBComputations = 0;
+  this->numberOfIntermediateRemainders = 0;
 
   this->MaxNumSerreSystemComputationsPreferred = 0;
   this->MaxNumGBComputations = 0;

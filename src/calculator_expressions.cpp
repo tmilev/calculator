@@ -65,7 +65,7 @@ int Expression::GetTypeOperation<ElementEllipticCurve<ElementZmodP> >() const {
 }
 
 template < >
-int Expression::GetTypeOperation<RationalFunctionOld>() const {
+int Expression::GetTypeOperation<RationalFunction>() const {
   this->CheckInitialization();
   return this->owner->opRationalFunction();
 }
@@ -113,7 +113,7 @@ int Expression::GetTypeOperation<ElementZmodP>() const {
 }
 
 template < >
-int Expression::GetTypeOperation<ElementUniversalEnveloping<RationalFunctionOld> >() const {
+int Expression::GetTypeOperation<ElementUniversalEnveloping<RationalFunction> >() const {
   this->CheckInitialization();
   return this->owner->opElementUEoverRF();
 }
@@ -191,7 +191,7 @@ int Expression::GetTypeOperation<MonomialTensor<int, MathRoutines::IntUnsignIden
 }
 
 template < >
-int Expression::GetTypeOperation<ElementTensorsGeneralizedVermas<RationalFunctionOld> >() const {
+int Expression::GetTypeOperation<ElementTensorsGeneralizedVermas<RationalFunction> >() const {
   this->CheckInitialization();
   return this->owner->opElementTensorGVM();
 }
@@ -254,8 +254,8 @@ ElementSemisimpleLieAlgebra<AlgebraicNumber>* whichElement
   if (this->owner == nullptr) {
     return false;
   }
-  ElementUniversalEnveloping<RationalFunctionOld> theUEElt;
-  if (!this->IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >(&theUEElt)) {
+  ElementUniversalEnveloping<RationalFunction> theUEElt;
+  if (!this->IsOfType<ElementUniversalEnveloping<RationalFunction> >(&theUEElt)) {
     return false;
   }
   ElementSemisimpleLieAlgebra<Rational> theRatElt;
@@ -362,7 +362,7 @@ double
 
 template < >
 int Expression::AddObjectReturnIndex(const
-RationalFunctionOld
+RationalFunction
 & inputValue) const {
   this->CheckInitialization();
   return this->owner->theObjectContainer.theRFs
@@ -380,7 +380,7 @@ MatrixTensor<Rational>
 
 template < >
 int Expression::AddObjectReturnIndex(const
-ElementUniversalEnveloping<RationalFunctionOld>
+ElementUniversalEnveloping<RationalFunction>
 & inputValue) const {
   this->CheckInitialization();
   return this->owner->theObjectContainer.theUEs
@@ -490,7 +490,7 @@ MonomialTensor<int, MathRoutines::IntUnsignIdentity>
 
 template < >
 int Expression::AddObjectReturnIndex(const
-ElementTensorsGeneralizedVermas<RationalFunctionOld>
+ElementTensorsGeneralizedVermas<RationalFunction>
 & inputValue) const {
   this->CheckInitialization();
   return this->owner->theObjectContainer.theTensorElts
@@ -664,8 +664,8 @@ std::string& Expression::GetValueNonConst() const {
 }
 
 template < >
-RationalFunctionOld& Expression::GetValueNonConst() const {
-  if (!this->IsOfType<RationalFunctionOld>()) {
+RationalFunction& Expression::GetValueNonConst() const {
+  if (!this->IsOfType<RationalFunction>()) {
     global.fatal << "This is a programming error: expression not of required type RationalFunctionOld. "
     << "The expression equals " << this->ToString() << "." << global.fatal;
   }
@@ -673,8 +673,8 @@ RationalFunctionOld& Expression::GetValueNonConst() const {
 }
 
 template < >
-ElementUniversalEnveloping<RationalFunctionOld>& Expression::GetValueNonConst() const {
-  if (!this->IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >()) {
+ElementUniversalEnveloping<RationalFunction>& Expression::GetValueNonConst() const {
+  if (!this->IsOfType<ElementUniversalEnveloping<RationalFunction> >()) {
     global.fatal << "This is a programming error: expression not of required type "
     << "ElementUniversalEnveloping_RationalFunctionOld. The expression equals " << this->ToString() << "." << global.fatal;
   }
@@ -736,8 +736,8 @@ MonomialTensor<int, MathRoutines::IntUnsignIdentity>& Expression::GetValueNonCon
 }
 
 template < >
-ElementTensorsGeneralizedVermas<RationalFunctionOld>& Expression::GetValueNonConst() const {
-  if (!this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >()) {
+ElementTensorsGeneralizedVermas<RationalFunction>& Expression::GetValueNonConst() const {
+  if (!this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunction> >()) {
     global.fatal << "This is a programming error: expression not of "
     << "required type ElementTGVM_RationalFunctionOld. The expression equals " << this->ToString() << "." << global.fatal;
   }
@@ -897,24 +897,24 @@ bool Expression::ConvertToType<Polynomial<Rational> >(Expression& output) const 
 }
 
 template< >
-bool Expression::ConvertToType<RationalFunctionOld>(Expression& output) const {
+bool Expression::ConvertToType<RationalFunction>(Expression& output) const {
   MacroRegisterFunctionWithName("ConvertToType_RationalFunctionOld");
   this->CheckInitialization();
   if (this->IsOfType<Rational>()) {
-    RationalFunctionOld resultRF;
+    RationalFunction resultRF;
     resultRF.MakeConst(this->GetValue<Rational>());
     return output.AssignValueWithContext(
       resultRF, this->GetContext(), *this->owner
     );
   }
   if (this->IsOfType<Polynomial<Rational> >()) {
-    RationalFunctionOld resultRF;
+    RationalFunction resultRF;
     resultRF = this->GetValue<Polynomial<Rational> >();
     return output.AssignValueWithContext(
       resultRF, this->GetContext(), *this->owner
     );
   }
-  if (this->IsOfType<RationalFunctionOld>()) {
+  if (this->IsOfType<RationalFunction>()) {
     output = *this;
     return true;
   }
@@ -957,12 +957,12 @@ bool Expression::ConvertToType<Weight<Polynomial<Rational> > >(Expression& outpu
 }
 
 template< >
-bool Expression::ConvertToType<ElementUniversalEnveloping<RationalFunctionOld> >(Expression& output) const {
+bool Expression::ConvertToType<ElementUniversalEnveloping<RationalFunction> >(Expression& output) const {
   MacroRegisterFunctionWithName("ConvertToType_RationalFunctionOld");
   this->CheckInitialization();
   if (!this->IsBuiltInTypE())
     return false;
-  if (this->IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >()) {
+  if (this->IsOfType<ElementUniversalEnveloping<RationalFunction> >()) {
     output = *this;
     return true;
   }
@@ -972,17 +972,17 @@ bool Expression::ConvertToType<ElementUniversalEnveloping<RationalFunctionOld> >
     << ") to element of universal enveloping -  failed to extract ambient Lie algebra. ";
     return false;
   }
-  ElementUniversalEnveloping<RationalFunctionOld> outputUE;
+  ElementUniversalEnveloping<RationalFunction> outputUE;
   if (this->IsOfType<Rational>()) {
     outputUE.MakeConst(this->GetValue<Rational>(), *theOwner);
     return output.AssignValueWithContext(outputUE, this->GetContext(), *this->owner);
   } else if (this->IsOfType<Polynomial<Rational> >()) {
-    RationalFunctionOld tempRF;
+    RationalFunction tempRF;
     tempRF = this->GetValue<Polynomial<Rational> >();
     outputUE.MakeConst(tempRF, *theOwner);
     return output.AssignValueWithContext(outputUE, this->GetContext(), *this->owner);
-  } else if (this->IsOfType<RationalFunctionOld>()) {
-    outputUE.MakeConst(this->GetValue<RationalFunctionOld>(), *theOwner);
+  } else if (this->IsOfType<RationalFunction>()) {
+    outputUE.MakeConst(this->GetValue<RationalFunction>(), *theOwner);
     return output.AssignValueWithContext(outputUE, this->GetContext(), *this->owner);
   }
   return *this->owner << "<hr>Failed to convert " << this->ToString()
@@ -990,10 +990,10 @@ bool Expression::ConvertToType<ElementUniversalEnveloping<RationalFunctionOld> >
 }
 
 template< >
-bool Expression::ConvertToType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >(Expression& output) const {
+bool Expression::ConvertToType<ElementTensorsGeneralizedVermas<RationalFunction> >(Expression& output) const {
   MacroRegisterFunctionWithName("ConvertToType_RationalFunctionOld");
   this->CheckInitialization();
-  if (this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >()) {
+  if (this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunction> >()) {
     output = *this;
     return true;
   }
@@ -1286,8 +1286,8 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext) {
   if (this->IsOfType<AlgebraicNumber>()) {
     return this->SetChilD(1, inputOutputMinContext);
   }
-  if (this->IsOfType<ElementUniversalEnveloping<RationalFunctionOld> > ()) {
-    ElementUniversalEnveloping<RationalFunctionOld> newUE = this->GetValue<ElementUniversalEnveloping<RationalFunctionOld> >();
+  if (this->IsOfType<ElementUniversalEnveloping<RationalFunction> > ()) {
+    ElementUniversalEnveloping<RationalFunction> newUE = this->GetValue<ElementUniversalEnveloping<RationalFunction> >();
     PolynomialSubstitution<Rational> subPolyPart;
     myOldContext.ContextGetPolySubFromSuperContextNoFailure<Rational>(newContext, subPolyPart);
     newUE.Substitution(subPolyPart);
@@ -1323,16 +1323,16 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext) {
     }
     return this->AssignValueWithContext(outputEWA, inputOutputMinContext, *this->owner);
   }
-  if (this->IsOfType<RationalFunctionOld>()) {
-    RationalFunctionOld newRF = this->GetValue<RationalFunctionOld>();
+  if (this->IsOfType<RationalFunction>()) {
+    RationalFunction newRF = this->GetValue<RationalFunction>();
     PolynomialSubstitution<Rational> subPolyPart;
     myOldContext.ContextGetPolySubFromSuperContextNoFailure(newContext, subPolyPart);
     newRF.Substitution(subPolyPart);
     return this->AssignValueWithContext(newRF, inputOutputMinContext, *this->owner);
   }
-  if (this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >()) {
-    ElementTensorsGeneralizedVermas<RationalFunctionOld> newETGV;
-    newETGV = this->GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >();
+  if (this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunction> >()) {
+    ElementTensorsGeneralizedVermas<RationalFunction> newETGV;
+    newETGV = this->GetValue<ElementTensorsGeneralizedVermas<RationalFunction> >();
     PolynomialSubstitution<Rational> subPolyPart;
     myOldContext.ContextGetPolySubFromSuperContextNoFailure(newContext, subPolyPart);
     newETGV.Substitution(subPolyPart, this->owner->theObjectContainer.theCategoryOmodules);
@@ -1347,8 +1347,8 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext) {
     }
     return this->AssignValueWithContext(theWeight, inputOutputMinContext, *this->owner);
   }
-  if (this->IsMatrixOfType<RationalFunctionOld>()) {
-    Matrix<RationalFunctionOld> newMat;
+  if (this->IsMatrixOfType<RationalFunction>()) {
+    Matrix<RationalFunction> newMat;
     this->owner->functionGetMatrix(*this, newMat, &newContext);
     PolynomialSubstitution<Rational> subPolyPart;
     myOldContext.ContextGetPolySubFromSuperContextNoFailure<Rational>(newContext, subPolyPart);
@@ -1970,8 +1970,8 @@ bool Expression::IsEqualToZero() const {
   if (this->IsOfType<Polynomial<Rational> >()) {
     return this->GetValue<Polynomial<Rational> >().IsEqualToZero();
   }
-  if (this->IsOfType<RationalFunctionOld>()) {
-    return this->GetValue<RationalFunctionOld>().IsEqualToZero();
+  if (this->IsOfType<RationalFunction>()) {
+    return this->GetValue<RationalFunction>().IsEqualToZero();
   }
   return false;
 }
@@ -2564,11 +2564,11 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
       out << "[" << this->GetContext().ToString() << "]";
     }
     result = true;
-  } else if (this->IsOfType<RationalFunctionOld>()) {
+  } else if (this->IsOfType<RationalFunction>()) {
     this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
     contextFormat.GetElement().flagUseFrac = true;
     out << "MakeRationalFunction{}("
-    << this->GetValue<RationalFunctionOld>().ToString(&contextFormat.GetElement()) << ")";
+    << this->GetValue<RationalFunction>().ToString(&contextFormat.GetElement()) << ")";
     if (showContext) {
       out << "[" << this->GetContext().ToString() << "]";
     }
@@ -2583,10 +2583,10 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     << this->GetValue<SemisimpleLieAlgebra>().ToStringLieAlgebraName()
     << ")";
     result = true;
-  } else if (this->IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >()) {
+  } else if (this->IsOfType<ElementUniversalEnveloping<RationalFunction> >()) {
     this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
     out << "UEE{}(" //<< this->GetContext().ToString() << ", "
-    << this->GetValue<ElementUniversalEnveloping<RationalFunctionOld> >().ToString(&contextFormat.GetElement())
+    << this->GetValue<ElementUniversalEnveloping<RationalFunction> >().ToString(&contextFormat.GetElement())
     << ")";
     result = true;
   } else if (this->IsOfType<MatrixTensor<Rational> >()) {
@@ -2623,10 +2623,10 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     this->IsMatrixGivenType(0, 0, &theMat);
     out << theMat.ToString(&contextFormat.GetElement());
     result = true;
-  } */else if (this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >()) {
+  } */else if (this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunction> >()) {
     this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
     out << "ETGVM{}(";
-    out << this->GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >().ToString(&contextFormat.GetElement());
+    out << this->GetValue<ElementTensorsGeneralizedVermas<RationalFunction> >().ToString(&contextFormat.GetElement());
     out << ")";
     result = true;
   } else if (this->IsOfType<Plot>()) {
@@ -2725,11 +2725,11 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
   } else if (this->IsOfType<LittelmannPath>()) {
     out << this->GetValue<LittelmannPath>().ToString();
     result = true;
-  } else if (this->IsMatrixOfType<RationalFunctionOld>()) {
+  } else if (this->IsMatrixOfType<RationalFunction>()) {
     this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
     contextFormat.GetElement().flagUseHTML = false;
     contextFormat.GetElement().flagUseLatex = true;
-    Matrix<RationalFunctionOld> theMat;
+    Matrix<RationalFunction> theMat;
     this->owner->functionGetMatrix(*this, theMat);
     out << theMat.ToString(&contextFormat.GetElement());
     result = true;
@@ -4772,7 +4772,7 @@ bool Expression::IsCacheableExpression() const {
 
 bool Expression::IsBuiltInScalar() const {
   return this->IsOfType<Rational>() || this->IsOfType<Polynomial<Rational> >() ||
-  this->IsOfType<RationalFunctionOld>() || this->IsOfType<double>() || this->IsOfType<AlgebraicNumber>();
+  this->IsOfType<RationalFunction>() || this->IsOfType<double>() || this->IsOfType<AlgebraicNumber>();
 }
 
 bool Expression::IsElementaryObject() const {

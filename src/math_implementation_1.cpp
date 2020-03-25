@@ -851,9 +851,9 @@ void branchingData::initAssumingParSelAndHmmInittedPart2Subgroups() {
 }
 
 std::string branchingData::GetStringCasimirProjector(int theIndex, const Rational& additionalMultiple) {
-  Vector<RationalFunctionOld> weightDifference;
+  Vector<RationalFunction> weightDifference;
   std::stringstream formulaStream1;
-  HashedList<Vector<RationalFunctionOld> > accountedDiffs;
+  HashedList<Vector<RationalFunction> > accountedDiffs;
   accountedDiffs.SetExpectedSize(this->g2Weights.size);
   bool found = false;
   for (int i = 0; i < this->g2Weights.size; i ++) {

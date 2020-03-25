@@ -2664,14 +2664,14 @@ FormatExpressions::GetMonOrder<MonomialWeylAlgebra>() {
 }
 
 template<>
-List<MonomialUniversalEnveloping<RationalFunctionOld> >::Comparator*
-FormatExpressions::GetMonOrder<MonomialUniversalEnveloping<RationalFunctionOld> >() {
+List<MonomialUniversalEnveloping<RationalFunction> >::Comparator*
+FormatExpressions::GetMonOrder<MonomialUniversalEnveloping<RationalFunction> >() {
   return nullptr;
 }
 
 template<>
-List<MonomialGeneralizedVerma<RationalFunctionOld> >::Comparator*
-FormatExpressions::GetMonOrder<MonomialGeneralizedVerma<RationalFunctionOld> >() {
+List<MonomialGeneralizedVerma<RationalFunction> >::Comparator*
+FormatExpressions::GetMonOrder<MonomialGeneralizedVerma<RationalFunction> >() {
   return nullptr;
 }
 
@@ -2694,8 +2694,8 @@ FormatExpressions::GetMonOrder<MonomialUniversalEnveloping<Rational> >() {
 }
 
 template<>
-List<MonomialTensorGeneralizedVermas<RationalFunctionOld> >::Comparator*
-FormatExpressions::GetMonOrder<MonomialTensorGeneralizedVermas<RationalFunctionOld> >() {
+List<MonomialTensorGeneralizedVermas<RationalFunction> >::Comparator*
+FormatExpressions::GetMonOrder<MonomialTensorGeneralizedVermas<RationalFunction> >() {
   return nullptr;
 }
 
@@ -10908,8 +10908,8 @@ void DrawOperations::operator+=(const DrawOperations& other) {
   //this->GraphicsUnit.AddListOnTop(other.GraphicsUnit);
 }
 
-void RationalFunctionOld::operator/=(const Polynomial<Rational>& other) {
-  RationalFunctionOld tempRF;
+void RationalFunction::operator/=(const Polynomial<Rational>& other) {
+  RationalFunction tempRF;
   tempRF = other;
   tempRF.Invert();
   *this *= tempRF;
@@ -10918,7 +10918,7 @@ void RationalFunctionOld::operator/=(const Polynomial<Rational>& other) {
   }
 }
 
-void RationalFunctionOld::ReduceRFToPoly() {
+void RationalFunction::ReduceRFToPoly() {
   if (this->expressionType != this->typeRationalFunction) {
     return;
   }
@@ -10932,7 +10932,7 @@ void RationalFunctionOld::ReduceRFToPoly() {
   }
 }
 
-bool RationalFunctionOld::Substitution(const PolynomialSubstitution<Rational>& theSub) {
+bool RationalFunction::Substitution(const PolynomialSubstitution<Rational>& theSub) {
   MacroRegisterFunctionWithName("RationalFunctionOld::Substitution");
   if (theSub.size < 1) {
     return false;
@@ -10940,10 +10940,10 @@ bool RationalFunctionOld::Substitution(const PolynomialSubstitution<Rational>& t
 //  FormatExpressions tempFormat;
 //  int commentMEWhenDone;
   switch(this->expressionType) {
-    case RationalFunctionOld::typeRational:
+    case RationalFunction::typeRational:
 //      if (!this->checkConsistency())global.fatal << global.fatal;
       return true;
-    case RationalFunctionOld::typePoly:
+    case RationalFunction::typePoly:
 //      global.Comments << "<hr>subbing in<br>" << this->ToString(tempFormat) << " using " << theSub.ToString()
 //      << " to get ";
       if (!this->Numerator.GetElement().Substitution(theSub)) {
@@ -10954,7 +10954,7 @@ bool RationalFunctionOld::Substitution(const PolynomialSubstitution<Rational>& t
 //      global.Comments << ", which, simplified, yields<br> " << this->ToString(tempFormat);
 //      if (!this->checkConsistency())global.fatal << global.fatal;
       return true;
-    case RationalFunctionOld::typeRationalFunction:
+    case RationalFunction::typeRationalFunction:
       if (!this->Numerator.GetElement().Substitution(theSub)) {
         return false;
       }
@@ -12589,13 +12589,13 @@ std::string ConeComplex::ToString(bool useHtml) {
   return out.str();
 }
 
-int RationalFunctionOld::GetMinNumVars() const {
+int RationalFunction::GetMinNumVars() const {
   switch (this->expressionType) {
-    case RationalFunctionOld::typeRational:
+    case RationalFunction::typeRational:
       return 0;
-    case RationalFunctionOld::typePoly:
+    case RationalFunction::typePoly:
       return this->Numerator.GetElementConst().GetMinNumVars();
-    case RationalFunctionOld::typeRationalFunction:
+    case RationalFunction::typeRationalFunction:
       return MathRoutines::Maximum(
         this->Numerator.GetElementConst().GetMinNumVars(), this->Denominator.GetElementConst().GetMinNumVars()
       );
@@ -12604,7 +12604,7 @@ int RationalFunctionOld::GetMinNumVars() const {
   }
 }
 
-bool RationalFunctionOld::GetRelations(
+bool RationalFunction::GetRelations(
   const List<Polynomial<Rational> >& inputElements,
   List<Polynomial<Rational> >& outputGeneratorLabels,
   List<Polynomial<Rational> >& outputRelations,

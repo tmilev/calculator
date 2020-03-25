@@ -4,16 +4,16 @@
 #define vpfHeaderLieTheoryMiscellaneous
 
 #include "math_extra_semisimple_Lie_algebras.h"
-//#include "math_extra_universal_enveloping.h"
+// #include "math_extra_universal_enveloping.h"
 
-//the following data is isolated in a struct because it is
-//way too large a lump to pass separately
+// the following data is isolated in a struct because it is
+// way too large a lump to pass separately
 struct branchingData {
   HomomorphismSemisimpleLieAlgebra theHmm;
   FormatExpressions theFormat;
-  Vector<RationalFunctionOld> theWeightFundCoords;
-  charSSAlgMod<RationalFunctionOld> theAmbientChar;
-  charSSAlgMod<RationalFunctionOld> theSmallCharFDpart;
+  Vector<RationalFunction> theWeightFundCoords;
+  charSSAlgMod<RationalFunction> theAmbientChar;
+  charSSAlgMod<RationalFunction> theSmallCharFDpart;
   Selection selInducing;
   Selection selSmallParSel;
   Selection SelSplittingParSel;
@@ -25,20 +25,20 @@ struct branchingData {
   List<ElementSemisimpleLieAlgebra<Rational> > nilradicalLarge;
   List<ElementSemisimpleLieAlgebra<Rational> > nilradicalSmall;
   List<ElementSemisimpleLieAlgebra<Rational> > NilModPreNil;
-  Vectors<RationalFunctionOld> outputWeightsFundCoordS;
-  Vectors<RationalFunctionOld> outputWeightsSimpleCoords;
-  Vectors<RationalFunctionOld> g2Weights;
-  Vectors<RationalFunctionOld> g2DualWeights;
-  Vectors<RationalFunctionOld> leviEigenSpace;
+  Vectors<RationalFunction> outputWeightsFundCoordS;
+  Vectors<RationalFunction> outputWeightsSimpleCoords;
+  Vectors<RationalFunction> g2Weights;
+  Vectors<RationalFunction> g2DualWeights;
+  Vectors<RationalFunction> leviEigenSpace;
   Vectors<Rational> generatorsSmallSub;
-  HashedList<RationalFunctionOld> theCharacterDifferences;
-  List<ElementUniversalEnveloping<RationalFunctionOld> > outputEigenWords;
-  List<RationalFunctionOld> theChars;
-  List<ElementSumGeneralizedVermas<RationalFunctionOld> > theEigenVectorS;
-  List<ElementUniversalEnveloping<RationalFunctionOld> > theUEelts;
+  HashedList<RationalFunction> theCharacterDifferences;
+  List<ElementUniversalEnveloping<RationalFunction> > outputEigenWords;
+  List<RationalFunction> theChars;
+  List<ElementSumGeneralizedVermas<RationalFunction> > theEigenVectorS;
+  List<ElementUniversalEnveloping<RationalFunction> > theUEelts;
   List<Rational> additionalMultipliers;
-  List<RationalFunctionOld> theShapovalovProducts;
-  List<ElementSumGeneralizedVermas<RationalFunctionOld> > theEigenVectorsLevi;
+  List<RationalFunction> theShapovalovProducts;
+  List<ElementSumGeneralizedVermas<RationalFunction> > theEigenVectorsLevi;
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms WeylFD;
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms WeylFDSmallAsSubInLarge;
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms WeylFDSmall;
@@ -510,10 +510,10 @@ public:
   ) const;
   static void GetBasisFromSpanOfElements(
     List<ElementVermaModuleOrdered<coefficient> >& theElements,
-    Vectors<RationalFunctionOld>& outputCoordinates,
+    Vectors<RationalFunction>& outputCoordinates,
     List<ElementVermaModuleOrdered>& outputTheBasis,
-    const RationalFunctionOld& RFOne,
-    const RationalFunctionOld& RFZero
+    const RationalFunction& RFOne,
+    const RationalFunction& RFZero
   );
   bool GetCoordsInBasis(
     const List<ElementVermaModuleOrdered<coefficient> >& theBasis,

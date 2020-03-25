@@ -133,16 +133,16 @@ bool ModuleSSalgebra<coefficient>::IsNotInLevi(int theGeneratorIndex) {
 template <class coefficient>
 void ModuleSSalgebra<coefficient>::GetGenericUnMinusElt(
   bool shiftPowersByNumVarsBaseField,
-  ElementUniversalEnveloping<RationalFunctionOld>& output,
+  ElementUniversalEnveloping<RationalFunction>& output,
   bool useNilWeight,
   bool ascending
 ) {
   MacroRegisterFunctionWithName("ModuleSSalgebra::GetGenericUnMinusElt");
   List<ElementUniversalEnveloping<coefficient> > eltsNilrad;
   this->GetElementsNilradical(eltsNilrad, true, useNilWeight, ascending);
-  RationalFunctionOld tempRF;
+  RationalFunction tempRF;
   output.MakeZero(*this->theAlgebras, this->indexAlgebra);
-  MonomialUniversalEnveloping<RationalFunctionOld> tempMon;
+  MonomialUniversalEnveloping<RationalFunction> tempMon;
   tempMon.MakeConst(*this->theAlgebras, this->indexAlgebra);
   int varShift = 0;
   if (shiftPowersByNumVarsBaseField) {
@@ -430,7 +430,7 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator(
   result.Simplify();
   MatrixTensor<Polynomial<Rational> > endoPart, tempMT, idMT;
   idMT.MakeIdSpecial();
-  MatrixTensor<RationalFunctionOld> tempMat1;
+  MatrixTensor<RationalFunction> tempMat1;
 
   int varShift = this->GetMinNumVars();
   ElementWeylAlgebra<Rational> weylPartSummand, exponentContribution, oneIndexContribution,
@@ -452,7 +452,7 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator(
       tempMat1 = this->GetActionGeneratorIndeX(currentMon.generatorsIndices[j]);
       tempMT.MakeZero();
       for (int k = 0; k < tempMat1.size(); k ++) {
-        if (tempMat1.coefficients[k].expressionType == RationalFunctionOld::typeRationalFunction) {
+        if (tempMat1.coefficients[k].expressionType == RationalFunction::typeRationalFunction) {
           return false;
         }
         tempMat1.coefficients[k].GetNumerator(tempP1);
@@ -568,9 +568,9 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
   latexReport << "}\\caption{\\label{tableDiffOps" << selInducing.ToString()
   << "} Differential operators corresponding to actions"
   << " of simple positive generators for the " << selInducing.ToString() << "-parabolic subalgebra.}\\\\<br>";
-  List<ModuleSSalgebra<RationalFunctionOld > > theMods;
+  List<ModuleSSalgebra<RationalFunction > > theMods;
   theMods.SetSize(theHws.size);
-  Vector<RationalFunctionOld> tempV;
+  Vector<RationalFunction> tempV;
   int numStartingVars = hwContext.ContextGetNumContextVariables();
   std::stringstream reportFourierTransformedCalculatorCommands, reportCalculatorCommands;
   long long totalAdditions = 0;
@@ -579,7 +579,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
   long long currentMultiplications = 0;
   double totalTime = 0, currentTime = 0;
   for (int i = 0; i < theHws.size; i ++) {
-    ModuleSSalgebra<RationalFunctionOld>& theMod = theMods[i];
+    ModuleSSalgebra<RationalFunction>& theMod = theMods[i];
     tempV = theHws[i];
     if (!theMod.MakeFromHW(theSSalgebra, tempV, selInducing, 1, 0, nullptr, true)) {
       return output.MakeError("Failed to create module.", theCommands);
@@ -733,7 +733,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
 bool Calculator::innerHWVCommon(
   Calculator& theCommands,
   Expression& output,
-  Vector<RationalFunctionOld>& highestWeightFundCoords,
+  Vector<RationalFunction>& highestWeightFundCoords,
   Selection& selectionParSel,
   Expression& hwContext,
   SemisimpleLieAlgebra* owner,
@@ -741,17 +741,17 @@ bool Calculator::innerHWVCommon(
 ) {
   MacroRegisterFunctionWithName("Calculator::innerHWVCommon");
   RecursionDepthCounter therecursionIncrementer(&theCommands.RecursionDeptH);
-  RationalFunctionOld RFOne, RFZero;
+  RationalFunction RFOne, RFZero;
   RFOne.MakeOne();
   RFZero.MakeZero();
   std::string report;
-  ElementTensorsGeneralizedVermas<RationalFunctionOld> theElt;
+  ElementTensorsGeneralizedVermas<RationalFunction> theElt;
   //= theElementData.theElementTensorGenVermas.GetElement();
-  ListReferences<ModuleSSalgebra<RationalFunctionOld> >& theMods = theCommands.theObjectContainer.theCategoryOmodules;
+  ListReferences<ModuleSSalgebra<RationalFunction> >& theMods = theCommands.theObjectContainer.theCategoryOmodules;
   int indexOfModule = - 1;
 
   for (int i = 0; i < theMods.size; i ++) {
-    ModuleSSalgebra<RationalFunctionOld>& currentMod = theMods[i];
+    ModuleSSalgebra<RationalFunction>& currentMod = theMods[i];
     if (
       highestWeightFundCoords == currentMod.theHWFundamentalCoordsBaseField &&
       selectionParSel == currentMod.parabolicSelectionNonSelectedAreElementsLevi &&
@@ -766,7 +766,7 @@ bool Calculator::innerHWVCommon(
     theMods.SetSize(theMods.size + 1);
     theMods.LastObject().reset();
   }
-  ModuleSSalgebra<RationalFunctionOld>& theMod = theMods[indexOfModule];
+  ModuleSSalgebra<RationalFunction>& theMod = theMods[indexOfModule];
   if (!theMod.flagIsInitialized) {
     bool isGood = theMod.MakeFromHW(*owner, highestWeightFundCoords, selectionParSel, RFOne, RFZero, &report);
     if (Verbose) {
@@ -784,7 +784,7 @@ bool Calculator::innerHWVCommon(
     global.fatal << "This is a programming error: just created an ElementTensorsGeneralizedVermas "
     << "whose owner is not what it should be. " << global.fatal;
   }
-  return output.AssignValueWithContext<ElementTensorsGeneralizedVermas<RationalFunctionOld> >(theElt, hwContext, theCommands);
+  return output.AssignValueWithContext<ElementTensorsGeneralizedVermas<RationalFunction> >(theElt, hwContext, theCommands);
 }
 
 bool Calculator::RecursionDepthExceededHandleRoughly(const std::string& additionalErrorInfo) {
@@ -920,7 +920,7 @@ bool Calculator::innerGetChevGen(
   }
   theIndex += theSSalg->GetNumPosRoots();
   theElt.MakeGenerator(theIndex, *theSSalg);
-  ElementUniversalEnveloping<RationalFunctionOld> theUE;
+  ElementUniversalEnveloping<RationalFunction> theUE;
   theUE.AssignElementLieAlgebra(theElt, *theSSalg);
   Expression theContext;
   int indexInOwner = theCommands.theObjectContainer.theSSLieAlgebras.GetIndex(theSSalg->theWeyl.theDynkinType);
@@ -959,7 +959,7 @@ bool Calculator::innerGetCartanGen(Calculator& theCommands, const Expression& in
   ElementSemisimpleLieAlgebra<Rational> theElt;
   Vector<Rational> theH = theSSalg->theWeyl.RootSystem[theSSalg->GetRootIndexFromDisplayIndex(theIndex)];
   theElt.MakeHgenerator(theH, *theSSalg);
-  ElementUniversalEnveloping<RationalFunctionOld> theUE;
+  ElementUniversalEnveloping<RationalFunction> theUE;
   theUE.AssignElementLieAlgebra(theElt, *theSSalg);
   Expression theContext;
   int theAlgIndex = theCommands.theObjectContainer.theSSLieAlgebras.GetIndex(theSSalg->theWeyl.theDynkinType);
@@ -1382,10 +1382,10 @@ bool Calculator::StandardIsDenotedBy(Calculator& theCommands, const Expression& 
   output = input;
   output.SetChildAtomValue(0, theCommands.opDefine());
   ////
-  if (withNotation.IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >()) {
-    if (withNotation.GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >().IsHWV()) {
-      MonomialGeneralizedVerma<RationalFunctionOld>& theElt =
-      withNotation.GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >()[0].theMons[0];
+  if (withNotation.IsOfType<ElementTensorsGeneralizedVermas<RationalFunction> >()) {
+    if (withNotation.GetValue<ElementTensorsGeneralizedVermas<RationalFunction> >().IsHWV()) {
+      MonomialGeneralizedVerma<RationalFunction>& theElt =
+      withNotation.GetValue<ElementTensorsGeneralizedVermas<RationalFunction> >()[0].theMons[0];
       theElt.GetOwner().highestWeightVectorNotation = theNotation.ToString();
     }
   }

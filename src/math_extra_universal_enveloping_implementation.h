@@ -1082,10 +1082,10 @@ void ElementUniversalEnvelopingOrdered<coefficient>::MakeOneGenerator(
 template<class coefficient>
 void ElementVermaModuleOrdered<coefficient>::GetBasisFromSpanOfElements(
   List<ElementVermaModuleOrdered>& theElements,
-  Vectors<RationalFunctionOld>& outputCoordinates,
+  Vectors<RationalFunction>& outputCoordinates,
   List<ElementVermaModuleOrdered>& outputTheBasis,
-  const RationalFunctionOld& RFOne,
-  const RationalFunctionOld& RFZero
+  const RationalFunction& RFOne,
+  const RationalFunction& RFZero
 ) {
   List<ElementUniversalEnvelopingOrdered<coefficient> > theEltsUEform;
   theEltsUEform.SetSize(theElements.size);

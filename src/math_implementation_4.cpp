@@ -610,8 +610,8 @@ std::string UserCalculatorData::ToStringUnsecure() {
 }
 
 template<>
-List<Weight<RationalFunctionOld> >::Comparator*
-FormatExpressions::GetMonOrder<Weight<RationalFunctionOld> >() {
+List<Weight<RationalFunction> >::Comparator*
+FormatExpressions::GetMonOrder<Weight<RationalFunction> >() {
   return nullptr;
 }
 

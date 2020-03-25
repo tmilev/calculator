@@ -414,14 +414,14 @@ bool CalculatorFunctionsBinaryOps::innerTensorEltTensorByEltTensor(
     return false;
   }
   Expression inputConverted;
-  if (!input.MergeContextsMyArumentsAndConvertThem<ElementTensorsGeneralizedVermas<RationalFunctionOld> >(
+  if (!input.MergeContextsMyArumentsAndConvertThem<ElementTensorsGeneralizedVermas<RationalFunction> >(
     inputConverted, &theCommands.Comments
   )) {
     return false;
   }
-  ElementTensorsGeneralizedVermas<RationalFunctionOld> resultTensor;
-  resultTensor = inputConverted[1].GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >();
-  resultTensor.TensorOnTheRight(inputConverted[2].GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >());
+  ElementTensorsGeneralizedVermas<RationalFunction> resultTensor;
+  resultTensor = inputConverted[1].GetValue<ElementTensorsGeneralizedVermas<RationalFunction> >();
+  resultTensor.TensorOnTheRight(inputConverted[2].GetValue<ElementTensorsGeneralizedVermas<RationalFunction> >());
   return output.AssignValueWithContext(resultTensor, inputConverted[1].GetContext(), theCommands);
 }
 
@@ -533,7 +533,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyEllipticCurveElementsZmodP(
 }
 
 template <>
-bool Expression::ConvertToType<ElementUniversalEnveloping<RationalFunctionOld> >(Expression& output) const;
+bool Expression::ConvertToType<ElementUniversalEnveloping<RationalFunction> >(Expression& output) const;
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(
   Calculator& theCommands, const Expression& input, Expression& output
@@ -547,21 +547,21 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(
   if (!input.MergeContextsMyAruments(inputConverted, &theCommands.Comments)) {
     return false;
   }
-  if (!inputConverted[2].IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >()) {
+  if (!inputConverted[2].IsOfType<ElementTensorsGeneralizedVermas<RationalFunction> >()) {
     return false;
   }
   SemisimpleLieAlgebra& theSSalg =
-  inputConverted[2].GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >().GetOwnerSS();
+  inputConverted[2].GetValue<ElementTensorsGeneralizedVermas<RationalFunction> >().GetOwnerSS();
   Expression leftE;
   inputConverted[1].CheckConsistency();
   input[1].CheckConsistency();
   input[2].CheckConsistency();
-  if (!inputConverted[1].ConvertToType<ElementUniversalEnveloping<RationalFunctionOld> >(leftE)) {
+  if (!inputConverted[1].ConvertToType<ElementUniversalEnveloping<RationalFunction> >(leftE)) {
     return false;
   }
-  const ElementTensorsGeneralizedVermas<RationalFunctionOld>& rightEltETGVM =
-  inputConverted[2].GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >();
-  ElementTensorsGeneralizedVermas<RationalFunctionOld> outputElt;
+  const ElementTensorsGeneralizedVermas<RationalFunction>& rightEltETGVM =
+  inputConverted[2].GetValue<ElementTensorsGeneralizedVermas<RationalFunction> >();
+  ElementTensorsGeneralizedVermas<RationalFunction> outputElt;
   if (rightEltETGVM.IsEqualToZero()) {
     output = inputConverted[2];
     return true;
@@ -569,7 +569,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(
   theSSalg.OrderNilradicalNilWeightAscending(rightEltETGVM.GetOwnerModule().parabolicSelectionNonSelectedAreElementsLevi);
   theSSalg.flagHasNilradicalOrder = true;
   if (!rightEltETGVM.MultiplyOnTheLeft(
-    leftE.GetValue<ElementUniversalEnveloping<RationalFunctionOld> >(), outputElt, theSSalg, 1
+    leftE.GetValue<ElementUniversalEnveloping<RationalFunction> >(), outputElt, theSSalg, 1
   )) {
     return false;
   }
@@ -606,10 +606,10 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF");
-  if (!CalculatorFunctionsBinaryOps::innerMultiplyTypeByType<RationalFunctionOld>(theCommands, input, output)) {
+  if (!CalculatorFunctionsBinaryOps::innerMultiplyTypeByType<RationalFunction>(theCommands, input, output)) {
     return false;
   }
-  RationalFunctionOld simplified;
+  RationalFunction simplified;
   if (!output.IsOfType(&simplified)) {
     return true;
   }
@@ -621,10 +621,10 @@ bool CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly");
-  if (!CalculatorFunctionsBinaryOps::innerDivideTypeByType<RationalFunctionOld>(theCommands, input, output)) {
+  if (!CalculatorFunctionsBinaryOps::innerDivideTypeByType<RationalFunction>(theCommands, input, output)) {
     return false;
   }
-  RationalFunctionOld simplified;
+  RationalFunction simplified;
   if (!output.IsOfType(&simplified)) {
     return true;
   }
@@ -636,7 +636,7 @@ bool CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrRFToRatOrPolyOrRF(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrRFToRatOrPolyOrRF");
-  return CalculatorFunctionsBinaryOps::innerAddTypeToType<RationalFunctionOld>(theCommands, input, output);
+  return CalculatorFunctionsBinaryOps::innerAddTypeToType<RationalFunction>(theCommands, input, output);
 }
 
 bool CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA(
@@ -668,7 +668,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly(
 
 bool CalculatorFunctionsBinaryOps::innerAddUEToAny(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddUEToAny");
-  return CalculatorFunctionsBinaryOps::innerAddTypeToType<ElementUniversalEnveloping<RationalFunctionOld> >(
+  return CalculatorFunctionsBinaryOps::innerAddTypeToType<ElementUniversalEnveloping<RationalFunction> >(
     theCommands, input, output
   );
 }
@@ -680,13 +680,13 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByUE(Calculator& theCommands,
     return false;
   }
   Expression inputContextsMerged;
-  if (!input.MergeContextsMyArumentsAndConvertThem<ElementUniversalEnveloping<RationalFunctionOld> >(
+  if (!input.MergeContextsMyArumentsAndConvertThem<ElementUniversalEnveloping<RationalFunction> >(
     inputContextsMerged, &theCommands.Comments
   )) {
     return false;
   }
-  ElementUniversalEnveloping<RationalFunctionOld> result = inputContextsMerged[1].GetValue<ElementUniversalEnveloping<RationalFunctionOld> >();
-  result *= inputContextsMerged[2].GetValue<ElementUniversalEnveloping<RationalFunctionOld> >();
+  ElementUniversalEnveloping<RationalFunction> result = inputContextsMerged[1].GetValue<ElementUniversalEnveloping<RationalFunction> >();
+  result *= inputContextsMerged[2].GetValue<ElementUniversalEnveloping<RationalFunction> >();
   result.Simplify();
   return output.AssignValueWithContext(result, inputContextsMerged[1].GetContext(), theCommands);
 }
@@ -767,7 +767,7 @@ bool CalculatorFunctionsBinaryOps::innerAddEltTensorToEltTensor(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddEltTensorToEltTensor");
-  return CalculatorFunctionsBinaryOps::innerAddTypeToType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >(
+  return CalculatorFunctionsBinaryOps::innerAddTypeToType<ElementTensorsGeneralizedVermas<RationalFunction> >(
     theCommands, input, output
   );
 }
@@ -844,7 +844,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerPolyBySmallInteger(
       return output.AssignValueWithContext(outputPoly, input[1].GetContext(), theCommands);
     }
     base.RaiseToPower(- thePower);
-    RationalFunctionOld theRF;
+    RationalFunction theRF;
     theRF = base;
     theRF.Invert();
     return output.AssignValueWithContext(theRF, input[1].GetContext(), theCommands);
@@ -981,7 +981,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatNumbersBySmallInteger(
     MathRoutines::RaiseToPower(baseAlg, thePower, idMat);
     return output.AssignMatrix(baseAlg, theCommands);
   }
-  Matrix<RationalFunctionOld> baseRF;
+  Matrix<RationalFunction> baseRF;
   Expression theContext;
   if (theCommands.functionGetMatrix(matrixE, baseRF, &theContext)) {
     if (!baseRF.IsSquare() || baseRF.NumCols == 0) {
@@ -1006,7 +1006,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatNumbersBySmallInteger(
       << "Raising matrices of rational functions to "
       << "negative powers not implemented yet. ";
     }
-    Matrix<RationalFunctionOld> idMat;
+    Matrix<RationalFunction> idMat;
     idMat.MakeIdMatrix(baseRF.NumRows);
     MathRoutines::RaiseToPower(baseRF, thePower, idMat);
     return output.AssignMatrix(baseRF, theCommands, &theContext);
@@ -1248,7 +1248,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByInteger(
 }
 
 template <>
-bool Expression::ConvertToType<RationalFunctionOld>(Expression& output) const;
+bool Expression::ConvertToType<RationalFunction>(Expression& output) const;
 
 bool CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF(
   Calculator& theCommands, const Expression& input, Expression& output
@@ -1262,10 +1262,10 @@ bool CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF(
   if (!input.MergeContextsMyAruments(inputConverted, &theCommands.Comments)) {
     return false;
   }
-  ElementUniversalEnveloping<RationalFunctionOld> theUE;
+  ElementUniversalEnveloping<RationalFunction> theUE;
   Expression copyExponent = inputConverted[2];
   Expression copyBase = inputConverted[1];
-  if (!copyBase.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >(&theUE)) {
+  if (!copyBase.IsOfType<ElementUniversalEnveloping<RationalFunction> >(&theUE)) {
     return false;
   }
   if (!theUE.IsAPowerOfASingleGenerator()) {
@@ -1277,13 +1277,13 @@ bool CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF(
     return output.AssignValueWithContext(theUE, copyBase.GetContext(), theCommands);
   }
   Expression exponentConverted;
-  if (!copyExponent.ConvertToType<RationalFunctionOld>(exponentConverted)) {
+  if (!copyExponent.ConvertToType<RationalFunction>(exponentConverted)) {
     return false;
   }
-  MonomialUniversalEnveloping<RationalFunctionOld> theMon;
+  MonomialUniversalEnveloping<RationalFunction> theMon;
   theMon = theUE[0];
-  theMon.Powers[0] *= exponentConverted.GetValue<RationalFunctionOld>();
-  ElementUniversalEnveloping<RationalFunctionOld> outputUE;
+  theMon.Powers[0] *= exponentConverted.GetValue<RationalFunction>();
+  ElementUniversalEnveloping<RationalFunction> outputUE;
   outputUE.MakeZero(*theUE.owner);
   outputUE.AddMonomial(theMon, 1);
   return output.AssignValueWithContext(outputUE, copyBase.GetContext(), theCommands);
@@ -1708,9 +1708,9 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix(
     return CalculatorFunctionsBinaryOps::innerMultiplyMatRatOrMatAlgByMatRatOrMatAlg(theCommands, input, output);
   }
   bool invokeRFMultiplication =
-  (left.IsMatrixOfType<RationalFunctionOld>() && right.IsMatrixOfType<Rational>()) ||
-  (left.IsMatrixOfType<Rational>()            && right.IsMatrixOfType<RationalFunctionOld>()) ||
-  (left.IsMatrixOfType<RationalFunctionOld>() && right.IsMatrixOfType<RationalFunctionOld>() );
+  (left.IsMatrixOfType<RationalFunction>() && right.IsMatrixOfType<Rational>()) ||
+  (left.IsMatrixOfType<Rational>()            && right.IsMatrixOfType<RationalFunction>()) ||
+  (left.IsMatrixOfType<RationalFunction>() && right.IsMatrixOfType<RationalFunction>() );
   if (invokeRFMultiplication) {
     return CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF(
       theCommands, input, output
@@ -1950,11 +1950,11 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF(
   Expression leftE = input[1];
   Expression rightE = input[2];
   if (
-    !rightE.IsMatrixOfType<RationalFunctionOld>() || !(
+    !rightE.IsMatrixOfType<RationalFunction>() || !(
       leftE.IsOfType<Rational>() ||
       leftE.IsOfType<Polynomial<Rational> >() ||
-      leftE.IsOfType<RationalFunctionOld>() ||
-      leftE.IsMatrixOfType<RationalFunctionOld>()
+      leftE.IsOfType<RationalFunction>() ||
+      leftE.IsMatrixOfType<RationalFunction>()
     )
   ) {
     return false;
@@ -1964,16 +1964,16 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF(
     << leftE.ToString() << " and " << rightE.ToString()
     << " to common context. ";
   }
-  Matrix<RationalFunctionOld> leftMat, rightMat;
+  Matrix<RationalFunction> leftMat, rightMat;
   if (!theCommands.functionGetMatrix(rightE, rightMat)) {
     return false;
   }
-  if (!leftE.IsMatrixOfType<RationalFunctionOld>()) {
+  if (!leftE.IsMatrixOfType<RationalFunction>()) {
     Expression leftErfForm;
-    if (!leftE.ConvertToType<RationalFunctionOld>(leftErfForm)) {
+    if (!leftE.ConvertToType<RationalFunction>(leftErfForm)) {
       return theCommands << "Failed to convert " << leftE.ToString() << " to rational function. ";
     }
-    RationalFunctionOld theScalar = leftErfForm.GetValue<RationalFunctionOld>();
+    RationalFunction theScalar = leftErfForm.GetValue<RationalFunction>();
     rightMat *= theScalar;
     Expression contextE = leftE.GetContext();
     return output.AssignMatrix(rightMat, theCommands, &contextE);
@@ -2077,12 +2077,12 @@ bool CalculatorFunctionsBinaryOps::innerLieBracketRatOrUEWithRatOrUE(
     return output.AssignValueWithContext(0, leftE.GetContext() , theCommands);
   }
   if (
-    leftE.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >() &&
-    rightE.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >()
+    leftE.IsOfType<ElementUniversalEnveloping<RationalFunction> >() &&
+    rightE.IsOfType<ElementUniversalEnveloping<RationalFunction> >()
   ) {
-    ElementUniversalEnveloping<RationalFunctionOld> result;
-    leftE.GetValue<ElementUniversalEnveloping<RationalFunctionOld> >().LieBracketOnTheRight(
-      rightE.GetValue<ElementUniversalEnveloping<RationalFunctionOld> >(), result
+    ElementUniversalEnveloping<RationalFunction> result;
+    leftE.GetValue<ElementUniversalEnveloping<RationalFunction> >().LieBracketOnTheRight(
+      rightE.GetValue<ElementUniversalEnveloping<RationalFunction> >(), result
     );
     result.Simplify();
     return output.AssignValueWithContext(result, leftE.GetContext(), theCommands);
@@ -2401,15 +2401,15 @@ bool CalculatorFunctionsBinaryOps::innerAddMatrixRFsToMatrixRFs(
   Expression leftE = input[1];
   Expression rightE = input[2];
   if (
-    !rightE.IsMatrixOfType<RationalFunctionOld>() ||
-    !leftE.IsMatrixOfType<RationalFunctionOld>()
+    !rightE.IsMatrixOfType<RationalFunction>() ||
+    !leftE.IsMatrixOfType<RationalFunction>()
   ) {
     return false;
   }
   if (!leftE.MergeContexts(leftE, rightE)) {
     return false;
   }
-  Matrix<RationalFunctionOld> leftMat, rightMat;
+  Matrix<RationalFunction> leftMat, rightMat;
   if (!theCommands.functionGetMatrix(leftE, leftMat)) {
     return false;
   }

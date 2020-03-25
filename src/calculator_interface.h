@@ -419,9 +419,9 @@ private:
   bool IsKnownToBeNonNegative() const;
   bool IsNegativeConstant() const;
   bool MakeIdMatrixExpressions(int theDim, Calculator& inputBoss);
-  void MakeMonomialGenVerma(const MonomialGeneralizedVerma<RationalFunctionOld>& inputMon, Calculator& newBoss);
+  void MakeMonomialGenVerma(const MonomialGeneralizedVerma<RationalFunction>& inputMon, Calculator& newBoss);
   void MakeElementTensorsGeneralizedVermas(
-    const ElementTensorsGeneralizedVermas<RationalFunctionOld>& inputMon,
+    const ElementTensorsGeneralizedVermas<RationalFunction>& inputMon,
     Calculator& newBoss
   );
   bool MakeAtom(int input, Calculator& newBoss) {
@@ -969,16 +969,16 @@ public:
   MapReferences<DynkinType, SemisimpleSubalgebras> theSSSubalgebraS;
   HashedListReferences<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> > theWeylGroupReps;
   HashedListReferences<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> > theWeylGroupVirtualReps;
-  ListReferences<ModuleSSalgebra<RationalFunctionOld> > theCategoryOmodules;
+  ListReferences<ModuleSSalgebra<RationalFunction> > theCategoryOmodules;
   ListReferences<SltwoSubalgebras> theSltwoSAs;
   HashedListReferences<ElementEllipticCurve<ElementZmodP> > EllipticCurveElementsZmodP;
   HashedListReferences<ElementEllipticCurve<Rational> > EllipticCurveElementsRational;
-  HashedListReferences<ElementTensorsGeneralizedVermas<RationalFunctionOld> > theTensorElts;
+  HashedListReferences<ElementTensorsGeneralizedVermas<RationalFunction> > theTensorElts;
   HashedListReferences<Polynomial<Rational> > thePolys;
   HashedListReferences<Polynomial<AlgebraicNumber> > thePolysOverANs;
   HashedListReferences<ElementWeylAlgebra<Rational> > theWeylAlgebraElements;
-  HashedListReferences<ElementUniversalEnveloping<RationalFunctionOld> > theUEs;
-  HashedListReferences<RationalFunctionOld> theRFs;
+  HashedListReferences<ElementUniversalEnveloping<RationalFunction> > theUEs;
+  HashedListReferences<RationalFunction> theRFs;
   HashedListReferences<Rational> theRationals;
   HashedListReferences<charSSAlgMod<Rational> > theCharsSSLieAlgFD;
   HashedListReferences<double, MathRoutines::HashDouble> theDoubles;
@@ -2283,7 +2283,7 @@ public:
     Calculator& theCommands,
     const Expression& input,
     Expression& output,
-    Vectors<RationalFunctionOld>& theHWs,
+    Vectors<RationalFunction>& theHWs,
     branchingData& theG2B3Data,
     Expression& theContext
   );
@@ -2292,7 +2292,7 @@ public:
     Calculator& theCommands,
     const Expression& input,
     Expression& output,
-    Vectors<RationalFunctionOld>& outputHWs,
+    Vectors<RationalFunction>& outputHWs,
     branchingData& theG2B3Data,
     Expression& theContext
   );
@@ -2370,7 +2370,7 @@ public:
   static bool innerHWVCommon(
     Calculator& theCommands,
     Expression& output,
-    Vector<RationalFunctionOld>& highestWeightFundCoords,
+    Vector<RationalFunction>& highestWeightFundCoords,
     Selection& selectionParSel,
     Expression& hwContext,
     SemisimpleLieAlgebra* owner,
@@ -2583,7 +2583,7 @@ public:
   static bool innerDynkinSimpleTypE(Calculator& theCommands, const Expression& input, DynkinSimpleType& output);
   static bool functionDynkinSimpleType(Calculator& theCommands, const Expression& input, DynkinSimpleType& output);
   static bool innerSlTwoSubalgebraPrecomputed(Calculator& theCommands, const Expression& input, slTwoSubalgebra& output);
-  static bool innerLoadFromObject(Calculator& theCommands, const Expression& input, RationalFunctionOld& output);
+  static bool innerLoadFromObject(Calculator& theCommands, const Expression& input, RationalFunction& output);
   static bool innerAlgebraicNumber(Calculator& theCommands, const Expression& input, Expression& output);
   template <class coefficient>
   static bool innerPolynomiaL(Calculator& theCommands, const Expression& input, Expression& output);
@@ -2620,7 +2620,7 @@ public:
   );
   static bool innerExpressionFromRF(
     Calculator& theCommands,
-    const RationalFunctionOld& input,
+    const RationalFunction& input,
     Expression& output,
     Expression* inputContext = nullptr
   );
@@ -2651,7 +2651,7 @@ public:
   );
   static bool innerExpressionFromUE(
     Calculator& theCommands,
-    const ElementUniversalEnveloping<RationalFunctionOld>& input,
+    const ElementUniversalEnveloping<RationalFunction>& input,
     Expression& output,
     Expression* inputContext = nullptr
   );
@@ -2693,7 +2693,7 @@ public:
   );
   static bool innerExpressionFromMonomialUE(
     Calculator& theCommands,
-    const MonomialUniversalEnveloping<RationalFunctionOld>& input,
+    const MonomialUniversalEnveloping<RationalFunction>& input,
     Expression& output,
     Expression* inputContext = nullptr
   );

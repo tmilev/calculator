@@ -218,7 +218,7 @@ public:
   );
   void GetGenericUnMinusElt(
     bool shiftPowersByNumVarsBaseField,
-    ElementUniversalEnveloping<RationalFunctionOld>& output,
+    ElementUniversalEnveloping<RationalFunction>& output,
     bool useNilWeight,
     bool ascending
   );

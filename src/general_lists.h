@@ -60,7 +60,7 @@ class Rational;
 template<class Base>
 class CompleX;
 class AlgebraicNumber;
-class RationalFunctionOld;
+class RationalFunction;
 class SemisimpleLieAlgebra;
 class rootSubalgebra;
 class rootSubalgebras;

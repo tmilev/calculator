@@ -394,6 +394,9 @@ void Polynomial<coefficient>::DivideBy(
   if (monomialOrder == nullptr) {
     global.fatal << "Non-initialized monomial pointer not allowed. " << global.fatal;
   }
+  if (&outputQuotient == &outputRemainder) {
+    global.fatal << "Input and output addresses not allowed to coincide. " << global.fatal;
+  }
   if (inputDivisor.IsEqualToZero()) {
     global.fatal << "Division by zero polynomial. " << global.fatal;
   }
@@ -419,8 +422,6 @@ void Polynomial<coefficient>::DivideBy(
   int remainderLeadingIndex = outputRemainder.GetIndexLeadingMonomial(
     &remainderLeadingMonomial, &remainderLeadingCoefficient, monomialOrder
   );
-  global.Comments << "<br>DEBUG: remainderMaxMonomial: "
-  << remainderLeadingMonomial.ToString() << "<br>";
   MonomialP leadingMonomialShiftedDivisor;
   coefficient leadingCoefficientShiftedDivisor;
   divisorShiftedExponents.GetIndexLeadingMonomial(
@@ -436,11 +437,7 @@ void Polynomial<coefficient>::DivideBy(
   MonomialP quotientMonomial;
   Polynomial<coefficient> subtracand;
   subtracand.SetExpectedSize(this->size());
-  global.Comments << "<br>DEBUG: first monomial comparison: "
-  << remainderLeadingMonomial.ToString() << ", " << leadingMonomialShiftedDivisor.ToString()
-  << "<br>";
   while (monomialOrder->greaterThanOrEqualTo(remainderLeadingMonomial, leadingMonomialShiftedDivisor)) {
-    global.Comments << "DEBUG: max monomial remainder: " << remainderLeadingMonomial.ToString() << "<br>";
     quotientMonomial = remainderLeadingMonomial;
     quotientMonomial /= leadingMonomialShiftedDivisor;
     if (!quotientMonomial.HasPositiveOrZeroExponents()) {
@@ -453,7 +450,9 @@ void Polynomial<coefficient>::DivideBy(
     subtracand.MultiplyBy(quotientMonomial, quotientCoefficient);
     outputRemainder -= subtracand;
     int remainderIndex = outputRemainder.GetIndexLeadingMonomial(
-      &remainderLeadingMonomial, &remainderLeadingCoefficient, monomialOrder
+      &remainderLeadingMonomial,
+      &remainderLeadingCoefficient,
+      monomialOrder
     );
     if (remainderIndex == - 1) {
       break;

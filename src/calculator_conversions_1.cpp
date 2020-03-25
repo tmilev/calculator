@@ -775,7 +775,7 @@ bool CalculatorConversions::innerStoreSemisimpleSubalgebras(
 
 bool CalculatorConversions::innerExpressionFromMonomialUE(
   Calculator& theCommands,
-  const MonomialUniversalEnveloping<RationalFunctionOld>& input,
+  const MonomialUniversalEnveloping<RationalFunction>& input,
   Expression& output,
   Expression* inputContext
 ) {
@@ -799,12 +799,12 @@ bool CalculatorConversions::innerExpressionFromMonomialUE(
 
 bool CalculatorConversions::innerExpressionFromUE(
   Calculator& theCommands,
-  const ElementUniversalEnveloping<RationalFunctionOld>& input,
+  const ElementUniversalEnveloping<RationalFunction>& input,
   Expression& output,
   Expression* inputContext
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromUE");
-  LinearCombination<Expression, RationalFunctionOld> theUEE;
+  LinearCombination<Expression, RationalFunction> theUEE;
   theUEE.MakeZero();
   Expression currentMonE;
   for (int i = 0; i < input.size(); i ++) {
@@ -921,12 +921,12 @@ bool CalculatorConversions::innerElementUE(
   }
   ChevalleyGenerator theChevGen;
   theChevGen.owner = &owner;
-  ElementUniversalEnveloping<RationalFunctionOld> outputUE;
-  ElementUniversalEnveloping<RationalFunctionOld> currentSummand;
-  ElementUniversalEnveloping<RationalFunctionOld> currentMultiplicand;
+  ElementUniversalEnveloping<RationalFunction> outputUE;
+  ElementUniversalEnveloping<RationalFunction> currentSummand;
+  ElementUniversalEnveloping<RationalFunction> currentMultiplicand;
   MonomialP currentMultiplicandRFpartMon;
   Polynomial<Rational> currentPMultiplicand;
-  RationalFunctionOld currentMultiplicandRFpart;
+  RationalFunction currentMultiplicandRFpart;
   outputUE.MakeZero(owner);
   Expression polyE;
   if (!CalculatorConversions::functionPolynomiaL<Rational>(theCommands, input[1], polyE)) {
@@ -1042,7 +1042,7 @@ bool CalculatorConversions::functionExpressionFromBuiltInType(
   if (input.IsOfType<Polynomial<AlgebraicNumber> >()) {
     return CalculatorConversions::functionExpressionFromPoly<AlgebraicNumber>(theCommands, input, output);
   }
-  if (input.IsOfType<RationalFunctionOld>()) {
+  if (input.IsOfType<RationalFunction>()) {
     return CalculatorConversions::innerExpressionFromRF(theCommands, input, output);
   }
   return false;
@@ -1050,8 +1050,8 @@ bool CalculatorConversions::functionExpressionFromBuiltInType(
 
 bool CalculatorConversions::innerExpressionFromUE(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromUE");
-  ElementUniversalEnveloping<RationalFunctionOld> theUE;
-  if (!input.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >(&theUE)) {
+  ElementUniversalEnveloping<RationalFunction> theUE;
+  if (!input.IsOfType<ElementUniversalEnveloping<RationalFunction> >(&theUE)) {
     return theCommands << "<hr>Expression " << input.ToString()
     << " is not an element of universal enveloping, can't convert to expression";
   }
@@ -1060,16 +1060,16 @@ bool CalculatorConversions::innerExpressionFromUE(Calculator& theCommands, const
 
 bool CalculatorConversions::innerExpressionFromRF(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromRF");
-  if (!input.IsOfType<RationalFunctionOld>()) {
+  if (!input.IsOfType<RationalFunction>()) {
     return false;
   }
-  const RationalFunctionOld& theRF= input.GetValue<RationalFunctionOld>();
+  const RationalFunction& theRF= input.GetValue<RationalFunction>();
   Expression theContext = input.GetContext();
   return CalculatorConversions::innerExpressionFromRF(theCommands, theRF, output, &theContext);
 }
 
 bool CalculatorConversions::innerExpressionFromRF(
-  Calculator& theCommands, const RationalFunctionOld& input, Expression& output, Expression* inputContext
+  Calculator& theCommands, const RationalFunction& input, Expression& output, Expression* inputContext
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromRF");
   Rational aConst;
@@ -1097,7 +1097,7 @@ bool CalculatorConversions::innerExpressionFromRF(
 }
 
 template <>
-bool Expression::ConvertToType<RationalFunctionOld>(Expression& output) const;
+bool Expression::ConvertToType<RationalFunction>(Expression& output) const;
 
 bool CalculatorConversions::innerRationalFunctioN(
   Calculator& theCommands, const Expression& input, Expression& output
@@ -1163,7 +1163,7 @@ bool CalculatorConversions::functionRationalFunction(
       if (leftE.IsError()) {
         return theCommands << "<hr> Conversion of " << input[1].ToString() << " returned error: " << leftE.ToString();
       }
-      RationalFunctionOld theRF = leftE.GetValue<RationalFunctionOld>();
+      RationalFunction theRF = leftE.GetValue<RationalFunction>();
       theRF.RaiseToPower(theSmallPower);
       return output.AssignValueWithContext(theRF, leftE.GetContext(), theCommands);
     }
@@ -1171,12 +1171,12 @@ bool CalculatorConversions::functionRationalFunction(
     << ": failed to convert the power to small integer. I am treating " << input.ToString()
     << " as a single variable: please make sure that is what you want.";
   }
-  if (input.IsOfType<RationalFunctionOld>()) {
+  if (input.IsOfType<RationalFunction>()) {
     output = input;
     return true;
   }
   if (input.IsOfType<Polynomial<Rational> >() || input.IsOfType<Rational>()) {
-    return input.ConvertToType<RationalFunctionOld> (output);
+    return input.ConvertToType<RationalFunction> (output);
   }
   if (input.IsOfType<AlgebraicNumber>()) {
     AlgebraicNumber theNumber = input.GetValue<AlgebraicNumber>();
@@ -1184,12 +1184,12 @@ bool CalculatorConversions::functionRationalFunction(
     if (theNumber.IsRational(&theRat)) {
       Expression tempE;
       tempE.AssignValue(theRat, theCommands);
-      return tempE.ConvertToType<RationalFunctionOld> (output);
+      return tempE.ConvertToType<RationalFunction> (output);
     }
   }
   Expression theContext;
   theContext.ContextMakeContextWithOnePolyVar(theCommands, input);
-  RationalFunctionOld theRF;
+  RationalFunction theRF;
   theRF.MakeOneLetterMoN(0, 1);
   return output.AssignValueWithContext(theRF, theContext, theCommands);
 }
@@ -1305,7 +1305,7 @@ bool CalculatorConversions::functionMatrixRationalFunction(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::functionMatrixRationalFunction");
-  Matrix<RationalFunctionOld> outputMat;
+  Matrix<RationalFunction> outputMat;
   Expression ContextE;
   if (!theCommands.functionGetMatrix(
     input,

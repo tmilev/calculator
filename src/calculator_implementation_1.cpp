@@ -172,9 +172,9 @@ bool Calculator::innerGCDOrLCMPoly(
   }
   Polynomial<Rational> outputPolynomial;
   if (doGCD) {
-    RationalFunctionOld::gcd(thePolys[0], thePolys[1], outputPolynomial);
+    RationalFunction::gcd(thePolys[0], thePolys[1], outputPolynomial);
   } else {
-    RationalFunctionOld::lcm(thePolys[0], thePolys[1], outputPolynomial);
+    RationalFunction::lcm(thePolys[0], thePolys[1], outputPolynomial);
   }
   return output.AssignValueWithContext(outputPolynomial, theContext, theCommands);
 }
@@ -2177,10 +2177,10 @@ bool Calculator::innerKillingForm(Calculator& theCommands, const Expression& inp
     return false;
   }
   Expression theContext = leftE.GetContext();
-  ElementUniversalEnveloping<RationalFunctionOld> left, right;
+  ElementUniversalEnveloping<RationalFunction> left, right;
   if (
-    !leftE.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >(&left) ||
-    !rightE.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >(&right)
+    !leftE.IsOfType<ElementUniversalEnveloping<RationalFunction> >(&left) ||
+    !rightE.IsOfType<ElementUniversalEnveloping<RationalFunction> >(&right)
   ) {
     return false;
   }

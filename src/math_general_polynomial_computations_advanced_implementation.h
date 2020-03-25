@@ -400,7 +400,7 @@ std::string GroebnerBasisComputation<coefficient>::ToStringLetterOrder(bool addD
   std::stringstream out;
   int numVars = this->GetNumVars();
   List<MonomialP> theVars;
-  out << "Variable name(s): ";
+  out << "Variable name(s), ascending order: ";
   theVars.SetSize(numVars);
   for (int i = 0; i < theVars.size; i ++) {
     theVars[i].MakeEi(i, 1);
@@ -413,11 +413,26 @@ std::string GroebnerBasisComputation<coefficient>::ToStringLetterOrder(bool addD
   for (int i = 0; i < numVars; i ++) {
     out << theVars[i].ToString(&tempFormat);
     if (i != numVars - 1) {
-      out << " < ";
+      out << ", ";
     }
   }
   if (addDollars) {
     out << "$";
+  }
+  if (numVars > 1) {
+    out << ". The implied lexicographic order runs in the opposite direction: ";
+    if (addDollars) {
+      out << "$";
+    }
+    for (int i = 0; i < numVars; i ++) {
+      out << theVars[i].ToString(&tempFormat);
+      if (i != numVars - 1) {
+        out << " > ";
+      }
+    }
+    if (addDollars) {
+      out << "$";
+    }
   }
   return out.str();
 }
@@ -451,11 +466,7 @@ void GroebnerBasisComputation<coefficient>::OneDivisonSubStepWithBasis(
   }
   this->bufPoly.MultiplyBy(quotientMonomial, quotientCoefficient);
   if (this->flagStoreQuotients) {
-  global.Comments << "DEBUG: storing quotient mon: " << quotientMonomial.ToString() << "<br>";
     this->theQuotients[index].AddMonomial(quotientMonomial, quotientCoefficient);
-  } else {
-    global.Comments << "DEBUG: NOT STORING mon: " << quotientMonomial.ToString() << "<br>";
-
   }
   if (this->flagDoLogDivision) {
     this->intermediateSubtractands.GetElement().AddOnTop(this->bufPoly);
@@ -1281,6 +1292,13 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively(List
     }
   }
   inputSystem = startingSystemNoModifications;
+}
+
+template <class coefficient>
+std::string GroebnerBasisComputation<coefficient>::toStringDivision(Polynomial<coefficient>& toBeDivided) {
+  std::stringstream out;
+  out << "Dividing: " << toBeDivided.ToString() << "<br>by:<br>" << this->theBasiS.ToStringCommaDelimited();
+  return  out.str();
 }
 
 template <class coefficient>

@@ -2641,7 +2641,7 @@ bool MonomialP::greaterThan_rightLargerWins(const MonomialP& other) const {
       return false;
     }
   }
-  return true;
+  return false;
 }
 
 List<MonomialP>::Comparator& MonomialP::orderDefault() {
@@ -2685,7 +2685,7 @@ bool MonomialP::greaterThan_leftLargerWins(const MonomialP &other) const {
       return false;
     }
   }
-  return true;
+  return false;
 }
 
 void MonomialP::operator*=(const MonomialP& other) {

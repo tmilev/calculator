@@ -841,6 +841,11 @@ public:
     if (theList.size == 0) {
       return;
     }
+    if (order != nullptr) {
+      if (order->leftGreaterThanRight == nullptr) {
+        order = nullptr;
+      }
+    }
     if (order == nullptr) {
       List<Object>::QuickSortAscendingNoOrder(theList, 0, theList.size - 1, carbonCopy);
     } else {

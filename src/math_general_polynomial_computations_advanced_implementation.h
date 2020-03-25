@@ -496,7 +496,9 @@ bool GroebnerBasisComputation<coefficient>::OneDivisonStepWithRespectToBasis(
     &leadingCoefficient,
     &this->thePolynomialOrder.theMonOrder
   );
-
+  if (indexLeadingMonomial == -1) {
+    return false;
+  }
   for (int i = 0; i < this->theBasiS.size; i ++) {
     if (i == basisIndexToIgnore) {
       continue;
@@ -506,7 +508,13 @@ bool GroebnerBasisComputation<coefficient>::OneDivisonStepWithRespectToBasis(
       continue;
     }
     this->numberOfIntermediateRemainders ++;
-    this->OneDivisonSubStepWithRespectToBasis(currentRemainder, highestMonomial, leadingCoefficient, i, report);
+    this->OneDivisonSubStepWithRespectToBasis(
+      currentRemainder,
+      highestMonomial,
+      leadingCoefficient,
+      i,
+      report
+    );
     return true;
   }
   if (remainderResult != nullptr) {
@@ -526,7 +534,7 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis(
   Polynomial<coefficient>* outputRemainder,
   int basisIndexToIgnore
 ) {
-  //Reference: Cox, Little, O'Shea, Ideals, Varieties and Algorithms, page 62
+  //Reference: Cox, Little, O'Shea, Ideals, Varieties and Algorithms, page 62.
   MacroRegisterFunctionWithName("GroebnerBasisComputation::RemainderDivisionWithRespectToBasis");
   if (
     &inputOutput == outputRemainder ||
@@ -584,7 +592,7 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis(
       << "\n<br>" << currentRemainder.size()
       << " monomials in working remainder.";
       if (outputRemainder != nullptr) {
-        out <<  "<br>" << outputRemainder->size()
+        out << "<br>" << outputRemainder->size()
         << " monomials in the final output remainder.";
       }
       reportRemainderSoFar.Report(out.str());

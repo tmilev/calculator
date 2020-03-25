@@ -2336,24 +2336,26 @@ public:
     SemisimpleLieAlgebra*& ambientSSalgebra,
     Expression::FunctionAddress ConversionFun
   );
-  static bool innerGroebnerGrLex(Calculator& theCommands, const Expression& input, Expression& output) {
-    return theCommands.innerGroebner(theCommands, input, output, true);
+  static bool innerGroebnerGradedLexicographic(Calculator& theCommands, const Expression& input, Expression& output) {
+    return theCommands.innerGroebner(theCommands, input, output, MonomialP::Order::gradedLexicographic);
   }
-  static bool innerGroebnerLex(Calculator& theCommands, const Expression& input, Expression& output) {
-    return theCommands.innerGroebner(theCommands, input, output, false);
+  static bool innerGroebnerGradedReverseLexicographic(Calculator& theCommands, const Expression& input, Expression& output) {
+    return theCommands.innerGroebner(theCommands, input, output, MonomialP::Order::gradedReverseLexicographic);
   }
-  static bool innerGroebnerRevLex(Calculator& theCommands, const Expression& input, Expression& output) {
-    return theCommands.innerGroebner(theCommands, input, output, false, true);
+  static bool innerGroebnerLexicographic(Calculator& theCommands, const Expression& input, Expression& output) {
+    return theCommands.innerGroebner(theCommands, input, output, MonomialP::Order::lexicographic);
   }
-  static bool innerGroebnerModZpLex(Calculator& theCommands, const Expression& input, Expression& output) {
-    return theCommands.innerGroebner(theCommands, input, output, false, false, true);
+  static bool innerGroebnerLexicographicOpposite(Calculator& theCommands, const Expression& input, Expression& output) {
+    return theCommands.innerGroebner(theCommands, input, output, MonomialP::Order::lexicographicOpposite);
   }
+  static bool innerGroebnerModZpLexicographic(Calculator& theCommands, const Expression& input, Expression& output) {
+    return theCommands.innerGroebner(theCommands, input, output, MonomialP::Order::lexicographic, true);
+  }  
   static bool innerGroebner(
     Calculator& theCommands,
     const Expression& input,
     Expression& output,
-    bool useGraded,
-    bool useReverseLexicographic = false,
+    int order,
     bool useModZp = false
   );
   static bool innerKLcoeffs(Calculator& theCommands, const Expression& input, Expression& output);

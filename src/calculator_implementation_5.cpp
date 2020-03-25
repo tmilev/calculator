@@ -2244,28 +2244,6 @@ bool CalculatorFunctions::innerPlotSurface(Calculator& theCommands, const Expres
 class QRFactorizationComputation{
 };
 
-//bool CalculatorFunctions::innerGramSchmidtVerbose(Calculator& theCommands, const Expression& input, Expression& output)
-//{ MacroRegisterFunctionWithName("CalculatorFunctions::innerGramSchmidtVerbose");
-//  Matrix<AlgebraicNumber> theMatAlg;
-//  bool matAlgWorks = false;
-//  if (input.IsMatrixGivenType<AlgebraicNumber>(0, 0, &theMatAlg))
-//    matAlgWorks = true;
-//  if (!matAlgWorks)
-//    if (theCommands.GetMatriXFromArguments(input, theMatAlg, 0, - 1, 0))
-//      matAlgWorks = true;
-//  if (matAlgWorks)
-//  { if (theMatAlg.NumRows != theMatAlg.NumCols || theMatAlg.NumCols < 1)
-//      return output.MakeError("The matrix is not square", theCommands, true);
-//    if (theMatAlg.GetDeterminant() == 0)
-//      return output.MakeError("Matrix determinant is zero.", theCommands, true);
-//    QRFactorizationComputation theComputation;
-//    theMatAlg.Invert();
-//    return output.AssignMatrix(theMatAlg, theCommands);
-//  }
-//  return theCommands << "<hr>Failed to extract algebraic number matrix from: "
-//  << input.ToString();
-//}
-
 bool CalculatorFunctions::innerPolynomialDivisionRemainder(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
@@ -2284,8 +2262,8 @@ bool CalculatorFunctions::innerPolynomialDivisionRemainder(
     theGB.theBasiS[i - 1] = thePolys[i];
   }
   Polynomial<AlgebraicNumber> outputRemainder;
-  theGB.initForDivisionAlone(theGB.theBasiS);
-  theGB.RemainderDivisionWithRespectToBasis(thePolys[0], &outputRemainder, - 1);
+  theGB.initializeForDivision(theGB.theBasiS);
+  theGB.RemainderDivisionByBasis(thePolys[0], &outputRemainder, - 1);
   Expression thePolyE;
   thePolyE.AssignValueWithContext(outputRemainder, theContext, theCommands);
   output.reset(theCommands);
@@ -2298,28 +2276,28 @@ bool CalculatorFunctions::innerPolynomialDivisionVerboseGrLex(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   return CalculatorFunctions::innerPolynomialDivisionVerbose(
-    theCommands, input, output, &MonomialP::orderLeftToRightDegreeThenGreaterThan()
+    theCommands, input, output, &MonomialP::orderDegreeThenLeftLargerWins()
   );
 }
 
-bool CalculatorFunctions::innerPolynomialDivisionVerboseGrLexRev(
+bool CalculatorFunctions::innerPolynomialDivisionVerboseGradedReverseLexicographic(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   List<MonomialP>::Comparator order(
-    MonomialP::Left_greaterThan_rightToLeft_firstLEQ
+    MonomialP::greaterThan_totalDegree_rightSmallerWins
   );
   return CalculatorFunctions::innerPolynomialDivisionVerbose(
     theCommands, input, output, &order
   );
 }
 
-bool CalculatorFunctions::innerPolynomialDivisionVerboseLex(
+bool CalculatorFunctions::innerPolynomialDivisionVerboseLexicographic(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::innerPolynomialDivisionVerboseLexicographic");
   List<MonomialP>::Comparator order(
-    MonomialP::Left_greaterThan_leftToRight_firstGEQ
+    MonomialP::greaterThan_leftLargerWins
   );
-
   return CalculatorFunctions::innerPolynomialDivisionVerbose(
     theCommands,
     input,
@@ -2328,11 +2306,11 @@ bool CalculatorFunctions::innerPolynomialDivisionVerboseLex(
   );
 }
 
-bool CalculatorFunctions::innerPolynomialDivisionVerboseLexicographicReversed(
+bool CalculatorFunctions::innerPolynomialDivisionVerboseLexicographicOpposite(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   List<MonomialP>::Comparator order(
-    MonomialP::Left_greaterThan_rightToLeft_firstGEQ
+    MonomialP::greaterThan_rightLargerWins
   );
   return CalculatorFunctions::innerPolynomialDivisionVerbose(
     theCommands, input, output, &order
@@ -2366,11 +2344,11 @@ bool CalculatorFunctions::innerPolynomialDivisionVerbose(
     }
     theGB.theBasiS[i - 1] = thePolys[i];
   }
-  theGB.initForDivisionAlone(theGB.theBasiS);
+  theGB.initializeForDivision(theGB.theBasiS);
   if (theMonOrder != nullptr) {
     theGB.thePolynomialOrder.theMonOrder = *theMonOrder;
   }
-  theGB.RemainderDivisionWithRespectToBasis(thePolys[0], &theGB.remainderDivision, - 1);
+  theGB.RemainderDivisionByBasis(thePolys[0], &theGB.remainderDivision, - 1);
   theContext.ContextGetFormatExpressions(theGB.theFormat);
   theGB.theFormat.flagUseLatex = true;
   theGB.theFormat.flagUseFrac = true;
@@ -2925,9 +2903,11 @@ bool CalculatorFunctions::innerPolynomialDivisionSlidesGrLex(
   if (!thePolys[0].IsSmallInteger(&theGB.firstIndexLatexSlide)) {
     return theCommands << "Failed to extract integer from first argument";
   }
-  theGB.initForDivisionAlone(theGB.theBasiS);
-  theGB.thePolynomialOrder.theMonOrder = MonomialP::Left_greaterThan_totalDegree_rightToLeft_firstSmaller;
-  theGB.RemainderDivisionWithRespectToBasis(thePolys[1], &theGB.remainderDivision, - 1);
+  theGB.initializeForDivision(theGB.theBasiS);
+  theGB.thePolynomialOrder.theMonOrder.setComparison(
+    MonomialP::greaterThan_totalDegree_rightSmallerWins
+  );
+  theGB.RemainderDivisionByBasis(thePolys[1], &theGB.remainderDivision, - 1);
   theContext.ContextGetFormatExpressions(theGB.theFormat);
   theGB.theFormat.flagUseLatex = true;
   theGB.theFormat.flagUseFrac = true;

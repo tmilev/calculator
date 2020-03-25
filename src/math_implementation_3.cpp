@@ -12632,7 +12632,9 @@ bool RationalFunctionOld::GetRelations(
     currentPoly -= currentGenerator;
   }
   GroebnerBasisComputation<Rational> theComputation;
-  theComputation.thePolynomialOrder.theMonOrder = MonomialP::Left_isGEQ_leftToRight_firstGEQ;
+  theComputation.thePolynomialOrder.theMonOrder.setComparison(
+    MonomialP::greaterThan_leftLargerWins
+  );
   if (!theComputation.TransformToReducedGroebnerBasis(theGroebnerBasis)) {
     comments << "Failed to find Groebner basis";
     return false;
@@ -12667,7 +12669,7 @@ bool ConeComplex::findMaxLFOverConeProjective(
   for (int i = 0; i < inputLinPolys.size; i ++) {
     Polynomial<Rational>& currentPoly = inputLinPolys[i];
     if (currentPoly.TotalDegree() != 1 ) {
-      global.Comments << "You messed up the total degree which must be one, instead it is "
+      global.Comments << "The total degree must be one, instead it is "
       << currentPoly.TotalDegree() << ". The dimension of the cone is " << theDim;
       return false;
     }

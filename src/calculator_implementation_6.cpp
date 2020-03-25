@@ -1339,8 +1339,8 @@ bool CalculatorFunctions::innerPolynomialDivisionQuotient(
     theGB.theBasiS[i - 1] = thePolys[i];
   }
   Polynomial<AlgebraicNumber> outputRemainder;
-  theGB.initForDivisionAlone(theGB.theBasiS);
-  theGB.RemainderDivisionWithRespectToBasis(thePolys[0], &outputRemainder, - 1);
+  theGB.initializeForDivision(theGB.theBasiS);
+  theGB.RemainderDivisionByBasis(thePolys[0], &outputRemainder, - 1);
   Expression currentE, thePolyE;
   List<Expression> theList;
   for (int i = 0; i < theGB.theQuotients.size; i ++) {
@@ -2580,7 +2580,7 @@ bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
     << curveContext.ContextGetPolynomialVariables().ToString();
   }
   MonomialP leadingMonomial;
-  List<MonomialP>::Comparator monomialOrder(MonomialP::Left_greaterThan_rightToLeft_firstLEQ);
+  List<MonomialP>::Comparator monomialOrder(MonomialP::greaterThan_totalDegree_rightSmallerWins);
   thePoly.GetIndexLeadingMonomial(&leadingMonomial, nullptr, &monomialOrder);
   int indexX = 0;
   int indexY = 1;

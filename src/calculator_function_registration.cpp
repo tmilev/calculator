@@ -3072,23 +3072,30 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->AddOperationHandler(
     "PolyDivStringGrLexRev",
-    CalculatorFunctions::innerPolynomialDivisionVerboseGrLexRev,
+    CalculatorFunctions::innerPolynomialDivisionVerboseGradedReverseLexicographic,
     "",
-    "Prints a string representing division of "
-    "a polynomial by a set of polynomials using total degree (graded) order with "
-    "equal total degrees compared by lex order with reversed order of the letters, "
-    "for example, x y^4> x^2 y^3 , x^11>y^10. ",
+    "String that presents the division of a polynomial "
+    "by a set of polynomials. Uses the graded reverse lexicographic order. "
+    "More precisely, compares monomials by total degree. "
+    "Ties are broken by comparing powers right to left. "
+    "First **smaller** power on the right is declared the winner ('larger')."
+    "For example,  x^2 y^3 > x y^4, x^11 > y^10. ",
     "PolyDivStringGrLexRev{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3- 1) ;",
-    "CalculatorFunctions::innerPolynomialDivisionVerboseGrLexRev",
+    "CalculatorFunctions::innerPolynomialDivisionVerboseGradedReverseLexicographic",
     "PolyDivStringGrLexRev",
     innerStandard
   );
   this->AddOperationHandler(
     "PolyDivStringLex",
-    CalculatorFunctions::innerPolynomialDivisionVerboseLex,
+    CalculatorFunctions::innerPolynomialDivisionVerboseLexicographic,
     "",
     "Prints a string representing division of "
-    "a polynomial by a set of polynomials using the lex order, for example, x^2 y^4 > x y^1000 > x y^2. ",
+    "a polynomial by a set of polynomials using the "
+    "lexicographic order on the monomial exponents. "
+    "For example, x^2 y^4 > x y^1000 > x y^2."
+    "Please do note that the lexicographic order "
+    "is not related to the lexicographic order on the "
+    "words 'expansions' (x^2y^3->xxyyy) of the monomials. ",
     "PolyDivStringLex{}(x^7 + 6 x y + 5x y^8 + y^5, x^2 + 2, y^3 - 1);\n"
     "PolyDivStringLex{}(x^7 + \\sqrt{2} x + 1, \\sqrt{3}x^2 + 2x + 1)",
     "CalculatorFunctions::innerPolynomialDivisionVerboseLex",
@@ -3097,12 +3104,17 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->AddOperationHandler(
     "PolyDivStringLexRev",
-    CalculatorFunctions::innerPolynomialDivisionVerboseLexicographicReversed,
+    CalculatorFunctions::innerPolynomialDivisionVerboseLexicographicOpposite,
     "",
     "Prints a string representing division of "
-    "a polynomial by a set of polynomials using the lex "
-    "order with reversed order of variables, "
-    "for example, y^2 > x^1000 y > x y. ",
+    "a polynomial by a set of polynomials using the "
+    "lexicographic order on the monimial exponents "
+    "with reversed order of variables. "
+    "For example, y^2 > x^1000 y > x y. "
+    "Please do note that the lexicographic order "
+    "is not related to the lexicographic order on the "
+    "words 'expansions' (x^2y^3->xxyyy) of the monomials. "
+    ,
     "PolyDivStringLexRev{}(x^7 + 6x y + 5x y^8 + y^5, x^2 + 2, y^3- 1) ;",
     "CalculatorFunctions::innerPolynomialDivisionVerboseLexRev",
     "PolyDivStringLexRev",
@@ -5056,7 +5068,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->AddOperationHandler(
     "GroebnerLexUpperLimit",
-    Calculator::innerGroebnerLex,
+    Calculator::innerGroebnerLexicographic,
     "",
     "Transforms to a reduced Groebner basis using the "
     "lexicographic order. The lexicographic order is "
@@ -5141,8 +5153,8 @@ void Calculator::initPredefinedInnerFunctions() {
     innerStandard
   );
   this->AddOperationHandler(
-    "GroebnerRevLexUpperLimit",
-    Calculator::innerGroebnerRevLex,
+    "GroebnerLexOppositeUpperLimit",
+    Calculator::innerGroebnerLexicographicOpposite,
     "",
     "Same as GroebnerLexUpperLimit but uses reverse order on the variables (z<x).",
     "GroebnerRevLexUpperLimit{}(10000, s^2+c^2+ 1, a-s^4, b-c^4 );"
@@ -5153,7 +5165,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->AddOperationHandler(
     "GroebnerGrLexUpperLimit",
-    Calculator::innerGroebnerGrLex,
+    Calculator::innerGroebnerGradedLexicographic,
     "",
     "Transforms to a reduced Groebner basis relative to the graded "
     "lexicographic order. In the graded lexicographic order, "

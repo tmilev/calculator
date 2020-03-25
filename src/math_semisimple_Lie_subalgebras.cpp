@@ -125,8 +125,7 @@ bool SemisimpleLieAlgebra::AttempTFindingHEF(
   }
   theComputation.MaxNumSerreSystemComputationsPreferred = 4001;
   theComputation.MaxNumGBComputations = 2001;
-  theComputation.thePolynomialOrder.theMonOrder =
-  MonomialP::Left_greaterThan_rightToLeft_firstGEQ;
+  theComputation.thePolynomialOrder.theMonOrder.setComparison(MonomialP::greaterThan_rightLargerWins);
   theComputation.SolveSerreLikeSystem(theSystem);
   if (!theComputation.flagSystemSolvedOverBaseField) {
     if (logStream != nullptr) {
@@ -4060,8 +4059,7 @@ bool CandidateSSSubalgebra::AttemptToSolveSystem() {
   << " I need to solve the following system." << this->ToStringSystemPart2();
   theReport.Report(reportstream.str());
   GroebnerBasisComputation<AlgebraicNumber> theComputation;
-  theComputation.thePolynomialOrder.theMonOrder =
-  MonomialP::Left_greaterThan_totalDegree_rightToLeft_firstSmaller;
+  theComputation.thePolynomialOrder.theMonOrder.setComparison(MonomialP::greaterThan_totalDegree_rightSmallerWins);
   for (int i = 500; i < 200000; i += 100000) {
     theComputation.MaxNumGBComputations = i;
     theComputation.MaxNumSerreSystemComputationsPreferred = i;

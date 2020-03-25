@@ -1,6 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "calculator_interface.h"
+#include "calculator_inner_typed_functions.h"
 #include "math_general_implementation.h"
 #include "math_extra_semisimple_Lie_algebras.h"
 #include "math_extra_universal_enveloping_implementation.h"
@@ -602,8 +603,7 @@ bool Calculator::innerGroebner(
   Calculator& theCommands,
   const Expression& input,
   Expression& output,
-  bool useGraded,
-  bool useReverseLexicographic,
+  int order,
   bool useModZp
 ) {
   MacroRegisterFunctionWithName("Calculator::innerGroebner");
@@ -670,22 +670,24 @@ bool Calculator::innerGroebner(
   List<Polynomial<AlgebraicNumber> > outputGroebner, outputGroebner2;
   outputGroebner = inputVector;
   outputGroebner2 = inputVector;
-  if (useGraded && !useReverseLexicographic) {
+  if (order == MonomialP::Order::gradedLexicographic) {
     theGroebnerComputation.thePolynomialOrder.theMonOrder.setComparison(
-      MonomialP::Left_greaterThan_totalDegree_leftToRight_firstGreater
+      MonomialP::greaterThan_totalDegree_leftLargerWins
     );
-  } else if (useGraded && useReverseLexicographic) {
+  } else if (order == MonomialP::Order::gradedReverseLexicographic) {
     theGroebnerComputation.thePolynomialOrder.theMonOrder.setComparison(
-      MonomialP::Left_greaterThan_totalDegree_rightToLeft_firstSmaller
+      MonomialP::greaterThan_totalDegree_rightSmallerWins
     );
-  } else if (!useGraded && !useReverseLexicographic) {
+  } else if (order == MonomialP::Order::lexicographicOpposite) {
     theGroebnerComputation.thePolynomialOrder.theMonOrder.setComparison(
-      MonomialP::Left_greaterThan_leftToRight_firstGEQ
+      MonomialP::greaterThan_rightLargerWins
     );
-  } else if (!useGraded && useReverseLexicographic){
+  } else if (order == MonomialP::Order::lexicographic){
     theGroebnerComputation.thePolynomialOrder.theMonOrder.setComparison(
-      MonomialP::Left_greaterThan_rightToLeft_firstLEQ
+      MonomialP::greaterThan_leftLargerWins
     );
+  } else {
+    global.fatal << "Unexpected order value: " << order << global.fatal;
   }
   theGroebnerComputation.theFormat.monomialOrder = theGroebnerComputation.thePolynomialOrder.theMonOrder;
   theGroebnerComputation.MaxNumGBComputations = upperBoundComputations;

@@ -1385,8 +1385,7 @@ bool CalculatorFunctions::innerSolveSerreLikeSystem(
   //int numVars = theContext.GetNumContextVariables();
   theComputation.MaxNumGBComputations = upperLimit;
   theComputation.MaxNumSerreSystemComputationsPreferred = upperLimit;
-  theComputation.thePolynomialOrder.theMonOrder =
-  MonomialP::Left_greaterThan_totalDegree_rightToLeft_firstSmaller;
+  theComputation.thePolynomialOrder.theMonOrder.setComparison(MonomialP::greaterThan_totalDegree_rightSmallerWins);
   theComputation.theAlgebraicClosurE = &theCommands.theObjectContainer.theAlgebraicClosure;
   theComputation.flagTryDirectlySolutionOverAlgebraicClosure = startWithAlgebraicClosure;
   global.theDefaultFormat.GetElement() = theComputation.theFormat;
@@ -2105,9 +2104,9 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
     theGB.theBasiS[0] = this->theDen;
     theGB.theFormat = this->currentFormaT;
     theGB.thePolynomialOrder.theMonOrder = monomialOrder;
-    theGB.initForDivisionAlone(theGB.theBasiS);
+    theGB.initializeForDivision(theGB.theBasiS);
     Polynomial<Rational> theNumCopy = this->theNum;
-    theGB.RemainderDivisionWithRespectToBasis(theNumCopy, &theGB.remainderDivision, - 1);
+    theGB.RemainderDivisionByBasis(theNumCopy, &theGB.remainderDivision, - 1);
     this->printoutPFsLatex << "Here is a detailed long polynomial division. ";
     this->printoutPFsLatex << theGB.GetDivisionStringLaTeX();
     this->printoutPFsHtml << "<br>Here is a detailed long polynomial division:<br> ";

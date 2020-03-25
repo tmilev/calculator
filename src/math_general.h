@@ -278,6 +278,17 @@ private:
   // to sort monomials when displaying polynomials to the screen.
   List<Rational> monBody;
 public:
+  struct Order {
+    // Lexicographic order, see documentation below.
+    static const int lexicographic = 0;
+    // Lexicographic with opposite letter order.
+    static const int lexicographicOpposite = 1;
+    // Graded lexicographic order, ties resolved with lexicographic order.
+    static const int gradedLexicographic = 2;
+    // Graded reverse order, ties resolved with right-to-left-smaller-wins.
+    static const int gradedReverseLexicographic = 3;
+  };
+
   MonomialP(int letterIndex) {
     this->monBody.initializeFillInObject(letterIndex + 1, 0);
     this->monBody[letterIndex] = 1;
@@ -415,74 +426,22 @@ public:
 
   static List<MonomialP>::Comparator& orderDefault();
   static List<MonomialP>::Comparator& orderForGCD();
-  static List<MonomialP>::Comparator& orderLeftToRightDegreeThenGreaterThan();
-
-  // "Reverse lexicographic" order.
-  bool IsGEQpartialOrder(MonomialP& m);
-
-  static bool Left_isGEQ_rightToLeft_firstGEQ(const MonomialP& left, const MonomialP& right) {
-    return left.IsGEQ_rightToLeft_firstGEQ(right);
-  }
-
-  static bool Left_isGEQ_rightToLeft_firstLEQ(const MonomialP& left, const MonomialP& right) {
-    return left.IsGEQ_rightToLeft_firstLEQ(right);
-  }
-
-  // "Reverse lexicographic" order.
-  static bool Left_greaterThan_rightToLeft_firstLEQ(const MonomialP& left, const MonomialP& right) {
-    if (left == right) {
-      return false;
-    }
-    return left.IsGEQ_rightToLeft_firstLEQ(right);
-  }
-
-  // "Lexicographic" order in reverse.
-  static bool Left_greaterThan_rightToLeft_firstGEQ(const MonomialP& left, const MonomialP& right) {
-    if (left == right) {
-      return false;
-    }
-    return left.IsGEQ_rightToLeft_firstGEQ(right);
-  }
-
-  // "Lexicographic" order.
-  static bool Left_greaterThan_leftToRight_firstGEQ(const MonomialP& left, const MonomialP& right) {
-    if (left == right) {
-      return false;
-    }
-    return left.IsGEQ_leftToRight_firstGEQ(right);
-  }
-
-  // "Lexicographic" order.
-  static bool Left_isGEQ_leftToRight_firstGEQ(const MonomialP& left, const MonomialP& right) {
-    return left.IsGEQ_leftToRight_firstGEQ(right);
-  }
+  static List<MonomialP>::Comparator& orderDegreeThenLeftLargerWins();
 
   // "Graded reverse lexicographic" order.
-  static bool Left_greaterThan_totalDegree_rightToLeft_firstSmaller(const MonomialP& left, const MonomialP& right) {
-    if (left == right) {
-      return false;
-    }
-    return left.IsGEQ_totalDegree_rightToLeft_firstLEQ(right);
-  }
+  // We compare by total degree.
+  // If tied by total degree, compare right to left.
+  // The first unequal power from the right breaks the tie.
+  // The monomial with **smaller** power is declared **larger**.
+  static bool greaterThan_totalDegree_rightSmallerWins(
+    const MonomialP& left, const MonomialP& right
+  );
 
   // "Graded lexicographic" order.
-  static bool Left_greaterThan_totalDegree_leftToRight_firstGreater(const MonomialP& left, const MonomialP& right) {
-    if (left == right) {
-      return false;
-    }
-    if (left.TotalDegree() > right.TotalDegree()) {
-      return true;
-    }
-    if (left.TotalDegree() < right.TotalDegree()) {
-      return false;
-    }
-    return left.IsGEQ_totalDegree_leftToRight_firstGEQ(right);
-  }
+  static bool greaterThan_totalDegree_leftLargerWins(const MonomialP& left, const MonomialP& right);
 
-  bool IsGEQ_leftToRight(const MonomialP& other, bool trueIfThisGreater) const;
-  bool IsGEQ_rightToLeft(const MonomialP& other, bool trueIfThisGreater) const;
-
-  // The "lexicographic order" follows. If computing with n variables, the "lexicographic order"
+  // "Lexicographic" order.
+  // If computing with n variables, the "lexicographic order"
   // coincides with the infinite-alphabet dictionary of all words with length n, where
   // each letter is given by the variable exponent.
   // In other words, the lexicographic order for x^2 y^0 z^3 is the "lexicographic" order
@@ -495,25 +454,15 @@ public:
   // x x x y y y z <  x y y z z z.
   // This has lead to lots of confusion in previous version, so we have dropped the
   // term "lexicographic" in all places except the end-user facing calculator commands.
-  bool IsGEQ_leftToRight_firstGEQ(const MonomialP& other) const {
-    return this->IsGEQ_leftToRight(other, true);
+  bool greaterThan_leftLargerWins(const MonomialP& other) const;
+  static bool greaterThan_leftLargerWins(const MonomialP& left, const MonomialP& right) {
+    return left.greaterThan_leftLargerWins(right);
   }
-  bool IsGEQ_rightToLeft_firstGEQ(const MonomialP& other) const {
-    return this->IsGEQ_rightToLeft(other, true);
+  // Lexicographic order but with variables ordered in the opposite direction.
+  bool greaterThan_rightLargerWins(const MonomialP& other) const;
+  static bool greaterThan_rightLargerWins(const MonomialP& left, const MonomialP& right) {
+    return left.greaterThan_rightLargerWins(right);
   }
-  bool IsGEQ_leftToRight_firstLEQ(const MonomialP& other) const {
-    return this->IsGEQ_leftToRight(other, false);
-  }
-  // The "reverse lexicographic" order follows. We compare right to left.
-  // If the comparisons are decisive, we reverse the boolean.
-  bool IsGEQ_rightToLeft_firstLEQ(const MonomialP& other) const {
-    return this->IsGEQ_rightToLeft(other, false);
-  }
-  // The "graded lexicographic" order follows.
-  bool IsGEQ_totalDegree_leftToRight_firstGEQ(const MonomialP& other) const;
-  // The "graded reverse lexicographic" order follows.
-  bool IsGEQ_totalDegree_rightToLeft_firstLEQ(const MonomialP& other) const;
-
 
   void SetNumVariablesSubDeletedVarsByOne(int newNumVars);
   bool IsConstant() const {
@@ -548,6 +497,11 @@ public:
   void operator=(const MonomialP& other) {
     this->monBody = other.monBody;
   }
+  class Test {
+  public:
+    static bool All();
+    static bool TestMonomialOrdersSatisfyTheDefinition();
+  };
 };
 
 template <typename coefficient>
@@ -2963,10 +2917,7 @@ public:
   ) const;
   void DrawElement(DrawElementInputOutput& theDrawData, FormatExpressions& PolyFormatLocal);
 
-  int IndexMaximumMonomial_rightToLeft_firstLEQ() const {
-    return this->GetIndexMaxMonomial(MonomialP::Left_greaterThan_rightToLeft_firstLEQ);
-  }
-//  void ComponentInFrontOfVariableToPower(int VariableIndex, ListPointers<Polynomial<coefficient> >& output, int UpToPower);
+  // void ComponentInFrontOfVariableToPower(int VariableIndex, ListPointers<Polynomial<coefficient> >& output, int UpToPower);
   int GetMaxPowerOfVariableIndex(int VariableIndex);
   bool operator<=(const coefficient& other) const {
     coefficient constME;
@@ -3398,18 +3349,18 @@ class GroebnerBasisComputation {
   static int GetNumVarsToSolveFor(const List<Polynomial<coefficient> >& input);
   static void GetVarsToSolveFor(const List<Polynomial<coefficient> >& input, Selection& output);
   static bool IsContradictoryReducedSystem(const List<Polynomial<coefficient> >& input);
-  void RemainderDivisionWithRespectToBasis(
+  void RemainderDivisionByBasis(
     Polynomial<coefficient>& inputOutput,
     Polynomial<coefficient>* outputRemainder = 0,
     int basisIndexToIgnore = - 1
   );
-  bool OneDivisonStepWithRespectToBasis(
+  bool OneDivisonStepWithBasis(
     Polynomial<coefficient>& currentRemainder,
     Polynomial<coefficient>* remainderResult,
     int basisIndexToIgnore,
     ProgressReport* report
   );
-  void OneDivisonSubStepWithRespectToBasis(
+  void OneDivisonSubStepWithBasis(
     Polynomial<coefficient>& remainder,
     const MonomialP& leadingMonomial,
     const coefficient& leadingCoefficient,
@@ -3444,7 +3395,7 @@ class GroebnerBasisComputation {
   void CheckConsistency();
   void initForSystemSolution();
   void initForGroebnerComputation(int expectedNumInputPolys);
-  void initForDivisionAlone(List<Polynomial<coefficient> >& inputOutpuT);
+  void initializeForDivision(List<Polynomial<coefficient> >& inputOutpuT);
 };
 
 class RationalFunctionOld {

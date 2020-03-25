@@ -189,7 +189,7 @@ bool GroebnerBasisComputation<coefficient>::AddPolysAndReduceBasis() {
     int oldBasisSize = this->basisCandidates.size;
     while (this->basisCandidates.size > 0) {
       int selectedIndex = this->SelectPolyIndexToAddNext();
-      this->RemainderDivisionWithRespectToBasis(this->basisCandidates[selectedIndex], &this->remainderDivision);
+      this->RemainderDivisionByBasis(this->basisCandidates[selectedIndex], &this->remainderDivision);
       this->basisCandidates.RemoveIndexSwapWithLast(selectedIndex);
       if (this->AddRemainderToBasis()) {
         changed = true;
@@ -223,7 +223,7 @@ bool GroebnerBasisComputation<coefficient>::AddPolysAndReduceBasis() {
         theReport1.Report(reportStream.str());
       }
       this->NumberGBComputations ++;
-      this->RemainderDivisionWithRespectToBasis(this->bufPolyForGaussianElimination, &this->remainderDivision, i);
+      this->RemainderDivisionByBasis(this->bufPolyForGaussianElimination, &this->remainderDivision, i);
       this->remainderDivision.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
       if (this->MaxNumGBComputations > 0) {
         if (this->NumberGBComputations > this->MaxNumGBComputations) {
@@ -356,7 +356,7 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasisImpro
         leftBuf.MultiplyBy(leftShift, this->leadingCoeffs[lastPair.Object2]);
         rightBuf.MultiplyBy(rightShift, this->leadingCoeffs[lastPair.Object1]);
         leftBuf -= rightBuf;
-        this->RemainderDivisionWithRespectToBasis(leftBuf, &outputRemainder, global);
+        this->RemainderDivisionByBasis(leftBuf, &outputRemainder, global);
         if (this->flagDoProgressReport) {
           std::stringstream out;
           out << "Basis size: " << this->theBasiS.size << ".\n<br>Remaining cases current round: " << indexPairs.size;
@@ -423,7 +423,7 @@ std::string GroebnerBasisComputation<coefficient>::ToStringLetterOrder(bool addD
 }
 
 template <class coefficient>
-void GroebnerBasisComputation<coefficient>::OneDivisonSubStepWithRespectToBasis(
+void GroebnerBasisComputation<coefficient>::OneDivisonSubStepWithBasis(
   Polynomial<coefficient>& remainder,
   const MonomialP& leadingMonomial,
   const coefficient& leadingCoefficient,
@@ -458,15 +458,17 @@ void GroebnerBasisComputation<coefficient>::OneDivisonSubStepWithRespectToBasis(
   }
   if (this->flagDoProgressReport && theReport != nullptr) {
     std::stringstream out;
-    out << "Total number of polynomial operations so far: " << this->NumberGBComputations;
+    out << "Polynomial operation count: " << this->NumberGBComputations;
     if (this->MaxNumGBComputations > 0) {
-      out << ", with a limit of " << this->MaxNumGBComputations << " operations. ";
+      out << ", with a limit of " << this->MaxNumGBComputations;
     }
-    out << "\n<br>Number of intermediate remainders: "
-    << this->numberOfIntermediateRemainders << "\n<br> Highest remainder monomial: "
+    out << ".\n";
+    out << "<br>Number of intermediate remainders: "
+    << this->numberOfIntermediateRemainders << "\n<br>Highest remainder monomial: "
     << leadingMonomial.ToString()
     << ".\n<br>"
-    << "Dividing by the leading monomial " << leadingMonomialBasis.ToString()
+    << "Dividing working remainder monomial " << leadingMonomialBasis.ToString()
+    << " by the leading monomial " << leadingMonomialBasis.ToString()
     << " of basis element: " << index + 1
     << " out of " << this->theBasiS.size << "\n<br>"
     << remainder.size() << " monomials in current remainder.";
@@ -482,13 +484,13 @@ void GroebnerBasisComputation<coefficient>::OneDivisonSubStepWithRespectToBasis(
 }
 
 template <class coefficient>
-bool GroebnerBasisComputation<coefficient>::OneDivisonStepWithRespectToBasis(
+bool GroebnerBasisComputation<coefficient>::OneDivisonStepWithBasis(
   Polynomial<coefficient>& currentRemainder,
   Polynomial<coefficient>* remainderResult,
   int basisIndexToIgnore,
   ProgressReport* report
 ) {
-  MacroRegisterFunctionWithName("GroebnerBasisComputation::OneDivisonStepWithRespectToBasis");
+  MacroRegisterFunctionWithName("GroebnerBasisComputation::OneDivisonStepWithBasis");
   MonomialP highestMonomial;
   coefficient leadingCoefficient;
   int indexLeadingMonomial = currentRemainder.GetIndexLeadingMonomial(
@@ -503,12 +505,11 @@ bool GroebnerBasisComputation<coefficient>::OneDivisonStepWithRespectToBasis(
     if (i == basisIndexToIgnore) {
       continue;
     }
-    MonomialP& highestMonomialBasis = this->leadingMons[i];
-    if (!highestMonomial.IsDivisibleBy(highestMonomialBasis)) {
+    if (!highestMonomial.IsDivisibleBy(this->leadingMons[i])) {
       continue;
     }
     this->numberOfIntermediateRemainders ++;
-    this->OneDivisonSubStepWithRespectToBasis(
+    this->OneDivisonSubStepWithBasis(
       currentRemainder,
       highestMonomial,
       leadingCoefficient,
@@ -529,13 +530,13 @@ bool GroebnerBasisComputation<coefficient>::OneDivisonStepWithRespectToBasis(
 }
 
 template <class coefficient>
-void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis(
+void GroebnerBasisComputation<coefficient>::RemainderDivisionByBasis(
   Polynomial<coefficient>& inputOutput,
   Polynomial<coefficient>* outputRemainder,
   int basisIndexToIgnore
 ) {
   //Reference: Cox, Little, O'Shea, Ideals, Varieties and Algorithms, page 62.
-  MacroRegisterFunctionWithName("GroebnerBasisComputation::RemainderDivisionWithRespectToBasis");
+  MacroRegisterFunctionWithName("GroebnerBasisComputation::RemainderDivisionByBasis");
   if (
     &inputOutput == outputRemainder ||
     &inputOutput == &this->bufPoly ||
@@ -556,8 +557,8 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis(
     outputRemainder = &tempPoly.GetElement();
   }
   ProgressReport reportHeader;
+  ProgressReport reportMain;
   ProgressReport reportRemainderSoFar;
-  ProgressReport reportBody;
   if (this->flagDoProgressReport) {
     reportHeader.Report("Computing remainder division");
   }
@@ -578,19 +579,19 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis(
   }
   while (!currentRemainder.IsEqualToZero()) {
     this->numberOfIntermediateRemainders = 0;
-    while (this->OneDivisonStepWithRespectToBasis(
+    while (this->OneDivisonStepWithBasis(
       currentRemainder,
       outputRemainder,
       basisIndexToIgnore,
-      &reportBody
+      &reportMain
     )) {
     }
     if (this->flagDoProgressReport) {
       std::stringstream out;
       out << "Last extracted remainder monomial took: "
-      << this->numberOfIntermediateRemainders << " polynomial divisions. "
-      << "\n<br>" << currentRemainder.size()
-      << " monomials in working remainder.";
+      << this->numberOfIntermediateRemainders << " polynomial divisions.\n"
+      << "<br>" << currentRemainder.size()
+      << " monomials in the working remainder.";
       if (outputRemainder != nullptr) {
         out << "<br>" << outputRemainder->size()
         << " monomials in the final output remainder.";
@@ -603,7 +604,9 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis(
 template <class coefficient>
 bool GroebnerBasisComputation<coefficient>::AddRemainderToBasis() {
   if (this->leadingMons.size != this->theBasiS.size) {
-    global.fatal << "This is a programming error: the number of leading monomials does not equal the number of polynomials. " << global.fatal;
+    global.fatal << "This is a programming error: "
+    << "the number of leading monomials does not equal "
+    << "the number of polynomials. " << global.fatal;
   }
   MacroRegisterFunctionWithName("GroebnerBasisComputation::AddPolyToBasis");
   if (this->remainderDivision.IsEqualToZero()) {
@@ -650,7 +653,7 @@ bool GroebnerBasisComputation<coefficient>::AddRemainderToBasis() {
 template <class coefficient>
 GroebnerBasisComputation<coefficient>::GroebnerBasisComputation() {
   // "Graded reverse lexicographic" order.
-  this->thePolynomialOrder.theMonOrder.leftGreaterThanRight = MonomialP::Left_greaterThan_rightToLeft_firstLEQ;
+  this->thePolynomialOrder.theMonOrder.leftGreaterThanRight = MonomialP::greaterThan_totalDegree_rightSmallerWins;
 
   this->RecursionCounterSerreLikeSystem = 0;
   this->NumVarsToSolveForStarT = - 1;
@@ -680,14 +683,18 @@ GroebnerBasisComputation<coefficient>::GroebnerBasisComputation() {
 }
 
 template <class coefficient>
-void GroebnerBasisComputation<coefficient>::initForDivisionAlone(List<Polynomial<coefficient> >& inputOutpuT) {
-  MacroRegisterFunctionWithName("GroebnerBasisComputation::initForDivisionAlone");
-  if (inputOutpuT.size <= 0) {
-    global.fatal << "This is a programming error: I cannot transform an empty list to a Groebner basis. " << global.fatal;
+void GroebnerBasisComputation<coefficient>::initializeForDivision(
+  List<Polynomial<coefficient> >& inputOutput
+) {
+  MacroRegisterFunctionWithName("GroebnerBasisComputation::initializeForDivision");
+  if (inputOutput.size <= 0) {
+    global.fatal << "This is a programming error: "
+    << "I cannot transform an empty list to a Groebner basis. "
+    << global.fatal;
   }
-  this->theBasiS = inputOutpuT;
-  this->leadingMons.SetSize(inputOutpuT.size);
-  this->leadingCoeffs.SetSize(inputOutpuT.size);
+  this->theBasiS = inputOutput;
+  this->leadingMons.SetSize(inputOutput.size);
+  this->leadingCoeffs.SetSize(inputOutput.size);
   for (int i = 0; i < this->theBasiS.size; i ++) {
     Polynomial<coefficient>& curPoly = theBasiS[i];
     int theIndex = curPoly.GetIndexLeadingMonomial(
@@ -695,6 +702,7 @@ void GroebnerBasisComputation<coefficient>::initForDivisionAlone(List<Polynomial
       &this->leadingCoeffs[i],
       &this->thePolynomialOrder.theMonOrder
     );
+    global.Comments << "Polynomial " << i + 1 << " has leading monomial: " << this->leadingMons[i] << "<br>";
     if (theIndex == - 1) {
       global.fatal << "This is a programming error: initialization for polynomial "
       << "division with respect to at least one zero polynomial. "

@@ -2548,10 +2548,7 @@ void MonomialP::ExponentMeBy(const Rational& theExp) {
 }
 
 bool MonomialP::operator>(const MonomialP& other) const {
-  if (this->monBody == other.monBody) {
-    return false;
-  }
-  return this->IsGEQ_totalDegree_rightToLeft_firstLEQ(other);
+  return MonomialP::greaterThan_totalDegree_leftLargerWins(*this, other);
 }
 
 bool MonomialP::IsDivisibleBy(const MonomialP& other) const {
@@ -2589,21 +2586,50 @@ bool MonomialP::operator==(const MonomialP& other) const {
   return true;
 }
 
-bool MonomialP::IsGEQ_rightToLeft(const MonomialP &other, bool trueIfThisGreater) const {
+bool MonomialP::greaterThan_totalDegree_rightSmallerWins(
+  const MonomialP& left, const MonomialP& right
+) {
+  if (left == right) {
+    return false;
+  }
+  if (left.TotalDegree() > right.TotalDegree()) {
+    return true;
+  }
+  if (left.TotalDegree() < right.TotalDegree()) {
+    return false;
+  }
+  return !MonomialP::greaterThan_rightLargerWins(left, right);
+}
+
+// "Graded lexicographic" order.
+bool MonomialP::greaterThan_totalDegree_leftLargerWins(
+  const MonomialP& left, const MonomialP& right
+) {
+  if (left.TotalDegree() > right.TotalDegree()) {
+    return true;
+  }
+  if (left.TotalDegree() < right.TotalDegree()) {
+    return false;
+  }
+  return left.greaterThan_leftLargerWins(right);
+}
+
+
+bool MonomialP::greaterThan_rightLargerWins(const MonomialP& other) const {
   for (int i = other.monBody.size - 1; i >= this->monBody.size; i --) {
     if (other.monBody[i] > 0) {
-      return !trueIfThisGreater;
+      return false;
     }
     if (other.monBody[i] < 0) {
-      return trueIfThisGreater;
+      return true;
     }
   }
   for (int i = this->monBody.size - 1; i >= other.monBody.size; i --) {
     if (this->monBody[i] > 0) {
-      return trueIfThisGreater;
+      return true;
     }
     if (this->monBody[i] < 0) {
-      return !trueIfThisGreater;
+      return false;
     }
   }
   int highestIndex = MathRoutines::Minimum(this->GetMinNumVars(), other.GetMinNumVars()) - 1;
@@ -2619,75 +2645,43 @@ bool MonomialP::IsGEQ_rightToLeft(const MonomialP &other, bool trueIfThisGreater
 }
 
 List<MonomialP>::Comparator& MonomialP::orderDefault() {
-  static List<MonomialP>::Comparator result(MonomialP::Left_greaterThan_totalDegree_leftToRight_firstGreater);
+  static List<MonomialP>::Comparator result(MonomialP::greaterThan_totalDegree_leftLargerWins);
   return result;
 }
 
 List<MonomialP>::Comparator& MonomialP::orderForGCD() {
-  static List<MonomialP>::Comparator result(MonomialP::Left_greaterThan_rightToLeft_firstGEQ);
+  static List<MonomialP>::Comparator result(MonomialP::greaterThan_rightLargerWins);
   return result;
 }
 
-List<MonomialP>::Comparator& MonomialP::orderLeftToRightDegreeThenGreaterThan() {
-  static List<MonomialP>::Comparator result(MonomialP::Left_greaterThan_totalDegree_leftToRight_firstGreater);
+List<MonomialP>::Comparator& MonomialP::orderDegreeThenLeftLargerWins() {
+  static List<MonomialP>::Comparator result(MonomialP::greaterThan_totalDegree_leftLargerWins);
   return result;
 }
 
-bool MonomialP::IsGEQ_leftToRight(const MonomialP &other, bool trueIfThisGreater) const {
+bool MonomialP::greaterThan_leftLargerWins(const MonomialP &other) const {
   int commonSize = MathRoutines::Minimum(this->GetMinNumVars(), other.GetMinNumVars());
   for (int i = 0; i < commonSize; i ++) {
     if (this->monBody[i] > other.monBody[i]) {
-      return trueIfThisGreater;
+      return true;
     }
     if (this->monBody[i] < other.monBody[i]) {
-      return !trueIfThisGreater;
+      return false;
     }
   }
   for (int i = this->monBody.size; i < other.monBody.size; i ++) {
     if (other.monBody[i] > 0) {
-      return !trueIfThisGreater;
+      return false;
     }
     if (other.monBody[i] < 0) {
-      return trueIfThisGreater;
+      return true;
     }
   }
   for (int i = other.monBody.size; i < this->monBody.size; i ++) {
     if (this->monBody[i] > 0) {
-      return trueIfThisGreater;
+      return true;
     }
     if (this->monBody[i] < 0) {
-      return !trueIfThisGreater;
-    }
-  }
-  return true;
-}
-
-bool MonomialP::IsGEQ_totalDegree_rightToLeft_firstLEQ(const MonomialP& other) const {
-  if (this->TotalDegree() > other.TotalDegree()) {
-    return true;
-  }
-  if (this->TotalDegree() < other.TotalDegree()) {
-    return false;
-  }
-  return this->IsGEQ_rightToLeft_firstLEQ(other);
-}
-
-bool MonomialP::IsGEQ_totalDegree_leftToRight_firstGEQ(const MonomialP& other) const {
-  if (this->TotalDegree() > other.TotalDegree()) {
-    return true;
-  }
-  if (this->TotalDegree() < other.TotalDegree()) {
-    return false;
-  }
-  return this->IsGEQ_leftToRight_firstGEQ(other);
-}
-
-bool MonomialP::IsGEQpartialOrder(MonomialP& m) {
-  if (this->monBody.size != m.monBody.size) {
-    global.fatal << "This is a programming error: comparing two monomials with different number of variables. " << global.fatal;
-  }
-  for (int i = 0; i < m.monBody.size; i ++) {
-    if ((*this)[i] < m[i]) {
       return false;
     }
   }

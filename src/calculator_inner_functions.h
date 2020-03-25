@@ -118,9 +118,9 @@ public:
     List<MonomialP>::Comparator* theMonOrder
   );
   static bool innerPolynomialDivisionVerboseGrLex(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPolynomialDivisionVerboseGrLexRev(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPolynomialDivisionVerboseLexicographicReversed(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPolynomialDivisionVerboseLex(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPolynomialDivisionVerboseGradedReverseLexicographic(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPolynomialDivisionVerboseLexicographicOpposite(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPolynomialDivisionVerboseLexicographic(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerGenerateVectorSpaceClosedWRTLieBracket(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerFourierTransformEWA(Calculator& theCommands, const Expression& input, Expression& output);

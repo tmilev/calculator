@@ -134,14 +134,17 @@ void Polynomial<coefficient>::ScaleToIntegralNoGCDCoeffs() {
   if (this->size() == 0) {
     return;
   }
-  int indexHighestMon = 0;
+  int indexHighestMonomial = 0;
   LargeIntegerUnsigned tempInt1, accumNum, accumDen;
   LargeInteger tempInt2;
   accumDen.MakeOne();
   accumNum = this->coefficients[0].GetNumerator().value;
   for (int i = 0; i < this->size(); i ++) {
-    if ((*this)[i].IsGEQ_totalDegree_leftToRight_firstGEQ((*this)[indexHighestMon])) {
-      indexHighestMon = i;
+    if (MonomialP::orderDefault().greaterThan(
+      (*this)[i],
+      (*this)[indexHighestMonomial]
+    )) {
+      indexHighestMonomial = i;
     }
     Rational& tempRat = this->coefficients[i];
     tempInt1 = tempRat.GetDenominator();
@@ -151,7 +154,7 @@ void Polynomial<coefficient>::ScaleToIntegralNoGCDCoeffs() {
   }
   Rational theMultiple;
   theMultiple.MakeOne();
-  if (this->coefficients[indexHighestMon].IsNegative()) {
+  if (this->coefficients[indexHighestMonomial].IsNegative()) {
     theMultiple.MakeMOne();
   }
   theMultiple.MultiplyByLargeIntUnsigned(accumDen);

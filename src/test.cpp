@@ -17,6 +17,7 @@ public:
     static const std::string topicLists;
     static const std::string topiclists;
     static const std::string calculator;
+    static const std::string polynomial;
   };
   HashedList<std::string, MathRoutines::HashString> inputs;
   bool flagTestAll;
@@ -40,18 +41,13 @@ const std::string Test::Suites::crypto = "crypto";
 const std::string Test::Suites::topicLists = "topicLists";
 const std::string Test::Suites::topiclists = "topiclists";
 const std::string Test::Suites::calculator = "calculator";
+const std::string Test::Suites::polynomial = "polynomial";
 
 void Test::Run() {
   global << "Testing ..." << logger::endL;
   global.millisecondsMaxComputation = 100000000;
   if (this->ShouldTest(Test::Suites::database)) {
     Database::Test::All();
-  }
-  if (this->ShouldTest(Test::Suites::problems)) {
-    CalculatorHTML::Test::All();
-  }
-  if (this->ShouldTest(Test::Suites::calculator)) {
-    Calculator::Test::All();
   }
   if (this->ShouldTest(Test::Suites::crypto)) {
     ASNObject::initializeNonThreadSafe();
@@ -60,6 +56,15 @@ void Test::Run() {
     Crypto::Test::All();
     X509Certificate::Test::All();
     SSLRecord::Test::All();
+  }
+  if (this->ShouldTest(Test::Suites::polynomial)) {
+    MonomialP::Test::All();
+  }
+  if (this->ShouldTest(Test::Suites::calculator)) {
+    Calculator::Test::All();
+  }
+  if (this->ShouldTest(Test::Suites::problems)) {
+    CalculatorHTML::Test::All();
   }
   if (this->flagTestAll) {
     JSData::Test::All();

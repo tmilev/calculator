@@ -195,7 +195,6 @@ bool Calculator::GetListPolynomialVariableLabelsLexicographic(
   )) {
     return false;
   }
-  global.Comments << "DEBUG: and hte output so far: " << output.ToString() << "<hr>";
   if (output.size < 2) {
     return false;
   }

@@ -707,7 +707,6 @@ void GroebnerBasisComputation<coefficient>::initializeForDivision(
     << "I cannot transform an empty list to a Groebner basis. "
     << global.fatal;
   }
-  global.Comments << "DEBUG: And store quotients is:" << this->flagStoreQuotients;
   this->theBasiS = inputOutput;
   this->leadingMons.SetSize(inputOutput.size);
   this->leadingCoeffs.SetSize(inputOutput.size);
@@ -718,7 +717,6 @@ void GroebnerBasisComputation<coefficient>::initializeForDivision(
       &this->leadingCoeffs[i],
       &this->thePolynomialOrder.theMonOrder
     );
-    global.Comments << "Polynomial " << i + 1 << " has leading monomial: " << this->leadingMons[i] << "<br>";
     if (theIndex == - 1) {
       global.fatal << "This is a programming error: initialization for polynomial "
       << "division with respect to at least one zero polynomial. "

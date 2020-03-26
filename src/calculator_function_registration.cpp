@@ -5157,10 +5157,10 @@ void Calculator::initPredefinedInnerFunctions() {
     Calculator::innerGroebnerLexicographicOpposite,
     "",
     "Same as GroebnerLexUpperLimit but uses reverse order on the variables (z<x).",
-    "GroebnerRevLexUpperLimit{}(10000, s^2+c^2+ 1, a-s^4, b-c^4 );"
+    "GroebnerLexOppositeUpperLimit{}(10000, s^2+c^2+ 1, a-s^4, b-c^4 );"
     "\nGroebnerRevLexUpperLimit{}(5, s^2+c^2+ 1, a-s^4, b-c^4 );",
-    "Calculator::innerGroebnerRevLex",
-    "GroebnerRevLexUpperLimit",
+    "Calculator::innerGroebnerLexicographicOpposite",
+    "GroebnerLexOppositeUpperLimit",
     innerStandard
   );
   this->AddOperationHandler(

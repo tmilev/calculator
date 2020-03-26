@@ -228,6 +228,7 @@ bool CalculatorHTML::Test::OneProblemTest::Run() {
       &current.flagBuiltInGenerated,
       false
     );
+    global.webArguments.RemoveKey(current.answerIdWebAPI);
     if (!current.flagBuiltInGenerated) {
       commentsOnFailure << "Failed to generate answer: " << current.answerId << "<br>";
       commentsOnFailure << current.builtInAnswerAPICall[WebAPI::result::resultHtml].theString;
@@ -242,6 +243,7 @@ bool CalculatorHTML::Test::OneProblemTest::Run() {
     current.builtInAnswerReply = WebAPIResponse::SubmitAnswersJSON(
       randomSeedStream.str(), &current.flagBuiltInWorks, false
     );
+    global.webArguments.RemoveKey(current.answerIdWebAPI);
     if (!current.flagBuiltInWorks) {
       this->flagAllBuiltInAnswersOK = false;
       commentsOnFailure << "<br>Built-in answer of index: "
@@ -252,7 +254,6 @@ bool CalculatorHTML::Test::OneProblemTest::Run() {
       this->flagSuccess = false;
       break;
     }
-    global.webArguments.RemoveKey(current.answerIdWebAPI);
   }
   this->errorAnswers = commentsOnFailure.str();
   return this->flagSuccess;

@@ -1876,14 +1876,17 @@ std::string StringRoutines::Differ::ToString() {
 }
 
 void StringRoutines::Differ::ComputeBestStartingIndices(int& outputIndexLeft, int& outputIndexRight) {
-  MacroRegisterFunctionWithName("StringRoutines::Differ::ComputeBestStartingIndex");
+  MacroRegisterFunctionWithName("StringRoutines::Differ::ComputeBestStartingIndices");
   Matrix<int> theMatrix = this->matrixLongestCommonSubsequence.GetElement();
   outputIndexLeft = theMatrix.NumRows - 1;
   outputIndexRight = theMatrix.NumCols - 1;
   int bestSoFar = 0;
   for (int i = 1; i < theMatrix.NumRows; i ++) {
     for (int j = 1; j < theMatrix.NumCols; j ++) {
-      if (this->left[static_cast<unsigned>(i - 1)] != this->right[static_cast<unsigned>(j - 1)]) {
+      if (
+        this->left[static_cast<unsigned>(i - 1)] !=
+        this->right[static_cast<unsigned>(j - 1)]
+      ) {
         continue;
       }
       int current = theMatrix(i, j);
@@ -1905,7 +1908,7 @@ void StringRoutines::Differ::ComputeBestStartingIndices(int& outputIndexLeft, in
 
 void StringRoutines::Differ::ComputeLongestSubsequenceMatrix() {
   MacroRegisterFunctionWithName("StringRoutines::Differ::ComputeLongestSubsequenceMatrix");
-  unsigned numberOfRows = static_cast<unsigned>(left.size() ) + 1;
+  unsigned numberOfRows = static_cast<unsigned>(left.size()) + 1;
   unsigned numberOfColumns = static_cast<unsigned>(right.size()) + 1;
   Matrix<int>& theMatrix = this->matrixLongestCommonSubsequence.GetElement();
   theMatrix.init(
@@ -1942,32 +1945,45 @@ void StringRoutines::Differ::ExtractCommonStrings(
   int indexLeft, int indexRight, int previousLeft, int previousRight
 ) {
   MacroRegisterFunctionWithName("StringRoutines::Differ::ExtractCommonStrings");
-  if (this->left.size() == 0 || this->right.size() == 0) {
-    return;
-  }
   if (
-    indexLeft == 0 ||
-    indexRight == 0
+    this->left.size() == 0 ||
+    this->right.size() == 0 ||
+    indexLeft < 0 ||
+    indexRight < 0
   ) {
-    this->PushCommonString(previousLeft, previousRight);
     return;
   }
-  unsigned leftUnsigned  = static_cast<unsigned>(indexLeft - 1);
-  unsigned rightUnsigned = static_cast<unsigned>(indexRight - 1);
-  if (this->left[leftUnsigned] == this->right[rightUnsigned]) {
-    this->currentCommonStringLength ++ ;
-    this->ExtractCommonStrings(indexLeft - 1, indexRight - 1, indexLeft, indexRight);
-    return;
-  }
-  this->PushCommonString(previousLeft, previousRight);
-  Matrix<int>& theMatrix = this->matrixLongestCommonSubsequence.GetElement();
-  if (
-    theMatrix(indexLeft - 1, indexRight) > theMatrix(indexLeft, indexRight - 1)
-  ) {
-    this->ExtractCommonStrings(indexLeft - 1, indexRight, indexLeft, indexRight);
 
-  } else {
-    this->ExtractCommonStrings(indexLeft, indexRight - 1, indexLeft, indexRight);
+  while (indexLeft >= 0 && indexRight >= 0) {
+    if (
+      indexLeft == 0 ||
+      indexRight == 0
+    ) {
+      this->PushCommonString(previousLeft, previousRight);
+      return;
+    }
+    previousLeft = indexLeft;
+    previousRight = indexRight;
+    unsigned leftUnsigned  = static_cast<unsigned>(indexLeft - 1);
+    unsigned rightUnsigned = static_cast<unsigned>(indexRight - 1);
+    if (leftUnsigned >= this->left.size() || rightUnsigned >= this->right.size()) {
+      global.fatal << "Unexpected: left index: " << leftUnsigned << ", right index: " << rightUnsigned << global.fatal;
+    }
+    if (this->left[leftUnsigned] == this->right[rightUnsigned]) {
+      this->currentCommonStringLength ++ ;
+      indexLeft --;
+      indexRight --;
+      continue;
+    }
+    this->PushCommonString(previousLeft, previousRight);
+    Matrix<int>& theMatrix = this->matrixLongestCommonSubsequence.GetElement();
+    if (
+      theMatrix(indexLeft - 1, indexRight) > theMatrix(indexLeft, indexRight - 1)
+    ) {
+      indexLeft --;
+    } else {
+      indexRight --;
+    }
   }
 }
 

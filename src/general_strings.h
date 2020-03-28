@@ -96,7 +96,7 @@ public:
     bool ComputeDifference(std::stringstream* commentsOnFailure);
     void ComputeLongestSubsequenceMatrix();
     void ComputeBestStartingIndices(int& outputIndexLeft, int& outputIndexRight);
-    void ExtractCommonStrings(int indexLeft, int indexRight, int previousLeft, int previousRight);
+    void ExtractCommonStrings(int indexLeft, int indexRight);
     void ExtractDifferences();
     void ExtractResult(const List<int>& starts, const std::string& input, List<std::string>& output);
     void PushCommonString(int indexLeft, int indexRight);

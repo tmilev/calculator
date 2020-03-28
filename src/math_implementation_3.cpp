@@ -1941,9 +1941,7 @@ void StringRoutines::Differ::PushCommonString(int indexLeft, int indexRight) {
   this->currentCommonStringLength = 0;
 }
 
-void StringRoutines::Differ::ExtractCommonStrings(
-  int indexLeft, int indexRight, int previousLeft, int previousRight
-) {
+void StringRoutines::Differ::ExtractCommonStrings(int indexLeft, int indexRight) {
   MacroRegisterFunctionWithName("StringRoutines::Differ::ExtractCommonStrings");
   if (
     this->left.size() == 0 ||
@@ -1953,7 +1951,8 @@ void StringRoutines::Differ::ExtractCommonStrings(
   ) {
     return;
   }
-
+  int previousLeft = - 1;
+  int previousRight = - 1;
   while (indexLeft >= 0 && indexRight >= 0) {
     if (
       indexLeft == 0 ||
@@ -1962,15 +1961,12 @@ void StringRoutines::Differ::ExtractCommonStrings(
       this->PushCommonString(previousLeft, previousRight);
       return;
     }
-    previousLeft = indexLeft;
-    previousRight = indexRight;
     unsigned leftUnsigned  = static_cast<unsigned>(indexLeft - 1);
     unsigned rightUnsigned = static_cast<unsigned>(indexRight - 1);
-    if (leftUnsigned >= this->left.size() || rightUnsigned >= this->right.size()) {
-      global.fatal << "Unexpected: left index: " << leftUnsigned << ", right index: " << rightUnsigned << global.fatal;
-    }
     if (this->left[leftUnsigned] == this->right[rightUnsigned]) {
-      this->currentCommonStringLength ++ ;
+      this->currentCommonStringLength ++;
+      previousLeft = indexLeft;
+      previousRight = indexRight;
       indexLeft --;
       indexRight --;
       continue;
@@ -1984,6 +1980,8 @@ void StringRoutines::Differ::ExtractCommonStrings(
     } else {
       indexRight --;
     }
+    previousLeft = indexLeft;
+    previousRight = indexRight;
   }
 }
 
@@ -2048,9 +2046,7 @@ bool StringRoutines::Differ::ComputeDifference(std::stringstream* commentsOnFail
   this->ComputeBestStartingIndices(startLeft, startRight);
   this->ExtractCommonStrings(
     startLeft,
-    startRight,
-    0,
-    0
+    startRight
   );
   this->ExtractDifferences();
   return true;

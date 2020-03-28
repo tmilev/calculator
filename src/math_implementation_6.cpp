@@ -6,5 +6,5 @@ template <>
 bool Polynomial<ElementZmodP>::FactorMeCantorZassenhaus(
   List<Polynomial<ElementZmodP> >& outputFactors, std::stringstream* comments
 ) const {
-
+  return false;
 }

@@ -1942,11 +1942,12 @@ void StringRoutines::Differ::ExtractCommonStrings(
   int indexLeft, int indexRight, int previousLeft, int previousRight
 ) {
   MacroRegisterFunctionWithName("StringRoutines::Differ::ExtractCommonStrings");
+  if (this->left.size() == 0 || this->right.size() == 0) {
+    return;
+  }
   if (
     indexLeft == 0 ||
-    indexRight == 0 ||
-    indexLeft >= static_cast<signed>(this->left.size()) ||
-    indexRight >= static_cast<signed>(right.size())
+    indexRight == 0
   ) {
     this->PushCommonString(previousLeft, previousRight);
     return;

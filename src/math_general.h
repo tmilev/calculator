@@ -11,6 +11,12 @@
 #include "general_file_operations_encodings.h"
 #include "web_api.h"
 
+class ElementZmodP;
+class WeylGroupData;
+class AlgebraicClosureRationals;
+template <class coefficient>
+class MatrixTensor;
+
 // We are wrapping the math.h c++ functions for portability reasons
 // (if for some reason we want to change from math.h to a better floating point
 // library, we only need to change the implementation of the FloatingPoint class.
@@ -30,11 +36,6 @@ public:
   static double Floor(double argument);
   static std::string DoubleToString(double input);
 };
-
-class WeylGroupData;
-class AlgebraicClosureRationals;
-template <class coefficient>
-class MatrixTensor;
 
 class ChevalleyGenerator {
 public:
@@ -1411,7 +1412,7 @@ void Matrix<Element>::Resize(int r, int c, bool PReserveValues, const Element* c
       firstInvalidRow = 0;
       firstInvalidCol = 0;
     }
-    for (int i = 0; i <r; i ++) {
+    for (int i = 0; i < r; i ++) {
       int colStart = (i < firstInvalidRow) ? firstInvalidCol : 0;
       for (int j = colStart; j < c; j ++) {
         newElements[i][j] = *TheRingZero;
@@ -1520,8 +1521,6 @@ bool Matrix<coefficient>::Invert() {
     << this->NumCols << " columns. " << global.fatal;
   }
   MacroRegisterFunctionWithName("Matrix::Invert");
-//  if (this->flagComputingDebugInfo)
-//    this->ComputeDebugString();
   Matrix theInverse;
   theInverse.MakeIdMatrix(this->NumRows);
   Selection NonPivotCols;
@@ -2437,9 +2436,6 @@ public:
     result *= other;
     return result;
   }
-//  void operator+=(const templateMonomial& m)
-//  { this->AddMonomial(m, 1);
-//  }
   LinearCombination<templateMonomial, coefficient> operator-(
     const LinearCombination<templateMonomial, coefficient>& other
   ) const {
@@ -2530,8 +2526,8 @@ public:
   }
   void operator=(const templateMonomial& other) {
     templateMonomial otherCopy = other; //in case other is contained as a monomial in me and gets destroyed when I call
-    //this->MakeZero(). This shouldn't yield a measurable slowdown.
-    //Further this function is to be used for non-time critical operations.
+    // this->MakeZero(). This shouldn't yield a measurable slowdown.
+    // Further this function is to be used for non-time critical operations.
     this->MakeZero();
     this->AddMonomial(otherCopy, 1);
   }
@@ -2700,12 +2696,20 @@ public:
   bool FactorMeNormalizedFactors(
     Rational& outputCoeff, List<Polynomial<Rational> >& outputFactors, std::stringstream* comments
   ) const;
+  bool FactorMeCantorZassenhaus(
+    List<Polynomial<ElementZmodP> >& outputFactors, std::stringstream* comments
+  ) const;
   bool FactorMe(List<Polynomial<Rational> >& outputFactors, std::stringstream* comments) const;
   void Interpolate(const Vector<coefficient>& thePoints, const Vector<coefficient>& ValuesAtThePoints);
   bool FindOneVariableRationalRoots(List<Rational>& output);
   coefficient GetDiscriminant();
   void GetCoeffInFrontOfLinearTermVariableIndex(int index, coefficient& output);
-  void MakeMonomiaL(int LetterIndex, const Rational& Power, const coefficient& Coeff = 1, int ExpectedNumVars = 0) {
+  void MakeMonomiaL(
+    int LetterIndex,
+    const Rational& Power,
+    const coefficient& Coeff = 1,
+    int ExpectedNumVars = 0
+  ) {
     if (LetterIndex < 0) {
       global.fatal << "This is a programming error: the index"
       << LetterIndex + 1 << " is  non-positive which is not allowed. " << global.fatal;
@@ -3092,8 +3096,8 @@ public:
 template <class coefficient>
 class PolynomialSubstitution: public List<Polynomial<coefficient> > {
   public:
-  //One of the main purposes of this class is to be used for carrying out substitutions.
-  //the general format of the substitution is:
+  // One of the main purposes of this class is to be used for carrying out substitutions.
+  // the general format of the substitution is:
   // the i^th element denotes the image of x_i,
   // For example, if polynomials is the array
   // x_1+x_2 (poly in 3 variables)
@@ -3443,9 +3447,6 @@ private:
         this->Numerator.FreeMemory();
       }
     }
-//    int commentMEWhenDone;
-//    if (!this->checkConsistency())
-//      global.fatal << global.fatal;
   }
   bool ConvertToType(int theType);
 public:

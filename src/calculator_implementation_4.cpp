@@ -901,9 +901,9 @@ bool Calculator::innerGetChevGen(
   if (input.size() != 3) {
     return false;
   }
-  SemisimpleLieAlgebra* theSSalg;
-  if (!theCommands.CallConversionFunctionReturnsNonConst(
-    CalculatorConversions::functionSemisimpleLieAlgebra, input[1], theSSalg
+  WithContext<SemisimpleLieAlgebra*> theSSalg;
+  if (!theCommands.Convert(
+    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, theSSalg
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
@@ -911,19 +911,21 @@ bool Calculator::innerGetChevGen(
   if (!input[2].IsSmallInteger(&theIndex)) {
     return false;
   }
-  if (theIndex > theSSalg->GetNumPosRoots() || theIndex == 0 || theIndex < - theSSalg->GetNumPosRoots()) {
+  if (theIndex > theSSalg.content->GetNumPosRoots() || theIndex == 0 || theIndex < - theSSalg.content->GetNumPosRoots()) {
     return output.MakeError("Bad Chevalley-Weyl generator index.", theCommands);
   }
   ElementSemisimpleLieAlgebra<Rational> theElt;
   if (theIndex > 0) {
-    theIndex += theSSalg->GetRank() - 1;
+    theIndex += theSSalg.content->GetRank() - 1;
   }
-  theIndex += theSSalg->GetNumPosRoots();
-  theElt.MakeGenerator(theIndex, *theSSalg);
+  theIndex += theSSalg.content->GetNumPosRoots();
+  theElt.MakeGenerator(theIndex, *theSSalg.content);
   ElementUniversalEnveloping<RationalFunction> theUE;
-  theUE.AssignElementLieAlgebra(theElt, *theSSalg);
+  theUE.AssignElementLieAlgebra(theElt, *theSSalg.content);
   Expression theContext;
-  int indexInOwner = theCommands.theObjectContainer.theSSLieAlgebras.GetIndex(theSSalg->theWeyl.theDynkinType);
+  int indexInOwner = theCommands.theObjectContainer.semisimpleLieAlgebras.GetIndex(
+    theSSalg.content->theWeyl.theDynkinType
+  );
   theContext.ContextMakeContextSSLieAlgebrA(indexInOwner, theCommands);
   output.AssignValueWithContext(theUE, theContext, theCommands);
   return true;
@@ -934,13 +936,13 @@ bool Calculator::innerGetCartanGen(Calculator& theCommands, const Expression& in
   if (input.size() != 3) {
     return false;
   }
-  SemisimpleLieAlgebra* theSSalg = nullptr;
-  if (!theCommands.CallConversionFunctionReturnsNonConst(
-    CalculatorConversions::functionSemisimpleLieAlgebra, input[1], theSSalg
+  WithContext<SemisimpleLieAlgebra*> theSSalg;
+  if (!theCommands.Convert(
+    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, theSSalg
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
-  if (theSSalg == nullptr) {
+  if (theSSalg.content == nullptr) {
     global.fatal << "This is a programming error: called conversion function successfully, "
     << "but the output is a zero pointer to a semisimple Lie algebra. "
     << global.fatal;
@@ -951,18 +953,18 @@ bool Calculator::innerGetCartanGen(Calculator& theCommands, const Expression& in
   }
   if (
     theIndex == 0 ||
-    theIndex > theSSalg->GetNumPosRoots() ||
-    theIndex < - theSSalg->GetNumPosRoots()
+    theIndex > theSSalg.content->GetNumPosRoots() ||
+    theIndex < - theSSalg.content->GetNumPosRoots()
   ) {
     return output.MakeError("Bad Cartan subalgebra generator index.", theCommands);
   }
   ElementSemisimpleLieAlgebra<Rational> theElt;
-  Vector<Rational> theH = theSSalg->theWeyl.RootSystem[theSSalg->GetRootIndexFromDisplayIndex(theIndex)];
-  theElt.MakeHgenerator(theH, *theSSalg);
+  Vector<Rational> theH = theSSalg.content->theWeyl.RootSystem[theSSalg.content->GetRootIndexFromDisplayIndex(theIndex)];
+  theElt.MakeHgenerator(theH, *theSSalg.content);
   ElementUniversalEnveloping<RationalFunction> theUE;
-  theUE.AssignElementLieAlgebra(theElt, *theSSalg);
+  theUE.AssignElementLieAlgebra(theElt, *theSSalg.content);
   Expression theContext;
-  int theAlgIndex = theCommands.theObjectContainer.theSSLieAlgebras.GetIndex(theSSalg->theWeyl.theDynkinType);
+  int theAlgIndex = theCommands.theObjectContainer.semisimpleLieAlgebras.GetIndex(theSSalg.content->theWeyl.theDynkinType);
   theContext.ContextMakeContextSSLieAlgebrA(theAlgIndex, theCommands);
   return output.AssignValueWithContext(theUE, theContext, theCommands);
 }
@@ -974,20 +976,21 @@ bool Calculator::innerKLcoeffs(Calculator& theCommands, const Expression& input,
     << "Kazhdan-Lusztig coefficients function expects 1 argument. ";
   }
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
-  SemisimpleLieAlgebra* theSSalgebra = nullptr;
-  if (!theCommands.CallConversionFunctionReturnsNonConst(
-    CalculatorConversions::functionSemisimpleLieAlgebra,
+  WithContext<SemisimpleLieAlgebra*> theSSalgebra;
+  if (!theCommands.Convert(
     input[1],
+    CalculatorConversions::functionSemisimpleLieAlgebra,
     theSSalgebra
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
   std::stringstream out;
-  WeylGroupData& theWeyl = theSSalgebra->theWeyl;
+  WeylGroupData& theWeyl = theSSalgebra.content->theWeyl;
   if (theWeyl.theGroup.GetSize() > 192) {
     out << "I have been instructed to run only for Weyl groups that"
     << " have at most 192 elements (i.e. no larger than D_4). "
-    << theSSalgebra->ToStringLieAlgebraName() << " has " << theWeyl.theGroup.GetSize().ToString() << ".";
+    << theSSalgebra.content->ToStringLieAlgebraName()
+    << " has " << theWeyl.theGroup.GetSize().ToString() << ".";
     return output.AssignValue(out.str(), theCommands);
   }
   FormatExpressions theFormat;
@@ -995,7 +998,7 @@ bool Calculator::innerKLcoeffs(Calculator& theCommands, const Expression& input,
   theFormat.polyAlphabeT[0] = "q";
   out << "Our notation follows that of the original Kazhdan-Lusztig paper, "
   << "Representations of Coxeter Groups and Hecke Algebras.<br>";
-  out << " The algebra: " << theSSalgebra->ToStringLieAlgebraName();
+  out << " The algebra: " << theSSalgebra.content->ToStringLieAlgebraName();
   KLpolys theKLpolys;
   theKLpolys.ComputeKLPolys(&theWeyl);
   theFormat.flagUseHTML = true;
@@ -1009,9 +1012,15 @@ bool Calculator::innerPrintSSLieAlgebra(
   return Calculator::innerWriteToHDOrPrintSSLieAlgebra(theCommands, input, output, Verbose, false);
 }
 
-bool Calculator::innerWriteSSLieAlgebraToHD(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::innerWriteSSLieAlgebraToHD(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("Calculator::innerWriteSSLieAlgebraToHD");
+  theCommands.CheckInputNotSameAsOutput(input, output);
   if (!global.UserDefaultHasAdminRights()) {
-    return output.MakeError(std::string("Caching structure constants to HD available to logged-in admins only. "), theCommands);
+    return output.MakeError(
+      "Caching structure constants to HD available to admins only. ",
+      theCommands);
   }
   return Calculator::innerWriteToHDOrPrintSSLieAlgebra(theCommands, input, output, true, true);
 }
@@ -1024,7 +1033,6 @@ bool Calculator::innerWriteToHDOrPrintSSLieAlgebra(
   bool writeToHD
 ) {
   MacroRegisterFunctionWithName("Calculator::innerWriteToHDOrPrintSSLieAlgebra");
-//  double startTimeDebug= global.GetElapsedSeconds();
   if (input.size() != 2) {
     return theCommands << "Print semisimple Lie algebras expects 1 argument. ";
   }
@@ -1041,17 +1049,20 @@ bool Calculator::functionWriteToHDOrPrintSSLieAlgebra(
   bool writeToHD
 ) {
   MacroRegisterFunctionWithName("Calculator::functionWriteToHDOrPrintSSLieAlgebra");
-  SemisimpleLieAlgebra* tempSSpointer = nullptr;
+  WithContext<SemisimpleLieAlgebra*> tempSSpointer;
   input.CheckInitialization();
-  if (!theCommands.CallConversionFunctionReturnsNonConst(
-    CalculatorConversions::functionSemisimpleLieAlgebra,
+  if (!theCommands.Convert(
     input,
+    CalculatorConversions::functionSemisimpleLieAlgebra,
     tempSSpointer
   )) {
+
+    theCommands << "Failed to extract Lie algebra from: " << input.ToString() << "<br>";
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
-  SemisimpleLieAlgebra& theSSalgebra = *tempSSpointer;
-
+  tempSSpointer.content->CheckConsistency();
+  tempSSpointer.context.context.CheckConsistency();
+  SemisimpleLieAlgebra& theSSalgebra = *tempSSpointer.content;
   std::string result = theSSalgebra.ToHTMLCalculator(Verbose, writeToHD, theCommands.flagWriteLatexPlots);
   return output.AssignValue(result, theCommands);
 }
@@ -2081,7 +2092,7 @@ SemisimpleLieAlgebra* Expression::GetAmbientSSAlgebraNonConstUseWithCaution() co
   if (indexSSalg == - 1) {
     return nullptr;
   }
-  return &this->owner->theObjectContainer.theSSLieAlgebras.theValues[indexSSalg];
+  return &this->owner->theObjectContainer.semisimpleLieAlgebras.theValues[indexSSalg];
 }
 
 Function& Calculator::GetFunctionHandlerFromNamedRule(const std::string& inputNamedRule) {
@@ -2443,11 +2454,11 @@ std::string Function::ToStringFull() const {
 std::string ObjectContainer::ToString() {
   MacroRegisterFunctionWithName("ObjectContainer::ToString");
   std::stringstream out;
-  if (this->theSSLieAlgebras.theValues.size > 0) {
-    out << "Lie algebras created (" << this->theSSLieAlgebras.theValues.size << " total): ";
-    for (int i = 0; i < this->theSSLieAlgebras.theValues.size; i ++) {
-      out << this->theSSLieAlgebras.theValues[i].ToStringLieAlgebraName();
-      if (i != this->theSSLieAlgebras.theValues.size - 1) {
+  if (this->semisimpleLieAlgebras.theValues.size > 0) {
+    out << "Lie algebras created (" << this->semisimpleLieAlgebras.theValues.size << " total): ";
+    for (int i = 0; i < this->semisimpleLieAlgebras.theValues.size; i ++) {
+      out << this->semisimpleLieAlgebras.theValues[i].ToStringLieAlgebraName();
+      if (i != this->semisimpleLieAlgebras.theValues.size - 1) {
         out << ", ";
       }
     }
@@ -2753,11 +2764,12 @@ SemisimpleSubalgebras& ObjectContainer::GetSemisimpleSubalgebrasCreateIfNotPrese
 SemisimpleLieAlgebra& ObjectContainer::GetLieAlgebraCreateIfNotPresent(const DynkinType& input) {
   MacroRegisterFunctionWithName("ObjectContainer::GetLieAlgebraCreateIfNotPresent");
   bool needToInit = false;
-  if (!this->theSSLieAlgebras.Contains(input)) {
+  if (!this->semisimpleLieAlgebras.Contains(input)) {
     needToInit = true;
   }
-  SemisimpleLieAlgebra& theLA = this->theSSLieAlgebras.GetValueCreateNoInit(input);
+  SemisimpleLieAlgebra& theLA = this->semisimpleLieAlgebras.GetValueCreateNoInit(input);
   if (needToInit) {
+    this->semisimpleLieAlgebraPointers.AddOnTop(&theLA);
     theLA.theWeyl.MakeFromDynkinType(input);
   }
   return theLA;
@@ -2809,9 +2821,9 @@ bool ObjectContainer::CheckConsistencyAfterReset() {
     global.fatal << "WeylGroupElements expected to be empty, got "
     << this->theWeylGroupElements.size << " elements. " << global.fatal;
   }
-  if (this->theSSLieAlgebras.size() != 0) {
+  if (this->semisimpleLieAlgebras.size() != 0) {
     global.fatal << "theSSLieAlgebras expected to be empty, got "
-    << this->theSSLieAlgebras.size() << " elements. " << global.fatal;
+    << this->semisimpleLieAlgebras.size() << " elements. " << global.fatal;
   }
   // MapReferences<DynkinType, SemisimpleSubalgebras> theSSSubalgebraS;
   if (this->theWeylGroupReps.size != 0) {
@@ -2874,7 +2886,8 @@ void ObjectContainer::reset() {
   this->theWeylGroupReps.Clear();
   this->theWeylGroupVirtualReps.Clear();
   this->theCategoryOmodules.SetSize(0);
-  this->theSSLieAlgebras.Clear();
+  this->semisimpleLieAlgebras.Clear();
+  this->semisimpleLieAlgebraPointers.Clear();
   this->theSSSubalgebraS.Clear();
   this->theTensorElts.Clear();
   this->thePolys.Clear();
@@ -2933,9 +2946,8 @@ bool Calculator::innerWriteGenVermaModAsDiffOperators(
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   Vectors<Polynomial<Rational> > theHWs;
   theHWs.SetSize(1);
-  Expression theContext;
   Selection theParSel;
-  SemisimpleLieAlgebra* theSSalgebra;
+  WithContext<SemisimpleLieAlgebra*> theSSalgebra;
   Expression truncatedInput = input;
   if (truncatedInput.children.size > 4) {
     int numEltsToCut = truncatedInput.children.size - 4;
@@ -2949,7 +2961,6 @@ bool Calculator::innerWriteGenVermaModAsDiffOperators(
     output,
     theHWs[0],
     theParSel,
-    theContext,
     theSSalgebra,
     CalculatorConversions::functionPolynomiaL<Rational>)
   ) {
@@ -2975,9 +2986,9 @@ bool Calculator::innerWriteGenVermaModAsDiffOperators(
     input,
     output,
     theHWs,
-    theContext,
+    theSSalgebra.context.context,
     theParSel,
-    theSSalgebra,
+    theSSalgebra.content,
     AllGenerators,
     &letterString,
     &partialString,
@@ -2990,10 +3001,9 @@ bool Calculator::innerWriteGenVermaModAsDiffOperators(
 bool Calculator::innerFreudenthalFull(Calculator& theCommands, const Expression& input, Expression& output) {
   Vector<Rational> hwFundamental, hwSimple;
   Selection tempSel;
-  SemisimpleLieAlgebra* theSSalg;
-  Expression context;
+  WithContext<SemisimpleLieAlgebra*> theSSalg;
   if (!theCommands.GetTypeHighestWeightParabolic<Rational>(
-    theCommands, input, output, hwFundamental, tempSel, context, theSSalg, nullptr
+    theCommands, input, output, hwFundamental, tempSel, theSSalg, nullptr
   )) {
     return output.MakeError("Failed to extract highest weight and algebra", theCommands);
   }
@@ -3004,8 +3014,8 @@ bool Calculator::innerFreudenthalFull(Calculator& theCommands, const Expression&
     return output.MakeError("Failed to extract highest weight. ", theCommands);
   }
   charSSAlgMod<Rational> startingChar, resultChar;
-  hwSimple = theSSalg->theWeyl.GetSimpleCoordinatesFromFundamental(hwFundamental);
-  startingChar.MakeFromWeight(hwSimple, theSSalg);
+  hwSimple = theSSalg.content->theWeyl.GetSimpleCoordinatesFromFundamental(hwFundamental);
+  startingChar.MakeFromWeight(hwSimple, theSSalg.content);
   std::string reportString;
   if (!startingChar.FreudenthalEvalMeFullCharacter(resultChar, 10000, &reportString)) {
     return output.MakeError(reportString, theCommands);
@@ -3018,10 +3028,9 @@ bool Calculator::innerFreudenthalFull(Calculator& theCommands, const Expression&
 bool Calculator::innerFreudenthalEval(Calculator& theCommands, const Expression& input, Expression& output) {
   Vector<Rational> hwFundamental, hwSimple;
   Selection tempSel;
-  SemisimpleLieAlgebra* theSSalg = nullptr;
-  Expression context;
+  WithContext<SemisimpleLieAlgebra*> theSSalg;
   if (!theCommands.GetTypeHighestWeightParabolic<Rational>(
-    theCommands, input, output, hwFundamental, tempSel, context, theSSalg, nullptr
+    theCommands, input, output, hwFundamental, tempSel, theSSalg, nullptr
   )) {
     return output.MakeError("Failed to extract highest weight and algebra", theCommands);
   }
@@ -3032,8 +3041,8 @@ bool Calculator::innerFreudenthalEval(Calculator& theCommands, const Expression&
     return output.MakeError("Failed to extract highest weight. ", theCommands);
   }
   charSSAlgMod<Rational> startingChar, resultChar;
-  hwSimple = theSSalg->theWeyl.GetSimpleCoordinatesFromFundamental(hwFundamental);
-  startingChar.MakeFromWeight(hwSimple, theSSalg);
+  hwSimple = theSSalg.content->theWeyl.GetSimpleCoordinatesFromFundamental(hwFundamental);
+  startingChar.MakeFromWeight(hwSimple, theSSalg.content);
   std::string reportString;
   if (!startingChar.FreudenthalEvalMeDominantWeightsOnly(resultChar, 10000, &reportString)) {
     return output.MakeError(reportString, theCommands);

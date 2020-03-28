@@ -13,6 +13,9 @@ FormatExpressions::GetMonOrder<ClassFunction<WeylGroupData::WeylGroupBase, Ratio
   return nullptr;
 }
 
+template < >
+WeylGroupData& Expression::GetValueNonConst() const;
+
 bool WeylGroupData::CheckConsistency() const {
   //if (this == 0)
   //  global.fatal << "The this pointer of a Weyl group is zero. " << global.fatal;
@@ -417,15 +420,16 @@ bool CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(
   if (input.children.size < 2) {
     return output.MakeError("Raising to maximally dominant takes at least 2 arguments, type and vector", theCommands);
   }
-  const Expression& theSSalgebraNode = input[1];
-  SemisimpleLieAlgebra* theSSalgebra;
-  if (!theCommands.CallConversionFunctionReturnsNonConst(
+  const Expression& semisimpleLieAlgebraNode = input[1];
+  WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
+  if (!theCommands.Convert(
+    semisimpleLieAlgebraNode,
     CalculatorConversions::functionSemisimpleLieAlgebra,
-    theSSalgebraNode,
-    theSSalgebra
+    semisimpleLieAlgebra
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
+  SemisimpleLieAlgebra* theSSalgebra = semisimpleLieAlgebra.content;
   Vectors<Rational> theHWs;
   theHWs.SetSize(input.children.size - 2);
   bool isGood = true;
@@ -478,8 +482,9 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple(
   const Expression& theSSalgebraNode = input[1];
   const Expression& vectorNode = input[2];
   DynkinType theType;
-  if (theSSalgebraNode.IsOfType<SemisimpleLieAlgebra>()) {
-    theType = theSSalgebraNode.GetValue<SemisimpleLieAlgebra>().theWeyl.theDynkinType;
+  if (theSSalgebraNode.IsOfType<SemisimpleLieAlgebra*>()) {
+    SemisimpleLieAlgebra* theAlgebra = theSSalgebraNode.GetValue<SemisimpleLieAlgebra*>();
+    theType = theAlgebra->theWeyl.theDynkinType;
   } else {
     if (!CalculatorConversions::functionDynkinType(
       theCommands, theSSalgebraNode, theType
@@ -554,22 +559,21 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSize(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSize");
   //double startTimeForDebug= global.GetElapsedSeconds();
-  SemisimpleLieAlgebra* theSSalgebra = nullptr;
+  WithContext<SemisimpleLieAlgebra*> theAlgebra;
   Vector<Rational> theWeightRat;
-  Expression theContextE;
   if (theCommands.GetTypeWeight<Rational>(
-    theCommands, input, theWeightRat, theContextE, theSSalgebra, nullptr
+    theCommands, input, theWeightRat, theAlgebra, nullptr
   )) {
-    Rational result = theSSalgebra->theWeyl.GetOrbitSize(theWeightRat);
+    Rational result = theAlgebra.content->theWeyl.GetOrbitSize(theWeightRat);
     return output.AssignValue(result, theCommands);
   }
+  SemisimpleLieAlgebra* theSSalgebra = theAlgebra.content;
   Vector<Polynomial<Rational> > theWeightPoly;
   if (theCommands.GetTypeWeight<Polynomial<Rational> >(
     theCommands,
     input,
     theWeightPoly,
-    theContextE,
-    theSSalgebra,
+    theAlgebra,
     CalculatorConversions::functionPolynomiaL<Rational>
   )) {
     Rational result = theSSalgebra->theWeyl.GetOrbitSize(theWeightPoly);
@@ -589,21 +593,19 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
   if (!input.IsListNElements(3)) {
     return output.MakeError("innerWeylOrbit takes two arguments", theCommands);
   }
-  SemisimpleLieAlgebra* theSSalgebra = nullptr;
+  WithContext<SemisimpleLieAlgebra*> theSSalgebra;
   Vector<Polynomial<Rational> > theWeight;
-  Expression theContextE;
   if (!theCommands.GetTypeWeight(
     theCommands,
     input,
     theWeight,
-    theContextE,
     theSSalgebra,
     CalculatorConversions::functionPolynomiaL<Rational>
   )) {
     return false;
   }
   Vector<Polynomial<Rational> > theHWfundCoords, theHWsimpleCoords, currentWeight;
-  WeylGroupData& theWeyl = theSSalgebra->theWeyl;
+  WeylGroupData& theWeyl = theSSalgebra.content->theWeyl;
   if (!useFundCoords) {
     theHWsimpleCoords = theWeight;
     theHWfundCoords = theWeyl.GetFundamentalCoordinatesFromSimple(theWeight);
@@ -614,13 +616,13 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
   std::stringstream out, latexReport;
   Vectors<Polynomial<Rational> > theHWs;
   FormatExpressions theFormat;
-  theContextE.ContextGetFormatExpressions(theFormat);
+  theSSalgebra.context.context.ContextGetFormatExpressions(theFormat);
 //  theFormat.fundamentalWeightLetter ="\\psi";
   theHWs.AddOnTop(theHWsimpleCoords);
   HashedList<Vector<Polynomial<Rational> > > outputOrbit;
   HashedList<ElementWeylGroup> orbitGeneratingSet;
   Polynomial<Rational> theExp;
-  if (!theSSalgebra->theWeyl.GenerateOrbit(theHWs, useRho, outputOrbit, false, 1921, &orbitGeneratingSet, 1921)) {
+  if (!theSSalgebra.content->theWeyl.GenerateOrbit(theHWs, useRho, outputOrbit, false, 1921, &orbitGeneratingSet, 1921)) {
     out << "Failed to generate the entire orbit (maybe too large?), generated the first " << outputOrbit.size << " elements only.";
   } else {
     out << "The orbit has " << outputOrbit.size << " elements.";
@@ -706,7 +708,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
     << "$\\\\\n<br>";
     if (useRho) {
       currentWeight = theHWsimpleCoords;
-      standardElt.MakeOne(*theSSalgebra);
+      standardElt.MakeOne(*theSSalgebra.content);
       bool isGood = true;
       for (int j = orbitGeneratingSet[i].generatorsLastAppliedFirst.size - 1; j >= 0; j --) {
         int simpleIndex = orbitGeneratingSet[i].generatorsLastAppliedFirst[j].index;
@@ -721,7 +723,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
             break;
           }
         }
-        standardElt.MultiplyByGeneratorPowerOnTheLeft(theSSalgebra->GetNumPosRoots() - simpleIndex - 1, theExp);
+        standardElt.MultiplyByGeneratorPowerOnTheLeft(theSSalgebra.content->GetNumPosRoots() - simpleIndex - 1, theExp);
       }
       out << "<td>";
       if (isGood) {
@@ -737,10 +739,6 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
   out << "</table>" << "<br> " << latexReport.str();
   return output.AssignValue(out.str(), theCommands);
 }
-
-
-template < >
-WeylGroupData& Expression::GetValueNonConst() const;
 
 bool CalculatorFunctionsWeylGroup::innerWeylGroupLoadOrComputeCharTable(
   Calculator& theCommands, const Expression& input, Expression& output
@@ -2107,21 +2105,21 @@ bool CalculatorFunctionsWeylGroup::innerMacdonaldPolys(Calculator& theCommands, 
   if (input.size() != 2) {
     return theCommands << "Macdonald polynomials expects as input a single argument. ";
   }
-  SemisimpleLieAlgebra* thePointer = nullptr;
-  if (!theCommands.CallConversionFunctionReturnsNonConst(
-    CalculatorConversions::functionSemisimpleLieAlgebra, input[1], thePointer
+  WithContext<SemisimpleLieAlgebra*> algebra;
+  if (!theCommands.Convert(
+    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, algebra
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
   rootSubalgebras theRootSAs;
-  theRootSAs.owner = thePointer;
+  theRootSAs.owner = algebra.content;
   theRootSAs.ComputeAllReductiveRootSubalgebrasUpToIsomorphism();
   std::stringstream out;
   MonomialMacdonald theGenerator;
   HashedList<MonomialMacdonald> theOrbit;
   for (int i = 0; i < theRootSAs.theSubalgebras.size; i ++) {
     rootSubalgebra& currentRootSA = theRootSAs.theSubalgebras[i];
-    theGenerator.MakeFromRootSubsystem(currentRootSA.PositiveRootsK, *thePointer);
+    theGenerator.MakeFromRootSubsystem(currentRootSA.PositiveRootsK, *algebra.content);
     theGenerator.GenerateMyOrbit(theOrbit);
     out << "<hr>Root subsystem type " << currentRootSA.theDynkinDiagram.ToString();
     out << ". Orbit has " << theOrbit.size << " element(s), here they are: ";
@@ -2412,25 +2410,25 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupElement(
   if (input.size() < 2) {
     return output.MakeError("Function WeylElement needs to know what group the element belongs to", theCommands);
   }
-  SemisimpleLieAlgebra* thePointer;
-  if (!theCommands.CallConversionFunctionReturnsNonConst(
-    CalculatorConversions::functionSemisimpleLieAlgebra, input[1], thePointer
+  WithContext<SemisimpleLieAlgebra*> thePointer;
+  if (!theCommands.Convert(
+    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, thePointer
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
   ElementWeylGroup theElt;
   theElt.generatorsLastAppliedFirst.Reserve(input.size() - 2);
-  for (int i = 2; i < input.children.size; i ++) {
+  for (int i = 2; i < input.size(); i ++) {
     int tmp;
     if (!input[i].IsSmallInteger(& tmp)) {
       return false;
     }
     theElt.MultiplyOnTheRightBySimpleReflection(tmp - 1);
   }
-  theElt.owner = &thePointer->theWeyl;
+  theElt.owner = &thePointer.content->theWeyl;
   for (int i = 0; i < theElt.generatorsLastAppliedFirst.size; i ++) {
     if (
-      theElt.generatorsLastAppliedFirst[i].index >= thePointer->GetRank() ||
+      theElt.generatorsLastAppliedFirst[i].index >= thePointer.content->GetRank() ||
       theElt.generatorsLastAppliedFirst[i].index < 0
     ) {
       return output.MakeError("Bad reflection index", theCommands);

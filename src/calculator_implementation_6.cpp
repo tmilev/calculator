@@ -705,8 +705,7 @@ bool CalculatorFunctions::innerPlotDirectionOrVectorField(
       "Vector fields take at least four arguments: the vector field, "
       "the low left corner, the upper right, and the "
       "number of segments in each direction. ",
-      theCommands,
-      true
+      theCommands
     );
   }
   if (input.HasBoundVariables()) {
@@ -1335,7 +1334,7 @@ bool CalculatorFunctions::innerPolynomialDivisionQuotient(
   theGB.theBasiS.SetSize(thePolys.size - 1);
   for (int i = 1; i < thePolys.size; i ++) {
     if (thePolys[i].IsEqualToZero()) {
-      return output.MakeError("Division by zero.", theCommands, true);
+      return output.MakeError("Division by zero.", theCommands);
     }
     theGB.theBasiS[i - 1] = thePolys[i];
   }

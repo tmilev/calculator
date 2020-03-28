@@ -427,16 +427,18 @@ bool Calculator::innerPrintSSSubalgebras(
     return theCommands << "Semisimple Lie algebra expects a single argument. ";
   }
   std::stringstream out;
+  WithContext<SemisimpleLieAlgebra*> ownerAlgebra;
   SemisimpleLieAlgebra* ownerSSPointer = nullptr;
   bool isAlreadySubalgebrasObject = input[1].IsOfType<SemisimpleSubalgebras>();
   if (!isAlreadySubalgebrasObject) {
-    if (!theCommands.CallConversionFunctionReturnsNonConst(
-      CalculatorConversions::functionSemisimpleLieAlgebra,
+    if (!theCommands.Convert(
       input[1],
-      ownerSSPointer
+      CalculatorConversions::functionSemisimpleLieAlgebra,
+      ownerAlgebra
     )) {
       return output.MakeError("Error extracting Lie algebra.", theCommands);
     }
+    ownerSSPointer = ownerAlgebra.content;
     if (ownerSSPointer->GetRank() > 8) {
       out << "<b>This code is completely experimental and has been set to run up to rank 6. "
       << "As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
@@ -460,7 +462,7 @@ bool Calculator::innerPrintSSSubalgebras(
   theSubalgebras.ComputeStructureWriteFiles(
     ownerLieAlgebra,
     theCommands.theObjectContainer.theAlgebraicClosure,
-    theCommands.theObjectContainer.theSSLieAlgebras,
+    theCommands.theObjectContainer.semisimpleLieAlgebras,
     theCommands.theObjectContainer.theSltwoSAs,
     &out,
     doForceRecompute,
@@ -536,12 +538,13 @@ bool Calculator::innerAttemptExtendingEtoHEFwithHinCartan(Calculator& theCommand
   if (input.size() != 3) {
     return output.MakeError("Function takes 2 arguments - type and an element of the Lie algebra.", theCommands);
   }
-  SemisimpleLieAlgebra* ownerSS = nullptr;
-  if (!theCommands.CallConversionFunctionReturnsNonConst(
-    CalculatorConversions::functionSemisimpleLieAlgebra, input[1], ownerSS
+  WithContext<SemisimpleLieAlgebra*> ownerAlgebra;
+  if (!theCommands.Convert(
+    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, ownerAlgebra
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
+  SemisimpleLieAlgebra* ownerSS = ownerAlgebra.content;
   ElementSemisimpleLieAlgebra<Rational> theErational;
   if (!CalculatorConversions::innerElementSemisimpleLieAlgebraRationalCoeffs(theCommands, input[2], theErational, *ownerSS)) {
     return output.MakeError("Failed to extract element of semisimple Lie algebra. ", theCommands);
@@ -569,12 +572,13 @@ bool Calculator::innerAdCommonEigenSpaces(Calculator& theCommands, const Express
       theCommands
     );
   }
-  SemisimpleLieAlgebra* ownerSS;
-  if (!theCommands.CallConversionFunctionReturnsNonConst(
-    CalculatorConversions::functionSemisimpleLieAlgebra, input[1], ownerSS
+  WithContext<SemisimpleLieAlgebra*> algebra;
+  if (!theCommands.Convert(
+    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, algebra
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
+  SemisimpleLieAlgebra* ownerSS = algebra.content;
   List<ElementSemisimpleLieAlgebra<Rational> > theOperators, outputElts;
   theOperators.Reserve(input.size() - 2);
   ElementSemisimpleLieAlgebra<Rational> tempElt;
@@ -1976,10 +1980,10 @@ bool Calculator::innerCharacterSSLieAlgFD(Calculator& theCommands, const Express
   MacroRegisterFunctionWithName("Calculator::innerCharacterSSLieAlgFD");
   Vector<Rational> theHW;
   Selection parSel;
-  SemisimpleLieAlgebra* ownerSSLiealg;
+  WithContext<SemisimpleLieAlgebra*> ownerSSLiealg;
   Expression tempE, tempE2;
   if (!theCommands.GetTypeHighestWeightParabolic(
-    theCommands, input, output, theHW, parSel, tempE, ownerSSLiealg, nullptr
+    theCommands, input, output, theHW, parSel, ownerSSLiealg, nullptr
   )) {
     return false;
   }
@@ -1990,7 +1994,7 @@ bool Calculator::innerCharacterSSLieAlgFD(Calculator& theCommands, const Express
     return output.MakeError("I know only to compute with finite dimensional characters, for the time being.", theCommands);
   }
   charSSAlgMod<Rational> theElt;
-  theElt.MakeFromWeight(ownerSSLiealg->theWeyl.GetSimpleCoordinatesFromFundamental(theHW), ownerSSLiealg);
+  theElt.MakeFromWeight(ownerSSLiealg.content->theWeyl.GetSimpleCoordinatesFromFundamental(theHW), ownerSSLiealg.content);
   return output.AssignValue(theElt, theCommands);
 }
 
@@ -2201,12 +2205,13 @@ bool Calculator::innerRootSubsystem(Calculator& theCommands, const Expression& i
   if (input.size() < 3) {
     return false;
   }
-  SemisimpleLieAlgebra* theSSlieAlg = nullptr;
-  if (!theCommands.CallConversionFunctionReturnsNonConst(
-    CalculatorConversions::functionSemisimpleLieAlgebra, input[1], theSSlieAlg
+  WithContext<SemisimpleLieAlgebra*> algebra;
+  if (!theCommands.Convert(
+    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, algebra
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
+  SemisimpleLieAlgebra* theSSlieAlg = algebra.content;
   int theRank = theSSlieAlg->GetRank();
   Vector<Rational> currentRoot;
   Vectors<Rational> outputRoots;

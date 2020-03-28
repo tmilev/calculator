@@ -188,12 +188,13 @@ bool Calculator::innerAnimateLittelmannPaths(
   if (!input.IsListNElements(3)) {
     return output.MakeError("This function takes 2 arguments", theCommands);
   }
-  SemisimpleLieAlgebra* theSSowner = nullptr;
-  if (!theCommands.CallConversionFunctionReturnsNonConst(
-    CalculatorConversions::functionSemisimpleLieAlgebra, input[1], theSSowner
+  WithContext<SemisimpleLieAlgebra*> algebra;
+  if (!theCommands.Convert(
+    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, algebra
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
+  SemisimpleLieAlgebra* theSSowner = algebra.content;
   Vector<Rational> theWeight;
   Expression tempContext(theCommands);
   if (!theCommands.GetVectoR<Rational>(
@@ -222,12 +223,13 @@ bool Calculator::innerCasimir(Calculator& theCommands, const Expression& input, 
   if (input.size() != 2) {
     return theCommands << "Casimir function expects a single input. ";
   }
-  SemisimpleLieAlgebra* theSSalg = nullptr;
-  if (!theCommands.CallConversionFunctionReturnsNonConst(
-    CalculatorConversions::functionSemisimpleLieAlgebra, input[1], theSSalg
+  WithContext<SemisimpleLieAlgebra*> algebra;
+  if (!theCommands.Convert(
+    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, algebra
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
+  SemisimpleLieAlgebra* theSSalg = algebra.content;
   SemisimpleLieAlgebra& theSSowner = *theSSalg;
   ElementUniversalEnveloping<RationalFunction> theCasimir;
   theCasimir.MakeCasimir(theSSowner);
@@ -1061,13 +1063,14 @@ bool Calculator::innerPrintAllVectorPartitions(Calculator& theCommands, const Ex
   if (input.size() != 3) {
     return output.MakeError("Function innerPrintAllPartitions expects 2 arguments.", theCommands);
   }
-
-  SemisimpleLieAlgebra* theSSowner;
-  if (!theCommands.CallConversionFunctionReturnsNonConst(
-    CalculatorConversions::functionSemisimpleLieAlgebra, input[1], theSSowner
+  WithContext<SemisimpleLieAlgebra*> algebra;
+  if (!theCommands.Convert(
+    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, algebra
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
+  SemisimpleLieAlgebra* theSSowner = algebra.content;
+
   SemisimpleLieAlgebra& theSSalgebra = *theSSowner;
   Expression theContext;
   Vector<Rational> theHW;
@@ -1347,13 +1350,13 @@ bool Calculator::innerLSPath(Calculator& theCommands, const Expression& input, E
   if (input.size() < 3) {
     return output.MakeError("LSPath needs at least two arguments.", theCommands);
   }
-  SemisimpleLieAlgebra* theSSowner;
-  if (!theCommands.CallConversionFunctionReturnsNonConst(
-    CalculatorConversions::functionSemisimpleLieAlgebra, input[1], theSSowner
+  WithContext<SemisimpleLieAlgebra*> theSSowner;
+  if (!theCommands.Convert(
+    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, theSSowner
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
-  SemisimpleLieAlgebra& ownerSSalgebra = *theSSowner;
+  SemisimpleLieAlgebra& ownerSSalgebra = *theSSowner.content;
   Vectors<Rational> waypoints;
   waypoints.SetSize(input.children.size - 2);
   for (int i = 2; i < input.children.size; i ++) {
@@ -1907,6 +1910,7 @@ bool Calculator::innerAutomatedTest(
 
 bool Calculator::Test::ProcessResults() {
   std::stringstream commentsOnFailure, out;
+
   if (!this->LoadTestStrings(&commentsOnFailure)) {
     global << logger::red << "Failed to load test strings. " << logger::endL
     << commentsOnFailure.str();
@@ -1942,7 +1946,10 @@ bool Calculator::Test::ProcessResults() {
     currentLineConsole << "Function " << currentTest.functionAdditionalIdentifier << ", atom: " << currentTest.atom << "\n";
     currentLine << "<td style = 'min-width:45px;'>" << currentTest.atom << "</td>";
     currentLineConsole << "Ran:\n" << this->commands.theKeys[i] << "\n";
-    currentLine << "<td style = 'min-width:200px;'>" << global.ToStringCalculatorComputation(this->commands.theKeys[i], this->commands.theKeys[i]) << "</td>";
+    currentLine << "<td style = 'min-width:200px;'>"
+    << global.ToStringCalculatorComputation(
+      this->commands.theKeys[i], this->commands.theKeys[i]
+    ) << "</td>";
     bool isBad = false;
     bool isUknown = false;
     if (currentTest.actualResult == currentTest.expectedResult) {

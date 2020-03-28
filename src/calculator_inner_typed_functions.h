@@ -157,7 +157,7 @@ bool CalculatorFunctionsBinaryOps::innerDivideTypeByType(Calculator& theCommands
     return false;
   }
   if (inputContextsMerged[2].GetValue<theType>().IsEqualToZero()) {
-    return output.MakeError("Division by zero. ", theCommands, true);
+    return output.MakeError("Division by zero. ", theCommands);
   }
   theType result = inputContextsMerged[1].GetValue<theType>();
   result /= inputContextsMerged[2].GetValue<theType>();

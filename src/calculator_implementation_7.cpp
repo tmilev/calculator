@@ -892,12 +892,13 @@ bool CalculatorFunctions::innerCasimirWRTlevi(
   if (!input.IsListNElements(3)) {
     return false;
   }
-  SemisimpleLieAlgebra* theSSalg = nullptr;
-  if (!theCommands.CallConversionFunctionReturnsNonConst(
-    CalculatorConversions::functionSemisimpleLieAlgebra, input[1], theSSalg
+  WithContext<SemisimpleLieAlgebra*> algebra;
+  if (!theCommands.Convert(
+    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, algebra
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
+  SemisimpleLieAlgebra* theSSalg = algebra.content;
   Vector<Rational> leviSelection;
   if (!theCommands.GetVectoR(input[2], leviSelection, nullptr, theSSalg->GetRank())) {
     return theCommands << "<hr>Failed to extract parabolic selection. ";
@@ -929,7 +930,7 @@ bool CalculatorFunctions::innerLog(Calculator& theCommands, const Expression& in
     return false;
   }
   if (input[1].IsEqualToZero()) {
-    return output.MakeError("Attempting to compute logarithm of zero.", theCommands, true);
+    return output.MakeError("Attempting to compute logarithm of zero.", theCommands);
   }
   if (input[1].IsEqualToOne()) {
     return output.AssignValue(0, theCommands);
@@ -2511,7 +2512,7 @@ bool CalculatorFunctions::innerCrossProduct(Calculator& theCommands, const Expre
     std::stringstream out;
     out << "Can't compute cross product of the non-3d vectors " << input[1].ToString() << " and "
     << input[2].ToString() << ". ";
-    return output.MakeError(out.str(), theCommands, true);
+    return output.MakeError(out.str(), theCommands);
   }
   List<Expression> outputSequence;
   outputSequence.SetSize(3);
@@ -2727,7 +2728,7 @@ bool CalculatorFunctions::outerDivideByNumber(
     return false;
   }
   if (input[2].IsEqualToZero()) {
-    return output.MakeError("Division by zero. ", theCommands, true);
+    return output.MakeError("Division by zero. ", theCommands);
   }
   Rational theRatValue;
   AlgebraicNumber theAlgValue;
@@ -3001,7 +3002,7 @@ bool CalculatorFunctions::innerPowerAnyToZero(Calculator& theCommands, const Exp
     }
   }
   if (input[1].IsEqualToZero()) {
-    return output.MakeError("Error: expression of the form 0^0 is illegal.", theCommands, true);
+    return output.MakeError("Error: expression of the form 0^0 is illegal.", theCommands);
   }
   return output.AssignValue<Rational>(1, theCommands);
 }
@@ -3789,7 +3790,7 @@ bool Calculator::innerInvertMatrixVerbose(
     return CalculatorFunctions::innerInvertMatrixRFsVerbose(theCommands, input, output);
   }
   if (mat.NumRows != mat.NumCols || mat.NumCols < 1) {
-    return output.MakeError("The matrix is not square", theCommands, true);
+    return output.MakeError("The matrix is not square", theCommands);
   }
   outputMat.MakeIdMatrix(mat.NumRows);
   int tempI;
@@ -5314,7 +5315,9 @@ bool CalculatorFunctions::outerAtimesBpowerJplusEtcDivBpowerI(
   return output.MakeSum(theCommands, numeratorsNew);
 }
 
-bool CalculatorFunctions::innerGrowDynkinType(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctions::innerGrowDynkinType(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerGrowDynkinType");
   if (input.size() != 3) {
     return false;
@@ -5326,23 +5329,23 @@ bool CalculatorFunctions::innerGrowDynkinType(Calculator& theCommands, const Exp
   )) {
     return false;
   }
-  SemisimpleLieAlgebra* theSSalg = nullptr;
-  if (!theCommands.CallConversionFunctionReturnsNonConst(
-    CalculatorConversions::functionSemisimpleLieAlgebra, input[2], theSSalg
+  WithContext<SemisimpleLieAlgebra*> theSSalg;
+  if (!theCommands.Convert(
+    input[2], CalculatorConversions::functionSemisimpleLieAlgebra, theSSalg
   )) {
     return output.MakeError("Error extracting ambient Lie algebra.", theCommands);
   }
   SemisimpleSubalgebras tempSas;
   tempSas.initHookUpPointers(
-    *theSSalg,
+    *theSSalg.content,
     &theCommands.theObjectContainer.theAlgebraicClosure,
-    &theCommands.theObjectContainer.theSSLieAlgebras,
+    &theCommands.theObjectContainer.semisimpleLieAlgebras,
     &theCommands.theObjectContainer.theSltwoSAs
   );
   tempSas.ComputeSl2sInitOrbitsForComputationOnDemand();
   if (!tempSas.RanksAndIndicesFit(theSmallDynkinType)) {
     return output.MakeError(
-      "Error: type " + theSmallDynkinType.ToString() + " does not fit inside " + theSSalg->theWeyl.theDynkinType.ToString(),
+      "Error: type " + theSmallDynkinType.ToString() + " does not fit inside " + theSSalg.content->theWeyl.theDynkinType.ToString(),
       theCommands
     );
   }
@@ -5350,12 +5353,13 @@ bool CalculatorFunctions::innerGrowDynkinType(Calculator& theCommands, const Exp
   List<List<int> > imagesSimpleRoots;
   if (!tempSas.GrowDynkinType(theSmallDynkinType, largerTypes, &imagesSimpleRoots)) {
     return output.MakeError(
-      "Error: growing type " + theSmallDynkinType.ToString() + " inside " + theSSalg->theWeyl.theDynkinType.ToString() + " failed. ",
+      "Error: growing type " + theSmallDynkinType.ToString() + " inside " + theSSalg.content->theWeyl.theDynkinType.ToString() + " failed. ",
       theCommands
     );
   }
   std::stringstream out;
-  out << "Inside " << theSSalg->theWeyl.theDynkinType.ToString() << ", input type " << theSmallDynkinType.ToString();
+  out << "Inside " << theSSalg.content->theWeyl.theDynkinType.ToString()
+  << ", input type " << theSmallDynkinType.ToString();
   if (largerTypes.size == 0) {
     out << " cannot grow any further. ";
   } else {
@@ -5482,13 +5486,13 @@ bool CalculatorFunctions::innerComputeSemisimpleSubalgebras(
   if (input.size() != 2) {
     return theCommands << "Semisimple subalgebras function expects 1 argument. ";
   }
-  SemisimpleLieAlgebra* ownerSSPointer;
-  if (!theCommands.CallConversionFunctionReturnsNonConst(
-    CalculatorConversions::functionSemisimpleLieAlgebra, input[1], ownerSSPointer
+  WithContext<SemisimpleLieAlgebra*> ownerSSPointer;
+  if (!theCommands.Convert(
+    input[1], CalculatorConversions::functionSemisimpleLieAlgebra, ownerSSPointer
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
-  SemisimpleLieAlgebra& ownerSS = *ownerSSPointer;
+  SemisimpleLieAlgebra& ownerSS = *ownerSSPointer.content;
   std::stringstream out;
   if (ownerSS.GetRank() > 6) {
     out << "<b>This code is completely experimental and has been set to run up to rank 6. "
@@ -5504,7 +5508,7 @@ bool CalculatorFunctions::innerComputeSemisimpleSubalgebras(
   theSSsubalgebras.FindTheSSSubalgebrasFromScratch(
     ownerSS,
     theCommands.theObjectContainer.theAlgebraicClosure,
-    theCommands.theObjectContainer.theSSLieAlgebras,
+    theCommands.theObjectContainer.semisimpleLieAlgebras,
     theCommands.theObjectContainer.theSltwoSAs,
     nullptr
   );
@@ -5547,7 +5551,7 @@ bool CalculatorFunctions::innerMinPolyMatrix(
     << argument.ToString() << " to rational matrix.";
   }
   if (theMat.NumRows != theMat.NumCols || theMat.NumRows <= 0) {
-    return output.MakeError("Error: matrix is not square.", theCommands, true);
+    return output.MakeError("Error: matrix is not square.", theCommands);
   }
   FormatExpressions tempF;
   tempF.polyAlphabeT.SetSize(1);
@@ -5572,7 +5576,7 @@ bool CalculatorFunctions::innerCharPolyMatrix(
     << input.ToString() << " to rational matrix.";
   }
   if (theMat.NumRows != theMat.NumCols || theMat.NumRows <= 0) {
-    return output.MakeError("Error: matrix is not square.", theCommands, true);
+    return output.MakeError("Error: matrix is not square.", theCommands);
   }
   FormatExpressions tempF;
   tempF.polyAlphabeT.SetSize(1);
@@ -5611,8 +5615,7 @@ bool CalculatorFunctions::innerTrace(
     if (!theMat.IsSquare()) {
       return output.MakeError(
         "Error: attempting to get trace of non-square matrix. ",
-        theCommands,
-        true
+        theCommands
       );
     }
     return output.AssignValue(theMat.GetTrace(), theCommands);
@@ -5622,8 +5625,7 @@ bool CalculatorFunctions::innerTrace(
     if (!theMatRF.IsSquare()) {
       return output.MakeError(
         "Error: attempting to get trace of non-square matrix. ",
-        theCommands,
-        true
+        theCommands
       );
     }
     return output.AssignValue(theMatRF.GetTrace(), theCommands);
@@ -5635,8 +5637,7 @@ bool CalculatorFunctions::innerTrace(
   if (!theMat.IsSquare()) {
     return output.MakeError(
       "Error: attempting to get trace of non-square matrix. ",
-      theCommands,
-      true
+      theCommands
     );
   }
   if (theMat.NumRows == 1) {
@@ -5687,7 +5688,7 @@ bool CalculatorFunctions::innerLastElement(Calculator& theCommands, const Expres
   if (input.IsAtom()) {
     std::stringstream out;
     out << "Error: requesting the last element of the atom " << input.ToString();
-    return output.MakeError(out.str(), theCommands, true);
+    return output.MakeError(out.str(), theCommands);
   }
   if (input.size() == 2) {
     const Expression& sequenceCandidate = input[1];
@@ -5712,7 +5713,7 @@ bool CalculatorFunctions::innerRemoveLastElement(Calculator& theCommands, const 
     } else {
       out << "Error: requesting to remove the last element of the zero-element list " << input.ToString() << ". ";
     }
-    return output.MakeError(out.str(), theCommands, true);
+    return output.MakeError(out.str(), theCommands);
   }
   if (input.size() == 2) {
     const Expression& sequenceCandidate = input[1];
@@ -5955,10 +5956,10 @@ bool CalculatorFunctions::innerInvertMatrix(Calculator& theCommands, const Expre
   }
   if (theCommands.functionGetMatrix(converted, theMat)) {
     if (theMat.NumRows != theMat.NumCols || theMat.NumCols < 1) {
-      return output.MakeError("The matrix is not square", theCommands, true);
+      return output.MakeError("The matrix is not square", theCommands);
     }
     if (theMat.GetDeterminant() == 0) {
-      return output.MakeError("Matrix determinant is zero.", theCommands, true);
+      return output.MakeError("Matrix determinant is zero.", theCommands);
     }
     theMat.Invert();
     return output.AssignMatrix(theMat, theCommands);
@@ -5969,10 +5970,10 @@ bool CalculatorFunctions::innerInvertMatrix(Calculator& theCommands, const Expre
     << input.ToString();
   }
   if (theMatAlg.NumRows != theMatAlg.NumCols || theMatAlg.NumCols < 1) {
-    return output.MakeError("The matrix is not square", theCommands, true);
+    return output.MakeError("The matrix is not square", theCommands);
   }
   if (theMatAlg.GetDeterminant() == 0) {
-    return output.MakeError("Matrix determinant is zero.", theCommands, true);
+    return output.MakeError("Matrix determinant is zero.", theCommands);
   }
   theMatAlg.Invert();
   return output.AssignMatrix(theMatAlg, theCommands);
@@ -6303,8 +6304,7 @@ bool CalculatorFunctions::innerPlot2D(Calculator& theCommands, const Expression&
   if (input.size() < 4) {
     return output.MakeError(
       "Plotting coordinates takes at least three arguments: function, lower and upper bound. ",
-      theCommands,
-      true
+      theCommands
     );
   }
   if (input.HasBoundVariables()) {
@@ -6465,8 +6465,7 @@ bool CalculatorFunctions::innerPlotPoint(Calculator& theCommands, const Expressi
   if (input.size() != 3) {
     return output.MakeError(
       "Plotting a point takes at least two arguments, location and color. ",
-      theCommands,
-      true
+      theCommands
     );
   }
   Plot theFinalPlot;
@@ -6512,8 +6511,7 @@ bool CalculatorFunctions::innerPlot2DWithBars(Calculator& theCommands, const Exp
     return output.MakeError(
       "Plotting coordinates takes the following arguments: lower function, "
       "upper function, lower and upper bound, delta x. ",
-      theCommands,
-      true
+      theCommands
     );
   }
   Expression lowerEplot = input, upperEplot = input;
@@ -6562,10 +6560,10 @@ bool CalculatorFunctions::innerPlot2DWithBars(Calculator& theCommands, const Exp
   List<double> fValuesLower;
   List<double> fValuesUpper;
   if (theDeltaNoSign == 0.0) {
-    return output.MakeError("Delta equal to zero is not allowed", theCommands, true);
+    return output.MakeError("Delta equal to zero is not allowed", theCommands);
   }
   if ((upperBound - lowerBound) / theDeltaNoSign > 10000) {
-    return output.MakeError("More than 10000 intervals needed for the plot, this is not allowed.", theCommands, true);
+    return output.MakeError("More than 10000 intervals needed for the plot, this is not allowed.", theCommands);
   }
   List<Rational> rValues;
   Rational lowerBoundRat, upperBoundRat, deltaRat;
@@ -7109,23 +7107,23 @@ bool CalculatorFunctions::innerEmbedSSalgInSSalg(Calculator& theCommands, const 
   }
   const Expression& EsmallSA = input[1];
   const Expression& ElargeSA = input[2];
-  SemisimpleLieAlgebra* smallSubalgebraPointer = nullptr;
-  if (!theCommands.CallConversionFunctionReturnsNonConst(
-    CalculatorConversions::functionSemisimpleLieAlgebra,
+  WithContext<SemisimpleLieAlgebra*> smallSubalgebraPointer;
+  if (!theCommands.Convert(
     EsmallSA,
+    CalculatorConversions::functionSemisimpleLieAlgebra,
     smallSubalgebraPointer
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
-  SemisimpleLieAlgebra* largeSubalgebraPointer = nullptr;
-  if (!theCommands.CallConversionFunctionReturnsNonConst(
-    CalculatorConversions::functionSemisimpleLieAlgebra,
+  WithContext<SemisimpleLieAlgebra*> largeSubalgebraPointer;
+  if (!theCommands.Convert(
     ElargeSA,
+    CalculatorConversions::functionSemisimpleLieAlgebra,
     largeSubalgebraPointer
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
-  SemisimpleLieAlgebra& ownerSS = *largeSubalgebraPointer;
+  SemisimpleLieAlgebra& ownerSS = *largeSubalgebraPointer.content;
   std::stringstream out;
   if (ownerSS.GetRank() > 8) {
     out << "<b>This code is has been set to run up to ambient Lie algebra of rank 8. </b>";
@@ -7138,14 +7136,14 @@ bool CalculatorFunctions::innerEmbedSSalgInSSalg(Calculator& theCommands, const 
   theSSsubalgebras.ToStringExpressionString = CalculatorConversions::innerStringFromSemisimpleSubalgebras;
 
   out << "Attempting to embed "
-  << smallSubalgebraPointer->theWeyl.theDynkinType.ToString()
+  << smallSubalgebraPointer.content->theWeyl.theDynkinType.ToString()
   << " in " << ownerSS.ToStringLieAlgebraName();
   theSSsubalgebras.FindTheSSSubalgebrasFromScratch(
     ownerSS,
     theCommands.theObjectContainer.theAlgebraicClosure,
-    theCommands.theObjectContainer.theSSLieAlgebras,
+    theCommands.theObjectContainer.semisimpleLieAlgebras,
     theCommands.theObjectContainer.theSltwoSAs,
-    &smallSubalgebraPointer->theWeyl.theDynkinType
+    &smallSubalgebraPointer.content->theWeyl.theDynkinType
   );
   return output.AssignValue(theSSsubalgebras, theCommands);
 }
@@ -7155,21 +7153,20 @@ bool CalculatorFunctions::innerWeylDimFormula(Calculator& theCommands, const Exp
   if (input.size() != 3) {
     return output.MakeError("This function takes 2 arguments", theCommands);
   }
-  SemisimpleLieAlgebra* theSSowner;
-  if (!theCommands.CallConversionFunctionReturnsNonConst(
-    CalculatorConversions::functionSemisimpleLieAlgebra,
+  WithContext<SemisimpleLieAlgebra*> theSSowner;
+  if (!theCommands.Convert(
     input[1],
+    CalculatorConversions::functionSemisimpleLieAlgebra,
     theSSowner
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
   Vector<RationalFunction> theWeight;
-  Expression newContext(theCommands);
   if (!theCommands.GetVectoR<RationalFunction>(
     input[2],
     theWeight,
-    &newContext,
-    theSSowner->GetRank(),
+    &theSSowner.context.context,
+    theSSowner.content->GetRank(),
     CalculatorConversions::functionRationalFunction
   )) {
     return output.MakeError(
@@ -7181,13 +7178,13 @@ bool CalculatorFunctions::innerWeylDimFormula(Calculator& theCommands, const Exp
   rfOne.MakeOne();
   Vector<RationalFunction> theWeightInSimpleCoords;
   FormatExpressions theFormat;
-  newContext.ContextGetFormatExpressions(theFormat);
-  theWeightInSimpleCoords = theSSowner->theWeyl.GetSimpleCoordinatesFromFundamental(theWeight);
+  theSSowner.context.context.ContextGetFormatExpressions(theFormat);
+  theWeightInSimpleCoords = theSSowner.content->theWeyl.GetSimpleCoordinatesFromFundamental(theWeight);
   theCommands << "<br>Weyl dim formula input: simple coords: "
   << theWeightInSimpleCoords.ToString(&theFormat)
   << ", fundamental coords: " << theWeight.ToString(&theFormat);
-  RationalFunction tempRF = theSSowner->theWeyl.WeylDimFormulaSimpleCoords(theWeightInSimpleCoords);
-  return output.AssignValueWithContext(tempRF, newContext, theCommands);
+  RationalFunction tempRF = theSSowner.content->theWeyl.WeylDimFormulaSimpleCoords(theWeightInSimpleCoords);
+  return output.AssignValueWithContext(tempRF, theSSowner.context.context, theCommands);
 }
 
 bool CalculatorFunctions::innerDecomposeFDPartGeneralizedVermaModuleOverLeviPart(
@@ -7205,17 +7202,17 @@ bool CalculatorFunctions::innerDecomposeFDPartGeneralizedVermaModuleOverLeviPart
   const Expression& weightNode = input[2];
   const Expression& inducingParNode = input[3];
   const Expression& splittingParNode = input[4];
-  SemisimpleLieAlgebra* ownerSSPointer = nullptr;
-  if (!theCommands.CallConversionFunctionReturnsNonConst(
-    CalculatorConversions::functionSemisimpleLieAlgebra,
+  WithContext<SemisimpleLieAlgebra*> ownerSSPointer;
+  if (!theCommands.Convert(
     typeNode,
+    CalculatorConversions::functionSemisimpleLieAlgebra,
     ownerSSPointer
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
   Vector<RationalFunction> theWeightFundCoords;
   Vector<Rational> inducingParSel, splittingParSel;
-  SemisimpleLieAlgebra& ownerSS = *ownerSSPointer;
+  SemisimpleLieAlgebra& ownerSS = *ownerSSPointer.content;
   WeylGroupData& theWeyl = ownerSS.theWeyl;
   int theDim = ownerSS.GetRank();
   Expression finalContext;
@@ -7283,15 +7280,15 @@ bool CalculatorFunctions::innerParabolicWeylGroups(
     return false;
   }
   Selection selectionParSel;
-  SemisimpleLieAlgebra* theSSPointer;
-  if (!theCommands.CallConversionFunctionReturnsNonConst(
-    CalculatorConversions::functionSemisimpleLieAlgebra,
+  WithContext<SemisimpleLieAlgebra*> theSSPointer;
+  if (!theCommands.Convert(
     input[1],
+    CalculatorConversions::functionSemisimpleLieAlgebra,
     theSSPointer
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
-  SemisimpleLieAlgebra& theSSalgebra = *theSSPointer;
+  SemisimpleLieAlgebra& theSSalgebra = *theSSPointer.content;
   int numCycles = MathRoutines::TwoToTheNth(selectionParSel.MaxSize);
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms theSubgroup;
   std::stringstream out;
@@ -7307,15 +7304,13 @@ bool CalculatorFunctions::innerParabolicWeylGroupsBruhatGraph(Calculator& theCom
   RecursionDepthCounter theRecursion(&theCommands.RecursionDeptH);
   Selection parabolicSel;
   Vector<RationalFunction> theHWfundcoords, tempRoot, theHWsimplecoords;
-  Expression hwContext(theCommands);
-  SemisimpleLieAlgebra* theSSalgPointer;
+  WithContext<SemisimpleLieAlgebra*> theSSalgPointer;
   if (!theCommands.GetTypeHighestWeightParabolic(
     theCommands,
     input,
     output,
     theHWfundcoords,
     parabolicSel,
-    hwContext,
     theSSalgPointer,
     CalculatorConversions::functionRationalFunction
   )) {
@@ -7325,7 +7320,7 @@ bool CalculatorFunctions::innerParabolicWeylGroupsBruhatGraph(Calculator& theCom
       return true;
     }
   }
-  SemisimpleLieAlgebra& theSSalgebra = *theSSalgPointer;
+  SemisimpleLieAlgebra& theSSalgebra = *theSSalgPointer.content;
 
   WeylGroupData& theAmbientWeyl = theSSalgebra.theWeyl;
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms theSubgroup;
@@ -7340,7 +7335,7 @@ bool CalculatorFunctions::innerParabolicWeylGroupsBruhatGraph(Calculator& theCom
   out << "<br>Number of elements of the ambient Weyl: "
   << theSubgroup.AmbientWeyl->theGroup.theElements.size;
   FormatExpressions theFormat;
-  hwContext.ContextGetFormatExpressions(theFormat);
+  theSSalgPointer.context.context.ContextGetFormatExpressions(theFormat);
   if (theSubgroup.allElements.size > 498) {
     if (theSubgroup.AmbientWeyl->SizeByFormulaOrNeg1('E', 6) <= theSubgroup.AmbientWeyl->theGroup.GetSize()) {
       out << "Weyl group is too large. <br>";
@@ -7504,7 +7499,7 @@ bool CalculatorFunctions::innerDeterminant(
       << matRat.NumRows << " by "
       << matRat.NumCols << " matrix: " << argument.ToString();
       return output.MakeError(
-        "Requesting to compute determinant of non-square matrix. ", theCommands, true
+        "Requesting to compute determinant of non-square matrix. ", theCommands
       );
     }
   }
@@ -7527,8 +7522,7 @@ bool CalculatorFunctions::innerDeterminant(
       << matRat.NumCols << " matrix: " << argument.ToString();
       return output.MakeError(
         "Requesting to compute determinant of non-square matrix. ",
-        theCommands,
-        true
+        theCommands
       );
     }
   }
@@ -7556,8 +7550,7 @@ bool CalculatorFunctions::innerDeterminant(
     << matRat.NumCols << " matrix: " << argument.ToString();
     return output.MakeError(
       "Requesting to compute determinant of non-square matrix given by: " + argument.ToString(),
-      theCommands,
-      true
+      theCommands
     );
   }
   if (matRF.NumRows > 20) {
@@ -7576,10 +7569,9 @@ bool CalculatorFunctions::innerDecomposeCharGenVerma(
 ) {
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("CalculatorFunctions::innerDecomposeCharGenVerma");
-  Expression theContext;
   Vector<RationalFunction> theHWfundcoords, theHWsimpCoords, theHWFundCoordsFDPart, theHWSimpCoordsFDPart;
   Selection parSel, invertedParSel;
-  SemisimpleLieAlgebra* theSSlieAlg = nullptr;
+  WithContext<SemisimpleLieAlgebra*> theSSlieAlg;
   output.reset(theCommands);
   if (!theCommands.GetTypeHighestWeightParabolic<RationalFunction>(
     theCommands,
@@ -7587,7 +7579,6 @@ bool CalculatorFunctions::innerDecomposeCharGenVerma(
     output,
     theHWfundcoords,
     parSel,
-    theContext,
     theSSlieAlg,
     CalculatorConversions::functionRationalFunction
   )) {
@@ -7598,7 +7589,7 @@ bool CalculatorFunctions::innerDecomposeCharGenVerma(
   }
   std::stringstream out;
   FormatExpressions theFormat;
-  theContext.ContextGetFormatExpressions(theFormat);
+  theSSlieAlg.context.context.ContextGetFormatExpressions(theFormat);
   out << "<br>Highest weight: " << theHWfundcoords.ToString(&theFormat)
   << "<br>Parabolic selection: " << parSel.ToString();
   theHWFundCoordsFDPart = theHWfundcoords;
@@ -7606,7 +7597,7 @@ bool CalculatorFunctions::innerDecomposeCharGenVerma(
     theHWFundCoordsFDPart[parSel.elements[i]] = 0;
   }
   KLpolys theKLpolys;
-  WeylGroupData& theWeyl = theSSlieAlg->theWeyl;
+  WeylGroupData& theWeyl = theSSlieAlg.content->theWeyl;
   if (!theKLpolys.ComputeKLPolys(&theWeyl)) {
     return output.MakeError("failed to generate Kazhdan-Lusztig polynomials (output too large?)", theCommands);
   }
@@ -7662,7 +7653,7 @@ bool CalculatorFunctions::innerDecomposeCharGenVerma(
       << "There is a bug somewhere; crashing in accordance. " << global.fatal;
     }
     currentChar.MakeZero();
-    theMon.owner = theSSlieAlg;
+    theMon.owner = theSSlieAlg.content;
     for (int j = 0; j < theKLpolys.theKLcoeffs[indexInWeyl].size; j ++) {
       if (!theKLpolys.theKLcoeffs[indexInWeyl][j].IsEqualToZero()) {
         currentHW = theHWsimpCoords;
@@ -7695,15 +7686,13 @@ bool CalculatorFunctions::innerPrintGenVermaModule(
   MacroRegisterFunctionWithName("CalculatorFunctions::innerPrintGenVermaModule");
   Selection selectionParSel;
   Vector<RationalFunction> theHWfundcoords;
-  Expression hwContext(theCommands);
-  SemisimpleLieAlgebra* theSSalgebra = nullptr;
+  WithContext<SemisimpleLieAlgebra*> theSSalgebra;
   if (!theCommands.GetTypeHighestWeightParabolic(
     theCommands,
     input,
     output,
     theHWfundcoords,
     selectionParSel,
-    hwContext,
     theSSalgebra,
     CalculatorConversions::functionRationalFunction
   )) {
@@ -7718,8 +7707,8 @@ bool CalculatorFunctions::innerPrintGenVermaModule(
     output,
     theHWfundcoords,
     selectionParSel,
-    hwContext,
-    theSSalgebra,
+    theSSalgebra.context.context,
+    theSSalgebra.content,
     false
   )) {
     return output.MakeError("Failed to create Generalized Verma module", theCommands);
@@ -7750,13 +7739,13 @@ bool CalculatorFunctions::innerWriteGenVermaModAsDiffOperatorUpToLevel(
   const Expression& levelNode = input[2];
   Expression resultSSalgebraE;
   resultSSalgebraE = leftE;
-  SemisimpleLieAlgebra* theSSalgebra;
-  if (!theCommands.CallConversionFunctionReturnsNonConst(
-    CalculatorConversions::functionSemisimpleLieAlgebra, leftE, theSSalgebra
+  WithContext<SemisimpleLieAlgebra*> theSSalgebra;
+  if (!theCommands.Convert(
+    leftE, CalculatorConversions::functionSemisimpleLieAlgebra, theSSalgebra
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
-  int theRank = theSSalgebra->GetRank();
+  int theRank = theSSalgebra.content->GetRank();
   Vector<Polynomial<Rational> > highestWeightFundCoords;
   Expression hwContext(theCommands);
   if (!theCommands.GetVectoR(
@@ -7814,7 +7803,7 @@ bool CalculatorFunctions::innerWriteGenVermaModAsDiffOperatorUpToLevel(
     theHws,
     hwContext,
     selInducing,
-    theSSalgebra,
+    theSSalgebra.content,
     false,
     nullptr,
     nullptr,
@@ -7827,15 +7816,13 @@ bool CalculatorFunctions::innerWriteGenVermaModAsDiffOperatorUpToLevel(
 bool CalculatorFunctions::innerHWV(Calculator& theCommands, const Expression& input, Expression& output) {
   Selection selectionParSel;
   Vector<RationalFunction> theHWfundcoords;
-  Expression hwContext(theCommands);
-  SemisimpleLieAlgebra* theSSalgebra = nullptr;
+  WithContext<SemisimpleLieAlgebra*> theSSalgebra;
   if (!theCommands.GetTypeHighestWeightParabolic(
     theCommands,
     input,
     output,
     theHWfundcoords,
     selectionParSel,
-    hwContext,
     theSSalgebra,
     CalculatorConversions::functionRationalFunction
   )) {
@@ -7850,8 +7837,8 @@ bool CalculatorFunctions::innerHWV(Calculator& theCommands, const Expression& in
     output,
     theHWfundcoords,
     selectionParSel,
-    hwContext,
-    theSSalgebra
+    theSSalgebra.context.context,
+    theSSalgebra.content
   );
 }
 
@@ -7869,13 +7856,13 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
   const Expression& leftE = input[1];
   const Expression& genVemaWeightNode = input[3];
   const Expression& fdWeightNode = input[2];
-  SemisimpleLieAlgebra* theSSalgebra;
-  if (!theCommands.CallConversionFunctionReturnsNonConst(
-    CalculatorConversions::functionSemisimpleLieAlgebra, leftE, theSSalgebra
+  WithContext<SemisimpleLieAlgebra*> theSSalgebra;
+  if (!theCommands.Convert(
+    leftE, CalculatorConversions::functionSemisimpleLieAlgebra, theSSalgebra
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
-  int theRank = theSSalgebra->GetRank();
+  int theRank = theSSalgebra.content->GetRank();
   Vector<RationalFunction> highestWeightFundCoords;
   Expression hwContext(theCommands);
   if (!theCommands.GetVectoR<RationalFunction>(
@@ -7931,9 +7918,9 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
       );
     }
   }
-  theSSalgebra->flagHasNilradicalOrder = true;
+  theSSalgebra.content->flagHasNilradicalOrder = true;
   if (!theCommands.innerHWVCommon(
-    theCommands, hwvGenVerma, highestWeightFundCoords, selParSel1, hwContext, theSSalgebra
+    theCommands, hwvGenVerma, highestWeightFundCoords, selParSel1, hwContext, theSSalgebra.content
   )) {
     return false;
   }
@@ -7943,7 +7930,7 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
   }
   Vector<RationalFunction> theFDhwRF;
   theFDhwRF = theFDhw;
-  if (!theCommands.innerHWVCommon(theCommands, hwvFD, theFDhwRF, selFD, hwContext, theSSalgebra)) {
+  if (!theCommands.innerHWVCommon(theCommands, hwvFD, theFDhwRF, selFD, hwContext, theSSalgebra.content)) {
     return false;
   }
   if (hwvFD.IsError()) {
@@ -7972,7 +7959,7 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
   }
   ElementUniversalEnveloping<RationalFunction> theCasimir, theCasimirMinusChar;
   charSSAlgMod<RationalFunction> theHWchar, theFDLeviSplit, theFDChaR, theFDLeviSplitShifteD;
-  theHWchar.MakeFromWeight(theFDMod.theHWSimpleCoordSBaseField, theSSalgebra);
+  theHWchar.MakeFromWeight(theFDMod.theHWSimpleCoordSBaseField, theSSalgebra.content);
   List<ElementUniversalEnveloping<RationalFunction> > theLeviEigenVectors;
   Vectors<RationalFunction> theEigenVectorWeightsFund;
   if (theGenMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize != theGenMod.GetOwner().GetRank()) {
@@ -7991,7 +7978,7 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
   );
   theFDMod.GetFDchar(theFDChaR);
   List<ElementUniversalEnveloping<RationalFunction> > theCentralCharacters;
-  theCasimir.MakeCasimir(*theSSalgebra);
+  theCasimir.MakeCasimir(*theSSalgebra.content);
   Vector<RationalFunction> currentHWsimplecoords, currentHWdualcoords;
   FormatExpressions tempFormat;
   tempFormat.MaxLineLength = 60;
@@ -8013,13 +8000,13 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
   tempFormat.chevalleyHgeneratorLetter = "\\bar{h}";
   theFDLeviSplitShifteD.MakeZero();
   Weight<RationalFunction> tempMon;
-  tempMon.owner = theSSalgebra;
+  tempMon.owner = theSSalgebra.content;
   ElementUniversalEnveloping<RationalFunction> currentChar;
   for (int i = 0; i < theLeviEigenVectors.size; i ++) {
     tempMon.weightFundamentalCoordS = theEigenVectorWeightsFund[i];
     tempMon.weightFundamentalCoordS += theGenMod.theHWFundamentalCoordsBaseField;
     theFDLeviSplitShifteD.AddMonomial(tempMon, RFOne);
-    currentHWdualcoords = theSSalgebra->theWeyl.GetDualCoordinatesFromFundamental(tempMon.weightFundamentalCoordS);
+    currentHWdualcoords = theSSalgebra.content->theWeyl.GetDualCoordinatesFromFundamental(tempMon.weightFundamentalCoordS);
     currentChar = theCasimir;
     currentChar.ModOutVermaRelations(& currentHWdualcoords, RFOne, RFZero);
     theCentralCharacters.AddOnTop(currentChar);
@@ -8051,9 +8038,9 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
   << " Extra multiplier & Resulting $\\bar {\\mathfrak b}$-singular vector \\endhead\\hline";
   for (int i = 0; i < theCentralCharacters.size; i ++) {
     Vector<RationalFunction> currentWeightSimpleCoords =
-    theSSalgebra->theWeyl.GetSimpleCoordinatesFromFundamental(theEigenVectorWeightsFund[i]);
+    theSSalgebra.content->theWeyl.GetSimpleCoordinatesFromFundamental(theEigenVectorWeightsFund[i]);
     tempElt.MakeHWV(theFDMod, RFOne);
-    tempElt.MultiplyOnTheLeft(theLeviEigenVectors[i], theElt, *theSSalgebra, RFOne);
+    tempElt.MultiplyOnTheLeft(theLeviEigenVectors[i], theElt, *theSSalgebra.content, RFOne);
     tempElt.MakeHWV(theGenMod, RFOne);
     theElt.TensorOnTheRight(tempElt);
     theElt *= - 1;
@@ -8063,11 +8050,11 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
     bool found = false;
     for (int j = 0; j < theCentralCharacters.size; j ++) {
       Vector<RationalFunction> otherWeightSimpleCoords =
-      theSSalgebra->theWeyl.GetSimpleCoordinatesFromFundamental(theEigenVectorWeightsFund[j]);
+      theSSalgebra.content->theWeyl.GetSimpleCoordinatesFromFundamental(theEigenVectorWeightsFund[j]);
       if ((otherWeightSimpleCoords - currentWeightSimpleCoords).IsPositive()) {
         theCasimirMinusChar = theCasimir;
         theCasimirMinusChar -= theCentralCharacters[j];
-        theElt.MultiplyOnTheLeft(theCasimirMinusChar, tempElt2, *theSSalgebra, RFOne);
+        theElt.MultiplyOnTheLeft(theCasimirMinusChar, tempElt2, *theSSalgebra.content, RFOne);
         theElt = tempElt2;
         tempStream << "(i(\\bar c)- (" << theCentralCharacters[j].ToString() << ") )\\\\";
         tempStream2 << " $(\\bar c-p_" << j + 1 << ") $ ";
@@ -8085,10 +8072,10 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
     currentHWsimplecoords = theGenMod.theHWSimpleCoordSBaseField;
     currentHWsimplecoords += theFDMod.theModuleWeightsSimpleCoords[i];
     out << "<tr><td>"
-    << theSSalgebra->theWeyl.GetFundamentalCoordinatesFromSimple(currentHWsimplecoords).ToStringLetterFormat("\\psi")
+    << theSSalgebra.content->theWeyl.GetFundamentalCoordinatesFromSimple(currentHWsimplecoords).ToStringLetterFormat("\\psi")
     << "</td><td>" << HtmlRoutines::GetMathMouseHover(tempStream.str()) << "</td><td>" << tempRat.ToString() << "</td>";
     latexReport2
-    << "$" << theSSalgebra->theWeyl.GetFundamentalCoordinatesFromSimple(currentHWsimplecoords).ToStringLetterFormat("\\psi")
+    << "$" << theSSalgebra.content->theWeyl.GetFundamentalCoordinatesFromSimple(currentHWsimplecoords).ToStringLetterFormat("\\psi")
     << "$ &  " << tempStream2.str() << " &" << tempRat.ToString();
     Polynomial<Rational> tmpGCD, tmpRF;
     tempFormat.MaxLineLength = 80;
@@ -8132,7 +8119,7 @@ bool CalculatorFunctions::innerHWTAABF(Calculator& theCommands, const Expression
   if (algebraIndex == - 1) {
     return output.MakeError("I couldn't extract a Lie algebra to compute hwtaabf.", theCommands);
   }
-  SemisimpleLieAlgebra& constSSalg = theCommands.theObjectContainer.theSSLieAlgebras.theValues[algebraIndex];
+  SemisimpleLieAlgebra& constSSalg = theCommands.theObjectContainer.semisimpleLieAlgebras.theValues[algebraIndex];
   const Expression& weightExpression = input[3];
   Vector<RationalFunction> weight;
   if (!theCommands.GetVectoR<RationalFunction>(
@@ -8785,11 +8772,10 @@ bool CalculatorFunctions::innerRootSAsAndSltwos(
   if (input.size() != 2) {
     return theCommands << "Root subalgebra / sl(2)-subalgebras function expects 1 argument. ";
   }
-  //bool showIndicator = true;
-  SemisimpleLieAlgebra* ownerSS;
-  if (!theCommands.CallConversionFunctionReturnsNonConst(
-    CalculatorConversions::functionSemisimpleLieAlgebra,
+  WithContext<SemisimpleLieAlgebra*> ownerSS;
+  if (!theCommands.Convert(
     input[1],
+    CalculatorConversions::functionSemisimpleLieAlgebra,
     ownerSS
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
@@ -8801,11 +8787,11 @@ bool CalculatorFunctions::innerRootSAsAndSltwos(
 
   std::stringstream outRootHtmlFileName, outRootHtmlDisplayName, outSltwoMainFile, outSltwoFileDisplayName;
 
-  std::string displayFolder = ownerSS->ToStringDisplayFolderName("");
+  std::string displayFolder = ownerSS.content->ToStringDisplayFolderName("");
 
-  outSltwoMainFile << displayFolder << ownerSS->ToStringFileNameRelativePathSlTwoSubalgebras();
-  outRootHtmlFileName << displayFolder << ownerSS->ToStringFileNameNoPathRootSubalgebras();
-  outRootHtmlDisplayName << displayFolder << ownerSS->ToStringFileNameNoPathRootSubalgebras();
+  outSltwoMainFile << displayFolder << ownerSS.content->ToStringFileNameRelativePathSlTwoSubalgebras();
+  outRootHtmlFileName << displayFolder << ownerSS.content->ToStringFileNameNoPathRootSubalgebras();
+  outRootHtmlDisplayName << displayFolder << ownerSS.content->ToStringFileNameNoPathRootSubalgebras();
   if (
     !FileOperations::FileExistsVirtual(outSltwoMainFile.str()) ||
     !FileOperations::FileExistsVirtual(outRootHtmlFileName.str())
@@ -8814,9 +8800,9 @@ bool CalculatorFunctions::innerRootSAsAndSltwos(
   }
   std::stringstream out;
   if (MustRecompute) {
-    SltwoSubalgebras theSl2s(*ownerSS);
+    SltwoSubalgebras theSl2s(*ownerSS.content);
     theSl2s.theRootSAs.flagPrintParabolicPseudoParabolicInfo = true;
-    ownerSS->FindSl2Subalgebras(*ownerSS, theSl2s);
+    ownerSS.content->FindSl2Subalgebras(*ownerSS.content, theSl2s);
     theSl2s.ToHTML(&theFormat);
   } else {
     out << "The table is precomputed and served from the hard disk. <br>";
@@ -9198,7 +9184,7 @@ bool CalculatorFunctions::innerCrash(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerCrash");
-  (void) input;//portable way of avoiding unused parameter warning
+  (void) input;
   global.fatal << "This is a test of the crashing mechanism. "
   << "A file report must have been written. "
   << "The crash file report is not accessible through the calculator's webserver. "
@@ -9260,10 +9246,10 @@ bool CalculatorFunctions::innerDrawWeightSupportWithMults(
   }
   const Expression& typeNode = input[1];
   const Expression& hwNode = input[2];
-  SemisimpleLieAlgebra* theSSalgpointer = nullptr;
-  if (!theCommands.CallConversionFunctionReturnsNonConst(
-    CalculatorConversions::functionSemisimpleLieAlgebra,
+  WithContext<SemisimpleLieAlgebra*> theSSalgpointer;
+  if (!theCommands.Convert(
     typeNode,
+    CalculatorConversions::functionSemisimpleLieAlgebra,
     theSSalgpointer
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
@@ -9271,16 +9257,16 @@ bool CalculatorFunctions::innerDrawWeightSupportWithMults(
   Vector<Rational> highestWeightFundCoords;
   Expression theContext;
   if (!theCommands.GetVectoR<Rational>(
-    hwNode, highestWeightFundCoords, &theContext, theSSalgpointer->GetRank(), nullptr
+    hwNode, highestWeightFundCoords, &theContext, theSSalgpointer.content->GetRank(), nullptr
   )) {
     return output.MakeError("Failed to extract highest weight vector", theCommands);
   }
   Vector<Rational> highestWeightSimpleCoords;
-  WeylGroupData& theWeyl = theSSalgpointer->theWeyl;
+  WeylGroupData& theWeyl = theSSalgpointer.content->theWeyl;
   highestWeightSimpleCoords = theWeyl.GetSimpleCoordinatesFromFundamental(highestWeightFundCoords);
   std::stringstream out;
   charSSAlgMod<Rational> theChar;
-  theChar.MakeFromWeight(highestWeightSimpleCoords, theSSalgpointer);
+  theChar.MakeFromWeight(highestWeightSimpleCoords, theSSalgpointer.content);
   DrawingVariables theDV;
   std::string report;
   theChar.DrawMeWithMults(report, theDV, 10000);
@@ -9296,15 +9282,15 @@ bool CalculatorFunctions::innerDrawRootSystem(
     return theCommands << "DrawRootSystem expects at least 1 argument. ";
   }
   bool hasPreferredProjectionPlane = input.IsListNElements(4);
-  SemisimpleLieAlgebra* theAlgPointer;
-  if (!theCommands.CallConversionFunctionReturnsNonConst(
-    CalculatorConversions::functionSemisimpleLieAlgebra,
+  WithContext<SemisimpleLieAlgebra*> theAlgPointer;
+  if (!theCommands.Convert(
     input[1],
+    CalculatorConversions::functionSemisimpleLieAlgebra,
     theAlgPointer
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
-  SemisimpleLieAlgebra& theAlg = *theAlgPointer;
+  SemisimpleLieAlgebra& theAlg = *theAlgPointer.content;
   WeylGroupData& theWeyl = theAlg.theWeyl;
   Vectors<Rational> preferredProjectionPlane;
   if (hasPreferredProjectionPlane) {
@@ -9678,15 +9664,15 @@ bool CalculatorFunctions::innerDrawWeightSupport(
   }
   const Expression& typeNode = input[1];
   const Expression& hwNode = input[2];
-  SemisimpleLieAlgebra* theAlgPointer;
-  if (!theCommands.CallConversionFunctionReturnsNonConst(
-    CalculatorConversions::functionSemisimpleLieAlgebra,
+  WithContext<SemisimpleLieAlgebra*> theAlgPointer;
+  if (!theCommands.Convert(
     typeNode,
+    CalculatorConversions::functionSemisimpleLieAlgebra,
     theAlgPointer
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
-  SemisimpleLieAlgebra& theAlg = *theAlgPointer;
+  SemisimpleLieAlgebra& theAlg = *theAlgPointer.content;
   Vector<Rational> highestWeightFundCoords;
   Expression tempContext;
   if (!theCommands.GetVectoR<Rational>(hwNode, highestWeightFundCoords, &tempContext, theAlg.GetRank(), nullptr)) {
@@ -9698,7 +9684,7 @@ bool CalculatorFunctions::innerDrawWeightSupport(
   //Vectors<Rational> theWeightsToBeDrawn;
   std::stringstream out;
   charSSAlgMod<Rational> theChar;
-  theChar.MakeFromWeight(highestWeightSimpleCoords, theAlgPointer);
+  theChar.MakeFromWeight(highestWeightSimpleCoords, theAlgPointer.content);
   DrawingVariables theDV;
   std::string report;
   theChar.DrawMeNoMults(report, theDV, 10000);

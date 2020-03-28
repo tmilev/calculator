@@ -515,9 +515,13 @@ std::string HtmlRoutines::ConvertStringToHtmlStringRestrictSize(
   return result;
 }
 
-std::string HtmlRoutines::ConvertStringToHtmlString(const std::string& theString, bool doReplaceNewLineByBr) {
+std::string HtmlRoutines::ConvertStringToHtmlString(
+  const std::string& theString, bool doReplaceNewLineByBr
+) {
   std::string result;
-  HtmlRoutines::ConvertStringToHtmlStringReturnTrueIfModified(theString, result, doReplaceNewLineByBr);
+  HtmlRoutines::ConvertStringToHtmlStringReturnTrueIfModified(
+    theString, result, doReplaceNewLineByBr
+  );
   return result;
 }
 
@@ -1937,8 +1941,13 @@ void StringRoutines::Differ::PushCommonString(int indexLeft, int indexRight) {
 void StringRoutines::Differ::ExtractCommonStrings(
   int indexLeft, int indexRight, int previousLeft, int previousRight
 ) {
-  MacroRegisterFunctionWithName("stringDiffer::ExtractCommonStrings");
-  if (indexLeft == 0 || indexRight == 0) {
+  MacroRegisterFunctionWithName("StringRoutines::Differ::ExtractCommonStrings");
+  if (
+    indexLeft == 0 ||
+    indexRight == 0 ||
+    indexLeft >= static_cast<signed>(this->left.size()) ||
+    indexRight >= static_cast<signed>(right.size())
+  ) {
     this->PushCommonString(previousLeft, previousRight);
     return;
   }
@@ -2017,7 +2026,8 @@ bool StringRoutines::Differ::ComputeDifference(std::stringstream* commentsOnFail
   }
   this->ComputeLongestSubsequenceMatrix();
   this->currentCommonStringLength = 0;
-  int startLeft = 0, startRight = 0;
+  int startLeft = 0;
+  int startRight = 0;
   this->ComputeBestStartingIndices(startLeft, startRight);
   this->ExtractCommonStrings(
     startLeft,

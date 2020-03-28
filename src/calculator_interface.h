@@ -358,6 +358,7 @@ private:
     this->CheckInitialization();
     Expression tempE;
     tempE.AssignValue(inputValue, *this->owner);
+    tempE.CheckConsistency();
     return this->AddChildOnTop(tempE);
   }
   template <class theType>
@@ -614,7 +615,7 @@ private:
   const Expression& GetLastChild() const {
     return (*this)[this->children.size - 1];
   }
-  bool MakeError (const std::string& theError, Calculator& owner, bool isPublicError = false);
+  bool MakeError (const std::string& theError, Calculator& owner);
   Expression(const Expression& other): flagDeallocated(false) {
     this->operator=(other);
   }
@@ -706,6 +707,21 @@ private:
     static bool ToStringTest(Calculator& ownerInitialized);
     static bool ToStringTestRecode(const std::string& inputHardCodedMustParse, Calculator& ownerInitialized);
   };
+};
+
+class ExpressionContext {
+public:
+  Expression context;
+
+};
+
+template <class builtIn>
+class WithContext {
+public:
+  ExpressionContext context;
+  builtIn content;
+  WithContext() {
+  }
 };
 
 class Function {
@@ -965,7 +981,8 @@ class ObjectContainer {
   // by various predefined function handlers.
 public:
   HashedListReferences<ElementWeylGroup> theWeylGroupElements;
-  MapReferences<DynkinType, SemisimpleLieAlgebra> theSSLieAlgebras;
+  MapReferences<DynkinType, SemisimpleLieAlgebra> semisimpleLieAlgebras;
+  ListReferences<SemisimpleLieAlgebra*> semisimpleLieAlgebraPointers;
   MapReferences<DynkinType, SemisimpleSubalgebras> theSSSubalgebraS;
   HashedListReferences<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> > theWeylGroupReps;
   HashedListReferences<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> > theWeylGroupVirtualReps;
@@ -1803,7 +1820,7 @@ public:
   int opCharSSAlgMod() {
     return this->operations.GetIndexIMustContainTheObject("CharSSAlgMod");
   }
-  int opSSLieAlg() {
+  int opSemisimpleLieAlgebrA() {
     return this->operations.GetIndexIMustContainTheObject("SemisimpleLieAlg");
   }
   int opSemisimpleSubalgebras() {
@@ -1996,7 +2013,9 @@ public:
     }
   }
   template <class theType>
-  bool ConvertToTypeUsingFunction(Expression::FunctionAddress theFun, const Expression& input, Expression& output) {
+  bool ConvertToTypeUsingFunction(
+    Expression::FunctionAddress theFun, const Expression& input, Expression& output
+  ) {
     MacroRegisterFunctionWithName("Calculator::ConvertToTypeUsingFunction");
     if (input.IsOfType<theType>()) {
       output = input;
@@ -2013,17 +2032,22 @@ public:
   }
   // Return type is non-const, please use with caution.
   template <class theType>
-  bool CallConversionFunctionReturnsNonConst(
-    Expression::FunctionAddress theFun,
+  bool Convert(
     const Expression& input,
-    theType*& outputData
+    Expression::FunctionAddress conversion,
+    WithContext<theType>& output
   ) {
-    MacroRegisterFunctionWithName("Calculator::CallConversionFunctionReturnsNonConst");
-    Expression tempE;
-    if (!this->ConvertToTypeUsingFunction<theType>(theFun, input, tempE)) {
+    MacroRegisterFunctionWithName("Calculator::Convert");
+    Expression conversionExpression;
+    if (!this->ConvertToTypeUsingFunction<theType>(conversion, input, conversionExpression)) {
       return false;
     }
-    outputData = &tempE.GetValueNonConst<theType>();
+    global.Comments << "DEBUG: Got to conversoin expression check. <hr>";
+    if (!conversionExpression.IsOfType(&output.content)) {
+      return false;
+    }
+    global.Comments << "DEBUG: en after!. <hr>";
+    output.context.context = conversionExpression.GetContext();
     return true;
   }
   bool CallCalculatorFunction(Expression::FunctionAddress theFun, const Expression& input, Expression& output) {
@@ -2321,8 +2345,7 @@ public:
     Calculator& theCommands,
     const Expression& input,
     Vector<coefficient>& outputWeightSimpleCoords,
-    Expression& outputWeightContext,
-    SemisimpleLieAlgebra*& ambientSSalgebra,
+    WithContext<SemisimpleLieAlgebra*>& outputAmbientSSalgebra,
     Expression::FunctionAddress ConversionFun
   );
   template<class coefficient>
@@ -2332,8 +2355,7 @@ public:
     Expression& output,
     Vector<coefficient>& outputWeightHWFundcoords,
     Selection& outputInducingSel,
-    Expression& outputHWContext,
-    SemisimpleLieAlgebra*& ambientSSalgebra,
+    WithContext<SemisimpleLieAlgebra*>& outputAmbientSSalgebra,
     Expression::FunctionAddress ConversionFun
   );
   static bool innerGroebnerGradedLexicographic(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -2933,6 +2955,8 @@ template <class theType>
 bool Expression::AssignValue(const theType& inputValue, Calculator& owner) {
   Expression tempE;
   tempE.owner = &owner;
+  // std::stringstream comments;
+  // comments << inputValue;
   int curType = tempE.GetTypeOperation<theType>();
   if (
     curType == owner.opPoly() ||
@@ -2984,8 +3008,7 @@ bool Calculator::GetTypeWeight(
   Calculator& theCommands,
   const Expression& input,
   Vector<coefficient>& outputWeightSimpleCoords,
-  Expression& outputWeightContext,
-  SemisimpleLieAlgebra*& ambientSSalgebra,
+  WithContext<SemisimpleLieAlgebra*>& outputAmbientSemisimpleLieAlgebra,
   Expression::FunctionAddress ConversionFun
 ) {
   MacroRegisterFunctionWithName("Calculator::GetTypeWeight");
@@ -2996,18 +3019,19 @@ bool Calculator::GetTypeWeight(
   }
   const Expression& leftE = input[1];
   const Expression& middleE = input[2];
-  if (!Calculator::CallConversionFunctionReturnsNonConst(
-    CalculatorConversions::functionSemisimpleLieAlgebra,
+  if (!Calculator::Convert(
     leftE,
-    ambientSSalgebra
+    CalculatorConversions::functionSemisimpleLieAlgebra,
+    outputAmbientSemisimpleLieAlgebra
   )) {
     theCommands << "Error extracting Lie algebra from " << leftE.ToString();
     return false;
   }
+  SemisimpleLieAlgebra* ambientSSalgebra = outputAmbientSemisimpleLieAlgebra.content;
   if (!theCommands.GetVectoR<coefficient>(
     middleE,
     outputWeightSimpleCoords,
-    &outputWeightContext,
+    &outputAmbientSemisimpleLieAlgebra.context.context,
     ambientSSalgebra->GetRank(),
     ConversionFun
   )) {
@@ -3017,17 +3041,17 @@ bool Calculator::GetTypeWeight(
     << middleE.ToString() << ".";
     return false;
   }
-  if (!theCommands.theObjectContainer.theSSLieAlgebras.Contains(
+  if (!theCommands.theObjectContainer.semisimpleLieAlgebras.Contains(
     ambientSSalgebra->theWeyl.theDynkinType
   )) {
     global.fatal << "This is a programming error: "
     << ambientSSalgebra->ToStringLieAlgebraName()
     << " contained object container more than once. " << global.fatal;
   }
-  int algebraIndex = theCommands.theObjectContainer.theSSLieAlgebras.GetIndex(
+  int algebraIndex = theCommands.theObjectContainer.semisimpleLieAlgebras.GetIndex(
     ambientSSalgebra->theWeyl.theDynkinType
   );
-  outputWeightContext.ContextSetSSLieAlgebrA(algebraIndex, theCommands);
+  outputAmbientSemisimpleLieAlgebra.context.context.ContextSetSSLieAlgebrA(algebraIndex, theCommands);
   return true;
 }
 
@@ -3038,8 +3062,7 @@ bool Calculator::GetTypeHighestWeightParabolic(
   Expression& output,
   Vector<coefficient>& outputWeightHWFundcoords,
   Selection& outputInducingSel,
-  Expression& outputHWContext,
-  SemisimpleLieAlgebra*& ambientSSalgebra,
+  WithContext<SemisimpleLieAlgebra*>& outputAmbientSSalgebra,
   Expression::FunctionAddress ConversionFun
 ) {
   if (!input.IsListNElements(4) && !input.IsListNElements(3)) {
@@ -3052,13 +3075,15 @@ bool Calculator::GetTypeHighestWeightParabolic(
   }
   const Expression& leftE = input[1];
   const Expression& middleE = input[2];
-  if (!Calculator::CallConversionFunctionReturnsNonConst(
-    CalculatorConversions::functionSemisimpleLieAlgebra,
+  if (!Calculator::Convert(
     leftE,
-    ambientSSalgebra
+    CalculatorConversions::functionSemisimpleLieAlgebra,
+    outputAmbientSSalgebra
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
+  SemisimpleLieAlgebra* ambientSSalgebra = outputAmbientSSalgebra.content;
+  Expression& outputHWContext = outputAmbientSSalgebra.context.context;
   if (!theCommands.GetVectoR<coefficient>(
     middleE,
     outputWeightHWFundcoords,
@@ -3101,7 +3126,7 @@ bool Calculator::GetTypeHighestWeightParabolic(
       }
     }
   }
-  if (!theCommands.theObjectContainer.theSSLieAlgebras.Contains(
+  if (!theCommands.theObjectContainer.semisimpleLieAlgebras.Contains(
     ambientSSalgebra->theWeyl.theDynkinType
   )) {
     global.fatal << "This is a programming error: "
@@ -3109,7 +3134,7 @@ bool Calculator::GetTypeHighestWeightParabolic(
     << " contained object container more than once. "
     << global.fatal;
   }
-  int algebraIndex = theCommands.theObjectContainer.theSSLieAlgebras.GetIndex(
+  int algebraIndex = theCommands.theObjectContainer.semisimpleLieAlgebras.GetIndex(
     ambientSSalgebra->theWeyl.theDynkinType
   );
   outputHWContext.ContextSetSSLieAlgebrA(algebraIndex, theCommands);

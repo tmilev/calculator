@@ -1426,7 +1426,7 @@ bool CalculatorFunctions::innerSqrt(Calculator& theCommands, const Expression& i
   }
   if (thePower < 0) {
     if (rationalValue.IsEqualToZero()) {
-      return output.MakeError("Division by zero in expression: " + input.ToString(), theCommands, true);
+      return output.MakeError("Division by zero in expression: " + input.ToString(), theCommands);
     }
     thePower *= - 1;
     rationalValue.Invert();
@@ -2258,7 +2258,7 @@ bool CalculatorFunctions::innerPolynomialDivisionRemainder(
   theGB.theBasiS.SetSize(thePolys.size - 1);
   for (int i = 1; i < thePolys.size; i ++) {
     if (thePolys[i].IsEqualToZero()) {
-      return output.MakeError("Division by zero.", theCommands, true);
+      return output.MakeError("Division by zero.", theCommands);
     }
     theGB.theBasiS[i - 1] = thePolys[i];
   }
@@ -2341,7 +2341,7 @@ bool CalculatorFunctions::innerPolynomialDivisionVerbose(
   theGB.theBasiS.SetSize(thePolys.size - 1);
   for (int i = 1; i < thePolys.size; i ++) {
     if (thePolys[i].IsEqualToZero()) {
-      return output.MakeError("Division by zero.", theCommands, true);
+      return output.MakeError("Division by zero.", theCommands);
     }
     theGB.theBasiS[i - 1] = thePolys[i];
   }
@@ -2897,7 +2897,7 @@ bool CalculatorFunctions::innerPolynomialDivisionSlidesGrLex(
   theGB.theBasiS.SetSize(thePolys.size - 2);
   for (int i = 2; i < thePolys.size; i ++) {
     if (thePolys[i].IsEqualToZero()) {
-      return output.MakeError("Division by zero.", theCommands, true);
+      return output.MakeError("Division by zero.", theCommands);
     }
     theGB.theBasiS[i - 2] = thePolys[i];
   }
@@ -2929,4 +2929,15 @@ bool CalculatorFunctions::innerPolynomialDivisionSlidesGrLex(
   return output.AssignValue(
     HtmlRoutines::ConvertStringToHtmlString(latexOutput.str(), true), theCommands
   );
+}
+
+bool CalculatorFunctions::innerFactorPolynomialModPrime(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::innerFactorPolynomialModPrime");
+  if (input.size() != 3) {
+    return theCommands << "Expected two arguments, polynomial and prime.";
+  }
+  global.fatal << "Factor mod prime not implemented yet." << global.fatal;
+  return false;
 }

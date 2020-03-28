@@ -1812,16 +1812,6 @@ void Rational::Simplify() {
   this->ShrinkExtendedPartIfPossible();
 }
 
-/*
-void Rational::DrawElement(DrawElementInputOutput& theDrawData) {
-  std::string tempS;
-  tempS = this->ToString();
-  global.theDrawingVariables.theBuffer.drawTextBuffer
-  (theDrawData.TopLeftCornerX, theDrawData.TopLeftCornerY, tempS, 0, global.theDrawingVariables.fontSizeNormal, global.theDrawingVariables.TextStyleNormal);
-  theDrawData.outputHeight =10;
-  theDrawData.outputWidth =10*tempS.size();
-}*/
-
 void Rational::operator=(const Polynomial<Rational>& other) {
   if (!other.IsConstant(this)) {
     global.fatal << "This is a programming error: attempting to assign "

@@ -173,9 +173,9 @@ int Expression::GetTypeOperation<ElementWeylAlgebra<Rational> >() const {
 }
 
 template < >
-int Expression::GetTypeOperation<SemisimpleLieAlgebra>() const {
+int Expression::GetTypeOperation<SemisimpleLieAlgebra*>() const {
   this->CheckInitialization();
-  return this->owner->opSSLieAlg();
+  return this->owner->opSemisimpleLieAlgebrA();
 }
 
 template < >
@@ -451,14 +451,15 @@ ElementWeylAlgebra<Rational>
 }
 
 template < >
-int Expression::AddObjectReturnIndex(const
-SemisimpleLieAlgebra
+int Expression::AddObjectReturnIndex(
+SemisimpleLieAlgebra* const
 & inputValue) const {
   this->CheckInitialization();
-  if (!this->owner->theObjectContainer.theSSLieAlgebras.Contains(inputValue.theWeyl.theDynkinType)) {
+  if (!this->owner->theObjectContainer.semisimpleLieAlgebras.Contains(inputValue->theWeyl.theDynkinType)) {
     global.fatal << "Semisimple Lie algebra must be allocated directly in the object container. " << global.fatal;
   }
-  return this->owner->theObjectContainer.theSSLieAlgebras.GetIndex(inputValue.theWeyl.theDynkinType);
+  int index = this->owner->theObjectContainer.semisimpleLieAlgebras.GetIndex(inputValue->theWeyl.theDynkinType);
+  return index;
 }
 
 template < >
@@ -541,7 +542,7 @@ WeylGroupData
 & inputValue) const {
   this->CheckInitialization();
   this->owner->theObjectContainer.GetLieAlgebraCreateIfNotPresent(inputValue.theDynkinType);
-  return this->owner->theObjectContainer.theSSLieAlgebras.GetIndex(inputValue.theDynkinType);
+  return this->owner->theObjectContainer.semisimpleLieAlgebras.GetIndex(inputValue.theDynkinType);
 }
 
 template < >
@@ -658,7 +659,8 @@ template < >
 std::string& Expression::GetValueNonConst() const {
   if (!this->IsOfType<std::string>()) {
     global.fatal << "This is a programming error: expression not of required type std::string. "
-    << "The expression equals " << this->ToString() << "." << global.fatal;
+    << "The expression equals " << this->ToString() << ". Comments so far: "
+    << this->owner->Comments.str() << global.fatal;
   }
   return this->owner->theObjectContainer.theStrings.GetElement(this->GetLastChild().theData);
 }
@@ -754,12 +756,12 @@ charSSAlgMod<Rational>& Expression::GetValueNonConst() const {
 }
 
 template < >
-SemisimpleLieAlgebra& Expression::GetValueNonConst() const {
-  if (!this->IsOfType<SemisimpleLieAlgebra>()) {
+SemisimpleLieAlgebra*& Expression::GetValueNonConst() const {
+  if (!this->IsOfType<SemisimpleLieAlgebra*>()) {
     global.fatal << "This is a programming error: expression not of required type "
     << "SemisimpleLieAlgebra. The expression equals " << this->ToString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theSSLieAlgebras.theValues[this->GetLastChild().theData];
+  return this->owner->theObjectContainer.semisimpleLieAlgebraPointers[this->GetLastChild().theData];
 }
 
 template < >
@@ -796,7 +798,9 @@ WeylGroupData& Expression::GetValueNonConst() const {
     << "WeylGroupData. The expression equals "
     << this->ToString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.theSSLieAlgebras.theValues[this->GetLastChild().theData].theWeyl;
+  return this->owner->theObjectContainer.semisimpleLieAlgebras.theValues[
+    this->GetLastChild().theData
+  ].theWeyl;
 }
 
 template < >
@@ -1082,7 +1086,7 @@ bool Expression::CheckConsistency() const {
       if (currentE.StartsWith(this->owner->opPolynomialVariables())) {
         isGood = true;
       }
-      if (currentE.StartsWith(this->owner->opSSLieAlg())) {
+      if (currentE.StartsWith(this->owner->opSemisimpleLieAlgebrA())) {
         isGood = true;
       }
       if (currentE.StartsWith(this->owner->opWeylAlgebraVariables())) {
@@ -1413,7 +1417,7 @@ bool Expression::ContextSetSSLieAlgebrA(int indexInOwners, Calculator& owner) {
   Expression emptyContext;
   emptyContext.MakeEmptyContext(owner);
   LieAlgContextE.reset(owner, 3);
-  LieAlgContextE.AddChildAtomOnTop(owner.opSSLieAlg());
+  LieAlgContextE.AddChildAtomOnTop(owner.opSemisimpleLieAlgebrA());
   LieAlgContextE.AddChildOnTop(emptyContext);
   LieAlgContextE.AddChildAtomOnTop(indexInOwners);
   return this->AddChildOnTop(LieAlgContextE);
@@ -1576,7 +1580,7 @@ bool Expression::ContextMergeContexts(const Expression& leftContext, const Expre
     Expression emptyContext;
     emptyContext.MakeEmptyContext(owner);
     ssAlgE.reset(owner, 2);
-    ssAlgE.AddChildAtomOnTop(owner.opSSLieAlg());
+    ssAlgE.AddChildAtomOnTop(owner.opSemisimpleLieAlgebrA());
     ssAlgE.AddChildOnTop(emptyContext);
     ssAlgE.AddChildAtomOnTop(leftSSindex);
     outputContext.AddChildOnTop(ssAlgE);
@@ -1976,14 +1980,11 @@ bool Expression::IsEqualToZero() const {
   return false;
 }
 
-bool Expression::MakeError(const std::string& theError, Calculator& owner, bool isPublicError) {
+bool Expression::MakeError(const std::string& theError, Calculator& owner) {
   this->reset(owner, 2);
+  this->CheckConsistency();
   this->AddChildAtomOnTop(owner.opError());
-  if (isPublicError) {
-    if (owner.errorsPublic.str() == "") {
-      owner.errorsPublic << theError;
-    }
-  }
+  this->CheckConsistency();
   return this->AddChildValueOnTop(theError);
 }
 
@@ -2233,7 +2234,7 @@ int Expression::ContextGetIndexAmbientSSalg() const {
     return - 1;
   }
   for (int i = 1; i < this->children.size; i ++) {
-    if ((*this)[i].StartsWith(this->owner->opSSLieAlg(), 3)) {
+    if ((*this)[i].StartsWith(this->owner->opSemisimpleLieAlgebrA(), 3)) {
       return (*this)[i][2].theData;
     }
   }
@@ -2578,9 +2579,9 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     contextFormat.GetElement().flagFormatWeightAsVectorSpaceIndex = false;
     out << this->GetValue<Weight<Polynomial<Rational> > >().ToString(&contextFormat.GetElement());
     result = true;
-  } else if (this->IsOfType<SemisimpleLieAlgebra>()) {
+  } else if (this->IsOfType<SemisimpleLieAlgebra*>()) {
     out << "SSLieAlg{}("
-    << this->GetValue<SemisimpleLieAlgebra>().ToStringLieAlgebraName()
+    << this->GetValue<SemisimpleLieAlgebra*>()->ToStringLieAlgebraName()
     << ")";
     result = true;
   } else if (this->IsOfType<ElementUniversalEnveloping<RationalFunction> >()) {
@@ -3887,10 +3888,12 @@ bool Expression::ToStringError(
   if (!input.StartsWith(input.owner->opError(), 2)) {
     return false;
   }
+  input.CheckInitialization();
   input.owner->NumErrors ++;
-  out << "(Error~ " << input.owner->NumErrors << ":~ see~ comments)";
-  input.owner->Comments << "<br>Error "
-  << input.owner->NumErrors << ". " << input[1].ToString(theFormat);
+  out << "\\text{Error number "
+  << input.owner->NumErrors
+  << ": " << input[1].ToString(theFormat) << "}"
+  ;
   return true;
 }
 
@@ -4903,7 +4906,9 @@ bool Expression::MakeContextSSLieAlg(Calculator& owner, const SemisimpleLieAlgeb
   this->MakeEmptyContext(owner);
   owner.theObjectContainer.GetLieAlgebraCreateIfNotPresent(theSSLiealg.theWeyl.theDynkinType);
   return this->ContextSetSSLieAlgebrA(
-    owner.theObjectContainer.theSSLieAlgebras.GetIndex(theSSLiealg.theWeyl.theDynkinType), owner
+    owner.theObjectContainer.semisimpleLieAlgebras.GetIndex(
+      theSSLiealg.theWeyl.theDynkinType
+    ), owner
   );
 }
 

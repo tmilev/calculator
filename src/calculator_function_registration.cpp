@@ -5369,6 +5369,19 @@ void Calculator::initPredefinedInnerFunctions() {
     "FactorOneVarPolyOverRationals",
     innerStandard
   );
+/*  this->AddOperationHandler(
+    "FactorOneVariablePolynomialModPrime",
+    CalculatorFunctions::innerFactorPolynomialModPrime,
+    "",
+    "Factors a one variable polynomial over a given prime field Z/pZ "
+    "using the Cantor-Zassenhaus algorithm. "
+    "First argument = polynomial. "
+    "Second argument = prime number.",
+    "FactorOneVariablePolynomialModPrime{}(x^4+x^3-x+1, 3);\n",
+    "CalculatorFunctions::innerFactorPolynomialModPrime",
+    "FactorOneVariablePolynomialModPrime",
+    innerStandard
+  );*/
   this->AddOperationHandler(
     "FactorInteger",
     CalculatorFunctions::innerFactorIntegeR,

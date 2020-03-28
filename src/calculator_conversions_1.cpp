@@ -224,15 +224,16 @@ bool CalculatorConversions::functionSemisimpleLieAlgebra(
     return theCommands
     << "I have been instructed to allow semisimple Lie algebras of rank 20 maximum. "
     << "If you would like to relax this limitation edit file " << __FILE__
-    << " line " << __LINE__ << ". Note that the Chevalley constant computation Reserves a dim(g)*dim(g) "
+    << " line " << __LINE__ << ". Note that the Chevalley "
+    << "constant computation Reserves a dim(g)*dim(g) "
     << "table of RAM memory, which means the RAM memory rises with the 4^th power of rank(g). "
     << "You have been warned. Alternatively, you may want to implement a sparse structure constant table "
     << "(write me an email if you want to do that, I will help you). ";
   }
-  bool newlyCreated = !theCommands.theObjectContainer.theSSLieAlgebras.Contains(theDynkinType);
+  bool newlyCreated = !theCommands.theObjectContainer.semisimpleLieAlgebras.Contains(theDynkinType);
   outputPointer = &theCommands.theObjectContainer.GetLieAlgebraCreateIfNotPresent(theDynkinType);
   outputPointer->CheckConsistency();
-  output.AssignValue(*outputPointer, theCommands);
+  output.AssignValue(outputPointer, theCommands);
   if (newlyCreated) {
     outputPointer->ComputeChevalleyConstants();
     Expression tempE;
@@ -259,16 +260,19 @@ bool CalculatorConversions::innerExpressionFromDynkinSimpleType(
 }
 
 template < >
-SemisimpleLieAlgebra& Expression::GetValueNonConst() const;
+SemisimpleLieAlgebra*& Expression::GetValueNonConst() const;
 
 bool CalculatorConversions::innerStoreSemisimpleLieAlgebra(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  if (!input.IsOfType<SemisimpleLieAlgebra>()) {
+  if (!input.IsOfType<SemisimpleLieAlgebra*>()) {
     return output.MakeError("Asking to store non-semisimple Lie algebra as such is not allowed. ", theCommands);
   }
-  SemisimpleLieAlgebra& owner = input.GetValueNonConst<SemisimpleLieAlgebra>();
-  return CalculatorConversions::innerExpressionFromDynkinType(theCommands, owner.theWeyl.theDynkinType, output);
+  SemisimpleLieAlgebra* owner = input.GetValueNonConst<SemisimpleLieAlgebra*>();
+  if (owner == nullptr) {
+    global.fatal << "Unexpected null pointer" << global.fatal;
+  }
+  return CalculatorConversions::innerExpressionFromDynkinType(theCommands, owner->theWeyl.theDynkinType, output);
 }
 
 bool CalculatorConversions::innerExpressionFromElementSemisimpleLieAlgebraRationals(
@@ -644,7 +648,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
 
   SemisimpleSubalgebras& theSAs =
   theCommands.theObjectContainer.GetSemisimpleSubalgebrasCreateIfNotPresent(ownerSemisimple->theWeyl.theDynkinType);
-  theSAs.theSubalgebrasNonEmbedded = &theCommands.theObjectContainer.theSSLieAlgebras;
+  theSAs.theSubalgebrasNonEmbedded = &theCommands.theObjectContainer.semisimpleLieAlgebras;
   theSAs.owner = ownerSemisimple;
   reportStream << " Initializing data structures... ";
   theReport.Report(reportStream.str());
@@ -1013,7 +1017,7 @@ bool CalculatorConversions::innerElementUE(
   outputContext.MakeEmptyContext(theCommands);
   outputContext.AddChildOnTop(outputPolyVars);
   outputContext.ContextSetSSLieAlgebrA(
-    theCommands.theObjectContainer.theSSLieAlgebras.GetIndex(owner.theWeyl.theDynkinType),
+    theCommands.theObjectContainer.semisimpleLieAlgebras.GetIndex(owner.theWeyl.theDynkinType),
     theCommands
   );
   return output.AssignValueWithContext(outputUE, outputContext, theCommands);

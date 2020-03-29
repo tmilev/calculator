@@ -737,8 +737,9 @@ std::string WebWorker::GetHtmlHiddenInputs(bool includeUserName, bool includeAut
 void WebWorker::WriteAfterTimeoutProgress(const std::string& input, bool forceFileWrite) {
   this->PauseIfRequested();
   MacroRegisterFunctionWithName("WebWorker::WriteAfterTimeoutProgress");
-  if (!this->workerToWorkerRequestIndicator.ReadOnceIfFailThenCrash(false, true)) {
-    global << logger::red << "Failed to read non-blocking worker-to-worker pipe. " << logger::endL;
+  if (!this->workerToWorkerRequestIndicator.ReadOnceIfFailThenCrash(true)) {
+    global << logger::red
+    << "Failed to read non-blocking worker-to-worker pipe. " << logger::endL;
     return;
   }
   if (this->workerToWorkerRequestIndicator.lastRead.size == 0 && !forceFileWrite) {
@@ -1151,7 +1152,7 @@ JSData WebWorker::ProcessComputationIndicatorJSData() {
   }
   WebWorker& otherWorker = this->parent->theWorkers[otherIndex];
   // Request a progress report from the running worker, non-blocking.
-  otherWorker.workerToWorkerRequestIndicator.WriteOnceAfterEmptying("!", false, true);
+  otherWorker.workerToWorkerRequestIndicator.WriteOnceAfterEmptying("!", true);
   return result;
 }
 
@@ -1477,7 +1478,7 @@ bool WebWorker::IsFileExtensionOfBinaryFile(const std::string& fileExtension) {
   return false;
 }
 
-void WebWorker::WrapUpConnectioN() {
+void WebWorker::WrapUpConnection() {
   MacroRegisterFunctionWithName("WebWorker::WrapUpConnection");
   if (global.flagServerDetailedLog) {
     global << "Detail: wrapping up connection. " << logger::endL;
@@ -1491,7 +1492,7 @@ void WebWorker::WrapUpConnectioN() {
     this->resultWork["stopNeeded"] = "true";
   }
   this->pipeWorkerToServerControls.WriteOnceAfterEmptying(
-    this->resultWork.ToString(nullptr), false, false
+    this->resultWork.ToString(nullptr), false
   );
   if (global.flagServerDetailedLog) {
     global << "Detail: done with pipes, releasing resources. " << logger::endL;
@@ -2412,7 +2413,7 @@ void WebServer::WrapUp() {
   if (global.server().activeWorker == - 1) {
     return;
   }
-  global.server().GetActiveWorker().WrapUpConnectioN();
+  global.server().GetActiveWorker().WrapUpConnection();
   global.server().activeWorker = - 1;
 }
 
@@ -2434,7 +2435,7 @@ void WebServer::WorkerTimerPing(int64_t pingTime) {
   }
   std::stringstream outTimestream;
   outTimestream << pingTime;
-  global.server().GetActiveWorker().pipeWorkerToServerTimerPing.WriteOnceAfterEmptying(outTimestream.str(), false, false);
+  global.server().GetActiveWorker().pipeWorkerToServerTimerPing.WriteOnceAfterEmptying(outTimestream.str(), false);
 }
 
 void WebServer::ReleaseNonActiveWorkers() {
@@ -2503,22 +2504,22 @@ bool WebServer::CreateNewActiveWorker() {
   std::string wtos = wtosStream.str();
   std::string wtow = this->ToStringWorkerToWorker();
   WebWorker& worker = this->GetActiveWorker();
-  if (!worker.workerToWorkerRequestIndicator.CreateMe(wtow + "request-indicator", false, false, false, true)) {
+  if (!worker.workerToWorkerRequestIndicator.CreateMe(wtow + "request-indicator", false, false, true)) {
     global << "Failed to create pipe: "
     << worker.workerToWorkerRequestIndicator.name << "\n";
     return this->EmergencyRemoval_LastCreatedWorker();
   }
-  if (!worker.pipeWorkerToServerTimerPing.CreateMe(wtos + "ping", false, false, false, true)) {
+  if (!worker.pipeWorkerToServerTimerPing.CreateMe(wtos + "ping", false, false, true)) {
     global << "Failed to create pipe: "
     << worker.pipeWorkerToServerTimerPing.name << "\n";
     return this->EmergencyRemoval_LastCreatedWorker();
   }
-  if (!worker.pipeWorkerToServerControls.CreateMe(wtos + "controls", false, false, false, true)) {
+  if (!worker.pipeWorkerToServerControls.CreateMe(wtos + "controls", false, false, true)) {
     global << "Failed to create pipe: "
     << worker.pipeWorkerToServerControls.name << "\n";
     return this->EmergencyRemoval_LastCreatedWorker();
   }
-  if (!worker.pipeWorkerToWorkerStatus.CreateMe(wtos + "worker status", false, false, false, true)) {
+  if (!worker.pipeWorkerToWorkerStatus.CreateMe(wtos + "worker status", false, false, true)) {
     global << "Failed to create pipe: "
     << worker.pipeWorkerToWorkerStatus.name << "\n";
     return this->EmergencyRemoval_LastCreatedWorker();
@@ -2638,7 +2639,7 @@ std::string WebServer::ToStringStatusAll() {
     if (!currentWorker.flagInUsE) {
       continue;
     }
-    currentWorker.pipeWorkerToWorkerStatus.ReadOnceWithoutEmptying(false, false);
+    currentWorker.pipeWorkerToWorkerStatus.ReadOnceWithoutEmptying(false);
     currentWorker.status = currentWorker.pipeWorkerToWorkerStatus.GetLastRead();
   }
   out << "<hr>";
@@ -2667,7 +2668,8 @@ bool WebServer::RestartIsNeeded() {
   << " function resubmit() { location.reload(true);}</script></head>";
   out << "<body>";
 
-  out << "<b>The server executable was updated, but the server has not been restarted yet. "
+  out << "<b>The server executable was updated, "
+  << "but the server has not been restarted yet. "
   << "Restarting in 0.5 seconds...</b>";
   out << "</body></html>";
   global << "Current process spawned from file with time stamp: "
@@ -2679,12 +2681,13 @@ bool WebServer::RestartIsNeeded() {
   return true;
 }
 
-void WebServer::StopKillAll[[noreturn]](bool attemptToRestart) {
+void WebServer::StopKillAll(bool attemptToRestart) {
   if (
     global.logs.logType != GlobalVariables::LogData::type::server &&
     global.logs.logType != GlobalVariables::LogData::type::serverMonitor
   ) {
-    global.fatal << "Server restart is allowed only to the server/monitor processes. " << global.fatal;
+    global.fatal << "Server restart is allowed only to "
+    << "the server/monitor processes. " << global.fatal;
   }
   global << logger::red << "Server restart requested. " << logger::endL;
   global << "Sending kill signal to all copies of the calculator. " << logger::endL;
@@ -2709,10 +2712,12 @@ void WebServer::StopKillAll[[noreturn]](bool attemptToRestart) {
     }
     waitAttempts ++;
     if (waitAttempts > maximumWaitAttempts) {
-      global << logger::red << "Child exit timeout: made " << waitAttempts << " attempts to exit. " << logger::endL;
+      global << logger::red << "Child exit timeout: made "
+      << waitAttempts << " attempts to exit. " << logger::endL;
       break;
     }
-    global << logger::blue << "Still waiting on " << workersStillInUse << " workers to finish. " << logger::endL;
+    global << logger::blue << "Still waiting on "
+    << workersStillInUse << " workers to finish. " << logger::endL;
     global.FallAsleep(1000000);
   }
   this->ReleaseEverything();
@@ -2726,7 +2731,8 @@ void WebServer::StopKillAll[[noreturn]](bool attemptToRestart) {
     theCommand << " && ";
     theCommand << global.PhysicalNameExecutableWithPath;
     theCommand << " server " << timeLimitSeconds;
-    global << logger::red << "Restart command: " << logger::blue << theCommand.str() << logger::endL;
+    global << logger::red << "Restart command: "
+    << logger::blue << theCommand.str() << logger::endL;
   } else {
     global << logger::red << "Proceeding to stop server. " << logger::endL;
   }
@@ -2953,7 +2959,7 @@ void WebServer::RecycleOneChild(int childIndex, int& numberInUse) {
   if (currentControlPipe.flagReadEndBlocks) {
     global.fatal << "Pipe: " << currentControlPipe.ToString() << " has blocking read end. " << global.fatal;
   }
-  currentControlPipe.ReadOnceIfFailThenCrash(false, true);
+  currentControlPipe.ReadOnceIfFailThenCrash(true);
   if (currentControlPipe.lastRead.size > 0) {
     this->ProcessOneChildMessage(childIndex, numberInUse);
   } else {
@@ -2963,7 +2969,7 @@ void WebServer::RecycleOneChild(int childIndex, int& numberInUse) {
   if (currentPingPipe.flagReadEndBlocks) {
     global.fatal << "Pipe: " << currentPingPipe.ToString() << " has blocking read end. " << global.fatal;
   }
-  currentPingPipe.ReadOnceIfFailThenCrash(false, true);
+  currentPingPipe.ReadOnceIfFailThenCrash(true);
   if (currentPingPipe.lastRead.size > 0) {
     currentWorker.pingMessage = currentPingPipe.GetLastRead();
     currentWorker.millisecondsLastPingServerSideOnly = global.GetElapsedMilliseconds();
@@ -3318,6 +3324,7 @@ int WebServer::Run() {
   global.logs.worker.reset();
   this->processIdServer = getpid();
   if (global.flagServerAutoMonitor) {
+    global << logger::green << "Start monitor process." << logger::endL;
     this->processIdServer = this->Fork();
     if (this->processIdServer < 0) {
       global.fatal << "Failed to create server process. " << global.fatal;

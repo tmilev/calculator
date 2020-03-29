@@ -228,7 +228,7 @@ Database::FallBack::FallBack() {
 }
 
 void Database::FallBack::initialize() {
-  this->access.CreateMe("databaseFallback", true, false);
+  this->access.CreateMe("databaseFallback", false);
   this->knownIndices.AddOnTop({
     DatabaseStrings::tableUsers + "." + DatabaseStrings::labelUsername
   });

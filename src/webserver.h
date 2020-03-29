@@ -148,7 +148,7 @@ public:
   void QueueStringForSendingNoHeadeR(const std::string& stringToSend, bool MustSendAll = false);
   void QueueBytesForSendingNoHeadeR(const List<char>& bytesToSend, bool MustSendAll = false);
   bool ShouldDisplayLoginPage();
-  void WrapUpConnectioN();
+  void WrapUpConnection();
   void ResetMutexProcesses();
   void reset();
   void resetMessageComponentsExceptRawMessage();
@@ -312,7 +312,7 @@ public:
   void RecycleOneChild(int childIndex, int& numberInUse);
   void HandleTooManyConnections(const std::string& incomingUserAddress);
   void HandleTooManyWorkers(int& numInUse);
-  void StopKillAll[[noreturn]](bool attemptToRestart);
+  void StopKillAll(bool attemptToRestart);
   bool RestartIsNeeded();
   void initDates();
   std::string ToStringWorkerToWorker();

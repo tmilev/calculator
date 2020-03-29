@@ -80,7 +80,8 @@ int GlobalVariables::CallSystemNoOutput(const std::string& systemCommand, bool l
   }
   int exitCode = this->pointerCallSystemNoOutput(systemCommand);
   if (exitCode != 0 && logErrors) {
-    global << logger::red << "System command: " << systemCommand << " exited with " << exitCode << ". " << logger::endL;
+    global << logger::red << "System command: " << systemCommand
+    << " exited with " << exitCode << ". " << logger::endL;
   }
   return exitCode;
 }

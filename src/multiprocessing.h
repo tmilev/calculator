@@ -22,7 +22,6 @@ public:
     const std::string& inputPipeName,
     bool readEndBlocks,
     bool writeEndBlocks,
-    bool restartServerOnFail,
     bool dontCrashOnFail
   );
   std::string GetLastRead();
@@ -30,35 +29,31 @@ public:
   bool SetPipeFlagsIfFailThenCrash(
     int inputFlags,
     int whichEnd,
-    bool restartServerOnFail,
     bool dontCrashOnFail
   );
 
-  bool SetReadNonBlocking (bool restartServerOnFail, bool dontCrashOnFail);
-  bool SetReadBlocking(bool restartServerOnFail, bool dontCrashOnFail);
+  bool SetReadNonBlocking (bool dontCrashOnFail);
+  bool SetReadBlocking(bool dontCrashOnFail);
 
-  bool SetWriteBlocking(bool restartServerOnFail, bool dontCrashOnFail);
-  bool SetPipeWriteNonBlockingIfFailThenCrash(bool restartServerOnFail, bool dontCrashOnFail);
+  bool SetWriteBlocking(bool dontCrashOnFail);
+  bool SetPipeWriteNonBlockingIfFailThenCrash(bool dontCrashOnFail);
 
   bool SetPipeWriteFlagsIfFailThenCrash(
     int inputFlags,
     int whichEnd,
-    bool restartServerOnFail,
     bool dontCrashOnFail
   );
   bool WriteOnceIfFailThenCrash(
     const std::string& input,
     int offset,
-    bool restartServerOnFail,
     bool dontCrashOnFail
   );
-  bool ReadOnceIfFailThenCrash(bool restartServerOnFail, bool dontCrashOnFail);
-  bool WriteOnceAfterEmptying(const std::string& input, bool restartServerOnFail, bool dontCrashOnFail);
+  bool ReadOnceIfFailThenCrash(bool dontCrashOnFail);
+  bool WriteOnceAfterEmptying(const std::string& input, bool dontCrashOnFail);
 
-  bool ReadOnceWithoutEmptying(bool restartServerOnFail, bool dontCrashOnFail);
+  bool ReadOnceWithoutEmptying(bool dontCrashOnFail);
   bool HandleFailedWriteReturnFalse(
     const std::string& toBeSent,
-    bool restartServerOnFail,
     bool dontCrashOnFail,
     int numBadAttempts
   );
@@ -87,7 +82,6 @@ public:
   // to see in error messages and logs.
   bool CreateMe(
     const std::string& inputName,
-    bool restartServerOnFail,
     bool dontCrashOnFail
   );
   bool ResetNoAllocation();
@@ -160,10 +154,10 @@ public:
     return this->thePipe.GetLastRead();
   }
   static void WriteIfFailThenCrash(
-    int theFD, const List<char>& input, bool restartServerOnFail, bool dontCrashOnFail
+    int theFD, const List<char>& input, bool dontCrashOnFail
   );
-  void ReadOnce(bool restartServerOnFail, bool dontCrashOnFail);
-  void ReadOnceWithoutEmptying(bool restartServerOnFail, bool dontCrashOnFail);
+  void ReadOnce(bool dontCrashOnFail);
+  void ReadOnceWithoutEmptying(bool dontCrashOnFail);
   void ReadLoop(List<char>& output);
   static int WriteNoInterrupts(int theFD, const std::string& input);
   static int WriteWithTimeoutViaSelect(
@@ -182,7 +176,6 @@ public:
   );
   void WriteOnceAfterEmptying(
     const std::string& toBeSent,
-    bool restartServerOnFail,
     bool dontCrashOnFail
   );
 

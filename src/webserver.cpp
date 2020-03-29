@@ -50,8 +50,6 @@ SignalsInfrastructure::SignalsInfrastructure() {
   this->flagInitialized = false;
 }
 
-//sigset_t SignalSetToBlockWhileHandlingSIGCHLD;
-
 //This class locks/unlocks all signals within its scope
 class SignalLock {
   SignalLock() {
@@ -83,8 +81,11 @@ void SignalsInfrastructure::blockSignals() {
   int error = sigprocmask(SIG_BLOCK, &this->allSignals, theSignals);
   this->flagSignalsAreStored = true;
   if (error < 0) {
-    global << logger::red << "Fatal error: sigprocmask failed. The server is going to crash. " << logger::endL;
-    global.fatal << "Sigprocmas failed. This should not happen. " << global.fatal;
+    global
+    << logger::red << "Fatal error: sigprocmask failed. "
+    << "The server is going to crash. " << logger::endL;
+    global.fatal << "Sigprocmas failed. "
+    << "This should not happen. " << global.fatal;
   }
   this->flagSignalsAreBlocked = true;
 }

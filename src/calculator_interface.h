@@ -2614,10 +2614,10 @@ public:
   static bool innerLoadFromObject(Calculator& theCommands, const Expression& input, RationalFunction& output);
   static bool innerAlgebraicNumber(Calculator& theCommands, const Expression& input, Expression& output);
   template <class coefficient>
-  static bool innerPolynomiaL(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPolynomial(Calculator& theCommands, const Expression& input, Expression& output);
   //conversions from expression tree to expression containing type
   template <class coefficient>
-  static bool functionPolynomiaL(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool functionPolynomial(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerRationalFunctioN(Calculator& theCommands, const Expression& input, Expression& output);
   static bool functionRationalFunction(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerElementUE(

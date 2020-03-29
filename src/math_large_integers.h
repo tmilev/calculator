@@ -42,6 +42,7 @@ public:
     static bool All();
     static bool SerializationToHex(const LargeIntegerUnsigned& input);
     static bool SerializationToHex();
+    static bool Comparisons();
   };
   void PadWithZeroesToAtLeastNDigits(int desiredMinNumDigits);
   void AddLargeIntUnsignedShiftedTimesDigit(const LargeIntegerUnsigned& other, int digitShift, int theConst);
@@ -59,6 +60,7 @@ public:
   bool IsEven() const;
   bool IsPositive() const;
   bool TryToFindWhetherIsPower(bool& outputIsPower, LargeInteger& outputBase, int& outputPower) const;
+  bool IsCompositePrimeDivision(List<unsigned int>& primesGenerated, std::stringstream* comments = nullptr);
   bool IsPossiblyPrime(int MmillerRabinTries, bool tryDivisionSetTrueFaster = true, std::stringstream* comments = nullptr);
   bool IsPossiblyPrimeMillerRabiN(int numTimesToRun = 1, std::stringstream* comments = nullptr);
   bool IsPossiblyPrimeMillerRabinOnce(
@@ -68,8 +70,10 @@ public:
     std::stringstream* comments
   );
   bool IsEqualToOne() const;
-  bool IsGEQ(const LargeIntegerUnsigned& x) const;
-  static void GetAllPrimesSmallerThanOrEqualToUseEratosthenesSieve(unsigned int n, List<unsigned int>& output);
+  bool IsGreaterThanOrEqualTo(const LargeIntegerUnsigned& x) const;
+  static void getPrimesEratosthenesSieve(
+    unsigned int primesUpToInclusive, List<unsigned int>& output
+  );
   static void gcd(const LargeIntegerUnsigned& a, const LargeIntegerUnsigned& b, LargeIntegerUnsigned& output);
   static LargeIntegerUnsigned gcd(const LargeIntegerUnsigned& a, const LargeIntegerUnsigned& b);
   static LargeIntegerUnsigned lcm(const LargeIntegerUnsigned& a, const LargeIntegerUnsigned& b);

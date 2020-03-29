@@ -30,7 +30,7 @@ public:
   static bool innerTurnOnApproximations(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTurnOffApproximations(Calculator& theCommands, const Expression& input, Expression& output);
 
-  static bool innerEqualityToArithmeticExpressioN(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerEqualityToArithmeticExpression(Calculator& theCommands, const Expression& input, Expression& output);
   static bool functionEqualityToArithmeticExpression(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerRandomInteger(Calculator& theCommands, const Expression& input, Expression& output);

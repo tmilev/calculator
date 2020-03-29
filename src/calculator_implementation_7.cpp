@@ -167,10 +167,13 @@ bool CalculatorFunctions::innerGenerateVectorSpaceClosedWRTLieBracket(
   bool success = MathRoutines::GenerateVectorSpaceClosedWRTLieBracket(theOps, upperBound);
   if (!success) {
     out << "<br>Did not succeed with generating vector space, "
-    << "instead got a vector space with basis " << theOps.size << " exceeding the limit. "
-    << "The basis generated before exceeding the limit was: " << theOps.ToString();
+    << "instead got a vector space with basis "
+    << theOps.size << " exceeding the limit. "
+    << "The basis generated before exceeding the limit was: "
+    << theOps.ToString();
   } else {
-    out << "<br>Lie bracket generates vector space of dimension " << theOps.size << " with basis:";
+    out << "<br>Lie bracket generates vector space of dimension "
+    << theOps.size << " with basis:";
     for (int i = 0; i < theOps.size; i ++) {
       out << "<br>";
       if (theOps.size > 50) {
@@ -1362,7 +1365,7 @@ bool CalculatorFunctions::innerSolveSerreLikeSystem(
       thePolysRational,
       &theContext,
       0,
-      CalculatorConversions::functionPolynomiaL<Rational>
+      CalculatorConversions::functionPolynomial<Rational>
     )) {
       return output.MakeError("Failed to extract list of polynomials. ", theCommands);
     }
@@ -1372,7 +1375,7 @@ bool CalculatorFunctions::innerSolveSerreLikeSystem(
       thePolysRational,
       &theContext,
       0,
-      CalculatorConversions::functionPolynomiaL<Rational>
+      CalculatorConversions::functionPolynomial<Rational>
     )) {
       return output.MakeError("Failed to extract list of polynomials. ", theCommands);
     }
@@ -1461,7 +1464,7 @@ bool CalculatorFunctions::innerGetAlgebraicNumberFromMinPoly(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerGetAlgebraicNumberFromMinPoly");
   Expression polyE;
-  if (!CalculatorConversions::innerPolynomiaL<AlgebraicNumber>(
+  if (!CalculatorConversions::innerPolynomial<AlgebraicNumber>(
     theCommands, input, polyE
   )) {
     return theCommands << "<hr>Failed to convert "
@@ -3907,7 +3910,7 @@ bool CalculatorFunctions::innerPolynomialRelations(
     inputVector,
     &theContext,
     - 1,
-    CalculatorConversions::functionPolynomiaL<Rational>
+    CalculatorConversions::functionPolynomial<Rational>
   )) {
     return output.MakeError("Failed to extract polynomial expressions", theCommands);
   }
@@ -3944,7 +3947,7 @@ bool CalculatorFunctions::functionPolynomialize(Calculator& theCommands, const E
   if (input.HasBoundVariables()) {
     return false;
   }
-  if (!CalculatorConversions::functionPolynomiaL<Rational>(
+  if (!CalculatorConversions::functionPolynomial<Rational>(
     theCommands, input, thePolyE
   )) {
     return false;
@@ -4593,7 +4596,7 @@ bool CalculatorFunctions::innerIntegrateSinPowerNCosPowerM(
     return false;
   }
   Expression polynomializedFunctionE;
-  if (!CalculatorConversions::functionPolynomiaL<Rational>(
+  if (!CalculatorConversions::functionPolynomial<Rational>(
     theCommands, theFunctionE, polynomializedFunctionE
   )) {
     return false;
@@ -4733,7 +4736,7 @@ bool CalculatorFunctions::innerIntegrateTanPowerNSecPowerM(
     return false;
   }
   Expression polynomializedFunctionE;
-  if (!CalculatorConversions::functionPolynomiaL<Rational>(
+  if (!CalculatorConversions::functionPolynomial<Rational>(
     theCommands, theFunctionE, polynomializedFunctionE
   )) {
     return false;
@@ -5757,136 +5760,6 @@ void ElementZmodP::operator*=(const ElementZmodP& other) {
   this->CheckEqualModuli(other);
   this->theValue *= other.theValue;
   this->theValue %= this->theModulus;
-}
-
-bool LargeIntegerUnsigned::IsPossiblyPrimeMillerRabinOnce(
-  unsigned int theBase,
-  int theExponentOfThePowerTwoFactorOfNminusOne,
-  const LargeIntegerUnsigned& theOddFactorOfNminusOne,
-  std::stringstream* comments
-) {
-  MacroRegisterFunctionWithName("LargeIntUnsigned::IsPossiblyPrimeMillerRabin");
-  ElementZmodP thePower, theOne;
-  thePower.theModulus = *this;
-  thePower.theValue = theBase;
-  theOne.theModulus = *this;
-  theOne.theValue = 1;
-  MathRoutines::RaiseToPower(thePower, theOddFactorOfNminusOne, theOne);
-  if (thePower == 1) {
-    return true;
-  }
-  for (int i = 0; i < theExponentOfThePowerTwoFactorOfNminusOne; i ++) {
-    if (thePower == - 1) {
-      return true;
-    }
-    if (i == theExponentOfThePowerTwoFactorOfNminusOne - 1) {
-      if (comments != nullptr) {
-        std::stringstream theTwoPowerContraStream, theTwoPowerStream;
-        if (i > 0) {
-          theTwoPowerContraStream << "2";
-          if (i > 1) {
-            theTwoPowerContraStream << "^{ " << i << "} \\cdot ";
-          }
-        }
-        theTwoPowerStream << "2";
-        if (theExponentOfThePowerTwoFactorOfNminusOne > 1) {
-          theTwoPowerStream << "^{" << theExponentOfThePowerTwoFactorOfNminusOne << "}";
-        }
-        *comments << this->ToString() << " is not prime because \\(" << theBase << "^{"
-        << theTwoPowerContraStream.str()
-        << theOddFactorOfNminusOne.ToString() << "} = " << thePower.theValue.ToString() << " ~ mod ~"
-        << this->ToString() << " \\)"
-        << "<br>If " << this->ToString() << " were prime, we'd have to have that \\("
-        << theBase << "^{" << theTwoPowerStream.str() << "\\cdot" << theOddFactorOfNminusOne
-        << "} = " << theBase << "^{" << this->ToString() << " - 1} = 1 ~mod ~" << this->ToString() << "\\)"
-        << "<br> which can be reasoned to contradict the first equality.";
-      }
-      return false;
-    }
-    thePower *= thePower;
-  }
-  return false;
-}
-
-bool LargeIntegerUnsigned::TryToFindWhetherIsPower(bool& outputIsPower, LargeInteger& outputBase, int& outputPower) const {
-  MacroRegisterFunctionWithName("LargeIntUnsigned::TryToFindWhetherIsPower");
-  List<LargeInteger> theFactors;
-  List<int> theMults;
-  if (!this->FactorReturnFalseIfFactorizationIncomplete(theFactors, theMults, 0, nullptr)) {
-    return false;
-  }
-  if (theMults.size == 0) {
-    outputIsPower = true;
-    outputBase = 1;
-    outputPower = 0;
-    return true;
-  }
-  if (theMults[0] <= 1) {
-    outputIsPower = false;
-    return true;
-  }
-  for (int i = 1; i < theFactors.size; i ++) {
-    if (theMults[i] != theMults[0]) {
-      outputIsPower = false;
-      return true;
-    }
-  }
-  outputIsPower = true;
-  outputBase = 1;
-  for (int i = 0; i < theFactors.size; i ++) {
-    outputBase *= theFactors[i];
-  }
-  outputPower = theMults[0];
-  return true;
-}
-
-bool LargeIntegerUnsigned::IsPossiblyPrimeMillerRabiN(int numberOfTries, std::stringstream* comments) {
-  return this->IsPossiblyPrime(numberOfTries, false, comments);
-}
-
-bool LargeIntegerUnsigned::IsPossiblyPrime(int timesToRunMillerRabin, bool tryDivisionSetTrueFaster, std::stringstream* comments) {
-  MacroRegisterFunctionWithName("LargeIntUnsigned::IsPossiblyPrimeMillerRabin");
-  if (this->IsEven()) {
-    return *this == 2;
-  }
-  List<unsigned int> aFewPrimes;
-  LargeIntegerUnsigned::GetAllPrimesSmallerThanOrEqualToUseEratosthenesSieve(100000, aFewPrimes);
-  if (timesToRunMillerRabin > aFewPrimes.size) {
-    timesToRunMillerRabin = aFewPrimes.size;
-  }
-  if (tryDivisionSetTrueFaster) {
-    for (int i = 0; i < aFewPrimes.size; i ++) {
-      if (this->isDivisibleBy(aFewPrimes[i])) {
-        if (comments != nullptr) {
-          *comments << "Number not prime as it is divisible by " << aFewPrimes[i] << ". ";
-        }
-        return false;
-      }
-    }
-  }
-  LargeIntegerUnsigned theOddFactorOfNminusOne = *this;
-  int theExponentOfThePowerTwoFactorOfNminusOne = 0;
-  theOddFactorOfNminusOne --;
-  while (theOddFactorOfNminusOne.IsEven()) {
-    theOddFactorOfNminusOne /= 2;
-    theExponentOfThePowerTwoFactorOfNminusOne ++;
-  }
-  ProgressReport theReport;
-  for (int i = 0; i < timesToRunMillerRabin; i ++) {
-    if (theReport.TickAndWantReport()) {
-      std::stringstream reportStream;
-      reportStream << "Testing whether " << this->ToStringAbbreviate()
-      << " is prime using Miller-Rabin test " << i + 1 << " out of "
-      << timesToRunMillerRabin << ". ";
-      theReport.Report(reportStream.str());
-    }
-    if (!this->IsPossiblyPrimeMillerRabinOnce(
-      aFewPrimes[i], theExponentOfThePowerTwoFactorOfNminusOne, theOddFactorOfNminusOne, comments
-    )) {
-      return false;
-    }
-  }
-  return true;
 }
 
 bool CalculatorFunctions::innerIsPossiblyPrime(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -7759,7 +7632,7 @@ bool CalculatorFunctions::innerWriteGenVermaModAsDiffOperatorUpToLevel(
     highestWeightFundCoords,
     &hwContext,
     theRank,
-    CalculatorConversions::functionPolynomiaL<Rational>
+    CalculatorConversions::functionPolynomial<Rational>
   )) {
     return theCommands
     << "Failed to convert the third argument of innerSplitGenericGenVermaTensorFD to a list of " << theRank
@@ -9661,9 +9534,12 @@ bool CalculatorFunctions::innerDrawWeightSupport(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerDrawWeightSupport");
-  //theNode.owner->theHmm.MakeG2InB3(theParser);
+  // theNode.owner->theHmm.MakeG2InB3(theParser);
   if (!input.IsListNElements(3)) {
-    return output.MakeError("Wrong number of arguments, must be 2. ", theCommands);
+    return output.MakeError(
+      "Wrong number of arguments, must be 2. ",
+      theCommands
+    );
   }
   const Expression& typeNode = input[1];
   const Expression& hwNode = input[2];
@@ -9678,13 +9554,19 @@ bool CalculatorFunctions::innerDrawWeightSupport(
   SemisimpleLieAlgebra& theAlg = *theAlgPointer.content;
   Vector<Rational> highestWeightFundCoords;
   Expression tempContext;
-  if (!theCommands.GetVectoR<Rational>(hwNode, highestWeightFundCoords, &tempContext, theAlg.GetRank(), nullptr)) {
+  if (!theCommands.GetVectoR<Rational>(
+    hwNode,
+    highestWeightFundCoords,
+    &tempContext,
+    theAlg.GetRank(),
+    nullptr
+  )) {
     return false;
   }
   Vector<Rational> highestWeightSimpleCoords;
   WeylGroupData& theWeyl = theAlg.theWeyl;
   highestWeightSimpleCoords = theWeyl.GetSimpleCoordinatesFromFundamental(highestWeightFundCoords);
-  //Vectors<Rational> theWeightsToBeDrawn;
+  // Vectors<Rational> theWeightsToBeDrawn;
   std::stringstream out;
   charSSAlgMod<Rational> theChar;
   theChar.MakeFromWeight(highestWeightSimpleCoords, theAlgPointer.content);
@@ -9777,7 +9659,7 @@ bool CalculatorFunctions::innerIfFrozen(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerIfFrozen");
-  (void) theCommands; //portable way of avoiding unused parameter warning
+  (void) theCommands; // portable way of avoiding unused parameter warning
   if (input.size() != 4) {
     return false;
   }
@@ -9894,10 +9776,10 @@ bool CalculatorFunctions::innerTurnOnRules(
   return CalculatorFunctions::innerTurnRulesOnOff(theCommands, input, output, false);
 }
 
-bool CalculatorFunctions::innerEqualityToArithmeticExpressioN(
+bool CalculatorFunctions::innerEqualityToArithmeticExpression(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerEqualityToArithmeticExpressioN");
+  MacroRegisterFunctionWithName("CalculatorFunctions::innerEqualityToArithmeticExpression");
   if (input.size() != 2) {
     return false;
   }
@@ -9932,7 +9814,8 @@ bool CalculatorFunctions::innerRandomInteger(
     theIntervals[i].SetSize(theMat.NumCols);
     for (int j = 0; j < theMat.NumCols; j ++) {
       if (!theMat(i, j).IsIntegerFittingInInt(&theIntervals[i][j])) {
-        return theCommands << "<hr>Failed to convert " << theMat(i, j).ToString() << " to an integer. ";
+        return theCommands << "<hr>Failed to convert "
+        << theMat(i, j).ToString() << " to an integer. ";
       }
     }
   }
@@ -9980,22 +9863,24 @@ bool CalculatorFunctions::innerSelectAtRandom(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSelectAtRandom");
   if (!input.StartsWith(theCommands.operations.GetIndex("SelectAtRandom"))) {
-    output = input; //only one item to select from: returning the item
+    output = input; // only one item to select from: returning the item
     return true;
   }
   if (input.size() < 2) {
     return false;
   }
   if (input.size() == 2) {
-    output = input[1]; //only one item to select from: return that item
+    output = input[1]; // only one item to select from: return that item
     return true;
   }
   int randomIndex = (global.unsecurePseudoRandomGenerator.GetRandomPositiveLessThanBillion() % (input.size() - 1)) + 1;
   if (randomIndex < 0 || randomIndex > input.size() - 1) {
     randomIndex = input.size() - 1;
   }
-  //<-the line above should never be executed if the % operator works as it should,
-  //but having an extra check never hurts (may be a life saver if I change the code above).
+  // <-the line above should never be executed
+  // if the % operator works as it should,
+  // but having an extra check never hurts
+  // (may be a life saver if I change the code above).
   output = input[randomIndex];
   return true;
 }

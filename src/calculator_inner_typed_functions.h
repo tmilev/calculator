@@ -165,16 +165,18 @@ bool CalculatorFunctionsBinaryOps::innerDivideTypeByType(Calculator& theCommands
 }
 
 template <class coefficient>
-bool CalculatorConversions::innerPolynomiaL(Calculator& theCommands, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorConversions::innerPolynomiaL");
+bool CalculatorConversions::innerPolynomial(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorConversions::innerPolynomial");
   if (input.size() != 2) {
     return false;
   }
-  return CalculatorConversions::functionPolynomiaL<coefficient>(theCommands, input[1], output);
+  return CalculatorConversions::functionPolynomial<coefficient>(theCommands, input[1], output);
 }
 
 template <class coefficient>
-bool CalculatorConversions::functionPolynomiaL(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorConversions::functionPolynomial(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorConversions::functionPolynomial");
   RecursionDepthCounter theRecursionCounter(&theCommands.RecursionDeptH);
   if (theCommands.RecursionDeptH > theCommands.MaxRecursionDeptH) {
@@ -207,14 +209,18 @@ bool CalculatorConversions::functionPolynomiaL(Calculator& theCommands, const Ex
     theComputed.reset(theCommands, input.size());
     theComputed.AddChildOnTop(input[0]);
     for (int i = 1; i < input.size(); i ++) {
-      if (!CalculatorConversions::functionPolynomiaL<coefficient>(theCommands, input[i], theConverted)) {
+      if (!CalculatorConversions::functionPolynomial<coefficient>(
+        theCommands, input[i], theConverted
+      )) {
         return theCommands << "<hr>Failed to extract polynomial from "
         << input[i].ToString();
       }
       theComputed.AddChildOnTop(theConverted);
     }
     if (input.IsListStartingWithAtom(theCommands.opTimes())) {
-      return CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly(theCommands, theComputed, output);
+      return CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly(
+        theCommands, theComputed, output
+      );
     }
     if (input.IsListStartingWithAtom(theCommands.opPlus())) {
       return CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly(theCommands, theComputed, output);
@@ -229,7 +235,7 @@ bool CalculatorConversions::functionPolynomiaL(Calculator& theCommands, const Ex
       if (i == 2) {
         summand *= - 1;
       }
-      if (!CalculatorConversions::functionPolynomiaL<coefficient>(theCommands, summand, theConverted)) {
+      if (!CalculatorConversions::functionPolynomial<coefficient>(theCommands, summand, theConverted)) {
         return theCommands << "<hr>Failed to extract polynomial from " << summand.ToString();
       }
       theComputed.AddChildOnTop(theConverted);
@@ -240,7 +246,7 @@ bool CalculatorConversions::functionPolynomiaL(Calculator& theCommands, const Ex
   int thePower = - 1;
   if (input.StartsWith(theCommands.opThePower(), 3)) {
     if (input[2].IsSmallInteger(&thePower)) {
-      if (!CalculatorConversions::functionPolynomiaL<coefficient>(theCommands, input[1], theConverted)) {
+      if (!CalculatorConversions::functionPolynomial<coefficient>(theCommands, input[1], theConverted)) {
         return theCommands << "<hr>Failed to extract polynomial from " << input[1].ToString() << ".";
       }
       Polynomial<coefficient> resultP = theConverted.GetValue<Polynomial<coefficient> >();

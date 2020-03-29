@@ -470,7 +470,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(
 
 
 template <>
-bool CalculatorConversions::functionPolynomiaL<Rational>(Calculator& theCommands, const Expression& input, Expression& output);
+bool CalculatorConversions::functionPolynomial<Rational>(Calculator& theCommands, const Expression& input, Expression& output);
 
 bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple(
   Calculator& theCommands, const Expression& input, Expression& output
@@ -499,7 +499,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple(
     theHWfundCoords,
     &theContext,
     theType.GetRank(),
-    CalculatorConversions::functionPolynomiaL<Rational>
+    CalculatorConversions::functionPolynomial<Rational>
   )) {
     return output.MakeError("Failed to extract highest weight", theCommands);
   }
@@ -574,7 +574,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSize(
     input,
     theWeightPoly,
     theAlgebra,
-    CalculatorConversions::functionPolynomiaL<Rational>
+    CalculatorConversions::functionPolynomial<Rational>
   )) {
     Rational result = theSSalgebra->theWeyl.GetOrbitSize(theWeightPoly);
     return output.AssignValue(result, theCommands);
@@ -600,7 +600,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
     input,
     theWeight,
     theSSalgebra,
-    CalculatorConversions::functionPolynomiaL<Rational>
+    CalculatorConversions::functionPolynomial<Rational>
   )) {
     return false;
   }

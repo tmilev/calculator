@@ -2566,7 +2566,7 @@ bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
   }
   Expression thePolyE;
   Polynomial<Rational> thePoly;
-  if (!CalculatorConversions::functionPolynomiaL<Rational>(
+  if (!CalculatorConversions::functionPolynomial<Rational>(
     theCommands, theCurveE, thePolyE
   )) {
     return theCommands << "Could not get polynomial from " << theCurveE.ToString();

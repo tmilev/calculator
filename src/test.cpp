@@ -13,6 +13,7 @@ public:
     static const std::string all;
     static const std::string database;
     static const std::string problems;
+    static const std::string build;
     static const std::string crypto;
     static const std::string topicLists;
     static const std::string topiclists;
@@ -42,6 +43,7 @@ const std::string Test::Suites::topicLists = "topicLists";
 const std::string Test::Suites::topiclists = "topiclists";
 const std::string Test::Suites::calculator = "calculator";
 const std::string Test::Suites::polynomial = "polynomial";
+const std::string Test::Suites::build = "build";
 
 void Test::Run() {
   global << "Testing ..." << logger::endL;
@@ -60,17 +62,16 @@ void Test::Run() {
   if (this->ShouldTest(Test::Suites::polynomial)) {
     MonomialP::Test::All();
   }
+  if (this->flagTestAll) {
+    JSData::Test::All();
+    Expression::Test::All();
+    LargeIntegerUnsigned::Test::All();
+  }
   if (this->ShouldTest(Test::Suites::calculator)) {
     Calculator::Test::All();
   }
   if (this->ShouldTest(Test::Suites::problems)) {
     CalculatorHTML::Test::All();
-  }
-  if (this->flagTestAll) {
-    JSData::Test::All();
-    Expression::Test::All();
-    LargeIntegerUnsigned::Test::All();
-    GlobalVariables::Test::All();
   }
   if (
     this->ShouldTest(Test::Suites::topicLists) ||
@@ -78,8 +79,10 @@ void Test::Run() {
   ) {
     TopicElementParser::Test::All();
   }
+  if (this->ShouldTest(Test::Suites::build)) {
+    GlobalVariables::Test::All();
+  }
   global << logger::green << "All tests passed. " << logger::endL;
-
 }
 
 bool Test::ShouldTest(const std::string& testSuite) {

@@ -150,7 +150,7 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
 }
 
 template <>
-bool CalculatorConversions::functionPolynomiaL<Rational>(Calculator& theCommands, const Expression& input, Expression& output);
+bool CalculatorConversions::functionPolynomial<Rational>(Calculator& theCommands, const Expression& input, Expression& output);
 
 bool Calculator::innerGCDOrLCMPoly(
   Calculator& theCommands,
@@ -166,7 +166,7 @@ bool Calculator::innerGCDOrLCMPoly(
     thePolys,
     &theContext,
     2,
-    CalculatorConversions::functionPolynomiaL<Rational>
+    CalculatorConversions::functionPolynomial<Rational>
   )) {
     return output.MakeError("Failed to extract a list of 2 polynomials. ", theCommands);
   }
@@ -191,7 +191,7 @@ bool Calculator::GetListPolynomialVariableLabelsLexicographic(
     output,
     &theContextStart,
     0,
-    CalculatorConversions::functionPolynomiaL<AlgebraicNumber>
+    CalculatorConversions::functionPolynomial<AlgebraicNumber>
   )) {
     return false;
   }
@@ -648,7 +648,7 @@ bool Calculator::innerGroebner(
     inputVector,
     &theContext,
     - 1,
-    CalculatorConversions::functionPolynomiaL<Rational>
+    CalculatorConversions::functionPolynomial<Rational>
   )) {
     return output.MakeError("Failed to extract polynomial expressions", theCommands);
   }
@@ -755,7 +755,7 @@ bool Calculator::innerDeterminantPolynomial(
     matPol,
     &theContext,
     - 1,
-    CalculatorConversions::functionPolynomiaL<Rational>
+    CalculatorConversions::functionPolynomial<Rational>
   )) {
     return theCommands << "<hr>Failed to convert the input to "
     << "matrix of polynomials. ";

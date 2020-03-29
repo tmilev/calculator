@@ -24,5 +24,20 @@ bool LargeIntegerUnsigned::Test::SerializationToHex(const LargeIntegerUnsigned& 
 bool LargeIntegerUnsigned::Test::All() {
   MacroRegisterFunctionWithName("LargeIntegerUnsigned::Test::All");
   LargeIntegerUnsigned::Test::SerializationToHex(LargeIntegerUnsigned(100));
+  LargeIntegerUnsigned::Test::Comparisons();
+  return true;
+}
+
+bool LargeIntegerUnsigned::Test::Comparisons() {
+  LargeIntegerUnsigned x = 1;
+  LargeIntegerUnsigned y = 0;
+  List<LargeIntegerUnsigned> toTest = {x, y};
+  for (int i = 0; i < toTest.size; i ++) {
+    LargeIntegerUnsigned& current = toTest[i];
+    if (!current.IsGreaterThanOrEqualTo(current)) {
+      global.fatal << "Number: " << current
+      << " not greater than or equal to itself. " << global.fatal;
+    }
+  }
   return true;
 }

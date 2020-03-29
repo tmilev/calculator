@@ -856,7 +856,7 @@ bool CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
   MacroRegisterFunctionWithName("CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers");
   Expression polyFormE;
   Polynomial<AlgebraicNumber> polyForm;
-  bool polyFormGood = CalculatorConversions::functionPolynomiaL<AlgebraicNumber>(theCommands, input, polyFormE);
+  bool polyFormGood = CalculatorConversions::functionPolynomial<AlgebraicNumber>(theCommands, input, polyFormE);
   if (polyFormGood) {
     polyFormGood = polyFormE.IsOfType<Polynomial<AlgebraicNumber> >(&polyForm);
   }
@@ -936,7 +936,7 @@ bool CalculatorConversions::innerElementUE(
   RationalFunction currentMultiplicandRFpart;
   outputUE.MakeZero(owner);
   Expression polyE;
-  if (!CalculatorConversions::functionPolynomiaL<Rational>(theCommands, input[1], polyE)) {
+  if (!CalculatorConversions::functionPolynomial<Rational>(theCommands, input[1], polyE)) {
     return theCommands << "<hr>Failed to convert " << input[1].ToString() << " to polynomial.<hr>";
   }
   Polynomial<Rational> theP;

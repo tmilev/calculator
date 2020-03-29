@@ -227,7 +227,7 @@ bool LargeIntegerUnsigned::IsIntegerFittingInInt(int* whichInt) {
   return true;
 }
 
-bool LargeIntegerUnsigned::IsGEQ(const LargeIntegerUnsigned& x) const {
+bool LargeIntegerUnsigned::IsGreaterThanOrEqualTo(const LargeIntegerUnsigned& x) const {
   if (this->theDigits.size > x.theDigits.size) {
     return true;
   }
@@ -245,19 +245,180 @@ bool LargeIntegerUnsigned::IsGEQ(const LargeIntegerUnsigned& x) const {
   return true;
 }
 
-void LargeIntegerUnsigned::GetAllPrimesSmallerThanOrEqualToUseEratosthenesSieve(
-  unsigned int n, List<unsigned int>& output
+bool LargeIntegerUnsigned::IsPossiblyPrimeMillerRabinOnce(
+  unsigned int theBase,
+  int theExponentOfThePowerTwoFactorOfNminusOne,
+  const LargeIntegerUnsigned& theOddFactorOfNminusOne,
+  std::stringstream* comments
+) {
+  MacroRegisterFunctionWithName("LargeIntUnsigned::IsPossiblyPrimeMillerRabinOnce");
+  if (*this == theBase) {
+    return true;
+  }
+  ElementZmodP thePower, theOne;
+  thePower.theModulus = *this;
+  thePower.theValue = theBase;
+  theOne.theModulus = *this;
+  theOne.theValue = 1;
+  MathRoutines::RaiseToPower(thePower, theOddFactorOfNminusOne, theOne);
+  if (thePower == 1) {
+    return true;
+  }
+  for (int i = 0; i < theExponentOfThePowerTwoFactorOfNminusOne; i ++) {
+    if (thePower == - 1) {
+      return true;
+    }
+    if (i == theExponentOfThePowerTwoFactorOfNminusOne - 1) {
+      if (comments != nullptr) {
+        std::stringstream theTwoPowerContraStream, theTwoPowerStream;
+        if (i > 0) {
+          theTwoPowerContraStream << "2";
+          if (i > 1) {
+            theTwoPowerContraStream << "^{ " << i << "} \\cdot ";
+          }
+        }
+        theTwoPowerStream << "2";
+        if (theExponentOfThePowerTwoFactorOfNminusOne > 1) {
+          theTwoPowerStream << "^{" << theExponentOfThePowerTwoFactorOfNminusOne << "}";
+        }
+        *comments << this->ToString() << " is not prime because \\(" << theBase << "^{"
+        << theTwoPowerContraStream.str()
+        << theOddFactorOfNminusOne.ToString() << "} = " << thePower.theValue.ToString() << " ~ mod ~"
+        << this->ToString() << " \\)"
+        << "<br>If " << this->ToString() << " were prime, we'd have to have that \\("
+        << theBase << "^{" << theTwoPowerStream.str() << "\\cdot" << theOddFactorOfNminusOne
+        << "} = " << theBase << "^{" << this->ToString() << " - 1} = 1 ~mod ~" << this->ToString() << "\\)"
+        << "<br> which can be reasoned to contradict the first equality.";
+      }
+      return false;
+    }
+    thePower *= thePower;
+  }
+  return false;
+}
+
+bool LargeIntegerUnsigned::TryToFindWhetherIsPower(bool& outputIsPower, LargeInteger& outputBase, int& outputPower) const {
+  MacroRegisterFunctionWithName("LargeIntUnsigned::TryToFindWhetherIsPower");
+  List<LargeInteger> theFactors;
+  List<int> theMults;
+  if (!this->FactorReturnFalseIfFactorizationIncomplete(theFactors, theMults, 0, nullptr)) {
+    return false;
+  }
+  if (theMults.size == 0) {
+    outputIsPower = true;
+    outputBase = 1;
+    outputPower = 0;
+    return true;
+  }
+  if (theMults[0] <= 1) {
+    outputIsPower = false;
+    return true;
+  }
+  for (int i = 1; i < theFactors.size; i ++) {
+    if (theMults[i] != theMults[0]) {
+      outputIsPower = false;
+      return true;
+    }
+  }
+  outputIsPower = true;
+  outputBase = 1;
+  for (int i = 0; i < theFactors.size; i ++) {
+    outputBase *= theFactors[i];
+  }
+  outputPower = theMults[0];
+  return true;
+}
+
+bool LargeIntegerUnsigned::IsPossiblyPrimeMillerRabiN(int numberOfTries, std::stringstream* comments) {
+  return this->IsPossiblyPrime(numberOfTries, false, comments);
+}
+
+bool LargeIntegerUnsigned::IsCompositePrimeDivision(
+  List<unsigned int>& primesGenerated, std::stringstream* comments
+) {
+  MacroRegisterFunctionWithName("LargeIntUnsigned::IsCompositePrimeDivision");
+  if (this->IsEven()) {
+    return *this == 2;
+  }
+  LargeIntegerUnsigned::getPrimesEratosthenesSieve(
+    100000, primesGenerated
+  );
+  for (int i = 0; i < primesGenerated.size; i ++) {
+    LargeIntegerUnsigned current = primesGenerated[i];
+    if (current >= *this) {
+      return false;
+    }
+    if (!this->isDivisibleBy(current)) {
+      continue;
+    }
+    if (comments != nullptr) {
+      *comments << "Number not prime as it is divisible by "
+      << primesGenerated[i] << ". ";
+    }
+    return true;
+  }
+  return false;
+}
+
+bool LargeIntegerUnsigned::IsPossiblyPrime(
+  int timesToRunMillerRabin,
+  bool tryDivisionSetTrueFaster,
+  std::stringstream* comments
+) {
+  MacroRegisterFunctionWithName("LargeIntUnsigned::IsPossiblyPrime");
+  List<unsigned int> aFewPrimes;
+  if (tryDivisionSetTrueFaster) {
+    if (this->IsCompositePrimeDivision(aFewPrimes, comments)) {
+      return false;
+    }
+  } else {
+    LargeIntegerUnsigned::getPrimesEratosthenesSieve(100000, aFewPrimes);
+  }
+  if (timesToRunMillerRabin > aFewPrimes.size) {
+    timesToRunMillerRabin = aFewPrimes.size;
+  }
+  LargeIntegerUnsigned theOddFactorOfNminusOne = *this;
+  int theExponentOfThePowerTwoFactorOfNminusOne = 0;
+  theOddFactorOfNminusOne --;
+  while (theOddFactorOfNminusOne.IsEven()) {
+    theOddFactorOfNminusOne /= 2;
+    theExponentOfThePowerTwoFactorOfNminusOne ++;
+  }
+  ProgressReport theReport;
+  for (int i = 0; i < timesToRunMillerRabin; i ++) {
+    if (theReport.TickAndWantReport()) {
+      std::stringstream reportStream;
+      reportStream << "Testing whether " << this->ToStringAbbreviate()
+      << " is prime using Miller-Rabin test " << i + 1 << " out of "
+      << timesToRunMillerRabin << ". ";
+      theReport.Report(reportStream.str());
+    }
+    if (!this->IsPossiblyPrimeMillerRabinOnce(
+      aFewPrimes[i],
+      theExponentOfThePowerTwoFactorOfNminusOne,
+      theOddFactorOfNminusOne,
+      comments
+    )) {
+      return false;
+    }
+  }
+  return true;
+}
+
+void LargeIntegerUnsigned::getPrimesEratosthenesSieve(
+  unsigned int primesUpToInclusive, List<unsigned int>& output
 ) {
   List<int> theSieve;
-  theSieve.initializeFillInObject(static_cast<signed>(n) + 1, 1);
-  output.Reserve(n / 2);
+  theSieve.initializeFillInObject(static_cast<signed>(primesUpToInclusive) + 1, 1);
+  output.Reserve(primesUpToInclusive / 2);
   output.size = 0;
-  for (unsigned int i = 2; i <= n; i ++) {
-    if (theSieve[static_cast<signed>(i)] != 0) {
-      output.AddOnTop(i);
-      for (unsigned int j = i; j <= n; j += i) {
-        theSieve[static_cast<signed>(j)] = 0;
-      }
+  for (unsigned int i = 2; i <= primesUpToInclusive; i ++) {
+    if (theSieve[static_cast<signed>(i)] == 0) {
+      continue;
+    }
+    output.AddOnTop(i);
+    for (unsigned int j = i; j <= primesUpToInclusive; j += i) {
+      theSieve[static_cast<signed>(j)] = 0;
     }
   }
 }
@@ -287,11 +448,11 @@ bool LargeIntegerUnsigned::operator>(int other) const {
 }
 
 bool LargeIntegerUnsigned::operator<(const LargeIntegerUnsigned& other) const {
-  return !this->IsGEQ(other);
+  return !this->IsGreaterThanOrEqualTo(other);
 }
 
 bool LargeIntegerUnsigned::operator>=(const LargeIntegerUnsigned& other) const {
-  return this->IsGEQ(other);
+  return this->IsGreaterThanOrEqualTo(other);
 }
 
 bool LargeIntegerUnsigned::operator>(const LargeIntegerUnsigned& other) const {
@@ -399,7 +560,7 @@ void LargeIntegerUnsigned::DivPositive(
   int numRunsNoDigitImprovement = 0;
   LargeIntegerUnsigned remainderBackup;
   int upperlimitNoImprovementRounds = this->SquareRootOfCarryOverBound * 2;
-  while (remainderOutput.IsGEQ(divisor)) {
+  while (remainderOutput.IsGreaterThanOrEqualTo(divisor)) {
     int quotientDigitIndex = remainderOutput.theDigits.size - divisor.theDigits.size;
     long long remainderLeadingDigit = *remainderOutput.theDigits.LastObject();
     int divisorLeadingDigitPlusSlack = divisorLeadingDigit;
@@ -496,7 +657,7 @@ void LargeIntegerUnsigned::ElementToStringLargeElementDecimal(std::string& outpu
     int highestBufferIndex = - 1;
     bufferPowersOfBase.TheObjects[0].MakeOne();
     bool bufferFilled = false;
-    while (Remainder.IsGEQ(currentPower)) {
+    while (Remainder.IsGreaterThanOrEqualTo(currentPower)) {
       numRemainingDigits ++;
       highestBufferIndex ++;
       highestBufferIndex %= sizeBufferPowersOfBase;
@@ -510,7 +671,7 @@ void LargeIntegerUnsigned::ElementToStringLargeElementDecimal(std::string& outpu
     do {
       currentPower = bufferPowersOfBase.TheObjects[highestBufferIndex];
       unsigned int theDigit = 0;
-      while (Remainder.IsGEQ(currentPower)) {
+      while (Remainder.IsGreaterThanOrEqualTo(currentPower)) {
         theDigit ++;
         currentPower += bufferPowersOfBase[highestBufferIndex];
       }
@@ -1021,7 +1182,7 @@ bool LargeIntegerUnsigned::IsEqualToZero() const {
 void LargeIntegerUnsigned::AssignFactorial(unsigned int x) {
   this->MakeOne();
   List<unsigned int> primesBelowX;
-  LargeIntegerUnsigned::GetAllPrimesSmallerThanOrEqualToUseEratosthenesSieve(x, primesBelowX);
+  LargeIntegerUnsigned::getPrimesEratosthenesSieve(x, primesBelowX);
   LargeIntegerUnsigned tempInt, tempOne;
   tempOne.MakeOne();
   for (int i = 0; i < primesBelowX.size; i ++) {
@@ -1031,8 +1192,7 @@ void LargeIntegerUnsigned::AssignFactorial(unsigned int x) {
     do {
       thePowerOfThePrime += x / currentPower;
       currentPower *= thePrime;
-    }
-    while (currentPower <= x);
+    } while (currentPower <= x);
     tempInt.AssignShiftedUInt(thePrime, 0);
     MathRoutines::RaiseToPower(tempInt, thePowerOfThePrime, tempOne);
     *this *= tempInt;
@@ -1058,11 +1218,14 @@ void LargeInteger::ReadFromFile(std::fstream& input) {
 void LargeInteger::AssignString(const std::string& input) {
   bool success = this->AssignStringFailureAllowed(input, nullptr);
   if (!success) {
-    global.fatal << "LargeInt::AssignString is not allowed to fail." << global.fatal;
+    global.fatal
+    << "LargeInt::AssignString is not allowed to fail." << global.fatal;
   }
 }
 
-bool LargeInteger::AssignStringFailureAllowed(const std::string& input, std::stringstream* commentsOnFailure) {
+bool LargeInteger::AssignStringFailureAllowed(
+  const std::string& input, std::stringstream* commentsOnFailure
+) {
   if (input.size() == 0) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Empty string is not interpretted as zero. ";
@@ -1078,7 +1241,8 @@ bool LargeInteger::AssignStringFailureAllowed(const std::string& input, std::str
     int x = input[i] - '0';
     if (x < 0 || x > 9) {
       if (commentsOnFailure != nullptr) {
-        *commentsOnFailure << "Encountered a digit character not between 0 and 9. ";
+        *commentsOnFailure
+        << "Encountered a digit character not between 0 and 9. ";
       }
       return false;
     }
@@ -1216,7 +1380,7 @@ void LargeInteger::AddLargeIntUnsigned(const LargeIntegerUnsigned& x) {
     this->value += x;
     return;
   }
-  if (this->value.IsGEQ(x)) {
+  if (this->value.IsGreaterThanOrEqualTo(x)) {
     this->value.SubtractSmallerPositive(x);
   } else {
     LargeIntegerUnsigned tempI = x;
@@ -1230,7 +1394,7 @@ void LargeInteger::operator+=(const LargeInteger& x) {
   if (this->sign == x.sign) {
     this->value += x.value;
   } else {
-    if (this->value.IsGEQ(x.value)) {
+    if (this->value.IsGreaterThanOrEqualTo(x.value)) {
       this->value.SubtractSmallerPositive(x.value);
     } else {
       LargeIntegerUnsigned tempI = this->value;
@@ -1979,6 +2143,8 @@ bool Rational::AssignStringFailureAllowed(const std::string& input) {
 
 void Rational::AssignString(const std::string& input) {
   if (!Rational::AssignStringFailureAllowed(input)) {
-    global.fatal << "Programming error: Rational::AssignString failed (likely a zero denominator). " << global.fatal;
+    global.fatal << "Programming error: "
+    << "Rational::AssignString failed (likely a zero denominator). "
+    << global.fatal;
   }
 }

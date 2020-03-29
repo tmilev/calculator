@@ -2939,6 +2939,24 @@ bool CalculatorFunctions::innerFactorPolynomialModPrime(
     return theCommands << "Expected two arguments, polynomial and prime.";
   }
   WithContext<Polynomial<Rational> > polynomial;
-
-  return false;
+  if (!theCommands.Convert(
+    input[1],
+    CalculatorConversions::functionPolynomial<Rational>,
+    polynomial
+  )) {
+    return false;
+  }
+  LargeInteger thePrime;
+  if (!input[2].IsInteger(&thePrime)) {
+    return false;
+  }
+  std::stringstream commentsOnFailure;
+  if (!thePrime.value.IsPossiblyPrime(2, true, &commentsOnFailure)) {
+    theCommands << "The modulus: " << thePrime << " appears not to be prime. " << commentsOnFailure.str();
+  }
+  std::stringstream out;
+  FormatExpressions format;
+  polynomial.context.context.ContextGetFormatExpressions(format);
+  out << "Polynomial: " << polynomial.content.ToString(&format);
+  return output.AssignValue(out.str(), theCommands);
 }

@@ -2932,7 +2932,7 @@ void ObjectContainer::reset() {
 }
 
 template <>
-bool CalculatorConversions::functionPolynomiaL<Rational>(Calculator& theCommands, const Expression& input, Expression& output);
+bool CalculatorConversions::functionPolynomial<Rational>(Calculator& theCommands, const Expression& input, Expression& output);
 
 bool Calculator::innerWriteGenVermaModAsDiffOperators(
   Calculator& theCommands,
@@ -2962,7 +2962,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperators(
     theHWs[0],
     theParSel,
     theSSalgebra,
-    CalculatorConversions::functionPolynomiaL<Rational>)
+    CalculatorConversions::functionPolynomial<Rational>)
   ) {
     return output.MakeError("Failed to extract type, highest weight, parabolic selection", theCommands);
   }

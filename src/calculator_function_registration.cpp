@@ -1438,22 +1438,22 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->AddOperationHandler(
     "Polynomial",
-    CalculatorConversions::innerPolynomiaL<Rational>,
+    CalculatorConversions::innerPolynomial<Rational>,
     "",
     "Creates a polynomial expression with rational coefficients. ",
     "Polynomial{}((x-2y+z- 1)^2(x +y-z));"
     "\nPolynomial{}(y^2)-(Polynomial{}y)^2",
-    "CalculatorConversions::innerPolynomiaL",
+    "CalculatorConversions::innerPolynomial",
     "Polynomial",
     innerStandard
   );
   this->AddOperationHandler(
     "PolynomialAlgebraicNumbers",
-    CalculatorConversions::innerPolynomiaL<AlgebraicNumber>,
+    CalculatorConversions::innerPolynomial<AlgebraicNumber>,
     "",
     "Creates a polynomial expression with algebraic number coefficients. ",
     "PolynomialAlgebraicNumbers{}((x + \\sqrt{2})^2 (\\sqrt{3}x - \\sqrt{5}));",
-    "CalculatorConversions::innerPolynomiaL",
+    "CalculatorConversions::innerPolynomial",
     "PolynomialAlgebraicNumbers",
     innerStandard
   );
@@ -3115,7 +3115,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "is not related to the lexicographic order on the "
     "words 'expansions' (x^2y^3->xxyyy) of the monomials. "
     ,
-    "PolyDivStringLexRev{}(x^7 + 6x y + 5x y^8 + y^5, x^2 + 2, y^3- 1) ;",
+    "PolyDivStringLexRev{}(x^7 + 6x y + 5x y^8 + y^5, x^2 + 2, y^3 - 1) ;",
     "CalculatorFunctions::innerPolynomialDivisionVerboseLexRev",
     "PolyDivStringLexRev",
     innerStandard
@@ -3220,7 +3220,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "",
     "<b>Calculus teaching function.</b> Same as PlotPolar "
     "but also produces a graph in the (rho,theta)-plane. ",
-    "PlotPolarExtended(1+sin  t, 0, \\pi);\n"
+    "PlotPolarExtended(1 + sin  t, 0, \\pi);\n"
     "PlotPolarExtended((1 + 9/10 cos(8 t) ) (1 + 1/10 cos (24 t) )\n"
     "(9/10 + 5/100 cos (200 t)) (1 + sin t), 0, 2\\pi)",
     "CalculatorFunctions::innerPlotPolarRfunctionThetaExtended",
@@ -3234,8 +3234,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "Gaussian elimination of a matrix. Prints a detailed string "
     "that shows the Gaussian elimination of a matrix.",
     "GaussianElimination(\\begin{array}{cccccc} "
-    "sqrt 1 & sqrt 2 & sqrt 3 & 1 & 0& 0\\\\ "
-    "sqrt 4 & sqrt 5 & sqrt 6 & 0 &1&0\\\\ "
+    "sqrt 1 & sqrt 2 & sqrt 3 & 1 & 0 & 0\\\\ "
+    "sqrt 4 & sqrt 5 & sqrt 6 & 0 & 1 & 0\\\\ "
     "sqrt 7 & sqrt 8 & sqrt 9 & 0 & 0 & 1 \\end{array})",
     "CalculatorFunctions::innerGaussianEliminationMatrix",
     "GaussianElimination",
@@ -3272,7 +3272,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->AddOperationHandler(
     "EqualityToArithmeticExpression",
-    CalculatorFunctions::innerEqualityToArithmeticExpressioN,
+    CalculatorFunctions::innerEqualityToArithmeticExpression,
     "",
     "Transforms the equality a = b to the arithmetic expression a - b.",
     "EqualityToArithmeticExpression(a = b)",

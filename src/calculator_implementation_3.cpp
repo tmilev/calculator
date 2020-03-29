@@ -1418,15 +1418,15 @@ void Polynomial<coefficient>::GetValuesLagrangeInterpolandsAtConsecutivePoints(
 }
 
 template <>
-bool CalculatorConversions::innerPolynomiaL<Rational>(Calculator& theCommands, const Expression& input, Expression& output);
+bool CalculatorConversions::innerPolynomial<Rational>(Calculator& theCommands, const Expression& input, Expression& output);
 template <>
-bool CalculatorConversions::functionPolynomiaL<Rational>(Calculator& theCommands, const Expression& input, Expression& output);
+bool CalculatorConversions::functionPolynomial<Rational>(Calculator& theCommands, const Expression& input, Expression& output);
 
 bool Calculator::innerFactorPolynomial(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerFactorPolynomial");
   WithContext<Polynomial<Rational> > polynomial;
   if (!theCommands.Convert(
-    input, CalculatorConversions::innerPolynomiaL<Rational>, polynomial
+    input, CalculatorConversions::innerPolynomial<Rational>, polynomial
   )) {
     return false;
   }
@@ -1747,7 +1747,7 @@ bool Calculator::innerEWAorPoly(Calculator& theCommands, const Expression& input
     inputPolForm,
     &startContext,
     2,
-    CalculatorConversions::functionPolynomiaL<Rational>
+    CalculatorConversions::functionPolynomial<Rational>
   )) {
     return theCommands
     << "<hr>Failed to extract polynomials from arguments of "

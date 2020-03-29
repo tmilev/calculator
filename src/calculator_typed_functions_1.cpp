@@ -10,6 +10,12 @@
 #include "math_general_polynomial_computations_basic_implementation.h" //undefined reference to Polynomial<AlgebraicNumber>::MakeOne(int)
 #include "math_extra_finite_groups_implementation.h" // undefined reference to `void WeylGroup::RaiseToDominantWeight<Rational>(Vector<Rational>&, int*, bool*, ElementWeylGroup<WeylGroup>*)
 
+template <>
+bool Expression::ConvertInternally<RationalFunction>(Expression& output) const;
+
+template <>
+bool Expression::ConvertInternally<ElementWeylAlgebra<Rational> >(Expression& output) const;
+
 bool Calculator::innerOperationBinary(
   Calculator& theCommands,
   const Expression& input,
@@ -533,7 +539,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyEllipticCurveElementsZmodP(
 }
 
 template <>
-bool Expression::ConvertToType<ElementUniversalEnveloping<RationalFunction> >(Expression& output) const;
+bool Expression::ConvertInternally<ElementUniversalEnveloping<RationalFunction> >(Expression& output) const;
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(
   Calculator& theCommands, const Expression& input, Expression& output
@@ -556,7 +562,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(
   inputConverted[1].CheckConsistency();
   input[1].CheckConsistency();
   input[2].CheckConsistency();
-  if (!inputConverted[1].ConvertToType<ElementUniversalEnveloping<RationalFunction> >(leftE)) {
+  if (!inputConverted[1].ConvertInternally<ElementUniversalEnveloping<RationalFunction> >(leftE)) {
     return false;
   }
   const ElementTensorsGeneralizedVermas<RationalFunction>& rightEltETGVM =
@@ -1245,9 +1251,6 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByInteger(
   return output.AssignValue(base, theCommands);
 }
 
-template <>
-bool Expression::ConvertToType<RationalFunction>(Expression& output) const;
-
 bool CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
@@ -1275,7 +1278,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF(
     return output.AssignValueWithContext(theUE, copyBase.GetContext(), theCommands);
   }
   Expression exponentConverted;
-  if (!copyExponent.ConvertToType<RationalFunction>(exponentConverted)) {
+  if (!copyExponent.ConvertInternally<RationalFunction>(exponentConverted)) {
     return false;
   }
   MonomialUniversalEnveloping<RationalFunction> theMon;
@@ -1968,7 +1971,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF(
   }
   if (!leftE.IsMatrixOfType<RationalFunction>()) {
     Expression leftErfForm;
-    if (!leftE.ConvertToType<RationalFunction>(leftErfForm)) {
+    if (!leftE.ConvertInternally<RationalFunction>(leftErfForm)) {
       return theCommands << "Failed to convert " << leftE.ToString() << " to rational function. ";
     }
     RationalFunction theScalar = leftErfForm.GetValue<RationalFunction>();
@@ -2136,9 +2139,6 @@ bool CalculatorFunctionsBinaryOps::innerLieBracketSwapTermsIfNeeded(
   return true;
 }
 
-template <>
-bool Expression::ConvertToType<ElementWeylAlgebra<Rational> >(Expression& output) const;
-
 bool CalculatorFunctionsBinaryOps::innerLieBracketRatPolyOrEWAWithRatPolyOrEWA(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
@@ -2168,8 +2168,8 @@ bool CalculatorFunctionsBinaryOps::innerLieBracketRatPolyOrEWAWithRatPolyOrEWA(
   }
   Expression leftConverted, rightConverted;
   if (
-    !leftE.ConvertToType<ElementWeylAlgebra<Rational> >(leftConverted) ||
-    !rightE.ConvertToType<ElementWeylAlgebra<Rational> >(rightConverted)
+    !leftE.ConvertInternally<ElementWeylAlgebra<Rational> >(leftConverted) ||
+    !rightE.ConvertInternally<ElementWeylAlgebra<Rational> >(rightConverted)
   ) {
     theCommands << "<hr>Failed with conversion to Element weyl algebra - possible programming error?";
     return false;

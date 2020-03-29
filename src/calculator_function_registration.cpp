@@ -5352,7 +5352,7 @@ void Calculator::initPredefinedInnerFunctions() {
   );
   this->AddOperationHandler(
     "FactorOneVarPolyOverRationals",
-    Calculator::innerFactorPoly,
+    Calculator::innerFactorPolynomial,
     "",
     "Factors a one variable polynomial over the rationals "
     "using Kroenecker's method. After clearing denominators, "
@@ -5365,11 +5365,11 @@ void Calculator::initPredefinedInnerFunctions() {
     "as interpolated by Lagrange polynomials.",
     "FactorOneVarPolyOverRationals{}(x^{8}-44x^{6}+438x^{4}- 1292x^{2}+529);\n"
     "FactorOneVarPolyOverRationals{}(x^{8}+2x^{7}-3x^{6}-4x^{5}+6x^{4}+2x^{3}- 13x^{2}+ 1)",
-    "Calculator::innerFactorPoly",
+    "Calculator::innerFactorPolynomial",
     "FactorOneVarPolyOverRationals",
     innerStandard
   );
-/*  this->AddOperationHandler(
+  this->AddOperationHandler(
     "FactorOneVariablePolynomialModPrime",
     CalculatorFunctions::innerFactorPolynomialModPrime,
     "",
@@ -5381,7 +5381,7 @@ void Calculator::initPredefinedInnerFunctions() {
     "CalculatorFunctions::innerFactorPolynomialModPrime",
     "FactorOneVariablePolynomialModPrime",
     innerStandard
-  );*/
+  );
   this->AddOperationHandler(
     "FactorInteger",
     CalculatorFunctions::innerFactorIntegeR,

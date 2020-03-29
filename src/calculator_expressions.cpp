@@ -245,25 +245,26 @@ int Expression::GetTypeOperation<VirtualRepresentation<FiniteGroup<ElementWeylGr
 }
 
 //Expression::GetTypeOperation specializations end.
-//Expression::ConvertsToType specializations follow.
+//Expression::ConvertsInternally specializations follow.
 template < >
-bool Expression::ConvertsToType(
-ElementSemisimpleLieAlgebra<AlgebraicNumber>* whichElement
+bool Expression::ConvertsInternally(
+  WithContext<ElementSemisimpleLieAlgebra<AlgebraicNumber> >* whichElement
 ) const {
-  MacroRegisterFunctionWithName("Expression::ConvertsToType");
+  MacroRegisterFunctionWithName("Expression::ConvertsInternally");
   if (this->owner == nullptr) {
     return false;
   }
-  ElementUniversalEnveloping<RationalFunction> theUEElt;
-  if (!this->IsOfType<ElementUniversalEnveloping<RationalFunction> >(&theUEElt)) {
+  ElementUniversalEnveloping<RationalFunction> element;
+  if (!this->IsOfType<ElementUniversalEnveloping<RationalFunction> >(&element)) {
     return false;
   }
-  ElementSemisimpleLieAlgebra<Rational> theRatElt;
-  if (!theUEElt.GetLieAlgebraElementIfPossible(theRatElt)) {
+  ElementSemisimpleLieAlgebra<Rational> elementSemisimple;
+  if (!element.GetLieAlgebraElementIfPossible(elementSemisimple)) {
     return false;
   }
   if (whichElement != nullptr) {
-    *whichElement = theRatElt;
+    this->GetContext(whichElement->context);
+    whichElement->content = elementSemisimple;
   }
   return true;
 }
@@ -857,9 +858,9 @@ bool Expression::IsMatrix(int* outputNumRows, int* outputNumCols) const {
 }
 
 //end Expression::GetValueNonConst specializations.
-//start Expression::ConvertToType specializations.
+//start Expression::ConvertInternally specializations.
 template< >
-bool Expression::ConvertToType<Polynomial<AlgebraicNumber> >(Expression& output) const {
+bool Expression::ConvertInternally<Polynomial<AlgebraicNumber> >(Expression& output) const {
   MacroRegisterFunctionWithName("ConvertToType_Polynomial_AlgebraicNumber");
   this->CheckInitialization();
   if (this->IsOfType<Rational>()) {
@@ -885,7 +886,7 @@ bool Expression::ConvertToType<Polynomial<AlgebraicNumber> >(Expression& output)
 }
 
 template< >
-bool Expression::ConvertToType<Polynomial<Rational> >(Expression& output) const {
+bool Expression::ConvertInternally<Polynomial<Rational> >(Expression& output) const {
   MacroRegisterFunctionWithName("ConvertToType_Polynomial_Rational");
   this->CheckInitialization();
   if (this->IsOfType<Rational>()) {
@@ -901,7 +902,7 @@ bool Expression::ConvertToType<Polynomial<Rational> >(Expression& output) const 
 }
 
 template< >
-bool Expression::ConvertToType<RationalFunction>(Expression& output) const {
+bool Expression::ConvertInternally<RationalFunction>(Expression& output) const {
   MacroRegisterFunctionWithName("ConvertToType_RationalFunctionOld");
   this->CheckInitialization();
   if (this->IsOfType<Rational>()) {
@@ -929,7 +930,7 @@ bool Expression::ConvertToType<RationalFunction>(Expression& output) const {
 }
 
 template< >
-bool Expression::ConvertToType<ElementWeylAlgebra<Rational> >(Expression& output) const {
+bool Expression::ConvertInternally<ElementWeylAlgebra<Rational> >(Expression& output) const {
   MacroRegisterFunctionWithName("ConvertToType_ElementWeylAlgebra");
   this->CheckInitialization();
   if (this->IsOfType<Rational>()) {
@@ -950,7 +951,7 @@ bool Expression::ConvertToType<ElementWeylAlgebra<Rational> >(Expression& output
 }
 
 template< >
-bool Expression::ConvertToType<Weight<Polynomial<Rational> > >(Expression& output) const {
+bool Expression::ConvertInternally<Weight<Polynomial<Rational> > >(Expression& output) const {
   MacroRegisterFunctionWithName("ConvertToType_Weight_Polynomial");
   this->CheckInitialization();
   if (this->IsOfType<Weight<Polynomial<Rational> > >()) {
@@ -961,7 +962,7 @@ bool Expression::ConvertToType<Weight<Polynomial<Rational> > >(Expression& outpu
 }
 
 template< >
-bool Expression::ConvertToType<ElementUniversalEnveloping<RationalFunction> >(Expression& output) const {
+bool Expression::ConvertInternally<ElementUniversalEnveloping<RationalFunction> >(Expression& output) const {
   MacroRegisterFunctionWithName("ConvertToType_RationalFunctionOld");
   this->CheckInitialization();
   if (!this->IsBuiltInTypE())
@@ -994,7 +995,7 @@ bool Expression::ConvertToType<ElementUniversalEnveloping<RationalFunction> >(Ex
 }
 
 template< >
-bool Expression::ConvertToType<ElementTensorsGeneralizedVermas<RationalFunction> >(Expression& output) const {
+bool Expression::ConvertInternally<ElementTensorsGeneralizedVermas<RationalFunction> >(Expression& output) const {
   MacroRegisterFunctionWithName("ConvertToType_RationalFunctionOld");
   this->CheckInitialization();
   if (this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunction> >()) {
@@ -1005,7 +1006,7 @@ bool Expression::ConvertToType<ElementTensorsGeneralizedVermas<RationalFunction>
 }
 
 template< >
-bool Expression::ConvertToType<Rational>(Expression& output) const {
+bool Expression::ConvertInternally<Rational>(Expression& output) const {
   MacroRegisterFunctionWithName("ConvertToType_Rational");
   this->CheckInitialization();
   if (this->IsOfType<Rational>()) {
@@ -1016,7 +1017,7 @@ bool Expression::ConvertToType<Rational>(Expression& output) const {
 }
 
 template< >
-bool Expression::ConvertToType<AlgebraicNumber>(Expression& output) const {
+bool Expression::ConvertInternally<AlgebraicNumber>(Expression& output) const {
   MacroRegisterFunctionWithName("ConvertToType_AlgebraicNumber");
   this->CheckInitialization();
   if (this->IsOfType<AlgebraicNumber>()) {
@@ -1032,7 +1033,7 @@ bool Expression::ConvertToType<AlgebraicNumber>(Expression& output) const {
 }
 
 template< >
-bool Expression::ConvertToType<double>(Expression& output) const {
+bool Expression::ConvertInternally<double>(Expression& output) const {
   MacroRegisterFunctionWithName("ConvertToType_double");
   this->CheckInitialization();
   if (this->IsOfType<double>()) {
@@ -2252,6 +2253,11 @@ void Expression::GetBaseExponentForm(Expression& outputBase, Expression& outputE
   outputExponent.AssignValue(1, *this->owner);
 }
 
+bool Expression::GetContext(ExpressionContext& output) const {
+  output.context = this->GetContext();
+  return true;
+}
+
 Expression Expression::GetContext() const {
   this->CheckInitialization();
   if (this->IsBuiltInTypE()) {
@@ -2266,11 +2272,14 @@ Expression Expression::GetContext() const {
   }
   Expression output;
   output.MakeEmptyContext(*this->owner);
-  global.fatal << "This is a programming error: GetContext called on an Expression"
-  << " that is not a built-in data type. "
-  << " I can't display the expression as this may cause ``infinite'' "
-  << "recursion if the error is caused by the ToString method. Here is however the lisp form "
-  << this->ToStringFull() << " of the expression. " << "Here's  a stack trace. " << global.fatal;
+  global.fatal
+  << "This is a programming error: GetContext called on an Expression"
+  << "that is not a built-in data type. "
+  << "I can't display the expression as this may cause ``infinite'' "
+  << "recursion if the error is caused by the ToString method. "
+  << "Here is however the lisp form "
+  << this->ToStringFull() << " of the expression. "
+  << "Here's stack trace. " << global.fatal;
   return output;
 }
 

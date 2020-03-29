@@ -15,6 +15,10 @@
 #include "math_extra_symmetric_groups_and_generalizations.h"
 #include "math_extra_elliptic_curves_implementation.h"
 
+template <class builtIn>
+class WithContext;
+class ExpressionContext;
+
 class Expression {
 private:
   void reset() {
@@ -286,10 +290,12 @@ private:
   bool NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost(const Expression* leftNeighbor = nullptr) const;
 
   int GetExpressionTreeSize() const;
+
   template <class theType>
-  bool ConvertToType(Expression& output) const;
+  bool ConvertInternally(Expression& output) const;
   template <class theType>
-  bool ConvertsToType(theType* whichElement = nullptr) const;
+  bool ConvertsInternally(WithContext<theType>* whichElement = nullptr) const;
+
   template <class theType>
   bool IsOfType() const {
     MacroRegisterFunctionWithName("Expression::IsOfType");
@@ -373,6 +379,7 @@ private:
   bool HasContext() const;
   bool HasNonEmptyContext() const;
   Expression GetContext() const;
+  bool GetContext(ExpressionContext& output) const;
   static bool MergeContexts(Expression& leftE, Expression& rightE);
   bool MergeContextsMyAruments(Expression& output, std::stringstream* commentsOnFailure) const;
   template <class theType>
@@ -712,7 +719,6 @@ private:
 class ExpressionContext {
 public:
   Expression context;
-
 };
 
 template <class builtIn>
@@ -2012,6 +2018,7 @@ public:
       << global.fatal;
     }
   }
+  // TODO: move to calculator conversions.
   template <class theType>
   bool ConvertToTypeUsingFunction(
     Expression::FunctionAddress theFun, const Expression& input, Expression& output
@@ -2030,7 +2037,8 @@ public:
     }
     return output.IsOfType<theType>();
   }
-  // Return type is non-const, please use with caution.
+  // TODO: move to calculator conversions.
+  // TODO: remove redundancy with Expression::ConvertToType, if any.
   template <class theType>
   bool Convert(
     const Expression& input,
@@ -2042,11 +2050,9 @@ public:
     if (!this->ConvertToTypeUsingFunction<theType>(conversion, input, conversionExpression)) {
       return false;
     }
-    global.Comments << "DEBUG: Got to conversoin expression check. <hr>";
     if (!conversionExpression.IsOfType(&output.content)) {
       return false;
     }
-    global.Comments << "DEBUG: en after!. <hr>";
     output.context.context = conversionExpression.GetContext();
     return true;
   }
@@ -2385,7 +2391,7 @@ public:
   static bool innerSplitFDpartB3overG2inner(Calculator& theCommands, branchingData& theG2B3Data, Expression& output);
   static bool innerLittelmannOperator(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAnimateLittelmannPaths(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerFactorPoly(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerFactorPolynomial(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLSPath(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTestMonomialBaseConjecture(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerJacobiSymbol(Calculator& theCommands, const Expression& input, Expression& output);
@@ -2647,7 +2653,10 @@ public:
     Expression* inputContext = nullptr
   );
   static bool innerLoadKey(
-    Calculator& theCommands, const Expression& inputStatementList, const std::string& inputKey, Expression& output
+    Calculator& theCommands,
+    const Expression& inputStatementList,
+    const std::string& inputKey,
+    Expression& output
   );
   static bool innerLoadKeysFromStatementLisT(
     Calculator& theCommands,
@@ -2843,7 +2852,7 @@ bool Calculator::functionGetMatrix(
       if (!this->ConvertToTypeUsingFunction<theType>(
         conversionFunction, nonConvertedEs(i, j), convertedEs(i, j)
       )) {
-        if (!nonConvertedEs(i, j).ConvertToType<theType>(convertedEs.elements[i][j])) {
+        if (!nonConvertedEs(i, j).ConvertInternally<theType>(convertedEs.elements[i][j])) {
           if (commentsOnError != nullptr) {
             *commentsOnError << "Failed to convert matrix element: "
             << "row: " << i << ", column: "
@@ -2991,7 +3000,7 @@ bool Expression::MergeContextsMyArumentsAndConvertThem(
   output.AddChildOnTop((*this)[0]);
   Expression convertedE;
   for (int i = 1; i < mergedContexts.children.size; i ++) {
-    if (!mergedContexts[i].ConvertToType<theType>(convertedE)) {
+    if (!mergedContexts[i].ConvertInternally<theType>(convertedE)) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "<hr>Failed to convert "
         << mergedContexts[i].ToString() << " to the desired type. ";

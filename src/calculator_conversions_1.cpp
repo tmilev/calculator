@@ -6,6 +6,9 @@
 #include "math_general_polynomial_computations_basic_implementation.h"
 #include "math_extra_universal_enveloping_implementation.h" // undefined reference to `ElementUniversalEnveloping<RationalFunctionOld>::MakeZero(SemisimpleLieAlgebra&)'
 
+template <>
+bool Expression::ConvertInternally<RationalFunction>(Expression& output) const;
+
 bool CalculatorConversions::innerExpressionFromChevalleyGenerator(
   Calculator& theCommands, const ChevalleyGenerator& input, Expression& output
 ) {
@@ -1100,9 +1103,6 @@ bool CalculatorConversions::innerExpressionFromRF(
   return output.MakeXOX(theCommands, theCommands.opDivide(), numE, denE);
 }
 
-template <>
-bool Expression::ConvertToType<RationalFunction>(Expression& output) const;
-
 bool CalculatorConversions::innerRationalFunctioN(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
@@ -1180,7 +1180,7 @@ bool CalculatorConversions::functionRationalFunction(
     return true;
   }
   if (input.IsOfType<Polynomial<Rational> >() || input.IsOfType<Rational>()) {
-    return input.ConvertToType<RationalFunction> (output);
+    return input.ConvertInternally<RationalFunction>(output);
   }
   if (input.IsOfType<AlgebraicNumber>()) {
     AlgebraicNumber theNumber = input.GetValue<AlgebraicNumber>();
@@ -1188,7 +1188,7 @@ bool CalculatorConversions::functionRationalFunction(
     if (theNumber.IsRational(&theRat)) {
       Expression tempE;
       tempE.AssignValue(theRat, theCommands);
-      return tempE.ConvertToType<RationalFunction> (output);
+      return tempE.ConvertInternally<RationalFunction> (output);
     }
   }
   Expression theContext;

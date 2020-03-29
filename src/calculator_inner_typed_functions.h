@@ -193,7 +193,7 @@ bool CalculatorConversions::functionPolynomiaL(Calculator& theCommands, const Ex
     return output.AssignValueWithContext(converted, input.GetContext(), theCommands);
   }
   if (input.IsOfType<coefficient>() || input.IsOfType<Rational>()) {
-    if (!input.ConvertToType<Polynomial<coefficient> >(output)) {
+    if (!input.ConvertInternally<Polynomial<coefficient> >(output)) {
       global.fatal << "This is a programming error: "
       << "failed to convert coefficient to polynomial. " << global.fatal;
     }

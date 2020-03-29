@@ -1422,29 +1422,32 @@ bool CalculatorConversions::innerPolynomiaL<Rational>(Calculator& theCommands, c
 template <>
 bool CalculatorConversions::functionPolynomiaL<Rational>(Calculator& theCommands, const Expression& input, Expression& output);
 
-bool Calculator::innerFactorPoly(Calculator& theCommands, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("Calculator::innerFactorPoly");
-  RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
-  if (!theCommands.CallCalculatorFunction(CalculatorConversions::innerPolynomiaL<Rational>, input, output)) {
+bool Calculator::innerFactorPolynomial(Calculator& theCommands, const Expression& input, Expression& output) {
+  MacroRegisterFunctionWithName("Calculator::innerFactorPolynomial");
+  WithContext<Polynomial<Rational> > polynomial;
+  if (!theCommands.Convert(
+    input, CalculatorConversions::innerPolynomiaL<Rational>, polynomial
+  )) {
     return false;
   }
-  Expression theContext = output.GetContext();
-  Polynomial<Rational> thePoly = output.GetValue<Polynomial<Rational> >();
-  if (thePoly.GetMinNumVars() > 1) {
-    return output.MakeError("I have been taught to factor one variable polys only. ", theCommands);
+  if (polynomial.content.GetMinNumVars() > 1) {
+    return output.MakeError(
+      "I have been taught to factor one variable polynomials only. ",
+      theCommands
+    );
   }
-  List<Polynomial<Rational> > theFactors;
-  if (!thePoly.FactorMe(theFactors, &theCommands.Comments)) {
+  List<Polynomial<Rational> > factors;
+  if (!polynomial.content.FactorMe(factors, &theCommands.Comments)) {
     return false;
   }
-  output.reset(theCommands, theFactors.size + 1);
-  Expression polyE(theCommands), expressionE(theCommands);
+  output.reset(theCommands, factors.size + 1);
+  Expression polynomialE, expressionE(theCommands);
   output.AddChildAtomOnTop(theCommands.opSequence());
-  for (int i = 0; i < theFactors.size; i ++) {
-    polyE.AssignValueWithContext(theFactors[i], theContext, theCommands);
+  for (int i = 0; i < factors.size; i ++) {
+    polynomialE.AssignValueWithContext(factors[i], polynomial.context.context, theCommands);
     expressionE.children.Clear();
     expressionE.AddChildAtomOnTop("MakeExpression");
-    expressionE.AddChildOnTop(polyE);
+    expressionE.AddChildOnTop(polynomialE);
     output.AddChildOnTop(expressionE);
   }
   return true;

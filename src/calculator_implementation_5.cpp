@@ -2938,6 +2938,7 @@ bool CalculatorFunctions::innerFactorPolynomialModPrime(
   if (input.size() != 3) {
     return theCommands << "Expected two arguments, polynomial and prime.";
   }
-  global.fatal << "Factor mod prime not implemented yet." << global.fatal;
+  WithContext<Polynomial<Rational> > polynomial;
+
   return false;
 }

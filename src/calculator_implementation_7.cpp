@@ -19,6 +19,18 @@
 #include "transport_layer_security.h"
 #include "string_constants.h"
 
+template <>
+bool Expression::ConvertsInternally<ElementSemisimpleLieAlgebra<AlgebraicNumber> >(
+  WithContext<ElementSemisimpleLieAlgebra<AlgebraicNumber> >* whichElement
+) const;
+
+template <>
+bool Expression::ConvertInternally<ElementWeylAlgebra<Rational> >(Expression& output) const;
+template <>
+bool Expression::ConvertInternally<Polynomial<Rational> >(Expression& output) const;
+template <>
+bool Expression::ConvertInternally<ElementUniversalEnveloping<RationalFunction> >(Expression& output) const;
+
 template <class theType>
 bool MathRoutines::GenerateVectorSpaceClosedWRTOperation(
   List<theType>& inputOutputElts,
@@ -58,19 +70,18 @@ bool MathRoutines::GenerateVectorSpaceClosedWRTOperation(
   return true;
 }
 
-template <>
-bool Expression::ConvertsToType<ElementSemisimpleLieAlgebra<AlgebraicNumber> >(ElementSemisimpleLieAlgebra<AlgebraicNumber>* whichElement) const;
-
-bool CalculatorFunctions::innerConstructCartanSA(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctions::innerConstructCartanSA(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerConstructCartanSA");
   SubalgebraSemisimpleLieAlgebra theSA;
-  ElementSemisimpleLieAlgebra<AlgebraicNumber> theElt;
-  if (input.ConvertsToType(&theElt)) {
-    theSA.theGenerators.AddOnTop(theElt);
+  WithContext<ElementSemisimpleLieAlgebra<AlgebraicNumber> > element;
+  if (input.ConvertsInternally(&element)) {
+    theSA.theGenerators.AddOnTop(element.content);
   } else {
     for (int i = 1; i < input.size(); i ++) {
-      if (input[i].ConvertsToType(&theElt)) {
-        theSA.theGenerators.AddOnTop(theElt);
+      if (input[i].ConvertsInternally(&element)) {
+        theSA.theGenerators.AddOnTop(element.content);
       } else {
         return theCommands << "Failed to extract element of a semisimple Lie algebra from " << input[i].ToString();
       }
@@ -2336,11 +2347,6 @@ bool CalculatorFunctions::innerCompositeConstTimesAnyActOn(
   return output.MakeXOX(theCommands, theCommands.opTimes(), input[0][1], functionActsOnE);
 }
 
-template <>
-bool Expression::ConvertToType<ElementWeylAlgebra<Rational> >(Expression& output) const;
-template <>
-bool Expression::ConvertToType<Polynomial<Rational> >(Expression& output) const;
-
 bool CalculatorFunctions::innerCompositeEWAactOnPoly(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
@@ -2361,9 +2367,9 @@ bool CalculatorFunctions::innerCompositeEWAactOnPoly(
   }
   Polynomial<Rational> theArgumentPoly;
   Expression theArgumentConverted;
-  if (theArgument.ConvertToType<Polynomial<Rational> >(theArgumentConverted)) {
+  if (theArgument.ConvertInternally<Polynomial<Rational> >(theArgumentConverted)) {
     theArgumentPoly = theArgumentConverted.GetValue<Polynomial<Rational> >();
-  } else if (theArgument.ConvertToType<ElementWeylAlgebra<Rational> >(theArgumentConverted)) {
+  } else if (theArgument.ConvertInternally<ElementWeylAlgebra<Rational> >(theArgumentConverted)) {
     if (!theArgumentConverted.GetValue<ElementWeylAlgebra<Rational> >().IsPolynomial(&theArgumentPoly)) {
       return false;
     }
@@ -8099,9 +8105,6 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
   return output.AssignValue(out.str(), theCommands);
 }
 
-template <>
-bool Expression::ConvertToType<ElementUniversalEnveloping<RationalFunction> >(Expression& output) const;
-
 bool CalculatorFunctions::innerHWTAABF(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerHWTAABF");
   RecursionDepthCounter theRecursionCounter(&theCommands.RecursionDeptH);
@@ -8140,10 +8143,10 @@ bool CalculatorFunctions::innerHWTAABF(Calculator& theCommands, const Expression
     );
   }
   Expression leftConverted, rightConverted;
-  if (!leftMerged.ConvertToType<ElementUniversalEnveloping<RationalFunction> >(leftConverted)) {
+  if (!leftMerged.ConvertInternally<ElementUniversalEnveloping<RationalFunction> >(leftConverted)) {
     return false;
   }
-  if (!rightMerged.ConvertToType<ElementUniversalEnveloping<RationalFunction> >(rightConverted)) {
+  if (!rightMerged.ConvertInternally<ElementUniversalEnveloping<RationalFunction> >(rightConverted)) {
     return false;
   }
   const ElementUniversalEnveloping<RationalFunction>& leftUE = leftConverted.GetValue<ElementUniversalEnveloping<RationalFunction> >();

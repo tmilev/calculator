@@ -67,7 +67,10 @@ bool Polynomial<coefficient>::IsOneVariablePoly(int* whichVariable) const {
 }
 
 template <class coefficient>
-bool Polynomial<coefficient>::FactorMe(List<Polynomial<Rational> >& outputFactors, std::stringstream* comments) const {
+bool Polynomial<coefficient>::FactorMe(
+  List<Polynomial<Rational> >& outputFactors,
+  std::stringstream* comments
+) const {
   MacroRegisterFunctionWithName("Polynomial::FactorMe");
   outputFactors.SetSize(0);
   if (this->IsEqualToZero() || this->IsConstant()) {

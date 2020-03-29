@@ -9,12 +9,12 @@ bool GlobalVariables::Test::All() {
 }
 
 bool GlobalVariables::Test::Builds() {
-  global.CallSystemNoOutput("make clean", true);
+  global.externalCommandNoOutput("make clean", true);
   // This is the most restrictive build allowed:
-  int result = global.CallSystemNoOutput("make -j20 noMongo=1 nossl=1 noPublicDomain=1", true);
+  int result = global.externalCommandNoOutput("make -j20 noMongo=1 nossl=1 noPublicDomain=1", true);
   if (result != 0) {
     global.fatal << "Calculator noMongo nossl build generated errors. " << global.fatal;
   }
-  global.CallSystemNoOutput("make clean", true);
+  global.externalCommandNoOutput("make clean", true);
   return true;
 }

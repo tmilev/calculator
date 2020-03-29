@@ -1634,7 +1634,7 @@ bool EmailRoutines::SendEmailWithMailGun(
   << "-F text=\""
   << HtmlRoutines::ConvertStringEscapeQuotesAndBackslashes(this->emailContent)
   << "\"";
-  std::string commandResult = global.CallSystemWithOutput(commandToExecute.str());
+  std::string commandResult = global.externalCommandReturnOutput(commandToExecute.str());
   if (commentsGeneralSensitive != nullptr) {
     *commentsGeneralSensitive << "Command: " << HtmlRoutines::ConvertStringToHtmlString(commandToExecute.str(), true);
     bool isBad = false;

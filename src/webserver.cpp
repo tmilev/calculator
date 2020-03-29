@@ -3282,10 +3282,52 @@ TransportLayerSecurity& TransportLayerSecurity::DefaultTLS_READ_ONLY() {
   return global.server().theTLS;
 }
 
+int WebServer::Daemon() {
+  MacroRegisterFunctionWithName("WebServer::Daemon");
+  global.logs.logType = GlobalVariables::LogData::type::daemon;
+  std::stringstream restartCommand;
+  restartCommand << global.PhysicalNameExecutableWithPath << " ";
+  for (int i = 2; i < global.programArguments.size; i ++) {
+    restartCommand << global.programArguments[i] << " ";
+  }
+  while(true) {
+    int pidChild = fork();
+    if (pidChild == 0) {
+      // child process
+      global << logger::orange << "Development daemon is starting command:" << logger::endL;
+      global << logger::green << restartCommand.str() << logger::endL;
+      global.externalCommandStream(restartCommand.str());
+    }
+    int exitStatus = - 1;
+    waitpid(pidChild, &exitStatus, 0);
+    if (exitStatus != 0) {
+      global << logger::red;
+    } else {
+      global << logger::green;
+    }
+    global << "Server exited with status: " << exitStatus << logger::endL;
+    global.FallAsleep(100000);
+  }
+}
+
 int WebServer::Run() {
   MacroRegisterFunctionWithName("WebServer::Run");
   global.RelativePhysicalNameCrashReport = "crash_WebServerRun.html";
   WebServer::initializeRandomBytes();
+  if (global.millisecondsMaxComputation <= 0) {
+    global
+    << logger::purple << "************************" << logger::endL
+    << logger::red << "WARNING: no computation time limit set. " << logger::endL
+    << logger::purple << "************************" << logger::endL;
+  }
+  if (global.millisecondsMaxComputation > 500000) {
+    global
+    << logger::purple << "************************" << logger::endL
+    << logger::red << "WARNING: computation time limit is high: "
+    << (global.millisecondsMaxComputation / 1000)
+    << " seconds. " << logger::endL
+    << logger::purple << "************************" << logger::endL;
+  }
 
   // <-worker log resets are needed, else forked processes reset their common log.
   // <-resets of the server logs are not needed, but I put them here nonetheless.
@@ -3299,7 +3341,7 @@ int WebServer::Run() {
   global.logs.serverMonitor.reset();
   global.logs.worker.reset();
   this->processIdServer = getpid();
-  if (global.flagServerAutoMonitor) {
+  if (global.flagLocalhostConnectionMonitor) {
     global << logger::green << "Start monitor process." << logger::endL;
     this->processIdServer = this->Fork();
     if (this->processIdServer < 0) {
@@ -3593,7 +3635,7 @@ void WebServer::FigureOutOperatingSystem() {
   List<std::string> supportedOSes;
   supportedOSes.AddOnTop("Ubuntu");
   supportedOSes.AddOnTop("CentOS");
-  std::string commandOutput = global.CallSystemWithOutput("cat /etc/*-release");
+  std::string commandOutput = global.externalCommandReturnOutput("cat /etc/*-release");
   if (
     commandOutput.find("ubuntu") != std::string::npos ||
     commandOutput.find("Ubuntu") != std::string::npos ||
@@ -3642,7 +3684,7 @@ void WebServer::CheckSystemInstallationOpenSSL() {
     global << "You appear to be missing an openssl installation. Let me try to install that for you. "
     << logger::green << "About to request sudo password for: " << sslInstallCommand << logger::endL;
     global << logger::red << "To refuse the command type CTRL+C. " << logger::endL;
-    global.CallSystemNoOutput(sslInstallCommand, true);
+    global.externalCommandNoOutput(sslInstallCommand, true);
     global.configuration["openSSL"] = "Attempted installation on Ubuntu";
   }
   global.ConfigurationStore();
@@ -3667,17 +3709,17 @@ void WebServer::CheckSystemInstallationMongoDB() {
   global << "You appear to be missing an mongoDB installation. Let me try to install that for you. "
   << logger::green << "Enter your the sudo password as prompted please. " << logger::endL;
   if (global.OperatingSystem == "Ubuntu") {
-    global.CallSystemNoOutput("sudo apt-get install mongodb", true);
+    global.externalCommandNoOutput("sudo apt-get install mongodb", true);
     global.configuration["mongoDB"] = "Attempted installation on Ubuntu";
   } else if (global.OperatingSystem == "CentOS") {
-    global.CallSystemNoOutput("sudo yum install mongodb", true);
+    global.externalCommandNoOutput("sudo yum install mongodb", true);
     global.configuration["mongoDB"] = "Attempted installation on CentOS";
   }
   global.ChDir(global.PhysicalPathProjectBase);
-  global.CallSystemNoOutput("make clean", true);
+  global.externalCommandNoOutput("make clean", true);
   global << "Proceeding to rebuild the calculator. " << logger::red
   << "This is expected to take 10+ minutes. " << logger::endL;
-  global.CallSystemNoOutput("make -j8", true);
+  global.externalCommandNoOutput("make -j8", true);
   global.ConfigurationStore();
 }
 
@@ -3703,29 +3745,29 @@ void WebServer::CheckMongoDBSetup() {
   std::stringstream commandUnzipMongoC, commandUnzipLibbson;
   commandUnzipMongoC << "tar -xvzf mongo-c-driver-1.9.3.tar.gz";
   global << logger::green << commandUnzipMongoC.str() << logger::endL;
-  global << global.CallSystemWithOutput(commandUnzipMongoC.str());
+  global << global.externalCommandReturnOutput(commandUnzipMongoC.str());
   commandUnzipLibbson << "tar -xvzf libbson-1.9.3.tar.gz";
   global << logger::green << commandUnzipLibbson.str() << logger::endL;
-  global << global.CallSystemWithOutput(commandUnzipLibbson.str());
+  global << global.externalCommandReturnOutput(commandUnzipLibbson.str());
 
   global.ChDir("./mongo-c-driver-1.9.3");
-  global.CallSystemNoOutput("./configure", true);
-  global.CallSystemNoOutput("make -j8", true);
+  global.externalCommandNoOutput("./configure", true);
+  global.externalCommandNoOutput("make -j8", true);
   global << "Need sudo access for command: "
   << logger::red << "sudo make install" << logger::endL;
-  global.CallSystemNoOutput("sudo make install", true);
+  global.externalCommandNoOutput("sudo make install", true);
   global.ChDir("../libbson-1.9.3");
-  global.CallSystemNoOutput("./configure", true);
-  global.CallSystemNoOutput("make -j8", true);
+  global.externalCommandNoOutput("./configure", true);
+  global.externalCommandNoOutput("make -j8", true);
   global << "Need sudo access for command: "
   << logger::red << "sudo make install" << logger::endL;
-  global.CallSystemNoOutput("sudo make install", true);
+  global.externalCommandNoOutput("sudo make install", true);
   global.ChDir("../../bin");
   global << "Need sudo access for command to configure linker to use local usr/local/lib path (needed by mongo): "
   << logger::red << "sudo cp ../external-source/usr_local_lib_for_mongo.conf /etc/ld.so.conf.d/" << logger::endL;
-  global.CallSystemNoOutput("sudo cp ../external-source/usr_local_lib_for_mongo.conf /etc/ld.so.conf.d/", true);
+  global.externalCommandNoOutput("sudo cp ../external-source/usr_local_lib_for_mongo.conf /etc/ld.so.conf.d/", true);
   global << "Need sudo access for command: " << logger::red << "sudo ldconfig" << logger::endL;
-  global.CallSystemNoOutput("sudo ldconfig", true);
+  global.externalCommandNoOutput("sudo ldconfig", true);
   global.configuration["mongoDBSetup"] = "Setup complete";
   global.ConfigurationStore();
 }
@@ -3744,7 +3786,7 @@ void WebServer::CheckFreecalcSetup() {
   global.ChDir(global.PhysicalPathProjectBase + "../");
   global << logger::green << "Current folder: " << FileOperations::GetCurrentFolder() << logger::endL;
   global << logger::green << "git clone https://github.com/tmilev/freecalc.git" << logger::endL;
-  global.CallSystemNoOutput("git clone https://github.com/tmilev/freecalc.git", true);
+  global.externalCommandNoOutput("git clone https://github.com/tmilev/freecalc.git", true);
   global.configuration["freecalcSetup"] = "Setup complete";
   global.ConfigurationStore();
 }
@@ -3752,9 +3794,9 @@ void WebServer::CheckFreecalcSetup() {
 void WebServer::CheckUnzipInstall() {
   WebServer::FigureOutOperatingSystem();
   if (global.OperatingSystem == "Ubuntu") {
-    global.CallSystemNoOutput("sudo apt-get install unzip", true);
+    global.externalCommandNoOutput("sudo apt-get install unzip", true);
   } else if (global.OperatingSystem == "CentOS") {
-    global.CallSystemNoOutput("sudo yum install unzip", true);
+    global.externalCommandNoOutput("sudo yum install unzip", true);
   }
 
 }
@@ -3828,8 +3870,8 @@ void WebServer::CheckMathJaxSetup() {
   std::stringstream unzipCommand, moveCommand;
   unzipCommand << "unzip " << mathjaxZipSource << " -d " << publicHtmlFolder;
   moveCommand << "mv " << publicHtmlFolder << "MathJax-2.7.2 " << publicHtmlFolder << "MathJax-2.7-latest";
-  global.CallSystemNoOutput(unzipCommand.str(), true);
-  global.CallSystemNoOutput(moveCommand.str(), true);
+  global.externalCommandNoOutput(unzipCommand.str(), true);
+  global.externalCommandNoOutput(moveCommand.str(), true);
 }
 
 bool WebServer::AnalyzeMainArgumentsTimeString(const std::string& timeLimitString) {
@@ -3867,6 +3909,7 @@ void WebServer::InitializeBuildFlags() {
 }
 
 std::string MainFlags::server = "server";
+std::string MainFlags::daemon = "daemon";
 std::string MainFlags::help = "help";
 std::string MainFlags::pathExecutable = "path_executable";
 std::string MainFlags::configurationFile = "configuration_file";
@@ -3954,6 +3997,10 @@ bool ArgumentAnalyzer::processOneArgument() {
     global.flagRunningConsoleHelp = true;
     return true;
   }
+  if (current == MainFlags::daemon && this->currentIndex == 1) {
+    global.flagDaemonMonitor = true;
+    return true;
+  }
   if (current == MainFlags::test) {
     return this->setTest();
   }
@@ -3999,7 +4046,7 @@ void WebServer::InitializeMainHashes() {
   StateMaintainerCurrentFolder preserveCurrentFolder;
   if (global.buildVersionSimple == "") {
     global.buildVersionSimple =
-    StringRoutines::StringTrimWhiteSpace(global.CallSystemWithOutput("git rev-list --count HEAD"));
+    StringRoutines::StringTrimWhiteSpace(global.externalCommandReturnOutput("git rev-list --count HEAD"));
   }
   global.buildVersionSimple = StringRoutines::StringTrimWhiteSpace(global.buildVersionSimple);
   for (unsigned i = 0; i < global.buildVersionSimple.size(); i ++) {
@@ -4009,7 +4056,7 @@ void WebServer::InitializeMainHashes() {
     }
   }
   global.buildHeadHashWithServerTime = StringRoutines::StringTrimWhiteSpace(
-    global.CallSystemWithOutput("git rev-parse HEAD")
+    global.externalCommandReturnOutput("git rev-parse HEAD")
   );
   for (unsigned i = 0; i < global.buildHeadHashWithServerTime.size(); i ++) {
     if (!MathRoutines::IsAHexDigit(global.buildHeadHashWithServerTime[i])) {
@@ -4238,9 +4285,9 @@ void GlobalVariables::ConfigurationProcess() {
     << logger::purple << "************************" << logger::endL;
   }
   if (global.configuration[Configuration::serverAutoMonitor].isTrueRepresentationInJSON()) {
-    global.flagServerAutoMonitor = true;
+    global.flagLocalhostConnectionMonitor = true;
   } else {
-    global.flagServerAutoMonitor = false;
+    global.flagLocalhostConnectionMonitor = false;
     if (!global.flagRunningConsoleRegular && !global.flagRunningConsoleTest) {
       global
       << logger::red << "WARNING: server auto-monitoring is off. " << logger::endL;
@@ -4354,8 +4401,6 @@ void WebServer::CheckInstallation() {
 int WebServer::main(int argc, char **argv) {
   global.init();
   global.InitThreadsExecutableStart();
-  // use of loggers forbidden before calling global.server().AnalyzeMainArguments(...):
-  // we need to initialize first the folder locations relative to the executable.
   MacroRegisterFunctionWithName("main");
   try {
     // Initializations basic (timer, ...).
@@ -4412,21 +4457,9 @@ int WebServer::main(int argc, char **argv) {
     if (!mathJaxPresent && global.flagRunningBuiltInWebServer) {
       global << logger::red << "MathJax not available. " << logger::endL;
     }
-    if (global.flagRunningBuiltInWebServer) {
-      if (global.millisecondsMaxComputation <= 0) {
-        global
-        << logger::purple << "************************" << logger::endL
-        << logger::red << "WARNING: no computation time limit set. " << logger::endL
-        << logger::purple << "************************" << logger::endL;
-      }
-      if (global.millisecondsMaxComputation > 500000) {
-        global
-        << logger::purple << "************************" << logger::endL
-        << logger::red << "WARNING: computation time limit is high: "
-        << (global.millisecondsMaxComputation / 1000)
-        << " seconds. " << logger::endL
-        << logger::purple << "************************" << logger::endL;
-      }
+    if (global.flagDaemonMonitor) {
+      return global.server().Daemon();
+    } else if (global.flagRunningBuiltInWebServer) {
       return global.server().Run();
     } else if (global.flagRunningConsoleTest) {
       return mainTest(global.programArguments);

@@ -144,12 +144,14 @@ public:
       // This optional process monitors the server process over a localhost connection.
       static const int serverMonitor = 2;
       // This optional process monitors the entire system and reboots it if it goes down.
-      static const int serverDaemon = 3;
+      static const int daemon = 3;
     };
     int logType;
     logger server;
     logger serverMonitor;
     logger worker;
+    // Logger daemon currently logs to stdout only (no file backup).
+    logger daemon;
     LogData() {
       this->logType = LogData::type::server;
     }
@@ -168,13 +170,23 @@ public:
     case GlobalVariables::LogData::type::worker:
       this->logs.worker << toBePrinted;
       return *this;
+    case GlobalVariables::LogData::type::daemon:
+      this->logs.daemon << toBePrinted;
+      return *this;
     default:
       this->logs.worker << toBePrinted;
       return *this;
     }
   }
-  int (*pointerCallSystemNoOutput)(const std::string& theSystemCommand);
-  std::string (*pointerCallSystemWithOutput)(const std::string& theSystemCommand);
+  // When non-null, usually points to:
+  // int externalCommandNoOutput(const std::string& theCommand)
+  int (*pointerExternalCommandNoOutput)(const std::string& theSystemCommand);
+  // When non-null, usually points to:
+  // std::string externalCommandReturnStandartOut(const std::string& inputCommand)
+  std::string (*pointerExternalCommandReturnOutput)(const std::string& theSystemCommand);
+  // When non-null, usually points to:
+  // int externalCommandStream(const std::string& inputCommand)
+  int (*pointerExternalCommandStream)(const std::string& theSystemCommand);
   void (*pointerCallChDir)(const std::string& theDirectoryName);
   //  double MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit;
   MemorySaving<Calculator>& calculator();
@@ -209,7 +221,8 @@ public:
 
   bool flagDatabaseCompiled;
   bool flagDisableDatabaseLogEveryoneAsAdmin;
-  bool flagServerAutoMonitor;
+  bool flagLocalhostConnectionMonitor;
+  bool flagDaemonMonitor;
 
   std::string buildVersionSimple;
   std::string buildHeadHashWithServerTime;
@@ -433,8 +446,9 @@ public:
   bool UserDebugFlagOn();
   bool UserStudentVieWOn();
   bool CheckConsistency();
-  int CallSystemNoOutput(const std::string& systemCommand, bool logErrors);
-  std::string CallSystemWithOutput(const std::string& systemCommand);
+  int externalCommandStream(const std::string& systemCommand);
+  int externalCommandNoOutput(const std::string& systemCommand, bool logErrors);
+  std::string externalCommandReturnOutput(const std::string& systemCommand);
   void ChDir(const std::string& systemCommand);
   std::string ToStringCalculatorComputation(const std::string& computation, const std::string &display);
   std::string ToStringCalcArgsNoNavigation(List<std::string>* tagsToExclude);

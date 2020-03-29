@@ -12,8 +12,9 @@
 class Calculator;
 
 extern int GetElapsedMilliseconds();
-extern int CallSystemWrapperNoOutput(const std::string& theCommand);
-extern std::string CallSystemWrapperReturnStandardOutput(const std::string& theCommand);
+extern int externalCommandNoOutput(const std::string& theCommand);
+extern std::string externalCommandReturnStandartOut(const std::string& theCommand);
+extern int externalCommandStreamOutput(const std::string& theCommand);
 extern void CallChDirWrapper(const std::string& theCommand);
 extern void ignoreUserAbortSignal();
 

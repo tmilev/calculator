@@ -279,6 +279,7 @@ public:
   bool CreateNewActiveWorker();
   bool EmergencyRemoval_LastCreatedWorker();
   bool CheckConsistency();
+  int Daemon();
   int Run();
   // Wraps the system level fork() call.
   // Addionally computes a

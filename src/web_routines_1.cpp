@@ -92,13 +92,13 @@ void WebServerMonitor::BackupDatabaseIfNeeded() {
   << global.GetDateForLogFiles() << ".mongo";
   global << logger::orange << "Backing up database with command: " << logger::endL;
   global << commandStream.str() << logger::endL;
-  global.CallSystemWithOutput(commandStream.str());
+  global.externalCommandReturnOutput(commandStream.str());
   global << logger::green << "Backing up completed. " << logger::endL;
   this->timeAtLastBackup = global.GetElapsedSeconds();
 }
 
 void WebServerMonitor::Monitor(int pidServer) {
-  if (!global.flagServerAutoMonitor) {
+  if (!global.flagLocalhostConnectionMonitor) {
     return;
   }
   this->pidServer = pidServer;
@@ -173,7 +173,7 @@ void WebServerMonitor::Restart() {
   std::stringstream killServerChildrenCommand;
   killServerChildrenCommand << "pkill -9 -P " << this->pidServer;
   global << "Terminating server children with command: " << killServerChildrenCommand.str() << logger::endL;
-  global.CallSystemNoOutput(killServerChildrenCommand.str(), true);
+  global.externalCommandNoOutput(killServerChildrenCommand.str(), true);
   global << logger::red << "Terminating server with pid: " << this->pidServer << logger::endL;
   WebServer::TerminateProcessId(this->pidServer);
   global << logger::red << "Restarting monitor. " << this->pidServer << logger::endL;

@@ -277,14 +277,14 @@ void LaTeXCrawler::BuildFreecalC() {
   } else {
     printableFolder = "lectures_printable_" + folderEnd + "/";
   }
-  global.CallSystemNoOutput("mkdir " + printableFolder, true);
+  global.externalCommandNoOutput("mkdir " + printableFolder, true);
   if (isLecturE) {
-    global.CallSystemNoOutput("mkdir " + lectureProjectorFolder, true);
+    global.externalCommandNoOutput("mkdir " + lectureProjectorFolder, true);
     if (this->flagBuildSingleSlides) {
       slideProjectorFolder = "slides_projector_" + folderEnd + "/";
       slideHandoutFolder = "slides_handout_" + folderEnd + "/";
-      global.CallSystemNoOutput("mkdir " + slideProjectorFolder, true);
-      global.CallSystemNoOutput("mkdir " + slideHandoutFolder, true);
+      global.externalCommandNoOutput("mkdir " + slideProjectorFolder, true);
+      global.externalCommandNoOutput("mkdir " + slideHandoutFolder, true);
     }
   }
   this->theFileNameWorkingCopy = "working_file_" + this->theFileNameToCrawlPhysicalNoPathName;
@@ -315,10 +315,10 @@ void LaTeXCrawler::BuildFreecalC() {
     executedCommands << "<br>" << currentSysCommand;
     reportStream << currentSysCommand;
     theReport.Report(reportStream.str());
-    global.CallSystemNoOutput(currentSysCommand, true);
+    global.externalCommandNoOutput(currentSysCommand, true);
     reportStream << "<b>[x2]</b>";
     theReport.Report(reportStream.str());
-    global.CallSystemNoOutput(currentSysCommand, true);
+    global.externalCommandNoOutput(currentSysCommand, true);
     std::stringstream thePdfFileNameHandout;
     if (isLecturE) {
       thePdfFileNameHandout << "./" << printableFolder << "Lecture" << theLectureNumbers[i] << "Handout_"
@@ -339,7 +339,7 @@ void LaTeXCrawler::BuildFreecalC() {
     executedCommands << "<br>" << currentSysCommand;
     reportStream << "<br>Lecture/Homework " << i + 1 << " handout compiled, renaming file ... ";
     theReport.Report(reportStream.str());
-    global.CallSystemNoOutput(currentSysCommand, true);
+    global.externalCommandNoOutput(currentSysCommand, true);
     reportStream << " done.";
     theReport.Report(reportStream.str());
     if (!isLecturE) {
@@ -362,7 +362,7 @@ void LaTeXCrawler::BuildFreecalC() {
     executedCommands << "<br>" << currentSysCommand;
     reportStream << currentSysCommand;
     theReport.Report(reportStream.str());
-    global.CallSystemNoOutput(currentSysCommand, true);
+    global.externalCommandNoOutput(currentSysCommand, true);
     std::stringstream thePdfFileNameNormal;
     thePdfFileNameNormal << "./" << lectureProjectorFolder << "Lecture"
     << theLectureNumbers[i] << "_" << theLectureDesiredNames[i] << "_"
@@ -371,7 +371,7 @@ void LaTeXCrawler::BuildFreecalC() {
     executedCommands << "<br>" << currentSysCommand;
     reportStream << "<br>Lecture " << i + 1 << " regular slides compiled, renaming file ... ";
     theReport.Report(reportStream.str());
-    global.CallSystemNoOutput(currentSysCommand, true);
+    global.externalCommandNoOutput(currentSysCommand, true);
     reportStream << " done.";
     theReport.Report(reportStream.str());
     resultTable << "<td>" << thePdfFileNameNormal.str() << "</td>" << "<td>" << thePdfFileNameHandout.str() << "</td>";
@@ -411,7 +411,7 @@ void LaTeXCrawler::BuildFreecalC() {
       executedCommands << "<br>" << currentSysCommand;
       reportStream << currentSysCommand;
       theReport.Report(reportStream.str());
-      global.CallSystemNoOutput(currentSysCommand, true);
+      global.externalCommandNoOutput(currentSysCommand, true);
       std::stringstream thePdfFileNameNormal;
       thePdfFileNameNormal << "./";
       if (k == 0) {
@@ -425,7 +425,7 @@ void LaTeXCrawler::BuildFreecalC() {
       executedCommands << "<br>" << currentSysCommand;
       reportStream << "<br>Slide " << i + 1 << ", run " << k << " compiled, renaming file ... ";
       theReport.Report(reportStream.str());
-      global.CallSystemWithOutput(currentSysCommand);
+      global.externalCommandReturnOutput(currentSysCommand);
       reportStream << " done.";
       theReport.Report(reportStream.str());
       resultTable << "<td>" << thePdfFileNameNormal.str() << "</td>";
@@ -864,26 +864,26 @@ bool LaTeXCrawler::BuildOrFetchFromCachePDF(
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "Executing command: " << currentSysCommand << " ... ";
   }
-  global.CallSystemNoOutput(currentSysCommand, true);
+  global.externalCommandNoOutput(currentSysCommand, true);
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "done!<br>";
   }
   currentSysCommand = "mkdir -p " + this->targetPDFLatexPath;
-  std::string commandResult = global.CallSystemWithOutput(currentSysCommand);
+  std::string commandResult = global.externalCommandReturnOutput(currentSysCommand);
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "Executed command: " << currentSysCommand
     << " ... to get result: " << commandResult << "<br>";
   }
   if (this->targetVideoLatexPath!= "") {
     currentSysCommand = "mkdir -p " + this->targetVideoLatexPath;
-    std::string commandResult = global.CallSystemWithOutput(currentSysCommand);
+    std::string commandResult = global.externalCommandReturnOutput(currentSysCommand);
     if (commentsGeneral != nullptr) {
       *commentsGeneral << "Executed command: " << currentSysCommand
       << " ... to get result: " << commandResult << "<br>";
     }
   }
   currentSysCommand = "mv " + this->workingFileNameNoPathPDF + " " + this->targetPDFFileNameWithLatexPath;
-  commandResult = global.CallSystemWithOutput(currentSysCommand);
+  commandResult = global.externalCommandReturnOutput(currentSysCommand);
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "Executed command: " << currentSysCommand
     << " ... to get result: " << commandResult << "<br>";

@@ -74,11 +74,16 @@ unsigned long long int Rational::TotalSmallAdditions = 0;
 unsigned long long int Rational::TotalSmallGCDcalls = 0;
 unsigned long long int Rational::TotalSmallMultiplications = 0;
 
-int GlobalVariables::CallSystemNoOutput(const std::string& systemCommand, bool logErrors) {
-  if (this->pointerCallSystemNoOutput == nullptr) {
+int GlobalVariables::externalCommandNoOutput(
+  const std::string& systemCommand, bool logErrors
+) {
+  if (this->pointerExternalCommandNoOutput == nullptr) {
+    global << logger::red
+    << "Unable to call system command without output. "
+    << logger::endL;
     return - 1;
   }
-  int exitCode = this->pointerCallSystemNoOutput(systemCommand);
+  int exitCode = this->pointerExternalCommandNoOutput(systemCommand);
   if (exitCode != 0 && logErrors) {
     global << logger::red << "System command: " << systemCommand
     << " exited with " << exitCode << ". " << logger::endL;
@@ -86,11 +91,29 @@ int GlobalVariables::CallSystemNoOutput(const std::string& systemCommand, bool l
   return exitCode;
 }
 
-std::string GlobalVariables::CallSystemWithOutput(const std::string& systemCommand) {
-  if (this->pointerCallSystemWithOutput == nullptr) {
+int GlobalVariables::externalCommandStream(
+  const std::string& systemCommand
+) {
+  if (this->pointerExternalCommandStream == nullptr) {
+    global << logger::red
+    << "Unable to call system command with stream output. "
+    << logger::endL;
+    return - 1;
+  }
+  // Usually this is the non-member function int externalCommandStream():
+  int exitCode = this->pointerExternalCommandStream(systemCommand);
+  if (exitCode != 0) {
+    global << logger::red << "System command: " << systemCommand
+    << " exited with " << exitCode << ". " << logger::endL;
+  }
+  return exitCode;
+}
+
+std::string GlobalVariables::externalCommandReturnOutput(const std::string& systemCommand) {
+  if (this->pointerExternalCommandReturnOutput == nullptr) {
     return "Error";
   }
-  return this->pointerCallSystemWithOutput(systemCommand);
+  return this->pointerExternalCommandReturnOutput(systemCommand);
 }
 
 void GlobalVariables::ChDir(const std::string& systemCommand) {
@@ -137,8 +160,9 @@ GlobalVariables::GlobalVariables() {
   this->millisecondOffset = 0;
   this->millisecondsComputationStart = - 1;
   this->millisecondsReplyAfterComputation = 5000; //5 seconds
-  this->pointerCallSystemWithOutput = nullptr;
-  this->pointerCallSystemNoOutput = nullptr;
+  this->pointerExternalCommandReturnOutput = nullptr;
+  this->pointerExternalCommandNoOutput = nullptr;
+  this->pointerExternalCommandStream = nullptr;
   this->pointerCallChDir = nullptr;
   this->flagServerForkedIntoWorker = false;
   this->flagComputationCompletE = false;
@@ -159,7 +183,8 @@ GlobalVariables::GlobalVariables() {
   this->flagRunServerOnEmptyCommandLine = false;
   this->flagRequestComingLocally = false;
   this->flagDatabaseCompiled = false;
-  this->flagServerAutoMonitor = true;
+  this->flagLocalhostConnectionMonitor = true;
+  this->flagDaemonMonitor = false;
   this->flagDisableDatabaseLogEveryoneAsAdmin = false;
 }
 
@@ -1489,7 +1514,7 @@ bool FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded_Ultr
   std::string folderName = FileOperations::GetPathFromFileNameWithPath(computedFileName);
   std::stringstream mkDirCommand;
   mkDirCommand << "mkdir -p " << folderName;
-  global.CallSystemWithOutput(mkDirCommand.str());
+  global.externalCommandReturnOutput(mkDirCommand.str());
   return FileOperations::OpenFileCreateIfNotPresentUnsecure(
     theFile, computedFileName, OpenInAppendMode, truncate, openAsBinary
   );

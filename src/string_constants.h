@@ -9,6 +9,7 @@ public:
   static std::string configurationFile;
   static std::string test;
   static std::string help;
+  static std::string daemon;
 };
 
 class WebAPI {

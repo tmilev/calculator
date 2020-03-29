@@ -799,6 +799,9 @@ std::string logger::openTagHtml() {
 }
 
 std::string logger::getStampShort() {
+  if (global.logs.logType == GlobalVariables::LogData::type::daemon) {
+    return "[daemon] ";
+  }
   std::stringstream out;
   out << "[" << global.logs.ToStringProcessType() << ", ";
   if (global.server().activeWorker != - 1) {

@@ -372,7 +372,7 @@ void SemisimpleSubalgebras::CheckFileWritePermissions() {
   FileOperations::GetPhysicalFileNameFromVirtual(
     this->owner->ToStringVirtualFolderName(), testFileFolderPhysical, false, false, nullptr
   );
-  global.CallSystemNoOutput("mkdir " + testFileFolderPhysical, true);
+  global.externalCommandNoOutput("mkdir " + testFileFolderPhysical, true);
 
   if (!FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(testFile, testFileNameRelative, false, true, false)) {
     global.fatal << "<br>This may or may not be a programming error. I requested to create file "

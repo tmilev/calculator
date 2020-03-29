@@ -53,14 +53,14 @@ std::string Calculator::WriteDefaultLatexFileReturnHtmlLink(
   theFile.flush();
   theFile.close();
   systemCommand1 << " latex -output-directory=" << baseFolder << " " << fileName.str() << ".tex";
-  global.CallSystemNoOutput(systemCommand1.str(), true);
+  global.externalCommandNoOutput(systemCommand1.str(), true);
   if (useLatexDviPSpsToPNG) {
     systemCommand2 << " dvips -o " << fileNameWithPathPhysical << ".ps "
     << fileNameWithPathPhysical << ".dvi";
-    global.CallSystemNoOutput(systemCommand2.str(), true);
+    global.externalCommandNoOutput(systemCommand2.str(), true);
     systemCommand3 << " convert " << fileNameWithPathPhysical
     << ".ps " << fileNameWithPathPhysical << ".png";
-    global.CallSystemNoOutput(systemCommand3.str(), true);
+    global.externalCommandNoOutput(systemCommand3.str(), true);
   }
   std::stringstream out;
   out << "<img src =\"" << global.DisplayPathOutputFolder

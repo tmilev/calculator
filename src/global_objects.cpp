@@ -43,8 +43,9 @@ void InitializeGlobalObjects() {
   global.logs.logType = GlobalVariables::LogData::type::server;
   global.flagIsChildProcess = false;
   InitializeTimeR();
-  global.pointerCallSystemNoOutput = &CallSystemWrapperNoOutput;
-  global.pointerCallSystemWithOutput = &CallSystemWrapperReturnStandardOutput;
+  global.pointerExternalCommandNoOutput = &externalCommandNoOutput;
+  global.pointerExternalCommandReturnOutput = &externalCommandReturnStandartOut;
+  global.pointerExternalCommandStream = &externalCommandStreamOutput;
   global.pointerCallChDir = &CallChDirWrapper;
 }
 

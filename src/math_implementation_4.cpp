@@ -202,7 +202,7 @@ std::string GlobalVariables::ToStringHTMLTopCommandLinuxSystem() {
   if (!global.UserDefaultHasAdminRights()) {
     return "Login as admin for RAM memory statistics.";
   }
-  std::string topString = this->CallSystemWithOutput("top -b -n 1 -s");
+  std::string topString = this->externalCommandReturnOutput("top -b -n 1 -s");
   std::stringstream out;
   std::string lineString, wordString;
   std::stringstream topStream(topString);
@@ -376,7 +376,7 @@ std::string GlobalVariables::LogData::ToStringProcessType() const {
     return "server monitor";
   case GlobalVariables::LogData::type::worker:
     return "worker";
-  case GlobalVariables::LogData::type::serverDaemon:
+  case GlobalVariables::LogData::type::daemon:
     return "daemon";
   default:
     return "uknown process type";

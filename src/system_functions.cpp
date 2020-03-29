@@ -174,11 +174,11 @@ void CreateTimerThread() {
   ThreadData::CreateThread(RunTimerThread, "timer");
 }
 
-int CallSystemWrapperNoOutput(const std::string& theCommand) {
+int externalCommandNoOutput(const std::string& theCommand) {
   return system(theCommand.c_str());
 }
 
-std::string CallSystemWrapperReturnStandardOutput(const std::string& inputCommand) {
+std::string externalCommandReturnStandartOut(const std::string& inputCommand) {
   std::string inputCommandWithRedirection = inputCommand + " 2>&1";
   std::shared_ptr<FILE> pipe(popen(inputCommandWithRedirection.c_str(), "r"), pclose);
   if (!pipe) {
@@ -191,6 +191,29 @@ std::string CallSystemWrapperReturnStandardOutput(const std::string& inputComman
     if (fgets(buffer, bufferSize, pipe.get()) != nullptr) {
       result += buffer;
     }
+  }
+  return result;
+}
+
+int externalCommandStreamOutput(const std::string& inputCommand) {
+  std::string inputCommandWithRedirection = inputCommand + " 2>&1";
+  std::shared_ptr<FILE> reader(popen(inputCommandWithRedirection.c_str(), "r"), pclose);
+  if (!reader) {
+    global << logger::red << "Failed to create pipe. " << logger::endL;
+    return - 1;
+  }
+  const int bufferSize = 20000;
+  char buffer[bufferSize];
+  while (!feof(reader.get())) {
+    char* incoming = fgets(buffer, bufferSize, reader.get());
+    if (incoming != nullptr) {
+      std::string result(buffer);
+      std::cout << result;
+    }
+  }
+  int result = pclose(reader.get());
+  if (result != 0) {
+    global << logger::red << strerror(errno) << logger::endL;
   }
   return result;
 }

@@ -312,7 +312,7 @@ public:
   void RecycleOneChild(int childIndex, int& numberInUse);
   void HandleTooManyConnections(const std::string& incomingUserAddress);
   void HandleTooManyWorkers(int& numInUse);
-  void StopKillAll(bool attemptToRestart);
+  void StopKillAll();
   bool RestartIsNeeded();
   void initDates();
   std::string ToStringWorkerToWorker();

@@ -133,7 +133,6 @@ GlobalVariables::GlobalVariables() {
   this->flagCertificatesAreOfficiallySigned = false;
   this->flagIsChildProcess = false;
   this->flagRestartNeeded = false;
-  this->flagStopNeeded = false;
   this->millisecondsMaxComputation = 100000; //100 seconds
   this->millisecondOffset = 0;
   this->millisecondsComputationStart = - 1;

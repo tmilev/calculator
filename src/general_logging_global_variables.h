@@ -136,9 +136,15 @@ public:
   public:
     class type {
     public:
+      // This process type runs the web server and accepts connections.
       static const int server = 0;
-      static const int serverMonitor = 1;
-      static const int worker = 2;
+      // This process type runs the calculator connections
+      // and does the actual internet input/output.
+      static const int worker = 1;
+      // This optional process monitors the server process over a localhost connection.
+      static const int serverMonitor = 2;
+      // This optional process monitors the entire system and reboots it if it goes down.
+      static const int serverDaemon = 3;
     };
     int logType;
     logger server;
@@ -193,7 +199,6 @@ public:
   bool flagServerDetailedLog;
   bool flagIsChildProcess;
   bool flagRestartNeeded;
-  bool flagStopNeeded;
 
   bool flagLoggedIn;
   bool flagLogInAttempted;

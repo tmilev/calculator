@@ -1488,9 +1488,6 @@ void WebWorker::WrapUpConnection() {
   if (global.flagRestartNeeded) {
     this->resultWork["restartNeeded"] = "true";
   }
-  if (global.flagStopNeeded) {
-    this->resultWork["stopNeeded"] = "true";
-  }
   this->pipeWorkerToServerControls.WriteOnceAfterEmptying(
     this->resultWork.ToString(nullptr), false
   );
@@ -2681,7 +2678,7 @@ bool WebServer::RestartIsNeeded() {
   return true;
 }
 
-void WebServer::StopKillAll(bool attemptToRestart) {
+void WebServer::StopKillAll() {
   if (
     global.logs.logType != GlobalVariables::LogData::type::server &&
     global.logs.logType != GlobalVariables::LogData::type::serverMonitor
@@ -2721,26 +2718,7 @@ void WebServer::StopKillAll(bool attemptToRestart) {
     global.FallAsleep(1000000);
   }
   this->ReleaseEverything();
-  std::stringstream theCommand;
-  theCommand << "killall " << global.PhysicalNameExecutableNoPath;
-  if (attemptToRestart) {
-    global << logger::yellow << "Proceeding to restart server. " << logger::endL;
-    global << "Current folder: " << FileOperations::GetCurrentFolder() << logger::endL;
-    long timeLimitSeconds = global.millisecondsMaxComputation / 1000;
-    global << logger::red << "Restart with time limit " << timeLimitSeconds << logger::endL;
-    theCommand << " && ";
-    theCommand << global.PhysicalNameExecutableWithPath;
-    theCommand << " server " << timeLimitSeconds;
-    global << logger::red << "Restart command: "
-    << logger::blue << theCommand.str() << logger::endL;
-  } else {
-    global << logger::red << "Proceeding to stop server. " << logger::endL;
-  }
-  global.CallSystemNoOutput(theCommand.str(), true); //kill any other running copies of the calculator.
-  while (true) {
-    global.FallAsleep(1000000);
-    global << logger::red << "Waiting for killall command ... " << logger::endL;
-  }
+  exit(0);
 }
 
 void WebServer::initPortsITry() {
@@ -2940,13 +2918,11 @@ void WebServer::ProcessOneChildMessage(int childIndex, int& outputNumInUse) {
     workerMessage["connectionsServed"].theInteger.GetElement().GetIntValueTruncated()
     ;
   }
-  if (workerMessage["stopNeeded"].isTrueRepresentationInJSON()) {
-    this->StopKillAll(false);
-  }
-  if (workerMessage["restartNeeded"].isTrueRepresentationInJSON()) {
-    // A worker has returned request to restart.
-    // This is likely a user-triggered event; restart is desired.
-    this->StopKillAll(true);
+  if (
+    workerMessage["stopNeeded"].isTrueRepresentationInJSON() ||
+    workerMessage["restartNeeded"].isTrueRepresentationInJSON()
+  ) {
+    this->StopKillAll();
   }
 }
 
@@ -3576,7 +3552,6 @@ bool WebWorker::RunOnce() {
   if (
     (!this->flagKeepAlive) ||
     global.flagRestartNeeded ||
-    global.flagStopNeeded ||
     global.theResponse.TimedOut()
   ) {
     return false;
@@ -3897,6 +3872,100 @@ std::string MainFlags::pathExecutable = "path_executable";
 std::string MainFlags::configurationFile = "configuration_file";
 std::string MainFlags::test = "test";
 
+class ArgumentAnalyzer {
+public:
+  int currentIndex;
+  HashedList<std::string, MathRoutines::HashString> commandLineConfigurations;
+  bool processOneArgument();
+  bool setServer();
+  bool setTest();
+  bool setPathExecutable();
+  bool setConfigurationFile();
+  bool processCommandLineConfigurations(std::string& input);
+};
+
+bool ArgumentAnalyzer::setServer() {
+  std::string timeLimitString;
+  global.flagRunningBuiltInWebServer = true;
+  global.flagRunningConsoleRegular = false;
+  global.flagRunningConsoleTest = false;
+  if (this->currentIndex + 1 < global.programArguments.size) {
+    timeLimitString = global.programArguments[this->currentIndex + 1];
+    if (WebServer::AnalyzeMainArgumentsTimeString(timeLimitString)) {
+      this->currentIndex ++;
+    }
+  }
+  return true;
+}
+
+bool ArgumentAnalyzer::setTest() {
+  global.flagRunningConsoleTest = true;
+  global.flagRunningConsoleRegular = false;
+  global.flagRunningBuiltInWebServer = false;
+  global.configurationFileName = "/configuration/configuration_for_testing.json";
+  return true;
+}
+
+bool ArgumentAnalyzer::setPathExecutable() {
+  if (this->currentIndex + 1 >= global.programArguments.size) {
+    global << logger::red
+    << "The executable path is missing. " << logger::endL;
+    return false;
+  }
+  this->currentIndex ++;
+  global.PathExecutableUserInputOrDeduced = global.programArguments[this->currentIndex];
+  return true;
+}
+
+bool ArgumentAnalyzer::setConfigurationFile() {
+  if (this->currentIndex + 1 >= global.programArguments.size) {
+    global << logger::red
+    << "The configuration filename is missing. " << logger::endL;
+    return false;
+  }
+  this->currentIndex ++;
+  global.configurationFileName = global.programArguments[this->currentIndex];
+  return true;
+}
+
+bool ArgumentAnalyzer::processCommandLineConfigurations(std::string& input) {
+  if (!this->commandLineConfigurations.Contains(input)) {
+    return true;
+  }
+  if (this->currentIndex + 1 >= global.programArguments.size) {
+    global << logger::red
+    << "The configuration: " << input << " is missing. " << logger::endL;
+    return false;
+  }
+  this->currentIndex ++;
+  global.configurationCommandLine[input] = global.programArguments[this->currentIndex];
+  return true;
+}
+
+bool ArgumentAnalyzer::processOneArgument() {
+  if (this->currentIndex >= global.programArguments.size) {
+    return false;
+  }
+  std::string current = StringRoutines::StringTrimWhiteSpace(global.programArguments[this->currentIndex]);
+  if (current == MainFlags::server) {
+    return this->setServer();
+  }
+  if (current == MainFlags::help && this->currentIndex == 1) {
+    global.flagRunningConsoleHelp = true;
+    return true;
+  }
+  if (current == MainFlags::test) {
+    return this->setTest();
+  }
+  if (current == MainFlags::pathExecutable) {
+    return this->setPathExecutable();
+  }
+  if (current == MainFlags::configurationFile) {
+    return this->setConfigurationFile();
+  }
+  return this->processCommandLineConfigurations(current);
+}
+
 void WebServer::AnalyzeMainArguments(int argC, char **argv) {
   MacroRegisterFunctionWithName("WebServer::AnalyzeMainArguments");
   global.configurationCommandLine.reset(JSData::token::tokenObject);
@@ -3916,58 +3985,13 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv) {
   if (argC < 2) {
     return;
   }
-  HashedList<std::string, MathRoutines::HashString> commandLineConfigurations;
-  commandLineConfigurations.AddOnTop(List<std::string> ({
+  ArgumentAnalyzer arguments;
+  arguments.currentIndex = 1;
+  arguments.commandLineConfigurations.AddOnTop(List<std::string> ({
     Configuration::portHTTP,
     Configuration::portHTTPSOpenSSL
   }));
-  std::string timeLimitString;
-  for (int i = 1; i < global.programArguments.size; i ++) {
-    std::string current = StringRoutines::StringTrimWhiteSpace(global.programArguments[i]);
-    if (current == MainFlags::server) {
-      global.flagRunningBuiltInWebServer = true;
-      global.flagRunningConsoleRegular = false;
-      global.flagRunningConsoleTest = false;
-      if (i + 1 < global.programArguments.size) {
-        timeLimitString = global.programArguments[i + 1];
-        if (WebServer::AnalyzeMainArgumentsTimeString(timeLimitString)) {
-          i ++;
-          continue;
-        }
-      }
-    }
-    if (current == MainFlags::help && i == 1) {
-      global.flagRunningConsoleHelp = true;
-      return;
-    }
-    if (current == MainFlags::test) {
-      global.flagRunningConsoleTest = true;
-      global.flagRunningConsoleRegular = false;
-      global.flagRunningBuiltInWebServer = false;
-      global.configurationFileName = "/configuration/configuration_for_testing.json";
-      return;
-    }
-    if (current == MainFlags::pathExecutable) {
-      if (i + 1 < global.programArguments.size) {
-        i ++;
-        global.PathExecutableUserInputOrDeduced = global.programArguments[i];
-        continue;
-      }
-    }
-    if (current == MainFlags::configurationFile) {
-      if (i + 1 < global.programArguments.size) {
-        i ++;
-        global.configurationFileName = global.programArguments[i];
-        continue;
-      }
-    }
-    if (commandLineConfigurations.Contains(current)) {
-      if (i + 1 < global.programArguments.size) {
-        i ++;
-        global.configurationCommandLine[current] = global.programArguments[i];
-        continue;
-      }
-    }
+  for (; arguments.processOneArgument(); arguments.currentIndex ++) {
   }
 }
 

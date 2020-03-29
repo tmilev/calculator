@@ -177,7 +177,7 @@ void WebServerMonitor::Restart() {
   global << logger::red << "Terminating server with pid: " << this->pidServer << logger::endL;
   WebServer::TerminateProcessId(this->pidServer);
   global << logger::red << "Restarting monitor. " << this->pidServer << logger::endL;
-  global.server().StopKillAll(false);
+  global.server().StopKillAll();
 }
 
 WebCrawler::WebCrawler() {

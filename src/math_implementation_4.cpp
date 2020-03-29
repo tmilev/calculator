@@ -376,6 +376,8 @@ std::string GlobalVariables::LogData::ToStringProcessType() const {
     return "server monitor";
   case GlobalVariables::LogData::type::worker:
     return "worker";
+  case GlobalVariables::LogData::type::serverDaemon:
+    return "daemon";
   default:
     return "uknown process type";
   }

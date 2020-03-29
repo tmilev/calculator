@@ -94,7 +94,7 @@ bool PipePrimitive::CreateMe(
   if (pipe(this->pipeEnds.TheObjects) < 0) {
     global << logger::red << "FAILED to create pipe: " << this->name << ". " << logger::endL;
     this->Release();
-    global.server().StopKillAll(false);
+    global.server().StopKillAll();
     // return false;
   }
   if (!readEndBlocks) {

@@ -18,6 +18,7 @@
 #include <cmath>
 #include "transport_layer_security.h"
 #include "string_constants.h"
+#include <vector>
 
 template <>
 bool Expression::ConvertsInternally<ElementSemisimpleLieAlgebra<AlgebraicNumber> >(
@@ -9070,19 +9071,6 @@ bool CalculatorFunctions::innerCrash(
   return output.AssignValue(std::string("Crashed succesfully"), theCommands);
 }
 
-bool CalculatorFunctions::innerStopServer(Calculator& theCommands, const Expression& input, Expression& output) {
-  (void) input;
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerStopServer");
-  if (!global.UserDefaultHasAdminRights()) {
-    return output.MakeError("Stop server function allowed to logged-in admins only. ", theCommands);
-  }
-  global << "Stopping server as requested. ";
-  global.flagStopNeeded = true;
-  theCommands.flagAbortComputationASAP = true;
-  return output.AssignValue(std::string("Stopping."), theCommands);
-}
-
-#include <vector>
 bool CalculatorFunctions::innerCrashByListOutOfBounds(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {

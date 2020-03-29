@@ -20,21 +20,6 @@ void Calculator::initAdminFunctions() {
   adminDisabled = adminDefault;
   adminDisabled.disabledByUserDefault = true;
   adminDisabled.disabledByUser = true;
-
-  this->AddOperationHandler(
-    "StopServer",
-    CalculatorFunctions::innerStopServer,
-    "",
-    "Stops the server/kills the calculator for all users. "
-    "Requires administator rights. "
-    "Disabled by default. "
-    "Use to stop server remotely/test server service restart. ",
-    "StopServer 0",
-    "CalculatorDatabaseFunctions::innerStopServer",
-    "StopServer",
-    adminDisabled
-  );
-
   if (!global.flagDatabaseCompiled || global.flagRunningConsoleTest) {
     return;
   }

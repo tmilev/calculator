@@ -1476,7 +1476,7 @@ std::string ElementZmodP::toString(FormatExpressions* theFormat) const {
   if (suppressModulus) {
     out << this->theValue.toString();
   } else {
-    out << "(" << this->theValue.toString() << this->toStringModP() << ")";
+    out << "(" << this->theValue.toString() << " " << this->toStringModP() << ")";
   }
   return out.str();
 }

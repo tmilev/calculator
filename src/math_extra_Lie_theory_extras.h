@@ -184,7 +184,7 @@ class MonomialUniversalEnvelopingOrdered {
 public:
   SemisimpleLieAlgebraOrdered* owner;
   std::string DebugString;
-  std::string ToString(FormatExpressions* PolyFormatLocal) const;
+  std::string toString(FormatExpressions* PolyFormatLocal) const;
   // SelectedIndices gives the non-zero powers of the generators participating in the monomial
   // Powers gives the powers of the generators in the order specified in the owner
   List<int> generatorsIndices;
@@ -301,10 +301,10 @@ private:
   friend class MonomialUniversalEnvelopingOrdered<coefficient>;
 public:
   std::string DebugString;
-  void ToString(std::string& output, FormatExpressions* PolyFormatLocal) const;
-  std::string ToString(FormatExpressions* PolyFormatLocal) const {
+  void toString(std::string& output, FormatExpressions* PolyFormatLocal) const;
+  std::string toString(FormatExpressions* PolyFormatLocal) const {
     std::string tempS;
-    this->ToString(tempS, PolyFormatLocal);
+    this->toString(tempS, PolyFormatLocal);
     return tempS;
   }
   bool NeedsParenthesisForMultiplication() const {
@@ -312,7 +312,7 @@ public:
   }
   void ComputeDebugString() {
     FormatExpressions tempFormat;
-    this->DebugString = this->ToString(tempFormat);
+    this->DebugString = this->toString(tempFormat);
   }
   SemisimpleLieAlgebraOrdered* owner;
   void AddMonomial(const MonomialUniversalEnvelopingOrdered<coefficient>& input);
@@ -487,11 +487,11 @@ public:
   PolynomialSubstitution<coefficient> theSubNthElementIsImageNthCoordSimpleBasis;
   void ComputeDebugString() {
     FormatExpressions tempFormat;
-    this->DebugString = this->ToString(tempFormat);
+    this->DebugString = this->toString(tempFormat);
   }
-  std::string ToString(const FormatExpressions& theFormat) const;
-  void ToString(std::string& output) const {
-    output = this->ToString();
+  std::string toString(const FormatExpressions& theFormat) const;
+  void toString(std::string& output) const {
+    output = this->toString();
   }
   bool IsEqualToZero() const {
     return this->theElT.IsEqualToZero();

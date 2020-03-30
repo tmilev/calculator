@@ -10,7 +10,7 @@ class CodeElement {
 public:
   std::string content;
   std::string type;
-  std::string ToString();
+  std::string toString();
 };
 
 class CodeFormatter {

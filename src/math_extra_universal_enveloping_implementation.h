@@ -458,19 +458,19 @@ bool ElementUniversalEnveloping<coefficient>::HWTAAbilinearForm(
   constMon.MakeOne(this->GetOwner());
   if (logStream != nullptr) {
     *logStream << "left eltement transposed: "
-    << TAleft.ToString(&global.theDefaultFormat.GetElement()) << "<br>";
-    *logStream << "right element: " << right.ToString(&global.theDefaultFormat.GetElement()) << "<br>";
+    << TAleft.toString(&global.theDefaultFormat.GetElement()) << "<br>";
+    *logStream << "right element: " << right.toString(&global.theDefaultFormat.GetElement()) << "<br>";
   }
   startingElt = right;
   startingElt.Simplify(theRingUnit);
   if (logStream != nullptr) {
     *logStream << "right element after simplification: "
-    << startingElt.ToString(&global.theDefaultFormat.GetElement()) << "<br>";
+    << startingElt.toString(&global.theDefaultFormat.GetElement()) << "<br>";
   }
   startingElt.ModOutVermaRelations(subHiGoesToIthElement, theRingUnit);
   if (logStream != nullptr) {
     *logStream << "right element after Verma rels: "
-    << startingElt.ToString(&global.theDefaultFormat.GetElement()) << "<br>";
+    << startingElt.toString(&global.theDefaultFormat.GetElement()) << "<br>";
   }
   coefficient leftMonCoeff;
   for (int j = 0; j < TAleft.size(); j ++) {
@@ -484,24 +484,24 @@ bool ElementUniversalEnveloping<coefficient>::HWTAAbilinearForm(
           tempElt.MakeOneGenerator(leftMon.generatorsIndices[i], this->GetOwner(), theRingUnit);
           MathRoutines::swap(tempElt, intermediateAccum);
           if (logStream != nullptr) {
-            //*logStream << "tempElt before mult: " << tempElt.ToString(global, tempFormat) << "<br>";
+            //*logStream << "tempElt before mult: " << tempElt.toString(global, tempFormat) << "<br>";
             *logStream << "intermediate before mult: "
-            << intermediateAccum.ToString(&global.theDefaultFormat.GetElement()) << "<br>";
+            << intermediateAccum.toString(&global.theDefaultFormat.GetElement()) << "<br>";
           }
           intermediateAccum *= tempElt;
           if (logStream != nullptr) {
             *logStream << "intermediate before simplification: "
-            << intermediateAccum.ToString(&global.theDefaultFormat.GetElement()) << "<br>";
+            << intermediateAccum.toString(&global.theDefaultFormat.GetElement()) << "<br>";
           }
           intermediateAccum.Simplify(theRingUnit);
           if (logStream != nullptr) {
             *logStream << "intermediate after simplification: "
-            << intermediateAccum.ToString(&global.theDefaultFormat.GetElement()) << "<br>";
+            << intermediateAccum.toString(&global.theDefaultFormat.GetElement()) << "<br>";
           }
           intermediateAccum.ModOutVermaRelations(subHiGoesToIthElement, theRingUnit, theRingZero);
           if (logStream != nullptr) {
             *logStream << "intermediate after Verma rels: "
-            << intermediateAccum.ToString(&global.theDefaultFormat.GetElement()) << "<br>";
+            << intermediateAccum.toString(&global.theDefaultFormat.GetElement()) << "<br>";
           }
         }
       } else {
@@ -517,7 +517,7 @@ bool ElementUniversalEnveloping<coefficient>::HWTAAbilinearForm(
     }
   }
   if (logStream != nullptr) {
-    *logStream << "final UE element: " << Accum.ToString(&global.theDefaultFormat.GetElement());
+    *logStream << "final UE element: " << Accum.toString(&global.theDefaultFormat.GetElement());
   }
   this->GetOwner().UEGeneratorOrderIncludingCartanElts = oldOrder;
   return true;
@@ -600,7 +600,7 @@ void MonomialUniversalEnveloping<coefficient>::SetNumVariables(int newNumVars) {
 }
 
 template <class coefficient>
-std::string MonomialUniversalEnveloping<coefficient>::ToString(FormatExpressions* theFormat) const {
+std::string MonomialUniversalEnveloping<coefficient>::toString(FormatExpressions* theFormat) const {
   std::stringstream out;
   std::string tempS;
   if (this->owner == nullptr) {
@@ -617,7 +617,7 @@ std::string MonomialUniversalEnveloping<coefficient>::ToString(FormatExpressions
     if (!thePower.IsEqualToOne()) {
       out << "^";
       out << "{";
-      out << thePower.ToString(theFormat);
+      out << thePower.toString(theFormat);
       out << "}";
     }
   }
@@ -644,7 +644,7 @@ void ElementUniversalEnveloping<coefficient>::MakeCasimir(SemisimpleLieAlgebra& 
 //  }
 //  killingForm.Invert(global);
 //  killingForm.ComputeDebugString();
-//  out << killingForm.ToString(true, false);
+//  out << killingForm.toString(true, false);
 
 
   ElementUniversalEnveloping<coefficient> tempElt1, tempElt2;
@@ -1153,7 +1153,7 @@ void ElementVermaModuleOrdered<coefficient>::MultiplyOnTheLeft(
 }
 
 template <class coefficient>
-std::string ElementVermaModuleOrdered<coefficient>::ToString(const FormatExpressions& theFormat) const {
+std::string ElementVermaModuleOrdered<coefficient>::toString(const FormatExpressions& theFormat) const {
   std::stringstream out;
   std::string tempS = MathRoutines::ElementToStringBrackets(this->theElT, theFormat);
   if (tempS.size() > 1) {
@@ -1551,7 +1551,7 @@ void MonomialUniversalEnvelopingOrdered<coefficient>::CommuteConsecutiveIndicesR
   theRightPoweR -= 1;
   int powerDroP = 0;
 //  if (this->flagAnErrorHasOccurredTimeToPanic)
-//  if (this->ToString() == "2f_{5}f_{-5}f_{-4}" || this->ToString() == "2f_{11}f_{-4}")
+//  if (this->toString() == "2f_{5}f_{-5}f_{-4}" || this->toString() == "2f_{11}f_{-4}")
 //  { this->flagAnErrorHasOccurredTimeToPanic = true;
 //  }
 
@@ -1759,7 +1759,7 @@ void MonomialUniversalEnvelopingOrdered<coefficient>::MultiplyByGeneratorPowerOn
 }
 
 template <class coefficient>
-std::string MonomialUniversalEnvelopingOrdered<coefficient>::ToString(
+std::string MonomialUniversalEnvelopingOrdered<coefficient>::toString(
   FormatExpressions* PolyFormatLocal
 ) const {
 
@@ -1780,7 +1780,7 @@ std::string MonomialUniversalEnvelopingOrdered<coefficient>::ToString(
       tempS = "-";
     }
   } else {
-    tempS = this->Coefficient.ToString(PolyFormatLocal);
+    tempS = this->Coefficient.toString(PolyFormatLocal);
   }
   out << tempS;
   for (int i = 0; i < this->generatorsIndices.size; i ++) {
@@ -1795,7 +1795,7 @@ std::string MonomialUniversalEnvelopingOrdered<coefficient>::ToString(
     if (usebrackets) {
       out << ")";
     }
-    tempS = thePower.ToString(PolyFormatLocal);
+    tempS = thePower.toString(PolyFormatLocal);
     if (tempS != "1") {
       out << "^";
      // if (useLatex)
@@ -1811,7 +1811,7 @@ std::string MonomialUniversalEnvelopingOrdered<coefficient>::ToString(
 }
 
 template <class coefficient>
-void ElementUniversalEnvelopingOrdered<coefficient>::ToString(
+void ElementUniversalEnvelopingOrdered<coefficient>::toString(
   std::string& output, FormatExpressions* PolyFormatLocal
 ) const {
   std::stringstream out;
@@ -1822,7 +1822,7 @@ void ElementUniversalEnvelopingOrdered<coefficient>::ToString(
   int IndexCharAtLastLineBreak = 0;
   for (int i = 0; i < this->size; i ++) {
     MonomialUniversalEnvelopingOrdered<coefficient>& current = this->TheObjects[i];
-    tempS = current.ToString(PolyFormatLocal);
+    tempS = current.toString(PolyFormatLocal);
     if (i != 0) {
       if (tempS.size() > 0) {
         if (tempS[0] != '-') {

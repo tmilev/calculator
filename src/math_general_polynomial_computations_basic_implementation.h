@@ -17,11 +17,11 @@ bool MonomialP::SubstitutioN(const List<Polynomial<coefficient> >& TheSubstituti
     if (this->monBody[i] != 0) {
       if (i >= TheSubstitution.size) {
         global.fatal << "This is a programming error. Attempting to carry out a substitution in the monomial "
-        << this->ToString()
+        << this->toString()
         << " which does have non-zero exponent of variable x_{" << i + 1 << "}; however, the input substitution has "
         << TheSubstitution.size
         << " variable images. More precisely, the input substitution is:  "
-        << TheSubstitution.ToString() << ". " << global.fatal;
+        << TheSubstitution.toString() << ". " << global.fatal;
       }
       int theExponent = 0;
       if (!this->monBody[i].IsSmallInteger(&theExponent) || this->monBody[i] < 0) {
@@ -243,7 +243,7 @@ coefficient Polynomial<coefficient>::Evaluate(const Vector<coefficient>& input) 
       if (!(*this)[i](j).IsSmallInteger(&numCycles)) {
         global.fatal << "This is a programming error. Attempting to evaluate a polynomial whose "
         <<  i + 1 << "^{th} variable is raised to the power "
-        << (*this)[i](j).ToString()
+        << (*this)[i](j).toString()
         << ". Raising variables to power is allowed only if the power is a small integer. "
         << "If the user has requested such an operation, "
         << "it *must* be intercepted at an earlier level (and the user must be informed)." << global.fatal;
@@ -327,7 +327,7 @@ Matrix<coefficient> Polynomial<coefficient>::EvaluateUnivariatePoly(const Matrix
     if (!currentMon(0).IsSmallInteger(&numCycles) ) {
       global.fatal << "This is a programming error. Attempting to evaluate a polynomial whose "
       <<  i + 1 << "^{th} variable is raised to the power "
-      << currentMon(0).ToString()
+      << currentMon(0).toString()
       << ". Raising variables to power is allowed only if the power is a small integer. "
       << "If the user has requested such an operation, "
       << "it *must* be intercepted at an earlier level (and the user must be informed)."
@@ -690,7 +690,7 @@ bool Polynomial<coefficient>::FactorMeOutputIsADivisor(Polynomial<Rational>& out
       )) {
         if (comments != nullptr) {
           *comments << "<br>Aborting polynomial factorization: failed to factor the integer "
-          << theValuesAtPoints[i].ToString() << " (most probably the integer is too large).";
+          << theValuesAtPoints[i].toString() << " (most probably the integer is too large).";
         }
         return false;
       }
@@ -882,10 +882,10 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionStringLaTeX() {
   << "\\\\";
   for (int i = 0; i < this->theBasiS.size; i ++) {
     out << "$";
-    out << this->theBasiS[i].ToString(&this->theFormat);
+    out << this->theBasiS[i].toString(&this->theFormat);
     out << "$";
     out << "& \\multicolumn{" << this->allMonomials.size << "}{|l|}{";
-    out << "$" << this->theQuotients[i].ToString(&this->theFormat) << "$" << "}\\\\\\hline\\hline";
+    out << "$" << this->theQuotients[i].toString(&this->theFormat) << "$" << "}\\\\\\hline\\hline";
   }
   for (int i = 0; i < theRemainders.size; i ++) {
     if (i < theRemainders.size - 1) {
@@ -997,14 +997,14 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionStringHtml() {
     out << "<tr>";
     out << "<td style ='border-right:1px solid black; border-bottom: 1px solid gray;'>";
     if (this->theFormat.flagUseLatex) {
-      out << HtmlRoutines::GetMathSpanPure(this->theBasiS[i].ToString(&this->theFormat), - 1);
+      out << HtmlRoutines::GetMathSpanPure(this->theBasiS[i].toString(&this->theFormat), - 1);
     } else {
-      out << this->theBasiS[i].ToString(&this->theFormat);
+      out << this->theBasiS[i].toString(&this->theFormat);
     }
     out << "</td>";
     out << "<td style ='border-bottom:1px solid gray;' colspan ='"
     << this->allMonomials.size + 1 << "'>";
-    out << HtmlRoutines::GetMathSpanPure(this->theQuotients[i].ToString(&this->theFormat));
+    out << HtmlRoutines::GetMathSpanPure(this->theQuotients[i].toString(&this->theFormat));
     out << "</td></tr>";
   }
   out << "</tr>";

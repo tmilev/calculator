@@ -36,7 +36,7 @@ void Matrix<coefficient>::ComputeDeterminantOverwriteMatrix(
         std::stringstream reportStream;
         reportStream << "Pivot row " << i + 1 << " out of " << dim << ": ";
         for (int colCounter = 0; colCounter < this->NumCols; colCounter ++) {
-          reportStream << (*this)(i, colCounter).ToString();
+          reportStream << (*this)(i, colCounter).toString();
           if (colCounter != this->NumCols - 1) {
             reportStream << ", ";
           }
@@ -140,7 +140,7 @@ void MathRoutines::RaiseToPower(
   }
   if (reportOne.TickAndWantReport()) {
     std::stringstream reportStream;
-    reportStream << "Raising " << theElement.ToString()
+    reportStream << "Raising " << theElement.toString()
     << " to power: " << thePowerCopy;
     reportOne.Report(reportStream.str());
   }
@@ -150,8 +150,8 @@ void MathRoutines::RaiseToPower(
       if (reportTwo.TickAndWantReport()) {
         std::stringstream reportStream2;
         reportStream2 << "Remaining exponent: " << thePowerCopy << "<br>";
-        reportStream2 << "Multiplying " << theElement.ToString()
-        << " by " << squares.ToString();
+        reportStream2 << "Multiplying " << theElement.toString()
+        << " by " << squares.toString();
         reportTwo.Report(reportStream2.str());
       }
       theElement *= squares;
@@ -161,7 +161,7 @@ void MathRoutines::RaiseToPower(
       if (reportTwo.TickAndWantReport()) {
         std::stringstream reportStream2;
         reportStream2 << "Remaining exponent: " << thePowerCopy << "<br>";
-        reportStream2 << "Squaring: " << squares.ToString();
+        reportStream2 << "Squaring: " << squares.toString();
         reportTwo.Report(reportStream2.str());
       }
       squares *= squares;
@@ -198,7 +198,7 @@ void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy(
     std::stringstream reportStream;
     reportStream << "Large polynomial computation: " << this->size() << " x "
     << other.size() << "=" << totalMonPairs << " monomials:\n<br>\n"
-    << this->ToString() << " times " << other.ToString();
+    << this->toString() << " times " << other.toString();
     theReport1.Report(reportStream.str());
   }
   bufferPoly.MakeZero();
@@ -259,7 +259,7 @@ void MatrixTensor<coefficient>::operator*=(
     std::stringstream reportStream;
     reportStream << "Large matrix monomial computation: " << this->size() << " x "
     << other.size() << "=" << totalMonPairs << " monomials:\n<br>\n"
-    << this->ToString() << " times " << other.ToString();
+    << this->toString() << " times " << other.toString();
     theReport1.Report(reportStream.str());
   }
   MatrixTensor<coefficient> result;

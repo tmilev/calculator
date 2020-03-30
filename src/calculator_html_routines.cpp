@@ -14,7 +14,7 @@ bool CalculatorHtmlFunctions::innerUserInputBox(
     return false;
   }
   if (!theArguments.Contains("name")) {
-    return theCommands << "User input name not specified in: " << input.ToString();
+    return theCommands << "User input name not specified in: " << input.toString();
   }
   std::string boxName = CalculatorHtmlFunctions::GetUserInputBoxName(input);
   if (theCommands.theObjectContainer.theUserInputTextBoxesWithValues.Contains(boxName)) {
@@ -60,14 +60,14 @@ bool CalculatorHtmlFunctions::innerEvaluateSymbols(
     SyntacticElement& currentElt = theElts[i];
     if (currentElt.controlIndex == theCommands.conVariable()) {
       theCommands.EvaluateExpression(theCommands, currentElt.theData, evaluatedE);
-      out << evaluatedE.ToString();
+      out << evaluatedE.toString();
       continue;
     }
     if (currentElt.controlIndex == theCommands.conInteger()) {
       if (!previousWasInteger) {
         out << "{";
       }
-      out << currentElt.theData.ToString();
+      out << currentElt.theData.toString();
       previousWasInteger = true;
       continue;
     }
@@ -94,10 +94,10 @@ bool CalculatorHtmlFunctions::innerSetInputBox(
     return false;
   }
   if (!theArguments.Contains("name")) {
-    return theCommands << "User input name not specified in: " << input.ToString();
+    return theCommands << "User input name not specified in: " << input.toString();
   }
   if (!theArguments.Contains("value")) {
-    return theCommands << "Input box value not specified in: " << input.ToString();
+    return theCommands << "Input box value not specified in: " << input.toString();
   }
   std::string boxName = CalculatorHtmlFunctions::GetUserInputBoxName(input);
   if (theCommands.theObjectContainer.theUserInputTextBoxesWithValues.Contains(boxName)) {
@@ -127,7 +127,7 @@ std::string CalculatorHtmlFunctions::GetUserInputBoxName(const Expression& theBo
   }
   std::string theBoxName = "faultyBoxName";
   if (!theArguments.GetValueCreate("name").IsOfType<std::string>(&theBoxName)) {
-    theBoxName = theArguments.GetValueCreate("name").ToString();
+    theBoxName = theArguments.GetValueCreate("name").toString();
   }
   return theBoxName;
 }

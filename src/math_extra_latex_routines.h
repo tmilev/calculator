@@ -98,7 +98,7 @@ class LaTeXCrawler {
   bool initializeFromGlobalVariables(std::stringstream* commentsOnFailure);
   std::stringstream displayResult;
   std::stringstream errorStream;
-  std::string ToString();
+  std::string toString();
   LaTeXCrawler();
 };
 

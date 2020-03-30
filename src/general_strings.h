@@ -100,7 +100,7 @@ public:
     void ExtractDifferences();
     void ExtractResult(const List<int>& starts, const std::string& input, List<std::string>& output);
     void PushCommonString(int indexLeft, int indexRight);
-    std::string ToString();
+    std::string toString();
     Differ();
   };
 };

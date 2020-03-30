@@ -404,7 +404,7 @@ bool MeshTriangles::ComputePoints(
   this->knownValues.AddOnTop(0);
   HashedList<Expression> theFreeVars;
   if (!this->theFun.GetFreeVariables(theFreeVars, true)) {
-    return theCommands << "Failed to extract free variables from: " << this->theFun.ToString();
+    return theCommands << "Failed to extract free variables from: " << this->theFun.toString();
   }
   theFreeVars.QuickSortAscending();
   if (theFreeVars.size > 2) {
@@ -427,27 +427,27 @@ bool MeshTriangles::ComputePoints(
   this->knownEs.AddOnTopNoRepetitionMustBeNewCrashIfNot(theFreeVars[0]);
   this->knownEs.AddOnTopNoRepetitionMustBeNewCrashIfNot(theFreeVars[1]);
   if (!theCommands.GetVectorDoubles(input[2], this->lowerLeftCorner)) {
-    return theCommands << "Failed to extract lower left corner from: " << input[2].ToString();
+    return theCommands << "Failed to extract lower left corner from: " << input[2].toString();
   }
   if (!theCommands.GetVectorDoubles(input[3], this->upperRightCorner)) {
-    return theCommands << "Failed to extract upper right corner from: " << input[3].ToString();
+    return theCommands << "Failed to extract upper right corner from: " << input[3].toString();
   }
   List<int> theGridCount;
   if (!theCommands.GetVectoRInt(input[4], theGridCount)) {
-    return theCommands << "Failed to extract pair of small integers from: " << input[4].ToString();
+    return theCommands << "Failed to extract pair of small integers from: " << input[4].toString();
   }
   if (theGridCount.size != 2) {
-    return theCommands << "Failed to extract pair of small integers from: " << input[4].ToString();
+    return theCommands << "Failed to extract pair of small integers from: " << input[4].toString();
   }
   this->XstartingGridCount = theGridCount[0];
   this->YstartingGridCount = theGridCount[1];
   if (input.size() >= 6) {
     if (!input[5].IsSmallInteger(&this->maxNumTriangles)) {
-      return theCommands << "Failed to extract small integer from: " << input[5].ToString();
+      return theCommands << "Failed to extract small integer from: " << input[5].toString();
     }
     if (this->maxNumTriangles > 20000) {
       this->maxNumTriangles = 20000;
-      theCommands << "Max number of triangles decreased from your input: " << input[5].ToString()
+      theCommands << "Max number of triangles decreased from your input: " << input[5].toString()
       << " to 20000. If you'd like to lift the restriction, modify code around: file: " << __FILE__
       << " line: " << __LINE__ << ". ";
     }
@@ -946,7 +946,7 @@ bool CalculatorFunctions::innerEnsureExpressionDependsOnlyOnStandard(
   theExpression.GetFreeVariables(presentFreeVars, true);
   if (!allowedFreeVars.Contains(presentFreeVars)) {
     out << "<hr>";
-    out << "Your expression:<br>\\(" << input[1].ToString() << "\\)"
+    out << "Your expression:<br>\\(" << input[1].toString() << "\\)"
     << "<br><b style ='color:red'>contains the unexpected variable(s):</b><br><b>";
     bool found = false;
     for (int i = 0; i < presentFreeVars.size; i ++) {
@@ -955,7 +955,7 @@ bool CalculatorFunctions::innerEnsureExpressionDependsOnlyOnStandard(
           out << ", ";
         }
         found = true;
-        out << presentFreeVars[i].ToString();
+        out << presentFreeVars[i].toString();
       }
     }
     out << "</b>.";
@@ -1078,7 +1078,7 @@ bool CalculatorFunctions::innerEnsureExpressionDependsOnlyOnMandatoryVariables(
   std::stringstream out;
   if (!presentFreeVars.Contains(mandatoryFreeVars)) {
     out << "<hr>";
-    out << "Your expression:<br>\\(" << input[1].ToString() << "\\)"
+    out << "Your expression:<br>\\(" << input[1].toString() << "\\)"
     << "<br><b style ='color:red'>is required to contain the variables:</b><br><b>";
     bool found = false;
     for (int i = 0; i < mandatoryFreeVars.size; i ++) {
@@ -1087,7 +1087,7 @@ bool CalculatorFunctions::innerEnsureExpressionDependsOnlyOnMandatoryVariables(
           out << ", ";
         }
         found = true;
-        out << "\\(" << mandatoryFreeVars[i].ToString() << "\\)";
+        out << "\\(" << mandatoryFreeVars[i].toString() << "\\)";
       }
     }
     out << "</b>.";
@@ -1095,7 +1095,7 @@ bool CalculatorFunctions::innerEnsureExpressionDependsOnlyOnMandatoryVariables(
   }
   if (!allowedFreeVars.Contains(presentFreeVars)) {
     out << "<hr>";
-    out << "Your expression:<br>\\(" << input[1].ToString() << "\\)"
+    out << "Your expression:<br>\\(" << input[1].toString() << "\\)"
     << "<br><b style ='color:red'>contains the unexpected variable(s):</b><br><b>";
     bool found = false;
     for (int i = 0; i < presentFreeVars.size; i ++) {
@@ -1104,7 +1104,7 @@ bool CalculatorFunctions::innerEnsureExpressionDependsOnlyOnMandatoryVariables(
           out << ", ";
         }
         found = true;
-        out << presentFreeVars[i].ToString();
+        out << presentFreeVars[i].toString();
       }
     }
     out << "</b>.";
@@ -1151,7 +1151,7 @@ bool CalculatorFunctions::innerPlotLabel(
   }
   std::string theLabel;
   if (!input[2].IsOfType<std::string>(&theLabel)) {
-    theLabel = input[2].ToString();
+    theLabel = input[2].toString();
   }
   PlotObject thePlot;
   thePlot.dimension = labelPosition.size;
@@ -1218,33 +1218,33 @@ bool CalculatorFunctions::innerSolveUnivariatePolynomialWithRadicalsWRT(
   Expression modifiedInput = input;
   if (!modifiedInput[2].StartsWith(theCommands.opDefine())) {
     if (!CalculatorFunctions::innerCoefficientsPowersOf(theCommands, modifiedInput, thePowers)) {
-      return theCommands << "Failed to extract the coefficients of " << modifiedInput[1].ToString()
-      << " in " << modifiedInput[2].ToString();
+      return theCommands << "Failed to extract the coefficients of " << modifiedInput[1].toString()
+      << " in " << modifiedInput[2].toString();
     }
   } else {
     Expression convertedEqualityE, convertedSimplifiedEqualityE;
     if (!CalculatorFunctions::functionEqualityToArithmeticExpression(theCommands, modifiedInput[2], convertedEqualityE)) {
-      return theCommands << "Failed to interpret the equality " << modifiedInput[2].ToString();
+      return theCommands << "Failed to interpret the equality " << modifiedInput[2].toString();
     }
     if (!Calculator::EvaluateExpression(theCommands, convertedEqualityE, convertedSimplifiedEqualityE)) {
-      return theCommands << "Failed to simplify: " << convertedEqualityE.ToString();
+      return theCommands << "Failed to simplify: " << convertedEqualityE.toString();
     }
     modifiedInput.SetChilD(2, convertedSimplifiedEqualityE);
     if (!CalculatorFunctions::innerCoefficientsPowersOf(theCommands, modifiedInput, thePowers)) {
-      return theCommands << "Failed to extract the coefficients of " << modifiedInput[1].ToString()
-      << " in " << modifiedInput[2].ToString() << " which was obtained from the equality "
-      << input[2].ToString();
+      return theCommands << "Failed to extract the coefficients of " << modifiedInput[1].toString()
+      << " in " << modifiedInput[2].toString() << " which was obtained from the equality "
+      << input[2].toString();
     }
   }
   if (!thePowers.IsSequenceNElementS()) {
     return theCommands << "This is not supposed to happen: expression "
-    << thePowers.ToString() << " should be a list. This may be a programming bug. ";
+    << thePowers.toString() << " should be a list. This may be a programming bug. ";
   }
   if (thePowers.size() == 2) {
-    return theCommands << "Cannot solve: " << modifiedInput[2].ToString()
-    << ". The expression does not depend on " << modifiedInput[1].ToString()
+    return theCommands << "Cannot solve: " << modifiedInput[2].toString()
+    << ". The expression does not depend on " << modifiedInput[1].toString()
     << ". The coefficients of "
-    << modifiedInput[1].ToString() << " are: " << thePowers.ToString();
+    << modifiedInput[1].toString() << " are: " << thePowers.toString();
   }
   if (thePowers.size() == 3) {
     output = thePowers[1];
@@ -1426,7 +1426,7 @@ bool CalculatorFunctions::innerSqrt(Calculator& theCommands, const Expression& i
   }
   if (thePower < 0) {
     if (rationalValue.IsEqualToZero()) {
-      return output.MakeError("Division by zero in expression: " + input.ToString(), theCommands);
+      return output.MakeError("Division by zero in expression: " + input.toString(), theCommands);
     }
     thePower *= - 1;
     rationalValue.Invert();
@@ -1521,7 +1521,7 @@ bool CalculatorFunctions::innerPlotPath(Calculator& theCommands, const Expressio
   const Expression& theMatE = input[1];
   Matrix<double> theMat;
   if (!theCommands.GetMatrixDoubles(theMatE, theMat)) {
-    return theCommands << "Failed to extract matrix from: " << theMatE.ToString();
+    return theCommands << "Failed to extract matrix from: " << theMatE.toString();
   }
   if (theMat.NumCols != 2 && theMat.NumCols != 3) {
     return theCommands << "Only dimensions 2 and 3 are supported at the moment. ";
@@ -1532,7 +1532,7 @@ bool CalculatorFunctions::innerPlotPath(Calculator& theCommands, const Expressio
     theSegment.colorRGB = static_cast<int>(HtmlRoutines::RedGreenBlue(0, 0, 0));
     const Expression& colorE = input[2];
     if (!colorE.IsOfType<std::string>(&theSegment.colorJS)) {
-      theSegment.colorJS = colorE.ToString();
+      theSegment.colorJS = colorE.toString();
     }
     if (!DrawingVariables::GetColorIntFromColorString(
       theSegment.colorJS, theSegment.colorRGB
@@ -1543,7 +1543,7 @@ bool CalculatorFunctions::innerPlotPath(Calculator& theCommands, const Expressio
   if (input.size() >= 4) {
     const Expression& lineWidthE = input[3];
     if (!lineWidthE.EvaluatesToDouble(&theSegment.lineWidth)) {
-      theCommands << "Failed to extract line width from: " << lineWidthE.ToString();
+      theCommands << "Failed to extract line width from: " << lineWidthE.toString();
     }
     std::stringstream lineWidthStream;
     lineWidthStream.precision(4);
@@ -1583,7 +1583,7 @@ bool CalculatorFunctions::innerPlotMarkSegment(Calculator& theCommands, const Ex
   int numSegments = 1;
   if (input.size() >= 4) {
     if (!input[3].IsSmallInteger(&numSegments)) {
-      return theCommands << "Could not extract small integer from " << input[3].ToString();
+      return theCommands << "Could not extract small integer from " << input[3].toString();
     }
   }
   if (numSegments < 1 || numSegments > 100) {
@@ -1631,7 +1631,7 @@ bool CalculatorFunctions::innerPlotSegment(Calculator& theCommands, const Expres
     theSegment.colorRGB = static_cast<int>(HtmlRoutines::RedGreenBlue(0, 0, 0));
     const Expression& colorE = input[3];
     if (!colorE.IsOfType<std::string>(&theSegment.colorJS)) {
-      theSegment.colorJS = colorE.ToString();
+      theSegment.colorJS = colorE.toString();
     }
     if (!DrawingVariables::GetColorIntFromColorString(theSegment.colorJS, theSegment.colorRGB)) {
       theCommands << "Unrecognized color: " << theSegment.colorJS;
@@ -1641,7 +1641,7 @@ bool CalculatorFunctions::innerPlotSegment(Calculator& theCommands, const Expres
     const Expression& lineWidthE = input[4];
     if (!lineWidthE.EvaluatesToDouble(&theSegment.lineWidth)) {
       theCommands << "Failed to extract line width from: "
-      << lineWidthE.ToString();
+      << lineWidthE.toString();
     }
     std::stringstream lineWidthStream;
     lineWidthStream.precision(4);
@@ -1860,7 +1860,7 @@ std::string InputBox::GetUserInputBox() const {
     out << "\\FormInput" << "[" << theReader
     << "]" << "{" << this->name << "}" ;
   } else {
-    out << "\\FormInput" << "[" << this->value.ToString()
+    out << "\\FormInput" << "[" << this->value.toString()
     << "]" << "{" << this->name << "}" ;
   }
   return out.str();
@@ -1942,9 +1942,9 @@ bool CalculatorFunctions::functionMakeJavascriptExpression(
     out << "[";
     for (int i = 1; i < input.size(); i ++) {
       if (!CalculatorFunctions::functionMakeJavascriptExpression(theCommands, input[i], opE)) {
-        return output.AssignValue("(Failed to convert " + input[i].ToString() + ")", theCommands);
+        return output.AssignValue("(Failed to convert " + input[i].toString() + ")", theCommands);
       }
-      out << opE.ToString();
+      out << opE.toString();
       if (i != input.size() - 1) {
         out << ", ";
       }
@@ -1959,12 +1959,12 @@ bool CalculatorFunctions::functionMakeJavascriptExpression(
     std::string* currentString = &opString;
     for (int i = 0; i < input.size(); i ++) {
       if (!CalculatorFunctions::functionMakeJavascriptExpression(theCommands, input[i], *currentE)) {
-        return output.AssignValue("(Failed to convert " + input[i].ToString() + ")", theCommands);
+        return output.AssignValue("(Failed to convert " + input[i].toString() + ")", theCommands);
       }
       if (!currentE->IsOfType(currentString)) {
-        return output.AssignValue("(Failed to convert " + input[i].ToString() + ")", theCommands);
+        return output.AssignValue("(Failed to convert " + input[i].toString() + ")", theCommands);
       }
-      logStream << "Converted: " << input[i].ToString() << " to: "
+      logStream << "Converted: " << input[i].toString() << " to: "
       << *currentString << ". ";
       if (i == 0) {
         currentE = &leftE;
@@ -2023,7 +2023,7 @@ bool CalculatorFunctions::functionMakeJavascriptExpression(
       }
     }
   }
-  out << "(Failed to make expression from " << input.ToString() << ". "
+  out << "(Failed to make expression from " << input.toString() << ". "
   << logStream.str() << ")";
   return output.AssignValue(out.str(), theCommands);
 }
@@ -2041,7 +2041,7 @@ bool CalculatorFunctions::innerPlotSetProjectionScreenBasis(
     !theCommands.GetVectorDoubles(input[2], v2, 3)
   ) {
     return theCommands << "Failed to extract 3d-vectors from "
-    << input[1].ToString() << ", " << input[2].ToString() << ".";
+    << input[1].toString() << ", " << input[2].toString() << ".";
   }
   Plot resultPlot;
   resultPlot.dimension = 3;
@@ -2064,8 +2064,8 @@ bool CalculatorFunctions::innerPlotCoordinateSystem(Calculator& theCommands, con
     !theCommands.GetVectorDoubles(input[2], corner2, 3)
   ) {
     return theCommands << "Failed to extract 3d-vectors from "
-    << input[1].ToString() << ", "
-    << input[2].ToString() << ".";
+    << input[1].toString() << ", "
+    << input[2].toString() << ".";
   }
   Plot resultPlot;
   resultPlot.dimension = 3;
@@ -2141,7 +2141,7 @@ bool CalculatorFunctions::innerPlotSurface(Calculator& theCommands, const Expres
   thePlot.variablesInPlayJS.SetSize(2);
   for (int i = 0; i < 2; i ++) {
     thePlot.theVarRangesJS[i].SetSize(2);
-    thePlot.variablesInPlayJS[i] = thePlot.variablesInPlay[i].ToString();
+    thePlot.variablesInPlayJS[i] = thePlot.variablesInPlay[i].toString();
   }
   Expression jsConverter;
   for (int i = 1; i < thePlot.manifoldImmersion.size(); i ++) {
@@ -2154,7 +2154,7 @@ bool CalculatorFunctions::innerPlotSurface(Calculator& theCommands, const Expres
     }
     if (!isGood) {
       return theCommands << "Failed to convert "
-      << thePlot.coordinateFunctionsE[i - 1].ToString()
+      << thePlot.coordinateFunctionsE[i - 1].toString()
       << " to a javascript expression. ";
     }
   }
@@ -2177,7 +2177,7 @@ bool CalculatorFunctions::innerPlotSurface(Calculator& theCommands, const Expres
         }
         if (!isGood) {
           return theCommands << "Failed to convert "
-          << input[i][2][j + 1].ToString() << " to a javascript expression. ";
+          << input[i][2][j + 1].toString() << " to a javascript expression. ";
         }
       }
     }
@@ -2187,10 +2187,10 @@ bool CalculatorFunctions::innerPlotSurface(Calculator& theCommands, const Expres
     theCommands, input, theKeys, &theCommands.Comments, true
   )) {
     if (theKeys.Contains("color1")) {
-      thePlot.colorUV = theKeys.GetValueCreate("color1").ToString();
+      thePlot.colorUV = theKeys.GetValueCreate("color1").toString();
     }
     if (theKeys.Contains("color2")) {
-      thePlot.colorVU = theKeys.GetValueCreate("color2").ToString();
+      thePlot.colorVU = theKeys.GetValueCreate("color2").toString();
     }
     MapList<std::string, std::string, MathRoutines::HashString> keysToConvert;
     keysToConvert.GetValueCreate("numSegments1");
@@ -2209,7 +2209,7 @@ bool CalculatorFunctions::innerPlotSurface(Calculator& theCommands, const Expres
       }
       if (!isGood) {
         return theCommands << "Failed to convert "
-        << expressionToConvert.ToString()
+        << expressionToConvert.toString()
         << " to a javascript expression. ";
       }
     }
@@ -2950,13 +2950,20 @@ bool CalculatorFunctions::innerFactorPolynomialModPrime(
   if (!input[2].IsInteger(&thePrime)) {
     return false;
   }
+  if (thePrime < 0) {
+    return theCommands << "The modulus: " << thePrime << " is not positive. ";
+  }
   std::stringstream commentsOnFailure;
   if (!thePrime.value.IsPossiblyPrime(2, true, &commentsOnFailure)) {
     theCommands << "The modulus: " << thePrime << " appears not to be prime. " << commentsOnFailure.str();
   }
+  Polynomial<ElementZmodP> converted;
+  ElementZmodP::ScaleToIntegralMinimalHeightAndGetPoly(polynomial.content, converted, thePrime.value);
   std::stringstream out;
   FormatExpressions format;
+  format.suffixLinearCombination = ElementZmodP::toStringModP(thePrime.value);
+  format.flagSuppressModP = true;
   polynomial.context.context.ContextGetFormatExpressions(format);
-  out << "Polynomial: " << polynomial.content.ToString(&format);
+  out << "Converted polynomial: " << converted.toString(&format);
   return output.AssignValue(out.str(), theCommands);
 }

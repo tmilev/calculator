@@ -71,7 +71,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::CheckRepIsMu
       if (!(tempMat == this->theElementImages[targetIndex])) {
         global.fatal << "this is a programming error: element " << i + 1 << " times element "
         << j + 1 << " is outside of the set, i.e.,  "
-        << tempList[i].ToString() << " * " << tempList[j].ToString() << " is bad. " << global.fatal;
+        << tempList[i].toString() << " * " << tempList[j].toString() << " is bad. " << global.fatal;
       }
     }
   }
@@ -291,9 +291,9 @@ bool Matrix<Element>::GetEigenspacesProvidedAllAreIntegralWithEigenValueSmallerT
       output.SetSize(output.size + 1);
       tempMat.GetEigenspaceModifyMe(theEigenValueCandidate[0], *output.LastObject());
       if (output.LastObject()->size == 0) {
-        global.fatal << "This is a programmig error: " << theEigenValueCandidate[0].ToString()
+        global.fatal << "This is a programmig error: " << theEigenValueCandidate[0].toString()
         << " is a zero of the minimal polynomial "
-        << theMinPoly.ToString() << " of the operator " << this->ToString()
+        << theMinPoly.toString() << " of the operator " << this->toString()
         << " but the corresponding eigenspace is empty. " << global.fatal;
       }
       found += output.LastObject()->size;
@@ -323,7 +323,7 @@ void WeylGroupData::ComputeIrreducibleRepresentationsWithFormulasImplementation(
       GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> irrep;
       thePartitions[i].SpechtModuleMatricesOfTranspositionsjjplusone(irrep.generatorS);
       irrep.ownerGroup = &G;
-      irrep.identifyingString = thePartitions[i].ToString();
+      irrep.identifyingString = thePartitions[i].toString();
       irrep.ComputeCharacter();
       G.AddIrreducibleRepresentation(irrep);
     }
@@ -451,12 +451,12 @@ bool CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(
     }
   }
   if (theHWs.size == 0 || !isGood) {
-    return output.MakeError("Failed to extract rational vectors from expression " + input.ToString() + ". ", theCommands);
+    return output.MakeError("Failed to extract rational vectors from expression " + input.toString() + ". ", theCommands);
   }
   std::stringstream out;
-  out << "Input: " << theHWs.ToString()
+  out << "Input: " << theHWs.toString()
   << ", simultaneously raising to maximally dominant in Weyl group of type "
-  << theSSalgebra->theWeyl.theDynkinType.ToString();
+  << theSSalgebra->theWeyl.theDynkinType.toString();
   if (!useOuter) {
     theSSalgebra->theWeyl.RaiseToMaximallyDominanT(theHWs);
   } else {
@@ -464,7 +464,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(
     theOuterAutos.theWeyl = &theSSalgebra->theWeyl;
     theOuterAutos.RaiseToMaximallyDominant(theHWs);
   }
-  out << "<br>Maximally dominant output: " << theHWs.ToString();
+  out << "<br>Maximally dominant output: " << theHWs.toString();
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -533,7 +533,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple(
   for (int i = 0; i < outputOrbit.size; i ++) {
     theFormat.simpleRootLetter = "\\alpha";
     theFormat.fundamentalWeightLetter = "\\psi";
-    std::string orbitEltString = outputOrbit[i].ToString(&theFormat);
+    std::string orbitEltString = outputOrbit[i].toString(&theFormat);
     Vector<Polynomial<Rational> > epsVect = outputOrbit[i];
     epsCoordMat.ActOnVectorColumn(epsVect);
     std::string orbitEltStringEpsilonCoords = epsVect.ToStringLetterFormat("\\varepsilon", &theFormat);
@@ -541,11 +541,11 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple(
     theWeyl.GetFundamentalCoordinatesFromSimple(outputOrbit[i]).ToStringLetterFormat
     (theFormat.fundamentalWeightLetter, &theFormat);
     out << "<tr>" << "<td>"
-    << (useMathTag ? HtmlRoutines::GetMathSpanPure(theOuterAutos.allElements[i].ToString()) : theOuterAutos.allElements[i].ToString())
+    << (useMathTag ? HtmlRoutines::GetMathSpanPure(theOuterAutos.allElements[i].toString()) : theOuterAutos.allElements[i].toString())
     << "</td><td>" << (useMathTag ? HtmlRoutines::GetMathSpanPure(orbitEltString) : orbitEltString) << "</td><td>"
     << (useMathTag ? HtmlRoutines::GetMathSpanPure(orbitEltStringEpsilonCoords) : orbitEltStringEpsilonCoords)
     << "</td><td>" << (useMathTag ? HtmlRoutines::GetMathSpanPure(weightEltString) : weightEltString) << "</td>";
-    latexReport << "$" << theOuterAutos.allElements[i].ToString(&theFormat) << "$ & $" << orbitEltStringEpsilonCoords << "$ & $"
+    latexReport << "$" << theOuterAutos.allElements[i].toString(&theFormat) << "$ & $" << orbitEltStringEpsilonCoords << "$ & $"
     << weightEltString << "$ & $" << (outputOrbit[0]-outputOrbit[i]).ToStringLetterFormat(theFormat.simpleRootLetter, &theFormat) << "$\\\\\n<br>";
     out << "</tr>";
   }
@@ -688,21 +688,21 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
   for (int i = 0; i < outputOrbit.size; i ++) {
     theFormat.simpleRootLetter = "\\alpha";
     theFormat.fundamentalWeightLetter = "\\psi";
-    std::string orbitEltString = outputOrbit[i].ToString(&theFormat);
+    std::string orbitEltString = outputOrbit[i].toString(&theFormat);
     Vector<Polynomial<Rational> > epsVect = outputOrbit[i];
     epsCoordMat.ActOnVectorColumn(epsVect);
     std::string orbitEltStringEpsilonCoords = epsVect.ToStringLetterFormat("\\varepsilon", &theFormat);
     std::string weightEltString=
     theWeyl.GetFundamentalCoordinatesFromSimple(outputOrbit[i]).ToStringLetterFormat(theFormat.fundamentalWeightLetter, &theFormat);
     out << "<tr>" << "<td>"
-    << (useMathTag ? HtmlRoutines::GetMathMouseHover(orbitGeneratingSet[i].ToString()) : orbitGeneratingSet[i].ToString())
+    << (useMathTag ? HtmlRoutines::GetMathMouseHover(orbitGeneratingSet[i].toString()) : orbitGeneratingSet[i].toString())
     << "</td><td>"
     << (useMathTag ? HtmlRoutines::GetMathMouseHover(orbitEltString) : orbitEltString) << "</td><td>"
     << (useMathTag ? HtmlRoutines::GetMathMouseHover(orbitEltStringEpsilonCoords) : orbitEltStringEpsilonCoords)
     << "</td><td>"
     << (useMathTag ? HtmlRoutines::GetMathMouseHover(weightEltString) : weightEltString)
     << "</td>";
-    latexReport << "$" << orbitGeneratingSet[i].ToString(&theFormat) << "$ & $" << orbitEltStringEpsilonCoords
+    latexReport << "$" << orbitGeneratingSet[i].toString(&theFormat) << "$ & $" << orbitEltStringEpsilonCoords
     << "$ & $" <<  weightEltString << "$ & $"
     << (outputOrbit[0] - outputOrbit[i]).ToStringLetterFormat(theFormat.simpleRootLetter, &theFormat)
     << "$\\\\\n<br>";
@@ -727,7 +727,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
       }
       out << "<td>";
       if (isGood) {
-        out << HtmlRoutines::GetMathMouseHover(standardElt.ToString(&theFormat));
+        out << HtmlRoutines::GetMathMouseHover(standardElt.toString(&theFormat));
       } else {
         out << "-";
       }
@@ -823,20 +823,20 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOuterConjugacyClassesFromAllEle
   out << "Weyl group generators. <br>";
   for (int i = 0; i <groupNoOuterAutos.generators.size; i ++) {
     out << "Generator " << i + 1 << ": "
-    << groupNoOuterAutos.generators[i].ToString() << "<br>";
+    << groupNoOuterAutos.generators[i].toString() << "<br>";
   }
 //  out << "Outer automorphism realizations:<br>";
 //  for (int i = 0; i <outerAutossize; i ++)
 //    out << "Generator " << i << ": "
-//    << outerAutossize[i].ToString() << "<br>";
+//    << outerAutossize[i].toString() << "<br>";
 //  groupWithOuterAutos.ComputeAllElements(false, - 1);
   groupNoOuterAutos.ComputeAllElements(false, - 1);
   groupNoOuterAutos.ComputeCCfromAllElements();
-  out << "Weyl group matrix realization: " << groupNoOuterAutos.ToString();
+  out << "Weyl group matrix realization: " << groupNoOuterAutos.toString();
   Matrix<Rational> conjugatedMat, invertedOuterAuto;
   for (int j = 0; j < outerAutos.size; j ++) {
     out << "Outer automorphism " << j << ": "
-    << outerAutos[j].ToString() << "<br>";
+    << outerAutos[j].toString() << "<br>";
     invertedOuterAuto = outerAutos[j];
     invertedOuterAuto.Invert();
     for (int i = 0; i <groupNoOuterAutos.conjugacyClasseS.size; i ++) {
@@ -866,7 +866,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements
   WeylGroupData& theGroupData = output.GetValueNonConst<WeylGroupData>();
   if (theGroupData.GetDim() > 7) {
     theCommands << "<hr>Loaded Dynkin type "
-    << theGroupData.theDynkinType.ToString() << " of rank "
+    << theGroupData.theDynkinType.toString() << " of rank "
     << theGroupData.GetDim() << " but I've been told "
     << "not to compute when the rank is larger than 7. ";
     return false;
@@ -875,7 +875,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements
   theGroupData.theGroup.ComputeCCfromAllElements();
   //std::stringstream out;
   theCommands << "<hr> Computed conjugacy classes of "
-  << theGroupData.ToString() << " in " << global.GetElapsedSeconds() - timeStart1
+  << theGroupData.toString() << " in " << global.GetElapsedSeconds() - timeStart1
   << " second(s). ";
   return output.AssignValue(theGroupData, theCommands);
 }
@@ -890,7 +890,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesRepresentatives
   WeylGroupData& theGroupData = output.GetValueNonConst<WeylGroupData>();
   theGroupData.CheckConsistency();
   if (theGroupData.GetDim() > 8) {
-    return theCommands << "<hr>Loaded Dynkin type " << theGroupData.theDynkinType.ToString()
+    return theCommands << "<hr>Loaded Dynkin type " << theGroupData.theDynkinType.toString()
     << " of rank " << theGroupData.GetDim() << " but I've been told "
     << "not to compute when the rank is larger than 8. ";
   }
@@ -899,7 +899,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesRepresentatives
   theGroupData.CheckConsistency();
   theGroupData.theGroup.ComputeCCSizesAndRepresentatives();
   theCommands << "<hr> Computed conjugacy classes representatives of "
-  << theGroupData.theDynkinType.ToString() << " in " << global.GetElapsedSeconds()-timeStart1
+  << theGroupData.theDynkinType.toString() << " in " << global.GetElapsedSeconds()-timeStart1
   << " second(s). ";
   return output.AssignValue(theGroupData, theCommands);
 }
@@ -926,15 +926,15 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupIrrepsAndCharTableComputeFromSc
   //Matrix<Rational> charMat;
   //charMat.init(theGroupData.theGroup.ConjugacyClassCount(), theGroupData.theGroup.ConjugacyClassCount());
   //for (int i = 0; i < theGroupData.theGroup.irreps.size; i ++)
-  //{ //out << "<br>" << theGroup.irreps[i].theCharacteR.ToString();
+  //{ //out << "<br>" << theGroup.irreps[i].theCharacteR.toString();
   //  charMat.AssignVectorToRowKeepOtherRowsIntactNoInit(i, theGroupData.irreps[i].GetCharacter().data);
   //}
-  //out << HtmlRoutines::GetMathSpanPure(charMat.ToString(&tempFormat));
+  //out << HtmlRoutines::GetMathSpanPure(charMat.toString(&tempFormat));
   out << "<br>Explicit realizations of each representation follow.";
   for (int i = 0; i < theGroupData.theGroup.irreps.size; i ++) {
-    out << "<hr>" << theGroupData.theGroup.irreps[i].ToString(&tempFormat);
+    out << "<hr>" << theGroupData.theGroup.irreps[i].toString(&tempFormat);
   }
-  out << theGroupData.ToString(&tempFormat);
+  out << theGroupData.toString(&tempFormat);
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -1213,7 +1213,7 @@ std::string WeylGroupData::ToStringSignSignatureRootSubsystem(const List<Subgrou
       mainTableStream << "p{0.275cm}";
     }
     mainTableStream << "}\n<br>\n" << "\\caption{\\label{table:SignSignature"
-    << HtmlRoutines::CleanUpForLaTeXLabelUse(this->theDynkinType.ToString())
+    << HtmlRoutines::CleanUpForLaTeXLabelUse(this->theDynkinType.toString())
     << "}Multiplicity of the sign representation over the classes of root subgroups. "
     << "There are " << numParabolicClasses << " parabolic subgroup classes, " << numNonParabolicPseudoParabolic
     << " pseudo-parabolic subgroup classes that are not parabolic, and "
@@ -1236,11 +1236,11 @@ std::string WeylGroupData::ToStringSignSignatureRootSubsystem(const List<Subgrou
     mainTableStream << "Irrep label";
     if (this->theDynkinType.IsSimple(&simpleType.theLetter, &simpleType.theRank, &simpleType.CartanSymmetricInverseScale)) {
       for (int i = startIndex; i < startIndexNextCol; i ++) {
-        mainTableStream << "&$" << inputSubgroups[i].theDynkinType.ToString(&formatSupressUpperIndexOne) << "$";
+        mainTableStream << "&$" << inputSubgroups[i].theDynkinType.toString(&formatSupressUpperIndexOne) << "$";
       }
     } else {
       for (int i = startIndex; i < startIndexNextCol; i ++) {
-        mainTableStream << "&$" << inputSubgroups[i].theDynkinType.ToString() << "$";
+        mainTableStream << "&$" << inputSubgroups[i].theDynkinType.toString() << "$";
       }
     }
     for (int i = 0; i < this->theGroup.ConjugacyClassCount(); i ++) {
@@ -1250,7 +1250,7 @@ std::string WeylGroupData::ToStringSignSignatureRootSubsystem(const List<Subgrou
       }
       mainTableStream << "\n<br>\n$" << this->ToStringIrrepLabel(i) << "$";
       for (int j = startIndex; j < startIndexNextCol; j ++) {
-        mainTableStream << "&" << inputSubgroups[j].tauSignature[i].ToString();
+        mainTableStream << "&" << inputSubgroups[j].tauSignature[i].toString();
       }
       mainTableStream << "\\\\\n<br>\n";
     }
@@ -1264,18 +1264,18 @@ std::string WeylGroupData::ToStringSignSignatureRootSubsystem(const List<Subgrou
       for (int i = 0; i < inputSubgroups.size; i ++) {
         parSelrootsAreOuttaLevi = inputSubgroups[i].simpleRootsInLeviParabolic;
         parSelrootsAreOuttaLevi.InvertSelection();
-        out << "<td>" << parSelrootsAreOuttaLevi.ToString() << "</td>";
+        out << "<td>" << parSelrootsAreOuttaLevi.toString() << "</td>";
       }
       out << "</tr><tr><td></td><td></td>";
     }
     if (this->theDynkinType.IsSimple(&simpleType.theLetter, &simpleType.theRank, &simpleType.CartanSymmetricInverseScale)) {
       for (int i = 0; i < inputSubgroups.size; i ++) {
-        out << "<td>" << inputSubgroups[i].theDynkinType.ToString(&formatSupressUpperIndexOne)
+        out << "<td>" << inputSubgroups[i].theDynkinType.toString(&formatSupressUpperIndexOne)
         << "</td>";
       }
     } else {
       for (int i = 0; i < inputSubgroups.size; i ++) {
-        out << "<td>" << inputSubgroups[i].theDynkinType.ToString() << "</td>";
+        out << "<td>" << inputSubgroups[i].theDynkinType.toString() << "</td>";
       }
     }
     out << "</tr>";
@@ -1286,15 +1286,15 @@ std::string WeylGroupData::ToStringSignSignatureRootSubsystem(const List<Subgrou
       } else {
         out << "<td></td>";
       }
-      out << "<td>" << this->theGroup.characterTable[i].ToString() << "</td>";
+      out << "<td>" << this->theGroup.characterTable[i].toString() << "</td>";
       if (s == 0) {
         for (int j = 0; j < inputSubgroups.size; j ++) {
-          out << "<td>" << inputSubgroups[j].tauSignature[i].ToString() << "</td>";
+          out << "<td>" << inputSubgroups[j].tauSignature[i].toString() << "</td>";
         }
       }
       if (s == 1) {
         for (int j = 0; j < pseudoSignSig[i].size; j ++) {
-          out << "<td>" << pseudoSignSig[i][j].ToString() << "</td>";
+          out << "<td>" << pseudoSignSig[i][j].toString() << "</td>";
         }
       }
       out << "</tr>";
@@ -1318,7 +1318,7 @@ std::string WeylGroupData::ToStringSignSignatureRootSubsystem(const List<Subgrou
     out << "r";
   }
   out << "}"
-  << "\\caption{\\label{tableIrrepChars" << this->theDynkinType.ToString()
+  << "\\caption{\\label{tableIrrepChars" << this->theDynkinType.toString()
   << "}\\\\ Irreducible representation characters. Columns are labeled by conjugacy classes.} \\\\";
   out << "<br>\n  & \\multicolumn{"
   << this->theGroup.characterTable[0].data.size
@@ -1332,17 +1332,17 @@ std::string WeylGroupData::ToStringSignSignatureRootSubsystem(const List<Subgrou
   for (int i = 0; i < this->theGroup.characterTable.size; i ++) {
     out << "$" << this->ToStringIrrepLabel(i) << "$";
     for (int j = 0; j < this->theGroup.characterTable[i].data.size; j ++) {
-      out << "&$" << this->theGroup.characterTable[i].data[j].ToString() << "$";
+      out << "&$" << this->theGroup.characterTable[i].data[j].toString() << "$";
     }
     out << "\\\\<br>\n";
   }
   out << "\\end{longtable}\n<br>\n";
   out << "\\begin{longtable}{rrcl}" << "\\caption{\\label{tableConjugacyClassTable"
-  << HtmlRoutines::CleanUpForLaTeXLabelUse(this->theDynkinType.ToString()) << "}}\\\\ ";
+  << HtmlRoutines::CleanUpForLaTeXLabelUse(this->theDynkinType.toString()) << "}}\\\\ ";
   out << "$\\#$ & Representative & Class size & Root subsystem label\\\\<br>\n";
   for (int i = 0; i < this->theGroup.ConjugacyClassCount(); i ++) {
-    out << "$" << i + 1 << "$ & " "$" << this->theGroup.conjugacyClasseS[i].representative.ToString()
-    << "$&$ " << this->theGroup.conjugacyClasseS[i].size.ToString() << "$";
+    out << "$" << i + 1 << "$ & " "$" << this->theGroup.conjugacyClasseS[i].representative.toString()
+    << "$&$ " << this->theGroup.conjugacyClasseS[i].size.toString() << "$";
     if (i < this->ccCarterLabels.size) {
       out << "&$" << this->ccCarterLabels[i] << "$";
     }
@@ -1375,7 +1375,7 @@ public:
   );
   static std::string GetTypeBParabolicSignMultiplicityTable(int rank);
   static unsigned int HashFunction(const KostkaNumber& input);
-  std::string ToString();
+  std::string toString();
   KostkaNumber();
   bool Compute(HashedList<KostkaNumber>* KNcache, std::stringstream* comments = nullptr);
 };
@@ -1390,7 +1390,7 @@ public:
   bool firstIncrement();
   bool IncrementReturnFalseIfPastLast();
   SelectionFixedRankDifferentMaxMultiplicities();
-  std::string ToString();
+  std::string toString();
   std::string ToStringFull();
 };
 
@@ -1406,7 +1406,7 @@ KostkaNumber::KostkaNumber() {
   this->MaxNumCachedKostkaNumbers = 10000;
 }
 
-std::string KostkaNumber::ToString() {
+std::string KostkaNumber::toString() {
   std::stringstream out;
   out << "KostkaNumber" << "((";
   for (int i = 0; i < this->partition.size; i ++) {
@@ -1541,8 +1541,8 @@ std::string KostkaNumber::GetTypeBParabolicSignMultiplicityTable(int rank) {
   }
   out << partitionPairs.size << " partition pairs. <br>";
   for (int i = 0; i < partitionPairs.size; i ++) {
-    out << partitionPairs[i].Object1.ToString()
-    << "," << partitionPairs[i].Object2.ToString() << "<br>";
+    out << partitionPairs[i].Object1.toString()
+    << "," << partitionPairs[i].Object2.toString() << "<br>";
   }
   partitionPairs.QuickSortAscending();
   partitionsParabolics.QuickSortAscending();
@@ -1607,7 +1607,7 @@ std::string KostkaNumber::GetTypeBParabolicSignMultiplicityTable(int rank) {
       theSimpleType.MakeArbitrary('B', typeBsize, 1);
       theType.AddMonomial(theSimpleType, 1);
     }
-    outLaTeX << "&$" << theType.ToString(&theFormat) << "$";
+    outLaTeX << "&$" << theType.toString(&theFormat) << "$";
   }
   outLaTeX << "\\\\";
   ///////////////////////////////////////
@@ -1700,12 +1700,12 @@ Rational KostkaNumber::ComputeTypeBParabolicSignMultiplicity(
     result += leftKN.value * rightKN.value;
   } while (theSelection.IncrementReturnFalseIfPastLast());
   if (comments != nullptr) {
-    *comments << result.ToString();
+    *comments << result.toString();
   }
   return result;
 }
 
-std::string SelectionFixedRankDifferentMaxMultiplicities::ToString() {
+std::string SelectionFixedRankDifferentMaxMultiplicities::toString() {
   std::stringstream out;
   Vector<int> theMults;
   theMults = this->Multiplicities;
@@ -1793,12 +1793,12 @@ bool CalculatorFunctionsWeylGroup::innerKostkaNumber(Calculator& theCommands, co
     !theCommands.GetVectoRInt(input[1], theKN.partition) ||
     !theCommands.GetVectoRInt(input[2], theKN.tuple)
   ) {
-    return theCommands << "Failed to extract partition and tuple from input: " << input.ToString();
+    return theCommands << "Failed to extract partition and tuple from input: " << input.toString();
   }
   std::stringstream out;
   HashedList<KostkaNumber> theKNs;
   if (theKN.Compute(&theKNs, &out)) {
-    out << "<br>Final result: " << theKN.value.ToString();
+    out << "<br>Final result: " << theKN.value.toString();
   }
   return output.AssignValue(out.str(), theCommands);
 }
@@ -1816,7 +1816,7 @@ bool CalculatorFunctionsWeylGroup::innerAllSelectionsFixedRank(
   }
   if (!theCommands.GetVectoRInt(input[2], theSel.MaxMultiplicities)) {
     return theCommands << "Failed to extract list of multiplicities from "
-    << input[2].ToString();
+    << input[2].toString();
   }
   if (theSel.rank < 0) {
     return output.AssignValue(0, theCommands);
@@ -1826,7 +1826,7 @@ bool CalculatorFunctionsWeylGroup::innerAllSelectionsFixedRank(
   out << "Max multiplicities: " << theSel.MaxMultiplicities << " rank: "
   << theSel.rank;
   while (theSel.IncrementReturnFalseIfPastLast()) {
-    out << "<br>" << theSel.ToString();
+    out << "<br>" << theSel.toString();
   }
   return output.AssignValue(out.str(), theCommands);
 }
@@ -1867,8 +1867,8 @@ bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystemsFromKostkaNum
       for (int i = 0; i < thePartitions.size; i ++) {
         partitionsTransposed[i] = thePartitions[i];
         partitionsTransposed[i].Transpose();
-        out << "<br>Partition: " << thePartitions[i].ToString()
-        << ", transposed: " << partitionsTransposed[i].ToString();
+        out << "<br>Partition: " << thePartitions[i].toString()
+        << ", transposed: " << partitionsTransposed[i].toString();
       }
     }
     return theCommands << "Not implemented yet.";
@@ -1913,7 +1913,7 @@ bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems(
         currentSGs = &allRootSubgroups;
       }
       for (int i = 0; i < currentSGs->size; i ++) {
-        currentTauSig.Object1 = (*currentSGs)[i].theDynkinType.ToString();
+        currentTauSig.Object1 = (*currentSGs)[i].theDynkinType.toString();
         currentTauSig.Object2 = (*currentSGs)[i].tauSignature;
         if (!tauSigPairs.Contains(currentTauSig)) {
           tauSigPairs.AddOnTop(currentTauSig);
@@ -1951,14 +1951,14 @@ bool CalculatorFunctionsWeylGroup::innerIsOuterAutoWeylGroup(
   }
   DynkinType theType;
   if (!CalculatorConversions::functionDynkinType(theCommands, input[1], theType)) {
-    return theCommands << "<hr>Failed to get Dynkin type from argument. " << input[1].ToString();
+    return theCommands << "<hr>Failed to get Dynkin type from argument. " << input[1].toString();
   }
   Matrix<Rational> theMat;
   if (!theCommands.functionGetMatrix(input[2], theMat)) {
-    return theCommands << "<hr>Failed to get matrix from argument. " << input[2].ToString();
+    return theCommands << "<hr>Failed to get matrix from argument. " << input[2].toString();
   }
   if (theMat.NumCols != theMat.NumRows || theMat.NumCols != theType.GetRank()) {
-    theCommands << "<hr>Extracted Dynkin type " << theType.ToString() << " is of rank " << theType.GetRank()
+    theCommands << "<hr>Extracted Dynkin type " << theType.toString() << " is of rank " << theType.GetRank()
     << " but extracted linear operator has " << theMat.NumCols << " columns and " << theMat.NumRows << " rows.";
     return false;
   }
@@ -1998,7 +1998,7 @@ public:
   bool flagDeallocated;
   MonomialMacdonald(): owner(nullptr), flagDeallocated(false) {
   }
-  std::string ToString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* theFormat = nullptr) const;
   bool CheckConsistency() {
     if (this->flagDeallocated) {
       global.fatal << "This is a programming error: use after free of MonomialMacdonald. " << global.fatal;
@@ -2021,8 +2021,8 @@ public:
   ~MonomialMacdonald();
 };
 
-std::string MonomialMacdonald::ToString(FormatExpressions* theFormat) const {
-  MacroRegisterFunctionWithName("MonomialMacdonald::ToString");
+std::string MonomialMacdonald::toString(FormatExpressions* theFormat) const {
+  MacroRegisterFunctionWithName("MonomialMacdonald::toString");
   (void) theFormat; //prevent unused parameter warning, portable
   if (this->owner == nullptr) {
     return "(non-initialized)";
@@ -2072,8 +2072,8 @@ void MonomialMacdonald::MakeFromRootSubsystem(const Vectors<Rational>& inputRoot
     }
     int indexInRoots = inputOwner.theWeyl.RootSystem.GetIndex(currentV);
     if (indexInRoots < 0) {
-      global.fatal << "This is a programming error: attempting to make a Macdonald polynomial from " << inputRoots.ToString()
-      << ": the vector " << currentV.ToString()
+      global.fatal << "This is a programming error: attempting to make a Macdonald polynomial from " << inputRoots.toString()
+      << ": the vector " << currentV.toString()
       << " is not a root. " << global.fatal;
     }
     this->rootSel.AddSelectionAppendNewIndex(indexInRoots);
@@ -2121,13 +2121,13 @@ bool CalculatorFunctionsWeylGroup::innerMacdonaldPolys(Calculator& theCommands, 
     rootSubalgebra& currentRootSA = theRootSAs.theSubalgebras[i];
     theGenerator.MakeFromRootSubsystem(currentRootSA.PositiveRootsK, *algebra.content);
     theGenerator.GenerateMyOrbit(theOrbit);
-    out << "<hr>Root subsystem type " << currentRootSA.theDynkinDiagram.ToString();
+    out << "<hr>Root subsystem type " << currentRootSA.theDynkinDiagram.toString();
     out << ". Orbit has " << theOrbit.size << " element(s), here they are: ";
     for (int j = 0; j < theOrbit.size; j ++) {
-      out << "<br>" << theOrbit[j].ToString();
+      out << "<br>" << theOrbit[j].toString();
     }
   }
-  out << "Type: " << theRootSAs.owner->theWeyl.theDynkinType.ToString()
+  out << "Type: " << theRootSAs.owner->theWeyl.theDynkinType.toString()
   << ". Number of root subsystems: " << theRootSAs.theSubalgebras.size;
   return output.AssignValue(out.str(), theCommands);
 }
@@ -2249,15 +2249,15 @@ bool CalculatorFunctionsWeylGroup::innerRepresentElementHyperOctahedral(
   ElementHyperoctahedralGroupR2 theElt;
   GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> theRep;
   if (!input[1].IsOfType(&theElt)) {
-    return theCommands << "Failed to extract element of hyperoctahedral group from " << input[1].ToString();
+    return theCommands << "Failed to extract element of hyperoctahedral group from " << input[1].toString();
   }
   if (!input[2].IsOfType(&theRep)) {
-    return theCommands << "Failed to extract representation from " << input[2].ToString();
+    return theCommands << "Failed to extract representation from " << input[2].toString();
   }
   Matrix<Rational> result;
   if (!theRep.GetMatrixOfElement(theElt, result)) {
-    return theCommands << "Failed to get matrix of element " << theElt.ToString()
-    << " from representation: " << theRep.ToString();
+    return theCommands << "Failed to get matrix of element " << theElt.toString()
+    << " from representation: " << theRep.toString();
   }
   return output.AssignMatrix(result, theCommands, nullptr, false);
 }
@@ -2288,7 +2288,7 @@ bool CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation(
     currentInput->SetSize(currentInputRat->size);
     for (int i = 0; i < currentInputRat->size; i ++) {
       if (!(*currentInputRat)[i].IsIntegerFittingInInt(&(*currentInput)[i])) {
-        return theCommands << "Failed to convert input: " << input.ToString() << " to a list of small integers.";
+        return theCommands << "Failed to convert input: " << input.toString() << " to a list of small integers.";
       }
     }
     for (int i = 0; i < currentInput->size; i ++) {
@@ -2305,8 +2305,8 @@ bool CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation(
   partitionLeft.FromListInt(inputLeft);
   partitionRight.FromListInt(inputRight);
   //std::stringstream out;
-  //out << "Left partition is: " << partitionLeft.ToString() << ", created from: " << inputLeft;
-  //out << "Right partition is: " << partitionRight.ToString() << ", created from: " << inputRight;
+  //out << "Left partition is: " << partitionLeft.toString() << ", created from: " << inputLeft;
+  //out << "Right partition is: " << partitionRight.toString() << ", created from: " << inputRight;
   int index = 0;
   for (; index < theCommands.theObjectContainer.theHyperOctahedralGroups.size; index ++) {
     if (
@@ -2347,7 +2347,7 @@ bool CalculatorFunctionsWeylGroup::innerSpechtModule(Calculator& theCommands, co
   inputInt.SetSize(inputRat.size);
   for (int i = 0; i < inputRat.size; i ++) {
     if (!(inputRat[i].IsIntegerFittingInInt(&inputInt[i]))) {
-      return theCommands << "Failed to convert input: " << input.ToString() << " to a list of small integers.";
+      return theCommands << "Failed to convert input: " << input.toString() << " to a list of small integers.";
     }
   }
   for (int i = 0; i < inputInt.size; i ++) {
@@ -2361,7 +2361,7 @@ bool CalculatorFunctionsWeylGroup::innerSpechtModule(Calculator& theCommands, co
   Partition p;
   p.FromListInt(inputInt);
   std::stringstream out;
-  out << "Partition is " << p.ToString();
+  out << "Partition is " << p.toString();
   List<Matrix<Rational> > gens;
   p.SpechtModuleMatricesOfTranspositionsjjplusone(gens);
   for (int i = 0; i < gens.size; i ++) {
@@ -2467,7 +2467,7 @@ bool Calculator::innerGenerateMultiplicativelyClosedSet(
       theProduct.MakeProducT(theCommands, theSet[j], theSet[i]);
       std::stringstream reportStream;
       reportStream << "found " << theSet.size << "elements so far, exploring element " << i + 1;
-      reportStream << "<br>Evaluating: " << theProduct.ToString();
+      reportStream << "<br>Evaluating: " << theProduct.toString();
       theReport.Report(reportStream.str());
       theCommands.EvaluateExpression(theCommands, theProduct, evaluatedProduct);
       //if (evaluatedProduct == theSet[0])

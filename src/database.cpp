@@ -433,7 +433,7 @@ void GlobalVariables::initModifiableDatabaseFields() {
   outputFile << "//File automatically generated. Please do not modify.\n";
   outputFile << "\"use strict\";\n";
   outputFile << "var modifiableDatabaseData = "
-  << toWrite.ToString(&JSData::PrintOptions::NewLine())
+  << toWrite.toString(&JSData::PrintOptions::NewLine())
   << ";\n";
   outputFile << "module.exports = {modifiableDatabaseData};";
 }
@@ -481,7 +481,7 @@ bool ProblemDataAdministrative::GetWeightFromCoursE(
   return output.AssignStringFailureAllowed(*outputAsGivenByInstructor);
 }
 
-std::string ProblemDataAdministrative::ToString() const {
+std::string ProblemDataAdministrative::toString() const {
   std::stringstream out;
   out << this->deadlinesPerSection.ToStringHtml();
   out << this->problemWeightsPerCoursE.ToStringHtml();
@@ -504,15 +504,15 @@ bool ProblemData::CheckConsistencyMQids() const {
     if (StringRoutines::StringTrimWhiteSpace(this->theAnswers.theValues[i].idMQfielD) == "") {
       std::stringstream errorStream;
       errorStream << "This is not supposed to happen: empty idMQfield. The answer id is: "
-      << this->theAnswers.theValues[i].answerId << "<br>" << this->ToString() << "<hr>Answer information: "
-      << this->ToString() << "<br>";
+      << this->theAnswers.theValues[i].answerId << "<br>" << this->toString() << "<hr>Answer information: "
+      << this->toString() << "<br>";
       global.fatal << errorStream.str() << global.fatal;
     }
   }
   return true;
 }
 
-std::string ProblemData::ToString() const {
+std::string ProblemData::toString() const {
   std::stringstream out;
   out << "Problem data. "
   << "Random seed: " << this->randomSeed;
@@ -533,7 +533,7 @@ std::string ProblemData::ToString() const {
     }
     out << "<br>";
   }
-  out << "Administrator data: " << this->adminData.ToString();
+  out << "Administrator data: " << this->adminData.toString();
   return out.str();
 }
 
@@ -568,8 +568,8 @@ std::string UserCalculator::ToStringSelectedColumns() {
   return out.str();
 }
 
-std::string UserCalculator::ToString() {
-  MacroRegisterFunctionWithName("UserCalculator::ToString");
+std::string UserCalculator::toString() {
+  MacroRegisterFunctionWithName("UserCalculator::toString");
   std::stringstream out;
 
   out << "Calculator user: " << this->username
@@ -591,12 +591,12 @@ std::string UserCalculator::ToString() {
     if (!this->theProblemData.theValues[i].adminData.GetWeightFromCoursE(this->courseComputed, weightRat)) {
       out << " (weight not available). ";
     } else {
-      out << " weight: " << weightRat.ToString();
+      out << " weight: " << weightRat.toString();
     }
   }
   out << "<br>Deadline info: "
   << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(
-    this->deadlines.ToString(nullptr)
+    this->deadlines.toString(nullptr)
   );
   return out.str();
 }
@@ -1217,11 +1217,11 @@ bool UserCalculator::ComputeAndStoreActivationStats(
   if (commentsGeneral != nullptr) {
     *commentsGeneral
     << "<br>Total activations (attempted on) this email: "
-    << numActivationsThisEmail.ToString() << ".\n<br>\n";
+    << numActivationsThisEmail.toString() << ".\n<br>\n";
   }
   QueryExact findQueryInUsers(DatabaseStrings::tableUsers, "", "");
   QuerySet updateUser;
-  updateUser.value[DatabaseStrings::labelTimeOfActivationTokenCreation] = now.ToString();
+  updateUser.value[DatabaseStrings::labelTimeOfActivationTokenCreation] = now.toString();
   if (this->userId != "") {
     findQueryInUsers.SetLabelValue(DatabaseStrings::labelUserId, this->userId);
   } else if (this->username != "") {
@@ -1242,8 +1242,8 @@ bool UserCalculator::ComputeAndStoreActivationStats(
     return false;
   }
   QuerySet emailStatQuery;
-  emailStatQuery.value[DatabaseStrings::labelLastActivationEmailTime] = now.ToString();
-  emailStatQuery.value[DatabaseStrings::labelNumActivationEmails] = numActivationsThisEmail.ToString();
+  emailStatQuery.value[DatabaseStrings::labelLastActivationEmailTime] = now.toString();
+  emailStatQuery.value[DatabaseStrings::labelNumActivationEmails] = numActivationsThisEmail.toString();
   emailStatQuery.value[DatabaseStrings::labelActivationToken] = this->actualActivationToken;
   emailStatQuery.value[DatabaseStrings::labelUsernameAssociatedWithToken] = this->username;
   if (!Database::get().UpdateOne(
@@ -1733,7 +1733,7 @@ bool Database::User::LoginViaGoogleTokenCreateNewAccountIfNeeded(
   if (theData.GetValue("email").theType != JSData::token::tokenString) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Could not find email entry in the json data "
-      << theData.ToString(nullptr);
+      << theData.toString(nullptr);
     }
     return false;
   }
@@ -1934,6 +1934,6 @@ std::string UserCalculator::GetActivationAddressFromActivationToken(
   theJS[DatabaseStrings::labelEmail] = inputEmailUnsafe;
   theJS[DatabaseStrings::labelCurrentPage] = DatabaseStrings::labelPageActivateAccount;
   out << global.DisplayNameExecutableApp
-  << "#" << HtmlRoutines::ConvertStringToURLString(theJS.ToString(nullptr), false);
+  << "#" << HtmlRoutines::ConvertStringToURLString(theJS.toString(nullptr), false);
   return out.str();
 }

@@ -13,7 +13,7 @@ public:
 //  std::string GetRFC1123time();
   void AssignLocalTime();
   void ComputeTimeStringNonReadable();
-  std::string ToString() const;
+  std::string toString() const;
   static std::string ToStringYMDHMS(const tm* input);
   std::string ToStringGM() const;
   std::string ToStringLocal() const;

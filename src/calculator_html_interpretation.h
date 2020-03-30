@@ -15,7 +15,7 @@ public:
   class TopicLine {
   public:
     friend std::ostream& operator<<(std::ostream& output, const TopicLine& line) {
-      output << line.ToString();
+      output << line.toString();
       return output;
     }
     int theType;
@@ -24,7 +24,7 @@ public:
     void MakeError(const std::string& message);
     void MakeEmpty();
     TopicElement ToTopicElement() const;
-    std::string ToString() const;
+    std::string toString() const;
     bool AccountIfStateChanger(CalculatorHTML& owner) const;
   };
   CalculatorHTML* owner;
@@ -58,7 +58,7 @@ public:
   bool CheckProblemsOpen(std::stringstream* commentsOnFailure);
   bool CheckTopicPdfs(std::stringstream* commentsOnFailure);
   void AddTopic(TopicElement& inputElt, int index);
-  std::string ToString() const;
+  std::string toString() const;
   void initializeElementTypes();
   TopicLine ExtractLine(const std::string& inputNonTrimmed);
   class Test {
@@ -159,7 +159,7 @@ public:
   void ComputeID(int elementIndex, TopicElementParser& owner);
   void reset();
   friend std::ostream& operator << (std::ostream& output, const TopicElement& theElt) {
-    output << theElt.ToString();
+    output << theElt.toString();
     return output;
   }
   bool IsError();
@@ -167,7 +167,7 @@ public:
   bool PdfsOpenIfAvailable(CalculatorHTML& owner, std::stringstream* commentsOnFailure);
   bool PdfSlidesOpenIfAvailable(CalculatorHTML& owner, std::stringstream* commentsOnFailure);
   bool PdfHomeworkOpensIfAvailable(CalculatorHTML& owner, std::stringstream* commentsOnFailure);
-  std::string ToString() const;
+  std::string toString() const;
   JSData ToJSON(CalculatorHTML& owner);
   void ComputeSlides(CalculatorHTML& owner);
   JSData ComputeSlidesJSON(CalculatorHTML& owner);
@@ -507,7 +507,7 @@ public:
   bool IsEmpty();
   void reset();
   std::string courseTopicsWithFolder();
-  std::string ToString() const;
+  std::string toString() const;
   JSData ToJSON() const;
 };
 

@@ -13,9 +13,9 @@ bool MonomialP::Test::TestMonomialOrdersSatisfyTheDefinitionOne(
 ) {
   if (!order.leftGreaterThanRight(mustBeLarger, mustBeSmaller)) {
     global.fatal << "Monomial: "
-    << mustBeLarger.ToString()
+    << mustBeLarger.toString()
     << " is not larger than "
-    << mustBeSmaller.ToString()
+    << mustBeSmaller.toString()
     << " when using monomial: " << order.name
     << global.fatal;
   }

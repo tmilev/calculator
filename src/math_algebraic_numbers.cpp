@@ -5,7 +5,7 @@
 #include "math_subsets_selections.h"
 #include "math_general_implementation.h"
 
-std::string MonomialVector::ToString(FormatExpressions* theFormat) const {
+std::string MonomialVector::toString(FormatExpressions* theFormat) const {
   if (theFormat != nullptr) {
     if (this->theIndex < theFormat->vectorSpaceEiBasisNames.size && this->theIndex >= 0) {
       return theFormat->vectorSpaceEiBasisNames[this->theIndex];
@@ -67,7 +67,7 @@ void AlgebraicClosureRationals::ComputeDisplayStringsFromRadicals() {
       theRad *= this->theQuadraticRadicals[theSel.elements[i]];
     }
     if (theRad != 1) {
-      out << "\\sqrt{" << theRad.ToString() << "}";
+      out << "\\sqrt{" << theRad.toString() << "}";
     }
     this->DisplayNamesBasisElements[this->GetIndexFromRadicalSelection(theSel)] = out.str();
   } while (theSel.IncrementReturnFalseIfPastLast());
@@ -324,7 +324,7 @@ bool AlgebraicClosureRationals::ReduceMe(
   if (!mustBeTrue) {
     global.fatal
     << "This is a programming error: failed to factor polynomial "
-    << theMinPoly.ToString() << global.fatal;
+    << theMinPoly.toString() << global.fatal;
   }
   smallestFactor = theFactors[0];
   if (smallestFactor.TotalDegreeInt() == theDim) {
@@ -340,7 +340,7 @@ bool AlgebraicClosureRationals::ReduceMe(
   if (!smallestFactor.TotalDegree().IsSmallInteger(&smallestFactorDegree)) {
     global.fatal
     << "This is a programming error: "
-    << smallestFactor.ToString()
+    << smallestFactor.toString()
     << " has non-integral exponent, which should be "
     << "impossible in the current context. "
     << global.fatal;
@@ -448,7 +448,7 @@ void AlgebraicClosureRationals::GetAdditionTo(
       << input.basisIndex
       << " with current index " << currentIndex
       << ". A printout of the algebraic closure follows. "
-      << this->ToString() << global.fatal;
+      << this->toString() << global.fatal;
     }
     output.AddOtherTimesConst(
       this->basisInjections[input.basisIndex][currentIndex],
@@ -470,9 +470,9 @@ void AlgebraicClosureRationals::GetMultiplicationBy(
       inputAdditiveForm[i].theIndex < 0 ||
       inputAdditiveForm[i].theIndex >= this->latestBasis.size
     ) {
-      global.fatal << "This is a programming error: element " << input.ToString()
+      global.fatal << "This is a programming error: element " << input.toString()
       << " has bad index, namely, " << inputAdditiveForm[i].theIndex
-      << ". The algebraic closure is: " << this->ToString() << ". " << global.fatal;
+      << ". The algebraic closure is: " << this->toString() << ". " << global.fatal;
     }
     currentMat = this->latestBasis[inputAdditiveForm[i].theIndex];
     currentMat *= inputAdditiveForm.coefficients[i];
@@ -608,7 +608,10 @@ bool AlgebraicNumber::operator==(const Rational& other) const {
   return this->element.coefficients[0] == other;
 }
 
-bool AlgebraicNumber::NeedsParenthesisForMultiplication() const {
+bool AlgebraicNumber::NeedsParenthesisForMultiplication(
+  FormatExpressions* unused
+) const {
+  (void) unused;
   if (this->owner == nullptr) {
     return false;
   }
@@ -711,11 +714,11 @@ bool AlgebraicClosureRationals::AdjoinRootQuadraticPolyToQuadraticRadicalExtensi
   checkSub[0].MakeConst(outputRoot);
   algNumPoly.Substitution(checkSub);
   if (!algNumPoly.IsEqualToZero()) {
-    global.fatal << "This is a programming error. The number z = " << outputRoot.ToString()
+    global.fatal << "This is a programming error. The number z = " << outputRoot.toString()
     << " was just adjoined to a quadratic radical extension of the rationals; z "
-    << "was given by requesting that it has minimial polynomial " << algNumPoly.ToString()
+    << "was given by requesting that it has minimial polynomial " << algNumPoly.toString()
     << ", however, substituting z back in to the minimal polynomial "
-    << "does not yield zero, rather yields " << algNumPoly.ToString() << ". " << global.fatal;
+    << "does not yield zero, rather yields " << algNumPoly.toString() << ". " << global.fatal;
   }
   return true;
 }
@@ -729,7 +732,7 @@ void AlgebraicClosureRationals::ConvertPolyDependingOneVariableToPolyDependingOn
     global.fatal << "This is a programming error: "
     << "I am being asked convert to a one-variable polynomial a polynomial "
     << "depending on more than one variables. "
-    << "The input poly is: " << input.ToString() << global.fatal;
+    << "The input poly is: " << input.toString() << global.fatal;
   }
   PolynomialSubstitution<AlgebraicNumber> theSub;
   theSub.MakeIdSubstitution(indexVar + 1);
@@ -858,7 +861,7 @@ bool AlgebraicClosureRationals::AdjoinRootMinimalPolynomial(
   // the solution of our polynomial and so we want to know the image of
   // x as that will give us the solution in question.
   this->ContractBasesIfRedundant(backUpCopy, &outputRoot);
-  // global.Comments << "DEBUG: And the output root is: " << outputRoot.ToString();
+  // global.Comments << "DEBUG: And the output root is: " << outputRoot.toString();
 
 
   // Sanity check code here:
@@ -870,12 +873,12 @@ bool AlgebraicClosureRationals::AdjoinRootMinimalPolynomial(
   substitutedMinPoly.Substitution(theSub);
   if (!substitutedMinPoly.IsEqualToZero()) {
     global.fatal << "This is a programming error. The number z = "
-    << outputRoot.ToString() << " was just adjoined to the base field; z "
+    << outputRoot.toString() << " was just adjoined to the base field; z "
     << "was given by requesting that it has minimial polynomial "
-    << minPoly.ToString()
+    << minPoly.toString()
     << ", however, substituting z back in to the minimal polynomial "
     << "does not yield zero, rather yields "
-    << substitutedMinPoly.ToString() << ". "
+    << substitutedMinPoly.toString() << ". "
     << "The algebraic closure printout follows. "
     << this->ToStringFull() << global.fatal;
   }
@@ -895,7 +898,7 @@ void AlgebraicNumber::Invert() {
     if (!isGood) {
       global.fatal << "This is a programming error: Algebraic number has no owner, "
       << "so it must be rational, but it appears to be not. "
-      << "Its theElt vector is: " << this->element.ToString() << global.fatal;
+      << "Its theElt vector is: " << this->element.toString() << global.fatal;
     }
     this->element.coefficients[0].Invert();
     return;
@@ -974,7 +977,7 @@ void AlgebraicNumber::operator+=(const AlgebraicNumber& other) {
   }
   if (theOwner == nullptr && this->basisIndex != other.basisIndex) {
     global.fatal << "This is a programming error: algebraic numbers: "
-    << this->ToString() << " and " << other.ToString()
+    << this->toString() << " and " << other.toString()
     << " have with zero owners but different basis indices. " << global.fatal;
   }
   if (this->basisIndex == other.basisIndex) {
@@ -1043,7 +1046,7 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other) {
   if (doReport) {
     std::stringstream reportStream;
     reportStream << "Large multiplication:<br>"
-    << this->ToString() << "\n<br>by<br>\n" << other.ToString()
+    << this->toString() << "\n<br>by<br>\n" << other.toString()
     << "\n<br>...";
     theReport.Report(reportStream.str());
   }
@@ -1260,7 +1263,7 @@ std::string AlgebraicClosureRationals::ToStringQuadraticRadical(
   std::stringstream out;
   out << "\\mathbb Q[";
   for (int i = 0; i < this->theQuadraticRadicals.size; i ++) {
-    out << "\\sqrt{" << this->theQuadraticRadicals[i].ToString() << "}";
+    out << "\\sqrt{" << this->theQuadraticRadicals[i].toString() << "}";
     if (i != this->theQuadraticRadicals.size - 1) {
       out << ", ";
     }
@@ -1295,13 +1298,13 @@ std::string AlgebraicClosureRationals::ToStringFull(FormatExpressions* theFormat
     out << "<br>Generating element not selected. ";
   } else {
     out << "<br>Generating element: "
-    << HtmlRoutines::GetMathSpanPure(this->GeneratingElementMatForm.ToString(theFormat));
+    << HtmlRoutines::GetMathSpanPure(this->GeneratingElementMatForm.toString(theFormat));
   }
   out << "<br>There are " << this->basisInjections.size << " registered old bases. ";
   for (int i = 0; i < this->basisInjections.size; i ++) {
     out << "<hr>Basis " << i + 1 << " has " << this->basisInjections[i].size << " elements: ";
     for (int j = 0; j < this->basisInjections[i].size; j ++) {
-      out << HtmlRoutines::GetMathSpanPure(this->basisInjections[i][j].ToString(theFormat));
+      out << HtmlRoutines::GetMathSpanPure(this->basisInjections[i][j].toString(theFormat));
       if (j != this->basisInjections[i].size - 1) {
         out << ", ";
       }
@@ -1321,8 +1324,8 @@ AlgebraicNumber AlgebraicClosureRationals::fromRational(const Rational& input) {
   return result;
 }
 
-std::string AlgebraicClosureRationals::ToString(FormatExpressions* theFormat) const {
-  MacroRegisterFunctionWithName("AlgebraicClosureRationals::ToString");
+std::string AlgebraicClosureRationals::toString(FormatExpressions* theFormat) const {
+  MacroRegisterFunctionWithName("AlgebraicClosureRationals::toString");
   (void) theFormat;
   std::stringstream out;
   FormatExpressions tempFormat;
@@ -1359,12 +1362,12 @@ bool AlgebraicNumber::IsEqualToZero() const {
   return this->element.IsEqualToZero();
 }
 
-std::string AlgebraicNumber::ToString(FormatExpressions* theFormat) const {
+std::string AlgebraicNumber::toString(FormatExpressions* theFormat) const {
   if (this->owner == nullptr) {
     if (this->element.IsEqualToZero()) {
       return "0";
     }
-    return this->element.coefficients[0].ToString(theFormat);
+    return this->element.coefficients[0].toString(theFormat);
   }
   std::stringstream out;
   FormatExpressions tempFormat;
@@ -1374,7 +1377,7 @@ std::string AlgebraicNumber::ToString(FormatExpressions* theFormat) const {
   }
   VectorSparse<Rational> theAdditiveVector;
   this->owner->GetAdditionTo(*this, theAdditiveVector);
-  out << theAdditiveVector.ToString(&tempFormat); //<< "~ in~ the~ field~ " << this->owner->ToString();
+  out << theAdditiveVector.toString(&tempFormat); //<< "~ in~ the~ field~ " << this->owner->toString();
   if (this->basisIndex < this->owner->basisInjections.size - 1 && global.UserDebugFlagOn()) {
     out << "[=" << this->ToStringNonInjected() << "]";
   }
@@ -1386,7 +1389,7 @@ std::string AlgebraicNumber::ToStringNonInjected(FormatExpressions* theFormat) c
     if (this->element.IsEqualToZero()) {
       return "0";
     }
-    return this->element.coefficients[0].ToString(theFormat);
+    return this->element.coefficients[0].toString(theFormat);
   }
   std::stringstream out;
   FormatExpressions tempFormat;
@@ -1401,7 +1404,7 @@ std::string AlgebraicNumber::ToStringNonInjected(FormatExpressions* theFormat) c
   if (theFormat != nullptr) {
     tempFormat.flagUseFrac = theFormat->flagUseFrac;
   }
-  out << this->element.ToString(&tempFormat); //<< "~ in~ the~ field~ " << this->owner->ToString();
+  out << this->element.toString(&tempFormat); //<< "~ in~ the~ field~ " << this->owner->toString();
   return out.str();
 }
 
@@ -1421,7 +1424,7 @@ bool AlgebraicNumber::operator==(const AlgebraicNumber& other) const {
     << "comparing two algebraic number that do not have the same owner. "
     << "The numbers have owners of respective addresses "
     << this->owner << " and " << other.owner << ". The numbers are: "
-    << this->ToString() << " and " << other.ToString() << ". Crashing to let you know. ";
+    << this->toString() << " and " << other.toString() << ". Crashing to let you know. ";
     global.fatal << global.fatal;
   }
   this->CheckNonZeroOwner();
@@ -1447,10 +1450,34 @@ void AlgebraicNumber::operator=(const Rational& other) {
   this->basisIndex = 0;
 }
 
-std::string ElementZmodP::ToString(FormatExpressions* theFormat) const {
-  (void) theFormat; //remove unused parameter warnign portable.
+bool ElementZmodP::NeedsParenthesisForMultiplication(FormatExpressions* theFormat) const {
+  if (theFormat == nullptr) {
+    return true;
+  }
+  return !theFormat->flagSuppressModP;
+}
+
+std::string ElementZmodP::toStringModP() const {
+  return ElementZmodP::toStringModP(this->theModulus);
+}
+
+std::string ElementZmodP::toStringModP(const LargeIntegerUnsigned& modulus) {
   std::stringstream out;
-  out << "(" << this->theValue.ToString() << " ~mod~ " << this->theModulus.ToString() << ")";
+  out << "mod(" << modulus.toString() << ")";
+  return out.str();
+}
+
+std::string ElementZmodP::toString(FormatExpressions* theFormat) const {
+  bool suppressModulus = false;
+  if (theFormat != nullptr) {
+    suppressModulus = theFormat->flagSuppressModP;
+  }
+  std::stringstream out;
+  if (suppressModulus) {
+    out << this->theValue.toString();
+  } else {
+    out << "(" << this->theValue.toString() << this->toStringModP() << ")";
+  }
   return out.str();
 }
 
@@ -1472,12 +1499,13 @@ unsigned int ElementZmodP::HashFunction() const {
 
 void ElementZmodP::CheckIamInitialized() const {
   if (this->theModulus.IsEqualToZero()) {
-    global.fatal << "This is a programming error: computing with non-initialized "
+    global.fatal << "Programming error: computing with non-initialized "
     << "element the ring Z mod p (the number p has not been initialized!)."
     << global.fatal;
   }
   if (this->flagDeallocated) {
-    global.fatal << "This is a programming error: use after free of element z mod p. " << global.fatal;
+    global.fatal
+    << "Programming error: use after free of element z mod p. " << global.fatal;
   }
 }
 
@@ -1536,8 +1564,8 @@ void ElementZmodP::CheckEqualModuli(const ElementZmodP& other) {
   if (this->theModulus != other.theModulus) {
     global.fatal << "This is a programming error: attempting to make an operation "
     << "with two elemetns of Z mod P with different moduli, "
-    << this->theModulus.ToString() << " and "
-    << other.theModulus.ToString() << ". " << global.fatal;
+    << this->theModulus.toString() << " and "
+    << other.theModulus.toString() << ". " << global.fatal;
   }
 }
 

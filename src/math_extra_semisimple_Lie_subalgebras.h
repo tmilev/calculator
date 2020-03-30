@@ -66,7 +66,7 @@ class NilradicalCandidate {
   void ComputeParabolicACextendsToParabolicAC();
   bool IsCommutingSelectionNilradicalElements(Selection& inputNilradSel);
   void ProcessMe();
-  std::string ToString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* theFormat = nullptr) const;
   std::string ToStringTableElementWithWeights(
     const List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& theElts,
     const Vectors<Rational>& theWeights
@@ -77,7 +77,7 @@ class NilradicalCandidate {
 
 class SubalgebraSemisimpleLieAlgebra {
 public:
-  std::string ToString(FormatExpressions* theFormat = nullptr);
+  std::string toString(FormatExpressions* theFormat = nullptr);
   SemisimpleLieAlgebra* owner;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theGenerators;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theBasis;
@@ -91,7 +91,7 @@ public:
 
 class CandidateSSSubalgebra {
   friend std::ostream& operator << (std::ostream& output, const CandidateSSSubalgebra& theCandidate) {
-    output << theCandidate.ToString();
+    output << theCandidate.toString();
     return output;
   }
 
@@ -335,7 +335,7 @@ public:
   std::string ToStringType(FormatExpressions* theFormat = nullptr) const;
   std::string ToStringTypeAndHs(FormatExpressions* theFormat = nullptr) const;
   std::string ToStringGenerators(FormatExpressions* theFormat = nullptr) const;
-  std::string ToString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* theFormat = nullptr) const;
   std::string ToStringSystem(FormatExpressions* theFormat = nullptr) const;
   std::string ToStringSystemPart2(FormatExpressions* theFormat = nullptr) const;
   std::string ToStringLoadUnknown(FormatExpressions* theFormat = nullptr) const;
@@ -491,7 +491,7 @@ public:
   std::string ToStringState(FormatExpressions* theFormat = nullptr);
   std::string ToStringCurrentChain(FormatExpressions* theFormat = nullptr);
   std::string ToStringProgressReport(FormatExpressions* theFormat = nullptr);
-  std::string ToString(FormatExpressions* theFormat = nullptr);
+  std::string toString(FormatExpressions* theFormat = nullptr);
   std::string ToStringPart2(FormatExpressions* theFormat = nullptr);
   std::string ToStringTableSubalgebraLinksTable(FormatExpressions* theFormat);
   std::string ToStringSubalgebrasNoHDWrite(FormatExpressions* theFormat = nullptr);

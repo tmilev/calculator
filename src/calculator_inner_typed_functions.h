@@ -213,7 +213,7 @@ bool CalculatorConversions::functionPolynomial(Calculator& theCommands, const Ex
         theCommands, input[i], theConverted
       )) {
         return theCommands << "<hr>Failed to extract polynomial from "
-        << input[i].ToString();
+        << input[i].toString();
       }
       theComputed.AddChildOnTop(theConverted);
     }
@@ -236,7 +236,7 @@ bool CalculatorConversions::functionPolynomial(Calculator& theCommands, const Ex
         summand *= - 1;
       }
       if (!CalculatorConversions::functionPolynomial<coefficient>(theCommands, summand, theConverted)) {
-        return theCommands << "<hr>Failed to extract polynomial from " << summand.ToString();
+        return theCommands << "<hr>Failed to extract polynomial from " << summand.toString();
       }
       theComputed.AddChildOnTop(theConverted);
     }
@@ -247,16 +247,16 @@ bool CalculatorConversions::functionPolynomial(Calculator& theCommands, const Ex
   if (input.StartsWith(theCommands.opThePower(), 3)) {
     if (input[2].IsSmallInteger(&thePower)) {
       if (!CalculatorConversions::functionPolynomial<coefficient>(theCommands, input[1], theConverted)) {
-        return theCommands << "<hr>Failed to extract polynomial from " << input[1].ToString() << ".";
+        return theCommands << "<hr>Failed to extract polynomial from " << input[1].toString() << ".";
       }
       Polynomial<coefficient> resultP = theConverted.GetValue<Polynomial<coefficient> >();
       if (thePower < 0) {
         coefficient theConst;
         if (!resultP.IsConstant(&theConst)) {
           theCommands << "<hr>Failed to extract polynomial from  "
-          << input.ToString() << " because the exponent was negative. "
+          << input.toString() << " because the exponent was negative. "
           << "Please make sure that this is not a typo. "
-          << "I am treating " << input.ToString() << " as a single variable. ";
+          << "I am treating " << input.toString() << " as a single variable. ";
           Polynomial<coefficient> JustAmonomial;
           JustAmonomial.MakeMonomiaL(0, 1, 1);
           Expression theContext;

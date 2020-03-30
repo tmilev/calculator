@@ -34,8 +34,8 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::I
     << "whose reflections generate the ambient group, "
     << "however one of the scalar products in question was non-constant. "
     << "More precisely, the scalar product of "
-    << theWeight.ToString() << " and " << tempVect.ToString() << " "
-    << "equals " << tempRF.ToString() << ". "
+    << theWeight.toString() << " and " << tempVect.toString() << " "
+    << "equals " << tempRF.toString() << ". "
     << "I cannot decide (more precisely, do not want to *silently* decide for you) "
     << "whether a non-constant function is to be declared positive or not. "
     << "If this is not a programming mistake, "
@@ -72,8 +72,8 @@ bool WeylGroupData::IsDominantWRTgenerator<RationalFunction>(
     << "whose reflections generate the ambient group, "
     << "however one of the scalar products in question was non-constant. "
     << "More precisely, the scalar product of "
-    << theWeight.ToString() << " and " << tempVect.ToString() << " "
-    << "equals " << tempRF.ToString() << ". "
+    << theWeight.toString() << " and " << tempVect.toString() << " "
+    << "equals " << tempRF.toString() << ". "
     << "I cannot decide (more precisely, do not want to *silently* decide for you) "
     << "whether a non-constant function is positive or not. "
     << "If this is not a programming mistake, "
@@ -212,7 +212,7 @@ bool Calculator::innerAnimateLittelmannPaths(
   Vector<Rational> theWeightInSimpleCoords;
   theWeightInSimpleCoords = theSSowner->theWeyl.GetSimpleCoordinatesFromFundamental(theWeight);
   theCommands << "<br>Function innerAnimateLittelmannPaths: your input in simple coords: "
-  << theWeightInSimpleCoords.ToString();
+  << theWeightInSimpleCoords.toString();
   LittelmannPath thePath;
   thePath.MakeFromWeightInSimpleCoords(theWeightInSimpleCoords, theSSowner->theWeyl);
   return output.AssignValue(thePath.GenerateOrbitAndAnimate(), theCommands);
@@ -233,8 +233,8 @@ bool Calculator::innerCasimir(Calculator& theCommands, const Expression& input, 
   SemisimpleLieAlgebra& theSSowner = *theSSalg;
   ElementUniversalEnveloping<RationalFunction> theCasimir;
   theCasimir.MakeCasimir(theSSowner);
-  theCommands << "Context Lie algebra: " << theSSowner.theWeyl.theDynkinType.ToString()
-  << ". The coefficient: " << theSSowner.theWeyl.GetKillingDivTraceRatio().ToString()
+  theCommands << "Context Lie algebra: " << theSSowner.theWeyl.theDynkinType.toString()
+  << ". The coefficient: " << theSSowner.theWeyl.GetKillingDivTraceRatio().toString()
   <<  ". The Casimir element of the ambient Lie algebra. ";
   Expression contextE;
   contextE.MakeContextSSLieAlg(theCommands, theSSowner);
@@ -300,10 +300,10 @@ std::string LittelmannPath::GenerateOrbitAndAnimate() {
   this->owner->DrawRootSystem(collapsed, true, true);
   for (int i = 0; i < theOrbit.size; i ++) {
     LittelmannPath& currentPath = theOrbit[i];
-    animated.drawPath(currentPath.Waypoints, "black", 1, this->owner->theDynkinType.ToString(), i);
+    animated.drawPath(currentPath.Waypoints, "black", 1, this->owner->theDynkinType.toString(), i);
     collapsed.drawPath(currentPath.Waypoints, "black", 1);
     for (int j = 0; j < currentPath.Waypoints.size; j ++) {
-      animated.drawCircleAtVector(currentPath.Waypoints[j], "purple", 3, this->owner->theDynkinType.ToString(), i);
+      animated.drawCircleAtVector(currentPath.Waypoints[j], "purple", 3, this->owner->theDynkinType.toString(), i);
       collapsed.drawCircleAtVector(currentPath.Waypoints[j], "purple", 3);
     }
   }
@@ -316,7 +316,7 @@ std::string LittelmannPath::GenerateOrbitAndAnimate() {
   out << "<table>";
   for (int i = 0; i < theOrbit.size; i ++) {
     LittelmannPath& currentPath = theOrbit[i];
-    out << "<tr><td>" << currentPath.ToString() << "</td>"
+    out << "<tr><td>" << currentPath.toString() << "</td>"
     << "<td>"
     << this->ElementToStringOperatorSequenceStartingOnMe(theGens[i])
     << "</td></tr>";
@@ -337,13 +337,13 @@ std::string LittelmannPath::GenerateOrbitAndAnimate() {
     }
     tempPath = lastPath;
     tempPath.ActByEalpha(nextInd);
-    out << "<tr><td> e_" << nextInd + 1 << "(" << lastPath.ToString() << ") =</td>" << "<td>"
-    << tempPath.ToString() << "</td>";
+    out << "<tr><td> e_" << nextInd + 1 << "(" << lastPath.toString() << ") =</td>" << "<td>"
+    << tempPath.toString() << "</td>";
     for (int j = 0; j < this->owner->GetDim(); j ++) {
       tempPath = lastPath;
       tempPath.ActByEalpha(j);
       out << "<td> e_" << j + 1 << "("
-      << lastPath.ToString() << ")=</td>" << "<td>" << tempPath.ToString() << "</td>";
+      << lastPath.toString() << ")=</td>" << "<td>" << tempPath.toString() << "</td>";
     }
     out << "</tr>";
   }
@@ -356,9 +356,9 @@ std::string LittelmannPath::GenerateOrbitAndAnimate() {
     tempMon.generatorsIndices.ReverseOrderElements();
     tempMon.Powers.ReverseOrderElements();
     bool isadapted = tempPath.IsAdaptedString(tempMon);
-    out << "<tr><td>" << tempMon.ToString() << "</td><td>"
+    out << "<tr><td>" << tempMon.toString() << "</td><td>"
     << (isadapted ? "is adapted to" : "is not adapted to" ) << "</td><td>"
-    << tempPath.ToString() << "</td><td>";
+    << tempPath.toString() << "</td><td>";
     for (int j = 0; j < this->owner->GetDim(); j ++) {
       tempPath = theOrbit[i];
       tempPath.ActByEFDisplayIndex(j + 1);
@@ -391,7 +391,7 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg(
     if (comments != nullptr) {
       std::stringstream out;
       out << "I have been instructed only to split modules that are irreducible over the ambient Lie algebra";
-      out << " Instead I got the character " << this->theChaR.ToString()
+      out << " Instead I got the character " << this->theChaR.toString()
       << " (" << this->theChaR.size() << " monomials)";
       *comments << out.str();
     }
@@ -402,10 +402,10 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg(
   if (comments != nullptr) {
     out << tempS;
   }
-  out << "<br>Parabolic selection: " << LeviInSmall.ToString();
+  out << "<br>Parabolic selection: " << LeviInSmall.toString();
   std::stringstream tempStream1;
   tempStream1 << "Started splitting the f.d. part of the " << theHmm.theRange().ToStringLieAlgebraName() << "-module with highest weight in fund coords "
-  << this->theChaR[0].weightFundamentalCoordS.ToString();
+  << this->theChaR[0].weightFundamentalCoordS.toString();
   ProgressReport theReport;
   theReport.Report(tempStream1.str());
   List<List<Vector<coefficient> > > eigenSpacesPerSimpleGenerator;
@@ -432,7 +432,7 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg(
     }
     std::stringstream tempStream3;
     double timeAtStart1 = global.GetElapsedSeconds();
-    tempStream3 << "Computing eigenspace corresponding to " << currentElt.ToString() << "...";
+    tempStream3 << "Computing eigenspace corresponding to " << currentElt.toString() << "...";
     theReport.Report(tempStream3.str());
     Matrix<coefficient> currentOpMat;
     currentOp.GetMatrix(currentOpMat, this->GetDim());
@@ -444,7 +444,7 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg(
     } else {
       std::stringstream tempStream4;
       double timeAtStart2 = global.GetElapsedSeconds();
-      tempStream4 << "Intersecting with eigenspace corresponding to " << currentElt.ToString() << "...";
+      tempStream4 << "Intersecting with eigenspace corresponding to " << currentElt.toString() << "...";
       tempSpace1 = theFinalEigenSpace;
       theReport.Report(tempStream4.str());
       tempSpace2 = eigenSpacesPerSimpleGenerator[i];
@@ -495,7 +495,7 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg(
     if (outputWeightsFundCoords != nullptr) {
       outputWeightsFundCoords->AddOnTop(currentWeight);
     }
-    out << currentElt.ToString(&global.theDefaultFormat.GetElement());
+    out << currentElt.toString(&global.theDefaultFormat.GetElement());
     if (currentElt.size() > 1) {
       out << ")";
     }
@@ -563,10 +563,10 @@ bool Calculator::innerPrintB3G2branchingIntermediate(
     << "\\endhead \n<br>";
   } else {
     out << "Let " << HtmlRoutines::GetMathSpanPure("p\\subset so(7)") << " be the "
-    << theG2B3Data.selInducing.ToString() << "-parabolic subalgebra"
+    << theG2B3Data.selInducing.toString() << "-parabolic subalgebra"
     << " and let " << HtmlRoutines::GetMathSpanPure("{p}'= p\\cap G_2")
     << ". Then  " << HtmlRoutines::GetMathSpanPure("{p}'") << " is the "
-    << theG2B3Data.selSmallParSel.ToString() << "- parabolic subalgebra of G_2"
+    << theG2B3Data.selSmallParSel.toString() << "- parabolic subalgebra of G_2"
     << "<br> <table border =\"1\"><tr><td>$so(7)$-highest weight</td>"
     << "<td>character difference from top</td>"
     << "<td>Decomposition of inducing module over "
@@ -576,9 +576,9 @@ bool Calculator::innerPrintB3G2branchingIntermediate(
     << HtmlRoutines::GetMathSpanPure("G_2\\cap b")
     << "-eigenvectors</td><td>Shapovalov square</td></tr>";
     latexTable << "\\begin{longtable}{|cccclll|} \\caption{\\label{tableB3fdsOverG2charsAndHWV"
-    << theG2B3Data.selInducing.ToString() << "} "
-    << "Decomposition of inducing $" << theG2B3Data.selInducing.ToString() << "$-$\\mathfrak p$-module over $"
-    << theG2B3Data.selSmallParSel.ToString() << "$-$\\mathfrak p'=\\mathfrak p\\cap G_2$}\\\\"
+    << theG2B3Data.selInducing.toString() << "} "
+    << "Decomposition of inducing $" << theG2B3Data.selInducing.toString() << "$-$\\mathfrak p$-module over $"
+    << theG2B3Data.selSmallParSel.toString() << "$-$\\mathfrak p'=\\mathfrak p\\cap G_2$}\\\\"
     << "\\hline $\\mathfrak p-inducing$& dim. &$\\mathfrak p' decomp. $&dim.&"
     << " $\\mathfrak b \\cap \\mathfrak p'$-singular vectors & Casimir projector "
     << "& Corresp. $\\mathfrak b \\cap G_2$-singular vectors  \\\\ \\hline"
@@ -620,13 +620,13 @@ bool Calculator::innerPrintB3G2branchingIntermediate(
         if (k == 0 && counter == 0) {
           theG2B3Data.theFormat.CustomPlusSign = "\\oplus ";
           theG2B3Data.theFormat.fundamentalWeightLetter = "\\omega";
-          out << "<td rowspan =\"" << numEigenVectors.ToString() << "\">" << theG2B3Data.theAmbientChar.ToString(&theG2B3Data.theFormat) << "</td> ";
+          out << "<td rowspan =\"" << numEigenVectors.toString() << "\">" << theG2B3Data.theAmbientChar.toString(&theG2B3Data.theFormat) << "</td> ";
           if (!isFD) {
-            out << "<td rowspan =\"" << numEigenVectors.ToString() << "\">";
+            out << "<td rowspan =\"" << numEigenVectors.toString() << "\">";
             for (int charcounter1 = 0; charcounter1 < theG2B3Data.theCharacterDifferences.size; charcounter1 ++) {
               std::string tempS = theG2B3Data.theFormat.CustomPlusSign;
               theG2B3Data.theFormat.CustomPlusSign = "";
-              out << "A_{" << charcounter1 << "}=" << theG2B3Data.theCharacterDifferences[charcounter1].ToString(&theG2B3Data.theFormat) << ";";
+              out << "A_{" << charcounter1 << "}=" << theG2B3Data.theCharacterDifferences[charcounter1].toString(&theG2B3Data.theFormat) << ";";
               if (charcounter1 != theG2B3Data.theCharacterDifferences.size - 1) {
                 out << "<br>";
               }
@@ -635,7 +635,7 @@ bool Calculator::innerPrintB3G2branchingIntermediate(
             out << "</td> ";
           }
           latexTable << "\\multirow{" << theG2B3Data.theEigenVectorS.size  << "}{*}{$"
-          << theG2B3Data.theAmbientChar.ToString(&theG2B3Data.theFormat) << "$}";
+          << theG2B3Data.theAmbientChar.toString(&theG2B3Data.theFormat) << "$}";
           Vector<RationalFunction> theSimpleCoordinates;
           theSimpleCoordinates = theG2B3Data.WeylFD.AmbientWeyl->GetSimpleCoordinatesFromFundamental(
             theG2B3Data.theAmbientChar[0].weightFundamentalCoordS
@@ -643,7 +643,7 @@ bool Calculator::innerPrintB3G2branchingIntermediate(
           RationalFunction theWeylSize;
           theWeylSize = theG2B3Data.WeylFD.WeylDimFormulaInnerSimpleCoords(theSimpleCoordinates);
           latexTable << "& \\multirow{" << theG2B3Data.theEigenVectorS.size  << "}{*}{$"
-          << theWeylSize.ToString(&theG2B3Data.theFormat)
+          << theWeylSize.toString(&theG2B3Data.theFormat)
           << "$}";
         } else {
           latexTable << "&";
@@ -652,9 +652,9 @@ bool Calculator::innerPrintB3G2branchingIntermediate(
         if (counter == 0) {
           theG2B3Data.theFormat.fundamentalWeightLetter = "\\psi";
           theG2B3Data.theFormat.CustomPlusSign = "\\oplus ";
-          out << "<td rowspan =\"" << multiplicity << " \">" << tempChar.ToString(&theG2B3Data.theFormat) << "</td>";
+          out << "<td rowspan =\"" << multiplicity << " \">" << tempChar.toString(&theG2B3Data.theFormat) << "</td>";
           latexTable << "\\multirow{" << multiplicity  << "}{*}{$";
-          latexTable << tempChar.ToString(&theG2B3Data.theFormat) << "$}";
+          latexTable << tempChar.toString(&theG2B3Data.theFormat) << "$}";
           latexTable << "&\\multirow{" << multiplicity  << "}{*}{$";
           if (multiplicity > 1) {
             latexTable << multiplicity << "\\times";
@@ -665,22 +665,22 @@ bool Calculator::innerPrintB3G2branchingIntermediate(
           );
           RationalFunction dimension;
           dimension = theG2B3Data.WeylFDSmall.WeylDimFormulaInnerSimpleCoords(theSimpleCoordinates, rfOne);
-          latexTable << dimension.ToString(&theG2B3Data.theFormat) << "$}";
+          latexTable << dimension.toString(&theG2B3Data.theFormat) << "$}";
         } else {
           latexTable << "&";
         }
         latexTable << "&";
         theG2B3Data.theFormat.CustomPlusSign = "";
-        out << "<td>" << HtmlRoutines::GetMathSpanPure(theG2B3Data.theEigenVectorsLevi[eigenIndexcounter].ToString(&theG2B3Data.theFormat)) << "</td>";
+        out << "<td>" << HtmlRoutines::GetMathSpanPure(theG2B3Data.theEigenVectorsLevi[eigenIndexcounter].toString(&theG2B3Data.theFormat)) << "</td>";
         theG2B3Data.theFormat.MaxLineLength = 20;
-        latexTable << "$\\begin{array}{l}" << theG2B3Data.theEigenVectorsLevi[eigenIndexcounter].ToString(&theG2B3Data.theFormat) << "\\end{array}$ \n";
+        latexTable << "$\\begin{array}{l}" << theG2B3Data.theEigenVectorsLevi[eigenIndexcounter].toString(&theG2B3Data.theFormat) << "\\end{array}$ \n";
         if (!isFD) {
           std::string tempS1 = theG2B3Data.GetStringCasimirProjector(eigenIndexcounter, 12);
-          std::string tempS2 = "("+ theG2B3Data.theUEelts[eigenIndexcounter].ToString(&theG2B3Data.theFormat) + ")\\cdot v_\\lambda";
+          std::string tempS2 = "("+ theG2B3Data.theUEelts[eigenIndexcounter].toString(&theG2B3Data.theFormat) + ")\\cdot v_\\lambda";
           out << "<td>" << HtmlRoutines::GetMathSpanPure(tempS1) << "</td>";
-          out << "<td>" << theG2B3Data.additionalMultipliers[eigenIndexcounter].ToString() << "</td>";
+          out << "<td>" << theG2B3Data.additionalMultipliers[eigenIndexcounter].toString() << "</td>";
           out << "<td>" << HtmlRoutines::GetMathSpanPure(tempS2) << "</td>";
-          out << "<td>" << theG2B3Data.theShapovalovProducts[eigenIndexcounter].ToString(&theG2B3Data.theFormat);
+          out << "<td>" << theG2B3Data.theShapovalovProducts[eigenIndexcounter].toString(&theG2B3Data.theFormat);
           out << "</td>";
           int theIndex = - 1;
           numEigenVectors.IsSmallInteger(&theIndex);
@@ -690,11 +690,11 @@ bool Calculator::innerPrintB3G2branchingIntermediate(
             Polynomial<Rational> tempP;
             theG2B3Data.theShapovalovProducts[eigenIndexcounter].GetNumerator(tempP);
             tempP.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
-            latexTable2 << "$\\begin{array}{l}" << tempP.ToString(&theG2B3Data.theFormat) << "\\end{array}$ & ";
+            latexTable2 << "$\\begin{array}{l}" << tempP.toString(&theG2B3Data.theFormat) << "\\end{array}$ & ";
             if (tempP.FindOneVariableRationalRoots(tempList)) {
               tempList2.AddOnTopNoRepetition(tempList);
-              out << "<td>Rational roots: " << tempList.ToString() << "</td>";
-              latexTable2 << tempList2.ToString();
+              out << "<td>Rational roots: " << tempList.toString() << "</td>";
+              latexTable2 << tempList2.toString();
             }
             latexTable2 << "\\\\";
           }
@@ -772,10 +772,10 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
     << "\\hline$so(7)$-module & ~~~~~~ decomposition over $G_2$\\endhead \\hline\n<br>";
   } else {
     out << "Let " << HtmlRoutines::GetMathSpanPure("p\\subset so(7)") << " be the "
-    << theg2b3data.selInducing.ToString() << "-parabolic subalgebra "
+    << theg2b3data.selInducing.toString() << "-parabolic subalgebra "
     << "and let " << HtmlRoutines::GetMathSpanPure("{p}'= p\\cap G_2")
     << ". Then  " << HtmlRoutines::GetMathSpanPure("{p}'") << " is the "
-    << theg2b3data.selSmallParSel.ToString() << "- parabolic subalgebra of G_2"
+    << theg2b3data.selSmallParSel.toString() << "- parabolic subalgebra of G_2"
     << "<br> <table><tr><td>$so(7)$-highest weight</td>"
     << "<td>Dimension of inducing fin. dim. "
     << HtmlRoutines::GetMathSpanPure(" p")
@@ -785,14 +785,14 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
     << " <td>Highest weight <br> is sufficiently generic <br> if none of <br>the following vanish</td>"
     << "</tr>";
     latexTable << "\\begin{longtable}{|p{2cm}l|} \\caption{\\label{tableB3fdsOverG2charsonly"
-    << theg2b3data.selInducing.ToString() << "} "
+    << theg2b3data.selInducing.toString() << "} "
     << "Decompositions of inducing $\\mathfrak{p}" << "_{"
-    << theg2b3data.selInducing.ToString()
+    << theg2b3data.selInducing.toString()
     << "}" << "$-modules over $\\bar{ \\mathfrak {l}}$"
     << ", where $\\mathfrak{l}$ is the reductive Levi part of "
-    << "$\\mathfrak{p}" << "_{" << theg2b3data.selInducing.ToString()
+    << "$\\mathfrak{p}" << "_{" << theg2b3data.selInducing.toString()
     <<  "}$ and $\\bar{\\mathfrak {l}}$ is the reductive Levi part of $\\bar{\\mathfrak {p}} _{"
-    << theg2b3data.selSmallParSel.ToString()  << "}$" << " } \\\\"
+    << theg2b3data.selSmallParSel.toString()  << "}$" << " } \\\\"
     << "\\hline $V_\\lambda(\\mathfrak l)$ " << "& Decomposition over $\\bar { \\mathfrak l}$ "
     << "\\endhead \\hline\n<br>";
   }
@@ -808,24 +808,24 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
     );
     theCharacter.SplitCharOverRedSubalg(nullptr, outputChar, theg2b3data);
     theg2b3data.theFormat.fundamentalWeightLetter = "\\omega";
-    out << "<tr><td> " << theCharacter.ToString(&theg2b3data.theFormat) << "</td> ";
+    out << "<tr><td> " << theCharacter.toString(&theg2b3data.theFormat) << "</td> ";
     Vector<RationalFunction> simpleCoordinates;
     simpleCoordinates = theg2b3data.WeylFD.AmbientWeyl->GetSimpleCoordinatesFromFundamental(
       theCharacter[0].weightFundamentalCoordS
     );
     RationalFunction dimension;
     dimension = theg2b3data.WeylFD.WeylDimFormulaInnerSimpleCoords(simpleCoordinates);
-    out << "<td>" << dimension.ToString() << "</td>";
-    latexTable << " $ " << theCharacter.ToString(&theg2b3data.theFormat) << " $ ";
+    out << "<td>" << dimension.toString() << "</td>";
+    latexTable << " $ " << theCharacter.toString(&theg2b3data.theFormat) << " $ ";
     theg2b3data.theFormat.fundamentalWeightLetter = "\\psi";
-    out << "<td>" << outputChar.ToString(&theg2b3data.theFormat) << "</td>";
+    out << "<td>" << outputChar.toString(&theg2b3data.theFormat) << "</td>";
     out << "<td>";
     theg2b3data.theFormat.CustomPlusSign = "\\oplus ";
     Vector<RationalFunction> leftWeightSimple, leftWeightDual, rightWeightSimple, rightWeightDual;
     theCentralChars.Clear();
     for (int i = 0; i < outputChar.size(); i ++) {
       if (!outputChar.coefficients[i].IsEqualToOne()) {
-        out << outputChar.coefficients[i].ToString() << " x ";
+        out << outputChar.coefficients[i].toString() << " x ";
       }
       simpleCoordinates = theg2b3data.WeylFDSmall.AmbientWeyl->GetSimpleCoordinatesFromFundamental(
         outputChar[i].weightFundamentalCoordS
@@ -854,15 +854,15 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
     }
     out << "</td>";
     theg2b3data.theFormat.MaxLineLength = 80;
-    latexTable << "& $\\begin{array}{l} " << outputChar.ToString(&theg2b3data.theFormat) << "\\end{array} $ ";
+    latexTable << "& $\\begin{array}{l} " << outputChar.toString(&theg2b3data.theFormat) << "\\end{array} $ ";
     theg2b3data.theFormat.CustomPlusSign = "";
     if (!isFD && theCentralChars.size > 0) {
       out << "<td>";
       latexTable << " \\\\\n<br> ";
       latexTable << "\\multicolumn{2}{|p{11.6cm}|}{ \\tiny Strong Condition B: ";
       for (int l = 0; l < theCentralChars.size; l ++) {
-        out << theCentralChars[l].ToString(&theg2b3data.theFormat) << "<br> ";
-        latexTable << "$" << theCentralChars[l].ToString(&theg2b3data.theFormat) << "\\neq 0$";
+        out << theCentralChars[l].toString(&theg2b3data.theFormat) << "<br> ";
+        latexTable << "$" << theCentralChars[l].toString(&theg2b3data.theFormat) << "\\neq 0$";
         if (l != theCentralChars.size - 1) {
           latexTable << ", ";
         }
@@ -1075,7 +1075,7 @@ bool Calculator::innerPrintAllVectorPartitions(Calculator& theCommands, const Ex
   Expression theContext;
   Vector<Rational> theHW;
   if (!theCommands.GetVectoR<Rational>(input[2], theHW, &theContext, theSSalgebra.GetRank())) {
-    return output.MakeError("Failed to extract weight you want partitioned from " + input[2].ToString(), theCommands);
+    return output.MakeError("Failed to extract weight you want partitioned from " + input[2].toString(), theCommands);
   }
   Vector<int> theHWint;
   theHWint.SetSize(theHW.size);
@@ -1231,11 +1231,11 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
     for (int j = 0; j < theHws.size; j ++) {
       std::stringstream reportStream;
       Vector<Rational>& currentHW = theHws[j];
-      out << "<tr><td> " << currentHW.ToString() << "</td><td>"
+      out << "<tr><td> " << currentHW.toString() << "</td><td>"
       << currentAlg.theWeyl.WeylDimFormulaFundamentalCoords(currentHW) << "</td>";
       reportStream << "Processing " << currentAlg.ToStringLieAlgebraName() << ", index  "
       << i + 1 << " out of " << theRanks.size << ",  highest weight "
-      << currentHW.ToString() << ", dim: " << currentAlg.theWeyl.WeylDimFormulaFundamentalCoords(currentHW)
+      << currentHW.toString() << ", dim: " << currentAlg.theWeyl.WeylDimFormulaFundamentalCoords(currentHW)
       << ", index " << j + 1 << " out of " << theHws.size;
       theReport.Report(reportStream.str());
       latexReport << "$" << currentHW.ToStringLetterFormat("\\omega") << "$ &"
@@ -1334,7 +1334,7 @@ bool Calculator::innerLittelmannOperator(Calculator& theCommands, const Expressi
     return output.MakeError(
       "The argument of the Littelmann root operator is "
       "expected to be a small integer, instead you gave me " +
-      input.ToString(),
+      input.toString(),
       theCommands
     );
   }
@@ -1495,7 +1495,7 @@ bool Calculator::innerInterpolatePoly(Calculator& theCommands, const Expression&
   )) {
     return theCommands
     << "<hr>Failed to extract points of interpolation from "
-    << convertedE.ToString();
+    << convertedE.toString();
   }
   Polynomial<Rational> interPoly;
   Vector<Rational> theArgs, theValues;
@@ -1531,7 +1531,7 @@ bool Calculator::innerPrintZnEnumeration(
     theSel.GetGrading() == gradeLarge;
     theSel.IncrementReturnFalseIfPastLast()
   ) {
-    out2 << theSel.ToString() << "<br>";
+    out2 << theSel.toString() << "<br>";
     counter ++;
   }
   out << "Total " << counter << " vectors:<br>" << out2.str();
@@ -1751,7 +1751,7 @@ bool Calculator::innerEWAorPoly(Calculator& theCommands, const Expression& input
   )) {
     return theCommands
     << "<hr>Failed to extract polynomials from arguments of "
-    << input.ToString();
+    << input.toString();
   }
   int letterDiff = 0, letterPol = 0;
   if (
@@ -1761,7 +1761,7 @@ bool Calculator::innerEWAorPoly(Calculator& theCommands, const Expression& input
   ) {
     return theCommands
     << "<hr>Failed to get different one-variable polynomials from input. "
-    << input.ToString();
+    << input.toString();
   }
   Expression endContext;
   endContext.MakeContextWithOnePolyVarOneDiffVar(
@@ -1868,7 +1868,7 @@ bool Calculator::Test::WriteTestStrings(std::stringstream* commentsOnFailure) {
   }
   return FileOperations::WriteFileVirual(
     WebAPI::calculator::testFileNameVirtual,
-    result.ToString(&JSData::PrintOptions::NewLine()),
+    result.toString(&JSData::PrintOptions::NewLine()),
     commentsOnFailure
   );
 }

@@ -190,7 +190,7 @@ bool CodeFormatter::DecreaseStack(int numberToPop) {
   return true;
 }
 
-std::string CodeElement::ToString() {
+std::string CodeElement::toString() {
   std::stringstream out;
   out << "[";
   if (this->content == "\n") {
@@ -218,12 +218,12 @@ std::string CodeFormatter::ToStringTransformed6() {
   << ", previous indent: " <<  this->previousLineIndent << ", previous length: "
   << this->previousLineLength;
   out << "<br>Last 6: "
-  << sixthToLast .ToString()
-  << fifthToLast .ToString()
-  << fourthToLast.ToString()
-  << thirdToLast .ToString()
-  << secondToLast.ToString()
-  << last        .ToString();
+  << sixthToLast .toString()
+  << fifthToLast .toString()
+  << fourthToLast.toString()
+  << thirdToLast .toString()
+  << secondToLast.toString()
+  << last        .toString();
   return out.str();
 }
 

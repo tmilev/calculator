@@ -87,7 +87,7 @@ bool Calculator::GetVectorExpressions(const Expression& input, List<Expression>&
     if (targetDimNonMandatory > 0) {
       if (targetDimNonMandatory != 1) {
         return *this << "<hr>GetVector failure: target dim is "
-        << targetDimNonMandatory << " but the input " << input.ToString()
+        << targetDimNonMandatory << " but the input " << input.toString()
         << " can only be interpreted as a single element";
       }
     }
@@ -185,7 +185,7 @@ void ModuleSSalgebra<coefficient>::GetGenericUnMinusElt(
 
 class quasiDiffMon {
   friend std::ostream& operator << (std::ostream& output, const quasiDiffMon& theMon) {
-    output << theMon.ToString();
+    output << theMon.toString();
     return output;
   }
   public:
@@ -210,20 +210,20 @@ class quasiDiffMon {
     }
     return this->theMatMon>other.theMatMon;
   }
-  std::string ToString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* theFormat = nullptr) const;
 };
 
-std::string quasiDiffMon::ToString(FormatExpressions* theFormat) const {
+std::string quasiDiffMon::toString(FormatExpressions* theFormat) const {
   std::stringstream out;
-  out << this->theWeylMon.ToString(theFormat) << "\\otimes ";
-  out << this->theMatMon.ToString(theFormat);
+  out << this->theWeylMon.toString(theFormat) << "\\otimes ";
+  out << this->theMatMon.toString(theFormat);
   return out.str();
 }
 
 template <class coefficient>
 class quasiDiffOp : public LinearCombination<quasiDiffMon, coefficient> {
 public:
-  std::string ToString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* theFormat = nullptr) const;
   void GenerateBasisLieAlgebra(List<quasiDiffOp<coefficient> >& theElts, FormatExpressions* theFormat = nullptr);
   void operator*=(const quasiDiffOp<coefficient>& standsOnTheRight);
   void operator=(const LinearCombination<quasiDiffMon, coefficient>& other) {
@@ -306,11 +306,11 @@ void quasiDiffOp<coefficient>::GenerateBasisLieAlgebra(
         std::stringstream report;
         report << "Lie bracketing elements " << " of indices " << i + 1
         << " and " << j + 1 << " out of " << theEltsConverted.size << "<br> "
-        << tempQDO.ToString(theFormat) << "<br> with element <br>"
-        << theEltsConverted[j].ToString(theFormat) << " to get <br>";
+        << tempQDO.toString(theFormat) << "<br> with element <br>"
+        << theEltsConverted[j].toString(theFormat) << " to get <br>";
         tempQDO.LieBracketMeOnTheRight(theEltsConverted[j]);
         theReport.Report(report.str());
-        report << tempQDO.ToString(theFormat);
+        report << tempQDO.toString(theFormat);
         theReport.Report(report.str());
         theEltsConverted.AddOnTop(tempQDO);
         quasiDiffOp::GaussianEliminationByRows(theEltsConverted, 0, &bufferMons);
@@ -360,13 +360,13 @@ void quasiDiffOp<coefficient>::operator*=(const quasiDiffOp<coefficient>& stands
 }
 
 template <class coefficient>
-std::string quasiDiffOp<coefficient>::ToString(FormatExpressions* theFormat) const {
+std::string quasiDiffOp<coefficient>::toString(FormatExpressions* theFormat) const {
   bool combineWeylPart = true;
   if (theFormat != nullptr) {
     combineWeylPart = theFormat->flagQuasiDiffOpCombineWeylPart;
   }
   if (!combineWeylPart) {
-    return this->LinearCombination<quasiDiffMon, coefficient>::ToString(theFormat);
+    return this->LinearCombination<quasiDiffMon, coefficient>::toString(theFormat);
   }
   MatrixTensor<ElementWeylAlgebra<Rational> > reordered;
   reordered.MakeZero();
@@ -377,12 +377,12 @@ std::string quasiDiffOp<coefficient>::ToString(FormatExpressions* theFormat) con
     tempP.AddMonomial(currentMon.theWeylMon, this->coefficients[i]);
     reordered.AddMonomial(currentMon.theMatMon, tempP);
   }
-  std::string result = reordered.ToString(theFormat);
+  std::string result = reordered.toString(theFormat);
   if (result == "0" && this->size() != 0) {
     global.fatal << "This is likely a programming error (crashing at any rate): "
     << "I have a non-zero quasidifferential operator "
     << " with non-properly formatted LaTeX string "
-    << this->LinearCombination<quasiDiffMon, coefficient>::ToString(theFormat)
+    << this->LinearCombination<quasiDiffMon, coefficient>::toString(theFormat)
     << ", however its properly formatted string is 0. "
     << "Probably there is something wrong with the initializations of the monomials of the qdo. " << global.fatal;
   }
@@ -565,9 +565,9 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
   for (int i = 0; i < theGeneratorsItry.size; i ++) {
     latexReport << "l";
   }
-  latexReport << "}\\caption{\\label{tableDiffOps" << selInducing.ToString()
+  latexReport << "}\\caption{\\label{tableDiffOps" << selInducing.toString()
   << "} Differential operators corresponding to actions"
-  << " of simple positive generators for the " << selInducing.ToString() << "-parabolic subalgebra.}\\\\<br>";
+  << " of simple positive generators for the " << selInducing.toString() << "-parabolic subalgebra.}\\\\<br>";
   List<ModuleSSalgebra<RationalFunction > > theMods;
   theMods.SetSize(theHws.size);
   Vector<RationalFunction> tempV;
@@ -620,39 +620,39 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
         theWeylFormat.weylAlgebraLetters[k] = tempStream4.str();
       }
       out << "<tr><td>General monomial in U(n_-):</td><td>"
-      << HtmlRoutines::GetMathMouseHover(genericElt.ToString(&theUEformat)) << "</td> </tr>";
+      << HtmlRoutines::GetMathMouseHover(genericElt.toString(&theUEformat)) << "</td> </tr>";
       latexReport << "& \\multicolumn{" << theGeneratorsItry.size << "}{c}{Element acting}\\\\<br>\n ";
       latexReport << "Action on ";
       out << "<tr><td></td><td colspan =\"" << theGeneratorsItry.size << "\"> Element acting</td></td></tr>";
       out << "<tr><td>Action on</td>";
       for (int j = 0; j < theGeneratorsItry.size; j ++) {
-        out << "<td>" << theGeneratorsItry[j].ToString(&theUEformat) << "</td>";
-        latexReport << "& $" << theGeneratorsItry[j].ToString(&theUEformat)  << "$";
+        out << "<td>" << theGeneratorsItry[j].toString(&theUEformat) << "</td>";
+        latexReport << "& $" << theGeneratorsItry[j].toString(&theUEformat)  << "$";
       }
       latexReport << "\\endhead \\hline<br>";
       out << "</tr>";
-      out << "<tr><td>" << HtmlRoutines::GetMathMouseHover(genericElt.ToString(&theUEformat)) << "</td>";
-      latexReport << "$" << genericElt.ToString(&theUEformat) << "$";
+      out << "<tr><td>" << HtmlRoutines::GetMathMouseHover(genericElt.toString(&theUEformat)) << "</td>";
+      latexReport << "$" << genericElt.toString(&theUEformat) << "$";
       for (int j = 0; j < theGeneratorsItry.size; j ++) {
         actionOnGenericElt.AssignElementLieAlgebra(theGeneratorsItry[j], theSSalgebra, Pone);
         actionOnGenericElt *= genericElt;
         theSSalgebra.OrderNilradical(theMod.parabolicSelectionNonSelectedAreElementsLevi, useNilWeight, ascending);
         actionOnGenericElt.Simplify();
         theUEformat.NumAmpersandsPerNewLineForLaTeX = 2;
-        out << "<td>" << HtmlRoutines::GetMathMouseHover("\\begin{array}{rcl}&&" + actionOnGenericElt.ToString(&theUEformat) + "\\end{array}") << "</td>";
+        out << "<td>" << HtmlRoutines::GetMathMouseHover("\\begin{array}{rcl}&&" + actionOnGenericElt.toString(&theUEformat) + "\\end{array}") << "</td>";
         theUEformat.NumAmpersandsPerNewLineForLaTeX = 0;
-        latexReport << "& $\\begin{array}{l} " << actionOnGenericElt.ToString(&theUEformat) << "\\end{array}$ ";
+        latexReport << "& $\\begin{array}{l} " << actionOnGenericElt.toString(&theUEformat) << "\\end{array}$ ";
       }
       latexReport << "\\\\ \\hline\\hline<br>";
       out << "</tr>";
     }
-    out << "<tr><td>" << HtmlRoutines::GetMathMouseHover(theMod.theChaR.ToString()) << "</td>";
+    out << "<tr><td>" << HtmlRoutines::GetMathMouseHover(theMod.theChaR.toString()) << "</td>";
     latexReport2 << "\\begin{longtable}{rll}";
     latexReport2 << "$\\gog$& $n$& element of $\\mathbb W_n$ \\\\\\hline" << "\\multirow{" << theGeneratorsItry.size
     << "}{*}{$" << theSSalgebra.ToStringLieAlgebraName() << "$}" << " &  \\multirow{"  << theGeneratorsItry.size << "}{*}{"
     << elementsNegativeNilrad.size << "}&";
 
-    latexReport << "$\\begin{array}{r}" << theMod.theChaR.ToString() << "(\\mathfrak{l}) \\\\ \\\\dim:~" << theMod.GetDim() << " \\end{array}$";
+    latexReport << "$\\begin{array}{r}" << theMod.theChaR.toString() << "(\\mathfrak{l}) \\\\ \\\\dim:~" << theMod.GetDim() << " \\end{array}$";
     for (int j = 0; j < theGeneratorsItry.size; j ++) {
       theGenerator = theGeneratorsItry[j];
       currentTime = global.GetElapsedSeconds();
@@ -664,15 +664,15 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
       totalTime += global.GetElapsedSeconds() - currentTime;
       theWeylFormat.CustomCoeffMonSeparator = "\\otimes ";
       theWeylFormat.NumAmpersandsPerNewLineForLaTeX = 2;
-      out << "<td>" << HtmlRoutines::GetMathMouseHover("\\begin{array}{|r|c|l|}&&"+theQDOs[j].ToString(&theWeylFormat) +"\\end{array}")
+      out << "<td>" << HtmlRoutines::GetMathMouseHover("\\begin{array}{|r|c|l|}&&"+theQDOs[j].toString(&theWeylFormat) +"\\end{array}")
       << "</td>";
       theWeylFormat.NumAmpersandsPerNewLineForLaTeX = 0;
       theWeylFormat.MaxLineLength = 300;
-      latexReport << " & $\\begin{array}{l}" << theQDOs[j].ToString(&theWeylFormat) << "\\end{array}$";
+      latexReport << " & $\\begin{array}{l}" << theQDOs[j].toString(&theWeylFormat) << "\\end{array}$";
       if (j != 0) {
         latexReport2 << "&&";
       }
-      latexReport2 << " $\\begin{array}{l}" << theQDOs[j].ToString(&theWeylFormat) << "\\end{array}$\\\\ "
+      latexReport2 << " $\\begin{array}{l}" << theQDOs[j].toString(&theWeylFormat) << "\\end{array}$\\\\ "
       << (j != theGeneratorsItry.size - 1 ? "\\cline{3-3}" : "\\hline" ) << "\n<br>";
       theWeylFormat.CustomCoeffMonSeparator = "";
     }
@@ -681,11 +681,11 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
     out << "</tr>";
     if (theMod.GetDim() == 1) {
       ElementWeylAlgebra<Rational> diffOpPart, transformedDO;
-      reportFourierTransformedCalculatorCommands << "<hr>" << HtmlRoutines::GetMathMouseHover(theMod.theChaR.ToString())
+      reportFourierTransformedCalculatorCommands << "<hr>" << HtmlRoutines::GetMathMouseHover(theMod.theChaR.toString())
       << ", differential operators Fourier transformed - formatted for calculator input. <br><br>";
       reportFourierTransformedCalculatorCommands << "x_{{i}}= ElementWeylAlgebraPoly{}(\\partial_i, x_i);\n<br>"
       << "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n";
-      reportCalculatorCommands << "<hr>" << HtmlRoutines::GetMathMouseHover(theMod.theChaR.ToString())
+      reportCalculatorCommands << "<hr>" << HtmlRoutines::GetMathMouseHover(theMod.theChaR.toString())
       << ", differential operators - formatted for calculator input. <br><br>";
       reportCalculatorCommands << "x_{{i}}= ElementWeylAlgebraPoly{}(\\partial_i, x_i);\n<br>"
       << "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n";
@@ -694,14 +694,14 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
         theQDOs[j].GetEWAsetMatrixPartsToId(diffOpPart);
         diffOpPart.FourierTransform(transformedDO);
         reportFourierTransformedCalculatorCommands << "<br>"
-        << theGeneratorsItry[j].ToString() << "=" << transformedDO.ToString() << ";";
-        reportCalculatorCommands << "<br>" << theGeneratorsItry[j].ToString() << "=" << diffOpPart.ToString() << ";";
+        << theGeneratorsItry[j].toString() << "=" << transformedDO.toString() << ";";
+        reportCalculatorCommands << "<br>" << theGeneratorsItry[j].toString() << "=" << diffOpPart.toString() << ";";
       }
       reportFourierTransformedCalculatorCommands << "<br>GenerateVectorSpaceClosedWRTLieBracket{}(248," ;
       reportCalculatorCommands << "<br>GenerateVectorSpaceClosedWRTLieBracket{}(248," ;
       for (int j = 0; j < theGeneratorsItry.size; j ++) {
-        reportFourierTransformedCalculatorCommands << theGeneratorsItry[j].ToString();
-        reportCalculatorCommands << theGeneratorsItry[j].ToString();
+        reportFourierTransformedCalculatorCommands << theGeneratorsItry[j].toString();
+        reportCalculatorCommands << theGeneratorsItry[j].toString();
         if (j != theGeneratorsItry.size - 1) {
           reportFourierTransformedCalculatorCommands << ", ";
           reportCalculatorCommands << ", ";
@@ -721,7 +721,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
   theCommands << "<hr>"
   << "Multiplications needed to embed generators: " << totalMultiplications << ".<br>"
   << "Additions needed to embed generators: " << totalAdditions << ".<br>"
-  << "Total time to embed generators invoked by command: " << input.ToString()
+  << "Total time to embed generators invoked by command: " << input.toString()
   << ": <br>" << totalTime << " seconds. ";
   out << reportCalculatorCommands.str();
   out << reportFourierTransformedCalculatorCommands.str();
@@ -770,7 +770,7 @@ bool Calculator::innerHWVCommon(
   if (!theMod.flagIsInitialized) {
     bool isGood = theMod.MakeFromHW(*owner, highestWeightFundCoords, selectionParSel, RFOne, RFZero, &report);
     if (Verbose) {
-      theCommands << theMod.ToString();
+      theCommands << theMod.toString();
     }
     if (!isGood) {
       return output.MakeError("Error while generating highest weight module. See comments for details. ", theCommands);
@@ -834,7 +834,7 @@ bool Calculator::CheckConsistencyAfterInitialization() {
     << " elements but instead it has " << this->theExpressionContainer.size
     << ". Expression container: ";
     for (int i = 0; i < this->theExpressionContainer.size; i ++) {
-      global.fatal << this->theExpressionContainer[i].ToString() << ", ";
+      global.fatal << this->theExpressionContainer[i].toString() << ", ";
     }
     global.fatal << global.fatal;
   }
@@ -875,7 +875,7 @@ bool Calculator::innerFunctionToMatrix(Calculator& theCommands, const Expression
   if (numRowsTimesCols > 10000) {
     theCommands << "Max number of matrix entries is 10000. You requested " << numRows
     << " rows and " << numCols
-    << " columns, total: " << numRowsTimesCols.ToString() << " entries<br>";
+    << " columns, total: " << numRowsTimesCols.toString() << " entries<br>";
     return false;
   }
   Matrix<Expression> resultMat;
@@ -990,7 +990,7 @@ bool Calculator::innerKLcoeffs(Calculator& theCommands, const Expression& input,
     out << "I have been instructed to run only for Weyl groups that"
     << " have at most 192 elements (i.e. no larger than D_4). "
     << theSSalgebra.content->ToStringLieAlgebraName()
-    << " has " << theWeyl.theGroup.GetSize().ToString() << ".";
+    << " has " << theWeyl.theGroup.GetSize().toString() << ".";
     return output.AssignValue(out.str(), theCommands);
   }
   FormatExpressions theFormat;
@@ -1002,7 +1002,7 @@ bool Calculator::innerKLcoeffs(Calculator& theCommands, const Expression& input,
   KLpolys theKLpolys;
   theKLpolys.ComputeKLPolys(&theWeyl);
   theFormat.flagUseHTML = true;
-  out << theKLpolys.ToString(&theFormat);
+  out << theKLpolys.toString(&theFormat);
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -1057,7 +1057,7 @@ bool Calculator::functionWriteToHDOrPrintSSLieAlgebra(
     tempSSpointer
   )) {
 
-    theCommands << "Failed to extract Lie algebra from: " << input.ToString() << "<br>";
+    theCommands << "Failed to extract Lie algebra from: " << input.toString() << "<br>";
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
   tempSSpointer.content->CheckConsistency();
@@ -1386,9 +1386,9 @@ bool Calculator::StandardIsDenotedBy(Calculator& theCommands, const Expression& 
   }
   const Expression& withNotation = input[2];
   const Expression& theNotation = input[1];
-  theCommands << "<br>Registering notation: globally, " << withNotation.ToString() << " will be denoted by "
-  << theNotation.ToString();
-  theCommands.theObjectContainer.ExpressionNotation.AddOnTop(theNotation.ToString());
+  theCommands << "<br>Registering notation: globally, " << withNotation.toString() << " will be denoted by "
+  << theNotation.toString();
+  theCommands.theObjectContainer.ExpressionNotation.AddOnTop(theNotation.toString());
   theCommands.theObjectContainer.ExpressionWithNotation.AddOnTop(withNotation);
   output = input;
   output.SetChildAtomValue(0, theCommands.opDefine());
@@ -1397,7 +1397,7 @@ bool Calculator::StandardIsDenotedBy(Calculator& theCommands, const Expression& 
     if (withNotation.GetValue<ElementTensorsGeneralizedVermas<RationalFunction> >().IsHWV()) {
       MonomialGeneralizedVerma<RationalFunction>& theElt =
       withNotation.GetValue<ElementTensorsGeneralizedVermas<RationalFunction> >()[0].theMons[0];
-      theElt.GetOwner().highestWeightVectorNotation = theNotation.ToString();
+      theElt.GetOwner().highestWeightVectorNotation = theNotation.toString();
     }
   }
   return true;
@@ -1424,8 +1424,8 @@ bool Calculator::GetVectorLargeIntFromFunctionArguments(const Expression& input,
   output.initializeFillInObject(theRats.size, 0);
   for (int i = 0; i < theRats.size; i ++) {
     if (!theRats[i].IsInteger(&output[i])) {
-      return *this << "<hr>Succeeded to convert " << input.ToString() << " to the vector of rationals: "
-      << theRats.ToString() << " but failed to convert that to list of integers. ";
+      return *this << "<hr>Succeeded to convert " << input.toString() << " to the vector of rationals: "
+      << theRats.toString() << " but failed to convert that to list of integers. ";
     }
   }
   return true;
@@ -1440,8 +1440,8 @@ bool Calculator::GetVectoRInt(const Expression& input, List<int>& output) {
   output.initializeFillInObject(theRats.size,0);
   for (int i = 0; i < theRats.size; i ++) {
     if (!theRats[i].IsSmallInteger(&output[i])) {
-      return *this << "<hr>Succeeded to convert " << input.ToString() << " to the vector of rationals: "
-      << theRats.ToString() << " but failed to convert that to list of small integers. ";
+      return *this << "<hr>Succeeded to convert " << input.toString() << " to the vector of rationals: "
+      << theRats.toString() << " but failed to convert that to list of small integers. ";
     }
   }
   return true;
@@ -1803,7 +1803,7 @@ bool Calculator::outerPlus(Calculator& theCommands, const Expression& input, Exp
       for (int j = i; j < theSum.size(); j ++) {
         if (theSum[i] > theSum[j] && theSum[j] > theSum[i]) {
           global.fatal << "Faulty comparison: "
-          << theSum[i].ToString() << " and " << theSum[j].ToString()
+          << theSum[i].toString() << " and " << theSum[j].toString()
           << " are mutually greater than one another. " << global.fatal;
         }
       }
@@ -2451,8 +2451,8 @@ std::string Function::ToStringFull() const {
   return out2.str();
 }
 
-std::string ObjectContainer::ToString() {
-  MacroRegisterFunctionWithName("ObjectContainer::ToString");
+std::string ObjectContainer::toString() {
+  MacroRegisterFunctionWithName("ObjectContainer::toString");
   std::stringstream out;
   if (this->semisimpleLieAlgebras.theValues.size > 0) {
     out << "Lie algebras created (" << this->semisimpleLieAlgebras.theValues.size << " total): ";
@@ -2490,7 +2490,7 @@ JSData Calculator::ToJSONOutputAndSpecials() {
 
 std::string Calculator::ToStringOutputAndSpecials() {
   MacroRegisterFunctionWithName("Calculator::ToStringOutputAndSpecials");
-  return this->ToJSONOutputAndSpecials().ToString(nullptr);
+  return this->ToJSONOutputAndSpecials().toString(nullptr);
 }
 
 void Calculator::WriteAutoCompleteKeyWordsToFile() {
@@ -2614,8 +2614,8 @@ std::string Calculator::ToStringPerformance() {
   return out.str();
 }
 
-std::string Calculator::ToString() {
-  MacroRegisterFunctionWithName("Calculator::ToString");
+std::string Calculator::toString() {
+  MacroRegisterFunctionWithName("Calculator::toString");
   std::stringstream out2;
   std::string openTag1 = "<span style =\"color:blue\">";
   std::string closeTag1 = "</span>";
@@ -2629,7 +2629,7 @@ std::string Calculator::ToString() {
   if (this->RuleStack.children.size > 1) {
     out2 << "<b>Predefined rules.</b><br>";
     for (int i = 1; i < this->RuleStack.children.size; i ++) {
-      out2 << this->RuleStack[i].ToString();
+      out2 << this->RuleStack[i].toString();
       if (i != this->RuleStack.children.size - 1) {
         out2 << "<br>";
       }
@@ -2654,7 +2654,7 @@ std::string Calculator::ToString() {
   out2 << "<hr><b>Further calculator details.</b>";
   out << "<br><b>Object container information</b>. "
   << "The object container is the data structure storing all c++ built-in data types "
-  << "requested by the user<br> " << this->theObjectContainer.ToString();
+  << "requested by the user<br> " << this->theObjectContainer.toString();
   out << "<hr>Control sequences (" << this->controlSequences.size << " total):\n<br>\n";
   for (int i = 0; i < this->controlSequences.size; i ++) {
     out << openTag1 << this->controlSequences[i] << closeTag1;
@@ -2679,7 +2679,7 @@ std::string Calculator::ToString() {
     out << " <b>Displaying first " << numExpressionsToDisplay << " only </b><br>";
   }
   for (int i = 0; i < numExpressionsToDisplay; i ++) {
-    out << this->theExpressionContainer[i].ToString() << ", ";
+    out << this->theExpressionContainer[i].toString() << ", ";
   }
   out << "<hr>";
   out << "\n Cached expressions (" << this->cachedExpressions.size << " total):\n<br>\n";
@@ -2689,7 +2689,7 @@ std::string Calculator::ToString() {
     out << "<b>Displaying first " << numExpressionsToDisplay << " expressions only. </b><br>";
   }
   for (int i = 0; i < numExpressionsToDisplay; i ++) {
-    out << this->cachedExpressions[i].ToString() << " -> " << this->imagesCachedExpressions[i].ToString();
+    out << this->cachedExpressions[i].toString() << " -> " << this->imagesCachedExpressions[i].toString();
     if (i != this->cachedExpressions.size - 1) {
       out << "<br>";
     }
@@ -2973,13 +2973,13 @@ bool Calculator::innerWriteGenVermaModAsDiffOperators(
   std::string partialString = "\\partial";
   std::string exponentLetterString = "a";
   if (input.children.size > 4) {
-    letterString = input[4].ToString();
+    letterString = input[4].toString();
   }
   if (input.children.size > 5) {
-    partialString = input[5].ToString();
+    partialString = input[5].toString();
   }
   if (input.children.size > 6) {
-    exponentLetterString = input[6].ToString();
+    exponentLetterString = input[6].toString();
   }
   return theCommands.innerWriteGenVermaModAsDiffOperatorInner(
     theCommands,
@@ -3021,7 +3021,7 @@ bool Calculator::innerFreudenthalFull(Calculator& theCommands, const Expression&
     return output.MakeError(reportString, theCommands);
   }
   std::stringstream out;
-  out << resultChar.ToString();
+  out << resultChar.toString();
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -3074,8 +3074,8 @@ bool Expression::MergeContextsMyAruments(Expression& output, std::stringstream* 
   for (int i = 1; i < this->size(); i ++) {
     if (!(*this)[i].IsBuiltInTypE()) {
       if (commentsOnFailure != nullptr) {
-        *commentsOnFailure << "<hr>Failed to merge the arguments of the expression" << this->ToString() << ": the argument "
-        << (*this)[i].ToString() << "is not of built-in type";
+        *commentsOnFailure << "<hr>Failed to merge the arguments of the expression" << this->toString() << ": the argument "
+        << (*this)[i].toString() << "is not of built-in type";
       }
       return false;
     }
@@ -3100,8 +3100,8 @@ bool Expression::MergeContextsMyAruments(Expression& output, std::stringstream* 
       return false;
     }
     if (!commonContext.ContextMergeContexts(commonContext, (*this)[i].GetContext(), commonContext)) {
-      *this->owner << "<hr>Failed to merge context " << commonContext.ToString()
-      << " with " << (*this)[i].GetContext().ToString();
+      *this->owner << "<hr>Failed to merge context " << commonContext.toString()
+      << " with " << (*this)[i].GetContext().toString();
       return false;
     }
   }
@@ -3111,7 +3111,7 @@ bool Expression::MergeContextsMyAruments(Expression& output, std::stringstream* 
   for (int i = 1; i < this->size(); i ++) {
     convertedE = (*this)[i];
     if (!convertedE.SetContextAtLeastEqualTo(commonContext)) {
-      *this->owner << "<hr>Failed to convert " << convertedE.ToString() << " to context " << commonContext.ToString();
+      *this->owner << "<hr>Failed to convert " << convertedE.toString() << " to context " << commonContext.toString();
       return false;
     }
     output.AddChildOnTop(convertedE);
@@ -3136,7 +3136,7 @@ bool Calculator::ConvertExpressionsToCommonContext(List<Expression>& inputOutput
     }
     if (!commonContext.ContextMergeContexts(commonContext, inputOutputEs[i].GetContext(), commonContext)) {
       return *this << "<hr>Failed to merge context "
-      << commonContext.ToString() << " with " << inputOutputEs[i].GetContext().ToString();
+      << commonContext.toString() << " with " << inputOutputEs[i].GetContext().toString();
     }
   }
   for (int i = 0; i < inputOutputEs.size; i ++) {

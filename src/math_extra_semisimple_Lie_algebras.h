@@ -124,7 +124,7 @@ public:
   void GetChevalleyGeneratorAsLieBracketsSimpleGens(
     int generatorIndex, List<int>& outputIndicesFormatAd0Ad1Ad2etc, Rational& outputMultiplyLieBracketsToGetGenerator
   );
-  std::string ToString(FormatExpressions* inputFormat = nullptr);
+  std::string toString(FormatExpressions* inputFormat = nullptr);
   std::string ToStringHTMLMenuStructureSummary(
     const std::string& relativeTo,
     bool includeStructureConstants,
@@ -296,7 +296,7 @@ public:
   SemisimpleLieAlgebra* owner;
   Vector<coefficient> weightFundamentalCoordS;
   friend std::ostream& operator << (std::ostream& output, const Weight<coefficient>& input) {
-    output << input.ToString();
+    output << input.toString();
     return output;
   }
   Weight(): owner(nullptr) {
@@ -315,7 +315,7 @@ public:
     charSSAlgMod<coefficient>& outputAccum
   ) const;
   std::string TensorAndDecompose(const Weight<coefficient>& other, charSSAlgMod<coefficient>& output) const;
-  std::string ToString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* theFormat = nullptr) const;
   inline unsigned int HashFunction() const {
     return weightFundamentalCoordS.HashFunction();
   }
@@ -467,10 +467,10 @@ public:
   void GetWeightsWrtKInSimpleCoordsK(
     Vectors<Rational>& outputWeights, List<ElementSemisimpleLieAlgebra<Rational> >& inputElts
   );
-  void ToString(std::string& output) {
-    this->ToString(output, false);
+  void toString(std::string& output) {
+    this->toString(output, false);
   }
-  void ToString(std::string& output, bool useHtml);
+  void toString(std::string& output, bool useHtml);
   void MakeGinGWithId(
     char theWeylLetter, int theWeylDim, MapReferences<DynkinType, SemisimpleLieAlgebra>& ownerOfAlgebras
   );
@@ -478,14 +478,14 @@ public:
   void ProjectOntoSmallCartan(Vectors<Rational>& input, Vectors<Rational>& output);
   void GetMapSmallCartanDualToLargeCartanDual(Matrix<Rational> & output);
   void ComputeDebugString() {
-    this->ToString(this->DebugString);
+    this->toString(this->DebugString);
   }
   void ComputeDebugString(bool useHtml) {
-    this->ToString(this->DebugString, useHtml);
+    this->toString(this->DebugString, useHtml);
   }
-  std::string ToString() {
+  std::string toString() {
     std::string tempS;
-    this->ToString(tempS);
+    this->toString(tempS);
     return tempS;
   }
   void GetRestrictionAmbientRootSystemToTheSmallerCartanSA(Vectors<Rational>& output);

@@ -11,7 +11,7 @@
 #include "math_extra_finite_groups_implementation.h"
 #include "math_extra_universal_enveloping_implementation.h" // undefined reference to `ElementUniversalEnveloping<RationalFunctionOld>::MakeZero(SemisimpleLieAlgebra&)'
 
-std::string MonomialWeylAlgebra::ToString(FormatExpressions* theFormat) const {
+std::string MonomialWeylAlgebra::toString(FormatExpressions* theFormat) const {
   if (this->IsConstant()) {
     return "1";
   }
@@ -23,8 +23,8 @@ std::string MonomialWeylAlgebra::ToString(FormatExpressions* theFormat) const {
     tempFormat.polyDefaultLetter = theFormat->WeylAlgebraDefaultLetter;
     tempFormat.polyAlphabeT = theFormat->weylAlgebraLetters;
   }
-  std::string firstS = this->polynomialPart.ToString(theFormat);
-  std::string secondS = this->differentialPart.ToString(&tempFormat);
+  std::string firstS = this->polynomialPart.toString(theFormat);
+  std::string secondS = this->differentialPart.toString(&tempFormat);
   if (firstS != "1") {
     out << firstS;
   }
@@ -790,7 +790,7 @@ void HomomorphismSemisimpleLieAlgebra::MakeGinGWithId(
   }
 }
 
-void HomomorphismSemisimpleLieAlgebra::ToString(std::string& output, bool useHtml) {
+void HomomorphismSemisimpleLieAlgebra::toString(std::string& output, bool useHtml) {
   std::stringstream out;
   if (this->CheckClosednessLieBracket()) {
     out << "Lie bracket closes, everything is good!";
@@ -805,15 +805,15 @@ void HomomorphismSemisimpleLieAlgebra::ToString(std::string& output, bool useHtm
     out << "<br>";
   }
   for (int i = 0; i < this->imagesSimpleChevalleyGenerators.size; i ++) {
-    out << this->imagesSimpleChevalleyGenerators[i].ToString(&global.theDefaultFormat.GetElement()) << "\n\n";
+    out << this->imagesSimpleChevalleyGenerators[i].toString(&global.theDefaultFormat.GetElement()) << "\n\n";
     if (useHtml) {
       out << "<br>";
     }
   }
   out << "Maps of Chevalley generators:\n\n";
   for (int i = 0; i < this->domainAllChevalleyGenerators.size; i ++) {
-    out << "<br>" << this->domainAllChevalleyGenerators[i].ToString(&global.theDefaultFormat.GetElement())
-    << " \\mapsto " << this->imagesAllChevalleyGenerators[i].ToString(&global.theDefaultFormat.GetElement());
+    out << "<br>" << this->domainAllChevalleyGenerators[i].toString(&global.theDefaultFormat.GetElement())
+    << " \\mapsto " << this->imagesAllChevalleyGenerators[i].toString(&global.theDefaultFormat.GetElement());
   }
   output = out.str();
 }
@@ -877,7 +877,7 @@ bool ChevalleyGenerator::CheckInitialization() const {
   return true;
 }
 
-std::string ChevalleyGenerator::ToString(FormatExpressions* inputFormat) const {
+std::string ChevalleyGenerator::toString(FormatExpressions* inputFormat) const {
   this->CheckInitialization();
   return this->owner->GetStringFromChevalleyGenerator(this->theGeneratorIndex, inputFormat);
 }
@@ -1187,10 +1187,10 @@ std::string VectorPartition::ToStringPartitioningVectors() {
   MacroRegisterFunctionWithName("VectorPartition::ToStringPartitioningVectors");
   std::stringstream out;
   for (int i = 0; i < this->PartitioningRoots.size; i ++) {
-    out << "e_{" << i + 1 << "}=" << this->PartitioningRoots[i].ToString() << "<br>";
+    out << "e_{" << i + 1 << "}=" << this->PartitioningRoots[i].toString() << "<br>";
   }
   out << "<hr>";
-  out << "Looking for partitions of: " << this->goalVector.ToString();
+  out << "Looking for partitions of: " << this->goalVector.toString();
   out << "<hr>";
   return out.str();
 }
@@ -1202,9 +1202,9 @@ std::string VectorPartition::ToStringOnePartition(const List<int>& currentPartit
 }
 
 std::string VectorPartition::ToStringAllPartitions(bool useHtml) {
-  MacroRegisterFunctionWithName("VectorPartition::ToString");
+  MacroRegisterFunctionWithName("VectorPartition::toString");
   std::stringstream out;
-  out << this->goalVector.ToString() << "\n\n";
+  out << this->goalVector.toString() << "\n\n";
   if (useHtml) {
     out << "<br>";
   }
@@ -1416,12 +1416,25 @@ bool RationalFunction::FindOneVariableRationalRoots(List<Rational>& output) {
   return tempP.FindOneVariableRationalRoots(output);
 }
 
-std::string RationalFunction::ToString(FormatExpressions* theFormat) const {
+bool RationalFunction::NeedsParenthesisForMultiplication(FormatExpressions* unused) const {
+  (void) unused;
+  switch(this->expressionType) {
+    case RationalFunction::typeRational:
+      return false;
+    case RationalFunction::typePoly:
+      return this->Numerator.GetElementConst().NeedsParenthesisForMultiplication();
+    case RationalFunction::typeRationalFunction:
+      return false;
+  }
+  return false;
+}
+
+std::string RationalFunction::toString(FormatExpressions* theFormat) const {
   if (this->expressionType == this->typeRational) {
-    return this->ratValue.ToString();
+    return this->ratValue.toString();
   }
   if (this->expressionType == this->typePoly) {
-    return this->Numerator.GetElementConst().ToString(theFormat);
+    return this->Numerator.GetElementConst().toString(theFormat);
   }
   std::stringstream out;
   bool useFrac = theFormat == nullptr ? false : theFormat->flagUseFrac;
@@ -1435,7 +1448,7 @@ std::string RationalFunction::ToString(FormatExpressions* theFormat) const {
   if (needParenthesis) {
     out << "(";
   }
-  out << this->Numerator.GetElementConst().ToString(theFormat);
+  out << this->Numerator.GetElementConst().toString(theFormat);
   if (needParenthesis) {
     out << ")";
   }
@@ -1444,7 +1457,7 @@ std::string RationalFunction::ToString(FormatExpressions* theFormat) const {
   } else {
     out << "/(";
   }
-  out << this->Denominator.GetElementConst().ToString(theFormat);
+  out << this->Denominator.GetElementConst().toString(theFormat);
   if (useFrac) {
     out << "}";
   } else {
@@ -1476,14 +1489,14 @@ void RationalFunction::gcd(
   if (!remainderBuffer.IsEqualToZero() || output.IsEqualToZero()) {
     global.fatal
     << "This is a programming error. <br>While computing the gcd of left = "
-    << left.ToString() << " <br>and right = "
-    << right.ToString() << " <br>I got that left * right = "
-    << productBuffer.ToString()
+    << left.toString() << " <br>and right = "
+    << right.toString() << " <br>I got that left * right = "
+    << productBuffer.toString()
     << "<br>, and that lcm(left, right) = "
-    << leastCommonMultipleBuffer.ToString()
+    << leastCommonMultipleBuffer.toString()
     << " <br>but at the same time right * left divided by lcm (left, right) equals<br>"
-    << output.ToString()
-    << "<br> with remainder " << remainderBuffer.ToString()
+    << output.toString()
+    << "<br> with remainder " << remainderBuffer.toString()
     << ", which is imposible."
     << global.fatal;
   }
@@ -1599,7 +1612,7 @@ void RationalFunction::lcm(
     global.fatal << "This is a programming error: failed to obtain "
     << "the least common multiple of two polynomials. The list of polynomials is: ";
     for (int i = 0; i < theBasis.size; i ++) {
-      global.fatal << theBasis[i].ToString() << ", ";
+      global.fatal << theBasis[i].toString() << ", ";
     }
     global.fatal << global.fatal;
   }
@@ -1632,8 +1645,8 @@ void RationalFunction::operator*=(const Polynomial<Rational>& other) {
   ProgressReport theReport;
   if (theReport.TickAndWantReport()) {
     std::stringstream out;
-    out << "Multiplying " << this->ToString(&global.theDefaultFormat.GetElement()) << " by "
-    << other.ToString(&global.theDefaultFormat.GetElement());
+    out << "Multiplying " << this->toString(&global.theDefaultFormat.GetElement()) << " by "
+    << other.toString(&global.theDefaultFormat.GetElement());
     theReport.Report(out.str());
   }
   RationalFunction::gcd(this->Denominator.GetElement(), other, theGCD);
@@ -1653,9 +1666,9 @@ void RationalFunction::operator*=(const Polynomial<Rational>& other) {
   this->SimplifyLeadingCoefficientOnly();
   if (theReport.TickAndWantReport()) {
     std::stringstream out;
-    out << "Multiplying " << this->ToString(&global.theDefaultFormat.GetElement()) << " by "
-    << other.ToString(&global.theDefaultFormat.GetElement());
-    out << " and the result is:\n" << this->ToString();
+    out << "Multiplying " << this->toString(&global.theDefaultFormat.GetElement()) << " by "
+    << other.toString(&global.theDefaultFormat.GetElement());
+    out << " and the result is:\n" << this->toString();
     theReport.Report(out.str());
   }
 }
@@ -1675,7 +1688,6 @@ void RationalFunction::operator/=(const RationalFunction& other) {
 
 
 void RationalFunction::operator*=(const Rational& other) {
-  //if (!this->checkConsistency()) global.fatal << global.fatal;
   if (other.IsEqualToZero()) {
     this->MakeZero();
     return;
@@ -1736,7 +1748,7 @@ void RationalFunction::operator*=(const RationalFunction& other) {
   ProgressReport theReport;
   if (theReport.TickAndWantReport()) {
     std::stringstream out;
-    out << "Multiplying " << this->ToString() << " by " << other.ToString();
+    out << "Multiplying " << this->toString() << " by " << other.toString();
     theReport.Report(out.str());
   }
   RationalFunction::gcd(other.Denominator.GetElementConst(), this->Numerator.GetElement(), theGCD1);
@@ -1766,8 +1778,8 @@ void RationalFunction::operator*=(const RationalFunction& other) {
   this->SimplifyLeadingCoefficientOnly();
   if (theReport.TickAndWantReport()) {
     std::stringstream out;
-    out << "Multiplying " << this->ToString() << " by " << other.ToString();
-    out << " and the result is:\n" << this->ToString();
+    out << "Multiplying " << this->toString() << " by " << other.toString();
+    out << " and the result is:\n" << this->toString();
     theReport.Report(out.str());
   }
 }
@@ -1822,8 +1834,8 @@ void RationalFunction::Simplify() {
       this->gcd(this->Numerator.GetElement(), this->Denominator.GetElement(), theGCD);
       if (theGCD.IsEqualToZero()) {
         global.fatal << "This is a programing error: "
-        << " while fetching the gcd of " << this->Numerator.GetElement().ToString()
-        << " and " << this->Denominator.GetElement().ToString()
+        << " while fetching the gcd of " << this->Numerator.GetElement().toString()
+        << " and " << this->Denominator.GetElement().toString()
         << " I got 0, which is impossible. " << global.fatal;
       }
       this->Numerator.GetElement().DivideBy(theGCD, tempP, tempP2, monomialOrder);
@@ -2226,7 +2238,7 @@ std::string slTwoInSlN::ElementMatrixToTensorString(const Matrix<Rational>& inpu
   for (int i = 0; i < input.NumRows; i ++) {
     for (int j = 0; j < input.NumCols; j ++) {
       if (!input.elements[i][j].IsEqualToZero()) {
-        tempS = input.elements[i][j].ToString();
+        tempS = input.elements[i][j].toString();
         if (tempS == "- 1" || tempS == "-1") {
           tempS = "-";
         }
@@ -2479,8 +2491,8 @@ std::string slTwoInSlN::PairTwoIndices(List<int>& output, int leftIndex, int rig
         for (int k = 0; k < HighestWeightsContainingModules.size; k ++) {
           output.AddOnTopNoRepetition(this->GetModuleIndexFromHighestWeightVector(HighestWeightsContainingModules[k]));
           if (this->GetModuleIndexFromHighestWeightVector(HighestWeightsContainingModules[k]) == - 1) {
-            global.Comments << newLine << beginMath << "[" << leftElt.ToString(&latexFormat) << ", "
-            << rightElt.ToString(&latexFormat) << "] =" << tempMat.ToString(&latexFormat) << endMath;
+            global.Comments << newLine << beginMath << "[" << leftElt.toString(&latexFormat) << ", "
+            << rightElt.toString(&latexFormat) << "] =" << tempMat.toString(&latexFormat) << endMath;
           }
         }
       }
@@ -2726,7 +2738,7 @@ bool Cone::IsInCone(const Vector<Rational>& point) const {
   return true;
 }
 
-std::string MonomialP::ToString(FormatExpressions* theFormat) const {
+std::string MonomialP::toString(FormatExpressions* theFormat) const {
   std::stringstream out;
   MemorySaving<FormatExpressions> tempFormat;
   if (theFormat == nullptr) {

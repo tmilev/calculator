@@ -47,7 +47,7 @@ public:
   ClassFunction operator-(const ClassFunction& other) const;
   ClassFunction ReducedWithChars(const List<ClassFunction>& chars);
   coefficient& operator[](int i) const;
-  std::string ToString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* theFormat = nullptr) const;
   static unsigned int HashFunction(const ClassFunction& input);
   unsigned int HashFunction() const {
     return this->HashFunction(*this);
@@ -85,7 +85,7 @@ public:
     return true;
   }
   friend std::ostream& operator<<(std::ostream& out, const ClassFunction<someFiniteGroup, coefficient>& data) {
-    out << data.ToString();
+    out << data.toString();
     return out;
   }
 };
@@ -153,7 +153,7 @@ public:
   HashedList<elementSomeGroup> unionGeneratorsCC;
   struct ConjugacyClass {
     friend std::ostream& operator << (std::ostream& output, const ConjugacyClass& theClass) {
-      output << theClass.ToString();
+      output << theClass.toString();
       return output;
     }
   public:
@@ -170,10 +170,10 @@ public:
     bool flagElementsComputed;
     bool flagRepresentativeWordComputed;
     List<int> representativeWord;
-    std::string ToString(FormatExpressions* theFormat = nullptr) const {
+    std::string toString(FormatExpressions* theFormat = nullptr) const {
       (void) theFormat;//avoid unused parameter warning, portable
       std::stringstream out;
-      out << "Conj. class size: " << this->size.ToString();
+      out << "Conj. class size: " << this->size.toString();
       return out.str();
     }
     bool operator>(const ConjugacyClass& other) const {
@@ -242,7 +242,7 @@ public:
     this->sizePrivate = inputSize;
   }
   void init();
-  std::string ToString(FormatExpressions* theFormat = nullptr){
+  std::string toString(FormatExpressions* theFormat = nullptr){
     std::stringstream out;
     out << this->ToStringElements(theFormat);
     if (this->flagCCRepresentativesComputed) {
@@ -332,7 +332,7 @@ public:
   GroupRepresentation<FiniteGroup<elementSomeGroup>, Rational> GetEmptyRationalRepresentation();
 
   friend std::ostream& operator<<(std::ostream& out, FiniteGroup<elementSomeGroup>& data) {
-    out << data.ToString(0);
+    out << data.toString(0);
     return out;
   }
 };
@@ -364,7 +364,7 @@ struct simpleReflectionOrOuterAutomorphism {
   int index;
   simpleReflectionOrOuterAutomorphism(): flagIsOuter(false), index(- 1) {
   }
-  std::string ToString() const;
+  std::string toString() const;
   void MakeOuterAuto(int inputIndex) {
     this->flagIsOuter = true;
     this->index = inputIndex;
@@ -395,7 +395,7 @@ struct simpleReflection {
   simpleReflection() {
     this->index = - 1;
   }
-  std::string ToString() const;
+  std::string toString() const;
   void MakeSimpleReflection(int inputIndex) {
     this->index = inputIndex;
   }
@@ -419,12 +419,12 @@ public:
   void MultiplyOnTheRightByOuterAutomorphism(int indexOuterAutomorphism);
   static unsigned int HashFunction(const ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& input);
   unsigned int HashFunction() const;
-  std::string ToString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* theFormat = nullptr) const;
 };
 
 class ElementWeylGroup {
   friend std::ostream& operator << (std::ostream& output, const ElementWeylGroup& theElement) {
-    output << theElement.ToString();
+    output << theElement.toString();
     return output;
   }
 public:
@@ -468,7 +468,7 @@ public:
   void MakeID(const ElementWeylGroup& initializeFrom);
   bool IsID();
   std::string ToStringInvariants(FormatExpressions* theFormat) const;
-  std::string ToString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* theFormat = nullptr) const;
   unsigned int HashFunction() const;
   static unsigned int HashFunction(const ElementWeylGroup& input) {
     return input.HashFunction();
@@ -517,7 +517,7 @@ public:
   void MultiplyOnTheRightByOuterAuto(int outerAutoIndex);
   unsigned int HashFunction() const;
   static unsigned int HashFunction(const ElementWeylGroupAutomorphisms& input);
-  std::string ToString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* theFormat = nullptr) const;
 };
 
 template <class coefficient>
@@ -526,7 +526,7 @@ class FinitelyGeneratedMatrixMonoid {
   List<MatrixTensor<coefficient> > theGenerators;
   HashedList<MatrixTensor<coefficient> > theElements;
   bool GenerateElements(int upperBoundNonPositiveMeansNoLimit);
-  std::string ToString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* theFormat = nullptr) const;
 };
 
 template <class coefficient>
@@ -623,7 +623,7 @@ public:
   void AddCharacter(const ClassFunction<WeylGroupData::WeylGroupBase, Rational>& X);
   void ComputeRho(bool Recompute);
   std::string ToStringRootsAndRootReflections(FormatExpressions* theFormat = nullptr);
-  std::string ToString(FormatExpressions* theFormat = nullptr);
+  std::string toString(FormatExpressions* theFormat = nullptr);
   std::string ToStringCppConjugacyClasses(FormatExpressions* theFormat = nullptr);
   std::string ToStringCppCharTable(FormatExpressions* theFormat = nullptr);
   std::string ToStringIrrepLabel(int irrepIndex);
@@ -1110,7 +1110,7 @@ void WeylGroupAutomorphisms::ActOn(
       this->theWeyl->SimpleReflection(currentGenerator.index, outputVector);
     } else {
       if (!this->flagAllOuterAutosComputed) {
-        global.fatal << "Weyl group of type " << this->theWeyl->theDynkinType.ToString()
+        global.fatal << "Weyl group of type " << this->theWeyl->theDynkinType.toString()
         << " does not have its outer autos computed at a place where it should. " << global.fatal;
       }
       this->theOuterAutos.theGenerators[currentGenerator.index].ActOnVectorColumn(outputVector, outputVector);
@@ -1216,7 +1216,7 @@ public:
 
   template <typename somestream>
   somestream& IntoStream(somestream& out) const;
-  std::string ToString(FormatExpressions* fmt = nullptr) const;
+  std::string toString(FormatExpressions* fmt = nullptr) const;
   friend std::ostream& operator<<(std::ostream& out, GroupRepresentation<someGroup, coefficient>& data) {
     return data.IntoStream(out);
   }
@@ -1341,7 +1341,7 @@ somestream& GroupRepresentation<someGroup, coefficient>::IntoStream(somestream& 
   }
   // WeylGroup needs to be printable
   // WeylGroup really needs to be printable lol
-  out << "Representation of group " << ownerGroup->ToString();
+  out << "Representation of group " << ownerGroup->toString();
   if (!this->identifyingString.empty()) {
     out << "identified as " << identifyingString;
   }
@@ -1350,7 +1350,7 @@ somestream& GroupRepresentation<someGroup, coefficient>::IntoStream(somestream& 
 }
 
 template <typename someGroup, typename coefficient>
-std::string GroupRepresentation<someGroup, coefficient>::ToString(FormatExpressions* fmt) const {
+std::string GroupRepresentation<someGroup, coefficient>::toString(FormatExpressions* fmt) const {
   (void) fmt;//portable way of avoiding unused parameter warning
   std::stringstream out;
   this->IntoStream(out);
@@ -1375,7 +1375,7 @@ JSData GroupRepresentation<someGroup, coefficient>::JSOut() {
 template <typename somegroup, typename coefficient>
 class GroupRepresentationCarriesAllMatrices {
   friend std::ostream& operator << (std::ostream& output, const GroupRepresentationCarriesAllMatrices& theIrrep) {
-    output << theIrrep.ToString();
+    output << theIrrep.toString();
     return output;
   }
   // at one time, this class used the 'private' and 'friend' features of c++
@@ -1457,7 +1457,7 @@ public:
   }
   void SpreadVector(const Vector<coefficient>& input, Vectors<coefficient>& outputBasisGeneratedSpace);
   std::string GetName() const;
-  std::string ToString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* theFormat = nullptr) const;
   Matrix<coefficient>& GetMatrixElement(int groupElementIndex);
   template <typename elementSomeGroup>
   void GetMatrixElement(const elementSomeGroup& input, Matrix<coefficient>& output);
@@ -1559,7 +1559,7 @@ public:
   void reset();
   bool IncrementReturnFalseIfPastLast();
   const Vector<Rational>& GetCurrentElement();
-  std::string ToString() const;
+  std::string toString() const;
   std::string ToStringSize() const;
   bool CheckConsistency();
   void initialize();
@@ -1576,11 +1576,11 @@ public:
   elementSomeGroup representative;
   List<int> representativeWord;
   List<int> supergroupIndices;
-  std::string ToString() const;
+  std::string toString() const;
 };
 
 template <typename elementSomeGroup>
-std::string Coset<elementSomeGroup>::ToString() const {
+std::string Coset<elementSomeGroup>::toString() const {
   std::stringstream out;
   out << "Coset with representative " << representative;
   if (supergroupIndices.size != 0) {
@@ -1629,7 +1629,7 @@ public:
   void ComputeCosets();
   bool VerifyCosets();
   bool VerifyNormal();
-  std::string ToString(FormatExpressions* theFormat);
+  std::string toString(FormatExpressions* theFormat);
   bool SameCosetAs(elementSomeGroup& g1, elementSomeGroup& g2);
   int GetCosetId(elementSomeGroup& g);
   int QIDMul(int i, int j);
@@ -1798,17 +1798,17 @@ GroupRepresentation<someGroup, coefficient> SubgroupData<someGroup, elementSomeG
   }
   GroupRepresentation<someGroup, coefficient> out;
   out.MakeTensorRepresentation(qr,sr);
-  global.Comments << "Subgroup representation: " << sr.ToString() << "\n";
+  global.Comments << "Subgroup representation: " << sr.toString() << "\n";
   for (int i = 0; i < this->theGroup->generators.size; i ++) {
     global.Comments << this->theGroup->generators[i] << ' ' << sr.generatorS[i].GetTrace() << '\n'
     << sr.generatorS[i].ToStringPlainText() << '\n';
   }
-  global.Comments << "Quotient representation: " << qr.ToString() << "\n";
+  global.Comments << "Quotient representation: " << qr.toString() << "\n";
   for (int i = 0; i < this->theGroup->generators.size; i ++) {
     global.Comments << this->theGroup->generators[i] << ' ' << qr.generatorS[i].GetTrace() << '\n'
     << qr.generatorS[i].ToStringPlainText() << '\n';
   }
-  global.Comments << "Induced representation: " << out.ToString() << '\n';
+  global.Comments << "Induced representation: " << out.toString() << '\n';
   for (int i = 0; i <out.generatorS.size; i ++) {
     global.Comments << this->theGroup->generators[i] << ' ' << out.generatorS[i].GetTrace() << '\n'
     << out.generatorS[i].ToStringPlainText() << '\n';
@@ -1885,7 +1885,7 @@ public:
   void ComputeTauSignature();
   void GetSignCharacter(Vector<Rational>& out);
   SubgroupDataWeylGroup();
-  std::string ToString(FormatExpressions* theFormat = nullptr);
+  std::string toString(FormatExpressions* theFormat = nullptr);
 };
 
 class SubgroupDataRootReflections : public SubgroupDataWeylGroup {
@@ -1913,7 +1913,7 @@ public:
   void ComputeDynkinType();
   void ComputeCCSizesRepresentativesPreimages();
   SubgroupDataRootReflections();
-  std::string ToString(FormatExpressions* theFormat = nullptr);
+  std::string toString(FormatExpressions* theFormat = nullptr);
 };
 
 class SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms {
@@ -1939,16 +1939,16 @@ public:
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms();
   ~SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms();
   bool CheckInitialization();
-  void ToString(std::string& output, bool displayElements);
+  void toString(std::string& output, bool displayElements);
   void GetGroupElementsIndexedAsAmbientGroup(List<ElementWeylGroup>& output);
   std::string ElementToStringBruhatGraph();
   std::string ElementToStringCosetGraph();
   std::string ElementToStringFromLayersAndArrows(
     List<List<List<int> > >& arrows, List<List<int> >& Layers, int GraphWidth, bool useAmbientIndices
   );
-  std::string ToString(bool displayElements = true) {
+  std::string toString(bool displayElements = true) {
     std::string tempS;
-    this->ToString(tempS, displayElements);
+    this->toString(tempS, displayElements);
     return tempS;
   }
   Vector<Rational> GetRho();
@@ -2247,7 +2247,7 @@ public:
   coefficient& operator[](int i) const;
   bool operator<(const UDPolynomial<coefficient>& right) const;
   bool operator==(int other) const;
-  std::string ToString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* theFormat = nullptr) const;
   void AssignMinPoly(const Matrix<coefficient>& input);
   void AssignCharPoly(const Matrix<coefficient>& input); // method due to Urbain Le Verrier
 };
@@ -2392,7 +2392,7 @@ void UDPolynomial<coefficient>::operator*=(const coefficient& right) {
 }
 
 template <class coefficient>
-std::string UDPolynomial<coefficient>::ToString(FormatExpressions* theFormat) const {
+std::string UDPolynomial<coefficient>::toString(FormatExpressions* theFormat) const {
   Polynomial<coefficient> tempP;
   tempP.MakeZero();
   MonomialP tempM;
@@ -2400,7 +2400,7 @@ std::string UDPolynomial<coefficient>::ToString(FormatExpressions* theFormat) co
     tempM.MakeEi(0, i, 1);
     tempP.AddMonomial(tempM, this->data[i]);
   }
-  return tempP.ToString(theFormat);
+  return tempP.toString(theFormat);
 }
 
 template <typename coefficient>
@@ -2408,7 +2408,7 @@ std::ostream& operator<<(std::ostream& out, const UDPolynomial<coefficient>& p) 
   FormatExpressions tempFormat;
   tempFormat.polyAlphabeT.SetSize(1);
   tempFormat.polyAlphabeT[0] = "q";
-  return out << p.ToString(&tempFormat);
+  return out << p.toString(&tempFormat);
 }
 
 template <typename elementSomeGroup>
@@ -2508,7 +2508,7 @@ bool FiniteGroup<elementSomeGroup>::CheckInitializationConjugacyClasses() const 
     sumSquares+= tempRat*tempRat;
   }
   if (sumSquares !=1)
-    global.fatal << "This is a programming error: sumSquares equals " << sumSquares.ToString() << " when it should equal 1. " << global.fatal;*/
+    global.fatal << "This is a programming error: sumSquares equals " << sumSquares.toString() << " when it should equal 1. " << global.fatal;*/
   return true;
 }
 

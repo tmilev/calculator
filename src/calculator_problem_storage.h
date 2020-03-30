@@ -131,7 +131,7 @@ public:
     this->flagAutoGenerateButtonSolution = true;
     this->flagSolutionFound = false;
   }
-  std::string ToString();
+  std::string toString();
 };
 
 class ProblemDataAdministrative {
@@ -143,7 +143,7 @@ public:
     Rational& output,
     std::string* outputAsGivenByInstructor = nullptr
   );
-  std::string ToString() const;
+  std::string toString() const;
 };
 
 class ProblemData {
@@ -152,7 +152,7 @@ private:
   int knownNumberOfAnswersFromHD;
 public:
   friend std::ostream& operator << (std::ostream& output, const ProblemData& theData) {
-    output << theData.ToString();
+    output << theData.toString();
     return output;
   }
   bool flagRandomSeedGiven;
@@ -177,7 +177,7 @@ public:
   bool LoadFromJSON(const JSData& inputData, std::stringstream& commentsOnFailure);
   std::string StorE();
   JSData StoreJSON() const;
-  std::string ToString() const;
+  std::string toString() const;
   std::string ToStringAvailableAnswerIds();
 };
 
@@ -250,7 +250,7 @@ public:
     std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
   );
   bool ComputeAndStoreActivationStats(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
-  std::string ToString();
+  std::string toString();
   std::string ToStringSelectedColumns();
   UserCalculator();
   ~UserCalculator();

@@ -141,7 +141,7 @@ private:
     this->AssignValue(other, *this->owner);
   }
   friend std::ostream& operator << (std::ostream& output, const Expression& theMon) {
-    output << theMon.ToString();
+    output << theMon.toString();
     return output;
   }
   friend Expression operator*(const Expression& left, const Expression& right);
@@ -285,7 +285,7 @@ private:
   bool IsError(std::string* outputErrorMessage = nullptr) const;
   bool IsContext() const;
   bool NeedsParenthesisForBaseOfExponent() const;
-  bool NeedsParenthesisForMultiplication() const;
+  bool NeedsParenthesisForMultiplication(FormatExpressions* theFormat = nullptr) const;
   bool NeedsParenthesisForAddition() const;
   bool NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost(const Expression* leftNeighbor = nullptr) const;
 
@@ -554,7 +554,7 @@ private:
   void ToStringOpMultiplicative(std::stringstream& out, const std::string& operation, FormatExpressions* theFormat) const;
 
   std::string ToStringTreeHtml(int depth) const;
-  std::string ToString(
+  std::string toString(
     FormatExpressions* theFormat = nullptr,
     Expression* startingExpression = nullptr,
     bool unfoldCommandEnclosures = true,
@@ -1032,7 +1032,7 @@ public:
   void resetSliders();
   void resetPlots();
   bool CheckConsistencyAfterReset();
-  std::string ToString();
+  std::string toString();
   std::string ToStringJavascriptForUserInputBoxes();
 };
 
@@ -1298,7 +1298,7 @@ public:
   std::stringstream errorsPublic;
   FormatExpressions formatVisibleStrings;
   std::string ToStringRuleStatusUser();
-  std::string ToString();
+  std::string toString();
   std::string ToStringPerformance();
   Expression GetNewBoundVar();
   Expression GetNewAtom();
@@ -2014,7 +2014,7 @@ public:
   static void CheckInputNotSameAsOutput(const Expression& input, const Expression& output) {
     if (&input == &output) {
       global.fatal << "This is a programming error: the input expression, equal to "
-      << input.ToString() << " has the same address as the output expression. "
+      << input.toString() << " has the same address as the output expression. "
       << global.fatal;
     }
   }
@@ -2032,7 +2032,7 @@ public:
       return false;
     }
     if (!theFun(*this, input, output)) {
-      this->Comments << "<hr>Conversion function failed on " << input.ToString() << ". ";
+      this->Comments << "<hr>Conversion function failed on " << input.toString() << ". ";
       return false;
     }
     return output.IsOfType<theType>();
@@ -2835,7 +2835,7 @@ bool Calculator::functionGetMatrix(
   )) {
     if (commentsOnError != nullptr) {
       *commentsOnError << "Failed to extract matrix of expressions from "
-      << input.ToString();
+      << input.toString();
     }
     return false;
   }
@@ -2857,7 +2857,7 @@ bool Calculator::functionGetMatrix(
             *commentsOnError << "Failed to convert matrix element: "
             << "row: " << i << ", column: "
             << j << ", expression: "
-            << nonConvertedEs(i, j).ToString() << ". ";
+            << nonConvertedEs(i, j).toString() << ". ";
           }
           return false;
         }
@@ -2873,7 +2873,7 @@ bool Calculator::functionGetMatrix(
           << "Failed to set context to matrix element: "
           << "row: " << i << ", column: "
           << j << ", expression: "
-          << convertedEs.elements[i][j].ToString()
+          << convertedEs.elements[i][j].toString()
           << ". ";
         }
         return false;
@@ -2927,8 +2927,8 @@ bool Expression::MakeSum(
         ) {
           global.fatal << "This is a programming error: bad comparison "
           << "function: each of the expressions "
-          << summandsWithCoeff[i].ToString()
-          << " and " << summandsWithCoeff[j].ToString()
+          << summandsWithCoeff[i].toString()
+          << " and " << summandsWithCoeff[j].toString()
           << " is reported to be greater than the other. " << global.fatal;
         }
       }
@@ -3003,7 +3003,7 @@ bool Expression::MergeContextsMyArumentsAndConvertThem(
     if (!mergedContexts[i].ConvertInternally<theType>(convertedE)) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "<hr>Failed to convert "
-        << mergedContexts[i].ToString() << " to the desired type. ";
+        << mergedContexts[i].toString() << " to the desired type. ";
       }
       return false;
     }
@@ -3033,7 +3033,7 @@ bool Calculator::GetTypeWeight(
     CalculatorConversions::functionSemisimpleLieAlgebra,
     outputAmbientSemisimpleLieAlgebra
   )) {
-    theCommands << "Error extracting Lie algebra from " << leftE.ToString();
+    theCommands << "Error extracting Lie algebra from " << leftE.toString();
     return false;
   }
   SemisimpleLieAlgebra* ambientSSalgebra = outputAmbientSemisimpleLieAlgebra.content;
@@ -3047,7 +3047,7 @@ bool Calculator::GetTypeWeight(
     theCommands << "Failed to convert the second "
     << "argument of HWV to a list of " << ambientSSalgebra->GetRank()
     << " polynomials. The second argument you gave is "
-    << middleE.ToString() << ".";
+    << middleE.toString() << ".";
     return false;
   }
   if (!theCommands.theObjectContainer.semisimpleLieAlgebras.Contains(
@@ -3105,7 +3105,7 @@ bool Calculator::GetTypeHighestWeightParabolic(
     << "Failed to convert the second argument of HWV to a list of "
     << ambientSSalgebra->GetRank()
     << " polynomials. The second argument you gave is "
-    << middleE.ToString() << ".";
+    << middleE.toString() << ".";
     return output.MakeError(tempStream.str(), theCommands);
   }
   if (input.IsListNElements(4)) {
@@ -3123,7 +3123,7 @@ bool Calculator::GetTypeHighestWeightParabolic(
       << "Failed to convert the third argument of HWV to a list of "
       << ambientSSalgebra->GetRank()
       << " rationals. The third argument you gave is "
-      << rightE.ToString() << ".";
+      << rightE.toString() << ".";
       return output.MakeError(tempStream.str(), theCommands);
     }
     outputInducingSel = parabolicSel;

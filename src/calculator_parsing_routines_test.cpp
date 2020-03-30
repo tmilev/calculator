@@ -64,17 +64,17 @@ bool Calculator::Test::ParseAllExamples(Calculator& ownerInitialized) {
 bool Calculator::Test::ParseDecimal(Calculator& ownerInitialized) {
   std::string mustEvaluateToZero = "2.01 - 201/100";
   ownerInitialized.Evaluate(mustEvaluateToZero);
-  if (ownerInitialized.theProgramExpression.ToString() != "0") {
+  if (ownerInitialized.theProgramExpression.toString() != "0") {
     global.fatal << "Expression: " << mustEvaluateToZero << " evaluates to: "
-    << ownerInitialized.theProgramExpression.ToString() << " instead of 0. " << global.fatal;
+    << ownerInitialized.theProgramExpression.toString() << " instead of 0. " << global.fatal;
   }
   std::string mustEvaluateToOne =
   "100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 - 10^128 + 1";
   ownerInitialized.Evaluate(mustEvaluateToOne);
-  if (ownerInitialized.theProgramExpression.ToString() != "1") {
+  if (ownerInitialized.theProgramExpression.toString() != "1") {
     std::cout << "Must crash!\n";
     global.fatal << "Expression: " << mustEvaluateToOne << " evaluates to: "
-    << ownerInitialized.theProgramExpression.ToString() << " instead of 1. " << global.fatal;
+    << ownerInitialized.theProgramExpression.toString() << " instead of 1. " << global.fatal;
   }
 
   return true;

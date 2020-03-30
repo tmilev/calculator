@@ -175,11 +175,11 @@ std::string WebAPIResponse::GetSanitizedComment(
     if (StringRoutines::StringBeginsWith(theString, "Approximations have been")) {
       return "";
     }
-    return input.ToString(&theFormat);
+    return input.toString(&theFormat);
   }
   if (input.IsOfType<Plot>()) {
     resultIsPlot = true;
-    return input.ToString(&theFormat);
+    return input.toString(&theFormat);
   }
   if (input.HasType<Plot>()) {
     return "";
@@ -194,7 +194,7 @@ std::string WebAPIResponse::GetSanitizedComment(
   ) {
     return "";
   }
-  return input.ToString(&theFormat);
+  return input.toString(&theFormat);
 }
 
 std::string WebAPIResponse::GetCommentsInterpretation(
@@ -317,7 +317,7 @@ JSData WebAPIResponse::SubmitAnswersPreviewJSON() {
   theInterpreteR.theProgramExpression[theInterpreteR.theProgramExpression.size() - 1];
   out << "<span style =\"color:magenta\"><b>Interpreting as:</b></span><br>";
   out << "\\(\\displaystyle "
-  << studentAnswerNoContextE.ToString(&theFormat) << "\\)";
+  << studentAnswerNoContextE.toString(&theFormat) << "\\)";
   Calculator theInterpreterWithAdvice;
   theInterpreterWithAdvice.flagUseLnInsteadOfLog = true;
   theInterpreterWithAdvice.initialize();
@@ -607,7 +607,7 @@ std::string Course::courseTopicsWithFolder() {
   return Configuration::topicLists + this->courseTopicsNoFolder;
 }
 
-std::string Course::ToString() const {
+std::string Course::toString() const {
   std::stringstream out;
   out << "Html: " << this->courseTemplate
   << "\n" << "Topics: " << this->courseTopicsNoFolder;
@@ -626,7 +626,7 @@ void Course::reset() {
 }
 
 std::string CourseList::ToHtml() {
-  return this->theCourses.ToString();
+  return this->theCourses.toString();
 }
 
 bool CourseList::LoadFromString(const std::string& input) {
@@ -882,7 +882,7 @@ JSData WebAPIResponse::GetEditPageJSON() {
     errorStream << "<b>Failed to parse file: " << theFile.fileName
     << ".</b> Details:<br>" << failureStream.str();
     output[WebAPI::result::error] = errorStream.str();
-    //return output.ToString(false);
+    //return output.toString(false);
   }
   HashedList<std::string, MathRoutines::HashString> theAutocompleteKeyWords;
   theFile.initBuiltInSpanClasses();
@@ -1455,7 +1455,7 @@ JSData WebAPIResponse::GetAnswerOnGiveUp(
     out << "<b> Unfortunately there is no answer given for this "
     << "question (answerID: " << lastStudentAnswerID << ").</b>";
     if (global.UserDebugFlagOn() && global.UserDefaultHasProblemComposingRights()) {
-      out << "<br>Answer status: " << currentA.ToString();
+      out << "<br>Answer status: " << currentA.toString();
     }
     result[WebAPI::result::error] = out.str();
     return result;
@@ -1513,9 +1513,9 @@ JSData WebAPIResponse::GetAnswerOnGiveUp(
     theInterpreteR.theProgramExpression.size() - 1
   ][1];
   if (!currentE.StartsWith(theInterpreteR.opEndStatement())) {
-    out << "\\(\\displaystyle " << currentE.ToString(&theFormat) << "\\)";
+    out << "\\(\\displaystyle " << currentE.toString(&theFormat) << "\\)";
     if (outputNakedAnswer != nullptr) {
-      *outputNakedAnswer = currentE.ToString(&theFormat);
+      *outputNakedAnswer = currentE.toString(&theFormat);
     }
     result[WebAPI::problem::answerGenerationSuccess] = "true";
     if (answerGenerationSuccess != nullptr) {
@@ -1545,11 +1545,11 @@ JSData WebAPIResponse::GetAnswerOnGiveUp(
       if (currentE[j].IsOfType<std::string>()) {
         out << currentE[j].GetValue<std::string>();
       } else {
-        out << "\\(\\displaystyle " << currentE[j].ToString(&theFormat) << "\\)";
+        out << "\\(\\displaystyle " << currentE[j].toString(&theFormat) << "\\)";
       }
       if (isFirst) {
         if (outputNakedAnswer != nullptr) {
-          *outputNakedAnswer = currentE[j].ToString(&theFormat);
+          *outputNakedAnswer = currentE[j].toString(&theFormat);
         }
         result[WebAPI::problem::answerGenerationSuccess] = "true";
         if (answerGenerationSuccess != nullptr) {

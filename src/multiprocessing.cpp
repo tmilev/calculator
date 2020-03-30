@@ -24,7 +24,7 @@ PipePrimitive::PipePrimitive() {
   this->pipeEnds.initializeFillInObject(2, - 1);
 }
 
-std::string PipePrimitive::ToString() const {
+std::string PipePrimitive::toString() const {
   if (this->pipeEnds.size == 0) {
     return "pipe: non-initialized";
   }
@@ -57,7 +57,7 @@ void MutexProcess::Release() {
 
 bool MutexProcess::CheckConsistency() {
   if (this->flagDeallocated) {
-    global.fatal << "Use after free of " << this->ToString() << global.fatal;
+    global.fatal << "Use after free of " << this->toString() << global.fatal;
   }
   return true;
 }
@@ -79,7 +79,7 @@ std::string PipePrimitive::GetLastRead() {
 
 bool PipePrimitive::CheckConsistency() {
   if (this->flagDeallocated) {
-    global.fatal << "Use after free of pipe: " << this->ToString() << global.fatal;
+    global.fatal << "Use after free of pipe: " << this->toString() << global.fatal;
   }
   return true;
 }
@@ -131,7 +131,7 @@ bool MutexProcess::ResetNoAllocation() {
   ) {
     return true;
   }
-  global << logger::red << this->ToString() << ": failed to reset without allocation. " << logger::endL;
+  global << logger::red << this->toString() << ": failed to reset without allocation. " << logger::endL;
   return false;
 }
 
@@ -145,7 +145,7 @@ bool MutexProcess::Lock() {
   bool success = this->lockPipe.ReadOnceIfFailThenCrash(true);
   if (!success) {
     global << logger::red << "Error: " << this->currentProcessName
-    << " failed to lock pipe " << this->ToString() << logger::endL;
+    << " failed to lock pipe " << this->toString() << logger::endL;
   }
   this->flagLockHeldByAnotherThread = false;
   return success;
@@ -156,17 +156,17 @@ bool MutexProcess::Unlock() {
   bool success = this->lockPipe.WriteOnceIfFailThenCrash(MutexProcess::lockContent, 0, true);
   if (!success) {
     global << logger::red << "Error: " << this->currentProcessName
-    << " failed to unlock pipe " << this->ToString() << logger::endL;
+    << " failed to unlock pipe " << this->toString() << logger::endL;
   }
   return success;
 }
 
-std::string MutexProcess::ToString() const {
+std::string MutexProcess::toString() const {
   std::stringstream out;
   if (this->name != "") {
     out << this->name << ": ";
   }
-  out << "mutexProcess: " << this->lockPipe.ToString();
+  out << "mutexProcess: " << this->lockPipe.toString();
   return out.str();
 }
 
@@ -390,7 +390,7 @@ void Pipe::WriteOnceAfterEmptying(
 
 bool PipePrimitive::ReadOnceWithoutEmptying(bool dontCrashOnFail) {
   if (this->flagReadEndBlocks || this->flagWriteEndBlocks) {
-    global.fatal << this->ToString() << ": read without emptying allowed only on fully non-blocking pipes. " << global.fatal;
+    global.fatal << this->toString() << ": read without emptying allowed only on fully non-blocking pipes. " << global.fatal;
   }
   if (!this->ReadOnceIfFailThenCrash(dontCrashOnFail)) {
     return false;
@@ -401,7 +401,7 @@ bool PipePrimitive::ReadOnceWithoutEmptying(bool dontCrashOnFail) {
 bool PipePrimitive::WriteOnceAfterEmptying(const std::string& input, bool dontCrashOnFail
 ) {
   if (this->flagReadEndBlocks) {
-    global.fatal << this->ToString() << ": write after emptying allowed only on non-blocking read pipes. " << global.fatal;
+    global.fatal << this->toString() << ": write after emptying allowed only on non-blocking read pipes. " << global.fatal;
   }
   if (!this->ReadOnceIfFailThenCrash(dontCrashOnFail)) {
     return false;
@@ -414,12 +414,12 @@ bool PipePrimitive::HandleFailedWriteReturnFalse(
 ) {
   std::stringstream errorStream;
   errorStream << "Failed write: " << toBeSent.size() << " bytes ["
-  << StringRoutines::StringShortenInsertDots(toBeSent, 200) << "] onto: " << this->ToString() << numBadAttempts
+  << StringRoutines::StringShortenInsertDots(toBeSent, 200) << "] onto: " << this->toString() << numBadAttempts
   << " or more times. Last error: "
   << strerror(errno) << ". ";
   global << logger::red << errorStream.str() << logger::endL;
   if (!dontCrashOnFail) {
-    global.fatal << "Failed write on: " << this->ToString() << numBadAttempts << " or more times. Last error: "
+    global.fatal << "Failed write on: " << this->toString() << numBadAttempts << " or more times. Last error: "
     << strerror(errno) << ". " << global.fatal;
   }
   return false;
@@ -432,7 +432,7 @@ bool PipePrimitive::WriteOnceIfFailThenCrash(
 ) {
   MacroRegisterFunctionWithName("PipePrimitive::WriteIfFailThenCrash");
   if (this->pipeEnds[1] == - 1) {
-    global << logger::yellow << "WARNING: " << this->ToString()
+    global << logger::yellow << "WARNING: " << this->toString()
     << " writing on non-initialized pipe. ";
     return false;
   }
@@ -471,19 +471,19 @@ bool PipePrimitive::WriteOnceIfFailThenCrash(
     return false;
   }
   if (static_cast<unsigned>(this->numberOfBytesLastWrite) < remaining) {
-    global << logger::red << this->ToString() << ": wrote only "
+    global << logger::red << this->toString() << ": wrote only "
     << this->numberOfBytesLastWrite << " bytes out of " << remaining << " total. " << logger::endL;
   }
   return true;
 }
 
-std::string Pipe::ToString() const {
+std::string Pipe::toString() const {
   std::stringstream out;
   if (this->name != "") {
     out << this->name << ": information pipe: ";
   }
-  out << this->thePipe.ToString();
-  out << " mutex data: " << this->theMutexPipe.ToString();
+  out << this->thePipe.toString();
+  out << " mutex data: " << this->theMutexPipe.toString();
   return out.str();
 }
 
@@ -506,7 +506,7 @@ bool Pipe::ResetNoAllocation() {
   ) {
     return true;
   }
-  global << logger::red << this->ToString() << ": failed to reset without allocation. " << logger::endL;
+  global << logger::red << this->toString() << ": failed to reset without allocation. " << logger::endL;
   return false;
 }
 
@@ -572,11 +572,11 @@ bool PipePrimitive::ReadOnceIfFailThenCrash(bool dontCrashOnFail) {
     }
     counter ++;
     if (counter > 100) {
-      global << logger::red << this->ToString()
+      global << logger::red << this->toString()
       << ": more than 100 iterations of read resulted in an error. "
       << logger::endL;
       if (!dontCrashOnFail) {
-        global.fatal << this->ToString()
+        global.fatal << this->toString()
         << ": more than 100 iterations of read resulted in an error. "
         << global.fatal;
       }
@@ -587,7 +587,7 @@ bool PipePrimitive::ReadOnceIfFailThenCrash(bool dontCrashOnFail) {
     }
   }
   if (numReadBytes > 150000) {
-    global << logger::red << this->ToString()
+    global << logger::red << this->toString()
     << "This is not supposed to happen: pipe read more than 150000 bytes. " << logger::endL;
   }
   if (numReadBytes > 0) {

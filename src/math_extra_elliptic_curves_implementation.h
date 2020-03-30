@@ -82,17 +82,17 @@ bool ElementEllipticCurve<coefficient>::operator*=(const ElementEllipticCurve& o
 }
 
 template <typename coefficient>
-std::string ElementEllipticCurve<coefficient>::ToString(FormatExpressions* theFormat) const {
+std::string ElementEllipticCurve<coefficient>::toString(FormatExpressions* theFormat) const {
   std::stringstream out;
   Polynomial<Rational> leftHandSide, rightHandSide;
   leftHandSide.MakeMonomiaL(1, 2, 1);
   rightHandSide.MakeMonomiaL(0, 3, 1);
   rightHandSide.AddMonomial(MonomialP(0, 1), this->owner.linearCoefficient);
   rightHandSide += Rational(this->owner.constantTerm);
-  out << "ElementEllipticCurveNormalForm{}(" << leftHandSide.ToString(theFormat)
-  << " = " << rightHandSide.ToString(theFormat) << ", "
-  << MonomialP(0, 1).ToString(theFormat) << " = " << this->xCoordinate.ToString()
-  << ", " << MonomialP(1, 1).ToString(theFormat) << " = " << this->yCoordinate.ToString()
+  out << "ElementEllipticCurveNormalForm{}(" << leftHandSide.toString(theFormat)
+  << " = " << rightHandSide.toString(theFormat) << ", "
+  << MonomialP(0, 1).toString(theFormat) << " = " << this->xCoordinate.toString()
+  << ", " << MonomialP(1, 1).toString(theFormat) << " = " << this->yCoordinate.toString()
   << ") ";
   if (this->flagInfinity) {
     out << " Infinity. ";

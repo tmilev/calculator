@@ -34,7 +34,7 @@ public:
   ListReferences<TreeNode<data> > theNodes;
   void ResetAddRoot(const data& inputData);
   void reset();
-  std::string ToString() const;
+  std::string toString() const;
 };
 
 
@@ -104,7 +104,7 @@ void Tree<data>::reset() {
 }
 
 template <typename data>
-std::string Tree<data>::ToString() const {
+std::string Tree<data>::toString() const {
   if (this->theNodes.size == 0) {
     return "[empty tree]";
   }

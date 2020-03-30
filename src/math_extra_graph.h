@@ -25,7 +25,7 @@ private:
 class GraphEdge {
 public:
   friend std::ostream& operator << (std::ostream& output, const GraphEdge& theEdge) {
-    output << theEdge.ToString();
+    output << theEdge.toString();
     return output;
   }
   int vStart;
@@ -35,7 +35,7 @@ public:
   GraphEdge(int inputStart, int inputEnd):vStart(inputStart), vEnd(inputEnd) {}
   GraphEdge(int inputStart, int inputEnd, const std::string& inputLabel)
   : vStart(inputStart), vEnd(inputEnd), label(inputLabel) {}
-  std::string ToString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* theFormat = nullptr) const;
   static unsigned int HashFunction(const GraphEdge& input) {
     return input.HashFunction();
   }

@@ -31,7 +31,7 @@ public:
     bool useLatex,
     rootSubalgebra& owner
   );
-  int ToString(
+  int toString(
     std::string& output,
     rootSubalgebras& owners,
     bool useLatex,
@@ -48,7 +48,7 @@ public:
   );
   void ComputeConnectedComponents(Vectors<Rational>& input, rootSubalgebra& owner, List<List<int> >& output);
   void ComputeDebugString(rootSubalgebras& owner, bool includeScalarsProducts, bool includeMixedScalarProducts) {
-    this->ToString(this->DebugString, owner, true, includeScalarsProducts, includeMixedScalarProducts);
+    this->toString(this->DebugString, owner, true, includeScalarsProducts, includeMixedScalarProducts);
   }
   void MakeLookCivilized(rootSubalgebra& owner);
   bool IsStrictlyWeaklyProhibiting(
@@ -93,7 +93,7 @@ public:
   std::string DebugString;
   List<std::string> CoordinateReps;
   void GetLatexHeaderAndFooter(std::string& outputHeader, std::string& outputFooter);
-  void ToString(std::string& output, rootSubalgebras& owners, bool useLatex);
+  void toString(std::string& output, rootSubalgebras& owners, bool useLatex);
   void ComputeDebugString(rootSubalgebras& owners);
   void WriteToFile(std::fstream& output);
   void ReadFromFile(std::fstream& input, rootSubalgebras& owner);
@@ -108,7 +108,7 @@ public:
 
 class rootSubalgebra {
   friend std::ostream& operator << (std::ostream& output, rootSubalgebra& theSA) {
-    output << theSA.ToString();
+    output << theSA.toString();
     return output;
   }
 public:
@@ -306,7 +306,7 @@ public:
     bool doExtractRelations
   );
   void PossibleNilradicalComputation(Selection& selKmods, rootSubalgebras& owner, int indexInOwner);
-  std::string ToString(FormatExpressions* theFormat = nullptr);
+  std::string toString(FormatExpressions* theFormat = nullptr);
   void ToHTML(int index, FormatExpressions* theFormat);
   std::string ToStringMultTable(bool useLaTeX, bool useHtml, rootSubalgebra& owner);
   bool RootsDefineASubalgebra(Vectors<Rational>& theRoots);
@@ -418,7 +418,7 @@ public:
   void ElementToStringConeConditionNotSatisfying(std::string& output, bool includeMatrixForm);
   void ElementToStringCentralizerIsomorphisms(std::string& output, bool useLatex, bool useHtml, int fromIndex, int NumToProcess);
   void ToHTML(FormatExpressions* theFormat);
-  std::string ToString(FormatExpressions* theFormat);
+  std::string toString(FormatExpressions* theFormat);
   std::string ToStringAlgebraLink(int index);
   std::string ToStringDynkinTableHTML(FormatExpressions* theFormat);
   std::string ToStringDynkinTableFormat2LaTeX(FormatExpressions* theFormat);
@@ -436,7 +436,7 @@ class slTwoSubalgebra {
 public:
 /////////////////////////////////////////////
   friend std::ostream& operator << (std::ostream& output, const slTwoSubalgebra& theSl2) {
-    output << theSl2.ToString();
+    output << theSl2.toString();
     return output;
   }
 /////////////////////////////////////////////
@@ -494,7 +494,7 @@ public:
     }
     return *this->owner;
   }
-  std::string ToString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* theFormat = nullptr) const;
   void GetInvolvedPosGenerators(List<ChevalleyGenerator>& output);
   void GetInvolvedNegGenerators(List<ChevalleyGenerator>& output);
   void ElementToStringModuleDecompositionMinimalContainingRegularSAs(
@@ -608,7 +608,7 @@ public:
   void ToHTML(FormatExpressions* theFormat = nullptr);
   std::string ToStringSummary(FormatExpressions* theFormat = nullptr);
   void ElementToStringModuleDecompositionMinimalContainingRegularSAs(std::string& output, bool useLatex, bool useHtml);
-  std::string ToString(FormatExpressions* theFormat = nullptr);
+  std::string toString(FormatExpressions* theFormat = nullptr);
 };
 
 #endif

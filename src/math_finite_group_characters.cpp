@@ -945,8 +945,8 @@ bool SubgroupDataWeylGroup::CheckInitialization() {
 }
 
 template <class someGroup, class elementSomeGroup>
-std::string SubgroupData<someGroup, elementSomeGroup>::ToString(FormatExpressions* theFormat) {
-  MacroRegisterFunctionWithName("SubgroupData::ToString");
+std::string SubgroupData<someGroup, elementSomeGroup>::toString(FormatExpressions* theFormat) {
+  MacroRegisterFunctionWithName("SubgroupData::toString");
   (void) theFormat;//avoid unused parameter warning, portable.
   if (this->theGroup == nullptr) {
     return "(not initialized (no owner group))";
@@ -955,24 +955,24 @@ std::string SubgroupData<someGroup, elementSomeGroup>::ToString(FormatExpression
     return "(not initialized (subgroup pointer is 0))";
   }
   std::stringstream out;
-  out << "<br>\nSubgroup: " << this->theSubgroup->ToString();
+  out << "<br>\nSubgroup: " << this->theSubgroup->toString();
 
-  out << "<br>\nOwner group: " << this->theGroup->ToString();
+  out << "<br>\nOwner group: " << this->theGroup->toString();
 
   return out.str();
 }
 
-std::string SubgroupDataRootReflections::ToString(FormatExpressions* theFormat) {
-  MacroRegisterFunctionWithName("SubgroupDataRootReflections::ToString");
+std::string SubgroupDataRootReflections::toString(FormatExpressions* theFormat) {
+  MacroRegisterFunctionWithName("SubgroupDataRootReflections::toString");
   std::stringstream out;
-  out << subGroupDataContainer.ToString(theFormat);
+  out << subGroupDataContainer.toString(theFormat);
   return out.str();
 }
 
-std::string SubgroupDataWeylGroup::ToString(FormatExpressions* theFormat) {
-  MacroRegisterFunctionWithName("SubgroupDataWeylGroup::ToString");
+std::string SubgroupDataWeylGroup::toString(FormatExpressions* theFormat) {
+  MacroRegisterFunctionWithName("SubgroupDataWeylGroup::toString");
   std::stringstream out;
-  out << this->theSubgroupData.ToString(theFormat);
+  out << this->theSubgroupData.toString(theFormat);
   return out.str();
 }
 
@@ -1006,13 +1006,13 @@ void SubgroupDataWeylGroup::ComputeTauSignature() {
   for (int i = 0; i < this->theSubgroupData.theGroup->conjugacyClasseS.size; i ++) {
     ClassFunction<FiniteGroup<ElementWeylGroup>, Rational>& XiG =
     this->theWeylData->theGroup.characterTable[i];
-    //global.Comments << "Restricting character: " << Xip.ToString() << "<br>";
+    //global.Comments << "Restricting character: " << Xip.toString() << "<br>";
     for (int j = 0; j < this->theSubgroupData.theSubgroup->conjugacyClasseS.size; j ++) {
       XiS[j] = XiG[this->theSubgroupData.ccRepresentativesPreimages[j]];
     }
     this->tauSignature[i] = this->theSubgroupData.theSubgroup->GetHermitianProduct(Xs, XiS);
-    //global.Comments << "<br>Hermitian product of " << Xs.ToString() << " and "
-    //<< XiS.ToString() << " = " << this->tauSignature[i];
+    //global.Comments << "<br>Hermitian product of " << Xs.toString() << " and "
+    //<< XiS.toString() << " = " << this->tauSignature[i];
     if (!this->tauSignature[i].IsSmallInteger()) {
       global.fatal << " Tau signature is not integral, something is wrong. " << global.fatal ;
     }
@@ -1126,8 +1126,8 @@ bool FiniteGroup<elementSomeGroup>::AreConjugate_OLD_Deprecated_Version_By_Todor
     global.fatal << "Generators not allowed to be 0. " << global.fatal;
   }
   do {
-    //if (left.ToString() == "s_{4}")
-    //  global.Comments << "<br>" << theIterator.GetCurrentElement().ToString() << "=?=" << right.ToString();
+    //if (left.toString() == "s_{4}")
+    //  global.Comments << "<br>" << theIterator.GetCurrentElement().toString() << "=?=" << right.toString();
     if (theIterator.GetCurrentElement() == right) {
       return true;
     }
@@ -1164,12 +1164,12 @@ void WeylGroupData::GetSignSignatureParabolics(List<SubgroupDataRootReflections>
   outputSubgroups.SetSize(numCycles);
   ElementWeylGroup g;
   g.owner = this;
-//  global.Comments << "<hr>Meself is: " << this->ToString();
+//  global.Comments << "<hr>Meself is: " << this->toString();
   for (int i = 0; i < outputSubgroups.size; i ++, sel.incrementSelection()) {
     SubgroupDataRootReflections& currentParabolic = outputSubgroups[i];
     currentParabolic.MakeParabolicSubgroup(*this, sel);
     currentParabolic.ComputeCCSizesRepresentativesPreimages();
-//    global.Comments << "<hr>Current parabolic is: " << currentParabolic.ToString();
+//    global.Comments << "<hr>Current parabolic is: " << currentParabolic.toString();
     // ComputeInitialCharacters gets the character of the sign representation
     // as characterTable[1]
     //global.Comments << "<hr>before compute initial irreps";

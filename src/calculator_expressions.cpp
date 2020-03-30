@@ -580,7 +580,7 @@ template < >
 Rational& Expression::GetValueNonConst() const {
   if (!this->IsOfType<Rational>()) {
     global.fatal << "This is a programming error: expression not of required type Rational. "
-    << "The expression equals " << this->ToString() << "." << global.fatal;
+    << "The expression equals " << this->toString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theRationals.GetElement(this->GetLastChild().theData);
 }
@@ -589,7 +589,7 @@ template < >
 ElementEllipticCurve<Rational>& Expression::GetValueNonConst() const {
   if (!this->IsOfType<ElementEllipticCurve<Rational> >()) {
     global.fatal << "This is a programming error: expression not of required type Rational. "
-    << "The expression equals " << this->ToString() << "." << global.fatal;
+    << "The expression equals " << this->toString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.EllipticCurveElementsRational.GetElement(this->GetLastChild().theData);
 }
@@ -598,7 +598,7 @@ template < >
 ElementEllipticCurve<ElementZmodP>& Expression::GetValueNonConst() const {
   if (!this->IsOfType<ElementEllipticCurve<ElementZmodP> >()) {
     global.fatal << "This is a programming error: expression not of required type Rational. The expression equals "
-    << this->ToString() << "." << global.fatal;
+    << this->toString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.EllipticCurveElementsZmodP.GetElement(this->GetLastChild().theData);
 }
@@ -607,7 +607,7 @@ template < >
 ElementHyperoctahedralGroupR2& Expression::GetValueNonConst() const {
   if (!this->IsOfType<ElementHyperoctahedralGroupR2>()) {
     global.fatal << "This is a programming error: expression not of required type Rational. "
-    << "The expression equals " << this->ToString() << "." << global.fatal;
+    << "The expression equals " << this->toString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theElementsHyperOctGroup.GetElement(this->GetLastChild().theData);
 }
@@ -616,7 +616,7 @@ template < >
 InputBox& Expression::GetValueNonConst() const {
   if (!this->IsOfType<InputBox>()) {
     global.fatal << "This is a programming error: expression not of required type Rational. "
-    << "The expression equals " << this->ToString() << "." << global.fatal;
+    << "The expression equals " << this->toString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theUserInputTextBoxesWithValues.theValues[this->GetLastChild().theData];
 }
@@ -625,7 +625,7 @@ template < >
 GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> & Expression::GetValueNonConst() const {
   if (!this->IsOfType<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> >()) {
     global.fatal << "This is a programming error: expression not of required type Rational. "
-    << "The expression equals " << this->ToString() << "." << global.fatal;
+    << "The expression equals " << this->toString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theHyperoctahedralReps[this->GetLastChild().theData];
 }
@@ -634,7 +634,7 @@ template < >
 ElementZmodP& Expression::GetValueNonConst() const {
   if (!this->IsOfType<ElementZmodP>())
     global.fatal << "This is a programming error: expression not of required type ElementZmodP. "
-    << "The expression equals " << this->ToString() << "." << global.fatal;
+    << "The expression equals " << this->toString() << "." << global.fatal;
   return this->owner->theObjectContainer.theEltsModP.GetElement(this->GetLastChild().theData);
 }
 
@@ -642,7 +642,7 @@ template < >
 AlgebraicNumber& Expression::GetValueNonConst() const {
   if (!this->IsOfType<AlgebraicNumber>()) {
     global.fatal << "This is a programming error: expression not of required type AlgebraicNumber. "
-    << "The expression equals " << this->ToString() << "." << global.fatal;
+    << "The expression equals " << this->toString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theAlgebraicNumbers.GetElement(this->GetLastChild().theData);
 }
@@ -651,7 +651,7 @@ template < >
 double& Expression::GetValueNonConst() const {
   if (!this->IsOfType<double>()) {
     global.fatal << "This is a programming error: expression not of required type double. "
-    << "The expression equals " << this->ToString() << "." << global.fatal;
+    << "The expression equals " << this->toString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theDoubles.GetElement(this->GetLastChild().theData);
 }
@@ -660,7 +660,7 @@ template < >
 std::string& Expression::GetValueNonConst() const {
   if (!this->IsOfType<std::string>()) {
     global.fatal << "This is a programming error: expression not of required type std::string. "
-    << "The expression equals " << this->ToString() << ". Comments so far: "
+    << "The expression equals " << this->toString() << ". Comments so far: "
     << this->owner->Comments.str() << global.fatal;
   }
   return this->owner->theObjectContainer.theStrings.GetElement(this->GetLastChild().theData);
@@ -670,7 +670,7 @@ template < >
 RationalFunction& Expression::GetValueNonConst() const {
   if (!this->IsOfType<RationalFunction>()) {
     global.fatal << "This is a programming error: expression not of required type RationalFunctionOld. "
-    << "The expression equals " << this->ToString() << "." << global.fatal;
+    << "The expression equals " << this->toString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theRFs.GetElement(this->GetLastChild().theData);
 }
@@ -679,7 +679,7 @@ template < >
 ElementUniversalEnveloping<RationalFunction>& Expression::GetValueNonConst() const {
   if (!this->IsOfType<ElementUniversalEnveloping<RationalFunction> >()) {
     global.fatal << "This is a programming error: expression not of required type "
-    << "ElementUniversalEnveloping_RationalFunctionOld. The expression equals " << this->ToString() << "." << global.fatal;
+    << "ElementUniversalEnveloping_RationalFunctionOld. The expression equals " << this->toString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theUEs.GetElement(this->GetLastChild().theData);
 }
@@ -688,7 +688,7 @@ template < >
 Polynomial<Rational>& Expression::GetValueNonConst() const {
   if (!this->IsOfType<Polynomial<Rational> >()) {
     global.fatal << "This is a programming error: expression not of required type Polynomial_Rational. "
-    << "The expression equals " << this->ToString() << "." << global.fatal;
+    << "The expression equals " << this->toString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.thePolys.GetElement(this->GetLastChild().theData);
 }
@@ -697,7 +697,7 @@ template < >
 Polynomial<AlgebraicNumber>& Expression::GetValueNonConst() const {
   if (!this->IsOfType<Polynomial<AlgebraicNumber> >()) {
     global.fatal << "This is a programming error: expression not of required type Polynomial_AlgebraicNumber. "
-    << "The expression equals " << this->ToString() << "." << global.fatal;
+    << "The expression equals " << this->toString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.thePolysOverANs.GetElement(this->GetLastChild().theData);
 }
@@ -706,7 +706,7 @@ template < >
 ElementWeylAlgebra<Rational>& Expression::GetValueNonConst() const {
   if (!this->IsOfType<ElementWeylAlgebra<Rational> >()) {
     global.fatal << "This is a programming error: expression not of required type "
-    << "ElementWeylAlgebra_Rational. The expression equals " << this->ToString() << "." << global.fatal;
+    << "ElementWeylAlgebra_Rational. The expression equals " << this->toString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theWeylAlgebraElements.GetElement(this->GetLastChild().theData);
 }
@@ -715,7 +715,7 @@ template < >
 LittelmannPath& Expression::GetValueNonConst() const {
   if (!this->IsOfType<LittelmannPath>()) {
     global.fatal << "This is a programming error: expression not of required type "
-    << "LittelmannPath. The expression equals " << this->ToString() << "." << global.fatal;
+    << "LittelmannPath. The expression equals " << this->toString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theLSpaths.GetElement(this->GetLastChild().theData);
 }
@@ -724,7 +724,7 @@ template < >
 Weight<Polynomial<Rational> >& Expression::GetValueNonConst() const {
   if (!this->IsOfType<Weight<Polynomial<Rational> > >()) {
     global.fatal << "This is a programming error: expression not of required type "
-    << "LittelmannPath. The expression equals " << this->ToString() << "." << global.fatal;
+    << "LittelmannPath. The expression equals " << this->toString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theWeightsPoly.GetElement(this->GetLastChild().theData);
 }
@@ -733,7 +733,7 @@ template < >
 MonomialTensor<int, MathRoutines::IntUnsignIdentity>& Expression::GetValueNonConst() const {
   if (!this->IsOfType<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >()) {
     global.fatal << "This is a programming error: expression not of required type "
-    << "MonomialTensor. The expression equals " << this->ToString() << "." << global.fatal;
+    << "MonomialTensor. The expression equals " << this->toString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theLittelmannOperators.GetElement(this->GetLastChild().theData);
 }
@@ -742,7 +742,7 @@ template < >
 ElementTensorsGeneralizedVermas<RationalFunction>& Expression::GetValueNonConst() const {
   if (!this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunction> >()) {
     global.fatal << "This is a programming error: expression not of "
-    << "required type ElementTGVM_RationalFunctionOld. The expression equals " << this->ToString() << "." << global.fatal;
+    << "required type ElementTGVM_RationalFunctionOld. The expression equals " << this->toString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theTensorElts.GetElement(this->GetLastChild().theData);
 }
@@ -751,7 +751,7 @@ template < >
 charSSAlgMod<Rational>& Expression::GetValueNonConst() const {
   if (!this->IsOfType<charSSAlgMod<Rational> >()) {
     global.fatal << "This is a programming error: expression not of required type "
-    << "charSSAlgMod_Rational. The expression equals " << this->ToString() << "." << global.fatal;
+    << "charSSAlgMod_Rational. The expression equals " << this->toString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theCharsSSLieAlgFD.GetElement(this->GetLastChild().theData);
 }
@@ -760,7 +760,7 @@ template < >
 SemisimpleLieAlgebra*& Expression::GetValueNonConst() const {
   if (!this->IsOfType<SemisimpleLieAlgebra*>()) {
     global.fatal << "This is a programming error: expression not of required type "
-    << "SemisimpleLieAlgebra. The expression equals " << this->ToString() << "." << global.fatal;
+    << "SemisimpleLieAlgebra. The expression equals " << this->toString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.semisimpleLieAlgebraPointers[this->GetLastChild().theData];
 }
@@ -769,7 +769,7 @@ template < >
 MatrixTensor<Rational>& Expression::GetValueNonConst() const {
   if (!this->IsOfType<MatrixTensor<Rational> >()) {
     global.fatal << "This is a programming error: expression not of required type "
-    << "MatrixTensorRational. The expression equals " << this->ToString() << "." << global.fatal;
+    << "MatrixTensorRational. The expression equals " << this->toString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theMatTensorRats.GetElement(this->GetLastChild().theData);
 }
@@ -778,7 +778,7 @@ template < >
 SemisimpleSubalgebras& Expression::GetValueNonConst() const {
   if (!this->IsOfType<SemisimpleSubalgebras>()) {
     global.fatal << "This is a programming error: expression not of required type "
-    << "SemisimpleSubalgebras. The expression equals " << this->ToString() << "." << global.fatal;
+    << "SemisimpleSubalgebras. The expression equals " << this->toString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theSSSubalgebraS.theValues[this->GetLastChild().theData];
 }
@@ -787,7 +787,7 @@ template < >
 Plot& Expression::GetValueNonConst() const {
   if (!this->IsOfType<Plot>()) {
     global.fatal << "This is a programming error: expression not of required type "
-    << "Plot. The expression equals " << this->ToString() << "." << global.fatal;
+    << "Plot. The expression equals " << this->toString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.thePlots[this->GetLastChild().theData];
 }
@@ -797,7 +797,7 @@ WeylGroupData& Expression::GetValueNonConst() const {
   if (!this->IsOfType<WeylGroupData>()) {
     global.fatal << "This is a programming error: expression not of required type "
     << "WeylGroupData. The expression equals "
-    << this->ToString() << "." << global.fatal;
+    << this->toString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.semisimpleLieAlgebras.theValues[
     this->GetLastChild().theData
@@ -808,7 +808,7 @@ template < >
 GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& Expression::GetValueNonConst() const {
   if (!this->IsOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >()) {
     global.fatal << "This is a programming error: expression not of required type "
-    << "WeylGroupRepresentation_Rational. The expression equals " << this->ToString() << "." << global.fatal;
+    << "WeylGroupRepresentation_Rational. The expression equals " << this->toString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theWeylGroupReps.GetElement(this->GetLastChild().theData);
 }
@@ -817,7 +817,7 @@ template < >
 ElementWeylGroup& Expression::GetValueNonConst() const {
   if (!this->IsOfType<ElementWeylGroup>()) {
     global.fatal << "This is a programming error: expression not of required type "
-    << "ElementWeylGroup. The expression equals " << this->ToString() << "." << global.fatal;
+    << "ElementWeylGroup. The expression equals " << this->toString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theWeylGroupElements.GetElement(this->GetLastChild().theData);
 }
@@ -827,7 +827,7 @@ VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& Expression::GetV
   if (!this->IsOfType<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >()) {
     global.fatal << "This is a programming error: expression not of required type "
     << "WeylGroupVirtualRepresentation. The expression equals "
-    << this->ToString() << "." << global.fatal;
+    << this->toString() << "." << global.fatal;
   }
   return this->owner->theObjectContainer.theWeylGroupVirtualReps.GetElement(this->GetLastChild().theData);
 }
@@ -925,7 +925,7 @@ bool Expression::ConvertInternally<RationalFunction>(Expression& output) const {
   }
   (*this->owner)
   << "<hr>ConvertToType_RationalFunctionOld: Failed to convert "
-  << this->ToString() << " to rational function. ";
+  << this->toString() << " to rational function. ";
   return false;
 }
 
@@ -973,7 +973,7 @@ bool Expression::ConvertInternally<ElementUniversalEnveloping<RationalFunction> 
   }
   SemisimpleLieAlgebra* theOwner = this->GetAmbientSSAlgebraNonConstUseWithCaution();
   if (theOwner == nullptr) {
-    this->owner->Comments << "<hr>Failed to convert " << this->ToString() << " (Lispified: " << this->ToStringFull()
+    this->owner->Comments << "<hr>Failed to convert " << this->toString() << " (Lispified: " << this->ToStringFull()
     << ") to element of universal enveloping -  failed to extract ambient Lie algebra. ";
     return false;
   }
@@ -990,7 +990,7 @@ bool Expression::ConvertInternally<ElementUniversalEnveloping<RationalFunction> 
     outputUE.MakeConst(this->GetValue<RationalFunction>(), *theOwner);
     return output.AssignValueWithContext(outputUE, this->GetContext(), *this->owner);
   }
-  return *this->owner << "<hr>Failed to convert " << this->ToString()
+  return *this->owner << "<hr>Failed to convert " << this->toString()
   << " to element of universal enveloping -  I don't know how. ";
 }
 
@@ -1059,7 +1059,7 @@ bool Expression::CheckConsistencyRecursively() const {
 
 bool Expression::CheckConsistency() const {
   MacroRegisterFunctionWithName("Expression::CheckConsistency");
-  // warning: do not use ToString method from here: ToString itself calls CheckConosistency,
+  // warning: do not use toString method from here: toString itself calls CheckConosistency,
   // so that causes an "infinite" recursion call cycle,
   // i.e., stack overflow.
   if (this->flagDeallocated) {
@@ -1322,8 +1322,8 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext) {
     myOldContext.ContextGetPolyAndEWASubFromSuperContextNoFailure(newContext, subPolyPart, subEWApart);
     ElementWeylAlgebra<Rational> outputEWA = this->GetValue<ElementWeylAlgebra<Rational> >();
     if (!outputEWA.Substitution(subPolyPart, subEWApart)) {
-      this->owner->Comments << "<hr>Failed to convert " << outputEWA.ToString() << ": failed to carry out substitution "
-      << subEWApart.ToString() << ", " << subPolyPart.ToString();
+      this->owner->Comments << "<hr>Failed to convert " << outputEWA.toString() << ": failed to carry out substitution "
+      << subEWApart.toString() << ", " << subPolyPart.toString();
       return false;
     }
     return this->AssignValueWithContext(outputEWA, inputOutputMinContext, *this->owner);
@@ -1361,13 +1361,13 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext) {
       for (int j = 0; j < newMat.NumCols; j ++) {
         if (!newMat(i, j).Substitution(subPolyPart)) {
           return *this->owner << "Failed to carry out the substitution "
-          << subPolyPart.ToString() << " in the matrix " << this->ToString() << ". ";
+          << subPolyPart.toString() << " in the matrix " << this->toString() << ". ";
         }
       }
     }
     return this->AssignMatrix(newMat, *this->owner, &inputOutputMinContext);
   }
-  this->owner->Comments << "Expression " << this->ToString()
+  this->owner->Comments << "Expression " << this->toString()
   << " is of built-in type but is not handled by Expression::SetContextAtLeastEqualTo. ";
   return false;
 }
@@ -1541,11 +1541,11 @@ bool Expression::ContextMergeContexts(const Expression& leftContext, const Expre
         int theIndex = polyVarUnion.GetIndex((*currentPolyV)[i]);
         if (foundEWAVar.selected[theIndex]) {
           if ((*currentEWAV)[i] != EWAVars[theIndex]) {
-            return owner << "<hr>Failed to merge contexts " << leftContext.ToString() << " and "
-            << rightContext.ToString()
-            << " because " << (*currentPolyV)[i].ToString()
+            return owner << "<hr>Failed to merge contexts " << leftContext.toString() << " and "
+            << rightContext.toString()
+            << " because " << (*currentPolyV)[i].toString()
             << " has two different corresponding differential operator variables: "
-            << EWAVars[theIndex].ToString() << " and " << (*currentEWAV)[i].ToString();
+            << EWAVars[theIndex].toString() << " and " << (*currentEWAV)[i].toString();
           }
         }
         foundEWAVar.AddSelectionAppendNewIndex(theIndex);
@@ -1561,10 +1561,10 @@ bool Expression::ContextMergeContexts(const Expression& leftContext, const Expre
         indexE.AssignValue(i, owner);
         currentEWAVar.AddChildOnTop(indexE);
         if (EWAVars.Contains(currentEWAVar)) {
-          return owner << "<hr>Failed to merge contexts " << leftContext.ToString() << " and " << rightContext.ToString()
-          << ": " << polyVarUnion[i].ToString()
+          return owner << "<hr>Failed to merge contexts " << leftContext.toString() << " and " << rightContext.toString()
+          << ": " << polyVarUnion[i].toString()
           << " had no differential letter assigned to it. I tried to assign automatically  "
-          << currentEWAVar.ToString() << " as differential operator letter, but it was already taken. ";
+          << currentEWAVar.toString() << " as differential operator letter, but it was already taken. ";
         }
       }
     }
@@ -1601,12 +1601,12 @@ void Expression::ContextGetFormatExpressions(FormatExpressions& output) const {
   Expression thePolyE = this->ContextGetPolynomialVariables();
   output.polyAlphabeT.SetSize(thePolyE.children.size - 1);
   for (int i = 1; i < thePolyE.children.size; i ++) {
-    output.polyAlphabeT[i - 1] = thePolyE[i].ToString();
+    output.polyAlphabeT[i - 1] = thePolyE[i].toString();
   }
   Expression theEWAE = this->ContextGetDifferentialOperatorVariables();
   output.weylAlgebraLetters.SetSize(theEWAE.children.size - 1);
   for (int i = 1; i < theEWAE.size(); i ++) {
-    output.weylAlgebraLetters[i - 1] = theEWAE[i].ToString();
+    output.weylAlgebraLetters[i - 1] = theEWAE[i].toString();
   }
 }
 
@@ -2164,8 +2164,8 @@ bool Expression::ContextGetPolySubFromSuperContextNoFailure(
   if (!mustBeTrue) {
     global.fatal << "This is a programming error: I was not able to "
     << "extract a polynomial substitution from smaller context "
-    << this->ToString() << " relative to larger context "
-    << largerContext.ToString() << ". " << global.fatal;
+    << this->toString() << " relative to larger context "
+    << largerContext.toString() << ". " << global.fatal;
   }
   return mustBeTrue;
 }
@@ -2197,7 +2197,7 @@ bool Expression::ContextGetPolyAndEWASubFromSuperContextNoFailure(
   if (!mustBeTrue) {
     global.fatal << "This is a programming error: "
     << "I was not able to extract a polynomial/differential operator substitution from smaller context "
-    << this->ToString() << " relative to larger context " << largerContext.ToString() << global.fatal;
+    << this->toString() << " relative to larger context " << largerContext.toString() << global.fatal;
   }
   return mustBeTrue;
 }
@@ -2276,7 +2276,7 @@ Expression Expression::GetContext() const {
   << "This is a programming error: GetContext called on an Expression"
   << "that is not a built-in data type. "
   << "I can't display the expression as this may cause ``infinite'' "
-  << "recursion if the error is caused by the ToString method. "
+  << "recursion if the error is caused by the toString method. "
   << "Here is however the lisp form "
   << this->ToStringFull() << " of the expression. "
   << "Here's stack trace. " << global.fatal;
@@ -2504,10 +2504,10 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     result = true;
   } else if (this->IsOfType<Rational>()) {
     if (this->HasNonEmptyContext()) {
-      out << "Rational{}(" << (*this)[1].ToString() << ", ";
+      out << "Rational{}(" << (*this)[1].toString() << ", ";
     }
     if (!this->owner->flagUseFracInRationalLaTeX) {
-      out << this->GetValue<Rational>().ToString();
+      out << this->GetValue<Rational>().toString();
     } else {
       out << this->GetValue<Rational>().ToStringFrac();
     }
@@ -2518,24 +2518,24 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
   } else if (this->IsOfType<ElementEllipticCurve<Rational> >()) {
     this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
     contextFormat.GetElement().flagUseFrac = true;
-    out << this->GetValue<ElementEllipticCurve<Rational> >().ToString(&contextFormat.GetElement());
+    out << this->GetValue<ElementEllipticCurve<Rational> >().toString(&contextFormat.GetElement());
     result = true;
   } else if (this->IsOfType<ElementEllipticCurve<ElementZmodP> >()) {
     this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
     contextFormat.GetElement().flagUseFrac = true;
-    out << this->GetValue<ElementEllipticCurve<ElementZmodP> >().ToString(&contextFormat.GetElement());
+    out << this->GetValue<ElementEllipticCurve<ElementZmodP> >().toString(&contextFormat.GetElement());
     result = true;
   } else if (this->IsOfType<ElementZmodP>()) {
-    out << this->GetValue<ElementZmodP>().ToString();
+    out << this->GetValue<ElementZmodP>().toString();
     result = true;
   } else if (this->IsOfType<InputBox>()) {
     out << this->GetValue<InputBox>().GetUserInputBox();
     result = true;
   } else if (this->IsOfType<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> >()) {
-    out << this->GetValue<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> >().ToString();
+    out << this->GetValue<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> >().toString();
     result = true;
   } else if (this->IsOfType<ElementHyperoctahedralGroupR2>()) {
-    out << this->GetValue<ElementHyperoctahedralGroupR2>().ToString(&contextFormat.GetElement());
+    out << this->GetValue<ElementHyperoctahedralGroupR2>().toString(&contextFormat.GetElement());
     result = true;
   } else if (this->IsOfType<Polynomial<Rational> >()) {
     this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
@@ -2543,19 +2543,19 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     if (!this->owner->flagHidePolynomialBuiltInTypeIndicator) {
       out << "Polynomial{}(";
     }
-    out << this->GetValue<Polynomial<Rational> >().ToString(&contextFormat.GetElement());
+    out << this->GetValue<Polynomial<Rational> >().toString(&contextFormat.GetElement());
     if (!this->owner->flagHidePolynomialBuiltInTypeIndicator) {
       out << ")";
     }
     if (showContext) {
-      out << "[" << this->GetContext().ToString() << "]";
+      out << "[" << this->GetContext().toString() << "]";
     }
     result = true;
   } else if (this->IsOfType<Polynomial<AlgebraicNumber> >()) {
     this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
     contextFormat.GetElement().flagUseFrac = true;
     out << "PolynomialAlgebraicNumbers{}(";
-    std::string currentString= this->GetValue<Polynomial<AlgebraicNumber> >().ToString(&contextFormat.GetElement());
+    std::string currentString= this->GetValue<Polynomial<AlgebraicNumber> >().toString(&contextFormat.GetElement());
     if (currentString.size() > 0) {
       if (currentString[0] == '-') {
         currentString = currentString.substr(1);
@@ -2571,22 +2571,22 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     }
     out << ")";
     if (showContext) {
-      out << "[" << this->GetContext().ToString() << "]";
+      out << "[" << this->GetContext().toString() << "]";
     }
     result = true;
   } else if (this->IsOfType<RationalFunction>()) {
     this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
     contextFormat.GetElement().flagUseFrac = true;
     out << "MakeRationalFunction{}("
-    << this->GetValue<RationalFunction>().ToString(&contextFormat.GetElement()) << ")";
+    << this->GetValue<RationalFunction>().toString(&contextFormat.GetElement()) << ")";
     if (showContext) {
-      out << "[" << this->GetContext().ToString() << "]";
+      out << "[" << this->GetContext().toString() << "]";
     }
     result = true;
   } else if (this->IsOfType<Weight<Polynomial<Rational> > >()) {
     this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
     contextFormat.GetElement().flagFormatWeightAsVectorSpaceIndex = false;
-    out << this->GetValue<Weight<Polynomial<Rational> > >().ToString(&contextFormat.GetElement());
+    out << this->GetValue<Weight<Polynomial<Rational> > >().toString(&contextFormat.GetElement());
     result = true;
   } else if (this->IsOfType<SemisimpleLieAlgebra*>()) {
     out << "SSLieAlg{}("
@@ -2595,8 +2595,8 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     result = true;
   } else if (this->IsOfType<ElementUniversalEnveloping<RationalFunction> >()) {
     this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
-    out << "UEE{}(" //<< this->GetContext().ToString() << ", "
-    << this->GetValue<ElementUniversalEnveloping<RationalFunction> >().ToString(&contextFormat.GetElement())
+    out << "UEE{}(" //<< this->GetContext().toString() << ", "
+    << this->GetValue<ElementUniversalEnveloping<RationalFunction> >().toString(&contextFormat.GetElement())
     << ")";
     result = true;
   } else if (this->IsOfType<MatrixTensor<Rational> >()) {
@@ -2608,7 +2608,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
       << this->GetValue<MatrixTensor<Rational> > ().ToStringMatrixForm(&contextFormat.GetElement())
       << ")";
     } else {
-      out << this->GetValue<MatrixTensor<Rational> >().ToString();
+      out << this->GetValue<MatrixTensor<Rational> >().toString();
     }
     result = true;
   } /*else if (this->IsMatrixGivenType<Rational>()) {
@@ -2617,7 +2617,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     contextFormat.GetElement().flagUseHTML = false;
     Matrix<Rational> theMat;
     this->IsMatrixGivenType(0, 0, &theMat);
-    out << theMat.ToString(&contextFormat.GetElement());
+    out << theMat.toString(&contextFormat.GetElement());
     result = true;
   } else if (this->IsMatrixGivenType<double>()) {
     out.precision(4);
@@ -2631,12 +2631,12 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     contextFormat.GetElement().flagUseHTML = false;
     Matrix<AlgebraicNumber> theMat;
     this->IsMatrixGivenType(0, 0, &theMat);
-    out << theMat.ToString(&contextFormat.GetElement());
+    out << theMat.toString(&contextFormat.GetElement());
     result = true;
   } */else if (this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunction> >()) {
     this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
     out << "ETGVM{}(";
-    out << this->GetValue<ElementTensorsGeneralizedVermas<RationalFunction> >().ToString(&contextFormat.GetElement());
+    out << this->GetValue<ElementTensorsGeneralizedVermas<RationalFunction> >().toString(&contextFormat.GetElement());
     out << ")";
     result = true;
   } else if (this->IsOfType<Plot>()) {
@@ -2659,14 +2659,14 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     contextFormat.GetElement().flagUseLatex = true;
     contextFormat.GetElement().flagUseHTML = false;
     contextFormat.GetElement().flagUseReflectionNotation = true;
-    out << theGroup.ToString(&contextFormat.GetElement());
+    out << theGroup.toString(&contextFormat.GetElement());
     result = true;
   } else if (this->IsOfType<ElementWeylGroup>()) {
     const ElementWeylGroup& theElt = this->GetValue<ElementWeylGroup>();
     contextFormat.GetElement().flagUseLatex = true;
     contextFormat.GetElement().flagUseHTML = false;
     contextFormat.GetElement().flagUseReflectionNotation = true;
-    out << theElt.ToString(&contextFormat.GetElement());
+    out << theElt.toString(&contextFormat.GetElement());
     result = true;
   } else if (this->IsOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >()) {
     const GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& theElt =
@@ -2674,7 +2674,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     contextFormat.GetElement().flagUseLatex = true;
     contextFormat.GetElement().flagUseHTML = false;
     contextFormat.GetElement().flagUseReflectionNotation = true;
-    out << theElt.ToString(&contextFormat.GetElement());
+    out << theElt.toString(&contextFormat.GetElement());
     result = true;
   } else if (this->IsOfType<VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >()) {
     const VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& theElt =
@@ -2682,11 +2682,11 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     contextFormat.GetElement().flagUseLatex = true;
     contextFormat.GetElement().flagUseHTML = false;
     contextFormat.GetElement().flagUseReflectionNotation = true;
-    out << theElt.ToString(&contextFormat.GetElement());
+    out << theElt.toString(&contextFormat.GetElement());
     result = true;
   } else if (this->IsOfType<charSSAlgMod<Rational> >()) {
     charSSAlgMod<Rational> theElt = this->GetValue<charSSAlgMod<Rational> >();
-    out << theElt.ToString();
+    out << theElt.toString();
     result = true;
   } else if (this->IsOfType<SemisimpleSubalgebras>()) {
     SemisimpleSubalgebras& theSubalgebras = this->GetValueNonConst<SemisimpleSubalgebras>();
@@ -2695,7 +2695,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     contextFormat.GetElement().flagCandidateSubalgebraShortReportOnly = false;
     contextFormat.GetElement().flagIncludeMutableInformation = false;
     contextFormat.GetElement().flagUseMathSpanPureVsMouseHover = false;
-    out << theSubalgebras.ToString(&contextFormat.GetElement());
+    out << theSubalgebras.toString(&contextFormat.GetElement());
     result = true;
   } else if (this->IsOfType<double>()) {
     std::string currentString = FloatingPoint::DoubleToString(this->GetValue<double>());
@@ -2717,7 +2717,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     if (this->owner->flagUseFracInRationalLaTeX) {
       contextFormat.GetElement().flagUseFrac = true;
     }
-    std::string currentString = this->GetValue<AlgebraicNumber>().ToString(&contextFormat.GetElement());
+    std::string currentString = this->GetValue<AlgebraicNumber>().toString(&contextFormat.GetElement());
     if (currentString.size() > 0) {
       if (currentString[0] == '-') {
         currentString = currentString.substr(1);
@@ -2733,7 +2733,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     }
     result = true;
   } else if (this->IsOfType<LittelmannPath>()) {
-    out << this->GetValue<LittelmannPath>().ToString();
+    out << this->GetValue<LittelmannPath>().toString();
     result = true;
   } else if (this->IsMatrixOfType<RationalFunction>()) {
     this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
@@ -2741,17 +2741,17 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     contextFormat.GetElement().flagUseLatex = true;
     Matrix<RationalFunction> theMat;
     this->owner->functionGetMatrix(*this, theMat);
-    out << theMat.ToString(&contextFormat.GetElement());
+    out << theMat.toString(&contextFormat.GetElement());
     result = true;
   } else if (this->IsOfType<ElementWeylAlgebra<Rational> >()) {
     this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
     contextFormat.GetElement().flagUseHTML = false;
     contextFormat.GetElement().flagUseLatex = true;
     out << "ElementWeylAlgebra{}(";
-    out << this->GetValue<ElementWeylAlgebra<Rational> >().ToString(&contextFormat.GetElement());
+    out << this->GetValue<ElementWeylAlgebra<Rational> >().toString(&contextFormat.GetElement());
     out << ")";
     if (showContext) {
-      out << "[" << this->GetContext().ToString() << "]";
+      out << "[" << this->GetContext().toString() << "]";
     }
     result = true;
   }
@@ -2891,7 +2891,7 @@ bool Expression::NeedsParenthesisForAddition() const {
   return false;
 }
 
-bool Expression::NeedsParenthesisForMultiplication() const {
+bool Expression::NeedsParenthesisForMultiplication(FormatExpressions* theFormat) const {
   if (this->owner == nullptr) {
     return false;
   }
@@ -2923,10 +2923,10 @@ bool Expression::NeedsParenthesisForMultiplication() const {
     }
   }
   if (this->IsOfType<Rational>()) {
-    return this->GetValue<Rational>().NeedsParenthesisForMultiplication();
+    return this->GetValue<Rational>().NeedsParenthesisForMultiplication(theFormat);
   }
   if (this->IsOfType<AlgebraicNumber>()) {
-    return this->GetValue<AlgebraicNumber>().NeedsParenthesisForMultiplication();
+    return this->GetValue<AlgebraicNumber>().NeedsParenthesisForMultiplication(theFormat);
   }
   if (this->IsAtom() || this->children.size == 0) {
     return false;
@@ -3089,7 +3089,7 @@ JSData Expression::ToJSData(FormatExpressions* theFormat, const Expression& star
       const Expression currentE = (*this)[i];
       if (!this->owner->flagHideLHS) {
         if (i < startingExpression.size()) {
-          input[i - 1] = startingExpression[i].ToString(theFormat);
+          input[i - 1] = startingExpression[i].toString(theFormat);
         } else {
           input[i - 1] = "No matching starting expression - possible use of the Melt keyword.";
         }
@@ -3105,22 +3105,22 @@ JSData Expression::ToJSData(FormatExpressions* theFormat, const Expression& star
         currentE.IsOfType<WeylGroupData>() ||
         currentE.IsOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >()
       ) {
-        out << currentE.ToString(theFormat);
+        out << currentE.toString(theFormat);
       } else {
-        out << HtmlRoutines::GetMathSpanPure(currentE.ToString(theFormat), 1700);
+        out << HtmlRoutines::GetMathSpanPure(currentE.toString(theFormat), 1700);
       }
       out << currentE.ToStringAllSlidersInExpression();
       output[i - 1] = out.str();
     }
   } else {
-    input[0] = HtmlRoutines::GetMathSpanPure(startingExpression.ToString(theFormat), 1700);
+    input[0] = HtmlRoutines::GetMathSpanPure(startingExpression.toString(theFormat), 1700);
     if (
       this->IsOfType<std::string>() || this->IsOfType<Plot>() ||
       this->IsOfType<SemisimpleSubalgebras>() || this->IsOfType<WeylGroupData>()
     ) {
-      output[0] = this->ToString(theFormat);
+      output[0] = this->toString(theFormat);
     } else {
-      output[0] = HtmlRoutines::GetMathSpanPure(this->ToString(theFormat), 1700);
+      output[0] = HtmlRoutines::GetMathSpanPure(this->toString(theFormat), 1700);
     }
   }
   result["input"] = input;
@@ -3134,14 +3134,14 @@ bool Expression::ToStringTimes(
   if (!input.StartsWith(input.owner->opTimes(), 3)) {
     return false;
   }
-  std::string secondE = input[2].ToString(theFormat);
+  std::string secondE = input[2].toString(theFormat);
   if (input[1].IsOperationGiven(input.owner->opSqrt())) {
     // A malformed expression such as: "\sqrt 3" will be parsed as "sqrt * 3"
     // and later corrected to "\sqrt{3}".
     out << "\\sqrt{" << secondE << "}";
     return true;
   }
-  std::string firstE = input[1].ToString(theFormat);
+  std::string firstE = input[1].toString(theFormat);
   bool firstNeedsBrackets = input[1].NeedsParenthesisForMultiplication();
   bool secondNeedsBrackets = input[2].NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost(&(input[1]));
   if (secondE.size() > 0) {
@@ -3200,8 +3200,8 @@ void Expression::ToStringOpMultiplicative(
   const std::string& operation,
   FormatExpressions* theFormat
 ) const {
-  std::string secondE = (*this)[2].ToString(theFormat);
-  std::string firstE = (*this)[1].ToString(theFormat);
+  std::string secondE = (*this)[2].toString(theFormat);
+  std::string firstE = (*this)[1].toString(theFormat);
   bool firstNeedsBrackets = (*this)[1].NeedsParenthesisForMultiplication();
   bool secondNeedsBrackets = (*this)[2].NeedsParenthesisForMultiplication();
   if (firstE == "- 1" || firstE == "-1") {
@@ -3273,8 +3273,8 @@ bool Expression::ToStringDivide(
     }
   }
   if (!doUseFrac) {
-    std::string firstE = (*this)[1].ToString(theFormat);
-    std::string secondE = (*this)[2].ToString(theFormat);
+    std::string firstE = (*this)[1].toString(theFormat);
+    std::string secondE = (*this)[2].toString(theFormat);
     bool firstNeedsBrackets =
       !((*this)[1].IsListStartingWithAtom(this->owner->opTimes()) ||
       (*this)[1].IsListStartingWithAtom(this->owner->opDivide()));
@@ -3301,8 +3301,8 @@ bool Expression::ToStringDivide(
       maintain.initialize(theFormat->flagExpressionNewLineAllowed);
       theFormat->flagExpressionNewLineAllowed = false;
     }
-    std::string firstE = (*this)[1].ToString(theFormat);
-    std::string secondE = (*this)[2].ToString(theFormat);
+    std::string firstE = (*this)[1].toString(theFormat);
+    std::string secondE = (*this)[2].toString(theFormat);
     out << "\\frac{" << firstE << "}{" << secondE << "}";
   }
   return true;
@@ -3332,14 +3332,14 @@ bool Expression::ToStringPower(
       Expression newFunE;
       newFunE.MakeXOX(*this->owner, this->owner->opThePower(), firstE[0], (*this)[2]);
       newFunE.CheckConsistency();
-      out << "{" << newFunE.ToString(theFormat) << "}{}";
+      out << "{" << newFunE.toString(theFormat) << "}{}";
       if (
         firstE[1].NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost() ||
         firstE[1].StartsWith(this->owner->opTimes())
       ) {
-        out << "\\left(" << firstE[1].ToString(theFormat) << "\\right)";
+        out << "\\left(" << firstE[1].toString(theFormat) << "\\right)";
       } else {
-        out << firstE[1].ToString(theFormat);
+        out << firstE[1].toString(theFormat);
       }
     }
   }
@@ -3351,10 +3351,10 @@ bool Expression::ToStringPower(
       }
     }
     if (isSqrt) {
-      out << "\\sqrt{" << (*this)[1].ToString(theFormat) << "}";
+      out << "\\sqrt{" << (*this)[1].toString(theFormat) << "}";
     } else {
-      std::string secondEstr = (*this)[2].ToString(theFormat);
-      std::string firstEstr = (*this)[1].ToString(theFormat);
+      std::string secondEstr = (*this)[2].toString(theFormat);
+      std::string firstEstr = (*this)[1].toString(theFormat);
       if ((*this)[1].NeedsParenthesisForBaseOfExponent()) {
         bool useBigParenthesis = true;
         if ((*this)[1].StartsWith(this->owner->opDivide())) {
@@ -3386,7 +3386,7 @@ bool Expression::ToStringGeneral(
   if (this->size() < 2) {
     return false;
   }
-  out << (*this)[0].ToString(theFormat);
+  out << (*this)[0].toString(theFormat);
   bool needParenthesis = true;
   if (this->size() == 2) {
     if ((*this)[0].IsAtomWhoseExponentsAreInterpretedAsFunction()) {
@@ -3401,7 +3401,7 @@ bool Expression::ToStringGeneral(
     out << "\\left(";
   }
   for (int i = 1; i < this->children.size; i ++) {
-    out << (*this)[i].ToString(theFormat);
+    out << (*this)[i].toString(theFormat);
     if (i != this->children.size - 1) {
       out << ", ";
     }
@@ -3451,7 +3451,7 @@ bool Expression::ToStringEndStatement(
       if (!this->owner->flagHideLHS) {
         if (i < (*startingExpression).size()) {
           theFormat->flagDontCollalpseProductsByUnits = true;
-          currentInput = HtmlRoutines::GetMathSpanPure((*startingExpression)[i].ToString(theFormat));
+          currentInput = HtmlRoutines::GetMathSpanPure((*startingExpression)[i].toString(theFormat));
         } else {
           currentInput = "No matching starting expression - possible use of the Melt keyword.";
         }
@@ -3476,10 +3476,10 @@ bool Expression::ToStringEndStatement(
         ) && isFinal
       ) {
         theFormat->flagDontCollalpseProductsByUnits = false;
-        currentOutput = currentE.ToString(theFormat);
+        currentOutput = currentE.toString(theFormat);
       } else {
         theFormat->flagDontCollalpseProductsByUnits = false;
-        currentOutput = HtmlRoutines::GetMathSpanPure(currentE.ToString(theFormat), 1700);
+        currentOutput = HtmlRoutines::GetMathSpanPure(currentE.toString(theFormat), 1700);
       }
       currentOutput += currentE.ToStringAllSlidersInExpression();
       if (outputJS != nullptr) {
@@ -3497,7 +3497,7 @@ bool Expression::ToStringEndStatement(
           outWithDelimiter << "\\(";
         }
       }
-      outWithDelimiter << currentE.ToString(theFormat);
+      outWithDelimiter << currentE.toString(theFormat);
       if (createSingleTable && addLatexDelimiter) {
         outWithDelimiter << "\\)";
       }
@@ -3538,9 +3538,9 @@ bool Expression::ToStringPlus(const Expression& input, std::stringstream& out, F
   const Expression& right = input[2];
   std::string leftString;
   if (left.NeedsParenthesisForAddition()) {
-    leftString = "\\left(" + left.ToString(theFormat) + "\\right)";
+    leftString = "\\left(" + left.toString(theFormat) + "\\right)";
   } else {
-    leftString = left.ToString(theFormat);
+    leftString = left.toString(theFormat);
   }
   out << leftString;
   bool allowNewLine = false;
@@ -3551,9 +3551,9 @@ bool Expression::ToStringPlus(const Expression& input, std::stringstream& out, F
   if (allowNewLine && !useFrac && leftString.size() > static_cast<unsigned>(FormatExpressions::ExpressionLineBreak)) {
     out << "\\\\\n";
   }
-  std::string rightString = right.ToString(theFormat);
+  std::string rightString = right.toString(theFormat);
   if (right.NeedsParenthesisForAddition()) {
-    rightString = "\\left(" + right.ToString(theFormat) + "\\right)";
+    rightString = "\\left(" + right.toString(theFormat) + "\\right)";
   }
   if (rightString.size() > 0) {
     if (rightString[0] != '-') {
@@ -3576,9 +3576,9 @@ bool Expression::ToStringDirectSum(const Expression& input, std::stringstream& o
   const Expression& right = input[2];
   std::string leftString;
   if (left.NeedsParenthesisForAddition()) {
-    leftString = "\\left(" + left.ToString(theFormat) + "\\right)";
+    leftString = "\\left(" + left.toString(theFormat) + "\\right)";
   } else {
-    leftString = left.ToString(theFormat);
+    leftString = left.toString(theFormat);
   }
   out << leftString;
   bool allowNewLine = false;
@@ -3590,7 +3590,7 @@ bool Expression::ToStringDirectSum(const Expression& input, std::stringstream& o
     out << "\\\\\n";
   }
   std::string rightString = right.NeedsParenthesisForAddition() ?
-  ("\\left(" + right.ToString(theFormat) + "\\right)") : right.ToString(theFormat);
+  ("\\left(" + right.toString(theFormat) + "\\right)") : right.toString(theFormat);
   if (rightString.size() > 0) {
     if (rightString[0] != '-') {
       out << "\\oplus ";
@@ -3616,7 +3616,7 @@ bool Expression::ToStringSequence(
     allowNewLine = theFormat->flagExpressionNewLineAllowed;
   }
   for (int i = 1; i < input.size(); i ++) {
-    std::string currentChildString = input[i].ToString(theFormat);
+    std::string currentChildString = input[i].toString(theFormat);
     out << currentChildString;
     charCounter += currentChildString.size();
     if (i != input.children.size - 1) {
@@ -3660,7 +3660,7 @@ bool Expression::ToStringMatrix(const Expression& input, std::stringstream& out,
   }
   for (int i = 1; i < input.size(); i ++) {
     for (int j = 1; j < input[i].size(); j ++) {
-      out << input[i][j].ToString(theFormat);
+      out << input[i][j].toString(theFormat);
       if (j != input[i].size() - 1) {
         out << " & ";
       }
@@ -3686,8 +3686,8 @@ bool Expression::ToStringDefine(
   if (!input.StartsWith(input.owner->opDefine(), 3)) {
     return false;
   }
-  std::string firstE  = input[1].ToString(theFormat);
-  std::string secondE = input[2].ToString(theFormat);
+  std::string firstE  = input[1].toString(theFormat);
+  std::string secondE = input[2].toString(theFormat);
   if (
     input[1].IsListStartingWithAtom(input.owner->opDefine()) ||
     input[1].IsListStartingWithAtom(input.owner->opGreaterThan()) ||
@@ -3717,7 +3717,7 @@ bool Expression::ToStringLnAbsoluteInsteadOfLogarithm(
   ) {
     return false;
   }
-  std::string theArg = input[1].ToString(theFormat);
+  std::string theArg = input[1].toString(theFormat);
   if (!StringRoutines::StringBeginsWith(theArg, "\\left|")) {
     out << "\\ln \\left|" << theArg << "\\right|";
   } else {
@@ -3740,7 +3740,7 @@ bool Expression::ToStringDifferential2(
     needsParen = false;
   }
   bool rightNeedsParen = (!input[1].IsAtom()) && (!input[1].IsBuiltInTypE());
-  std::string theCoeff = input[2].ToString(theFormat);
+  std::string theCoeff = input[2].toString(theFormat);
   if (theCoeff == "1") {
     needsParen = false;
     theCoeff = "";
@@ -3756,7 +3756,7 @@ bool Expression::ToStringDifferential2(
   if (rightNeedsParen) {
     out << "\\left(";
   }
-  out << input[1].ToString(theFormat);
+  out << input[1].toString(theFormat);
   if (rightNeedsParen) {
     out << "\\right)";
   }
@@ -3771,13 +3771,13 @@ bool Expression::ToStringDifferentiate(
   }
   out << "\\frac{\\text{d}} ";
   if (input[2].NeedsParenthesisForMultiplication()) {
-    out << "\\left(" << input[2].ToString(theFormat)
+    out << "\\left(" << input[2].toString(theFormat)
     << "\\right)";
   } else {
-    out << input[2].ToString(theFormat);
+    out << input[2].toString(theFormat);
   }
   out << "}{{\\text{d}} "
-  << input[1].ToString(theFormat) << "}";
+  << input[1].toString(theFormat) << "}";
   return true;
 }
 
@@ -3792,7 +3792,7 @@ bool Expression::ToStringDifferential3(
   if (needsParen) {
     out << "\\left(";
   }
-  out << input[1].ToString(theFormat);
+  out << input[1].toString(theFormat);
   if (needsParen) {
     out << "\\right)";
   }
@@ -3804,9 +3804,9 @@ bool Expression::ToStringFactorial(const Expression& input, std::stringstream& o
     return false;
   }
   if (input[1].NeedsParenthesisForBaseOfExponent()) {
-    out << "\\left(" << input[1].ToString(theFormat) << "\\right) !";
+    out << "\\left(" << input[1].toString(theFormat) << "\\right) !";
   } else {
-    out << input[1].ToString(theFormat) << "!";
+    out << input[1].toString(theFormat) << "!";
   }
   return true;
 }
@@ -3817,7 +3817,7 @@ bool Expression::ToStringSqrt2(
   if (!input.StartsWith(input.owner->opSqrt(), 2)) {
     return false;
   }
-  out << "\\sqrt{" << input[1].ToString(theFormat) << "}";
+  out << "\\sqrt{" << input[1].toString(theFormat) << "}";
   return true;
 }
 
@@ -3833,10 +3833,10 @@ bool Expression::ToStringSqrt3(
     hasPowerTwo = (thePower == 2);
   }
   if (hasPowerTwo) {
-    out << "\\sqrt{" << input[2].ToString(theFormat) << "}";
+    out << "\\sqrt{" << input[2].toString(theFormat) << "}";
   } else {
-    out << "\\sqrt[" << input[1].ToString(theFormat)
-    << "]{" << input[2].ToString(theFormat) << "}";
+    out << "\\sqrt[" << input[1].toString(theFormat)
+    << "]{" << input[2].toString(theFormat) << "}";
   }
   return true;
 }
@@ -3847,7 +3847,7 @@ bool Expression::ToStringGreaterThan(
   if (!input.IsListStartingWithAtom(input.owner->opGreaterThan())) {
     return false;
   }
-  out << input[1].ToString(theFormat) << "&gt;" << input[2].ToString(theFormat);
+  out << input[1].toString(theFormat) << "&gt;" << input[2].toString(theFormat);
   return true;
 }
 
@@ -3857,7 +3857,7 @@ bool Expression::ToStringLessThanOrEqualTo(
   if (!input.IsListStartingWithAtom(input.owner->opLessThanOrEqualTo())) {
     return false;
   }
-  out << input[1].ToString(theFormat) << "\\leq " << input[2].ToString(theFormat);
+  out << input[1].toString(theFormat) << "\\leq " << input[2].toString(theFormat);
   return true;
 }
 
@@ -3867,7 +3867,7 @@ bool Expression::ToStringLessThan(
   if (!input.IsListStartingWithAtom(input.owner->opLessThan())) {
     return false;
   }
-  out << input[1].ToString(theFormat) << "&lt;" << input[2].ToString(theFormat);
+  out << input[1].toString(theFormat) << "&lt;" << input[2].toString(theFormat);
   return true;
 }
 
@@ -3877,7 +3877,7 @@ bool Expression::ToStringLimitProcess(
   if (!input.IsListStartingWithAtom(input.owner->opLimitProcess())) {
     return false;
   }
-  out << input[1].ToString(theFormat) << " \\to " << input[2].ToString(theFormat);
+  out << input[1].toString(theFormat) << " \\to " << input[2].toString(theFormat);
   return true;
 }
 
@@ -3887,7 +3887,7 @@ bool Expression::ToStringGreaterThanOrEqualTo(
   if (!input.IsListStartingWithAtom(input.owner->opGreaterThanOrEqualTo())) {
     return false;
   }
-  out << input[1].ToString(theFormat) << "\\geq " << input[2].ToString(theFormat);
+  out << input[1].toString(theFormat) << "\\geq " << input[2].toString(theFormat);
   return true;
 }
 
@@ -3901,7 +3901,7 @@ bool Expression::ToStringError(
   input.owner->NumErrors ++;
   out << "\\text{Error number "
   << input.owner->NumErrors
-  << ": " << input[1].ToString(theFormat) << "}"
+  << ": " << input[1].toString(theFormat) << "}"
   ;
   return true;
 }
@@ -3915,14 +3915,14 @@ bool Expression::ToStringSumOrIntegral(
   ) {
     return false;
   }
-  std::string opString = input[0].ToString(theFormat);
+  std::string opString = input[0].toString(theFormat);
   out << opString << " ";
   int firstIndex = 2;
   if (input.size() >= 2) {
     if (input[1].StartsWith(input.owner->opLimitBoundary(), 3)) {
       out
-      << "_{" << input[1][1].ToString(theFormat) << "}"
-      << "^{" << input[1][2].ToString(theFormat) << "}";
+      << "_{" << input[1][1].toString(theFormat) << "}"
+      << "^{" << input[1][2].toString(theFormat) << "}";
     } else if (input[1].IsOperationGiven(input.owner->opIndefiniteIndicator())) {
       firstIndex = 2;
     } else {
@@ -3931,12 +3931,12 @@ bool Expression::ToStringSumOrIntegral(
   }
   if (input.size() <= firstIndex + 1) {
     if (input.size() == firstIndex + 1) {
-      out << input[firstIndex].ToString(theFormat);
+      out << input[firstIndex].toString(theFormat);
     }
   } else {
     out << "(";
     for (int i = firstIndex; i < input.size(); i ++) {
-      out << input[i].ToString(theFormat);
+      out << input[i].toString(theFormat);
       if (i != input.size() - 1) {
         out << ", ";
       }
@@ -3954,16 +3954,16 @@ bool Expression::ToStringLimit(
   }
   out << "\\lim_{";
   if (!input[1].IsSequenceNElementS()) {
-    out << input[1].ToString(theFormat);
+    out << input[1].toString(theFormat);
   } else {
     for (int i = 1; i < input[1].size(); i ++) {
-      out << input[1][i].ToString(theFormat);
+      out << input[1][i].toString(theFormat);
       if (i != input[1].size() - 1) {
         out << ", ";
       }
     }
   }
-  out << "}" << input[2].ToString(theFormat);
+  out << "}" << input[2].toString(theFormat);
   return true;
 }
 
@@ -3974,10 +3974,10 @@ bool Expression::ToStringUnion(
     return false;
   }
   if (input[1].StartsWith(input.owner->opIntersection())) {
-    out << "\\left(" << input[1].ToString(theFormat) <<  "\\right)"
-    << "\\cup " << input[2].ToString(theFormat);
+    out << "\\left(" << input[1].toString(theFormat) <<  "\\right)"
+    << "\\cup " << input[2].toString(theFormat);
   } else {
-    out << input[1].ToString(theFormat) << "\\cup " << input[2].ToString(theFormat);
+    out << input[1].toString(theFormat) << "\\cup " << input[2].toString(theFormat);
   }
   return true;
 }
@@ -3988,7 +3988,7 @@ bool Expression::ToStringUnionNoRepetition(
   if (!input.IsListStartingWithAtom(input.owner->opUnionNoRepetition())) {
     return false;
   }
-  out << input[1].ToString(theFormat) << "\\sqcup " << input[2].ToString(theFormat);
+  out << input[1].toString(theFormat) << "\\sqcup " << input[2].toString(theFormat);
   return true;
 }
 
@@ -3999,10 +3999,10 @@ bool Expression::ToStringIntersection(
     return false;
   }
   if (input[1].StartsWith(input.owner->opUnion())) {
-    out << "\\left(" << input[1].ToString(theFormat) << "\\right)"
-    << "\\cap " << input[2].ToString(theFormat);
+    out << "\\left(" << input[1].toString(theFormat) << "\\right)"
+    << "\\cap " << input[2].toString(theFormat);
   } else {
-    out << input[1].ToString(theFormat) << "\\cap " << input[2].ToString(theFormat);
+    out << input[1].toString(theFormat) << "\\cap " << input[2].toString(theFormat);
   }
   return true;
 }
@@ -4030,7 +4030,7 @@ std::string Expression::ToStringWithStartingExpression(
     if (theFormat != nullptr) {
       theFormat->flagDontCollalpseProductsByUnits = true;
     }
-    input = HtmlRoutines::GetMathSpanPure(startingExpression->ToString(theFormat), 1700);
+    input = HtmlRoutines::GetMathSpanPure(startingExpression->toString(theFormat), 1700);
     if (theFormat != nullptr) {
       theFormat->flagDontCollalpseProductsByUnits = false;
     }
@@ -4068,11 +4068,11 @@ bool Expression::ToStringMinus3(
     << "instead there are " << input.children.size - 1
     << ". " << global.fatal;
   }
-  out << input[1].ToString(theFormat) << "-";
+  out << input[1].toString(theFormat) << "-";
   if (input[2].StartsWith(input.owner->opPlus()) || input[2].StartsWith(input.owner->opMinus())) {
-    out << "\\left(" << input[2].ToString(theFormat) << "\\right)";
+    out << "\\left(" << input[2].toString(theFormat) << "\\right)";
   } else {
-    out << input[2].ToString(theFormat);
+    out << input[2].toString(theFormat);
   }
   return true;
 }
@@ -4087,9 +4087,9 @@ bool Expression::ToStringMinus2(
     input[1].StartsWith(input.owner->opPlus()) ||
     input[1].StartsWith(input.owner->opMinus())
   ) {
-    out << "-\\left(" << input[1].ToString(theFormat) << "\\right)";
+    out << "-\\left(" << input[1].toString(theFormat) << "\\right)";
   } else {
-    out << "-" << input[1].ToString(theFormat);
+    out << "-" << input[1].toString(theFormat);
   }
   return true;
 }
@@ -4124,8 +4124,8 @@ bool Expression::ToStringIntervalOpen(
   if (!input.owner->flagUseBracketsForIntervals) {
     out << "IntervalOpen{}";
   }
-  out << "\\left(" << input[1].ToString(theFormat) << ", "
-  << input[2].ToString(theFormat) << "\\right)";
+  out << "\\left(" << input[1].toString(theFormat) << ", "
+  << input[2].toString(theFormat) << "\\right)";
   return true;
 }
 
@@ -4136,13 +4136,13 @@ bool Expression::ToStringIntervalLeftClosed(
     if (input[1].IsSequenceNElementS(2)) {
       out << "\\left[" << input[1][1] << ", " << input[1][2] << "\\right)";
     } else {
-      out << input[0].ToString(theFormat) << "{}" << input[1].ToString(theFormat);
+      out << input[0].toString(theFormat) << "{}" << input[1].toString(theFormat);
     }
     return true;
   }
   if (input.StartsWith(input.owner->opIntervalLeftClosed(), 3)) {
-    out << "\\left[" << input[1].ToString(theFormat) << ", "
-    << input[2].ToString(theFormat) << "\\right)";
+    out << "\\left[" << input[1].toString(theFormat) << ", "
+    << input[2].toString(theFormat) << "\\right)";
     return true;
   }
   return false;
@@ -4154,15 +4154,15 @@ bool Expression::ToStringIntervalRightClosed(
   if (
     input.StartsWith(input.owner->opIntervalRightClosed(), 3)
   ) {
-    out << "\\left(" << input[1].ToString(theFormat) << ", "
-    << input[2].ToString(theFormat) << "\\right]";
+    out << "\\left(" << input[1].toString(theFormat) << ", "
+    << input[2].toString(theFormat) << "\\right]";
     return true;
   }
   if (input.StartsWith(input.owner->opIntervalRightClosed(), 2)) {
     if (input[1].IsSequenceNElementS(2)) {
       out << "\\left(" << input[1][1] << ", " << input[1][2] << "\\right]";
     } else {
-      out << input[0].ToString(theFormat) << "{}" << input[1].ToString(theFormat);
+      out << input[0].toString(theFormat) << "{}" << input[1].toString(theFormat);
     }
     return true;
   }
@@ -4176,13 +4176,13 @@ bool Expression::ToStringIntervalClosed(
     if (input[1].IsSequenceNElementS(2)) {
       out << "\\left[" << input[1][1] << ", " << input[1][2] << "\\right]";
     } else {
-      out << input[0].ToString(theFormat) << "{}" << input[1].ToString(theFormat);
+      out << input[0].toString(theFormat) << "{}" << input[1].toString(theFormat);
     }
     return true;
   }
   if (input.StartsWith(input.owner->opIntervalClosed(), 3)) {
-    out << "\\left[" << input[1].ToString(theFormat) << ", "
-    << input[2].ToString(theFormat) << "\\right]";
+    out << "\\left[" << input[1].toString(theFormat) << ", "
+    << input[2].toString(theFormat) << "\\right]";
     return true;
   }
   return false;
@@ -4210,8 +4210,8 @@ bool Expression::ToStringLogBase(
   if (!input.StartsWith(input.owner->opLogBase(), 3)) {
     return false;
   }
-  out << "\\log_{" << input[1].ToString(theFormat) << "}"
-  << "\\left(" << input[2].ToString(theFormat) << "\\right)";
+  out << "\\log_{" << input[1].toString(theFormat) << "}"
+  << "\\left(" << input[2].toString(theFormat) << "\\right)";
   return true;
 }
 
@@ -4221,7 +4221,7 @@ bool Expression::ToStringIsDenotedBy(
   if (!input.IsListStartingWithAtom(input.owner->opIsDenotedBy())) {
     return false;
   }
-  out << input[1].ToString(theFormat) << "=:" << input[2].ToString(theFormat);
+  out << input[1].toString(theFormat) << "=:" << input[2].toString(theFormat);
   return true;
 }
 
@@ -4231,9 +4231,9 @@ bool Expression::ToStringDefineConditional(
   if (!input.StartsWith(input.owner->opDefineConditional(), 4)) {
     return false;
   }
-  out << input[1].ToString(theFormat) << " :if \\left("
-  << input[2].ToString(theFormat) << "\\right)="
-  << input[3].ToString(theFormat);
+  out << input[1].toString(theFormat) << " :if \\left("
+  << input[2].toString(theFormat) << "\\right)="
+  << input[3].toString(theFormat);
   return true;
 }
 
@@ -4253,8 +4253,8 @@ bool Expression::ToStringIn(
   if (!input.StartsWith(input.owner->opIn(), 3)) {
     return false;
   }
-  out << input[1].ToString(theFormat) << "\\in "
-  << input[2].ToString(theFormat);
+  out << input[1].toString(theFormat) << "\\in "
+  << input[2].toString(theFormat);
   return true;
 }
 
@@ -4276,8 +4276,8 @@ bool Expression::ToStringBinom(
   if (!input.StartsWith(input.owner->opBinom(), 3)) {
     return false;
   }
-  out << "\\binom{" << input[1].ToString(theFormat) << "}{ "
-  << input[2].ToString(theFormat) << "}";
+  out << "\\binom{" << input[1].toString(theFormat) << "}{ "
+  << input[2].toString(theFormat) << "}";
   return true;
 }
 
@@ -4287,8 +4287,8 @@ bool Expression::ToStringUnderscore(
   if (!input.StartsWith(input.owner->opUnderscore())) {
     return false;
   }
-  out << "{" << input[1].ToString(theFormat) << "}_{"
-  << input[2].ToString(theFormat) << "}";
+  out << "{" << input[1].toString(theFormat) << "}_{"
+  << input[2].toString(theFormat) << "}";
   return true;
 }
 
@@ -4298,8 +4298,8 @@ bool Expression::ToStringSetMinus(
   if (!input.StartsWith(input.owner->opSetMinus(), 3)) {
     return false;
   }
-  out << input[1].ToString(theFormat) << "\\setminus "
-  << input[2].ToString(theFormat);
+  out << input[1].toString(theFormat) << "\\setminus "
+  << input[2].toString(theFormat);
   return true;
 }
 
@@ -4309,9 +4309,9 @@ bool Expression::ToStringLimitBoundary(
   if (!input.StartsWith(input.owner->opLimitBoundary(), 3)) {
     return false;
   }
-  out << "\\limits_{" << input[1].ToString(theFormat)
+  out << "\\limits_{" << input[1].toString(theFormat)
   << "}^{"
-  << input[2].ToString(theFormat)
+  << input[2].toString(theFormat)
   << "}";
   return true;
 }
@@ -4332,7 +4332,7 @@ bool Expression::ToStringAbsoluteValue(
   if (!input.StartsWith(input.owner->opAbsoluteValue(), 2)) {
     return false;
   }
-  out << "\\left|" << input[1].ToString(theFormat) << "\\right|";
+  out << "\\left|" << input[1].toString(theFormat) << "\\right|";
   return true;
 }
 
@@ -4342,7 +4342,7 @@ bool Expression::ToStringBind(
   if (!input.StartsWith(input.owner->opBind(), 2)) {
     return false;
   }
-  out << "{{" << input[1].ToString(theFormat) << "}}";
+  out << "{{" << input[1].toString(theFormat) << "}}";
   return true;
 }
 
@@ -4352,7 +4352,7 @@ bool Expression::ToStringMod(
   if (!input.IsListStartingWithAtom(input.owner->opMod())) {
     return false;
   }
-  out << input[1].ToString(theFormat) << " mod " << input[2].ToString(theFormat);
+  out << input[1].toString(theFormat) << " mod " << input[2].toString(theFormat);
   return true;
 }
 
@@ -4362,7 +4362,7 @@ bool Expression::ToStringLieBracket(
   if (!input.IsListStartingWithAtom(input.owner->opLieBracket())) {
     return false;
   }
-  out << "[" << input[1].ToString(theFormat) << "," << input[2].ToString(theFormat) << "]";
+  out << "[" << input[1].toString(theFormat) << "," << input[2].toString(theFormat) << "]";
   return true;
 }
 
@@ -4372,7 +4372,7 @@ bool Expression::ToStringEqualEqual(
   if (!input.IsListStartingWithAtom(input.owner->opEqualEqual())) {
     return false;
   }
-  out << input[1].ToString(theFormat) << "==" << input[2].ToString(theFormat);
+  out << input[1].toString(theFormat) << "==" << input[2].toString(theFormat);
   return true;
 }
 
@@ -4382,17 +4382,17 @@ bool Expression::ToStringEqualEqualEqual(
   if (!input.IsListStartingWithAtom(input.owner->opEqualEqualEqual())) {
     return false;
   }
-  out << input[1].ToString(theFormat) << "===" << input[2].ToString(theFormat);
+  out << input[1].toString(theFormat) << "===" << input[2].toString(theFormat);
   return true;
 }
 
-std::string Expression::ToString(
+std::string Expression::toString(
   FormatExpressions* theFormat,
   Expression* startingExpression,
   bool unfoldCommandEnclosures,
   JSData* outputJS
 ) const {
-  MacroRegisterFunctionWithName("Expression::ToString");
+  MacroRegisterFunctionWithName("Expression::toString");
   MemorySaving<FormatExpressions> tempFormat;
   if (theFormat == nullptr) {
     theFormat = &tempFormat.GetElement();
@@ -4413,7 +4413,7 @@ std::string Expression::ToString(
       this->owner->functionFlattenCommandEnclosuresOneLayer(*this->owner, *this, newMe) &&
       this->owner->functionFlattenCommandEnclosuresOneLayer(*this->owner, *startingExpression, newStart)
     ) {
-      return newMe.ToString(theFormat, &newStart, false, outputJS);
+      return newMe.toString(theFormat, &newStart, false, outputJS);
     }
   }
   int notationIndex = owner->theObjectContainer.ExpressionWithNotation.GetIndex(*this);
@@ -4490,7 +4490,7 @@ std::string Expression::ToString(
   } else if (this->ToStringEndStatement(out, startingExpression, outputJS, theFormat)) {
   } else if (this->ToStringError(*this, out, theFormat)) {
   } else if (this->size() == 1) {
-    out << (*this)[0].ToString(theFormat);
+    out << (*this)[0].toString(theFormat);
   } else if (this->ToStringGeneral(out, theFormat)) {
   } else { //<-not sure if this case is possible
     out << "(ProgrammingError:NotDocumented)";
@@ -4519,7 +4519,7 @@ std::string Expression::Lispify() const {
     return tempS;
   }
   if (this->children.size == 0) {
-    return this->ToString();
+    return this->toString();
   }
   std::stringstream out;
   out << "(";
@@ -5010,21 +5010,21 @@ bool Expression::operator==(const std::string& other) const {
 std::string Expression::ToUTF8String(FormatExpressions* theFormat) const {
   MacroRegisterFunctionWithName("Expression::ToUTF8String");
   if (this->owner == nullptr) {
-    return this->ToString(theFormat);
+    return this->toString(theFormat);
   }
   std::stringstream out;
   Rational theRat;
   if (this->IsOfType<Rational>(&theRat)) {
     FormatExpressions tempFormat;
     tempFormat.flagUseFrac = false;
-    return theRat.ToString(&tempFormat);
+    return theRat.toString(&tempFormat);
   } else if (this->IsOperationGiven(this->owner->opPi())) {
     return "\\u03C0";
   } else if (this->StartsWith(this->owner->opPlus(), 3)) {
     return (*this)[1].ToUTF8String(theFormat) + "+" + (*this)[2].ToUTF8String(theFormat);
   } else if (this->StartsWith(this->owner->opTimes(), 3)) {
     std::string secondUTF8String = (*this)[2].ToUTF8String(theFormat);
-    std::string secondString = (*this)[2].ToString(theFormat);
+    std::string secondString = (*this)[2].toString(theFormat);
     if ((*this)[1].IsOperationGiven(this->owner->opSqrt())) {
       out << "sqrt(" << secondUTF8String << ")";
     } else {
@@ -5077,5 +5077,5 @@ std::string Expression::ToUTF8String(FormatExpressions* theFormat) const {
     out << ")";
     return out.str();
   }
-  return this->ToString(theFormat);
+  return this->toString(theFormat);
 }

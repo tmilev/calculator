@@ -23,7 +23,7 @@ public:
     std::stringstream* commentsGeneral
   );
   bool LoadFromModulusAndExponentStrings(std::stringstream* commentsOnFailure);
-  std::string ToString();
+  std::string toString();
 };
 
 // Reference:
@@ -61,7 +61,7 @@ public:
   );
   void SignBytesPadPKCS1(List<unsigned char>& input, int hash, List<unsigned char>& output);
   void HashAndPadPKCS1(List<unsigned char>& input, int hash, List<unsigned char>& output);
-  std::string ToString() const;
+  std::string toString() const;
 };
 
 class TBSCertificateInfo {
@@ -76,7 +76,7 @@ public:
     ASNObject commonName;
     ASNObject emailAddress;
     void ComputeASN(ASNElement& output);
-    std::string ToString();
+    std::string toString();
     bool LoadFields(
       const MapList<std::string, ASNObject, MathRoutines::HashString>& fields,
       std::stringstream* commentsOnFailure
@@ -122,7 +122,7 @@ public:
     ASNElement& output,
     std::stringstream* commentsOnFailure
   );
-  std::string ToString();
+  std::string toString();
   void ComputeASN(ASNElement& output);
   void ComputeASNVersionWrapper(ASNElement& output);
   void ComputeASNValidityWrapper(ASNElement& output);
@@ -158,7 +158,7 @@ public:
     std::stringstream* commentsOnFailure,
     std::stringstream* commentsGeneral
   );
-  std::string ToString();
+  std::string toString();
   std::string ToHex();
   std::string ToStringTestEncode();
   void ComputeASN(ASNElement& output);
@@ -411,7 +411,7 @@ public:
   MapList<std::string, std::string, MathRoutines::HashString> payloadKeys;
 
   bool AssignString(const std::string& other, std::stringstream* commentsOnFailure);
-  std::string ToString();
+  std::string toString();
   bool VerifyRSA256(
     const LargeIntegerUnsigned& theModulus,
     const LargeIntegerUnsigned& theExponent,

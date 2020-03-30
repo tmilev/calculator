@@ -281,13 +281,13 @@ bool LargeIntegerUnsigned::IsPossiblyPrimeMillerRabinOnce(
         if (theExponentOfThePowerTwoFactorOfNminusOne > 1) {
           theTwoPowerStream << "^{" << theExponentOfThePowerTwoFactorOfNminusOne << "}";
         }
-        *comments << this->ToString() << " is not prime because \\(" << theBase << "^{"
+        *comments << this->toString() << " is not prime because \\(" << theBase << "^{"
         << theTwoPowerContraStream.str()
-        << theOddFactorOfNminusOne.ToString() << "} = " << thePower.theValue.ToString() << " ~ mod ~"
-        << this->ToString() << " \\)"
-        << "<br>If " << this->ToString() << " were prime, we'd have to have that \\("
+        << theOddFactorOfNminusOne.toString() << "} = " << thePower.theValue.toString() << " ~ mod ~"
+        << this->toString() << " \\)"
+        << "<br>If " << this->toString() << " were prime, we'd have to have that \\("
         << theBase << "^{" << theTwoPowerStream.str() << "\\cdot" << theOddFactorOfNminusOne
-        << "} = " << theBase << "^{" << this->ToString() << " - 1} = 1 ~mod ~" << this->ToString() << "\\)"
+        << "} = " << theBase << "^{" << this->toString() << " - 1} = 1 ~mod ~" << this->toString() << "\\)"
         << "<br> which can be reasoned to contradict the first equality.";
       }
       return false;
@@ -503,7 +503,7 @@ void LargeIntegerUnsigned::operator/=(const LargeIntegerUnsigned& other) {
   copyMe.DivPositive(other, *this, temp1);
 }
 
-void LargeIntegerUnsigned::ToString(std::string& output) const {
+void LargeIntegerUnsigned::toString(std::string& output) const {
   if (this->IsEqualToZero()) {
     output = "0";
     return;
@@ -593,18 +593,18 @@ void LargeIntegerUnsigned::DivPositive(
     }
     lastRemainderSize = remainderOutput.theDigits.size;
     if (numRunsNoDigitImprovement > upperlimitNoImprovementRounds) {
-      global.fatal << "Bad division: while dividing " << this->ToString() << " by "
-      << divisor.ToString()
+      global.fatal << "Bad division: while dividing " << this->toString() << " by "
+      << divisor.toString()
       << " got too many algorithm steps without remainder size decrease. "
       << "." << global.fatal;
     }
   }
 }
 
-std::string LargeIntegerUnsigned::ToString(FormatExpressions* theFormat) const {
+std::string LargeIntegerUnsigned::toString(FormatExpressions* theFormat) const {
   (void) theFormat; //to avoid unused paramater warning
   std::string tempS;
-  this->ToString(tempS);
+  this->toString(tempS);
   return tempS;
 }
 
@@ -836,7 +836,7 @@ LargeIntegerUnsigned LargeIntegerUnsigned::operator-(const LargeIntegerUnsigned&
 
 std::string LargeIntegerUnsigned::ToStringAbbreviate(FormatExpressions *theFormat) const {
   (void) theFormat;
-  std::string result = this->ToString(theFormat);
+  std::string result = this->toString(theFormat);
   if (result.size() > 100) {
     std::stringstream out;
     out << result.substr(0, 40)
@@ -1205,7 +1205,7 @@ bool LargeInteger::IsEven() const {
 
 void LargeInteger::WriteToFile(std::fstream& output) {
   std::string tempS;
-  this->ToString(tempS);
+  this->toString(tempS);
   output << tempS;
 }
 
@@ -1313,7 +1313,7 @@ double LargeInteger::GetDoubleValue() const {
   return this->sign * this->value.GetDoubleValue();
 }
 
-void LargeInteger::ToString(std::string& output) const {
+void LargeInteger::toString(std::string& output) const {
   std::stringstream out;
   if (this->IsEqualToZero()) {
     output.assign("0");
@@ -1323,7 +1323,7 @@ void LargeInteger::ToString(std::string& output) const {
     out << "-";
   }
   std::string tempS;
-  this->value.ToString(tempS);
+  this->value.toString(tempS);
   out << tempS;
   output = out.str();
 }
@@ -1412,7 +1412,7 @@ void LargeInteger::MakeZero() {
 
 void LargeInteger::operator=(const Rational& other) {
   if (!other.IsInteger(this)) {
-    global.fatal << "This is a programming error: converting implicitly rational number " << other.ToString()
+    global.fatal << "This is a programming error: converting implicitly rational number " << other.toString()
     << " to integer is not possible as the Rational number is not integral. " << global.fatal;
   }
 }
@@ -1489,7 +1489,7 @@ int Rational::floorIfSmall() {
 }
 
 void Rational::WriteToFile(std::fstream& output) {
-  output << this->ToString();
+  output << this->toString();
 }
 
 void Rational::RaiseToPower(int x) {
@@ -1966,8 +1966,8 @@ void Rational::Simplify() {
     LargeIntegerUnsigned::gcd(this->Extended->den, this->Extended->num.value, tempI);
     /*if (Rational::flagAnErrorHasOccurredTimeToPanic) {
       std::string tempS1, tempS2, tempS3;
-      tempI.ToString(tempS1);
-      this->ToString(tempS2);
+      tempI.toString(tempS1);
+      this->toString(tempS2);
     }*/
     LargeIntegerUnsigned tempI2;
     this->Extended->den.DivPositive(tempI, this->Extended->den, tempI2);
@@ -2004,7 +2004,7 @@ bool Rational::IsGreaterThanOrEqualTo(const Rational& right) const {
   return tempRat.IsPositiveOrZero();
 }
 
-std::string Rational::ToString(FormatExpressions* theFormat) const {
+std::string Rational::toString(FormatExpressions* theFormat) const {
   if (theFormat != nullptr) {
     if (theFormat->flagUseFrac) {
       return this->ToStringFrac();
@@ -2018,9 +2018,9 @@ std::string Rational::ToString(FormatExpressions* theFormat) const {
     }
   } else {
     std::string tempS;
-    this->Extended->num.ToString(tempS);
+    this->Extended->num.toString(tempS);
     out << tempS;
-    this->Extended->den.ToString(tempS);
+    this->Extended->den.toString(tempS);
     if (tempS != "1") {
       out << "/" << tempS;
     }
@@ -2049,9 +2049,9 @@ std::string Rational::ToStringForFileOperations(FormatExpressions* notUsed) cons
     numAbsVal.sign = 1;
   }
   if (this->Extended->den.IsEqualToOne()) {
-    out << numAbsVal.ToString();
+    out << numAbsVal.toString();
   } else {
-    out << numAbsVal.ToString() << "_div_" << this->Extended->den.ToString();
+    out << numAbsVal.toString() << "_div_" << this->Extended->den.toString();
   }
   return out.str();
 }
@@ -2076,9 +2076,9 @@ std::string Rational::ToStringFrac() const {
     numAbsVal.sign = 1;
   }
   if (this->Extended->den.IsEqualToOne()) {
-    out << numAbsVal.ToString();
+    out << numAbsVal.toString();
   } else {
-    out << "\\frac{" << numAbsVal.ToString() << "}{" << this->Extended->den.ToString() << "}";
+    out << "\\frac{" << numAbsVal.toString() << "}{" << this->Extended->den.toString() << "}";
   }
   return out.str();
 }
@@ -2087,7 +2087,7 @@ void Rational::operator=(const AlgebraicNumber& other) {
   bool isGood = other.IsRational(this);
   if (!isGood) {
     global.fatal << "This is a programming error: attempting to assign the "
-    << "non-rational algebraic number " << other.ToString() << "to a rational number. " << global.fatal;
+    << "non-rational algebraic number " << other.toString() << "to a rational number. " << global.fatal;
   }
 }
 

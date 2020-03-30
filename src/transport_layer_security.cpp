@@ -1426,7 +1426,7 @@ std::string Serialization::JSLabels::offset = "offset";
 std::string Serialization::JSLabels::label = "label";
 std::string Serialization::JSLabels::serialization = "serialization";
 
-std::string Serialization::Marker::ToString() const {
+std::string Serialization::Marker::toString() const {
   std::stringstream out;
   out << "[" << this->offset << ", " << this->length << ", '" << this->label << "']";
   return out.str();
@@ -1612,7 +1612,7 @@ std::string SSLRecord::ToStringType() const {
   return out.str();
 }
 
-std::string SSLRecord::ToString() const {
+std::string SSLRecord::toString() const {
   JSData result;
   result["length"] = this->length;
   result["incomingBytes"] = Crypto::ConvertListUnsignedCharsToHexFormat(this->incomingBytes, 50, false);
@@ -1625,7 +1625,7 @@ std::string SSLRecord::ToString() const {
     LargeIntegerUnsigned(static_cast<unsigned>(this->version)), 0, hexVersion
   );
   result["version"] = hexVersion;
-  return result.ToString(&JSData::PrintOptions::HexEncodeNonASCII());
+  return result.toString(&JSData::PrintOptions::HexEncodeNonASCII());
 }
 
 bool SSLRecord::Decode(std::stringstream *commentsOnFailure) {
@@ -1722,7 +1722,7 @@ bool SSLContent::CheckInitialization() const {
   return true;
 }
 
-std::string CipherSuiteSpecification::ToString() const {
+std::string CipherSuiteSpecification::toString() const {
   std::stringstream out;
   std::string hexVersion;
   Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst(

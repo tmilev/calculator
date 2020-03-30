@@ -411,7 +411,7 @@ std::string GroebnerBasisComputation<coefficient>::ToStringLetterOrder(bool addD
     out << "$";
   }
   for (int i = 0; i < numVars; i ++) {
-    out << theVars[i].ToString(&tempFormat);
+    out << theVars[i].toString(&tempFormat);
     if (i != numVars - 1) {
       out << ", ";
     }
@@ -425,7 +425,7 @@ std::string GroebnerBasisComputation<coefficient>::ToStringLetterOrder(bool addD
       out << "$";
     }
     for (int i = 0; i < numVars; i ++) {
-      out << theVars[i].ToString(&tempFormat);
+      out << theVars[i].toString(&tempFormat);
       if (i != numVars - 1) {
         out << " > ";
       }
@@ -480,10 +480,10 @@ void GroebnerBasisComputation<coefficient>::OneDivisonSubStepWithBasis(
     out << ".\n";
     out << "<br>Number of intermediate remainders: "
     << this->numberOfIntermediateRemainders << "\n<br>Highest remainder monomial: "
-    << leadingMonomial.ToString()
+    << leadingMonomial.toString()
     << ".\n<br>"
-    << "Dividing working remainder monomial " << leadingMonomialBasis.ToString()
-    << " by the leading monomial " << leadingMonomialBasis.ToString()
+    << "Dividing working remainder monomial " << leadingMonomialBasis.toString()
+    << " by the leading monomial " << leadingMonomialBasis.toString()
     << " of basis element: " << index + 1
     << " out of " << this->theBasiS.size << "\n<br>"
     << remainder.size() << " monomials in current remainder.";
@@ -722,7 +722,7 @@ void GroebnerBasisComputation<coefficient>::initializeForDivision(
       << "division with respect to at least one zero polynomial. "
       << "If this is a bad user input, it should be handled at an earlier level. "
       << "Here is the current basis by which we need to divide. "
-      << this->theBasiS.ToString() << global.fatal;
+      << this->theBasiS.toString() << global.fatal;
     }
   }
   this->NumberGBComputations = 0;
@@ -816,10 +816,10 @@ bool GroebnerBasisComputation<coefficient>::HasImpliedSubstitutions(
       theCF *= - 1;
       outputSub[j] /= theCF;
 //      coefficient theConst;
-//      global.Comments << "<hr>Output sub is: x_{" << j+ 1 << "}=" << outputSub[j].ToString();
+//      global.Comments << "<hr>Output sub is: x_{" << j+ 1 << "}=" << outputSub[j].toString();
 //      if (outputSub[j].IsConstant(&theConst))
 //        this->SetSerreLikeSolutionIndex(j, theConst);
-      //global.Comments << "<br>Current solution candidate is: " << this->systemSolution.GetElement().ToString();
+      //global.Comments << "<br>Current solution candidate is: " << this->systemSolution.GetElement().toString();
       return true;
     }
     int oneVarIndex;
@@ -831,9 +831,9 @@ bool GroebnerBasisComputation<coefficient>::HasImpliedSubstitutions(
           //check our work:
           tempP.Substitution(outputSub);
           if (!tempP.IsEqualToZero()) {
-            global.fatal << "This is a programming error: I was solving the polynomial equation " << inputSystem[i].ToString()
-            << ", which resulted in the substitution " << outputSub.ToString()
-            << ". However, after carrying out the substitution in the polynomial, I got " << tempP.ToString() << ". "
+            global.fatal << "This is a programming error: I was solving the polynomial equation " << inputSystem[i].toString()
+            << ", which resulted in the substitution " << outputSub.toString()
+            << ". However, after carrying out the substitution in the polynomial, I got " << tempP.toString() << ". "
             << global.fatal;
           }
           //
@@ -923,7 +923,7 @@ void GroebnerBasisComputation<coefficient>::BackSubstituteIntoSinglePoly(
   if (!thePoly.IsConstant(&tempCF)) {
     global.fatal << "\n<br>\nThis is a programming error: after carrying all implied substitutions "
     << "the polynomial is not a constant, rather equals "
-    << thePoly.ToString() << ". " << global.fatal;
+    << thePoly.toString() << ". " << global.fatal;
   }
   theFinalSub[theIndex] = tempCF;
   this->SetSerreLikeSolutionIndex(theIndex, tempCF);
@@ -1079,8 +1079,8 @@ std::string GroebnerBasisComputation<coefficient>::ToStringImpliedSubs() {
           continue;
         }
       }
-      out << "<br>" << (MonomialP(j)).ToString(&this->theFormat) << "="
-      << this->theImpliedSubS[i][j].ToString(&this->theFormat) << "; ";
+      out << "<br>" << (MonomialP(j)).toString(&this->theFormat) << "="
+      << this->theImpliedSubS[i][j].toString(&this->theFormat) << "; ";
     }
   }
   return out.str();
@@ -1153,7 +1153,7 @@ void GroebnerBasisComputation<coefficient>::TrySettingValueToVariable(
     std::stringstream out;
     MonomialP theMon(theVarIndex);
     out << this->ToStringImpliedSubs() << "<br>Attempting an (a priori random) substitution:<br>"
-    << theMon.ToString(&this->theFormat) << "=" << aValueToTryOnPreferredVariable << ";";
+    << theMon.toString(&this->theFormat) << "=" << aValueToTryOnPreferredVariable << ";";
     theReport1.Report(out.str());
   }
   theHeuristicAttempt.SetSerreLikeSolutionIndex(theVarIndex, aValueToTryOnPreferredVariable);
@@ -1202,8 +1202,8 @@ void GroebnerBasisComputation<coefficient>::SolveWhenSystemHasSingleMonomial(
       if (this->flagDoProgressReport) {
         std::stringstream out;
         MonomialP tempMon(i);
-        out << "The system has the single monomial: " << theMon.ToString(&this->theFormat)
-        << "<br>Trying case:<br>" << tempMon.ToString(&this->theFormat) << "= 0;";
+        out << "The system has the single monomial: " << theMon.toString(&this->theFormat)
+        << "<br>Trying case:<br>" << tempMon.toString(&this->theFormat) << "= 0;";
         theReport1.Report(out.str());
       }
       PolynomialSubstitution<coefficient> theSub;
@@ -1279,7 +1279,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively(List
     if (this->flagDoProgressReport) {
       MonomialP theMon(this->GetPreferredSerreSystemSubIndex(inputSystem));
       reportStreamHeuristics << "<br>The substitution  "
-      << theMon.ToString(&this->theFormat) << "=" << randomValueItry << ";"
+      << theMon.toString(&this->theFormat) << "=" << randomValueItry << ";"
       << " did not produce a solution over the base field ";
       if (this->ComputationUsedInRecursiveCalls.GetElement().flagSystemProvenToHaveNoSolution) {
         reportStreamHeuristics << " as it resulted in a system which has no solution. ";
@@ -1295,7 +1295,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively(List
 template <class coefficient>
 std::string GroebnerBasisComputation<coefficient>::toStringDivision(Polynomial<coefficient>& toBeDivided) {
   std::stringstream out;
-  out << "Dividing: " << toBeDivided.ToString() << "<br>by:<br>" << this->theBasiS.ToStringCommaDelimited();
+  out << "Dividing: " << toBeDivided.toString() << "<br>by:<br>" << this->theBasiS.ToStringCommaDelimited();
   return  out.str();
 }
 
@@ -1310,7 +1310,7 @@ std::string GroebnerBasisComputation<coefficient>::ToStringCalculatorInputFromSy
   }
   out << "UpperLimit{}(" << this->MaxNumSerreSystemComputationsPreferred << ", ";
   for (int j = 0; j < inputSystem.size; j ++) {
-    out << inputSystem[j].ToString(&this->theFormat);
+    out << inputSystem[j].toString(&this->theFormat);
     if (j != inputSystem.size - 1) {
       out << ", ";
     }
@@ -1381,8 +1381,8 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystem(List<Polynomial
         << "but substituting the solution back to the original "
         << "system does not yield a zero system of equations. More precisely, "
         << "the reported solution was " << this->ToStringSerreLikeSolution()
-        << " but substitution in equation " << inputSystem[i].ToString()
-        << " yields " << workingSystem[i].ToString() << ". Calculator input: <br>"
+        << " but substitution in equation " << inputSystem[i].toString()
+        << " yields " << workingSystem[i].toString() << ". Calculator input: <br>"
         << this->ToStringCalculatorInputFromSystem(inputSystem) << " <br>"
         << global.fatal;
       }
@@ -1398,7 +1398,7 @@ std::string GroebnerBasisComputation<coefficient>::ToStringSerreLikeSolution() {
   for (int i = 0; i < this->systemSolution.GetElement().size; i ++) {
     if (this->solutionsFound.GetElement().selected[i]) {
       theMon.MakeMonomiaL(i, 1, 1);
-      out << " " << theMon.ToString(&this->theFormat)
+      out << " " << theMon.toString(&this->theFormat)
       << " = " << this->systemSolution.GetElement()[i] << ";";
     }
   }

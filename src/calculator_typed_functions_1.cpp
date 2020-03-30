@@ -187,7 +187,7 @@ bool CalculatorFunctionsBinaryOps::innerDivideEltZmodPorRatByEltZmodPorRat(
       if (!(theElt1 /= theElt2)) {
         std::stringstream out;
         out << "Got division by zero while attempting to divide "
-        << theElt1.ToString() << " by " << theElt2.ToString();
+        << theElt1.toString() << " by " << theElt2.toString();
         return output.MakeError(out.str(), theCommands);
       }
       return output.AssignValue(theElt1, theCommands);
@@ -599,8 +599,8 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA(
     inputContextsMerged[1].GetValue<ElementWeylAlgebra<Rational> >().HasNonSmallPositiveIntegerDerivation() ||
     inputContextsMerged[2].GetValue<ElementWeylAlgebra<Rational> >().HasNonSmallPositiveIntegerDerivation()
   ) {
-    return theCommands << "<hr> Failed to multiply " << inputContextsMerged[1].ToString()
-    << " by " << inputContextsMerged[2].ToString() << ": "
+    return theCommands << "<hr> Failed to multiply " << inputContextsMerged[1].toString()
+    << " by " << inputContextsMerged[2].toString() << ": "
     << "one of the two differential operators has differential operator exponent that is not a small integer. ";
   }
   ElementWeylAlgebra<Rational> result = inputContextsMerged[1].GetValue<ElementWeylAlgebra<Rational> >();
@@ -721,7 +721,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyLRObyLRO(Calculator& theCommands
   for (int i = 0; i < result.generatorsIndices.size; i ++) {
     if (result.Powers[i] > 100000 || result.Powers[i] < 0) {
       return output.MakeError(
-        "The result of this operation is " + result.ToString() + " which is outside of the allowed range. ",
+        "The result of this operation is " + result.toString() + " which is outside of the allowed range. ",
         theCommands
       );
     }
@@ -879,7 +879,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatNumbersByLargeIntegerIfPossible(
     if (!baseRat.IsSquare() || baseRat.NumCols == 0) {
       std::stringstream errorStream;
       errorStream << "Exponentiating non-square matrices or matrices with zero rows is not allowed. "
-      << "Your matrix, " << baseRat.ToString() << " is not square. ";
+      << "Your matrix, " << baseRat.toString() << " is not square. ";
       return output.MakeError(errorStream.str(), theCommands);
     }
     Rational theDet = baseRat.GetDeterminant();
@@ -905,7 +905,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatNumbersByLargeIntegerIfPossible(
     if (!baseAlg.IsSquare() || baseAlg.NumCols == 0) {
       std::stringstream errorStream;
       errorStream << "Exponentiating non-square matrices or matrices with zero rows is not allowed. "
-      << "Your matrix, " << baseAlg.ToString() << " is not square. ";
+      << "Your matrix, " << baseAlg.toString() << " is not square. ";
       return output.MakeError(errorStream.str(), theCommands);
     }
     AlgebraicNumber theDet = baseAlg.GetDeterminant();
@@ -951,7 +951,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatNumbersBySmallInteger(
     if (!baseRat.IsSquare() || baseRat.NumCols == 0) {
       std::stringstream errorStream;
       errorStream << "Exponentiating non-square matrices or matrices with zero rows is not allowed. "
-      << "Your matrix, " << baseRat.ToString() << " is not square. ";
+      << "Your matrix, " << baseRat.toString() << " is not square. ";
       return output.MakeError(errorStream.str(), theCommands);
     }
     if (thePower <= 0) {
@@ -1186,8 +1186,8 @@ bool CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger(
       isMon = false;
     }
     if (!isMon) {
-      return theCommands << "<hr>Failed to raise " << base.ToString() << " to power "
-      << powerRat.ToString() << ": the exponent is not a "
+      return theCommands << "<hr>Failed to raise " << base.toString() << " to power "
+      << powerRat.toString() << ": the exponent is not a "
       << " small integer and the base is not a coefficient one monomial. ";
     }
     ElementWeylAlgebra<Rational> finalOutput;
@@ -1196,8 +1196,8 @@ bool CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger(
     theMon.differentialPart.RaiseToPower(powerRat);
     for (int i = 0; i < theMon.polynomialPart.GetMinNumVars(); i ++) {
       if (theMon.polynomialPart[i] != 0 && theMon.differentialPart[i] != 0) {
-        return theCommands << "<hr>Failed to raise " << base.ToString() << " to power "
-        << powerRat.ToString() << ": the exponent is not a "
+        return theCommands << "<hr>Failed to raise " << base.toString() << " to power "
+        << powerRat.toString() << ": the exponent is not a "
         << "small integer, the base is a monomial, however the monomial "
         << "contains derivative and polynomial with respect to the same variable. ";
       }
@@ -1337,7 +1337,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatExpressionsBySmallInteger(
   expectedNumTerms.RaiseToPower(thePower);
   if (expectedNumTerms > 10000) {
     return theCommands << "The expected number terms in the result of the exponentiation "
-    << theMat.ToString() << " to the power of " << thePower << " is approximately ("
+    << theMat.toString() << " to the power of " << thePower << " is approximately ("
     << theMat.NumCols << ")^" << thePower << "=" << expectedNumTerms
     << ". I have been instructed to proceed only if the expected number of terms is fewer than 10000. ";
   }
@@ -1363,7 +1363,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
   }
   if (base == 0) {
     if (exponentStarting < 0) {
-      return output.MakeError("Division by zero while evaluating " + input.ToString(), theCommands);
+      return output.MakeError("Division by zero while evaluating " + input.toString(), theCommands);
     }
     return output.AssignValue(0, theCommands);
   }
@@ -1613,7 +1613,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyCharSSLieAlgByCharSSLieAlg(
   }
   std::string successString = (leftC *= rightC);
   if (successString != "") {
-    return theCommands << "I tried to multiply character " << leftC.ToString() << " by " << rightC.ToString()
+    return theCommands << "I tried to multiply character " << leftC.toString() << " by " << rightC.toString()
     << " but I failed with the following message: " << successString;
   }
   return output.AssignValue(leftC, theCommands);
@@ -1962,7 +1962,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF(
   }
   if (!leftE.MergeContexts(leftE, rightE)) {
     return theCommands << "Failed to convert "
-    << leftE.ToString() << " and " << rightE.ToString()
+    << leftE.toString() << " and " << rightE.toString()
     << " to common context. ";
   }
   Matrix<RationalFunction> leftMat, rightMat;
@@ -1972,7 +1972,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF(
   if (!leftE.IsMatrixOfType<RationalFunction>()) {
     Expression leftErfForm;
     if (!leftE.ConvertInternally<RationalFunction>(leftErfForm)) {
-      return theCommands << "Failed to convert " << leftE.ToString() << " to rational function. ";
+      return theCommands << "Failed to convert " << leftE.toString() << " to rational function. ";
     }
     RationalFunction theScalar = leftErfForm.GetValue<RationalFunction>();
     rightMat *= theScalar;

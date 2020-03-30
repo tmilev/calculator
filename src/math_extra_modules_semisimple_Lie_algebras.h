@@ -172,17 +172,17 @@ public:
     const coefficient& theRingUnit,
     const coefficient& theRingZero
   );
-  std::string ToString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* theFormat = nullptr) const;
   std::string ElementToStringHWV(FormatExpressions* theFormat = nullptr) const {
     if (this->highestWeightVectorNotation != "") {
       return this->highestWeightVectorNotation;
     }
     std::stringstream out;
-    out << "v_{" << this->theHWFundamentalCoordsBaseField.ToString(theFormat)
-    << ", " << this->parabolicSelectionNonSelectedAreElementsLevi.ToString() << "}";
+    out << "v_{" << this->theHWFundamentalCoordsBaseField.toString(theFormat)
+    << ", " << this->parabolicSelectionNonSelectedAreElementsLevi.toString() << "}";
     return out.str();
-    //    return "hwv{}("+ this->GetOwner().ToStringLieAlgebraName(false) + "," + this->theHWFundamentalCoordsBaseField.ToString(theFormat) + ","
-    //    + Vector<Rational> (this->parabolicSelectionNonSelectedAreElementsLevi).ToString(theFormat) + ")";
+    //    return "hwv{}("+ this->GetOwner().ToStringLieAlgebraName(false) + "," + this->theHWFundamentalCoordsBaseField.toString(theFormat) + ","
+    //    + Vector<Rational> (this->parabolicSelectionNonSelectedAreElementsLevi).toString(theFormat) + ")";
   }
   void SplitOverLevi(
     std::string* Report,

@@ -34,7 +34,7 @@ public:
     return right > left;
   }
   friend std::ostream& operator<<(std::ostream& output, const LargeIntegerUnsigned& theLIU) {
-    output << theLIU.ToString();
+    output << theLIU.toString();
     return output;
   }
   class Test {
@@ -47,9 +47,9 @@ public:
   void PadWithZeroesToAtLeastNDigits(int desiredMinNumDigits);
   void AddLargeIntUnsignedShiftedTimesDigit(const LargeIntegerUnsigned& other, int digitShift, int theConst);
   void SubtractSmallerPositive(const LargeIntegerUnsigned& x);
-  void ToString(std::string& output) const;
+  void toString(std::string& output) const;
   void ElementToStringLargeElementDecimal(std::string& output) const;
-  std::string ToString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* theFormat = nullptr) const;
   std::string ToStringAbbreviate(FormatExpressions* theFormat = nullptr) const;
   void DivPositive(const LargeIntegerUnsigned& divisor, LargeIntegerUnsigned& quotientOutput, LargeIntegerUnsigned& remainderOutput) const;
   bool isDivisibleBy(const LargeIntegerUnsigned& divisor);
@@ -169,7 +169,7 @@ class LargeInteger {
     return left * tempI;
   }
   friend std::ostream& operator << (std::ostream& output, const LargeInteger& theLI) {
-    output << theLI.ToString();
+    output << theLI.toString();
     return output;
   }
 public:
@@ -180,11 +180,11 @@ public:
     this->value.MultiplyBy(x.value);
   }
   void MultiplyByInt(int x);
-  void ToString(std::string& output) const;
-  std::string ToString(FormatExpressions* theFormat = nullptr) const {
+  void toString(std::string& output) const;
+  std::string toString(FormatExpressions* theFormat = nullptr) const {
     (void) theFormat;//avoid unused parameter warning, portable
     std::string tempS;
-    this->ToString(tempS);
+    this->toString(tempS);
     return tempS;
   }
   bool IsIntegerFittingInInt(int* whichInt);
@@ -204,7 +204,8 @@ public:
     return !this->IsPositive();
   }
   bool TryToFindWhetherIsPower(bool& outputIsPower, LargeInteger& outputBase, int& outputPower) const;
-  bool NeedsParenthesisForMultiplication() const {
+  bool NeedsParenthesisForMultiplication(FormatExpressions* unused) const {
+    (void) unused;
     return false;
   }
   bool operator==(const LargeInteger& x) const;
@@ -392,7 +393,7 @@ private:
 //  friend int operator=(int& left, const Rational& right)
 //  { if (!right.IsSmallInteger(&left))
 //      global.fatal << "This is a programming error. I am asked to assign a rational number to a small integer, but the rational "
-//      << " number is either too large or is not an integer. Namely, the rational number equals " << this->ToString()
+//      << " number is either too large or is not an integer. Namely, the rational number equals " << this->toString()
 //      << ". The programmer is supposed to write something of the sort int = rational only on condition that "
 //      << " the programmer is sure that the rational contains is a small int. "
 //      << global.fatal;
@@ -406,7 +407,7 @@ private:
   friend Rational operator-(const Rational& argument);
   friend Rational operator/(int left, const Rational& right);
   friend std::ostream& operator << (std::ostream& output, const Rational& theRat) {
-    output << theRat.ToString();
+    output << theRat.toString();
     return output;
   }
   friend Rational operator*(int left, const Rational& right) {
@@ -468,7 +469,7 @@ public:
     int result = 0;
     if (!this->IsSmallInteger(&result))
       global.fatal << "This is a programming error. I am asked to assign a rational number to a small integer, but the rational "
-      << " number is either too large or is not an integer. Namely, the rational number equals " << this->ToString()
+      << " number is either too large or is not an integer. Namely, the rational number equals " << this->toString()
       << ". The programmer is supposed to write something of the sort int = rational only on condition that "
       << " the programmer is sure that the rational contains is a small int. "
       << global.fatal;
@@ -477,7 +478,8 @@ public:
   bool NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost() const {
     return this->IsNegative();
   }
-  bool NeedsParenthesisForMultiplication() const {
+  bool NeedsParenthesisForMultiplication(FormatExpressions* unused) const {
+    (void) unused;
     return false;
     //return this->IsNegative();
   }
@@ -652,7 +654,7 @@ public:
     this->Extended->den.MultiplyBy(x);
     this->Simplify();
   }
-  std::string ToString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* theFormat = nullptr) const;
   std::string ToStringFrac() const;
   std::string ToStringForFileOperations(FormatExpressions* notUsed = nullptr) const;
   bool IsEqualTo(const Rational& r) const;

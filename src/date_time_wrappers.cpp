@@ -132,7 +132,7 @@ std::string TimeWrapper::ToStringLocal() const {
   return this->ToStringYMDHMS(&this->timeLocal);
 }
 
-std::string TimeWrapper::ToString() const {
+std::string TimeWrapper::toString() const {
   std::stringstream out;
   out
   <<        this->timeGM.tm_year

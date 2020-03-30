@@ -4,8 +4,8 @@
 #include "math_general_polynomial_computations_basic_implementation.h"
 #include "math_extra_drawing_variables.h"
 
-std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat) {
-  MacroRegisterFunctionWithName("SemisimpleLieAlgebra::ToString");
+std::string SemisimpleLieAlgebra::toString(FormatExpressions* theFormat) {
+  MacroRegisterFunctionWithName("SemisimpleLieAlgebra::toString");
   std::stringstream out;
   std::string tempS;
   Vector<Rational> tempRoot, tempRoot2;
@@ -19,7 +19,7 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat) {
     hLetter = theFormat->chevalleyHgeneratorLetter;
     gLetter = theFormat->chevalleyGgeneratorLetter;
   }
-  out << "Type " << this->theWeyl.theDynkinType.ToString() << ".";
+  out << "Type " << this->theWeyl.theDynkinType.toString() << ".";
   out << "The letter " << HtmlRoutines::GetMathSpanPure(hLetter)
   << " stands for elements of the Cartan subalgebra, <br>"
   << " the letter " << HtmlRoutines::GetMathSpanPure(gLetter)
@@ -42,7 +42,7 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat) {
   theTableLateXStream << "\\mathrm{roots~simple~coords}&\\varepsilon-\\mathrm{root~notation}&" << "[\\bullet, \\bullet]\n";
   for (int i = 0; i < numRoots + theDimension; i ++) {
     tempElt1.MakeGenerator(i, *this);
-    tempS = tempElt1.ToString(theFormat);
+    tempS = tempElt1.toString(theFormat);
     theHtmlStream << "<td>" << tempS << "</td>";
     theTableLateXStream << " & ";
     theTableLateXStream << tempS;
@@ -52,19 +52,19 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat) {
   //int lineCounter = 0;
   for (int i = 0; i < theDimension + numRoots; i ++) {
     tempRoot = this->GetWeightOfGenerator(i);
-    theTableLateXStream << tempRoot.ToString() << "&";
-    theHtmlStream << "<tr><td>" << tempRoot.ToString() << "</td>";
+    theTableLateXStream << tempRoot.toString() << "&";
+    theHtmlStream << "<tr><td>" << tempRoot.toString() << "</td>";
     this->theWeyl.GetEpsilonCoords(tempRoot, tempRoot2);
     theTableLateXStream << tempRoot2.ToStringLetterFormat("\\varepsilon") << "&";
     theHtmlStream << "<td>" << tempRoot2.ToStringLetterFormat("e") << "</td>";
     tempElt1.MakeGenerator(i, *this);
-    tempS = tempElt1.ToString(theFormat);
+    tempS = tempElt1.toString(theFormat);
     theTableLateXStream << tempS;
     theHtmlStream << "<td>" << tempS << "</td>";
     for (int j = 0; j < numRoots + theDimension; j ++) {
       tempElt2.MakeGenerator(j, *this);
       this->LieBracket(tempElt1, tempElt2, tempElt3);
-      tempS = tempElt3.ToString(theFormat);
+      tempS = tempElt3.toString(theFormat);
       theTableLateXStream << "& ";
       theTableLateXStream << tempS;
       theHtmlStream << "<td>" << tempS << "</td>";
@@ -170,7 +170,7 @@ std::string SemisimpleLieAlgebra::ToHTMLCalculator(
   latexFormat.flagUseLatex = true;
   latexFormat.flagUseHTML = false;
   out << "<h1>Lie algebra " << this->ToStringLieAlgebraNameFullHTML() << "</h1>";
-  out << "<br>Weyl group size: " << theWeyl.theGroup.GetSize().ToString() << ".<br>";
+  out << "<br>Weyl group size: " << theWeyl.theGroup.GetSize().toString() << ".<br>";
   if (!Verbose) {
     out << "<br>To get extra details: ";
     std::stringstream tempStream;
@@ -186,7 +186,7 @@ std::string SemisimpleLieAlgebra::ToHTMLCalculator(
     << theDV.GetHtmlDiv(theWeyl.GetDim());
     out << theWeyl.ToStringRootsAndRootReflections();
     out << " The resulting Lie bracket pairing table follows. <hr> "
-    << this->ToString(&global.theDefaultFormat.GetElement());
+    << this->toString(&global.theDefaultFormat.GetElement());
     if (flagWriteLatexPlots) {
       out << "Ready for LaTeX consumption version of the first three columns: ";
       out << "<br>%Add to preamble: <br>\\usepackage{longtable} <br>%Add to body: <br>"
@@ -197,7 +197,7 @@ std::string SemisimpleLieAlgebra::ToHTMLCalculator(
         tempElt1.MakeGenerator(i, *this);
         tempRoot = this->GetWeightOfGenerator(i);
         theWeyl.GetEpsilonCoords(tempRoot, tempRoot2);
-        out << "$" << tempElt1.ToString(&theFormat) << "$&$" << tempRoot.ToString() << "$";
+        out << "$" << tempElt1.toString(&theFormat) << "$&$" << tempRoot.toString() << "$";
         out << "&$" << tempRoot2.ToStringLetterFormat("\\varepsilon") << "$";
         out << "\\\\\n";
       }
@@ -206,14 +206,14 @@ std::string SemisimpleLieAlgebra::ToHTMLCalculator(
   }
   out << "We define the symmetric Cartan matrix <br>by requesting that the entry in the i-th row and j-th column<br> "
   << " be the scalar product of the i^th and j^th roots. The symmetric Cartan matrix is:<br>"
-  << HtmlRoutines::GetMathSpanPure(theWeyl.CartanSymmetric.ToString(&latexFormat));
+  << HtmlRoutines::GetMathSpanPure(theWeyl.CartanSymmetric.toString(&latexFormat));
   out << "<br>Let the (i, j)^{th} entry of the symmetric Cartan matrix be a_{ij}. "
   << "<br> Then we define the co-symmetric Cartan matrix as "
   << " the matrix whose (i, j)^{th} entry equals 4*a_{ij}/(a_{ii}*a_{jj}). "
   << "In other words, the co-symmetric Cartan matrix is the "
   << "symmetric Cartan matrix of the dual root system. The co-symmetric Cartan matrix equals:<br>"
   << HtmlRoutines::GetMathSpanPure(theWeyl.CoCartanSymmetric.ToStringLatex());
-  out << "<br>The determinant of the symmetric Cartan matrix is: " << theWeyl.CartanSymmetric.GetDeterminant().ToString();
+  out << "<br>The determinant of the symmetric Cartan matrix is: " << theWeyl.CartanSymmetric.GetDeterminant().toString();
   /*  Rational theRatio;
     for (int j = 0; j < theWeyl.GetDim(); j ++) {
       theRatio = 0;
@@ -228,14 +228,14 @@ std::string SemisimpleLieAlgebra::ToHTMLCalculator(
     }*/
   //Lattice tempLattice;
   //theWeyl.GetIntegralLatticeInSimpleCoordinates(tempLattice);
-  //out << "<br>The integral lattice in simple coordinates is (generated by): " << tempLattice.ToString(true, false);
+  //out << "<br>The integral lattice in simple coordinates is (generated by): " << tempLattice.toString(true, false);
   //Vectors<Rational> integralRoots, integralRootsEpsForm;
   Vectors<Rational> fundamentalWeights, fundamentalWeightsEpsForm;
   //theWeyl.GetEpsilonCoords(integralRoots, integralRootsEpsForm);
   //out << "<br>The integral lattice generators in epsilon format: " << integralRootsEpsForm.ElementToStringEpsilonForm();
   theWeyl.GetFundamentalWeightsInSimpleCoordinates(fundamentalWeights);
   Vectors<Rational> simpleBasis, simplebasisEpsCoords;
-  out << "<hr> Half sum of positive roots: " << theWeyl.rho.ToString();
+  out << "<hr> Half sum of positive roots: " << theWeyl.rho.toString();
   Vector<Rational> tempRoot;
   theWeyl.GetEpsilonCoords(theWeyl.rho, tempRoot);
   out << "= " << HtmlRoutines::GetMathSpanPure(tempRoot.ToStringLetterFormat("\\varepsilon"));
@@ -245,7 +245,7 @@ std::string SemisimpleLieAlgebra::ToHTMLCalculator(
   theWeyl.GetEpsilonCoords(fundamentalWeights, fundamentalWeightsEpsForm);
   out << "<table>";
   for (int i = 0; i < fundamentalWeights.size; i ++) {
-    out << "<tr><td style =\"white-space: nowrap\">" << fundamentalWeights[i].ToString()
+    out << "<tr><td style =\"white-space: nowrap\">" << fundamentalWeights[i].toString()
     << "</td><td> =</td><td style =\"white-space: nowrap\"> "
     << HtmlRoutines::GetMathSpanPure(fundamentalWeightsEpsForm[i].ToStringEpsilonFormat())
     << "</td></tr>";
@@ -261,7 +261,7 @@ std::string SemisimpleLieAlgebra::ToHTMLCalculator(
   simpleBasis.MakeEiBasis(theWeyl.GetDim());
   theWeyl.GetEpsilonCoords(simpleBasis, simplebasisEpsCoords);
   for (int i = 0; i < simplebasisEpsCoords.size; i ++) {
-    out << "<tr><td style =\"white-space: nowrap\">" << simpleBasis[i].ToString()
+    out << "<tr><td style =\"white-space: nowrap\">" << simpleBasis[i].toString()
     << " </td><td>=</td> <td style =\"white-space: nowrap\">"
     << HtmlRoutines::GetMathSpanPure(simplebasisEpsCoords[i].ToStringEpsilonFormat())
     << "</td></tr>";
@@ -282,11 +282,11 @@ std::string SemisimpleLieAlgebra::ToHTMLCalculator(
         global.fatal << "This is a (non-critical) programming error: "
         << "the epsilon coordinates of the vectors are incorrect. "
         << "Please fix function DynkinType::GetEpsilonMatrix. "
-        << "The matrix of the epsilon coordinates is " << tempM.ToString()
+        << "The matrix of the epsilon coordinates is " << tempM.toString()
         << ", the Symmetric Cartan matrix is "
-        << theWeyl.CartanSymmetric.ToString() << ", and the "
+        << theWeyl.CartanSymmetric.toString() << ", and the "
         << "transpose of the epsilon matrix times the epsilon matrix: "
-        << tempM2.ToString() << ". " << global.fatal;
+        << tempM2.toString() << ". " << global.fatal;
       }
     }
   }
@@ -322,14 +322,14 @@ bool DynkinType::HasPrecomputedSubalgebras() const {
 std::string DynkinType::ToStringVirtualNameFolder() const {
   std::stringstream out;
   out << "/output/semisimple_lie_algebras/"
-  << FileOperations::CleanUpForFileNameUse(this->ToString()) << "/";
+  << FileOperations::CleanUpForFileNameUse(this->toString()) << "/";
   return out.str();
 }
 
 std::string SemisimpleLieAlgebra::ToStringFileNameRelativePathSlTwoSubalgebras() const {
   std::stringstream out;
   out << "sl2s/sl2s_"
-  << FileOperations::CleanUpForFileNameUse(this->theWeyl.theDynkinType.ToString())
+  << FileOperations::CleanUpForFileNameUse(this->theWeyl.theDynkinType.toString())
   << ".html";
   return out.str();
 }
@@ -337,7 +337,7 @@ std::string SemisimpleLieAlgebra::ToStringFileNameRelativePathSlTwoSubalgebras()
 std::string SemisimpleLieAlgebra::ToStringFileNameNoPathSemisimpleSubalgebras() const {
   std::stringstream theFileName;
   theFileName << "semisimple_subalgebras_"
-  << FileOperations::CleanUpForFileNameUse(this->theWeyl.theDynkinType.ToString())
+  << FileOperations::CleanUpForFileNameUse(this->theWeyl.theDynkinType.toString())
   << ".html";
   return theFileName.str();
 }
@@ -345,7 +345,7 @@ std::string SemisimpleLieAlgebra::ToStringFileNameNoPathSemisimpleSubalgebras() 
 std::string SemisimpleLieAlgebra::ToStringFileNameNoPathRootSubalgebras() const {
   std::stringstream theFileName;
   theFileName << "rootSubalgebras_"
-  << FileOperations::CleanUpForFileNameUse(this->theWeyl.theDynkinType.ToString())
+  << FileOperations::CleanUpForFileNameUse(this->theWeyl.theDynkinType.toString())
   << ".html";
   return theFileName.str();
 }
@@ -367,7 +367,7 @@ std::string SemisimpleLieAlgebra::ToStringVirtualFileNameWithPathStructureConsta
 std::string SemisimpleLieAlgebra::ToStringDisplayFolderName(const std::string& baseFolder) const {
   std::stringstream out;
   out << baseFolder << "output/semisimple_lie_algebras/"
-  << FileOperations::CleanUpForFileNameUse(this->theWeyl.theDynkinType.ToString())
+  << FileOperations::CleanUpForFileNameUse(this->theWeyl.theDynkinType.toString())
   << "/";
   return out.str();
 }
@@ -376,7 +376,7 @@ std::string SemisimpleLieAlgebra::ToStringFileNameNoPathStructureConstants() con
   std::stringstream theFileName;
   theFileName
   << "structure_constants_notation_"
-  << FileOperations::CleanUpForFileNameUse(this->theWeyl.theDynkinType.ToString())
+  << FileOperations::CleanUpForFileNameUse(this->theWeyl.theDynkinType.toString())
   << ".html";
   return theFileName.str();
 }
@@ -726,12 +726,12 @@ bool SemisimpleLieAlgebra::TestForConsistency() {
           global.fatal << "This is a programming error. "
           << "The computed structure constants are wrong: the Jacobi identity fails. "
           << "More precisely, I get that "
-          << "<br>[" << g1.ToString(&theFormat) << ", " << g2.ToString(&theFormat) << "] =" << g12.ToString(&theFormat)
-          << "<br>[" << g2.ToString(&theFormat) << ", " << g3.ToString(&theFormat) << "] =" << g23.ToString(&theFormat)
-          << "<br>[" << g3.ToString(&theFormat) << ", " << g1.ToString(&theFormat) << "] =" << g31.ToString(&theFormat)
-          << "<br>g123= " << g123.ToString(&theFormat)
-          << "<br>g231=" << g231.ToString(&theFormat)
-          << "<br>g312=" << g312.ToString(&theFormat) << "<br>"
+          << "<br>[" << g1.toString(&theFormat) << ", " << g2.toString(&theFormat) << "] =" << g12.toString(&theFormat)
+          << "<br>[" << g2.toString(&theFormat) << ", " << g3.toString(&theFormat) << "] =" << g23.toString(&theFormat)
+          << "<br>[" << g3.toString(&theFormat) << ", " << g1.toString(&theFormat) << "] =" << g31.toString(&theFormat)
+          << "<br>g123= " << g123.toString(&theFormat)
+          << "<br>g231=" << g231.toString(&theFormat)
+          << "<br>g312=" << g312.toString(&theFormat) << "<br>"
           << global.fatal;
           return false;
         }

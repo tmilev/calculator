@@ -1451,7 +1451,7 @@ bool PublicKeyRSA::LoadFromJSON(JSData& input, std::stringstream* commentsOnFail
   MacroRegisterFunctionWithName("Certificate::LoadFromJSON");
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "<hr>Loading certificate from: "
-    << input.ToString(nullptr);
+    << input.toString(nullptr);
   }
   if (input.theType != JSData::token::tokenObject) {
     if (commentsOnFailure != nullptr) {
@@ -1522,22 +1522,22 @@ bool Crypto::LoadOneKnownCertificate(
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "I expected an object with key 'keys' "
       << "consisting of an array of public keys. Instead, I got: "
-      << certificateJSON.ToString(nullptr);
+      << certificateJSON.toString(nullptr);
     }
     return false;
   }
   return true;
 }
 
-std::string PublicKeyRSA::ToString() {
+std::string PublicKeyRSA::toString() {
   std::stringstream out;
   out << "Algorithm: " << this->algorithm << "\n<br>\n";
   out << "Keyid: "     << this->keyid << "\n<br>\n";
   out << "Modulus [string, math]: [" << this->theModulusString
-  << ", " << this->theModulus.ToString() << "]" << "\n<br>\n";
+  << ", " << this->theModulus.toString() << "]" << "\n<br>\n";
   out << "Exponent [string, math]: " << "["
   << this->theExponentString << ", "
-  << this->theExponent.ToString()
+  << this->theExponent.toString()
   << "]\n\n";
   return out.str();
 }
@@ -1580,7 +1580,7 @@ bool Crypto::LoadKnownCertificates(std::stringstream* commentsOnFailure, std::st
   }
   for (int i = 0; i < Crypto::knownCertificates.size; i ++) {
     if (commentsGeneral != nullptr) {
-      *commentsGeneral << "\n<hr>\nLoaded: " << Crypto::knownCertificates[i].ToString();
+      *commentsGeneral << "\n<hr>\nLoaded: " << Crypto::knownCertificates[i].toString();
     }
   }
   return true;
@@ -1592,7 +1592,7 @@ LargeIntegerUnsigned Crypto::RSAencrypt(
   MacroRegisterFunctionWithName("Crypto::RSAencrypt");
   if (theModulus == 0 || theExponent == 0) {
     global.fatal << "The modulus and the exponent are not allowed to be zero while running RSA. "
-    << "The modulus: " << theModulus.ToString() << "; the exponent: " << theExponent.ToString() << global.fatal;
+    << "The modulus: " << theModulus.toString() << "; the exponent: " << theExponent.toString() << global.fatal;
   }
   ElementZmodP theElt, theOne;
   theElt.theModulus = theModulus;
@@ -1603,7 +1603,7 @@ LargeIntegerUnsigned Crypto::RSAencrypt(
   return theElt.theValue;
 }
 
-std::string JSONWebToken::ToString() {
+std::string JSONWebToken::toString() {
   std::stringstream out;
   out << "JWT token.";
   out << "<br>Header: " << this->headerJSON;
@@ -1627,7 +1627,7 @@ bool JSONWebToken::VerifyRSA256(
   if (commentsGeneral != nullptr) {
     LargeIntegerUnsigned theSha;
     Crypto::ConvertListUint32ToLargeIntegerUnsignedLittleEndian(outputSha, theSha);
-    *commentsGeneral << "<br>Sha256 of payload: " << theSha.ToString();
+    *commentsGeneral << "<br>Sha256 of payload: " << theSha.toString();
   }
   LargeIntegerUnsigned theSignatureInt;
   if (!Crypto::ConvertBase64ToLargeUnsignedInt(this->signatureBase64, theSignatureInt, commentsOnFailure)) {
@@ -1681,8 +1681,8 @@ bool JSONWebToken::VerifyRSA256(
     }
     if (commentsGeneral != nullptr) {
       *commentsGeneral
-      << "<br>Sha integer: " << theShaUI.ToString()
-      << "<br>Encrypted signature: " << RSAresult.ToString()
+      << "<br>Sha integer: " << theShaUI.toString()
+      << "<br>Encrypted signature: " << RSAresult.toString()
       << "<br>sha hex: " << theShaHex
       << "<br>RSAresult hex: " << RSAresultHex
       << "<br>trimmed: " << RSAresultTrimmedHex

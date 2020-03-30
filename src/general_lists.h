@@ -37,7 +37,7 @@
 // is at best O(N log(N) ) operations, while
 // computing the hash functions is only O(N) operations.
 
-//used for hashing various things.
+// Used for hashing.
 const int SomeRandomPrimesSize = 25;
 const unsigned int SomeRandomPrimes[SomeRandomPrimesSize] = {
   607,  1013, 2207, 3001, 4057, 5419, 5849, 6221,
@@ -45,20 +45,20 @@ const unsigned int SomeRandomPrimes[SomeRandomPrimesSize] = {
   9539, 10267, 10657, 11489, 12071, 12613, 13933, 14759
 };
 
-//the following class is for buffers, i/o function pointers, multitasking, general purpose.
+// The following class is for buffers, i/o function pointers, multitasking, general purpose.
 class GlobalVariables;
 
-//Simple math routines (min, max, etc.) that I have not been able to find a better placement for
+// Simple math routines (min, max, etc.) that I have not been able to find a better placement for
 class MathRoutines;
 
-//Rationals and integers:
+// Rationals and integers:
 class LargeIntegerUnsigned;
 class LargeInteger;
 class Rational;
 
-//More involved mathematical types
+// More involved mathematical types
 template<class Base>
-class CompleX;
+class Complex;
 class AlgebraicNumber;
 class RationalFunction;
 class SemisimpleLieAlgebra;
@@ -297,22 +297,22 @@ public:
   template<class Element>
   static std::string ElementToStringBrackets(const Element& input) {
     if (!input.NeedsParenthesisForMultiplication()) {
-      return input.ToString();
+      return input.toString();
     }
     std::string result;
     result.append("(");
-    result.append(input.ToString());
+    result.append(input.toString());
     result.append(")");
     return result;
   }
   template<class Element>
   static std::string ElementToStringBrackets(const Element& input, FormatExpressions* theFormat) {
     if (!input.NeedsParenthesisForMultiplication()) {
-      return input.ToString(theFormat);
+      return input.toString(theFormat);
     }
     std::string result;
     result.append("(");
-    result.append(input.ToString(theFormat));
+    result.append(input.toString(theFormat));
     result.append(")");
     return result;
   }
@@ -950,12 +950,12 @@ public:
   void CycleIndices(const List<int>& cycle);
   void PermuteIndices(const List<List<int> >& cycles);
   std::string ToStringConcatenate() const;
-  std::string ToString(FormatExpressions* theFormat) const;
-  std::string ToString() const;
+  std::string toString(FormatExpressions* theFormat) const;
+  std::string toString() const;
   std::string ToStringCommaDelimited(FormatExpressions* theFormat) const;
   std::string ToStringCommaDelimited() const;
-  void ToString(std::string& output, FormatExpressions* theFormat = nullptr) const {
-    output = this->ToString(theFormat);
+  void toString(std::string& output, FormatExpressions* theFormat = nullptr) const {
+    output = this->toString(theFormat);
   }
   int GetIndex(const Object& o) const;
   bool Contains(const Object& o) const {
@@ -1623,11 +1623,11 @@ public:
   HashTemplate() {
     this->initHashesToOne();
   }
-  std::string ToString(FormatExpressions* theFormat) const {
-    return this->List<Object>::ToString(theFormat);
+  std::string toString(FormatExpressions* theFormat) const {
+    return this->List<Object>::toString(theFormat);
   }
-  std::string ToString() const {
-    return this->::List<Object>::ToString();
+  std::string toString() const {
+    return this->::List<Object>::toString();
   }
   void operator=(const HashedList<Object, hashFunction>& From) {
     if (&From == this) {
@@ -1789,7 +1789,7 @@ public:
 };
 
 template<class Base>
-std::iostream& operator<<(std::iostream& output, const CompleX<Base>& input);
+std::iostream& operator<<(std::iostream& output, const Complex<Base>& input);
 
 template <typename Element>
 std::iostream& operator<<(std::iostream& output, const Matrix<Element>& theMat) {
@@ -2124,10 +2124,10 @@ void List<Object>::SetSize(int theSize) {
 }
 
 template <class Object>
-std::string List<Object>::ToString() const {
+std::string List<Object>::toString() const {
   std::stringstream out;
   for (int i = 0; i < this->size; i ++) {
-    out << this->TheObjects[i].ToString() << "\n";
+    out << this->TheObjects[i].toString() << "\n";
   }
   return out.str();
 }
@@ -2154,10 +2154,10 @@ std::string List<Object>::ToStringConcatenate() const {
 }
 
 template <class Object>
-std::string List<Object>::ToString(FormatExpressions* theFormat) const {
+std::string List<Object>::toString(FormatExpressions* theFormat) const {
   std::stringstream out;
   for (int i = 0; i < this->size; i ++) {
-    out << this->TheObjects[i].ToString(theFormat) << "\n";
+    out << this->TheObjects[i].toString(theFormat) << "\n";
   }
   return out.str();
 }
@@ -2166,7 +2166,7 @@ template <class Object>
 std::string List<Object>::ToStringCommaDelimited(FormatExpressions* theFormat) const {
   std::stringstream out;
   for (int i = 0; i < this->size; i ++) {
-    out << this->TheObjects[i].ToString(theFormat);
+    out << this->TheObjects[i].toString(theFormat);
     if (i != this->size - 1) {
       out << ", ";
     }

@@ -129,7 +129,7 @@ public:
   bool CheckInitialization() const;
   CipherSuiteSpecification();
   CipherSuiteSpecification(TransportLayerSecurityServer* owner, int inputType);
-  std::string ToString() const;
+  std::string toString() const;
   static unsigned int HashFunction(const CipherSuiteSpecification& input);
   unsigned int HashFunction() const;
 };
@@ -406,7 +406,7 @@ public:
   bool DecodeBody(std::stringstream* commentsOnFailure);
   std::string ToBytes() const;
   std::string ToHtml(int id);
-  std::string ToString() const;
+  std::string toString() const;
   std::string ToStringType() const;
   JSData ToJSONSerialization();
   JSData ToJSON();

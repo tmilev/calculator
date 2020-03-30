@@ -175,7 +175,7 @@ bool Database::FallBack::FindIndexOneNoLocksMinusOneNotFound(
   if (currentLocationIndex == - 1) {
     if (commentsOnNotFound != nullptr ) {
       *commentsOnNotFound << "Entry "
-      << query.value.ToString(nullptr) << " not found. " ;
+      << query.value.toString(nullptr) << " not found. " ;
     }
     return true;
   }
@@ -297,7 +297,7 @@ void Database::FallBack::IndexOneRecord(
 bool Database::FallBack::StoreDatabase(std::stringstream* commentsOnFailure) {
   return FileOperations::WriteFileVirualWithPermissions(
     Database::FallBack::databaseFilename,
-    this->reader.ToString(nullptr),
+    this->reader.toString(nullptr),
     true,
     commentsOnFailure
   );

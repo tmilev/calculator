@@ -32,12 +32,12 @@ public:
   Vector(const Selection& other) {
     *this = other;
   }
-  std::string ToString(FormatExpressions* theFormat = nullptr) const {
+  std::string toString(FormatExpressions* theFormat = nullptr) const {
     std::stringstream out;
     out.precision(5);
     out << "(";
     for (int i = 0; i < this->size; i ++) {
-      out << (*this)[i].ToString(theFormat);
+      out << (*this)[i].toString(theFormat);
       if (i != this->size - 1) {
         out << ", ";
       }
@@ -59,7 +59,7 @@ public:
     out.precision(5);
     out << "[";
     for (int i = 0; i < this->size; i ++) {
-      out << (*this)[i].ToString(theFormat);
+      out << (*this)[i].toString(theFormat);
       if (i != this->size - 1) {
         out << ", ";
       }
@@ -481,7 +481,7 @@ public:
   bool operator>(const Vector<coefficient>& other) const {
     if (this->size != other.size) {
       global.fatal << "This is a programming error: comparing Vectors with different number of coordinates, namely, "
-      << this->ToString() << " and " << other.ToString() << ". " << global.fatal;
+      << this->toString() << " and " << other.toString() << ". " << global.fatal;
     }
     coefficient c1 = 0, c2 = 0;
     for (int i = 0; i < this->size; i ++) {
@@ -742,7 +742,7 @@ class Vectors: public List<Vector<coefficient> > {
   std::string ElementsToInequalitiesString(
     bool useLatex, bool useHtml, bool LastVarIsConstant, FormatExpressions& theFormat
   ) const;
-  std::string ToString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* theFormat = nullptr) const;
   bool LinearAlgebraForVertexComputation(
     Selection& theSelection, Vector<coefficient>& output, Matrix<coefficient>& buffer, Selection& NonPivotPointsBuffer
   );
@@ -775,7 +775,7 @@ class Vectors: public List<Vector<coefficient> > {
     std::stringstream out;
     std::string tempS;
     for (int i = 0; i < this->size; i ++) {
-      this->TheObjects[i].ToString(tempS);
+      this->TheObjects[i].toString(tempS);
       out << tempS;
       if (i != this->size - 1) {
         out << " + ";
@@ -1233,7 +1233,7 @@ class affineHyperplane {
 public:
   Vector<coefficient> affinePoint;
   Vector<coefficient> normal;
-  void ToString(std::string& output);
+  void toString(std::string& output);
   //void InduceFromFacet(Facet& input);
   //the below returns false if the projection is not of full dimension
   unsigned int HashFunction() const;
@@ -1328,7 +1328,7 @@ void affineHyperplane<coefficient>::MakeFromNormalAndPoint(Vector<coefficient>& 
 }
 
 template <class coefficient>
-void affineHyperplane<coefficient>::ToString(std::string& output) {
+void affineHyperplane<coefficient>::toString(std::string& output) {
   std::stringstream out;
   out << "point: " << this->affinePoint << ", normal: " << this->normal;
   output = out.str();
@@ -1347,9 +1347,9 @@ unsigned int affineHyperplane<coefficient>::HashFunction() const {
 class affineHyperplanes: public List<affineHyperplane<Rational> > {
 public:
   std::string DebugString;
-  void ToString(std::string& output);
+  void toString(std::string& output);
   void ComputeDebugString() {
-    this->ToString(this->DebugString);
+    this->toString(this->DebugString);
   }
 };
 

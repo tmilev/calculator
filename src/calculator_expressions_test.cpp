@@ -14,7 +14,7 @@ bool Expression::Test::ToStringTestRecode(const std::string& inputHardCodedMustP
   if (!ownerInitialized.Parse(inputHardCodedMustParse, parsed)) {
     global.fatal << "Failed to parse hard-coded input string. " << global.fatal;
   }
-  std::string recoded = parsed.ToString();
+  std::string recoded = parsed.toString();
   if (recoded != inputHardCodedMustParse) {
     global.fatal << "Recoded string: " << recoded
     << " does not coincide with the original: "

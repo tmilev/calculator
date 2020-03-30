@@ -14,13 +14,13 @@ bool CalculatorDatabaseFunctions::innerExecuteMongoQuery(
   std::string inputCollection, inputQuery;
   if (!input[2].IsOfType(&inputQuery)) {
     theCommands << "Expected string as second argument. Using the string: "
-    << input[2].ToString() << " as second name. ";
-    inputQuery = input[2].ToString();
+    << input[2].toString() << " as second name. ";
+    inputQuery = input[2].toString();
   }
   if (!input[1].IsOfType(&inputCollection)) {
     theCommands << "Expected string as first argument. Using the string: "
-    << input[1].ToString() << " as collection name. ";
-    inputCollection = input[1].ToString();
+    << input[1].toString() << " as collection name. ";
+    inputCollection = input[1].toString();
   }
   List<JSData> outputList;
   std::stringstream commentsOnFailure;

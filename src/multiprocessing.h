@@ -57,7 +57,7 @@ public:
     bool dontCrashOnFail,
     int numBadAttempts
   );
-  std::string ToString() const;
+  std::string toString() const;
   PipePrimitive();
   ~PipePrimitive();
 };
@@ -76,7 +76,7 @@ public:
   MemorySaving<MutexRecursiveWrapper> lockThreads;
   //<- to avoid two threads from the same process blocking the process.
   bool flagDeallocated;
-  std::string ToString() const;
+  std::string toString() const;
   void Release();
   // inputName is the display name of the mutex - something you want
   // to see in error messages and logs.
@@ -179,7 +179,7 @@ public:
     bool dontCrashOnFail
   );
 
-  std::string ToString() const;
+  std::string toString() const;
   void Release();
   bool CheckConsistency();
   bool CreateMe(const std::string& inputPipeName);

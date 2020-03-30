@@ -63,7 +63,7 @@ public:
   double timeAtLastBackup;
   int pidServer;
   void Monitor(int pidServer);
-  [[noreturn]] void Restart();
+  void Restart();
   WebServerMonitor();
 };
 
@@ -611,13 +611,13 @@ bool CalculatorFunctions::innerFetchWebPageGET(Calculator& theCommands, const Ex
     return theCommands << "Fetching web page expects 3 arguments: server, service/port, and webpage. ";
   }
   if (!input[1].IsOfType(&theCrawler.serverToConnectTo)) {
-    theCrawler.serverToConnectTo = input[1].ToString();
+    theCrawler.serverToConnectTo = input[1].toString();
   }
   if (!input[2].IsOfType(&theCrawler.portOrService)) {
-    theCrawler.portOrService = input[2].ToString();
+    theCrawler.portOrService = input[2].toString();
   }
   if (!input[3].IsOfType(&theCrawler.addressToConnectTo)) {
-    theCrawler.addressToConnectTo = input[3].ToString();
+    theCrawler.addressToConnectTo = input[3].toString();
   }
   std::stringstream out;
   theCrawler.flagDoUseGET = true;
@@ -641,16 +641,16 @@ bool CalculatorFunctions::innerFetchWebPagePOST(Calculator& theCommands, const E
     return theCommands << "Fetching web page expects 4 arguments: server, service/port, webpage and message to post. ";
   }
   if (!input[1].IsOfType(&theCrawler.serverToConnectTo)) {
-    theCrawler.serverToConnectTo = input[1].ToString();
+    theCrawler.serverToConnectTo = input[1].toString();
   }
   if (!input[2].IsOfType(&theCrawler.portOrService)) {
-    theCrawler.portOrService = input[2].ToString();
+    theCrawler.portOrService = input[2].toString();
   }
   if (!input[3].IsOfType(&theCrawler.addressToConnectTo)) {
-    theCrawler.addressToConnectTo = input[3].ToString();
+    theCrawler.addressToConnectTo = input[3].toString();
   }
   if (!input[4].IsOfType(&theCrawler.postMessageToSend)) {
-    theCrawler.postMessageToSend = input[4].ToString();
+    theCrawler.postMessageToSend = input[4].toString();
   }
   std::stringstream out;
   out
@@ -716,7 +716,7 @@ void WebCrawler::UpdatePublicKeys(std::stringstream* commentsOnFailure, std::str
   global << logger::green << "Updated public key file: " << googleKeysFileName << logger::endL;
   googleKeysFile << this->bodyReceiveD;
   googleKeysDebugFile
-  << "Expected body length: " << this->expectedLength.ToString() << "\n";
+  << "Expected body length: " << this->expectedLength.toString() << "\n";
   if (this->flagContinueWasNeeded) {
     googleKeysDebugFile << "Did send a continue message.\n";
   } else {
@@ -1043,7 +1043,7 @@ JSData WebWorker::GetSignUpRequestResult() {
 
 bool WebWorker::WriteToBodyJSOn(const JSData& result) {
   std::string toWrite = HtmlRoutines::ConvertStringToHtmlString(
-    result.ToString(nullptr), false
+    result.toString(nullptr), false
   );
   if (toWrite.size() < 2000) {
     if (toWrite.find(WebAPIResponse::youHaveReachedTheBackend) != std::string::npos) {
@@ -1062,7 +1062,7 @@ bool GlobalVariables::Response::WriteResponse(const JSData& incoming, bool isCra
   MacroRegisterFunctionWithName("WebWorker::WriteResponse");
   if (!global.flagRunningBuiltInWebServer) {
     if (!isCrash) {
-      global << incoming.ToString();
+      global << incoming.toString();
     }
     return true;
   }

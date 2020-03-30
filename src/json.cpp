@@ -137,7 +137,7 @@ bool JSData::HasCompositeKeyOfTokeN(
   if (whichValue->theType != targetType) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Key: " << key << ", value: "
-      << whichValue->ToString(nullptr) << " is of type "
+      << whichValue->toString(nullptr) << " is of type "
       << static_cast<int>(whichValue->theType)
       << " instead of the target one: " << static_cast<int>(targetType)
       << ". ";
@@ -170,7 +170,7 @@ bool JSData::HasCompositeKey(const std::string& inputKeys, JSData* whichValue, s
           *commentsOnFailure << "The sub-object located before the key: " << keys[i] << " [all keys: "
           << keys.ToStringCommaDelimited() << "] "
           << "is not an array, but is instead: "
-          << currentData->ToString(&JSData::PrintOptions::HTML())
+          << currentData->toString(&JSData::PrintOptions::HTML())
           << ". ";
         }
         return false;
@@ -178,7 +178,7 @@ bool JSData::HasCompositeKey(const std::string& inputKeys, JSData* whichValue, s
       if (currentData->theList.size <= theDigit) {
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure << "Key index: " << theDigit
-          << " is too large for current value: " << currentData->ToString(&JSData::PrintOptions::HTML());
+          << " is too large for current value: " << currentData->toString(&JSData::PrintOptions::HTML());
         }
         return false;
       }
@@ -188,14 +188,14 @@ bool JSData::HasCompositeKey(const std::string& inputKeys, JSData* whichValue, s
     if (currentData->theType != JSData::token::tokenObject) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Value preceding key: " << keys[i]
-        << " is not of type object: " << currentData->ToString(&JSData::PrintOptions::HTML());
+        << " is not of type object: " << currentData->toString(&JSData::PrintOptions::HTML());
       }
       return false;
     }
     if (!currentData->HasKey(keys[i])) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Key: " << keys[i]
-        << " not present in: " << currentData->ToString(&JSData::PrintOptions::HTML());
+        << " not present in: " << currentData->toString(&JSData::PrintOptions::HTML());
       }
       return false;
     }
@@ -652,7 +652,7 @@ bool JSData::readstring(
       << "<br>Result:<br>\n ";
       for (int i = JSData::numEmptyTokensAtStart; i < readingStack.size; i ++) {
         *commentsOnFailure << i << ": "
-        << readingStack[i].ToString(&JSData::PrintOptions::HTML()) << "\n<br>\n";
+        << readingStack[i].toString(&JSData::PrintOptions::HTML()) << "\n<br>\n";
       }
     }
     return false;
@@ -663,7 +663,7 @@ bool JSData::readstring(
   bool result = this->IsValidElement();
   if (!result) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << this->ToString(nullptr)
+      *commentsOnFailure << this->toString(nullptr)
       << " does not appear to be valid json. ";
     }
   }
@@ -738,7 +738,7 @@ somestream& JSData::IntoStream(
       out << this->theFloat;
       return out;
     case JSData::token::tokenLargeInteger:
-      out << this->theInteger.GetElementConst().ToString();
+      out << this->theInteger.GetElementConst().toString();
       return out;
     case JSData::token::tokenBool:
       if (this->theBoolean == true) {
@@ -929,7 +929,7 @@ void JSData::reset(char inputType) {
   }
 }
 
-std::string JSData::ToString(const JSData::PrintOptions* options) const {
+std::string JSData::toString(const JSData::PrintOptions* options) const {
   std::stringstream out;
   this->IntoStream(out, options);
   return out.str();

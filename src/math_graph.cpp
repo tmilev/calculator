@@ -59,7 +59,7 @@ void GraphOLD::TreeRecurseCopyDelete(List<int>& l, int v, int m) {
   }
 }
 
-std::string GraphEdge::ToString(FormatExpressions* theFormat) const {
+std::string GraphEdge::toString(FormatExpressions* theFormat) const {
   (void) theFormat; //avoid unused parameter warning, portable.
   std::stringstream out;
   out << this->vStart + 1 << "->" << this->vEnd + 1;
@@ -88,7 +88,7 @@ bool GraphWeightedLabeledEdges:: CheckConsistency() const {
       this->theEdges[i].vEnd >= this->numNodes
     ) {
       global.fatal << "Graph error in graph with " << this->numNodes << " nodes: detected a corrupt edge: "
-      << this->theEdges[i].ToString() << " is a bad." << global.fatal;
+      << this->theEdges[i].toString() << " is a bad." << global.fatal;
     }
   }
   for (int i = 0; i < this->nodeGroupsForDisplay.size; i ++) {
@@ -247,7 +247,7 @@ std::string GraphWeightedLabeledEdges::ToStringNodesAndEdges(FormatExpressions* 
   std::stringstream out;
   out << "The graph has " << this->theEdges.size() << " edges: <br>\n";
   for (int i = 0; i < this->theEdges.size(); i ++) {
-    out << this->theEdges[i].ToString();
+    out << this->theEdges[i].toString();
     if (i != this->theEdges.size() - 1) {
       out << ", ";
     }

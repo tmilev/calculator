@@ -46,7 +46,7 @@ public:
   };
 
   friend std::ostream& operator<<(std::ostream& output, const ASNElement& element) {
-    output << element.ToString();
+    output << element.toString();
     return output;
   }
   unsigned char startByte;
@@ -76,7 +76,7 @@ public:
   void ToJSON(JSData& output) const;
   JSData ToJSON() const;
   void WriteAnnotations(List<Serialization::Marker>& output);
-  std::string ToString() const;
+  std::string toString() const;
   bool isComposite() const;
   bool isPureComposite() const;
   bool isNonPureComposite() const;
@@ -169,7 +169,7 @@ public:
     static std::string emailAddress           ;
   };
   friend std::ostream& operator<<(std::ostream& output, const ASNObject& element) {
-    output << element.ToString();
+    output << element.toString();
     return output;
   }
   std::string name;
@@ -205,7 +205,7 @@ public:
   static const List<unsigned char>& ObjectIdFromNameNoFail(const std::string& input);
   static std::string ToStringAllRecognizedObjectIds();
   void ComputeASN(ASNElement& output);
-  std::string ToString() const;
+  std::string toString() const;
   bool isEmpty() const;
 };
 

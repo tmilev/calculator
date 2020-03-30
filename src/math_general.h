@@ -44,7 +44,7 @@ public:
   ChevalleyGenerator(): owner(nullptr), theGeneratorIndex(- 1) {
   }
   friend std::ostream& operator << (std::ostream& output, const ChevalleyGenerator& theGen) {
-    output << theGen.ToString();
+    output << theGen.toString();
     return output;
   }
   bool CheckInitialization() const;
@@ -63,7 +63,7 @@ public:
     this->theGeneratorIndex = other.theGeneratorIndex;
   }
   bool operator>(const ChevalleyGenerator& other) const;
-  std::string ToString(FormatExpressions* inputFormat = nullptr) const;
+  std::string toString(FormatExpressions* inputFormat = nullptr) const;
   void CheckConsistencyWithOther(const ChevalleyGenerator& other) const;
   bool operator==(const ChevalleyGenerator& other) const {
     this->CheckConsistencyWithOther(other);
@@ -74,14 +74,14 @@ public:
 template <class coefficient, unsigned int inputHashFunction(const coefficient&)= coefficient::HashFunction>
 class MonomialTensor {
   friend std::ostream& operator << (std::ostream& output, const MonomialTensor<coefficient, inputHashFunction>& theMon) {
-    return output << theMon.ToString();
+    return output << theMon.toString();
   }
 private:
 public:
   List<int> generatorsIndices;
   List<coefficient> Powers;
   bool flagDeallocated;
-  std::string ToString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* theFormat = nullptr) const;
   bool IsEqualToOne() const {
     return this->generatorsIndices.size == 0;
   }
@@ -237,7 +237,7 @@ class MonomialWrapper {
   MonomialWrapper(const theType& input) {
     this->theObject = input;
   }
-  std::string ToString(FormatExpressions* theFormat = nullptr) const {
+  std::string toString(FormatExpressions* theFormat = nullptr) const {
     (void) theFormat;
     std::stringstream out;
     out << "(" << this->theObject << ")";
@@ -275,7 +275,7 @@ private:
   // IMPORTANT. The default monomial order, implemented by operator>, is the graded lexicographic
   // last variable strongest order. Other monomial orders are not referred by operator>, but
   // by their explicit names.
-  // Note that the LinearCombination::ToString method uses the FormatExpressions::monomialOrder
+  // Note that the LinearCombination::toString method uses the FormatExpressions::monomialOrder
   // to sort monomials when displaying polynomials to the screen.
   List<Rational> monBody;
 public:
@@ -304,7 +304,7 @@ public:
   MonomialP() {
   }
   friend std::ostream& operator << (std::ostream& output, const MonomialP& theMon) {
-    output << theMon.ToString();
+    output << theMon.toString();
     return output;
   }
   Rational& operator[](int i) {
@@ -350,7 +350,7 @@ public:
     }
     return result;
   }
-  std::string ToString(FormatExpressions* PolyFormat = nullptr) const;
+  std::string toString(FormatExpressions* PolyFormat = nullptr) const;
   void MakeOne(int ExpectedNumVars = 0) {
     this->monBody.initializeFillInObject(ExpectedNumVars, static_cast<Rational>(0));
   }
@@ -759,9 +759,9 @@ public:
     }
     if (this->NumCols != input.GetDim()) {
       global.fatal << "This is a programming error: attempting to act by "
-      << this->ToString() << "(an " << this->NumRows << " x "
+      << this->toString() << "(an " << this->NumRows << " x "
       << this->NumCols << " matrix) on a column vector "
-      << input.ToString() << "(dimension " << input.size << ")." << global.fatal;
+      << input.toString() << "(dimension " << input.size << ")." << global.fatal;
     }
     output.SetSize(input.size);
     for (int i = 0; i < input.size; i ++) {
@@ -786,7 +786,7 @@ public:
       this->ActOnVectorColumn(inputOutput[i], TheRingZero);
     }
   }
-  std::string ToString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* theFormat = nullptr) const;
   std::string ToStringLatex(FormatExpressions* theFormat = nullptr) const;
   std::string ToStringSystemLatex(
     Matrix<coefficient>* constTerms = 0,
@@ -973,7 +973,7 @@ public:
   Matrix<coefficient> Inverse() {
     Matrix<coefficient> copy = *this;
     if (!copy.Invert()) {
-      global.fatal << "Request to invert " << copy.ToString() << " failed. " << global.fatal;
+      global.fatal << "Request to invert " << copy.toString() << " failed. " << global.fatal;
     }
     return copy;
   }
@@ -1026,7 +1026,7 @@ public:
   }
   void AssignVectorToRowKeepOtherRowsIntactNoInit(int rowIndex, const Vector<coefficient>& input) {
     if (input.size != this->NumCols || rowIndex >= this->NumRows || rowIndex < 0) {
-      global.fatal << "Error: attempting to assign vector " << input.ToString()
+      global.fatal << "Error: attempting to assign vector " << input.toString()
       << " (" << input.size << " coordinates) "
       << " to row with index " << rowIndex << " in a matrix with "
       << this->NumRows << " rows and " << this->NumCols << " columns. " << global.fatal;
@@ -1351,8 +1351,8 @@ bool Vectors<coefficient>::ConesIntersect(
         << "I get that two cones do not intersect, yet there exists no plane separating them. "
         << "Something is wrong with the implementation of the simplex algorithm. "
         << "The input which manifested the problem was: <br>StrictCone: <br>"
-        << StrictCone.ToString() << "<br>Non-strict cone: <br>"
-        << NonStrictCone.ToString() << "<br>" << global.fatal;
+        << StrictCone.toString() << "<br>Non-strict cone: <br>"
+        << NonStrictCone.toString() << "<br>" << global.fatal;
       }
     }
     return false;
@@ -1612,7 +1612,7 @@ std::string Matrix<Element>::ElementToStringWithBlocks(List<int>& theBlocks) {
   blockIndex = 0;
   for (int i = 0; i < this->NumRows; i ++) {
     for (int j = 0; j < this->NumCols; j ++) {
-      tempS = this->elements[i][j].ToString();
+      tempS = this->elements[i][j].toString();
       out << tempS;
       if (j != this->NumCols - 1) {
         out << " & ";
@@ -1901,6 +1901,8 @@ public:
   bool flagSuppressLongMatrices;
   bool flagLatexDetailsInHtml;
   bool flagUseQuotes;
+  bool flagSuppressModP;
+  std::string suffixLinearCombination;
   char AmbientWeylLetter;
   List<MonomialP>::Comparator monomialOrder;
   template <typename templateMonomial>
@@ -1914,13 +1916,13 @@ class MonomialWeylAlgebra {
   MonomialP polynomialPart;
   MonomialP differentialPart;
   friend std::ostream& operator << (std::ostream& output, const MonomialWeylAlgebra& theMon) {
-    output << theMon.ToString();
+    output << theMon.toString();
     return output;
   }
   bool IsConstant() const {
     return this->polynomialPart.IsConstant() && this->differentialPart.IsConstant();
   }
-  std::string ToString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* theFormat = nullptr) const;
   static unsigned int HashFunction(const MonomialWeylAlgebra& input) {
     return
     input.polynomialPart.HashFunction() +
@@ -1967,7 +1969,7 @@ class MonomialWeylAlgebra {
 
 template <class coefficient>
 std::iostream& operator <<(std::iostream& output, const Polynomial<coefficient>& input) {
-  output << input.ToString();
+  output << input.toString();
   return output;
 }
 
@@ -2000,16 +2002,16 @@ public:
   ~LinearCombination() {
     this->flagDeallocated = true;
   }
-  bool NeedsParenthesisForMultiplication() const {
+  bool NeedsParenthesisForMultiplication(FormatExpressions* unused = nullptr) const {
+    (void) unused;
     return this->size() > 1;
   }
-  std::string ToString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* theFormat = nullptr) const;
   int size() const {
     return this->theMonomials.size;
   }
-  // BIG FAT WARNING
-  // the hash function of Monomial collection must return the same value for
-  // monomial collections whose monomials are permuted!
+  // The hash function of Monomial collection must return the same value for
+  // monomial collections whose monomials are permuted.
   static unsigned int HashFunction(const LinearCombination<templateMonomial, coefficient>& input) {
     unsigned int result = 0;
     for (int i = 0; i < input.size(); i ++) {
@@ -2540,7 +2542,7 @@ public:
 
 class MonomialVector {
   friend std::ostream& operator << (std::ostream& output, const MonomialVector& theMon) {
-    output << theMon.ToString();
+    output << theMon.toString();
     return output;
   }
   public:
@@ -2549,7 +2551,7 @@ class MonomialVector {
   }
   MonomialVector(int inputIndex): theIndex(inputIndex) {
   }
-  std::string ToString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* theFormat = nullptr) const;
   unsigned int HashFunction() const {
     return static_cast<unsigned int>(this->theIndex);
   }
@@ -2915,7 +2917,7 @@ public:
     }
     if (d < 0) {
       global.fatal << "This is a programming error: attempting to raise the polynomial "
-      << this->ToString() << " to the negative power "
+      << this->toString() << " to the negative power "
       << d << ". " << global.fatal;
     }
     Polynomial<coefficient> theOne;
@@ -3136,9 +3138,9 @@ class PolynomialSubstitution: public List<Polynomial<coefficient> > {
       this->TheObjects[i].MakeZero(NumVars);
     }
   }
-  std::string ToString(int numDisplayedEltsMinus1ForAll = - 1) const {
+  std::string toString(int numDisplayedEltsMinus1ForAll = - 1) const {
     std::string tempS;
-    this->ToString(tempS, numDisplayedEltsMinus1ForAll);
+    this->toString(tempS, numDisplayedEltsMinus1ForAll);
     return tempS;
   }
   void ComputeDebugString();
@@ -3165,7 +3167,7 @@ class PolynomialSubstitution: public List<Polynomial<coefficient> > {
     tempMat.AssignMatrixIntWithDen(theMat, Den);
     this->MakeLinearSubConstTermsLastRow(tempMat);
   }
-  void ToString(std::string& output, int numDisplayedEltsMinus1ForAll) const {
+  void toString(std::string& output, int numDisplayedEltsMinus1ForAll) const {
     std::stringstream out;
     output.clear();
     FormatExpressions PolyFormatLocal;
@@ -3173,7 +3175,7 @@ class PolynomialSubstitution: public List<Polynomial<coefficient> > {
       numDisplayedEltsMinus1ForAll = this->size;
     }
     for (int i = 0; i < this->size; i ++) {
-      out << "x_{" << i + 1 << "} \\mapsto " << this->TheObjects[i].ToString(&PolyFormatLocal);
+      out << "x_{" << i + 1 << "} \\mapsto " << this->TheObjects[i].toString(&PolyFormatLocal);
       if (i != this->size - 1) {
         out << ", ";
       }
@@ -3451,7 +3453,7 @@ private:
   bool ConvertToType(int theType);
 public:
   friend std::ostream& operator<< (std::ostream& output, const RationalFunction& theRF) {
-    output << theRF.ToString();
+    output << theRF.toString();
     return output;
   }
   friend std::istream& operator>> (std::istream& input, RationalFunction& theRF);
@@ -3466,18 +3468,8 @@ public:
     typeRationalFunction = 2,
     typeError = 3
   };
-  std::string ToString(FormatExpressions* theFormat = nullptr) const;
-  bool NeedsParenthesisForMultiplication() const {
-    switch(this->expressionType) {
-      case RationalFunction::typeRational:
-        return false;
-      case RationalFunction::typePoly:
-        return this->Numerator.GetElementConst().NeedsParenthesisForMultiplication();
-      case RationalFunction::typeRationalFunction:
-        return false;
-    }
-    return false;
-  }
+  std::string toString(FormatExpressions* theFormat = nullptr) const;
+  bool NeedsParenthesisForMultiplication(FormatExpressions* unused = nullptr) const;
   bool FindOneVariableRationalRoots(List<Rational>& output);
   Rational GetDenominatorRationalPart() {
     Polynomial<Rational> Num;
@@ -3997,7 +3989,7 @@ void LinearCombination<templateMonomial, coefficient>::GaussianEliminationByRows
       global.fatal << "This is a programming error. An internal check at the "
       << "Gaussian elimination method for monomial collections fails. "
       << "Something is wrong. Here is the List you wanted to perform Gaussian elimination upon. "
-      << theList.ToString() << ". " << global.fatal;
+      << theList.toString() << ". " << global.fatal;
     }
     tempCF = currentPivot.coefficients[colIndex];
     tempCF.Invert();
@@ -4181,7 +4173,7 @@ public:
   bool IsHigherThan(oneFracWithMultiplicitiesAndElongations& f);
   void operator=(oneFracWithMultiplicitiesAndElongations& right);
   bool operator==(oneFracWithMultiplicitiesAndElongations& right);
-  std::string ToString();
+  std::string toString();
   void OneFracToStringBasisChange(
     PartFractions& owner,
     int indexElongation,
@@ -4269,37 +4261,37 @@ void Matrix<coefficient>::NonPivotPointsToEigenVector(
 }
 
 template<class coefficient>
-class CompleX {
+class Complex {
   static bool flagEqualityIsApproximate;
   static double EqualityPrecision;
   public:
   coefficient Im;
   coefficient Re;
-  std::string ToString(FormatExpressions* theFormat = nullptr) {
+  std::string toString(FormatExpressions* theFormat = nullptr) {
     (void) theFormat; //taking care of unused parameters
     std::stringstream tempStream;
     tempStream << *this;
     return tempStream.str();
   }
-  friend std::iostream& operator<<(std::iostream& output, const CompleX<coefficient>& input) {
+  friend std::iostream& operator<<(std::iostream& output, const Complex<coefficient>& input) {
     output << input.Re << "+ i" << input.Im;
     return output;
   }
-  void operator*=(const CompleX<coefficient>& other) {
-    CompleX Accum;
+  void operator*=(const Complex<coefficient>& other) {
+    Complex Accum;
     Accum.Re = this->Re * other.Re - this->Im * other.Im;
     Accum.Im = this->Re * other.Im + this->Im * other.Re;
     this->operator=(Accum);
   }
-  void operator=(const CompleX<coefficient>& other) {
+  void operator=(const Complex<coefficient>& other) {
     this->Re = other.Re;
     this->Im = other.Im;
   }
-  void operator+=(const CompleX<coefficient>& other) {
+  void operator+=(const Complex<coefficient>& other) {
     this->Re += other.Re;
     this->Im += other.Im;
   }
-  void operator-=(const CompleX<coefficient>& other) {
+  void operator-=(const Complex<coefficient>& other) {
     this->Re -= other.Re;
     this->Im -= other.Im;
   }
@@ -4308,12 +4300,12 @@ class CompleX {
     this->Im = 0;
   }
   bool operator==(int other) const {
-    CompleX<coefficient> otherComplex;
+    Complex<coefficient> otherComplex;
     otherComplex = other;
     return *this == otherComplex;
   }
-  bool operator==(CompleX<coefficient>& other) const {
-    CompleX<coefficient> difference;
+  bool operator==(Complex<coefficient>& other) const {
+    Complex<coefficient> difference;
     difference = *this;
     difference -= other;
     return difference.IsEqualToZero();
@@ -4334,7 +4326,8 @@ class CompleX {
     this->Im = - this->Im;
     this->Re = - this->Re;
   }
-  bool NeedsParenthesisForMultiplication() {
+  bool NeedsParenthesisForMultiplication(FormatExpressions* unused) {
+    (void) unused;
     if (this->Re == 0 && this->Im >= 0) {
       return false;
     }
@@ -4343,26 +4336,26 @@ class CompleX {
     }
     return true;
   }
-  CompleX(){}
-  CompleX(int other) {
+  Complex(){}
+  Complex(int other) {
     this->operator=(other);
   }
-  CompleX(double other) {
+  Complex(double other) {
     this->operator=(other);
   }
 };
 
-template < > bool CompleX<double>::flagEqualityIsApproximate;
-template < > double CompleX<double>::EqualityPrecision;
+template < > bool Complex<double>::flagEqualityIsApproximate;
+template < > double Complex<double>::EqualityPrecision;
 
 template <class coefficient>
-bool CompleX<coefficient>::IsEqualToZero() const {
-  if (!CompleX<coefficient>::flagEqualityIsApproximate) {
+bool Complex<coefficient>::IsEqualToZero() const {
+  if (!Complex<coefficient>::flagEqualityIsApproximate) {
     return this->Im == 0 && this->Re == 0;
   } else {
     return
-    this->Im<CompleX<coefficient>::EqualityPrecision && - this->Im<CompleX<coefficient>::EqualityPrecision &&
-    this->Re<CompleX<coefficient>::EqualityPrecision && - this->Re<CompleX<coefficient>::EqualityPrecision;
+    this->Im<Complex<coefficient>::EqualityPrecision && - this->Im<Complex<coefficient>::EqualityPrecision &&
+    this->Re<Complex<coefficient>::EqualityPrecision && - this->Re<Complex<coefficient>::EqualityPrecision;
   }
 }
 
@@ -4760,7 +4753,7 @@ void Matrix<coefficient>::GetZeroEigenSpaceModifyMe(List<Vector<coefficient> >& 
 }
 
 template <class coefficient>
-std::string Vectors<coefficient>::ToString(FormatExpressions* theFormat) const {
+std::string Vectors<coefficient>::toString(FormatExpressions* theFormat) const {
   std::stringstream out;
   std::string tempS;
   bool useLaTeX = false;
@@ -4780,7 +4773,7 @@ std::string Vectors<coefficient>::ToString(FormatExpressions* theFormat) const {
     out << "<table>";
   }
   for (int i = 0; i < this->size; i ++) {
-    tempS = this->TheObjects[i].ToString(theFormat);
+    tempS = this->TheObjects[i].toString(theFormat);
     if (useHtml && makeTable) {
       out << "<tr><td>";
     }
@@ -4848,8 +4841,8 @@ std::string Vector<coefficient>::ToStringLetterFormat(
   int NumVars = DontIncludeLastVar ? this->size - 1 : this->size;
   for (int i = 0; i < NumVars; i ++) {
     if (!this->TheObjects[i].IsEqualToZero()) {
-      tempS = this->TheObjects[i].ToString(theFormat);
-      if (this->TheObjects[i].NeedsParenthesisForMultiplication()) {
+      tempS = (*this)[i].toString(theFormat);
+      if ((*this)[i].NeedsParenthesisForMultiplication(theFormat)) {
         tempS = "(" + tempS + ")";
       }
       if (tempS == "1") {
@@ -4918,7 +4911,7 @@ void MonomialTensor<coefficient, inputHashFunction>::MultiplyByGeneratorPowerOnT
 }
 
 template <class coefficient, unsigned int inputHashFunction(const coefficient&)>
-std::string MonomialTensor<coefficient, inputHashFunction>::ToString(FormatExpressions* theFormat) const {
+std::string MonomialTensor<coefficient, inputHashFunction>::toString(FormatExpressions* theFormat) const {
   if (this->generatorsIndices.size == 0) {
     return "1";
   }
@@ -4989,7 +4982,7 @@ std::string Matrix<coefficient>::ToStringLatex(FormatExpressions* theFormat) con
   }
   formatCopy.flagUseLatex = true;
   formatCopy.flagUseHTML = false;
-  return this->ToString(&formatCopy);
+  return this->toString(&formatCopy);
 }
 
 template <typename coefficient>
@@ -5011,9 +5004,9 @@ std::string Matrix<coefficient>::ToStringSystemLatex(
     for (int j = 0; j < this->NumCols; j ++) {
       if (!((*this)(i, j) == 0)) {
         theMon.MakeMonomiaL(j, 1, (*this)(i, j));
-        currentEntry = theMon.ToString(theFormat);
+        currentEntry = theMon.toString(theFormat);
         if (currentEntry == "") {
-          global.fatal << "Empty strings not allowed as result of ToString() function call. " << global.fatal;
+          global.fatal << "Empty strings not allowed as result of toString() function call. " << global.fatal;
         }
         if (currentEntry[0] != '-' && foundNonZeroEntry) {
           out << "+";
@@ -5030,7 +5023,7 @@ std::string Matrix<coefficient>::ToStringSystemLatex(
     if (!constTermsAreGood) {
       out << "0";
     } else {
-      out << (*constTerms)(i, 0).ToString(theFormat);
+      out << (*constTerms)(i, 0).toString(theFormat);
     }
     out << "\\\\";
   }
@@ -5039,7 +5032,7 @@ std::string Matrix<coefficient>::ToStringSystemLatex(
 }
 
 template <typename coefficient>
-std::string Matrix<coefficient>::ToString(FormatExpressions* theFormat) const {
+std::string Matrix<coefficient>::toString(FormatExpressions* theFormat) const {
   std::stringstream out;
   std::string tempS;
   bool useHtml    = (theFormat == nullptr) ? true : theFormat->flagUseHTML;
@@ -5069,7 +5062,7 @@ std::string Matrix<coefficient>::ToString(FormatExpressions* theFormat) const {
       out << "<tr>";
     }
     for (int j = 0; j < this->NumCols; j ++) {
-      tempS = (*this)(i, j).ToString(theFormat);
+      tempS = (*this)(i, j).toString(theFormat);
       if (useHtml) {
         out << "<td>";
       }
@@ -5199,7 +5192,7 @@ std::string LinearCombination<templateMonomial, coefficient>::GetBlendCoeffAndMo
   FormatExpressions* theFormat
 ) {
   std::stringstream out;
-  std::string coefficientString = inputCoefficient.ToString(theFormat);
+  std::string coefficientString = inputCoefficient.toString(theFormat);
   if (inputMonomial.IsConstant()) {
     if (coefficientString[0] != '-' && addPlusToFront) {
       out << "+" << coefficientString;
@@ -5208,8 +5201,8 @@ std::string LinearCombination<templateMonomial, coefficient>::GetBlendCoeffAndMo
     }
     return out.str();
   }
-  std::string monString = inputMonomial.ToString(theFormat);
-  if (inputCoefficient.NeedsParenthesisForMultiplication()) {
+  std::string monString = inputMonomial.toString(theFormat);
+  if (inputCoefficient.NeedsParenthesisForMultiplication(theFormat)) {
     coefficientString = "\\left(" + coefficientString + "\\right)";
   }
   if (coefficientString == "1") {
@@ -5232,13 +5225,13 @@ std::string LinearCombination<templateMonomial, coefficient>::GetBlendCoeffAndMo
 }
 
 template <class templateMonomial, class coefficient>
-std::string LinearCombination<templateMonomial, coefficient>::ToString(
+std::string LinearCombination<templateMonomial, coefficient>::toString(
   FormatExpressions* theFormat
 ) const {
   if (this->size() == 0) {
     return "0";
   }
-  MacroRegisterFunctionWithName("LinearCombination::ToString");
+  MacroRegisterFunctionWithName("LinearCombination::toString");
   std::stringstream out;
   std::string tempS1, tempS2;
   List<templateMonomial> sortedMons;
@@ -5269,12 +5262,12 @@ std::string LinearCombination<templateMonomial, coefficient>::ToString(
   for (int i = 0; i < sortedMons.size; i ++) {
     templateMonomial& currentMon = sortedMons[i];
     coefficient& currentCoeff = this->coefficients[this->theMonomials.GetIndex(currentMon)];
-    if (currentCoeff.NeedsParenthesisForMultiplication()) {
-      tempS1 = "\\left(" + currentCoeff.ToString(theFormat) + "\\right)";
+    if (currentCoeff.NeedsParenthesisForMultiplication(theFormat)) {
+      tempS1 = "\\left(" + currentCoeff.toString(theFormat) + "\\right)";
     } else {
-      tempS1 = currentCoeff.ToString(theFormat);
+      tempS1 = currentCoeff.toString(theFormat);
     }
-    tempS2 = currentMon.ToString(theFormat);
+    tempS2 = currentMon.toString(theFormat);
     if (tempS2 != "") {
       bool useFracSpecial = false;
       if (theFormat != nullptr) {
@@ -5344,6 +5337,9 @@ std::string LinearCombination<templateMonomial, coefficient>::ToString(
   }
   if (theFormat != nullptr) {
     theFormat->CustomCoeffMonSeparator = oldCustomTimes;
+    if (theFormat->suffixLinearCombination != "") {
+      out << " " << theFormat->suffixLinearCombination;
+    }
   }
   return out.str();
 }
@@ -5435,7 +5431,7 @@ public:
   bool GetAllRepresentativesProjectingDownTo(
     const Lattice& rougherLattice, Vectors<Rational>& startingShifts, Vectors<Rational>& output
   ) const;
-  std::string ToString() const;
+  std::string toString() const;
   bool operator==(const Lattice& other) {
     return this->basisRationalForm == other.basisRationalForm;
   }
@@ -5466,12 +5462,12 @@ public:
   Vectors<Rational> LatticeShifts;
   std::string DebugString;
   List<Polynomial<Rational> > valueOnEachLatticeShift;
-  std::string ToString(bool useHtml, bool useLatex) {
-    return this->ToString(useHtml, useLatex, nullptr);
+  std::string toString(bool useHtml, bool useLatex) {
+    return this->toString(useHtml, useLatex, nullptr);
   }
-  std::string ToString(bool useHtml, bool useLatex, FormatExpressions* thePolyFormat);
+  std::string toString(bool useHtml, bool useLatex, FormatExpressions* thePolyFormat);
   void ComputeDebugString() {
-    this->DebugString = this->ToString(false, false);
+    this->DebugString = this->toString(false, false);
   }
   Rational Evaluate(const Vector<Rational>& input);
   void AddLatticeShift(const Polynomial<Rational>& input, const Vector<Rational>& inputShift);
@@ -5705,7 +5701,7 @@ public:
   bool operator==(const PartFraction& right) const;
   void operator=(const PartFraction& right);
   bool initFromRoots(PartFractions& owner, Vectors<Rational>& input);
-  std::string ToString(bool LatexFormat, FormatExpressions& PolyFormatLocal, int& NumLinesUsed);
+  std::string toString(bool LatexFormat, FormatExpressions& PolyFormatLocal, int& NumLinesUsed);
   void ReadFromFile(PartFractions& owner, std::fstream& input);
   void WriteToFile(std::fstream& output) const;
   int SizeWithoutDebugString() const;
@@ -5715,7 +5711,7 @@ class Cone {
   void ComputeVerticesFromNormalsNoFakeVertices();
   bool EliminateFakeNormalsUsingVertices(int numAddedFakeWalls);
   friend std::ostream& operator << (std::ostream& output, const Cone& theCone) {
-    output << theCone.ToString();
+    output << theCone.toString();
     return output;
   }
 public:
@@ -5724,7 +5720,7 @@ public:
   Vectors<Rational> Normals;
   int LowestIndexNotCheckedForChopping;
   int LowestIndexNotCheckedForSlicingInDirection;
-  std::string ToString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* theFormat = nullptr) const;
   void TransformToWeylProjective(ConeComplex& owner);
   std::string DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat);
   std::string DrawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat);
@@ -5878,7 +5874,7 @@ class ConeLatticeAndShift {
     Matrix<Rational>& theProjectionLatticeLevel
   );
   bool ReadFromFile(std::fstream& input);
-  std::string ToString(FormatExpressions& theFormat);
+  std::string toString(FormatExpressions& theFormat);
   int GetDimProjectivized() {
     return this->theProjectivizedCone.GetDim();
   }
@@ -5926,9 +5922,9 @@ public:
     FormatExpressions& theFormat
   );
   std::string DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat);
-  std::string ToString(bool useHtml = false);
+  std::string toString(bool useHtml = false);
   void ComputeDebugString() {
-    this->DebugString = this->ToString();
+    this->DebugString = this->toString();
   }
   int GetLowestIndexchamberContaining(const Vector<Rational>& theRoot) const {
     for (int i = 0; i < this->size; i ++) {
@@ -6082,13 +6078,13 @@ public:
   void PrepareIndicatorVariables();
   void initFromOtherPartFractions(PartFractions& input);
   void IncreaseHighestIndex(int increment);
-  std::string ToString(FormatExpressions& theFormat) {
+  std::string toString(FormatExpressions& theFormat) {
     std::string tempS;
-    this->ToString(tempS, theFormat);
+    this->toString(tempS, theFormat);
     return tempS;
   }
-  void ToString(std::string& output, FormatExpressions& theFormat);
-  int ToString(std::string& output, bool LatexFormat, FormatExpressions& theFormat);
+  void toString(std::string& output, FormatExpressions& theFormat);
+  int toString(std::string& output, bool LatexFormat, FormatExpressions& theFormat);
   int ElementToStringBasisChange(
     std::string& output, bool LatexFormat, FormatExpressions& PolyFormatLocal
   );
@@ -6114,7 +6110,7 @@ public:
 
 class DynkinSimpleType {
   friend std::ostream& operator << (std::ostream& output, const DynkinSimpleType& theMon) {
-    output << theMon.ToString();
+    output << theMon.toString();
     return output;
   }
   public:
@@ -6199,7 +6195,7 @@ class DynkinSimpleType {
   Rational GetRatioLongRootToFirst() const {
     return this->GetRatioLongRootToFirst(this->theLetter, this->theRank);
   }
-  std::string ToString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* theFormat = nullptr) const;
   std::string ToStringNonTechnicalName(FormatExpressions* theFormat = nullptr) const;
   void operator++(int);
   bool operator>(const DynkinSimpleType& other) const;
@@ -6259,7 +6255,7 @@ public:
   DynkinSimpleType GetGreatestSimpleType() const;
   DynkinSimpleType GetSmallestSimpleType() const;
   LargeInteger GetWeylGroupSizeByFormula() const;
-  std::string ToString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* theFormat = nullptr) const;
   void ScaleFirstCoRootSquaredLength(const Rational& multiplyCoRootSquaredLengthBy);
   int GetMult(int SimpleTypeIdentifier) const {
     int result = 0;
@@ -6344,7 +6340,7 @@ public:
   List<int> indexUniComponent;
   List<int> indexInUniComponent;
   bool CheckInitialization() const;
-  std::string ToString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* theFormat = nullptr) const;
   int RankTotal();
   int NumRootsGeneratedByDiagram();
   void Sort();
@@ -6510,7 +6506,7 @@ public:
   );
   std::string GenerateOrbitAndAnimate();
   bool MinimaAreIntegral();
-  std::string ToString(bool useSimpleCoords = true, bool useArrows = true, bool includeDominance = false) const;
+  std::string toString(bool useSimpleCoords = true, bool useArrows = true, bool includeDominance = false) const;
   void Simplify();
   unsigned int HashFunction() const {
     return this->Waypoints.HashFunction();
@@ -6554,7 +6550,7 @@ public:
   Vectors<Rational> LPtoMaximizeLargerDim;
   Vectors<Rational> LPtoMaximizeSmallerDim;
 
-  std::string ToString(FormatExpressions* theFormat = nullptr);
+  std::string toString(FormatExpressions* theFormat = nullptr);
   void init(Vector<Rational>& theNEq, Cone& startingCone, Lattice& startingLattice, Vector<Rational>& startingShift);
   void FindExtremaParametricStep1(PauseThread& thePauseController);
   void FindExtremaParametricStep2TrimChamberForMultOne(PauseThread& thePauseController);
@@ -6572,7 +6568,7 @@ class PiecewiseQuasipolynomial {
   ConeComplex theProjectivizedComplex;
   List<QuasiPolynomial> theQPs;
   int NumVariables;
-  std::string ToString(bool useLatex, bool useHtml);
+  std::string toString(bool useLatex, bool useHtml);
   void DrawMe(
     DrawingVariables& theDrawingVars,
     int numLatticePointsPerDim,
@@ -6604,7 +6600,7 @@ class PiecewiseQuasipolynomial {
 
 class MonomialMatrix {
   friend std::ostream& operator<<(std::ostream& output, const MonomialMatrix& theMon) {
-    output << theMon.ToString();
+    output << theMon.toString();
     return output;
   }
   public:
@@ -6674,7 +6670,7 @@ class MonomialMatrix {
     this->dualIndex = - 1;
     this->IsId = true;
   }
-  std::string ToString(FormatExpressions* theFormat = nullptr) const {
+  std::string toString(FormatExpressions* theFormat = nullptr) const {
     (void) theFormat;//avoid unused parameter warning, portable
     std::stringstream out;
     if (!this->IsId) {
@@ -6880,7 +6876,7 @@ public:
     }
     Matrix<coefficient> tempMat;
     this->GetMatrix(tempMat, this->GetMinNumColsNumRows());
-    return tempMat.ToString(theFormat);
+    return tempMat.toString(theFormat);
   }
   void GetMatrix(Matrix<coefficient>& output, int theDim) const {
     theDim = MathRoutines::Maximum(theDim, this->GetMinNumColsNumRows());
@@ -6965,9 +6961,9 @@ public:
     int numColsTarget = inputStandToTheLeftAsVectorRows[0].size;
     if (this->GetMinNumCols() != inputStandToTheLeftAsVectorRows.size) {
       global.fatal << "This is a programming error: attemtping to act by matrix "
-      << this->ToString() << " (" << this->GetMinNumCols() << " columns) "
+      << this->toString() << " (" << this->GetMinNumCols() << " columns) "
       << " on the " << inputStandToTheLeftAsVectorRows.size << " vector-rows: "
-      << inputStandToTheLeftAsVectorRows.ToString() << ". "
+      << inputStandToTheLeftAsVectorRows.toString() << ". "
       << global.fatal;
     }
     for (int i = 0; i < inputStandToTheLeftAsVectorRows.size; i ++) {
@@ -7094,7 +7090,7 @@ class MonomialGeneralizedVerma {
   MonomialGeneralizedVerma(): owner(nullptr), indexFDVector(- 1) {
   }
   friend std::ostream& operator << (std::ostream& output, const MonomialGeneralizedVerma<coefficient>& theGen) {
-    output << theGen.ToString();
+    output << theGen.toString();
     return output;
   }
   void MultiplyMeByUEEltOnTheLefT(
@@ -7107,7 +7103,7 @@ class MonomialGeneralizedVerma {
     this->theMonCoeffOne = other.theMonCoeffOne;
   }
 
-  std::string ToString(FormatExpressions* theFormat = nullptr, bool includeV = true) const;
+  std::string toString(FormatExpressions* theFormat = nullptr, bool includeV = true) const;
   bool operator==(const MonomialGeneralizedVerma<coefficient>& other) const {
     if (this->indexFDVector == other.indexFDVector && this->owner == other.owner) {
       return this->theMonCoeffOne == other.theMonCoeffOne;
@@ -7197,7 +7193,7 @@ public:
   List<MonomialGeneralizedVerma<coefficient> > theMons;
   void SimplifyNormalizeCoeffs();
   friend std::ostream& operator << (std::ostream& output, const MonomialTensorGeneralizedVermas<coefficient>& input) {
-    output << input.ToString();
+    output << input.toString();
     return output;
   }
   int GetNumVars() {
@@ -7239,7 +7235,7 @@ public:
       this->theMons[i].Substitution(theSub, theMods);
     }
   }
-  std::string ToString(FormatExpressions* theFormat = nullptr, bool includeV = true) const;
+  std::string toString(FormatExpressions* theFormat = nullptr, bool includeV = true) const;
   MonomialTensorGeneralizedVermas() {
   }
   void operator=(const MonomialTensorGeneralizedVermas<coefficient>& other) {
@@ -7273,7 +7269,7 @@ public:
     ///This might need a rewrite. As it is, it will cause monomials to be sorted according to the
     ///alphabetical order of their human-readable strings. If I have time, I will make a better scheme for
     ///comparison.
-    return this->ToString() > other.ToString();
+    return this->toString() > other.toString();
   }
 };
 
@@ -7383,7 +7379,7 @@ public:
   bool IndexGEQIndex(int a, int b);
   bool IndexGreaterThanIndex(int a, int b);
   void ComputeDebugString();
-  std::string ToString(FormatExpressions* theFormat = nullptr);
+  std::string toString(FormatExpressions* theFormat = nullptr);
   void MergeBruhatLists(int fromList, int toList);
   std::string KLPolysToString(FormatExpressions* theFormat = nullptr);
   void ComputeKLcoefficients();
@@ -7415,7 +7411,7 @@ void Matrix<coefficient>::Substitution(const PolynomialSubstitution<Rational>& t
 }
 
 template <class coefficient>
-std::string MonomialTensorGeneralizedVermas<coefficient>::ToString(FormatExpressions* theFormat, bool includeV) const {
+std::string MonomialTensorGeneralizedVermas<coefficient>::toString(FormatExpressions* theFormat, bool includeV) const {
   std::stringstream out;
   if (this->theMons.size > 1) {
     for (int i = 0; i < this->theMons.size; i ++) {
@@ -7423,7 +7419,7 @@ std::string MonomialTensorGeneralizedVermas<coefficient>::ToString(FormatExpress
       if (!ishwv) {
         out << "(";
       }
-      out << this->theMons[i].ToString(theFormat, includeV);
+      out << this->theMons[i].toString(theFormat, includeV);
       if (!ishwv) {
         out  << ")";
       }
@@ -7432,13 +7428,13 @@ std::string MonomialTensorGeneralizedVermas<coefficient>::ToString(FormatExpress
       }
     }
   } else {
-    out << this->theMons[0].ToString(theFormat, includeV);
+    out << this->theMons[0].toString(theFormat, includeV);
   }
   return out.str();
 }
 
 template <class coefficient>
-std::string MonomialGeneralizedVerma<coefficient>::ToString(FormatExpressions* theFormat, bool includeV) const {
+std::string MonomialGeneralizedVerma<coefficient>::toString(FormatExpressions* theFormat, bool includeV) const {
   if (this->owner == nullptr) {
     global.fatal << "This is a programming error: non-initialized generalized Verma monomial (owner is 0)." << global.fatal;
   }
@@ -7450,7 +7446,7 @@ std::string MonomialGeneralizedVerma<coefficient>::ToString(FormatExpressions* t
   if (tempS == "- 1" || tempS == "-1") {
     tempS = "-";
   }
-  tempS += this->theMonCoeffOne.ToString(theFormat);
+  tempS += this->theMonCoeffOne.toString(theFormat);
   if (tempS == "1") {
     tempS = "";
   }
@@ -7460,7 +7456,7 @@ std::string MonomialGeneralizedVerma<coefficient>::ToString(FormatExpressions* t
   bool needsCdot = (tempS != "1" && tempS != "-" && tempS != "");
   std::stringstream out;
   out << tempS;
-  tempS = theMod.theGeneratingWordsNonReduced[this->indexFDVector].ToString(theFormat);
+  tempS = theMod.theGeneratingWordsNonReduced[this->indexFDVector].toString(theFormat);
   if (tempS != "1") {
     out << tempS;
   }
@@ -7491,7 +7487,7 @@ std::ostream& operator<<(std::ostream& output, const LinearCombination<templateM
     coefficient& currentCoeff = theCollection.coefficients[theCollection.theMonomials.GetIndex(currentMon)];
     tempStream << currentCoeff;
     tempS1 = tempStream.str();
-    tempS2 = currentMon.ToString();
+    tempS2 = currentMon.toString();
     if (tempS1 == "1" && tempS2 != "1") {
       tempS1 = "";
     }
@@ -7572,7 +7568,7 @@ void MonomialGeneralizedVerma<coefficient>::MultiplyMeByUEEltOnTheLefT(
     currentMon.indexFDVector = this->indexFDVector;
     currentMon.owner = this->owner;
     std::stringstream reportStream;
-    reportStream << "reducing mon: " << currentMon.ToString()
+    reportStream << "reducing mon: " << currentMon.toString()
     << ", index" << j + 1 << " out of " << theUE.size() << "...";
     theReport.Report(reportStream.str());
     currentMon.ReduceMe(buffer);
@@ -7634,7 +7630,7 @@ void MonomialGeneralizedVerma<coefficient>::ReduceMe(
     tempMat1.MakeIdSpecial();
     for (int k = currentMon.Powers.size - 1; k >= 0; k --) {
       std::stringstream reportStream;
-      reportStream << "accounting monomial " << currentMon.ToString() << " of index "
+      reportStream << "accounting monomial " << currentMon.toString() << " of index "
       << l + 1 << " out of "
       << theUEelt.size() << " and letter index " << currentMon.Powers.size - k
       << " out of " << currentMon.Powers.size << "...";
@@ -7811,9 +7807,9 @@ std::string Vectors<coefficient>::ElementsToInequalitiesString(
       }
     } else {
       if (useLatex) {
-        out << "\\geq " << (- (*current.LastObject())).ToString() << "\\\\";
+        out << "\\geq " << (- (*current.LastObject())).toString() << "\\\\";
       } else {
-        out << "=>" <<  (- (*current.LastObject())).ToString();
+        out << "=>" <<  (- (*current.LastObject())).toString();
       }
     }
     if (tempS == "") {

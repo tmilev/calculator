@@ -16,7 +16,7 @@ void ElementWeylGroup::MakeFromReadableReflections(
     }
     this->generatorsLastAppliedFirst[i].index --;
     if (this->generatorsLastAppliedFirst[i].index < 0 || this->generatorsLastAppliedFirst[i].index >= input.GetDim()) {
-      global.fatal << "Bad reflection index: " << this->generatorsLastAppliedFirst[i].ToString() << global.fatal;
+      global.fatal << "Bad reflection index: " << this->generatorsLastAppliedFirst[i].toString() << global.fatal;
     }
   }
   if (!dontMakeCanonical_SET_TRUE_ON_YOUR_OWN_RISK) {
@@ -32,7 +32,7 @@ void WeylGroupData::ComputeOrLoadCharacterTable(std::stringstream* reportStream)
   this->ComputeOrLoadConjugacyClasses(reportStream);
   if (this->LoadCharTable()) {
     if (reportStream != nullptr) {
-      *reportStream << "The character table of " << this->theDynkinType.ToString()
+      *reportStream << "The character table of " << this->theDynkinType.toString()
       << " is precomputed (hard-coded in c++), loading directly. ";
     }
     this->flagCharTableIsComputed = true;
@@ -57,7 +57,7 @@ void WeylGroupData::ComputeOrLoadConjugacyClasses(std::stringstream* reportStrea
   if (this->LoadConjugacyClasses()) {
     if (reportStream != nullptr) {
       *reportStream << "The conjugacy classes of "
-      << this->theDynkinType.ToString()
+      << this->theDynkinType.toString()
       << " are precomputed (hard-coded in c++), loading directly. ";
     }
     this->theGroup.flagCCRepresentativesComputed = true;
@@ -1145,7 +1145,7 @@ bool LoadOutputSubgroupsFromJSData(JSData& input, WeylGroupData& inputGroup, Lis
     } else {
       global.fatal << "Corrupt JSON data, entry number "
       << i + 1 << ": the group labels are: "
-      << currentSGdata.theList[0].ToString(nullptr) << global.fatal;
+      << currentSGdata.theList[0].toString(nullptr) << global.fatal;
     }
     std::string sgString = currentSGdata.theList[0].theList[1].theString;
     readerSubgroup.generatingSimpleRoots.SetSize(0);
@@ -1157,10 +1157,10 @@ bool LoadOutputSubgroupsFromJSData(JSData& input, WeylGroupData& inputGroup, Lis
     DynkinDiagramRootSubalgebra theSAdiagram;
     theSAdiagram.ComputeDiagramTypeModifyInput(readerSubgroup.generatingSimpleRoots, inputGroup);
     theSAdiagram.GetDynkinType(readerSubgroup.theDynkinType);
-    if (readerSubgroup.theDynkinType.ToString() != sgString) {
+    if (readerSubgroup.theDynkinType.toString() != sgString) {
       global.fatal << "Corrupt JSon data: hard-coded Dynkin type is: "
       << sgString << " but dynkin type is computed to be: "
-      << readerSubgroup.theDynkinType.ToString() << global.fatal;
+      << readerSubgroup.theDynkinType.toString() << global.fatal;
     }
     if (currentSGdata.theList[1].theList.size != inputGroup.theGroup.characterTable.size) {
       global.fatal << "Corrupt JSon or non-initialized Weyl group: tau signature has " << currentSGdata.theList[1].theList.size
@@ -1173,7 +1173,7 @@ bool LoadOutputSubgroupsFromJSData(JSData& input, WeylGroupData& inputGroup, Lis
     ) {
       global.fatal << "Bad input group. " << global.fatal;
     }
-    if (inputGroup.theDynkinType.ToString() == "F^{1}_4") {
+    if (inputGroup.theDynkinType.toString() == "F^{1}_4") {
       if (inputGroup.theGroup.ConjugacyClassCount() != 25) {
         global.fatal << "Bad f4. " << global.fatal;
       }
@@ -1432,35 +1432,35 @@ bool WeylGroupData::LoadSignSignatures(List<SubgroupDataRootReflections>& output
   if (!this->LoadCharTable()) {
     return false;
   }
-  if (this->theDynkinType.ToString() == "F^{1}_4") {
+  if (this->theDynkinType.toString() == "F^{1}_4") {
     return LoadSignSignatureF1_4(*this, outputSubgroups);
   }
-  if (this->theDynkinType.ToString() == "E^{1}_6") {
+  if (this->theDynkinType.toString() == "E^{1}_6") {
     return LoadSignSignatureE1_6(*this, outputSubgroups);
   }
-  if (this->theDynkinType.ToString() == "E^{1}_7") {
+  if (this->theDynkinType.toString() == "E^{1}_7") {
     return LoadSignSignatureE1_7(*this, outputSubgroups);
   }
-  if (this->theDynkinType.ToString() == "E^{1}_8") {
+  if (this->theDynkinType.toString() == "E^{1}_8") {
     return LoadSignSignatureE1_8(*this, outputSubgroups);
   }
   return false;
 }
 
 bool WeylGroupData::LoadConjugacyClasses() {
-  if (this->theDynkinType.ToString() == "G^{1}_2") {
+  if (this->theDynkinType.toString() == "G^{1}_2") {
     return LoadConjugacyClassesG1_2(*this);
   }
-  if (this->theDynkinType.ToString() == "F^{1}_4") {
+  if (this->theDynkinType.toString() == "F^{1}_4") {
     return LoadConjugacyClassesF1_4(*this);
   }
-  if (this->theDynkinType.ToString() == "E^{1}_6") {
+  if (this->theDynkinType.toString() == "E^{1}_6") {
     return LoadConjugacyClassesE1_6(*this);
   }
-  if (this->theDynkinType.ToString() == "E^{1}_7") {
+  if (this->theDynkinType.toString() == "E^{1}_7") {
     return LoadConjugacyClassesE1_7(*this);
   }
-  if (this->theDynkinType.ToString() == "E^{1}_8") {
+  if (this->theDynkinType.toString() == "E^{1}_8") {
     return LoadConjugacyClassesE1_8(*this);
   }
   return false;
@@ -1468,19 +1468,19 @@ bool WeylGroupData::LoadConjugacyClasses() {
 
 bool WeylGroupData::LoadCharTable() {
   bool result = false;
-  if (this->theDynkinType.ToString() == "G^{1}_2") {
+  if (this->theDynkinType.toString() == "G^{1}_2") {
     result = LoadCharTableG1_2(*this);
   }
-  if (this->theDynkinType.ToString() == "F^{1}_4") {
+  if (this->theDynkinType.toString() == "F^{1}_4") {
     result = LoadCharTableF1_4(*this);
   }
-  if (this->theDynkinType.ToString() == "E^{1}_6") {
+  if (this->theDynkinType.toString() == "E^{1}_6") {
     result = LoadCharTableE1_6(*this);
   }
-  if (this->theDynkinType.ToString() == "E^{1}_7") {
+  if (this->theDynkinType.toString() == "E^{1}_7") {
     result = LoadCharTableE1_7(*this);
   }
-  if (this->theDynkinType.ToString() == "E^{1}_8") {
+  if (this->theDynkinType.toString() == "E^{1}_8") {
     result = LoadCharTableE1_8(*this);
   }
   if (result) {
@@ -1778,7 +1778,7 @@ bool WeylGroupData::LoadGAPRootSystem(HashedList<Vector<Rational> >& outputPosit
   }
   for (int i = 0; i < this->RootsOfBorel.size; i ++) {
     if (!outputPositiveRootSystem.Contains(this->RootsOfBorel[i])) {
-      global.fatal << " Positive root " << outputPositiveRootSystem[i].ToString() << " is not a GAP root. " << global.fatal;
+      global.fatal << " Positive root " << outputPositiveRootSystem[i].toString() << " is not a GAP root. " << global.fatal;
     }
   }
   return true;

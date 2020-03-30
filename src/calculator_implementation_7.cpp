@@ -84,7 +84,7 @@ bool CalculatorFunctions::innerConstructCartanSA(
       if (input[i].ConvertsInternally(&element)) {
         theSA.theGenerators.AddOnTop(element.content);
       } else {
-        return theCommands << "Failed to extract element of a semisimple Lie algebra from " << input[i].ToString();
+        return theCommands << "Failed to extract element of a semisimple Lie algebra from " << input[i].toString();
       }
     }
   }
@@ -92,7 +92,7 @@ bool CalculatorFunctions::innerConstructCartanSA(
     if (!theSA.theGenerators[i].IsEqualToZero()) {
       if (theSA.owner != nullptr) {
         if (theSA.owner != theSA.theGenerators[i].GetOwner()) {
-          return theCommands << "The input elements in " << input.ToString()
+          return theCommands << "The input elements in " << input.toString()
           << " belong to different semisimple Lie algebras";
         }
       }
@@ -101,11 +101,11 @@ bool CalculatorFunctions::innerConstructCartanSA(
   }
   if (theSA.owner == nullptr) {
     return theCommands << "Failed to extract input semisimple Lie algebra "
-    << "elements from the inputs of " << input.ToString();
+    << "elements from the inputs of " << input.toString();
   }
   theSA.ComputeBasis();
   theSA.ComputeCartanSA();
-  return output.AssignValue(theSA.ToString(), theCommands);
+  return output.AssignValue(theSA.toString(), theCommands);
 }
 
 bool CalculatorFunctions::innerGenerateVectorSpaceClosedWRTLieBracket(
@@ -131,28 +131,28 @@ bool CalculatorFunctions::innerGenerateVectorSpaceClosedWRTLieBracket(
     if (!theCommands.GetVectorFromFunctionArguments(inputModded, theLieAlgElts, &theContext)) {
       return theCommands << "<hr>Failed to extract elements of Weyl algebra and "
       << "failed to extract elements of UE algebra from input "
-      << input.ToString();
+      << input.toString();
     }
     FormatExpressions theFormat;
     theContext.ContextGetFormatExpressions(theFormat);
     std::stringstream out;
     out << "Starting elements: <br>";
     for (int i = 0; i < theLieAlgElts.size; i ++) {
-      out << HtmlRoutines::GetMathSpanPure(theLieAlgElts[i].ToString(&theFormat)) << "<br>";
+      out << HtmlRoutines::GetMathSpanPure(theLieAlgElts[i].toString(&theFormat)) << "<br>";
     }
     bool success = MathRoutines::GenerateVectorSpaceClosedWRTLieBracket(theLieAlgElts, upperBound);
     if (!success) {
       out << "<br>Did not succeed with generating vector space, "
       << "instead got a vector space with basis " << theLieAlgElts.size << " exceeding the limit. "
-      << "The basis generated before exceeding the limit was: " << theLieAlgElts.ToString();
+      << "The basis generated before exceeding the limit was: " << theLieAlgElts.toString();
     } else {
       out << "<br>Lie bracket generates vector space of dimension " << theLieAlgElts.size << " with basis:";
       for (int i = 0; i < theLieAlgElts.size; i ++) {
         out << "<br>";
         if (theLieAlgElts.size > 50) {
-          out << theLieAlgElts[i].ToString(&theFormat);
+          out << theLieAlgElts[i].toString(&theFormat);
         } else {
-          out << HtmlRoutines::GetMathSpanPure(theLieAlgElts[i].ToString(&theFormat));
+          out << HtmlRoutines::GetMathSpanPure(theLieAlgElts[i].toString(&theFormat));
         }
       }
     }
@@ -163,7 +163,7 @@ bool CalculatorFunctions::innerGenerateVectorSpaceClosedWRTLieBracket(
   std::stringstream out;
   out << "Starting elements: <br>";
   for (int i = 0; i < theOps.size; i ++) {
-    out << HtmlRoutines::GetMathSpanPure(theOps[i].ToString(&theFormat)) << "<br>";
+    out << HtmlRoutines::GetMathSpanPure(theOps[i].toString(&theFormat)) << "<br>";
   }
   bool success = MathRoutines::GenerateVectorSpaceClosedWRTLieBracket(theOps, upperBound);
   if (!success) {
@@ -171,16 +171,16 @@ bool CalculatorFunctions::innerGenerateVectorSpaceClosedWRTLieBracket(
     << "instead got a vector space with basis "
     << theOps.size << " exceeding the limit. "
     << "The basis generated before exceeding the limit was: "
-    << theOps.ToString();
+    << theOps.toString();
   } else {
     out << "<br>Lie bracket generates vector space of dimension "
     << theOps.size << " with basis:";
     for (int i = 0; i < theOps.size; i ++) {
       out << "<br>";
       if (theOps.size > 50) {
-        out << theOps[i].ToString(&theFormat);
+        out << theOps[i].toString(&theFormat);
       } else {
-        out << HtmlRoutines::GetMathSpanPure(theOps[i].ToString(&theFormat));
+        out << HtmlRoutines::GetMathSpanPure(theOps[i].toString(&theFormat));
       }
     }
   }
@@ -207,7 +207,7 @@ bool CalculatorFunctions::innerTestLoadPEMCertificates(
     resultStream << "Failed to load asn encoded certificate.<br>";
     resultStream << errorStream.str();
   } else {
-    resultStream << "<br>Loaded certificate successfully.<br>" << theCertificate.ToString();
+    resultStream << "<br>Loaded certificate successfully.<br>" << theCertificate.toString();
   }
   return output.AssignValue(resultStream.str(), theCommands);
 }
@@ -308,7 +308,7 @@ bool CalculatorFunctions::innerTestLoadPEMPrivateKey(
     resultStream << "<br>Failed to load asn encoded certificate.<br>";
     resultStream << errorStream.str();
   } else {
-    resultStream << "<br>Loaded private key.<br>" << thePrivateKey.ToString();
+    resultStream << "<br>Loaded private key.<br>" << thePrivateKey.toString();
   }
   return output.AssignValue(resultStream.str(), theCommands);
 }
@@ -479,7 +479,7 @@ bool CalculatorFunctions::innerConvertBase64ToString(
   }
   std::string inputString, result;
   if (!input[1].IsOfType(&inputString)) {
-    inputString = input[1].ToString();
+    inputString = input[1].toString();
   }
   if (!Crypto::ConvertBase64ToString(inputString, result, &theCommands.Comments)) {
     return false;
@@ -858,7 +858,7 @@ bool CalculatorFunctions::innerExpressionToString(
   if (input.size() != 2) {
     return false;
   }
-  return output.AssignValue(input[1].ToString(), theCommands);
+  return output.AssignValue(input[1].toString(), theCommands);
 }
 
 bool CalculatorFunctions::innerQuoteToString(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -870,7 +870,7 @@ bool CalculatorFunctions::innerQuoteToString(Calculator& theCommands, const Expr
     << "with wrong number of arguments. "
     << "This may be a bug with the function "
     << "Calculator::ParseFillDictionary.</b>";
-    return output.AssignValue(input.ToString(), theCommands);
+    return output.AssignValue(input.toString(), theCommands);
   }
   if (input[1].IsOperation(&operation)) {
     return output.AssignValue(operation, theCommands);
@@ -878,9 +878,9 @@ bool CalculatorFunctions::innerQuoteToString(Calculator& theCommands, const Expr
   theCommands
   << "<b>Warning: this shouldn't happen: quote operation "
   << "is applied to the non-atomic expression: "
-  << input.ToString() << ". "
+  << input.toString() << ". "
   << "This may be a bug with the function Calculator::ParseFillDictionary. </b>";
-  return output.AssignValue(input.ToString(), theCommands);
+  return output.AssignValue(input.toString(), theCommands);
 }
 
 bool CalculatorFunctions::innerFourierTransformEWA(
@@ -1235,7 +1235,7 @@ bool CalculatorFunctions::innerCoefficientOf(Calculator& theCommands, const Expr
   }
   if (!theCommands.GetSumProductsExpressions(input[2], theSummands)) {
     return theCommands << "Failed to extract product of expressions from "
-    << input[2].ToString();
+    << input[2].toString();
   }
   for (int i = 0; i < theSummands.size; i ++) {
     bool isGood = false;
@@ -1388,11 +1388,11 @@ bool CalculatorFunctions::innerSolveSerreLikeSystem(
     Rational upperLimitRat;
     if (!thePolysRational[0].IsConstant(&upperLimitRat)) {
       return theCommands << "Failed to extract a constant from the first argument "
-      << thePolysRational[0].ToString(&theComputation.theFormat) << ". ";
+      << thePolysRational[0].toString(&theComputation.theFormat) << ". ";
     }
     if (!upperLimitRat.IsIntegerFittingInInt(&upperLimit)) {
       return theCommands << "Failed to extract a small integer from the first argument "
-      << upperLimitRat.ToString(&theComputation.theFormat) << ". ";
+      << upperLimitRat.toString(&theComputation.theFormat) << ". ";
     }
     thePolysRational.PopIndexShiftDown(0);
   }
@@ -1408,8 +1408,8 @@ bool CalculatorFunctions::innerSolveSerreLikeSystem(
   theComputation.flagUseTheMonomialBranchingOptimization = true;
   theComputation.SolveSerreLikeSystem(thePolysAlgebraic);
   std::stringstream out;
-  out << "<br>The context vars:<br>" << theContext.ToString();
-  out << "<br>The polynomials: " << thePolysAlgebraic.ToString(&theComputation.theFormat);
+  out << "<br>The context vars:<br>" << theContext.toString();
+  out << "<br>The polynomials: " << thePolysAlgebraic.toString(&theComputation.theFormat);
   out << "<br>Total number of polynomial computations: " << theComputation.NumberSerreSystemComputations;
   if (theComputation.flagSystemProvenToHaveNoSolution) {
     out << "<br>The system does not have a solution. ";
@@ -1437,7 +1437,7 @@ bool CalculatorFunctions::innerConvertAlgebraicNumberToMatrix(
   AlgebraicNumber theNumber;
   if (!argument.IsOfType(&theNumber)) {
     return theCommands << "Failed to convert "
-    << argument.ToString() << " to algebraic number. ";
+    << argument.toString() << " to algebraic number. ";
   }
   int dimension = theNumber.owner->GetDimensionOverTheRationals();
   MatrixTensor<Rational> numberMatrixTensor;
@@ -1469,15 +1469,15 @@ bool CalculatorFunctions::innerGetAlgebraicNumberFromMinPoly(
     theCommands, input, polyE
   )) {
     return theCommands << "<hr>Failed to convert "
-    << input.ToString() << " to polynomial. ";
+    << input.toString() << " to polynomial. ";
   }
   Polynomial<AlgebraicNumber> thePoly;
   if (!polyE.IsOfType<Polynomial<AlgebraicNumber> >(&thePoly)) {
-    return theCommands << "<hr>Failed to convert " << input.ToString()
-    << " to polynomial, instead got " << polyE.ToString();
+    return theCommands << "<hr>Failed to convert " << input.toString()
+    << " to polynomial, instead got " << polyE.toString();
   }
   if (polyE.GetNumContextVariables() != 1) {
-    return theCommands << "<hr>After conversion, I got the polynomial " << polyE.ToString()
+    return theCommands << "<hr>After conversion, I got the polynomial " << polyE.toString()
     << ", which is not in one variable.";
   }
   AlgebraicNumber theAN;
@@ -1742,7 +1742,7 @@ bool IntegralRFComputation::PreparePFExpressionSummands() {
     )) {
       *this->owner
       << "<br>Something is wrong: failed to convert polynomial "
-      << currentPFpolyForm.ToString()
+      << currentPFpolyForm.toString()
       << " to expression. This shouldn't happen. ";
       return false;
     }
@@ -1817,7 +1817,7 @@ bool IntegralRFComputation::IntegrateRF() {
       *this->owner, currentIntegrandPolyForm, currentIntegrand
     )) {
       *this->owner << "<br>Something is wrong: failed to convert polynomial "
-      << currentIntegrandPolyForm.ToString()
+      << currentIntegrandPolyForm.toString()
       << " to expression. This shouldn't happen. ";
       return false;
     }
@@ -1876,8 +1876,8 @@ bool Polynomial<coefficient>::FactorMeNormalizedFactors(
 void IntegralRFComputation::PrepareFormatExpressions() {
   MacroRegisterFunctionWithName("IntegralRFComputation::PrepareFormatExpressions");
   std::stringstream rfStream, polyStream;
-  rfStream << transformedRF.ToString(&this->currentFormaT) << " = ";
-  polyStream << remainderRescaledAlgebraic.ToString(&this->currentFormaT) << " = ";
+  rfStream << transformedRF.toString(&this->currentFormaT) << " = ";
+  polyStream << remainderRescaledAlgebraic.toString(&this->currentFormaT) << " = ";
   int varCounter = 0;
   for (int i = 0; i < this->theDenominatorFactorsWithMults.size(); i ++) {
     int tempSize = - 1;
@@ -1918,7 +1918,7 @@ void IntegralRFComputation::PrepareFormatExpressions() {
         if (theExp == 0) {
           continue;
         }
-        polyStream << "(" << this->theDenominatorFactorsWithMults[j].ToString(&this->currentFormaT) << ")";
+        polyStream << "(" << this->theDenominatorFactorsWithMults[j].toString(&this->currentFormaT) << ")";
         if (theExp > 1) {
           polyStream << "^{" << theExp << "}";
         }
@@ -1927,7 +1927,7 @@ void IntegralRFComputation::PrepareFormatExpressions() {
       if (k > 0) {
         rfStream << "(";
       }
-      rfStream << this->theDenominatorFactorsWithMults[i].ToString(&this->currentFormaT);
+      rfStream << this->theDenominatorFactorsWithMults[i].toString(&this->currentFormaT);
       if (k > 0) {
         rfStream << ")^{" << k + 1 << "}";
       }
@@ -1993,9 +1993,9 @@ void IntegralRFComputation::PrepareFinalAnswer() {
   std::stringstream rfComputedStream, answerFinalStream;
   for (int i = 0; i < theDenominatorFactorsWithMults.size(); i ++) {
     for (int k = 0; k < theDenominatorFactorsWithMults.coefficients[i]; k ++) {
-      rfComputedStream << "\\frac{" << this->theNumerators[i][k].ToString(&this->currentFormaT) << "}";
+      rfComputedStream << "\\frac{" << this->theNumerators[i][k].toString(&this->currentFormaT) << "}";
       rfComputedStream << "{";
-      rfComputedStream << "(" << theDenominatorFactorsWithMults[i].ToString(&this->currentFormaT) << ")";
+      rfComputedStream << "(" << theDenominatorFactorsWithMults[i].toString(&this->currentFormaT) << ")";
       if (k > 0) {
         rfComputedStream << "^{" << k + 1 << "}";
       }
@@ -2009,13 +2009,13 @@ void IntegralRFComputation::PrepareFinalAnswer() {
     }
   }
   this->stringRationalFunctionPartialFractionLatex = rfComputedStream.str();
-  answerFinalStream << this->theRF.ToString(&this->currentFormaT) << "=";
+  answerFinalStream << this->theRF.toString(&this->currentFormaT) << "=";
   if (!this->quotientRat.IsEqualToZero()) {
-    answerFinalStream << this->quotientRat.ToString(&this->currentFormaT) << "+ ";
-    answerFinalStream << this->transformedRF.ToString(&this->currentFormaT) << "=";
+    answerFinalStream << this->quotientRat.toString(&this->currentFormaT) << "+ ";
+    answerFinalStream << this->transformedRF.toString(&this->currentFormaT) << "=";
   }
   if (!this->quotientRat.IsEqualToZero()) {
-    answerFinalStream << this->quotientRat.ToString(&this->currentFormaT) << "+ ";
+    answerFinalStream << this->quotientRat.toString(&this->currentFormaT) << "+ ";
   }
   answerFinalStream << this->stringRationalFunctionPartialFractionLatex;
   this->stringFinalAnswer = answerFinalStream.str();
@@ -2024,22 +2024,22 @@ void IntegralRFComputation::PrepareFinalAnswer() {
 void IntegralRFComputation::PrepareDenominatorFactors() {
   MacroRegisterFunctionWithName("IntegralRFComputation::PrepareDenominatorFactors");
   this->printoutPFsHtml << "The rational function is: " << HtmlRoutines::GetMathSpanPure(
-    "\\frac{" + this->theNum.ToString(&this->currentFormaT) + "}{" + this->theDen.ToString(&this->currentFormaT) + "}"
+    "\\frac{" + this->theNum.toString(&this->currentFormaT) + "}{" + this->theDen.toString(&this->currentFormaT) + "}"
   )
   << ".";
   this->printoutPFsHtml << "<br>The denominator factors are: ";
   this->printoutPFsLatex << "We aim to decompose into partial fractions the following function "
   << "(the denominator has been factored). \\[\\frac{"
-  << this->theNum.ToString(&this->currentFormaT) << "}{" << this->theDen.ToString(&this->currentFormaT) << "}="
-  << "\\frac{" << this->theNum.ToString(&this->currentFormaT)  << "}{ ";
+  << this->theNum.toString(&this->currentFormaT) << "}{" << this->theDen.toString(&this->currentFormaT) << "}="
+  << "\\frac{" << this->theNum.toString(&this->currentFormaT)  << "}{ ";
   this->allFactorsAreOfDegree2orless = true;
   for (int i = 0; i < this->theFactors.size; i ++) {
-    this->printoutPFsHtml << HtmlRoutines::GetMathSpanPure(this->theFactors[i].ToString(&this->currentFormaT));
+    this->printoutPFsHtml << HtmlRoutines::GetMathSpanPure(this->theFactors[i].toString(&this->currentFormaT));
     bool needsParenthesis = this->theFactors[i].NeedsParenthesisForMultiplication();
     if (needsParenthesis) {
       this->printoutPFsLatex << "\\left(";
     }
-    this->printoutPFsLatex << this->theFactors[i].ToString(&this->currentFormaT);
+    this->printoutPFsLatex << this->theFactors[i].toString(&this->currentFormaT);
     if (needsParenthesis) {
       this->printoutPFsLatex << "\\right)";
     }
@@ -2065,7 +2065,7 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
     this->theRF.expressionType == this->theRF.typeRational ||
     this->theRF.expressionType == this->theRF.typePoly
   ) {
-    this->printoutPFsHtml << this->theRF.ToString(&this->currentFormaT) << " is already split into partial fractions. ";
+    this->printoutPFsHtml << this->theRF.toString(&this->currentFormaT) << " is already split into partial fractions. ";
     return true;
   }
   this->theRF.GetDenominator(this->theDen);
@@ -2085,8 +2085,8 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
   }
   if (tempP != this->theDen) {
     global.fatal << "Something is very wrong: product of denominator factors is "
-    << tempP.ToString(&this->currentFormaT)
-    << ", but the denominator equals: " << this->theDen.ToString(&this->currentFormaT);
+    << tempP.toString(&this->currentFormaT)
+    << ", but the denominator equals: " << this->theDen.toString(&this->currentFormaT);
   }
   this->printoutPFsLatex << "\\documentclass{article}\\usepackage{longtable}\\usepackage{xcolor}\\usepackage{multicol} "
   << "\\begin{document}";
@@ -2106,13 +2106,13 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
   needPolyDivision = !this->quotientRat.IsEqualToZero();
   if (needPolyDivision) {
     this->printoutPFsHtml << "<br>The numerator "
-    << HtmlRoutines::GetMathSpanPure(this->theNum.ToString(&this->currentFormaT))
+    << HtmlRoutines::GetMathSpanPure(this->theNum.toString(&this->currentFormaT))
     << " divided by the denominator "
-    << HtmlRoutines::GetMathSpanPure(theDen.ToString(&this->currentFormaT))
+    << HtmlRoutines::GetMathSpanPure(theDen.toString(&this->currentFormaT))
     << " yields "
-    << HtmlRoutines::GetMathSpanPure(this->quotientRat.ToString(&this->currentFormaT))
+    << HtmlRoutines::GetMathSpanPure(this->quotientRat.toString(&this->currentFormaT))
     << " with remainder "
-    << HtmlRoutines::GetMathSpanPure(this->remainderRat.ToString(&this->currentFormaT)) << ". ";
+    << HtmlRoutines::GetMathSpanPure(this->remainderRat.toString(&this->currentFormaT)) << ". ";
     GroebnerBasisComputation<Rational> theGB;
     theGB.flagDoLogDivision = true;
     theGB.flagStoreQuotients = true;
@@ -2162,7 +2162,7 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
     )) {
       this->printoutPFsHtml
       << "Failed to take radical of "
-      << theDiscriminant.ToString()
+      << theDiscriminant.toString()
       << " (radical too large?).";
       return false;
     }
@@ -2195,10 +2195,10 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
   Polynomial<Polynomial<AlgebraicNumber> > univariateThatMustDie;
   thePolyThatMustVanish.GetPolyUnivariateWithPolyCoeffs(0, univariateThatMustDie);
   this->printoutPFsHtml << "<br><br>After rearranging we get that the following polynomial must vanish: "
-  << HtmlRoutines::GetMathSpanPure(univariateThatMustDie.ToString(&this->currentFormaT));
+  << HtmlRoutines::GetMathSpanPure(univariateThatMustDie.toString(&this->currentFormaT));
   this->printoutPFsLatex << "After rearranging we get that the following polynomial must vanish. Here, by ``vanish'' "
   << "we mean that the coefficients of the powers of $x$ must be equal to zero."
-  << "\\[" << univariateThatMustDie.ToString(&this->currentFormaT) << "\\]";
+  << "\\[" << univariateThatMustDie.toString(&this->currentFormaT) << "\\]";
   this->printoutPFsHtml << "<br>Here, by ``vanish'', we mean that the coefficients in front of the powers of x must vanish.";
   Matrix<AlgebraicNumber> theSystemHomogeneous, theSystemHomogeneousForLaTeX, theConstTerms, theConstTermsForLaTeX;
   Polynomial<AlgebraicNumber>::GetLinearSystemFromLinearPolys(univariateThatMustDie.coefficients, theSystemHomogeneous, theConstTerms);
@@ -2258,7 +2258,7 @@ bool CalculatorFunctions::functionSplitToPartialFractionsOverAlgebraicReals(
   if (!isGood) {
     return theCommands << "CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicReals: "
     << "Failed to convert "
-    << input.ToString() << " to rational function. ";
+    << input.toString() << " to rational function. ";
   }
   theComputation.theRF = theComputation.inpuTE.GetValue<RationalFunction>();
   if (theComputation.theRF.GetMinNumVars() > 1) {
@@ -2267,12 +2267,12 @@ bool CalculatorFunctions::functionSplitToPartialFractionsOverAlgebraicReals(
   }
   if (!theComputation.ComputePartialFractionDecomposition()) {
     return theCommands << "Did not manage do decompose "
-    << input.ToString() << " into partial fractions. ";
+    << input.toString() << " into partial fractions. ";
   }
   if (!theComputation.PreparePFExpressionSummands()) {
     return theCommands << "Something went wrong while collecting summands "
     << "while splitting "
-    << input.ToString() << " into partial fractions. ";
+    << input.toString() << " into partial fractions. ";
   }
   return output.MakeSequence(theCommands, &theComputation.thePFSummands);
 }
@@ -2289,7 +2289,7 @@ bool CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicRealsAlgorith
   if (!isGood) {
     return theCommands << "CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicReals: "
     << "Failed to convert "
-    << input.ToString() << " to rational function. ";
+    << input.toString() << " to rational function. ";
   }
   theComputation.theRF = theComputation.inpuTE.GetValue<RationalFunction>();
   if (theComputation.theRF.GetMinNumVars() > 1) {
@@ -2310,14 +2310,14 @@ bool CalculatorFunctions::innerGaussianEliminationMatrix(
   )) {
     return theCommands
     << "<hr>Failed to extract algebraic number matrix from "
-    << input.ToString() << ". ";
+    << input.toString() << ". ";
   }
   Matrix<AlgebraicNumber> theMat;
   if (!theCommands.functionGetMatrix(theConverted, theMat)) {
     return theCommands
     << "<hr>Failed to extract algebraic number matrix, "
     << "got intermediate conversion to: "
-    << theConverted.ToString();
+    << theConverted.toString();
   }
   if (theMat.NumRows < 2) {
     return theCommands
@@ -2382,13 +2382,13 @@ bool CalculatorFunctions::innerCompositeEWAactOnPoly(
   }
   const ElementWeylAlgebra<Rational>& theEWA = theEWAE.GetValue<ElementWeylAlgebra<Rational> >();
   if (theEWA.HasNonSmallPositiveIntegerDerivation()) {
-    return theCommands << "<hr> I cannot apply " << theEWA.ToString()
-    << " onto " << theArgumentPoly.ToString() << " as "
+    return theCommands << "<hr> I cannot apply " << theEWA.toString()
+    << " onto " << theArgumentPoly.toString() << " as "
     << "the differential operator contains non-integral differential operator exponents. ";
   }
   if (!theEWA.ActOnPolynomial(theArgumentPoly)) {
     std::stringstream out;
-    out << "Failed to act by operator " << theEWA.ToString() << " on polynomial " << theArgumentPoly.ToString()
+    out << "Failed to act by operator " << theEWA.toString() << " on polynomial " << theArgumentPoly.toString()
     << " (possibly the weyl algebra element has non-integral exponents)";
     return output.MakeError(out.str(), theCommands);
   }
@@ -2520,8 +2520,8 @@ bool CalculatorFunctions::innerCrossProduct(Calculator& theCommands, const Expre
   const Expression& rightE = input[2];
   if (!leftE.IsSequenceNElementS(3) || !rightE.IsSequenceNElementS(3)) {
     std::stringstream out;
-    out << "Can't compute cross product of the non-3d vectors " << input[1].ToString() << " and "
-    << input[2].ToString() << ". ";
+    out << "Can't compute cross product of the non-3d vectors " << input[1].toString() << " and "
+    << input[2].toString() << ". ";
     return output.MakeError(out.str(), theCommands);
   }
   List<Expression> outputSequence;
@@ -2539,7 +2539,7 @@ bool CalculatorFunctions::innerDifferentiateConstPower(Calculator& theCommands, 
     return false;
   }
   if (!input[1].IsAtom()) {
-    theCommands << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].ToString()
+    theCommands << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].toString()
     << " - possible user typo?";
   }
   const Expression& theDOvar = input[1];
@@ -2567,7 +2567,7 @@ bool CalculatorFunctions::innerDifferentiateAPowerB(Calculator& theCommands, con
     return false;
   }
   if (!input[1].IsAtom()) {
-    theCommands << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].ToString()
+    theCommands << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].toString()
     << " - possible user typo?";
   }
   const Expression& theDOvar = input[1];
@@ -2593,7 +2593,7 @@ bool CalculatorFunctions::innerDifferentiateConstant(Calculator& theCommands, co
     return false;
   }
   if (!input[1].IsAtom()) {
-    theCommands << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].ToString()
+    theCommands << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].toString()
     << " - possible user typo?";
   }
   const Expression& theArgument = input[2];
@@ -2611,7 +2611,7 @@ bool CalculatorFunctions::innerDifferentiateX(Calculator& theCommands, const Exp
     return false;
   }
   if (!input[1].IsAtom()) {
-    theCommands << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].ToString()
+    theCommands << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].toString()
     << " - possible user typo?";
   }
   const Expression& theDOvar = input[1];
@@ -2632,7 +2632,7 @@ bool CalculatorFunctions::innerDifferentiateTrigAndInverseTrig(
   }
   if (!input[1].IsAtom()) {
     theCommands << "<hr>Warning: differentiating with respect to the non-atomic expression "
-    << input[1].ToString() << " - possible user typo?";
+    << input[1].toString() << " - possible user typo?";
   }
   const Expression& theArgument = input[2];
   //////////////////////
@@ -2924,7 +2924,7 @@ bool CalculatorFunctions::innerDifferentiateChainRule(
     return false;
   }
   if (!input[1].IsAtom()) {
-    theCommands << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].ToString()
+    theCommands << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].toString()
     << " - possible user typo?";
   }
   const Expression& theDOvar = input[1], theArgument = input[2];
@@ -2956,7 +2956,7 @@ bool CalculatorFunctions::innerDifferentiateAplusB(
   }
   if (!input[1].IsAtom()) {
     theCommands << "<hr>Warning: differentiating with respect to the non-atomic expression "
-    << input[1].ToString() << " - possible user typo?";
+    << input[1].toString() << " - possible user typo?";
   }
   const Expression& theDOvar = input[1], theArgument = input[2];
   //////////////////////
@@ -2980,7 +2980,7 @@ bool CalculatorFunctions::innerDifferentiateAtimesB(
     return false;
   }
   if (!input[1].IsAtom()) {
-    theCommands << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].ToString()
+    theCommands << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].toString()
     << " - possible user typo?";
   }
   const Expression& theDOvar = input[1], theArgument = input[2];
@@ -3026,7 +3026,7 @@ bool CalculatorFunctions::innerDifferentiateAdivideBCommutative(
     return false;
   }
   if (!input[1].IsAtom()) {
-    theCommands << "<hr>Warning: differentiating with respect to the non-atomic expression " << input[1].ToString()
+    theCommands << "<hr>Warning: differentiating with respect to the non-atomic expression " << input[1].toString()
     << " - possible user typo?";
   }
   const Expression& theDOvar = input[1], theArgument = input[2];
@@ -3085,7 +3085,7 @@ bool CalculatorFunctions::innerDifferentiateAdivideBNONCommutative(
     return false;
   }
   if (!input[1].IsAtom()) {
-    theCommands << "<hr>Warning: differentiating with respect to the non-atomic expression " << input[1].ToString()
+    theCommands << "<hr>Warning: differentiating with respect to the non-atomic expression " << input[1].toString()
     << " - possible user typo?";
   }
   const Expression& theDOvar = input[1], theArgument = input[2];
@@ -3224,12 +3224,12 @@ bool CalculatorFunctions::innerCompareFunctionsNumerically(
   int numPoints = 50;
   if (input.size() > 5) {
     if (!input[5].IsSmallInteger(&numPoints)) {
-      return theCommands << "Failed to convert argument: " << input[5].ToString() << " to a small integer. ";
+      return theCommands << "Failed to convert argument: " << input[5].toString() << " to a small integer. ";
     }
   }
   double minDiff = 0, maxDiff = 0;
   if (!theFunE.EvaluatesToDoubleInRange(
-    theVars[0].ToString(), leftBoundary, rightBoundary, numPoints, &minDiff, &maxDiff, nullptr
+    theVars[0].toString(), leftBoundary, rightBoundary, numPoints, &minDiff, &maxDiff, nullptr
   )) {
     return theCommands << "Failed to evaluate your function to a number. "
     << "The sampling interval may be outside of the domain of the function. ";
@@ -3237,7 +3237,7 @@ bool CalculatorFunctions::innerCompareFunctionsNumerically(
   double tolerance = 0.0001;
   if (input.size() > 6) {
     if (!input[6].EvaluatesToDouble(&tolerance)) {
-      return theCommands << "Failed to evaluate the argument " << input[6].ToString() << " to a floating point number. ";
+      return theCommands << "Failed to evaluate the argument " << input[6].toString() << " to a floating point number. ";
     }
   }
   if (minDiff < - tolerance || maxDiff > tolerance) {
@@ -3267,14 +3267,14 @@ bool CalculatorFunctions::innerCompareExpressionsNumericallyAtPoints(
   }
   double tolerance = 0.0001;
   if (!input[3].EvaluatesToDouble(&tolerance)) {
-    return theCommands << "Failed to evaluate tolerance limit from " << input[3].ToString()
+    return theCommands << "Failed to evaluate tolerance limit from " << input[3].toString()
     << " to a floating point number. ";
   }
   if (tolerance < 0) {
     tolerance *= - 1;
   }
   if (!input[4].StartsWith(theCommands.opIn(), 3)) {
-    return theCommands << "The fourth argument " << input[4].ToString() << " needs to be "
+    return theCommands << "The fourth argument " << input[4].toString() << " needs to be "
     << " of the form (x,y,...)\\in (...). ";
   }
   const Expression& theVarsE = input[4][1];
@@ -3292,7 +3292,7 @@ bool CalculatorFunctions::innerCompareExpressionsNumericallyAtPoints(
   for (int i = 0; i < theFreeVars.size; i ++) {
     if (!varsGiven.Contains(theFreeVars[i])) {
       return theCommands << "The expression depends on "
-      << theFreeVars[i].ToString()
+      << theFreeVars[i].toString()
       << " but I no value given for that expression. ";
     }
   }
@@ -3307,7 +3307,7 @@ bool CalculatorFunctions::innerCompareExpressionsNumericallyAtPoints(
   )) {
     return theCommands
     << "Failed to extract list of points from: "
-    << thePointsE.ToString();
+    << thePointsE.toString();
   }
   HashedList<Expression> knownEs = theCommands.knownDoubleConstants;
   List<double> knownValues = theCommands.knownDoubleConstantValues;
@@ -3367,21 +3367,21 @@ bool CalculatorFunctions::innerCompareExpressionsNumerically(
   for (int i = 4; i < input.size(); i += 2) {
     const Expression& currentIntervalWithVariable = input[i];
     if (!currentIntervalWithVariable.StartsWith(theCommands.opIn(), 3)) {
-      return theCommands << "Expression " << currentIntervalWithVariable.ToString()
+      return theCommands << "Expression " << currentIntervalWithVariable.toString()
       << " is not a belonging relation (does not use the \\in symbol). ";
     }
     if (!currentIntervalWithVariable[2].IsSequenceNElementS(2)) {
-      return theCommands << "Could not get a two-element sequence from " << currentIntervalWithVariable[2].ToString();
+      return theCommands << "Could not get a two-element sequence from " << currentIntervalWithVariable[2].toString();
     }
     double currentLeft, currentRight;
     if (!currentIntervalWithVariable[2][1].EvaluatesToDouble(&currentLeft)) {
-      return theCommands << "Could not get a double from " << currentIntervalWithVariable[2][1].ToString();
+      return theCommands << "Could not get a double from " << currentIntervalWithVariable[2][1].toString();
     }
     if (!currentIntervalWithVariable[2][2].EvaluatesToDouble(&currentRight)) {
-      return theCommands << "Could not get a double from " << currentIntervalWithVariable[2][2].ToString();
+      return theCommands << "Could not get a double from " << currentIntervalWithVariable[2][2].toString();
     }
     if (theBoundaryVars.Contains(currentIntervalWithVariable[1])) {
-      return theCommands << "Expression " << currentIntervalWithVariable[1].ToString()
+      return theCommands << "Expression " << currentIntervalWithVariable[1].toString()
       << " specified an interval range more than once. ";
     }
     theBoundaryVars.AddOnTop(currentIntervalWithVariable[1]);
@@ -3394,21 +3394,21 @@ bool CalculatorFunctions::innerCompareExpressionsNumerically(
         *numSamples.LastObject() = currentNumSamplingPoints;
       } else {
         return theCommands << "Failed to extract a small integer for the number of sampling points from: "
-        << input[i + 1].ToString();
+        << input[i + 1].toString();
       }
       if (*numSamples.LastObject() > 1000) {
         return theCommands << *numSamples.LastObject() << " sampling points requested for variable/expression "
-        << theBoundaryVars.LastObject()->ToString() << "; this exceeds the hard-coded limit of 1000. ";
+        << theBoundaryVars.LastObject()->toString() << "; this exceeds the hard-coded limit of 1000. ";
       }
       if (*numSamples.LastObject() < 1) {
         return theCommands << *numSamples.LastObject() << " sampling points requested for variable/expression "
-        << theBoundaryVars.LastObject()->ToString() << "; this is not allowed. ";
+        << theBoundaryVars.LastObject()->toString() << "; this is not allowed. ";
       }
     }
   }
   for (int i = 0; i < theVars.size; i ++) {
     if (!theBoundaryVars.Contains(theVars[i])) {
-      return theCommands << "Could not find an interval for variable/expression: " << theVars[i].ToString();
+      return theCommands << "Could not find an interval for variable/expression: " << theVars[i].toString();
     }
   }
   HashedList<Expression> knownEs = theCommands.knownDoubleConstants;
@@ -3426,12 +3426,12 @@ bool CalculatorFunctions::innerCompareExpressionsNumerically(
   theSamplingSelector.initFromInts(numSamples);
   if (theSamplingSelector.TotalNumSubsets() > 1000000) {
     return theCommands << "The total number of sampling points, "
-    << theSamplingSelector.TotalNumSubsets().ToString() << " exceeds "
+    << theSamplingSelector.TotalNumSubsets().toString() << " exceeds "
     << "the hard-coded limit of 1000000. ";
   }
   double tolerance = 0.0001;
   if (!input[3].EvaluatesToDouble(&tolerance)) {
-    return theCommands << "Failed to evaluate tolerance limit from " << input[3].ToString()
+    return theCommands << "Failed to evaluate tolerance limit from " << input[3].toString()
     << " to a floating point number. ";
   }
   if (tolerance < 0) {
@@ -3673,7 +3673,7 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
   theContext = converted.GetContext();
   if (theMatrix.NumRows != theMatrix.NumCols || theMatrix.NumCols < 1) {
     std::stringstream out;
-    out << "The matrix " << theMatrix.ToString( ) << " has "
+    out << "The matrix " << theMatrix.toString( ) << " has "
     << theMatrix.NumCols << " columns and " << theMatrix.NumRows << " rows. "
     << "The matrix is not square.";
     return output.MakeError(out.str(), theCommands);
@@ -3691,12 +3691,12 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
   theFormat.flagUseFrac = true;
   theFormat.MatrixColumnVerticalLineIndex = theMatrix.NumCols - 1;
   out << "Computing "
-  << HtmlRoutines::GetMathSpanPure(theMatrix.ToString(&theFormat) + "^{- 1}");
+  << HtmlRoutines::GetMathSpanPure(theMatrix.toString(&theFormat) + "^{- 1}");
   extendedMatrix = theMatrix;
   extendedMatrix.AppendMatrixOnTheRight(outputMat);
-  out << "<br>" << HtmlRoutines::GetMathSpanPure(extendedMatrix.ToString(&theFormat)) ;
+  out << "<br>" << HtmlRoutines::GetMathSpanPure(extendedMatrix.toString(&theFormat)) ;
   outLaTeX << "\\begin{tabular}{ll}";
-  outLaTeX << "$" << extendedMatrix.ToString(& theFormat) << "$";
+  outLaTeX << "$" << extendedMatrix.toString(& theFormat) << "$";
 
   for (int i = 0; i < theMatrix.NumCols; i ++) {
     tempI = theMatrix.FindPivot(i, NumFoundPivots);
@@ -3708,24 +3708,24 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
         outLaTeX << "& Swap row " << NumFoundPivots + 1 << " and row " << tempI + 1 << ". ";
         extendedMatrix = theMatrix;
         extendedMatrix.AppendMatrixOnTheRight(outputMat);
-        out << "<br>" << HtmlRoutines::GetMathSpanPure(outputMat.ToString(&theFormat));
-        outLaTeX << "\\\\" << "$" << outputMat.ToString(&theFormat) << "$";
+        out << "<br>" << HtmlRoutines::GetMathSpanPure(outputMat.toString(&theFormat));
+        outLaTeX << "\\\\" << "$" << outputMat.toString(&theFormat) << "$";
       }
       tempElement = theMatrix(NumFoundPivots, i);
       tempElement.Invert();
       if (tempElement != 1) {
         out << "<br> multiply row number " << NumFoundPivots + 1 << " by "
-        << tempElement.ToString(&theFormat) << ": ";
+        << tempElement.toString(&theFormat) << ": ";
         outLaTeX << "& multiply row number " << NumFoundPivots + 1 << " by $"
-        << tempElement.ToString(&theFormat) << "$. \\\\";
+        << tempElement.toString(&theFormat) << "$. \\\\";
       }
       theMatrix.RowTimesScalar(NumFoundPivots, tempElement);
       outputMat.RowTimesScalar(NumFoundPivots, tempElement);
       if (tempElement != 1) {
         extendedMatrix = theMatrix;
         extendedMatrix.AppendMatrixOnTheRight(outputMat);
-        out << HtmlRoutines::GetMathSpanPure(extendedMatrix.ToString(&theFormat));
-        outLaTeX << "$" << extendedMatrix.ToString(&theFormat) << "$";
+        out << HtmlRoutines::GetMathSpanPure(extendedMatrix.toString(&theFormat));
+        outLaTeX << "$" << extendedMatrix.toString(&theFormat) << "$";
       }
       bool found = false;
       for (int j = 0; j < theMatrix.NumRows; j ++) {
@@ -3745,9 +3745,9 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
             }
             found = true;
             out << " Row index " << NumFoundPivots + 1 << " times "
-            << tempElement.ToString(&theFormat) << " added to row index " << j + 1;
+            << tempElement.toString(&theFormat) << " added to row index " << j + 1;
             outLaTeX << " Row index " << NumFoundPivots + 1 << " times $"
-            << tempElement.ToString(&theFormat) << "$ added to row index " << j + 1 << "\\\\";
+            << tempElement.toString(&theFormat) << "$ added to row index " << j + 1 << "\\\\";
           }
         }
       }
@@ -3757,8 +3757,8 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
         outLaTeX << "\\\\";
         extendedMatrix = theMatrix;
         extendedMatrix.AppendMatrixOnTheRight(outputMat);
-        out << HtmlRoutines::GetMathSpanPure(extendedMatrix.ToString(&theFormat));
-        outLaTeX << "$" << extendedMatrix.ToString(&theFormat) << "$";
+        out << HtmlRoutines::GetMathSpanPure(extendedMatrix.toString(&theFormat));
+        outLaTeX << "$" << extendedMatrix.toString(&theFormat) << "$";
       }
       NumFoundPivots ++;
     }
@@ -3775,10 +3775,10 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
   } else {
     out << "<br>The inverse of the starting matrix "
     << "can be read off on the matrix to the left of the id matrix: "
-    << HtmlRoutines::GetMathSpanPure(outputMat.ToString(&theFormat));
+    << HtmlRoutines::GetMathSpanPure(outputMat.toString(&theFormat));
     outLaTeX << " The inverse matrix can now be read off as the matrix "
     << "to the left of the identity matrix: $"
-    << outputMat.ToString(&theFormat) << "$";
+    << outputMat.toString(&theFormat) << "$";
   }
   out << "Output in LaTeX: <br><br>" << outLaTeX.str();
   return output.AssignValue(out.str(), theCommands);
@@ -3790,7 +3790,7 @@ bool Calculator::innerInvertMatrixVerbose(
   MacroRegisterFunctionWithName("Calculator::innerInvertMatrixVerbose");
   Expression converted;
   if (!CalculatorConversions::innerMakeMatrix(theCommands, input, converted)) {
-    return theCommands << "Failed to get matrix from: " << input.ToString();
+    return theCommands << "Failed to get matrix from: " << input.toString();
   }
 
   Matrix<Rational> mat, outputMat, tempMat;
@@ -3811,10 +3811,10 @@ bool Calculator::innerInvertMatrixVerbose(
   theFormat.flagUseLatex = true;
   theFormat.flagUseHTML = false;
   theFormat.MatrixColumnVerticalLineIndex = mat.NumCols - 1;
-  out << "Computing " << HtmlRoutines::GetMathSpanPure(mat.ToString(&theFormat) + "^{- 1}");
+  out << "Computing " << HtmlRoutines::GetMathSpanPure(mat.toString(&theFormat) + "^{- 1}");
   tempMat = mat;
   tempMat.AppendMatrixOnTheRight(outputMat);
-  out << "<br>" << HtmlRoutines::GetMathSpanPure(tempMat.ToString(&theFormat));
+  out << "<br>" << HtmlRoutines::GetMathSpanPure(tempMat.toString(&theFormat));
   for (int i = 0; i < mat.NumCols; i ++) {
     tempI = mat.FindPivot(i, NumFoundPivots);
     if (tempI != - 1) {
@@ -3826,7 +3826,7 @@ bool Calculator::innerInvertMatrixVerbose(
         tempMat = mat;
         tempMat.AppendMatrixOnTheRight(outputMat);
         out << "<br>"
-        << HtmlRoutines::GetMathSpanPure(outputMat.ToString(&theFormat));
+        << HtmlRoutines::GetMathSpanPure(outputMat.toString(&theFormat));
       }
       tempElement = mat.elements[NumFoundPivots][i];
       tempElement.Invert();
@@ -3839,7 +3839,7 @@ bool Calculator::innerInvertMatrixVerbose(
       if (tempElement != 1) {
         tempMat = mat;
         tempMat.AppendMatrixOnTheRight(outputMat);
-        out << HtmlRoutines::GetMathSpanPure(tempMat.ToString(&theFormat));
+        out << HtmlRoutines::GetMathSpanPure(tempMat.toString(&theFormat));
       }
       bool found = false;
       for (int j = 0; j < mat.NumRows; j ++) {
@@ -3864,7 +3864,7 @@ bool Calculator::innerInvertMatrixVerbose(
         out << ": <br> ";
         tempMat = mat;
         tempMat.AppendMatrixOnTheRight(outputMat);
-        out << HtmlRoutines::GetMathSpanPure(tempMat.ToString(&theFormat));
+        out << HtmlRoutines::GetMathSpanPure(tempMat.toString(&theFormat));
       }
       NumFoundPivots ++;
     }
@@ -3876,7 +3876,7 @@ bool Calculator::innerInvertMatrixVerbose(
   } else {
     out << "<br>The inverse of the starting matrix can "
     << "be read off on the matrix to the left of the id matrix: "
-    << HtmlRoutines::GetMathSpanPure(outputMat.ToString(&theFormat));
+    << HtmlRoutines::GetMathSpanPure(outputMat.toString(&theFormat));
   }
   return output.AssignValue(out.str(), theCommands);
 }
@@ -3932,12 +3932,12 @@ bool CalculatorFunctions::innerPolynomialRelations(
   std::stringstream out;
   out << "Polynomials:";
   for (int i = 0; i < theGens.size; i ++) {
-    out << "<br>" << theGens[i].ToString(&theFormat) << "=" << inputVector[i].ToString(&theFormat);
+    out << "<br>" << theGens[i].toString(&theFormat) << "=" << inputVector[i].toString(&theFormat);
   }
   out << "<br>Relations: ";
   for (int i = 0; i < theRels.size; i ++) {
     theRels[i].ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
-    out << "<br>" << theRels[i].ToString(&theFormat);
+    out << "<br>" << theRels[i].toString(&theFormat);
   }
   return output.AssignValue(out.str(), theCommands);
 }
@@ -3983,28 +3983,28 @@ bool CalculatorFunctions::innerIntegrateRationalFunctionSplitToBuidingBlocks(
     return theCommands
     << "<hr>Call of function CalculatorConversions::innerRationalFunction "
     << "failed, input was: "
-    << theFunctionE.ToString();
+    << theFunctionE.toString();
   }
   if (!theComputation.inpuTE.IsOfType<RationalFunction>()) {
     return theCommands
     << "<hr>CalculatorFunctions::innerIntegrateRationalFunctionSplitToBuidingBlocks: "
     << "failed to convert "
-    << theFunctionE.ToString() << " to rational function. "
-    << "Attempt to converted expression yielded: " << theComputation.inpuTE.ToString();
+    << theFunctionE.toString() << " to rational function. "
+    << "Attempt to converted expression yielded: " << theComputation.inpuTE.toString();
   }
   if (theComputation.inpuTE.GetNumContextVariables() > 1) {
-    return theCommands << "<hr>I converted " << theFunctionE.ToString()
+    return theCommands << "<hr>I converted " << theFunctionE.toString()
     << " to rational function, but it is of "
     << theComputation.inpuTE.GetNumContextVariables()
     << " variables. I have been taught to work with 1 variable only. "
     << "<br>The context of the rational function is: "
-    << theComputation.inpuTE.GetContext().ToString();
+    << theComputation.inpuTE.GetContext().toString();
   }
   if (theComputation.inpuTE.GetNumContextVariables() == 1) {
     if (theComputation.inpuTE.GetContext().ContextGetContextVariable(0) != theVariableE) {
       return theCommands << "<hr>The univariate rational function was in variable "
-      << theComputation.inpuTE.GetContext().ToString()
-      << " but the variable of integration is " << theVariableE.ToString();
+      << theComputation.inpuTE.GetContext().toString()
+      << " but the variable of integration is " << theVariableE.toString();
     }
   }
   theComputation.integrationSetE = integrationSetE;
@@ -4242,12 +4242,12 @@ bool CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIaandIIIa(
     !A.IsConstantNumber() || !B.IsConstantNumber()
   ) {
     return theCommands << "<hr>Failed to evaluate to constant the coefficients of the block IIa and IIIa integral."
-    << "The coefficients are: " << a.ToString() << ", " << b.ToString() << ", " << c.ToString() << ", "
-    << A.ToString() << ", " << B.ToString() << ". ";
+    << "The coefficients are: " << a.toString() << ", " << b.toString() << ", " << c.toString() << ", "
+    << A.toString() << ", " << B.toString() << ". ";
   }
   double approxa, approxb, approxc;
   if (!a.EvaluatesToDouble(&approxa) || !b.EvaluatesToDouble(&approxb) || !c.EvaluatesToDouble(&approxc)) {
-    return theCommands << "<hr>Failed to evaluate variable coefficients in denominator " << denNoPower.ToString()
+    return theCommands << "<hr>Failed to evaluate variable coefficients in denominator " << denNoPower.toString()
     << " to double. Possible user typo. ";
   }
   if (approxb*approxb >= approxa * approxc * 4) {
@@ -4313,12 +4313,12 @@ bool CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIIb(
   }
   if (!a.IsEqualToOne() || !b.IsConstantNumber() || !c.IsConstantNumber()) {
     theCommands << "<hr>Failed to evaluate to constant the coefficients of the block IIIb integral."
-    << "The coefficients are: " << a.ToString() << ", " << b.ToString() << ", " << c.ToString() << ". ";
+    << "The coefficients are: " << a.toString() << ", " << b.toString() << ", " << c.toString() << ". ";
     return false;
   }
   double approxa, approxb, approxc;
   if (!a.EvaluatesToDouble(&approxa) || !b.EvaluatesToDouble(&approxb) || !c.EvaluatesToDouble(&approxc)) {
-    theCommands << "Failed to evaluate variable coefficients in denominator " << denNoPower.ToString()
+    theCommands << "Failed to evaluate variable coefficients in denominator " << denNoPower.toString()
     << " to double. Possible user typo. ";
     return false;
   }
@@ -4388,13 +4388,13 @@ bool CalculatorFunctions::innerIntegrateRationalFunctionBuidingBlockIIb(
     !A.IsConstantNumber() || !B.IsConstantNumber()
   ) {
     theCommands << "<hr>Failed to evaluate to constant the coefficients of the block IIb integral."
-    << "The coefficients are: " << a.ToString() << ", " << b.ToString() << ", " << c.ToString() << ", "
-    << A.ToString() << ", " << B.ToString() << ". ";
+    << "The coefficients are: " << a.toString() << ", " << b.toString() << ", " << c.toString() << ", "
+    << A.toString() << ", " << B.toString() << ". ";
     return false;
   }
   double approxa, approxb, approxc;
   if (!a.EvaluatesToDouble(&approxa) || !b.EvaluatesToDouble(&approxb) || !c.EvaluatesToDouble(&approxc)) {
-    theCommands << "Failed to evaluate variable coefficients in denominator " << denNoPower.ToString()
+    theCommands << "Failed to evaluate variable coefficients in denominator " << denNoPower.toString()
     << " to double. Possible user typo. ";
     return false;
   }
@@ -5060,7 +5060,7 @@ bool CalculatorFunctions::innerDifferentiateSqrt(Calculator& theCommands, const 
   }
   if (!input[1].IsAtom()) {
     theCommands << "<hr>Warning: differentiating with respect to the non-atomic expression "
-    << input[1].ToString() << " - possible user typo?";
+    << input[1].toString() << " - possible user typo?";
   }
   const Expression& theArgument = input[2];
   if (!theArgument.IsOperationGiven(theCommands.opSqrt())) {
@@ -5355,7 +5355,7 @@ bool CalculatorFunctions::innerGrowDynkinType(
   tempSas.ComputeSl2sInitOrbitsForComputationOnDemand();
   if (!tempSas.RanksAndIndicesFit(theSmallDynkinType)) {
     return output.MakeError(
-      "Error: type " + theSmallDynkinType.ToString() + " does not fit inside " + theSSalg.content->theWeyl.theDynkinType.ToString(),
+      "Error: type " + theSmallDynkinType.toString() + " does not fit inside " + theSSalg.content->theWeyl.theDynkinType.toString(),
       theCommands
     );
   }
@@ -5363,13 +5363,13 @@ bool CalculatorFunctions::innerGrowDynkinType(
   List<List<int> > imagesSimpleRoots;
   if (!tempSas.GrowDynkinType(theSmallDynkinType, largerTypes, &imagesSimpleRoots)) {
     return output.MakeError(
-      "Error: growing type " + theSmallDynkinType.ToString() + " inside " + theSSalg.content->theWeyl.theDynkinType.ToString() + " failed. ",
+      "Error: growing type " + theSmallDynkinType.toString() + " inside " + theSSalg.content->theWeyl.theDynkinType.toString() + " failed. ",
       theCommands
     );
   }
   std::stringstream out;
-  out << "Inside " << theSSalg.content->theWeyl.theDynkinType.ToString()
-  << ", input type " << theSmallDynkinType.ToString();
+  out << "Inside " << theSSalg.content->theWeyl.theDynkinType.toString()
+  << ", input type " << theSmallDynkinType.toString();
   if (largerTypes.size == 0) {
     out << " cannot grow any further. ";
   } else {
@@ -5380,7 +5380,7 @@ bool CalculatorFunctions::innerGrowDynkinType(
     << "<td>Root injection</td>"
     << "<td>Highest weight module containing new simple generator</td></tr>";
     for (int i = 0; i < largerTypes.size; i ++) {
-      out << "<tr><td>" << largerTypes[i].ToString() << "</td>";
+      out << "<tr><td>" << largerTypes[i].toString() << "</td>";
       out << "<td>";
       for (int j = 0; j < imagesSimpleRoots[i].size; j ++) {
         out << "r_" << j + 1 << " -> " << "r_" << imagesSimpleRoots[i][j] + 1;
@@ -5558,7 +5558,7 @@ bool CalculatorFunctions::innerMinPolyMatrix(
   if (!theCommands.functionGetMatrix(argument, theMat)) {
     return theCommands
     << "<hr>Minimal poly computation: could not convert "
-    << argument.ToString() << " to rational matrix.";
+    << argument.toString() << " to rational matrix.";
   }
   if (theMat.NumRows != theMat.NumCols || theMat.NumRows <= 0) {
     return output.MakeError("Error: matrix is not square.", theCommands);
@@ -5568,7 +5568,7 @@ bool CalculatorFunctions::innerMinPolyMatrix(
   tempF.polyAlphabeT[0] = "q";
   Polynomial<Rational> theMinPoly;
   theMinPoly.AssignMinPoly(theMat);
-  return output.AssignValue(theMinPoly.ToString(&tempF), theCommands);
+  return output.AssignValue(theMinPoly.toString(&tempF), theCommands);
 }
 
 bool CalculatorFunctions::innerCharPolyMatrix(
@@ -5583,7 +5583,7 @@ bool CalculatorFunctions::innerCharPolyMatrix(
   if (!theCommands.functionGetMatrix(argument, theMat)) {
     return theCommands
     << "<hr>Characteristic poly computation: could not convert "
-    << input.ToString() << " to rational matrix.";
+    << input.toString() << " to rational matrix.";
   }
   if (theMat.NumRows != theMat.NumCols || theMat.NumRows <= 0) {
     return output.MakeError("Error: matrix is not square.", theCommands);
@@ -5593,7 +5593,7 @@ bool CalculatorFunctions::innerCharPolyMatrix(
   tempF.polyAlphabeT[0] = "q";
   Polynomial<Rational> theCharPoly;
   theCharPoly.AssignCharPoly(theMat);
-  return output.AssignValue(theCharPoly.ToString(&tempF), theCommands);
+  return output.AssignValue(theCharPoly.toString(&tempF), theCommands);
 }
 
 bool CalculatorFunctions::innerReverseBytes(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -5681,11 +5681,11 @@ bool CalculatorFunctions::innerExpressionLeafs(
   if (input.StartsWithGivenOperation("ExpressionLeafs")) {
     for (int i = 1; i < input.size(); i ++) {
       if (!input[i].GetExpressionLeafs(theLeafs)) {
-        return theCommands << "Failed to extract expression leafs from " << input.ToString() << ".";
+        return theCommands << "Failed to extract expression leafs from " << input.toString() << ".";
       }
     }
   } else if (!input.GetExpressionLeafs(theLeafs)) {
-    return theCommands << "Failed to extract expression leafs from " << input.ToString() << ".";
+    return theCommands << "Failed to extract expression leafs from " << input.toString() << ".";
   }
   return output.MakeSequence(theCommands, &theLeafs);
 }
@@ -5697,7 +5697,7 @@ bool CalculatorFunctions::innerLastElement(Calculator& theCommands, const Expres
   }
   if (input.IsAtom()) {
     std::stringstream out;
-    out << "Error: requesting the last element of the atom " << input.ToString();
+    out << "Error: requesting the last element of the atom " << input.toString();
     return output.MakeError(out.str(), theCommands);
   }
   if (input.size() == 2) {
@@ -5719,9 +5719,9 @@ bool CalculatorFunctions::innerRemoveLastElement(Calculator& theCommands, const 
   if (input.IsAtom() || input.size() == 1) {
     std::stringstream out;
     if (input.IsAtom()) {
-      out << "Error: requesting to remove the last element of the atom " << input.ToString() << ". ";
+      out << "Error: requesting to remove the last element of the atom " << input.toString() << ". ";
     } else {
-      out << "Error: requesting to remove the last element of the zero-element list " << input.ToString() << ". ";
+      out << "Error: requesting to remove the last element of the zero-element list " << input.toString() << ". ";
     }
     return output.MakeError(out.str(), theCommands);
   }
@@ -5847,7 +5847,7 @@ bool CalculatorFunctions::innerInvertMatrix(Calculator& theCommands, const Expre
   Matrix<AlgebraicNumber> theMatAlg;
   if (theCommands.functionGetMatrix(input, theMatAlg)) {
     return theCommands << "<hr>Failed to extract algebraic number matrix from: "
-    << input.ToString();
+    << input.toString();
   }
   if (theMatAlg.NumRows != theMatAlg.NumCols || theMatAlg.NumCols < 1) {
     return output.MakeError("The matrix is not square", theCommands);
@@ -5867,13 +5867,13 @@ bool CalculatorFunctions::innerDFQsEulersMethod(Calculator& theCommands, const E
   double xInitial, yInitial, leftEndpoint, rightEndpoint;
   int numPoints;
   if (!input[2].EvaluatesToDouble(&xInitial) || !input[3].EvaluatesToDouble(&yInitial)) {
-    return theCommands << "Failed to extract initial x,y values from " << input.ToString();
+    return theCommands << "Failed to extract initial x,y values from " << input.toString();
   }
   if (!input[4].IsSmallInteger(&numPoints)) {
-    return theCommands << "Failed to extract number of points from " << input.ToString();
+    return theCommands << "Failed to extract number of points from " << input.toString();
   }
   if (!input[5].EvaluatesToDouble(&leftEndpoint) || !input[6].EvaluatesToDouble(&rightEndpoint)) {
-    return theCommands << "Failed to extract left and right endpoints from " << input.ToString();
+    return theCommands << "Failed to extract left and right endpoints from " << input.toString();
   }
   if (leftEndpoint > rightEndpoint) {
     MathRoutines::swap(leftEndpoint, rightEndpoint);
@@ -5998,9 +5998,9 @@ bool CalculatorFunctions::innerDFQsEulersMethod(Calculator& theCommands, const E
   thePlot.yHigh = 0.5;
   thePlot.coordinateFunctionsE.AddOnTop(input);
   std::stringstream outLatex, outHtml;
-  outLatex << "\n\n%calculator input:" << input.ToString() << "\n\n"
+  outLatex << "\n\n%calculator input:" << input.toString() << "\n\n"
   << "\\psline[linecolor =\\fcColorGraph]";
-  outHtml << "\n<br>\n%calculator input:" << input.ToString() << "\n<br>\n"
+  outHtml << "\n<br>\n%calculator input:" << input.toString() << "\n<br>\n"
   << "\\psline[linecolor =\\fcColorGraph]";
   for (int i = firstGoodXIndex; i <= lastGoodXIndex; i ++) {
     outLatex << std::fixed << "(" << XValues[i] << ", " << YValues[i] << ")";
@@ -6050,7 +6050,7 @@ bool CalculatorFunctions::innerPlotViewWindow(
   }
   if (!isGood) {
     return theCommands << "Failed to extract a pair of positive numbers from: "
-    << input.ToString();
+    << input.toString();
   }
   emptyPlot.DesiredHtmlWidthInPixels = static_cast<int>(widthHeight[0]);
   emptyPlot.DesiredHtmlHeightInPixels = static_cast<int>(widthHeight[1]);
@@ -6067,7 +6067,7 @@ bool CalculatorFunctions::innerPlotSetId(
   emptyPlot.DesiredHtmlWidthInPixels = 100;
   std::string incomingName;
   if (!input.IsOfType(&incomingName)) {
-   incomingName = input.ToString();
+   incomingName = input.toString();
   }
   emptyPlot.SetCanvasName(incomingName);
   return output.AssignValue(emptyPlot, theCommands);
@@ -6086,7 +6086,7 @@ bool CalculatorFunctions::innerPlotViewRectangle(
     !theCommands.GetVectorDoubles(input[2], upperRight, 2)
   ) {
     return theCommands << "Failed to extract two pairs of floating point numbers from: "
-    << input[1].ToString() << " and " << input[2].ToString();
+    << input[1].toString() << " and " << input[2].toString();
   }
   Plot emptyPlot;
   emptyPlot.dimension = 2;
@@ -6115,10 +6115,10 @@ bool CalculatorFunctions::innerPlotFill(Calculator& theCommands, const Expressio
   }
   std::string colorString;
   if (!colorE.IsOfType<std::string>(&colorString)) {
-    colorString = colorE.ToString();
+    colorString = colorE.toString();
   }
   if (!DrawingVariables::GetColorIntFromColorString(colorString, theFilledPlot.colorFillRGB)) {
-    theCommands << "Failed to extract color from: " << colorE.ToString() << "; using default color value. ";
+    theCommands << "Failed to extract color from: " << colorE.toString() << "; using default color value. ";
   }
   theFilledPlot.colorFillJS = colorString;
   for (int i = 0; i < startPlot.thePlots.size; i ++) {
@@ -6197,7 +6197,7 @@ bool CalculatorFunctions::innerPlot2D(Calculator& theCommands, const Expression&
   thePlotObj.rightPtE = input[3];
   if (input.size() >= 5) {
     if (!input[4].IsOfType<std::string>(&thePlotObj.colorJS)) {
-      thePlotObj.colorJS = input[4].ToString();
+      thePlotObj.colorJS = input[4].toString();
     }
   } else {
     thePlotObj.colorJS = "red";
@@ -6226,7 +6226,7 @@ bool CalculatorFunctions::innerPlot2D(Calculator& theCommands, const Expression&
     if (thePlotObj.leftPtE != theCommands.EMInfinity()) {
       return theCommands
       << "Couldn't convert left boundary "
-      << thePlotObj.leftPtE.ToString() << " to floating point number. ";
+      << thePlotObj.leftPtE.toString() << " to floating point number. ";
     } else {
       thePlotObj.leftBoundaryIsMinusInfinity = true;
     }
@@ -6235,7 +6235,7 @@ bool CalculatorFunctions::innerPlot2D(Calculator& theCommands, const Expression&
     if (thePlotObj.rightPtE != theCommands.EInfinity()) {
       return theCommands
       << "Couldn't convert right boundary "
-      << thePlotObj.rightPtE.ToString() << " to floating point number. ";
+      << thePlotObj.rightPtE.toString() << " to floating point number. ";
     } else {
       thePlotObj.rightBoundaryIsMinusInfinity = true;
     }
@@ -6256,14 +6256,14 @@ bool CalculatorFunctions::innerPlot2D(Calculator& theCommands, const Expression&
     thePlotObj.variablesInPlay.AddOnTop(xE);
   }
   thePlotObj.variablesInPlayJS.SetSize(thePlotObj.variablesInPlay.size);
-  thePlotObj.variablesInPlayJS[0] = thePlotObj.variablesInPlay[0].ToString();
+  thePlotObj.variablesInPlayJS[0] = thePlotObj.variablesInPlay[0].toString();
   std::string theVarString = thePlotObj.variablesInPlayJS[0];
   Expression jsConverterE;
   thePlotObj.thePlotType = "plotFunction";
   if (CalculatorFunctions::functionMakeJavascriptExpression(
     theCommands, thePlotObj.coordinateFunctionsE[0], jsConverterE
   )) {
-    thePlotObj.coordinateFunctionsJS[0] = jsConverterE.ToString();
+    thePlotObj.coordinateFunctionsJS[0] = jsConverterE.toString();
     thePlotObj.coordinateFunctionsE[0].HasInputBoxVariables(&thePlot.boxesThatUpdateMe);
   } else {
     thePlotObj.thePlotType = "plotFunctionPrecomputed";
@@ -6271,7 +6271,7 @@ bool CalculatorFunctions::innerPlot2D(Calculator& theCommands, const Expression&
   if (CalculatorFunctions::functionMakeJavascriptExpression(
     theCommands, thePlotObj.leftPtE, jsConverterE
   )) {
-    thePlotObj.leftPtJS = jsConverterE.ToString();
+    thePlotObj.leftPtJS = jsConverterE.toString();
     thePlotObj.leftPtE.HasInputBoxVariables(&thePlot.boxesThatUpdateMe);
   } else {
     thePlotObj.thePlotType = "plotFunctionPrecomputed";
@@ -6279,7 +6279,7 @@ bool CalculatorFunctions::innerPlot2D(Calculator& theCommands, const Expression&
   if (CalculatorFunctions::functionMakeJavascriptExpression(
     theCommands, thePlotObj.rightPtE, jsConverterE
   )) {
-    thePlotObj.rightPtJS = jsConverterE.ToString();
+    thePlotObj.rightPtJS = jsConverterE.toString();
     thePlotObj.rightPtE.HasInputBoxVariables(&thePlot.boxesThatUpdateMe);
   } else {
     thePlotObj.thePlotType = "plotFunctionPrecomputed";
@@ -6289,7 +6289,7 @@ bool CalculatorFunctions::innerPlot2D(Calculator& theCommands, const Expression&
   if (CalculatorFunctions::functionMakeJavascriptExpression(
     theCommands, thePlotObj.numSegmentsE, jsConverterE
   )) {
-    thePlotObj.numSegmenTsJS[0] = jsConverterE.ToString();
+    thePlotObj.numSegmenTsJS[0] = jsConverterE.toString();
     thePlotObj.numSegmentsE.HasInputBoxVariables(&thePlot.boxesThatUpdateMe);
   } else {
     thePlotObj.thePlotType = "plotFunctionPrecomputed";
@@ -6324,13 +6324,13 @@ bool CalculatorFunctions::innerPlot2D(Calculator& theCommands, const Expression&
     theCommands.innerSuffixNotationForPostScript, input[1], functionSuffixNotationE
   )) {
     theCommands << "No LaTeX version: failed to convert: "
-    << input[1].ToString() << " to postfix notation. ";
+    << input[1].toString() << " to postfix notation. ";
   } else {
     thePlotObj.thePlotString = thePlotObj.
     GetPlotStringFromFunctionStringAndRanges(
       false,
-      functionSuffixNotationE.ToString(),
-      thePlotObj.coordinateFunctionsE[0].ToString(),
+      functionSuffixNotationE.toString(),
+      thePlotObj.coordinateFunctionsE[0].toString(),
       thePlotObj.xLow,
       thePlotObj.xHigh
     );
@@ -6352,7 +6352,7 @@ bool CalculatorFunctions::innerPlotPoint(Calculator& theCommands, const Expressi
   PlotObject thePlot;
   if (!theCommands.GetMatrixExpressions(input[1], thePlot.thePointS)) {
     return theCommands << "The first argument of PlotPoint is "
-    << "expected to be a sequence, instead I had: " << input[1].ToString();
+    << "expected to be a sequence, instead I had: " << input[1].toString();
   }
   theFinalPlot.dimension = thePlot.thePointS.NumCols;
   thePlot.dimension = theFinalPlot.dimension;
@@ -6366,9 +6366,9 @@ bool CalculatorFunctions::innerPlotPoint(Calculator& theCommands, const Expressi
         theCommands, thePlot.thePointS(i, j), jsConverterE
       )) {
         return theCommands << "Failed to extract coordinate " << i + 1 << " from: "
-        << thePlot.coordinateFunctionsE[i].ToString();
+        << thePlot.coordinateFunctionsE[i].toString();
       }
-      thePlot.thePointsJS(i, j) = jsConverterE.ToString();
+      thePlot.thePointsJS(i, j) = jsConverterE.toString();
       thePlot.thePointS(i, j).HasInputBoxVariables(&theFinalPlot.boxesThatUpdateMe);
     }
   }
@@ -6377,7 +6377,7 @@ bool CalculatorFunctions::innerPlotPoint(Calculator& theCommands, const Expressi
   if (input[2].IsOfType<std::string>()) {
     DrawingVariables::GetColorIntFromColorString(input[2].GetValue<std::string>(), thePlot.colorRGB);
   }
-  thePlot.colorJS = input[2].ToString();
+  thePlot.colorJS = input[2].toString();
   thePlot.thePlotType = "points";
   theFinalPlot.thePlots.AddOnTop(thePlot);
   theFinalPlot.DesiredHtmlHeightInPixels = 100;
@@ -6402,12 +6402,12 @@ bool CalculatorFunctions::innerPlot2DWithBars(Calculator& theCommands, const Exp
   bool tempB = CalculatorFunctions::innerPlot2D(theCommands, lowerEplot, output);
   if (!tempB || !output.IsOfType<Plot>(&outputPlot)) {
     return theCommands << "<hr>Failed to get a plot from "
-    << lowerEplot.ToString() << ", not proceding with bar plot.";
+    << lowerEplot.toString() << ", not proceding with bar plot.";
   }
   tempB = CalculatorFunctions::innerPlot2D(theCommands, upperEplot, output);
   if (!tempB || !output.IsOfType<Plot>()) {
     return theCommands << "<hr>Failed to get a plot from "
-    << upperEplot.ToString() << ", not proceding with bar plot.";
+    << upperEplot.toString() << ", not proceding with bar plot.";
   }
   outputPlot += output.GetValue<Plot>();
   const Expression& lowerFunctionE = input[1];
@@ -6483,7 +6483,7 @@ bool CalculatorFunctions::innerPlot2DWithBars(Calculator& theCommands, const Exp
       double finalResultDouble;
       if (!theFunValueFinal.EvaluatesToDouble(&finalResultDouble)) {
         return theCommands << "<hr>Failed to evaluate your function at point " << i
-        << ", instead " << "I evaluated to " << theFunValueFinal.ToString();
+        << ", instead " << "I evaluated to " << theFunValueFinal.toString();
       }
       if (j == 0) {
         xValues.AddOnTop(i);
@@ -6536,10 +6536,10 @@ bool CalculatorFunctions::innerPlot2DWithBars(Calculator& theCommands, const Exp
     std::stringstream tempStream;
     tempStream << "\\rput[t](" << std::fixed << rValues[i].GetDoubleValue() << ",-0.03)" << "{$";
     if (rValues[i].IsInteger()) {
-      tempStream << rValues[i].ToString();
+      tempStream << rValues[i].toString();
     } else {
-      tempStream << "\\frac{" << rValues[i].GetNumerator().ToString() << "}"
-      << "{" << rValues[i].GetDenominator().ToString() << "}";
+      tempStream << "\\frac{" << rValues[i].GetNumerator().toString() << "}"
+      << "{" << rValues[i].GetDenominator().toString() << "}";
     }
     tempStream << "$}";
     outHtml << tempStream.str();
@@ -6648,7 +6648,7 @@ bool CalculatorFunctions::innerPlotParametricCurve(
   if (!input[1].IsSequenceNElementS()) {
     return theCommands
     << "The first argument of parametric curve must be a sequence, instead I got: "
-    << input[1].ToString();
+    << input[1].toString();
   }
   thePlot.dimension = input[1].size() - 1;
   for (int i = 0; i < thePlot.dimension; i ++) {
@@ -6657,7 +6657,7 @@ bool CalculatorFunctions::innerPlotParametricCurve(
   }
   if (thePlot.variablesInPlay.size > 1) {
     return theCommands << "Curve is allowed to depend on at most 1 parameter. "
-    << "Instead, your curve: " << input.ToString()
+    << "Instead, your curve: " << input.toString()
     << " depends on "
     << thePlot.variablesInPlay.size << ", namely: "
     << thePlot.variablesInPlay.ToStringCommaDelimited() << ". ";
@@ -6668,13 +6668,13 @@ bool CalculatorFunctions::innerPlotParametricCurve(
     thePlot.variablesInPlay.AddOnTop(tempE);
   }
   thePlot.variablesInPlayJS.AddOnTop(
-    HtmlRoutines::GetJavascriptVariable(thePlot.variablesInPlay[0].ToString())
+    HtmlRoutines::GetJavascriptVariable(thePlot.variablesInPlay[0].toString())
   );
   thePlot.colorJS = "red";
   thePlot.colorRGB = static_cast<int>(HtmlRoutines::RedGreenBlue(255, 0, 0));
   if (input.size() >= 5) {
     if (!input[4].IsOfType<std::string>(&thePlot.colorJS)) {
-      thePlot.colorJS = input[4].ToString();
+      thePlot.colorJS = input[4].toString();
     }
   }
   DrawingVariables::GetColorIntFromColorString(thePlot.colorJS, thePlot.colorRGB);
@@ -6689,7 +6689,7 @@ bool CalculatorFunctions::innerPlotParametricCurve(
     if (!input[6].IsSmallInteger(&numPoints)) {
       numPoints = 1000;
       theCommands << "<hr>Could not extract number of points from "
-      << input[6].ToString();
+      << input[6].toString();
     }
     thePlot.numSegmentsE = input[6];
   }
@@ -6710,8 +6710,8 @@ bool CalculatorFunctions::innerPlotParametricCurve(
     !thePlot.paramHighE.EvaluatesToDouble(&thePlot.paramHigh)
   ) {
     theCommands << "Failed to convert "
-    << thePlot.paramLowE.ToString() << " and "
-    << thePlot.paramHighE.ToString()
+    << thePlot.paramLowE.toString() << " and "
+    << thePlot.paramHighE.toString()
     << " to left and right endpoint of parameter interval. ";
   }
   Vectors<double> theXs, theYs;
@@ -6724,7 +6724,7 @@ bool CalculatorFunctions::innerPlotParametricCurve(
       theConvertedExpressions[i]
     )) {
       theCommands << "Failed to extract suffix notation from argument "
-      << thePlot.coordinateFunctionsE[i].ToString();
+      << thePlot.coordinateFunctionsE[i].toString();
       isGoodLatexWise = false;
       break;
     }
@@ -6735,7 +6735,7 @@ bool CalculatorFunctions::innerPlotParametricCurve(
     << thePlot.paramLow << "}{" << thePlot.paramHigh << "}{"
     << theConvertedExpressions[0].GetValue<std::string>()
     << theConvertedExpressions[1].GetValue<std::string>() << "}";
-    outHtml << "<br>%Calculator input: " << input.ToString()
+    outHtml << "<br>%Calculator input: " << input.toString()
     << "<br>\\parametricplot[linecolor =\\fcColorGraph, plotpoints =" << numPoints << "]{"
     << thePlot.paramLow << "}{" << thePlot.paramHigh << "}{"
     << theConvertedExpressions[0].GetValue<std::string>()
@@ -6752,7 +6752,7 @@ bool CalculatorFunctions::innerPlotParametricCurve(
       thePlot.coordinateFunctionsE[i],
       converterE
     )) {
-      thePlot.coordinateFunctionsJS[i] = converterE.ToString();
+      thePlot.coordinateFunctionsJS[i] = converterE.toString();
     } else {
       thePlot.thePlotType = "parametricCurvePrecomputed";
       theCommands << "Failed to convert: "
@@ -6764,7 +6764,7 @@ bool CalculatorFunctions::innerPlotParametricCurve(
   if (CalculatorFunctions::functionMakeJavascriptExpression(
     theCommands, thePlot.numSegmentsE, converterE
   )) {
-    thePlot.numSegmenTsJS[0] = converterE.ToString();
+    thePlot.numSegmenTsJS[0] = converterE.toString();
   } else {
     thePlot.thePlotType = "parametricCurvePrecomputMakeBoxed";
     theCommands << "Failed to convert: "
@@ -6773,7 +6773,7 @@ bool CalculatorFunctions::innerPlotParametricCurve(
   if (CalculatorFunctions::functionMakeJavascriptExpression(
     theCommands, thePlot.paramLowE, converterE
   )) {
-    thePlot.paramLowJS = converterE.ToString();
+    thePlot.paramLowJS = converterE.toString();
   } else {
     thePlot.thePlotType = "parametricCurvePrecomputed";
     theCommands << "Failed to convert: " << thePlot.paramLowE << " to js. ";
@@ -6781,14 +6781,14 @@ bool CalculatorFunctions::innerPlotParametricCurve(
   if (CalculatorFunctions::functionMakeJavascriptExpression(
     theCommands, thePlot.paramHighE, converterE
   )) {
-    thePlot.paramHighJS = converterE.ToString();
+    thePlot.paramHighJS = converterE.toString();
   } else {
     thePlot.thePlotType = "parametricCurvePrecomputed";
     theCommands << "Failed to convert: " << thePlot.paramHighE << " to js. ";
   }
   if (thePlot.dimension == 2) {
     if (!thePlot.coordinateFunctionsE[0].EvaluatesToDoubleInRange(
-      thePlot.variablesInPlay[0].ToString(),
+      thePlot.variablesInPlay[0].toString(),
       thePlot.paramLow,
       thePlot.paramHigh,
       numPoints,
@@ -6799,7 +6799,7 @@ bool CalculatorFunctions::innerPlotParametricCurve(
       theCommands << "<hr>Failed to evaluate curve function. ";
     }
     if (!thePlot.coordinateFunctionsE[1].EvaluatesToDoubleInRange(
-      thePlot.variablesInPlay[0].ToString(),
+      thePlot.variablesInPlay[0].toString(),
       thePlot.paramLow,
       thePlot.paramHigh,
       numPoints,
@@ -6846,7 +6846,7 @@ bool CalculatorFunctions::innerComputePairingTablesAndFKFTsubalgebras(
   tempFormat.flagUseHTML = true;
   tempFormat.flagCandidateSubalgebraShortReportOnly = false;
   FileOperations::OpenFileCreateIfNotPresentVirtual(theFile, "output/" + theFileName, false, true, false);
-  theFile << theSAs.ToString(&tempFormat);
+  theFile << theSAs.toString(&tempFormat);
   std::stringstream out;
   out << "<a href=\"" << global.DisplayPathOutputFolder << "FKFTcomputation.html\">FKFTcomputation.html</a>";
   return output.AssignValue(out.str(), theCommands);
@@ -6867,12 +6867,12 @@ bool CalculatorFunctions::innerGetCentralizerChainsSemisimpleSubalgebras(
   out << theChains.size << " chains total. <br>";
   for (int i = 0; i < theChains.size; i ++) {
     out << "<br>Chain " << i + 1 << ": LoadSemisimpleSubalgebras{}( "
-    << theSAs.owner->theWeyl.theDynkinType.ToString() << ", (";
+    << theSAs.owner->theWeyl.theDynkinType.toString() << ", (";
     for (int j = 0; j < theChains[i].size; j ++) {
       CalculatorConversions::innerStoreCandidateSA(
         theCommands, theSAs.theSubalgebras.theValues[theChains[i][j]], currentChainE
       );
-      out << currentChainE.ToString();
+      out << currentChainE.toString();
       if (j != theChains[i].size - 1) {
         out << ", ";
       }
@@ -6909,7 +6909,7 @@ bool CalculatorFunctions::functionEvaluateToDouble(
 bool CalculatorFunctions::innerTestMathMouseHover(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerTestMathMouseHover");
   std::stringstream out;
-  out << "Hover mouse to render: " << HtmlRoutines::GetMathMouseHover(input.ToString());
+  out << "Hover mouse to render: " << HtmlRoutines::GetMathMouseHover(input.toString());
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -6925,7 +6925,7 @@ bool CalculatorFunctions::innerCanBeExtendedParabolicallyTo(
     !CalculatorConversions::functionDynkinType(theCommands, input[1], smallType) ||
     !CalculatorConversions::functionDynkinType(theCommands, input[2], targetType)
   ) {
-    return theCommands << "Failed to convert arguments of " << input.ToString() << " to two DynkinType's.";
+    return theCommands << "Failed to convert arguments of " << input.toString() << " to two DynkinType's.";
   }
   return output.AssignValue(static_cast<int>(smallType.CanBeExtendedParabolicallyTo(targetType)), theCommands);
 }
@@ -6934,7 +6934,7 @@ bool CalculatorFunctions::innerGetSymmetricCartan(Calculator& theCommands, const
   MacroRegisterFunctionWithName("CalculatorFunctions::innerGetSymmetricCartan");
   DynkinType theType;
   if (!CalculatorConversions::innerDynkinTypE(theCommands, input, theType)) {
-    return theCommands << "Failed to convert " << input.ToString() << " to DynkinType.";
+    return theCommands << "Failed to convert " << input.toString() << " to DynkinType.";
   }
   std::stringstream out;
   Matrix<Rational> outputMat, outputCoMat;
@@ -6950,7 +6950,7 @@ bool CalculatorFunctions::innerGetPrincipalSl2Index(Calculator& theCommands, con
   DynkinType theType;
   if (!CalculatorConversions::innerDynkinTypE(theCommands, input, theType)) {
     return theCommands << "Failed to convert "
-    << input.ToString() << " to DynkinType.";
+    << input.toString() << " to DynkinType.";
   }
   return output.AssignValue(theType.GetPrincipalSlTwoCSInverseScale(), theCommands);
 }
@@ -6962,7 +6962,7 @@ bool CalculatorFunctions::innerGetDynkinIndicesSlTwoSubalgebras(
   DynkinType theType;
   if (!CalculatorConversions::innerDynkinTypE(theCommands, input, theType)) {
     return theCommands << "Failed to convert "
-    << input.ToString() << " to DynkinType.";
+    << input.toString() << " to DynkinType.";
   }
   if (theType.GetRank() > 20) {
     return theCommands
@@ -7016,7 +7016,7 @@ bool CalculatorFunctions::innerEmbedSSalgInSSalg(Calculator& theCommands, const 
   theSSsubalgebras.ToStringExpressionString = CalculatorConversions::innerStringFromSemisimpleSubalgebras;
 
   out << "Attempting to embed "
-  << smallSubalgebraPointer.content->theWeyl.theDynkinType.ToString()
+  << smallSubalgebraPointer.content->theWeyl.theDynkinType.toString()
   << " in " << ownerSS.ToStringLieAlgebraName();
   theSSsubalgebras.FindTheSSSubalgebrasFromScratch(
     ownerSS,
@@ -7061,8 +7061,8 @@ bool CalculatorFunctions::innerWeylDimFormula(Calculator& theCommands, const Exp
   theSSowner.context.context.ContextGetFormatExpressions(theFormat);
   theWeightInSimpleCoords = theSSowner.content->theWeyl.GetSimpleCoordinatesFromFundamental(theWeight);
   theCommands << "<br>Weyl dim formula input: simple coords: "
-  << theWeightInSimpleCoords.ToString(&theFormat)
-  << ", fundamental coords: " << theWeight.ToString(&theFormat);
+  << theWeightInSimpleCoords.toString(&theFormat)
+  << ", fundamental coords: " << theWeight.toString(&theFormat);
   RationalFunction tempRF = theSSowner.content->theWeyl.WeylDimFormulaSimpleCoords(theWeightInSimpleCoords);
   return output.AssignValueWithContext(tempRF, theSSowner.context.context, theCommands);
 }
@@ -7111,11 +7111,11 @@ bool CalculatorFunctions::innerDecomposeFDPartGeneralizedVermaModuleOverLeviPart
   if (!theCommands.GetVectoR<Rational>(splittingParNode, splittingParSel, &finalContext, theDim, nullptr)) {
     return output.MakeError("Failed to extract parabolic selection from the fourth argument", theCommands);
   }
-  theCommands << "Your input weight in fundamental coordinates: " << theWeightFundCoords.ToString();
+  theCommands << "Your input weight in fundamental coordinates: " << theWeightFundCoords.toString();
   theCommands << "<br>Your input weight in simple coordinates: "
-  << theWeyl.GetSimpleCoordinatesFromFundamental(theWeightFundCoords).ToString()
-  << "<br>Your inducing parabolic subalgebra: " << inducingParSel.ToString() << "."
-  << "<br>The parabolic subalgebra I should split over: " << splittingParSel.ToString() << ".";
+  << theWeyl.GetSimpleCoordinatesFromFundamental(theWeightFundCoords).toString()
+  << "<br>Your inducing parabolic subalgebra: " << inducingParSel.toString() << "."
+  << "<br>The parabolic subalgebra I should split over: " << splittingParSel.toString() << ".";
   ModuleSSalgebra<RationalFunction> theMod;
   Selection selInducing = inducingParSel;
   Selection selSplittingParSel = splittingParSel;
@@ -7174,7 +7174,7 @@ bool CalculatorFunctions::innerParabolicWeylGroups(
   std::stringstream out;
   for (int i = 0; i < numCycles; i ++, selectionParSel.incrementSelection()) {
     theSubgroup.MakeParabolicFromSelectionSimpleRoots(theSSalgebra.theWeyl, selectionParSel, 2000);
-    out << "<hr>" << HtmlRoutines::GetMathSpanPure(theSubgroup.ToString());
+    out << "<hr>" << HtmlRoutines::GetMathSpanPure(theSubgroup.toString());
   }
   return output.AssignValue(out.str(), theCommands);
 }
@@ -7260,13 +7260,13 @@ bool CalculatorFunctions::innerParabolicWeylGroupsBruhatGraph(Calculator& theCom
     for (int i = 0; i < theSubgroup.RepresentativesQuotientAmbientOrder.size; i ++) {
       ElementWeylGroup& current = theSubgroup.RepresentativesQuotientAmbientOrder[i];
       out << "<tr><td>"
-      << (useJavascript ? HtmlRoutines::GetMathSpanPure(current.ToString()) : current.ToString())
+      << (useJavascript ? HtmlRoutines::GetMathSpanPure(current.toString()) : current.toString())
       << "</td>";
       theHWsimplecoords = theSSalgebra.theWeyl.GetSimpleCoordinatesFromFundamental(theHWfundcoords);
       theSSalgebra.theWeyl.ActOnRhoModified(theSubgroup.RepresentativesQuotientAmbientOrder[i], theHWsimplecoords);
       out << "<td>"
-      << (useJavascript ? HtmlRoutines::GetMathSpanPure(theHWsimplecoords.ToString(&theFormat))
-      : theHWsimplecoords.ToString(&theFormat))
+      << (useJavascript ? HtmlRoutines::GetMathSpanPure(theHWsimplecoords.toString(&theFormat))
+      : theHWsimplecoords.toString(&theFormat))
       << "</td>";
       tempRoot = theSSalgebra.theWeyl.GetFundamentalCoordinatesFromSimple(theHWsimplecoords);
       std::string theFundString = tempRoot.ToStringLetterFormat(theFormat.fundamentalWeightLetter, &theFormat);
@@ -7275,7 +7275,7 @@ bool CalculatorFunctions::innerParabolicWeylGroupsBruhatGraph(Calculator& theCom
       out << "</tr>";
     }
     out << "</table><hr>";
-    out << theSubgroup.ToString();
+    out << theSubgroup.toString();
   }
   return output.AssignValue(out.str(), theCommands);
 }
@@ -7293,7 +7293,7 @@ bool CalculatorFunctions::innerAllPartitions(Calculator& theCommands, const Expr
     return theCommands
     << "Partitions printouts are limited "
     << "from n = 0 to n = 33, your input was: "
-    << input[1].ToString();
+    << input[1].toString();
   }
   List<Partition> thePartitions;
   Partition::GetPartitions(thePartitions, theRank);
@@ -7301,7 +7301,7 @@ bool CalculatorFunctions::innerAllPartitions(Calculator& theCommands, const Expr
   out << "The partitions of " << theRank << " (total: " << thePartitions.size << ")"
   << ": ";
   for (int i = 0; i < thePartitions.size; i ++) {
-    out << "<br>" << thePartitions[i].ToString();
+    out << "<br>" << thePartitions[i].toString();
   }
   return output.AssignValue(out.str(), theCommands);
 }
@@ -7315,7 +7315,7 @@ bool CalculatorFunctions::innerAllVectorPartitions(Calculator& theCommands, cons
   const Expression& theVectorE = input[1];
   const Expression& thePartitioningVectorsE = input[2];
   if (!theCommands.GetVectoR(theVectorE, thePartition.goalVector)) {
-    return theCommands << "<hr>Failed to extract vector from " << theVectorE.ToString();
+    return theCommands << "<hr>Failed to extract vector from " << theVectorE.toString();
   }
   Matrix<Rational> vectorsMatForm;
   if (!theCommands.functionGetMatrix(
@@ -7325,14 +7325,14 @@ bool CalculatorFunctions::innerAllVectorPartitions(Calculator& theCommands, cons
     thePartition.goalVector.size
   )) {
     return theCommands << "<hr>Failed to extract list of vectors from "
-    << thePartitioningVectorsE.ToString();
+    << thePartitioningVectorsE.toString();
   }
   Vectors<Rational> theInputVectors;
   theInputVectors.AssignMatrixRows(vectorsMatForm);
   for (int i = 0; i < theInputVectors.size; i ++) {
     if (!theInputVectors[i].IsPositive()) {
       return theCommands << "<hr>Input vector "
-      << theInputVectors[i].ToString() << " is non-positive";
+      << theInputVectors[i].toString() << " is non-positive";
     }
   }
   if (!thePartition.init(theInputVectors, thePartition.goalVector)) {
@@ -7347,7 +7347,7 @@ bool CalculatorFunctions::innerAllVectorPartitions(Calculator& theCommands, cons
     numFound ++;
     if (numFound % 1000 == 0) {
       std::stringstream reportStream;
-      reportStream << "Found " << numFound << " partitions of " << thePartition.goalVector.ToString()
+      reportStream << "Found " << numFound << " partitions of " << thePartition.goalVector.toString()
       << "<br>Current partition: " << thePartition.currentPartition;
       theReport.Report(reportStream.str());
     }
@@ -7377,7 +7377,7 @@ bool CalculatorFunctions::innerDeterminant(
     } else {
       theCommands << "Requesting to compute determinant of the non-square "
       << matRat.NumRows << " by "
-      << matRat.NumCols << " matrix: " << argument.ToString();
+      << matRat.NumCols << " matrix: " << argument.toString();
       return output.MakeError(
         "Requesting to compute determinant of non-square matrix. ", theCommands
       );
@@ -7399,7 +7399,7 @@ bool CalculatorFunctions::innerDeterminant(
     } else {
       theCommands << "Requesting to compute determinant of the non-square "
       << matRat.NumRows << " by "
-      << matRat.NumCols << " matrix: " << argument.ToString();
+      << matRat.NumCols << " matrix: " << argument.toString();
       return output.MakeError(
         "Requesting to compute determinant of non-square matrix. ",
         theCommands
@@ -7427,9 +7427,9 @@ bool CalculatorFunctions::innerDeterminant(
   if (matRF.NumRows != matRF.NumCols) {
     theCommands << "Requesting to compute determinant of the non-square "
     << matRat.NumRows << " by "
-    << matRat.NumCols << " matrix: " << argument.ToString();
+    << matRat.NumCols << " matrix: " << argument.toString();
     return output.MakeError(
-      "Requesting to compute determinant of non-square matrix given by: " + argument.ToString(),
+      "Requesting to compute determinant of non-square matrix given by: " + argument.toString(),
       theCommands
     );
   }
@@ -7470,8 +7470,8 @@ bool CalculatorFunctions::innerDecomposeCharGenVerma(
   std::stringstream out;
   FormatExpressions theFormat;
   theSSlieAlg.context.context.ContextGetFormatExpressions(theFormat);
-  out << "<br>Highest weight: " << theHWfundcoords.ToString(&theFormat)
-  << "<br>Parabolic selection: " << parSel.ToString();
+  out << "<br>Highest weight: " << theHWfundcoords.toString(&theFormat)
+  << "<br>Parabolic selection: " << parSel.toString();
   theHWFundCoordsFDPart = theHWfundcoords;
   for (int i = 0; i < parSel.CardinalitySelection; i ++) {
     theHWFundCoordsFDPart[parSel.elements[i]] = 0;
@@ -7501,12 +7501,12 @@ bool CalculatorFunctions::innerDecomposeCharGenVerma(
     currentHW += theSub.GetRho();
     theWeyl.ActOn(i, currentHW);
     currentHW -= theSub.GetRho();
-    out << "<tr><td>" << currentHW.ToString() << "</td><td>"
-    << theWeyl.GetFundamentalCoordinatesFromSimple(currentHW).ToString() << "</td></tr>";
+    out << "<tr><td>" << currentHW.toString() << "</td><td>"
+    << theWeyl.GetFundamentalCoordinatesFromSimple(currentHW).toString() << "</td></tr>";
   }
   out << "</table>";
   out << "<br>The rho of the Levi part is: "
-  << theSub.GetRho().ToString() << "<br>Weyl group of Levi part follows. "
+  << theSub.GetRho().toString() << "<br>Weyl group of Levi part follows. "
   << "<br><table><tr><td>Weyl element</td>"
   << "<td>Image hw under small rho modified action fund coords</td>"
   << "<td>Character Verma given h.w.</td></tr>";
@@ -7523,7 +7523,7 @@ bool CalculatorFunctions::innerDecomposeCharGenVerma(
   theSubgroup.AmbientWeyl = theKLpolys.TheWeylGroup;
   for (int i = 0; i < theWeylElements.size; i ++) {
     ElementWeylGroup& currentElement = theWeylElements[i];
-    out << "<tr><td>" << currentElement.ToString() << "</td>";
+    out << "<tr><td>" << currentElement.toString() << "</td>";
 
     int indexInWeyl = theKLpolys.TheWeylGroup->theGroup.theElements.GetIndex(currentElement);
     if (indexInWeyl == - 1) {
@@ -7548,7 +7548,7 @@ bool CalculatorFunctions::innerDecomposeCharGenVerma(
     theWeyl.ActOn(indexInWeyl, currentHW);
     currentHW -= theSub.GetRho();
     out << "<td>" << theWeyl.GetFundamentalCoordinatesFromSimple(currentHW).ToStringLetterFormat("\\omega") << "</td>";
-    out << "<td>" << HtmlRoutines::GetMathMouseHover(currentChar.ToString(&formatChars)) << "</td>";
+    out << "<td>" << HtmlRoutines::GetMathMouseHover(currentChar.toString(&formatChars)) << "</td>";
     if (currentElement.generatorsLastAppliedFirst.size % 2 == 1) {
       currentChar *= - 1;
     }
@@ -7556,7 +7556,7 @@ bool CalculatorFunctions::innerDecomposeCharGenVerma(
     out << "</tr>";
   }
   out << "</table>";
-  out << "Final char: " << HtmlRoutines::GetMathMouseHover(theChar.ToString(&formatChars));
+  out << "Final char: " << HtmlRoutines::GetMathMouseHover(theChar.toString(&formatChars));
   return output.AssignValue<std::string>(out.str(), theCommands);
 }
 
@@ -7599,7 +7599,7 @@ bool CalculatorFunctions::innerPrintGenVermaModule(
   ElementTensorsGeneralizedVermas<RationalFunction> theElt;
   theElt = output.GetValue<ElementTensorsGeneralizedVermas<RationalFunction> >();
   ModuleSSalgebra<RationalFunction>& theModule = *theElt[0].theMons[0].owner;
-  return output.AssignValue(theModule.ToString(), theCommands);
+  return output.AssignValue(theModule.toString(), theCommands);
 }
 
 bool CalculatorFunctions::innerWriteGenVermaModAsDiffOperatorUpToLevel(
@@ -7637,11 +7637,11 @@ bool CalculatorFunctions::innerWriteGenVermaModAsDiffOperatorUpToLevel(
   )) {
     return theCommands
     << "Failed to convert the third argument of innerSplitGenericGenVermaTensorFD to a list of " << theRank
-    << " polynomials. The second argument you gave is " << genVemaWeightNode.ToString() << ".";
+    << " polynomials. The second argument you gave is " << genVemaWeightNode.toString() << ".";
   }
   int desiredHeight;
   if (!levelNode.IsSmallInteger(&desiredHeight)) {
-    return output.MakeError("second argument of " + input.ToString() + " must be a small integer", theCommands);
+    return output.MakeError("second argument of " + input.toString() + " must be a small integer", theCommands);
   }
   RationalFunction RFOne, RFZero;
   RFOne.MakeOne();
@@ -7756,7 +7756,7 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
     << "Failed to convert the third argument of "
     << "innerSplitGenericGenVermaTensorFD to a list of " << theRank
     << " polynomials. The second argument you gave is "
-    << genVemaWeightNode.ToString() << ".";
+    << genVemaWeightNode.toString() << ".";
   }
   Vector<Rational> theFDhw;
   if (!theCommands.GetVectoR<Rational>(fdWeightNode, theFDhw, nullptr, theRank, nullptr)) {
@@ -7765,7 +7765,7 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
     << "innerSplitGenericGenVermaTensorFD to a list of "
     << theRank
     << " rationals. The second argument you gave is "
-    << fdWeightNode.ToString() << ".";
+    << fdWeightNode.toString() << ".";
   }
   int theNumVars = hwContext.ContextGetNumContextVariables();
   RationalFunction RFOne, RFZero;
@@ -7818,7 +7818,7 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
     return true;
   }
   std::stringstream out;
-  out << "hwv par sel: " << hwvGenVerma.ToString() << "hwv fd: " << hwvFD.ToString();
+  out << "hwv par sel: " << hwvGenVerma.toString() << "hwv fd: " << hwvFD.toString();
   const ElementTensorsGeneralizedVermas<RationalFunction>& theHWgenVerma =
   hwvGenVerma.GetValue<ElementTensorsGeneralizedVermas<RationalFunction> >();
   const ElementTensorsGeneralizedVermas<RationalFunction>& theHWfd =
@@ -7832,8 +7832,8 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
     theFDMod.GetOwner().GetRank() != theFDMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize
   ) {
     global.fatal << "This is a programming error: the two modules have owners, "
-    << theFDMod.GetOwner().theWeyl.theDynkinType.ToString()
-    << " and " << theGenMod.GetOwner().theWeyl.theDynkinType.ToString() << ", and parabolic selections of max size "
+    << theFDMod.GetOwner().theWeyl.theDynkinType.toString()
+    << " and " << theGenMod.GetOwner().theWeyl.theDynkinType.toString() << ", and parabolic selections of max size "
     << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize
     << " and " << theFDMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize << global.fatal;
   }
@@ -7866,14 +7866,14 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
   tempFormat.fundamentalWeightLetter = "\\psi";
   tempFormat.CustomPlusSign = "\\oplus ";
   hwContext.ContextGetFormatExpressions(tempFormat);
-  out << "<br>Character of finite dimensional module:" << HtmlRoutines::GetMathMouseHover(theFDChaR.ToString());
+  out << "<br>Character of finite dimensional module:" << HtmlRoutines::GetMathMouseHover(theFDChaR.toString());
   if (theGenMod.parabolicSelectionSelectedAreElementsLevi.CardinalitySelection > 0) {
-    out << "<br>theFDChar split over levi:" << HtmlRoutines::GetMathMouseHover(theFDLeviSplit.ToString(&tempFormat));
+    out << "<br>theFDChar split over levi:" << HtmlRoutines::GetMathMouseHover(theFDLeviSplit.toString(&tempFormat));
   }
   std::stringstream latexReport1;
   out << "<br><table><tr><td>weight in fundamental coords</td><td>Character</td></tr>";
-  latexReport1 << " \\begin{longtable}{rl}\\caption{\\label{table" << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.ToString()
-  << "GenVermatimes7DimCentralCharacters} $" << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.ToString()
+  latexReport1 << " \\begin{longtable}{rl}\\caption{\\label{table" << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.toString()
+  << "GenVermatimes7DimCentralCharacters} $" << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.toString()
   << "$- parabolic $\\bar{\\mathfrak{p}}$} \\\\ $\\mu+\\gamma$ & Action of $\\bar c$\\\\\\hline";
   tempFormat.CustomPlusSign = "";
   tempFormat.chevalleyGgeneratorLetter = "\\bar{g}";
@@ -7891,9 +7891,9 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
     currentChar.ModOutVermaRelations(& currentHWdualcoords, RFOne, RFZero);
     theCentralCharacters.AddOnTop(currentChar);
     out << "<tr><td>" << theFDLeviSplitShifteD[i].weightFundamentalCoordS.ToStringLetterFormat("\\psi") << "</td><td>"
-    << currentChar.ToString(&tempFormat) << "</td></tr>";
+    << currentChar.toString(&tempFormat) << "</td></tr>";
     latexReport1 << " $" << theFDLeviSplitShifteD[i].weightFundamentalCoordS.ToStringLetterFormat("\\psi", &tempFormat) << "$"
-    << "&$p_{" << i + 1 << "}=$ $" << currentChar.ToString(&tempFormat) << "$\\\\<br>";
+    << "&$p_{" << i + 1 << "}=$ $" << currentChar.toString(&tempFormat) << "$\\\\<br>";
   }
   out << "</table>";
   latexReport1 << "\\end{longtable}<br>";
@@ -7912,8 +7912,8 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
   out << "</tr>";
   std::stringstream latexReport2;
   latexReport2 << "\\begin{longtable}{p{2.5cm}p{2.5cm}p{1.5cm}l}\\caption{\\label{tableDecompo"
-  << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.ToString() << "times7dim}Decomposition for the $"
-  << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.ToString()
+  << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.toString() << "times7dim}Decomposition for the $"
+  << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.toString()
   << "$-parabolic subalgebra $\\bar{\\mathfrak{p}}$ } \\\\ Weight & Projector applied to &"
   << " Extra multiplier & Resulting $\\bar {\\mathfrak b}$-singular vector \\endhead\\hline";
   for (int i = 0; i < theCentralCharacters.size; i ++) {
@@ -7924,7 +7924,7 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
     tempElt.MakeHWV(theGenMod, RFOne);
     theElt.TensorOnTheRight(tempElt);
     theElt *= - 1;
-    std::string startingEltString = theElt.ToString(&tempFormat);
+    std::string startingEltString = theElt.toString(&tempFormat);
     std::stringstream tempStream, tempStream2;
     tempStream << "\\begin{array}{l}";
     bool found = false;
@@ -7936,7 +7936,7 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
         theCasimirMinusChar -= theCentralCharacters[j];
         theElt.MultiplyOnTheLeft(theCasimirMinusChar, tempElt2, *theSSalgebra.content, RFOne);
         theElt = tempElt2;
-        tempStream << "(i(\\bar c)- (" << theCentralCharacters[j].ToString() << ") )\\\\";
+        tempStream << "(i(\\bar c)- (" << theCentralCharacters[j].toString() << ") )\\\\";
         tempStream2 << " $(\\bar c-p_" << j + 1 << ") $ ";
         found = true;
       }
@@ -7953,23 +7953,23 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
     currentHWsimplecoords += theFDMod.theModuleWeightsSimpleCoords[i];
     out << "<tr><td>"
     << theSSalgebra.content->theWeyl.GetFundamentalCoordinatesFromSimple(currentHWsimplecoords).ToStringLetterFormat("\\psi")
-    << "</td><td>" << HtmlRoutines::GetMathMouseHover(tempStream.str()) << "</td><td>" << tempRat.ToString() << "</td>";
+    << "</td><td>" << HtmlRoutines::GetMathMouseHover(tempStream.str()) << "</td><td>" << tempRat.toString() << "</td>";
     latexReport2
     << "$" << theSSalgebra.content->theWeyl.GetFundamentalCoordinatesFromSimple(currentHWsimplecoords).ToStringLetterFormat("\\psi")
-    << "$ &  " << tempStream2.str() << " &" << tempRat.ToString();
+    << "$ &  " << tempStream2.str() << " &" << tempRat.toString();
     Polynomial<Rational> tmpGCD, tmpRF;
     tempFormat.MaxLineLength = 80;
     if (theNumVars == 1) {
       tmpGCD = theElt.FindGCDCoefficientNumeratorsOverRationals();
       tmpGCD.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
-      out << "<td>" << HtmlRoutines::GetMathMouseHover(tmpGCD.ToString(&tempFormat)) << "</td>";
+      out << "<td>" << HtmlRoutines::GetMathMouseHover(tmpGCD.toString(&tempFormat)) << "</td>";
     }
-    out << "<td>" << HtmlRoutines::GetMathMouseHover(theElt.ToString(&tempFormat)) << "</td>";
-    latexReport2 << "&$\\begin{array}{l}" << theElt.ToString(&tempFormat) << "\\end{array}$\\\\<br>";
+    out << "<td>" << HtmlRoutines::GetMathMouseHover(theElt.toString(&tempFormat)) << "</td>";
+    latexReport2 << "&$\\begin{array}{l}" << theElt.toString(&tempFormat) << "\\end{array}$\\\\<br>";
     if (theNumVars == 1) {
       tmpRF = tmpGCD;
       theElt /= tmpRF;
-      out << "<td>" << HtmlRoutines::GetMathMouseHover("\\begin{array}{l}" + theElt.ToString(&tempFormat) + "\\end{array}") << "</td>";
+      out << "<td>" << HtmlRoutines::GetMathMouseHover("\\begin{array}{l}" + theElt.toString(&tempFormat) + "\\end{array}") << "</td>";
     }
     out << "</tr>";
   }
@@ -7988,8 +7988,8 @@ bool CalculatorFunctions::innerHWTAABF(Calculator& theCommands, const Expression
   Expression leftMerged = input[1];
   Expression rightMerged = input[2];
   if (!Expression::MergeContexts(leftMerged, rightMerged)) {
-    return theCommands << "Could not get elements of universal enveloping algebra from inputs: " << input[1].ToString()
-    << " and " << input[2].ToString();
+    return theCommands << "Could not get elements of universal enveloping algebra from inputs: " << input[1].toString()
+    << " and " << input[2].toString();
   }
   Expression finalContext = rightMerged.GetContext();
   int algebraIndex = finalContext.ContextGetIndexAmbientSSalg();
@@ -8008,7 +8008,7 @@ bool CalculatorFunctions::innerHWTAABF(Calculator& theCommands, const Expression
   )) {
     return theCommands
     << "<hr>Failed to obtain highest weight from the third argument which is "
-    << weightExpression.ToString();
+    << weightExpression.toString();
   }
   if (!leftMerged.SetContextAtLeastEqualTo(finalContext) || !rightMerged.SetContextAtLeastEqualTo(finalContext)) {
     return output.MakeError(
@@ -8047,8 +8047,8 @@ bool CalculatorFunctions::innerSplitFDpartB3overG2CharsOutput(
     return true;
   }
   std::stringstream out;
-  out << "<br>Highest weight: " << theG2B3Data.theWeightFundCoords.ToString() << "<br>Parabolic selection: "
-  << theG2B3Data.selInducing.ToString();
+  out << "<br>Highest weight: " << theG2B3Data.theWeightFundCoords.toString() << "<br>Parabolic selection: "
+  << theG2B3Data.selInducing.toString();
   std::string report;
   charSSAlgMod<RationalFunction> tempChar;
   charSSAlgMod<RationalFunction> startingChar;
@@ -8154,9 +8154,9 @@ bool Calculator::innerSplitFDpartB3overG2old(Calculator& theCommands, const Expr
   }
   std::stringstream out;
   theCommands.innerSplitFDpartB3overG2inner(theCommands, theG2B3Data, output);
-  out << "<br>Highest weight: " << theG2B3Data.theWeightFundCoords.ToString() << "<br>Parabolic selection: "
-  << theG2B3Data.selInducing.ToString() << "<br>common Levi part of G_2 and B_3: "
-  << theG2B3Data.selSmallParSel.ToString();
+  out << "<br>Highest weight: " << theG2B3Data.theWeightFundCoords.toString() << "<br>Parabolic selection: "
+  << theG2B3Data.selInducing.toString() << "<br>common Levi part of G_2 and B_3: "
+  << theG2B3Data.selSmallParSel.toString();
   out
   << "<table border =\"1\"><tr><td>word</td><td>B_3-weight simple coords</td><td>B_3-weight fund. coords </td>"
   << "<td>G_2 simple coordinates</td><td>G2-fund. coords</td><td>G2-dual coordinates</td><td>character</td></tr>";
@@ -8173,12 +8173,12 @@ bool Calculator::innerSplitFDpartB3overG2old(Calculator& theCommands, const Expr
     readyForLatexConsumptionTable1 << "$" << currentWeightFundB3coords.ToStringLetterFormat("\\omega")
     << " $ & $" << theG2B3Data.leviEigenSpace[i].ToStringLetterFormat("m")
     << " $ & $ " << currentG2Weight.ToStringLetterFormat("\\alpha") << " $ \\\\\n<br>";
-    out << "<tr><td>" << theG2B3Data.outputEigenWords[i].ToString() << "</td><td> "
-    << currentWeightSimpleB3coords.ToString() << "</td><td> " << currentWeightFundB3coords.ToString()
+    out << "<tr><td>" << theG2B3Data.outputEigenWords[i].toString() << "</td><td> "
+    << currentWeightSimpleB3coords.toString() << "</td><td> " << currentWeightFundB3coords.toString()
     << "</td><td>" << currentG2Weight.ToStringLetterFormat("\\alpha") << "</td><td> "
-    << theG2B3Data.theHmm.theDomain().theWeyl.GetFundamentalCoordinatesFromSimple(currentG2Weight).ToString()
-    << "</td><td> " << currentG2DualWeight.ToString() << "</td>";
-    out << "<td>" << HtmlRoutines::GetMathSpanPure(theG2B3Data.theChars[i].ToString()) << "</td>";
+    << theG2B3Data.theHmm.theDomain().theWeyl.GetFundamentalCoordinatesFromSimple(currentG2Weight).toString()
+    << "</td><td> " << currentG2DualWeight.toString() << "</td>";
+    out << "<td>" << HtmlRoutines::GetMathSpanPure(theG2B3Data.theChars[i].toString()) << "</td>";
     out << "</tr>";
   }
   readyForLatexConsumptionTable1 << "\\hline \n";
@@ -8189,16 +8189,16 @@ bool Calculator::innerSplitFDpartB3overG2old(Calculator& theCommands, const Expr
   Vector<RationalFunction> weightDifference;
   std::stringstream formulaStream1;
   for (int k = 0; k < theG2B3Data.g2Weights.size; k ++) {
-    out << "<tr><td>" << theG2B3Data.g2Weights[k].ToString() << "</td><td>";
+    out << "<tr><td>" << theG2B3Data.g2Weights[k].toString() << "</td><td>";
     for (int j = 0; j < theG2B3Data.g2Weights.size; j ++) {
       weightDifference = theG2B3Data.g2Weights[j] - theG2B3Data.g2Weights[k];
       if (weightDifference.IsPositive()) {
-        formulaStream1 << "(12(i(\\bar c) - " << theG2B3Data.theChars[j].ToString() <<  "))";
+        formulaStream1 << "(12(i(\\bar c) - " << theG2B3Data.theChars[j].toString() <<  "))";
       }
     }
     formulaStream1 << "v_\\lambda";
     out << HtmlRoutines::GetMathSpanPure(formulaStream1.str())
-    << "</td><td>" << HtmlRoutines::GetMathSpanPure(theG2B3Data.theEigenVectorS[k].ToString()) << "</td></tr>";
+    << "</td><td>" << HtmlRoutines::GetMathSpanPure(theG2B3Data.theEigenVectorS[k].toString()) << "</td></tr>";
   }
   out << "</table>";
   out << "<br>Time final: " << global.GetElapsedSeconds();
@@ -8243,7 +8243,7 @@ bool Expression::EvaluatesToDoubleInRange(
     if (!this->EvaluatesToDoubleUnderSubstitutions(knownEs, knownValues, &currentValue)) {
       numFailedEvaluations ++;
       if (numFailedEvaluations < 5) {
-        *(this->owner) << "<br>Failed to evaluate " << this->ToString() << " at " << varName << "="
+        *(this->owner) << "<br>Failed to evaluate " << this->toString() << " at " << varName << "="
         << *knownValues.LastObject() << ". ";
       }
       if (numFailedEvaluations == 5) {
@@ -8701,7 +8701,7 @@ bool CalculatorFunctions::innerCrawlTexFile(
     return output.AssignValue(out.str(), theCommands);
   }
   if (!input.IsOfType<std::string>()) {
-    return theCommands << "<hr>Input " << input.ToString() << " is not of type string. ";
+    return theCommands << "<hr>Input " << input.toString() << " is not of type string. ";
   }
   LaTeXCrawler theCrawler;
   theCrawler.ownerCalculator = &theCommands;
@@ -8739,7 +8739,7 @@ bool CalculatorFunctions::innerBuildFreecalcSingleSlides(
     return output.AssignValue(out.str(), theCommands);
   }
   if (!input.IsOfType<std::string>()) {
-    return theCommands << "<hr>Input " << input.ToString() << " is not of type string. ";
+    return theCommands << "<hr>Input " << input.toString() << " is not of type string. ";
   }
   LaTeXCrawler theCrawler;
   theCrawler.flagBuildSingleSlides = true;
@@ -8761,7 +8761,7 @@ bool CalculatorFunctions::innerBuildFreecalc(
     return output.AssignValue(out.str(), theCommands);
   }
   if (!input.IsOfType<std::string>()) {
-    return theCommands << "<hr>Input " << input.ToString() << " is not of type string. ";
+    return theCommands << "<hr>Input " << input.toString() << " is not of type string. ";
   }
   LaTeXCrawler theCrawler;
   theCrawler.flagBuildSingleSlides = false;
@@ -8784,7 +8784,7 @@ bool CalculatorFunctions::innerFindProductDistanceModN(
   const Expression& theIntegersE = input[2];
   int theSize;
   if (!theModuloE.IsIntegerFittingInInt(&theSize)) {
-    return theCommands << " <hr> Failed to extract modulus from " << theModuloE.ToString();
+    return theCommands << " <hr> Failed to extract modulus from " << theModuloE.toString();
   }
   if (theSize == 0) {
     return theCommands << "<hr>Zero modulus not allowed.";
@@ -8797,7 +8797,7 @@ bool CalculatorFunctions::innerFindProductDistanceModN(
   }
   List<int> theInts, theIntsReduced;
   if (!theCommands.GetVectoRInt(theIntegersE, theInts)) {
-    return theCommands << "<hr>Failed to extract integer list from " << theIntegersE.ToString();
+    return theCommands << "<hr>Failed to extract integer list from " << theIntegersE.toString();
   }
   theIntsReduced.SetSize(theInts.size);
   for (int i = 0; i < theInts.size; i ++) {
@@ -8824,7 +8824,7 @@ bool CalculatorFunctions::innerFindProductDistanceModN(
   int currentIndex;
   ProgressReport theReport;
   std::stringstream reportstream;
-  reportstream << "Finding product distance mod " << theMod.ToString() << " w.r.t. elements "
+  reportstream << "Finding product distance mod " << theMod.toString() << " w.r.t. elements "
   << theInts;
   int numElementsNotAddedToStack = 0;
   maxDistanceGenerated = 0;
@@ -8848,7 +8848,7 @@ bool CalculatorFunctions::innerFindProductDistanceModN(
             << theIndexStack.size << " indices. " << numElementsNotAddedToStack
             << " candidates were not added to the stack. "
             << "Number of elements reached: " << numElementsCovered << ". "
-            << "Max distance generated while searching: " << maxDistanceGenerated.ToString();
+            << "Max distance generated while searching: " << maxDistanceGenerated.toString();
             theReport.Report(out.str());
           }
           continue;
@@ -8867,7 +8867,7 @@ bool CalculatorFunctions::innerFindProductDistanceModN(
         out << "While computing product distance, explored " << i + 1 << " out of "
         << theIndexStack.size << " indices. " << numElementsNotAddedToStack << " candidates were not added to the stack. "
         << "Number of elements reached: " << numElementsCovered << ". "
-        << "Max distance generated while searching: " << maxDistanceGenerated.ToString();
+        << "Max distance generated while searching: " << maxDistanceGenerated.toString();
         theReport.Report(out.str());
       }
     }
@@ -8877,7 +8877,7 @@ bool CalculatorFunctions::innerFindProductDistanceModN(
   }
   std::stringstream out;
   for (int i = 0; i < theList.size; i ++) {
-    out << "<br>" << i << ": " << theList[i].ToString();
+    out << "<br>" << i << ": " << theList[i].toString();
   }
   return output.AssignValue(out.str(), theCommands);
 }
@@ -8892,7 +8892,7 @@ bool CalculatorFunctions::innerSolveProductSumEquationOverSetModN(
   }
   int theMod;
   if (!theModuloE.IsIntegerFittingInInt(&theMod)) {
-    return theCommands << " <hr> Failed to extract modulus from " << theModuloE.ToString();
+    return theCommands << " <hr> Failed to extract modulus from " << theModuloE.toString();
   }
   if (theMod == 0) {
     return theCommands << "<hr>Zero modulus not allowed.";
@@ -8908,7 +8908,7 @@ bool CalculatorFunctions::innerSolveProductSumEquationOverSetModN(
   }
   List<int> theInts;
   if (!theCommands.GetVectoRInt(theIntegersE, theInts)) {
-    return theCommands << "<hr>Failed to extract integer list from " << theIntegersE.ToString();
+    return theCommands << "<hr>Failed to extract integer list from " << theIntegersE.toString();
   }
   for (int i = 0; i < theInts.size; i ++) {
     if (theInts[i] <= 0) {
@@ -8920,7 +8920,7 @@ bool CalculatorFunctions::innerSolveProductSumEquationOverSetModN(
   }
   LargeInteger goalProduct;
   if (!theProductE.IsInteger(&goalProduct)) {
-    return theCommands << "<hr>Failed to extract integer from " << theProductE.ToString();
+    return theCommands << "<hr>Failed to extract integer from " << theProductE.toString();
   }
   if (goalProduct.IsNegative()) {
     return theCommands << "<hr>I am expecting a positive product as input. ";
@@ -8930,7 +8930,7 @@ bool CalculatorFunctions::innerSolveProductSumEquationOverSetModN(
   }
   int theSum = - 1;
   if (!theSumE.IsSmallInteger(&theSum)) {
-    return theCommands << "Failed to extract small integer from " << theSumE.ToString();
+    return theCommands << "Failed to extract small integer from " << theSumE.toString();
   }
   VectorPartition thePartition;
   Vectors<Rational> theOneDimVectors;
@@ -9040,8 +9040,8 @@ bool Calculator::Test::CalculatorTestRun() {
     theTester.initialize();
     theTester.CheckConsistencyAfterInitialization();
     theTester.Evaluate(currentTest.command);
-    currentTest.actualResult = theTester.theProgramExpression.ToString(&theFormat);
-    reportStream << "<br>Result: " << theTester.theProgramExpression.ToString();
+    currentTest.actualResult = theTester.theProgramExpression.toString(&theFormat);
+    reportStream << "<br>Result: " << theTester.theProgramExpression.toString();
     reportStream << "<br>Done in: " << global.GetElapsedSeconds() - this->startTime << " seconds. ";
     theReport.Report(reportStream.str());
   }
@@ -9054,7 +9054,7 @@ bool CalculatorFunctions::innerPrintRuleStack(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerPrintRuleStack");
   (void) input;//portable way of avoiding unused parameter warning
-  return output.AssignValue(theCommands.RuleStack.ToString(), theCommands);
+  return output.AssignValue(theCommands.RuleStack.toString(), theCommands);
 }
 
 bool CalculatorFunctions::innerCrash(
@@ -9210,7 +9210,7 @@ std::string charSSAlgMod<coefficient>::ToStringFullCharacterWeightsTable() {
   std::stringstream out;
   charSSAlgMod<coefficient> outputChar;
   if (!this->FreudenthalEvalMeFullCharacter(outputChar, 10000, nullptr)) {
-    out << "Failed to compute the character with highest weight " << this->ToString()
+    out << "Failed to compute the character with highest weight " << this->toString()
     << " I used Fredenthal's formula; likely the computation was too large. ";
     return out.str();
   }
@@ -9221,10 +9221,10 @@ std::string charSSAlgMod<coefficient>::ToStringFullCharacterWeightsTable() {
   Vector<coefficient> theSimpleRootFundCoords;
   for (int k = 0; k < outputChar.size(); k ++) {
     out << "<tr>";
-    out << "<td>" << outputChar[k].weightFundamentalCoordS.ToString() << "</td>";
+    out << "<td>" << outputChar[k].weightFundamentalCoordS.toString() << "</td>";
     Vector<coefficient> weightSimple = this->GetOwner()->theWeyl.GetSimpleCoordinatesFromFundamental
     (outputChar[k].weightFundamentalCoordS);
-    out << "<td>" << weightSimple.ToString() << "</td>";
+    out << "<td>" << weightSimple.toString() << "</td>";
     outputSimpleStringCoords.MakeZero(this->GetOwner()->GetRank());
     outputSimpleHalfStringCoords.MakeZero(this->GetOwner()->GetRank());
     for (int j = 0; j < this->GetOwner()->GetRank(); j ++) {
@@ -9241,14 +9241,14 @@ std::string charSSAlgMod<coefficient>::ToStringFullCharacterWeightsTable() {
       );
     }
     if (outputSimpleStringCoords != outputChar[k].weightFundamentalCoordS) {
-      out << "<td><b style =\"color:red\">" << outputSimpleStringCoords.ToString() << "</b></td>" ;
+      out << "<td><b style =\"color:red\">" << outputSimpleStringCoords.toString() << "</b></td>" ;
     } else {
-      out << "<td>" << outputSimpleStringCoords.ToString() << "</td>";
+      out << "<td>" << outputSimpleStringCoords.toString() << "</td>";
     }
     if (outputSimpleHalfStringCoords != outputChar[k].weightFundamentalCoordS) {
-      out << "<td><b style =\"color:red\">" << outputSimpleHalfStringCoords.ToString() << "</b></td>" ;
+      out << "<td><b style =\"color:red\">" << outputSimpleHalfStringCoords.toString() << "</b></td>" ;
     } else {
-      out << "<td>" << outputSimpleHalfStringCoords.ToString() << "</td>";
+      out << "<td>" << outputSimpleHalfStringCoords.toString() << "</td>";
     }
     out << "</tr>";
   }
@@ -9340,10 +9340,10 @@ public:
           out << "...";
         }
       } else {
-        out << input.ToString();
+        out << input.toString();
       }
     } else {
-      out << input.ToString();
+      out << input.toString();
     }
     return out.str();
   }
@@ -9373,12 +9373,12 @@ public:
     this->arrows.AddOnTop(emptyArrows);
     this->currentLayer[0] = this->baseExpression;
     this->DisplayedEstrings.Clear();
-    this->AddStringTruncate(this->baseExpression.ToString(), this->isLeaf(this->baseExpression));
+    this->AddStringTruncate(this->baseExpression.toString(), this->isLeaf(this->baseExpression));
     this->ComputeCurrentEContributionToNextLayer();
     this->DisplayedEstrings.SetExpectedSize(this->MaxDisplayedNodes);
     this->arrows.SetExpectedSize(this->MaxDisplayedNodes);
   }
-  std::string ToString() {
+  std::string toString() {
     std::stringstream out;
     out << "<br>Index in current layer: " << this->indexInCurrentLayer;
     out << "<br>Index in displayed strings: " << this->indexCurrentChild;
@@ -9692,7 +9692,7 @@ bool CalculatorFunctions::innerTurnRulesOnOff(
       rulesToConsider.AddOnTop(currentRule);
     } else {
       return theCommands << "Could not extract rule to turn off from "
-      << input.ToString() << ". ";
+      << input.toString() << ". ";
     }
   } else {
     for (int i = 1; i < input.size(); i ++) {
@@ -9703,7 +9703,7 @@ bool CalculatorFunctions::innerTurnRulesOnOff(
       } else {
         return theCommands
         << "Could not extract rule to turn off from "
-        << input[i].ToString() << ". ";
+        << input[i].toString() << ". ";
       }
     }
   }
@@ -9803,7 +9803,7 @@ bool CalculatorFunctions::innerRandomInteger(
     for (int j = 0; j < theMat.NumCols; j ++) {
       if (!theMat(i, j).IsIntegerFittingInInt(&theIntervals[i][j])) {
         return theCommands << "<hr>Failed to convert "
-        << theMat(i, j).ToString() << " to an integer. ";
+        << theMat(i, j).toString() << " to an integer. ";
       }
     }
   }

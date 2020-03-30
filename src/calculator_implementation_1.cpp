@@ -368,7 +368,7 @@ bool Calculator::innerGetLinksToSimpleLieAlgerbas(Calculator& theCommands, const
     outFromHD << theCommands.ToStringSemismipleLieAlgebraLinksFromHD(precomputedTypes[i]);
     if (precomputedTypes[i].HasPrecomputedSubalgebras()) {
       std::stringstream recomputeCommand;
-      recomputeCommand << "PrintSemisimpleSubalgebrasRecompute{}(" << precomputedTypes[i].ToString() << ")";
+      recomputeCommand << "PrintSemisimpleSubalgebrasRecompute{}(" << precomputedTypes[i].toString() << ")";
       outRecomputeLinks << "<br>" << HtmlRoutines::GetCalculatorComputationAnchor(recomputeCommand.str());
     }
   }
@@ -454,7 +454,7 @@ bool Calculator::innerPrintSSSubalgebras(
     global.fatal << "Zero pointer to semisimple Lie algebra: this shouldn't happen. " << global.fatal;
   }
   SemisimpleLieAlgebra& ownerLieAlgebra = *ownerSSPointer;
-  std::string dynkinString = ownerSSPointer->theWeyl.theDynkinType.ToString();
+  std::string dynkinString = ownerSSPointer->theWeyl.theDynkinType.toString();
   global.RelativePhysicalNameOptionalProgressReport = "progress_subalgebras_" + dynkinString;
   global.RelativePhysicalNameOptionalResult = "result_subalgebras_" + dynkinString;
   SemisimpleSubalgebras& theSubalgebras =
@@ -554,9 +554,9 @@ bool Calculator::innerAttemptExtendingEtoHEFwithHinCartan(Calculator& theCommand
   std::stringstream out, logStream;
   bool success = ownerSS->AttemptExtendingEtoHEFwithHinCartan(theE, theH, theF, &logStream);
   if (success) {
-    out << HtmlRoutines::GetMathSpanPure("F=" + theF.ToString() + ";")
-    << "<br>" << HtmlRoutines::GetMathSpanPure("H=" + theH.ToString() + ";") << "<br>"
-    << HtmlRoutines::GetMathSpanPure("E=" + theE.ToString() + ";")
+    out << HtmlRoutines::GetMathSpanPure("F=" + theF.toString() + ";")
+    << "<br>" << HtmlRoutines::GetMathSpanPure("H=" + theH.toString() + ";") << "<br>"
+    << HtmlRoutines::GetMathSpanPure("E=" + theE.toString() + ";")
     << "<br><br>The log stream of the computation follows. " << logStream.str();
   } else {
     out << "<br>Couldn't extend E to sl(2)-triple. The log stream follows. " << logStream.str();
@@ -593,7 +593,7 @@ bool Calculator::innerAdCommonEigenSpaces(Calculator& theCommands, const Express
   out << "<br>EigenSpace basis (" << outputElts.size << " elements total):<br> (";
   for (int i = 0; i < outputElts.size; i ++) {
     ElementSemisimpleLieAlgebra<Rational>& currentElt = outputElts[i];
-    out << currentElt.ToString();
+    out << currentElt.toString();
     if (i != outputElts.size - 1) {
       out << ", ";
     }
@@ -700,25 +700,25 @@ bool Calculator::innerGroebner(
   out << theGroebnerComputation.ToStringLetterOrder(false);
   out << "Letter/expression order: ";
   for (int i = 0; i < theContext.ContextGetNumContextVariables(); i ++) {
-    out << theContext.ContextGetContextVariable(i).ToString();
+    out << theContext.ContextGetContextVariable(i).toString();
     if (i != theContext.ContextGetNumContextVariables() - 1) {
       out << "&lt;";
     }
   }
   out << "<br>Starting basis (" << inputVector.size  << " elements): ";
   for (int i = 0; i < inputVector.size; i ++) {
-    out << "<br>" << HtmlRoutines::GetMathSpanPure(inputVector[i].ToString(&theGroebnerComputation.theFormat));
+    out << "<br>" << HtmlRoutines::GetMathSpanPure(inputVector[i].toString(&theGroebnerComputation.theFormat));
   }
   if (success) {
     out << "<br>Minimal Groebner basis with " << outputGroebner.size << " elements, computed using algorithm 1, using "
     << theGroebnerComputation.NumberGBComputations << " polynomial operations. ";
     for (int i = 0; i < outputGroebner.size; i ++) {
-      out << "<br> " << HtmlRoutines::GetMathSpanPure(outputGroebner[i].ToString(&theGroebnerComputation.theFormat));
+      out << "<br> " << HtmlRoutines::GetMathSpanPure(outputGroebner[i].toString(&theGroebnerComputation.theFormat));
     }
     out << "<br>Output in calculator-ready format: ";
     out << "<br>(";
     for (int i = 0; i < outputGroebner.size; i ++) {
-      out << outputGroebner[i].ToString(&theGroebnerComputation.theFormat);
+      out << outputGroebner[i].toString(&theGroebnerComputation.theFormat);
       if (i != outputGroebner.size - 1) {
         out << ", <br>";
       }
@@ -731,7 +731,7 @@ bool Calculator::innerGroebner(
     << " basis elements: ";
     out << "<br>GroebnerLexUpperLimit{}(10000, <br>";
     for (int i = 0; i < theGroebnerComputation.theBasiS.size; i ++) {
-      out << theGroebnerComputation.theBasiS[i].ToString(&theGroebnerComputation.theFormat);
+      out << theGroebnerComputation.theBasiS[i].toString(&theGroebnerComputation.theFormat);
       if (i != theGroebnerComputation.theBasiS.size - 1) {
         out << ", <br>";
       }
@@ -1861,10 +1861,10 @@ bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const
   }
   std::string currentString;
   if (input.IsOperation(&currentString)) {
-    if (input.ToString() == "e") {
+    if (input.toString() == "e") {
       return output.AssignValue<std::string>(" 2.718281828 ", theCommands);
     }
-    if (input.ToString() == "\\pi") {
+    if (input.toString() == "\\pi") {
       return output.AssignValue<std::string>(" 3.141592654 ", theCommands);
     }
     if (input.theData >= theCommands.NumPredefinedAtoms) {
@@ -1924,7 +1924,7 @@ bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const
       theRat.GetDenominator().IsIntegerFittingInInt(nullptr) &&
       theRat.GetNumerator().IsIntegerFittingInInt(nullptr)
     ) {
-      out << " " << theRat.GetNumerator().ToString() << " " << theRat.GetDenominator() << " div ";
+      out << " " << theRat.GetNumerator().toString() << " " << theRat.GetDenominator() << " div ";
       return output.AssignValue(out.str(), theCommands);
     }
     hasDoubleValue = true;
@@ -1948,29 +1948,29 @@ bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const
   if (useUsualOrder) {
     for (int i = input.size() - 1; i >= 1; i --) {
       if (!theCommands.innerSuffixNotationForPostScript(theCommands, input[i], currentE)) {
-        return output.MakeError("Failed to convert " + input[i].ToString(), theCommands);
+        return output.MakeError("Failed to convert " + input[i].toString(), theCommands);
       }
       if (!currentE.IsOfType(&currentString)) {
-        return output.MakeError("Failed to convert " + input[i].ToString(), theCommands);
+        return output.MakeError("Failed to convert " + input[i].toString(), theCommands);
       }
       out << currentString << " ";
     }
   } else {
     for (int i = 1; i < input.size(); i ++) {
       if (!theCommands.innerSuffixNotationForPostScript(theCommands, input[i], currentE)) {
-        return output.MakeError("Failed to convert " + input[i].ToString(), theCommands);
+        return output.MakeError("Failed to convert " + input[i].toString(), theCommands);
       }
       if (!currentE.IsOfType(&currentString)) {
-        return output.MakeError("Failed to convert " + input[i].ToString(), theCommands);
+        return output.MakeError("Failed to convert " + input[i].toString(), theCommands);
       }
       out << currentString << " ";
     }
   }
   if (!theCommands.innerSuffixNotationForPostScript(theCommands, input[0], currentE)) {
-    return output.MakeError("Failed to convert " + input[0].ToString(), theCommands);
+    return output.MakeError("Failed to convert " + input[0].toString(), theCommands);
   }
   if (!currentE.IsOfType(&currentString)) {
-    return output.MakeError("Failed to convert " + input[0].ToString(), theCommands);
+    return output.MakeError("Failed to convert " + input[0].toString(), theCommands);
   }
   out << currentString << " ";
   return output.AssignValue(out.str(), theCommands);
@@ -2008,10 +2008,10 @@ bool Calculator::innerConesIntersect(Calculator& theCommands, const Expression& 
   Vectors<Rational> coneNonStrictGens;
   Vectors<Rational> coneStrictGens;
   if (!theCommands.functionGetMatrix(input[1], coneStrictMatForm)) {
-    return theCommands << "Failed to extract matrix from the first argument, " << input[1].ToString();
+    return theCommands << "Failed to extract matrix from the first argument, " << input[1].toString();
   }
   if (!theCommands.functionGetMatrix(input[2], coneNonStrictMatForm)) {
-    return theCommands << "Failed to extract matrix from the second argument, " << input[2].ToString();
+    return theCommands << "Failed to extract matrix from the second argument, " << input[2].toString();
   }
   std::stringstream out;
   if (coneNonStrictMatForm.NumCols != coneStrictMatForm.NumCols) {
@@ -2023,11 +2023,11 @@ bool Calculator::innerConesIntersect(Calculator& theCommands, const Expression& 
   coneStrictMatForm.GetVectorsFromRows(coneStrictGens);
   out << "<br>Input non-strict (i.e., over Z_{&gt;= 0}) cone: ";
   for (int i = 0; i < coneStrictGens.size; i ++) {
-    out << "<br>v_{" << i + 1 << "}=" << coneStrictGens[i].ToString() << ";";
+    out << "<br>v_{" << i + 1 << "}=" << coneStrictGens[i].toString() << ";";
   }
   out << "<br>Input strict (i.e., over Z_{&gt;0}) cone: ";
   for (int i = 0; i < coneNonStrictGens.size; i ++) {
-    out << "<br>v_{" << coneStrictGens.size + i + 1 << "}=" << coneNonStrictGens[i].ToString() << ";";
+    out << "<br>v_{" << coneStrictGens.size + i + 1 << "}=" << coneNonStrictGens[i].toString() << ";";
   }
   Vector<Rational> outputIntersection, outputSeparatingNormal;
   bool conesDoIntersect = coneNonStrictGens.ConesIntersect(coneStrictGens, coneNonStrictGens, &outputIntersection, &outputSeparatingNormal);
@@ -2041,22 +2041,22 @@ bool Calculator::innerConesIntersect(Calculator& theCommands, const Expression& 
       checkVector += coneNonStrictGens[i] * outputIntersection[coneStrictGens.size + i];
     }
     if (!checkVector.IsEqualToZero()) {
-      global.fatal << "<br>This is a programming error: the output linear combination " << outputIntersection.ToString()
-      << " corresponds to the cone intersection " << checkVector.ToString()
+      global.fatal << "<br>This is a programming error: the output linear combination " << outputIntersection.toString()
+      << " corresponds to the cone intersection " << checkVector.toString()
       << " and is not equal to zero! Here is the cone output so far: "
       << out.str() << global.fatal;
     }
     out << "<br>Cones intersect, here is one intersection: 0= " << outputIntersection.ToStringLetterFormat("v");
   } else {
     out << "<br>Cones have empty intersection.";
-    out << "<br> A normal separating the cones is: n =" << outputSeparatingNormal.ToString() << ". Indeed, ";
+    out << "<br> A normal separating the cones is: n =" << outputSeparatingNormal.toString() << ". Indeed, ";
     for (int i = 0; i < coneStrictGens.size; i ++) {
       out << "<br>\\langle v_{" << i + 1 << "}, n\\rangle = "
-      << outputSeparatingNormal.ScalarEuclidean(coneStrictGens[i]).ToString();
+      << outputSeparatingNormal.ScalarEuclidean(coneStrictGens[i]).toString();
     }
     for (int i = 0; i < coneNonStrictGens.size; i ++) {
       out << "<br>\\langle v_{" << i + 1 + coneStrictGens.size << "}, n\\rangle = "
-      << outputSeparatingNormal.ScalarEuclidean(coneNonStrictGens[i]).ToString();
+      << outputSeparatingNormal.ScalarEuclidean(coneNonStrictGens[i]).toString();
     }
   }
   return output.AssignValue(out.str(), theCommands);
@@ -2224,7 +2224,7 @@ bool Calculator::innerRootSubsystem(Calculator& theCommands, const Expression& i
       return false;
     }
     if (!theWeyl.RootSystem.Contains(currentRoot)) {
-      return output.MakeError("Input vector " + currentRoot.ToString() + " is not a root. ", theCommands);
+      return output.MakeError("Input vector " + currentRoot.toString() + " is not a root. ", theCommands);
     }
     outputRoots.AddOnTop(currentRoot);
   }
@@ -2234,8 +2234,8 @@ bool Calculator::innerRootSubsystem(Calculator& theCommands, const Expression& i
   theDiagram.AmbientBilinearForm = theWeyl.CartanSymmetric;
   theDiagram.AmbientRootSystem = theWeyl.RootSystem;
   theDiagram.ComputeDiagramInputIsSimple(outputRoots);
-  out << "Diagram final: " << theDiagram.ToString()
-  << ". Simple basis: " << theDiagram.SimpleBasesConnectedComponents.ToString();
+  out << "Diagram final: " << theDiagram.toString()
+  << ". Simple basis: " << theDiagram.SimpleBasesConnectedComponents.toString();
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -2275,15 +2275,15 @@ bool Calculator::innerPerturbSplittingNormal(Calculator& theCommands, const Expr
   for (int i = 0; i < NonStrictCone.size; i ++) {
     if (splittingNormal.ScalarEuclidean(NonStrictCone[i]) < 0) {
       std::stringstream out;
-      out << "The normal vector " << splittingNormal.ToString()
-      << " is has negative scalar product with " << NonStrictCone[i].ToString();
+      out << "The normal vector " << splittingNormal.toString()
+      << " is has negative scalar product with " << NonStrictCone[i].toString();
       return output.MakeError(out.str(), theCommands);
     }
   }
-  out << "Perturbing " << splittingNormal.ToString() << " relative to cone "
-  << NonStrictCone.ToString() << " and vectors " << VectorsToPerturbRelativeTo.ToString();
+  out << "Perturbing " << splittingNormal.toString() << " relative to cone "
+  << NonStrictCone.toString() << " and vectors " << VectorsToPerturbRelativeTo.toString();
   splittingNormal.PerturbNormalRelativeToVectorsInGeneralPosition(NonStrictCone, VectorsToPerturbRelativeTo);
-  out << "<br>End result: " << splittingNormal.ToString();
+  out << "<br>End result: " << splittingNormal.toString();
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -2295,7 +2295,7 @@ public:
     if (theH.currentE == nullptr) {
       output << "(no expression)";
     } else {
-      output << theH.currentE->ToString();
+      output << theH.currentE->toString();
     }
     output << " active: " << theH.lastActiveSubexpression;
     return output;
@@ -2368,7 +2368,7 @@ Expression ExpressionHistoryEnumerator::GetExpression(
       currentNode.theData.lastActiveSubexpression
     ];
     if (currentRuleSequence.size() > 3) {
-      std::string ruleName = currentRuleSequence[3].ToString();
+      std::string ruleName = currentRuleSequence[3].toString();
       if (ruleName != "" && ruleName != "Sub-expression simplification") {
         outputRuleNames.AddOnTop(ruleName);
       }
@@ -2414,7 +2414,7 @@ bool ExpressionHistoryEnumerator::ComputeRecursively(
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Corrupt expression history does not start with the expected atom: "
-      << this->theHistory.ToString();
+      << this->theHistory.toString();
       return false;
     }
   }
@@ -2460,14 +2460,14 @@ bool ExpressionHistoryEnumerator::ProcessChildrenTransformations(
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "ExpressionHistorySetChild "
         << "expression does not have enough children. "
-        << current.ToString() ;
+        << current.toString() ;
       }
       return false;
     }
     if (!current[1].IsSmallInteger(&indicesInParent[i])) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "ExpressionHistorySetChild: bad child index. "
-        << current.ToString() ;
+        << current.toString() ;
       }
       return false;
     }
@@ -2481,7 +2481,7 @@ bool ExpressionHistoryEnumerator::ProcessChildrenTransformations(
   }
   if (this->output.size == 0) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Missing starting expression. History: " << this->theHistory.ToString();
+      *commentsOnFailure << "Missing starting expression. History: " << this->theHistory.toString();
     }
     return false;
   }
@@ -2517,13 +2517,13 @@ bool ExpressionHistoryEnumerator::ProcessTransformation(
 ) {
   if (!current.StartsWith(this->owner->opExpressionHistorySet())) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Bad first atom in history child : " << current.ToString();
+      *commentsOnFailure << "Bad first atom in history child : " << current.toString();
     }
     return false;
   }
   if (current.size() < 2) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Not enough elements in history child: " << current.ToString();
+      *commentsOnFailure << "Not enough elements in history child: " << current.toString();
     }
     return false;
   }
@@ -2531,7 +2531,7 @@ bool ExpressionHistoryEnumerator::ProcessTransformation(
   this->rulesNames.SetSize(this->rulesNames.size + 1);
   this->rulesNames.LastObject()->SetSize(0);
   if (current.size() >= 3) {
-    std::string incoming = current[2].ToString();
+    std::string incoming = current[2].toString();
     if (incoming != "") {
       this->rulesNames.LastObject()->AddOnTop(incoming);
     }
@@ -2544,9 +2544,9 @@ std::string ExpressionHistoryEnumerator::ToStringDebug() {
   std::stringstream out;
   out << "<b>History</b><br>" << this->theHistory.ToStringTreeHtml(- 1) << "<hr>";
   out << "" << this->theHistory.ToStringSemiFull() << "<hr>";
-  // out << "Current state: " << this->currentState.ToString()
+  // out << "Current state: " << this->currentState.toString()
   // << "<br>";
-  // out << "Current subtree: " << this->currentSubTree.ToString();
+  // out << "Current subtree: " << this->currentSubTree.toString();
 
   return out.str();
 }
@@ -2557,7 +2557,7 @@ std::string ExpressionHistoryEnumerator::ToStringExpressionHistoryMerged() {
   std::string prevEstring = "";
   List<std::string> currentRules;
   for (int j = 0; j < this->output.size; j ++) {
-    std::string currentEstring = this->output[j].ToString();
+    std::string currentEstring = this->output[j].toString();
     if (currentEstring == prevEstring) {
       currentRules.AddListOnTop(this->rulesNames[j]);
       continue;

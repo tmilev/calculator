@@ -119,7 +119,7 @@ std::string DrawingVariables::GetHtmlDiv(int theDimension) {
   theData[drawObjects].theList = this->theBuffer.theOperations;
   theData["dimension"] = theDimension;
 
-  std::string graphicsId = Crypto::ConvertStringToHex(Crypto::computeSha256(theData.ToString()), 0, false);
+  std::string graphicsId = Crypto::ConvertStringToHex(Crypto::computeSha256(theData.toString()), 0, false);
   std::string idCanvas = "idCanvasNDimensionalGraphics" + graphicsId;
   std::string idHighlightInformation = "idHighlightInfoNDimensionalGraphics" + graphicsId;
   std::string idSpanInformation = "idCanvasInfoNDimensionalGraphics" + graphicsId;
@@ -135,7 +135,7 @@ std::string DrawingVariables::GetHtmlDiv(int theDimension) {
   out << "<div id = '" << idHighlightInformation << "'></div><br>";
   out << "<span id = '" << idSpanInformation << "'></span><br>";
   out << "<script>\n";
-  out << "var " << graphicsVar << " = " << theData.ToString(nullptr) << ";\n";
+  out << "var " << graphicsVar << " = " << theData.toString(nullptr) << ";\n";
   out << "window.calculator.graphicsNDimensions.createGraphicsFromObject(" << graphicsVar << ");\n";
   out << "</script>";
   return out.str();

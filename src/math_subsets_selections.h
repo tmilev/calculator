@@ -48,7 +48,7 @@ public:
   static unsigned int HashFunction(const Selection& input) {
     return input.HashFunction();
   }
-  std::string ToString() const;
+  std::string toString() const;
   void incrementSelection();
   bool IncrementReturnFalseIfPastLast() {
     this->incrementSelection();
@@ -104,12 +104,12 @@ class SelectionWithMultiplicities {
 public:
   std::string DebugString;
   void ComputeDebugString() {
-    this->ToString(this->DebugString);
+    this->toString(this->DebugString);
   }
-  void ToString(std::string& output);
-  std::string ToString() {
+  void toString(std::string& output);
+  std::string toString() {
     std::string tempS;
-    this->ToString(tempS);
+    this->toString(tempS);
     return tempS;
   }
   List<int> elements;
@@ -197,7 +197,7 @@ class SelectionOneItem {
     this->MaxMultiplicity = theMult;
     this->SelectedMult = 0;
   }
-  std::string ToString() const {
+  std::string toString() const {
     std::stringstream out;
     out << this->SelectedMult << " out of " << this->MaxMultiplicity;
     return out.str();
@@ -243,11 +243,11 @@ public:
       this->theElements[i].initFromMults(input[i]);
     }
   }
-  std::string ToString() const {
+  std::string toString() const {
     std::stringstream out;
     out << "(";
     for (int i = 0; i < this->theElements.size; i ++) {
-      out << this->theElements[i].ToString();
+      out << this->theElements[i].toString();
       if (i != this->theElements.size - 1) {
         out << ", ";
       }
@@ -278,8 +278,8 @@ public:
       this->theSelection.incrementSelectionFixedCardinality(this->DesiredSubsetSize);
     }
   }
-  std::string ToString() const {
-    return this->theSelection.ToString();
+  std::string toString() const {
+    return this->theSelection.toString();
   }
   bool IncrementReturnFalseIfPastLast() {
     this->theSelection.incrementSelectionFixedCardinality(this->DesiredSubsetSize);
@@ -295,9 +295,9 @@ public:
 class SelectionPositiveIntegers {
   public:
   Vector<LargeIntegerUnsigned> theInts;
-  std::string ToString(FormatExpressions* theFormat = nullptr) {
+  std::string toString(FormatExpressions* theFormat = nullptr) {
     (void) theFormat;//avoid unused parameter warning, portable
-    return this->theInts.ToString();
+    return this->theInts.toString();
   }
   LargeIntegerUnsigned GetGrading() {
     return this->theInts.SumCoords();

@@ -24,7 +24,7 @@ std::string SyntacticElement::ToStringHumanReadable(Calculator& theBoss, bool in
   }
   std::stringstream out;
   out << "<table style = \"vertical-align:top;border-spacing= 0px 0px\">";
-  out << "<tr><td style = \"text-align:center\">" << this->theData.ToString(nullptr) << "</td></tr>";
+  out << "<tr><td style = \"text-align:center\">" << this->theData.toString(nullptr) << "</td></tr>";
   out << "<tr><td style = \"color:#AAAAAA\">" << controlString << "</td></tr>";
   if (includeLispifiedExpressions) {
     out <<  "<tr><td style =\"color:#AAAAAA\">" << this->theData.ToStringFull() << "</td></tr>";
@@ -1370,7 +1370,7 @@ bool Calculator::ReplaceVbyVdotsVAccordingToPredefinedWordSplits() {
   SyntacticElement& theE = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1];
   const std::string& currentVar = this->operations.theKeys[theE.theData.theData];
   if (!this->predefinedWordSplits.Contains(currentVar)) {
-    global.fatal << "Predefined word splits array does not contain the variable: " << theE.theData.ToString()
+    global.fatal << "Predefined word splits array does not contain the variable: " << theE.theData.toString()
     << ". This should not happen in the body of this function. " << global.fatal;
   }
   List<std::string>& theSplit = this->predefinedWordSplits.GetValueCreate(currentVar);

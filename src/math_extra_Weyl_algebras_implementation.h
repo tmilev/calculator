@@ -46,7 +46,7 @@ void ElementWeylAlgebra<coefficient>::MultiplyTwoMonomials(
     if (!left.differentialPart(i).IsSmallInteger(&powerDiffOp)) {
       global.fatal << "This is a programming error. Requested operations with elements of Weyl algebra "
       << "that have monomials of exponent "
-      << left.differentialPart(i).ToString()
+      << left.differentialPart(i).toString()
       << " which I cannot handle. If this is bad user input, "
       << "it should have been caught at an earlier level. " << global.fatal;
     }

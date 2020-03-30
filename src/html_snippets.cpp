@@ -210,7 +210,7 @@ std::string HtmlRoutines::GetCalculatorComputationURL(const std::string& inputNo
   JSData theRequest;
   theRequest[DatabaseStrings::labelCalculatorInput] = inputNoEncoding;
   theRequest[DatabaseStrings::labelCurrentPage] = WebAPI::request::calculatorPage;
-  out << "#" << HtmlRoutines::ConvertStringToURLString(theRequest.ToString(nullptr), false);
+  out << "#" << HtmlRoutines::ConvertStringToURLString(theRequest.toString(nullptr), false);
   return out.str();
 }
 

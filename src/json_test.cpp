@@ -46,7 +46,7 @@ bool JSData::Test::TestRecode() {
       global.fatal << "Failed to decode "<< toRecode[i][0] << global.fatal;
     }
     std::string expectedOutput = toRecode[i][1];
-    std::string recoded = parser.ToString(nullptr);
+    std::string recoded = parser.toString(nullptr);
     if (recoded != expectedOutput) {
       global.fatal << "Input " << input << " decoded to " << recoded
       << ". However, I expected: " << expectedOutput << ". " << global.fatal;

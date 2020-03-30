@@ -579,14 +579,14 @@ void Calculator::initPredefinedInnerFunctions() {
     innerStandard
   );
   this->AddOperationHandler(
-    "ToString",
+    "toString",
     CalculatorFunctions::innerExpressionToString,
     "",
     "Transforms an arbitrary expression to its string representation. "
     "The string representation is (supposed to be) LaTeX-compatible. ",
-    "ToString( e^x); \n \"e^x\";\"The quick brown fox jumps over the lazy dog.\"",
+    "toString( e^x); \n \"e^x\";\"The quick brown fox jumps over the lazy dog.\"",
     "CalculatorFunctions::innerExpressionToString",
-    "ToString",
+    "toString",
     innerStandard
   );
   this->AddOperationHandler(

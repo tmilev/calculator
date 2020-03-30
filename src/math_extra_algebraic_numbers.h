@@ -8,7 +8,7 @@
 class AlgebraicClosureRationals;
 class AlgebraicNumber {
   friend std::ostream& operator<<(std::ostream& output, const AlgebraicNumber& theNumber) {
-    output << theNumber.ToString();
+    output << theNumber.toString();
     return output;
   }
   friend AlgebraicNumber operator-(const AlgebraicNumber& argument) {
@@ -42,7 +42,7 @@ class AlgebraicNumber {
     return this->AssignCosRationalTimesPi(rHalf - input, inputOwner);
   }
   bool NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost() const;
-  bool NeedsParenthesisForMultiplication() const;
+  bool NeedsParenthesisForMultiplication(FormatExpressions* unused) const;
   bool CheckConsistency() const;
   bool CheckNonZeroOwner() const;
   bool CheckCommonOwner(const AlgebraicNumber& other) const;
@@ -179,7 +179,7 @@ class AlgebraicNumber {
     this->operator*=(Rational(other));
   }
   bool operator>(const AlgebraicNumber& other) const;
-  std::string ToString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* theFormat = nullptr) const;
   std::string ToStringNonInjected(FormatExpressions* theFormat = nullptr) const;
 };
 
@@ -247,7 +247,7 @@ public:
     std::stringstream* commentsOnFailure
   );
   std::string ToStringQuadraticRadical(FormatExpressions* theFormat = nullptr) const;
-  std::string ToString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* theFormat = nullptr) const;
   std::string ToStringFull(FormatExpressions* theFormat = nullptr) const;
   bool splitToPartialFractionsOverRealAlgebraicNumbers(
     RationalFunction& inputRF,
@@ -263,7 +263,7 @@ public:
 class ElementZmodP {
 public:
   friend std::ostream& operator<<(std::ostream& output, const ElementZmodP& input) {
-    output << input.ToString();
+    output << input.toString();
     return output;
   }
   LargeIntegerUnsigned theModulus;
@@ -285,7 +285,6 @@ public:
     this->flagDeallocated = true;
   }
   void CheckIamInitialized() const;
-  std::string ToString(FormatExpressions* theFormat = nullptr) const;
   bool IsEqualToZero() const {
     return this->theValue.IsEqualToZero();
   }
@@ -309,12 +308,16 @@ public:
   ElementZmodP operator/(const ElementZmodP& other) const;
   ElementZmodP operator*(const Rational& other) const;
   ElementZmodP operator*(const ElementZmodP& other) const;
+  std::string toString(FormatExpressions* theFormat = nullptr) const;
+  std::string toStringModP() const;
+  static std::string toStringModP(const LargeIntegerUnsigned& modulus);
   void operator=(const LargeInteger& other);
   bool AssignRational(const Rational& other);
   void operator=(const Rational& other);
   bool operator/=(const ElementZmodP& den);
   bool operator/=(const LargeInteger& den);
-  void ScaleToIntegralMinimalHeightAndGetPoly(
+  bool NeedsParenthesisForMultiplication(FormatExpressions* theFormat = nullptr) const;
+  static void ScaleToIntegralMinimalHeightAndGetPoly(
     const Polynomial<Rational>& input,
     Polynomial<ElementZmodP>& output,
     const LargeIntegerUnsigned& newModulo

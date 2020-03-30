@@ -38,7 +38,7 @@ void SemisimpleLieAlgebra::GetChevalleyGeneratorAsLieBracketsSimpleGens(
           theIndex = this->GetRootIndexFromGenerator(theIndex);
           if (!this->Computed.elements[theIndex][currentIndex]) {
             global.fatal << "This is a programming error. "
-            << "For some reason I am not computed. Here is me: " << this->ToString() << global.fatal;
+            << "For some reason I am not computed. Here is me: " << this->toString() << global.fatal;
           }
           outputMultiplyLieBracketsToGetGenerator /= this->ChevalleyConstants.elements[theIndex][currentIndex];
         }
@@ -62,8 +62,8 @@ bool PartFractions::ArgumentsAllowed(Vectors<Rational>& theArguments, std::strin
     if (tempCone.IsInCone(tempCone.Vertices[i]) && tempCone.IsInCone(- tempCone.Vertices[i])) {
       std::stringstream out;
       out << "Error: the Q_{>0} span of vectors you gave as input contains zero (as it contains the vector "
-      << tempCone.Vertices[i].ToString() << " as well as its opposite vector "
-      << (- tempCone.Vertices[i]).ToString()
+      << tempCone.Vertices[i].toString() << " as well as its opposite vector "
+      << (- tempCone.Vertices[i]).toString()
       << "), hence the vector partition function is " << "can only take values infinity or zero. ";
       outputWhatWentWrong = out.str();
       return false;
@@ -274,7 +274,7 @@ void LittelmannPath::Simplify() {
   this->Waypoints[leftIndex] = *this->Waypoints.LastObject();
 /*  if (leftIndex + 1< this->Waypoints.size) {
     this->Waypoints.SetSize(leftIndex + 1);
-    tempStream << " reduced to " << this->ToString();
+    tempStream << " reduced to " << this->toString();
     global.Comments << tempStream.str();
   }*/
   this->Waypoints.SetSize(leftIndex + 1);
@@ -324,7 +324,7 @@ std::string LittelmannPath::ElementToStringIndicesToCalculatorOutput(LittelmannP
     out << "eAlpha(" << displayIndex << ", ";
   }
   out << "littelmann"
-  << inputStartingPath.owner->GetFundamentalCoordinatesFromSimple(*inputStartingPath.Waypoints.LastObject()).ToString();
+  << inputStartingPath.owner->GetFundamentalCoordinatesFromSimple(*inputStartingPath.Waypoints.LastObject()).toString();
   for (int i = 0; i < input.size; i ++) {
     out << " ) ";
   }
@@ -376,7 +376,7 @@ bool LittelmannPath::GenerateOrbit(
               outputOperators.AddOnTop(currentSequence);
               if (!currentPath.MinimaAreIntegral()) {
                 global.Comments << "<hr>Found a bad path:<br> ";
-                global.Comments << " = " << currentPath.ToString();
+                global.Comments << " = " << currentPath.toString();
               }
             }
           }
@@ -394,7 +394,7 @@ bool LittelmannPath::GenerateOrbit(
               outputOperators.AddOnTop(currentSequence);
               if (!currentPath.MinimaAreIntegral()) {
                 global.Comments << "<hr>Found a bad path:<br> ";
-                global.Comments << " = " << currentPath.ToString();
+                global.Comments << " = " << currentPath.toString();
               }
             }
           }
@@ -411,7 +411,7 @@ std::string LittelmannPath:: ElementToStringOperatorSequenceStartingOnMe(List<in
   tempMon = input;
   tempMon.generatorsIndices.ReverseOrderElements();
   tempMon.Powers.ReverseOrderElements();
-  return tempMon.ToString();
+  return tempMon.toString();
 }
 
 template <class coefficient>
@@ -631,15 +631,15 @@ bool ElementUniversalEnveloping<coefficient>::HWMTAbilinearForm(
   MonomialUniversalEnveloping<coefficient> constMon;
   constMon.MakeConst();
   if (logStream != nullptr) {
-    *logStream << "backtraced elt: " << MTright.ToString(&global.theDefaultFormat.GetElement()) << "<br>";
-    *logStream << "this element: " << this->ToString(&global.theDefaultFormat.GetElement()) << "<br>";
+    *logStream << "backtraced elt: " << MTright.toString(&global.theDefaultFormat.GetElement()) << "<br>";
+    *logStream << "this element: " << this->toString(&global.theDefaultFormat.GetElement()) << "<br>";
   }
   for (int j = 0; j < right.size; j ++) {
     intermediateAccum = *this;
     intermediateAccum.Simplify(global, theRingUnit, theRingZero);
     if (logStream != nullptr) {
       *logStream << "intermediate after simplification: "
-      << intermediateAccum.ToString(&global.theDefaultFormat.GetElement()) << "<br>";
+      << intermediateAccum.toString(&global.theDefaultFormat.GetElement()) << "<br>";
     }
     intermediateAccum.ModOutVermaRelations(&global, subHiGoesToIthElement, theRingUnit, theRingZero);
     MonomialUniversalEnveloping<coefficient>& rightMon = MTright[j];
@@ -651,24 +651,24 @@ bool ElementUniversalEnveloping<coefficient>::HWMTAbilinearForm(
           tempElt.MakeOneGenerator(rightMon.generatorsIndices[i], *this->owners, this->indexInOwners, theRingUnit);
           MathRoutines::swap(tempElt, intermediateAccum);
           if (logStream != nullptr) {
-            *logStream << "tempElt before mult: " << tempElt.ToString(&global.theDefaultFormat) << "<br>";
+            *logStream << "tempElt before mult: " << tempElt.toString(&global.theDefaultFormat) << "<br>";
             *logStream << "intermediate before mult: "
-            << intermediateAccum.ToString(&global.theDefaultFormat.GetElement()) << "<br>";
+            << intermediateAccum.toString(&global.theDefaultFormat.GetElement()) << "<br>";
           }
           intermediateAccum *= (tempElt);
           if (logStream != nullptr) {
             *logStream << "intermediate before simplification: "
-            << intermediateAccum.ToString(&global.theDefaultFormat.GetElement()) << "<br>";
+            << intermediateAccum.toString(&global.theDefaultFormat.GetElement()) << "<br>";
           }
           intermediateAccum.Simplify(theRingUnit);
           if (logStream != nullptr) {
             *logStream << "intermediate after simplification: "
-            << intermediateAccum.ToString(&global.theDefaultFormat.GetElement()) << "<br>";
+            << intermediateAccum.toString(&global.theDefaultFormat.GetElement()) << "<br>";
           }
           intermediateAccum.ModOutVermaRelations(subHiGoesToIthElement, theRingUnit, theRingZero);
           if (logStream != nullptr) {
             *logStream << "intermediate after Verma rels: "
-            << intermediateAccum.ToString(&global.theDefaultFormat.GetElement()) << "<br>";
+            << intermediateAccum.toString(&global.theDefaultFormat.GetElement()) << "<br>";
           }
         }
       } else {
@@ -683,7 +683,7 @@ bool ElementUniversalEnveloping<coefficient>::HWMTAbilinearForm(
     }
   }
   if (logStream != nullptr) {
-    *logStream << "final UE element: " << Accum.ToString(&global.theDefaultFormat.GetElement());
+    *logStream << "final UE element: " << Accum.toString(&global.theDefaultFormat.GetElement());
   }
   return true;
 }
@@ -712,7 +712,7 @@ std::string ElementUniversalEnveloping<coefficient>::IsInProperSubmodule(
   }
   for (int i = 0; i < theOrbit.size; i ++) {
     ElementUniversalEnveloping<coefficient>& current = theOrbit[i];
-    out << "<br>" << current.ToString(&global.theDefaultFormat.GetElement());
+    out << "<br>" << current.toString(&global.theDefaultFormat.GetElement());
   }
   return out.str();
 }
@@ -827,8 +827,8 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
     if (!isGood) {
       global.fatal << "This is either a programming error, or Lemma 3.3, T. Milev, P. Somberg, \"On branching...\""
       << " is wrong. The question is, which is the more desirable case... The bad apple is element "
-      << this->nilradicalSmall[i].ToString() << " of weight "
-      << this->weightsNilradicalSmall[i].ToString() << ". " << global.fatal;
+      << this->nilradicalSmall[i].toString() << " of weight "
+      << this->weightsNilradicalSmall[i].toString() << ". " << global.fatal;
     }
   }
 }
@@ -861,9 +861,9 @@ std::string branchingData::GetStringCasimirProjector(int theIndex, const Rationa
     if (weightDifference.IsPositive() && !accountedDiffs.Contains(weightDifference)) {
       accountedDiffs.AddOnTop(weightDifference);
       if (additionalMultiple != 1) {
-        formulaStream1 << additionalMultiple.ToString(&this->theFormat);
+        formulaStream1 << additionalMultiple.toString(&this->theFormat);
       }
-      formulaStream1 << "(i(\\bar c) - (" << this->theChars[i].ToString(&this->theFormat) << "))";
+      formulaStream1 << "(i(\\bar c) - (" << this->theChars[i].toString(&this->theFormat) << "))";
       found = true;
     }
   }
@@ -929,16 +929,16 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
   }
 }
 
-std::string LittelmannPath::ToString(bool useSimpleCoords, bool useArrows, bool includeDominance) const {
+std::string LittelmannPath::toString(bool useSimpleCoords, bool useArrows, bool includeDominance) const {
   if (this->Waypoints.size == 0) {
     return "0";
   }
   std::stringstream out;
   for (int i = 0; i < this->Waypoints.size; i ++) {
     if (useSimpleCoords) {
-      out << this->Waypoints[i].ToString();
+      out << this->Waypoints[i].toString();
     } else {
-      out << this->owner->GetFundamentalCoordinatesFromSimple(this->Waypoints[i]).ToString();
+      out << this->owner->GetFundamentalCoordinatesFromSimple(this->Waypoints[i]).toString();
     }
     if (i != this->Waypoints.size - 1) {
       if (useArrows) {

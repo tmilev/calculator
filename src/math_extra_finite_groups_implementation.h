@@ -7,7 +7,7 @@
 #include "math_general_polynomial_computations_advanced_implementation.h"
 
 template <class coefficient>
-std::string FinitelyGeneratedMatrixMonoid<coefficient>::ToString(FormatExpressions* theFormat) const {
+std::string FinitelyGeneratedMatrixMonoid<coefficient>::toString(FormatExpressions* theFormat) const {
   std::stringstream out;
   out << "Number of generators: " << this->theGenerators.size;
   out << "<br>Number of elements: " << this->theElements.size;
@@ -76,7 +76,7 @@ bool FiniteGroup<elementSomeGroup>::ComputeAllElementsLargeGroup(bool andWords, 
         LargeInteger sizeByFla = this->SizeByFormulaOrNeg1();
         reportStream << "So far, generated " << this->theElements.size << " elements";
         if (sizeByFla > 0) {
-          reportStream << " out of " << sizeByFla.ToString();
+          reportStream << " out of " << sizeByFla.toString();
         }
         reportStream << ".";
         theReport.Report(reportStream.str());
@@ -381,7 +381,7 @@ std::string FiniteGroup<elementSomeGroup>::ToStringElements(FormatExpressions* t
   out << "<br>Elements of the group(" << this->theElements.size << " total):\n ";
   if (this->theElements.size <= 100) {
     for (int i = 0; i < this->theElements.size; i ++) {
-      out << i << ". " << this->theElements[i].ToString() << "\n";
+      out << i << ". " << this->theElements[i].toString() << "\n";
     }
   } else {
     out << "... too many, not displaying. ";
@@ -393,7 +393,7 @@ template <class elementSomeGroup>
 std::string FiniteGroup<elementSomeGroup>::ToStringConjugacyClasses(FormatExpressions* theFormat) {
   MacroRegisterFunctionWithName("Subgroup::ToStringConjugacyClasses");
   std::stringstream out;
-  out << "<br>Size: " << this->GetSize().ToString() << "\n";
+  out << "<br>Size: " << this->GetSize().toString() << "\n";
   FormatExpressions charPolyFormat;
   charPolyFormat.polyAlphabeT.SetSize(1);
   charPolyFormat.polyAlphabeT[0] = "q";
@@ -403,16 +403,16 @@ std::string FiniteGroup<elementSomeGroup>::ToStringConjugacyClasses(FormatExpres
     for (int i = 0; i < this->conjugacyClasseS.size; i ++) {
       out << "<hr>Conjugacy class " << i + 1 << ": ";
       if (this->conjugacyClasseS[i].flagRepresentativeComputed) {
-        out << " represented by " << this->conjugacyClasseS[i].representative.ToString(theFormat) << ". ";
+        out << " represented by " << this->conjugacyClasseS[i].representative.toString(theFormat) << ". ";
         //out << this->conjugacyClasseS[i].ToStringInvariants(theFormat); FIXME: do this sanely
       } else {
         out << " representative not computed. ";
       }
-      out << "Class size: " << this->conjugacyClasseS[i].size.ToString() << ".\n<br>\n";
+      out << "Class size: " << this->conjugacyClasseS[i].size.toString() << ".\n<br>\n";
       if (this->flagCharPolysAreComputed) {
         if (i < this->CCsStandardRepCharPolys.size) {
           out << "Characteristic poly standard representation: "
-          << this->CCsStandardRepCharPolys[i].ToString(&charPolyFormat);
+          << this->CCsStandardRepCharPolys[i].toString(&charPolyFormat);
           const List<int>& currentHashList = this->CCsStandardRepCharPolys.GetHashArray(
             this->CCsStandardRepCharPolys.GetHash(this->CCsStandardRepCharPolys[i])
           );
@@ -443,7 +443,7 @@ std::string FiniteGroup<elementSomeGroup>::ToStringConjugacyClasses(FormatExpres
         numEltsToDisplay = 10;
       }
       for (int j = 0; j < numEltsToDisplay; j ++) {
-        out << this->conjugacyClasseS[i].theElements[j].ToString(theFormat);
+        out << this->conjugacyClasseS[i].theElements[j].toString(theFormat);
         if (j != numEltsToDisplay - 1) {
           out << ", ";
         }
@@ -475,15 +475,15 @@ bool FiniteGroup<elementSomeGroup>::CheckOrthogonalityCharTable() {
       if (j != i) {
         if (theScalarProd != 0) {
           global.fatal << "Error: the character table is not orthonormal: char number " << i + 1 << " = "
-          << leftChar.ToString() << " is not orthogonal to char number "
-          << j+ 1 << " = " << rightChar.ToString() << ". <br>The entire char table is: "
+          << leftChar.toString() << " is not orthogonal to char number "
+          << j+ 1 << " = " << rightChar.toString() << ". <br>The entire char table is: "
           << this->PrettyPrintCharacterTable() << global.fatal;
         }
       }
       if (j == i) {
         if (theScalarProd != 1) {
           global.fatal << "Error: the character table is not orthonormal: char number " << i + 1 << " = "
-          << leftChar.ToString() << " is not of norm 1. "
+          << leftChar.toString() << " is not of norm 1. "
           << "<br>The entire char table is: " << this->PrettyPrintCharacterTable() << global.fatal;
         }
       }
@@ -528,7 +528,7 @@ void FiniteGroup<elementSomeGroup>::ComputeCCSizeOrCCFromRepresentative(
     inputOutputClass.size ++;
     if (storeCC) {
       if (inputOutputClass.theElements.Contains(theOrbitIterator.GetCurrentElement())) {
-        global.fatal << " !element " << theOrbitIterator.GetCurrentElement().ToString()
+        global.fatal << " !element " << theOrbitIterator.GetCurrentElement().toString()
         << " already contained !" << global.fatal;
       }
       inputOutputClass.theElements.AddOnTop(theOrbitIterator.GetCurrentElement());
@@ -544,21 +544,21 @@ bool FiniteGroup<elementSomeGroup>::CheckConjugacyClassRepsMatchCCsizes() {
     LargeInteger oldCCsize = this->conjugacyClasseS[i].size;
     this->ComputeCCSizeOrCCFromRepresentative(this->conjugacyClasseS[i], true);
     if (oldCCsize != this->conjugacyClasseS[i].size) {
-      global.fatal << "The precomputed size " << oldCCsize.ToString()
-      << " of the class represented by " << this->conjugacyClasseS[i].representative.ToString()
-      << " doesn't match actual class size which is: " << this->conjugacyClasseS[i].size.ToString()
+      global.fatal << "The precomputed size " << oldCCsize.toString()
+      << " of the class represented by " << this->conjugacyClasseS[i].representative.toString()
+      << " doesn't match actual class size which is: " << this->conjugacyClasseS[i].size.toString()
       << global.fatal;
     }
     computedSize += oldCCsize;
   }
   if (computedSize != this->sizePrivate) {
-    global.fatal << "Computed size " << computedSize.ToString() << " is different from recorded size "
-    << sizePrivate.ToString() << global.fatal;
+    global.fatal << "Computed size " << computedSize.toString() << " is different from recorded size "
+    << sizePrivate.toString() << global.fatal;
   }
   if (this->SizeByFormulaOrNeg1() > 0) {
     if (computedSize != this->SizeByFormulaOrNeg1()) {
       global.fatal << "Computed size is different from size dicated by formula which is: "
-      << this->SizeByFormulaOrNeg1().ToString() << global.fatal;
+      << this->SizeByFormulaOrNeg1().toString() << global.fatal;
     }
   }
   return true;
@@ -751,7 +751,7 @@ LargeInteger WeylGroupData::GetOrbitSize(Vector<coefficient>& theWeight) {
   resultRat /= theStabilizerDynkinType.GetWeylGroupSizeByFormula();
   LargeInteger result;
   if (!resultRat.IsInteger(&result)) {
-    global.fatal << "Something has gone very wrong: orbit size reported to be " << resultRat.ToString()
+    global.fatal << "Something has gone very wrong: orbit size reported to be " << resultRat.toString()
     << " which is non-integer!" << global.fatal;
   }
   bool doDebug = true;
@@ -760,8 +760,8 @@ LargeInteger WeylGroupData::GetOrbitSize(Vector<coefficient>& theWeight) {
       HashedList<Vector<coefficient> > comparisonOrbit;
       this->GenerateOrbit(theWeight, false, comparisonOrbit, false, - 1, 0, - 1);
       if (result != comparisonOrbit.size) {
-        global.fatal << "Actual orbit of " << theWeight.ToString() << " has size " << comparisonOrbit.size << " but I computed "
-        << " the orbit size to be " << result.ToString() << ". This may be a mathematical error. " << global.fatal;
+        global.fatal << "Actual orbit of " << theWeight.toString() << " has size " << comparisonOrbit.size << " but I computed "
+        << " the orbit size to be " << result.toString() << ". This may be a mathematical error. " << global.fatal;
       }
     }
   }
@@ -822,7 +822,7 @@ bool WeylGroupAutomorphisms::GenerateOuterOrbit(
         std::stringstream reportStream;
         reportStream << "Generating outer orbit, " << output.size
         << " elements found so far, Weyl group type: "
-        << this->theWeyl->theDynkinType.ToString() << ". ";
+        << this->theWeyl->theDynkinType.toString() << ". ";
         theReport.Report(reportStream.str());
       }
     }
@@ -937,7 +937,7 @@ bool WeylGroupData::GenerateOrbit(
       if (theReport.TickAndWantReport()) {
         std::stringstream reportStream;
         reportStream << "So far found " << i + 1 << " elements in the orbit(s) of the starting weight(s) "
-        << theWeights.ToString() << ". ";
+        << theWeights.toString() << ". ";
         theReport.Report(reportStream.str());
       }
       if (!RhoAction) {
@@ -1160,8 +1160,8 @@ bool WeylGroupData::FreudenthalEval(
     if (BufferCoeff == 0) {
       global.fatal << "This is a programming or a mathematical error. "
       << "I get that the denominator in the Freundenthal formula is zero. "
-      << " The highest weight is " << inputHWfundamentalCoords.ToString()
-      << ". The Weyl group details follow. " << this->ToString() << global.fatal;
+      << " The highest weight is " << inputHWfundamentalCoords.toString()
+      << ". The Weyl group details follow. " << this->toString() << global.fatal;
     }
     currentAccum /= BufferCoeff;
     std::stringstream out;
@@ -1186,8 +1186,8 @@ bool WeylGroupData::GetAlLDominantWeightsHWFDIM(
   Vector<coefficient> highestWeightFundCoords = this->GetFundamentalCoordinatesFromSimple(highestWeightTrue);
   if (!highestWeightFundCoords.SumCoords().IsSmallInteger()) {
     if (outputDetails != nullptr) {
-      out << "<hr> The highest weight you gave in simple coordinates: " << highestWeightSimpleCoords.ToString()
-      << " which equals " << highestWeightFundCoords.ToString()
+      out << "<hr> The highest weight you gave in simple coordinates: " << highestWeightSimpleCoords.toString()
+      << " which equals " << highestWeightFundCoords.toString()
       << "  in fundamental coordinates is not integral dominant.<br>";
       *outputDetails = out.str();
     }
@@ -1447,7 +1447,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::GetClassFunc
         std::stringstream reportstream;
         reportstream << "<br>Class function matrix of conjugacy class " << cci + 1
         << " (total num classes is " << numClasses << ") computed to be: "
-        << this->classFunctionMatrices[cci].ToString();
+        << this->classFunctionMatrices[cci].toString();
         theReport.Report(reportstream.str());
       }
     }
@@ -1487,26 +1487,26 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::ClassFunctio
 }
 
 template <typename somegroup, typename coefficient>
-std::string GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::ToString(FormatExpressions* theFormat) const {
+std::string GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::toString(FormatExpressions* theFormat) const {
   if (this->ownerGroup == 0) {
     return "non-initialized representation";
   }
   std::stringstream out;
   if (this->flagCharacterIsComputed) {
-    out << "Character: " << this->theCharacteR.ToString(theFormat) << " of norm " << this->theCharacteR.Norm();
+    out << "Character: " << this->theCharacteR.toString(theFormat) << " of norm " << this->theCharacteR.Norm();
   } else {
     out << "Character needs to be computed.";
   }
   int theRank = this->ownerGroup->generators.size;
   LargeIntegerUnsigned theLCM, theDen;
   this->GetLargestDenominatorSimpleGens(theLCM, theDen);
-  out << "\n<br>\n LCM denominators simple generators: " << theLCM.ToString() << ", largest denominator: " << theDen.ToString();
+  out << "\n<br>\n LCM denominators simple generators: " << theLCM.toString() << ", largest denominator: " << theDen.toString();
   out << "\n<br>\nThe simple generators (" << theRank << " total):<br> ";
   std::stringstream forYourCopyConvenience;
   for (int i = 0; i < theRank; i ++) {
     if (i < this->generatorS.size) {
       std::stringstream tempStream;
-      tempStream << "s_" << i + 1 << "=MatrixRationals{}" << this->generatorS[i].ToString(theFormat) << "; \\\\\n";
+      tempStream << "s_" << i + 1 << "=MatrixRationals{}" << this->generatorS[i].toString(theFormat) << "; \\\\\n";
       forYourCopyConvenience << tempStream.str();
       out << HtmlRoutines::GetMathSpanPure("\\begin{array}{l}" + tempStream.str() + "\\end{array}", 3000);
     } else {
@@ -1861,7 +1861,7 @@ coefficient& ClassFunction<someFiniteGroup, coefficient>::operator[](int i) cons
 }
 
 template<class someFiniteGroup, typename coefficient>
-std::string ClassFunction<someFiniteGroup, coefficient>::ToString(FormatExpressions* theFormat) const {
+std::string ClassFunction<someFiniteGroup, coefficient>::toString(FormatExpressions* theFormat) const {
   (void) theFormat;//avoid unused parameter warning, portable
   if (this->G == 0) {
     return "(not initialized)";
@@ -1875,7 +1875,7 @@ std::string ClassFunction<someFiniteGroup, coefficient>::ToString(FormatExpressi
     }
   }
   out << ")";
-  if (this->Norm().ToString() != "1") {
+  if (this->Norm().toString() != "1") {
     out << "[";
     out << this->Norm();
     out << "]";
@@ -1885,7 +1885,7 @@ std::string ClassFunction<someFiniteGroup, coefficient>::ToString(FormatExpressi
 
 template<class someFiniteGroup, typename coefficient>
 std::ostream& operator<<(std::ostream& out, const ClassFunction<someFiniteGroup, coefficient> X) {
-  out << X.ToString();
+  out << X.toString();
   return out;
 }
 
@@ -2089,7 +2089,7 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsTodorsVersi
       newRep *= appendOnlyIrrepsList[i];
       bool tempB = newRep.DecomposeTodorsVersion(decompositionNewRep, &appendOnlyIrrepsList);
       if (!tempB) {
-        global.fatal << "This is a mathematical error: failed to decompose " << newRep.theCharacteR.ToString() << ". " << global.fatal;
+        global.fatal << "This is a mathematical error: failed to decompose " << newRep.theCharacteR.toString() << ". " << global.fatal;
       }
     }
   }
@@ -2097,12 +2097,12 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsTodorsVersi
     std::stringstream reportStream;
     reportStream << "Irrep table:";
     for (int i = 0; i < this->irreps.size; i ++) {
-      reportStream << "\n<br>\n" << this->irreps[i].theCharacteR.ToString();
+      reportStream << "\n<br>\n" << this->irreps[i].theCharacteR.toString();
     }
     FormatExpressions tempFormat;
     tempFormat.flagUseLatex = true;
     for (int i = 0; i < this->irreps.size; i ++) {
-      reportStream << "<hr>irrep " << i + 1 << "<br>" << this->irreps_grcam[i].ToString(&tempFormat);
+      reportStream << "<hr>irrep " << i + 1 << "<br>" << this->irreps_grcam[i].toString(&tempFormat);
     }
     theReport1.Report(reportStream.str());
   }
@@ -2169,9 +2169,9 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
   this->GetCharacter();
   coefficient SumOfNumComponentsSquared = this->GetNumberOfComponents();
   if (SumOfNumComponentsSquared == 0) {
-    global.fatal << "This is a programming error: a module has character " << this->theCharacteR.ToString()
+    global.fatal << "This is a programming error: a module has character " << this->theCharacteR.toString()
     << " of zero length, which is impossible. " << "Here is a printout of the module. "
-    << this->ToString() << global.fatal;
+    << this->toString() << global.fatal;
   }
   if (SumOfNumComponentsSquared == 1) {
     int i = this->ownerGroup->characterTable.BSGetIndex(this->theCharacteR);
@@ -2193,11 +2193,11 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
   ProgressReport Report1, Report2, Report3, Report4;
   {
     std::stringstream reportStream;
-    reportStream << "<br>\nDecomposing module with character " << this->theCharacteR.ToString();
+    reportStream << "<br>\nDecomposing module with character " << this->theCharacteR.toString();
     LargeIntegerUnsigned largestDen, lcmDen;
     this->GetLargestDenominatorSimpleGens(lcmDen, largestDen);
-    reportStream << "\n<br>\n Largest denominator is " << largestDen.ToString()
-    << ", denominator lcm is: " << lcmDen.ToString();
+    reportStream << "\n<br>\n Largest denominator is " << largestDen.toString()
+    << ", denominator lcm is: " << lcmDen.toString();
     Report1.Report(reportStream.str());
   }
   //chop off already known pieces:
@@ -2207,7 +2207,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
       this->ownerGroup->CheckInitializationFDrepComputation();
       {
         std::stringstream reportStream;
-        reportStream << "<hr>\ncontains irrep " << appendOnlyIrrepsList[i].theCharacteR.ToString() << " with multiplicity "
+        reportStream << "<hr>\ncontains irrep " << appendOnlyIrrepsList[i].theCharacteR.toString() << " with multiplicity "
         << NumIrrepsOfType << "\n";
         reportStream << "<hr>\nGetting class f-n matrix from character: " << appendOnlyIrrepsList[i].theCharacteR;
         Report2.Report(reportStream.str());
@@ -2215,7 +2215,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
       this->GetClassFunctionMatrix(appendOnlyIrrepsList[i].theCharacteR, splittingOperatorMatrix);
       {
         std::stringstream reportStream;
-        reportStream << "<br>class f-n matrix: " << splittingOperatorMatrix.ToString() << "\n <br>\n"
+        reportStream << "<br>class f-n matrix: " << splittingOperatorMatrix.toString() << "\n <br>\n"
         << " computing its zero eigenspace... ";
         Report3.Report(reportStream.str());
       }
@@ -2231,21 +2231,21 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
       remainingCharacter -= appendOnlyIrrepsList[i].theCharacteR*NumIrrepsOfType;
       {
         std::stringstream reportStream;
-        reportStream << "<br>Intersecting kernel of class f-n matrix" << splittingMatrixKernel.ToString() << " with "
-        << remainingVectorSpace.ToString() << " to get: " << tempSpace.ToString()
-        << " with remaining character: " << remainingCharacter.ToString();
+        reportStream << "<br>Intersecting kernel of class f-n matrix" << splittingMatrixKernel.toString() << " with "
+        << remainingVectorSpace.toString() << " to get: " << tempSpace.toString()
+        << " with remaining character: " << remainingCharacter.toString();
         Report4.Report(reportStream.str());
       }
       remainingVectorSpace = tempSpace;
       if (remainingCharacter[0] != remainingVectorSpace.size) {
-        global.fatal << "<br>This is a programming error: remaining char " << remainingCharacter.ToString() << " indicates dimension "
-        << remainingCharacter[0].ToString()
+        global.fatal << "<br>This is a programming error: remaining char " << remainingCharacter.toString() << " indicates dimension "
+        << remainingCharacter[0].toString()
         << " but remaining vector space has dim " << remainingVectorSpace.size << global.fatal;
       }
       if (remainingCharacter.IsEqualToZero()) {
         if (remainingVectorSpace.size != 0) {
-          global.fatal << "This is a programming error: remaining char is zero but remaining space is " << remainingVectorSpace.ToString()
-          << ". Starting char: " << this->theCharacteR.ToString() << global.fatal;
+          global.fatal << "This is a programming error: remaining char is zero but remaining space is " << remainingVectorSpace.toString()
+          << ". Starting char: " << this->theCharacteR.toString() << global.fatal;
         }
       }
     }

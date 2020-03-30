@@ -475,7 +475,7 @@ std::string WebWorker::GetDatabaseDeleteOneItem() {
     commentsStream << "Failed to parse input string. ";
     return commentsStream.str();
   }
-  commentsStream << "Parsed input string: " << inputParsed.ToString(nullptr) << "\n";
+  commentsStream << "Parsed input string: " << inputParsed.toString(nullptr) << "\n";
   if (Database::get().DeleteOneEntry(inputParsed, &commentsStream)) {
     return "success";
   }
@@ -1167,7 +1167,7 @@ void WebWorker::WriteAfterTimeoutCarbonCopy(
     fileNameCarbonCopy
   ) + ".json";
   std::stringstream commentsOnError;
-  bool success = FileOperations::WriteFileVirual(extraFilename, input.ToString(nullptr), &commentsOnError);
+  bool success = FileOperations::WriteFileVirual(extraFilename, input.toString(nullptr), &commentsOnError);
   if (!success) {
     global << logger::red << "Error writing optional file. " << commentsOnError.str() << logger::endL;
   }
@@ -1205,7 +1205,7 @@ void WebWorker::WriteAfterTimeoutPartTwo(
   result[WebAPI::result::status] = status;
   WebWorker& currentWorker = global.server().GetActiveWorker();
   result[WebAPI::result::workerIndex] = currentWorker.indexInParent;
-  std::string toWrite = result.ToString(nullptr);
+  std::string toWrite = result.toString(nullptr);
   currentWorker.writingReportFile.Lock();
   bool success = FileOperations::WriteFileVirualWithPermissions_AccessUltraSensitiveFoldersIfNeeded(
     "results/" + currentWorker.workerId,
@@ -1489,7 +1489,7 @@ void WebWorker::WrapUpConnection() {
     this->resultWork["restartNeeded"] = "true";
   }
   this->pipeWorkerToServerControls.WriteOnceAfterEmptying(
-    this->resultWork.ToString(nullptr), false
+    this->resultWork.toString(nullptr), false
   );
   if (global.flagServerDetailedLog) {
     global << "Detail: done with pipes, releasing resources. " << logger::endL;
@@ -2294,12 +2294,12 @@ std::string WebWorker::ToStringStatus() const {
     out << "<br><b style =\"color:red\">Status: "
     << this->status << "</b><br>";
   }
-  out << "Pipes: " << this->pipeWorkerToServerControls.ToString()
-  << ", " << this->pipeWorkerToServerTimerPing.ToString()
-  << ", " << this->workerToWorkerRequestIndicator.ToString()
-  << ", " << this->pipeWorkerToWorkerStatus.ToString();
-  out << ". MutexProcesses: " << this->PauseWorker.ToString()
-  << ", " << this->writingReportFile.ToString();
+  out << "Pipes: " << this->pipeWorkerToServerControls.toString()
+  << ", " << this->pipeWorkerToServerTimerPing.toString()
+  << ", " << this->workerToWorkerRequestIndicator.toString()
+  << ", " << this->pipeWorkerToWorkerStatus.toString();
+  out << ". MutexProcesses: " << this->PauseWorker.toString()
+  << ", " << this->writingReportFile.toString();
   out << ", user address: " << this->userAddress << ".";
   return out.str();
 }
@@ -2640,7 +2640,7 @@ std::string WebServer::ToStringStatusAll() {
     currentWorker.status = currentWorker.pipeWorkerToWorkerStatus.GetLastRead();
   }
   out << "<hr>";
-  out << "Connections: " << this->currentlyConnectedAddresses.ToString();
+  out << "Connections: " << this->currentlyConnectedAddresses.toString();
   for (int i = 0; i < this->theWorkers.size; i ++) {
     out << "<hr>" << this->theWorkers[i].ToStringStatus();
   }
@@ -2933,7 +2933,7 @@ void WebServer::RecycleOneChild(int childIndex, int& numberInUse) {
   WebWorker& currentWorker = this->theWorkers[childIndex];
   PipePrimitive& currentControlPipe = currentWorker.pipeWorkerToServerControls;
   if (currentControlPipe.flagReadEndBlocks) {
-    global.fatal << "Pipe: " << currentControlPipe.ToString() << " has blocking read end. " << global.fatal;
+    global.fatal << "Pipe: " << currentControlPipe.toString() << " has blocking read end. " << global.fatal;
   }
   currentControlPipe.ReadOnceIfFailThenCrash(true);
   if (currentControlPipe.lastRead.size > 0) {
@@ -2943,7 +2943,7 @@ void WebServer::RecycleOneChild(int childIndex, int& numberInUse) {
   }
   PipePrimitive& currentPingPipe = currentWorker.pipeWorkerToServerTimerPing;
   if (currentPingPipe.flagReadEndBlocks) {
-    global.fatal << "Pipe: " << currentPingPipe.ToString() << " has blocking read end. " << global.fatal;
+    global.fatal << "Pipe: " << currentPingPipe.toString() << " has blocking read end. " << global.fatal;
   }
   currentPingPipe.ReadOnceIfFailThenCrash(true);
   if (currentPingPipe.lastRead.size > 0) {
@@ -4234,7 +4234,7 @@ bool GlobalVariables::ConfigurationStore() {
     global << logger::yellow << "Command-line overrides in the present configuration: configuration file not stored. ";
     return true;
   }
-  std::string correctedConfiguration = global.configuration.ToString(&JSData::PrintOptions::NewLine());
+  std::string correctedConfiguration = global.configuration.toString(&JSData::PrintOptions::NewLine());
   if (correctedConfiguration == global.configurationFileContent) {
     return true;
   }

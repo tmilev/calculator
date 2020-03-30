@@ -8,7 +8,7 @@
 #include "math_extra_drawing_variables.h"
 
 template <class coefficient>
-std::string Weight<coefficient>::ToString(FormatExpressions* theFormat) const {
+std::string Weight<coefficient>::toString(FormatExpressions* theFormat) const {
   std::stringstream out;
   bool formatWeightAsIndexVectorSpace = theFormat == nullptr ? true : theFormat->flagFormatWeightAsVectorSpaceIndex;
   if (!formatWeightAsIndexVectorSpace) {
@@ -183,7 +183,7 @@ void charSSAlgMod<coefficient>::MakeFromWeight(
   this->MakeZero();
   if (inputWeightSimpleCoords.size != inputOwner->GetRank()) {
     global.fatal << "This is a programming error: attempting to create a character from highest weight in simple coords "
-    << inputWeightSimpleCoords.ToString() << "("
+    << inputWeightSimpleCoords.toString() << "("
     << inputWeightSimpleCoords.size << " coordinates) while the owner semisimple "
     << " Lie algebra is of rank " << (inputOwner->GetRank()) << global.fatal;
   }
@@ -436,7 +436,7 @@ bool charSSAlgMod<coefficient>::DrawMe(
       convertor = finalWeights[j].GetVectorRational();
       theDrawingVars.drawCircleAtVectorBufferRational(convertor, "black", 3);
       if (useMults) {
-        theDrawingVars.drawTextAtVectorBufferRational(convertor, CharCartan.coefficients[i].ToString(), "black");
+        theDrawingVars.drawTextAtVectorBufferRational(convertor, CharCartan.coefficients[i].toString(), "black");
       }
     }
   }
@@ -465,7 +465,7 @@ void charSSAlgMod<coefficient>::DrawMeAssumeCharIsOverCartan(
     actualWeight = actualAmbientWeyl.GetSimpleCoordinatesFromFundamental((*this)[j].weightFundamentalCoordS);
     actualWeightRationalPart = actualWeight.GetVectorRational(); // <-type conversion here!
     theDrawingVars.drawCircleAtVectorBufferRational(actualWeightRationalPart, "black", 5);
-    theDrawingVars.drawTextAtVectorBufferRational(actualWeightRationalPart, this->coefficients[j].ToString(), "black");
+    theDrawingVars.drawTextAtVectorBufferRational(actualWeightRationalPart, this->coefficients[j].toString(), "black");
   }
 }
 
@@ -560,7 +560,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(
       theWeyL.GetSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoordS), orbitDom, true, 10000
     )) {
       out << "failed to generate the complement-sub-Weyl-orbit of weight "
-      << theWeyL.GetSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoordS).ToString();
+      << theWeyL.GetSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoordS).toString();
       if (Report != nullptr) {
         *Report = out.str();
       }
@@ -579,7 +579,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(
   theFormat.CustomPlusSign = "\\oplus ";
   theFormat.fundamentalWeightLetter = "\\omega";
   out << "<br>Character w.r.t Levi part of the parabolic of the larger algebra: "
-  << HtmlRoutines::GetMathSpanPure(remainingCharDominantLevI.ToString(&theFormat));
+  << HtmlRoutines::GetMathSpanPure(remainingCharDominantLevI.toString(&theFormat));
   remainingCharProjected.MakeZero();
   Vector<coefficient> fundCoordsSmaller, inSimpleCoords;
   fundCoordsSmaller.SetSize(WeylFDSmall.AmbientWeyl->GetDim());
@@ -632,7 +632,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(
   }
   theFormat.fundamentalWeightLetter = "\\psi";
   out << "<br>Character w.r.t the Levi part of the parabolic of the small algebra: "
-  << HtmlRoutines::GetMathSpanPure(output.ToString(&theFormat));
+  << HtmlRoutines::GetMathSpanPure(output.toString(&theFormat));
   if (Report != nullptr) {
     DrawingVariables theDV1;
     std::string tempS;
@@ -645,7 +645,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(
         output[i].weightFundamentalCoordS
       ).GetVectorRational();
       std::stringstream tempStream;
-      tempStream << output.coefficients[i].ToString();
+      tempStream << output.coefficients[i].toString();
       theDV1.drawTextAtVectorBufferRational(tempRoot, tempStream.str(), "black");
       for (int j = 1; j < WeylFDSmall.AmbientWeyl->theGroup.theElements.size; j ++) {
         tempRoot2 = tempRoot;

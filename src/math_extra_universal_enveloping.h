@@ -9,12 +9,12 @@ template <class coefficient>
 class MonomialUniversalEnveloping : public MonomialTensor<coefficient> {
 private:
 public:
-  std::string ToString(FormatExpressions* theFormat = nullptr) const;
+  std::string toString(FormatExpressions* theFormat = nullptr) const;
   SemisimpleLieAlgebra* owner;
   // SelectedIndices gives the non-zero powers of the chevalley generators participating in the monomial
   // Powers gives the powers of the Chevalley generators in the order they appear in generatorsIndices
   friend std::ostream& operator<<(std::ostream& output, const MonomialUniversalEnveloping<coefficient>& theMon) {
-    output << theMon.ToString();
+    output << theMon.toString();
     return output;
   }
   bool IsConstant() const {

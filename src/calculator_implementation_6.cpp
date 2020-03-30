@@ -69,7 +69,7 @@ std::string CalculatorHTML::ToStringLinkFromProblem(
   std::stringstream out;
   out << "<a href='" << global.DisplayNameExecutableAppNoCache
   << "#"
-  << request.ToString()
+  << request.toString()
   << "'>"
   << theFileName
   << "</a>";
@@ -718,7 +718,7 @@ bool CalculatorFunctions::innerPlotDirectionOrVectorField(
   thePlotObj.rightPtE = input[3];
   if (input.size() >= 7) {
     if (!input[6].IsOfType<std::string>(&thePlotObj.colorJS)) {
-      thePlotObj.colorJS = input[6].ToString();
+      thePlotObj.colorJS = input[6].toString();
     }
   } else {
     thePlotObj.colorJS = "blue";
@@ -731,10 +731,10 @@ bool CalculatorFunctions::innerPlotDirectionOrVectorField(
   }
   Vector<double> lowLeft, upRight;
   if (!theCommands.GetVectorDoubles(input[2], lowLeft, 2)) {
-    return theCommands << "Failed to low left corner from: " << input[2].ToString();
+    return theCommands << "Failed to low left corner from: " << input[2].toString();
   }
   if (!theCommands.GetVectorDoubles(input[3], upRight, 2)) {
-    return theCommands << "Failed to up right corner from: " << input[3].ToString();
+    return theCommands << "Failed to up right corner from: " << input[3].toString();
   }
   thePlotObj.yHigh = upRight[1];
   thePlotObj.yLow = lowLeft[1];
@@ -754,16 +754,16 @@ bool CalculatorFunctions::innerPlotDirectionOrVectorField(
   Expression jsConverterE;
   if (input.size() >= 6) {
     if (CalculatorFunctions::functionMakeJavascriptExpression(theCommands, input[5], jsConverterE)) {
-      thePlotObj.defaultLengthJS = jsConverterE.ToString();
+      thePlotObj.defaultLengthJS = jsConverterE.toString();
     } else {
-      return theCommands << "Failed to extract javascript from " << input[5].ToString();
+      return theCommands << "Failed to extract javascript from " << input[5].toString();
     }
   }
   if (CalculatorFunctions::functionMakeJavascriptExpression(theCommands, thePlotObj.manifoldImmersion, jsConverterE)) {
-    thePlotObj.manifoldImmersionJS = jsConverterE.ToString();
+    thePlotObj.manifoldImmersionJS = jsConverterE.toString();
     thePlotObj.manifoldImmersion.HasInputBoxVariables(&thePlot.boxesThatUpdateMe);
   } else {
-    return theCommands << "Failed to extract javascript from " << input[1].ToString();
+    return theCommands << "Failed to extract javascript from " << input[1].toString();
   }
   thePlotObj.manifoldImmersion.GetFreeVariables(thePlotObj.variablesInPlay, true);
   Expression xE, yE;
@@ -782,7 +782,7 @@ bool CalculatorFunctions::innerPlotDirectionOrVectorField(
   thePlotObj.variablesInPlay.QuickSortAscending();
   thePlotObj.variablesInPlayJS.SetSize(thePlotObj.variablesInPlay.size);
   for (int i = 0; i < thePlotObj.variablesInPlay.size; i ++) {
-    thePlotObj.variablesInPlayJS[i] = thePlotObj.variablesInPlay[i].ToString();
+    thePlotObj.variablesInPlayJS[i] = thePlotObj.variablesInPlay[i].toString();
   }
   thePlotObj.thePlotType = "plotDirectionField";
   if (
@@ -791,7 +791,7 @@ bool CalculatorFunctions::innerPlotDirectionOrVectorField(
   ) {
     return theCommands
     << "<hr>Could not extract a list of elements for the "
-    << "number of segments from: " << input[4].ToString();
+    << "number of segments from: " << input[4].toString();
   }
   thePlotObj.numSegmenTsJS.SetSize(2);
   for (int i = 0; i < 2; i ++) {
@@ -799,9 +799,9 @@ bool CalculatorFunctions::innerPlotDirectionOrVectorField(
       theCommands, input[4][i + 1], jsConverterE
     )) {
       return theCommands << "Failed to convert "
-      << input[4][i + 1].ToString() << " to javascript. ";
+      << input[4][i + 1].toString() << " to javascript. ";
     }
-    thePlotObj.numSegmenTsJS[i] = jsConverterE.ToString();
+    thePlotObj.numSegmenTsJS[i] = jsConverterE.toString();
   }
   thePlot.thePlots.AddOnTop(thePlotObj);
   return output.AssignValue(thePlot, theCommands);
@@ -816,14 +816,14 @@ bool CalculatorFunctions::innerJWTVerifyAgainstRSA256(Calculator& theCommands, c
   }
   std::string theTokenString;
   if (!input[1].IsOfType(&theTokenString)) {
-    return theCommands << "The first argument of " << input.ToString() << " is not a string. ";
+    return theCommands << "The first argument of " << input.toString() << " is not a string. ";
   }
   std::stringstream out;
   std::string theModBase64, theExpBase64;
   if (!input[2].IsOfType(&theModBase64) || !input[3].IsOfType(&theExpBase64)) {
     return theCommands << "Failed to convert the arguments "
-    << input[2].ToString()
-    << " and " << input[3].ToString()
+    << input[2].toString()
+    << " and " << input[3].toString()
     << " to base64 strings";
   }
   JSONWebToken theToken;
@@ -832,7 +832,7 @@ bool CalculatorFunctions::innerJWTVerifyAgainstRSA256(Calculator& theCommands, c
     return output.AssignValue(out.str(), theCommands);
   }
   out << "Sucesfully extracted JWT token. <br>"
-  << theToken.ToString()
+  << theToken.toString()
   << "<br>";
   if (
     !Crypto::ConvertBase64ToLargeUnsignedInt(theModBase64, theMod, &out) ||
@@ -871,7 +871,7 @@ bool CalculatorFunctions::innerHexToString(Calculator& theCommands, const Expres
   }
   std::string inputString;
   if (!input[1].IsOfType(&inputString)) {
-    inputString = input[1].ToString();
+    inputString = input[1].toString();
   }
   std::string result;
   std::stringstream commentsOnFailure;
@@ -927,7 +927,7 @@ bool CalculatorFunctions::innerTestJSON(Calculator& theCommands, const Expressio
   }
   std::string inputString;
   if (!input[1].IsOfType(&inputString)) {
-    inputString = input[1].ToString();
+    inputString = input[1].toString();
   }
   JSData theData;
   std::stringstream out;
@@ -935,7 +935,7 @@ bool CalculatorFunctions::innerTestJSON(Calculator& theCommands, const Expressio
     return output.AssignValue(out.str(), theCommands);
   }
   out << "Input:<br>" << inputString << "<hr>Output: <br>"
-  << theData.ToString(nullptr);
+  << theData.toString(nullptr);
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -946,7 +946,7 @@ bool CalculatorFunctions::innerBase64ToHex(Calculator& theCommands, const Expres
   }
   std::string inputString;
   if (!input[1].IsOfType(&inputString)) {
-    inputString = input[1].ToString();
+    inputString = input[1].toString();
   }
   std::string result, bitStream;
   if (!Crypto::ConvertBase64ToString(inputString, bitStream, &theCommands.Comments, &theCommands.Comments)) {
@@ -1005,7 +1005,7 @@ bool CalculatorFunctions::innerTestRSASign(
   List<unsigned char> message, paddedMessage, signature;
   message = messageString;
   theKey.HashAndPadPKCS1(message, SignatureAlgorithmSpecification::HashAlgorithm::sha256, paddedMessage);
-  out << "Temporary private key:<br>" << theKey.ToString() << "<br>";
+  out << "Temporary private key:<br>" << theKey.toString() << "<br>";
   theKey.SignBytesPadPKCS1(message, SignatureAlgorithmSpecification::HashAlgorithm::sha256, signature);
   out << "Message:<br>" << Crypto::ConvertListUnsignedCharsToHex(message);
   out << "<br>Padded message digest:<br>" << Crypto::ConvertListUnsignedCharsToHex(paddedMessage);
@@ -1014,12 +1014,12 @@ bool CalculatorFunctions::innerTestRSASign(
   theElement.theModulus = theKey.thePublicKey.theModulus;
   theOne.MakeOne(theElement.theModulus);
   Crypto::ConvertListUnsignedCharsToLargeUnsignedIntegerBigEndian(signature, theElement.theValue);
-  out << "<br>Signature integer:<br>" << theElement.theValue.ToString();
+  out << "<br>Signature integer:<br>" << theElement.theValue.toString();
   MathRoutines::RaiseToPower(theElement, theKey.thePublicKey.theExponent, theOne);
   out << "<br>Signature power e mod n [e = "
   << theKey.thePublicKey.theExponent << ", n = "
   << theKey.thePublicKey.theModulus << "]"
-  << ":<br>" << theElement.theValue.ToString();
+  << ":<br>" << theElement.theValue.toString();
   std::string theHex;
   Crypto::ConvertLargeUnsignedIntToHexSignificantDigitsFirst(theElement.theValue, 0, theHex);
   out << "<br>Converted to hex:<br>" << theHex;
@@ -1040,7 +1040,7 @@ bool CalculatorFunctions::innerRSAEncrypt(
     !input[3].IsInteger(&theMessage)
   ) {
     return theCommands << "Failed to extract three (large) integers from the arguments of "
-    << input.ToString();
+    << input.toString();
   }
   if (theModulus < 0) {
     theModulus *= - 1;
@@ -1073,7 +1073,7 @@ bool CalculatorFunctions::innerSendEmailWithMailGun(
       !input[2].IsOfType(&theEmail.emailContent) ||
       !input[3].IsOfType(&theEmail.subject)
     ) {
-      return theCommands << "Arguments of " << input.ToString()
+      return theCommands << "Arguments of " << input.toString()
       << "expected to be strings (enclose in \"\" please). ";
     }
     theEmail.SendEmailWithMailGun(&out, &out, &out);
@@ -1102,7 +1102,7 @@ bool CalculatorFunctions::innerIsSquare(Calculator& theCommands, const Expressio
   List<int> theMults;
   List<LargeInteger> theFactors;
   if (!theLI.value.FactorReturnFalseIfFactorizationIncomplete(theFactors, theMults, 0, nullptr)) {
-    return theCommands << "Failed to factor: " << theLI.ToString() << " (may be too large?).";
+    return theCommands << "Failed to factor: " << theLI.toString() << " (may be too large?).";
   }
   int result = 1;
   for (int i = 0; i < theMults.size; i ++) {
@@ -1126,7 +1126,7 @@ bool CalculatorFunctions::innerIsSquareFree(Calculator& theCommands, const Expre
   List<int> theMults;
   List<LargeInteger> theFactors;
   if (!theLI.value.FactorReturnFalseIfFactorizationIncomplete(theFactors, theMults, 0, &theCommands.Comments)) {
-    return theCommands << "Failed to factor: " << theLI.ToString() << " (may be too large?).";
+    return theCommands << "Failed to factor: " << theLI.toString() << " (may be too large?).";
   }
   int result = 1;
   for (int i = 0; i < theMults.size; i ++) {
@@ -1156,7 +1156,7 @@ bool CalculatorFunctions::innerIsPower(Calculator& theCommands, const Expression
     theFactors, theMults, 0, &theCommands.Comments
   )) {
     return theCommands << "Failed to factor: "
-    << theLI.ToString() << " (may be too large?).";
+    << theLI.toString() << " (may be too large?).";
   }
   int result = 1;
   if (theMults.size > 0) {
@@ -1243,7 +1243,7 @@ bool CalculatorFunctions::innerFactorOutNumberContent(
   }
   LinearCombination<Expression, Rational> theV;
   if (!theCommands.functionCollectSummands(theCommands, input[1], theV)) {
-    return theCommands << "Failed to extract summands from: " << input[1].ToString();
+    return theCommands << "Failed to extract summands from: " << input[1].toString();
   }
   if (theV.IsEqualToZero()) {
     return output.AssignValue(0, theCommands);
@@ -1274,7 +1274,7 @@ bool CalculatorFunctions::innerSubList(Calculator& theCommands, const Expression
   }
   HashedList<Expression> boundVars;
   if (!input[2].GetBoundVariables(boundVars)) {
-    return theCommands << "Could not get bound variables from: " << input[2].ToString();
+    return theCommands << "Could not get bound variables from: " << input[2].toString();
   }
   if (input[2].IsEqualToOne()) {
     output = input[1];
@@ -1292,7 +1292,7 @@ bool CalculatorFunctions::innerSubList(Calculator& theCommands, const Expression
     theSubbed = input[2];
     theSubbed.SubstituteRecursively(toBeSubbed, input[1][i]);
     if (!theCommands.EvaluateExpression(theCommands, theSubbed, subbedSimplified)) {
-      return theCommands << "Failed to evaluate " << theSubbed.ToString();
+      return theCommands << "Failed to evaluate " << theSubbed.toString();
     }
     if (subbedSimplified.IsEqualToOne()) {
       theList.AddOnTop(input[1][i]);
@@ -1518,7 +1518,7 @@ bool CalculatorFunctions::innerMatchesPattern(
     Expression currentCommand;
     if (!matchedExpressions.theKeys[i].StartsWith(theCommands.opBind(), 2)) {
       std::stringstream errorStream;
-      errorStream << "Bound variable " << matchedExpressions.theKeys[i].ToString()
+      errorStream << "Bound variable " << matchedExpressions.theKeys[i].toString()
       << " does not start with the bind atom. ";
       return output.MakeError(errorStream.str(), theCommands);
     }
@@ -2111,7 +2111,7 @@ bool CalculatorFunctions::innerIsLinearOrConstantIn(
   List<List<Expression> > theSummands;
   if (!theCommands.GetSumProductsExpressions(input[2], theSummands)) {
     return theCommands << "Failed to extract sum from "
-    << input[2].ToString();
+    << input[2].toString();
   }
   for (int i = 0; i < theSummands.size; i ++) {
     bool found = false;
@@ -2139,13 +2139,13 @@ bool CalculatorFunctions::innerIsProductLinearOrConstTermsIn(
   List<Expression> theMultiplicands;
   if (!theCommands.CollectOpands(input[2], theCommands.opTimes(),theMultiplicands)) {
     return theCommands << "Could not extract multiplicands from: "
-    << input[2].ToString();
+    << input[2].toString();
   }
   for (int k = 0; k < theMultiplicands.size; k ++) {
     List<List<Expression> > theSummands;
     if (!theCommands.GetSumProductsExpressions(theMultiplicands[k], theSummands)) {
       return theCommands << "Failed to extract sum from "
-      << theMultiplicands[k].ToString();
+      << theMultiplicands[k].toString();
     }
     for (int i = 0; i < theSummands.size; i ++) {
       bool found = false;
@@ -2376,14 +2376,14 @@ bool CalculatorFunctions::innerIsProductTermsUpToPower(
   List<Expression> theMultiplicands;
   if (!theCommands.CollectOpands(input[2], theCommands.opTimes(), theMultiplicands)) {
     return theCommands << "Could not extract multiplicands from: "
-    << input[2].ToString();
+    << input[2].toString();
   }
 
   for (int k = 0; k < theMultiplicands.size; k ++) {
     List<List<Expression> > theSummands;
     if (!theCommands.GetSumProductsExpressions(theMultiplicands[k], theSummands)) {
       return theCommands << "Failed to extract sum from "
-      << theMultiplicands[k].ToString();
+      << theMultiplicands[k].toString();
     }
     for (int i = 0; i < theSummands.size; i ++) {
       LargeInteger foundPower = 0;
@@ -2466,10 +2466,10 @@ bool CalculatorFunctions::innerNewtonsMethod(Calculator& theCommands, const Expr
   }
   HashedList<Expression> theVars;
   if (!theFun.GetFreeVariables(theVars, true)) {
-    return theCommands << "Failed to get free variables from: " << theFun.ToString();
+    return theCommands << "Failed to get free variables from: " << theFun.toString();
   }
   if (theVars.size != 1) {
-    return theCommands << "While trying to extract a function from: " << theFun.ToString()
+    return theCommands << "While trying to extract a function from: " << theFun.toString()
     << ", got " << theVars.size << " variables. Newton's method requires an expression that depends "
     << "on exactly one variable. The variables I got were: "
     << theVars.ToStringCommaDelimited();
@@ -2478,13 +2478,13 @@ bool CalculatorFunctions::innerNewtonsMethod(Calculator& theCommands, const Expr
   if (!input[3].IsSmallInteger(&numIterations)) {
     std::stringstream errorStream;
     errorStream << "While doing Newton's method, could not extract a **small** integer from the third argument "
-    << input[3].ToString() << " of "
-    << input.ToString() << ". Please enter a number as the third argument of Newton's method. ";
+    << input[3].toString() << " of "
+    << input.toString() << ". Please enter a number as the third argument of Newton's method. ";
     return output.MakeError(errorStream.str(), theCommands);
   }
   if (numIterations < 1 || numIterations > 50) {
     std::stringstream errorStream;
-    errorStream << "While doing Newton's method with the command: " << input.ToString()
+    errorStream << "While doing Newton's method with the command: " << input.toString()
     << ", the third argument requests " << numIterations
     << " iterations. However, the number of iterations is required to be a number between 1 and 50. ";
     return output.MakeError(errorStream.str(), theCommands);
@@ -2519,18 +2519,18 @@ bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
   const Expression& yDefE = input[3];
   //  HashedList<Expression> xEcandidates, yEcandidates;
   //  if (!xDefE.GetFreeVariables(xEcandidates, false))
-  //    return theCommands << "Failed to get free variables from " << xDefE.ToString();
+  //    return theCommands << "Failed to get free variables from " << xDefE.toString();
   //  if (!yDefE.GetFreeVariables(yEcandidates, false))
-  //    return theCommands << "Failed to get free variables from " << yDefE.ToString();
+  //    return theCommands << "Failed to get free variables from " << yDefE.toString();
   //  if (xEcandidates.size != 1 || yEcandidates.size != 1)
   //    return theCommands << "Couldn't get single free variable from " << xEcandidates.ToStringCommaDelimited()
   //    << " and/or " << yEcandidates.ToStringCommaDelimited();
   //  if (CalculatorFunctions::innerEqualityToArithmeticExpression())
   if (!xDefE.StartsWith(theCommands.opDefine(), 3)) {
-    return theCommands << "Failed to extract variable form " << xDefE.ToString();
+    return theCommands << "Failed to extract variable form " << xDefE.toString();
   }
   if (!yDefE.StartsWith(theCommands.opDefine(), 3)) {
-    return theCommands << "Failed to extract variable form " << yDefE.ToString();
+    return theCommands << "Failed to extract variable form " << yDefE.toString();
   }
   ElementEllipticCurve<ElementZmodP> eltZmodP;
   ElementEllipticCurve<Rational> eltRational;
@@ -2552,7 +2552,7 @@ bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
   }
   if (!isRational && !isElementZmodP) {
     return theCommands << "Could not extract rational or element of z mod p from "
-    << xDefE[2].ToString() << ", " << yDefE[2].ToString();
+    << xDefE[2].toString() << ", " << yDefE[2].toString();
   }
   if (isElementZmodP) {
     if (eltZmodP.xCoordinate.theModulus != eltZmodP.yCoordinate.theModulus) {
@@ -2561,7 +2561,7 @@ bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
   }
   Expression theCurveE;
   if (!CalculatorFunctions::functionEqualityToArithmeticExpression(theCommands, input[1], theCurveE)) {
-    return theCommands << "Could not get arithmetic expression from: " << input[1].ToString()
+    return theCommands << "Could not get arithmetic expression from: " << input[1].toString()
     << ". I was expecting a cubic equality.";
   }
   Expression thePolyE;
@@ -2569,15 +2569,15 @@ bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
   if (!CalculatorConversions::functionPolynomial<Rational>(
     theCommands, theCurveE, thePolyE
   )) {
-    return theCommands << "Could not get polynomial from " << theCurveE.ToString();
+    return theCommands << "Could not get polynomial from " << theCurveE.toString();
   }
   if (!thePolyE.IsOfType(&thePoly)) {
-    return theCommands << "Could not convert to polynomial: " << thePolyE.ToString();
+    return theCommands << "Could not convert to polynomial: " << thePolyE.toString();
   }
   Expression curveContext = thePolyE.GetContext();
   if (curveContext.ContextGetNumContextVariables() != 2) {
-    return theCommands << "Expected 2 context variables in " << theCurveE.ToString() << ", got: "
-    << curveContext.ContextGetPolynomialVariables().ToString();
+    return theCommands << "Expected 2 context variables in " << theCurveE.toString() << ", got: "
+    << curveContext.ContextGetPolynomialVariables().toString();
   }
   MonomialP leadingMonomial;
   List<MonomialP>::Comparator monomialOrder(MonomialP::greaterThan_totalDegree_rightSmallerWins);
@@ -2593,11 +2593,11 @@ bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
     MathRoutines::swap(xE, yE);
   }
   if (curveContext.ContextGetContextVariable(indexY) != yE) {
-    return theCommands << "Curve variable " << curveContext.ContextGetContextVariable(1).ToString()
-    << " not equal to " << yE.ToString();
+    return theCommands << "Curve variable " << curveContext.ContextGetContextVariable(1).toString()
+    << " not equal to " << yE.toString();
   }
-  theCommands << "Created elliptic curve " << thePolyE.ToString()
-  << " = 0. The variables are assumed to be: x = " << xE.ToString() << ", y = " << yE.ToString();
+  theCommands << "Created elliptic curve " << thePolyE.toString()
+  << " = 0. The variables are assumed to be: x = " << xE.toString() << ", y = " << yE.toString();
   if (thePoly.size() > 4) {
     return theCommands << "Elliptic curve allowed to have max 4 terms, yours has: " << thePoly.size();
   }
@@ -2631,7 +2631,7 @@ bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
     numNonZeroGoodCoeffs ++;
   }
   if (numNonZeroGoodCoeffs != thePoly.size()) {
-    return theCommands << "It appears your curve: " << theCurveE.ToString()
+    return theCommands << "It appears your curve: " << theCurveE.toString()
     << " is not of the form y^2 = x^3 + ax + b. ";
   }
   Expression theContext, thePolyVars;
@@ -2667,7 +2667,7 @@ bool CalculatorFunctions::innerPrecomputeSemisimpleLieAlgebraStructure(
   for (int i = 0; i < lastIndexPlusOne; i ++) {
     std::stringstream reportStream;
     reportStream << "Computing structure of subalgebra "
-    << theTypes[i].ToString() << " (" << i + 1 << " out of " << theTypes.size << ").";
+    << theTypes[i].toString() << " (" << i + 1 << " out of " << theTypes.size << ").";
     theReport.Report(reportStream.str());
     SemisimpleLieAlgebra theAlgebra;
     theAlgebra.theWeyl.MakeFromDynkinType(theTypes[i]);
@@ -2696,11 +2696,11 @@ bool CalculatorFunctions::innerPrecomputeSemisimpleLieAlgebraStructure(
           false,
           true
         )) {
-          out << "Failed to compute " << theTypes[i].ToString();
+          out << "Failed to compute " << theTypes[i].toString();
         }
       }
     }
-    out << theTypes[i].ToString();
+    out << theTypes[i].toString();
     if (i != theTypes.size - 1) {
       out << ", ";
     }

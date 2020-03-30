@@ -67,7 +67,7 @@ bool CalculatorHTML::MergeProblemWeight(
   if (inputJSON.theType != JSData::token::tokenObject) {
     return true;
   }
-  global << logger::green << "About to merge problem weight: " << inputJSON.ToString() << logger::endL;
+  global << logger::green << "About to merge problem weight: " << inputJSON.toString() << logger::endL;
   ProblemData emptyData;
   std::string currentCourse = global.userDefault.courseComputed;
   for (int i = 0; i < inputJSON.objects.size(); i ++) {
@@ -97,7 +97,7 @@ bool CalculatorHTML::MergeProblemWeight(
           if (commentsOnFailure != nullptr) {
             *commentsOnFailure << "Failed to extract weight from: "
             << currentWeight.objects.theValues[i]
-            << " in weight: " << currentWeight.ToString();
+            << " in weight: " << currentWeight.toString();
           }
           return false;
         }
@@ -109,8 +109,8 @@ bool CalculatorHTML::MergeProblemWeight(
     } else {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Could extract weight from "
-        << currentWeight.ToString(nullptr) << ". Your input was: "
-        << inputJSON.ToString(nullptr);
+        << currentWeight.toString(nullptr) << ". Your input was: "
+        << inputJSON.toString(nullptr);
       }
       return false;
     }
@@ -535,8 +535,8 @@ bool CalculatorHTML::IsStateModifierApplyIfYes(SyntacticElementHTML& inputElt) {
   return false;
 }
 
-std::string Answer::ToString() {
-  MacroRegisterFunctionWithName("Answer::ToString");
+std::string Answer::toString() {
+  MacroRegisterFunctionWithName("Answer::toString");
   std::stringstream out;
   out << "Answer id: " << this->answerId;
   out << "<br>Answer commands on give-up: " << this->commandsNoEnclosureAnswerOnGiveUpOnly;
@@ -674,10 +674,10 @@ bool CalculatorHtmlFunctions::innerInterpretProblemGiveUp(
     return theCommands << "Expected 3 arguments: problem filename, answer id and randomSeed string. ";
   }
   std::string oldProblem = global.GetWebInput(WebAPI::problem::fileName);
-  std::string testedProblem = input[1].ToString();
+  std::string testedProblem = input[1].toString();
   global.SetWebInpuT(WebAPI::problem::fileName, testedProblem);
-  std::string randomSeed = input[3].ToString();
-  std::string answerId = input[2].ToString();
+  std::string randomSeed = input[3].toString();
+  std::string answerId = input[2].toString();
   global.SetWebInpuT(WebAPI::problem::calculatorAnswerPrefix + answerId, "not used");
   JSData result = WebAPIResponse::GetAnswerOnGiveUp(randomSeed, nullptr, nullptr, false);
   global.webArguments.RemoveKey(WebAPI::problem::calculatorAnswerPrefix + answerId);
@@ -814,7 +814,7 @@ std::string SyntacticElementHTML::ToStringTagAndContent() {
 }
 
 std::string SyntacticElementHTML::ToStringDebug() {
-  MacroRegisterFunctionWithName("SyntacticElementHTML::ToString");
+  MacroRegisterFunctionWithName("SyntacticElementHTML::toString");
   if (this->syntacticRole == "") {
     return HtmlRoutines::ConvertStringToHtmlString(this->ToStringTagAndContent(), false);
   }
@@ -1773,13 +1773,13 @@ std::string CalculatorHTML::ToStringInterprettedCommands(Calculator &theInterpre
     if (!currentElt.IsInterpretedByCalculatorDuringProblemGeneration()) {
       out << "<tr><td>" << currentEltString << "</td>"
       << "<td>"
-      << theInterpreter.theProgramExpression[commandCounter].ToString()
+      << theInterpreter.theProgramExpression[commandCounter].toString()
       << "</td></tr>";
       commandCounter --;
       continue;
     }
     for (; commandCounter > 1; commandCounter --) {
-      std::string currentString= theInterpreter.theProgramExpression[commandCounter].ToString();
+      std::string currentString= theInterpreter.theProgramExpression[commandCounter].toString();
       out << "<tr><td>" << currentEltString << "</td><td>"
       << currentString << "</td></tr>";
       if (currentString == "SeparatorBetweenSpans") {
@@ -1824,8 +1824,8 @@ bool CalculatorHTML::InterpretProcessExecutedCommands(
       continue;
     }
     if (!theInterpreter.theProgramExpression[currentElt.commandIndex].StartsWith(theInterpreter.opCommandEnclosure())) {
-      global.fatal << "Element: " << theInterpreter.theProgramExpression[currentElt.commandIndex].ToString()
-      << " in " << theInterpreter.theProgramExpression.ToString()
+      global.fatal << "Element: " << theInterpreter.theProgramExpression[currentElt.commandIndex].toString()
+      << " in " << theInterpreter.theProgramExpression.toString()
       << " is supposed to be a command enclosure but apparently isn't. " << global.fatal;
     }
     Expression currentExpr = theInterpreter.theProgramExpression[currentElt.commandIndex][1];
@@ -1837,7 +1837,7 @@ bool CalculatorHTML::InterpretProcessExecutedCommands(
     }
     theFormat.flagUseQuotes = false;
     theFormat.flagMakingExpressionTableWithLatex = true;
-    currentElt.interpretedCommand = currentExpr.ToString(&theFormat);
+    currentElt.interpretedCommand = currentExpr.toString(&theFormat);
     currentElt.flagUseDisplaystyleInMathMode = (currentElt.content.find("\\displaystyle") != std::string::npos);
     currentElt.flagUseMathMode = true;
     currentElt.flagUseMathSpan = false;
@@ -1865,7 +1865,7 @@ void CalculatorHTML::LogProblemGenerationObsolete(Calculator &theInterpreter) {
         streamLog << "<td>" << this->theContent[j].ToStringDebug() << "</td>";
       }
     }
-    streamLog << "<td>" << theInterpreter.theProgramExpression[i].ToString()
+    streamLog << "<td>" << theInterpreter.theProgramExpression[i].toString()
     << "</td></tr>";
   }
   streamLog << "</table>";
@@ -3462,7 +3462,7 @@ bool TopicElementParser::CheckConsistencyParsed() {
     if (this->theTopics.theValues[i].type == TopicElement::types::problem) {
       if (this->theTopics.theValues[i].immediateChildren.size > 0) {
         global.fatal << "Topic element: "
-        << this->theTopics.theValues[i].ToString()
+        << this->theTopics.theValues[i].toString()
         << " has non-zero immediate children. " << global.fatal;
         return false;
       }
@@ -3478,7 +3478,7 @@ bool TopicElementParser::CheckNoErrors(std::stringstream* commentsOnFailure) {
     if (current.IsError()) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Element index "
-        << i << " has an error. " << current.ToString();
+        << i << " has an error. " << current.toString();
       }
       return false;
     }
@@ -3834,7 +3834,7 @@ bool TopicElement::MergeTopicLine(
   return  false;
 }
 
-std::string TopicElementParser::TopicLine::ToString() const {
+std::string TopicElementParser::TopicLine::toString() const {
   std::stringstream out;
   out << this->tag << ": " << this->contentTrimmedWhiteSpace;
   return out.str();
@@ -3894,7 +3894,7 @@ void TopicElementParser::ComputeIds() {
   }
 }
 
-std::string TopicElementParser::ToString() const {
+std::string TopicElementParser::toString() const {
   std::stringstream out;
   out << "Loaded bundle files: " << this->loadedTopicBundleFiles;
   out << "<hr>";
@@ -4184,7 +4184,7 @@ bool CalculatorHTML::ComputeTopicListAndPointsEarned(std::stringstream& comments
       if (this->topics.theTopics.theValues[i].type == TopicElement::types::problem) {
         gradableProblems.AddOnTopNoRepetition(this->topics.theTopics.theValues[i].id);
         if (this->topics.theTopics.theValues[i].immediateChildren.size > 0) {
-          global.fatal << "Error: problem " << this->topics.theTopics.theValues[i].ToString()
+          global.fatal << "Error: problem " << this->topics.theTopics.theValues[i].toString()
           << " has children topics which is not allowed. "
           << global.fatal;
         }
@@ -4324,7 +4324,7 @@ void TopicElement::ComputeHomework(CalculatorHTML& owner) {
     return;
   }
   JSData resultJSON = this->ComputeHomeworkJSON(owner);
-  this->queryHomework = WebAPI::request::slides::content + "=" + HtmlRoutines::ConvertStringToURLString(resultJSON.ToString(), false);
+  this->queryHomework = WebAPI::request::slides::content + "=" + HtmlRoutines::ConvertStringToURLString(resultJSON.toString(), false);
 }
 
 
@@ -4334,7 +4334,7 @@ void TopicElement::ComputeSlides(CalculatorHTML& owner) {
     return;
   }
   JSData resultJSON = this->ComputeSlidesJSON(owner);
-  this->querySlides = WebAPI::request::slides::content + "=" + HtmlRoutines::ConvertStringToURLString(resultJSON.ToString(), false);
+  this->querySlides = WebAPI::request::slides::content + "=" + HtmlRoutines::ConvertStringToURLString(resultJSON.toString(), false);
 }
 
 void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle) {
@@ -4475,7 +4475,7 @@ JSData TopicElement::ToJSON(CalculatorHTML& owner) {
   output["children"].theType = JSData::token::tokenArray;
   this->ComputeLinks(owner, true);
   if (this->type == TopicElement::types::problem && this->immediateChildren.size > 0) {
-    global.fatal << "Error: Problem " << this->ToString() << " reported to have children topic elements: "
+    global.fatal << "Error: Problem " << this->toString() << " reported to have children topic elements: "
     << this->immediateChildren.ToStringCommaDelimited() << global.fatal;
   }
   for (int i = 0; i < this->immediateChildren.size; i ++) {
@@ -4518,7 +4518,7 @@ JSData TopicElement::ToJSON(CalculatorHTML& owner) {
   return output;
 }
 
-std::string TopicElement::ToString() const {
+std::string TopicElement::toString() const {
   std::stringstream out;
   out << this->title << ", id: " << this->id << " ";
   if (this->title == "") {

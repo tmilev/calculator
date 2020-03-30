@@ -241,7 +241,7 @@ std::string ASNElement::InterpretAsObjectIdentifier() const {
   resultStream << static_cast<int>(firstEntry) << "." << static_cast<int>(secondEntry);
   for (int i = 0; i < this->ASNAtom.size; i ++) {
     LargeInteger nextInt = AbstractSyntaxNotationOneSubsetDecoder::VariableLengthQuantityDecode(this->ASNAtom, i);
-    resultStream << "." << nextInt.ToString();
+    resultStream << "." << nextInt.toString();
   }
   return resultStream.str();
 }
@@ -483,8 +483,8 @@ bool ASNElement::isTime() const {
   this->tag == AbstractSyntaxNotationOneSubsetDecoder::tags::UTCTime0x17;
 }
 
-std::string ASNElement::ToString() const {
-  return this->ToJSON().ToString(&JSData::PrintOptions::HexEncodeNonASCII());
+std::string ASNElement::toString() const {
+  return this->ToJSON().toString(&JSData::PrintOptions::HexEncodeNonASCII());
 }
 
 void ASNElement::WriteAnnotations(List<Serialization::Marker>& output) {
@@ -606,7 +606,7 @@ void ASNElement::ToJSON(JSData& output) const {
     if (this->tag == AbstractSyntaxNotationOneSubsetDecoder::tags::integer0x02) {
       LargeInteger theInt;
       this->isInteger(&theInt, nullptr);
-      output[ASNElement::JSLabels::interpretation] = theInt.ToString();
+      output[ASNElement::JSLabels::interpretation] = theInt.toString();
     }
   }
 }
@@ -908,7 +908,7 @@ std::string AbstractSyntaxNotationOneSubsetDecoder::ToStringAnnotateBinary() {
   out << "window.calculator.crypto.abstractSyntaxNotationAnnotate(";
   out << "\"" << Crypto::ConvertListUnsignedCharsToHex(*this->rawDatA) << "\"";
   out << ", ";
-  out << this->decodedData->ToString();
+  out << this->decodedData->toString();
   out << ", ";
   List<unsigned char> idNonHexed;
   Crypto::computeSha256(*this->rawDatA, idNonHexed);
@@ -1175,7 +1175,7 @@ int ASNObject::LoadField(
   return 1;
 }
 
-std::string ASNObject::ToString() const {
+std::string ASNObject::toString() const {
   std::stringstream out;
   out << "objectId: " << Crypto::ConvertListUnsignedCharsToHex(this->objectId.ASNAtom)
   << ", name: " << Crypto::ConvertStringToHex(this->name, 0, false);
@@ -1523,11 +1523,11 @@ std::string X509Certificate::ToHex() {
   return Crypto::ConvertListUnsignedCharsToHex(bytes);
 }
 
-std::string X509Certificate::ToString() {
+std::string X509Certificate::toString() {
   std::stringstream out;
   out << "Certificate pub key:<br>"
-  << this->information.subjectPublicKey.ToString();
-  out << this->information.ToString();
+  << this->information.subjectPublicKey.toString();
+  out << this->information.toString();
   AbstractSyntaxNotationOneSubsetDecoder decoderRecoded;
   decoderRecoded.decodedData = &this->recodedASN;
   List<unsigned char> recodedBytes;
@@ -1548,7 +1548,7 @@ std::string X509Certificate::ToString() {
   return out.str();
 }
 
-std::string PrivateKeyRSA::ToString() const {
+std::string PrivateKeyRSA::toString() const {
   std::stringstream out;
   out << "Exponent: " << this->thePublicKey.theExponent << "<br>Prime 1: "
   << this->primeOne << "<br>Prime 2: " << this->primeTwo;
@@ -1566,7 +1566,7 @@ bool PrivateKeyRSA::BasicChecks(std::stringstream* comments) {
   mustBeZero = this->primeOne;
   mustBeZero *= this->primeTwo;
   mustBeZero -= this->thePublicKey.theModulus;
-  *comments << "Must be zero: " << mustBeZero.ToString();
+  *comments << "Must be zero: " << mustBeZero.toString();
   LargeInteger EulerPhi = (primeOneLI - 1) * (primeTwoLI - 1);
   ElementZmodP mustBeZeroModP;
   //theExponent.theModulo = EulerPhi.value;
@@ -1575,7 +1575,7 @@ bool PrivateKeyRSA::BasicChecks(std::stringstream* comments) {
   mustBeZeroModP.theValue = 1;
   mustBeZeroModP /= this->thePublicKey.theExponent;
   mustBeZeroModP -= this->privateExponent;
-  *comments << "<br>Difference between private exponent and computed one: " << mustBeZeroModP.theValue.ToString();
+  *comments << "<br>Difference between private exponent and computed one: " << mustBeZeroModP.theValue.toString();
   return true;
 }
 
@@ -1678,13 +1678,13 @@ bool PrivateKeyRSA::ComputeFromTwoPrimes(
   if (verifyInputsArePrime) {
     if (!this->primeOne.IsPossiblyPrime(10, true, commentsOnFailure)) {
       if (commentsOnFailure != nullptr) {
-        *commentsOnFailure << "First input: " << this->primeTwo.ToString() << " is not prime. ";
+        *commentsOnFailure << "First input: " << this->primeTwo.toString() << " is not prime. ";
       }
       return false;
     }
     if (!this->primeTwo.IsPossiblyPrime(10, true, commentsOnFailure)) {
       if (commentsOnFailure != nullptr) {
-        *commentsOnFailure << "Second input: " << this->primeTwo.ToString() << " is not prime. ";
+        *commentsOnFailure << "Second input: " << this->primeTwo.toString() << " is not prime. ";
       }
       return false;
     }
@@ -1862,24 +1862,24 @@ bool X509Certificate::LoadFromPEMFile(const std::string& input, std::stringstrea
   return this->LoadFromPEM(certificateContent, commentsOnFailure);
 }
 
-std::string TBSCertificateInfo::Organization::ToString() {
+std::string TBSCertificateInfo::Organization::toString() {
   std::stringstream out;
-  out << "Country name: " << this->countryName.content.ToString() << "\n<br>\n";
-  out << "Common name: " << this->commonName.content.ToString() << "\n<br>\n";
-  out << "Email address: " << this->emailAddress.content.ToString() << "\n<br>\n";
-  out << "Locality name: " << this->localityName.content.ToString() << "\n<br>\n";
-  out << "Organizational unit name: " << this->organizationalUnitName.content.ToString() << "\n<br>\n";
-  out << "Organization name: " << this->organizationName.content.ToString() << "\n<br>\n";
-  out << "State or province name: " << this->stateOrProvinceName.content.ToString() << "\n<br>\n";
+  out << "Country name: " << this->countryName.content.toString() << "\n<br>\n";
+  out << "Common name: " << this->commonName.content.toString() << "\n<br>\n";
+  out << "Email address: " << this->emailAddress.content.toString() << "\n<br>\n";
+  out << "Locality name: " << this->localityName.content.toString() << "\n<br>\n";
+  out << "Organizational unit name: " << this->organizationalUnitName.content.toString() << "\n<br>\n";
+  out << "Organization name: " << this->organizationName.content.toString() << "\n<br>\n";
+  out << "State or province name: " << this->stateOrProvinceName.content.toString() << "\n<br>\n";
   return out.str();
 }
 
-std::string TBSCertificateInfo::ToString() {
+std::string TBSCertificateInfo::toString() {
   std::stringstream out;
   out << "<b>Issuer:</b><br>";
-  out << this->issuer.ToString();
+  out << this->issuer.toString();
   out << "<b>Subject (holder of the advertised public key):</b><br>";
-  out << this->subject.ToString();
+  out << this->subject.toString();
   return out.str();
 }
 

@@ -50,10 +50,10 @@ void rootSubalgebra::GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double
     lastRoot.GetCoordsInBasiS(tempGroup.simpleRootsInner, lastRootInSimpleCoords);
     coxeterNumber = MathRoutines::Maximum(lastRootInSimpleCoords.SumCoords().NumShort, coxeterNumber);
   }
-  CompleX<double> theEigenValue;
+  Complex<double> theEigenValue;
   theEigenValue.Re = FloatingPoint::Cos(2 * MathRoutines::Pi() / coxeterNumber);
   theEigenValue.Im = FloatingPoint::Sin(2 * MathRoutines::Pi() / coxeterNumber);
-  Matrix<CompleX<double> > eigenMat;
+  Matrix<Complex<double> > eigenMat;
   eigenMat.init(matCoxeterElt.NumRows, matCoxeterElt.NumCols);
   for (int i = 0; i < eigenMat.NumRows; i ++) {
     for (int j = 0; j < eigenMat.NumCols; j ++) {
@@ -63,9 +63,9 @@ void rootSubalgebra::GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double
       }
     }
   }
-  List<Vector<CompleX<double> > > theEigenSpaceList;
+  List<Vector<Complex<double> > > theEigenSpaceList;
   eigenMat.GetZeroEigenSpace(theEigenSpaceList);
-  Vectors<CompleX<double> > theEigenSpace;
+  Vectors<Complex<double> > theEigenSpace;
   theEigenSpace.operator=(theEigenSpaceList);
   DrawOperations tempDO;
   tempDO.initDimensions(theDimension);
@@ -127,8 +127,8 @@ void rootSubalgebra::ComputeCentralizerFromKModulesAndSortKModules() {
     }
   } else {
     if (this->theDynkinType.IsEqualToZero()) {
-      global.fatal << "Simple basis is " << this->SimpleBasisK.ToString() << " but Dynkin type is: "
-      << this->theDynkinType.ToString() << global.fatal;
+      global.fatal << "Simple basis is " << this->SimpleBasisK.toString() << " but Dynkin type is: "
+      << this->theDynkinType.toString() << global.fatal;
     }
   }
   for (int i = 0; i < this->Modules.size; i ++) {
@@ -144,8 +144,8 @@ void rootSubalgebra::ComputeCentralizerFromKModulesAndSortKModules() {
   this->theCentralizerDiagram.GetDynkinType(this->theCentralizerDynkinType);
   if (this->theDynkinType.IsEqualToZero()) {
     if (this->theCentralizerDynkinType.GetRank() + this->theDynkinType.GetRank() != this->ownEr->owner->GetRank()) {
-      global.fatal << "Centralizer of " << this->theDynkinType.ToString() << " computed to be "
-      << this->theCentralizerDynkinType.ToString()
+      global.fatal << "Centralizer of " << this->theDynkinType.toString() << " computed to be "
+      << this->theCentralizerDynkinType.toString()
       << " which is impossible. " << global.fatal;
     }
   }
@@ -438,12 +438,12 @@ void rootSubalgebra::MakeProgressReportPossibleNilradicalComputation(rootSubalge
   if (this->flagMakingProgressReport) {
     std::stringstream out1, out2, out3, out4, out5;
     if (this->flagFirstRoundCounting) {
-      out1 << "Counting ss part " << this->theDynkinDiagram.ToString();
+      out1 << "Counting ss part " << this->theDynkinDiagram.toString();
       out2 << "# nilradicals for fixed ss part: " << this->NumTotalSubalgebras;
       owner.NumSubalgebrasCounted ++;
       out3 << owner.NumSubalgebrasCounted << " total subalgebras counted";
     } else {
-      out1 << "Computing ss part " << this->theDynkinDiagram.ToString();
+      out1 << "Computing ss part " << this->theDynkinDiagram.toString();
       out2 << this->NumNilradicalsAllowed << " Nilradicals processed out of " << this->NumTotalSubalgebras;
       owner.NumSubalgebrasProcessed ++;
       out3 << "Total # subalgebras processed: " << owner.NumSubalgebrasProcessed;
@@ -464,8 +464,8 @@ void rootSubalgebra::GenerateKmodMultTable(List<List<List<int> > >& output, List
   int numTotal = this->Modules.size * this->Modules.size;
   std::stringstream out;
   out << "Computing pairing table for the module decomposition of the root subalgebra of type "
-  << this->theDynkinDiagram.ToString()
-  << "\n<br>\nwith centralizer " << this->theCentralizerDiagram.ToString();
+  << this->theDynkinDiagram.toString()
+  << "\n<br>\nwith centralizer " << this->theCentralizerDiagram.toString();
   ProgressReport theReport;
   theReport.Report(out.str());
   ProgressReport theReport2(10, GlobalVariables::Response::ReportType::general);
@@ -631,9 +631,9 @@ void rootSubalgebra::ComputeModuleFromHighestVector(int moduleIndex) {
       this->LowestWeightsPrimalSimple[moduleIndex] = wPrimalSimple[j];
       if (j != wPrimalSimple.size - 1) {
         global.fatal << "Last module weight is not lowest. The simple basis is: "
-        << this->SimpleBasisK.ToString() << ". The lowest weight is "
-        << this->LowestWeightsPrimalSimple[moduleIndex].ToString() << " and the weights of the module are: "
-        << wPrimalSimple.ToString() << ". I think this shouldn't happen, should it?" << global.fatal;
+        << this->SimpleBasisK.toString() << ". The lowest weight is "
+        << this->LowestWeightsPrimalSimple[moduleIndex].toString() << " and the weights of the module are: "
+        << wPrimalSimple.toString() << ". I think this shouldn't happen, should it?" << global.fatal;
       }
     }
   }
@@ -878,7 +878,7 @@ void rootSubalgebra::ExtractRelations(
     theRel.MakeLookCivilized(*this);
     theRel.ComputeDebugString(owner, true, true);
     if ((false)) {
-      if (theRel.theDiagram.ToString() == "C^{2}_3") {
+      if (theRel.theDiagram.toString() == "C^{2}_3") {
         Selection tempSel;
         tempSel.init(Ksingular.size);
         int tempNum=MathRoutines::NChooseK(Ksingular.size, 2);
@@ -948,8 +948,8 @@ bool rootSubalgebra::AttemptTheTripleTrickWRTSubalgebra(
           theDiagram.ComputeDiagramTypeModifyInput(chosenAlphas, this->GetAmbientWeyl());
           int theRank = theDiagram.RankTotal();
           if (
-            theRank > 4 || theDiagram.ToString() == "B^{2}_4" ||
-            theDiagram.ToString() == "C^{2}_4"
+            theRank > 4 || theDiagram.toString() == "B^{2}_4" ||
+            theDiagram.toString() == "C^{2}_4"
           ) {
             int goalNumBetas = 2;
             theRel.Betas.size = 0; theRel.BetaCoeffs.size = 0;
@@ -1124,8 +1124,8 @@ bool rootSubalgebra::attemptExtensionToIsomorphismNoCentralizer(
   rightSA.ComputeEssentialS();
   if (RecursionDepth!= 0) {
     if (
-      leftSA.theDynkinDiagram.ToString() != rightSA.theDynkinDiagram.ToString() ||
-      leftSA.theCentralizerDiagram.ToString() != rightSA.theCentralizerDiagram.ToString() ||
+      leftSA.theDynkinDiagram.toString() != rightSA.theDynkinDiagram.toString() ||
+      leftSA.theCentralizerDiagram.toString() != rightSA.theCentralizerDiagram.toString() ||
       rightSA.Modules.size != leftSA.Modules.size
     ) {
       if (abortKmodule != nullptr) {
@@ -1253,21 +1253,21 @@ void rootSubalgebra::ToHTML(int index, FormatExpressions* theFormat) {
   myPath << this->ownEr->owner->ToStringVirtualFolderName();
   myPath << "rootSubalgebra_" << index + 1 << ".html";
   FileOperations::OpenFileCreateIfNotPresentVirtual(output, myPath.str(), false, true, false);
-  output << "<html><title>" << this->GetAmbientWeyl().theDynkinType.ToString() << " root subalgebra of type "
-  << this->theDynkinDiagram.ToString() << "</title>";
-  output << "<meta name = \"keywords\" content = \"" << this->GetAmbientWeyl().theDynkinType.ToString()
+  output << "<html><title>" << this->GetAmbientWeyl().theDynkinType.toString() << " root subalgebra of type "
+  << this->theDynkinDiagram.toString() << "</title>";
+  output << "<meta name = \"keywords\" content = \"" << this->GetAmbientWeyl().theDynkinType.toString()
   << " root subsystems, root subsystems, root systems";
   if (this->GetAmbientWeyl().theDynkinType.HasExceptionalComponent()) {
     output << ", exceptional Lie algebra";
   }
   output << " \">";
   output << HtmlRoutines::GetJavascriptMathjax("../../../");
-  output << "<body>" << this->ToString(theFormat) << "</body></html>";
+  output << "<body>" << this->toString(theFormat) << "</body></html>";
   output.close();
 }
 
-std::string rootSubalgebra::ToString(FormatExpressions* theFormat) {
-  MacroRegisterFunctionWithName("rootSubalgebra::ToString");
+std::string rootSubalgebra::toString(FormatExpressions* theFormat) {
+  MacroRegisterFunctionWithName("rootSubalgebra::toString");
   (void) theFormat;//taking care of unused parameter warning in a portable way
   std::stringstream out;
   bool useLatex = false;
@@ -1281,9 +1281,9 @@ std::string rootSubalgebra::ToString(FormatExpressions* theFormat) {
   ) {
     includeKEpsCoords = false;
   }
-  out << "Type: " << HtmlRoutines::GetMathSpanPure(this->theDynkinDiagram.ToString());
-  out << " (Dynkin type computed to be: " << HtmlRoutines::GetMathSpanPure(this->theDynkinType.ToString()) << ")";
-  out << "\n<br>\nSimple basis: " << this->SimpleBasisK.ToString();
+  out << "Type: " << HtmlRoutines::GetMathSpanPure(this->theDynkinDiagram.toString());
+  out << " (Dynkin type computed to be: " << HtmlRoutines::GetMathSpanPure(this->theDynkinType.toString()) << ")";
+  out << "\n<br>\nSimple basis: " << this->SimpleBasisK.toString();
   out << "\n<br>\nSimple basis epsilon form: "
   << this->SimpleBasisgEpsCoords.ElementToStringEpsilonForm(useLatex, useHtml, false);
   out << "\n<br>\nSimple basis epsilon form with respect to k: "
@@ -1292,11 +1292,11 @@ std::string rootSubalgebra::ToString(FormatExpressions* theFormat) {
   << this->outerSAautosExtendingToAmbientAutosGenerators.theElements.size;
   out << "<br>Number of outer autos with trivial action on orthogonal complement: "
   << this->outerSAautos.theElements.size << ". ";
-  out << "<br>\nC(k_{ss})_{ss}: " << this->theCentralizerDiagram.ToString();
-  out << "<br>\n simple basis centralizer: " << this->SimpleBasisCentralizerRoots.ToString();
+  out << "<br>\nC(k_{ss})_{ss}: " << this->theCentralizerDiagram.toString();
+  out << "<br>\n simple basis centralizer: " << this->SimpleBasisCentralizerRoots.toString();
   out << "<hr>\n Number of k-submodules of g: " << this->Modules.size;
   out << "<br>Module decomposition, fundamental coords over k: ";
-  out << HtmlRoutines::GetMathSpanPure(this->ModuleDecompoHighestWeights.ToString());
+  out << HtmlRoutines::GetMathSpanPure(this->ModuleDecompoHighestWeights.toString());
   out << "<br>\n";
   out << "\ng/k k-submodules<table border =\"1\">\n<tr><th>id</th><th>size</th>"
   << "<th>b\\cap k-lowest weight</th><th>b\\cap k-highest weight</th><th>Module basis</th><th>Weights epsilon coords</th>";
@@ -1307,11 +1307,11 @@ std::string rootSubalgebra::ToString(FormatExpressions* theFormat) {
   this->kModulesgEpsCoords.SetSize(this->Modules.size);
   for (int i = 0; i < this->Modules.size; i ++) {
     out << "\n<tr><td>Module " << i + 1 << "</td><td>" << this->Modules[i].size << "</td>";
-    out << "<td>" << this->LowestWeightsPrimalSimple[i].ToString() << "</td>";
-    out << "<td>" << this->HighestWeightsPrimalSimple[i].ToString() << "</td>";
+    out << "<td>" << this->LowestWeightsPrimalSimple[i].toString() << "</td>";
+    out << "<td>" << this->HighestWeightsPrimalSimple[i].toString() << "</td>";
     out << "<td>";
     for (int j = 0; j < this->Modules[i].size; j ++) {
-      out << this->Modules[i][j].ToString();
+      out << this->Modules[i][j].toString();
       if (j != this->Modules[i].size - 1) {
         out << "<br>";
       }
@@ -1357,7 +1357,7 @@ std::string rootSubalgebra::ToString(FormatExpressions* theFormat) {
   }
   out << "<br>Potential Dynkin type extensions: ";
   for (int i = 0; i < this->potentialExtensionDynkinTypes.size; i ++) {
-    out << this->potentialExtensionDynkinTypes[i].ToString() << ", ";
+    out << this->potentialExtensionDynkinTypes[i].toString() << ", ";
   }
   return out.str();
 }
@@ -1418,7 +1418,7 @@ void rootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnu
   int theDimension = this->GetAmbientWeyl().CartanSymmetric.NumRows;
   std::stringstream out2;
   std::stringstream out;
-  out2 << this->ToString() << "\n";
+  out2 << this->toString() << "\n";
   Matrix<Rational> tempMat;
   this->SimpleBasisK.GetMatrixRootsToRows(tempMat);
   tempMat.Invert();
@@ -1461,7 +1461,7 @@ void rootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnu
 void rootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2() {
   int theDimension = this->GetAmbientWeyl().CartanSymmetric.NumRows;
   std::stringstream out;
-  out << this->ToString() << "\n\n";
+  out << this->toString() << "\n\n";
   Vector<Rational> tempRoot;
   tempRoot = this->SimpleBasisK[0];
   this->ComputeHighestWeightInTheSameKMod(tempRoot, tempRoot);
@@ -1511,13 +1511,13 @@ bool rootSubalgebra::LinCombToString(
     return false;
   }
   std::stringstream out;
-  std::string tempS = alphaRoot.ToString();
+  std::string tempS = alphaRoot.toString();
   out << "(" << tempS << ")&$";
   out << coeff << "\\alpha_" << theDimension + 1;
   for (int i = 0; i < theDimension; i ++) {
      //if (linComb.coordinates[i].IsEqualToZero())
     //  return false;
-    tempS = linComb[i].ToString();
+    tempS = linComb[i].toString();
     if (tempS != "0") {
       if (tempS == "- 1" || tempS == "-1") {
         tempS = "-";
@@ -1696,11 +1696,11 @@ bool rootSubalgebra::LinCombToStringDistinguishedIndex(
     return false;
   }
   std::stringstream out;
-  std::string tempS = alphaRoot.ToString();
+  std::string tempS = alphaRoot.toString();
   out << "(" << tempS << ")&$";
   out << coeff << "\\alpha_" << theDimension + 1;
   for (int i = 0; i < theDimension; i ++) {
-    tempS = linComb.TheObjects[i].ToString();
+    tempS = linComb.TheObjects[i].toString();
     if (tempS != "0") {
       if (tempS == "- 1" || tempS == "-1") {
         tempS = "-";
@@ -1837,8 +1837,8 @@ bool rootSubalgebra::attemptExtensionToIsomorphism(Vectors<Rational>& Domain,
   theDomainRootSA.ComputeEssentialS();
   theRangeRootSA.ComputeEssentialS();
   if (
-    theDomainRootSA.theDynkinDiagram.ToString() != theRangeRootSA.theDynkinDiagram.ToString() ||
-    theDomainRootSA.theCentralizerDiagram.ToString() != theRangeRootSA.theCentralizerDiagram.ToString()
+    theDomainRootSA.theDynkinDiagram.toString() != theRangeRootSA.theDynkinDiagram.toString() ||
+    theDomainRootSA.theCentralizerDiagram.toString() != theRangeRootSA.theCentralizerDiagram.toString()
   ) {
     if (DomainAndRangeGenerateNonIsoSAs != nullptr) {
       *DomainAndRangeGenerateNonIsoSAs = true;
@@ -1851,7 +1851,7 @@ bool rootSubalgebra::attemptExtensionToIsomorphism(Vectors<Rational>& Domain,
   SelectionWithDifferentMaxMultiplicities tempAutosCentralizer;
   List<List<List<int> > > CentralizerDiagramAutomorphisms;
   theDomainRootSA.theCentralizerDiagram.GetAutomorphisms(CentralizerDiagramAutomorphisms);
-  theDomainRootSA.theCentralizerDiagram.ToString();
+  theDomainRootSA.theCentralizerDiagram.toString();
   tempAutosCentralizer.initPart1(CentralizerDiagramAutomorphisms.size);
   for (int i = 0; i <CentralizerDiagramAutomorphisms.size; i ++) {
     tempAutosCentralizer.MaxMultiplicities[i] = CentralizerDiagramAutomorphisms[i].size - 1;
@@ -1914,10 +1914,10 @@ bool rootSubalgebra::attemptExtensionToIsomorphism(Vectors<Rational>& Domain,
 bool rootSubalgebra::GenerateIsomorphismsPreservingBorel(
   rootSubalgebra& right, SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms *outputAutomorphisms
 ) {
-  if (this->theDynkinDiagram.ToString() != right.theDynkinDiagram.ToString()) {
+  if (this->theDynkinDiagram.toString() != right.theDynkinDiagram.toString()) {
     return false;
   }
-  if (this->theCentralizerDiagram.ToString() != right.theCentralizerDiagram.ToString()) {
+  if (this->theCentralizerDiagram.toString() != right.theCentralizerDiagram.toString()) {
     return false;
   }
   if (outputAutomorphisms != nullptr) {
@@ -2250,9 +2250,9 @@ void rootSubalgebra::ComputeEssentialS() {
   this->theDynkinDiagram.ComputeDiagramInputIsSimple(this->SimpleBasisK);
   this->theDynkinDiagram.GetDynkinType(this->theDynkinType);
   if (this->SimpleBasisK.size != 0) {
-    if (this->theDynkinType.ToString() == "0") {
+    if (this->theDynkinType.toString() == "0") {
       global.fatal << "Subalgebra dynkin type computed to be zero while the simple basis is: "
-      << this->SimpleBasisK.ToString() << ". " << global.fatal;
+      << this->SimpleBasisK.toString() << ". " << global.fatal;
     }
   }
   this->ComputeKModules();
@@ -2322,7 +2322,7 @@ bool rootSubalgebra::ComputeEssentialsIfNew() {
     tempVs.RemoveLastObject();
     if (!this->GetAmbientWeylAutomorphisms().AreMaximallyDominantGroupOuter(tempVs)) {
       global.fatal << "<br>This is a programming error: first vectors "
-      << tempVs.ToString() << " are not maximally dominant. " << global.fatal;
+      << tempVs.toString() << " are not maximally dominant. " << global.fatal;
     }
     if (this->indexInducingSubalgebra != - 1) {
       this->ownEr->theSubalgebras[this->indexInducingSubalgebra].numHeirsRejectedNotMaximallyDominant ++;
@@ -2354,8 +2354,8 @@ bool rootSubalgebra::ComputeEssentialsIfNew() {
     }
   }
   if (theReport.TickAndWantReport()) {
-    reportStream << "...module decomposition computed, subalgebra type: " << this->theDynkinType.ToString()
-    << ", centralizer type: " << this->theCentralizerDynkinType.ToString() << ". Computing outer automorphisms that "
+    reportStream << "...module decomposition computed, subalgebra type: " << this->theDynkinType.toString()
+    << ", centralizer type: " << this->theCentralizerDynkinType.toString() << ". Computing outer automorphisms that "
     << "have zero action on centralizer and extend to ambient automorphisms... ";
     theReport.Report(reportStream.str());
   }
@@ -2511,9 +2511,9 @@ void slTwoSubalgebra::initHEFSystemFromECoeffs(
   outputMatrixSystemToBeSolved.init(0, numberVariables);
   for (int i = 0; i < rootsInPlay.size; i ++) {
     if (this->GetOwnerWeyl().RootScalarCartanRoot(targetH, rootsInPlay[i]) != 2) {
-      global.fatal << "The scalar product of the h element: " << targetH.ToString()
-      << " and the root in play " << rootsInPlay[i].ToString() << " must be 2, but equals instead "
-      << this->GetOwnerWeyl().RootScalarCartanRoot(targetH, rootsInPlay[i]).ToString() << global.fatal;
+      global.fatal << "The scalar product of the h element: " << targetH.toString()
+      << " and the root in play " << rootsInPlay[i].toString() << " must be 2, but equals instead "
+      << this->GetOwnerWeyl().RootScalarCartanRoot(targetH, rootsInPlay[i]).toString() << global.fatal;
     }
   }
   for (int i = 0; i < rootsInPlay.size; i ++) {
@@ -2661,11 +2661,11 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(
     }
     for (int k = 0; k < rootsScalarProduct2HnonRaised.size; k ++) {
       if (this->GetAmbientWeyl().RootScalarCartanRoot(characteristicH, rootsScalarProduct2HnonRaised[k]) != 2) {
-        global.fatal << "Programming error: characteristicH is: " << characteristicH.ToString()
+        global.fatal << "Programming error: characteristicH is: " << characteristicH.toString()
         << "; rootsWithScalarProduct2NonRaised: "
-        << rootsScalarProduct2HnonRaised.ToString()
-        << "; the scalar product with vector " << rootsScalarProduct2HnonRaised[k].ToString() << " is:  "
-        << this->GetAmbientWeyl().RootScalarCartanRoot(characteristicH, rootsScalarProduct2HnonRaised[k]).ToString()
+        << rootsScalarProduct2HnonRaised.toString()
+        << "; the scalar product with vector " << rootsScalarProduct2HnonRaised[k].toString() << " is:  "
+        << this->GetAmbientWeyl().RootScalarCartanRoot(characteristicH, rootsScalarProduct2HnonRaised[k]).toString()
         << " which is supposed to equal 2. " << global.fatal;
       }
     }
@@ -2681,18 +2681,18 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(
     for (int i = 0; i < theSl2.RootsWithScalar2WithH.size; i ++) {
       if (this->GetAmbientWeyl().RootScalarCartanRoot(characteristicH, theSl2.RootsWithScalar2WithH[i]) != 2) {
         global.fatal << "Programming error, bad scalar product after raising: raised characteristic: "
-        << characteristicH.ToString()
-        << " simplebasisK: " << this->SimpleBasisK.ToString()
-        << "raised by: " << raisingElt.ToString()
-        << " to get: " << reflectedSimpleBasisK.ToString()
+        << characteristicH.toString()
+        << " simplebasisK: " << this->SimpleBasisK.toString()
+        << "raised by: " << raisingElt.toString()
+        << " to get: " << reflectedSimpleBasisK.toString()
         << " theSl2.RootsWithScalar2WithH: "
-        << theSl2.RootsWithScalar2WithH.ToString()
+        << theSl2.RootsWithScalar2WithH.toString()
         << ", theSl2.RootsWithScalar2WithH[i]: "
-        << theSl2.RootsWithScalar2WithH[i].ToString()
+        << theSl2.RootsWithScalar2WithH[i].toString()
         << " scalar product: "
-        << this->GetAmbientWeyl().RootScalarCartanRoot(characteristicH, theSl2.RootsWithScalar2WithH[i]).ToString()
-        << ". The inverted relative cartan: " << InvertedRelativeKillingForm.ToString()
-        << ". The cartan: " << this->GetAmbientWeyl().CartanSymmetric.ToString() << ". "
+        << this->GetAmbientWeyl().RootScalarCartanRoot(characteristicH, theSl2.RootsWithScalar2WithH[i]).toString()
+        << ". The inverted relative cartan: " << InvertedRelativeKillingForm.toString()
+        << ". The cartan: " << this->GetAmbientWeyl().CartanSymmetric.toString() << ". "
         << global.fatal;
       }
     }
@@ -2726,13 +2726,13 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(
       DynkinType tempType;
       diagramZeroCharRoots.GetDynkinType(tempType);
       global.Comments
-      << "<br>obtained bad characteristic " << characteristicH.ToString()
+      << "<br>obtained bad characteristic " << characteristicH.toString()
       << ". The zero char root diagram is "
-      << tempType.ToString() << "; the Dynkin epsilon is "
+      << tempType.toString() << "; the Dynkin epsilon is "
       << theDynkinEpsilon << "= the num roots generated by diagram "
       << diagramZeroCharRoots.NumRootsGeneratedByDiagram()
       << " + the relative dimension " << theRelativeDimension
-      << " - the slack " << theSlack << "<br>The relative root system is: " << relativeRootSystem.ToString();
+      << " - the slack " << theSlack << "<br>The relative root system is: " << relativeRootSystem.toString();
     }
     std::stringstream out;
     out << "Exploring Dynkin characteristics case " << cyclecounter + 1 << " out of " << numCycles;
@@ -2778,7 +2778,7 @@ void rootSubalgebras::ComputeParabolicPseudoParabolicNeitherOrder() {
           reportStream << "Exploring which of the subalgebras are pseudo-parabolic. ";
         }
         reportStream << "Current " << (i == 0 ? "pseudo-parabolic " : "parabolic ") << "selection: "
-        << parSel.ToString() << ", total  " << counter << " selections explored. ";
+        << parSel.toString() << ", total  " << counter << " selections explored. ";
         counter ++;
         theReport.Report(reportStream.str());
       }
@@ -2789,14 +2789,14 @@ void rootSubalgebras::ComputeParabolicPseudoParabolicNeitherOrder() {
       currentSA.genK = currentBasis;
       currentSA.ComputeEssentialS();
       if (currentBasis.size != 0) {
-        if (currentSA.theDynkinType.ToString() == "0") {
-          global.fatal << "Subalgebra dynkin type computed to be zero while currentBasis is " << currentBasis.ToString()
-          << " and simple basis k is: " << currentSA.SimpleBasisK.ToString() << global.fatal;
+        if (currentSA.theDynkinType.toString() == "0") {
+          global.fatal << "Subalgebra dynkin type computed to be zero while currentBasis is " << currentBasis.toString()
+          << " and simple basis k is: " << currentSA.SimpleBasisK.toString() << global.fatal;
         }
       }
       int theIndex = this->GetIndexUpToEquivalenceByDiagramsAndDimensions(currentSA);
       if (theIndex == - 1) {
-        global.fatal << "Experimental code has failed an internal check on currentSA: " << currentSA.ToString() << global.fatal;
+        global.fatal << "Experimental code has failed an internal check on currentSA: " << currentSA.toString() << global.fatal;
       }
       if (!Explored[theIndex]) {
         currentList.AddOnTop(this->theSubalgebras[theIndex]);
@@ -2842,7 +2842,7 @@ void rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism() {
     if (theReport2.TickAndWantReport()) {
       std::stringstream reportStream;
       for (int j = 0; j < this->theSubalgebras[i].potentialExtensionDynkinTypes.size; j ++) {
-        reportStream << this->theSubalgebras[i].potentialExtensionDynkinTypes[j].ToString();
+        reportStream << this->theSubalgebras[i].potentialExtensionDynkinTypes[j].toString();
         if (j != this->theSubalgebras[i].potentialExtensionDynkinTypes.size - 1) {
           reportStream << ", ";
         }
@@ -2857,7 +2857,7 @@ void rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism() {
         std::stringstream out;
         out << "Exploring extensions of subalgebra " << i + 1
         << " out of " << this->theSubalgebras.size << ". Type current SA: "
-        << this->theSubalgebras[i].theDynkinType.ToString() << ". Possible standard parabolic extensions: "
+        << this->theSubalgebras[i].theDynkinType.toString() << ". Possible standard parabolic extensions: "
         << reportString << ". Exploring extension by lowest weight vector of module "
         << j + 1 << " out of " << this->theSubalgebras[i].Modules.size;
         theReport2.Report(out.str());
@@ -3026,10 +3026,10 @@ void rootSubalgebras::ToHTML(FormatExpressions* theFormat) {
     << global.fatal;
   }
   output << "<html><title> Root subsystems of "
-  << this->theSubalgebras[0].theDynkinDiagram.ToString()
+  << this->theSubalgebras[0].theDynkinDiagram.toString()
   << "</title>";
   output << "<meta name = \"keywords\" content = \""
-  << this->theSubalgebras[0].theDynkinDiagram.ToString()
+  << this->theSubalgebras[0].theDynkinDiagram.toString()
   << " root subsystems, root subsystems, root systems";
   if (this->GetOwnerWeyl().theDynkinType.HasExceptionalComponent()) {
     output << ", exceptional Lie algebra";
@@ -3040,7 +3040,7 @@ void rootSubalgebras::ToHTML(FormatExpressions* theFormat) {
   output << HtmlRoutines::GetJavascriptLinkGraphicsNDimensionsWithPanels("../../../");
   output << "<body>"
   << this->owner->ToStringHTMLMenuStructureSummary("", true, false, true, true)
-  << this->ToString(theFormat)
+  << this->toString(theFormat)
   << "<hr>LaTeX table with root subalgebra details.<br>"
   << this->ToStringDynkinTableFormat2LaTeX(theFormat)
   << "</body></html>";
@@ -3050,7 +3050,7 @@ void rootSubalgebras::ToHTML(FormatExpressions* theFormat) {
   }
 }
 
-std::string rootSubalgebras::ToString(FormatExpressions* theFormat) {
+std::string rootSubalgebras::toString(FormatExpressions* theFormat) {
   return this->ToStringDynkinTableHTML(theFormat);
 }
 
@@ -3082,7 +3082,7 @@ void rootSubalgebras::ElementToStringCentralizerIsomorphisms(
     if (useHtml) {
       out << "<td>";
     }
-    tempS = current.theDynkinDiagram.ToString();
+    tempS = current.theDynkinDiagram.toString();
     out << tempS;
     if (useHtml) {
       out << "</td><td>";
@@ -3090,7 +3090,7 @@ void rootSubalgebras::ElementToStringCentralizerIsomorphisms(
     if (useLatex) {
       out << " & ";
     }
-    tempS = current.theCentralizerDiagram.ToString();
+    tempS = current.theCentralizerDiagram.toString();
     out << tempS;
     if (useHtml) {
       out << "</td><td>";
@@ -3105,14 +3105,14 @@ void rootSubalgebras::ElementToStringCentralizerIsomorphisms(
     if (useLatex) {
       out << " & ";
     }
-    out << numInnerIsos.ToString();
+    out << numInnerIsos.toString();
     if (useHtml) {
       out << "</td><td>";
     }
     if (useLatex) {
       out << " & ";
     }
-    out << (numInnerIsos * theOuterIsos.allElements.size).ToString();
+    out << (numInnerIsos * theOuterIsos.allElements.size).toString();
     if (useHtml) {
       out << "</td></tr>";
     }
@@ -3132,7 +3132,7 @@ void rootSubalgebras::ElementToStringCentralizerIsomorphisms(
 std::string rootSubalgebras::ToStringAlgebraLink(int index) {
   std::stringstream out;
   out << "<a href = \"rootSubalgebra_" << index + 1 << ".html\">"
-  << this->theSubalgebras[index].theDynkinDiagram.ToString() << "</a>";
+  << this->theSubalgebras[index].theDynkinDiagram.toString() << "</a>";
   return out.str();
 }
 
@@ -3145,7 +3145,7 @@ Vector<Rational> ElementSemisimpleLieAlgebra<coefficient>::GetRootIMustBeWeight(
     if (!this->IsElementCartan()) {
       global.fatal << "Calling ElementSemisimpleLieAlgebra::GetRootIMustBeWeight "
       << "on a non-weight element is forbidden. The element is: "
-      << this->ToString() << global.fatal;
+      << this->toString() << global.fatal;
     }
     Vector<Rational> result;
     result.MakeZero(this->GetOwner()->GetRank());
@@ -3166,7 +3166,7 @@ std::string rootSubalgebras::ToStringDynkinTableHTML(FormatExpressions* theForma
   "C(k_{ss}) consists of root spaces with roots strongly orthogonal to \\Delta(k) and a part of the Cartan h";
   int col = 0;
   int row = 0;
-  out << "g: " << this->theSubalgebras[0].theDynkinDiagram.ToString()
+  out << "g: " << this->theSubalgebras[0].theDynkinDiagram.toString()
   << ". There are " << this->theSubalgebras.size << " table entries (= " << this->theSubalgebras.size-2
   << " larger than the Cartan subalgebra + the Cartan subalgebra + the full subalgebra).\n\n";
   out << "<table border =\"1\">\n <colgroup>";
@@ -3189,7 +3189,7 @@ std::string rootSubalgebras::ToStringDynkinTableHTML(FormatExpressions* theForma
     if (i == this->theSubalgebras.size - 1) {
       out << "<b>(Cartan subalgebra)</b>";
     }
-    out << "\n<br>\nType C(k_{ss})_{ss}: " << this->theSubalgebras[i].theCentralizerDiagram.ToString();
+    out << "\n<br>\nType C(k_{ss})_{ss}: " << this->theSubalgebras[i].theCentralizerDiagram.toString();
     if (row == this->NumLinesPerTableLatex) {
       row = 0;
     }
@@ -3217,7 +3217,7 @@ std::string rootSubalgebras::ToStringDynkinTableHTML(FormatExpressions* theForma
         } else {
           out << "\"nonPseudoParabolic\",";
         }
-        out << "\"" << currentSA.theDynkinType.ToString() << "\", ";
+        out << "\"" << currentSA.theDynkinType.toString() << "\", ";
         out << "[";
         for (int j = 0; j < currentSA.SimpleBasisK.size; j ++) {
           int theIndex = GAPPosRootSystem.GetIndex(currentSA.SimpleBasisK[j]);
@@ -3247,12 +3247,12 @@ std::string rootSubalgebras::ToStringDynkinTableHTML(FormatExpressions* theForma
       } else {
         out << "\"nonPseudoParabolic\",";
       }
-      out << "\"" << currentSA.theDynkinType.ToString() << "\", ";
+      out << "\"" << currentSA.theDynkinType.toString() << "\", ";
       out << "[";
       for (int j = 0; j < currentSA.SimpleBasisK.size; j ++) {
         out << "[";
         for (int k = 0; k < currentSA.SimpleBasisK[j].size; k ++) {
-          out << currentSA.SimpleBasisK[j][k].ToString();
+          out << currentSA.SimpleBasisK[j][k].toString();
           if (k != currentSA.SimpleBasisK[j].size - 1) {
             out << ", ";
           }
@@ -3281,7 +3281,7 @@ std::string rootSubalgebras::ToStringDynkinTableFormat2LaTeX(FormatExpressions* 
   out << "\\documentclass{article}" << endline
   << "\\usepackage{longtable, amssymb, lscape}" << endline
   << "\\begin{document}" << endline;
-  out << "Lie algebra type: $" << this->theSubalgebras[0].theDynkinType.ToString(theFormat)
+  out << "Lie algebra type: $" << this->theSubalgebras[0].theDynkinType.toString(theFormat)
   << "$. There are " << this->theSubalgebras.size << " table entries (= " << this->theSubalgebras.size - 2
   << " larger than the Cartan subalgebra + the Cartan subalgebra + the full subalgebra)." << endline
   << "Let $\\mathfrak g$ stand for the type of the regular subalgebra and $C(\\mathfrak g)$ for the type of the centralizer. "
@@ -3293,8 +3293,8 @@ std::string rootSubalgebras::ToStringDynkinTableFormat2LaTeX(FormatExpressions* 
   out << "$\\mathfrak g$ & $C(\\mathfrak g)$& $p$ & $q$&  $m$& $r$ & $c_r$ \\\\\\endhead" << endline;
   for (int i = 0; i < this->theSubalgebras.size; i ++) {
     rootSubalgebra& currentSA = this->theSubalgebras[i];
-    out << "$" << currentSA.theDynkinType.ToString(theFormat) << "$&" ;
-    out << "$" << currentSA.theCentralizerDynkinType.ToString(theFormat) << "$&" ;
+    out << "$" << currentSA.theDynkinType.toString(theFormat) << "$&" ;
+    out << "$" << currentSA.theCentralizerDynkinType.toString(theFormat) << "$&" ;
     out << "$" << (currentSA.theDynkinType.GetRootSystemSize() / 2) << "$&" ;
     out << "$" << (currentSA.theCentralizerDynkinType.GetRootSystemSize() / 2)<< "$&" ;
     out << "$" << currentSA.theDynkinType.GetNumSimpleComponentsOfGivenRank(1) << "$&" ;
@@ -3391,8 +3391,8 @@ void rootSubalgebras::MakeProgressReportAutomorphisms(
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms &theSubgroup, rootSubalgebra& theRootSA
 ) {
   std::stringstream out4, out1;
-  out1 << "k_ss: " << theRootSA.theDynkinDiagram.ToString() << " C(k_ss): "
-  << theRootSA.theCentralizerDiagram.ToString();
+  out1 << "k_ss: " << theRootSA.theDynkinDiagram.toString() << " C(k_ss): "
+  << theRootSA.theCentralizerDiagram.toString();
   out4 << "Num elements ";
   if (theSubgroup.truncated) {
     out4 << "truncated ";
@@ -3579,7 +3579,7 @@ void rootSubalgebras::ElementToStringConeConditionNotSatisfying(std::string& out
         out << "\\hline\\begin{tabular}{r}";
       }
       out << "$\\Delta(\\mathfrak{k})$ is of type "
-      << currentRootSA.theDynkinDiagram.ToString() << "; ";
+      << currentRootSA.theDynkinDiagram.toString() << "; ";
       if (!includeMatrixForm) {
         out << "\\\\";
       }
@@ -3845,8 +3845,8 @@ int rootSubalgebras::IndexSubalgebra(rootSubalgebra& input) {
   for (int j = 0; j < this->theSubalgebras.size; j ++) {
     rootSubalgebra& right = this->theSubalgebras[j];
     if (
-      input.theDynkinDiagram.ToString() == right.theDynkinDiagram.ToString() &&
-      input.theCentralizerDiagram.ToString() == right.theCentralizerDiagram.ToString()
+      input.theDynkinDiagram.toString() == right.theDynkinDiagram.toString() &&
+      input.theCentralizerDiagram.toString() == right.theCentralizerDiagram.toString()
     ) {
       if (!this->GetOwnerWeyl().IsOfSimpleType('E', 7)) {
         return j;
@@ -3897,7 +3897,7 @@ void coneRelation::RelationOneSideToStringCoordForm(
   std::stringstream out;
   std::string tempS;
   for (int i = 0; i < theRoots.size; i ++) {
-    tempS = coeffs[i].ToString();
+    tempS = coeffs[i].toString();
     if (tempS == "1") {
       tempS = "";
     }
@@ -3909,7 +3909,7 @@ void coneRelation::RelationOneSideToStringCoordForm(
     }
     out << tempS;
     if (!EpsilonForm) {
-      tempS = theRoots[i].ToString();
+      tempS = theRoots[i].toString();
     } else {
       tempS = theRoots[i].ToStringEpsilonFormat();
     }
@@ -3943,7 +3943,7 @@ void coneRelation::RelationOneSideToString(
     out << "}";
   }
   for (int i = 0; i < theRoots.size; i ++) {
-    tempS = coeffs[i].ToString();
+    tempS = coeffs[i].toString();
     if (tempS == "1") {
       tempS = "";
     }
@@ -3955,7 +3955,7 @@ void coneRelation::RelationOneSideToString(
     }
     out << tempS;
     if (!useLatex) {
-      tempS = theRoots[i].ToString();
+      tempS = theRoots[i].toString();
       out << "(" << tempS << ")";
       if (i != theRoots.size - 1) {
         out << " + ";
@@ -3981,7 +3981,7 @@ void coneRelation::RelationOneSideToString(
     for (int j = 0; j < kComponents[i].size; j ++) {
       int index = kComponents[i][j];
       int indexUniComponent = owner.theDynkinDiagram.indexUniComponent[index];
-      out << owner.theDynkinDiagram.SimpleComponentTypes[index].ToString();
+      out << owner.theDynkinDiagram.SimpleComponentTypes[index].toString();
       if (TakenIndices[index] == - 1) {
         NumPrimesUniTypicComponent[indexUniComponent] ++;
         TakenIndices[index] = NumPrimesUniTypicComponent[indexUniComponent];
@@ -4006,7 +4006,7 @@ void coneRelation::RelationOneSideToString(
   output = out.str();
 }
 
-int coneRelation::ToString(
+int coneRelation::toString(
   std::string& output, rootSubalgebras& owners, bool useLatex, bool includeScalarsProductsEachSide, bool includeMixedScalarProducts
 ) {
   std::string tempS;
@@ -4051,9 +4051,9 @@ int coneRelation::ToString(
   if (useLatex) {
     out << " & ";
   }
-  this->theDiagram.ToString();
+  this->theDiagram.toString();
   out << tempS;
-  this->theDiagramRelAndK.ToString();
+  this->theDiagramRelAndK.toString();
   if (useLatex) {
     out << " & ";
   }
@@ -4096,7 +4096,7 @@ int coneRelation::RootsToScalarProductString(
       if (i < j || letterTypeLeft != letterTypeRight) {
         owner.GetAmbientWeyl().RootScalarCartanRoot(inputLeft[i], inputRight[j], tempRat);
         if (!tempRat.IsEqualToZero()) {
-          tempS = tempRat.ToString();
+          tempS = tempRat.toString();
           out << "$\\langle" << letterTypeLeft << "_" << i + 1
           << ", " << letterTypeRight << "_" << j + 1 << "\\rangle =" << tempS << "$, ";
           numLinesLatex ++;
@@ -4131,7 +4131,7 @@ bool coneRelation::IsStrictlyWeaklyProhibiting(
   tempRoots.AddListOnTop(owner.genK);
   //owner.AmbientWeyl.TransformToSimpleBasisGenerators(tempRoots);
   this->theDiagram.ComputeDiagramTypeModifyInput(tempRoots, owner.GetAmbientWeyl());
-  if (this->theDiagram.ToString() == "F^{1}_4") {
+  if (this->theDiagram.toString() == "F^{1}_4") {
     return false;
   }
   if (this->theDiagram.SimpleComponentTypes[0].theLetter == 'A' && this->theDiagram.SimpleComponentTypes[0].theRank == 1) {
@@ -4364,7 +4364,7 @@ void coneRelations::AddRelationNoRepetition(coneRelation& input, rootSubalgebras
     }
   }
   if (!this->flagIncludeSmallerRelations) {
-    if (input.theDiagramRelAndK.ToString() != owners.theSubalgebras[0].theDynkinDiagram.ToString()) {
+    if (input.theDiagramRelAndK.toString() != owners.theSubalgebras[0].theDynkinDiagram.toString()) {
       return;
     }
   }
@@ -4383,7 +4383,7 @@ void coneRelations::GetLatexHeaderAndFooter(std::string& outputHeader, std::stri
   outputFooter.append("\\end{tabular}");
 }
 
-void coneRelations::ToString(std::string& output, rootSubalgebras& owners, bool useLatex) {
+void coneRelations::toString(std::string& output, rootSubalgebras& owners, bool useLatex) {
   std::stringstream out;
   std::string tempS, header, footer;
   Vectors<Rational> tempAlphas, tempBetas;
@@ -4398,11 +4398,11 @@ void coneRelations::ToString(std::string& output, rootSubalgebras& owners, bool 
       oldIndex = this->TheObjects[i].IndexOwnerRootSubalgebra;
       if (useLatex) {
         out << "\\hline\\multicolumn{5}{c}{$\\mathfrak{k}$-semisimple type: "
-        << owners.theSubalgebras[oldIndex].theDynkinDiagram.ToString()
+        << owners.theSubalgebras[oldIndex].theDynkinDiagram.toString()
         << "}\\\\\n\\hline\\hline";
       }
     }
-    lineCounter += this->TheObjects[i].ToString(tempS, owners, useLatex, true, true);
+    lineCounter += this->TheObjects[i].toString(tempS, owners, useLatex, true, true);
     out << tempS;
     if (useLatex) {
       out << "\\\\";
@@ -4428,7 +4428,7 @@ void coneRelations::ToString(std::string& output, rootSubalgebras& owners, bool 
   }
   if (this->flagIncludeSubalgebraDataInDebugString) {
     FormatExpressions tempFormat;
-    out << "\n\n\\newpage" << owners.ToString(&tempFormat);
+    out << "\n\n\\newpage" << owners.toString(&tempFormat);
   }
   output = out.str();
 }

@@ -109,7 +109,7 @@ public:
     static const JSData::PrintOptions& HTML();
     static const PrintOptions& HexEncodeNonASCII();
   };
-  std::string ToString(const JSData::PrintOptions* options = nullptr) const;
+  std::string toString(const JSData::PrintOptions* options = nullptr) const;
   template <typename somestream>
   somestream& IntoStream(
     somestream& out,

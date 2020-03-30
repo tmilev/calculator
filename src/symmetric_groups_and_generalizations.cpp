@@ -270,7 +270,7 @@ bool Partition::operator>(const Partition& right) const {
   return false;
 }
 
-std::string Partition::ToString() const {
+std::string Partition::toString() const {
   std::stringstream out;
   this->IntoStream(out);
   return out.str();
@@ -381,7 +381,7 @@ void Tableau::ColumnStabilizer(FiniteGroup<PermutationR2>& in) const {
   }
 }
 
-std::string Tableau::ToString() const {
+std::string Tableau::toString() const {
   std::stringstream out;
   this->IntoStream(out);
   return out.str();
@@ -705,7 +705,7 @@ unsigned int PermutationR2::HashFunction() const {
 }
 
 
-std::string PermutationR2::ToString(FormatExpressions* format) const {
+std::string PermutationR2::toString(FormatExpressions* format) const {
   std::stringstream out;
   if (format != nullptr) {
     out << "(";
@@ -861,7 +861,7 @@ bool PermutationGroupData::GetWordjjPlus1Implementation(FiniteGroup<PermutationR
   return true;
 }
 
-std::string PermutationGroupData::ToString() {
+std::string PermutationGroupData::toString() {
   std::stringstream out;
   this->IntoStream(out);
   return out.str();
@@ -1100,7 +1100,7 @@ bool ElementHyperoctahedralGroup::operator>(const ElementHyperoctahedralGroup& r
 }
 
 
-std::string ElementHyperoctahedralGroup::ToString(FormatExpressions* unused) const {
+std::string ElementHyperoctahedralGroup::toString(FormatExpressions* unused) const {
   std::stringstream out;
   this->IntoStream(out);
   return out.str();
@@ -1510,7 +1510,7 @@ void HyperoctahedralGroup::ComputeCCSizesAndRepresentativesByFormulaImplementati
 */
 
 /*
-std::string HyperoctahedralGroup::ToString() const {
+std::string HyperoctahedralGroup::toString() const {
   std::stringstream out;
   this->IntoStream(out);
   return out.str();
@@ -1533,7 +1533,7 @@ void ElementHyperoctahedralGroupR2::MakeFromString(const std::string& in) {
   this->k.MakeFromString(in.substr(sep, in.size() - 1));
 }
 
-std::string HyperoctahedralGroupData::ToString() const {
+std::string HyperoctahedralGroupData::toString() const {
   std::stringstream out;
   this->IntoStream(out);
   return out.str();

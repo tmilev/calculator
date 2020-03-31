@@ -226,6 +226,25 @@ void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy(
   output = bufferPoly;
 }
 
+template <class templateMonomial, class coefficient>
+void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy(
+  const templateMonomial &other,
+  ElementMonomialAlgebra<templateMonomial, coefficient>& output
+) const {
+  if (this == &output) {
+    ElementMonomialAlgebra<templateMonomial, coefficient> thisCopy = *this;
+    thisCopy.MultiplyBy(other, output);
+    return;
+  }
+  output.MakeZero();
+  templateMonomial currentMonomial;
+  for (int i = 0; i < this->size(); i ++) {
+    currentMonomial = this->theMonomials[i];
+    currentMonomial *= other;
+    output.AddMonomial(currentMonomial, this->coefficients[i]);
+  }
+}
+
 template<class coefficient>
 void MatrixTensor<coefficient>::RaiseToPower(int power) {
   if (power <= 0) {

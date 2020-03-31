@@ -689,7 +689,7 @@ bool Calculator::innerPrintB3G2branchingIntermediate(
             latexTable2 << " $v_{\\lambda," <<  theIndex- eigenIndexcounter - 1 << "} $&";
             Polynomial<Rational> tempP;
             theG2B3Data.theShapovalovProducts[eigenIndexcounter].GetNumerator(tempP);
-            tempP.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
+            tempP.ScaleNormalizeLeadingMonomial();
             latexTable2 << "$\\begin{array}{l}" << tempP.toString(&theG2B3Data.theFormat) << "\\end{array}$ & ";
             if (tempP.FindOneVariableRationalRoots(tempList)) {
               tempList2.AddOnTopNoRepetition(tempList);
@@ -846,7 +846,7 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
           resultChar.ModOutVermaRelations(&rightWeightDual);
           theCentralCharacter.ModOutVermaRelations(&leftWeightDual);
           resultChar -= theCentralCharacter;
-          resultChar.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
+          resultChar.ScaleNormalizeLeadingMonomial();
           resultChar *= - 1;
           theCentralChars.AddOnTopNoRepetition(resultChar);
         }
@@ -1031,7 +1031,10 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
         }
       }
     }
-    theG2B3Data.additionalMultipliers[k] = currentTensorEltEigen.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
+    RationalFunction scale = currentTensorEltEigen.ScaleNormalizeLeadingMonomial();
+    if (!scale.IsConstant(&theG2B3Data.additionalMultipliers[k])) {
+      global.fatal << "This is unexpected: the scale is not a constant. " << global.fatal;
+    }
     currentTensorEltEigen.ExtractElementUE(currentUEelt, *theMod.owner);
     currentUEelt.HWTAAbilinearForm(
       currentUEelt, theG2B3Data.theShapovalovProducts[k], &theMod.theHWDualCoordsBaseFielD, 1, 0, nullptr
@@ -1392,31 +1395,6 @@ void Polynomial<coefficient>::Interpolate(
   }
 }
 
-template <class coefficient>
-void Polynomial<coefficient>::GetValuesLagrangeInterpolandsAtConsecutivePoints(
-  Vector<Rational>& inputConsecutivePointsOfInterpolation,
-  Vector<Rational>& inputPointsOfEvaluation,
-  Vectors<Rational>& outputValuesInterpolands
-) {
-  outputValuesInterpolands.SetSize(inputConsecutivePointsOfInterpolation.size);
-  for (int i = 0; i < inputConsecutivePointsOfInterpolation.size; i ++) {
-    Vector<Rational>& currentInterpoland = outputValuesInterpolands[i];
-    currentInterpoland.SetSize(inputPointsOfEvaluation.size);
-    for (int j = 0; j < inputConsecutivePointsOfInterpolation.size; j ++) {
-      currentInterpoland[j] = (i == j) ? 1 : 0;
-    }
-    for (int j = inputConsecutivePointsOfInterpolation.size; j < inputPointsOfEvaluation.size; j ++) {
-      currentInterpoland[j] = 1;
-      for (int k = 0; k < inputConsecutivePointsOfInterpolation.size; k ++) {
-        if (i != k) {
-          currentInterpoland[j] *= inputPointsOfEvaluation[j] - inputConsecutivePointsOfInterpolation[k];
-          currentInterpoland[j] /= inputConsecutivePointsOfInterpolation[i] - inputConsecutivePointsOfInterpolation[k];
-        }
-      }
-    }
-  }
-}
-
 template <>
 bool CalculatorConversions::innerPolynomial<Rational>(Calculator& theCommands, const Expression& input, Expression& output);
 template <>
@@ -1430,7 +1408,7 @@ bool Calculator::innerFactorPolynomial(Calculator& theCommands, const Expression
   )) {
     return false;
   }
-  if (polynomial.content.GetMinNumVars() > 1) {
+  if (polynomial.content.GetMinimalNumberOfVariables() > 1) {
     return output.MakeError(
       "I have been taught to factor one variable polynomials only. ",
       theCommands

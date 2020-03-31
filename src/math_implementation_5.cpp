@@ -700,14 +700,16 @@ bool HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism(
   ElementUniversalEnveloping<RationalFunction> tempElt;
   output.MakeZero(this->theRange());
   RationalFunction polyOne;
-  polyOne = theCoeff.GetOne();
+  polyOne = theCoeff.one();
   output.MakeConst(theCoeff, this->theRange());
   for (int i = 0; i < input.generatorsIndices.size; i ++) {
     if (input.generatorsIndices[i] >= this->imagesAllChevalleyGenerators.size) {
       return false;
     }
     tempElt.AssignElementLieAlgebra(
-      this->imagesAllChevalleyGenerators[input.generatorsIndices[i]], this->theRange(), polyOne
+      this->imagesAllChevalleyGenerators[input.generatorsIndices[i]],
+      this->theRange(),
+      polyOne
     );
     RationalFunction& thePower = input.Powers[i];
     int theIntegralPower;
@@ -1394,13 +1396,13 @@ RationalFunction::RationalFunction(const RationalFunction& other): expressionTyp
   this->operator=(other);
 }
 
-RationalFunction RationalFunction::GetZero() const {
+RationalFunction RationalFunction::zero() {
   RationalFunction tempRat;
   tempRat.MakeZero();
   return tempRat;
 }
 
-RationalFunction RationalFunction::GetOne() const {
+RationalFunction RationalFunction::one() {
   RationalFunction tempRat;
   tempRat.MakeConst(1);
   return tempRat;
@@ -1500,7 +1502,7 @@ void RationalFunction::gcd(
     << ", which is imposible."
     << global.fatal;
   }
-  output.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
+  output.ScaleNormalizeLeadingMonomial();
 }
 
 void RationalFunction::MakeOneLetterMoN(
@@ -1527,7 +1529,7 @@ void RationalFunction::MakeMonomiaL(
 }
 
 void RationalFunction::SetNumVariablesSubDeletedVarsByOne(int newNumVars) {
-  int oldNumVars = this->GetMinNumVars();
+  int oldNumVars = this->GetMinimalNumberOfVariables();
   this->Numerator.GetElement().SetNumVariablesSubDeletedVarsByOne(newNumVars);
   this->Denominator.GetElement().SetNumVariablesSubDeletedVarsByOne(newNumVars);
   if (newNumVars < oldNumVars) {
@@ -1569,7 +1571,7 @@ void RationalFunction::lcm(
   List<Polynomial<Rational> > theBasis;
   leftTemp = left;
   rightTemp = right;
-  int theNumVars = MathRoutines::Maximum(left.GetMinNumVars(), right.GetMinNumVars());
+  int theNumVars = MathRoutines::Maximum(left.GetMinimalNumberOfVariables(), right.GetMinimalNumberOfVariables());
   leftTemp.SetNumVariablesSubDeletedVarsByOne(theNumVars + 1);
   rightTemp.SetNumVariablesSubDeletedVarsByOne(theNumVars + 1);
   leftTemp.ScaleToIntegralNoGCDCoeffs();
@@ -1618,7 +1620,7 @@ void RationalFunction::lcm(
   }
   output = theBasis[maxMonNoTIndex];
   output.SetNumVariablesSubDeletedVarsByOne(theNumVars);
-  output.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
+  output.ScaleNormalizeLeadingMonomial();
 }
 
 void RationalFunction::operator*=(const MonomialP& other) {
@@ -1889,24 +1891,30 @@ void ElementUniversalEnveloping<coefficient>::AssignFromCoordinateFormWRTBasis(
   }
 }
 
-void RationalFunction::ScaleClearDenominator(List<RationalFunction>& input, Vector<Polynomial<Rational> >& output) {
-  Polynomial<Rational> tempP;
+RationalFunction RationalFunction::scaleNormalizeIndex(List<RationalFunction>& input, int indexNonZeroElement) {
+  Polynomial<Rational> scale;
   List<RationalFunction> buffer;
   buffer = input;
+  RationalFunction result;
+  result.MakeOne();
   for (int i = 0; i < buffer.size; i ++) {
     RationalFunction& current = buffer[i];
     if (current.expressionType == RationalFunction::typeRationalFunction) {
-      tempP.operator=(current.Denominator.GetElement());
+      scale = current.Denominator.GetElement();
+      result *= scale;
       for (int j = 0; j < buffer.size; j ++) {
-        buffer[j].operator*=(tempP);
+        buffer[j].operator*=(scale);
       }
     }
   }
-  output.SetSize(input.size);
+  buffer[indexNonZeroElement].GetNumerator(scale);
+  Rational scaleRational = scale.ScaleNormalizeLeadingMonomial();
+  result *= scaleRational;
   for (int i = 0; i < buffer.size; i ++) {
-    buffer[i].GetNumerator(tempP);
-    output[i] = tempP;
+    input[i] = buffer[i];
+    input[i] *= scaleRational;
   }
+  return result;
 }
 
 bool SemisimpleLieAlgebraOrdered::CheckInitialization() const {
@@ -2067,14 +2075,14 @@ bool RationalFunction::gcdQuick(
     if (remainder.IsEqualToZero()) {
       output = right;
     } else {
-      output.MakeOne(left.GetMinNumVars());
+      output.MakeOne(left.GetMinimalNumberOfVariables());
     }
   } else {
     right.DivideBy(left, quotient, remainder, monomialOrder);
     if (remainder.IsEqualToZero()) {
       output = left;
     } else {
-      output.MakeOne(left.GetMinNumVars());
+      output.MakeOne(left.GetMinimalNumberOfVariables());
     }
   }
   return true;
@@ -2588,7 +2596,7 @@ bool MonomialP::operator==(const MonomialP& other) const {
       return false;
     }
   }
-  int highestIndex = MathRoutines::Minimum(this->GetMinNumVars(), other.GetMinNumVars()) - 1;
+  int highestIndex = MathRoutines::Minimum(this->GetMinimalNumberOfVariables(), other.GetMinimalNumberOfVariables()) - 1;
   for (int i = highestIndex; i >= 0; i --) {
     if (this->monBody[i] != other.monBody[i]) {
       return false;
@@ -2643,7 +2651,7 @@ bool MonomialP::greaterThan_rightLargerWins(const MonomialP& other) const {
       return false;
     }
   }
-  int highestIndex = MathRoutines::Minimum(this->GetMinNumVars(), other.GetMinNumVars()) - 1;
+  int highestIndex = MathRoutines::Minimum(this->GetMinimalNumberOfVariables(), other.GetMinimalNumberOfVariables()) - 1;
   for (int i = highestIndex; i >= 0; i --) {
     if (this->monBody[i] > other.monBody[i]) {
       return true;
@@ -2671,7 +2679,7 @@ List<MonomialP>::Comparator& MonomialP::orderDegreeThenLeftLargerWins() {
 }
 
 bool MonomialP::greaterThan_leftLargerWins(const MonomialP &other) const {
-  int commonSize = MathRoutines::Minimum(this->GetMinNumVars(), other.GetMinNumVars());
+  int commonSize = MathRoutines::Minimum(this->GetMinimalNumberOfVariables(), other.GetMinimalNumberOfVariables());
   for (int i = 0; i < commonSize; i ++) {
     if (this->monBody[i] > other.monBody[i]) {
       return true;

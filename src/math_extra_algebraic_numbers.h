@@ -34,6 +34,12 @@ class AlgebraicNumber {
   AlgebraicNumber(const AlgebraicNumber& other): owner(nullptr), basisIndex(0), flagDeallocated(false) {
     this->operator=(other);
   }
+  AlgebraicNumber(AlgebraicClosureRationals* inputOwner) {
+    this->owner = inputOwner;
+    this->basisIndex = 0;
+    this->flagDeallocated = false;
+  }
+  static AlgebraicNumber zero();
   bool IsExpressedViaLatestBasis() const;
   void ExpressViaLatestBasis();
   bool AssignCosRationalTimesPi(const Rational& input, AlgebraicClosureRationals& inputOwner);
@@ -50,12 +56,9 @@ class AlgebraicNumber {
   static unsigned int HashFunction(const AlgebraicNumber& input) {
     return input.HashFunction();
   }
-  LargeIntegerUnsigned GetNumerator() const {
-    return this->element.FindGCDCoefficientNumeratorsOverRationals().GetNumerator().value;
-  }
-  LargeIntegerUnsigned GetDenominator() const {
-    return this->GetDenominatorRationalPart().GetDenominator();
-  }
+  static AlgebraicNumber scaleNormalizeIndex(
+    List<AlgebraicNumber>& output, int indexNonZeroElement
+  );
   bool IsPositive() {
     Rational ratPart;
     if (this->IsRational(&ratPart)) {
@@ -288,6 +291,9 @@ public:
   bool IsEqualToZero() const {
     return this->theValue.IsEqualToZero();
   }
+  static ElementZmodP scaleNormalizeIndex(
+    List<ElementZmodP>& toBeScaled, int indexNonZeroElement
+  );
   void operator=(const ElementZmodP& other);
   void operator=(const LargeIntegerUnsigned& other);
   void MakeOne(const LargeIntegerUnsigned& newModulo);
@@ -296,7 +302,9 @@ public:
   bool operator==(int other) const;
   bool operator==(const ElementZmodP& other) const;
   void operator*=(const ElementZmodP& other);
+  void operator*=(int other);
   void operator*=(const LargeInteger& other);
+  bool operator*=(const Rational& other);
   void operator+=(const ElementZmodP& other);
   void operator-=(const ElementZmodP& other);
   void operator-=(const LargeIntegerUnsigned& other);
@@ -322,5 +330,12 @@ public:
     Polynomial<ElementZmodP>& output,
     const LargeIntegerUnsigned& newModulo
   );
+  static ElementZmodP zero();
+  bool operator>(const ElementZmodP& other) const;
+  class Test {
+  public:
+    static bool all();
+    static bool basicOperations();
+  };
 };
 #endif

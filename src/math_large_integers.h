@@ -203,6 +203,7 @@ public:
   bool IsNonPositive() const {
     return !this->IsPositive();
   }
+  static LargeInteger zero();
   bool TryToFindWhetherIsPower(bool& outputIsPower, LargeInteger& outputBase, int& outputPower) const;
   bool NeedsParenthesisForMultiplication(FormatExpressions* unused) const {
     (void) unused;
@@ -465,16 +466,6 @@ public:
   static unsigned long long int TotalLargeMultiplications;
   static unsigned long long int TotalSmallGCDcalls;
   static unsigned long long int TotalLargeGCDcalls;
-/*  operator int() const {
-    int result = 0;
-    if (!this->IsSmallInteger(&result))
-      global.fatal << "This is a programming error. I am asked to assign a rational number to a small integer, but the rational "
-      << " number is either too large or is not an integer. Namely, the rational number equals " << this->toString()
-      << ". The programmer is supposed to write something of the sort int = rational only on condition that "
-      << " the programmer is sure that the rational contains is a small int. "
-      << global.fatal;
-    return result;
-  }*/
   bool NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost() const {
     return this->IsNegative();
   }
@@ -484,54 +475,20 @@ public:
     //return this->IsNegative();
   }
   bool GetSquareRootIfRational(Rational& output) const;
-  inline Rational GetDenominatorRationalPart() {
-    return this->GetDenominator();
-  }
-  Rational GetNumeratorRationalPart() {
-    return this->GetNumerator();
-  }
-  inline LargeIntegerUnsigned GetDenominator() const {
-    LargeIntegerUnsigned result;
-    if (this->Extended == nullptr) {
-      unsigned int tempI = static_cast<unsigned int>(this->DenShort);
-      result.AssignShiftedUInt(tempI, 0);
-    } else {
-      result = (this->Extended->den);
-    }
-    return result;
-  }
-  bool BeginsWithMinus() {
-    return this->IsNegative();
-  }
-  LargeInteger GetNumerator() const {
-    LargeInteger result;
-    if (this->Extended == nullptr) {
-      if (this->NumShort < 0) {
-        result.value.AssignShiftedUInt(static_cast<unsigned int>(- this->NumShort), 0);
-      } else {
-        result.value.AssignShiftedUInt(static_cast<unsigned int>(this->NumShort), 0);
-      }
-    } else {
-      result.value = this->Extended->num.value;
-    }
-    result.sign = 1;
-    if (this->IsNegative()) {
-      result.sign = - 1;
-    }
-    return result;
-  }
+  // Scales a vector of rationals so as to
+  // make the distinguished index equal to one.
+  // The number at the distinguished index must not be zero.
+  static Rational scaleNormalizeIndex(List<Rational>& output, int indexNonZeroEntry);
+  LargeIntegerUnsigned GetDenominator() const;
+  bool BeginsWithMinus();
+  LargeInteger GetNumerator() const;
   bool GetPrimeFactorsAbsoluteValue(
     List<LargeInteger>& numeratorPrimeFactors,
     List<int> &numeratorMultiplicities,
     List<LargeInteger>& denominatorPrimeFactors,
     List<int> &denominatorMultiplicities
   );
-  inline const Rational& GetComplexConjugate() const {
-    return *this;
-  }
-//  inline void SetDynamicSubtype(int dummyParameter)
-//  {(void) dummyParameter;
-//  }
+  const Rational& GetComplexConjugate() const;
   Rational RationalValue() {
     return *this;
   }
@@ -540,29 +497,14 @@ public:
     this->operator+=(r);
   }
   void AddInteger(int x);
-  void AssignLargeIntUnsigned(const LargeIntegerUnsigned& other) {
-    LargeInteger tempInt;
-    tempInt.AssignLargeIntUnsigned(other);
-    this->AssignLargeInteger(tempInt);
-  }
-  void AssignLargeInteger(const LargeInteger& other) {
-    if (this->Extended == nullptr) {
-      this->Extended = new LargeRationalExtended;
-#ifdef AllocationLimitsSafeguard
-  ParallelComputing::GlobalPointerCounter ++;
-  ParallelComputing::CheckPointerCounters();
-#endif
-    }
-    this->Extended->num = other;
-    this->Extended->den.MakeOne();
-    this->ShrinkExtendedPartIfPossible();
-  }
+  void AssignLargeIntUnsigned(const LargeIntegerUnsigned& other);
+  void AssignLargeInteger(const LargeInteger& other);
   void AssignString(const std::string& input);
   bool AssignStringFailureAllowed(const std::string& input);
-  Rational GetZero() {
+  static Rational zero() {
     return 0;
   }
-  Rational GetOne() {
+  static Rational one() {
     return 1;
   }
   void AssignFracValue();
@@ -572,9 +514,8 @@ public:
     *this -= tempRat;
   }
   void MultiplyBy(const Rational& r);
-  //IMPORTANT NOTE ON HASHFUNCTIONS
-  //The Hash function of zero MUST be equal to zero.
-  //See Note on Hashes before the definition of SomeRandomPrimes;
+  // The Hash function of zero must be equal to zero.
+  // See Note on Hashes before the definition of SomeRandomPrimes;
   unsigned int HashFunction() const {
     if (this->Extended == nullptr) {
       if (this->NumShort == 0) {
@@ -927,5 +868,10 @@ public:
     tempRat.AssignInteger(right);
     return tempRat.IsGreaterThan(*this);
   }
+  class Test {
+  public:
+    static bool All();
+    static bool TestScale();
+  };
 };
 #endif

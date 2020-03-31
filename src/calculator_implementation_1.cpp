@@ -653,7 +653,7 @@ bool Calculator::innerGroebner(
     return output.MakeError("Failed to extract polynomial expressions", theCommands);
   }
   for (int i = 0; i < inputVector.size; i ++) {
-    inputVector[i].ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
+    inputVector[i].ScaleNormalizeLeadingMonomial();
   }
   GroebnerBasisComputation<AlgebraicNumber> theGroebnerComputation;
   theContext.ContextGetFormatExpressions(theGroebnerComputation.theFormat);

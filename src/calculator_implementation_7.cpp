@@ -1556,7 +1556,7 @@ void Polynomial<coefficient>::GetPolyWithPolyCoeff(
   Selection& theNonCoefficientVariables, Polynomial<Polynomial<coefficient> >& output
 ) const {
   MacroRegisterFunctionWithName("Polynomial::GetPolyWithPolyCoeff");
-  if (theNonCoefficientVariables.MaxSize != this->GetMinNumVars()) {
+  if (theNonCoefficientVariables.MaxSize != this->GetMinimalNumberOfVariables()) {
     global.fatal << "GetPolyWithPolyCoeff called with selection which has "
     << "selects the wrong number of variables. " << global.fatal;
   }
@@ -1566,7 +1566,7 @@ void Polynomial<coefficient>::GetPolyWithPolyCoeff(
   for (int i = 0; i < this->size(); i ++) {
     coeffPart.MakeOne();
     polyPart.MakeOne();
-    for (int j = 0; j < (*this)[i].GetMinNumVars(); j ++) {
+    for (int j = 0; j < (*this)[i].GetMinimalNumberOfVariables(); j ++) {
       if (theNonCoefficientVariables.selected[j]) {
         polyPart[j] = (*this)[i](j);
       } else {
@@ -1584,7 +1584,7 @@ void Polynomial<coefficient>::GetPolyUnivariateWithPolyCoeffs(
   int theVar, Polynomial<Polynomial<coefficient> >& output
 ) const {
   Selection theVars;
-  theVars.init(this->GetMinNumVars());
+  theVars.init(this->GetMinimalNumberOfVariables());
   theVars.AddSelectionAppendNewIndex(theVar);
   this->GetPolyWithPolyCoeff(theVars, output);
 }
@@ -1599,7 +1599,7 @@ bool Polynomial<coefficient>::GetLinearSystemFromLinearPolys(
   int theLetter;
   int numVars = 0;
   for (int i = 0; i < theLinPolys.size; i ++) {
-    numVars = MathRoutines::Maximum(theLinPolys[i].GetMinNumVars(), numVars);
+    numVars = MathRoutines::Maximum(theLinPolys[i].GetMinimalNumberOfVariables(), numVars);
   }
   homogenousPart.init(theLinPolys.size, numVars);
   homogenousPart.MakeZero();
@@ -1623,7 +1623,7 @@ bool Polynomial<coefficient>::GetLinearSystemFromLinearPolys(
 template <class coefficient>
 coefficient Polynomial<coefficient>::GetDiscriminant() {
   MacroRegisterFunctionWithName("Polynomial::GetDiscriminant");
-  if (this->GetMinNumVars() > 1) {
+  if (this->GetMinimalNumberOfVariables() > 1) {
     global.fatal << "I do not have a definition of discriminant for more than one variable. " << global.fatal;
   }
   if (this->TotalDegree() != 2) {
@@ -1835,44 +1835,6 @@ bool IntegralRFComputation::IntegrateRF() {
   return true;
 }
 
-template <class coefficient>
-bool Polynomial<coefficient>::FactorMeNormalizedFactors(
-  Rational& outputCoeff,
-  List<Polynomial<Rational> >& outputFactors,
-  std::stringstream* comments
-) const {
-  MacroRegisterFunctionWithName("Polynomial::FactorMeNormalizedFactors");
-  List<Polynomial<Rational> > factorsToBeProcessed;
-  outputFactors.SetSize(0);
-  factorsToBeProcessed.AddOnTop(*this);
-  factorsToBeProcessed.LastObject()->ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
-  Polynomial<Rational> currentFactor, divisor;
-  while (factorsToBeProcessed.size > 0) {
-    currentFactor = factorsToBeProcessed.PopLastObject();
-    if (!currentFactor.FactorMeOutputIsADivisor(divisor, comments)) {
-      return false;
-    }
-    if (currentFactor.IsEqualToOne()) {
-      divisor.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
-      outputFactors.AddOnTop(divisor);
-      continue;
-    }
-    divisor.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
-    factorsToBeProcessed.AddOnTop(divisor);
-    factorsToBeProcessed.AddOnTop(currentFactor);
-  }
-  outputFactors.QuickSortAscending();
-  Polynomial<Rational> checkComputations;
-  checkComputations.MakeOne();
-  for (int i = 0; i < outputFactors.size; i ++) {
-    checkComputations *= outputFactors[i];
-  }
-  if (!checkComputations.IsProportionalTo(*this, outputCoeff, 1)) {
-    global.fatal << "Error in polynomial factorization function." << global.fatal;
-  }
-  return true;
-}
-
 void IntegralRFComputation::PrepareFormatExpressions() {
   MacroRegisterFunctionWithName("IntegralRFComputation::PrepareFormatExpressions");
   std::stringstream rfStream, polyStream;
@@ -2061,7 +2023,7 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
   this->contextE = this->inpuTE.GetContext();
   this->contextE.ContextGetFormatExpressions(this->currentFormaT);
   if (
-    this->theRF.GetMinNumVars() < 1 ||
+    this->theRF.GetMinimalNumberOfVariables() < 1 ||
     this->theRF.expressionType == this->theRF.typeRational ||
     this->theRF.expressionType == this->theRF.typePoly
   ) {
@@ -2070,7 +2032,7 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
   }
   this->theRF.GetDenominator(this->theDen);
   this->theRF.GetNumerator(this->theNum);
-  this->theNum *= this->theDen.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
+  this->theNum *= this->theDen.ScaleNormalizeLeadingMonomial();
   Rational theConstantCoeff;
   if (!this->theDen.FactorMeNormalizedFactors(theConstantCoeff, this->theFactors, &this->printoutPFsHtml)) {
     this->printoutPFsHtml << "<hr>Failed to factor the denominator of the rational function, I surrender.";
@@ -2261,8 +2223,8 @@ bool CalculatorFunctions::functionSplitToPartialFractionsOverAlgebraicReals(
     << input.toString() << " to rational function. ";
   }
   theComputation.theRF = theComputation.inpuTE.GetValue<RationalFunction>();
-  if (theComputation.theRF.GetMinNumVars() > 1) {
-    return theCommands << "The input rational function is of " << theComputation.theRF.GetMinNumVars() << " variables and "
+  if (theComputation.theRF.GetMinimalNumberOfVariables() > 1) {
+    return theCommands << "The input rational function is of " << theComputation.theRF.GetMinimalNumberOfVariables() << " variables and "
     << " I can handle only 1.";
   }
   if (!theComputation.ComputePartialFractionDecomposition()) {
@@ -2292,8 +2254,8 @@ bool CalculatorFunctions::innerSplitToPartialFractionsOverAlgebraicRealsAlgorith
     << input.toString() << " to rational function. ";
   }
   theComputation.theRF = theComputation.inpuTE.GetValue<RationalFunction>();
-  if (theComputation.theRF.GetMinNumVars() > 1) {
-    return theCommands << "The input rational function is of " << theComputation.theRF.GetMinNumVars() << " variables and "
+  if (theComputation.theRF.GetMinimalNumberOfVariables() > 1) {
+    return theCommands << "The input rational function is of " << theComputation.theRF.GetMinimalNumberOfVariables() << " variables and "
     << " I can handle only 1. ";
   }
   theComputation.ComputePartialFractionDecomposition();
@@ -2677,7 +2639,7 @@ bool CalculatorFunctions::innerDifferentiateTrigAndInverseTrig(
     Polynomial<Rational> onePlusXsquared;
     RationalFunction oneOverOnePlusXsquared;
     onePlusXsquared.MakeMonomiaL(0, 2);
-    onePlusXsquared += 1;
+    onePlusXsquared += Rational::one();
     oneOverOnePlusXsquared.MakeOne();
     oneOverOnePlusXsquared /= onePlusXsquared;
     Expression theContext;
@@ -3646,7 +3608,7 @@ bool CalculatorFunctions::innerRationalFunctionSubstitution(
   if (!input[0].IsOfType<RationalFunction>()) {
     return false;
   }
-  if (input[0].GetValue<RationalFunction>().GetMinNumVars() > 1) {
+  if (input[0].GetValue<RationalFunction>().GetMinimalNumberOfVariables() > 1) {
     return false;
   }
   Expression ResultRationalForm;
@@ -3936,14 +3898,16 @@ bool CalculatorFunctions::innerPolynomialRelations(
   }
   out << "<br>Relations: ";
   for (int i = 0; i < theRels.size; i ++) {
-    theRels[i].ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
+    theRels[i].ScaleNormalizeLeadingMonomial();
     out << "<br>" << theRels[i].toString(&theFormat);
   }
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CalculatorFunctions::functionPolynomialize(Calculator& theCommands, const Expression& input, Expression& output) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerPolynomialize");
+bool CalculatorFunctions::functionPolynomialize(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::functionPolynomialize");
   Expression thePolyE;
   if (input.HasBoundVariables()) {
     return false;
@@ -7669,7 +7633,7 @@ bool CalculatorFunctions::innerWriteGenVermaModAsDiffOperatorUpToLevel(
     for (int i = 0; i < numCycles; i ++, theHWenumerator.IncrementSubsetFixedCardinality(j)) {
       theHWrf = highestWeightFundCoords;
       for (int k = 0; k < invertedSelInducing.CardinalitySelection; k ++) {
-        theHWrf[invertedSelInducing.elements[k]] += theHWenumerator.Multiplicities[k];
+        theHWrf[invertedSelInducing.elements[k]] += Rational(theHWenumerator.Multiplicities[k]);
       }
       theHws.AddOnTop(theHWrf);
     }
@@ -7948,7 +7912,11 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
     tempStream << "(" << startingEltString << ")";
     tempStream << "\\end{array}";
     tempStream2 << " $(" << startingEltString << ")$ ";
-    Rational tempRat = theElt.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
+    RationalFunction scale = theElt.ScaleNormalizeLeadingMonomial();
+    Rational tempRat;
+    if (!scale.IsConstant(&tempRat)) {
+      global.fatal << "Unexpected: scale not rational" << global.fatal;
+    }
     currentHWsimplecoords = theGenMod.theHWSimpleCoordSBaseField;
     currentHWsimplecoords += theFDMod.theModuleWeightsSimpleCoords[i];
     out << "<tr><td>"
@@ -7960,8 +7928,9 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
     Polynomial<Rational> tmpGCD, tmpRF;
     tempFormat.MaxLineLength = 80;
     if (theNumVars == 1) {
-      tmpGCD = theElt.FindGCDCoefficientNumeratorsOverRationals();
-      tmpGCD.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
+      scale = theElt.ScaleNormalizeLeadingMonomial();
+      scale.GetNumerator(tmpGCD);
+      tmpGCD.ScaleNormalizeLeadingMonomial();
       out << "<td>" << HtmlRoutines::GetMathMouseHover(tmpGCD.toString(&tempFormat)) << "</td>";
     }
     out << "<td>" << HtmlRoutines::GetMathMouseHover(theElt.toString(&tempFormat)) << "</td>";

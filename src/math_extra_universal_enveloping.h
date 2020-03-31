@@ -86,14 +86,14 @@ public:
     this->Powers.size = 0;
     this->owner = &inputOwner;
   }
-  //we assume the standard order for being simplified to be Ascending.
-  //this way the positive roots will end up being in the end, which is very
-  //convenient for computing with Verma modules.
-  //Format of the order of the generators:
+  // We assume the standard order for being simplified to be Ascending.
+  // This way the positive roots will end up being in the end, which is very
+  // convenient for computations with Verma modules.
+  // Format of the order of the generators:
   // first come the negative roots, in increasing height, then the elements of
-  //the Cartan subalgebra, then the positive roots, in increasing height
-  //The order of the positive roots is the same as the order in which roots are kept
-  //in WeylGroup::RootSystem.
+  // the Cartan subalgebra, then the positive roots, in increasing height
+  // The order of the positive roots is the same as the order in which roots are kept
+  // in WeylGroup::RootSystem.
   // The "zero level roots" - i.e. the elements of the Cartan subalgebra lie in between
   // the negative and positive rootss.
   void Simplify(ElementUniversalEnveloping<coefficient>& output, const coefficient& theRingUnit = 1);
@@ -104,7 +104,7 @@ public:
     int indexA, ElementUniversalEnveloping<coefficient>& output, const coefficient& theRingUnit = 1
   );
   MonomialUniversalEnveloping(): owner(nullptr) {}
-  bool operator>(const MonomialUniversalEnveloping& other) {
+  bool operator>(const MonomialUniversalEnveloping& other) const {
     return this->::MonomialTensor<coefficient>::operator>(other);
   }
   bool operator==(const MonomialUniversalEnveloping& other) const {
@@ -193,11 +193,11 @@ public:
     this->AddMonomial(tempMon, coeff);
   }
   void Simplify(const coefficient& theRingUnit = 1);
-  int GetMinNumVars() const {
+  int GetMinimalNumberOfVariables() const {
     int result = 0;
     for (int i = 0; i < this->size; i ++) {
-      result = MathRoutines::Maximum(result, this->coefficients[i].GetMinNumVars());
-      result = MathRoutines::Maximum(result, (*this)[i].GetMinNumVars());
+      result = MathRoutines::Maximum(result, this->coefficients[i].GetMinimalNumberOfVariables());
+      result = MathRoutines::Maximum(result, (*this)[i].GetMinimalNumberOfVariables());
     }
     return result;
   }

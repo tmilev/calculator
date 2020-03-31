@@ -53,7 +53,7 @@ bool Polynomial<coefficient>::IsOneVariablePoly(int* whichVariable) const {
   }
   *whichVariable = - 1;
   for (int i = 0; i < this->size(); i ++) {
-    for (int j = 0; j < (*this)[i].GetMinNumVars(); j ++) {
+    for (int j = 0; j < (*this)[i].GetMinimalNumberOfVariables(); j ++) {
       if ((*this)[i](j) != 0) {
         if (*whichVariable == - 1) {
           *whichVariable = j;
@@ -63,38 +63,6 @@ bool Polynomial<coefficient>::IsOneVariablePoly(int* whichVariable) const {
       }
     }
   }
-  return true;
-}
-
-template <class coefficient>
-bool Polynomial<coefficient>::FactorMe(
-  List<Polynomial<Rational> >& outputFactors,
-  std::stringstream* comments
-) const {
-  MacroRegisterFunctionWithName("Polynomial::FactorMe");
-  outputFactors.SetSize(0);
-  if (this->IsEqualToZero() || this->IsConstant()) {
-    outputFactors.AddOnTop(*this);
-    return true;
-  }
-  List<Polynomial<Rational> > factorsToBeProcessed;
-  factorsToBeProcessed.AddOnTop(*this);
-  Polynomial<Rational> currentFactor, divisor;
-  while (factorsToBeProcessed.size > 0) {
-    currentFactor = factorsToBeProcessed.PopLastObject();
-    if (!currentFactor.FactorMeOutputIsADivisor(divisor, comments)) {
-      return false;
-    }
-    if (currentFactor.IsEqualToOne()) {
-      outputFactors.AddOnTop(divisor);
-      continue;
-    }
-    Rational tempRat = divisor.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
-    currentFactor /= tempRat;
-    factorsToBeProcessed.AddOnTop(divisor);
-    factorsToBeProcessed.AddOnTop(currentFactor);
-  }
-  outputFactors.QuickSortAscending();
   return true;
 }
 
@@ -238,7 +206,7 @@ coefficient Polynomial<coefficient>::Evaluate(const Vector<coefficient>& input) 
     const MonomialP& currentMon = (*this)[i];
     coefficient accum = this->coefficients[i];
     coefficient tempElt;
-    for (int j = 0; j < currentMon.GetMinNumVars(); j ++) {
+    for (int j = 0; j < currentMon.GetMinimalNumberOfVariables(); j ++) {
       int numCycles = 0;
       if (!(*this)[i](j).IsSmallInteger(&numCycles)) {
         global.fatal << "This is a programming error. Attempting to evaluate a polynomial whose "
@@ -267,7 +235,7 @@ coefficient Polynomial<coefficient>::Evaluate(const Vector<coefficient>& input) 
 template <class coefficient>
 void Polynomial<coefficient>::SetNumVariablesSubDeletedVarsByOne(int newNumVars) {
   MacroRegisterFunctionWithName("Polynomial_CoefficientType::SetNumVariablesSubDeletedVarsByOne");
-  if (newNumVars >= this->GetMinNumVars()) {
+  if (newNumVars >= this->GetMinimalNumberOfVariables()) {
     return;
   }
   if (newNumVars < 0) {
@@ -298,7 +266,7 @@ void Polynomial<coefficient>::ShiftVariableIndicesToTheRight(int VarIndexShift) 
   if (VarIndexShift == 0) {
     return;
   }
-  int oldNumVars = this->GetMinNumVars();
+  int oldNumVars = this->GetMinimalNumberOfVariables();
   int newNumVars = oldNumVars + VarIndexShift;
   Polynomial<coefficient> Accum;
   Accum.MakeZero();
@@ -349,8 +317,8 @@ Matrix<coefficient> Polynomial<coefficient>::EvaluateUnivariatePoly(const Matrix
 }
 
 template <class coefficient>
-void Polynomial<coefficient>::ScaleToPositiveMonomials(MonomialP& outputScale) {
-  int numVars = this->GetMinNumVars();
+void Polynomial<coefficient>::ScaleToPositiveMonomialExponents(MonomialP& outputScale) {
+  int numVars = this->GetMinimalNumberOfVariables();
   outputScale.MakeOne(numVars);
   for (int i = 0; i < numVars; i ++) {
     for (int j = 0; j < this->size(); j ++) {
@@ -358,7 +326,7 @@ void Polynomial<coefficient>::ScaleToPositiveMonomials(MonomialP& outputScale) {
     }
   }
   outputScale.Invert();
-  this->MultiplyBy(outputScale, 1);
+  this->MultiplyBy(outputScale);
 }
 
 template <class coefficient>
@@ -418,8 +386,8 @@ void Polynomial<coefficient>::DivideBy(
   outputRemainder = *this;
   MonomialP scaleRemainder, scaleInput;
   Polynomial<coefficient> divisorShiftedExponents = inputDivisor;
-  outputRemainder.ScaleToPositiveMonomials(scaleRemainder);
-  divisorShiftedExponents.ScaleToPositiveMonomials(scaleInput);
+  outputRemainder.ScaleToPositiveMonomialExponents(scaleRemainder);
+  divisorShiftedExponents.ScaleToPositiveMonomialExponents(scaleInput);
   MonomialP remainderLeadingMonomial;
   coefficient remainderLeadingCoefficient;
   int remainderLeadingIndex = outputRemainder.GetIndexLeadingMonomial(
@@ -462,9 +430,9 @@ void Polynomial<coefficient>::DivideBy(
     }
   }
   scaleInput.Invert();
-  outputQuotient.MultiplyBy(scaleInput, 1);
-  outputQuotient.MultiplyBy(scaleRemainder, 1);
-  outputRemainder.MultiplyBy(scaleRemainder, 1);
+  outputQuotient.MultiplyBy(scaleInput);
+  outputQuotient.MultiplyBy(scaleRemainder);
+  outputRemainder.MultiplyBy(scaleRemainder);
 }
 
 template <class coefficient>
@@ -542,7 +510,7 @@ void Polynomial<coefficient>::AssignMinPoly(const Matrix<coefficient>& input) {
     currentFactor.AddMonomial(tempM, 1);
     *this = MathRoutines::lcm(*this, currentFactor);
   }
-  this->ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
+  this->ScaleNormalizeLeadingMonomial();
 }
 
 template <class coefficient>
@@ -582,206 +550,45 @@ void Polynomial<coefficient>::GetCoeffInFrontOfLinearTermVariableIndex(int index
   }
 }
 
-template<class coefficient>
-bool Polynomial<coefficient>::FindOneVariableRationalRoots(List<Rational>& output) {
-  MacroRegisterFunctionWithName("Polynomial::FindOneVarRatRoots");
-  List<MonomialP>::Comparator* monomialOrder = &MonomialP::orderDefault();
-  if (this->GetMinNumVars() > 1) {
-    return false;
-  }
-  output.SetSize(0);
-  if (this->GetMinNumVars() == 0 || this->IsEqualToZero()) {
-    return true;
-  }
-  Polynomial<coefficient> myCopy;
-  myCopy = *this;
-  myCopy.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
-  Rational lowestTerm, highestCoefficient;
-  this->GetConstantTerm(lowestTerm);
-  if (lowestTerm == 0) {
-    Polynomial<Rational> x1, tempP;
-    x1.MakeMonomiaL(0, 1, 1);
-    myCopy.DivideBy(x1, myCopy, tempP, monomialOrder);
-    List<Rational> tempList;
-    bool result = myCopy.FindOneVariableRationalRoots(tempList);
-    output.AddOnTop(0);
-    output.AddListOnTop(tempList);
-    return result;
-  }
-  if (this->IsConstant()) {
-    return true;
-  }
-  highestCoefficient = this->GetLeadingCoefficient(monomialOrder);
-  if (!highestCoefficient.IsSmallInteger() || !lowestTerm.IsSmallInteger()) {
-    return false;
-  }
-  Vector<Rational> tempV;
-  Rational val;
-  tempV.SetSize(1);
-  List<int> divisorsH, divisorsS;
-  LargeInteger hT, lT;
-  hT = highestCoefficient.GetNumerator();
-  lT = lowestTerm.GetNumerator();
-  if (!hT.GetDivisors(divisorsH, false) || !lT.GetDivisors(divisorsS, true)) {
-    return false;
-  }
-  for (int i = 0; i < divisorsH.size; i ++) {
-    for (int j = 0; j < divisorsS.size; j ++) {
-      tempV[0].AssignNumeratorAndDenominator(divisorsS[j],divisorsH[i]);
-      val = myCopy.Evaluate(tempV);
-      if (val == 0) {
-        Polynomial<Rational> divisor, tempP;
-        divisor.MakeDegreeOne(1, 0, 1, - tempV[0]);
-        myCopy.DivideBy(divisor, myCopy, tempP, monomialOrder);
-        output.AddOnTop(tempV[0]);
-        List<Rational> tempList;
-        bool result = myCopy.FindOneVariableRationalRoots(tempList);
-        output.AddListOnTop(tempList);
-        return result;
-      }
-    }
-  }
-  return true;
-}
-
-template <class coefficient>
-bool Polynomial<coefficient>::FactorMeOutputIsADivisor(Polynomial<Rational>& output, std::stringstream* comments) {
-  MacroRegisterFunctionWithName("Polynomial_CoefficientType::FactorMeOutputIsADivisor");
-  if (this->GetMinNumVars() > 1) {
-    return false;
-  }
-  if (this->GetMinNumVars() == 0) {
-    return true;
-  }
-  Polynomial<Rational> thePoly = *this;
-  thePoly.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
-  int degree = 0;
-  if (!thePoly.TotalDegree().IsSmallInteger(&degree)) {
-    return false;
-  }
-  int degreeLeft = degree / 2;
-  Vector<Rational> AllPointsOfEvaluation;
-  List<List<LargeInteger> > thePrimeFactorsAtPoints;
-  List<List<int> > thePrimeFactorsMults;
-  Vector<Rational> theValuesAtPoints, theValuesAtPointsLeft;
-  AllPointsOfEvaluation.SetSize(degree + 1);
-  thePrimeFactorsAtPoints.SetSize(degreeLeft + 1);
-  thePrimeFactorsMults.SetSize(degreeLeft + 1);
-  AllPointsOfEvaluation[0] = 0;
-  for (int i = 1; i < AllPointsOfEvaluation.size; i ++) {
-    AllPointsOfEvaluation[i] = (i % 2 == 1) ? i / 2 + 1 : - (i / 2);
-  }
-  Vector<Rational> theArgument;
-  theArgument.SetSize(1);
-  theValuesAtPoints.SetSize(AllPointsOfEvaluation.size);
-  LargeInteger tempLI;
-  for (int i = 0; i < AllPointsOfEvaluation.size; i ++) {
-    theArgument[0] = AllPointsOfEvaluation[i];
-    theValuesAtPoints[i] = thePoly.Evaluate(theArgument);
-    if (theValuesAtPoints[i].IsEqualToZero()) {
-      output.MakeDegreeOne(1, 0, 1, - theArgument[0]);
-      *this /= output;
-      return true;
-    }
-    if (i < degreeLeft + 1) {
-      theValuesAtPoints[i].IsInteger(&tempLI);
-      if (!tempLI.value.FactorReturnFalseIfFactorizationIncomplete(
-        thePrimeFactorsAtPoints[i], thePrimeFactorsMults[i], 0, comments
-      )) {
-        if (comments != nullptr) {
-          *comments << "<br>Aborting polynomial factorization: failed to factor the integer "
-          << theValuesAtPoints[i].toString() << " (most probably the integer is too large).";
-        }
-        return false;
-      }
-    }
-  }
-  Incrementable<Incrementable<SelectionOneItem> > theDivisorSel;
-  Incrementable<SelectionOneItem> signSel;
-  Polynomial<Rational> quotient, remainder;
-  Vectors<Rational> valuesLeftInterpolands;
-  Vector<Rational> PointsOfInterpolationLeft;
-  PointsOfInterpolationLeft.Reserve(degreeLeft + 1);
-  Rational currentPrimePowerContribution, currentPointContribution;
-  for (int i = 0; i <= degreeLeft; i ++) {
-    PointsOfInterpolationLeft.AddOnTop(AllPointsOfEvaluation[i]);
-  }
-  theDivisorSel.initFromMults(thePrimeFactorsMults);
-  signSel.initFromMults(1, degreeLeft + 1);
-  valuesLeftInterpolands.SetSize(degreeLeft + 1);
-  this->GetValuesLagrangeInterpolandsAtConsecutivePoints(
-    PointsOfInterpolationLeft, AllPointsOfEvaluation, valuesLeftInterpolands
-  );
-  do {
-    do {
-      theValuesAtPointsLeft.MakeZero(theValuesAtPoints.size);
-      Rational firstValue;
-      bool isGood = false;//<-we shall first check if the divisor is constant.
-      for (int j = 0; j < theDivisorSel.theElements.size; j ++) {
-        currentPointContribution = 1;
-        for (int k = 0; k < theDivisorSel[j].theElements.size; k ++) {
-          currentPrimePowerContribution = thePrimeFactorsAtPoints[j][k];
-          currentPrimePowerContribution.RaiseToPower(theDivisorSel[j][k].SelectedMult);
-          currentPointContribution *= currentPrimePowerContribution;
-        }
-        if (signSel[j].SelectedMult == 1) {
-          currentPointContribution *= - 1;
-        }
-        if (!isGood) {
-          if (j == 0) {
-            firstValue = currentPointContribution;
-          } else {
-            if (firstValue != currentPointContribution) {
-              isGood = true; //<- the divisor has takes two different values, hence is non-constant.
-            }
-          }
-        }
-        theValuesAtPointsLeft += valuesLeftInterpolands[j]*currentPointContribution;
-      }
-      if (!isGood) {
-        continue;
-      }
-      for (int j = 0; j < AllPointsOfEvaluation.size; j ++) {
-        if (theValuesAtPointsLeft[j].IsEqualToZero()) {
-          isGood = false;
-          break;
-        }
-        currentPointContribution = (theValuesAtPoints[j]) / theValuesAtPointsLeft[j];
-        if (!currentPointContribution.IsInteger()) {
-          isGood = false;
-          break;
-        }
-      }
-      if (!isGood) {
-        continue;
-      }
-      output.Interpolate(Vector<Rational>(PointsOfInterpolationLeft), Vector<Rational>(theValuesAtPointsLeft));
-      this->DivideBy(output, quotient, remainder, &MonomialP::orderDefault());
-      if (!remainder.IsEqualToZero()) {
-        continue;
-      }
-      *this = quotient;
-      return true;
-    } while (theDivisorSel.IncrementReturnFalseIfPastLast());
-  } while (signSel.IncrementReturnFalseIfPastLast());
-  output = *this;
-  this->MakeOne(1);
-  return true;
-}
+template<>
+bool Polynomial<Rational>::FindOneVariableRationalRoots(List<Rational>& output);
+template <>
+bool Polynomial<Rational>::FactorMeOutputIsADivisor(Polynomial<Rational>& output, std::stringstream* comments);
 
 template <class coefficient>
 bool PolynomialOrder<coefficient>::CompareLeftGreaterThanRight(
   const Polynomial<coefficient>& left, const Polynomial<coefficient>& right
 ) const {
   MacroRegisterFunctionWithName("PolynomialOrder::CompareLeftGreaterThanRight");
-  Polynomial<coefficient> difference = left;
-  difference -= right;
-  if (difference.IsEqualToZero()) {
-    return false;
+  List<MonomialP> sortedLeft = left.theMonomials;
+  List<MonomialP> sortedRight = right.theMonomials;
+  sortedLeft.QuickSortAscending(&this->theMonOrder);
+  sortedRight.QuickSortAscending(&this->theMonOrder);
+  int leftIndex = sortedLeft.size - 1;
+  int rightIndex = sortedRight.size - 1;
+  for (; leftIndex >= 0 && rightIndex >= 0; leftIndex --, rightIndex--) {
+    MonomialP& leftMonomial = sortedLeft[leftIndex];
+    MonomialP& rightMonomial = sortedRight[rightIndex];
+    if (leftMonomial > rightMonomial) {
+      return true;
+    }
+    if (rightMonomial > leftMonomial) {
+      return false;
+    }
+    coefficient leftCoefficient = left.GetMonomialCoefficient(leftMonomial);
+    coefficient rightCoefficient = right.GetMonomialCoefficient(rightMonomial);
+    if (leftCoefficient > rightCoefficient) {
+      return true;
+    }
+    if (rightCoefficient > leftCoefficient) {
+      return false;
+    }
   }
-  coefficient leading = difference.GetLeadingCoefficient(&this->theMonOrder);
-  if (leading > 0) {
+  if (left.size() > right.size()) {
     return true;
+  }
+  if (right.size() > left.size()) {
+    return false;
   }
   return false;
 }

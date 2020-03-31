@@ -1114,6 +1114,11 @@ const Expression& Expression::operator[](int n) const {
   return this->owner->theExpressionContainer[childIndex];
 }
 
+Expression Expression::zero() {
+  Expression result;
+  return result;
+}
+
 bool Expression::AddChildRationalOnTop(const Rational& inputRat) {
   this->CheckInitialization();
   Expression ratE;
@@ -1134,7 +1139,8 @@ bool Expression::SetChildAtomValue(int childIndex, int TheAtomValue) {
   Expression tempE;
   tempE.MakeAtom(TheAtomValue, *this->owner);
   this->children.SetObjectAtIndex(
-    childIndex, this->owner->theExpressionContainer.AddNoRepetitionOrReturnIndexFirst(tempE)
+    childIndex,
+    this->owner->theExpressionContainer.AddNoRepetitionOrReturnIndexFirst(tempE)
   );
   return true;
 }

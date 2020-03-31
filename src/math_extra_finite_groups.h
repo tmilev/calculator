@@ -1024,7 +1024,7 @@ void WeylGroupData::RootScalarCartanRoot(const Vector<leftType>& r1, const Vecto
     << ". ";
     global.fatal << global.fatal;
   }
-  output = r1[0].GetZero();
+  output = r1[0].zero();
   leftType buffer;
   for (int i = 0; i < this->CartanSymmetric.NumRows; i ++) {
     for (int j = 0; j < this->CartanSymmetric.NumCols; j ++) {

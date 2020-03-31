@@ -978,7 +978,9 @@ void WeylGroupData::SimpleReflectionMinusRhoModified(int index, Vector<coefficie
   }
   alphaShift *= - 2;
   alphaShift /= this->CartanSymmetric.elements[index][index];
-  alphaShift += 1;
+  coefficient one;
+  one = 1;
+  alphaShift += one;
   theVector[index] += alphaShift;
 }
 
@@ -1257,7 +1259,7 @@ void WeylGroupData::ReflectBetaWRTAlpha(
   coefficient bufferCoeff, alphaShift, lengthA;
   Vector<coefficient> result;
   result = (Beta);
-  alphaShift = Beta[0].GetZero();//<-the zero of coefficient is not known at compile time (think multivariate polynomials)
+  alphaShift = Beta[0].zero();//<-the zero of coefficient is not known at compile time (think multivariate polynomials)
   lengthA = alphaShift;
   if (RhoAction) {
     result += this->rho;//<-implicit type conversion here if coefficient is not Rational
@@ -1756,7 +1758,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::F
   Vector<Rational> EiVect;
   List<bool> Explored;
   coefficient theRingZero;
-  theRingZero = inputHWfundamentalCoords[0].GetZero();
+  theRingZero = inputHWfundamentalCoords[0].zero();
   /////////////////////////
   Vector<coefficient> hwSimpleCoordsLeviPart, hwSimpleCoordsNilPart;
   hwSimpleCoordsLeviPart = inputHWfundamentalCoords;

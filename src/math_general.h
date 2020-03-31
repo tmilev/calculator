@@ -109,10 +109,10 @@ public:
   ~MonomialTensor() {
     this->flagDeallocated = true;
   }
-  int GetMinNumVars() {
+  int GetMinimalNumberOfVariables() {
     int result = 0;
     for (int i = 0; i < this->Powers.size; i ++) {
-      result = MathRoutines::Maximum(result, this->Powers[i].GetMinNumVars());
+      result = MathRoutines::Maximum(result, this->Powers[i].GetMinimalNumberOfVariables());
     }
     return result;
   }
@@ -309,7 +309,8 @@ public:
   }
   Rational& operator[](int i) {
     if (i < 0) {
-      global.fatal << "This is a programming error: requested exponent of monomial variable with index "
+      global.fatal << "This is a programming error: requested exponent "
+      << "of monomial variable with index "
       << i << " which is negative. " << global.fatal;
     }
     if (i >= this->monBody.size) {
@@ -319,8 +320,9 @@ public:
   }
   Rational operator()(int i) const {
     if (i < 0) {
-      global.fatal << "This is a programming error: requested exponent of monomial variable"
-      << " with index " << i << " which is negative. " << global.fatal;
+      global.fatal << "This is a programming error: "
+      << "requested exponent of monomial variable "
+      << "with index " << i << " which is negative. " << global.fatal;
     }
     if (i >= this->monBody.size) {
       return 0;
@@ -359,7 +361,8 @@ public:
   int TotalDegreeInt() const {
     int result = - 1;
     if (!this->TotalDegree().IsSmallInteger(&result)) {
-      global.fatal << "This is a programming error: total degree of monomial must be "
+      global.fatal
+      << "This is a programming error: total degree of monomial must be "
       << "a small integer to call this function. " << global.fatal;
     }
     return result;
@@ -390,7 +393,9 @@ public:
     }
     return whichDegree == 1;
   }
-  bool IsOneLetterNthDegree(int* whichLetter = nullptr, Rational* whichDegree = nullptr) const {
+  bool IsOneLetterNthDegree(
+    int* whichLetter = nullptr, Rational* whichDegree = nullptr
+  ) const {
     int tempI1;
     if (whichLetter == nullptr) {
       whichLetter = &tempI1;
@@ -474,7 +479,7 @@ public:
     }
     return true;
   }
-  int GetMinNumVars() const {
+  int GetMinimalNumberOfVariables() const {
     return this->monBody.size;
   }
   void Invert() {
@@ -1931,8 +1936,8 @@ class MonomialWeylAlgebra {
   unsigned int HashFunction() const {
     return this->HashFunction(*this);
   }
-  int GetMinNumVars() const {
-    return MathRoutines::Maximum(this->polynomialPart.GetMinNumVars(), this->differentialPart.GetMinNumVars());
+  int GetMinimalNumberOfVariables() const {
+    return MathRoutines::Maximum(this->polynomialPart.GetMinimalNumberOfVariables(), this->differentialPart.GetMinimalNumberOfVariables());
   }
   bool operator==(const MonomialWeylAlgebra& other) const {
     return this->polynomialPart == other.polynomialPart &&
@@ -1954,7 +1959,7 @@ class MonomialWeylAlgebra {
     return false;
   }
   bool HasNonSmallPositiveIntegerDerivation() const {
-    for (int i = 0; i < this->differentialPart.GetMinNumVars(); i ++) {
+    for (int i = 0; i < this->differentialPart.GetMinimalNumberOfVariables(); i ++) {
       if (!this->differentialPart(i).IsSmallInteger()) {
         return true;
       }
@@ -2262,7 +2267,7 @@ public:
   coefficient GetMonomialCoefficient(const templateMonomial& inputMon) const {
     int theIndex = this->theMonomials.GetIndex(inputMon);
     if (theIndex == - 1) {
-      return 0;
+      return coefficient::zero();
     }
     return this->coefficients[theIndex];
   }
@@ -2314,70 +2319,12 @@ public:
     this->CheckFlagDeallocated();
     this->CheckNumCoeffsConsistency();
   }
-  template <class baseRing>
-  baseRing FindGCDCoefficientNumerators() const {
-    if (this->size() == 0) {
-      return 1;
+  coefficient ScaleNormalizeLeadingMonomial() {
+    if (this->IsEqualToZero()) {
+      return coefficient();
     }
-    baseRing result, tempCF;
-    this->coefficients[0].GetNumerator(result);
-    for (int i = 1; i < this->size(); i ++) {
-      this->coefficients[i].GetNumerator(tempCF);
-      coefficient::gcd(result, tempCF, result);
-    }
-    return result;
-  }
-  Rational FindGCDCoefficientNumeratorsOverRationals() const {
-    if (this->size() == 0) {
-      return 1;
-    }
-    LargeInteger result, tempUI;
-    result = this->coefficients[0].GetNumeratorRationalPart();
-    result.sign = 1;
-    for (int i = 1; i < this->size(); i ++) {
-      tempUI = this->coefficients[i].GetNumeratorRationalPart();
-      LargeIntegerUnsigned::gcd(result.value, tempUI.value, result.value);
-    }
-    return result;
-  }
-  Rational FindLCMCoefficientDenominatorsOverRationals() const {
-    LargeInteger result, tempUI;
-    result = 1;
-    for (int i = 0; i < this->size(); i ++) {
-      tempUI = this->coefficients[i].GetDenominator();
-      LargeIntegerUnsigned::lcm(result.value, tempUI.value, result.value);
-    }
-    return result;
-  }
-  Rational ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedByLeadingCoefficientPositive() {
-    Rational result = this->ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
-    if (this->GetLeadingCoefficient(nullptr) < 0) {
-      (*this) *= - 1;
-      result *= - 1;
-    }
-    return result;
-  }
-  Rational ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy() {
-    if (this->size() == 0) {
-      return 1;
-    }
-    Rational result = 1;
-    Rational tempRat;
-    for (int i = 0; i < this->size(); i ++) {
-      tempRat = this->coefficients[i].GetDenominatorRationalPart();
-      *this *= tempRat;
-      result *= tempRat;
-    }
-    LargeInteger theGCD, tempUI;
-    theGCD = this->coefficients[0].GetNumeratorRationalPart().GetNumerator();
-    theGCD.sign = 1;
-    for (int i = 0; i < this->size(); i ++) {
-      tempUI = this->coefficients[i].GetNumeratorRationalPart().GetNumerator();
-      LargeIntegerUnsigned::gcd(theGCD.value, tempUI.value, theGCD.value);
-    }
-    tempRat = theGCD;
-    *this /= tempRat;
-    result /= tempRat;
+    int indexLeadingMonomial = this->GetIndexLeadingMonomial(nullptr, nullptr);
+    coefficient result = coefficient::scaleNormalizeIndex(this->coefficients, indexLeadingMonomial);
     return result;
   }
 
@@ -2400,10 +2347,10 @@ public:
     this->theMonomials.Clear();
     this->coefficients.SetSize(0);
   }
-  int GetMinNumVars() const {
+  int GetMinimalNumberOfVariables() const {
     int result = 0;
     for (int i = 0; i < this->size(); i ++) {
-      result = MathRoutines::Maximum(result, (*this)[i].GetMinNumVars());
+      result = MathRoutines::Maximum(result, (*this)[i].GetMinimalNumberOfVariables());
     }
     return result;
   }
@@ -2460,23 +2407,10 @@ public:
   void MakeOne() {
     this->MakeConst(1);
   }
-  void operator+=(const int& other) {
-    templateMonomial tempM;
-    coefficient theCF = other;
-    tempM.MakeOne();
-    this->AddMonomial(tempM, theCF);
-  }
-
   void operator+=(const coefficient& other) {
     templateMonomial tempM;
     tempM.MakeOne();
     this->AddMonomial(tempM, other);
-  }
-  void operator+=(const templateMonomial& other) {
-    this->AddMonomial(other, 1);
-  }
-  void operator-=(const templateMonomial& other) {
-    this->SubtractMonomial(other, 1);
   }
   void operator-=(const coefficient& other) {
     templateMonomial tempM;
@@ -2606,6 +2540,25 @@ class ElementMonomialAlgebra: public LinearCombination<templateMonomial, coeffic
     ElementMonomialAlgebra<templateMonomial, coefficient>& bufferPoly,
     templateMonomial& bufferMon
   ) const;
+  void MultiplyBy(
+    const templateMonomial& monomial,
+    ElementMonomialAlgebra<templateMonomial, coefficient>& output
+  ) const;
+  void MultiplyBy(const MonomialP& other) {
+    this->MultiplyBy(other, *this);
+  }
+  void MultiplyBy(const MonomialP& other, const coefficient& theCoeff) {
+    return this->MultiplyBy(other, theCoeff, *this);
+  }
+  void MultiplyBy(
+    const MonomialP& other,
+    const coefficient& theCoeff,
+    ElementMonomialAlgebra<templateMonomial, coefficient>& output
+  ) const {
+    this->MultiplyBy(other, output);
+    output *= theCoeff;
+  }
+
   void MultiplyOnTheLeft(const ElementMonomialAlgebra<templateMonomial, coefficient>& standsOnTheLeft) {
     ElementMonomialAlgebra<templateMonomial, coefficient> tempMat, bufferPoly;
     templateMonomial bufferMon;
@@ -2654,25 +2607,11 @@ public:
     this->operator=(other);
   }
   static bool flagAnErrorHasOccuredTimeToPanic;
-  //to avoid code::blocks parsing problems (remove when code::blocks learns to parse parent classes:
-  void AddMonomial(const MonomialP& inputMon, const coefficient& inputCoeff) {
-    this->::LinearCombination<MonomialP, coefficient>::AddMonomial(inputMon, inputCoeff);
-  }
   unsigned int HashFunction() const {
     return this->::LinearCombination<MonomialP, coefficient>::HashFunction();
   }
   static unsigned int HashFunction(const Polynomial<coefficient>& input) {
     return input.HashFunction();
-  }
-  void MultiplyBy(const MonomialP& other, const coefficient& theCoeff) {
-    Polynomial<coefficient> output;
-    output.MakeZero();
-    output.AddMonomial(other, theCoeff);
-    *this *= output;
-  }
-  void MultiplyBy(const MonomialP& other, const coefficient& theCoeff, Polynomial<coefficient>& output) const {
-    output = *this;
-    output.MultiplyBy(other, theCoeff);
   }
   //////////////////////////////////////////////
   void AssignFloor() const {
@@ -2698,10 +2637,13 @@ public:
   bool FactorMeNormalizedFactors(
     Rational& outputCoeff, List<Polynomial<Rational> >& outputFactors, std::stringstream* comments
   ) const;
-  bool FactorMeCantorZassenhaus(
-    List<Polynomial<ElementZmodP> >& outputFactors, std::stringstream* comments
+  bool factorMeCantorZassenhaus(
+    List<Polynomial<ElementZmodP> >& outputFactors,
+    std::stringstream* comments
   ) const;
-  bool FactorMe(List<Polynomial<Rational> >& outputFactors, std::stringstream* comments) const;
+  // bool isSquareFreeAndUnivariate(std::stringstream* comments) const;
+  bool computeDerivative(Polynomial<coefficient>& output, std::stringstream* comments) const;
+  bool FactorMe(List<Polynomial<coefficient> >& outputFactors, std::stringstream* comments) const;
   void Interpolate(const Vector<coefficient>& thePoints, const Vector<coefficient>& ValuesAtThePoints);
   bool FindOneVariableRationalRoots(List<Rational>& output);
   coefficient GetDiscriminant();
@@ -2753,12 +2695,12 @@ public:
     }
     return *whichVariable != - 1;
   }
-  Polynomial<coefficient> GetOne() const {
+  Polynomial<coefficient> one() const {
     Polynomial<coefficient> result;
     result.MakeOne();
     return result;
   }
-  Polynomial<coefficient> GetZero() const {
+  static Polynomial<coefficient> zero() {
     Polynomial<coefficient> result;
     result.MakeZero();
     return result;
@@ -2776,18 +2718,6 @@ public:
     this->AddMonomial(theConstMon, theConst);
   }
   void MakeOne(int ExpectedNumVars = 0);
-  Rational ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy() {
-    if (this->IsEqualToZero()) {
-      return 1;
-    }
-    Rational result = this->ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
-    int indexMaximalMonomial = this->GetIndexLeadingMonomial(nullptr, nullptr, &MonomialP::orderDefault());
-    if (this->coefficients[indexMaximalMonomial].IsNegative()) {
-      *this *= - 1;
-      result *= - 1;
-    }
-    return result;
-  }
   void GetPolyWithPolyCoeff(
     Selection& theNonCoefficientVariables, Polynomial<Polynomial<coefficient> >& output
   ) const;
@@ -2826,7 +2756,7 @@ public:
     }
     return result;
   }
-  void ScaleToPositiveMonomials(MonomialP& outputScale);
+  void ScaleToPositiveMonomialExponents(MonomialP& outputScale);
   void DecreaseNumVariables(int increment, Polynomial<coefficient>& output);
   bool Substitution(const List<Polynomial<coefficient> >& TheSubstitution);
   Rational TotalDegree() const{
@@ -2896,7 +2826,7 @@ public:
     return true;
   }
   bool IsLinearGetRootConstantTermLastCoordinate(Vector<coefficient>& outputRoot) {
-    outputRoot.MakeZero(this->GetMinNumVars() + 1);
+    outputRoot.MakeZero(this->GetMinimalNumberOfVariables() + 1);
     int index;
     for (int i = 0; i < this->size(); i ++) {
       if ((*this)[i].IsConstant()) {
@@ -2921,7 +2851,7 @@ public:
       << d << ". " << global.fatal;
     }
     Polynomial<coefficient> theOne;
-    theOne.MakeOne(this->GetMinNumVars());
+    theOne.MakeOne(this->GetMinimalNumberOfVariables());
     MathRoutines::RaiseToPower(*this, d, theOne);
   }
   bool GetRootFromLinPolyConstTermLastVariable(Vector<coefficient>& outputRoot) {
@@ -3093,6 +3023,20 @@ public:
     this->NumVars = other.NumVars;
     this->::LinearCombination<MonomialP, coefficient>::AssignOtherType(other);
   }
+  static bool greatestCommonDivisor(
+    const Polynomial<coefficient>& left,
+    const Polynomial<coefficient>& right,
+    Polynomial<coefficient>& output,
+    coefficient one,
+    std::stringstream* commentsOnFailure
+  );
+  static bool leastCommonMultiple(
+    const Polynomial<coefficient>& left,
+    const Polynomial<coefficient>& right,
+    Polynomial<coefficient>& output,
+    coefficient one,
+    std::stringstream* commentsOnFailure
+  );
 };
 
 template <class coefficient>
@@ -3349,7 +3293,8 @@ class GroebnerBasisComputation {
   );
   bool TransformToReducedGroebnerBasis(List<Polynomial<coefficient> >& inputOutpuT);
   bool TransformToReducedGroebnerBasisImprovedAlgorithm(
-    List<Polynomial<coefficient> >& inputOutpuT, int upperComputationBound = - 1
+    List<Polynomial<coefficient> >& inputOutpuT,
+    int upperComputationBound = - 1
   );
   void TrySettingValueToVariable(
     List<Polynomial<coefficient> >& inputSystem, const Rational& aValueToTryOnPreferredVariable
@@ -3471,19 +3416,9 @@ public:
   std::string toString(FormatExpressions* theFormat = nullptr) const;
   bool NeedsParenthesisForMultiplication(FormatExpressions* unused = nullptr) const;
   bool FindOneVariableRationalRoots(List<Rational>& output);
-  Rational GetDenominatorRationalPart() {
-    Polynomial<Rational> Num;
-    this->GetNumerator(Num);
-    return Num.FindLCMCoefficientDenominatorsOverRationals();
-  }
-  Rational GetNumeratorRationalPart() {
-    Polynomial<Rational> Num;
-    this->GetNumerator(Num);
-    return Num.FindGCDCoefficientNumeratorsOverRationals();
-  }
-  RationalFunction GetOne() const;
-  RationalFunction GetZero() const;
-  int GetMinNumVars() const;
+  static RationalFunction one();
+  static RationalFunction zero();
+  int GetMinimalNumberOfVariables() const;
   bool Substitution(const PolynomialSubstitution<Rational>& theSub);
   RationalFunction(const RationalFunction& other);
   RationalFunction();
@@ -3686,10 +3621,18 @@ public:
     std::stringstream& comments
   );
   static bool gcdQuick(
-    const Polynomial<Rational>& left, const Polynomial<Rational>& right, Polynomial<Rational>& output
+    const Polynomial<Rational>& left,
+    const Polynomial<Rational>& right,
+    Polynomial<Rational>& output
   );
-  static void ScaleClearDenominator(List<RationalFunction>& input, Vector<Polynomial<Rational> >& output);
-  static void gcd(const Polynomial<Rational>& left, const Polynomial<Rational>& right, Polynomial<Rational>& output);
+  static RationalFunction scaleNormalizeIndex(
+    List<RationalFunction>& input, int indexNonZeroElement
+  );
+  static void gcd(
+    const Polynomial<Rational>& left,
+    const Polynomial<Rational>& right,
+    Polynomial<Rational>& output
+  );
   static void lcm(
     const Polynomial<Rational>& left,
     const Polynomial<Rational>& right,
@@ -5411,7 +5354,7 @@ public:
   // 1  0
   bool SubstitutionHomogeneous(const Matrix<Rational>& theSub);
   bool SubstitutionHomogeneous(const PolynomialSubstitution<Rational>& theSub);
-  // the following function follows the same convention
+  // The following function follows the same convention
   // as the preceding except that we allow n < m. However,
   // in order to assure that the preimage of the lattice is a lattice,
   // we provide as input an ambient lattice
@@ -5425,7 +5368,7 @@ public:
     const PolynomialSubstitution<Rational>& theSub, Matrix<Rational>& output
   );
   // Returning false means that the lattice given as rougher
-  // is not actually rougher than the current lattice
+  // is not actually rougher than the current one
   // or that there are too many representatives.
   bool GetAllRepresentatives(const Lattice& rougherLattice, Vectors<Rational>& output) const;
   bool GetAllRepresentativesProjectingDownTo(
@@ -5749,6 +5692,16 @@ public:
     Vector<Rational>& vertex2 = this->Vertices[vertexIndex2];
     return this->IsAnHonest1DEdgeAffine(vertex1, vertex2);
   }
+  static bool IsRegularToBasis(
+    const Vectors<Rational>& basis,
+    Vector<Rational>& r,
+    Vector<Rational>& outputFailingNormal,
+    int theDimension
+  );
+  static bool RegularizeToBasis(
+    const Vectors<Rational> &basis,
+    Vector<Rational>& output
+  );
   bool DrawMeLastCoordAffine(
     bool InitDrawVars,
     DrawingVariables& theDrawingVariables,
@@ -5799,6 +5752,7 @@ public:
     return this->CreateFromNormalS(inputNormals, false);
   }
   bool CreateFromVertices(const Vectors<Rational>& inputVertices);
+  static void scaleNormalizeByPositive(Vector<Rational>& toScale);
   void GetInternalPoint(Vector<Rational>& output) const {
     if (this->Vertices.size <= 0) {
       return;
@@ -7126,10 +7080,8 @@ class MonomialGeneralizedVerma {
   static unsigned int HashFunction(const MonomialGeneralizedVerma<coefficient>& input) {
     return input.HashFunction();
   }
-  bool operator>(const MonomialGeneralizedVerma<coefficient>& other) {
+  bool operator>(const MonomialGeneralizedVerma<coefficient>& other) const {
     if (this->owner != other.owner) {
-      // use of ulong is correct on i386, amd64, and a number of other popular platforms
-      // uintptr_t is only available in c++ 0x
       return reinterpret_cast<unsigned long>(this->owner) > reinterpret_cast<unsigned long>(other.owner);
     }
     if (this->indexFDVector != other.indexFDVector) {

@@ -829,7 +829,6 @@ bool AlgebraicClosureRationals::AdjoinRootMinimalPolynomial(
   theGenMatPower.MakeId(degreeMinPoly);
   for (int i = 0; i < startingDimension; i ++) {
     finalBasis[i].AssignTensorProduct(theGenMatPower, this->latestBasis[i]);
-    // global.Comments << "DEBUG: final basis " << i + 1 << ": " << finalBasis[i].ToStringMatrixForm() << "<br>";
   }
   this->latestBasis = finalBasis;
   this->latestBasis.SetSize(finalDimension);
@@ -861,7 +860,6 @@ bool AlgebraicClosureRationals::AdjoinRootMinimalPolynomial(
   // the solution of our polynomial and so we want to know the image of
   // x as that will give us the solution in question.
   this->ContractBasesIfRedundant(backUpCopy, &outputRoot);
-  // global.Comments << "DEBUG: And the output root is: " << outputRoot.toString();
 
 
   // Sanity check code here:
@@ -1079,6 +1077,11 @@ void AlgebraicNumber::AssignRational(const Rational& input, AlgebraicClosureRati
   this->basisIndex = 0;
   this->owner = &inputOwner;
   this->element.MaKeEi(0, input);
+}
+
+AlgebraicNumber AlgebraicNumber::zero() {
+  AlgebraicNumber result;
+  return result;
 }
 
 bool AlgebraicNumber::IsExpressedViaLatestBasis() const {
@@ -1314,6 +1317,22 @@ std::string AlgebraicClosureRationals::ToStringFull(FormatExpressions* theFormat
   return out.str();
 }
 
+AlgebraicNumber AlgebraicNumber::scaleNormalizeIndex(
+  List<AlgebraicNumber>& output, int indexNonZeroElement
+) {
+  AlgebraicNumber& current = output[indexNonZeroElement];
+  Rational denominator = current.GetDenominatorRationalPart();
+  Rational numerator = current.GetNumeratorRationalPart();
+  Rational scale = denominator;
+  scale /= numerator;
+  AlgebraicNumber result(scale);
+  result.owner = current.owner;
+  for (int i = 0; i < output.size; i ++){
+    output[i] *= result;
+  }
+  return result;
+}
+
 AlgebraicNumber AlgebraicClosureRationals::One() {
   return this->fromRational(1);
 }
@@ -1476,9 +1495,20 @@ std::string ElementZmodP::toString(FormatExpressions* theFormat) const {
   if (suppressModulus) {
     out << this->theValue.toString();
   } else {
-    out << "(" << this->theValue.toString() << " " << this->toStringModP() << ")";
+    out << "(" << this->theValue.toString() << " "
+    << this->toStringModP() << ")";
   }
   return out.str();
+}
+
+bool ElementZmodP::operator*=(const Rational& other) {
+  ElementZmodP otherElement;
+  otherElement.theModulus = this->theModulus;
+  if (!otherElement.AssignRational(other)) {
+    return false;
+  }
+  *this *= otherElement;
+  return true;
 }
 
 ElementZmodP ElementZmodP::operator*(const Rational& other) const {
@@ -1494,7 +1524,8 @@ unsigned int ElementZmodP::HashFunction() const {
   if (this->theValue.IsEqualToZero()) {
     return 0;
   }
-  return this->theValue.HashFunction() * SomeRandomPrimes[0] + this->theModulus.HashFunction() * SomeRandomPrimes[1];
+  return this->theValue.HashFunction() * SomeRandomPrimes[0] +
+  this->theModulus.HashFunction() * SomeRandomPrimes[1];
 }
 
 void ElementZmodP::CheckIamInitialized() const {
@@ -1520,6 +1551,22 @@ void ElementZmodP::operator=(const LargeInteger& other) {
   }
 }
 
+bool ElementZmodP::operator>(const ElementZmodP& other) const {
+  if (this->theModulus > other.theModulus) {
+    return true;
+  }
+  if (other.theModulus > this->theModulus) {
+    return false;
+  }
+  return this->theValue > other.theValue;
+}
+
+ElementZmodP ElementZmodP::zero() {
+  ElementZmodP result;
+  result.theModulus = 1;
+  return result;
+}
+
 void ElementZmodP::ScaleToIntegralMinimalHeightAndGetPoly(
   const Polynomial<Rational>& input,
   Polynomial<ElementZmodP>& output,
@@ -1527,7 +1574,7 @@ void ElementZmodP::ScaleToIntegralMinimalHeightAndGetPoly(
 ) {
   Polynomial<Rational> rescaled;
   rescaled = input;
-  rescaled.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
+  rescaled.ScaleNormalizeLeadingMonomial();
   output.SetExpectedSize(input.size());
   ElementZmodP theCF;
   theCF.theModulus = newModulo;
@@ -1575,6 +1622,19 @@ ElementZmodP ElementZmodP::operator*(const ElementZmodP& other) const {
   return result;
 }
 
+ElementZmodP ElementZmodP::scaleNormalizeIndex(
+  List<ElementZmodP>& toBeScaled, int indexNonZeroElement
+) {
+  ElementZmodP scale = toBeScaled[indexNonZeroElement];
+  ElementZmodP one;
+  one.MakeOne(scale.theModulus);
+  one /= scale;
+  for (int i = 0; i < toBeScaled.size; i ++) {
+    toBeScaled[i] *= scale;
+  }
+  return scale;
+}
+
 ElementZmodP ElementZmodP::operator+(const Rational& other) const {
   ElementZmodP result = *this;
   result += other;
@@ -1600,13 +1660,17 @@ ElementZmodP operator*(int left, const ElementZmodP& right) {
   return result;
 }
 
+void ElementZmodP::operator*=(int other) {
+  *this *= LargeInteger(other);
+}
+
 void ElementZmodP::operator*=(const LargeInteger& other) {
   this->theValue *= other.value;
-  if (other.IsNegative()) {
-    this->theValue *= this->theModulus - 1;
-    this->theValue %= this->theModulus;
-  }
-}
+   if (other.IsNegative()) {
+     this->theValue *= this->theModulus - 1;
+   }
+   this->theValue %= this->theModulus;
+ }
 
 bool ElementZmodP::operator+=(const Rational& other) {
   ElementZmodP otherElt;
@@ -1644,8 +1708,9 @@ void ElementZmodP::operator-=(const ElementZmodP& other) {
 void ElementZmodP::operator=(const Rational& other) {
   bool tempB = this->AssignRational(other);
   if (!tempB) {
-    global.fatal << "This is a programming error: using ElementZmodP::operator= to assign a Rational number failed. "
-    << " Operator = does not allow failure. " << global.fatal;
+    global.fatal << "This is a programming error: "
+    << "using ElementZmodP::operator= to assign a Rational number failed. "
+    << "Operator = does not allow failure. " << global.fatal;
   }
 }
 
@@ -1664,13 +1729,13 @@ void ElementZmodP::operator-=(const LargeIntegerUnsigned& other) {
 bool ElementZmodP::AssignRational(const Rational& other) {
   this->CheckIamInitialized();
   *this = other.GetNumerator();
-  ElementZmodP den;
-  den.theModulus = this->theModulus;
-  den = other.GetDenominator();
-  if (den.IsEqualToZero()) {
+  ElementZmodP denominator;
+  denominator.theModulus = this->theModulus;
+  denominator.theValue = other.GetDenominator();
+  if (denominator.IsEqualToZero()) {
     return false;
   }
-  return (*this /= den);
+  return (*this /= denominator);
 }
 
 bool ElementZmodP::operator/=(const LargeInteger& other) {
@@ -1686,6 +1751,9 @@ bool ElementZmodP::operator/=(const LargeInteger& other) {
 bool ElementZmodP::operator/=(const ElementZmodP& other) {
   this->CheckIamInitialized();
   this->CheckEqualModuli(other);
+  if (other.IsEqualToZero()) {
+    global.fatal << "Division by zero in ElementZmodP." << global.fatal;
+  }
   LargeInteger theInverted, otherValue, theMod;
   theMod = this->theModulus;
   otherValue = other.theValue;

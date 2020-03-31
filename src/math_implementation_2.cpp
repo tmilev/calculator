@@ -1136,7 +1136,11 @@ bool LargeIntegerUnsigned::FactorReturnFalseIfFactorizationIncomplete(
   return true;
 }
 
-void LargeIntegerUnsigned::lcm(const LargeIntegerUnsigned& a, const LargeIntegerUnsigned& b, LargeIntegerUnsigned& output) {
+void LargeIntegerUnsigned::lcm(
+  const LargeIntegerUnsigned& a,
+  const LargeIntegerUnsigned& b,
+  LargeIntegerUnsigned& output
+) {
   LargeIntegerUnsigned tempUI, tempUI2;
   if (a.IsEqualToZero() || b.IsEqualToZero()) {
     global.fatal << "This is a programming error: calling lcm on zero elements is not allowed. " << global.fatal;
@@ -1279,7 +1283,14 @@ void LargeInteger::MultiplyByInt(int x) {
   *this *= tempI;
 }
 
-bool LargeInteger::TryToFindWhetherIsPower(bool& outputIsPower, LargeInteger& outputBase, int& outputPower) const {
+LargeInteger LargeInteger::zero() {
+  LargeInteger result;
+  return result;
+}
+
+bool LargeInteger::TryToFindWhetherIsPower(
+  bool& outputIsPower, LargeInteger& outputBase, int& outputPower
+) const {
   if (this->sign == - 1) {
     return false;
   }
@@ -1673,6 +1684,25 @@ void Rational::AssignFracValue() {
   this->Simplify();
 }
 
+void Rational::AssignLargeIntUnsigned(const LargeIntegerUnsigned& other) {
+  LargeInteger tempInt;
+  tempInt.AssignLargeIntUnsigned(other);
+  this->AssignLargeInteger(tempInt);
+}
+
+void Rational::AssignLargeInteger(const LargeInteger& other){
+  if (this->Extended == nullptr) {
+    this->Extended = new LargeRationalExtended;
+#ifdef AllocationLimitsSafeguard
+ParallelComputing::GlobalPointerCounter ++;
+ParallelComputing::CheckPointerCounters();
+#endif
+  }
+  this->Extended->num = other;
+  this->Extended->den.MakeOne();
+  this->ShrinkExtendedPartIfPossible();
+}
+
 void Rational::AddInteger(int x) {
   Rational tempRat;
   tempRat.AssignNumeratorAndDenominator(x, 1);
@@ -1823,6 +1853,81 @@ bool Rational::TryToMultiplyQuickly(int OtherNum, int OtherDen) {
   }
   MacroIncrementCounter(Rational::TotalSmallMultiplications);
   return true;
+}
+
+Rational Rational::scaleNormalizeIndex(
+  List<Rational>& output, int indexNonZeroEntry
+) {
+  if (output.size == 0) {
+    return 1;
+  }
+  LargeIntegerUnsigned denominatorLCM = output[0].GetDenominator();
+  for (int i = 1; i < output.size; i ++) {
+    LargeIntegerUnsigned::lcm(
+      denominatorLCM,
+      output[i].GetDenominator(),
+      denominatorLCM
+    );
+  }
+  for (int i = 0; i < output.size; i ++) {
+    output[i] *= denominatorLCM;
+  }
+  LargeIntegerUnsigned numeratorGCD;
+  numeratorGCD = output[0].GetNumerator().value;
+  for (int i = 1; i < output.size; i ++) {
+    LargeIntegerUnsigned::gcd(
+      numeratorGCD,
+      output[i].GetNumerator().value,
+      numeratorGCD
+    );
+  }
+  Rational result = 1;
+  result /= numeratorGCD;
+  if (output[indexNonZeroEntry] < 0) {
+    result *= - 1;
+  }
+  for (int i = 0; i < output.size; i ++) {
+    output[i] *= result;
+  }
+  result *= denominatorLCM;
+  return result;
+}
+
+LargeIntegerUnsigned Rational::GetDenominator() const {
+  LargeIntegerUnsigned result;
+  if (this->Extended == nullptr) {
+    unsigned int tempI = static_cast<unsigned int>(this->DenShort);
+    result.AssignShiftedUInt(tempI, 0);
+  } else {
+    result = (this->Extended->den);
+  }
+  return result;
+}
+
+bool Rational::BeginsWithMinus() {
+  return this->IsNegative();
+}
+
+LargeInteger Rational::GetNumerator() const {
+  LargeInteger result;
+  if (this->Extended == nullptr) {
+    if (this->NumShort < 0) {
+      result.value.AssignShiftedUInt(static_cast<unsigned int>(- this->NumShort), 0);
+    } else {
+      result.value.AssignShiftedUInt(static_cast<unsigned int>(this->NumShort), 0);
+    }
+  } else {
+    result.value = this->Extended->num.value;
+  }
+  result.sign = 1;
+  if (this->IsNegative()) {
+    result.sign = - 1;
+  }
+  return result;
+}
+
+const Rational& Rational::GetComplexConjugate() const {
+  return *this;
 }
 
 bool Rational::GetPrimeFactorsAbsoluteValue(

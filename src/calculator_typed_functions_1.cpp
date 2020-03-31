@@ -1194,7 +1194,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger(
     MonomialWeylAlgebra theMon = base[0];
     theMon.polynomialPart.RaiseToPower(powerRat);
     theMon.differentialPart.RaiseToPower(powerRat);
-    for (int i = 0; i < theMon.polynomialPart.GetMinNumVars(); i ++) {
+    for (int i = 0; i < theMon.polynomialPart.GetMinimalNumberOfVariables(); i ++) {
       if (theMon.polynomialPart[i] != 0 && theMon.differentialPart[i] != 0) {
         return theCommands << "<hr>Failed to raise " << base.toString() << " to power "
         << powerRat.toString() << ": the exponent is not a "

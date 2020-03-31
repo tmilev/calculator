@@ -2204,7 +2204,7 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep2() {
     for (int i = 0; i < this->smallerAlgebraChamber.size; i ++) {
       for (int j = 0; j < this->smallerAlgebraChamber[i].Normals.size; j ++) {
         this->TransformToWeylProjective(k, this->smallerAlgebraChamber[i].Normals[j], wallToSliceWith);
-        wallToSliceWith.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
+        wallToSliceWith.ScaleNormalizeFirstNonZero();
         this->projectivizedChambeR.splittingNormals.AddOnTopNoRepetition(wallToSliceWith);
       }
     }

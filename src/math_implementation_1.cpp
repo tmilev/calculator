@@ -735,7 +735,7 @@ bool ElementUniversalEnveloping<coefficient>::ConvertToRationalCoeff(ElementUniv
       }
       tempMon.MultiplyByGeneratorPowerOnTheRight(currentMon.generatorsIndices[j], tempRat);
     }
-    output += tempMon;
+    output.AddMonomial(tempMon, coefficient(1));
   }
   return true;
 }

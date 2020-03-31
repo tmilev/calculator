@@ -952,7 +952,7 @@ bool CalculatorConversions::innerElementUE(
     const MonomialP& currentMon = theP[j];
     currentSummand.MakeConst(theP.coefficients[j], owner);
     currentMultiplicandRFpartMon.MakeOne();
-    for (int i = 0; i < currentMon.GetMinNumVars(); i ++) {
+    for (int i = 0; i < currentMon.GetMinimalNumberOfVariables(); i ++) {
       int thePower = - 1;
       if (!currentMon(i).IsSmallInteger(&thePower)) {
         return theCommands << "<hr>Failed to convert one of the exponents appearing in " << input[1].toString()
@@ -1093,8 +1093,8 @@ bool CalculatorConversions::innerExpressionFromRF(
   input.GetDenominator(denP);
   Polynomial<Rational> numRescaled = numP;
   Polynomial<Rational> denRescaled = denP;
-  Rational topMultiple = numRescaled.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
-  Rational bottomMultiple = denRescaled.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
+  Rational topMultiple = numRescaled.ScaleNormalizeLeadingMonomial();
+  Rational bottomMultiple = denRescaled.ScaleNormalizeLeadingMonomial();
   Rational multipleTopBottom = bottomMultiple / topMultiple;
   numRescaled *= multipleTopBottom.GetNumerator();
   denRescaled *= multipleTopBottom.GetDenominator();

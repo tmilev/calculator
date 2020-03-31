@@ -3055,7 +3055,7 @@ void PartFraction::PrepareFraction(
   } else {
     powerDropA = 0;
   }
-  outputCommonCoeff.MakeOne(AminusNbetaPoly.GetMinNumVars());
+  outputCommonCoeff.MakeOne(AminusNbetaPoly.GetMinimalNumberOfVariables());
   for (int i = 0; i < powerDropB; i ++) {
     outputCommonCoeff *= AminusNbetaPoly;
   }
@@ -3247,7 +3247,7 @@ void PartFraction::GetNElongationPolyWithMonomialContribution(
     output,
     theDimension
   );
-  output.MultiplyBy(tempM, 1);
+  output.MultiplyBy(tempM);
 }
 
 void PartFraction::ApplyGeneralizedSzenesVergneFormulA(
@@ -3349,7 +3349,7 @@ void PartFraction::ApplySzenesVergneFormulA(
       }
     }
     ParallelComputing::SafePointDontCallMeFromDestructors();
-    CoefficientBuffer.MultiplyBy(tempM, 1);
+    CoefficientBuffer.MultiplyBy(tempM);
     this->GetNElongationPoly(startingVectors, theSelectedIndices[i], LargestElongation, theElongations[i], tempP, theDim);
     CoefficientBuffer *= tempP;
     tempFrac.ComputeIndicesNonZeroMults();
@@ -3565,7 +3565,7 @@ bool PartFractions::AssureIndicatorRegularity(Vector<Rational>& theIndicator) {
     tempRoots.average(theIndicator, this->AmbientDimension);
     theIndicator *= tempRoots.size;
   }
-  return tempRoots.PerturbVectorToRegular(theIndicator);
+  return Cone::RegularizeToBasis(tempRoots, theIndicator);
 }
 
 void PartFractions::PrepareCheckSums() {
@@ -5104,9 +5104,9 @@ bool DynkinType::CanBeExtendedParabolicallyOrIsEqualTo(const DynkinType& other) 
       continue;
     }
     remainderThis = *this;
-    remainderThis -= currentSimpleType;
+    remainderThis.SubtractMonomial(currentSimpleType, 1);
     remainderOther = other;
-    remainderOther -= other[i];
+    remainderOther.SubtractMonomial(other[i], 1);
     if (remainderThis.CanBeExtendedParabolicallyOrIsEqualTo(remainderOther)) {
       return true;
     }
@@ -5149,8 +5149,8 @@ bool DynkinType::Grow(
     }
     return true;
   }
-  //  Rational minCoRootLengthSquared = - 1;
-  //growth is allowed from the minimal component only
+  // Rational minCoRootLengthSquared = - 1;
+  // growth is allowed from the minimal component only
   DynkinSimpleType minComponent;
   Rational coeffMinCompo;
   List<int> currentRootInjection;
@@ -5194,7 +5194,7 @@ bool DynkinType::Grow(
       continue;
     }
     output.AddOnTop(*this);
-    *output.LastObject() += currentA1;
+    output.LastObject()->AddMonomial(currentA1, Rational::one());
     currentRootInjection.SetSize(output.LastObject()->GetRank());
     if (outputPermutationRoots != nullptr) {
       for (int j = 0; j < currentRootInjection.size; j ++) {
@@ -6563,7 +6563,7 @@ void WeylGroupData::SimpleReflectionRootAlg(int index, PolynomialSubstitution<Ra
   AscalarB /= lengthA;
   theRoot[index] += AscalarB;
   if (RhoAction) {
-    theRoot[index] += - 1;
+    theRoot[index] += Rational(- 1);
   }
 }
 
@@ -8902,7 +8902,10 @@ void WeylGroupData::TransformToSimpleBasisGeneratorsWRTh(Vectors<Rational>& theG
 }
 
 void WeylGroupData::ComputeExtremeRootInTheSameKMod(
-  const Vectors<Rational>& inputSimpleBasisK, const Vector<Rational>& inputRoot, Vector<Rational>& output, bool lookingForHighest
+  const Vectors<Rational>& inputSimpleBasisK,
+  const Vector<Rational>& inputRoot,
+  Vector<Rational>& output,
+  bool lookingForHighest
 ) {
   MacroRegisterFunctionWithName("WeylGroup::ComputeExtremeRootInTheSameKMod");
   output = inputRoot;
@@ -8927,21 +8930,6 @@ void WeylGroupData::ComputeExtremeRootInTheSameKMod(
       }
     }
   } while (FoundHigher);
-}
-
-template<class coefficient>
-bool Vectors<coefficient>::PerturbVectorToRegular(Vector<coefficient>& output) {
-  Vector<coefficient> normal;
-  bool result = false;
-  while (!this->IsRegular(output, normal, output.size)) {
-    result = true;
-    normal /= 10;
-    output += normal;
-  }
-  if (result) {
-    output.ScaleByPositiveRationalToIntegralMinHeight();
-  }
-  return result;
 }
 
 //returning false means that the lattice given as rougher is not actually rougher than the current lattice
@@ -9364,8 +9352,8 @@ void PartFraction::ComputePolyCorrespondingToOneMonomial(
   QuasiPolynomial& outputQP, const MonomialP& theMon, Vectors<Rational>& normals, Lattice& theLattice
 ) const {
   Polynomial<Rational> tempP, outputPolyPart;
-  outputPolyPart.MakeOne(theMon.GetMinNumVars());
-  for (int i = 0; i < theMon.GetMinNumVars(); i ++) {
+  outputPolyPart.MakeOne(theMon.GetMinimalNumberOfVariables());
+  for (int i = 0; i < theMon.GetMinimalNumberOfVariables(); i ++) {
     this->MakePolynomialFromOneNormal(normals[i], theMon, this->TheObjects[this->IndicesNonZeroMults[i]].Multiplicities[0], tempP);
     outputPolyPart *= tempP;
   }
@@ -9659,7 +9647,7 @@ bool Lattice::GetHomogeneousSubMatFromSubIgnoreConstantTerms(
   }
   int theTargetDim = 0;
   for (int i = 0; i < theSub.size; i ++) {
-    theTargetDim = MathRoutines::Maximum(theTargetDim, theSub[i].GetMinNumVars());
+    theTargetDim = MathRoutines::Maximum(theTargetDim, theSub[i].GetMinimalNumberOfVariables());
   }
   output.init(theSub.size, theTargetDim);
   for (int i = 0; i < theSub.size; i ++) {
@@ -9698,7 +9686,7 @@ void Lattice::IntersectWithLinearSubspaceGivenByNormal(const Vector<Rational>& t
       currentRoot[pivotColumnIndex] = theScalarProducts[i];
     }
   }
-  theScalarProducts.ScaleByPositiveRationalToIntegralMinHeight();
+  theScalarProducts.ScaleNormalizeFirstNonZero();
   eigenSpacePlusOrthogonalComponent[pivotColumnIndex] = theScalarProducts;
   Lattice eigenLattice, theZnLattice;
   eigenLattice.MakeFromRoots(eigenSpacePlusOrthogonalComponent);
@@ -9782,7 +9770,7 @@ bool Lattice::SubstitutionHomogeneous(const Matrix<Rational>& theSub) {
   Vectors<Rational> theEigenSpace;
   matRelationBetweenStartingVariables.GetZeroEigenSpaceModifyMe(theEigenSpace);
   for (int i = 0; i < theEigenSpace.size; i ++) {
-    theEigenSpace[i].ScaleByPositiveRationalToIntegralMinHeight();
+    Cone::scaleNormalizeByPositive(theEigenSpace[i]);
   }
   oldBasisTransformed.ActOnVectorsColumn(theEigenSpace);
   this->basisRationalForm.init(targetDim, targetDim);
@@ -9840,7 +9828,7 @@ bool Cone::GetRootFromLPolyConstantTermGoesToLastVariable(Polynomial<Rational>& 
   if (!inputLPoly.IsLinear()) {
     return false;
   }
-  output.MakeZero(inputLPoly.GetMinNumVars() + 1);
+  output.MakeZero(inputLPoly.GetMinimalNumberOfVariables() + 1);
   for (int i = 0; i < inputLPoly.size(); i ++) {
     int theIndex;
     if (inputLPoly[i].::MonomialP::IsOneLetterFirstDegree(&theIndex)) {
@@ -10377,8 +10365,54 @@ bool ConeComplex::DrawMeProjective(
   return result;
 }
 
+bool Cone::IsRegularToBasis(
+  const Vectors<Rational>& basis,
+  Vector<Rational>& input,
+  Vector<Rational>& outputFailingNormal,
+  int theDimension
+) {
+  Selection WallSelection;
+  WallSelection.init(basis.size);
+  int x = MathRoutines::NChooseK(basis.size, theDimension - 1);
+  Matrix<Rational> bufferMat;
+  Vector<Rational> candidate;
+  Rational theScalarProduct;
+  for (int i = 0; i < x; i ++) {
+    WallSelection.incrementSelectionFixedCardinality(theDimension - 1);
+    if (basis.ComputeNormalFromSelection(candidate, WallSelection, bufferMat, theDimension)) {
+      candidate.ScalarEuclidean(input, theScalarProduct);
+      if (theScalarProduct.IsEqualToZero()) {
+        outputFailingNormal = candidate;
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+bool Cone::RegularizeToBasis(
+  const Vectors<Rational>& basis,
+  Vector<Rational>& output
+) {
+  Vector<Rational> normal;
+  bool result = false;
+  while (!Cone::IsRegularToBasis(basis, output, normal, output.size)) {
+    result = true;
+    normal /= 10;
+    output += normal;
+  }
+  if (result) {
+    Cone::scaleNormalizeByPositive(output);
+  }
+  return result;
+}
+
+
 bool Cone::DrawMeLastCoordAffine(
-  bool InitDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& theFormat, const std::string& ChamberWallColor
+  bool InitDrawVars,
+  DrawingVariables& theDrawingVariables,
+  FormatExpressions& theFormat,
+  const std::string& ChamberWallColor
 ) const {
   (void) theFormat; //avoid unused parameter warning, portable.
   Vector<Rational> ZeroRoot;
@@ -10412,18 +10446,6 @@ bool Cone::DrawMeLastCoordAffine(
         for (int j = i + 1; j < VerticesScaled.size; j ++) {
           if (DrawVertex[j] && this->Normals[k].ScalarEuclidean(this->Vertices[j]).IsEqualToZero()) {
             if (this->IsAnHonest1DEdgeAffine(i, j)) {
-              /*bool iVertexLiesAtInfinity = this->Vertices[i].LastObject()->IsEqualToZero();
-              bool jVertexLiesAtInfinity = this->Vertices[j].LastObject()->IsEqualToZero();
-              if (iVertexLiesAtInfinity || jVertexLiesAtInfinity) {
-                iScaledVertex =VerticesScaled[i];
-                jScaledVertex =VerticesScaled[j];
-                if (iVertexLiesAtInfinity)
-                  iScaledVertex*=10000;
-                if (jVertexLiesAtInfinity)
-                  jScaledVertex*=10000;
-                theDrawingVariables.drawLineBetweenTwoVectorsBuffer
-                (iScaledVertex, jScaledVertex, theDrawingVariables.PenStyleNormal, HtmlRoutines::RedGreenBlue(200,200,200));
-              }*/
               theDrawingVariables.drawLineBetweenTwoVectorsBufferRational(
                 VerticesScaled[i], VerticesScaled[j], ChamberWallColor, 1
               );
@@ -11079,7 +11101,9 @@ Vector<coefficient> Vector<coefficient>::GetProjectivizedNormal(Vector<coefficie
   return result;
 }
 
-void Lattice::GetRootOnLatticeSmallestPositiveProportionalTo(Vector<Rational>& input, Vector<Rational>& output) {
+void Lattice::GetRootOnLatticeSmallestPositiveProportionalTo(
+  Vector<Rational>& input, Vector<Rational>& output
+) {
   if (&input == &output) {
     global.fatal << "Input not allowed to coincide with output. " << global.fatal;
   }
@@ -11087,23 +11111,11 @@ void Lattice::GetRootOnLatticeSmallestPositiveProportionalTo(Vector<Rational>& i
   Vector<Rational> tempRoot;
   theBasis.AssignMatrixRows(this->basisRationalForm);
   input.GetCoordsInBasiS(theBasis, tempRoot);
-  tempRoot.ScaleByPositiveRationalToIntegralMinHeight();
+  Cone::scaleNormalizeByPositive(tempRoot);
   Matrix<Rational> tempMat;
   tempMat = this->basisRationalForm;
   tempMat.Transpose();
   tempMat.ActOnVectorColumn(tempRoot, output);
-/*
-  Vectors<Rational> tempRoots;
-  tempRoots.AddOnTop(input);
-  Lattice tempLattice =*this;
-  tempLattice.IntersectWithLinearSubspaceSpannedBy(tempRoots);
-  if (!tempLattice.basisRationalForm.NumRows ==1)global.fatal << global.fatal;
-  tempLattice.basisRationalForm.RowToRoot(0, output);
-  Rational tempRat;
-  bool tempBool =  output.IsProportionalTo(input, tempRat);
-  if (!tempBool)global.fatal << global.fatal;
-  if (tempRat.IsNegative())
-    output.Minus();*/
 }
 
 bool Cone::GetLatticePointsInCone(
@@ -11262,7 +11274,7 @@ void Cone::TranslateMeMyLastCoordinateAffinization(Vector<Rational>& theTranslat
       Rational tempRat = *this->Vertices[i].LastObject();
       this->Vertices[i] /= tempRat;
       this->Vertices[i] += tempRoot;
-      this->Vertices[i].ScaleByPositiveRationalToIntegralMinHeight();
+      Cone::scaleNormalizeByPositive(this->Vertices[i]);
     }
   }
 }
@@ -11273,7 +11285,7 @@ void ConeComplex::GetAllWallsConesNoOrientationNoRepetitionNoSplittingNormals(Ve
   for (int i = 0; i < this->size; i ++) {
     for (int j = 0; j < this->TheObjects[i].Normals.size; j ++) {
       tempRoot = this->TheObjects[i].Normals[j];
-      tempRoot.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
+      tempRoot.ScaleNormalizeFirstNonZero();
       outputHashed.AddOnTopNoRepetition(tempRoot);
     }
   }
@@ -12047,7 +12059,7 @@ void ConeComplex::GetNewVerticesAppend(
     theLinearAlgebra.GaussianEliminationByRows(nullptr, &nonPivotPoints);
     if (nonPivotPoints.CardinalitySelection == 1) {
       theLinearAlgebra.NonPivotPointsToEigenVector(nonPivotPoints, tempRoot, Rational(1), Rational(0));
-      tempRoot.ScaleByPositiveRationalToIntegralMinHeight();
+      Cone::scaleNormalizeByPositive(tempRoot);
       if (myDyingCone.IsInCone(tempRoot)) {
         outputVertices.AddOnTopNoRepetition(tempRoot);
       } else {
@@ -12238,7 +12250,7 @@ void Cone::ComputeVerticesFromNormalsNoFakeVertices() {
   this->Vertices.size = 0;
   Selection theSel, nonPivotPoints;
   for (int i = 0; i < this->Normals.size; i ++) {
-    this->Normals[i].ScaleByPositiveRationalToIntegralMinHeight();
+    Cone::scaleNormalizeByPositive(this->Normals[i]);
   }
   int theDim = this->Normals[0].size;
   theSel.init(this->Normals.size);
@@ -12284,7 +12296,7 @@ void Cone::ComputeVerticesFromNormalsNoFakeVertices() {
         tempBool = this->IsInCone(tempRoot);
       }
       if (tempBool) {
-        tempRoot.ScaleByPositiveRationalToIntegralMinHeight();
+        Cone::scaleNormalizeByPositive(tempRoot);
         this->Vertices.AddOnTopNoRepetition(tempRoot);
       }
     }
@@ -12318,7 +12330,7 @@ bool Cone::EliminateFakeNormalsUsingVertices(int numAddedFakeWalls) {
         for (int j = 0; j < tempRoot.size; j ++) {
           this->Normals[i] -= NormalsToSubspace[j] * tempRoot[j];
         }
-        this->Normals[i].ScaleByPositiveRationalToIntegralMinHeight();
+        Cone::scaleNormalizeByPositive(this->Normals[i]);
         if (this->Normals[i].IsEqualToZero()) {
           this->Normals.RemoveIndexSwapWithLast(i);
           i --;
@@ -12328,7 +12340,7 @@ bool Cone::EliminateFakeNormalsUsingVertices(int numAddedFakeWalls) {
       //add the walls needed to go down to the subspace
       this->Normals.Reserve(this->Normals.size + 2 * NormalsToSubspace.size);
       for (int i = 0; i < NormalsToSubspace.size; i ++) {
-        NormalsToSubspace[i].ScaleByPositiveRationalToIntegralMinHeight();
+        Cone::scaleNormalizeByPositive(NormalsToSubspace[i]);
         this->Normals.AddOnTop(NormalsToSubspace[i]);
         this->Normals.AddOnTop(- NormalsToSubspace[i]);
       }
@@ -12401,8 +12413,19 @@ bool Cone::ProduceNormalFromTwoNormalsAndSlicingDirection(
   Rational t1 = - normal2.ScalarEuclidean(SlicingDirection) / normal1ScalarDirection;
   output = normal2;
   output += normal1 * t1;
-  output.ScaleByPositiveRationalToIntegralMinHeight();
+  Cone::scaleNormalizeByPositive(output);
   return true;
+}
+
+void Cone::scaleNormalizeByPositive(Vector<Rational> &toScale) {
+  int firstIndex = toScale.GetIndexFirstNonZeroCoordinate();
+  if (firstIndex < 0) {
+    return;
+  }
+  Rational scale = Rational::scaleNormalizeIndex(toScale, firstIndex);
+  if (scale < 0) {
+    toScale *= - 1;
+  }
 }
 
 bool Cone::CreateFromVertices(const Vectors<Rational>& inputVertices) {
@@ -12455,7 +12478,7 @@ bool Cone::CreateFromVertices(const Vectors<Rational>& inputVertices) {
           break;
         }
       }
-      normalCandidate.ScaleByPositiveRationalToIntegralMinHeight();
+      Cone::scaleNormalizeByPositive(normalCandidate);
       if ((hasNegative && !hasPositive)) {
         normalCandidate.Minus();
       }
@@ -12545,7 +12568,7 @@ void ConeComplex::initFromCones(
   for (int i = 0; i < this->size; i ++) {
     for (int j = 0; j < this->TheObjects[i].Normals.size; j ++) {
       tempRoot = this->TheObjects[i].Normals[j];
-      tempRoot.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
+      tempRoot.ScaleNormalizeFirstNonZero();
       this->splittingNormals.AddOnTopNoRepetition(tempRoot);
       std::stringstream out;
       out << "Extracting walls from cone " << i + 1 << " out of " << this->size
@@ -12638,15 +12661,15 @@ std::string ConeComplex::toString(bool useHtml) {
   return out.str();
 }
 
-int RationalFunction::GetMinNumVars() const {
+int RationalFunction::GetMinimalNumberOfVariables() const {
   switch (this->expressionType) {
     case RationalFunction::typeRational:
       return 0;
     case RationalFunction::typePoly:
-      return this->Numerator.GetElementConst().GetMinNumVars();
+      return this->Numerator.GetElementConst().GetMinimalNumberOfVariables();
     case RationalFunction::typeRationalFunction:
       return MathRoutines::Maximum(
-        this->Numerator.GetElementConst().GetMinNumVars(), this->Denominator.GetElementConst().GetMinNumVars()
+        this->Numerator.GetElementConst().GetMinimalNumberOfVariables(), this->Denominator.GetElementConst().GetMinimalNumberOfVariables()
       );
     default: //this should never happen! maybe global.fatal << global.fatal here...
       return - 1;
@@ -12670,7 +12693,7 @@ bool RationalFunction::GetRelations(
   int numStartingGenerators = inputElements.size;
   int numStartingVariables = 0;
   for (int i = 0; i < inputElements.size; i ++) {
-    numStartingVariables = MathRoutines::Maximum(numStartingVariables, inputElements[0].GetMinNumVars());
+    numStartingVariables = MathRoutines::Maximum(numStartingVariables, inputElements[0].GetMinimalNumberOfVariables());
   }
   Polynomial<Rational> currentGenerator;
   for (int i = 0; i < numStartingGenerators; i ++) {
@@ -12749,7 +12772,7 @@ bool ConeComplex::findMaxLFOverConeProjective(
   for (int i = 0; i < inputLFsLastCoordConst.size; i ++) {
     for (int j = i + 1; j < inputLFsLastCoordConst.size; j ++) {
       tempRoot = inputLFsLastCoordConst[i] - inputLFsLastCoordConst[j];
-      tempRoot.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
+      tempRoot.ScaleNormalizeFirstNonZero();
       if (!tempRoot.IsEqualToZero()) {
         this->splittingNormals.AddOnTopNoRepetition(tempRoot);
       }

@@ -2514,7 +2514,7 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(bool AttemptToChooseCentalizer, b
     theDeterminant.MakeDeterminantFromSquareMatrix(theCentralizerCartanVars);
     theDetMultiplier.MakeMonomiaL(this->totalNumUnknownsWithCentralizer - 1, 1, 1);
     theDeterminant *= theDetMultiplier;
-    theDeterminant += - 1;
+    theDeterminant += - Rational(1);
     this->theSystemToSolve.AddOnTop(theDeterminant);
   }
   if (this->theUnknownNegGens.size != this->theUnknownPosGens.size) {
@@ -3277,7 +3277,7 @@ bool NilradicalCandidate::TryFindingLInfiniteRels() {
         if (this->theNilradicalSubsetWeights.ConesIntersect(
           this->theNilradicalSubsetWeights, this->theNonFKhwsStronglyTwoSided, &betterIntersection, nullptr
         )) {
-          betterIntersection.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
+          betterIntersection.ScaleNormalizeFirstNonZero();
           this->ConeStrongIntersection.MakeZero(this->theNilradicalWeights.size +this->theNonFKhwsStronglyTwoSided.size);
           this->ConeRelativelyStrongIntersection.SetSize(0);
           for (int k = 0; k < this->theNilradSubsel.CardinalitySelection; k ++) {
@@ -3320,7 +3320,7 @@ bool NilradicalCandidate::TryFindingLInfiniteRels() {
           &this->ConeRelativelyStrongIntersection,
           nullptr
         )) {
-          this->ConeRelativelyStrongIntersection.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
+          this->ConeRelativelyStrongIntersection.ScaleNormalizeFirstNonZero();
           return true;
         } else {
           this->FKnilradicalLog += "... but the cones dont intersect. ";
@@ -3979,7 +3979,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWVsOnly(HashedList<
     }
     adIncludingCartanActions.GetZeroEigenSpace(outputV);
     for (int j = 0; j < outputV.size; j ++) {
-      outputV[j].ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
+      outputV[j].ScaleNormalizeFirstNonZero();
       tempElt.AssignVectorNegRootSpacesCartanPosRootSpaces(outputV[j], this->GetAmbientSS());
       this->HighestVectorsNonSorted.AddOnTop(tempElt);
     }
@@ -4147,7 +4147,7 @@ void CandidateSSSubalgebra::AddToSystem(const ElementSemisimpleLieAlgebra<Polyno
   Polynomial<AlgebraicNumber> thePoly;
   for (int i = 0; i < elementThatMustVanish.size(); i ++) {
     thePoly = elementThatMustVanish.coefficients[i];
-    thePoly.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
+    thePoly.ScaleNormalizeLeadingMonomial();
     this->theSystemToSolve.AddOnTopNoRepetition(thePoly);
   }
 }
@@ -7027,10 +7027,6 @@ bool DynkinType::operator>(const DynkinType& other) const {
 }
 
 bool CandidateSSSubalgebra::operator>(const CandidateSSSubalgebra& other) const {
-  //if (this->owner != other.owner)
-  //{ global.fatal << "This is a programming error: comparing CandidateSSSubalgebra with different owners. "
-  //  << global.fatal;
-  //}
   return this->theWeylNonEmbedded->theDynkinType > other.theWeylNonEmbedded->theDynkinType;
 }
 
@@ -7063,33 +7059,8 @@ void CandidateSSSubalgebra::ComputeCartanOfCentralizer() {
       theCentralizerH /= theFirstNonZeroCoeff;
     }
     this->CartanOfCentralizer[i] = theCentralizerH;
-    this->CartanOfCentralizer[i].ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
+    this->CartanOfCentralizer[i].ScaleNormalizeFirstNonZero();
   }
-//  if (this->CartanOfCentralizer.size > 0)
-//    this->CartanOfCentralizer[0]*=4;
-/*  Matrix<Rational> basisChangeMatrix;
-  Vectors<Rational> aBasisProjection, aBasisPreimages;
-  Vector<Rational> projection, preimage;
-  for (int i = 0; i < this->owner->owner->GetRank(); i ++) {
-    preimage.MakeEi(this->owner->owner->GetRank(), i);
-    this->GetPrimalWeightProjectionFundCoords(preimage, projection);
-    aBasisProjection.AddOnTop(projection);
-    if (aBasisProjection.size ==aBasisProjection.GetRankOfSpanOfElements())
-      aBasisPreimages.AddOnTop(preimage);
-    else
-      aBasisProjection.RemoveLastObject();
-  }
-  aBasisPreimages.GetGramMatrix(this->BilinearFormFundPrimal, &this->owner->owner->theWeyl.CartanSymmetric);
-  global.Comments << "<hr>aBasisPreimages: " << aBasisPreimages.toString();
-  basisChangeMatrix.AssignVectorsToColumns(aBasisProjection);
-  basisChangeMatrix.Invert();
-  global.Comments << "<br>basisChangeMatrix: " << basisChangeMatrix.toString();
-  global.Comments << "<br>BilinearFormFundPrimal: " << this->BilinearFormFundPrimal.toString();
-  this->BilinearFormFundPrimal*=basisChangeMatrix;
-  basisChangeMatrix.Transpose();
-  this->BilinearFormFundPrimal.MultiplyOnTheLeft(basisChangeMatrix);
-  global.Comments << "<br>final bilinear form fund primal: " << this->BilinearFormFundPrimal.toString();
-*/
   ////////////////
   this->BilinearFormSimplePrimal = this->theWeylNonEmbedded->CartanSymmetric;
   Matrix<Rational> centralizerPart, matFundCoordsSimple, diagMat, diagMatrix2, bilinearFormInverted;

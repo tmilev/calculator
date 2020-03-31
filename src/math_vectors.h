@@ -260,18 +260,15 @@ public:
     }
     return result;
   }
-  void ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive() {
-    this->ScaleByPositiveRationalToIntegralMinHeight();
-    this->ScaleToFirstNonZeroCoordinatePositive();
-  }
   void ScaleToFirstNonZeroCoordinatePositive();
+  // Returns the number by which the vector was multiplied.
+  void ScaleNormalizeFirstNonZero();
   void MakeAffineUsingLastCoordinate() {
     coefficient theElt;
     theElt = *this->LastObject();
     this->size --;
     this->operator/=(theElt);
   }
-  void ScaleByPositiveRationalToIntegralMinHeight();
   bool AssignMatDetectRowOrColumn(const Matrix<coefficient>& input) {
     if (input.NumCols == 1) {
       this->SetSize(input.NumRows);
@@ -336,7 +333,7 @@ public:
     return true;
   }
   bool MakeAffineProjectionFromNormal(affineHyperplane<Rational>& output);
-  int GetIndexFirstNonZeroCoordinate() {
+  int GetIndexFirstNonZeroCoordinate() const {
     for (int i = 0; i < this->size; i ++) {
       if (!this->TheObjects[i].IsEqualToZero()) {
         return i;
@@ -597,32 +594,12 @@ public:
 };
 
 template <class coefficient>
-void Vector<coefficient>::ScaleByPositiveRationalToIntegralMinHeight() {
-  LargeInteger numGCD, tempUI;
-  bool foundNonZero = false;
-  for (int i = 0; i < this->size; i ++) {
-    if (!this->TheObjects[i].IsEqualToZero()) {
-      if (foundNonZero) {
-        if (!numGCD.IsEqualToOne()) {
-          tempUI = (*this)[i].GetNumerator();
-          LargeIntegerUnsigned::gcd(numGCD.value, tempUI.value, numGCD.value);
-        }
-      } else {
-        numGCD = (*this)[i].GetNumerator();
-        numGCD.sign = 1;
-        foundNonZero = true;
-      }
-      tempUI = (*this)[i].GetDenominator();
-      if (!tempUI.IsEqualToOne()) {
-        (*this) *= static_cast<coefficient>(tempUI);
-      }
-    }
+void Vector<coefficient>::ScaleNormalizeFirstNonZero() {
+  int index = this->GetIndexFirstNonZeroCoordinate();
+  if (index < 0) {
+    return;
   }
-  if (foundNonZero) {
-    if (!numGCD.IsEqualToOne()) {
-      *this /= static_cast<coefficient>(numGCD);
-    }
-  }
+  coefficient::scaleNormalizeIndex(*this, index);
 }
 
 template <class coefficient>
@@ -640,7 +617,8 @@ void Vector<coefficient>::ScaleToFirstNonZeroCoordinatePositive() {
 
 template <class coefficient>
 bool Vector<coefficient>::IsProportionalTo(
-  const Vector<coefficient>& input, coefficient& outputTimesMeEqualsInput
+  const Vector<coefficient>& input,
+  coefficient& outputTimesMeEqualsInput
 ) const {
   if (this->size != input.size) {
     return false;
@@ -660,8 +638,8 @@ bool Vector<coefficient>::IsProportionalTo(
     return false;
   }
   Vector<Rational> tempRoot = *this;
-  outputTimesMeEqualsInput = input.TheObjects[IndexFirstNonZero];
-  outputTimesMeEqualsInput /= this->TheObjects[IndexFirstNonZero];
+  outputTimesMeEqualsInput = input[IndexFirstNonZero];
+  outputTimesMeEqualsInput /= (*this)[IndexFirstNonZero];
   tempRoot *= outputTimesMeEqualsInput;
   return tempRoot == input;
 }
@@ -814,7 +792,6 @@ class Vectors: public List<Vector<coefficient> > {
     }
     return false;
   }
-  bool PerturbVectorToRegular(Vector<coefficient>& inputOutput);
   void SelectionToMatrix(Selection& theSelection, int OutputDimension, Matrix<coefficient>& output);
   void SelectionToMatrixAppend(Selection& theSelection, int OutputDimension, Matrix<coefficient>& output, int StartRowIndex);
   void SelectionToMatrix(Selection& theSelection, int OutputDimension, Matrix<coefficient>& output, int StartRowIndex);
@@ -925,8 +902,11 @@ class Vectors: public List<Vector<coefficient> > {
   }
   bool ComputeNormalExcludingIndex(Vector<coefficient>& output, int index, Matrix<coefficient>& bufferMatrix);
   bool ComputeNormalFromSelection(
-    Vector<coefficient>& output, Selection& theSelection, Matrix<coefficient>& bufferMatrix, int theDimension
-  );
+    Vector<coefficient>& output,
+    Selection& theSelection,
+    Matrix<coefficient>& bufferMatrix,
+    int theDimension
+  ) const;
   bool ComputeNormalFromSelectionAndExtraRoot(
     Vector<coefficient>& output,
     Vector<coefficient>& ExtraRoot,
@@ -1008,7 +988,6 @@ class Vectors: public List<Vector<coefficient> > {
     const List<Vector<coefficient> >& secondSpace,
     List<Vector<coefficient> >& output
   );
-  bool IsRegular(Vector<coefficient>& r, Vector<coefficient>& outputFailingNormal, int theDimension);
   void operator=(const List<List<coefficient> >& other) {
     this->SetSize(other.size);
     for (int i = 0; i < other.size; i ++) {
@@ -1254,8 +1233,8 @@ bool affineHyperplane<coefficient>::operator==(const affineHyperplane& right) {
   Vector<Rational> tempRoot1, tempRoot2;
   tempRoot1 = this->normal;
   tempRoot2 = right.normal;
-  tempRoot1.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
-  tempRoot2.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
+  tempRoot1.ScaleNormalizeFirstNonZero();
+  tempRoot2.ScaleNormalizeFirstNonZero();
   if (!(tempRoot1 == tempRoot2)) {
     return false;
   }
@@ -1336,10 +1315,10 @@ void affineHyperplane<coefficient>::toString(std::string& output) {
 
 template <class coefficient>
 unsigned int affineHyperplane<coefficient>::HashFunction() const {
-  //warning: if normal gets streched, the hashfunction should not change!
+  // warning: if normal gets streched, the hashfunction should not change!
   Vector<Rational> tempNormal;
   tempNormal = this->normal;
-  tempNormal.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
+  tempNormal.ScaleNormalizeFirstNonZero();
   Rational tempRat = this->normal.ScalarEuclidean(this->affinePoint);
   return this->normal.HashFunction() + tempRat.HashFunction();
 }
@@ -1360,7 +1339,7 @@ public:
   inline static unsigned int HashFunction(const affineCone& input) {
     return input.HashFunction();
   }
-  inline int GetDimension();
+  int GetDimension();
   void SuperimposeAffineCones(affineCones& theOtherComplex);
   //void induceFromCombinatorialChamber(CombinatorialChamber& input);
   bool WallIsInternalInCone(affineHyperplane<Rational>& theKillerCandidate);

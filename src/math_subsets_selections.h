@@ -329,28 +329,6 @@ class SelectionPositiveIntegers {
 };
 
 template<class coefficient>
-bool Vectors<coefficient>::IsRegular(Vector<coefficient>& r, Vector<coefficient>& outputFailingNormal, int theDimension) {
-  //this function needs a complete rewrite
-  Selection WallSelection;
-  WallSelection.init(this->size);
-  int x = MathRoutines::NChooseK(this->size, theDimension - 1);
-  Matrix<coefficient> bufferMat;
-  Vector<coefficient> tempRoot;
-  coefficient theScalarProduct;
-  for (int i = 0; i < x; i ++) {
-    WallSelection.incrementSelectionFixedCardinality(theDimension - 1);
-    if (this->ComputeNormalFromSelection(tempRoot, WallSelection, bufferMat, theDimension)) {
-      tempRoot.ScalarEuclidean(r, theScalarProduct);
-      if (theScalarProduct.IsEqualToZero()) {
-        outputFailingNormal = tempRoot;
-        return false;
-      }
-    }
-  }
-  return true;
-}
-
-template<class coefficient>
 bool Vectors<coefficient>::ComputeNormalFromSelectionAndTwoExtraRoots(
   Vector<coefficient>& output,
   Vector<coefficient>& ExtraRoot1,
@@ -443,8 +421,11 @@ bool Vectors<coefficient>::ComputeNormalExcludingIndex(
 
 template<class coefficient>
 bool Vectors<coefficient>::ComputeNormalFromSelection(
-  Vector<coefficient>& output, Selection& theSelection, Matrix<coefficient>& bufferMatrix, int theDimension
-) {
+  Vector<coefficient>& output,
+  Selection& theSelection,
+  Matrix<coefficient>& bufferMatrix,
+  int theDimension
+) const {
   Selection NonPivotPoints;
   output.SetSize(theDimension);
   bufferMatrix.init(theSelection.CardinalitySelection, theDimension);

@@ -716,7 +716,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
         theWeyl.SimpleReflectionRhoModified(simpleIndex, currentWeight);
         theExp *= 2;
         theExp /= theWeyl.CartanSymmetric.elements[simpleIndex][simpleIndex];
-        theExp += 1;
+        theExp += Rational(1);
         if (theExp.IsInteger(&tempInt)) {
           if (tempInt < 0) {
             isGood = false;

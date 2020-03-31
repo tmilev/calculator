@@ -155,6 +155,7 @@ private:
     this->children.Clear();
     this->children.SetExpectedSize(numExpectedChildren);
   }
+  static Expression zero();
   bool AddChildRationalOnTop(const Rational& inputRat);
   bool AddChildOnTop(const Expression& inputChild);
   bool AddChildAtomOnTop(const std::string& theOperationString);
@@ -3200,7 +3201,7 @@ bool CalculatorConversions::innerExpressionFromPoly(
       continue;
     }
     bool found = false;
-    for (int j = 0; j < input[i].GetMinNumVars(); j ++) {
+    for (int j = 0; j < input[i].GetMinimalNumberOfVariables(); j ++) {
       if (input[i](j) != 0) {
         if (inputContext != nullptr) {
           currentBase = inputContext->ContextGetContextVariable(j);

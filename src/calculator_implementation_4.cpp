@@ -146,7 +146,7 @@ void ModuleSSalgebra<coefficient>::GetGenericUnMinusElt(
   tempMon.MakeConst(*this->theAlgebras, this->indexAlgebra);
   int varShift = 0;
   if (shiftPowersByNumVarsBaseField) {
-    varShift = this->GetMinNumVars();
+    varShift = this->GetMinimalNumberOfVariables();
   }
   for (int i = 0; i < eltsNilrad.size; i ++) {
     tempRF.MakeOneLetterMoN(i + varShift, 1);
@@ -172,7 +172,7 @@ void ModuleSSalgebra<coefficient>::GetGenericUnMinusElt(
   tempMon.MakeOne(*this->owner);
   int varShift = 0;
   if (shiftPowersByNumVarsBaseField) {
-    varShift = this->GetMinNumVars();
+    varShift = this->GetMinimalNumberOfVariables();
   }
   int numVars = varShift + eltsNilrad.size;
   for (int i = 0; i < eltsNilrad.size; i ++) {
@@ -397,7 +397,7 @@ bool ModuleSSalgebra<coefficient>::GetActionEulerOperatorPart(
   int powerMonCoeff = 0;
   ElementWeylAlgebra<Rational> currentMonContribution;
   outputDO.MakeOne();
-  for (int i = 0; i < theCoeff.GetMinNumVars(); i ++) {
+  for (int i = 0; i < theCoeff.GetMinimalNumberOfVariables(); i ++) {
     if (!theCoeff(i).IsSmallInteger(&powerMonCoeff)) {
       global.fatal << "This is a programming error. "
       << "Getting euler operator part of action on generalized Verma module: "
@@ -432,7 +432,7 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator(
   idMT.MakeIdSpecial();
   MatrixTensor<RationalFunction> tempMat1;
 
-  int varShift = this->GetMinNumVars();
+  int varShift = this->GetMinimalNumberOfVariables();
   ElementWeylAlgebra<Rational> weylPartSummand, exponentContribution, oneIndexContribution,
   eulerOperatorContribution;
   Polynomial<Rational> tempP1, negativeExponentDenominatorContribution, theCoeff;
@@ -587,7 +587,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
     if (i == 0) {
       theMod.GetElementsNilradical(elementsNegativeNilrad, true, nullptr, useNilWeight, ascending);
       Polynomial<Rational> Pone, Pzero;
-      Pone.MakeOne(elementsNegativeNilrad.size + theMod.GetMinNumVars());
+      Pone.MakeOne(elementsNegativeNilrad.size + theMod.GetMinimalNumberOfVariables());
       Pzero.MakeZero();
       theMod.GetGenericUnMinusElt(true, genericElt, useNilWeight, ascending);
       theWeylFormat.polyAlphabeT.SetSize(numStartingVars + elementsNegativeNilrad.size);

@@ -51,6 +51,13 @@ void Test::Run() {
   if (this->ShouldTest(Test::Suites::database)) {
     Database::Test::All();
   }
+  if (this->flagTestAll) {
+    JSData::Test::All();
+    Expression::Test::All();
+    LargeIntegerUnsigned::Test::All();
+    Rational::Test::All();
+    ElementZmodP::Test::all();
+  }
   if (this->ShouldTest(Test::Suites::crypto)) {
     ASNObject::initializeNonThreadSafe();
     Crypto::Random::initializeRandomBytes();
@@ -61,11 +68,6 @@ void Test::Run() {
   }
   if (this->ShouldTest(Test::Suites::polynomial)) {
     MonomialP::Test::All();
-  }
-  if (this->flagTestAll) {
-    JSData::Test::All();
-    Expression::Test::All();
-    LargeIntegerUnsigned::Test::All();
   }
   if (this->ShouldTest(Test::Suites::calculator)) {
     Calculator::Test::All();

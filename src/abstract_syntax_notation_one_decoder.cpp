@@ -1569,13 +1569,14 @@ bool PrivateKeyRSA::BasicChecks(std::stringstream* comments) {
   *comments << "Must be zero: " << mustBeZero.toString();
   LargeInteger EulerPhi = (primeOneLI - 1) * (primeTwoLI - 1);
   ElementZmodP mustBeZeroModP;
-  //theExponent.theModulo = EulerPhi.value;
-  //theExponent.theValue = this->exponent;
+  // theExponent.theModulo = EulerPhi.value;
+  // theExponent.theValue = this->exponent;
   mustBeZeroModP.theModulus = EulerPhi.value;
   mustBeZeroModP.theValue = 1;
   mustBeZeroModP /= this->thePublicKey.theExponent;
   mustBeZeroModP -= this->privateExponent;
-  *comments << "<br>Difference between private exponent and computed one: " << mustBeZeroModP.theValue.toString();
+  *comments << "<br>Difference between private "
+  << "exponent and computed one: " << mustBeZeroModP.theValue.toString();
   return true;
 }
 

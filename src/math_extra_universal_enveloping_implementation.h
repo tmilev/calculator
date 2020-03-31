@@ -125,7 +125,7 @@ void ElementUniversalEnveloping<coefficient>::LieBracketOnTheLeft(const ElementS
     return;
   }
   ElementUniversalEnveloping<coefficient> tempElt1, tempElt2;
-  tempElt1.AssignElementLieAlgebra(left, *this->owner, this->coefficients[0].GetOne());
+  tempElt1.AssignElementLieAlgebra(left, *this->owner, this->coefficients[0].one());
   tempElt2 = *this;
   tempElt2.LieBracketOnTheRight(tempElt1, *this);
 }
@@ -1061,7 +1061,7 @@ void ElementUniversalEnveloping<coefficient>::RaiseToPower(int thePower) {
   if (this->size() == 0) {
     return;
   }
-  this->MakeConst(this->coefficients[0].GetOne(), *this->owner);
+  this->MakeConst(this->coefficients[0].one(), *this->owner);
   for (int i = 0; i < thePower; i ++) {
     this->operator*=(buffer);
   }

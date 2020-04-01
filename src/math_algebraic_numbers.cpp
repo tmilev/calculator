@@ -480,22 +480,6 @@ void AlgebraicClosureRationals::GetMultiplicationBy(
   }
 }
 
-Rational AlgebraicNumber::GetDenominatorRationalPart() const {
-  if (this->owner == nullptr) {
-    if (this->element.IsEqualToZero()) {
-      return 1;
-    }
-    return this->element.coefficients[0].GetDenominator();
-  }
-  VectorSparse<Rational> theEltAdditive;
-  this->owner->GetAdditionTo(*this, theEltAdditive);
-  LargeIntegerUnsigned resultLCM = 1;
-  for (int i = 0; i < theEltAdditive.size(); i ++) {
-    resultLCM = LargeIntegerUnsigned::lcm(resultLCM, theEltAdditive.coefficients[i].GetDenominator());
-  }
-  return resultLCM;
-}
-
 bool AlgebraicNumber::AssignCosRationalTimesPi(const Rational& input, AlgebraicClosureRationals& inputOwner) {
   MacroRegisterFunctionWithName("AlgebraicNumber::AssignCosRationalTimesPi");
   Rational fracPart = input;
@@ -564,26 +548,6 @@ bool AlgebraicNumber::AssignCosRationalTimesPi(const Rational& input, AlgebraicC
   return false;
 }
 
-Rational AlgebraicNumber::GetNumeratorRationalPart() const {
-  if (this->owner == nullptr) {
-    if (this->element.IsEqualToZero()) {
-      return 0;
-    }
-    return this->element.coefficients[0].GetNumerator();
-  }
-  VectorSparse<Rational> theEltAdditive;
-  this->owner->GetAdditionTo(*this, theEltAdditive);
-  LargeInteger resultGCD = 1;
-  LargeIntegerUnsigned tempR;
-  if (theEltAdditive.size() > 0) {
-    resultGCD = theEltAdditive.coefficients[0].GetNumerator();
-  }
-  for (int i = 1; i < theEltAdditive.size(); i ++) {
-    tempR = resultGCD.value;
-    LargeIntegerUnsigned::gcd(tempR, theEltAdditive.coefficients[i].GetNumerator().value, resultGCD.value);
-  }
-  return resultGCD;
-}
 
 unsigned int AlgebraicNumber::HashFunction() const {
   //global.fatal << global.fatal;
@@ -1320,17 +1284,26 @@ std::string AlgebraicClosureRationals::ToStringFull(FormatExpressions* theFormat
 AlgebraicNumber AlgebraicNumber::scaleNormalizeIndex(
   List<AlgebraicNumber>& output, int indexNonZeroElement
 ) {
-  AlgebraicNumber& current = output[indexNonZeroElement];
-  Rational denominator = current.GetDenominatorRationalPart();
-  Rational numerator = current.GetNumeratorRationalPart();
-  Rational scale = denominator;
-  scale /= numerator;
-  AlgebraicNumber result(scale);
-  result.owner = current.owner;
-  for (int i = 0; i < output.size; i ++){
-    output[i] *= result;
+  List<Rational> allCoefficients;
+  int indexNonZeroRational = - 1;
+  for (int i = 0; i < output.size; i ++) {
+    List<Rational>& current = output[i].element.coefficients;
+    if (i == indexNonZeroElement) {
+      indexNonZeroRational = allCoefficients.size - 1;
+      for (int j = 0; j < current.size; j ++) {
+        indexNonZeroRational ++;
+        if (!current[j].IsEqualToZero()) {
+          break;
+        }
+      }
+    }
+    allCoefficients.AddListOnTop(output[i].element.coefficients);
   }
-  return result;
+  Rational scale = Rational::scaleNormalizeIndex(allCoefficients, indexNonZeroRational);
+  for (int i = 0; i < output.size; i ++){
+    output[i] *= scale;
+  }
+  return scale;
 }
 
 AlgebraicNumber AlgebraicClosureRationals::One() {

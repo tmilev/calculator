@@ -538,7 +538,11 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(
   for (int i = 0; i < this->size(); i ++) {
     const Weight<coefficient>& currentMon = (*this)[i];
     if (!inputData.WeylFD.FreudenthalEvalIrrepIsWRTLeviPart(
-      currentMon.weightFundamentalCoordS, tempHashedRoots, tempMults, tempS, 10000
+      currentMon.weightFundamentalCoordS,
+      tempHashedRoots,
+      tempMults,
+      tempS,
+      10000
     )) {
       if (Report != nullptr) {
         *Report = tempS;
@@ -557,9 +561,14 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(
   for (int i = 0; i < charAmbientFDWeyl.size(); i ++) {
     orbitDom.SetSize(0);
     if (!inputData.WeylFD.GenerateOrbitReturnFalseIfTruncated(
-      theWeyL.GetSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoordS), orbitDom, true, 10000
+      theWeyL.GetSimpleCoordinatesFromFundamental(
+        charAmbientFDWeyl[i].weightFundamentalCoordS
+      ),
+      orbitDom,
+      true,
+      10000
     )) {
-      out << "failed to generate the complement-sub-Weyl-orbit of weight "
+      out << "Failed to generate the complement-sub-Weyl-orbit of weight "
       << theWeyL.GetSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoordS).toString();
       if (Report != nullptr) {
         *Report = out.str();
@@ -639,7 +648,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(
     output.DrawMeNoMults(tempS, theDV1, 10000);
     Vector<Rational> tempRoot, tempRoot2;
     WeylFDSmall.AmbientWeyl->theGroup.ComputeAllElements(false, 20);
-    out << "<hr>";//In the following weight visualization, a yellow line is drawn if the corresponding weights are "
+    out << "<hr>";
     for (int i = 0; i < output.size(); i ++) {
       tempRoot = WeylFDSmall.AmbientWeyl->GetSimpleCoordinatesFromFundamental(
         output[i].weightFundamentalCoordS

@@ -1862,26 +1862,20 @@ Rational Rational::scaleNormalizeIndex(
     return 1;
   }
   LargeIntegerUnsigned denominatorLCM = output[0].GetDenominator();
+  LargeIntegerUnsigned numeratorGCD = output[0].GetNumerator().value;
   for (int i = 1; i < output.size; i ++) {
     LargeIntegerUnsigned::lcm(
       denominatorLCM,
       output[i].GetDenominator(),
       denominatorLCM
     );
-  }
-  for (int i = 0; i < output.size; i ++) {
-    output[i] *= denominatorLCM;
-  }
-  LargeIntegerUnsigned numeratorGCD;
-  numeratorGCD = output[0].GetNumerator().value;
-  for (int i = 1; i < output.size; i ++) {
     LargeIntegerUnsigned::gcd(
       numeratorGCD,
       output[i].GetNumerator().value,
       numeratorGCD
     );
   }
-  Rational result = 1;
+  Rational result = denominatorLCM;
   result /= numeratorGCD;
   if (output[indexNonZeroEntry] < 0) {
     result *= - 1;
@@ -1889,7 +1883,6 @@ Rational Rational::scaleNormalizeIndex(
   for (int i = 0; i < output.size; i ++) {
     output[i] *= result;
   }
-  result *= denominatorLCM;
   return result;
 }
 

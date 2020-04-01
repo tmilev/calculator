@@ -107,8 +107,6 @@ class AlgebraicNumber {
     std::stringstream* commentsOnFailure
   );
   void AssignRational(const Rational& input, AlgebraicClosureRationals& inputOwner);
-  Rational GetDenominatorRationalPart() const;
-  Rational GetNumeratorRationalPart() const;
   void SqrtMeDefault(std::stringstream* commentsOnError);
   bool IsSmallInteger(int* whichInteger) const {
     Rational theRat;

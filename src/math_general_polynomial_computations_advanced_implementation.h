@@ -116,7 +116,8 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasis(
           << ". Taking s-difference of indices " << i + 1 << " and " << j + 1
           << " out of " << this->theBasiS.size
           << ".<br>Before proceding to adjoin candidates, "
-          << "I have " << this->basisCandidates.size << " candidates and basis of size "
+          << "I have " << this->basisCandidates.size
+          << " candidates and basis of size "
           << this->theBasiS.size << ".";
           theReport2.Report(reportStream.str());
         }
@@ -143,7 +144,6 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasis(
       }
     }
   }
-//  this->MakeMinimalBasis();
   this->theBasiS.QuickSortAscendingCustom(this->thePolynomialOrder);
   return this->WrapUpOnGroebnerBasisSuccess(inputOutput);
 }
@@ -199,7 +199,9 @@ bool GroebnerBasisComputation<coefficient>::AddPolysAndReduceBasis() {
     int oldBasisSize = this->basisCandidates.size;
     while (this->basisCandidates.size > 0) {
       int selectedIndex = this->SelectPolyIndexToAddNext();
-      this->RemainderDivisionByBasis(this->basisCandidates[selectedIndex], &this->remainderDivision);
+      this->RemainderDivisionByBasis(
+        this->basisCandidates[selectedIndex], &this->remainderDivision
+      );
       this->basisCandidates.RemoveIndexSwapWithLast(selectedIndex);
       if (this->AddRemainderToBasis()) {
         changed = true;
@@ -232,7 +234,11 @@ bool GroebnerBasisComputation<coefficient>::AddPolysAndReduceBasis() {
         theReport1.Report(reportStream.str());
       }
       this->NumberGBComputations ++;
-      this->RemainderDivisionByBasis(this->bufPolyForGaussianElimination, &this->remainderDivision, i);
+      this->RemainderDivisionByBasis(
+        this->bufPolyForGaussianElimination,
+        &this->remainderDivision,
+        i
+      );
       this->remainderDivision.ScaleNormalizeLeadingMonomial();
       if (this->MaxNumGBComputations > 0) {
         if (this->NumberGBComputations > this->MaxNumGBComputations) {
@@ -241,7 +247,6 @@ bool GroebnerBasisComputation<coefficient>::AddPolysAndReduceBasis() {
         }
       }
       if (!(this->remainderDivision == this->theBasiS[i])) {
-        //this->flagBasisGuaranteedToGenerateIdeal = false;
         this->basisCandidates.AddOnTop(this->remainderDivision);
         this->leadingMons.RemoveIndexShiftDown(i);
         this->leadingCoeffs.RemoveIndexShiftDown(i);
@@ -277,8 +282,8 @@ bool GroebnerBasisComputation<coefficient>::CriterionCLOsh(
   List<MonomialP>& theLeadingMons,
   MonomialP& leadingTermLCM
 ) {
-  //page 107, Cox, Little, O'Shea,
-  //Ideals, Varieties, algorithms
+  // page 107, Cox, Little, O'Shea,
+  // Ideals, Varieties, algorithms
   Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignIdentity>&
   lastPair = *thePairs.LastObject();
   Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignIdentity>

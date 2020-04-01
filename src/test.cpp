@@ -46,6 +46,7 @@ const std::string Test::Suites::polynomial = "polynomial";
 const std::string Test::Suites::build = "build";
 
 void Test::Run() {
+  MacroRegisterFunctionWithName("Test::Run");
   global << "Testing ..." << logger::endL;
   global.millisecondsMaxComputation = 100000000;
   if (this->ShouldTest(Test::Suites::database)) {
@@ -57,6 +58,7 @@ void Test::Run() {
     LargeIntegerUnsigned::Test::All();
     Rational::Test::All();
     ElementZmodP::Test::all();
+    RationalFunction::Test::all();
   }
   if (this->ShouldTest(Test::Suites::crypto)) {
     ASNObject::initializeNonThreadSafe();

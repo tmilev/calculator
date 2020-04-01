@@ -620,12 +620,18 @@ bool Calculator::innerGroebner(
   const Expression& numComputationsE = input[1];
   Rational upperBound = 0;
   if (!numComputationsE.IsOfType(&upperBound)) {
-    return output.MakeError("Failed to convert the first argument of the expression to rational number.", theCommands);
+    return output.MakeError(
+      "Failed to convert the first argument of "
+      "the expression to rational number. ",
+      theCommands
+    );
   }
   if (upperBound > 1000000) {
     return output.MakeError(
-      "Error: your upper limit of polynomial operations exceeds 1000000, which is too large. "
-      "You may use negative or zero number give no computation bound, but please don't. ",
+      "Error: your upper limit of polynomial "
+      "operations exceeds 1000000, which is too large. "
+      "You may use negative or zero number "
+      "give no computation bound, but please don't. ",
       theCommands
     );
   }
@@ -637,7 +643,10 @@ bool Calculator::innerGroebner(
   int theMod = 0;
   if (useModZp) {
     if (!output[1].IsSmallInteger(&theMod)) {
-      return output.MakeError("Error: failed to extract modulo from the second argument. ", theCommands);
+      return output.MakeError(
+        "Error: failed to extract modulo from the second argument. ",
+        theCommands
+      );
     }
     if (!MathRoutines::IsPrime(theMod)) {
       return output.MakeError("Error: modulus not prime. ", theCommands);
@@ -650,7 +659,10 @@ bool Calculator::innerGroebner(
     - 1,
     CalculatorConversions::functionPolynomial<Rational>
   )) {
-    return output.MakeError("Failed to extract polynomial expressions", theCommands);
+    return output.MakeError(
+      "Failed to extract polynomial expressions",
+      theCommands
+    );
   }
   for (int i = 0; i < inputVector.size; i ++) {
     inputVector[i].ScaleNormalizeLeadingMonomial();
@@ -669,7 +681,6 @@ bool Calculator::innerGroebner(
         inputVectorZmodP[i].AddMonomial(inputVector[i][j], tempElt);
       }
     }
-    GroebnerBasisComputation<ElementZmodP> theGroebnerComputationZmodP;
   }
   List<Polynomial<AlgebraicNumber> > outputGroebner, outputGroebner2;
   outputGroebner = inputVector;
@@ -707,13 +718,21 @@ bool Calculator::innerGroebner(
   }
   out << "<br>Starting basis (" << inputVector.size  << " elements): ";
   for (int i = 0; i < inputVector.size; i ++) {
-    out << "<br>" << HtmlRoutines::GetMathSpanPure(inputVector[i].toString(&theGroebnerComputation.theFormat));
+    out << "<br>"
+    << HtmlRoutines::GetMathSpanPure(
+      inputVector[i].toString(&theGroebnerComputation.theFormat)
+    );
   }
   if (success) {
-    out << "<br>Minimal Groebner basis with " << outputGroebner.size << " elements, computed using algorithm 1, using "
-    << theGroebnerComputation.NumberGBComputations << " polynomial operations. ";
+    out << "<br>Minimal Groebner basis with "
+    << outputGroebner.size
+    << " elements, computed using algorithm 1, using "
+    << theGroebnerComputation.NumberGBComputations
+    << " polynomial operations. ";
     for (int i = 0; i < outputGroebner.size; i ++) {
-      out << "<br> " << HtmlRoutines::GetMathSpanPure(outputGroebner[i].toString(&theGroebnerComputation.theFormat));
+      out << "<br> " << HtmlRoutines::GetMathSpanPure(
+        outputGroebner[i].toString(&theGroebnerComputation.theFormat)
+      );
     }
     out << "<br>Output in calculator-ready format: ";
     out << "<br>(";
@@ -725,9 +744,11 @@ bool Calculator::innerGroebner(
     }
     out << ")";
   } else {
-    out << "<br>Minimal Groebner basis not computed: exceeded the user-given limit of "
+    out << "<br>Minimal Groebner basis not computed: "
+    << "exceeded the user-given limit of "
     << upperBoundComputations << " polynomial operations. ";
-    out << "<br>An intermediate non-Groebner basis containing total " << theGroebnerComputation.theBasiS.size
+    out << "<br>An intermediate non-Groebner basis containing total "
+    << theGroebnerComputation.theBasiS.size
     << " basis elements: ";
     out << "<br>GroebnerLexUpperLimit{}(10000, <br>";
     for (int i = 0; i < theGroebnerComputation.theBasiS.size; i ++) {

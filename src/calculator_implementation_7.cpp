@@ -7090,11 +7090,19 @@ bool CalculatorFunctions::innerDecomposeFDPartGeneralizedVermaModuleOverLeviPart
 }
 
 bool CalculatorFunctions::innerSplitFDpartB3overG2Init(
-  Calculator& theCommands, const Expression& input, Expression& output, branchingData& theG2B3Data, Expression& outputContext
+  Calculator& theCommands,
+  const Expression& input,
+  Expression& output,
+  branchingData& theG2B3Data,
+  Expression& outputContext
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSplitFDpartB3overG2Init");
   if (!input.IsListNElements(4)) {
-    return output.MakeError("Splitting the f.d. part of a B_3-representation over G_2 requires 3 arguments", theCommands);
+    return output.MakeError(
+      "Splitting the f.d. part of a B_3-representation "
+      "over G_2 requires 3 arguments",
+      theCommands
+    );
   }
   if (!theCommands.GetVectorFromFunctionArguments<RationalFunction>(
     input,
@@ -7103,7 +7111,10 @@ bool CalculatorFunctions::innerSplitFDpartB3overG2Init(
     3,
     CalculatorConversions::functionRationalFunction
   )) {
-    output.MakeError("Failed to extract highest weight in fundamental coordinates. ", theCommands);
+    output.MakeError(
+      "Failed to extract highest weight in fundamental coordinates. ",
+      theCommands
+    );
   }
   theCommands.MakeHmmG2InB3(theG2B3Data.theHmm);
   theG2B3Data.selInducing.init(3);
@@ -8007,7 +8018,10 @@ bool CalculatorFunctions::innerHWTAABF(Calculator& theCommands, const Expression
 }
 
 bool CalculatorFunctions::innerSplitFDpartB3overG2CharsOutput(
-  Calculator& theCommands, const Expression& input, Expression& output, branchingData& theG2B3Data
+  Calculator& theCommands,
+  const Expression& input,
+  Expression& output,
+  branchingData& theG2B3Data
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSplitFDpartB3overG2CharsOutput");
   Expression theContext(theCommands);

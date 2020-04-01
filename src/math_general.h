@@ -2324,7 +2324,9 @@ public:
       return coefficient();
     }
     int indexLeadingMonomial = this->GetIndexLeadingMonomial(nullptr, nullptr);
-    coefficient result = coefficient::scaleNormalizeIndex(this->coefficients, indexLeadingMonomial);
+    coefficient result = coefficient::scaleNormalizeIndex(
+      this->coefficients, indexLeadingMonomial
+    );
     return result;
   }
 
@@ -3184,9 +3186,6 @@ class PolynomialSubstitution: public List<Polynomial<coefficient> > {
   }
 };
 
-//std::iostream& operator<<(std::iostream& output, const RationalFunctionOld& theRF);
-//std::iostream& operator>>(std::iostream& input, RationalFunctionOld& theRF);
-
 template<class coefficient>
 class GroebnerBasisComputation {
   public:
@@ -3413,6 +3412,9 @@ public:
     typeRationalFunction = 2,
     typeError = 3
   };
+  // Instantiates the calculator and assigns the parsed input.
+  // For internal use only, will crash on failure.
+  void fromString(const std::string& input);
   std::string toString(FormatExpressions* theFormat = nullptr) const;
   bool NeedsParenthesisForMultiplication(FormatExpressions* unused = nullptr) const;
   bool FindOneVariableRationalRoots(List<Rational>& output);
@@ -3518,7 +3520,17 @@ public:
     return this->IsEqualTo(other);
   }
   void Simplify();
-  void SimplifyLeadingCoefficientOnly();
+  // Scales the numerator and denominator simultaneously
+  // so all coefficients are integers,
+  // the leading monomial of the denominator has positive coefficient,
+  // and either the denominator or the numerator
+  // has coefficients that are relatively prime.
+  void simplifyLeadingCoefficientOnly();
+  // Scales the numerator and denominator so that both
+  // have positive leading coefficients, all coefficients are integers,
+  // and the denominator and numerator have relatively prime coefficients.
+  // Returns the number by which the element was multiplied.
+  Rational scaleToIntegral();
   void operator+=(int theConstant);
   void operator*=(const RationalFunction& other);
   void operator*=(const Polynomial<Rational>& other);
@@ -3576,22 +3588,9 @@ public:
     this->MakeZero();
     this->ratValue = theCoeff;
   }
-  bool IsConstant(Rational* whichConstant = nullptr) const {
-    if (this->expressionType != this->typeRational) {
-      return false;
-    }
-    if (whichConstant != nullptr) {
-      *whichConstant = this->ratValue;
-    }
-    return true;
-  }
-  bool IsInteger() const {
-    return this->expressionType == this->typeRational && this->ratValue.IsInteger();
-  }
-  bool IsSmallInteger(int* whichInteger = nullptr) const {
-    return this->expressionType == this->typeRational &&
-    this->ratValue.IsSmallInteger(whichInteger);
-  }
+  bool IsConstant(Rational* whichConstant = nullptr) const;
+  bool IsInteger() const;
+  bool IsSmallInteger(int* whichInteger = nullptr) const;
   bool IsEqualToZero() const {
     return this->expressionType == this->typeRational && this->ratValue.IsEqualToZero();
   }
@@ -3647,6 +3646,12 @@ public:
   void operator/=(const Polynomial<Rational>& other);
   void operator/=(const RationalFunction& other);
   void Minus();
+  class Test {
+  public:
+    static bool all();
+    static bool scaleNormalizeIndex();
+    static bool fromString();
+  };
 };
 
 template <class templateMonomial, class coefficient>
@@ -4325,7 +4330,10 @@ public:
   void MakeHgenerator(const Vector<coefficient>& theH, SemisimpleLieAlgebra& inputOwners);
   void MakeGenerator(int generatorIndex, SemisimpleLieAlgebra& inputOwner);
   void ElementToVectorNegativeRootSpacesFirst(Vector<coefficient>& output) const;
-  void AssignVectorNegRootSpacesCartanPosRootSpaces(const Vector<coefficient>& input, SemisimpleLieAlgebra& owner);
+  void AssignVectorNegRootSpacesCartanPosRootSpaces(
+    const Vector<coefficient>& input,
+    SemisimpleLieAlgebra& owner
+  );
   bool GetCoordsInBasis(
     const List<ElementSemisimpleLieAlgebra<coefficient> >& theBasis, Vector<coefficient>& output
   ) const;

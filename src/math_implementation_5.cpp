@@ -1260,7 +1260,7 @@ void RationalFunction::Invert() {
   MathRoutines::swap(this->Numerator.GetElement(), this->Denominator.GetElement());
   this->expressionType = this->typeRationalFunction;
   this->ReduceMemory();
-  this->SimplifyLeadingCoefficientOnly();
+  this->simplifyLeadingCoefficientOnly();
   if (!this->checkConsistency()) {
     global.fatal << "Consistency check failed. " << global.fatal;
   }
@@ -1420,7 +1420,7 @@ bool RationalFunction::FindOneVariableRationalRoots(List<Rational>& output) {
 
 bool RationalFunction::NeedsParenthesisForMultiplication(FormatExpressions* unused) const {
   (void) unused;
-  switch(this->expressionType) {
+  switch (this->expressionType) {
     case RationalFunction::typeRational:
       return false;
     case RationalFunction::typePoly:
@@ -1432,6 +1432,9 @@ bool RationalFunction::NeedsParenthesisForMultiplication(FormatExpressions* unus
 }
 
 std::string RationalFunction::toString(FormatExpressions* theFormat) const {
+  if (this->expressionType == this->typeError) {
+    return "[error]";
+  }
   if (this->expressionType == this->typeRational) {
     return this->ratValue.toString();
   }
@@ -1665,7 +1668,7 @@ void RationalFunction::operator*=(const Polynomial<Rational>& other) {
   }
   this->Denominator.GetElement() = theResult;
   this->ReduceMemory();
-  this->SimplifyLeadingCoefficientOnly();
+  this->simplifyLeadingCoefficientOnly();
   if (theReport.TickAndWantReport()) {
     std::stringstream out;
     out << "Multiplying " << this->toString(&global.theDefaultFormat.GetElement()) << " by "
@@ -1703,7 +1706,7 @@ void RationalFunction::operator*=(const Rational& other) {
       return;
     case RationalFunction::typeRationalFunction:
       this->Numerator.GetElement() *= other;
-      this->SimplifyLeadingCoefficientOnly();
+      this->simplifyLeadingCoefficientOnly();
       return;
   }
 }
@@ -1777,7 +1780,7 @@ void RationalFunction::operator*=(const RationalFunction& other) {
   }
   this->Numerator.GetElement() *= tempP1;
   this->ReduceMemory();
-  this->SimplifyLeadingCoefficientOnly();
+  this->simplifyLeadingCoefficientOnly();
   if (theReport.TickAndWantReport()) {
     std::stringstream out;
     out << "Multiplying " << this->toString() << " by " << other.toString();
@@ -1847,27 +1850,40 @@ void RationalFunction::Simplify() {
     }
   }
   this->ReduceMemory();
-  this->SimplifyLeadingCoefficientOnly();
+  this->simplifyLeadingCoefficientOnly();
 }
 
-void RationalFunction::SimplifyLeadingCoefficientOnly() {
+Rational RationalFunction::scaleToIntegral() {
+  if (this->IsEqualToZero()) {
+    return Rational::one();
+  }
+  if (this->expressionType == this->typeRational) {
+    Rational result = this->ratValue;
+    result.Invert();
+    this->ratValue.MakeOne();
+    return result;
+  }
+  if (this->expressionType == this->typePoly) {
+    return this->Numerator.GetElement().ScaleNormalizeLeadingMonomial();
+  }
+  if (this->expressionType != this->typeRationalFunction) {
+    return Rational::one();
+  }
+  Rational result;
+  result = this->Numerator.GetElement().ScaleNormalizeLeadingMonomial();
+  result /= this->Denominator.GetElement().ScaleNormalizeLeadingMonomial();
+  return result;
+}
+
+void RationalFunction::simplifyLeadingCoefficientOnly() {
   if (this->expressionType != this->typeRationalFunction) {
     return;
   }
-  Rational leadingCoefficientInverted;
-  this->Denominator.GetElement().GetIndexLeadingMonomial(
-    nullptr, &leadingCoefficientInverted, &MonomialP::orderDefault()
-  );
-  leadingCoefficientInverted.Invert();
-  this->Denominator.GetElement() *= leadingCoefficientInverted;
-  this->Numerator.GetElement() *= leadingCoefficientInverted;
-  if (this->Denominator.GetElement().IsEqualToOne()) {
-    this->expressionType = this->typePoly;
-    if (this->Numerator.GetElement().IsConstant(&leadingCoefficientInverted)) {
-      this->ratValue = leadingCoefficientInverted;
-      this->expressionType = this->typeRational;
-    }
-  }
+  Rational scaleNumerator = this->Numerator.GetElement().ScaleNormalizeLeadingMonomial();
+  Rational scaleDenominator = this->Denominator.GetElement().ScaleNormalizeLeadingMonomial();
+  Rational scale = scaleDenominator / scaleNumerator;
+  this->Denominator.GetElement() *= scale.GetDenominator();
+  this->Numerator.GetElement() *= scale.GetNumerator();
 }
 
 void RootIndexToPoly(int theIndex, SemisimpleLieAlgebra& theAlgebra, Polynomial<Rational> & output) {
@@ -1891,30 +1907,64 @@ void ElementUniversalEnveloping<coefficient>::AssignFromCoordinateFormWRTBasis(
   }
 }
 
-RationalFunction RationalFunction::scaleNormalizeIndex(List<RationalFunction>& input, int indexNonZeroElement) {
-  Polynomial<Rational> scale;
-  List<RationalFunction> buffer;
-  buffer = input;
-  RationalFunction result;
-  result.MakeOne();
-  for (int i = 0; i < buffer.size; i ++) {
-    RationalFunction& current = buffer[i];
-    if (current.expressionType == RationalFunction::typeRationalFunction) {
-      scale = current.Denominator.GetElement();
-      result *= scale;
-      for (int j = 0; j < buffer.size; j ++) {
-        buffer[j].operator*=(scale);
-      }
-    }
+bool RationalFunction::IsConstant(Rational* whichConstant) const {
+  if (this->expressionType != this->typeRational) {
+    return false;
   }
-  buffer[indexNonZeroElement].GetNumerator(scale);
-  Rational scaleRational = scale.ScaleNormalizeLeadingMonomial();
-  result *= scaleRational;
-  for (int i = 0; i < buffer.size; i ++) {
-    input[i] = buffer[i];
-    input[i] *= scaleRational;
+  if (whichConstant != nullptr) {
+    *whichConstant = this->ratValue;
   }
-  return result;
+  return true;
+}
+
+bool RationalFunction::IsInteger() const {
+  return this->expressionType == this->typeRational && this->ratValue.IsInteger();
+}
+
+bool RationalFunction::IsSmallInteger(int* whichInteger) const {
+  return this->expressionType == this->typeRational &&
+  this->ratValue.IsSmallInteger(whichInteger);
+}
+
+
+RationalFunction RationalFunction::scaleNormalizeIndex(
+  List<RationalFunction>& input, int indexNonZeroElement
+) {
+  if (input.size == 0) {
+    return 1;
+  }
+  List<Rational> scales;
+  Rational scale;
+  Polynomial<Rational> currentNumerator, currentDenominator;
+  for (int i = 0; i < input.size; i ++) {
+    RationalFunction& current = input[i];
+    current.GetNumerator(currentNumerator);
+    current.GetDenominator(currentDenominator);
+    scale = currentNumerator.ScaleNormalizeLeadingMonomial();
+    scale /= currentDenominator.ScaleNormalizeLeadingMonomial();
+    scales.AddOnTop(scale);
+  }
+  LargeIntegerUnsigned numeratorContentGreatestCommonDivisor = scales[0].GetNumerator().value;
+  LargeIntegerUnsigned denominatorContentLeastCommonMultiple = scales[0].GetDenominator();
+  for (int i = 1; i < scales.size; i ++) {
+    numeratorContentGreatestCommonDivisor = LargeIntegerUnsigned::lcm(
+      scales[i].GetNumerator().value,
+      numeratorContentGreatestCommonDivisor
+    );
+    denominatorContentLeastCommonMultiple = LargeIntegerUnsigned::gcd(
+      denominatorContentLeastCommonMultiple,
+      scales[i].GetDenominator()
+    );
+  }
+  scale = numeratorContentGreatestCommonDivisor;
+  scale /= denominatorContentLeastCommonMultiple;
+  if (scales[indexNonZeroElement] < 0) {
+    scale *= -1;
+  }
+  for (int i = 0; i < input.size; i ++) {
+    input[i] *= scale;
+  }
+  return scale;
 }
 
 bool SemisimpleLieAlgebraOrdered::CheckInitialization() const {
@@ -2547,7 +2597,7 @@ void RationalFunction::AddHonestRF(const RationalFunction& other) {
     this->Denominator.GetElement() *= tempRat;
     this->Numerator.GetElement() += other.Numerator.GetElementConst();
     this->ReduceMemory();
-    this->SimplifyLeadingCoefficientOnly();
+    this->simplifyLeadingCoefficientOnly();
   }
   if (!this->checkConsistency()) {
     global.fatal << "Inconsistent rational function. " << global.fatal;

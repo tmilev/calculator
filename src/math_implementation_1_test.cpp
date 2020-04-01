@@ -3,6 +3,7 @@
 #include "math_general.h"
 #include "crypto.h"
 #include "math_extra_algebraic_numbers.h"
+#include "calculator.h"
 
 bool LargeIntegerUnsigned::Test::SerializationToHex(const LargeIntegerUnsigned& input) {
   MacroRegisterFunctionWithName("LargeIntUnsigned::Test::SerializationToHex");
@@ -108,6 +109,73 @@ bool ElementZmodP::Test::basicOperations() {
   if (!(z.theValue == 1)) {
     global.fatal << "Bad arithmetic: " << x.toString() << " * "
     << y.toString() << " equals: " << z.toString() << ". " << global.fatal;
+  }
+  return true;
+}
+
+void RationalFunction::fromString(const std::string& input) {
+  Calculator parser;
+  std::string inputModified = "MakeRationalFunction(" + input + ")";
+  parser.initialize();
+  parser.Evaluate(inputModified);
+  if (!parser.theProgramExpression.StartsWith(parser.opEndStatement())) {
+    global.fatal
+    << "RationalFunction::fromString parsed: "
+    << parser.theProgramExpression.toString()
+    << " which was not expected. This function is not allowed to fail. "
+    << global.fatal;
+  }
+  if (!parser.theProgramExpression[1].IsOfType(this)) {
+    global.fatal << "RationalFunction::fromString did not "
+    << "produce a rational function, but instead: "
+    << parser.theProgramExpression.toString()
+    << global.fatal;
+  }
+}
+
+bool RationalFunction::Test::all() {
+  RationalFunction::Test::fromString();
+  RationalFunction::Test::scaleNormalizeIndex();
+  return true;
+}
+
+bool RationalFunction::Test::fromString() {
+  MacroRegisterFunctionWithName("RationalFunction::Test::fromString");
+  RationalFunction a;
+  std::string input = "(a^2+7b)/(2+d*c)";
+  std::string expected = "(x_{1}^{2}+7x_{2} )/(x_{3} x_{4} +2)";
+  a.fromString(input);
+  if (a.toString() != expected) {
+    global.fatal << "Input: " << input << " parsed as: "
+    << a.toString() << ", expected: "
+    << expected << ". " << global.fatal;
+  }
+  return true;
+}
+
+bool RationalFunction::Test::scaleNormalizeIndex() {
+  RationalFunction a, b, c;
+  a.fromString("(a+1/2)/(b+1/3)");
+  b.fromString("2a/5");
+  c.fromString("3a/(7x)");
+  List<List<RationalFunction> > toScale = {
+    {a},
+    {a, b},
+    {a, b, c}
+  };
+  List<std::string> expected = {
+  "(2x_{1} +1)/(3x_{2} +1)",
+  "(30x_{1} +15)/(3x_{2} +1), 4x_{1} ",
+  "(210x_{1} +105)/(3x_{2} +1), 28x_{1} , 30x_{1} /(x_{2} )"
+  };
+  for (int i = 0; i < toScale.size; i ++) {
+    std::string atStart = toScale[i].ToStringCommaDelimited();
+    RationalFunction::scaleNormalizeIndex(toScale[i], 0);
+    if (toScale[i].ToStringCommaDelimited() != expected[i]) {
+      global.fatal << "Scaling rational functions: " << atStart
+      << " produced: " << toScale[i].ToStringCommaDelimited()
+      << " instead of the expected: " << expected[i] << global.fatal;
+    }
   }
   return true;
 }

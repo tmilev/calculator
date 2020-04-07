@@ -225,11 +225,11 @@ bool Polynomial<coefficient>::isSquareFreeAndUnivariate(
 */
 
 template <>
-bool Polynomial<Rational>::FactorMe(
+bool Polynomial<Rational>::factorMe(
   List<Polynomial<Rational> >& outputFactors,
   std::stringstream* comments
 ) const {
-  MacroRegisterFunctionWithName("Polynomial::FactorMe");
+  MacroRegisterFunctionWithName("Polynomial::factorMe");
   outputFactors.SetSize(0);
   if (this->IsEqualToZero() || this->IsConstant()) {
     outputFactors.AddOnTop(*this);

@@ -320,7 +320,7 @@ bool AlgebraicClosureRationals::ReduceMe(
   theMinPoly.AssignMinPoly(this->GeneratingElementMatForm);
   int theDim = this->latestBasis.size;
   List<Polynomial<Rational> > theFactors;
-  bool mustBeTrue = theMinPoly.FactorMe(theFactors, nullptr);
+  bool mustBeTrue = theMinPoly.factorMe(theFactors, nullptr);
   if (!mustBeTrue) {
     global.fatal
     << "This is a programming error: failed to factor polynomial "

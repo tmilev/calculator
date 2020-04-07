@@ -2645,7 +2645,7 @@ public:
   ) const;
   // bool isSquareFreeAndUnivariate(std::stringstream* comments) const;
   bool computeDerivative(Polynomial<coefficient>& output, std::stringstream* comments) const;
-  bool FactorMe(List<Polynomial<coefficient> >& outputFactors, std::stringstream* comments) const;
+  bool factorMe(List<Polynomial<coefficient> >& outputFactors, std::stringstream* comments) const;
   void Interpolate(const Vector<coefficient>& thePoints, const Vector<coefficient>& ValuesAtThePoints);
   bool FindOneVariableRationalRoots(List<Rational>& output);
   coefficient GetDiscriminant();
@@ -3054,6 +3054,11 @@ template <>
 Polynomial<Rational> Polynomial<Rational>::Test::fromString(const std::string& input);
 template <>
 bool Polynomial<Rational>::Test::fromStringTest();
+template <>
+bool Polynomial<Rational>::factorMe(
+  List<Polynomial<Rational> >& outputFactors,
+  std::stringstream* comments
+) const;
 
 template <class coefficient>
 class PolynomialSubstitution: public List<Polynomial<coefficient> > {

@@ -1395,7 +1395,7 @@ bool Calculator::innerFactorPolynomial(Calculator& theCommands, const Expression
     );
   }
   List<Polynomial<Rational> > factors;
-  if (!polynomial.content.FactorMe(factors, &theCommands.Comments)) {
+  if (!polynomial.content.factorMe(factors, &theCommands.Comments)) {
     return false;
   }
   output.reset(theCommands, factors.size + 1);

@@ -63,8 +63,23 @@ bool MonomialP::Test::TestMonomialOrdersSatisfyTheDefinition() {
 
 template <>
 bool Polynomial<Rational>::Test::factorization() {
+  std::string input = "(-3x^3-3x-5)(5x^3+x-7)";
+  Polynomial<Rational> toBeFactored = Polynomial<Rational>::Test::fromString(input);
+  List<Polynomial<Rational> > output;
+  bool success = toBeFactored.factorMe(output, nullptr);
+  if (!success) {
+    global.fatal << "Factorization of " << toBeFactored.toString() << " failed. " << global.fatal;
+  }
+  std::string expectedFactors = "-3x_{1}^{3}-3x_{1} -5, 5x_{1}^{3}+x_{1} -7";
+  std::string resultFactors = output.ToStringCommaDelimited();
+  if (resultFactors != expectedFactors) {
+    global.fatal << "While factoring: "
+    << input << "=" << toBeFactored.toString()
+    << " got factors: " << resultFactors
+    << ", expected: " << expectedFactors << ". " << global.fatal;
+  }
 
-  global.fatal << "Not implemented yet." << global.fatal;
+
   return true;
 }
 

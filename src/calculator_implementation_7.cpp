@@ -2034,7 +2034,7 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
   this->theRF.GetNumerator(this->theNum);
   this->theNum *= this->theDen.ScaleNormalizeLeadingMonomial();
   Rational theConstantCoeff;
-  if (!this->theDen.FactorMeNormalizedFactors(theConstantCoeff, this->theFactors, &this->printoutPFsHtml)) {
+  if (!this->theDen.factorMeNormalizedFactors(theConstantCoeff, this->theFactors, &this->printoutPFsHtml)) {
     this->printoutPFsHtml << "<hr>Failed to factor the denominator of the rational function, I surrender.";
     return false;
   }

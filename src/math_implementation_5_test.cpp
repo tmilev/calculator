@@ -62,15 +62,15 @@ bool MonomialP::Test::TestMonomialOrdersSatisfyTheDefinition() {
 }
 
 template <>
-bool Polynomial<Rational>::Test::factorization() {
-  std::string input = "(-3x^3-3x-5)(5x^3+x-7)";
+bool Polynomial<Rational>::Test::oneFactorization(
+  const std::string& input, const std::string& expectedFactors
+) {
   Polynomial<Rational> toBeFactored = Polynomial<Rational>::Test::fromString(input);
   List<Polynomial<Rational> > output;
   bool success = toBeFactored.factorMe(output, nullptr);
   if (!success) {
     global.fatal << "Factorization of " << toBeFactored.toString() << " failed. " << global.fatal;
   }
-  std::string expectedFactors = "-3x_{1}^{3}-3x_{1} -5, 5x_{1}^{3}+x_{1} -7";
   std::string resultFactors = output.ToStringCommaDelimited();
   if (resultFactors != expectedFactors) {
     global.fatal << "While factoring: "
@@ -78,8 +78,23 @@ bool Polynomial<Rational>::Test::factorization() {
     << " got factors: " << resultFactors
     << ", expected: " << expectedFactors << ". " << global.fatal;
   }
+  return true;
+}
 
-
+template <>
+bool Polynomial<Rational>::Test::factorization() {
+  Polynomial<Rational>::Test::oneFactorization(
+    "x+1", "x_{1} +1"
+  );
+  Polynomial<Rational>::Test::oneFactorization(
+    "(2x+1)(-3x+1)", "-3x_{1} +1, 2x_{1} +1"
+  );
+  Polynomial<Rational>::Test::oneFactorization(
+    "(x^2+3x+1)(-3x+1)", "3x_{1} -1, -x_{1}^{2}-3x_{1} -1"
+  );
+  Polynomial<Rational>::Test::oneFactorization(
+    "(-3x^3-3x-5)(5x^3+x-7)", "-3x_{1}^{3}-3x_{1} -5, 5x_{1}^{3}+x_{1} -7"
+  );
   return true;
 }
 

@@ -550,11 +550,6 @@ void Polynomial<coefficient>::GetCoeffInFrontOfLinearTermVariableIndex(int index
   }
 }
 
-template<>
-bool Polynomial<Rational>::FindOneVariableRationalRoots(List<Rational>& output);
-template <>
-bool Polynomial<Rational>::FactorMeOutputIsADivisor(Polynomial<Rational>& output, std::stringstream* comments);
-
 template <class coefficient>
 bool PolynomialOrder<coefficient>::CompareLeftGreaterThanRight(
   const Polynomial<coefficient>& left, const Polynomial<coefficient>& right

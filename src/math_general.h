@@ -2635,9 +2635,14 @@ public:
     Vector<Rational>& inputPointsOfEvaluation,
     Vectors<Rational>& outputValuesInterpolands
   );
-  bool FactorMeOutputIsADivisor(Polynomial<Rational>& output, std::stringstream* comments);
-  bool FactorMeNormalizedFactors(
-    Rational& outputCoeff, List<Polynomial<Rational> >& outputFactors, std::stringstream* comments
+  bool factorMeOutputIsADivisor(
+    Polynomial<Rational>& output,
+    std::stringstream* comments
+  );
+  bool factorMeNormalizedFactors(
+    Rational& outputCoeff,
+    List<Polynomial<Rational> >& outputFactors,
+    std::stringstream* comments
   ) const;
   bool factorMeCantorZassenhaus(
     List<Polynomial<ElementZmodP> >& outputFactors,
@@ -3043,6 +3048,9 @@ public:
   public:
     static bool all();
     static bool factorization();
+    static bool oneFactorization(
+      const std::string& input, const std::string& expectedFactors
+    );
     static Polynomial<coefficient> fromString(const std::string& input);
     static bool fromStringTest();
   };
@@ -3059,6 +3067,15 @@ bool Polynomial<Rational>::factorMe(
   List<Polynomial<Rational> >& outputFactors,
   std::stringstream* comments
 ) const;
+template<>
+bool Polynomial<Rational>::FindOneVariableRationalRoots(List<Rational>& output);
+template <>
+bool Polynomial<Rational>::factorMeOutputIsADivisor(Polynomial<Rational>& output, std::stringstream* comments);
+template <>
+bool Polynomial<Rational>::factorMeNormalizedFactors(
+  Rational& outputCoeff, List<Polynomial<Rational> >& outputFactors, std::stringstream* comments
+) const;
+
 
 template <class coefficient>
 class PolynomialSubstitution: public List<Polynomial<coefficient> > {
@@ -3081,12 +3098,12 @@ class PolynomialSubstitution: public List<Polynomial<coefficient> > {
   );
   // In the following function we have that:
   // the format of the linear substitution is:
-  // theSub is a  whose number of rows minus 1 must equal the # number of
+  // theSub is a matrix whose number of rows minus 1 must equal the # number of
   // target variables and whose number of columns must equal the number of variables in
   // the current polynomial (this->NumVariables).
-  // The first row denotes the constant term in the substitution of the respective variable!
+  // The first row denotes the constant term in the substitution of the respective variable.
   // An element in the x-th row and y-th column
-  // is defined as element [x][y] !
+  // is defined as element [x][y].
   void MakeExponentSubstitution(Matrix<LargeInteger>& theSub);
   void PrintPolys(std::string& output);
   void MakeSubstitutionLastVariableToEndPoint(int numVars, Polynomial<coefficient>& EndPoint);
@@ -3376,7 +3393,7 @@ class GroebnerBasisComputation {
   );
   bool AddRemainderToBasis();
   bool GetOneVarPolySolution(const Polynomial<coefficient>& thePoly, coefficient& outputSolution);
-   // Criterion from Cox, Little, O'Shea:
+  // Criterion from Cox, Little, O'Shea:
   static bool CriterionCLOsh(
     HashedListSpecialized<Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignIdentity> >& thePairs,
     List<MonomialP>& theLeadingMons,

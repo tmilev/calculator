@@ -240,7 +240,7 @@ bool Polynomial<Rational>::factorMe(
   Polynomial<Rational> currentFactor, divisor;
   while (factorsToBeProcessed.size > 0) {
     currentFactor = factorsToBeProcessed.PopLastObject();
-    if (!currentFactor.FactorMeOutputIsADivisor(divisor, comments)) {
+    if (!currentFactor.factorMeOutputIsADivisor(divisor, comments)) {
       return false;
     }
     if (currentFactor.IsEqualToOne()) {
@@ -364,8 +364,10 @@ void Polynomial<coefficient>::Interpolate(
 }
 
 template <>
-bool Polynomial<Rational>::FactorMeOutputIsADivisor(Polynomial<Rational>& output, std::stringstream* comments) {
-  MacroRegisterFunctionWithName("Polynomial_CoefficientType::FactorMeOutputIsADivisor");
+bool Polynomial<Rational>::factorMeOutputIsADivisor(
+  Polynomial<Rational>& output, std::stringstream* comments
+) {
+  MacroRegisterFunctionWithName("Polynomial::factorMeOutputIsADivisor");
   if (this->GetMinimalNumberOfVariables() > 1) {
     return false;
   }
@@ -402,21 +404,23 @@ bool Polynomial<Rational>::FactorMeOutputIsADivisor(Polynomial<Rational>& output
       *this /= output;
       return true;
     }
-    if (i < degreeLeft + 1) {
-      theValuesAtPoints[i].IsInteger(&tempLI);
-      if (!tempLI.value.FactorReturnFalseIfFactorizationIncomplete(
-        thePrimeFactorsAtPoints[i], thePrimeFactorsMults[i], 0, comments
-      )) {
-        if (comments != nullptr) {
-          *comments << "<br>Aborting polynomial factorization: failed to factor the integer "
-          << theValuesAtPoints[i].toString() << " (most probably the integer is too large).";
-        }
-        return false;
-      }
+    if (i > degreeLeft) {
+      continue;
     }
+    theValuesAtPoints[i].IsInteger(&tempLI);
+    if (!tempLI.value.FactorReturnFalseIfFactorizationIncomplete(
+      thePrimeFactorsAtPoints[i], thePrimeFactorsMults[i], 0, comments
+    )) {
+      if (comments != nullptr) {
+        *comments << "<br>Aborting polynomial factorization: failed to factor the integer "
+        << theValuesAtPoints[i].toString() << " (most probably the integer is too large).";
+      }
+      return false;
+    }
+    thePrimeFactorsAtPoints[i].AddOnTop(- 1);
+    thePrimeFactorsMults[i].AddOnTop(1);
   }
   Incrementable<Incrementable<SelectionOneItem> > divisorSelection;
-  Incrementable<SelectionOneItem> signSelection;
   Polynomial<Rational> quotient, remainder;
   Vectors<Rational> valuesLeftInterpolands;
   Vector<Rational> PointsOfInterpolationLeft;
@@ -426,75 +430,69 @@ bool Polynomial<Rational>::FactorMeOutputIsADivisor(Polynomial<Rational>& output
     PointsOfInterpolationLeft.AddOnTop(AllPointsOfEvaluation[i]);
   }
   divisorSelection.initFromMults(thePrimeFactorsMults);
-  signSelection.initFromMults(1, degreeLeft + 1);
   valuesLeftInterpolands.SetSize(degreeLeft + 1);
   this->GetValuesLagrangeInterpolandsAtConsecutivePoints(
     PointsOfInterpolationLeft, AllPointsOfEvaluation, valuesLeftInterpolands
   );
   do {
-    do {
-      theValuesAtPointsLeft.MakeZero(theValuesAtPoints.size);
-      Rational firstValue;
-      bool isGood = false; //<-we shall first check if the divisor is constant.
-      for (int j = 0; j < divisorSelection.theElements.size; j ++) {
-        currentPointContribution = 1;
-        for (int k = 0; k < divisorSelection[j].theElements.size; k ++) {
-          currentPrimePowerContribution = thePrimeFactorsAtPoints[j][k];
-          currentPrimePowerContribution.RaiseToPower(divisorSelection[j][k].SelectedMult);
-          currentPointContribution *= currentPrimePowerContribution;
-        }
-        if (signSelection[j].SelectedMult == 1) {
-          currentPointContribution *= - 1;
-        }
-        if (!isGood) {
-          if (j == 0) {
-            firstValue = currentPointContribution;
-          } else {
-            if (firstValue != currentPointContribution) {
-              isGood = true; //<- the divisor has takes two different values, hence is non-constant.
-            }
+    theValuesAtPointsLeft.MakeZero(theValuesAtPoints.size);
+    Rational firstValue;
+    bool isGood = false; //<-we shall first check if the divisor is constant.
+    for (int j = 0; j < divisorSelection.theElements.size; j ++) {
+      currentPointContribution = 1;
+      for (int k = 0; k < divisorSelection[j].theElements.size; k ++) {
+        currentPrimePowerContribution = thePrimeFactorsAtPoints[j][k];
+        currentPrimePowerContribution.RaiseToPower(divisorSelection[j][k].SelectedMult);
+        currentPointContribution *= currentPrimePowerContribution;
+      }
+      if (!isGood) {
+        if (j == 0) {
+          firstValue = currentPointContribution;
+        } else {
+          if (firstValue != currentPointContribution) {
+            isGood = true; //<- the divisor has takes two different values, hence is non-constant.
           }
         }
-        theValuesAtPointsLeft += valuesLeftInterpolands[j] * currentPointContribution;
       }
-      if (!isGood) {
-        continue;
+      theValuesAtPointsLeft += valuesLeftInterpolands[j] * currentPointContribution;
+    }
+    if (!isGood) {
+      continue;
+    }
+    for (int j = 0; j < AllPointsOfEvaluation.size; j ++) {
+      if (theValuesAtPointsLeft[j].IsEqualToZero()) {
+        isGood = false;
+        break;
       }
-      for (int j = 0; j < AllPointsOfEvaluation.size; j ++) {
-        if (theValuesAtPointsLeft[j].IsEqualToZero()) {
-          isGood = false;
-          break;
-        }
-        currentPointContribution = (theValuesAtPoints[j]) / theValuesAtPointsLeft[j];
-        if (!currentPointContribution.IsInteger()) {
-          isGood = false;
-          break;
-        }
+      currentPointContribution = (theValuesAtPoints[j]) / theValuesAtPointsLeft[j];
+      if (!currentPointContribution.IsInteger()) {
+        isGood = false;
+        break;
       }
-      if (!isGood) {
-        continue;
-      }
-      output.Interpolate(Vector<Rational>(PointsOfInterpolationLeft), Vector<Rational>(theValuesAtPointsLeft));
-      this->DivideBy(output, quotient, remainder, &MonomialP::orderDefault());
-      if (!remainder.IsEqualToZero()) {
-        continue;
-      }
-      *this = quotient;
-      return true;
-    } while (divisorSelection.IncrementReturnFalseIfPastLast());
-  } while (signSelection.IncrementReturnFalseIfPastLast());
+    }
+    if (!isGood) {
+      continue;
+    }
+    output.Interpolate(Vector<Rational>(PointsOfInterpolationLeft), Vector<Rational>(theValuesAtPointsLeft));
+    this->DivideBy(output, quotient, remainder, &MonomialP::orderDefault());
+    if (!remainder.IsEqualToZero()) {
+      continue;
+    }
+    *this = quotient;
+    return true;
+  } while (divisorSelection.IncrementReturnFalseIfPastLast());
   output = *this;
   this->MakeOne(1);
   return true;
 }
 
 template <>
-bool Polynomial<Rational>::FactorMeNormalizedFactors(
+bool Polynomial<Rational>::factorMeNormalizedFactors(
   Rational& outputCoeff,
   List<Polynomial<Rational> >& outputFactors,
   std::stringstream* comments
 ) const {
-  MacroRegisterFunctionWithName("Polynomial::FactorMeNormalizedFactors");
+  MacroRegisterFunctionWithName("Polynomial::factorMeNormalizedFactors");
   List<Polynomial<Rational> > factorsToBeProcessed;
   outputFactors.SetSize(0);
   factorsToBeProcessed.AddOnTop(*this);
@@ -502,7 +500,7 @@ bool Polynomial<Rational>::FactorMeNormalizedFactors(
   Polynomial<Rational> currentFactor, divisor;
   while (factorsToBeProcessed.size > 0) {
     currentFactor = factorsToBeProcessed.PopLastObject();
-    if (!currentFactor.FactorMeOutputIsADivisor(divisor, comments)) {
+    if (!currentFactor.factorMeOutputIsADivisor(divisor, comments)) {
       return false;
     }
     if (currentFactor.IsEqualToOne()) {

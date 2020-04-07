@@ -1375,26 +1375,6 @@ bool Calculator::innerLSPath(Calculator& theCommands, const Expression& input, E
   return output.AssignValue(theLSpath, theCommands);
 }
 
-template <class coefficient>
-void Polynomial<coefficient>::Interpolate(
-  const Vector<coefficient>& thePoints, const Vector<coefficient>& ValuesAtThePoints
-) {
-  Polynomial<coefficient> theLagrangeInterpolator, tempP;
-  this->MakeZero();
-  for (int i = 0; i < thePoints.size; i ++) {
-    theLagrangeInterpolator.MakeConst(1, 1);
-    for (int j = 0; j < thePoints.size; j ++) {
-      if (i != j) {
-        tempP.MakeDegreeOne(1, 0, 1, - thePoints[j]);
-        tempP /= thePoints[i] - thePoints[j];
-        theLagrangeInterpolator *= tempP;
-      }
-    }
-    theLagrangeInterpolator *= ValuesAtThePoints[i];
-    *this += theLagrangeInterpolator;
-  }
-}
-
 template <>
 bool CalculatorConversions::innerPolynomial<Rational>(Calculator& theCommands, const Expression& input, Expression& output);
 template <>

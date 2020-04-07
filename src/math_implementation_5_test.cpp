@@ -1,8 +1,9 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "math_general_polynomial_computations_basic_implementation.h"
+#include "calculator.h"
 
-bool MonomialP::Test::All() {
+bool MonomialP::Test::all() {
   return MonomialP::Test::TestMonomialOrdersSatisfyTheDefinition();
 }
 
@@ -60,3 +61,56 @@ bool MonomialP::Test::TestMonomialOrdersSatisfyTheDefinition() {
   return true;
 }
 
+template <>
+bool Polynomial<Rational>::Test::factorization() {
+
+  global.fatal << "Not implemented yet." << global.fatal;
+  return true;
+}
+
+template <>
+bool Polynomial<Rational>::Test::all() {
+  Polynomial<Rational>::Test::fromStringTest();
+  Polynomial<Rational>::Test::factorization();
+  return true;
+}
+
+template <>
+Polynomial<Rational> Polynomial<Rational>::Test::fromString(const std::string& input) {
+  Calculator parser;
+  std::string inputModified = "Polynomial(" + input + ")";
+  parser.initialize();
+  parser.Evaluate(inputModified);
+  if (!parser.theProgramExpression.StartsWith(parser.opEndStatement())) {
+    global.fatal
+    << "Polynomial::fromString parsed: "
+    << parser.theProgramExpression.toString()
+    << " which was not expected. This function is not allowed to fail. "
+    << global.fatal;
+  }
+  Polynomial<Rational> result;
+  if (!parser.theProgramExpression[1].IsOfType(&result)) {
+    global.fatal << "RationalFunction::fromString did not "
+    << "produce a rational function, but instead: "
+    << parser.theProgramExpression.toString()
+    << global.fatal;
+  }
+  return result;
+}
+
+template <>
+bool Polynomial<Rational>::Test::fromStringTest() {
+  std::string expected = "x_{2}^{2}+x_{1} -x_{2} -1";
+  std::string input = "x^2-1-x+b";
+  Polynomial<Rational> underTest = Polynomial<Rational>::Test::fromString(input);
+  std::string result = underTest.toString();
+  if (result != expected) {
+    global.fatal << "Polynomial from string: "
+    << "input: " << input
+    << ", result: "
+    << result
+    << ", expected: " << expected
+    << "." << global.fatal;
+  }
+  return true;
+}

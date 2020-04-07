@@ -506,7 +506,7 @@ public:
   class Test {
 
   public:
-    static bool All();
+    static bool all();
     static bool TestMonomialOrdersSatisfyTheDefinitionOne(
       const MonomialP& mustBeSmaller,
       const MonomialP& mustBeLarger,
@@ -3039,7 +3039,21 @@ public:
     coefficient one,
     std::stringstream* commentsOnFailure
   );
+  class Test {
+  public:
+    static bool all();
+    static bool factorization();
+    static Polynomial<coefficient> fromString(const std::string& input);
+    static bool fromStringTest();
+  };
 };
+
+template <>
+bool Polynomial<Rational>::Test::all();
+template <>
+Polynomial<Rational> Polynomial<Rational>::Test::fromString(const std::string& input);
+template <>
+bool Polynomial<Rational>::Test::fromStringTest();
 
 template <class coefficient>
 class PolynomialSubstitution: public List<Polynomial<coefficient> > {
@@ -3055,7 +3069,11 @@ class PolynomialSubstitution: public List<Polynomial<coefficient> > {
   // x_2-> (x_1x_3+2)
   // to produce a polynomial in three variables
   void MakeIdSubstitution(int numVars, const coefficient& theRingUnit = 1);
-  void MakeIdLikeInjectionSub(int numStartingVars, int numTargetVarsMustBeLargerOrEqual, const coefficient& theRingUnit);
+  void MakeIdLikeInjectionSub(
+    int numStartingVars,
+    int numTargetVarsMustBeLargerOrEqual,
+    const coefficient& theRingUnit
+  );
   // In the following function we have that:
   // the format of the linear substitution is:
   // theSub is a  whose number of rows minus 1 must equal the # number of
@@ -3094,7 +3112,12 @@ class PolynomialSubstitution: public List<Polynomial<coefficient> > {
   void Substitution(PolynomialSubstitution<coefficient>& theSub, int NumVarsTarget) {
     Polynomial<Rational>  tempP;
     for (int i = 0; i < this->size; i ++) {
-      this->TheObjects[i].Substitution(theSub, tempP, NumVarsTarget, static_cast<Rational>(1));
+      this->TheObjects[i].Substitution(
+        theSub,
+        tempP,
+        NumVarsTarget,
+        static_cast<Rational>(1)
+      );
       this->TheObjects[i] = tempP;
     }
   }
@@ -3412,9 +3435,6 @@ public:
     typeRationalFunction = 2,
     typeError = 3
   };
-  // Instantiates the calculator and assigns the parsed input.
-  // For internal use only, will crash on failure.
-  void fromString(const std::string& input);
   std::string toString(FormatExpressions* theFormat = nullptr) const;
   bool NeedsParenthesisForMultiplication(FormatExpressions* unused = nullptr) const;
   bool FindOneVariableRationalRoots(List<Rational>& output);
@@ -3650,7 +3670,8 @@ public:
   public:
     static bool all();
     static bool scaleNormalizeIndex();
-    static bool fromString();
+    static RationalFunction fromString(const std::string& input);
+    static bool fromStringTest();
   };
 };
 

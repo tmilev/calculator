@@ -113,7 +113,7 @@ bool ElementZmodP::Test::basicOperations() {
   return true;
 }
 
-void RationalFunction::fromString(const std::string& input) {
+RationalFunction RationalFunction::Test::fromString(const std::string& input) {
   Calculator parser;
   std::string inputModified = "MakeRationalFunction(" + input + ")";
   parser.initialize();
@@ -125,39 +125,39 @@ void RationalFunction::fromString(const std::string& input) {
     << " which was not expected. This function is not allowed to fail. "
     << global.fatal;
   }
-  if (!parser.theProgramExpression[1].IsOfType(this)) {
+  RationalFunction result;
+  if (!parser.theProgramExpression[1].IsOfType(&result)) {
     global.fatal << "RationalFunction::fromString did not "
     << "produce a rational function, but instead: "
     << parser.theProgramExpression.toString()
     << global.fatal;
   }
+  return result;
 }
 
 bool RationalFunction::Test::all() {
-  RationalFunction::Test::fromString();
+  RationalFunction::Test::fromStringTest();
   RationalFunction::Test::scaleNormalizeIndex();
   return true;
 }
 
-bool RationalFunction::Test::fromString() {
+bool RationalFunction::Test::fromStringTest() {
   MacroRegisterFunctionWithName("RationalFunction::Test::fromString");
-  RationalFunction a;
   std::string input = "(a^2+7b)/(2+d*c)";
   std::string expected = "(x_{1}^{2}+7x_{2} )/(x_{3} x_{4} +2)";
-  a.fromString(input);
-  if (a.toString() != expected) {
+  RationalFunction underTest = RationalFunction::Test::fromString(input);
+  if (underTest.toString() != expected) {
     global.fatal << "Input: " << input << " parsed as: "
-    << a.toString() << ", expected: "
+    << underTest.toString() << ", expected: "
     << expected << ". " << global.fatal;
   }
   return true;
 }
 
 bool RationalFunction::Test::scaleNormalizeIndex() {
-  RationalFunction a, b, c;
-  a.fromString("(a+1/2)/(b+1/3)");
-  b.fromString("2a/5");
-  c.fromString("3a/(7x)");
+  RationalFunction a = RationalFunction::Test::fromString("(a+1/2)/(b+1/3)");
+  RationalFunction b = RationalFunction::Test::fromString("2a/5");
+  RationalFunction c = RationalFunction::Test::fromString("3a/(7x)");
   List<List<RationalFunction> > toScale = {
     {a},
     {a, b},

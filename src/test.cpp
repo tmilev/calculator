@@ -69,7 +69,8 @@ void Test::Run() {
     SSLRecord::Test::All();
   }
   if (this->ShouldTest(Test::Suites::polynomial)) {
-    MonomialP::Test::All();
+    MonomialP::Test::all();
+    Polynomial<Rational>::Test::all();
   }
   if (this->ShouldTest(Test::Suites::calculator)) {
     Calculator::Test::All();

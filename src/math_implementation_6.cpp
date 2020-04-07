@@ -343,6 +343,26 @@ void Polynomial<Rational>::GetValuesLagrangeInterpolandsAtConsecutivePoints(
   }
 }
 
+template <class coefficient>
+void Polynomial<coefficient>::Interpolate(
+  const Vector<coefficient>& thePoints, const Vector<coefficient>& ValuesAtThePoints
+) {
+  Polynomial<coefficient> theLagrangeInterpolator, tempP;
+  this->MakeZero();
+  for (int i = 0; i < thePoints.size; i ++) {
+    theLagrangeInterpolator.MakeConst(1, 1);
+    for (int j = 0; j < thePoints.size; j ++) {
+      if (i != j) {
+        tempP.MakeDegreeOne(1, 0, 1, - thePoints[j]);
+        tempP /= thePoints[i] - thePoints[j];
+        theLagrangeInterpolator *= tempP;
+      }
+    }
+    theLagrangeInterpolator *= ValuesAtThePoints[i];
+    *this += theLagrangeInterpolator;
+  }
+}
+
 template <>
 bool Polynomial<Rational>::FactorMeOutputIsADivisor(Polynomial<Rational>& output, std::stringstream* comments) {
   MacroRegisterFunctionWithName("Polynomial_CoefficientType::FactorMeOutputIsADivisor");
@@ -395,8 +415,8 @@ bool Polynomial<Rational>::FactorMeOutputIsADivisor(Polynomial<Rational>& output
       }
     }
   }
-  Incrementable<Incrementable<SelectionOneItem> > theDivisorSel;
-  Incrementable<SelectionOneItem> signSel;
+  Incrementable<Incrementable<SelectionOneItem> > divisorSelection;
+  Incrementable<SelectionOneItem> signSelection;
   Polynomial<Rational> quotient, remainder;
   Vectors<Rational> valuesLeftInterpolands;
   Vector<Rational> PointsOfInterpolationLeft;
@@ -405,8 +425,8 @@ bool Polynomial<Rational>::FactorMeOutputIsADivisor(Polynomial<Rational>& output
   for (int i = 0; i <= degreeLeft; i ++) {
     PointsOfInterpolationLeft.AddOnTop(AllPointsOfEvaluation[i]);
   }
-  theDivisorSel.initFromMults(thePrimeFactorsMults);
-  signSel.initFromMults(1, degreeLeft + 1);
+  divisorSelection.initFromMults(thePrimeFactorsMults);
+  signSelection.initFromMults(1, degreeLeft + 1);
   valuesLeftInterpolands.SetSize(degreeLeft + 1);
   this->GetValuesLagrangeInterpolandsAtConsecutivePoints(
     PointsOfInterpolationLeft, AllPointsOfEvaluation, valuesLeftInterpolands
@@ -415,15 +435,15 @@ bool Polynomial<Rational>::FactorMeOutputIsADivisor(Polynomial<Rational>& output
     do {
       theValuesAtPointsLeft.MakeZero(theValuesAtPoints.size);
       Rational firstValue;
-      bool isGood = false;//<-we shall first check if the divisor is constant.
-      for (int j = 0; j < theDivisorSel.theElements.size; j ++) {
+      bool isGood = false; //<-we shall first check if the divisor is constant.
+      for (int j = 0; j < divisorSelection.theElements.size; j ++) {
         currentPointContribution = 1;
-        for (int k = 0; k < theDivisorSel[j].theElements.size; k ++) {
+        for (int k = 0; k < divisorSelection[j].theElements.size; k ++) {
           currentPrimePowerContribution = thePrimeFactorsAtPoints[j][k];
-          currentPrimePowerContribution.RaiseToPower(theDivisorSel[j][k].SelectedMult);
+          currentPrimePowerContribution.RaiseToPower(divisorSelection[j][k].SelectedMult);
           currentPointContribution *= currentPrimePowerContribution;
         }
-        if (signSel[j].SelectedMult == 1) {
+        if (signSelection[j].SelectedMult == 1) {
           currentPointContribution *= - 1;
         }
         if (!isGood) {
@@ -435,7 +455,7 @@ bool Polynomial<Rational>::FactorMeOutputIsADivisor(Polynomial<Rational>& output
             }
           }
         }
-        theValuesAtPointsLeft += valuesLeftInterpolands[j]*currentPointContribution;
+        theValuesAtPointsLeft += valuesLeftInterpolands[j] * currentPointContribution;
       }
       if (!isGood) {
         continue;
@@ -461,8 +481,8 @@ bool Polynomial<Rational>::FactorMeOutputIsADivisor(Polynomial<Rational>& output
       }
       *this = quotient;
       return true;
-    } while (theDivisorSel.IncrementReturnFalseIfPastLast());
-  } while (signSel.IncrementReturnFalseIfPastLast());
+    } while (divisorSelection.IncrementReturnFalseIfPastLast());
+  } while (signSelection.IncrementReturnFalseIfPastLast());
   output = *this;
   this->MakeOne(1);
   return true;

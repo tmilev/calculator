@@ -1017,7 +1017,7 @@ bool Calculator::innerWriteSSLieAlgebraToHD(
 ) {
   MacroRegisterFunctionWithName("Calculator::innerWriteSSLieAlgebraToHD");
   theCommands.CheckInputNotSameAsOutput(input, output);
-  if (!global.UserDefaultHasAdminRights()) {
+  if (!global.UserDefaultHasAdminRights() && !global.flagRunningConsoleTest) {
     return output.MakeError(
       "Caching structure constants to HD available to admins only. ",
       theCommands);

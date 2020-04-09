@@ -239,7 +239,7 @@ bool GroebnerBasisComputation<coefficient>::AddPolysAndReduceBasis() {
         &this->remainderDivision,
         i
       );
-      this->remainderDivision.ScaleNormalizeLeadingMonomial();
+      this->remainderDivision.scaleNormalizeLeadingMonomial();
       if (this->MaxNumGBComputations > 0) {
         if (this->NumberGBComputations > this->MaxNumGBComputations) {
           this->CheckConsistency();
@@ -377,7 +377,7 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasisImpro
           reportOuter.Report(out.str());
         }
         if (!outputRemainder.IsEqualToZero()) {
-          outputRemainder.ScaleNormalizeLeadingMonomial();
+          outputRemainder.scaleNormalizeLeadingMonomial();
           this->theBasiS.AddOnTop(outputRemainder);
           int theIndexMaxMon = this->theBasiS.LastObject()->GetIndexMaxMonomial(this->theMonOrdeR);
           this->leadingMons.AddOnTop((*this->theBasiS.LastObject())[theIndexMaxMon]);
@@ -641,7 +641,7 @@ bool GroebnerBasisComputation<coefficient>::AddRemainderToBasis() {
   if (this->remainderDivision.IsEqualToZero()) {
     return false;
   }
-  this->remainderDivision.ScaleNormalizeLeadingMonomial();
+  this->remainderDivision.scaleNormalizeLeadingMonomial();
   MonomialP theNewLeadingMon;
   coefficient remainderLeadingCoefficient;
   this->remainderDivision.GetIndexLeadingMonomial(

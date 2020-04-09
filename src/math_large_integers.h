@@ -478,6 +478,7 @@ public:
   // Scales a vector of rationals so as to
   // make the distinguished index equal to one.
   // The number at the distinguished index must not be zero.
+  // Returns the number by which the vector was multiplied.
   static Rational scaleNormalizeIndex(List<Rational>& output, int indexNonZeroEntry);
   LargeIntegerUnsigned GetDenominator() const;
   bool BeginsWithMinus();

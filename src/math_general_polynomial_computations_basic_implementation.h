@@ -510,7 +510,7 @@ void Polynomial<coefficient>::AssignMinPoly(const Matrix<coefficient>& input) {
     currentFactor.AddMonomial(tempM, 1);
     *this = MathRoutines::lcm(*this, currentFactor);
   }
-  this->ScaleNormalizeLeadingMonomial();
+  this->scaleNormalizeLeadingMonomial();
 }
 
 template <class coefficient>
@@ -519,8 +519,10 @@ int Polynomial<coefficient>::GetMaxPowerOfVariableIndex(int VariableIndex) {
   for (int i = 0; i < this->size(); i ++) {
     result = MathRoutines::Maximum(result, (*this)[i](VariableIndex).NumShort);
     if (!(*this)[i](VariableIndex).IsSmallInteger()) {
-      global.fatal << " This is a programming error: GetMaxPowerOfVariableIndex is called on a polynomial whose monomials"
-      << " have degrees that are not small integers. This needs to be fixed! " << global.fatal;
+      global.fatal << " This is a programming error: "
+      << "GetMaxPowerOfVariableIndex called on a polynomial whose monomials "
+      << "have degrees that are not small integers. "
+      << "This needs to be fixed! " << global.fatal;
     }
   }
   return result;

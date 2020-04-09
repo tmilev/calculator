@@ -1248,7 +1248,7 @@ bool CalculatorFunctions::innerFactorOutNumberContent(
   if (theV.IsEqualToZero()) {
     return output.AssignValue(0, theCommands);
   }
-  Rational theCF = theV.ScaleNormalizeLeadingMonomial();
+  Rational theCF = theV.scaleNormalizeLeadingMonomial();
   if (theCF == 0) {
     return false;
   }

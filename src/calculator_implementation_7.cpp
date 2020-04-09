@@ -2032,7 +2032,7 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
   }
   this->theRF.GetDenominator(this->theDen);
   this->theRF.GetNumerator(this->theNum);
-  this->theNum *= this->theDen.ScaleNormalizeLeadingMonomial();
+  this->theNum *= this->theDen.scaleNormalizeLeadingMonomial();
   Rational theConstantCoeff;
   if (!this->theDen.factorMeNormalizedFactors(theConstantCoeff, this->theFactors, &this->printoutPFsHtml)) {
     this->printoutPFsHtml << "<hr>Failed to factor the denominator of the rational function, I surrender.";
@@ -3898,7 +3898,7 @@ bool CalculatorFunctions::innerPolynomialRelations(
   }
   out << "<br>Relations: ";
   for (int i = 0; i < theRels.size; i ++) {
-    theRels[i].ScaleNormalizeLeadingMonomial();
+    theRels[i].scaleNormalizeLeadingMonomial();
     out << "<br>" << theRels[i].toString(&theFormat);
   }
   return output.AssignValue(out.str(), theCommands);
@@ -7923,7 +7923,7 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
     tempStream << "(" << startingEltString << ")";
     tempStream << "\\end{array}";
     tempStream2 << " $(" << startingEltString << ")$ ";
-    RationalFunction scale = theElt.ScaleNormalizeLeadingMonomial();
+    RationalFunction scale = theElt.scaleNormalizeLeadingMonomial();
     Rational tempRat;
     if (!scale.IsConstant(&tempRat)) {
       global.fatal << "Unexpected: scale not rational" << global.fatal;
@@ -7939,9 +7939,9 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
     Polynomial<Rational> tmpGCD, tmpRF;
     tempFormat.MaxLineLength = 80;
     if (theNumVars == 1) {
-      scale = theElt.ScaleNormalizeLeadingMonomial();
+      scale = theElt.scaleNormalizeLeadingMonomial();
       scale.GetNumerator(tmpGCD);
-      tmpGCD.ScaleNormalizeLeadingMonomial();
+      tmpGCD.scaleNormalizeLeadingMonomial();
       out << "<td>" << HtmlRoutines::GetMathMouseHover(tmpGCD.toString(&tempFormat)) << "</td>";
     }
     out << "<td>" << HtmlRoutines::GetMathMouseHover(theElt.toString(&tempFormat)) << "</td>";

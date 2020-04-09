@@ -1497,7 +1497,7 @@ void RationalFunction::gcd(
     << left.toString() << " <br>and right = "
     << right.toString() << " <br>I got that left * right = "
     << productBuffer.toString()
-    << "<br>, and that lcm(left, right) = "
+    << "<br>and that lcm(left, right) = "
     << leastCommonMultipleBuffer.toString()
     << " <br>but at the same time right * left divided by lcm (left, right) equals<br>"
     << output.toString()
@@ -1505,7 +1505,7 @@ void RationalFunction::gcd(
     << ", which is imposible."
     << global.fatal;
   }
-  output.ScaleNormalizeLeadingMonomial();
+  output.scaleNormalizeLeadingMonomial();
 }
 
 void RationalFunction::MakeOneLetterMoN(
@@ -1623,7 +1623,7 @@ void RationalFunction::lcm(
   }
   output = theBasis[maxMonNoTIndex];
   output.SetNumVariablesSubDeletedVarsByOne(theNumVars);
-  output.ScaleNormalizeLeadingMonomial();
+  output.scaleNormalizeLeadingMonomial();
 }
 
 void RationalFunction::operator*=(const MonomialP& other) {
@@ -1864,14 +1864,14 @@ Rational RationalFunction::scaleToIntegral() {
     return result;
   }
   if (this->expressionType == this->typePoly) {
-    return this->Numerator.GetElement().ScaleNormalizeLeadingMonomial();
+    return this->Numerator.GetElement().scaleNormalizeLeadingMonomial();
   }
   if (this->expressionType != this->typeRationalFunction) {
     return Rational::one();
   }
   Rational result;
-  result = this->Numerator.GetElement().ScaleNormalizeLeadingMonomial();
-  result /= this->Denominator.GetElement().ScaleNormalizeLeadingMonomial();
+  result = this->Numerator.GetElement().scaleNormalizeLeadingMonomial();
+  result /= this->Denominator.GetElement().scaleNormalizeLeadingMonomial();
   return result;
 }
 
@@ -1879,8 +1879,8 @@ void RationalFunction::simplifyLeadingCoefficientOnly() {
   if (this->expressionType != this->typeRationalFunction) {
     return;
   }
-  Rational scaleNumerator = this->Numerator.GetElement().ScaleNormalizeLeadingMonomial();
-  Rational scaleDenominator = this->Denominator.GetElement().ScaleNormalizeLeadingMonomial();
+  Rational scaleNumerator = this->Numerator.GetElement().scaleNormalizeLeadingMonomial();
+  Rational scaleDenominator = this->Denominator.GetElement().scaleNormalizeLeadingMonomial();
   Rational scale = scaleDenominator / scaleNumerator;
   this->Denominator.GetElement() *= scale.GetDenominator();
   this->Numerator.GetElement() *= scale.GetNumerator();
@@ -1940,8 +1940,8 @@ RationalFunction RationalFunction::scaleNormalizeIndex(
     RationalFunction& current = input[i];
     current.GetNumerator(currentNumerator);
     current.GetDenominator(currentDenominator);
-    scale = currentNumerator.ScaleNormalizeLeadingMonomial();
-    scale /= currentDenominator.ScaleNormalizeLeadingMonomial();
+    scale = currentNumerator.scaleNormalizeLeadingMonomial();
+    scale /= currentDenominator.scaleNormalizeLeadingMonomial();
     scales.AddOnTop(scale);
   }
   LargeIntegerUnsigned numeratorContentGreatestCommonDivisor = scales[0].GetNumerator().value;

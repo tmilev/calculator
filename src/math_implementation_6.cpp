@@ -149,7 +149,7 @@ bool Polynomial<coefficient>::leastCommonMultiple(
   }
   output = theBasis[maxMonNoTIndex];
   output.SetNumVariablesSubDeletedVarsByOne(theNumVars);
-  output.ScaleNormalizeLeadingMonomial();
+  output.scaleNormalizeLeadingMonomial();
   return true;
 }
 
@@ -194,7 +194,7 @@ bool Polynomial<coefficient>::greatestCommonDivisor(
     << ", which is imposible."
     << global.fatal;
   }
-  output.ScaleNormalizeLeadingMonomial();
+  output.scaleNormalizeLeadingMonomial();
   return true;
 }
 
@@ -247,7 +247,7 @@ bool Polynomial<Rational>::factorMe(
       outputFactors.AddOnTop(divisor);
       continue;
     }
-    Rational tempRat = divisor.ScaleNormalizeLeadingMonomial();
+    Rational tempRat = divisor.scaleNormalizeLeadingMonomial();
     currentFactor /= tempRat;
     factorsToBeProcessed.AddOnTop(divisor);
     factorsToBeProcessed.AddOnTop(currentFactor);
@@ -269,7 +269,7 @@ bool Polynomial<Rational>::FindOneVariableRationalRoots(List<Rational>& output) 
   }
   Polynomial<Rational> myCopy;
   myCopy = *this;
-  myCopy.ScaleNormalizeLeadingMonomial();
+  myCopy.scaleNormalizeLeadingMonomial();
   Rational lowestTerm, highestCoefficient;
   this->GetConstantTerm(lowestTerm);
   if (lowestTerm == 0) {
@@ -375,7 +375,7 @@ bool Polynomial<Rational>::factorMeOutputIsADivisor(
     return true;
   }
   Polynomial<Rational> thePoly = *this;
-  thePoly.ScaleNormalizeLeadingMonomial();
+  thePoly.scaleNormalizeLeadingMonomial();
   int degree = 0;
   if (!thePoly.TotalDegree().IsSmallInteger(&degree)) {
     return false;
@@ -488,7 +488,7 @@ bool Polynomial<Rational>::factorMeOutputIsADivisor(
 
 template <>
 bool Polynomial<Rational>::factorMeNormalizedFactors(
-  Rational& outputCoeff,
+  Rational& outputCoefficient,
   List<Polynomial<Rational> >& outputFactors,
   std::stringstream* comments
 ) const {
@@ -496,7 +496,7 @@ bool Polynomial<Rational>::factorMeNormalizedFactors(
   List<Polynomial<Rational> > factorsToBeProcessed;
   outputFactors.SetSize(0);
   factorsToBeProcessed.AddOnTop(*this);
-  factorsToBeProcessed.LastObject()->ScaleNormalizeLeadingMonomial();
+  outputCoefficient = factorsToBeProcessed.LastObject()->scaleNormalizeLeadingMonomial();
   Polynomial<Rational> currentFactor, divisor;
   while (factorsToBeProcessed.size > 0) {
     currentFactor = factorsToBeProcessed.PopLastObject();
@@ -504,11 +504,9 @@ bool Polynomial<Rational>::factorMeNormalizedFactors(
       return false;
     }
     if (currentFactor.IsEqualToOne()) {
-      divisor.ScaleNormalizeLeadingMonomial();
       outputFactors.AddOnTop(divisor);
       continue;
     }
-    divisor.ScaleNormalizeLeadingMonomial();
     factorsToBeProcessed.AddOnTop(divisor);
     factorsToBeProcessed.AddOnTop(currentFactor);
   }
@@ -518,7 +516,8 @@ bool Polynomial<Rational>::factorMeNormalizedFactors(
   for (int i = 0; i < outputFactors.size; i ++) {
     checkComputations *= outputFactors[i];
   }
-  if (!checkComputations.IsProportionalTo(*this, outputCoeff, 1)) {
+  checkComputations *= outputCoefficient;
+  if (!checkComputations.IsEqualTo(*this)) {
     global.fatal << "Error in polynomial factorization function." << global.fatal;
   }
   return true;

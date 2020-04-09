@@ -2319,7 +2319,8 @@ public:
     this->CheckFlagDeallocated();
     this->CheckNumCoeffsConsistency();
   }
-  coefficient ScaleNormalizeLeadingMonomial() {
+  // Returns the number by which the linear combination was multiplied.
+  coefficient scaleNormalizeLeadingMonomial() {
     if (this->IsEqualToZero()) {
       return coefficient();
     }
@@ -2640,7 +2641,7 @@ public:
     std::stringstream* comments
   );
   bool factorMeNormalizedFactors(
-    Rational& outputCoeff,
+    Rational& outputCoefficient,
     List<Polynomial<Rational> >& outputFactors,
     std::stringstream* comments
   ) const;

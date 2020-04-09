@@ -1093,8 +1093,8 @@ bool CalculatorConversions::innerExpressionFromRF(
   input.GetDenominator(denP);
   Polynomial<Rational> numRescaled = numP;
   Polynomial<Rational> denRescaled = denP;
-  Rational topMultiple = numRescaled.ScaleNormalizeLeadingMonomial();
-  Rational bottomMultiple = denRescaled.ScaleNormalizeLeadingMonomial();
+  Rational topMultiple = numRescaled.scaleNormalizeLeadingMonomial();
+  Rational bottomMultiple = denRescaled.scaleNormalizeLeadingMonomial();
   Rational multipleTopBottom = bottomMultiple / topMultiple;
   numRescaled *= multipleTopBottom.GetNumerator();
   denRescaled *= multipleTopBottom.GetDenominator();

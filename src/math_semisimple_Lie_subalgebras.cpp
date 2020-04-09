@@ -4147,7 +4147,7 @@ void CandidateSSSubalgebra::AddToSystem(const ElementSemisimpleLieAlgebra<Polyno
   Polynomial<AlgebraicNumber> thePoly;
   for (int i = 0; i < elementThatMustVanish.size(); i ++) {
     thePoly = elementThatMustVanish.coefficients[i];
-    thePoly.ScaleNormalizeLeadingMonomial();
+    thePoly.scaleNormalizeLeadingMonomial();
     this->theSystemToSolve.AddOnTopNoRepetition(thePoly);
   }
 }

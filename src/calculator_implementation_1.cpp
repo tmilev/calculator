@@ -665,7 +665,7 @@ bool Calculator::innerGroebner(
     );
   }
   for (int i = 0; i < inputVector.size; i ++) {
-    inputVector[i].ScaleNormalizeLeadingMonomial();
+    inputVector[i].scaleNormalizeLeadingMonomial();
   }
   GroebnerBasisComputation<AlgebraicNumber> theGroebnerComputation;
   theContext.ContextGetFormatExpressions(theGroebnerComputation.theFormat);

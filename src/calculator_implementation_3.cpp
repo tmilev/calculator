@@ -689,7 +689,7 @@ bool Calculator::innerPrintB3G2branchingIntermediate(
             latexTable2 << " $v_{\\lambda," <<  theIndex- eigenIndexcounter - 1 << "} $&";
             Polynomial<Rational> tempP;
             theG2B3Data.theShapovalovProducts[eigenIndexcounter].GetNumerator(tempP);
-            tempP.ScaleNormalizeLeadingMonomial();
+            tempP.scaleNormalizeLeadingMonomial();
             latexTable2 << "$\\begin{array}{l}" << tempP.toString(&theG2B3Data.theFormat) << "\\end{array}$ & ";
             if (tempP.FindOneVariableRationalRoots(tempList)) {
               tempList2.AddOnTopNoRepetition(tempList);
@@ -846,7 +846,7 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
           resultChar.ModOutVermaRelations(&rightWeightDual);
           theCentralCharacter.ModOutVermaRelations(&leftWeightDual);
           resultChar -= theCentralCharacter;
-          resultChar.ScaleNormalizeLeadingMonomial();
+          resultChar.scaleNormalizeLeadingMonomial();
           resultChar *= - 1;
           theCentralChars.AddOnTopNoRepetition(resultChar);
         }
@@ -1031,7 +1031,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
         }
       }
     }
-    RationalFunction scale = currentTensorEltEigen.ScaleNormalizeLeadingMonomial();
+    RationalFunction scale = currentTensorEltEigen.scaleNormalizeLeadingMonomial();
     if (!scale.IsConstant(&theG2B3Data.additionalMultipliers[k])) {
       global.fatal << "This is unexpected: the scale is not a constant. " << global.fatal;
     }

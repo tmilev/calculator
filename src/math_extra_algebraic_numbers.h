@@ -56,6 +56,7 @@ class AlgebraicNumber {
   static unsigned int HashFunction(const AlgebraicNumber& input) {
     return input.HashFunction();
   }
+  // Returns the number by which the vector was multiplied.
   static AlgebraicNumber scaleNormalizeIndex(
     List<AlgebraicNumber>& output, int indexNonZeroElement
   );
@@ -289,6 +290,7 @@ public:
   bool IsEqualToZero() const {
     return this->theValue.IsEqualToZero();
   }
+  // Returns the number by which the vector was multiplied.
   static ElementZmodP scaleNormalizeIndex(
     List<ElementZmodP>& toBeScaled, int indexNonZeroElement
   );

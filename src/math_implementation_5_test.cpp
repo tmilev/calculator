@@ -90,6 +90,9 @@ bool Polynomial<Rational>::Test::factorization() {
     "(2x+1)(-3x+1)", "-3x_{1} +1, 2x_{1} +1"
   );
   Polynomial<Rational>::Test::oneFactorization(
+    "(1/2x+1/3)(-3/5x+1)", "-1/10x_{1} -1/15, 3x_{1} -5"
+  );
+  Polynomial<Rational>::Test::oneFactorization(
     "(x^2+3x+1)(-3x+1)", "3x_{1} -1, -x_{1}^{2}-3x_{1} -1"
   );
   Polynomial<Rational>::Test::oneFactorization(

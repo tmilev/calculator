@@ -1547,7 +1547,7 @@ void ElementZmodP::ScaleToIntegralMinimalHeightAndGetPoly(
 ) {
   Polynomial<Rational> rescaled;
   rescaled = input;
-  rescaled.ScaleNormalizeLeadingMonomial();
+  rescaled.scaleNormalizeLeadingMonomial();
   output.SetExpectedSize(input.size());
   ElementZmodP theCF;
   theCF.theModulus = newModulo;

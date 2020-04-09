@@ -475,9 +475,8 @@ public:
     //return this->IsNegative();
   }
   bool GetSquareRootIfRational(Rational& output) const;
-  // Scales a vector of rationals so as to
-  // make the distinguished index equal to one.
-  // The number at the distinguished index must not be zero.
+  // Scales a vector of rationals so as to make all coordinates
+  // relatively prime integers such that the non-zero coefficient is positive.
   // Returns the number by which the vector was multiplied.
   static Rational scaleNormalizeIndex(List<Rational>& output, int indexNonZeroEntry);
   LargeIntegerUnsigned GetDenominator() const;
@@ -485,9 +484,9 @@ public:
   LargeInteger GetNumerator() const;
   bool GetPrimeFactorsAbsoluteValue(
     List<LargeInteger>& numeratorPrimeFactors,
-    List<int> &numeratorMultiplicities,
+    List<int>& numeratorMultiplicities,
     List<LargeInteger>& denominatorPrimeFactors,
-    List<int> &denominatorMultiplicities
+    List<int>& denominatorMultiplicities
   );
   const Rational& GetComplexConjugate() const;
   Rational RationalValue() {

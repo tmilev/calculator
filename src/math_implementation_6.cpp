@@ -319,25 +319,26 @@ bool Polynomial<Rational>::FindOneVariableRationalRoots(List<Rational>& output) 
 }
 
 template <>
-void Polynomial<Rational>::GetValuesLagrangeInterpolandsAtConsecutivePoints(
-  Vector<Rational>& inputConsecutivePointsOfInterpolation,
-  Vector<Rational>& inputPointsOfEvaluation,
+void Polynomial<Rational>::getValuesLagrangeInterpolands(
+  Vector<Rational>& pointsOfInterpolation,
+  Vector<Rational>& pointsOfEvaluation,
   Vectors<Rational>& outputValuesInterpolands
 ) {
-  outputValuesInterpolands.SetSize(inputConsecutivePointsOfInterpolation.size);
-  for (int i = 0; i < inputConsecutivePointsOfInterpolation.size; i ++) {
+  outputValuesInterpolands.SetSize(pointsOfInterpolation.size);
+  for (int i = 0; i < pointsOfInterpolation.size; i ++) {
     Vector<Rational>& currentInterpoland = outputValuesInterpolands[i];
-    currentInterpoland.SetSize(inputPointsOfEvaluation.size);
-    for (int j = 0; j < inputConsecutivePointsOfInterpolation.size; j ++) {
+    currentInterpoland.SetSize(pointsOfEvaluation.size);
+    for (int j = 0; j < pointsOfInterpolation.size; j ++) {
       currentInterpoland[j] = (i == j) ? 1 : 0;
     }
-    for (int j = inputConsecutivePointsOfInterpolation.size; j < inputPointsOfEvaluation.size; j ++) {
+    for (int j = pointsOfInterpolation.size; j < pointsOfEvaluation.size; j ++) {
       currentInterpoland[j] = 1;
-      for (int k = 0; k < inputConsecutivePointsOfInterpolation.size; k ++) {
-        if (i != k) {
-          currentInterpoland[j] *= inputPointsOfEvaluation[j] - inputConsecutivePointsOfInterpolation[k];
-          currentInterpoland[j] /= inputConsecutivePointsOfInterpolation[i] - inputConsecutivePointsOfInterpolation[k];
+      for (int k = 0; k < pointsOfInterpolation.size; k ++) {
+        if (i == k) {
+          continue;
         }
+        currentInterpoland[j] *= pointsOfEvaluation[j] - pointsOfInterpolation[k];
+        currentInterpoland[j] /= pointsOfInterpolation[i] - pointsOfInterpolation[k];
       }
     }
   }
@@ -347,16 +348,17 @@ template <class coefficient>
 void Polynomial<coefficient>::Interpolate(
   const Vector<coefficient>& thePoints, const Vector<coefficient>& ValuesAtThePoints
 ) {
-  Polynomial<coefficient> theLagrangeInterpolator, tempP;
+  Polynomial<coefficient> theLagrangeInterpolator, accumulator;
   this->MakeZero();
   for (int i = 0; i < thePoints.size; i ++) {
     theLagrangeInterpolator.MakeConst(1, 1);
     for (int j = 0; j < thePoints.size; j ++) {
-      if (i != j) {
-        tempP.MakeDegreeOne(1, 0, 1, - thePoints[j]);
-        tempP /= thePoints[i] - thePoints[j];
-        theLagrangeInterpolator *= tempP;
+      if (i == j) {
+        continue;
       }
+      accumulator.MakeDegreeOne(1, 0, 1, - thePoints[j]);
+      accumulator /= thePoints[i] - thePoints[j];
+      theLagrangeInterpolator *= accumulator;
     }
     theLagrangeInterpolator *= ValuesAtThePoints[i];
     *this += theLagrangeInterpolator;
@@ -431,7 +433,7 @@ bool Polynomial<Rational>::factorMeOutputIsADivisor(
   }
   divisorSelection.initFromMults(thePrimeFactorsMults);
   valuesLeftInterpolands.SetSize(degreeLeft + 1);
-  this->GetValuesLagrangeInterpolandsAtConsecutivePoints(
+  this->getValuesLagrangeInterpolands(
     PointsOfInterpolationLeft, AllPointsOfEvaluation, valuesLeftInterpolands
   );
   do {
@@ -464,7 +466,7 @@ bool Polynomial<Rational>::factorMeOutputIsADivisor(
         isGood = false;
         break;
       }
-      currentPointContribution = (theValuesAtPoints[j]) / theValuesAtPointsLeft[j];
+      currentPointContribution = theValuesAtPoints[j] / theValuesAtPointsLeft[j];
       if (!currentPointContribution.IsInteger()) {
         isGood = false;
         break;

@@ -2631,9 +2631,9 @@ public:
     this->GetConstantTerm(result, theRingZero);
     return result;
   }
-  static void GetValuesLagrangeInterpolandsAtConsecutivePoints(
-    Vector<Rational>& inputConsecutivePointsOfInterpolation,
-    Vector<Rational>& inputPointsOfEvaluation,
+  static void getValuesLagrangeInterpolands(
+    Vector<Rational>& pointsOfInterpolation,
+    Vector<Rational>& pointsOfEvaluation,
     Vectors<Rational>& outputValuesInterpolands
   );
   bool factorMeOutputIsADivisor(

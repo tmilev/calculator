@@ -202,6 +202,9 @@ class SelectionOneItem {
     out << this->SelectedMult << " out of " << this->MaxMultiplicity;
     return out.str();
   }
+  LargeInteger totalCombinations() {
+    return this->MaxMultiplicity + 1;
+  }
 };
 
 template <class Base>
@@ -211,10 +214,10 @@ public:
   Base& operator[](int i) {
     return this->theElements[i];
   }
-  LargeInteger GetNumTotalCombinations() {
+  LargeInteger totalCombinations() {
     LargeInteger result = 1;
     for (int i = 0; i < this->theElements.size; i ++) {
-      result *= this->theElements[i].GetNumTotalCombinations();
+      result *= this->theElements[i].totalCombinations();
     }
     return result;
   }
@@ -261,7 +264,7 @@ class SelectionFixedRank {
 public:
   Selection theSelection;
   int DesiredSubsetSize;
-  LargeInteger GetNumTotalCombinations() {
+  LargeInteger totalCombinations() {
     LargeInteger result;
     MathRoutines::NChooseK(theSelection.MaxSize, DesiredSubsetSize, result);
     return result;

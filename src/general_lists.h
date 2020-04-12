@@ -1763,6 +1763,7 @@ public:
   int threadIndex;
   int ticks;
   int ticksPerReport;
+  // Constant GlobalVariables::Response::ReportType
   int reportType;
   bool flagInitialized;
   // Call TickAndWantReport before generating report.

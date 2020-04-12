@@ -6807,7 +6807,7 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other
     global.fatal << "Failed to generate outer automorphisms of Dynkin simple type. "
     << "The upper limit for such automorphism group size is 100000. " << global.fatal;
   }
-  Rational numCyclesFromTypes = selectedTypes.GetNumTotalCombinations();
+  Rational numCyclesFromTypes = selectedTypes.totalCombinations();
   if (!numCyclesFromTypes.IsSmallInteger()) {
     global.fatal << "Computation is too large: "
     << "I am crashing to let you know that the program cannot "

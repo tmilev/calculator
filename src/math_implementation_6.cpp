@@ -436,7 +436,14 @@ bool Polynomial<Rational>::factorMeOutputIsADivisor(
   this->getValuesLagrangeInterpolands(
     PointsOfInterpolationLeft, AllPointsOfEvaluation, valuesLeftInterpolands
   );
+  ProgressReport theReport(1000, GlobalVariables::Response::ReportType::general);
+  LargeInteger total = divisorSelection.totalCombinations();
   do {
+    if (theReport.TickAndWantReport()) {
+      std::stringstream report;
+      report << "Trying divisor combination " << theReport.ticks << " out of " << total.toString();
+      theReport.Report(report.str());
+    }
     theValuesAtPointsLeft.MakeZero(theValuesAtPoints.size);
     Rational firstValue;
     bool isGood = false; //<-we shall first check if the divisor is constant.

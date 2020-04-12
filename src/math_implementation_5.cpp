@@ -1569,63 +1569,13 @@ void RationalFunction::lcm(
   const Polynomial<Rational>& right,
   Polynomial<Rational>& output
 ) {
-  MacroRegisterFunctionWithName("RationalFunctionOld::lcm");
-  Polynomial<Rational> leftTemp, rightTemp, tempP;
-  List<Polynomial<Rational> > theBasis;
-  leftTemp = left;
-  rightTemp = right;
-  int theNumVars = MathRoutines::Maximum(
-    left.GetMinimalNumberOfVariables(), right.GetMinimalNumberOfVariables()
+  std::stringstream commentsOnFailure;
+  bool success = Polynomial::leastCommonMultiple(
+    left, right, output, Rational.one(), &commentsOnFailure
   );
-  leftTemp.SetNumVariablesSubDeletedVarsByOne(theNumVars + 1);
-  rightTemp.SetNumVariablesSubDeletedVarsByOne(theNumVars + 1);
-  leftTemp.ScaleToIntegralNoGCDCoeffs();
-  rightTemp.ScaleToIntegralNoGCDCoeffs();
-  tempP.MakeMonomiaL(theNumVars, 1, Rational(1), theNumVars + 1);
-  leftTemp *= tempP;
-  tempP *= - 1;
-  tempP += 1;
-  rightTemp *= tempP;
-  theBasis.size = 0;
-  theBasis.AddOnTop(leftTemp);
-  theBasis.AddOnTop(rightTemp);
-  GroebnerBasisComputation<Rational> theComp;
-  theComp.thePolynomialOrder.theMonOrder = MonomialP::orderForGCD();
-  theComp.MaxNumGBComputations = - 1;
-  if (!theComp.TransformToReducedGroebnerBasis(theBasis)) {
-    global.fatal << "Transformation to reduced "
-    << "Groebner basis is not allowed to fail in this function. "
-    << global.fatal;
+  if (!success) {
+    global.fatal << "Failure of least common multiple computation not allowed here. " << global.fatal;
   }
-  int maxMonNoTIndex = - 1;
-  Rational maximalTotalDegree;
-  MonomialP currentLeading;
-  for (int i = 0; i < theBasis.size; i ++) {
-    theBasis[i].GetIndexLeadingMonomial(
-      &currentLeading, nullptr, &theComp.thePolynomialOrder.theMonOrder
-    );
-    if (currentLeading(theNumVars) == 0) {
-      if (maxMonNoTIndex == - 1) {
-        maximalTotalDegree = currentLeading.TotalDegree();
-        maxMonNoTIndex = i;
-      }
-      if (maximalTotalDegree < currentLeading.TotalDegree()) {
-        maximalTotalDegree = currentLeading.TotalDegree();
-        maxMonNoTIndex = i;
-      }
-    }
-  }
-  if (maxMonNoTIndex == - 1) {
-    global.fatal << "This is a programming error: failed to obtain "
-    << "the least common multiple of two polynomials. The list of polynomials is: ";
-    for (int i = 0; i < theBasis.size; i ++) {
-      global.fatal << theBasis[i].toString() << ", ";
-    }
-    global.fatal << global.fatal;
-  }
-  output = theBasis[maxMonNoTIndex];
-  output.SetNumVariablesSubDeletedVarsByOne(theNumVars);
-  output.scaleNormalizeLeadingMonomial();
 }
 
 void RationalFunction::operator*=(const MonomialP& other) {

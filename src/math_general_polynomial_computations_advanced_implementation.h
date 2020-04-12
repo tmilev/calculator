@@ -1411,7 +1411,7 @@ std::string GroebnerBasisComputation<coefficient>::ToStringSerreLikeSolution() {
   Polynomial<Rational> theMon;
   for (int i = 0; i < this->systemSolution.GetElement().size; i ++) {
     if (this->solutionsFound.GetElement().selected[i]) {
-      theMon.MakeMonomiaL(i, 1, 1);
+      theMon.MakeMonomial(i, 1, 1);
       out << " " << theMon.toString(&this->theFormat)
       << " = " << this->systemSolution.GetElement()[i] << ";";
     }
@@ -1420,12 +1420,127 @@ std::string GroebnerBasisComputation<coefficient>::ToStringSerreLikeSolution() {
 }
 
 template <class coefficient>
-void GroebnerBasisComputation<coefficient>::SetSerreLikeSolutionIndex(int theIndex, const coefficient& theConst) {
+void GroebnerBasisComputation<coefficient>::SetSerreLikeSolutionIndex(
+  int theIndex, const coefficient& theConst
+) {
   this->systemSolution.GetElement()[theIndex] = theConst;
   if (this->solutionsFound.GetElement().selected[theIndex]) {
     global.fatal << "This a programming error: attempting to set "
     << "value to a variable whose value has already been computed. " << global.fatal;
   }
   this->solutionsFound.GetElement().AddSelectionAppendNewIndex(theIndex);
+}
+
+template<class coefficient>
+bool Polynomial<coefficient>::leastCommonMultiple(
+  const Polynomial<coefficient>& left,
+  const Polynomial<coefficient>& right,
+  Polynomial<coefficient>& output,
+  coefficient one,
+  std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("Polynomial::leastCommonMultiple");
+  Polynomial<coefficient> leftTemp, rightTemp, oneMinusT;
+  List<Polynomial<coefficient> > theBasis;
+  leftTemp = left;
+  rightTemp = right;
+  int theNumVars = MathRoutines::Maximum(
+    left.GetMinimalNumberOfVariables(), right.GetMinimalNumberOfVariables()
+  );
+  leftTemp.SetNumVariablesSubDeletedVarsByOne(theNumVars + 1);
+  rightTemp.SetNumVariablesSubDeletedVarsByOne(theNumVars + 1);
+  leftTemp.ScaleToIntegralNoGCDCoeffs();
+  rightTemp.ScaleToIntegralNoGCDCoeffs();
+  oneMinusT.MakeMonomiaL(theNumVars, 1, Rational(1), theNumVars + 1);
+  leftTemp *= oneMinusT;
+  oneMinusT *= - 1;
+  oneMinusT += 1;
+  rightTemp *= oneMinusT;
+  theBasis.size = 0;
+  theBasis.AddOnTop(leftTemp);
+  theBasis.AddOnTop(rightTemp);
+  GroebnerBasisComputation<Rational> theComp;
+  theComp.thePolynomialOrder.theMonOrder = MonomialP::orderForGCD();
+  theComp.MaxNumGBComputations = - 1;
+  if (!theComp.TransformToReducedGroebnerBasis(theBasis)) {
+    global.fatal << "Transformation to reduced "
+    << "Groebner basis is not allowed to fail in this function. "
+    << global.fatal;
+  }
+  int maxMonNoTIndex = - 1;
+  Rational maximalTotalDegree;
+  MonomialP currentLeading;
+  for (int i = 0; i < theBasis.size; i ++) {
+    theBasis[i].GetIndexLeadingMonomial(
+      &currentLeading, nullptr, &theComp.thePolynomialOrder.theMonOrder
+    );
+    if (currentLeading(theNumVars) == 0) {
+      if (maxMonNoTIndex == - 1) {
+        maximalTotalDegree = currentLeading.TotalDegree();
+        maxMonNoTIndex = i;
+      }
+      if (maximalTotalDegree < currentLeading.TotalDegree()) {
+        maximalTotalDegree = currentLeading.TotalDegree();
+        maxMonNoTIndex = i;
+      }
+    }
+  }
+  if (maxMonNoTIndex == - 1) {
+    global.fatal << "This is a programming error: failed to obtain "
+    << "the least common multiple of two polynomials. The list of polynomials is: ";
+    for (int i = 0; i < theBasis.size; i ++) {
+      global.fatal << theBasis[i].toString() << ", ";
+    }
+    global.fatal << global.fatal;
+  }
+  output = theBasis[maxMonNoTIndex];
+  output.SetNumVariablesSubDeletedVarsByOne(theNumVars);
+  output.scaleNormalizeLeadingMonomial();
+  return true;
+}
+
+template<class coefficient>
+bool Polynomial<coefficient>::greatestCommonDivisor(
+  const Polynomial<coefficient>& left,
+  const Polynomial<coefficient>& right,
+  Polynomial<coefficient>& output,
+  coefficient one,
+  std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("Polynomial::greatestCommonDivisor");
+  Polynomial<coefficient> leastCommonMultipleBuffer;
+  Polynomial<coefficient> productBuffer;
+  Polynomial<coefficient> remainderBuffer;
+  if (!Polynomial<coefficient>::leastCommonMultiple(
+    left, right, leastCommonMultipleBuffer, one, commentsOnFailure
+  )) {
+    return false;
+  }
+  productBuffer = left;
+  productBuffer *= right;
+  productBuffer.DivideBy(
+    leastCommonMultipleBuffer,
+    output,
+    remainderBuffer,
+    &MonomialP::orderForGCD()
+  );
+  if (!remainderBuffer.IsEqualToZero() || output.IsEqualToZero()) {
+    global.fatal
+    << "This is a programming error."
+    << "<br>While computing the gcd of left = "
+    << left.toString() << "<br>and right = "
+    << right.toString() << "<br>I got that left * right = "
+    << productBuffer.toString()
+    << "<br>, and that lcm(left, right) = "
+    << leastCommonMultipleBuffer.toString()
+    << "<br>but at the same time "
+    << "right * left divided by lcm (left, right) equals<br>"
+    << output.toString()
+    << "<br>with remainder " << remainderBuffer.toString()
+    << ", which is imposible."
+    << global.fatal;
+  }
+  output.scaleNormalizeLeadingMonomial();
+  return true;
 }
 #endif

@@ -1,6 +1,7 @@
 // The current file is licensed under the license terms found in the main header file "calculator.h".
 // For additional information refer to the file "calculator.h".
 #include "math_general_polynomial_computations_basic_implementation.h"
+#include "math_general_polynomial_computations_advanced_implementation.h"
 #include "calculator.h"
 
 bool MonomialP::Test::all() {
@@ -112,10 +113,20 @@ bool Polynomial<Rational>::Test::factorization() {
 
 template <>
 bool Polynomial<Rational>::Test::all() {
-  Polynomial<Rational>::Test::fromStringTest();
-  Polynomial<Rational>::Test::factorization();
-  Polynomial<Rational>::Test::leastCommonMultiple();
+  Polynomial<Rational>::Test tester;
+  tester.initialize();
+
+  tester.leastCommonMultiple();
+  tester.fromStringTest();
+  tester.factorization();
   return true;
+}
+
+template <>
+void Polynomial<Rational>::Test::initialize() {
+  this->format.polyAlphabeT.AddOnTop("x");
+  this->format.polyAlphabeT.AddOnTop("y");
+  this->format.polyAlphabeT.AddOnTop("z");
 }
 
 template <>
@@ -159,5 +170,28 @@ bool Polynomial<Rational>::Test::fromStringTest() {
 }
 
 template <>
+bool Polynomial<Rational>::Test::oneLeastCommonMultiple(
+  const std::string& left,
+  const std::string& right,
+  const std::string& expected
+) {
+  Polynomial<Rational> leftPolynomial = Polynomial<Rational>::Test::fromString(left);
+  Polynomial<Rational> rightPolynomial = Polynomial<Rational>::Test::fromString(right);
+  Polynomial<Rational> output;
+  Polynomial<Rational>::leastCommonMultiple(
+    leftPolynomial, rightPolynomial, output, Rational::one(), nullptr
+  );
+  if (output.toString() != expected) {
+    global.fatal << "Least common multiple of "
+    << left << ", " << right
+    << " computed to be: " << output.toString(&this->format)
+    << ", expected: " << expected << ". " << global.fatal;
+  }
+  return true;
+}
+
+template <>
 bool Polynomial<Rational>::Test::leastCommonMultiple() {
+  this->oneLeastCommonMultiple("x", "y", "x y");
+  return true;
 }

@@ -2697,22 +2697,23 @@ public:
   bool FindOneVariableRationalRoots(List<Rational>& output);
   coefficient GetDiscriminant();
   void GetCoeffInFrontOfLinearTermVariableIndex(int index, coefficient& output);
-  void MakeMonomiaL(
-    int LetterIndex,
-    const Rational& Power,
-    const coefficient& Coeff = 1,
+  void MakeMonomial(
+    int letterIndex,
+    const Rational& power,
+    const coefficient& inputCoefficient = 1,
     int ExpectedNumVars = 0
   ) {
-    if (LetterIndex < 0) {
-      global.fatal << "This is a programming error: the index"
-      << LetterIndex + 1 << " is  non-positive which is not allowed. " << global.fatal;
+    if (letterIndex < 0) {
+      global.fatal << "Negative variable index: "
+      << letterIndex << " is not allowed. "
+      << global.fatal;
     }
-    int numVars = MathRoutines::Maximum(LetterIndex + 1, ExpectedNumVars);
+    int numVars = MathRoutines::Maximum(letterIndex + 1, ExpectedNumVars);
     this->MakeZero();
     MonomialP tempM;
     tempM.MakeOne(numVars);
-    tempM[LetterIndex] = Power;
-    this->AddMonomial(tempM, Coeff);
+    tempM[letterIndex] = power;
+    this->AddMonomial(tempM, inputCoefficient);
   }
   void MakeDegreeOne(int NVar, int NonZeroIndex, const coefficient& coeff);
   void MakeDegreeOne(
@@ -3092,16 +3093,34 @@ public:
   );
   class Test {
   public:
+    FormatExpressions format;
     static bool all();
-    static bool factorization();
-    static bool oneFactorization(
+    void initialize();
+    bool oneLeastCommonMultiple(
+      const std::string& left,
+      const std::string& right,
+      const std::string& expected
+    );
+    bool leastCommonMultiple();
+    bool factorization();
+    bool oneFactorization(
       const std::string& input, const std::string& expectedFactors
     );
-    static Polynomial<coefficient> fromString(const std::string& input);
-    static bool fromStringTest();
+    Polynomial<coefficient> fromString(const std::string& input);
+    bool fromStringTest();
   };
 };
 
+template <>
+bool Polynomial<Rational>::Test::oneLeastCommonMultiple(
+  const std::string& left,
+  const std::string& right,
+  const std::string& expected
+);
+template <>
+void Polynomial<Rational>::Test::initialize();
+template <>
+bool Polynomial<Rational>::Test::leastCommonMultiple();
 template <>
 bool Polynomial<Rational>::Test::all();
 template <>
@@ -3113,6 +3132,7 @@ bool Polynomial<Rational>::factorMe(
   List<Polynomial<Rational> >& outputFactors,
   std::stringstream* comments
 ) const;
+
 template<>
 bool Polynomial<Rational>::FindOneVariableRationalRoots(List<Rational>& output);
 template <>

@@ -8530,7 +8530,7 @@ void KLpolys::ComputeKLxy(int x, int y) {
       2 * this->TheWeylGroup->theGroup.theElements[i].generatorsLastAppliedFirst.size -
       this->TheWeylGroup->theGroup.theElements[y].generatorsLastAppliedFirst.size;
       powerQ /= 2;
-      tempP2.MakeMonomiaL(0, powerQ, tempI, 1);
+      tempP2.makeMonomial(0, powerQ, tempI, 1);
       tempP1 *= tempP2;
       tempP1 *= this->theKLPolys[i][y];
       if (!this->Explored[i]) {
@@ -8582,7 +8582,7 @@ bool KLpolys::ComputeRxy(int x, int y, int SimpleReflectionIndex) {
   }
   if (!boolX && boolY) {
     Polynomial<Rational> qMinus1;
-    qMinus1.MakeMonomiaL(0, 1, 1, 1);
+    qMinus1.makeMonomial(0, 1, 1, 1);
     this->theRPolys[x][y] = qMinus1;
     this->theRPolys[x][y] *= (this->theRPolys[sx][sy]);
     qMinus1 -= 1;

@@ -164,7 +164,7 @@ bool Polynomial<Rational>::FindOneVariableRationalRoots(List<Rational>& output) 
   this->GetConstantTerm(lowestTerm);
   if (lowestTerm == 0) {
     Polynomial<Rational> x1, tempP;
-    x1.MakeMonomiaL(0, 1, 1);
+    x1.makeMonomial(0, 1, 1);
     myCopy.DivideBy(x1, myCopy, tempP, monomialOrder);
     List<Rational> tempList;
     bool result = myCopy.FindOneVariableRationalRoots(tempList);

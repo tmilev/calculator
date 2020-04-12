@@ -67,10 +67,13 @@ bool Polynomial<coefficient>::IsOneVariablePoly(int* whichVariable) const {
 }
 
 template <class coefficient>
-void Polynomial<coefficient>::MakeDeterminantFromSquareMatrix(const Matrix<Polynomial<coefficient> >& theMat) {
+void Polynomial<coefficient>::MakeDeterminantFromSquareMatrix(
+  const Matrix<Polynomial<coefficient> >& theMat
+) {
   if (theMat.NumCols != theMat.NumRows) {
     global.fatal << "Cannot compute determinant: matrix has "
-    << theMat.NumRows << " rows and " << theMat.NumCols << " columns. " << global.fatal;
+    << theMat.NumRows << " rows and " << theMat.NumCols
+    << " columns. " << global.fatal;
   }
   permutation thePerm;
   thePerm.initPermutation(theMat.NumRows);
@@ -100,48 +103,12 @@ void Polynomial<coefficient>::MakeDeterminantFromSquareMatrix(const Matrix<Polyn
   *this = result;
 }
 
-template<class coefficient>
-void Polynomial<coefficient>::ScaleToIntegralNoGCDCoeffs() {
-  if (this->size() == 0) {
-    return;
-  }
-  int indexHighestMonomial = 0;
-  LargeIntegerUnsigned tempInt1, accumNum, accumDen;
-  LargeInteger tempInt2;
-  accumDen.MakeOne();
-  accumNum = this->coefficients[0].GetNumerator().value;
-  for (int i = 0; i < this->size(); i ++) {
-    if (MonomialP::orderDefault().greaterThan(
-      (*this)[i],
-      (*this)[indexHighestMonomial]
-    )) {
-      indexHighestMonomial = i;
-    }
-    Rational& tempRat = this->coefficients[i];
-    tempInt1 = tempRat.GetDenominator();
-    tempInt2 = tempRat.GetNumerator();
-    LargeIntegerUnsigned::lcm(tempInt1, accumDen, accumDen);
-    LargeIntegerUnsigned::gcd(tempInt2.value, accumNum, accumNum);
-  }
-  Rational theMultiple;
-  theMultiple.MakeOne();
-  if (this->coefficients[indexHighestMonomial].IsNegative()) {
-    theMultiple.MakeMOne();
-  }
-  theMultiple.MultiplyByLargeIntUnsigned(accumDen);
-  Rational tempRat2;
-  LargeInteger tempInt3;
-  tempInt3.AssignLargeIntUnsigned(accumNum);
-  tempRat2.AssignLargeInteger(tempInt3);
-  theMultiple.DivideBy(tempRat2);
-  *this *= theMultiple;
-}
-
 template <class coefficient>
 int Polynomial<coefficient>::TotalDegreeInt() const {
   int result = - 1;
   if (!this->TotalDegree().IsSmallInteger(&result)) {
-    global.fatal << "This is a programming error: requested total degree of a "
+    global.fatal
+    << "This is a programming error: requested total degree of a "
     << "polynomial in int formal, but the "
     << "degree of the polynomial is not a small integer. "
     << global.fatal;
@@ -153,8 +120,6 @@ template <class coefficient>
 bool Polynomial<coefficient>::Substitution(const List<Polynomial<coefficient> >& TheSubstitution) {
   MacroRegisterFunctionWithName("Polynomial::Substitution");
   Polynomial<coefficient> Accum, TempPoly;
-//  int commentGrandMasterCheckWhenDone;
-//  this->GrandMasterConsistencyCheck();
   for (int i = 0; i < this->size(); i ++) {
     if (!(*this)[i].SubstitutioN(TheSubstitution, TempPoly)) {
       return false;

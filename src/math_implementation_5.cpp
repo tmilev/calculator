@@ -1520,7 +1520,7 @@ void RationalFunction::MakeOneLetterMoN(
   this->Numerator.GetElement().MakeDegreeOne(ExpectedNumVars, theIndex, theCoeff);
 }
 
-void RationalFunction::MakeMonomiaL(
+void RationalFunction::makeMonomial(
   int LetterIndex, const Rational& Power, const Rational& Coeff, int ExpectedNumVars
 ) {
   if (LetterIndex < 0) {
@@ -1528,7 +1528,7 @@ void RationalFunction::MakeMonomiaL(
     << LetterIndex << ". " << global.fatal;
   }
   this->expressionType = this->typePoly;
-  this->Numerator.GetElement().MakeMonomiaL(LetterIndex, Power, Coeff, ExpectedNumVars);
+  this->Numerator.GetElement().makeMonomial(LetterIndex, Power, Coeff, ExpectedNumVars);
 }
 
 void RationalFunction::SetNumVariablesSubDeletedVarsByOne(int newNumVars) {
@@ -1570,11 +1570,13 @@ void RationalFunction::lcm(
   Polynomial<Rational>& output
 ) {
   std::stringstream commentsOnFailure;
-  bool success = Polynomial::leastCommonMultiple(
-    left, right, output, Rational.one(), &commentsOnFailure
+  bool success = Polynomial<Rational>::leastCommonMultiple(
+    left, right, output, Rational::one(), &commentsOnFailure
   );
   if (!success) {
-    global.fatal << "Failure of least common multiple computation not allowed here. " << global.fatal;
+    global.fatal
+    << "Failure of least common multiple "
+    << "computation not allowed here. " << global.fatal;
   }
 }
 
@@ -1642,7 +1644,6 @@ void RationalFunction::operator/=(const RationalFunction& other) {
     global.fatal << "Incosistent rational function. " << global.fatal;
   }
 }
-
 
 void RationalFunction::operator*=(const Rational& other) {
   if (other.IsEqualToZero()) {

@@ -258,7 +258,7 @@ bool CalculatorConversions::functionPolynomial(Calculator& theCommands, const Ex
           << "Please make sure that this is not a typo. "
           << "I am treating " << input.toString() << " as a single variable. ";
           Polynomial<coefficient> JustAmonomial;
-          JustAmonomial.MakeMonomiaL(0, 1, 1);
+          JustAmonomial.makeMonomial(0, 1, 1);
           Expression theContext;
           theContext.ContextMakeContextWithOnePolyVar(theCommands, input);
           return output.AssignValueWithContext(JustAmonomial, theContext, theCommands);
@@ -279,10 +279,10 @@ bool CalculatorConversions::functionPolynomial(Calculator& theCommands, const Ex
       return output.AssignValueWithContext(resultP, theConverted.GetContext(), theCommands);
     }
   }
-  Polynomial<coefficient> JustAmonomial;
-  JustAmonomial.MakeMonomiaL(0, 1, 1);
+  Polynomial<coefficient> monomial;
+  monomial.makeMonomial(0, 1, 1);
   Expression theContext;
   theContext.ContextMakeContextWithOnePolyVar(theCommands, input);
-  return output.AssignValueWithContext(JustAmonomial, theContext, theCommands);
+  return output.AssignValueWithContext(monomial, theContext, theCommands);
 }
 #endif

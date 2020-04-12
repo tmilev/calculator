@@ -2133,10 +2133,10 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
     AlgebraicNumber b = currentSecondDegreePoly.GetMonomialCoefficient(MonomialP(0, 1));
     a.CheckConsistency();
     b.CheckConsistency();
-    currentLinPoly.MakeMonomiaL(0, 1);
+    currentLinPoly.makeMonomial(0, 1);
     currentLinPoly -= (- b + theDiscriminantSqrt) / (a * 2);
     this->theDenominatorFactorsWithMults.AddMonomial(currentLinPoly, theDenominatorFactorsWithMultsCopy.coefficients[i]);
-    currentLinPoly.MakeMonomiaL(0, 1);
+    currentLinPoly.makeMonomial(0, 1);
     currentLinPoly -= (- b - theDiscriminantSqrt) / (a * 2);
     this->theDenominatorFactorsWithMults.AddMonomial(currentLinPoly, theDenominatorFactorsWithMultsCopy.coefficients[i]);
     additionalMultiple *= a;
@@ -2638,7 +2638,7 @@ bool CalculatorFunctions::innerDifferentiateTrigAndInverseTrig(
   if (theArgument.IsOperationGiven(theCommands.opArcTan())) {
     Polynomial<Rational> onePlusXsquared;
     RationalFunction oneOverOnePlusXsquared;
-    onePlusXsquared.MakeMonomiaL(0, 2);
+    onePlusXsquared.makeMonomial(0, 2);
     onePlusXsquared += Rational::one();
     oneOverOnePlusXsquared.MakeOne();
     oneOverOnePlusXsquared /= onePlusXsquared;
@@ -2650,7 +2650,7 @@ bool CalculatorFunctions::innerDifferentiateTrigAndInverseTrig(
     Expression denE, theContext;
     theContext.ContextMakeContextWithOnePolyVar(theCommands, "x");
     RationalFunction oneMinusXsquared;
-    oneMinusXsquared.MakeMonomiaL(0, 2);
+    oneMinusXsquared.makeMonomial(0, 2);
     oneMinusXsquared *= - 1;
     oneMinusXsquared += 1;
     denE.AssignValueWithContext(oneMinusXsquared, theContext, theCommands);
@@ -2660,7 +2660,7 @@ bool CalculatorFunctions::innerDifferentiateTrigAndInverseTrig(
     Expression denE, theContext;
     theContext.ContextMakeContextWithOnePolyVar(theCommands, "x");
     RationalFunction oneMinusXsquared;
-    oneMinusXsquared.MakeMonomiaL(0, 2);
+    oneMinusXsquared.makeMonomial(0, 2);
     oneMinusXsquared *= - 1;
     oneMinusXsquared += 1;
     denE.AssignValueWithContext(oneMinusXsquared, theContext, theCommands);

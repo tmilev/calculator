@@ -2189,7 +2189,7 @@ bool Expression::ContextGetPolySubFromSuperContext(
     if (theNewIndex == - 1) {
       return false;
     }
-    output[i - 1].MakeMonomiaL(theNewIndex - 1, 1, 1, numVars);
+    output[i - 1].makeMonomial(theNewIndex - 1, 1, 1, numVars);
   }
   return true;
 }
@@ -2225,7 +2225,7 @@ bool Expression::ContextGetPolyAndEWASubFromSuperContext(
     if (theNewIndex == - 1) {
       return false;
     }
-    outputEWApart[i - 1].MakeMonomiaL(theNewIndex - 1, 1, 1, numVars);
+    outputEWApart[i - 1].makeMonomial(theNewIndex - 1, 1, 1, numVars);
   }
   return true;
 }

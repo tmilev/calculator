@@ -2697,7 +2697,7 @@ public:
   bool FindOneVariableRationalRoots(List<Rational>& output);
   coefficient GetDiscriminant();
   void GetCoeffInFrontOfLinearTermVariableIndex(int index, coefficient& output);
-  void MakeMonomial(
+  void makeMonomial(
     int letterIndex,
     const Rational& power,
     const coefficient& inputCoefficient = 1,
@@ -2775,7 +2775,6 @@ public:
     int theVar,
     Polynomial<Polynomial<coefficient> >& output
   ) const;
-  void ScaleToIntegralNoGCDCoeffs();
   void TimesInteger(int a);
   // Multivariable polynomial division with remainder.
   // Can be done using the multi-divisor polynomial division algorithm
@@ -3107,7 +3106,10 @@ public:
       const std::string& input, const std::string& expectedFactors
     );
     Polynomial<coefficient> fromString(const std::string& input);
+    Vector<Polynomial<coefficient> > fromStringCommonContext(const std::string& first, const std::string& second);
+    Vector<Polynomial<coefficient> > fromStringCommonContext(const List<std::string>& input);
     bool fromStringTest();
+    bool fromStringCommonContextTest();
   };
 };
 
@@ -3117,6 +3119,12 @@ bool Polynomial<Rational>::Test::oneLeastCommonMultiple(
   const std::string& right,
   const std::string& expected
 );
+template <>
+Vector<Polynomial<Rational> > Polynomial<Rational>::Test::fromStringCommonContext(const std::string& first, const std::string& second);
+template <>
+Vector<Polynomial<Rational> > Polynomial<Rational>::Test::fromStringCommonContext(const List<std::string>& input);
+template <>
+bool Polynomial<Rational>::Test::fromStringCommonContextTest();
 template <>
 void Polynomial<Rational>::Test::initialize();
 template <>
@@ -3689,7 +3697,7 @@ public:
   void Invert();
   void MakeOne();
   void MakeZero();
-  void MakeMonomiaL(
+  void makeMonomial(
     int LetterIndex,
     const Rational& Power,
     const Rational& Coeff = 1,
@@ -5066,7 +5074,7 @@ std::string Matrix<coefficient>::ToStringSystemLatex(
     bool foundNonZeroEntry = false;
     for (int j = 0; j < this->NumCols; j ++) {
       if (!((*this)(i, j) == 0)) {
-        theMon.MakeMonomiaL(j, 1, (*this)(i, j));
+        theMon.makeMonomial(j, 1, (*this)(i, j));
         currentEntry = theMon.toString(theFormat);
         if (currentEntry == "") {
           global.fatal << "Empty strings not allowed as result of toString() function call. " << global.fatal;

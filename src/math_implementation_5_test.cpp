@@ -72,7 +72,7 @@ bool Polynomial<Rational>::Test::oneFactorization(
   if (!success) {
     global.fatal << "Factorization of " << toBeFactored.toString() << " failed. " << global.fatal;
   }
-  std::string resultFactors = output.ToStringCommaDelimited();
+  std::string resultFactors = output.ToStringCommaDelimited(&this->format);
   if (resultFactors != expectedFactors) {
     global.fatal << "While factoring: "
     << input << "=" << toBeFactored.toString()
@@ -85,28 +85,28 @@ bool Polynomial<Rational>::Test::oneFactorization(
 template <>
 bool Polynomial<Rational>::Test::factorization() {
   Polynomial<Rational>::Test::oneFactorization(
-    "x+1", "x_{1} +1"
+    "x+1", "x +1"
   );
   Polynomial<Rational>::Test::oneFactorization(
-    "(2x+1)(-3x+1)", "-3x_{1} +1, 2x_{1} +1"
+    "(2x+1)(-3x+1)", "-3x +1, 2x +1"
   );
   Polynomial<Rational>::Test::oneFactorization(
-    "(1/2x+1/3)(-3/5x+1)", "-1/10x_{1} -1/15, 3x_{1} -5"
+    "(1/2x+1/3)(-3/5x+1)", "-1/10x -1/15, 3x -5"
   );
   Polynomial<Rational>::Test::oneFactorization(
-    "(x^2+3x+1)(-3x+1)", "3x_{1} -1, -x_{1}^{2}-3x_{1} -1"
+    "(x^2+3x+1)(-3x+1)", "3x -1, -x^{2}-3x -1"
   );
   Polynomial<Rational>::Test::oneFactorization(
-    "(-3x^3-3x-5)(5x^3+x-7)", "-3x_{1}^{3}-3x_{1} -5, 5x_{1}^{3}+x_{1} -7"
+    "(-3x^3-3x-5)(5x^3+x-7)", "-3x^{3}-3x -5, 5x^{3}+x -7"
   );
   Polynomial<Rational>::Test::oneFactorization(
-    "(-(1/2)x^4+7x^3+4x^2-3x-5)(11x^3+x^2+x-7)",
-    "11x_{1}^{3}+x_{1}^{2}+x_{1} -7, -1/2x_{1}^{4}+7x_{1}^{3}+4x_{1}^{2}-3x_{1} -5"
+    "(-3x^4+7x^3+2x^2-3x-5)(-1/2x^3+x^2+x-7)",
+    "x^{3}-2x^{2}-2x +14, 3/2x^{4}-7/2x^{3}-x^{2}+3/2x +5/2"
   );
 
   Polynomial<Rational>::Test::oneFactorization(
     "10x^7+3x^6+5x^5-2x^4-x^3+x^2-4x+1",
-    "10x_{1}^{7}+3x_{1}^{6}+5x_{1}^{5}-2x_{1}^{4}-x_{1}^{3}+x_{1}^{2}-4x_{1} +1"
+    "10x^{7}+3x^{6}+5x^{5}-2x^{4}-x^{3}+x^{2}-4x +1"
   );
   return true;
 }
@@ -116,8 +116,10 @@ bool Polynomial<Rational>::Test::all() {
   Polynomial<Rational>::Test tester;
   tester.initialize();
 
-  tester.leastCommonMultiple();
   tester.fromStringTest();
+  tester.fromStringCommonContextTest();
+
+  tester.leastCommonMultiple();
   tester.factorization();
   return true;
 }
@@ -170,28 +172,94 @@ bool Polynomial<Rational>::Test::fromStringTest() {
 }
 
 template <>
+Vector<Polynomial<Rational> > Polynomial<Rational>::Test::fromStringCommonContext(
+  const std::string& first, const std::string& second
+) {
+  List<std::string> input;
+  input.AddOnTop(first);
+  input.AddOnTop(second);
+  return Polynomial<Rational>::Test::fromStringCommonContext(input);
+}
+
+template <>
+Vector<Polynomial<Rational> > Polynomial<Rational>::Test::fromStringCommonContext(
+  const List<std::string> & input
+) {
+  Vector<Polynomial<Rational> > result;
+  if (input.size == 0) {
+    return result;
+  }
+  Calculator parser;
+  std::stringstream inputStream;
+  inputStream << "(";
+  for (int i = 0; i < input.size; i ++) {
+    inputStream << "Polynomial(" + input[i] + ")";
+    if (i != input.size - 1) {
+      inputStream << ", ";
+    }
+  }
+  inputStream << ")";
+  parser.initialize();
+  parser.Evaluate(inputStream.str());
+  if (!parser.theProgramExpression.StartsWith(parser.opEndStatement())) {
+    global.fatal
+    << "Polynomial::fromString parsed: "
+    << parser.theProgramExpression.toString()
+    << " which was not expected. This function is not allowed to fail. "
+    << global.fatal;
+  }
+  if (!parser.GetVectoR<Polynomial<Rational> >(
+    parser.theProgramExpression[1], result
+  )) {
+    global.fatal
+    << "Extracting vector from polynomial not allowed to fail. "
+    << global.fatal;
+  }
+  return result;
+}
+
+template <>
+bool Polynomial<Rational>::Test::fromStringCommonContextTest() {
+  std::string expected = "x , y^{2}+y ";
+  std::string inputFirst = "x";
+  std::string inputSecond = "y^{2}+y";
+  List<Polynomial<Rational> > underTest = Polynomial<Rational>::Test::fromStringCommonContext(inputFirst, inputSecond);
+  std::string result = underTest.ToStringCommaDelimited(&this->format);
+  if (result != expected) {
+    global.fatal << "Polynomials with context from string: "
+    << "input: " << inputFirst << ", " << inputSecond
+    << ", result: "
+    << result
+    << ", expected: " << expected
+    << "." << global.fatal;
+  }
+  return true;
+}
+
+template <>
 bool Polynomial<Rational>::Test::oneLeastCommonMultiple(
   const std::string& left,
   const std::string& right,
   const std::string& expected
 ) {
-  Polynomial<Rational> leftPolynomial = Polynomial<Rational>::Test::fromString(left);
-  Polynomial<Rational> rightPolynomial = Polynomial<Rational>::Test::fromString(right);
+  List<Polynomial<Rational> > converted = Polynomial<Rational>::Test::fromStringCommonContext(left, right);
   Polynomial<Rational> output;
   Polynomial<Rational>::leastCommonMultiple(
-    leftPolynomial, rightPolynomial, output, Rational::one(), nullptr
+    converted[0], converted[1], output, Rational::one(), nullptr
   );
-  if (output.toString() != expected) {
+  std::string outputString = output.toString(&this->format);
+  if (outputString != expected) {
     global.fatal << "Least common multiple of "
     << left << ", " << right
-    << " computed to be: " << output.toString(&this->format)
-    << ", expected: " << expected << ". " << global.fatal;
+    << ", converted to: " << converted.ToStringCommaDelimited(&this->format)
+    << " computed to be: [" << outputString
+    << "], expected: [" << expected << "]. " << global.fatal;
   }
   return true;
 }
 
 template <>
 bool Polynomial<Rational>::Test::leastCommonMultiple() {
-  this->oneLeastCommonMultiple("x", "y", "x y");
+  this->oneLeastCommonMultiple("x", "y", "x y ");
   return true;
 }

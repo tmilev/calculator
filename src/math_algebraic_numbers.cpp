@@ -350,7 +350,7 @@ bool AlgebraicClosureRationals::ReduceMe(
     projectionGeneratorCoordinates.AddMonomial(MonomialMatrix(i, i), 1);
   }
   for (int i = smallestFactorDegree; i < theDim; i ++) {
-    zToTheNth.MakeMonomiaL(0, i, 1, 1);
+    zToTheNth.makeMonomial(0, i, 1, 1);
     zToTheNth.DivideBy(smallestFactor, tempP, remainderAfterReduction, &MonomialP::orderDefault());
     for (int j = 0; j < remainderAfterReduction.size(); j ++) {
       int theIndex = - 1;
@@ -700,7 +700,7 @@ void AlgebraicClosureRationals::ConvertPolyDependingOneVariableToPolyDependingOn
   }
   PolynomialSubstitution<AlgebraicNumber> theSub;
   theSub.MakeIdSubstitution(indexVar + 1);
-  theSub[indexVar].MakeMonomiaL(0, 1, 1);
+  theSub[indexVar].makeMonomial(0, 1, 1);
   output = input;
   output.Substitution(theSub);
 }
@@ -1126,7 +1126,7 @@ bool AlgebraicNumber::AssignRationalQuadraticRadical(
   }
   if (!inputOwner.flagIsQuadraticRadicalExtensionRationals) {
     Polynomial<AlgebraicNumber> minPoly;
-    minPoly.MakeMonomiaL(0, 2);
+    minPoly.makeMonomial(0, 2);
     minPoly -= inpuT;
     bool result = this->ConstructFromMinPoly(minPoly, inputOwner, commentsOnFailure);
     if (result) {

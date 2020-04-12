@@ -209,7 +209,7 @@ bool Calculator::GetListPolynomialVariableLabelsLexicographic(
   theSub.SetSize(numVars);
   for (int i = 0; i < theSub.size; i ++) {
     int currentIndex = theVars.GetIndex(theContextStart.ContextGetContextVariable(i));
-    theSub[i].MakeMonomiaL(
+    theSub[i].makeMonomial(
       currentIndex,
       1,
       this->theObjectContainer.theAlgebraicClosure.One(),

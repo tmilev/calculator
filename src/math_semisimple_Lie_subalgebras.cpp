@@ -2512,7 +2512,7 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(bool AttemptToChooseCentalizer, b
     theCentralizerCartanElts.GetGramMatrix(theCentralizerCartanVars, &this->GetAmbientWeyl().CartanSymmetric);
     Polynomial<AlgebraicNumber> theDeterminant, theDetMultiplier;
     theDeterminant.MakeDeterminantFromSquareMatrix(theCentralizerCartanVars);
-    theDetMultiplier.MakeMonomiaL(this->totalNumUnknownsWithCentralizer - 1, 1, 1);
+    theDetMultiplier.makeMonomial(this->totalNumUnknownsWithCentralizer - 1, 1, 1);
     theDeterminant *= theDetMultiplier;
     theDeterminant += - Rational(1);
     this->theSystemToSolve.AddOnTop(theDeterminant);
@@ -3053,7 +3053,7 @@ bool CandidateSSSubalgebra::ComputeKsl2tripleSetUpAndSolveSystem(
   Polynomial<AlgebraicNumber> tempP;
   for (int i = 0; i < FisLinearCombiOf.size; i ++) {
     tempElt = FisLinearCombiOf[i];
-    tempP.MakeMonomiaL(i + this->GetAmbientSS().GetRank(), 1, 1);
+    tempP.makeMonomial(i + this->GetAmbientSS().GetRank(), 1, 1);
     tempElt *= tempP;
     theF += tempElt;
   }

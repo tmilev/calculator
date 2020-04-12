@@ -85,8 +85,8 @@ template <typename coefficient>
 std::string ElementEllipticCurve<coefficient>::toString(FormatExpressions* theFormat) const {
   std::stringstream out;
   Polynomial<Rational> leftHandSide, rightHandSide;
-  leftHandSide.MakeMonomial(1, 2, 1);
-  rightHandSide.MakeMonomial(0, 3, 1);
+  leftHandSide.makeMonomial(1, 2, 1);
+  rightHandSide.makeMonomial(0, 3, 1);
   rightHandSide.AddMonomial(MonomialP(0, 1), this->owner.linearCoefficient);
   rightHandSide += Rational(this->owner.constantTerm);
   out << "ElementEllipticCurveNormalForm{}(" << leftHandSide.toString(theFormat)

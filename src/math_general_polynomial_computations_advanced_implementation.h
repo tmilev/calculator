@@ -908,7 +908,7 @@ void GroebnerBasisComputation<coefficient>::BackSubstituteIntoSinglePoly(
 ) {
   MacroRegisterFunctionWithName("GroebnerBasisComputation::BackSubstituteIntoSinglePoly");
   Polynomial<coefficient> tempP;
-  tempP.MakeMonomiaL(theIndex, 1, 1);
+  tempP.makeMonomial(theIndex, 1, 1);
   if (thePoly == tempP) {
     return;
   }
@@ -1411,7 +1411,7 @@ std::string GroebnerBasisComputation<coefficient>::ToStringSerreLikeSolution() {
   Polynomial<Rational> theMon;
   for (int i = 0; i < this->systemSolution.GetElement().size; i ++) {
     if (this->solutionsFound.GetElement().selected[i]) {
-      theMon.MakeMonomial(i, 1, 1);
+      theMon.makeMonomial(i, 1, 1);
       out << " " << theMon.toString(&this->theFormat)
       << " = " << this->systemSolution.GetElement()[i] << ";";
     }
@@ -1449,17 +1449,17 @@ bool Polynomial<coefficient>::leastCommonMultiple(
   );
   leftTemp.SetNumVariablesSubDeletedVarsByOne(theNumVars + 1);
   rightTemp.SetNumVariablesSubDeletedVarsByOne(theNumVars + 1);
-  leftTemp.ScaleToIntegralNoGCDCoeffs();
-  rightTemp.ScaleToIntegralNoGCDCoeffs();
-  oneMinusT.MakeMonomiaL(theNumVars, 1, Rational(1), theNumVars + 1);
+  leftTemp.scaleNormalizeLeadingMonomial();
+  rightTemp.scaleNormalizeLeadingMonomial();
+  oneMinusT.makeMonomial(theNumVars, 1, one, theNumVars + 1);
   leftTemp *= oneMinusT;
   oneMinusT *= - 1;
-  oneMinusT += 1;
+  oneMinusT += one;
   rightTemp *= oneMinusT;
   theBasis.size = 0;
   theBasis.AddOnTop(leftTemp);
   theBasis.AddOnTop(rightTemp);
-  GroebnerBasisComputation<Rational> theComp;
+  GroebnerBasisComputation<coefficient> theComp;
   theComp.thePolynomialOrder.theMonOrder = MonomialP::orderForGCD();
   theComp.MaxNumGBComputations = - 1;
   if (!theComp.TransformToReducedGroebnerBasis(theBasis)) {

@@ -75,7 +75,7 @@ public:
     Polynomial<coefficient> theCf;
     for (int i = 0; i < this->GetRank(); i ++) {
       theGen.MakeGenerator(*this, this->GetCartanGeneratorIndex(i));
-      theCf.MakeMonomiaL(indexFirstVar + i, 1, 1);
+      theCf.makeMonomial(indexFirstVar + i, 1, 1);
       output.AddMonomial(theGen, theCf);
     }
   }
@@ -88,7 +88,7 @@ public:
     Polynomial<coefficient> theCf;
     for (int i = 0; i < this->GetNumPosRoots(); i ++) {
       theGen.MakeGenerator(*this, i);
-      theCf.MakeMonomiaL(indexFirstVar + i, 1, 1);
+      theCf.makeMonomial(indexFirstVar + i, 1, 1);
       output.AddMonomial(theGen, theCf);
     }
   }

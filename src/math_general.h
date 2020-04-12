@@ -388,12 +388,12 @@ public:
   }
   bool IsOneLetterFirstDegree(int* whichLetter = nullptr) const {
     Rational whichDegree;
-    if (!this->IsOneLetterNthDegree(whichLetter, &whichDegree)) {
+    if (!this->IsOneLetterNonConstant(whichLetter, &whichDegree)) {
       return false;
     }
     return whichDegree == 1;
   }
-  bool IsOneLetterNthDegree(
+  bool IsOneLetterNonConstant(
     int* whichLetter = nullptr, Rational* whichDegree = nullptr
   ) const {
     int tempI1;
@@ -402,15 +402,16 @@ public:
     }
     *whichLetter = - 1;
     for (int i = 0; i < this->monBody.size; i ++) {
-      if (this->monBody[i] != 0) {
-        if (whichDegree != nullptr) {
-          *whichDegree = this->monBody[i];
-        }
-        if ((*whichLetter) == - 1) {
-          *whichLetter = i;
-        } else {
-          return false;
-        }
+      if (this->monBody[i] == 0) {
+        continue;
+      }
+      if (whichDegree != nullptr) {
+        *whichDegree = this->monBody[i];
+      }
+      if ((*whichLetter) == - 1) {
+        *whichLetter = i;
+      } else {
+        return false;
       }
     }
     return (*whichLetter) != - 1;
@@ -2597,7 +2598,9 @@ class ElementMonomialAlgebra: public LinearCombination<templateMonomial, coeffic
     output *= theCoeff;
   }
 
-  void MultiplyOnTheLeft(const ElementMonomialAlgebra<templateMonomial, coefficient>& standsOnTheLeft) {
+  void MultiplyOnTheLeft(
+    const ElementMonomialAlgebra<templateMonomial, coefficient>& standsOnTheLeft
+  ) {
     ElementMonomialAlgebra<templateMonomial, coefficient> tempMat, bufferPoly;
     templateMonomial bufferMon;
     standsOnTheLeft.MultiplyBy(*this, tempMat, bufferPoly, bufferMon);
@@ -2684,7 +2687,10 @@ public:
     List<Polynomial<ElementZmodP> >& outputFactors,
     std::stringstream* comments
   ) const;
-  // bool isSquareFreeAndUnivariate(std::stringstream* comments) const;
+  bool isSquareFreeAndUnivariate(
+    const ElementZmodP& one,
+    std::stringstream* comments
+  ) const;
   bool computeDerivative(Polynomial<coefficient>& output, std::stringstream* comments) const;
   bool factorMe(List<Polynomial<coefficient> >& outputFactors, std::stringstream* comments) const;
   void Interpolate(const Vector<coefficient>& thePoints, const Vector<coefficient>& ValuesAtThePoints);
@@ -2917,7 +2923,8 @@ public:
     if (!this->IsConstant(&constME)) {
       global.fatal << "This may or may not be a programming error: "
       << "attempting to compare a non-constant polynomial to "
-      << "a constant. I cannot judge at the moment whether allowing that is a good decision. "
+      << "a constant. I cannot judge at the moment whether "
+      << "allowing that is a good decision. "
       << "In any case, crashing to let you know. "
       << global.fatal;
       return false;
@@ -2975,7 +2982,7 @@ public:
   bool operator<=(const Polynomial<coefficient>& other) const {
     return !(*this > other);
   }
-  //has to be rewritten please don't use!
+  // has to be rewritten please don't use!
   bool IsGreaterThanZeroLexicographicOrder();
   static bool IsGEQcompareByTopMonomialTotalDegThenLexicographic(
     const Polynomial<coefficient>& left, const Polynomial<coefficient>& right

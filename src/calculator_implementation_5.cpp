@@ -2955,7 +2955,8 @@ bool CalculatorFunctions::innerFactorPolynomialModPrime(
   }
   std::stringstream commentsOnFailure;
   if (!thePrime.value.IsPossiblyPrime(2, true, &commentsOnFailure)) {
-    theCommands << "The modulus: " << thePrime << " appears not to be prime. " << commentsOnFailure.str();
+    theCommands << "The modulus: " << thePrime
+    << " appears not to be prime. " << commentsOnFailure.str();
   }
   Polynomial<ElementZmodP> converted;
   ElementZmodP::ScaleToIntegralMinimalHeightAndGetPoly(polynomial.content, converted, thePrime.value);
@@ -2964,6 +2965,8 @@ bool CalculatorFunctions::innerFactorPolynomialModPrime(
   format.suffixLinearCombination = ElementZmodP::toStringModP(thePrime.value);
   format.flagSuppressModP = true;
   polynomial.context.context.ContextGetFormatExpressions(format);
-  out << "Converted polynomial: " << converted.toString(&format);
+  out << "Converted polynomial: " << converted.toString(&format) << "<br>";
+  List<Polynomial<ElementZmodP> > result;
+  converted.factorMeCantorZassenhaus(result, &out);
   return output.AssignValue(out.str(), theCommands);
 }

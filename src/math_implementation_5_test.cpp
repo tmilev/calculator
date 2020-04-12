@@ -114,6 +114,7 @@ template <>
 bool Polynomial<Rational>::Test::all() {
   Polynomial<Rational>::Test::fromStringTest();
   Polynomial<Rational>::Test::factorization();
+  Polynomial<Rational>::Test::leastCommonMultiple();
   return true;
 }
 
@@ -155,4 +156,8 @@ bool Polynomial<Rational>::Test::fromStringTest() {
     << "." << global.fatal;
   }
   return true;
+}
+
+template <>
+bool Polynomial<Rational>::Test::leastCommonMultiple() {
 }

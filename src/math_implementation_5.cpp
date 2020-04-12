@@ -1574,7 +1574,9 @@ void RationalFunction::lcm(
   List<Polynomial<Rational> > theBasis;
   leftTemp = left;
   rightTemp = right;
-  int theNumVars = MathRoutines::Maximum(left.GetMinimalNumberOfVariables(), right.GetMinimalNumberOfVariables());
+  int theNumVars = MathRoutines::Maximum(
+    left.GetMinimalNumberOfVariables(), right.GetMinimalNumberOfVariables()
+  );
   leftTemp.SetNumVariablesSubDeletedVarsByOne(theNumVars + 1);
   rightTemp.SetNumVariablesSubDeletedVarsByOne(theNumVars + 1);
   leftTemp.ScaleToIntegralNoGCDCoeffs();
@@ -1587,13 +1589,13 @@ void RationalFunction::lcm(
   theBasis.size = 0;
   theBasis.AddOnTop(leftTemp);
   theBasis.AddOnTop(rightTemp);
-  MemorySaving<GroebnerBasisComputation<Rational> > bufComp;
   GroebnerBasisComputation<Rational> theComp;
   theComp.thePolynomialOrder.theMonOrder = MonomialP::orderForGCD();
   theComp.MaxNumGBComputations = - 1;
   if (!theComp.TransformToReducedGroebnerBasis(theBasis)) {
     global.fatal << "Transformation to reduced "
-    << "Groebner basis is not allowed to fail in this function. " << global.fatal;
+    << "Groebner basis is not allowed to fail in this function. "
+    << global.fatal;
   }
   int maxMonNoTIndex = - 1;
   Rational maximalTotalDegree;

@@ -72,12 +72,11 @@ bool Polynomial<coefficient>::computeDerivative(
     coefficient newCoefficient;
     newCoefficient = this->coefficients[i];
     const MonomialP& currentMonomial = this->theMonomials[i];
-    Rational power;
-    currentMonomial.IsOneLetterNthDegree(&variableIndex, &power);
+    Rational power = currentMonomial.TotalDegree();
     LargeInteger powerInteger;
     if (!power.IsInteger(&powerInteger)) {
       if (comments != nullptr) {
-        *comments << "Monomial has non-integer power. ";
+        *comments << "Monomial has non-integer power " << power << ". ";
       }
       return false;
     }
@@ -103,7 +102,9 @@ bool Polynomial<coefficient>::leastCommonMultiple(
   List<Polynomial<coefficient> > theBasis;
   leftTemp = left;
   rightTemp = right;
-  int theNumVars = MathRoutines::Maximum(left.GetMinimalNumberOfVariables(), right.GetMinimalNumberOfVariables());
+  int theNumVars = MathRoutines::Maximum(
+    left.GetMinimalNumberOfVariables(), right.GetMinimalNumberOfVariables()
+  );
   leftTemp.SetNumVariablesSubDeletedVarsByOne(theNumVars + 1);
   rightTemp.SetNumVariablesSubDeletedVarsByOne(theNumVars + 1);
   tempP.MakeMonomiaL(theNumVars, 1, one, theNumVars + 1);
@@ -198,9 +199,9 @@ bool Polynomial<coefficient>::greatestCommonDivisor(
   return true;
 }
 
-/*
 template<class coefficient>
 bool Polynomial<coefficient>::isSquareFreeAndUnivariate(
+  const ElementZmodP& one,
   std::stringstream* comments
 ) const {
   if (this->GetMinimalNumberOfVariables() > 1) {
@@ -214,15 +215,14 @@ bool Polynomial<coefficient>::isSquareFreeAndUnivariate(
   if (this->GetMinimalNumberOfVariables() == 0) {
     return true;
   }
-
   Polynomial<coefficient> derivative;
   if (!this->computeDerivative(derivative, comments)) {
     return false;
   }
-
+  Polynomial<coefficient> divisor;
+  Polynomial::greatestCommonDivisor(*this, derivative, divisor, one, comments);
   return true;
 }
-*/
 
 template <>
 bool Polynomial<Rational>::factorMe(
@@ -301,7 +301,7 @@ bool Polynomial<Rational>::FindOneVariableRationalRoots(List<Rational>& output) 
   }
   for (int i = 0; i < divisorsH.size; i ++) {
     for (int j = 0; j < divisorsS.size; j ++) {
-      tempV[0].AssignNumeratorAndDenominator(divisorsS[j],divisorsH[i]);
+      tempV[0].AssignNumeratorAndDenominator(divisorsS[j], divisorsH[i]);
       val = myCopy.Evaluate(tempV);
       if (val == 0) {
         Polynomial<Rational> divisor, tempP;
@@ -414,8 +414,11 @@ bool Polynomial<Rational>::factorMeOutputIsADivisor(
       thePrimeFactorsAtPoints[i], thePrimeFactorsMults[i], 0, comments
     )) {
       if (comments != nullptr) {
-        *comments << "<br>Aborting polynomial factorization: failed to factor the integer "
-        << theValuesAtPoints[i].toString() << " (most probably the integer is too large).";
+        *comments
+        << "<br>Aborting polynomial factorization: "
+        << "failed to factor the integer "
+        << theValuesAtPoints[i].toString()
+        << " (most probably the integer is too large).";
       }
       return false;
     }
@@ -441,7 +444,8 @@ bool Polynomial<Rational>::factorMeOutputIsADivisor(
   do {
     if (theReport.TickAndWantReport()) {
       std::stringstream report;
-      report << "Trying divisor combination " << theReport.ticks << " out of " << total.toString();
+      report << "Trying divisor combination "
+      << theReport.ticks << " out of " << total.toString();
       theReport.Report(report.str());
     }
     theValuesAtPointsLeft.MakeZero(theValuesAtPoints.size);

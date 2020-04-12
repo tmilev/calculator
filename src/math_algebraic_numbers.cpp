@@ -1431,7 +1431,8 @@ bool AlgebraicNumber::operator==(const AlgebraicNumber& other) const {
 
 void AlgebraicNumber::operator=(const Polynomial<AlgebraicNumber>& other) {
   if (!other.IsConstant(this)) {
-    global.fatal << "This is a programming error: attempting to assign non-constant "
+    global.fatal
+    << "This is a programming error: attempting to assign non-constant "
     << "polynomial to a Rational number is not allowed. " << global.fatal;
   }
 }
@@ -1442,7 +1443,9 @@ void AlgebraicNumber::operator=(const Rational& other) {
   this->basisIndex = 0;
 }
 
-bool ElementZmodP::NeedsParenthesisForMultiplication(FormatExpressions* theFormat) const {
+bool ElementZmodP::NeedsParenthesisForMultiplication(
+  FormatExpressions* theFormat
+) const {
   if (theFormat == nullptr) {
     return true;
   }
@@ -1455,7 +1458,7 @@ std::string ElementZmodP::toStringModP() const {
 
 std::string ElementZmodP::toStringModP(const LargeIntegerUnsigned& modulus) {
   std::stringstream out;
-  out << "mod(" << modulus.toString() << ")";
+  out << "mod (" << modulus.toString() << ")";
   return out.str();
 }
 

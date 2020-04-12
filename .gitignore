@@ -13,6 +13,8 @@
 
 *.new
 
+*.autosave
+
 certificates*
 
 LogFiles*

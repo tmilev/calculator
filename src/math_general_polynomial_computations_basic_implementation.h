@@ -85,7 +85,7 @@ void Polynomial<coefficient>::MakeDeterminantFromSquareMatrix(const Matrix<Polyn
     for (int j = 0; j < permutationIndices.size; j ++) {
       theMonomial *= theMat(j, permutationIndices[j]);
     }
-    //the following can be made much faster, but no need right now as it won't be a bottleneck.
+    // The following can be made much faster, but no need right now as it won't be a bottleneck.
     int sign = 1;
     for (int j = 0; j < permutationIndices.size; j ++) {
       for (int k = j + 1; k < permutationIndices.size; k ++) {
@@ -142,7 +142,9 @@ int Polynomial<coefficient>::TotalDegreeInt() const {
   int result = - 1;
   if (!this->TotalDegree().IsSmallInteger(&result)) {
     global.fatal << "This is a programming error: requested total degree of a "
-    << "polynomial in int formal, but the degree of the polynomial is not a small integer. " << global.fatal;
+    << "polynomial in int formal, but the "
+    << "degree of the polynomial is not a small integer. "
+    << global.fatal;
   }
   return result;
 }
@@ -179,7 +181,11 @@ void Polynomial<coefficient>::MakeDegreeOne(int NVar, int NonZeroIndex, const co
 
 template <class coefficient>
 void Polynomial<coefficient>::MakeDegreeOne(
-  int NVar, int NonZeroIndex1, int NonZeroIndex2, const coefficient& coeff1, const coefficient& coeff2
+  int NVar,
+  int NonZeroIndex1,
+  int NonZeroIndex2,
+  const coefficient& coeff1,
+  const coefficient& coeff2
 ) {
   (void) NVar;
   this->MakeZero();
@@ -331,7 +337,9 @@ void Polynomial<coefficient>::ScaleToPositiveMonomialExponents(MonomialP& output
 
 template <class coefficient>
 bool Polynomial<coefficient>::IsProportionalTo(
-  const Polynomial<coefficient>& other, coefficient& TimesMeEqualsOther, const coefficient& theRingUnit
+  const Polynomial<coefficient>& other,
+  coefficient& TimesMeEqualsOther,
+  const coefficient& theRingUnit
 ) const {
   if (this->size() != other.size()) {
     return false;
@@ -453,12 +461,17 @@ template <class coefficient>
 void Polynomial<coefficient>::AssignCharPoly(const Matrix<coefficient>& input) {
   MacroRegisterFunctionWithName("Polynomial::AssignCharPoly");
   if (input.NumCols != input.NumRows) {
-    global.fatal << "Programming error: requesting the minimimal polynomial of a non-square matrix. " << global.fatal;
+    global.fatal << "Programming error: requesting the "
+    << "minimimal polynomial of a non-square matrix. "
+    << global.fatal;
   }
   int n = input.NumCols;
   if (n == 0) {
-    global.fatal << "At present, the characteristic polyomial of a 0x0 matrix is not defined. "
-    << "Crashing to let you know. If you think this should be changed, document why and "
+    global.fatal
+    << "At present, the characteristic polynomial of "
+    << "a 0x0 matrix is not defined. "
+    << "Crashing to let you know. If you think this "
+    << "should be changed, document why and "
     << "modify the present assertion. " << global.fatal;
   }
   this->MakeConst(1);
@@ -479,7 +492,9 @@ template <class coefficient>
 void Polynomial<coefficient>::AssignMinPoly(const Matrix<coefficient>& input) {
   MacroRegisterFunctionWithName("Polynomial::AssignMinPoly");
   if (input.NumCols != input.NumRows) {
-    global.fatal << "Programming error: requesting the minimimal polynomial of a non-square matrix. " << global.fatal;
+    global.fatal << "Programming error: requesting the "
+    << "minimimal polynomial of a non-square matrix. "
+    << global.fatal;
   }
   int theDim = input.NumCols;
   this->MakeOne(1);
@@ -541,7 +556,9 @@ void Polynomial<coefficient>::GetConstantTerm(coefficient& output, const coeffic
 }
 
 template <class coefficient>
-void Polynomial<coefficient>::GetCoeffInFrontOfLinearTermVariableIndex(int index, coefficient& output) {
+void Polynomial<coefficient>::GetCoeffInFrontOfLinearTermVariableIndex(
+  int index, coefficient& output
+) {
   MonomialP tempM;
   tempM.MakeEi(index);
   int i = this->theMonomials.GetIndex(tempM);
@@ -631,7 +648,10 @@ std::string GroebnerBasisComputation<coefficient>::GetPolynomialStringSpacedMono
       out << "\\color{" << *highlightColor << "}{";
     }
     out << Polynomial<coefficient>::GetBlendCoeffAndMon(
-      thePoly[theIndex], thePoly.coefficients[theIndex], found, &this->theFormat
+      thePoly[theIndex],
+      thePoly.coefficients[theIndex],
+      found,
+      &this->theFormat
     );
     found = true;
     if (useHighlightStyle) {

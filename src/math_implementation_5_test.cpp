@@ -99,7 +99,8 @@ bool Polynomial<Rational>::Test::factorization() {
     "(-3x^3-3x-5)(5x^3+x-7)", "-3x_{1}^{3}-3x_{1} -5, 5x_{1}^{3}+x_{1} -7"
   );
   Polynomial<Rational>::Test::oneFactorization(
-    "(-3x^5-(1/2)x^4+7x^3+4x^2-3x-5)(5x^5-2x^4+13x^3+x^2+x-7)", "-3x_{1}^{3}-3x_{1} -5, 5x_{1}^{3}+x_{1} -7"
+    "(-(1/2)x^4+7x^3+4x^2-3x-5)(11x^3+x^2+x-7)",
+    "11x_{1}^{3}+x_{1}^{2}+x_{1} -7, -1/2x_{1}^{4}+7x_{1}^{3}+4x_{1}^{2}-3x_{1} -5"
   );
 
   Polynomial<Rational>::Test::oneFactorization(

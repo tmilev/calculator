@@ -1840,7 +1840,11 @@ void Matrix<Element>::MakeZero(const Element& theRingZero) {
 }
 
 template <typename Element>
-void Matrix<Element>::MakeID(const Matrix<Element>& prototype, const Element& theRingZero, const Element& theRingOne) {
+void Matrix<Element>::MakeID(
+  const Matrix<Element>& prototype,
+  const Element& theRingZero,
+  const Element& theRingOne
+) {
   this->init(prototype.NumRows, prototype.NumCols);
   for (int i = 0; i < this->NumRows; i ++) {
     for (int j = 0; j < this->NumCols; j ++) {
@@ -1959,7 +1963,11 @@ class MonomialWeylAlgebra {
     return false;
   }
   bool HasNonSmallPositiveIntegerDerivation() const {
-    for (int i = 0; i < this->differentialPart.GetMinimalNumberOfVariables(); i ++) {
+    for (
+      int i = 0;
+      i < this->differentialPart.GetMinimalNumberOfVariables();
+      i ++
+    ) {
       if (!this->differentialPart(i).IsSmallInteger()) {
         return true;
       }
@@ -1973,13 +1981,16 @@ class MonomialWeylAlgebra {
 };
 
 template <class coefficient>
-std::iostream& operator <<(std::iostream& output, const Polynomial<coefficient>& input) {
+std::iostream& operator<<(std::iostream& output, const Polynomial<coefficient>& input) {
   output << input.toString();
   return output;
 }
 
 template <class templateMonomial, class coefficient>
-std::ostream& operator<<(std::ostream& output, const LinearCombination<templateMonomial, coefficient>& theCollection);
+std::ostream& operator<<(
+  std::ostream& output,
+  const LinearCombination<templateMonomial, coefficient>& theCollection
+);
 
 template <class templateMonomial, class coefficient>
 class LinearCombination {
@@ -2040,7 +2051,10 @@ public:
     this->theMonomials.RemoveIndexSwapWithLast(index);
     this->coefficients.RemoveIndexSwapWithLast(index);
   }
-  void AddOtherTimesConst(LinearCombination<templateMonomial, coefficient>& other, const coefficient& theConst);
+  void AddOtherTimesConst(
+    LinearCombination<templateMonomial, coefficient>& other,
+    const coefficient& theConst
+  );
   void PopMonomial(int index, templateMonomial& outputMon, coefficient& outputCoeff) {
     outputMon = (*this)[index];
     outputCoeff = this->coefficients[index];
@@ -2057,8 +2071,12 @@ public:
     }
     return result;
   }
-  void AddMonomial(const templateMonomial& inputMon, const coefficient& inputCoeff) {
-    this->CleanupMonIndex(this->AddMonomialNoCoeffCleanUpReturnsCoeffIndex(inputMon, inputCoeff));
+  void AddMonomial(
+    const templateMonomial& inputMon, const coefficient& inputCoeff
+  ) {
+    this->CleanupMonIndex(
+      this->AddMonomialNoCoeffCleanUpReturnsCoeffIndex(inputMon, inputCoeff)
+    );
   }
   void GetMinMonomial(templateMonomial& outputMon, coefficient& outputCF) const {
     if (this->IsEqualToZero()) {
@@ -2124,13 +2142,16 @@ public:
     if (theIndex == - 1) {
       return false;
     }
-    // Note: operator != is not required to be defined for our coefficients; operator == is.
+    // Note: operator != is not required to be defined
+    // for our coefficients; operator == is.
     bool coefficientIsZero = (this->coefficients[theIndex] == 0);
     if (!coefficientIsZero) {
       return false;
     }
     if (this->flagDeallocated) {
-      global.fatal << "Use after free or race condition on monomial collection. " << global.fatal;
+      global.fatal
+      << "Use after free or race condition on monomial collection. "
+      << global.fatal;
     }
     bool oldFlagDeallocated = this->flagDeallocated;
     this->flagDeallocated = true;
@@ -2139,7 +2160,9 @@ public:
     this->flagDeallocated = oldFlagDeallocated;
     return true;
   }
-  int AddMonomialNoCoeffCleanUpReturnsCoeffIndex(const templateMonomial& inputMonomial, const coefficient& inputCoefficient);
+  int AddMonomialNoCoeffCleanUpReturnsCoeffIndex(
+    const templateMonomial& inputMonomial, const coefficient& inputCoefficient
+  );
   template <class LinearCombinationTemplate>
   static void GaussianEliminationByRows(
     List<LinearCombinationTemplate>& theList,
@@ -2152,7 +2175,8 @@ public:
   static void IntersectVectorSpaces(
     const List<LinearCombinationTemplate>& vectorSpace1,
     const List<LinearCombinationTemplate>& vectorSpace2,
-    List<LinearCombinationTemplate>& outputIntersection, HashedList<templateMonomial>* seedMonomials = nullptr
+    List<LinearCombinationTemplate>& outputIntersection,
+    HashedList<templateMonomial>* seedMonomials = nullptr
   );
   template <class LinearCombinationTemplate>
   static int GetRankIntersectionVectorSpaces(
@@ -2199,7 +2223,9 @@ public:
     Vector<coefficient>& outputFirstLinearCombination,
     HashedList<templateMonomial>* seedMonomials = nullptr
   );
-  bool HasRationalCoeffs(LinearCombination<templateMonomial, Rational>* outputConversionToRationals = nullptr) {
+  bool HasRationalCoeffs(LinearCombination<templateMonomial, Rational>*
+    outputConversionToRationals = nullptr
+  ) {
     Rational tempRat;
     Rational* theCF = nullptr;
     if (outputConversionToRationals != nullptr) {
@@ -2219,7 +2245,8 @@ public:
   }
   template <class LinearCombinationTemplate>
   static int GetRankOfSpanOfElements(
-    List<LinearCombinationTemplate>& theList, HashedList<templateMonomial>* seedMonomials = nullptr
+    List<LinearCombinationTemplate>& theList,
+    HashedList<templateMonomial>* seedMonomials = nullptr
   ) {
     List<LinearCombinationTemplate> listCopy = theList;
     LinearCombination<templateMonomial, coefficient>::GaussianEliminationByRowsDeleteZeroRows(listCopy, 0, seedMonomials);
@@ -2231,14 +2258,18 @@ public:
     bool *IvemadeARowSwitch = nullptr,
     HashedList<templateMonomial>* seedMonomials = nullptr
   ) {
-    LinearCombinationTemplate::GaussianEliminationByRows(theList, IvemadeARowSwitch, seedMonomials);
+    LinearCombinationTemplate::GaussianEliminationByRows(
+      theList, IvemadeARowSwitch, seedMonomials
+    );
     for (int j = theList.size - 1; j >= 0; j --) {
       if (theList[j].IsEqualToZero()) {
         theList.size --;
       }
     }
   }
-  int SubtractMonomialNoCoeffCleanUpReturnsCoefficientIndex(const templateMonomial& inputMon, const coefficient& inputCoeff);
+  int SubtractMonomialNoCoeffCleanUpReturnsCoefficientIndex(
+    const templateMonomial& inputMon, const coefficient& inputCoeff
+  );
   void CleanUpZeroCoeffs() {
     for (int i = 0; i < this->size; i ++) {
       if (this->CleanupMonIndex(i)) {
@@ -2452,7 +2483,8 @@ public:
     for (int i = 0; i < this->coefficients.size; i ++) {
       this->coefficients[i] *= other;
       if (i == 0) {
-        //to avoid implicit conversion problems, we make the zero check at the first cycle
+        // To avoid implicit conversion problems,
+        // we make the zero check at the first cycle.
         if (this->coefficients[i].IsEqualToZero()) {
           this->MakeZero();
           return;
@@ -2464,8 +2496,11 @@ public:
     return this->theMonomials[theIndex];
   }
   void operator=(const templateMonomial& other) {
-    templateMonomial otherCopy = other; //in case other is contained as a monomial in me and gets destroyed when I call
-    // this->MakeZero(). This shouldn't yield a measurable slowdown.
+    templateMonomial otherCopy = other;
+    // <- In case other is contained as a
+    // monomial in this LinearCombination
+    // and gets destroyed when this->MakeZero() is called.
+    // This shouldn't yield a measurable slowdown.
     // Further this function is to be used for non-time critical operations.
     this->MakeZero();
     this->AddMonomial(otherCopy, 1);
@@ -2760,7 +2795,10 @@ public:
   int GetHighestIndexSuchThatHigherIndexVarsDontParticipate() {
     int result = - 1;
     for (int i = 0; i < this->size; i ++) {
-      result = MathRoutines::Maximum(result, this->TheObjects[i].GetHighestIndexSuchThatHigherIndexVarsDontParticipate());
+      result = MathRoutines::Maximum(
+        result,
+        this->TheObjects[i].GetHighestIndexSuchThatHigherIndexVarsDontParticipate()
+      );
     }
     return result;
   }
@@ -3074,7 +3112,9 @@ template <>
 bool Polynomial<Rational>::factorMeOutputIsADivisor(Polynomial<Rational>& output, std::stringstream* comments);
 template <>
 bool Polynomial<Rational>::factorMeNormalizedFactors(
-  Rational& outputCoeff, List<Polynomial<Rational> >& outputFactors, std::stringstream* comments
+  Rational& outputCoeff,
+  List<Polynomial<Rational> >& outputFactors,
+  std::stringstream* comments
 ) const;
 
 
@@ -3167,7 +3207,8 @@ class PolynomialSubstitution: public List<Polynomial<coefficient> > {
       numDisplayedEltsMinus1ForAll = this->size;
     }
     for (int i = 0; i < this->size; i ++) {
-      out << "x_{" << i + 1 << "} \\mapsto " << this->TheObjects[i].toString(&PolyFormatLocal);
+      out << "x_{" << i + 1 << "} \\mapsto "
+      << this->TheObjects[i].toString(&PolyFormatLocal);
       if (i != this->size - 1) {
         out << ", ";
       }

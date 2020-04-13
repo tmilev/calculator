@@ -6,7 +6,7 @@
 #include "calculator_inner_typed_functions.h"
 #include "calculator_inner_functions.h"
 #include "calculator_html_functions.h"
-#include "math_general_polynomial_computations_basic_implementation.h" //undefined reference to Polynomial<AlgebraicNumber>::MakeOne(int)
+#include "math_general_polynomial_computations_basic_implementation.h"
 #include "database.h"
 #include "calculator_database_mongo.h"
 
@@ -207,7 +207,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "EvaluateSymbols",
     CalculatorHtmlFunctions::innerEvaluateSymbols,
     "",
-    "Evaluates and replaces individual symbols/variables in LaTeX string. Leaves the rest of the string intact.",
+    "Evaluates and replaces individual symbols/variables in LaTeX string. "
+    "Leaves the rest of the string intact.",
     "x = 5;\n"
     "left = a;\n"
     "EvaluateSymbols(\"x^x +ax +a x +\\left(left \\right)\")",
@@ -229,9 +230,12 @@ void Calculator::initPredefinedInnerFunctions() {
     "or",
     CalculatorFunctions::innerOrIdentical,
     "",
-    "If the two arguments of or are identical, replaces the expression with the argument. "
-    "Works even if the individual expression cannot be evaluated to 1 or 0. "
-    "Please note that mathematically equal objects may fail to be identical, for example "
+    "If the two arguments of or are identical, "
+    "replaces the expression with the argument. "
+    "Works even if the individual expression "
+    "cannot be evaluated to 1 or 0. "
+    "Please note that mathematically equal objects "
+    "may fail to be identical, for example "
     "a rational number 5 and an algebraic number 5. ",
     "a or b; a or a",
     "CalculatorConversions::innerOrIdentical",
@@ -343,10 +347,14 @@ void Calculator::initPredefinedInnerFunctions() {
     "Loads a file into a string. "
     "The file must be given its relative file name displayed when browsing "
     "the web server. "
-    "There are two exceptions. 1) The file can be located in a folder in the project base "
-    "that is otherwise not visible by the webserver **provided that** the folder is white-listed "
-    "via the FileOperations class within the C++ source. Example: folder problems/ "
-    "is white-listed. To access this file simply start your file name with the foldername. "
+    "There are two exceptions. "
+    "1) The file can be located in a folder in the project base "
+    "that is otherwise not visible by the webserver "
+    "**provided that** the folder is white-listed "
+    "via the FileOperations class within the C++ source. "
+    "Example: folder problems/ "
+    "is white-listed. To access this file simply "
+    "start your file name with the foldername. "
     "Do not start the folder name with the / character."
     "2) The file can be located in a folder in a level parallel to the project base "
     "- such folders are outside of the project folder - **provided that** "
@@ -426,7 +434,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "TestCalculatorIndicator",
     CalculatorFunctions::innerTestIndicator,
     "",
-    "(This is not a mathematical function). Tests the calculator indicator mechanism."
+    "(This is not a mathematical function). "
+    "Tests the calculator indicator mechanism."
     "First argument times number of iterations. "
     "Second argument = length of dummy comment appended to the calculator comments. "
     "Use a large dummy comment to test that large outputs are piped correctly to the "
@@ -462,7 +471,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "CrashListOutOfBounds",
     CalculatorFunctions::innerCrashByListOutOfBounds,
     "",
-    "Crashes the calculator by attempting to use data out-of-bounds in a List data structure. ",
+    "Crashes the calculator by attempting to "
+    "use data out-of-bounds in a List data structure. ",
     "CrashListOutOfBounds(0)",
     "CalculatorFunctions::innerCrashByListOutOfBounds",
     "CrashListOutOfBounds",
@@ -494,7 +504,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "Thaw",
     CalculatorFunctions::innerThaw,
     "",
-    "If the argument is frozen, removes the top freeze command and returns the argument, "
+    "If the argument is frozen, removes the top "
+    "freeze command and returns the argument, "
     "else returns the argument unchanged.",
     "a =Freeze{}(1 + 1); Thaw a; c =Thaw(Freeze(a,b)); PlotExpressionTree c",
     "CalculatorFunctions::innerThaw",
@@ -505,7 +516,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "LogEvaluationStepsDebug",
     Calculator::innerLogEvaluationStepsDebug,
     "",
-    "Creates an expression evaluation tree. Intended for debugging the system. ",
+    "Creates an expression evaluation tree. "
+    "Intended for debugging the system. ",
     "LogEvaluationStepsDebug((x +2)(x +3))",
     "CalculatorFunctions::innerLogEvaluationStepsDebug",
     "LogEvaluationStepsDebug",
@@ -649,7 +661,8 @@ void Calculator::initPredefinedInnerFunctions() {
     "EllipticCurveGeneratorNIST",
     CalculatorFunctions::innerNISTEllipticCurveGenerator,
     "",
-    "Makes generator of a NIST curve. At present implemented for secp256k1 only. ",
+    "Makes generator of a NIST curve. "
+    "At present implemented for secp256k1 only. ",
     "g=EllipticCurveGeneratorNIST(\"secp256k1\");\n"
     "g^3; g^115792089237316195423570985008687907852837564279074904382605163141518161494337",
     "CalculatorFunctions::innerNISTEllipticCurveGenerator",
@@ -6944,6 +6957,16 @@ void Calculator::initPredefinedStandardOperations() {
     "\\int \\theta {\\text d} \\theta",
     "CalculatorFunctionsBinaryOps::innerDifferentialStandardHandler",
     "DifferentialStandardHandler",
+    innerStandard
+  );
+  this->AddOperationHandler(
+    "Differential",
+    CalculatorFunctions::innerDifferentialOfPolynomial,
+    "",
+    "Differential of a polynomial.",
+    "Differential{}(Polynomial{}(x+y))",
+    "CalculatorFunctionsBinaryOps::innerDifferentialOfPolynomial",
+    "DifferentialOfPolynomial",
     innerStandard
   );
   this->AddOperationHandler(

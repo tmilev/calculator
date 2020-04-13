@@ -908,7 +908,7 @@ bool CalculatorFunctions::innerSumSequence(
   for (int i = 1; i < sequenceToSum->size(); i ++) {
     theTerms.AddOnTop((*sequenceToSum)[i]);
   }
-  return output.MakeSum(theCommands, theTerms);
+  return output.makeSum(theCommands, theTerms);
 }
 
 bool CalculatorFunctions::innerMultiplySequence(

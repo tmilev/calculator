@@ -193,11 +193,11 @@ public:
     this->AddMonomial(tempMon, coeff);
   }
   void Simplify(const coefficient& theRingUnit = 1);
-  int GetMinimalNumberOfVariables() const {
+  int minimalNumberOfVariables() const {
     int result = 0;
     for (int i = 0; i < this->size; i ++) {
-      result = MathRoutines::Maximum(result, this->coefficients[i].GetMinimalNumberOfVariables());
-      result = MathRoutines::Maximum(result, (*this)[i].GetMinimalNumberOfVariables());
+      result = MathRoutines::Maximum(result, this->coefficients[i].minimalNumberOfVariables());
+      result = MathRoutines::Maximum(result, (*this)[i].minimalNumberOfVariables());
     }
     return result;
   }

@@ -289,7 +289,7 @@ bool CalculatorConversions::innerExpressionFromElementSemisimpleLieAlgebraRation
     CalculatorConversions::innerExpressionFromChevalleyGenerator(theCommands, input[i], currentMon);
     theMons.AddMonomial(currentMon, input.coefficients[i]);
   }
-  return output.MakeSum(theCommands, theMons);
+  return output.makeSum(theCommands, theMons);
 }
 
 bool CalculatorConversions::innerExpressionFromDynkinType(
@@ -303,7 +303,7 @@ bool CalculatorConversions::innerExpressionFromDynkinType(
     CalculatorConversions::innerExpressionFromDynkinSimpleType(theCommands, input[i], currentMon);
     theMons.AddMonomial(currentMon, input.coefficients[i]);
   }
-  return output.MakeSum(theCommands, theMons);
+  return output.makeSum(theCommands, theMons);
 }
 
 bool CalculatorConversions::innerExpressionFromElementSemisimpleLieAlgebraAlgebraicNumbers(
@@ -317,7 +317,7 @@ bool CalculatorConversions::innerExpressionFromElementSemisimpleLieAlgebraAlgebr
     CalculatorConversions::innerExpressionFromChevalleyGenerator(theCommands, input[i], currentMon);
     theMons.AddMonomial(currentMon, input.coefficients[i]);
   }
-  return output.MakeSum(theCommands, theMons);
+  return output.makeSum(theCommands, theMons);
 }
 
 bool CalculatorConversions::innerSlTwoSubalgebraPrecomputed(
@@ -820,7 +820,7 @@ bool CalculatorConversions::innerExpressionFromUE(
     }
     theUEE.AddMonomial(currentMonE, input.coefficients[i]);
   }
-  return output.MakeSum(theCommands, theUEE);
+  return output.makeSum(theCommands, theUEE);
 }
 
 bool CalculatorConversions::innerElementSemisimpleLieAlgebraRationalCoeffs(
@@ -952,10 +952,12 @@ bool CalculatorConversions::innerElementUE(
     const MonomialP& currentMon = theP[j];
     currentSummand.MakeConst(theP.coefficients[j], owner);
     currentMultiplicandRFpartMon.MakeOne();
-    for (int i = 0; i < currentMon.GetMinimalNumberOfVariables(); i ++) {
+    for (int i = 0; i < currentMon.minimalNumberOfVariables(); i ++) {
       int thePower = - 1;
       if (!currentMon(i).IsSmallInteger(&thePower)) {
-        return theCommands << "<hr>Failed to convert one of the exponents appearing in " << input[1].toString()
+        return theCommands
+        << "<hr>Failed to convert one of the exponents appearing in "
+        << input[1].toString()
         << " to  a small integer polynomial.<hr>";
       }
       if (thePower == 0) {

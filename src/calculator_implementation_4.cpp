@@ -146,7 +146,7 @@ void ModuleSSalgebra<coefficient>::GetGenericUnMinusElt(
   tempMon.MakeConst(*this->theAlgebras, this->indexAlgebra);
   int varShift = 0;
   if (shiftPowersByNumVarsBaseField) {
-    varShift = this->GetMinimalNumberOfVariables();
+    varShift = this->minimalNumberOfVariables();
   }
   for (int i = 0; i < eltsNilrad.size; i ++) {
     tempRF.MakeOneLetterMoN(i + varShift, 1);
@@ -172,7 +172,7 @@ void ModuleSSalgebra<coefficient>::GetGenericUnMinusElt(
   tempMon.MakeOne(*this->owner);
   int varShift = 0;
   if (shiftPowersByNumVarsBaseField) {
-    varShift = this->GetMinimalNumberOfVariables();
+    varShift = this->minimalNumberOfVariables();
   }
   int numVars = varShift + eltsNilrad.size;
   for (int i = 0; i < eltsNilrad.size; i ++) {
@@ -397,7 +397,7 @@ bool ModuleSSalgebra<coefficient>::GetActionEulerOperatorPart(
   int powerMonCoeff = 0;
   ElementWeylAlgebra<Rational> currentMonContribution;
   outputDO.MakeOne();
-  for (int i = 0; i < theCoeff.GetMinimalNumberOfVariables(); i ++) {
+  for (int i = 0; i < theCoeff.minimalNumberOfVariables(); i ++) {
     if (!theCoeff(i).IsSmallInteger(&powerMonCoeff)) {
       global.fatal << "This is a programming error. "
       << "Getting euler operator part of action on generalized Verma module: "
@@ -432,7 +432,7 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator(
   idMT.MakeIdSpecial();
   MatrixTensor<RationalFunction> tempMat1;
 
-  int varShift = this->GetMinimalNumberOfVariables();
+  int varShift = this->minimalNumberOfVariables();
   ElementWeylAlgebra<Rational> weylPartSummand, exponentContribution, oneIndexContribution,
   eulerOperatorContribution;
   Polynomial<Rational> tempP1, negativeExponentDenominatorContribution, theCoeff;
@@ -587,7 +587,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
     if (i == 0) {
       theMod.GetElementsNilradical(elementsNegativeNilrad, true, nullptr, useNilWeight, ascending);
       Polynomial<Rational> Pone, Pzero;
-      Pone.MakeOne(elementsNegativeNilrad.size + theMod.GetMinimalNumberOfVariables());
+      Pone.MakeOne(elementsNegativeNilrad.size + theMod.minimalNumberOfVariables());
       Pzero.MakeZero();
       theMod.GetGenericUnMinusElt(true, genericElt, useNilWeight, ascending);
       theWeylFormat.polyAlphabeT.SetSize(numStartingVars + elementsNegativeNilrad.size);
@@ -1696,13 +1696,13 @@ bool Calculator::functionCollectSummands(
   if (!sumOverDoubles.IsEqualToZero() && !hasNAN) {
     sumOverDoubles.QuickSortDescending();
     Expression doubleSum;
-    doubleSum.MakeSum(theCommands, sumOverDoubles);
+    doubleSum.makeSum(theCommands, sumOverDoubles);
     outputSum.AddMonomial(doubleSum, 1);
   }
   if (!sumOverAlgebraicNumbers.IsEqualToZero()) {
     sumOverAlgebraicNumbers.QuickSortDescending();
     Expression algebraicSum;
-    algebraicSum.MakeSum(theCommands, sumOverAlgebraicNumbers);
+    algebraicSum.makeSum(theCommands, sumOverAlgebraicNumbers);
     outputSum.AddMonomial(algebraicSum, 1);
   }
   outputSum.QuickSortDescending();
@@ -1809,7 +1809,7 @@ bool Calculator::outerPlus(Calculator& theCommands, const Expression& input, Exp
       }
     }
   }
-  output.MakeSum(theCommands, theSum);
+  output.makeSum(theCommands, theSum);
   if (output == input) {
     return false;
   }

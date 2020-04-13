@@ -37,7 +37,7 @@ void ElementWeylAlgebra<coefficient>::MultiplyTwoMonomials(
   const MonomialWeylAlgebra& left, const MonomialWeylAlgebra& right, ElementWeylAlgebra& output
 ) const {
   SelectionWithDifferentMaxMultiplicities tempSel;
-  int theDimensioN = MathRoutines::Maximum(left.GetMinimalNumberOfVariables(), right.GetMinimalNumberOfVariables());
+  int theDimensioN = MathRoutines::Maximum(left.minimalNumberOfVariables(), right.minimalNumberOfVariables());
   tempSel.Multiplicities.initializeFillInObject(theDimensioN, 0);
   tempSel.MaxMultiplicities.SetSize(theDimensioN);
   int theExpectedSize = 1;
@@ -167,7 +167,7 @@ void ElementWeylAlgebra<coefficient>::operator*=(const ElementWeylAlgebra& stand
 template <class coefficient>
 void ElementWeylAlgebra<coefficient>::RaiseToPower(int thePower) {
   ElementWeylAlgebra WeylOne;
-  WeylOne.MakeOne(this->GetMinimalNumberOfVariables());
+  WeylOne.MakeOne(this->minimalNumberOfVariables());
   MathRoutines::RaiseToPower(*this, thePower, WeylOne);
 }
 
@@ -363,7 +363,7 @@ bool ElementWeylAlgebra<coefficient>::ActOnPolynomial(Polynomial<Rational>& theP
       resultMon = currentPolMon;
       coeff = thePoly.coefficients[j];
       coeff *= this->coefficients[i];
-      for (int k = 0; k < currentOpMon.GetMinimalNumberOfVariables(); k ++) {
+      for (int k = 0; k < currentOpMon.minimalNumberOfVariables(); k ++) {
         int numDiff = 0;
         if (!currentOpMon.differentialPart(k).IsSmallInteger(&numDiff)) {
           return false;

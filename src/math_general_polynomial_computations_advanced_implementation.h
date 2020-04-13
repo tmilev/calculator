@@ -96,8 +96,8 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasis(
           &this->thePolynomialOrder.theMonOrder
         );
         int numVars = MathRoutines::Maximum(
-          leftHighestMonomial.GetMinimalNumberOfVariables(),
-          rightHighestMonomial.GetMinimalNumberOfVariables()
+          leftHighestMonomial.minimalNumberOfVariables(),
+          rightHighestMonomial.minimalNumberOfVariables()
         );
         this->SoPolyLeftShift.MakeOne(numVars);
         this->SoPolyRightShift.MakeOne(numVars);
@@ -347,7 +347,10 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasisImpro
       out << "Basis size: " << this->theBasiS.size << ".\n<br>Remaining cases current round: " << indexPairs.size;
       reportOuter.Report(out.str());
     }
-    int numVars = MathRoutines::Maximum(leftHighestMon.GetMinimalNumberOfVariables(), rightHighestMon.GetMinimalNumberOfVariables());
+    int numVars = MathRoutines::Maximum(
+      leftHighestMon.minimalNumberOfVariables(),
+      rightHighestMon.minimalNumberOfVariables()
+    );
     leftShift.MakeOne(numVars);
     rightShift.MakeOne(numVars);
     for (int k = 0; k < numVars; k ++) {
@@ -402,7 +405,7 @@ int GroebnerBasisComputation<coefficient>::GetNumVars() const {
   for (int i = 0; i < this->theBasiS.size; i ++) {
     for (int j = 0; j < this->theBasiS[i].size(); j ++) {
       const MonomialP& currentMon = this->theBasiS[i][j];
-      result = MathRoutines::Maximum(currentMon.GetMinimalNumberOfVariables(), result);
+      result = MathRoutines::Maximum(currentMon.minimalNumberOfVariables(), result);
     }
   }
   return result;
@@ -915,7 +918,7 @@ void GroebnerBasisComputation<coefficient>::BackSubstituteIntoSinglePoly(
   thePoly.Substitution(theFinalSub);
   bool changed = false;
   for (int i = 0; i < thePoly.size(); i ++) {
-    for (int j = 0; j < thePoly[i].GetMinimalNumberOfVariables(); j ++) {
+    for (int j = 0; j < thePoly[i].minimalNumberOfVariables(); j ++) {
       if (thePoly[i](j) != 0) {
         if (!this->solutionsFound.GetElement().selected[j]) {
           this->SetSerreLikeSolutionIndex(j, 0);
@@ -969,12 +972,12 @@ void GroebnerBasisComputation<coefficient>::GetVarsToSolveFor(const List<Polynom
   MacroRegisterFunctionWithName("GroebnerBasisComputation::GetVarsToSolveFor");
   int NumVars = 0;
   for (int i = 0; i < input.size; i ++) {
-    NumVars = MathRoutines::Maximum(NumVars, input[i].GetMinimalNumberOfVariables());
+    NumVars = MathRoutines::Maximum(NumVars, input[i].minimalNumberOfVariables());
   }
   output.init(NumVars);
   for (int i = 0; i < input.size && output.CardinalitySelection < output.MaxSize; i ++) {
     for (int j = 0; j < input[i].size() && output.CardinalitySelection < output.MaxSize; j ++) {
-      for (int k = 0; k < input[i][j].GetMinimalNumberOfVariables() && output.CardinalitySelection < output.MaxSize; k ++) {
+      for (int k = 0; k < input[i][j].minimalNumberOfVariables() && output.CardinalitySelection < output.MaxSize; k ++) {
         if (input[i][j](k) != 0) {
           output.AddSelectionAppendNewIndex(k);
         }
@@ -1190,7 +1193,7 @@ bool GroebnerBasisComputation<coefficient>::HasSingleMonomialEquation(
     if (inputSystem[i].size() == 1) {
       result = true;
       int currentNumNonZeroMonEntries = 0;
-      for (int j = 0; j < inputSystem[i][0].GetMinimalNumberOfVariables(); j ++) {
+      for (int j = 0; j < inputSystem[i][0].minimalNumberOfVariables(); j ++) {
         if (!(inputSystem[i][0](j) == 0)) {
           currentNumNonZeroMonEntries ++;
         }
@@ -1211,7 +1214,7 @@ void GroebnerBasisComputation<coefficient>::SolveWhenSystemHasSingleMonomial(
   ProgressReport theReport1;
   List<Polynomial<coefficient> > inputSystemCopy = inputSystem;
   bool allProvenToHaveNoSolution = true;
-  for (int i = 0; i < theMon.GetMinimalNumberOfVariables(); i ++) {
+  for (int i = 0; i < theMon.minimalNumberOfVariables(); i ++) {
     if (theMon(i) != 0) {
       if (this->flagDoProgressReport) {
         std::stringstream out;
@@ -1345,7 +1348,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystem(List<Polynomial
   int numVars = 0;
   List<Polynomial<coefficient> > workingSystem = inputSystem;
   for (int i = 0; i < workingSystem.size; i ++) {
-    numVars = MathRoutines::Maximum(numVars, workingSystem[i].GetMinimalNumberOfVariables());
+    numVars = MathRoutines::Maximum(numVars, workingSystem[i].minimalNumberOfVariables());
   }
   this->systemSolution.GetElement().initializeFillInObject(numVars, 0);
   this->solutionsFound.GetElement().init(numVars);
@@ -1355,7 +1358,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystem(List<Polynomial
     reportStream << "Solving system " << this->ToStringCalculatorInputFromSystem(inputSystem);
     theReport.Report(reportStream.str());
   }
-  this->NumberSerreVariablesOneGenerator = workingSystem[0].GetMinimalNumberOfVariables() / 2;
+  this->NumberSerreVariablesOneGenerator = workingSystem[0].minimalNumberOfVariables() / 2;
   if (this->theAlgebraicClosurE == 0) {
     this->flagTryDirectlySolutionOverAlgebraicClosure = false;
   }
@@ -1445,7 +1448,7 @@ bool Polynomial<coefficient>::leastCommonMultiple(
   leftTemp = left;
   rightTemp = right;
   int theNumVars = MathRoutines::Maximum(
-    left.GetMinimalNumberOfVariables(), right.GetMinimalNumberOfVariables()
+    left.minimalNumberOfVariables(), right.minimalNumberOfVariables()
   );
   leftTemp.SetNumVariablesSubDeletedVarsByOne(theNumVars + 1);
   rightTemp.SetNumVariablesSubDeletedVarsByOne(theNumVars + 1);

@@ -108,14 +108,14 @@ public:
 //  List<Matrix<coefficient> > ActionsChevalleyGenerators;
   MatrixTensor<coefficient>& GetActionGeneratorIndeX(int generatorIndex);
   MatrixTensor<coefficient>& GetActionSimpleGeneratorIndex(int generatorIndex);
-  int GetMinimalNumberOfVariables() {
+  int minimalNumberOfVariables() {
     if (this->theHWFundamentalCoordsBaseField.size <= 0) {
       return - 1;
     }
     int result = 0;
     for (int i = 0; i < this->theHWFundamentalCoordsBaseField.size; i ++) {
       result = MathRoutines::Maximum(
-        result, this->theHWFundamentalCoordsBaseField[i].GetMinimalNumberOfVariables()
+        result, this->theHWFundamentalCoordsBaseField[i].minimalNumberOfVariables()
       );
     }
     return result;

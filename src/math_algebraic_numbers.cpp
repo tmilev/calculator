@@ -337,7 +337,7 @@ bool AlgebraicClosureRationals::ReduceMe(
   Polynomial<Rational> zToTheNth, remainderAfterReduction, tempP;
   MatrixTensor<Rational> projectionGeneratorCoordinates;
   int smallestFactorDegree = - 1;
-  if (!smallestFactor.TotalDegree().IsSmallInteger(&smallestFactorDegree)) {
+  if (!smallestFactor.totalDegree().IsSmallInteger(&smallestFactorDegree)) {
     global.fatal
     << "This is a programming error: "
     << smallestFactor.toString()
@@ -644,7 +644,7 @@ bool AlgebraicClosureRationals::AdjoinRootQuadraticPolyToQuadraticRadicalExtensi
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("AlgebraicClosureRationals::AdjoinRootQuadraticPolyToQuadraticRadicalExtension");
-  if (thePoly.TotalDegree() != 2 || !this->flagIsQuadraticRadicalExtensionRationals) {
+  if (thePoly.totalDegree() != 2 || !this->flagIsQuadraticRadicalExtensionRationals) {
     return false;
   }
   Polynomial<AlgebraicNumber> algNumPoly;

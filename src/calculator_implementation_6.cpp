@@ -1259,7 +1259,7 @@ bool CalculatorFunctions::innerFactorOutNumberContent(
   }
   Expression left, right;
   left.AssignValue(theCF, theCommands);
-  right.MakeSum(theCommands, theV);
+  right.makeSum(theCommands, theV);
   output = left * right;
   return true;
 }
@@ -2422,7 +2422,7 @@ bool CalculatorFunctions::innerScaleToLeadingUnit(Calculator& theCommands, const
   LinearCombination<Expression, Rational> theCollection;
   theCommands.functionCollectSummands(theCommands, argument, theCollection);
   theCollection /= theCollection.GetLeadingCoefficient(nullptr);
-  return output.MakeSum(theCommands, theCollection);
+  return output.makeSum(theCommands, theCollection);
 }
 
 bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalOutputAlgebraic(

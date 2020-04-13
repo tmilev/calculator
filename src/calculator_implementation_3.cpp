@@ -1388,7 +1388,7 @@ bool Calculator::innerFactorPolynomial(Calculator& theCommands, const Expression
   )) {
     return false;
   }
-  if (polynomial.content.GetMinimalNumberOfVariables() > 1) {
+  if (polynomial.content.minimalNumberOfVariables() > 1) {
     return output.MakeError(
       "I have been taught to factor one variable polynomials only. ",
       theCommands

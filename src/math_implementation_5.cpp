@@ -1532,7 +1532,7 @@ void RationalFunction::makeMonomial(
 }
 
 void RationalFunction::SetNumVariablesSubDeletedVarsByOne(int newNumVars) {
-  int oldNumVars = this->GetMinimalNumberOfVariables();
+  int oldNumVars = this->minimalNumberOfVariables();
   this->Numerator.GetElement().SetNumVariablesSubDeletedVarsByOne(newNumVars);
   this->Denominator.GetElement().SetNumVariablesSubDeletedVarsByOne(newNumVars);
   if (newNumVars < oldNumVars) {
@@ -2068,24 +2068,24 @@ bool RationalFunction::gcdQuick(
   const Polynomial<Rational>& right,
   Polynomial<Rational>& output
 ) {
-  if (left.TotalDegree() > 1 && right.TotalDegree() > 1) {
+  if (left.totalDegree() > 1 && right.totalDegree() > 1) {
     return false;
   }
   Polynomial<Rational> quotient, remainder;
   List<MonomialP>::Comparator* monomialOrder = &MonomialP::orderDefault();
-  if (left.TotalDegree() > right.TotalDegree()) {
+  if (left.totalDegree() > right.totalDegree()) {
     left.DivideBy(right, quotient, remainder, monomialOrder);
     if (remainder.IsEqualToZero()) {
       output = right;
     } else {
-      output.MakeOne(left.GetMinimalNumberOfVariables());
+      output.MakeOne(left.minimalNumberOfVariables());
     }
   } else {
     right.DivideBy(left, quotient, remainder, monomialOrder);
     if (remainder.IsEqualToZero()) {
       output = left;
     } else {
-      output.MakeOne(left.GetMinimalNumberOfVariables());
+      output.MakeOne(left.minimalNumberOfVariables());
     }
   }
   return true;
@@ -2599,7 +2599,7 @@ bool MonomialP::operator==(const MonomialP& other) const {
       return false;
     }
   }
-  int highestIndex = MathRoutines::Minimum(this->GetMinimalNumberOfVariables(), other.GetMinimalNumberOfVariables()) - 1;
+  int highestIndex = MathRoutines::Minimum(this->minimalNumberOfVariables(), other.minimalNumberOfVariables()) - 1;
   for (int i = highestIndex; i >= 0; i --) {
     if (this->monBody[i] != other.monBody[i]) {
       return false;
@@ -2654,7 +2654,9 @@ bool MonomialP::greaterThan_rightLargerWins(const MonomialP& other) const {
       return false;
     }
   }
-  int highestIndex = MathRoutines::Minimum(this->GetMinimalNumberOfVariables(), other.GetMinimalNumberOfVariables()) - 1;
+  int highestIndex = MathRoutines::Minimum(
+    this->minimalNumberOfVariables(), other.minimalNumberOfVariables()
+  ) - 1;
   for (int i = highestIndex; i >= 0; i --) {
     if (this->monBody[i] > other.monBody[i]) {
       return true;
@@ -2682,7 +2684,9 @@ List<MonomialP>::Comparator& MonomialP::orderDegreeThenLeftLargerWins() {
 }
 
 bool MonomialP::greaterThan_leftLargerWins(const MonomialP &other) const {
-  int commonSize = MathRoutines::Minimum(this->GetMinimalNumberOfVariables(), other.GetMinimalNumberOfVariables());
+  int commonSize = MathRoutines::Minimum(
+    this->minimalNumberOfVariables(), other.minimalNumberOfVariables()
+  );
   for (int i = 0; i < commonSize; i ++) {
     if (this->monBody[i] > other.monBody[i]) {
       return true;

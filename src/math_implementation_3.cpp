@@ -3055,7 +3055,7 @@ void PartFraction::PrepareFraction(
   } else {
     powerDropA = 0;
   }
-  outputCommonCoeff.MakeOne(AminusNbetaPoly.GetMinimalNumberOfVariables());
+  outputCommonCoeff.MakeOne(AminusNbetaPoly.minimalNumberOfVariables());
   for (int i = 0; i < powerDropB; i ++) {
     outputCommonCoeff *= AminusNbetaPoly;
   }
@@ -9352,9 +9352,14 @@ void PartFraction::ComputePolyCorrespondingToOneMonomial(
   QuasiPolynomial& outputQP, const MonomialP& theMon, Vectors<Rational>& normals, Lattice& theLattice
 ) const {
   Polynomial<Rational> tempP, outputPolyPart;
-  outputPolyPart.MakeOne(theMon.GetMinimalNumberOfVariables());
-  for (int i = 0; i < theMon.GetMinimalNumberOfVariables(); i ++) {
-    this->MakePolynomialFromOneNormal(normals[i], theMon, this->TheObjects[this->IndicesNonZeroMults[i]].Multiplicities[0], tempP);
+  outputPolyPart.MakeOne(theMon.minimalNumberOfVariables());
+  for (int i = 0; i < theMon.minimalNumberOfVariables(); i ++) {
+    this->MakePolynomialFromOneNormal(
+      normals[i],
+      theMon,
+      this->TheObjects[this->IndicesNonZeroMults[i]].Multiplicities[0],
+      tempP
+    );
     outputPolyPart *= tempP;
   }
   outputQP.MakeFromPolyShiftAndLattice(outputPolyPart, theMon, theLattice);
@@ -9647,7 +9652,7 @@ bool Lattice::GetHomogeneousSubMatFromSubIgnoreConstantTerms(
   }
   int theTargetDim = 0;
   for (int i = 0; i < theSub.size; i ++) {
-    theTargetDim = MathRoutines::Maximum(theTargetDim, theSub[i].GetMinimalNumberOfVariables());
+    theTargetDim = MathRoutines::Maximum(theTargetDim, theSub[i].minimalNumberOfVariables());
   }
   output.init(theSub.size, theTargetDim);
   for (int i = 0; i < theSub.size; i ++) {
@@ -9828,7 +9833,7 @@ bool Cone::GetRootFromLPolyConstantTermGoesToLastVariable(Polynomial<Rational>& 
   if (!inputLPoly.IsLinear()) {
     return false;
   }
-  output.MakeZero(inputLPoly.GetMinimalNumberOfVariables() + 1);
+  output.MakeZero(inputLPoly.minimalNumberOfVariables() + 1);
   for (int i = 0; i < inputLPoly.size(); i ++) {
     int theIndex;
     if (inputLPoly[i].::MonomialP::IsOneLetterFirstDegree(&theIndex)) {
@@ -12661,15 +12666,15 @@ std::string ConeComplex::toString(bool useHtml) {
   return out.str();
 }
 
-int RationalFunction::GetMinimalNumberOfVariables() const {
+int RationalFunction::minimalNumberOfVariables() const {
   switch (this->expressionType) {
     case RationalFunction::typeRational:
       return 0;
     case RationalFunction::typePoly:
-      return this->Numerator.GetElementConst().GetMinimalNumberOfVariables();
+      return this->Numerator.GetElementConst().minimalNumberOfVariables();
     case RationalFunction::typeRationalFunction:
       return MathRoutines::Maximum(
-        this->Numerator.GetElementConst().GetMinimalNumberOfVariables(), this->Denominator.GetElementConst().GetMinimalNumberOfVariables()
+        this->Numerator.GetElementConst().minimalNumberOfVariables(), this->Denominator.GetElementConst().minimalNumberOfVariables()
       );
     default: //this should never happen! maybe global.fatal << global.fatal here...
       return - 1;
@@ -12693,7 +12698,7 @@ bool RationalFunction::GetRelations(
   int numStartingGenerators = inputElements.size;
   int numStartingVariables = 0;
   for (int i = 0; i < inputElements.size; i ++) {
-    numStartingVariables = MathRoutines::Maximum(numStartingVariables, inputElements[0].GetMinimalNumberOfVariables());
+    numStartingVariables = MathRoutines::Maximum(numStartingVariables, inputElements[0].minimalNumberOfVariables());
   }
   Polynomial<Rational> currentGenerator;
   for (int i = 0; i < numStartingGenerators; i ++) {
@@ -12740,9 +12745,9 @@ bool ConeComplex::findMaxLFOverConeProjective(
   HyperPlanesCorrespondingToLF.SetSize(inputLinPolys.size);
   for (int i = 0; i < inputLinPolys.size; i ++) {
     Polynomial<Rational>& currentPoly = inputLinPolys[i];
-    if (currentPoly.TotalDegree() != 1 ) {
+    if (currentPoly.totalDegree() != 1 ) {
       global.Comments << "The total degree must be one, instead it is "
-      << currentPoly.TotalDegree() << ". The dimension of the cone is " << theDim;
+      << currentPoly.totalDegree() << ". The dimension of the cone is " << theDim;
       return false;
     }
     Vector<Rational>& newWall = HyperPlanesCorrespondingToLF[i];

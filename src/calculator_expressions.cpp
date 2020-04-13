@@ -4848,7 +4848,7 @@ bool Expression::MakeProducT(Calculator& owner, const List<Expression>& theMulti
   return this->MakeXOXOdotsOX(owner, owner.opTimes(), theMultiplicands);
 }
 
-bool Expression::MakeSum(Calculator& owner, const List<Expression>& theSummands) {
+bool Expression::makeSum(Calculator& owner, const List<Expression>& theSummands) {
   MacroRegisterFunctionWithName("Expression::MakeSum");
   if (theSummands.size == 0) {
     return this->AssignValue(0, owner);

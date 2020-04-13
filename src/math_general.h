@@ -109,10 +109,10 @@ public:
   ~MonomialTensor() {
     this->flagDeallocated = true;
   }
-  int GetMinimalNumberOfVariables() {
+  int minimalNumberOfVariables() {
     int result = 0;
     for (int i = 0; i < this->Powers.size; i ++) {
-      result = MathRoutines::Maximum(result, this->Powers[i].GetMinimalNumberOfVariables());
+      result = MathRoutines::Maximum(result, this->Powers[i].minimalNumberOfVariables());
     }
     return result;
   }
@@ -422,7 +422,7 @@ public:
   template <class coefficient>
   bool SubstitutioN(const List<Polynomial<coefficient> >& TheSubstitution, Polynomial<coefficient>& output) const;
   void MakeEi(int LetterIndex, int Power = 1, int ExpectedNumVars = 0);
-  int GetHighestIndexSuchThatHigherIndexVarsDontParticipate() {
+  int GetHighestIndexSuchThatHigherIndexVarsDontParticipate() const {
     for (int i = this->monBody.size - 1; i >= 0; i --) {
       if (this->monBody[i] != 0) {
         return i;
@@ -480,7 +480,7 @@ public:
     }
     return true;
   }
-  int GetMinimalNumberOfVariables() const {
+  int minimalNumberOfVariables() const {
     return this->monBody.size;
   }
   void Invert() {
@@ -1941,8 +1941,11 @@ class MonomialWeylAlgebra {
   unsigned int HashFunction() const {
     return this->HashFunction(*this);
   }
-  int GetMinimalNumberOfVariables() const {
-    return MathRoutines::Maximum(this->polynomialPart.GetMinimalNumberOfVariables(), this->differentialPart.GetMinimalNumberOfVariables());
+  int minimalNumberOfVariables() const {
+    return MathRoutines::Maximum(
+      this->polynomialPart.minimalNumberOfVariables(),
+      this->differentialPart.minimalNumberOfVariables()
+    );
   }
   bool operator==(const MonomialWeylAlgebra& other) const {
     return this->polynomialPart == other.polynomialPart &&
@@ -1966,7 +1969,7 @@ class MonomialWeylAlgebra {
   bool HasNonSmallPositiveIntegerDerivation() const {
     for (
       int i = 0;
-      i < this->differentialPart.GetMinimalNumberOfVariables();
+      i < this->differentialPart.minimalNumberOfVariables();
       i ++
     ) {
       if (!this->differentialPart(i).IsSmallInteger()) {
@@ -2330,7 +2333,6 @@ public:
     }
     return false;
   }
-  int TotalDegree();
   void CheckFlagDeallocated() const {
     if (
       this->theMonomials.flagDeallocated ||
@@ -2382,10 +2384,10 @@ public:
     this->theMonomials.Clear();
     this->coefficients.SetSize(0);
   }
-  int GetMinimalNumberOfVariables() const {
+  int minimalNumberOfVariables() const {
     int result = 0;
     for (int i = 0; i < this->size(); i ++) {
-      result = MathRoutines::Maximum(result, (*this)[i].GetMinimalNumberOfVariables());
+      result = MathRoutines::Maximum(result, (*this)[i].minimalNumberOfVariables());
     }
     return result;
   }
@@ -2690,11 +2692,23 @@ public:
     PolynomialFactorizationResult<coefficient>& output,
     std::stringstream* comments
   ) const;
-  bool isSquareFreeAndUnivariate(
+  bool isSquareFree(
     const ElementZmodP& one,
     std::stringstream* comments
   ) const;
-  bool computeDerivative(Polynomial<coefficient>& output, std::stringstream* comments) const;
+  bool isSquareFreeAndUnivariate(
+    const coefficient& one,
+    std::stringstream* comments
+  ) const;
+  // Given polynomial p, returns d/dx_1 p dx_1 + ... + d/dx_n p dx_n.
+  // The differentials dx_1, ..., dx_n are introduced as additional variables.
+  bool differential(
+    Polynomial<coefficient>& output, std::stringstream* comments
+  ) const;
+  // Similar to the preceding function but returns a vector.
+  bool differential(
+    Vector<Polynomial<coefficient> >& output, std::stringstream* comments
+  ) const;
   bool factorMe(List<Polynomial<coefficient> >& outputFactors, std::stringstream* comments) const;
   void Interpolate(const Vector<coefficient>& thePoints, const Vector<coefficient>& ValuesAtThePoints);
   bool findOneVariableRationalRoots(List<Rational>& output);
@@ -2814,7 +2828,7 @@ public:
   void ScaleToPositiveMonomialExponents(MonomialP& outputScale);
   void DecreaseNumVariables(int increment, Polynomial<coefficient>& output);
   bool Substitution(const List<Polynomial<coefficient> >& TheSubstitution);
-  Rational TotalDegree() const{
+  Rational totalDegree() const{
     Rational result = 0;
     for (int i = 0; i < this->size(); i ++) {
       result = MathRoutines::Maximum((*this)[i].TotalDegree(), result);
@@ -2881,7 +2895,7 @@ public:
     return true;
   }
   bool IsLinearGetRootConstantTermLastCoordinate(Vector<coefficient>& outputRoot) {
-    outputRoot.MakeZero(this->GetMinimalNumberOfVariables() + 1);
+    outputRoot.MakeZero(this->minimalNumberOfVariables() + 1);
     int index;
     for (int i = 0; i < this->size(); i ++) {
       if ((*this)[i].IsConstant()) {
@@ -2906,7 +2920,7 @@ public:
       << d << ". " << global.fatal;
     }
     Polynomial<coefficient> theOne;
-    theOne.MakeOne(this->GetMinimalNumberOfVariables());
+    theOne.MakeOne(this->minimalNumberOfVariables());
     MathRoutines::RaiseToPower(*this, d, theOne);
   }
   bool GetRootFromLinPolyConstTermLastVariable(Vector<coefficient>& outputRoot) {
@@ -2958,10 +2972,10 @@ public:
     if (this->size() == 0) {
       return false;
     }
-    if (this->TotalDegree() > other.TotalDegree()) {
+    if (this->totalDegree() > other.totalDegree()) {
       return true;
     }
-    if (this->TotalDegree() < other.TotalDegree()) {
+    if (this->totalDegree() < other.totalDegree()) {
       return false;
     }
     MonomialP thisMaximalMonomial, otherMaximalMonomial;
@@ -3030,10 +3044,7 @@ public:
     this->::LinearCombination<MonomialP, coefficient>::operator-=(other);
   }
   void operator*=(const MonomialP& other) {
-    Polynomial<coefficient> otherP;
-    otherP.MakeZero();
-    otherP.AddMonomial(other, 1);
-    (*this) *= otherP;
+    this->MultiplyBy(other, *this);
   }
   void operator*=(const Polynomial<coefficient>& other) {
     this->::ElementMonomialAlgebra<MonomialP, coefficient>::operator*=(other);
@@ -3547,7 +3558,7 @@ public:
   bool FindOneVariableRationalRoots(List<Rational>& output);
   static RationalFunction one();
   static RationalFunction zero();
-  int GetMinimalNumberOfVariables() const;
+  int minimalNumberOfVariables() const;
   bool Substitution(const PolynomialSubstitution<Rational>& theSub);
   RationalFunction(const RationalFunction& other);
   RationalFunction();

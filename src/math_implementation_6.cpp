@@ -10,7 +10,7 @@ bool Polynomial<ElementZmodP>::factorMeCantorZassenhaus(
   PolynomialFactorizationResult<ElementZmodP>& output,
   std::stringstream* comments
 ) const {
-  if (this->GetMinimalNumberOfVariables() > 1) {
+  if (this->minimalNumberOfVariables() > 1) {
     if (comments != nullptr) {
       *comments
       << "I haven't been taught how to factor polynomials "
@@ -18,7 +18,7 @@ bool Polynomial<ElementZmodP>::factorMeCantorZassenhaus(
     }
     return false;
   }
-  if (this->GetMinimalNumberOfVariables() == 0) {
+  if (this->minimalNumberOfVariables() == 0) {
     if (comments != nullptr) {
       *comments << "Factoring constant polynomials is not allowed. ";
     }
@@ -27,91 +27,44 @@ bool Polynomial<ElementZmodP>::factorMeCantorZassenhaus(
   if (this->IsEqualToZero()) {
     return false;
   }
-  Polynomial<ElementZmodP> derivative;
-  if (!this->computeDerivative(derivative, comments)) {
-    return false;
-  }
-  Polynomial<ElementZmodP> greatestCommonDivisorWithDerivative;
   ElementZmodP one;
   one.MakeOne(this->coefficients[0].theModulus);
-  if (!this->greatestCommonDivisor(
-    *this,
-    derivative,
-    greatestCommonDivisorWithDerivative,
-    one,
-    comments
-  )) {
-    return false;
+  if (!this->isSquareFree(one, comments)) {
+    *comments << "Not square free.";
   }
   if (comments != nullptr) {
     *comments << "Not implemented yet.";
   }
-
   return false;
 }
 
 template<class coefficient>
-bool Polynomial<coefficient>::computeDerivative(
-  Polynomial<coefficient>& output,
-  std::stringstream* comments
+bool Polynomial<coefficient>::isSquareFree(
+  const ElementZmodP& one, std::stringstream* comments
 ) const {
-  if (this->GetMinimalNumberOfVariables() > 1) {
-    if (comments != nullptr) {
-      *comments
-      << "Can only compute derivative of a one-variable polynomial. ";
-    }
+  MacroRegisterFunctionWithName("Polynomial::isSquareFree");
+  Polynomial<coefficient> differentialPolynomial;
+  if (!this->differential(differentialPolynomial, comments)) {
     return false;
   }
-  if (&output == this) {
-    Polynomial<coefficient> thisCopy = *this;
-    return thisCopy.computeDerivative(output, comments);
-  }
-  output.MakeZero();
-  int variableIndex = 0;
-  for (int i = 0; i < this->size(); i ++) {
-    coefficient newCoefficient;
-    newCoefficient = this->coefficients[i];
-    const MonomialP& currentMonomial = this->theMonomials[i];
-    Rational power = currentMonomial.TotalDegree();
-    LargeInteger powerInteger;
-    if (!power.IsInteger(&powerInteger)) {
-      if (comments != nullptr) {
-        *comments << "Monomial has non-integer power " << power << ". ";
-      }
-      return false;
-    }
-    newCoefficient *= power;
-    MonomialP newMonomial;
-    power -= 1;
-    newMonomial[variableIndex] = power;
-    output.AddMonomial(newMonomial, newCoefficient);
-  }
-  return true;
+  Polynomial<coefficient> divisor;
+  Polynomial::greatestCommonDivisor(*this, differentialPolynomial, divisor, one, comments);
+  return divisor.totalDegree() > 0;
 }
 
 template<class coefficient>
 bool Polynomial<coefficient>::isSquareFreeAndUnivariate(
-  const ElementZmodP& one,
+  const coefficient& one,
   std::stringstream* comments
 ) const {
-  if (this->GetMinimalNumberOfVariables() > 1) {
+  int numberOfVariables = this->minimalNumberOfVariables();
+  if (numberOfVariables > 1) {
     if (comments != nullptr) {
-      *comments
-      << "I haven't been taught to compute square-freeness "
-      << "with polynomials in more than one variable. ";
+      *comments << "Not univariate: polynomial has " << numberOfVariables << " variables. ";
     }
     return false;
   }
-  if (this->GetMinimalNumberOfVariables() == 0) {
-    return true;
-  }
-  Polynomial<coefficient> derivative;
-  if (!this->computeDerivative(derivative, comments)) {
-    return false;
-  }
-  Polynomial<coefficient> divisor;
-  Polynomial::greatestCommonDivisor(*this, derivative, divisor, one, comments);
-  return true;
+  return this->isSquareFree(one, comments);
 }
 
 template <>
@@ -150,11 +103,11 @@ template<>
 bool Polynomial<Rational>::findOneVariableRationalRoots(List<Rational>& output) {
   MacroRegisterFunctionWithName("Polynomial::findOneVariableRationalRoots");
   List<MonomialP>::Comparator* monomialOrder = &MonomialP::orderDefault();
-  if (this->GetMinimalNumberOfVariables() > 1) {
+  if (this->minimalNumberOfVariables() > 1) {
     return false;
   }
   output.SetSize(0);
-  if (this->GetMinimalNumberOfVariables() == 0 || this->IsEqualToZero()) {
+  if (this->minimalNumberOfVariables() == 0 || this->IsEqualToZero()) {
     return true;
   }
   Polynomial<Rational> myCopy;
@@ -260,16 +213,16 @@ bool Polynomial<Rational>::factorMeOutputIsADivisor(
   Polynomial<Rational>& output, std::stringstream* comments
 ) {
   MacroRegisterFunctionWithName("Polynomial::factorMeOutputIsADivisor");
-  if (this->GetMinimalNumberOfVariables() > 1) {
+  if (this->minimalNumberOfVariables() > 1) {
     return false;
   }
-  if (this->GetMinimalNumberOfVariables() == 0) {
+  if (this->minimalNumberOfVariables() == 0) {
     return true;
   }
   Polynomial<Rational> thePoly = *this;
   thePoly.scaleNormalizeLeadingMonomial();
   int degree = 0;
-  if (!thePoly.TotalDegree().IsSmallInteger(&degree)) {
+  if (!thePoly.totalDegree().IsSmallInteger(&degree)) {
     return false;
   }
   int degreeLeft = degree / 2;

@@ -53,7 +53,7 @@ bool Polynomial<coefficient>::IsOneVariablePoly(int* whichVariable) const {
   }
   *whichVariable = - 1;
   for (int i = 0; i < this->size(); i ++) {
-    for (int j = 0; j < (*this)[i].GetMinimalNumberOfVariables(); j ++) {
+    for (int j = 0; j < (*this)[i].minimalNumberOfVariables(); j ++) {
       if ((*this)[i](j) != 0) {
         if (*whichVariable == - 1) {
           *whichVariable = j;
@@ -106,7 +106,7 @@ void Polynomial<coefficient>::MakeDeterminantFromSquareMatrix(
 template <class coefficient>
 int Polynomial<coefficient>::TotalDegreeInt() const {
   int result = - 1;
-  if (!this->TotalDegree().IsSmallInteger(&result)) {
+  if (!this->totalDegree().IsSmallInteger(&result)) {
     global.fatal
     << "This is a programming error: requested total degree of a "
     << "polynomial in int formal, but the "
@@ -177,15 +177,18 @@ coefficient Polynomial<coefficient>::Evaluate(const Vector<coefficient>& input) 
     const MonomialP& currentMon = (*this)[i];
     coefficient accum = this->coefficients[i];
     coefficient tempElt;
-    for (int j = 0; j < currentMon.GetMinimalNumberOfVariables(); j ++) {
+    for (int j = 0; j < currentMon.minimalNumberOfVariables(); j ++) {
       int numCycles = 0;
       if (!(*this)[i](j).IsSmallInteger(&numCycles)) {
-        global.fatal << "This is a programming error. Attempting to evaluate a polynomial whose "
+        global.fatal << "This is a programming error. "
+        << "Attempting to evaluate a polynomial whose "
         <<  i + 1 << "^{th} variable is raised to the power "
         << (*this)[i](j).toString()
-        << ". Raising variables to power is allowed only if the power is a small integer. "
+        << ". Raising variables to power is allowed "
+        << "only if the power is a small integer. "
         << "If the user has requested such an operation, "
-        << "it *must* be intercepted at an earlier level (and the user must be informed)." << global.fatal;
+        << "it *must* be intercepted at an earlier level "
+        << "(and the user must be informed)." << global.fatal;
       }
       bool isPositive = numCycles > 0;
       if (numCycles < 0) {
@@ -206,7 +209,7 @@ coefficient Polynomial<coefficient>::Evaluate(const Vector<coefficient>& input) 
 template <class coefficient>
 void Polynomial<coefficient>::SetNumVariablesSubDeletedVarsByOne(int newNumVars) {
   MacroRegisterFunctionWithName("Polynomial_CoefficientType::SetNumVariablesSubDeletedVarsByOne");
-  if (newNumVars >= this->GetMinimalNumberOfVariables()) {
+  if (newNumVars >= this->minimalNumberOfVariables()) {
     return;
   }
   if (newNumVars < 0) {
@@ -237,7 +240,7 @@ void Polynomial<coefficient>::ShiftVariableIndicesToTheRight(int VarIndexShift) 
   if (VarIndexShift == 0) {
     return;
   }
-  int oldNumVars = this->GetMinimalNumberOfVariables();
+  int oldNumVars = this->minimalNumberOfVariables();
   int newNumVars = oldNumVars + VarIndexShift;
   Polynomial<coefficient> Accum;
   Accum.MakeZero();
@@ -289,7 +292,7 @@ Matrix<coefficient> Polynomial<coefficient>::EvaluateUnivariatePoly(const Matrix
 
 template <class coefficient>
 void Polynomial<coefficient>::ScaleToPositiveMonomialExponents(MonomialP& outputScale) {
-  int numVars = this->GetMinimalNumberOfVariables();
+  int numVars = this->minimalNumberOfVariables();
   outputScale.MakeOne(numVars);
   for (int i = 0; i < numVars; i ++) {
     for (int j = 0; j < this->size(); j ++) {
@@ -532,6 +535,63 @@ void Polynomial<coefficient>::GetCoeffInFrontOfLinearTermVariableIndex(
   } else {
     output = this->coefficients[i];
   }
+}
+
+
+template<class coefficient>
+bool Polynomial<coefficient>::differential(
+  Vector<Polynomial<coefficient> >& output, std::stringstream* comments
+) const {
+  MacroRegisterFunctionWithName("Polynomial::differential");
+  int numberOfVariables = this->minimalNumberOfVariables();
+  output.SetSize(numberOfVariables);
+  for (int i = 0; i < this->size(); i ++) {
+    const MonomialP& currentMonomial = this->theMonomials[i];
+    const coefficient& currentCoefficient = this->coefficients[i];
+    int currentNumberOfVariables = currentMonomial.GetHighestIndexSuchThatHigherIndexVarsDontParticipate();
+    for (int j = 0; j < currentNumberOfVariables; j ++) {
+      coefficient newCoefficient = currentCoefficient;
+      Rational power = currentMonomial(j);
+      LargeInteger powerInteger;
+      if (!power.IsInteger(&powerInteger)) {
+        if (comments != nullptr) {
+          *comments << "Monomial has non-integer power " << power << ". ";
+        }
+        return false;
+      }
+      newCoefficient *= power;
+      MonomialP newMonomial;
+      power -= 1;
+      newMonomial[j] = power;
+      output[j].AddMonomial(newMonomial, newCoefficient);
+    }
+  }
+  return true;
+}
+
+template<class coefficient>
+bool Polynomial<coefficient>::differential(
+  Polynomial<coefficient>& output,
+  std::stringstream* comments
+) const {
+  MacroRegisterFunctionWithName("Polynomial::differential");
+  if (&output == this) {
+    Polynomial<coefficient> thisCopy = *this;
+    return thisCopy.differential(output, comments);
+  }
+  Vector<Polynomial<coefficient> > differentials;
+  if (!this->differential(differentials, comments)) {
+    return false;
+  }
+  output.MakeZero();
+  Polynomial<coefficient> nextSummand;
+  for (int i = 0; i < differentials.size; i ++) {
+    nextSummand = differentials[i];
+    MonomialP differentialVariable(differentials.size + i, 1);
+    nextSummand *= differentialVariable;
+    output += nextSummand;
+  }
+  return true;
 }
 
 template <class coefficient>

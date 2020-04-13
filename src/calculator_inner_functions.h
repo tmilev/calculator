@@ -309,6 +309,7 @@ public:
   static bool outerCommuteAtimesBifUnivariate(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerCommuteAtimesBtimesCifUnivariate(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDifferentialStandardHandler(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerDifferentialOfPolynomial(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerIsDifferentialOneFormOneVariable(Calculator& theCommands, const Expression& input, Expression& output);
 

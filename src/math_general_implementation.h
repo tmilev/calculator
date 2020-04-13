@@ -228,7 +228,7 @@ void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy(
 
 template <class templateMonomial, class coefficient>
 void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy(
-  const templateMonomial &other,
+  const templateMonomial& other,
   ElementMonomialAlgebra<templateMonomial, coefficient>& output
 ) const {
   if (this == &output) {

@@ -345,6 +345,25 @@ private:
     return true;
   }
   template <class theType>
+  bool IsOfTypeWithContext(WithContext<theType>* whichElement) const {
+    MacroRegisterFunctionWithName("Expression::IsOfTypeWithContext");
+    if (this->owner == nullptr) {
+      return false;
+    }
+    if (!this->StartsWith(this->GetTypeOperation<theType>())) {
+      return false;
+    }
+    if (this->size() < 2 || !this->GetLastChild().IsAtom()) {
+      return false;
+    }
+    if (whichElement == 0) {
+      return true;
+    }
+    whichElement->context.context = this->GetContext();
+    whichElement->content = this->GetValue<theType>();
+    return true;
+  }
+  template <class theType>
   const theType& GetValue() const {
     return this->GetValueNonConst<theType>();
   }
@@ -449,8 +468,8 @@ private:
     const Expression& theVariable
   );
   template<class coefficient>
-  bool MakeSum(Calculator& theCommands, const LinearCombination<Expression, coefficient>& theSum);
-  bool MakeSum(Calculator& theCommands, const List<Expression>& theSum);
+  bool makeSum(Calculator& theCommands, const LinearCombination<Expression, coefficient>& theSum);
+  bool makeSum(Calculator& theCommands, const List<Expression>& theSum);
   bool MakeProducT(Calculator& owner, const List<Expression>& theMultiplicands);
   bool MakeProducT(Calculator& owner, const Expression& left, const Expression& right);
   int GetNumCols() const;
@@ -2894,11 +2913,11 @@ bool Calculator::functionGetMatrix(
 }
 
 template <class coefficient>
-bool Expression::MakeSum(
+bool Expression::makeSum(
   Calculator& theCommands,
   const LinearCombination<Expression, coefficient>& theSum
 ) {
-  MacroRegisterFunctionWithName("Expression::MakeSum");
+  MacroRegisterFunctionWithName("Expression::makeSum");
   Expression oneE; //used to record the constant term
   oneE.AssignValue<Rational>(1, theCommands);
   if (theSum.IsEqualToZero()) {
@@ -3201,7 +3220,7 @@ bool CalculatorConversions::innerExpressionFromPoly(
       continue;
     }
     bool found = false;
-    for (int j = 0; j < input[i].GetMinimalNumberOfVariables(); j ++) {
+    for (int j = 0; j < input[i].minimalNumberOfVariables(); j ++) {
       if (input[i](j) != 0) {
         if (inputContext != nullptr) {
           currentBase = inputContext->ContextGetContextVariable(j);
@@ -3228,7 +3247,7 @@ bool CalculatorConversions::innerExpressionFromPoly(
     }
     theTerms.AddMonomial(currentTerm, input.coefficients[i]);
   }
-  return output.MakeSum(theCommands, theTerms);
+  return output.makeSum(theCommands, theTerms);
 }
 
 #endif

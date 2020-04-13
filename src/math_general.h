@@ -2636,6 +2636,9 @@ class PolynomialOrder {
   bool CompareLeftGreaterThanRight(const Polynomial<coefficient>& left, const Polynomial<coefficient>& right) const;
 };
 
+template <class coefficient>
+class PolynomialFactorizationResult;
+
 template<class coefficient>
 class Polynomial: public ElementMonomialAlgebra<MonomialP, coefficient> {
 public:
@@ -2684,7 +2687,7 @@ public:
     std::stringstream* comments
   ) const;
   bool factorMeCantorZassenhaus(
-    List<Polynomial<ElementZmodP> >& outputFactors,
+    PolynomialFactorizationResult<coefficient>& output,
     std::stringstream* comments
   ) const;
   bool isSquareFreeAndUnivariate(
@@ -2694,7 +2697,7 @@ public:
   bool computeDerivative(Polynomial<coefficient>& output, std::stringstream* comments) const;
   bool factorMe(List<Polynomial<coefficient> >& outputFactors, std::stringstream* comments) const;
   void Interpolate(const Vector<coefficient>& thePoints, const Vector<coefficient>& ValuesAtThePoints);
-  bool FindOneVariableRationalRoots(List<Rational>& output);
+  bool findOneVariableRationalRoots(List<Rational>& output);
   coefficient GetDiscriminant();
   void GetCoeffInFrontOfLinearTermVariableIndex(int index, coefficient& output);
   void makeMonomial(
@@ -3142,7 +3145,7 @@ bool Polynomial<Rational>::factorMe(
 ) const;
 
 template<>
-bool Polynomial<Rational>::FindOneVariableRationalRoots(List<Rational>& output);
+bool Polynomial<Rational>::findOneVariableRationalRoots(List<Rational>& output);
 template <>
 bool Polynomial<Rational>::factorMeOutputIsADivisor(Polynomial<Rational>& output, std::stringstream* comments);
 template <>
@@ -3151,6 +3154,11 @@ bool Polynomial<Rational>::factorMeNormalizedFactors(
   List<Polynomial<Rational> >& outputFactors,
   std::stringstream* comments
 ) const;
+
+template <class coefficient>
+class PolynomialFactorizationResult {
+
+};
 
 
 template <class coefficient>

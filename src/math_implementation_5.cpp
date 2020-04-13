@@ -1415,7 +1415,7 @@ bool RationalFunction::FindOneVariableRationalRoots(List<Rational>& output) {
   }
   Polynomial<Rational> tempP;
   this->GetNumerator(tempP);
-  return tempP.FindOneVariableRationalRoots(output);
+  return tempP.findOneVariableRationalRoots(output);
 }
 
 bool RationalFunction::NeedsParenthesisForMultiplication(FormatExpressions* unused) const {

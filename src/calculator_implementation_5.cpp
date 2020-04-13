@@ -2966,7 +2966,7 @@ bool CalculatorFunctions::innerFactorPolynomialModPrime(
   format.flagSuppressModP = true;
   polynomial.context.context.ContextGetFormatExpressions(format);
   out << "Converted polynomial: " << converted.toString(&format) << "<br>";
-  List<Polynomial<ElementZmodP> > result;
+  PolynomialFactorizationResult<ElementZmodP> result;
   converted.factorMeCantorZassenhaus(result, &out);
   return output.AssignValue(out.str(), theCommands);
 }

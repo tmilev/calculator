@@ -7,7 +7,7 @@
 // https://en.wikipedia.org/wiki/Cantor%E2%80%93Zassenhaus_algorithm
 template <>
 bool Polynomial<ElementZmodP>::factorMeCantorZassenhaus(
-  List<Polynomial<ElementZmodP> >& outputFactors,
+  PolynomialFactorizationResult<ElementZmodP>& output,
   std::stringstream* comments
 ) const {
   if (this->GetMinimalNumberOfVariables() > 1) {
@@ -147,8 +147,8 @@ bool Polynomial<Rational>::factorMe(
 }
 
 template<>
-bool Polynomial<Rational>::FindOneVariableRationalRoots(List<Rational>& output) {
-  MacroRegisterFunctionWithName("Polynomial::FindOneVariableRationalRoots");
+bool Polynomial<Rational>::findOneVariableRationalRoots(List<Rational>& output) {
+  MacroRegisterFunctionWithName("Polynomial::findOneVariableRationalRoots");
   List<MonomialP>::Comparator* monomialOrder = &MonomialP::orderDefault();
   if (this->GetMinimalNumberOfVariables() > 1) {
     return false;
@@ -167,7 +167,7 @@ bool Polynomial<Rational>::FindOneVariableRationalRoots(List<Rational>& output) 
     x1.makeMonomial(0, 1, 1);
     myCopy.DivideBy(x1, myCopy, tempP, monomialOrder);
     List<Rational> tempList;
-    bool result = myCopy.FindOneVariableRationalRoots(tempList);
+    bool result = myCopy.findOneVariableRationalRoots(tempList);
     output.AddOnTop(0);
     output.AddListOnTop(tempList);
     return result;
@@ -199,7 +199,7 @@ bool Polynomial<Rational>::FindOneVariableRationalRoots(List<Rational>& output) 
         myCopy.DivideBy(divisor, myCopy, tempP, monomialOrder);
         output.AddOnTop(tempV[0]);
         List<Rational> tempList;
-        bool result = myCopy.FindOneVariableRationalRoots(tempList);
+        bool result = myCopy.findOneVariableRationalRoots(tempList);
         output.AddListOnTop(tempList);
         return result;
       }

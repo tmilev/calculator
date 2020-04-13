@@ -691,7 +691,7 @@ bool Calculator::innerPrintB3G2branchingIntermediate(
             theG2B3Data.theShapovalovProducts[eigenIndexcounter].GetNumerator(tempP);
             tempP.scaleNormalizeLeadingMonomial();
             latexTable2 << "$\\begin{array}{l}" << tempP.toString(&theG2B3Data.theFormat) << "\\end{array}$ & ";
-            if (tempP.FindOneVariableRationalRoots(tempList)) {
+            if (tempP.findOneVariableRationalRoots(tempList)) {
               tempList2.AddOnTopNoRepetition(tempList);
               out << "<td>Rational roots: " << tempList.toString() << "</td>";
               latexTable2 << tempList2.toString();

@@ -129,6 +129,7 @@ void Polynomial<Rational>::Test::initialize() {
   this->format.polyAlphabeT.AddOnTop("x");
   this->format.polyAlphabeT.AddOnTop("y");
   this->format.polyAlphabeT.AddOnTop("z");
+  this->format.flagUseHTML = false;
 }
 
 template <>
@@ -156,10 +157,10 @@ Polynomial<Rational> Polynomial<Rational>::Test::fromString(const std::string& i
 
 template <>
 bool Polynomial<Rational>::Test::fromStringTest() {
-  std::string expected = "x_{2}^{2}+x_{1} -x_{2} -1";
+  std::string expected = "y^{2}+x -y -1";
   std::string input = "x^2-1-x+b";
   Polynomial<Rational> underTest = Polynomial<Rational>::Test::fromString(input);
-  std::string result = underTest.toString();
+  std::string result = underTest.toString(&this->format);
   if (result != expected) {
     global.fatal << "Polynomial from string: "
     << "input: " << input
@@ -251,9 +252,9 @@ bool Polynomial<Rational>::Test::oneLeastCommonMultiple(
   if (outputString != expected) {
     global.fatal << "Least common multiple of "
     << left << ", " << right
-    << ", converted to: " << converted.ToStringCommaDelimited(&this->format)
-    << " computed to be: [" << outputString
-    << "], expected: [" << expected << "]. " << global.fatal;
+    << ", converted to:\n" << converted.ToStringCommaDelimited(&this->format)
+    << "\ncomputed to be:\n[" << outputString
+    << "]\nexpected:\n[" << expected << "]" << global.fatal;
   }
   return true;
 }
@@ -261,5 +262,20 @@ bool Polynomial<Rational>::Test::oneLeastCommonMultiple(
 template <>
 bool Polynomial<Rational>::Test::leastCommonMultiple() {
   this->oneLeastCommonMultiple("x", "y", "x y ");
+  this->oneLeastCommonMultiple(
+    "(x^2y + 3 x + z y^2 - 1 + 7x^3)(x^3 + 5x y z + x y - z - 2)",
+    "(x^2y + 3 x + z y^2 - 1 + 7x^3)(x^3 + x y z - 3y^2)",
+    "7x^{9}+x^{8}y +42x^{7}y z +7x^{6}y^{2}z +35x^{5}y^{2}z^{2}"
+    "+11x^{4}y^{3}z^{2}+5x^{2}y^{4}z^{3}+7x^{7}y -20x^{6}y^{2}"
+    "-3x^{5}y^{3}+7x^{5}y^{2}z -103x^{4}y^{3}z -18x^{3}y^{4}z "
+    "+x^{2}y^{4}z^{2}-15x y^{5}z^{2}+3x^{7}-7x^{6}z "
+    "+17x^{5}y z -21x^{4}y^{3}-7x^{4}y z^{2}-3x^{3}y^{4}"
+    "+13x^{3}y^{2}z^{2}-3x y^{5}z -x y^{3}z^{3}-15x^{6}"
+    "+x^{5}y -9x^{4}y^{2}-20x^{4}y z +20x^{3}y^{2}z -42x^{2}y^{3}z "
+    "-5x^{2}y^{2}z^{2}-2x y^{3}z^{2}+3y^{4}z^{2}-x^{4}y -3x^{4}z "
+    "+45x^{3}y^{2}-3x^{2}y^{3}-x^{2}y^{2}z -3x^{2}y z^{2}+15x y^{3}z "
+    "+6y^{4}z -6x^{4}+x^{3}z -6x^{2}y z +3x y^{3}+9x y^{2}z "
+    "+x y z^{2}+2x^{3}+18x y^{2}+2x y z -3y^{2}z -6y^{2}"
+  );
   return true;
 }

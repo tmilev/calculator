@@ -561,7 +561,7 @@ bool Polynomial<coefficient>::differential(
         return false;
       }
       newCoefficient *= power;
-      MonomialP newMonomial;
+      MonomialP newMonomial = currentMonomial;
       power -= 1;
       newMonomial.setVariable(j, power);
       output[j].AddMonomial(newMonomial, newCoefficient);

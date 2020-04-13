@@ -119,6 +119,7 @@ bool Polynomial<Rational>::Test::all() {
   tester.fromStringTest();
   tester.fromStringCommonContextTest();
 
+  tester.differential();
   tester.leastCommonMultiple();
   tester.factorization();
   return true;
@@ -277,5 +278,34 @@ bool Polynomial<Rational>::Test::leastCommonMultiple() {
     "+6y^{4}z -6x^{4}+x^{3}z -6x^{2}y z +3x y^{3}+9x y^{2}z "
     "+x y z^{2}+2x^{3}+18x y^{2}+2x y z -3y^{2}z -6y^{2}"
   );
+  return true;
+}
+
+template <>
+bool Polynomial<Rational>::Test::oneDifferential(
+  const std::string& input, const std::string& expected
+) {
+  Polynomial<Rational> inputPolynomial = Polynomial<Rational>::Test::fromString(input);
+  Polynomial<Rational> output;
+  inputPolynomial.differential(output, nullptr);
+  std::string outputString = output.toString(&this->formatDifferentials);
+  if (outputString != expected) {
+    global.fatal << "Differential of " << input << " was computed to be: "
+    << outputString << ", expected: " << expected << ". " << global.fatal;
+  }
+  return true;
+}
+
+template <>
+bool Polynomial<Rational>::Test::differential() {
+  this->formatDifferentials.polyAlphabeT.AddOnTop("x");
+  this->formatDifferentials.polyAlphabeT.AddOnTop("y");
+  this->formatDifferentials.polyAlphabeT.AddOnTop("z");
+  this->formatDifferentials.polyAlphabeT.AddOnTop("dx");
+  this->formatDifferentials.polyAlphabeT.AddOnTop("dy");
+  this->formatDifferentials.polyAlphabeT.AddOnTop("dz");
+  this->oneDifferential("1", "0");
+  this->oneDifferential("x+y+z+1", "dx +dy +dz ");
+  this->oneDifferential("x^2y^3z^5 + x", "5x^{2}y^{3}z^{4}dz +3x^{2}y^{2}z^{5}dy +2x y^{3}z^{5}dx +dx ");
   return true;
 }

@@ -3071,6 +3071,7 @@ public:
   class Test {
   public:
     FormatExpressions format;
+    FormatExpressions formatDifferentials;
     static bool all();
     void initialize();
     bool oneLeastCommonMultiple(
@@ -3079,10 +3080,12 @@ public:
       const std::string& expected
     );
     bool leastCommonMultiple();
-    bool factorization();
     bool oneFactorization(
       const std::string& input, const std::string& expectedFactors
     );
+    bool factorization();
+    bool oneDifferential(const std::string& input, const std::string& expected);
+    bool differential();
     Polynomial<coefficient> fromString(const std::string& input);
     Vector<Polynomial<coefficient> > fromStringCommonContext(const std::string& first, const std::string& second);
     Vector<Polynomial<coefficient> > fromStringCommonContext(const List<std::string>& input);
@@ -3092,15 +3095,23 @@ public:
 };
 
 template <>
+bool Polynomial<Rational>::Test::differential();
+template <>
+bool Polynomial<Rational>::Test::oneDifferential(const std::string& input, const std::string& expected);
+template <>
 bool Polynomial<Rational>::Test::oneLeastCommonMultiple(
   const std::string& left,
   const std::string& right,
   const std::string& expected
 );
 template <>
-Vector<Polynomial<Rational> > Polynomial<Rational>::Test::fromStringCommonContext(const std::string& first, const std::string& second);
+Vector<Polynomial<Rational> > Polynomial<Rational>::Test::fromStringCommonContext(
+  const std::string& first, const std::string& second
+);
 template <>
-Vector<Polynomial<Rational> > Polynomial<Rational>::Test::fromStringCommonContext(const List<std::string>& input);
+Vector<Polynomial<Rational> > Polynomial<Rational>::Test::fromStringCommonContext(
+  const List<std::string>& input
+);
 template <>
 bool Polynomial<Rational>::Test::fromStringCommonContextTest();
 template <>

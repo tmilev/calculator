@@ -1568,9 +1568,9 @@ void Polynomial<coefficient>::GetPolyWithPolyCoeff(
     polyPart.MakeOne();
     for (int j = 0; j < (*this)[i].minimalNumberOfVariables(); j ++) {
       if (theNonCoefficientVariables.selected[j]) {
-        polyPart[j] = (*this)[i](j);
+        polyPart.setVariable(j, (*this)[i](j));
       } else {
-        coeffPart[j] = (*this)[i](j);
+        coeffPart.setVariable(j, (*this)[i](j));
       }
     }
     currentCF.MakeZero();
@@ -1937,7 +1937,7 @@ void IntegralRFComputation::PrepareNumerators() {
       for (int j = 0; j < this->theDenominatorFactorsWithMults[i].totalDegree(); j ++) {
         this->NumberOfSystemVariables ++;
         currentMon.MakeEi(this->NumberOfSystemVariables);
-        currentMon[0] = j;
+        currentMon.setVariable(0, j);
         this->theNumerators[i][k].AddMonomial(currentMon, 1);
         currentSummand.AddMonomial(currentMon, 1);
       }
@@ -3537,14 +3537,15 @@ bool CalculatorFunctions::innerDifferentialOfPolynomial(
     return false;
   }
   List<Expression> outputSummands;
-  outputSummands.SetSize(differentials.size);
   for (int i = 0; i < differentials.size; i ++) {
+    Expression incoming(theCommands);
     Expression variable = polynomial.context.context.ContextGetContextVariable(i);
-    outputSummands[i].AddChildAtomOnTop(theCommands.opDifferential());
-    outputSummands[i].AddChildOnTop(variable);
+    incoming.AddChildAtomOnTop(theCommands.opDifferential());
+    incoming.AddChildOnTop(variable);
     Expression polynomialWrapper;
     polynomialWrapper.AssignValueWithContext(differentials[i], polynomial.context.context, theCommands);
-    outputSummands[i].AddChildOnTop(polynomialWrapper);
+    incoming.AddChildOnTop(polynomialWrapper);
+    outputSummands.AddOnTop(incoming);
   }
   return output.makeSum(theCommands, outputSummands);
 }

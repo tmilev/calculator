@@ -224,7 +224,7 @@ void Polynomial<coefficient>::SetNumVariablesSubDeletedVarsByOne(int newNumVars)
   for (int i = 0; i < this->size(); i ++) {
     tempM.MakeOne(newNumVars);
     for (int j = 0; j < newNumVars; j ++) {
-      tempM[j] = (*this)[i](j);
+      tempM.setVariable(j, (*this)[i](j));
     }
     Accum.AddMonomial(tempM, this->coefficients[i]);
   }
@@ -296,7 +296,9 @@ void Polynomial<coefficient>::ScaleToPositiveMonomialExponents(MonomialP& output
   outputScale.MakeOne(numVars);
   for (int i = 0; i < numVars; i ++) {
     for (int j = 0; j < this->size(); j ++) {
-      outputScale[i] = MathRoutines::Minimum(outputScale(i), (*this)[j](i));
+      const MonomialP& currentMonomial = (*this)[j];
+      Rational currentScale = MathRoutines::Minimum(outputScale(i), currentMonomial(i));
+      outputScale.setVariable(i, currentScale);
     }
   }
   outputScale.Invert();
@@ -537,7 +539,6 @@ void Polynomial<coefficient>::GetCoeffInFrontOfLinearTermVariableIndex(
   }
 }
 
-
 template<class coefficient>
 bool Polynomial<coefficient>::differential(
   Vector<Polynomial<coefficient> >& output, std::stringstream* comments
@@ -548,7 +549,7 @@ bool Polynomial<coefficient>::differential(
   for (int i = 0; i < this->size(); i ++) {
     const MonomialP& currentMonomial = this->theMonomials[i];
     const coefficient& currentCoefficient = this->coefficients[i];
-    int currentNumberOfVariables = currentMonomial.GetHighestIndexSuchThatHigherIndexVarsDontParticipate();
+    int currentNumberOfVariables = currentMonomial.minimalNumberOfVariables();
     for (int j = 0; j < currentNumberOfVariables; j ++) {
       coefficient newCoefficient = currentCoefficient;
       Rational power = currentMonomial(j);
@@ -562,7 +563,7 @@ bool Polynomial<coefficient>::differential(
       newCoefficient *= power;
       MonomialP newMonomial;
       power -= 1;
-      newMonomial[j] = power;
+      newMonomial.setVariable(j, power);
       output[j].AddMonomial(newMonomial, newCoefficient);
     }
   }

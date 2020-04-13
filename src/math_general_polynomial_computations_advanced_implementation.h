@@ -103,11 +103,11 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasis(
         this->SoPolyRightShift.MakeOne(numVars);
         for (int k = 0; k < numVars; k ++) {
           if (leftHighestMonomial(k) > rightHighestMonomial(k)) {
-            this->SoPolyRightShift[k] = leftHighestMonomial(k) - rightHighestMonomial(k);
-            this->SoPolyLeftShift[k] = 0;
+            this->SoPolyRightShift.setVariable(k, leftHighestMonomial(k) - rightHighestMonomial(k));
+            this->SoPolyLeftShift.setVariable(k, 0);
           } else {
-            this->SoPolyLeftShift[k] = rightHighestMonomial(k) - leftHighestMonomial(k);
-            this->SoPolyRightShift[k] = 0;
+            this->SoPolyLeftShift.setVariable(k, rightHighestMonomial(k) - leftHighestMonomial(k));
+            this->SoPolyRightShift.setVariable(k, 0);
           }
         }
         if (this->flagDoProgressReport) {

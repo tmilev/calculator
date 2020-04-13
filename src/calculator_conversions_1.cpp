@@ -815,7 +815,9 @@ bool CalculatorConversions::innerExpressionFromUE(
   theUEE.MakeZero();
   Expression currentMonE;
   for (int i = 0; i < input.size(); i ++) {
-    if (!CalculatorConversions::innerExpressionFromMonomialUE(theCommands, input[i], currentMonE, inputContext)) {
+    if (!CalculatorConversions::innerExpressionFromMonomialUE(
+      theCommands, input[i], currentMonE, inputContext
+    )) {
       return theCommands << "<hr>Failed to store " << input.toString();
     }
     theUEE.AddMonomial(currentMonE, input.coefficients[i]);
@@ -839,8 +841,10 @@ bool CalculatorConversions::innerElementSemisimpleLieAlgebraRationalCoeffs(
   }
   for (int i = 0; i < outputAlgebraic.coefficients.size; i ++) {
     if (!outputAlgebraic.coefficients[i].IsRational()) {
-      return theCommands << "<hr>From input: " << input.toString() << ", I managed to extract element: "
-      << outputAlgebraic.toString() << " but that appears to not have rational coefficients.";
+      return theCommands << "<hr>From input: "
+      << input.toString() << ", I managed to extract element: "
+      << outputAlgebraic.toString()
+      << " but that appears to not have rational coefficients.";
     }
   }
   output = outputAlgebraic; //<-implicit conversion here!
@@ -1009,7 +1013,7 @@ bool CalculatorConversions::innerElementUE(
         } else {
           varIndex --;
         }
-        currentMultiplicandRFpartMon[varIndex] = thePower;
+        currentMultiplicandRFpartMon.setVariable(varIndex, thePower);
       }
     }
     currentPMultiplicand.MakeZero();

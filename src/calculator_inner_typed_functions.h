@@ -257,11 +257,11 @@ bool CalculatorConversions::functionPolynomial(Calculator& theCommands, const Ex
           << input.toString() << " because the exponent was negative. "
           << "Please make sure that this is not a typo. "
           << "I am treating " << input.toString() << " as a single variable. ";
-          Polynomial<coefficient> JustAmonomial;
-          JustAmonomial.makeMonomial(0, 1, 1);
+          Polynomial<coefficient> monomial;
+          monomial.makeMonomial(0, 1, 1);
           Expression theContext;
           theContext.ContextMakeContextWithOnePolyVar(theCommands, input);
-          return output.AssignValueWithContext(JustAmonomial, theContext, theCommands);
+          return output.AssignValueWithContext(monomial, theContext, theCommands);
         }
         theConst.Invert();
         thePower *= - 1;

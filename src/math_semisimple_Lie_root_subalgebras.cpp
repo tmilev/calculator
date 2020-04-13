@@ -2528,8 +2528,8 @@ void slTwoSubalgebra::initHEFSystemFromECoeffs(
           outputSystemToBeSolved.LastObject()->MakeZero();
         }
         tempM.MakeOne(numberVariables);
-        tempM[i] = 1;
-        tempM[j + halfNumberVariables] = 1;
+        tempM.setVariable(i, 1);
+        tempM.setVariable(j + halfNumberVariables, 1);
         Rational tempCoeff = this->GetOwnerSSAlgebra().GetConstant(rootsInPlay[i], - rootsInPlay[j]);
         outputSystemToBeSolved[indexEquation].AddMonomial(tempM, tempCoeff);
       }
@@ -2547,8 +2547,8 @@ void slTwoSubalgebra::initHEFSystemFromECoeffs(
     this->GetOwnerSSAlgebra().GetConstantOrHElement(rootsInPlay[i], - rootsInPlay[i], tempRat, tempRoot);
     for (int j = 0; j < this->GetOwnerSSAlgebra().GetRank(); j ++) {
       tempM.MakeOne(numberVariables);
-      tempM[i] = 1;
-      tempM[i + halfNumberVariables] = 1;
+      tempM.setVariable(i, 1);
+      tempM.setVariable(i + halfNumberVariables, 1);
       outputSystemToBeSolved[j+oldSize].AddMonomial(tempM, tempRoot[j]);
     }
   }

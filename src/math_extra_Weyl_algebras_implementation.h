@@ -67,8 +67,8 @@ void ElementWeylAlgebra<coefficient>::MultiplyTwoMonomials(
       Rational theDOPower = left.differentialPart(k);
       Rational thePolPower = right.polynomialPart(k);
       coeffBuff *= Rational::NChooseK(theDOPower, multDrop) * Rational::NChooseK(thePolPower, multDrop) * Rational::Factorial(multDrop);
-      buffer.polynomialPart[k] = left.polynomialPart(k) + right.polynomialPart(k) - multDrop;
-      buffer.differentialPart[k] = left.differentialPart(k) + right.differentialPart(k) - multDrop;
+      buffer.polynomialPart.setVariable(k, left.polynomialPart(k) + right.polynomialPart(k) - multDrop);
+      buffer.differentialPart.setVariable(k, left.differentialPart(k) + right.differentialPart(k) - multDrop);
     }
     output.AddMonomial(buffer, coeffBuff);
     tempSel.IncrementReturnFalseIfPastLast();
@@ -238,7 +238,7 @@ void ElementWeylAlgebra<coefficient>::Makexi(int i, int NumVars) {
   this->MakeZero();
   MonomialWeylAlgebra tempMon;
   tempMon.MakeOne(NumVars);
-  tempMon.polynomialPart[i] = 1;
+  tempMon.polynomialPart.setVariable(i, 1);
   this->AddMonomial(tempMon, 1);
 }
 
@@ -247,7 +247,7 @@ void ElementWeylAlgebra<coefficient>::Makedi(int i, int NumVars) {
   this->MakeZero();
   MonomialWeylAlgebra tempMon;
   tempMon.MakeOne(NumVars);
-  tempMon.differentialPart[i] = 1;
+  tempMon.differentialPart.setVariable(i, 1);
   this->AddMonomial(tempMon, 1);
 }
 
@@ -256,8 +256,8 @@ void ElementWeylAlgebra<coefficient>::Makexidj(int i, int j, int NumVars) {
   this->MakeZero();
   MonomialWeylAlgebra tempMon;
   tempMon.MakeOne(NumVars);
-  tempMon.polynomialPart[i] = 1;
-  tempMon.differentialPart[j] = 1;
+  tempMon.polynomialPart.setVariable(i, 1);
+  tempMon.differentialPart.setVariable(j, 1);
   this->AddMonomial(tempMon, 1);
 }
 
@@ -373,7 +373,7 @@ bool ElementWeylAlgebra<coefficient>::ActOnPolynomial(Polynomial<Rational>& theP
           if (coeff.IsEqualToZero()) {
             break;
           }
-          resultMon[k] -= 1;
+          resultMon.multiplyByVariable(k, -1);
         }
         if (coeff.IsEqualToZero()) {
           break;

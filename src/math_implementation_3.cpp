@@ -3236,7 +3236,7 @@ void PartFraction::GetNElongationPolyWithMonomialContribution(
   for (int i = 0; i < theIndex; i ++) {
     int tempI = theSelectedIndices[i];
     for (int j = 0; j < theDimension; j ++) {
-      tempM[j] += startingVectors[tempI][j] * theCoefficients[i] * theGreatestElongations[i];
+      tempM.multiplyByVariable(j, startingVectors[tempI][j] * theCoefficients[i] * theGreatestElongations[i]);
     }
   }
   this->GetNElongationPoly(
@@ -3345,7 +3345,8 @@ void PartFraction::ApplySzenesVergneFormulA(
     for (int j = 0; j < i; j ++) {
       int tempElongation = (*this)[theSelectedIndices[j]].GetLargestElongation();
       for (int k = 0; k < theDim; k ++) {
-        tempM[k] += startingVectors[theSelectedIndices[j]][k] * theElongations[j] * tempElongation;
+        Rational incomingPower = startingVectors[theSelectedIndices[j]][k] * theElongations[j] * tempElongation;
+        tempM.multiplyByVariable(k, incomingPower);
       }
     }
     ParallelComputing::SafePointDontCallMeFromDestructors();
@@ -3418,7 +3419,7 @@ void PartFraction::GetAlphaMinusNBetaPoly(PartFractions& owner, int indexA, int 
   tempM.MakeOne(owner.AmbientDimension);
   for (int i = 0; i < n; i ++) {
     for (int j = 0; j < owner.AmbientDimension; j ++) {
-      tempM[j] = owner.startingVectors[indexA][j] - owner.startingVectors[indexB][j] * (i + 1);
+      tempM.setVariable(j, owner.startingVectors[indexA][j] - owner.startingVectors[indexB][j] * (i + 1));
     }
     output.AddMonomial(tempM, - 1);
   }
@@ -3438,14 +3439,16 @@ void PartFraction::GetNElongationPoly(
   if (LengthOfGeometricSeries > 0) {
     for (int i = 0; i < LengthOfGeometricSeries; i ++) {
       for (int j = 0; j < theDimension; j ++) {
-        tempM[j] = startingVectors[index][j] * baseElongation * i;
+        Rational power = startingVectors[index][j] * baseElongation * i;
+        tempM.setVariable(j, power);
       }
       output.AddMonomial(tempM, 1);
     }
   } else {
     for (int i = - 1; i >= LengthOfGeometricSeries; i --) {
       for (int j = 0; j < theDimension; j ++) {
-        tempM[j] = startingVectors[index][j] * baseElongation * i;
+        Rational power = startingVectors[index][j] * baseElongation * i;
+        tempM.setVariable(j, power);
       }
       output.AddMonomial(tempM, - 1);
     }
@@ -4450,7 +4453,7 @@ void oneFracWithMultiplicitiesAndElongations::GetPolyDenominator(
   output.MakeOne(theExponent.size);
   tempM.MakeOne(theExponent.size);
   for (int i = 0; i < theExponent.size; i ++) {
-    tempM[i] = theExponent[i] * this->Elongations[MultiplicityIndex];
+    tempM.setVariable(i, theExponent[i] * this->Elongations[MultiplicityIndex]);
   }
   output.AddMonomial(tempM, - 1);
 }
@@ -8550,8 +8553,8 @@ void KLpolys::ComputeKLxy(int x, int y) {
   for (int i = 0; i < Accum.size(); i ++) {
     if (Accum[i].HasPositiveOrZeroExponents()) {
       tempM = Accum[i];
-      tempM[0].Minus();
-      tempM[0] += lengthDiff;
+      tempM.setVariable(0, tempM[0] * - 1);
+      tempM.multiplyByVariable(0, lengthDiff);
       this->theKLPolys[x][y].AddMonomial(tempM, Accum.coefficients[i]);
     }
   }
@@ -10137,7 +10140,7 @@ bool slTwoInSlN::ComputeInvariantsOfDegree(
   Rational theMonCoeff = 1;
   for (int i = 0; i < numCycles; i ++, theSel.IncrementSubsetFixedCardinality(theDegree)) {
     for (int j = 0; j < this->theDimension; j ++) {
-      theMon[j] = theSel.Multiplicities[j];
+      theMon.setVariable(j, theSel.Multiplicities[j]);
       theWeight[j] = theMon[j];
     }
     basisMonsAll.AddMonomial(theMon, theMonCoeff);

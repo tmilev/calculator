@@ -261,7 +261,7 @@ class MonomialWrapper {
 class MonomialP {
 private:
   // monbody contains the exponents of the variables.
-  // IMPORTANT. The monBody of a monomial is NOT unique.
+  // IMPORTANT. The monBody of a monomial may not be unique.
   // Two monomials whose non-zero entries coincide
   // (but otherwise one monomial might have more entries filled with zeroes)
   // are considered to be equal.
@@ -278,6 +278,8 @@ private:
   // Note that the LinearCombination::toString method uses the FormatExpressions::monomialOrder
   // to sort monomials when displaying polynomials to the screen.
   List<Rational> monBody;
+
+  void setSize(int variableCount);
 public:
   struct Order {
     // Lexicographic order, see documentation below.
@@ -291,12 +293,10 @@ public:
   };
 
   MonomialP(int letterIndex) {
-    this->monBody.initializeFillInObject(letterIndex + 1, 0);
-    this->monBody[letterIndex] = 1;
+    this->setVariable(letterIndex, Rational::one());
   }
   MonomialP(int letterIndex, int power) {
-    this->monBody.initializeFillInObject(letterIndex + 1, 0);
-    this->monBody[letterIndex] = power;
+    this->setVariable(letterIndex, power);
   }
   MonomialP(const MonomialP& other) {
     *this = other;
@@ -307,39 +307,13 @@ public:
     output << theMon.toString();
     return output;
   }
-  Rational& operator[](int i) {
-    if (i < 0) {
-      global.fatal << "This is a programming error: requested exponent "
-      << "of monomial variable with index "
-      << i << " which is negative. " << global.fatal;
-    }
-    if (i >= this->monBody.size) {
-      this->SetNumVariablesSubDeletedVarsByOne(i + 1);
-    }
-    return this->monBody[i];
-  }
-  Rational operator()(int i) const {
-    if (i < 0) {
-      global.fatal << "This is a programming error: "
-      << "requested exponent of monomial variable "
-      << "with index " << i << " which is negative. " << global.fatal;
-    }
-    if (i >= this->monBody.size) {
-      return 0;
-    }
-    return this->monBody[i];
-  }
-  unsigned  int HashFunction() const {
+  void multiplyByVariable(int variableIndex, const Rational& variablePower);
+  const Rational& operator[](int i) const;
+  Rational operator()(int i) const;
+  unsigned int HashFunction() const {
     return this->monBody.HashFunction();
   }
-  bool HasPositiveOrZeroExponents() const {
-    for (int i = 0; i < this->monBody.size; i ++) {
-      if (this->monBody[i].IsNegative()) {
-        return false;
-      }
-    }
-    return true;
-  }
+  bool HasPositiveOrZeroExponents() const;
   void ExponentMeBy(const Rational& theExp);
   // Warning: HashFunction must return the same result
   // for equal monomials represented by different monBodies.
@@ -354,8 +328,12 @@ public:
   }
   std::string toString(FormatExpressions* PolyFormat = nullptr) const;
   void MakeOne(int ExpectedNumVars = 0) {
-    this->monBody.initializeFillInObject(ExpectedNumVars, static_cast<Rational>(0));
+    this->monBody.SetExpectedSize(ExpectedNumVars);
+    this->monBody.SetSize(0);
   }
+  void MakeEi(int LetterIndex, int Power = 1, int ExpectedNumVars = 0);
+  void setVariable(int variableIndex, const Rational& power);
+  void trimTrailingZeroes();
   bool operator>(const MonomialP& other) const;
   bool IsDivisibleBy(const MonomialP& other) const;
   int TotalDegreeInt() const {
@@ -421,15 +399,6 @@ public:
   }
   template <class coefficient>
   bool SubstitutioN(const List<Polynomial<coefficient> >& TheSubstitution, Polynomial<coefficient>& output) const;
-  void MakeEi(int LetterIndex, int Power = 1, int ExpectedNumVars = 0);
-  int GetHighestIndexSuchThatHigherIndexVarsDontParticipate() const {
-    for (int i = this->monBody.size - 1; i >= 0; i --) {
-      if (this->monBody[i] != 0) {
-        return i;
-      }
-    }
-    return - 1;
-  }
 
   static List<MonomialP>::Comparator& orderDefault();
   static List<MonomialP>::Comparator& orderForGCD();
@@ -471,7 +440,6 @@ public:
     return left.greaterThan_rightLargerWins(right);
   }
 
-  void SetNumVariablesSubDeletedVarsByOne(int newNumVars);
   bool IsConstant() const {
     for (int i = 0; i < this->monBody.size; i ++) {
       if (!this->monBody[i].IsEqualToZero()) {
@@ -489,11 +457,7 @@ public:
     }
   }
   void DrawElement(DrawElementInputOutput& theDrawData);
-  void RaiseToPower(const Rational& thePower) {
-    for (int i = 0; i < this->monBody.size; i ++) {
-      this->monBody[i] *= thePower;
-    }
-  }
+  void RaiseToPower(const Rational& thePower);
   void operator*=(const MonomialP& other);
   void operator/=(const MonomialP& other);
   bool operator==(const MonomialP& other) const;
@@ -2729,7 +2693,7 @@ public:
     this->MakeZero();
     MonomialP tempM;
     tempM.MakeOne(numVars);
-    tempM[letterIndex] = power;
+    tempM.setVariable(letterIndex, power);
     this->AddMonomial(tempM, inputCoefficient);
   }
   void MakeDegreeOne(int NVar, int NonZeroIndex, const coefficient& coeff);
@@ -4810,8 +4774,8 @@ void Matrix<coefficient>::ActOnMonomialAsDifferentialOperator(
       tempMon = input;
       coeff = tempMon(j);
       coeff *= this->elements[i][j];
-      tempMon[j] -= 1;
-      tempMon[i] += 1;
+      tempMon.multiplyByVariable(j, - 1);
+      tempMon.multiplyByVariable(i, 1);
       output.AddMonomial(tempMon, coeff);
     }
   }
@@ -7621,7 +7585,7 @@ void PolynomialSubstitution<coefficient>::MakeLinearSubConstTermsLastRow(Matrix<
     this->TheObjects[i].MakeZero();
     for (int j = 0; j < theMat.NumRows - 1; j ++) {
       tempM.MakeOne(theMat.NumRows - 1);
-      tempM[j] = 1;
+      tempM.setVariable(j, 1);
       this->TheObjects[i].AddMonomial(tempM, theMat.elements[j][i]);
     }
     this->TheObjects[i] += theMat.elements[theMat.NumRows - 1][i];

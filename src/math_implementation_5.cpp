@@ -2558,9 +2558,62 @@ void RationalFunction::AddHonestRF(const RationalFunction& other) {
 }
 
 void MonomialP::MakeEi(int LetterIndex, int Power, int ExpectedNumVars) {
-  ExpectedNumVars = MathRoutines::Maximum(ExpectedNumVars, LetterIndex + 1);
   this->MakeOne(ExpectedNumVars);
-  (*this)[LetterIndex] = Power;
+  if (Power == 0) {
+    return;
+  }
+  this->setVariable(LetterIndex, Power);
+}
+
+void MonomialP::setVariable(int variableIndex, const Rational& power) {
+  if (variableIndex >= this->monBody.size) {
+    this->setSize(variableIndex + 1);
+  }
+  this->monBody[variableIndex] = power;
+  this->trimTrailingZeroes();
+}
+
+void MonomialP::multiplyByVariable(int variableIndex, const Rational& variablePower) {
+  if (variablePower.IsEqualToZero()) {
+    return;
+  }
+  if (variableIndex >= this->monBody.size) {
+    this->setSize(variableIndex);
+  }
+  this->monBody[variableIndex] += variablePower;
+  this->trimTrailingZeroes();
+}
+
+const Rational& MonomialP::operator[](int i) const {
+  if (i < 0 || i >= this->monBody.size) {
+    global.fatal << "This is a programming error: requested exponent "
+    << "of monomial variable with index "
+    << i << " which is out of range (size = "
+    << this->monBody.size
+    << "). " << global.fatal;
+  }
+  return this->monBody[i];
+}
+
+Rational MonomialP::operator()(int i) const {
+  if (i < 0) {
+    global.fatal << "This is a programming error: "
+    << "requested exponent of monomial variable "
+    << "with index " << i << " which is negative. " << global.fatal;
+  }
+  if (i >= this->monBody.size) {
+    return 0;
+  }
+  return this->monBody[i];
+}
+
+bool MonomialP::HasPositiveOrZeroExponents() const {
+  for (int i = 0; i < this->monBody.size; i ++) {
+    if (this->monBody[i].IsNegative()) {
+      return false;
+    }
+  }
+  return true;
 }
 
 void MonomialP::ExponentMeBy(const Rational& theExp) {
@@ -2714,28 +2767,46 @@ bool MonomialP::greaterThan_leftLargerWins(const MonomialP &other) const {
   return false;
 }
 
+void MonomialP::trimTrailingZeroes() {
+  for (int i = this->monBody.size - 1; i >= 0; i --) {
+    if (this->monBody[i] != 0) {
+      break;
+    }
+    this->monBody.SetSize(this->monBody.size - 1);
+  }
+}
+
+void MonomialP::RaiseToPower(const Rational& thePower) {
+  for (int i = 0; i < this->monBody.size; i ++) {
+    this->monBody[i] *= thePower;
+  }
+  this->trimTrailingZeroes();
+}
+
 void MonomialP::operator*=(const MonomialP& other) {
-  this->SetNumVariablesSubDeletedVarsByOne(MathRoutines::Maximum(this->monBody.size, other.monBody.size));
+  this->setSize(MathRoutines::Maximum(this->monBody.size, other.monBody.size));
   for (int i = 0; i < other.monBody.size; i ++) {
     this->monBody[i] += other.monBody[i];
   }
+  this->trimTrailingZeroes();
 }
 
 void MonomialP::operator/=(const MonomialP& other) {
-  this->SetNumVariablesSubDeletedVarsByOne(MathRoutines::Maximum(this->monBody.size, other.monBody.size));
+  this->setSize(MathRoutines::Maximum(this->monBody.size, other.monBody.size));
   for (int i = 0; i < other.monBody.size; i ++) {
     this->monBody[i] -= other.monBody[i];
   }
+  this->trimTrailingZeroes();
 }
 
-void MonomialP::SetNumVariablesSubDeletedVarsByOne(int newNumVars) {
-  if (newNumVars < 0) {
-    newNumVars = 0;
+void MonomialP::setSize(int variableCount) {
+  if (variableCount < 0) {
+    variableCount = 0;
   }
   int oldSize = this->monBody.size;
-  this->monBody.SetSize(newNumVars);
+  this->monBody.SetSize(variableCount);
   for (int i = oldSize; i < this->monBody.size; i ++) {
-    (*this)[i] = 0;
+    this->monBody[i] = 0;
   }
 }
 

@@ -263,7 +263,7 @@ bool CalculatorConversions::functionPolynomial(Calculator& theCommands, const Ex
           theContext.ContextMakeContextWithOnePolyVar(theCommands, input);
           return output.AssignValueWithContext(monomial, theContext, theCommands);
         }
-        theConst.Invert();
+        theConst.invert();
         thePower *= - 1;
         resultP = theConst;
       }

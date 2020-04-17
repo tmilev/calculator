@@ -388,7 +388,12 @@ private:
     return this->AddChildOnTop(tempE);
   }
   template <class theType>
-  bool AssignValueWithContextToChild(int childIndex, const theType& inputValue, const Expression& theContext, Calculator& owner) {
+  bool AssignValueWithContextToChild(
+    int childIndex,
+    const theType& inputValue,
+    const Expression& theContext,
+    Calculator& owner
+  ) {
     Expression tempE;
     tempE.AssignValueWithContext(inputValue, theContext, owner);
     return this->SetChilD(childIndex, tempE);
@@ -746,6 +751,11 @@ class WithContext {
 public:
   ExpressionContext context;
   builtIn content;
+  std::string toStringContentWithFormat() {
+    FormatExpressions theFormat;
+    this->context.context.ContextGetFormatExpressions(theFormat);
+    return this->content.toString(&theFormat);
+  }
   WithContext() {
   }
 };
@@ -2058,7 +2068,6 @@ public:
     return output.IsOfType<theType>();
   }
   // TODO: move to calculator conversions.
-  // TODO: remove redundancy with Expression::ConvertToType, if any.
   template <class theType>
   bool Convert(
     const Expression& input,
@@ -2635,7 +2644,7 @@ public:
   static bool innerAlgebraicNumber(Calculator& theCommands, const Expression& input, Expression& output);
   template <class coefficient>
   static bool innerPolynomial(Calculator& theCommands, const Expression& input, Expression& output);
-  //conversions from expression tree to expression containing type
+  // Conversions from expression tree to expression containing type.
   template <class coefficient>
   static bool functionPolynomial(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerRationalFunctioN(Calculator& theCommands, const Expression& input, Expression& output);

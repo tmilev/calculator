@@ -99,8 +99,8 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasis(
           leftHighestMonomial.minimalNumberOfVariables(),
           rightHighestMonomial.minimalNumberOfVariables()
         );
-        this->SoPolyLeftShift.MakeOne(numVars);
-        this->SoPolyRightShift.MakeOne(numVars);
+        this->SoPolyLeftShift.makeOne(numVars);
+        this->SoPolyRightShift.makeOne(numVars);
         for (int k = 0; k < numVars; k ++) {
           if (leftHighestMonomial(k) > rightHighestMonomial(k)) {
             this->SoPolyRightShift.setVariable(k, leftHighestMonomial(k) - rightHighestMonomial(k));
@@ -351,8 +351,8 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasisImpro
       leftHighestMon.minimalNumberOfVariables(),
       rightHighestMon.minimalNumberOfVariables()
     );
-    leftShift.MakeOne(numVars);
-    rightShift.MakeOne(numVars);
+    leftShift.makeOne(numVars);
+    rightShift.makeOne(numVars);
     for (int k = 0; k < numVars; k ++) {
       if (leftHighestMon[k] > 0 && rightHighestMon[k] > 0)
         isGood = true;
@@ -1466,9 +1466,11 @@ bool Polynomial<coefficient>::leastCommonMultiple(
   theComp.thePolynomialOrder.theMonOrder = MonomialP::orderForGCD();
   theComp.MaxNumGBComputations = - 1;
   if (!theComp.TransformToReducedGroebnerBasis(theBasis)) {
-    global.fatal << "Transformation to reduced "
-    << "Groebner basis is not allowed to fail in this function. "
-    << global.fatal;
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Unexpected: failed to transform to reduced "
+      << "Groebner basis. ";
+    }
+    return false;
   }
   int maxMonNoTIndex = - 1;
   Rational maximalTotalDegree;
@@ -1545,5 +1547,131 @@ bool Polynomial<coefficient>::greatestCommonDivisor(
   }
   output.scaleNormalizeLeadingMonomial();
   return true;
+}
+
+template <class coefficient, class oneFactorFinder>
+bool PolynomialFactorization<coefficient, oneFactorFinder>::factor(
+  const Polynomial<coefficient>& input,
+  std::stringstream* commentsOnFailure
+) {
+  MacroRegisterFunctionWithName("PolynomialFactorization::factor");
+  this->original = input;
+  if (this->original.IsConstant(&this->constantFactor)) {
+    return true;
+  }
+  this->current = this->original;
+  this->constantFactor = this->current.scaleNormalizeLeadingMonomial();
+  this->constantFactor.invert();
+  this->nonReduced.AddOnTop(this->current);
+  while (this->nonReduced.size > 0) {
+    this->current = this->nonReduced.PopLastObject();
+    oneFactorFinder algorithm;
+    algorithm.output = this;
+    if (!algorithm.oneFactor(commentsOnFailure)) {
+      return false;
+    }
+  }
+  this->nonReduced.QuickSortAscending();
+  this->reduced.QuickSortAscending();
+  this->checkFactorization();
+  return true;
+}
+
+template <class coefficient, class oneFactorFinder>
+bool PolynomialFactorization<coefficient, oneFactorFinder>::accountNonReducedFactor(
+  Polynomial<coefficient>& incoming
+) {
+  MacroRegisterFunctionWithName("PolynomialFactorization::accountNonReducedFactor");
+  incoming.scaleNormalizeLeadingMonomial();
+  Polynomial<coefficient> quotient, remainder;
+  this->current.DivideBy(incoming, quotient, remainder, &MonomialP::orderDefault());
+  if (!remainder.IsEqualToZero()) {
+    return false;
+  }
+  this->nonReduced.AddOnTop(incoming);
+  if (quotient.IsConstant()) {
+    global.fatal
+    << "Accounting non-reduced factor must result is degree drop. "
+    << global.fatal;
+  }
+  this->nonReduced.AddOnTop(quotient);
+  return true;
+}
+
+template <class coefficient, class oneFactorFinder>
+bool PolynomialFactorization<coefficient, oneFactorFinder>::accountReducedFactor(
+  Polynomial<coefficient>& incoming
+) {
+  MacroRegisterFunctionWithName("PolynomialFactorization::accountReducedFactor");
+  if (incoming.IsEqualToZero()) {
+    global.fatal << "Zero is not a valid factor. " << global.fatal;
+  }
+  incoming.scaleNormalizeLeadingMonomial();
+  Polynomial<coefficient> quotient, remainder;
+  this->current.DivideBy(
+    incoming, quotient, remainder, &MonomialP::orderDefault()
+  );
+  if (!remainder.IsEqualToZero()) {
+    return false;
+  }
+  this->reduced.AddOnTop(incoming);
+  coefficient extraFactor;
+  if (quotient.IsConstant(&extraFactor)) {
+    this->constantFactor *= extraFactor;
+  } else {
+    this->nonReduced.AddOnTop(quotient);
+  }
+  return true;
+}
+
+template <class coefficient, class oneFactorFinder>
+bool PolynomialFactorization<coefficient, oneFactorFinder>::checkFactorization() const {
+  MacroRegisterFunctionWithName("Polynomial::checkFactorization");
+  Polynomial<coefficient> checkComputations;
+  checkComputations.MakeConst(this->constantFactor);
+  for (int i = 0; i < this->nonReduced.size; i ++) {
+    checkComputations *= nonReduced[i];
+  }
+  for (int i = 0; i < this->reduced.size; i ++) {
+    checkComputations *= this->reduced[i];
+  }
+  if (!checkComputations.IsEqualTo(this->original)) {
+    global.fatal << "Error in polynomial factorization function."
+    << "Product of factorization: " << this->toStringResult(nullptr)
+    << " equals " << checkComputations
+    << global.fatal;
+  }
+  return true;
+}
+
+template <class coefficient, class oneFactorFinder>
+std::string PolynomialFactorization<coefficient, oneFactorFinder>::toStringResult(
+  FormatExpressions *theFormat
+) const {
+  std::stringstream out;
+  std::string constantFactorString = this->constantFactor.toString(theFormat);
+  if (this->nonReduced.size + this->reduced.size == 0) {
+    return constantFactorString;
+  }
+  if (constantFactorString == "1") {
+    constantFactorString = "";
+  }
+  if (constantFactorString == "-1" || constantFactorString == "- 1") {
+    constantFactorString = "-";
+  }
+  out << constantFactorString;
+  for (int i = 0; i < this->reduced.size; i ++) {
+    out << "(" << this->reduced[i].toString(theFormat) << ")";
+  }
+  if (this->nonReduced.size > 0) {
+    out << "[[";
+  }
+  for (int i = 0; i < this->nonReduced.size; i ++) {
+    out << "(" << this->nonReduced[i].toString(theFormat) << ")";
+  }
+  if (this->nonReduced.size > 0) {
+    out << "]]";
+  }
+  return out.str();
 }
 #endif

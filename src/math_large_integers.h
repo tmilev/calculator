@@ -53,7 +53,7 @@ public:
   std::string ToStringAbbreviate(FormatExpressions* theFormat = nullptr) const;
   void DivPositive(const LargeIntegerUnsigned& divisor, LargeIntegerUnsigned& quotientOutput, LargeIntegerUnsigned& remainderOutput) const;
   bool isDivisibleBy(const LargeIntegerUnsigned& divisor);
-  void MakeOne();
+  void makeOne();
   void AddUInt(unsigned int x);
   void MakeZero();
   bool IsEqualToZero() const;
@@ -239,12 +239,12 @@ public:
   void checkConsistency(){}
   void MakeZero();
   bool GetDivisors(List<int>& output, bool includeNegative);
-  void MakeOne() {
-    this->value.MakeOne();
+  void makeOne() {
+    this->value.makeOne();
     this->sign = 1;
   }
   void MakeMOne() {
-    this->value.MakeOne();
+    this->value.makeOne();
     this->sign = - 1;
   }
   static unsigned int HashFunction(const LargeInteger& input) {
@@ -651,7 +651,7 @@ public:
     }
   }
   void Simplify();
-  void Invert();
+  void invert();
   void Minus() {
     if (this->Extended == nullptr) {
       this->NumShort *= - 1;
@@ -666,7 +666,7 @@ public:
     this->DenShort = 1;
     this->FreeExtended();
   }
-  void MakeOne() {
+  void makeOne() {
     this->NumShort = 1;
     this->DenShort = 1;
     this->FreeExtended();

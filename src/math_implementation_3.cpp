@@ -1714,7 +1714,7 @@ bool WeylGroupData::HasStronglyPerpendicularDecompositionWRT(
       output.SetSize(1);
       *output.LastObject() = input;
       outputCoeffs.SetSize(1);
-      outputCoeffs.LastObject()->MakeOne();
+      outputCoeffs.LastObject()->makeOne();
       return true;
     }
     output.Reserve(theSet.size);
@@ -3055,7 +3055,7 @@ void PartFraction::PrepareFraction(
   } else {
     powerDropA = 0;
   }
-  outputCommonCoeff.MakeOne(AminusNbetaPoly.minimalNumberOfVariables());
+  outputCommonCoeff.makeOne(AminusNbetaPoly.minimalNumberOfVariables());
   for (int i = 0; i < powerDropB; i ++) {
     outputCommonCoeff *= AminusNbetaPoly;
   }
@@ -3232,7 +3232,7 @@ void PartFraction::GetNElongationPolyWithMonomialContribution(
   int theDimension
 ) {
   MonomialP tempM;
-  tempM.MakeOne(theDimension);
+  tempM.makeOne(theDimension);
   for (int i = 0; i < theIndex; i ++) {
     int tempI = theSelectedIndices[i];
     for (int j = 0; j < theDimension; j ++) {
@@ -3333,7 +3333,7 @@ void PartFraction::ApplySzenesVergneFormulA(
   MonomialP tempM;
   output.MakeZero();
   int theDim = startingVectors[0].size;
-  CoefficientBuffer.MakeOne(theDim);
+  CoefficientBuffer.makeOne(theDim);
   for (int i = 0; i < theSelectedIndices.size; i ++) {
     tempFrac.Assign(*this);
     tempFrac.RelevanceIsComputed = false;
@@ -3341,7 +3341,7 @@ void PartFraction::ApplySzenesVergneFormulA(
     oneFracWithMultiplicitiesAndElongations& currentFrac = tempFrac[theSelectedIndices[i]];
     int LargestElongation = currentFrac.GetLargestElongation();
     currentFrac.AddMultiplicity(- 1, LargestElongation);
-    tempM.MakeOne(theDim);
+    tempM.makeOne(theDim);
     for (int j = 0; j < i; j ++) {
       int tempElongation = (*this)[theSelectedIndices[j]].GetLargestElongation();
       for (int k = 0; k < theDim; k ++) {
@@ -3416,7 +3416,7 @@ void PartFraction::ComputeIndicesNonZeroMults() {
 void PartFraction::GetAlphaMinusNBetaPoly(PartFractions& owner, int indexA, int indexB, int n, Polynomial<LargeInteger>& output) {
   output.MakeZero();
   MonomialP tempM;
-  tempM.MakeOne(owner.AmbientDimension);
+  tempM.makeOne(owner.AmbientDimension);
   for (int i = 0; i < n; i ++) {
     for (int j = 0; j < owner.AmbientDimension; j ++) {
       tempM.setVariable(j, owner.startingVectors[indexA][j] - owner.startingVectors[indexB][j] * (i + 1));
@@ -3435,7 +3435,7 @@ void PartFraction::GetNElongationPoly(
 ) {
   output.MakeZero();
   MonomialP tempM;
-  tempM.MakeOne(theDimension);
+  tempM.makeOne(theDimension);
   if (LengthOfGeometricSeries > 0) {
     for (int i = 0; i < LengthOfGeometricSeries; i ++) {
       for (int j = 0; j < theDimension; j ++) {
@@ -3459,7 +3459,7 @@ void PartFraction::MakePolynomialFromOneNormal(
   Vector<Rational>& normal, const MonomialP& shiftRational, int theMult, Polynomial<Rational>& output
 ) {
   int theDimension = normal.size;
-  output.MakeOne(theDimension);
+  output.makeOne(theDimension);
   if (theMult == 1) {
     return;
   }
@@ -3964,11 +3964,11 @@ void PartFraction::GetPolyReduceMonomialByMonomial(
   Polynomial<LargeInteger>& output
 ) {
   if (StartMonomialPower == 0) {
-    output.MakeOne(owner.AmbientDimension);
+    output.makeOne(owner.AmbientDimension);
     return;
   }
   MonomialP tempMon;
-  tempMon.MakeOne(owner.AmbientDimension);
+  tempMon.makeOne(owner.AmbientDimension);
   output.MakeZero();
   LargeInteger theCoeff = 1;
   if (StartMonomialPower > 0) {
@@ -4220,7 +4220,7 @@ bool PartFractions::initFromRoots(Vectors<Rational>& input) {
   this->AmbientDimension = input[0].size;
   bool tempBool = f.initFromRoots(*this, input);
   Polynomial<LargeInteger> tempOne;
-  tempOne.MakeOne(this->AmbientDimension);
+  tempOne.makeOne(this->AmbientDimension);
   this->AddMonomial(f, tempOne);
   return tempBool;
 }
@@ -4450,8 +4450,8 @@ void oneFracWithMultiplicitiesAndElongations::GetPolyDenominator(
     global.fatal << "Bad multiplicity. " << global.fatal;
   }
   MonomialP tempM;
-  output.MakeOne(theExponent.size);
-  tempM.MakeOne(theExponent.size);
+  output.makeOne(theExponent.size);
+  tempM.makeOne(theExponent.size);
   for (int i = 0; i < theExponent.size; i ++) {
     tempM.setVariable(i, theExponent[i] * this->Elongations[MultiplicityIndex]);
   }
@@ -4541,7 +4541,7 @@ void oneFracWithMultiplicitiesAndElongations::ComputeOneCheckSum(
       tempS = output.toString();
     }
   }
-  output.Invert();
+  output.invert();
   if (PartFraction::flagAnErrorHasOccurredTimeToPanic) {
     tempS = output.toString();
   }
@@ -5604,7 +5604,7 @@ int DynkinSimpleType::GetRootSystemSize() const {
 
 Rational DynkinSimpleType::GetDefaultCoRootLengthSquared(int rootIndex) const {
   Rational result = this->GetDefaultRootLengthSquared(rootIndex);
-  result.Invert();
+  result.invert();
   result *= 4;
   return result;
 }
@@ -8502,7 +8502,7 @@ int KLpolys::ComputeProductfromSimpleReflectionsActionList(int x, int y) {
 void KLpolys::ComputeKLxy(int x, int y) {
   Polynomial<Rational> Accum, tempP1, tempP2;
   if (x == y) {
-    this->theKLPolys[x][y].MakeOne();
+    this->theKLPolys[x][y].makeOne();
     return;
   }
   if (!this->IndexGEQIndex(y, x)) {
@@ -8563,7 +8563,7 @@ void KLpolys::ComputeKLxy(int x, int y) {
 bool KLpolys::ComputeRxy(int x, int y, int SimpleReflectionIndex) {
   MacroRegisterFunctionWithName("KLpolys::ComputeRxy");
   if (x == y) {
-    this->theRPolys[x][y].MakeOne();
+    this->theRPolys[x][y].makeOne();
     return true;
   }
   if (this->IndexGreaterThanIndex(x, y)) {
@@ -9321,7 +9321,7 @@ bool Lattice::ReduceVector(Vector<Rational>& theVector) const {
 void Lattice::MakeZn(int theDim) {
   this->basisRationalForm.MakeIdMatrix(theDim);
   this->basis.MakeIdMatrix(theDim, LargeInteger(1), LargeInteger(0));
-  this->Den.MakeOne();
+  this->Den.makeOne();
 }
 
 void QuasiPolynomial::MakeZeroOverLattice(Lattice& theLattice) {
@@ -9355,7 +9355,7 @@ void PartFraction::ComputePolyCorrespondingToOneMonomial(
   QuasiPolynomial& outputQP, const MonomialP& theMon, Vectors<Rational>& normals, Lattice& theLattice
 ) const {
   Polynomial<Rational> tempP, outputPolyPart;
-  outputPolyPart.MakeOne(theMon.minimalNumberOfVariables());
+  outputPolyPart.makeOne(theMon.minimalNumberOfVariables());
   for (int i = 0; i < theMon.minimalNumberOfVariables(); i ++) {
     this->MakePolynomialFromOneNormal(
       normals[i],
@@ -10128,7 +10128,7 @@ bool slTwoInSlN::ComputeInvariantsOfDegree(
   basisMonsAll.MakeZero();
   basisMonsAll.SetExpectedSize(numCycles);
   MonomialP theMon;
-  theMon.MakeOne(this->theDimension);
+  theMon.makeOne(this->theDimension);
   Vector<Rational> theWeight;
   Vector<Rational> theCartanAction;
   theCartanAction.SetSize(this->theDimension);
@@ -10990,7 +10990,7 @@ void DrawOperations::operator+=(const DrawOperations& other) {
 void RationalFunction::operator/=(const Polynomial<Rational>& other) {
   RationalFunction tempRF;
   tempRF = other;
-  tempRF.Invert();
+  tempRF.invert();
   *this *= tempRF;
   if (!this->checkConsistency()) {
     global.fatal << "Bad rational function." << global.fatal;

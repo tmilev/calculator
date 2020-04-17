@@ -124,7 +124,7 @@ class AlgebraicNumber {
     return theRat.IsInteger(whichInteger);
   }
   bool RadicalMeDefault(int radical, std::stringstream* commentsOnError);
-  void Invert();
+  void invert();
   bool EvaluatesToDouble(double* outputWhichDouble) const;
   void operator/=(const AlgebraicNumber& other);
   bool operator==(const AlgebraicNumber& other) const;
@@ -132,7 +132,6 @@ class AlgebraicNumber {
   bool operator==(int other) const {
     return *this == Rational(other);
   }
-
   bool operator!= (const AlgebraicNumber& other) const {
     return !(*this == other);
   }
@@ -287,6 +286,7 @@ public:
     this->flagDeallocated = true;
   }
   void CheckIamInitialized() const;
+  void invert();
   bool IsEqualToZero() const {
     return this->theValue.IsEqualToZero();
   }
@@ -296,7 +296,7 @@ public:
   );
   void operator=(const ElementZmodP& other);
   void operator=(const LargeIntegerUnsigned& other);
-  void MakeOne(const LargeIntegerUnsigned& newModulo);
+  void makeOne(const LargeIntegerUnsigned& newModulo);
   void MakeMOne(const LargeIntegerUnsigned& newModulo);
   void CheckEqualModuli(const ElementZmodP& other);
   bool operator==(int other) const;
@@ -338,4 +338,21 @@ public:
     static bool basicOperations();
   };
 };
+
+class PolynomialFactorizationCantorZassenhaus {
+public:
+  ElementZmodP one;
+  int degree;
+  int degreeUnknownFactor;
+  PolynomialFactorization<ElementZmodP, PolynomialFactorizationCantorZassenhaus>* output;
+  Polynomial<ElementZmodP> current;
+  bool oneFactor(
+    std::stringstream* commentsOnFailure
+  );
+  bool oneFactorGo(std::stringstream* commentsOnFailure);
+  PolynomialFactorizationCantorZassenhaus() {
+    this->output = nullptr;
+  }
+};
+
 #endif

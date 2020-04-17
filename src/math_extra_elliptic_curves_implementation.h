@@ -37,7 +37,7 @@ void ElementEllipticCurve<coefficient>::Invert() {
 }
 
 template <typename coefficient>
-void ElementEllipticCurve<coefficient>::MakeOne(const EllipticCurveWeierstrassNormalForm& inputCurve) {
+void ElementEllipticCurve<coefficient>::makeOne(const EllipticCurveWeierstrassNormalForm& inputCurve) {
   this->owner = inputCurve;
   this->flagInfinity = true;
 }

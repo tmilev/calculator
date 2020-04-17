@@ -319,14 +319,18 @@ bool AlgebraicClosureRationals::ReduceMe(
   Polynomial<Rational> theMinPoly, smallestFactor;
   theMinPoly.AssignMinPoly(this->GeneratingElementMatForm);
   int theDim = this->latestBasis.size;
-  List<Polynomial<Rational> > theFactors;
-  bool mustBeTrue = theMinPoly.factorMe(theFactors, nullptr);
+  PolynomialFactorization<Rational, PolynomialFactorizationKronecker> factorization;
+  bool mustBeTrue = factorization.factor(
+    theMinPoly,
+    nullptr
+  );
   if (!mustBeTrue) {
     global.fatal
     << "This is a programming error: failed to factor polynomial "
-    << theMinPoly.toString() << global.fatal;
+    << theMinPoly.toString() << ". "
+    << global.fatal;
   }
-  smallestFactor = theFactors[0];
+  smallestFactor = factorization.reduced[0];
   if (smallestFactor.TotalDegreeInt() == theDim) {
     return true;
   }
@@ -847,8 +851,8 @@ bool AlgebraicClosureRationals::AdjoinRootMinimalPolynomial(
   return true;
 }
 
-void AlgebraicNumber::Invert() {
-  MacroRegisterFunctionWithName("AlgebraicNumber::Invert");
+void AlgebraicNumber::invert() {
+  MacroRegisterFunctionWithName("AlgebraicNumber::invert");
   if (this->owner == nullptr) {
     if (this->element.IsEqualToZero()) {
       global.fatal << "This is a programming error: division by zero. " << global.fatal;
@@ -862,7 +866,7 @@ void AlgebraicNumber::Invert() {
       << "so it must be rational, but it appears to be not. "
       << "Its theElt vector is: " << this->element.toString() << global.fatal;
     }
-    this->element.coefficients[0].Invert();
+    this->element.coefficients[0].invert();
     return;
   }
   MatrixTensor<Rational> theInverted;
@@ -879,7 +883,7 @@ void AlgebraicNumber::Invert() {
 void AlgebraicNumber::operator/=(const AlgebraicNumber& other) {
   MacroRegisterFunctionWithName("AlgebraicNumber::operator/=");
   AlgebraicNumber otherCopy = other;
-  otherCopy.Invert();
+  otherCopy.invert();
   *this *= otherCopy;
 }
 
@@ -1572,7 +1576,13 @@ void ElementZmodP::operator=(const LargeIntegerUnsigned& other) {
   this->theValue %= this->theModulus;
 }
 
-void ElementZmodP::MakeOne(const LargeIntegerUnsigned& newModulo) {
+void ElementZmodP::invert() {
+  ElementZmodP copy = *this;
+  this->makeOne(this->theModulus);
+  *this /= copy;
+}
+
+void ElementZmodP::makeOne(const LargeIntegerUnsigned& newModulo) {
   this->theModulus = newModulo;
   this->theValue = 1;
 }
@@ -1603,7 +1613,7 @@ ElementZmodP ElementZmodP::scaleNormalizeIndex(
 ) {
   ElementZmodP scale = toBeScaled[indexNonZeroElement];
   ElementZmodP one;
-  one.MakeOne(scale.theModulus);
+  one.makeOne(scale.theModulus);
   one /= scale;
   for (int i = 0; i < toBeScaled.size; i ++) {
     toBeScaled[i] *= scale;

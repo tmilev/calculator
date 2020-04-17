@@ -1646,7 +1646,7 @@ void PrivateKeyRSA::SignBytesPadPKCS1(
     global.fatal << "Public key modulus is zero. " << global.fatal;
   }
   theElement.theModulus = this->thePublicKey.theModulus;
-  theOne.MakeOne(this->thePublicKey.theModulus);
+  theOne.makeOne(this->thePublicKey.theModulus);
   Crypto::ConvertListUnsignedCharsToLargeUnsignedIntegerBigEndian(
     inputHashedPadded, theElement.theValue
   );

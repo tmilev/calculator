@@ -29,7 +29,7 @@ void Matrix<coefficient>::ComputeDeterminantOverwriteMatrix(
     }
     tempRat = this->elements[i][i];
     output *= tempRat;
-    tempRat.Invert();
+    tempRat.invert();
     this->RowTimesScalar(i, tempRat);
     if (doReport) {
       if (theReport.TickAndWantReport()) {
@@ -589,7 +589,7 @@ void Matrix<coefficient>::GaussianEliminationByRows(
       carbonCopyMat->SwitchTwoRows(NumFoundPivots, tempI);
     }
     tempElement = this->elements[NumFoundPivots][i];
-    tempElement.Invert();
+    tempElement.invert();
     this->RowTimesScalar(NumFoundPivots, tempElement);
     if (carbonCopyMat != 0) {
       carbonCopyMat->RowTimesScalar(NumFoundPivots, tempElement);

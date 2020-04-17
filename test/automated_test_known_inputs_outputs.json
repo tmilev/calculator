@@ -876,6 +876,10 @@
     "output":"\\frac{1}{2} \\theta^{2}"
   },
   {
+    "input":"Differential{}(Polynomial{}(x+y));\nDifferential{}(Polynomial{}(x^3y z+y z + x y + x^5 y^2 z + x y^2 z));\n",
+    "output":"(\\left(Polynomial{}(1)\\right) {\\text{d}} y+\\left(Polynomial{}(1)\\right) {\\text{d}} x;\\left(Polynomial{}(x^{5}y^{2}+x^{3}y +x y^{2}+y )\\right) {\\text{d}} z+\\left(Polynomial{}(2x^{5}y z +x^{3}z +2x y z +x +z )\\right) {\\text{d}} y+\\left(Polynomial{}(5x^{4}y^{2}z +3x^{2}y z +y^{2}z +y )\\right) {\\text{d}} x)"
+  },
+  {
     "input":"Max(- 4,2)",
     "output":"2"
   },
@@ -989,7 +993,7 @@
   },
   {
     "input":"LispifyFull(e^x)",
-    "output":"\"(20 , 97 , 453 )\""
+    "output":"\"(20 , 97 , 454 )\""
   },
   {
     "input":"ChildExpression(e^x, 1); ChildExpression(e^x, 2); ChildExpression(e^x, 3)",
@@ -1748,7 +1752,11 @@
     "output":"(i^{{{n}}} :if \\left(IsEven{}\\left({{n}}\\right)\\right)=\\left(-1\\right)^{\\frac{1}{2} {{n}}};1)"
   },
   {
-    "input":"IsSquareFree(6); IsSquareFree(12)",
+    "input":"IsSquareFree(6);\nIsSquareFree(12)",
+    "output":"(1;0)"
+  },
+  {
+    "input":"IsSquareFreePolynomial((x^2-3y^2 x )(x+y));\nIsSquareFreePolynomial( (x-3x y +5 x y^2)^2 (3+x +y^2) )",
     "output":"(1;0)"
   },
   {

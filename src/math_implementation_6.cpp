@@ -3,53 +3,111 @@
 #include "math_general_polynomial_computations_advanced_implementation.h"
 #include "math_general_implementation.h"
 
+class ElementOneVariablePolynomialQuotientRing {
+public:
+  Polynomial<ElementZmodP> modulus;
+  Polynomial<ElementZmodP> value;
+  void reduce();
+  void operator*=(ElementOneVariablePolynomialQuotientRing& other);
+  std::string toString(FormatExpressions* theFormat = nullptr);
+};
+
+void ElementOneVariablePolynomialQuotientRing::operator *=(
+  ElementOneVariablePolynomialQuotientRing& other
+) {
+  if (other.modulus != this->modulus) {
+    global.fatal << "Not allowed to multiply quotient-ring "
+    << "elements of different rings. [This modulus, other modulus]: "
+    << this->modulus << ", " << other.modulus << global.fatal;
+  }
+  this->value *= other.value;
+  this->reduce();
+}
+
+std::string ElementOneVariablePolynomialQuotientRing::toString(FormatExpressions* theFormat) {
+  std::stringstream out;
+  out << this->value.toString(theFormat) << " mod " << this->modulus.toString(theFormat);
+  return out.str();
+}
+
+void ElementOneVariablePolynomialQuotientRing::reduce() {
+  this->value.DivideBy(
+    this->value, this->modulus, this->value, &MonomialP::orderDefault()
+  );
+}
+
 // The Cantor-Zassenhaus algorithm:
 // https://en.wikipedia.org/wiki/Cantor%E2%80%93Zassenhaus_algorithm
-template <>
-bool Polynomial<ElementZmodP>::factorMeCantorZassenhaus(
-  PolynomialFactorizationResult<ElementZmodP>& output,
-  std::stringstream* comments
-) const {
-  if (this->minimalNumberOfVariables() > 1) {
-    if (comments != nullptr) {
-      *comments
+bool PolynomialFactorizationCantorZassenhaus::oneFactor(std::stringstream* commentsOnFailure) {
+  if (commentsOnFailure != nullptr) {
+    *commentsOnFailure << "Not implemented yet.";
+  }
+  return false;
+  this->current = this->output->current;
+  if (this->current.minimalNumberOfVariables() > 1) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
       << "I haven't been taught how to factor polynomials "
       << "with more than 1 variable. ";
     }
     return false;
   }
-  if (this->minimalNumberOfVariables() == 0) {
-    if (comments != nullptr) {
-      *comments << "Factoring constant polynomials is not allowed. ";
+  if (this->current.minimalNumberOfVariables() == 0) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Factoring constant polynomials is not allowed. ";
     }
     return false;
   }
-  if (this->IsEqualToZero()) {
+  if (this->current.IsEqualToZero()) {
     return false;
   }
-  ElementZmodP one;
-  one.MakeOne(this->coefficients[0].theModulus);
-  if (!this->isSquareFree(one, comments)) {
-    *comments << "Not square free.";
+  if (!this->current.hasSmallIntegralPositivePowers(nullptr)) {
+    return false;
   }
-  if (comments != nullptr) {
-    *comments << "Not implemented yet.";
+  this->one.makeOne(this->current.coefficients[0].theModulus);
+  if (this->one.theModulus == 2) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Only odd primes allowed. ";
+    }
+    return false;
   }
-  return false;
+  Vector<Polynomial<ElementZmodP> > derivative;
+  if (!this->current.differential(derivative, commentsOnFailure)) {
+    return false;
+  }
+  Polynomial<ElementZmodP> greatestCommonDivisor;
+  derivative[0].greatestCommonDivisor(
+    derivative[0],
+    this->current,
+    greatestCommonDivisor,
+    this->one,
+    commentsOnFailure
+  );
+  if (!greatestCommonDivisor.IsConstant()) {
+    this->output->accountNonReducedFactor(greatestCommonDivisor);
+    return true;
+  }
+  return this->oneFactorGo(commentsOnFailure);
 }
 
-template<class coefficient>
-bool Polynomial<coefficient>::isSquareFree(
-  const ElementZmodP& one, std::stringstream* comments
-) const {
-  MacroRegisterFunctionWithName("Polynomial::isSquareFree");
-  Polynomial<coefficient> differentialPolynomial;
-  if (!this->differential(differentialPolynomial, comments)) {
-    return false;
+bool PolynomialFactorizationCantorZassenhaus::oneFactorGo(
+  std::stringstream *commentsOnFailure
+) {
+  ElementOneVariablePolynomialQuotientRing x;
+  x.modulus = this->output->current;
+  ElementOneVariablePolynomialQuotientRing oneQuotientRing;
+  oneQuotientRing.modulus = this->current;
+  LargeInteger modulus = one.theModulus;
+  this->degree = this->output->current.TotalDegreeInt();
+  this->degreeUnknownFactor = this->degree / 2;
+  LargeInteger power = modulus;
+  power.RaiseToPower(this->degreeUnknownFactor);
+  power -= 1;
+  MathRoutines::RaiseToPower(x, power, oneQuotientRing);
+  if (commentsOnFailure != 0) {
+    *commentsOnFailure << "Not implemented yet";
   }
-  Polynomial<coefficient> divisor;
-  Polynomial::greatestCommonDivisor(*this, differentialPolynomial, divisor, one, comments);
-  return divisor.totalDegree() > 0;
+  return false;
 }
 
 template<class coefficient>
@@ -60,43 +118,12 @@ bool Polynomial<coefficient>::isSquareFreeAndUnivariate(
   int numberOfVariables = this->minimalNumberOfVariables();
   if (numberOfVariables > 1) {
     if (comments != nullptr) {
-      *comments << "Not univariate: polynomial has " << numberOfVariables << " variables. ";
+      *comments << "Not univariate: polynomial has "
+      << numberOfVariables << " variables. ";
     }
     return false;
   }
   return this->isSquareFree(one, comments);
-}
-
-template <>
-bool Polynomial<Rational>::factorMe(
-  List<Polynomial<Rational> >& outputFactors,
-  std::stringstream* comments
-) const {
-  MacroRegisterFunctionWithName("Polynomial::factorMe");
-  outputFactors.SetSize(0);
-  if (this->IsEqualToZero() || this->IsConstant()) {
-    outputFactors.AddOnTop(*this);
-    return true;
-  }
-  List<Polynomial<Rational> > factorsToBeProcessed;
-  factorsToBeProcessed.AddOnTop(*this);
-  Polynomial<Rational> currentFactor, divisor;
-  while (factorsToBeProcessed.size > 0) {
-    currentFactor = factorsToBeProcessed.PopLastObject();
-    if (!currentFactor.factorMeOutputIsADivisor(divisor, comments)) {
-      return false;
-    }
-    if (currentFactor.IsEqualToOne()) {
-      outputFactors.AddOnTop(divisor);
-      continue;
-    }
-    Rational tempRat = divisor.scaleNormalizeLeadingMonomial();
-    currentFactor /= tempRat;
-    factorsToBeProcessed.AddOnTop(divisor);
-    factorsToBeProcessed.AddOnTop(currentFactor);
-  }
-  outputFactors.QuickSortAscending();
-  return true;
 }
 
 template<>
@@ -208,21 +235,19 @@ void Polynomial<coefficient>::Interpolate(
   }
 }
 
-template <>
-bool Polynomial<Rational>::factorMeOutputIsADivisor(
-  Polynomial<Rational>& output, std::stringstream* comments
+bool PolynomialFactorizationKronecker::oneFactor(
+  std::stringstream* comments
 ) {
-  MacroRegisterFunctionWithName("Polynomial::factorMeOutputIsADivisor");
-  if (this->minimalNumberOfVariables() > 1) {
+  MacroRegisterFunctionWithName("Polynomial::oneFactor");
+  this->current = this->output->current;
+  if (this->current.minimalNumberOfVariables() > 1) {
     return false;
   }
-  if (this->minimalNumberOfVariables() == 0) {
+  if (this->current.minimalNumberOfVariables() == 0) {
     return true;
   }
-  Polynomial<Rational> thePoly = *this;
-  thePoly.scaleNormalizeLeadingMonomial();
   int degree = 0;
-  if (!thePoly.totalDegree().IsSmallInteger(&degree)) {
+  if (!this->current.totalDegree().IsSmallInteger(&degree)) {
     return false;
   }
   int degreeLeft = degree / 2;
@@ -243,10 +268,11 @@ bool Polynomial<Rational>::factorMeOutputIsADivisor(
   LargeInteger tempLI;
   for (int i = 0; i < AllPointsOfEvaluation.size; i ++) {
     theArgument[0] = AllPointsOfEvaluation[i];
-    theValuesAtPoints[i] = thePoly.Evaluate(theArgument);
+    theValuesAtPoints[i] = this->current.Evaluate(theArgument);
     if (theValuesAtPoints[i].IsEqualToZero()) {
-      output.MakeDegreeOne(1, 0, 1, - theArgument[0]);
-      *this /= output;
+      Polynomial<Rational> incomingFactor;
+      incomingFactor.MakeDegreeOne(1, 0, 1, - theArgument[0]);
+      this->output->accountReducedFactor(incomingFactor);
       return true;
     }
     if (i > degreeLeft) {
@@ -269,7 +295,6 @@ bool Polynomial<Rational>::factorMeOutputIsADivisor(
     thePrimeFactorsMults[i].AddOnTop(1);
   }
   Incrementable<Incrementable<SelectionOneItem> > divisorSelection;
-  Polynomial<Rational> quotient, remainder;
   Vectors<Rational> valuesLeftInterpolands;
   Vector<Rational> PointsOfInterpolationLeft;
   PointsOfInterpolationLeft.Reserve(degreeLeft + 1);
@@ -279,7 +304,7 @@ bool Polynomial<Rational>::factorMeOutputIsADivisor(
   }
   divisorSelection.initFromMults(thePrimeFactorsMults);
   valuesLeftInterpolands.SetSize(degreeLeft + 1);
-  this->getValuesLagrangeInterpolands(
+  Polynomial<Rational>::getValuesLagrangeInterpolands(
     PointsOfInterpolationLeft, AllPointsOfEvaluation, valuesLeftInterpolands
   );
   ProgressReport theReport(1000, GlobalVariables::Response::ReportType::general);
@@ -329,52 +354,14 @@ bool Polynomial<Rational>::factorMeOutputIsADivisor(
     if (!isGood) {
       continue;
     }
-    output.Interpolate(Vector<Rational>(PointsOfInterpolationLeft), Vector<Rational>(theValuesAtPointsLeft));
-    this->DivideBy(output, quotient, remainder, &MonomialP::orderDefault());
-    if (!remainder.IsEqualToZero()) {
-      continue;
+    Polynomial<Rational> incoming;
+    incoming.Interpolate(
+      PointsOfInterpolationLeft,
+      theValuesAtPointsLeft
+    );
+    if (this->output->accountNonReducedFactor(incoming)) {
+      return true;
     }
-    *this = quotient;
-    return true;
   } while (divisorSelection.IncrementReturnFalseIfPastLast());
-  output = *this;
-  this->MakeOne(1);
-  return true;
-}
-
-template <>
-bool Polynomial<Rational>::factorMeNormalizedFactors(
-  Rational& outputCoefficient,
-  List<Polynomial<Rational> >& outputFactors,
-  std::stringstream* comments
-) const {
-  MacroRegisterFunctionWithName("Polynomial::factorMeNormalizedFactors");
-  List<Polynomial<Rational> > factorsToBeProcessed;
-  outputFactors.SetSize(0);
-  factorsToBeProcessed.AddOnTop(*this);
-  outputCoefficient = factorsToBeProcessed.LastObject()->scaleNormalizeLeadingMonomial();
-  Polynomial<Rational> currentFactor, divisor;
-  while (factorsToBeProcessed.size > 0) {
-    currentFactor = factorsToBeProcessed.PopLastObject();
-    if (!currentFactor.factorMeOutputIsADivisor(divisor, comments)) {
-      return false;
-    }
-    if (currentFactor.IsEqualToOne()) {
-      outputFactors.AddOnTop(divisor);
-      continue;
-    }
-    factorsToBeProcessed.AddOnTop(divisor);
-    factorsToBeProcessed.AddOnTop(currentFactor);
-  }
-  outputFactors.QuickSortAscending();
-  Polynomial<Rational> checkComputations;
-  checkComputations.MakeOne();
-  for (int i = 0; i < outputFactors.size; i ++) {
-    checkComputations *= outputFactors[i];
-  }
-  checkComputations *= outputCoefficient;
-  if (!checkComputations.IsEqualTo(*this)) {
-    global.fatal << "Error in polynomial factorization function." << global.fatal;
-  }
-  return true;
+  return this->output->accountReducedFactor(this->current);
 }

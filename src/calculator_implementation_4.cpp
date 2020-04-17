@@ -152,7 +152,7 @@ void ModuleSSalgebra<coefficient>::GetGenericUnMinusElt(
     tempRF.MakeOneLetterMoN(i + varShift, 1);
     tempMon.MultiplyByGeneratorPowerOnTheRight(eltsNilrad[i][0].generatorsIndices[0], tempRF);
   }
-  tempRF.MakeOne();
+  tempRF.makeOne();
   output.AddMonomial(tempMon, tempRF);
 }
 
@@ -169,7 +169,7 @@ void ModuleSSalgebra<coefficient>::GetGenericUnMinusElt(
   Polynomial<Rational> tempRF;
   output.MakeZero(*this->owner);
   MonomialUniversalEnveloping<Polynomial<Rational> > tempMon;
-  tempMon.MakeOne(*this->owner);
+  tempMon.makeOne(*this->owner);
   int varShift = 0;
   if (shiftPowersByNumVarsBaseField) {
     varShift = this->minimalNumberOfVariables();
@@ -179,7 +179,7 @@ void ModuleSSalgebra<coefficient>::GetGenericUnMinusElt(
     tempRF.makeMonomial(i + varShift, 1, 1, numVars);
     tempMon.MultiplyByGeneratorPowerOnTheRight(eltsNilrad[i][0].generatorsIndices[0], tempRF);
   }
-  tempRF.MakeOne(numVars);
+  tempRF.makeOne(numVars);
   output.AddMonomial(tempMon, tempRF);
 }
 
@@ -396,7 +396,7 @@ bool ModuleSSalgebra<coefficient>::GetActionEulerOperatorPart(
   MacroRegisterFunctionWithName("ModuleSSalgebra::GetActionEulerOperatorPart");
   int powerMonCoeff = 0;
   ElementWeylAlgebra<Rational> currentMonContribution;
-  outputDO.MakeOne();
+  outputDO.makeOne();
   for (int i = 0; i < theCoeff.minimalNumberOfVariables(); i ++) {
     if (!theCoeff(i).IsSmallInteger(&powerMonCoeff)) {
       global.fatal << "This is a programming error. "
@@ -461,7 +461,7 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator(
       MathRoutines::RaiseToPower(tempMT, thePower, idMT);
       endoPart *= tempMT;
     }
-    exponentContribution.MakeOne();
+    exponentContribution.makeOne();
     theCoeff = result.coefficients[i];
     for (int j = 0; j < indicesNilrad.size; j ++) {
       currentMon.Powers[j].GetConstantTerm(currentShift);
@@ -587,7 +587,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
     if (i == 0) {
       theMod.GetElementsNilradical(elementsNegativeNilrad, true, nullptr, useNilWeight, ascending);
       Polynomial<Rational> Pone, Pzero;
-      Pone.MakeOne(elementsNegativeNilrad.size + theMod.minimalNumberOfVariables());
+      Pone.makeOne(elementsNegativeNilrad.size + theMod.minimalNumberOfVariables());
       Pzero.MakeZero();
       theMod.GetGenericUnMinusElt(true, genericElt, useNilWeight, ascending);
       theWeylFormat.polyAlphabeT.SetSize(numStartingVars + elementsNegativeNilrad.size);
@@ -742,7 +742,7 @@ bool Calculator::innerHWVCommon(
   MacroRegisterFunctionWithName("Calculator::innerHWVCommon");
   RecursionDepthCounter therecursionIncrementer(&theCommands.RecursionDeptH);
   RationalFunction RFOne, RFZero;
-  RFOne.MakeOne();
+  RFOne.makeOne();
   RFZero.MakeZero();
   std::string report;
   ElementTensorsGeneralizedVermas<RationalFunction> theElt;

@@ -327,7 +327,7 @@ public:
     return result;
   }
   std::string toString(FormatExpressions* PolyFormat = nullptr) const;
-  void MakeOne(int ExpectedNumVars = 0) {
+  void makeOne(int ExpectedNumVars = 0) {
     this->monBody.SetExpectedSize(ExpectedNumVars);
     this->monBody.SetSize(0);
   }
@@ -456,7 +456,7 @@ public:
       this->monBody[i].Minus();
     }
   }
-  void DrawElement(DrawElementInputOutput& theDrawData);
+  bool hasSmallIntegralPositivePowers(int* whichTotalDegree) const;
   void RaiseToPower(const Rational& thePower);
   void operator*=(const MonomialP& other);
   void operator/=(const MonomialP& other);
@@ -1296,12 +1296,12 @@ bool Vectors<coefficient>::ConesIntersect(
   int numCols = StrictCone.size + NonStrictCone.size;
   matA.init(theDimension + 1, numCols);
   matb.init(theDimension + 1, 1);
-  matb.MakeZero(); matb.elements[theDimension][0].MakeOne();
+  matb.MakeZero(); matb.elements[theDimension][0].makeOne();
   for (int i = 0; i < StrictCone.size; i ++) {
     for (int k = 0; k < theDimension; k ++) {
       matA.elements[k][i].Assign(StrictCone[i][k]);
     }
-    matA.elements[theDimension][i].MakeOne();
+    matA.elements[theDimension][i].makeOne();
   }
   for (int i = 0; i < NonStrictCone.size; i ++) {
     int currentCol = i + StrictCone.size;
@@ -1942,9 +1942,9 @@ class MonomialWeylAlgebra {
     }
     return false;
   }
-  void MakeOne(int ExpectedNumVars = 0) {
-    this->polynomialPart.MakeOne(ExpectedNumVars);
-    this->differentialPart.MakeOne(ExpectedNumVars);
+  void makeOne(int ExpectedNumVars = 0) {
+    this->polynomialPart.makeOne(ExpectedNumVars);
+    this->differentialPart.makeOne(ExpectedNumVars);
   }
 };
 
@@ -2319,6 +2319,7 @@ public:
   }
   // Returns the number by which the linear combination was multiplied.
   coefficient scaleNormalizeLeadingMonomial() {
+    MacroRegisterFunctionWithName("Polynomial::scaleNormalizeLeadingMonomial");
     if (this->IsEqualToZero()) {
       return coefficient();
     }
@@ -2364,7 +2365,7 @@ public:
   bool HasGEQMonomial(templateMonomial& m, int& WhichIndex);
   void WriteToFile(std::fstream& output);
   void ClearDenominators(Rational& output) {
-    output.MakeOne();
+    output.makeOne();
     Rational tempRat;
     for (int i = 0; i < this->size(); i ++) {
       if (!this->coefficients[i].IsInteger()) {
@@ -2402,20 +2403,20 @@ public:
   }
   void MakeConst(const coefficient& coeff) {
     templateMonomial tempM;
-    tempM.MakeOne();
+    tempM.makeOne();
     this->AddMonomial(tempM, coeff);
   }
-  void MakeOne() {
+  void makeOne() {
     this->MakeConst(1);
   }
   void operator+=(const coefficient& other) {
     templateMonomial tempM;
-    tempM.MakeOne();
+    tempM.makeOne();
     this->AddMonomial(tempM, other);
   }
   void operator-=(const coefficient& other) {
     templateMonomial tempM;
-    tempM.MakeOne();
+    tempM.makeOne();
     this->SubtractMonomial(tempM, other);
   }
   template <class OtherType>
@@ -2602,8 +2603,8 @@ class PolynomialOrder {
   bool CompareLeftGreaterThanRight(const Polynomial<coefficient>& left, const Polynomial<coefficient>& right) const;
 };
 
-template <class coefficient>
-class PolynomialFactorizationResult;
+template <class coefficient, class oneFactorFinder>
+class PolynomialFactorization;
 
 template<class coefficient>
 class Polynomial: public ElementMonomialAlgebra<MonomialP, coefficient> {
@@ -2643,21 +2644,8 @@ public:
     Vector<Rational>& pointsOfEvaluation,
     Vectors<Rational>& outputValuesInterpolands
   );
-  bool factorMeOutputIsADivisor(
-    Polynomial<Rational>& output,
-    std::stringstream* comments
-  );
-  bool factorMeNormalizedFactors(
-    Rational& outputCoefficient,
-    List<Polynomial<Rational> >& outputFactors,
-    std::stringstream* comments
-  ) const;
-  bool factorMeCantorZassenhaus(
-    PolynomialFactorizationResult<coefficient>& output,
-    std::stringstream* comments
-  ) const;
   bool isSquareFree(
-    const ElementZmodP& one,
+    const coefficient& one,
     std::stringstream* comments
   ) const;
   bool isSquareFreeAndUnivariate(
@@ -2673,7 +2661,6 @@ public:
   bool differential(
     Vector<Polynomial<coefficient> >& output, std::stringstream* comments
   ) const;
-  bool factorMe(List<Polynomial<coefficient> >& outputFactors, std::stringstream* comments) const;
   void Interpolate(const Vector<coefficient>& thePoints, const Vector<coefficient>& ValuesAtThePoints);
   bool findOneVariableRationalRoots(List<Rational>& output);
   coefficient GetDiscriminant();
@@ -2692,7 +2679,7 @@ public:
     int numVars = MathRoutines::Maximum(letterIndex + 1, ExpectedNumVars);
     this->MakeZero();
     MonomialP tempM;
-    tempM.MakeOne(numVars);
+    tempM.makeOne(numVars);
     tempM.setVariable(letterIndex, power);
     this->AddMonomial(tempM, inputCoefficient);
   }
@@ -2728,7 +2715,7 @@ public:
   }
   Polynomial<coefficient> one() const {
     Polynomial<coefficient> result;
-    result.MakeOne();
+    result.makeOne();
     return result;
   }
   static Polynomial<coefficient> zero() {
@@ -2745,10 +2732,10 @@ public:
   void MakeConst(const coefficient& theConst, int ExpectedNumVars = 0) {
     this->MakeZero();
     MonomialP theConstMon;
-    theConstMon.MakeOne(ExpectedNumVars);
+    theConstMon.makeOne(ExpectedNumVars);
     this->AddMonomial(theConstMon, theConst);
   }
-  void MakeOne(int ExpectedNumVars = 0);
+  void makeOne(int ExpectedNumVars = 0);
   void GetPolyWithPolyCoeff(
     Selection& theNonCoefficientVariables, Polynomial<Polynomial<coefficient> >& output
   ) const;
@@ -2771,7 +2758,7 @@ public:
   void DivideByConstant(const coefficient& r);
   void AddConstant(const coefficient& theConst) {
     MonomialP tempMon;
-    tempMon.MakeOne();
+    tempMon.makeOne();
     this->AddMonomial(tempMon, theConst);
   }
   void ShiftVariableIndicesToTheRight(int VarIndexShift);
@@ -2884,7 +2871,7 @@ public:
       << d << ". " << global.fatal;
     }
     Polynomial<coefficient> theOne;
-    theOne.MakeOne(this->minimalNumberOfVariables());
+    theOne.makeOne(this->minimalNumberOfVariables());
     MathRoutines::RaiseToPower(*this, d, theOne);
   }
   bool GetRootFromLinPolyConstTermLastVariable(Vector<coefficient>& outputRoot) {
@@ -2996,12 +2983,12 @@ public:
   }
   void operator-=(int x) {
     MonomialP tempMon;
-    tempMon.MakeOne();
+    tempMon.makeOne();
     this->SubtractMonomial(tempMon, x);
   }
   void operator-=(const coefficient& other) {
     MonomialP tempMon;
-    tempMon.MakeOne();
+    tempMon.makeOne();
     this->SubtractMonomial(tempMon, other);
   }
   void operator-=(const Polynomial<coefficient>& other) {
@@ -3068,6 +3055,7 @@ public:
     coefficient one,
     std::stringstream* commentsOnFailure
   );
+  bool hasSmallIntegralPositivePowers(int* whichTotalDegree) const;
   class Test {
   public:
     FormatExpressions format;
@@ -3080,10 +3068,10 @@ public:
       const std::string& expected
     );
     bool leastCommonMultiple();
-    bool oneFactorization(
+    bool oneFactorizationKronecker(
       const std::string& input, const std::string& expectedFactors
     );
-    bool factorization();
+    bool factorizationKronecker();
     bool oneDifferential(const std::string& input, const std::string& expected);
     bool differential();
     Polynomial<coefficient> fromString(const std::string& input);
@@ -3124,28 +3112,40 @@ template <>
 Polynomial<Rational> Polynomial<Rational>::Test::fromString(const std::string& input);
 template <>
 bool Polynomial<Rational>::Test::fromStringTest();
-template <>
-bool Polynomial<Rational>::factorMe(
-  List<Polynomial<Rational> >& outputFactors,
-  std::stringstream* comments
-) const;
 
 template<>
 bool Polynomial<Rational>::findOneVariableRationalRoots(List<Rational>& output);
-template <>
-bool Polynomial<Rational>::factorMeOutputIsADivisor(Polynomial<Rational>& output, std::stringstream* comments);
-template <>
-bool Polynomial<Rational>::factorMeNormalizedFactors(
-  Rational& outputCoeff,
-  List<Polynomial<Rational> >& outputFactors,
-  std::stringstream* comments
-) const;
 
-template <class coefficient>
-class PolynomialFactorizationResult {
-
+template <class coefficient, class oneFactorFinder>
+class PolynomialFactorization {
+public:
+  Polynomial<coefficient> original;
+  Polynomial<coefficient> current;
+  coefficient constantFactor;
+  List<Polynomial<coefficient> > reduced;
+  List<Polynomial<coefficient> > nonReduced;
+  bool factor(
+    const Polynomial<coefficient>& input,
+    std::stringstream* commentsOnFailure
+  );
+  bool accountNonReducedFactor(Polynomial<coefficient>& incoming);
+  bool accountReducedFactor(Polynomial<coefficient>& incoming);
+  bool oneFactor(std::stringstream* comments);
+  bool checkFactorization() const;
+  std::string toStringResult(FormatExpressions* theFormat) const;
 };
 
+class PolynomialFactorizationKronecker {
+  public:
+  PolynomialFactorization<Rational, PolynomialFactorizationKronecker>* output;
+  Polynomial<Rational> current;
+  bool oneFactor(
+    std::stringstream* commentsOnFailure
+  );
+  PolynomialFactorizationKronecker() {
+    this->output = nullptr;
+  }
+};
 
 template <class coefficient>
 class PolynomialSubstitution: public List<Polynomial<coefficient> > {
@@ -3208,14 +3208,14 @@ class PolynomialSubstitution: public List<Polynomial<coefficient> > {
         theSub,
         tempP,
         NumVarsTarget,
-        static_cast<Rational>(1)
+        Rational::one()
       );
       this->TheObjects[i] = tempP;
     }
   }
   void MakeOneParameterSubFromDirection(Vector<Rational>& direction) {
     MonomialP tempM;
-    tempM.MakeOne(1);
+    tempM.makeOne(1);
     tempM[0] = 1;
     this->SetSize(direction.size);
     for (int i = 0; i < this->size; i ++) {
@@ -3688,8 +3688,8 @@ public:
   void TimesConstant(const Rational& theConst) {
     this->operator*=(theConst);
   }
-  void Invert();
-  void MakeOne();
+  void invert();
+  void makeOne();
   void MakeZero();
   void makeMonomial(
     int LetterIndex,
@@ -4054,7 +4054,7 @@ void LinearCombination<templateMonomial, coefficient>::GaussianEliminationByRows
       << theList.toString() << ". " << global.fatal;
     }
     tempCF = currentPivot.coefficients[colIndex];
-    tempCF.Invert();
+    tempCF.invert();
     currentPivot *= tempCF;
     if (carbonCopyMatrix != 0) {
       carbonCopyMatrix->RowTimesScalar(currentRowIndex, tempCF);
@@ -4187,7 +4187,7 @@ template <class coefficient>
 void PolynomialSubstitution<coefficient>::MakeExponentSubstitution(Matrix<LargeInteger>& theSub) {
   Polynomial<coefficient> tempP;
   MonomialP tempM;
-  tempM.MakeOne(theSub.NumRows);
+  tempM.makeOne(theSub.NumRows);
   this->size = 0;
   this->SetSize(theSub.NumCols);
   for (int i = 0; i < theSub.NumCols; i ++) {
@@ -4376,7 +4376,7 @@ class Complex {
     this->Re = other;
     this->Im = 0;
   }
-  void Invert() {
+  void invert() {
     coefficient numerator;
     numerator = this->Re * this->Re + this->Im * this->Im;
     this->Re /= numerator;
@@ -4679,7 +4679,7 @@ bool Vectors<coefficient>::GetNormalSeparatingCones(
       matA.elements[i][k + theDimension].Assign(matA.elements[i][k]);
       matA.elements[i][k + theDimension].Minus();
     }
-    matb.elements[i][0].MakeOne();
+    matb.elements[i][0].makeOne();
     matA.elements[i][theDimension * 2 + i].MakeMOne();
   }
   for (int i = 0; i < coneNonNegativeCoeffs.size; i ++) {
@@ -4689,7 +4689,7 @@ bool Vectors<coefficient>::GetNormalSeparatingCones(
       matA.elements[currentRow][k + theDimension].Assign(matA.elements[currentRow][k]);
       matA.elements[currentRow][k + theDimension].Minus();
     }
-    matA.elements[currentRow][2 * theDimension + currentRow].MakeOne();
+    matA.elements[currentRow][2 * theDimension + currentRow].makeOne();
   }
   //matA.ComputeDebugString();
   //matb.ComputeDebugString();
@@ -4760,9 +4760,9 @@ void Matrix<coefficient>::GetMaxMovementAndLeavingVariableRow(
     Rational tempRat;
     tempRat.Assign(tempMatA.elements[i][EnteringVariable]);
     if (tempRat.IsPositive()) {
-      tempRat.Invert();
+      tempRat.invert();
       tempRat.MultiplyBy(inputVectorX[BaseVariables.elements[i]]);
-      if (maxMovement.IsGreaterThan(tempRat)|| (LeavingVariableRow == - 1)) {
+      if (maxMovement.IsGreaterThan(tempRat) || (LeavingVariableRow == - 1)) {
         maxMovement.Assign(tempRat);
         LeavingVariableRow = i;
       }
@@ -6520,10 +6520,10 @@ public:
     const PolynomialSubstitution<Rational>& SubPolyPart,
     const PolynomialSubstitution<Rational>& SubDiffPArt
   );
-  void MakeOne(int ExpectedNumVars = 0) {
+  void makeOne(int ExpectedNumVars = 0) {
     MonomialWeylAlgebra tempMon;
-    tempMon.polynomialPart.MakeOne(ExpectedNumVars);
-    tempMon.differentialPart.MakeOne(ExpectedNumVars);
+    tempMon.polynomialPart.makeOne(ExpectedNumVars);
+    tempMon.differentialPart.makeOne(ExpectedNumVars);
     this->MakeZero();
     this->AddMonomial(tempMon, 1);
   }
@@ -6705,7 +6705,7 @@ class MonomialMatrix {
     this->vIndex = i;
     this->IsId = false;
   }
-  void MakeOne() {
+  void makeOne() {
     this->MakeIdSpecial();
   }
   void Transpose() {
@@ -7220,7 +7220,7 @@ class MonomialGeneralizedVerma {
   }
   void MakeConst(ModuleSSalgebra<coefficient>& inputOwner) {
     this->owner = &inputOwner;
-    this->theMonCoeffOne.MakeOne(*inputOwner.owner);
+    this->theMonCoeffOne.makeOne(*inputOwner.owner);
   }
   ModuleSSalgebra<coefficient>& GetOwner() const {
     return *this->owner;
@@ -7595,7 +7595,7 @@ void PolynomialSubstitution<coefficient>::MakeLinearSubConstTermsLastRow(Matrix<
   for (int i = 0; i < this->size; i ++) {
     this->TheObjects[i].MakeZero();
     for (int j = 0; j < theMat.NumRows - 1; j ++) {
-      tempM.MakeOne(theMat.NumRows - 1);
+      tempM.makeOne(theMat.NumRows - 1);
       tempM.setVariable(j, 1);
       this->TheObjects[i].AddMonomial(tempM, theMat.elements[j][i]);
     }
@@ -7799,7 +7799,7 @@ void ElementSumGeneralizedVermas<coefficient>::MakeHWV(
   this->MakeZero();
   MonomialGeneralizedVerma<coefficient> theMon;
   theMon.indexFDVector = theOwner.theGeneratingWordsNonReduced.size - 1;
-  theMon.theMonCoeffOne.MakeOne(theOwner.GetOwner());
+  theMon.theMonCoeffOne.makeOne(theOwner.GetOwner());
   theMon.owner = &theOwner;
   this->AddMonomial(theMon, theRingUnit);
 }

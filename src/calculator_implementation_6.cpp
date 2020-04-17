@@ -807,12 +807,14 @@ bool CalculatorFunctions::innerPlotDirectionOrVectorField(
   return output.AssignValue(thePlot, theCommands);
 }
 
-bool CalculatorFunctions::innerJWTVerifyAgainstRSA256(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctions::innerJWTVerifyAgainstRSA256(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerJWTverifyAgainstRSA256");
   if (input.size() != 4) {
-    return theCommands << "The JWT verify command expects 3 arguments:"
-    << " string with the token in the usual format (\"a.b.c\"),"
-    << " the modulus of the key and the exponent of the key. ";
+    return theCommands << "The JWT verify command expects 3 arguments: "
+    << "string with the token in the usual format (\"a.b.c\"), "
+    << "the modulus of the key and the exponent of the key. ";
   }
   std::string theTokenString;
   if (!input[1].IsOfType(&theTokenString)) {
@@ -920,7 +922,9 @@ bool CalculatorFunctions::innerHexToInteger(Calculator& theCommands, const Expre
   return output.AssignValue(resultRat, theCommands);
 }
 
-bool CalculatorFunctions::innerTestJSON(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctions::innerTestJSON(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerTestJSON");
   if (input.size() != 2) {
     return false;
@@ -939,7 +943,9 @@ bool CalculatorFunctions::innerTestJSON(Calculator& theCommands, const Expressio
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CalculatorFunctions::innerBase64ToHex(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctions::innerBase64ToHex(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerBase64ToHex");
   if (input.size() != 2) {
     return false;
@@ -970,7 +976,8 @@ bool CalculatorFunctions::innerGenerateRandomPrime(
   int maxNumberOfBytes = 128;
   int minNumberOfBytes = 1;
   if (numberOfBytes > maxNumberOfBytes || numberOfBytes < minNumberOfBytes) {
-    return theCommands << "Max number of bytes: " << maxNumberOfBytes << ", min number of bytes: "
+    return theCommands << "Max number of bytes: "
+    << maxNumberOfBytes << ", min number of bytes: "
     << minNumberOfBytes << ", you requested: " << numberOfBytes << ". ";
   }
   LargeIntegerUnsigned result;
@@ -1012,7 +1019,7 @@ bool CalculatorFunctions::innerTestRSASign(
   out << "<br>Signature:<br>" << Crypto::ConvertListUnsignedCharsToHex(signature);
   ElementZmodP theElement, theOne;
   theElement.theModulus = theKey.thePublicKey.theModulus;
-  theOne.MakeOne(theElement.theModulus);
+  theOne.makeOne(theElement.theModulus);
   Crypto::ConvertListUnsignedCharsToLargeUnsignedIntegerBigEndian(signature, theElement.theValue);
   out << "<br>Signature integer:<br>" << theElement.theValue.toString();
   MathRoutines::RaiseToPower(theElement, theKey.thePublicKey.theExponent, theOne);
@@ -1114,19 +1121,24 @@ bool CalculatorFunctions::innerIsSquare(Calculator& theCommands, const Expressio
   return output.AssignValue(result, theCommands);
 }
 
-bool CalculatorFunctions::innerIsSquareFree(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctions::innerIsSquareFree(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerIsSquareFree");
   if (input.size() != 2) {
     return false;
   }
-  LargeInteger theLI;
-  if (!input[1].IsInteger(&theLI)) {
+  LargeInteger theInteger;
+  if (!input[1].IsInteger(&theInteger)) {
     return false;
   }
   List<int> theMults;
   List<LargeInteger> theFactors;
-  if (!theLI.value.FactorReturnFalseIfFactorizationIncomplete(theFactors, theMults, 0, &theCommands.Comments)) {
-    return theCommands << "Failed to factor: " << theLI.toString() << " (may be too large?).";
+  if (!theInteger.value.FactorReturnFalseIfFactorizationIncomplete(
+    theFactors, theMults, 0, &theCommands.Comments
+  )) {
+    return theCommands << "Failed to factor: "
+    << theInteger.toString() << " (may be too large?).";
   }
   int result = 1;
   for (int i = 0; i < theMults.size; i ++) {
@@ -1138,25 +1150,45 @@ bool CalculatorFunctions::innerIsSquareFree(Calculator& theCommands, const Expre
   return output.AssignValue(result, theCommands);
 }
 
-bool CalculatorFunctions::innerIsPower(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctions::innerIsSquareFreePolynomial(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::innerIsSquareFreePolynomial");
+  if (input.size() != 2) {
+    return false;
+  }
+  WithContext<Polynomial<Rational> > polynomial;
+  if (!theCommands.Convert(
+    input, CalculatorConversions::innerPolynomial<Rational>, polynomial
+  )) {
+    return false;
+  }
+  std::stringstream out;
+  bool squareFree = polynomial.content.isSquareFree(Rational::one(), &out);
+  return output.AssignValue(Rational(int(squareFree)), theCommands);
+}
+
+bool CalculatorFunctions::innerIsPower(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerIsPower");
   if (input.size() != 2) {
     return false;
   }
-  LargeInteger theLI;
-  if (!input[1].IsInteger(&theLI)) {
+  LargeInteger toBeFactored;
+  if (!input[1].IsInteger(&toBeFactored)) {
     return false;
   }
-  if (theLI.IsEqualToZero()) {
+  if (toBeFactored.IsEqualToZero()) {
     return false;
   }
   List<int> theMults;
   List<LargeInteger> theFactors;
-  if (!theLI.value.FactorReturnFalseIfFactorizationIncomplete(
+  if (!toBeFactored.value.FactorReturnFalseIfFactorizationIncomplete(
     theFactors, theMults, 0, &theCommands.Comments
   )) {
     return theCommands << "Failed to factor: "
-    << theLI.toString() << " (may be too large?).";
+    << toBeFactored.toString() << " (may be too large?).";
   }
   int result = 1;
   if (theMults.size > 0) {
@@ -1252,7 +1284,7 @@ bool CalculatorFunctions::innerFactorOutNumberContent(
   if (theCF == 0) {
     return false;
   }
-  theCF.Invert();
+  theCF.invert();
   if (theCF == 1 ) {
     output = input[1];
     return true;

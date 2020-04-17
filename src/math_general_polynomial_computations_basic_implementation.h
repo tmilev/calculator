@@ -84,7 +84,7 @@ void Polynomial<coefficient>::MakeDeterminantFromSquareMatrix(
   result.MakeZero();
   result.SetExpectedSize(numCycles);
   for (int i = 0; i < numCycles; i ++, thePerm.incrementAndGetPermutation(permutationIndices)) {
-    theMonomial.MakeOne();
+    theMonomial.makeOne();
     for (int j = 0; j < permutationIndices.size; j ++) {
       theMonomial *= theMat(j, permutationIndices[j]);
     }
@@ -117,7 +117,9 @@ int Polynomial<coefficient>::TotalDegreeInt() const {
 }
 
 template <class coefficient>
-bool Polynomial<coefficient>::Substitution(const List<Polynomial<coefficient> >& TheSubstitution) {
+bool Polynomial<coefficient>::Substitution(
+  const List<Polynomial<coefficient> >& TheSubstitution
+) {
   MacroRegisterFunctionWithName("Polynomial::Substitution");
   Polynomial<coefficient> Accum, TempPoly;
   for (int i = 0; i < this->size(); i ++) {
@@ -132,12 +134,14 @@ bool Polynomial<coefficient>::Substitution(const List<Polynomial<coefficient> >&
 }
 
 template <class coefficient>
-void Polynomial<coefficient>::MakeOne(int ExpectedNumVars) {
+void Polynomial<coefficient>::makeOne(int ExpectedNumVars) {
   this->MakeConst(1, ExpectedNumVars);
 }
 
 template <class coefficient>
-void Polynomial<coefficient>::MakeDegreeOne(int NVar, int NonZeroIndex, const coefficient& coeff) {
+void Polynomial<coefficient>::MakeDegreeOne(
+  int NVar, int NonZeroIndex, const coefficient& coeff
+) {
   this->MakeZero();
   MonomialP tempM;
   tempM.MakeEi(NonZeroIndex, 1, NVar);
@@ -163,7 +167,10 @@ void Polynomial<coefficient>::MakeDegreeOne(
 
 template <class coefficient>
 void Polynomial<coefficient>::MakeDegreeOne(
-  int NVar, int NonZeroIndex, const coefficient& coeff1, const coefficient& ConstantTerm
+  int NVar,
+  int NonZeroIndex,
+  const coefficient& coeff1,
+  const coefficient& ConstantTerm
 ) {
   this->MakeDegreeOne(NVar, NonZeroIndex, coeff1);
   *this += ConstantTerm;
@@ -182,7 +189,7 @@ coefficient Polynomial<coefficient>::Evaluate(const Vector<coefficient>& input) 
       if (!(*this)[i](j).IsSmallInteger(&numCycles)) {
         global.fatal << "This is a programming error. "
         << "Attempting to evaluate a polynomial whose "
-        <<  i + 1 << "^{th} variable is raised to the power "
+        << i + 1 << "^{th} variable is raised to the power "
         << (*this)[i](j).toString()
         << ". Raising variables to power is allowed "
         << "only if the power is a small integer. "
@@ -197,7 +204,7 @@ coefficient Polynomial<coefficient>::Evaluate(const Vector<coefficient>& input) 
       tempElt = input[j];
       MathRoutines::RaiseToPower(tempElt, numCycles, static_cast<coefficient>(1));
       if (!isPositive) {
-        tempElt.Invert();
+        tempElt.invert();
       }
       accum *= tempElt;
     }
@@ -222,7 +229,7 @@ void Polynomial<coefficient>::SetNumVariablesSubDeletedVarsByOne(int newNumVars)
   Accum.SetExpectedSize(this->size());
   MonomialP tempM;
   for (int i = 0; i < this->size(); i ++) {
-    tempM.MakeOne(newNumVars);
+    tempM.makeOne(newNumVars);
     for (int j = 0; j < newNumVars; j ++) {
       tempM.setVariable(j, (*this)[i](j));
     }
@@ -232,9 +239,26 @@ void Polynomial<coefficient>::SetNumVariablesSubDeletedVarsByOne(int newNumVars)
 }
 
 template <class coefficient>
+bool Polynomial<coefficient>::hasSmallIntegralPositivePowers(
+  int* whichTotalDegree
+) const {
+  int whichTotalDegreeContainer = 0;
+  for (int i = 0; i < this->size(); i ++) {
+    if (!this->theMonomials[i].hasSmallIntegralPositivePowers(&whichTotalDegreeContainer)) {
+      return false;
+    }
+  }
+  if (whichTotalDegree != nullptr) {
+    *whichTotalDegree = whichTotalDegreeContainer;
+  }
+  return true;
+}
+
+template <class coefficient>
 void Polynomial<coefficient>::ShiftVariableIndicesToTheRight(int VarIndexShift) {
   if (VarIndexShift < 0) {
-    global.fatal << "This is a programming error. Requesting negative variable shift (more precisely, "
+    global.fatal << "This is a programming error. "
+    << "Requesting negative variable shift (more precisely, "
     << VarIndexShift << ") not allowed. " << global.fatal;
   }
   if (VarIndexShift == 0) {
@@ -247,7 +271,7 @@ void Polynomial<coefficient>::ShiftVariableIndicesToTheRight(int VarIndexShift) 
   Accum.SetExpectedSize(this->size());
   MonomialP tempM;
   for (int i = 0; i < this->size(); i ++) {
-    tempM.MakeOne(newNumVars);
+    tempM.makeOne(newNumVars);
     for (int j = 0; j < oldNumVars; j ++) {
       tempM[j + VarIndexShift] = (*this)[i](j);
     }
@@ -257,8 +281,10 @@ void Polynomial<coefficient>::ShiftVariableIndicesToTheRight(int VarIndexShift) 
 }
 
 template <class coefficient>
-Matrix<coefficient> Polynomial<coefficient>::EvaluateUnivariatePoly(const Matrix<coefficient>& input) {
-  //for univariate polynomials only
+Matrix<coefficient> Polynomial<coefficient>::EvaluateUnivariatePoly(
+  const Matrix<coefficient>& input
+) {
+  // for univariate polynomials only
   MacroRegisterFunctionWithName("Polynomial::EvaluateUnivariatePoly");
   Matrix<coefficient> output, tempElt, idMat;
   idMat.MakeIdMatrix(input.NumCols);
@@ -267,12 +293,16 @@ Matrix<coefficient> Polynomial<coefficient>::EvaluateUnivariatePoly(const Matrix
     const MonomialP& currentMon = (*this)[i];
     int numCycles = 0;
     if (!currentMon(0).IsSmallInteger(&numCycles) ) {
-      global.fatal << "This is a programming error. Attempting to evaluate a polynomial whose "
-      <<  i + 1 << "^{th} variable is raised to the power "
+      global.fatal
+      << "This is a programming error. "
+      << "Attempting to evaluate a polynomial whose "
+      << i + 1 << "^{th} variable is raised to the power "
       << currentMon(0).toString()
-      << ". Raising variables to power is allowed only if the power is a small integer. "
+      << ". Raising variables to power is allowed "
+      << "only if the power is a small integer. "
       << "If the user has requested such an operation, "
-      << "it *must* be intercepted at an earlier level (and the user must be informed)."
+      << "it *must* be intercepted at an earlier level "
+      << "(and the user must be informed)."
       << global.fatal;
     }
     bool isPositive = (numCycles > 0);
@@ -293,7 +323,7 @@ Matrix<coefficient> Polynomial<coefficient>::EvaluateUnivariatePoly(const Matrix
 template <class coefficient>
 void Polynomial<coefficient>::ScaleToPositiveMonomialExponents(MonomialP& outputScale) {
   int numVars = this->minimalNumberOfVariables();
-  outputScale.MakeOne(numVars);
+  outputScale.makeOne(numVars);
   for (int i = 0; i < numVars; i ++) {
     for (int j = 0; j < this->size(); j ++) {
       const MonomialP& currentMonomial = (*this)[j];
@@ -467,7 +497,7 @@ void Polynomial<coefficient>::AssignMinPoly(const Matrix<coefficient>& input) {
     << global.fatal;
   }
   int theDim = input.NumCols;
-  this->MakeOne(1);
+  this->makeOne(1);
   Vectors<coefficient> theBasis;
   Vector<coefficient> theVectorPowers;
   Vector<coefficient> firstDependentPower;
@@ -516,7 +546,7 @@ int Polynomial<coefficient>::GetMaxPowerOfVariableIndex(int VariableIndex) {
 template <class coefficient>
 void Polynomial<coefficient>::GetConstantTerm(coefficient& output, const coefficient& theRingZero) const {
   MonomialP tempM;
-  tempM.MakeOne();
+  tempM.makeOne();
   int i = this->theMonomials.GetIndex(tempM);
   if (i == - 1) {
     output = theRingZero;
@@ -537,6 +567,28 @@ void Polynomial<coefficient>::GetCoeffInFrontOfLinearTermVariableIndex(
   } else {
     output = this->coefficients[i];
   }
+}
+
+template<class coefficient>
+bool Polynomial<coefficient>::isSquareFree(
+  const coefficient& one, std::stringstream* comments
+) const {
+  MacroRegisterFunctionWithName("Polynomial::isSquareFree");
+  Vector<Polynomial<coefficient> > differentials;
+  if (this->IsConstant()) {
+    return false;
+  }
+  if (!this->differential(differentials, comments)) {
+    return false;
+  }
+  Polynomial<coefficient> divisor = *this;
+  for (int i = 0; i < differentials.size; i ++) {
+    if (differentials[i].IsEqualToZero()) {
+      continue;
+    }
+    Polynomial::greatestCommonDivisor(divisor, differentials[i], divisor, one, comments);
+  }
+  return divisor.totalDegree() == 0;
 }
 
 template<class coefficient>

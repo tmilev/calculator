@@ -647,7 +647,7 @@ bool Vector<coefficient>::IsProportionalTo(
 template <class coefficient>
 void Vector<coefficient>::FindLCMDenominators(LargeIntegerUnsigned& output) {
   LargeIntegerUnsigned tempI, tempI2;
-  output.MakeOne();
+  output.makeOne();
   for (int i = 0; i < this->size; i ++) {
     this->TheObjects[i].GetDenominator(tempI2);
     LargeIntegerUnsigned::gcd(output, tempI2, tempI);

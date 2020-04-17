@@ -1378,7 +1378,9 @@ bool CalculatorFunctions::innerDistributeExponent(
   return output.MakeXOX(theCommands, theCommands.opTimes(), leftE, rightE);
 }
 
-bool CalculatorFunctions::innerSqrt(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctions::innerSqrt(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("Calculator::innerSqrt");
   if (input.size() != 3) {
     return false;
@@ -1387,7 +1389,7 @@ bool CalculatorFunctions::innerSqrt(Calculator& theCommands, const Expression& i
   if (input[1].IsRational(&ratPower)) {
     if (ratPower != 0) {
       Expression powerE, powerEreduced, theExponentE;
-      ratPower.Invert();
+      ratPower.invert();
       theExponentE.AssignValue(ratPower, theCommands);
       powerE.MakeXOX(theCommands,theCommands.opThePower(), input[2], theExponentE);
       if (CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactors(
@@ -1429,7 +1431,7 @@ bool CalculatorFunctions::innerSqrt(Calculator& theCommands, const Expression& i
       return output.MakeError("Division by zero in expression: " + input.toString(), theCommands);
     }
     thePower *= - 1;
-    rationalValue.Invert();
+    rationalValue.invert();
   }
   if (thePower != 2) {
     return false;
@@ -1782,14 +1784,14 @@ bool CalculatorFunctions::innerLogBaseSimpleCases(
   newBaseE.AssignValue(theBase, theCommands);
   newArgE.AssignValue(theArg, theCommands);
   if (theBase < 1) {
-    theBase.Invert();
+    theBase.invert();
     newBaseE.AssignValue(theBase, theCommands);
     output.MakeXOX(theCommands, theCommands.opLogBase(), newBaseE, newArgE);
     output *= - 1;
     return true;
   }
   if (theArg < 1) {
-    theArg.Invert();
+    theArg.invert();
     newArgE.AssignValue(theArg, theCommands);
     output.MakeXOX(theCommands, theCommands.opLogBase(), newBaseE, newArgE);
     output *= - 1;
@@ -2390,7 +2392,7 @@ std::string GroebnerBasisComputation<coefficient>::GetSpacedMonomialsWithHighlig
     std::stringstream highlightHeadStream;
     std::stringstream highlightTailStream;
     MonomialP tempM;
-    tempM.MakeOne();
+    tempM.makeOne();
     int monIndex = this->allMonomials.GetIndex(tempM);
     if (slidesAdditionalHighlight != nullptr && monIndex != - 1) {
       if ((*slidesAdditionalHighlight)[monIndex] > 0) {
@@ -2528,7 +2530,7 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
     currentSlideNumber ++;
   }
   MonomialP constMon;
-  constMon.MakeOne();
+  constMon.makeOne();
   int zeroMonIndex = this->allMonomials.GetIndex(constMon);
   if (this->intermediateRemainders.GetElement()[remainderIndex].IsEqualToZero()) {
     this->additionalHighlightRemainders[remainderIndex][zeroMonIndex] = currentSlideNumber;
@@ -2708,7 +2710,7 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionLaTeXSlide() {
   }
   if (this->remainderDivision.IsEqualToZero()) {
     MonomialP constMon;
-    constMon.MakeOne();
+    constMon.makeOne();
     this->allMonomials.AddOnTopNoRepetition(constMon);
   }
   this->allMonomials.QuickSortDescending(&this->thePolynomialOrder.theMonOrder);
@@ -2966,7 +2968,9 @@ bool CalculatorFunctions::innerFactorPolynomialModPrime(
   format.flagSuppressModP = true;
   polynomial.context.context.ContextGetFormatExpressions(format);
   out << "Converted polynomial: " << converted.toString(&format) << "<br>";
-  PolynomialFactorizationResult<ElementZmodP> result;
-  converted.factorMeCantorZassenhaus(result, &out);
+  PolynomialFactorization<ElementZmodP, PolynomialFactorizationCantorZassenhaus> result;
+  if (!result.factor(converted, &out)) {
+    return output.AssignValue(out.str(), theCommands);
+  }
   return output.AssignValue(out.str(), theCommands);
 }

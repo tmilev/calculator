@@ -1239,7 +1239,7 @@ bool RationalFunction::ConvertToType(int theType) {
   return true;
 }
 
-void RationalFunction::Invert() {
+void RationalFunction::invert() {
   if (!this->checkConsistency()) {
     global.fatal << "Inconsistent rational functoin. " << global.fatal;
   }
@@ -1248,7 +1248,7 @@ void RationalFunction::Invert() {
       global.fatal  << "This is a programming error: division by zero. Division by zero errors must be caught earlier in the program and "
       << "handled gracefully. Crashing ungracefully. " << global.fatal;
     }
-    this->ratValue.Invert();
+    this->ratValue.invert();
     return;
   }
   if (this->expressionType == this->typePoly) {
@@ -1346,7 +1346,7 @@ void RationalFunction::operator-=(const Rational& other) {
   }
 }
 
-void RationalFunction::MakeOne() {
+void RationalFunction::makeOne() {
   this->MakeConst(1);
 }
 
@@ -1637,7 +1637,7 @@ void RationalFunction::operator/=(const RationalFunction& other) {
   RationalFunction tempRF;
   tempRF = other;
   tempRF.checkConsistency();
-  tempRF.Invert();
+  tempRF.invert();
   tempRF.checkConsistency();
   *this *= tempRF;
   if (!this->checkConsistency()) {
@@ -1812,8 +1812,8 @@ Rational RationalFunction::scaleToIntegral() {
   }
   if (this->expressionType == this->typeRational) {
     Rational result = this->ratValue;
-    result.Invert();
-    this->ratValue.MakeOne();
+    result.invert();
+    this->ratValue.makeOne();
     return result;
   }
   if (this->expressionType == this->typePoly) {
@@ -1839,7 +1839,7 @@ void RationalFunction::simplifyLeadingCoefficientOnly() {
   this->Numerator.GetElement() *= scale.GetNumerator();
 }
 
-void RootIndexToPoly(int theIndex, SemisimpleLieAlgebra& theAlgebra, Polynomial<Rational> & output) {
+void RootIndexToPoly(int theIndex, SemisimpleLieAlgebra& theAlgebra, Polynomial<Rational>& output) {
   int theRank = theAlgebra.theWeyl.CartanSymmetric.NumRows;
   int numPosRoots = theAlgebra.theWeyl.RootsOfBorel.size;
   output.MakeDegreeOne(theRank + numPosRoots, theIndex + theRank, Rational(1));
@@ -2078,14 +2078,14 @@ bool RationalFunction::gcdQuick(
     if (remainder.IsEqualToZero()) {
       output = right;
     } else {
-      output.MakeOne(left.minimalNumberOfVariables());
+      output.makeOne(left.minimalNumberOfVariables());
     }
   } else {
     right.DivideBy(left, quotient, remainder, monomialOrder);
     if (remainder.IsEqualToZero()) {
       output = left;
     } else {
-      output.MakeOne(left.minimalNumberOfVariables());
+      output.makeOne(left.minimalNumberOfVariables());
     }
   }
   return true;
@@ -2095,14 +2095,11 @@ void RationalFunction::RaiseToPower(int thePower) {
   MacroRegisterFunctionWithName("RationalFunctionOld::RaiseToPower");
   this->checkConsistency();
   if (thePower < 0) {
-    this->Invert();
+    this->invert();
     thePower = - thePower;
   }
   if (thePower == 0) {
-    if (this->IsEqualToZero()) {
-      global.fatal << "This is a programming error: attempting to raise 0 to the 0th power, which is undefined. " << global.fatal;
-    }
-    this->MakeOne();
+    this->makeOne();
     return;
   }
   switch (this->expressionType) {
@@ -2163,7 +2160,7 @@ void slTwoInSlN::ClimbDownFromHighestWeightAlongSl2String(
   }
   Rational RaiseCoeff;
   RaiseCoeff.MakeZero();
-  outputCoeff.MakeOne();
+  outputCoeff.makeOne();
   output = input;
   for (int i = 0; i < generatorPower; i ++) {
     RaiseCoeff += currentWeight;
@@ -2558,7 +2555,7 @@ void RationalFunction::AddHonestRF(const RationalFunction& other) {
 }
 
 void MonomialP::MakeEi(int LetterIndex, int Power, int ExpectedNumVars) {
-  this->MakeOne(ExpectedNumVars);
+  this->makeOne(ExpectedNumVars);
   if (Power == 0) {
     return;
   }
@@ -2774,6 +2771,18 @@ void MonomialP::trimTrailingZeroes() {
     }
     this->monBody.SetSize(this->monBody.size - 1);
   }
+}
+
+bool MonomialP::hasSmallIntegralPositivePowers(int* whichTotalDegree) const {
+  for (int i = 0; i < this->monBody.size; i ++) {
+    if (!this->monBody[i].IsIntegerFittingInInt(nullptr)) {
+      return false;
+    }
+    if (this->monBody[i] < 0) {
+      return false;
+    }
+  }
+  return this->TotalDegree().IsIntegerFittingInInt(whichTotalDegree);
 }
 
 void MonomialP::RaiseToPower(const Rational& thePower) {

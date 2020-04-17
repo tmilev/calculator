@@ -648,7 +648,7 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW(
   MonomialTensor<int, MathRoutines::IntUnsignIdentity> tempMonInt;
   for (int i = 0; i < this->thePaths.size; i ++) {
     List<int>& currentPath = generatorsIndices[i];
-    currentNonReducedElement.MakeOne(this->GetOwner());
+    currentNonReducedElement.makeOne(this->GetOwner());
     tempMonInt.MakeConst();
     for (int j = currentPath.size - 1; j >= 0; j --) {
       int theIndex = currentPath[j];

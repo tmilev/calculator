@@ -30,7 +30,7 @@ public:
   void Invert();
   bool MakeGeneratorNISTCurve(const std::string& input, std::stringstream* commentsOnFailure);
   void MakeGeneratorSecp256k1();
-  void MakeOne(const EllipticCurveWeierstrassNormalForm& inputCurve);
+  void makeOne(const EllipticCurveWeierstrassNormalForm& inputCurve);
   bool operator==(const ElementEllipticCurve& other) const;
   bool operator*=(const ElementEllipticCurve& other);
   std::string toString(FormatExpressions* theFormat = nullptr) const;

@@ -81,7 +81,7 @@ public:
     coefficient& theLeftPower, int leftGeneratorIndex, coefficient& theRightPower, int rightGeneratorIndex
   );
   bool SwitchConsecutiveIndicesIfTheyCommute(int theLeftIndex);
-  void MakeOne(SemisimpleLieAlgebra& inputOwner) {
+  void makeOne(SemisimpleLieAlgebra& inputOwner) {
     this->generatorsIndices.size = 0;
     this->Powers.size = 0;
     this->owner = &inputOwner;
@@ -189,7 +189,7 @@ public:
   void MakeConst(const coefficient& coeff, SemisimpleLieAlgebra& inputOwner) {
     this->MakeZero(inputOwner);
     MonomialUniversalEnveloping<coefficient> tempMon;
-    tempMon.MakeOne(inputOwner);
+    tempMon.makeOne(inputOwner);
     this->AddMonomial(tempMon, coeff);
   }
   void Simplify(const coefficient& theRingUnit = 1);

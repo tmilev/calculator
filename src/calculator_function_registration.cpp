@@ -3701,9 +3701,24 @@ void Calculator::initPredefinedInnerFunctions() {
     "integer is square-free "
     "(no primes in the decomposition of the integer "
     "appear with power greater than one) ",
-    "IsSquareFree(6); IsSquareFree(12)",
+    "IsSquareFree(6);\n"
+    "IsSquareFree(12)",
     "CalculatorFunctions::innerIsSquareFree",
     "IsSquareFree",
+    innerStandard
+  );
+  this->AddOperationHandler(
+    "IsSquareFreePolynomial",
+    CalculatorFunctions::innerIsSquareFreePolynomial,
+    "",
+    "Computes whether a polynomial is square-free by "
+    "computing the greatest common divisors of "
+    "the partial derivatives with the original polynomial."
+    "If the greatest common divisor is constant, then the polynomial is square-free. ",
+    "IsSquareFreePolynomial((x^2-3y^2 x )(x+y));\n"
+    "IsSquareFreePolynomial( (x-3x y +5 x y^2)^2 (3+x +y^2) )",
+    "CalculatorFunctions::innerIsSquareFree",
+    "IsSquareFreePolynomial",
     innerStandard
   );
   this->AddOperationHandler(
@@ -6964,7 +6979,8 @@ void Calculator::initPredefinedStandardOperations() {
     CalculatorFunctions::innerDifferentialOfPolynomial,
     "",
     "Differential of a polynomial.",
-    "Differential{}(Polynomial{}(x+y))",
+    "Differential{}(Polynomial{}(x+y));\n"
+    "Differential{}(Polynomial{}(x^3y z+y z + x y + x^5 y^2 z + x y^2 z));\n",
     "CalculatorFunctionsBinaryOps::innerDifferentialOfPolynomial",
     "DifferentialOfPolynomial",
     innerStandard

@@ -7,7 +7,7 @@
 #include "math_extra_universal_enveloping_implementation.h"
 #include "math_extra_semisimple_Lie_algebras_implementation.h"
 #include "math_extra_modules_semisimple_Lie_algebras_implementation.h"
-#include "math_general_polynomial_computations_basic_implementation.h" //undefined reference to Polynomial<AlgebraicNumber>::MakeOne(int)
+#include "math_general_polynomial_computations_basic_implementation.h" //undefined reference to Polynomial<AlgebraicNumber>::makeOne(int)
 #include "math_extra_finite_groups_implementation.h" // undefined reference to `void WeylGroup::RaiseToDominantWeight<Rational>(Vector<Rational>&, int*, bool*, ElementWeylGroup<WeylGroup>*)
 
 template <>
@@ -852,7 +852,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerPolyBySmallInteger(
     base.RaiseToPower(- thePower);
     RationalFunction theRF;
     theRF = base;
-    theRF.Invert();
+    theRF.invert();
     return output.AssignValueWithContext(theRF, input[1].GetContext(), theCommands);
   }
   base.RaiseToPower(thePower);
@@ -1153,7 +1153,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger(
   }
   if (thePower < 0) {
     thePower *= - 1;
-    base.Invert();
+    base.invert();
   }
   MathRoutines::RaiseToPower(base, thePower, AlgebraicNumber(1));
   return output.AssignValueWithContext(base, input[1].GetContext(), theCommands);
@@ -2530,12 +2530,12 @@ bool CalculatorFunctionsBinaryOps::innerPowerElementZmodPByInteger(
   }
   if (thePower < 0) {
     ElementZmodP copy = theElt;
-    theElt.MakeOne(theElt.theModulus);
+    theElt.makeOne(theElt.theModulus);
     theElt /= copy;
     thePower *= - 1;
   }
   ElementZmodP unit;
-  unit.MakeOne(theElt.theModulus);
+  unit.makeOne(theElt.theModulus);
   MathRoutines::RaiseToPower(theElt, thePower, unit);
   return output.AssignValue(theElt, theCommands);
 }
@@ -2562,7 +2562,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerEllipticCurveRationalElementByInteg
     thePower *= - 1;
   }
   ElementEllipticCurve<Rational> unit;
-  unit.MakeOne(theElt.owner);
+  unit.makeOne(theElt.owner);
   MathRoutines::RaiseToPower(theElt, thePower, unit);
   return output.AssignValueWithContext(theElt, input[1].GetContext(), theCommands);
 }
@@ -2589,7 +2589,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerEllipticCurveZmodPElementByInteger(
     thePower *= - 1;
   }
   ElementEllipticCurve<ElementZmodP> unit;
-  unit.MakeOne(theElt.owner);
+  unit.makeOne(theElt.owner);
   MathRoutines::RaiseToPower(theElt, thePower, unit);
   return output.AssignValueWithContext(theElt, input[1].GetContext(), theCommands);
 }

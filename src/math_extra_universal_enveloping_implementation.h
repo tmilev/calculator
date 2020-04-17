@@ -59,7 +59,7 @@ void ElementUniversalEnveloping<coefficient>::MakeCasimirWRTLeviParabolic(
     if (theWeightLeft.IsEqualToZero()) {
       continue;
     }
-    theMon.MakeOne(theOwner);
+    theMon.makeOne(theOwner);
     int indexOpposite = theOwner.GetGeneratorFromRoot(- theWeightLeft);
     theMon.generatorsIndices.AddOnTop(i);
     theMon.generatorsIndices.AddOnTop(indexOpposite);
@@ -68,7 +68,7 @@ void ElementUniversalEnveloping<coefficient>::MakeCasimirWRTLeviParabolic(
     leftE.MakeGenerator(i, theOwner);
     rightE.MakeGenerator(indexOpposite, theOwner);
     theCF = theOwner.GetKillingFormProductWRTLevi(leftE, rightE, rootsNotInLEvi);
-    theCF.Invert();
+    theCF.invert();
     this->AddMonomial(theMon, theCF);
   }
   Matrix<Rational> killingRestrictedToCartan;
@@ -272,7 +272,7 @@ void MonomialUniversalEnveloping<coefficient>::CommuteAnBtoBAnPlusLowerOrder(
   }
   output.MakeZero(*this->owner);
   MonomialUniversalEnveloping<coefficient> tempMon;
-  tempMon.MakeOne(*this->owner);
+  tempMon.makeOne(*this->owner);
   tempMon.Powers.SetExpectedSize(this->generatorsIndices.size + 2);
   tempMon.generatorsIndices.SetExpectedSize(this->generatorsIndices.size + 2);
   tempMon.Powers.size = 0;
@@ -331,7 +331,7 @@ void MonomialUniversalEnveloping<coefficient>::CommuteABntoBnAPlusLowerOrder(
     return;
   output.MakeZero(*this->owner);
   MonomialUniversalEnveloping<coefficient> tempMon;
-  tempMon.MakeOne(*this->owner);
+  tempMon.makeOne(*this->owner);
   tempMon.Powers.SetExpectedSize(this->generatorsIndices.size + 2);
   tempMon.generatorsIndices.SetExpectedSize(this->generatorsIndices.size + 2);
   tempMon.Powers.size = 0;
@@ -455,7 +455,7 @@ bool ElementUniversalEnveloping<coefficient>::HWTAAbilinearForm(
   }
   Accum.MakeZero(this->GetOwner());
   MonomialUniversalEnveloping<coefficient> constMon;
-  constMon.MakeOne(this->GetOwner());
+  constMon.makeOne(this->GetOwner());
   if (logStream != nullptr) {
     *logStream << "left eltement transposed: "
     << TAleft.toString(&global.theDefaultFormat.GetElement()) << "<br>";
@@ -536,7 +536,7 @@ void MonomialUniversalEnveloping<coefficient>::ModOutVermaRelations(
   for (int i = this->generatorsIndices.size - 1; i >= 0; i --) {
     int IndexCurrentGenerator = this->generatorsIndices[i];
     if (IndexCurrentGenerator >= numPosRoots + theDimension) {
-      this->MakeOne(*this->owner);
+      this->makeOne(*this->owner);
       outputCoeff = theRingZero;
       return;
     }
@@ -545,7 +545,7 @@ void MonomialUniversalEnveloping<coefficient>::ModOutVermaRelations(
     }
     if (IndexCurrentGenerator >= numPosRoots && IndexCurrentGenerator < numPosRoots + theDimension) {
       if (subHiGoesToIthElement == 0) {
-        this->MakeOne(*this->owner);
+        this->makeOne(*this->owner);
         outputCoeff = theRingZero;
         return;
       }
@@ -772,7 +772,7 @@ void ElementUniversalEnveloping<coefficient>::MakeOneGenerator(
 ) {
   this->MakeZero(inputOwner);
   MonomialUniversalEnveloping<coefficient> tempMon;
-  tempMon.MakeOne(inputOwner);
+  tempMon.makeOne(inputOwner);
   tempMon.MultiplyByGeneratorPowerOnTheRight(theIndex, theRingUnit);
   this->AddMonomial(tempMon, theRingUnit);
 }
@@ -783,7 +783,7 @@ void ElementUniversalEnveloping<coefficient>::MakeOneGeneratorCoeffOne(
 ) {
   this->MakeZero(inputOwner);
   MonomialUniversalEnveloping<coefficient> tempMon;
-  tempMon.MakeOne(inputOwner);
+  tempMon.makeOne(inputOwner);
   tempMon.MultiplyByGeneratorPowerOnTheRight(theIndex, theRingUnit);
   this->AddMonomial(tempMon, theRingUnit);
 }
@@ -819,7 +819,7 @@ void ElementUniversalEnveloping<coefficient>::AssignElementLieAlgebra(
 ) {
   this->MakeZero(inputOwner);
   MonomialUniversalEnveloping<coefficient> tempMon;
-  tempMon.MakeOne(inputOwner);
+  tempMon.makeOne(inputOwner);
   tempMon.generatorsIndices.SetSize(1);
   tempMon.Powers.SetSize(1);
   tempMon.Powers[0] = theRingUnit;
@@ -867,7 +867,7 @@ void ElementUniversalEnveloping<coefficient>::MakeHgenerator(
 ) {
   MonomialUniversalEnveloping<coefficient> tempMon;
   this->MakeZero(inputOwner);
-  tempMon.MakeOne(inputOwner);
+  tempMon.makeOne(inputOwner);
   int theDimension = this->GetOwner().theWeyl.CartanSymmetric.NumRows;
   int numPosRoots = this->GetOwner().theWeyl.RootsOfBorel.size;
   tempMon.generatorsIndices.SetSize(1);

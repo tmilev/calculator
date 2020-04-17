@@ -785,7 +785,7 @@ bool rootSubalgebra::CheckForSmallRelations(coneRelation& theRel, Vectors<Ration
               tempBool = true;
               theRel.BetaCoeffs.SetSize(1);
               theRel.Betas.SetSize(1);
-              theRel.BetaCoeffs[0].MakeOne();
+              theRel.BetaCoeffs[0].makeOne();
               theRel.Betas[0] =(nilradicalRoots[tempI]);
             } else {
               tempBool =
@@ -2450,7 +2450,7 @@ bool slTwoSubalgebra::AttemptExtendingHFtoHEFWRTSubalgebra(
   int halfNumberVariables = rootsInPlay.size;
   int numberVariables = halfNumberVariables*2;
   MonomialP tempM;
-  tempM.MakeOne(numberVariables);
+  tempM.makeOne(numberVariables);
   Matrix<Rational> coeffsF;
   coeffsF.init(1, halfNumberVariables);
   for (int i = 0; i < numRootsChar2; i ++) {
@@ -2527,7 +2527,7 @@ void slTwoSubalgebra::initHEFSystemFromECoeffs(
           outputSystemToBeSolved.SetSize(outputSystemToBeSolved.size + 1);
           outputSystemToBeSolved.LastObject()->MakeZero();
         }
-        tempM.MakeOne(numberVariables);
+        tempM.makeOne(numberVariables);
         tempM.setVariable(i, 1);
         tempM.setVariable(j + halfNumberVariables, 1);
         Rational tempCoeff = this->GetOwnerSSAlgebra().GetConstant(rootsInPlay[i], - rootsInPlay[j]);
@@ -2546,7 +2546,7 @@ void slTwoSubalgebra::initHEFSystemFromECoeffs(
     }
     this->GetOwnerSSAlgebra().GetConstantOrHElement(rootsInPlay[i], - rootsInPlay[i], tempRat, tempRoot);
     for (int j = 0; j < this->GetOwnerSSAlgebra().GetRank(); j ++) {
-      tempM.MakeOne(numberVariables);
+      tempM.makeOne(numberVariables);
       tempM.setVariable(i, 1);
       tempM.setVariable(i + halfNumberVariables, 1);
       outputSystemToBeSolved[j+oldSize].AddMonomial(tempM, tempRoot[j]);

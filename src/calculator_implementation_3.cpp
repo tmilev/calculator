@@ -590,7 +590,7 @@ bool Calculator::innerPrintB3G2branchingIntermediate(
   Expression tempExpression;
   RationalFunction rfZero, rfOne;
   rfZero.MakeZero();
-  rfOne.MakeOne();
+  rfOne.makeOne();
   latexTable2 << "\\begin{longtable}{|rll|}\\caption"
   << "{Values of $x_1$ for each $v_{\\lambda,i}$}\\label{tableCriticalValuesvlambda}"
   << "\\endhead";
@@ -1394,21 +1394,29 @@ bool Calculator::innerFactorPolynomial(Calculator& theCommands, const Expression
       theCommands
     );
   }
-  List<Polynomial<Rational> > factors;
-  if (!polynomial.content.factorMe(factors, &theCommands.Comments)) {
+  PolynomialFactorization<Rational, PolynomialFactorizationKronecker> factorization;
+  if (!factorization.factor(
+    polynomial.content,
+    &theCommands.Comments
+  )) {
     return false;
   }
-  output.reset(theCommands, factors.size + 1);
+  List<Expression> resultSequence;
+  Expression constantFactor;
+  constantFactor.AssignValue(factorization.constantFactor, theCommands);
+  resultSequence.AddOnTop(constantFactor);
   Expression polynomialE, expressionE(theCommands);
-  output.AddChildAtomOnTop(theCommands.opSequence());
-  for (int i = 0; i < factors.size; i ++) {
-    polynomialE.AssignValueWithContext(factors[i], polynomial.context.context, theCommands);
+
+  for (int i = 0; i < factorization.reduced.size; i ++) {
+    polynomialE.AssignValueWithContext(
+      factorization.reduced[i], polynomial.context.context, theCommands
+    );
     expressionE.children.Clear();
     expressionE.AddChildAtomOnTop("MakeExpression");
     expressionE.AddChildOnTop(polynomialE);
-    output.AddChildOnTop(expressionE);
+    resultSequence.AddOnTop(expressionE);
   }
-  return true;
+  return output.MakeSequence(theCommands, &resultSequence);
 }
 
 bool Calculator::innerZmodP(Calculator& theCommands, const Expression& input, Expression& output) {

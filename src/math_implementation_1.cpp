@@ -724,7 +724,7 @@ bool ElementUniversalEnveloping<coefficient>::ConvertToRationalCoeff(ElementUniv
   Rational theCoeff;
   for (int i = 0; i < this->size; i ++) {
     MonomialUniversalEnveloping<coefficient>& currentMon = this->TheObjects[i];
-    tempMon.MakeOne(*this->owner);
+    tempMon.makeOne(*this->owner);
     if (!this->coefficients[i].IsConstant(theCoeff)) {
       return false;
     }

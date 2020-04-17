@@ -26,7 +26,7 @@ bool MonomialP::Test::TestMonomialOrdersSatisfyTheDefinitionOne(
 
 bool MonomialP::Test::TestMonomialOrdersSatisfyTheDefinition() {
   MonomialP xOne, xTwo, xOneSquared, xTwoSquared, xOneXtwo, one;
-  one.MakeOne();
+  one.makeOne();
   xOne.MakeEi(0, 1);
   xTwo.MakeEi(1, 1);
   xOneSquared.MakeEi(0, 2);
@@ -63,16 +63,19 @@ bool MonomialP::Test::TestMonomialOrdersSatisfyTheDefinition() {
 }
 
 template <>
-bool Polynomial<Rational>::Test::oneFactorization(
+bool Polynomial<Rational>::Test::oneFactorizationKronecker(
   const std::string& input, const std::string& expectedFactors
 ) {
   Polynomial<Rational> toBeFactored = Polynomial<Rational>::Test::fromString(input);
-  List<Polynomial<Rational> > output;
-  bool success = toBeFactored.factorMe(output, nullptr);
+  PolynomialFactorization<Rational, PolynomialFactorizationKronecker> factorization;
+  bool success = factorization.factor(
+    toBeFactored,
+    nullptr
+  );
   if (!success) {
     global.fatal << "Factorization of " << toBeFactored.toString() << " failed. " << global.fatal;
   }
-  std::string resultFactors = output.ToStringCommaDelimited(&this->format);
+  std::string resultFactors = factorization.toStringResult(&this->format);
   if (resultFactors != expectedFactors) {
     global.fatal << "While factoring: "
     << input << "=" << toBeFactored.toString()
@@ -83,30 +86,29 @@ bool Polynomial<Rational>::Test::oneFactorization(
 }
 
 template <>
-bool Polynomial<Rational>::Test::factorization() {
-  Polynomial<Rational>::Test::oneFactorization(
-    "x+1", "x +1"
+bool Polynomial<Rational>::Test::factorizationKronecker() {
+  Polynomial<Rational>::Test::oneFactorizationKronecker(
+    "x+1", "(x +1)"
   );
-  Polynomial<Rational>::Test::oneFactorization(
-    "(2x+1)(-3x+1)", "-3x +1, 2x +1"
+  Polynomial<Rational>::Test::oneFactorizationKronecker(
+    "(2x+1)(-3x+1)", "-(2x +1)(3x -1)"
   );
-  Polynomial<Rational>::Test::oneFactorization(
-    "(1/2x+1/3)(-3/5x+1)", "-1/10x -1/15, 3x -5"
+  Polynomial<Rational>::Test::oneFactorizationKronecker(
+    "(1/2x+1/3)(-3/5x+1)", "-1/30(3x -5)(3x +2)"
   );
-  Polynomial<Rational>::Test::oneFactorization(
-    "(x^2+3x+1)(-3x+1)", "3x -1, -x^{2}-3x -1"
+  Polynomial<Rational>::Test::oneFactorizationKronecker(
+    "(x^2+3x+1)(-3x+1)", "-(3x -1)(x^{2}+3x +1)"
   );
-  Polynomial<Rational>::Test::oneFactorization(
-    "(-3x^3-3x-5)(5x^3+x-7)", "-3x^{3}-3x -5, 5x^{3}+x -7"
+  Polynomial<Rational>::Test::oneFactorizationKronecker(
+    "(-3x^3-3x-5)(5x^3+x-7)", "-(3x^{3}+3x +5)(5x^{3}+x -7)"
   );
-  Polynomial<Rational>::Test::oneFactorization(
+  Polynomial<Rational>::Test::oneFactorizationKronecker(
     "(-3x^4+7x^3+2x^2-3x-5)(-1/2x^3+x^2+x-7)",
-    "x^{3}-2x^{2}-2x +14, 3/2x^{4}-7/2x^{3}-x^{2}+3/2x +5/2"
+    "1/2(x^{3}-2x^{2}-2x +14)(3x^{4}-7x^{3}-2x^{2}+3x +5)"
   );
-
-  Polynomial<Rational>::Test::oneFactorization(
+  Polynomial<Rational>::Test::oneFactorizationKronecker(
     "10x^7+3x^6+5x^5-2x^4-x^3+x^2-4x+1",
-    "10x^{7}+3x^{6}+5x^{5}-2x^{4}-x^{3}+x^{2}-4x +1"
+    "(10x^{7}+3x^{6}+5x^{5}-2x^{4}-x^{3}+x^{2}-4x +1)"
   );
   return true;
 }
@@ -121,7 +123,7 @@ bool Polynomial<Rational>::Test::all() {
 
   tester.differential();
   tester.leastCommonMultiple();
-  tester.factorization();
+  tester.factorizationKronecker();
   return true;
 }
 

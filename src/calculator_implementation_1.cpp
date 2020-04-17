@@ -54,7 +54,7 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
     }
   }
   for (int j = 0; j < matA.NumRows; j ++) {
-    tempMatA.elements[j][j + NumTrueVariables].MakeOne();
+    tempMatA.elements[j][j + NumTrueVariables].makeOne();
     matX[j + NumTrueVariables] = (matb.elements[j][0]);
     BaseVariables.AddSelectionAppendNewIndex(j + NumTrueVariables);
   }
@@ -86,7 +86,7 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
         global.fatal << "The leaving-entering coefficient is not allowed to be zero. " << global.fatal;
       }
       tempRat.Assign(tempMatA.elements[LeavingVariableRow][EnteringVariable]);
-      tempRat.Invert();
+      tempRat.invert();
       for (int i = 0; i < tempMatA.NumRows; i ++) {
         if (!tempMatA.elements[i][BaseVariables.elements[i]].IsEqualTo(1)) {
           global.fatal << "The base variable coefficient is required to be 1 at this point of code. "

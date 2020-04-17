@@ -955,7 +955,7 @@ bool CalculatorConversions::innerElementUE(
   for (int j = 0; j < theP.size(); j ++) {
     const MonomialP& currentMon = theP[j];
     currentSummand.MakeConst(theP.coefficients[j], owner);
-    currentMultiplicandRFpartMon.MakeOne();
+    currentMultiplicandRFpartMon.makeOne();
     for (int i = 0; i < currentMon.minimalNumberOfVariables(); i ++) {
       int thePower = - 1;
       if (!currentMon(i).IsSmallInteger(&thePower)) {

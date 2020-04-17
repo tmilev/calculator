@@ -160,7 +160,7 @@ void LargeIntegerUnsigned::WriteBigEndianBytes(
   }
 }
 
-void LargeIntegerUnsigned::MakeOne() {
+void LargeIntegerUnsigned::makeOne() {
   this->theDigits.SetSize(1);
   this->theDigits[0] = 1;
 }
@@ -425,7 +425,7 @@ void LargeIntegerUnsigned::getPrimesEratosthenesSieve(
 
 LargeIntegerUnsigned LargeIntegerUnsigned::GetOne() {
   LargeIntegerUnsigned tempI;
-  tempI.MakeOne();
+  tempI.makeOne();
   return tempI;
 }
 
@@ -495,7 +495,7 @@ void LargeIntegerUnsigned::operator%=(const LargeIntegerUnsigned& other) {
 
 void LargeIntegerUnsigned::operator/=(const LargeIntegerUnsigned& other) {
   if (&other == this) {
-    this->MakeOne();
+    this->makeOne();
     return;
   }
   LargeIntegerUnsigned copyMe = *this;
@@ -652,10 +652,10 @@ void LargeIntegerUnsigned::ElementToStringLargeElementDecimal(std::string& outpu
   LargeIntegerUnsigned Remainder = *this;
   int numRemainingDigits;
   while (!Remainder.IsEqualToZero()) {
-    currentPower.MakeOne();
+    currentPower.makeOne();
     numRemainingDigits = 0;
     int highestBufferIndex = - 1;
-    bufferPowersOfBase.TheObjects[0].MakeOne();
+    bufferPowersOfBase.TheObjects[0].makeOne();
     bool bufferFilled = false;
     while (Remainder.IsGreaterThanOrEqualTo(currentPower)) {
       numRemainingDigits ++;
@@ -1184,11 +1184,11 @@ bool LargeIntegerUnsigned::IsEqualToZero() const {
 }
 
 void LargeIntegerUnsigned::AssignFactorial(unsigned int x) {
-  this->MakeOne();
+  this->makeOne();
   List<unsigned int> primesBelowX;
   LargeIntegerUnsigned::getPrimesEratosthenesSieve(x, primesBelowX);
   LargeIntegerUnsigned tempInt, tempOne;
-  tempOne.MakeOne();
+  tempOne.makeOne();
   for (int i = 0; i < primesBelowX.size; i ++) {
     unsigned int thePrime = primesBelowX.TheObjects[i];
     unsigned int thePowerOfThePrime = 0;
@@ -1505,18 +1505,18 @@ void Rational::WriteToFile(std::fstream& output) {
 
 void Rational::RaiseToPower(int x) {
   Rational tempRat;
-  tempRat.MakeOne();
+  tempRat.makeOne();
   if (x < 0) {
     x = - x;
-    this->Invert();
+    this->invert();
   }
   LargeInteger tempNum = this->GetNumerator();
   LargeIntegerUnsigned oneLI;
-  oneLI.MakeOne();
+  oneLI.makeOne();
   MathRoutines::RaiseToPower(tempNum.value, x, oneLI);
   LargeIntegerUnsigned tempDen = this->GetDenominator();
   MathRoutines::RaiseToPower(tempDen, x, oneLI);
-  char theSign = (this->IsPositive() || x % 2 == 0) ? 1 :- 1;
+  char theSign = (this->IsPositive() || x % 2 == 0) ? 1 : - 1;
   this->AllocateExtended();
   this->Extended->num.sign = theSign;
   this->Extended->den = tempDen;
@@ -1524,7 +1524,7 @@ void Rational::RaiseToPower(int x) {
   this->ShrinkExtendedPartIfPossible();
 }
 
-void Rational::Invert() {
+void Rational::invert() {
   if (this->Extended == nullptr) {
     int tempI = this->DenShort;
     if (tempI <= 0) {
@@ -1598,11 +1598,11 @@ void Rational::MultiplyByLargeIntUnsigned(LargeIntegerUnsigned& x) {
 
 void Rational::DivideBy(const Rational& r) {
   if (this == &r) {
-    this->MakeOne();
+    this->makeOne();
     return;
   }
   Rational tempRat = r;
-  tempRat.Invert();
+  tempRat.invert();
   this->operator*=(tempRat);
 }
 
@@ -1699,7 +1699,7 @@ ParallelComputing::CheckPointerCounters();
 #endif
   }
   this->Extended->num = other;
-  this->Extended->den.MakeOne();
+  this->Extended->den.makeOne();
   this->ShrinkExtendedPartIfPossible();
 }
 
@@ -1992,7 +1992,7 @@ Rational Rational::TwoToTheNth(int n) {
 
 Rational Rational::NChooseK(const Rational& n, int k) {
   Rational result;
-  result.MakeOne();
+  result.makeOne();
   for (int i = 0; i < k; i ++) {
     result *= n - i;
     result.DivideByInteger(i + 1);

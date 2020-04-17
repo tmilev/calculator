@@ -84,7 +84,9 @@ bool CalculatorFunctions::innerConstructCartanSA(
       if (input[i].ConvertsInternally(&element)) {
         theSA.theGenerators.AddOnTop(element.content);
       } else {
-        return theCommands << "Failed to extract element of a semisimple Lie algebra from " << input[i].toString();
+        return theCommands
+        << "Failed to extract element of a semisimple Lie algebra from "
+        << input[i].toString();
       }
     }
   }
@@ -1564,8 +1566,8 @@ void Polynomial<coefficient>::GetPolyWithPolyCoeff(
   MonomialP coeffPart, polyPart;
   Polynomial<coefficient> currentCF;
   for (int i = 0; i < this->size(); i ++) {
-    coeffPart.MakeOne();
-    polyPart.MakeOne();
+    coeffPart.makeOne();
+    polyPart.makeOne();
     for (int j = 0; j < (*this)[i].minimalNumberOfVariables(); j ++) {
       if (theNonCoefficientVariables.selected[j]) {
         polyPart.setVariable(j, (*this)[i](j));
@@ -1710,7 +1712,7 @@ bool IntegralRFComputation::PreparePFExpressionSummands() {
       denominatorRescaled = this->theDenominatorFactorsWithMults[i];
       numeratorRescaled = this->theNumerators[i][j];
       denominatorRescaled.GetIndexLeadingMonomial(nullptr, &currentCoefficient, monomialOrder);
-      currentCoefficient.Invert();
+      currentCoefficient.invert();
       denominatorRescaled *= currentCoefficient;
       MathRoutines::RaiseToPower(currentCoefficient, j + 1, AlgebraicNumber(1));
       numeratorRescaled.GetIndexLeadingMonomial(nullptr, &numScale, monomialOrder);
@@ -1782,7 +1784,7 @@ bool IntegralRFComputation::IntegrateRF() {
       denRescaled = this->theDenominatorFactorsWithMults[i];
       numRescaled = this->theNumerators[i][j];
       currentCoefficient = denRescaled.GetLeadingCoefficient(monomialOrder);
-      currentCoefficient.Invert();
+      currentCoefficient.invert();
       denRescaled *= currentCoefficient;
       MathRoutines::RaiseToPower(currentCoefficient, j + 1, AlgebraicNumber(1));
       numScale = numRescaled.GetLeadingCoefficient(monomialOrder);
@@ -2043,13 +2045,17 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
   this->theRF.GetDenominator(this->theDen);
   this->theRF.GetNumerator(this->theNum);
   this->theNum *= this->theDen.scaleNormalizeLeadingMonomial();
-  Rational theConstantCoeff;
-  if (!this->theDen.factorMeNormalizedFactors(theConstantCoeff, this->theFactors, &this->printoutPFsHtml)) {
-    this->printoutPFsHtml << "<hr>Failed to factor the denominator of the rational function, I surrender.";
+  PolynomialFactorization<Rational, PolynomialFactorizationKronecker> factorization;
+  if (!factorization.factor(
+    this->theDen,
+    &this->printoutPFsHtml
+  )) {
+    this->printoutPFsHtml << "<hr>Failed to factor the denominator of the rational function, I surrender. ";
     return false;
   }
-  this->theNum /= theConstantCoeff;
-  this->theDen /= theConstantCoeff;
+  this->theNum /= factorization.constantFactor;
+  this->theDen /= factorization.constantFactor;
+  this->theFactors = factorization.reduced;
   Polynomial<Rational> tempP;
   tempP.MakeConst(1);
   for (int i = 0; i < this->theFactors.size; i ++) {
@@ -2058,14 +2064,17 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
   if (tempP != this->theDen) {
     global.fatal << "Something is very wrong: product of denominator factors is "
     << tempP.toString(&this->currentFormaT)
-    << ", but the denominator equals: " << this->theDen.toString(&this->currentFormaT);
+    << ", but the denominator equals: "
+    << this->theDen.toString(&this->currentFormaT) << ". " << global.fatal;
   }
   this->printoutPFsLatex
   << "\\documentclass{article}\\usepackage{longtable}\\usepackage{xcolor}\\usepackage{multicol} "
   << "\\begin{document}";
   this->PrepareDenominatorFactors();
   if (!allFactorsAreOfDegree2orless) {
-    this->printoutPFsHtml << "There were factors (over the rationals) of degree greater than 2. I surrender. ";
+    this->printoutPFsHtml
+    << "There were factors (over the rationals) of "
+    << "degree greater than 2. I surrender. ";
     return false;
   }
   List<MonomialP>::Comparator monomialOrder = MonomialP::orderDefault();
@@ -2652,7 +2661,7 @@ bool CalculatorFunctions::innerDifferentiateTrigAndInverseTrig(
     RationalFunction oneOverOnePlusXsquared;
     onePlusXsquared.makeMonomial(0, 2);
     onePlusXsquared += Rational::one();
-    oneOverOnePlusXsquared.MakeOne();
+    oneOverOnePlusXsquared.makeOne();
     oneOverOnePlusXsquared /= onePlusXsquared;
     Expression theContext;
     theContext.ContextMakeContextWithOnePolyVar(theCommands, "x");
@@ -2720,12 +2729,12 @@ bool CalculatorFunctions::outerDivideByNumber(
   Expression theInvertedE;
   bool result = false;
   if (input[2].IsOfType<Rational>(&theRatValue)) {
-    theRatValue.Invert();
+    theRatValue.invert();
     theInvertedE.AssignValue(theRatValue, theCommands);
     result = true;
   }
   if (input[2].IsOfType<AlgebraicNumber>(&theAlgValue)) {
-    theAlgValue.Invert();
+    theAlgValue.invert();
     theInvertedE.AssignValue(theAlgValue, theCommands);
     result = true;
   }
@@ -3716,7 +3725,7 @@ bool CalculatorFunctions::innerInvertMatrixRFsVerbose(
         outLaTeX << "\\\\" << "$" << outputMat.toString(&theFormat) << "$";
       }
       tempElement = theMatrix(NumFoundPivots, i);
-      tempElement.Invert();
+      tempElement.invert();
       if (tempElement != 1) {
         out << "<br> multiply row number " << NumFoundPivots + 1 << " by "
         << tempElement.toString(&theFormat) << ": ";
@@ -3833,7 +3842,7 @@ bool Calculator::innerInvertMatrixVerbose(
         << HtmlRoutines::GetMathSpanPure(outputMat.toString(&theFormat));
       }
       tempElement = mat.elements[NumFoundPivots][i];
-      tempElement.Invert();
+      tempElement.invert();
       if (tempElement != 1) {
         out << "<br> multiply row " << NumFoundPivots + 1
         << " by " << tempElement << ": ";
@@ -7061,7 +7070,7 @@ bool CalculatorFunctions::innerWeylDimFormula(Calculator& theCommands, const Exp
     );
   }
   RationalFunction rfOne;
-  rfOne.MakeOne();
+  rfOne.makeOne();
   Vector<RationalFunction> theWeightInSimpleCoords;
   FormatExpressions theFormat;
   theSSowner.context.context.ContextGetFormatExpressions(theFormat);
@@ -7661,7 +7670,7 @@ bool CalculatorFunctions::innerWriteGenVermaModAsDiffOperatorUpToLevel(
     return output.MakeError("second argument of " + input.toString() + " must be a small integer", theCommands);
   }
   RationalFunction RFOne, RFZero;
-  RFOne.MakeOne();
+  RFOne.makeOne();
   RFZero.MakeZero();
   Selection selInducing;
   selInducing.MakeFullSelection(theRank);
@@ -7786,7 +7795,7 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
   }
   int theNumVars = hwContext.ContextGetNumContextVariables();
   RationalFunction RFOne, RFZero;
-  RFOne.MakeOne();
+  RFOne.makeOne();
   RFZero.MakeZero();
   ElementTensorsGeneralizedVermas<RationalFunction> theElt;
   //= theElementData.theElementTensorGenVermas.GetElement();

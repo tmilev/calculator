@@ -244,8 +244,8 @@ int Expression::GetTypeOperation<VirtualRepresentation<FiniteGroup<ElementWeylGr
   return this->owner->opWeylGroupVirtualRep();
 }
 
-//Expression::GetTypeOperation specializations end.
-//Expression::ConvertsInternally specializations follow.
+// Expression::GetTypeOperation specializations end.
+// Expression::ConvertsInternally specializations follow.
 template < >
 bool Expression::ConvertsInternally(
   WithContext<ElementSemisimpleLieAlgebra<AlgebraicNumber> >* whichElement

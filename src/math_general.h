@@ -2670,19 +2670,7 @@ public:
     const Rational& power,
     const coefficient& inputCoefficient = 1,
     int ExpectedNumVars = 0
-  ) {
-    if (letterIndex < 0) {
-      global.fatal << "Negative variable index: "
-      << letterIndex << " is not allowed. "
-      << global.fatal;
-    }
-    int numVars = MathRoutines::Maximum(letterIndex + 1, ExpectedNumVars);
-    this->makeZero();
-    MonomialP tempM;
-    tempM.makeOne(numVars);
-    tempM.setVariable(letterIndex, power);
-    this->AddMonomial(tempM, inputCoefficient);
-  }
+  );
   void MakeDegreeOne(int NVar, int NonZeroIndex, const coefficient& coeff);
   void MakeDegreeOne(
     int NVar,
@@ -2703,31 +2691,10 @@ public:
     Matrix<coefficient>& constTerms
   );
   bool IsOneVariablePoly(int* whichVariable = nullptr) const;
-  bool IsOneVariableNonConstPoly(int* whichVariable = nullptr) const {
-    int tempInt;
-    if (whichVariable == nullptr) {
-      whichVariable = &tempInt;
-    }
-    if (!this->IsOneVariablePoly(whichVariable)) {
-      return false;
-    }
-    return *whichVariable != - 1;
-  }
-  Polynomial<coefficient> one() const {
-    Polynomial<coefficient> result;
-    result.makeOne();
-    return result;
-  }
-  static Polynomial<coefficient> zero() {
-    Polynomial<coefficient> result;
-    result.makeZero();
-    return result;
-  }
-  Rational RationalValue() {
-    Rational result;
-    this->GetConstantTerm(result, 0);
-    return result;
-  }
+  bool IsOneVariableNonConstPoly(int* whichVariable = nullptr) const;
+  Polynomial<coefficient> one() const;
+  static Polynomial<coefficient> zero();
+  Rational RationalValue();
   void MakeDeterminantFromSquareMatrix(const Matrix<Polynomial<coefficient> >& theMat);
   void MakeConst(const coefficient& theConst, int ExpectedNumVars = 0) {
     this->makeZero();
@@ -2766,117 +2733,22 @@ public:
   void SetDynamicSubtype(int newNumVars) {
     this->SetNumVariablesSubDeletedVarsByOne(newNumVars);
   }
-  int GetHighestIndexSuchThatHigherIndexVarsDontParticipate() {
-    int result = - 1;
-    for (int i = 0; i < this->size; i ++) {
-      result = MathRoutines::Maximum(
-        result,
-        this->TheObjects[i].GetHighestIndexSuchThatHigherIndexVarsDontParticipate()
-      );
-    }
-    return result;
-  }
+  int GetHighestIndexSuchThatHigherIndexVarsDontParticipate();
   void ScaleToPositiveMonomialExponents(MonomialP& outputScale);
   void DecreaseNumVariables(int increment, Polynomial<coefficient>& output);
   bool Substitution(const List<Polynomial<coefficient> >& TheSubstitution);
-  Rational totalDegree() const{
-    Rational result = 0;
-    for (int i = 0; i < this->size(); i ++) {
-      result = MathRoutines::Maximum((*this)[i].TotalDegree(), result);
-    }
-    return result;
-  }
+  Rational totalDegree() const;
   int TotalDegreeInt() const;
-  bool IsEqualToOne() const {
-    coefficient tempC;
-    if (this->IsConstant(&tempC)) {
-      return tempC.IsEqualToOne();
-    }
-    return false;
-  }
-  bool IsMonomialCoeffOne() const {
-    if (this->size() != 1) {
-      return false;
-    }
-    return this->coefficients[0].IsEqualToOne();
-  }
-  bool IsOneLetterFirstDegree(int* whichLetter = nullptr) const {
-    if (this->size() != 1) {
-      return false;
-    }
-    return (*this)[0].IsOneLetterFirstDegree(whichLetter);
-  }
-  bool IsConstant(coefficient* whichConstant = nullptr) const {
-    if (this->size() > 1) {
-      return false;
-    }
-    if (this->size() == 0) {
-      if (whichConstant != nullptr) {
-        *whichConstant = 0;
-      }
-      return true;
-    }
-    if (whichConstant != nullptr) {
-      *whichConstant = this->coefficients[0];
-    }
-    const MonomialP& theMon = (*this)[0];
-    return theMon.IsConstant();
-  }
-  bool IsNegative() const {
-    coefficient tempC;
-    if (!this->IsConstant(&tempC)) {
-      return false;
-    }
-    return tempC.IsNegative();
-  }
-  bool IsLinearNoConstantTerm() {
-    for (int i = 0; i < this->size; i ++) {
-      if (!this->TheObjects[i].IsLinearNoConstantTerm()) {
-        return false;
-      }
-    }
-    return true;
-  }
-  bool IsLinear() {
-    for (int i = 0; i < this->size(); i ++) {
-      if (!(*this)[i].IsLinear()) {
-        return false;
-      }
-    }
-    return true;
-  }
-  bool IsLinearGetRootConstantTermLastCoordinate(Vector<coefficient>& outputRoot) {
-    outputRoot.makeZero(this->minimalNumberOfVariables() + 1);
-    int index;
-    for (int i = 0; i < this->size(); i ++) {
-      if ((*this)[i].IsConstant()) {
-        *outputRoot.LastObject() = this->coefficients[i];
-      } else {
-        if ((*this)[i].IsOneLetterFirstDegree(&index)) {
-          outputRoot[index] = this->coefficients[i];
-        } else {
-          return false;
-        }
-      }
-    }
-    return true;
-  }
-  void RaiseToPower(int d) {
-    if (d == 1) {
-      return;
-    }
-    if (d < 0) {
-      global.fatal << "This is a programming error: attempting to raise the polynomial "
-      << this->toString() << " to the negative power "
-      << d << ". " << global.fatal;
-    }
-    Polynomial<coefficient> theOne;
-    theOne.makeOne(this->minimalNumberOfVariables());
-    MathRoutines::RaiseToPower(*this, d, theOne);
-  }
-  bool GetRootFromLinPolyConstTermLastVariable(Vector<coefficient>& outputRoot) {
-    return this->IsLinearGetRootConstantTermLastCoordinate(outputRoot);
-  }
+  bool IsEqualToOne() const;
+  bool IsMonomialCoeffOne() const;
+  bool IsOneLetterFirstDegree(int* whichLetter = nullptr) const;
+  bool IsConstant(coefficient* whichConstant = nullptr) const;
+  bool IsNegative() const;
+  bool IsLinearNoConstantTerm();
+  bool IsLinear();
+  bool IsLinearGetRootConstantTermLastCoordinate(Vector<coefficient>& outputRoot);
+  void RaiseToPower(int d);
+  bool GetRootFromLinPolyConstTermLastVariable(Vector<coefficient>& outputRoot);
   Matrix<coefficient> EvaluateUnivariatePoly(const Matrix<coefficient>& input);//<-for univariate polynomials only
   coefficient Evaluate(const Vector<coefficient>& input);
   bool IsProportionalTo(
@@ -2886,161 +2758,36 @@ public:
 
   // void ComponentInFrontOfVariableToPower(int VariableIndex, ListPointers<Polynomial<coefficient> >& output, int UpToPower);
   int GetMaxPowerOfVariableIndex(int VariableIndex);
-  bool operator<=(const coefficient& other) const {
-    coefficient constME;
-    if (!this->IsConstant(&constME)) {
-      global.fatal << "This may or may not be a programming error: "
-      << "attempting to compare a non-constant polynomial to "
-      << "a constant. I cannot judge at the moment whether "
-      << "allowing that is a good decision. "
-      << "In any case, crashing to let you know. "
-      << global.fatal;
-      return false;
-    }
-    return constME <= other;
-  }
-  bool operator<(const coefficient& other) const {
-    coefficient constME;
-    if (!this->IsConstant(&constME)) {
-      global.fatal << "This may or may not be a programming error: "
-      << "attempting to compare a non-constant polynomial to "
-      << "a constant. I cannot judge at the moment whether allowing "
-      << "that is a good decision. In any case, crashing to let you know. "
-      << global.fatal;
-      return false;
-    }
-    return constME<other;
-  }
-
-  bool operator>(const Polynomial<coefficient>& other) const {
-    if (other.size() == 0) {
-      if (this->size() == 0) {
-        return false;
-      } else {
-        return true;
-      }
-    }
-    if (this->size() == 0) {
-      return false;
-    }
-    if (this->totalDegree() > other.totalDegree()) {
-      return true;
-    }
-    if (this->totalDegree() < other.totalDegree()) {
-      return false;
-    }
-    MonomialP thisMaximalMonomial, otherMaximalMonomial;
-    List<MonomialP>::Comparator& monomialOrder = MonomialP::orderDefault();
-    int thisMaxMonIndex = this->GetIndexLeadingMonomial(&thisMaximalMonomial, nullptr, &monomialOrder);
-    int otherMaxMonIndex = other.GetIndexLeadingMonomial(&otherMaximalMonomial, nullptr, &monomialOrder);
-    if (thisMaximalMonomial > otherMaximalMonomial) {
-      return true;
-    }
-    if (otherMaximalMonomial > thisMaximalMonomial) {
-      return false;
-    }
-    if (this->coefficients[thisMaxMonIndex] > other.coefficients[otherMaxMonIndex]) {
-      return true;
-    }
-    if (other.coefficients[otherMaxMonIndex] > this->coefficients[thisMaxMonIndex]) {
-      return false;
-    }
-    return false;
-  }
-  bool operator<=(const Polynomial<coefficient>& other) const {
-    return !(*this > other);
-  }
-  // has to be rewritten please don't use!
+  bool operator<=(const coefficient& other) const;
+  bool operator<(const coefficient& other) const;
+  bool operator>(const Polynomial<coefficient>& other) const;
+  bool operator<=(const Polynomial<coefficient>& other) const;
   bool IsGreaterThanZeroLexicographicOrder();
   static bool IsGEQcompareByTopMonomialTotalDegThenLexicographic(
     const Polynomial<coefficient>& left, const Polynomial<coefficient>& right
-  ) {
-    if (left.IsEqualToZero()) {
-      return right.IsEqualToZero();
-    }
-    if (right.IsEqualToZero()) {
-      return true;
-    }
-    return left[left.GetIndexMaxMonomialTotalDegThenLexicographic()].MonomialP::IsGEQTotalDegThenLexicographic(
-      right[right.GetIndexMaxMonomialTotalDegThenLexicographic()]
-    );
-  }
+  );
   static bool IsGEQcompareByTopMonomialLexicographicLastVarStrongest(
     const Polynomial<coefficient>& left, const Polynomial<coefficient>& right
-  ) {
-    if (left.IsEqualToZero()) {
-      return right.IsEqualToZero();
-    }
-    if (right.IsEqualToZero()) {
-      return true;
-    }
-    int indexMaxLeft = left.GetIndexMaxMonomialLexicographicLastVariableStrongest();
-    int indexMaxRight = right.GetIndexMaxMonomialLexicographicLastVariableStrongest();
-    return left[indexMaxLeft].MonomialP::IsGEQLexicographicLastVariableStrongest(right[indexMaxRight]);
-  }
-  bool IsEqualTo(const Polynomial<coefficient>& p) const {
-    return *this == p;
-  }
-  void operator-=(int x) {
-    MonomialP tempMon;
-    tempMon.makeOne();
-    this->SubtractMonomial(tempMon, x);
-  }
-  void operator-=(const coefficient& other) {
-    MonomialP tempMon;
-    tempMon.makeOne();
-    this->SubtractMonomial(tempMon, other);
-  }
-  void operator-=(const Polynomial<coefficient>& other) {
-    this->::LinearCombination<MonomialP, coefficient>::operator-=(other);
-  }
-  void operator*=(const MonomialP& other) {
-    this->MultiplyBy(other, *this);
-  }
-  void operator*=(const Polynomial<coefficient>& other) {
-    this->::ElementMonomialAlgebra<MonomialP, coefficient>::operator*=(other);
-  }
-  Polynomial<coefficient> operator%(const Polynomial<coefficient>& other) {
-    Polynomial<coefficient> temp;
-    Polynomial<coefficient> result;
-    this->DivideBy(other, temp, result, &MonomialP::orderDefault());
-    return result;
-  }
-  void operator/=(const Polynomial<coefficient>& other) {
-    Polynomial<coefficient> tempMe = *this;
-    Polynomial<coefficient> tempRemainder;
-    tempMe.DivideBy(other, *this, tempRemainder, &MonomialP::orderDefault());
-  }
-  void operator/=(int other) {
-    this->::LinearCombination<MonomialP, coefficient>::operator/=(other);
-  }
-  void operator/=(const coefficient& other) {
-    this->::LinearCombination<MonomialP, coefficient>::operator/=(other);
-  }
+  );
+  bool IsEqualTo(const Polynomial<coefficient>& p) const;
+  void operator-=(int x);
+  void operator-=(const coefficient& other);
+  void operator-=(const Polynomial<coefficient>& other);
+  void operator*=(const MonomialP& other);
+  void operator*=(const Polynomial<coefficient>& other);
+  Polynomial<coefficient> operator%(const Polynomial<coefficient>& other);
+  void operator/=(const Polynomial<coefficient>& other);
+  void operator/=(int other);
+  void operator/=(const coefficient& other);
   template <class otherType>
-  void operator*=(const otherType& other) {
-    this->::LinearCombination<MonomialP, coefficient>::operator*= (other);
-  }
-  void operator=(const Polynomial<coefficient>& other) {
-    this->::LinearCombination<MonomialP, coefficient>::operator=(other);
-  }
+  void operator*=(const otherType& other);
+  void operator=(const Polynomial<coefficient>& other);
   template<class otherType>
-  void operator=(const Polynomial<otherType>& other) {
-    this->::LinearCombination<MonomialP, coefficient>::operator=(other);
-  }
-  void operator=(const coefficient& other) {
-    this->MakeConst(other);
-  }
-  void operator=(int other) {
-    coefficient tempCF;
-    tempCF = other;
-    this->MakeConst(tempCF);
-  }
+  void operator=(const Polynomial<otherType>& other);
+  void operator=(const coefficient& other);
+  void operator=(int other);
   template <class otherType>
-  void AssignOtherType(const Polynomial<otherType>& other) {
-    this->NumVars = other.NumVars;
-    this->::LinearCombination<MonomialP, coefficient>::AssignOtherType(other);
-  }
+  void AssignOtherType(const Polynomial<otherType>& other);
   static bool greatestCommonDivisor(
     const Polynomial<coefficient>& left,
     const Polynomial<coefficient>& right,
@@ -3841,16 +3588,22 @@ void LinearCombination<templateMonomial, coefficient>::GaussianEliminationByRows
   MacroRegisterFunctionWithName("LinearCombination::GaussianEliminationByRows");
   if (carbonCopyMatrix != 0) {
     if (carbonCopyMatrix->NumRows != theList.size) {
-      global.fatal << "This is a programming error: carbon copy matrix has "
-      << carbonCopyMatrix->NumRows << " rows, while the gaussian-eliminated list has " << theList.size
+      global.fatal
+      << "This is a programming error: carbon copy matrix has "
+      << carbonCopyMatrix->NumRows
+      << " rows, while the gaussian-eliminated list has " << theList.size
       << " elements; the two numbers must be the same!" << global.fatal;
     }
   }
   if (carbonCopyList != 0) {
     if (carbonCopyList->size != theList.size) {
-      global.fatal << "This is a programming error: carbon copy list has "
-      << carbonCopyList->size << " elements, while the gaussian-eliminated list has "
-      << theList.size << " elements; the two numbers must be the same!" << global.fatal;
+      global.fatal
+      << "This is a programming error: carbon copy list has "
+      << carbonCopyList->size
+      << " elements, while the gaussian-eliminated list has "
+      << theList.size
+      << " elements; the two numbers must be the same!"
+      << global.fatal;
     }
   }
   MemorySaving<HashedList<templateMonomial> > bufferMons;

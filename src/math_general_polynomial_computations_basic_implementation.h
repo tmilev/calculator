@@ -46,6 +46,39 @@ bool MonomialP::SubstitutioN(const List<Polynomial<coefficient> >& TheSubstituti
 }
 
 template<class coefficient>
+bool Polynomial<coefficient>::IsOneVariableNonConstPoly(int* whichVariable) const {
+  int tempInt;
+  if (whichVariable == nullptr) {
+    whichVariable = &tempInt;
+  }
+  if (!this->IsOneVariablePoly(whichVariable)) {
+    return false;
+  }
+  return *whichVariable != - 1;
+}
+
+template<class coefficient>
+Polynomial<coefficient> Polynomial<coefficient>::one() const {
+  Polynomial<coefficient> result;
+  result.makeOne();
+  return result;
+}
+
+template<class coefficient>
+Polynomial<coefficient> Polynomial<coefficient>::zero() {
+  Polynomial<coefficient> result;
+  result.makeZero();
+  return result;
+}
+
+template<class coefficient>
+Rational Polynomial<coefficient>::RationalValue() {
+  Rational result;
+  this->GetConstantTerm(result, 0);
+  return result;
+}
+
+template<class coefficient>
 bool Polynomial<coefficient>::IsOneVariablePoly(int* whichVariable) const {
   int tempInt;
   if (whichVariable == nullptr) {
@@ -112,6 +145,15 @@ int Polynomial<coefficient>::TotalDegreeInt() const {
     << "polynomial in int formal, but the "
     << "degree of the polynomial is not a small integer. "
     << global.fatal;
+  }
+  return result;
+}
+
+template <class coefficient>
+Rational Polynomial<coefficient>::totalDegree() const {
+  Rational result = 0;
+  for (int i = 0; i < this->size(); i ++) {
+    result = MathRoutines::Maximum((*this)[i].TotalDegree(), result);
   }
   return result;
 }
@@ -281,6 +323,116 @@ void Polynomial<coefficient>::ShiftVariableIndicesToTheRight(int VarIndexShift) 
 }
 
 template <class coefficient>
+bool Polynomial<coefficient>::IsEqualToOne() const {
+  coefficient tempC;
+  if (this->IsConstant(&tempC)) {
+    return tempC.IsEqualToOne();
+  }
+  return false;
+}
+
+template <class coefficient>
+bool Polynomial<coefficient>::IsMonomialCoeffOne() const {
+  if (this->size() != 1) {
+    return false;
+  }
+  return this->coefficients[0].IsEqualToOne();
+}
+
+template <class coefficient>
+bool Polynomial<coefficient>::IsOneLetterFirstDegree(int* whichLetter) const {
+  if (this->size() != 1) {
+    return false;
+  }
+  return (*this)[0].IsOneLetterFirstDegree(whichLetter);
+}
+
+template <class coefficient>
+bool Polynomial<coefficient>::IsConstant(coefficient* whichConstant) const {
+  if (this->size() > 1) {
+    return false;
+  }
+  if (this->size() == 0) {
+    if (whichConstant != nullptr) {
+      *whichConstant = 0;
+    }
+    return true;
+  }
+  if (whichConstant != nullptr) {
+    *whichConstant = this->coefficients[0];
+  }
+  const MonomialP& theMon = (*this)[0];
+  return theMon.IsConstant();
+}
+
+template <class coefficient>
+bool Polynomial<coefficient>::IsNegative() const {
+  coefficient tempC;
+  if (!this->IsConstant(&tempC)) {
+    return false;
+  }
+  return tempC.IsNegative();
+}
+
+template <class coefficient>
+bool Polynomial<coefficient>::IsLinearNoConstantTerm() {
+  for (int i = 0; i < this->size; i ++) {
+    if (!this->TheObjects[i].IsLinearNoConstantTerm()) {
+      return false;
+    }
+  }
+  return true;
+}
+
+template <class coefficient>
+bool Polynomial<coefficient>::IsLinear() {
+  for (int i = 0; i < this->size(); i ++) {
+    if (!(*this)[i].IsLinear()) {
+      return false;
+    }
+  }
+  return true;
+}
+
+template <class coefficient>
+bool Polynomial<coefficient>::IsLinearGetRootConstantTermLastCoordinate(Vector<coefficient>& outputRoot) {
+  outputRoot.makeZero(this->minimalNumberOfVariables() + 1);
+  int index;
+  for (int i = 0; i < this->size(); i ++) {
+    if ((*this)[i].IsConstant()) {
+      *outputRoot.LastObject() = this->coefficients[i];
+    } else {
+      if ((*this)[i].IsOneLetterFirstDegree(&index)) {
+        outputRoot[index] = this->coefficients[i];
+      } else {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+template <class coefficient>
+void Polynomial<coefficient>::RaiseToPower(int d) {
+  if (d == 1) {
+    return;
+  }
+  if (d < 0) {
+    global.fatal << "This is a programming error: attempting to raise the polynomial "
+    << this->toString() << " to the negative power "
+    << d << ". " << global.fatal;
+  }
+  Polynomial<coefficient> theOne;
+  theOne.makeOne(this->minimalNumberOfVariables());
+  MathRoutines::RaiseToPower(*this, d, theOne);
+}
+
+template <class coefficient>
+bool Polynomial<coefficient>::GetRootFromLinPolyConstTermLastVariable(Vector<coefficient>& outputRoot) {
+  return this->IsLinearGetRootConstantTermLastCoordinate(outputRoot);
+}
+
+template <class coefficient>
 Matrix<coefficient> Polynomial<coefficient>::EvaluateUnivariatePoly(
   const Matrix<coefficient>& input
 ) {
@@ -321,6 +473,18 @@ Matrix<coefficient> Polynomial<coefficient>::EvaluateUnivariatePoly(
 }
 
 template <class coefficient>
+int Polynomial<coefficient>::GetHighestIndexSuchThatHigherIndexVarsDontParticipate() {
+  int result = - 1;
+  for (int i = 0; i < this->size; i ++) {
+    result = MathRoutines::Maximum(
+      result,
+      this->TheObjects[i].GetHighestIndexSuchThatHigherIndexVarsDontParticipate()
+    );
+  }
+  return result;
+}
+
+template <class coefficient>
 void Polynomial<coefficient>::ScaleToPositiveMonomialExponents(MonomialP& outputScale) {
   int numVars = this->minimalNumberOfVariables();
   outputScale.makeOne(numVars);
@@ -333,6 +497,202 @@ void Polynomial<coefficient>::ScaleToPositiveMonomialExponents(MonomialP& output
   }
   outputScale.Invert();
   this->MultiplyBy(outputScale);
+}
+
+template <class coefficient>
+bool Polynomial<coefficient>::operator<=(const coefficient& other) const {
+  coefficient constME;
+  if (!this->IsConstant(&constME)) {
+    global.fatal << "This may or may not be a programming error: "
+    << "attempting to compare a non-constant polynomial to "
+    << "a constant. I cannot judge at the moment whether "
+    << "allowing that is a good decision. "
+    << "In any case, crashing to let you know. "
+    << global.fatal;
+    return false;
+  }
+  return constME <= other;
+}
+
+template <class coefficient>
+bool Polynomial<coefficient>::operator<(const coefficient& other) const {
+  coefficient constME;
+  if (!this->IsConstant(&constME)) {
+    global.fatal << "This may or may not be a programming error: "
+    << "attempting to compare a non-constant polynomial to "
+    << "a constant. I cannot judge at the moment whether allowing "
+    << "that is a good decision. In any case, crashing to let you know. "
+    << global.fatal;
+    return false;
+  }
+  return constME<other;
+}
+
+template <class coefficient>
+bool Polynomial<coefficient>::operator>(const Polynomial<coefficient>& other) const {
+  if (other.size() == 0) {
+    if (this->size() == 0) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+  if (this->size() == 0) {
+    return false;
+  }
+  if (this->totalDegree() > other.totalDegree()) {
+    return true;
+  }
+  if (this->totalDegree() < other.totalDegree()) {
+    return false;
+  }
+  MonomialP thisMaximalMonomial, otherMaximalMonomial;
+  List<MonomialP>::Comparator& monomialOrder = MonomialP::orderDefault();
+  int thisMaxMonIndex = this->GetIndexLeadingMonomial(&thisMaximalMonomial, nullptr, &monomialOrder);
+  int otherMaxMonIndex = other.GetIndexLeadingMonomial(&otherMaximalMonomial, nullptr, &monomialOrder);
+  if (thisMaximalMonomial > otherMaximalMonomial) {
+    return true;
+  }
+  if (otherMaximalMonomial > thisMaximalMonomial) {
+    return false;
+  }
+  if (this->coefficients[thisMaxMonIndex] > other.coefficients[otherMaxMonIndex]) {
+    return true;
+  }
+  if (other.coefficients[otherMaxMonIndex] > this->coefficients[thisMaxMonIndex]) {
+    return false;
+  }
+  return false;
+}
+
+template <class coefficient>
+bool Polynomial<coefficient>::IsGEQcompareByTopMonomialTotalDegThenLexicographic(
+  const Polynomial<coefficient>& left, const Polynomial<coefficient>& right
+) {
+  if (left.IsEqualToZero()) {
+    return right.IsEqualToZero();
+  }
+  if (right.IsEqualToZero()) {
+    return true;
+  }
+  return left[left.GetIndexMaxMonomialTotalDegThenLexicographic()].MonomialP::IsGEQTotalDegThenLexicographic(
+    right[right.GetIndexMaxMonomialTotalDegThenLexicographic()]
+  );
+}
+
+template <class coefficient>
+bool Polynomial<coefficient>::IsGEQcompareByTopMonomialLexicographicLastVarStrongest(
+  const Polynomial<coefficient>& left, const Polynomial<coefficient>& right
+) {
+  if (left.IsEqualToZero()) {
+    return right.IsEqualToZero();
+  }
+  if (right.IsEqualToZero()) {
+    return true;
+  }
+  int indexMaxLeft = left.GetIndexMaxMonomialLexicographicLastVariableStrongest();
+  int indexMaxRight = right.GetIndexMaxMonomialLexicographicLastVariableStrongest();
+  return left[indexMaxLeft].MonomialP::IsGEQLexicographicLastVariableStrongest(right[indexMaxRight]);
+}
+
+template <class coefficient>
+bool Polynomial<coefficient>::IsEqualTo(const Polynomial<coefficient>& p) const {
+  return *this == p;
+}
+
+template <class coefficient>
+void Polynomial<coefficient>::operator-=(int x) {
+  MonomialP tempMon;
+  tempMon.makeOne();
+  this->SubtractMonomial(tempMon, x);
+}
+
+template <class coefficient>
+void Polynomial<coefficient>::operator-=(const coefficient& other) {
+  MonomialP tempMon;
+  tempMon.makeOne();
+  this->SubtractMonomial(tempMon, other);
+}
+
+template <class coefficient>
+void Polynomial<coefficient>::operator-=(const Polynomial<coefficient>& other) {
+  this->::LinearCombination<MonomialP, coefficient>::operator-=(other);
+}
+
+template <class coefficient>
+void Polynomial<coefficient>::operator*=(const MonomialP& other) {
+  this->MultiplyBy(other, *this);
+}
+
+template <class coefficient>
+void Polynomial<coefficient>::operator*=(const Polynomial<coefficient>& other) {
+  this->::ElementMonomialAlgebra<MonomialP, coefficient>::operator*=(other);
+}
+
+template <class coefficient>
+Polynomial<coefficient> Polynomial<coefficient>::operator%(const Polynomial<coefficient>& other) {
+  Polynomial<coefficient> temp;
+  Polynomial<coefficient> result;
+  this->DivideBy(other, temp, result, &MonomialP::orderDefault());
+  return result;
+}
+
+template <class coefficient>
+void Polynomial<coefficient>::operator/=(const Polynomial<coefficient>& other) {
+  Polynomial<coefficient> tempMe = *this;
+  Polynomial<coefficient> tempRemainder;
+  tempMe.DivideBy(other, *this, tempRemainder, &MonomialP::orderDefault());
+}
+
+template <class coefficient>
+void Polynomial<coefficient>::operator/=(int other) {
+  this->::LinearCombination<MonomialP, coefficient>::operator/=(other);
+}
+
+template <class coefficient>
+void Polynomial<coefficient>::operator/=(const coefficient& other) {
+  this->::LinearCombination<MonomialP, coefficient>::operator/=(other);
+}
+
+template <class coefficient>
+template <class otherType>
+void Polynomial<coefficient>::operator*=(const otherType& other) {
+  this->::LinearCombination<MonomialP, coefficient>::operator*= (other);
+}
+
+template <class coefficient>
+void Polynomial<coefficient>::operator=(const Polynomial<coefficient>& other) {
+  this->::LinearCombination<MonomialP, coefficient>::operator=(other);
+}
+
+template <class coefficient>
+template<class otherType>
+void Polynomial<coefficient>::operator=(const Polynomial<otherType>& other) {
+  this->::LinearCombination<MonomialP, coefficient>::operator=(other);
+}
+
+template <class coefficient>
+void Polynomial<coefficient>::operator=(const coefficient& other) {
+  this->MakeConst(other);
+}
+
+template <class coefficient>
+void Polynomial<coefficient>::operator=(int other) {
+  coefficient tempCF;
+  tempCF = other;
+  this->MakeConst(tempCF);
+}
+
+template <class coefficient>
+template <class otherType>
+void Polynomial<coefficient>::AssignOtherType(const Polynomial<otherType>& other) {
+  this->NumVars = other.NumVars;
+  this->::LinearCombination<MonomialP, coefficient>::AssignOtherType(other);
+}
+
+template <class coefficient>
+bool Polynomial<coefficient>::operator<=(const Polynomial<coefficient>& other) const {
+  return !(*this > other);
 }
 
 template <class coefficient>
@@ -553,6 +913,26 @@ void Polynomial<coefficient>::GetConstantTerm(coefficient& output, const coeffic
   } else {
     output = this->coefficients[i];
   }
+}
+
+template <class coefficient>
+void Polynomial<coefficient>::makeMonomial(
+  int letterIndex,
+  const Rational& power,
+  const coefficient& inputCoefficient,
+  int ExpectedNumVars
+) {
+  if (letterIndex < 0) {
+    global.fatal << "Negative variable index: "
+    << letterIndex << " is not allowed. "
+    << global.fatal;
+  }
+  int numVars = MathRoutines::Maximum(letterIndex + 1, ExpectedNumVars);
+  this->makeZero();
+  MonomialP tempM;
+  tempM.makeOne(numVars);
+  tempM.setVariable(letterIndex, power);
+  this->AddMonomial(tempM, inputCoefficient);
 }
 
 template <class coefficient>

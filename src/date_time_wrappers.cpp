@@ -33,9 +33,9 @@ TimeWrapper::TimeWrapper() {
 bool TimeWrapper::AssignMonthDayYear(const std::string& input, std::stringstream& commentsOnFailure) {
   this->AssignLocalTime(); //<-hopefully this initialized time properly ...
   List<char> theDelimiters;
-  theDelimiters.AddOnTop('/');
-  theDelimiters.AddOnTop('-');
-  theDelimiters.AddOnTop('.');
+  theDelimiters.addOnTop('/');
+  theDelimiters.addOnTop('-');
+  theDelimiters.addOnTop('.');
   List<std::string> output;
   StringRoutines::StringSplitExcludeDelimiters(input, theDelimiters, output);
   if (output.size < 3) {

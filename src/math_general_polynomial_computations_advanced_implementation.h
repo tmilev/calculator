@@ -12,7 +12,7 @@ bool GroebnerBasisComputation<coefficient>::WrapUpGroebnerOnExceedingComputation
 ) {
   inputOutpuT.Reserve(this->theBasiS.size + this->basisCandidates.size);
   inputOutpuT = this->theBasiS;
-  inputOutpuT.AddListOnTop(this->basisCandidates);
+  inputOutpuT.addListOnTop(this->basisCandidates);
   return false;
 }
 
@@ -126,7 +126,7 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasis(
         this->SoPolyBuf= currentRight;
         this->SoPolyBuf.MultiplyBy(this->SoPolyRightShift, leftHighestCoefficient);
         this->SoPolyBuf -= this->bufPoly;
-        this->basisCandidates.AddOnTop(this->SoPolyBuf);
+        this->basisCandidates.addOnTop(this->SoPolyBuf);
         this->NumberGBComputations ++;
         if (this->MaxNumGBComputations > 0) {
           if (this->NumberGBComputations > this->MaxNumGBComputations) {
@@ -247,7 +247,7 @@ bool GroebnerBasisComputation<coefficient>::AddPolysAndReduceBasis() {
         }
       }
       if (!(this->remainderDivision == this->theBasiS[i])) {
-        this->basisCandidates.AddOnTop(this->remainderDivision);
+        this->basisCandidates.addOnTop(this->remainderDivision);
         this->leadingMons.RemoveIndexShiftDown(i);
         this->leadingCoeffs.RemoveIndexShiftDown(i);
         this->theBasiS.RemoveIndexShiftDown(i);
@@ -320,12 +320,12 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasisImpro
   this->leadingMons.SetExpectedSize(this->theBasiS.size * 2);
   for (int i = 0; i < this->theBasiS.size; i ++) {
     for (int j = i + 1; j < this->theBasiS.size; j ++) {
-      indexPairs.AddOnTop(PairInts (i, j));
+      indexPairs.addOnTop(PairInts (i, j));
     }
     this->theBasiS[i].ScaleNormalizeLeadingMonomial();
     int theIndex = this->theBasiS[i].GetIndexMaxMonomial(this->theMonOrdeR);
-    this->leadingMons.AddOnTop(this->theBasiS[i][theIndex]);
-    this->leadingCoeffs.AddOnTop(this->theBasiS[i].coefficients[theIndex]);
+    this->leadingMons.addOnTop(this->theBasiS[i][theIndex]);
+    this->leadingCoeffs.addOnTop(this->theBasiS[i].coefficients[theIndex]);
   }
   if (this->theBasiS.size <= 0) {
     global.fatal << "This is a programming error: transforming to Groebner basis not allowed for empty basis. " << global.fatal;
@@ -381,12 +381,12 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasisImpro
         }
         if (!outputRemainder.IsEqualToZero()) {
           outputRemainder.scaleNormalizeLeadingMonomial();
-          this->theBasiS.AddOnTop(outputRemainder);
+          this->theBasiS.addOnTop(outputRemainder);
           int theIndexMaxMon = this->theBasiS.LastObject()->GetIndexMaxMonomial(this->theMonOrdeR);
-          this->leadingMons.AddOnTop((*this->theBasiS.LastObject())[theIndexMaxMon]);
-          this->leadingCoeffs.AddOnTop(this->theBasiS.LastObject()->coefficients[theIndexMaxMon]);
+          this->leadingMons.addOnTop((*this->theBasiS.LastObject())[theIndexMaxMon]);
+          this->leadingCoeffs.addOnTop(this->theBasiS.LastObject()->coefficients[theIndexMaxMon]);
           for (int i = 0; i < this->theBasiS.size - 1; i ++) {
-            indexPairs.AddOnTop(PairInts(i, this->theBasiS.size - 1));
+            indexPairs.addOnTop(PairInts(i, this->theBasiS.size - 1));
           }
         }
       }
@@ -472,21 +472,21 @@ void GroebnerBasisComputation<coefficient>::OneDivisonSubStepWithBasis(
     << "This is not allowed. " << global.fatal;
   }
   if (this->flagDoLogDivision) {
-    this->intermediateHighestMonDivHighestMon.GetElement().AddOnTop(quotientMonomial);
-    this->intermediateSelectedDivisors.GetElement().AddOnTop(index);
+    this->intermediateHighestMonDivHighestMon.GetElement().addOnTop(quotientMonomial);
+    this->intermediateSelectedDivisors.GetElement().addOnTop(index);
   }
   this->bufPoly = this->theBasiS[index];
   coefficient quotientCoefficient = leadingCoefficient;
   quotientCoefficient /= leadingCoefficientBasis;
   if (this->flagDoLogDivision) {
-    this->intermediateCoeffs.GetElement().AddOnTop(quotientCoefficient);
+    this->intermediateCoeffs.GetElement().addOnTop(quotientCoefficient);
   }
   this->bufPoly.MultiplyBy(quotientMonomial, quotientCoefficient);
   if (this->flagStoreQuotients) {
     this->theQuotients[index].AddMonomial(quotientMonomial, quotientCoefficient);
   }
   if (this->flagDoLogDivision) {
-    this->intermediateSubtractands.GetElement().AddOnTop(this->bufPoly);
+    this->intermediateSubtractands.GetElement().addOnTop(this->bufPoly);
   }
   if (this->flagDoProgressReport && theReport != nullptr) {
     std::stringstream out;
@@ -508,9 +508,9 @@ void GroebnerBasisComputation<coefficient>::OneDivisonSubStepWithBasis(
   }
   remainder -= this->bufPoly;
   if (this->flagDoLogDivision) {
-    this->intermediateRemainders.GetElement().AddOnTop(remainder);
+    this->intermediateRemainders.GetElement().addOnTop(remainder);
     List<MonomialP> empty;
-    this->intermediateHighlightedMons.GetElement().AddOnTop(empty);
+    this->intermediateHighlightedMons.GetElement().addOnTop(empty);
   }
   this->NumberGBComputations++;
 }
@@ -554,7 +554,7 @@ bool GroebnerBasisComputation<coefficient>::OneDivisonStepWithBasis(
     remainderResult->AddMonomial(highestMonomial, leadingCoefficient);
   }
   if (this->flagDoLogDivision) {
-    (*this->intermediateHighlightedMons.GetElement().LastObject()).AddOnTop(highestMonomial);
+    (*this->intermediateHighlightedMons.GetElement().LastObject()).addOnTop(highestMonomial);
   }
   currentRemainder.PopMonomial(indexLeadingMonomial);
   this->NumberGBComputations ++;
@@ -605,7 +605,7 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionByBasis(
     this->intermediateRemainders.GetElement().size = 0;
     this->intermediateSubtractands.GetElement().size = 0;
 
-    this->intermediateRemainders.GetElement().AddOnTop(currentRemainder);
+    this->intermediateRemainders.GetElement().addOnTop(currentRemainder);
     this->intermediateHighlightedMons.GetElement().SetSize(1);
     this->intermediateHighlightedMons.GetElement().LastObject()->SetSize(0);
   }
@@ -675,9 +675,9 @@ bool GroebnerBasisComputation<coefficient>::AddRemainderToBasis() {
       }
     }
   } else {
-    this->theBasiS.AddOnTop(this->remainderDivision);
-    this->leadingMons.AddOnTop(theNewLeadingMon);
-    this->leadingCoeffs.AddOnTop(remainderLeadingCoefficient);
+    this->theBasiS.addOnTop(this->remainderDivision);
+    this->leadingMons.addOnTop(theNewLeadingMon);
+    this->leadingCoeffs.addOnTop(remainderLeadingCoefficient);
   }
   return true;
 }
@@ -1072,7 +1072,7 @@ void GroebnerBasisComputation<coefficient>::PolySystemSolutionSimplificationPhas
         << this->ToStringImpliedSubs();
         theReport3.Report(reportStream.str());
       }
-      this->theImpliedSubS.AddOnTop(theSub);
+      this->theImpliedSubS.addOnTop(theSub);
       for (int i = 0; i < inputSystem.size; i ++) {
         inputSystem[i].Substitution(theSub);
       }
@@ -1460,8 +1460,8 @@ bool Polynomial<coefficient>::leastCommonMultiple(
   oneMinusT += one;
   rightTemp *= oneMinusT;
   theBasis.size = 0;
-  theBasis.AddOnTop(leftTemp);
-  theBasis.AddOnTop(rightTemp);
+  theBasis.addOnTop(leftTemp);
+  theBasis.addOnTop(rightTemp);
   GroebnerBasisComputation<coefficient> theComp;
   theComp.thePolynomialOrder.theMonOrder = MonomialP::orderForGCD();
   theComp.MaxNumGBComputations = - 1;
@@ -1562,7 +1562,7 @@ bool PolynomialFactorization<coefficient, oneFactorFinder>::factor(
   this->current = this->original;
   this->constantFactor = this->current.scaleNormalizeLeadingMonomial();
   this->constantFactor.invert();
-  this->nonReduced.AddOnTop(this->current);
+  this->nonReduced.addOnTop(this->current);
   while (this->nonReduced.size > 0) {
     this->current = this->nonReduced.PopLastObject();
     oneFactorFinder algorithm;
@@ -1588,13 +1588,13 @@ bool PolynomialFactorization<coefficient, oneFactorFinder>::accountNonReducedFac
   if (!remainder.IsEqualToZero()) {
     return false;
   }
-  this->nonReduced.AddOnTop(incoming);
+  this->nonReduced.addOnTop(incoming);
   if (quotient.IsConstant()) {
     global.fatal
     << "Accounting non-reduced factor must result is degree drop. "
     << global.fatal;
   }
-  this->nonReduced.AddOnTop(quotient);
+  this->nonReduced.addOnTop(quotient);
   return true;
 }
 
@@ -1614,12 +1614,12 @@ bool PolynomialFactorization<coefficient, oneFactorFinder>::accountReducedFactor
   if (!remainder.IsEqualToZero()) {
     return false;
   }
-  this->reduced.AddOnTop(incoming);
+  this->reduced.addOnTop(incoming);
   coefficient extraFactor;
   if (quotient.IsConstant(&extraFactor)) {
     this->constantFactor *= extraFactor;
   } else {
-    this->nonReduced.AddOnTop(quotient);
+    this->nonReduced.addOnTop(quotient);
   }
   return true;
 }

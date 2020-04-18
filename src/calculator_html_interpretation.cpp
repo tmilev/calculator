@@ -502,7 +502,7 @@ void BuilderApplication::BuildHtmlJSpage(bool appendBuildHash) {
       }
     } else {
       StringRoutines::StringSplitExcludeDelimiter(secondAndThirdPart, '"', splitterStrings);
-      this->jsFileNames.AddOnTop(splitterStrings[0]);
+      this->jsFileNames.addOnTop(splitterStrings[0]);
     }
   }
   std::string virtualOnePageJS = appendBuildHash ?
@@ -637,35 +637,35 @@ bool CourseList::LoadFromString(const std::string& input) {
   while (std::getline(tableReader, currentLine, '\n')) {
     if (StringRoutines::StringBeginsWith(currentLine, "Html:", &currentArgument)) {
       if (current.courseTemplate != "") {
-        this->theCourses.AddOnTop(current);
+        this->theCourses.addOnTop(current);
         current.reset();
       }
       current.courseTemplate = StringRoutines::StringTrimWhiteSpace(currentArgument);
     }
     if (StringRoutines::StringBeginsWith(currentLine, "Topics:", &currentArgument)) {
       if (current.courseTopicsNoFolder != "") {
-        this->theCourses.AddOnTop(current);
+        this->theCourses.addOnTop(current);
         current.reset();
       }
       current.courseTopicsNoFolder = StringRoutines::StringTrimWhiteSpace(currentArgument);
     }
     if (StringRoutines::StringBeginsWith(currentLine, "Title:", &currentArgument)) {
       if (current.title != "") {
-        this->theCourses.AddOnTop(current);
+        this->theCourses.addOnTop(current);
         current.reset();
       }
       current.title = StringRoutines::StringTrimWhiteSpace(currentArgument);
     }
     if (StringRoutines::StringBeginsWith(currentLine, "RoughDraft:", &currentArgument)) {
       if (current.flagRoughDraft != "") {
-        this->theCourses.AddOnTop(current);
+        this->theCourses.addOnTop(current);
         current.reset();
       }
       current.flagRoughDraft = StringRoutines::StringTrimWhiteSpace(currentArgument);
     }
   }
   if (!current.IsEmpty()) {
-    this->theCourses.AddOnTop(current);
+    this->theCourses.addOnTop(current);
   }
   return true;
 }
@@ -691,7 +691,7 @@ JSData CourseList::ToJSON() {
   output["courses"].theType = JSData::token::tokenArray;
   for (int i = 0; i < this->theCourses.size; i ++) {
     Course& currentCourse = this->theCourses[i];
-    output["courses"].theList.AddOnTop(currentCourse.ToJSON());
+    output["courses"].theList.addOnTop(currentCourse.ToJSON());
   }
   return output;
 }
@@ -769,7 +769,7 @@ void WebAPIResponse::GetJSDataUserInfo(JSData& outputAppend, const std::string& 
   for (int i = 0; i < global.userDefault.sectionsTaught.size; i ++) {
     JSData nextSection;
     nextSection = HtmlRoutines::ConvertStringToHtmlString(global.userDefault.sectionsTaught[i], false);
-    sectionsTaught.theList.AddOnTop(nextSection);
+    sectionsTaught.theList.addOnTop(nextSection);
   }
   outputAppend[DatabaseStrings::labelSectionsTaught] = sectionsTaught;
 }
@@ -1275,13 +1275,13 @@ std::string WebAPIResponse::AddTeachersSections() {
 
   List<std::string> theTeachers;
   List<char> delimiters;
-  delimiters.AddOnTop(' ');
-  delimiters.AddOnTop('\r');
-  delimiters.AddOnTop('\n');
-  delimiters.AddOnTop('\t');
-  delimiters.AddOnTop(',');
-  delimiters.AddOnTop(';');
-  delimiters.AddOnTop(static_cast<char>(160));//<-&nbsp
+  delimiters.addOnTop(' ');
+  delimiters.addOnTop('\r');
+  delimiters.addOnTop('\n');
+  delimiters.addOnTop('\t');
+  delimiters.addOnTop(',');
+  delimiters.addOnTop(';');
+  delimiters.addOnTop(static_cast<char>(160));//<-&nbsp
   StringRoutines::StringSplitExcludeDelimiters(desiredSectionsOneString, delimiters, desiredSectionsList);
 
   StringRoutines::StringSplitExcludeDelimiters(desiredUsers, delimiters, theTeachers);
@@ -1605,13 +1605,13 @@ JSData WebAPIResponse::GetAccountsPageJSON(const std::string& hostWebAddressWith
   findStudents[DatabaseStrings::labelInstructor] = global.userDefault.username;
   findAdmins[DatabaseStrings::labelUserRole] = UserCalculator::Roles::administator;
   List<std::string> columnsToRetain;
-  columnsToRetain.AddOnTop(DatabaseStrings::labelUsername);
-  columnsToRetain.AddOnTop(DatabaseStrings::labelEmail);
-  columnsToRetain.AddOnTop(DatabaseStrings::labelActivationToken);
-  columnsToRetain.AddOnTop(DatabaseStrings::labelCurrentCourses);
-  columnsToRetain.AddOnTop(DatabaseStrings::labelInstructor);
-  columnsToRetain.AddOnTop(DatabaseStrings::labelSection);
-  columnsToRetain.AddOnTop(DatabaseStrings::labelSemester);
+  columnsToRetain.addOnTop(DatabaseStrings::labelUsername);
+  columnsToRetain.addOnTop(DatabaseStrings::labelEmail);
+  columnsToRetain.addOnTop(DatabaseStrings::labelActivationToken);
+  columnsToRetain.addOnTop(DatabaseStrings::labelCurrentCourses);
+  columnsToRetain.addOnTop(DatabaseStrings::labelInstructor);
+  columnsToRetain.addOnTop(DatabaseStrings::labelSection);
+  columnsToRetain.addOnTop(DatabaseStrings::labelSemester);
   if (!Database::FindFromJSONWithProjection(
     DatabaseStrings::tableUsers,
     findStudents,
@@ -1750,8 +1750,8 @@ std::string WebAPIResponse::ToStringUserDetailsTable(
       currentSectionInfo << "<b>Section: </b>" << currentUser.sectionInDB
       << ", <b>Course: </b>" << currentUser.courseInDB
       << ", <b>Instructor: </b>" << currentUser.instructorInDB;
-      theSections.AddOnTop(currentUser.sectionInDB);
-      sectionDescriptions.AddOnTop(currentSectionInfo.str());
+      theSections.addOnTop(currentUser.sectionInDB);
+      sectionDescriptions.addOnTop(currentSectionInfo.str());
     }
   }
   theSections.QuickSortAscending(nullptr, &sectionDescriptions);
@@ -1827,11 +1827,11 @@ std::string WebAPIResponse::ToStringUserDetailsTable(
     int indexCurrentBucket = theSections.GetIndex(currentUser.sectionInDB);
     if (indexCurrentBucket != - 1) {
       if (isActivated) {
-        activatedAccountBucketsBySection[indexCurrentBucket].AddOnTop(oneTableLineStream.str());
+        activatedAccountBucketsBySection[indexCurrentBucket].addOnTop(oneTableLineStream.str());
       } else {
-        nonActivatedAccountBucketsBySection[indexCurrentBucket].AddOnTop(oneTableLineStream.str());
+        nonActivatedAccountBucketsBySection[indexCurrentBucket].addOnTop(oneTableLineStream.str());
       }
-      preFilledLinkBucketsBySection[indexCurrentBucket].AddOnTop(oneLink.str());
+      preFilledLinkBucketsBySection[indexCurrentBucket].addOnTop(oneLink.str());
     }
   }
   for (int i = 0; i < nonActivatedAccountBucketsBySection.size; i ++) {
@@ -1933,8 +1933,8 @@ int ProblemData::getExpectedNumberOfAnswers(
     findProblemInfo.theType = JSData::token::tokenArray;
     List<JSData> result;
     List<std::string> fields;
-    fields.AddOnTop(DatabaseStrings::labelProblemFileName);
-    fields.AddOnTop(DatabaseStrings::labelProblemTotalQuestions);
+    fields.addOnTop(DatabaseStrings::labelProblemFileName);
+    fields.addOnTop(DatabaseStrings::labelProblemTotalQuestions);
 
     if (Database::FindFromJSONWithProjection(
       DatabaseStrings::tableProblemInformation,
@@ -2159,9 +2159,9 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
         }
       }
     }
-    this->userScores.AddOnTop(- 1);
-    this->userNames.AddOnTop(this->userProblemData[i][DatabaseStrings::labelUsername].theString);
-    this->userInfos.AddOnTop(currentUserRecord.currentUseR.sectionInDB);
+    this->userScores.addOnTop(- 1);
+    this->userNames.addOnTop(this->userProblemData[i][DatabaseStrings::labelUsername].theString);
+    this->userInfos.addOnTop(currentUserRecord.currentUseR.sectionInDB);
     this->scoresBreakdown.SetSize(this->scoresBreakdown.size + 1);
     currentUserRecord.currentUseR.username = this->userProblemData[i][
       DatabaseStrings::labelUsername

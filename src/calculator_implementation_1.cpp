@@ -103,7 +103,7 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
       } else {
         int tempI = VisitedVertices.GetIndex(BaseVariables);
         if (tempI == - 1) {
-          VisitedVertices.AddOnTop(BaseVariables);
+          VisitedVertices.addOnTop(BaseVariables);
         } else {
           WeHaveNotEnteredACycle = false;
         }
@@ -202,7 +202,7 @@ bool Calculator::GetListPolynomialVariableLabelsLexicographic(
   HashedList<Expression> theVars;
   theVars.SetExpectedSize(numVars);
   for (int i = 0; i < numVars; i ++) {
-    theVars.AddOnTop(theContextStart.ContextGetContextVariable(i));
+    theVars.addOnTop(theContextStart.ContextGetContextVariable(i));
   }
   theVars.QuickSortAscending();
   PolynomialSubstitution<AlgebraicNumber> theSub;
@@ -329,28 +329,28 @@ void DynkinType::GetPrecomputedDynkinTypes(List<DynkinType>& output) {
   output.SetSize(0);
   DynkinType theType;
   theType.MakeSimpleType('F', 4);
-  output.AddOnTop(theType);
+  output.addOnTop(theType);
   for (int i = 6; i <= 8; i ++) {
     theType.MakeSimpleType('E', i);
-    output.AddOnTop(theType);
+    output.addOnTop(theType);
   }
   theType.MakeSimpleType('G', 2);
-  output.AddOnTop(theType);
+  output.addOnTop(theType);
   for (int i = 1; i <= 8; i ++) {
     theType.MakeSimpleType('A', i);
-    output.AddOnTop(theType);
+    output.addOnTop(theType);
   }
   for (int i = 4; i <= 8; i ++) {
     theType.MakeSimpleType('D', i);
-    output.AddOnTop(theType);
+    output.addOnTop(theType);
   }
   for (int i = 2; i <= 8; i ++) {
     theType.MakeSimpleType('B', i);
-    output.AddOnTop(theType);
+    output.addOnTop(theType);
   }
   for (int i = 3; i <= 8; i ++) {
     theType.MakeSimpleType('C', i);
-    output.AddOnTop(theType);
+    output.addOnTop(theType);
   }
 }
 
@@ -586,7 +586,7 @@ bool Calculator::innerAdCommonEigenSpaces(Calculator& theCommands, const Express
     if (!CalculatorConversions::innerElementSemisimpleLieAlgebraRationalCoeffs(theCommands, input[i], tempElt, *ownerSS)) {
       return output.MakeError("Failed to extract element of semisimple Lie algebra. ", theCommands);
     }
-    theOperators.AddOnTop(tempElt);
+    theOperators.addOnTop(tempElt);
   }
   ownerSS->GetCommonCentralizer(theOperators, outputElts);
   std::stringstream out;
@@ -638,7 +638,7 @@ bool Calculator::innerGroebner(
   int upperBoundComputations = int(upperBound.GetDoubleValue());
   output.reset(theCommands);
   for (int i = 1; i < input.children.size; i ++) {
-    output.children.AddOnTop(input.children[i]);
+    output.children.addOnTop(input.children[i]);
   }
   int theMod = 0;
   if (useModZp) {
@@ -852,7 +852,7 @@ void Plot::operator+=(const Plot& other) {
     this->theUpperBoundAxes = MathRoutines::Maximum(this->theUpperBoundAxes, other.theUpperBoundAxes);
     this->theLowerBoundAxes = MathRoutines::Minimum(this->theLowerBoundAxes, other.theLowerBoundAxes);
   }
-  this->thePlots.AddListOnTop(other.thePlots);
+  this->thePlots.addListOnTop(other.thePlots);
   if (other.priorityWindow > this->priorityWindow) {
     this->DesiredHtmlHeightInPixels = other.DesiredHtmlHeightInPixels;
     this->DesiredHtmlWidthInPixels = other.DesiredHtmlWidthInPixels;
@@ -899,7 +899,7 @@ void Plot::operator+=(const PlotObject& other) {
   if (this->dimension == - 1) {
     this->dimension = other.dimension;
   }
-  this->thePlots.AddOnTop(other);
+  this->thePlots.addOnTop(other);
   this->SetCanvasName("");
 }
 
@@ -2247,7 +2247,7 @@ bool Calculator::innerRootSubsystem(Calculator& theCommands, const Expression& i
     if (!theWeyl.RootSystem.Contains(currentRoot)) {
       return output.MakeError("Input vector " + currentRoot.toString() + " is not a root. ", theCommands);
     }
-    outputRoots.AddOnTop(currentRoot);
+    outputRoots.addOnTop(currentRoot);
   }
   std::stringstream out;
   DynkinDiagramRootSubalgebra theDiagram;
@@ -2365,7 +2365,7 @@ void ExpressionHistoryEnumerator::initializeComputation() {
   // this->rulesDisplayNames.SetSize(0);
   this->rulesNames.SetSize(0);
   // this->rulesToBeIgnored.Clear();
-  // this->rulesToBeIgnored.AddOnTop("CommuteIfUnivariate");
+  // this->rulesToBeIgnored.addOnTop("CommuteIfUnivariate");
   // this->rulesDisplayNamesMap.Clear();
   // this->rulesDisplayNamesMap.SetKeyValue("Minus", "");
   // this->rulesDisplayNamesMap.SetKeyValue("DistributeMultiplication", "");
@@ -2391,7 +2391,7 @@ Expression ExpressionHistoryEnumerator::GetExpression(
     if (currentRuleSequence.size() > 3) {
       std::string ruleName = currentRuleSequence[3].toString();
       if (ruleName != "" && ruleName != "Sub-expression simplification") {
-        outputRuleNames.AddOnTop(ruleName);
+        outputRuleNames.addOnTop(ruleName);
       }
     }
   }
@@ -2521,14 +2521,14 @@ bool ExpressionHistoryEnumerator::ProcessChildrenTransformations(
         found = true;
         int indexInParent = indicesInParent[i];
         next.SetChilD(indexInParent, expressionSequence[currentIndex]);
-        nextRules.AddListOnTop(childrenEnumerators[i].rulesNames[currentIndex]);
+        nextRules.addListOnTop(childrenEnumerators[i].rulesNames[currentIndex]);
       }
     }
     if (!found) {
       break;
     }
-    this->output.AddOnTop(next);
-    this->rulesNames.AddOnTop(nextRules);
+    this->output.addOnTop(next);
+    this->rulesNames.addOnTop(nextRules);
   }
   return true;
 }
@@ -2548,13 +2548,13 @@ bool ExpressionHistoryEnumerator::ProcessTransformation(
     }
     return false;
   }
-  this->output.AddOnTop(current[1]);
+  this->output.addOnTop(current[1]);
   this->rulesNames.SetSize(this->rulesNames.size + 1);
   this->rulesNames.LastObject()->SetSize(0);
   if (current.size() >= 3) {
     std::string incoming = current[2].toString();
     if (incoming != "") {
-      this->rulesNames.LastObject()->AddOnTop(incoming);
+      this->rulesNames.LastObject()->addOnTop(incoming);
     }
   }
   return true;
@@ -2580,11 +2580,11 @@ std::string ExpressionHistoryEnumerator::ToStringExpressionHistoryMerged() {
   for (int j = 0; j < this->output.size; j ++) {
     std::string currentEstring = this->output[j].toString();
     if (currentEstring == prevEstring) {
-      currentRules.AddListOnTop(this->rulesNames[j]);
+      currentRules.addListOnTop(this->rulesNames[j]);
       continue;
     }
     prevEstring = currentEstring;
-    currentRules.AddListOnTop(this->rulesNames[j]);
+    currentRules.addListOnTop(this->rulesNames[j]);
     if (j > 0) {
       if (currentRules.size > 0) {
         out << "&\\text{" << currentRules.ToStringCommaDelimited() << "}";

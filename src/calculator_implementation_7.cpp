@@ -51,10 +51,10 @@ bool MathRoutines::GenerateVectorSpaceClosedWRTOperation(
     for (int j = i; j < inputOutputElts.size; j ++) {
       theBinaryOperation(inputOutputElts[i], inputOutputElts[j], theOpResult);
       //int oldNumElts = inputOutputElts.size;
-      theEltsForGaussianElimination.AddOnTop(theOpResult);
+      theEltsForGaussianElimination.addOnTop(theOpResult);
       theEltsForGaussianElimination[0].GaussianEliminationByRowsDeleteZeroRows(theEltsForGaussianElimination);
       if (theEltsForGaussianElimination.size > inputOutputElts.size) {
-        inputOutputElts.AddOnTop(theOpResult);
+        inputOutputElts.addOnTop(theOpResult);
       }
       if (upperDimensionBound > 0 && inputOutputElts.size > upperDimensionBound) {
         return false;
@@ -78,11 +78,11 @@ bool CalculatorFunctions::innerConstructCartanSA(
   SubalgebraSemisimpleLieAlgebra theSA;
   WithContext<ElementSemisimpleLieAlgebra<AlgebraicNumber> > element;
   if (input.ConvertsInternally(&element)) {
-    theSA.theGenerators.AddOnTop(element.content);
+    theSA.theGenerators.addOnTop(element.content);
   } else {
     for (int i = 1; i < input.size(); i ++) {
       if (input[i].ConvertsInternally(&element)) {
-        theSA.theGenerators.AddOnTop(element.content);
+        theSA.theGenerators.addOnTop(element.content);
       } else {
         return theCommands
         << "Failed to extract element of a semisimple Lie algebra from "
@@ -269,7 +269,7 @@ bool CalculatorFunctions::innerTestTLSMessageSequence(
   }
   spoofServer.spoofer.flagDoSpoof = true;
   for (int i = 2; i < inputMessages.size; i ++) {
-    spoofServer.spoofer.incomingMessages.AddOnTop(SSLRecord());
+    spoofServer.spoofer.incomingMessages.addOnTop(SSLRecord());
     spoofServer.spoofer.incomingMessages.LastObject()->incomingBytes = inputMessages[i];
   }
   spoofServer.spoofer.currentInputMessageIndex = 0;
@@ -535,8 +535,8 @@ bool CalculatorFunctions::innerNISTEllipticCurveGenerator(
   }
   Expression theContext;
   List<std::string> theVars;
-  theVars.AddOnTop("x");
-  theVars.AddOnTop("y");
+  theVars.addOnTop("x");
+  theVars.addOnTop("y");
   theContext.ContextMakeContextWithPolyVars(theCommands, theVars);
   return output.AssignValueWithContext(generator, theContext, theCommands);
 }
@@ -1214,7 +1214,7 @@ bool Calculator::GetSumProductsExpressions(const Expression& inputSum, List<List
   }
   for (int i = 0; i < theSummands.size; i ++) {
     this->CollectOpands(theSummands[i], this->opTimes(), currentMultiplicands);
-    outputSumMultiplicands.AddOnTop(currentMultiplicands);
+    outputSumMultiplicands.addOnTop(currentMultiplicands);
   }
   return true;
 }
@@ -1256,11 +1256,11 @@ bool CalculatorFunctions::innerCoefficientOf(Calculator& theCommands, const Expr
     currentListMultiplicands.SetSize(0);
     for (int j = 0; j < theSummands[i].size; j ++) {
       if (theSummands[i][j] != input[1]) {
-        currentListMultiplicands.AddOnTop(theSummands[i][j]);
+        currentListMultiplicands.addOnTop(theSummands[i][j]);
       }
     }
     currentMultiplicand.MakeProducT(theCommands, currentListMultiplicands);
-    survivingSummands.AddOnTop(currentMultiplicand);
+    survivingSummands.addOnTop(currentMultiplicand);
   }
   return output.makeSum(theCommands, survivingSummands);
 }
@@ -1737,7 +1737,7 @@ bool IntegralRFComputation::PreparePFExpressionSummands() {
       coeffE.AssignValue(currentCoefficient, *this->owner);
       currentPFWithCoeff = coeffE * currentPFnoCoeff;
       currentPFWithCoeff.CheckConsistencyRecursively();
-      this->thePFSummands.AddOnTop(currentPFWithCoeff);
+      this->thePFSummands.addOnTop(currentPFWithCoeff);
     }
   }
   if (!this->quotientRat.IsEqualToZero()) {
@@ -1755,7 +1755,7 @@ bool IntegralRFComputation::PreparePFExpressionSummands() {
       return false;
     }
     currentPFWithCoeff.CheckConsistencyRecursively();
-    this->thePFSummands.AddOnTop(currentPFWithCoeff);
+    this->thePFSummands.addOnTop(currentPFWithCoeff);
   }
   return true;
 }
@@ -1815,7 +1815,7 @@ bool IntegralRFComputation::IntegrateRF() {
       coeffE.AssignValue(currentCoefficient, *this->owner);
       currentIntegralWithCoeff = coeffE * currentIntegralNoCoeff;
       currentIntegralWithCoeff.CheckConsistencyRecursively();
-      this->theIntegralSummands.AddOnTop(currentIntegralWithCoeff);
+      this->theIntegralSummands.addOnTop(currentIntegralWithCoeff);
     }
   }
   if (!this->quotientRat.IsEqualToZero()) {
@@ -1838,7 +1838,7 @@ bool IntegralRFComputation::IntegrateRF() {
       this->contextE.ContextGetContextVariable(0)
     );
     currentIntegralWithCoeff.CheckConsistencyRecursively();
-    this->theIntegralSummands.AddOnTop(currentIntegralWithCoeff);
+    this->theIntegralSummands.addOnTop(currentIntegralWithCoeff);
   }
   this->theIntegralSum.makeSum(*this->owner, this->theIntegralSummands);
   this->theIntegralSum.CheckConsistencyRecursively();
@@ -1865,7 +1865,7 @@ void IntegralRFComputation::PrepareFormatExpressions() {
         varNameStream << "A_{" << varCounter << "} ";
         rfStream << varNameStream.str();
         polyStream << varNameStream.str();
-        this->currentFormaT.polyAlphabeT.AddOnTop(varNameStream.str());
+        this->currentFormaT.polyAlphabeT.addOnTop(varNameStream.str());
         if (j > 0) {
           rfStream << "x";
           polyStream << "x";
@@ -2427,7 +2427,7 @@ bool CalculatorFunctions::innerIntersection(Calculator& theCommands, const Expre
   for (int i = 1; i < input.size(); i ++) {
     theListsToBeIntersected[i - 1].Reserve(input[i].size());
     for (int j = 1; j < input[i].size(); j ++) {
-      theListsToBeIntersected[i - 1].AddOnTop(input[i][j]);
+      theListsToBeIntersected[i - 1].addOnTop(input[i][j]);
     }
   }
   if (theListsToBeIntersected.size == 0) {
@@ -2490,7 +2490,7 @@ bool CalculatorFunctions::innerUnionNoRepetition(Calculator& theCommands, const 
   output.children.Reserve(numElts);
   output.reset(theCommands, theIndices.size + 1);
   output.AddChildAtomOnTop(theCommands.opSequence());
-  output.children.AddOnTop(theIndices);
+  output.children.addOnTop(theIndices);
   return true;
 }
 
@@ -3263,13 +3263,13 @@ bool CalculatorFunctions::innerCompareExpressionsNumericallyAtPoints(
   const Expression& theVarsE = input[4][1];
   HashedList<Expression> varsGiven;
   if (!theVarsE.IsSequenceNElementS()) {
-    varsGiven.AddOnTop(theVarsE);
+    varsGiven.addOnTop(theVarsE);
   } else {
     for (int i = 1; i < theVarsE.size(); i ++) {
       if (varsGiven.Contains(theVarsE[i])) {
         return theCommands << theVarsE[i] << " given more than once. ";
       }
-      varsGiven.AddOnTop(theVarsE[i]);
+      varsGiven.addOnTop(theVarsE[i]);
     }
   }
   for (int i = 0; i < theFreeVars.size; i ++) {
@@ -3299,7 +3299,7 @@ bool CalculatorFunctions::innerCompareExpressionsNumericallyAtPoints(
       return theCommands << varsGiven[i]
       << " is an already known constant and cannot be used as a variable in this context. ";
     } else {
-      knownEs.AddOnTop(varsGiven[i]);
+      knownEs.addOnTop(varsGiven[i]);
     }
   }
   knownValues.SetSize(knownEs.size);
@@ -3367,10 +3367,10 @@ bool CalculatorFunctions::innerCompareExpressionsNumerically(
       return theCommands << "Expression " << currentIntervalWithVariable[1].toString()
       << " specified an interval range more than once. ";
     }
-    theBoundaryVars.AddOnTop(currentIntervalWithVariable[1]);
-    leftBoundaries.AddOnTop(currentLeft);
-    rightBoundaries.AddOnTop(currentRight);
-    numSamples.AddOnTop(10);
+    theBoundaryVars.addOnTop(currentIntervalWithVariable[1]);
+    leftBoundaries.addOnTop(currentLeft);
+    rightBoundaries.addOnTop(currentRight);
+    numSamples.addOnTop(10);
     int currentNumSamplingPoints = 0;
     if (i + 1 < input.size()) {
       if (input[i + 1].IsSmallInteger(&currentNumSamplingPoints)) {
@@ -3401,7 +3401,7 @@ bool CalculatorFunctions::innerCompareExpressionsNumerically(
       return theCommands << theBoundaryVars[i]
       << " is an already known constant and cannot be used as a variable in this context. ";
     } else {
-      knownEs.AddOnTop(theBoundaryVars[i]);
+      knownEs.addOnTop(theBoundaryVars[i]);
     }
   }
   knownValues.SetSize(knownEs.size);
@@ -3554,7 +3554,7 @@ bool CalculatorFunctions::innerDifferentialOfPolynomial(
     Expression polynomialWrapper;
     polynomialWrapper.AssignValueWithContext(differentials[i], polynomial.context.context, theCommands);
     incoming.AddChildOnTop(polynomialWrapper);
-    outputSummands.AddOnTop(incoming);
+    outputSummands.addOnTop(incoming);
   }
   return output.makeSum(theCommands, outputSummands);
 }
@@ -3917,7 +3917,7 @@ bool CalculatorFunctions::innerPolynomialRelations(
   }
   output.reset(theCommands);
   for (int i = 1; i < input.size(); i ++) {
-    output.children.AddOnTop(input.children[i]);
+    output.children.addOnTop(input.children[i]);
   }
   if (!theCommands.GetVectorFromFunctionArguments<Polynomial<Rational> >(
     output,
@@ -3936,7 +3936,7 @@ bool CalculatorFunctions::innerPolynomialRelations(
     std::string currentStr;
     currentStr = currentLetter;
     if (!theFormat.polyAlphabeT.Contains(currentStr)) {
-      theFormat.polyAlphabeT.AddOnTop(currentStr);
+      theFormat.polyAlphabeT.addOnTop(currentStr);
     }
   }
   if (!RationalFunction::GetRelations(inputVector, theGens, theRels, theCommands.Comments)) {
@@ -4067,7 +4067,7 @@ bool CalculatorFunctions::innerCoefficientsPowersOf(
     } else {
       currentCF = theCFs.coefficients[theIndex];
     }
-    theCFsIncludingZeros.AddOnTop(currentCF);
+    theCFsIncludingZeros.addOnTop(currentCF);
   }
   return output.MakeSequence(theCommands, &theCFsIncludingZeros);
 }
@@ -5275,7 +5275,7 @@ bool Expression::SplitProduct(
   }
   theMultiplicandsRight.SetExpectedSize(theMultiplicandsLeft.size-numDesiredMultiplicandsLeft);
   for (int i = numDesiredMultiplicandsLeft; i < theMultiplicandsLeft.size; i ++) {
-    theMultiplicandsRight.AddOnTop(theMultiplicandsLeft[i]);
+    theMultiplicandsRight.addOnTop(theMultiplicandsLeft[i]);
   }
   theMultiplicandsLeft.SetSize(numDesiredMultiplicandsLeft);
   outputLeftMultiplicand.MakeOXdotsX(*this->owner, this->owner->opTimes(), theMultiplicandsLeft);
@@ -5475,7 +5475,7 @@ bool Expression::MakeSequenceCommands(Calculator& owner, List<std::string>& inpu
   for (int i = 0; i < inputValues.size; i ++) {
     currentKey.MakeAtom(inputKeys[i], owner);
     currentStatement.MakeXOX(owner, owner.opDefine(), currentKey, inputValues[i]);
-    theStatements.AddOnTop(currentStatement);
+    theStatements.addOnTop(currentStatement);
   }
   return this->MakeSequenceStatements(owner, &theStatements);
 }
@@ -5900,8 +5900,8 @@ bool CalculatorFunctions::innerDFQsEulersMethod(Calculator& theCommands, const E
   }
   HashedList<Expression> knownConsts;
   List<double> knownValues;
-  knownConsts.AddOnTop(theCommands.knownDoubleConstants);
-  knownValues.AddListOnTop(theCommands.knownDoubleConstantValues);
+  knownConsts.addOnTop(theCommands.knownDoubleConstants);
+  knownValues.addListOnTop(theCommands.knownDoubleConstantValues);
   Expression xE, yE;
   xE.MakeAtom("x", theCommands);
   yE.MakeAtom("y", theCommands);
@@ -5909,10 +5909,10 @@ bool CalculatorFunctions::innerDFQsEulersMethod(Calculator& theCommands, const E
     return theCommands << "The letters x, y appear to be already used to "
     << "denote known constants, I cannot run Euler's method.";
   }
-  knownConsts.AddOnTop(xE);
-  knownConsts.AddOnTop(yE);
-  knownValues.AddOnTop(0);
-  knownValues.AddOnTop(0);
+  knownConsts.addOnTop(xE);
+  knownConsts.addOnTop(yE);
+  knownValues.addOnTop(0);
+  knownValues.addOnTop(0);
   if (numPoints < 2) {
     return theCommands << "The number of points for Euler's method is " << numPoints << ", too few. ";
   }
@@ -5929,7 +5929,7 @@ bool CalculatorFunctions::innerDFQsEulersMethod(Calculator& theCommands, const E
   YValues.SetExpectedSize(numPoints + 5);
   int pointsCounter = 0;
   for (double currentX = xInitial; currentX > leftEndpoint - delta; currentX -= delta) {
-    XValues.AddOnTop(currentX);
+    XValues.addOnTop(currentX);
     pointsCounter ++;
     if (pointsCounter > numPoints) {
       break; //<-in case floating point arithmetic is misbehaving
@@ -5939,7 +5939,7 @@ bool CalculatorFunctions::innerDFQsEulersMethod(Calculator& theCommands, const E
   int indexXinitial = XValues.size - 1;
   pointsCounter = 0;
   for (double currentX = xInitial + delta; currentX < rightEndpoint + delta; currentX += delta) {
-    XValues.AddOnTop(currentX);
+    XValues.addOnTop(currentX);
     pointsCounter ++;
     if (pointsCounter > numPoints) {
       break; //<-in case floating point arithmetic is misbehaving
@@ -6005,13 +6005,13 @@ bool CalculatorFunctions::innerDFQsEulersMethod(Calculator& theCommands, const E
   for (int i = firstGoodXIndex; i <= lastGoodXIndex; i ++) {
     currentPt[0] = XValues[i];
     currentPt[1] = YValues[i];
-    thePlot.thePointsDouble.AddOnTop(currentPt);
+    thePlot.thePointsDouble.addOnTop(currentPt);
   }
   thePlot.xLow = XValues[0];
   thePlot.xHigh = *XValues.LastObject();
   thePlot.yLow = - 0.5;
   thePlot.yHigh = 0.5;
-  thePlot.coordinateFunctionsE.AddOnTop(input);
+  thePlot.coordinateFunctionsE.addOnTop(input);
   std::stringstream outLatex, outHtml;
   outLatex << "\n\n%calculator input:" << input.toString() << "\n\n"
   << "\\psline[linecolor =\\fcColorGraph]";
@@ -6137,16 +6137,16 @@ bool CalculatorFunctions::innerPlotFill(Calculator& theCommands, const Expressio
   }
   theFilledPlot.colorFillJS = colorString;
   for (int i = 0; i < startPlot.thePlots.size; i ++) {
-    theFilledPlot.thePointsDouble.AddListOnTop(startPlot.thePlots[i].thePointsDouble);
+    theFilledPlot.thePointsDouble.addListOnTop(startPlot.thePlots[i].thePointsDouble);
   }
   theFilledPlot.fillStyle = "filled";
   theFilledPlot.thePlotType = "plotFillStart";
   outputPlot.DesiredHtmlHeightInPixels = startPlot.DesiredHtmlHeightInPixels;
   outputPlot.DesiredHtmlWidthInPixels = startPlot.DesiredHtmlWidthInPixels;
-  outputPlot.thePlots.AddOnTop(theFilledPlot);
+  outputPlot.thePlots.addOnTop(theFilledPlot);
   outputPlot += startPlot;
   theFilledPlot.thePlotType = "plotFillFinish";
-  outputPlot.thePlots.AddOnTop(theFilledPlot);
+  outputPlot.thePlots.addOnTop(theFilledPlot);
   return output.AssignValue(outputPlot, theCommands);
 }
 
@@ -6189,7 +6189,7 @@ bool CalculatorFunctions::innerPlot2DoverIntervals(Calculator& theCommands, cons
     for (int j = 3; j < input.size(); j ++) {
       summandE.AddChildOnTop(input[j]);
     }
-    finalSummands.AddOnTop(summandE);
+    finalSummands.addOnTop(summandE);
   }
   return output.makeSum(theCommands, finalSummands);
 }
@@ -6255,7 +6255,7 @@ bool CalculatorFunctions::innerPlot2D(Calculator& theCommands, const Expression&
       thePlotObj.rightBoundaryIsMinusInfinity = true;
     }
   }
-  thePlotObj.coordinateFunctionsE.AddOnTop(input[1]);
+  thePlotObj.coordinateFunctionsE.addOnTop(input[1]);
   thePlotObj.coordinateFunctionsJS.SetSize(1);
   thePlotObj.coordinateFunctionsE[0].GetFreeVariables(thePlotObj.variablesInPlay, true);
   if (thePlotObj.variablesInPlay.size > 1) {
@@ -6268,7 +6268,7 @@ bool CalculatorFunctions::innerPlot2D(Calculator& theCommands, const Expression&
   if (thePlotObj.variablesInPlay.size == 0) {
     Expression xE;
     xE.MakeAtom("x", theCommands);
-    thePlotObj.variablesInPlay.AddOnTop(xE);
+    thePlotObj.variablesInPlay.addOnTop(xE);
   }
   thePlotObj.variablesInPlayJS.SetSize(thePlotObj.variablesInPlay.size);
   thePlotObj.variablesInPlayJS[0] = thePlotObj.variablesInPlay[0].toString();
@@ -6351,7 +6351,7 @@ bool CalculatorFunctions::innerPlot2D(Calculator& theCommands, const Expression&
     );
     thePlotObj.thePlotStringWithHtml = thePlotObj.thePlotString;
   }
-  thePlot.thePlots.AddOnTop(thePlotObj);
+  thePlot.thePlots.addOnTop(thePlotObj);
   return output.AssignValue(thePlot, theCommands);
 }
 
@@ -6394,7 +6394,7 @@ bool CalculatorFunctions::innerPlotPoint(Calculator& theCommands, const Expressi
   }
   thePlot.colorJS = input[2].toString();
   thePlot.thePlotType = "points";
-  theFinalPlot.thePlots.AddOnTop(thePlot);
+  theFinalPlot.thePlots.addOnTop(thePlot);
   theFinalPlot.DesiredHtmlHeightInPixels = 100;
   theFinalPlot.DesiredHtmlWidthInPixels = 100;
   return output.AssignValue(theFinalPlot, theCommands);
@@ -6477,7 +6477,7 @@ bool CalculatorFunctions::innerPlot2DWithBars(Calculator& theCommands, const Exp
       return output.MakeError("Delta equal to zero is not allowed", theCommands);
     }
     for (Rational i = lowerBoundRat; i <= upperBoundRat; i += deltaRat) {
-      rValues.AddOnTop(i);
+      rValues.addOnTop(i);
     }
   }
   double yMax = - 0.5, yMin = 0.5;
@@ -6501,10 +6501,10 @@ bool CalculatorFunctions::innerPlot2DWithBars(Calculator& theCommands, const Exp
         << ", instead " << "I evaluated to " << theFunValueFinal.toString();
       }
       if (j == 0) {
-        xValues.AddOnTop(i);
-        fValuesLower.AddOnTop(finalResultDouble);
+        xValues.addOnTop(i);
+        fValuesLower.addOnTop(finalResultDouble);
       } else {
-        fValuesUpper.AddOnTop(finalResultDouble);
+        fValuesUpper.addOnTop(finalResultDouble);
       }
       yMin = MathRoutines::Minimum(yMin, finalResultDouble);
       yMax = MathRoutines::Maximum(yMax, finalResultDouble);
@@ -6569,7 +6569,7 @@ bool CalculatorFunctions::innerPlot2DWithBars(Calculator& theCommands, const Exp
   thePlot.yLow = yMin;
   thePlot.yHigh = yMax;
 
-  thePlot.coordinateFunctionsE.AddOnTop(input[1]);
+  thePlot.coordinateFunctionsE.addOnTop(input[1]);
   Plot plotFinal;
   plotFinal += thePlot;
   plotFinal += outputPlot;
@@ -6603,7 +6603,7 @@ bool CalculatorFunctions::innerPlotPolarRfunctionTheta(Calculator& theCommands, 
     return theCommands << "Polar radius must depend on a single variable. ";
   }
   if (theVars.size == 0) {
-    theVars.AddOnTop(theCommands.GetNewAtom());
+    theVars.addOnTop(theCommands.GetNewAtom());
   }
   Expression theSine(theCommands), theCosine(theCommands);
   theSine.AddChildAtomOnTop(theCommands.opSin());
@@ -6667,7 +6667,7 @@ bool CalculatorFunctions::innerPlotParametricCurve(
   }
   thePlot.dimension = input[1].size() - 1;
   for (int i = 0; i < thePlot.dimension; i ++) {
-    thePlot.coordinateFunctionsE.AddOnTop(input[1][i + 1]);
+    thePlot.coordinateFunctionsE.addOnTop(input[1][i + 1]);
     thePlot.coordinateFunctionsE[i].GetFreeVariables(thePlot.variablesInPlay, true);
   }
   if (thePlot.variablesInPlay.size > 1) {
@@ -6680,9 +6680,9 @@ bool CalculatorFunctions::innerPlotParametricCurve(
   if (thePlot.variablesInPlay.size == 0) {
     Expression tempE;
     tempE.MakeAtom("t", theCommands);
-    thePlot.variablesInPlay.AddOnTop(tempE);
+    thePlot.variablesInPlay.addOnTop(tempE);
   }
-  thePlot.variablesInPlayJS.AddOnTop(
+  thePlot.variablesInPlayJS.addOnTop(
     HtmlRoutines::GetJavascriptVariable(thePlot.variablesInPlay[0].toString())
   );
   thePlot.colorJS = "red";
@@ -7697,7 +7697,7 @@ bool CalculatorFunctions::innerWriteGenVermaModAsDiffOperatorUpToLevel(
       for (int k = 0; k < invertedSelInducing.CardinalitySelection; k ++) {
         theHWrf[invertedSelInducing.elements[k]] += Rational(theHWenumerator.Multiplicities[k]);
       }
-      theHws.AddOnTop(theHWrf);
+      theHws.addOnTop(theHWrf);
     }
   }
   FormatExpressions theFormat;
@@ -7915,7 +7915,7 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
     currentHWdualcoords = theSSalgebra.content->theWeyl.GetDualCoordinatesFromFundamental(tempMon.weightFundamentalCoordS);
     currentChar = theCasimir;
     currentChar.ModOutVermaRelations(& currentHWdualcoords, RFOne, RFZero);
-    theCentralCharacters.AddOnTop(currentChar);
+    theCentralCharacters.addOnTop(currentChar);
     out << "<tr><td>" << theFDLeviSplitShifteD[i].weightFundamentalCoordS.ToStringLetterFormat("\\psi") << "</td><td>"
     << currentChar.toString(&tempFormat) << "</td></tr>";
     latexReport1 << " $" << theFDLeviSplitShifteD[i].weightFundamentalCoordS.ToStringLetterFormat("\\psi", &tempFormat) << "$"
@@ -8132,7 +8132,7 @@ bool CalculatorFunctions::innerSplitFDpartB3overG2(
     return true;
   }
   Vectors<RationalFunction> theHWs;
-  theHWs.AddOnTop(theG2B3Data.theWeightFundCoords);
+  theHWs.addOnTop(theG2B3Data.theWeightFundCoords);
   return theCommands.innerPrintB3G2branchingIntermediate(theCommands, input, output, theHWs, theG2B3Data, theContext);
 }
 
@@ -8173,7 +8173,7 @@ bool Calculator::innerPrintB3G2branchingTableCommon(
       theHWrf = theG2B3Data.theWeightFundCoords;
       for (int k = 0; k < invertedSelInducing.CardinalitySelection; k ++)
         theHWrf[invertedSelInducing.elements[k]] += theHWenumerator.Multiplicities[k];
-      outputHWs.AddOnTop(theHWrf);
+      outputHWs.addOnTop(theHWrf);
     }
   }
   return true;
@@ -8259,8 +8259,8 @@ bool Expression::EvaluatesToDoubleInRange(
   if (knownEs.Contains(theVarNameE)) {
     return *(this->owner) << "Variable name is an already known constant, variable name is bad.";
   }
-  knownEs.AddOnTop(theVarNameE);
-  knownValues.AddOnTop(0);
+  knownEs.addOnTop(theVarNameE);
+  knownValues.addOnTop(0);
   int numPoints = numIntervals + 1;
   double delta = (highBound - lowBound) / (numIntervals);
   *knownValues.LastObject() = lowBound;
@@ -8852,7 +8852,7 @@ bool CalculatorFunctions::innerFindProductDistanceModN(
       numElementsCovered ++;
     }
     theList[theIntsReduced[i]] = static_cast<unsigned>(theInts[i]);
-    theIndexStack.AddOnTop(theIntsReduced[i]);
+    theIndexStack.addOnTop(theIntsReduced[i]);
   }
   LargeIntegerUnsigned currentIndexLarge, currentDistance, maxDistanceGenerated;
   int currentIndex;
@@ -8895,7 +8895,7 @@ bool CalculatorFunctions::innerFindProductDistanceModN(
       if (currentDistance > maxDistanceGenerated) {
         maxDistanceGenerated = currentDistance;
       }
-      theIndexStack.AddOnTop(currentIndex);
+      theIndexStack.addOnTop(currentIndex);
       if (theIndexStack.size % 10000 == 0) {
         std::stringstream out;
         out << "While computing product distance, explored " << i + 1 << " out of "
@@ -9113,7 +9113,7 @@ bool CalculatorFunctions::innerCrashByListOutOfBounds(
   List<int> theList;
   std::vector<int> theVector;
   for (int i = 0; i < 5; i ++) {
-    theList.AddOnTop(0);
+    theList.addOnTop(0);
     theVector.push_back(0);
   }
   theList.SetSize(0);
@@ -9344,11 +9344,11 @@ public:
       }
     }
     for (int i = 0; i < this->GetCurrentE().children.size; i ++) {
-      this->currentEchildrenTruncated.AddOnTop(this->GetCurrentE()[i]);
+      this->currentEchildrenTruncated.addOnTop(this->GetCurrentE()[i]);
       if (i + 1 + this->indexCurrentChild > this->MaxDisplayedNodes || i > this->MaxAllowedWidth) {
         Expression dotsAtom;
         dotsAtom.MakeAtom(std::string("..."), *this->owner);
-        this->currentEchildrenTruncated.AddOnTop(dotsAtom);
+        this->currentEchildrenTruncated.addOnTop(dotsAtom);
         break;
       }
     }
@@ -9384,15 +9384,15 @@ public:
   void ComputeCurrentEContributionToNextLayer() {
     MacroRegisterFunctionWithName("ExpressionTreeDrawer::ComputeCurrentEContributionToNextLayer");
     this->ComputeCurrentEchildrenTruncated();
-    this->nextLayer.AddListOnTop(this->currentEchildrenTruncated);
+    this->nextLayer.addListOnTop(this->currentEchildrenTruncated);
     List<int> emptyArrows;
     for (int i = 0; i < this->currentEchildrenTruncated.size; i ++) {
-      this->arrows[this->indexCurrentChild].AddOnTop(this->DisplayedEstrings.size);
+      this->arrows[this->indexCurrentChild].addOnTop(this->DisplayedEstrings.size);
       this->AddStringTruncate(
         this->GetDisplayString(this->currentEchildrenTruncated[i]),
         this->isLeaf(this->currentEchildrenTruncated[i])
       );
-      this->arrows.AddOnTop(emptyArrows);
+      this->arrows.addOnTop(emptyArrows);
     }
   }
   void init() {
@@ -9404,7 +9404,7 @@ public:
     this->LayerSizes.SetSize(1);
     this->LayerSizes[0] = 1;
     List<int> emptyArrows;
-    this->arrows.AddOnTop(emptyArrows);
+    this->arrows.addOnTop(emptyArrows);
     this->currentLayer[0] = this->baseExpression;
     this->DisplayedEstrings.Clear();
     this->AddStringTruncate(this->baseExpression.toString(), this->isLeaf(this->baseExpression));
@@ -9425,15 +9425,15 @@ public:
     return out.str();
   }
   void AddStringTruncate(const std::string& input, bool isLeaf) {
-    this->DisplayedStringIsLeaf.AddOnTop(isLeaf);
+    this->DisplayedStringIsLeaf.addOnTop(isLeaf);
     if (input.size() <= static_cast<unsigned>(this->maxNumCharsInString)) {
-      this->DisplayedEstrings.AddOnTop(input);
+      this->DisplayedEstrings.addOnTop(input);
       return;
     }
     std::string truncatedInput = input;
     truncatedInput.resize(static_cast<unsigned>(this->maxNumCharsInString) - 3);
     truncatedInput += "...";
-    this->DisplayedEstrings.AddOnTop(truncatedInput);
+    this->DisplayedEstrings.addOnTop(truncatedInput);
   }
   bool IncrementReturnFalseIfPastLast() {
     MacroRegisterFunctionWithName("ExpressionTreeDrawer::IncrementReturnFalseIfPastLast");
@@ -9445,8 +9445,8 @@ public:
       if (this->currentLayer.size == 0) {
         return false;
       }
-      this->LayerFirstIndices.AddOnTop(this->indexCurrentChild);
-      this->LayerSizes.AddOnTop(this->nextLayer.size);
+      this->LayerFirstIndices.addOnTop(this->indexCurrentChild);
+      this->LayerSizes.addOnTop(this->nextLayer.size);
       this->nextLayer.SetSize(0);
       this->ComputeCurrentEContributionToNextLayer();
       return this->currentLayer.size > 0;
@@ -9514,15 +9514,15 @@ public:
         arrowHead[1] += this->charHeight.GetDoubleValue() / 2;
         PlotObject theSegment;
         theSegment.thePlotString = "segment";
-        theSegment.thePointsDouble.AddOnTop(arrowBase);
-        theSegment.thePointsDouble.AddOnTop(arrowHead);
+        theSegment.thePointsDouble.addOnTop(arrowBase);
+        theSegment.thePointsDouble.addOnTop(arrowHead);
         theSegment.colorJS = "black";
         this->thePlot += theSegment;
       }
       if (this->DisplayedEstrings[i] != "") {
         PlotObject theText;
         theText.thePlotType = "label";
-        theText.thePointsDouble.AddOnTop(this->NodePositionsDouble[i]);
+        theText.thePointsDouble.addOnTop(this->NodePositionsDouble[i]);
         theText.colorJS =
         this->DisplayedStringIsLeaf[i] ? "red" : "gray";
         theText.thePlotString =
@@ -9533,7 +9533,7 @@ public:
         PlotObject thePoint;
         thePoint.thePlotType = "point";
         thePoint.colorJS = "blue";
-        thePoint.thePointsDouble.AddOnTop(this->NodePositionsDouble[i]);
+        thePoint.thePointsDouble.addOnTop(this->NodePositionsDouble[i]);
         this->thePlot += thePoint;
       }
     }
@@ -9721,9 +9721,9 @@ bool CalculatorFunctions::innerTurnRulesOnOff(
     !input.StartsWith(theCommands.opTurnOnRules())
   ) {
     if (input.IsOfType<std::string>(&currentRule)) {
-      rulesToConsider.AddOnTop(currentRule);
+      rulesToConsider.addOnTop(currentRule);
     } else if (input.IsOperation(&currentRule)) {
-      rulesToConsider.AddOnTop(currentRule);
+      rulesToConsider.addOnTop(currentRule);
     } else {
       return theCommands << "Could not extract rule to turn off from "
       << input.toString() << ". ";
@@ -9731,9 +9731,9 @@ bool CalculatorFunctions::innerTurnRulesOnOff(
   } else {
     for (int i = 1; i < input.size(); i ++) {
       if (input[i].IsOfType<std::string>(&currentRule)) {
-        rulesToConsider.AddOnTop(currentRule);
+        rulesToConsider.addOnTop(currentRule);
       } else if (input[i].IsOperation(&currentRule)) {
-        rulesToConsider.AddOnTop(currentRule);
+        rulesToConsider.addOnTop(currentRule);
       } else {
         return theCommands
         << "Could not extract rule to turn off from "

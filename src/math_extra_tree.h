@@ -47,7 +47,7 @@ void TreeNode<data>::AddChild(const data& inputData) {
   this->owner->theNodes[newNodeIndex].theData = inputData;
   this->owner->theNodes[newNodeIndex].parent = this->myIndex;
   this->owner->theNodes[newNodeIndex].myIndex = newNodeIndex;
-  this->children.AddOnTop(newNodeIndex);
+  this->children.addOnTop(newNodeIndex);
 }
 
 template <typename data>

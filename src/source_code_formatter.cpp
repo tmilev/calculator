@@ -61,8 +61,8 @@ bool CodeFormatter::FormatCPPDirectory(const std::string& inputDirectory, std::s
   oldFileNames.SetExpectedSize(allFiles.size);
   for (int i = 0; i < allFiles.size; i ++) {
     if (allFileExtensions[i] == ".cpp" || allFileExtensions[i] == ".h") {
-      oldFileNames.AddOnTop(directory + allFiles[i]);
-      newFileNames.AddOnTop(directory + "new/" + allFiles[i]);
+      oldFileNames.addOnTop(directory + allFiles[i]);
+      newFileNames.addOnTop(directory + "new/" + allFiles[i]);
     }
   }
   for (int i = 0; i < newFileNames.size; i ++) {
@@ -109,7 +109,7 @@ bool CodeFormatter::AddWordToTarget(const std::string& incomingString, List<Code
   }
   CodeElement incoming;
   this->SetContentComputeType(incomingString, incoming);
-  output.AddOnTop(incoming);
+  output.addOnTop(incoming);
   return true;
 }
 
@@ -387,7 +387,7 @@ bool CodeFormatter::ComputeState(int maximumElementsToProcess) {
 }
 
 bool CodeFormatter::AddAndAccount(const CodeElement& incoming) {
-  this->transformedElements.AddOnTop(incoming);
+  this->transformedElements.addOnTop(incoming);
   if (incoming.content == "\n") {
     this->previousLineIndent = this->currentLineIndent;
     this->previousLineLength = this->currentLineLength;

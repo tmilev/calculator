@@ -278,7 +278,7 @@ public:
   void Substitution(const PolynomialSubstitution<Rational>& theSub, ListReferences<ModuleSSalgebra<coefficient> >& theMods);
   void SetNumVariables(int GoalNumVars) {
     for (int i = 0; i < this->size; i ++) {
-      this->TheObjects[i].SetNumVariables(GoalNumVars);
+      this->theObjects[i].SetNumVariables(GoalNumVars);
     }
   }
   SemisimpleLieAlgebra& GetOwnerSS() const {
@@ -304,9 +304,9 @@ public:
     if (this->size == 0) {
       return - 1;
     }
-    int theAnswer = this->TheObjects[0].GetNumVars();
+    int theAnswer = this->theObjects[0].GetNumVars();
     for (int i = 1; i < this->size; i ++) {
-      if (theAnswer != this->TheObjects[i].GetNumVars()) {
+      if (theAnswer != this->theObjects[i].GetNumVars()) {
         return - 1;
       }
     }

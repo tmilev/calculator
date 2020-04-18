@@ -377,7 +377,7 @@ bool Polynomial<coefficient>::IsNegative() const {
 template <class coefficient>
 bool Polynomial<coefficient>::IsLinearNoConstantTerm() {
   for (int i = 0; i < this->size; i ++) {
-    if (!this->TheObjects[i].IsLinearNoConstantTerm()) {
+    if (!this->theObjects[i].IsLinearNoConstantTerm()) {
       return false;
     }
   }
@@ -478,7 +478,7 @@ int Polynomial<coefficient>::GetHighestIndexSuchThatHigherIndexVarsDontParticipa
   for (int i = 0; i < this->size; i ++) {
     result = MathRoutines::Maximum(
       result,
-      this->TheObjects[i].GetHighestIndexSuchThatHigherIndexVarsDontParticipate()
+      this->theObjects[i].GetHighestIndexSuchThatHigherIndexVarsDontParticipate()
     );
   }
   return result;
@@ -806,7 +806,7 @@ void Polynomial<coefficient>::DivideBy(
 template <class coefficient>
 void Polynomial<coefficient>::DivideByConstant(const coefficient& r) {
   for (int i = 0; i < this->size; i ++) {
-    this->TheObjects[i].Coefficient /= r;
+    this->theObjects[i].Coefficient /= r;
   }
 }
 
@@ -866,13 +866,13 @@ void Polynomial<coefficient>::AssignMinPoly(const Matrix<coefficient>& input) {
   for (int col = 0; col < theDim; col ++) {
     theVectorPowers.MakeEi(theDim,col);
     theBasis.SetSize(0);
-    theBasis.AddOnTop(theVectorPowers);
+    theBasis.addOnTop(theVectorPowers);
     for (int i = 0; i < theDim; i ++) {
       input.ActOnVectorColumn(*theBasis.LastObject(), theVectorPowers);
       if (theBasis.LinSpanContainsVector(theVectorPowers)) {
         break;
       }
-      theBasis.AddOnTop(theVectorPowers);
+      theBasis.addOnTop(theVectorPowers);
     }
     theVectorPowers.GetCoordsInBasiS(theBasis, firstDependentPower);
     currentFactor.SetExpectedSize(theBasis.size + 1);

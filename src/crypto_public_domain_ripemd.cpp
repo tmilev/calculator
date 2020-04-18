@@ -418,5 +418,5 @@ void CryptoPublicDomain::computeRIPEMD160(const std::string& input, List<unsigne
   ripemd160_init(&md);
   output.SetSize(20);
   ripemd160_process(&md, reinterpret_cast<const unsigned char*>(input.c_str()), input.size());
-  ripemd160_done(&md, output.TheObjects);
+  ripemd160_done(&md, output.theObjects);
 }

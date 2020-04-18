@@ -57,7 +57,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::CheckAllSimp
 /*template <typename somegroup, typename coefficient>
 void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::CheckRepIsMultiplicativelyClosed() {
   HashedList<Matrix<Rational> > tempList;
-  tempList.AddOnTop(this->theElementImages);
+  tempList.addOnTop(this->theElementImages);
   Matrix<Rational> tempMat;
   ElementWeylGroup tempElt;
   for (int i = 0; i < tempList.size; i ++) {
@@ -90,7 +90,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::ComputeAllGe
   ElementWeylGroup currentElt;
   int theRank = this->ownerGroup->GetDim();
   currentElt.makeIdentity(*this->ownerGroup);
-  ElementsExplored.AddOnTop(currentElt);
+  ElementsExplored.addOnTop(currentElt);
   List<ElementWeylGroup> theGens;
   theGens.SetSize(theRank);
   for (int i = 0; i < theRank; i ++)
@@ -103,7 +103,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::ComputeAllGe
         int indexCurrentElt = this->ownerGroup->theElements.GetIndex(currentElt);
         this->theElementIsComputed[indexCurrentElt] = true;
         this->theElementImageS[indexParentElement].MultiplyOnTheLeft(this->generatorS[j], this->theElementImageS[indexCurrentElt]);
-        ElementsExplored.AddOnTop(currentElt);
+        ElementsExplored.addOnTop(currentElt);
       }
     }
   }
@@ -131,7 +131,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::ComputeAllEl
   int theRank = this->ownerGroup->generators.size;
   auto& theGens = this->ownerGroup->generators;
 
-  ElementsExplored.AddOnTop(currentElt);
+  ElementsExplored.addOnTop(currentElt);
   for (int i = 0; i < ElementsExplored.size; i ++) {
     int indexParentElement = this->ownerGroup->theElements.GetIndex(ElementsExplored[i]);
     for (int j = 0; j < theRank; j ++) {
@@ -140,7 +140,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::ComputeAllEl
         int indexCurrentElt = this->ownerGroup->theElements.GetIndex(currentElt);
         this->theElementIsComputed[indexCurrentElt] = true;
         this->theElementImageS[indexParentElement].MultiplyOnTheLeft(this->generatorS[j], this->theElementImageS[indexCurrentElt]);
-        ElementsExplored.AddOnTop(currentElt);
+        ElementsExplored.addOnTop(currentElt);
       }
     }
   }
@@ -268,7 +268,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
   outputIrrepMults.makeZero();
   List<GroupRepresentation<somegroup, coefficient> > appendOnlyIrrepsList;
   for (int i = 0; i < this->ownerGroup->irreps.size; i ++) {
-    appendOnlyIrrepsList.AddOnTop(this->ownerGroup->irreps[i]);
+    appendOnlyIrrepsList.addOnTop(this->ownerGroup->irreps[i]);
   }
   return this->DecomposeTodorsVersionRecursive(outputIrrepMults, appendOnlyIrrepsList, appendOnlyGRCAMSList);
 }
@@ -511,7 +511,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple(
   Vectors<Polynomial<Rational> > theHWs;
   FormatExpressions theFormat;
   theContext.ContextGetFormatExpressions(theFormat);
-  theHWs.AddOnTop(theHWsimpleCoords);
+  theHWs.addOnTop(theHWsimpleCoords);
   HashedList<Vector<Polynomial<Rational> > > outputOrbit;
   WeylGroupAutomorphisms theOuterAutos;
   theOuterAutos.theWeyl = &theWeyl;
@@ -618,7 +618,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
   FormatExpressions theFormat;
   theSSalgebra.context.context.ContextGetFormatExpressions(theFormat);
 //  theFormat.fundamentalWeightLetter ="\\psi";
-  theHWs.AddOnTop(theHWsimpleCoords);
+  theHWs.addOnTop(theHWsimpleCoords);
   HashedList<Vector<Polynomial<Rational> > > outputOrbit;
   HashedList<ElementWeylGroup> orbitGeneratingSet;
   Polynomial<Rational> theExp;
@@ -817,7 +817,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOuterConjugacyClassesFromAllEle
   List<Matrix<Rational> > outerAutos;
   for (int i = 0; i < theAutomorphismGroup.theOuterAutos.theGenerators.size; i ++) {
     theAutomorphismGroup.theOuterAutos.theGenerators[i].GetMatrix(currentAuto, theGroupData.GetDim());
-    outerAutos.AddOnTop(currentAuto);
+    outerAutos.addOnTop(currentAuto);
   }
   std::stringstream out;
   out << "Weyl group generators. <br>";
@@ -1149,7 +1149,7 @@ std::string WeylGroupData::ToStringSignSignatureRootSubsystem(const List<Subgrou
     parSignSigsNoRepetition.AddOnTopNoRepetition(parabolicSignSig);
     irrepsPerSignature.SetSize(parSignSigsNoRepetition.size);
     for (int i = 0; i < parabolicSignSig.size; i ++) {
-      irrepsPerSignature[parSignSigsNoRepetition.GetIndex(parabolicSignSig[i])].AddOnTop(this->irrepsCarterLabels[i]);
+      irrepsPerSignature[parSignSigsNoRepetition.GetIndex(parabolicSignSig[i])].addOnTop(this->irrepsCarterLabels[i]);
     }
     mainTableStream << "\n<br>\n\n<br>\nThe following families of representations share the same sign signature. ";
     for (int i = 0; i < irrepsPerSignature.size; i ++) {
@@ -1172,7 +1172,7 @@ std::string WeylGroupData::ToStringSignSignatureRootSubsystem(const List<Subgrou
     pseudoSigsNoRepetition.AddOnTopNoRepetition(pseudoSignSig);
     irrepsPerSignature.SetSize(pseudoSigsNoRepetition.size);
     for (int i = 0; i < pseudoSignSig.size; i ++) {
-      irrepsPerSignature[pseudoSigsNoRepetition.GetIndex(pseudoSignSig[i])].AddOnTop(this->irrepsCarterLabels[i]);
+      irrepsPerSignature[pseudoSigsNoRepetition.GetIndex(pseudoSignSig[i])].addOnTop(this->irrepsCarterLabels[i]);
     }
     mainTableStream << "\n<br>\n\n<br>\nThe following families of representations share the same pseudo-sign signature. ";
     for (int i = 0; i < irrepsPerSignature.size; i ++) {
@@ -1507,7 +1507,7 @@ bool KostkaNumber::Compute(HashedList<KostkaNumber>* KNcache, std::stringstream*
         return false;
       } else {
         if (KNcache->size < this->MaxNumCachedKostkaNumbers) {
-          KNcache->AddOnTop(ancestor);
+          KNcache->addOnTop(ancestor);
         }
       }
     } else {
@@ -1530,12 +1530,12 @@ std::string KostkaNumber::GetTypeBParabolicSignMultiplicityTable(int rank) {
   for (int i = 0; i <= rank; i ++) {
     Partition::GetPartitions(partitionsLeft, i);
     Partition::GetPartitions(partitionsRight, rank - i);
-    partitionsParabolics.AddListOnTop(partitionsRight);
+    partitionsParabolics.addListOnTop(partitionsRight);
     for (int j = 0; j < partitionsLeft.size; j ++) {
       for (int k = 0; k < partitionsRight.size; k ++) {
         currentPartition.Object1 = partitionsLeft[j];
         currentPartition.Object2 = partitionsRight[k];
-        partitionPairs.AddOnTop(currentPartition);
+        partitionPairs.addOnTop(currentPartition);
       }
     }
   }
@@ -1695,7 +1695,7 @@ Rational KostkaNumber::ComputeTypeBParabolicSignMultiplicity(
     leftKN.tuple = theSelection.Multiplicities;
     leftKN.Compute(&KNcache, nullptr);
     rightKN.tuple = complementSelection;
-    rightKN.tuple.AddOnTop(BcomponentSize);
+    rightKN.tuple.addOnTop(BcomponentSize);
     rightKN.Compute(&KNcache, nullptr);
     result += leftKN.value * rightKN.value;
   } while (theSelection.IncrementReturnFalseIfPastLast());
@@ -1916,8 +1916,8 @@ bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems(
         currentTauSig.Object1 = (*currentSGs)[i].theDynkinType.toString();
         currentTauSig.Object2 = (*currentSGs)[i].tauSignature;
         if (!tauSigPairs.Contains(currentTauSig)) {
-          tauSigPairs.AddOnTop(currentTauSig);
-          finalSubGroups.AddOnTop((*currentSGs)[i]);
+          tauSigPairs.addOnTop(currentTauSig);
+          finalSubGroups.addOnTop((*currentSGs)[i]);
         }
       }
     }
@@ -2048,7 +2048,7 @@ MonomialMacdonald::~MonomialMacdonald() {
 void MonomialMacdonald::GenerateMyOrbit(HashedList<MonomialMacdonald>& output) {
   MacroRegisterFunctionWithName("MonomialMacdonald::GenerateMyOrbit");
   output.Clear();
-  output.AddOnTop(*this);
+  output.addOnTop(*this);
   MonomialMacdonald currentMon;
   Rational tempRat;
   for (int i = 0; i < output.size; i ++) {
@@ -2457,7 +2457,7 @@ bool Calculator::innerGenerateMultiplicativelyClosedSet(
   HashedList<Expression> theSet;
   theSet.SetExpectedSize(input.size() - 2);
   for (int i = 2; i < input.size(); i ++) {
-    theSet.AddOnTop(input[i]);
+    theSet.addOnTop(input[i]);
   }
   int numGenerators = theSet.size;
   Expression theProduct, evaluatedProduct;
@@ -2479,7 +2479,7 @@ bool Calculator::innerGenerateMultiplicativelyClosedSet(
         out << "<hr>While generating multiplicatively closed set, I went above the upper limit of "
         << upperLimit << " elements.";
         evaluatedProduct.MakeError(out.str(), theCommands);
-        theSet.AddOnTop(evaluatedProduct);
+        theSet.addOnTop(evaluatedProduct);
         i = theSet.size; break;
       }
     }

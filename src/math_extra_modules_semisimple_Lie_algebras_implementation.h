@@ -64,12 +64,12 @@ Rational ModuleSSalgebra<coefficient>::hwTrace(
       summand *= oldRight.Powers[i];
       result += summand;
     }
-    Accum.generatorsIndices.AddOnTop(oldRight.generatorsIndices[i]);
-    Accum.Powers.AddOnTop(oldRight.Powers[i]);
+    Accum.generatorsIndices.addOnTop(oldRight.generatorsIndices[i]);
+    Accum.Powers.addOnTop(oldRight.Powers[i]);
   }
   if (this->cachedPairs.size < this->MaxNumCachedPairs) {
-    this->cachedPairs.AddOnTop(thePair);
-    this->cachedTraces.AddOnTop(result);
+    this->cachedPairs.addOnTop(thePair);
+    this->cachedTraces.addOnTop(result);
   }
   if (theProgressReport != nullptr && this->cachedPairs.size < 500000) {
     std::stringstream tempStream;
@@ -132,7 +132,7 @@ void ModuleSSalgebra<coefficient>::Substitution(const PolynomialSubstitution<Rat
   this->theGeneratingWordsNonReduced.Clear();
   for (int i = 0; i < oldGeneratingWordsNonReduced.size; i ++) {
     oldGeneratingWordsNonReduced[i].Substitution(theSub);
-    this->theGeneratingWordsNonReduced.AddOnTop(oldGeneratingWordsNonReduced[i]);
+    this->theGeneratingWordsNonReduced.addOnTop(oldGeneratingWordsNonReduced[i]);
   }
   for (int i = 0; i < this->theGeneratingWordsGrouppedByWeight.size; i ++) {
     for (int j = 0; j < this->theGeneratingWordsGrouppedByWeight[i].size; j ++) {
@@ -486,10 +486,10 @@ void ModuleSSalgebra<coefficient>::SplitOverLevi(
       out << "(";
     }
     if (outputEigenVectors != 0) {
-      outputEigenVectors->AddOnTop(currentElt);
+      outputEigenVectors->addOnTop(currentElt);
     }
     if (outputWeightsFundCoords != 0) {
-      outputWeightsFundCoords->AddOnTop(currentWeight);
+      outputWeightsFundCoords->addOnTop(currentWeight);
     }
     out << currentElt.toString(&global.theDefaultFormat.GetElement());
     if (currentElt.size() > 1) {
@@ -670,8 +670,8 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW(
       }
       return false;
     }
-    this->theGeneratingWordsGrouppedByWeight[theIndex].AddOnTop(currentNonReducedElement);
-    this->theGeneratingWordsIntGrouppedByWeight[theIndex].AddOnTop(tempMonInt);
+    this->theGeneratingWordsGrouppedByWeight[theIndex].addOnTop(currentNonReducedElement);
+    this->theGeneratingWordsIntGrouppedByWeight[theIndex].addOnTop(tempMonInt);
   }
   this->theGeneratingWordsNonReduced.Clear();
   this->theGeneratingWordsNonReduced.SetExpectedSize(this->thePaths.size);
@@ -687,9 +687,9 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW(
     currentListInt.QuickSortDescending();
     for (int j = 0; j < currentList.size; j ++) {
       //wordCounter ++;
-      this->theGeneratingWordsNonReduced.AddOnTop(currentList[j]);
-      this->theGeneratingWordsNonReducedInt.AddOnTop(currentListInt[j]);
-      this->theGeneratingWordsWeightsPlusWeightFDpart.AddOnTop(this->theModuleWeightsSimpleCoords[i]);
+      this->theGeneratingWordsNonReduced.addOnTop(currentList[j]);
+      this->theGeneratingWordsNonReducedInt.addOnTop(currentListInt[j]);
+      this->theGeneratingWordsWeightsPlusWeightFDpart.addOnTop(this->theModuleWeightsSimpleCoords[i]);
     }
   }
   this->IntermediateStepForMakeFromHW(theRingUnit, theRingZero);
@@ -839,7 +839,7 @@ void ModuleSSalgebra<coefficient>::GetElementsNilradical(
   outputListOfGenerators->Reserve(ownerSS.GetNumPosRoots());
   for (int i = theBeginning; i < theBeginning+ownerSS.GetNumPosRoots(); i ++) {
     if (this->IsNotInLevi(i)) {
-      outputListOfGenerators->AddOnTop(i);
+      outputListOfGenerators->addOnTop(i);
     }
   }
   //bubble sort:
@@ -854,8 +854,8 @@ void ModuleSSalgebra<coefficient>::GetElementsNilradical(
     }
   }
   for (int i = 0; i < outputListOfGenerators->size; i ++) {
-    theElt.MakeOneGeneratorCoeffOne(outputListOfGenerators->TheObjects[i], *this->owner);
-    output.AddOnTop(theElt);
+    theElt.MakeOneGeneratorCoeffOne(outputListOfGenerators->theObjects[i], *this->owner);
+    output.addOnTop(theElt);
   }
 }
 

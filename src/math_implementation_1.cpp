@@ -14,8 +14,8 @@ void SemisimpleLieAlgebra::GetChevalleyGeneratorAsLieBracketsSimpleGens(
   outputIndicesFormatAd0Ad1Ad2etc.size = 0;
   if (this->IsGeneratorFromCartan(generatorIndex)) {
     int simpleIndex = generatorIndex - this->GetNumPosRoots();
-    outputIndicesFormatAd0Ad1Ad2etc.AddOnTop(generatorIndex + this->GetRank());
-    outputIndicesFormatAd0Ad1Ad2etc.AddOnTop(2 * this->GetNumPosRoots() - 1 - generatorIndex);
+    outputIndicesFormatAd0Ad1Ad2etc.addOnTop(generatorIndex + this->GetRank());
+    outputIndicesFormatAd0Ad1Ad2etc.addOnTop(2 * this->GetNumPosRoots() - 1 - generatorIndex);
     outputMultiplyLieBracketsToGetGenerator = this->theWeyl.CartanSymmetric.elements[simpleIndex][simpleIndex] / 2;
     return;
   }
@@ -32,7 +32,7 @@ void SemisimpleLieAlgebra::GetChevalleyGeneratorAsLieBracketsSimpleGens(
       if (newWeight.IsEqualToZero() || this->theWeyl.IsARoot(newWeight)) {
         theWeight = newWeight;
         int theIndex = this->GetGeneratorFromRoot(- genWeight);
-        outputIndicesFormatAd0Ad1Ad2etc.AddOnTop(theIndex);
+        outputIndicesFormatAd0Ad1Ad2etc.addOnTop(theIndex);
         if (!theWeight.IsEqualToZero()) {
           int currentIndex = this->theWeyl.RootSystem.GetIndex(theWeight);
           theIndex = this->GetRootIndexFromGenerator(theIndex);
@@ -74,7 +74,7 @@ bool PartFractions::ArgumentsAllowed(Vectors<Rational>& theArguments, std::strin
 
 void Lattice::IntersectWithLineGivenBy(Vector<Rational>& inputLine, Vector<Rational>& outputGenerator) {
   Vectors<Rational> tempRoots;
-  tempRoots.AddOnTop(inputLine);
+  tempRoots.addOnTop(inputLine);
   this->IntersectWithLinearSubspaceSpannedBy(tempRoots);
   if (this->basisRationalForm.NumRows > 1) {
     global.fatal << "This should not be possible. " << global.fatal;
@@ -338,7 +338,7 @@ bool LittelmannPath::GenerateOrbit(
   Selection* parabolicNonSelectedAreInLeviPart
 ) {
   HashedList<LittelmannPath> hashedOutput;
-  hashedOutput.AddOnTop(*this);
+  hashedOutput.addOnTop(*this);
   int theDim = this->owner->GetDim();
   outputOperators.SetSize(1);
   outputOperators[0].SetSize(0);
@@ -372,8 +372,8 @@ bool LittelmannPath::GenerateOrbit(
           if (!currentPath.IsEqualToZero()) {
             if (hashedOutput.AddOnTopNoRepetition(currentPath)) {
               found = true;
-              currentSequence.AddOnTop(theIndex);
-              outputOperators.AddOnTop(currentSequence);
+              currentSequence.addOnTop(theIndex);
+              outputOperators.addOnTop(currentSequence);
               if (!currentPath.MinimaAreIntegral()) {
                 global.Comments << "<hr>Found a bad path:<br> ";
                 global.Comments << " = " << currentPath.toString();
@@ -390,8 +390,8 @@ bool LittelmannPath::GenerateOrbit(
           if (!currentPath.IsEqualToZero()) {
             if (hashedOutput.AddOnTopNoRepetition(currentPath)) {
               found = true;
-              currentSequence.AddOnTop(- theIndex - 1);
-              outputOperators.AddOnTop(currentSequence);
+              currentSequence.addOnTop(- theIndex - 1);
+              outputOperators.addOnTop(currentSequence);
               if (!currentPath.MinimaAreIntegral()) {
                 global.Comments << "<hr>Found a bad path:<br> ";
                 global.Comments << " = " << currentPath.toString();
@@ -474,7 +474,7 @@ bool ElementUniversalEnvelopingOrdered<coefficient>::ModOutFDRelationsExperiment
   output.makeZero(*this->owner);
   bool result = true;
   for (int i = 0; i < this->size; i ++) {
-    tempMon = this->TheObjects[i];
+    tempMon = this->theObjects[i];
     if (!tempMon.ModOutFDRelationsExperimental(theHWsimpleCoords, theRingUnit, theRingZero)) {
       result = false;
     }
@@ -493,7 +493,7 @@ bool ElementUniversalEnveloping<coefficient>::GetCoordsInBasis(
 ) const {
   List<ElementUniversalEnveloping<coefficient> > tempBasis, tempElts;
   tempBasis = theBasis;
-  tempBasis.AddOnTop(*this);
+  tempBasis.addOnTop(*this);
   Vectors<coefficient> tempCoords;
   if (!this->GetBasisFromSpanOfElements(tempBasis, tempCoords, tempElts, theRingUnit, theRingZero)) {
     return false;
@@ -541,7 +541,7 @@ bool ElementUniversalEnveloping<coefficient>::GetBasisFromSpanOfElements(
   Selection selectedBasis;
   outputCoordsBeforeReduction.SelectABasis(basisCoordForm, theFieldZero, selectedBasis);
   for (int i = 0; i < selectedBasis.CardinalitySelection; i ++) {
-    outputTheBasis.AddOnTop(theElements.TheObjects[selectedBasis.elements[i]]);
+    outputTheBasis.addOnTop(theElements.theObjects[selectedBasis.elements[i]]);
   }
   Matrix<coefficient> bufferMat;
   Vectors<coefficient> bufferVectors;
@@ -584,7 +584,7 @@ bool ElementUniversalEnveloping<coefficient>::ApplyMinusTransposeAutoOnMe() {
   int theRank = this->GetOwner().GetRank();
   coefficient theCoeff;
   for (int i = 0; i < this->size; i ++) {
-    MonomialUniversalEnveloping<coefficient>& currentMon = this->TheObjects[i];
+    MonomialUniversalEnveloping<coefficient>& currentMon = this->theObjects[i];
     theCoeff = this->coefficients[i];
     tempMon.owner = currentMon.owner;
     tempMon.Powers.size = 0;
@@ -698,7 +698,7 @@ std::string ElementUniversalEnveloping<coefficient>::IsInProperSubmodule(
   ElementUniversalEnveloping<coefficient> theElt;
   int theDim = this->GetOwner().GetRank();
   int numPosRoots = this->GetOwner().GetNumPosRoots();
-  theOrbit.AddOnTop(*this);
+  theOrbit.addOnTop(*this);
   for (int i = 0; i < theOrbit.size; i ++) {
     for (int j = 0; j < theDim; j ++) {
       theElt.MakeOneGenerator(j + numPosRoots + theDim, *this->owner, theRingUnit);
@@ -706,7 +706,7 @@ std::string ElementUniversalEnveloping<coefficient>::IsInProperSubmodule(
       theElt.simplify(theRingUnit);
       theElt.ModOutVermaRelations(subHiGoesToIthElement, theRingUnit, theRingZero);
       if (!theElt.IsEqualToZero()) {
-        theOrbit.AddOnTop(theElt);
+        theOrbit.addOnTop(theElt);
       }
     }
   }
@@ -723,7 +723,7 @@ bool ElementUniversalEnveloping<coefficient>::ConvertToRationalCoeff(ElementUniv
   MonomialUniversalEnveloping<Rational> tempMon;
   Rational theCoeff;
   for (int i = 0; i < this->size; i ++) {
-    MonomialUniversalEnveloping<coefficient>& currentMon = this->TheObjects[i];
+    MonomialUniversalEnveloping<coefficient>& currentMon = this->theObjects[i];
     tempMon.makeOne(*this->owner);
     if (!this->coefficients[i].IsConstant(theCoeff)) {
       return false;
@@ -748,7 +748,7 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
   this->selSmallParSel.init(WeylFDSmall.AmbientWeyl->GetDim());
   for (int i = 0; i < this->theHmm.ImagesCartanDomain.size; i ++) {
     Vector<Rational>& currentV = this->theHmm.ImagesCartanDomain[i];
-    this->generatorsSmallSub.AddOnTop(currentV);
+    this->generatorsSmallSub.addOnTop(currentV);
     for (int j = 0; j < currentV.size; j ++) {
       if (!currentV[j].IsEqualToZero() && this->selInducing.selected[j]) {
         this->generatorsSmallSub.RemoveLastObject();
@@ -780,10 +780,10 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
       }
     }
     if (isInNilradical) {
-      this->weightsNilradicalLarge.AddOnTop(currentWeight);
+      this->weightsNilradicalLarge.addOnTop(currentWeight);
       tempElt.MakeGenerator(i, this->theHmm.theRange());
-      this->nilradicalLarge.AddOnTop(tempElt);
-      this->indicesNilradicalLarge.AddOnTop(i);
+      this->nilradicalLarge.addOnTop(tempElt);
+      this->indicesNilradicalLarge.addOnTop(i);
     }
   }
   for (int i = 0; i < numG2NegGenerators; i ++) {
@@ -796,10 +796,10 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
       }
     }
     if (isInNilradical) {
-      this->weightsNilradicalSmall.AddOnTop(currentWeight);
+      this->weightsNilradicalSmall.addOnTop(currentWeight);
       tempElt.MakeGenerator(i, this->theHmm.theDomain());
-      this->nilradicalSmall.AddOnTop(tempElt);
-      this->indicesNilradicalSmall.AddOnTop(i);
+      this->nilradicalSmall.addOnTop(tempElt);
+      this->indicesNilradicalSmall.addOnTop(i);
     }
   }
   this->NilModPreNil = this->nilradicalLarge;
@@ -859,7 +859,7 @@ std::string branchingData::GetStringCasimirProjector(int theIndex, const Rationa
   for (int i = 0; i < this->g2Weights.size; i ++) {
     weightDifference = this->g2Weights[i] - this->g2Weights[theIndex];
     if (weightDifference.IsPositive() && !accountedDiffs.Contains(weightDifference)) {
-      accountedDiffs.AddOnTop(weightDifference);
+      accountedDiffs.addOnTop(weightDifference);
       if (additionalMultiple != 1) {
         formulaStream1 << additionalMultiple.toString(&this->theFormat);
       }
@@ -925,7 +925,7 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
     for (int j = 0; j < currentOutput.generatorsLastAppliedFirst.size; j ++) {
       currentOutput.generatorsLastAppliedFirst[j].index = indexShifts[other.generatorsLastAppliedFirst[j].index];
     }
-    output.AddOnTop(currentOutput);
+    output.addOnTop(currentOutput);
   }
 }
 

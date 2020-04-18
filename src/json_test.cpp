@@ -14,28 +14,28 @@ bool JSData::Test::TestRecode() {
   // first element is string input, second element
   // is expected recoded output.
   List<List<std::string> > toRecode;
-  toRecode.AddOnTop(List<std::string>({
+  toRecode.addOnTop(List<std::string>({
     "{}", "{}"
   }));
-  toRecode.AddOnTop(List<std::string>({
+  toRecode.addOnTop(List<std::string>({
     "null", "null"
   }));
-  toRecode.AddOnTop(List<std::string>({
+  toRecode.addOnTop(List<std::string>({
     "5", "5"
   }));
-  toRecode.AddOnTop(List<std::string>({
+  toRecode.addOnTop(List<std::string>({
     "- 5", "-5"
   }));
-  toRecode.AddOnTop(List<std::string>({
+  toRecode.addOnTop(List<std::string>({
     "[1, \"\"]", "[1,\"\"]"
   }));
-  toRecode.AddOnTop(List<std::string>({
+  toRecode.addOnTop(List<std::string>({
     "{\"a\":\"b\", \"c\": [\"d\",5]}", "{\"a\":\"b\",\"c\":[\"d\",5]}"
   }));
-  toRecode.AddOnTop(List<std::string>({
+  toRecode.addOnTop(List<std::string>({
     "{\"a\":\"\\n\"}", "{\"a\":\"\\n\"}"
   }));
-  toRecode.AddOnTop(List<std::string>({
+  toRecode.addOnTop(List<std::string>({
     "{\"a\":\"\n\"}", "{\"a\":\"\\n\"}"
   }));
   std::stringstream commentsOnFailure;

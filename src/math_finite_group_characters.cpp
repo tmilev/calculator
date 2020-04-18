@@ -174,7 +174,7 @@ void SpaceTree<coefficient>::PlaceInTree(const List<Vector<coefficient> > &V) {
   if (tempVspace.size != V.size) {
     SpaceTree<coefficient> vst;
     vst.space = V;
-    subspaces.AddOnTop(vst);
+    subspaces.addOnTop(vst);
   }
 }
 
@@ -185,7 +185,7 @@ void SpaceTree<coefficient>::GetLeaves(List<List<Vector<coefficient> > >& leaves
       subspaces[i].GetLeaves(leaves);
     }
   } else {
-    leaves.AddOnTop(space);
+    leaves.addOnTop(space);
   }
 }
 
@@ -229,7 +229,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::MultiplyBy(
           u[i * Wd + j] = this->basis[vi][i] * other.basis[wi][j];
         }
       }
-      output.basis.AddOnTop(u);
+      output.basis.addOnTop(u);
     }
   }
   output.generators.SetSize(this->generators.size);
@@ -321,7 +321,7 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> >
       global.Comments << "new irrep found, have " << this->ownerGroup->characterTable.size << "\n";
       this->ownerGroup->AddIrreducibleRepresentation(*this);
     }
-    out.AddOnTop(*this);
+    out.addOnTop(*this);
     return out;
   }
   List<Vector<coefficient> > Vb = this->basis;
@@ -401,7 +401,7 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> >
     outeme.ownerGroup = this->ownerGroup;
     outeme.generatorS = this->generatorS;
     outeme.basis = es[i];
-    out.AddOnTop(outeme.Reduced());
+    out.addOnTop(outeme.Reduced());
   }
   return out;
 }
@@ -580,7 +580,7 @@ void getunion(const List<Vector<coefficient> >& V, const List<Vector<coefficient
     if (v.IsEqualToZero()) {
       break;
     }
-    output.AddOnTop(v);
+    output.addOnTop(v);
   }
 }
 
@@ -681,7 +681,7 @@ List<Vector<coefficient> > orthogonal_complement(
     if (v.IsEqualToZero()) {
       return out;
     }
-    out.AddOnTop(v);
+    out.addOnTop(v);
   }
   return out;
 }
@@ -692,7 +692,7 @@ bool pdiv(List<coefficient> &p, int a) {
   List<coefficient> q;
   coefficient lastround = p[0];
   for (int i = 1; i < p.size; i ++) {
-    q.AddOnTop(lastround);
+    q.addOnTop(lastround);
     lastround = p[i] - lastround * a;
   }
   if (lastround == 0) {
@@ -710,7 +710,7 @@ List<int> factorpoly(List<coefficient> p, int maxfac) {
       int i = i1 * i2;
       while (pdiv(p, i)) {
         if (!factors.Contains(i)) {
-          factors.AddOnTop(i);
+          factors.addOnTop(i);
         }
         if (p.size == 1) {
           return factors;
@@ -742,7 +742,7 @@ List<Vector<coefficient> > DestructiveColumnSpace(Matrix<coefficient>& M) {
     if (zerov) {
       return out;
     }
-    out.AddOnTop(v);
+    out.addOnTop(v);
   }
 }
 
@@ -766,7 +766,7 @@ List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational>& M, int checkD
       List<Vector<Rational> > V;
       M2.GetEigenspaceModifyMe(r, V);
       found += V.size;
-      spaces.AddOnTop(V);
+      spaces.addOnTop(V);
       if (found == M.NumCols) {
         break;
       }
@@ -869,7 +869,7 @@ Matrix<Rational> MatrixInBasis(
   for (int i = 0; i < B.size; i ++) {
     Vector<Rational> v;
     v.makeZero(B[0].size);
-    rows.AddOnTop(v);
+    rows.addOnTop(v);
   }
   for (int i1 = 0; i1 < X.G->ConjugacyClassCount(); i1 ++) {
     for (int i2 = 0; i2 < X.G->conjugacyClasseS[i1].size; i2 ++) {
@@ -1146,7 +1146,7 @@ void WeylGroupData::GetSignSignatureAllRootSubsystems(List<SubgroupDataRootRefle
   List<Vectors<Rational> > theRootSAsBases;
   theRootSAsBases.SetExpectedSize(theRootSAs.theSubalgebras.size);
   for (int i = theRootSAs.theSubalgebras.size - 1; i >= 0; i --) {
-    theRootSAsBases.AddOnTop(theRootSAs.theSubalgebras[i].SimpleBasisK);
+    theRootSAsBases.addOnTop(theRootSAs.theSubalgebras[i].SimpleBasisK);
   }
   this->GetSignSignatureRootSubgroups(outputSubgroups, theRootSAsBases);
 }
@@ -1191,7 +1191,7 @@ void WeylGroupData::GetSignSignatureExtendedParabolics(List<SubgroupDataRootRefl
   parSelrootsAreInLevi.init(this->GetDim() + 1);
   Vectors<Rational> extendedBasis, currentBasisExtendedParabolic;
   extendedBasis.MakeEiBasis(this->GetDim());
-  extendedBasis.AddOnTop(this->RootSystem[0]);
+  extendedBasis.addOnTop(this->RootSystem[0]);
   outputSubgroups.SetExpectedSize(MathRoutines::TwoToTheNth(this->GetDim()));
   outputSubgroups.SetSize(0);
   SubgroupDataRootReflections theSG;
@@ -1201,7 +1201,7 @@ void WeylGroupData::GetSignSignatureExtendedParabolics(List<SubgroupDataRootRefl
       theSG.MakeFromRoots(*this, currentBasisExtendedParabolic);
       theSG.flagIsExtendedParabolic = true;
       theSG.simpleRootsInLeviParabolic = parSelrootsAreInLevi;
-      outputSubgroups.AddOnTop(theSG);
+      outputSubgroups.addOnTop(theSG);
     }
   } while (parSelrootsAreInLevi.IncrementReturnFalseIfPastLast());
   for (int i = 0; i < outputSubgroups.size; i ++) {

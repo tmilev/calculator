@@ -8284,7 +8284,7 @@ void Calculator::AddKnownDoubleConstant(const std::string& theConstantName, doub
   Expression theConstantE;
   theConstantE.MakeAtom(theConstantName, *this);
   this->knownDoubleConstants.AddOnTopNoRepetitionMustBeNewCrashIfNot(theConstantE);
-  this->knownDoubleConstantValues.AddOnTop(theConstantValue);
+  this->knownDoubleConstantValues.addOnTop(theConstantValue);
 }
 
 void Calculator::initBuiltInAtomsNotInterpretedAsFunctions() {
@@ -8303,22 +8303,22 @@ void Calculator::AddTrigSplit(const std::string& trigFun, const List<std::string
   for (int i = 0; i < theVars.size; i ++) {
     const std::string& theVar = theVars[i];
     theSplit.SetSize(0);
-    theSplit.AddOnTop("\\" + trigFun);
-    theSplit.AddOnTop(theVar);
+    theSplit.addOnTop("\\" + trigFun);
+    theSplit.addOnTop(theVar);
     this->predefinedWordSplits.SetKeyValue(trigFun + theVar, theSplit);
     this->predefinedWordSplits.SetKeyValue("\\" + trigFun + theVar, theSplit);
     theSplit.SetSize(0);
-    theSplit.AddOnTop(theVar);
-    theSplit.AddOnTop("\\" + trigFun);
+    theSplit.addOnTop(theVar);
+    theSplit.addOnTop("\\" + trigFun);
     this->predefinedWordSplits.SetKeyValue(theVar + trigFun, theSplit);
     this->predefinedWordSplits.SetKeyValue(theVar + "\\" + trigFun, theSplit);
   }
   for (int i = 0; i < theVars.size; i ++) {
     for (int j = 0; j < theVars.size; j ++) {
       theSplit.SetSize(0);
-      theSplit.AddOnTop(theVars[i]);
-      theSplit.AddOnTop("\\" + trigFun);
-      theSplit.AddOnTop(theVars[j]);
+      theSplit.addOnTop(theVars[i]);
+      theSplit.addOnTop("\\" + trigFun);
+      theSplit.addOnTop(theVars[j]);
       this->predefinedWordSplits.SetKeyValue(theVars[i] + trigFun + theVars[j], theSplit);
     }
   }
@@ -8328,13 +8328,13 @@ void Calculator::initPredefinedWordSplits() {
   MacroRegisterFunctionWithName("Calculator::initPredefinedWordSplits");
   List<std::string> theSplit;
   List<std::string> theVars;
-  theVars.AddOnTop("x");
-  theVars.AddOnTop("y");
+  theVars.addOnTop("x");
+  theVars.addOnTop("y");
   theSplit.SetSize(0);
-  theSplit.AddOnTop("x"); theSplit.AddOnTop("y");
+  theSplit.addOnTop("x"); theSplit.addOnTop("y");
   this->predefinedWordSplits.SetKeyValue("xy", theSplit);
   theSplit.SetSize(0);
-  theSplit.AddOnTop("y"); theSplit.AddOnTop("x");
+  theSplit.addOnTop("y"); theSplit.addOnTop("x");
   this->predefinedWordSplits.SetKeyValue("yx", theSplit);
   this->AddTrigSplit("sin", theVars);
   this->AddTrigSplit("cos", theVars);
@@ -8347,7 +8347,7 @@ void Calculator::initPredefinedWordSplits() {
 void Calculator::initAtomsThatFreezeArguments() {
   MacroRegisterFunctionWithName("Calculator::initAtomsThatFreezeArguments");
   this->atomsThatFreezeArguments.SetExpectedSize(this->builtInTypes.size + 100);
-  this->atomsThatFreezeArguments.AddOnTop(this->builtInTypes);
+  this->atomsThatFreezeArguments.addOnTop(this->builtInTypes);
   this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("ElementWeylAlgebraDO"); //<-needed to facilitate civilized context handling
   this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("ElementWeylAlgebraPoly"); //<-needed to facilitate civilized context handling
   this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("Freeze");

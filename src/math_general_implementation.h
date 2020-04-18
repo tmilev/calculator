@@ -386,7 +386,7 @@ void Vectors<coefficient>::ChooseABasis() {
   Matrix<coefficient> tempMat;
   Selection tempSel;
   for (int i = 0; i < this->size; i ++) {
-    output.AddOnTop(this->TheObjects[i]);
+    output.addOnTop(this->theObjects[i]);
     if (output.GetRankOfSpanOfElements(&tempMat, &tempSel) < output.size) {
       output.RemoveLastObject();
     }
@@ -408,7 +408,7 @@ void Vectors<coefficient>::BeefUpWithEiToLinearlyIndependentBasis(int theDim) {
   Vector<coefficient> theVect;
   for (int i = 0; i < theDim && currentRank < theDim; i ++) {
     theVect.MakeEi(theDim, i);
-    this->AddOnTop(theVect);
+    this->addOnTop(theVect);
     int candidateRank = this->GetRankOfSpanOfElements(Buffer, BufferSel);
     if (candidateRank > currentRank) {
       currentRank = candidateRank;

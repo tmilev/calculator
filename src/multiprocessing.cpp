@@ -73,7 +73,7 @@ MutexProcess::~MutexProcess() {
 
 std::string PipePrimitive::GetLastRead() {
   MacroRegisterFunctionWithName("PipePrimitive::GetLastRead");
-  std::string result(this->lastRead.TheObjects, static_cast<unsigned>(this->lastRead.size));
+  std::string result(this->lastRead.theObjects, static_cast<unsigned>(this->lastRead.size));
   return result;
 }
 
@@ -91,7 +91,7 @@ bool PipePrimitive::CreateMe(
   bool dontCrashOnFail
 ) {
   this->name = inputPipeName;
-  if (pipe(this->pipeEnds.TheObjects) < 0) {
+  if (pipe(this->pipeEnds.theObjects) < 0) {
     global << logger::red << "FAILED to create pipe: " << this->name << ". " << logger::endL;
     this->Release();
     global.server().StopKillAll();
@@ -253,7 +253,7 @@ int Pipe::ReadWithTimeOutViaSelect(
   do {
     bytesRead = static_cast<int>(read(
       theFD,
-      output.TheObjects,
+      output.theObjects,
       static_cast<unsigned>(output.size - 1)
     ));
     if (bytesRead > 0) {
@@ -371,7 +371,7 @@ void Pipe::ReadLoop(List<char>& output) {
   output.SetSize(0);
   while (output.size < expectedBytes) {
     this->thePipe.ReadOnceIfFailThenCrash(true);
-    output.AddListOnTop(this->thePipe.lastRead);
+    output.addListOnTop(this->thePipe.lastRead);
   }
   safetyFirst.UnlockMe(); // Prevent threads from locking one another.
 }
@@ -566,7 +566,7 @@ bool PipePrimitive::ReadOnceIfFailThenCrash(bool dontCrashOnFail) {
   this->buffer.SetSize(bufferSize); // <-once the buffer is resized, this operation does no memory allocation and is fast.
   int numReadBytes = 0;
   for (;;) {
-    numReadBytes = static_cast<int>(read(this->pipeEnds[0], this->buffer.TheObjects, bufferSize));
+    numReadBytes = static_cast<int>(read(this->pipeEnds[0], this->buffer.theObjects, bufferSize));
     if (numReadBytes >= 0) {
       break;
     }
@@ -854,11 +854,11 @@ logger::StringHighligher::StringHighligher() {
 
 logger::StringHighligher::StringHighligher(const std::string& input) {
   List<char> delimiters;
-  delimiters.AddOnTop(',');
-  delimiters.AddOnTop('(');
-  delimiters.AddOnTop(')');
-  delimiters.AddOnTop('[');
-  delimiters.AddOnTop(']');
+  delimiters.addOnTop(',');
+  delimiters.addOnTop('(');
+  delimiters.addOnTop(')');
+  delimiters.addOnTop('[');
+  delimiters.addOnTop(']');
   List<std::string> inputStrings;
   StringRoutines::StringSplitExcludeDelimiters(input, delimiters, inputStrings);
   for (int i = 0; i < inputStrings.size; i ++) {
@@ -866,12 +866,12 @@ logger::StringHighligher::StringHighligher(const std::string& input) {
     logger::StringHighligher::Section incoming;
     if (current == "|") {
       incoming.theType = "|";
-      this->sections.AddOnTop(incoming);
+      this->sections.addOnTop(incoming);
       continue;
     }
     if (current == "||") {
       incoming.theType = "||";
-      this->sections.AddOnTop(incoming);
+      this->sections.addOnTop(incoming);
       continue;
     }
     incoming.theType = "";
@@ -881,7 +881,7 @@ logger::StringHighligher::StringHighligher(const std::string& input) {
       global.fatal << "StringHighligher is not allowed to fail: this is an internal function, "
       << "please do not expose to the outside world. " << global.fatal;
     }
-    this->sections.AddOnTop(incoming);
+    this->sections.addOnTop(incoming);
   }
 }
 
@@ -943,7 +943,7 @@ logger& logger::operator<<(const std::string& input) {
   ) {
     logger::StringHighligher::Section& currentSection = this->nextHighlighter.sections[i];
     if (currentSection.theType != "") {
-      chunks.AddOnTop(currentSection.theType);
+      chunks.addOnTop(currentSection.theType);
       continue;
     }
     int nextSectionLength = currentSection.length;
@@ -954,11 +954,11 @@ logger& logger::operator<<(const std::string& input) {
       static_cast<unsigned>(indexLastNonShownByte),
       static_cast<unsigned>(nextSectionLength)
     );
-    chunks.AddOnTop(current);
+    chunks.addOnTop(current);
     indexLastNonShownByte += nextSectionLength;
   }
   if (indexLastNonShownByte < static_cast<signed>(input.size())) {
-    chunks.AddOnTop(input.substr(static_cast<unsigned>(indexLastNonShownByte)));
+    chunks.addOnTop(input.substr(static_cast<unsigned>(indexLastNonShownByte)));
   }
   for (int i = 0; i < chunks.size; i ++) {
     int colorIndex = i % 3;

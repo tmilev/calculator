@@ -35,9 +35,9 @@ List<List<int> > GraphOLD::DestructivelyGetConnectedComponents() {
   for (int i = 0; i < this->vertices * this->max_edges; i ++) {
     if (this->data[i] != - 1) {
       List<int> l;
-      l.AddOnTop(i / this->max_edges);
+      l.addOnTop(i / this->max_edges);
       this->TreeRecurseCopyDelete(l, i / this->max_edges, this->max_edges);
-      outerl.AddOnTop(l);
+      outerl.addOnTop(l);
     }
   }
   for (int i = 0; i < outerl.size; i ++) {
@@ -51,7 +51,7 @@ void GraphOLD::TreeRecurseCopyDelete(List<int>& l, int v, int m) {
     if (this->data[v * m + i] != - 1) {
       int w = this->data[v * m + i];
       if (!l.Contains(w)) {
-        l.AddOnTop(w);
+        l.addOnTop(w);
       }
       this->data[v * m + i] = - 1;
       this->TreeRecurseCopyDelete(l, w, m);
@@ -114,7 +114,7 @@ void GraphWeightedLabeledEdges::ComputeEdgesPerNodesNoMultiplicities() {
   this->edgesPerNodeNoMultiplicities.initializeFillInObject(this->numNodes, emptyList);
   this->CheckConsistency();
   for (int i = 0; i < this->theEdges.size(); i ++) {
-    this->edgesPerNodeNoMultiplicities[this->theEdges[i].vStart].AddOnTop(this->theEdges[i].vEnd);
+    this->edgesPerNodeNoMultiplicities[this->theEdges[i].vStart].addOnTop(this->theEdges[i].vEnd);
   }
 }
 
@@ -144,7 +144,7 @@ void GraphWeightedLabeledEdges::AddNodeToComponent(int nodeIndex) {
     }
   }
   List<int>& currentDistanceGroup = currentComponent[distanceFromBase];
-  currentDistanceGroup.AddOnTop(nodeIndex);
+  currentDistanceGroup.addOnTop(nodeIndex);
 }
 
 void GraphWeightedLabeledEdges::ComputeConnectedComponentsAndBaseNodeDistances() {
@@ -158,14 +158,14 @@ void GraphWeightedLabeledEdges::ComputeConnectedComponentsAndBaseNodeDistances()
       this->distanceToBaseNode[indexBaseNode] = 0;
       this->baseNode[indexBaseNode] = indexBaseNode;
       theOrbit.SetSize(0);
-      theOrbit.AddOnTop(indexBaseNode);
+      theOrbit.addOnTop(indexBaseNode);
       for (int i = 0; i < theOrbit.size; i ++) {
         List<int>& currentHeirs = this->edgesPerNodeNoMultiplicities[theOrbit[i]];
         for (int j = 0; j<currentHeirs.size; j ++) {
           if (this->distanceToBaseNode[currentHeirs[j]] == - 1) {
             this->distanceToBaseNode[currentHeirs[j]] = this->distanceToBaseNode[theOrbit[i]] + 1;
             this->baseNode[currentHeirs[j]] = indexBaseNode;
-            theOrbit.AddOnTop(currentHeirs[j]);
+            theOrbit.addOnTop(currentHeirs[j]);
           }
         }
       }
@@ -187,7 +187,7 @@ void GraphWeightedLabeledEdges::ComputeDisplayGroups() {
   this->nodeGroupsForDisplay.SetSize(0);
   for (int i = 0; i < this->connectedComponents.size; i ++) {
     for (int j = 0; j < this->connectedComponents[i].size; j ++) {
-      this->nodeGroupsForDisplay.AddOnTop(this->connectedComponents[i][j]);
+      this->nodeGroupsForDisplay.addOnTop(this->connectedComponents[i][j]);
     }
   }
   this->groupMaxSize = 0;

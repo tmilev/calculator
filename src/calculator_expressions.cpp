@@ -1128,7 +1128,7 @@ bool Expression::AddChildRationalOnTop(const Rational& inputRat) {
 
 bool Expression::AddChildOnTop(const Expression& inputChild) {
   this->CheckInitialization();
-  this->children.AddOnTop(
+  this->children.addOnTop(
     this->owner->theExpressionContainer.AddNoRepetitionOrReturnIndexFirst(inputChild)
   );
   return true;
@@ -2314,7 +2314,7 @@ void Expression::GetMultiplicandsRecursive(List<Expression>& outputAppendList, i
     outputAppendList.SetSize(0);
   }
   if (!this->StartsWith(this->owner->opTimes())) {
-    outputAppendList.AddOnTop(*this);
+    outputAppendList.addOnTop(*this);
     return;
   }
   for (int i = 1; i < this->size(); i ++) {
@@ -2329,7 +2329,7 @@ void Expression::GetMultiplicandsDivisorsRecursive(List<Expression>& outputAppen
     outputAppendList.SetSize(0);
   }
   if (!this->StartsWith(this->owner->opTimes()) && !this->StartsWith(this->owner->opDivide())) {
-    outputAppendList.AddOnTop(*this);
+    outputAppendList.addOnTop(*this);
     return;
   }
   for (int i = 1; i < this->size(); i ++) {

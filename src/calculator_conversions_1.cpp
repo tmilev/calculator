@@ -470,13 +470,13 @@ bool CalculatorConversions::innerStoreCandidateSA(
   CalculatorConversions::innerExpressionFromDynkinType(
     theCommands, input.theWeylNonEmbedded->theDynkinType, currentE
   );
-  keys.AddOnTop("DynkinType");
-  values.AddOnTop(currentE);
+  keys.addOnTop("DynkinType");
+  values.addOnTop(currentE);
   Matrix<Rational> conversionMat;
   conversionMat.AssignVectorsToRows(input.theHsScaledToActByTwo);
   currentE.AssignMatrix(conversionMat, theCommands, nullptr, false);
-  keys.AddOnTop("ElementsCartan");
-  values.AddOnTop(currentE);
+  keys.addOnTop("ElementsCartan");
+  values.addOnTop(currentE);
   if (input.flagSystemSolved) {
     Expression listGenerators;
     listGenerators.MakeSequence(theCommands);
@@ -490,8 +490,8 @@ bool CalculatorConversions::innerStoreCandidateSA(
       );
       listGenerators.AddChildOnTop(currentE);
     }
-    keys.AddOnTop("generators");
-    values.AddOnTop(listGenerators);
+    keys.addOnTop("generators");
+    values.addOnTop(listGenerators);
   }
   return output.MakeSequenceCommands(theCommands, keys, values);
 }
@@ -577,9 +577,9 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(
         << generatorsE[i].toString() << ". ";
       }
       if (i % 2 == 1) {
-        outputSubalgebra.theNegGens.AddOnTop(curGenAlgebraic);
+        outputSubalgebra.theNegGens.addOnTop(curGenAlgebraic);
       } else {
-        outputSubalgebra.thePosGens.AddOnTop(curGenAlgebraic);
+        outputSubalgebra.thePosGens.addOnTop(curGenAlgebraic);
       }
     }
     outputSubalgebra.flagSystemProvedToHaveNoSolution = false;
@@ -739,8 +739,8 @@ bool CalculatorConversions::innerStoreSemisimpleSubalgebras(
   )) {
     return false;
   }
-  theKeys.AddOnTop("AmbientDynkinType");
-  theValues.AddOnTop(dynkinTypeE);
+  theKeys.addOnTop("AmbientDynkinType");
+  theValues.addOnTop(dynkinTypeE);
 
   Expression currentChainE, numericalConvertorE(theCommands);
   currentChainE.MakeSequence(theCommands);
@@ -748,24 +748,24 @@ bool CalculatorConversions::innerStoreSemisimpleSubalgebras(
     numericalConvertorE = input.currentSubalgebraChain[i].indexInOwner;
     currentChainE.AddChildOnTop(numericalConvertorE);
   }
-  theKeys.AddOnTop("CurrentChain");
-  theValues.AddOnTop(currentChainE);
+  theKeys.addOnTop("CurrentChain");
+  theValues.addOnTop(currentChainE);
   Expression numTypesExploredE;
   numTypesExploredE.MakeSequence(theCommands);
   for (int i = 0; i < input.currentNumLargerTypesExplored.size; i ++) {
     numericalConvertorE = input.currentNumLargerTypesExplored[i];
     numTypesExploredE.AddChildOnTop(numericalConvertorE);
   }
-  theKeys.AddOnTop("NumExploredTypes");
-  theValues.AddOnTop(numTypesExploredE);
+  theKeys.addOnTop("NumExploredTypes");
+  theValues.addOnTop(numTypesExploredE);
   Expression numHsExploredE;
   numHsExploredE.MakeSequence(theCommands);
   for (int i = 0; i < input.currentNumHcandidatesExplored.size; i ++) {
     numericalConvertorE = input.currentNumHcandidatesExplored[i];
     numHsExploredE.AddChildOnTop(numericalConvertorE);
   }
-  theKeys.AddOnTop("NumExploredHs");
-  theValues.AddOnTop(numHsExploredE);
+  theKeys.addOnTop("NumExploredHs");
+  theValues.addOnTop(numHsExploredE);
   Expression subalgebrasListE, candidateE;
   subalgebrasListE.MakeSequence(theCommands);
   subalgebrasListE.children.Reserve(input.theSubalgebras.theValues.size + 1);
@@ -775,8 +775,8 @@ bool CalculatorConversions::innerStoreSemisimpleSubalgebras(
     }
     subalgebrasListE.AddChildOnTop(candidateE);
   }
-  theKeys.AddOnTop("Subalgebras");
-  theValues.AddOnTop(subalgebrasListE);
+  theKeys.addOnTop("Subalgebras");
+  theValues.addOnTop(subalgebrasListE);
   return output.MakeSequenceCommands(theCommands, theKeys, theValues);
 }
 
@@ -799,7 +799,7 @@ bool CalculatorConversions::innerExpressionFromMonomialUE(
     CalculatorConversions::innerExpressionFromChevalleyGenerator(theCommands, theGen, chevGenE);
     CalculatorConversions::innerExpressionFromRF(theCommands, input.Powers[i], powerE, inputContext);
     termE.MakeXOX(theCommands, theCommands.opThePower(), chevGenE, powerE);
-    theTerms.AddOnTop(termE);
+    theTerms.addOnTop(termE);
   }
   return output.MakeProducT(theCommands, theTerms);
 }

@@ -193,7 +193,7 @@ QuerySet CalculatorHTML::ToQuerySetProblemWeights(
 ) {
   MacroRegisterFunctionWithName("CalculatorHTML::ToQuerySetProblemWeights");
   QuerySet output;
-  output.nestedLabels.AddOnTop(DatabaseStrings::labelProblemWeight);
+  output.nestedLabels.addOnTop(DatabaseStrings::labelProblemWeight);
   for (int i = 0; i < inputProblemInfo.size(); i ++) {
     ProblemDataAdministrative& currentProblem = inputProblemInfo.theValues[i].adminData;
     if (currentProblem.problemWeightsPerCoursE.size() == 0) {
@@ -571,7 +571,7 @@ std::string CalculatorHTML::ToStringLinkCurrentAdmin(
   << global.requestType << "&";
   std::string urledProblem = HtmlRoutines::ConvertStringToURLString(this->fileName, false);
   List<std::string> randomSeedContainer;
-  randomSeedContainer.AddOnTop(WebAPI::problem::randomSeed);
+  randomSeedContainer.addOnTop(WebAPI::problem::randomSeed);
   out << "fileName=" << urledProblem << "&"
   << global.ToStringCalcArgsNoNavigation(&randomSeedContainer);
   if (includeRandomSeed) {
@@ -1222,8 +1222,8 @@ bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::
   theInterpreter.initialize();
   theInterpreter.flagWriteLatexPlots = false;
   theInterpreter.flagPlotNoControls = true;
-  this->timeIntermediatePerAttempt.LastObject()->AddOnTop(global.GetElapsedSeconds()-startTime);
-  this->timeIntermediateComments.LastObject()->AddOnTop("calculator init time");
+  this->timeIntermediatePerAttempt.LastObject()->addOnTop(global.GetElapsedSeconds()-startTime);
+  this->timeIntermediateComments.LastObject()->addOnTop("calculator init time");
   if (global.UserDebugFlagOn() && global.UserDefaultHasProblemComposingRights()) {
     this->logCommandsProblemGeneratioN << "<b>Input commands:</b> "
     << this->theProblemData.commandsGenerateProblemLink
@@ -1231,8 +1231,8 @@ bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::
     << this->theProblemData.commandsGenerateProblem << "<br>";
   }
   theInterpreter.Evaluate(this->theProblemData.commandsGenerateProblem);
-  this->timeIntermediatePerAttempt.LastObject()->AddOnTop(global.GetElapsedSeconds() - startTime);
-  this->timeIntermediateComments.LastObject()->AddOnTop("calculator evaluation time");
+  this->timeIntermediatePerAttempt.LastObject()->addOnTop(global.GetElapsedSeconds() - startTime);
+  this->timeIntermediateComments.LastObject()->addOnTop("calculator evaluation time");
   bool result = !theInterpreter.flagAbortComputationASAP && theInterpreter.syntaxErrors == "";
   if (!result && comments != nullptr) {
     *comments << "<br>Failed to interpret your file. "
@@ -1251,7 +1251,7 @@ bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::
     }
   }
   for (int i = 0; i < theInterpreter.theObjectContainer.theUserInputTextBoxesWithValues.size(); i ++) {
-    this->theProblemData.inputNonAnswerIds.AddOnTop(
+    this->theProblemData.inputNonAnswerIds.addOnTop(
       theInterpreter.theObjectContainer.theUserInputTextBoxesWithValues.theKeys[i]
     );
   }
@@ -1280,11 +1280,11 @@ bool CalculatorHTML::PrepareSectionList(std::stringstream& commentsOnFailure) {
     )
   ) {
     if (this->currentUseR.sectionComputed != "") {
-      this->databaseStudentSections.AddOnTop(this->currentUseR.sectionComputed);
+      this->databaseStudentSections.addOnTop(this->currentUseR.sectionComputed);
       return true;
     }
   }
-  this->databaseStudentSections.AddListOnTop(this->currentUseR.sectionsTaught);
+  this->databaseStudentSections.addListOnTop(this->currentUseR.sectionsTaught);
   return true;
 }
 
@@ -1918,11 +1918,11 @@ bool CalculatorHTML::InterpretHtml(std::stringstream* comments) {
     this->NumAttemptsToInterpret ++;
     std::stringstream commentsOnLastFailure;
     if (this->InterpretHtmlOneAttempt(theInterpreter, commentsOnLastFailure)) {
-      this->timePerAttempt.AddOnTop(global.GetElapsedSeconds() - startTime);
+      this->timePerAttempt.addOnTop(global.GetElapsedSeconds() - startTime);
       this->theProblemData.CheckConsistency();
       return true;
     }
-    this->timePerAttempt.AddOnTop(global.GetElapsedSeconds() - startTime);
+    this->timePerAttempt.addOnTop(global.GetElapsedSeconds() - startTime);
     if (this->NumAttemptsToInterpret >= this->MaxInterpretationAttempts && comments != nullptr) {
       *comments << "Failed attempt " << this->NumAttemptsToInterpret
       << " to interpret your file. Attempted random seeds: "
@@ -2067,11 +2067,11 @@ void CalculatorHTML::initAutocompleteExtras() {
   if (this->autoCompleteExtras.size > 0) {
     return;
   }
-  this->autoCompleteExtras.AddOnTop("answerCalculatorHighlight");
-  this->autoCompleteExtras.AddOnTop("algebra");
-  this->autoCompleteExtras.AddOnTop("logarithms");
-  this->autoCompleteExtras.AddOnTop("buttons");
-  this->autoCompleteExtras.AddOnTop("displaystyle");
+  this->autoCompleteExtras.addOnTop("answerCalculatorHighlight");
+  this->autoCompleteExtras.addOnTop("algebra");
+  this->autoCompleteExtras.addOnTop("logarithms");
+  this->autoCompleteExtras.addOnTop("buttons");
+  this->autoCompleteExtras.addOnTop("displaystyle");
 }
 
 void CalculatorHTML::initBuiltInSpanClasses() {
@@ -2080,36 +2080,36 @@ void CalculatorHTML::initBuiltInSpanClasses() {
     this->calculatorTagsRecordedLiterally.AddOnTopNoRepetition("answerCalculatorHighlight");
   }
   if (this->calculatorClassesAnswerFields.size == 0) {
-    this->calculatorClassesAnswerFields.AddOnTop("calculatorButtonSubmit");
-    this->calculatorClassesAnswerFields.AddOnTop("calculatorButtonInterpret");
-    this->calculatorClassesAnswerFields.AddOnTop("calculatorButtonGiveUp");
-    this->calculatorClassesAnswerFields.AddOnTop("calculatorButtonSolution");
-    this->calculatorClassesAnswerFields.AddOnTop("calculatorMQField");
-    this->calculatorClassesAnswerFields.AddOnTop("calculatorMQButtonPanel");
-    this->calculatorClassesAnswerFields.AddOnTop("calculatorAnswerVerification");
+    this->calculatorClassesAnswerFields.addOnTop("calculatorButtonSubmit");
+    this->calculatorClassesAnswerFields.addOnTop("calculatorButtonInterpret");
+    this->calculatorClassesAnswerFields.addOnTop("calculatorButtonGiveUp");
+    this->calculatorClassesAnswerFields.addOnTop("calculatorButtonSolution");
+    this->calculatorClassesAnswerFields.addOnTop("calculatorMQField");
+    this->calculatorClassesAnswerFields.addOnTop("calculatorMQButtonPanel");
+    this->calculatorClassesAnswerFields.addOnTop("calculatorAnswerVerification");
   }
   if (this->calculatorClasses.size == 0) {
-    this->calculatorClasses.AddOnTop("calculator");
-    this->calculatorClasses.AddOnTop(SyntacticElementHTML::Tags::calculatorSolution);
-    this->calculatorClasses.AddOnTop("calculatorShowToUserOnly");
-    this->calculatorClasses.AddOnTop("calculatorHidden");
-    this->calculatorClasses.AddOnTop("calculatorCommentsBeforeInterpretation");
-    this->calculatorClasses.AddOnTop("calculatorCommentsBeforeSubmission");
-    this->calculatorClasses.AddOnTop(SyntacticElementHTML::Tags::calculatorAnswer);
-    this->calculatorClasses.AddOnTop("calculatorAnswerOnGiveUp");
-    this->calculatorClasses.AddOnTop("calculatorExamIntermediate");
-    this->calculatorClasses.AddOnTop(SyntacticElementHTML::Tags::calculatorExamProblem);
-    this->calculatorClasses.AddOnTop("calculatorNavigationHere");
-    this->calculatorClasses.AddOnTop("calculatorProblemNavigationHere");
-    this->calculatorClasses.AddOnTop("calculatorEditPageHere");
-    this->calculatorClasses.AddOnTop("calculatorManageClass");
-    this->calculatorClasses.AddOnTop("setCalculatorExamProblem");
-    this->calculatorClasses.AddOnTop("setCalculatorExamHome");
-    this->calculatorClasses.AddOnTop("generateTopicTable");
-    this->calculatorClasses.AddOnTop("generateTableOfContents");
-    this->calculatorClasses.AddOnTop("accountInformationLinks");
-    this->calculatorClasses.AddOnTop("calculatorJavascript");
-    this->calculatorClasses.AddListOnTop(this->calculatorClassesAnswerFields);
+    this->calculatorClasses.addOnTop("calculator");
+    this->calculatorClasses.addOnTop(SyntacticElementHTML::Tags::calculatorSolution);
+    this->calculatorClasses.addOnTop("calculatorShowToUserOnly");
+    this->calculatorClasses.addOnTop("calculatorHidden");
+    this->calculatorClasses.addOnTop("calculatorCommentsBeforeInterpretation");
+    this->calculatorClasses.addOnTop("calculatorCommentsBeforeSubmission");
+    this->calculatorClasses.addOnTop(SyntacticElementHTML::Tags::calculatorAnswer);
+    this->calculatorClasses.addOnTop("calculatorAnswerOnGiveUp");
+    this->calculatorClasses.addOnTop("calculatorExamIntermediate");
+    this->calculatorClasses.addOnTop(SyntacticElementHTML::Tags::calculatorExamProblem);
+    this->calculatorClasses.addOnTop("calculatorNavigationHere");
+    this->calculatorClasses.addOnTop("calculatorProblemNavigationHere");
+    this->calculatorClasses.addOnTop("calculatorEditPageHere");
+    this->calculatorClasses.addOnTop("calculatorManageClass");
+    this->calculatorClasses.addOnTop("setCalculatorExamProblem");
+    this->calculatorClasses.addOnTop("setCalculatorExamHome");
+    this->calculatorClasses.addOnTop("generateTopicTable");
+    this->calculatorClasses.addOnTop("generateTableOfContents");
+    this->calculatorClasses.addOnTop("accountInformationLinks");
+    this->calculatorClasses.addOnTop("calculatorJavascript");
+    this->calculatorClasses.addListOnTop(this->calculatorClassesAnswerFields);
   }
 }
 
@@ -2122,27 +2122,27 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments) {
   List<SyntacticElementHTML> theElements;
   theElements.SetSize(0);
   theElements.SetExpectedSize(static_cast<int>(theReader.str().size()) / 4);
-  this->splittingChars.AddOnTop('<');
-  this->splittingChars.AddOnTop('\"');
-  this->splittingChars.AddOnTop('>');
-  this->splittingChars.AddOnTop('=');
-  this->splittingChars.AddOnTop('/');
-  this->splittingChars.AddOnTop(' ');
+  this->splittingChars.addOnTop('<');
+  this->splittingChars.addOnTop('\"');
+  this->splittingChars.addOnTop('>');
+  this->splittingChars.addOnTop('=');
+  this->splittingChars.addOnTop('/');
+  this->splittingChars.addOnTop(' ');
   while (theReader.get(currentChar)) {
     if (splittingChars.Contains(currentChar)) {
       if (word != "") {
-        theElements.AddOnTop(word);
+        theElements.addOnTop(word);
       }
       std::string charToString;
       charToString.push_back(currentChar);
-      theElements.AddOnTop(charToString);
+      theElements.addOnTop(charToString);
       word = "";
     } else {
       word.push_back(currentChar);
     }
   }
   if (word != "") {
-    theElements.AddOnTop(word);
+    theElements.addOnTop(word);
   }
   this->initBuiltInSpanClasses();
   this->eltsStack.SetSize(0);
@@ -2154,7 +2154,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments) {
   tempElt.content = "";
   eltsStack.SetExpectedSize(theElements.size + SyntacticElementHTML::ParsingNumDummyElements);
   for (int i = 0; i < SyntacticElementHTML::ParsingNumDummyElements; i ++) {
-    eltsStack.AddOnTop(dummyElt);
+    eltsStack.addOnTop(dummyElt);
   }
   int indexInElts = - 1;
   bool reduced = false;
@@ -2168,7 +2168,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments) {
     if (!reduced) {
       indexInElts ++;
       if (indexInElts < theElements.size) {
-        eltsStack.AddOnTop(theElements[indexInElts]);
+        eltsStack.addOnTop(theElements[indexInElts]);
       }
     }
     reduced = true;
@@ -2304,7 +2304,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments) {
       last != "=" &&
       last != "\""
     ) {
-      thirdToLast.tagKeysWithoutValue.AddOnTop(secondToLast.content);
+      thirdToLast.tagKeysWithoutValue.addOnTop(secondToLast.content);
       eltsStack[eltsStack.size - 2] = *eltsStack.LastObject();
       eltsStack.RemoveLastObject();
       continue;
@@ -2319,7 +2319,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments) {
       secondToLast.syntacticRole == "command" ||
       secondToLast.syntacticRole == "<"
     )) {
-      thirdToLast.children.AddOnTop(secondToLast);
+      thirdToLast.children.addOnTop(secondToLast);
       eltsStack[eltsStack.size - 2] = last;
       eltsStack.RemoveLastObject();
       continue;
@@ -2375,7 +2375,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments) {
     if (
       thirdToLast.syntacticRole == "<openTag" && secondToLast.syntacticRole == "" && last.syntacticRole == ">"
     ) {
-      thirdToLast.tagKeysWithoutValue.AddOnTop(secondToLast.content);
+      thirdToLast.tagKeysWithoutValue.addOnTop(secondToLast.content);
       eltsStack[eltsStack.size - 2] = *eltsStack.LastObject();
       eltsStack.RemoveLastObject();
       continue;
@@ -2459,10 +2459,10 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments) {
           eltsStack[i].IsInterpretedByCalculatorDuringProblemGeneration()
         ) {
           SyntacticElementHTML emptyElt;
-          this->theContent.AddOnTop(emptyElt);
+          this->theContent.addOnTop(emptyElt);
         }
       }
-      this->theContent.AddOnTop(eltsStack[i]);
+      this->theContent.addOnTop(eltsStack[i]);
     }
   }
   if (!result && comments != nullptr) {
@@ -2512,7 +2512,7 @@ bool CalculatorHTML::InterpretAnswerHighlights(std::stringstream& comments) {
   for (int i = 0; i < this->theContent.size; i ++) {
     if (this->theContent[i].tag == "answerCalculatorHighlightStart") {
       answerHighlightStarted = true;
-      this->answerHighlights.AddOnTop("");
+      this->answerHighlights.addOnTop("");
       this->theContent[i].content = "";
       continue;
     }
@@ -2947,11 +2947,11 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     this->NumAttemptsToInterpret - 1
   ]);
   this->FigureOutCurrentProblemList(comments);
-  this->timeIntermediatePerAttempt.LastObject()->AddOnTop(global.GetElapsedSeconds() - startTime);
-  this->timeIntermediateComments.LastObject()->AddOnTop("Time before after loading problem list");
+  this->timeIntermediatePerAttempt.LastObject()->addOnTop(global.GetElapsedSeconds() - startTime);
+  this->timeIntermediateComments.LastObject()->addOnTop("Time before after loading problem list");
   outHeadPt2 << HtmlRoutines::GetJavascriptMathjax("");
-  this->timeIntermediatePerAttempt.LastObject()->AddOnTop(global.GetElapsedSeconds() - startTime);
-  this->timeIntermediateComments.LastObject()->AddOnTop("Time before execution");
+  this->timeIntermediatePerAttempt.LastObject()->addOnTop(global.GetElapsedSeconds() - startTime);
+  this->timeIntermediateComments.LastObject()->addOnTop("Time before execution");
   if (!this->PrepareAndExecuteCommands(theInterpreter, &comments)) {
     return false;
   }
@@ -2991,8 +2991,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     }
   }
   //////////////////////////////
-  this->timeIntermediatePerAttempt.LastObject()->AddOnTop(global.GetElapsedSeconds() - startTime);
-  this->timeIntermediateComments.LastObject()->AddOnTop("Time after execution");
+  this->timeIntermediatePerAttempt.LastObject()->addOnTop(global.GetElapsedSeconds() - startTime);
+  this->timeIntermediateComments.LastObject()->addOnTop("Time after execution");
   //first command and first syntactic element are the random seed and are ignored.
   theInterpreter.theObjectContainer.resetSliders();
   if (!this->InterpretProcessExecutedCommands(theInterpreter, this->theContent, comments)) {
@@ -3000,8 +3000,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     this->outputHtmlBodyNoTag = outBody.str();
     return false;
   }
-  this->timeIntermediatePerAttempt.LastObject()->AddOnTop(global.GetElapsedSeconds() - startTime);
-  this->timeIntermediateComments.LastObject()->AddOnTop("Time before class management routines");
+  this->timeIntermediatePerAttempt.LastObject()->addOnTop(global.GetElapsedSeconds() - startTime);
+  this->timeIntermediateComments.LastObject()->addOnTop("Time before class management routines");
   this->PrepareAnswerElements(comments);
   this->NumAnswerIdsMathquilled = 0;
   for (int i = 0; i < this->theContent.size; i ++) {
@@ -3060,8 +3060,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   //out << "<hr><hr><hr><hr><hr><hr><hr><hr><hr>The calculator activity:<br>" << theInterpreter.outputString << "<hr>";
   //out << "<hr>" << this->ToStringExtractedCommands() << "<hr>";
   //out << "<hr> Between the commands:" << this->betweenTheCommands.ToStringCommaDelimited();
-  this->timeIntermediatePerAttempt.LastObject()->AddOnTop(global.GetElapsedSeconds() - startTime);
-  this->timeIntermediateComments.LastObject()->AddOnTop("Time before database storage");
+  this->timeIntermediatePerAttempt.LastObject()->addOnTop(global.GetElapsedSeconds() - startTime);
+  this->timeIntermediateComments.LastObject()->addOnTop("Time before database storage");
   if (global.flagDatabaseCompiled) {
     bool shouldResetTheRandomSeed = false;
     if (this->flagIsForReal && !this->theProblemData.flagRandomSeedGiven) {
@@ -3118,7 +3118,7 @@ std::string CalculatorHTML::ToStringProblemNavigation() const {
     << "?request=login\">Log in</a> " << linkSeparator;
   }
   List<std::string> randomSeedContainer;
-  randomSeedContainer.AddOnTop(WebAPI::problem::randomSeed);
+  randomSeedContainer.addOnTop(WebAPI::problem::randomSeed);
   std::string calcArgsNoPassExamDetails =
   global.ToStringCalcArgsNoNavigation(&randomSeedContainer);
   if (this->flagIsExamProblem) {
@@ -3249,7 +3249,7 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem(
   std::stringstream out;
   out << "request=" << requestType << "&";
   List<std::string> excludedTags;
-  excludedTags.AddOnTop(WebAPI::problem::randomSeed);
+  excludedTags.addOnTop(WebAPI::problem::randomSeed);
   out << global.ToStringCalcArgsNoNavigation(&excludedTags)
   << "courseHome=" << global.GetWebInput(WebAPI::problem::courseHome) << "&";
   if (this->fileName != "") {
@@ -3635,12 +3635,12 @@ void TopicElementParser::InsertTopicBundle(TopicElementParser::TopicLine& input)
     std::stringstream out;
     out << "Failed to find bundle: " << bundleId << ". ";
     input.MakeError(out.str());
-    this->bundleStack.AddOnTop(input);
+    this->bundleStack.addOnTop(input);
     return;
   }
   List<TopicElementParser::TopicLine>& currentBundle = this->knownTopicBundles.GetValueCreate(bundleId);
   for (int i = currentBundle.size - 1; i >= 0; i --) {
-    this->bundleStack.AddOnTop(currentBundle[i]);
+    this->bundleStack.addOnTop(currentBundle[i]);
   }
 }
 
@@ -3657,35 +3657,35 @@ void TopicElementParser::LoadTopicBundleFile(
   if (!FileOperations::IsOKfileNameVirtual(fileName, false, &errorStream)) {
     errorStream << "The file name " << fileName << " is not a valid topic bundle file name. ";
     input.MakeError(errorStream.str());
-    this->bundleStack.AddOnTop(input);
+    this->bundleStack.addOnTop(input);
     return;
   }
   if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly(fileName, newTopicBundles, &errorStream)) {
     errorStream << "Could not open topic bundle file. ";
     input.MakeError(errorStream.str());
-    this->bundleStack.AddOnTop(input);
+    this->bundleStack.addOnTop(input);
     return;
   }
-  this->loadedTopicBundleFiles.AddOnTop(fileName);
+  this->loadedTopicBundleFiles.addOnTop(fileName);
   std::string currentLineString;
   List<std::string> bundleNameStack;
   std::stringstream bundleReader(newTopicBundles);
   while (std::getline(bundleReader, currentLineString, '\n')) {
     TopicElementParser::TopicLine currentLine = this->ExtractLine(currentLineString);
     if (currentLine.theType == TopicElement::types::bundleBegin) {
-      bundleNameStack.AddOnTop(currentLine.contentTrimmedWhiteSpace);
+      bundleNameStack.addOnTop(currentLine.contentTrimmedWhiteSpace);
     } else if (currentLine.theType == TopicElement::types::bundleEnd) {
       if (bundleNameStack.size > 0) {
         bundleNameStack.RemoveLastObject();
       } else {
         errorStream << "BundleEnd command without BungleBegin.";
         input.MakeError(errorStream.str());
-        this->bundleStack.AddOnTop(input);
+        this->bundleStack.addOnTop(input);
         return;
       }
     } else {
       for (int i = 0; i < bundleNameStack.size; i ++) {
-        this->knownTopicBundles.GetValueCreate(bundleNameStack[i]).AddOnTop(currentLine);
+        this->knownTopicBundles.GetValueCreate(bundleNameStack[i]).addOnTop(currentLine);
       }
     }
   }
@@ -3730,7 +3730,7 @@ void TopicElementParser::ExhaustCrawlStack() {
       std::stringstream errorStream;
       errorStream << "Too many topics (" << this->crawled.size << ") while crawling bundles. ";
       errorLine.MakeError(errorStream.str());
-      this->crawled.AddOnTop(errorLine);
+      this->crawled.addOnTop(errorLine);
       return;
     }
     TopicElementParser::TopicLine nextLine = bundleStack.PopLastObject();
@@ -3742,7 +3742,7 @@ void TopicElementParser::ExhaustCrawlStack() {
       this->InsertTopicBundle(nextLine);
       continue;
     }
-    this->crawled.AddOnTop(nextLine);
+    this->crawled.addOnTop(nextLine);
   }
 }
 
@@ -3757,24 +3757,24 @@ void TopicElementParser::Crawl(const std::string& inputString) {
       std::stringstream errorStream;
       errorStream << "Too many topics (" << this->crawled.size << "). ";
       errorLine.MakeError(errorStream.str());
-      this->crawled.AddOnTop(errorLine);
+      this->crawled.addOnTop(errorLine);
       return;
     }
     this->ExhaustCrawlStack();
     if (!std::getline(tableReader, currentLine, '\n')) {
       break;
     }
-    this->bundleStack.AddOnTop(this->ExtractLine(currentLine));
+    this->bundleStack.addOnTop(this->ExtractLine(currentLine));
   }
 }
 
 bool TopicElementParser::TopicLine::AccountIfStateChanger(CalculatorHTML& owner) const {
   if (this->theType == TopicElement::types::slidesSourceHeader) {
-    owner.slidesSourcesHeaders.AddOnTop(this->contentTrimmedWhiteSpace);
+    owner.slidesSourcesHeaders.addOnTop(this->contentTrimmedWhiteSpace);
     return true;
   }
   if (this->theType == TopicElement::types::homeworkSourceHeader){
-    owner.sourcesHomeworkHeaders.AddOnTop(this->contentTrimmedWhiteSpace);
+    owner.sourcesHomeworkHeaders.addOnTop(this->contentTrimmedWhiteSpace);
     return true;
   }
   return false;
@@ -3785,7 +3785,7 @@ void TopicElementParser::AddNewTopicElementFromLine(const TopicElementParser::To
   if (incoming.type == TopicElement::types::empty) {
     return;
   }
-  this->elements.AddOnTop(incoming);
+  this->elements.addOnTop(incoming);
 }
 
 bool TopicElement::MergeTopicLine(
@@ -3810,22 +3810,22 @@ bool TopicElement::MergeTopicLine(
     this->videoHandwritten = input.contentTrimmedWhiteSpace;
     return true;
   case TopicElement::types::slidesSource:
-    this->sourceSlides.AddOnTop(input.contentTrimmedWhiteSpace);
+    this->sourceSlides.addOnTop(input.contentTrimmedWhiteSpace);
     return true;
   case TopicElement::types::homeworkSource:
-    this->sourceHomework.AddOnTop(input.contentTrimmedWhiteSpace);
-    this->sourceHomeworkIsSolution.AddOnTop(false);
+    this->sourceHomework.addOnTop(input.contentTrimmedWhiteSpace);
+    this->sourceHomeworkIsSolution.addOnTop(false);
     return true;
   case TopicElement::types::homeworkSolutionSource:
-    this->sourceHomework.AddOnTop(input.contentTrimmedWhiteSpace);
-    this->sourceHomeworkIsSolution.AddOnTop(true);
+    this->sourceHomework.addOnTop(input.contentTrimmedWhiteSpace);
+    this->sourceHomeworkIsSolution.addOnTop(true);
     return true;
   case TopicElement::types::slidesLatex:
-      this->sourceSlides.AddOnTop("LaTeX: " + input.contentTrimmedWhiteSpace);
+      this->sourceSlides.addOnTop("LaTeX: " + input.contentTrimmedWhiteSpace);
     return true;
   case TopicElement::types::homeworkLatex:
-      this->sourceHomework.AddOnTop("LaTeX: " + input.contentTrimmedWhiteSpace);
-      this->sourceHomeworkIsSolution.AddOnTop(false);
+      this->sourceHomework.addOnTop("LaTeX: " + input.contentTrimmedWhiteSpace);
+      this->sourceHomeworkIsSolution.addOnTop(false);
     return true;
   case TopicElement::types::handwrittenSolutions:
       this->handwrittenSolution = input.contentTrimmedWhiteSpace;
@@ -3925,7 +3925,7 @@ void TopicElementParser::ComputeTopicNumbers() {
       labelsNeeded = 4;
     }
     for (int j = currentProblemNumber.size; j < labelsNeeded; j ++) {
-      currentProblemNumber.AddOnTop(0);
+      currentProblemNumber.addOnTop(0);
     }
     currentProblemNumber.SetSize(labelsNeeded);
     (*currentProblemNumber.LastObject()) ++;
@@ -3959,14 +3959,14 @@ void TopicElementParser::ComputeTopicHierarchyPartOne() {
     }
     if (parentChain.size > 0) {
       TopicElement& parent = this->theTopics.theValues[*parentChain.LastObject()];
-      parent.immediateChildren.AddOnTop(i);
+      parent.immediateChildren.addOnTop(i);
     }
     this->theTopics.theValues[i].parentTopics.SetSize(0);
     for (int j = 0; j < parentChain.size; j ++) {
-      this->theTopics.theValues[i].parentTopics.AddOnTop(parentChain[j]);
+      this->theTopics.theValues[i].parentTopics.addOnTop(parentChain[j]);
     }
-    parentChain.AddOnTop(i);
-    parentTypes.AddOnTop(currentAdjustedtype);
+    parentChain.addOnTop(i);
+    parentTypes.addOnTop(currentAdjustedtype);
   }
 }
 
@@ -4047,7 +4047,7 @@ bool CalculatorHTML::LoadAndParseTopicList(std::stringstream& comments) {
   this->problemNamesNoTopics.Clear();
   for (int i = 0; i < this->topics.theTopics.size(); i ++) {
     if (this->topics.theTopics.theValues[i].problemFileName != "") {
-      this->problemNamesNoTopics.AddOnTop(this->topics.theTopics.theValues[i].problemFileName);
+      this->problemNamesNoTopics.addOnTop(this->topics.theTopics.theValues[i].problemFileName);
     }
   }
   return true;
@@ -4076,7 +4076,7 @@ JSData CalculatorHTML::ToStringTopicListJSON() {
   for (int i = 0; i < this->topics.theTopics.size(); i ++) {
     TopicElement& currentElt = this->topics.theTopics.theValues[i];
     if (currentElt.type == TopicElement::types::chapter) {
-      output["children"].theList.AddOnTop(currentElt.ToJSON(*this));
+      output["children"].theList.addOnTop(currentElt.ToJSON(*this));
     }
   }
   return output;
@@ -4228,7 +4228,7 @@ bool LaTeXCrawler::FileWithOption::fromJSON(JSData& input, std::stringstream* co
 
 void LaTeXCrawler::Slides::AddSlidesOnTop(const List<std::string>& input) {
   for (int i = 0; i < input.size; i ++) {
-    this->filesToCrawl.AddOnTop(LaTeXCrawler::FileWithOption(input[i]));
+    this->filesToCrawl.addOnTop(LaTeXCrawler::FileWithOption(input[i]));
   }
 }
 
@@ -4238,7 +4238,7 @@ JSData LaTeXCrawler::Slides::ToJSON() {
   JSData theFiles;
   theFiles.theType = JSData::token::tokenArray;
   for (int i = 0; i < this->filesToCrawl.size; i ++) {
-    theFiles.theList.AddOnTop(this->filesToCrawl[i].ToJSON());
+    theFiles.theList.addOnTop(this->filesToCrawl[i].ToJSON());
   }
   result[WebAPI::request::slides::files] = theFiles;
   return result;
@@ -4311,7 +4311,7 @@ JSData TopicElement::ComputeHomeworkJSON(CalculatorHTML& owner) {
     if (i < this->sourceHomeworkIsSolution.size) {
       file.isSolution = this->sourceHomeworkIsSolution[i];
     }
-    theSlides.filesToCrawl.AddOnTop(file);
+    theSlides.filesToCrawl.addOnTop(file);
   }
   theSlides.title = this->title;
   return theSlides.ToJSON();
@@ -4480,7 +4480,7 @@ JSData TopicElement::ToJSON(CalculatorHTML& owner) {
   }
   for (int i = 0; i < this->immediateChildren.size; i ++) {
     TopicElement& currentChild = owner.topics.theTopics.theValues[this->immediateChildren[i]];
-    output["children"].theList.AddOnTop(currentChild.ToJSON(owner));
+    output["children"].theList.addOnTop(currentChild.ToJSON(owner));
   }
   output["problemNumberString"] = this->problemNumberString;
   output["video"] = this->video;

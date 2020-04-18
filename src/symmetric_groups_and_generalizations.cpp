@@ -25,8 +25,8 @@ int acc = 1;
   for (int i = 0; i < this->p.size; i ++) {
     int numdex = nums.GetIndex(this->p[i]);
     if (numdex == - 1) {
-      nums.AddOnTop(this->p[i]);
-      counts.AddOnTop(1);
+      nums.addOnTop(this->p[i]);
+      counts.addOnTop(1);
     } else {
       counts[numdex] += 1;
     }
@@ -67,7 +67,7 @@ void Partition::FromListInt(const List<int>& in, int lastElement) {
       continue;
     }
     this->n += in[i];
-    this->p.AddOnTop(in[i]);
+    this->p.addOnTop(in[i]);
   }
   if (needsSorting) {
     p.QuickSortDescending();
@@ -86,7 +86,7 @@ void Partition::GetPartitions(List<Partition>& out, int n) {
     out.SetSize(1);
     out[0].n = 1;
     out[0].p.SetSize(0);
-    out[0].p.AddOnTop(1);
+    out[0].p.addOnTop(1);
     return;
   }
   List<int> p;
@@ -178,7 +178,7 @@ void Partition::GetAllStandardTableaux(List<Tableau>& out) const {
     Tableau theTableau;
     this->FillTableau(theTableau, *perms);
     if (theTableau.IsStandard()) {
-      out.AddOnTop(theTableau);
+      out.addOnTop(theTableau);
     }
   }
 }
@@ -300,7 +300,7 @@ List<int> Tableau::TurnIntoList() const {
   List<int> out;
   for (int i = 0; i < this->t.size; i ++) {
     for (int j = 0; j < this->t[i].size; j ++) {
-      out.AddOnTop(this->t[i][j]);
+      out.addOnTop(this->t[i][j]);
     }
   }
   return out;
@@ -314,7 +314,7 @@ void Tableau::GetColumns(List<List<int> >& output) const {
   output.SetSize(this->t[0].size);
   for (int i = 0; i < this->t[0].size; i ++) {
     for (int j = 0; j < t.size && t[j].size > i; j ++) {
-      output[i].AddOnTop(t[j][i]);
+      output[i].addOnTop(t[j][i]);
     }
   }
 }
@@ -425,11 +425,11 @@ void PermutationR2::MakeCanonical() {
       }
       if (!incycle) {
         tmp.SetSize(tmp.size + 1);
-        tmp[tmp.size - 1].AddOnTop(head);
+        tmp[tmp.size - 1].addOnTop(head);
         used[head] = true;
         incycle = true;
       }
-      tmp[tmp.size - 1].AddOnTop(cur);
+      tmp[tmp.size - 1].addOnTop(cur);
       used[cur] = true;
     }
   }
@@ -491,10 +491,10 @@ int PermutationR2::MakeFromMul(const PermutationR2& left, const PermutationR2& r
       if (!incycle) {
         this->cycles.SetSize(this->cycles.size + 1);
         this->cycles[this->cycles.size - 1].SetSize(0);
-        this->cycles[this->cycles.size - 1].AddOnTop(head);
+        this->cycles[this->cycles.size - 1].addOnTop(head);
         incycle = true;
       }
-      this->cycles[this->cycles.size - 1].AddOnTop(cur);
+      this->cycles[this->cycles.size - 1].addOnTop(cur);
       unused[cur] = false;
     }
   }
@@ -552,7 +552,7 @@ int PermutationR2::Sign() const {
 }
 
 void PermutationR2::BuildCycle(const List<int>& cycle) {
-  this->cycles.AddOnTop(cycle);
+  this->cycles.addOnTop(cycle);
 }
 
 void PermutationR2::BuildTransposition(int i, int j) {
@@ -607,10 +607,10 @@ void PermutationR2::MakeFromActionDescription(const List<int>& actionDescription
       if (!incycle) {
         this->cycles.SetSize(this->cycles.size + 1);
         this->cycles[this->cycles.size - 1].SetSize(0);
-        this->cycles[this->cycles.size - 1].AddOnTop(head);
+        this->cycles[this->cycles.size - 1].addOnTop(head);
         incycle = true;
       }
-      this->cycles[this->cycles.size - 1].AddOnTop(cur);
+      this->cycles[this->cycles.size - 1].addOnTop(cur);
       unused[cur] = false;
     }
   }
@@ -630,14 +630,14 @@ void PermutationR2::MakeFromString(const std::string& cppin) {
     case ')':
       if (curintstart != i) {
         std::string ss = cppin.substr(curintstart, i);
-        cycles.LastObject()->AddOnTop(atoi(ss.c_str()));
+        cycles.LastObject()->addOnTop(atoi(ss.c_str()));
       } else {
         cycles.SetSize(cycles.size - 1);
       }
       break;
     case ',':
       std::string ss = cppin.substr(curintstart, i);
-      cycles.LastObject()->AddOnTop(atoi(ss.c_str()));
+      cycles.LastObject()->addOnTop(atoi(ss.c_str()));
       curintstart = i + 1;
       break;
     }
@@ -746,11 +746,11 @@ void PermutationR2::ActOnMonomialTensor(
   this->ActOnList(expanded);
   int i = 0, xi = 0;
   while (xi < expanded.size) {
-    out.generatorsIndices.AddOnTop(expanded[xi]);
+    out.generatorsIndices.addOnTop(expanded[xi]);
     xi ++;
     for (int j =1; ; j ++, xi ++) {
       if ((xi == expanded.size) || (expanded[xi] != out.generatorsIndices[i])) {
-        out.Powers.AddOnTop(j);
+        out.Powers.addOnTop(j);
         break;
       }
     }
@@ -762,8 +762,8 @@ void PermutationR2::GetWordjjPlus1(List<int>& word) const {
   List<int> transpositions;
   for (int i = 0; i < this->cycles.size; i ++) {
     for (int j = 0; j < this->cycles[i].size - 1; j ++) {
-      transpositions.AddOnTop(this->cycles[i][j]);
-      transpositions.AddOnTop(this->cycles[i][j + 1]);
+      transpositions.addOnTop(this->cycles[i][j]);
+      transpositions.addOnTop(this->cycles[i][j + 1]);
     }
   }
   for (int i = 0; i < transpositions.size; i += 2) {
@@ -776,9 +776,9 @@ void PermutationR2::GetWordjjPlus1(List<int>& word) const {
     }
     int tl = tj - ti - 1;
     for (int tt = 0; tt < tl; tt ++) {
-      word.AddOnTop(ti + tt);
+      word.addOnTop(ti + tt);
     }
-    word.AddOnTop(tj - 1);
+    word.addOnTop(tj - 1);
     int end = word.size - 2;
     for (int tt = 0; tt < tl; tt ++) {
       word.SetSize(word.size + 1);
@@ -1174,7 +1174,7 @@ void HyperoctahedralGroup::SpechtModuleOfPartititons(const Partition &positive, 
   GroupRepresentation<Subgroup<Subgroup<HyperoctahedralGroup, ElementHyperoctahedralGroup>, ElementHyperoctahedralGroup>, Rational> pxmr;
   pxmr.ownerGroup = &PxM;
   pxmr.generatorS = pozm;
-  pxmr.generatorS.AddListOnTop(negm);
+  pxmr.generatorS.addListOnTop(negm);
   GroupRepresentation<Subgroup<HyperoctahedralGroup, ElementHyperoctahedralGroup>, Rational> snr;
   PxM.InduceRepresentation(pxmr,snr);
   GroupRepresentation<HyperoctahedralGroup, Rational> outreboxme;
@@ -1214,8 +1214,8 @@ void HyperoctahedralGroup::SpechtModuleOfPartititons(const Partition &positive, 
   GroupRepresentation<Subgroup<HyperoctahedralGroup, ElementHyperoctahedralGroup>, Rational> pxmr;
   pxmr.ownerGroup = &PxM;
   pxmr.generatorS.SetExpectedSize(PxM.generators.size);
-  pxmr.generatorS.AddListOnTop(pozm);
-  pxmr.generatorS.AddListOnTop(negm);
+  pxmr.generatorS.addListOnTop(pozm);
+  pxmr.generatorS.addListOnTop(negm);
   int cur = pxmr.generatorS.size;
   pxmr.generatorS.SetSize(PxM.generators.size);
   int repRank = pxmr.generatorS[0].NumRows;
@@ -1251,7 +1251,7 @@ void HyperoctahedralGroupData::SpechtModuleOfPartititons(
   negative.SpechtModuleMatricesOfTranspositionsjjplusone(negm);
   List<int> subgenids;
   for (int i = 0; i < this->theGroup->generators.size; i ++) {
-    subgenids.AddOnTop(i);
+    subgenids.addOnTop(i);
   }
   if ((positive.n > 0) && (negative.n > 0)) {
     subgenids.RemoveIndexShiftDown(positive.n - 1);
@@ -1259,8 +1259,8 @@ void HyperoctahedralGroupData::SpechtModuleOfPartititons(
   auto PxM = this->theGroup->ParabolicKindaSubgroupGeneratorSubset(subgenids);
   auto pxmr = PxM.theSubgroup->GetEmptyRationalRepresentation();
   pxmr.generatorS.SetExpectedSize(PxM.theSubgroup->generators.size);
-  pxmr.generatorS.AddListOnTop(pozm);
-  pxmr.generatorS.AddListOnTop(negm);
+  pxmr.generatorS.addListOnTop(pozm);
+  pxmr.generatorS.addListOnTop(negm);
   int cur = pxmr.generatorS.size;
   pxmr.generatorS.SetSize(PxM.theSubgroup->generators.size);
   int repRank = pxmr.generatorS[0].NumRows;
@@ -1369,7 +1369,7 @@ void HyperoctahedralGroup::AllSpechtModules() {
         this->SpechtModuleOfPartititons(pps[ppi],nps[npi],sm);
         sm.VerifyRepresentation();
         global.Comments << sm << '\n';
-        this->irreps.AddOnTop(sm);
+        this->irreps.addOnTop(sm);
       }
     }
   }
@@ -1436,7 +1436,7 @@ bool HyperoctahedralGroup::GetWordByFormulaImplementation(void* GG, const Elemen
     g.p.GetWordjjPlus1(word);
     for (int i = 0; i <g.s.size; i ++)
       if (g.s[i])
-        word.AddOnTop(G->N- 1+ i);
+        word.addOnTop(G->N- 1+ i);
     return true;
   }
   global.fatal << "This method should not have been called " << __FILE__ << ":" << __LINE__ << global.fatal;
@@ -1453,7 +1453,7 @@ bool HyperoctahedralGroupData::GetWordByFormulaImplementation(
     g.h.GetWordjjPlus1(word);
     for (int i = 0; i < g.k.bits.size; i ++) {
       if (g.k.bits[i]) {
-        word.AddOnTop(HD->N - 1+ i);
+        word.addOnTop(HD->N - 1+ i);
       }
     }
     return true;

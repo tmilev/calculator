@@ -98,13 +98,13 @@ void LargeIntegerUnsigned::GetHexBigEndian(
     int digitInt = 0;
     digit.IsIntegerFittingInInt(&digitInt);
     char digitChar = static_cast<char>(digitInt);
-    result.AddOnTop(digitChar);
+    result.addOnTop(digitChar);
   }
   for (int i = 0; i < numberOfLeadingZeroesToPadWith; i ++) {
-    result.AddOnTop(0);
+    result.addOnTop(0);
   }
   result.ReverseOrderElements();
-  output.assign(result.TheObjects, static_cast<unsigned>(result.size));
+  output.assign(result.theObjects, static_cast<unsigned>(result.size));
 }
 
 bool LargeIntegerUnsigned::WriteBigEndianFixedNumberOfBytes(
@@ -140,7 +140,7 @@ void LargeIntegerUnsigned::WriteBigEndianBytes(
   List<unsigned char> digitsReveredOrder;
   while (remainder > 0) {
     int nextDigit = remainder % 256;
-    digitsReveredOrder.AddOnTop(static_cast<unsigned char>(nextDigit));
+    digitsReveredOrder.addOnTop(static_cast<unsigned char>(nextDigit));
     remainder /= 256;
   }
   int padWithZero = 0;
@@ -153,10 +153,10 @@ void LargeIntegerUnsigned::WriteBigEndianBytes(
   }
   outputAppend.Reserve(outputAppend.size + digitsReveredOrder.size + padWithZero);
   if (padWithZero == 1) {
-    outputAppend.AddOnTop(0);
+    outputAppend.addOnTop(0);
   }
   for (int i = digitsReveredOrder.size - 1; i >= 0; i --) {
-    outputAppend.AddOnTop(digitsReveredOrder[i]);
+    outputAppend.addOnTop(digitsReveredOrder[i]);
   }
 }
 
@@ -416,7 +416,7 @@ void LargeIntegerUnsigned::getPrimesEratosthenesSieve(
     if (theSieve[static_cast<signed>(i)] == 0) {
       continue;
     }
-    output.AddOnTop(i);
+    output.addOnTop(i);
     for (unsigned int j = i; j <= primesUpToInclusive; j += i) {
       theSieve[static_cast<signed>(j)] = 0;
     }
@@ -655,13 +655,13 @@ void LargeIntegerUnsigned::ElementToStringLargeElementDecimal(std::string& outpu
     currentPower.makeOne();
     numRemainingDigits = 0;
     int highestBufferIndex = - 1;
-    bufferPowersOfBase.TheObjects[0].makeOne();
+    bufferPowersOfBase.theObjects[0].makeOne();
     bool bufferFilled = false;
     while (Remainder.IsGreaterThanOrEqualTo(currentPower)) {
       numRemainingDigits ++;
       highestBufferIndex ++;
       highestBufferIndex %= sizeBufferPowersOfBase;
-      bufferPowersOfBase.TheObjects[highestBufferIndex] = currentPower;
+      bufferPowersOfBase.theObjects[highestBufferIndex] = currentPower;
       if (highestBufferIndex == sizeBufferPowersOfBase - 1) {
         bufferFilled = true;
       }
@@ -669,7 +669,7 @@ void LargeIntegerUnsigned::ElementToStringLargeElementDecimal(std::string& outpu
     }
     int startIndex = highestBufferIndex;
     do {
-      currentPower = bufferPowersOfBase.TheObjects[highestBufferIndex];
+      currentPower = bufferPowersOfBase.theObjects[highestBufferIndex];
       unsigned int theDigit = 0;
       while (Remainder.IsGreaterThanOrEqualTo(currentPower)) {
         theDigit ++;
@@ -743,15 +743,15 @@ unsigned int LargeIntegerUnsigned::LogarithmBaseNCeiling(unsigned int theBase) c
   List<LargeIntegerUnsigned> baseRaisedTo2ToPowerIndex;
   List<unsigned int> powersOfTwo;
   current = theBase;
-  baseRaisedTo2ToPowerIndex.AddOnTop(current);
-  powersOfTwo.AddOnTop(1);
+  baseRaisedTo2ToPowerIndex.addOnTop(current);
+  powersOfTwo.addOnTop(1);
   while(true) {
     current *= current;
     if (current > *this) {
       break;
     }
-    baseRaisedTo2ToPowerIndex.AddOnTop(current);
-    powersOfTwo.AddOnTop(*powersOfTwo.LastObject() * 2);
+    baseRaisedTo2ToPowerIndex.addOnTop(current);
+    powersOfTwo.addOnTop(*powersOfTwo.LastObject() * 2);
   }
   unsigned int result = *powersOfTwo.LastObject();
   current = *baseRaisedTo2ToPowerIndex.LastObject();
@@ -771,7 +771,7 @@ void LargeIntegerUnsigned::AssignUInt64(uint64_t x) {
   this->theDigits.SetSize(0);
   while (x > 0) {
     uint64_t nextDigit = x % LargeIntegerUnsigned::CarryOverBound;
-    this->theDigits.AddOnTop(static_cast<int>(nextDigit));
+    this->theDigits.addOnTop(static_cast<int>(nextDigit));
     x /= LargeIntegerUnsigned::CarryOverBound;
   }
 }
@@ -788,7 +788,7 @@ void LargeIntegerUnsigned::AssignShiftedUInt(unsigned int x, int shift) {
   this->theDigits.initializeFillInObject(shift, 0);
   while (x != 0) {
     unsigned int tempX = x % LargeIntegerUnsigned::CarryOverBound;
-    this->theDigits.AddOnTop(static_cast<int>(tempX));
+    this->theDigits.addOnTop(static_cast<int>(tempX));
     x = x / LargeIntegerUnsigned::CarryOverBound;
   }
 }
@@ -1027,15 +1027,15 @@ void LargeIntegerUnsigned::AccountFactor(
   const LargeInteger& theP, List<LargeInteger>& outputPrimeFactors, List<int>& outputMultiplicities
 ) const {
   if (outputPrimeFactors.size == 0) {
-    outputPrimeFactors.AddOnTop(theP);
-    outputMultiplicities.AddOnTop(1);
+    outputPrimeFactors.addOnTop(theP);
+    outputMultiplicities.addOnTop(1);
     return;
   }
   if ((*outputPrimeFactors.LastObject()).operator==(theP)) {
     (*outputMultiplicities.LastObject()) ++;
   } else {
-    outputPrimeFactors.AddOnTop(theP);
-    outputMultiplicities.AddOnTop(1);
+    outputPrimeFactors.addOnTop(theP);
+    outputMultiplicities.addOnTop(1);
   }
 }
 
@@ -1190,7 +1190,7 @@ void LargeIntegerUnsigned::AssignFactorial(unsigned int x) {
   LargeIntegerUnsigned tempInt, tempOne;
   tempOne.makeOne();
   for (int i = 0; i < primesBelowX.size; i ++) {
-    unsigned int thePrime = primesBelowX.TheObjects[i];
+    unsigned int thePrime = primesBelowX.theObjects[i];
     unsigned int thePowerOfThePrime = 0;
     unsigned int currentPower = thePrime;
     do {
@@ -1377,9 +1377,9 @@ bool LargeInteger::GetDivisors(List<int>& output, bool includeNegative) {
   output.SetSize(0);
   for (int i = 1; i <= val; i ++) {
     if (val % i == 0) {
-      output.AddOnTop(i);
+      output.addOnTop(i);
       if (includeNegative) {
-        output.AddOnTop(- i);
+        output.addOnTop(- i);
       }
     }
   }

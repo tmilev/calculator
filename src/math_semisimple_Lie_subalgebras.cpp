@@ -22,7 +22,7 @@ void SemisimpleLieAlgebra::GenerateLieSubalgebra(
   ProgressReport theReport;
   List<ElementSemisimpleLieAlgebra<coefficient> > inputLinIndep;
   for (int i = 0; i < inputOutputGenerators.size; i ++) {
-    inputLinIndep.AddOnTop(inputOutputGenerators[i]);
+    inputLinIndep.addOnTop(inputOutputGenerators[i]);
     if (theBracket.GetRankOfSpanOfElements(inputLinIndep, &seedMons) < inputLinIndep.size) {
       inputLinIndep.RemoveLastObject();
     }
@@ -38,7 +38,7 @@ void SemisimpleLieAlgebra::GenerateLieSubalgebra(
         theReport.Report(reportStream.str());
       }
       this->LieBracket(inputOutputGenerators[i], inputOutputGenerators[j], theBracket);
-      inputOutputGenerators.AddOnTop(theBracket);
+      inputOutputGenerators.addOnTop(theBracket);
       if (theBracket.GetRankOfSpanOfElements(inputOutputGenerators, &seedMons) < inputOutputGenerators.size) {
         inputOutputGenerators.RemoveLastObject();
       }
@@ -105,17 +105,17 @@ bool SemisimpleLieAlgebra::AttempTFindingHEF(
   this->LieBracket(inputOutputH, inputOutputE, mustBeZero);
   mustBeZero -= inputOutputE * 2;
   for (int i = 0; i < mustBeZero.size(); i ++) {
-    theSystem.AddOnTop(mustBeZero.coefficients[i]);
+    theSystem.addOnTop(mustBeZero.coefficients[i]);
   }
   this->LieBracket(inputOutputH, inputOutputF, mustBeZero);
   mustBeZero += inputOutputF * 2;
   for (int i = 0; i < mustBeZero.size(); i ++) {
-    theSystem.AddOnTop(mustBeZero.coefficients[i]);
+    theSystem.addOnTop(mustBeZero.coefficients[i]);
   }
   this->LieBracket(inputOutputE, inputOutputF, mustBeZero);
   mustBeZero -= inputOutputH;
   for (int i = 0; i < mustBeZero.size(); i ++) {
-    theSystem.AddOnTop(mustBeZero.coefficients[i]);
+    theSystem.addOnTop(mustBeZero.coefficients[i]);
   }
   if (logStream != nullptr) {
     *logStream << "The system to solve: ";
@@ -267,7 +267,7 @@ void SubalgebraSemisimpleLieAlgebra::ComputeCartanSA() {
     if (!foundNewElement) {
       global.fatal  << "This shouldn't happen: could not found a new nilpotent element. " << global.fatal;
     }
-    this->CartanSA.AddOnTop(newElt);
+    this->CartanSA.addOnTop(newElt);
     this->owner->GetCommonCentralizer(this->CartanSA, CurrentCentralizer);
     newElt.IntersectVectorSpaces(CurrentCentralizer, this->theBasis, CurrentCentralizer, nullptr);
   }
@@ -848,10 +848,10 @@ void SemisimpleSubalgebras::GetCentralizerChains(List<List<int> >& outputChains)
     if (!Explored.selected[i]) {
       outputChains.SetSize(outputChains.size + 1);
       outputChains.LastObject()->SetSize(0);
-      outputChains.LastObject()->AddOnTop(i);
+      outputChains.LastObject()->addOnTop(i);
       int maxSScontainer = this->theSubalgebras.theValues[i].indexMaxSSContainer;
       if (maxSScontainer != - 1) {
-        outputChains.LastObject()->AddOnTop(maxSScontainer);
+        outputChains.LastObject()->addOnTop(maxSScontainer);
         Explored.AddSelectionAppendNewIndex(maxSScontainer);
       }
     }
@@ -872,18 +872,18 @@ void SemisimpleSubalgebras::ComputeSl2sInitOrbitsForComputationOnDemand() {
   ElementWeylGroupAutomorphisms theElt;
   for (int i = 0; i < this->owner->GetRank(); i ++) {
     theElt.MakeSimpleReflection(i, theWeylAutomorphisms);
-    theGens.AddOnTop(theElt);
+    theGens.addOnTop(theElt);
   }
   List<MatrixTensor<Rational> >& outerAutos = theWeylAutomorphisms.theOuterAutos.theGenerators;
   for (int i = 0; i < outerAutos.size; i ++) {
     if (!outerAutos[i].IsID()) {
       theElt.MakeOuterAuto(i, theWeylAutomorphisms);
-      theGens.AddOnTop(theElt);
+      theGens.addOnTop(theElt);
     }
   }
   for (int i = 0; i < this->theSl2s.size; i ++) {
-    this->theOrbitHelementLengths.AddOnTop(this->theSl2s[i].LengthHsquared);
-    this->theOrbitDynkinIndices.AddOnTop(DynkinSimpleType('A', 1, this->theSl2s[i].LengthHsquared));
+    this->theOrbitHelementLengths.addOnTop(this->theSl2s[i].LengthHsquared);
+    this->theOrbitDynkinIndices.addOnTop(DynkinSimpleType('A', 1, this->theSl2s[i].LengthHsquared));
     this->theOrbiTs[i].initialize(theGens, this->theSl2s[i].theH.GetCartanPart());
   }
 }
@@ -931,7 +931,7 @@ bool SemisimpleSubalgebras::LoadState(
       currentSA.theHsScaledToActByTwoInOrderOfCreation = this->baseSubalgebra().theHsScaledToActByTwoInOrderOfCreation;
       for (int i = 0; i < currentSA.theHs.size; i ++) {
         if (! this->baseSubalgebra().theHsScaledToActByTwoInOrderOfCreation.Contains(currentSA.theHs[i])) {
-          currentSA.theHsScaledToActByTwoInOrderOfCreation.AddOnTop(currentSA.theHs[i]);
+          currentSA.theHsScaledToActByTwoInOrderOfCreation.addOnTop(currentSA.theHs[i]);
           if (currentSA.theHsScaledToActByTwoInOrderOfCreation.size > currentSA.theHs.size) {
             isGood = false;
             break;
@@ -1143,7 +1143,7 @@ void CandidateSSSubalgebra::SetUpInjectionHs(
   this->theHsScaledToActByTwoInOrderOfCreation.Reserve(baseSubalgebra.theHsScaledToActByTwoInOrderOfCreation.size + 1);
   this->theHsScaledToActByTwoInOrderOfCreation = baseSubalgebra.theHsScaledToActByTwoInOrderOfCreation;
   if (newHScaledToActByTwo != nullptr) {
-    this->theHsScaledToActByTwoInOrderOfCreation.AddOnTop(*newHScaledToActByTwo);
+    this->theHsScaledToActByTwoInOrderOfCreation.addOnTop(*newHScaledToActByTwo);
   }
   DynkinSimpleType newComponent = this->theWeylNonEmbedded->theDynkinType.GetSmallestSimpleType();
   this->CartanSAsByComponentScaledToActByTwo = baseSubalgebra.CartanSAsByComponentScaledToActByTwo;
@@ -1347,7 +1347,7 @@ bool OrbitIteratorRootActionWeylGroupAutomorphisms::IncrementReturnFalseIfPastLa
     return false;
   }
   if (this->orbitBuffer.size < this->maxOrbitBufferSize) {
-    this->orbitBuffer.AddOnTop(this->theIterator.GetCurrentElement());
+    this->orbitBuffer.addOnTop(this->theIterator.GetCurrentElement());
   }
   return true;
 }
@@ -1391,7 +1391,7 @@ void OrbitIteratorRootActionWeylGroupAutomorphisms::initialize(
   this->orbitDefiningElement = inputElement;
   if (this->maxOrbitBufferSize >= 1) {
     this->orbitBuffer.SetSize(0);
-    this->orbitBuffer.AddOnTop(this->orbitDefiningElement);
+    this->orbitBuffer.addOnTop(this->orbitDefiningElement);
   }
   this->theIterator.init(inputGenerators, this->orbitDefiningElement, this->theIterator.theGroupAction);
 }
@@ -1491,7 +1491,7 @@ void SemisimpleSubalgebras::GetHCandidates(
       continue;
     }
     if (baseRank == 0) {
-      outputHCandidatesScaledToActByTwo.AddOnTop(this->theSl2s[j].theH.GetCartanPart());
+      outputHCandidatesScaledToActByTwo.addOnTop(this->theSl2s[j].theH.GetCartanPart());
       // Orbit of not generated because that is the very first H element selected.
       continue;
     }
@@ -1509,7 +1509,7 @@ void SemisimpleSubalgebras::GetHCandidates(
           out2 << "Current element has desired scalar products. ";
           theReport3.Report(out2.str());
         }
-        outputHCandidatesScaledToActByTwo.AddOnTop(currentOrbit.GetCurrentElement());
+        outputHCandidatesScaledToActByTwo.addOnTop(currentOrbit.GetCurrentElement());
       } else {
         if (theReport3.TickAndWantReport()) {
           std::stringstream out2;
@@ -1591,12 +1591,12 @@ void DynkinType::GetDynkinIndicesSl2SubalgebrasSimpleType(
     simpleAlgebra.theWeyl.MakeArbitrarySimple(theTypeDefaultScale.theLetter, theTypeDefaultScale.theRank);
     simpleAlgebra.ComputeChevalleyConstants();
     simpleAlgebra.FindSl2Subalgebras(simpleAlgebra, theSl2s);
-    dynkinSimpleTypesWithComputedSl2Subalgebras.AddOnTop(theTypeDefaultScale);
+    dynkinSimpleTypesWithComputedSl2Subalgebras.addOnTop(theTypeDefaultScale);
     outputIndicesDefaultScale.SetExpectedSize(theSl2s.size);
     for (int i = 0; i < theSl2s.size; i ++) {
       outputIndicesDefaultScale.AddOnTopNoRepetition(theSl2s[i].LengthHsquared / 2);
     }
-    precomputedDynkinIndicesSl2subalgebrasSimpleTypes.AddOnTop(outputIndicesDefaultScale);
+    precomputedDynkinIndicesSl2subalgebrasSimpleTypes.addOnTop(outputIndicesDefaultScale);
   }
   List<Rational>& outputIndicesDefaultScale = precomputedDynkinIndicesSl2subalgebrasSimpleTypes[
     dynkinSimpleTypesWithComputedSl2Subalgebras.GetIndex(theTypeDefaultScale)
@@ -1604,7 +1604,7 @@ void DynkinType::GetDynkinIndicesSl2SubalgebrasSimpleType(
   outputDynkinIndices.SetExpectedSize(outputIndicesDefaultScale.size);
   outputDynkinIndices.Clear();
   for (int i = 0; i <outputIndicesDefaultScale.size; i ++) {
-    outputDynkinIndices.AddOnTop(outputIndicesDefaultScale[i] * theType.CartanSymmetricInverseScale);
+    outputDynkinIndices.addOnTop(outputIndicesDefaultScale[i] * theType.CartanSymmetricInverseScale);
   }
 }
 
@@ -1626,8 +1626,8 @@ void DynkinType::GetDynkinIndicesSl2Subalgebras(
       bufferIndices
     );
     DynkinIndicesPerType.SetSize(DynkinIndicesPerType.size + 1);
-    DynkinIndicesPerType.LastObject()->AddOnTop(0);
-    DynkinIndicesPerType.LastObject()->AddListOnTop(bufferIndices);
+    DynkinIndicesPerType.LastObject()->addOnTop(0);
+    DynkinIndicesPerType.LastObject()->addListOnTop(bufferIndices);
   }
   SelectionWithDifferentMaxMultiplicities dynkinIndexSelector;
   List<int> theMults;
@@ -1862,7 +1862,7 @@ bool SemisimpleSubalgebras::ComputeCurrentHCandidates() {
     indicesModulesNewComponentExtensionMod.SetSize(0);
     for (int j = 0; j < this->baseSubalgebra().HighestWeightsNONPrimal.size; j ++) {
       if (this->baseSubalgebra().HighestWeightsNONPrimal[j] == weightHElementWeAreLookingFor) {
-        indicesModulesNewComponentExtensionMod.AddOnTop(j);
+        indicesModulesNewComponentExtensionMod.addOnTop(j);
       }
     }
     if (indicesModulesNewComponentExtensionMod.size == 0) {
@@ -1925,7 +1925,7 @@ void SemisimpleSubalgebras::AddSubalgebraToStack(
     << global.fatal;
   }
   input.ComputeCentralizerTypeFailureAllowed();//<- trying to compute the centralizer of a subalgebra on the stack.
-  this->currentSubalgebraChain.AddOnTop(input);
+  this->currentSubalgebraChain.addOnTop(input);
   this->currentPossibleLargerDynkinTypes.SetSize(this->currentSubalgebraChain.size);
   this->currentRootInjections.SetSize(this->currentSubalgebraChain.size);
 
@@ -1935,14 +1935,14 @@ void SemisimpleSubalgebras::AddSubalgebraToStack(
     this->currentRootInjections.LastObject()
   );
   ///////////
-  this->currentNumLargerTypesExplored.AddOnTop(inputNumLargerTypesExplored);
+  this->currentNumLargerTypesExplored.addOnTop(inputNumLargerTypesExplored);
   // global.Comments << "<hr>" << this->currentPossibleLargerDynkinTypes.LastObject()->size
   // << " possible extensions of " << input.theWeylNonEmbedded->theDynkinType.toString() << ": ";
   // for (int i = 0; i < this->currentPossibleLargerDynkinTypes.LastObject()->size; i ++)
   //   global.Comments << (*this->currentPossibleLargerDynkinTypes.LastObject())[i].toString() << ", ";
   ///////////
   this->currentHCandidatesScaledToActByTwo.SetSize(this->currentSubalgebraChain.size);
-  this->currentNumHcandidatesExplored.AddOnTop(inputNumHcandidatesExplored);
+  this->currentNumHcandidatesExplored.addOnTop(inputNumHcandidatesExplored);
 
   this->ComputeCurrentHCandidates();
 }
@@ -2287,7 +2287,7 @@ void CandidateSSSubalgebra::AddHincomplete(const Vector<Rational>& theH) {
       i --;
     }
   }
-  this->CartanSAsByComponentScaledToActByTwo.LastObject()->AddOnTop(theH);
+  this->CartanSAsByComponentScaledToActByTwo.LastObject()->addOnTop(theH);
 }
 
 bool CandidateSSSubalgebra::IsGoodHnewActingByTwo(
@@ -2341,7 +2341,7 @@ int charSSAlgMod<coefficient>::GetIndexExtremeWeightRelativeToWeyl(WeylGroupData
   HashedList<Vector<coefficient> > weightsSimpleCoords;
   weightsSimpleCoords.SetExpectedSize(this->size());
   for (int i = 0; i < this->size(); i ++) {
-    weightsSimpleCoords.AddOnTop(theWeyl.GetSimpleCoordinatesFromFundamental((*this)[i].weightFundamentalCoordS));
+    weightsSimpleCoords.addOnTop(theWeyl.GetSimpleCoordinatesFromFundamental((*this)[i].weightFundamentalCoordS));
   }
   for (int i = 0; i <weightsSimpleCoords.size; i ++) {
     bool isGood = true;
@@ -2388,8 +2388,8 @@ bool CandidateSSSubalgebra::ComputeSystem(bool AttemptToChooseCentalizer, bool a
       currentGen.MakeGenerator(*this->owner->owner, indexCurGen);
       currentOpGen.MakeGenerator(*this->owner->owner, opIndex);
       if (this->IsWeightSystemSpaceIndex(i, this->GetAmbientWeyl().RootSystem[j])) {
-        currentInvolvedPosGens.AddOnTop(currentGen);
-        currentInvolvedNegGens.AddOnTop(currentOpGen);
+        currentInvolvedPosGens.addOnTop(currentGen);
+        currentInvolvedNegGens.addOnTop(currentOpGen);
       }
     }
     if (currentInvolvedNegGens.size == 0) {
@@ -2515,7 +2515,7 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(bool AttemptToChooseCentalizer, b
     theDetMultiplier.makeMonomial(this->totalNumUnknownsWithCentralizer - 1, 1, 1);
     theDeterminant *= theDetMultiplier;
     theDeterminant += - Rational(1);
-    this->theSystemToSolve.AddOnTop(theDeterminant);
+    this->theSystemToSolve.addOnTop(theDeterminant);
   }
   if (this->theUnknownNegGens.size != this->theUnknownPosGens.size) {
     global.fatal << "Error: number of unknown negative generators differs from number of unknown positive ones. " << global.fatal;
@@ -2587,7 +2587,7 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(bool AttemptToChooseCentalizer, b
   }
   if (this->flagSystemSolved) {
     this->theBasis = this->theNegGens;
-    this->theBasis.AddListOnTop(this->thePosGens);
+    this->theBasis.addListOnTop(this->thePosGens);
     if (this->theBasis.size > 0) {
       this->owner->owner->GenerateLieSubalgebra(this->theBasis);
       if (this->theBasis.size != this->theWeylNonEmbedded->theDynkinType.GetLieAlgebraDimension()) {
@@ -2623,10 +2623,10 @@ void CandidateSSSubalgebra::ExtendToModule(List<ElementSemisimpleLieAlgebra<Alge
       << i + 1 << " and negative generator index " << j+ 1 << ".";
       theReport.Report(reportStream.str());
       this->GetAmbientSS().LieBracket(this->theNegGens[j], inputOutput[i], tempElt);
-      theVectorSpace.AddOnTop(tempElt);
+      theVectorSpace.addOnTop(tempElt);
       tempElt.GaussianEliminationByRowsDeleteZeroRows(theVectorSpace, nullptr, &bufferList);
       if (theVectorSpace.size >inputOutput.size) {
-        inputOutput.AddOnTop(tempElt);
+        inputOutput.addOnTop(tempElt);
       }
     }
   }
@@ -2648,7 +2648,7 @@ void LinearCombination<templateMonomial, coefficient>::IntersectVectorSpaces(
   Matrix<coefficient> theLinCombiMat;
   int firstSpaceDim = theVspaces.size;
   theLinCombiMat.MakeIdMatrix(theVspaces.size +vectorSpace2eliminated.size);
-  theVspaces.AddListOnTop(vectorSpace2eliminated);
+  theVspaces.addListOnTop(vectorSpace2eliminated);
   vectorSpace2eliminated = theVspaces;
   LinearCombination<templateMonomial, coefficient>::GaussianEliminationByRows(theVspaces, nullptr, seedMonomials, &theLinCombiMat);
   int dimResult = 0;
@@ -2733,7 +2733,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecomposition() {
   for (int i = 0; i < this->Modules.size; i ++) {
     this->ModulesIsotypicallyMerged[i].SetSize(0);
     for (int j = 0; j < this->Modules[i].size; j ++) {
-      this->ModulesIsotypicallyMerged[i].AddListOnTop(this->Modules[i][j]);
+      this->ModulesIsotypicallyMerged[i].addListOnTop(this->Modules[i][j]);
     }
   }
   //please note: part of primalSubalgebraModules have already been computed.
@@ -2746,7 +2746,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecomposition() {
           << "<br>Here is a detailed subalgebra printout. " << global.fatal;
         }
       }
-      this->primalSubalgebraModules.AddOnTop(i);
+      this->primalSubalgebraModules.addOnTop(i);
     }
   }
   this->fullBasisByModules.SetSize(0);
@@ -2755,8 +2755,8 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecomposition() {
   this->fullBasisOwnerModules.Reserve(this->GetAmbientSS().GetNumGenerators());
   for (int i = 0; i < this->ModulesIsotypicallyMerged.size; i ++) {
     for (int j = 0; j < this->ModulesIsotypicallyMerged[i].size; j ++) {
-      this->fullBasisByModules.AddOnTop(this->ModulesIsotypicallyMerged[i][j]);
-      this->fullBasisOwnerModules.AddOnTop(i);
+      this->fullBasisByModules.addOnTop(this->ModulesIsotypicallyMerged[i][j]);
+      this->fullBasisOwnerModules.addOnTop(i);
     }
   }
   if (this->fullBasisByModules.size != this->GetAmbientSS().GetNumGenerators()) {
@@ -2796,16 +2796,16 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecomposition() {
   this->RootSystemCentralizerPrimalCoords.Clear();
   for (int i = 0; i < this->ModulesIsotypicallyMerged.size; i ++) {
     if (this->ModulesIsotypicallyMerged[i].size == 1 || this->WeightsModulesPrimal[i][0].IsEqualToZero()) {
-      this->centralizerSubalgebraModules.AddOnTop(i);
+      this->centralizerSubalgebraModules.addOnTop(i);
       if (!this->WeightsModulesPrimal[i][0].IsEqualToZero()) {
-        this->RootSystemCentralizerPrimalCoords.AddOnTop(this->WeightsModulesPrimal[i][0]);
+        this->RootSystemCentralizerPrimalCoords.addOnTop(this->WeightsModulesPrimal[i][0]);
       }
     }
   }
   for (int i = 0; i < this->subalgebraModules.size; i ++) {
     for (int j = 0; j < this->WeightsModulesPrimal[this->subalgebraModules[i]].size; j ++) {
       if (!this->WeightsModulesPrimal[this->subalgebraModules[i]][j].IsEqualToZero()) {
-        this->RootSystemSubalgebraPrimalCoords.AddOnTop(this->WeightsModulesPrimal[this->subalgebraModules[i]][j]);
+        this->RootSystemSubalgebraPrimalCoords.addOnTop(this->WeightsModulesPrimal[this->subalgebraModules[i]][j]);
       }
     }
   }
@@ -2937,7 +2937,7 @@ void CandidateSSSubalgebra::ComputePairingTable() {
       if (this->GetAmbientSS().GetWeightOfGenerator(
         this->ModulesIsotypicallyMerged[i][j][0].theGeneratorIndex).IsEqualToZero()
       ) {
-        this->modulesWithZeroWeights.AddOnTop(i);
+        this->modulesWithZeroWeights.addOnTop(i);
         break;
       }
     }
@@ -2982,9 +2982,9 @@ void CandidateSSSubalgebra::ComputeCharsPrimalModules() {
   for (int i = 0; i < this->Modules.size; i ++) {
     for (int j = i; j < this->Modules.size; j ++) {
       if ((this->CharsPrimalModules[i] - theDualMods[j]).IsEqualToZero()) {
-        this->OppositeModulesByChar[i].AddOnTop(j);
+        this->OppositeModulesByChar[i].addOnTop(j);
         if (i != j) {
-          this->OppositeModulesByChar[j].AddOnTop(i);
+          this->OppositeModulesByChar[j].addOnTop(i);
         }
       }
     }
@@ -3000,7 +3000,7 @@ void CandidateSSSubalgebra::ComputeKsl2triplesGetOppositeEltsInOppositeModule(
   outputElts.SetSize(0);
   for (int i = 0; i < inputOppositeModule.size; i ++) {
     if ((this->GetPrimalWeightFirstGen(inputOppositeModule[i]) +theElementWeight).IsEqualToZero()) {
-      outputElts.AddOnTop(inputOppositeModule[i]);
+      outputElts.addOnTop(inputOppositeModule[i]);
     }
   }
 }
@@ -3028,7 +3028,7 @@ void CandidateSSSubalgebra::ComputeKsl2triplesGetOppositeEltsAll(
     for (int j = 0; j < this->WeightsModulesPrimal[i].size; j ++) {
       if ((theElementWeight + this->WeightsModulesPrimal[i][j]).IsEqualToZero()) {
         for (int k = 0; k < this->Modules[i].size; k ++) {
-          outputElts.AddOnTop(this->Modules[i][k][j]);
+          outputElts.addOnTop(this->Modules[i][k][j]);
           if (!(theElementWeight + this->GetPrimalWeightFirstGen(this->Modules[i][k][j])).IsEqualToZero()) {
             global.fatal << "This is a programming error: element "
             << "this->Modules[i][k][j] does not have the primal weight it is supposed to have. "
@@ -3192,15 +3192,15 @@ void NilradicalCandidate::ComputeParabolicACextendsToParabolicAC() {
   }
   conesCombination = this->theNilradicalWeights;
   for (int i = 0; i < this->theNonFKhws.size; i ++) {
-    conesCombination.AddOnTop(-this->theNonFKhws[i]);
+    conesCombination.addOnTop(-this->theNonFKhws[i]);
   }
   this->ConeSeparatingNormal.PerturbNormalRelativeToVectorsInGeneralPosition(conesCombination, rootSystemProjections);
   for (int i = 0; i < theWeyl.RootSystem.size; i ++) {
     this->owner->GetPrimalWeightProjectionFundCoords(theWeyl.RootSystem[i], projectionRoot);
     if (projectionRoot.ScalarEuclidean(this->ConeSeparatingNormal) == 0) {
-      this->leviRootsAmbienT.AddOnTop(theWeyl.RootSystem[i]);
+      this->leviRootsAmbienT.addOnTop(theWeyl.RootSystem[i]);
       if (this->owner->RootSystemCentralizerPrimalCoords.Contains(projectionRoot)) {
-        this->leviRootsSmallPrimalFundCoords.AddOnTop(projectionRoot);
+        this->leviRootsSmallPrimalFundCoords.addOnTop(projectionRoot);
       }
     }
   }
@@ -3282,7 +3282,7 @@ bool NilradicalCandidate::TryFindingLInfiniteRels() {
           this->ConeRelativelyStrongIntersection.SetSize(0);
           for (int k = 0; k < this->theNilradSubsel.CardinalitySelection; k ++) {
             this->ConeStrongIntersection[this->theNilradSubsel.elements[k]] = betterIntersection[k];
-            this->ConeRelativelyStrongIntersection.AddOnTop(betterIntersection[k]);
+            this->ConeRelativelyStrongIntersection.addOnTop(betterIntersection[k]);
           }
           this->theNilradical.SubSelection(this->theNilradSubsel, this->theNilradicalSubset);
           this->theNilradicalWeights.SubSelection(this->theNilradSubsel, this->theNilradicalSubsetWeights);
@@ -3291,9 +3291,9 @@ bool NilradicalCandidate::TryFindingLInfiniteRels() {
           for (int k = 0; k < this->theNonFKhwsStronglyTwoSided.size; k ++) {
             this->ConeStrongIntersection[k + this->theNilradicalWeights.size] = betterIntersection[k + i];
             if (betterIntersection[k + i] != 0) {
-              this->theNonFKhwVectorsStrongRelativeToSubset.AddOnTop(this->theNonFKHVectorsStronglyTwoSided[k]);
-              this->theNonFKhwVectorsStrongRelativeToSubsetWeights.AddOnTop(this->theNonFKhwsStronglyTwoSided[k]);
-              this->ConeRelativelyStrongIntersection.AddOnTop(betterIntersection[k + i]);
+              this->theNonFKhwVectorsStrongRelativeToSubset.addOnTop(this->theNonFKHVectorsStronglyTwoSided[k]);
+              this->theNonFKhwVectorsStrongRelativeToSubsetWeights.addOnTop(this->theNonFKhwsStronglyTwoSided[k]);
+              this->ConeRelativelyStrongIntersection.addOnTop(betterIntersection[k + i]);
             }
           }
           return true;
@@ -3396,8 +3396,8 @@ void NilradicalCandidate::ComputeTheTwoConesRelativeToNilradicalSubset() {
   this->theNonFKhwVectorsStrongRelativeToSubsetWeights.SetSize(0);
   for (int i = 0; i < this->theNonFKhws.size; i ++) {
     if (this->IsStronglySingularRelativeToSubset(i)) {
-      this->theNonFKhwVectorsStrongRelativeToSubsetWeights.AddOnTop(this->theNonFKhws[i]);
-      this->theNonFKhwVectorsStrongRelativeToSubset.AddOnTop(this->theNonFKhwVectors[i]);
+      this->theNonFKhwVectorsStrongRelativeToSubsetWeights.addOnTop(this->theNonFKhws[i]);
+      this->theNonFKhwVectorsStrongRelativeToSubset.addOnTop(this->theNonFKhwVectors[i]);
     }
   }
 }
@@ -3410,21 +3410,21 @@ void NilradicalCandidate::ComputeTheTwoCones() {
     if (!this->owner->primalSubalgebraModules.Contains(i)) {
       if (this->theNilradicalSelection[i] == 0) {
         for (int k = 0; k < this->owner->Modules[i].size; k ++) {
-          this->theNonFKhws.AddOnTop(this->owner->HighestWeightsPrimal[i]);
-          this->theNonFKhwVectors.AddOnTop(this->owner->HighestVectors[i][k]);
-          this->ownerModulestheNonFKhwVectors.AddOnTop(i);
+          this->theNonFKhws.addOnTop(this->owner->HighestWeightsPrimal[i]);
+          this->theNonFKhwVectors.addOnTop(this->owner->HighestVectors[i][k]);
+          this->ownerModulestheNonFKhwVectors.addOnTop(i);
           if (this->IsStronglySingular(i)) {
-            this->theNonFKhwsStronglyTwoSided.AddOnTop(this->owner->HighestWeightsPrimal[i]);
-            this->theNonFKHVectorsStronglyTwoSided.AddOnTop(this->owner->HighestVectors[i][k]);
+            this->theNonFKhwsStronglyTwoSided.addOnTop(this->owner->HighestWeightsPrimal[i]);
+            this->theNonFKHVectorsStronglyTwoSided.addOnTop(this->owner->HighestVectors[i][k]);
           }
         }
       } else if (this->theNilradicalSelection[i] == 1) {
         for (int k = 0; k < this->owner->Modules[i].size; k ++) {
-          this->theNilradicalWeights.AddListOnTop(this->owner->WeightsModulesPrimal[i]);
-          this->theNilradical.AddListOnTop(this->owner->Modules[i][k]);
-          this->theNilradicalElementOpposites.AddListOnTop(this->owner->ModulesSl2opposite[i][k]);
+          this->theNilradicalWeights.addListOnTop(this->owner->WeightsModulesPrimal[i]);
+          this->theNilradical.addListOnTop(this->owner->Modules[i][k]);
+          this->theNilradicalElementOpposites.addListOnTop(this->owner->ModulesSl2opposite[i][k]);
           for (int l = 0; l < this->owner->Modules[i][k].size; l ++) {
-            this->ownerModulesNilradicalElements.AddOnTop(i);
+            this->ownerModulesNilradicalElements.addOnTop(i);
           }
         }
       }
@@ -3499,7 +3499,7 @@ void Cone::GetLinesContainedInCone(Vectors<Rational>& output) {
   for (int i = 0; i < this->Vertices.size; i ++) {
     for (int j = i + 1; j < this->Vertices.size; j ++) {
       if (this->Vertices[i] == - this->Vertices[j]) {
-        output.AddOnTop(this->Vertices[i]);
+        output.addOnTop(this->Vertices[i]);
       }
     }
   }
@@ -3525,7 +3525,7 @@ void Vector<coefficient>::PerturbNormalRelativeToVectorsInGeneralPosition(
   coefficient theScale;
   Vector<Rational> currentModifier;
   Vectors<Rational> allVectors = theCone.Vertices;
-  allVectors.AddListOnTop(VectorsToBeInGeneralPosition);
+  allVectors.addListOnTop(VectorsToBeInGeneralPosition);
   for (int i = 0; i < VectorsToBeInGeneralPosition.size; i ++) {
     if (this->ScalarEuclidean(VectorsToBeInGeneralPosition[i]) == 0) {
       bool foundModifier = false;
@@ -3637,7 +3637,7 @@ bool CandidateSSSubalgebra::IsPossibleNilradicalCarryOutSelectionImplications(
   HashedList<int, MathRoutines::IntUnsignIdentity> selectedIndices;
   for (int i = 0; i < theSelection.size; i ++) {
     if (theSelection[i] == 1) {
-      selectedIndices.AddOnTop(i);
+      selectedIndices.addOnTop(i);
     }
   }
   MemorySaving<List<int> > oldSelection;
@@ -3732,7 +3732,7 @@ void CandidateSSSubalgebra::EnumerateNilradicalsRecursively(List<int>& theSelect
   NilradicalCandidate tempCandidate;
   tempCandidate.owner = this;
   tempCandidate.theNilradicalSelection = theSelection;
-  this->FKNilradicalCandidates.AddOnTop(tempCandidate);
+  this->FKNilradicalCandidates.addOnTop(tempCandidate);
 }
 
 void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHighestWeightsOnly(HashedList<Vector<Rational> >& outputHWsDualCoords) {
@@ -3826,7 +3826,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart(
     currentRoot = this->GetAmbientSS().GetWeightOfGenerator(this->HighestVectorsNonSorted[i][0].theGeneratorIndex);
     Vector<Rational>& currentHWPrimal = this->HighestWeightsPrimalNonSorted[i];
     this->GetPrimalWeightProjectionFundCoords(currentRoot, currentHWPrimal);
-    sortingWeights.AddOnTop(currentHWPrimal);
+    sortingWeights.addOnTop(currentHWPrimal);
   }
   sortingWeights.QuickSortAscendingCustom(*this, &this->HighestVectorsNonSorted);
   List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > > tempModules;
@@ -3846,9 +3846,9 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart(
       tempModules.SetSize(tempModules.size + 1);
       tempModules.LastObject()->SetSize(0);
       theIndex = tempHWs.size;
-      tempHWs.AddOnTop(currentHWPrimal);
+      tempHWs.addOnTop(currentHWPrimal);
     }
-    tempModules[theIndex].AddOnTop(this->HighestVectorsNonSorted[i]);
+    tempModules[theIndex].addOnTop(this->HighestVectorsNonSorted[i]);
   }
   this->HighestVectors.SetExpectedSize(this->thePrimalChaR.size() +this->owner->owner->GetRank());
   this->HighestWeightsPrimal.SetExpectedSize(this->thePrimalChaR.size() +this->owner->owner->GetRank());
@@ -3861,7 +3861,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart(
     this->Modules.SetSize(this->Modules.size + 1);
     this->HighestVectors.SetSize(this->Modules.size);
     this->HighestVectors.LastObject()->SetSize(0);
-    this->HighestWeightsPrimal.AddOnTop(tempHWs[i]);
+    this->HighestWeightsPrimal.addOnTop(tempHWs[i]);
     if (LinearCombination<ChevalleyGenerator, Rational>::VectorSpacesIntersectionIsNonTrivial(tempModules[i], this->theBasis)) {
       LinearCombination<ChevalleyGenerator, AlgebraicNumber>::IntersectVectorSpaces(
         tempModules[i], this->theBasis, *this->HighestVectors.LastObject()
@@ -3870,7 +3870,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart(
         global.fatal << "This is a programming error: simple component "
         << "computed to have more than one highest weight vector. " << global.fatal;
       }
-      this->primalSubalgebraModules.AddOnTop(this->Modules.size- 1);
+      this->primalSubalgebraModules.addOnTop(this->Modules.size- 1);
       this->Modules.LastObject()->SetSize(1);
       *this->Modules.LastObject()->LastObject()=*this->HighestVectors.LastObject();
       if (tempModules[i].size >1) {
@@ -3878,10 +3878,10 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart(
         this->Modules.LastObject()->SetSize(tempModules[i].size- 1);
         this->HighestVectors.SetSize(this->Modules.size);
         this->HighestVectors.LastObject()->SetSize(0);
-        this->HighestWeightsPrimal.AddOnTop(tempHWs[i]);
-        this->HighestVectors.LastObject()->AddListOnTop(this->HighestVectors[this->HighestVectors.size-2]);
+        this->HighestWeightsPrimal.addOnTop(tempHWs[i]);
+        this->HighestVectors.LastObject()->addListOnTop(this->HighestVectors[this->HighestVectors.size-2]);
         for (int j = 0; j < tempModules[i].size; j ++) {
-          this->HighestVectors.LastObject()->AddOnTop(tempModules[i][j]);
+          this->HighestVectors.LastObject()->addOnTop(tempModules[i][j]);
           if (
             LinearCombination<ChevalleyGenerator, Rational>::GetRankOfSpanOfElements(*this->HighestVectors.LastObject()) <
             this->HighestVectors.LastObject()->size
@@ -3959,8 +3959,8 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWVsOnly(HashedList<
   }
   ElementSemisimpleLieAlgebra<AlgebraicNumber> tempElt;
   Vectors<Rational> allHs;
-  allHs.AddListOnTop(this->theHs);
-  allHs.AddListOnTop(this->CartanOfCentralizer);
+  allHs.addListOnTop(this->theHs);
+  allHs.addListOnTop(this->CartanOfCentralizer);
   theAdsOfHs.SetSize(allHs.size);
   for (int j = 0; j < allHs.size; j ++) {
     tempElt.MakeHgenerator(allHs[j], this->GetAmbientSS());
@@ -3981,7 +3981,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWVsOnly(HashedList<
     for (int j = 0; j < outputV.size; j ++) {
       outputV[j].ScaleNormalizeFirstNonZero();
       tempElt.AssignVectorNegRootSpacesCartanPosRootSpaces(outputV[j], this->GetAmbientSS());
-      this->HighestVectorsNonSorted.AddOnTop(tempElt);
+      this->HighestVectorsNonSorted.addOnTop(tempElt);
     }
   }
 }
@@ -4386,7 +4386,7 @@ std::string slTwoSubalgebra::toString(FormatExpressions* theFormat) const {
   }
   out << "\nsl(2)-module decomposition of the ambient Lie algebra: ";
   FormatExpressions formatCharacter;
-  formatCharacter.vectorSpaceEiBasisNames.AddOnTop("\\psi");
+  formatCharacter.vectorSpaceEiBasisNames.addOnTop("\\psi");
   out << HtmlRoutines::GetMathMouseHover((this->moduleDecompositionAmbientSA.toString(&formatCharacter))) << "\n<br>\n";
   out << "\nBelow is one possible realization of the sl(2) subalgebra.";
   if (useHtml) {
@@ -4568,7 +4568,7 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, 
     output.GetElement(i).IndicesMinimalContainingRootSAs.size = 0;
     for (int j = 0; j < output.GetElement(i).IndicesContainingRootSAs.size; j ++) {
       bool isMinimalContaining = true;
-//      rootSubalgebra& currentRootSA = output.theRootSAs.TheObjects[];
+//      rootSubalgebra& currentRootSA = output.theRootSAs.theObjects[];
       for (int k = 0; k < output.GetElement(i).IndicesContainingRootSAs.size; k ++) {
         rootSubalgebra& theOtherRootSA = output.theRootSAs.theSubalgebras[output.GetElement(i).IndicesContainingRootSAs[k]];
         if (theOtherRootSA.indicesSubalgebrasContainingK.Contains(output.GetElement(i).IndicesContainingRootSAs[j])) {
@@ -4683,7 +4683,7 @@ bool SltwoSubalgebras::ContainsSl2WithGivenH(Vector<Rational>& theH, int* output
   this->CheckForCorrectInitializationCrashIfNot();
   tempH.MakeHgenerator(theH, *this->owner);
   for (int i = 0; i < this->size; i ++) {
-    if (this->TheObjects[i].theH == tempH) {
+    if (this->theObjects[i].theH == tempH) {
       if (outputIndex != nullptr) {
         *outputIndex = i;
       }
@@ -4782,7 +4782,7 @@ void slTwoSubalgebra::MakeReportPrecomputations(
   theDiagram.AmbientBilinearForm = this->GetOwnerWeyl().CartanSymmetric;
   theDiagram.AmbientRootSystem = this->GetOwnerWeyl().RootSystem;
   theDiagram.ComputeDiagramInputIsSimple(tempRoots);
-  this->IndicesContainingRootSAs.AddOnTop(indexMinimalContainingRegularSA);
+  this->IndicesContainingRootSAs.addOnTop(indexMinimalContainingRegularSA);
   tempRoots.MakeEiBasis(theDimension);
   this->GetOwnerSSAlgebra().theWeyl.TransformToSimpleBasisGeneratorsWRTh(tempRoots, this->theH.GetCartanPart());
   DynkinDiagramRootSubalgebra tempDiagram;
@@ -5033,7 +5033,7 @@ std::string SltwoSubalgebras::ToStringSummary(FormatExpressions* theFormat) {
       out << "</td><td style =\"padding-left:20px\">";
     }
     FormatExpressions formatCharacter;
-    formatCharacter.vectorSpaceEiBasisNames.AddOnTop("\\psi");
+    formatCharacter.vectorSpaceEiBasisNames.addOnTop("\\psi");
     out << HtmlRoutines::GetMathMouseHover((theSl2.moduleDecompositionAmbientSA.toString(&formatCharacter)))
     << "\n<br>\n";
     if (useHtml) {
@@ -5279,11 +5279,11 @@ std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFor
           }
           theDV.drawCircleAtVectorBufferRational(this->WeightsModulesPrimal[i][k], color, 2);
           if (this->IsExtremeWeight(i, k)) {
-            cornerWeights.AddOnTop(this->WeightsModulesPrimal[i][k]);
+            cornerWeights.addOnTop(this->WeightsModulesPrimal[i][k]);
           }
         }
         if (k == this->Modules[i][j].size - 1 && BasisToDrawCirclesAt.size < thePrimalRank) {
-          BasisToDrawCirclesAt.AddOnTop(this->WeightsModulesPrimal[i][k]);
+          BasisToDrawCirclesAt.addOnTop(this->WeightsModulesPrimal[i][k]);
           if (BasisToDrawCirclesAt.GetRankOfSpanOfElements() != BasisToDrawCirclesAt.size) {
             BasisToDrawCirclesAt.RemoveLastObject();
           }
@@ -5735,7 +5735,7 @@ void NilradicalCandidate::GetModGeneratedByNonHWVandNilradElt(
 ) const {
   MacroRegisterFunctionWithName("NilradicalCandidate::GetModGeneratedByNonHWVandNilradElt");
   outputBrackets.SetSize(0);
-  outputBrackets.AddOnTop(this->theNilradicalSubset[indexInNilradSubset]);
+  outputBrackets.addOnTop(this->theNilradicalSubset[indexInNilradSubset]);
   outputRight.SetSize(1);
   outputLeft.SetSize(1);
   ElementSemisimpleLieAlgebra<AlgebraicNumber> theLieBracket;
@@ -5743,9 +5743,9 @@ void NilradicalCandidate::GetModGeneratedByNonHWVandNilradElt(
     if (!outputBrackets[i].IsEqualToZero()) {
       for (int j = 0; j < this->theNonFKhwVectorsStrongRelativeToSubset.size; j ++) {
         this->owner->owner->owner->LieBracket(this->theNonFKhwVectorsStrongRelativeToSubset[j], outputBrackets[i], theLieBracket);
-        outputBrackets.AddOnTop(theLieBracket);
-        outputLeft.AddOnTop(this->theNonFKhwVectorsStrongRelativeToSubset[j]);
-        outputRight.AddOnTop(outputBrackets[i]);
+        outputBrackets.addOnTop(theLieBracket);
+        outputLeft.addOnTop(this->theNonFKhwVectorsStrongRelativeToSubset[j]);
+        outputRight.addOnTop(outputBrackets[i]);
       }
     }
   }
@@ -6730,9 +6730,9 @@ void CandidateSSSubalgebra::GetHsScaledToActByTwoByType(
     if (shouldOpenNewType) {
       outputHsByType.SetSize(outputHsByType.size + 1);
       outputHsByType.LastObject()->SetSize(0);
-      outputTypeList.AddOnTop(allTypes[i]);
+      outputTypeList.addOnTop(allTypes[i]);
     }
-    outputHsByType.LastObject()->AddOnTop(this->CartanSAsByComponentScaledToActByTwo[i]);
+    outputHsByType.LastObject()->addOnTop(this->CartanSAsByComponentScaledToActByTwo[i]);
   }
 }
 
@@ -6795,7 +6795,7 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other
       return false;
     }
     currentTypeSelection.SetNumItemsAndDesiredSubsetSize(intMult, theHsScaledToActByTwoByType[i].size);
-    selectedTypes.theElements.AddOnTop(currentTypeSelection);
+    selectedTypes.theElements.addOnTop(currentTypeSelection);
   }
   FinitelyGeneratedMatrixMonoid<Rational> theOuterAutos;
   this->theWeylNonEmbedded->theDynkinType.GetOuterAutosGeneratorsActOnVectorColumn(theOuterAutos.theGenerators);
@@ -6842,7 +6842,7 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other
         Selection& currentSel = selectedTypes.theElements[i].theSelection;
         for (int j = 0; j < currentSel.CardinalitySelection; j ++) {
           currentComponent = theHsScaledToActByTwoByType[i][currentSel.elements[j]];
-          conjugationCandidates.AddListOnTop(currentComponent);
+          conjugationCandidates.addListOnTop(currentComponent);
         }
       }
       theOuterAutos.theElements[k].ActOnVectorROWSOnTheLeft(conjugationCandidates, conjugationCandidates);
@@ -6955,7 +6955,7 @@ void SemisimpleSubalgebras::HookUpCentralizers(bool allowNonPolynomialSystemFail
       }
       CandidateSSSubalgebra& otherSA = this->theSubalgebras.theValues[j];
       if (currentSA.IsDirectSummandOf(otherSA)) {
-        currentSA.indicesDirectSummandSuperAlgebra.AddOnTop(j);
+        currentSA.indicesDirectSummandSuperAlgebra.addOnTop(j);
         if (currentSA.indexMaxSSContainer == - 1) {
           currentSA.indexMaxSSContainer = j;
         }

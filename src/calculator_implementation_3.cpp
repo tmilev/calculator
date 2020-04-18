@@ -131,7 +131,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
     outputWeightsByHeight[i].SetHashSizE(finalHashSize);
   }
   outputWeightsSimpleCoords.Clear();
-  outputWeightsByHeight[0].AddOnTop(highestWeightTrue);
+  outputWeightsByHeight[0].addOnTop(highestWeightTrue);
   int numTotalWeightsFound = 0;
   int numPosRoots = this->AmbientWeyl->RootsOfBorel.size;
   Vector<Rational> currentWeight, currentWeightRaisedToDominantWRTAmbientAlgebra;
@@ -165,7 +165,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
         }
       }
     }
-    outputWeightsSimpleCoords.AddOnTop(currentHashes);
+    outputWeightsSimpleCoords.addOnTop(currentHashes);
     outputWeightsSimpleCoords.AdjustHashes();
     currentHashes.Clear();
   }
@@ -490,10 +490,10 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg(
       out << "(";
     }
     if (outputEigenVectors != nullptr) {
-      outputEigenVectors->AddOnTop(currentElt);
+      outputEigenVectors->addOnTop(currentElt);
     }
     if (outputWeightsFundCoords != nullptr) {
-      outputWeightsFundCoords->AddOnTop(currentWeight);
+      outputWeightsFundCoords->addOnTop(currentWeight);
     }
     out << currentElt.toString(&global.theDefaultFormat.GetElement());
     if (currentElt.size() > 1) {
@@ -1140,7 +1140,7 @@ void WeylGroupData::GetHighestWeightsAllRepsDimLessThanOrEqualTo(
   HashedList<Vector<Rational> > output;
   Vector<Rational> current;
   current.makeZero(this->GetDim());
-  output.AddOnTop(current);
+  output.addOnTop(current);
   Rational theDim;
   Rational dimBound = inputDimBound + 1;
   for (int i = 0; i < output.size; i ++) {
@@ -1181,27 +1181,27 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
   List<int> theRanks;
   List<char> theWeylLetters;
   for (int i = 2; i <= rankBound; i ++) {
-    theRanks.AddOnTop(i);
-    theWeylLetters.AddOnTop('A');
-    theRanks.AddOnTop(i);
-    theWeylLetters.AddOnTop('B');
-    theRanks.AddOnTop(i);
-    theWeylLetters.AddOnTop('C');
+    theRanks.addOnTop(i);
+    theWeylLetters.addOnTop('A');
+    theRanks.addOnTop(i);
+    theWeylLetters.addOnTop('B');
+    theRanks.addOnTop(i);
+    theWeylLetters.addOnTop('C');
     if (i >= 4) {
-      theRanks.AddOnTop(i);
-      theWeylLetters.AddOnTop('D');
+      theRanks.addOnTop(i);
+      theWeylLetters.addOnTop('D');
     }
     if (i >= 6 && i <= 8) {
-      theRanks.AddOnTop(i);
-      theWeylLetters.AddOnTop('E');
+      theRanks.addOnTop(i);
+      theWeylLetters.addOnTop('E');
     }
     if (i == 4) {
-      theRanks.AddOnTop(i);
-      theWeylLetters.AddOnTop('F');
+      theRanks.addOnTop(i);
+      theWeylLetters.addOnTop('F');
     }
     if (i == 2) {
-      theRanks.AddOnTop(i);
-      theWeylLetters.AddOnTop('G');
+      theRanks.addOnTop(i);
+      theWeylLetters.addOnTop('G');
     }
   }
   List<List<Vector<Rational> > > theHighestWeights;
@@ -1404,7 +1404,7 @@ bool Calculator::innerFactorPolynomial(Calculator& theCommands, const Expression
   List<Expression> resultSequence;
   Expression constantFactor;
   constantFactor.AssignValue(factorization.constantFactor, theCommands);
-  resultSequence.AddOnTop(constantFactor);
+  resultSequence.addOnTop(constantFactor);
   Expression polynomialE, expressionE(theCommands);
 
   for (int i = 0; i < factorization.reduced.size; i ++) {
@@ -1414,7 +1414,7 @@ bool Calculator::innerFactorPolynomial(Calculator& theCommands, const Expression
     expressionE.children.Clear();
     expressionE.AddChildAtomOnTop("MakeExpression");
     expressionE.AddChildOnTop(polynomialE);
-    resultSequence.AddOnTop(expressionE);
+    resultSequence.addOnTop(expressionE);
   }
   return output.MakeSequence(theCommands, &resultSequence);
 }

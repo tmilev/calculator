@@ -137,7 +137,7 @@ void AnotherWeylGroup<scalar, templateVector>::GetSimpleReflections(const templa
       if (x > 0) {
         continue;
       }
-      out.AddOnTop(i);
+      out.addOnTop(i);
       SimpleReflection(i, w);
     }
   }
@@ -230,18 +230,18 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeRho() {
     if (this->RootSystem.Contains(vi)) {
       continue;
     }
-    this->RootSystem.AddOnTop(vi);
+    this->RootSystem.addOnTop(vi);
     List<int> newelts;
     templateVector w;
-    newelts.AddOnTop(this->RootSystem.GetIndex(vi));
+    newelts.addOnTop(this->RootSystem.GetIndex(vi));
     while (newelts.size > 0) {
       int i = newelts.PopLastObject();
       for (int si = 0; si < this->rank; si ++) {
         this->SimpleReflection(si, this->RootSystem[i], w);
         if (this->RootSystem.GetIndex(w) == - 1) {
-          this->RootSystem.AddOnTop(w);
+          this->RootSystem.addOnTop(w);
           int j = this->RootSystem.GetIndex(w);
-          newelts.AddOnTop(j);
+          newelts.addOnTop(j);
         }
       }
     }
@@ -278,16 +278,16 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeAllElements() {
   global.Comments << "(twiceRho is " << this->twiceRho << ")" << "\n";
   templateVector w;
   List<int> newelts;
-  this->rhoOrbit.AddOnTop(twiceRho);
-  newelts.AddOnTop(this->rhoOrbit.GetIndex(twiceRho));
+  this->rhoOrbit.addOnTop(twiceRho);
+  newelts.addOnTop(this->rhoOrbit.GetIndex(twiceRho));
   while (newelts.size > 0) {
     int i = newelts.PopLastObject();
     for (int si = 0; si < this->rank; si ++) {
       this->SimpleReflection(si,this->rhoOrbit[i],w);
       if (this->rhoOrbit.GetIndex(w) == - 1) {
-        this->rhoOrbit.AddOnTop(w);
+        this->rhoOrbit.addOnTop(w);
         int j = this->rhoOrbit.GetIndex(w);
-        newelts.AddOnTop(j);
+        newelts.addOnTop(j);
       }
     }
   }
@@ -313,7 +313,7 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeCC() {
   for (int i = 0; i < this->size(); i ++) {
     if (!Accounted[i]) {
       theStack.Clear();
-      theStack.AddOnTop(i);
+      theStack.addOnTop(i);
       for (int j = 0; j < theStack.size; j ++)
         for (int k = 0; k < theRank; k ++) {
           theRhoImage = this->twiceRho;
@@ -324,7 +324,7 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeCC() {
           theStack.AddOnTopNoRepetition(accountedIndex);
           Accounted[accountedIndex] = true;
         }
-      this->conjugacyClasses.AddOnTop(theStack);
+      this->conjugacyClasses.addOnTop(theStack);
       this->conjugacyClasses.LastObject()->QuickSortAscending();
       global.Comments << this->ConjugacyClassCount() << " ";
     }
@@ -422,7 +422,7 @@ List<VectorSpace<coefficient> > GetEigenspaces(const Matrix<coefficient> &M) {
     for (int j = 0; j < es[spi].size; j ++) {
       V.AddVector(es[spi][j]);
     }
-    vs.AddOnTop(V);
+    vs.addOnTop(V);
   }
   return vs;
 }
@@ -455,10 +455,10 @@ List<ClassFunction<somegroup, Rational> > ComputeCharacterTable(somegroup &G) {
     for (int i = 0; i < G.characterTable.size; i ++) {
       VectorSpace<Rational> xspi;
       xspi.AddVector(G.characterTable[i].data);
-      spaces.AddOnTop(xspi);
+      spaces.addOnTop(xspi);
       allchars.AddVector(G.characterTable[i].data);
     }
-    spaces.AddOnTop(allchars.OrthogonalComplement(nullptr, &form));
+    spaces.addOnTop(allchars.OrthogonalComplement(nullptr, &form));
   } else {
     Vector<Rational> X1;
     X1.SetSize(G.ConjugacyClassCount());
@@ -467,8 +467,8 @@ List<ClassFunction<somegroup, Rational> > ComputeCharacterTable(somegroup &G) {
     }
     VectorSpace<Rational> sp1;
     sp1.AddVector(X1);
-    spaces.AddOnTop(sp1);
-    spaces.AddOnTop(sp1.OrthogonalComplement(nullptr, &form));
+    spaces.addOnTop(sp1);
+    spaces.addOnTop(sp1.OrthogonalComplement(nullptr, &form));
   }
   bool foundEmAll = false;
   for (int i = 0; !foundEmAll && i < G.ConjugacyClassCount(); i ++) {
@@ -486,7 +486,7 @@ List<ClassFunction<somegroup, Rational> > ComputeCharacterTable(somegroup &G) {
         if ((V.rank > 0) and (V.rank < spaces[spi].rank)) {
           VectorSpace<Rational> W = es[esi].OrthogonalComplement(&spaces[spi],&form);
           spaces[spi] = V;
-          spaces.AddOnTop(W);
+          spaces.addOnTop(W);
           if (spaces.size == G.ConjugacyClassCount()) {
             foundEmAll = true;
             break;
@@ -644,7 +644,7 @@ void ComputeTauSignatures(WeylGroupData* G, List<List<bool> >& tauSignatures, bo
   for (int i = 0; i < G->theGroup.characterTable.size; i ++) {
     tsg[i] = G->theGroup.characterTable[i].data == Xs;
   }
-  tss.AddOnTop(tsg);
+  tss.addOnTop(tsg);
 
   if (pseudo) {
     global.Comments << "pseudo-parabolics" << "\n";
@@ -655,10 +655,10 @@ void ComputeTauSignatures(WeylGroupData* G, List<List<bool> >& tauSignatures, bo
       for (int j = 0; j < sel.CardinalitySelection; j ++) {
         theGenerators[j].MakeSimpleReflection(sel.elements[j], *G);
       }
-      theGenerators.AddOnTop(hr);
+      theGenerators.addOnTop(hr);
       List<bool> ts;
       GetTauSignaturesFromSubgroup(*G,theGenerators,ts);
-      tss.AddOnTop(ts);
+      tss.addOnTop(ts);
       sel.incrementSelection();
     }
   }

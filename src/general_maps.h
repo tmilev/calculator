@@ -46,9 +46,9 @@ public:
     int theIndex = this->theKeys.GetIndex(input);
     if (theIndex == - 1) {
       theIndex = this->theKeys.size;
-      this->theKeys.AddOnTop(input);
+      this->theKeys.addOnTop(input);
       value object;
-      this->theValues.AddOnTop(object);
+      this->theValues.addOnTop(object);
     }
     return this->theValues[theIndex];
   }
@@ -56,7 +56,7 @@ public:
     int theIndex = this->theKeys.GetIndex(input);
     if (theIndex == - 1) {
       theIndex = this->theKeys.size;
-      this->theKeys.AddOnTop(input);
+      this->theKeys.addOnTop(input);
       this->theValues.SetSize(this->theValues.size + 1);
     }
     return this->theValues[theIndex];
@@ -66,8 +66,8 @@ public:
       this->theValues[this->theKeys.GetIndex(inputKey)] = inputValue;
       return;
     }
-    this->theValues.AddOnTop(inputValue);
-    this->theKeys.AddOnTop(inputKey);
+    this->theValues.addOnTop(inputValue);
+    this->theKeys.addOnTop(inputKey);
   }
   void SetExpectedSize(int theSize) {
     this->theKeys.SetExpectedSize(theSize);
@@ -121,7 +121,7 @@ public:
     int theIndex = this->theKeys.GetIndex(input);
     if (theIndex == - 1) {
       theIndex = this->theKeys.size;
-      this->theKeys.AddOnTop(input);
+      this->theKeys.addOnTop(input);
       this->theValues.SetSize(this->theValues.size + 1);
     }
     return this->theValues[theIndex];
@@ -131,8 +131,8 @@ public:
       this->theValues[this->theKeys.GetIndex(inputKey)] = inputValue;
       return;
     }
-    this->theValues.AddOnTop(inputValue);
-    this->theKeys.AddOnTop(inputKey);
+    this->theValues.addOnTop(inputValue);
+    this->theKeys.addOnTop(inputKey);
   }
   void SetExpectedSize(int theSize) {
     this->theKeys.SetExpectedSize(theSize);

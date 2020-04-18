@@ -424,7 +424,7 @@ bool charSSAlgMod<coefficient>::DrawMe(
   for (int i = 0; i < CharCartan.size(); i ++) {
     const Weight<coefficient>& currentMon = CharCartan[i];
     dominantWeightsNonHashed.size = 0;
-    dominantWeightsNonHashed.AddOnTop(theWeyl.GetSimpleCoordinatesFromFundamental(currentMon.weightFundamentalCoordS));
+    dominantWeightsNonHashed.addOnTop(theWeyl.GetSimpleCoordinatesFromFundamental(currentMon.weightFundamentalCoordS));
     bool isTrimmed = !theWeyl.GenerateOrbit(dominantWeightsNonHashed, false, finalWeights, false, 0,  0, upperBoundWeights);
     totalNumWeights += finalWeights.size;
     if (isTrimmed || totalNumWeights>upperBoundWeights) {

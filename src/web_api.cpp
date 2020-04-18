@@ -580,7 +580,7 @@ bool LaTeXCrawler::initializeFromGlobalVariables(std::stringstream* commentsOnFa
     }
     return false;
   }
-  this->slideFileNamesVirtualWithPatH.AddListOnTop(theSlides.filesToCrawl);
+  this->slideFileNamesVirtualWithPatH.addListOnTop(theSlides.filesToCrawl);
   this->desiredPresentationTitle = theSlides.title;
   return true;
 }

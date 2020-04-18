@@ -453,7 +453,7 @@ void SemidirectProductGroup<hg, kg, helt, kelt, oa>::GetWord(SemidirectProductEl
   this->H.GetWord(g.h, out);
   List<int> kword;
   this->K.GetWord(g.k, kword);
-  out.AddListOnTop(kword);
+  out.addListOnTop(kword);
 }
 
 template <typename hg, typename kg, typename helt, typename kelt>
@@ -1290,7 +1290,7 @@ void Partition::SpechtModuleMatricesOfTranspositionsjjplusone(List<Matrix<scalar
 template <typename scalar>
 void Partition::SpechtModuleMatrixOfPermutation(List<Matrix<scalar> >& out, const PermutationR2& p) const {
   List<PermutationR2> perms;
-  perms.AddOnTop(p);
+  perms.addOnTop(p);
   this->SpechtModuleMatricesOfPermutations(out, perms);
 }
 
@@ -1592,11 +1592,11 @@ std::string FiniteGroup<elementSomeGroup>::PrettyPrintGeneratorCommutationRelati
   this->ComputeGeneratorCommutationRelations();
   std::string crs = this->generatorCommutationRelations.ToStringPlainText();
   List<char*> rows;
-  rows.AddOnTop(&crs[0]);
+  rows.addOnTop(&crs[0]);
   int i;
   while ((i = crs.find('\n')) != - 1) {
     crs[static_cast<unsigned>(i)] = 0;
-    rows.AddOnTop(&crs[static_cast<unsigned>(i) + 1]);
+    rows.addOnTop(&crs[static_cast<unsigned>(i) + 1]);
   }
   bool generatorStringsTooLarge = false;
   bool generatorStringsHaveNewline = false;
@@ -1665,7 +1665,7 @@ std::string FiniteGroup<elementSomeGroup>::PrettyPrintCharacterTable(bool andPri
   for (int i = 0; i < this->irreps.size; i ++) {
     std::stringstream ns;
     ns << i;
-    numbers.AddOnTop(ns.str());
+    numbers.addOnTop(ns.str());
     int nil = numbers.LastObject()->length();
     if (numpad < nil) {
       numpad = nil;
@@ -1741,7 +1741,7 @@ std::string FiniteGroup<elementSomeGroup>::PrettyPrintCCRepsSizes(bool andPrint)
   for (int i = 0; i < this->conjugacyClasseS.size; i ++) {
     std::stringstream ns;
     ns << i;
-    numbers.AddOnTop(ns.str());
+    numbers.addOnTop(ns.str());
     int nilen = numbers.LastObject()->length();
     if (numpad < nilen) {
       numpad = nilen;
@@ -1754,7 +1754,7 @@ std::string FiniteGroup<elementSomeGroup>::PrettyPrintCCRepsSizes(bool andPrint)
   for (int i = 0; i < this->conjugacyClasseS.size; i ++) {
     std::stringstream ns;
     ns << this->conjugacyClasseS[i].size;
-    sizes.AddOnTop(ns.str());
+    sizes.addOnTop(ns.str());
     int nilen = sizes.LastObject()->length();
     if (sizepad < nilen) {
       sizepad = nilen;

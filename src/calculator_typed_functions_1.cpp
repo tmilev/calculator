@@ -2378,7 +2378,7 @@ bool CalculatorFunctionsBinaryOps::innerSetMinus(
   HashedList<Expression> resultEs;
   resultEs.SetExpectedSize(leftSetE.size() - 1);
   for (int i = 1; i < leftSetE.size(); i ++) {
-    resultEs.AddOnTop(leftSetE[i]);
+    resultEs.addOnTop(leftSetE[i]);
   }
   for (int i = 1; i < rightSetE.children.size; i ++) {
     if (resultEs.Contains(rightSetE[i])) {

@@ -142,7 +142,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeSequenceLikeContent(
       global.fatal << "Programming error: decode current "
       << "did not increment the data pointer. " << global.fatal;
     }
-    output.theElements.AddOnTop(nextElement);
+    output.theElements.addOnTop(nextElement);
     numberOfDecoded ++;
   }
   return true;
@@ -167,7 +167,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeBitString(
   if (subDecoder.Decode(*this->rawDatA, offsetAtStart, subDecoderResult, nullptr)) {
     if (subDecoder.dataPointer == this->dataPointer) {
       output.theElements.SetSize(0);
-      output.theElements.AddOnTop(subDecoderResult);
+      output.theElements.addOnTop(subDecoderResult);
       if (insidePadded) {
         output.flagHeaderPadded = true;
       }
@@ -252,10 +252,10 @@ void ASNElement::WriteBytesConst(List<unsigned char>& output) const {
   AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength
   notAnonymous(this->startByte, this->lengthPromised, output, nullptr);
   if (this->flagHeaderPadded) {
-    output.AddOnTop(0);
+    output.addOnTop(0);
   }
   if (this->ASNAtom.size > 0) {
-    output.AddListOnTop(this->ASNAtom);
+    output.addListOnTop(this->ASNAtom);
   } else {
     for (int i = 0; i < this->theElements.size; i ++) {
       this->theElements[i].WriteBytesConst(output);
@@ -270,10 +270,10 @@ void ASNElement::WriteBytesUpdatePromisedLength(List<unsigned char>& output) {
   AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength
   notAnonymous(this->startByte, this->lengthPromised, output, &this->lengthPromised);
   if (this->flagHeaderPadded) {
-    output.AddOnTop(0);
+    output.addOnTop(0);
   }
   if (this->ASNAtom.size > 0) {
-    output.AddListOnTop(this->ASNAtom);
+    output.addListOnTop(this->ASNAtom);
   } else {
     for (int i = 0; i < this->theElements.size; i ++) {
       this->theElements[i].WriteBytesUpdatePromisedLength(output);
@@ -288,7 +288,7 @@ void ASNElement::WriteBytesASNAtom(
 ) {
   AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength
   notAnonymous(inputStartByte, atomContent.size, output, nullptr);
-  output.AddListOnTop(atomContent);
+  output.addListOnTop(atomContent);
 }
 
 bool ASNElement::isComposite() const {
@@ -496,16 +496,16 @@ void ASNElement::WriteAnnotations(List<Serialization::Marker>& output) {
     bodyStream << "<br>" << comment;
   }
   int lengthOfLengthEncoding = this->GetLengthLengthEncoding();
-  output.AddOnTop(Serialization::Marker(
+  output.addOnTop(Serialization::Marker(
     this->offsetLastWrite, this->lengthPromised + lengthOfLengthEncoding + 1, bodyStream.str()
   ));
-  output.AddOnTop(Serialization::Marker(
+  output.addOnTop(Serialization::Marker(
     this->offsetLastWrite, 1, tagStream.str()
   ));
-  output.AddOnTop(Serialization::Marker(
+  output.addOnTop(Serialization::Marker(
     this->offsetLastWrite + 1, lengthOfLengthEncoding, lengthStream.str()
   ));
-  output.AddOnTop(Serialization::Marker(
+  output.addOnTop(Serialization::Marker(
     this->offsetLastWrite + 1 + lengthOfLengthEncoding, this->lengthPromised, bodyStream.str()
   ));
   for (int i = 0; i < this->theElements.size; i ++) {
@@ -574,7 +574,7 @@ void ASNElement::ToJSON(JSData& output) const {
     for (int i = 0; i < this->theElements.size; i ++) {
       JSData incoming;
       this->theElements[i].ToJSON(incoming);
-      children.theList.AddOnTop(incoming);
+      children.theList.addOnTop(incoming);
     }
     output[ASNElement::JSLabels::children] = children;
   }
@@ -732,8 +732,8 @@ void ASNElement::resetExceptContent() {
 
 void AbstractSyntaxNotationOneSubsetDecoder::WriteNull(List<unsigned char>& output) {
   MacroRegisterFunctionWithName("AbstractSyntaxNotationOneSubsetDecoder::WriteNull");
-  output.AddOnTop(AbstractSyntaxNotationOneSubsetDecoder::tags::null0x05);
-  output.AddOnTop(0);
+  output.addOnTop(AbstractSyntaxNotationOneSubsetDecoder::tags::null0x05);
+  output.addOnTop(0);
 }
 
 void ASNElement::ComputeTag() {
@@ -944,11 +944,11 @@ AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::WriterObjectFix
   this->outputPointer = &output;
   this->outputTotalByteLength = outputTotalElementByteLength;
   this->offset = output.size;
-  this->outputPointer->AddOnTop(startByte);
+  this->outputPointer->addOnTop(startByte);
   this->totalByteLength = expectedTotalElementByteLength;
   this->reservedBytesForLength = this->GetReservedBytesForLength(expectedTotalElementByteLength);
   for (int i = 0; i < this->reservedBytesForLength; i ++) {
-    this->outputPointer->AddOnTop(0);
+    this->outputPointer->addOnTop(0);
   }
 
 }
@@ -1357,7 +1357,7 @@ void TBSCertificateInfo::ComputeASNVersionWrapper(ASNElement& output) {
   output.startByte = 160;
   ASNElement versionInteger;
   versionInteger.MakeInteger(this->version);
-  output.theElements.AddOnTop(versionInteger);
+  output.theElements.addOnTop(versionInteger);
 }
 
 void ASNElement::SetStartByteFlags(
@@ -1476,7 +1476,7 @@ void TBSCertificateInfo::Organization::ComputeASN(ASNElement& output) {
       continue;
     }
     current->ComputeASN(next);
-    output.theElements.AddOnTop(next);
+    output.theElements.addOnTop(next);
   }
 }
 
@@ -1739,13 +1739,13 @@ void PrivateKeyRSA::HashAndPadPKCS1(
     numberOfFFs = 0;
   }
   output.SetSize(0);
-  output.AddOnTop(0x00);
-  output.AddOnTop(0x01);
+  output.addOnTop(0x00);
+  output.addOnTop(0x01);
   for (int i = 0; i < numberOfFFs; i ++) {
-    output.AddOnTop(0xff);
+    output.addOnTop(0xff);
   }
-  output.AddOnTop(0x00);
-  output.AddListOnTop(payload);
+  output.addOnTop(0x00);
+  output.addListOnTop(payload);
 }
 
 bool PrivateKeyRSA::LoadFromASNEncoded(

@@ -94,7 +94,7 @@ QueryExact::QueryExact(
   const std::string& desiredValue
 ) {
   this->collection = desiredCollection;
-  this->nestedLabels.AddOnTop(label);
+  this->nestedLabels.addOnTop(label);
   this->value = desiredValue;
 }
 
@@ -106,7 +106,7 @@ QueryExact::QueryExact(
   this->collection = desiredCollection;
   this->value = desiredValue;
   this->nestedLabels.SetSize(0);
-  this->nestedLabels.AddListOnTop(desiredLabels);
+  this->nestedLabels.addListOnTop(desiredLabels);
 }
 
 bool QueryExact::isEmpty() const {
@@ -214,7 +214,7 @@ bool Database::ConvertJSONToJSONEncodeKeys(
       )) {
         return false;
       }
-      output.theList.AddOnTop(nextItem);
+      output.theList.addOnTop(nextItem);
     }
     return true;
   }
@@ -408,19 +408,19 @@ void GlobalVariables::initModifiableDatabaseFields() {
   List<List<std::string> >& modifiableData = global.databaseModifiableFields;
   List<std::string> currentEntry;
   modifiableData.Reserve(10);
-  currentEntry.AddOnTop(DatabaseStrings::tableUsers);
-  currentEntry.AddOnTop(DatabaseStrings::objectSelectoR);
-  currentEntry.AddOnTop(DatabaseStrings::labelProblemDataJSON);
-  currentEntry.AddOnTop(DatabaseStrings::anyFielD);
-  modifiableData.AddOnTop(currentEntry);
+  currentEntry.addOnTop(DatabaseStrings::tableUsers);
+  currentEntry.addOnTop(DatabaseStrings::objectSelectoR);
+  currentEntry.addOnTop(DatabaseStrings::labelProblemDataJSON);
+  currentEntry.addOnTop(DatabaseStrings::anyFielD);
+  modifiableData.addOnTop(currentEntry);
   currentEntry.SetSize(0);
-  currentEntry.AddOnTop(DatabaseStrings::tableUsers);
-  currentEntry.AddOnTop(DatabaseStrings::objectSelectoR);
-  modifiableData.AddOnTop(currentEntry);
+  currentEntry.addOnTop(DatabaseStrings::tableUsers);
+  currentEntry.addOnTop(DatabaseStrings::objectSelectoR);
+  modifiableData.addOnTop(currentEntry);
   currentEntry.SetSize(0);
-  currentEntry.AddOnTop(DatabaseStrings::tableEmailInfo);
-  currentEntry.AddOnTop(DatabaseStrings::objectSelectoR);
-  modifiableData.AddOnTop(currentEntry);
+  currentEntry.addOnTop(DatabaseStrings::tableEmailInfo);
+  currentEntry.addOnTop(DatabaseStrings::objectSelectoR);
+  modifiableData.addOnTop(currentEntry);
   std::fstream outputFile;
   FileOperations::OpenFileCreateIfNotPresentVirtual(
     outputFile, "/calculator-html/modifiable_database_fields.js", false, true, false
@@ -690,7 +690,7 @@ bool UserCalculatorData::LoadFromJSON(JSData& input) {
   JSData sectionsTaughtList = input[DatabaseStrings::labelSectionsTaught];
   if (sectionsTaughtList.theType == JSData::token::tokenArray) {
     for (int i = 0; i < sectionsTaughtList.theList.size; i ++) {
-      this->sectionsTaught.AddOnTop(sectionsTaughtList.theList[i].theString);
+      this->sectionsTaught.addOnTop(sectionsTaughtList.theList[i].theString);
     }
   }
   return true;
@@ -1267,11 +1267,11 @@ List<QueryExact> UserCalculatorData::GetFindMeFromUserNameQuery() {
   List<QueryExact> result;
   if (this->username != "") {
     QueryExact findByUsername(DatabaseStrings::tableUsers, DatabaseStrings::labelUsername, this->username);
-    result.AddOnTop(findByUsername);
+    result.addOnTop(findByUsername);
   }
   if (this->email != "") {
     QueryExact findByEmail(DatabaseStrings::tableUsers, DatabaseStrings::labelEmail, this->email);
-    result.AddOnTop(findByEmail);
+    result.addOnTop(findByEmail);
   }
   if (result.size == 0) {
     global.fatal << "User with find query not allowed to have neither username nor email. " << global.fatal;
@@ -1289,7 +1289,7 @@ bool UserCalculator::StoreProblemData(
   }
   const ProblemData& problem = this->theProblemData.GetValueConstCrashIfNotPresent(fileNamE);
   QuerySet update;
-  update.nestedLabels.AddOnTop(DatabaseStrings::labelProblemDataJSON);
+  update.nestedLabels.addOnTop(DatabaseStrings::labelProblemDataJSON);
   update.value[fileNamE] = problem.StoreJSON();
   return Database::get().UpdateOneFromSome(
     this->GetFindMeFromUserNameQuery(), update, commentsOnFailure
@@ -1343,8 +1343,8 @@ bool Database::User::AddUsersFromEmails(
     }
     QuerySet currentUserData;
     List<QueryExact> findUser;
-    findUser.AddOnTop(QueryExact(DatabaseStrings::tableUsers, DatabaseStrings::labelUsername, currentUser.username));
-    findUser.AddOnTop(QueryExact(DatabaseStrings::tableUsers, DatabaseStrings::labelEmail, currentUser.email));
+    findUser.addOnTop(QueryExact(DatabaseStrings::tableUsers, DatabaseStrings::labelUsername, currentUser.username));
+    findUser.addOnTop(QueryExact(DatabaseStrings::tableUsers, DatabaseStrings::labelEmail, currentUser.email));
     if (!this->owner->FindOneFromSome(
       findUser, currentUserData.value, &comments
     )) {

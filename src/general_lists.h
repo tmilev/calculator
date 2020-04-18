@@ -420,7 +420,7 @@ private:
   ListLight(const ListLight<Object>& right);
 public:
   int size;
-  Object* TheObjects;
+  Object* theObjects;
   void AddObjectOnTopLight(const Object& o);
   void CopyFromHeavy(const List<Object>& from);
   void CopyFromLight(const ListLight<Object>& from);
@@ -428,7 +428,7 @@ public:
   int SizeWithoutObjects() const;
   int IndexInList(const Object& o) {
     for (int i = 0; i < this->size; i ++) {
-      if (this->TheObjects[i] == o) {
+      if (this->theObjects[i] == o) {
         return i;
       }
     }
@@ -441,17 +441,17 @@ public:
   void initializeFillInObject(int theSize, const Object& o) {
     this->SetSize(theSize);
     for (int i = 0; i < this->size; i ++) {
-      this->TheObjects[i] = o;
+      this->theObjects[i] = o;
     }
   }
   Object& operator[](int i) const {
-    return this->TheObjects[i];
+    return this->theObjects[i];
   }
   void operator=(const ListLight<Object>& right);
   void operator=(const List<Object>& right) {
     this->SetSize(right.size);
     for (int i = 0; i < right.size; i ++) {
-      this->TheObjects[i] = right[i];
+      this->theObjects[i] = right[i];
     }
   }
   bool operator== (const ListLight<Object>& right) const {
@@ -459,14 +459,14 @@ public:
       return false;
     }
     for (int i = 0; i < this->size; i ++) {
-      if (!(this->TheObjects[i] == right[i])) {
+      if (!(this->theObjects[i] == right[i])) {
         return false;
       }
     }
     return true;
   }
   Object* LastObject() const {
-    return &this->TheObjects[this->size - 1];
+    return &this->theObjects[this->size - 1];
   }
   ListLight();
   ~ListLight();
@@ -475,12 +475,12 @@ public:
 template <class Object>
 void ListLight<Object>::AddObjectOnTopLight(const Object& o) {
   this->SetSize(this->size + 1);
-  this->TheObjects[this->size - 1] = o;
+  this->theObjects[this->size - 1] = o;
 }
 
 template <class Object>
 void ListLight<Object>::PopIndexSwapWithLastLight(int index) {
-  this->TheObjects[index] = this->TheObjects[this->size - 1];
+  this->theObjects[index] = this->theObjects[this->size - 1];
   this->SetSize(this->size - 1);
 }
 
@@ -503,8 +503,8 @@ void ListLight<Object>::SetSize(int theSize) {
   ParallelComputing::CheckPointerCounters();
 #endif
     this->size = 0;
-    delete [] this->TheObjects;
-    this->TheObjects = 0;
+    delete [] this->theObjects;
+    this->theObjects = 0;
     return;
   }
   Object* newArray = new Object[theSize];
@@ -517,38 +517,38 @@ void ListLight<Object>::SetSize(int theSize) {
     CopyUpTo = theSize;
   }
   for (int i = 0; i < CopyUpTo; i ++) {
-    newArray[i] = this->TheObjects[i];
+    newArray[i] = this->theObjects[i];
   }
-  delete [] this->TheObjects;
+  delete [] this->theObjects;
 #ifdef AllocationLimitsSafeguard
   ParallelComputing::GlobalPointerCounter -= this->size;
   ParallelComputing::CheckPointerCounters();
 #endif
-  this->TheObjects = newArray;
+  this->theObjects = newArray;
   this->size = theSize;
 }
 
 template <class Object>
 ListLight<Object>::ListLight() {
   this->size = 0;
-  this->TheObjects = 0;
+  this->theObjects = 0;
 }
 
 template <class Object>
 ListLight<Object>::~ListLight() {
-  delete [] this->TheObjects;
+  delete [] this->theObjects;
 #ifdef AllocationLimitsSafeguard
   ParallelComputing::GlobalPointerCounter -= this->size;
   ParallelComputing::CheckPointerCounters();
 #endif
-  this->TheObjects = 0;
+  this->theObjects = 0;
 }
 
 template <class Object>
 void ListLight<Object>::CopyFromHeavy(const List<Object>& from) {
   this->SetSize(from.size);
   for (int i = 0; i < this->size; i ++) {
-    this->TheObjects[i] = from.TheObjects[i];
+    this->theObjects[i] = from.theObjects[i];
   }
 }
 
@@ -556,7 +556,7 @@ template <class Object>
 void ListLight<Object>::CopyFromLight(const ListLight<Object>& from) {
   this->SetSize(from.size);
   for (int i = 0; i < this->size; i ++) {
-    this->TheObjects[i] = from.TheObjects[i];
+    this->theObjects[i] = from.theObjects[i];
   }
 }
 
@@ -649,7 +649,7 @@ private:
   );
   void QuickSortDescending(int BottomIndex, int TopIndex);
   inline void initConstructorCallOnly() {
-    this->TheObjects = 0;
+    this->theObjects = 0;
     this->ActualSize = 0;
     this->size = 0;
     this->flagDeallocated = false;
@@ -658,7 +658,7 @@ private:
   int ActualSize;
 public:
   bool flagDeallocated;
-  Object* TheObjects;
+  Object* theObjects;
   int size;
   List() {
     this->initConstructorCallOnly();
@@ -717,7 +717,7 @@ public:
   void SetSizeMakeMatrix(int numRows, int numCols) {
     this->SetSize(numRows);
     for (int i = 0; i < numRows; i ++) {
-      this->TheObjects[i].SetSize(numCols);
+      this->theObjects[i].SetSize(numCols);
     }
   }
   void initializeFillInObject(int theSize, const Object& o);
@@ -730,8 +730,8 @@ public:
     this->ShiftUpExpandOnTop(desiredIndex);
     (*this)[desiredIndex] = o;
   }
-  void AddOnTop(const Object& o);
-  void AddListOnTop(const List<Object>& theList);
+  void addOnTop(const Object& o);
+  void addListOnTop(const List<Object>& theList);
   bool AddOnTopNoRepetition(const Object& o);
   void AddOnTopNoRepetition(const List<Object>& theList) {
     this->SetExpectedSize(this->size + theList.size);
@@ -742,20 +742,20 @@ public:
   int AddNoRepetitionOrReturnIndexFirst(const Object& o) {
     int indexOfObject = this->GetIndex(o);
     if (indexOfObject == - 1) {
-      this->AddOnTop(o);
+      this->addOnTop(o);
       return this->size - 1;
     }
     return indexOfObject;
   }
   void RemoveIndexShiftDown(int index) {
     for (int i = index; i < this->size - 1; i ++) {
-      this->TheObjects[i] = this->TheObjects[i + 1];
+      this->theObjects[i] = this->theObjects[i + 1];
     }
     this->size --;
   }
   void RemoveIndicesShiftDown(int firstToRemove, int numberToRemove) {
     for (int i = firstToRemove; i < this->size - numberToRemove; i ++) {
-      this->TheObjects[i] = this->TheObjects[i + numberToRemove];
+      this->theObjects[i] = this->theObjects[i + numberToRemove];
     }
     this->size -= numberToRemove;
   }
@@ -971,10 +971,9 @@ public:
   }
 
   // The BS family of operations assume that the list is sorted in ascending order
-  // and that each object has a comparison operator, since there should be one, it
-  // should be <=.  This project appears to use its logical complement > everywhere
+  // and that each object has the comparison operator <=.
   // The objective is fast, stable insertion sorting of partially ordered data.
-  // The data that has x <= y and y <= x is called a bin.  The methods
+  // The data that has x <= y and y <= x is called a bin. The methods
   // BSIndexFirstGreaterThan and BSIndexFirstNotLessThan find the edges of the bin.
   // The insertion methods return the index at which the object was inserted, or - 1
   // BSInsert inserts the element at the end of the bin.
@@ -992,14 +991,14 @@ public:
     while (true) {
       int halflength = (end - start) / 2;
       if (halflength == 0) {
-        if ((start == this->size )|| (o > this->TheObjects[start])) {
+        if ((start == this->size )|| (o > this->theObjects[start])) {
           return end;
         } else {
           return start;
         }
       }
       int n = start + halflength;
-      if (o > this->TheObjects[n]) {
+      if (o > this->theObjects[n]) {
         start = n + 1;
       } else {
         end = n;
@@ -1016,14 +1015,14 @@ public:
     while (true) {
       int halflength = (end - start) / 2;
       if (halflength == 0) {
-        if (!(this->TheObjects[start] > o)) {
+        if (!(this->theObjects[start] > o)) {
           return end;
         } else {
           return start;
         }
       }
       int n = start + halflength;
-      if (!(this->TheObjects[n] > o)) {
+      if (!(this->theObjects[n] > o)) {
         start = n + 1;
       } else {
         end = n;
@@ -1035,15 +1034,15 @@ public:
   int BSGetIndex(const Object& o) const {
     int n = this->BSIndexFirstNotLessThan(o);
     if (n != this->size) {
-      if (this->TheObjects[n] == o) {
+      if (this->theObjects[n] == o) {
         return n;
       }
     }
     for (int i = n - 1; i > - 1; i --) {
-      if (this->TheObjects[i] == o) {
+      if (this->theObjects[i] == o) {
         return i;
       }
-      if (o > this->TheObjects[i]) {
+      if (o > this->theObjects[i]) {
         return - 1;
       }
     }
@@ -1055,7 +1054,7 @@ public:
   int BSInsert(const Object& o) {
     int n = BSIndexFirstGreaterThan(o);
     if (n == this->size) {
-      this->AddOnTop(o);
+      this->addOnTop(o);
     } else {
       this->InsertAtIndexShiftElementsUp(o, n);
     }
@@ -1065,15 +1064,15 @@ public:
   int BSInsertDontDup(const Object& o) {
     int n = BSIndexFirstNotLessThan(o);
     for (int i = n; i < this->size; i ++) {
-      if (this->TheObjects[i] == o) {
+      if (this->theObjects[i] == o) {
         return - 1;
       }
-      if (this->TheObjects[i] > o) {
+      if (this->theObjects[i] > o) {
         this->InsertAtIndexShiftElementsUp(o, i);
         return i;
       }
     }
-    this->AddOnTop(o);
+    this->addOnTop(o);
     return this->size - 1;
   }
 
@@ -1082,10 +1081,10 @@ public:
     int existing_index = - 1;
     int bin_end_index = - 1;
     for (int i = n; i < this->size; i ++) {
-      if (this->TheObjects[i] == o) {
+      if (this->theObjects[i] == o) {
         existing_index = i;
       }
-      if (this->TheObjects[i] > o) {
+      if (this->theObjects[i] > o) {
         bin_end_index = i;
         break;
       }
@@ -1103,7 +1102,7 @@ public:
   }
 
   void Rotate(int r) {
-    std::rotate(this->TheObjects, this->TheObjects + r, this->TheObjects + (this->size - 1));
+    std::rotate(this->theObjects, this->theObjects + r, this->theObjects + (this->size - 1));
   }
   int SizeWithoutObjects() const;
   Object* LastObject() const;// <-Registering stack trace forbidden! Multithreading deadlock alert.
@@ -1113,7 +1112,7 @@ public:
     int numCycles = MathRoutines::Minimum(SomeRandomPrimesSize, this->size);
     unsigned int result = 0;
     for (int i = 0; i < numCycles; i ++) {
-      result += SomeRandomPrimes[i] * MathRoutines::hashFunction(TheObjects[i]);
+      result += SomeRandomPrimes[i] * MathRoutines::hashFunction(theObjects[i]);
     }
     return result;
   }
@@ -1124,7 +1123,7 @@ public:
   void operator=(const std::string& right) {
     this->SetSize(right.size());
     for (int i = 0; i < this->size; i ++) {
-      this->TheObjects[i] = right[static_cast<unsigned>(i)];
+      this->theObjects[i] = right[static_cast<unsigned>(i)];
     }
   }
   void operator=(const std::initializer_list<Object>& other) {
@@ -1135,7 +1134,7 @@ public:
       otherIterator != other.end();
       otherIterator ++, counter ++
     ) {
-      this->TheObjects[counter] = *otherIterator;
+      this->theObjects[counter] = *otherIterator;
     }
   }
   void operator=(const List<Object>& right) {
@@ -1144,14 +1143,14 @@ public:
     }
     this->SetSize(right.size);
     for (int i = 0; i < this->size; i ++) {
-      this->TheObjects[i] = right.TheObjects[i];
+      this->theObjects[i] = right.theObjects[i];
     }
   }
   template <class otherObjectType>
   void operator=(const List<otherObjectType>& right) {
     this->SetSize(right.size);
     for (int i = 0; i < this->size; i ++) {
-      this->TheObjects[i] = right.TheObjects[i];
+      this->theObjects[i] = right.theObjects[i];
     }
   }
   static void swap(List<Object>& l1, List<Object>& l2);
@@ -1162,7 +1161,7 @@ public:
       return false;
     }
     for (int i = 0; i < Other.size; i ++) {
-      if (!(this->TheObjects[i] == Other.TheObjects[i])) {
+      if (!(this->theObjects[i] == Other.theObjects[i])) {
         return false;
       }
     }
@@ -1181,7 +1180,7 @@ public:
       << i << " in an array of " << this->size << " elements. ";
       fatalCrash(crashReport.str());
     }
-    return this->TheObjects[i];
+    return this->theObjects[i];
   }
   bool operator!=(const List<Object>& other) const {
     return !this->IsEqualTo(other);
@@ -1191,7 +1190,7 @@ public:
       return false;
     }
     for (int i = 0; i < this->size; i ++) {
-      if (!(this->TheObjects[i] == other[i])) {
+      if (!(this->theObjects[i] == other[i])) {
         return false;
       }
     }
@@ -1213,7 +1212,7 @@ public:
     this->Reserve(count);
     for (int i = 0; i < input.size; i ++) {
       for (int j = 0; j < input[i].size; j ++) {
-        this->AddOnTop(input[i][j]);
+        this->addOnTop(input[i][j]);
       }
     }
   }
@@ -1228,7 +1227,7 @@ class ListZeroAfterUse {
       // We zero the underlying buffer:
       // this->data[i] may be out of bounds if
       // the actual size does not equal the size.
-      this->data.TheObjects[i] = 0;
+      this->data.theObjects[i] = 0;
     }
   }
 };
@@ -1285,7 +1284,7 @@ template <class Object, class TemplateList, unsigned int hashFunction(const Obje
 class HashTemplate: public TemplateList {
 private:
   void AddObjectOnBottom(const Object& o);
-  void AddListOnTop(List<Object>& theList);
+  void addListOnTop(List<Object>& theList);
   Object PopIndexShiftDown(int index);
   void AssignLight(const ListLight<Object>& from);
   void ReverseOrderElements();
@@ -1337,18 +1336,18 @@ public:
     out << "<br>Average hash array size: " << (static_cast<double>(this->size)) / (static_cast<double>(numNonZeroHashes));
     return out.str();
   }
-  void AddOnTop(const Object& o) {
+  void addOnTop(const Object& o) {
     unsigned int hashIndex = this->GetHash(o);
-    this->TheHashedArrays[hashIndex].AddOnTop(this->size);
-    this->TemplateList::AddOnTop(o);
+    this->TheHashedArrays[hashIndex].addOnTop(this->size);
+    this->TemplateList::addOnTop(o);
     if (this->size > 1) {
       this->AdjustHashes();
     }
   }
-  void AddOnTop(const List<Object>& theList) {
+  void addOnTop(const List<Object>& theList) {
     this->SetExpectedSize(this->size + theList.size);
     for (int i = 0; i < theList.size; i ++) {
-      this->AddOnTop(theList[i]);
+      this->addOnTop(theList[i]);
     }
   }
   void RemoveFirstOccurenceSwapWithLast(const Object& o) {
@@ -1399,7 +1398,7 @@ public:
     if (result != - 1) {
       return result;
     }
-    this->AddOnTop(o);
+    this->addOnTop(o);
     return this->size - 1;
   }
   void AdjustHashes() {
@@ -1408,14 +1407,14 @@ public:
   void AddOnTopNoRepetition(const List<Object>& theList) {
     this->SetExpectedSize(this->size + theList.size);
     for (int i = 0; i < theList.size; i ++) {
-      this->AddOnTopNoRepetition(theList.TheObjects[i]);
+      this->AddOnTopNoRepetition(theList.theObjects[i]);
     }
   }
   bool AddOnTopNoRepetition(const Object& o) {
     if (this->GetIndex(o) != - 1) {
       return false;
     }
-    this->AddOnTop(o);
+    this->addOnTop(o);
     return true;
   }
   bool AddOnTopNoRepetitionMustBeNewCrashIfNot(const Object& o) {
@@ -1427,7 +1426,7 @@ public:
       << "but the hashed list already contains the object. ";
       fatalCrash(crashStream.str());
     }
-    this->AddOnTop(o);
+    this->addOnTop(o);
     return true;
   }
   Object PopLastObject() {
@@ -1457,11 +1456,11 @@ public:
       << " of size " << this->size << ". ";
       fatalCrash(commentsOnCrash.str());
     }
-    int hashIndexPop = this->GetHash(this->TheObjects[index]);
+    int hashIndexPop = this->GetHash(this->theObjects[index]);
     this->TheHashedArrays[hashIndexPop].RemoveFirstOccurenceSwapWithLast(index);
     int hashIndexIncoming = this->GetHash(theObject);
-    this->TheHashedArrays[hashIndexIncoming].AddOnTop(index);
-    this->TheObjects[index] = theObject;
+    this->TheHashedArrays[hashIndexIncoming].addOnTop(index);
+    this->theObjects[index] = theObject;
   }
   void RemoveIndexSwapWithLast(int index) {
     if (index < 0 || index >= this->size) {
@@ -1471,7 +1470,7 @@ public:
       << " of size " << this->size << ". ";
       fatalCrash(commentsOnCrash.str());
     }
-    Object* oPop = &this->TheObjects[index];
+    Object* oPop = &this->theObjects[index];
     int hashIndexPop = this->GetHash(*oPop);
     this->TheHashedArrays[hashIndexPop].RemoveFirstOccurenceSwapWithLast(index);
     if (index == this->size - 1) {
@@ -1479,23 +1478,23 @@ public:
       return;
     }
     int tempI = this->size - 1;
-    Object* oTop = &this->TheObjects[tempI];
+    Object* oTop = &this->theObjects[tempI];
     int hashIndexTop = this->GetHash(*oTop);
     this->TheHashedArrays[hashIndexTop].RemoveFirstOccurenceSwapWithLast(tempI);
-    this->TheHashedArrays[hashIndexTop].AddOnTop(index);
+    this->TheHashedArrays[hashIndexTop].addOnTop(index);
     this->TemplateList::RemoveIndexSwapWithLast(index);
   }
   void SwapTwoIndices(int i1, int i2) {
     Object tempO;
-    int i1Hash = this->GetHash(this->TheObjects[i1]);
-    int i2Hash = this->GetHash(this->TheObjects[i2]);
+    int i1Hash = this->GetHash(this->theObjects[i1]);
+    int i2Hash = this->GetHash(this->theObjects[i2]);
     this->TheHashedArrays[i1Hash].RemoveFirstOccurenceSwapWithLast(i1);
     this->TheHashedArrays[i2Hash].RemoveFirstOccurenceSwapWithLast(i2);
-    tempO = this->TheObjects[i1];
-    this->TheObjects[i1] = this->TheObjects[i2];
-    this->TheObjects[i2] = tempO;
-    this->TheHashedArrays[i1Hash].AddOnTop(i2);
-    this->TheHashedArrays[i2Hash].AddOnTop(i1);
+    tempO = this->theObjects[i1];
+    this->theObjects[i1] = this->theObjects[i2];
+    this->theObjects[i2] = tempO;
+    this->TheHashedArrays[i1Hash].addOnTop(i2);
+    this->TheHashedArrays[i2Hash].addOnTop(i1);
   }
   bool Contains(const Object& o) const {
     return this->GetIndex(o) != - 1;
@@ -1511,7 +1510,7 @@ public:
   int GetIndex(const Object& o) const {
     unsigned int hashIndex = this->GetHash(o);
     for (int i = 0; i < this->TheHashedArrays[hashIndex].size; i ++) {
-      int j = this->TheHashedArrays[hashIndex].TheObjects[i];
+      int j = this->TheHashedArrays[hashIndex].theObjects[i];
       if (j >= this->size) {
         std::stringstream commentsOnCrash;
         commentsOnCrash << "This is a programming error: corrupt hash table: at hashindex = "
@@ -1588,7 +1587,7 @@ public:
     if (this->size > 0) {
       for (int i = 0; i < this->size; i ++) {
         int theIndex = this->GetHash((*this)[i]);
-        this->TheHashedArrays[theIndex].AddOnTop(i);
+        this->TheHashedArrays[theIndex].addOnTop(i);
       }
     }
   }
@@ -1638,9 +1637,9 @@ public:
     this->::List<Object>::operator=(From);
     if (From.IsSparse()) {
       for (int i = 0; i < this->size; i ++) {
-        unsigned int hashIndex = this->GetHash(this->TheObjects[i]);
+        unsigned int hashIndex = this->GetHash(this->theObjects[i]);
         this->TheHashedArrays[hashIndex].Reserve(From.TheHashedArrays[hashIndex].size);
-        this->TheHashedArrays[hashIndex].AddOnTop(i);
+        this->TheHashedArrays[hashIndex].addOnTop(i);
       }
     } else {
       this->TheHashedArrays = From.TheHashedArrays;
@@ -1659,7 +1658,7 @@ public:
     this->Clear();
     this->SetExpectedSize(other.size);
     for (int i = 0; i < other.size; i ++) {
-      this->AddOnTop(other.TheObjects[i]);
+      this->addOnTop(other.theObjects[i]);
     }
   }
 };
@@ -1687,11 +1686,11 @@ public:
   bool AddOnTopNoRepetition(const Object& o) {
     return this->::HashTemplate<Object, List<Object>, hashFunction>::AddOnTopNoRepetition(o);
   }
-  void AddOnTop(const Object& o) {
-    this->::HashTemplate<Object, List<Object>, hashFunction>::AddOnTop(o);
+  void addOnTop(const Object& o) {
+    this->::HashTemplate<Object, List<Object>, hashFunction>::addOnTop(o);
   }
-  void AddOnTop(const List<Object>& theList) {
-    this->::HashTemplate<Object, List<Object>, hashFunction>::AddOnTop(theList);
+  void addOnTop(const List<Object>& theList) {
+    this->::HashTemplate<Object, List<Object>, hashFunction>::addOnTop(theList);
   }
   bool Contains(const Object& o) const {
     return this->::HashTemplate<Object, List<Object>, hashFunction>::Contains(o);
@@ -1832,7 +1831,7 @@ bool List<Object>::QuickSortAscendingCustomRecursive(
   int HighIndex = TopIndex;
   for (int LowIndex = BottomIndex + 1; LowIndex <= HighIndex; LowIndex ++) {
     if (theCompareror.CompareLeftGreaterThanRight(
-      this->TheObjects[LowIndex], this->TheObjects[BottomIndex]
+      this->theObjects[LowIndex], this->theObjects[BottomIndex]
     )) {
       if (carbonCopy != nullptr) {
         carbonCopy->SwapTwoIndices(LowIndex, HighIndex);
@@ -1842,7 +1841,7 @@ bool List<Object>::QuickSortAscendingCustomRecursive(
       HighIndex --;
     }
   }
-  if (theCompareror.CompareLeftGreaterThanRight(this->TheObjects[HighIndex], this->TheObjects[BottomIndex])) {
+  if (theCompareror.CompareLeftGreaterThanRight(this->theObjects[HighIndex], this->theObjects[BottomIndex])) {
     HighIndex --;
   }
   if (carbonCopy != nullptr) {
@@ -1859,12 +1858,12 @@ bool List<Object>::QuickSortAscendingCustomRecursive(
 }
 
 template <class Object>
-void List<Object>::AddListOnTop(const List<Object>& theList) {
+void List<Object>::addListOnTop(const List<Object>& theList) {
   int oldsize = this->size;
   int otherSize = theList.size;
   this->SetSize(oldsize + otherSize);
   for (int i = 0; i < otherSize; i ++) {
-    this->TheObjects[i + oldsize] = theList.TheObjects[i];
+    this->theObjects[i + oldsize] = theList.theObjects[i];
   }
 }
 
@@ -1882,9 +1881,9 @@ void List<Object>::SwapTwoIndices(int index1, int index2) {
     return;
   }
   Object tempO;
-  tempO = this->TheObjects[index1];
-  this->TheObjects[index1] = this->TheObjects[index2];
-  this->TheObjects[index2] = tempO;
+  tempO = this->theObjects[index1];
+  this->theObjects[index1] = this->theObjects[index2];
+  this->theObjects[index2] = tempO;
 }
 
 template<class Object>
@@ -1902,11 +1901,11 @@ void List<Object>::CycleIndices(const List<int>& cycle) {
   }
   // ironically, it's easier to program the cycles to go backwards XD
   Object tail;
-  tail = this->TheObjects[cycle[cycle.size - 1]];
+  tail = this->theObjects[cycle[cycle.size - 1]];
   for (int i = cycle.size - 1; i != 0; i --) {
-    this->TheObjects[cycle[i]] = this->TheObjects[cycle[i - 1]];
+    this->theObjects[cycle[i]] = this->theObjects[cycle[i - 1]];
   }
-  this->TheObjects[cycle[0]] = tail;
+  this->theObjects[cycle[0]] = tail;
 }
 
 template<class Object>
@@ -1919,7 +1918,7 @@ void List<Object>::PermuteIndices(const List<List<int> >& cycles) {
 template<class Object>
 int List<Object>::GetIndex(const Object& o) const {
   for (int i = 0; i < this->size; i ++) {
-    if (this->TheObjects[i] == o) {
+    if (this->theObjects[i] == o) {
       return i;
     }
   }
@@ -1943,19 +1942,19 @@ void List<Object>::swap(List<Object>& l1, List<Object>& l2) {
   smallL->SetSize(bigL->size);
   Object tempO;
   for (int i = 0; i < smallSize; i ++) {
-    tempO = smallL->TheObjects[i];
-    smallL->TheObjects[i] = bigL->TheObjects[i];
-    bigL->TheObjects[i] = tempO;
+    tempO = smallL->theObjects[i];
+    smallL->theObjects[i] = bigL->theObjects[i];
+    bigL->theObjects[i] = tempO;
   }
   for (int i = smallSize; i < bigL->size; i ++) {
-    smallL->TheObjects[i] = bigL->TheObjects[i];
+    smallL->theObjects[i] = bigL->theObjects[i];
   }
   bigL->size = smallSize;
 }
 
 template <class Object>
 int List<Object>::SizeWithoutObjects() const {
-  return sizeof(this->ActualSize) + sizeof(this->size) + sizeof(this->TheObjects);
+  return sizeof(this->ActualSize) + sizeof(this->size) + sizeof(this->theObjects);
 }
 
 template <class Object>
@@ -1967,10 +1966,10 @@ bool List<Object>::operator>(const List<Object>& other) const {
     return false;
   }
   for (int i = 0; i < this->size; i ++) {
-    if (this->TheObjects[i] > other.TheObjects[i]) {
+    if (this->theObjects[i] > other.theObjects[i]) {
       return true;
     }
-    if (other.TheObjects[i] > this->TheObjects[i]) {
+    if (other.theObjects[i] > this->theObjects[i]) {
       return false;
     }
   }
@@ -1986,10 +1985,10 @@ bool List<Object>::operator<(const List<Object>& other) const {
     return true;
   }
   for (int i = 0; i < this->size; i ++) {
-    if (this->TheObjects[i] > other.TheObjects[i]) {
+    if (this->theObjects[i] > other.theObjects[i]) {
       return false;
     }
-    if (other.TheObjects[i] > this->TheObjects[i]) {
+    if (other.theObjects[i] > this->theObjects[i]) {
       return true;
     }
   }
@@ -2006,7 +2005,7 @@ void List<Object>::ShiftUpExpandOnTopRepeated(int StartingIndex, int numberOfNew
   this->SetSize(this->size + numberOfNewElements);
   int lowBound = StartingIndex + numberOfNewElements;
   for (int i = this->size - 1; i >= lowBound; i --) {
-    this->TheObjects[i] = this->TheObjects[i - numberOfNewElements];
+    this->theObjects[i] = this->theObjects[i - numberOfNewElements];
   }
 }
 
@@ -2040,7 +2039,7 @@ void List<Object>::Slice(int StartingIndex, int SizeOfSlice, List<Object>& outpu
     output.SetSize(SizeOfSlice);
   }
   for (int i = 0; i < SizeOfSlice; i ++) {
-    output[i] = this->TheObjects[i + StartingIndex];
+    output[i] = this->theObjects[i + StartingIndex];
   }
   output.SetSize(SizeOfSlice);
 }
@@ -2049,7 +2048,7 @@ template <class Object>
 void List<Object>::initializeFillInObject(int theSize, const Object& o) {
   this->SetSize(theSize);
   for (int i = 0; i < this->size; i ++) {
-    this->TheObjects[i] = o;
+    this->theObjects[i] = o;
   }
 }
 
@@ -2058,7 +2057,7 @@ bool List<Object>::AddOnTopNoRepetition(const Object& o) {
   if (this->GetIndex(o) != - 1) {
     return false;
   }
-  this->AddOnTop(o);
+  this->addOnTop(o);
   return true;
 }
 
@@ -2072,14 +2071,14 @@ Object* List<Object>::LastObject() const {
     << this->size << " elements. ";
     fatalCrash(commentsOnCrash.str());
   }
-  return &this->TheObjects[this->size - 1];
+  return &this->theObjects[this->size - 1];
 }
 
 template <class Object>
 bool List<Object>::HasACommonElementWith(List<Object>& right) {
   for (int i = 0; i < this->size; i ++) {
     for (int j = 0; j < right.size; j ++) {
-      if (this->TheObjects[i] == right.TheObjects[j]) {
+      if (this->theObjects[i] == right.theObjects[j]) {
         return true;
       }
     }
@@ -2091,7 +2090,7 @@ template <class Object>
 void List<Object>::AssignLight(const ListLight<Object>& From) {
   this->SetSize(From.size);
   for (int i = 0; i < this->size; i ++) {
-    this->TheObjects[i] = From.TheObjects[i];
+    this->theObjects[i] = From.theObjects[i];
   }
 }
 
@@ -2106,7 +2105,7 @@ void List<Object>::Reserve(int theSize) {
 template <class Object>
 void List<Object>::RemoveFirstOccurenceSwapWithLast(const Object& o) {
   for (int i = 0; i < this->size; i ++) {
-    if (o == this->TheObjects[i]) {
+    if (o == this->theObjects[i]) {
       this->RemoveIndexSwapWithLast(i);
       return;
     }
@@ -2128,7 +2127,7 @@ template <class Object>
 std::string List<Object>::toString() const {
   std::stringstream out;
   for (int i = 0; i < this->size; i ++) {
-    out << this->TheObjects[i].toString() << "\n";
+    out << this->theObjects[i].toString() << "\n";
   }
   return out.str();
 }
@@ -2137,7 +2136,7 @@ template <class Object>
 std::string List<Object>::ToStringCommaDelimited() const {
   std::stringstream out;
   for (int i = 0; i < this->size; i ++) {
-    out << this->TheObjects[i];
+    out << this->theObjects[i];
     if (i != this->size - 1) {
       out << ", ";
     }
@@ -2149,7 +2148,7 @@ template <class Object>
 std::string List<Object>::ToStringConcatenate() const {
   std::stringstream out;
   for (int i = 0; i < this->size; i ++) {
-    out << this->TheObjects[i];
+    out << this->theObjects[i];
   }
   return out.str();
 }
@@ -2158,7 +2157,7 @@ template <class Object>
 std::string List<Object>::toString(FormatExpressions* theFormat) const {
   std::stringstream out;
   for (int i = 0; i < this->size; i ++) {
-    out << this->TheObjects[i].toString(theFormat) << "\n";
+    out << this->theObjects[i].toString(theFormat) << "\n";
   }
   return out.str();
 }
@@ -2167,7 +2166,7 @@ template <class Object>
 std::string List<Object>::ToStringCommaDelimited(FormatExpressions* theFormat) const {
   std::stringstream out;
   for (int i = 0; i < this->size; i ++) {
-    out << this->TheObjects[i].toString(theFormat);
+    out << this->theObjects[i].toString(theFormat);
     if (i != this->size - 1) {
       out << ", ";
     }
@@ -2186,7 +2185,7 @@ void List<Object>::RemoveIndexSwapWithLast(int index) {
     return;
   }
   this->size --;
-  this->TheObjects[index] = this->TheObjects[this->size];
+  this->theObjects[index] = this->theObjects[this->size];
 }
 
 template <class Object>
@@ -2203,14 +2202,14 @@ Object List<Object>::PopLastObject() {
     fatalCrash("Programming error: attempting to pop empty list. ");
   }
   this->size --;
-  return this->TheObjects[size];
+  return this->theObjects[size];
 }
 
 template <class Object>
 void List<Object>::ReleaseMemory() {
-  delete [] this->TheObjects;
+  delete [] this->theObjects;
   this->size = 0;
-  this->TheObjects = 0;
+  this->theObjects = 0;
 #ifdef AllocationLimitsSafeguard
   ParallelComputing::GlobalPointerCounter -= this->ActualSize;
   ParallelComputing::CheckPointerCounters();
@@ -2220,7 +2219,7 @@ void List<Object>::ReleaseMemory() {
 
 template <class Object>
 List<Object>::~List() {
-  delete [] this->TheObjects;
+  delete [] this->theObjects;
 #ifdef AllocationLimitsSafeguard
   ParallelComputing::GlobalPointerCounter -= this->ActualSize;
   ParallelComputing::CheckPointerCounters();
@@ -2251,10 +2250,10 @@ void List<Object>::ExpandArrayOnTop(int increase) {
   ParallelComputing::CheckPointerCounters();
 #endif
   for (int i = 0; i < this->size; i ++) {
-    newArray[i] = this->TheObjects[i];
+    newArray[i] = this->theObjects[i];
   }
-  Object* oldPointer = this->TheObjects; // <-store the old memory block
-  this->TheObjects = newArray; // <-replace TheObjects with newArray
+  Object* oldPointer = this->theObjects; // <-store the old memory block
+  this->theObjects = newArray; // <-replace theObjects with newArray
   delete [] oldPointer; // <-only then we delete the non-used memory.
   // The above looks complicated but is safe:
   // if another thread jumps and requests operator[]
@@ -2278,14 +2277,14 @@ void List<Object>::ReverseOrderElements() {
 template <class Object>
 void List<Object>::ReverseRange(int rangeBegin, int rangeEnd) {
   for (int i = rangeBegin, j = rangeEnd - 1; i < j; i ++, j --) {
-    Object oi = this->TheObjects[i];
-    this->TheObjects[i] = this->TheObjects[j];
-    this->TheObjects[j] = oi;
+    Object oi = this->theObjects[i];
+    this->theObjects[i] = this->theObjects[j];
+    this->theObjects[j] = oi;
   }
 }
 
 template <class Object>
-void List<Object>::AddOnTop(const Object& o) {
+void List<Object>::addOnTop(const Object& o) {
   // <-Registering stack trace forbidden! Multithreading deadlock alert.
   if (this->size > this->ActualSize) {
     std::stringstream commentsOnCrash;
@@ -2298,7 +2297,7 @@ void List<Object>::AddOnTop(const Object& o) {
   if (this->size == this->ActualSize) {
     this->ExpandArrayOnTop(this->GetNewSizeRelativeToExpectedSize(this->ActualSize + 1) - this->size);
   }
-  this->TheObjects[size] = o;
+  this->theObjects[size] = o;
   this->size ++;
 }
 #endif

@@ -110,7 +110,7 @@ bool TransportLayerSecurity::SSLReadLoop(
       includeNoErrorInComments
     );
     if (numBytes > 0) {
-      next.assign(this->readBuffer.TheObjects, static_cast<unsigned>(numBytes));
+      next.assign(this->readBuffer.theObjects, static_cast<unsigned>(numBytes));
       output += next;
       if (expectedLength <= 0) {
         break;
@@ -168,7 +168,7 @@ bool TransportLayerSecurity::SSLWriteLoop(
 
 void TransportLayerSecurityOpenSSL::SetSocketAddToStack(int theSocket) {
   MacroRegisterFunctionWithName("TransportLayerSecurity::SetSocketAddToStack");
-  this->socketStack.AddOnTop(theSocket);
+  this->socketStack.addOnTop(theSocket);
   this->DoSetSocket(theSocket);
 }
 
@@ -308,7 +308,7 @@ TransportLayerSecurityServer::TransportLayerSecurityServer() {
 }
 
 bool TransportLayerSecurityServer::NetworkSpoofer::WriteSSLRecords(List<SSLRecord>& input) {
-  this->outgoingMessages.AddOnTop(input);
+  this->outgoingMessages.addOnTop(input);
   return true;
 }
 
@@ -335,7 +335,7 @@ bool TransportLayerSecurityServer::WriteBytesOnce(
   setsockopt(this->session.socketId, SOL_SOCKET, SO_RCVTIMEO, static_cast<void*>(&tv), sizeof(timeval));
   ssize_t numBytesSent = send(
     this->session.socketId,
-    input.TheObjects,
+    input.theObjects,
     static_cast<size_t>(input.size),
     0
   );
@@ -424,7 +424,7 @@ bool TransportLayerSecurityServer::ReadBytesOnce(std::stringstream* commentsOnEr
   this->incomingBytes.SetSize(this->defaultBufferCapacity);
   int numBytesInBuffer = static_cast<int>(recv(
     this->session.socketId,
-    this->incomingBytes.TheObjects,
+    this->incomingBytes.theObjects,
     static_cast<unsigned>(this->incomingBytes.size - 1),
     0
   ));
@@ -463,17 +463,17 @@ SSLContent::SSLContent() {
 logger::StringHighligher SSLContent::getStringHighlighter() {
   logger::StringHighligher result("2,4,4,2,6,4,64,2,64,4,||");
   for (int i = 0; i < this->owner->owner->session.incomingCiphers.size; i ++) {
-    result.sections.AddOnTop(4);
+    result.sections.addOnTop(4);
   }
-  result.sections.AddOnTop(std::string("||"));
-  result.sections.AddOnTop(4);
-  result.sections.AddOnTop(4);
-  result.sections.AddOnTop(std::string("|"));
+  result.sections.addOnTop(std::string("||"));
+  result.sections.addOnTop(4);
+  result.sections.addOnTop(4);
+  result.sections.addOnTop(std::string("|"));
   for (int i = 0; i < this->extensions.size; i ++) {
-    result.sections.AddOnTop(4);
-    result.sections.AddOnTop(4);
+    result.sections.addOnTop(4);
+    result.sections.addOnTop(4);
     if (this->extensions[i].content.size > 0) {
-      result.sections.AddOnTop(this->extensions[i].content.size * 2);
+      result.sections.addOnTop(this->extensions[i].content.size * 2);
     }
   }
   return result;
@@ -515,7 +515,7 @@ JSData SSLContent::ToJSON() const {
   JSData extensionsObject;
   extensionsObject.theType = JSData::token::tokenArray;
   for (int i = 0; i < this->extensions.size; i ++) {
-    extensionsObject.theList.AddOnTop(this->extensions[i].ToJSON());
+    extensionsObject.theList.addOnTop(this->extensions[i].ToJSON());
   }
   result[SSLContent::JSLabels::extensions] = extensionsObject;
   result[SSLContent::JSLabels::renegotiate                      ] = this->flagRenegotiate;
@@ -641,16 +641,16 @@ void TransportLayerSecurityServer::Session::WriteNamedCurveAndPublicKey(
     annotations,
     "RSA"
   );
-  output.AddListOnTop(this->signature);
+  output.addListOnTop(this->signature);
 }
 
 void SSLContent::WriteType(
   List<unsigned char>& output, List<Serialization::Marker>* annotations
 ) const {
   if (annotations != nullptr) {
-    annotations->AddOnTop(Serialization::Marker(output.size, 1, this->GetType(this->theType)));
+    annotations->addOnTop(Serialization::Marker(output.size, 1, this->GetType(this->theType)));
   }
-  output.AddOnTop(this->theType);
+  output.addOnTop(this->theType);
 }
 
 void SSLContent::WriteVersion(
@@ -943,7 +943,7 @@ bool SSLContent::DecodeExtensions(std::stringstream *commentsOnFailure) {
     )) {
       return false;
     }
-    this->extensions.AddOnTop(incoming);
+    this->extensions.addOnTop(incoming);
   }
   return this->ProcessExtensions(commentsOnFailure);
 }
@@ -977,12 +977,12 @@ void SSLHelloExtension::MakeEllipticCurvePointFormat(SSLContent* inputOwner) {
   this->owner = inputOwner;
   this->theType = SSLContent::tokensExtension::ellipticCurvePointFormat;
   this->content.SetSize(0);
-  this->content.AddOnTop(0);
-  this->content.AddOnTop(4);
-  this->content.AddOnTop(3);
-  this->content.AddOnTop(0);
-  this->content.AddOnTop(1);
-  this->content.AddOnTop(2);
+  this->content.addOnTop(0);
+  this->content.addOnTop(4);
+  this->content.addOnTop(3);
+  this->content.addOnTop(0);
+  this->content.addOnTop(1);
+  this->content.addOnTop(2);
 }
 
 bool SSLHelloExtension::CheckInitialization() {
@@ -1086,7 +1086,7 @@ bool SSLHelloExtension::ProcessSignatureAlgorithms(std::stringstream* commentsOn
     incoming.ownerServer = this->owner->owner->owner;
     incoming.value = specifications[i * 2] * 256 + specifications[i * 2 + 1];
     incoming.processValue();
-    session.incomingAlgorithmSpecifications.AddOnTop(incoming);
+    session.incomingAlgorithmSpecifications.addOnTop(incoming);
   }
   if (session.incomingAlgorithmSpecifications.size == 0) {
     if (commentsOnError != nullptr) {
@@ -1292,7 +1292,7 @@ void Serialization::WriteTwoByteUnsignedAnnotated(
   const std::string& label
 ) {
   if (annotations != nullptr) {
-    annotations->AddOnTop(Serialization::Marker(output.size, 2, label));
+    annotations->addOnTop(Serialization::Marker(output.size, 2, label));
   }
   Serialization::WriteTwoByteUnsigned(input, output);
 }
@@ -1385,9 +1385,9 @@ void Serialization::WriteBytesAnnotated(
   const std::string& label
 ) {
   if (annotations != nullptr) {
-    annotations->AddOnTop(Serialization::Marker(output.size, input.size, label));
+    annotations->addOnTop(Serialization::Marker(output.size, input.size, label));
   }
-  output.AddListOnTop(input);
+  output.addListOnTop(input);
 }
 
 void Serialization::WriteNByteLengthFollowedByBytes(
@@ -1400,7 +1400,7 @@ void Serialization::WriteNByteLengthFollowedByBytes(
   Serialization::WriterIntegerWithMarker writer(
     byteCountOfLength, static_cast<unsigned>(input.size), output, annotations, label
   );
-  output.AddListOnTop(input);
+  output.addListOnTop(input);
 }
 
 bool SSLRecord::CheckInitialization() const {
@@ -1562,7 +1562,7 @@ JSData TransportLayerSecurityServer::Session::ToJSON() {
   JSData algorithmSpecifications;
   algorithmSpecifications.theType = JSData::token::tokenArray;
   for (int i = 0; i < this->incomingAlgorithmSpecifications.size; i ++) {
-    algorithmSpecifications.theList.AddOnTop(this->incomingAlgorithmSpecifications[i].ToJSON());
+    algorithmSpecifications.theList.addOnTop(this->incomingAlgorithmSpecifications[i].ToJSON());
   }
   result[TransportLayerSecurityServer::Session::JSLabels::algorithmSpecifications] = algorithmSpecifications;
   result[TransportLayerSecurityServer::Session::JSLabels::cipherSuites] = ciphers;
@@ -1585,7 +1585,7 @@ JSData SSLRecord::ToJSONSerialization() {
   JSData jsMarkers;
   jsMarkers.theType = JSData::token::tokenArray;
   for (int i = 0; i < markers.size; i ++) {
-    jsMarkers.theList.AddOnTop(markers[i].ToJSON());
+    jsMarkers.theList.addOnTop(markers[i].ToJSON());
   }
   result[Serialization::JSLabels::markers] = jsMarkers;
   result[Serialization::JSLabels::body] = Crypto::ConvertListUnsignedCharsToHex(serialization);
@@ -1747,8 +1747,8 @@ bool TransportLayerSecurityServer::Session::ComputeAndSignEphemerealKey(std::str
   this->chosenEllipticCurve = CipherSuiteSpecification::EllipticCurveSpecification::secp256k1;
   this->chosenEllipticCurveName = "secp256k1";
   this->bytesToSign.SetSize(0);
-  this->bytesToSign.AddListOnTop(this->incomingRandomBytes);
-  this->bytesToSign.AddListOnTop(this->myRandomBytes);
+  this->bytesToSign.addListOnTop(this->incomingRandomBytes);
+  this->bytesToSign.addListOnTop(this->myRandomBytes);
   //
   this->WriteNamedCurveAndPublicKey(this->bytesToSign, nullptr);
   this->owner->privateKey.SignBytesPadPKCS1(
@@ -1812,11 +1812,11 @@ void SSLContent::PrepareServerHello1Start(SSLContent& clientHello) {
   this->extensions.SetSize(0);
   SSLHelloExtension newExtension;
   newExtension.MakeGrease(this);
-  this->extensions.AddOnTop(newExtension);
+  this->extensions.addOnTop(newExtension);
   newExtension.MakeExtendedMasterSecret(this);
-  this->extensions.AddOnTop(newExtension);
+  this->extensions.addOnTop(newExtension);
   newExtension.MakeEllipticCurvePointFormat(this);
-  this->extensions.AddOnTop(newExtension);
+  this->extensions.addOnTop(newExtension);
 }
 
 void SSLRecord::resetExceptOwner() {
@@ -1831,7 +1831,7 @@ void SSLRecord::PrepareServerHello1Start(
   this->theType = SSLRecord::tokens::handshake;
   this->version = 3 * 256 + 1;
   this->content.PrepareServerHello1Start(clientHello.content);
-  this->owner->outgoingRecords.AddOnTop(*this);
+  this->owner->outgoingRecords.addOnTop(*this);
 }
 
 void SSLRecord::PrepareServerHello2Certificate() {
@@ -1839,7 +1839,7 @@ void SSLRecord::PrepareServerHello2Certificate() {
   this->theType = SSLRecord::tokens::handshake;
   this->version = 3 * 256 + 1;
   this->content.PrepareServerHello2Certificate();
-  this->owner->outgoingRecords.AddOnTop(*this);
+  this->owner->outgoingRecords.addOnTop(*this);
 }
 
 bool SSLRecord::PrepareServerHello3SecretExchange(std::stringstream* commentsOnFailure) {
@@ -1858,7 +1858,7 @@ bool SSLRecord::PrepareServerHello3SecretExchange(std::stringstream* commentsOnF
   this->theType = SSLRecord::tokens::handshake;
   this->version = 3 * 256 + 1;
   bool success = this->content.PrepareServerHello3ServerKeyExchange(commentsOnFailure);
-  this->owner->outgoingRecords.AddOnTop(*this);
+  this->owner->outgoingRecords.addOnTop(*this);
   return success;
 }
 
@@ -1945,7 +1945,7 @@ bool TransportLayerSecurityServer::HandShakeIamServer(
   if (!success) {
     global << logger::red << commentsOnFailure->str() << logger::endL;
     if (this->spoofer.flagDoSpoof) {
-      this->spoofer.errorsOnIncoming.AddOnTop(commentsOnFailure->str());
+      this->spoofer.errorsOnIncoming.addOnTop(commentsOnFailure->str());
     }
     return false;
   }
@@ -1953,7 +1953,7 @@ bool TransportLayerSecurityServer::HandShakeIamServer(
   if (!success) {
     global << logger::red << commentsOnFailure->str() << logger::endL;
     if (this->spoofer.flagDoSpoof) {
-      this->spoofer.errorsOnOutgoing.AddOnTop(commentsOnFailure->str());
+      this->spoofer.errorsOnOutgoing.addOnTop(commentsOnFailure->str());
     }
     return false;
   }
@@ -1999,7 +1999,7 @@ int TransportLayerSecurity::readOnce(
   } else {
     result = static_cast<int>(recv(
       socket,
-      this->readBuffer.TheObjects,
+      this->readBuffer.theObjects,
       static_cast<size_t>(readBuffer.size - 1), 0
     ));
   }

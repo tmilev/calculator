@@ -148,8 +148,8 @@ bool Polynomial<Rational>::findOneVariableRationalRoots(List<Rational>& output) 
     myCopy.DivideBy(x1, myCopy, tempP, monomialOrder);
     List<Rational> tempList;
     bool result = myCopy.findOneVariableRationalRoots(tempList);
-    output.AddOnTop(0);
-    output.AddListOnTop(tempList);
+    output.addOnTop(0);
+    output.addListOnTop(tempList);
     return result;
   }
   if (this->IsConstant()) {
@@ -177,10 +177,10 @@ bool Polynomial<Rational>::findOneVariableRationalRoots(List<Rational>& output) 
         Polynomial<Rational> divisor, tempP;
         divisor.MakeDegreeOne(1, 0, 1, - tempV[0]);
         myCopy.DivideBy(divisor, myCopy, tempP, monomialOrder);
-        output.AddOnTop(tempV[0]);
+        output.addOnTop(tempV[0]);
         List<Rational> tempList;
         bool result = myCopy.findOneVariableRationalRoots(tempList);
-        output.AddListOnTop(tempList);
+        output.addListOnTop(tempList);
         return result;
       }
     }
@@ -291,8 +291,8 @@ bool PolynomialFactorizationKronecker::oneFactor(
       }
       return false;
     }
-    thePrimeFactorsAtPoints[i].AddOnTop(- 1);
-    thePrimeFactorsMults[i].AddOnTop(1);
+    thePrimeFactorsAtPoints[i].addOnTop(- 1);
+    thePrimeFactorsMults[i].addOnTop(1);
   }
   Incrementable<Incrementable<SelectionOneItem> > divisorSelection;
   Vectors<Rational> valuesLeftInterpolands;
@@ -300,7 +300,7 @@ bool PolynomialFactorizationKronecker::oneFactor(
   PointsOfInterpolationLeft.Reserve(degreeLeft + 1);
   Rational currentPrimePowerContribution, currentPointContribution;
   for (int i = 0; i <= degreeLeft; i ++) {
-    PointsOfInterpolationLeft.AddOnTop(AllPointsOfEvaluation[i]);
+    PointsOfInterpolationLeft.addOnTop(AllPointsOfEvaluation[i]);
   }
   divisorSelection.initFromMults(thePrimeFactorsMults);
   valuesLeftInterpolands.SetSize(degreeLeft + 1);

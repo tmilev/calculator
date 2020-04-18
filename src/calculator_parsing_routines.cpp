@@ -232,7 +232,7 @@ void Calculator::initialize() {
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot(" ");//empty token must always come first!!!!
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("{{}}");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("Variable");
-  this->controlSequences.AddOnTop(this->operations.theKeys);//all operations defined up to this point are also control sequences
+  this->controlSequences.addOnTop(this->operations.theKeys);//all operations defined up to this point are also control sequences
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("Expression");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("Integer");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("{}");
@@ -329,7 +329,7 @@ void Calculator::initialize() {
   this->RuleStack.AddChildAtomOnTop(this->opEndStatement());
   this->cachedRuleStacks.Clear();
   this->RuleStackCacheIndex = 0;
-  this->cachedRuleStacks.AddOnTop(this->RuleStack);
+  this->cachedRuleStacks.addOnTop(this->RuleStack);
   this->NumPredefinedAtoms = this->operations.size(); //<-operations added up to this point are called ``operations''
   this->CheckConsistencyAfterInitialization();
 }
@@ -805,7 +805,7 @@ void Calculator::ParseFillDictionary(const std::string& input) {
   SyntacticElement currentElement;
   currentElement.theData.reset(*this);
   currentElement.controlIndex = this->conEndProgram();
-  (*this->CurrrentSyntacticSouP).AddOnTop(currentElement);
+  (*this->CurrrentSyntacticSouP).addOnTop(currentElement);
 }
 
 bool Calculator::ShouldSplitOutsideQuotes(const std::string& left, char right) {
@@ -897,15 +897,15 @@ void Calculator::ParseFillDictionary(const std::string& input, List<SyntacticEle
     if (this->controlSequences.Contains(current) && !mustInterpretAsVariable) {
       currentElement.controlIndex = this->controlSequences.GetIndex(current);
       currentElement.theData.reset(*this);
-      output.AddOnTop(currentElement);
+      output.addOnTop(currentElement);
     } else if (MathRoutines::hasDecimalDigitsOnly(current) && !mustInterpretAsVariable) {
       currentElement.theData.AssignValue(current, *this);
       currentElement.controlIndex = this->conInteger();
-      output.AddOnTop(currentElement);
+      output.addOnTop(currentElement);
     } else {
       currentElement.controlIndex = this->controlSequences.GetIndex("Variable");
       currentElement.theData.MakeAtom(this->AddOperationNoRepetitionOrReturnIndexFirst(current), *this);
-      output.AddOnTop(currentElement);
+      output.addOnTop(currentElement);
     }
     current = "";
   }
@@ -1061,7 +1061,7 @@ bool Calculator::ReplaceVXdotsXbyE_NONBOUND_XdotsX(int numXs) {
   } else {
     theElt.theData.MakeAtom(theBoundVar, *this);
     if (!this->IsNonBoundVarInContext(theBoundVar)) {
-      this->NonBoundVariablesInContext.AddOnTop(theBoundVar);
+      this->NonBoundVariablesInContext.addOnTop(theBoundVar);
     }
   }
   theElt.controlIndex = this->conExpression();
@@ -1392,7 +1392,7 @@ bool Calculator::ReplaceVbyVdotsVAccordingToPredefinedWordSplits() {
     if (newElt.controlIndex == - 1) {
       newElt.controlIndex = this->conVariable();
     }
-    (*this->CurrentSyntacticStacK).AddOnTop(newElt);
+    (*this->CurrentSyntacticStacK).addOnTop(newElt);
   }
   return true;
 }
@@ -1884,7 +1884,7 @@ bool Calculator::ExtractExpressions(Expression& outputExpression, std::string* o
         theReport.Report(reportStream.str());
       }
     }
-    (*this->CurrentSyntacticStacK).AddOnTop((*this->CurrrentSyntacticSouP)[this->counterInSyntacticSoup]);
+    (*this->CurrentSyntacticStacK).addOnTop((*this->CurrrentSyntacticSouP)[this->counterInSyntacticSoup]);
     int numTimesRulesCanBeAppliedWithoutStackDecrease = 0;
     int minStackSize = this->CurrentSyntacticStacK->size ;
     while (this->ApplyOneRule()) {

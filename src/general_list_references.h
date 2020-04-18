@@ -92,7 +92,7 @@ public:
     delete this->theReferences[i]; //<- NOT thread safe!
     this->theReferences[i] = 0;
   }
-  void AddOnTop(const Object& o);
+  void addOnTop(const Object& o);
   int GetIndex(const Object& o) const;
   bool ContainsExactlyOnce(const Object& o) const {
     bool result = false;
@@ -109,7 +109,7 @@ public:
   int AddNoRepetitionOrReturnIndexFirst(const Object& o) {
     int indexOfObject = this->GetIndex(o);
     if (indexOfObject == - 1) {
-      this->AddOnTop(o);
+      this->addOnTop(o);
       return this->size - 1;
     }
     return indexOfObject;
@@ -121,7 +121,7 @@ public:
     this->KillAllElements();
     this->Reserve(other.size);
     for (int i = 0; i < other.size; i ++) {
-      this->AddOnTop(other[i]);
+      this->addOnTop(other[i]);
     }
   }
   void operator=(const List<Object>& other) {
@@ -184,7 +184,7 @@ void ListReferences<Object>::KillAllElements() {
 }
 
 template<class Object>
-void ListReferences<Object>::AddOnTop(const Object& o) {
+void ListReferences<Object>::addOnTop(const Object& o) {
   this->SetSize(this->size + 1);
   (*this)[this->size - 1] = o;
 }
@@ -211,11 +211,11 @@ class HashedListReferences : public HashTemplate<Object, ListReferences<Object>,
   inline bool AddOnTopNoRepetition(const Object& o) {
     return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::AddOnTopNoRepetition(o);
   }
-  inline void AddOnTop(const Object& o) {
-    this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::AddOnTop(o);
+  inline void addOnTop(const Object& o) {
+    this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::addOnTop(o);
   }
-  inline void AddOnTop(const List<Object>& theList) {
-    this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::AddOnTop(theList);
+  inline void addOnTop(const List<Object>& theList) {
+    this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::addOnTop(theList);
   }
   inline bool Contains(const Object& o) const {
     return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::Contains(o);

@@ -9,13 +9,13 @@ JSData Calculator::OperationHandlers::ToJSON() {
   currentFunctionListDirect.theType = JSData::token::tokenArray;
   for (int i = 0; i < this->handlers.size; i ++) {
     Function& currentHandler = this->handlers[i];
-    currentFunctionListDirect.theList.AddOnTop(currentHandler.ToJSON());
+    currentFunctionListDirect.theList.addOnTop(currentHandler.ToJSON());
   }
   JSData currentFunctionListComposite;
   currentFunctionListComposite.theType = JSData::token::tokenArray;
   for (int i = 0; i < this->compositeHandlers.size; i ++) {
     Function& currentHandler = this->compositeHandlers[i];
-    currentFunctionListComposite.theList.AddOnTop(currentHandler.ToJSON());
+    currentFunctionListComposite.theList.addOnTop(currentHandler.ToJSON());
   }
   result["regular"] = currentFunctionListDirect;
   result["composite"] = currentFunctionListComposite;
@@ -108,8 +108,8 @@ Expression Calculator::EMInfinity() {
 
 List<Function> Calculator::OperationHandlers::mergeHandlers() {
   List<Function> result;
-  result.AddListOnTop(this->handlers);
-  result.AddListOnTop(this->compositeHandlers);
+  result.addListOnTop(this->handlers);
+  result.addListOnTop(this->compositeHandlers);
   return result;
 }
 
@@ -341,7 +341,7 @@ bool Calculator::ExpressionMatchesPattern(
     std::stringstream out;
     out << "Max recursion depth of " << this->MaxRecursionDeptH << " exceeded whlie trying to match expression pattern "
     << thePattern.toString() << " onto expression " << input.toString();
-    this->evaluationErrors.AddOnTop(out.str());
+    this->evaluationErrors.addOnTop(out.str());
     return false;
   }
 //  if (this->opDefine() == input.theOperation)
@@ -419,7 +419,7 @@ void StateMaintainerCalculator::AddRule(const Expression& theRule) {
   if (this->owner->RuleStackCacheIndex == - 1) {
     if (this->owner->cachedRuleStacks.size < this->owner->MaxCachedExpressionPerRuleStack) {
       this->owner->RuleStackCacheIndex = this->owner->cachedRuleStacks.size;
-      this->owner->cachedRuleStacks.AddOnTop(this->owner->RuleStack);
+      this->owner->cachedRuleStacks.addOnTop(this->owner->RuleStack);
     }
   }
   if (this->owner->flagLogRules) {
@@ -881,7 +881,7 @@ bool Calculator::EvaluateLoop::ReduceOnce() {
 }
 
 void Calculator::EvaluateLoop::LookUpCache() {
-  this->owner->EvaluatedExpressionsStack.AddOnTop(*(this->outpuT));
+  this->owner->EvaluatedExpressionsStack.addOnTop(*(this->outpuT));
   Expression theExpressionWithContext;
   theExpressionWithContext.reset(*this->owner, 3);
   theExpressionWithContext.AddChildAtomOnTop(this->owner->opSequence());
@@ -912,7 +912,7 @@ void Calculator::EvaluateLoop::LookUpCache() {
   ) {
     return;
   }
-  this->owner->cachedExpressions.AddOnTop(theExpressionWithContext);
+  this->owner->cachedExpressions.addOnTop(theExpressionWithContext);
   this->indexInCache = this->owner->cachedExpressions.size - 1;
   this->owner->imagesCachedExpressions.SetSize(this->indexInCache + 1);
   this->owner->imagesCachedExpressions.LastObject()->MakeError("Error: not computed yet.", *this->owner);

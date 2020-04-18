@@ -78,8 +78,8 @@ public:
       this->offset = output.size - this->numberOfBytes;
       this->markerOffset = this->outputMarkers->size;
       this->outputPointer = &output;
-      this->outputMarkers->AddOnTop(Serialization::Marker(this->offset, - 1, label));
-      this->outputMarkers->AddOnTop(Serialization::Marker(this->offset, this->numberOfBytes, label));
+      this->outputMarkers->addOnTop(Serialization::Marker(this->offset, - 1, label));
+      this->outputMarkers->addOnTop(Serialization::Marker(this->offset, this->numberOfBytes, label));
     }
     ~WriterIntegerWithMarker() {
       if (this->flagDeallocated) {
@@ -138,8 +138,8 @@ public:
       Serialization::WriteNByteUnsigned(numberOfBytes, 0, output, theSize);
       if (this->outputMarkers != nullptr) {
         this->markerOffset = this->outputMarkers->size;
-        this->outputMarkers->AddOnTop(Serialization::Marker(this->offset, - 1, Serialization::JSLabels::length));
-        this->outputMarkers->AddOnTop(Serialization::Marker(this->offset, numberOfBytes, label));
+        this->outputMarkers->addOnTop(Serialization::Marker(this->offset, - 1, Serialization::JSLabels::length));
+        this->outputMarkers->addOnTop(Serialization::Marker(this->offset, numberOfBytes, label));
       }
     }
     ~LengthWriterNBytes() {

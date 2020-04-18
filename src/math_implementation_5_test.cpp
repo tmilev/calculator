@@ -34,13 +34,13 @@ bool MonomialP::Test::TestMonomialOrdersSatisfyTheDefinition() {
   xOneXtwo = xOne;
   xOneXtwo *= xTwo;
   List<List<MonomialP>::Comparator> allOrders;
-  allOrders.AddOnTop(MonomialP::greaterThan_leftLargerWins);
+  allOrders.addOnTop(MonomialP::greaterThan_leftLargerWins);
   allOrders.LastObject()->name = "lexicographic";
-  allOrders.AddOnTop(MonomialP::greaterThan_rightLargerWins);
+  allOrders.addOnTop(MonomialP::greaterThan_rightLargerWins);
   allOrders.LastObject()->name = "lexicographic opposite";
-  allOrders.AddOnTop(MonomialP::greaterThan_totalDegree_leftLargerWins);
+  allOrders.addOnTop(MonomialP::greaterThan_totalDegree_leftLargerWins);
   allOrders.LastObject()->name = "graded lexicographic";
-  allOrders.AddOnTop(MonomialP::greaterThan_totalDegree_rightSmallerWins);
+  allOrders.addOnTop(MonomialP::greaterThan_totalDegree_rightSmallerWins);
   allOrders.LastObject()->name = "graded reverse lexicographic";
   List<List<MonomialP> > elementsIncreasingOrder ({
     {one, xOne, xOneSquared},
@@ -129,9 +129,9 @@ bool Polynomial<Rational>::Test::all() {
 
 template <>
 void Polynomial<Rational>::Test::initialize() {
-  this->format.polyAlphabeT.AddOnTop("x");
-  this->format.polyAlphabeT.AddOnTop("y");
-  this->format.polyAlphabeT.AddOnTop("z");
+  this->format.polyAlphabeT.addOnTop("x");
+  this->format.polyAlphabeT.addOnTop("y");
+  this->format.polyAlphabeT.addOnTop("z");
   this->format.flagUseHTML = false;
 }
 
@@ -180,8 +180,8 @@ Vector<Polynomial<Rational> > Polynomial<Rational>::Test::fromStringCommonContex
   const std::string& first, const std::string& second
 ) {
   List<std::string> input;
-  input.AddOnTop(first);
-  input.AddOnTop(second);
+  input.addOnTop(first);
+  input.addOnTop(second);
   return Polynomial<Rational>::Test::fromStringCommonContext(input);
 }
 
@@ -300,12 +300,12 @@ bool Polynomial<Rational>::Test::oneDifferential(
 
 template <>
 bool Polynomial<Rational>::Test::differential() {
-  this->formatDifferentials.polyAlphabeT.AddOnTop("x");
-  this->formatDifferentials.polyAlphabeT.AddOnTop("y");
-  this->formatDifferentials.polyAlphabeT.AddOnTop("z");
-  this->formatDifferentials.polyAlphabeT.AddOnTop("dx");
-  this->formatDifferentials.polyAlphabeT.AddOnTop("dy");
-  this->formatDifferentials.polyAlphabeT.AddOnTop("dz");
+  this->formatDifferentials.polyAlphabeT.addOnTop("x");
+  this->formatDifferentials.polyAlphabeT.addOnTop("y");
+  this->formatDifferentials.polyAlphabeT.addOnTop("z");
+  this->formatDifferentials.polyAlphabeT.addOnTop("dx");
+  this->formatDifferentials.polyAlphabeT.addOnTop("dy");
+  this->formatDifferentials.polyAlphabeT.addOnTop("dz");
   this->oneDifferential("1", "0");
   this->oneDifferential("x+y+z+1", "dx +dy +dz ");
   this->oneDifferential("x^2y^3z^5 + x", "5x^{2}y^{3}z^{4}dz +3x^{2}y^{2}z^{5}dy +2x y^{3}z^{5}dx +dx ");

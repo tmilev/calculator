@@ -42,7 +42,7 @@ bool CalculatorHTML::Test::ComputeTotalFiles() {
   this->fileNames.SetExpectedSize(this->fileNames.size);
   for (int i = 0; i < this->fileNamesAll.size; i ++) {
     if (this->fileExtensionsAll[i] == ".html") {
-      this->fileNames.AddOnTop(this->fileNamesAll[i]);
+      this->fileNames.addOnTop(this->fileNamesAll[i]);
     }
   }
   return true;
@@ -631,7 +631,7 @@ bool CalculatorFunctions::innerGetSummand(
     theCommands.CollectOpands(theExpression, theCommands.opPlus(), theSummands);
     for (int i = 0; i < theSummands.size; i ++) {
       if (theSummands[i].ContainsAsSubExpressionNoBuiltInTypes(theCommands.opSum())) {
-        theSums.AddOnTop(theSummands[i]);
+        theSums.addOnTop(theSummands[i]);
         theSummands.RemoveIndexShiftDown(i);
         i --;
       }
@@ -770,13 +770,13 @@ bool CalculatorFunctions::innerPlotDirectionOrVectorField(
   xE.MakeAtom("x", theCommands);
   yE.MakeAtom("y", theCommands);
   if (thePlotObj.variablesInPlay.size == 0) {
-    thePlotObj.variablesInPlay.AddOnTop(xE);
+    thePlotObj.variablesInPlay.addOnTop(xE);
   }
   if (thePlotObj.variablesInPlay.size == 1) {
     if (thePlotObj.variablesInPlay.Contains(xE)) {
-      thePlotObj.variablesInPlay.AddOnTop(yE);
+      thePlotObj.variablesInPlay.addOnTop(yE);
     } else {
-      thePlotObj.variablesInPlay.AddOnTop(xE);
+      thePlotObj.variablesInPlay.addOnTop(xE);
     }
   }
   thePlotObj.variablesInPlay.QuickSortAscending();
@@ -803,7 +803,7 @@ bool CalculatorFunctions::innerPlotDirectionOrVectorField(
     }
     thePlotObj.numSegmenTsJS[i] = jsConverterE.toString();
   }
-  thePlot.thePlots.AddOnTop(thePlotObj);
+  thePlot.thePlots.addOnTop(thePlotObj);
   return output.AssignValue(thePlot, theCommands);
 }
 
@@ -1247,7 +1247,7 @@ bool CalculatorFunctions::functionFactorInteger(Calculator& theCommands, const E
     Expression currentE;
     currentE.AssignValue(Rational(primeFactors[i]), theCommands);
     for (int j = 0; j < multiplicities[i]; j ++) {
-      result.AddOnTop(currentE);
+      result.addOnTop(currentE);
     }
   }
   if (theLI < 0 && result.size > 0) {
@@ -1327,7 +1327,7 @@ bool CalculatorFunctions::innerSubList(Calculator& theCommands, const Expression
       return theCommands << "Failed to evaluate " << theSubbed.toString();
     }
     if (subbedSimplified.IsEqualToOne()) {
-      theList.AddOnTop(input[1][i]);
+      theList.addOnTop(input[1][i]);
     }
   }
   return output.MakeSequence(theCommands, &theList);
@@ -1380,7 +1380,7 @@ bool CalculatorFunctions::innerPolynomialDivisionQuotient(
     currentE.AddChildAtomOnTop("MakeExpression");
     thePolyE.AssignValueWithContext(theGB.theQuotients[i], theContext, theCommands);
     currentE.AddChildOnTop(thePolyE);
-    theList.AddOnTop(currentE);
+    theList.addOnTop(currentE);
   }
   if (theList.size == 1) {
     output = theList[0];

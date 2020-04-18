@@ -149,9 +149,9 @@ bool JSData::HasCompositeKeyOfTokeN(
 
 bool JSData::HasCompositeKey(const std::string& inputKeys, JSData* whichValue, std::stringstream* commentsOnFailure) const {
   List<char> delimiters;
-  delimiters.AddOnTop('.');
-  delimiters.AddOnTop('[');
-  delimiters.AddOnTop(']');
+  delimiters.addOnTop('.');
+  delimiters.addOnTop('[');
+  delimiters.addOnTop(']');
   List<std::string> keys;
   StringRoutines::StringSplitExcludeDelimiters(inputKeys, delimiters, keys);
   const JSData* currentData = this;
@@ -472,7 +472,7 @@ bool JSData::readstringConsumeNextCharacter(
   JSData incoming;
   if (next == '"') {
     incoming.theType = JSData::token::tokenQuoteUnclosedStandard;
-    readingStack.AddOnTop(incoming);
+    readingStack.addOnTop(incoming);
     return true;
   }
   switch (next) {
@@ -503,7 +503,7 @@ bool JSData::readstringConsumeNextCharacter(
       incoming.theString = next;
       break;
   }
-  readingStack.AddOnTop(incoming);
+  readingStack.addOnTop(incoming);
   return true;
 }
 
@@ -516,7 +516,7 @@ bool JSData::TokenizePrependOneDummyElement(
   output.SetSize(0);
   output.SetExpectedSize(static_cast<int>(input.size()));
   JSData emptyElt;
-  output.AddOnTop(emptyElt);
+  output.addOnTop(emptyElt);
   for (unsigned i = 0; i < input.size(); i ++) {
     if (!this->readstringConsumeNextCharacter(output, i, input, commentsOnFailure)) {
       return false;
@@ -584,9 +584,9 @@ bool JSData::readstring(
   List<JSData> readingStack;
   JSData emptyElt;
   for (int i = 0; i < this->numEmptyTokensAtStart; i ++) {
-    readingStack.AddOnTop(emptyElt);
+    readingStack.addOnTop(emptyElt);
   }
-  readingStack.AddOnTop(theTokenS[1]);
+  readingStack.addOnTop(theTokenS[1]);
   for (int i = 1;;) {
     int fourthToLastIndex = readingStack.size - 4; //<- used to avoid compiler warning
     JSData& last = readingStack[fourthToLastIndex + 3];
@@ -603,7 +603,7 @@ bool JSData::readstring(
       continue;
     }
     if (secondToLast.theType == JSData::token::tokenOpenBracket && last.IsValidElement()) {
-      secondToLast.theList.AddOnTop(last);
+      secondToLast.theList.addOnTop(last);
       readingStack.RemoveLastObject();
       continue;
     }
@@ -632,7 +632,7 @@ bool JSData::readstring(
     if (i >= theTokenS.size) {
       break;
     }
-    readingStack.AddOnTop(theTokenS[i]);
+    readingStack.addOnTop(theTokenS[i]);
   }
   if (readingStack.size != JSData::numEmptyTokensAtStart + 1) {
     if (commentsOnFailure != nullptr) {

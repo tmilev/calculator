@@ -845,7 +845,7 @@ public:
     int UpperLimitNumElements = - 1
   ) {
     Vectors<coefficient> theWeights;
-    theWeights.AddOnTop(theWeight);
+    theWeights.addOnTop(theWeight);
     return this->GenerateOrbit(
       theWeights, RhoAction, output, UseMinusRho, expectedOrbitSize, outputSubset, UpperLimitNumElements
     );
@@ -1244,7 +1244,7 @@ public:
     out.generatorS = this->generatorS;
     out.flagCharacterIsComputed = this->flagCharacterIsComputed;
     if (this->identifyingString.size() > 0) {
-      out.names.AddOnTop(this->identifyingString);
+      out.names.addOnTop(this->identifyingString);
     }
     out.theCharacteR = this->theCharacteR;
     return out;
@@ -1661,7 +1661,7 @@ bool TranslatableWordsSubgroupElementGetWord(FiniteGroup<elementSomeGroup>& H, c
       << " so if this does belong to the subgroup, we need a better algorithm. "
       << global.fatal;
     }
-    out.AddListOnTop(H.parentRelationship->superGeneratorSubWords[superword[i]]);
+    out.addListOnTop(H.parentRelationship->superGeneratorSubWords[superword[i]]);
   }
   return true;
 }
@@ -2119,7 +2119,7 @@ ClassFunction<someFiniteGroup, coefficient> ClassFunction<someFiniteGroup, coeff
   l.G = G;
   l.data.SetExpectedSize(G->ConjugacyClassCount());
   for (int i = 0; i < G->ConjugacyClassCount(); i ++) {
-    l.data.AddOnTop((this->data[i] * this->data[i] + this->data[G->squaresFirstConjugacyClassRep[i]]) / 2);
+    l.data.addOnTop((this->data[i] * this->data[i] + this->data[G->squaresFirstConjugacyClassRep[i]]) / 2);
   }
   return l;
 }
@@ -2130,7 +2130,7 @@ ClassFunction<someFiniteGroup, coefficient> ClassFunction<someFiniteGroup, coeff
   l.G = G;
   l.data.SetExpectedSize(G->ConjugacyClassCount());
   for (int i = 0; i < G->ConjugacyClassCount(); i ++) {
-    l.data.AddOnTop((this->data[i] * this->data[i] - this->data[G->squaresFirstConjugacyClassRep[i]]) / 2);
+    l.data.addOnTop((this->data[i] * this->data[i] - this->data[G->squaresFirstConjugacyClassRep[i]]) / 2);
   }
   return l;
 }
@@ -2448,8 +2448,8 @@ bool FiniteGroup<elementSomeGroup>::RegisterCCclass(
   }
   theClass.flagRepresentativeComputed = true;
   this->ComputeCCSizeOrCCFromRepresentative(theClass, false);
-  this->conjugacyClasseS.AddOnTop(theClass);
-  this->CCsStandardRepCharPolys.AddOnTop(theCharPoly);
+  this->conjugacyClasseS.addOnTop(theClass);
+  this->CCsStandardRepCharPolys.addOnTop(theCharPoly);
   this->sizePrivate += theClass.size;
   this->conjugacyClasseS.QuickSortAscending();
   return true;

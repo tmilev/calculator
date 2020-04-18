@@ -364,7 +364,7 @@ public:
     if (this->size == 0) {
       return 0;
     } else {
-      return this->TheObjects[0].Coefficient.NumVars;
+      return this->theObjects[0].Coefficient.NumVars;
     }
   }
   inline void MultiplyBy(const ElementUniversalEnvelopingOrdered& other) {
@@ -414,7 +414,7 @@ public:
     if (this->size != 1) {
       return false;
     }
-    MonomialUniversalEnvelopingOrdered<coefficient>& tempMon = this->TheObjects[0];
+    MonomialUniversalEnvelopingOrdered<coefficient>& tempMon = this->theObjects[0];
     if (!tempMon.Coefficient.IsEqualToOne()) {
       return false;
     }
@@ -467,11 +467,11 @@ public:
     outputWasMultipliedBy = theRingUnit;
     coefficient currentCoeff;
     for (int i = 0; i < this->size; i ++) {
-      MonomialUniversalEnvelopingOrdered<coefficient>& currentMon = this->TheObjects[i];
+      MonomialUniversalEnvelopingOrdered<coefficient>& currentMon = this->theObjects[i];
       currentMon.Coefficient.ClearDenominators(currentCoeff);
       for (int j = 0; j < this->size; j ++) {
         if (j != i) {
-          this->TheObjects[j].Coefficient *= currentCoeff;
+          this->theObjects[j].Coefficient *= currentCoeff;
         }
       }
       outputWasMultipliedBy *= currentCoeff;

@@ -91,7 +91,7 @@ bool Calculator::GetVectorExpressions(const Expression& input, List<Expression>&
         << " can only be interpreted as a single element";
       }
     }
-    output.AddOnTop(input);
+    output.addOnTop(input);
     return true;
   }
   if (targetDimNonMandatory > 0) {
@@ -103,7 +103,7 @@ bool Calculator::GetVectorExpressions(const Expression& input, List<Expression>&
   }
   targetDimNonMandatory = input.size() - 1;
   for (int i = 0; i < targetDimNonMandatory; i ++) {
-    output.AddOnTop(input[i + 1]);
+    output.addOnTop(input[i + 1]);
   }
   return true;
 }
@@ -312,7 +312,7 @@ void quasiDiffOp<coefficient>::GenerateBasisLieAlgebra(
         theReport.Report(report.str());
         report << tempQDO.toString(theFormat);
         theReport.Report(report.str());
-        theEltsConverted.AddOnTop(tempQDO);
+        theEltsConverted.addOnTop(tempQDO);
         quasiDiffOp::GaussianEliminationByRows(theEltsConverted, 0, &bufferMons);
         numTimesEliminationWasExecuted ++;
         if (!theEltsConverted.LastObject()->IsEqualToZero()) {
@@ -548,15 +548,15 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
       Vector<Rational> ei;
       ei.MakeEi(theSSalgebra.GetRank(), j);
       theGenerator.MakeGGenerator(ei, theSSalgebra);
-      theGeneratorsItry.AddOnTop(theGenerator);
+      theGeneratorsItry.addOnTop(theGenerator);
       ei.Minus();
       theGenerator.MakeGGenerator(ei, theSSalgebra);
-      theGeneratorsItry.AddOnTop(theGenerator);
+      theGeneratorsItry.addOnTop(theGenerator);
     }
   } else {
     for (int j = 0; j < theSSalgebra.GetNumGenerators(); j ++) {
       theGenerator.MakeGenerator(j, theSSalgebra);
-      theGeneratorsItry.AddOnTop(theGenerator);
+      theGeneratorsItry.addOnTop(theGenerator);
     }
   }
   theQDOs.SetSize(theGeneratorsItry.size);
@@ -1194,7 +1194,7 @@ bool Calculator::AppendOpandsReturnTrueIfOrderNonCanonical(
   }
   bool result = false;
   if (!input.IsListStartingWithAtom(theOp)) {
-    output.AddOnTop(input);
+    output.addOnTop(input);
   } else {
     for (int i = 1; i < input.size(); i ++) {
       if (this->AppendOpandsReturnTrueIfOrderNonCanonical(input[i], output, theOp)) {
@@ -1388,8 +1388,8 @@ bool Calculator::StandardIsDenotedBy(Calculator& theCommands, const Expression& 
   const Expression& theNotation = input[1];
   theCommands << "<br>Registering notation: globally, " << withNotation.toString() << " will be denoted by "
   << theNotation.toString();
-  theCommands.theObjectContainer.ExpressionNotation.AddOnTop(theNotation.toString());
-  theCommands.theObjectContainer.ExpressionWithNotation.AddOnTop(withNotation);
+  theCommands.theObjectContainer.ExpressionNotation.addOnTop(theNotation.toString());
+  theCommands.theObjectContainer.ExpressionWithNotation.addOnTop(withNotation);
   output = input;
   output.SetChildAtomValue(0, theCommands.opDefine());
   ////
@@ -1640,7 +1640,7 @@ bool Calculator::CollectOpandsAccumulate(
 ) {
   MacroRegisterFunctionWithName("Calculator::CollectOpandsAccumulate");
   if (!input.StartsWith(theOp)) {
-    outputOpands.AddOnTop(input);
+    outputOpands.addOnTop(input);
     return true;
   }
   for (int i = 1; i < input.size(); i ++) {
@@ -2122,7 +2122,7 @@ int Calculator::AddOperationNoRepetitionOrReturnIndexFirst(const std::string& th
 
 void Calculator::AddOperationBuiltInType(const std::string& theOpName) {
   this->AddOperationNoRepetitionAllowed(theOpName);
-  this->builtInTypes.AddOnTop(theOpName);
+  this->builtInTypes.addOnTop(theOpName);
 }
 
 void Calculator::AddOperationNoRepetitionAllowed(const std::string& theOpName) {
@@ -2214,13 +2214,13 @@ void Calculator::RegisterCalculatorFunction(Function& theFun, int indexOp) {
   handler.CheckConsisitency();
   if (theFun.options.flagIsCompositeHandler) {
     theFun.indexInOperationHandlers = handler.compositeHandlers.size;
-    handler.compositeHandlers.AddOnTop(theFun);
+    handler.compositeHandlers.addOnTop(theFun);
     if (handler.compositeHandlers.size <= 0) {
       global.fatal << "Composite handlers cannot be empty. " << global.fatal;
     }
   } else {
     theFun.indexInOperationHandlers = handler.handlers.size;
-    handler.handlers.AddOnTop(theFun);
+    handler.handlers.addOnTop(theFun);
     if (handler.handlers.size <= 0) {
       global.fatal << "Handlers cannot be empty. " << global.fatal;
     }
@@ -2769,7 +2769,7 @@ SemisimpleLieAlgebra& ObjectContainer::GetLieAlgebraCreateIfNotPresent(const Dyn
   }
   SemisimpleLieAlgebra& theLA = this->semisimpleLieAlgebras.GetValueCreateNoInit(input);
   if (needToInit) {
-    this->semisimpleLieAlgebraPointers.AddOnTop(&theLA);
+    this->semisimpleLieAlgebraPointers.addOnTop(&theLA);
     theLA.theWeyl.MakeFromDynkinType(input);
   }
   return theLA;
@@ -2898,7 +2898,7 @@ void ObjectContainer::reset() {
   this->theRationals.Clear();
   this->theCharsSSLieAlgFD.Clear();
   this->theDoubles.Clear();
-  this->theDoubles.AddOnTop(std::nan(""));
+  this->theDoubles.addOnTop(std::nan(""));
   this->theStrings.Clear();
   this->ExpressionNotation.Clear();
   this->ExpressionWithNotation.Clear();

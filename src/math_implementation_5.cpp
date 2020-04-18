@@ -98,26 +98,26 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::C
   //This perturbation breaks the outer automorphism invariance for all
   //simple Weyl group of simple Lie algebras.
   //This needs needs improvement for non-simple groups.
-  orbitRho.AddOnTop(vectorGeneratingFaithfulOrbit);
-  this->allElements.AddOnTop(currentElement);
+  orbitRho.addOnTop(vectorGeneratingFaithfulOrbit);
+  this->allElements.addOnTop(currentElement);
   Vector<Rational> currentRoot;
   for (int i = 0; i < this->allElements.size; i ++) {
     for (int j = 0; j < this->simpleRootsInner.size; j ++) {
       this->AmbientWeyl->ReflectBetaWRTAlpha(this->simpleRootsInner[j], orbitRho[i], false, currentRoot);
       if (!orbitRho.Contains(currentRoot)) {
-        orbitRho.AddOnTop(currentRoot);
+        orbitRho.addOnTop(currentRoot);
         currentElement = this->allElements[i];
         currentElement.MultiplyOnTheRightBySimpleRootInner(j);
-        this->allElements.AddOnTop(currentElement);
+        this->allElements.addOnTop(currentElement);
       }
     }
     for (int j = 1; j < this->ExternalAutomorphisms.size; j ++) {
       orbitRho[i].GetCoordsInBasiS(this->ExternalAutomorphisms[j], currentRoot);
       if (!orbitRho.Contains(currentRoot)) {
-        orbitRho.AddOnTop(currentRoot);
+        orbitRho.addOnTop(currentRoot);
         currentElement = this->allElements[i];
         currentElement.MultiplyOnTheRightByOuterAutomorphism(j);
-        this->allElements.AddOnTop(currentElement);
+        this->allElements.addOnTop(currentElement);
       }
     }
     if (UpperLimitNumElements > 0) {
@@ -164,7 +164,7 @@ void DrawOperations::drawCircleAtVectorBufferRational(
     theOperation[DrawOperations::fieldFrameIndex] = frameIndex;
   }
   //theOperation[DrawOperations::fieldPenStyle] = DrawOperations::fieldPenStyle;
-  this->theOperations.AddOnTop(theOperation);
+  this->theOperations.addOnTop(theOperation);
 }
 
 void DrawOperations::drawCircleAtVectorBufferDouble(
@@ -176,7 +176,7 @@ void DrawOperations::drawCircleAtVectorBufferDouble(
   theOperation[DrawOperations::fieldRadius] = radius;
   theOperation[DrawOperations::fieldColor] = color;
   //theOperation[DrawOperations::fieldPenStyle] = DrawOperations::fieldPenStyle;
-  this->theOperations.AddOnTop(theOperation);
+  this->theOperations.addOnTop(theOperation);
 }
 
 void DrawOperations::drawLineBetweenTwoVectorsBufferRational(
@@ -205,7 +205,7 @@ void DrawOperations::drawPath(
   if (lineWidth != 1.0) {
     theOperation[DrawOperations::fieldLineWidth] = lineWidth;
   }
-  this->theOperations.AddOnTop(theOperation);
+  this->theOperations.addOnTop(theOperation);
 }
 
 void DrawOperations::drawLineBetweenTwoVectorsBufferDouble(
@@ -222,7 +222,7 @@ void DrawOperations::drawLineBetweenTwoVectorsBufferDouble(
   if (lineWidth != 1.0) {
     theOperation[DrawOperations::fieldLineWidth] = lineWidth;
   }
-  this->theOperations.AddOnTop(theOperation);
+  this->theOperations.addOnTop(theOperation);
 }
 
 void DrawOperations::drawFilledShape(
@@ -240,7 +240,7 @@ void DrawOperations::drawFilledShape(
   if (lineWidth != 1.0) {
     theOperation[DrawOperations::fieldLineWidth] = lineWidth;
   }
-  this->theOperations.AddOnTop(theOperation);
+  this->theOperations.addOnTop(theOperation);
 }
 
 void DrawOperations::drawTextAtVectorBufferRational(
@@ -252,7 +252,7 @@ void DrawOperations::drawTextAtVectorBufferRational(
   theOperation[DrawOperations::fieldOperation] = DrawOperations::typeTextAtVector;
   theOperation[DrawOperations::fieldLocation] = input.GetVectorDouble();
   theOperation[DrawOperations::fieldText] = inputText;
-  this->theOperations.AddOnTop(theOperation);
+  this->theOperations.addOnTop(theOperation);
 }
 
 void DrawOperations::drawTextAtVectorBufferDouble(
@@ -265,7 +265,7 @@ void DrawOperations::drawTextAtVectorBufferDouble(
   theOperation[DrawOperations::fieldOperation] = DrawOperations::typeTextAtVector;
   theOperation[DrawOperations::fieldLocation] = input;
   theOperation[DrawOperations::fieldText] = inputText;
-  this->theOperations.AddOnTop(theOperation);
+  this->theOperations.addOnTop(theOperation);
 }
 
 void DrawingVariables::drawLineDirectly(
@@ -283,7 +283,7 @@ void DrawOperations::drawHighlightGroup(
   theOperation[DrawOperations::fieldLabels] = labels;
   theOperation[DrawOperations::fieldColor] = color;
   theOperation[DrawOperations::fieldRadius] = radius;
-  this->theOperations.AddOnTop(theOperation);
+  this->theOperations.addOnTop(theOperation);
 }
 
 void DrawOperations::drawLineBuffer(
@@ -299,7 +299,7 @@ void DrawOperations::drawLineBuffer(
   theOperation[DrawOperations::fieldPoints][0][1] = Y1;
   theOperation[DrawOperations::fieldPoints][1][0] = X2;
   theOperation[DrawOperations::fieldPoints][1][1] = Y2;
-  this->theOperations.AddOnTop(theOperation);
+  this->theOperations.addOnTop(theOperation);
 }
 
 void DrawOperations::drawTextBuffer(
@@ -314,7 +314,7 @@ void DrawOperations::drawTextBuffer(
   theOperation[DrawOperations::fieldLocation][0] = X1;
   theOperation[DrawOperations::fieldLocation][1] = Y1;
   theOperation[DrawOperations::fieldText] = inputText;
-  this->theOperations.AddOnTop(theOperation);
+  this->theOperations.addOnTop(theOperation);
 }
 
 int DrawingVariables::GetActualPenStyleFromFlagsAnd(int inputPenStyle) {
@@ -520,17 +520,17 @@ void SemisimpleLieAlgebra::CreateEmbeddingFromFDModuleHaving1dimWeightSpaces(Vec
   Explored.initializeFillInObject(this->theWeyl.RootSystem.size, false);
   int numExplored = 0;
   for (int i = 0; i < this->theWeyl.RootSystem.size; i ++) {
-    Vector<Rational>& current = this->theWeyl.RootSystem.TheObjects[i];
+    Vector<Rational>& current = this->theWeyl.RootSystem.theObjects[i];
     if (current.SumCoordinates() ==1 || current.SumCoordinates() == - 1) {
       numExplored++;
-      Explored.TheObjects[i] = true;
-      Matrix<Rational> & currentMat = this->EmbeddingsRootSpaces.TheObjects[i];
+      Explored.theObjects[i] = true;
+      Matrix<Rational> & currentMat = this->EmbeddingsRootSpaces.theObjects[i];
       currentMat.init(weightSupport.size, weightSupport.size);
       currentMat.makeZero();
       for (int j = 0; j<weightSupport.size; j ++) {
-        int indexTarget = weightSupport.GetIndex(current +weightSupport.TheObjects[j]);
+        int indexTarget = weightSupport.GetIndex(current +weightSupport.theObjects[j]);
         if (indexTarget != - 1) {
-          highestWeight = - 1+ this->GetLengthStringAlongAlphaThroughBeta(current, weightSupport.TheObjects[j], distanceToHW, weightSupport);
+          highestWeight = - 1+ this->GetLengthStringAlongAlphaThroughBeta(current, weightSupport.theObjects[j], distanceToHW, weightSupport);
           if (current.IsNegativeOrZero())
             currentMat.elements[indexTarget][j] =1;
           else
@@ -543,30 +543,30 @@ void SemisimpleLieAlgebra::CreateEmbeddingFromFDModuleHaving1dimWeightSpaces(Vec
   simpleBasis.MakeEiBasis(theDimension);
   while (numExplored< this->theWeyl.RootSystem.size) {
     for (int i = 0; i < this->theWeyl.RootSystem.size; i ++)
-      if (Explored.TheObjects[i])
+      if (Explored.theObjects[i])
         for (int j = 0; j < this->theWeyl.RootSystem.size; j ++)
-          if (Explored.TheObjects[j]) {
-            Vector<Rational> tempRoot = this->theWeyl.RootSystem.TheObjects[i] + this->theWeyl.RootSystem.TheObjects[j];
+          if (Explored.theObjects[j]) {
+            Vector<Rational> tempRoot = this->theWeyl.RootSystem.theObjects[i] + this->theWeyl.RootSystem.theObjects[j];
             if (this->theWeyl.IsARoot(tempRoot)) {
               int index = this->theWeyl.RootSystem.GetIndex(tempRoot);
-              if (!Explored.TheObjects[index]) {
-                Explored.TheObjects[index] = true;
+              if (!Explored.theObjects[index]) {
+                Explored.theObjects[index] = true;
                 numExplored++;
-                this->EmbeddingsRootSpaces.TheObjects[index] = this->EmbeddingsRootSpaces.TheObjects[i];
-                this->EmbeddingsRootSpaces.TheObjects[index].LieBracketWith(this->EmbeddingsRootSpaces.TheObjects[j]);
+                this->EmbeddingsRootSpaces.theObjects[index] = this->EmbeddingsRootSpaces.theObjects[i];
+                this->EmbeddingsRootSpaces.theObjects[index].LieBracketWith(this->EmbeddingsRootSpaces.theObjects[j]);
               }
             }
           }
   }
   this->EmbeddingsCartan.SetSize(theDimension);
   for (int i = 0; i < theDimension; i ++) {
-    Matrix<Rational> & current = this->EmbeddingsCartan.TheObjects[i];
+    Matrix<Rational> & current = this->EmbeddingsCartan.theObjects[i];
     current.init(weightSupport.size, weightSupport.size);
     current.makeZero();
     Vector<Rational> tempRoot;
     tempRoot.MakeEi(theDimension, i);
     for (int j = 0; j<weightSupport.size; j ++)
-      current.elements[j][j] = this->theWeyl.RootScalarCartanRoot(tempRoot, weightSupport.TheObjects[j]);
+      current.elements[j][j] = this->theWeyl.RootScalarCartanRoot(tempRoot, weightSupport.theObjects[j]);
   }*/
 }
 
@@ -1897,7 +1897,7 @@ RationalFunction RationalFunction::scaleNormalizeIndex(
     current.GetDenominator(currentDenominator);
     scale = currentNumerator.scaleNormalizeLeadingMonomial();
     scale /= currentDenominator.scaleNormalizeLeadingMonomial();
-    scales.AddOnTop(scale);
+    scales.addOnTop(scale);
   }
   LargeIntegerUnsigned numeratorContentGreatestCommonDivisor = scales[0].GetNumerator().value;
   LargeIntegerUnsigned denominatorContentLeastCommonMultiple = scales[0].GetDenominator();
@@ -2051,8 +2051,8 @@ void ElementSemisimpleLieAlgebra<coefficient>::GetBasisFromSpanOfElements(
   }
 //  int theRank = 0; int numRoots = 0;
 //  if (theElements.size > 0)
-//  { theRank = theElements.TheObjects[0].Hcomponent.size;
-//    numRoots = theElements.TheObjects[0].coeffsRootSpaces.size;
+//  { theRank = theElements.theObjects[0].Hcomponent.size;
+//    numRoots = theElements.theObjects[0].coeffsRootSpaces.size;
 //  }
   theRootForm.ChooseABasis();
   outputTheBasis.SetSize(theRootForm.size);
@@ -2183,8 +2183,8 @@ std::string slTwoInSlN::ElementModuleIndexToString(int input, bool useHtml) {
     endMath = "$";
     newLine = "\n\n\n";
   }
-  Matrix<Rational>& currentHW = this->theHighestWeightVectors.TheObjects[input];
-  int currentEtaHw = this->theGmodKModules.TheObjects[input].size - 1;
+  Matrix<Rational>& currentHW = this->theHighestWeightVectors.theObjects[input];
+  int currentEtaHw = this->theGmodKModules.theObjects[input].size - 1;
   //currentEtaHw-= currentEtaHw/2;
   int firstNonZeroRow = - 1, firstNonZeroColumn = - 1;
   bool found = false;
@@ -2304,17 +2304,17 @@ void slTwoInSlN::ExtractHighestWeightVectorsFromVector(
       if (!tempMat.IsEqualToZero()) {
         tempMat.FindFirstNonZeroElementSearchEntireRow(tempRat);
         tempMat /= tempRat;
-        outputTheHWVectors.AddOnTop(tempMat);
+        outputTheHWVectors.addOnTop(tempMat);
       }
     }
     global.fatal << "Extract highest vector not fully implemented yet. " << global.fatal;
     component /= theCoeff;
-    outputDecompositionOfInput.AddOnTop(component);
+    outputDecompositionOfInput.addOnTop(component);
     remainder -= component;
   }
   //remainder.makeZero();
 //  for (int i = 0; i <outputVectors.size; i ++)
-//    remainder.Add(outputVectors.TheObjects[i]);
+//    remainder.Add(outputVectors.theObjects[i]);
 
 }
 
@@ -2421,14 +2421,14 @@ std::string slTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
           tempMat = theHwCandidatesBeforeProjection[k];
           tempMat.MultiplyOnTheLeft(this->theProjectors[l]);
           if (!tempMat.IsEqualToZero()) {
-            theHwCandidatesProjected.AddOnTop(tempMat);
+            theHwCandidatesProjected.addOnTop(tempMat);
           }
         }
       }
       for (int k = 0; k < theHwCandidatesProjected.size; k ++) {
         if (this->GetModuleIndexFromHighestWeightVector(theHwCandidatesProjected[k]) == - 1) {
           Matrix<Rational>& currentHighest = theHwCandidatesProjected[k];
-          this->theHighestWeightVectors.AddOnTop(currentHighest);
+          this->theHighestWeightVectors.addOnTop(currentHighest);
           this->theGmodKModules.ExpandOnTop(1);
           List<Matrix<Rational> >& currentMod = *this->theGmodKModules.LastObject();
           currentMod.size = 0;
@@ -2437,7 +2437,7 @@ std::string slTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
             !tempMat.IsEqualToZero();
             Matrix<Rational>::LieBracket(this->theF, tempMat, tempMat)
           ) {
-            currentMod.AddOnTop(tempMat);
+            currentMod.addOnTop(tempMat);
           }
         }
       }

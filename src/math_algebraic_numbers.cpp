@@ -262,10 +262,10 @@ bool AlgebraicClosureRationals::ChooseGeneratingElement(
     this->GeneratingElementTensorForm.GetMatrix(this->GeneratingElementMatForm, DimensionOverRationals);
     this->theGeneratingElementPowersBasis.SetSize(0);
     currentVect.MakeEi(DimensionOverRationals, 0);
-    this->theGeneratingElementPowersBasis.AddOnTop(currentVect);
+    this->theGeneratingElementPowersBasis.addOnTop(currentVect);
     do {
       this->GeneratingElementMatForm.ActOnVectorColumn(currentVect);
-      this->theGeneratingElementPowersBasis.AddOnTop(currentVect);
+      this->theGeneratingElementPowersBasis.addOnTop(currentVect);
       if (
         this->theGeneratingElementPowersBasis.size >
         this->theGeneratingElementPowersBasis.GetRankOfSpanOfElements()
@@ -1141,7 +1141,7 @@ bool AlgebraicNumber::AssignRationalQuadraticRadical(
   List<LargeInteger> theFactors;
   Rational absoluteInput = inpuT;
   if (absoluteInput < 0) {
-    theFactors.AddOnTop(- 1);
+    theFactors.addOnTop(- 1);
     absoluteInput *= - 1;
   }
   LargeInteger squareFreeInput = absoluteInput.GetNumerator();
@@ -1164,7 +1164,7 @@ bool AlgebraicNumber::AssignRationalQuadraticRadical(
     squareRootRationalPart *= primeFactors[i];
   }
   if (!squareFreeInput.IsEqualToOne()) {
-    theFactors.AddOnTop(squareFreeInput);
+    theFactors.addOnTop(squareFreeInput);
   }
   if (theFactors.size == 0) {
     this->AssignRational(squareRootRationalPart, inputOwner);
@@ -1301,7 +1301,7 @@ AlgebraicNumber AlgebraicNumber::scaleNormalizeIndex(
         }
       }
     }
-    allCoefficients.AddListOnTop(output[i].element.coefficients);
+    allCoefficients.addListOnTop(output[i].element.coefficients);
   }
   Rational scale = Rational::scaleNormalizeIndex(allCoefficients, indexNonZeroRational);
   for (int i = 0; i < output.size; i ++){

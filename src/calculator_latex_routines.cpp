@@ -29,10 +29,10 @@ void LaTeXCrawler::ComputeAllowedFolders() {
     return;
   }
   List<std::string> allowedFoldersVirtual;
-  allowedFoldersVirtual.AddOnTop("freecalc/");
-  allowedFoldersVirtual.AddOnTop("LaTeX-materials/");
-  allowedFoldersVirtual.AddOnTop("/freecalc/");
-  allowedFoldersVirtual.AddOnTop("/LaTeX-materials/");
+  allowedFoldersVirtual.addOnTop("freecalc/");
+  allowedFoldersVirtual.addOnTop("LaTeX-materials/");
+  allowedFoldersVirtual.addOnTop("/freecalc/");
+  allowedFoldersVirtual.addOnTop("/LaTeX-materials/");
   this->baseFoldersCrawlableFilesPhysical.SetSize(allowedFoldersVirtual.size);
   for (int i = 0; i < this->baseFoldersCrawlableFilesPhysical.size; i ++) {
     FileOperations::GetPhysicalFileNameFromVirtual(
@@ -57,7 +57,7 @@ void LaTeXCrawler::AddSlidesOnTop(List<std::string>& inputSlides) {
   for (int i = 0; i < inputSlides.size; i ++) {
     LaTeXCrawler::FileWithOption file;
     file.fileName = inputSlides[i];
-    this->slideFileNamesVirtualWithPatH.AddOnTop(file);
+    this->slideFileNamesVirtualWithPatH.addOnTop(file);
   }
 }
 
@@ -130,7 +130,7 @@ void LaTeXCrawler::BuildFreecalC() {
     }
     if (this->flagBuildSingleSlides && isLecturE) {
       if (StringRoutines::StringBeginsWith(StringRoutines::StringTrimWhiteSpace(buffer), "\\input", nullptr)) {
-        this->slideTexInputCommands.AddOnTop(StringRoutines::StringTrimWhiteSpace(buffer));
+        this->slideTexInputCommands.addOnTop(StringRoutines::StringTrimWhiteSpace(buffer));
       }
     }
     if (!isInput) {
@@ -161,7 +161,7 @@ void LaTeXCrawler::BuildFreecalC() {
       }
     }
     if (lectureNumber.size() > 0) {
-      this->theLectureNumbers.AddOnTop(lectureNumber.substr(1, lectureNumber.size() - 1));
+      this->theLectureNumbers.addOnTop(lectureNumber.substr(1, lectureNumber.size() - 1));
     } else {
       this->displayResult << "Failed to extract lecture/homework number from line: " << buffer;
       return;
@@ -184,7 +184,7 @@ void LaTeXCrawler::BuildFreecalC() {
       << "(<-has space bar in the end). The name itself should not contain the characters . / or \\. "
       << "I am assigning an automatic file name. <br>";
     }
-    theLectureDesiredNames.AddOnTop(desiredName);
+    theLectureDesiredNames.addOnTop(desiredName);
   }
   reportStream << " done. Extracted: " << theLectureNumbers.size << " homework/lecture numbers. Preparing Homework/Lecture content ... ";
   theReport.Report(reportStream.str());
@@ -700,10 +700,10 @@ std::string LaTeXCrawler::AdjustDisplayTitle(const std::string& input, bool isHo
   MacroRegisterFunctionWithName("LaTeXcrawler::AdjustDisplayTitle");
   std::string result = input;
   List<std::string> ignoredTags;
-  ignoredTags.AddOnTop("actualExamProblem");
-  ignoredTags.AddOnTop("lectureTag");
-  ignoredTags.AddOnTop("advancedTopic");
-  ignoredTags.AddOnTop("reviewProblem");
+  ignoredTags.addOnTop("actualExamProblem");
+  ignoredTags.addOnTop("lectureTag");
+  ignoredTags.addOnTop("advancedTopic");
+  ignoredTags.addOnTop("reviewProblem");
   for (int i = 0; i < ignoredTags.size; i ++) {
     std::string closeTag = "</" + ignoredTags[i] + ">";
     std::string openTag  = "<"  + ignoredTags[i] + ">";
@@ -950,7 +950,7 @@ bool LaTeXCrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
           file.isSolution = true;
         }
       }
-      this->slideFileNamesVirtualWithPatH.AddOnTop(file);
+      this->slideFileNamesVirtualWithPatH.addOnTop(file);
     }
     this->desiredPresentationTitle = currentElt.title;
     this->flagForceSlideRebuild = true;

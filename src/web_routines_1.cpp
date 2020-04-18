@@ -319,7 +319,7 @@ void WebCrawler::PingCalculatorStatus() {
       continue;
     }
     std::string readString;
-    readString.assign(buffer.TheObjects, static_cast<unsigned>(this->lastNumBytesRead));
+    readString.assign(buffer.theObjects, static_cast<unsigned>(this->lastNumBytesRead));
     reportStream << "Wrote " << numBytesWritten  << ", read "
     << this->lastNumBytesRead << " bytes: " << readString << ". ";
     this->lastTransaction = reportStream.str();

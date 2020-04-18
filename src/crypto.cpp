@@ -388,17 +388,17 @@ bool Crypto::ConvertBase64ToBitStream(
     theStack += sixBitDigit;
     numBitsInStack += 6;
     if (numBitsInStack == 12) {
-      output.AddOnTop(static_cast<unsigned char>(theStack / 16));
+      output.addOnTop(static_cast<unsigned char>(theStack / 16));
       numBitsInStack = 4;
       theStack = theStack % 16;
     }
     if (numBitsInStack == 8) {
-      output.AddOnTop(static_cast<unsigned char>(theStack));
+      output.addOnTop(static_cast<unsigned char>(theStack));
       numBitsInStack = 0;
       theStack = 0;
     }
     if (numBitsInStack == 10) {
-      output.AddOnTop(static_cast<unsigned char>(theStack / 4));
+      output.addOnTop(static_cast<unsigned char>(theStack / 4));
       numBitsInStack = 2;
       theStack = theStack % 4;
     }
@@ -695,14 +695,14 @@ void Crypto::AppendDoubleSha256Check(const std::string& input, std::string& outp
 std::string Crypto::ConvertListCharsToHex(
   const List<char>& input, int byteWidthLineBreakZeroForNone, bool useHtml
 ) {
-  std::string inputString(reinterpret_cast<char*>(input.TheObjects), static_cast<unsigned>(input.size));
+  std::string inputString(reinterpret_cast<char*>(input.theObjects), static_cast<unsigned>(input.size));
   return Crypto::ConvertStringToHex(inputString, byteWidthLineBreakZeroForNone, useHtml);
 }
 
 bool Crypto::ConvertListCharsToHex(
   const List<char>& input, std::string& output, int byteWidthLineBreakZeroForNone, bool useHtml
 ) {
-  std::string inputString(reinterpret_cast<char*>(input.TheObjects), static_cast<unsigned>(input.size));
+  std::string inputString(reinterpret_cast<char*>(input.theObjects), static_cast<unsigned>(input.size));
   return Crypto::ConvertStringToHex(inputString, output, byteWidthLineBreakZeroForNone, useHtml);
 }
 
@@ -713,14 +713,14 @@ std::string Crypto::ConvertListUnsignedCharsToHex(const List<unsigned char>& inp
 std::string Crypto::ConvertListUnsignedCharsToHexFormat(
   const List<unsigned char>& input, int byteWidthLineBreakZeroForNone, bool useHtml
 ) {
-  std::string inputString(reinterpret_cast<char*>(input.TheObjects), static_cast<unsigned>(input.size));
+  std::string inputString(reinterpret_cast<char*>(input.theObjects), static_cast<unsigned>(input.size));
   return Crypto::ConvertStringToHex(inputString, byteWidthLineBreakZeroForNone, useHtml);
 }
 
 bool Crypto::ConvertListUnsignedCharsToHexFormat(
   const List<unsigned char>& input, std::string& output, int byteWidthLineBreakZeroForNone, bool useHtml
 ) {
-  std::string inputString(reinterpret_cast<const char*>(input.TheObjects), static_cast<unsigned>(input.size));
+  std::string inputString(reinterpret_cast<const char*>(input.theObjects), static_cast<unsigned>(input.size));
   return Crypto::ConvertStringToHex(inputString, output, byteWidthLineBreakZeroForNone, useHtml);
 }
 
@@ -771,30 +771,30 @@ void Crypto::ConvertUint64toBigendianStringAppendResult(uint64_t input, std::str
 void Crypto::ConvertUint64toBigendianListUnsignedCharAppendResult(uint64_t input, List<unsigned char>& outputAppend) {
   //the following code should work on both big- and little-endian systems:
   outputAppend.SetExpectedSize(outputAppend.size + 8);
-  outputAppend.AddOnTop(static_cast<unsigned char>(input / 72057594037927936)      );
-  outputAppend.AddOnTop(static_cast<unsigned char>((input / 281474976710656) % 256));
-  outputAppend.AddOnTop(static_cast<unsigned char>((input / 1099511627776) % 256)  );
-  outputAppend.AddOnTop(static_cast<unsigned char>((input / 4294967296) % 256)     );
-  outputAppend.AddOnTop(static_cast<unsigned char>((input / 16777216) % 256)       );
-  outputAppend.AddOnTop(static_cast<unsigned char>((input / 65536) % 256)          );
-  outputAppend.AddOnTop(static_cast<unsigned char>((input / 256) % 256)            );
-  outputAppend.AddOnTop(static_cast<unsigned char>( input % 256)                   );
+  outputAppend.addOnTop(static_cast<unsigned char>(input / 72057594037927936)      );
+  outputAppend.addOnTop(static_cast<unsigned char>((input / 281474976710656) % 256));
+  outputAppend.addOnTop(static_cast<unsigned char>((input / 1099511627776) % 256)  );
+  outputAppend.addOnTop(static_cast<unsigned char>((input / 4294967296) % 256)     );
+  outputAppend.addOnTop(static_cast<unsigned char>((input / 16777216) % 256)       );
+  outputAppend.addOnTop(static_cast<unsigned char>((input / 65536) % 256)          );
+  outputAppend.addOnTop(static_cast<unsigned char>((input / 256) % 256)            );
+  outputAppend.addOnTop(static_cast<unsigned char>( input % 256)                   );
 }
 
 void Crypto::ConvertUint128toBigendianListUnsignedCharAppendResult(uint64_t input, List<unsigned char>& outputAppend) {
   //the following code should work on both big- and little-endian systems:
   outputAppend.SetExpectedSize(outputAppend.size + 16);
   for (int i = 0; i < 8; i ++) {
-    outputAppend.AddOnTop(0);
+    outputAppend.addOnTop(0);
   }
-  outputAppend.AddOnTop(static_cast<unsigned char>(input / 72057594037927936)      );
-  outputAppend.AddOnTop(static_cast<unsigned char>((input / 281474976710656) % 256));
-  outputAppend.AddOnTop(static_cast<unsigned char>((input / 1099511627776) % 256)  );
-  outputAppend.AddOnTop(static_cast<unsigned char>((input / 4294967296) % 256)     );
-  outputAppend.AddOnTop(static_cast<unsigned char>((input / 16777216) % 256)       );
-  outputAppend.AddOnTop(static_cast<unsigned char>((input / 65536) % 256)          );
-  outputAppend.AddOnTop(static_cast<unsigned char>((input / 256) % 256)            );
-  outputAppend.AddOnTop(static_cast<unsigned char>( input % 256)                   );
+  outputAppend.addOnTop(static_cast<unsigned char>(input / 72057594037927936)      );
+  outputAppend.addOnTop(static_cast<unsigned char>((input / 281474976710656) % 256));
+  outputAppend.addOnTop(static_cast<unsigned char>((input / 1099511627776) % 256)  );
+  outputAppend.addOnTop(static_cast<unsigned char>((input / 4294967296) % 256)     );
+  outputAppend.addOnTop(static_cast<unsigned char>((input / 16777216) % 256)       );
+  outputAppend.addOnTop(static_cast<unsigned char>((input / 65536) % 256)          );
+  outputAppend.addOnTop(static_cast<unsigned char>((input / 256) % 256)            );
+  outputAppend.addOnTop(static_cast<unsigned char>( input % 256)                   );
 }
 
 void Crypto::ConvertStringToListUInt32BigendianZeroPad(const std::string& input, List<uint32_t>& output) {
@@ -866,7 +866,7 @@ void Crypto::computeSha1(const std::string& inputString, List<uint32_t>& output)
     convertorToUint32[1] = static_cast<unsigned char>(inputStringPreprocessed[i * 4 + 1]);
     convertorToUint32[2] = static_cast<unsigned char>(inputStringPreprocessed[i * 4 + 2]);
     convertorToUint32[3] = static_cast<unsigned char>(inputStringPreprocessed[i * 4 + 3]);
-    inputStringUint32.AddOnTop(Crypto::GetUInt32FromCharBigendian(convertorToUint32));
+    inputStringUint32.addOnTop(Crypto::GetUInt32FromCharBigendian(convertorToUint32));
   }
   List<uint32_t> currentChunk;
   currentChunk.SetSize(80);
@@ -1179,7 +1179,7 @@ void Crypto::computeSha256(const std::string& input, std::string& output) {
   List<unsigned char> inputList, outputList;
   inputList = input;
   computeSha256(inputList, outputList);
-  output.assign(reinterpret_cast<char*>(outputList.TheObjects), static_cast<unsigned>(outputList.size));
+  output.assign(reinterpret_cast<char*>(outputList.theObjects), static_cast<unsigned>(outputList.size));
 }
 
 void Crypto::computeSha256(const List<unsigned char>& input, List<unsigned char>& output) {
@@ -1221,16 +1221,16 @@ void Crypto::computeSha2xx(const List<unsigned char>& input, List<uint32_t>& out
   Crypto::initSha256();
   uint64_t messageLength = static_cast<unsigned>(input.size) * 8;//*sizeof(char);
   List<unsigned char> inputPreprocessed = input;
-  inputPreprocessed.AddOnTop(0x80);
+  inputPreprocessed.addOnTop(0x80);
   unsigned numbytesMod64 = inputPreprocessed.size % 64;
   if (numbytesMod64 > 56) {
     for (unsigned i = numbytesMod64; i < 64; i ++) {
-      inputPreprocessed.AddOnTop(0);
+      inputPreprocessed.addOnTop(0);
     }
     numbytesMod64 = 0;
   }
   for (unsigned i = numbytesMod64; i < 56; i ++) {
-    inputPreprocessed.AddOnTop(0);
+    inputPreprocessed.addOnTop(0);
   }
   Crypto::ConvertUint64toBigendianListUnsignedCharAppendResult(messageLength, inputPreprocessed);
 ////////////////////////
@@ -1249,7 +1249,7 @@ void Crypto::computeSha2xx(const List<unsigned char>& input, List<uint32_t>& out
     convertorToUint32[1] = inputPreprocessed[i * 4 + 1];
     convertorToUint32[2] = inputPreprocessed[i * 4 + 2];
     convertorToUint32[3] = inputPreprocessed[i * 4 + 3];
-    inputStringUint32.AddOnTop(Crypto::GetUInt32FromCharBigendian(convertorToUint32));
+    inputStringUint32.addOnTop(Crypto::GetUInt32FromCharBigendian(convertorToUint32));
   }
   List<uint32_t> currentChunk;
   currentChunk.SetSize(64);
@@ -1352,16 +1352,16 @@ void Crypto::computeSha512(const List<unsigned char>& input, List<uint64_t>& out
   Crypto::initSha512();
   uint64_t messageBitLength = static_cast<unsigned>(input.size) * 8;
   List<unsigned char> inputPreprocessed = input;
-  inputPreprocessed.AddOnTop(0x80);
+  inputPreprocessed.addOnTop(0x80);
   unsigned numbytesMod128 = inputPreprocessed.size % 128;
   if (numbytesMod128 > 112) {
     for (unsigned i = numbytesMod128; i < 128; i ++) {
-      inputPreprocessed.AddOnTop(0);
+      inputPreprocessed.addOnTop(0);
     }
     numbytesMod128 = 0;
   }
   for (unsigned i = numbytesMod128; i < 112; i ++) {
-    inputPreprocessed.AddOnTop(0);
+    inputPreprocessed.addOnTop(0);
   }
   Crypto::ConvertUint128toBigendianListUnsignedCharAppendResult(messageBitLength, inputPreprocessed);
   List<uint64_t> inputStringUint64;
@@ -1373,7 +1373,7 @@ void Crypto::computeSha512(const List<unsigned char>& input, List<uint64_t>& out
       current += inputPreprocessed[i];
       i ++;
     }
-    inputStringUint64.AddOnTop(current);
+    inputStringUint64.addOnTop(current);
   }
   int numberOfRounds = 80;
   List<uint64_t> currentChunk;
@@ -1513,7 +1513,7 @@ bool Crypto::LoadOneKnownCertificate(
           if (!currentCert.LoadFromJSON(theKeys.theList[i], commentsOnFailure, commentsGeneral)) {
             return false;
           }
-          Crypto::knownCertificates.AddOnTop(currentCert);
+          Crypto::knownCertificates.addOnTop(currentCert);
         }
       }
     }
@@ -1786,7 +1786,7 @@ bool Crypto::External::decryptAES_CBC_256_string(
   if (!this->decryptAES_CBC_256(inputKey, inputCipherText, outputList, commentsOnFailure)) {
     return false;
   }
-  output.assign(reinterpret_cast<char *>(outputList.TheObjects), static_cast<unsigned>(outputList.size));
+  output.assign(reinterpret_cast<char *>(outputList.theObjects), static_cast<unsigned>(outputList.size));
   return true;
 }
 
@@ -1808,7 +1808,7 @@ bool Crypto::External::encryptAES_CBC_256_string(
   if (!this->encryptAES_CBC_256(inputKey, inputPlainText, outputList, commentsOnFailure)) {
     return false;
   }
-  output.assign(reinterpret_cast<char*>(outputList.TheObjects), static_cast<unsigned>(outputList.size));
+  output.assign(reinterpret_cast<char*>(outputList.theObjects), static_cast<unsigned>(outputList.size));
   return true;
 
 }

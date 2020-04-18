@@ -237,7 +237,7 @@ void ProgressReport::init() {
   }
   this->flagInitialized = true;
   this->currentLevel = global.progressReportStrings[this->threadIndex].size;
-  global.progressReportStrings[this->threadIndex].AddOnTop(std::string(""));
+  global.progressReportStrings[this->threadIndex].addOnTop(std::string(""));
   this->ticks = 0;
   this->ticksPerReport = 1;
   this->reportType = GlobalVariables::Response::ReportType::general;
@@ -808,18 +808,18 @@ bool FileOperations::GetFolderFileNamesUnsecure(
     fileOrFolder != nullptr;
     fileOrFolder = readdir(theDirectory)
   ) {
-    outputFileNamesNoPath.AddOnTop(fileOrFolder->d_name);
+    outputFileNamesNoPath.addOnTop(fileOrFolder->d_name);
     if (outputFileTypesWithDot != nullptr) {
       fileNameNoPath = fileOrFolder->d_name;
       fullName = theFolderName + fileNameNoPath;
       if (FileOperations::IsFolderUnsecure(fullName)) {
-        outputFileTypesWithDot->AddOnTop(".d");
+        outputFileTypesWithDot->addOnTop(".d");
       } else {
         theExtension = FileOperations::GetFileExtensionWithDot(fileNameNoPath);
         if (theExtension == ".d") {
           theExtension = "";
         }
-        outputFileTypesWithDot->AddOnTop(theExtension);
+        outputFileTypesWithDot->addOnTop(theExtension);
       }
     }
   }
@@ -1732,11 +1732,11 @@ bool WeylGroupData::HasStronglyPerpendicularDecompositionWRT(
          theNewSet.size = 0;
          for (int i = indexFirstNonZeroRoot; i < theSet.size; i ++) {
            if (this->IsStronglyPerpendicularTo(currentRoot, theSet[i])) {
-             theNewSet.AddOnTop(theSet[i]);
+             theNewSet.addOnTop(theSet[i]);
            }
          }
-         outputCoeffs.AddOnTop(tempRat);
-         output.AddOnTop(currentRoot);
+         outputCoeffs.addOnTop(tempRat);
+         output.addOnTop(currentRoot);
          tempRoot = input - currentRoot * tempRat;
          if (this->HasStronglyPerpendicularDecompositionWRT(
           tempRoot, UpperBoundNumBetas, theNewSet, output, outputCoeffs, IntegralCoefficientsOnly
@@ -1960,9 +1960,9 @@ void StringRoutines::Differ::PushCommonString(int indexLeft, int indexRight) {
   if (this->currentCommonStringLength == 0) {
     return;
   }
-  this->commonStringSizesReverseOrder.AddOnTop(this->currentCommonStringLength);
-  this->commonStringsLeftStartsReverseOrder.AddOnTop(indexLeft - 1);
-  this->commonStringsRightStartsReverseOrder.AddOnTop(indexRight - 1);
+  this->commonStringSizesReverseOrder.addOnTop(this->currentCommonStringLength);
+  this->commonStringsLeftStartsReverseOrder.addOnTop(indexLeft - 1);
+  this->commonStringsRightStartsReverseOrder.addOnTop(indexRight - 1);
   this->currentCommonStringLength = 0;
 }
 
@@ -2014,10 +2014,10 @@ void StringRoutines::Differ::ExtractDifferences() {
   this->ExtractResult(this->commonStringsLeftStartsReverseOrder, this->left, this->leftResult);
   this->ExtractResult(this->commonStringsRightStartsReverseOrder, this->right, this->rightResult);
   while (this->leftResult.size < this->rightResult.size) {
-    this->leftResult.AddOnTop("");
+    this->leftResult.addOnTop("");
   }
   while (this->rightResult.size < this->leftResult.size) {
-    this->rightResult.AddOnTop("");
+    this->rightResult.addOnTop("");
   }
 }
 
@@ -2034,16 +2034,16 @@ void StringRoutines::Differ::ExtractResult(
       static_cast<unsigned>(previousEnd),
       static_cast<unsigned>(stringStart) - previousEnd
     );
-    output.AddOnTop(nonCommon);
+    output.addOnTop(nonCommon);
     std::string common = input.substr(
       static_cast<unsigned>(stringStart),
       static_cast<unsigned>(stringSize)
     );
     previousEnd = static_cast<unsigned>(stringStart + stringSize);
-    output.AddOnTop(common);
+    output.addOnTop(common);
   }
   if (previousEnd < input.size()) {
-    output.AddOnTop(input.substr(previousEnd));
+    output.addOnTop(input.substr(previousEnd));
   }
 }
 
@@ -2098,7 +2098,7 @@ void StringRoutines::StringSplitExcludeDelimiter(
   const std::string& inputString, char delimiter, List<std::string>& output
 ) {
   List<char> tempList;
-  tempList.AddOnTop(delimiter);
+  tempList.addOnTop(delimiter);
   StringRoutines::StringSplitExcludeDelimiters(inputString, tempList, output);
 }
 
@@ -2183,13 +2183,13 @@ void StringRoutines::StringTrimWhiteSpace(const std::string& inputString, std::s
 void StringRoutines::StringSplitDefaultDelimiters(const std::string& inputString, List<std::string>& output) {
   MacroRegisterFunctionWithName("StringRoutines::StringSplitDefaultDelimiters");
   List<char> delimiters;
-  delimiters.AddOnTop(' ');
-  delimiters.AddOnTop('\r');
-  delimiters.AddOnTop('\n');
-  delimiters.AddOnTop('\t');
-  delimiters.AddOnTop(',');
-  delimiters.AddOnTop(';');
-  delimiters.AddOnTop(static_cast<char>(160)); //<-&nbsp
+  delimiters.addOnTop(' ');
+  delimiters.addOnTop('\r');
+  delimiters.addOnTop('\n');
+  delimiters.addOnTop('\t');
+  delimiters.addOnTop(',');
+  delimiters.addOnTop(';');
+  delimiters.addOnTop(static_cast<char>(160)); //<-&nbsp
   StringRoutines::StringSplitExcludeDelimiters(inputString, delimiters, output);
 }
 
@@ -2202,7 +2202,7 @@ void StringRoutines::StringSplitExcludeDelimiters(
   for (unsigned i = 0; i < inputString.size(); i ++) {
     if (delimiters.Contains(inputString[i])) {
       if (reader != "") {
-        output.AddOnTop(reader);
+        output.addOnTop(reader);
         reader = "";
       }
     } else {
@@ -2210,7 +2210,7 @@ void StringRoutines::StringSplitExcludeDelimiters(
     }
   }
   if (reader != "") {
-    output.AddOnTop(reader);
+    output.addOnTop(reader);
   }
 }
 
@@ -2860,8 +2860,8 @@ bool PartFraction::reduceOnceGeneralMethodNoOSBasis(
     if (currentIndex == this->LastDistinguishedIndex) {
       IndexInLinRelationOfLastGainingMultiplicityIndex = i;
     }
-    tempRoot = owner.startingVectors[currentIndex] * this->TheObjects[currentIndex].GetLargestElongation();
-    tempRoots.AddOnTop(tempRoot);
+    tempRoot = owner.startingVectors[currentIndex] * this->theObjects[currentIndex].GetLargestElongation();
+    tempRoots.addOnTop(tempRoot);
     bool ShouldDecompose;
     ShouldDecompose = tempRoots.GetLinearDependence(tempMat);
     if (ShouldDecompose && this->LastDistinguishedIndex != - 1) {
@@ -2901,8 +2901,8 @@ bool PartFraction::ReduceOnceGeneralMethod(
       IndexInLinRelationOfLastGainingMultiplicityIndex = i;
     }
     tempRoot = owner.startingVectors[currentIndex];
-    tempRoot *= (this->TheObjects[currentIndex].GetLargestElongation());
-    bufferVectors.AddOnTop(tempRoot);
+    tempRoot *= (this->theObjects[currentIndex].GetLargestElongation());
+    bufferVectors.addOnTop(tempRoot);
     bool ShouldDecompose;
     ShouldDecompose = bufferVectors.GetLinearDependence(tempMat);
     if (ShouldDecompose && (
@@ -2987,7 +2987,7 @@ void PartFraction::ComputeOneCheckSuM(PartFractions& owner, Rational& output, in
   Vector<Rational> CheckSumRoot = oneFracWithMultiplicitiesAndElongations::GetCheckSumRoot(owner.AmbientDimension);
   Rational tempRat;
   for (int i = 0; i < this->IndicesNonZeroMults.size; i ++) {
-    this->TheObjects[this->IndicesNonZeroMults[i]].ComputeOneCheckSum(
+    this->theObjects[this->IndicesNonZeroMults[i]].ComputeOneCheckSum(
       tempRat, owner.startingVectors[this->IndicesNonZeroMults[i]], theDimension
     );
     output.MultiplyBy(tempRat);
@@ -3001,7 +3001,7 @@ std::string PartFraction::toString(
   std::string tempS, stringPoly;
   NumLinesUsed = 0;
   for (int i = 0; i < this->size; i ++) {
-    this->TheObjects[i].toString();
+    this->theObjects[i].toString();
     out << tempS;
   }
   tempS = out.str();
@@ -3032,7 +3032,7 @@ bool PartFraction::rootIsInFractionCone(PartFractions& owner, Vector<Rational>* 
   Vectors<Rational> tempRoots;
   for (int i = 0; i < this->IndicesNonZeroMults.size; i ++) {
     int tempI = this->IndicesNonZeroMults[i];
-    tempRoots.AddOnTop(owner.startingVectors[tempI]);
+    tempRoots.addOnTop(owner.startingVectors[tempI]);
   }
   tempCone.CreateFromVertices(tempRoots);
   return !this->IsIrrelevant;
@@ -3048,8 +3048,8 @@ void PartFraction::PrepareFraction(
   Polynomial<LargeInteger>& outputCommonCoeff
 ) {
   output.AssignNoIndicesNonZeroMults(*this);
-  int powerDropA = this->TheObjects[indexA].Multiplicities[0];
-  int powerDropB = this->TheObjects[indexB].Multiplicities[0];
+  int powerDropA = this->theObjects[indexA].Multiplicities[0];
+  int powerDropB = this->theObjects[indexB].Multiplicities[0];
   if (indexAisNullified) {
     powerDropB = 0;
   } else {
@@ -3070,7 +3070,7 @@ int PartFraction::GetNumProportionalVectorsClassicalRootSystems(PartFractions& o
     int tempI = owner.IndicesRedundantShortRoots.elements[i];
     int tempI2 = owner.getIndexDoubleOfARoot(owner.startingVectors[tempI]);
     if (tempI2 != - 1) {
-      if (this->TheObjects[tempI2].Multiplicities.size > 0) {
+      if (this->theObjects[tempI2].Multiplicities.size > 0) {
         result ++;
       }
     }
@@ -3142,7 +3142,7 @@ bool PartFraction::DecomposeFromLinRelation(
   theGreatestElongations.size = 0;
   GainingMultiplicityIndexInLinRelation = this->ComputeGainingMultiplicityIndexInLinearRelation(flagUsingOSbasis, theLinearRelation);
   GainingMultiplicityIndex = this->IndicesNonZeroMults[GainingMultiplicityIndexInLinRelation];
-  int tempI = this->TheObjects[GainingMultiplicityIndex].GetLargestElongation();
+  int tempI = this->theObjects[GainingMultiplicityIndex].GetLargestElongation();
   theLinearRelation.elements[GainingMultiplicityIndexInLinRelation][0].MultiplyByInt(tempI);
   //theLinearRelation.ComputeDebugString();
   theLinearRelation.ScaleToIntegralForMinRationalHeightNoSignChange();
@@ -3158,9 +3158,9 @@ bool PartFraction::DecomposeFromLinRelation(
   for (int i = 0; i < theLinearRelation.NumRows; i ++) {
     if (i != GainingMultiplicityIndexInLinRelation && !theLinearRelation.elements[i][0].IsEqualToZero()) {
       int tempI = this->IndicesNonZeroMults[i];
-      ParticipatingIndices.AddOnTop(tempI);
-      theGreatestElongations.AddOnTop((*this)[tempI].GetLargestElongation());
-      theCoefficients.AddOnTop(theLinearRelation.elements[i][0].NumShort);
+      ParticipatingIndices.addOnTop(tempI);
+      theGreatestElongations.addOnTop((*this)[tempI].GetLargestElongation());
+      theCoefficients.addOnTop(theLinearRelation.elements[i][0].NumShort);
     }
   }
   if (!flagUsingOSbasis) {
@@ -3207,8 +3207,8 @@ bool PartFraction::ReduceMeOnce(
   while (hasImprovement) {
     hasImprovement = false;
     for (int i = 0; i < this->IndicesNonZeroMults.size; i ++) {
-      for (int j = 0; j < this->TheObjects[IndicesNonZeroMults[i]].Multiplicities.size; j ++) {
-        this->TheObjects[IndicesNonZeroMults[i]].GetPolyDenominator(denominator, j, startingVectors[IndicesNonZeroMults[i]]);
+      for (int j = 0; j < this->theObjects[IndicesNonZeroMults[i]].Multiplicities.size; j ++) {
+        this->theObjects[IndicesNonZeroMults[i]].GetPolyDenominator(denominator, j, startingVectors[IndicesNonZeroMults[i]]);
         outputCoeff.DivideBy(denominator, quotient, remainderDivision, &MonomialP::orderDefault());
         if (remainderDivision.IsEqualToZero()) {
           this->DecreasePowerOneFrac(IndicesNonZeroMults[i], 1);
@@ -3399,7 +3399,7 @@ void PartFraction::decomposeAMinusNB(
 }
 
 bool PartFraction::DecreasePowerOneFrac(int index, int increment) {
-  this->TheObjects[index].AddMultiplicity(- increment, 1);
+  this->theObjects[index].AddMultiplicity(- increment, 1);
   this->ComputeIndicesNonZeroMults();
   return true;
 }
@@ -3408,7 +3408,7 @@ void PartFraction::ComputeIndicesNonZeroMults() {
   this->IndicesNonZeroMults.size = 0;
   for (int i = 0; i < this->size; i ++) {
     if ((*this)[i].Multiplicities.size > 0) {
-      this->IndicesNonZeroMults.AddOnTop(i);
+      this->IndicesNonZeroMults.addOnTop(i);
     }
   }
 }
@@ -3492,7 +3492,7 @@ void PartFraction::ComputeNormals(PartFractions& owner, Vectors<Rational>& outpu
   output.size = 0;
   for (int i = 0; i < theDimension; i ++) {
     tempRoot = owner.startingVectors[this->IndicesNonZeroMults[i]];
-    dens.AddOnTop(tempRoot);
+    dens.addOnTop(tempRoot);
   }
   Rational tempRat;
   for (int i = 0; i < theDimension; i ++) {
@@ -3502,7 +3502,7 @@ void PartFraction::ComputeNormals(PartFractions& owner, Vectors<Rational>& outpu
       global.fatal << "Scalar product is equal to zero. " << global.fatal;
     }
     tempRoot /= tempRat;
-    output.AddOnTop(tempRoot);
+    output.addOnTop(tempRoot);
   }
 }
 
@@ -3519,8 +3519,8 @@ void PartFraction::init(int numRoots) {
   this->IndicesNonZeroMults.size = 0;
   this->SetSize(numRoots);
   for (int i = 0; i < this->size; i ++) {
-    this->TheObjects[i].Elongations.SetSize(0);
-    this->TheObjects[i].Multiplicities.SetSize(0);
+    this->theObjects[i].Elongations.SetSize(0);
+    this->theObjects[i].Multiplicities.SetSize(0);
   }
 }
 
@@ -3530,7 +3530,7 @@ PartFraction::~PartFraction() {
 unsigned int PartFraction::hashFunction() const {
   unsigned int result = 0;
   for (int i = 0; i < this->size; i ++) {
-    result += SomeRandomPrimes[i] * this->TheObjects[i].hashFunction();
+    result += SomeRandomPrimes[i] * this->theObjects[i].hashFunction();
   }
   return result;
 }
@@ -3540,7 +3540,7 @@ bool PartFraction::operator==(const PartFraction& right) const {
     return false;
   }
   for (int i = 0; i < this->size; i ++) {
-    if (!(this->TheObjects[i] == right[i])) {
+    if (!(this->theObjects[i] == right[i])) {
       return false;
     }
   }
@@ -3684,12 +3684,12 @@ bool PartFractions::splitClassicalRootSystem(bool ShouldElongate, Vector<Rationa
   while (this->IndexLowestNonProcessed< this->size) {
     //this->ComputeDebugString();
 //    if (!this->ShouldIgnore(Indicator)) {
-      tempF.Assign(this->TheObjects[this->IndexLowestNonProcessed]);
+      tempF.Assign(this->theObjects[this->IndexLowestNonProcessed]);
       //this->ComputeDebugString();
       //tempF.ComputeDebugString();
       if (! (tempF.reduceOnceTotalOrderMethod(*this, Indicator))) {
-        if (this->TheObjects[this->IndexLowestNonProcessed].IndicesNonZeroMults.size-this->TheObjects[this->IndexLowestNonProcessed].GetNumProportionalVectorsClassicalRootSystems(*this)>this->AmbientDimension) {
-          this->TheObjects[this->IndexLowestNonProcessed].ComputeDebugString(*this);
+        if (this->theObjects[this->IndexLowestNonProcessed].IndicesNonZeroMults.size-this->theObjects[this->IndexLowestNonProcessed].GetNumProportionalVectorsClassicalRootSystems(*this)>this->AmbientDimension) {
+          this->theObjects[this->IndexLowestNonProcessed].ComputeDebugString(*this);
           this->NumRelevantNonReducedFractions++;
         }
         this->IndexLowestNonProcessed++;
@@ -3736,11 +3736,11 @@ bool PartFraction::initFromRoots(PartFractions& owner, Vectors<Rational>& input)
   owner.startingVectors = input;
   this->init(owner.startingVectors.size);
   for (int i = 0; i < owner.startingVectors.size; i ++) {
-    this->TheObjects[i].init();
+    this->theObjects[i].init();
   }
   for (int i = 0; i < input.size; i ++) {
     int index = owner.getIndex(input[i]);
-    this->TheObjects[index].AddMultiplicity(1, 1);
+    this->theObjects[index].AddMultiplicity(1, 1);
   }
   this->ComputeIndicesNonZeroMults();
   for (int i = 0; i < input.size; i ++) {
@@ -3816,7 +3816,7 @@ void PartFraction::ReduceMonomialByMonomial(PartFractions& owner, int myIndex, V
   tempMat.init(owner.AmbientDimension, (int) this->IndicesNonZeroMults.size);
   for (int i = 0; i < this->IndicesNonZeroMults.size; i ++)
     for (int j = 0; j<owner.AmbientDimension; j ++)
-      tempMat.elements[j][i] =(owner.startingVectors[this->IndicesNonZeroMults[i]][j]*this->TheObjects[this->IndicesNonZeroMults[i]].GetLargestElongation());
+      tempMat.elements[j][i] =(owner.startingVectors[this->IndicesNonZeroMults[i]][j]*this->theObjects[this->IndicesNonZeroMults[i]].GetLargestElongation());
   if (this->flagAnErrorHasOccurredTimeToPanic) {
 
   }
@@ -3852,11 +3852,11 @@ void PartFraction::ReduceMonomialByMonomial(PartFractions& owner, int myIndex, V
           int tempI = matLinComb.elements[i][0].floorIfSmall();
           thePowersSigned[i] = tempI;
           if (tempI<0)
-            thePowers.MaxMultiplicities[i] = this->TheObjects[this->IndicesNonZeroMults[i]].GetMultiplicityLargestElongation();
+            thePowers.MaxMultiplicities[i] = this->theObjects[this->IndicesNonZeroMults[i]].GetMultiplicityLargestElongation();
           else
-            thePowers.MaxMultiplicities[i] =MathRoutines::Minimum(tempI, this->TheObjects[this->IndicesNonZeroMults[i]].GetMultiplicityLargestElongation());
+            thePowers.MaxMultiplicities[i] =MathRoutines::Minimum(tempI, this->theObjects[this->IndicesNonZeroMults[i]].GetMultiplicityLargestElongation());
           tempRoot = owner.startingVectors[this->IndicesNonZeroMults[i]];
-          tempRoot*=(thePowersSigned[i]*this->TheObjects[this->IndicesNonZeroMults[i]].GetLargestElongation());
+          tempRoot*=(thePowersSigned[i]*this->theObjects[this->IndicesNonZeroMults[i]].GetLargestElongation());
           tempMon-= tempRoot;
           if (this->flagAnErrorHasOccurredTimeToPanic)
             tempMon.ComputeDebugString();
@@ -3932,9 +3932,9 @@ void PartFraction::ReduceMonomialByMonomialModifyOneMonomial(
   }
   for (int j = 0; j < thePowers.Multiplicities.size; j ++) {
     int currentIndexInFraction = this->IndicesNonZeroMults[j];
-    int currentElongation = this->TheObjects[currentIndexInFraction].GetLargestElongation();
+    int currentElongation = this->theObjects[currentIndexInFraction].GetLargestElongation();
     int MultChange = thePowers.Multiplicities[j];
-    int MaxMultchange = this->TheObjects[currentIndexInFraction].GetMultiplicityLargestElongation();
+    int MaxMultchange = this->theObjects[currentIndexInFraction].GetMultiplicityLargestElongation();
     Vector<Rational> tempRoot;
     tempRoot = Accum.startingVectors[currentIndexInFraction];
     tempRoot*=(currentElongation);
@@ -3947,7 +3947,7 @@ void PartFraction::ReduceMonomialByMonomialModifyOneMonomial(
     if (this->flagAnErrorHasOccurredTimeToPanic) {
      // theNumerator.ComputeDebugString();
     }
-    this->TheObjects[currentIndexInFraction].AddMultiplicity(-MultChange, currentElongation);
+    this->theObjects[currentIndexInFraction].AddMultiplicity(-MultChange, currentElongation);
   }
   this->Coefficient = theNumerator;
   this->ComputeIndicesNonZeroMults();
@@ -4260,9 +4260,9 @@ void PartFractions::RemoveRedundantShortRootsClassicalRootSystem(Vector<Rational
   /*PartFraction tempFrac;
   Polynomial<LargeInt> buffer;
   for (int i = 0; i < this->size; i ++) {
-    tempFrac.Assign(this->TheObjects[i]);
+    tempFrac.Assign(this->theObjects[i]);
     if (tempFrac.RemoveRedundantShortRootsClassicalRootSystem(*this, Indicator, buffer, this->AmbientDimension)) {
-      this->TheObjects[i].Coefficient.makeZero(this->AmbientDimension);
+      this->theObjects[i].Coefficient.makeZero(this->AmbientDimension);
       this->AddAlreadyReduced(tempFrac, Indicator);
     }
     if (this->flagMakingProgressReport) {
@@ -4273,7 +4273,7 @@ void PartFractions::RemoveRedundantShortRootsClassicalRootSystem(Vector<Rational
     }
   }
   for (int i = 0; i < this->size; i ++)
-    if (this->TheObjects[i].Coefficient.IsEqualToZero()) {
+    if (this->theObjects[i].Coefficient.IsEqualToZero()) {
       this->PopIndexHashChooseSwapByLowestNonProcessedAndAccount(i, Indicator);
       i --;
     }*/
@@ -4390,7 +4390,7 @@ void PartFractions::ComputeKostantFunctionFromWeylGroup(
       tempRoot = theVPbasis[i];
       tempW.RootScalarCartanRoot(tempRoot, tempRoot, tempRat);
       if (tempRat.IsEqualToOne()) {
-        theVPbasis.AddOnTop(tempW.RootsOfBorel[i] * 2);
+        theVPbasis.addOnTop(tempW.RootsOfBorel[i] * 2);
       }
     }
   }
@@ -4399,10 +4399,10 @@ void PartFractions::ComputeKostantFunctionFromWeylGroup(
     tempRoot.makeZero(this->AmbientDimension);
     tempRoot[this->AmbientDimension - 1] = 1;
     tempRoot[this->AmbientDimension - 2] = - 1;
-    theVPbasis.AddOnTop(tempRoot);
+    theVPbasis.addOnTop(tempRoot);
     tempRoot[this->AmbientDimension - 1] = 1;
     tempRoot[this->AmbientDimension - 2] = 1;
-    theVPbasis.AddOnTop(tempRoot);
+    theVPbasis.addOnTop(tempRoot);
     for (int i = this->AmbientDimension - 3; i >= 0; i --) {
       tempRoot[i] = 2;
       global.fatal << "This is a programming error: this line of code "
@@ -4729,7 +4729,7 @@ int PartFractions::AddRootAndSort(Vector<Rational>& theRoot) {
   tempList[index] = theRoot;
   this->startingVectors.Clear();
   for (int i = 0; i < tempList.size; i ++) {
-    this->startingVectors.AddOnTop(tempList[i]);
+    this->startingVectors.addOnTop(tempList[i]);
   }
   return index;
 }
@@ -4866,7 +4866,7 @@ void SelectionWithMaxMultiplicity::IncrementSubset() {
   for (int i = this->Multiplicities.size - 1; i >= 0; i --) {
     if (this->Multiplicities[i] < this->MaxMultiplicity) {
       if (this->Multiplicities[i] == 0) {
-        this->elements.AddOnTop(i);
+        this->elements.addOnTop(i);
       }
       this->Multiplicities[i] ++;
       return;
@@ -4881,7 +4881,7 @@ void SelectionWithMultiplicities::ComputeElements() {
   this->elements.size = 0;
   for (int i = 0; i < this->Multiplicities.size; i ++) {
     if (this->Multiplicities[i] > 0) {
-      this->elements.AddOnTop(i);
+      this->elements.addOnTop(i);
     }
   }
 }
@@ -4957,7 +4957,7 @@ bool SelectionWithDifferentMaxMultiplicities::IncrementReturnFalseIfPastLast() {
   for (int i = this->Multiplicities.size - 1; i >= 0; i --) {
     if (this->Multiplicities[i] < this->MaxMultiplicities[i]) {
       if (this->Multiplicities[i] == 0) {
-        this->elements.AddOnTop(i);
+        this->elements.addOnTop(i);
       }
       this->Multiplicities[i] ++;
       return true;
@@ -4977,7 +4977,7 @@ void DynkinType::GetTypesWithMults(List<DynkinSimpleType>& output) const {
   for (int i = 0; i < componentsSorted.size; i ++) {
     int theIndex = this->theMonomials.GetIndex(componentsSorted[i]);
     for (int j = 0; j < this->GetMult(theIndex); j ++) {
-      output.AddOnTop(componentsSorted[i]);
+      output.addOnTop(componentsSorted[i]);
     }
   }
 }
@@ -5001,7 +5001,7 @@ void DynkinType::GetOuterAutosGeneratorsOneTypeActOnVectorColumn(
     for (int i = 1; i < numGens + 1; i ++) {
       theType.GetAutomorphismActingOnVectorColumn(finalMat, i);
       finalMat.DirectSumWith(directSummand);
-      output.AddOnTop(finalMat);
+      output.addOnTop(finalMat);
     }
   }
   if (multiplicity < 2) {
@@ -5017,7 +5017,7 @@ void DynkinType::GetOuterAutosGeneratorsOneTypeActOnVectorColumn(
     finalMat.DirectSumWith(directSummand);
     directSummand.MakeId((multiplicity - 2 - i) * theType.theRank);
     finalMat.DirectSumWith(directSummand);
-    output.AddOnTop(finalMat);
+    output.addOnTop(finalMat);
   }
 }
 
@@ -5040,7 +5040,7 @@ void DynkinType::GetOuterAutosGeneratorsActOnVectorColumn(List<MatrixTensor<Rati
       matrixFinal.MakeId(numRowsSoFar);
       matrixFinal.DirectSumWith(intermediateGenerators[j]);
       matrixFinal.DirectSumWith(matrixToGo);
-      output.AddOnTop(matrixFinal);
+      output.addOnTop(matrixFinal);
     }
     numRowsSoFar += currentMult * (*this)[i].theRank;
   }
@@ -5073,16 +5073,16 @@ void DynkinType::GetLettersTypesMults(
   for (int i = 0; i < componentsSorted.size; i ++) {
     int theIndex = this->theMonomials.GetIndex(componentsSorted[i]);
     if (outputLetters != nullptr) {
-      outputLetters->AddOnTop((*this)[theIndex].theLetter);
+      outputLetters->addOnTop((*this)[theIndex].theLetter);
     }
     if (outputRanks != nullptr) {
-      outputRanks->AddOnTop((*this)[theIndex].theRank);
+      outputRanks->addOnTop((*this)[theIndex].theRank);
     }
     if (outputFirstCoRootLengthsSquared != nullptr) {
-      outputFirstCoRootLengthsSquared->AddOnTop((*this)[theIndex].CartanSymmetricInverseScale);
+      outputFirstCoRootLengthsSquared->addOnTop((*this)[theIndex].CartanSymmetricInverseScale);
     }
     if (outputMults != nullptr) {
-      outputMults->AddOnTop(this->GetMult(theIndex));
+      outputMults->addOnTop(this->GetMult(theIndex));
     }
   }
 }
@@ -5176,7 +5176,7 @@ bool DynkinType::Grow(
       if (!isGood) {
         continue;
       }
-      output.AddOnTop(typeMinusMin);
+      output.addOnTop(typeMinusMin);
       output.LastObject()->AddMonomial(theSimpleTypes[i], 1);
       if (outputPermutationRoots != nullptr) {
         int baseTypeRank = typeMinusMin.GetRank();
@@ -5186,7 +5186,7 @@ bool DynkinType::Grow(
         for (int j = 0; j < lastComponentRootInjections[i].size; j ++) {
           currentRootInjection[j + baseTypeRank] = lastComponentRootInjections[i][j] + baseTypeRank;
         }
-        outputPermutationRoots->AddOnTop(currentRootInjection);
+        outputPermutationRoots->addOnTop(currentRootInjection);
       }
     }
   }
@@ -5196,14 +5196,14 @@ bool DynkinType::Grow(
     if (minComponent < currentA1) {
       continue;
     }
-    output.AddOnTop(*this);
+    output.addOnTop(*this);
     output.LastObject()->AddMonomial(currentA1, Rational::one());
     currentRootInjection.SetSize(output.LastObject()->GetRank());
     if (outputPermutationRoots != nullptr) {
       for (int j = 0; j < currentRootInjection.size; j ++) {
         currentRootInjection[j] = j;
       }
-      outputPermutationRoots->AddOnTop(currentRootInjection);
+      outputPermutationRoots->addOnTop(currentRootInjection);
     }
   }
   return true;
@@ -5885,17 +5885,17 @@ void DynkinSimpleType::Grow(List<DynkinSimpleType>& output, List<List<int> >* ou
   DynkinSimpleType newType;
   if (this->theLetter == 'B' && this->theRank == 3) {
     newType.MakeArbitrary('F', 4, this->CartanSymmetricInverseScale);
-    output.AddOnTop(newType);
+    output.addOnTop(newType);
     if (outputPermutationRoots != nullptr) {
       for (int i = 0; i < currentImagesSimpleRootsCurrent.size; i ++) {
         currentImagesSimpleRootsCurrent[i] = i;
       }
-      outputPermutationRoots->AddOnTop(currentImagesSimpleRootsCurrent);
+      outputPermutationRoots->addOnTop(currentImagesSimpleRootsCurrent);
     }
   }
   if (this->theLetter == 'D' && this->theRank == 5) {
     newType.MakeArbitrary('E', 6, this->CartanSymmetricInverseScale);
-    output.AddOnTop(newType);
+    output.addOnTop(newType);
     if (outputPermutationRoots != nullptr) {
       currentImagesSimpleRootsCurrent[0] = 0;
       currentImagesSimpleRootsCurrent[1] = 2;
@@ -5903,54 +5903,54 @@ void DynkinSimpleType::Grow(List<DynkinSimpleType>& output, List<List<int> >* ou
       currentImagesSimpleRootsCurrent[3] = 4;
       currentImagesSimpleRootsCurrent[4] = 1;
       currentImagesSimpleRootsCurrent[5] = 5;
-      outputPermutationRoots->AddOnTop(currentImagesSimpleRootsCurrent);
+      outputPermutationRoots->addOnTop(currentImagesSimpleRootsCurrent);
     }
   }
   if (this->theLetter == 'E' && this->theRank < 8) {
     newType.MakeArbitrary('E', this->theRank + 1, this->CartanSymmetricInverseScale);
-    output.AddOnTop(newType);
+    output.addOnTop(newType);
     if (outputPermutationRoots != nullptr) {
       for (int i = 0; i < currentImagesSimpleRootsCurrent.size; i ++) {
         currentImagesSimpleRootsCurrent[i] = i;
       }
-      outputPermutationRoots->AddOnTop(currentImagesSimpleRootsCurrent);
+      outputPermutationRoots->addOnTop(currentImagesSimpleRootsCurrent);
     }
   }
   if (this->theLetter != 'A') {
     return;
   }
   newType.MakeArbitrary(this->theLetter, this->theRank + 1, this->CartanSymmetricInverseScale);
-  output.AddOnTop(newType);
+  output.addOnTop(newType);
   if (outputPermutationRoots != nullptr) {
     for (int i = 0; i < currentImagesSimpleRootsCurrent.size; i ++) {
       currentImagesSimpleRootsCurrent[i] = i;
     }
-    outputPermutationRoots->AddOnTop(currentImagesSimpleRootsCurrent);
+    outputPermutationRoots->addOnTop(currentImagesSimpleRootsCurrent);
   }
   newType.MakeArbitrary('B', this->theRank + 1, this->CartanSymmetricInverseScale);
-  output.AddOnTop(newType);
+  output.addOnTop(newType);
   if (outputPermutationRoots != nullptr) {
-    outputPermutationRoots->AddOnTop(currentImagesSimpleRootsCurrent);
+    outputPermutationRoots->addOnTop(currentImagesSimpleRootsCurrent);
   }
   if (this->theRank > 1) {
     newType.MakeArbitrary('C', this->theRank + 1, this->CartanSymmetricInverseScale / 2);
-    output.AddOnTop(newType);
+    output.addOnTop(newType);
     if (outputPermutationRoots != nullptr) {
-      outputPermutationRoots->AddOnTop(currentImagesSimpleRootsCurrent);
+      outputPermutationRoots->addOnTop(currentImagesSimpleRootsCurrent);
     }
   }
   if (this->theRank > 2) {
     newType.MakeArbitrary('D', this->theRank + 1, this->CartanSymmetricInverseScale);
-    output.AddOnTop(newType);
+    output.addOnTop(newType);
     if (outputPermutationRoots != nullptr) {
-      outputPermutationRoots->AddOnTop(currentImagesSimpleRootsCurrent);
+      outputPermutationRoots->addOnTop(currentImagesSimpleRootsCurrent);
     }
   }
   if (this->theRank == 1) {
     newType.MakeArbitrary('G', 2, this->CartanSymmetricInverseScale / 3);
-    output.AddOnTop(newType);
+    output.addOnTop(newType);
     if (outputPermutationRoots != nullptr) {
-      outputPermutationRoots->AddOnTop(currentImagesSimpleRootsCurrent);
+      outputPermutationRoots->addOnTop(currentImagesSimpleRootsCurrent);
     }
   }
 }
@@ -6195,7 +6195,7 @@ void ElementWeylGroupAutomorphisms::MultiplyOnTheRightByOuterAuto(int outerAutoI
   simpleReflectionOrOuterAutomorphism generator;
   generator.index = outerAutoIndex;
   generator.flagIsOuter = true;
-  this->generatorsLastAppliedFirst.AddOnTop(generator);
+  this->generatorsLastAppliedFirst.addOnTop(generator);
 }
 
 void ElementWeylGroupAutomorphisms::MakeSimpleReflection(int simpleRootIndex, WeylGroupAutomorphisms& inputWeyl) {
@@ -6235,14 +6235,14 @@ std::string ElementWeylGroupAutomorphisms::toString(FormatExpressions* theFormat
 void ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::MultiplyOnTheRightBySimpleRootInner(int simpleRootIndex) {
   simpleReflectionOrOuterAutomorphism generator;
   generator.index = simpleRootIndex;
-  this->generatorsLastAppliedFirst.AddOnTop(generator);
+  this->generatorsLastAppliedFirst.addOnTop(generator);
 }
 
 void ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::MultiplyOnTheRightByOuterAutomorphism(int indexOuterAutomorphism) {
   simpleReflectionOrOuterAutomorphism generator;
   generator.index = indexOuterAutomorphism;
   generator.flagIsOuter = true;
-  this->generatorsLastAppliedFirst.AddOnTop(generator);
+  this->generatorsLastAppliedFirst.addOnTop(generator);
 }
 
 unsigned int ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::hashFunction(
@@ -6300,9 +6300,9 @@ ElementWeylGroup ElementWeylGroup::operator^(
   ElementWeylGroup out;
   out.owner = this->owner;
   out.generatorsLastAppliedFirst = right.generatorsLastAppliedFirst;
-  out.generatorsLastAppliedFirst.AddListOnTop(this->generatorsLastAppliedFirst);
+  out.generatorsLastAppliedFirst.addListOnTop(this->generatorsLastAppliedFirst);
   for (int i = right.generatorsLastAppliedFirst.size - 1; i >= 0; i --) {
-    out.generatorsLastAppliedFirst.AddOnTop(right.generatorsLastAppliedFirst[i]);
+    out.generatorsLastAppliedFirst.addOnTop(right.generatorsLastAppliedFirst[i]);
   }
   out.MakeCanonical();
   return out;
@@ -6326,7 +6326,7 @@ void ElementWeylGroup::operator*=(const ElementWeylGroup& other) {
     (*this) *= otherCopy;
     return;
   }
-  this->generatorsLastAppliedFirst.AddListOnTop(other.generatorsLastAppliedFirst);
+  this->generatorsLastAppliedFirst.addListOnTop(other.generatorsLastAppliedFirst);
   this->MakeCanonical();
 }
 
@@ -6377,7 +6377,7 @@ void ElementWeylGroup::MakeFromRhoImage(const Vector<Rational>& inputRhoImage, W
       if (this->owner->GetScalarProdSimpleRoot(theVector, i) < 0) {
         this->owner->SimpleReflection(i, theVector);
         theGen.MakeSimpleReflection(i);
-        this->generatorsLastAppliedFirst.AddOnTop(theGen);
+        this->generatorsLastAppliedFirst.addOnTop(theGen);
         break;
       }
     }
@@ -6508,7 +6508,7 @@ bool ElementWeylGroup::operator>(const ElementWeylGroup& other) const {
 void ElementWeylGroup::MultiplyOnTheRightBySimpleReflection(int reflectionIndex) {
   simpleReflection theGen;
   theGen.MakeSimpleReflection(reflectionIndex);
-  this->generatorsLastAppliedFirst.AddOnTop(theGen);
+  this->generatorsLastAppliedFirst.addOnTop(theGen);
 }
 
 void WeylGroupData::SimpleReflectionDualSpace(int index, Vector<Rational>& DualSpaceElement) {
@@ -6855,15 +6855,15 @@ void WeylGroupData::GenerateRootSystem() {
   this->RootsOfBorel.Reserve(theRootsFinder.size / 2);
   for (int i = 0; i < theRootsFinder.size; i ++) {
     if (theRootsFinder[i].IsPositiveOrZero()) {
-      this->RootsOfBorel.AddOnTop(theRootsFinder[i]);
+      this->RootsOfBorel.addOnTop(theRootsFinder[i]);
     }
   }
   this->RootsOfBorel.QuickSortAscending();
   for (int i = this->RootsOfBorel.size - 1; i >= 0; i --) {
-    this->RootSystem.AddOnTop(- this->RootsOfBorel[i]);
+    this->RootSystem.addOnTop(- this->RootsOfBorel[i]);
   }
   for (int i = 0; i < this->RootsOfBorel.size; i ++) {
-    this->RootSystem.AddOnTop(this->RootsOfBorel[i]);
+    this->RootSystem.addOnTop(this->RootsOfBorel[i]);
   }
 }
 
@@ -6879,7 +6879,7 @@ void WeylGroupData::ComputeWeylGroupAndRootsOfBorel(Vectors<Rational>& output) {
   output.Reserve(this->RootSystem.size / 2);
   for (int i = 0; i < this->RootSystem.size; i ++) {
     if (this->RootSystem[i].IsPositiveOrZero()) {
-      output.AddOnTop(this->RootSystem[i]);
+      output.addOnTop(this->RootSystem[i]);
     }
   }
 }
@@ -6931,11 +6931,11 @@ std::string WeylGroupData::ToStringCppCharTable(FormatExpressions* theFormat) {
       }
     }
     out << ")";
-    out << "\"); output.characterTable.AddOnTop(currentCF);";
+    out << "\"); output.characterTable.addOnTop(currentCF);";
   }
   out << "\n<br>&nbsp;&nbsp;output.irrepsCarterLabels.SetSize(0);";
   for (int i = 0; i < this->irrepsCarterLabels.size; i ++) {
-    out << "\n<br>&nbsp;&nbsp;output.irrepsCarterLabels.AddOnTop(\"" << this->irrepsCarterLabels[i] << "\");";
+    out << "\n<br>&nbsp;&nbsp;output.irrepsCarterLabels.addOnTop(\"" << this->irrepsCarterLabels[i] << "\");";
   }
   out << "\n<br>&nbsp;&nbsp;return true;";
   out << "\n<br>}";
@@ -6983,7 +6983,7 @@ std::string WeylGroupData::ToStringCppConjugacyClasses(FormatExpressions* theFor
   }
   out << "\n<br>&nbsp;&nbsp;output.ccCarterLabels.SetSize(0);";
   for (int i = 0; i < this->ccCarterLabels.size; i ++) {
-    out << "\n<br>&nbsp;&nbsp;output.ccCarterLabels.AddOnTop(\"" << this->ccCarterLabels[i] << "\");";
+    out << "\n<br>&nbsp;&nbsp;output.ccCarterLabels.addOnTop(\"" << this->ccCarterLabels[i] << "\");";
   }
   out << "\n<br>&nbsp;&nbsp;output.LoadConjugacyClassesHelper();";
   out << "\n<br>&nbsp;&nbsp;return true;";
@@ -7843,14 +7843,14 @@ std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorph
       Layers.SetSize(Layers.size + 1);
       oldLayerElementLength = currentElement.generatorsLastAppliedFirst.size;
     }
-    Layers.LastObject()->AddOnTop(i);
+    Layers.LastObject()->addOnTop(i);
     GraphWidth = MathRoutines::Maximum(GraphWidth, Layers.LastObject()->size);
   }
   HashedList<Vector<Rational> > orbit;
   orbit.Reserve(this->allElements.size);
   for (int i = 0; i < this->allElements.size; i ++) {
     this->ActByNonSimpleElement(i, this->AmbientWeyl->rho, tempRoot);
-    orbit.AddOnTop(tempRoot);
+    orbit.addOnTop(tempRoot);
   }
   arrows.SetSize(Layers.size);
   for (int i = 0; i < Layers.size; i ++) {
@@ -7865,7 +7865,7 @@ std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorph
         }
         const ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& currentElement = this->allElements[index];
         if (currentElement.generatorsLastAppliedFirst.size > this->allElements[indexOther].generatorsLastAppliedFirst.size) {
-          arrows[i][j].AddOnTop(index);
+          arrows[i][j].addOnTop(index);
         }
       }
     }
@@ -7982,7 +7982,7 @@ std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorph
       Layers.SetSize(Layers.size + 1);
       oldLayerElementLength = this->RepresentativesQuotientAmbientOrder[i].generatorsLastAppliedFirst.size;
     }
-    Layers.LastObject()->AddOnTop(i);
+    Layers.LastObject()->addOnTop(i);
     GraphWidth =MathRoutines::Maximum(GraphWidth, Layers.LastObject()->size);
   }
   for (int i = 0; i < this->RepresentativesQuotientAmbientOrder.size; i ++) {
@@ -8003,7 +8003,7 @@ std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorph
             this->RepresentativesQuotientAmbientOrder[Layers[i][j]].generatorsLastAppliedFirst.size ==
             this->RepresentativesQuotientAmbientOrder[k].generatorsLastAppliedFirst.size - 1
           ) {
-            arrows[i][j].AddOnTop(k);
+            arrows[i][j].addOnTop(k);
           }
         }
       }
@@ -8030,7 +8030,7 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::F
       }
     }
     if (isGood) {
-      this->RepresentativesQuotientAmbientOrder.AddOnTop(this->AmbientWeyl->theGroup.theElements[i]);
+      this->RepresentativesQuotientAmbientOrder.addOnTop(this->AmbientWeyl->theGroup.theElements[i]);
     }
   }
 }
@@ -8043,7 +8043,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::D
 ) {
   MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::DrawContour");
   HashedList<Vector<Rational> > theOrbit;
-  theOrbit.AddOnTop(highestWeightSimpleCoord);
+  theOrbit.addOnTop(highestWeightSimpleCoord);
   WeylGroupData& theWeyl = *this->AmbientWeyl;
   Vector<Rational> tempRoot;
   for (int i = 0; i < theOrbit.size; i ++) {
@@ -8089,7 +8089,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::C
 void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::ComputeRootSubsystem() {
   MacroRegisterFunctionWithName("SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::ComputeRootSubsystem");
   this->RootSubsystem.Clear();
-  this->RootSubsystem.AddOnTop(this->simpleRootsInner);
+  this->RootSubsystem.addOnTop(this->simpleRootsInner);
   this->RootSubsystem.SetExpectedSize(100);
   Vector<Rational> currentRoot;
   for (int i = 0; i < this->RootSubsystem.size; i ++) {
@@ -8220,7 +8220,7 @@ std::string KLpolys::toString(FormatExpressions* theFormat) {
   if (!useHtml) {
     out << "Next to explore: " << this->NextToExplore << "<br>\n Orbit of rho:<br>\n";
     for (int i = 0; i < this->size; i ++) {
-      out << this->TheObjects[i].toString() << "   :  " << this->TheMultiplicities[i];
+      out << this->theObjects[i].toString() << "   :  " << this->TheMultiplicities[i];
       if (this->Explored[i]) {
         out << " Explored<br>\n";
       } else {
@@ -8293,11 +8293,11 @@ void KLpolys::GeneratePartialBruhatOrder() {
         << " be in a certain Weyl group orbit isn't there. "
         << "There is an error in the code, crashing accordingly. " << global.fatal;
       }
-      this->SimpleReflectionsActionList[i].AddOnTop(x);
+      this->SimpleReflectionsActionList[i].addOnTop(x);
       tempRoot2 -= tempRoot;
       if (tempRoot2.IsPositiveOrZero() && !tempRoot2.IsEqualToZero()) {
-        this->BruhatOrder[i].AddOnTop(x);
-        this->InverseBruhatOrder[x].AddOnTop(i);
+        this->BruhatOrder[i].addOnTop(x);
+        this->InverseBruhatOrder[x].addOnTop(i);
       }
     }
   }
@@ -8346,7 +8346,7 @@ void KLpolys::MergeBruhatLists(int fromList, int toList) {
       }
     }
     if (!found) {
-      this->BruhatOrder[toList].AddOnTop(this->BruhatOrder[fromList][i]);
+      this->BruhatOrder[toList].addOnTop(this->BruhatOrder[fromList][i]);
     }
   }
 }
@@ -8405,7 +8405,7 @@ void KLpolys::initFromWeyl(WeylGroupData* theWeylGroup) {
   this->TheWeylGroup = theWeylGroup;
   Vectors<Rational> tempRoots;
   this->TheWeylGroup->ComputeRho(true);
-  tempRoots.AddOnTop(this->TheWeylGroup->rho);
+  tempRoots.addOnTop(this->TheWeylGroup->rho);
   this->TheWeylGroup->GenerateOrbit(tempRoots, false, *this, false);
   this->initTheMults();
 }
@@ -9030,7 +9030,7 @@ bool Lattice::GetAllRepresentativesProjectingDownTo(
   output.size = 0;
   for (int i = 0; i < startingShifts.size; i ++) {
     for (int j = 0; j < tempRepresentatives.size; j ++) {
-      output.AddOnTop(startingShifts[i] + tempRepresentatives[j]);
+      output.addOnTop(startingShifts[i] + tempRepresentatives[j]);
     }
   }
   return true;
@@ -9116,7 +9116,7 @@ void Lattice::IntersectWithPreimageOfLattice(const Matrix<Rational> & theLinearM
   tempRoots.AssignMatrixRows(theLinearMap);
   KernelPart.IntersectWithLinearSubspaceGivenByNormals(tempRoots);
   result.AssignMatrixRows(KernelPart.basisRationalForm);
-  result.AddListOnTop(resultNonKernelPart);
+  result.addListOnTop(resultNonKernelPart);
   this->MakeFromRoots(result);
 }
 
@@ -9343,7 +9343,7 @@ void PartFraction::GetRootsFromDenominator(PartFractions& owner, Vectors<Rationa
   output.SetSize(this->IndicesNonZeroMults.size);
   for (int i = 0; i < this->IndicesNonZeroMults.size; i ++) {
     output[i] = owner.startingVectors[this->IndicesNonZeroMults[i]];
-    oneFracWithMultiplicitiesAndElongations& current = this->TheObjects[this->IndicesNonZeroMults[i]];
+    oneFracWithMultiplicitiesAndElongations& current = this->theObjects[this->IndicesNonZeroMults[i]];
     if (current.Elongations.size != 1) {
       global.fatal << "Elongations expected to have a single element. " << global.fatal;
     }
@@ -9360,7 +9360,7 @@ void PartFraction::ComputePolyCorrespondingToOneMonomial(
     this->MakePolynomialFromOneNormal(
       normals[i],
       theMon,
-      this->TheObjects[this->IndicesNonZeroMults[i]].Multiplicities[0],
+      this->theObjects[this->IndicesNonZeroMults[i]].Multiplicities[0],
       tempP
     );
     outputPolyPart *= tempP;
@@ -9498,7 +9498,7 @@ void QuasiPolynomial::AddLatticeShift(
   int index = this->LatticeShifts.GetIndex(theShift);
   if (index == - 1) {
     index = this->LatticeShifts.size;
-    this->LatticeShifts.AddOnTop(theShift);
+    this->LatticeShifts.addOnTop(theShift);
     this->valueOnEachLatticeShift.ExpandOnTop(1);
     this->valueOnEachLatticeShift.LastObject()->makeZero();
   }
@@ -9714,7 +9714,7 @@ void Lattice::IntersectWithLinearSubspaceGivenByNormal(const Vector<Rational>& t
       for (int j = 0; j < startingBasis.size; j ++) {
         resultRoot += startingBasis[j] * tempRoot[j];
       }
-      resultBasis.AddOnTop(resultRoot);
+      resultBasis.addOnTop(resultRoot);
     }
   }
   this->MakeFromRoots(resultBasis);
@@ -9817,7 +9817,7 @@ void Cone::IntersectAHyperplane(Vector<Rational>& theNormal, Cone& outputConeLow
   }
   theEmbedding.AssignVectorsToRows(theBasis);
   theEmbedding.Transpose();
-  theBasis.AddOnTop(theNormal);
+  theBasis.addOnTop(theNormal);
   Vectors<Rational> tempRoots, tempRoots2, tempRoots3;
   tempRoots.MakeEiBasis(theDimension);
   tempRoots.GetCoordsInBasis(theBasis, tempRoots2);
@@ -10083,14 +10083,14 @@ void Lattice::GetRougherLatticeFromAffineHyperplaneDirectionAndLattice(
   theBasis.AssignMatrixRows(this->basisRationalForm);
   Lattice theHyperplaneLatticeNoShift, theDirectionLattice;//, normalProjectionLattice, theTrueProjectionLattice;
   Vectors<Rational> tempRoots; //Vector<Rational> tempRoot;
-  tempRoots.AddOnTop(theDirection);
+  tempRoots.addOnTop(theDirection);
   theDirectionLattice = *this;
   theDirectionLattice.IntersectWithLinearSubspaceSpannedBy(tempRoots);
   theDirectionLattice.basisRationalForm.GetVectorFromRow(0, outputDirectionMultipleOnLattice);
   theHyperplaneLatticeNoShift = *this;
   theHyperplaneLatticeNoShift.IntersectWithLinearSubspaceGivenByNormal(theNormal);
   tempRoots.AssignMatrixRows(theHyperplaneLatticeNoShift.basisRationalForm);
-  tempRoots.AddOnTop(outputDirectionMultipleOnLattice);
+  tempRoots.addOnTop(outputDirectionMultipleOnLattice);
   outputRougherLattice.MakeFromRoots(tempRoots);
   this->GetAllRepresentatives(outputRougherLattice, outputRepresentatives);
   for (int i = 0; i < outputRepresentatives.size; i ++) {
@@ -10331,10 +10331,10 @@ bool ConeComplex::DrawMeLastCoordAffine(
 
   theDrawingVariables.drawCoordSystemBuffer(theDrawingVariables, this->GetDim() - 1);
   for (int i = 0; i < this->size; i ++) {
-    result = this->TheObjects[i].DrawMeLastCoordAffine(InitDrawVars, theDrawingVariables, theFormat) && result;
+    result = this->theObjects[i].DrawMeLastCoordAffine(InitDrawVars, theDrawingVariables, theFormat) && result;
     std::stringstream tempStream;
     tempStream << i + 1;
-    Vector<Rational> tempRoot = this->TheObjects[i].GetInternalPoint();
+    Vector<Rational> tempRoot = this->theObjects[i].GetInternalPoint();
     tempRoot.MakeAffineUsingLastCoordinate();
     theDrawingVariables.drawTextAtVectorBufferRational(tempRoot, tempStream.str(), "black");
   }
@@ -10980,11 +10980,11 @@ void DrawOperations::operator+=(const DrawOperations& other) {
   if (this->theBilinearForm.NumRows != other.theBilinearForm.NumRows) {
     return;
   }
-  this->theOperations.AddListOnTop(other.theOperations);
-  //this->BasisProjectionPlane.AddListOnTop(other.BasisProjectionPlane);
-  //this->centerX.AddListOnTop(other.centerX);
-  //this->centerY.AddListOnTop(other.centerY);
-  //this->GraphicsUnit.AddListOnTop(other.GraphicsUnit);
+  this->theOperations.addListOnTop(other.theOperations);
+  //this->BasisProjectionPlane.addListOnTop(other.BasisProjectionPlane);
+  //this->centerX.addListOnTop(other.centerX);
+  //this->centerY.addListOnTop(other.centerY);
+  //this->GraphicsUnit.addListOnTop(other.GraphicsUnit);
 }
 
 void RationalFunction::operator/=(const Polynomial<Rational>& other) {
@@ -11091,9 +11091,9 @@ void ConeComplex::MakeAffineAndTransformToProjectiveDimPlusOne(Vector<Rational>&
   Vectors<Rational> newNormals;
   int theAffineDim = affinePoint.size;
   for (int i = 0; i < this->size; i ++) {
-    newNormals.SetSize(this->TheObjects[i].Normals.size + 1);
-    for (int j = 0; j < this->TheObjects[i].Normals.size; j ++) {
-      newNormals[j] = this->TheObjects[i].Normals[j].GetProjectivizedNormal(affinePoint);
+    newNormals.SetSize(this->theObjects[i].Normals.size + 1);
+    for (int j = 0; j < this->theObjects[i].Normals.size; j ++) {
+      newNormals[j] = this->theObjects[i].Normals[j].GetProjectivizedNormal(affinePoint);
     }
     newNormals.LastObject()->MakeEi(theAffineDim + 1, theAffineDim);
     tempCone.CreateFromNormals(newNormals);
@@ -11173,7 +11173,7 @@ bool Cone::GetLatticePointsInCone(
       *candidatePoint.LastObject() = 1;
     }
     if (this->IsInCone(candidatePoint)) {
-      outputPoints.AddOnTop(candidatePoint);
+      outputPoints.addOnTop(candidatePoint);
     }
   }
   return true;
@@ -11291,8 +11291,8 @@ void ConeComplex::GetAllWallsConesNoOrientationNoRepetitionNoSplittingNormals(Ve
   HashedList<Vector<Rational> > outputHashed;
   Vector<Rational> tempRoot;
   for (int i = 0; i < this->size; i ++) {
-    for (int j = 0; j < this->TheObjects[i].Normals.size; j ++) {
-      tempRoot = this->TheObjects[i].Normals[j];
+    for (int j = 0; j < this->theObjects[i].Normals.size; j ++) {
+      tempRoot = this->theObjects[i].Normals[j];
       tempRoot.ScaleNormalizeFirstNonZero();
       outputHashed.AddOnTopNoRepetition(tempRoot);
     }
@@ -11332,7 +11332,7 @@ void ConeComplex::TranslateMeMyLastCoordinateAffinization(Vector<Rational>& theT
     newNormal = normalNoAffinePart;
     normalNoAffinePart.size --;
     (*newNormal.LastObject()) -= normalNoAffinePart.ScalarEuclidean(theTranslationVector);
-    this->splittingNormals.AddOnTop(newNormal);
+    this->splittingNormals.addOnTop(newNormal);
   }
 }
 
@@ -11418,8 +11418,8 @@ void PiecewiseQuasipolynomial::DrawMe(
           }
         }
       }
-      theLatticePointsFinal.AddOnTop(latticePoints);
-      theLatticePointColors.AddListOnTop(tempList);
+      theLatticePointsFinal.addOnTop(latticePoints);
+      theLatticePointColors.addListOnTop(tempList);
     }
   }
   for (int i = 0; i < theLatticePointsFinal.size; i ++) {
@@ -11564,7 +11564,7 @@ void Cone::TransformToWeylProjective(ConeComplex& owner) {
   owner.GetWeylChamberWallsForCharacterComputation(newExternalWalls);
   for (int i = 0; i < newExternalWalls.size; i ++) {
     newWall.normal = newExternalWalls[i];
-    this->Externalwalls.AddOnTop(newWall);
+    this->Externalwalls.addOnTop(newWall);
   }
   this->AllVertices.size = 0;
   this->ComputeVerticesFromNormals(owner);*/
@@ -11583,9 +11583,9 @@ void ConeComplex::TransformToWeylProjective() {
 //  Vectors<Rational> oldDirections;
   for (int k = 0; k< this->AmbientWeyl.GetElement().size; k++)
     for (int i = 0; i < this->size; i ++)
-      if (this->TheObjects[i] != 0)
-        for (int j = 0; j < this->TheObjects[i]->Externalwalls.size; j ++) {
-          this->GetAffineWallImage(k, this->TheObjects[i]->Externalwalls[j], wallToSliceWith);
+      if (this->theObjects[i] != 0)
+        for (int j = 0; j < this->theObjects[i]->Externalwalls.size; j ++) {
+          this->GetAffineWallImage(k, this->theObjects[i]->Externalwalls[j], wallToSliceWith);
 //          if (k == 0)
 //            oldDirections.AddOnBottomNoRepetition(wallToSliceWith);
           wallToSliceWith.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
@@ -11599,9 +11599,9 @@ void ConeComplex::TransformToWeylProjective() {
   this->log << "\n";
   this->AmbientDimension = this->AmbientDimension*2+ 1;
   for (int i = 0; i < this->size; i ++)
-    if (this->TheObjects[i] != 0) {
-      this->TheObjects[i]->TransformToWeylProjective(*this);
-//      theVertices.AddRootSnoRepetition(this->TheObjects[i]->AllVertices);
+    if (this->theObjects[i] != 0) {
+      this->theObjects[i]->TransformToWeylProjective(*this);
+//      theVertices.AddRootSnoRepetition(this->theObjects[i]->AllVertices);
     }
   //this->startingCones.initFromDirections()
   Vector<Rational> tempRoot;
@@ -11616,7 +11616,7 @@ void ConeComplex::TransformToWeylProjective() {
   }
   Vectors<Rational> tempRoots;
   this->GetWeylChamberWallsForCharacterComputation(tempRoots);
-  this->TheGlobalConeNormals.AddListOnTop(tempRoots);
+  this->TheGlobalConeNormals.addListOnTop(tempRoots);
   this->log << "the global cone normals: " << this->TheGlobalConeNormals.toString();
   this->toString(tempS);
   this->log << tempS;
@@ -11640,15 +11640,15 @@ void ConeLatticeAndShiftMaxComputation::init(
   this->theFinalRepresentatives.size = 0;
   this->complexStartingPerRepresentative.size = 0;
   this->complexRefinedPerRepresentative.size = 0;
-  this->theConesLargerDim.AddOnTop(theCLS);
-  this->LPtoMaximizeLargerDim.AddOnTop(theNEq);
+  this->theConesLargerDim.addOnTop(theCLS);
+  this->LPtoMaximizeLargerDim.addOnTop(theNEq);
   this->IsInfinity.initializeFillInObject(1, false);
 }
 
 void Cone::SliceInDirection(Vector<Rational>& theDirection, ConeComplex& output) {
   output.init();
   output.AddNonRefinedChamberOnTopNoRepetition(*this);
-  output.slicingDirections.AddOnTop(theDirection);
+  output.slicingDirections.addOnTop(theDirection);
   output.Refine();
 }
 
@@ -11727,8 +11727,8 @@ void ConeLatticeAndShiftMaxComputation::FindExtremaParametricStep3() {
       tempRoot = this->theFinalRepresentatives[i];
       this->theConesLargerDim[j].theLattice.ReduceVector(tempRoot);
       if (tempRoot == this->theConesLargerDim[j].theShift) {
-        this->complexStartingPerRepresentative[i].AddOnTop(this->theConesLargerDim[j].theProjectivizedCone);
-        this->startingLPtoMaximize[i].AddOnTop(this->LPtoMaximizeLargerDim[j]);
+        this->complexStartingPerRepresentative[i].addOnTop(this->theConesLargerDim[j].theProjectivizedCone);
+        this->startingLPtoMaximize[i].addOnTop(this->LPtoMaximizeLargerDim[j]);
       }
     }
   }
@@ -11746,7 +11746,7 @@ void ConeLatticeAndShiftMaxComputation::FindExtremaParametricStep3() {
     multFreeWall = this->LPtoMaximizeLargerDim[i];
     multFreeWall.Minus();
     *multFreeWall.LastObject() +=1;
-    trimmedCone.Normals.AddOnTop(multFreeWall);
+    trimmedCone.Normals.addOnTop(multFreeWall);
     trimmedCone.CreateFromNormals(trimmedCone.Normals);
     if (!trimmedCone.flagIsTheZeroCone)
       this->theConesLargerDim[i].theProjectivizedCone = trimmedCone;
@@ -11881,8 +11881,8 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParamDegenerate
   //tempRoot2= preferredNormal;
   tempRoot += preferredNormal * theLPToMaximizeAffine[0];
   if (!tempCLS.theProjectivizedCone.flagIsTheZeroCone) {
-    outputAppend.AddOnTop(tempCLS);
-    outputAppendLPToMaximizeAffine.AddOnTop(tempRoot);
+    outputAppend.addOnTop(tempCLS);
+    outputAppendLPToMaximizeAffine.addOnTop(tempRoot);
   }
 }
 
@@ -11919,8 +11919,8 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam(
   if (direction.ScalarEuclidean(theLPToMaximizeAffine).IsNegative()) {
     direction.Minus();
   }
-  complexBeforeProjection.slicingDirections.AddOnTop(direction);
-  complexBeforeProjection.slicingDirections.AddOnTop(-direction);
+  complexBeforeProjection.slicingDirections.addOnTop(direction);
+  complexBeforeProjection.slicingDirections.addOnTop(-direction);
   complexBeforeProjection.Refine();
   Vector<Rational> tempRoot, extraEquation, exitNormalAffine, enteringNormalAffine;
   Vector<Rational> exitNormalLatticeLevel, exitNormalShiftedAffineProjected;
@@ -11942,7 +11942,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam(
       Vector<Rational>& currentNormal = currentCone.Normals[j];
       if (currentNormal[0].IsEqualToZero()) {
         tempRoot = currentNormal.GetShiftToTheLeftOnePosition();
-        theNewNormals.AddOnTop(tempRoot);
+        theNewNormals.addOnTop(tempRoot);
       } else {
         numNonPerpWalls ++;
         if (numNonPerpWalls >= 3) {
@@ -11992,11 +11992,11 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam(
         extraEquation = enteringNormalAffine.GetShiftToTheLeftOnePosition();
         extraEquation -= (exitNormalShiftedAffineProjected * enteringNormalAffine[0]) / exitNormalAffine[0];
         global.Comments << "extra equation: " << extraEquation.toString() << ", ";
-        tempCLS.theProjectivizedCone.Normals.AddOnTop(extraEquation);
+        tempCLS.theProjectivizedCone.Normals.addOnTop(extraEquation);
       }
       tempRoot = theLPToMaximizeAffine.GetShiftToTheLeftOnePosition();
       tempRoot -= exitNormalShiftedAffineProjected * theLPToMaximizeAffine[0] / exitNormalAffine[0];
-      outputAppendLPToMaximizeAffine.AddOnTop(tempRoot);
+      outputAppendLPToMaximizeAffine.addOnTop(tempRoot);
       if (tempCLS.theProjectivizedCone.Normals.size <= 0) {
         global.fatal << "Projectivized cone has no normals. " << global.fatal;
       }
@@ -12027,7 +12027,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam(
       //global.Comments << tempCLS.theProjectivizedCone.toString(false, true, true, true, theFormat);
       if (!tempCLS.theProjectivizedCone.flagIsTheZeroCone) {
         theProjectionLatticeLevel.ActOnVectorColumn(exitRepresentatives[j], tempCLS.theShift);
-        outputAppend.AddOnTop(tempCLS);
+        outputAppend.addOnTop(tempCLS);
         if (tempCLS.GetDimProjectivized() == 0) {
           theReport.Report(tempTempRoots.toString());
           while (true) {
@@ -12083,7 +12083,7 @@ void ConeComplex::GetNewVerticesAppend(
 bool ConeComplex::SplitChamber(
   int indexChamberBeingRefined, bool weAreChopping, const Vector<Rational>& killerNormal
 ) {
-  Cone& myDyingCone = this->TheObjects[indexChamberBeingRefined];
+  Cone& myDyingCone = this->theObjects[indexChamberBeingRefined];
   Cone newPlusCone, newMinusCone;
   Matrix<Rational> bufferMat;
   Selection bufferSel;
@@ -12107,13 +12107,13 @@ bool ConeComplex::SplitChamber(
   for (int i = 0; i < myDyingCone.Vertices.size; i ++) {
     killerNormal.ScalarEuclidean(myDyingCone.Vertices[i], tempRat);
     if (tempRat.IsPositive()) {
-      newPlusCone.Vertices.AddOnTop(myDyingCone.Vertices[i]);
+      newPlusCone.Vertices.addOnTop(myDyingCone.Vertices[i]);
     }
     if (tempRat.IsEqualToZero()) {
       ZeroVertices.AddOnTopNoRepetition(myDyingCone.Vertices[i]);
     }
     if (tempRat.IsNegative()) {
-      newMinusCone.Vertices.AddOnTop(myDyingCone.Vertices[i]);
+      newMinusCone.Vertices.addOnTop(myDyingCone.Vertices[i]);
     }
   }
   if (newPlusCone.Vertices.size == 0 || newMinusCone.Vertices.size == 0) {
@@ -12122,16 +12122,16 @@ bool ConeComplex::SplitChamber(
   this->GetNewVerticesAppend(myDyingCone, killerNormal, ZeroVertices);
   for (int i = 0; i < myDyingCone.Normals.size; i ++) {
     if (newPlusCone.Vertices.HasAnElementPerpendicularTo(myDyingCone.Normals[i])) {
-      newPlusCone.Normals.AddOnTop(myDyingCone.Normals[i]);
+      newPlusCone.Normals.addOnTop(myDyingCone.Normals[i]);
     }
     if (newMinusCone.Vertices.HasAnElementPerpendicularTo(myDyingCone.Normals[i])) {
-      newMinusCone.Normals.AddOnTop(myDyingCone.Normals[i]);
+      newMinusCone.Normals.addOnTop(myDyingCone.Normals[i]);
     }
   }
-  newPlusCone.Normals.AddOnTop(killerNormal);
-  newMinusCone.Normals.AddOnTop(- killerNormal);
-  newPlusCone.Vertices.AddListOnTop(ZeroVertices);
-  newMinusCone.Vertices.AddListOnTop(ZeroVertices);
+  newPlusCone.Normals.addOnTop(killerNormal);
+  newMinusCone.Normals.addOnTop(- killerNormal);
+  newPlusCone.Vertices.addListOnTop(ZeroVertices);
+  newMinusCone.Vertices.addListOnTop(ZeroVertices);
   this->PopChamberSwapWithLast(indexChamberBeingRefined);
   if (needToRecomputeVertices) {
     newPlusCone.CreateFromNormals(newPlusCone.Normals);
@@ -12158,8 +12158,8 @@ bool Cone::MakeConvexHullOfMeAnd(const Cone& other) {
     return true;
   }
   Vectors<Rational> newVertices;
-  newVertices.AddListOnTop(other.Vertices);
-  newVertices.AddListOnTop(this->Vertices);
+  newVertices.addListOnTop(other.Vertices);
+  newVertices.addListOnTop(this->Vertices);
   this->CreateFromVertices(newVertices);
   return true;
 }
@@ -12176,7 +12176,7 @@ void ConeComplex::RefineOneStep() {
   if (this->indexLowestNonRefinedChamber >= this->size) {
     return;
   }
-  Cone& currentCone = this->TheObjects[this->indexLowestNonRefinedChamber];
+  Cone& currentCone = this->theObjects[this->indexLowestNonRefinedChamber];
   for (;
     currentCone.LowestIndexNotCheckedForChopping < this->splittingNormals.size;
     currentCone.LowestIndexNotCheckedForChopping ++
@@ -12225,7 +12225,7 @@ void ConeComplex::InitFromDirectionsAndRefine(Vectors<Rational>& inputVectors) {
   Cone startingCone;
   startingCone.CreateFromVertices(inputVectors);
   this->AddNonRefinedChamberOnTopNoRepetition(startingCone);
-  this->slicingDirections.AddListOnTop(inputVectors);
+  this->slicingDirections.addListOnTop(inputVectors);
   this->Refine();
 }
 
@@ -12235,7 +12235,7 @@ void ConeComplex::Sort() {
   tempList.QuickSortAscending();
   this->Clear();
   for (int i = 0; i < tempList.size; i ++) {
-    this->AddOnTop(tempList[i]);
+    this->addOnTop(tempList[i]);
   }
 }
 
@@ -12349,8 +12349,8 @@ bool Cone::EliminateFakeNormalsUsingVertices(int numAddedFakeWalls) {
       this->Normals.Reserve(this->Normals.size + 2 * NormalsToSubspace.size);
       for (int i = 0; i < NormalsToSubspace.size; i ++) {
         Cone::scaleNormalizeByPositive(NormalsToSubspace[i]);
-        this->Normals.AddOnTop(NormalsToSubspace[i]);
-        this->Normals.AddOnTop(- NormalsToSubspace[i]);
+        this->Normals.addOnTop(NormalsToSubspace[i]);
+        this->Normals.addOnTop(- NormalsToSubspace[i]);
       }
     }
   }
@@ -12364,7 +12364,7 @@ bool Cone::EliminateFakeNormalsUsingVertices(int numAddedFakeWalls) {
       bool wallIsGood = false;
       for (int j = 0; j < this->Vertices.size; j ++) {
         if (currentNormal.ScalarEuclidean(this->Vertices[j]).IsEqualToZero()) {
-          verticesOnWall.AddOnTop(this->Vertices[j]);
+          verticesOnWall.addOnTop(this->Vertices[j]);
           int theRank = verticesOnWall.GetRankOfSpanOfElements(&tempMatX, &tempSelX);
           if (theRank < verticesOnWall.size) {
             verticesOnWall.RemoveLastObject();
@@ -12458,8 +12458,8 @@ bool Cone::CreateFromVertices(const Vectors<Rational>& inputVertices) {
     tempMat.AssignVectorsToRows(inputVertices);
     tempMat.GetZeroEigenSpace(extraVertices);
     for (int i = 0; i < extraVertices.size; i ++) {
-      this->Normals.AddOnTop(extraVertices[i]);
-      this->Normals.AddOnTop(-extraVertices[i]);
+      this->Normals.addOnTop(extraVertices[i]);
+      this->Normals.addOnTop(-extraVertices[i]);
     }
   }
   int NumCandidates = MathRoutines::NChooseK(inputVertices.size, rankVerticesSpan - 1);
@@ -12469,7 +12469,7 @@ bool Cone::CreateFromVertices(const Vectors<Rational>& inputVertices) {
   for (int i = 0; i < NumCandidates; i ++) {
     theSelection.incrementSelectionFixedCardinality(rankVerticesSpan - 1);
     for (int j = 0; j < theSelection.CardinalitySelection; j ++) {
-      extraVertices.AddOnTop(inputVertices[theSelection.elements[j]]);
+      extraVertices.addOnTop(inputVertices[theSelection.elements[j]]);
     }
     if (extraVertices.ComputeNormal(normalCandidate, theDim)) {
       bool hasPositive = false;
@@ -12525,7 +12525,7 @@ bool Cone::CreateFromNormalS(
       tempRoot.MakeEi(theDim, i);
       if (!this->Normals.LinSpanContainsVector(tempRoot, tempMat, tempSel)) {
         numAddedFakeWalls ++;
-        this->Normals.AddOnTop(tempRoot);
+        this->Normals.addOnTop(tempRoot);
       }
     }
   }
@@ -12574,14 +12574,14 @@ void ConeComplex::initFromCones(
   Vector<Rational> tempRoot;
   this->splittingNormals.Clear();
   for (int i = 0; i < this->size; i ++) {
-    for (int j = 0; j < this->TheObjects[i].Normals.size; j ++) {
-      tempRoot = this->TheObjects[i].Normals[j];
+    for (int j = 0; j < this->theObjects[i].Normals.size; j ++) {
+      tempRoot = this->theObjects[i].Normals[j];
       tempRoot.ScaleNormalizeFirstNonZero();
       this->splittingNormals.AddOnTopNoRepetition(tempRoot);
       std::stringstream out;
       out << "Extracting walls from cone " << i + 1 << " out of " << this->size
       << " total distinct chambers.";
-      out << "\nProcessed " << j + 1 << " out of " << this->TheObjects[i].Normals.size
+      out << "\nProcessed " << j + 1 << " out of " << this->theObjects[i].Normals.size
       << " walls of the current chamber.";
       out << "\nTotal # of distinct walls found: " << this->splittingNormals.size;
       theReport.Report(out.str());
@@ -12664,7 +12664,7 @@ std::string ConeComplex::toString(bool useHtml) {
     if (useHtml) {
       out << "<br>";
     }
-    out << this->TheObjects[i].toString(&theFormat) << "\n\n\n";
+    out << this->theObjects[i].toString(&theFormat) << "\n\n\n";
   }
   return out.str();
 }
@@ -12731,7 +12731,7 @@ bool RationalFunction::GetRelations(
       }
     }
     if (!bad) {
-      outputRelations.AddOnTop(currentPoly);
+      outputRelations.addOnTop(currentPoly);
     }
   }
   return true;
@@ -12791,7 +12791,7 @@ bool ConeComplex::findMaxLFOverConeProjective(
   outputMaximumOverEeachSubChamber.SetSize(this->size);
   Rational theMax = 0;
   for (int i = 0; i < this->size; i ++) {
-    this->TheObjects[i].GetInternalPoint(tempRoot);
+    this->theObjects[i].GetInternalPoint(tempRoot);
     bool isInitialized = false;
     for (int j = 0; j < inputLFsLastCoordConst.size; j ++) {
       if (!isInitialized || tempRoot.ScalarEuclidean(inputLFsLastCoordConst[j]) > theMax) {

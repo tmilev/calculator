@@ -79,7 +79,7 @@ void MeshTriangles::PlotGrid(int theColor) {
     pointsVector[1] = this->theTriangles[i][1];
     pointsVector[2] = this->theTriangles[i][2];
     pointsVector[3] = this->theTriangles[i][0];
-    this->theGrid.thePlots.AddOnTop(currentLinePlot);
+    this->theGrid.thePlots.addOnTop(currentLinePlot);
   }
 }
 
@@ -118,9 +118,9 @@ double MeshTriangles::GetTriangleMaxSideLength(int triangleIndex) {
   Vector<double>& secondV = this->theTriangles[triangleIndex][1];
   Vector<double>& thirdV = this->theTriangles[triangleIndex][2];
   List<Vector<double> > theSides;
-  theSides.AddOnTop(firstV - secondV);
-  theSides.AddOnTop(secondV - thirdV);
-  theSides.AddOnTop(thirdV - firstV);
+  theSides.addOnTop(firstV - secondV);
+  theSides.addOnTop(secondV - thirdV);
+  theSides.addOnTop(thirdV - firstV);
   double result = 0;
   for (int i = 0; i < theSides.size; i ++) {
     double normSquared = theSides[i][0] * theSides[i][0] + theSides[i][1] * theSides[i][1];
@@ -139,7 +139,7 @@ void MeshTriangles::AddPointFromVerticesValues(
   //MacroRegisterFunctionWithName("MeshTriangles::AddPointFromVerticesValues");
   double Delta = leftVal - rightVal;
   if (Delta == 0.0) {
-    outputAppend.AddOnTop(left);
+    outputAppend.addOnTop(left);
     return;
   }
   double contributionLeft = rightVal / Delta;
@@ -150,7 +150,7 @@ void MeshTriangles::AddPointFromVerticesValues(
   if (contributionRight < 0) {
     contributionRight *= - 1;
   }
-  outputAppend.AddOnTop(left * contributionLeft + right * contributionRight);
+  outputAppend.addOnTop(left * contributionLeft + right * contributionRight);
 }
 
 int MeshTriangles::CleanUpTrianglesReturnUpdatedCurrentIndex(int currentIndex) {
@@ -197,21 +197,21 @@ void MeshTriangles::Subdivide(int triangleIndex) {
   insideTriange[0] = (currentTriangle[1] + currentTriangle[2]) * 0.5;
   insideTriange[1] = (currentTriangle[2] + currentTriangle[0]) * 0.5;
   insideTriange[2] = (currentTriangle[0] + currentTriangle[1]) * 0.5;
-  this->theTriangles.AddOnTop(insideTriange);
-  this->trianglesUsed.AddOnTop(true);
+  this->theTriangles.addOnTop(insideTriange);
+  this->trianglesUsed.addOnTop(true);
   List<Vector<double> > newTriangle;
   newTriangle = insideTriange;
   newTriangle[0] = currentTriangle[0];
-  this->theTriangles.AddOnTop(newTriangle);
-  this->trianglesUsed.AddOnTop(true);
+  this->theTriangles.addOnTop(newTriangle);
+  this->trianglesUsed.addOnTop(true);
   newTriangle = insideTriange;
   newTriangle[1] = currentTriangle[1];
-  this->theTriangles.AddOnTop(newTriangle);
-  this->trianglesUsed.AddOnTop(true);
+  this->theTriangles.addOnTop(newTriangle);
+  this->trianglesUsed.addOnTop(true);
   newTriangle = insideTriange;
   newTriangle[2] = currentTriangle[2];
-  this->theTriangles.AddOnTop(newTriangle);
-  this->trianglesUsed.AddOnTop(true);
+  this->theTriangles.addOnTop(newTriangle);
+  this->trianglesUsed.addOnTop(true);
 }
 
 void MeshTriangles::ComputeImplicitPlotPart2() {
@@ -277,7 +277,7 @@ void MeshTriangles::ComputeImplicitPlotPart2() {
     if (theSegment.size != 2) {
       continue;
     }
-    this->theCurve.thePlots.AddOnTop(currentPlot);
+    this->theCurve.thePlots.addOnTop(currentPlot);
   }
 }
 
@@ -302,23 +302,23 @@ void MeshTriangles::ComputeImplicitPlot() {
       currentTriangle[1][0] += DeltaX;
       currentTriangle[2] = currentTriangle[1];
       currentTriangle[2][1] += DeltaY;
-      this->theTriangles.AddOnTop(currentTriangle);
+      this->theTriangles.addOnTop(currentTriangle);
       currentTriangle[1] = currentTriangle[0];
       currentTriangle[1][1] += DeltaY;
-      this->theTriangles.AddOnTop(currentTriangle);
+      this->theTriangles.addOnTop(currentTriangle);
     }
   }
   if (this->flagShowGrid) {
     this->PlotGrid(static_cast<int>(HtmlRoutines::RedGreenBlue(240, 240, 0)));
-    this->thePlot.thePlots.AddListOnTop(this->theGrid.thePlots);
+    this->thePlot.thePlots.addListOnTop(this->theGrid.thePlots);
   }
   this->ComputeImplicitPlotPart2();
   if (this->flagShowGrid) {
     this->PlotGrid(static_cast<int>(HtmlRoutines::RedGreenBlue(100, 100, 100)));
-    this->thePlot.thePlots.AddListOnTop(this->theGrid.thePlots);
+    this->thePlot.thePlots.addListOnTop(this->theGrid.thePlots);
   }
   // this->theCurve.colorRGB=HtmlRoutines::RedGreenBlue(255,0,0);
-  this->thePlot.thePlots.AddListOnTop(this->theCurve.thePlots);
+  this->thePlot.thePlots.addListOnTop(this->theCurve.thePlots);
 }
 
 bool Calculator::GetMatrixDoubles(const Expression& input, Matrix<double>& output, int DesiredNumcols) {
@@ -400,8 +400,8 @@ bool MeshTriangles::ComputePoints(
   this->theFun = input[1];
   this->knownEs = theCommands.knownDoubleConstants;
   this->knownValues = theCommands.knownDoubleConstantValues;
-  this->knownValues.AddOnTop(0);
-  this->knownValues.AddOnTop(0);
+  this->knownValues.addOnTop(0);
+  this->knownValues.addOnTop(0);
   HashedList<Expression> theFreeVars;
   if (!this->theFun.GetFreeVariables(theFreeVars, true)) {
     return theCommands << "Failed to extract free variables from: " << this->theFun.toString();
@@ -415,14 +415,14 @@ bool MeshTriangles::ComputePoints(
   Expression tempE;
   if (theFreeVars.size == 0) {
     tempE.MakeAtom("x", theCommands);
-    theFreeVars.AddOnTop(tempE);
+    theFreeVars.addOnTop(tempE);
   }
   if (theFreeVars.size == 1) {
     tempE.MakeAtom("y", theCommands);
     if (theFreeVars[0] == tempE) {
       tempE.MakeAtom("x", theCommands);
     }
-    theFreeVars.AddOnTop(tempE);
+    theFreeVars.addOnTop(tempE);
   }
   this->knownEs.AddOnTopNoRepetitionMustBeNewCrashIfNot(theFreeVars[0]);
   this->knownEs.AddOnTopNoRepetitionMustBeNewCrashIfNot(theFreeVars[1]);
@@ -693,8 +693,8 @@ bool CalculatorFunctions::innerIntegrateDefiniteIntegral(
   }
   HashedList<Expression> theVar;
   List<double> theValue;
-  theVar.AddOnTop(theVariableE);
-  theValue.AddOnTop(0);
+  theVar.addOnTop(theVariableE);
+  theValue.addOnTop(0);
   for (int i = 1; i <= 2; i ++) {
     if (theSetE[i].EvaluatesToDouble(&theValue[0])) {
       double theResult = 0;
@@ -846,7 +846,7 @@ bool CalculatorFunctions::innerSumAsOperatorToSumInternalNotation(
   }
   List<Expression> theRemaining;
   for (int i = 1; i < input.size(); i ++) {
-    theRemaining.AddOnTop(input[i]);
+    theRemaining.addOnTop(input[i]);
   }
   Expression argumentE;
   argumentE.MakeSequence(theCommands, &theRemaining);
@@ -906,7 +906,7 @@ bool CalculatorFunctions::innerSumSequence(
   }
   List<Expression> theTerms;
   for (int i = 1; i < sequenceToSum->size(); i ++) {
-    theTerms.AddOnTop((*sequenceToSum)[i]);
+    theTerms.addOnTop((*sequenceToSum)[i]);
   }
   return output.makeSum(theCommands, theTerms);
 }
@@ -923,7 +923,7 @@ bool CalculatorFunctions::innerMultiplySequence(
   }
   List<Expression> theTerms;
   for (int i = 1; i < input.size(); i ++) {
-    theTerms.AddOnTop(input[i]);
+    theTerms.addOnTop(input[i]);
   }
   return output.MakeProducT(theCommands, theTerms);
 }
@@ -1000,7 +1000,7 @@ bool CalculatorFunctions::innerSort(Calculator& theCommands, const Expression& i
   }
   sortedExpressions.Reserve(toBeSorted->size() - 1);
   for (int i = 1; i < toBeSorted->size(); i ++) {
-    sortedExpressions.AddOnTop((*toBeSorted)[i]);
+    sortedExpressions.addOnTop((*toBeSorted)[i]);
   }
   sortedExpressions.QuickSortAscending();
   return output.MakeSequence(theCommands, &sortedExpressions);
@@ -1025,7 +1025,7 @@ bool CalculatorFunctions::innerSortDescending(
   }
   sortedExpressions.Reserve(toBeSorted->size() - 1);
   for (int i = 1; i < toBeSorted->size(); i ++) {
-    sortedExpressions.AddOnTop((*toBeSorted)[i]);
+    sortedExpressions.addOnTop((*toBeSorted)[i]);
   }
   sortedExpressions.QuickSortDescending();
   return output.MakeSequence(theCommands, &sortedExpressions);
@@ -1058,19 +1058,19 @@ bool CalculatorFunctions::innerEnsureExpressionDependsOnlyOnMandatoryVariables(
   if (input[2].IsSequenceNElementS()) {
     mandatoryFreeVars.SetExpectedSize(input[2].size() - 1);
     for (int i = 1; i < input[2].size(); i ++) {
-      mandatoryFreeVars.AddOnTop(input[2][i]);
+      mandatoryFreeVars.addOnTop(input[2][i]);
     }
   } else {
-    mandatoryFreeVars.AddOnTop(input[2]);
+    mandatoryFreeVars.addOnTop(input[2]);
   }
-  allowedFreeVars.AddOnTop(mandatoryFreeVars);
+  allowedFreeVars.addOnTop(mandatoryFreeVars);
   if (input.size() > 3) {
     if (input[3].IsSequenceNElementS()) {
       for (int i = 1; i < input[3].size(); i ++) {
-        allowedFreeVars.AddOnTop(input[3][i]);
+        allowedFreeVars.addOnTop(input[3][i]);
       }
     } else {
-      allowedFreeVars.AddOnTop(input[3]);
+      allowedFreeVars.addOnTop(input[3]);
     }
   }
   presentFreeVars.SetExpectedSize(input.size() - 2);
@@ -1156,7 +1156,7 @@ bool CalculatorFunctions::innerPlotLabel(
   PlotObject thePlot;
   thePlot.dimension = labelPosition.size;
   thePlot.thePlotString = theLabel;
-  thePlot.thePointsDouble.AddOnTop(labelPosition);
+  thePlot.thePointsDouble.addOnTop(labelPosition);
   thePlot.thePlotType = "label";
   thePlot.colorJS = "black";
   return output.AssignValue(thePlot, theCommands);
@@ -1183,19 +1183,19 @@ bool CalculatorFunctions::innerPlotRectangle(
   Vector<double> currentCorner = theRectangle[0];
   Vector<double>& dimensions = theRectangle[1];
 
-  thePlot.thePointsDouble.AddOnTop(currentCorner);
+  thePlot.thePointsDouble.addOnTop(currentCorner);
   currentCorner[0] += dimensions[0];
-  thePlot.thePointsDouble.AddOnTop(currentCorner);
+  thePlot.thePointsDouble.addOnTop(currentCorner);
   currentCorner[1] += dimensions[1];
-  thePlot.thePointsDouble.AddOnTop(currentCorner);
+  thePlot.thePointsDouble.addOnTop(currentCorner);
   currentCorner[0] -= dimensions[0];
-  thePlot.thePointsDouble.AddOnTop(currentCorner);
+  thePlot.thePointsDouble.addOnTop(currentCorner);
   currentCorner[1] -= dimensions[1];
-  thePlot.thePointsDouble.AddOnTop(currentCorner);
+  thePlot.thePointsDouble.addOnTop(currentCorner);
   thePlot.colorFillJS = "cyan";
   thePlot.colorJS = "blue";
-  thePlot.thePointsDouble.AddOnTop(currentCorner);
-  thePlot.theRectangles.AddOnTop(theRectangle);
+  thePlot.thePointsDouble.addOnTop(currentCorner);
+  thePlot.theRectangles.addOnTop(theRectangle);
   thePlot.colorRGB = static_cast<int>(HtmlRoutines::RedGreenBlue(0, 0, 255));
   thePlot.colorFillRGB = static_cast<int>(HtmlRoutines::RedGreenBlue(0, 255, 255));
   return output.AssignValue(thePlot, theCommands);
@@ -1656,8 +1656,8 @@ bool CalculatorFunctions::innerPlotSegment(Calculator& theCommands, const Expres
   } else {
     theSegment.dimension = 2;
   }
-  theSegment.thePointsDouble.AddOnTop(leftV);
-  theSegment.thePointsDouble.AddOnTop(rightV);
+  theSegment.thePointsDouble.addOnTop(leftV);
+  theSegment.thePointsDouble.addOnTop(rightV);
   if (input.size() >= 5) {
     if (!input[4].EvaluatesToDouble(&theSegment.lineWidth)) {
       theSegment.lineWidth = 1;
@@ -2049,8 +2049,8 @@ bool CalculatorFunctions::innerPlotSetProjectionScreenBasis(
   resultPlot.dimension = 3;
   PlotObject thePlot;
   thePlot.thePlotType = "setProjectionScreen";
-  thePlot.thePointsDouble.AddOnTop(v1);
-  thePlot.thePointsDouble.AddOnTop(v2);
+  thePlot.thePointsDouble.addOnTop(v1);
+  thePlot.thePointsDouble.addOnTop(v2);
   resultPlot += thePlot;
   return output.AssignValue(resultPlot, theCommands);
 }
@@ -2127,14 +2127,14 @@ bool CalculatorFunctions::innerPlotSurface(Calculator& theCommands, const Expres
   vE.MakeAtom("v", theCommands);
   if (thePlot.variablesInPlay.size == 1) {
     if (thePlot.variablesInPlay.Contains(vE)) {
-      thePlot.variablesInPlay.AddOnTop(uE);
+      thePlot.variablesInPlay.addOnTop(uE);
     } else {
-      thePlot.variablesInPlay.AddOnTop(vE);
+      thePlot.variablesInPlay.addOnTop(vE);
     }
   }
   if (thePlot.variablesInPlay.size == 0) {
-    thePlot.variablesInPlay.AddOnTop(uE);
-    thePlot.variablesInPlay.AddOnTop(vE);
+    thePlot.variablesInPlay.addOnTop(uE);
+    thePlot.variablesInPlay.addOnTop(vE);
   }
   thePlot.variablesInPlay.QuickSortAscending();
   thePlot.coordinateFunctionsE.SetSize(thePlot.manifoldImmersion.size() - 1);
@@ -2430,7 +2430,7 @@ std::string GroebnerBasisComputation<coefficient>::GetSpacedMonomialsWithHighlig
         if ((*slidesToFcAnswer)[i] > 1) {
           fcAnswerSlide = (*slidesToFcAnswer)[i];
           if (slidesToHighlightMon != nullptr) {
-            (*slidesToHighlightMon)[i].AddOnTop(fcAnswerSlide);
+            (*slidesToHighlightMon)[i].addOnTop(fcAnswerSlide);
           }
         }
       }
@@ -2510,12 +2510,12 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
   MacroRegisterFunctionWithName("GroebnerBasisComputation::ComputeHighLightsFromRemainder");
   if (remainderIndex == 0) {
     for (int i = 0; i < this->allMonomials.size; i ++) {
-      this->highlightMonsRemainders[remainderIndex][i].AddOnTop(currentSlideNumber);
+      this->highlightMonsRemainders[remainderIndex][i].addOnTop(currentSlideNumber);
     }
     currentSlideNumber ++;
     for (int j = 0; j < this->theBasiS.size; j ++) {
       for (int i = 0; i < this->allMonomials.size; i ++) {
-        this->highlightMonsDivisors[j][i].AddOnTop(currentSlideNumber);
+        this->highlightMonsDivisors[j][i].addOnTop(currentSlideNumber);
       }
       currentSlideNumber ++;
     }
@@ -2541,7 +2541,7 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
     for (int i = 0; i < this->theBasiS.size; i ++) {
       this->uncoverAllMonsQuotients[i] = currentSlideNumber;
       for (int j = 0; j < this->allMonomials.size; j ++) {
-        this->highlightMonsQuotients[i][j].AddOnTop(currentSlideNumber);
+        this->highlightMonsQuotients[i][j].addOnTop(currentSlideNumber);
       }
     }
     currentSlideNumber ++;
@@ -2566,8 +2566,8 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
     &maxMonCurrentRemainder, &leadingCFCurrentRemainder, &this->thePolynomialOrder.theMonOrder
   );
   int indexCurrentRemainderLeadingMonInAllMons = this->allMonomials.GetIndex(maxMonCurrentRemainder);
-  this->highlightMonsDivisors[indexCurrentDivisor][indexCurrentDivisorLeadingMonInAllMons].AddOnTop(currentSlideNumber);
-  this->highlightMonsRemainders[remainderIndex][indexCurrentRemainderLeadingMonInAllMons].AddOnTop(currentSlideNumber);
+  this->highlightMonsDivisors[indexCurrentDivisor][indexCurrentDivisorLeadingMonInAllMons].addOnTop(currentSlideNumber);
+  this->highlightMonsRemainders[remainderIndex][indexCurrentRemainderLeadingMonInAllMons].addOnTop(currentSlideNumber);
 
   if (remainderIndex == 0) {
     this->longDivisionLog << "$\\vphantom"
@@ -2598,8 +2598,8 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
   << "}";
   currentSlideNumber ++;
   this->highlightMonsDivisors[indexCurrentDivisor][indexCurrentDivisorLeadingMonInAllMons].
-  AddOnTop(currentSlideNumber);
-  this->highlightMonsRemainders[remainderIndex][indexCurrentRemainderLeadingMonInAllMons].AddOnTop(currentSlideNumber);
+  addOnTop(currentSlideNumber);
+  this->highlightMonsRemainders[remainderIndex][indexCurrentRemainderLeadingMonInAllMons].addOnTop(currentSlideNumber);
   int indexCurrentQuotientMonInAllMons =
   this->allMonomials.GetIndex(this->intermediateHighestMonDivHighestMon.GetElement()[remainderIndex]);
   Polynomial<coefficient>& currentQuotient = this->theQuotients[indexCurrentDivisor];
@@ -2608,11 +2608,11 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
   );
   this->fcAnswerMonsQuotients[indexCurrentDivisor][indexCurrentQuotientMonInAllMons] = currentSlideNumber;
   currentSlideNumber ++;
-  this->highlightMonsQuotients[indexCurrentDivisor][indexCurrentQuotientMonInAllMons].AddOnTop(currentSlideNumber);
+  this->highlightMonsQuotients[indexCurrentDivisor][indexCurrentQuotientMonInAllMons].addOnTop(currentSlideNumber);
   for (int i = 0; i < this->theBasiS[indexCurrentDivisor].size(); i ++) {
     this->highlightMonsDivisors[indexCurrentDivisor][
       this->allMonomials.GetIndex(this->theBasiS[indexCurrentDivisor][i])
-    ].AddOnTop(currentSlideNumber);
+    ].addOnTop(currentSlideNumber);
   }
   this->uncoverAllMonsSubtracands[remainderIndex] = currentSlideNumber;
   this->longDivisionLog << "\\only<"
@@ -2633,11 +2633,11 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
   << " by divisor. "
   << "}";
   currentSlideNumber ++;
-  this->highlightMonsQuotients[indexCurrentDivisor][indexCurrentQuotientMonInAllMons].AddOnTop(currentSlideNumber);
+  this->highlightMonsQuotients[indexCurrentDivisor][indexCurrentQuotientMonInAllMons].addOnTop(currentSlideNumber);
   for (int i = 0; i < this->theBasiS[indexCurrentDivisor].size(); i ++) {
     this->highlightMonsDivisors[indexCurrentDivisor][
       this->allMonomials.GetIndex(this->theBasiS[indexCurrentDivisor][i])
-    ].AddOnTop(currentSlideNumber);
+    ].addOnTop(currentSlideNumber);
   }
   if (this->fcAnswerMonsSubtracands[remainderIndex].size != this->allMonomials.size) {
     this->fcAnswerMonsSubtracands[remainderIndex].initializeFillInObject(this->allMonomials.size, - 1);
@@ -2651,12 +2651,12 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
   for (int i = 0; i < this->intermediateRemainders.GetElement()[remainderIndex].size(); i ++) {
     this->highlightMonsRemainders[remainderIndex][
       this->allMonomials.GetIndex(this->intermediateRemainders.GetElement()[remainderIndex][i])
-    ].AddOnTop(currentSlideNumber);
+    ].addOnTop(currentSlideNumber);
   }
   for (int i = 0; i < this->intermediateSubtractands.GetElement()[remainderIndex].size(); i ++) {
     this->highlightMonsSubtracands[remainderIndex][
       this->allMonomials.GetIndex(this->intermediateSubtractands.GetElement()[remainderIndex][i])
-    ].AddOnTop(currentSlideNumber);
+    ].addOnTop(currentSlideNumber);
   }
   this->uncoverAllMonsRemainders[remainderIndex + 1] = currentSlideNumber;
   this->longDivisionLog << "\\only<" << currentSlideNumber << ", "
@@ -2665,12 +2665,12 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
   for (int i = 0; i < this->intermediateRemainders.GetElement()[remainderIndex].size(); i ++) {
     this->highlightMonsRemainders[remainderIndex][
       this->allMonomials.GetIndex(this->intermediateRemainders.GetElement()[remainderIndex][i])
-    ].AddOnTop(currentSlideNumber);
+    ].addOnTop(currentSlideNumber);
   }
   for (int i = 0; i < this->intermediateSubtractands.GetElement()[remainderIndex].size(); i ++) {
     this->highlightMonsSubtracands[remainderIndex][
       this->allMonomials.GetIndex(this->intermediateSubtractands.GetElement()[remainderIndex][i])
-    ].AddOnTop(currentSlideNumber);
+    ].addOnTop(currentSlideNumber);
   }
   if (remainderIndex + 1 >= this->intermediateRemainders.GetElement().size) {
     global.fatal << "Something is wrong: not enough intermediate remainders. " << global.fatal;

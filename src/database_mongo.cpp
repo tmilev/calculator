@@ -12,7 +12,7 @@
 QueryResultOptions Database::GetStandardProjectors(const std::string& collectionName) {
   QueryResultOptions result;
   if (collectionName == DatabaseStrings::tableUsers) {
-    result.fieldsProjectedAway.AddOnTop(DatabaseStrings::labelProblemDataJSON);
+    result.fieldsProjectedAway.addOnTop(DatabaseStrings::labelProblemDataJSON);
   }
   return result;
 }
@@ -449,7 +449,7 @@ bool MongoQuery::FindMultiple(
     std::string current(bufferOutpurStringFormat);
     bson_free(bufferOutpurStringFormat);
     if (this->maxOutputItems <= 0 || this->totalItems < this->maxOutputItems) {
-      outputString.AddOnTop(current);
+      outputString.addOnTop(current);
     }
     this->totalItems ++;
     if (this->flagFindOneOnly) {
@@ -826,7 +826,7 @@ bool Database::getLabels(
       }
       return false;
     }
-    output.AddOnTop(fieldEntries.theList[i].theString);
+    output.addOnTop(fieldEntries.theList[i].theString);
   }
   return true;
 }
@@ -946,8 +946,8 @@ bool Database::DeleteOneEntryUnsetUnsecure(
   std::string selectorString = QueryExact::getLabelFromNestedLabels(selector);
   JSData foundItem;
   QueryResultOptions options;
-  options.fieldsToProjectTo.AddListOnTop(selector);
-  options.fieldsToProjectTo.AddOnTop(selectorString);
+  options.fieldsToProjectTo.addListOnTop(selector);
+  options.fieldsToProjectTo.addOnTop(selectorString);
   bool didFindItem = Database::get().FindOneWithOptions(
     findQuery,
     options,
@@ -1198,7 +1198,7 @@ bool Database::Mongo::FetchCollectionNames(
   if (theCollectionChars != nullptr) {
     for (int i = 0; theCollectionChars[i]; i ++) {
       std::string currentCollection(theCollectionChars[i]);
-      output.AddOnTop(currentCollection);
+      output.addOnTop(currentCollection);
     }
     bson_strfreev(theCollectionChars);
     theCollectionChars = nullptr;

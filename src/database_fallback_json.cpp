@@ -82,7 +82,7 @@ bool Database::FallBack::UpdateOneNoLocks(
     index = this->reader[findQuery.collection].theList.size;
     JSData incoming;
     incoming.theType = JSData::token::tokenObject;
-    this->reader[findQuery.collection].theList.AddOnTop(incoming);
+    this->reader[findQuery.collection].theList.addOnTop(incoming);
   }
   JSData* modified = &(this->reader[findQuery.collection][index]);
   for (int i = 0; i < dataToMerge.nestedLabels.size; i ++) {
@@ -197,7 +197,7 @@ bool Database::FallBack::FetchCollectionNames(
     return false;
   }
   output.SetSize(0);
-  output.AddListOnTop(this->reader.objects.theKeys);
+  output.addListOnTop(this->reader.objects.theKeys);
   return true;
 }
 
@@ -229,10 +229,10 @@ Database::FallBack::FallBack() {
 
 void Database::FallBack::initialize() {
   this->access.CreateMe("databaseFallback", false);
-  this->knownIndices.AddOnTop({
+  this->knownIndices.addOnTop({
     DatabaseStrings::tableUsers + "." + DatabaseStrings::labelUsername
   });
-  this->knownCollectionS.AddOnTop({
+  this->knownCollectionS.addOnTop({
     DatabaseStrings::tableUsers
   });
 }
@@ -290,7 +290,7 @@ void Database::FallBack::IndexOneRecord(
       continue;
     }
     Database::FallBack::Index& currentIndex = this->indices.GetValueCreate(indexLabel);
-    currentIndex.locations.GetValueCreate(keyToIndexBy.theString).AddOnTop(row);
+    currentIndex.locations.GetValueCreate(keyToIndexBy.theString).addOnTop(row);
   }
 }
 

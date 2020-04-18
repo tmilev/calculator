@@ -200,7 +200,7 @@ bool WebWorker::ReceiveAll() {
       return false;
     }
   }
-  this->messageHead.assign(readBuffer.TheObjects, static_cast<unsigned>(numBytesInBuffer));
+  this->messageHead.assign(readBuffer.theObjects, static_cast<unsigned>(numBytesInBuffer));
   this->ParseMessageHead();
 
   if (this->requestTypE == WebWorker::requestTypes::requestPost) {
@@ -262,7 +262,7 @@ bool WebWorker::ReceiveAll() {
       this->displayUserInput = this->error;
       return false;
     }
-    bufferString.assign(readBuffer.TheObjects, static_cast<unsigned>(numBytesInBuffer));
+    bufferString.assign(readBuffer.theObjects, static_cast<unsigned>(numBytesInBuffer));
     this->messageBody += bufferString;
   }
   if (static_cast<signed>(this->messageBody.size()) != this->ContentLength) {
@@ -771,16 +771,16 @@ void WebWorker::ParseMessageHead() {
     if (this->messageHead[i] != ' ' && this->messageHead[i] != '\n' && this->messageHead[i] != '\r') {
       buffer.push_back(this->messageHead[i]);
       if (i == this->messageHead.size() - 1) {
-        this->theMessageHeaderStrings.AddOnTop(buffer);
+        this->theMessageHeaderStrings.addOnTop(buffer);
       }
     } else {
       if (buffer != "") {
-        this->theMessageHeaderStrings.AddOnTop(buffer);
+        this->theMessageHeaderStrings.addOnTop(buffer);
         buffer = "";
       }
       if (i > 0) {
         if (this->messageHead[i - 1] == '\r' && this->messageHead[i] == '\n') {
-          this->theMessageHeaderStrings.AddOnTop("\n");
+          this->theMessageHeaderStrings.addOnTop("\n");
         }
       }
     }
@@ -858,7 +858,7 @@ void WebWorker::ParseMessageHead() {
       for (; i < this->theMessageHeaderStrings.size; i ++) {
         if (this->theMessageHeaderStrings[i] == "\n")
           break;
-        this->cookies.AddOnTop(this->theMessageHeaderStrings[i]);
+        this->cookies.addOnTop(this->theMessageHeaderStrings[i]);
       }
     } else if (
       this->theMessageHeaderStrings[i] == "Connection:" ||
@@ -869,7 +869,7 @@ void WebWorker::ParseMessageHead() {
         if (this->theMessageHeaderStrings[i] == "\n") {
           break;
         }
-        this->connectionFlags.AddOnTop(this->theMessageHeaderStrings[i]);
+        this->connectionFlags.addOnTop(this->theMessageHeaderStrings[i]);
         if (
           this->theMessageHeaderStrings[i] == "keep-alive" ||
           this->theMessageHeaderStrings[i] == "Keep-Alive" ||
@@ -1017,7 +1017,7 @@ void WebWorker::SetHeader(
   this->remainingHeaderToSend.SetSize(0);
   this->remainingHeaderToSend.SetExpectedSize(static_cast<signed>(finalHeader.size()));
   for (unsigned i = 0; i < finalHeader.size(); i ++) {
-    this->remainingHeaderToSend.AddOnTop(finalHeader[i]);
+    this->remainingHeaderToSend.addOnTop(finalHeader[i]);
   }
 }
 
@@ -1276,9 +1276,9 @@ int WebWorker::ProcessFolder() {
     }
     currentStream << "</a><br>";
     if (isDir) {
-      folderLinksSanitized.AddOnTop(currentStream.str());
+      folderLinksSanitized.addOnTop(currentStream.str());
     } else {
-      fileLinksSanitized.AddOnTop(currentStream.str());
+      fileLinksSanitized.addOnTop(currentStream.str());
     }
   }
   folderLinksSanitized.QuickSortAscending();
@@ -1415,7 +1415,7 @@ int WebWorker::ProcessFile() {
     this->bufferFileIO.SetSize(static_cast<int>(numBytesRead));
     this->QueueBytesForSendingNoHeadeR(this->bufferFileIO);
     this->bufferFileIO.SetSize(bufferSize);
-    theFile.read(this->bufferFileIO.TheObjects, this->bufferFileIO.size);
+    theFile.read(this->bufferFileIO.theObjects, this->bufferFileIO.size);
     numBytesRead = theFile.gcount();
   }
   this->SendAllBytesNoHeaderS();
@@ -2735,14 +2735,14 @@ void WebServer::initListeningSockets() {
   MacroRegisterFunctionWithName("WebServer::initListeningSockets");
   this->highestSocketNumber = - 1;
   if (this->listeningSocketHTTP != - 1) {
-    this->theListeningSockets.AddOnTop(this->listeningSocketHTTP);
+    this->theListeningSockets.addOnTop(this->listeningSocketHTTP);
   }
   if (this->listeningSocketHTTPSBuiltIn != - 1) {
-    this->theListeningSockets.AddOnTop(this->listeningSocketHTTPSBuiltIn);
+    this->theListeningSockets.addOnTop(this->listeningSocketHTTPSBuiltIn);
     this->listeningSocketHTTPSDefault = this->listeningSocketHTTPSBuiltIn;
   }
   if (this->listeningSocketHTTPSOpenSSL != - 1) {
-    this->theListeningSockets.AddOnTop(this->listeningSocketHTTPSOpenSSL);
+    this->theListeningSockets.addOnTop(this->listeningSocketHTTPSOpenSSL);
     this->listeningSocketHTTPSDefault = this->listeningSocketHTTPSOpenSSL;
   }
   this->highestSocketNumber = - 1;
@@ -2851,8 +2851,8 @@ void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress)
   for (int i = 0; i < this->theWorkers.size; i ++) {
     if (this->theWorkers[i].flagInUsE) {
       if (this->theWorkers[i].userAddress == incomingAddress) {
-        theTimes.AddOnTop(this->theWorkers[i].millisecondsServerAtWorkerStart);
-        theIndices.AddOnTop(i);
+        theTimes.addOnTop(this->theWorkers[i].millisecondsServerAtWorkerStart);
+        theIndices.addOnTop(i);
       }
     }
   }
@@ -3633,8 +3633,8 @@ void WebServer::FigureOutOperatingSystem() {
     return;
   }
   List<std::string> supportedOSes;
-  supportedOSes.AddOnTop("Ubuntu");
-  supportedOSes.AddOnTop("CentOS");
+  supportedOSes.addOnTop("Ubuntu");
+  supportedOSes.addOnTop("CentOS");
   std::string commandOutput = global.externalCommandReturnOutput("cat /etc/*-release");
   if (
     commandOutput.find("ubuntu") != std::string::npos ||
@@ -4034,7 +4034,7 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv) {
   }
   ArgumentAnalyzer arguments;
   arguments.currentIndex = 1;
-  arguments.commandLineConfigurations.AddOnTop(List<std::string> ({
+  arguments.commandLineConfigurations.addOnTop(List<std::string> ({
     Configuration::portHTTP,
     Configuration::portHTTPSOpenSSL
   }));
@@ -4077,73 +4077,73 @@ void WebServer::InitializeMainHashes() {
 
 void WebServer::InitializeMainRequests() {
   MacroRegisterFunctionWithName("WebServer::InitializeMainRequests");
-  this->requestsNotNeedingLogin.AddOnTop("about");
-  this->requestsNotNeedingLogin.AddOnTop("signUp");
-  this->requestsNotNeedingLogin.AddOnTop("signUpPage");
-  this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::forgotLogin);
-  this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::compute);
-  this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::calculatorPage);
-  this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::examplesJSON);
-  this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::indicator);
-  this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::pause);
-  this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::exerciseNoLogin);
-  this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::exerciseJSON);
-  this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::templateNoLogin);
-  this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::templateJSONNoLogin);
-  this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::topicListJSONNoLogin);
-  this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::problemGiveUpNoLogin);
-  this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::problemSolutionNoLogin);
-  this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::homeworkFromSource);
-  this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::slides::source);
-  this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::slides::pdfFromSource);
-  this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::homeworkSource);
-  this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::submitExerciseNoLogin);
-  this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::submitExercisePreviewNoLogin);
-  this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::selectCourseJSON);
-  this->requestsNotNeedingLogin.AddOnTop(WebAPI::app);
-  this->requestsNotNeedingLogin.AddOnTop(WebAPI::appNoCache);
-  this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::userInfoJSON);
-  this->requestsNotNeedingLogin.AddOnTop(WebAPI::request::serverStatusJSON);
+  this->requestsNotNeedingLogin.addOnTop("about");
+  this->requestsNotNeedingLogin.addOnTop("signUp");
+  this->requestsNotNeedingLogin.addOnTop("signUpPage");
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::forgotLogin);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::compute);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::calculatorPage);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::examplesJSON);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::indicator);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::pause);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::exerciseNoLogin);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::exerciseJSON);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::templateNoLogin);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::templateJSONNoLogin);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::topicListJSONNoLogin);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::problemGiveUpNoLogin);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::problemSolutionNoLogin);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::homeworkFromSource);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::slides::source);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::slides::pdfFromSource);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::homeworkSource);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::submitExerciseNoLogin);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::submitExercisePreviewNoLogin);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::selectCourseJSON);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::app);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::appNoCache);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::userInfoJSON);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::serverStatusJSON);
 }
 
 void WebServer::InitializeMainAddresses() {
   MacroRegisterFunctionWithName("WebServer::InitializeMainAddresses");
-  this->addressStartsNotNeedingLogin.AddOnTop("favicon.ico");
-  this->addressStartsNotNeedingLogin.AddOnTop("/favicon.ico");
-  this->addressStartsNotNeedingLogin.AddOnTop("/html-common/");
-  this->addressStartsNotNeedingLogin.AddOnTop("/calculator-html/");
-  this->addressStartsNotNeedingLogin.AddOnTop("/src/");
-  this->addressStartsNotNeedingLogin.AddOnTop("/output/");
-  this->addressStartsNotNeedingLogin.AddOnTop("/css/");
-  this->addressStartsNotNeedingLogin.AddOnTop("/javascriptlibs/");
-  this->addressStartsNotNeedingLogin.AddOnTop("/MathJax-2.7-latest/");
-  this->addressStartsNotNeedingLogin.AddOnTop("/login");
-  this->addressStartsNotNeedingLogin.AddOnTop("/" + WebAPI::app);
-  this->addressStartsNotNeedingLogin.AddOnTop("/" + WebAPI::appNoCache);
-  this->addressStartsNotNeedingLogin.AddOnTop(WebAPI::request::onePageJS);
+  this->addressStartsNotNeedingLogin.addOnTop("favicon.ico");
+  this->addressStartsNotNeedingLogin.addOnTop("/favicon.ico");
+  this->addressStartsNotNeedingLogin.addOnTop("/html-common/");
+  this->addressStartsNotNeedingLogin.addOnTop("/calculator-html/");
+  this->addressStartsNotNeedingLogin.addOnTop("/src/");
+  this->addressStartsNotNeedingLogin.addOnTop("/output/");
+  this->addressStartsNotNeedingLogin.addOnTop("/css/");
+  this->addressStartsNotNeedingLogin.addOnTop("/javascriptlibs/");
+  this->addressStartsNotNeedingLogin.addOnTop("/MathJax-2.7-latest/");
+  this->addressStartsNotNeedingLogin.addOnTop("/login");
+  this->addressStartsNotNeedingLogin.addOnTop("/" + WebAPI::app);
+  this->addressStartsNotNeedingLogin.addOnTop("/" + WebAPI::appNoCache);
+  this->addressStartsNotNeedingLogin.addOnTop(WebAPI::request::onePageJS);
 
-  this->addressStartsInterpretedAsCalculatorRequest.AddOnTop("/" + WebAPI::app);
-  this->addressStartsInterpretedAsCalculatorRequest.AddOnTop(WebAPI::app);
-  this->addressStartsInterpretedAsCalculatorRequest.AddOnTop("/" + WebAPI::appNoCache);
-  this->addressStartsInterpretedAsCalculatorRequest.AddOnTop(WebAPI::appNoCache);
-  this->addressStartsInterpretedAsCalculatorRequest.AddOnTop(WebAPI::request::onePageJS);
-  this->addressStartsInterpretedAsCalculatorRequest.AddOnTop(WebAPI::request::onePageJSWithHash);
+  this->addressStartsInterpretedAsCalculatorRequest.addOnTop("/" + WebAPI::app);
+  this->addressStartsInterpretedAsCalculatorRequest.addOnTop(WebAPI::app);
+  this->addressStartsInterpretedAsCalculatorRequest.addOnTop("/" + WebAPI::appNoCache);
+  this->addressStartsInterpretedAsCalculatorRequest.addOnTop(WebAPI::appNoCache);
+  this->addressStartsInterpretedAsCalculatorRequest.addOnTop(WebAPI::request::onePageJS);
+  this->addressStartsInterpretedAsCalculatorRequest.addOnTop(WebAPI::request::onePageJSWithHash);
 
   // FORBIDDEN:
-  // this->addressStartsNotNeedingLogin.AddOnTop("logout");
+  // this->addressStartsNotNeedingLogin.addOnTop("logout");
   // Logging someone out definitely
   // requires authentication imagine someone
   // asking for logouts on your account once every second:
   // this would be fatal as proper logout resets
   // the authentication tokens.
-  this->addressStartsNotNeedingLogin.AddListOnTop(
+  this->addressStartsNotNeedingLogin.addListOnTop(
     FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash()
   );
 
-  this->addressStartsSentWithCacheMaxAge.AddOnTop("/MathJax-2.7-latest/");
-  this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common/");
+  this->addressStartsSentWithCacheMaxAge.addOnTop("/MathJax-2.7-latest/");
+  this->addressStartsSentWithCacheMaxAge.addOnTop("/html-common/");
   for (int i = 0; i < FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash().size; i ++) {
-    this->addressStartsSentWithCacheMaxAge.AddOnTop(
+    this->addressStartsSentWithCacheMaxAge.addOnTop(
       FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash()[i] +
       global.buildHeadHashWithServerTime
     );
@@ -4160,8 +4160,8 @@ void WebServer::InitializeMainFoldersInstructorSpecific() {
     Configuration::problemsFolder  ,
   });
   for (int i = 0; i < incoming.size; i ++) {
-    FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop(incoming[i]);
-    FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("/" + incoming[i]);
+    FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().addOnTop(incoming[i]);
+    FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().addOnTop("/" + incoming[i]);
   }
 }
 
@@ -4554,10 +4554,10 @@ void WebWorker::PrepareFullMessageHeaderAndFooter() {
   contentLengthStream << "\r\n";
   std::string contentLengthString = contentLengthStream.str();
   for (unsigned i = 0; i < contentLengthString.size(); i ++) {
-    this->remainingBytesToSenD.AddOnTop(contentLengthString[i]);
+    this->remainingBytesToSenD.addOnTop(contentLengthString[i]);
   }
   if (this->requestTypE != this->requestHead) {
-    this->remainingBytesToSenD.AddListOnTop(this->remainingBodyToSend);
+    this->remainingBytesToSenD.addListOnTop(this->remainingBodyToSend);
   }
   this->remainingBodyToSend.SetSize(0);
 }
@@ -4592,7 +4592,7 @@ void WebWorker::SendPending() {
 void WebWorker::QueueBytesForSendingNoHeadeR(const List<char>& bytesToSend, bool MustSendAll) {
   MacroRegisterFunctionWithName("WebWorker::QueueBytesForSendingNoHeadeR");
   (void) MustSendAll;
-  this->remainingBytesToSenD.AddListOnTop(bytesToSend);
+  this->remainingBytesToSenD.addListOnTop(bytesToSend);
 //  if (this->remainingBytesToSend.size >= 1024 * 512 || MustSendAll)
 //    this->SendAllBytes();
 }

@@ -148,11 +148,11 @@ public:
   friend std::ostream& operator<<(std::ostream& out, const Partition& data) {
     return data.IntoStream(out);
   }
-  unsigned int HashFunction() const {
+  unsigned int hashFunction() const {
     return MathRoutines::HashListInts(this->p);
   }
-  static unsigned int HashFunction(const Partition& input) {
-    return input.HashFunction();
+  static unsigned int hashFunction(const Partition& input) {
+    return input.hashFunction();
   }
 };
 
@@ -190,9 +190,9 @@ public:
   // the name MakeCanonical clashes with MakeFromMul and MakeFromTableau
   // but it seems to be typical of this project
   void MakeCanonical();
-  unsigned int HashFunction() const;
-  static unsigned int HashFunction(const PermutationR2& in) {
-    return in.HashFunction();
+  unsigned int hashFunction() const;
+  static unsigned int hashFunction(const PermutationR2& in) {
+    return in.hashFunction();
   }
   bool operator== (const PermutationR2& right) const;
   bool IsID() const;
@@ -219,7 +219,7 @@ public:
   // this type is hard to *=
   // we are returing the smallest n such that this is an element of Sn
   int MakeFromMul(const PermutationR2& left, const PermutationR2& right);
-  void MakeID(const PermutationR2& unused);
+  void makeIdentity(const PermutationR2& unused);
   // the purpose of this is compat with other element classes that need
   // to see some things before they can be a proper identity element
   PermutationR2 Inverse() {
@@ -367,9 +367,9 @@ public:
     return false;
   }
 
-  void MakeID(const SemidirectProductElement<helt, kelt, oa>& prototype) {
-    this->k.MakeID(prototype.k);
-    this->h.MakeID(prototype.h);
+  void makeIdentity(const SemidirectProductElement<helt, kelt, oa>& prototype) {
+    this->k.makeIdentity(prototype.k);
+    this->h.makeIdentity(prototype.h);
   }
 
   bool IsID() const {
@@ -400,11 +400,11 @@ public:
   friend std::ostream& operator<<(std::ostream& s, const SemidirectProductElement<helt, kelt, oa>& in) {
     return s << in.toString();
   }
-  unsigned int HashFunction() const {
-    return 2 * this->h.HashFunction() + 3 * this->k.HashFunction();
+  unsigned int hashFunction() const {
+    return 2 * this->h.hashFunction() + 3 * this->k.hashFunction();
   }
-  static unsigned int HashFunction(const SemidirectProductElement<helt, kelt, oa>& in) {
-    return in.HashFunction();
+  static unsigned int hashFunction(const SemidirectProductElement<helt, kelt, oa>& in) {
+    return in.hashFunction();
   }
   bool HasDifferentConjugacyInvariantsFrom(const SemidirectProductElement& other) const {
     (void) other;//avoid unused parameter warning, portable
@@ -440,10 +440,10 @@ void SemidirectProductGroup<hg, kg, helt, kelt, oa>::init(hg* inH, kg* inK) {
   int i = 0;
   for (; i < this->H.generators.size; i ++) {
     this->generators[i].h = this->H.generators[i];
-    this->generators[i].k = this->K.MakeID();
+    this->generators[i].k = this->K.makeIdentity();
   }
   for (; i < this->H.generators.size + this->K.generators.size; i ++) {
-    this->generators[i].h = this->H.MakeID();
+    this->generators[i].h = this->H.makeIdentity();
     this->generators[i].k = this->K.generators[i-this->H.generators.size];
   }
 }
@@ -527,7 +527,7 @@ public:
     }
     return true;
   }
-  void MakeID(const ElementZ2N& unused) {
+  void makeIdentity(const ElementZ2N& unused) {
     (void) unused;//avoid unused parameter warning, portable
     this->bits.SetSize(0);
   }
@@ -592,11 +592,11 @@ public:
     return s << in.toString();
   }
 
-  unsigned int HashFunction() const {
-    return ElementZ2N::HashFunction(*this);
+  unsigned int hashFunction() const {
+    return ElementZ2N::hashFunction(*this);
   }
-  static unsigned int HashFunction(const ElementZ2N& in) {
-    return in.bits.HashFunction();
+  static unsigned int hashFunction(const ElementZ2N& in) {
+    return in.bits.hashFunction();
   }
   template <typename coefficient>
   void GetCharacteristicPolyStandardRepresentation(Polynomial<coefficient>& p) {
@@ -640,8 +640,8 @@ void ElementHyperoctahedralGroupR2::MakeFromString(const std::string& in);
 
 //class HyperoctahedralElementR2: public SemidirectProductElement<PermutationR2,ElementZ2N,HyperoctahedralBitsAutomorphism>
 //{
-//  unsigned int HashFunction() const {return SemidirectProductElement<PermutationR2,ElementZ2N,HyperoctahedralBitsAutomorphism>::HashFunction();}
-//  static unsigned int HashFunction(const HyperoctahedralElementR2& in) {return in.HashFunction();}
+//  unsigned int hashFunction() const {return SemidirectProductElement<PermutationR2,ElementZ2N,HyperoctahedralBitsAutomorphism>::hashFunction();}
+//  static unsigned int hashFunction(const HyperoctahedralElementR2& in) {return in.hashFunction();}
 //};
 
 class HyperoctahedralGroupData {
@@ -718,7 +718,7 @@ std::ostream& operator<<(std::ostream& out, const HyperoctahedralGroupData& data
   void MakeFromMul(const ElementHyperoctahedralGroup& left, const ElementHyperoctahedralGroup& right);
   // for compatibility with element classes that need a prototype to be able to
   // turn themselves into the identity element
-  void MakeID(const ElementHyperoctahedralGroup& unused);
+  void makeIdentity(const ElementHyperoctahedralGroup& unused);
   bool IsID() const;
   void Invert();
 
@@ -733,9 +733,9 @@ std::ostream& operator<<(std::ostream& out, const HyperoctahedralGroupData& data
   void GetCharacteristicPolyStandardRepresentation(Polynomial<Rational>& out) const;
   bool operator== (const ElementHyperoctahedralGroup& right) const;
   bool operator>(const ElementHyperoctahedralGroup& right) const;
-  unsigned int HashFunction() const;
-  static  unsigned int HashFunction(const ElementHyperoctahedralGroup& in) {
-                                        return in.HashFunction();}
+  unsigned int hashFunction() const;
+  static  unsigned int hashFunction(const ElementHyperoctahedralGroup& in) {
+                                        return in.hashFunction();}
 
   template <typename somestream>
   somestream& IntoStream(somestream& out) const;
@@ -1184,7 +1184,7 @@ class ElementFiniteGroup: public GroupConjugacyImplementation<ElementFiniteGroup
     global.fatal << "Inversion function not available. " << global.fatal;
     return out;
   }
-  ElementFiniteGroup MakeID(const ElementFiniteGroup& prototype) {
+  ElementFiniteGroup makeIdentity(const ElementFiniteGroup& prototype) {
     ElementFiniteGroup out;
     out.mul = prototype.mul;
     out.inv = prototype.inv;
@@ -1368,7 +1368,7 @@ void Tableau::YoungSymmetrizerAction(
     (*rs).ActOnTensor(tmp, in);
     rst += tmp;
   }
-  out.MakeZero();
+  out.makeZero();
   List<List<int> > columns;
   this->GetColumns(columns);
   cs.Initialize(columns);
@@ -1479,9 +1479,9 @@ bool FiniteGroup<elementSomeGroup>::IsID(elementSomeGroup& g) {
 }
 
 template <typename elementSomeGroup>
-void FiniteGroup<elementSomeGroup>::MakeID(elementSomeGroup& e) {
+void FiniteGroup<elementSomeGroup>::makeIdentity(elementSomeGroup& e) {
   if (this->generators.size != 0) {
-    e.MakeID(this->generators[0]);
+    e.makeIdentity(this->generators[0]);
   }
 }
 
@@ -1862,7 +1862,7 @@ void FiniteGroup<elementSomeGroup>::VerifyWords() {
     List<int> word;
     GetWord(this->theElements[i], word);
     elementSomeGroup g;
-    this->MakeID(g);
+    this->makeIdentity(g);
     for (int j = 0; j < word.size; j ++) {
       g = g * this->generators[word[j]];
     }

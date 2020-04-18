@@ -312,16 +312,16 @@ public:
     }
     return theAnswer;
   }
-  unsigned int HashFunction() const {
-    return this->::LinearCombination<MonomialTensorGeneralizedVermas<coefficient>, coefficient >::HashFunction();
+  unsigned int hashFunction() const {
+    return this->::LinearCombination<MonomialTensorGeneralizedVermas<coefficient>, coefficient >::hashFunction();
   }
   ElementTensorsGeneralizedVermas<coefficient>& operator=(const ElementTensorsGeneralizedVermas<coefficient>& other) {
     this->::LinearCombination<MonomialTensorGeneralizedVermas<coefficient>, coefficient>::operator=(other);
     return *this;
   }
   ElementTensorsGeneralizedVermas<coefficient>& operator=(const ElementSumGeneralizedVermas<coefficient>& other);
-  static unsigned int HashFunction(const ElementTensorsGeneralizedVermas<coefficient>& input) {
-    return input.HashFunction();
+  static unsigned int hashFunction(const ElementTensorsGeneralizedVermas<coefficient>& input) {
+    return input.hashFunction();
   }
 };
 

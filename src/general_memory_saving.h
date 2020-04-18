@@ -48,14 +48,14 @@ public:
     }
     return this->GetElementConst() == other.GetElementConst();
   }
-  int HashFunction() const {
+  int hashFunction() const {
     if (this->IsZeroPointer()) {
       return 0;
     }
-    return this->GetElementConst().HashFunction();
+    return this->GetElementConst().hashFunction();
   }
-  static inline int HashFunction(const MemorySaving<Object>& input) {
-    return input.HashFunction();
+  static inline int hashFunction(const MemorySaving<Object>& input) {
+    return input.hashFunction();
   }
   bool IsZeroPointer() const {
     return this->theValue == 0;

@@ -87,8 +87,8 @@ void WeylGroupData::ComputeInitialIrreps() {
 
 // This is dumb, but i couldnt figure out what else to do
 template<> // haha wat
-unsigned int VectorSpace<Rational>::HashFunction(const VectorSpace<Rational>& in) {
-  return in.fastbasis.HashFunction();
+unsigned int VectorSpace<Rational>::hashFunction(const VectorSpace<Rational>& in) {
+  return in.fastbasis.hashFunction();
 }
 // whenever i figure out cxx i can get rid of this.  but im probably jst
 // going to define this for every other field
@@ -354,7 +354,7 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> >
   for (int cfi = 0; cfi <G->ccCount; cfi ++) {
      ClassFunction<coefficient> cf;
       cf.G = G;
-      cf.MakeZero();
+      cf.makeZero();
       cf[cfi] = 1;
       global.Comments << "getting matrix " << cf << "\n";
       Matrix<coefficient> A;
@@ -380,7 +380,7 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> >
   List<List<Vector<coefficient> > > es;
   for (int cfi = this->ownerGroup->ConjugacyClassCount() - 1; cfi >= 0; cfi --) {
     ClassFunction<somegroup, coefficient> cf;
-    cf.MakeZero(*this->ownerGroup);
+    cf.makeZero(*this->ownerGroup);
     cf[cfi] = 1;
     global.Comments << "getting matrix " << cf << "\n";
     Matrix<coefficient> A;
@@ -731,7 +731,7 @@ List<Vector<coefficient> > DestructiveColumnSpace(Matrix<coefficient>& M) {
   bool zerov;
   for (int i = 0; i < M.NumRows; i ++) {
     Vector<coefficient> v;
-    v.MakeZero(M.NumCols); // initializing is not necessary
+    v.makeZero(M.NumCols); // initializing is not necessary
     zerov = true;
     for (int j = 0; j < M.NumCols; j ++) {
       v[j] = M.elements[i][j];
@@ -778,7 +778,7 @@ List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational>& M, int checkD
 template <typename coefficient>
 Vector<coefficient> PutInBasis(const Vector<coefficient>& v, const List<Vector<coefficient> >& B) {
   Vector<coefficient> w;
-  w.MakeZero(B.size);
+  w.makeZero(B.size);
   Matrix<coefficient> M;
   M.MakeZeroMatrix(B.size);
   for (int i = 0; i < B.size; i ++) {
@@ -794,7 +794,7 @@ Vector<coefficient> PutInBasis(const Vector<coefficient>& v, const List<Vector<c
   M.Invert();
   Vector<coefficient> v2 = M * w;
   Vector<coefficient> v3;
-  v3.MakeZero(v.size);
+  v3.makeZero(v.size);
   for (int i = 0; i < B.size; i ++) {
     v3 += B[i] * v2[i];
   }
@@ -810,7 +810,7 @@ ElementWeylGroupRing<coefficient> ActOnGroupRing(
   ElementWeylGroup& theElement, const ElementWeylGroupRing<coefficient>& v
 ) {
   ElementWeylGroupRing<coefficient> out;
-  out.MakeZero();
+  out.makeZero();
   for (int i = 0; i < v.size(); i ++) {
     out.AddMonomial(v.coefficients[i], theElement * v[i]);
   }
@@ -868,7 +868,7 @@ Matrix<Rational> MatrixInBasis(
   List<Vector<Rational> > rows;
   for (int i = 0; i < B.size; i ++) {
     Vector<Rational> v;
-    v.MakeZero(B[0].size);
+    v.makeZero(B[0].size);
     rows.AddOnTop(v);
   }
   for (int i1 = 0; i1 < X.G->ConjugacyClassCount(); i1 ++) {
@@ -1002,7 +1002,7 @@ void SubgroupDataWeylGroup::ComputeTauSignature() {
   this->tauSignature.SetSize(this->theSubgroupData.theGroup->ConjugacyClassCount());
 
   Vector<Rational> XiS;
-  XiS.MakeZero(this->theSubgroupData.theSubgroup->conjugacyClasseS.size);
+  XiS.makeZero(this->theSubgroupData.theSubgroup->conjugacyClasseS.size);
   for (int i = 0; i < this->theSubgroupData.theGroup->conjugacyClasseS.size; i ++) {
     ClassFunction<FiniteGroup<ElementWeylGroup>, Rational>& XiG =
     this->theWeylData->theGroup.characterTable[i];
@@ -1049,7 +1049,7 @@ void SubgroupDataRootReflections::InitGenerators() {
   MacroRegisterFunctionWithName("SubgroupRootReflections::InitGenerators");
   if (this->theDynkinType.GetRank() == 0) {
     this->theSubgroupData.theSubgroup->generators.SetSize(1);
-    this->theSubgroupData.theSubgroup->generators[0].MakeID(*this->theSubgroupData.theGroup);
+    this->theSubgroupData.theSubgroup->generators[0].makeIdentity(*this->theSubgroupData.theGroup);
     return;
   }
   int d = this->SubCartanSymmetric.NumRows;

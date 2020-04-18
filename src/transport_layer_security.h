@@ -130,8 +130,8 @@ public:
   CipherSuiteSpecification();
   CipherSuiteSpecification(TransportLayerSecurityServer* owner, int inputType);
   std::string toString() const;
-  static unsigned int HashFunction(const CipherSuiteSpecification& input);
-  unsigned int HashFunction() const;
+  static unsigned int hashFunction(const CipherSuiteSpecification& input);
+  unsigned int hashFunction() const;
 };
 
 class SignatureAlgorithmSpecification {

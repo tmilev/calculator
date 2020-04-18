@@ -246,17 +246,17 @@ public:
     }
   }
   void MakeEi(int DesiredDimension, int NonZeroIndex) {
-    this->MakeZero(DesiredDimension);
+    this->makeZero(DesiredDimension);
     (*this)[NonZeroIndex] = 1;
   }
-  inline static unsigned int HashFunction(const Vector<coefficient>& input) {
-    return input.HashFunction();
+  inline static unsigned int hashFunction(const Vector<coefficient>& input) {
+    return input.hashFunction();
   }
-  unsigned int HashFunction() const {
+  unsigned int hashFunction() const {
     unsigned int result = 0;
     int theSize = MathRoutines::Minimum(this->size, SomeRandomPrimesSize);
     for (int i = 0; i < theSize; i ++) {
-      result += this->TheObjects[i].HashFunction() * ::SomeRandomPrimes[i];
+      result += this->TheObjects[i].hashFunction() * ::SomeRandomPrimes[i];
     }
     return result;
   }
@@ -286,7 +286,7 @@ public:
     }
     return false;
   }
-  void MakeZero(int theDim) {
+  void makeZero(int theDim) {
     this->SetSize(theDim);
     for (int i = 0; i < theDim; i ++) {
       (*this)[i] = 0;
@@ -632,7 +632,7 @@ bool Vector<coefficient>::IsProportionalTo(
   }
   if (IndexFirstNonZero == - 1) {
     if (input.IsEqualToZero()) {
-      outputTimesMeEqualsInput.MakeZero();
+      outputTimesMeEqualsInput.makeZero();
       return true;
     }
     return false;
@@ -762,11 +762,11 @@ class Vectors: public List<Vector<coefficient> > {
     return out.str();
   }
   int ArrangeFirstVectorsBeOfMaxPossibleRank(Matrix<coefficient>& bufferMat, Selection& bufferSel);
-  static unsigned int HashFunction(const Vectors<coefficient>& input) {
-    return input.HashFunction();
+  static unsigned int hashFunction(const Vectors<coefficient>& input) {
+    return input.hashFunction();
   }
-  unsigned int HashFunction() const {
-    return this->::List<Vector<coefficient> >::HashFunction();
+  unsigned int hashFunction() const {
+    return this->::List<Vector<coefficient> >::hashFunction();
   }
   bool HasAnElementWithPositiveScalarProduct(const Vector<coefficient>& input) const {
     for (int i = 0; i < this->size; i ++) {
@@ -831,7 +831,7 @@ class Vectors: public List<Vector<coefficient> > {
     output /= this->size;
   }
   void sum(Vector<coefficient>& output, int resultDim) const {
-    output.MakeZero(resultDim);
+    output.makeZero(resultDim);
     for (int i = 0; i < this->size; i ++) {
       output += this->TheObjects[i];
     }
@@ -1126,7 +1126,7 @@ bool Vector<coefficient>::GetIntegralCoordsInBasisIfTheyExist(
   if (this == &output) {
     global.fatal << "Output not allowed to coincide with this object" << global.fatal;
   }
-  output.MakeZero(inputBasis.size);
+  output.makeZero(inputBasis.size);
   theCombination = *this;
   int col = 0;
   for (int i = 0; i < inputBasis.size; i ++) {
@@ -1215,9 +1215,9 @@ public:
   void toString(std::string& output);
   //void InduceFromFacet(Facet& input);
   //the below returns false if the projection is not of full dimension
-  unsigned int HashFunction() const;
-  static inline unsigned int HashFunction(const affineHyperplane& input) {
-    return input.HashFunction();
+  unsigned int hashFunction() const;
+  static inline unsigned int hashFunction(const affineHyperplane& input) {
+    return input.hashFunction();
   }
   //  bool ProjectFromFacet(Facet& input);
   bool ProjectFromFacetNormal(Vector<coefficient>& input);
@@ -1263,7 +1263,7 @@ bool affineHyperplane<coefficient>::ProjectFromFacetNormal(Vector<coefficient>& 
   if (tempI == input.size - 1) {
     return false;
   }
-  this->affinePoint.MakeZero(input.size);
+  this->affinePoint.makeZero(input.size);
   this->affinePoint.SetSize(input.size - 1);
   this->affinePoint[tempI] = input[input.size - 1];
   this->affinePoint[tempI].Minus();
@@ -1314,13 +1314,13 @@ void affineHyperplane<coefficient>::toString(std::string& output) {
 }
 
 template <class coefficient>
-unsigned int affineHyperplane<coefficient>::HashFunction() const {
+unsigned int affineHyperplane<coefficient>::hashFunction() const {
   // warning: if normal gets streched, the hashfunction should not change!
   Vector<Rational> tempNormal;
   tempNormal = this->normal;
   tempNormal.ScaleNormalizeFirstNonZero();
   Rational tempRat = this->normal.ScalarEuclidean(this->affinePoint);
-  return this->normal.HashFunction() + tempRat.HashFunction();
+  return this->normal.hashFunction() + tempRat.hashFunction();
 }
 
 class affineHyperplanes: public List<affineHyperplane<Rational> > {
@@ -1335,9 +1335,9 @@ public:
 class affineCone {
 public:
   affineHyperplanes theWalls;
-  unsigned int HashFunction() const;
-  inline static unsigned int HashFunction(const affineCone& input) {
-    return input.HashFunction();
+  unsigned int hashFunction() const;
+  inline static unsigned int hashFunction(const affineCone& input) {
+    return input.hashFunction();
   }
   int GetDimension();
   void SuperimposeAffineCones(affineCones& theOtherComplex);

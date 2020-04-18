@@ -1600,7 +1600,7 @@ void DrawingVariables::drawCoordSystemBuffer(DrawingVariables& TDV, int theDimen
   MacroRegisterFunctionWithName("DrawingVariables::drawCoordSystemBuffer");
   Vector<Rational> tempRoot;
   Vector<Rational> zeroRoot;
-  zeroRoot.MakeZero(theDimension);
+  zeroRoot.makeZero(theDimension);
   std::string colorText ="#64c064";
   for (int i = 0; i < theDimension; i ++) {
     tempRoot.MakeEi(theDimension, i);
@@ -1663,7 +1663,7 @@ void DrawingVariables::ProjectOnToHyperPlaneGraphics(Vector<Rational>& input, Ve
   output = input;
   Vector<Rational> normal; Vector<Rational> basepoint;
   Rational tempRat2, tempRat, tempRat3;
-  normal.MakeZero(input.size);
+  normal.makeZero(input.size);
   for (int i = 0; i < input.size; i ++) {
     if (input[i].IsPositiveOrZero()) {
       normal[i] += 1;
@@ -1671,7 +1671,7 @@ void DrawingVariables::ProjectOnToHyperPlaneGraphics(Vector<Rational>& input, Ve
       normal[i] += - 1;
     }
   }
-  basepoint.MakeZero(input.size);
+  basepoint.makeZero(input.size);
   basepoint[0].AssignInteger(1);
   if (input[0].IsNegative()) {
     basepoint.Minus();
@@ -1684,7 +1684,7 @@ void DrawingVariables::ProjectOnToHyperPlaneGraphics(Vector<Rational>& input, Ve
     tempRat3.DivideBy(tempRat2);
     output *= tempRat3;
   } else {
-    output.MakeZero(input.size);
+    output.makeZero(input.size);
   }
 }
 
@@ -2670,7 +2670,7 @@ void Selection::operator=(const Selection& right) {
   this->CardinalitySelection = right.CardinalitySelection;
 }
 
-unsigned int Selection::HashFunction() const {
+unsigned int Selection::hashFunction() const {
   int tempMin = MathRoutines::Minimum(SomeRandomPrimesSize, this->MaxSize);
   unsigned int result = 0;
   for (int i = 0; i < tempMin; i ++) {
@@ -3263,7 +3263,7 @@ void PartFraction::ApplyGeneralizedSzenesVergneFormulA(
   tempFrac.RelevanceIsComputed = false;
   Polynomial<LargeInteger> tempP;
   Polynomial<LargeInteger> ComputationalBufferCoefficient;
-  output.MakeZero();
+  output.makeZero();
   int theDim = startingVectors[0].size;
   SelectionWithDifferentMaxMultiplicities TheBigBadIndexingSet;
   TheBigBadIndexingSet.initPart1(theSelectedIndices.size);
@@ -3331,7 +3331,7 @@ void PartFraction::ApplySzenesVergneFormulA(
   tempFrac.RelevanceIsComputed = false;
   Polynomial<LargeInteger> tempP, CoefficientBuffer;
   MonomialP tempM;
-  output.MakeZero();
+  output.makeZero();
   int theDim = startingVectors[0].size;
   CoefficientBuffer.makeOne(theDim);
   for (int i = 0; i < theSelectedIndices.size; i ++) {
@@ -3372,7 +3372,7 @@ void PartFraction::decomposeAMinusNB(
   this->GetAlphaMinusNBetaPoly(owner, indexA, indexB, n, AminusNbetaPoly);
   int powerA = (*this)[indexA].Multiplicities[0];
   int powerB = (*this)[indexB].Multiplicities[0];
-  output.MakeZero();
+  output.makeZero();
   this->PrepareFraction(indexA, indexB, indexAminusNB, true, tempFrac, AminusNbetaPoly, commonPoly);
   for (int i = powerB; i >= 1; i --) {
     LargeInteger tempInt = MathRoutines::NChooseK(powerA + powerB - i - 1, powerA - 1);
@@ -3414,7 +3414,7 @@ void PartFraction::ComputeIndicesNonZeroMults() {
 }
 
 void PartFraction::GetAlphaMinusNBetaPoly(PartFractions& owner, int indexA, int indexB, int n, Polynomial<LargeInteger>& output) {
-  output.MakeZero();
+  output.makeZero();
   MonomialP tempM;
   tempM.makeOne(owner.AmbientDimension);
   for (int i = 0; i < n; i ++) {
@@ -3433,7 +3433,7 @@ void PartFraction::GetNElongationPoly(
   Polynomial<LargeInteger>& output,
   int theDimension
 ) {
-  output.MakeZero();
+  output.makeZero();
   MonomialP tempM;
   tempM.makeOne(theDimension);
   if (LengthOfGeometricSeries > 0) {
@@ -3466,7 +3466,7 @@ void PartFraction::MakePolynomialFromOneNormal(
   Rational tempRat, tempRat2;
   Polynomial<Rational> tempP;
   Vector<Rational> shiftRationalVector;
-  shiftRationalVector.MakeZero(normal.size);
+  shiftRationalVector.makeZero(normal.size);
   for (int i = 0; i < normal.size; i ++) {
     shiftRationalVector[i] = shiftRational(i);
   }
@@ -3527,10 +3527,10 @@ void PartFraction::init(int numRoots) {
 PartFraction::~PartFraction() {
 }
 
-unsigned int PartFraction::HashFunction() const {
+unsigned int PartFraction::hashFunction() const {
   unsigned int result = 0;
   for (int i = 0; i < this->size; i ++) {
-    result += SomeRandomPrimes[i] * this->TheObjects[i].HashFunction();
+    result += SomeRandomPrimes[i] * this->TheObjects[i].hashFunction();
   }
   return result;
 }
@@ -3579,7 +3579,7 @@ void PartFractions::PrepareCheckSums() {
 }
 
 void PartFractions::initFromOtherPartFractions(PartFractions& input) {
-  this->MakeZero();
+  this->makeZero();
   this->startingVectors = input.startingVectors;
   this->IndexLowestNonProcessed = 0;
   this->IndexCurrentlyProcessed = 0;
@@ -3634,7 +3634,7 @@ bool PartFractions::splitPartial() {
   LinearCombination<PartFraction, Polynomial<LargeInteger> > buffer;
   PartFractions reducedForGood;
   Polynomial<LargeInteger> currentCoeff;
-  reducedForGood.MakeZero();
+  reducedForGood.makeZero();
   if (this->flagUsingCheckSum) {
     this->ComputeOneCheckSum(this->CheckSum);
   }
@@ -3839,7 +3839,7 @@ void PartFraction::ReduceMonomialByMonomial(PartFractions& owner, int myIndex, V
 
     }
     tempFrac.AssignDenominatorOnly(*this);
-    tempFrac.Coefficient.MakeZero(this->Coefficient.NumVars);
+    tempFrac.Coefficient.makeZero(this->Coefficient.NumVars);
     tempFrac.Coefficient.AddMonomial(this->Coefficient[k], this->Coefficient.theCoeffs[k]);
     if (tempMat.RowEchelonFormToLinearSystemSolution(tempSel, matColumn, matLinComb)) {
       tempMon = this->Coefficient[k];
@@ -3875,7 +3875,7 @@ void PartFraction::ReduceMonomialByMonomial(PartFractions& owner, int myIndex, V
         if (this->flagAnErrorHasOccurredTimeToPanic) {
           tempFracs.initFromOtherPartFractions(owner);
           tempFrac.AssignDenominatorOnly(*this);
-          tempFrac.Coefficient.MakeZero(owner.AmbientDimension);
+          tempFrac.Coefficient.makeZero(owner.AmbientDimension);
           tempFrac.Coefficient.AddMonomial(this->Coefficient[k], 1);
           tempFrac.ComputeOneCheckSum(owner, tempDiff, owner.AmbientDimension);
         }
@@ -3923,7 +3923,7 @@ void PartFraction::ReduceMonomialByMonomialModifyOneMonomial(
   (void) Accum; (void) thePowers; (void) thePowersSigned; (void) input; (void) inputCoeff;
   /*Polynomial<LargeInt>& theNumerator = global.PolyLargeIntPartFracBuffer5.GetElement();
   Polynomial<LargeInt>& tempP = global.PolyLargeIntPartFracBuffer6.GetElement();
-  theNumerator.MakeZero(Accum.AmbientDimension);
+  theNumerator.makeZero(Accum.AmbientDimension);
   theNumerator.AddMonomial(input, inputCoeff);
   if (thePowersSigned.size != thePowers.Multiplicities.size)
     global.fatal << global.fatal;
@@ -3969,7 +3969,7 @@ void PartFraction::GetPolyReduceMonomialByMonomial(
   }
   MonomialP tempMon;
   tempMon.makeOne(owner.AmbientDimension);
-  output.MakeZero();
+  output.makeZero();
   LargeInteger theCoeff = 1;
   if (StartMonomialPower > 0) {
     if (DenPowerReduction != startDenominatorPower) {
@@ -4181,7 +4181,7 @@ void PartFractions::MakeProgressVPFcomputation() {
 }
 
 void PartFractions::ComputeOneCheckSum(Rational& output) {
-  output.MakeZero();
+  output.makeZero();
   Vector<Rational> CheckSumRoot = oneFracWithMultiplicitiesAndElongations::GetCheckSumRoot(this->AmbientDimension);
   ProgressReport theReport;
   ProgressReport theReport2;
@@ -4205,7 +4205,7 @@ void PartFractions::ComputeOneCheckSum(Rational& output) {
 }
 
 void PartFractions::initCommon() {
-  this->MakeZero();
+  this->makeZero();
   this->startingVectors.Clear();
   this->flagInitialized = false;
   this->SplitStepsCounter = 1;
@@ -4262,7 +4262,7 @@ void PartFractions::RemoveRedundantShortRootsClassicalRootSystem(Vector<Rational
   for (int i = 0; i < this->size; i ++) {
     tempFrac.Assign(this->TheObjects[i]);
     if (tempFrac.RemoveRedundantShortRootsClassicalRootSystem(*this, Indicator, buffer, this->AmbientDimension)) {
-      this->TheObjects[i].Coefficient.MakeZero(this->AmbientDimension);
+      this->TheObjects[i].Coefficient.makeZero(this->AmbientDimension);
       this->AddAlreadyReduced(tempFrac, Indicator);
     }
     if (this->flagMakingProgressReport) {
@@ -4396,7 +4396,7 @@ void PartFractions::ComputeKostantFunctionFromWeylGroup(
   }
   if (WeylGroupLetter == 'D') {
     Vector<Rational> tempRoot;
-    tempRoot.MakeZero(this->AmbientDimension);
+    tempRoot.makeZero(this->AmbientDimension);
     tempRoot[this->AmbientDimension - 1] = 1;
     tempRoot[this->AmbientDimension - 2] = - 1;
     theVPbasis.AddOnTop(tempRoot);
@@ -4426,7 +4426,7 @@ void PartFractions::ComputeKostantFunctionFromWeylGroup(
   if (ChamberIndicator != nullptr) {
     tempRoot = *ChamberIndicator;
   } else {
-    tempRoot.MakeZero(this->AmbientDimension);
+    tempRoot.makeZero(this->AmbientDimension);
   }
   if (!this->GetVectorPartitionFunction(output, tempRoot)) {
     this->ComputeDebugStringNoNumerator();
@@ -4439,7 +4439,7 @@ void oneFracWithMultiplicitiesAndElongations::operator=(oneFracWithMultiplicitie
   this->Elongations.CopyFromLight(right.Elongations);
 }
 
-unsigned int oneFracWithMultiplicitiesAndElongations::HashFunction() const {
+unsigned int oneFracWithMultiplicitiesAndElongations::hashFunction() const {
   return static_cast<unsigned>(this->GetTotalMultiplicity());
 }
 
@@ -5008,7 +5008,7 @@ void DynkinType::GetOuterAutosGeneratorsOneTypeActOnVectorColumn(
     return;
   }
   for (int i = 0; i < multiplicity - 1; i ++) {
-    directSummand.MakeZero();
+    directSummand.makeZero();
     for (int j = 0; j < theType.theRank; j ++) {
       directSummand.AddMonomial(MonomialMatrix(j, theType.theRank + j), 1);
       directSummand.AddMonomial(MonomialMatrix(theType.theRank + j, j), 1);
@@ -5227,7 +5227,7 @@ void DynkinType::MakeSimpleType(char type, int rank, const Rational* inputFirstC
   DynkinSimpleType theMon;
   Rational cartanSymmetricInvScale = (inputFirstCoRootSqLength == nullptr ? 1 : *inputFirstCoRootSqLength);
   theMon.MakeArbitrary(type, rank, cartanSymmetricInvScale);
-  this->MakeZero();
+  this->makeZero();
   this->AddMonomial(theMon, 1);
 }
 
@@ -5335,7 +5335,7 @@ void DynkinType::SortTheDynkinTypes() {
   List<DynkinSimpleType> sortedTypes;
   this->GetSortedDynkinTypes(sortedTypes);
   DynkinType finalMe;
-  finalMe.MakeZero();
+  finalMe.makeZero();
   for (int i = 0; i < sortedTypes.size; i ++) {
     finalMe.AddMonomial(sortedTypes[i], this->GetMonomialCoefficient(sortedTypes[i]));
   }
@@ -5685,7 +5685,7 @@ Rational DynkinSimpleType::GetDefaultRootLengthSquared(int rootIndex) const {
 void DynkinSimpleType::GetEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Rational>& output) {
   if (WeylLetter == 'A') {
     output.init(WeylRank + 1, WeylRank);
-    output.MakeZero();
+    output.makeZero();
     for (int i = 0; i < WeylRank; i ++) {
       output(i, i) = 1;
       output(i + 1, i) = - 1;
@@ -5694,7 +5694,7 @@ void DynkinSimpleType::GetEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Ra
   }
   if (WeylLetter == 'B') {
     output.init(WeylRank, WeylRank);
-    output.MakeZero();
+    output.makeZero();
     for (int i = 0; i < WeylRank - 1; i ++) {
       output(i, i) = 1;
       output(i + 1, i) = - 1;
@@ -5703,7 +5703,7 @@ void DynkinSimpleType::GetEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Ra
   }
   if (WeylLetter == 'C') {
     output.init(WeylRank, WeylRank);
-    output.MakeZero();
+    output.makeZero();
     for (int i = 0; i < WeylRank - 1; i ++) {
       output(i, i) = 1;
       output(i + 1, i) = - 1;
@@ -5712,7 +5712,7 @@ void DynkinSimpleType::GetEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Ra
   }
   if (WeylLetter == 'D') {
     output.init(WeylRank, WeylRank);
-    output.MakeZero();
+    output.makeZero();
     for (int i = 0; i < WeylRank - 1; i ++) {
       output(i, i) = 1;
       output(i + 1, i) = - 1;
@@ -5727,7 +5727,7 @@ void DynkinSimpleType::GetEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Ra
     //Humpreys, Introduction to Lie algebras and representation theory, page 65
     //first comes first root, then the sticky part, then string with the rest of the roots.
     output.init(8, WeylRank);
-    output.MakeZero();
+    output.makeZero();
     //first simple root: - 1/2e_1- 1/2e_8+ 1/2e_2+ 1/2e_3+ 1/2e_4+ 1/2e_5+ 1/2e_6+ 1/2e_7
     output(0, 0) = RMHalf;
     output(1, 0) = RHalf;
@@ -5767,7 +5767,7 @@ void DynkinSimpleType::GetEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Ra
     //as of May 11 2013 the convention has been changed to coincide with that of
     //Wikipedia
     output.init(4, 4);
-    output.MakeZero();
+    output.makeZero();
 
     //image of first simple root = e_1 - e_2 (long one):
     output(0, 0) = 1;
@@ -5789,7 +5789,7 @@ void DynkinSimpleType::GetEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Ra
     //taken from Humpreys, Introduction to Lie algebras and representation theory, page 65
     // the long root has the higher index
     output.init(3, 2);
-    output.MakeZero();
+    output.makeZero();
     //image of the first simple root(short one):
     output(0, 0) = 1;
     output(1, 0) = - 1;
@@ -5807,7 +5807,7 @@ void DynkinSimpleType::GetAn(int n, Matrix<Rational>& output) const {
     << " be handled at an earlier stage. " << global.fatal;
   }
   output.init(n, n);
-  output.MakeZero();
+  output.makeZero();
   for (int i = 0; i < n - 1; i ++) {
     output(i, i) = 2;
     output(i + 1, i) = - 1;
@@ -6186,7 +6186,7 @@ bool ElementWeylGroupAutomorphisms::CheckInitialization() const {
   return true;
 }
 
-void ElementWeylGroupAutomorphisms::MakeID(WeylGroupAutomorphisms& inputAutomorphisms) {
+void ElementWeylGroupAutomorphisms::makeIdentity(WeylGroupAutomorphisms& inputAutomorphisms) {
   this->owner = &inputAutomorphisms;
   this->generatorsLastAppliedFirst.SetSize(0);
 }
@@ -6211,12 +6211,12 @@ void ElementWeylGroupAutomorphisms::MakeOuterAuto(int outerAutoIndex, WeylGroupA
 }
 
 
-unsigned int ElementWeylGroupAutomorphisms::HashFunction(const ElementWeylGroupAutomorphisms& input) {
-  return input.HashFunction();
+unsigned int ElementWeylGroupAutomorphisms::hashFunction(const ElementWeylGroupAutomorphisms& input) {
+  return input.hashFunction();
 }
 
-unsigned int ElementWeylGroupAutomorphisms::HashFunction() const {
-  return this->generatorsLastAppliedFirst.HashFunction();
+unsigned int ElementWeylGroupAutomorphisms::hashFunction() const {
+  return this->generatorsLastAppliedFirst.hashFunction();
 }
 
 std::string ElementWeylGroupAutomorphisms::toString(FormatExpressions* theFormat) const {
@@ -6245,14 +6245,14 @@ void ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorph
   this->generatorsLastAppliedFirst.AddOnTop(generator);
 }
 
-unsigned int ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::HashFunction(
+unsigned int ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::hashFunction(
   const ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& input
 ) {
-  return input.HashFunction();
+  return input.hashFunction();
 }
 
-unsigned int ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::HashFunction() const {
-  return this->generatorsLastAppliedFirst.HashFunction();
+unsigned int ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::hashFunction() const {
+  return this->generatorsLastAppliedFirst.hashFunction();
 }
 
 std::string ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::toString(FormatExpressions* theFormat) const {
@@ -6335,18 +6335,18 @@ Vector<Rational> ElementWeylGroup::operator*(const Vector<Rational>& v) const {
   this->owner->ActOn(*this,out);
   return out;
 }
-void ElementWeylGroup::MakeID(WeylGroupData& inputWeyl) {
+void ElementWeylGroup::makeIdentity(WeylGroupData& inputWeyl) {
   this->owner = &inputWeyl;
   this->generatorsLastAppliedFirst.SetSize(0);
 }
 
-void ElementWeylGroup::MakeID(const FiniteGroup<ElementWeylGroup> &inputGroup) {
+void ElementWeylGroup::makeIdentity(const FiniteGroup<ElementWeylGroup> &inputGroup) {
   this->owner = inputGroup.generators[0].owner;
   this->generatorsLastAppliedFirst.SetSize(0);
 }
 
-void ElementWeylGroup::MakeID(const ElementWeylGroup& initializeFrom) {
-  this->MakeID(*initializeFrom.owner);
+void ElementWeylGroup::makeIdentity(const ElementWeylGroup& initializeFrom) {
+  this->makeIdentity(*initializeFrom.owner);
 }
 
 bool ElementWeylGroup::IsID() {
@@ -6439,7 +6439,7 @@ void ElementWeylGroup::GetCycleStructure(
 ) const {
   MacroRegisterFunctionWithName("ElementWeylGroup::GetCycleStructure");
   this->CheckInitialization();
-  outputIndexIsCycleSizeCoordinateIsCycleMult.MakeZero();
+  outputIndexIsCycleSizeCoordinateIsCycleMult.makeZero();
   List<bool> Explored;
   HashedList<Vector<Rational> >& theRootSystem = this->owner->RootSystem;
   Explored.initializeFillInObject(theRootSystem.size, false);
@@ -6489,11 +6489,11 @@ std::string ElementWeylGroup::toString(FormatExpressions* theFormat) const {
   return out.str();
 }
 
-unsigned int ElementWeylGroup::HashFunction() const {
+unsigned int ElementWeylGroup::hashFunction() const {
   int top = MathRoutines::Minimum(this->generatorsLastAppliedFirst.size, ::SomeRandomPrimesSize);
   unsigned int result = 0;
   for (int i = 0; i < top; i ++) {
-    result += this->generatorsLastAppliedFirst[i].HashFunction() * ::SomeRandomPrimes[i];
+    result += this->generatorsLastAppliedFirst[i].hashFunction() * ::SomeRandomPrimes[i];
   }
   return result;
 }
@@ -6535,7 +6535,7 @@ ElementWeylGroup WeylGroupData::GetRootReflection(int rootIndex) {
 
 void WeylGroupData::SimpleReflectionRoot(int index, Vector<Rational>& theRoot, bool RhoAction, bool UseMinusRho) {
   Rational alphaShift, tempRat;
-  alphaShift.MakeZero();
+  alphaShift.makeZero();
   for (int i = 0; i < this->CartanSymmetric.NumCols; i ++) {
     tempRat = theRoot[i];
     tempRat.MultiplyBy(this->CartanSymmetric.elements[index][i] * (- 2));
@@ -6555,9 +6555,9 @@ void WeylGroupData::SimpleReflectionRoot(int index, Vector<Rational>& theRoot, b
 void WeylGroupData::SimpleReflectionRootAlg(int index, PolynomialSubstitution<Rational>& theRoot, bool RhoAction) {
   int lengthA = this->CartanSymmetric.elements[index][index].NumShort;
   Polynomial<Rational> AscalarB, tempP;
-  AscalarB.MakeZero();
+  AscalarB.makeZero();
   for (int i = 0; i < this->CartanSymmetric.NumCols; i ++) {
-    tempP.MakeZero();
+    tempP.makeZero();
     tempP = theRoot[i];
     tempP *= CartanSymmetric.elements[index][i];
     AscalarB += (tempP);
@@ -6584,7 +6584,7 @@ void WeylGroupData::reset() {
   this->flagIrrepsAreComputed = false;
   this->flagCharTableIsComputed = false;
 
-  this->theDynkinType.MakeZero();
+  this->theDynkinType.makeZero();
   this->CartanSymmetric.init(0, 0);
   this->CoCartanSymmetric.init(0, 0);
   this->rho.SetSize(0);
@@ -7119,7 +7119,7 @@ void WeylGroupData::InitGenerators() {
   this->theGroup.generators.SetSize(this->GetDim());
   if (this->GetDim() == 0) {
     this->theGroup.generators.SetSize(1);
-    this->theGroup.generators[0].MakeID(*this);
+    this->theGroup.generators[0].makeIdentity(*this);
   }
   for (int i = 0; i < this->GetDim(); i ++) {
     this->theGroup.generators[i].MakeSimpleReflection(i, *this);
@@ -7222,7 +7222,7 @@ void WeylGroupData::GetEpsilonCoordsWRTsubalgebra(
   if (!tempBool) {
     output.SetSize(input.size);
     for (int i = 0; i < input.size; i ++) {
-      output[i].MakeZero(0);
+      output[i].makeZero(0);
     }
     return;
   }
@@ -7324,7 +7324,7 @@ void WeylGroupData::GetExtremeElementInOrbit(
   bool* stabilizerFound
 ) {
   if (outputWeylElt != nullptr) {
-    outputWeylElt->MakeID(*this);
+    outputWeylElt->makeIdentity(*this);
   }
   if (sign != nullptr) {
     *sign = 1;
@@ -7424,7 +7424,7 @@ void WeylGroupData::GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double>
   if (theDimension < 2) {
     return;
   }
-  ZeroRoot.MakeZero(theDimension);
+  ZeroRoot.makeZero(theDimension);
   ElementWeylGroup tempElt;
   this->GetCoxeterElement(tempElt);
   Matrix<Rational> matCoxeterElt, tempMat;
@@ -7494,7 +7494,7 @@ void WeylGroupData::DrawRootSystem(
   int theDimension = this->GetDim();
   if (theDimension == 1) {
     Vector<Rational> tempRoot, tempZero;
-    tempZero.MakeZero(2);
+    tempZero.makeZero(2);
     tempRoot.MakeEi(2, 0);
     std::string currentColor = "#ff00ff";
     for (int i = 0; i < 2; i ++) {
@@ -7506,7 +7506,7 @@ void WeylGroupData::DrawRootSystem(
   }
   this->ComputeRho(true);
   Vector<Rational> ZeroRoot;
-  ZeroRoot.MakeZero(theDimension);
+  ZeroRoot.makeZero(theDimension);
   output.initDimensions(theDimension);
   output.GraphicsUnit = DrawOperations::GraphicsUnitDefault;
   for (int i = 0; i < theDimension; i ++) {
@@ -7739,7 +7739,7 @@ void WeylGroupData::ComputeRho(bool Recompute) {
   if (this->RootSystem.size == 0 || Recompute) {
     this->GenerateRootSystem();
   }
-  this->rho.MakeZero(this->CartanSymmetric.NumRows);
+  this->rho.makeZero(this->CartanSymmetric.NumRows);
   for (int i = 0; i < this->RootSystem.size; i ++) {
     if (this->RootSystem[i].IsPositiveOrZero()) {
       this->rho += RootSystem[i];
@@ -8274,7 +8274,7 @@ void KLpolys::GeneratePartialBruhatOrder() {
   MacroRegisterFunctionWithName("KLpolys::GeneratePartialBruhatOrder");
   int theDimension = this->TheWeylGroup->CartanSymmetric.NumRows;
   Vector<Rational> ZeroRoot;
-  ZeroRoot.MakeZero(theDimension);
+  ZeroRoot.makeZero(theDimension);
   this->BruhatOrder.SetSize(this->size);
   this->InverseBruhatOrder.SetSize(this->size);
   this->SimpleReflectionsActionList.SetSize(this->size);
@@ -8506,14 +8506,14 @@ void KLpolys::ComputeKLxy(int x, int y) {
     return;
   }
   if (!this->IndexGEQIndex(y, x)) {
-    this->theKLPolys[x][y].MakeZero();
+    this->theKLPolys[x][y].makeZero();
     return;
   }
-  Accum.MakeZero();
+  Accum.makeZero();
   MonomialP tempM;
   for (int i = 0; i < this->size; i ++) {
     if (this->IndexGreaterThanIndex(i, x) && this->IndexGEQIndex(y, i)) {
-      tempP1.MakeZero();
+      tempP1.makeZero();
       for (int j = 0; j < this->theRPolys[x][i].size(); j ++) {
         tempM = this->theRPolys[x][i][j];
         tempM.Invert();
@@ -8546,7 +8546,7 @@ void KLpolys::ComputeKLxy(int x, int y) {
       Accum += tempP1;
     }
   }
-  this->theKLPolys[x][y].MakeZero();
+  this->theKLPolys[x][y].makeZero();
   Rational lengthDiff = this->TheWeylGroup->theGroup.theElements[y].generatorsLastAppliedFirst.size -
   this->TheWeylGroup->theGroup.theElements[x].generatorsLastAppliedFirst.size;
   lengthDiff /= 2;
@@ -8567,7 +8567,7 @@ bool KLpolys::ComputeRxy(int x, int y, int SimpleReflectionIndex) {
     return true;
   }
   if (this->IndexGreaterThanIndex(x, y)) {
-    this->theRPolys[x][y].MakeZero();
+    this->theRPolys[x][y].makeZero();
     return true;
   }
   int sx = this->SimpleReflectionsActionList[x][SimpleReflectionIndex];
@@ -8637,7 +8637,7 @@ std::string KLpolys::RPolysToString(FormatExpressions* theFormat) {
 
 LargeInteger PartFraction::EvaluateIntPolyAtOne(Polynomial<LargeInteger>& input) {
   LargeInteger result;
-  result.MakeZero();
+  result.makeZero();
   for (int i = 0; i < input.size(); i ++) {
     result += input.coefficients[i];
   }
@@ -8645,7 +8645,7 @@ LargeInteger PartFraction::EvaluateIntPolyAtOne(Polynomial<LargeInteger>& input)
 }
 
 void PartFraction::EvaluateIntPoly(const Polynomial<LargeInteger>& input, const Vector<Rational>& values, Rational& output) {
-  output.MakeZero();
+  output.makeZero();
   Polynomial<Rational> tempInput;
   tempInput = input; //<-implicit type conversion here!
   output = tempInput.Evaluate(values);
@@ -8839,7 +8839,7 @@ void WeylGroupData::TransformToSimpleBasisGeneratorsArbitraryCoords(Vectors<Rati
   }
   MacroRegisterFunctionWithName("WeylGroup::TransformToSimpleBasisGeneratorsArbitraryCoords");
   Vector<Rational> theH;
-  theH.MakeZero(theGens[0].size);
+  theH.makeZero(theGens[0].size);
   theH.PerturbNoZeroScalarProductWithMe(inputRootSystem);
   for (int i = 0; i < theGens.size; i ++) {
     if (theGens[i].ScalarEuclidean(theH) < 0) {
@@ -8975,7 +8975,7 @@ bool Lattice::GetAllRepresentatives(const Lattice& rougherLattice, Vectors<Ratio
   int NumCycles = theCoeffSelection.TotalNumSubsetsMustBeSmalInt();
   output.SetSize(NumCycles);
   for (int i = 0; i < NumCycles; i ++, theCoeffSelection.IncrementReturnFalseIfPastLast()) {
-    output[i].MakeZero(theDim);
+    output[i].makeZero(theDim);
     for (int j = 0; j < theCoeffSelection.Multiplicities.size; j ++) {
       output[i] += thePeriodVectors[j] * theCoeffSelection.Multiplicities[j];
     }
@@ -9106,7 +9106,7 @@ void Lattice::IntersectWithPreimageOfLattice(const Matrix<Rational> & theLinearM
   resultNonKernelPart.SetSize(ImageBasisInImageStartingBasisCoords.size);
   for (int i = 0; i < resultNonKernelPart.size; i ++) {
     Vector<Rational>& currentRoot = resultNonKernelPart[i];
-    currentRoot.MakeZero(this->GetDim());
+    currentRoot.makeZero(this->GetDim());
     for (int j = 0; j < startingBasis.size; j ++) {
       currentRoot += startingBasis[j] * ImageBasisInImageStartingBasisCoords[i][j];
     }
@@ -9143,7 +9143,7 @@ void Lattice::IntersectWith(const Lattice& other) {
   resultBasis.SetSize(thisCommonCoordsLattice.basisRationalForm.NumRows);
   for (int i = 0; i < resultBasis.size; i ++) {
     Vector<Rational>& currentRoot = resultBasis[i];
-    currentRoot.MakeZero(this->GetDim());
+    currentRoot.makeZero(this->GetDim());
     for (int j = 0; j < thisCommonCoordsLattice.basisRationalForm.NumCols; j ++) {
       currentRoot += commonBasis[j] * thisCommonCoordsLattice.basisRationalForm.elements[i][j];
     }
@@ -9311,7 +9311,7 @@ bool Lattice::ReduceVector(Vector<Rational>& theVector) const {
   for (int i = 0; i < output.size; i ++) {
     output[i].AssignFracValue();
   }
-  theVector.MakeZero(theVector.size);
+  theVector.makeZero(theVector.size);
   for (int i = 0; i < basisRoots.size; i ++) {
     theVector += basisRoots[i] * output[i];
   }
@@ -9375,7 +9375,7 @@ void PartFraction::GetVectorPartitionFunction(
   QuasiPolynomial shiftedPoly;
   Vectors<Rational> theNormals, theLatticeGenerators;
   if (PartFraction::MakingConsistencyCheck) {
-    PartFraction::CheckSum.MakeZero();
+    PartFraction::CheckSum.makeZero();
   }
   this->GetRootsFromDenominator(owner, theLatticeGenerators);
   Lattice theLattice;
@@ -9403,7 +9403,7 @@ bool PartFractions::GetVectorPartitionFunction(QuasiPolynomial& output, Vector<R
   }
   this->NumProcessedForVPFfractions = 0;
   if (PartFraction::MakingConsistencyCheck) {
-    PartFractions::CheckSum.MakeZero();
+    PartFractions::CheckSum.makeZero();
   }
   output.MakeZeroLatTiceZn(this->AmbientDimension);
   ///////////////////////////////////////////////
@@ -9446,7 +9446,7 @@ std::string PartFractions::DoTheFullComputationReturnLatexFileString(
   this->theChambers.DrawMeProjective(nullptr, true, theDVs, theFormat);
   outHtml << theDVs.GetHtmlDiv(this->AmbientDimension);
   Vector<Rational> tempRoot;
-  tempRoot.MakeZero(this->AmbientDimension);
+  tempRoot.makeZero(this->AmbientDimension);
   global.fatal << "not implemented yet" << global.fatal;
 //  this->initFromRoots(theChambersOld.theDirections);
   out << "\\documentclass{article}\\usepackage{amsmath, amsfonts, amssymb} \n\\begin{document}\n";
@@ -9500,7 +9500,7 @@ void QuasiPolynomial::AddLatticeShift(
     index = this->LatticeShifts.size;
     this->LatticeShifts.AddOnTop(theShift);
     this->valueOnEachLatticeShift.ExpandOnTop(1);
-    this->valueOnEachLatticeShift.LastObject()->MakeZero();
+    this->valueOnEachLatticeShift.LastObject()->makeZero();
   }
   this->valueOnEachLatticeShift[index] += input;
   if (this->valueOnEachLatticeShift[index].IsEqualToZero()) {
@@ -9689,7 +9689,7 @@ void Lattice::IntersectWithLinearSubspaceGivenByNormal(const Vector<Rational>& t
   for (int i = 0; i < theScalarProducts.size; i ++) {
     if (i != pivotColumnIndex) {
       Vector<Rational>& currentRoot = eigenSpacePlusOrthogonalComponent[i];
-      currentRoot.MakeZero(theScalarProducts.size);
+      currentRoot.makeZero(theScalarProducts.size);
       currentRoot[i] = 1;
       currentRoot[pivotColumnIndex] = theScalarProducts[i];
     }
@@ -9710,7 +9710,7 @@ void Lattice::IntersectWithLinearSubspaceGivenByNormal(const Vector<Rational>& t
       global.fatal << "Orthogonal component is supposed to be an integer. " << global.fatal;
     }
     if (!tempRoot.IsEqualToZero()) {
-      resultRoot.MakeZero(this->GetDim());
+      resultRoot.makeZero(this->GetDim());
       for (int j = 0; j < startingBasis.size; j ++) {
         resultRoot += startingBasis[j] * tempRoot[j];
       }
@@ -9836,7 +9836,7 @@ bool Cone::GetRootFromLPolyConstantTermGoesToLastVariable(Polynomial<Rational>& 
   if (!inputLPoly.IsLinear()) {
     return false;
   }
-  output.MakeZero(inputLPoly.minimalNumberOfVariables() + 1);
+  output.makeZero(inputLPoly.minimalNumberOfVariables() + 1);
   for (int i = 0; i < inputLPoly.size(); i ++) {
     int theIndex;
     if (inputLPoly[i].::MonomialP::IsOneLetterFirstDegree(&theIndex)) {
@@ -10123,9 +10123,9 @@ bool slTwoInSlN::ComputeInvariantsOfDegree(
     return false;
   }
   Polynomial<Rational> basisMonsZeroWeight, basisMonsAll;
-  basisMonsZeroWeight.MakeZero();
+  basisMonsZeroWeight.makeZero();
   basisMonsZeroWeight.SetExpectedSize(numCycles);
-  basisMonsAll.MakeZero();
+  basisMonsAll.makeZero();
   basisMonsAll.SetExpectedSize(numCycles);
   MonomialP theMon;
   theMon.makeOne(this->theDimension);
@@ -10174,7 +10174,7 @@ bool slTwoInSlN::ComputeInvariantsOfDegree(
   output.SetSize(tempRoots.size);
   for (int i = 0; i < output.size; i ++) {
     Polynomial<Rational>& current = output[i];
-    current.MakeZero();
+    current.makeZero();
     for (int j = 0; j < basisMonsZeroWeight.size(); j ++) {
       if (!tempRoots[i][j].IsEqualToZero()) {
         theMon = basisMonsZeroWeight[j];
@@ -10424,7 +10424,7 @@ bool Cone::DrawMeLastCoordAffine(
 ) const {
   (void) theFormat; //avoid unused parameter warning, portable.
   Vector<Rational> ZeroRoot;
-  ZeroRoot.MakeZero(this->GetDim() - 1);
+  ZeroRoot.makeZero(this->GetDim() - 1);
   Vectors<Rational> VerticesScaled;
   VerticesScaled = this->Vertices;
   Rational tempRat;
@@ -10497,7 +10497,7 @@ bool Cone::DrawMeProjective(
 ) const {
   (void) theFormat;  //avoid unused parameter warning, portable.
   Vector<Rational> ZeroRoot, coordCenter;
-  ZeroRoot.MakeZero(this->GetDim());
+  ZeroRoot.makeZero(this->GetDim());
   if (coordCenterTranslation == nullptr) {
     coordCenter = ZeroRoot;
   } else {
@@ -11007,7 +11007,7 @@ void RationalFunction::ReduceRFToPoly() {
     this->expressionType = this->typePoly;
   }
   if (this->Numerator.GetElement().IsEqualToZero()) {
-    this->MakeZero();
+    this->makeZero();
   }
 }
 
@@ -11029,7 +11029,7 @@ bool RationalFunction::Substitution(const PolynomialSubstitution<Rational>& theS
         return false;
       }
 //      global.Comments << "<br>finally:<br>" << this->Numerator.GetElement().toString();
-      this->Simplify();
+      this->simplify();
 //      global.Comments << ", which, simplified, yields<br> " << this->toString(tempFormat);
 //      if (!this->checkConsistency())global.fatal << global.fatal;
       return true;
@@ -11043,7 +11043,7 @@ bool RationalFunction::Substitution(const PolynomialSubstitution<Rational>& theS
       if (this->Denominator.GetElement().IsEqualToZero()) {
         return false;
       }
-      this->Simplify();
+      this->simplify();
       return true;
     default:
       global.fatal << "Default case not allowed. " << global.fatal;
@@ -11181,7 +11181,7 @@ bool Cone::GetLatticePointsInCone(
 
 void PiecewiseQuasipolynomial::operator*=(const Rational& other) {
   if (other.IsEqualToZero()) {
-    this->MakeZero(this->NumVariables);
+    this->makeZero(this->NumVariables);
     return;
   }
   for (int i = 0; i < this->theQPs.size; i ++) {
@@ -11520,7 +11520,7 @@ void PiecewiseQuasipolynomial::MakeCommonRefinement(const ConeComplex& other) {
 }
 
 void Lattice::GetDefaultFundamentalDomainInternalPoint(Vector<Rational>& output) {
-  output.MakeZero(this->GetDim());
+  output.makeZero(this->GetDim());
   Vector<Rational> tempRoot;
   for (int i = 0; i < this->basisRationalForm.NumRows; i ++) {
     this->basisRationalForm.GetVectorFromRow(i, tempRoot);
@@ -11606,7 +11606,7 @@ void ConeComplex::TransformToWeylProjective() {
   //this->startingCones.initFromDirections()
   Vector<Rational> tempRoot;
   for (int i = 0; i < this->TheGlobalConeNormals.size; i ++) {
-    tempRoot.MakeZero(this->AmbientDimension);
+    tempRoot.makeZero(this->AmbientDimension);
     int startingDim= this->TheGlobalConeNormals[i].size;
     for (int j = 0; j<startingDim; j ++) {
       tempRoot[j] = this->TheGlobalConeNormals[i][j];
@@ -11896,7 +11896,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam(
   int theDimProjectivized = this->GetDimProjectivized();
   Matrix<Rational> theProjectionLatticeLevel;
   theProjectionLatticeLevel.init(theDimProjectivized - 2, theDimProjectivized - 1);
-  theProjectionLatticeLevel.MakeZero();
+  theProjectionLatticeLevel.makeZero();
   for (int i = 0; i < theProjectionLatticeLevel.NumRows; i ++) {
     theProjectionLatticeLevel.elements[i][i + 1] = 1;
   }
@@ -12754,7 +12754,7 @@ bool ConeComplex::findMaxLFOverConeProjective(
       return false;
     }
     Vector<Rational>& newWall = HyperPlanesCorrespondingToLF[i];
-    newWall.MakeZero(theDim);
+    newWall.makeZero(theDim);
     for (int j = 0; j < currentPoly.size(); j ++) {
       for (int k = 0; k < theDim; k ++) {
         if (currentPoly[j](k) == 1) {

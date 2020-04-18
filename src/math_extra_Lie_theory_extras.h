@@ -87,7 +87,7 @@ template <class coefficient>
 Vector<coefficient> branchingData::ProjectWeight(Vector<coefficient>& input) {
   Vector<coefficient> result;
   Vector<coefficient> fundCoordsSmaller;
-  fundCoordsSmaller.MakeZero(this->theHmm.theDomain().GetRank());
+  fundCoordsSmaller.makeZero(this->theHmm.theDomain().GetRank());
   for (int j = 0; j < this->theHmm.theDomain().GetRank(); j ++) {
     fundCoordsSmaller[j] = this->theHmm.theRange().theWeyl.RootScalarCartanRoot(input, theHmm.ImagesCartanDomain[j]);
     fundCoordsSmaller[j] /= this->theHmm.theDomain().theWeyl.CartanSymmetric.elements[j][j] / 2;
@@ -198,8 +198,8 @@ public:
   void MultiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, const coefficient& thePower);
   void MultiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, int thePower);
   void MultiplyByNoSimplify(const MonomialUniversalEnvelopingOrdered& other);
-  void MakeZero(int numVars, SemisimpleLieAlgebraOrdered& theOwner);
-  void MakeZero(const coefficient& theRingZero, SemisimpleLieAlgebraOrdered& theOwner);
+  void makeZero(int numVars, SemisimpleLieAlgebraOrdered& theOwner);
+  void makeZero(const coefficient& theRingZero, SemisimpleLieAlgebraOrdered& theOwner);
   bool ModOutFDRelationsExperimental(
     const Vector<Rational>& theHWsimpleCoords,
     const coefficient& theRingUnit = 1,
@@ -211,12 +211,12 @@ public:
     const coefficient& theRingZero = 0
   );
   void SetNumVariables(int newNumVars);
-  unsigned int HashFunction() const;
-  static inline unsigned int HashFunction(const MonomialUniversalEnvelopingOrdered<coefficient>& input) {
-    return input.HashFunction();
+  unsigned int hashFunction() const;
+  static inline unsigned int hashFunction(const MonomialUniversalEnvelopingOrdered<coefficient>& input) {
+    return input.hashFunction();
   }
   void GetDegree(Polynomial<Rational>& output) {
-    output.MakeZero(this->Coefficient.NumVars);
+    output.makeZero(this->Coefficient.NumVars);
     for (int i = 0; i < this->generatorsIndices.size; i ++) {
       output += this->Powers[i];
     }
@@ -245,7 +245,7 @@ public:
     this->Coefficient = theConst;
     this->owner = &theOwner;
   }
-  void Simplify(
+  void simplify(
     ElementUniversalEnvelopingOrdered<coefficient>& output,
     const coefficient& theRingUnit = 1,
     const coefficient& theRingZero = 0
@@ -326,7 +326,7 @@ public:
   void MakeOneGenerator(
     int theIndex, const coefficient& theCoeff, SemisimpleLieAlgebraOrdered& owner
   );
-  void MakeZero(SemisimpleLieAlgebraOrdered& theOwner);
+  void makeZero(SemisimpleLieAlgebraOrdered& theOwner);
   bool AssignElementUniversalEnveloping(
     ElementUniversalEnveloping<coefficient>& input,
     SemisimpleLieAlgebraOrdered& owner,
@@ -354,12 +354,12 @@ public:
   bool GetLieAlgebraElementIfPossible(ElementSemisimpleLieAlgebra<Rational>& output) const;
   void SubstitutionCoefficients(PolynomialSubstitution<Rational>& theSub);
   void MakeConst(const coefficient& coeff, SemisimpleLieAlgebraOrdered& theOwner) {
-    this->MakeZero(theOwner);
+    this->makeZero(theOwner);
     MonomialUniversalEnvelopingOrdered<coefficient> tempMon;
     tempMon.MakeConst(coeff, theOwner);
     this->AddMonomial(tempMon);
   }
-  void Simplify(const coefficient& theRingUnit = 1,  const coefficient& theRingZero = 0);
+  void simplify(const coefficient& theRingUnit = 1,  const coefficient& theRingZero = 0);
   int GetNumVars() const {
     if (this->size == 0) {
       return 0;
@@ -435,7 +435,7 @@ public:
   }
   template<class OtherCoefficientType>
   void AssignChangeCoefficientType (const ElementUniversalEnvelopingOrdered<OtherCoefficientType>& other) {
-    this->MakeZero(*other.owner);
+    this->makeZero(*other.owner);
     MonomialUniversalEnvelopingOrdered<coefficient> tempMon;
     this->Reserve(other.size);
     for (int i = 0; i < other.size; i ++) {
@@ -528,8 +528,8 @@ public:
   ) const {
     return this->theElT.IsProportionalTo(other.theElT, outputTimesMeEqualsOther, theRingZero);
   }
-  void MakeZero(SemisimpleLieAlgebraOrdered& owner, PolynomialSubstitution<Rational>& incomingSub) {
-    this->theElT.MakeZero(owner);
+  void makeZero(SemisimpleLieAlgebraOrdered& owner, PolynomialSubstitution<Rational>& incomingSub) {
+    this->theElT.makeZero(owner);
     this->theSubNthElementIsImageNthCoordSimpleBasis = incomingSub;
   }
   template <class CoefficientTypeOther>

@@ -19,7 +19,7 @@ public:
   bool operator==(const PackedVector<scalar>& other) const;
   bool operator>(const PackedVector<scalar>& other) const;
   // passing in d for compatibility with Vector
-  void MakeZero(int d);
+  void makeZero(int d);
   void MakeEi(int d, int i);
   // for compatibility
   void SetSize(int s);
@@ -29,8 +29,8 @@ public:
   void operator+=(const PackedVector<scalar>& w);
   scalar ScalarProduct(const PackedVector<scalar>& v, const Matrix<scalar>& B) const;
 
-  unsigned int HashFunction() const;
-  static unsigned int HashFunction(const PackedVector<scalar>& in);
+  unsigned int hashFunction() const;
+  static unsigned int hashFunction(const PackedVector<scalar>& in);
 };
 
 // In particular, scalar likes to be int
@@ -249,7 +249,7 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeRho() {
   global.Comments << "root system is" << "\n";
   global.Comments << this->RootSystem << "\n";
   this->RootSystem.QuickSortAscending();
-  this->twiceRho.MakeZero(rank);
+  this->twiceRho.makeZero(rank);
   for (int i = 0; i < this->RootSystem.size; i ++) {
     bool usethis = true;
     for (int j = 0; j < this->RootSystem[i].size; j ++) {

@@ -2076,8 +2076,8 @@ bool CalculatorFunctions::innerPlotCoordinateSystem(Calculator& theCommands, con
   thePlot.thePlotType = "segment";
   thePlot.thePointsDouble.SetSize(2);
   for (int i = 0; i < 3; i ++) {
-    thePlot.thePointsDouble[0].MakeZero(3);
-    thePlot.thePointsDouble[1].MakeZero(3);
+    thePlot.thePointsDouble[0].makeZero(3);
+    thePlot.thePointsDouble[1].makeZero(3);
     thePlot.thePointsDouble[0][i] = corner1[i];
     thePlot.thePointsDouble[1][i] = corner2[i];
     resultPlot += thePlot;
@@ -2087,7 +2087,7 @@ bool CalculatorFunctions::innerPlotCoordinateSystem(Calculator& theCommands, con
   plotLabels.thePointsDouble.SetSize(1);
   plotLabels.colorJS = "blue";
   for (char i = 0; i < 3; i ++) {
-    plotLabels.thePointsDouble[0].MakeZero(3);
+    plotLabels.thePointsDouble[0].makeZero(3);
     plotLabels.thePointsDouble[0][i] = corner2[i];
     std::stringstream out;
     out << static_cast<char>('x' + i);

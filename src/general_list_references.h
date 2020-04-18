@@ -199,7 +199,7 @@ int ListReferences<Object>::GetIndex(const Object& o) const {
   return - 1;
 }
 
-template <class Object, unsigned int hashFunction(const Object&)=Object::HashFunction>
+template <class Object, unsigned int hashFunction(const Object&)=Object::hashFunction>
 class HashedListReferences : public HashTemplate<Object, ListReferences<Object>, hashFunction> {
   public:
   //Note The following function specializations are declared entirely in order to

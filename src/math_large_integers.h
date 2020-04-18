@@ -55,7 +55,7 @@ public:
   bool isDivisibleBy(const LargeIntegerUnsigned& divisor);
   void makeOne();
   void AddUInt(unsigned int x);
-  void MakeZero();
+  void makeZero();
   bool IsEqualToZero() const;
   bool IsEven() const;
   bool IsPositive() const;
@@ -78,7 +78,7 @@ public:
   static LargeIntegerUnsigned gcd(const LargeIntegerUnsigned& a, const LargeIntegerUnsigned& b);
   static LargeIntegerUnsigned lcm(const LargeIntegerUnsigned& a, const LargeIntegerUnsigned& b);
   static void lcm(const LargeIntegerUnsigned& a, const LargeIntegerUnsigned& b, LargeIntegerUnsigned& output);
-  unsigned int HashFunction() const;
+  unsigned int hashFunction() const;
   void MultiplyBy(const LargeIntegerUnsigned& right);
   void operator*=(const LargeIntegerUnsigned& right);
   void operator*=(unsigned int x);
@@ -237,7 +237,7 @@ public:
   bool AssignStringFailureAllowed(const std::string& input, std::stringstream* commentsOnFailure);
   void ReadFromFile(std::fstream& input);
   void checkConsistency(){}
-  void MakeZero();
+  void makeZero();
   bool GetDivisors(List<int>& output, bool includeNegative);
   void makeOne() {
     this->value.makeOne();
@@ -247,11 +247,11 @@ public:
     this->value.makeOne();
     this->sign = - 1;
   }
-  static unsigned int HashFunction(const LargeInteger& input) {
-    return input.HashFunction();
+  static unsigned int hashFunction(const LargeInteger& input) {
+    return input.hashFunction();
   }
-  unsigned int HashFunction() const {
-    return this->value.HashFunction() + static_cast<unsigned int>(this->sign) + 3;
+  unsigned int hashFunction() const {
+    return this->value.hashFunction() + static_cast<unsigned int>(this->sign) + 3;
   }
   int GetIntValueTruncated() {
    return this->sign * this->value.GetUnsignedIntValueTruncated();
@@ -270,7 +270,7 @@ public:
   }
   void operator*=(const LargeIntegerUnsigned& other) {
     if (other.IsEqualToZero()) {
-      this->MakeZero();
+      this->makeZero();
       return;
     }
     this->value *= other;
@@ -516,18 +516,18 @@ public:
   void MultiplyBy(const Rational& r);
   // The Hash function of zero must be equal to zero.
   // See Note on Hashes before the definition of SomeRandomPrimes;
-  unsigned int HashFunction() const {
+  unsigned int hashFunction() const {
     if (this->Extended == nullptr) {
       if (this->NumShort == 0) {
         return 0;
       }
       return static_cast<unsigned int>(this->NumShort) * SomeRandomPrimes[0] + static_cast<unsigned int>(this->DenShort) * ::SomeRandomPrimes[1];
     }
-    return this->Extended->num.HashFunction() * SomeRandomPrimes[0] +
-    this->Extended->den.HashFunction() * SomeRandomPrimes[1];
+    return this->Extended->num.hashFunction() * SomeRandomPrimes[0] +
+    this->Extended->den.hashFunction() * SomeRandomPrimes[1];
   }
-  static inline unsigned int HashFunction(const Rational& input) {
-    return input.HashFunction();
+  static inline unsigned int hashFunction(const Rational& input) {
+    return input.hashFunction();
   }
   //void MultiplyByLargeRational(int num, int den);
   void MultiplyByInt(int x);
@@ -564,7 +564,7 @@ public:
     this->NumShort = n;
     this->DenShort = d;
     this->FreeExtended();
-    this->Simplify();
+    this->simplify();
   }
   void DivideBy(const Rational& r);
   void DivideByInteger(int x) {
@@ -582,18 +582,18 @@ public:
     this->InitExtendedFromShortIfNeeded();
     this->Extended->den.MultiplyByUInt(static_cast<unsigned int>(tempDen));
     this->Extended->num.sign *= tempSign;
-    this->Simplify();
+    this->simplify();
   }
   void DivideByLargeInteger(LargeInteger& x) {
     this->InitExtendedFromShortIfNeeded();
     this->Extended->den.MultiplyBy(x.value);
     this->Extended->num.sign *= x.sign;
-    this->Simplify();
+    this->simplify();
   }
   void DivideByLargeIntegerUnsigned(LargeIntegerUnsigned& x) {
     this->InitExtendedFromShortIfNeeded();
     this->Extended->den.MultiplyBy(x);
-    this->Simplify();
+    this->simplify();
   }
   std::string toString(FormatExpressions* theFormat = nullptr) const;
   std::string ToStringFrac() const;
@@ -650,7 +650,7 @@ public:
       return this->Extended->num.IsPositive();
     }
   }
-  void Simplify();
+  void simplify();
   void invert();
   void Minus() {
     if (this->Extended == nullptr) {
@@ -661,7 +661,7 @@ public:
   }
   double GetDoubleValue() const;
   int floorIfSmall();
-  void MakeZero() {
+  void makeZero() {
     this->NumShort = 0;
     this->DenShort = 1;
     this->FreeExtended();
@@ -799,7 +799,7 @@ public:
     this->Extended->num.value.MultiplyBy(tempRat.Extended->den);
     this->Extended->num += (tempI);
     this->Extended->den.MultiplyBy(tempRat.Extended->den);
-    this->Simplify();
+    this->simplify();
   }
   inline void operator-=(const Rational& right) {
     this->Subtract(right);

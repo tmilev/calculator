@@ -45,7 +45,7 @@ Rational ModuleSSalgebra<coefficient>::hwTrace(
       summand = 0;
       newRight = Accum;
       newRight.MultiplyByGeneratorPowerOnTheRight(oldRight.generatorsIndices[i], oldRight.Powers[i] - 1);
-      RemainingWeight.MakeZero(theWeyl.GetDim());
+      RemainingWeight.makeZero(theWeyl.GetDim());
       for (int j = i + 1; j < oldRight.generatorsIndices.size; j ++) {
         newRight.MultiplyByGeneratorPowerOnTheRight(oldRight.generatorsIndices[j], oldRight.Powers[j]);
         RemainingWeight += theWeyl.RootSystem[oldRight.generatorsIndices[j]] * oldRight.Powers[j];
@@ -164,11 +164,11 @@ MatrixTensor<coefficient>& ModuleSSalgebra<coefficient>::GetActionGeneratorIndeX
   if (this->HasFreeAction(generatorIndex)) {
     global.fatal << "This is a programming error, due to a change in "
     << "implementation of the generalized Verma module class. " << global.fatal;
-    this->actionsGeneratorsMaT[generatorIndex].MakeZero();
+    this->actionsGeneratorsMaT[generatorIndex].makeZero();
     return this->actionsGeneratorsMaT[generatorIndex];
   }
   if (this->HasZeroActionFDpart(generatorIndex)) {
-    this->actionsGeneratorsMaT[generatorIndex].MakeZero();
+    this->actionsGeneratorsMaT[generatorIndex].makeZero();
     return this->actionsGeneratorsMaT[generatorIndex];
   }
   if (this->GetOwner().IsASimpleGenerator(generatorIndex)) {
@@ -176,7 +176,7 @@ MatrixTensor<coefficient>& ModuleSSalgebra<coefficient>::GetActionGeneratorIndeX
   }
   MatrixTensor<coefficient>& output = this->actionsGeneratorsMaT[generatorIndex];
   if (this->GetOwner().IsGeneratorFromCartan(generatorIndex)) {
-    output.MakeZero();
+    output.makeZero();
     MonomialMatrix theMon;
     Vector<coefficient> weightH;
     coefficient tempCF, hwCFshift;
@@ -222,7 +222,7 @@ void ModuleSSalgebra<coefficient>::GetMatrixHomogenousElt(
   this->GetAdActionHomogenousElT(
     inputHomogeneous, weightUEEltSimpleCoords, outputSortedByArgumentWeight, theRingUnit, theRingZero
   );
-  output.MakeZero();
+  output.makeZero();
   for (int j = 0; j < outputSortedByArgumentWeight.size; j ++) {
     for (int k = 0; k < outputSortedByArgumentWeight[j].size; k ++) {
       MonomialUniversalEnveloping<coefficient>& currentMon = this->theGeneratingWordsGrouppedByWeight[j][k];
@@ -280,7 +280,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight(
   List<coefficient> tempMults;
   HashedList<Vector<coefficient> > tempHashedRoots;
   WeylGroupData& theWeyL = this->GetOwner()->theWeyl;
-  charAmbientFDWeyl.MakeZero();
+  charAmbientFDWeyl.makeZero();
   coefficient bufferCoeff, highestCoeff;
   out << "Starting character: " << this->toString();
   tempMon.owner = this->GetOwner();
@@ -302,7 +302,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight(
     }
   }
 
-  remainingCharDominantLevi.MakeZero();
+  remainingCharDominantLevi.makeZero();
   Vectors<coefficient> orbitDom;
   tempMon.owner = this->GetOwner();
   for (int i = 0; i < charAmbientFDWeyl.size(); i ++) {
@@ -324,7 +324,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight(
       }
     }
   }
-  output.MakeZero();
+  output.makeZero();
   out << "<br>Character w.r.t Levi part: " << HtmlRoutines::GetMathMouseHover(remainingCharDominantLevi.toString());
   Vector<coefficient> simpleGeneratorBaseField;
   while (!remainingCharDominantLevi.IsEqualToZero()) {
@@ -464,12 +464,12 @@ void ModuleSSalgebra<coefficient>::SplitOverLevi(
   ElementUniversalEnveloping<coefficient> currentElt, tempElt;
   for (int j = 0; j < theFinalEigenSpace.size; j ++) {
     out << "<tr><td>";
-    currentElt.MakeZero(this->GetOwner());
+    currentElt.makeZero(this->GetOwner());
     Vector<coefficient>& currentVect = theFinalEigenSpace[j];
     int lastNonZeroIndex = - 1;
     for (int i = 0; i < currentVect.size; i ++) {
       if (!(currentVect[i].IsEqualToZero())) {
-        tempElt.MakeZero(this->GetOwner());
+        tempElt.makeZero(this->GetOwner());
         tempElt.AddMonomial(this->theGeneratingWordsNonReduced[i], 1);
         tempElt *= currentVect[i];
         currentElt += tempElt;
@@ -515,7 +515,7 @@ MatrixTensor<coefficient>& ModuleSSalgebra<coefficient>::GetActionSimpleGenerato
   Pair<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, MonomialTensor<int, MathRoutines::IntUnsignIdentity> > currentPair;
   MatrixTensor<coefficient>& outputMat = this->actionsGeneratorsMaT[generatorIndex];
   Vector<coefficient> theScalarProds;
-  outputMat.MakeZero();
+  outputMat.makeZero();
   for (int i = 0; i < this->theGeneratingWordsGrouppedByWeight.size; i ++) {
     List<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >& currentWordList =
     this->theGeneratingWordsIntGrouppedByWeight[i];
@@ -630,7 +630,7 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW(
   this->theModuleWeightsSimpleCoords.Clear();
   Weight<coefficient> tempCharMon;
   tempCharMon.owner = nullptr;
-  this->theCharOverH.MakeZero();
+  this->theCharOverH.makeZero();
   for (int i = 0; i < this->thePaths.size; i ++) {
     this->theModuleWeightsSimpleCoords.AddOnTopNoRepetition(*this->thePaths[i].Waypoints.LastObject());
     tempCharMon.weightFundamentalCoordS = theWeyl.GetFundamentalCoordinatesFromSimple(*this->thePaths[i].Waypoints.LastObject());
@@ -874,7 +874,7 @@ void ModuleSSalgebra<coefficient>::CheckConsistency() {
       leftGen.MakeGenerator(i, *this->theAlgebras, this->indexAlgebra);
       rightGen.MakeGenerator(j, *this->theAlgebras, this->indexAlgebra);
       this->GetOwner().LieBracket(leftGen, rightGen, outputGen);
-      otherOutput.MakeZero();
+      otherOutput.makeZero();
       for (int k = 0; k < outputGen.size(); k ++) {
         tempMat = this->GetActionGeneratorIndeX(outputGen[k].theGeneratorIndex);
         tempMat *= outputGen.coefficients[k];
@@ -914,7 +914,7 @@ void ModuleSSalgebra<coefficient>::CheckConsistency() {
 
 template <class coefficient>
 void ModuleSSalgebra<coefficient>::GetFDchar(charSSAlgMod<coefficient>& output) {
-  output.MakeZero();
+  output.makeZero();
   if (this->theHWFundamentalCoordsBaseField.size <= 0) {
     return;
   }
@@ -953,10 +953,10 @@ void ModuleSSalgebra<coefficient>::ExpressAsLinearCombinationHomogenousElement(
     );
   }
   this->theBilinearFormsInverted[indexInputBasis].ActOnVectorColumn(theScalarProducts, theRingZero);
-  outputHomogeneous.MakeZero(*this->theAlgebras, this->indexAlgebra);
+  outputHomogeneous.makeZero(*this->theAlgebras, this->indexAlgebra);
   ElementUniversalEnveloping<coefficient> tempElt;
   for (int i = 0; i < theScalarProducts.size; i ++) {
-    tempElt.MakeZero(*this->theAlgebras, this->indexAlgebra);
+    tempElt.makeZero(*this->theAlgebras, this->indexAlgebra);
     tempElt.AddMonomial(this->theGeneratingWordsGrouppedByWeight[indexInputBasis][i], theRingUnit);
     tempElt *= theScalarProducts[i];
     outputHomogeneous += tempElt;
@@ -993,8 +993,8 @@ void ModuleSSalgebra<coefficient>::reset() {
   this->theHWFDpartFundamentalCoordS.SetSize(0);
   //List<List<Matrix<coefficient> > >
   this->theModuleWeightsSimpleCoords.Clear();
-  this->theCharOverH.MakeZero();
-  this->theChaR.MakeZero();
+  this->theCharOverH.makeZero();
+  this->theChaR.makeZero();
   this->parabolicSelectionNonSelectedAreElementsLevi.init(0);
   this->parabolicSelectionSelectedAreElementsLevi.init(0);
   this->highestWeightVectorNotation = "";
@@ -1040,7 +1040,7 @@ void ModuleSSalgebra<coefficient>::GetAdActionHomogenousElT(
       theReport.Report(progressStream.str());
       ElementUniversalEnveloping<coefficient>& currentOutputWord = outputCurrentList[j];
       if (theIndex == - 1) {
-        currentOutputWord.MakeZero(*this->theAlgebras, this->indexAlgebra);
+        currentOutputWord.makeZero(*this->theAlgebras, this->indexAlgebra);
       } else {
         theElt = inputHomogeneous;
         theElt.MultiplyBy(currentWordList[j], theRingUnit);
@@ -1061,7 +1061,7 @@ void ElementTensorsGeneralizedVermas<coefficient>::Substitution(
 ) {
   ElementTensorsGeneralizedVermas<coefficient> output;
   MonomialTensorGeneralizedVermas<coefficient> currentMon;
-  output.MakeZero();
+  output.makeZero();
   coefficient tempCF;
   for (int i = 0; i < this->size(); i ++) {
     currentMon = (*this)[i];
@@ -1077,7 +1077,7 @@ template <class coefficient>
 ElementTensorsGeneralizedVermas<coefficient>& ElementTensorsGeneralizedVermas<
   coefficient
 >::operator=(const ElementSumGeneralizedVermas<coefficient>& other) {
-  this->MakeZero();
+  this->makeZero();
   MonomialTensorGeneralizedVermas<coefficient> theMon;
   for (int i = 0; i < other.size(); i ++) {
     theMon = other[i];
@@ -1094,7 +1094,7 @@ bool ElementTensorsGeneralizedVermas<coefficient>::MultiplyOnTheLeft(
   const coefficient& theRingUnit
 ) const {
   ElementTensorsGeneralizedVermas<coefficient> buffer;
-  output.MakeZero();
+  output.makeZero();
   for (int i = 0; i < theUE.size(); i ++) {
     if (!this->MultiplyOnTheLeft(theUE[i], buffer, ownerAlgebra, theRingUnit)) {
       ElementSumGeneralizedVermas<coefficient> tempOutput;
@@ -1106,7 +1106,7 @@ bool ElementTensorsGeneralizedVermas<coefficient>::MultiplyOnTheLeft(
         }
         MonomialGeneralizedVerma<coefficient>& currentSingleMon = currentMon.theMons[0];
         if (j == 0) {
-          tempOutput.MakeZero();
+          tempOutput.makeZero();
         }
         tempOutput.AddMonomial(currentSingleMon, this->coefficients[j]);
       }
@@ -1131,7 +1131,7 @@ void ElementTensorsGeneralizedVermas<coefficient>::MakeHWV(
   MonomialGeneralizedVerma<coefficient>& theMon = tensorMon.theMons[0];
   theMon.indexFDVector = theOwner.theGeneratingWordsNonReduced.size - 1;
   theMon.MakeConst(theOwner);
-  this->MakeZero();
+  this->makeZero();
   this->AddMonomial(tensorMon, theRingUnit);
 }
 
@@ -1169,7 +1169,7 @@ void ElementTensorsGeneralizedVermas<coefficient>::MultiplyByElementLieAlg(
   int indexGenerator,
   const coefficient& theRingUnit
 ) const {
-  output.MakeZero();
+  output.makeZero();
   MonomialTensorGeneralizedVermas<coefficient> accumMon, monActedOn;
   ElementSumGeneralizedVermas<coefficient> tempElt;
   ElementUniversalEnveloping<coefficient> theGenerator;
@@ -1179,7 +1179,7 @@ void ElementTensorsGeneralizedVermas<coefficient>::MultiplyByElementLieAlg(
     const MonomialTensorGeneralizedVermas<coefficient>& currentMon = (*this)[i];
     accumMon.theMons.SetSize(0);
     for (int j = 0; j < currentMon.theMons.size; j ++) {
-      tempElt.MakeZero();
+      tempElt.makeZero();
       tempElt.AddMonomial(currentMon.theMons[j], theRingUnit);
       tempElt.MultiplyMeByUEEltOnTheLeft(theGenerator);
       for (int k = 0; k < tempElt.size(); k ++) {
@@ -1203,13 +1203,13 @@ void ElementTensorsGeneralizedVermas<coefficient>::TensorOnTheRight(
 ) {
   MacroRegisterFunctionWithName("ElementTensorsGeneralizedVermas<coefficient>::TensorOnTheRight");
   if (right.IsEqualToZero()) {
-    this->MakeZero();
+    this->makeZero();
     return;
   }
   int maxNumMonsFinal = this->size() * right.size();
   ElementTensorsGeneralizedVermas<coefficient> output;
   MonomialTensorGeneralizedVermas<coefficient> bufferMon;
-  output.MakeZero();
+  output.makeZero();
   output.SetExpectedSize(maxNumMonsFinal);
   coefficient theCoeff;
   for (int i = 0; i < right.size(); i ++) {

@@ -34,7 +34,7 @@ public:
   Vector<coefficient> data;
   ClassFunction(): G(nullptr) {
   }
-  void MakeZero(someFiniteGroup& inputWeyl);
+  void makeZero(someFiniteGroup& inputWeyl);
   bool IsEqualToZero() const {
     return this->data.IsEqualToZero();
   }
@@ -48,9 +48,9 @@ public:
   ClassFunction ReducedWithChars(const List<ClassFunction>& chars);
   coefficient& operator[](int i) const;
   std::string toString(FormatExpressions* theFormat = nullptr) const;
-  static unsigned int HashFunction(const ClassFunction& input);
-  unsigned int HashFunction() const {
-    return this->HashFunction(*this);
+  static unsigned int hashFunction(const ClassFunction& input);
+  unsigned int hashFunction() const {
+    return this->hashFunction(*this);
   }
   void operator*=(const coefficient& inputCF) {
     this->data *= inputCF;
@@ -106,7 +106,7 @@ public:
 // bool operator>(const elementSomeGroup& right) const;
 // //group elements are not in general comparable, but do something consistent
 // //and reasonable for collating and printing purposes
-// unsigned int HashFunction() const;
+// unsigned int hashFunction() const;
 //
 // To make certain operations go faster, it might be nice to put smarter algorithms
 // in the function pointers in the FiniteGroup class
@@ -118,7 +118,7 @@ public:
 // extent allowed by law.  Two uninitialized elements can be expected to multiply,
 // an an uninitialized element can multiply by an initialized element and where
 // needed thereby discover what group it belongs to.  Equality and sorting operators
-// and the HashFunction need to know what the identity is representation
+// and the hashFunction need to know what the identity is representation
 // It should hash to 0 and sort first.
 //
 // Elements generally know of a faithful representation, which may by reducible,
@@ -296,7 +296,7 @@ public:
   coefficient GetHermitianProduct(const Vector<coefficient>& leftCharacter, const Vector<coefficient>& rightCharacter);
 
   bool PossiblyConjugate(const elementSomeGroup& x, const elementSomeGroup& y);
-  void MakeID(elementSomeGroup& x);
+  void makeIdentity(elementSomeGroup& x);
   bool IsID(elementSomeGroup& x);
   void ComputeGeneratorCommutationRelations();
   void VerifyCCSizesAndRepresentativesFormula();
@@ -373,7 +373,7 @@ struct simpleReflectionOrOuterAutomorphism {
     this->flagIsOuter = false;
     this->index = inputIndex;
   }
-  unsigned int HashFunction() const {
+  unsigned int hashFunction() const {
     return static_cast<unsigned>(1 + this->index + 100 * flagIsOuter);
   }
   bool operator==(const simpleReflectionOrOuterAutomorphism& other) const {
@@ -385,8 +385,8 @@ struct simpleReflectionOrOuterAutomorphism {
     }
     return this->index > right.index;
   }
-  unsigned int HashFunction(const simpleReflectionOrOuterAutomorphism& input) const {
-    return input.HashFunction();
+  unsigned int hashFunction(const simpleReflectionOrOuterAutomorphism& input) const {
+    return input.hashFunction();
   }
 };
 
@@ -399,7 +399,7 @@ struct simpleReflection {
   void MakeSimpleReflection(int inputIndex) {
     this->index = inputIndex;
   }
-  unsigned int HashFunction() const {
+  unsigned int hashFunction() const {
     return static_cast<unsigned>(index);
   }
   bool operator==(const simpleReflection& other) const {
@@ -417,8 +417,8 @@ public:
   bool flagDeallocated;
   void MultiplyOnTheRightBySimpleRootInner(int simpleRootIndex);
   void MultiplyOnTheRightByOuterAutomorphism(int indexOuterAutomorphism);
-  static unsigned int HashFunction(const ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& input);
-  unsigned int HashFunction() const;
+  static unsigned int hashFunction(const ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& input);
+  unsigned int hashFunction() const;
   std::string toString(FormatExpressions* theFormat = nullptr) const;
 };
 
@@ -462,16 +462,16 @@ public:
   void MakeRootReflection(const Vector<Rational>& mustBeRoot, WeylGroupData& inputWeyl);
   void MakeCanonical();
   // This is actually a very reasonable API call to have
-  void MakeID(WeylGroupData& inputWeyl);
+  void makeIdentity(WeylGroupData& inputWeyl);
   // but for consistency with the other group element type, we must also have
-  void MakeID(const FiniteGroup<ElementWeylGroup>& inputGroup);
-  void MakeID(const ElementWeylGroup& initializeFrom);
+  void makeIdentity(const FiniteGroup<ElementWeylGroup>& inputGroup);
+  void makeIdentity(const ElementWeylGroup& initializeFrom);
   bool IsID();
   std::string ToStringInvariants(FormatExpressions* theFormat) const;
   std::string toString(FormatExpressions* theFormat = nullptr) const;
-  unsigned int HashFunction() const;
-  static unsigned int HashFunction(const ElementWeylGroup& input) {
-    return input.HashFunction();
+  unsigned int hashFunction() const;
+  static unsigned int hashFunction(const ElementWeylGroup& input) {
+    return input.hashFunction();
   }
   void operator*=(const ElementWeylGroup& other);
   ElementWeylGroup operator*(const ElementWeylGroup& other) const {
@@ -502,7 +502,7 @@ public:
   WeylGroupAutomorphisms* owner;
   List<simpleReflectionOrOuterAutomorphism> generatorsLastAppliedFirst;
   bool flagDeallocated;
-  void MakeID(WeylGroupAutomorphisms& inputAutomorphisms);
+  void makeIdentity(WeylGroupAutomorphisms& inputAutomorphisms);
   ElementWeylGroupAutomorphisms();
   ~ElementWeylGroupAutomorphisms();
   bool CheckInitialization() const;
@@ -515,8 +515,8 @@ public:
   void MakeOuterAuto(int outerAutoIndex, WeylGroupAutomorphisms& inputWeyl);
   void MakeSimpleReflection(int simpleRootIndex, WeylGroupAutomorphisms& inputWeyl);
   void MultiplyOnTheRightByOuterAuto(int outerAutoIndex);
-  unsigned int HashFunction() const;
-  static unsigned int HashFunction(const ElementWeylGroupAutomorphisms& input);
+  unsigned int hashFunction() const;
+  static unsigned int hashFunction(const ElementWeylGroupAutomorphisms& input);
   std::string toString(FormatExpressions* theFormat = nullptr) const;
 };
 
@@ -661,11 +661,11 @@ public:
     List<Vector<Rational> >& outputHighestWeightsFundCoords, int inputDimBound
   );
   Rational GetLongestRootLengthSquared() const;
-  static unsigned int HashFunction(const WeylGroupData& input) {
-    return input.CartanSymmetric.HashFunction();
+  static unsigned int hashFunction(const WeylGroupData& input) {
+    return input.CartanSymmetric.hashFunction();
   }
-  unsigned int HashFunction() const {
-    return this->HashFunction(*this);
+  unsigned int hashFunction() const {
+    return this->hashFunction(*this);
   }
   WeylGroupData() {
     this->flagDeallocated = false;
@@ -1129,7 +1129,7 @@ public:
     this->preimageGroup->GetWord(g, word);
     if (word.size == 0) {
       elementSecondGroup out;
-      out.MakeID(generatorImages[0]);
+      out.makeIdentity(generatorImages[0]);
       return out;
     }
     if (word.size == 1) {
@@ -1253,16 +1253,16 @@ public:
   // in which the order of the conjugacy classes determines the value
   // If you compare hash values from two groups which calculated their conjugacy classes in a different way,
   // you must ensure they are in the same order, or hashing won't work as expected.
-  unsigned int HashFunction() const;
-  static unsigned int HashFunction(const GroupRepresentation<someGroup, coefficient>& in) {
-    return in.HashFunction();
+  unsigned int hashFunction() const;
+  static unsigned int hashFunction(const GroupRepresentation<someGroup, coefficient>& in) {
+    return in.hashFunction();
   }
 };
 
 template <typename someGroup, typename coefficient>
 template <typename elementSomeGroup>
 bool GroupRepresentation<someGroup, coefficient>::GetMatrixOfElement(const elementSomeGroup& g, Matrix<coefficient>& out) {
-  out.MakeID(this->generatorS[0]);
+  out.makeIdentity(this->generatorS[0]);
   List<int> word;
   if (!this->ownerGroup->GetWord(g, word)) {
     return false;
@@ -1294,7 +1294,7 @@ void GroupRepresentation<someGroup, coefficient>::ComputeCharacter() const {
   this->theCharacteR.data.SetSize(this->ownerGroup->conjugacyClasseS.size);
   for (int cci = 0; cci < this->ownerGroup->conjugacyClasseS.size; cci ++) {
     Matrix<coefficient> M;
-    M.MakeID(this->generatorS[0]);
+    M.makeIdentity(this->generatorS[0]);
     List<int> ccirWord;
     // this->GetMatrixOfElement(this->ownerGroup->conjugacyClasseS[cci].representative);
     this->ownerGroup->GetWord(this->ownerGroup->conjugacyClasseS[cci].representative, ccirWord);
@@ -1406,11 +1406,11 @@ public:
   // in which the order of the conjugacy classes determines the value
   // If you compare hash values from two groups which calculated their conjugacy classes in a different way,
   // you must ensure they are in the same order, or hashing won't work as expected.
-  unsigned int HashFunction() const;
+  unsigned int hashFunction() const;
   bool CheckInitialization() const;
   bool CheckAllSimpleGensAreOK() const;
-  static unsigned int HashFunction(const GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& input) {
-    return input.HashFunction();
+  static unsigned int hashFunction(const GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& input) {
+    return input.hashFunction();
   }
   void ComputeAllElementImages();
   const ClassFunction<somegroup, coefficient>& GetCharacter();
@@ -1480,11 +1480,11 @@ public:
   void operator*= (const VirtualRepresentation<somegroup, coefficient>& other);
   void AssignRep(const GroupRepresentationCarriesAllMatrices<somegroup, Rational>& other);
   void AssignRep(const GroupRepresentation<somegroup, Rational>& other);
-  static unsigned int HashFunction(const VirtualRepresentation<somegroup, coefficient>& input) {
-    return input.HashFunction();
+  static unsigned int hashFunction(const VirtualRepresentation<somegroup, coefficient>& input) {
+    return input.hashFunction();
   }
-  unsigned int HashFunction() const {
-    return this->::LinearCombination<ClassFunction<somegroup, coefficient>, Rational>::HashFunction();
+  unsigned int hashFunction() const {
+    return this->::LinearCombination<ClassFunction<somegroup, coefficient>, Rational>::hashFunction();
   }
 };
 
@@ -1752,7 +1752,7 @@ void SubgroupData<someGroup, elementSomeGroup>::QuotientGroupPermutationRepresen
   out.generatorS.SetSize(this->theGroup->generators.size);
   for (int i = 0; i < this->theGroup->generators.size; i ++) {
     out.generatorS[i].init(this->cosets.size, this->cosets.size);
-    out.generatorS[i].MakeZero();
+    out.generatorS[i].makeZero();
     for (int ci = 0; ci <out.generatorS[i].NumCols; ci ++) {
       elementSomeGroup g =  this->theGroup->generators[i] * this->cosets[ci].representative;
       int j = this->GetCosetId(g);
@@ -2066,7 +2066,7 @@ void ElementWeylGroupRing<coefficient>::MakeFromClassFunction(WeylGroupData* GG,
   if (GG == nullptr) {
     global.fatal << "Weyl group pointer not allowed to be zero. " << global.fatal;
   }
-  this->MakeZero();
+  this->makeZero();
   ElementWeylGroup theMon;
   for (int i = 0; i < GG->theGroup.ConjugacyClassCount(); i ++) {
     if (l[i] != 0) {
@@ -2394,7 +2394,7 @@ void UDPolynomial<coefficient>::operator*=(const coefficient& right) {
 template <class coefficient>
 std::string UDPolynomial<coefficient>::toString(FormatExpressions* theFormat) const {
   Polynomial<coefficient> tempP;
-  tempP.MakeZero();
+  tempP.makeZero();
   MonomialP tempM;
   for (int i = 0; i < this->data.size; i ++) {
     tempM.MakeEi(0, i, 1);

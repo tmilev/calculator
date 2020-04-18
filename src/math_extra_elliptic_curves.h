@@ -15,7 +15,7 @@ public:
   static bool GetOrderNISTCurve(
     const std::string& curveName, LargeIntegerUnsigned& output, std::stringstream *commentsOnFailure
   );
-  static unsigned int HashFunction(const EllipticCurveWeierstrassNormalForm& input);
+  static unsigned int hashFunction(const EllipticCurveWeierstrassNormalForm& input);
   bool operator==(const EllipticCurveWeierstrassNormalForm& other) const;
 };
 
@@ -26,7 +26,7 @@ public:
   coefficient xCoordinate;
   coefficient yCoordinate;
   bool flagInfinity;
-  static unsigned int HashFunction(const ElementEllipticCurve<coefficient>& input);
+  static unsigned int hashFunction(const ElementEllipticCurve<coefficient>& input);
   void Invert();
   bool MakeGeneratorNISTCurve(const std::string& input, std::stringstream* commentsOnFailure);
   void MakeGeneratorSecp256k1();

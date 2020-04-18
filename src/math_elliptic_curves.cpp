@@ -1,10 +1,10 @@
 #include "math_extra_elliptic_curves_implementation.h"
 #include "math_extra_algebraic_numbers.h"
 
-unsigned int EllipticCurveWeierstrassNormalForm::HashFunction(const EllipticCurveWeierstrassNormalForm& input) {
+unsigned int EllipticCurveWeierstrassNormalForm::hashFunction(const EllipticCurveWeierstrassNormalForm& input) {
   return
-  input.linearCoefficient.HashFunction() * SomeRandomPrimes[0] +
-  input.constantTerm.HashFunction() * SomeRandomPrimes[1] ;
+  input.linearCoefficient.hashFunction() * SomeRandomPrimes[0] +
+  input.constantTerm.hashFunction() * SomeRandomPrimes[1] ;
 }
 
 bool EllipticCurveWeierstrassNormalForm::GetOrderNISTCurve(

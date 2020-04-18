@@ -6,7 +6,7 @@
 #include "general_lists.h"
 #include "general_list_references.h"
 
-template <class listType, class key, class value, unsigned int hashFunction(const key&) = key::HashFunction>
+template <class listType, class key, class value, unsigned int hashFunction(const key&) = key::hashFunction>
 class MapTemplate {
 public:
   HashedList<key, hashFunction> theKeys;
@@ -99,13 +99,13 @@ public:
 
 // using C++ 11, not sure if that is a good idea:
 // In case this does not compile, please see the commented code below.
-template <class key, class value, unsigned int hashFunction(const key&) = key::HashFunction>
+template <class key, class value, unsigned int hashFunction(const key&) = key::hashFunction>
 using MapReferences = MapTemplate<ListReferences<value>, key, value, hashFunction>;
-template <class key, class value, unsigned int hashFunction(const key&) = key::HashFunction>
+template <class key, class value, unsigned int hashFunction(const key&) = key::hashFunction>
 using MapList = MapTemplate<List<value>, key, value, hashFunction>;
 
 /*
-template <class value, class key, unsigned int hashFunction(const key&)=key::HashFunction>
+template <class value, class key, unsigned int hashFunction(const key&)=key::hashFunction>
 class MapReferences
 {
 public:

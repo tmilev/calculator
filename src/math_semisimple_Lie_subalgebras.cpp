@@ -526,7 +526,7 @@ std::string SemisimpleSubalgebras::ToStringSSsumaryLaTeX(FormatExpressions* theF
     if (!currentSA.flagCentralizerIsWellChosen) {
       continue;
     }
-    typeCentralizer.MakeZero();
+    typeCentralizer.makeZero();
     if (currentSA.indexMaxSSContainer != - 1) {
       typeCentralizer = this->theSubalgebras.theValues[currentSA.indexMaxSSContainer].theWeylNonEmbedded->theDynkinType -
       currentSA.theWeylNonEmbedded->theDynkinType;
@@ -1050,7 +1050,7 @@ bool SemisimpleSubalgebras::FindTheSSSubalgebrasFromScratch(
 
   this->CheckInitialization();
   this->owner->ComputeChevalleyConstants();
-  this->targetDynkinType.MakeZero();
+  this->targetDynkinType.makeZero();
   if (targetType != nullptr) {
     this->targetDynkinType = *targetType;
   }
@@ -1099,7 +1099,7 @@ Vector<Rational> SemisimpleSubalgebras::GetHighestWeightFundNewComponentFromImag
   Vector<Rational> result;
   if (input.IsEqualToZero()) {
     this->MakeEmptyCandidateSA(theSSSubalgebraToBeModified);
-    result.MakeZero(0);
+    result.makeZero(0);
     return result;
   } else {
     this->MakeCandidateSA(input, theSSSubalgebraToBeModified);
@@ -1665,7 +1665,7 @@ bool SemisimpleSubalgebras::CentralizersComputedToHaveUnsuitableNilpotentOrbits(
   DynkinType currentComplementSummand, centralizerOfComplementOfCurrentSummand, currentSummand;
   HashedList<Rational> theDynkinIndicesCurrentSummand, theDynkinIndicesCentralizerComplementCurrentSummand;
   while (simpleSummandSelection.IncrementReturnFalseIfPastLast()) {
-    currentComplementSummand.MakeZero();
+    currentComplementSummand.makeZero();
     for (int i = 0; i <simpleSummandSelection.Multiplicities.size; i ++) {
       currentComplementSummand.AddMonomial(currentType[i], simpleSummandSelection.Multiplicities[i]);
     }
@@ -2099,7 +2099,7 @@ void DynkinType::GetDynkinTypeWithDefaultScales(DynkinType& output) const {
     thisCopy.GetDynkinTypeWithDefaultScales(output);
     return;
   }
-  output.MakeZero();
+  output.makeZero();
   DynkinSimpleType tempType;
   for (int i = 0; i < this->size(); i ++) {
     tempType.MakeArbitrary((*this)[i].theLetter, (*this)[i].theRank, 1);
@@ -2121,7 +2121,7 @@ void DynkinSimpleType::GetAutomorphismActingOnVectorColumn(MatrixTensor<Rational
     output.MakeId(this->theRank);
     return;
   }
-  output.MakeZero();
+  output.makeZero();
   if (this->theLetter == 'A' && this->theRank != 1) {
     for (int i = 0; i < this->theRank; i ++) {
       output.AddMonomial(MonomialMatrix(i, this->theRank - i - 1), 1);
@@ -2667,7 +2667,7 @@ void LinearCombination<templateMonomial, coefficient>::IntersectVectorSpaces(
       break;
     }
     counter ++;
-    outputIntersection[counter].MakeZero();
+    outputIntersection[counter].makeZero();
     for (int j = 0; j < firstSpaceDim; j ++) {
       tempMCT = vectorSpace2eliminated[j];
       tempMCT *= theLinCombiMat(i, j);
@@ -2964,8 +2964,8 @@ void CandidateSSSubalgebra::ComputeCharsPrimalModules() {
   Weight<Rational> currentWeight;
   currentWeight.owner = nullptr;
   for (int i = 0; i < this->CharsPrimalModules.size; i ++) {
-    this->CharsPrimalModules[i].MakeZero();
-    this->CharsPrimalModulesMerged[i].MakeZero();
+    this->CharsPrimalModules[i].makeZero();
+    this->CharsPrimalModulesMerged[i].makeZero();
     for (int j = 0; j < this->WeightsModulesPrimal[i].size; j ++) {
       currentWeight.weightFundamentalCoordS = this->WeightsModulesPrimal[i][j];
       this->CharsPrimalModules[i].AddMonomial(currentWeight, 1);
@@ -3049,7 +3049,7 @@ bool CandidateSSSubalgebra::ComputeKsl2tripleSetUpAndSolveSystem(
   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > Ecopy, theH, theF, tempElt;
   Ecopy = theE;
   this->GetAmbientSS().GetGenericElementCartan(theH, 0);
-  theF.MakeZero();
+  theF.makeZero();
   Polynomial<AlgebraicNumber> tempP;
   for (int i = 0; i < FisLinearCombiOf.size; i ++) {
     tempElt = FisLinearCombiOf[i];
@@ -3114,7 +3114,7 @@ void NilradicalCandidate::CheckInitialization() const {
 
 Vector<Rational> NilradicalCandidate::GetConeStrongIntersectionWeight() const {
   Vector<Rational> theWeight;
-  theWeight.MakeZero(this->owner->GetPrimalRank());
+  theWeight.makeZero(this->owner->GetPrimalRank());
   for (int i = 0; i < this->theNilradicalWeights.size; i ++) {
     theWeight += this->theNilradicalWeights[i] * this->ConeStrongIntersection[i];
   }
@@ -3278,7 +3278,7 @@ bool NilradicalCandidate::TryFindingLInfiniteRels() {
           this->theNilradicalSubsetWeights, this->theNonFKhwsStronglyTwoSided, &betterIntersection, nullptr
         )) {
           betterIntersection.ScaleNormalizeFirstNonZero();
-          this->ConeStrongIntersection.MakeZero(this->theNilradicalWeights.size +this->theNonFKhwsStronglyTwoSided.size);
+          this->ConeStrongIntersection.makeZero(this->theNilradicalWeights.size +this->theNonFKhwsStronglyTwoSided.size);
           this->ConeRelativelyStrongIntersection.SetSize(0);
           for (int k = 0; k < this->theNilradSubsel.CardinalitySelection; k ++) {
             this->ConeStrongIntersection[this->theNilradSubsel.elements[k]] = betterIntersection[k];
@@ -3301,7 +3301,7 @@ bool NilradicalCandidate::TryFindingLInfiniteRels() {
       }
     }
   }
-//  this->ConeStrongIntersection.MakeZero(this->ConeStrongIntersection.size);
+//  this->ConeStrongIntersection.makeZero(this->ConeStrongIntersection.size);
   ProgressReport theReport;
   this->flagComputedRelativelyStrongIntersections = true;
   for (int i = 1; i < this->theNilradicalWeights.size + 1 && i < 5; i ++) {
@@ -3597,9 +3597,9 @@ void NilradicalCandidate::ProcessMe() {
 
 std::string CandidateSSSubalgebra::ToStringNilradicalSelection(const List<int>& theSelection) {
   Vector<Rational> undecided, included, excluded, tempV;
-  included.MakeZero(this->NilradicalPairingTable.size);
-  undecided.MakeZero(this->NilradicalPairingTable.size);
-  excluded.MakeZero(this->NilradicalPairingTable.size);
+  included.makeZero(this->NilradicalPairingTable.size);
+  undecided.makeZero(this->NilradicalPairingTable.size);
+  excluded.makeZero(this->NilradicalPairingTable.size);
   for (int i = 0; i < theSelection.size; i ++) {
     tempV.MakeEi(this->NilradicalPairingTable.size, i);
     if (theSelection[i] == 0) {
@@ -3817,7 +3817,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart(
   MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart");
   this->HighestWeightsPrimalNonSorted.SetSize(this->HighestVectorsNonSorted.size);
   this->HighestWeightsNONprimalNonSorted.SetSize(this->HighestVectorsNonSorted.size);
-  this->thePrimalChaR.MakeZero();
+  this->thePrimalChaR.makeZero();
   Weight<Rational> theWeight;
   theWeight.owner = nullptr;
   Vector<Rational> currentRoot;
@@ -4160,7 +4160,7 @@ void CandidateSSSubalgebra::GetGenericLinearCombination(
 ) {
   Polynomial<AlgebraicNumber> theCF;
   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > tempMon;
-  output.MakeZero();
+  output.makeZero();
   for (int i = 0; i < involvedGens.size; i ++) {
     theCF.MakeDegreeOne(numVars, varOffset + i, 1);
     tempMon.MakeGenerator(involvedGens[i].theGeneratorIndex, *this->owner->owner);
@@ -4178,9 +4178,9 @@ bool CandidateSSSubalgebra::ComputeChar(bool allowBadCharacter) {
   this->CheckCandidateInitialization();
   this->theWeylNonEmbedded->ComputeRho(true);
   Weight<Rational> tempMon;
-  tempMon.weightFundamentalCoordS.MakeZero(this->theWeylNonEmbedded->GetDim());
+  tempMon.weightFundamentalCoordS.makeZero(this->theWeylNonEmbedded->GetDim());
   tempMon.owner = nullptr;
-  this->theCharFundamentalCoordsRelativeToCartan.MakeZero();
+  this->theCharFundamentalCoordsRelativeToCartan.makeZero();
   this->theCharFundamentalCoordsRelativeToCartan.AddMonomial(tempMon, this->GetAmbientSS().GetRank());
   List<DynkinSimpleType> theTypes;
   this->theWeylNonEmbedded->theDynkinType.GetTypesWithMults(theTypes);
@@ -4227,7 +4227,7 @@ bool CandidateSSSubalgebra::ComputeChar(bool allowBadCharacter) {
   accumChar = this->theCharFundamentalCoordsRelativeToCartan;
   SemisimpleLieAlgebra* nonEmbeddedMe =
   & (*this->owner->theSubalgebrasNonEmbedded).theValues[this->indexNonEmbeddedMeStandard];
-  this->theCharNonPrimalFundCoords.MakeZero();
+  this->theCharNonPrimalFundCoords.makeZero();
 
   while (accumChar.size() > 0) {
     int currentIndex = accumChar.GetIndexExtremeWeightRelativeToWeyl(*this->theWeylNonEmbedded);
@@ -4243,7 +4243,7 @@ bool CandidateSSSubalgebra::ComputeChar(bool allowBadCharacter) {
         return false;
       }
     }
-    freudenthalChar.MakeZero();
+    freudenthalChar.makeZero();
     tempMon =accumChar[currentIndex];
     tempMon.owner = nonEmbeddedMe;
     freudenthalChar.AddMonomial(tempMon, accumChar.coefficients[currentIndex]);
@@ -4713,7 +4713,7 @@ bool slTwoSubalgebra::AttemptToComputeCentralizer() {
   this->flagCentralizerIsRegular = false;
   this->flagCentralizerTypeComputed = false;
   Weight<Rational> zeroWeight;
-  zeroWeight.weightFundamentalCoordS.MakeZero(1);
+  zeroWeight.weightFundamentalCoordS.makeZero(1);
   if (
     !this->moduleDecompositionAmbientSA.GetMonomialCoefficient(zeroWeight).IsSmallInteger(
       &this->dimensionCentralizer
@@ -4848,7 +4848,7 @@ void slTwoSubalgebra::ComputeModuleDecomposition(
   }
   BufferHighestWeights = (outputModuleDimensions);
   outputHWs.SetExpectedSize( positiveRootsContainingRegularSA.size * 2);
-  outputHWs.MakeZero();
+  outputHWs.makeZero();
   Weight<Rational> currentHW;
   currentHW.weightFundamentalCoordS.MakeEi(1, 0);
   for (int j = BufferHighestWeights.size - 1; j >= IndexZeroWeight; j --) {
@@ -5260,7 +5260,7 @@ std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFor
     }
   }
   Vector<Rational> zeroVector;
-  zeroVector.MakeZero(thePrimalRank);
+  zeroVector.makeZero(thePrimalRank);
   BasisToDrawCirclesAt.MakeEiBasis(thePrimalRank);
   Vectors<Rational> cornerWeights;
   int maxModDim = 0;
@@ -5600,8 +5600,8 @@ std::string CandidateSSSubalgebra::ToStringModuleDecomposition(FormatExpressions
   out << "</tr>";
   out << "</table>";
   Vector<Rational> semisimpleSAv, centralizerV;
-  semisimpleSAv.MakeZero(this->Modules.size);
-  centralizerV.MakeZero(this->Modules.size);
+  semisimpleSAv.makeZero(this->Modules.size);
+  centralizerV.makeZero(this->Modules.size);
   for (int i = 0; i < this->subalgebraModules.size; i ++) {
     semisimpleSAv[this->subalgebraModules[i]] += 1;
   }
@@ -6066,7 +6066,7 @@ std::string CandidateSSSubalgebra::ToStringPairingTable(FormatExpressions* theFo
   out << "</table>";
   out << "<br>Modules corresponding to the semisimple subalgebra: ";
   Vector<Rational> theSAvector, tempV;
-  theSAvector.MakeZero(this->NilradicalPairingTable.size);
+  theSAvector.makeZero(this->NilradicalPairingTable.size);
   for (int i = 0; i < this->subalgebraModules.size; i ++) {
     tempV.MakeEi(this->NilradicalPairingTable.size, this->subalgebraModules[i]);
     theSAvector += tempV;
@@ -6103,7 +6103,7 @@ std::string CandidateSSSubalgebra::ToStringPairingTable(FormatExpressions* theFo
 
 void DynkinType::ScaleFirstCoRootSquaredLength(const Rational& multiplyCoRootSquaredLengthBy) {
   DynkinType result;
-  result.MakeZero();
+  result.makeZero();
   result.SetExpectedSize(this->size());
   DynkinSimpleType tempType;
   for (int i = 0; i < this->size(); i ++) {
@@ -6277,7 +6277,7 @@ void CandidateSSSubalgebra::ComputeCentralizerIsWellChosen() {
   }
   Weight<Rational> theZeroWeight;
   theZeroWeight.owner = nullptr;
-  theZeroWeight.weightFundamentalCoordS.MakeZero(this->theHs.size);
+  theZeroWeight.weightFundamentalCoordS.makeZero(this->theHs.size);
   this->centralizerDimension = this->theCharNonPrimalFundCoords.GetMonomialCoefficient(theZeroWeight);
   this->centralizerRank = this->centralizerDimension;
   if (this->centralizerRank == 0) {
@@ -7072,8 +7072,8 @@ void CandidateSSSubalgebra::ComputeCartanOfCentralizer() {
   bilinearFormInverted.Invert();
   diagMat.init(this->BilinearFormSimplePrimal.NumRows, this->BilinearFormSimplePrimal.NumCols);
   diagMatrix2.init(this->BilinearFormSimplePrimal.NumRows, this->BilinearFormSimplePrimal.NumCols);
-  diagMat.MakeZero();
-  diagMatrix2.MakeZero();
+  diagMat.makeZero();
+  diagMatrix2.makeZero();
   for (int i = 0; i < this->BilinearFormSimplePrimal.NumRows; i ++) {
     if (i < this->theHs.size) {
       diagMat(i, i) = this->theSubalgebraNonEmbeddedDefaultScale->theWeyl.CartanSymmetric(i, i) / 2;

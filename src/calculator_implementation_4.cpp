@@ -141,7 +141,7 @@ void ModuleSSalgebra<coefficient>::GetGenericUnMinusElt(
   List<ElementUniversalEnveloping<coefficient> > eltsNilrad;
   this->GetElementsNilradical(eltsNilrad, true, useNilWeight, ascending);
   RationalFunction tempRF;
-  output.MakeZero(*this->theAlgebras, this->indexAlgebra);
+  output.makeZero(*this->theAlgebras, this->indexAlgebra);
   MonomialUniversalEnveloping<RationalFunction> tempMon;
   tempMon.MakeConst(*this->theAlgebras, this->indexAlgebra);
   int varShift = 0;
@@ -167,7 +167,7 @@ void ModuleSSalgebra<coefficient>::GetGenericUnMinusElt(
   List<ElementUniversalEnveloping<coefficient> > eltsNilrad;
   this->GetElementsNilradical(eltsNilrad, true, nullptr, useNilWeight, ascending);
   Polynomial<Rational> tempRF;
-  output.MakeZero(*this->owner);
+  output.makeZero(*this->owner);
   MonomialUniversalEnveloping<Polynomial<Rational> > tempMon;
   tempMon.makeOne(*this->owner);
   int varShift = 0;
@@ -191,11 +191,11 @@ class quasiDiffMon {
   public:
   MonomialWeylAlgebra theWeylMon;
   MonomialMatrix theMatMon;
-  static unsigned int HashFunction(const quasiDiffMon& input) {
-    return input.theWeylMon.HashFunction() * SomeRandomPrimes[0] + input.theMatMon.HashFunction() * SomeRandomPrimes[1];
+  static unsigned int hashFunction(const quasiDiffMon& input) {
+    return input.theWeylMon.hashFunction() * SomeRandomPrimes[0] + input.theMatMon.hashFunction() * SomeRandomPrimes[1];
   }
-  unsigned int HashFunction() const {
-    return HashFunction(*this);
+  unsigned int hashFunction() const {
+    return hashFunction(*this);
   }
   bool operator==(const quasiDiffMon& other) const {
     return this->theWeylMon == other.theWeylMon && this->theMatMon == other.theMatMon;
@@ -245,11 +245,11 @@ void quasiDiffOp<coefficient>::FourierTransformDiffPartOnly(quasiDiffOp<coeffici
     thisCopy.FourierTransformDiffPartOnly(output);
     return;
   }
-  output.MakeZero();
+  output.makeZero();
   ElementWeylAlgebra<coefficient> startDO, finalDO;
   quasiDiffMon theMon;
   for (int i = 0; i < this->size(); i ++) {
-    startDO.MakeZero();
+    startDO.makeZero();
     startDO.AddMonomial((*this)[i].theWeylMon, this->coefficients[i]);
     startDO.FourierTransform(finalDO);
     for (int j = 0; j < finalDO.size(); j ++) {
@@ -262,7 +262,7 @@ void quasiDiffOp<coefficient>::FourierTransformDiffPartOnly(quasiDiffOp<coeffici
 
 template <class coefficient>
 void quasiDiffOp<coefficient>::GetEWAsetMatrixPartsToId(ElementWeylAlgebra<coefficient>& output) const {
-  output.MakeZero();
+  output.makeZero();
   for (int i = 0; i < this->size(); i ++) {
     output.AddMonomial((*this)[i].theWeylMon, this->coefficients[i]);
   }
@@ -340,12 +340,12 @@ void quasiDiffOp<coefficient>::operator*=(const quasiDiffOp<coefficient>& stands
   quasiDiffOp<coefficient> output;
   ElementWeylAlgebra<Rational> leftElt, rightElt;
   quasiDiffMon outputMon;
-  output.MakeZero();
+  output.makeZero();
   for (int j = 0; j < standsOnTheRight.size(); j ++) {
-    rightElt.MakeZero();
+    rightElt.makeZero();
     rightElt.AddMonomial(standsOnTheRight[j].theWeylMon, standsOnTheRight.coefficients[j]);
     for (int i = 0; i < this->size(); i ++) {
-      leftElt.MakeZero();
+      leftElt.makeZero();
       leftElt.AddMonomial((*this)[i].theWeylMon, this->coefficients[i]);
       outputMon.theMatMon = (*this)[i].theMatMon;
       outputMon.theMatMon *= standsOnTheRight[j].theMatMon;
@@ -369,11 +369,11 @@ std::string quasiDiffOp<coefficient>::toString(FormatExpressions* theFormat) con
     return this->LinearCombination<quasiDiffMon, coefficient>::toString(theFormat);
   }
   MatrixTensor<ElementWeylAlgebra<Rational> > reordered;
-  reordered.MakeZero();
+  reordered.makeZero();
   ElementWeylAlgebra<Rational> tempP;
   for (int i = 0; i < this->size(); i ++) {
     const quasiDiffMon& currentMon = (*this)[i];
-    tempP.MakeZero();
+    tempP.makeZero();
     tempP.AddMonomial(currentMon.theWeylMon, this->coefficients[i]);
     reordered.AddMonomial(currentMon.theMatMon, tempP);
   }
@@ -425,9 +425,9 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator(
   ElementUniversalEnveloping<Polynomial<Rational> > theGenElt, result;
   this->GetGenericUnMinusElt(true, theGenElt, useNilWeight, ascending);
   result.AssignElementLieAlgebra(inputElt, *this->owner, 1);
-  theGenElt.Simplify();
+  theGenElt.simplify();
   result *= theGenElt;
-  result.Simplify();
+  result.simplify();
   MatrixTensor<Polynomial<Rational> > endoPart, tempMT, idMT;
   idMT.MakeIdSpecial();
   MatrixTensor<RationalFunction> tempMat1;
@@ -438,7 +438,7 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator(
   Polynomial<Rational> tempP1, negativeExponentDenominatorContribution, theCoeff;
   quasiDiffMon monQDO, monQDO2;
   Rational tempRat;
-  output.MakeZero();
+  output.makeZero();
   Rational currentShift;
   for (int i = 0; i < result.size(); i ++) {
     //problemCounter ++;
@@ -450,7 +450,7 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator(
         return false;
       }
       tempMat1 = this->GetActionGeneratorIndeX(currentMon.generatorsIndices[j]);
-      tempMT.MakeZero();
+      tempMT.makeZero();
       for (int k = 0; k < tempMat1.size(); k ++) {
         if (tempMat1.coefficients[k].expressionType == RationalFunction::typeRationalFunction) {
           return false;
@@ -588,7 +588,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
       theMod.GetElementsNilradical(elementsNegativeNilrad, true, nullptr, useNilWeight, ascending);
       Polynomial<Rational> Pone, Pzero;
       Pone.makeOne(elementsNegativeNilrad.size + theMod.minimalNumberOfVariables());
-      Pzero.MakeZero();
+      Pzero.makeZero();
       theMod.GetGenericUnMinusElt(true, genericElt, useNilWeight, ascending);
       theWeylFormat.polyAlphabeT.SetSize(numStartingVars + elementsNegativeNilrad.size);
       theWeylFormat.weylAlgebraLetters.SetSize(numStartingVars + elementsNegativeNilrad.size);
@@ -637,7 +637,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
         actionOnGenericElt.AssignElementLieAlgebra(theGeneratorsItry[j], theSSalgebra, Pone);
         actionOnGenericElt *= genericElt;
         theSSalgebra.OrderNilradical(theMod.parabolicSelectionNonSelectedAreElementsLevi, useNilWeight, ascending);
-        actionOnGenericElt.Simplify();
+        actionOnGenericElt.simplify();
         theUEformat.NumAmpersandsPerNewLineForLaTeX = 2;
         out << "<td>" << HtmlRoutines::GetMathMouseHover("\\begin{array}{rcl}&&" + actionOnGenericElt.toString(&theUEformat) + "\\end{array}") << "</td>";
         theUEformat.NumAmpersandsPerNewLineForLaTeX = 0;
@@ -743,7 +743,7 @@ bool Calculator::innerHWVCommon(
   RecursionDepthCounter therecursionIncrementer(&theCommands.RecursionDeptH);
   RationalFunction RFOne, RFZero;
   RFOne.makeOne();
-  RFZero.MakeZero();
+  RFZero.makeZero();
   std::string report;
   ElementTensorsGeneralizedVermas<RationalFunction> theElt;
   //= theElementData.theElementTensorGenVermas.GetElement();
@@ -1593,7 +1593,7 @@ bool Calculator::CollectCoefficientsPowersVar(
   Calculator& theCommands = *input.owner;
   theCommands.CollectOpands(input, theCommands.opPlus(), theSummands);
   Expression currentCoeff;
-  outputPositionIiscoeffXtoIth.MakeZero();
+  outputPositionIiscoeffXtoIth.makeZero();
   for (int i = 0; i < theSummands.size; i ++) {
     theCommands.CollectOpands(theSummands[i], theCommands.opTimes(), currentMultiplicands);
     bool found = false;
@@ -1657,7 +1657,7 @@ bool Calculator::functionCollectSummands(
   MacroRegisterFunctionWithName("Calculator::functionCollectSummands");
   List<Expression> summands;
   theCommands.AppendSummandsReturnTrueIfOrderNonCanonical(input, summands);
-  outputSum.MakeZero();
+  outputSum.makeZero();
   LinearCombination<Expression, AlgebraicNumber> sumOverAlgebraicNumbers;
   LinearCombination<Expression, double> sumOverDoubles;
   Rational coeffRat = 1;

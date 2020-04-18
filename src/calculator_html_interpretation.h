@@ -410,10 +410,10 @@ public:
   std::string LoadAndInterpretCurrentProblemItemJSON(
     bool needToLoadDatabaseMayIgnore, const std::string& desiredRandomSeed, std::stringstream* commentsOnFailure
   );
-  static unsigned int HashFunction(const CalculatorHTML& input) {
-    return input.HashFunction();
+  static unsigned int hashFunction(const CalculatorHTML& input) {
+    return input.hashFunction();
   }
-  unsigned int HashFunction() const {
+  unsigned int hashFunction() const {
     return MathRoutines::HashString(this->fileName);
   }
   bool operator==(const CalculatorHTML& other) const {

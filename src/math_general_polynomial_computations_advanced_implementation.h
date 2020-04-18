@@ -581,7 +581,7 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionByBasis(
   if (this->flagStoreQuotients) {
     this->theQuotients.SetSize(this->theBasiS.size);
     for (int i = 0; i < this->theQuotients.size; i ++) {
-      this->theQuotients[i].MakeZero();
+      this->theQuotients[i].makeZero();
     }
   }
   MemorySaving<Polynomial<coefficient> > tempPoly;
@@ -594,7 +594,7 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionByBasis(
   if (this->flagDoProgressReport) {
     reportHeader.Report("Computing remainder division");
   }
-  outputRemainder->MakeZero();
+  outputRemainder->makeZero();
   Polynomial<coefficient>& currentRemainder = inputOutput;
   if (this->flagDoLogDivision) {
     this->startingPoly.GetElement() = currentRemainder;

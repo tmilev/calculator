@@ -58,15 +58,15 @@ public:
   );
   void SetNumVariables(int newNumVars);
   void Substitution(const PolynomialSubstitution<Rational>& theSub);
-  unsigned int HashFunction() const {
-    return this->::MonomialTensor<coefficient>::HashFunction();
+  unsigned int hashFunction() const {
+    return this->::MonomialTensor<coefficient>::hashFunction();
   }
-  static inline unsigned int HashFunction(const MonomialUniversalEnveloping<coefficient>& input) {
-    return input.HashFunction();
+  static inline unsigned int hashFunction(const MonomialUniversalEnveloping<coefficient>& input) {
+    return input.hashFunction();
   }
   void GetDegree(coefficient& output) const {
     if (this->Powers.size == 0) {
-      output.MakeZero();
+      output.makeZero();
       return;
     }
     output = this->Powers[0];
@@ -96,7 +96,7 @@ public:
   // in WeylGroup::RootSystem.
   // The "zero level roots" - i.e. the elements of the Cartan subalgebra lie in between
   // the negative and positive rootss.
-  void Simplify(ElementUniversalEnveloping<coefficient>& output, const coefficient& theRingUnit = 1);
+  void simplify(ElementUniversalEnveloping<coefficient>& output, const coefficient& theRingUnit = 1);
   void CommuteABntoBnAPlusLowerOrder(
     int theIndeX, ElementUniversalEnveloping<coefficient>& output, const coefficient& theRingUnit = 1
   );
@@ -161,7 +161,7 @@ public:
     std::stringstream* logStream = nullptr
   ) const {
     ElementUniversalEnveloping<coefficient> tempElt;
-    tempElt.MakeZero(*this->owner);
+    tempElt.makeZero(*this->owner);
     tempElt.AddMonomial(right, theRingUnit);
     return this->HWTAAbilinearForm(tempElt, output, subHiGoesToIthElement, theRingUnit, theRingZero, logStream);
   }
@@ -184,15 +184,15 @@ public:
     this->MakeOneGeneratorCoeffOne(inputOwner.GetGeneratorFromRoot(rootSpace), inputOwner, theRingUnit);
   }
   coefficient GetKillingFormProduct(const ElementUniversalEnveloping<coefficient>& right) const;
-  void MakeZero(SemisimpleLieAlgebra& inputOwner);
+  void makeZero(SemisimpleLieAlgebra& inputOwner);
   bool GetLieAlgebraElementIfPossible(ElementSemisimpleLieAlgebra<Rational>& output) const;
   void MakeConst(const coefficient& coeff, SemisimpleLieAlgebra& inputOwner) {
-    this->MakeZero(inputOwner);
+    this->makeZero(inputOwner);
     MonomialUniversalEnveloping<coefficient> tempMon;
     tempMon.makeOne(inputOwner);
     this->AddMonomial(tempMon, coeff);
   }
-  void Simplify(const coefficient& theRingUnit = 1);
+  void simplify(const coefficient& theRingUnit = 1);
   int minimalNumberOfVariables() const {
     int result = 0;
     for (int i = 0; i < this->size; i ++) {
@@ -219,11 +219,11 @@ public:
     const coefficient& theRingUnit,
     const coefficient& theRingZero
   ) const;
-  static inline unsigned int HashFunction (const ElementUniversalEnveloping<coefficient>& input) {
-    return input.HashFunction();
+  static inline unsigned int hashFunction (const ElementUniversalEnveloping<coefficient>& input) {
+    return input.hashFunction();
   }
-  unsigned int HashFunction() const {
-    return this->::LinearCombination<MonomialUniversalEnveloping<coefficient>, coefficient>::HashFunction();
+  unsigned int hashFunction() const {
+    return this->::LinearCombination<MonomialUniversalEnveloping<coefficient>, coefficient>::hashFunction();
   }
   template<class CoefficientTypeQuotientField>
   static bool GetBasisFromSpanOfElements(
@@ -258,7 +258,7 @@ public:
     ElementUniversalEnveloping<coefficient>& output
   ) {
     left.LieBracketOnTheRight(right, output);
-    output.Simplify();
+    output.simplify();
   }
   void LieBracketOnTheRight(
     const ElementUniversalEnveloping<coefficient>& right, ElementUniversalEnveloping<coefficient>& output

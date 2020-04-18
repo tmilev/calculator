@@ -4,7 +4,7 @@
 #include "calculator_interface.h"
 #include "calculator_inner_typed_functions.h"
 #include "math_general_polynomial_computations_basic_implementation.h"
-#include "math_extra_universal_enveloping_implementation.h" // undefined reference to `ElementUniversalEnveloping<RationalFunctionOld>::MakeZero(SemisimpleLieAlgebra&)'
+#include "math_extra_universal_enveloping_implementation.h" // undefined reference to `ElementUniversalEnveloping<RationalFunctionOld>::makeZero(SemisimpleLieAlgebra&)'
 
 template <>
 bool Expression::ConvertInternally<RationalFunction>(Expression& output) const;
@@ -187,7 +187,7 @@ bool CalculatorConversions::functionDynkinType(
     return false;
   }
   DynkinSimpleType simpleComponent;
-  output.MakeZero();
+  output.makeZero();
   for (int i = 0; i < theType.size(); i ++) {
     if (!CalculatorConversions::functionDynkinSimpleType(
       theCommands, theType[i], simpleComponent
@@ -283,7 +283,7 @@ bool CalculatorConversions::innerExpressionFromElementSemisimpleLieAlgebraRation
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerStoreElementSemisimpleLieAlgebraRational");
   LinearCombination<Expression, Rational> theMons;
-  theMons.MakeZero();
+  theMons.makeZero();
   Expression currentMon;
   for (int i = 0; i < input.size(); i ++) {
     CalculatorConversions::innerExpressionFromChevalleyGenerator(theCommands, input[i], currentMon);
@@ -297,7 +297,7 @@ bool CalculatorConversions::innerExpressionFromDynkinType(
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromDynkinType");
   LinearCombination<Expression, AlgebraicNumber> theMons;
-  theMons.MakeZero();
+  theMons.makeZero();
   Expression currentMon;
   for (int i = 0; i < input.size(); i ++) {
     CalculatorConversions::innerExpressionFromDynkinSimpleType(theCommands, input[i], currentMon);
@@ -311,7 +311,7 @@ bool CalculatorConversions::innerExpressionFromElementSemisimpleLieAlgebraAlgebr
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromElementSemisimpleLieAlgebraAlgebraicNumbers");
   LinearCombination<Expression, AlgebraicNumber> theMons;
-  theMons.MakeZero();
+  theMons.makeZero();
   Expression currentMon;
   for (int i = 0; i < input.size(); i ++) {
     CalculatorConversions::innerExpressionFromChevalleyGenerator(theCommands, input[i], currentMon);
@@ -812,7 +812,7 @@ bool CalculatorConversions::innerExpressionFromUE(
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromUE");
   LinearCombination<Expression, RationalFunction> theUEE;
-  theUEE.MakeZero();
+  theUEE.makeZero();
   Expression currentMonE;
   for (int i = 0; i < input.size(); i ++) {
     if (!CalculatorConversions::innerExpressionFromMonomialUE(
@@ -870,7 +870,7 @@ bool CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
   ChevalleyGenerator theChevGen;
   ElementSemisimpleLieAlgebra<AlgebraicNumber> currentElt;
   theChevGen.owner = &owner;
-  output.MakeZero();
+  output.makeZero();
   Expression theContext = polyFormE.GetContext();
   for (int j = 0; j < polyForm.size(); j ++) {
     const MonomialP& currentMon = polyForm[j];
@@ -938,7 +938,7 @@ bool CalculatorConversions::innerElementUE(
   MonomialP currentMultiplicandRFpartMon;
   Polynomial<Rational> currentPMultiplicand;
   RationalFunction currentMultiplicandRFpart;
-  outputUE.MakeZero(owner);
+  outputUE.makeZero(owner);
   Expression polyE;
   if (!CalculatorConversions::functionPolynomial<Rational>(theCommands, input[1], polyE)) {
     return theCommands << "<hr>Failed to convert " << input[1].toString() << " to polynomial.<hr>";
@@ -1016,7 +1016,7 @@ bool CalculatorConversions::innerElementUE(
         currentMultiplicandRFpartMon.setVariable(varIndex, thePower);
       }
     }
-    currentPMultiplicand.MakeZero();
+    currentPMultiplicand.makeZero();
     currentPMultiplicand.AddMonomial(currentMultiplicandRFpartMon, 1);
     currentMultiplicandRFpart = currentPMultiplicand;
     currentSummand *= currentMultiplicandRFpart;

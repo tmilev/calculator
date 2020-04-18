@@ -6,13 +6,13 @@
 #include "math_extra_algebraic_numbers.h"
 
 template <typename coefficient>
-unsigned int ElementEllipticCurve<coefficient>::HashFunction(const ElementEllipticCurve<coefficient>& input) {
+unsigned int ElementEllipticCurve<coefficient>::hashFunction(const ElementEllipticCurve<coefficient>& input) {
   if (input.flagInfinity) {
     return 0;
   }
-  return input.xCoordinate.HashFunction() * SomeRandomPrimes[0] +
-  input.yCoordinate.HashFunction() * SomeRandomPrimes[1] +
-  input.owner.HashFunction(input.owner) * SomeRandomPrimes[2];
+  return input.xCoordinate.hashFunction() * SomeRandomPrimes[0] +
+  input.yCoordinate.hashFunction() * SomeRandomPrimes[1] +
+  input.owner.hashFunction(input.owner) * SomeRandomPrimes[2];
 }
 
 template <typename coefficient>

@@ -219,7 +219,7 @@ void Polynomial<coefficient>::Interpolate(
   const Vector<coefficient>& thePoints, const Vector<coefficient>& ValuesAtThePoints
 ) {
   Polynomial<coefficient> theLagrangeInterpolator, accumulator;
-  this->MakeZero();
+  this->makeZero();
   for (int i = 0; i < thePoints.size; i ++) {
     theLagrangeInterpolator.MakeConst(1, 1);
     for (int j = 0; j < thePoints.size; j ++) {
@@ -316,7 +316,7 @@ bool PolynomialFactorizationKronecker::oneFactor(
       << theReport.ticks << " out of " << total.toString();
       theReport.Report(report.str());
     }
-    theValuesAtPointsLeft.MakeZero(theValuesAtPoints.size);
+    theValuesAtPointsLeft.makeZero(theValuesAtPoints.size);
     Rational firstValue;
     bool isGood = false; //<-we shall first check if the divisor is constant.
     for (int j = 0; j < divisorSelection.theElements.size; j ++) {

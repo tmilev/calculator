@@ -522,11 +522,11 @@ JSData SSLContent::ToJSON() const {
   return result;
 }
 
-unsigned int CipherSuiteSpecification::HashFunction(const CipherSuiteSpecification &input) {
-  return input.HashFunction();
+unsigned int CipherSuiteSpecification::hashFunction(const CipherSuiteSpecification &input) {
+  return input.hashFunction();
 }
 
-unsigned int CipherSuiteSpecification::HashFunction() const {
+unsigned int CipherSuiteSpecification::hashFunction() const {
   return static_cast<unsigned>(this->id);
 }
 

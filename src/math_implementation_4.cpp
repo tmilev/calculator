@@ -844,7 +844,7 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent) {
 
 std::string DynkinDiagramRootSubalgebra::toString(FormatExpressions* theFormat) const {
   DynkinType theType;
-  theType.MakeZero();
+  theType.makeZero();
   for (int j = 0; j < this->SimpleComponentTypes.size; j ++) {
     theType.AddMonomial(this->SimpleComponentTypes[j], 1);
   }
@@ -1022,7 +1022,7 @@ bool DynkinDiagramRootSubalgebra::operator==(const DynkinDiagramRootSubalgebra& 
 }
 
 void DynkinDiagramRootSubalgebra::GetDynkinType(DynkinType& output) const {
-  output.MakeZero();
+  output.makeZero();
   output.SetExpectedSize(this->SimpleComponentTypes.size);
   for (int i = 0; i < this->SimpleComponentTypes.size; i ++) {
     output.AddMonomial(this->SimpleComponentTypes[i], 1);
@@ -1207,11 +1207,11 @@ int affineCone::GetDimension() {
   return this->theWalls.TheObjects[0].affinePoint.size;
 }
 
-unsigned int affineCone::HashFunction() const {
+unsigned int affineCone::hashFunction() const {
   int tempMin = MathRoutines::Minimum(this->theWalls.size, ::SomeRandomPrimesSize);
   unsigned int result = 0;
   for (int i = 0; i < tempMin; i ++) {
-    result += this->theWalls[i].HashFunction() * ::SomeRandomPrimes[i];
+    result += this->theWalls[i].hashFunction() * ::SomeRandomPrimes[i];
   }
   return result;
 }
@@ -1303,7 +1303,7 @@ bool WeylGroupAutomorphisms::AreMaximallyDominantGroupOuter(List<Vector<Rational
   MemorySaving<Vectors<Rational> > theWeightsCopy;
   Vector<Rational> zeroWeight;
   this->ComputeOuterAutos();
-  zeroWeight.MakeZero(this->theWeyl->GetDim());
+  zeroWeight.makeZero(this->theWeyl->GetDim());
   for (int i = 0; i < theWeights.size; i ++) {
     for (int j = 0; j < this->theWeyl->RootsOfBorel.size; j ++) {
       if (this->theWeyl->RootScalarCartanRoot(this->theWeyl->RootsOfBorel[j], theWeights[i]) < 0) {
@@ -1510,7 +1510,7 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
     drawOps.drawCircleAtVectorBufferRational(- translationsProjectedFinal[i], "red", 3);
   }
   out << "<br>the translations projected final: " << translationsProjectedFinal.toString();
-  Accum.MakeZero(theStartingPoly.NumVariables);
+  Accum.makeZero(theStartingPoly.NumVariables);
   for (int i = 0; i < this->theLinearOperators.size; i ++) {
     theSubbedPoly = theStartingPoly;
     theSubbedPoly *= this->theCoeffs[i];
@@ -1546,7 +1546,7 @@ std::string GeneralizedVermaModuleCharacters::CheckMultiplicitiesVsOrbits() {
   int totalDimAffine = this->WeylLarger->GetDim() + this->WeylSmaller->GetDim();
   int smallDim = this->WeylSmaller->GetDim();
   Vector<Rational> normal;
-  normal.MakeZero(totalDimAffine + 1);
+  normal.makeZero(totalDimAffine + 1);
   Vectors<Rational> newWalls;
   ConeComplex tempComplex;
   tempComplex = this->projectivizedChambeR;
@@ -1780,7 +1780,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   }
   tempMatPoly.init(input.theDomain().theWeyl.GetDim(), tempVect.size);
   Polynomial<Rational> polyZero;
-  polyZero.MakeZero();
+  polyZero.makeZero();
   theFormat.polyAlphabeT.SetSize(5);
   theFormat.polyAlphabeT[0] = "x_1";
   theFormat.polyAlphabeT[1] = "x_2";
@@ -1841,7 +1841,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   this->log << "\nWeyl chamber larger algebra before projectivizing: " << this->WeylChamberSmallerAlgebra.toString(&theFormat) << "\n";
   this->PreimageWeylChamberSmallerAlgebra.Normals = this->WeylChamberSmallerAlgebra.Normals;
   for (int i = 0; i < this->PreimageWeylChamberLargerAlgebra.Normals.size; i ++) {
-    tempRoot.MakeZero(input.theRange().GetRank() + input.theDomain().GetRank() + 1);
+    tempRoot.makeZero(input.theRange().GetRank() + input.theDomain().GetRank() + 1);
     for (int j = 0; j < input.theRange().GetRank(); j ++) {
       tempRoot[j + input.theDomain().GetRank()] = this->PreimageWeylChamberLargerAlgebra.Normals[i][j];
     }
@@ -1878,7 +1878,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
     *this->PreimageWeylChamberSmallerAlgebra.TheObjects[i].LastObject()= 0;
   }*/
   for (int i = 0; i < this->PreimageWeylChamberSmallerAlgebra.Normals.size; i ++) {
-    tempRoot.MakeZero(input.theRange().GetRank() + input.theDomain().GetRank() + 1);
+    tempRoot.makeZero(input.theRange().GetRank() + input.theDomain().GetRank() + 1);
     for (int j = 0; j < input.theDomain().GetRank(); j ++) {
       tempRoot[j] = this->PreimageWeylChamberSmallerAlgebra.Normals[i][j];
     }
@@ -2014,7 +2014,7 @@ void GeneralizedVermaModuleCharacters::InitTheMaxComputation() {
   for (int i = 0; i < this->theMultiplicities.size; i ++) {
     if (! this->theMultiplicities[i].IsEqualToZero()) {
       currentCLS.theProjectivizedCone = this->projectivizedChambeR[i];
-      currentCLS.theShift.MakeZero(theAffineDim);
+      currentCLS.theShift.makeZero(theAffineDim);
       currentCLS.theLattice = ZnLattice;
       bool tempBool = this->theMultiplicities[i].valueOnEachLatticeShift[0].GetRootFromLinPolyConstTermLastVariable(theLPtoMax);
       if (!tempBool) {
@@ -2082,8 +2082,8 @@ void GeneralizedVermaModuleCharacters::GetSubFromNonParamArray(
   //reminder: the very last variable comes from the projectivization and contributes to the translation only!
   int numNonParams = NonParams.size;
   output.init(numParams + numNonParams - 1, numParams - 1);
-  outputTranslation.MakeZero(numParams + numNonParams - 1);
-  output.MakeZero();
+  outputTranslation.makeZero(numParams + numNonParams - 1);
+  output.makeZero();
   for (int l = 0; l < numNonParams; l ++) {
     for (int k = 0; k < numParams - 1; k ++) {
       output.elements[l][k] = NonParams[l][k];
@@ -2120,7 +2120,7 @@ void GeneralizedVermaModuleCharacters::GetSubFromIndex(
   Vector<Rational>& theTranslation = this->theTranslationS[theIndex];
   Matrix<Rational> tempMat;
   tempMat.init(dimLargerAlgebra + dimSmallerAlgebra + 1, dimSmallerAlgebra);
-  tempMat.MakeZero();
+  tempMat.makeZero();
   for (int j = 0; j < dimSmallerAlgebra; j ++) {
     tempMat.elements[j][j] = 1;
     for (int i = 0; i < dimLargerAlgebra; i ++) {

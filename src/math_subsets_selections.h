@@ -44,9 +44,9 @@ public:
   void init(int maxNumElements);
   void ComputeIndicesFromSelection();
   void initNoMemoryAllocation();
-  unsigned int HashFunction() const;
-  static unsigned int HashFunction(const Selection& input) {
-    return input.HashFunction();
+  unsigned int hashFunction() const;
+  static unsigned int hashFunction(const Selection& input) {
+    return input.hashFunction();
   }
   std::string toString() const;
   void incrementSelection();
@@ -114,7 +114,7 @@ public:
   }
   List<int> elements;
   List<int> Multiplicities;
-  static unsigned int HashFunction(const SelectionWithMultiplicities& input) {
+  static unsigned int hashFunction(const SelectionWithMultiplicities& input) {
     unsigned int result = 0;
     for (int i = 0; i < input.elements.size; i ++) {
       result += static_cast<unsigned int>(input.Multiplicities[input.elements[i]]) * SomeRandomPrimes[input.elements[i]];
@@ -146,9 +146,9 @@ public:
     return this->MaxMultiplicity*this->Multiplicities.size;
   }
   int CardinalitySelectionWithMultiplicities();
-  static unsigned int HashFunction(const SelectionWithMaxMultiplicity& input) {
+  static unsigned int hashFunction(const SelectionWithMaxMultiplicity& input) {
     return static_cast<unsigned int>(input.MaxMultiplicity) * SomeRandomPrimes[0] +
-    input.::SelectionWithMultiplicities::HashFunction(input);
+    input.::SelectionWithMultiplicities::hashFunction(input);
   }
 };
 
@@ -306,7 +306,7 @@ class SelectionPositiveIntegers {
     return this->theInts.SumCoords();
   }
   void init(int numIntegers) {
-    this->theInts.MakeZero(numIntegers);
+    this->theInts.makeZero(numIntegers);
   }
   void SetFirstInGradeLevel(const LargeIntegerUnsigned& inputGradingLevel) {
     this->theInts[0] = inputGradingLevel;

@@ -41,9 +41,9 @@ public:
    VectorSpace<coefficient> OrthogonalComplement(VectorSpace<coefficient>* ambient = 0, Matrix<coefficient>* form = 0) const;
    Vector<coefficient> GetBasisVector(int i) const;
    Vector<coefficient> GetCanonicalBasisVector(int i) const;
-//   unsigned int HashFunction() const {return this->HashFunction(*this);}
-   static unsigned int HashFunction(const VectorSpace<coefficient>& input) {
-     return input.fastbasis.HashFunction();
+//   unsigned int hashFunction() const {return this->hashFunction(*this);}
+   static unsigned int hashFunction(const VectorSpace<coefficient>& input) {
+     return input.fastbasis.hashFunction();
    }
    bool operator==(const VectorSpace<coefficient> &other) const;
 };
@@ -198,7 +198,7 @@ bool VectorSpace<coefficient>::AddVectorToBasis(const Vector<coefficient>& v) {
 
 template <typename coefficient>
 bool VectorSpace<coefficient>::GetCoordinatesDestructively(Vector<coefficient>& v, Vector<coefficient>& out) const {
-  out.MakeZero(this->rank);
+  out.makeZero(this->rank);
   if (v.IsEqualToZero()) {
     if (this->rank == 0) {
       return false;

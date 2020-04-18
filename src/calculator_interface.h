@@ -611,10 +611,10 @@ private:
   ) const;
 
   JSData ToJSData(FormatExpressions* theFormat, const Expression& startingExpression) const;
-  static unsigned int HashFunction(const Expression& input) {
-    return input.HashFunction();
+  static unsigned int hashFunction(const Expression& input) {
+    return input.hashFunction();
   }
-  unsigned int HashFunction() const {
+  unsigned int hashFunction() const {
     return this->HashFunctionRecursive(0, 1000);
   }
   unsigned int HashFunctionRecursive(int RecursionDepth, int MaxRecursionDepth) const {
@@ -838,10 +838,10 @@ class Function {
     const Function::Options& inputOptions,
     int inputIndexParentThatBansHandler = - 1
   );
-  static unsigned int HashFunction(const Function& input) {
-    return input.HashFunction();
+  static unsigned int hashFunction(const Function& input) {
+    return input.hashFunction();
   }
-  unsigned int HashFunction() const {
+  unsigned int hashFunction() const {
     return static_cast<unsigned int>(reinterpret_cast<uintptr_t>(this->theFunction));
   }
   bool Apply(Calculator& theCommands, const Expression& input, Expression& output, int opIndexParentIfAvailable, Function **outputHandler);
@@ -1086,7 +1086,7 @@ public:
   ): theOp(inputOp), leftType(inputLeft), rightType(inputRight) {
 
   }
-  static unsigned int HashFunction(const ExpressionTripleCrunchers& input) {
+  static unsigned int hashFunction(const ExpressionTripleCrunchers& input) {
     return
       static_cast<unsigned int>(input.leftType) * SomeRandomPrimes[0] +
       static_cast<unsigned int>(input.rightType) * SomeRandomPrimes[1] +

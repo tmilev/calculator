@@ -89,7 +89,7 @@ std::string Weight<coefficient>::TensorAndDecompose(
   this->CheckNonZeroOwner();
   std::stringstream errorLog;
   std::string tempS;
-  output.MakeZero();
+  output.makeZero();
   WeylGroupData& theWeyl = this->owner->theWeyl;
   Vector<Rational> leftHWFundCoords;
   leftHWFundCoords = this->weightFundamentalCoordS;
@@ -137,7 +137,7 @@ bool charSSAlgMod<coefficient>::FreudenthalEvalMeFullCharacter(
   if (!this->FreudenthalEvalMeDominantWeightsOnly(domChar, upperBoundNumDominantWeights, outputDetails)) {
     return false;
   }
-  outputCharOwnerSetToZero.MakeZero();
+  outputCharOwnerSetToZero.makeZero();
   Vectors<Rational> theVect;
   HashedList<Vector<coefficient> > theOrbit;
   theVect.SetSize(1);
@@ -168,7 +168,7 @@ void charSSAlgMod<coefficient>::GetDual(charSSAlgMod<coefficient>& output) const
     return;
   }
   Weight<coefficient> tempM;
-  output.MakeZero();
+  output.makeZero();
   for (int i = 0; i < this->size(); i ++) {
     tempM = (*this)[i];
     tempM.weightFundamentalCoordS.Minus();
@@ -180,7 +180,7 @@ template <class coefficient>
 void charSSAlgMod<coefficient>::MakeFromWeight(
   const Vector<coefficient>& inputWeightSimpleCoords, SemisimpleLieAlgebra* inputOwner
 ) {
-  this->MakeZero();
+  this->makeZero();
   if (inputWeightSimpleCoords.size != inputOwner->GetRank()) {
     global.fatal << "This is a programming error: attempting to create a character from highest weight in simple coords "
     << inputWeightSimpleCoords.toString() << "("
@@ -204,7 +204,7 @@ bool charSSAlgMod<coefficient>::FreudenthalEvalMeDominantWeightsOnly(
     return thisCopy.FreudenthalEvalMeDominantWeightsOnly(outputCharOwnerSetToZero, upperBoundNumDominantWeights, outputDetails);
   }
   this->CheckNonZeroOwner();
-  outputCharOwnerSetToZero.MakeZero();
+  outputCharOwnerSetToZero.makeZero();
   Vector<coefficient> currentWeightFundCoords;
   List<coefficient> currentMults;
   HashedList<Vector<coefficient> > currentWeights;
@@ -252,7 +252,7 @@ template <class coefficient>
 void SemisimpleLieAlgebra::GetAd(Matrix<coefficient>& output, ElementSemisimpleLieAlgebra<coefficient>& e) {
   int NumGenerators = this->GetNumGenerators();
   output.init(NumGenerators, NumGenerators);
-  output.MakeZero();
+  output.makeZero();
   ElementSemisimpleLieAlgebra<coefficient> theGen, theResult;
   for (int i = 0; i < NumGenerators; i ++) {
     theGen.MakeGenerator(i, *this);
@@ -294,7 +294,7 @@ void SemisimpleLieAlgebra::LieBracket(
     output = outputNew;
     return;
   }
-  output.MakeZero();
+  output.makeZero();
   if (g1.IsEqualToZero() || g2.IsEqualToZero()) {
     return;
   }
@@ -326,14 +326,14 @@ template <class coefficient>
 Vector<coefficient> ElementSemisimpleLieAlgebra<coefficient>::GetCartanPart() const {
   Vector<coefficient> result;
   if (this->IsEqualToZero()) {
-    result.MakeZero(0);
+    result.makeZero(0);
     return result;
   }
   ChevalleyGenerator tempGen;
   SemisimpleLieAlgebra* owner = this->GetOwner();
   int theRank = owner->GetRank();
   int numPosRoots = owner->GetNumPosRoots();
-  result.MakeZero(theRank);
+  result.makeZero(theRank);
   if (theRank <= 0 || owner == nullptr) {
     global.fatal << "This is a programming error: the owner of "
     << "a semisimple Lie algebra element is non-present or corrupted. " << global.fatal;
@@ -351,10 +351,10 @@ Vector<coefficient> ElementSemisimpleLieAlgebra<coefficient>::GetCartanPart() co
 template <class coefficient>
 void ElementSemisimpleLieAlgebra<coefficient>::ElementToVectorNegativeRootSpacesFirst(Vector<coefficient>& output) const {
   if (this->IsEqualToZero()) {
-    output.MakeZero(0);
+    output.makeZero(0);
     return;
   }
-  output.MakeZero(this->GetOwner()->GetNumGenerators());
+  output.makeZero(this->GetOwner()->GetNumGenerators());
   for (int i = 0; i < this->size(); i ++) {
     output[(*this)[i].theGeneratorIndex] = this->coefficients[i];
   }
@@ -372,7 +372,7 @@ void ElementSemisimpleLieAlgebra<coefficient>::AssignVectorNegRootSpacesCartanPo
   const Vector<coefficient>& input, SemisimpleLieAlgebra& owner
 ) {
   //Changing RootSystem order invalidates this function!
-  this->MakeZero();
+  this->makeZero();
   ChevalleyGenerator tempGenerator;
   for (int i = 0; i < input.size; i ++) {
     if (input[i] != 0) {
@@ -399,7 +399,7 @@ bool ElementSemisimpleLieAlgebra<coefficient>::IsElementCartan() const {
 template <class coefficient>
 void ElementSemisimpleLieAlgebra<coefficient>::MakeHgenerator(const Vector<coefficient>& theH, SemisimpleLieAlgebra& inputOwner) {
   ChevalleyGenerator tempGen;
-  this->MakeZero();
+  this->makeZero();
   for (int i = 0; i < theH.size; i ++) {
     tempGen.MakeGenerator(inputOwner, inputOwner.GetCartanIndexFromGenerator(i));
     this->AddMonomial(tempGen, theH[i]);
@@ -471,10 +471,10 @@ void charSSAlgMod<coefficient>::DrawMeAssumeCharIsOverCartan(
 
 template <class coefficient>
 void charSSAlgMod<coefficient>::MakeTrivial(SemisimpleLieAlgebra& inputOwner) {
-  this->MakeZero();
+  this->makeZero();
   Weight<Rational> tempMon;
   tempMon.owner = &inputOwner;
-  tempMon.weightFundamentalCoordS.MakeZero(inputOwner.GetRank());
+  tempMon.weightFundamentalCoordS.makeZero(inputOwner.GetRank());
   this->AddMonomial(tempMon, 1);
 }
 
@@ -491,7 +491,7 @@ std::string charSSAlgMod<coefficient>::MultiplyBy(const charSSAlgMod& other) {
   }
   this->SetExpectedSize(other.size() + this->size());
   charSSAlgMod result, summand;
-  result.MakeZero();
+  result.makeZero();
   std::string potentialError;
   coefficient theCF;
   for (int i = 0; i < this->size(); i ++) {
@@ -589,7 +589,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(
   theFormat.fundamentalWeightLetter = "\\omega";
   out << "<br>Character w.r.t Levi part of the parabolic of the larger algebra: "
   << HtmlRoutines::GetMathSpanPure(remainingCharDominantLevI.toString(&theFormat));
-  remainingCharProjected.MakeZero();
+  remainingCharProjected.makeZero();
   Vector<coefficient> fundCoordsSmaller, inSimpleCoords;
   fundCoordsSmaller.SetSize(WeylFDSmall.AmbientWeyl->GetDim());
   for (int i = 0; i < remainingCharDominantLevI.size(); i ++) {
@@ -603,7 +603,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(
     remainingCharProjected.AddMonomial(tempMon, remainingCharDominantLevI.coefficients[i]);
   }
   Vector<coefficient> simpleGeneratorBaseField;
-  output.MakeZero();
+  output.makeZero();
   while (!remainingCharProjected.IsEqualToZero()) {
     localHighest = *remainingCharProjected.theMonomials.LastObject();
     for (bool Found = true; Found;) {

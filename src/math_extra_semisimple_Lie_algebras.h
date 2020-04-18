@@ -54,11 +54,11 @@ public:
   bool flagHasNilradicalOrder;
   bool flagDeallocated;
   bool HasComputedStructureConstants();
-  unsigned int HashFunction() const {
-    return this->HashFunction(*this);
+  unsigned int hashFunction() const {
+    return this->hashFunction(*this);
   }
-  static unsigned int HashFunction(const SemisimpleLieAlgebra& input) {
-    return input.theWeyl.HashFunction();
+  static unsigned int hashFunction(const SemisimpleLieAlgebra& input) {
+    return input.theWeyl.hashFunction();
   }
   std::string ToStringDisplayFolderName(const std::string& baseFolder) const;
   std::string ToStringDisplayFileNameWithPathStructureConstants(const std::string& baseFolder) const;
@@ -70,7 +70,7 @@ public:
   std::string ToStringFileNameRelativePathSlTwoSubalgebras() const;
   template <class coefficient>
   void GetGenericElementCartan(ElementSemisimpleLieAlgebra<Polynomial<coefficient> >& output, int indexFirstVar = 0) {
-    output.MakeZero();
+    output.makeZero();
     ChevalleyGenerator theGen;
     Polynomial<coefficient> theCf;
     for (int i = 0; i < this->GetRank(); i ++) {
@@ -83,7 +83,7 @@ public:
   void GetGenericElementNegativeBorelNilradical(
     ElementSemisimpleLieAlgebra<Polynomial<coefficient> >& output, int indexFirstVar = 0
   ) {
-    output.MakeZero();
+    output.makeZero();
     ChevalleyGenerator theGen;
     Polynomial<coefficient> theCf;
     for (int i = 0; i < this->GetNumPosRoots(); i ++) {
@@ -246,7 +246,7 @@ public:
       return this->theWeyl.RootSystem[index - this->GetRank()];
     }
     Vector<Rational> result;
-    result.MakeZero(this->GetRank());
+    result.makeZero(this->GetRank());
     return result;
   }
   //returns true if returning constant, false if returning element of h
@@ -316,11 +316,11 @@ public:
   ) const;
   std::string TensorAndDecompose(const Weight<coefficient>& other, charSSAlgMod<coefficient>& output) const;
   std::string toString(FormatExpressions* theFormat = nullptr) const;
-  inline unsigned int HashFunction() const {
-    return weightFundamentalCoordS.HashFunction();
+  inline unsigned int hashFunction() const {
+    return weightFundamentalCoordS.hashFunction();
   }
-  static inline unsigned int HashFunction(const Weight<coefficient>& input) {
-    return input.HashFunction();
+  static inline unsigned int hashFunction(const Weight<coefficient>& input) {
+    return input.hashFunction();
   }
   void operator+=(const Weight<coefficient>& other) {
     if (this->owner != other.owner) {
@@ -364,11 +364,11 @@ class charSSAlgMod : public LinearCombination<Weight<coefficient>, coefficient> 
   bool IsEqualToZero() {
     return this->size() == 0;
   }
-  unsigned int HashFunction() const {
-    return this->HashFunction(*this);
+  unsigned int hashFunction() const {
+    return this->hashFunction(*this);
   }
-  static unsigned int HashFunction(const charSSAlgMod<coefficient>& input) {
-    return input.::LinearCombination<Weight<coefficient>, coefficient>::HashFunction(input);
+  static unsigned int hashFunction(const charSSAlgMod<coefficient>& input) {
+    return input.::LinearCombination<Weight<coefficient>, coefficient>::hashFunction(input);
   }
   void GetDual(charSSAlgMod<coefficient>& output) const;
   void MakeFromWeight(const Vector<coefficient>& inputWeightSimpleCoords, SemisimpleLieAlgebra* inputOwner);

@@ -13,7 +13,7 @@
 // 1. C++ objects that represent mathematically equal objects
 //    are allowed to have different bit representations in RAM memory.
 // 2. Mathematically equal objects must
-//    have their object::HashFunction return identical
+//    have their object::hashFunction return identical
 //    values, even if the objects have bitwise different
 //    representations in RAM.
 // 3. Mathematical objects representing 0 in an abelian group
@@ -101,7 +101,7 @@ class affineCones;
 
 //Hybrid classes that serve both memory-management and mathematical purposes
 //(Matrices, Vectors, PolynomialSubstitution, etc.)
-template <class ObjectType1, class ObjectType2, unsigned int hashFunction1(const ObjectType1&) = ObjectType1::HashFunction, unsigned int hashFunction2(const ObjectType2&)=ObjectType2::HashFunction>
+template <class ObjectType1, class ObjectType2, unsigned int hashFunction1(const ObjectType1&) = ObjectType1::hashFunction, unsigned int hashFunction2(const ObjectType2&)=ObjectType2::hashFunction>
 class Pair;
 template <class Object>
 class List;
@@ -344,10 +344,10 @@ public:
   }
   static bool IsInteger(Rational x);
   template <typename hashobject>
-  static unsigned int HashFunction(const hashobject& in) {
-    return in.HashFunction();
+  static unsigned int hashFunction(const hashobject& in) {
+    return in.hashFunction();
   }
-  static unsigned int HashFunction(bool in) {
+  static unsigned int hashFunction(bool in) {
     if (in) {
       return 1;
     } else {
@@ -1109,16 +1109,16 @@ public:
   Object* LastObject() const;// <-Registering stack trace forbidden! Multithreading deadlock alert.
   void ReleaseMemory();
 
-  unsigned int HashFunction() const {
+  unsigned int hashFunction() const {
     int numCycles = MathRoutines::Minimum(SomeRandomPrimesSize, this->size);
     unsigned int result = 0;
     for (int i = 0; i < numCycles; i ++) {
-      result += SomeRandomPrimes[i] * MathRoutines::HashFunction(TheObjects[i]);
+      result += SomeRandomPrimes[i] * MathRoutines::hashFunction(TheObjects[i]);
     }
     return result;
   }
-  static unsigned int HashFunction(const List<Object>& input) {
-    return input.HashFunction();
+  static unsigned int hashFunction(const List<Object>& input) {
+    return input.hashFunction();
   }
   void IntersectWith(const List<Object>& other, List<Object>& output) const;
   void operator=(const std::string& right) {
@@ -1246,15 +1246,15 @@ public:
   ObjectType2 Object2;
   Pair(){}
   Pair(const ObjectType1& o1, const ObjectType2& o2): Object1(o1), Object2(o2) {}
-  static unsigned int HashFunction(
+  static unsigned int hashFunction(
     const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& input
   ) {
     return
       SomeRandomPrimes[0] * hashFunction1(input.Object1) +
       SomeRandomPrimes[1] * hashFunction2(input.Object2);
   }
-  unsigned int HashFunction() const {
-    return Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>::HashFunction(*this);
+  unsigned int hashFunction() const {
+    return Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>::hashFunction(*this);
   }
   void operator=(const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& other) {
     this->Object1 = other.Object1;
@@ -1281,7 +1281,7 @@ public:
 };
 typedef Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignIdentity> PairInts;
 
-template <class Object, class TemplateList, unsigned int hashFunction(const Object&) = Object::HashFunction>
+template <class Object, class TemplateList, unsigned int hashFunction(const Object&) = Object::hashFunction>
 class HashTemplate: public TemplateList {
 private:
   void AddObjectOnBottom(const Object& o);
@@ -1664,7 +1664,7 @@ public:
   }
 };
 
-template <class Object, unsigned int hashFunction(const Object&) = Object::HashFunction>
+template <class Object, unsigned int hashFunction(const Object&) = Object::hashFunction>
 class HashedList: public HashTemplate<Object, List<Object>, hashFunction> {
 public:
   HashedList(const HashedList& other):HashTemplate<Object, List<Object>, hashFunction>() {
@@ -1742,7 +1742,7 @@ public:
 // class used to avoid a gcc compiler bug.
 // This class should probably be removed as soon as the bug is resolved.
 template <class Object>
-class HashedListSpecialized: public HashedList<Object, Object::HashFunction> {
+class HashedListSpecialized: public HashedList<Object, Object::hashFunction> {
 };
 
 struct stackInfo {

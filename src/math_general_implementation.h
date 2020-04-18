@@ -178,7 +178,7 @@ void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy(
 ) const {
   MacroRegisterFunctionWithName("ElementMonomialAlgebra::MultiplyBy");
   if (other.IsEqualToZero()) {
-    output.MakeZero();
+    output.makeZero();
     return;
   }
   if (&bufferPoly == this || &bufferPoly == &other) {
@@ -201,7 +201,7 @@ void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy(
     << this->toString() << " times " << other.toString();
     theReport1.Report(reportStream.str());
   }
-  bufferPoly.MakeZero();
+  bufferPoly.makeZero();
   bufferPoly.SetExpectedSize(maxNumMonsFinal);
   bufferPoly.CheckConsistency();
   bufferMon.CheckConsistency();
@@ -236,7 +236,7 @@ void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy(
     thisCopy.MultiplyBy(other, output);
     return;
   }
-  output.MakeZero();
+  output.makeZero();
   templateMonomial currentMonomial;
   for (int i = 0; i < this->size(); i ++) {
     currentMonomial = this->theMonomials[i];
@@ -261,7 +261,7 @@ void MatrixTensor<coefficient>::operator*=(
 ) {
   MacroRegisterFunctionWithName("MatrixTensor::MultiplyBy");
   if (other.IsEqualToZero()) {
-    this->MakeZero();
+    this->makeZero();
     return;
   }
   this->CheckConsistency();

@@ -81,7 +81,7 @@ void Polynomial<coefficient>::MakeDeterminantFromSquareMatrix(
   List<int> permutationIndices;
   thePerm.GetPermutationLthElementIsTheImageofLthIndex(permutationIndices);
   Polynomial<coefficient> result, theMonomial;
-  result.MakeZero();
+  result.makeZero();
   result.SetExpectedSize(numCycles);
   for (int i = 0; i < numCycles; i ++, thePerm.incrementAndGetPermutation(permutationIndices)) {
     theMonomial.makeOne();
@@ -142,7 +142,7 @@ template <class coefficient>
 void Polynomial<coefficient>::MakeDegreeOne(
   int NVar, int NonZeroIndex, const coefficient& coeff
 ) {
-  this->MakeZero();
+  this->makeZero();
   MonomialP tempM;
   tempM.MakeEi(NonZeroIndex, 1, NVar);
   this->AddMonomial(tempM, coeff);
@@ -157,7 +157,7 @@ void Polynomial<coefficient>::MakeDegreeOne(
   const coefficient& coeff2
 ) {
   (void) NVar;
-  this->MakeZero();
+  this->makeZero();
   MonomialP tempM;
   tempM.MakeEi(NonZeroIndex1);
   this->AddMonomial(tempM, coeff1);
@@ -225,7 +225,7 @@ void Polynomial<coefficient>::SetNumVariablesSubDeletedVarsByOne(int newNumVars)
     << newNumVars << ") is not allowed. " << global.fatal;
   }
   Polynomial<coefficient> Accum;
-  Accum.MakeZero();
+  Accum.makeZero();
   Accum.SetExpectedSize(this->size());
   MonomialP tempM;
   for (int i = 0; i < this->size(); i ++) {
@@ -267,7 +267,7 @@ void Polynomial<coefficient>::ShiftVariableIndicesToTheRight(int VarIndexShift) 
   int oldNumVars = this->minimalNumberOfVariables();
   int newNumVars = oldNumVars + VarIndexShift;
   Polynomial<coefficient> Accum;
-  Accum.MakeZero();
+  Accum.makeZero();
   Accum.SetExpectedSize(this->size());
   MonomialP tempM;
   for (int i = 0; i < this->size(); i ++) {
@@ -408,7 +408,7 @@ void Polynomial<coefficient>::DivideBy(
     &leadingCoefficientShiftedDivisor,
     monomialOrder
   );
-  outputQuotient.MakeZero();
+  outputQuotient.makeZero();
   if (remainderLeadingIndex == - 1) {
     return;
   }
@@ -516,7 +516,7 @@ void Polynomial<coefficient>::AssignMinPoly(const Matrix<coefficient>& input) {
     }
     theVectorPowers.GetCoordsInBasiS(theBasis, firstDependentPower);
     currentFactor.SetExpectedSize(theBasis.size + 1);
-    currentFactor.MakeZero();
+    currentFactor.makeZero();
     for (int i = 0; i < theBasis.size; i ++) {
       tempM.MakeEi(0, i, 1);
       currentFactor.AddMonomial(tempM, - firstDependentPower[i]);
@@ -636,7 +636,7 @@ bool Polynomial<coefficient>::differential(
   if (!this->differential(differentials, comments)) {
     return false;
   }
-  output.MakeZero();
+  output.makeZero();
   Polynomial<coefficient> nextSummand;
   for (int i = 0; i < differentials.size; i ++) {
     nextSummand = differentials[i];

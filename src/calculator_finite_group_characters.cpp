@@ -89,7 +89,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::ComputeAllGe
   this->theElementImageS[0].MakeIdMatrix(this->GetDim());
   ElementWeylGroup currentElt;
   int theRank = this->ownerGroup->GetDim();
-  currentElt.MakeID(*this->ownerGroup);
+  currentElt.makeIdentity(*this->ownerGroup);
   ElementsExplored.AddOnTop(currentElt);
   List<ElementWeylGroup> theGens;
   theGens.SetSize(theRank);
@@ -127,7 +127,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::ComputeAllEl
   ElementsExplored.SetExpectedSize(this->ownerGroup->theElements.size);
   this->theElementImageS[0].MakeIdMatrix(this->GetDim());
   auto currentElt = this->ownerGroup->generators[0];
-  currentElt.MakeID(this->ownerGroup->generators[0]);
+  currentElt.makeIdentity(this->ownerGroup->generators[0]);
   int theRank = this->ownerGroup->generators.size;
   auto& theGens = this->ownerGroup->generators;
 
@@ -265,7 +265,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
   MacroRegisterFunctionWithName("WeylGroupRepresentation::DecomposeTodorsVersion");
   this->CheckInitialization();
   this->ownerGroup->CheckInitializationFDrepComputation();
-  outputIrrepMults.MakeZero();
+  outputIrrepMults.makeZero();
   List<GroupRepresentation<somegroup, coefficient> > appendOnlyIrrepsList;
   for (int i = 0; i < this->ownerGroup->irreps.size; i ++) {
     appendOnlyIrrepsList.AddOnTop(this->ownerGroup->irreps[i]);
@@ -1374,7 +1374,7 @@ public:
     std::stringstream* comments
   );
   static std::string GetTypeBParabolicSignMultiplicityTable(int rank);
-  static unsigned int HashFunction(const KostkaNumber& input);
+  static unsigned int hashFunction(const KostkaNumber& input);
   std::string toString();
   KostkaNumber();
   bool Compute(HashedList<KostkaNumber>* KNcache, std::stringstream* comments = nullptr);
@@ -1394,7 +1394,7 @@ public:
   std::string ToStringFull();
 };
 
-unsigned int KostkaNumber::HashFunction(const KostkaNumber& input) {
+unsigned int KostkaNumber::hashFunction(const KostkaNumber& input) {
   return  MathRoutines::HashListInts(input.partition) + MathRoutines::HashListInts(input.tuple);
 }
 
@@ -2006,8 +2006,8 @@ public:
     }
     return true;
   }
-  static unsigned int HashFunction(const MonomialMacdonald& input) {
-    return input.rootSel.HashFunction();
+  static unsigned int hashFunction(const MonomialMacdonald& input) {
+    return input.rootSel.hashFunction();
   }
   void operator=(const MonomialMacdonald& other) {
     this->owner = other.owner;
@@ -2175,7 +2175,7 @@ bool CalculatorFunctionsWeylGroup::innerLieAlgebraWeight(Calculator& theCommands
     }
   } else {
     Vector<Rational> EiVector;
-    EiVector.MakeZero(theSSowner->GetRank());
+    EiVector.makeZero(theSSowner->GetRank());
     Vector<Rational> tempV = theSSowner->theWeyl.GetEpsilonCoords(EiVector);
     if (theWeightIndex>tempV.size || theWeightIndex < 1) {
       std::stringstream errorStream;
@@ -2500,7 +2500,7 @@ void VirtualRepresentation<somegroup, coefficient>::operator*=(const VirtualRepr
   global.fatal << "Not implemented yet. " << global.fatal;
 /*  WeylGroupVirtualRepresentation<coefficient> output, currentContribution;
   output.ownerGroup = this->ownerGroup;
-  output.coefficientsIrreps.MakeZero(this->coefficientsIrreps.size);
+  output.coefficientsIrreps.makeZero(this->coefficientsIrreps.size);
   WeylGroupRepresentation<Rational> tempRep;
   for (int i = 0; i < this->coefficientsIrreps.size; i ++)
     for (int j = 0; j<other.coefficientsIrreps.size; j ++) {

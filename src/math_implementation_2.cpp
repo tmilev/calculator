@@ -11,7 +11,7 @@ void LargeIntegerUnsigned::AssignString(const std::string& input) {
     this->AssignShiftedUInt(x, 0);
     return;
   }
-  this->MakeZero();
+  this->makeZero();
   for (unsigned int i = 0; i < input.size(); i ++) {
     this->operator*=(10);
     int whichDigit = input[i] - '0';
@@ -39,7 +39,7 @@ bool LargeIntegerUnsigned::AssignStringFailureAllowed(const std::string& input, 
     this->AssignShiftedUInt(x, 0);
     return true;
   }
-  this->MakeZero();
+  this->makeZero();
   for (unsigned int i = 0; i < input.size(); i ++) {
     this->operator*=(10);
     int whichDigit = input[i] - '0';
@@ -165,7 +165,7 @@ void LargeIntegerUnsigned::makeOne() {
   this->theDigits[0] = 1;
 }
 
-void LargeIntegerUnsigned::MakeZero() {
+void LargeIntegerUnsigned::makeZero() {
   this->theDigits.SetSize(1);
   this->theDigits[0] = 0;
 }
@@ -485,7 +485,7 @@ void LargeIntegerUnsigned::operator--(int) {
 
 void LargeIntegerUnsigned::operator%=(const LargeIntegerUnsigned& other) {
   if (&other == this) {
-    this->MakeZero();
+    this->makeZero();
     return;
   }
   LargeIntegerUnsigned copyMe = *this;
@@ -553,7 +553,7 @@ void LargeIntegerUnsigned::DivPositive(
     return;
   }
   remainderOutput = *this;
-  quotientOutput.MakeZero();
+  quotientOutput.makeZero();
   int currentQuotientDigit = 0;
   int divisorLeadingDigit = *divisor.theDigits.LastObject();
   int lastRemainderSize = - 1;
@@ -782,7 +782,7 @@ void LargeIntegerUnsigned::AssignUnsignedInt(unsigned int x) {
 
 void LargeIntegerUnsigned::AssignShiftedUInt(unsigned int x, int shift) {
   if (x == 0) {
-    this->MakeZero();
+    this->makeZero();
     return;
   }
   this->theDigits.initializeFillInObject(shift, 0);
@@ -1162,7 +1162,7 @@ void LargeIntegerUnsigned::operator=(unsigned int x) {
   this->AssignShiftedUInt(x, 0);
 }
 
-unsigned int LargeIntegerUnsigned::HashFunction() const {
+unsigned int LargeIntegerUnsigned::hashFunction() const {
   int numCycles = MathRoutines::Minimum(this->theDigits.size, SomeRandomPrimesSize);
   unsigned int result = 0;
   for (int i = 0; i < numCycles; i ++) {
@@ -1236,7 +1236,7 @@ bool LargeInteger::AssignStringFailureAllowed(
     }
     return false;
   }
-  this->MakeZero();
+  this->makeZero();
   unsigned int startingIndex = 0;
   if (input[0] == '-') {
     startingIndex = 1;
@@ -1355,7 +1355,7 @@ void LargeInteger::AssignInt64(int64_t x) {
 
 void LargeInteger::AssignInt(int x) {
   if (x == 0) {
-    this->MakeZero();
+    this->makeZero();
     return;
   }
   this->sign = 1;
@@ -1416,8 +1416,8 @@ void LargeInteger::operator+=(const LargeInteger& x) {
   }
 }
 
-void LargeInteger::MakeZero() {
-  this->value.MakeZero();
+void LargeInteger::makeZero() {
+  this->value.makeZero();
   this->sign = 1;
 }
 
@@ -1568,7 +1568,7 @@ void Rational::MultiplyBy(const Rational& r) {
     this->Extended->num.MultiplyByInt(r.NumShort);
     this->Extended->den.MultiplyByUInt( static_cast<unsigned int>(r.DenShort));
   }
-  this->Simplify();
+  this->simplify();
 }
 
 Rational operator/(int left, const Rational& right) {
@@ -1587,13 +1587,13 @@ Rational operator-(const Rational& argument) {
 void Rational::MultiplyByLargeInt(LargeInteger& x) {
   this->InitExtendedFromShortIfNeeded();
   this->Extended->num *= x;
-  this->Simplify();
+  this->simplify();
 }
 
 void Rational::MultiplyByLargeIntUnsigned(LargeIntegerUnsigned& x) {
   this->InitExtendedFromShortIfNeeded();
   this->Extended->num.value.MultiplyBy(x);
-  this->Simplify();
+  this->simplify();
 }
 
 void Rational::DivideBy(const Rational& r) {
@@ -1669,7 +1669,7 @@ void Rational::AssignFracValue() {
     return;
   }
   if (this->Extended->den.IsEqualToOne()) {
-    this->MakeZero();
+    this->makeZero();
     return;
   }
   LargeIntegerUnsigned newNum, tempI;
@@ -1681,7 +1681,7 @@ void Rational::AssignFracValue() {
   if (!this->Extended->num.IsPositiveOrZero()) {
     global.fatal << "Numerator must not be negative. " << global.fatal;
   }
-  this->Simplify();
+  this->simplify();
 }
 
 void Rational::AssignLargeIntUnsigned(const LargeIntegerUnsigned& other) {
@@ -2036,7 +2036,7 @@ double Rational::GetDoubleValue() const {
   }
 }
 
-void Rational::Simplify() {
+void Rational::simplify() {
   if (this->Extended == nullptr) {
     if (this->NumShort == 0) {
       this->DenShort = 1;
@@ -2056,7 +2056,7 @@ void Rational::Simplify() {
     return;
   }
   if (this->Extended->num.IsEqualToZero()) {
-    this->MakeZero();
+    this->makeZero();
     return;
   }
   if (!this->Extended->den.IsEqualToOne()) {
@@ -2190,7 +2190,7 @@ void Rational::operator=(const AlgebraicNumber& other) {
 }
 
 bool Rational::AssignStringFailureAllowed(const std::string& input) {
-  this->MakeZero();
+  this->makeZero();
   if (input == "") {
     return false;
   }

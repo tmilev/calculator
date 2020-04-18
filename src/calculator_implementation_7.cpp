@@ -1562,7 +1562,7 @@ void Polynomial<coefficient>::GetPolyWithPolyCoeff(
     global.fatal << "GetPolyWithPolyCoeff called with selection which has "
     << "selects the wrong number of variables. " << global.fatal;
   }
-  output.MakeZero();
+  output.makeZero();
   MonomialP coeffPart, polyPart;
   Polynomial<coefficient> currentCF;
   for (int i = 0; i < this->size(); i ++) {
@@ -1575,7 +1575,7 @@ void Polynomial<coefficient>::GetPolyWithPolyCoeff(
         coeffPart.setVariable(j, (*this)[i](j));
       }
     }
-    currentCF.MakeZero();
+    currentCF.makeZero();
     currentCF.AddMonomial(coeffPart, this->coefficients[i]);
     output.AddMonomial(polyPart, currentCF);
   }
@@ -1604,9 +1604,9 @@ bool Polynomial<coefficient>::GetLinearSystemFromLinearPolys(
     numVars = MathRoutines::Maximum(theLinPolys[i].minimalNumberOfVariables(), numVars);
   }
   homogenousPart.init(theLinPolys.size, numVars);
-  homogenousPart.MakeZero();
+  homogenousPart.makeZero();
   constTerms.init(theLinPolys.size, 1);
-  constTerms.MakeZero();
+  constTerms.makeZero();
   for (int i = 0; i < theLinPolys.size; i ++) {
     for (int j = 0; j < theLinPolys[i].size(); j ++) {
       if (theLinPolys[i][j].IsLinearNoConstantTerm(&theLetter)) {
@@ -1926,7 +1926,7 @@ void IntegralRFComputation::PrepareNumerators() {
   this->NumberOfSystemVariables = 0;
   Polynomial<AlgebraicNumber> currentSummand;
   MonomialP currentMon;
-  this->thePolyThatMustVanish.MakeZero();
+  this->thePolyThatMustVanish.makeZero();
   this->thePolyThatMustVanish -= remainderRescaledAlgebraic;
   this->theNumerators.SetSize(this->theDenominatorFactorsWithMults.size());
   for (int i = 0; i < this->theDenominatorFactorsWithMults.size(); i ++) {
@@ -1934,8 +1934,8 @@ void IntegralRFComputation::PrepareNumerators() {
     this->theDenominatorFactorsWithMults.coefficients[i].IsSmallInteger(&tempSize);
     this->theNumerators[i].SetSize(tempSize);
     for (int k = 0; k < this->theDenominatorFactorsWithMults.coefficients[i]; k ++) {
-      currentSummand.MakeZero();
-      this->theNumerators[i][k].MakeZero();
+      currentSummand.makeZero();
+      this->theNumerators[i][k].makeZero();
       for (int j = 0; j < this->theDenominatorFactorsWithMults[i].totalDegree(); j ++) {
         this->NumberOfSystemVariables ++;
         currentMon.MakeEi(this->NumberOfSystemVariables);
@@ -2111,13 +2111,13 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
     this->printoutPFsHtml << theGB.GetDivisionStringHtml();
   }
   LinearCombination<Polynomial<Rational>, Rational> theDenominatorFactorsWithMultsCopy;
-  theDenominatorFactorsWithMultsCopy.MakeZero();
+  theDenominatorFactorsWithMultsCopy.makeZero();
   for (int i = 0; i < this->theFactors.size; i ++) {
     theDenominatorFactorsWithMultsCopy.AddMonomial(this->theFactors[i], 1);
   }
   theDenominatorFactorsWithMultsCopy.QuickSortAscending();
   Polynomial<Rational> currentSecondDegreePoly;
-  this->theDenominatorFactorsWithMults.MakeZero();
+  this->theDenominatorFactorsWithMults.makeZero();
   Polynomial<AlgebraicNumber> currentLinPoly, currentSecondDegreePolyAlgebraic;
   this->additionalMultiple = 1;
   for (int i = 0; i < theDenominatorFactorsWithMultsCopy.size(); i ++) {
@@ -5297,7 +5297,7 @@ bool CalculatorFunctions::outerAtimesBpowerJplusEtcDivBpowerI(
   LinearCombination<Expression, Rational> numerators, numeratorsNew;
   theCommands.functionCollectSummands(theCommands, input[1], numerators);
   numeratorsNew.SetExpectedSize(numerators.size());
-  numeratorsNew.MakeZero();
+  numeratorsNew.makeZero();
   Expression numeratorMultiplicandLeft, numeratorMultiplicandRight, numeratorBaseRight, numeratorExponentRight;
   Expression newNumSummand, newNumSummandRightPart, newNumExponent, mOneE;
   mOneE.AssignValue(- 1, theCommands);
@@ -7540,7 +7540,7 @@ bool CalculatorFunctions::innerDecomposeCharGenVerma(
   invertedParSel.InvertSelection();
   charSSAlgMod<RationalFunction> theChar, currentChar;
   Weight<RationalFunction> theMon;
-  theChar.MakeZero();
+  theChar.makeZero();
   FormatExpressions formatChars;
   formatChars.FDrepLetter = "L";
   formatChars.fundamentalWeightLetter = "\\omega";
@@ -7558,7 +7558,7 @@ bool CalculatorFunctions::innerDecomposeCharGenVerma(
       << "the parabolic does not lie in the ambient Weyl group, which is impossible. "
       << "There is a bug somewhere; crashing in accordance. " << global.fatal;
     }
-    currentChar.MakeZero();
+    currentChar.makeZero();
     theMon.owner = theSSlieAlg.content;
     for (int j = 0; j < theKLpolys.theKLcoeffs[indexInWeyl].size; j ++) {
       if (!theKLpolys.theKLcoeffs[indexInWeyl][j].IsEqualToZero()) {
@@ -7671,7 +7671,7 @@ bool CalculatorFunctions::innerWriteGenVermaModAsDiffOperatorUpToLevel(
   }
   RationalFunction RFOne, RFZero;
   RFOne.makeOne();
-  RFZero.MakeZero();
+  RFZero.makeZero();
   Selection selInducing;
   selInducing.MakeFullSelection(theRank);
   int theCoeff;
@@ -7796,7 +7796,7 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
   int theNumVars = hwContext.ContextGetNumContextVariables();
   RationalFunction RFOne, RFZero;
   RFOne.makeOne();
-  RFZero.MakeZero();
+  RFZero.makeZero();
   ElementTensorsGeneralizedVermas<RationalFunction> theElt;
   //= theElementData.theElementTensorGenVermas.GetElement();
   Selection selParSel1, selFD;
@@ -7904,7 +7904,7 @@ bool CalculatorFunctions::innerSplitGenericGenVermaTensorFD(
   tempFormat.CustomPlusSign = "";
   tempFormat.chevalleyGgeneratorLetter = "\\bar{g}";
   tempFormat.chevalleyHgeneratorLetter = "\\bar{h}";
-  theFDLeviSplitShifteD.MakeZero();
+  theFDLeviSplitShifteD.makeZero();
   Weight<RationalFunction> tempMon;
   tempMon.owner = theSSalgebra.content;
   ElementUniversalEnveloping<RationalFunction> currentChar;
@@ -8970,10 +8970,10 @@ bool CalculatorFunctions::innerSolveProductSumEquationOverSetModN(
   Vectors<Rational> theOneDimVectors;
   theOneDimVectors.SetSize(theInts.size);
   for (int i = 0; i < theInts.size; i ++) {
-    theOneDimVectors[i].MakeZero(1);
+    theOneDimVectors[i].makeZero(1);
     theOneDimVectors[i][0] = theInts[i];
   }
-  thePartition.goalVector.MakeZero(1);
+  thePartition.goalVector.makeZero(1);
   thePartition.goalVector[0] = theSum;
   if (!thePartition.init(theOneDimVectors, thePartition.goalVector)) {
     return theCommands << "Failed to initialize the computation. ";
@@ -9259,8 +9259,8 @@ std::string charSSAlgMod<coefficient>::ToStringFullCharacterWeightsTable() {
     Vector<coefficient> weightSimple = this->GetOwner()->theWeyl.GetSimpleCoordinatesFromFundamental
     (outputChar[k].weightFundamentalCoordS);
     out << "<td>" << weightSimple.toString() << "</td>";
-    outputSimpleStringCoords.MakeZero(this->GetOwner()->GetRank());
-    outputSimpleHalfStringCoords.MakeZero(this->GetOwner()->GetRank());
+    outputSimpleStringCoords.makeZero(this->GetOwner()->GetRank());
+    outputSimpleHalfStringCoords.makeZero(this->GetOwner()->GetRank());
     for (int j = 0; j < this->GetOwner()->GetRank(); j ++) {
       theSimpleRoot.MakeEi(this->GetOwner()->GetRank(), j);
       theSimpleRootFundCoords =

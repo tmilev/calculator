@@ -619,7 +619,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF(
   if (!output.IsOfType(&simplified)) {
     return true;
   }
-  simplified.Simplify();
+  simplified.simplify();
   return output.AssignValueWithContext(simplified, output.GetContext(), theCommands);
 }
 
@@ -634,7 +634,7 @@ bool CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly(
   if (!output.IsOfType(&simplified)) {
     return true;
   }
-  simplified.Simplify();
+  simplified.simplify();
   return output.AssignValueWithContext(simplified, output.GetContext(), theCommands);
 }
 
@@ -693,7 +693,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByUE(Calculator& theCommands,
   }
   ElementUniversalEnveloping<RationalFunction> result = inputContextsMerged[1].GetValue<ElementUniversalEnveloping<RationalFunction> >();
   result *= inputContextsMerged[2].GetValue<ElementUniversalEnveloping<RationalFunction> >();
-  result.Simplify();
+  result.simplify();
   return output.AssignValueWithContext(result, inputContextsMerged[1].GetContext(), theCommands);
 }
 
@@ -845,7 +845,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerPolyBySmallInteger(
       Rational theCF = base.coefficients[0];
       theCF.RaiseToPower(thePower);
       theMon.RaiseToPower(thePower);
-      outputPoly.MakeZero();
+      outputPoly.makeZero();
       outputPoly.AddMonomial(theMon, theCF);
       return output.AssignValueWithContext(outputPoly, input[1].GetContext(), theCommands);
     }
@@ -1202,7 +1202,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger(
         << "contains derivative and polynomial with respect to the same variable. ";
       }
     }
-    finalOutput.MakeZero();
+    finalOutput.makeZero();
     finalOutput.AddMonomial(theMon, 1);
     return output.AssignValueWithContext(finalOutput, input[1].GetContext(), theCommands);
   }
@@ -1285,7 +1285,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF(
   theMon = theUE[0];
   theMon.Powers[0] *= exponentConverted.GetValue<RationalFunction>();
   ElementUniversalEnveloping<RationalFunction> outputUE;
-  outputUE.MakeZero(*theUE.owner);
+  outputUE.makeZero(*theUE.owner);
   outputUE.AddMonomial(theMon, 1);
   return output.AssignValueWithContext(outputUE, copyBase.GetContext(), theCommands);
 }
@@ -2085,7 +2085,7 @@ bool CalculatorFunctionsBinaryOps::innerLieBracketRatOrUEWithRatOrUE(
     leftE.GetValue<ElementUniversalEnveloping<RationalFunction> >().LieBracketOnTheRight(
       rightE.GetValue<ElementUniversalEnveloping<RationalFunction> >(), result
     );
-    result.Simplify();
+    result.simplify();
     return output.AssignValueWithContext(result, leftE.GetContext(), theCommands);
   }
   return false;

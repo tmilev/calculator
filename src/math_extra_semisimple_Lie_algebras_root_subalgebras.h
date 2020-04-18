@@ -66,7 +66,7 @@ public:
   bool operator==(const coneRelation& right) {
     return this->DebugString == right.DebugString;
   }
-  unsigned int HashFunction() const {
+  unsigned int hashFunction() const {
     int tempI = ::MathRoutines::Minimum(static_cast<int>(this->DebugString.length()), ::SomeRandomPrimesSize);
     unsigned int result = 0;
     for (int i = 0; i < tempI; i ++) {
@@ -76,8 +76,8 @@ public:
     }
     return result;
   }
-  static unsigned int HashFunction(const coneRelation& input) {
-    return input.HashFunction();
+  static unsigned int hashFunction(const coneRelation& input) {
+    return input.hashFunction();
   }
   coneRelation() {
    this->IndexOwnerRootSubalgebra = - 1;
@@ -541,7 +541,7 @@ public:
   void ToHTML(std::string& filePath);
   bool operator==(const slTwoSubalgebra& right) const;
   bool operator>(const slTwoSubalgebra& right) const;
-  unsigned int HashFunction() const {
+  unsigned int hashFunction() const {
     int tempI = MathRoutines::Minimum(SomeRandomPrimesSize, this->hCharacteristic.size);
     unsigned int result = 0;
     for (int i = 0; i < tempI; i ++) {
@@ -549,8 +549,8 @@ public:
     }
     return result;
   }
-  static inline unsigned int HashFunction(const slTwoSubalgebra& input) {
-    return input.HashFunction();
+  static inline unsigned int hashFunction(const slTwoSubalgebra& input) {
+    return input.hashFunction();
   }
 };
 

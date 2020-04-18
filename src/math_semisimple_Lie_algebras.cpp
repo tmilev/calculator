@@ -394,7 +394,7 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstants() {
   this->theWeyl.ComputeRho(true);
   this->ChevalleyConstants.init(this->theWeyl.RootSystem.size, this->theWeyl.RootSystem.size);
   this->Computed.init(this->theWeyl.RootSystem.size, this->theWeyl.RootSystem.size);
-  this->Computed.MakeZero(false);
+  this->Computed.makeZero(false);
   Selection nonExploredRoots;
   this->flagAnErrorHasOccurredTimeToPanic = false;
   Vectors<Rational>& posRoots = this->theWeyl.RootsOfBorel;
@@ -414,9 +414,9 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstants() {
       if (!tempRoot.IsEqualToZero()) {
         if (!this->theWeyl.IsARoot(tempRoot)) {
           this->Computed.elements[i][j] = true;
-          this->ChevalleyConstants.elements[i][j].MakeZero();
+          this->ChevalleyConstants.elements[i][j].makeZero();
           this->Computed.elements[j][i] = true;
-          this->ChevalleyConstants.elements[j][i].MakeZero();
+          this->ChevalleyConstants.elements[j][i].makeZero();
         }
       }
     }
@@ -502,7 +502,7 @@ void SemisimpleLieAlgebra::ComputeMultTable() {
   this->theLiebrackets.init(numGenerators, numGenerators);
   //  this->theLiebracketPairingIndices.init(numGenerators, numGenerators);
   this->UEGeneratorOrderIncludingCartanElts.initializeFillInObject(numGenerators, - 1);
-  //  this->theLiebracketPairingIndices.MakeZero(- 1);
+  //  this->theLiebracketPairingIndices.makeZero(- 1);
   //  this->OppositeRootSpaces.initializeFillInObject(numRoots+theDimension, - 1);
   Vector<Rational> leftWeight, rightWeight, hRoot;
   for (int i = 0; i < numGenerators; i ++) {
@@ -510,7 +510,7 @@ void SemisimpleLieAlgebra::ComputeMultTable() {
     for (int j = i; j < numGenerators; j ++) {
       rightWeight = this->GetWeightOfGenerator(j);
       if (leftWeight.IsEqualToZero() && rightWeight.IsEqualToZero()) {
-        this->theLiebrackets.elements[i][j].MakeZero();
+        this->theLiebrackets.elements[i][j].makeZero();
         continue;
       }
       if (leftWeight.IsEqualToZero() && !rightWeight.IsEqualToZero()) {
@@ -538,7 +538,7 @@ void SemisimpleLieAlgebra::ComputeMultTable() {
           this->theLiebrackets.elements[i][j] *= this->ChevalleyConstants.elements[leftIndex][rightIndex];
         } else {
           if (!(leftWeight +rightWeight).IsEqualToZero()) {
-            this->theLiebrackets.elements[i][j].MakeZero();
+            this->theLiebrackets.elements[i][j].makeZero();
           } else {
             ElementSemisimpleLieAlgebra<Rational>& current = this->theLiebrackets.elements[i][j];
             current.MakeHgenerator(leftWeight * 2 / (this->theWeyl.RootScalarCartanRoot(leftWeight, leftWeight)), *this);
@@ -681,7 +681,7 @@ void SemisimpleLieAlgebra::ComputeOneChevalleyConstant(
     this->ChevalleyConstants.elements[indexGamma][indexDeltaMinusEpsilon] *
     this->ChevalleyConstants.elements[indexDelta][indexMinusEpsilon];
   } else {
-    FirstSummand.MakeZero();
+    FirstSummand.makeZero();
   }
   if (indexGammaMinusEpsilon != - 1) {
     if (
@@ -693,7 +693,7 @@ void SemisimpleLieAlgebra::ComputeOneChevalleyConstant(
     SecondSummand = this->ChevalleyConstants.elements[indexDelta][indexGammaMinusEpsilon] *
     this->ChevalleyConstants.elements[indexMinusEpsilon][indexGamma];
   } else {
-    SecondSummand.MakeZero();
+    SecondSummand.makeZero();
   }
   this->ChevalleyConstants.elements[indexMinusEpsilon][indexMinusZeta] = (
     this->theWeyl.RootScalarCartanRoot(eta, eta) /
@@ -759,7 +759,7 @@ bool SemisimpleLieAlgebra::GetConstantOrHElement(
     return true;
   }
   if (this->theWeyl.RootSystem.GetIndex(root1) == - 1 || this->theWeyl.RootSystem.GetIndex(root2) == - 1) {
-    outputRat.MakeZero();
+    outputRat.makeZero();
     return true;
   }
   outputH = (root1 * 2) / Vector<Rational>::ScalarProduct(root1, root1, this->theWeyl.CartanSymmetric);

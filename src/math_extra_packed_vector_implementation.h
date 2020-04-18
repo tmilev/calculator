@@ -37,7 +37,7 @@ PackedVector<scalar> PackedVector<scalar>::operator*(scalar x) const {
 template <typename scalar>
 scalar PackedVector<scalar>::ScalarProduct(const PackedVector<scalar>& v, const Matrix<scalar>& B) const {
   PackedVector<scalar> Bv;
-  Bv.MakeZero(B.NumRows);
+  Bv.makeZero(B.NumRows);
   for (int i = 0; i < B.NumRows; i ++) {
     for (int j = 0; j < B.NumCols; j ++) {
       Bv[i] += B.elements[i][j] * v[j];
@@ -53,7 +53,7 @@ scalar PackedVector<scalar>::ScalarProduct(const PackedVector<scalar>& v, const 
 template <typename scalar>
 scalar PackedVector<scalar>::ScalarProduct(const PackedVector<scalar>& v, const PackedVector* B) const {
   PackedVector<scalar> Bv;
-  Bv.MakeZero();
+  Bv.makeZero();
   for (int i = 0; i < this->size; i ++)
     for (int j = 0; j < this->size; j ++)
       Bv[i] += B[i][j]*v[j]
@@ -112,7 +112,7 @@ bool PackedVector<scalar>::operator>(const PackedVector<scalar>&w) const {
 
 
 template <typename scalar>
-void PackedVector<scalar>::MakeZero(int n) {
+void PackedVector<scalar>::makeZero(int n) {
   (void) n;
   for (int i = 0; i < this->size; i ++) {
     this->data[i] = 0;
@@ -129,15 +129,15 @@ void PackedVector<scalar>::MakeEi(int d, int ei) {
 }
 
 template <typename scalar>
-unsigned int PackedVector<scalar>::HashFunction(const PackedVector<scalar>& in) {
-  return in.HashFunction();
+unsigned int PackedVector<scalar>::hashFunction(const PackedVector<scalar>& in) {
+  return in.hashFunction();
 }
 
 template <typename scalar>
-unsigned int PackedVector<scalar>::HashFunction() const {
+unsigned int PackedVector<scalar>::hashFunction() const {
   unsigned int result = 0;
   for (int i = 0; i < this->size; i ++) {
-    result += this->data[i].HashFunction() * SomeRandomPrimes[i];
+    result += this->data[i].hashFunction() * SomeRandomPrimes[i];
   }
   return result;
 }

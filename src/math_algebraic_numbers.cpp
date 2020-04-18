@@ -28,7 +28,7 @@ void AlgebraicClosureRationals::GetMultiplicativeOperatorFromRadicalSelection(
   const Selection& theSel, MatrixTensor<Rational>& outputOp
 ) {
   MacroRegisterFunctionWithName("AlgebraicClosureRationals::GetMultiplicativeOperatorFromRadicalSelection");
-  outputOp.MakeZero();
+  outputOp.makeZero();
   Selection vectorActedOnSel, resultVectorSel;
   vectorActedOnSel.init(this->theQuadraticRadicals.size);
   resultVectorSel.init(this->theQuadraticRadicals.size);
@@ -154,7 +154,7 @@ bool AlgebraicClosureRationals::MergeRadicals(const List<LargeInteger>& theRadic
   }
   this->latestBasis.SetSize(MathRoutines::TwoToTheNth(radicalsNew.size));
   MatrixTensor<Rational> currentInjection;
-  currentInjection.MakeZero();
+  currentInjection.makeZero();
   Selection largerFieldSel, smallerFieldSel;
   largerFieldSel.init(radicalsNew.size);
   smallerFieldSel.init(this->theQuadraticRadicals.size);
@@ -252,7 +252,7 @@ bool AlgebraicClosureRationals::ChooseGeneratingElement(
       << attemptsSoFar << " attempts so far, limit: " << attemptsLimitZeroForNone << ". ";
       return false;
     }
-    this->GeneratingElemenT.element.MakeZero();
+    this->GeneratingElemenT.element.makeZero();
     for (int i = 0; i < theSel.theInts.size; i ++) {
       MonomialVector tempV;
       tempV.MakeEi(i);
@@ -349,7 +349,7 @@ bool AlgebraicClosureRationals::ReduceMe(
     << "impossible in the current context. "
     << global.fatal;
   }
-  projectionGeneratorCoordinates.MakeZero();
+  projectionGeneratorCoordinates.makeZero();
   for (int i = 0; i < smallestFactorDegree; i ++) {
     projectionGeneratorCoordinates.AddMonomial(MonomialMatrix(i, i), 1);
   }
@@ -440,7 +440,7 @@ void AlgebraicClosureRationals::GetAdditionTo(
     output = input.element;
     return;
   }
-  output.MakeZero();
+  output.makeZero();
   for (int i = 0; i < input.element.size(); i ++) {
     int currentIndex = input.element[i].theIndex;
     if (
@@ -465,7 +465,7 @@ void AlgebraicClosureRationals::GetMultiplicationBy(
   const AlgebraicNumber& input, MatrixTensor<Rational>& output
 ) {
   MacroRegisterFunctionWithName("AlgebraicClosureRationals::GetMultiplicationBy");
-  output.MakeZero();
+  output.makeZero();
   VectorSparse<Rational> inputAdditiveForm;
   this->GetAdditionTo(input, inputAdditiveForm);
   MatrixTensor<Rational> currentMat;
@@ -553,7 +553,7 @@ bool AlgebraicNumber::AssignCosRationalTimesPi(const Rational& input, AlgebraicC
 }
 
 
-unsigned int AlgebraicNumber::HashFunction() const {
+unsigned int AlgebraicNumber::hashFunction() const {
   //global.fatal << global.fatal;
   //WARNING. Algebraic numbers, as they are recorded in memory at the moment,
   //do not have unique presentations, so we return 0 as their hash function.
@@ -654,7 +654,7 @@ bool AlgebraicClosureRationals::AdjoinRootQuadraticPolyToQuadraticRadicalExtensi
   Polynomial<AlgebraicNumber> algNumPoly;
   this->ConvertPolyDependingOneVariableToPolyDependingOnFirstVariableNoFail(thePoly, algNumPoly);
   Polynomial<Rational> minPoly;
-  minPoly.MakeZero();
+  minPoly.makeZero();
   Rational currentCF, theLinearTermCFdividedByTwo, theConstTermShifted;
   for (int i = 0; i < algNumPoly.size(); i ++) {
     if (!algNumPoly.coefficients[i].IsRational(&currentCF)) {
@@ -755,7 +755,7 @@ bool AlgebraicClosureRationals::AdjoinRootMinimalPolynomial(
     }
     return false;
   }
-  theGenMat.MakeZero();
+  theGenMat.makeZero();
   for (int i = 0; i < degreeMinPoly - 1; i ++) {
     for (int j = 0; j < startingDimension; j ++) {
       theGenMat.AddMonomial(MonomialMatrix((i + 1) * startingDimension + j, i * startingDimension + j), 1);
@@ -992,7 +992,7 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other) {
   this->CheckConsistency();
   if (other.owner == nullptr) {
     if (other.IsEqualToZero()) {
-      this->element.MakeZero();
+      this->element.makeZero();
       return;
     }
     this->element *= other.element.coefficients[0];
@@ -1500,12 +1500,12 @@ ElementZmodP ElementZmodP::operator*(const Rational& other) const {
   return result;
 }
 
-unsigned int ElementZmodP::HashFunction() const {
+unsigned int ElementZmodP::hashFunction() const {
   if (this->theValue.IsEqualToZero()) {
     return 0;
   }
-  return this->theValue.HashFunction() * SomeRandomPrimes[0] +
-  this->theModulus.HashFunction() * SomeRandomPrimes[1];
+  return this->theValue.hashFunction() * SomeRandomPrimes[0] +
+  this->theModulus.hashFunction() * SomeRandomPrimes[1];
 }
 
 void ElementZmodP::CheckIamInitialized() const {
@@ -1558,7 +1558,7 @@ void ElementZmodP::ScaleToIntegralMinimalHeightAndGetPoly(
   output.SetExpectedSize(input.size());
   ElementZmodP theCF;
   theCF.theModulus = newModulo;
-  output.MakeZero();
+  output.makeZero();
   for (int i = 0; i < input.size(); i ++) {
     theCF = input.coefficients[i];
     output.AddMonomial(input[i], theCF);

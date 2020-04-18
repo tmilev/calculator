@@ -643,7 +643,7 @@ bool Crypto::ConvertHexToString(const std::string& input, std::string& output, s
 }
 
 bool Crypto::ConvertHexToInteger(const std::string& input, LargeIntegerUnsigned& output, int& outputNumLeadingZeroPairs) {
-  output.MakeZero();
+  output.makeZero();
   bool foundNonZero = false;
   outputNumLeadingZeroPairs = 0;
   for (unsigned i = 0; i < input.size(); i ++) {

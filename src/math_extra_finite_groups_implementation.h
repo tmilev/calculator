@@ -50,7 +50,7 @@ bool FiniteGroup<elementSomeGroup>::ComputeAllElementsLargeGroup(bool andWords, 
   }
   this->theElements.Clear();
   elementSomeGroup currentElement;
-  currentElement.MakeID(this->generators[0]);
+  currentElement.makeIdentity(this->generators[0]);
   this->theElements.AddOnTop(currentElement);
   this->theWords.SetSize(0);
   if (andWords) {
@@ -652,7 +652,7 @@ void FiniteGroup<elementSomeGroup>::ComputeCCSizesAndRepresentativesWithOrbitIte
   this->sizePrivate = 0;
 
   elementSomeGroup currentElt;
-  currentElt.MakeID(this->generators[0]);
+  currentElt.makeIdentity(this->generators[0]);
   static int recursionCount = 0;
   recursionCount ++;
   if (recursionCount > 100) {
@@ -790,7 +790,7 @@ bool WeylGroupAutomorphisms::GenerateOuterOrbit(
   ProgressReport theReport(3000, GlobalVariables::Response::ReportType::general);
   simpleReflectionOrOuterAutomorphism theGen;
   if (outputSubset != nullptr) {
-    currentElt.MakeID(*this);
+    currentElt.makeIdentity(*this);
     outputSubset->SetExpectedSize(numElementsToReserve);
     outputSubset->Clear();
     outputSubset->AddOnTop(currentElt);
@@ -806,7 +806,7 @@ bool WeylGroupAutomorphisms::GenerateOuterOrbit(
       }
       if (output.AddOnTopNoRepetition(currentRoot)) {
         if (outputSubset != nullptr) {
-          currentElt.MakeID(*this);
+          currentElt.makeIdentity(*this);
           theGen.MakeSimpleReflection(j);
           currentElt.generatorsLastAppliedFirst.AddOnTop(theGen);
           currentElt.generatorsLastAppliedFirst.AddListOnTop((*outputSubset)[i].generatorsLastAppliedFirst);
@@ -845,7 +845,7 @@ void WeylGroupData::RaiseToDominantWeight(
   int theDim = this->GetDim();
   simpleReflection theGen;
   if (raisingElt != nullptr) {
-    raisingElt->MakeID(*this);
+    raisingElt->makeIdentity(*this);
   }
   for (bool found = true; found; ) {
     found = false;
@@ -924,7 +924,7 @@ bool WeylGroupData::GenerateOrbit(
     if (UpperLimitNumElements > 0) {
       expectedOrbitSize = MathRoutines::Minimum(UpperLimitNumElements, expectedOrbitSize);
     }
-    currentElt.MakeID(*this);
+    currentElt.makeIdentity(*this);
     outputSubset->SetExpectedSize(expectedOrbitSize);
     outputSubset->Clear();
     outputSubset->AddOnTop(currentElt);
@@ -1324,16 +1324,16 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::init(somegro
 // If you compare hash values from two groups which calculated their conjugacy classes in a different way,
 // you must ensure they are in the same order, or hashing won't work as expected.
 template <typename somegroup, typename coefficient>
-unsigned int GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::HashFunction() const {
+unsigned int GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::hashFunction() const {
   unsigned int result = 0;
-  result += this->theCharacteR.HashFunction();
+  result += this->theCharacteR.hashFunction();
   return result;
 }
 
 template <typename somegroup, typename coefficient>
-unsigned int GroupRepresentation<somegroup, coefficient>::HashFunction() const {
+unsigned int GroupRepresentation<somegroup, coefficient>::hashFunction() const {
   unsigned int result = 0;
-  result += this->theCharacteR.HashFunction();
+  result += this->theCharacteR.hashFunction();
   return result;
 }
 
@@ -1562,7 +1562,7 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::A
       this->AmbientWeyl->ReflectBetaWRTAlpha(this->simpleRootsInner[tempI], output, false, output);
     } else {
       tempI -= this->simpleRootsInner.size;
-      tempRoot.MakeZero(input.size);
+      tempRoot.makeZero(input.size);
       for (int j = 0; j < output.size; j ++) {
         tempRoot2 = this->ExternalAutomorphisms[tempI][j];
         tempRoot2 *= output[j];
@@ -1852,9 +1852,9 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::F
 }
 
 template<class someFiniteGroup, typename coefficient>
-void ClassFunction<someFiniteGroup, coefficient>::MakeZero(someFiniteGroup& inputWeyl) {
+void ClassFunction<someFiniteGroup, coefficient>::makeZero(someFiniteGroup& inputWeyl) {
   this->G = &inputWeyl;
-  this->data.MakeZero(this->G->ConjugacyClassCount());
+  this->data.makeZero(this->G->ConjugacyClassCount());
 }
 
 template<class someFiniteGroup, typename coefficient>
@@ -1892,11 +1892,11 @@ std::ostream& operator<<(std::ostream& out, const ClassFunction<someFiniteGroup,
 }
 
 template<class someFiniteGroup, typename coefficient>
-unsigned int ClassFunction<someFiniteGroup, coefficient>::HashFunction(const ClassFunction<someFiniteGroup, coefficient>& input) {
+unsigned int ClassFunction<someFiniteGroup, coefficient>::hashFunction(const ClassFunction<someFiniteGroup, coefficient>& input) {
   unsigned int acc = 0;
   int N = (input.data.size < SomeRandomPrimesSize) ? input.data.size : SomeRandomPrimesSize;
   for (int i = 0; i < N; i ++) {
-    acc += input.data[i].HashFunction() * SomeRandomPrimes[i];
+    acc += input.data[i].hashFunction() * SomeRandomPrimes[i];
   }
   return acc;
 }
@@ -2264,7 +2264,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
   ClassFunction<WeylGroupData::WeylGroupBase, coefficient> virtualChar;
   List<Vectors<coefficient> > theSubRepsBasis;
   for (int cfi = NumClasses - 1; cfi >= 0; cfi --) {
-    virtualChar.MakeZero(*this->ownerGroup);
+    virtualChar.makeZero(*this->ownerGroup);
     virtualChar[cfi] = 1;
     this->GetClassFunctionMatrix(virtualChar, splittingOperatorMatrix);
     bool tempB = splittingOperatorMatrix.GetEigenspacesProvidedAllAreIntegralWithEigenValueSmallerThanDim(theSubRepsBasis);
@@ -2276,7 +2276,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
     if (theSubRepsBasis.size > 1) {
       //we found splitting, so let us recursively decompose:
       for (int i = 0; i < theSubRepsBasis.size; i ++) {
-        remainingCharacter.MakeZero(*this->ownerGroup);
+        remainingCharacter.makeZero(*this->ownerGroup);
         this->Restrict(theSubRepsBasis[i], remainingCharacter, newRep);
         if (!newRep.DecomposeTodorsVersionRecursive(outputIrrepMults, appendOnlyIrrepsList, appendOnlyGRCAMSList)) {
           return false;
@@ -2287,7 +2287,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
   }
   Vector<coefficient> startingVector, tempV, average;
   startingVector.MakeEi(this->GetDim(), 0);
-  average.MakeZero(this->GetDim());
+  average.makeZero(this->GetDim());
   for (int i = 0; i < this->theElementImageS.size; i ++) {
     if (!this->theElementIsComputed[i]) {
       global.fatal << "<hr>This is a programming error: an internal check failed. " << global.fatal;
@@ -2463,7 +2463,7 @@ void WeylGroupAutomorphisms::RaiseToMaximallyDominant(List<Vector<coefficient> >
         }
       }
       Vector<Rational> zeroWeight;
-      zeroWeight.MakeZero(this->theWeyl->GetDim());
+      zeroWeight.makeZero(this->theWeyl->GetDim());
       HashedList<MatrixTensor<Rational> >& outerAutos = this->theOuterAutos.theElements;
       for (int j = 0; j < outerAutos.size; j ++) {
         theWeightsCopy = theWeights;

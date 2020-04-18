@@ -80,7 +80,7 @@ void Lattice::IntersectWithLineGivenBy(Vector<Rational>& inputLine, Vector<Ratio
     global.fatal << "This should not be possible. " << global.fatal;
   }
   if (this->basisRationalForm.NumRows == 0) {
-    outputGenerator.MakeZero(inputLine.size);
+    outputGenerator.makeZero(inputLine.size);
   } else {
     this->basisRationalForm.GetVectorFromRow(0, outputGenerator);
   }
@@ -173,7 +173,7 @@ void LittelmannPath::ActByEalpha(int indexAlpha) {
   for (int i = minIndex + 1; i < this->Waypoints.size; i ++) {
     this->Waypoints[i] += alpha;
   }
-  this->Simplify();
+  this->simplify();
 }
 
 void LittelmannPath::ActByFalpha(int indexAlpha) {
@@ -243,10 +243,10 @@ void LittelmannPath::ActByFalpha(int indexAlpha) {
   for (int i = succeedingIndex + 1; i < this->Waypoints.size; i ++) {
     this->Waypoints[i] -= alpha;
   }
-  this->Simplify();
+  this->simplify();
 }
 
-void LittelmannPath::Simplify() {
+void LittelmannPath::simplify() {
   if (this->Waypoints.size == 0) {
     return;
   }
@@ -309,9 +309,9 @@ bool LittelmannPath::MinimaAreIntegral() {
 void LittelmannPath::MakeFromWeightInSimpleCoords(const Vector<Rational>& weightInSimpleCoords, WeylGroupData& theOwner) {
   this->owner = &theOwner;
   this->Waypoints.SetSize(2);
-  this->Waypoints[0].MakeZero(theOwner.GetDim());
+  this->Waypoints[0].makeZero(theOwner.GetDim());
   this->Waypoints[1] = weightInSimpleCoords;
-  this->Simplify();
+  this->simplify();
 }
 
 std::string LittelmannPath::ElementToStringIndicesToCalculatorOutput(LittelmannPath& inputStartingPath, List<int>& input) {
@@ -455,7 +455,7 @@ bool MonomialUniversalEnvelopingOrdered<coefficient>::ModOutFDRelationsExperimen
       testWeight = currentWeight;
       theWeyl.RaiseToDominantWeight(testWeight);
       if (!(theHWsimpleCoordsTrue - testWeight).IsPositiveOrZero()) {
-        this->MakeZero(theRingZero, *this->owner);
+        this->makeZero(theRingZero, *this->owner);
         return true;
       }
     }
@@ -471,7 +471,7 @@ bool ElementUniversalEnvelopingOrdered<coefficient>::ModOutFDRelationsExperiment
 ) {
   MonomialUniversalEnvelopingOrdered<coefficient> tempMon;
   ElementUniversalEnvelopingOrdered<coefficient> output;
-  output.MakeZero(*this->owner);
+  output.makeZero(*this->owner);
   bool result = true;
   for (int i = 0; i < this->size; i ++) {
     tempMon = this->TheObjects[i];
@@ -517,7 +517,7 @@ bool ElementUniversalEnveloping<coefficient>::GetBasisFromSpanOfElements(
     return false;
   }
   ElementUniversalEnveloping<coefficient> outputCorrespondingMonomials;
-  outputCorrespondingMonomials.MakeZero(*theElements[0].owner);
+  outputCorrespondingMonomials.makeZero(*theElements[0].owner);
   Vectors<CoefficientTypeQuotientField> outputCoordsBeforeReduction;
   for (int i = 0; i < theElements.size; i ++) {
     for (int j = 0; j < theElements[i].size; j ++) {
@@ -527,7 +527,7 @@ bool ElementUniversalEnveloping<coefficient>::GetBasisFromSpanOfElements(
   outputCoordsBeforeReduction.SetSize(theElements.size);
   for (int i = 0; i < theElements.size; i ++) {
     Vector<CoefficientTypeQuotientField>& currentList = outputCoordsBeforeReduction[i];
-    currentList.MakeZero(outputCorrespondingMonomials.size);
+    currentList.makeZero(outputCorrespondingMonomials.size);
     ElementUniversalEnveloping<coefficient>& currentElt = theElements[i];
     for (int j = 0; j < currentElt.size; j ++) {
       MonomialUniversalEnveloping<coefficient>& currentMon = currentElt[j];
@@ -558,28 +558,28 @@ void ElementUniversalEnveloping<coefficient>::ModToMinDegreeFormFDRels(
   const coefficient& theRingZero
 ) {
   ElementUniversalEnveloping<coefficient> result;
-  result.MakeZero(*this->owner);
+  result.makeZero(*this->owner);
   bool Found = true;
   int numPosRoots = this->owner->GetNumPosRoots();
   while (Found) {
     Found = false;
     for (int j = numPosRoots - 1; j >= 0; j --) {
       this->owner->UEGeneratorOrderIncludingCartanElts.SwapTwoIndices(j, numPosRoots - 1);
-      this->Simplify(theRingUnit);
+      this->simplify(theRingUnit);
       this->owner->UEGeneratorOrderIncludingCartanElts.SwapTwoIndices(j, numPosRoots - 1);
       if (this->ModOutFDRelationsExperimental(theHWinSimpleCoords, theRingUnit, theRingZero)) {
         Found = true;
       }
     }
   }
-  this->Simplify(theRingUnit);
+  this->simplify(theRingUnit);
 }
 
 template<class coefficient>
 bool ElementUniversalEnveloping<coefficient>::ApplyMinusTransposeAutoOnMe() {
   MonomialUniversalEnveloping<coefficient> tempMon;
   ElementUniversalEnveloping<coefficient> result;
-  result.MakeZero(*this->owner);
+  result.makeZero(*this->owner);
   int numPosRoots = this->GetOwner().GetNumPosRoots();
   int theRank = this->GetOwner().GetRank();
   coefficient theCoeff;
@@ -627,7 +627,7 @@ bool ElementUniversalEnveloping<coefficient>::HWMTAbilinearForm(
     return false;
   }
   ElementUniversalEnveloping<coefficient> Accum, intermediateAccum, tempElt;
-  Accum.MakeZero(*this->owners, this->indexInOwners);
+  Accum.makeZero(*this->owners, this->indexInOwners);
   MonomialUniversalEnveloping<coefficient> constMon;
   constMon.MakeConst();
   if (logStream != nullptr) {
@@ -636,7 +636,7 @@ bool ElementUniversalEnveloping<coefficient>::HWMTAbilinearForm(
   }
   for (int j = 0; j < right.size; j ++) {
     intermediateAccum = *this;
-    intermediateAccum.Simplify(global, theRingUnit, theRingZero);
+    intermediateAccum.simplify(global, theRingUnit, theRingZero);
     if (logStream != nullptr) {
       *logStream << "intermediate after simplification: "
       << intermediateAccum.toString(&global.theDefaultFormat.GetElement()) << "<br>";
@@ -660,7 +660,7 @@ bool ElementUniversalEnveloping<coefficient>::HWMTAbilinearForm(
             *logStream << "intermediate before simplification: "
             << intermediateAccum.toString(&global.theDefaultFormat.GetElement()) << "<br>";
           }
-          intermediateAccum.Simplify(theRingUnit);
+          intermediateAccum.simplify(theRingUnit);
           if (logStream != nullptr) {
             *logStream << "intermediate after simplification: "
             << intermediateAccum.toString(&global.theDefaultFormat.GetElement()) << "<br>";
@@ -703,7 +703,7 @@ std::string ElementUniversalEnveloping<coefficient>::IsInProperSubmodule(
     for (int j = 0; j < theDim; j ++) {
       theElt.MakeOneGenerator(j + numPosRoots + theDim, *this->owner, theRingUnit);
       theElt *= theOrbit[i];
-      theElt.Simplify(theRingUnit);
+      theElt.simplify(theRingUnit);
       theElt.ModOutVermaRelations(subHiGoesToIthElement, theRingUnit, theRingZero);
       if (!theElt.IsEqualToZero()) {
         theOrbit.AddOnTop(theElt);
@@ -719,7 +719,7 @@ std::string ElementUniversalEnveloping<coefficient>::IsInProperSubmodule(
 
 template <class coefficient>
 bool ElementUniversalEnveloping<coefficient>::ConvertToRationalCoeff(ElementUniversalEnveloping<Rational>& output) {
-  output.MakeZero(*this->owner);
+  output.makeZero(*this->owner);
   MonomialUniversalEnveloping<Rational> tempMon;
   Rational theCoeff;
   for (int i = 0; i < this->size; i ++) {

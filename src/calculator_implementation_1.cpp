@@ -25,7 +25,7 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
   Vector<Rational> matX;
   Selection BaseVariables;
   Rational GlobalGoal;
-  GlobalGoal.MakeZero();
+  GlobalGoal.makeZero();
   if (matA.NumRows != matb.NumRows) {
     global.fatal << "The number of inequalities: " << matA.NumRows << " does not match the number of "
     << "constaints: " << matb.NumRows << ". " << global.fatal;
@@ -46,8 +46,8 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
   HashedList<Selection> VisitedVertices;
   VisitedVertices.Clear();
   BaseVariables.init(tempMatA.NumCols);
-  tempMatA.MakeZero();
-  matX.MakeZero(tempMatA.NumCols);
+  tempMatA.makeZero();
+  matX.makeZero(tempMatA.NumCols);
   for (int j = 0; j < matA.NumCols; j ++) {
     for (int i = 0; i < matA.NumRows; i ++) {
       tempMatA.elements[i][j].Assign(matA.elements[i][j]);
@@ -62,7 +62,7 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
   int EnteringVariable = 0;
   bool WeHaveNotEnteredACycle = true;
   while (EnteringVariable != - 1 && WeHaveNotEnteredACycle && GlobalGoal.IsPositive()) {
-    EnteringVariable = - 1; ChangeGradient.MakeZero();
+    EnteringVariable = - 1; ChangeGradient.makeZero();
     for (int i = 0; i < tempMatA.NumCols; i ++) {
       if (!BaseVariables.selected[i]) {
         Rational PotentialChangeGradient; bool hasAPotentialLeavingVariable;
@@ -675,7 +675,7 @@ bool Calculator::innerGroebner(
     tempElt.MakeMOne(static_cast<unsigned>(theMod));
     inputVectorZmodP.SetSize(inputVector.size);
     for (int i = 0; i < inputVector.size; i ++) {
-      inputVectorZmodP[i].MakeZero();
+      inputVectorZmodP[i].makeZero();
       for (int j = 0; j < inputVector[i].size(); j ++) {
         tempElt = inputVector[i].coefficients[j];
         inputVectorZmodP[i].AddMonomial(inputVector[i][j], tempElt);
@@ -2054,7 +2054,7 @@ bool Calculator::innerConesIntersect(Calculator& theCommands, const Expression& 
   bool conesDoIntersect = coneNonStrictGens.ConesIntersect(coneStrictGens, coneNonStrictGens, &outputIntersection, &outputSeparatingNormal);
   if (conesDoIntersect) {
     Vector<Rational> checkVector;
-    checkVector.MakeZero(coneStrictMatForm.NumCols);
+    checkVector.makeZero(coneStrictMatForm.NumCols);
     for (int i = 0; i < coneStrictGens.size; i ++) {
       checkVector += coneStrictGens[i] * outputIntersection[i];
     }
@@ -2157,12 +2157,12 @@ coefficient ElementUniversalEnveloping<coefficient>::GetKillingFormProduct(
   MonomialUniversalEnveloping<coefficient> baseGen;
   for (int i = 0; i < theOwner->GetNumGenerators(); i ++) {
     baseGen.MakeGenerator(i, *theOwner);
-    adadAppliedToMon.MakeZero(*theOwner);
+    adadAppliedToMon.makeZero(*theOwner);
     adadAppliedToMon.AddMonomial(baseGen, 1);
     right.AdjointRepresentationAction(adadAppliedToMon, tempElt);
-    tempElt.Simplify();
+    tempElt.simplify();
     this->AdjointRepresentationAction(tempElt, adadAppliedToMon);
-    adadAppliedToMon.Simplify();
+    adadAppliedToMon.simplify();
     result += adadAppliedToMon.GetMonomialCoefficient(baseGen);
   }
   return result;
@@ -2178,7 +2178,7 @@ coefficient SemisimpleLieAlgebra::GetKillingForm(
   ChevalleyGenerator baseGen;
   for (int i = 0; i < this->GetNumGenerators(); i ++) {
     baseGen.MakeGenerator(*this, i);
-    adadAppliedToMon.MakeZero();
+    adadAppliedToMon.makeZero();
     adadAppliedToMon.AddMonomial(baseGen, 1);
     this->LieBracket(right, adadAppliedToMon, tempElt);
     this->LieBracket(left, tempElt, adadAppliedToMon);

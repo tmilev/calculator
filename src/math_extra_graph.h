@@ -36,10 +36,10 @@ public:
   GraphEdge(int inputStart, int inputEnd, const std::string& inputLabel)
   : vStart(inputStart), vEnd(inputEnd), label(inputLabel) {}
   std::string toString(FormatExpressions* theFormat = nullptr) const;
-  static unsigned int HashFunction(const GraphEdge& input) {
-    return input.HashFunction();
+  static unsigned int hashFunction(const GraphEdge& input) {
+    return input.hashFunction();
   }
-  unsigned int HashFunction() const {
+  unsigned int hashFunction() const {
     return static_cast<unsigned>(this->vStart) + static_cast<unsigned>(this->vEnd) * SomeRandomPrimes[0];
   }
   bool operator==(const GraphEdge& other) const {

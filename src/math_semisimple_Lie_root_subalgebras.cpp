@@ -35,7 +35,7 @@ void rootSubalgebra::GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double
     return;
   }
   Vector<Rational> ZeroRoot;
-  ZeroRoot.MakeZero(theDimension);
+  ZeroRoot.makeZero(theDimension);
   Matrix<Rational>  matCoxeterElt;
   this->GetCoxeterElement(matCoxeterElt);
   this->ComputeDynkinDiagramKandCentralizer();
@@ -108,7 +108,7 @@ void rootSubalgebra::ComputeDynkinDiagramKandCentralizer() {
 
 void rootSubalgebra::ComputeModuleDecompoAmbientAlgebraDimensionsOnly() {
   MacroRegisterFunctionWithName("rootSubalgebra::ComputeModuleDecompoAmbientAlgebraDimensionsOnly");
-  this->moduleDecompoAmbientAlgebraDimensionsOnly.MakeZero();
+  this->moduleDecompoAmbientAlgebraDimensionsOnly.makeZero();
   for (int i = 0; i < this->GetNumModules(); i ++) {
     this->moduleDecompoAmbientAlgebraDimensionsOnly.AddMonomial(MonomialVector(this->Modules[i].size - 1), 1);
   }
@@ -524,7 +524,7 @@ void rootSubalgebra::KmodTimesKmod(int index1, int index2, List<int>& oppositeKm
 Vector<Rational> rootSubalgebra::GetFundamentalCoordsOverKss(const Vector<Rational>& inputGweightSimpleCoords) const {
   MacroRegisterFunctionWithName("rootSubalgebra::GetFundamentalCoordsOverK");
   Vector<Rational> output;
-  output.MakeZero(this->SimpleBasisK.size);
+  output.makeZero(this->SimpleBasisK.size);
   for (int i = 0; i < this->SimpleBasisK.size; i ++) {
     output[i] = this->GetAmbientWeyl().RootScalarCartanRoot(inputGweightSimpleCoords, this->SimpleBasisK[i]) * 2 /
     this->GetAmbientWeyl().RootScalarCartanRoot(this->SimpleBasisK[i], this->SimpleBasisK[i]);
@@ -535,7 +535,7 @@ Vector<Rational> rootSubalgebra::GetFundamentalCoordsOverKss(const Vector<Ration
 Vector<Rational> rootSubalgebra::GetSimpleCoordsOverKss(const Vector<Rational>& inputGweightSimpleCoords) const {
   MacroRegisterFunctionWithName("rootSubalgebra::GetSimpleCoordsOverKss");
   Vector<Rational> result;
-  result.MakeZero(this->SimpleBasisK.size);
+  result.makeZero(this->SimpleBasisK.size);
   if (this->SimpleBasisK.size == 0) {
     return result;
   }
@@ -567,7 +567,7 @@ void rootSubalgebra::ComputeHighestVectorsHighestWeights() {
   Vectors<Rational> cartanCentralizer;
   this->SimpleBasisK.GetOrthogonalComplement(cartanCentralizer, &this->GetAmbientWeyl().CartanSymmetric);
   Vector<Rational> zeroRoot;
-  zeroRoot.MakeZero(this->SimpleBasisK.size);
+  zeroRoot.makeZero(this->SimpleBasisK.size);
   for (int i = 0; i <cartanCentralizer.size; i ++) {
     currentElt.MakeHgenerator(cartanCentralizer[i], this->GetOwnerSSalg());
     this->HighestVectors.AddOnTop(currentElt);
@@ -612,7 +612,7 @@ void rootSubalgebra::ComputeModuleFromHighestVector(int moduleIndex) {
         }
       }
     }
-    currentWeight.MakeZero(this->GetOwnerSSalg().GetRank());
+    currentWeight.makeZero(this->GetOwnerSSalg().GetRank());
     for (int i = 0; i <zeroSpace.size; i ++) {
       currentWeights.AddOnTop(currentWeight);
     }
@@ -666,7 +666,7 @@ void rootSubalgebra::ComputeModulesFromHighestVectors() {
 
 void rootSubalgebra::ComputeModuleDecompo() {
   MacroRegisterFunctionWithName("rootSubalgebra::ComputeModuleDecompo");
-  this->ModuleDecompoHighestWeights.MakeZero();
+  this->ModuleDecompoHighestWeights.makeZero();
   Weight<Rational> theM;
   for (int i = 0; i < this->Modules.size; i ++) {
     theM.weightFundamentalCoordS = this->HighestWeightsNONPrimalFundamental[i];
@@ -858,7 +858,7 @@ void rootSubalgebra::ExtractRelations(
 ) {
   int theDimension = this->GetOwnerSSalg().GetRank();
   Vector<Rational> tempRoot;
-  tempRoot.MakeZero(theDimension);
+  tempRoot.makeZero(theDimension);
   coneRelation theRel; theRel.IndexOwnerRootSubalgebra = indexInOwner;
   if (owner.flagLookingForMinimalRels) {
     theRel.FixRightHandSide(*this, NilradicalRoots);
@@ -930,7 +930,7 @@ bool rootSubalgebra::AttemptTheTripleTrickWRTSubalgebra(
     int NumElts = tempSel.NumCombinationsOfCardinality(i);
     for (int j = 0; j < NumElts; j ++) {
       tempSel.IncrementSubsetFixedCardinality(i);
-      Accum.MakeZero(this->GetAmbientWeyl().CartanSymmetric.NumRows);
+      Accum.makeZero(this->GetAmbientWeyl().CartanSymmetric.NumRows);
       chosenAlphas.size = 0;
       for (int k = 0; k < tempSel.elements.size; k ++) {
         tempRoot = highestWeightsAllowed[tempSel.elements[k]];
@@ -1037,7 +1037,7 @@ void rootSubalgebra::ComputeEpsCoordsWRTk() {
   int theDimension = this->GetAmbientWeyl().CartanSymmetric.NumRows;
   simpleBasisG.SetSize(theDimension);
   for (int i = 0; i < theDimension; i ++) {
-    simpleBasisG[i].MakeZero(theDimension);
+    simpleBasisG[i].makeZero(theDimension);
     simpleBasisG[i][i] = 1;
   }
   Vector<Rational> tempRoot, tempRoot2, tempRoot3;
@@ -1052,7 +1052,7 @@ void rootSubalgebra::ComputeEpsCoordsWRTk() {
           );
         }
         this->scalarProdInvertedMatrixOrdered.ActOnVectorColumn(tempRoot, tempRoot3);
-        tempRoot2.MakeZero(this->GetAmbientWeyl().CartanSymmetric.NumRows);
+        tempRoot2.makeZero(this->GetAmbientWeyl().CartanSymmetric.NumRows);
         for (int j = 0; j < this->SimpleBasisK.size; j ++) {
           tempRoot2 += this->SimpleBasisK[j] * tempRoot3[j];
         }
@@ -1211,7 +1211,7 @@ bool rootSubalgebra::IsAnIsomorphism(
     for (int j = 0; j < theDimension; j ++) {
       matB.elements[i][j] = domain[i][j];
     }
-    tempRoots[i].MakeZero(theDimension);
+    tempRoots[i].makeZero(theDimension);
   }
   matB.Invert();
   Rational tempRat2;
@@ -1428,7 +1428,7 @@ void rootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnu
     Vector<Rational> linComb;
     if (this->AllRootsK.GetIndex(AllRoots[i]) == - 1) {
       for (int j = 0; j < theDimension; j ++) {
-        linComb[j].MakeZero();
+        linComb[j].makeZero();
         for (int k = 0; k < theDimension; k++) {
           Rational tempRat;
           tempRat.Assign(tempMat.elements[k][j]);
@@ -1481,7 +1481,7 @@ void rootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2() {
         Vector<Rational> linComb;
         if (this->AllRootsK.GetIndex(AllRoots.TheObjects[i]) == - 1) {
           for (int j = 0; j < theDimension; j ++) {
-            linComb[j].MakeZero();
+            linComb[j].makeZero();
             for (int k = 0; k < theDimension; k++) {
               Rational tempRat;
               tempRat.Assign(tempMat.elements[k][j]);
@@ -2049,7 +2049,7 @@ void rootSubalgebra::KEnumerationsToLinComb() {
       Vector<Rational> linComb;
       Vector<Rational>& TestedRootAlpha = this->TestedRootsAlpha[l];
       for (int j = 0; j < theDimension; j ++) {
-        linComb[j].MakeZero();
+        linComb[j].makeZero();
         for (int k = 0; k < theDimension; k ++) {
           Rational tempRat;
           tempRat.Assign(tempMat.elements[k][j]);
@@ -2472,8 +2472,8 @@ bool slTwoSubalgebra::AttemptExtendingHFtoHEFWRTSubalgebra(
   Matrix<Rational> tempMat, tempMatColumn, tempMatResult;
   tempMat = outputMatrixSystemToBeSolved;
   tempMatColumn = outputSystemColumnVector;
-  outputF.MakeZero();
-  outputE.MakeZero();
+  outputF.makeZero();
+  outputE.makeZero();
   ChevalleyGenerator tempGen;
   if (Matrix<Rational>::Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(
     tempMat, tempMatColumn, tempMatResult
@@ -2525,7 +2525,7 @@ void slTwoSubalgebra::initHEFSystemFromECoeffs(
           RootSpacesThatNeedToBeKilled.AddOnTop(tempRoot);
           indexEquation = outputSystemToBeSolved.size;
           outputSystemToBeSolved.SetSize(outputSystemToBeSolved.size + 1);
-          outputSystemToBeSolved.LastObject()->MakeZero();
+          outputSystemToBeSolved.LastObject()->makeZero();
         }
         tempM.makeOne(numberVariables);
         tempM.setVariable(i, 1);
@@ -2538,7 +2538,7 @@ void slTwoSubalgebra::initHEFSystemFromECoeffs(
   int oldSize = outputSystemToBeSolved.size;
   outputSystemToBeSolved.SetSize(oldSize + this->GetOwnerWeyl().CartanSymmetric.NumRows);
   for (int i = oldSize; i < outputSystemToBeSolved.size; i ++) {
-    outputSystemToBeSolved[i].MakeZero();
+    outputSystemToBeSolved[i].makeZero();
   }
   for (int i = 0; i < rootsInPlay.size; i ++) {
     if (rootsInPlay.size != halfNumberVariables) {
@@ -2557,8 +2557,8 @@ void slTwoSubalgebra::initHEFSystemFromECoeffs(
   }
   outputMatrixSystemToBeSolved.init(outputSystemToBeSolved.size, halfNumberVariables);
   outputSystemColumnVector.init(outputSystemToBeSolved.size, 1);
-  outputMatrixSystemToBeSolved.MakeZero();
-  outputSystemColumnVector.MakeZero();
+  outputMatrixSystemToBeSolved.makeZero();
+  outputSystemColumnVector.makeZero();
   for (int i = 0; i < outputSystemToBeSolved.size; i ++) {
     for (int j = 0; j < outputSystemToBeSolved[i].size(); j ++) {
       int lowerIndex = - 1;
@@ -2647,7 +2647,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(
       continue;
     }
     Vector<Rational> relativeCharacteristic, relativeSimpleCoords;
-    relativeCharacteristic.MakeZero(theRelativeDimension);
+    relativeCharacteristic.makeZero(theRelativeDimension);
     for (int k = 0; k < theRelativeDimension; k ++) {
       if (!selectionRootsWithZeroCharacteristic.selected[k]) {
         relativeCharacteristic[k] = 2;
@@ -2655,7 +2655,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(
     }
     InvertedRelativeKillingForm.ActOnVectorColumn(relativeCharacteristic, relativeSimpleCoords);
     Vector<Rational> characteristicH;
-    characteristicH.MakeZero(theLieAlgebra.GetRank());
+    characteristicH.makeZero(theLieAlgebra.GetRank());
     for (int j = 0; j < theRelativeDimension; j ++) {
       characteristicH += this->SimpleBasisK[j] * relativeSimpleCoords[j];
     }
@@ -2698,8 +2698,8 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(
     }
     theSl2.theH.MakeHgenerator(characteristicH, theLieAlgebra);
     theSl2.LengthHsquared = theSl2.GetOwnerSSAlgebra().theWeyl.RootScalarCartanRoot(characteristicH, characteristicH);
-    theSl2.theE.MakeZero();
-    theSl2.theF.MakeZero();
+    theSl2.theE.makeZero();
+    theSl2.theF.makeZero();
     if (theSl2.AttemptExtendingHFtoHEFWRTSubalgebra(
       theSl2.RootsWithScalar2WithH,
       selectionRootsWithZeroCharacteristic,
@@ -3148,7 +3148,7 @@ Vector<Rational> ElementSemisimpleLieAlgebra<coefficient>::GetRootIMustBeWeight(
       << this->toString() << global.fatal;
     }
     Vector<Rational> result;
-    result.MakeZero(this->GetOwner()->GetRank());
+    result.makeZero(this->GetOwner()->GetRank());
     return result;
   }
   return this->GetOwner()->GetWeightOfGenerator((*this)[0].theGeneratorIndex);
@@ -4245,7 +4245,7 @@ void coneRelation::GetSumAlphas(Vector<Rational>& output, int theDimension) {
   if (this->AlphaCoeffs.size != this->Alphas.size) {
     global.fatal << "Wrong number of alpha coefficients" << global.fatal;
   }
-  output.MakeZero(theDimension);
+  output.makeZero(theDimension);
   Vector<Rational> tempRoot;
   for (int i = 0; i < this->Alphas.size; i ++) {
     tempRoot = this->Alphas[i];

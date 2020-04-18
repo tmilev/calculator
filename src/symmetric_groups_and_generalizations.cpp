@@ -507,7 +507,7 @@ PermutationR2 PermutationR2::operator*(const PermutationR2& right) const {
   return out;
 }
 
-void PermutationR2::MakeID(const PermutationR2& unused) {
+void PermutationR2::makeIdentity(const PermutationR2& unused) {
   (void) unused;//avoid unused parameter warning, portable
   this->cycles.SetSize(0);
 }
@@ -689,7 +689,7 @@ bool PermutationR2::IsID() const {
   return(this->cycles.size == 0);
 }
 
-unsigned int PermutationR2::HashFunction() const {
+unsigned int PermutationR2::hashFunction() const {
   unsigned int acc = 0;
   unsigned int n = 0;
   for (int i = 0; i < this->cycles.size; i ++) {
@@ -976,8 +976,8 @@ ElementHyperoctahedralGroup ElementHyperoctahedralGroup::operator*(const Element
   return out;
 }
 
-void ElementHyperoctahedralGroup::MakeID(const ElementHyperoctahedralGroup& unused) {
-  this->p.MakeID(this->p);
+void ElementHyperoctahedralGroup::makeIdentity(const ElementHyperoctahedralGroup& unused) {
+  this->p.makeIdentity(this->p);
   this->s.SetSize(0);
 }
 
@@ -1035,7 +1035,7 @@ void ElementHyperoctahedralGroup::GetCharacteristicPolyStandardRepresentation(Po
     return;
   }
   M.init(n, n);
-  M.MakeZero();
+  M.makeZero();
   for (int i = 0; i < n; i ++) {
     int a = this->p*i;
     M.elements[i][a] = (this->s[i])?- 1:1; // ahaha 0 is false
@@ -1058,11 +1058,11 @@ bool ElementHyperoctahedralGroup::operator==(const ElementHyperoctahedralGroup& 
   return this->p == right.p;
 }
 
-unsigned int ElementHyperoctahedralGroup::HashFunction() const {
-  int acc = this->p.HashFunction();
+unsigned int ElementHyperoctahedralGroup::hashFunction() const {
+  int acc = this->p.hashFunction();
   // idk how to make bools their own like hash function or whatever lol
-  // I mean why not just have a parametric collection of global HashFunction
-  // that does normal stuff to normal types and calls .HashFunction() on
+  // I mean why not just have a parametric collection of global hashFunction
+  // that does normal stuff to normal types and calls .hashFunction() on
   // class types or whatever
   // its ok though because I need to be sure that a string of false at the end
   // hashes to the exact same thing as not having a string of false at the end
@@ -1332,11 +1332,11 @@ void HyperoctahedralGroup::SomeModuleOfPartititons(const Partition& positive, co
   if (pozm.size == 0)
     hid.MakeIdMatrix(1);
   else
-    hid.MakeID(pozm[0]);
+    hid.makeIdentity(pozm[0]);
   if (negm.size == 0)
     kid.MakeIdMatrix(1);
   else
-    kid.MakeID(negm[0]);
+    kid.makeIdentity(negm[0]);
   int i = 0;
   for (int pi = 0; pi < pozm.size; i ++, pi ++)
     pxmr.generatorS[i].AssignTensorProduct(pozm[pi], kid);

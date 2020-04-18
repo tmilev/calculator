@@ -52,9 +52,9 @@ class AlgebraicNumber {
   bool CheckConsistency() const;
   bool CheckNonZeroOwner() const;
   bool CheckCommonOwner(const AlgebraicNumber& other) const;
-  unsigned int HashFunction() const;
-  static unsigned int HashFunction(const AlgebraicNumber& input) {
-    return input.HashFunction();
+  unsigned int hashFunction() const;
+  static unsigned int hashFunction(const AlgebraicNumber& input) {
+    return input.hashFunction();
   }
   // Returns the number by which the vector was multiplied.
   static AlgebraicNumber scaleNormalizeIndex(
@@ -271,9 +271,9 @@ public:
   LargeIntegerUnsigned theValue;
   bool flagDeallocated;
   friend ElementZmodP operator*(int left, const ElementZmodP& right);
-  unsigned int HashFunction() const;
-  static unsigned int HashFunction(const ElementZmodP& input) {
-    return input.HashFunction();
+  unsigned int hashFunction() const;
+  static unsigned int hashFunction(const ElementZmodP& input) {
+    return input.hashFunction();
   }
   ElementZmodP() {
     this->flagDeallocated = false;

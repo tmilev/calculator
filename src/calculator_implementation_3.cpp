@@ -262,7 +262,7 @@ bool Calculator::innerEmbedG2inB3(Calculator& theCommands, const Expression& inp
   if (!theHmm.ApplyHomomorphism(argument, outputUE)) {
     return output.MakeError("Failed to apply homomorphism for unspecified reason", theCommands);
   }
-  outputUE.Simplify();
+  outputUE.simplify();
   Expression contextE;
   contextE.MakeContextSSLieAlg(theCommands, theHmm.theRange());
   return output.AssignValueWithContext(outputUE, contextE, theCommands);
@@ -424,7 +424,7 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg(
     ElementSemisimpleLieAlgebra<Rational>& currentElt =
     theHmm.imagesSimpleChevalleyGenerators[InvertedLeviInSmall.elements[i]];
     MatrixTensor<coefficient> currentOp, tempMat;
-    currentOp.MakeZero();
+    currentOp.makeZero();
     for (int j = 0; j < currentElt.size(); j ++) {
       tempMat = this->GetActionGeneratorIndeX(currentElt[j].theGeneratorIndex);
       tempMat *= currentElt.coefficients[j];
@@ -469,12 +469,12 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg(
   }
   for (int j = 0; j < theFinalEigenSpace.size; j ++) {
     out << "<tr><td>";
-    currentElt.MakeZero(this->GetOwner());
+    currentElt.makeZero(this->GetOwner());
     Vector<coefficient>& currentVect = theFinalEigenSpace[j];
     int lastNonZeroIndex = - 1;
     for (int i = 0; i < currentVect.size; i ++) {
       if (!(currentVect[i].IsEqualToZero())) {
-        tempElt.MakeZero(this->GetOwner());
+        tempElt.makeZero(this->GetOwner());
         tempElt.AddMonomial(this->theGeneratingWordsNonReduced[i], 1);
         tempElt *= currentVect[i];
         currentElt += tempElt;
@@ -589,7 +589,7 @@ bool Calculator::innerPrintB3G2branchingIntermediate(
   theG2B3Data.theFormat.NumAmpersandsPerNewLineForLaTeX = 0;
   Expression tempExpression;
   RationalFunction rfZero, rfOne;
-  rfZero.MakeZero();
+  rfZero.makeZero();
   rfOne.makeOne();
   latexTable2 << "\\begin{longtable}{|rll|}\\caption"
   << "{Values of $x_1$ for each $v_{\\lambda,i}$}\\label{tableCriticalValuesvlambda}"
@@ -895,7 +895,7 @@ template<class coefficient>
 bool ElementSumGeneralizedVermas<coefficient>::ExtractElementUE(
   ElementUniversalEnveloping<coefficient>& output, SemisimpleLieAlgebra& theOwner
 ) {
-  output.MakeZero(theOwner);
+  output.makeZero(theOwner);
   ModuleSSalgebra<coefficient>* theModPtr = nullptr;
   MonomialUniversalEnveloping<coefficient> tempMon;
   for (int i = 0; i < this->size(); i ++) {
@@ -957,7 +957,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
     theG2B3Data.theWeightFundCoords
   );
   theG2B3Data.theAmbientChar.MakeFromWeight(weightSimpleCoordinates, &theG2B3Data.theHmm.theRange());
-  theG2B3Data.theSmallCharFDpart.MakeZero();
+  theG2B3Data.theSmallCharFDpart.makeZero();
   charSSAlgMod<RationalFunction> tempMon;
   for (int i = 0; i < theG2B3Data.outputWeightsSimpleCoords.size; i ++) {
     Vector<RationalFunction>& currentWeight = theG2B3Data.outputWeightsSimpleCoords[i];
@@ -1102,7 +1102,7 @@ bool Calculator::innerPrintAllVectorPartitions(Calculator& theCommands, const Ex
   Vectors<Rational>& rootsBorel = theSSalgebra.theWeyl.RootsOfBorel;
   int counter = 0;
   int totalCycles = 0;
-  theWeight.MakeZero(theSSalgebra.GetRank());
+  theWeight.makeZero(theSSalgebra.GetRank());
   int i = rootsBorel.size;
   while (i > 0 && counter < 10000) {
     totalCycles ++;
@@ -1139,7 +1139,7 @@ void WeylGroupData::GetHighestWeightsAllRepsDimLessThanOrEqualTo(
   }
   HashedList<Vector<Rational> > output;
   Vector<Rational> current;
-  current.MakeZero(this->GetDim());
+  current.makeZero(this->GetDim());
   output.AddOnTop(current);
   Rational theDim;
   Rational dimBound = inputDimBound + 1;

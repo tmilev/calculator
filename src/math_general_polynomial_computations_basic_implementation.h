@@ -115,7 +115,7 @@ void Polynomial<coefficient>::MakeDeterminantFromSquareMatrix(
   thePerm.GetPermutationLthElementIsTheImageofLthIndex(permutationIndices);
   Polynomial<coefficient> result, theMonomial;
   result.makeZero();
-  result.SetExpectedSize(numCycles);
+  result.setExpectedSize(numCycles);
   for (int i = 0; i < numCycles; i ++, thePerm.incrementAndGetPermutation(permutationIndices)) {
     theMonomial.makeOne();
     for (int j = 0; j < permutationIndices.size; j ++) {
@@ -181,7 +181,7 @@ void Polynomial<coefficient>::makeOne(int ExpectedNumVars) {
 }
 
 template <class coefficient>
-void Polynomial<coefficient>::MakeDegreeOne(
+void Polynomial<coefficient>::makeDegreeOne(
   int NVar, int NonZeroIndex, const coefficient& coeff
 ) {
   this->makeZero();
@@ -191,7 +191,7 @@ void Polynomial<coefficient>::MakeDegreeOne(
 }
 
 template <class coefficient>
-void Polynomial<coefficient>::MakeDegreeOne(
+void Polynomial<coefficient>::makeDegreeOne(
   int NVar,
   int NonZeroIndex1,
   int NonZeroIndex2,
@@ -208,13 +208,13 @@ void Polynomial<coefficient>::MakeDegreeOne(
 }
 
 template <class coefficient>
-void Polynomial<coefficient>::MakeDegreeOne(
+void Polynomial<coefficient>::makeDegreeOne(
   int NVar,
   int NonZeroIndex,
   const coefficient& coeff1,
   const coefficient& ConstantTerm
 ) {
-  this->MakeDegreeOne(NVar, NonZeroIndex, coeff1);
+  this->makeDegreeOne(NVar, NonZeroIndex, coeff1);
   *this += ConstantTerm;
 }
 
@@ -268,7 +268,7 @@ void Polynomial<coefficient>::SetNumVariablesSubDeletedVarsByOne(int newNumVars)
   }
   Polynomial<coefficient> Accum;
   Accum.makeZero();
-  Accum.SetExpectedSize(this->size());
+  Accum.setExpectedSize(this->size());
   MonomialP tempM;
   for (int i = 0; i < this->size(); i ++) {
     tempM.makeOne(newNumVars);
@@ -310,7 +310,7 @@ void Polynomial<coefficient>::ShiftVariableIndicesToTheRight(int VarIndexShift) 
   int newNumVars = oldNumVars + VarIndexShift;
   Polynomial<coefficient> Accum;
   Accum.makeZero();
-  Accum.SetExpectedSize(this->size());
+  Accum.setExpectedSize(this->size());
   MonomialP tempM;
   for (int i = 0; i < this->size(); i ++) {
     tempM.makeOne(newNumVars);
@@ -772,10 +772,10 @@ void Polynomial<coefficient>::DivideBy(
   if (remainderLeadingIndex == - 1) {
     return;
   }
-  outputQuotient.SetExpectedSize(this->size());
+  outputQuotient.setExpectedSize(this->size());
   MonomialP quotientMonomial;
   Polynomial<coefficient> subtracand;
-  subtracand.SetExpectedSize(this->size());
+  subtracand.setExpectedSize(this->size());
   while (monomialOrder->greaterThanOrEqualTo(remainderLeadingMonomial, leadingMonomialShiftedDivisor)) {
     quotientMonomial = remainderLeadingMonomial;
     quotientMonomial /= leadingMonomialShiftedDivisor;
@@ -865,7 +865,7 @@ void Polynomial<coefficient>::AssignMinPoly(const Matrix<coefficient>& input) {
   MonomialP tempM;
   for (int col = 0; col < theDim; col ++) {
     theVectorPowers.MakeEi(theDim,col);
-    theBasis.SetSize(0);
+    theBasis.setSize(0);
     theBasis.addOnTop(theVectorPowers);
     for (int i = 0; i < theDim; i ++) {
       input.ActOnVectorColumn(*theBasis.LastObject(), theVectorPowers);
@@ -875,7 +875,7 @@ void Polynomial<coefficient>::AssignMinPoly(const Matrix<coefficient>& input) {
       theBasis.addOnTop(theVectorPowers);
     }
     theVectorPowers.GetCoordsInBasiS(theBasis, firstDependentPower);
-    currentFactor.SetExpectedSize(theBasis.size + 1);
+    currentFactor.setExpectedSize(theBasis.size + 1);
     currentFactor.makeZero();
     for (int i = 0; i < theBasis.size; i ++) {
       tempM.MakeEi(0, i, 1);
@@ -977,7 +977,7 @@ bool Polynomial<coefficient>::differential(
 ) const {
   MacroRegisterFunctionWithName("Polynomial::differential");
   int numberOfVariables = this->minimalNumberOfVariables();
-  output.SetSize(numberOfVariables);
+  output.setSize(numberOfVariables);
   for (int i = 0; i < this->size(); i ++) {
     const MonomialP& currentMonomial = this->theMonomials[i];
     const coefficient& currentCoefficient = this->coefficients[i];
@@ -1134,15 +1134,15 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionStringLaTeX() {
   List<Polynomial<coefficient> >& theSubtracands = this->intermediateSubtractands.GetElement();
   this->theFormat.monomialOrder = this->thePolynomialOrder.theMonOrder;
   std::string HighlightedColor = "red";
-  this->allMonomials.AddOnTopNoRepetition(this->startingPoly.GetElement().theMonomials);
+  this->allMonomials.addOnTopNoRepetition(this->startingPoly.GetElement().theMonomials);
   for (int i = 0; i < theRemainders.size; i ++) {
-    this->allMonomials.AddOnTopNoRepetition(theRemainders[i].theMonomials);
+    this->allMonomials.addOnTopNoRepetition(theRemainders[i].theMonomials);
   }
   for (int i = 0; i < theSubtracands.size; i ++) {
-    this->allMonomials.AddOnTopNoRepetition(theSubtracands[i].theMonomials);
+    this->allMonomials.addOnTopNoRepetition(theSubtracands[i].theMonomials);
   }
   //List<std::string> basisColorStyles;
-  //basisColorStyles.SetSize(this->theBasiS.size);
+  //basisColorStyles.setSize(this->theBasiS.size);
   this->allMonomials.QuickSortDescending(&this->thePolynomialOrder.theMonOrder);
   this->theFormat.flagUseLatex = true;
   out << this->ToStringLetterOrder(true);
@@ -1253,15 +1253,15 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionStringHtml() {
   this->theFormat.monomialOrder = this->thePolynomialOrder.theMonOrder;
   std::string underlineStyle = " style ='white-space: nowrap; border-bottom:1px solid black;'";
   this->allMonomials.Clear();
-  this->allMonomials.AddOnTopNoRepetition(this->startingPoly.GetElement().theMonomials);
+  this->allMonomials.addOnTopNoRepetition(this->startingPoly.GetElement().theMonomials);
   for (int i = 0; i < theRemainders.size; i ++) {
-    this->allMonomials.AddOnTopNoRepetition(theRemainders[i].theMonomials);
+    this->allMonomials.addOnTopNoRepetition(theRemainders[i].theMonomials);
     if (i < theSubtracands.size) {
-      this->allMonomials.AddOnTopNoRepetition(theSubtracands[i].theMonomials);
+      this->allMonomials.addOnTopNoRepetition(theSubtracands[i].theMonomials);
     }
   }
   //List<std::string> basisColorStyles;
-  //basisColorStyles.SetSize(this->theBasiS.size);
+  //basisColorStyles.setSize(this->theBasiS.size);
   this->allMonomials.QuickSortDescending(&this->thePolynomialOrder.theMonOrder);
   out << this->ToStringLetterOrder(false);
   out << "<br>";
@@ -1312,4 +1312,53 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionStringHtml() {
   out << "</table>";
   return out.str();
 }
+
+template<class coefficient>
+void ElementOneVariablePolynomialQuotientRing<coefficient>::operator*=(
+  ElementOneVariablePolynomialQuotientRing& other
+) {
+  if (other.modulus != this->modulus) {
+    global.fatal << "Not allowed to multiply quotient-ring "
+    << "elements of different rings. [This modulus, other modulus]: "
+    << this->modulus << ", " << other.modulus << global.fatal;
+  }
+  this->value *= other.value;
+  this->reduce();
+}
+
+template<class coefficient>
+unsigned int ElementOneVariablePolynomialQuotientRing<coefficient>::hashFunction(
+) {
+  return
+  this->value.hashFunction() * SomeRandomPrimes[0] +
+  this->value.hashFunction() * SomeRandomPrimes[1];
+}
+
+template<class coefficient>
+unsigned int ElementOneVariablePolynomialQuotientRing<coefficient>::hashFunction(
+  const ElementOneVariablePolynomialQuotientRing<coefficient>& input
+) {
+  return input.hashFunction();
+}
+
+template<class coefficient>
+std::string ElementOneVariablePolynomialQuotientRing<coefficient>::toString(
+  FormatExpressions* theFormat
+) {
+  std::stringstream out;
+  out << this->value.toString(theFormat) << " mod " << this->modulus.toString(theFormat);
+  return out.str();
+}
+
+template<class coefficient>
+void ElementOneVariablePolynomialQuotientRing<coefficient>::reduce() {
+  Polynomial<coefficient> unusedQuotient;
+  this->value.DivideBy(
+    this->modulus,
+    unusedQuotient,
+    this->value,
+    &MonomialP::orderDefault()
+  );
+}
+
 #endif

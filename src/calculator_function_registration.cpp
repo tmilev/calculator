@@ -1456,6 +1456,19 @@ void Calculator::initPredefinedInnerFunctions() {
     innerStandard
   );
   this->AddOperationHandler(
+    "PolynomialModP",
+    CalculatorConversions::innerPolynomialModuloInteger,
+    "",
+    "Creates a polynomial, with modular "
+    "arithmetic coefficients, i.e., coefficients in Z / p Z. "
+    "First argument = expression to convert to polynomial. "
+    "Second argument = the number mod which we are computing. ",
+    "PolynomialModP{}(x^2+x+1, 2);",
+    "CalculatorConversions::innerPolynomialModuloInteger",
+    "PolynomialModP",
+    innerStandard
+  );
+  this->AddOperationHandler(
     "ConvertAlgebraicNumberToMatrix",
     CalculatorFunctions::innerConvertAlgebraicNumberToMatrix,
     "",
@@ -5773,7 +5786,7 @@ void Calculator::initPredefinedStandardOperations() {
     "+",
     CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
     this->opRational(),
-    this->opPoly(),
+    this->opPolynomialRational(),
     "Adds a rational to a polynomial. ",
     "1+Polynomial{}\\lambda; Polynomial{}\\lambda + 1",
     "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly",
@@ -5783,7 +5796,7 @@ void Calculator::initPredefinedStandardOperations() {
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
-    this->opPoly(),
+    this->opPolynomialRational(),
     this->opRational(),
     "Adds a polynomial to a rational. ",
     "1+Polynomial{}\\lambda; Polynomial{}\\lambda + 1",
@@ -5794,8 +5807,8 @@ void Calculator::initPredefinedStandardOperations() {
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
-    this->opPoly(),
-    this->opPoly(),
+    this->opPolynomialRational(),
+    this->opPolynomialRational(),
     "Adds a polynomial to a polynomial. ",
     "x = 1 + Polynomial{} \\lambda;\n"
     "x + x",
@@ -5806,8 +5819,8 @@ void Calculator::initPredefinedStandardOperations() {
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
-    this->opPolyOverANs(),
-    this->opPolyOverANs(),
+    this->opPolynomialAlgebraicNumbers(),
+    this->opPolynomialAlgebraicNumbers(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
     "PolynomialAlgebraicNumbers(\\sqrt{12}x) + PolynomialAlgebraicNumbers(-\\sqrt{3}x)",
     "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly",
@@ -5818,7 +5831,7 @@ void Calculator::initPredefinedStandardOperations() {
     "+",
     CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
     this->opAlgNumber(),
-    this->opPolyOverANs(),
+    this->opPolynomialAlgebraicNumbers(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
     "PolynomialAlgebraicNumbers(\\sqrt{12}) +PolynomialAlgebraicNumbers(\\sqrt{3}x)",
     "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly",
@@ -5828,7 +5841,7 @@ void Calculator::initPredefinedStandardOperations() {
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
-    this->opPolyOverANs(),
+    this->opPolynomialAlgebraicNumbers(),
     this->opAlgNumber(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
     "PolynomialAlgebraicNumbers(\\sqrt{12}x) +PolynomialAlgebraicNumbers(-\\sqrt{3})",
@@ -5840,7 +5853,7 @@ void Calculator::initPredefinedStandardOperations() {
     "+",
     CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
     this->opRational(),
-    this->opPolyOverANs(),
+    this->opPolynomialAlgebraicNumbers(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
     "1 + PolynomialAlgebraicNumbers(\\sqrt{12}x)",
     "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly",
@@ -5850,7 +5863,7 @@ void Calculator::initPredefinedStandardOperations() {
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
-    this->opPolyOverANs(),
+    this->opPolynomialAlgebraicNumbers(),
     this->opRational(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
     "PolynomialAlgebraicNumbers(\\sqrt{12}x) + 1",
@@ -5861,7 +5874,7 @@ void Calculator::initPredefinedStandardOperations() {
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
-    this->opPoly(),
+    this->opPolynomialRational(),
     this->opAlgNumber(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
     "PolynomialAlgebraicNumbers(x) +\\sqrt{2}",
@@ -5872,8 +5885,8 @@ void Calculator::initPredefinedStandardOperations() {
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
-    this->opPoly(),
-    this->opPolyOverANs(),
+    this->opPolynomialRational(),
+    this->opPolynomialAlgebraicNumbers(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
     "Polynomial{}x + PolynomialAlgebraicNumbers(\\sqrt{2}x)",
     "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly",
@@ -5883,8 +5896,8 @@ void Calculator::initPredefinedStandardOperations() {
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
-    this->opPolyOverANs(),
-    this->opPoly(),
+    this->opPolynomialAlgebraicNumbers(),
+    this->opPolynomialRational(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
     "PolynomialAlgebraicNumbers(\\sqrt{2}x) + Polynomial{}x",
     "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly",
@@ -5895,7 +5908,7 @@ void Calculator::initPredefinedStandardOperations() {
     "+",
     CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly,
     this->opAlgNumber(),
-    this->opPoly(),
+    this->opPolynomialRational(),
     "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
     "\\sqrt{2}+PolynomialAlgebraicNumbers(x)",
     "CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly",
@@ -5917,7 +5930,7 @@ void Calculator::initPredefinedStandardOperations() {
   this->AddOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA,
-    this->opPoly(),
+    this->opPolynomialRational(),
     this->opElementWeylAlgebra(),
     "Adds a rational or polynomial to element Weyl algebra. ",
     "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n"
@@ -5930,7 +5943,7 @@ void Calculator::initPredefinedStandardOperations() {
     "+",
     CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA,
     this->opElementWeylAlgebra(),
-    this->opPoly(),
+    this->opPolynomialRational(),
     "Adds a rational or polynomial to element Weyl algebra. ",
     " \\partial_{{i}} = ElementWeylAlgebraDO{}(\\partial_i, x_i);\n"
     "x_{{i}}= Polynomial{}x_i;\nx_i +x_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]",
@@ -6353,7 +6366,7 @@ void Calculator::initPredefinedStandardOperations() {
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA,
-    this->opPoly(),
+    this->opPolynomialRational(),
     this->opElementWeylAlgebra(),
     "Multiplies rational or polynomial or element Weyl algebra by rational or polynomial or element Weyl algebra. ",
     "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n"
@@ -6381,7 +6394,7 @@ void Calculator::initPredefinedStandardOperations() {
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA,
     this->opElementWeylAlgebra(),
-    this->opPoly(),
+    this->opPolynomialRational(),
     "Multiplies rational or polynomial or element Weyl algebra by rational or polynomial or element Weyl algebra. ",
     "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n"
     "x_{{i}}= Polynomial{}x_i;\n"
@@ -6393,7 +6406,7 @@ void Calculator::initPredefinedStandardOperations() {
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly,
-    this->opPoly(),
+    this->opPolynomialRational(),
     this->opRational(),
     "Multiplies polynomial by a rational (polynomial comes first). ",
     "2*Polynomial{}(a +b);\n"
@@ -6407,7 +6420,7 @@ void Calculator::initPredefinedStandardOperations() {
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly,
     this->opRational(),
-    this->opPoly(),
+    this->opPolynomialRational(),
     "Multiplies rational by a polynomial (rational comes first). ",
     "2*Polynomial{}(a + b);\n"
     "Polynomial{}(a + b)/2;\n"
@@ -6419,8 +6432,8 @@ void Calculator::initPredefinedStandardOperations() {
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly,
-    this->opPoly(),
-    this->opPoly(),
+    this->opPolynomialRational(),
+    this->opPolynomialRational(),
     "Multiplies two polynomials. ",
     "2*Polynomial{}(a +b);\n"
     "Polynomial{}(a +b)/2;\n"
@@ -6432,8 +6445,8 @@ void Calculator::initPredefinedStandardOperations() {
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly,
-    this->opPolyOverANs(),
-    this->opPolyOverANs(),
+    this->opPolynomialAlgebraicNumbers(),
+    this->opPolynomialAlgebraicNumbers(),
     "Multiplies two polynomials over the algebraic numbers. ",
     "PolynomialAlgebraicNumbers{}(\\sqrt{3}x)*PolynomialAlgebraicNumbers{}(\\sqrt{6}y);",
     "CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly",
@@ -6443,7 +6456,7 @@ void Calculator::initPredefinedStandardOperations() {
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly,
-    this->opPolyOverANs(),
+    this->opPolynomialAlgebraicNumbers(),
     this->opAlgNumber(),
     "Multiplies two polynomials over the algebraic numbers. ",
     "PolynomialAlgebraicNumbers{}(\\sqrt{3}x)*\\sqrt{6};",
@@ -6455,7 +6468,7 @@ void Calculator::initPredefinedStandardOperations() {
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly,
     this->opAlgNumber(),
-    this->opPolyOverANs(),
+    this->opPolynomialAlgebraicNumbers(),
     "Multiplies two polynomials over the algebraic numbers. ",
     "\\sqrt{6}*PolynomialAlgebraicNumbers{}(\\sqrt{3}x);",
     "CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly",
@@ -6466,7 +6479,7 @@ void Calculator::initPredefinedStandardOperations() {
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly,
     this->opRational(),
-    this->opPolyOverANs(),
+    this->opPolynomialAlgebraicNumbers(),
     "Multiplies two polynomials over the algebraic numbers. ",
     "PolynomialAlgebraicNumbers{}(\\sqrt{3}x)*2;",
     "CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly",
@@ -6476,7 +6489,7 @@ void Calculator::initPredefinedStandardOperations() {
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly,
-    this->opPoly(),
+    this->opPolynomialRational(),
     this->opAlgNumber(),
     "Multiplies two polynomials over the algebraic numbers. ",
     "Polynomial{}(x)*\\sqrt{2};",
@@ -6488,7 +6501,7 @@ void Calculator::initPredefinedStandardOperations() {
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly,
     this->opAlgNumber(),
-    this->opPoly(),
+    this->opPolynomialRational(),
     "Multiplies two polynomials over the algebraic numbers. ",
     "\\sqrt{3} * PolynomialAlgebraicNumbers{}(x);",
     "CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly",
@@ -6744,7 +6757,7 @@ void Calculator::initPredefinedStandardOperations() {
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor,
-    this->opPoly(),
+    this->opPolynomialRational(),
     this->opElementTensorGVM(),
     "Handles multiplying polynomial by an element of tensor "
     "product of generalized Verma modules. "
@@ -6872,7 +6885,7 @@ void Calculator::initPredefinedStandardOperations() {
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence,
-    this->opPoly(),
+    this->opPolynomialRational(),
     this->opSequence(),
     "Carries out multiplication between a rational number on left "
     "and sequence on the right.",
@@ -6899,7 +6912,7 @@ void Calculator::initPredefinedStandardOperations() {
   this->AddOperationBinaryInnerHandlerWithTypes(
     "*",
     CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly,
-    this->opPoly(),
+    this->opPolynomialRational(),
     this->opWeightLieAlgPoly(),
     "Carries out multiplication between a rational or polynomial "
     "on left and a weight on the right.",
@@ -6951,6 +6964,22 @@ void Calculator::initPredefinedStandardOperations() {
     "7 mod 3",
     "Calculator::innerZmodP",
     "mod",
+    innerStandard
+  );
+  this->AddOperationHandler(
+    "mod",
+    CalculatorFunctionsBinaryOps::innerPolynomialModPModuloPolynomialModP,
+    "",
+    "A polynomial modulo another polynomial. "
+    "Returns the element given by the first argument "
+    "of a quotient ring formed modulo the ideal "
+    "generated by the second argument. ",
+    "p = PolynomialModP(x^2, 7);\n"
+    "q = PolynomialModP(x^9+x+1, 7);\n"
+    "p mod q;\n"
+    "p^10 mod q",
+    "Calculator::innerZmodP",
+    "moduloPolynomial",
     innerStandard
   );
   this->AddOperationHandler(
@@ -7172,7 +7201,7 @@ void Calculator::initPredefinedStandardOperations() {
     "/",
     CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly,
     this->opRational(),
-    this->opPoly(),
+    this->opPolynomialRational(),
     "Divides rational by polynomial (to get a rational function).",
     "z = Polynomial{}(x^2+y^2);\n1/z",
     "CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly",
@@ -7182,8 +7211,8 @@ void Calculator::initPredefinedStandardOperations() {
   this->AddOperationBinaryInnerHandlerWithTypes(
     "/",
     CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly,
-    this->opPoly(),
-    this->opPoly(),
+    this->opPolynomialRational(),
+    this->opPolynomialRational(),
     "Divides polynomial by polynomial (to get a rational function). ",
     "Polynomial{}(-x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}+x_{2}+ 1)/\n"
     "Polynomial{}(x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}-x_{2}+ 1) ",
@@ -7330,7 +7359,7 @@ void Calculator::initPredefinedStandardOperations() {
   this->AddOperationBinaryInnerHandlerWithTypes(
     "^",
     CalculatorFunctionsBinaryOps::innerPowerPolyBySmallInteger,
-    this->opPoly(),
+    this->opPolynomialRational(),
     this->opRational(),
     "Raises poly to small integer power. ",
     "x = Polynomial{}x; y = Polynomial{}y;(x +2y+x y+x^2+3y^2)^3",
@@ -7341,7 +7370,7 @@ void Calculator::initPredefinedStandardOperations() {
   this->AddOperationBinaryInnerHandlerWithTypes(
     "^",
     CalculatorFunctionsBinaryOps::innerPowerAlgNumPolyBySmallInteger,
-    this->opPolyOverANs(),
+    this->opPolynomialAlgebraicNumbers(),
     this->opRational(),
     "Raises poly over algebraic numbers to small integer power. ",
     "x = Polynomial{}x; y = Polynomial{}y;(x +\\sqrt{2}y+x y+x^2+\\sqrt{3}y^2)^3",
@@ -7435,7 +7464,7 @@ void Calculator::initPredefinedStandardOperations() {
     "^",
     CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF,
     this->opElementUEoverRF(),
-    this->opPoly(),
+    this->opPolynomialRational(),
     "Provided that an element of Universal Enveloping algebra is "
     "a single generator (raised to arbitrary formal polynomial power) with coefficient 1, "
     "raises (formally) the element of the UE to arbitrary polynomial power. ",
@@ -8175,7 +8204,7 @@ void Calculator::initPredefinedStandardOperationsWithoutHandler() {
 
 void Calculator::initAtomsNonCacheable() {
   MacroRegisterFunctionWithName("Calculator::initAtomsNonCacheable");
-  this->atomsThatMustNotBeCached.SetExpectedSize(30);
+  this->atomsThatMustNotBeCached.setExpectedSize(30);
   this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("RandomInteger");
   this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("SelectAtRandom");
   this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("GenerateRandomPrime");
@@ -8210,7 +8239,7 @@ void Calculator::initStringsThatSplitIfFollowedByDigit() {
 
 void Calculator::initAtomsThatAllowCommutingOfArguments() {
   MacroRegisterFunctionWithName("Calculator::initAtomsThatAllowCommutingOfArguments");
-  this->atomsThatAllowCommutingOfCompositesStartingWithThem.SetExpectedSize(30);
+  this->atomsThatAllowCommutingOfCompositesStartingWithThem.setExpectedSize(30);
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("+");
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("*");
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("/");
@@ -8289,7 +8318,7 @@ void Calculator::AddKnownDoubleConstant(const std::string& theConstantName, doub
 
 void Calculator::initBuiltInAtomsNotInterpretedAsFunctions() {
   MacroRegisterFunctionWithName("Calculator::initBuiltInAtomsNotInterpretedAsFunctions");
-  this->atomsNotInterpretedAsFunctions.SetExpectedSize(30);
+  this->atomsNotInterpretedAsFunctions.setExpectedSize(30);
 
   this->AddKnownDoubleConstant("\\pi", MathRoutines::Pi());
   this->AddKnownDoubleConstant("e", MathRoutines::E());
@@ -8302,12 +8331,12 @@ void Calculator::AddTrigSplit(const std::string& trigFun, const List<std::string
   List<std::string> theSplit;
   for (int i = 0; i < theVars.size; i ++) {
     const std::string& theVar = theVars[i];
-    theSplit.SetSize(0);
+    theSplit.setSize(0);
     theSplit.addOnTop("\\" + trigFun);
     theSplit.addOnTop(theVar);
     this->predefinedWordSplits.SetKeyValue(trigFun + theVar, theSplit);
     this->predefinedWordSplits.SetKeyValue("\\" + trigFun + theVar, theSplit);
-    theSplit.SetSize(0);
+    theSplit.setSize(0);
     theSplit.addOnTop(theVar);
     theSplit.addOnTop("\\" + trigFun);
     this->predefinedWordSplits.SetKeyValue(theVar + trigFun, theSplit);
@@ -8315,7 +8344,7 @@ void Calculator::AddTrigSplit(const std::string& trigFun, const List<std::string
   }
   for (int i = 0; i < theVars.size; i ++) {
     for (int j = 0; j < theVars.size; j ++) {
-      theSplit.SetSize(0);
+      theSplit.setSize(0);
       theSplit.addOnTop(theVars[i]);
       theSplit.addOnTop("\\" + trigFun);
       theSplit.addOnTop(theVars[j]);
@@ -8330,10 +8359,10 @@ void Calculator::initPredefinedWordSplits() {
   List<std::string> theVars;
   theVars.addOnTop("x");
   theVars.addOnTop("y");
-  theSplit.SetSize(0);
+  theSplit.setSize(0);
   theSplit.addOnTop("x"); theSplit.addOnTop("y");
   this->predefinedWordSplits.SetKeyValue("xy", theSplit);
-  theSplit.SetSize(0);
+  theSplit.setSize(0);
   theSplit.addOnTop("y"); theSplit.addOnTop("x");
   this->predefinedWordSplits.SetKeyValue("yx", theSplit);
   this->AddTrigSplit("sin", theVars);
@@ -8346,7 +8375,7 @@ void Calculator::initPredefinedWordSplits() {
 
 void Calculator::initAtomsThatFreezeArguments() {
   MacroRegisterFunctionWithName("Calculator::initAtomsThatFreezeArguments");
-  this->atomsThatFreezeArguments.SetExpectedSize(this->builtInTypes.size + 100);
+  this->atomsThatFreezeArguments.setExpectedSize(this->builtInTypes.size + 100);
   this->atomsThatFreezeArguments.addOnTop(this->builtInTypes);
   this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("ElementWeylAlgebraDO"); //<-needed to facilitate civilized context handling
   this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("ElementWeylAlgebraPoly"); //<-needed to facilitate civilized context handling

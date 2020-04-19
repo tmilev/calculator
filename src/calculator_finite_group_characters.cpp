@@ -85,14 +85,14 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::ComputeAllGe
   this->CheckInitialization();
   this->ownerGroup->CheckInitializationFDrepComputation();
   HashedList<ElementWeylGroup> ElementsExplored;
-  ElementsExplored.SetExpectedSize(this->ownerGroup->theElements.size);
+  ElementsExplored.setExpectedSize(this->ownerGroup->theElements.size);
   this->theElementImageS[0].MakeIdMatrix(this->GetDim());
   ElementWeylGroup currentElt;
   int theRank = this->ownerGroup->GetDim();
   currentElt.makeIdentity(*this->ownerGroup);
   ElementsExplored.addOnTop(currentElt);
   List<ElementWeylGroup> theGens;
-  theGens.SetSize(theRank);
+  theGens.setSize(theRank);
   for (int i = 0; i < theRank; i ++)
     theGens[i].MakeSimpleReflection(i, *this->ownerGroup);
   for (int i = 0; i <ElementsExplored.size; i ++) {
@@ -124,7 +124,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::ComputeAllEl
   this->ownerGroup->CheckInitializationFDrepComputation();
   auto ElementsExplored = this->ownerGroup->theElements;
   ElementsExplored.Clear();
-  ElementsExplored.SetExpectedSize(this->ownerGroup->theElements.size);
+  ElementsExplored.setExpectedSize(this->ownerGroup->theElements.size);
   this->theElementImageS[0].MakeIdMatrix(this->GetDim());
   auto currentElt = this->ownerGroup->generators[0];
   currentElt.makeIdentity(this->ownerGroup->generators[0]);
@@ -276,19 +276,19 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
 template <class Element>
 bool Matrix<Element>::GetEigenspacesProvidedAllAreIntegralWithEigenValueSmallerThanDim(List<Vectors<Element> >& output) const {
   int upperLimitComputations = 100000;
-  output.SetSize(0);
+  output.setSize(0);
   int found = 0;
   Polynomial<Element> theMinPoly;
   theMinPoly.AssignMinPoly(*this);
   Vector<Element> theEigenValueCandidate;
-  theEigenValueCandidate.SetSize(1);
+  theEigenValueCandidate.setSize(1);
   Matrix<Rational> tempMat;
   for (int ii = 0; ii < upperLimitComputations; ii ++) {
     int i = ((ii + 1) / 2) * (2 * (ii % 2) - 1); // 0, 1, - 1, 2, - 2, 3, - 3,...
     theEigenValueCandidate[0] = i;
     if (theMinPoly.Evaluate(theEigenValueCandidate) == 0) {
       tempMat = *this;
-      output.SetSize(output.size + 1);
+      output.setSize(output.size + 1);
       tempMat.GetEigenspaceModifyMe(theEigenValueCandidate[0], *output.LastObject());
       if (output.LastObject()->size == 0) {
         global.fatal << "This is a programmig error: " << theEigenValueCandidate[0].toString()
@@ -334,7 +334,7 @@ void WeylGroupData::ComputeIrreducibleRepresentationsWithFormulasImplementation(
     HOG.AllSpechtModules();
     GroupHomomorphism<ElementWeylGroup, ElementHyperoctahedralGroupR2> phi;
     phi.preimageGroup = &G;
-    phi.generatorImages.SetSize(G.generators.size);
+    phi.generatorImages.setSize(G.generators.size);
     for (int i = 0; i < phi.generatorImages.size - 1; i ++) {
       phi.generatorImages[i].h.AddTransposition(i, i + 1);
     }
@@ -360,7 +360,7 @@ void WeylGroupData::ComputeIrreducibleRepresentationsWithFormulasImplementation(
     HOG.MakeHyperoctahedralGroup(theRank + 1);
     GroupHomomorphism<ElementWeylGroup, ElementHyperoctahedralGroupR2> inclusionMap;
     inclusionMap.preimageGroup = &G;
-    inclusionMap.generatorImages.SetSize(G.generators.size);
+    inclusionMap.generatorImages.setSize(G.generators.size);
     for (int i = 0; i < inclusionMap.generatorImages.size - 1; i ++) {
       inclusionMap.generatorImages[i].h.AddTransposition(i, i + 1);
       inclusionMap.generatorImages[i].k.ToggleBit(i);
@@ -431,7 +431,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(
   }
   SemisimpleLieAlgebra* theSSalgebra = semisimpleLieAlgebra.content;
   Vectors<Rational> theHWs;
-  theHWs.SetSize(input.children.size - 2);
+  theHWs.setSize(input.children.size - 2);
   bool isGood = true;
   for (int i = 2; i < input.size(); i ++) {
     if (!theCommands.GetVectoR<Rational>(
@@ -644,7 +644,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
   theWeyl.theDynkinType.GetEpsilonMatrix(epsCoordMat);
   GraphWeightedLabeledEdges integralPositiveRootReflectionGraph;
   integralPositiveRootReflectionGraph.numNodes = outputOrbit.size;
-  integralPositiveRootReflectionGraph.nodeLabels.SetSize(outputOrbit.size);
+  integralPositiveRootReflectionGraph.nodeLabels.setSize(outputOrbit.size);
   theFormat.flagUseFrac = true;
   for (int i = 0; i < outputOrbit.size; i ++) {
     integralPositiveRootReflectionGraph.nodeLabels[i] =
@@ -806,7 +806,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOuterConjugacyClassesFromAllEle
   WeylGroupAutomorphisms theAutomorphismGroup;
   theAutomorphismGroup.theWeyl = &theGroupData;
   theAutomorphismGroup.ComputeOuterAutoGenerators();
-  groupNoOuterAutos.generators.SetSize(theGroupData.GetDim());
+  groupNoOuterAutos.generators.setSize(theGroupData.GetDim());
   Vector<Rational> simpleRoot;
   for (int i = 0; i < theGroupData.GetDim(); i ++) {
     simpleRoot.MakeEi(theGroupData.GetDim(), i);
@@ -1087,13 +1087,13 @@ std::string WeylGroupData::ToStringSignSignatureRootSubsystem(const List<Subgrou
 
   //check for repeating signatures
   List<List<Rational> > pseudoSignSig, fullSignSig, parabolicSignSig;
-  fullSignSig.SetSize(this->theGroup.ConjugacyClassCount());
-  pseudoSignSig.SetSize(this->theGroup.ConjugacyClassCount());
-  parabolicSignSig.SetSize(this->theGroup.ConjugacyClassCount());
+  fullSignSig.setSize(this->theGroup.ConjugacyClassCount());
+  pseudoSignSig.setSize(this->theGroup.ConjugacyClassCount());
+  parabolicSignSig.setSize(this->theGroup.ConjugacyClassCount());
   for (int i = 0; i < this->theGroup.ConjugacyClassCount(); i ++) {
-    fullSignSig[i].SetSize(inputSubgroups.size);
-    pseudoSignSig[i].SetSize(numParabolicClasses+numNonParabolicPseudoParabolic);
-    parabolicSignSig[i].SetSize(numParabolicClasses);
+    fullSignSig[i].setSize(inputSubgroups.size);
+    pseudoSignSig[i].setSize(numParabolicClasses+numNonParabolicPseudoParabolic);
+    parabolicSignSig[i].setSize(numParabolicClasses);
     for (int j = 0; j < inputSubgroups.size; j ++) {
       fullSignSig[i][j] = (inputSubgroups[j].tauSignature[i] == 0 ? 0 : 1);
       if (j < numParabolicClasses+numNonParabolicPseudoParabolic) {
@@ -1146,8 +1146,8 @@ std::string WeylGroupData::ToStringSignSignatureRootSubsystem(const List<Subgrou
   if (hasRepeatingParSigs) {
     HashedList<List<Rational> > parSignSigsNoRepetition;
     List<List<std::string> > irrepsPerSignature;
-    parSignSigsNoRepetition.AddOnTopNoRepetition(parabolicSignSig);
-    irrepsPerSignature.SetSize(parSignSigsNoRepetition.size);
+    parSignSigsNoRepetition.addOnTopNoRepetition(parabolicSignSig);
+    irrepsPerSignature.setSize(parSignSigsNoRepetition.size);
     for (int i = 0; i < parabolicSignSig.size; i ++) {
       irrepsPerSignature[parSignSigsNoRepetition.GetIndex(parabolicSignSig[i])].addOnTop(this->irrepsCarterLabels[i]);
     }
@@ -1169,8 +1169,8 @@ std::string WeylGroupData::ToStringSignSignatureRootSubsystem(const List<Subgrou
   if (hasRepeatingPseudoParabolicSigs) {
     HashedList<List<Rational> > pseudoSigsNoRepetition;
     List<List<std::string> > irrepsPerSignature;
-    pseudoSigsNoRepetition.AddOnTopNoRepetition(pseudoSignSig);
-    irrepsPerSignature.SetSize(pseudoSigsNoRepetition.size);
+    pseudoSigsNoRepetition.addOnTopNoRepetition(pseudoSignSig);
+    irrepsPerSignature.setSize(pseudoSigsNoRepetition.size);
     for (int i = 0; i < pseudoSignSig.size; i ++) {
       irrepsPerSignature[pseudoSigsNoRepetition.GetIndex(pseudoSignSig[i])].addOnTop(this->irrepsCarterLabels[i]);
     }
@@ -1481,7 +1481,7 @@ bool KostkaNumber::Compute(HashedList<KostkaNumber>* KNcache, std::stringstream*
   }
   SelectionFixedRankDifferentMaxMultiplicities theSel;
   theSel.init();
-  theSel.MaxMultiplicities.SetSize(this->partition.size);
+  theSel.MaxMultiplicities.setSize(this->partition.size);
   for (int i = 0; i < this->partition.size; i ++) {
     if (i != this->partition.size - 1) {
       theSel.MaxMultiplicities[i] = this->partition[i] - this->partition[i + 1];
@@ -1495,7 +1495,7 @@ bool KostkaNumber::Compute(HashedList<KostkaNumber>* KNcache, std::stringstream*
     KostkaNumber ancestor;
     ancestor.partition = this->partition;
     ancestor.tuple = this->tuple;
-    ancestor.tuple.SetSize(ancestor.tuple.size - 1);
+    ancestor.tuple.setSize(ancestor.tuple.size - 1);
     for (int i = 0; i < theSel.Multiplicities.size; i ++) {
       ancestor.partition[i] -= theSel.Multiplicities[i];
     }
@@ -1688,7 +1688,7 @@ Rational KostkaNumber::ComputeTypeBParabolicSignMultiplicity(
   rightKN.partition = tempP.p;
   theSelection.initFromInts(parabolicPartition.p);
   do {
-    complementSelection.SetSize(parabolicPartition.p.size);
+    complementSelection.setSize(parabolicPartition.p.size);
     for (int k = 0; k < theSelection.MaxMultiplicities.size; k ++) {
       complementSelection[k] = parabolicPartition.p[k] - theSelection.Multiplicities[k];
     }
@@ -1735,7 +1735,7 @@ bool SelectionFixedRankDifferentMaxMultiplicities::init() {
 bool SelectionFixedRankDifferentMaxMultiplicities::firstIncrement() {
   MacroRegisterFunctionWithName("SelectionFixedRankDifferentMaxMultiplicities::firstIncrement");
   this->flagFirstComputed = true;
-  this->Multiplicities.SetSize(this->MaxMultiplicities.size);
+  this->Multiplicities.setSize(this->MaxMultiplicities.size);
   int remainingRank = this->rank;
   for (int i = this->MaxMultiplicities.size - 1; i >= 0; i --) {
     if (this->MaxMultiplicities[i] < remainingRank) {
@@ -1863,7 +1863,7 @@ bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystemsFromKostkaNum
       int permutationSize = rank + 1;
       List<Partition> thePartitions, partitionsTransposed;
       Partition::GetPartitions(thePartitions, permutationSize);
-      partitionsTransposed.SetSize(thePartitions.size);
+      partitionsTransposed.setSize(thePartitions.size);
       for (int i = 0; i < thePartitions.size; i ++) {
         partitionsTransposed[i] = thePartitions[i];
         partitionsTransposed[i].Transpose();
@@ -2055,7 +2055,7 @@ void MonomialMacdonald::GenerateMyOrbit(HashedList<MonomialMacdonald>& output) {
     for (int j = 0; j < this->owner->GetRank(); j ++) {
       currentMon = output[i];
       currentMon.ActOnMeSimpleReflection(j, tempRat);
-      output.AddOnTopNoRepetition(currentMon);
+      output.addOnTopNoRepetition(currentMon);
     }
   }
 }
@@ -2285,7 +2285,7 @@ bool CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation(
     inputCounter < 2;
     inputCounter ++, currentInput = &inputRight, currentInputRat = &inputRightRat
   ) {
-    currentInput->SetSize(currentInputRat->size);
+    currentInput->setSize(currentInputRat->size);
     for (int i = 0; i < currentInputRat->size; i ++) {
       if (!(*currentInputRat)[i].IsIntegerFittingInInt(&(*currentInput)[i])) {
         return theCommands << "Failed to convert input: " << input.toString() << " to a list of small integers.";
@@ -2317,7 +2317,7 @@ bool CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation(
     }
   }
   if (index == theCommands.theObjectContainer.theHyperOctahedralGroups.size) {
-    theCommands.theObjectContainer.theHyperOctahedralGroups.SetSize(
+    theCommands.theObjectContainer.theHyperOctahedralGroups.setSize(
       theCommands.theObjectContainer.theHyperOctahedralGroups.size + 1
     );
     theCommands.theObjectContainer.theHyperOctahedralGroups[index].MakeHyperoctahedralGroup(
@@ -2344,7 +2344,7 @@ bool CalculatorFunctionsWeylGroup::innerSpechtModule(Calculator& theCommands, co
   }
   const int maxPartitionSize = 1000;
   Vector<int> inputInt;
-  inputInt.SetSize(inputRat.size);
+  inputInt.setSize(inputRat.size);
   for (int i = 0; i < inputRat.size; i ++) {
     if (!(inputRat[i].IsIntegerFittingInInt(&inputInt[i]))) {
       return theCommands << "Failed to convert input: " << input.toString() << " to a list of small integers.";
@@ -2455,7 +2455,7 @@ bool Calculator::innerGenerateMultiplicativelyClosedSet(
     << upperLimit << ".";
   }
   HashedList<Expression> theSet;
-  theSet.SetExpectedSize(input.size() - 2);
+  theSet.setExpectedSize(input.size() - 2);
   for (int i = 2; i < input.size(); i ++) {
     theSet.addOnTop(input[i]);
   }
@@ -2473,7 +2473,7 @@ bool Calculator::innerGenerateMultiplicativelyClosedSet(
       //if (evaluatedProduct == theSet[0])
       //{
       //}
-      theSet.AddOnTopNoRepetition(evaluatedProduct);
+      theSet.addOnTopNoRepetition(evaluatedProduct);
       if (theSet.size >upperLimit) {
         std::stringstream out;
         out << "<hr>While generating multiplicatively closed set, I went above the upper limit of "

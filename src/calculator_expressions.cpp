@@ -157,13 +157,19 @@ int Expression::GetTypeOperation<double>() const {
 template < >
 int Expression::GetTypeOperation<Polynomial<Rational> >() const {
   this->CheckInitialization();
-  return this->owner->opPoly();
+  return this->owner->opPolynomialRational();
 }
 
 template < >
 int Expression::GetTypeOperation<Polynomial<AlgebraicNumber> >() const {
   this->CheckInitialization();
-  return this->owner->opPolyOverANs();
+  return this->owner->opPolynomialAlgebraicNumbers();
+}
+
+template < >
+int Expression::GetTypeOperation<Polynomial<ElementZmodP> >() const {
+  this->CheckInitialization();
+  return this->owner->opPolynomialModuloInteger();
 }
 
 template < >
@@ -429,7 +435,16 @@ int Expression::AddObjectReturnIndex(const
 Polynomial<Rational>
 & inputValue) const {
   this->CheckInitialization();
-  return this->owner->theObjectContainer.thePolys
+  return this->owner->theObjectContainer.polynomialsRational
+  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+}
+
+template < >
+int Expression::AddObjectReturnIndex(const
+Polynomial<ElementZmodP>
+& inputValue) const {
+  this->CheckInitialization();
+  return this->owner->theObjectContainer.polynomialsModular
   .AddNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -438,7 +453,7 @@ int Expression::AddObjectReturnIndex(const
 Polynomial<AlgebraicNumber>
 & inputValue) const {
   this->CheckInitialization();
-  return this->owner->theObjectContainer.thePolysOverANs
+  return this->owner->theObjectContainer.polynomialsAlgebraic
   .AddNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -595,6 +610,15 @@ ElementEllipticCurve<Rational>& Expression::GetValueNonConst() const {
 }
 
 template < >
+Polynomial<ElementZmodP> & Expression::GetValueNonConst() const {
+  if (!this->IsOfType<Polynomial<ElementZmodP> >()) {
+    global.fatal << "This is a programming error: expression not of required type Polynomial mod integer. "
+    << "The expression equals " << this->toString() << "." << global.fatal;
+  }
+  return this->owner->theObjectContainer.polynomialsModular.GetElement(this->GetLastChild().theData);
+}
+
+template < >
 ElementEllipticCurve<ElementZmodP>& Expression::GetValueNonConst() const {
   if (!this->IsOfType<ElementEllipticCurve<ElementZmodP> >()) {
     global.fatal << "This is a programming error: expression not of required type Rational. The expression equals "
@@ -690,7 +714,7 @@ Polynomial<Rational>& Expression::GetValueNonConst() const {
     global.fatal << "This is a programming error: expression not of required type Polynomial_Rational. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.thePolys.GetElement(this->GetLastChild().theData);
+  return this->owner->theObjectContainer.polynomialsRational.GetElement(this->GetLastChild().theData);
 }
 
 template < >
@@ -699,7 +723,7 @@ Polynomial<AlgebraicNumber>& Expression::GetValueNonConst() const {
     global.fatal << "This is a programming error: expression not of required type Polynomial_AlgebraicNumber. "
     << "The expression equals " << this->toString() << "." << global.fatal;
   }
-  return this->owner->theObjectContainer.thePolysOverANs.GetElement(this->GetLastChild().theData);
+  return this->owner->theObjectContainer.polynomialsAlgebraic.GetElement(this->GetLastChild().theData);
 }
 
 template < >
@@ -895,6 +919,17 @@ bool Expression::ConvertInternally<Polynomial<Rational> >(Expression& output) co
     return output.AssignValueWithContext(resultP, this->GetContext(), *this->owner);
   }
   if (this->IsOfType<Polynomial<Rational> >()) {
+    output = *this;
+    return true;
+  }
+  return false;
+}
+
+template< >
+bool Expression::ConvertInternally<Polynomial<ElementZmodP> >(Expression& output) const {
+  MacroRegisterFunctionWithName("ConvertToType_Polynomial_Rational");
+  this->CheckInitialization();
+  if (this->IsOfType<Polynomial<ElementZmodP> >()) {
     output = *this;
     return true;
   }
@@ -1491,7 +1526,9 @@ Expression Expression::ContextGetContextType(int theType) const {
   return output;
 }
 
-bool Expression::ContextMergeContexts(const Expression& leftContext, const Expression& rightContext, Expression& outputContext) {
+bool Expression::ContextMergeContexts(
+  const Expression& leftContext, const Expression& rightContext, Expression& outputContext
+) {
   MacroRegisterFunctionWithName("Expression::ContextMergeContexts");
   if (&leftContext == &outputContext || &rightContext == &outputContext) {
     Expression leftCopy = leftContext;
@@ -1512,12 +1549,12 @@ bool Expression::ContextMergeContexts(const Expression& leftContext, const Expre
   Expression leftPolyV = leftContext.ContextGetPolynomialVariables();
   Expression rightPolyV = rightContext.ContextGetPolynomialVariables();
   HashedList<Expression> polyVarUnion;
-  polyVarUnion.SetExpectedSize(leftPolyV.size() + rightPolyV.size() - 2);
+  polyVarUnion.setExpectedSize(leftPolyV.size() + rightPolyV.size() - 2);
   for (int i = 1; i < leftPolyV.size(); i ++) {
-    polyVarUnion.AddOnTopNoRepetition(leftPolyV[i]);
+    polyVarUnion.addOnTopNoRepetition(leftPolyV[i]);
   }
   for (int i = 1; i < rightPolyV.size(); i ++) {
-    polyVarUnion.AddOnTopNoRepetition(rightPolyV[i]);
+    polyVarUnion.addOnTopNoRepetition(rightPolyV[i]);
   }
   polyVarUnion.QuickSortAscending();
   Calculator& owner = *leftContext.owner;
@@ -1539,7 +1576,7 @@ bool Expression::ContextMergeContexts(const Expression& leftContext, const Expre
     Selection foundEWAVar;
     List<Expression> EWAVars;
     foundEWAVar.init(polyVarUnion.size);
-    EWAVars.SetSize(polyVarUnion.size);
+    EWAVars.setSize(polyVarUnion.size);
     Expression* currentPolyV = &leftPolyV;
     Expression* currentEWAV = &leftEWAV;
     for (int k = 0; k < 2; k ++, currentPolyV = &rightPolyV, currentEWAV = &rightEWAV) {
@@ -1596,7 +1633,7 @@ bool Expression::ContextMergeContexts(const Expression& leftContext, const Expre
 }
 
 void Expression::ContextGetFormatExpressions(FormatExpressions& output) const {
-  output.polyAlphabeT.SetSize(0);
+  output.polyAlphabeT.setSize(0);
   output.polyDefaultLetter = "x";
   if (this->owner == nullptr) {
     return;
@@ -1605,12 +1642,12 @@ void Expression::ContextGetFormatExpressions(FormatExpressions& output) const {
     return;
   }
   Expression thePolyE = this->ContextGetPolynomialVariables();
-  output.polyAlphabeT.SetSize(thePolyE.children.size - 1);
+  output.polyAlphabeT.setSize(thePolyE.children.size - 1);
   for (int i = 1; i < thePolyE.children.size; i ++) {
     output.polyAlphabeT[i - 1] = thePolyE[i].toString();
   }
   Expression theEWAE = this->ContextGetDifferentialOperatorVariables();
-  output.weylAlgebraLetters.SetSize(theEWAE.children.size - 1);
+  output.weylAlgebraLetters.setSize(theEWAE.children.size - 1);
   for (int i = 1; i < theEWAE.size(); i ++) {
     output.weylAlgebraLetters[i - 1] = theEWAE[i].toString();
   }
@@ -1626,7 +1663,7 @@ bool Expression::GetExpressionLeafs(HashedList<Expression>& outputAccumulateLeaf
     return false;
   }
   if (this->IsBuiltInTypE() || this->IsAtom()) {
-    outputAccumulateLeafs.AddOnTopNoRepetition(*this);
+    outputAccumulateLeafs.addOnTopNoRepetition(*this);
     return true;
   }
   for (int i = 0; i < this->size(); i ++) {
@@ -1650,7 +1687,7 @@ bool Expression::GetBoundVariables(HashedList<Expression>& outputAccumulateBound
     return true;
   }
   if (this->StartsWith(this->owner->opBind(), 2)) {
-    outputAccumulateBoundVariables.AddOnTopNoRepetition((*this)[1]);
+    outputAccumulateBoundVariables.addOnTopNoRepetition((*this)[1]);
     return true;
   }
   for (int i = 0; i < this->size(); i ++) {
@@ -1712,7 +1749,7 @@ bool Expression::GetFreeVariables(HashedList<Expression>& outputAccumulateFreeVa
       }
     }
     if (doAddExpression) {
-      outputAccumulateFreeVariables.AddOnTopNoRepetition(*this);
+      outputAccumulateFreeVariables.addOnTopNoRepetition(*this);
     }
     return true;
   }
@@ -2182,7 +2219,7 @@ bool Expression::ContextGetPolySubFromSuperContext(
 ) const {
   Expression polyVarsElargerContext = largerContext.ContextGetPolynomialVariables();
   Expression polyVarsEsmallContext = this->ContextGetPolynomialVariables();
-  output.SetSize(polyVarsElargerContext.children.size - 1);
+  output.setSize(polyVarsElargerContext.children.size - 1);
   int numVars = polyVarsElargerContext.children.size - 1;
   for (int i = 1; i < polyVarsEsmallContext.children.size; i ++) {
     int theNewIndex = polyVarsElargerContext.GetIndexChild(polyVarsEsmallContext[i]);
@@ -2218,7 +2255,7 @@ bool Expression::ContextGetPolyAndEWASubFromSuperContext(
   }
   Expression EWAVarsElargerContext = largerContext.ContextGetDifferentialOperatorVariables();
   Expression EWAVarsEsmallContext = this->ContextGetDifferentialOperatorVariables();
-  outputEWApart.SetSize(EWAVarsElargerContext.children.size - 1);
+  outputEWApart.setSize(EWAVarsElargerContext.children.size - 1);
   int numVars = EWAVarsElargerContext.children.size - 1;
   for (int i = 1; i < EWAVarsEsmallContext.children.size; i ++) {
     int theNewIndex = EWAVarsElargerContext.GetIndexChild(EWAVarsEsmallContext[i]);
@@ -2311,7 +2348,7 @@ void Expression::GetMultiplicandsRecursive(List<Expression>& outputAppendList, i
   MacroRegisterFunctionWithName("Expression::GetMultiplicandsRecursive");
   this->CheckInitialization();
   if (depth == 0) {
-    outputAppendList.SetSize(0);
+    outputAppendList.setSize(0);
   }
   if (!this->StartsWith(this->owner->opTimes())) {
     outputAppendList.addOnTop(*this);
@@ -2326,7 +2363,7 @@ void Expression::GetMultiplicandsDivisorsRecursive(List<Expression>& outputAppen
   MacroRegisterFunctionWithName("Expression::GetMultiplicandsDivisorsRecursive");
   this->CheckInitialization();
   if (depth == 0) {
-    outputAppendList.SetSize(0);
+    outputAppendList.setSize(0);
   }
   if (!this->StartsWith(this->owner->opTimes()) && !this->StartsWith(this->owner->opDivide())) {
     outputAppendList.addOnTop(*this);
@@ -4881,7 +4918,7 @@ bool Expression::MakeEmptyContext(Calculator& owner) {
 bool Expression::ContextMakeContextWithPolyVars(Calculator& owner, const List<std::string>& inputPolyVarNames) {
   MacroRegisterFunctionWithName("Expression::ContextMakeContextWithPolyVars");
   List<Expression> thePolyVars;
-  thePolyVars.SetSize(inputPolyVarNames.size);
+  thePolyVars.setSize(inputPolyVarNames.size);
   for (int i = 0; i < thePolyVars.size; i ++) {
     thePolyVars[i].MakeAtom(inputPolyVarNames[i], owner);
   }

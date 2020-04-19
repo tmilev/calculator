@@ -533,7 +533,7 @@ std::string WebAPIResponse::GetOnePageJS(bool appendBuildHash) {
     return out.str();
   }
   theInterpretation.BuildHtmlJSpage(appendBuildHash);
-  theInterpretation.jsFileContents.SetSize(theInterpretation.jsFileNames.size);
+  theInterpretation.jsFileContents.setSize(theInterpretation.jsFileNames.size);
   for (int i = 0; i < theInterpretation.jsFileNames.size; i ++) {
     if (!FileOperations::LoadFileToStringVirtual(
       theInterpretation.jsFileNames[i],
@@ -840,7 +840,7 @@ JSData WebAPIResponse::GetExamPageJSON() {
     output["answers"] = theFile.GetJavascriptMathQuillBoxesForJSON();
     JSData theScripts;
     theScripts = JSData::token::tokenArray;
-    theScripts.theList.SetSize(theFile.theScripts.size());
+    theScripts.theList.setSize(theFile.theScripts.size());
     for (int i = 0; i < theFile.theScripts.size(); i ++) {
       theScripts[theFile.theScripts.theKeys[i]] =
       HtmlRoutines::ConvertStringToURLString(theFile.theScripts.theValues[i], false);
@@ -891,16 +891,16 @@ JSData WebAPIResponse::GetEditPageJSON() {
     Calculator tempCalculator;
     tempCalculator.initialize();
     tempCalculator.ComputeAutoCompleteKeyWords();
-    theAutocompleteKeyWords.AddOnTopNoRepetition(theFile.calculatorClasses);
-    theAutocompleteKeyWords.AddOnTopNoRepetition(tempCalculator.autoCompleteKeyWords);
+    theAutocompleteKeyWords.addOnTopNoRepetition(theFile.calculatorClasses);
+    theAutocompleteKeyWords.addOnTopNoRepetition(tempCalculator.autoCompleteKeyWords);
     theFile.initAutocompleteExtras();
-    theAutocompleteKeyWords.AddOnTopNoRepetition(theFile.autoCompleteExtras);
+    theAutocompleteKeyWords.addOnTopNoRepetition(theFile.autoCompleteExtras);
   } else {
     theFile.LoadAndParseTopicList(comments);
-    theAutocompleteKeyWords.AddOnTopNoRepetition(theFile.calculatorClasses);
-    theAutocompleteKeyWords.AddOnTopNoRepetition(theFile.calculatorClassesAnswerFields);
-    theAutocompleteKeyWords.AddOnTopNoRepetition(theFile.calculatorTopicElementNames);
-    theAutocompleteKeyWords.AddOnTopNoRepetition(theFile.topics.knownTopicBundles.theKeys);
+    theAutocompleteKeyWords.addOnTopNoRepetition(theFile.calculatorClasses);
+    theAutocompleteKeyWords.addOnTopNoRepetition(theFile.calculatorClassesAnswerFields);
+    theAutocompleteKeyWords.addOnTopNoRepetition(theFile.calculatorTopicElementNames);
+    theAutocompleteKeyWords.addOnTopNoRepetition(theFile.topics.knownTopicBundles.theKeys);
   }
   JSData theAutoCompleteWordsJS;
   theAutoCompleteWordsJS.theType = JSData::token::tokenArray;
@@ -1755,9 +1755,9 @@ std::string WebAPIResponse::ToStringUserDetailsTable(
     }
   }
   theSections.QuickSortAscending(nullptr, &sectionDescriptions);
-  activatedAccountBucketsBySection.SetSize(theSections.size);
-  nonActivatedAccountBucketsBySection.SetSize(theSections.size);
-  preFilledLinkBucketsBySection.SetSize(theSections.size);
+  activatedAccountBucketsBySection.setSize(theSections.size);
+  nonActivatedAccountBucketsBySection.setSize(theSections.size);
+  preFilledLinkBucketsBySection.setSize(theSections.size);
   int numActivatedUsers = 0;
   for (int i = 0; i < theUsers.size; i ++) {
     currentUser.LoadFromJSON(theUsers[i]);
@@ -2127,10 +2127,10 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
   this->userNames.Reserve(this->userProblemData.size);
   this->userInfos.Reserve(this->userProblemData.size);
   this->scoresBreakdown.Reserve(this->userProblemData.size);
-  this->userScores.SetSize(0);
-  this->userNames.SetSize(0);
-  this->userInfos.SetSize(0);
-  this->scoresBreakdown.SetSize(0);
+  this->userScores.setSize(0);
+  this->userNames.setSize(0);
+  this->userInfos.setSize(0);
+  this->scoresBreakdown.setSize(0);
   this->numStudentsSolvedEntireTopic.initializeFillInObject(this->theProblem.topics.theTopics.size(), 0);
   this->numStudentsSolvedPartOfTopic.initializeFillInObject(this->theProblem.topics.theTopics.size(), 0);
   this->numStudentsSolvedNothingInTopic.initializeFillInObject(this->theProblem.topics.theTopics.size(), 0);
@@ -2162,7 +2162,7 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
     this->userScores.addOnTop(- 1);
     this->userNames.addOnTop(this->userProblemData[i][DatabaseStrings::labelUsername].theString);
     this->userInfos.addOnTop(currentUserRecord.currentUseR.sectionInDB);
-    this->scoresBreakdown.SetSize(this->scoresBreakdown.size + 1);
+    this->scoresBreakdown.setSize(this->scoresBreakdown.size + 1);
     currentUserRecord.currentUseR.username = this->userProblemData[i][
       DatabaseStrings::labelUsername
     ].theString;

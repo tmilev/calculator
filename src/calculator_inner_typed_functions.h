@@ -113,6 +113,10 @@ public:
   static bool innerTensorEltTensorByEltTensor(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTensorMatrixByMatrix(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTensorMatByMatTensor(Calculator& theCommands, const Expression& input, Expression& output);
+
+  static bool innerPolynomialModPModuloPolynomialModP(
+    Calculator& theCommands, const Expression& input, Expression& output
+  );
 };
 
 template <class theType>

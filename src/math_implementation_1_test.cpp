@@ -66,7 +66,7 @@ TestRationalScale::TestRationalScale(
   int inputIndex,
   const std::string& inputExpected
 ) {
-  this->vector.SetSize(inputVector.size);
+  this->vector.setSize(inputVector.size);
   for (int i = 0; i < inputVector.size; i ++) {
     this->vector[i] = Rational(inputVector[i]);
   }

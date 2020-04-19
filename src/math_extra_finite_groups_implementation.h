@@ -52,22 +52,22 @@ bool FiniteGroup<elementSomeGroup>::ComputeAllElementsLargeGroup(bool andWords, 
   elementSomeGroup currentElement;
   currentElement.makeIdentity(this->generators[0]);
   this->theElements.addOnTop(currentElement);
-  this->theWords.SetSize(0);
+  this->theWords.setSize(0);
   if (andWords) {
-    this->theWords.SetSize(1);
-    this->theWords.LastObject()->SetSize(0);
+    this->theWords.setSize(1);
+    this->theWords.LastObject()->setSize(0);
   }
   ProgressReport theReport(1000, GlobalVariables::Response::ReportType::general);
   // Warning: not checking whether the generators have repetitions.
   for (int j = 0; j < this->theElements.size; j ++) {
     for (int i = 0; i < this->generators.size; i ++) {
       currentElement = this->generators[i] * this->theElements[j];
-      if (this->theElements.AddOnTopNoRepetition(currentElement) && andWords) {
+      if (this->theElements.addOnTopNoRepetition(currentElement) && andWords) {
         if (this->GetWordByFormula == 0) {
           this->theWords.addOnTop(this->theWords[j]);
           this->theWords.LastObject()->addOnTop(i);
         } else {
-          this->theWords.SetSize(this->theWords.size + 1);
+          this->theWords.setSize(this->theWords.size + 1);
           this->GetWordByFormula(*this, currentElement, *this->theWords.LastObject());
         }
       }
@@ -148,7 +148,7 @@ bool OrbitIterator<elementGroup, elementRepresentation>::IncrementReturnFalseIfP
       this->bufferRepresentationElement
     );
     if (!this->currentLayer->Contains(this->bufferRepresentationElement)) {
-      this->currentLayer->AddOnTopNoRepetition(this->bufferRepresentationElement);
+      this->currentLayer->addOnTopNoRepetition(this->bufferRepresentationElement);
     }
   }
   this->indexCurrentElement ++;
@@ -182,7 +182,7 @@ bool OrbitIterator<elementGroup, elementRepresentation>::IncrementReturnFalseIfP
       !this->previousLayer->Contains(this->bufferRepresentationElement) &&
       !this->currentLayer->Contains(this->bufferRepresentationElement)
     ) {
-      this->nextLayer->AddOnTopNoRepetition(this->bufferRepresentationElement);
+      this->nextLayer->addOnTopNoRepetition(this->bufferRepresentationElement);
     }
   }
   this->indexCurrentElement ++;
@@ -214,8 +214,8 @@ void SubgroupData<someGroup, elementSomeGroup>::initFromGroupAndGenerators(
   }
   this->theGroup = &inputGroup;
   this->theSubgroup = &this->theSubgroupMayBeHere;
-  this->theSubgroup->generators.SetSize(0);
-  this->theSubgroup->generators.AddOnTopNoRepetition(inputGenerators);//<- we have eliminated all repeating generators
+  this->theSubgroup->generators.setSize(0);
+  this->theSubgroup->generators.addOnTopNoRepetition(inputGenerators);//<- we have eliminated all repeating generators
   //(there shouldn't be any, but knowing I am one of the programmers...)
 }
 
@@ -231,8 +231,8 @@ void SubgroupData<someGroup, elementSomeGroup>::MakeTranslatableWordsSubgroup(
   this->theGroup = &inputGroup;
   this->theSubgroup = &this->theSubgroupMayBeHere;
   this->theSubgroup->generators = subGenerators;
-  this->superGeneratorSubWords.SetSize(this->theGroup->generators.size);
-  this->superGeneratorSubWordExists.SetSize(this->theGroup->generators.size);
+  this->superGeneratorSubWords.setSize(this->theGroup->generators.size);
+  this->superGeneratorSubWordExists.setSize(this->theGroup->generators.size);
   for (int i = 0; i < superGeneratorSubWordExists.size; i ++) {
     superGeneratorSubWordExists[i] = false;
   }
@@ -276,7 +276,7 @@ void FiniteGroup<elementSomeGroup>::GetSignCharacter(Vector<Rational>& outputCha
   if (!this->flagCCsComputed) {
     this->ComputeCCSizesAndRepresentatives();
   }
-  outputCharacter.SetSize(this->ConjugacyClassCount());
+  outputCharacter.setSize(this->ConjugacyClassCount());
   for (int i = 0; i < this->ConjugacyClassCount(); i ++) {
     outputCharacter[i] = this->conjugacyClasseS[i].representative.Sign();
   }
@@ -287,8 +287,8 @@ void SubgroupData<someGroup, elementSomeGroup>::init() {
   this->theGroup = 0;
   this->theSubgroup = 0;
   this->theSubgroupMayBeHere.init();
-  this->ccRepresentativesPreimages.SetSize(0);
-  this->generatorPreimages.SetSize(0);
+  this->ccRepresentativesPreimages.setSize(0);
+  this->generatorPreimages.setSize(0);
   this->flagCosetSetsComputed = false;
   this->flagCosetRepresentativesComputed = false;
 }
@@ -304,7 +304,7 @@ SubgroupData<FiniteGroup<elementSomeGroup>, elementSomeGroup> FiniteGroup<elemen
 ) {
   SubgroupData<FiniteGroup<elementSomeGroup>, elementSomeGroup> out;
   List<elementSomeGroup> subgens;
-  subgens.SetSize(subgenids.size);
+  subgens.setSize(subgenids.size);
   for (int i = 0; i < subgenids.size; i ++) {
     subgens[i] = this->generators[subgenids[i]];
   }
@@ -345,7 +345,7 @@ int FiniteGroup<elementSomeGroup>::ConjugacyClassCount() const {
 template <class someGroup, class elementSomeGroup>
 void SubgroupData<someGroup, elementSomeGroup>::ComputeCCRepresentativesPreimages() {
   MacroRegisterFunctionWithName("Subgroup::ComputeCCRepresentativesPreimages");
-  this->ccRepresentativesPreimages.SetSize(this->theSubgroup->ConjugacyClassCount());
+  this->ccRepresentativesPreimages.setSize(this->theSubgroup->ConjugacyClassCount());
   if (this->theSubgroup->generators.size == 0) {
     global.fatal << "At this computation the group must have initialized generators. " << global.fatal;
   }
@@ -395,7 +395,7 @@ std::string FiniteGroup<elementSomeGroup>::ToStringConjugacyClasses(FormatExpres
   std::stringstream out;
   out << "<br>Size: " << this->GetSize().toString() << "\n";
   FormatExpressions charPolyFormat;
-  charPolyFormat.polyAlphabeT.SetSize(1);
+  charPolyFormat.polyAlphabeT.setSize(1);
   charPolyFormat.polyAlphabeT[0] = "q";
   //  out << "Number of Vectors<Rational>: " << this->RootSystem.size<< "\n
   if (this->ConjugacyClassCount() > 0) {
@@ -499,12 +499,12 @@ void FiniteGroup<elementSomeGroup>::ComputeGeneratorsConjugacyClasses() {
     return;
   }
   this->unionGeneratorsCC.Clear();
-  this->unionGeneratorsCC.AddOnTopNoRepetition(this->generators);
+  this->unionGeneratorsCC.addOnTopNoRepetition(this->generators);
   elementSomeGroup currentElt;
   for (int i = 0; i < this->unionGeneratorsCC.size; i ++) {
     for (int j = 0; j < this->generators.size; j ++) {
       elementSomeGroup::ConjugationAction(this->generators[j], this->unionGeneratorsCC[i], currentElt);
-      this->unionGeneratorsCC.AddOnTopNoRepetition(currentElt);
+      this->unionGeneratorsCC.addOnTopNoRepetition(currentElt);
     }
   }
   this->flagGeneratorsConjugacyClassesComputed = true;
@@ -521,7 +521,7 @@ void FiniteGroup<elementSomeGroup>::ComputeCCSizeOrCCFromRepresentative(
   theOrbitIterator.init(this->generators, inputOutputClass.representative, theOrbitIterator.theGroupAction);
   inputOutputClass.size = 1;
   if (storeCC) {
-    inputOutputClass.theElements.SetSize(0);
+    inputOutputClass.theElements.setSize(0);
     inputOutputClass.theElements.addOnTop(inputOutputClass.representative);
   }
   while (theOrbitIterator.IncrementReturnFalseIfPastLast()) {
@@ -648,7 +648,7 @@ void FiniteGroup<elementSomeGroup>::ComputeCCSizesAndRepresentativesWithOrbitIte
   this->InitGenerators();
   this->CheckInitialization();
   this->CCsStandardRepCharPolys.Clear();
-  this->conjugacyClasseS.SetSize(0);
+  this->conjugacyClasseS.setSize(0);
   this->sizePrivate = 0;
 
   elementSomeGroup currentElt;
@@ -670,11 +670,11 @@ void FiniteGroup<elementSomeGroup>::ComputeCCSizesAndRepresentativesWithOrbitIte
 template <class elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::ComputeCCfromCCindicesInAllElements(const List<List<int> >& ccIndices) {
   MacroRegisterFunctionWithName("FiniteGroup::ComputeCCfromCCindicesInAllElements");
-  this->conjugacyClasseS.SetSize(ccIndices.size);
+  this->conjugacyClasseS.setSize(ccIndices.size);
   for (int i = 0; i < ccIndices.size; i ++) {
     this->conjugacyClasseS[i].size = ccIndices[i].size;
     this->conjugacyClasseS[i].indicesEltsInOwner = ccIndices[i];
-    this->conjugacyClasseS[i].theElements.SetSize(ccIndices[i].size);
+    this->conjugacyClasseS[i].theElements.setSize(ccIndices[i].size);
     for (int j = 0; j < ccIndices[i].size; j ++) {
       this->conjugacyClasseS[i].theElements[j] = this->theElements[ccIndices[i][j]];
     }
@@ -694,9 +694,9 @@ void FiniteGroup<elementSomeGroup>::ComputeCCfromAllElements() {
   List<bool> Accounted;
   Accounted.initializeFillInObject(this->theElements.size, false);
   HashedList<int, MathRoutines::IntUnsignIdentity> theStack;
-  theStack.SetExpectedSize(this->theElements.size);
+  theStack.setExpectedSize(this->theElements.size);
   List<elementSomeGroup> inversesOfGenerators;
-  inversesOfGenerators.SetSize(this->generators.size);
+  inversesOfGenerators.setSize(this->generators.size);
   for (int i = 0; i < this->generators.size; i ++) {
     inversesOfGenerators[i] = this->generators[i].Inverse();
   }
@@ -711,7 +711,7 @@ void FiniteGroup<elementSomeGroup>::ComputeCCfromAllElements() {
         for (int k = 0; k < this->generators.size; k ++) {
           currentElement = inversesOfGenerators[k] * this->theElements[theStack[j]] * this->generators[k];
           int accountedIndex = this->theElements.GetIndexIMustContainTheObject(currentElement);
-          theStack.AddOnTopNoRepetition(accountedIndex);
+          theStack.addOnTopNoRepetition(accountedIndex);
           Accounted[accountedIndex] = true;
         }
       }
@@ -786,12 +786,12 @@ bool WeylGroupAutomorphisms::GenerateOuterOrbit(
   Vector<coefficient> currentRoot;
   ElementWeylGroupAutomorphisms currentElt;
   int numElementsToReserve = MathRoutines::Minimum(UpperLimitNumElements, 1000000);
-  output.SetExpectedSize(numElementsToReserve);
+  output.setExpectedSize(numElementsToReserve);
   ProgressReport theReport(3000, GlobalVariables::Response::ReportType::general);
   simpleReflectionOrOuterAutomorphism theGen;
   if (outputSubset != nullptr) {
     currentElt.makeIdentity(*this);
-    outputSubset->SetExpectedSize(numElementsToReserve);
+    outputSubset->setExpectedSize(numElementsToReserve);
     outputSubset->Clear();
     outputSubset->addOnTop(currentElt);
   }
@@ -804,7 +804,7 @@ bool WeylGroupAutomorphisms::GenerateOuterOrbit(
       } else {
         theOuterGens[j - this->theWeyl->GetDim()].ActOnVectorColumn(output[i], currentRoot);
       }
-      if (output.AddOnTopNoRepetition(currentRoot)) {
+      if (output.addOnTopNoRepetition(currentRoot)) {
         if (outputSubset != nullptr) {
           currentElt.makeIdentity(*this);
           theGen.MakeSimpleReflection(j);
@@ -904,7 +904,7 @@ bool WeylGroupData::GenerateOrbit(
   MacroRegisterFunctionWithName("WeylGroup::GenerateOrbit");
   output.Clear();
   for (int i = 0; i < theWeights.size; i ++) {
-    output.AddOnTopNoRepetition(theWeights[i]);
+    output.addOnTopNoRepetition(theWeights[i]);
   }
   Vector<coefficient> currentRoot;
   ElementWeylGroup currentElt;
@@ -919,13 +919,13 @@ bool WeylGroupData::GenerateOrbit(
   if (expectedOrbitSize > 10000000) {
     expectedOrbitSize = 10000000;
   }
-  output.SetExpectedSize(expectedOrbitSize);
+  output.setExpectedSize(expectedOrbitSize);
   if (outputSubset != nullptr) {
     if (UpperLimitNumElements > 0) {
       expectedOrbitSize = MathRoutines::Minimum(UpperLimitNumElements, expectedOrbitSize);
     }
     currentElt.makeIdentity(*this);
-    outputSubset->SetExpectedSize(expectedOrbitSize);
+    outputSubset->setExpectedSize(expectedOrbitSize);
     outputSubset->Clear();
     outputSubset->addOnTop(currentElt);
   }
@@ -947,9 +947,9 @@ bool WeylGroupData::GenerateOrbit(
       } else {
         this->SimpleReflectionMinusRhoModified(j, currentRoot);
       }
-      if (output.AddOnTopNoRepetition(currentRoot)) {
+      if (output.addOnTopNoRepetition(currentRoot)) {
         if (outputSubset != nullptr) {
-          currentElt.generatorsLastAppliedFirst.SetSize(1);
+          currentElt.generatorsLastAppliedFirst.setSize(1);
           theGen.MakeSimpleReflection(j);
           currentElt.generatorsLastAppliedFirst[0] = theGen;
           currentElt.generatorsLastAppliedFirst.addListOnTop((*outputSubset)[i].generatorsLastAppliedFirst);
@@ -1046,7 +1046,7 @@ Vector<coefficient> WeylGroupData::GetSimpleCoordinatesFromEpsilon(const Vector<
   simpleBasis.MakeEiBasis(this->GetDim());
   this->GetEpsilonCoords(simpleBasis, simpleBasisEpsCoords);
   Vector<coefficient> result;
-  result.SetSize(this->GetDim());
+  result.setSize(this->GetDim());
   for (int i = 0; i < simpleBasisEpsCoords.size; i ++) {
     result[i] = simpleBasisEpsCoords[i].ScalarEuclidean(inputInEpsCoords);
   }
@@ -1114,7 +1114,7 @@ bool WeylGroupData::FreudenthalEval(
     return false;
   }
   Explored.initializeFillInObject(outputDominantWeightsSimpleCoords.size, false);
-  outputMultsSimpleCoords.SetSize(outputDominantWeightsSimpleCoords.size);
+  outputMultsSimpleCoords.setSize(outputDominantWeightsSimpleCoords.size);
   Vector<coefficient> currentWeight, currentDominantRepresentative, convertor;
   coefficient hwPlusRhoSquared;
   convertor = hwSimpleCoords;
@@ -1202,7 +1202,7 @@ bool WeylGroupData::GetAlLDominantWeightsHWFDIM(
   List<HashedList<Vector<coefficient> > > outputWeightsByHeight;
   int topHeightRootSystem = this->RootsOfBorel.LastObject()->SumCoords().NumShort;
   int topHeightRootSystemPlusOne = topHeightRootSystem + 1;
-  outputWeightsByHeight.SetSize(topHeightRootSystemPlusOne);
+  outputWeightsByHeight.setSize(topHeightRootSystemPlusOne);
   int finalHashSize = 100;
   for (int i = 0; i < topHeightRootSystemPlusOne; i ++) {
     outputWeightsByHeight[i].SetHashSizE(finalHashSize);
@@ -1230,7 +1230,7 @@ bool WeylGroupData::GetAlLDominantWeightsHWFDIM(
         if (this->IsDominantWeight(currentWeight)) {
           int currentIndexShift = this->RootsOfBorel[i].SumCoords().NumShort;
           currentIndexShift = (currentIndexShift + bufferIndexShift) % topHeightRootSystemPlusOne;
-          if (outputWeightsByHeight[currentIndexShift].AddOnTopNoRepetition(currentWeight)) {
+          if (outputWeightsByHeight[currentIndexShift].addOnTopNoRepetition(currentWeight)) {
             numTotalWeightsFound ++;
             outputWeightsByHeight[currentIndexShift].AdjustHashes();
           }
@@ -1277,7 +1277,7 @@ void WeylGroupData::ReflectBetaWRTAlpha(
     }
   }
   alphaShift /= lengthA;
-  Output.SetSize(this->CartanSymmetric.NumRows);
+  Output.setSize(this->CartanSymmetric.NumRows);
   for (int i = 0; i < this->CartanSymmetric.NumCols; i ++) {
     bufferCoeff = alphaShift;
     bufferCoeff *= alpha[i];
@@ -1311,10 +1311,10 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::init(somegro
   this->reset();
   this->ownerGroup = &inputOwner;
   this->ownerGroup->CheckInitializationConjugacyClasses();
-  this->generatorS.SetSize(this->ownerGroup->generators.size);
-  this->theElementImageS.SetSize(this->ownerGroup->theElements.size);
+  this->generatorS.setSize(this->ownerGroup->generators.size);
+  this->theElementImageS.setSize(this->ownerGroup->theElements.size);
   this->theElementIsComputed.initializeFillInObject(this->ownerGroup->theElements.size, false);
-  this->classFunctionMatrices.SetSize(this->ownerGroup->ConjugacyClassCount());
+  this->classFunctionMatrices.setSize(this->ownerGroup->ConjugacyClassCount());
   this->classFunctionMatricesComputed.initializeFillInObject(this->ownerGroup->ConjugacyClassCount(), false);
   this->CheckInitialization();
 }
@@ -1468,7 +1468,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::ClassFunctio
   int theDim = this->generatorS[0].NumRows;
   outputMat.MakeZeroMatrix(theDim);
   if (classFunctionMatrices.size == 0) {
-    classFunctionMatrices.SetSize(this->ownerGroup->ConjugacyClassCount());
+    classFunctionMatrices.setSize(this->ownerGroup->ConjugacyClassCount());
   }
   for (int cci = 0; cci < this->ownerGroup->ConjugacyClassCount(); cci ++) {
     if (inputCF[cci] == 0) {
@@ -1539,7 +1539,7 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::A
   const Vectors<coefficient>& input,
   Vectors<coefficient>& output
 ) const {
-  output.SetSize(input.size);
+  output.setSize(input.size);
   for (int i = 0; i < input.size; i ++) {
     this->ActByElement(theElement, input[i], output[i]);
   }
@@ -1629,7 +1629,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
   List<HashedList<Vector<coefficient> > > outputWeightsByHeight;
   int topHeightRootSystem = this->AmbientWeyl->RootsOfBorel.LastObject()->SumCoords().NumShort;
   int topHeightRootSystemPlusOne = topHeightRootSystem + 1;
-  outputWeightsByHeight.SetSize(topHeightRootSystemPlusOne);
+  outputWeightsByHeight.setSize(topHeightRootSystemPlusOne);
   int finalHashSize = 100;
   for (int i = 0; i < topHeightRootSystemPlusOne; i ++) {
     outputWeightsByHeight[i].SetHashSizE(finalHashSize);
@@ -1655,7 +1655,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
         if (this->IsDominantWeight(currentWeight)) {
           int currentIndexShift = this->RootsOfBorel[i].SumCoords().NumShort;
           currentIndexShift = (currentIndexShift + bufferIndexShift) % topHeightRootSystemPlusOne;
-          if (outputWeightsByHeight[currentIndexShift].AddOnTopNoRepetition(currentWeight)) {
+          if (outputWeightsByHeight[currentIndexShift].addOnTopNoRepetition(currentWeight)) {
             numTotalWeightsFound ++;
             outputWeightsByHeight[currentIndexShift].AdjustHashes();
           }
@@ -1729,7 +1729,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
     }
     for (int j = 0; j < this->simpleRootsInner.size; j ++) {
       this->AmbientWeyl->ReflectBetaWRTAlpha(this->simpleRootsInner[j], theOrbit[i], false, tempRoot);
-      theOrbit.AddOnTopNoRepetition(tempRoot);
+      theOrbit.addOnTopNoRepetition(tempRoot);
     }
     if (restrictToInner) {
       continue;
@@ -1737,7 +1737,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
     for (int j = 1; j < this->ExternalAutomorphisms.size; j ++) {
       ExternalAutosOverAmbientField = this->ExternalAutomorphisms[j];
       theOrbit[i].GetCoordsInBasiS(ExternalAutosOverAmbientField, tempRoot);
-      theOrbit.AddOnTopNoRepetition(tempRoot);
+      theOrbit.addOnTopNoRepetition(tempRoot);
     }
   }
   outputOrbit = theOrbit;
@@ -1786,7 +1786,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::F
     return false;
   }
   Explored.initializeFillInObject(outputDomWeightsSimpleCoordsLeviPart.size, false);
-  outputMultsSimpleCoords.SetSize(outputDomWeightsSimpleCoordsLeviPart.size);
+  outputMultsSimpleCoords.setSize(outputDomWeightsSimpleCoordsLeviPart.size);
   Vector<coefficient> currentWeight, currentDominantRepresentative;
   Vector<coefficient> Rho;
   Rho = this->GetRho();//<-implicit type conversion here!
@@ -1844,7 +1844,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::F
     theReport.Report(out.str());
   }
   outputDominantWeightsSimpleCoordS.Clear();
-  outputDominantWeightsSimpleCoordS.SetExpectedSize(outputDomWeightsSimpleCoordsLeviPart.size);
+  outputDominantWeightsSimpleCoordS.setExpectedSize(outputDomWeightsSimpleCoordsLeviPart.size);
   for (int i = 0; i < outputDomWeightsSimpleCoordsLeviPart.size; i ++) {
     outputDominantWeightsSimpleCoordS.addOnTop(outputDomWeightsSimpleCoordsLeviPart[i] + hwSimpleCoordsNilPart);
   }
@@ -1954,7 +1954,7 @@ void SubgroupData<someGroup, elementSomeGroup>::ComputeCosets() {
   }
   List<List<int> > orbits;
   orbits = orbitg.DestructivelyGetConnectedComponents();
-  this->cosets.SetSize(orbits.size);
+  this->cosets.setSize(orbits.size);
   for (int i = 0; i < orbits.size; i ++) {
     cosets[i].supergroupIndices = orbits[i];
     cosets[i].representative = this->theGroup->theElements[orbits[i][0]];
@@ -2123,7 +2123,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::SpreadVector
   const Vector<coefficient>& input, Vectors<coefficient>& outputBasisGeneratedSpace
 ) {
   this->CheckInitialization();
-  outputBasisGeneratedSpace.SetSize(1);
+  outputBasisGeneratedSpace.setSize(1);
   outputBasisGeneratedSpace[0] = input;
   Vector<coefficient> tempV;
   int theRank = this->ownerGroup->GetDim();
@@ -2338,8 +2338,8 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsThomasVersi
   if (this->theGroup.squaresCCReps.size == 0) {
     this->theGroup.ComputeSquaresCCReps(global);
   }
-  this->theGroup.characterTable.SetSize(0);
-  this->irreps_grcam.SetSize(0);
+  this->theGroup.characterTable.setSize(0);
+  this->irreps_grcam.setSize(0);
   List<GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational> > newspaces;
   newspaces.addOnTop(sr);
   List<GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational> > incompletely_digested;
@@ -2390,8 +2390,8 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsThomasVersi
     }
   }
   this->irreps_grcam.QuickSortAscending();
-  this->irreps.SetSize(0);
-  this->characterTable.SetSize(0);
+  this->irreps.setSize(0);
+  this->characterTable.setSize(0);
   for (int i = 0; i < irreps_grcam.size; i ++) {
     this->irreps.addOnTop(this->irreps_grcam[i].MakeOtherGroupRepresentationClass());
     this->characterTable.addOnTop(&(this->irreps[i].theCharacteR));
@@ -2419,7 +2419,7 @@ const ClassFunction<somegroup, coefficient>& GroupRepresentationCarriesAllMatric
     return this->theCharacteR;
   }
   this->theCharacteR.G = this->ownerGroup;
-  this->theCharacteR.data.SetSize(this->ownerGroup->ConjugacyClassCount());
+  this->theCharacteR.data.setSize(this->ownerGroup->ConjugacyClassCount());
   for (int cci = 0; cci < this->ownerGroup->ConjugacyClassCount(); cci ++) {
     this->theCharacteR.data[cci] = this->GetMatrixElement(this->ownerGroup->conjugacyClasseS[cci].representative).GetTrace();
   }

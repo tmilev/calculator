@@ -105,7 +105,7 @@ QueryExact::QueryExact(
 ) {
   this->collection = desiredCollection;
   this->value = desiredValue;
-  this->nestedLabels.SetSize(0);
+  this->nestedLabels.setSize(0);
   this->nestedLabels.addListOnTop(desiredLabels);
 }
 
@@ -166,7 +166,7 @@ void QueryExact::SetLabelsValue(const List<std::string>& labels, const std::stri
 
 void QueryExact::SetLabelValue(const std::string& label, const std::string& desiredValue) {
   this->value = desiredValue;
-  this->nestedLabels.SetSize(1);
+  this->nestedLabels.setSize(1);
   this->nestedLabels[0] = label;
 }
 
@@ -413,11 +413,11 @@ void GlobalVariables::initModifiableDatabaseFields() {
   currentEntry.addOnTop(DatabaseStrings::labelProblemDataJSON);
   currentEntry.addOnTop(DatabaseStrings::anyFielD);
   modifiableData.addOnTop(currentEntry);
-  currentEntry.SetSize(0);
+  currentEntry.setSize(0);
   currentEntry.addOnTop(DatabaseStrings::tableUsers);
   currentEntry.addOnTop(DatabaseStrings::objectSelectoR);
   modifiableData.addOnTop(currentEntry);
-  currentEntry.SetSize(0);
+  currentEntry.setSize(0);
   currentEntry.addOnTop(DatabaseStrings::tableEmailInfo);
   currentEntry.addOnTop(DatabaseStrings::objectSelectoR);
   modifiableData.addOnTop(currentEntry);
@@ -676,7 +676,7 @@ bool UserCalculatorData::LoadFromJSON(JSData& input) {
   this->semesterInDB                      = input[DatabaseStrings::labelSemester                          ].theString;
   this->sectionInDB                       = input[DatabaseStrings::labelSection                           ].theString;
   this->courseInDB                        = input[DatabaseStrings::labelCurrentCourses                    ].theString;
-  this->sectionsTaught.SetSize(0);
+  this->sectionsTaught.setSize(0);
   // TODO(tmilev): Remove URL decoding.
   // The layer of URL decoding is here because older
   // versions of the calculator stored pass hashes as:
@@ -1093,7 +1093,7 @@ bool UserCalculator::InterpretDatabaseProblemDatA(const std::string& theInfo, st
     return false;
   }
   this->theProblemData.Clear();
-  this->theProblemData.SetExpectedSize(theMap.size());
+  this->theProblemData.setExpectedSize(theMap.size());
   bool result = true;
   ProblemData reader;
   std::string probNameNoWhiteSpace;
@@ -1114,7 +1114,7 @@ bool UserCalculator::InterpretDatabaseProblemDatA(const std::string& theInfo, st
 bool UserCalculator::InterpretDatabaseProblemDataJSON(const JSData& theData, std::stringstream& commentsOnFailure) {
   MacroRegisterFunctionWithName("UserCalculator::InterpretDatabaseProblemDataJSON");
   this->theProblemData.Clear();
-  this->theProblemData.SetExpectedSize(theData.objects.size());
+  this->theProblemData.setExpectedSize(theData.objects.size());
   bool result = true;
   ProblemData reader;
   std::string problemNameNoWhiteSpace;

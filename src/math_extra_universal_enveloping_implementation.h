@@ -273,8 +273,8 @@ void MonomialUniversalEnveloping<coefficient>::CommuteAnBtoBAnPlusLowerOrder(
   output.makeZero(*this->owner);
   MonomialUniversalEnveloping<coefficient> tempMon;
   tempMon.makeOne(*this->owner);
-  tempMon.Powers.SetExpectedSize(this->generatorsIndices.size + 2);
-  tempMon.generatorsIndices.SetExpectedSize(this->generatorsIndices.size + 2);
+  tempMon.Powers.setExpectedSize(this->generatorsIndices.size + 2);
+  tempMon.generatorsIndices.setExpectedSize(this->generatorsIndices.size + 2);
   tempMon.Powers.size = 0;
   tempMon.generatorsIndices.size = 0;
   int rightGeneratorIndeX = this->generatorsIndices[indexA + 1];
@@ -332,8 +332,8 @@ void MonomialUniversalEnveloping<coefficient>::CommuteABntoBnAPlusLowerOrder(
   output.makeZero(*this->owner);
   MonomialUniversalEnveloping<coefficient> tempMon;
   tempMon.makeOne(*this->owner);
-  tempMon.Powers.SetExpectedSize(this->generatorsIndices.size + 2);
-  tempMon.generatorsIndices.SetExpectedSize(this->generatorsIndices.size + 2);
+  tempMon.Powers.setExpectedSize(this->generatorsIndices.size + 2);
+  tempMon.generatorsIndices.setExpectedSize(this->generatorsIndices.size + 2);
   tempMon.Powers.size = 0;
   tempMon.generatorsIndices.size = 0;
   int rightGeneratorIndex = this->generatorsIndices[theIndeX + 1];
@@ -820,8 +820,8 @@ void ElementUniversalEnveloping<coefficient>::AssignElementLieAlgebra(
   this->makeZero(inputOwner);
   MonomialUniversalEnveloping<coefficient> tempMon;
   tempMon.makeOne(inputOwner);
-  tempMon.generatorsIndices.SetSize(1);
-  tempMon.Powers.SetSize(1);
+  tempMon.generatorsIndices.setSize(1);
+  tempMon.Powers.setSize(1);
   tempMon.Powers[0] = theRingUnit;
   coefficient tempCF;
   for (int i = 0; i < input.size(); i ++) {
@@ -844,10 +844,10 @@ void ElementUniversalEnveloping<coefficient>::GetCoordinateFormOfSpanOfElements(
   outputCorrespondingMonomials.makeZero(*theElements[0].owners, theElements[0].indexInOwners);
   for (int i = 0; i < theElements.size; i ++) {
     for (int j = 0; j < theElements[i].size; j ++) {
-      outputCorrespondingMonomials.AddOnTopNoRepetition(theElements[i][j]);
+      outputCorrespondingMonomials.addOnTopNoRepetition(theElements[i][j]);
     }
   }
-  outputCoordinates.SetSize(theElements.size);
+  outputCoordinates.setSize(theElements.size);
   Polynomial<Rational> ZeroPoly;
   ZeroPoly.makeZero();
   for (int i = 0; i < theElements.size; i ++) {
@@ -870,8 +870,8 @@ void ElementUniversalEnveloping<coefficient>::MakeHgenerator(
   tempMon.makeOne(inputOwner);
   int theDimension = this->GetOwner().theWeyl.CartanSymmetric.NumRows;
   int numPosRoots = this->GetOwner().theWeyl.RootsOfBorel.size;
-  tempMon.generatorsIndices.SetSize(1);
-  tempMon.Powers.SetSize(1);
+  tempMon.generatorsIndices.setSize(1);
+  tempMon.Powers.setSize(1);
   coefficient tempCF;
   for (int i = 0; i < theDimension; i ++) {
     if (!input[i].IsEqualToZero()) {
@@ -966,7 +966,7 @@ bool ElementUniversalEnvelopingOrdered<coefficient>::GetCoordsInBasis(
   this->GetBasisFromSpanOfElements(tempBasis, tempCoords, tempElts, theRingUnit, theRingZero, global);
   Vector<coefficient> tempRoot;
   tempRoot = *tempCoords.LastObject();
-  tempCoords.SetSize(theBasis.size);
+  tempCoords.setSize(theBasis.size);
   return tempRoot.GetCoordsInBasiS(tempCoords, output, theRingUnit, theRingZero);
 }
 
@@ -982,10 +982,10 @@ void ElementUniversalEnvelopingOrdered<coefficient>::GetCoordinateFormOfSpanOfEl
   outputCorrespondingMonomials.makeZero(*theElements[0].owner);
   for (int i = 0; i < theElements.size; i ++) {
     for (int j = 0; j < theElements[i].size; j ++) {
-      outputCorrespondingMonomials.AddOnTopNoRepetition(theElements[i][j]);
+      outputCorrespondingMonomials.addOnTopNoRepetition(theElements[i][j]);
     }
   }
-  outputCoordinates.SetSize(theElements.size);
+  outputCoordinates.setSize(theElements.size);
   Polynomial<Rational> ZeroPoly;
   ZeroPoly.makeZero();
   for (int i = 0; i < theElements.size; i ++) {
@@ -1034,7 +1034,7 @@ void ElementUniversalEnveloping<coefficient>::MultiplyBy(
     return;
   }
   ElementUniversalEnveloping<coefficient> output;
-  output.SetExpectedSize(this->size);
+  output.setExpectedSize(this->size);
   output.makeZero(*this->owner);
   MonomialUniversalEnveloping<coefficient> tempMon;
   coefficient newCoeff;
@@ -1088,7 +1088,7 @@ void ElementVermaModuleOrdered<coefficient>::GetBasisFromSpanOfElements(
   const RationalFunction& RFZero
 ) {
   List<ElementUniversalEnvelopingOrdered<coefficient> > theEltsUEform;
-  theEltsUEform.SetSize(theElements.size);
+  theEltsUEform.setSize(theElements.size);
   for (int i = 0; i < theElements.size; i ++) {
     theEltsUEform[i] = theElements[i].theElT;
   }
@@ -1096,7 +1096,7 @@ void ElementVermaModuleOrdered<coefficient>::GetBasisFromSpanOfElements(
   ElementUniversalEnvelopingOrdered<coefficient>::GetBasisFromSpanOfElements(
     theEltsUEform, outputCoordinates, theBasisUEform, RFOne, RFZero, global
   );
-  outputTheBasis.SetSize(theBasisUEform.size);
+  outputTheBasis.setSize(theBasisUEform.size);
   for (int i = 0; i < theBasisUEform.size; i ++) {
     outputTheBasis[i].theElT = theBasisUEform[i];
     outputTheBasis[i].theSubNthElementIsImageNthCoordSimpleBasis = theElements[0].theSubNthElementIsImageNthCoordSimpleBasis;
@@ -1111,7 +1111,7 @@ bool ElementVermaModuleOrdered<coefficient>::GetCoordsInBasis(
   const coefficient& theRingZero
 ) const {
   List<ElementUniversalEnvelopingOrdered<coefficient> > theEltsUEform;
-  theEltsUEform.SetSize(theBasis.size);
+  theEltsUEform.setSize(theBasis.size);
   for (int i = 0; i < theBasis.size; i ++) {
     theEltsUEform.theObjects[i] = theBasis.theObjects[i].theElT;
   }
@@ -1203,10 +1203,10 @@ void ElementUniversalEnvelopingOrdered<coefficient>::GetBasisFromSpanOfElements(
   Vectors<CoefficientTypeQuotientField> outputCoordsBeforeReduction;
   for (int i = 0; i < theElements.size; i ++) {
     for (int j = 0; j < theElements[i].size; j ++) {
-      outputCorrespondingMonomials.AddOnTopNoRepetition(theElements[i][j]);
+      outputCorrespondingMonomials.addOnTopNoRepetition(theElements[i][j]);
     }
   }
-  outputCoordsBeforeReduction.SetSize(theElements.size);
+  outputCoordsBeforeReduction.setSize(theElements.size);
   for (int i = 0; i < theElements.size; i ++) {
     Vector<CoefficientTypeQuotientField>& currentList = outputCoordsBeforeReduction[i];
     currentList.makeZero(outputCorrespondingMonomials.size, theFieldZero);
@@ -1623,8 +1623,8 @@ void MonomialUniversalEnvelopingOrdered<coefficient>::CommuteConsecutiveIndicesL
   output.makeZero(*this->owner);
   MonomialUniversalEnvelopingOrdered tempMon;
   tempMon.makeZero(theRingZero, *this->owner);
-  tempMon.Powers.SetExpectedSize(this->generatorsIndices.size + 2);
-  tempMon.generatorsIndices.SetExpectedSize(this->generatorsIndices.size + 2);
+  tempMon.Powers.setExpectedSize(this->generatorsIndices.size + 2);
+  tempMon.generatorsIndices.setExpectedSize(this->generatorsIndices.size + 2);
   tempMon.Powers.size = 0;
   tempMon.generatorsIndices.size = 0;
   int rightGeneratorIndex = this->generatorsIndices.theObjects[theIndeX + 1];
@@ -1903,8 +1903,8 @@ void ElementUniversalEnvelopingOrdered<coefficient>::AssignElementLieAlgebra(
   theOwner.ChevalleyGeneratorsInCurrentCoords.ActOnVectorColumn(ElementRootForm);
   MonomialUniversalEnvelopingOrdered<coefficient> tempMon;
   tempMon.makeZero(theRingZero, theOwner);
-  tempMon.generatorsIndices.SetSize(1);
-  tempMon.Powers.SetSize(1);
+  tempMon.generatorsIndices.setSize(1);
+  tempMon.Powers.setSize(1);
   tempMon.Powers.theObjects[0] = theRingUnit;
   for (int theIndex = 0; theIndex < ElementRootForm.size; theIndex ++) {
     if (ElementRootForm.theObjects[theIndex] != 0) {

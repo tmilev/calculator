@@ -16,7 +16,7 @@ std::string MonomialVector::toString(FormatExpressions* theFormat) const {
   return out.str();
 }
 
-int AlgebraicClosureRationals::GetDimensionOverTheRationals() const {
+int AlgebraicClosureRationals::getDimensionOverTheRationals() const {
   return this->latestBasis.size;
 }
 
@@ -57,7 +57,7 @@ void AlgebraicClosureRationals::ComputeDisplayStringsFromRadicals() {
   if (!this->flagIsQuadraticRadicalExtensionRationals) {
     return;
   }
-  this->DisplayNamesBasisElements.SetSize(this->latestBasis.size);
+  this->DisplayNamesBasisElements.setSize(this->latestBasis.size);
   Selection theSel;
   theSel.init(this->theQuadraticRadicals.size);
   do {
@@ -115,7 +115,7 @@ bool AlgebraicClosureRationals::MergeRadicals(const List<LargeInteger>& theRadic
   }
   //refine factors:
   HashedList<LargeInteger> radicalsNew = this->theQuadraticRadicals;
-  radicalsNew.AddOnTopNoRepetition(theRadicals);
+  radicalsNew.addOnTopNoRepetition(theRadicals);
   bool found = true;
   LargeIntegerUnsigned candidateGCD, leftQuotient, rightQuotient;
   while (found) {
@@ -132,12 +132,12 @@ bool AlgebraicClosureRationals::MergeRadicals(const List<LargeInteger>& theRadic
           radicalsNew.RemoveIndexSwapWithLast(j);
           radicalsNew.RemoveIndexSwapWithLast(i);
           if (leftQuotient > 1) {
-            radicalsNew.AddOnTopNoRepetition(LargeInteger(leftQuotient));
+            radicalsNew.addOnTopNoRepetition(LargeInteger(leftQuotient));
           }
           if (rightQuotient > 1) {
-            radicalsNew.AddOnTopNoRepetition(LargeInteger(rightQuotient));
+            radicalsNew.addOnTopNoRepetition(LargeInteger(rightQuotient));
           }
-          radicalsNew.AddOnTopNoRepetition(LargeInteger(candidateGCD));
+          radicalsNew.addOnTopNoRepetition(LargeInteger(candidateGCD));
           found = true;
         }
       }
@@ -152,7 +152,7 @@ bool AlgebraicClosureRationals::MergeRadicals(const List<LargeInteger>& theRadic
     << GlobalVariables::Crasher::GetStackTraceEtcErrorMessageHTML();
     return (false);
   }
-  this->latestBasis.SetSize(MathRoutines::TwoToTheNth(radicalsNew.size));
+  this->latestBasis.setSize(MathRoutines::TwoToTheNth(radicalsNew.size));
   MatrixTensor<Rational> currentInjection;
   currentInjection.makeZero();
   Selection largerFieldSel, smallerFieldSel;
@@ -194,7 +194,7 @@ bool AlgebraicClosureRationals::MergeRadicals(const List<LargeInteger>& theRadic
 }
 
 void AlgebraicClosureRationals::AssignDefaultBasisDisplayNames() {
-  this->DisplayNamesBasisElements.SetSize(this->latestBasis.size);
+  this->DisplayNamesBasisElements.setSize(this->latestBasis.size);
   int extensionNumber = this->basisInjections.size;
   for (int i = 1; i < this->latestBasis.size; i ++) {
     std::stringstream basisVector;
@@ -216,8 +216,8 @@ void AlgebraicClosureRationals::InjectOldBases(
   }
 }
 void AlgebraicClosureRationals::AppendAdditiveEiBasis() {
-  this->basisInjections.SetSize(this->basisInjections.size + 1);
-  this->basisInjections.LastObject()->SetSize(this->latestBasis.size);
+  this->basisInjections.setSize(this->basisInjections.size + 1);
+  this->basisInjections.LastObject()->setSize(this->latestBasis.size);
   for (int i = 0; i < this->latestBasis.size; i ++) {
     (*this->basisInjections.LastObject())[i].MaKeEi(i);
   }
@@ -230,7 +230,7 @@ bool AlgebraicClosureRationals::ChooseGeneratingElement(
   SelectionPositiveIntegers theSel;
   int DimensionOverRationals = this->latestBasis.size;
   theSel.init(DimensionOverRationals);
-  this->theGeneratingElementPowersBasis.SetSize(0);
+  this->theGeneratingElementPowersBasis.setSize(0);
   Vector<Rational> currentVect;
   this->GeneratingElemenT.owner = this;
   this->GeneratingElemenT.basisIndex = this->basisInjections.size - 1;
@@ -260,7 +260,7 @@ bool AlgebraicClosureRationals::ChooseGeneratingElement(
     }
     this->GetMultiplicationBy(this->GeneratingElemenT, this->GeneratingElementTensorForm);
     this->GeneratingElementTensorForm.GetMatrix(this->GeneratingElementMatForm, DimensionOverRationals);
-    this->theGeneratingElementPowersBasis.SetSize(0);
+    this->theGeneratingElementPowersBasis.setSize(0);
     currentVect.MakeEi(DimensionOverRationals, 0);
     this->theGeneratingElementPowersBasis.addOnTop(currentVect);
     do {
@@ -270,7 +270,7 @@ bool AlgebraicClosureRationals::ChooseGeneratingElement(
         this->theGeneratingElementPowersBasis.size >
         this->theGeneratingElementPowersBasis.GetRankOfSpanOfElements()
       ) {
-        this->theGeneratingElementPowersBasis.SetSize(this->theGeneratingElementPowersBasis.size - 1);
+        this->theGeneratingElementPowersBasis.setSize(this->theGeneratingElementPowersBasis.size - 1);
         break;
       }
     } while (true);
@@ -382,7 +382,7 @@ bool AlgebraicClosureRationals::ReduceMe(
       global.fatal << "We shouldn't have zero generator. " << global.fatal;
     }
   }
-  newBasis.SetSize(smallestFactorDegree);
+  newBasis.setSize(smallestFactorDegree);
   newBasis[0].MakeId(smallestFactorDegree);
   newBasis[1] = generatorProjected;
   for (int i = 2; i < smallestFactorDegree; i ++) {
@@ -625,16 +625,16 @@ bool AlgebraicNumber::ConstructFromMinPoly(
 
 void AlgebraicClosureRationals::reset() {
   this->flagIsQuadraticRadicalExtensionRationals = true;
-  this->latestBasis.SetSize(1);
+  this->latestBasis.setSize(1);
   this->latestBasis[0].MakeId(1);
 
-  this->theGeneratingElementPowersBasis.SetSize(1);
+  this->theGeneratingElementPowersBasis.setSize(1);
   this->theGeneratingElementPowersBasis[0].MakeEi(1, 0);
-  this->basisInjections.SetSize(1);
-  this->basisInjections[0].SetSize(1);
+  this->basisInjections.setSize(1);
+  this->basisInjections[0].setSize(1);
   this->basisInjections[0][0].MaKeEi(0);
   this->theQuadraticRadicals.Clear();
-  this->DisplayNamesBasisElements.SetSize(1);
+  this->DisplayNamesBasisElements.setSize(1);
   this->DisplayNamesBasisElements[0] = "";
   this->GeneratingElementTensorForm.MakeId(1);
   this->GeneratingElementMatForm.MakeIdMatrix(1);
@@ -678,7 +678,7 @@ bool AlgebraicClosureRationals::AdjoinRootQuadraticPolyToQuadraticRadicalExtensi
   outputRoot -= theLinearTermCFdividedByTwo;
   //Check our work:
   PolynomialSubstitution<AlgebraicNumber> checkSub;
-  checkSub.SetSize(1);
+  checkSub.setSize(1);
   checkSub[0].MakeConst(outputRoot);
   algNumPoly.Substitution(checkSub);
   if (!algNumPoly.IsEqualToZero()) {
@@ -792,14 +792,14 @@ bool AlgebraicClosureRationals::AdjoinRootMinimalPolynomial(
   }
   int finalDimension = degreeMinPoly * startingDimension;
   List<MatrixTensor<Rational> > finalBasis;
-  finalBasis.SetSize(this->latestBasis.size);
+  finalBasis.setSize(this->latestBasis.size);
   MatrixTensor<Rational> theGenMatPower;
   theGenMatPower.MakeId(degreeMinPoly);
   for (int i = 0; i < startingDimension; i ++) {
     finalBasis[i].AssignTensorProduct(theGenMatPower, this->latestBasis[i]);
   }
   this->latestBasis = finalBasis;
-  this->latestBasis.SetSize(finalDimension);
+  this->latestBasis.setSize(finalDimension);
   theGenMatPower = theGenMat;
   for (int i = 1; i < degreeMinPoly; i ++) {
     for (int j = 0; j < startingDimension; j ++) {
@@ -832,7 +832,7 @@ bool AlgebraicClosureRationals::AdjoinRootMinimalPolynomial(
 
   // Sanity check code here:
   PolynomialSubstitution<AlgebraicNumber> theSub;
-  theSub.SetSize(1);
+  theSub.setSize(1);
   theSub[0].MakeConst(outputRoot);
   Polynomial<AlgebraicNumber> substitutedMinPoly;
   substitutedMinPoly = minPoly;
@@ -1390,7 +1390,7 @@ std::string AlgebraicNumber::ToStringNonInjected(FormatExpressions* theFormat) c
   std::stringstream out;
   FormatExpressions tempFormat;
   int dimension = this->owner->basisInjections[this->basisIndex].size;
-  tempFormat.vectorSpaceEiBasisNames.SetSize(dimension);
+  tempFormat.vectorSpaceEiBasisNames.setSize(dimension);
 
   for (int i = 0; i < dimension; i ++) {
     std::stringstream letter;
@@ -1547,7 +1547,7 @@ ElementZmodP ElementZmodP::zero() {
   return result;
 }
 
-void ElementZmodP::ScaleToIntegralMinimalHeightAndGetPoly(
+void ElementZmodP::convertModuloIntegerAfterScalingToIntegral(
   const Polynomial<Rational>& input,
   Polynomial<ElementZmodP>& output,
   const LargeIntegerUnsigned& newModulo
@@ -1555,7 +1555,7 @@ void ElementZmodP::ScaleToIntegralMinimalHeightAndGetPoly(
   Polynomial<Rational> rescaled;
   rescaled = input;
   rescaled.scaleNormalizeLeadingMonomial();
-  output.SetExpectedSize(input.size());
+  output.setExpectedSize(input.size());
   ElementZmodP theCF;
   theCF.theModulus = newModulo;
   output.makeZero();

@@ -69,7 +69,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::C
   if (recomputeAmbientRho) {
     this->AmbientWeyl->ComputeRho(false);
   }
-  this->simpleRootsInner.SetSize(0);
+  this->simpleRootsInner.setSize(0);
   if (inputRoots != nullptr) {
     this->simpleRootsInner = *inputRoots;
   }
@@ -438,8 +438,8 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism(Matrix<Rational>& outputAuto, 
 
   this->ComputeChevalleyConstants();
   List<ElementSemisimpleLieAlgebra<Rational> > Domain, Range;
-  Range.SetSize(numRoots + theDimension);
-  Domain.SetSize(numRoots + theDimension);
+  Range.setSize(numRoots + theDimension);
+  Domain.setSize(numRoots + theDimension);
   ElementSemisimpleLieAlgebra<Rational> tempElt;
   for (int i = 0; i < theDimension; i ++) {
     domainRoot.MakeEi(theDimension, i);
@@ -484,8 +484,8 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism(Matrix<Rational>& outputAuto, 
     }
   }
   Vectors<Rational> vectorsLeft, vectorsRight;
-  vectorsLeft.SetSize(Range.size);
-  vectorsRight.SetSize(Range.size);
+  vectorsLeft.setSize(Range.size);
+  vectorsRight.setSize(Range.size);
   if (!useNegativeRootsFirst) {
     for (int i = 0; i < Range.size; i ++) {
       Range[i].ElementToVectorNegativeRootSpacesFirst(vectorsRight[i]);
@@ -514,7 +514,7 @@ void SemisimpleLieAlgebra::CreateEmbeddingFromFDModuleHaving1dimWeightSpaces(Vec
   /*Vectors<Rational> weightSupport;
   this->GenerateWeightSupport(theHighestWeight, weightSupport);
   int highestWeight, distanceToHW;
-  this->EmbeddingsRootSpaces.SetSize(this->theWeyl.RootSystem.size);
+  this->EmbeddingsRootSpaces.setSize(this->theWeyl.RootSystem.size);
   int theDimension = this->theWeyl.CartanSymmetric.NumRows;
   List<bool> Explored;
   Explored.initializeFillInObject(this->theWeyl.RootSystem.size, false);
@@ -558,7 +558,7 @@ void SemisimpleLieAlgebra::CreateEmbeddingFromFDModuleHaving1dimWeightSpaces(Vec
             }
           }
   }
-  this->EmbeddingsCartan.SetSize(theDimension);
+  this->EmbeddingsCartan.setSize(theDimension);
   for (int i = 0; i < theDimension; i ++) {
     Matrix<Rational> & current = this->EmbeddingsCartan.theObjects[i];
     current.init(weightSupport.size, weightSupport.size);
@@ -599,8 +599,8 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
   NonExplored.init(numRoots);
   NonExplored.MakeFullSelection();
   List<ElementSemisimpleLieAlgebra<Rational> > tempDomain, tempRange;
-  tempDomain.SetSize(numRoots+theDomainDimension);
-  tempRange.SetSize(numRoots+theDomainDimension);
+  tempDomain.setSize(numRoots+theDomainDimension);
+  tempRange.setSize(numRoots+theDomainDimension);
   Vector<Rational> tempRoot;
   for (int i = 0; i < theDomainDimension; i ++) {
     tempRoot.MakeEi(theDomainDimension, i);
@@ -649,8 +649,8 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
     this->theRange().LieBracket(tempRange[leftIndex], tempRange[rightIndex], tempRange[numRoots + i]);
   }
   Vectors<Rational> vectorsLeft, vectorsRight;
-  vectorsLeft.SetSize(tempDomain.size);
-  vectorsRight.SetSize(tempDomain.size);
+  vectorsLeft.setSize(tempDomain.size);
+  vectorsRight.setSize(tempDomain.size);
   for (int i = 0; i < tempRange.size; i ++) {
     tempDomain[i].ElementToVectorNegativeRootSpacesFirst(vectorsLeft[i]);
     tempRange[i].ElementToVectorNegativeRootSpacesFirst(vectorsRight[i]);
@@ -658,8 +658,8 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
   Matrix<Rational> tempMat;
   tempMat.MakeLinearOperatorFromDomainAndRange(vectorsLeft, vectorsRight);
   Vector<Rational> imageRoot;
-  this->domainAllChevalleyGenerators.SetSize(tempDomain.size);
-  this->imagesAllChevalleyGenerators.SetSize(tempDomain.size);
+  this->domainAllChevalleyGenerators.setSize(tempDomain.size);
+  this->imagesAllChevalleyGenerators.setSize(tempDomain.size);
   for (int i = 0; i < this->theDomain().GetNumGenerators(); i ++) {
     this->domainAllChevalleyGenerators[i].MakeGenerator(i, this->theDomain());
   }
@@ -672,7 +672,7 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
 }
 
 void HomomorphismSemisimpleLieAlgebra::ProjectOntoSmallCartan(Vectors<Rational>& input, Vectors<Rational>& output) {
-  output.SetSize(input.size);
+  output.setSize(input.size);
   for (int i = 0; i < input.size; i ++) {
     this->ProjectOntoSmallCartan(input[i], output[i]);
   }
@@ -775,9 +775,9 @@ void HomomorphismSemisimpleLieAlgebra::MakeGinGWithId(
   this->domainAlg->theWeyl.MakeArbitrarySimple(theWeylLetter, theWeylDim);
   this->theDomain().ComputeChevalleyConstants();
   int numPosRoots = this->theDomain().theWeyl.RootsOfBorel.size;
-  this->imagesAllChevalleyGenerators.SetSize(numPosRoots * 2 + theWeylDim);
-  this->domainAllChevalleyGenerators.SetSize(numPosRoots * 2 + theWeylDim);
-  this->imagesSimpleChevalleyGenerators.SetSize(theWeylDim * 2);
+  this->imagesAllChevalleyGenerators.setSize(numPosRoots * 2 + theWeylDim);
+  this->domainAllChevalleyGenerators.setSize(numPosRoots * 2 + theWeylDim);
+  this->imagesSimpleChevalleyGenerators.setSize(theWeylDim * 2);
   for (int i = 0; i < 2 * numPosRoots + theWeylDim; i ++) {
     ElementSemisimpleLieAlgebra<Rational>& tempElt1 = this->imagesAllChevalleyGenerators[i];
     ElementSemisimpleLieAlgebra<Rational>& tempElt2 = this->domainAllChevalleyGenerators[i];
@@ -829,9 +829,9 @@ void HomomorphismSemisimpleLieAlgebra::GetRestrictionAmbientRootSystemToTheSmall
   tempMat = this->theDomain().theWeyl.CartanSymmetric;
   tempMat.Invert();
   int numPosRootsDomain = this->theDomain().theWeyl.RootsOfBorel.size;
-  output.SetSize(theRootSystem.size);
+  output.setSize(theRootSystem.size);
   Vector<Rational> theScalarProducts;
-  theScalarProducts.SetSize(rankSA);
+  theScalarProducts.setSize(rankSA);
   for (int i = 0; i < theRootSystem.size; i ++) {
     for (int j = 0; j < rankSA; j ++) {
       ElementSemisimpleLieAlgebra<Rational>& currentH = this->imagesAllChevalleyGenerators[j + numPosRootsDomain];
@@ -839,7 +839,7 @@ void HomomorphismSemisimpleLieAlgebra::GetRestrictionAmbientRootSystemToTheSmall
     }
     tempMat.ActOnVectorColumn(theScalarProducts, output[i]);
   }
-  this->ImagesCartanDomain.SetSize(rankSA);
+  this->ImagesCartanDomain.setSize(rankSA);
   for (int i = 0; i < rankSA; i ++) {
     this->ImagesCartanDomain[i] = this->imagesAllChevalleyGenerators[i +numPosRootsDomain].GetCartanPart();
   }
@@ -849,7 +849,7 @@ bool HomomorphismSemisimpleLieAlgebra::CheckClosednessLieBracket() {
   ElementSemisimpleLieAlgebra<Rational> tempElt;
   Vectors<Rational> tempRoots;
   Vector<Rational> tempRoot;
-  tempRoots.SetSize(this->imagesAllChevalleyGenerators.size);
+  tempRoots.setSize(this->imagesAllChevalleyGenerators.size);
   for (int i = 0; i < tempRoots.size; i ++) {
     this->imagesAllChevalleyGenerators[i].ElementToVectorNegativeRootSpacesFirst(tempRoots[i]);
   }
@@ -1410,7 +1410,7 @@ RationalFunction RationalFunction::one() {
 
 bool RationalFunction::FindOneVariableRationalRoots(List<Rational>& output) {
   if (this->expressionType == this->typeRational) {
-    output.SetSize(0);
+    output.setSize(0);
     return true;
   }
   Polynomial<Rational> tempP;
@@ -1517,7 +1517,7 @@ void RationalFunction::MakeOneLetterMoN(
   }
   this->expressionType = this->typePoly;
   ExpectedNumVars = MathRoutines::Maximum(theIndex + 1, ExpectedNumVars);
-  this->Numerator.GetElement().MakeDegreeOne(ExpectedNumVars, theIndex, theCoeff);
+  this->Numerator.GetElement().makeDegreeOne(ExpectedNumVars, theIndex, theCoeff);
 }
 
 void RationalFunction::makeMonomial(
@@ -1844,7 +1844,7 @@ void RationalFunction::simplifyLeadingCoefficientOnly() {
 void RootIndexToPoly(int theIndex, SemisimpleLieAlgebra& theAlgebra, Polynomial<Rational>& output) {
   int theRank = theAlgebra.theWeyl.CartanSymmetric.NumRows;
   int numPosRoots = theAlgebra.theWeyl.RootsOfBorel.size;
-  output.MakeDegreeOne(theRank + numPosRoots, theIndex + theRank, Rational(1));
+  output.makeDegreeOne(theRank + numPosRoots, theIndex + theRank, Rational(1));
 }
 
 template <class coefficient>
@@ -1985,7 +1985,7 @@ void SemisimpleLieAlgebraOrdered::init(
 
 void SemisimpleLieAlgebraOrdered::initDefaultOrder(SemisimpleLieAlgebra& owner) {
   List<ElementSemisimpleLieAlgebra<Rational> > defaultOrder;
-  defaultOrder.SetSize(owner.GetNumGenerators());
+  defaultOrder.setSize(owner.GetNumGenerators());
   for (int i = 0; i < defaultOrder.size; i ++) {
     ElementSemisimpleLieAlgebra<Rational>& currentElt = defaultOrder[i];
     currentElt.MakeGenerator(i, owner);
@@ -2014,7 +2014,7 @@ bool ElementSemisimpleLieAlgebra<coefficient>::IsACoeffOneChevalleyGenerator() {
 void HomomorphismSemisimpleLieAlgebra::GetWeightsWrtKInSimpleCoordsK(
   Vectors<Rational>& outputWeights, List<ElementSemisimpleLieAlgebra<Rational> >& inputElts
 ) {
-  outputWeights.SetSize(inputElts.size);
+  outputWeights.setSize(inputElts.size);
   Rational tempRat;
   ElementSemisimpleLieAlgebra<Rational> tempLieElement;
   for (int i = 0; i < inputElts.size; i ++) {
@@ -2044,7 +2044,7 @@ void ElementSemisimpleLieAlgebra<coefficient>::GetBasisFromSpanOfElements(
   List<ElementSemisimpleLieAlgebra>& outputTheBasis
 ) {
   Vectors<Rational> theRootForm;
-  theRootForm.SetSize(theElements.size);
+  theRootForm.setSize(theElements.size);
   for (int i = 0; i < theElements.size; i ++) {
     ElementSemisimpleLieAlgebra& currentElt = theElements[i];
     currentElt.ElementToVectorNegativeRootSpacesFirst(theRootForm[i]);
@@ -2055,7 +2055,7 @@ void ElementSemisimpleLieAlgebra<coefficient>::GetBasisFromSpanOfElements(
 //    numRoots = theElements.theObjects[0].coeffsRootSpaces.size;
 //  }
   theRootForm.ChooseABasis();
-  outputTheBasis.SetSize(theRootForm.size);
+  outputTheBasis.setSize(theRootForm.size);
   for (int i = 0; i < theRootForm.size; i ++) {
     ElementSemisimpleLieAlgebra& currentElt = outputTheBasis[i];
     currentElt.AssignVectorNegRootSpacesCartanPosRootSpaces(
@@ -2374,7 +2374,7 @@ std::string slTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
   theE.makeZero();
   theF.init(this->theDimension, this->theDimension);
   theF.makeZero();
-  this->theProjectors.SetSize(this->thePartition.size);
+  this->theProjectors.setSize(this->thePartition.size);
   int currentOffset = 0;
   std::string beginMath, endMath, newLine;
   if (useHtml) {
@@ -2459,9 +2459,9 @@ std::string slTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
 
 std::string slTwoInSlN::initPairingTable(bool useHtml) {
   std::stringstream out;
-  this->PairingTable.SetSize(this->theHighestWeightVectors.size);
+  this->PairingTable.setSize(this->theHighestWeightVectors.size);
   for (int i = 0; i < this->PairingTable.size; i ++) {
-    this->PairingTable[i].SetSize(this->theHighestWeightVectors.size);
+    this->PairingTable[i].setSize(this->theHighestWeightVectors.size);
     for (int j = 0; j < this->PairingTable[i].size; j ++) {
       List<int>& currentPairing = this->PairingTable[i][j];
       out << this->PairTwoIndices(currentPairing, i, j, useHtml);
@@ -2499,7 +2499,7 @@ std::string slTwoInSlN::PairTwoIndices(List<int>& output, int leftIndex, int rig
       if (!tempMat.IsEqualToZero()) {
         this->ExtractHighestWeightVectorsFromVector(tempMat, tempDecomposition, HighestWeightsContainingModules);
         for (int k = 0; k < HighestWeightsContainingModules.size; k ++) {
-          output.AddOnTopNoRepetition(this->GetModuleIndexFromHighestWeightVector(HighestWeightsContainingModules[k]));
+          output.addOnTopNoRepetition(this->GetModuleIndexFromHighestWeightVector(HighestWeightsContainingModules[k]));
           if (this->GetModuleIndexFromHighestWeightVector(HighestWeightsContainingModules[k]) == - 1) {
             global.Comments << newLine << beginMath << "[" << leftElt.toString(&latexFormat) << ", "
             << rightElt.toString(&latexFormat) << "] =" << tempMat.toString(&latexFormat) << endMath;
@@ -2963,7 +2963,7 @@ void MonomialP::trimTrailingZeroes() {
     if (this->monBody[i] != 0) {
       break;
     }
-    this->monBody.SetSize(this->monBody.size - 1);
+    this->monBody.setSize(this->monBody.size - 1);
   }
 }
 
@@ -3007,7 +3007,7 @@ void MonomialP::setSize(int variableCount) {
     variableCount = 0;
   }
   int oldSize = this->monBody.size;
-  this->monBody.SetSize(variableCount);
+  this->monBody.setSize(variableCount);
   for (int i = oldSize; i < this->monBody.size; i ++) {
     this->monBody[i] = 0;
   }

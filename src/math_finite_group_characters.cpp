@@ -54,8 +54,8 @@ void FiniteGroup<elementSomeGroup>::ComputeSquaresCCReps() {
   if (!this->flagCCsComputed) {
     this->ComputeCCfromAllElements();
   }
-  this->squaresCCReps.SetExpectedSize(this->ConjugacyClassCount());
-  this->squaresCCReps.SetSize(this->ConjugacyClassCount());
+  this->squaresCCReps.setExpectedSize(this->ConjugacyClassCount());
+  this->squaresCCReps.setSize(this->ConjugacyClassCount());
   //elementSomeGroup currentSquare;
   for (int i = 0; i < this->ConjugacyClassCount(); i ++) {
     this->squaresCCReps[i] = this->conjugacyClasseS[i].representative * this->conjugacyClasseS[i].representative;
@@ -70,12 +70,12 @@ void WeylGroupData::ComputeInitialIrreps() {
   if (this->theGroup.squaresCCReps.size == 0) {
     this->theGroup.ComputeSquaresCCReps();
   }
-  this->theGroup.irreps.SetSize(0);
-  this->theGroup.characterTable.SetSize(0);
-  this->theGroup.irreps_grcam.SetSize(0);
-  this->theGroup.characterTable.SetExpectedSize(this->theGroup.ConjugacyClassCount());
-  this->theGroup.irreps.SetExpectedSize(this->theGroup.ConjugacyClassCount());
-  this->theGroup.irreps_grcam.SetExpectedSize(this->theGroup.ConjugacyClassCount());
+  this->theGroup.irreps.setSize(0);
+  this->theGroup.characterTable.setSize(0);
+  this->theGroup.irreps_grcam.setSize(0);
+  this->theGroup.characterTable.setExpectedSize(this->theGroup.ConjugacyClassCount());
+  this->theGroup.irreps.setExpectedSize(this->theGroup.ConjugacyClassCount());
+  this->theGroup.irreps_grcam.setExpectedSize(this->theGroup.ConjugacyClassCount());
   GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup>, Rational> trivialRep, signRep, standardRep;
   this->GetTrivialRepresentation(trivialRep);
   this->GetSignRepresentation(signRep);
@@ -223,7 +223,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::MultiplyBy(
   for (int vi = 0; vi < this->basis.size; vi ++) {
     for (int wi = 0; wi < other.basis.size; wi ++) {
       Vector<coefficient> u;
-      u.SetSize(Ud);
+      u.setSize(Ud);
       for (int i = 0; i < Vd; i ++) {
         for (int j = 0; j < Wd; j ++) {
           u[i * Wd + j] = this->basis[vi][i] * other.basis[wi][j];
@@ -232,13 +232,13 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::MultiplyBy(
       output.basis.addOnTop(u);
     }
   }
-  output.generators.SetSize(this->generators.size);
+  output.generators.setSize(this->generators.size);
   for (int i = 0; i < this->generators.size; i ++) {
     output.generators[i].AssignTensorProduct(this->generators[i],other.generators[i]);
   }
   /* would that it be this simple
   if ((classFunctionMatrices.size > 0) && (other.classFunctionMatrices.size > 0)) {
-    U.classFunctionMatrices.SetSize(G->ccCount);
+    U.classFunctionMatrices.setSize(G->ccCount);
     for (int i = 0; i <classFunctionMatrices.size; i ++) {
       if ((classFunctionMatrices[i].NumCols > 0) && (other.classFunctionMatrices[i].NumCols > 0))
       U.classFunctionMatrices[i].AssignTensorProduct(classFunctionMatrices[i],other.classFunctionMatrices[i]);
@@ -260,7 +260,7 @@ GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::Reduced() const {
   }
   GM.Invert();
   GroupRepresentationCarriesAllMatrices<somegroup, coefficient> out;
-  out.generatorS.SetSize(this->generatorS.size);
+  out.generatorS.setSize(this->generatorS.size);
   for (int i = 0; i < this->generatorS.size; i ++) {
   //     MatrixInBasisFast(out.generatorS[i], this->generatorS[i], BM);
     MatrixInBasis(out.generatorS[i], this->generatorS[i], this->basis, GM);
@@ -270,7 +270,7 @@ GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::Reduced() const {
 
 /*
    if (classFunctionMatrices.size > 0) {
-     out.classFunctionMatrices.SetSize(G->ccCount);
+     out.classFunctionMatrices.setSize(G->ccCount);
      for (int i = 0; i <classFunctionMatrices.size; i ++) {
         if (classFunctionMatrices[i].NumRows > 0) {
           //MatrixInBasisFast(out.classFunctionMatrices[i],classFunctionMatrices[i],BM);
@@ -424,7 +424,7 @@ struct DivisionResult<UDPolynomial<coefficient> > UDPolynomial<coefficient>::Div
     return out;
   }
   int r = data.size - divisor.data.size + 1;
-  out.quotient.data.SetSize(r);
+  out.quotient.data.setSize(r);
   for (int i = r- 1; i != - 1; i --) {
     if (out.remainder.data.size - divisor.data.size != i) {
       out.quotient[i] = 0;
@@ -570,10 +570,10 @@ void getunion(const List<Vector<coefficient> >& V, const List<Vector<coefficient
     }
   }
   M.GaussianEliminationByRows(M);
-  output.SetSize(0);
+  output.setSize(0);
   Vector<coefficient> v;
   for (int i = 0; i < M.NumRows; i ++) {
-    v.SetSize(d);
+    v.setSize(d);
     for (int j = 0; j < d; j ++) {
       v[j] = M.elements[i][j];
     }
@@ -591,7 +591,7 @@ void intersection(
   List<Vector<coefficient> >& output
 ) {
   if ((V.size == 0) or (W.size == 0)) {
-    output.SetSize(0);
+    output.setSize(0);
     return;
   }
   int d = V[0].size;
@@ -674,7 +674,7 @@ List<Vector<coefficient> > orthogonal_complement(
   List<Vector<coefficient> > out;
   for (int i = 0; i < outm.NumRows; i ++) {
     Vector<coefficient> v;
-    v.SetSize(d);
+    v.setSize(d);
     for (int j = 0; j < d; j ++) {
       v[j] = outm.elements[i][j];
     }
@@ -832,7 +832,7 @@ bool is_isotypic_component(WeylGroupData& G, const List<Vector<coefficient> >& V
   // more expensive test: character of V has unit Norm
   ClassFunction<FiniteGroup<ElementWeylGroup>, coefficient> X;
   X.G = &G.theGroup;
-  X.data.SetSize(G.theGroup.ConjugacyClassCount());
+  X.data.setSize(G.theGroup.ConjugacyClassCount());
   for (int i = 0; i < G.theGroup.ConjugacyClassCount(); i ++) {
     ElementWeylGroup& g = G.theGroup.conjugacyClasseS[i].representative;
     coefficient tr = 0;
@@ -999,7 +999,7 @@ void SubgroupDataWeylGroup::ComputeTauSignature() {
   //global.Comments << this->theSubgroupData.ccRepresentativesPreimages.ToStringCommaDelimited() << '\n';
  //}
 
-  this->tauSignature.SetSize(this->theSubgroupData.theGroup->ConjugacyClassCount());
+  this->tauSignature.setSize(this->theSubgroupData.theGroup->ConjugacyClassCount());
 
   Vector<Rational> XiS;
   XiS.makeZero(this->theSubgroupData.theSubgroup->conjugacyClasseS.size);
@@ -1022,14 +1022,14 @@ void SubgroupDataWeylGroup::ComputeTauSignature() {
 void SubgroupDataRootReflections::ComputeCCSizesRepresentativesPreimages() {
   MacroRegisterFunctionWithName("SubgroupRootReflections::ComputeCCSizesRepresentativesPreimages");
   if (this->theDynkinType == this->theWeylData->theDynkinType && this->theWeylData->theGroup.flagCCRepresentativesComputed) {
-    this->theSubgroupData.theSubgroup->conjugacyClasseS.SetSize(this->theSubgroupData.theGroup->conjugacyClasseS.size);
+    this->theSubgroupData.theSubgroup->conjugacyClasseS.setSize(this->theSubgroupData.theGroup->conjugacyClasseS.size);
     for (int i = 0; i < this->theSubgroupData.theSubgroup->conjugacyClasseS.size; i ++) {
       this->theSubgroupData.theSubgroup->conjugacyClasseS[i].flagRepresentativeComputed = true;
       this->theSubgroupData.theSubgroup->conjugacyClasseS[i].representative = this->theSubgroupData.theGroup->conjugacyClasseS[i].representative;
       this->theSubgroupData.theSubgroup->conjugacyClasseS[i].size = this->theSubgroupData.theGroup->conjugacyClasseS[i].size;
       this->theSubgroupData.theSubgroup->conjugacyClasseS[i].flagElementsComputed = false;
     }
-    this->theSubgroupData.ccRepresentativesPreimages.SetSize(this->theSubgroupData.theGroup->conjugacyClasseS.size);
+    this->theSubgroupData.ccRepresentativesPreimages.setSize(this->theSubgroupData.theGroup->conjugacyClasseS.size);
     for (int i = 0; i < this->theSubgroupData.ccRepresentativesPreimages.size; i ++) {
       this->theSubgroupData.ccRepresentativesPreimages[i] = i;
     }
@@ -1048,13 +1048,13 @@ void SubgroupDataRootReflections::ComputeCCSizesRepresentativesPreimages() {
 void SubgroupDataRootReflections::InitGenerators() {
   MacroRegisterFunctionWithName("SubgroupRootReflections::InitGenerators");
   if (this->theDynkinType.GetRank() == 0) {
-    this->theSubgroupData.theSubgroup->generators.SetSize(1);
+    this->theSubgroupData.theSubgroup->generators.setSize(1);
     this->theSubgroupData.theSubgroup->generators[0].makeIdentity(*this->theSubgroupData.theGroup);
     return;
   }
   int d = this->SubCartanSymmetric.NumRows;
-  this->theSubgroupData.generatorPreimages.SetSize(d);
-  this->theSubgroupData.theSubgroup->generators.SetSize(d);
+  this->theSubgroupData.generatorPreimages.setSize(d);
+  this->theSubgroupData.theSubgroup->generators.setSize(d);
   ElementWeylGroup currentReflection;
   for (int i = 0; i < d; i ++) {
     currentReflection.MakeRootReflection(this->generatingSimpleRoots[i], *this->theWeylData);
@@ -1144,7 +1144,7 @@ void WeylGroupData::GetSignSignatureAllRootSubsystems(List<SubgroupDataRootRefle
   theRootSAs.owner = &theSSlieAlg;
   theRootSAs.ComputeAllReductiveRootSubalgebrasUpToIsomorphism();
   List<Vectors<Rational> > theRootSAsBases;
-  theRootSAsBases.SetExpectedSize(theRootSAs.theSubalgebras.size);
+  theRootSAsBases.setExpectedSize(theRootSAs.theSubalgebras.size);
   for (int i = theRootSAs.theSubalgebras.size - 1; i >= 0; i --) {
     theRootSAsBases.addOnTop(theRootSAs.theSubalgebras[i].SimpleBasisK);
   }
@@ -1161,7 +1161,7 @@ void WeylGroupData::GetSignSignatureParabolics(List<SubgroupDataRootReflections>
   Selection sel;
   sel.init(this->GetDim());
   int numCycles = MathRoutines::TwoToTheNth(sel.MaxSize);
-  outputSubgroups.SetSize(numCycles);
+  outputSubgroups.setSize(numCycles);
   ElementWeylGroup g;
   g.owner = this;
 //  global.Comments << "<hr>Meself is: " << this->toString();
@@ -1192,8 +1192,8 @@ void WeylGroupData::GetSignSignatureExtendedParabolics(List<SubgroupDataRootRefl
   Vectors<Rational> extendedBasis, currentBasisExtendedParabolic;
   extendedBasis.MakeEiBasis(this->GetDim());
   extendedBasis.addOnTop(this->RootSystem[0]);
-  outputSubgroups.SetExpectedSize(MathRoutines::TwoToTheNth(this->GetDim()));
-  outputSubgroups.SetSize(0);
+  outputSubgroups.setExpectedSize(MathRoutines::TwoToTheNth(this->GetDim()));
+  outputSubgroups.setSize(0);
   SubgroupDataRootReflections theSG;
   do {
     extendedBasis.SubSelection(parSelrootsAreInLevi, currentBasisExtendedParabolic);
@@ -1221,7 +1221,7 @@ void WeylGroupData::GetSignSignatureRootSubgroups(
   ClassFunction<WeylGroupData::WeylGroupBase, Rational> signRep;
   signRep.G = &(this->theGroup);
   this->GetSignCharacter(signRep.data);
-  outputSubgroups.SetSize(rootsGeneratingReflections.size);
+  outputSubgroups.setSize(rootsGeneratingReflections.size);
   ElementWeylGroup g;
   g.owner = this;
   for (int i = 0; i < outputSubgroups.size; i ++) {

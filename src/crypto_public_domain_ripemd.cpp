@@ -416,7 +416,7 @@ void CryptoPublicDomain::computeRIPEMD160(const std::string& input, List<unsigne
   MacroRegisterFunctionWithName("Crypto::computeRIPEMD160");
   Ripemd160State md;
   ripemd160_init(&md);
-  output.SetSize(20);
+  output.setSize(20);
   ripemd160_process(&md, reinterpret_cast<const unsigned char*>(input.c_str()), input.size());
   ripemd160_done(&md, output.theObjects);
 }

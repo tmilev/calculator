@@ -416,7 +416,7 @@ bool CalculatorFunctionsBinaryOps::innerTensorEltTensorByEltTensor(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerTensorEltTensorByEltTensor");
   theCommands.CheckInputNotSameAsOutput(input, output);
-  if (!input.IsListNElements(3)) {
+  if (input.size() != 3) {
     return false;
   }
   Expression inputConverted;
@@ -1761,7 +1761,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplySequenceByMatrix(
     return false;
   }
   List<Expression> theResult;
-  theResult.SetSize(matCols);
+  theResult.setSize(matCols);
   for (int i = 0; i < theResult.size; i ++) {
     for (int j = 0; j < matRows; j ++) {
       if (j == 0) {
@@ -2376,7 +2376,7 @@ bool CalculatorFunctionsBinaryOps::innerSetMinus(
     return false;
   }
   HashedList<Expression> resultEs;
-  resultEs.SetExpectedSize(leftSetE.size() - 1);
+  resultEs.setExpectedSize(leftSetE.size() - 1);
   for (int i = 1; i < leftSetE.size(); i ++) {
     resultEs.addOnTop(leftSetE[i]);
   }
@@ -2592,4 +2592,33 @@ bool CalculatorFunctionsBinaryOps::innerPowerEllipticCurveZmodPElementByInteger(
   unit.makeOne(theElt.owner);
   MathRoutines::RaiseToPower(theElt, thePower, unit);
   return output.AssignValueWithContext(theElt, input[1].GetContext(), theCommands);
+}
+
+bool CalculatorFunctionsBinaryOps::innerPolynomialModPModuloPolynomialModP(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPolynomialModPModuloPolynomialModP");
+  if (input.size() != 3) {
+    return false;
+  }
+  if (
+    !input[1].IsOfType<Polynomial<ElementZmodP> >() ||
+    !input[2].IsOfType<Polynomial<ElementZmodP> >()
+  ) {
+    return false;
+  }
+  Expression inputConverted;
+  if (!input.MergeContextsMyArumentsAndConvertThem<Polynomial<ElementZmodP> >(
+    inputConverted, &theCommands.Comments
+  )) {
+    return false;
+  }
+  WithContext<Polynomial<ElementZmodP> > left, right;
+  if (
+    !inputConverted[1].IsOfTypeWithContext(&left) ||
+    !inputConverted[2].IsOfTypeWithContext(&right)
+  ) {
+    return false;
+  }
+  return false;
 }

@@ -161,12 +161,12 @@ void LargeIntegerUnsigned::WriteBigEndianBytes(
 }
 
 void LargeIntegerUnsigned::makeOne() {
-  this->theDigits.SetSize(1);
+  this->theDigits.setSize(1);
   this->theDigits[0] = 1;
 }
 
 void LargeIntegerUnsigned::makeZero() {
-  this->theDigits.SetSize(1);
+  this->theDigits.setSize(1);
   this->theDigits[0] = 0;
 }
 
@@ -647,7 +647,7 @@ void LargeIntegerUnsigned::ElementToStringLargeElementDecimal(std::string& outpu
   List<LargeIntegerUnsigned> bufferPowersOfBase;
   int initialNumDigitsEstimate = MaxNumIntegersPerCarryOverBound*this->theDigits.size;
   int sizeBufferPowersOfBase = MathRoutines::Minimum(initialNumDigitsEstimate, 10000);
-  bufferPowersOfBase.SetSize(sizeBufferPowersOfBase);
+  bufferPowersOfBase.setSize(sizeBufferPowersOfBase);
   LargeIntegerUnsigned currentPower;
   LargeIntegerUnsigned Remainder = *this;
   int numRemainingDigits;
@@ -697,7 +697,7 @@ void LargeIntegerUnsigned::ElementToStringLargeElementDecimal(std::string& outpu
 }
 
 LargeIntegerUnsigned::LargeIntegerUnsigned() {
-  this->theDigits.SetSize(1);
+  this->theDigits.setSize(1);
   this->theDigits[0] = 0;
 }
 
@@ -716,7 +716,7 @@ void LargeIntegerUnsigned::AddShiftedUIntSmallerThanCarryOverBound(unsigned int 
   while (x > 0) {
     if (shift >= this->theDigits.size) {
       int oldsize = this->theDigits.size;
-      this->theDigits.SetSize(shift + 1);
+      this->theDigits.setSize(shift + 1);
       for (int i = oldsize; i < this->theDigits.size; i ++) {
         this->theDigits[i] = 0;
       }
@@ -768,7 +768,7 @@ unsigned int LargeIntegerUnsigned::LogarithmBaseNCeiling(unsigned int theBase) c
 }
 
 void LargeIntegerUnsigned::AssignUInt64(uint64_t x) {
-  this->theDigits.SetSize(0);
+  this->theDigits.setSize(0);
   while (x > 0) {
     uint64_t nextDigit = x % LargeIntegerUnsigned::CarryOverBound;
     this->theDigits.addOnTop(static_cast<int>(nextDigit));
@@ -796,7 +796,7 @@ void LargeIntegerUnsigned::AssignShiftedUInt(unsigned int x, int shift) {
 void LargeIntegerUnsigned::AddNoFitSize(const LargeIntegerUnsigned& x) {
   MacroIncrementCounter(Rational::TotalLargeAdditions);
   int oldsize = this->theDigits.size;
-  this->theDigits.SetSize(MathRoutines::Maximum(this->theDigits.size, x.theDigits.size) + 1);
+  this->theDigits.setSize(MathRoutines::Maximum(this->theDigits.size, x.theDigits.size) + 1);
   for (int i = oldsize; i < this->theDigits.size; i ++) {
     this->theDigits[i] = 0;
   }
@@ -852,7 +852,7 @@ void LargeIntegerUnsigned::PadWithZeroesToAtLeastNDigits(int desiredMinNumDigits
     return;
   }
   int i = this->theDigits.size;
-  this->theDigits.SetSize(desiredMinNumDigits);
+  this->theDigits.setSize(desiredMinNumDigits);
   for (; i < desiredMinNumDigits; i ++) {
     this->theDigits[i] = 0;
   }
@@ -921,7 +921,7 @@ void LargeIntegerUnsigned::MultiplyBy(const LargeIntegerUnsigned& x, LargeIntege
     return thisCopy.MultiplyBy(xCopy, output);
   }
   MacroIncrementCounter(Rational::TotalLargeMultiplications);
-  output.theDigits.SetSize(x.theDigits.size + this->theDigits.size);
+  output.theDigits.setSize(x.theDigits.size + this->theDigits.size);
   for (int i = 0; i < output.theDigits.size; i ++) {
     output.theDigits[i] = 0;
   }
@@ -1020,7 +1020,7 @@ void LargeIntegerUnsigned::FitSize() {
       break;
     }
   }
-  this->theDigits.SetSize(newSize);
+  this->theDigits.setSize(newSize);
 }
 
 void LargeIntegerUnsigned::AccountFactor(
@@ -1058,8 +1058,8 @@ bool LargeIntegerUnsigned::FactorLargeReturnFalseIfFactorizationIncomplete(
     global.fatal << "This is a programming error: it was requested that I factor 0, which is forbidden. " << global.fatal;
   }
   LargeIntegerUnsigned toBeFactored = *this;
-  outputFactors.SetSize(0);
-  outputMultiplicites.SetSize(0);
+  outputFactors.setSize(0);
+  outputMultiplicites.setSize(0);
   if (dontSearchForDivisorsLargerThan <= 0) {
     dontSearchForDivisorsLargerThan = 100000;
   }
@@ -1111,8 +1111,8 @@ bool LargeIntegerUnsigned::FactorReturnFalseIfFactorizationIncomplete(
     global.fatal << "This is a programming error: it was requested that I factor 0, which is forbidden." << global.fatal;
   }
   unsigned int toBeFactored = static_cast<unsigned>(this->theDigits[0]);
-  outputFactors.SetSize(0);
-  outputMultiplicites.SetSize(0);
+  outputFactors.setSize(0);
+  outputMultiplicites.setSize(0);
   int upperboundPrimeDivisors = static_cast<int>(FloatingPoint::Sqrt(static_cast<double>(toBeFactored)));
   List<bool> theSieve;
   theSieve.initializeFillInObject(upperboundPrimeDivisors + 1, true);
@@ -1374,7 +1374,7 @@ bool LargeInteger::GetDivisors(List<int>& output, bool includeNegative) {
   if (val > 50000) {
     return false;
   }
-  output.SetSize(0);
+  output.setSize(0);
   for (int i = 1; i <= val; i ++) {
     if (val % i == 0) {
       output.addOnTop(i);

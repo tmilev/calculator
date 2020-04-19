@@ -79,7 +79,7 @@ public:
   void operator=(const List<any>& other) {
     this->reset();
     this->theType = JSData::token::tokenArray;
-    this->theList.SetSize(other.size);
+    this->theList.setSize(other.size);
     for (int i = 0; i < other.size; i ++) {
       this->theList[i] = other[i];
     }

@@ -82,7 +82,7 @@ int IntIdentity(const int& x) {
 bool Calculator::GetVectorExpressions(const Expression& input, List<Expression>& output, int targetDimNonMandatory) {
   MacroRegisterFunctionWithName("Calculator::GetVectorExpressions");
   output.Reserve(input.size());
-  output.SetSize(0);
+  output.setSize(0);
   if (!input.IsSequenceNElementS() && !input.StartsWith(this->opIntervalOpen())) {
     if (targetDimNonMandatory > 0) {
       if (targetDimNonMandatory != 1) {
@@ -328,7 +328,7 @@ void quasiDiffOp<coefficient>::GenerateBasisLieAlgebra(
       }
     }
   }
-  theElts.SetSize(theEltsConverted.size);
+  theElts.setSize(theEltsConverted.size);
   for (int i = 0; i < theEltsConverted.size; i ++) {
     theElts[i] = theEltsConverted[i];
   }
@@ -559,7 +559,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
       theGeneratorsItry.addOnTop(theGenerator);
     }
   }
-  theQDOs.SetSize(theGeneratorsItry.size);
+  theQDOs.setSize(theGeneratorsItry.size);
   out << "<table border =\"1\">";
   latexReport << "\\begin{longtable}{rll";
   for (int i = 0; i < theGeneratorsItry.size; i ++) {
@@ -569,7 +569,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
   << "} Differential operators corresponding to actions"
   << " of simple positive generators for the " << selInducing.toString() << "-parabolic subalgebra.}\\\\<br>";
   List<ModuleSSalgebra<RationalFunction > > theMods;
-  theMods.SetSize(theHws.size);
+  theMods.setSize(theHws.size);
   Vector<RationalFunction> tempV;
   int numStartingVars = hwContext.ContextGetNumContextVariables();
   std::stringstream reportFourierTransformedCalculatorCommands, reportCalculatorCommands;
@@ -590,9 +590,9 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
       Pone.makeOne(elementsNegativeNilrad.size + theMod.minimalNumberOfVariables());
       Pzero.makeZero();
       theMod.GetGenericUnMinusElt(true, genericElt, useNilWeight, ascending);
-      theWeylFormat.polyAlphabeT.SetSize(numStartingVars + elementsNegativeNilrad.size);
-      theWeylFormat.weylAlgebraLetters.SetSize(numStartingVars + elementsNegativeNilrad.size);
-      theUEformat.polyAlphabeT.SetSize(numStartingVars + elementsNegativeNilrad.size);
+      theWeylFormat.polyAlphabeT.setSize(numStartingVars + elementsNegativeNilrad.size);
+      theWeylFormat.weylAlgebraLetters.setSize(numStartingVars + elementsNegativeNilrad.size);
+      theUEformat.polyAlphabeT.setSize(numStartingVars + elementsNegativeNilrad.size);
       for (int k = 0; k < numStartingVars; k ++) {
         theWeylFormat.weylAlgebraLetters[k] = "error";
       }
@@ -763,7 +763,7 @@ bool Calculator::innerHWVCommon(
   }
   if (indexOfModule == - 1) {
     indexOfModule = theMods.size;
-    theMods.SetSize(theMods.size + 1);
+    theMods.setSize(theMods.size + 1);
     theMods.LastObject().reset();
   }
   ModuleSSalgebra<RationalFunction>& theMod = theMods[indexOfModule];
@@ -994,7 +994,7 @@ bool Calculator::innerKLcoeffs(Calculator& theCommands, const Expression& input,
     return output.AssignValue(out.str(), theCommands);
   }
   FormatExpressions theFormat;
-  theFormat.polyAlphabeT.SetSize(1);
+  theFormat.polyAlphabeT.setSize(1);
   theFormat.polyAlphabeT[0] = "q";
   out << "Our notation follows that of the original Kazhdan-Lusztig paper, "
   << "Representations of Coxeter Groups and Hecke Algebras.<br>";
@@ -1102,7 +1102,7 @@ bool Expression::HasInputBoxVariables(HashedList<std::string, MathRoutines::Hash
       return true;
     } else {
       result = true;
-      boxNames->AddOnTopNoRepetition(tempBox.name);
+      boxNames->addOnTopNoRepetition(tempBox.name);
     }
   }
   for (int i = 0; i < this->size(); i ++) {
@@ -1631,7 +1631,7 @@ bool Calculator::CollectCoefficientsPowersVar(
 
 bool Calculator::CollectOpands(const Expression& input, int theOp, List<Expression>& outputOpands) {
   MacroRegisterFunctionWithName("Calculator::CollectOpands");
-  outputOpands.SetSize(0);
+  outputOpands.setSize(0);
   return this->CollectOpandsAccumulate(input, theOp, outputOpands);
 }
 
@@ -2518,17 +2518,17 @@ void Calculator::WriteAutoCompleteKeyWordsToFile() {
 
 void Calculator::ComputeAutoCompleteKeyWords() {
   MacroRegisterFunctionWithName("Calculator::ComputeAutoCompleteKeyWords");
-  this->autoCompleteKeyWords.SetExpectedSize(this->operations.size() * 2);
+  this->autoCompleteKeyWords.setExpectedSize(this->operations.size() * 2);
   for (int i = 0; i < this->operations.size(); i ++) {
-    this->autoCompleteKeyWords.AddOnTopNoRepetition(this->operations.theKeys[i]);
+    this->autoCompleteKeyWords.addOnTopNoRepetition(this->operations.theKeys[i]);
   }
   for (int i = 0; i < this->namedRules.size(); i ++) {
-    this->autoCompleteKeyWords.AddOnTopNoRepetition(this->namedRules.theKeys[i]);
+    this->autoCompleteKeyWords.addOnTopNoRepetition(this->namedRules.theKeys[i]);
   }
   for (int i = 0; i < this->controlSequences.size; i ++) {
     if (this->controlSequences[i].size() > 0) {
       if (MathRoutines::isALatinLetter(this->controlSequences[i][0])) {
-        autoCompleteKeyWords.AddOnTopNoRepetition(this->controlSequences[i]);
+        autoCompleteKeyWords.addOnTopNoRepetition(this->controlSequences[i]);
       }
     }
   }
@@ -2840,10 +2840,10 @@ bool ObjectContainer::CheckConsistencyAfterReset() {
   // HashedListReferences<ElementEllipticCurve<Rational> > EllipticCurveElementsRational;
   // HashedListReferences<ElementTensorsGeneralizedVermas<RationalFunctionOld> > theTensorElts;
 
-  if (this->thePolys.size != 0) {
-    global.fatal << "The rational polynomials are expected to be empty, have: " << this->thePolys.size << " elements instead. " << global.fatal;
+  if (this->polynomialsRational.size != 0) {
+    global.fatal << "The rational polynomials are expected to be empty, have: " << this->polynomialsRational.size << " elements instead. " << global.fatal;
   }
-  // HashedListReferences<Polynomial<AlgebraicNumber> > thePolysOverANs;
+  // HashedListReferences<Polynomial<AlgebraicNumber> > polynomialsAlgebraic;
   // HashedListReferences<ElementWeylAlgebra<Rational> > theWeylAlgebraElements;
   // HashedListReferences<ElementUniversalEnveloping<RationalFunctionOld> > theUEs;
   // HashedListReferences<RationalFunctionOld> theRFs;
@@ -2885,13 +2885,14 @@ void ObjectContainer::reset() {
   this->theWeylGroupElements.Clear();
   this->theWeylGroupReps.Clear();
   this->theWeylGroupVirtualReps.Clear();
-  this->theCategoryOmodules.SetSize(0);
+  this->theCategoryOmodules.setSize(0);
   this->semisimpleLieAlgebras.Clear();
   this->semisimpleLieAlgebraPointers.Clear();
   this->theSSSubalgebraS.Clear();
   this->theTensorElts.Clear();
-  this->thePolys.Clear();
-  this->thePolysOverANs.Clear();
+  this->polynomialsRational.Clear();
+  this->polynomialsAlgebraic.Clear();
+  this->polynomialsModular.Clear();
   this->theWeylAlgebraElements.Clear();
   this->theUEs.Clear();
   this->theRFs.Clear();
@@ -2907,17 +2908,17 @@ void ObjectContainer::reset() {
   this->theMatTensorRats.Clear();
   //this->theMatRFs.Clear();
   this->theEltsModP.Clear();
-  this->thePlots.SetSize(0);
+  this->thePlots.setSize(0);
   this->theAlgebraicClosure.reset();
   this->theAlgebraicNumbers.Clear();
   this->theLittelmannOperators.Clear();
-  this->theSltwoSAs.SetSize(0);
-  //this->theMatDoubles.SetSize(0);
+  this->theSltwoSAs.setSize(0);
+  //this->theMatDoubles.setSize(0);
   //this->theMatsAlgebraic.Clear();
   //this->theMatPolyRational.Clear();
   this->theWeights.Clear();
   this->theWeightsPoly.Clear();
-  this->theHyperOctahedralGroups.SetSize(0);
+  this->theHyperOctahedralGroups.setSize(0);
   this->theElementsHyperOctGroup.Clear();
   this->CurrentRandomSeed = static_cast<int>(time(nullptr));
   this->theUserInputTextBoxesWithValues.Clear();
@@ -2945,7 +2946,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperators(
   MacroRegisterFunctionWithName("Calculator::innerWriteGenVermaModAsDiffOperators");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   Vectors<Polynomial<Rational> > theHWs;
-  theHWs.SetSize(1);
+  theHWs.setSize(1);
   Selection theParSel;
   WithContext<SemisimpleLieAlgebra*> theSSalgebra;
   Expression truncatedInput = input;

@@ -97,7 +97,7 @@ bool TransportLayerSecurity::SSLReadLoop(
     }
     return false;
   }
-  this->readBuffer.SetSize(this->readBufferStandardSize);
+  this->readBuffer.setSize(this->readBufferStandardSize);
   output = "";
   int i = 0;
   std::string next;
@@ -318,7 +318,7 @@ bool TransportLayerSecurityServer::WriteSSLRecords(
   if (this->spoofer.flagDoSpoof) {
     return this->spoofer.WriteSSLRecords(input);
   }
-  this->outgoingBytes.SetSize(0);
+  this->outgoingBytes.setSize(0);
   for (int i = 0; i < input.size; i ++) {
     input[i].WriteBytes(this->outgoingBytes, nullptr);
   }
@@ -421,7 +421,7 @@ bool TransportLayerSecurityServer::ReadBytesOnce(std::stringstream* commentsOnEr
   tv.tv_sec = 5;  // 5 Secs Timeout
   tv.tv_usec = 0;  // Not init'ing this can cause strange errors
   setsockopt(this->session.socketId, SOL_SOCKET, SO_RCVTIMEO, static_cast<void*>(&tv), sizeof(timeval));
-  this->incomingBytes.SetSize(this->defaultBufferCapacity);
+  this->incomingBytes.setSize(this->defaultBufferCapacity);
   int numBytesInBuffer = static_cast<int>(recv(
     this->session.socketId,
     this->incomingBytes.theObjects,
@@ -429,7 +429,7 @@ bool TransportLayerSecurityServer::ReadBytesOnce(std::stringstream* commentsOnEr
     0
   ));
   if (numBytesInBuffer >= 0) {
-    this->incomingBytes.SetSize(numBytesInBuffer);
+    this->incomingBytes.setSize(numBytesInBuffer);
   }
   global << "Read bytes:\n"
   << Crypto::ConvertListUnsignedCharsToHexFormat(this->incomingBytes, 40, false) << logger::endL;
@@ -450,9 +450,9 @@ void SSLContent::resetExceptOwner() {
   this->flagRenegotiate            = false;
   this->flagIncomingRandomIncluded = false;
   this->flagOutgoingRandomIncluded = false;
-  this->extensions             .SetSize(0);
-  this->sessionId              .SetSize(0);
-  this->challenge              .SetSize(0);
+  this->extensions             .setSize(0);
+  this->sessionId              .setSize(0);
+  this->challenge              .setSize(0);
 }
 
 SSLContent::SSLContent() {
@@ -481,7 +481,7 @@ logger::StringHighligher SSLContent::getStringHighlighter() {
 
 std::string SSLContent::ToStringVersion() const {
   List<char> twoBytes;
-  twoBytes.SetSize(2);
+  twoBytes.setSize(2);
   twoBytes[0] = static_cast<char> (this->version / 256);
   twoBytes[1] = static_cast<char> (this->version % 256);
   std::stringstream out;
@@ -776,7 +776,7 @@ bool SSLContent::DecodeSupportedCiphers(std::stringstream* commentsOnFailure) {
     }
     return false;
   }
-  ciphers.SetSize(halfCipherLength);
+  ciphers.setSize(halfCipherLength);
   for (int i = 0; i < halfCipherLength; i ++) {
     ciphers[i].owner = this->owner->owner;
     if (!Serialization::ReadTwoByteInt(
@@ -921,7 +921,7 @@ bool SSLContent::DecodeExtensions(std::stringstream *commentsOnFailure) {
     }
     return false;
   }
-  this->extensions.SetSize(0);
+  this->extensions.setSize(0);
 
   while (this->owner->offsetDecoded < extensionsLimit) {
     SSLHelloExtension incoming;
@@ -963,20 +963,20 @@ void SSLHelloExtension::WriteBytes(
 
 void SSLHelloExtension::MakeGrease(SSLContent* inputOwner) {
   this->owner = inputOwner;
-  this->content.SetSize(0);
+  this->content.setSize(0);
   this->theType = (13 * 16 + 10) * 256 + (13 * 16 + 10); // 0xdada;
 }
 
 void SSLHelloExtension::MakeExtendedMasterSecret(SSLContent* inputOwner) {
   this->owner = inputOwner;
-  this->content.SetSize(0);
+  this->content.setSize(0);
   this->theType = SSLContent::tokensExtension::extendedMasterSecret;
 }
 
 void SSLHelloExtension::MakeEllipticCurvePointFormat(SSLContent* inputOwner) {
   this->owner = inputOwner;
   this->theType = SSLContent::tokensExtension::ellipticCurvePointFormat;
-  this->content.SetSize(0);
+  this->content.setSize(0);
   this->content.addOnTop(0);
   this->content.addOnTop(4);
   this->content.addOnTop(3);
@@ -1191,7 +1191,7 @@ bool Serialization::ReadBytesFixedLength(
     }
     return false;
   }
-  output.SetSize(desiredNumberOfBytes);
+  output.setSize(desiredNumberOfBytes);
   for (int i = 0; i < desiredNumberOfBytes; i ++) {
     output[i] = input[inputOutputOffset + i];
   }
@@ -1260,7 +1260,7 @@ bool Serialization::ReadNByteLengthFollowedByBytes(
     return false;
   }
   if (output != nullptr) {
-    output->SetSize(*resultLength);
+    output->setSize(*resultLength);
     for (int i = 0; i < *resultLength; i ++) {
       (*output)[i] = input[outputOffset + i];
     }
@@ -1331,7 +1331,7 @@ void Serialization::WriteNByteUnsigned(
     global.fatal << "Invalid byteCountOfLength: " << byteCountOfLength << global.fatal;
   }
   if (inputOutputOffset + byteCountOfLength > output.size) {
-    output.SetSize(inputOutputOffset + byteCountOfLength);
+    output.setSize(inputOutputOffset + byteCountOfLength);
   }
   for (int i = byteCountOfLength - 1 + inputOutputOffset; i >= inputOutputOffset; i --) {
     output[i] = static_cast<unsigned char>(input % 256);
@@ -1554,7 +1554,7 @@ JSData TransportLayerSecurityServer::Session::ToJSON() {
   result[TransportLayerSecurityServer::Session::JSLabels::bytesToSign                      ] = Crypto::ConvertListUnsignedCharsToHex(this->bytesToSign);
   JSData ciphers;
   ciphers.theType = JSData::token::tokenObject;
-  ciphers.theList.SetSize(this->incomingCiphers.size);
+  ciphers.theList.setSize(this->incomingCiphers.size);
   for (int i = 0; i < this->incomingCiphers.size; i ++) {
     CipherSuiteSpecification& current = this->incomingCiphers[i];
     ciphers[Crypto::ConvertIntToHex(current.id, 2)] = current.name;
@@ -1746,7 +1746,7 @@ bool TransportLayerSecurityServer::Session::ComputeAndSignEphemerealKey(std::str
   Crypto::Random::GetRandomLargeIntegerSecure(this->ephemerealPrivateKey, 32);
   this->chosenEllipticCurve = CipherSuiteSpecification::EllipticCurveSpecification::secp256k1;
   this->chosenEllipticCurveName = "secp256k1";
-  this->bytesToSign.SetSize(0);
+  this->bytesToSign.setSize(0);
   this->bytesToSign.addListOnTop(this->incomingRandomBytes);
   this->bytesToSign.addListOnTop(this->myRandomBytes);
   //
@@ -1809,7 +1809,7 @@ void SSLContent::PrepareServerHello1Start(SSLContent& clientHello) {
   Crypto::computeSha256(
     this->owner->owner->session.myRandomBytes, this->sessionId
   );
-  this->extensions.SetSize(0);
+  this->extensions.setSize(0);
   SSLHelloExtension newExtension;
   newExtension.MakeGrease(this);
   this->extensions.addOnTop(newExtension);
@@ -1821,7 +1821,7 @@ void SSLContent::PrepareServerHello1Start(SSLContent& clientHello) {
 
 void SSLRecord::resetExceptOwner() {
   this->content.resetExceptOwner();
-  this->incomingBytes.SetSize(0);
+  this->incomingBytes.setSize(0);
 }
 
 void SSLRecord::PrepareServerHello1Start(
@@ -1867,7 +1867,7 @@ bool TransportLayerSecurityServer::ReplyToClientHello(
 ) {
   (void) commentsOnFailure;
   (void) inputSocketID;
-  this->outgoingRecords.SetSize(0);
+  this->outgoingRecords.setSize(0);
   this->serverHelloStart.PrepareServerHello1Start(this->lastReaD);
   this->serverHelloCertificate.PrepareServerHello2Certificate();
   if (!this->serverHelloKeyExchange.PrepareServerHello3SecretExchange(
@@ -1878,7 +1878,7 @@ bool TransportLayerSecurityServer::ReplyToClientHello(
     }
     return false;
   }
-  this->outgoingBytes.SetSize(0);
+  this->outgoingBytes.setSize(0);
   if (!this->WriteSSLRecords(this->outgoingRecords, commentsOnFailure)) {
     global << "Error replying to client hello. ";
     if (commentsOnFailure != nullptr) {
@@ -1914,8 +1914,8 @@ bool TransportLayerSecurityServer::Session::SetIncomingRandomBytes(
 
 void TransportLayerSecurityServer::Session::initialize() {
   this->socketId = - 1;
-  this->incomingRandomBytes.SetSize(0);
-  this->incomingAlgorithmSpecifications.SetSize(0);
+  this->incomingRandomBytes.setSize(0);
+  this->incomingAlgorithmSpecifications.setSize(0);
   this->chosenCipher = 0;
   this->chosenSignatureAlgorithm = 0;
   this->chosenEllipticCurve = 0;
@@ -1924,10 +1924,10 @@ void TransportLayerSecurityServer::Session::initialize() {
     this->myRandomBytes, SSLContent::LengthRandomBytesInSSLHello
   );
   this->ephemerealPrivateKey = 0;
-  this->serverName.SetSize(0);
-  this->bytesToSign.SetSize(0);
-  this->signature.SetSize(0);
-  this->incomingCiphers.SetSize(0);
+  this->serverName.setSize(0);
+  this->bytesToSign.setSize(0);
+  this->signature.setSize(0);
+  this->incomingCiphers.setSize(0);
 }
 
 bool TransportLayerSecurityServer::HandShakeIamServer(
@@ -1991,7 +1991,7 @@ int TransportLayerSecurity::readOnce(
   bool useSSL = global.flagUsingSSLinCurrentConnection && global.flagSSLIsAvailable;
 
 
-  this->readBuffer.SetSize(this->readBufferStandardSize);
+  this->readBuffer.setSize(this->readBufferStandardSize);
   int result = - 1;
 
   if (useSSL) {

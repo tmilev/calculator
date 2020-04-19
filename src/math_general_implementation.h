@@ -202,7 +202,7 @@ void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy(
     theReport1.Report(reportStream.str());
   }
   bufferPoly.makeZero();
-  bufferPoly.SetExpectedSize(maxNumMonsFinal);
+  bufferPoly.setExpectedSize(maxNumMonsFinal);
   bufferPoly.CheckConsistency();
   bufferMon.CheckConsistency();
   coefficient theCoeff;
@@ -282,7 +282,7 @@ void MatrixTensor<coefficient>::operator*=(
     theReport1.Report(reportStream.str());
   }
   MatrixTensor<coefficient> result;
-  result.SetExpectedSize(maxNumMonsFinal);
+  result.setExpectedSize(maxNumMonsFinal);
   coefficient currentCoefficient;
   MonomialMatrix currentMonomial;
   for (int i = 0; i < other.size(); i ++) {
@@ -468,7 +468,7 @@ void Vectors<coefficient>::SelectABasisInSubspace(
       break;
     }
   }
-  output.SetSize(outputSelectedPivotColumns.CardinalitySelection);
+  output.setSize(outputSelectedPivotColumns.CardinalitySelection);
   for (int i = 0; i < output.size; i ++) {
     theMat.GetVectorFromRow(i, output[i]);
   }

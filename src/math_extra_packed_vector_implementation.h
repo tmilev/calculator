@@ -75,7 +75,7 @@ scalar PackedVector<scalar>::operator[](int i) const {
 }
 
 template <typename scalar>
-void PackedVector<scalar>::SetSize(int s) {
+void PackedVector<scalar>::setSize(int s) {
   if (s > this->size) {
     global.Comments << "if this was intentional, recompile PackedVector with size>=" << s << "\n";
     assert(false);

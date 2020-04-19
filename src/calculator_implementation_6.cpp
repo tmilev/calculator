@@ -38,8 +38,8 @@ bool CalculatorHTML::Test::ComputeTotalFiles() {
     this->errorComments += commentsOnFailure.str();
     return false;
   }
-  this->fileNames.SetSize(0);
-  this->fileNames.SetExpectedSize(this->fileNames.size);
+  this->fileNames.setSize(0);
+  this->fileNames.setExpectedSize(this->fileNames.size);
   for (int i = 0; i < this->fileNamesAll.size; i ++) {
     if (this->fileExtensionsAll[i] == ".html") {
       this->fileNames.addOnTop(this->fileNamesAll[i]);
@@ -212,7 +212,7 @@ bool CalculatorHTML::Test::OneProblemTest::Run() {
   }
   std::stringstream randomSeedStream;
   randomSeedStream << theProblem.theProblemData.randomSeed;
-  this->answers.SetSize(theProblem.theProblemData.theAnswers.size());
+  this->answers.setSize(theProblem.theProblemData.theAnswers.size());
   this->flagAllBuiltInAnswersOK = true;
   global.SetWebInpuT(WebAPI::problem::fileName, theProblem.fileName);
   global.SetWebInpuT(WebAPI::problem::randomSeed, randomSeedStream.str());
@@ -284,7 +284,7 @@ bool CalculatorHTML::Test::BuiltInMultiple(
   std::stringstream* comments
 ) {
   List<int> randomSeeds;
-  randomSeeds.SetSize(numberOfRepetitions);
+  randomSeeds.setSize(numberOfRepetitions);
   ProgressReport theReport;
   for (int i = 0; i < numberOfRepetitions; i ++) {
     randomSeeds[i] = inputRandomSeed + i;
@@ -345,12 +345,12 @@ bool CalculatorHTML::Test::BuiltIn(
     this->flagCorrectedTotalFiles = true;
   }
   bool result = true;
-  this->results.SetExpectedSize(this->filesToInterpret);
-  this->results.SetSize(0);
+  this->results.setExpectedSize(this->filesToInterpret);
+  this->results.setSize(0);
   std::stringstream commentsOnFailure;
   int badSoFar = 0;
   for (int i = this->firstFileIndex; i < lastIndex; i ++) {
-    this->results.SetSize(this->results.size + 1);
+    this->results.setSize(this->results.size + 1);
     OneProblemTest& currentTest = *this->results.LastObject();
     currentTest.fileName = "problems/" + this->fileNames[i];
     currentTest.randomSeed = this->randomSeed;
@@ -743,9 +743,9 @@ bool CalculatorFunctions::innerPlotDirectionOrVectorField(
   List<std::string> lowLeftStrings, upRightStrings;
   lowLeft.ToListStringsBasicType(lowLeftStrings);
   upRight.ToListStringsBasicType(upRightStrings);
-  thePlotObj.theVarRangesJS.SetSize(2);
-  thePlotObj.theVarRangesJS[0].SetSize(2);
-  thePlotObj.theVarRangesJS[1].SetSize(2);
+  thePlotObj.theVarRangesJS.setSize(2);
+  thePlotObj.theVarRangesJS[0].setSize(2);
+  thePlotObj.theVarRangesJS[1].setSize(2);
   thePlotObj.theVarRangesJS[0][0] = lowLeftStrings[0];
   thePlotObj.theVarRangesJS[0][1] = upRightStrings[0];
   thePlotObj.theVarRangesJS[1][0] = lowLeftStrings[1];
@@ -780,7 +780,7 @@ bool CalculatorFunctions::innerPlotDirectionOrVectorField(
     }
   }
   thePlotObj.variablesInPlay.QuickSortAscending();
-  thePlotObj.variablesInPlayJS.SetSize(thePlotObj.variablesInPlay.size);
+  thePlotObj.variablesInPlayJS.setSize(thePlotObj.variablesInPlay.size);
   for (int i = 0; i < thePlotObj.variablesInPlay.size; i ++) {
     thePlotObj.variablesInPlayJS[i] = thePlotObj.variablesInPlay[i].toString();
   }
@@ -793,7 +793,7 @@ bool CalculatorFunctions::innerPlotDirectionOrVectorField(
     << "<hr>Could not extract a list of elements for the "
     << "number of segments from: " << input[4].toString();
   }
-  thePlotObj.numSegmenTsJS.SetSize(2);
+  thePlotObj.numSegmenTsJS.setSize(2);
   for (int i = 0; i < 2; i ++) {
     if (!CalculatorFunctions::functionMakeJavascriptExpression(
       theCommands, input[4][i + 1], jsConverterE
@@ -1343,7 +1343,7 @@ bool CalculatorFunctions::innerApplyToList(Calculator& theCommands, const Expres
     return false;
   }
   List<Expression> result;
-  result.SetSize(input[2].size() - 1);
+  result.setSize(input[2].size() - 1);
   for (int i = 1; i < input[2].size(); i ++) {
     result[i - 1].reset(theCommands);
     result[i - 1].AddChildOnTop(theFun);
@@ -1357,22 +1357,22 @@ bool CalculatorFunctions::innerPolynomialDivisionQuotient(
 ) {
   MacroRegisterFunctionWithName("Calculator::innerPolynomialDivisionQuotient");
   Expression theContext;
-  Vector<Polynomial<AlgebraicNumber> > thePolys;
-  if (!theCommands.GetListPolynomialVariableLabelsLexicographic(input, thePolys, theContext)) {
+  Vector<Polynomial<AlgebraicNumber> > polynomialsRational;
+  if (!theCommands.GetListPolynomialVariableLabelsLexicographic(input, polynomialsRational, theContext)) {
     return output.MakeError("Failed to extract list of polynomials. ", theCommands);
   }
   GroebnerBasisComputation<AlgebraicNumber> theGB;
   theGB.flagStoreQuotients = true;
-  theGB.theBasiS.SetSize(thePolys.size - 1);
-  for (int i = 1; i < thePolys.size; i ++) {
-    if (thePolys[i].IsEqualToZero()) {
+  theGB.theBasiS.setSize(polynomialsRational.size - 1);
+  for (int i = 1; i < polynomialsRational.size; i ++) {
+    if (polynomialsRational[i].IsEqualToZero()) {
       return output.MakeError("Division by zero.", theCommands);
     }
-    theGB.theBasiS[i - 1] = thePolys[i];
+    theGB.theBasiS[i - 1] = polynomialsRational[i];
   }
   Polynomial<AlgebraicNumber> outputRemainder;
   theGB.initializeForDivision(theGB.theBasiS);
-  theGB.RemainderDivisionByBasis(thePolys[0], &outputRemainder, - 1);
+  theGB.RemainderDivisionByBasis(polynomialsRational[0], &outputRemainder, - 1);
   Expression currentE, thePolyE;
   List<Expression> theList;
   for (int i = 0; i < theGB.theQuotients.size; i ++) {

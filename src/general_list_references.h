@@ -74,14 +74,14 @@ public:
     this->AllocateElements(desiredSize);
   }
   void Clear() {
-    this->SetSize(0);
+    this->setSize(0);
   }
-  void SetSize(int newSize) {
+  void setSize(int newSize) {
     //std::cout << "Setting size to: " << newSize << std::endl;
     this->AllocateElements(newSize);
     this->size = newSize;
   }
-  void SetExpectedSize(int theSize) {
+  void setExpectedSize(int theSize) {
     int newSize = (theSize * 6) / 5;
     if (newSize > 0) {
       this->AllocateElements(newSize);
@@ -125,7 +125,7 @@ public:
     }
   }
   void operator=(const List<Object>& other) {
-    this->SetSize(other.size);
+    this->setSize(other.size);
     for (int i = 0; i < other.size; i ++) {
       (*this)[i] = other[i];
     }
@@ -151,15 +151,15 @@ void ListReferences<Object>::AllocateElements(int newSize) {
     std::stringstream commentsOnCrash;
     commentsOnCrash << "This is a programming error: requested to set negative size "
     << newSize << " of List of References. If a "
-    << "List is to be set empty, then one should call SetSize(0), "
-    << "rather than provide a negative argument to SetSize.";
+    << "List is to be set empty, then one should call setSize(0), "
+    << "rather than provide a negative argument to setSize.";
     fatalCrash(commentsOnCrash.str());
   }
   if (newSize <= this->theReferences.size) {
     return;
   }
   int oldReferencesSize = this->theReferences.size;
-  this->theReferences.SetSize(newSize);
+  this->theReferences.setSize(newSize);
   for (int i = oldReferencesSize; i < newSize; i ++) {
     this->theReferences[i] = (new Object);
   }
@@ -185,7 +185,7 @@ void ListReferences<Object>::KillAllElements() {
 
 template<class Object>
 void ListReferences<Object>::addOnTop(const Object& o) {
-  this->SetSize(this->size + 1);
+  this->setSize(this->size + 1);
   (*this)[this->size - 1] = o;
 }
 
@@ -205,11 +205,11 @@ class HashedListReferences : public HashTemplate<Object, ListReferences<Object>,
   //Note The following function specializations are declared entirely in order to
   //facilitate autocomplete in my current IDE. If I find a better autocompletion
   //IDE the following should be removed.
-  inline void AddOnTopNoRepetition(const List<Object>& theList) {
-    this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::AddOnTopNoRepetition(theList);
+  inline void addOnTopNoRepetition(const List<Object>& theList) {
+    this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::addOnTopNoRepetition(theList);
   }
-  inline bool AddOnTopNoRepetition(const Object& o) {
-    return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::AddOnTopNoRepetition(o);
+  inline bool addOnTopNoRepetition(const Object& o) {
+    return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::addOnTopNoRepetition(o);
   }
   inline void addOnTop(const Object& o) {
     this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::addOnTop(o);

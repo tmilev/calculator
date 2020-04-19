@@ -57,7 +57,7 @@ public:
     if (theIndex == - 1) {
       theIndex = this->theKeys.size;
       this->theKeys.addOnTop(input);
-      this->theValues.SetSize(this->theValues.size + 1);
+      this->theValues.setSize(this->theValues.size + 1);
     }
     return this->theValues[theIndex];
   }
@@ -69,13 +69,13 @@ public:
     this->theValues.addOnTop(inputValue);
     this->theKeys.addOnTop(inputKey);
   }
-  void SetExpectedSize(int theSize) {
-    this->theKeys.SetExpectedSize(theSize);
-    this->theValues.SetExpectedSize(theSize);
+  void setExpectedSize(int theSize) {
+    this->theKeys.setExpectedSize(theSize);
+    this->theValues.setExpectedSize(theSize);
   }
   void Clear() {
     this->theKeys.Clear();
-    this->theValues.SetSize(0);
+    this->theValues.setSize(0);
   }
   int size() const {
     return this->theValues.size;
@@ -122,7 +122,7 @@ public:
     if (theIndex == - 1) {
       theIndex = this->theKeys.size;
       this->theKeys.addOnTop(input);
-      this->theValues.SetSize(this->theValues.size + 1);
+      this->theValues.setSize(this->theValues.size + 1);
     }
     return this->theValues[theIndex];
   }
@@ -134,13 +134,13 @@ public:
     this->theValues.addOnTop(inputValue);
     this->theKeys.addOnTop(inputKey);
   }
-  void SetExpectedSize(int theSize) {
-    this->theKeys.SetExpectedSize(theSize);
-    this->theValues.SetExpectedSize(theSize);
+  void setExpectedSize(int theSize) {
+    this->theKeys.setExpectedSize(theSize);
+    this->theValues.setExpectedSize(theSize);
   }
   void Clear() {
     this->theKeys.Clear();
-    this->theValues.SetSize(0);
+    this->theValues.setSize(0);
   }
   value& operator[](int i) const {
     return this->theValues[i];

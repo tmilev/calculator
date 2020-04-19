@@ -45,7 +45,7 @@ void PipePrimitive::Release() {
   MutexProcess::Release(this->pipeEnds[0]);
   MutexProcess::Release(this->pipeEnds[1]);
   this->numberOfBytesLastWrite = 0;
-  this->lastRead.SetSize(0);
+  this->lastRead.setSize(0);
 }
 
 std::string MutexProcess::lockContent = "!";
@@ -359,7 +359,7 @@ void Pipe::ReadLoop(List<char>& output) {
   this->CheckConsistency();
   MutexRecursiveWrapper& safetyFirst = global.MutexWebWorkerPipeReadLock;
   safetyFirst.LockMe(); // Prevent threads from locking one another.
-  this->metaData.lastRead.SetSize(0);
+  this->metaData.lastRead.setSize(0);
   this->metaData.ReadOnceIfFailThenCrash(true);
   int expectedBytes = 0;
   int offset = 0;
@@ -368,7 +368,7 @@ void Pipe::ReadLoop(List<char>& output) {
   Serialization::ReadFourByteInt(
     metaDataBuffer, offset, expectedBytes, nullptr
   );
-  output.SetSize(0);
+  output.setSize(0);
   while (output.size < expectedBytes) {
     this->thePipe.ReadOnceIfFailThenCrash(true);
     output.addListOnTop(this->thePipe.lastRead);
@@ -383,7 +383,7 @@ void Pipe::WriteOnceAfterEmptying(
   MutexLockGuard safety(global.MutexWebWorkerPipeWriteLock);
   this->theMutexPipe.Lock();
   this->thePipe.ReadOnceIfFailThenCrash(dontCrashOnFail);
-  this->thePipe.lastRead.SetSize(0);
+  this->thePipe.lastRead.setSize(0);
   this->thePipe.WriteOnceIfFailThenCrash(toBeSent, 0, dontCrashOnFail);
   this->theMutexPipe.Unlock();
 }
@@ -557,13 +557,13 @@ void Pipe::Release() {
 bool PipePrimitive::ReadOnceIfFailThenCrash(bool dontCrashOnFail) {
   MacroRegisterFunctionWithName("PipePrimitive::ReadOnceIfFailThenCrash");
   this->CheckConsistency();
-  this->lastRead.SetSize(0);
+  this->lastRead.setSize(0);
   if (this->pipeEnds[0] == - 1) {
     return false;
   }
   int counter = 0;
   const unsigned int bufferSize = 200000;
-  this->buffer.SetSize(bufferSize); // <-once the buffer is resized, this operation does no memory allocation and is fast.
+  this->buffer.setSize(bufferSize); // <-once the buffer is resized, this operation does no memory allocation and is fast.
   int numReadBytes = 0;
   for (;;) {
     numReadBytes = static_cast<int>(read(this->pipeEnds[0], this->buffer.theObjects, bufferSize));
@@ -591,7 +591,7 @@ bool PipePrimitive::ReadOnceIfFailThenCrash(bool dontCrashOnFail) {
     << "This is not supposed to happen: pipe read more than 150000 bytes. " << logger::endL;
   }
   if (numReadBytes > 0) {
-    this->buffer.SetSize(numReadBytes);
+    this->buffer.setSize(numReadBytes);
     this->lastRead = this->buffer;
   }
   return true;
@@ -831,7 +831,7 @@ std::string logger::getStamp() {
 }
 
 void logger::StringHighligher::reset() {
-  this->sections.SetSize(0);
+  this->sections.setSize(0);
 }
 
 logger::StringHighligher::Section::Section(int inputLength) {
@@ -896,15 +896,15 @@ bool MathRoutines::ParseListInt(
   const std::string& input, List<int>& result, std::stringstream* commentsOnFailure
 ) {
   List<char> delimiters;
-  delimiters.AddOnTopNoRepetition('\n');
-  delimiters.AddOnTopNoRepetition(',');
-  delimiters.AddOnTopNoRepetition('[');
-  delimiters.AddOnTopNoRepetition(']');
-  delimiters.AddOnTopNoRepetition('(');
-  delimiters.AddOnTopNoRepetition(')');
+  delimiters.addOnTopNoRepetition('\n');
+  delimiters.addOnTopNoRepetition(',');
+  delimiters.addOnTopNoRepetition('[');
+  delimiters.addOnTopNoRepetition(']');
+  delimiters.addOnTopNoRepetition('(');
+  delimiters.addOnTopNoRepetition(')');
   List<std::string> theNumbers;
   StringRoutines::StringSplitExcludeDelimiters(input, delimiters, theNumbers);
-  result.SetSize(theNumbers.size);
+  result.setSize(theNumbers.size);
   for (int i = 0; i < theNumbers.size; i ++) {
     LargeInteger theInt;
     bool success = theInt.AssignStringFailureAllowed(theNumbers[i], commentsOnFailure);
@@ -915,7 +915,7 @@ bool MathRoutines::ParseListInt(
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Integer at position " << i << " is too large. ";
       }
-      result.SetSize(0);
+      result.setSize(0);
       return false;
     }
   }

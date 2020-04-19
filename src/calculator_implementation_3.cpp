@@ -125,7 +125,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
   List<HashedList<Vector<Rational> > > outputWeightsByHeight;
   int topHeightRootSystem = this->AmbientWeyl->RootsOfBorel.LastObject()->SumCoords().NumShort;
   int topHeightRootSystemPlusOne = topHeightRootSystem + 1;
-  outputWeightsByHeight.SetSize(topHeightRootSystemPlusOne);
+  outputWeightsByHeight.setSize(topHeightRootSystemPlusOne);
   int finalHashSize = 100;
   for (int i = 0; i < topHeightRootSystemPlusOne; i ++) {
     outputWeightsByHeight[i].SetHashSizE(finalHashSize);
@@ -157,7 +157,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
           if (currentWeightRaisedToDominantWRTAmbientAlgebra.IsNegativeOrZero()) {
             int currentIndexShift = this->AmbientWeyl->RootsOfBorel[i].SumCoords().NumShort;
             currentIndexShift = (currentIndexShift + bufferIndexShift) % topHeightRootSystemPlusOne;
-            if (outputWeightsByHeight[currentIndexShift].AddOnTopNoRepetition(currentWeight)) {
+            if (outputWeightsByHeight[currentIndexShift].addOnTopNoRepetition(currentWeight)) {
               numTotalWeightsFound ++;
               outputWeightsByHeight[currentIndexShift].AdjustHashes();
             }
@@ -293,7 +293,7 @@ std::string LittelmannPath::GenerateOrbitAndAnimate() {
     out  << "<b>Not all paths were genenerated, only the first " << theOrbit.size << "</b>";
   }
   Vectors<double> coxPlane;
-  coxPlane.SetSize(2);
+  coxPlane.setSize(2);
   this->owner->GetCoxeterPlane(coxPlane[0], coxPlane[1]);
   DrawingVariables animated, collapsed;
   this->owner->DrawRootSystem(animated, true, true);
@@ -412,11 +412,11 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg(
   Selection InvertedLeviInSmall;
   InvertedLeviInSmall = LeviInSmall;
   InvertedLeviInSmall.InvertSelection();
-  eigenSpacesPerSimpleGenerator.SetSize(InvertedLeviInSmall.CardinalitySelection);
+  eigenSpacesPerSimpleGenerator.setSize(InvertedLeviInSmall.CardinalitySelection);
   Vectors<coefficient> tempSpace1, tempSpace2;
   MemorySaving<Vectors<coefficient> > tempEigenVects;
   Vectors<coefficient>& theFinalEigenSpace = (outputEigenSpace == nullptr) ? tempEigenVects.GetElement() : *outputEigenSpace;
-  theFinalEigenSpace.SetSize(0);
+  theFinalEigenSpace.setSize(0);
   if (InvertedLeviInSmall.CardinalitySelection == 0) {
     theFinalEigenSpace.MakeEiBasis(this->GetDim());
   }
@@ -465,7 +465,7 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg(
   hwFundCoordsNilPart -= this->theHWFDpartFundamentalCoordS;
   ElementUniversalEnveloping<coefficient> currentElt, tempElt;
   if (outputEigenVectors != nullptr) {
-    outputEigenVectors->SetSize(0);
+    outputEigenVectors->setSize(0);
   }
   for (int j = 0; j < theFinalEigenSpace.size; j ++) {
     out << "<tr><td>";
@@ -532,7 +532,7 @@ void Calculator::MakeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output) {
   g_m1plusg_m3.MakeGenerator(6, output.theRange());
   tempElt.MakeGenerator     (8, output.theRange());
   g_m1plusg_m3 += tempElt;
-  output.imagesSimpleChevalleyGenerators.SetSize(4);
+  output.imagesSimpleChevalleyGenerators.setSize(4);
   output.imagesSimpleChevalleyGenerators[0] = g_1plusg_3;
   output.imagesSimpleChevalleyGenerators[1] = g_2;
   output.imagesSimpleChevalleyGenerators[3] = g_m2;
@@ -692,7 +692,7 @@ bool Calculator::innerPrintB3G2branchingIntermediate(
             tempP.scaleNormalizeLeadingMonomial();
             latexTable2 << "$\\begin{array}{l}" << tempP.toString(&theG2B3Data.theFormat) << "\\end{array}$ & ";
             if (tempP.findOneVariableRationalRoots(tempList)) {
-              tempList2.AddOnTopNoRepetition(tempList);
+              tempList2.addOnTopNoRepetition(tempList);
               out << "<td>Rational roots: " << tempList.toString() << "</td>";
               latexTable2 << tempList2.toString();
             }
@@ -848,7 +848,7 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
           resultChar -= theCentralCharacter;
           resultChar.scaleNormalizeLeadingMonomial();
           resultChar *= - 1;
-          theCentralChars.AddOnTopNoRepetition(resultChar);
+          theCentralChars.addOnTopNoRepetition(resultChar);
         }
       }
     }
@@ -883,11 +883,11 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
 }
 
 void branchingData::resetOutputData() {
-  this->theEigenVectorS.SetSize(0);
-  this->theEigenVectorsLevi.SetSize(0);
-  this->outputEigenWords.SetSize(0);
-  this->g2Weights.SetSize(0);
-  this->outputWeightsFundCoordS.SetSize(0);
+  this->theEigenVectorS.setSize(0);
+  this->theEigenVectorsLevi.setSize(0);
+  this->outputEigenWords.setSize(0);
+  this->g2Weights.setSize(0);
+  this->outputWeightsFundCoordS.setSize(0);
   this->theCharacterDifferences.Clear();
 }
 
@@ -945,8 +945,8 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
     nullptr
   );
   theCommands << "<br>Time needed to make B3 irrep: " << global.GetElapsedSeconds() - timeAtStart;
-  theG2B3Data.g2Weights.SetSize(theG2B3Data.outputWeightsFundCoordS.size);
-  theG2B3Data.g2DualWeights.SetSize(theG2B3Data.outputWeightsFundCoordS.size);
+  theG2B3Data.g2Weights.setSize(theG2B3Data.outputWeightsFundCoordS.size);
+  theG2B3Data.g2DualWeights.setSize(theG2B3Data.outputWeightsFundCoordS.size);
   Matrix<Rational> invertedG2cartanMat;
   invertedG2cartanMat = theG2B3Data.theHmm.theDomain().theWeyl.CartanSymmetric;
   invertedG2cartanMat.Invert();
@@ -963,7 +963,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
     Vector<RationalFunction>& currentWeight = theG2B3Data.outputWeightsSimpleCoords[i];
     Vector<RationalFunction>& currentG2Weight = theG2B3Data.g2Weights[i];
     Vector<RationalFunction>& currentG2DualWeight = theG2B3Data.g2DualWeights[i];
-    currentG2DualWeight.SetSize(2);
+    currentG2DualWeight.setSize(2);
     currentG2DualWeight[0] = theG2B3Data.theHmm.theRange().theWeyl.RootScalarCartanRoot(
       currentWeight, theG2B3Data.theHmm.ImagesCartanDomain[0]
     );
@@ -979,7 +979,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
   ElementUniversalEnveloping<RationalFunction> theG2Casimir, theG2CasimirCopy, imageCasimirInB3, tempElt;
   theG2Casimir.MakeCasimir(theG2B3Data.theHmm.theDomain());
 
-  theG2B3Data.theChars.SetSize(theG2B3Data.outputWeightsFundCoordS.size);
+  theG2B3Data.theChars.setSize(theG2B3Data.outputWeightsFundCoordS.size);
   for (int i = 0; i < theG2B3Data.outputWeightsSimpleCoords.size; i ++) {
     Vector<RationalFunction>& currentG2DualWeight = theG2B3Data.g2DualWeights[i];
     theG2CasimirCopy = theG2Casimir;
@@ -990,11 +990,11 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
       theG2B3Data.theChars[i] = theG2CasimirCopy.coefficients[0];
     }
   }
-  theG2B3Data.theEigenVectorsLevi.SetSize(theG2B3Data.g2Weights.size);
-  theG2B3Data.theEigenVectorS.SetSize(theG2B3Data.g2Weights.size);
-  theG2B3Data.additionalMultipliers.SetSize(theG2B3Data.g2Weights.size);
-  theG2B3Data.theShapovalovProducts.SetSize(theG2B3Data.g2Weights.size);
-  theG2B3Data.theUEelts.SetSize(theG2B3Data.g2Weights.size);
+  theG2B3Data.theEigenVectorsLevi.setSize(theG2B3Data.g2Weights.size);
+  theG2B3Data.theEigenVectorS.setSize(theG2B3Data.g2Weights.size);
+  theG2B3Data.additionalMultipliers.setSize(theG2B3Data.g2Weights.size);
+  theG2B3Data.theShapovalovProducts.setSize(theG2B3Data.g2Weights.size);
+  theG2B3Data.theUEelts.setSize(theG2B3Data.g2Weights.size);
   ElementSumGeneralizedVermas<RationalFunction>& theHWV = *theG2B3Data.theEigenVectorsLevi.LastObject();
   theHWV.MakeHWV(theMod, 1);
   theHWV *= - 1;
@@ -1027,7 +1027,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
           currentTensorEltEigen.MultiplyMeByUEEltOnTheLeft(theG2CasimirCopy);
           charDiff = theG2B3Data.theChars[j];
           charDiff -= *theG2B3Data.theChars.LastObject();
-          theG2B3Data.theCharacterDifferences.AddOnTopNoRepetition(charDiff);
+          theG2B3Data.theCharacterDifferences.addOnTopNoRepetition(charDiff);
         }
       }
     }
@@ -1081,7 +1081,7 @@ bool Calculator::innerPrintAllVectorPartitions(Calculator& theCommands, const Ex
     return output.MakeError("Failed to extract weight you want partitioned from " + input[2].toString(), theCommands);
   }
   Vector<int> theHWint;
-  theHWint.SetSize(theHW.size);
+  theHWint.setSize(theHW.size);
   for (int i = 0; i < theHW.size; i ++) {
     if (!theHW[i].IsSmallInteger(&theHWint[i]) || theHW[i] < 0) {
       return output.MakeError(
@@ -1094,7 +1094,7 @@ bool Calculator::innerPrintAllVectorPartitions(Calculator& theCommands, const Ex
   std::stringstream out;
   out << "<br>the weight you want partitioned: " << theHWint;
   Vector<int> thePartition;
-  thePartition.SetSize(theSSalgebra.GetNumPosRoots());
+  thePartition.setSize(theSSalgebra.GetNumPosRoots());
   for (int i = 0; i < thePartition.size; i ++) {
     thePartition[i] = 0;
   }
@@ -1134,7 +1134,7 @@ void WeylGroupData::GetHighestWeightsAllRepsDimLessThanOrEqualTo(
   List<Vector<Rational> >& outputHighestWeightsFundCoords, int inputDimBound
 ) {
   if (inputDimBound < 1) {
-    outputHighestWeightsFundCoords.SetSize(0);
+    outputHighestWeightsFundCoords.setSize(0);
     return;
   }
   HashedList<Vector<Rational> > output;
@@ -1149,7 +1149,7 @@ void WeylGroupData::GetHighestWeightsAllRepsDimLessThanOrEqualTo(
       current[k] += 1;
       theDim = this->WeylDimFormulaFundamentalCoords(current);
       if (theDim < dimBound) {
-        output.AddOnTopNoRepetition(current);
+        output.addOnTopNoRepetition(current);
       }
       current[k] -= 1;
     }
@@ -1205,7 +1205,7 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
     }
   }
   List<List<Vector<Rational> > > theHighestWeights;
-  theHighestWeights.SetSize(theRanks.size);
+  theHighestWeights.setSize(theRanks.size);
   bool foundBad = false;
   Selection tempSel;
   std::stringstream latexReport;
@@ -1361,7 +1361,7 @@ bool Calculator::innerLSPath(Calculator& theCommands, const Expression& input, E
   }
   SemisimpleLieAlgebra& ownerSSalgebra = *theSSowner.content;
   Vectors<Rational> waypoints;
-  waypoints.SetSize(input.children.size - 2);
+  waypoints.setSize(input.children.size - 2);
   for (int i = 2; i < input.children.size; i ++) {
     if (!theCommands.GetVectoR<Rational>(
       input[i], waypoints[i - 2], nullptr, ownerSSalgebra.GetRank(), nullptr
@@ -1613,10 +1613,10 @@ bool Expression::AssignMatrixExpressions(
       theMatType.AddChildAtomOnTop(owner.opAlgNumber());
       break;
     case typePolyRat:
-      theMatType.AddChildAtomOnTop(owner.opPoly());
+      theMatType.AddChildAtomOnTop(owner.opPolynomialRational());
       break;
     case typePolyAlg:
-      theMatType.AddChildAtomOnTop(owner.opPolyOverANs());
+      theMatType.AddChildAtomOnTop(owner.opPolynomialAlgebraicNumbers());
       break;
     case typeRF:
       theMatType.AddChildAtomOnTop(owner.opRationalFunction());
@@ -1824,7 +1824,7 @@ bool Calculator::Test::WriteTestStrings(std::stringstream* commentsOnFailure) {
   MacroRegisterFunctionWithName("Calculator::WriteTestStrings");
   JSData result;
   result.theType = JSData::token::tokenArray;
-  result.theList.SetSize(this->commands.size());
+  result.theList.setSize(this->commands.size());
   for (int i = 0; i < this->commands.size(); i ++) {
     JSData nextEntry;
     nextEntry["input"] = this->commands.theKeys[i];

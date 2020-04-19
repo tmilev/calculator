@@ -39,7 +39,7 @@ void ElementWeylAlgebra<coefficient>::MultiplyTwoMonomials(
   SelectionWithDifferentMaxMultiplicities tempSel;
   int theDimensioN = MathRoutines::Maximum(left.minimalNumberOfVariables(), right.minimalNumberOfVariables());
   tempSel.Multiplicities.initializeFillInObject(theDimensioN, 0);
-  tempSel.MaxMultiplicities.SetSize(theDimensioN);
+  tempSel.MaxMultiplicities.setSize(theDimensioN);
   int theExpectedSize = 1;
   for (int i = 0; i < theDimensioN; i ++) {
     int powerDiffOp = 0;
@@ -59,7 +59,7 @@ void ElementWeylAlgebra<coefficient>::MultiplyTwoMonomials(
   output.makeZero();
   int numCycles = tempSel.TotalNumSubsetsMustBeSmalInt();
   Rational coeffBuff;
-  output.SetExpectedSize(theExpectedSize);
+  output.setExpectedSize(theExpectedSize);
   for (int i = 0; i < numCycles; i ++) {
     coeffBuff = 1;
     for (int k = 0; k<theDimensioN; k ++) {
@@ -281,7 +281,7 @@ void ElementWeylAlgebra<coefficient>::GetStandardOrderDiffOperatorCorrespondingT
   outputDO.AddMonomial(tempMon, 1);
   inputPower *= - 1;
   Polynomial<Rational> newMult;
-  newMult.MakeDegreeOne(0, indexVar, 1);
+  newMult.makeDegreeOne(0, indexVar, 1);
   for (int i = 0; i < inputPower; i ++) {
     outputDenominator *= newMult;
     newMult -= 1;

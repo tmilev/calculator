@@ -378,8 +378,8 @@ bool Calculator::ExpressionMatchesPattern(
     if (!input.StartsWith(thePattern.owner->opPlus())) {
       return false;
     }
-    matchedExpressions.theValues.SetSize(numMatchedExpressionsAtStart);
-    matchedExpressions.theKeys.SetSize(numMatchedExpressionsAtStart);
+    matchedExpressions.theValues.setSize(numMatchedExpressionsAtStart);
+    matchedExpressions.theKeys.setSize(numMatchedExpressionsAtStart);
     for (int i = 1; i < thePattern.size(); i ++) {
       if (!(this->ExpressionMatchesPattern(
         thePattern[i], input[thePattern.size() - i], matchedExpressions, commentsGeneral
@@ -479,7 +479,7 @@ StateMaintainerCalculator::~StateMaintainerCalculator() {
     }
   }
   this->owner->RuleStackCacheIndex = this->startingRuleStackIndex;
-  this->owner->RuleStack.children.SetSize(this->startingRuleStackSize);
+  this->owner->RuleStack.children.setSize(this->startingRuleStackSize);
   this->owner = nullptr;
 }
 
@@ -914,7 +914,7 @@ void Calculator::EvaluateLoop::LookUpCache() {
   }
   this->owner->cachedExpressions.addOnTop(theExpressionWithContext);
   this->indexInCache = this->owner->cachedExpressions.size - 1;
-  this->owner->imagesCachedExpressions.SetSize(this->indexInCache + 1);
+  this->owner->imagesCachedExpressions.setSize(this->indexInCache + 1);
   this->owner->imagesCachedExpressions.LastObject()->MakeError("Error: not computed yet.", *this->owner);
 }
 

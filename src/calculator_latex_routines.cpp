@@ -33,7 +33,7 @@ void LaTeXCrawler::ComputeAllowedFolders() {
   allowedFoldersVirtual.addOnTop("LaTeX-materials/");
   allowedFoldersVirtual.addOnTop("/freecalc/");
   allowedFoldersVirtual.addOnTop("/LaTeX-materials/");
-  this->baseFoldersCrawlableFilesPhysical.SetSize(allowedFoldersVirtual.size);
+  this->baseFoldersCrawlableFilesPhysical.setSize(allowedFoldersVirtual.size);
   for (int i = 0; i < this->baseFoldersCrawlableFilesPhysical.size; i ++) {
     FileOperations::GetPhysicalFileNameFromVirtual(
       allowedFoldersVirtual[i], this->baseFoldersCrawlableFilesPhysical[i], false, false, nullptr
@@ -378,7 +378,7 @@ void LaTeXCrawler::BuildFreecalC() {
     resultTable << "</tr>";
   }
   int numSlidesToBuild = this->slideTexInputCommands.size;
-  this->slideFileNamesVirtualNoPathNoExtensioN.SetSize(this->slideTexInputCommands.size);
+  this->slideFileNamesVirtualNoPathNoExtensioN.setSize(this->slideTexInputCommands.size);
   for (int i = 0; i < this->slideTexInputCommands.size; i ++) {
     this->slideFileNamesVirtualNoPathNoExtensioN[i] = "";
     if (this->slideTexInputCommands[i] == "") {
@@ -925,7 +925,7 @@ bool LaTeXCrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
   }
   bool result = true;
   int numProcessed = 0;
-  this->slideFileNamesVirtualWithPatH.SetSize(topicParser.sourcesHomeworkHeaders.size);
+  this->slideFileNamesVirtualWithPatH.setSize(topicParser.sourcesHomeworkHeaders.size);
   for (int i = 0; i < topicParser.sourcesHomeworkHeaders.size; i ++) {
     this->slideFileNamesVirtualWithPatH[i].fileName = topicParser.sourcesHomeworkHeaders[i];
     this->slideFileNamesVirtualWithPatH[i].isSolution = false;
@@ -976,7 +976,7 @@ bool LaTeXCrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
     }
   }
 
-  this->slideFileNamesVirtualWithPatH.SetSize(0);
+  this->slideFileNamesVirtualWithPatH.setSize(0);
   numProcessed = 0;
   this->AddSlidesOnTop(topicParser.slidesSourcesHeaders);
   for (int i = 0; i < topicParser.topics.theTopics.size(); i ++) {
@@ -992,7 +992,7 @@ bool LaTeXCrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
     << this->slideFileNamesVirtualWithPatH.ToStringCommaDelimited();
     theReport.Report(reportStream.str());
 
-    this->slideFileNamesVirtualWithPatH.SetSize(topicParser.slidesSourcesHeaders.size);
+    this->slideFileNamesVirtualWithPatH.setSize(topicParser.slidesSourcesHeaders.size);
     this->AddSlidesOnTop(currentElt.sourceSlides);
     this->desiredPresentationTitle = currentElt.title;
     this->flagForceSlideRebuild = true;

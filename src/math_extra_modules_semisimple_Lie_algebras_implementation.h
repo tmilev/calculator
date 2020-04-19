@@ -306,7 +306,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight(
   Vectors<coefficient> orbitDom;
   tempMon.owner = this->GetOwner();
   for (int i = 0; i < charAmbientFDWeyl.size(); i ++) {
-    orbitDom.SetSize(0);
+    orbitDom.setSize(0);
     if (!theFDWeyl.GenerateOrbitReturnFalseIfTruncated(
       theWeyL.GetSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoordS), orbitDom, false, 10000
     )) {
@@ -434,7 +434,7 @@ void ModuleSSalgebra<coefficient>::SplitOverLevi(
   out << "<br>Parabolic selection: " << splittingParSel.toString();
   List<List<Vector<coefficient> > > eigenSpacesPerSimpleGenerator;
   //if (false)
-  eigenSpacesPerSimpleGenerator.SetSize(splittingParSelectedInLevi.CardinalitySelection);
+  eigenSpacesPerSimpleGenerator.setSize(splittingParSelectedInLevi.CardinalitySelection);
   Vectors<coefficient> tempSpace1, tempSpace2;
   MemorySaving<Vectors<coefficient> > tempEigenVects;
   Vectors<coefficient>& theFinalEigenSpace = (outputEigenSpace == 0) ? tempEigenVects.GetElement() : *outputEigenSpace;
@@ -528,7 +528,7 @@ MatrixTensor<coefficient>& ModuleSSalgebra<coefficient>::GetActionSimpleGenerato
       List<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >&
       otherWordList = this->theGeneratingWordsIntGrouppedByWeight[weightLevelIndex];
       for (int j = 0; j < currentWordList.size; j ++) {
-        theScalarProds.SetSize(otherWordList.size);
+        theScalarProds.setSize(otherWordList.size);
         for (int k = 0; k < otherWordList.size; k ++) {
           if (generatorIndex > this->GetOwner().GetNumPosRoots()) {
             currentPair.Object1 = currentWordList[j];
@@ -580,15 +580,15 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW(
   }
   WeylGroupData& theWeyl = theAlgebrA.theWeyl;
   this->cachedPairs.Clear();
-  this->cachedTraces.SetSize(0);
+  this->cachedTraces.setSize(0);
 
   this->parabolicSelectionNonSelectedAreElementsLevi = selNonSelectedAreElementsLevi;
   this->parabolicSelectionSelectedAreElementsLevi = this->parabolicSelectionNonSelectedAreElementsLevi;
   this->parabolicSelectionSelectedAreElementsLevi.InvertSelection();
 
   this->theHWFundamentalCoordsBaseField = HWFundCoords;
-  this->theHWDualCoordsBaseFielD.SetSize(theRank);
-  this->theHWFDpartFundamentalCoordS.SetSize(theRank);
+  this->theHWDualCoordsBaseFielD.setSize(theRank);
+  this->theHWFDpartFundamentalCoordS.setSize(theRank);
 
   for (int i = 0; i < theRank; i ++) {
     this->theHWFDpartFundamentalCoordS[i] = 0;
@@ -632,14 +632,14 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW(
   tempCharMon.owner = nullptr;
   this->theCharOverH.makeZero();
   for (int i = 0; i < this->thePaths.size; i ++) {
-    this->theModuleWeightsSimpleCoords.AddOnTopNoRepetition(*this->thePaths[i].Waypoints.LastObject());
+    this->theModuleWeightsSimpleCoords.addOnTopNoRepetition(*this->thePaths[i].Waypoints.LastObject());
     tempCharMon.weightFundamentalCoordS = theWeyl.GetFundamentalCoordinatesFromSimple(*this->thePaths[i].Waypoints.LastObject());
     this->theCharOverH.AddMonomial(tempCharMon, 1);
   }
   this->theModuleWeightsSimpleCoords.QuickSortAscending();
   std::stringstream out2;
-  this->theGeneratingWordsGrouppedByWeight.SetSize(this->theModuleWeightsSimpleCoords.size);
-  this->theGeneratingWordsIntGrouppedByWeight.SetSize(this->theModuleWeightsSimpleCoords.size);
+  this->theGeneratingWordsGrouppedByWeight.setSize(this->theModuleWeightsSimpleCoords.size);
+  this->theGeneratingWordsIntGrouppedByWeight.setSize(this->theModuleWeightsSimpleCoords.size);
   for (int i = 0; i < this->theGeneratingWordsGrouppedByWeight.size; i ++) {
     this->theGeneratingWordsGrouppedByWeight[i].size = 0;
     this->theGeneratingWordsIntGrouppedByWeight[i].size = 0;
@@ -674,11 +674,11 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW(
     this->theGeneratingWordsIntGrouppedByWeight[theIndex].addOnTop(tempMonInt);
   }
   this->theGeneratingWordsNonReduced.Clear();
-  this->theGeneratingWordsNonReduced.SetExpectedSize(this->thePaths.size);
+  this->theGeneratingWordsNonReduced.setExpectedSize(this->thePaths.size);
   this->theGeneratingWordsNonReducedInt.Clear();
-  this->theGeneratingWordsNonReducedInt.SetExpectedSize(this->thePaths.size);
+  this->theGeneratingWordsNonReducedInt.setExpectedSize(this->thePaths.size);
   this->theGeneratingWordsNonReduced.size = 0;
-  this->theGeneratingWordsWeightsPlusWeightFDpart.SetSize(0);
+  this->theGeneratingWordsWeightsPlusWeightFDpart.setSize(0);
   this->theGeneratingWordsWeightsPlusWeightFDpart.Reserve(this->thePaths.size);
   for (int i = 0; i < this->theGeneratingWordsGrouppedByWeight.size; i ++) {
     List<MonomialUniversalEnveloping<coefficient> >& currentList = this->theGeneratingWordsGrouppedByWeight[i];
@@ -772,11 +772,11 @@ void ModuleSSalgebra<coefficient>::IntermediateStepForMakeFromHW(
   ProgressReport theReport;
   ProgressReport theReport2;
   Vector<Rational> targetWeight;
-  this->theBilinearFormsAtEachWeightLevel.SetSize(this->theGeneratingWordsGrouppedByWeight.size);
-  this->theBilinearFormsInverted.SetSize(this->theGeneratingWordsGrouppedByWeight.size);
+  this->theBilinearFormsAtEachWeightLevel.setSize(this->theGeneratingWordsGrouppedByWeight.size);
+  this->theBilinearFormsInverted.setSize(this->theGeneratingWordsGrouppedByWeight.size);
   this->ComputedGeneratorActions.init(this->GetOwner().GetNumGenerators());
-  this->actionsGeneratorS.SetSize(this->GetOwner().GetNumGenerators());
-  this->actionsGeneratorsMaT.SetSize(this->GetOwner().GetNumGenerators());
+  this->actionsGeneratorS.setSize(this->GetOwner().GetNumGenerators());
+  this->actionsGeneratorsMaT.setSize(this->GetOwner().GetNumGenerators());
   int numScalarProducts = 0;
   this->flagConjectureBholds = true;
   this->flagConjectureCholds = true;
@@ -827,7 +827,7 @@ void ModuleSSalgebra<coefficient>::GetElementsNilradical(
   SemisimpleLieAlgebra& ownerSS = this->GetOwner();
   ownerSS.OrderNilradical(this->parabolicSelectionNonSelectedAreElementsLevi, useNilWeight, ascending);
   ElementUniversalEnveloping<ResultType> theElt;
-  output.SetSize(0);
+  output.setSize(0);
   output.Reserve(ownerSS.GetNumPosRoots());
 
   int theBeginning = useNegativeNilradical ? 0: ownerSS.GetNumPosRoots() +ownerSS.GetRank();
@@ -835,7 +835,7 @@ void ModuleSSalgebra<coefficient>::GetElementsNilradical(
   if (outputListOfGenerators == nullptr) {
     outputListOfGenerators = &tempList.GetElement();
   }
-  outputListOfGenerators->SetSize(0);
+  outputListOfGenerators->setSize(0);
   outputListOfGenerators->Reserve(ownerSS.GetNumPosRoots());
   for (int i = theBeginning; i < theBeginning+ownerSS.GetNumPosRoots(); i ++) {
     if (this->IsNotInLevi(i)) {
@@ -939,7 +939,7 @@ void ModuleSSalgebra<coefficient>::ExpressAsLinearCombinationHomogenousElement(
   Vector <coefficient> theScalarProducts;
   List<MonomialUniversalEnveloping<coefficient> >& inputBasis =
   this->theGeneratingWordsGrouppedByWeight[indexInputBasis];
-  theScalarProducts.SetSize(inputBasis.size);
+  theScalarProducts.setSize(inputBasis.size);
 
   for (int i = 0; i < inputBasis.size; i ++) {
     std::stringstream tempStream;
@@ -965,8 +965,8 @@ void ModuleSSalgebra<coefficient>::ExpressAsLinearCombinationHomogenousElement(
 
 template <class coefficient>
 void ModuleSSalgebra<coefficient>::reset() {
-  this->actionsGeneratorsMaT.SetSize(0);
-  this->actionsGeneratorS.SetSize(0);
+  this->actionsGeneratorsMaT.setSize(0);
+  this->actionsGeneratorS.setSize(0);
   this->ComputedGeneratorActions.init(0);
   this->owner = nullptr;
   this->theGeneratingWordsNonReduced.Clear();
@@ -975,22 +975,22 @@ void ModuleSSalgebra<coefficient>::reset() {
   // [Update:] made a bug report on this in the gcc bug tracker.
   // This issue has officially been recognized as a gcc bug. Hope to get a fix soon.
   this->theGeneratingWordsNonReducedInt.Clear();
-  this->theGeneratingWordsWeightsPlusWeightFDpart.SetSize(0);
-  this->thePaths.SetSize(0);
-  this->theGeneratingWordsGrouppedByWeight.SetSize(0);
-  this->theGeneratingWordsIntGrouppedByWeight.SetSize(0);
+  this->theGeneratingWordsWeightsPlusWeightFDpart.setSize(0);
+  this->thePaths.setSize(0);
+  this->theGeneratingWordsGrouppedByWeight.setSize(0);
+  this->theGeneratingWordsIntGrouppedByWeight.setSize(0);
   //List<ElementUniversalEnveloping<coefficient> > theSimpleGens;
   //List<List<List<ElementUniversalEnveloping<coefficient> > > > actionsSimpleGens;
   //List<Matrix<coefficient> > actionsSimpleGensMatrixForM;
-  this->theBilinearFormsAtEachWeightLevel.SetSize(0);
-  this->theBilinearFormsInverted.SetSize(0);
+  this->theBilinearFormsAtEachWeightLevel.setSize(0);
+  this->theBilinearFormsInverted.setSize(0);
   //Vectors<Rational> weightsSimpleGens;
-  this->theHWDualCoordsBaseFielD.SetSize(0);
-  this->theHWSimpleCoordSBaseField.SetSize(0);
-  this->theHWFundamentalCoordsBaseField.SetSize(0);
-  this->theHWFDpartDualCoords.SetSize(0);
-  this->theHWFDpartSimpleCoordS.SetSize(0);
-  this->theHWFDpartFundamentalCoordS.SetSize(0);
+  this->theHWDualCoordsBaseFielD.setSize(0);
+  this->theHWSimpleCoordSBaseField.setSize(0);
+  this->theHWFundamentalCoordsBaseField.setSize(0);
+  this->theHWFDpartDualCoords.setSize(0);
+  this->theHWFDpartSimpleCoordS.setSize(0);
+  this->theHWFDpartFundamentalCoordS.setSize(0);
   //List<List<Matrix<coefficient> > >
   this->theModuleWeightsSimpleCoords.Clear();
   this->theCharOverH.makeZero();
@@ -1002,7 +1002,7 @@ void ModuleSSalgebra<coefficient>::reset() {
   //explicit template specialization below.
   //[Update:] This is now a recognized gcc bug.
   this->cachedPairs.Clear();
-  this->cachedTraces.SetSize(0);
+  this->cachedTraces.setSize(0);
   this->flagIsInitialized = false;
   this->flagConjectureBholds = true;
   this->flagConjectureCholds = true;
@@ -1020,14 +1020,14 @@ void ModuleSSalgebra<coefficient>::GetAdActionHomogenousElT(
   const coefficient& theRingZero
 ) {
   Vector<Rational> targetWeight;
-  outputSortedByArgumentWeight.SetSize(this->theGeneratingWordsGrouppedByWeight.size);
+  outputSortedByArgumentWeight.setSize(this->theGeneratingWordsGrouppedByWeight.size);
   ElementUniversalEnveloping<coefficient> theElt;
   std::string generatorString = inputHomogeneous.toString();
   ProgressReport theReport;
   for (int i = 0; i < this->theGeneratingWordsGrouppedByWeight.size; i ++) {
     List<MonomialUniversalEnveloping<coefficient> >& currentWordList = this->theGeneratingWordsGrouppedByWeight[i];
     List<ElementUniversalEnveloping<coefficient> >& outputCurrentList = outputSortedByArgumentWeight[i];
-    outputCurrentList.SetSize(currentWordList.size);
+    outputCurrentList.setSize(currentWordList.size);
     Vector<Rational>& currentWeight = this->theModuleWeightsSimpleCoords[i];
     targetWeight = currentWeight + weightUEEltSimpleCoords;
     int theIndex = this->theModuleWeightsSimpleCoords.GetIndex(targetWeight);
@@ -1127,7 +1127,7 @@ void ElementTensorsGeneralizedVermas<coefficient>::MakeHWV(
   MonomialTensorGeneralizedVermas<coefficient> tensorMon;
   coefficient currentCoeff;
   currentCoeff = theRingUnit;
-  tensorMon.theMons.SetSize(1);
+  tensorMon.theMons.setSize(1);
   MonomialGeneralizedVerma<coefficient>& theMon = tensorMon.theMons[0];
   theMon.indexFDVector = theOwner.theGeneratingWordsNonReduced.size - 1;
   theMon.MakeConst(theOwner);
@@ -1177,7 +1177,7 @@ void ElementTensorsGeneralizedVermas<coefficient>::MultiplyByElementLieAlg(
   coefficient currentCoeff;
   for (int i = 0; i < this->size(); i ++) {
     const MonomialTensorGeneralizedVermas<coefficient>& currentMon = (*this)[i];
-    accumMon.theMons.SetSize(0);
+    accumMon.theMons.setSize(0);
     for (int j = 0; j < currentMon.theMons.size; j ++) {
       tempElt.makeZero();
       tempElt.AddMonomial(currentMon.theMons[j], theRingUnit);
@@ -1210,7 +1210,7 @@ void ElementTensorsGeneralizedVermas<coefficient>::TensorOnTheRight(
   ElementTensorsGeneralizedVermas<coefficient> output;
   MonomialTensorGeneralizedVermas<coefficient> bufferMon;
   output.makeZero();
-  output.SetExpectedSize(maxNumMonsFinal);
+  output.setExpectedSize(maxNumMonsFinal);
   coefficient theCoeff;
   for (int i = 0; i < right.size(); i ++) {
     for (int j = 0; j < this->size(); j ++) {
@@ -1266,7 +1266,7 @@ std::string ModuleSSalgebra<coefficient>::toString(FormatExpressions* theFormat)
     List<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >& currentListInt = this->theGeneratingWordsIntGrouppedByWeight[i];
     for (int j = 0; j < currentList.size; j ++) {
       wordCounter ++;
-      tempWelt.generatorsLastAppliedFirst.SetSize(currentListInt[j].generatorsIndices.size);
+      tempWelt.generatorsLastAppliedFirst.setSize(currentListInt[j].generatorsIndices.size);
       for (int k = 0; k < currentListInt[j].generatorsIndices.size; k ++) {
         aGen.MakeSimpleReflection(theWeyl.RootsOfBorel.size - 1 - currentListInt[j].generatorsIndices[k]);
         tempWelt.generatorsLastAppliedFirst[k] = aGen;

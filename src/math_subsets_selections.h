@@ -230,7 +230,7 @@ public:
     return false;
   }
   void initFromMults(int inputBase, int numElts) {
-    this->theElements.SetSize(numElts);
+    this->theElements.setSize(numElts);
     for (int i = 0; i < this->theElements.size; i ++) {
       this->theElements[i].initFromMults(inputBase);
     }
@@ -238,9 +238,9 @@ public:
   template<class Element>
   void initFromMults(const List<Element>& input, int useOnlyNElementsOnly = 0) {
     if (useOnlyNElementsOnly > 0 && useOnlyNElementsOnly <= input.size) {
-      this->theElements.SetSize(useOnlyNElementsOnly);
+      this->theElements.setSize(useOnlyNElementsOnly);
     } else {
-      this->theElements.SetSize(input.size);
+      this->theElements.setSize(input.size);
     }
     for (int i = 0; i < this->theElements.size; i ++) {
       this->theElements[i].initFromMults(input[i]);
@@ -345,7 +345,7 @@ bool Vectors<coefficient>::ComputeNormalFromSelectionAndTwoExtraRoots(
     return false;
   }
   int theDimension = this->theObjects[0].size;
-  output.SetSize(theDimension);
+  output.setSize(theDimension);
   bufferMat.init(theSelection.CardinalitySelection + 2, theDimension);
   for (int j = 0; j < theDimension; j ++) {
     for (int i = 0; i < theSelection.CardinalitySelection; i ++) {
@@ -403,7 +403,7 @@ bool Vectors<coefficient>::ComputeNormalExcludingIndex(
     return false;
   }
   int theDimension = this->theObjects[0].size;
-  output.SetSize(theDimension);
+  output.setSize(theDimension);
   bufferMatrix.init(this->size - 1, theDimension);
   int k = - 1;
   for (int i = 0; i < this->size; i ++) {
@@ -430,7 +430,7 @@ bool Vectors<coefficient>::ComputeNormalFromSelection(
   int theDimension
 ) const {
   Selection NonPivotPoints;
-  output.SetSize(theDimension);
+  output.setSize(theDimension);
   bufferMatrix.init(theSelection.CardinalitySelection, theDimension);
   for (int i = 0; i < theSelection.CardinalitySelection; i ++) {
     for (int j = 0; j < theDimension; j ++) {
@@ -457,7 +457,7 @@ bool Vectors<coefficient>::ComputeNormalFromSelectionAndExtraRoot(
     return false;
   }
   int theDimension = this->theObjects[0].size;
-  output.SetSize(theDimension);
+  output.setSize(theDimension);
   Matrix<coefficient> matOutputEmpty;
   Selection& NonPivotPoints = bufferSel;
   bufferMatrix.init(theSelection.CardinalitySelection + 1, theDimension);
@@ -523,10 +523,10 @@ bool Vectors<coefficient>::GetLinearDependence(Matrix<coefficient>& outputTheLin
 template <class coefficient>
 void Vector<coefficient>::operator=(const Selection& other) {
   if (other.MaxSize < 0) {
-    this->SetSize(0);
+    this->setSize(0);
     return;
   }
-  this->SetSize(other.MaxSize);
+  this->setSize(other.MaxSize);
   for (int i = 0; i < other.MaxSize; i ++) {
     if (other.selected[i]) {
       this->theObjects[i] = 1;
@@ -538,7 +538,7 @@ void Vector<coefficient>::operator=(const Selection& other) {
 
 template <class coefficient>
 void Vector<coefficient>::operator=(const SelectionWithMultiplicities& other) {
-  this->SetSize(other.Multiplicities.size);
+  this->setSize(other.Multiplicities.size);
   for (int i = 0; i < other.Multiplicities.size; i ++) {
     this->theObjects[i] = other.Multiplicities[i];
   }
@@ -552,7 +552,7 @@ bool Vectors<coefficient>::LinearAlgebraForVertexComputation(
     return false;
   }
   int theDimension = this->theObjects[0].size;
-  output.SetSize(theDimension);
+  output.setSize(theDimension);
   if (theDimension - 1 != theSelection.CardinalitySelection) {
     global.fatal << "Dimensions don't match. " << global.fatal;
   }

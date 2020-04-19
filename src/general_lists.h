@@ -437,9 +437,9 @@ public:
   bool Contains(const Object& o) {
     return this->IndexInList(o) != - 1;
   }
-  void SetSize(int theSize);
+  void setSize(int theSize);
   void initializeFillInObject(int theSize, const Object& o) {
-    this->SetSize(theSize);
+    this->setSize(theSize);
     for (int i = 0; i < this->size; i ++) {
       this->theObjects[i] = o;
     }
@@ -449,7 +449,7 @@ public:
   }
   void operator=(const ListLight<Object>& right);
   void operator=(const List<Object>& right) {
-    this->SetSize(right.size);
+    this->setSize(right.size);
     for (int i = 0; i < right.size; i ++) {
       this->theObjects[i] = right[i];
     }
@@ -474,14 +474,14 @@ public:
 
 template <class Object>
 void ListLight<Object>::AddObjectOnTopLight(const Object& o) {
-  this->SetSize(this->size + 1);
+  this->setSize(this->size + 1);
   this->theObjects[this->size - 1] = o;
 }
 
 template <class Object>
 void ListLight<Object>::PopIndexSwapWithLastLight(int index) {
   this->theObjects[index] = this->theObjects[this->size - 1];
-  this->SetSize(this->size - 1);
+  this->setSize(this->size - 1);
 }
 
 template <class Object>
@@ -490,7 +490,7 @@ void ListLight<Object>::operator=(const ListLight<Object>& right) {
 }
 
 template <class Object>
-void ListLight<Object>::SetSize(int theSize) {
+void ListLight<Object>::setSize(int theSize) {
   if (theSize == this->size) {
     return;
   }
@@ -546,7 +546,7 @@ ListLight<Object>::~ListLight() {
 
 template <class Object>
 void ListLight<Object>::CopyFromHeavy(const List<Object>& from) {
-  this->SetSize(from.size);
+  this->setSize(from.size);
   for (int i = 0; i < this->size; i ++) {
     this->theObjects[i] = from.theObjects[i];
   }
@@ -554,7 +554,7 @@ void ListLight<Object>::CopyFromHeavy(const List<Object>& from) {
 
 template <class Object>
 void ListLight<Object>::CopyFromLight(const ListLight<Object>& from) {
-  this->SetSize(from.size);
+  this->setSize(from.size);
   for (int i = 0; i < this->size; i ++) {
     this->theObjects[i] = from.theObjects[i];
   }
@@ -585,7 +585,7 @@ std::iostream& operator>>(std::iostream& input, List<Object>& theList) {
   if (tempS != "size:") {
     fatalCrash("Failed reading list from stream. ");
   }
-  theList.SetSize(tempI);
+  theList.setSize(tempI);
   for (int i = 0; i < theList.size; i ++) {
     input >> theList[i];
   }
@@ -699,7 +699,7 @@ public:
     }
     return (expectedSize * 4) / 3 + 1;
   }
-  void SetExpectedSize(int theSize) {
+  void setExpectedSize(int theSize) {
     // <-Registering stack trace forbidden! Multithreading deadlock alert.
     if ((this->ActualSize * 5 / 6) < theSize) {
       this->Reserve(this->GetNewSizeRelativeToExpectedSize(theSize));
@@ -711,13 +711,13 @@ public:
     if (newSize < 0) {
       newSize = 0;
     }
-    this->SetSize(newSize);
+    this->setSize(newSize);
   }
-  void SetSize(int theSize);// <-Registering stack trace forbidden! Multithreading deadlock alert.
+  void setSize(int theSize);// <-Registering stack trace forbidden! Multithreading deadlock alert.
   void SetSizeMakeMatrix(int numRows, int numCols) {
-    this->SetSize(numRows);
+    this->setSize(numRows);
     for (int i = 0; i < numRows; i ++) {
-      this->theObjects[i].SetSize(numCols);
+      this->theObjects[i].setSize(numCols);
     }
   }
   void initializeFillInObject(int theSize, const Object& o);
@@ -732,11 +732,11 @@ public:
   }
   void addOnTop(const Object& o);
   void addListOnTop(const List<Object>& theList);
-  bool AddOnTopNoRepetition(const Object& o);
-  void AddOnTopNoRepetition(const List<Object>& theList) {
-    this->SetExpectedSize(this->size + theList.size);
+  bool addOnTopNoRepetition(const Object& o);
+  void addOnTopNoRepetition(const List<Object>& theList) {
+    this->setExpectedSize(this->size + theList.size);
     for (int i = 0; i < theList.size; i ++) {
-      this->AddOnTopNoRepetition(theList[i]);
+      this->addOnTopNoRepetition(theList[i]);
     }
   }
   int AddNoRepetitionOrReturnIndexFirst(const Object& o) {
@@ -769,7 +769,7 @@ public:
         currentIndex ++;
       }
     }
-    this->SetSize(currentIndex);
+    this->setSize(currentIndex);
   }
   // The below function is named a bit awkwardly because otherwise there is a risk of confusion
   // with the RemoveIndexSwapWithLast when selecting from autocomplete list.
@@ -1121,13 +1121,13 @@ public:
   }
   void IntersectWith(const List<Object>& other, List<Object>& output) const;
   void operator=(const std::string& right) {
-    this->SetSize(right.size());
+    this->setSize(right.size());
     for (int i = 0; i < this->size; i ++) {
       this->theObjects[i] = right[static_cast<unsigned>(i)];
     }
   }
   void operator=(const std::initializer_list<Object>& other) {
-    this->SetSize(other.size());
+    this->setSize(other.size());
     int counter = 0;
     for (
       auto otherIterator = other.begin();
@@ -1141,14 +1141,14 @@ public:
     if (this == &right) {
       return;
     }
-    this->SetSize(right.size);
+    this->setSize(right.size);
     for (int i = 0; i < this->size; i ++) {
       this->theObjects[i] = right.theObjects[i];
     }
   }
   template <class otherObjectType>
   void operator=(const List<otherObjectType>& right) {
-    this->SetSize(right.size);
+    this->setSize(right.size);
     for (int i = 0; i < this->size; i ++) {
       this->theObjects[i] = right.theObjects[i];
     }
@@ -1208,7 +1208,7 @@ public:
     for (int i = 0; i < input.size; i ++) {
       count += input[i].size;
     }
-    this->SetSize(0);
+    this->setSize(0);
     this->Reserve(count);
     for (int i = 0; i < input.size; i ++) {
       for (int j = 0; j < input[i].size; j ++) {
@@ -1345,7 +1345,7 @@ public:
     }
   }
   void addOnTop(const List<Object>& theList) {
-    this->SetExpectedSize(this->size + theList.size);
+    this->setExpectedSize(this->size + theList.size);
     for (int i = 0; i < theList.size; i ++) {
       this->addOnTop(theList[i]);
     }
@@ -1402,15 +1402,15 @@ public:
     return this->size - 1;
   }
   void AdjustHashes() {
-    this->SetExpectedSize(this->size);
+    this->setExpectedSize(this->size);
   }
-  void AddOnTopNoRepetition(const List<Object>& theList) {
-    this->SetExpectedSize(this->size + theList.size);
+  void addOnTopNoRepetition(const List<Object>& theList) {
+    this->setExpectedSize(this->size + theList.size);
     for (int i = 0; i < theList.size; i ++) {
-      this->AddOnTopNoRepetition(theList.theObjects[i]);
+      this->addOnTopNoRepetition(theList.theObjects[i]);
     }
   }
-  bool AddOnTopNoRepetition(const Object& o) {
+  bool addOnTopNoRepetition(const Object& o) {
     if (this->GetIndex(o) != - 1) {
       return false;
     }
@@ -1536,13 +1536,13 @@ public:
     }
     return result;
   }
-  void SetSize(int inputSize) {
+  void setSize(int inputSize) {
     if (inputSize < 0) {
       inputSize = 0;
     }
     if (inputSize > this->size) {
       fatalCrash(
-        "SetSize is allowed for hashed lists only when "
+        "setSize is allowed for hashed lists only when "
         "resizing the hashed list to smaller. "
         "This is because if I was to resize to larger, "
         "I would have to allocate non-initialized "
@@ -1561,7 +1561,7 @@ public:
   bool IsSparse() const {
     return this->IsSparseRelativeToExpectedSize(this->size);
   }
-  void SetExpectedSize(int expectedSize) {
+  void setExpectedSize(int expectedSize) {
     if (expectedSize < 1) {
       return;
     }
@@ -1569,7 +1569,7 @@ public:
       this->SetHashSizE(1);
       return;
     }
-    this->TemplateList::SetExpectedSize(expectedSize);
+    this->TemplateList::setExpectedSize(expectedSize);
     if (!this->IsSparseRelativeToExpectedSize(expectedSize)) {
       this->SetHashSizE(expectedSize * 5);
     }
@@ -1612,7 +1612,7 @@ public:
     this->operator=(theList);
   }
   void initHashesToOne() {
-    this->TheHashedArrays.SetSize(1);
+    this->TheHashedArrays.setSize(1);
     this->TheHashedArrays[0].size = 0;
   }
   HashTemplate(const HashTemplate& other) {
@@ -1656,7 +1656,7 @@ public:
       return;
     }
     this->Clear();
-    this->SetExpectedSize(other.size);
+    this->setExpectedSize(other.size);
     for (int i = 0; i < other.size; i ++) {
       this->addOnTop(other.theObjects[i]);
     }
@@ -1680,11 +1680,11 @@ public:
   // Note The following function specializations are declared entirely in order to
   // facilitate autocomplete in my current IDE. If I find a better autocompletion
   // IDE the following should be removed.
-  void AddOnTopNoRepetition(const List<Object>& theList) {
-    this->::HashTemplate<Object, List<Object>, hashFunction>::AddOnTopNoRepetition(theList);
+  void addOnTopNoRepetition(const List<Object>& theList) {
+    this->::HashTemplate<Object, List<Object>, hashFunction>::addOnTopNoRepetition(theList);
   }
-  bool AddOnTopNoRepetition(const Object& o) {
-    return this->::HashTemplate<Object, List<Object>, hashFunction>::AddOnTopNoRepetition(o);
+  bool addOnTopNoRepetition(const Object& o) {
+    return this->::HashTemplate<Object, List<Object>, hashFunction>::addOnTopNoRepetition(o);
   }
   void addOnTop(const Object& o) {
     this->::HashTemplate<Object, List<Object>, hashFunction>::addOnTop(o);
@@ -1733,8 +1733,8 @@ public:
   ) {
     this->::HashTemplate<Object, List<Object>, hashFunction>::QuickSortDescending(theOrder, carbonCopy);
   }
-  void SetExpectedSize(int expectedSize) {
-    this->::HashTemplate<Object, List<Object>, hashFunction>::SetExpectedSize(expectedSize);
+  void setExpectedSize(int expectedSize) {
+    this->::HashTemplate<Object, List<Object>, hashFunction>::setExpectedSize(expectedSize);
   }
 };
 
@@ -1861,7 +1861,7 @@ template <class Object>
 void List<Object>::addListOnTop(const List<Object>& theList) {
   int oldsize = this->size;
   int otherSize = theList.size;
-  this->SetSize(oldsize + otherSize);
+  this->setSize(oldsize + otherSize);
   for (int i = 0; i < otherSize; i ++) {
     this->theObjects[i + oldsize] = theList.theObjects[i];
   }
@@ -1939,7 +1939,7 @@ void List<Object>::swap(List<Object>& l1, List<Object>& l2) {
     smallL = &l2;
     smallSize = l2.size;
   }
-  smallL->SetSize(bigL->size);
+  smallL->setSize(bigL->size);
   Object tempO;
   for (int i = 0; i < smallSize; i ++) {
     tempO = smallL->theObjects[i];
@@ -2002,7 +2002,7 @@ void List<Object>::ShiftUpExpandOnTop(int StartingIndex) {
 
 template <class Object>
 void List<Object>::ShiftUpExpandOnTopRepeated(int StartingIndex, int numberOfNewElements) {
-  this->SetSize(this->size + numberOfNewElements);
+  this->setSize(this->size + numberOfNewElements);
   int lowBound = StartingIndex + numberOfNewElements;
   for (int i = this->size - 1; i >= lowBound; i --) {
     this->theObjects[i] = this->theObjects[i - numberOfNewElements];
@@ -2036,24 +2036,24 @@ void List<Object>::Slice(int StartingIndex, int SizeOfSlice, List<Object>& outpu
   if (output.size < SizeOfSlice) {
     // Implies output is not this.
     // In case output is this we only need to resize at the end.
-    output.SetSize(SizeOfSlice);
+    output.setSize(SizeOfSlice);
   }
   for (int i = 0; i < SizeOfSlice; i ++) {
     output[i] = this->theObjects[i + StartingIndex];
   }
-  output.SetSize(SizeOfSlice);
+  output.setSize(SizeOfSlice);
 }
 
 template <class Object>
 void List<Object>::initializeFillInObject(int theSize, const Object& o) {
-  this->SetSize(theSize);
+  this->setSize(theSize);
   for (int i = 0; i < this->size; i ++) {
     this->theObjects[i] = o;
   }
 }
 
 template <class Object>
-bool List<Object>::AddOnTopNoRepetition(const Object& o) {
+bool List<Object>::addOnTopNoRepetition(const Object& o) {
   if (this->GetIndex(o) != - 1) {
     return false;
   }
@@ -2088,7 +2088,7 @@ bool List<Object>::HasACommonElementWith(List<Object>& right) {
 
 template <class Object>
 void List<Object>::AssignLight(const ListLight<Object>& From) {
-  this->SetSize(From.size);
+  this->setSize(From.size);
   for (int i = 0; i < this->size; i ++) {
     this->theObjects[i] = From.theObjects[i];
   }
@@ -2113,12 +2113,12 @@ void List<Object>::RemoveFirstOccurenceSwapWithLast(const Object& o) {
 }
 
 template <class Object>
-void List<Object>::SetSize(int theSize) {
+void List<Object>::setSize(int theSize) {
   // <-Registering stack trace forbidden! Multithreading deadlock alert.
   if (theSize < 0) {
     theSize = 0;
   }
-  this->SetExpectedSize(theSize);
+  this->setExpectedSize(theSize);
   this->Reserve(theSize);
   this->size = theSize;
 }
@@ -2176,7 +2176,7 @@ std::string List<Object>::ToStringCommaDelimited(FormatExpressions* theFormat) c
 
 template <class Object>
 void List<Object>::AddObjectOnTopCreateNew() {
-  this->SetSize(this->size + 1);
+  this->setSize(this->size + 1);
 }
 
 template <class Object>

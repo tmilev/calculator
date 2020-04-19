@@ -227,7 +227,7 @@ public:
   );
   void ComputeDisplayStringsFromRadicals();
   bool GetRadicalSelectionFromIndex(int inputIndex, Selection& theSel);
-  int GetDimensionOverTheRationals() const;
+  int getDimensionOverTheRationals() const;
   static int GetIndexFromRadicalSelection(const Selection& theSel);
   void GetMultiplicativeOperatorFromRadicalSelection(
     const Selection& theSel, MatrixTensor<Rational>& outputOp
@@ -325,7 +325,7 @@ public:
   bool operator/=(const ElementZmodP& den);
   bool operator/=(const LargeInteger& den);
   bool NeedsParenthesisForMultiplication(FormatExpressions* theFormat = nullptr) const;
-  static void ScaleToIntegralMinimalHeightAndGetPoly(
+  static void convertModuloIntegerAfterScalingToIntegral(
     const Polynomial<Rational>& input,
     Polynomial<ElementZmodP>& output,
     const LargeIntegerUnsigned& newModulo

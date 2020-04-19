@@ -253,7 +253,7 @@ bool CalculatorHTML::MergeOneProblemAdminData(
       commentsOnFailure << "Failed to account deadlines: max 999 sections allowed. ";
       return false;
     }
-    this->databaseStudentSections.AddOnTopNoRepetition(incomingDeadlines.theKeys[i]);
+    this->databaseStudentSections.addOnTopNoRepetition(incomingDeadlines.theKeys[i]);
   }
   ////////////////////////////////////////////
   for (int i = 0; i < incomingDeadlines.size(); i ++) {
@@ -751,7 +751,7 @@ void SyntacticElementHTML::resetAllExceptContent() {
   this->properties.Clear();
   this->syntacticRole = "";
   this->flagUseDisplaystyleInMathMode = false;
-  this->children.SetSize(0);
+  this->children.setSize(0);
 }
 
 std::string SyntacticElementHTML::ToStringOpenTag(const std::string& overrideTagIfNonEmpty, bool immediatelyClose) {
@@ -1671,7 +1671,7 @@ void CalculatorHTML::ComputeDeadlineModifyButton(
   << inputOutput.idDeadlineTable
   << "\">";
   deadlineStream << "<tr><th>Grp.</th><th>Deadline</th></tr>";
-  inputOutput.idsDeadlines.SetSize(this->databaseStudentSections.size);
+  inputOutput.idsDeadlines.setSize(this->databaseStudentSections.size);
   inputOutput.deadlinesPerSectionFormatted.initializeFillInObject(this->databaseStudentSections.size, "");
   for (int i = 0; i < this->databaseStudentSections.size; i ++) {
     std::string& currentDeadlineId = inputOutput.idsDeadlines[i];
@@ -1892,7 +1892,7 @@ bool CalculatorHTML::InterpretHtml(std::stringstream* comments) {
   }
   this->timeToParseHtml = global.GetElapsedSeconds() - startTime;
   this->MaxInterpretationAttempts = 25;
-  this->randomSeedsIfInterpretationFails.SetSize(this->MaxInterpretationAttempts);
+  this->randomSeedsIfInterpretationFails.setSize(this->MaxInterpretationAttempts);
   if (!this->theProblemData.flagRandomSeedGiven) {
     int randomSeedFromTime = static_cast<signed>(time(nullptr));
     global.unsecurePseudoRandomGenerator.SetRandomSeed(103 + randomSeedFromTime);
@@ -1904,16 +1904,16 @@ bool CalculatorHTML::InterpretHtml(std::stringstream* comments) {
   for (int i = 1; i < this->randomSeedsIfInterpretationFails.size; i ++) {
     this->randomSeedsIfInterpretationFails[i] = (103 + global.unsecurePseudoRandomGenerator.GetRandomLessThanBillion()) % 100000000;
   }
-  this->timePerAttempt.SetSize(0);
-  this->timeIntermediatePerAttempt.SetSize(0);
-  this->timeIntermediateComments.SetSize(0);
+  this->timePerAttempt.setSize(0);
+  this->timeIntermediatePerAttempt.setSize(0);
+  this->timeIntermediateComments.setSize(0);
   this->NumAttemptsToInterpret = 0;
   while (this->NumAttemptsToInterpret < this->MaxInterpretationAttempts) {
     startTime = global.GetElapsedSeconds();
-    this->timeIntermediatePerAttempt.SetSize(this->timeIntermediatePerAttempt.size + 1);
-    this->timeIntermediatePerAttempt.LastObject()->SetSize(0);
-    this->timeIntermediateComments.SetSize(this->timeIntermediateComments.size + 1);
-    this->timeIntermediateComments.LastObject()->SetSize(0);
+    this->timeIntermediatePerAttempt.setSize(this->timeIntermediatePerAttempt.size + 1);
+    this->timeIntermediatePerAttempt.LastObject()->setSize(0);
+    this->timeIntermediateComments.setSize(this->timeIntermediateComments.size + 1);
+    this->timeIntermediateComments.LastObject()->setSize(0);
     Calculator theInterpreter;
     this->NumAttemptsToInterpret ++;
     std::stringstream commentsOnLastFailure;
@@ -2077,7 +2077,7 @@ void CalculatorHTML::initAutocompleteExtras() {
 void CalculatorHTML::initBuiltInSpanClasses() {
   MacroRegisterFunctionWithName("CalculatorHTML::initBuiltInSpanClasses");
   if (this->calculatorTagsRecordedLiterally.size == 0) {
-    this->calculatorTagsRecordedLiterally.AddOnTopNoRepetition("answerCalculatorHighlight");
+    this->calculatorTagsRecordedLiterally.addOnTopNoRepetition("answerCalculatorHighlight");
   }
   if (this->calculatorClassesAnswerFields.size == 0) {
     this->calculatorClassesAnswerFields.addOnTop("calculatorButtonSubmit");
@@ -2120,8 +2120,8 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments) {
   std::string word;
   char currentChar;
   List<SyntacticElementHTML> theElements;
-  theElements.SetSize(0);
-  theElements.SetExpectedSize(static_cast<int>(theReader.str().size()) / 4);
+  theElements.setSize(0);
+  theElements.setExpectedSize(static_cast<int>(theReader.str().size()) / 4);
   this->splittingChars.addOnTop('<');
   this->splittingChars.addOnTop('\"');
   this->splittingChars.addOnTop('>');
@@ -2145,14 +2145,14 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments) {
     theElements.addOnTop(word);
   }
   this->initBuiltInSpanClasses();
-  this->eltsStack.SetSize(0);
+  this->eltsStack.setSize(0);
   SyntacticElementHTML dummyElt, tempElt;
   dummyElt.content = "<>";
   dummyElt.syntacticRole = "filler";
   tempElt.syntacticRole = "command";
   tempElt.tag = "";
   tempElt.content = "";
-  eltsStack.SetExpectedSize(theElements.size + SyntacticElementHTML::ParsingNumDummyElements);
+  eltsStack.setExpectedSize(theElements.size + SyntacticElementHTML::ParsingNumDummyElements);
   for (int i = 0; i < SyntacticElementHTML::ParsingNumDummyElements; i ++) {
     eltsStack.addOnTop(dummyElt);
   }
@@ -2240,7 +2240,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments) {
     if (thirdToLast.syntacticRole == "<openTagCalc>" && secondToLast.syntacticRole == "") {
       thirdToLast.content += secondToLast.content;
       secondToLast = last;
-      eltsStack.SetSize(eltsStack.size - 1);
+      eltsStack.setSize(eltsStack.size - 1);
       continue;
     }
     if (secondToLast.syntacticRole != "<openTagCalc>" && last == "<") {
@@ -2356,20 +2356,20 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments) {
       last == "\""
     ) {
       sixthToLast.SetKeyValue(fifthToLast.content, secondToLast.content);
-      eltsStack.SetSize(eltsStack.size - 5);
+      eltsStack.setSize(eltsStack.size - 5);
       continue;
     }
     if (
       fifthToLast.syntacticRole == "<openTag" && thirdToLast == "=" && secondToLast == "\"" && last == "\""
     ) {
       fifthToLast.SetKeyValue(fourthToLast.content, "");
-      eltsStack.SetSize(eltsStack.size - 4);
+      eltsStack.setSize(eltsStack.size - 4);
       continue;
     }
     if (thirdToLast == "\"" && secondToLast != "\"" && last == "\"") {
       thirdToLast.content += secondToLast.content;
       thirdToLast.content += last.content;
-      eltsStack.SetSize(eltsStack.size - 2);
+      eltsStack.setSize(eltsStack.size - 2);
       continue;
     }
     if (
@@ -2426,7 +2426,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream* comments) {
     }
     reduced = false;
   } while (reduced || indexInElts < theElements.size);
-  this->theContent.SetSize(0);
+  this->theContent.setSize(0);
   bool result = true;
   for (int i = SyntacticElementHTML::ParsingNumDummyElements; i < eltsStack.size; i ++) {
     bool needNewTag = false;
@@ -2507,7 +2507,7 @@ bool CalculatorHTML::InterpretOneAnswerElement(SyntacticElementHTML& inputOutput
 bool CalculatorHTML::InterpretAnswerHighlights(std::stringstream& comments) {
   MacroRegisterFunctionWithName("CalculatorHTML::InterpretAnswerHighlights");
   (void) comments;
-  this->answerHighlights.SetSize(0);
+  this->answerHighlights.setSize(0);
   bool answerHighlightStarted = false;
   for (int i = 0; i < this->theContent.size; i ++) {
     if (this->theContent[i].tag == "answerCalculatorHighlightStart") {
@@ -2609,7 +2609,7 @@ bool CalculatorHTML::ExtractAnswerIds(std::stringstream* comments) {
         }
         return false;
       }
-      answerIdsSeenSoFar.AddOnTopNoRepetition(currentId);
+      answerIdsSeenSoFar.addOnTopNoRepetition(currentId);
       this->theProblemData.theAnswers.GetValueCreate(currentId).MQpanelButtonOptions =
       currentE.GetKeyValue("buttons");
       continue;
@@ -3418,7 +3418,7 @@ void TopicElementParser::AddTopic(TopicElement& inputElt, int index) {
 void TopicElement::MakeError(const std::string& message) {
   this->type = TopicElement::types::error;
   this->error = message;
-  this->immediateChildren.SetSize(0);
+  this->immediateChildren.setSize(0);
 }
 
 TopicElement::TopicElement() {
@@ -3439,13 +3439,13 @@ void TopicElement::reset() {
 
   this->handwrittenSolution = "";
 
-  this->sourceSlides.SetSize(0);
-  this->sourceHomework.SetSize(0);
-  this->sourceHomeworkIsSolution.SetSize(0);
+  this->sourceSlides.setSize(0);
+  this->sourceHomework.setSize(0);
+  this->sourceHomeworkIsSolution.setSize(0);
   this->problemFileName = "";
   this->error = "";
 
-  this->immediateChildren.SetSize(0);
+  this->immediateChildren.setSize(0);
   this->totalSubSectionsUnderME = 0;
   this->totalSubSectionsUnderMeIncludingEmptySubsections = 0;
   this->flagContainsProblemsNotInSubsection = false;
@@ -3750,7 +3750,7 @@ void TopicElementParser::Crawl(const std::string& inputString) {
   this->initializeElementTypes();
   std::string currentLine, currentArgument;
   std::stringstream tableReader(inputString);
-  this->crawled.SetSize(0);
+  this->crawled.setSize(0);
   while (true) {
     if (this->crawled.size > this->maximumTopics) {
       TopicElementParser::TopicLine errorLine;
@@ -3882,7 +3882,7 @@ void TopicElementParser::CompressOneTopicLine(
 void TopicElementParser::CompressTopicLines() {
   MacroRegisterFunctionWithName("TopicElementParser::CompressTopicLines");
   this->CheckInitialization();
-  this->elements.SetSize(0);
+  this->elements.setSize(0);
   for (int i = 0; i < this->crawled.size; i ++) {
     this->CompressOneTopicLine(this->crawled[i], *this->owner);
   }
@@ -3927,7 +3927,7 @@ void TopicElementParser::ComputeTopicNumbers() {
     for (int j = currentProblemNumber.size; j < labelsNeeded; j ++) {
       currentProblemNumber.addOnTop(0);
     }
-    currentProblemNumber.SetSize(labelsNeeded);
+    currentProblemNumber.setSize(labelsNeeded);
     (*currentProblemNumber.LastObject()) ++;
     current.problemNumber = currentProblemNumber;
   }
@@ -3961,7 +3961,7 @@ void TopicElementParser::ComputeTopicHierarchyPartOne() {
       TopicElement& parent = this->theTopics.theValues[*parentChain.LastObject()];
       parent.immediateChildren.addOnTop(i);
     }
-    this->theTopics.theValues[i].parentTopics.SetSize(0);
+    this->theTopics.theValues[i].parentTopics.setSize(0);
     for (int j = 0; j < parentChain.size; j ++) {
       this->theTopics.theValues[i].parentTopics.addOnTop(parentChain[j]);
     }
@@ -4182,7 +4182,7 @@ bool CalculatorHTML::ComputeTopicListAndPointsEarned(std::stringstream& comments
     HashedList<std::string, MathRoutines::HashString> gradableProblems;
     for (int i = 0; i < this->topics.theTopics.size(); i ++) {
       if (this->topics.theTopics.theValues[i].type == TopicElement::types::problem) {
-        gradableProblems.AddOnTopNoRepetition(this->topics.theTopics.theValues[i].id);
+        gradableProblems.addOnTopNoRepetition(this->topics.theTopics.theValues[i].id);
         if (this->topics.theTopics.theValues[i].immediateChildren.size > 0) {
           global.fatal << "Error: problem " << this->topics.theTopics.theValues[i].toString()
           << " has children topics which is not allowed. "
@@ -4260,7 +4260,7 @@ bool LaTeXCrawler::Slides::FromJSON(
     }
     return false;
   }
-  this->filesToCrawl.SetSize(files.theList.size);
+  this->filesToCrawl.setSize(files.theList.size);
   for (int i = 0; i < files.theList.size; i ++) {
     if (!this->filesToCrawl[i].fromJSON(files.theList[i], commentsOnFailure)) {
       if (commentsOnFailure != nullptr) {

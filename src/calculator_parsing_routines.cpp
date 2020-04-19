@@ -91,7 +91,7 @@ void Calculator::reset() {
   this->theObjectContainer.reset();
   this->controlSequences.Clear();
 
-  //this->logEvaluationSteps.SetSize(0);
+  //this->logEvaluationSteps.setSize(0);
   this->operations.Clear();
   this->builtInTypes.Clear();
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.Clear();
@@ -104,11 +104,11 @@ void Calculator::reset() {
   this->stringsThatSplitIfFollowedByDigit.Clear();
   this->knownFunctionsWithComplexRange.Clear();
   this->knownDoubleConstants.Clear();
-  this->knownDoubleConstantValues.SetSize(0);
+  this->knownDoubleConstantValues.setSize(0);
   this->knownOperationsInterpretedAsFunctionsMultiplicatively.Clear();
 
-  this->syntacticSouP.SetSize(0);
-  this->syntacticStacK.SetSize(0);
+  this->syntacticSouP.setSize(0);
+  this->syntacticStacK.setSize(0);
   this->flagTimeLimitErrorDetected = false;
   this->flagFirstErrorEncountered = false;
   this->flagMaxTransformationsErrorEncountered = false;
@@ -117,13 +117,13 @@ void Calculator::reset() {
   this->flagDisplayContext = false;
   this->EvaluatedExpressionsStack.Clear();
   this->theCruncherIds.Clear();
-  this->theCruncherS.SetSize(0);
+  this->theCruncherS.setSize(0);
   this->syntaxErrors = "";
-  this->evaluationErrors.SetSize(0);
+  this->evaluationErrors.setSize(0);
   this->CurrentSyntacticStacK = &this->syntacticStacK;
   this->CurrrentSyntacticSouP = &this->syntacticSouP;
   this->cachedExpressions.Clear();
-  this->imagesCachedExpressions.SetSize(0);
+  this->imagesCachedExpressions.setSize(0);
   this->theProgramExpression.reset(*this);
   this->RuleStackCacheIndex = - 1;
   this->RuleStack.reset(*this,this->MaxRuleStacksCached);
@@ -136,9 +136,9 @@ void Calculator::initialize() {
   MacroRegisterFunctionWithName("Calculator::init");
   this->reset();
 
-  this->operations.SetExpectedSize(1000);
-  this->namedRules.SetExpectedSize(500);
-  this->builtInTypes.SetExpectedSize(50);
+  this->operations.setExpectedSize(1000);
+  this->namedRules.setExpectedSize(500);
+  this->builtInTypes.setExpectedSize(50);
 
   this->formatVisibleStrings.flagExpressionIsFinal = true;
 
@@ -198,6 +198,7 @@ void Calculator::initialize() {
   this->AddOperationBuiltInType("AlgebraicNumber");
   this->AddOperationBuiltInType("PolynomialRational");
   this->AddOperationBuiltInType("PolynomialOverANs");
+  this->AddOperationBuiltInType("PolynomialModuloInteger");
   this->AddOperationBuiltInType("RationalFunction");
   this->AddOperationBuiltInType("string");
   this->AddOperationBuiltInType("ElementUEoverRF");
@@ -267,7 +268,7 @@ void Calculator::initialize() {
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("arcsin");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("arccos");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("arctan");
-  this->controlSequences.AddOnTopNoRepetition(
+  this->controlSequences.addOnTopNoRepetition(
     this->knownOperationsInterpretedAsFunctionsMultiplicatively
   );
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("SequenceStatements");
@@ -402,7 +403,7 @@ bool Calculator::ReplaceSqrtEXXByEXX() {
   left.controlIndex = this->conExpression();
   (*this->CurrentSyntacticStacK)[lastSize - 3] = (*this->CurrentSyntacticStacK)[lastSize - 2];
   (*this->CurrentSyntacticStacK)[lastSize - 2] = (*this->CurrentSyntacticStacK)[lastSize - 1];
-  (*this->CurrentSyntacticStacK).SetSize(lastSize - 1);
+  (*this->CurrentSyntacticStacK).setSize(lastSize - 1);
   return true;
 }
 
@@ -476,7 +477,7 @@ bool Calculator::DecreaseStackExceptLast(int decrease) {
   }
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - decrease - 1] =
   *this->CurrentSyntacticStacK->LastObject();
-  (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size - decrease);
+  (*this->CurrentSyntacticStacK).setSize((*this->CurrentSyntacticStacK).size - decrease);
   return true;
 }
 
@@ -491,7 +492,7 @@ bool Calculator::DecreaseStackExceptLastTwo(int decrease) {
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-decrease - 1] =
   *this->CurrentSyntacticStacK->LastObject();
-  (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size - decrease);
+  (*this->CurrentSyntacticStacK).setSize((*this->CurrentSyntacticStacK).size - decrease);
   return true;
 }
 
@@ -644,7 +645,7 @@ bool Calculator::ReplaceXByO(int theOperation) {
 }
 
 bool Calculator::ReplaceXByConCon(int con1, int con2) {
-  (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size + 1);
+  (*this->CurrentSyntacticStacK).setSize((*this->CurrentSyntacticStacK).size + 1);
   (*this->CurrentSyntacticStacK).LastObject()->theData.reset(*this);
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2].controlIndex = con1;
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1].controlIndex = con2;
@@ -837,7 +838,7 @@ void Calculator::ParseFillDictionary(const std::string& input, List<SyntacticEle
   MacroRegisterFunctionWithName("Calculator::ParseFillDictionary");
   std::string current;
   output.Reserve(static_cast<signed>(input.size()));
-  output.SetSize(0);
+  output.setSize(0);
   char LookAheadChar;
   SyntacticElement currentElement;
   bool inQuotes = false;
@@ -1040,7 +1041,7 @@ bool Calculator::ReplaceXXVXdotsXbyE_BOUND_XdotsX(int numXs) {
     return true;
   }
   if (!this->IsBoundVarInContext(theBoundVar)) {
-    this->BoundVariablesInContext.AddOnTopNoRepetition(theBoundVar);
+    this->BoundVariablesInContext.addOnTopNoRepetition(theBoundVar);
   }
   theElt.theData.reset(*this, 2);
   theElt.theData.AddChildAtomOnTop(this->opBind());
@@ -1102,8 +1103,8 @@ bool Calculator::ReplaceCXByEX() {
 
 bool Calculator::ReplaceXdotsXByMatrixStart(int numXes) {
   SyntacticElement& currentElt = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - numXes];
-  currentElt.dataList.SetExpectedSize(10);
-  currentElt.dataList.SetSize(1);
+  currentElt.dataList.setExpectedSize(10);
+  currentElt.dataList.setSize(1);
   currentElt.dataList.LastObject()->MakeSequence(*this);
   currentElt.controlIndex = this->conMatrixStart();
   if (this->flagLogSyntaxRules) {
@@ -1135,7 +1136,7 @@ bool Calculator::ReplaceMatrixXByE() {
   } else {
     theMatElt.theData.MakeMatrix(*this);
   }
-  theMatElt.dataList.SetSize(0);
+  theMatElt.dataList.setSize(0);
   theMatElt.controlIndex = this->conExpression();
   if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceMatrixXByE]";
@@ -1147,7 +1148,7 @@ bool Calculator::ReplaceMatrixEXByMatrixNewRow() {
   SyntacticElement& theMatElt = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3];
   SyntacticElement& theElt = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
   theMatElt.dataList.LastObject()->AddChildOnTop(theElt.theData);
-  theMatElt.dataList.SetSize(theMatElt.dataList.size + 1);
+  theMatElt.dataList.setSize(theMatElt.dataList.size + 1);
   theMatElt.dataList.LastObject()->MakeSequence(*this);
   if (this->flagLogSyntaxRules) {
     this->parsingLog += "[Rule: Calculator::ReplaceMatrixEXByMatrixNewRow]";
@@ -1227,7 +1228,7 @@ std::string Calculator::ToStringIsCorrectAsciiCalculatorString(const std::string
   HashedList<char, MathRoutines::HashChar> theBadChars;
   for (unsigned i = 0; i < input.size(); i ++) {
     if (!this->isStandardCalculatorCharacter(static_cast<unsigned char>(input[i]))) {
-      theBadChars.AddOnTopNoRepetition(input[i]);
+      theBadChars.addOnTopNoRepetition(input[i]);
     }
   }
   if (theBadChars.size > 0) {
@@ -1500,8 +1501,8 @@ bool Calculator::ReplaceEXdotsXbySsXdotsX(int numDots) {
   for (int i = (*this->CurrentSyntacticStacK).size - numDots - 2; i >= 0; i --) {
     SyntacticElement& current = (*this->CurrentSyntacticStacK)[i];
     if (current.numBoundVariablesInherited >= 0 && current.numNonBoundVariablesInherited >= 0) {
-      this->NonBoundVariablesInContext.SetSize(current.numNonBoundVariablesInherited);
-      this->BoundVariablesInContext.SetSize(current.numBoundVariablesInherited);
+      this->NonBoundVariablesInContext.setSize(current.numNonBoundVariablesInherited);
+      this->BoundVariablesInContext.setSize(current.numBoundVariablesInherited);
       found = true;
       break;
     }
@@ -1854,7 +1855,7 @@ bool Calculator::ExtractExpressions(Expression& outputExpression, std::string* o
   //std::string lookAheadToken;
   std::stringstream errorLog;
   (*this->CurrentSyntacticStacK).Reserve((*this->CurrrentSyntacticSouP).size + this->numEmptyTokensStart);
-  (*this->CurrentSyntacticStacK).SetSize(this->numEmptyTokensStart);
+  (*this->CurrentSyntacticStacK).setSize(this->numEmptyTokensStart);
   for (int i = 0; i < this->numEmptyTokensStart; i ++) {
     (*this->CurrentSyntacticStacK)[i] = this->GetEmptySyntacticElement();
   }

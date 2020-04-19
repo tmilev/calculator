@@ -76,7 +76,7 @@ void SparseSubspaceBasis<templateVector, templateMonomial, coefficient>::DenseVe
   Vector<coefficient>& out, const templateVector& in
 ) {
   Vector<coefficient> inDense;
-  inDense.SetSize(this->involvedMonomials.size);
+  inDense.setSize(this->involvedMonomials.size);
   for (int i = 0; i < involvedMonomials.size; i ++) {
     inDense[i] = in.GetMonomialCoefficient(involvedMonomials[i]);
   }
@@ -436,7 +436,7 @@ template <typename hg, typename kg, typename helt, typename kelt, typename oa>
 void SemidirectProductGroup<hg, kg, helt, kelt, oa>::init(hg* inH, kg* inK) {
   this->H = inH;
   this->K = inK;
-  this->generators.SetSize(inH->generators.size + inK->generators.size);
+  this->generators.setSize(inH->generators.size + inK->generators.size);
   int i = 0;
   for (; i < this->H.generators.size; i ++) {
     this->generators[i].h = this->H.generators[i];
@@ -473,7 +473,7 @@ public:
 
   ElementZ2N operator*(const ElementZ2N right) const {
     ElementZ2N out;
-    out.bits.SetSize(MathRoutines::Maximum(this->bits.size, right.bits.size));
+    out.bits.setSize(MathRoutines::Maximum(this->bits.size, right.bits.size));
     int i = 0;
     for (; i < MathRoutines::Minimum(this->bits.size, right.bits.size); i ++) {
       out.bits[i] = this->bits[i] != right.bits[i];
@@ -493,7 +493,7 @@ public:
       this->bits[i] = !this->bits[i];
     } else {
       int os = this->bits.size;
-      this->bits.SetSize(i + 1);
+      this->bits.setSize(i + 1);
       for (int ii = os; ii < i; ii ++) {
         this->bits[ii] = false;
       }
@@ -529,7 +529,7 @@ public:
   }
   void makeIdentity(const ElementZ2N& unused) {
     (void) unused;//avoid unused parameter warning, portable
-    this->bits.SetSize(0);
+    this->bits.setSize(0);
   }
 
   bool IsID() const {
@@ -580,7 +580,7 @@ public:
   }
 
   void MakeFromString(const std::string& in) {
-    this->bits.SetSize(0);
+    this->bits.setSize(0);
     for (unsigned i = 0; i < in.size(); i ++) {
       if (in[i] == '1') {
         this->ToggleBit(static_cast<int>(i));
@@ -620,7 +620,7 @@ public:
     int bon = h.BiggestOccurringNumber();
     int os = out.bits.size;
     if (os <= bon) {
-      out.bits.SetSize(bon + 1);
+      out.bits.setSize(bon + 1);
       for (int i = os; i < bon + 1; i ++) {
         out.bits[i] = false;
       }
@@ -656,7 +656,7 @@ public:
     this->theGroup = &theGroupMayBeHereNameIsLongToDiscourageUse;
     this->theGroup->specificDataPointer = this;
     this->N = n;
-    this->theGroup->generators.SetSize(n - 1 + n);
+    this->theGroup->generators.setSize(n - 1 + n);
     for (int i = 0; i < n - 1; i ++) {
       this->theGroup->generators[i].h.AddTransposition(i, i + 1);
     }
@@ -795,7 +795,7 @@ public:
     this->done_iterating = false;
     this->go_once = false;
     this->frame_pointer = 0;
-    this->stack.SetSize(this->l.size);
+    this->stack.setSize(this->l.size);
     this->stack[0].c = this->l.size - 1;
     this->stack[0].program_counter = 0;
     ++ (*this);
@@ -857,7 +857,7 @@ public:
   }
   void Initialize(int theN) {
     List<int> ll;
-    ll.SetSize(theN);
+    ll.setSize(theN);
     for (int i = 0; i < theN; i ++) {
       ll[i] = i;
     }
@@ -921,7 +921,7 @@ public:
   }
   void Initialize(int n) {
     List<int> l;
-    l.SetSize(n);
+    l.setSize(n);
     for (int i = 0; i < n; i ++) {
       l[i] = i;
     }
@@ -951,7 +951,7 @@ public:
   int frame_pointer;
   void Initialize(List<TElementGenerator> theGenerators) {
     generators = theGenerators;
-    stack.SetSize(generators.size);
+    stack.setSize(generators.size);
     frame_pointer = 0;
     stack[frame_pointer].program_counter = pcpositions::beginning;
     ++ (*this);
@@ -1028,7 +1028,7 @@ class GeneratorElementsSnxSnOnIndicesAndIndices: public GeneratorProductOfGenera
 { public:
   void Initialize(List<List<int> > indiceses) {
     List<GeneratorPermutationR2sOnIndices> gens;
-    gens.SetSize(indiceses.size);
+    gens.setSize(indiceses.size);
     for (int i = 0; i < indiceses.size; i ++) {
       gens[i].Initialize(indiceses[i]);
     }
@@ -1054,7 +1054,7 @@ public:
       return;
     }
     generators = theGenerators;
-    stack.SetSize(generators.size);
+    stack.setSize(generators.size);
     frame_pointer = 0;
     stack[frame_pointer].program_counter = pcpositions::beginning;
     ++ (*this);
@@ -1130,7 +1130,7 @@ public:
 
   void Initialize(List<List<int> >& indiceses) {
     List<GeneratorPermutationR2sOnIndices> gens;
-    gens.SetSize(indiceses.size);
+    gens.setSize(indiceses.size);
     for (int i = 0; i < indiceses.size; i ++) {
       gens[i].Initialize(indiceses[i]);
     }
@@ -1270,7 +1270,7 @@ class HyperoctahedralGroup: public FiniteGroup<ElementHyperoctahedralGroup>
 template <typename scalar>
 void Partition::SpechtModuleMatricesOfTranspositions1j(List<Matrix<scalar> >& out) const {
   List<PermutationR2> perms;
-  perms.SetSize(this->n - 1);
+  perms.setSize(this->n - 1);
   for (int i = 0; i < this->n - 1; i ++) {
     perms[i].BuildTransposition(0, i + 1);
   }
@@ -1280,7 +1280,7 @@ void Partition::SpechtModuleMatricesOfTranspositions1j(List<Matrix<scalar> >& ou
 template <typename scalar>
 void Partition::SpechtModuleMatricesOfTranspositionsjjplusone(List<Matrix<scalar> >& out) const {
   List<PermutationR2> perms;
-  perms.SetSize(this->n - 1);
+  perms.setSize(this->n - 1);
   for (int i = 0; i < this->n - 1; i ++) {
     perms[i].BuildTransposition(i, i + 1);
   }
@@ -1299,14 +1299,14 @@ template <typename scalar>
 void Partition::SpechtModuleMatricesOfPermutations(List<Matrix<scalar> >& out, const List<PermutationR2>& perms) const {
   Tableau initialTableau;
   List<int> stuffing;
-  stuffing.SetSize(this->n);
+  stuffing.setSize(this->n);
   for (int i = 0; i < this->n; i ++){
     stuffing[i] = i;
   }
   this->FillTableau(initialTableau, stuffing);
   MonomialTensor<int, MathRoutines::IntUnsignIdentity> tm1;
-  tm1.generatorsIndices.SetSize(n);
-  tm1.Powers.SetSize(n);
+  tm1.generatorsIndices.setSize(n);
+  tm1.Powers.setSize(n);
   for (int i = 0; i < n; i ++) {
     tm1.generatorsIndices[i] = i;
     tm1.Powers[i] = 1;
@@ -1321,14 +1321,14 @@ void Partition::SpechtModuleMatricesOfPermutations(List<Matrix<scalar> >& out, c
   > basis;
   List<Tableau> standardTableaux;
   this->GetAllStandardTableaux(standardTableaux);
-  basisvs.SetSize(standardTableaux.size);
+  basisvs.setSize(standardTableaux.size);
   for (int i = 0; i <standardTableaux.size; i ++) {
     PermutationR2 p;
     p.MakeFromActionDescription(standardTableaux[i].TurnIntoList());
     p.ActOnTensor(basisvs[i], t2);
   }
   basis.SetBasis(basisvs);
-  out.SetSize(perms.size);
+  out.setSize(perms.size);
   for (int permi = 0; permi < perms.size; permi ++) {
     out[permi].init(basis.rank, basis.rank);
     for (int bi = 0; bi < basis.rank; bi ++) {
@@ -1518,7 +1518,7 @@ void FiniteGroup<elementSomeGroup>::ComputeCCSizesRepresentativesWords() {
   }
   List<List<int> > components = conjugacygraph.DestructivelyGetConnectedComponents();
   // boxing and unboxing...
-  this->conjugacyClasseS.SetSize(components.size);
+  this->conjugacyClasseS.setSize(components.size);
   for (int i = 0; i < components.size; i ++) {
     this->conjugacyClasseS[i].representative = this->theElements[components[i][0]];
     this->conjugacyClasseS[i].size = components[i].size;
@@ -1601,7 +1601,7 @@ std::string FiniteGroup<elementSomeGroup>::PrettyPrintGeneratorCommutationRelati
   bool generatorStringsTooLarge = false;
   bool generatorStringsHaveNewline = false;
   List<std::string> genstrings;
-  genstrings.SetSize(this->generators.size);
+  genstrings.setSize(this->generators.size);
   for (int i = 0; i < this->generators.size; i ++) {
     std::stringstream geni;
     geni << this->generators[i];
@@ -1674,10 +1674,10 @@ std::string FiniteGroup<elementSomeGroup>::PrettyPrintCharacterTable(bool andPri
 
   // pad the character values
   List<List<std::string> > values;
-  values.SetSize(this->irreps.size);
+  values.setSize(this->irreps.size);
   int cols_per_elt = 0;
   for (int i = 0; i < this->irreps.size; i ++) {
-    values[i].SetSize(this->irreps[i].theCharacteR.data.size);
+    values[i].setSize(this->irreps[i].theCharacteR.data.size);
     for (int j = 0; j < this->irreps[i].theCharacteR.data.size; j ++) {
       values[i][j] = irreps[i].theCharacteR.data[j].toString();
       int vijcols = values[i][j].length();

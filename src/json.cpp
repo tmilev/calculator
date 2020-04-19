@@ -52,7 +52,7 @@ void JSData::operator=(const JSData& other) {
 JSData& JSData::operator[](int i) {
   this->theType = JSData::token::tokenArray;
   if (this->theList.size < i + 1) {
-    this->theList.SetSize(i + 1);
+    this->theList.setSize(i + 1);
   }
   return this->theList[i];
 }
@@ -223,13 +223,13 @@ JSData& JSData::operator[](const std::string& key) {
 void JSData::operator=(const List<unsigned char>& other) {
   this->theType = JSData::token::tokenString;
   this->theString = other.ToStringConcatenate();
-  this->theList.SetSize(0); ;
+  this->theList.setSize(0); ;
   this->objects.Clear();
 }
 
 void JSData::operator=(const List<JSData>& other) {
   this->theType = JSData::token::tokenArray;
-  this->theList.SetSize(other.size);
+  this->theList.setSize(other.size);
   for (int i = 0; i < other.size; i ++) {
     this->theList[i] = other[i];
   }
@@ -301,7 +301,7 @@ bool JSData::isListOfStrings(List<std::string>* whichStrings) {
     }
   }
   if (whichStrings != nullptr) {
-    whichStrings->SetSize(this->theList.size);
+    whichStrings->setSize(this->theList.size);
     for (int i = 0; i < this->theList.size; i ++) {
       (*whichStrings)[i] = this->theList[i].theString;
     }
@@ -513,8 +513,8 @@ bool JSData::TokenizePrependOneDummyElement(
   std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("JSData::TokenizePrependOneDummyElement");
-  output.SetSize(0);
-  output.SetExpectedSize(static_cast<int>(input.size()));
+  output.setSize(0);
+  output.setExpectedSize(static_cast<int>(input.size()));
   JSData emptyElt;
   output.addOnTop(emptyElt);
   for (unsigned i = 0; i < input.size(); i ++) {
@@ -599,7 +599,7 @@ bool JSData::readstring(
       secondToLast.theType == JSData::token::tokenColon && last.IsValidElement()
     ) {
       fourthToLast.objects.SetKeyValue(thirdToLast.theString, last);
-      readingStack.SetSize(readingStack.size - 3);
+      readingStack.setSize(readingStack.size - 3);
       continue;
     }
     if (secondToLast.theType == JSData::token::tokenOpenBracket && last.IsValidElement()) {
@@ -921,7 +921,7 @@ void JSData::reset(char inputType) {
   this->theBoolean = false;
   this->theFloat = 0;
   this->theString = "";
-  this->theList.SetSize(0);
+  this->theList.setSize(0);
   this->objects.Clear();
   this->theInteger.FreeMemory();
   if (inputType == JSData::token::tokenLargeInteger) {

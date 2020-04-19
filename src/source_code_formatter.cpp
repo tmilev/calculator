@@ -57,8 +57,8 @@ bool CodeFormatter::FormatCPPDirectory(const std::string& inputDirectory, std::s
   if (!FileOperations::GetFolderFileNamesVirtual(directory, allFiles, &allFileExtensions, false, false, comments)) {
     return false;
   }
-  newFileNames.SetExpectedSize(allFiles.size);
-  oldFileNames.SetExpectedSize(allFiles.size);
+  newFileNames.setExpectedSize(allFiles.size);
+  oldFileNames.setExpectedSize(allFiles.size);
   for (int i = 0; i < allFiles.size; i ++) {
     if (allFileExtensions[i] == ".cpp" || allFileExtensions[i] == ".h") {
       oldFileNames.addOnTop(directory + allFiles[i]);
@@ -169,7 +169,7 @@ void CodeFormatter::SetContentComputeType(const std::string& input, CodeElement&
 bool CodeFormatter::ExtractCodeElements(std::stringstream* comments) {
   MacroRegisterFunctionWithName("SourceCodeFormatter::ExtractCodeElements");
   (void) comments;
-  this->originalElements.SetExpectedSize(static_cast<signed>(this->inputCode.size()));
+  this->originalElements.setExpectedSize(static_cast<signed>(this->inputCode.size()));
   this->flagInQuotes = false;
   this->flagPreviousIsStandaloneBackSlash = false;
   for (unsigned i = 0; i < this->inputCode.size(); i ++) {
@@ -186,7 +186,7 @@ bool CodeFormatter::ExtractCodeElements(std::stringstream* comments) {
 }
 
 bool CodeFormatter::DecreaseStack(int numberToPop) {
-  this->transformedElements.SetSize(this->transformedElements.size - numberToPop);
+  this->transformedElements.setSize(this->transformedElements.size - numberToPop);
   return true;
 }
 
@@ -406,7 +406,7 @@ bool CodeFormatter::AddAndAccount(const CodeElement& incoming) {
 
 bool CodeFormatter::ApplyFormattingRules(std::stringstream* comments) {
   MacroRegisterFunctionWithName("SourceCodeFormatter::ApplyFormattingRules");
-  this->transformedElements.SetExpectedSize(this->originalElements.size);
+  this->transformedElements.setExpectedSize(this->originalElements.size);
   CodeElement empty;
   this->transformedElements.initializeFillInObject(6, empty);
   for (int i = 0; i < this->originalElements.size; i ++) {

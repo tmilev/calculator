@@ -1208,7 +1208,7 @@ bool CalculatorFunctions::innerCsc(Calculator& theCommands, const Expression& in
 bool Calculator::GetSumProductsExpressions(const Expression& inputSum, List<List<Expression> >& outputSumMultiplicands) {
   MacroRegisterFunctionWithName("Calculator::GetSumProductsExpressions");
   List<Expression> theSummands, currentMultiplicands;
-  outputSumMultiplicands.SetSize(0);
+  outputSumMultiplicands.setSize(0);
   if (!this->CollectOpands(inputSum, this->opPlus(), theSummands)) {
     return false;
   }
@@ -1253,7 +1253,7 @@ bool CalculatorFunctions::innerCoefficientOf(Calculator& theCommands, const Expr
     if (!isGood) {
       continue;
     }
-    currentListMultiplicands.SetSize(0);
+    currentListMultiplicands.setSize(0);
     for (int j = 0; j < theSummands[i].size; j ++) {
       if (theSummands[i][j] != input[1]) {
         currentListMultiplicands.addOnTop(theSummands[i][j]);
@@ -1441,7 +1441,7 @@ bool CalculatorFunctions::innerConvertAlgebraicNumberToMatrix(
     return theCommands << "Failed to convert "
     << argument.toString() << " to algebraic number. ";
   }
-  int dimension = theNumber.owner->GetDimensionOverTheRationals();
+  int dimension = theNumber.owner->getDimensionOverTheRationals();
   MatrixTensor<Rational> numberMatrixTensor;
   theNumber.owner->GetMultiplicationBy(theNumber, numberMatrixTensor);
   Matrix<Rational> result;
@@ -1700,7 +1700,7 @@ bool IntegralRFComputation::PreparePFExpressionSummands() {
   Expression polyE, currentNum, denExpE, currentDenNoPowerMonic,
   currentDen, currentPFnoCoeff, currentPFWithCoeff,
   coeffE;
-  this->thePFSummands.SetSize(0);
+  this->thePFSummands.setSize(0);
   Polynomial<AlgebraicNumber> denominatorRescaled, numeratorRescaled;
   AlgebraicNumber currentCoefficient, numScale;
   List<MonomialP>::Comparator* monomialOrder = &MonomialP::orderDefault();
@@ -1772,7 +1772,7 @@ bool IntegralRFComputation::IntegrateRF() {
   printoutIntegration << this->printoutPFsHtml.str();
   Expression polyE, currentNum, denExpE, currentDenNoPowerMonic, currentDen, currentIntegrand,
   currentIntegralNoCoeff, currentIntegralWithCoeff, coeffE;
-  this->theIntegralSummands.SetSize(0);
+  this->theIntegralSummands.setSize(0);
   Polynomial<AlgebraicNumber> denRescaled, numRescaled;
   AlgebraicNumber currentCoefficient, numScale;
   List<MonomialP>::Comparator* monomialOrder = &MonomialP::orderDefault();
@@ -1928,11 +1928,11 @@ void IntegralRFComputation::PrepareNumerators() {
   MonomialP currentMon;
   this->thePolyThatMustVanish.makeZero();
   this->thePolyThatMustVanish -= remainderRescaledAlgebraic;
-  this->theNumerators.SetSize(this->theDenominatorFactorsWithMults.size());
+  this->theNumerators.setSize(this->theDenominatorFactorsWithMults.size());
   for (int i = 0; i < this->theDenominatorFactorsWithMults.size(); i ++) {
     int tempSize = - 1;
     this->theDenominatorFactorsWithMults.coefficients[i].IsSmallInteger(&tempSize);
-    this->theNumerators[i].SetSize(tempSize);
+    this->theNumerators[i].setSize(tempSize);
     for (int k = 0; k < this->theDenominatorFactorsWithMults.coefficients[i]; k ++) {
       currentSummand.makeZero();
       this->theNumerators[i][k].makeZero();
@@ -2098,7 +2098,7 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition() {
     GroebnerBasisComputation<Rational> theGB;
     theGB.flagDoLogDivision = true;
     theGB.flagStoreQuotients = true;
-    theGB.theBasiS.SetSize(1);
+    theGB.theBasiS.setSize(1);
     theGB.theBasiS[0] = this->theDen;
     theGB.theFormat = this->currentFormaT;
     theGB.thePolynomialOrder.theMonOrder = monomialOrder;
@@ -2423,7 +2423,7 @@ bool CalculatorFunctions::innerIntersection(Calculator& theCommands, const Expre
     }
   }
   List<List<Expression> > theListsToBeIntersected;
-  theListsToBeIntersected.SetSize(input.size() - 1);
+  theListsToBeIntersected.setSize(input.size() - 1);
   for (int i = 1; i < input.size(); i ++) {
     theListsToBeIntersected[i - 1].Reserve(input[i].size());
     for (int j = 1; j < input[i].size(); j ++) {
@@ -2477,13 +2477,13 @@ bool CalculatorFunctions::innerUnionNoRepetition(Calculator& theCommands, const 
   }
   HashedList<Expression> theList;
   List<int> theIndices;
-  theList.SetExpectedSize(numElts);
+  theList.setExpectedSize(numElts);
   for (int i = 1; i < input.size(); i ++) {
     for (int j = 1; j < input[i].size(); j ++) {
-      theList.AddOnTopNoRepetition(input[i][j]);
+      theList.addOnTopNoRepetition(input[i][j]);
     }
   }
-  theIndices.SetSize(theList.size);
+  theIndices.setSize(theList.size);
   for (int i = 0; i < theList.size; i ++) {
     theIndices[i] = theCommands.theExpressionContainer.AddNoRepetitionOrReturnIndexFirst(theList[i]);
   }
@@ -2508,7 +2508,7 @@ bool CalculatorFunctions::innerCrossProduct(Calculator& theCommands, const Expre
     return output.MakeError(out.str(), theCommands);
   }
   List<Expression> outputSequence;
-  outputSequence.SetSize(3);
+  outputSequence.setSize(3);
   outputSequence[0] = leftE[2] * rightE[3] - leftE[3] * rightE[2];
   outputSequence[1] = leftE[3] * rightE[1] - leftE[1] * rightE[3];
   outputSequence[2] = leftE[1] * rightE[2] - leftE[2] * rightE[1];
@@ -3302,7 +3302,7 @@ bool CalculatorFunctions::innerCompareExpressionsNumericallyAtPoints(
       knownEs.addOnTop(varsGiven[i]);
     }
   }
-  knownValues.SetSize(knownEs.size);
+  knownValues.setSize(knownEs.size);
   int numFailedSamples = 0;
   int totalSamples = thePoints.NumRows;
   for (int i = 0; i < thePoints.NumRows; i ++) {
@@ -3404,7 +3404,7 @@ bool CalculatorFunctions::innerCompareExpressionsNumerically(
       knownEs.addOnTop(theBoundaryVars[i]);
     }
   }
-  knownValues.SetSize(knownEs.size);
+  knownValues.setSize(knownEs.size);
   SelectionWithDifferentMaxMultiplicities theSamplingSelector;
   theSamplingSelector.initFromInts(numSamples);
   if (theSamplingSelector.TotalNumSubsets() > 1000000) {
@@ -4538,7 +4538,7 @@ bool CalculatorFunctions::innerIntegrateSum(Calculator& theCommands, const Expre
     return false;
   }
   List<Expression> integralsOfSummands;
-  integralsOfSummands.SetSize(theFunctionE.size() - 1);
+  integralsOfSummands.setSize(theFunctionE.size() - 1);
   Expression newIntegralE, result, newSummand;
   for (int i = 1; i < theFunctionE.size(); i ++) {
     newIntegralE.MakeIntegral(theCommands, integrationSetE, theFunctionE[i], theVariableE);
@@ -5273,11 +5273,11 @@ bool Expression::SplitProduct(
   if (theMultiplicandsLeft.size <= numDesiredMultiplicandsLeft) {
     return false;
   }
-  theMultiplicandsRight.SetExpectedSize(theMultiplicandsLeft.size-numDesiredMultiplicandsLeft);
+  theMultiplicandsRight.setExpectedSize(theMultiplicandsLeft.size-numDesiredMultiplicandsLeft);
   for (int i = numDesiredMultiplicandsLeft; i < theMultiplicandsLeft.size; i ++) {
     theMultiplicandsRight.addOnTop(theMultiplicandsLeft[i]);
   }
-  theMultiplicandsLeft.SetSize(numDesiredMultiplicandsLeft);
+  theMultiplicandsLeft.setSize(numDesiredMultiplicandsLeft);
   outputLeftMultiplicand.MakeOXdotsX(*this->owner, this->owner->opTimes(), theMultiplicandsLeft);
   return outputRightMultiplicand.MakeOXdotsX(*this->owner, this->owner->opTimes(), theMultiplicandsRight);
 }
@@ -5296,7 +5296,7 @@ bool CalculatorFunctions::outerAtimesBpowerJplusEtcDivBpowerI(
   }
   LinearCombination<Expression, Rational> numerators, numeratorsNew;
   theCommands.functionCollectSummands(theCommands, input[1], numerators);
-  numeratorsNew.SetExpectedSize(numerators.size());
+  numeratorsNew.setExpectedSize(numerators.size());
   numeratorsNew.makeZero();
   Expression numeratorMultiplicandLeft, numeratorMultiplicandRight, numeratorBaseRight, numeratorExponentRight;
   Expression newNumSummand, newNumSummandRightPart, newNumExponent, mOneE;
@@ -5421,7 +5421,7 @@ void Expression::GetBlocksOfCommutativity(HashedListSpecialized<Expression>& inp
   MacroRegisterFunctionWithName("Expression::GetBlocksOfCommutativity");
   this->CheckInitialization();
   if (this->IsAtom()) {
-    inputOutputList.AddOnTopNoRepetition(*this);
+    inputOutputList.addOnTopNoRepetition(*this);
     return;
   }
   if (this->IsConstantNumber()) {
@@ -5436,7 +5436,7 @@ void Expression::GetBlocksOfCommutativity(HashedListSpecialized<Expression>& inp
       return;
     }
   }
-  inputOutputList.AddOnTopNoRepetition(*this);
+  inputOutputList.addOnTopNoRepetition(*this);
 }
 
 bool Expression::MakeMatrix(Calculator& owner, Matrix<Expression>* inputMat) {
@@ -5579,7 +5579,7 @@ bool CalculatorFunctions::innerMinPolyMatrix(
     return output.MakeError("Error: matrix is not square.", theCommands);
   }
   FormatExpressions tempF;
-  tempF.polyAlphabeT.SetSize(1);
+  tempF.polyAlphabeT.setSize(1);
   tempF.polyAlphabeT[0] = "q";
   Polynomial<Rational> theMinPoly;
   theMinPoly.AssignMinPoly(theMat);
@@ -5604,7 +5604,7 @@ bool CalculatorFunctions::innerCharPolyMatrix(
     return output.MakeError("Error: matrix is not square.", theCommands);
   }
   FormatExpressions tempF;
-  tempF.polyAlphabeT.SetSize(1);
+  tempF.polyAlphabeT.setSize(1);
   tempF.polyAlphabeT[0] = "q";
   Polynomial<Rational> theCharPoly;
   theCharPoly.AssignCharPoly(theMat);
@@ -5925,8 +5925,8 @@ bool CalculatorFunctions::innerDFQsEulersMethod(Calculator& theCommands, const E
   }
   double delta = (rightEndpoint - leftEndpoint) / numPoints;
   List<double> XValues, YValues;
-  XValues.SetExpectedSize(numPoints + 5);
-  YValues.SetExpectedSize(numPoints + 5);
+  XValues.setExpectedSize(numPoints + 5);
+  YValues.setExpectedSize(numPoints + 5);
   int pointsCounter = 0;
   for (double currentX = xInitial; currentX > leftEndpoint - delta; currentX -= delta) {
     XValues.addOnTop(currentX);
@@ -6001,7 +6001,7 @@ bool CalculatorFunctions::innerDFQsEulersMethod(Calculator& theCommands, const E
   }
   PlotObject thePlot;
   Vector<double> currentPt;
-  currentPt.SetSize(2);
+  currentPt.setSize(2);
   for (int i = firstGoodXIndex; i <= lastGoodXIndex; i ++) {
     currentPt[0] = XValues[i];
     currentPt[1] = YValues[i];
@@ -6042,7 +6042,7 @@ bool CalculatorFunctions::innerPlotViewWindow(
   if (theCommands.GetVectorDoublesFromFunctionArguments(input, widthHeight, 2)) {
     isGood = true;
   } else {
-    widthHeight.SetSize(2);
+    widthHeight.setSize(2);
     widthHeight[0] = 100;
     widthHeight[1] = 100;
     MapList<std::string, Expression, MathRoutines::HashString> theMap;
@@ -6256,7 +6256,7 @@ bool CalculatorFunctions::innerPlot2D(Calculator& theCommands, const Expression&
     }
   }
   thePlotObj.coordinateFunctionsE.addOnTop(input[1]);
-  thePlotObj.coordinateFunctionsJS.SetSize(1);
+  thePlotObj.coordinateFunctionsJS.setSize(1);
   thePlotObj.coordinateFunctionsE[0].GetFreeVariables(thePlotObj.variablesInPlay, true);
   if (thePlotObj.variablesInPlay.size > 1) {
     return theCommands << "Got a function with "
@@ -6270,7 +6270,7 @@ bool CalculatorFunctions::innerPlot2D(Calculator& theCommands, const Expression&
     xE.MakeAtom("x", theCommands);
     thePlotObj.variablesInPlay.addOnTop(xE);
   }
-  thePlotObj.variablesInPlayJS.SetSize(thePlotObj.variablesInPlay.size);
+  thePlotObj.variablesInPlayJS.setSize(thePlotObj.variablesInPlay.size);
   thePlotObj.variablesInPlayJS[0] = thePlotObj.variablesInPlay[0].toString();
   std::string theVarString = thePlotObj.variablesInPlayJS[0];
   Expression jsConverterE;
@@ -6299,7 +6299,7 @@ bool CalculatorFunctions::innerPlot2D(Calculator& theCommands, const Expression&
   } else {
     thePlotObj.thePlotType = "plotFunctionPrecomputed";
   }
-  thePlotObj.numSegmenTsJS.SetSize(1);
+  thePlotObj.numSegmenTsJS.setSize(1);
   thePlotObj.numSegmenTsJS[0] = "200";
   if (CalculatorFunctions::functionMakeJavascriptExpression(
     theCommands, thePlotObj.numSegmentsE, jsConverterE
@@ -6371,8 +6371,8 @@ bool CalculatorFunctions::innerPlotPoint(Calculator& theCommands, const Expressi
   }
   theFinalPlot.dimension = thePlot.thePointS.NumCols;
   thePlot.dimension = theFinalPlot.dimension;
-  thePlot.coordinateFunctionsE.SetSize(thePlot.dimension);
-  thePlot.coordinateFunctionsJS.SetSize(thePlot.dimension);
+  thePlot.coordinateFunctionsE.setSize(thePlot.dimension);
+  thePlot.coordinateFunctionsJS.setSize(thePlot.dimension);
   Expression jsConverterE;
   thePlot.thePointsJS.init(thePlot.thePointS.NumRows, thePlot.thePointS.NumCols);
   for (int i = 0; i < thePlot.thePointS.NumRows; i ++) {
@@ -6717,7 +6717,7 @@ bool CalculatorFunctions::innerPlotParametricCurve(
     thePlot.numSegmentsE.AssignValue(numPoints, theCommands);
   }
   List<Expression> theConvertedExpressions;
-  theConvertedExpressions.SetSize(thePlot.dimension);
+  theConvertedExpressions.setSize(thePlot.dimension);
   thePlot.paramLowE = input[2];
   thePlot.paramHighE = input[3];
   if (
@@ -6760,7 +6760,7 @@ bool CalculatorFunctions::innerPlotParametricCurve(
   }
   Expression converterE;
   thePlot.thePlotType = "parametricCurve";
-  thePlot.coordinateFunctionsJS.SetSize(thePlot.dimension);
+  thePlot.coordinateFunctionsJS.setSize(thePlot.dimension);
   for (int i = 0; i < thePlot.dimension; i ++) {
     if (CalculatorFunctions::functionMakeJavascriptExpression(
       theCommands,
@@ -6774,7 +6774,7 @@ bool CalculatorFunctions::innerPlotParametricCurve(
       << thePlot.coordinateFunctionsE[i] << " to js. ";
     }
   }
-  thePlot.numSegmenTsJS.SetSize(1);
+  thePlot.numSegmenTsJS.setSize(1);
   thePlot.numSegmenTsJS[0] = "200";
   if (CalculatorFunctions::functionMakeJavascriptExpression(
     theCommands, thePlot.numSegmentsE, converterE
@@ -6824,9 +6824,9 @@ bool CalculatorFunctions::innerPlotParametricCurve(
     )) {
       theCommands << "<hr>Failed to evaluate curve function. ";
     }
-    thePlot.thePointsDouble.SetSize(theXs.size);
+    thePlot.thePointsDouble.setSize(theXs.size);
     for (int i = 0; i < theXs.size; i ++) {
-      thePlot.thePointsDouble[i].SetSize(2);
+      thePlot.thePointsDouble[i].setSize(2);
       thePlot.thePointsDouble[i][0] = theXs[i][1];
       thePlot.thePointsDouble[i][1] = theYs[i][1];
     }
@@ -7685,7 +7685,7 @@ bool CalculatorFunctions::innerWriteGenVermaModAsDiffOperatorUpToLevel(
   Vectors<Polynomial<Rational> > theHws;
   Selection invertedSelInducing = selInducing;
   invertedSelInducing.InvertSelection();
-  theHws.SetSize(0);
+  theHws.setSize(0);
   SelectionWithMaxMultiplicity theHWenumerator;
   Vector<Polynomial<Rational> > theHWrf;
   for (int j = 0; j <= desiredHeight; j ++) {
@@ -8164,7 +8164,7 @@ bool Calculator::innerPrintB3G2branchingTableCommon(
   Selection invertedSelInducing = theG2B3Data.selInducing;
   theContext.ContextGetFormatExpressions(theG2B3Data.theFormat);
   invertedSelInducing.InvertSelection();
-  outputHWs.SetSize(0);
+  outputHWs.setSize(0);
   for (int j = 0; j <= desiredHeight; j ++) {
     theHWenumerator.initMaxMultiplicity(3 - theG2B3Data.selInducing.CardinalitySelection, j);
     theHWenumerator.IncrementSubsetFixedCardinality(j);
@@ -8266,7 +8266,7 @@ bool Expression::EvaluatesToDoubleInRange(
   *knownValues.LastObject() = lowBound;
   double currentValue = 0;
   if (outputPoints != nullptr) {
-    outputPoints->SetSize(numPoints);
+    outputPoints->setSize(numPoints);
   }
   bool result = true;
   int numFailedEvaluations = 0;
@@ -8285,7 +8285,7 @@ bool Expression::EvaluatesToDoubleInRange(
       }
       result = false;
       if (outputPoints != nullptr) {
-        (*outputPoints)[i].SetSize(2);
+        (*outputPoints)[i].setSize(2);
         (*outputPoints)[i][0] = *knownValues.LastObject();
         (*outputPoints)[i][1] = std::nan("");
       }
@@ -8293,7 +8293,7 @@ bool Expression::EvaluatesToDoubleInRange(
       continue;
     }
     if (outputPoints != nullptr) {
-      (*outputPoints)[i].SetSize(2);
+      (*outputPoints)[i].setSize(2);
       (*outputPoints)[i][0] = *knownValues.LastObject();
       (*outputPoints)[i][1] = currentValue;
     }
@@ -8833,7 +8833,7 @@ bool CalculatorFunctions::innerFindProductDistanceModN(
   if (!theCommands.GetVectoRInt(theIntegersE, theInts)) {
     return theCommands << "<hr>Failed to extract integer list from " << theIntegersE.toString();
   }
-  theIntsReduced.SetSize(theInts.size);
+  theIntsReduced.setSize(theInts.size);
   for (int i = 0; i < theInts.size; i ++) {
     if (theInts[i] <= 0) {
       return theCommands << "<hr>The integer list " << theInts << " contains non-positive numbers. ";
@@ -8968,7 +8968,7 @@ bool CalculatorFunctions::innerSolveProductSumEquationOverSetModN(
   }
   VectorPartition thePartition;
   Vectors<Rational> theOneDimVectors;
-  theOneDimVectors.SetSize(theInts.size);
+  theOneDimVectors.setSize(theInts.size);
   for (int i = 0; i < theInts.size; i ++) {
     theOneDimVectors[i].makeZero(1);
     theOneDimVectors[i][0] = theInts[i];
@@ -9116,7 +9116,7 @@ bool CalculatorFunctions::innerCrashByListOutOfBounds(
     theList.addOnTop(0);
     theVector.push_back(0);
   }
-  theList.SetSize(0);
+  theList.setSize(0);
   theVector.resize(0);
   theVector[1] = 1;
   theList[1] = 1;
@@ -9192,7 +9192,7 @@ bool CalculatorFunctions::innerDrawRootSystem(
   WeylGroupData& theWeyl = theAlg.theWeyl;
   Vectors<Rational> preferredProjectionPlane;
   if (hasPreferredProjectionPlane) {
-    preferredProjectionPlane.SetSize(2);
+    preferredProjectionPlane.setSize(2);
     bool isGood = theCommands.GetVectoR(
       input[2],
       preferredProjectionPlane[0],
@@ -9337,7 +9337,7 @@ public:
   }
   void ComputeCurrentEchildrenTruncated() {
     MacroRegisterFunctionWithName("ExpressionTreeDrawer::ComputeCurrentEchildrenTruncated");
-    this->currentEchildrenTruncated.SetSize(0);
+    this->currentEchildrenTruncated.setSize(0);
     if (!this->flagUseFullTree) {
       if (this->GetCurrentE().IsBuiltInTypE()) {
         return;
@@ -9398,10 +9398,10 @@ public:
   void init() {
     this->indexInCurrentLayer = 0;
     this->indexCurrentChild = 0;
-    this->currentLayer.SetSize(1);
-    this->LayerFirstIndices.SetSize(1);
+    this->currentLayer.setSize(1);
+    this->LayerFirstIndices.setSize(1);
     this->LayerFirstIndices[0] = 0;
-    this->LayerSizes.SetSize(1);
+    this->LayerSizes.setSize(1);
     this->LayerSizes[0] = 1;
     List<int> emptyArrows;
     this->arrows.addOnTop(emptyArrows);
@@ -9409,8 +9409,8 @@ public:
     this->DisplayedEstrings.Clear();
     this->AddStringTruncate(this->baseExpression.toString(), this->isLeaf(this->baseExpression));
     this->ComputeCurrentEContributionToNextLayer();
-    this->DisplayedEstrings.SetExpectedSize(this->MaxDisplayedNodes);
-    this->arrows.SetExpectedSize(this->MaxDisplayedNodes);
+    this->DisplayedEstrings.setExpectedSize(this->MaxDisplayedNodes);
+    this->arrows.setExpectedSize(this->MaxDisplayedNodes);
   }
   std::string toString() {
     std::stringstream out;
@@ -9447,7 +9447,7 @@ public:
       }
       this->LayerFirstIndices.addOnTop(this->indexCurrentChild);
       this->LayerSizes.addOnTop(this->nextLayer.size);
-      this->nextLayer.SetSize(0);
+      this->nextLayer.setSize(0);
       this->ComputeCurrentEContributionToNextLayer();
       return this->currentLayer.size > 0;
     }
@@ -9485,7 +9485,7 @@ public:
       i < this->LayerFirstIndices[layerIndex] + this->LayerSizes[layerIndex];
       i ++
     ) {
-      this->NodePositions[i].SetSize(2);
+      this->NodePositions[i].setSize(2);
       this->NodePositions[i][0] = currentX + this->GetStringWidthTruncated(i) / 2;
       this->NodePositions[i][1] = this->layerHeight * layerIndex * (- 1);
       currentX += this->charWidth * static_cast<int>(this->DisplayedEstrings[i].size()) + this->padding;
@@ -9498,11 +9498,11 @@ public:
     }
     this->thePlot.dimension = 2;
     this->thePlot.flagIncludeCoordinateSystem = false;
-    this->NodePositions.SetSize(this->DisplayedEstrings.size);
+    this->NodePositions.setSize(this->DisplayedEstrings.size);
     for (int i = 0; i < this->LayerFirstIndices.size; i ++) {
       this->ComputeLayerPositions(i);
     }
-    this->NodePositionsDouble.SetSize(this->NodePositions.size);
+    this->NodePositionsDouble.setSize(this->NodePositions.size);
     for (int i = 0; i < this->NodePositionsDouble.size; i ++) {
       this->NodePositionsDouble[i] = MathRoutines::GetVectorDouble(this->NodePositions[i]);
     }
@@ -9749,7 +9749,7 @@ bool CalculatorFunctions::innerTurnRulesOnOff(
       << ". Turn-off rules command failed. "
       ;
     } else {
-      rulesToSwitch.AddOnTopNoRepetition(rulesToConsider[i]);
+      rulesToSwitch.addOnTopNoRepetition(rulesToConsider[i]);
     }
   }
   output.reset(theCommands, rulesToSwitch.size + 1);
@@ -9831,9 +9831,9 @@ bool CalculatorFunctions::innerRandomInteger(
     return theCommands << "<hr>Failed to extract a Nx2 matrix giving the integer intervals";
   }
   List<List<int> > theIntervals;
-  theIntervals.SetSize(theMat.NumRows);
+  theIntervals.setSize(theMat.NumRows);
   for (int i = 0; i < theMat.NumRows; i ++) {
-    theIntervals[i].SetSize(theMat.NumCols);
+    theIntervals[i].setSize(theMat.NumCols);
     for (int j = 0; j < theMat.NumCols; j ++) {
       if (!theMat(i, j).IsIntegerFittingInInt(&theIntervals[i][j])) {
         return theCommands << "<hr>Failed to convert "

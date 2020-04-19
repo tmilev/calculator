@@ -74,7 +74,7 @@ int WebServer::Fork() {
 
     // child process
     // lose 256 bits of entropy from the server:
-    global.randomBytesCurrent.SetSize(static_cast<signed>(global.maximumExtractedRandomBytes));
+    global.randomBytesCurrent.setSize(static_cast<signed>(global.maximumExtractedRandomBytes));
     // Forget previous random bytes, and gain a little extra entropy:
     Crypto::Random::acquireAdditionalRandomness(millisecondsAtFork);
 

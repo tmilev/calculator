@@ -364,7 +364,7 @@ bool HtmlRoutines::ChopCGIString(
 ) {
   MacroRegisterFunctionWithName("HtmlRoutines::ChopCGIString");
   outputMap.Clear();
-  outputMap.SetExpectedSize(15);
+  outputMap.setExpectedSize(15);
   return HtmlRoutines::ChopCGIStringAppend(input, outputMap, commentsOnFailure);
 }
 

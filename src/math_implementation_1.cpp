@@ -143,7 +143,7 @@ void LittelmannPath::ActByEalpha(int indexAlpha) {
     global.Comments << "<br>Something is wrong: starting path is BAD!";
   }
   if (s2 > theMin + 1) {
-    this->Waypoints.SetSize(this->Waypoints.size + 1);
+    this->Waypoints.setSize(this->Waypoints.size + 1);
     for (int i = this->Waypoints.size - 1; i >= precedingIndex + 2; i --) {
       this->Waypoints[i] = this->Waypoints[i - 1];
     }
@@ -156,7 +156,7 @@ void LittelmannPath::ActByEalpha(int indexAlpha) {
     this->Waypoints[precedingIndex] = (r1 - r2) * x + r2;
   }
   Vectors<Rational> differences;
-  differences.SetSize(minIndex-precedingIndex);
+  differences.setSize(minIndex-precedingIndex);
   Rational currentDist = 0;
   Rational minDist = 0;
   for (int i = 0; i < differences.size; i ++) {
@@ -216,7 +216,7 @@ void LittelmannPath::ActByFalpha(int indexAlpha) {
   }
   Rational s1 = this->owner->RootScalarCartanRoot(this->Waypoints[succeedingIndex], alphaScaled);
   if (s1 > theMin + 1) {
-    this->Waypoints.SetSize(this->Waypoints.size + 1);
+    this->Waypoints.setSize(this->Waypoints.size + 1);
     for (int i = this->Waypoints.size - 1; i >= succeedingIndex + 1; i --) {
       this->Waypoints[i] = this->Waypoints[i - 1];
     }
@@ -273,11 +273,11 @@ void LittelmannPath::simplify() {
   leftIndex ++;
   this->Waypoints[leftIndex] = *this->Waypoints.LastObject();
 /*  if (leftIndex + 1< this->Waypoints.size) {
-    this->Waypoints.SetSize(leftIndex + 1);
+    this->Waypoints.setSize(leftIndex + 1);
     tempStream << " reduced to " << this->toString();
     global.Comments << tempStream.str();
   }*/
-  this->Waypoints.SetSize(leftIndex + 1);
+  this->Waypoints.setSize(leftIndex + 1);
 }
 
 bool LittelmannPath::MinimaAreIntegral() {
@@ -287,7 +287,7 @@ bool LittelmannPath::MinimaAreIntegral() {
   List<Rational> theMinima;
   WeylGroupData& theWeyl = *this->owner;
   int theDim = theWeyl.GetDim();
-  theMinima.SetSize(theDim);
+  theMinima.setSize(theDim);
   for (int i = 0; i < theDim; i ++) {
     theMinima[i] = theWeyl.GetScalarProdSimpleRoot(this->Waypoints[0], i) * 2 / theWeyl.CartanSymmetric.elements[i][i];
   }
@@ -308,7 +308,7 @@ bool LittelmannPath::MinimaAreIntegral() {
 
 void LittelmannPath::MakeFromWeightInSimpleCoords(const Vector<Rational>& weightInSimpleCoords, WeylGroupData& theOwner) {
   this->owner = &theOwner;
-  this->Waypoints.SetSize(2);
+  this->Waypoints.setSize(2);
   this->Waypoints[0].makeZero(theOwner.GetDim());
   this->Waypoints[1] = weightInSimpleCoords;
   this->simplify();
@@ -340,8 +340,8 @@ bool LittelmannPath::GenerateOrbit(
   HashedList<LittelmannPath> hashedOutput;
   hashedOutput.addOnTop(*this);
   int theDim = this->owner->GetDim();
-  outputOperators.SetSize(1);
-  outputOperators[0].SetSize(0);
+  outputOperators.setSize(1);
+  outputOperators[0].setSize(0);
   List<int> currentSequence;
   if (UpperBoundNumElts > 0) {
     currentSequence.Reserve(UpperBoundNumElts);
@@ -370,7 +370,7 @@ bool LittelmannPath::GenerateOrbit(
           found = false;
           currentPath.ActByEalpha(theIndex);
           if (!currentPath.IsEqualToZero()) {
-            if (hashedOutput.AddOnTopNoRepetition(currentPath)) {
+            if (hashedOutput.addOnTopNoRepetition(currentPath)) {
               found = true;
               currentSequence.addOnTop(theIndex);
               outputOperators.addOnTop(currentSequence);
@@ -388,7 +388,7 @@ bool LittelmannPath::GenerateOrbit(
           found = false;
           currentPath.ActByFalpha(theIndex);
           if (!currentPath.IsEqualToZero()) {
-            if (hashedOutput.AddOnTopNoRepetition(currentPath)) {
+            if (hashedOutput.addOnTopNoRepetition(currentPath)) {
               found = true;
               currentSequence.addOnTop(- theIndex - 1);
               outputOperators.addOnTop(currentSequence);
@@ -427,7 +427,7 @@ bool MonomialUniversalEnvelopingOrdered<coefficient>::ModOutFDRelationsExperimen
     theWeyl.GetFundamentalCoordinatesFromSimple(theHWsimpleCoordsTrue)
   );
   List<coefficient> theSub;
-  theSub.SetSize(theHWdualCoords.size);
+  theSub.setSize(theHWdualCoords.size);
   for (int i = 0; i < theHWdualCoords.size; i ++) {
     theSub[i] = theHWdualCoords[i];
   }
@@ -500,7 +500,7 @@ bool ElementUniversalEnveloping<coefficient>::GetCoordsInBasis(
   }
   Vector<coefficient> tempRoot;
   tempRoot = *tempCoords.LastObject();
-  tempCoords.SetSize(theBasis.size);
+  tempCoords.setSize(theBasis.size);
   return tempRoot.GetCoordsInBasiS(tempCoords, output);
 }
 
@@ -521,10 +521,10 @@ bool ElementUniversalEnveloping<coefficient>::GetBasisFromSpanOfElements(
   Vectors<CoefficientTypeQuotientField> outputCoordsBeforeReduction;
   for (int i = 0; i < theElements.size; i ++) {
     for (int j = 0; j < theElements[i].size; j ++) {
-      outputCorrespondingMonomials.AddOnTopNoRepetition(theElements[i][j]);
+      outputCorrespondingMonomials.addOnTopNoRepetition(theElements[i][j]);
     }
   }
-  outputCoordsBeforeReduction.SetSize(theElements.size);
+  outputCoordsBeforeReduction.setSize(theElements.size);
   for (int i = 0; i < theElements.size; i ++) {
     Vector<CoefficientTypeQuotientField>& currentList = outputCoordsBeforeReduction[i];
     currentList.makeZero(outputCorrespondingMonomials.size);
@@ -757,14 +757,14 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
       }
     }
   }
-  this->NilModPreNil.SetSize(0);
-  this->nilradicalSmall.SetSize(0);
-  this->nilradicalLarge.SetSize(0);
-  this->weightsNilradicalLarge.SetSize(0);
-  this->weightsNilradicalSmall.SetSize(0);
-  this->weightsNilModPreNil.SetSize(0);
-  this->indicesNilradicalLarge.SetSize(0);
-  this->indicesNilradicalSmall.SetSize(0);
+  this->NilModPreNil.setSize(0);
+  this->nilradicalSmall.setSize(0);
+  this->nilradicalLarge.setSize(0);
+  this->weightsNilradicalLarge.setSize(0);
+  this->weightsNilradicalSmall.setSize(0);
+  this->weightsNilModPreNil.setSize(0);
+  this->indicesNilradicalLarge.setSize(0);
+  this->indicesNilradicalSmall.setSize(0);
   ElementSemisimpleLieAlgebra<Rational> tempElt;
   WeylGroupData& theLargeWeyl = this->theHmm.theRange().theWeyl;
   WeylGroupData& theSmallWeyl = this->theHmm.theDomain().theWeyl;
@@ -854,7 +854,7 @@ std::string branchingData::GetStringCasimirProjector(int theIndex, const Rationa
   Vector<RationalFunction> weightDifference;
   std::stringstream formulaStream1;
   HashedList<Vector<RationalFunction> > accountedDiffs;
-  accountedDiffs.SetExpectedSize(this->g2Weights.size);
+  accountedDiffs.setExpectedSize(this->g2Weights.size);
   bool found = false;
   for (int i = 0; i < this->g2Weights.size; i ++) {
     weightDifference = this->g2Weights[i] - this->g2Weights[theIndex];
@@ -911,17 +911,17 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::G
     << global.fatal;
   }
   output.Reserve(this->allElements.size);
-  output.SetSize(0);
+  output.setSize(0);
   ElementWeylGroup currentOutput;
   currentOutput.owner = this->AmbientWeyl;
   Vector<int> indexShifts;
-  indexShifts.SetSize(this->simpleRootsInner.size);
+  indexShifts.setSize(this->simpleRootsInner.size);
   for (int i = 0; i < this->simpleRootsInner.size; i ++) {
     indexShifts[i] = this->simpleRootsInner[i].GetIndexFirstNonZeroCoordinate();
   }
   for (int i = 0; i < this->allElements.size; i ++) {
     const ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms& other = this->allElements[i];
-    currentOutput.generatorsLastAppliedFirst.SetSize(other.generatorsLastAppliedFirst.size);
+    currentOutput.generatorsLastAppliedFirst.setSize(other.generatorsLastAppliedFirst.size);
     for (int j = 0; j < currentOutput.generatorsLastAppliedFirst.size; j ++) {
       currentOutput.generatorsLastAppliedFirst[j].index = indexShifts[other.generatorsLastAppliedFirst[j].index];
     }

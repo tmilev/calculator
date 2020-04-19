@@ -196,7 +196,7 @@ bool Database::FallBack::FetchCollectionNames(
   if (!this->ReadDatabase(commentsOnFailure)) {
     return false;
   }
-  output.SetSize(0);
+  output.setSize(0);
   output.addListOnTop(this->reader.objects.theKeys);
   return true;
 }

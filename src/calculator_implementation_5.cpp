@@ -68,11 +68,11 @@ MeshTriangles::MeshTriangles() {
 
 void MeshTriangles::PlotGrid(int theColor) {
   MacroRegisterFunctionWithName("MeshTriangles::PlotGrid");
-  this->theGrid.thePlots.SetSize(0);
-  this->theGrid.thePlots.SetExpectedSize(this->theGrid.thePlots.size + this->theTriangles.size * 3);
+  this->theGrid.thePlots.setSize(0);
+  this->theGrid.thePlots.setExpectedSize(this->theGrid.thePlots.size + this->theTriangles.size * 3);
   PlotObject currentLinePlot;
   List<Vector<double> >& pointsVector = currentLinePlot.thePointsDouble;
-  currentLinePlot.thePointsDouble.SetSize(4);
+  currentLinePlot.thePointsDouble.setSize(4);
   currentLinePlot.colorRGB = theColor;
   for (int i = 0; i < this->theTriangles.size; i ++) {
     pointsVector[0] = this->theTriangles[i][0];
@@ -178,8 +178,8 @@ int MeshTriangles::CleanUpTrianglesReturnUpdatedCurrentIndex(int currentIndex) {
       lowestFree ++;
     }
   }
-  this->theTriangles.SetSize(lowestFree);
-  this->trianglesUsed.SetSize(lowestFree);
+  this->theTriangles.setSize(lowestFree);
+  this->trianglesUsed.setSize(lowestFree);
   if (lowestFree > this->maxNumTriangles) {
     this->flagTriangleLimitReached = true;
   }
@@ -193,7 +193,7 @@ void MeshTriangles::Subdivide(int triangleIndex) {
     global.fatal << "Triangle in mesh with less than 3 sides! " << global.fatal;
   }
   List<Vector<double> > insideTriange;
-  insideTriange.SetSize(3);
+  insideTriange.setSize(3);
   insideTriange[0] = (currentTriangle[1] + currentTriangle[2]) * 0.5;
   insideTriange[1] = (currentTriangle[2] + currentTriangle[0]) * 0.5;
   insideTriange[2] = (currentTriangle[0] + currentTriangle[1]) * 0.5;
@@ -216,10 +216,10 @@ void MeshTriangles::Subdivide(int triangleIndex) {
 
 void MeshTriangles::ComputeImplicitPlotPart2() {
   MacroRegisterFunctionWithName("MeshTriangles::ComputeImplicitPlotPart2");
-  this->theTriangles.SetExpectedSize(this->maxNumTriangles * 2);
-  this->trianglesUsed.SetExpectedSize(this->maxNumTriangles * 2);
+  this->theTriangles.setExpectedSize(this->maxNumTriangles * 2);
+  this->trianglesUsed.setExpectedSize(this->maxNumTriangles * 2);
   this->trianglesUsed.initializeFillInObject(this->theTriangles.size, true);
-  this->theEvaluatedPoints.SetExpectedSize(this->maxNumTriangles * 4);
+  this->theEvaluatedPoints.setExpectedSize(this->maxNumTriangles * 4);
   this->flagTriangleLimitReached = false;
   for (int i = 0; i < this->theTriangles.size; i ++) {
     this->EvaluateFunAtTriangleVertices(i);
@@ -264,7 +264,7 @@ void MeshTriangles::ComputeImplicitPlotPart2() {
       this->Subdivide(i);
       continue;
     }
-    theSegment.SetSize(0);
+    theSegment.setSize(0);
     if (prod01 <= 0) {
       this->AddPointFromVerticesValues(theSegment, currentTriangle[0], currentTriangle[1], val0, val1);
     }
@@ -367,8 +367,8 @@ bool CalculatorFunctions::innerGetPointsImplicitly(
   }
   HashedList<Vector<double>, MathRoutines::HashVectorDoubles> thePoints;
   for (int i = 0; i < theMesh.theCurve.thePlots.size; i ++) {
-    thePoints.AddOnTopNoRepetition(theMesh.theCurve.thePlots[i].thePointsDouble[0]);
-    thePoints.AddOnTopNoRepetition(theMesh.theCurve.thePlots[i].thePointsDouble[1]);
+    thePoints.addOnTopNoRepetition(theMesh.theCurve.thePlots[i].thePointsDouble[0]);
+    thePoints.addOnTopNoRepetition(theMesh.theCurve.thePlots[i].thePointsDouble[1]);
   }
   Matrix<double> theMatrix;
   theMatrix.AssignVectorsToRows(thePoints);
@@ -754,7 +754,7 @@ bool CalculatorFunctions::innerApplyToSubexpressionsRecurseThroughCalculusFuncti
     nextE.AddChildAtomOnTop("ApplyToSubexpressionsRecurseThroughCalculusFunctions");
     nextE.AddChildOnTop(input[1]);
     for (int i = 1; i < theArg.size(); i ++) {
-      nextE.children.SetSize(2);
+      nextE.children.setSize(2);
       nextE.AddChildOnTop(theArg[i]);
       theRecursivelyModifiedE.AddChildOnTop(nextE);
     }
@@ -937,10 +937,10 @@ bool CalculatorFunctions::innerEnsureExpressionDependsOnlyOnStandard(
   }
   const Expression& theExpression = input[1];
   HashedList<Expression> allowedFreeVars, presentFreeVars;
-  allowedFreeVars.SetExpectedSize(input.size() - 2);
-  presentFreeVars.SetExpectedSize(input.size() - 2);
+  allowedFreeVars.setExpectedSize(input.size() - 2);
+  presentFreeVars.setExpectedSize(input.size() - 2);
   for (int i = 2; i < input.size(); i ++) {
-    allowedFreeVars.AddOnTopNoRepetition(input[i]);
+    allowedFreeVars.addOnTopNoRepetition(input[i]);
   }
   std::stringstream out;
   theExpression.GetFreeVariables(presentFreeVars, true);
@@ -979,7 +979,7 @@ bool CalculatorFunctions::innerRemoveDuplicates(Calculator& theCommands, const E
   }
   HashedList<Expression> result;
   for (int i = 1; i < input.size(); i ++) {
-    result.AddOnTopNoRepetition(input[i]);
+    result.addOnTopNoRepetition(input[i]);
   }
   return output.MakeSequence(theCommands, &result);
 }
@@ -1056,7 +1056,7 @@ bool CalculatorFunctions::innerEnsureExpressionDependsOnlyOnMandatoryVariables(
   const Expression& theExpression = input[1];
   HashedList<Expression> mandatoryFreeVars, allowedFreeVars, presentFreeVars;
   if (input[2].IsSequenceNElementS()) {
-    mandatoryFreeVars.SetExpectedSize(input[2].size() - 1);
+    mandatoryFreeVars.setExpectedSize(input[2].size() - 1);
     for (int i = 1; i < input[2].size(); i ++) {
       mandatoryFreeVars.addOnTop(input[2][i]);
     }
@@ -1073,7 +1073,7 @@ bool CalculatorFunctions::innerEnsureExpressionDependsOnlyOnMandatoryVariables(
       allowedFreeVars.addOnTop(input[3]);
     }
   }
-  presentFreeVars.SetExpectedSize(input.size() - 2);
+  presentFreeVars.setExpectedSize(input.size() - 2);
   theExpression.GetFreeVariables(presentFreeVars, excludeNamedConstants);
   std::stringstream out;
   if (!presentFreeVars.Contains(mandatoryFreeVars)) {
@@ -1170,7 +1170,7 @@ bool CalculatorFunctions::innerPlotRectangle(
     return false;
   }
   Vectors<double> theRectangle;
-  theRectangle.SetSize(2);
+  theRectangle.setSize(2);
   if (
     !theCommands.GetVectorDoubles(input[1], theRectangle[0], 2) ||
     !theCommands.GetVectorDoubles(input[2], theRectangle[1], 2)
@@ -2074,7 +2074,7 @@ bool CalculatorFunctions::innerPlotCoordinateSystem(Calculator& theCommands, con
   PlotObject thePlot;
   thePlot.colorJS = "black";
   thePlot.thePlotType = "segment";
-  thePlot.thePointsDouble.SetSize(2);
+  thePlot.thePointsDouble.setSize(2);
   for (int i = 0; i < 3; i ++) {
     thePlot.thePointsDouble[0].makeZero(3);
     thePlot.thePointsDouble[1].makeZero(3);
@@ -2084,7 +2084,7 @@ bool CalculatorFunctions::innerPlotCoordinateSystem(Calculator& theCommands, con
   }
   PlotObject plotLabels;
   plotLabels.thePlotType = "label";
-  plotLabels.thePointsDouble.SetSize(1);
+  plotLabels.thePointsDouble.setSize(1);
   plotLabels.colorJS = "blue";
   for (char i = 0; i < 3; i ++) {
     plotLabels.thePointsDouble[0].makeZero(3);
@@ -2137,12 +2137,12 @@ bool CalculatorFunctions::innerPlotSurface(Calculator& theCommands, const Expres
     thePlot.variablesInPlay.addOnTop(vE);
   }
   thePlot.variablesInPlay.QuickSortAscending();
-  thePlot.coordinateFunctionsE.SetSize(thePlot.manifoldImmersion.size() - 1);
-  thePlot.coordinateFunctionsJS.SetSize(thePlot.coordinateFunctionsE.size);
-  thePlot.theVarRangesJS.SetSize(2);
-  thePlot.variablesInPlayJS.SetSize(2);
+  thePlot.coordinateFunctionsE.setSize(thePlot.manifoldImmersion.size() - 1);
+  thePlot.coordinateFunctionsJS.setSize(thePlot.coordinateFunctionsE.size);
+  thePlot.theVarRangesJS.setSize(2);
+  thePlot.variablesInPlayJS.setSize(2);
   for (int i = 0; i < 2; i ++) {
-    thePlot.theVarRangesJS[i].SetSize(2);
+    thePlot.theVarRangesJS[i].setSize(2);
     thePlot.variablesInPlayJS[i] = thePlot.variablesInPlay[i].toString();
   }
   Expression jsConverter;
@@ -2215,7 +2215,7 @@ bool CalculatorFunctions::innerPlotSurface(Calculator& theCommands, const Expres
         << " to a javascript expression. ";
       }
     }
-    thePlot.numSegmenTsJS.SetSize(2);
+    thePlot.numSegmenTsJS.setSize(2);
     if (keysToConvert.GetValueCreate("numSegments1") != "") {
       thePlot.numSegmenTsJS[0] = keysToConvert.GetValueCreate("numSegments1");
     }
@@ -2251,22 +2251,22 @@ bool CalculatorFunctions::innerPolynomialDivisionRemainder(
 ) {
   MacroRegisterFunctionWithName("Calculator::innerPolynomialDivisionRemainder");
   Expression theContext;
-  Vector<Polynomial<AlgebraicNumber> > thePolys;
-  if (!theCommands.GetListPolynomialVariableLabelsLexicographic(input, thePolys, theContext)) {
+  Vector<Polynomial<AlgebraicNumber> > polynomialsRational;
+  if (!theCommands.GetListPolynomialVariableLabelsLexicographic(input, polynomialsRational, theContext)) {
     return output.MakeError("Failed to extract list of polynomials. ", theCommands);
   }
   GroebnerBasisComputation<AlgebraicNumber> theGB;
   theGB.flagStoreQuotients = true;
-  theGB.theBasiS.SetSize(thePolys.size - 1);
-  for (int i = 1; i < thePolys.size; i ++) {
-    if (thePolys[i].IsEqualToZero()) {
+  theGB.theBasiS.setSize(polynomialsRational.size - 1);
+  for (int i = 1; i < polynomialsRational.size; i ++) {
+    if (polynomialsRational[i].IsEqualToZero()) {
       return output.MakeError("Division by zero.", theCommands);
     }
-    theGB.theBasiS[i - 1] = thePolys[i];
+    theGB.theBasiS[i - 1] = polynomialsRational[i];
   }
   Polynomial<AlgebraicNumber> outputRemainder;
   theGB.initializeForDivision(theGB.theBasiS);
-  theGB.RemainderDivisionByBasis(thePolys[0], &outputRemainder, - 1);
+  theGB.RemainderDivisionByBasis(polynomialsRational[0], &outputRemainder, - 1);
   Expression thePolyE;
   thePolyE.AssignValueWithContext(outputRemainder, theContext, theCommands);
   output.reset(theCommands);
@@ -2328,9 +2328,9 @@ bool CalculatorFunctions::innerPolynomialDivisionVerbose(
 ) {
   MacroRegisterFunctionWithName("Calculator::innerPolynomialDivisionVerbose");
   Expression theContext;
-  Vector<Polynomial<AlgebraicNumber> > thePolys;
+  Vector<Polynomial<AlgebraicNumber> > polynomialsRational;
   if (!theCommands.GetListPolynomialVariableLabelsLexicographic(
-    input, thePolys, theContext
+    input, polynomialsRational, theContext
   )) {
     return output.MakeError(
       "Failed to extract list of polynomials. ",
@@ -2340,18 +2340,18 @@ bool CalculatorFunctions::innerPolynomialDivisionVerbose(
   GroebnerBasisComputation<AlgebraicNumber> theGB;
   theGB.flagDoLogDivision = true;
   theGB.flagStoreQuotients = true;
-  theGB.theBasiS.SetSize(thePolys.size - 1);
-  for (int i = 1; i < thePolys.size; i ++) {
-    if (thePolys[i].IsEqualToZero()) {
+  theGB.theBasiS.setSize(polynomialsRational.size - 1);
+  for (int i = 1; i < polynomialsRational.size; i ++) {
+    if (polynomialsRational[i].IsEqualToZero()) {
       return output.MakeError("Division by zero.", theCommands);
     }
-    theGB.theBasiS[i - 1] = thePolys[i];
+    theGB.theBasiS[i - 1] = polynomialsRational[i];
   }
   theGB.initializeForDivision(theGB.theBasiS);
   if (theMonOrder != nullptr) {
     theGB.thePolynomialOrder.theMonOrder = *theMonOrder;
   }
-  theGB.RemainderDivisionByBasis(thePolys[0], &theGB.remainderDivision, - 1);
+  theGB.RemainderDivisionByBasis(polynomialsRational[0], &theGB.remainderDivision, - 1);
   theContext.ContextGetFormatExpressions(theGB.theFormat);
   theGB.theFormat.flagUseLatex = true;
   theGB.theFormat.flagUseFrac = true;
@@ -2695,28 +2695,28 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionLaTeXSlide() {
   this->theFormat.monomialOrder = this->thePolynomialOrder.theMonOrder;
   bool oneDivisor = (this->theBasiS.size == 1);
   this->allMonomials.Clear();
-  this->allMonomials.AddOnTopNoRepetition(this->startingPoly.GetElement().theMonomials);
+  this->allMonomials.addOnTopNoRepetition(this->startingPoly.GetElement().theMonomials);
   for (int i = 0; i < theRemainders.size; i ++) {
-    this->allMonomials.AddOnTopNoRepetition(theRemainders[i].theMonomials);
+    this->allMonomials.addOnTopNoRepetition(theRemainders[i].theMonomials);
   }
   for (int i = 0; i < theSubtracands.size; i ++) {
-    this->allMonomials.AddOnTopNoRepetition(theSubtracands[i].theMonomials);
+    this->allMonomials.addOnTopNoRepetition(theSubtracands[i].theMonomials);
   }
   for (int i = 0; i < this->theBasiS.size; i ++) {
-    this->allMonomials.AddOnTopNoRepetition(this->theBasiS[i].theMonomials);
+    this->allMonomials.addOnTopNoRepetition(this->theBasiS[i].theMonomials);
   }
   for (int i = 0; i < this->theQuotients.size; i ++) {
-    this->allMonomials.AddOnTopNoRepetition(this->theQuotients[i].theMonomials);
+    this->allMonomials.addOnTopNoRepetition(this->theQuotients[i].theMonomials);
   }
   if (this->remainderDivision.IsEqualToZero()) {
     MonomialP constMon;
     constMon.makeOne();
-    this->allMonomials.AddOnTopNoRepetition(constMon);
+    this->allMonomials.addOnTopNoRepetition(constMon);
   }
   this->allMonomials.QuickSortDescending(&this->thePolynomialOrder.theMonOrder);
   List<List<int> > dummyListList;
   List<int> dummyList;
-  dummyListList.SetSize(this->allMonomials.size);
+  dummyListList.setSize(this->allMonomials.size);
   dummyList.initializeFillInObject(this->allMonomials.size, - 1);
   this->firstNonZeroIndicesPerIntermediateSubtracand.initializeFillInObject(theSubtracands.size, 0);
   this->highlightMonsRemainders.initializeFillInObject(theRemainders.size,   dummyListList);
@@ -2884,11 +2884,11 @@ bool CalculatorFunctions::innerPolynomialDivisionSlidesGrLex(
 ) {
   MacroRegisterFunctionWithName("Calculator::innerPolynomialDivisionSlidesGrLex");
   Expression theContext;
-  Vector<Polynomial<AlgebraicNumber> > thePolys;
-  if (!theCommands.GetListPolynomialVariableLabelsLexicographic(input, thePolys, theContext)) {
+  Vector<Polynomial<AlgebraicNumber> > polynomialsRational;
+  if (!theCommands.GetListPolynomialVariableLabelsLexicographic(input, polynomialsRational, theContext)) {
     return output.MakeError("Failed to extract list of polynomials. ", theCommands);
   }
-  if (thePolys.size < 3) {
+  if (polynomialsRational.size < 3) {
     return theCommands
     << "Function takes at least 3 inputs: "
     << "index of first slide, dividend, divisor(s).";
@@ -2896,21 +2896,21 @@ bool CalculatorFunctions::innerPolynomialDivisionSlidesGrLex(
   GroebnerBasisComputation<AlgebraicNumber> theGB;
   theGB.flagDoLogDivision = true;
   theGB.flagStoreQuotients = true;
-  theGB.theBasiS.SetSize(thePolys.size - 2);
-  for (int i = 2; i < thePolys.size; i ++) {
-    if (thePolys[i].IsEqualToZero()) {
+  theGB.theBasiS.setSize(polynomialsRational.size - 2);
+  for (int i = 2; i < polynomialsRational.size; i ++) {
+    if (polynomialsRational[i].IsEqualToZero()) {
       return output.MakeError("Division by zero.", theCommands);
     }
-    theGB.theBasiS[i - 2] = thePolys[i];
+    theGB.theBasiS[i - 2] = polynomialsRational[i];
   }
-  if (!thePolys[0].IsSmallInteger(&theGB.firstIndexLatexSlide)) {
+  if (!polynomialsRational[0].IsSmallInteger(&theGB.firstIndexLatexSlide)) {
     return theCommands << "Failed to extract integer from first argument";
   }
   theGB.initializeForDivision(theGB.theBasiS);
   theGB.thePolynomialOrder.theMonOrder.setComparison(
     MonomialP::greaterThan_totalDegree_rightSmallerWins
   );
-  theGB.RemainderDivisionByBasis(thePolys[1], &theGB.remainderDivision, - 1);
+  theGB.RemainderDivisionByBasis(polynomialsRational[1], &theGB.remainderDivision, - 1);
   theContext.ContextGetFormatExpressions(theGB.theFormat);
   theGB.theFormat.flagUseLatex = true;
   theGB.theFormat.flagUseFrac = true;
@@ -2937,18 +2937,29 @@ bool CalculatorFunctions::innerFactorPolynomialModPrime(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerFactorPolynomialModPrime");
-  if (input.size() != 3) {
-    return theCommands << "Expected two arguments, polynomial and prime.";
+  if (input.size() != 2 && input.size() != 3) {
+    return theCommands << "Expected two arguments "
+    << "(polynomial and prime) or one argument (modular polynomial).";
   }
-  WithContext<Polynomial<Rational> > polynomial;
-  if (!theCommands.Convert(
-    input[1],
-    CalculatorConversions::functionPolynomial<Rational>,
-    polynomial
-  )) {
-    return false;
+  Expression converted;
+  if (input.size() == 3) {
+    if (!CalculatorConversions::innerPolynomialModuloInteger(
+      theCommands, input, converted
+    )) {
+      return theCommands
+      << "Failed to convert arguments to modular polynomial.";
+    }
+  } else {
+    converted = input[1];
   }
-  LargeInteger thePrime;
+  WithContext<Polynomial<ElementZmodP> > polynomial;
+  if (!converted.IsOfTypeWithContext(&polynomial)) {
+    return theCommands << "Failed to extract modular polynomial. ";
+  }
+  if (polynomial.content.IsEqualToZero()) {
+    return theCommands << "Factoring zero not allowed. ";
+  }
+  LargeInteger thePrime = polynomial.content.coefficients[0].theModulus;
   if (!input[2].IsInteger(&thePrime)) {
     return false;
   }
@@ -2960,16 +2971,10 @@ bool CalculatorFunctions::innerFactorPolynomialModPrime(
     theCommands << "The modulus: " << thePrime
     << " appears not to be prime. " << commentsOnFailure.str();
   }
-  Polynomial<ElementZmodP> converted;
-  ElementZmodP::ScaleToIntegralMinimalHeightAndGetPoly(polynomial.content, converted, thePrime.value);
   std::stringstream out;
-  FormatExpressions format;
-  format.suffixLinearCombination = ElementZmodP::toStringModP(thePrime.value);
-  format.flagSuppressModP = true;
-  polynomial.context.context.ContextGetFormatExpressions(format);
-  out << "Converted polynomial: " << converted.toString(&format) << "<br>";
+  out << "Converted polynomial: " << polynomial.toStringContentWithFormat() << "<br>";
   PolynomialFactorization<ElementZmodP, PolynomialFactorizationCantorZassenhaus> result;
-  if (!result.factor(converted, &out)) {
+  if (!result.factor(polynomial.content, &out)) {
     return output.AssignValue(out.str(), theCommands);
   }
   return output.AssignValue(out.str(), theCommands);

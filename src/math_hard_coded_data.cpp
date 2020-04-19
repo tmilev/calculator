@@ -9,7 +9,7 @@ void ElementWeylGroup::MakeFromReadableReflections(
   this->owner = &input;
   Vector<Rational> theReflections;
   theReflections.AssignString(inputReflections);
-  this->generatorsLastAppliedFirst.SetSize(theReflections.size);
+  this->generatorsLastAppliedFirst.setSize(theReflections.size);
   for (int i = 0; i < theReflections.size; i ++) {
     if (!theReflections[i].IsSmallInteger(&this->generatorsLastAppliedFirst[i].index)) {
       global.fatal << "Bad reflection list." << global.fatal;
@@ -71,7 +71,7 @@ bool LoadConjugacyClassesF1_4(WeylGroupData& output) {
   output.ComputeRho(true);
   FiniteGroup<ElementWeylGroup>::ConjugacyClass theClass;
   theClass.flagRepresentativeComputed = true;
-  output.theGroup.conjugacyClasseS.SetSize(0);
+  output.theGroup.conjugacyClasseS.setSize(0);
   theClass.representative.MakeFromReadableReflections(output, false, "[  ]                                                                      "); output.theGroup.conjugacyClasseS.addOnTop(theClass);
   theClass.representative.MakeFromReadableReflections(output, false, "[ 1, 2, 1, 3, 2, 1, 3, 2, 3, 4, 3, 2, 1, 3, 2, 3, 4, 3, 2, 1, 3, 2, 3, 4 ]"); output.theGroup.conjugacyClasseS.addOnTop(theClass);
   theClass.representative.MakeFromReadableReflections(output, false, "[ 2, 3, 2, 3 ]                                                            "); output.theGroup.conjugacyClasseS.addOnTop(theClass);
@@ -98,7 +98,7 @@ bool LoadConjugacyClassesF1_4(WeylGroupData& output) {
   theClass.representative.MakeFromReadableReflections(output, false, "[ 2, 3, 2, 3, 4, 3, 2, 1, 3, 2, 4, 3, 2, 1 ]                              "); output.theGroup.conjugacyClasseS.addOnTop(theClass);
   theClass.representative.MakeFromReadableReflections(output, false, "[ 2, 4, 3, 2, 1, 3 ]                                                      "); output.theGroup.conjugacyClasseS.addOnTop(theClass);
 
-  output.ccCarterLabels.SetSize(0);
+  output.ccCarterLabels.setSize(0);
   output.ccCarterLabels.addOnTop(" "         );
   output.ccCarterLabels.addOnTop("4A_1"      );
   output.ccCarterLabels.addOnTop("2A_1"      );
@@ -158,7 +158,7 @@ bool LoadConjugacyClassesE1_7(WeylGroupData& output) {
   output.ComputeRho(true);
   FiniteGroup<ElementWeylGroup>::ConjugacyClass theClass;
   theClass.flagRepresentativeComputed = true;
-  output.theGroup.conjugacyClasseS.SetSize(0);
+  output.theGroup.conjugacyClasseS.setSize(0);
   theClass.representative.MakeFromReadableReflections(output, false, "[ ]"); output.theGroup.conjugacyClasseS.addOnTop(theClass);
   theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 6, 7, 5, 6, 7, 4, 5, 6, 7, 2, 4, 5, 6, 7, 3, 4, 5, 6, 7, 2, 4, 5, 6, 3, 4, 5, 2, 4, 3 ]"); output.theGroup.conjugacyClasseS.addOnTop(theClass);
   theClass.representative.MakeFromReadableReflections(output, false, "[ 5, 4, 5, 2, 4, 5, 3, 4, 5, 2, 4, 3 ]"); output.theGroup.conjugacyClasseS.addOnTop(theClass);
@@ -220,7 +220,7 @@ bool LoadConjugacyClassesE1_7(WeylGroupData& output) {
   theClass.representative.MakeFromReadableReflections(output, false, "[ 7, 6, 7, 5, 6, 4, 5, 2, 4, 3, 1 ]"); output.theGroup.conjugacyClasseS.addOnTop(theClass);
   theClass.representative.MakeFromReadableReflections(output, false, "[ 2, 4, 2, 3, 5, 4, 2, 7, 6, 5, 4, 3, 1 ]"); output.theGroup.conjugacyClasseS.addOnTop(theClass);
 
-  output.ccCarterLabels.SetSize(0);
+  output.ccCarterLabels.setSize(0);
   output.ccCarterLabels.addOnTop(" "              );
   output.ccCarterLabels.addOnTop("6A_1"           );
   output.ccCarterLabels.addOnTop("4A_1''"         );
@@ -352,7 +352,7 @@ bool LoadConjugacyClassesE1_8(WeylGroupData& output) {
   output.ComputeRho(true);
   FiniteGroup<ElementWeylGroup>::ConjugacyClass theClass;
   theClass.flagRepresentativeComputed = true;
-  output.theGroup.conjugacyClasseS.SetSize(0);
+  output.theGroup.conjugacyClasseS.setSize(0);
 
 
 
@@ -469,7 +469,7 @@ bool LoadConjugacyClassesE1_8(WeylGroupData& output) {
   theClass.representative.MakeFromReadableReflections(output, false, "[ 8, 6, 7, 5, 2, 3, 1 ]"); output.theGroup.conjugacyClasseS.addOnTop(theClass);
   theClass.representative.MakeFromReadableReflections(output, false, "[ 2, 4, 2, 3, 1, 6, 5, 4, 2, 3, 4, 5, 7 ]"); output.theGroup.conjugacyClasseS.addOnTop(theClass);
 
-  output.ccCarterLabels.SetSize(0);
+  output.ccCarterLabels.setSize(0);
   output.ccCarterLabels.addOnTop(" "              );
   output.ccCarterLabels.addOnTop("8A_1"           );
   output.ccCarterLabels.addOnTop("4A_1'"          );
@@ -701,7 +701,7 @@ bool LoadConjugacyClassesE1_8(WeylGroupData& output) {
 
 bool LoadCharTableF1_4(WeylGroupData& output) {
   FiniteGroup<ElementWeylGroup>& outputG = output.theGroup;
-  outputG.characterTable.SetExpectedSize(112); outputG.characterTable.SetSize(0);
+  outputG.characterTable.setExpectedSize(112); outputG.characterTable.setSize(0);
   ClassFunction<FiniteGroup<ElementWeylGroup>, Rational> currentCF;
   currentCF.G = &outputG;
   currentCF.data.AssignString("[  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1 ]"); outputG.characterTable.addOnTop(currentCF);
@@ -729,7 +729,7 @@ bool LoadCharTableF1_4(WeylGroupData& output) {
   currentCF.data.AssignString("[  8, -8,  0, - 1,  1,  0,  2, -2,  2, -2,  0,  0,  0,  0,  0,  0,  4, -4,  1, - 1,  0,  0,  0,  0,  0 ]"); outputG.characterTable.addOnTop(currentCF);
   currentCF.data.AssignString("[  8, -8,  0, - 1,  1,  0,  2, -2,  2, -2,  0,  0,  0,  0,  0,  0, -4,  4, - 1,  1,  0,  0,  0,  0,  0 ]"); outputG.characterTable.addOnTop(currentCF);
   currentCF.data.AssignString("[ 16, - 16, 0, -2,  2,  0, -2,  2, -2,  2,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 ]"); outputG.characterTable.addOnTop(currentCF);
-  output.irrepsCarterLabels.SetSize(0);
+  output.irrepsCarterLabels.setSize(0);
   output.irrepsCarterLabels.addOnTop("\\phi_{1,0}   ");
   output.irrepsCarterLabels.addOnTop("\\phi_{1,12}''");
   output.irrepsCarterLabels.addOnTop("\\phi_{1,12}' ");
@@ -760,7 +760,7 @@ bool LoadCharTableF1_4(WeylGroupData& output) {
 
 bool LoadCharTableE1_7(WeylGroupData& output) {
   FiniteGroup<ElementWeylGroup>& outputG = output.theGroup;
-  outputG.characterTable.SetExpectedSize(112); outputG.characterTable.SetSize(0);
+  outputG.characterTable.setExpectedSize(112); outputG.characterTable.setSize(0);
   ClassFunction<FiniteGroup<ElementWeylGroup>, Rational> currentCF;
   currentCF.G = &outputG;
   currentCF.data.AssignString("[ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ]"); outputG.characterTable.addOnTop(currentCF);
@@ -823,7 +823,7 @@ bool LoadCharTableE1_7(WeylGroupData& output) {
   currentCF.data.AssignString("[ 420, 20, 4, - 12, 4, 0, -3, 3, -4, 0, 0, -4, 0, 0, -4, 4, 1, 0, - 1, 1, 1,      0, 0, 0, 0, 0, 0, 0, - 1, 0, -420, -20, -4, 12, -4, 0, 3, -3, 4, 0, 0,      4, 0, 0, 4, -4, - 1, 0, 1, - 1, - 1, 0, 0, 0, 0, 0, 0, 0, 1, 0 ]"); outputG.characterTable.addOnTop(currentCF);
   currentCF.data.AssignString("[ 512, 0, 0, 0, 0, - 16, 8, -4, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1, 0,      0, - 1, 0, 0, 0, 0, - 1, 512, 0, 0, 0, 0, - 16, 8, -4, 0, 0, 0, 0, 0, 2,      0, 0, 0, 0, 0, 0, 0, 1, 0, 0, - 1, 0, 0, 0, 0, - 1 ]"); outputG.characterTable.addOnTop(currentCF);
   currentCF.data.AssignString("[ 512, 0, 0, 0, 0, - 16, 8, -4, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1, 0,      0, - 1, 0, 0, 0, 0, - 1, -512, 0, 0, 0, 0, 16, -8, 4, 0, 0, 0, 0, 0, -2,      0, 0, 0, 0, 0, 0, 0, - 1, 0, 0, 1, 0, 0, 0, 0, 1 ]"); outputG.characterTable.addOnTop(currentCF);
-  output.irrepsCarterLabels.SetSize(0);
+  output.irrepsCarterLabels.setSize(0);
   output.irrepsCarterLabels.addOnTop("\\phi_{1,0}"   );
   output.irrepsCarterLabels.addOnTop("\\phi_{1,63}"  );
   output.irrepsCarterLabels.addOnTop("\\phi_{7,46}"  );
@@ -889,7 +889,7 @@ bool LoadCharTableE1_7(WeylGroupData& output) {
 
 bool LoadCharTableE1_8(WeylGroupData& output) {
   FiniteGroup<ElementWeylGroup>& outputG = output.theGroup;
-  outputG.characterTable.SetExpectedSize(112); outputG.characterTable.SetSize(0);
+  outputG.characterTable.setExpectedSize(112); outputG.characterTable.setSize(0);
   ClassFunction<FiniteGroup<ElementWeylGroup>, Rational> currentCF;
   currentCF.G = &outputG;
 
@@ -1006,7 +1006,7 @@ bool LoadCharTableE1_8(WeylGroupData& output) {
   currentCF.data.AssignString("[ 5600, -5600, 0, -80, 80, 0, 0, 20, -20, 20, -20, 11, - 11, 2, -2, - 16, 16,      0, 0, 0, 0, 0, 0, 0, 0, 0, - 12, 12, 0, 4, -4, 0, 3, -3, 0, 0, -2, 2, 0,      0, 0, 0, 0, 0, 0, - 1, 1, - 1, 1, 0, 0, 0, -4, 4, 2, -2, - 1, 1, 0, 0, 0,      0, 0, 0, 0, 280, -280, 8, -8, 0, 0, 0, -8, 8, 0, 0, -20, 20, 1, - 1, -4,      4, 4, -4, - 1, 1, 2, -2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, - 1, 0,      0, 1, - 1, 0, 0, 0, 0, 0, 0 ]"); outputG.characterTable.addOnTop(currentCF);
   currentCF.data.AssignString("[ 5600, -5600, 0, -80, 80, 0, 0, 20, -20, 20, -20, 11, - 11, 2, -2, - 16, 16,     0, 0, 0, 0, 0, 0, 0, 0, 0, - 12, 12, 0, 4, -4, 0, 3, -3, 0, 0, -2, 2, 0,      0, 0, 0, 0, 0, 0, - 1, 1, - 1, 1, 0, 0, 0, -4, 4, 2, -2, - 1, 1, 0, 0, 0,      0, 0, 0, 0, -280, 280, -8, 8, 0, 0, 0, 8, -8, 0, 0, 20, -20, - 1, 1, 4,      -4, -4, 4, 1, - 1, -2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, - 1, 1, 0,      0, - 1, 1, 0, 0, 0, 0, 0, 0 ]"); outputG.characterTable.addOnTop(currentCF);
 
-  output.irrepsCarterLabels.SetSize(0);
+  output.irrepsCarterLabels.setSize(0);
 
 
   output.irrepsCarterLabels.addOnTop("\\phi_{1,0}"     );
@@ -1148,7 +1148,7 @@ bool LoadOutputSubgroupsFromJSData(JSData& input, WeylGroupData& inputGroup, Lis
       << currentSGdata.theList[0].toString(nullptr) << global.fatal;
     }
     std::string sgString = currentSGdata.theList[0].theList[1].theString;
-    readerSubgroup.generatingSimpleRoots.SetSize(0);
+    readerSubgroup.generatingSimpleRoots.setSize(0);
     for (int j = 0; j < currentSGdata.theList[0].theList[2].theList.size; j ++) {
       int theInt = 0;
       currentSGdata.theList[0].theList[2].theList[j].theInteger.GetElement().IsIntegerFittingInInt(&theInt);
@@ -1178,7 +1178,7 @@ bool LoadOutputSubgroupsFromJSData(JSData& input, WeylGroupData& inputGroup, Lis
         global.fatal << "Bad f4. " << global.fatal;
       }
     }
-    readerSubgroup.tauSignature.SetSize(inputGroup.theGroup.characterTable.size);
+    readerSubgroup.tauSignature.setSize(inputGroup.theGroup.characterTable.size);
     for (int j = 0; j < readerSubgroup.tauSignature.size; j ++) {
       readerSubgroup.tauSignature[j] = currentSGdata.theList[1].theList[j].theInteger.GetElement();
     }
@@ -1232,7 +1232,7 @@ bool LoadConjugacyClassesG1_2(WeylGroupData& output) {
   output.theGroup.conjugacyClasseS[3  ].size = 2;
   output.theGroup.conjugacyClasseS[4  ].size = 2;
   output.theGroup.conjugacyClasseS[5  ].size = 1;
-  output.ccCarterLabels.SetSize(0);
+  output.ccCarterLabels.setSize(0);
   output.ccCarterLabels.addOnTop("0");
   output.ccCarterLabels.addOnTop("A^{3}_1");
   output.ccCarterLabels.addOnTop("A_1");
@@ -1245,7 +1245,7 @@ bool LoadConjugacyClassesG1_2(WeylGroupData& output) {
 
 bool LoadCharTableG1_2(WeylGroupData& output) {
   FiniteGroup<ElementWeylGroup>& outputG = output.theGroup;
-  outputG.characterTable.SetExpectedSize(12); outputG.characterTable.SetSize(0);
+  outputG.characterTable.setExpectedSize(12); outputG.characterTable.setSize(0);
   ClassFunction<FiniteGroup<ElementWeylGroup>, Rational> currentCF;
   currentCF.G = &outputG;
   currentCF.data.AssignString("(1, - 1, - 1,   1,   1,   1)"); outputG.characterTable.addOnTop(currentCF);
@@ -1254,7 +1254,7 @@ bool LoadCharTableG1_2(WeylGroupData& output) {
   currentCF.data.AssignString("(1,   1,   1,   1,   1,   1)"); outputG.characterTable.addOnTop(currentCF);
   currentCF.data.AssignString("(2,   0,   0,   1, - 1, - 2)"); outputG.characterTable.addOnTop(currentCF);
   currentCF.data.AssignString("(2,   0,   0, - 1, - 1,   2)"); outputG.characterTable.addOnTop(currentCF);
-  output.irrepsCarterLabels.SetSize(0);
+  output.irrepsCarterLabels.setSize(0);
   output.irrepsCarterLabels.addOnTop("\\phi_{1,6}  ");
   output.irrepsCarterLabels.addOnTop("\\phi_{1,3}''");
   output.irrepsCarterLabels.addOnTop("\\phi_{1,3}' ");
@@ -1295,7 +1295,7 @@ bool LoadConjugacyClassesE1_6(WeylGroupData& output) {
   output.theGroup.conjugacyClasseS[23 ].representative.MakeFromReadableReflections(output, false, "1, 4, 3, 2, 6  ");
   output.theGroup.conjugacyClasseS[24 ].representative.MakeFromReadableReflections(output, false, "1, 4, 2, 5, 4, 2, 3 ");
 
-  output.ccCarterLabels.SetSize(0);
+  output.ccCarterLabels.setSize(0);
   output.ccCarterLabels.addOnTop("0"        );
   output.ccCarterLabels.addOnTop("4A_1"     );
   output.ccCarterLabels.addOnTop("2A_1"     );
@@ -1353,7 +1353,7 @@ bool LoadConjugacyClassesE1_6(WeylGroupData& output) {
 
 bool LoadCharTableE1_6(WeylGroupData& output) {
   FiniteGroup<ElementWeylGroup>& outputG = output.theGroup;
-  outputG.characterTable.SetExpectedSize(48); outputG.characterTable.SetSize(0);
+  outputG.characterTable.setExpectedSize(48); outputG.characterTable.setSize(0);
   ClassFunction<FiniteGroup<ElementWeylGroup>, Rational> currentCF;
   currentCF.G = &outputG;
   currentCF.data.AssignString("(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1              )"); outputG.characterTable.addOnTop(currentCF);
@@ -1381,7 +1381,7 @@ bool LoadCharTableE1_6(WeylGroupData& output) {
   currentCF.data.AssignString("(64, 0, 0, -8, 4, -2, 0, 0, - 1, 0, 0, 0, 0, 1, 0, - 16, 0, 0, 0, 2, 2, 0, 0, - 1, 0       )"); outputG.characterTable.addOnTop(currentCF);
   currentCF.data.AssignString("(81, 9, -3, 0, 0, 0, -3, - 1, 1, 0, 0, 0, 0, 0, 0, 9, -3, 3, - 1, 0, 0, 0, 1, - 1, 0       )"); outputG.characterTable.addOnTop(currentCF);
   currentCF.data.AssignString("(81, 9, -3, 0, 0, 0, -3, - 1, 1, 0, 0, 0, 0, 0, 0, -9, 3, -3, 1, 0, 0, 0, - 1, 1, 0       )"); outputG.characterTable.addOnTop(currentCF);
-  output.irrepsCarterLabels.SetSize(0);
+  output.irrepsCarterLabels.setSize(0);
   output.irrepsCarterLabels.addOnTop("\\phi_{1,0}  " );
   output.irrepsCarterLabels.addOnTop("\\phi_{1,36} " );
   output.irrepsCarterLabels.addOnTop("\\phi_{10,9} " );

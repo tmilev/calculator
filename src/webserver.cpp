@@ -225,7 +225,7 @@ bool WebWorker::ReceiveAll() {
   }
   this->remainingBytesToSenD = std::string("HTTP/1.0 100 Continue\r\n\r\n");
   this->SendAllBytesNoHeaderS();
-  this->remainingBytesToSenD.SetSize(0);
+  this->remainingBytesToSenD.setSize(0);
   std::string bufferString;
   while (static_cast<signed>(this->messageBody.size()) < this->ContentLength) {
     if (global.GetElapsedSeconds() - numSecondsAtStart > 5) {
@@ -429,7 +429,7 @@ void WebWorker::resetMessageComponentsExceptRawMessage() {
   this->RelativePhysicalFileNamE = "";
   this->VirtualFileName = "";
   this->displayUserInput = "";
-  this->theMessageHeaderStrings.SetSize(0);
+  this->theMessageHeaderStrings.setSize(0);
   this->requestHeaders.Clear();
   this->requestTypE = this->requestUnknown;
   this->ContentLength = - 1;
@@ -757,8 +757,8 @@ void WebWorker::ParseMessageHead() {
   this->resetMessageComponentsExceptRawMessage();
   std::string buffer;
   buffer.reserve(this->messageHead.size());
-  this->theMessageHeaderStrings.SetExpectedSize(50);
-  this->cookies.SetExpectedSize(30);
+  this->theMessageHeaderStrings.setExpectedSize(50);
+  this->cookies.setExpectedSize(30);
   this->theMessageHeaderStrings.size = 0;
   this->cookies.size = 0;
   this->connectionFlags.size = 0;
@@ -1014,8 +1014,8 @@ void WebWorker::SetHeader(
     out << WebWorker::GetHeaderSetCookie() << "\r\n";
   }
   std::string finalHeader = out.str();
-  this->remainingHeaderToSend.SetSize(0);
-  this->remainingHeaderToSend.SetExpectedSize(static_cast<signed>(finalHeader.size()));
+  this->remainingHeaderToSend.setSize(0);
+  this->remainingHeaderToSend.setExpectedSize(static_cast<signed>(finalHeader.size()));
   for (unsigned i = 0; i < finalHeader.size(); i ++) {
     this->remainingHeaderToSend.addOnTop(finalHeader[i]);
   }
@@ -1407,14 +1407,14 @@ int WebWorker::ProcessFile() {
     return 0;
   }
   const int bufferSize = 64 * 1024;
-  this->bufferFileIO.SetSize(bufferSize);
+  this->bufferFileIO.setSize(bufferSize);
   theFile.seekg(0);
   theFile.read(&this->bufferFileIO[0], this->bufferFileIO.size);
   long numBytesRead = theFile.gcount();
   while (numBytesRead != 0) {
-    this->bufferFileIO.SetSize(static_cast<int>(numBytesRead));
+    this->bufferFileIO.setSize(static_cast<int>(numBytesRead));
     this->QueueBytesForSendingNoHeadeR(this->bufferFileIO);
-    this->bufferFileIO.SetSize(bufferSize);
+    this->bufferFileIO.setSize(bufferSize);
     theFile.read(this->bufferFileIO.theObjects, this->bufferFileIO.size);
     numBytesRead = theFile.gcount();
   }
@@ -2456,7 +2456,7 @@ void WebServer::ReleaseSocketsNonActiveWorkers() {
 bool WebServer::EmergencyRemoval_LastCreatedWorker() {
   this->GetActiveWorker().Release();
   this->activeWorker = - 1;
-  this->theWorkers.SetSize(this->theWorkers.size - 1);
+  this->theWorkers.setSize(this->theWorkers.size - 1);
   return false;
 }
 
@@ -2482,7 +2482,7 @@ bool WebServer::CreateNewActiveWorker() {
   }
   if (this->activeWorker == - 1) {
     this->activeWorker = this->theWorkers.size;
-    this->theWorkers.SetSize(this->theWorkers.size + 1);
+    this->theWorkers.setSize(this->theWorkers.size + 1);
   }
   this->GetActiveWorker().indexInParent = this->activeWorker;
   this->GetActiveWorker().parent = this;
@@ -4019,7 +4019,7 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv) {
   if (argC < 0) {
     argC = 0;
   }
-  global.programArguments.SetSize(argC);
+  global.programArguments.setSize(argC);
   for (int i = 0; i < argC; i ++) {
     global.programArguments[i] = argv[i];
     //std::cout << "Argument " << i + 1 << ": " << global.programArguments[i] << "\n";
@@ -4536,17 +4536,17 @@ std::string WebServer::GetEnvironment(const std::string& envVarName) {
 
 void WebWorker::PrepareFullMessageHeaderAndFooter() {
   MacroRegisterFunctionWithName("WebWorker::PrepareFullMessageHeaderAndFooter");
-  this->remainingBytesToSenD.SetSize(0);
-  this->remainingBytesToSenD.SetExpectedSize(this->remainingBodyToSend.size + this->remainingHeaderToSend.size + 30);
+  this->remainingBytesToSenD.setSize(0);
+  this->remainingBytesToSenD.setExpectedSize(this->remainingBodyToSend.size + this->remainingHeaderToSend.size + 30);
   if (this->remainingHeaderToSend.size == 0) {
     if (this->requestTypE != this->requestHead) {
       this->remainingBytesToSenD = this->remainingBodyToSend;
     }
-    this->remainingBodyToSend.SetSize(0);
+    this->remainingBodyToSend.setSize(0);
     return;
   }
   this->remainingBytesToSenD = this->remainingHeaderToSend;
-  this->remainingHeaderToSend.SetSize(0);
+  this->remainingHeaderToSend.setSize(0);
   std::stringstream contentLengthStream;
   if (this->flagDoAddContentLength) {
     contentLengthStream << "Content-length: " << this->remainingBodyToSend.size << "\r\n";
@@ -4559,7 +4559,7 @@ void WebWorker::PrepareFullMessageHeaderAndFooter() {
   if (this->requestTypE != this->requestHead) {
     this->remainingBytesToSenD.addListOnTop(this->remainingBodyToSend);
   }
-  this->remainingBodyToSend.SetSize(0);
+  this->remainingBodyToSend.setSize(0);
 }
 
 bool WebWorker::EnsureAllBytesSent() {
@@ -4600,7 +4600,7 @@ void WebWorker::QueueBytesForSendingNoHeadeR(const List<char>& bytesToSend, bool
 bool WebWorker::WriteToBody(const std::string& stringToSend) {
   MacroRegisterFunctionWithName("WebWorker::WriteToBody");
   int oldSize = this->remainingBodyToSend.size;
-  this->remainingBodyToSend.SetSize(
+  this->remainingBodyToSend.setSize(
     this->remainingBodyToSend.size + static_cast<signed>(stringToSend.size())
   );
   for (unsigned i = 0; i < stringToSend.size(); i ++) {
@@ -4613,7 +4613,7 @@ void WebWorker::QueueStringForSendingNoHeadeR(const std::string& stringToSend, b
   MacroRegisterFunctionWithName("WebWorker::QueueStringForSendingNoHeadeR");
   (void) MustSendAll;
   int oldSize = this->remainingBytesToSenD.size;
-  this->remainingBytesToSenD.SetSize(
+  this->remainingBytesToSenD.setSize(
     this->remainingBytesToSenD.size + static_cast<signed>(stringToSend.size())
   );
   for (unsigned i = 0; i < stringToSend.size(); i ++) {

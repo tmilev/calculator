@@ -141,16 +141,13 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
     }
   }
   if (outputSolution != nullptr) {
-    outputSolution->SetSize(NumTrueVariables);
+    outputSolution->setSize(NumTrueVariables);
     for (int i = 0; i < NumTrueVariables; i ++) {
       (*outputSolution)[i] = matX[i];
     }
   }
   return true;
 }
-
-template <>
-bool CalculatorConversions::functionPolynomial<Rational>(Calculator& theCommands, const Expression& input, Expression& output);
 
 bool Calculator::innerGCDOrLCMPoly(
   Calculator& theCommands,
@@ -159,11 +156,11 @@ bool Calculator::innerGCDOrLCMPoly(
   bool doGCD
 ) {
   MacroRegisterFunctionWithName("Calculator::innerGCDOrLCMPoly");
-  Vector<Polynomial<Rational> > thePolys;
+  Vector<Polynomial<Rational> > polynomialsRational;
   Expression theContext(theCommands);
   if (!theCommands.GetVectorFromFunctionArguments(
     input,
-    thePolys,
+    polynomialsRational,
     &theContext,
     2,
     CalculatorConversions::functionPolynomial<Rational>
@@ -172,9 +169,9 @@ bool Calculator::innerGCDOrLCMPoly(
   }
   Polynomial<Rational> outputPolynomial;
   if (doGCD) {
-    RationalFunction::gcd(thePolys[0], thePolys[1], outputPolynomial);
+    RationalFunction::gcd(polynomialsRational[0], polynomialsRational[1], outputPolynomial);
   } else {
-    RationalFunction::lcm(thePolys[0], thePolys[1], outputPolynomial);
+    RationalFunction::lcm(polynomialsRational[0], polynomialsRational[1], outputPolynomial);
   }
   return output.AssignValueWithContext(outputPolynomial, theContext, theCommands);
 }
@@ -200,13 +197,13 @@ bool Calculator::GetListPolynomialVariableLabelsLexicographic(
   }
   int numVars = theContextStart.ContextGetNumContextVariables();
   HashedList<Expression> theVars;
-  theVars.SetExpectedSize(numVars);
+  theVars.setExpectedSize(numVars);
   for (int i = 0; i < numVars; i ++) {
     theVars.addOnTop(theContextStart.ContextGetContextVariable(i));
   }
   theVars.QuickSortAscending();
   PolynomialSubstitution<AlgebraicNumber> theSub;
-  theSub.SetSize(numVars);
+  theSub.setSize(numVars);
   for (int i = 0; i < theSub.size; i ++) {
     int currentIndex = theVars.GetIndex(theContextStart.ContextGetContextVariable(i));
     theSub[i].makeMonomial(
@@ -326,7 +323,7 @@ std::string Calculator::ToStringSemismipleLieAlgebraLinksFromHD(const DynkinType
 
 void DynkinType::GetPrecomputedDynkinTypes(List<DynkinType>& output) {
   MacroRegisterFunctionWithName("DynkinType::GetPrecomputedDynkinTypes");
-  output.SetSize(0);
+  output.setSize(0);
   DynkinType theType;
   theType.MakeSimpleType('F', 4);
   output.addOnTop(theType);
@@ -673,7 +670,7 @@ bool Calculator::innerGroebner(
   if (useModZp) {
     ElementZmodP tempElt;
     tempElt.MakeMOne(static_cast<unsigned>(theMod));
-    inputVectorZmodP.SetSize(inputVector.size);
+    inputVectorZmodP.setSize(inputVector.size);
     for (int i = 0; i < inputVector.size; i ++) {
       inputVectorZmodP[i].makeZero();
       for (int j = 0; j < inputVector[i].size(); j ++) {
@@ -867,7 +864,7 @@ void Plot::operator+=(const Plot& other) {
   if (!other.flagIncludeCoordinateSystem) {
     this->flagIncludeCoordinateSystem = false;
   }
-  this->boxesThatUpdateMe.AddOnTopNoRepetition(other.boxesThatUpdateMe);
+  this->boxesThatUpdateMe.addOnTopNoRepetition(other.boxesThatUpdateMe);
   this->priorityWindow = MathRoutines::Maximum(this->priorityWindow, other.priorityWindow);
   this->priorityViewRectangle = MathRoutines::Maximum(this->priorityViewRectangle, other.priorityViewRectangle);
 }
@@ -1137,7 +1134,7 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner) {
     << ";\n";
   }
   List<std::string> the3dObjects;
-  the3dObjects.SetSize(this->thePlots.size);
+  the3dObjects.setSize(this->thePlots.size);
   int funCounter = 0;
   for (int i = 0; i < this->thePlots.size; i ++) {
     PlotObject& currentO = this->thePlots[i];
@@ -1372,7 +1369,7 @@ std::string PlotObject::GetJavascriptParametricCurve2D(
   MacroRegisterFunctionWithName("PlotSurfaceIn3d::GetJavascript2dPlot");
   std::stringstream out;
   List<std::string> fnNames;
-  fnNames.SetSize(this->coordinateFunctionsJS.size);
+  fnNames.setSize(this->coordinateFunctionsJS.size);
   for (int i = 0; i < this->coordinateFunctionsJS.size; i ++) {
     funCounter ++;
     std::stringstream fnNameStream;
@@ -1611,7 +1608,7 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner) {
   }
   int funCounter = 0;
   List<std::string> theFnPlots;
-  theFnPlots.SetSize(this->thePlots.size);
+  theFnPlots.setSize(this->thePlots.size);
   for (int i = 0; i < this->thePlots.size; i ++) {
     PlotObject& currentPlot = this->thePlots[i];
     if (currentPlot.thePlotType == "plotFunction") {
@@ -2361,9 +2358,9 @@ public:
 
 void ExpressionHistoryEnumerator::initializeComputation() {
   MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::initializeComputation");
-  this->output.SetSize(0);
-  // this->rulesDisplayNames.SetSize(0);
-  this->rulesNames.SetSize(0);
+  this->output.setSize(0);
+  // this->rulesDisplayNames.setSize(0);
+  this->rulesNames.setSize(0);
   // this->rulesToBeIgnored.Clear();
   // this->rulesToBeIgnored.addOnTop("CommuteIfUnivariate");
   // this->rulesDisplayNamesMap.Clear();
@@ -2473,8 +2470,8 @@ bool ExpressionHistoryEnumerator::ProcessChildrenTransformations(
   }
   List<int> indicesInParent;
   List<ExpressionHistoryEnumerator> childrenEnumerators;
-  childrenEnumerators.SetSize(numberOfChildren);
-  indicesInParent.SetSize(numberOfChildren);
+  childrenEnumerators.setSize(numberOfChildren);
+  indicesInParent.setSize(numberOfChildren);
   for (int i = 0; i < numberOfChildren; i ++) {
     const Expression& current = this->theHistory[startIndex + i];
     if (current.size() < 3) {
@@ -2549,8 +2546,8 @@ bool ExpressionHistoryEnumerator::ProcessTransformation(
     return false;
   }
   this->output.addOnTop(current[1]);
-  this->rulesNames.SetSize(this->rulesNames.size + 1);
-  this->rulesNames.LastObject()->SetSize(0);
+  this->rulesNames.setSize(this->rulesNames.size + 1);
+  this->rulesNames.LastObject()->setSize(0);
   if (current.size() >= 3) {
     std::string incoming = current[2].toString();
     if (incoming != "") {
@@ -2589,7 +2586,7 @@ std::string ExpressionHistoryEnumerator::ToStringExpressionHistoryMerged() {
       if (currentRules.size > 0) {
         out << "&\\text{" << currentRules.ToStringCommaDelimited() << "}";
       }
-      currentRules.SetSize(0);
+      currentRules.setSize(0);
       out << "\\\\";
       out << "=";
     }

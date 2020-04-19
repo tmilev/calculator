@@ -19,7 +19,7 @@ void Crypto::Random::initializeRandomBytes() {
     global.fatal << "The number of system random bytes must not exceed 256. " << global.fatal;
   }
   List<unsigned char>& output = global.randomBytesCurrent;
-  output.SetSize(static_cast<signed>(global.numberOfRandomBytes));
+  output.setSize(static_cast<signed>(global.numberOfRandomBytes));
   // According to the
   // documentation of getrandom, the following call
   // must not block or return fewer than the requested bytes in Linux

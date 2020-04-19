@@ -456,7 +456,7 @@ bool MongoQuery::FindMultiple(
       break;
     }
   }
-  output.SetSize(outputString.size);
+  output.setSize(outputString.size);
   for (int i = 0; i < outputString.size; i ++) {
     JSData encoded;
     if (!encoded.readstring(outputString[i], commentsOnFailure)) {
@@ -818,7 +818,7 @@ bool Database::getLabels(
   const JSData& fieldEntries, List<std::string>& output, std::stringstream* commentsOnFailure
 ) {
   MacroRegisterFunctionWithName("Database::getLabels");
-  output.SetSize(0);
+  output.setSize(0);
   for (int i = 0; i < fieldEntries.theList.size; i ++) {
     if (fieldEntries.theList[i].theType != JSData::token::tokenString) {
       if (commentsOnFailure != nullptr) {
@@ -1194,7 +1194,7 @@ bool Database::Mongo::FetchCollectionNames(
     static_cast<mongoc_database_t*>(this->database), &opts, &error
   );
   bool result = true;
-  output.SetSize(0);
+  output.setSize(0);
   if (theCollectionChars != nullptr) {
     for (int i = 0; theCollectionChars[i]; i ++) {
       std::string currentCollection(theCollectionChars[i]);
@@ -1236,13 +1236,13 @@ bool Database::FetchTable(
   HashedList<std::string, MathRoutines::HashString> theLabels;
   for (int i = 0; i < rowsJSON.size; i ++) {
     for (int j = 0; j < rowsJSON[i].objects.size(); j ++) {
-      theLabels.AddOnTopNoRepetition(rowsJSON[i].objects.theKeys[j]);
+      theLabels.addOnTopNoRepetition(rowsJSON[i].objects.theKeys[j]);
     }
   }
   outputLabels = theLabels;
-  outputRows.SetSize(rowsJSON.size);
+  outputRows.setSize(rowsJSON.size);
   for (int i = 0; i < rowsJSON.size; i ++) {
-    outputRows[i].SetSize(theLabels.size);
+    outputRows[i].setSize(theLabels.size);
     for (int j = 0; j < theLabels.size; j ++) {
       if (rowsJSON[i].objects.Contains(theLabels[j])) {
         outputRows[i][j] = rowsJSON[i].GetValue(theLabels[j]).toString(nullptr);
@@ -1337,7 +1337,7 @@ JSData Database::ToJSONDatabaseCollection(const std::string& currentTable) {
     if (Database::FetchCollectionNames(theCollectionNames, &out)) {
       JSData collectionNames;
       collectionNames.theType = JSData::token::tokenArray;
-      collectionNames.theList.SetSize(theCollectionNames.size);
+      collectionNames.theList.setSize(theCollectionNames.size);
       for (int i = 0; i < theCollectionNames.size; i ++) {
         collectionNames[i] = theCollectionNames[i];
       }

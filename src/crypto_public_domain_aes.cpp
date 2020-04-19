@@ -510,7 +510,7 @@ bool CryptoPublicDomain::decryptAES_CBC_256(
   List<unsigned char>& output,
   std::stringstream* commentsOnFailure
 ) {
-  output.SetSize(static_cast<signed>(inputCipherText.size()));
+  output.setSize(static_cast<signed>(inputCipherText.size()));
   if (inputKey.size() != 32) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Input key: " << inputKey << " is of length: "
@@ -542,7 +542,7 @@ bool CryptoPublicDomain::encryptAES_CBC_256(
   List<unsigned char>& output,
   std::stringstream* commentsOnFailure
 ) {
-  output.SetSize(static_cast<signed>(inputPlainText.size()));
+  output.setSize(static_cast<signed>(inputPlainText.size()));
   if (inputKey.size() != 32) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Input key: " << inputKey << " is of length: "

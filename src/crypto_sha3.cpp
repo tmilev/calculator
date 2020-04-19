@@ -294,7 +294,7 @@ std::string Sha3::getResultString() {
 }
 
 void Sha3::getResultVector(List<unsigned char>& output) {
-  output.SetSize(32);
+  output.setSize(32);
   for (int i = 0; i < 32; i ++) {
     output[i] = this->stateBytes[i];
   }

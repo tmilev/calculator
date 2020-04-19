@@ -316,8 +316,8 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasisImpro
   this->theBasiS = inputOutpuT;
   HashedListSpecialized<PairInts> indexPairs;
 //  Pair<int, int> currentPair;
-  indexPairs.SetExpectedSize(this->theBasiS.size * this->theBasiS.size);
-  this->leadingMons.SetExpectedSize(this->theBasiS.size * 2);
+  indexPairs.setExpectedSize(this->theBasiS.size * this->theBasiS.size);
+  this->leadingMons.setExpectedSize(this->theBasiS.size * 2);
   for (int i = 0; i < this->theBasiS.size; i ++) {
     for (int j = i + 1; j < this->theBasiS.size; j ++) {
       indexPairs.addOnTop(PairInts (i, j));
@@ -418,7 +418,7 @@ std::string GroebnerBasisComputation<coefficient>::ToStringLetterOrder(bool addD
   int numVars = this->GetNumVars();
   List<MonomialP> theVars;
   out << "Variable name(s), ascending order: ";
-  theVars.SetSize(numVars);
+  theVars.setSize(numVars);
   for (int i = 0; i < theVars.size; i ++) {
     theVars[i].MakeEi(i, 1);
   }
@@ -579,7 +579,7 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionByBasis(
     << "multi-polynomial division. " << global.fatal;
   }
   if (this->flagStoreQuotients) {
-    this->theQuotients.SetSize(this->theBasiS.size);
+    this->theQuotients.setSize(this->theBasiS.size);
     for (int i = 0; i < this->theQuotients.size; i ++) {
       this->theQuotients[i].makeZero();
     }
@@ -606,8 +606,8 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionByBasis(
     this->intermediateSubtractands.GetElement().size = 0;
 
     this->intermediateRemainders.GetElement().addOnTop(currentRemainder);
-    this->intermediateHighlightedMons.GetElement().SetSize(1);
-    this->intermediateHighlightedMons.GetElement().LastObject()->SetSize(0);
+    this->intermediateHighlightedMons.GetElement().setSize(1);
+    this->intermediateHighlightedMons.GetElement().LastObject()->setSize(0);
   }
   while (!currentRemainder.IsEqualToZero()) {
     this->numberOfIntermediateRemainders = 0;
@@ -653,9 +653,9 @@ bool GroebnerBasisComputation<coefficient>::AddRemainderToBasis() {
     &this->thePolynomialOrder.theMonOrder
   );
   if (this->flagDoSortBasis) {
-    this->theBasiS.SetSize(this->theBasiS.size + 1);
-    this->leadingMons.SetSize(this->theBasiS.size);
-    this->leadingCoeffs.SetSize(this->theBasiS.size);
+    this->theBasiS.setSize(this->theBasiS.size + 1);
+    this->leadingMons.setSize(this->theBasiS.size);
+    this->leadingCoeffs.setSize(this->theBasiS.size);
     for (int i = theBasiS.size - 1; i >= 0; i --) {
       bool shouldAddHere = true;
       if (i > 0) {
@@ -725,8 +725,8 @@ void GroebnerBasisComputation<coefficient>::initializeForDivision(
     << global.fatal;
   }
   this->theBasiS = inputOutput;
-  this->leadingMons.SetSize(inputOutput.size);
-  this->leadingCoeffs.SetSize(inputOutput.size);
+  this->leadingMons.setSize(inputOutput.size);
+  this->leadingCoeffs.setSize(inputOutput.size);
   for (int i = 0; i < this->theBasiS.size; i ++) {
     Polynomial<coefficient>& curPoly = theBasiS[i];
     int theIndex = curPoly.GetIndexLeadingMonomial(
@@ -748,12 +748,12 @@ void GroebnerBasisComputation<coefficient>::initializeForDivision(
 template <class coefficient>
 void GroebnerBasisComputation<coefficient>::initForGroebnerComputation(int expectedNumInputPolys) {
   MacroRegisterFunctionWithName("GroebnerBasisComputation::initForGroebnerComputation");
-  this->basisCandidates.SetSize(0);
-  this->theBasiS.SetSize(0);
+  this->basisCandidates.setSize(0);
+  this->theBasiS.setSize(0);
   this->theBasiS.Reserve(expectedNumInputPolys);
-  this->leadingMons.SetSize(0);
+  this->leadingMons.setSize(0);
   this->leadingMons.Reserve(expectedNumInputPolys);
-  this->leadingCoeffs.SetSize(0);
+  this->leadingCoeffs.setSize(0);
   this->leadingCoeffs.Reserve(expectedNumInputPolys);
   this->NumberGBComputations = 0;
 }
@@ -1010,7 +1010,7 @@ void GroebnerBasisComputation<coefficient>::PolySystemSolutionSimplificationPhas
   }
   bool changed = true;
   PolynomialSubstitution<coefficient> theSub;
-  this->theImpliedSubS.SetSize(0);
+  this->theImpliedSubS.setSize(0);
   this->theImpliedSubS.Reserve(inputSystem.size);
 //  int startingMaxNumSerreSystemComputations = this->MaxNumSerreSystemComputations;
   while (changed) {
@@ -1107,7 +1107,7 @@ template <class coefficient>
 void GroebnerBasisComputation<coefficient>::initForSystemSolution() {
   MacroRegisterFunctionWithName("GroebnerBasisComputation::initForSystemSolution");
   this->initForGroebnerComputation(0);
-  this->theImpliedSubS.SetSize(0);
+  this->theImpliedSubS.setSize(0);
   this->flagSystemProvenToHaveNoSolution = false;
   this->flagSystemSolvedOverBaseField = false;
   this->flagSystemProvenToHaveSolution = false;

@@ -3,46 +3,11 @@
 #include "math_general_polynomial_computations_advanced_implementation.h"
 #include "math_general_implementation.h"
 
-class ElementOneVariablePolynomialQuotientRing {
-public:
-  Polynomial<ElementZmodP> modulus;
-  Polynomial<ElementZmodP> value;
-  void reduce();
-  void operator*=(ElementOneVariablePolynomialQuotientRing& other);
-  std::string toString(FormatExpressions* theFormat = nullptr);
-};
-
-void ElementOneVariablePolynomialQuotientRing::operator *=(
-  ElementOneVariablePolynomialQuotientRing& other
-) {
-  if (other.modulus != this->modulus) {
-    global.fatal << "Not allowed to multiply quotient-ring "
-    << "elements of different rings. [This modulus, other modulus]: "
-    << this->modulus << ", " << other.modulus << global.fatal;
-  }
-  this->value *= other.value;
-  this->reduce();
-}
-
-std::string ElementOneVariablePolynomialQuotientRing::toString(FormatExpressions* theFormat) {
-  std::stringstream out;
-  out << this->value.toString(theFormat) << " mod " << this->modulus.toString(theFormat);
-  return out.str();
-}
-
-void ElementOneVariablePolynomialQuotientRing::reduce() {
-  this->value.DivideBy(
-    this->value, this->modulus, this->value, &MonomialP::orderDefault()
-  );
-}
-
 // The Cantor-Zassenhaus algorithm:
 // https://en.wikipedia.org/wiki/Cantor%E2%80%93Zassenhaus_algorithm
-bool PolynomialFactorizationCantorZassenhaus::oneFactor(std::stringstream* commentsOnFailure) {
-  if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "Not implemented yet.";
-  }
-  return false;
+bool PolynomialFactorizationCantorZassenhaus::oneFactor(
+  std::stringstream* commentsOnFailure
+) {
   this->current = this->output->current;
   if (this->current.minimalNumberOfVariables() > 1) {
     if (commentsOnFailure != nullptr) {
@@ -93,9 +58,10 @@ bool PolynomialFactorizationCantorZassenhaus::oneFactor(std::stringstream* comme
 bool PolynomialFactorizationCantorZassenhaus::oneFactorGo(
   std::stringstream *commentsOnFailure
 ) {
-  ElementOneVariablePolynomialQuotientRing x;
+  ElementOneVariablePolynomialQuotientRing<ElementZmodP> x;
   x.modulus = this->output->current;
-  ElementOneVariablePolynomialQuotientRing oneQuotientRing;
+  x.value.makeDegreeOne(1, 0, this->one, this->one.zero());
+  ElementOneVariablePolynomialQuotientRing<ElementZmodP> oneQuotientRing;
   oneQuotientRing.modulus = this->current;
   LargeInteger modulus = one.theModulus;
   this->degree = this->output->current.TotalDegreeInt();
@@ -103,9 +69,10 @@ bool PolynomialFactorizationCantorZassenhaus::oneFactorGo(
   LargeInteger power = modulus;
   power.RaiseToPower(this->degreeUnknownFactor);
   power -= 1;
+  power /= 2;
   MathRoutines::RaiseToPower(x, power, oneQuotientRing);
   if (commentsOnFailure != 0) {
-    *commentsOnFailure << "Not implemented yet";
+    global.Comments << "Power x^{" << power << "} is: " << x.toString();
   }
   return false;
 }
@@ -133,7 +100,7 @@ bool Polynomial<Rational>::findOneVariableRationalRoots(List<Rational>& output) 
   if (this->minimalNumberOfVariables() > 1) {
     return false;
   }
-  output.SetSize(0);
+  output.setSize(0);
   if (this->minimalNumberOfVariables() == 0 || this->IsEqualToZero()) {
     return true;
   }
@@ -161,7 +128,7 @@ bool Polynomial<Rational>::findOneVariableRationalRoots(List<Rational>& output) 
   }
   Vector<Rational> tempV;
   Rational val;
-  tempV.SetSize(1);
+  tempV.setSize(1);
   List<int> divisorsH, divisorsS;
   LargeInteger hT, lT;
   hT = highestCoefficient.GetNumerator();
@@ -175,7 +142,7 @@ bool Polynomial<Rational>::findOneVariableRationalRoots(List<Rational>& output) 
       val = myCopy.Evaluate(tempV);
       if (val == 0) {
         Polynomial<Rational> divisor, tempP;
-        divisor.MakeDegreeOne(1, 0, 1, - tempV[0]);
+        divisor.makeDegreeOne(1, 0, 1, - tempV[0]);
         myCopy.DivideBy(divisor, myCopy, tempP, monomialOrder);
         output.addOnTop(tempV[0]);
         List<Rational> tempList;
@@ -194,10 +161,10 @@ void Polynomial<Rational>::getValuesLagrangeInterpolands(
   Vector<Rational>& pointsOfEvaluation,
   Vectors<Rational>& outputValuesInterpolands
 ) {
-  outputValuesInterpolands.SetSize(pointsOfInterpolation.size);
+  outputValuesInterpolands.setSize(pointsOfInterpolation.size);
   for (int i = 0; i < pointsOfInterpolation.size; i ++) {
     Vector<Rational>& currentInterpoland = outputValuesInterpolands[i];
-    currentInterpoland.SetSize(pointsOfEvaluation.size);
+    currentInterpoland.setSize(pointsOfEvaluation.size);
     for (int j = 0; j < pointsOfInterpolation.size; j ++) {
       currentInterpoland[j] = (i == j) ? 1 : 0;
     }
@@ -226,7 +193,7 @@ void Polynomial<coefficient>::Interpolate(
       if (i == j) {
         continue;
       }
-      accumulator.MakeDegreeOne(1, 0, 1, - thePoints[j]);
+      accumulator.makeDegreeOne(1, 0, 1, - thePoints[j]);
       accumulator /= thePoints[i] - thePoints[j];
       theLagrangeInterpolator *= accumulator;
     }
@@ -255,23 +222,23 @@ bool PolynomialFactorizationKronecker::oneFactor(
   List<List<LargeInteger> > thePrimeFactorsAtPoints;
   List<List<int> > thePrimeFactorsMults;
   Vector<Rational> theValuesAtPoints, theValuesAtPointsLeft;
-  AllPointsOfEvaluation.SetSize(degree + 1);
-  thePrimeFactorsAtPoints.SetSize(degreeLeft + 1);
-  thePrimeFactorsMults.SetSize(degreeLeft + 1);
+  AllPointsOfEvaluation.setSize(degree + 1);
+  thePrimeFactorsAtPoints.setSize(degreeLeft + 1);
+  thePrimeFactorsMults.setSize(degreeLeft + 1);
   AllPointsOfEvaluation[0] = 0;
   for (int i = 1; i < AllPointsOfEvaluation.size; i ++) {
     AllPointsOfEvaluation[i] = (i % 2 == 1) ? i / 2 + 1 : - (i / 2);
   }
   Vector<Rational> theArgument;
-  theArgument.SetSize(1);
-  theValuesAtPoints.SetSize(AllPointsOfEvaluation.size);
+  theArgument.setSize(1);
+  theValuesAtPoints.setSize(AllPointsOfEvaluation.size);
   LargeInteger tempLI;
   for (int i = 0; i < AllPointsOfEvaluation.size; i ++) {
     theArgument[0] = AllPointsOfEvaluation[i];
     theValuesAtPoints[i] = this->current.Evaluate(theArgument);
     if (theValuesAtPoints[i].IsEqualToZero()) {
       Polynomial<Rational> incomingFactor;
-      incomingFactor.MakeDegreeOne(1, 0, 1, - theArgument[0]);
+      incomingFactor.makeDegreeOne(1, 0, 1, - theArgument[0]);
       this->output->accountReducedFactor(incomingFactor);
       return true;
     }
@@ -303,7 +270,7 @@ bool PolynomialFactorizationKronecker::oneFactor(
     PointsOfInterpolationLeft.addOnTop(AllPointsOfEvaluation[i]);
   }
   divisorSelection.initFromMults(thePrimeFactorsMults);
-  valuesLeftInterpolands.SetSize(degreeLeft + 1);
+  valuesLeftInterpolands.setSize(degreeLeft + 1);
   Polynomial<Rational>::getValuesLagrangeInterpolands(
     PointsOfInterpolationLeft, AllPointsOfEvaluation, valuesLeftInterpolands
   );

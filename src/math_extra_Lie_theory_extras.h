@@ -277,7 +277,7 @@ public:
   void AssignChangeCoefficientType(const MonomialUniversalEnvelopingOrdered<OtherCoefficientType>& other) {
     this->Coefficient = other.Coefficient;
     this->generatorsIndices = other.generatorsIndices.size;
-    this->Powers.SetSize(other.Powers.size);
+    this->Powers.setSize(other.Powers.size);
     for (int i = 0; i < this->Powers.size; i ++) {
       this->Powers[i] = other.Powers[i];
     }

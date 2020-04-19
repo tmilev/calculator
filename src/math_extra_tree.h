@@ -41,8 +41,8 @@ public:
 template <typename data>
 void TreeNode<data>::AddChild(const data& inputData) {
   int newNodeIndex = this->owner->theNodes.size;
-  this->owner->theNodes.SetSize(this->owner->theNodes.size + 1);
-  this->owner->theNodes[newNodeIndex].children.SetSize(0);
+  this->owner->theNodes.setSize(this->owner->theNodes.size + 1);
+  this->owner->theNodes[newNodeIndex].children.setSize(0);
   this->owner->theNodes[newNodeIndex].owner = this->owner;
   this->owner->theNodes[newNodeIndex].theData = inputData;
   this->owner->theNodes[newNodeIndex].parent = this->myIndex;
@@ -60,7 +60,7 @@ void TreeNode<data>::RemoveAllChildren() {
     currentNode.myIndex = - 1;
     currentNode.RemoveAllChildren();
   }
-  this->children.SetSize(0);
+  this->children.setSize(0);
 }
 
 template <typename data>
@@ -90,9 +90,9 @@ std::string TreeNode<data>::ToStringHTML(int indentation) const {
 template <typename data>
 void Tree<data>::ResetAddRoot(const data& inputData) {
   this->reset();
-  this->theNodes.SetSize(1);
+  this->theNodes.setSize(1);
   this->theNodes[0].owner = this;
-  this->theNodes[0].children.SetSize(0);
+  this->theNodes[0].children.setSize(0);
   this->theNodes[0].theData = inputData;
   this->theNodes[0].myIndex = 0;
   this->theNodes[0].parent = - 1;
@@ -100,7 +100,7 @@ void Tree<data>::ResetAddRoot(const data& inputData) {
 
 template <typename data>
 void Tree<data>::reset() {
-  this->theNodes.SetSize(0);
+  this->theNodes.setSize(0);
 }
 
 template <typename data>

@@ -126,9 +126,9 @@ void GraphWeightedLabeledEdges::AddNodeToComponent(int nodeIndex) {
   }
   if (componentIndex >= this->connectedComponents.size) {
     int oldSize = this->connectedComponents.size;
-    this->connectedComponents.SetSize(componentIndex + 1);
+    this->connectedComponents.setSize(componentIndex + 1);
     for (int i = oldSize; i < this->connectedComponents.size; i ++) {
-      this->connectedComponents[i].SetSize(0);
+      this->connectedComponents[i].setSize(0);
     }
   }
   List<List<int> >& currentComponent = this->connectedComponents[componentIndex];
@@ -138,9 +138,9 @@ void GraphWeightedLabeledEdges::AddNodeToComponent(int nodeIndex) {
   }
   if (distanceFromBase >= currentComponent.size) {
     int oldSize = currentComponent.size;
-    currentComponent.SetSize(distanceFromBase + 1);
+    currentComponent.setSize(distanceFromBase + 1);
     for (int i = oldSize; i < currentComponent.size; i ++) {
-      currentComponent[i].SetSize(0);
+      currentComponent[i].setSize(0);
     }
   }
   List<int>& currentDistanceGroup = currentComponent[distanceFromBase];
@@ -152,12 +152,12 @@ void GraphWeightedLabeledEdges::ComputeConnectedComponentsAndBaseNodeDistances()
   this->distanceToBaseNode.initializeFillInObject(this->numNodes, - 1);
   this->baseNode.initializeFillInObject(this->numNodes, - 1);
   List<int> theOrbit;
-  theOrbit.SetExpectedSize(this->theEdges.size());
+  theOrbit.setExpectedSize(this->theEdges.size());
   for (int indexBaseNode = 0; indexBaseNode < this->numNodes; indexBaseNode ++) {
     if (this->baseNode[indexBaseNode] == - 1) {
       this->distanceToBaseNode[indexBaseNode] = 0;
       this->baseNode[indexBaseNode] = indexBaseNode;
-      theOrbit.SetSize(0);
+      theOrbit.setSize(0);
       theOrbit.addOnTop(indexBaseNode);
       for (int i = 0; i < theOrbit.size; i ++) {
         List<int>& currentHeirs = this->edgesPerNodeNoMultiplicities[theOrbit[i]];
@@ -171,7 +171,7 @@ void GraphWeightedLabeledEdges::ComputeConnectedComponentsAndBaseNodeDistances()
       }
     }
   }
-  this->connectedComponents.SetSize(0);
+  this->connectedComponents.setSize(0);
   for (int i = 0; i < this->numNodes; i ++) {
     this->AddNodeToComponent(i);
   }
@@ -183,8 +183,8 @@ void GraphWeightedLabeledEdges::ComputeDisplayGroups() {
   for (int i = 0; i < this->connectedComponents.size; i ++) {
     numGroups += this->connectedComponents[i].size;
   }
-  this->nodeGroupsForDisplay.SetExpectedSize(numGroups);
-  this->nodeGroupsForDisplay.SetSize(0);
+  this->nodeGroupsForDisplay.setExpectedSize(numGroups);
+  this->nodeGroupsForDisplay.setSize(0);
   for (int i = 0; i < this->connectedComponents.size; i ++) {
     for (int j = 0; j < this->connectedComponents[i].size; j ++) {
       this->nodeGroupsForDisplay.addOnTop(this->connectedComponents[i][j]);

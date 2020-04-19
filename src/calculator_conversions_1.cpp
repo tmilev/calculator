@@ -546,7 +546,7 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(
   }
   List<int> theRanks, theMults;
   outputSubalgebra.theWeylNonEmbedded->theDynkinType.GetLettersTypesMults(nullptr, &theRanks, &theMults, nullptr);
-  outputSubalgebra.CartanSAsByComponentScaledToActByTwo.SetSize(
+  outputSubalgebra.CartanSAsByComponentScaledToActByTwo.setSize(
     outputSubalgebra.theWeylNonEmbedded->theDynkinType.GetNumSimpleComponents()
   );
   int componentCounter = - 1;
@@ -555,7 +555,7 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(
     for (int j = 0; j < theMults[i]; j ++) {
       componentCounter ++;
       Vectors<Rational>& currentComponent = outputSubalgebra.CartanSAsByComponentScaledToActByTwo[componentCounter];
-      currentComponent.SetSize(theRanks[i]);
+      currentComponent.setSize(theRanks[i]);
       for (int k = 0; k < theRanks[i]; k ++) {
         counter ++;
         theHs.GetVectorFromRow(counter, currentComponent[k]);
@@ -564,8 +564,8 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(
   }
   reportStream << "Extracting generators ... ";
   theReport.Report(reportStream.str());
-  outputSubalgebra.thePosGens.SetSize(0);
-  outputSubalgebra.theNegGens.SetSize(0);
+  outputSubalgebra.thePosGens.setSize(0);
+  outputSubalgebra.theNegGens.setSize(0);
   if (CalculatorConversions::innerLoadKey(theCommands, input, "generators", generatorsE)) {
     generatorsE.Sequencefy();
     ElementSemisimpleLieAlgebra<AlgebraicNumber> curGenAlgebraic;
@@ -658,9 +658,9 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(
   reportStream << " done. Fetching subalgebra list ... ";
   theReport.Report(reportStream.str());
   theSAsE.Sequencefy();
-  theSAs.theSubalgebras.SetExpectedSize(theSAsE.children.size - 1);
+  theSAs.theSubalgebras.setExpectedSize(theSAsE.children.size - 1);
   theSAs.theSubalgebras.Clear();
-  theSAs.theSubalgebrasNonEmbedded->SetExpectedSize(theSAsE.children.size - 1);
+  theSAs.theSubalgebrasNonEmbedded->setExpectedSize(theSAsE.children.size - 1);
   theSAs.flagAttemptToSolveSystems = true;
   theSAs.flagComputeModuleDecomposition = true;
   theSAs.flagComputePairingTable = false;
@@ -1394,4 +1394,34 @@ bool CalculatorConversions::innerMakeElementHyperOctahedral(
     }
   }
   return output.AssignValue(theElement, theCommands);
+}
+
+bool CalculatorConversions::innerPolynomialModuloInteger(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
+  MacroRegisterFunctionWithName("CalculatorFunctions::innerPolynomialModuloInteger");
+  if (input.size() != 3) {
+    return theCommands
+    << "Expected two arguments, polynomial and positive integer.";
+  }
+  WithContext<Polynomial<Rational> > polynomial;
+  if (!theCommands.Convert(
+    input[1],
+    CalculatorConversions::functionPolynomial<Rational>,
+    polynomial
+  )) {
+    return false;
+  }
+  LargeInteger theModulus;
+  if (!input[2].IsInteger(&theModulus)) {
+    return false;
+  }
+  if (theModulus <= 0) {
+    return theCommands << "The modulus: " << theModulus << " is not positive. ";
+  }
+  Polynomial<ElementZmodP> converted;
+  ElementZmodP::convertModuloIntegerAfterScalingToIntegral(
+    polynomial.content, converted, theModulus.value
+  );
+  return output.AssignValueWithContext(converted, polynomial.context.context, theCommands);
 }

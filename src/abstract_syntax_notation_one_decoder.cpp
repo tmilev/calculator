@@ -166,7 +166,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeBitString(
   }
   if (subDecoder.Decode(*this->rawDatA, offsetAtStart, subDecoderResult, nullptr)) {
     if (subDecoder.dataPointer == this->dataPointer) {
-      output.theElements.SetSize(0);
+      output.theElements.setSize(0);
       output.theElements.addOnTop(subDecoderResult);
       if (insidePadded) {
         output.flagHeaderPadded = true;
@@ -179,7 +179,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::DecodeBitString(
 void AbstractSyntaxNotationOneSubsetDecoder::DecodeASNAtomContent(
   ASNElement& output
 ) {
-  output.ASNAtom.SetSize(output.lengthPromised);
+  output.ASNAtom.setSize(output.lengthPromised);
   for (int i = 0; i < output.lengthPromised; i ++) {
     output.ASNAtom[i] = (*this->rawDatA)[this->dataPointer + i];
   }
@@ -715,8 +715,8 @@ ASNElement::ASNElement() {
 
 void ASNElement::reset() {
   this->resetExceptContent();
-  this->ASNAtom.SetSize(0);
-  this->theElements.SetSize(0);
+  this->ASNAtom.setSize(0);
+  this->theElements.setSize(0);
 }
 
 void ASNElement::resetExceptContent() {
@@ -866,7 +866,7 @@ void AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::WriteLengt
 ) {
   if (offset >= output.size) {
     int oldSize = output.size;
-    output.SetSize(offset + 1);
+    output.setSize(offset + 1);
     for (int i = oldSize; i < offset; i ++) {
       output[i] = 0;
     }
@@ -1168,7 +1168,7 @@ int ASNObject::LoadField(
   }
   if (!inputFields.Contains(fieldName)) {
     this->name = fieldName;
-    this->objectId.ASNAtom.SetSize(0);
+    this->objectId.ASNAtom.setSize(0);
     return 0;
   }
   *this = inputFields.GetValueConstCrashIfNotPresent(fieldName);
@@ -1322,7 +1322,7 @@ void ASNElement::MakeSet(
   this->tag = AbstractSyntaxNotationOneSubsetDecoder::tags::set0x11;
   this->startByte = this->tag;
   this->SetStartByteFlags(setLeadingBit, setSecondMostSignificantBit, constructed);
-  this->theElements.SetSize(numberOfEmptyElements);
+  this->theElements.setSize(numberOfEmptyElements);
 }
 
 void ASNElement::MakeSequence(const List<ASNElement>& input) {
@@ -1334,7 +1334,7 @@ void ASNElement::MakeSequence(int numberOfEmptyElements) {
   this->reset();
   this->tag = AbstractSyntaxNotationOneSubsetDecoder::tags::sequence0x10;
   this->startByte = this->tag + 32;
-  this->theElements.SetSize(numberOfEmptyElements);
+  this->theElements.setSize(numberOfEmptyElements);
 }
 
 void TBSCertificateInfo::ComputeASNSignatureAlgorithmIdentifier(ASNElement& output) {
@@ -1381,8 +1381,8 @@ void ASNElement::MakeBitStringEmpty(
   this->tag = AbstractSyntaxNotationOneSubsetDecoder::tags::bitString0x03;
   this->startByte = this->tag;
   this->SetStartByteFlags(setLeadingBit, setSecondMostSignificantBit, setConstructed);
-  this->ASNAtom.SetSize(0);
-  this->theElements.SetSize(0);
+  this->ASNAtom.setSize(0);
+  this->theElements.setSize(0);
 }
 
 void ASNElement::MakeBitStrinG(const List<unsigned char>& input) {
@@ -1406,7 +1406,7 @@ void TBSCertificateInfo::ComputeASNSignature(ASNElement& output) {
   output[0][0].MakeObjectId(ASNObject::ObjectIdFromNameNoFail(ASNObject::names::RSAEncryption));
   output[0][1].MakeNull();
   output[1].MakeBitStringEmpty(false, false, false);
-  output[1].theElements.SetSize(1);
+  output[1].theElements.setSize(1);
   ASNElement& signatureSerializer = output[1][0];
   signatureSerializer.MakeSequence(2);
   signatureSerializer[0].MakeInteger(this->subjectPublicKey.theExponent);
@@ -1651,7 +1651,7 @@ void PrivateKeyRSA::SignBytesPadPKCS1(
     inputHashedPadded, theElement.theValue
   );
   MathRoutines::RaiseToPower(theElement, this->privateExponent, theOne);
-  output.SetSize(0);
+  output.setSize(0);
   theElement.theValue.WriteBigEndianBytes(output, false);
 }
 
@@ -1738,7 +1738,7 @@ void PrivateKeyRSA::HashAndPadPKCS1(
   if (numberOfFFs < 0) {
     numberOfFFs = 0;
   }
-  output.SetSize(0);
+  output.setSize(0);
   output.addOnTop(0x00);
   output.addOnTop(0x01);
   for (int i = 0; i < numberOfFFs; i ++) {
@@ -1887,7 +1887,7 @@ std::string TBSCertificateInfo::toString() {
 bool TBSCertificateInfo::LoadExtensions(
   const ASNElement& input, std::stringstream* commentsOnFailure
 ) {
-  this->extensions.SetSize(0);
+  this->extensions.setSize(0);
   if (input.tag != AbstractSyntaxNotationOneSubsetDecoder::tags::bitString0x03) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "TBS certificate extensions are expected to be of type bit string. ";

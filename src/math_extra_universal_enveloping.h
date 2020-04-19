@@ -37,9 +37,9 @@ public:
       global.fatal << "This is a programming error: attempting to assign impossible index to monomial UE. " << global.fatal;
     }
     this->owner = &inputOwner;
-    this->generatorsIndices.SetSize(1);
+    this->generatorsIndices.setSize(1);
     this->generatorsIndices[0] = generatorIndex;
-    this->Powers.SetSize(1);
+    this->Powers.setSize(1);
     this->Powers[0] = 1;
   }
   bool HWTAAbilinearForm(

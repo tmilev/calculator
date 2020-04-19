@@ -112,7 +112,7 @@ std::string Weight<coefficient>::TensorAndDecompose(
   const int OrbitSizeHardLimit = 10000000;
   Vector<Rational> rightHWSimpleCoords = theWeyl.GetSimpleCoordinatesFromFundamental(rightHWFundCoords);
   Vectors<Rational> tempRoots;
-  tempRoots.SetSize(1);
+  tempRoots.setSize(1);
   for (int i = 0; i < weightsLeftSimpleCoords.size; i ++) {
     tempRoots[0] = weightsLeftSimpleCoords[i];
     theWeyl.GenerateOrbit(tempRoots, false, currentOrbit, false, 0, 0, OrbitSizeHardLimit);
@@ -140,7 +140,7 @@ bool charSSAlgMod<coefficient>::FreudenthalEvalMeFullCharacter(
   outputCharOwnerSetToZero.makeZero();
   Vectors<Rational> theVect;
   HashedList<Vector<coefficient> > theOrbit;
-  theVect.SetSize(1);
+  theVect.setSize(1);
   Weight<coefficient> tempMon;
   tempMon.owner = nullptr;
   for (int i = 0; i < domChar.size(); i ++) {
@@ -275,7 +275,7 @@ void SemisimpleLieAlgebra::GetCommonCentralizer(
   }
   Vectors<coefficient> outputV;
   commonAd.GetZeroEigenSpace(outputV);
-  outputCentralizingElements.SetSize(outputV.size);
+  outputCentralizingElements.setSize(outputV.size);
   for (int i = 0; i < outputV.size; i ++) {
     ElementSemisimpleLieAlgebra<coefficient>& currentElt = outputCentralizingElements[i];
     currentElt.AssignVectorNegRootSpacesCartanPosRootSpaces(outputV[i], *this);
@@ -299,7 +299,7 @@ void SemisimpleLieAlgebra::LieBracket(
     return;
   }
   int maxNumMonsFinal = g1.size() * g2.size();
-  output.SetExpectedSize(maxNumMonsFinal);
+  output.setExpectedSize(maxNumMonsFinal);
   coefficient theCoeff;
   ElementSemisimpleLieAlgebra<coefficient> buffer;
   for (int i = 0; i < g1.size(); i ++) {
@@ -489,7 +489,7 @@ std::string charSSAlgMod<coefficient>::MultiplyBy(const charSSAlgMod& other) {
     global.fatal << "This is a programming error: attempting to multiply characters of "
     << "different or non-initialized semisimple Lie algebras." << global.fatal;
   }
-  this->SetExpectedSize(other.size() + this->size());
+  this->setExpectedSize(other.size() + this->size());
   charSSAlgMod result, summand;
   result.makeZero();
   std::string potentialError;
@@ -559,7 +559,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(
   }
   Vectors<coefficient> orbitDom;
   for (int i = 0; i < charAmbientFDWeyl.size(); i ++) {
-    orbitDom.SetSize(0);
+    orbitDom.setSize(0);
     if (!inputData.WeylFD.GenerateOrbitReturnFalseIfTruncated(
       theWeyL.GetSimpleCoordinatesFromFundamental(
         charAmbientFDWeyl[i].weightFundamentalCoordS
@@ -591,7 +591,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(
   << HtmlRoutines::GetMathSpanPure(remainingCharDominantLevI.toString(&theFormat));
   remainingCharProjected.makeZero();
   Vector<coefficient> fundCoordsSmaller, inSimpleCoords;
-  fundCoordsSmaller.SetSize(WeylFDSmall.AmbientWeyl->GetDim());
+  fundCoordsSmaller.setSize(WeylFDSmall.AmbientWeyl->GetDim());
   for (int i = 0; i < remainingCharDominantLevI.size(); i ++) {
     inSimpleCoords = theWeyL.GetSimpleCoordinatesFromFundamental(remainingCharDominantLevI[i].weightFundamentalCoordS);
     for (int j = 0; j < WeylFDSmall.AmbientWeyl->GetDim(); j ++) {

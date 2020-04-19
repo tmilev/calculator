@@ -339,9 +339,9 @@ public:
 
 template <class elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::init() {
-  this->generators.SetSize(0);
-  this->conjugacyClasseS.SetSize(0);
-  this->squaresCCReps.SetSize(0);
+  this->generators.setSize(0);
+  this->conjugacyClasseS.setSize(0);
+  this->squaresCCReps.setSize(0);
   this->theElements.Clear();
   this->flagAllElementsAreComputed = false;
   this->flagCCsComputed = false;
@@ -533,13 +533,13 @@ template <class coefficient>
 bool FinitelyGeneratedMatrixMonoid<coefficient>::GenerateElements(int upperBoundNonPositiveMeansNoLimit) {
   MacroRegisterFunctionWithName("FinitelyGeneratedMatrixMonoid::GenerateElements");
   this->theElements.Clear();
-  this->theElements.AddOnTopNoRepetition(theGenerators);
+  this->theElements.addOnTopNoRepetition(theGenerators);
   MatrixTensor<coefficient> currentElement;
   for (int i = 0; i < this->theElements.size; i ++) {
     for (int j = 0; j < this->theGenerators.size; j ++) {
       currentElement = this->theGenerators[j];
       currentElement *= this->theElements[i];
-      this->theElements.AddOnTopNoRepetition(currentElement);
+      this->theElements.addOnTopNoRepetition(currentElement);
       if (upperBoundNonPositiveMeansNoLimit > 0) {
         if (this->theElements.size > upperBoundNonPositiveMeansNoLimit) {
           return false;
@@ -893,7 +893,7 @@ public:
   void GetLongestWeylElt(ElementWeylGroup& outputWeylElt);
   bool IsEigenSpaceGeneratorCoxeterElement(Vector<Rational>& input);
   void GetCoxeterElement(ElementWeylGroup& outputWeylElt) {
-    outputWeylElt.generatorsLastAppliedFirst.SetSize(this->GetDim());
+    outputWeylElt.generatorsLastAppliedFirst.setSize(this->GetDim());
     for (int i = 0; i < outputWeylElt.generatorsLastAppliedFirst.size; i ++) {
       outputWeylElt.generatorsLastAppliedFirst[i].MakeSimpleReflection(i);
     }
@@ -947,7 +947,7 @@ public:
   ElementWeylGroup GetRootReflection(int rootIndex);
   void GetWord(int g, List<int>& out) const;
   void GetWord(const ElementWeylGroup& g, List<int>& out) const {
-    out.SetSize(g.generatorsLastAppliedFirst.size);
+    out.setSize(g.generatorsLastAppliedFirst.size);
     for (int i = 0; i < g.generatorsLastAppliedFirst.size; i ++) {
       out[i] = g.generatorsLastAppliedFirst[i].index;
     }
@@ -1149,7 +1149,7 @@ public:
     GroupRepresentation<FiniteGroup<elementFirstGroup>, coefficient> out;
     out.ownerGroup = this->preimageGroup;
     out.identifyingString = M2.identifyingString;
-    out.generatorS.SetSize(this->preimageGroup->generators.size);
+    out.generatorS.setSize(this->preimageGroup->generators.size);
     for (int i = 0; i < this->preimageGroup->generators.size; i ++) {
       elementSecondGroup ki = (*this)(this->preimageGroup->generators[i]);
       M2.GetMatrixOfElement(ki, out.generatorS[i]);
@@ -1193,7 +1193,7 @@ public:
 
   bool VerifyRepresentationExpensive() {
     List<Matrix<coefficient> > repms;
-    repms.SetSize(this->ownerGroup->theElements.size);
+    repms.setSize(this->ownerGroup->theElements.size);
     for (int i = 0; i < this->ownerGroup->theElements.size; i ++) {
       this->GetMatrixOfElement(this->ownerGroup->theElements[i], repms[i]);
     }
@@ -1291,7 +1291,7 @@ void GroupRepresentation<someGroup, coefficient>::ComputeCharacter() const {
     this->ownerGroup->ComputeCCSizesAndRepresentatives();
   }
   this->theCharacteR.G = ownerGroup;
-  this->theCharacteR.data.SetSize(this->ownerGroup->conjugacyClasseS.size);
+  this->theCharacteR.data.setSize(this->ownerGroup->conjugacyClasseS.size);
   for (int cci = 0; cci < this->ownerGroup->conjugacyClasseS.size; cci ++) {
     Matrix<coefficient> M;
     M.makeIdentity(this->generatorS[0]);
@@ -1325,7 +1325,7 @@ void GroupRepresentation<someGroup, coefficient>::MakeTensorRepresentation(
   GroupRepresentation<someGroup, coefficient>& right, GroupRepresentation<someGroup, coefficient>& left
 ) {
   ownerGroup = right.ownerGroup;
-  generatorS.SetSize(right.generatorS.size);
+  generatorS.setSize(right.generatorS.size);
   for (int i = 0; i < right.generatorS.size; i ++) {
     generatorS[i].AssignTensorProduct(right.generatorS[i], left.generatorS[i]);
   }
@@ -1650,7 +1650,7 @@ template <typename elementSomeGroup>
 bool TranslatableWordsSubgroupElementGetWord(FiniteGroup<elementSomeGroup>& H, const elementSomeGroup& g, List<int>& out) {
   List<int> superword;
   H.parentRelationship->theGroup->GetWord(g, superword);
-  out.SetSize(0);
+  out.setSize(0);
   for (int i = 0; i < superword.size; i ++) {
     if (!H.parentRelationship->superGeneratorSubWordExists[superword[i]]) {
       if (!H.HasElement(g)) {
@@ -1749,7 +1749,7 @@ void SubgroupData<someGroup, elementSomeGroup>::QuotientGroupPermutationRepresen
   out.ownerGroup = this->theGroup;
   out.identifyingString = "Quotient permutation representation";
   global.Comments << "Subgroup::QuotientGroupPermutationRepresentation: Permuting " << cosets.size << " cosets.\n";
-  out.generatorS.SetSize(this->theGroup->generators.size);
+  out.generatorS.setSize(this->theGroup->generators.size);
   for (int i = 0; i < this->theGroup->generators.size; i ++) {
     out.generatorS[i].init(this->cosets.size, this->cosets.size);
     out.generatorS[i].makeZero();
@@ -1775,7 +1775,7 @@ GroupRepresentation<someGroup, coefficient> SubgroupData<someGroup, elementSomeG
   this->QuotientGroupPermutationRepresentation(qr);
   GroupRepresentation<someGroup, coefficient> sr;
   sr.ownerGroup = this->theGroup;
-  sr.generatorS.SetSize(this->theGroup->generators.size);
+  sr.generatorS.setSize(this->theGroup->generators.size);
   // in TODO: make random FiniteGroups capable of finding their conjugacy classes in less than at least 5 minutes
   global.Comments << "inducing from subgroup representation:\n";
   for (int i = 0; i < this->theSubgroup->generators.size; i ++) {
@@ -1822,7 +1822,7 @@ GroupRepresentation<someGroup, coefficient> SubgroupData<someGroup, elementSomeG
   GroupRepresentation<someGroup, coefficient>& in
 ) {
   GroupRepresentation<someGroup, coefficient> out;
-  out.generatorS.SetSize(this->theGroup->generators.size);
+  out.generatorS.setSize(this->theGroup->generators.size);
   for (int i = 0; i < this->theGroup->generators.size; i ++) {
     this->ComputeCosets();
     // parent->generators[i] = cg * h
@@ -2117,7 +2117,7 @@ template<class someFiniteGroup, typename coefficient>
 ClassFunction<someFiniteGroup, coefficient> ClassFunction<someFiniteGroup, coefficient>::Sym2() const {
   ClassFunction<someFiniteGroup, coefficient> l;
   l.G = G;
-  l.data.SetExpectedSize(G->ConjugacyClassCount());
+  l.data.setExpectedSize(G->ConjugacyClassCount());
   for (int i = 0; i < G->ConjugacyClassCount(); i ++) {
     l.data.addOnTop((this->data[i] * this->data[i] + this->data[G->squaresFirstConjugacyClassRep[i]]) / 2);
   }
@@ -2128,7 +2128,7 @@ template<class someFiniteGroup, typename coefficient>
 ClassFunction<someFiniteGroup, coefficient> ClassFunction<someFiniteGroup, coefficient>::Alt2() const {
   ClassFunction<someFiniteGroup, coefficient> l;
   l.G = G;
-  l.data.SetExpectedSize(G->ConjugacyClassCount());
+  l.data.setExpectedSize(G->ConjugacyClassCount());
   for (int i = 0; i < G->ConjugacyClassCount(); i ++) {
     l.data.addOnTop((this->data[i] * this->data[i] - this->data[G->squaresFirstConjugacyClassRep[i]]) / 2);
   }
@@ -2255,7 +2255,7 @@ public:
 template <typename coefficient>
 void UDPolynomial<coefficient>::AssignMinPoly(const Matrix<coefficient>& input) {
   int n = input.NumCols;
-  this->data.SetSize(1);
+  this->data.setSize(1);
   this->data[0] = 1;
   for (int col = 0; col < n; col ++) {
     VectorSpace<coefficient> vs;
@@ -2271,7 +2271,7 @@ void UDPolynomial<coefficient>::AssignMinPoly(const Matrix<coefficient>& input) 
     }
     Vector<coefficient> p = vs.basis.PutInBasis(w);
     UDPolynomial<coefficient> out;
-    out.data.SetSize(p.size + 1);
+    out.data.setSize(p.size + 1);
     for (int i = 0; i <p.size; i ++) {
       out.data[i] = - p[i];
     }
@@ -2283,7 +2283,7 @@ void UDPolynomial<coefficient>::AssignMinPoly(const Matrix<coefficient>& input) 
 template <typename coefficient>
 void UDPolynomial<coefficient>::AssignCharPoly(const Matrix<coefficient>& input) {
   int n = input.NumCols;
-  this->data.SetSize(n + 1);
+  this->data.setSize(n + 1);
   this->data[0] = 1;
   Matrix<coefficient> acc;
   acc = input;
@@ -2321,7 +2321,7 @@ void UDPolynomial<coefficient>::operator+=(const UDPolynomial<coefficient>& righ
   }
   if (right.data.size > data.size) {
     int n = data.size;
-    data.SetSize(right.data.size);
+    data.setSize(right.data.size);
     for (int i = n; i < right.data.size; i ++) {
       data[i] = right.data[i];
     }
@@ -2344,7 +2344,7 @@ void UDPolynomial<coefficient>::operator-=(const UDPolynomial<coefficient>& righ
   }
   if (right.data.size > data.size) {
     int n = data.size;
-    data.SetSize(right.data.size);
+    data.setSize(right.data.size);
     for (int i = n; i < right.data.size; i ++) {
       data[i] = - right.data[i];
     }
@@ -2358,7 +2358,7 @@ void UDPolynomial<coefficient>::operator-=(const UDPolynomial<coefficient>& righ
 template <typename coefficient>
 UDPolynomial<coefficient> UDPolynomial<coefficient>::operator*(const UDPolynomial<coefficient>& right) const {
   UDPolynomial<coefficient> out;
-  out.data.SetSize(data.size + right.data.size - 1);
+  out.data.setSize(data.size + right.data.size - 1);
   for (int i = 0; i <out.data.size; i ++) {
     out.data[i] = 0;
   }
@@ -2373,7 +2373,7 @@ UDPolynomial<coefficient> UDPolynomial<coefficient>::operator*(const UDPolynomia
 template <typename coefficient>
 UDPolynomial<coefficient> UDPolynomial<coefficient>::TimesXn(int n) const {
   UDPolynomial<coefficient> out;
-  out.data.SetSize(data.size + n);
+  out.data.setSize(data.size + n);
   for (int i = 0; i < n; i ++) {
     out.data[i] = 0;
   }
@@ -2406,7 +2406,7 @@ std::string UDPolynomial<coefficient>::toString(FormatExpressions* theFormat) co
 template <typename coefficient>
 std::ostream& operator<<(std::ostream& out, const UDPolynomial<coefficient>& p) {
   FormatExpressions tempFormat;
-  tempFormat.polyAlphabeT.SetSize(1);
+  tempFormat.polyAlphabeT.setSize(1);
   tempFormat.polyAlphabeT[0] = "q";
   return out << p.toString(&tempFormat);
 }

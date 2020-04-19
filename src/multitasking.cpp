@@ -190,11 +190,11 @@ ThreadData& ThreadData::RegisterNewThread(const std::string& inputName) {
   newThreadData.name = inputName;
   newThreadData.index = theThreadData.size;
   theThreadData.addOnTop(newThreadData);
-  global.theThreads.SetSize(theThreadData.size);
+  global.theThreads.setSize(theThreadData.size);
   global.CustomStackTrace.Reserve(2);
   global.progressReportStrings.Reserve(2);
-  global.CustomStackTrace.SetSize(theThreadData.size);
-  global.progressReportStrings.SetSize(theThreadData.size);
+  global.CustomStackTrace.setSize(theThreadData.size);
+  global.progressReportStrings.setSize(theThreadData.size);
   global.CustomStackTrace.LastObject().Reserve(30);
   global.progressReportStrings.LastObject().Reserve(30);
   return global.theThreadData.LastObject();

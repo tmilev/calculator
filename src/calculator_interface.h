@@ -153,7 +153,7 @@ private:
     this->owner = &newBoss;
     this->theData = 0;
     this->children.Clear();
-    this->children.SetExpectedSize(numExpectedChildren);
+    this->children.setExpectedSize(numExpectedChildren);
   }
   static Expression zero();
   bool AddChildRationalOnTop(const Rational& inputRat);
@@ -378,7 +378,9 @@ private:
   bool AssignValue(const theType& inputValue, Calculator& owner);
   //note: the following always returns true:
   template <class theType>
-  bool AssignValueWithContext(const theType& inputValue, const Expression& theContext, Calculator& owner);
+  bool AssignValueWithContext(
+    const theType& inputValue, const Expression& theContext, Calculator& owner
+  );
   template <class theType>
   bool AddChildValueOnTop(const theType& inputValue) {
     this->CheckInitialization();
@@ -758,6 +760,9 @@ public:
   }
   WithContext() {
   }
+  bool mergeContextWith(
+    WithContext<builtIn>& otherOutput, std::stringstream* commentsOnFailure
+  );
 };
 
 class Function {
@@ -1027,8 +1032,11 @@ public:
   HashedListReferences<ElementEllipticCurve<ElementZmodP> > EllipticCurveElementsZmodP;
   HashedListReferences<ElementEllipticCurve<Rational> > EllipticCurveElementsRational;
   HashedListReferences<ElementTensorsGeneralizedVermas<RationalFunction> > theTensorElts;
-  HashedListReferences<Polynomial<Rational> > thePolys;
-  HashedListReferences<Polynomial<AlgebraicNumber> > thePolysOverANs;
+  HashedListReferences<Polynomial<Rational> > polynomialsRational;
+  HashedListReferences<Polynomial<AlgebraicNumber> > polynomialsAlgebraic;
+  HashedListReferences<Polynomial<ElementZmodP> > polynomialsModular;
+  HashedListReferences<Polynomial<ElementOneVariablePolynomialQuotientRing<ElementZmodP> > > polynomialQuotientsModular;
+
   HashedListReferences<ElementWeylAlgebra<Rational> > theWeylAlgebraElements;
   HashedListReferences<ElementUniversalEnveloping<RationalFunction> > theUEs;
   HashedListReferences<RationalFunction> theRFs;
@@ -1374,7 +1382,7 @@ public:
     if ((*this->CurrentSyntacticStacK).size - decrease <= 0) {
       global.fatal << "Bad stack decrease. " << global.fatal;
     }
-    (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size - decrease);
+    (*this->CurrentSyntacticStacK).setSize((*this->CurrentSyntacticStacK).size - decrease);
     return true;
   }
   Expression EZero();
@@ -1429,7 +1437,7 @@ public:
   bool AllowsTensorInPreceding(const std::string& lookAhead);
   bool AllowsDivideInPreceding(const std::string& lookAhead);
   bool PopTopSyntacticStack() {
-    (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size - 1);
+    (*this->CurrentSyntacticStacK).setSize((*this->CurrentSyntacticStacK).size - 1);
     return true;
   }
   bool ReplaceEXXEXEBy_CofEEE(int theOp);
@@ -1521,7 +1529,7 @@ public:
   bool ReplaceXXYByY() {
     (*this->CurrentSyntacticStacK)[this->CurrentSyntacticStacK->size - 3] =
     (*this->CurrentSyntacticStacK)[this->CurrentSyntacticStacK->size - 1];
-    (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size - 2);
+    (*this->CurrentSyntacticStacK).setSize((*this->CurrentSyntacticStacK).size - 2);
     return true;
   }
   bool ReplaceXXYXByYX() {
@@ -1529,7 +1537,7 @@ public:
     (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
     (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3] =
     (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1];
-    (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size - 2);
+    (*this->CurrentSyntacticStacK).setSize((*this->CurrentSyntacticStacK).size - 2);
     return true;
   }
   bool ReplaceXYYXByYY() {
@@ -1537,7 +1545,7 @@ public:
     (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3];
     (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 3] =
     (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2];
-    (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size - 2);
+    (*this->CurrentSyntacticStacK).setSize((*this->CurrentSyntacticStacK).size - 2);
     return true;
   }
   bool ReplaceXYXByY() {
@@ -1549,7 +1557,7 @@ public:
   bool ReplaceXYByY() {
     (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 2] =
     (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size - 1];
-    (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size - 1);
+    (*this->CurrentSyntacticStacK).setSize((*this->CurrentSyntacticStacK).size - 1);
     return true;
   }
   bool ReplaceXEXByE();
@@ -1799,10 +1807,13 @@ public:
   int opElementWeylAlgebra() {
     return this->operations.GetIndexIMustContainTheObject("ElementWeylAlgebra");
   }
-  int opPoly() {
+  int opPolynomialRational() {
     return this->operations.GetIndexIMustContainTheObject("PolynomialRational");
   }
-  int opPolyOverANs() {
+  int opPolynomialModuloInteger() {
+    return this->operations.GetIndexIMustContainTheObject("PolynomialModuloInteger");
+  }
+  int opPolynomialAlgebraicNumbers() {
     return this->operations.GetIndexIMustContainTheObject("PolynomialOverANs");
   }
   int opEllipticCurveElementsRational() {
@@ -2642,6 +2653,7 @@ public:
   static bool innerSlTwoSubalgebraPrecomputed(Calculator& theCommands, const Expression& input, slTwoSubalgebra& output);
   static bool innerLoadFromObject(Calculator& theCommands, const Expression& input, RationalFunction& output);
   static bool innerAlgebraicNumber(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPolynomialModuloInteger(Calculator& theCommands, const Expression& input, Expression& output);
   template <class coefficient>
   static bool innerPolynomial(Calculator& theCommands, const Expression& input, Expression& output);
   // Conversions from expression tree to expression containing type.
@@ -2780,7 +2792,7 @@ bool Calculator::GetVectoR(
     return false;
   }
   List<Expression> convertedEs;
-  convertedEs.SetSize(nonConvertedEs.size);
+  convertedEs.setSize(nonConvertedEs.size);
   for (int i = 0; i < nonConvertedEs.size; i ++) {
     if (!this->ConvertToTypeUsingFunction<theType>(conversionFunction, nonConvertedEs[i], convertedEs[i])) {
       return false;
@@ -2794,7 +2806,7 @@ bool Calculator::GetVectoR(
       return false;
     }
   }
-  output.SetSize(convertedEs.size);
+  output.setSize(convertedEs.size);
   for (int i = 0; i < convertedEs.size; i ++) {
     output[i] = convertedEs[i].GetValue<theType>();
   }
@@ -2933,7 +2945,7 @@ bool Expression::makeSum(
     return this->AssignValue<Rational>(0, theCommands);
   }
   List<Expression> summandsWithCoeff;
-  summandsWithCoeff.SetSize(theSum.size());
+  summandsWithCoeff.setSize(theSum.size());
   for (int i = 0; i < theSum.size(); i ++) {
     Expression& current = summandsWithCoeff[i];
     if (theSum[i] == oneE) {
@@ -2997,7 +3009,7 @@ bool Expression::AssignValue(const theType& inputValue, Calculator& owner) {
   // comments << inputValue;
   int curType = tempE.GetTypeOperation<theType>();
   if (
-    curType == owner.opPoly() ||
+    curType == owner.opPolynomialRational() ||
     curType == owner.opRationalFunction() ||
     curType == owner.opElementTensorGVM() ||
     curType == owner.opElementUEoverRF() ||

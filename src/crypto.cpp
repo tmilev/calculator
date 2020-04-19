@@ -363,7 +363,7 @@ bool Crypto::ConvertBase64ToBitStream(
 ) {
   MacroRegisterFunctionWithName("Crypto::Base64ToBitStream");
   output.Reserve(static_cast<signed>((3 * input.size()) / 4 + 1));
-  output.SetSize(0);
+  output.setSize(0);
   uint32_t theStack = 0, sixBitDigit = 0;
   int numBitsInStack = 0;
   for (unsigned i = 0; i < input.size(); i ++) {
@@ -549,7 +549,7 @@ uint64_t Crypto::rightRotateAsIfBigEndian64(uint64_t input, int numBitsToRotate)
 
 void Crypto::ConvertUint32ToUcharBigendian(const List<uint32_t>& input, List<unsigned char>& output) {
   MacroRegisterFunctionWithName("Crypto::ConvertUint32ToUcharBigendian");
-  output.SetSize(input.size * 4);
+  output.setSize(input.size * 4);
   for (int i = 0; i < input.size; i ++) {
     output[i * 4 + 0] = static_cast<unsigned char>( input[i] / 16777216    );
     output[i * 4 + 1] = static_cast<unsigned char>((input[i] / 65536) % 256);
@@ -770,7 +770,7 @@ void Crypto::ConvertUint64toBigendianStringAppendResult(uint64_t input, std::str
 
 void Crypto::ConvertUint64toBigendianListUnsignedCharAppendResult(uint64_t input, List<unsigned char>& outputAppend) {
   //the following code should work on both big- and little-endian systems:
-  outputAppend.SetExpectedSize(outputAppend.size + 8);
+  outputAppend.setExpectedSize(outputAppend.size + 8);
   outputAppend.addOnTop(static_cast<unsigned char>(input / 72057594037927936)      );
   outputAppend.addOnTop(static_cast<unsigned char>((input / 281474976710656) % 256));
   outputAppend.addOnTop(static_cast<unsigned char>((input / 1099511627776) % 256)  );
@@ -783,7 +783,7 @@ void Crypto::ConvertUint64toBigendianListUnsignedCharAppendResult(uint64_t input
 
 void Crypto::ConvertUint128toBigendianListUnsignedCharAppendResult(uint64_t input, List<unsigned char>& outputAppend) {
   //the following code should work on both big- and little-endian systems:
-  outputAppend.SetExpectedSize(outputAppend.size + 16);
+  outputAppend.setExpectedSize(outputAppend.size + 16);
   for (int i = 0; i < 8; i ++) {
     outputAppend.addOnTop(0);
   }
@@ -806,12 +806,12 @@ void Crypto::ConvertStringToListUInt32BigendianZeroPad(const std::string& input,
 void Crypto::ConvertStringToListUInt32BigendianZeroPad(const List<unsigned char>& input, List<uint32_t>& output) {
   MacroRegisterFunctionWithName("Crypto::ConvertStringToListUInt32BigendianZeroPad");
   List<unsigned char> theConvertor;
-  theConvertor.SetSize(4);
+  theConvertor.setSize(4);
   int finalSize = input.size / 4;
   if (input.size % 4 != 0) {
     finalSize ++;
   }
-  output.SetSize(finalSize);
+  output.setSize(finalSize);
   for (int i = 0; i < output.size; i ++) {
     for (int j = 0; j < 4; j ++) {
       theConvertor[j] = (i * 4 + j < input.size) ? input[i * 4 + j] : 0;
@@ -860,7 +860,7 @@ void Crypto::computeSha1(const std::string& inputString, List<uint32_t>& output)
   List<unsigned char> convertorToUint32;
   List<uint32_t> inputStringUint32;
   inputStringUint32.Reserve(static_cast<signed>(inputStringPreprocessed.size() / 4));
-  convertorToUint32.SetSize(4);
+  convertorToUint32.setSize(4);
   for (unsigned i = 0; i < inputStringPreprocessed.size() / 4; i ++) {
     convertorToUint32[0] = static_cast<unsigned char>(inputStringPreprocessed[i * 4    ]);
     convertorToUint32[1] = static_cast<unsigned char>(inputStringPreprocessed[i * 4 + 1]);
@@ -869,7 +869,7 @@ void Crypto::computeSha1(const std::string& inputString, List<uint32_t>& output)
     inputStringUint32.addOnTop(Crypto::GetUInt32FromCharBigendian(convertorToUint32));
   }
   List<uint32_t> currentChunk;
-  currentChunk.SetSize(80);
+  currentChunk.setSize(80);
   uint32_t a = 0, b = 0, c = 0, d = 0, e = 0, f = 0, k = 0, temp = 0;
   for (int chunkCounter = 0; chunkCounter < inputStringUint32.size; chunkCounter += 16) {
     for (int j = 0; j < 16; j ++) {
@@ -917,7 +917,7 @@ void Crypto::computeSha1(const std::string& inputString, List<uint32_t>& output)
     h3 += d;
     h4 += e;
   }
-  output.SetSize(5);
+  output.setSize(5);
   output[0] = h0;
   output[1] = h1;
   output[2] = h2;
@@ -930,7 +930,7 @@ void Crypto::initSha256() {
   if (Crypto::kArraySha2xx.size != 0) {
     return;
   }
-  Crypto::kArraySha2xx.SetSize(64);
+  Crypto::kArraySha2xx.setSize(64);
   Crypto::kArraySha2xx[0]  = 0x428a2f98;
   Crypto::kArraySha2xx[1]  = 0x71374491;
   Crypto::kArraySha2xx[2]  = 0xb5c0fbcf;
@@ -1243,7 +1243,7 @@ void Crypto::computeSha2xx(const List<unsigned char>& input, List<uint32_t>& out
   List<unsigned char> convertorToUint32;
   List<uint32_t> inputStringUint32;
   inputStringUint32.Reserve(1 + inputPreprocessed.size / 4);
-  convertorToUint32.SetSize(4);
+  convertorToUint32.setSize(4);
   for (int i = 0; i < inputPreprocessed.size / 4; i ++) {
     convertorToUint32[0] = inputPreprocessed[i * 4];
     convertorToUint32[1] = inputPreprocessed[i * 4 + 1];
@@ -1252,7 +1252,7 @@ void Crypto::computeSha2xx(const List<unsigned char>& input, List<uint32_t>& out
     inputStringUint32.addOnTop(Crypto::GetUInt32FromCharBigendian(convertorToUint32));
   }
   List<uint32_t> currentChunk;
-  currentChunk.SetSize(64);
+  currentChunk.setSize(64);
   uint32_t a = 0, b = 0, c = 0, d = 0, e = 0, f = 0, g = 0, h = 0, maj = 0, temp1 = 0, temp2 = 0;
   uint32_t s0 = 0, s1 = 0, ch = 0;
   List<uint32_t>& kArray = Crypto::kArraySha2xx;
@@ -1311,9 +1311,9 @@ void Crypto::computeSha2xx(const List<unsigned char>& input, List<uint32_t>& out
     h7 += h;
   }
   if (is224) {
-    output.SetSize(7);
+    output.setSize(7);
   } else {
-    output.SetSize(8);
+    output.setSize(8);
   }
   output[0] = h0;
   output[1] = h1;
@@ -1330,7 +1330,7 @@ void Crypto::computeSha2xx(const List<unsigned char>& input, List<uint32_t>& out
 void Crypto::computeSha512(const List<unsigned char>& input, List<unsigned char>& output) {
   List<uint64_t> output64;
   Crypto::computeSha512(input, output64);
-  output.SetSize(0);
+  output.setSize(0);
   output.Reserve(64);
   for (int i = 0; i < output64.size; i ++) {
     Crypto::ConvertUint64toBigendianListUnsignedCharAppendResult(output64[i], output);
@@ -1377,7 +1377,7 @@ void Crypto::computeSha512(const List<unsigned char>& input, List<uint64_t>& out
   }
   int numberOfRounds = 80;
   List<uint64_t> currentChunk;
-  currentChunk.SetSize(numberOfRounds);
+  currentChunk.setSize(numberOfRounds);
   uint64_t a = 0, b = 0, c = 0, d = 0, e = 0, f = 0, g = 0, h = 0, maj = 0, temp1 = 0, temp2 = 0;
   uint64_t s0 = 0, s1 = 0, S0 = 0, S1 = 0,  ch = 0;
   List<uint64_t>& kArray = Crypto::kArraySha512;
@@ -1436,7 +1436,7 @@ void Crypto::computeSha512(const List<unsigned char>& input, List<uint64_t>& out
     h6 += g;
     h7 += h;
   }
-  output.SetSize(8);
+  output.setSize(8);
   output[0] = h0;
   output[1] = h1;
   output[2] = h2;
@@ -1544,7 +1544,7 @@ std::string PublicKeyRSA::toString() {
 
 bool Crypto::LoadKnownCertificates(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral) {
   MacroRegisterFunctionWithName("Crypto::LoadKnownCertificates");
-  Crypto::knownCertificates.SetSize(0);
+  Crypto::knownCertificates.setSize(0);
   List<std::string> theFileNames;
   if (! FileOperations::GetFolderFileNamesVirtual("certificates-public/", theFileNames, nullptr)) {
     if (commentsOnFailure != nullptr) {
@@ -1735,7 +1735,7 @@ void UnsecurePseudoRandomGenerator::SetRandomSeed(int32_t inputRandomSeed) {
   this->randomSeed = inputRandomSeed;
   this->randomNumbersGenerated = 0;
   this->bytesConsumed = 0;
-  this->state().SetSize(4);
+  this->state().setSize(4);
   unsigned int randomSeedUnsigned = static_cast<unsigned int>(this->randomSeed);
   this->state()[0] = static_cast<unsigned char>( randomSeedUnsigned / 16777216    );
   this->state()[1] = static_cast<unsigned char>((randomSeedUnsigned / 65536) % 256);

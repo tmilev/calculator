@@ -511,7 +511,7 @@ bool ElementUniversalEnveloping<coefficient>::HWTAAbilinearForm(
     }
     intermediateAccum *= leftMonCoeff;
     Accum += intermediateAccum;
-    int theIndex = intermediateAccum.theMonomials.GetIndex(constMon);
+    int theIndex = intermediateAccum.theMonomials.getIndex(constMon);
     if (theIndex != - 1) {
       output += intermediateAccum.coefficients[theIndex];
     }
@@ -676,14 +676,14 @@ void ElementUniversalEnveloping<coefficient>::MakeCasimir(SemisimpleLieAlgebra& 
     //Implementation without the ninja formula:
 //    tempRat = 0;
 //    Vector<Rational> & theRoot = theWeyl.RootSystem.theObjects[i];
-//    int indexOfOpposite = theWeyl.RootSystem.GetIndex(-theRoot);
+//    int indexOfOpposite = theWeyl.RootSystem.getIndex(-theRoot);
 //    Vector<Rational> & theOpposite = theWeyl.RootSystem.theObjects[indexOfOpposite];
 //    for (int j = 0; j < theWeyl.RootSystem.size; j ++)
 //    { Vector<Rational> & current = theWeyl.RootSystem.theObjects[j];
 //      if (current == theOpposite)
 //        tempRat +=2;
 //       else
-//       { int indexOfSum= theWeyl.RootSystem.GetIndex(current +theRoot);
+//       { int indexOfSum= theWeyl.RootSystem.getIndex(current +theRoot);
 //         if (indexOfSum!= - 1)
 //           tempRat +=(theOwner.ChevalleyConstants.elements[i][j]*theOwner.ChevalleyConstants.elements[indexOfOpposite][indexOfSum]);
 //       }
@@ -856,7 +856,7 @@ void ElementUniversalEnveloping<coefficient>::GetCoordinateFormOfSpanOfElements(
     ElementUniversalEnveloping& currentElt = theElements[i];
     for (int j = 0; j < currentElt.size; j ++) {
       MonomialUniversalEnveloping<coefficient>& currentMon = currentElt[j];
-      current[outputCorrespondingMonomials.GetIndex(currentMon)] = currentElt.coefficients[j];
+      current[outputCorrespondingMonomials.getIndex(currentMon)] = currentElt.coefficients[j];
     }
   }
 }
@@ -994,7 +994,7 @@ void ElementUniversalEnvelopingOrdered<coefficient>::GetCoordinateFormOfSpanOfEl
     ElementUniversalEnvelopingOrdered& currentElt = theElements[i];
     for (int j = 0; j < currentElt.size; j ++) {
       MonomialUniversalEnvelopingOrdered<coefficient>& currentMon = currentElt[j];
-      current.theObjects[outputCorrespondingMonomials.GetIndex(currentMon)] = currentMon.Coefficient;
+      current.theObjects[outputCorrespondingMonomials.getIndex(currentMon)] = currentMon.Coefficient;
     }
   }
 }
@@ -1213,7 +1213,7 @@ void ElementUniversalEnvelopingOrdered<coefficient>::GetBasisFromSpanOfElements(
     ElementUniversalEnvelopingOrdered<coefficient>& currentElt = theElements[i];
     for (int j = 0; j < currentElt.size; j ++) {
       MonomialUniversalEnvelopingOrdered<coefficient>& currentMon = currentElt[j];
-      currentList.theObjects[outputCorrespondingMonomials.GetIndex(currentMon)] = currentMon.Coefficient;
+      currentList.theObjects[outputCorrespondingMonomials.getIndex(currentMon)] = currentMon.Coefficient;
     }
   }
   outputTheBasis.size = 0;
@@ -1358,7 +1358,7 @@ bool ElementUniversalEnvelopingOrdered<coefficient>::IsProportionalTo(
     return false;
   }
   MonomialUniversalEnvelopingOrdered<coefficient>& theMon = (*this)[0];
-  int theIndex = other.GetIndex(theMon);
+  int theIndex = other.getIndex(theMon);
   if (theIndex == - 1) {
     return false;
   }
@@ -1408,7 +1408,7 @@ template <class coefficient>
 void ElementUniversalEnvelopingOrdered<coefficient>::AddMonomialNoCleanUpZeroCoeff(
   const MonomialUniversalEnvelopingOrdered<coefficient>& input
 ) {
-  int theIndex = this->GetIndex(input);
+  int theIndex = this->getIndex(input);
   if (theIndex == - 1) {
     this->addOnTop(input);
   } else {
@@ -1958,7 +1958,7 @@ void ElementUniversalEnvelopingOrdered<coefficient>::AddMonomial(
   if (input.IsEqualToZero()) {
     return;
   }
-  int theIndex = this->GetIndex(input);
+  int theIndex = this->getIndex(input);
   if (theIndex == - 1) {
     this->addOnTop(input);
   } else {

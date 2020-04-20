@@ -196,8 +196,8 @@ bool Calculator::innerAnimateLittelmannPaths(
   }
   SemisimpleLieAlgebra* theSSowner = algebra.content;
   Vector<Rational> theWeight;
-  Expression tempContext(theCommands);
-  if (!theCommands.GetVectoR<Rational>(
+  ExpressionContext tempContext(theCommands);
+  if (!theCommands.GetVector<Rational>(
     input[2],
     theWeight,
     &tempContext,
@@ -229,16 +229,15 @@ bool Calculator::innerCasimir(Calculator& theCommands, const Expression& input, 
   )) {
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
-  SemisimpleLieAlgebra* theSSalg = algebra.content;
-  SemisimpleLieAlgebra& theSSowner = *theSSalg;
+  SemisimpleLieAlgebra& algebraReference = *algebra.content;
   ElementUniversalEnveloping<RationalFunction> theCasimir;
-  theCasimir.MakeCasimir(theSSowner);
-  theCommands << "Context Lie algebra: " << theSSowner.theWeyl.theDynkinType.toString()
-  << ". The coefficient: " << theSSowner.theWeyl.GetKillingDivTraceRatio().toString()
+  theCasimir.MakeCasimir(algebraReference);
+  theCommands << "Context Lie algebra: " << algebraReference.theWeyl.theDynkinType.toString()
+  << ". The coefficient: " << algebraReference.theWeyl.GetKillingDivTraceRatio().toString()
   <<  ". The Casimir element of the ambient Lie algebra. ";
-  Expression contextE;
-  contextE.MakeContextSSLieAlg(theCommands, theSSowner);
-  return output.AssignValueWithContext(theCasimir, contextE, theCommands);
+  ExpressionContext context(theCommands);
+  context.setAmbientSemisimpleLieAlgebra(algebraReference);
+  return output.AssignValueWithContext(theCasimir, context, theCommands);
 }
 
 bool Calculator::innerEmbedG2inB3(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -263,9 +262,9 @@ bool Calculator::innerEmbedG2inB3(Calculator& theCommands, const Expression& inp
     return output.MakeError("Failed to apply homomorphism for unspecified reason", theCommands);
   }
   outputUE.simplify();
-  Expression contextE;
-  contextE.MakeContextSSLieAlg(theCommands, theHmm.theRange());
-  return output.AssignValueWithContext(outputUE, contextE, theCommands);
+  ExpressionContext context(theCommands);
+  context.setAmbientSemisimpleLieAlgebra(theHmm.theRange());
+  return output.AssignValueWithContext(outputUE, context, theCommands);
 }
 
 std::string HtmlRoutines::GetSliderSpanStartsHidden(
@@ -547,7 +546,7 @@ bool Calculator::innerPrintB3G2branchingIntermediate(
   Expression& output,
   Vectors<RationalFunction>& theHWs,
   branchingData& theG2B3Data,
-  Expression& theContext
+  ExpressionContext& theContext
 ) {
   MacroRegisterFunctionWithName("Calculator::innerPrintB3G2branchingIntermediate");
   (void) input;//avoid unused parameter warning, portable
@@ -584,7 +583,7 @@ bool Calculator::innerPrintB3G2branchingIntermediate(
     << "& Corresp. $\\mathfrak b \\cap G_2$-singular vectors  \\\\ \\hline"
     << "\\endhead \n<br>";
   }
-  theContext.ContextGetFormatExpressions(theG2B3Data.theFormat);
+  theContext.getFormat(theG2B3Data.theFormat);
   theG2B3Data.theFormat.flagUseLatex = true;
   theG2B3Data.theFormat.NumAmpersandsPerNewLineForLaTeX = 0;
   Expression tempExpression;
@@ -733,24 +732,30 @@ bool Calculator::innerPrintB3G2branchingIntermediate(
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool Calculator::innerPrintB3G2branchingTable(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::innerPrintB3G2branchingTable(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("Calculator::innerPrintB3G2branchingTable");
   Vectors<RationalFunction> theHWs;
   branchingData theG2B3Data;
-  Expression theContext(theCommands);
-  if (!theCommands.innerPrintB3G2branchingTableCommon(theCommands, input, output, theHWs, theG2B3Data, theContext)) {
+  ExpressionContext context(theCommands);
+  if (!theCommands.innerPrintB3G2branchingTableCommon(
+    theCommands, input, output, theHWs, theG2B3Data, context
+  )) {
     return false;
   }
   if (output.IsError()) {
     return true;
   }
-  return theCommands.innerPrintB3G2branchingIntermediate(theCommands, input, output, theHWs, theG2B3Data, theContext);
+  return theCommands.innerPrintB3G2branchingIntermediate(
+    theCommands, input, output, theHWs, theG2B3Data, context
+  );
 }
 
 bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("Calculator::innerPrintB3G2branchingTableCharsOnly");
   branchingData theg2b3data;
-  Expression theContext(theCommands);
+  ExpressionContext theContext(theCommands);
   Vectors<RationalFunction> theHWs;
   theCommands.innerPrintB3G2branchingTableCommon(
     theCommands, input, output, theHWs, theg2b3data, theContext
@@ -930,7 +935,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
   splittingParSel = theG2B3Data.SelSplittingParSel;
 
   theCommands.theObjectContainer.theCategoryOmodules.AddNoRepetitionOrReturnIndexFirst(theModCopy);
-  int theModIndex = theCommands.theObjectContainer.theCategoryOmodules.GetIndex(theModCopy);
+  int theModIndex = theCommands.theObjectContainer.theCategoryOmodules.getIndex(theModCopy);
   ModuleSSalgebra<RationalFunction>& theMod = theCommands.theObjectContainer.theCategoryOmodules[theModIndex];
   theMod.GetOwner().flagHasNilradicalOrder = true;
   std::stringstream out;
@@ -1075,9 +1080,9 @@ bool Calculator::innerPrintAllVectorPartitions(Calculator& theCommands, const Ex
   SemisimpleLieAlgebra* theSSowner = algebra.content;
 
   SemisimpleLieAlgebra& theSSalgebra = *theSSowner;
-  Expression theContext;
+  ExpressionContext theContext(theCommands);
   Vector<Rational> theHW;
-  if (!theCommands.GetVectoR<Rational>(input[2], theHW, &theContext, theSSalgebra.GetRank())) {
+  if (!theCommands.GetVector<Rational>(input[2], theHW, &theContext, theSSalgebra.GetRank())) {
     return output.MakeError("Failed to extract weight you want partitioned from " + input[2].toString(), theCommands);
   }
   Vector<int> theHWint;
@@ -1363,7 +1368,7 @@ bool Calculator::innerLSPath(Calculator& theCommands, const Expression& input, E
   Vectors<Rational> waypoints;
   waypoints.setSize(input.children.size - 2);
   for (int i = 2; i < input.children.size; i ++) {
-    if (!theCommands.GetVectoR<Rational>(
+    if (!theCommands.GetVector<Rational>(
       input[i], waypoints[i - 2], nullptr, ownerSSalgebra.GetRank(), nullptr
     )) {
       return output.MakeError("Failed to extract waypoints", theCommands);
@@ -1409,7 +1414,7 @@ bool Calculator::innerFactorPolynomial(Calculator& theCommands, const Expression
 
   for (int i = 0; i < factorization.reduced.size; i ++) {
     polynomialE.AssignValueWithContext(
-      factorization.reduced[i], polynomial.context.context, theCommands
+      factorization.reduced[i], polynomial.context, theCommands
     );
     expressionE.children.Clear();
     expressionE.AddChildAtomOnTop("MakeExpression");
@@ -1468,8 +1473,8 @@ bool Calculator::innerInterpolatePoly(Calculator& theCommands, const Expression&
   pointsOfInterpoly.GetVectorFromColumn(0, theArgs);
   pointsOfInterpoly.GetVectorFromColumn(1, theValues);
   interPoly.Interpolate(theArgs, theValues);
-  Expression theContext;
-  theContext.ContextMakeContextWithOnePolyVar(theCommands, "x");
+  ExpressionContext theContext(theCommands);
+  theContext.makeOneVariableFromString("x");
   return output.AssignValueWithContext(interPoly, theContext, theCommands);
 }
 
@@ -1707,7 +1712,7 @@ bool Calculator::innerEWAorPoly(Calculator& theCommands, const Expression& input
     return false;
   }
   Vector<Polynomial<Rational> > inputPolForm;
-  Expression startContext;
+  ExpressionContext startContext(theCommands);
   if (!theCommands.GetVectorFromFunctionArguments(
     input,
     inputPolForm,
@@ -1729,11 +1734,10 @@ bool Calculator::innerEWAorPoly(Calculator& theCommands, const Expression& input
     << "<hr>Failed to get different one-variable polynomials from input. "
     << input.toString();
   }
-  Expression endContext;
-  endContext.MakeContextWithOnePolyVarOneDiffVar(
-    theCommands,
-    startContext.ContextGetContextVariable(letterPol),
-    startContext.ContextGetContextVariable(letterDiff)
+  ExpressionContext endContext(theCommands);
+  endContext.makeOneVariableOneDifferentialOperator(
+    startContext.getVariable(letterPol),
+    startContext.getVariable(letterDiff)
   );
   ElementWeylAlgebra<Rational> outputEWA;
   if (assignPoly) {

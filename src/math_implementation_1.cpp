@@ -34,7 +34,7 @@ void SemisimpleLieAlgebra::GetChevalleyGeneratorAsLieBracketsSimpleGens(
         int theIndex = this->GetGeneratorFromRoot(- genWeight);
         outputIndicesFormatAd0Ad1Ad2etc.addOnTop(theIndex);
         if (!theWeight.IsEqualToZero()) {
-          int currentIndex = this->theWeyl.RootSystem.GetIndex(theWeight);
+          int currentIndex = this->theWeyl.RootSystem.getIndex(theWeight);
           theIndex = this->GetRootIndexFromGenerator(theIndex);
           if (!this->Computed.elements[theIndex][currentIndex]) {
             global.fatal << "This is a programming error. "
@@ -531,7 +531,7 @@ bool ElementUniversalEnveloping<coefficient>::GetBasisFromSpanOfElements(
     ElementUniversalEnveloping<coefficient>& currentElt = theElements[i];
     for (int j = 0; j < currentElt.size; j ++) {
       MonomialUniversalEnveloping<coefficient>& currentMon = currentElt[j];
-      currentList[outputCorrespondingMonomials.GetIndex(currentMon)] = currentMon.Coefficient;
+      currentList[outputCorrespondingMonomials.getIndex(currentMon)] = currentMon.Coefficient;
     }
   }
   outputTheBasis.size = 0;
@@ -677,7 +677,7 @@ bool ElementUniversalEnveloping<coefficient>::HWMTAbilinearForm(
     }
     intermediateAccum *= rightMonCoeff;
     Accum += intermediateAccum;
-    int theIndex = intermediateAccum.GetIndex(constMon);
+    int theIndex = intermediateAccum.getIndex(constMon);
     if (theIndex != - 1) {
       output += intermediateAccum.coefficients[theIndex];
     }
@@ -808,7 +808,7 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups() {
   for (int i = 0; i < this->nilradicalSmall.size; i ++) {
     ElementSemisimpleLieAlgebra<Rational>& eltImage =
     this->theHmm.imagesAllChevalleyGenerators[this->indicesNilradicalSmall[i]];
-    int theIndex = this->NilModPreNil.GetIndex(eltImage);
+    int theIndex = this->NilModPreNil.getIndex(eltImage);
     if (theIndex != - 1) {
       this->NilModPreNil.RemoveIndexSwapWithLast(theIndex);
       this->weightsNilModPreNil.RemoveIndexSwapWithLast(theIndex);

@@ -940,7 +940,7 @@ bool UserCalculator::IsAcceptableDatabaseInpuT(const std::string& input, std::st
 
 std::string UserCalculator::GetSelectedRowEntry(const std::string& theKey) {
   MacroRegisterFunctionWithName("UserCalculator::GetSelectedRowEntry");
-  int theIndex = this->selectedRowFieldNamesUnsafe.GetIndex(theKey);
+  int theIndex = this->selectedRowFieldNamesUnsafe.getIndex(theKey);
   if (theIndex == - 1) {
     return "";
   }
@@ -1465,10 +1465,10 @@ bool CalculatorDatabaseFunctions::innerRepairDatabaseEmailRecords(
   List<std::string> labels;
   if (!theRoutines.FetchAllUsers(theUserTable, labels, out))
     return output.AssignValue(out.str(), theCommands);
-  int emailColumn = labels.GetIndex("email");
-  int usernameColumn = labels.GetIndex(DatabaseStrings::labelUsername);
-  int passwordColumn = labels.GetIndex("password");
-  int activationTokenColumn = labels.GetIndex("activationToken");
+  int emailColumn = labels.getIndex("email");
+  int usernameColumn = labels.getIndex(DatabaseStrings::labelUsername);
+  int passwordColumn = labels.getIndex("password");
+  int activationTokenColumn = labels.getIndex("activationToken");
   ProgressReport theReport;
   if (emailColumn == - 1) {
     out << "Couldn't find email column. ";

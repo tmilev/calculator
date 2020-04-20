@@ -182,7 +182,7 @@ template <typename scalar, typename templateVector>
 int AnotherWeylGroup<scalar, templateVector>::MultiplyElements(int i, int j) const {
   templateVector v = this->rhoOrbit[j];
   this->ActOn(i, v);
-  return this->rhoOrbit.GetIndex(v);
+  return this->rhoOrbit.getIndex(v);
 }
 
 template <typename scalar, typename templateVector>
@@ -193,7 +193,7 @@ int AnotherWeylGroup<scalar, templateVector>::Invert(int i) const {
   for (int i = srsl.size - 1; i >= 0; i --) {
     this->SimpleReflection(srsl[i], v);
   }
-  return this->rhoOrbit.GetIndex(v);
+  return this->rhoOrbit.getIndex(v);
 }
 
 template <typename scalar, typename templateVector>
@@ -233,14 +233,14 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeRho() {
     this->RootSystem.addOnTop(vi);
     List<int> newelts;
     templateVector w;
-    newelts.addOnTop(this->RootSystem.GetIndex(vi));
+    newelts.addOnTop(this->RootSystem.getIndex(vi));
     while (newelts.size > 0) {
       int i = newelts.PopLastObject();
       for (int si = 0; si < this->rank; si ++) {
         this->SimpleReflection(si, this->RootSystem[i], w);
-        if (this->RootSystem.GetIndex(w) == - 1) {
+        if (this->RootSystem.getIndex(w) == - 1) {
           this->RootSystem.addOnTop(w);
-          int j = this->RootSystem.GetIndex(w);
+          int j = this->RootSystem.getIndex(w);
           newelts.addOnTop(j);
         }
       }
@@ -279,14 +279,14 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeAllElements() {
   templateVector w;
   List<int> newelts;
   this->rhoOrbit.addOnTop(twiceRho);
-  newelts.addOnTop(this->rhoOrbit.GetIndex(twiceRho));
+  newelts.addOnTop(this->rhoOrbit.getIndex(twiceRho));
   while (newelts.size > 0) {
     int i = newelts.PopLastObject();
     for (int si = 0; si < this->rank; si ++) {
       this->SimpleReflection(si,this->rhoOrbit[i],w);
-      if (this->rhoOrbit.GetIndex(w) == - 1) {
+      if (this->rhoOrbit.getIndex(w) == - 1) {
         this->rhoOrbit.addOnTop(w);
-        int j = this->rhoOrbit.GetIndex(w);
+        int j = this->rhoOrbit.getIndex(w);
         newelts.addOnTop(j);
       }
     }
@@ -320,7 +320,7 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeCC() {
           this->SimpleReflection(k, theRhoImage);
           this->ActOn(theStack[j], theRhoImage);
           this->SimpleReflection(k, theRhoImage);
-          int accountedIndex = this->rhoOrbit.GetIndex(theRhoImage);
+          int accountedIndex = this->rhoOrbit.getIndex(theRhoImage);
           theStack.addOnTopNoRepetition(accountedIndex);
           Accounted[accountedIndex] = true;
         }
@@ -441,7 +441,7 @@ List<ClassFunction<somegroup, Rational> > ComputeCharacterTable(somegroup &G) {
 //  classmap.setSize(G.theElements.size);
   for (int i = 0; i < G.ConjugacyClassCount(); i ++) {
     for (int j = 0; j < G.conjugacyClasseS[i].size; j ++) {
-      classmap[G.theElements.GetIndex(G.conjugacyClasseS[i].theElements[j])] = i;
+      classmap[G.theElements.getIndex(G.conjugacyClasseS[i].theElements[j])] = i;
     }
   }
   Matrix<Rational> form; // so inefficient
@@ -544,13 +544,13 @@ Matrix<Rational> GetClassMatrix(const somegroup &G, int cci, List<int>* classmap
   G.conjugacyClasseS[cci].size.IsIntegerFittingInInt(&classSize);
   invl.setSize(classSize);
   for (int i = 0; i < G.conjugacyClasseS[cci].size; i ++) {
-    invl[i] = G.Invert(G.theElements.GetIndex(G.conjugacyClasseS[cci].theElements[i]));
+    invl[i] = G.Invert(G.theElements.getIndex(G.conjugacyClasseS[cci].theElements[i]));
   }
   Matrix<int> M;
   M.MakeZeroMatrix(G.ConjugacyClassCount());
   for (int t = 0; t < G.ConjugacyClassCount(); t ++)
     for (int xi = 0; xi < invl.size; xi ++) {
-      int yi = G.MultiplyElements(invl[xi], G.theElements.GetIndex(G.conjugacyClasseS[t].representative));
+      int yi = G.MultiplyElements(invl[xi], G.theElements.getIndex(G.conjugacyClasseS[t].representative));
       int ci;
       if (classmap) {
         M.elements[t][(*classmap)[yi]] += 1;

@@ -251,7 +251,9 @@ bool CalculatorConversions::functionPolynomial(Calculator& theCommands, const Ex
   if (input.StartsWith(theCommands.opThePower(), 3)) {
     if (input[2].IsSmallInteger(&thePower)) {
       if (!CalculatorConversions::functionPolynomial<coefficient>(theCommands, input[1], theConverted)) {
-        return theCommands << "<hr>Failed to extract polynomial from " << input[1].toString() << ".";
+        return theCommands
+        << "<hr>Failed to extract polynomial from "
+        << input[1].toString() << ".";
       }
       Polynomial<coefficient> resultP = theConverted.GetValue<Polynomial<coefficient> >();
       if (thePower < 0) {
@@ -263,21 +265,13 @@ bool CalculatorConversions::functionPolynomial(Calculator& theCommands, const Ex
           << "I am treating " << input.toString() << " as a single variable. ";
           Polynomial<coefficient> monomial;
           monomial.makeMonomial(0, 1, 1);
-          Expression theContext;
-          theContext.ContextMakeContextWithOnePolyVar(theCommands, input);
+          ExpressionContext theContext(theCommands);
+          theContext.makeOneVariable(input);
           return output.AssignValueWithContext(monomial, theContext, theCommands);
         }
         theConst.invert();
         thePower *= - 1;
         resultP = theConst;
-      }
-      if (thePower == 0) {
-        if (resultP.IsEqualToZero()) {
-          return output.MakeError(
-            "Error: 0^0 is undefined in the present version of the calculator. ",
-            theCommands
-          );
-        }
       }
       resultP.RaiseToPower(thePower);
       return output.AssignValueWithContext(resultP, theConverted.GetContext(), theCommands);
@@ -285,8 +279,8 @@ bool CalculatorConversions::functionPolynomial(Calculator& theCommands, const Ex
   }
   Polynomial<coefficient> monomial;
   monomial.makeMonomial(0, 1, 1);
-  Expression theContext;
-  theContext.ContextMakeContextWithOnePolyVar(theCommands, input);
+  ExpressionContext theContext(theCommands);
+  theContext.makeOneVariable(input);
   return output.AssignValueWithContext(monomial, theContext, theCommands);
 }
 #endif

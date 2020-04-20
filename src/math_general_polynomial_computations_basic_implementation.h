@@ -709,7 +709,7 @@ bool Polynomial<coefficient>::IsProportionalTo(
     return true;
   }
   const MonomialP& firstMon = (*this)[0];
-  int indexInOther = other.theMonomials.GetIndex(firstMon);
+  int indexInOther = other.theMonomials.getIndex(firstMon);
   if (indexInOther == - 1) {
     return false;
   }
@@ -907,7 +907,7 @@ template <class coefficient>
 void Polynomial<coefficient>::GetConstantTerm(coefficient& output, const coefficient& theRingZero) const {
   MonomialP tempM;
   tempM.makeOne();
-  int i = this->theMonomials.GetIndex(tempM);
+  int i = this->theMonomials.getIndex(tempM);
   if (i == - 1) {
     output = theRingZero;
   } else {
@@ -941,7 +941,7 @@ void Polynomial<coefficient>::GetCoeffInFrontOfLinearTermVariableIndex(
 ) {
   MonomialP tempM;
   tempM.MakeEi(index);
-  int i = this->theMonomials.GetIndex(tempM);
+  int i = this->theMonomials.getIndex(tempM);
   if (i == - 1) {
     output = 0;
   } else {
@@ -1080,7 +1080,7 @@ std::string GroebnerBasisComputation<coefficient>::GetPolynomialStringSpacedMono
     *firstNonZeroIndex = - 1;
   }
   for (int i = 0; i < this->allMonomials.size; i ++) {
-    int theIndex = thePoly.theMonomials.GetIndex(this->allMonomials[i]);
+    int theIndex = thePoly.theMonomials.getIndex(this->allMonomials[i]);
     if (theIndex == - 1) {
       if (i != this->allMonomials.size - 1) {
         out << "&";
@@ -1199,7 +1199,7 @@ std::string GroebnerBasisComputation<coefficient>::GetPolynomialStringSpacedMono
   bool found = false;
   int countMons = 0;
   for (int i = 0; i < this->allMonomials.size; i ++) {
-    int theIndex = thePoly.theMonomials.GetIndex(this->allMonomials[i]);
+    int theIndex = thePoly.theMonomials.getIndex(this->allMonomials[i]);
     if (theIndex == - 1) {
       out << "<td" << extraStyle << ">" << "</td>";
       continue;

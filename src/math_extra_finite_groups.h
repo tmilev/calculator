@@ -1199,7 +1199,7 @@ public:
     }
     for (int i = 0; i < this->ownerGroup->theElements.size; i ++) {
       for (int j = 0; j < this->ownerGroup->theElements.size; j ++) {
-        if (repms[i] * repms[j] != repms[this->ownerGroup->theElements.GetIndex(
+        if (repms[i] * repms[j] != repms[this->ownerGroup->theElements.getIndex(
           this->ownerGroup->theElements[i] * this->ownerGroup->theElements[j])]
         ) {
           global.fatal << "Bad representation. " << global.fatal;
@@ -1701,8 +1701,8 @@ bool SubgroupData<someGroup, elementSomeGroup>::SameCosetAs(elementSomeGroup& g1
     return SameCosetAsByFormula(this, g1, g2);
   }
   this->ComputeCosets();
-  int g1i = this->theGroup->theElements.GetIndex(g1);
-  int g2i = this->theGroup->theElements.GetIndex(g2);
+  int g1i = this->theGroup->theElements.getIndex(g1);
+  int g2i = this->theGroup->theElements.getIndex(g2);
   for (int i = 0; i < this->cosets.size; i ++) {
     if (this->cosets[i].BSContains(g1i)) {
       if (this->cosets[i].BSContains(g2i)) {
@@ -1724,7 +1724,7 @@ int SubgroupData<someGroup, elementSomeGroup>::GetCosetId(elementSomeGroup& g) {
     if (!flagCosetSetsComputed) {
       this->ComputeCosets();
     }
-    gi = this->theGroup->theElements.GetIndex(g);
+    gi = this->theGroup->theElements.getIndex(g);
   }
   for (int i = 0; i < this->cosets.size; i ++) {
     if (this->SameCosetAsByFormula) {
@@ -2413,12 +2413,12 @@ std::ostream& operator<<(std::ostream& out, const UDPolynomial<coefficient>& p) 
 
 template <typename elementSomeGroup>
 int FiniteGroup<elementSomeGroup>::MultiplyElements(int indexLeft, int indexRight) const {
-  return this->theElements.GetIndex(this->theElements[indexLeft] * this->theElements[indexRight]);
+  return this->theElements.getIndex(this->theElements[indexLeft] * this->theElements[indexRight]);
 }
 
 template <typename elementSomeGroup>
 int FiniteGroup<elementSomeGroup>::Invert(int g) const {
-  return this->theElements.GetIndex(this->theElements[g].Inverse());
+  return this->theElements.getIndex(this->theElements[g].Inverse());
 }
 
 template <class elementSomeGroup>
@@ -2463,7 +2463,7 @@ bool FiniteGroup<elementSomeGroup>::GetWord(const elementSomeGroup& g, List<int>
   if (!this->flagWordsComputed) {
     this->ComputeAllElementsLargeGroup(true);
   }
-  int index = this->theElements.GetIndex(g);
+  int index = this->theElements.getIndex(g);
   if (index == - 1) {
     return false;
   }

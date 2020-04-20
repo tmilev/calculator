@@ -1019,7 +1019,7 @@ void SemisimpleSubalgebras::MakeEmptyCandidateSA(CandidateSSSubalgebra& output) 
   output.theSubalgebraNonEmbeddedDefaultScale =
   &this->theSubalgebrasNonDefaultCartanAndScale.GetValueCreateNoInit(theZeroCartan);
   output.indexNonEmbeddedMeNonStandardCartan =
-  this->theSubalgebrasNonDefaultCartanAndScale.GetIndex(theZeroCartan);
+  this->theSubalgebrasNonDefaultCartanAndScale.getIndex(theZeroCartan);
 }
 
 void SemisimpleSubalgebras::MakeCandidateSA(const DynkinType& input, CandidateSSSubalgebra& output) {
@@ -1030,7 +1030,7 @@ void SemisimpleSubalgebras::MakeCandidateSA(const DynkinType& input, CandidateSS
     needsInit = true;
   }
   output.theWeylNonEmbedded = &this->theSubalgebrasNonEmbedded->GetValueCreateNoInit(input).theWeyl;
-  output.indexNonEmbeddedMeStandard = this->theSubalgebrasNonEmbedded->GetIndex(input);
+  output.indexNonEmbeddedMeStandard = this->theSubalgebrasNonEmbedded->getIndex(input);
   if (needsInit) {
     output.theWeylNonEmbedded->MakeFromDynkinType(input);
   }
@@ -1189,7 +1189,7 @@ void CandidateSSSubalgebra::ComputeHsAndHsScaledToActByTwoFromComponents() {
   this->theSubalgebraNonEmbeddedDefaultScale->theWeyl.ComputeRho(true);
   this->theSubalgebraNonEmbeddedDefaultScale->ComputeChevalleyConstants();
   this->indexNonEmbeddedMeNonStandardCartan =
-  this->owner->theSubalgebrasNonDefaultCartanAndScale.GetIndex(cartanInComponentOrder);
+  this->owner->theSubalgebrasNonDefaultCartanAndScale.getIndex(cartanInComponentOrder);
   int counter = - 1;
   List<DynkinSimpleType> theTypes;
   this->theWeylNonEmbedded->theDynkinType.GetTypesWithMults(theTypes);
@@ -1203,7 +1203,7 @@ void CandidateSSSubalgebra::ComputeHsAndHsScaledToActByTwoFromComponents() {
 
 bool SemisimpleSubalgebras::SetUpParabolicInductionDataPrecomputedSA(CandidateSSSubalgebra& theCandidate) {
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::SetUpParabolicInductionDataPrecomputedSA");
-  int indexPrecomputed = this->theSubalgebras.GetIndex(theCandidate.theHs);
+  int indexPrecomputed = this->theSubalgebras.getIndex(theCandidate.theHs);
   if (indexPrecomputed == - 1)
     return false;
   if (
@@ -1599,7 +1599,7 @@ void DynkinType::GetDynkinIndicesSl2SubalgebrasSimpleType(
     precomputedDynkinIndicesSl2subalgebrasSimpleTypes.addOnTop(outputIndicesDefaultScale);
   }
   List<Rational>& outputIndicesDefaultScale = precomputedDynkinIndicesSl2subalgebrasSimpleTypes[
-    dynkinSimpleTypesWithComputedSl2Subalgebras.GetIndex(theTypeDefaultScale)
+    dynkinSimpleTypesWithComputedSl2Subalgebras.getIndex(theTypeDefaultScale)
   ];
   outputDynkinIndices.setExpectedSize(outputIndicesDefaultScale.size);
   outputDynkinIndices.Clear();
@@ -1898,7 +1898,7 @@ void SemisimpleSubalgebras::AddSubalgebraIfNewSetToStackTop(CandidateSSSubalgebr
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::AddSubalgebraIfNewSetToStackTop");
   this->CheckConsistencyHs();
   if (this->theSubalgebras.Contains(input.theHs)) {
-    input = this->theSubalgebras.theValues[this->theSubalgebras.GetIndex(input.theHs)];
+    input = this->theSubalgebras.theValues[this->theSubalgebras.getIndex(input.theHs)];
     if (!input.theWeylNonEmbedded->theDynkinType.IsEqualToZero() && input.indexInOwner == - 1) {
       global.fatal << "This is not supposed to happen: subalgebra of type "
       << input.theWeylNonEmbedded->theDynkinType.toString() << " has index in owner - 1. " << global.fatal;
@@ -3841,7 +3841,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart(
     this->GetPrimalWeightProjectionFundCoords(currentRoot, currentHWPrimal);
     theWeight.weightFundamentalCoordS = currentHWPrimal;
     this->thePrimalChaR.AddMonomial(theWeight, 1);
-    int theIndex = tempHWs.GetIndex(currentHWPrimal);
+    int theIndex = tempHWs.getIndex(currentHWPrimal);
     if (theIndex == - 1) {
       tempModules.setSize(tempModules.size + 1);
       tempModules.LastObject()->setSize(0);
@@ -6946,7 +6946,7 @@ void SemisimpleSubalgebras::HookUpCentralizers(bool allowNonPolynomialSystemFail
     << ". The subalgebra is of type " << currentSA.ToStringTypeAndHs() << ". ";
     theReport2.Report(reportStream2.str());
     currentSA.indexInOwner = i;
-    currentSA.indexIamInducedFrom = theCandidatePermutationHashed.GetIndex(currentSA.indexIamInducedFrom);
+    currentSA.indexIamInducedFrom = theCandidatePermutationHashed.getIndex(currentSA.indexIamInducedFrom);
     currentSA.indicesDirectSummandSuperAlgebra.setSize(0);
     currentSA.indexMaxSSContainer = - 1;
     for (int j = 0; j < this->theSubalgebras.theValues.size; j ++) {

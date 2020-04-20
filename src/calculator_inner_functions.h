@@ -446,7 +446,11 @@ public:
   static bool innerWeylDimFormula(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDecomposeCharGenVerma(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSplitFDpartB3overG2Init(
-    Calculator& theCommands, const Expression& input, Expression& output, branchingData& theG2B3Data, Expression& outputContext
+    Calculator& theCommands,
+    const Expression& input,
+    Expression& output,
+    branchingData& theG2B3Data,
+    ExpressionContext& outputContext
   );
   static bool innerDecomposeFDPartGeneralizedVermaModuleOverLeviPart(
     Calculator& theCommands, const Expression& input, Expression& output
@@ -471,7 +475,7 @@ public:
     Expression& output,
     branchingData& theG2B3data,
     int& desiredHeight,
-    Expression& outputContext
+    ExpressionContext& outputContext
   );
   static bool innerSplitFDpartB3overG2(Calculator& theCommands, const Expression& input, Expression& output);
 

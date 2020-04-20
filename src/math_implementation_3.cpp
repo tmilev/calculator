@@ -4735,7 +4735,7 @@ int PartFractions::AddRootAndSort(Vector<Rational>& theRoot) {
 }
 
 int PartFractions::getIndex(const Vector<Rational>& TheRoot) {
-  return this->startingVectors.GetIndex(TheRoot);
+  return this->startingVectors.getIndex(TheRoot);
 }
 
 int PartFractions::getIndexDoubleOfARoot(const Vector<Rational>& TheRoot) {
@@ -4975,7 +4975,7 @@ void DynkinType::GetTypesWithMults(List<DynkinSimpleType>& output) const {
   List<DynkinSimpleType> componentsSorted;
   this->GetSortedDynkinTypes(componentsSorted);
   for (int i = 0; i < componentsSorted.size; i ++) {
-    int theIndex = this->theMonomials.GetIndex(componentsSorted[i]);
+    int theIndex = this->theMonomials.getIndex(componentsSorted[i]);
     for (int j = 0; j < this->GetMult(theIndex); j ++) {
       output.addOnTop(componentsSorted[i]);
     }
@@ -5071,7 +5071,7 @@ void DynkinType::GetLettersTypesMults(
   List<DynkinSimpleType> componentsSorted;
   this->GetSortedDynkinTypes(componentsSorted);
   for (int i = 0; i < componentsSorted.size; i ++) {
-    int theIndex = this->theMonomials.GetIndex(componentsSorted[i]);
+    int theIndex = this->theMonomials.getIndex(componentsSorted[i]);
     if (outputLetters != nullptr) {
       outputLetters->addOnTop((*this)[theIndex].theLetter);
     }
@@ -5322,7 +5322,7 @@ void DynkinType::GetEpsilonMatrix(Matrix<Rational>& output) const {
   List<DynkinSimpleType> sortedMons;
   this->GetSortedDynkinTypes(sortedMons);
   for (int j = 0; j < sortedMons.size; j ++) {
-    int theIndex = this->theMonomials.GetIndex(sortedMons[j]);
+    int theIndex = this->theMonomials.getIndex(sortedMons[j]);
     int theMult = this->GetMult(theIndex);
     for (int k = 0; k < theMult; k ++) {
       DynkinSimpleType::GetEpsilonMatrix((*this)[theIndex].theLetter, (*this)[theIndex].theRank, curCartan);
@@ -5354,7 +5354,7 @@ void DynkinType::GetCartanSymmetric(Matrix<Rational>& output) const {
   List<DynkinSimpleType> sortedMons;
   this->GetSortedDynkinTypes(sortedMons);
   for (int j = 0; j < sortedMons.size; j ++) {
-    int theIndex = this->theMonomials.GetIndex(sortedMons[j]);
+    int theIndex = this->theMonomials.getIndex(sortedMons[j]);
     int mult = this->GetMult(theIndex);
     for (int k = 0; k < mult; k ++) {
       (*this)[theIndex].GetCartanSymmetric(curCartan);
@@ -5378,7 +5378,7 @@ void DynkinType::GetCartanSymmetricDefaultLengthKeepComponentOrder(Matrix<Ration
   this->GetSortedDynkinTypes(sortedMons);
   DynkinSimpleType currentType;
   for (int j = 0; j < sortedMons.size; j ++) {
-    int theIndex = this->theMonomials.GetIndex(sortedMons[j]);
+    int theIndex = this->theMonomials.getIndex(sortedMons[j]);
     int mult = this->GetMult(theIndex);
     currentType.MakeArbitrary(sortedMons[j].theLetter, sortedMons[j].theRank, 1);
     currentType.CartanSymmetricInverseScale = 1;//= currentType.GetDefaultCoRootLengthSquared(0);
@@ -6454,7 +6454,7 @@ void ElementWeylGroup::GetCycleStructure(
         this->owner->ActOn(*this, currentRoot, currentRoot)
       ) {
         currentCycleSize ++;
-        Explored[theRootSystem.GetIndex(currentRoot)] = true;
+        Explored[theRootSystem.getIndex(currentRoot)] = true;
       }
       outputIndexIsCycleSizeCoordinateIsCycleMult.AddMonomial(MonomialVector(currentCycleSize - 1), 1);
     }
@@ -7761,7 +7761,7 @@ std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorph
   if (!useAmbientIndices) {
     DisplayIndicesSimpleGenerators.setSize(this->simpleRootsInner.size);
     for (int i = 0; i < this->simpleRootsInner.size; i ++) {
-      DisplayIndicesSimpleGenerators[i] = this->AmbientWeyl->RootsOfBorel.GetIndex(this->simpleRootsInner[i]) + 1;
+      DisplayIndicesSimpleGenerators[i] = this->AmbientWeyl->RootsOfBorel.getIndex(this->simpleRootsInner[i]) + 1;
     }
   }
   out << "\\xymatrix{";
@@ -7792,7 +7792,7 @@ std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorph
       }
       for (int k = 0; k < arrows[i][j].size; k ++) {
         out << " \\ar[d";
-        int indexInLayer = Layers[i + 1].GetIndex(arrows[i][j][k]);
+        int indexInLayer = Layers[i + 1].getIndex(arrows[i][j][k]);
         if (indexInLayer == - 1) {
           global.fatal << "Negative index in layer ... " << global.fatal;
         }
@@ -7859,7 +7859,7 @@ std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorph
       int indexOther = Layers[i][j];
       for (int k = 0; k < this->simpleRootsInner.size; k ++) {
         this->AmbientWeyl->ReflectBetaWRTAlpha(this->simpleRootsInner[k], orbit[indexOther], false, tempRoot);
-        int index = orbit.GetIndex(tempRoot);
+        int index = orbit.getIndex(tempRoot);
         if (index == - 1) {
           global.fatal << "Negative index not allowed. " << global.fatal;
         }
@@ -7884,7 +7884,7 @@ void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::t
   latexFormat.flagUseLatex = true;
   bool isGood = true;
   for (int i = 0; i < this->simpleRootsInner.size; i ++) {
-    DisplayIndicesSimpleGenerators[i] = this->AmbientWeyl->RootsOfBorel.GetIndex(this->simpleRootsInner[i]) + 1;
+    DisplayIndicesSimpleGenerators[i] = this->AmbientWeyl->RootsOfBorel.getIndex(this->simpleRootsInner[i]) + 1;
     if (DisplayIndicesSimpleGenerators[i] == 0) {
       isGood = false;
       break;
@@ -7988,7 +7988,7 @@ std::string SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorph
   for (int i = 0; i < this->RepresentativesQuotientAmbientOrder.size; i ++) {
     tempRoot = this->AmbientWeyl->rho;
     this->AmbientWeyl->ActOnRootByGroupElement(
-      this->AmbientWeyl->theGroup.theElements.GetIndex(this->RepresentativesQuotientAmbientOrder[i]), tempRoot, false, false
+      this->AmbientWeyl->theGroup.theElements.getIndex(this->RepresentativesQuotientAmbientOrder[i]), tempRoot, false, false
     );
   }
   arrows.setSize(Layers.size);
@@ -8286,7 +8286,7 @@ void KLpolys::GeneratePartialBruhatOrder() {
       tempRoot = (*this)[i];
       tempRoot2 = (*this)[i];
       this->TheWeylGroup->SimpleReflectionRoot(j, tempRoot, false, false);
-      int x = this->GetIndex(tempRoot);
+      int x = this->getIndex(tempRoot);
       if (x == - 1) {
         global.fatal << "This is a programming error: something wrong has happened. "
         << "A weight that is supposed to "
@@ -8890,7 +8890,7 @@ void WeylGroupData::TransformToSimpleBasisGeneratorsWRTh(Vectors<Rational>& theG
           theGens.RemoveIndexSwapWithLast(j);
           reductionOccured = true;
         }
-        if (this->RootSystem.GetIndex(tempRoot) != - 1) {
+        if (this->RootSystem.getIndex(tempRoot) != - 1) {
           if (!this->IsPositiveOrPerpWRTh(tempRoot, theH)) {
             tempRoot.Minus();
             theGens[j] = tempRoot;
@@ -8923,7 +8923,7 @@ void WeylGroupData::ComputeExtremeRootInTheSameKMod(
       } else {
         tempRoot -= inputSimpleBasisK[i];
       }
-      if (this->RootSystem.GetIndex(tempRoot) != - 1) {
+      if (this->RootSystem.getIndex(tempRoot) != - 1) {
         output = tempRoot;
         FoundHigher = true;
       }
@@ -9495,7 +9495,7 @@ void QuasiPolynomial::AddLatticeShift(
 ) {
   Vector<Rational> theShift = inputShift;
   this->AmbientLatticeReduced.ReduceVector(theShift);
-  int index = this->LatticeShifts.GetIndex(theShift);
+  int index = this->LatticeShifts.getIndex(theShift);
   if (index == - 1) {
     index = this->LatticeShifts.size;
     this->LatticeShifts.addOnTop(theShift);
@@ -10159,7 +10159,7 @@ bool slTwoInSlN::ComputeInvariantsOfDegree(
         this->theF.ActOnMonomialAsDifferentialOperator(basisMonsZeroWeight[k], tempP);
       }
       for (int j = 0; j < basisMonsAll.size(); j ++) {
-        int indexInResult = tempP.theMonomials.GetIndex(basisMonsAll[j]);
+        int indexInResult = tempP.theMonomials.getIndex(basisMonsAll[j]);
         int currentRow = l * basisMonsAll.size() + j;
         if (indexInResult == - 1) {
           tempMat.elements[currentRow][k] = 0;

@@ -507,7 +507,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
   const Expression& input,
   Expression& output,
   Vectors<Polynomial<Rational> >& theHws,
-  Expression& hwContext,
+  ExpressionContext& hwContext,
   Selection& selInducing,
   SemisimpleLieAlgebra* owner,
   bool AllGenerators,
@@ -536,12 +536,12 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
   theUEformat.flagUseLatex = true;
   theUEformat.chevalleyGgeneratorLetter = "g";
   theUEformat.chevalleyHgeneratorLetter = "h";
-  hwContext.ContextGetFormatExpressions(theUEformat);
+  hwContext.getFormat(theUEformat);
   theUEformat.polyDefaultLetter = exponentVariableLetter == nullptr  ? "a" : *exponentVariableLetter;
   theUEformat.MaxLineLength = 178;
   theUEformat.NumAmpersandsPerNewLineForLaTeX = 2;
   theWeylFormat.NumAmpersandsPerNewLineForLaTeX = 2;
-  hwContext.ContextGetFormatExpressions(theWeylFormat);
+  hwContext.getFormat(theWeylFormat);
   List<ElementSemisimpleLieAlgebra<Rational> > theGeneratorsItry;
   if (!AllGenerators) {
     for (int j = 0; j < theSSalgebra.GetRank(); j ++) {
@@ -571,7 +571,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
   List<ModuleSSalgebra<RationalFunction > > theMods;
   theMods.setSize(theHws.size);
   Vector<RationalFunction> tempV;
-  int numStartingVars = hwContext.ContextGetNumContextVariables();
+  int numStartingVars = hwContext.numberOfVariables();
   std::stringstream reportFourierTransformedCalculatorCommands, reportCalculatorCommands;
   long long totalAdditions = 0;
   long long currentAdditions = 0;
@@ -600,7 +600,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner(
       std::string theFinalPartialLetter = (partialLetter == nullptr) ? "\\partial" : *partialLetter;
       for (int k = numStartingVars; k < theUEformat.polyAlphabeT.size; k ++) {
         std::stringstream tmpStream, tempstream2, tempstream3, tempStream4;
-        tmpStream << theUEformat.polyDefaultLetter << "_{" << k-hwContext.ContextGetNumContextVariables() + 1 << "}";
+        tmpStream << theUEformat.polyDefaultLetter << "_{" << k - hwContext.numberOfVariables() + 1 << "}";
         theUEformat.polyAlphabeT[k] = tmpStream.str();
         tempstream2 << theFinalXletter << "_{" << k-numStartingVars + 1 << "}";
         tempstream3 << theFinalXletter << "_" << k-numStartingVars + 1;
@@ -735,7 +735,7 @@ bool Calculator::innerHWVCommon(
   Expression& output,
   Vector<RationalFunction>& highestWeightFundCoords,
   Selection& selectionParSel,
-  Expression& hwContext,
+  ExpressionContext& hwContext,
   SemisimpleLieAlgebra* owner,
   bool Verbose
 ) {
@@ -922,13 +922,12 @@ bool Calculator::innerGetChevGen(
   theElt.MakeGenerator(theIndex, *theSSalg.content);
   ElementUniversalEnveloping<RationalFunction> theUE;
   theUE.AssignElementLieAlgebra(theElt, *theSSalg.content);
-  Expression theContext;
-  int indexInOwner = theCommands.theObjectContainer.semisimpleLieAlgebras.GetIndex(
+  ExpressionContext context(theCommands);
+  int indexInOwner = theCommands.theObjectContainer.semisimpleLieAlgebras.getIndex(
     theSSalg.content->theWeyl.theDynkinType
   );
-  theContext.ContextMakeContextSSLieAlgebrA(indexInOwner, theCommands);
-  output.AssignValueWithContext(theUE, theContext, theCommands);
-  return true;
+  context.setIndexAmbientSemisimpleLieAlgebra(indexInOwner);
+  return output.AssignValueWithContext(theUE, context, theCommands);
 }
 
 bool Calculator::innerGetCartanGen(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -963,9 +962,9 @@ bool Calculator::innerGetCartanGen(Calculator& theCommands, const Expression& in
   theElt.MakeHgenerator(theH, *theSSalg.content);
   ElementUniversalEnveloping<RationalFunction> theUE;
   theUE.AssignElementLieAlgebra(theElt, *theSSalg.content);
-  Expression theContext;
-  int theAlgIndex = theCommands.theObjectContainer.semisimpleLieAlgebras.GetIndex(theSSalg.content->theWeyl.theDynkinType);
-  theContext.ContextMakeContextSSLieAlgebrA(theAlgIndex, theCommands);
+  ExpressionContext theContext(theCommands);
+  int theAlgIndex = theCommands.theObjectContainer.semisimpleLieAlgebras.getIndex(theSSalg.content->theWeyl.theDynkinType);
+  theContext.setIndexAmbientSemisimpleLieAlgebra(theAlgIndex);
   return output.AssignValueWithContext(theUE, theContext, theCommands);
 }
 
@@ -1061,7 +1060,7 @@ bool Calculator::functionWriteToHDOrPrintSSLieAlgebra(
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   }
   tempSSpointer.content->CheckConsistency();
-  tempSSpointer.context.context.CheckConsistency();
+  tempSSpointer.context.checkInitialization();
   SemisimpleLieAlgebra& theSSalgebra = *tempSSpointer.content;
   std::string result = theSSalgebra.ToHTMLCalculator(Verbose, writeToHD, theCommands.flagWriteLatexPlots);
   return output.AssignValue(result, theCommands);
@@ -1434,7 +1433,7 @@ bool Calculator::GetVectorLargeIntFromFunctionArguments(const Expression& input,
 bool Calculator::GetVectoRInt(const Expression& input, List<int>& output) {
   MacroRegisterFunctionWithName("Calculator::GetVectoRInt");
   Vector<Rational> theRats;
-  if (!this->GetVectoR(input, theRats)) {
+  if (!this->GetVector(input, theRats)) {
     return false;
   }
   output.initializeFillInObject(theRats.size,0);
@@ -2087,8 +2086,8 @@ bool Expression::IsEqualToMathematically(const Expression& other) const {
 
 SemisimpleLieAlgebra* Expression::GetAmbientSSAlgebraNonConstUseWithCaution() const {
   this->CheckInitialization();
-  Expression myContext = this->GetContext();
-  int indexSSalg = myContext.ContextGetIndexAmbientSSalg();
+  ExpressionContext myContext = this->GetContext();
+  int indexSSalg = myContext.indexAmbientSemisimpleLieAlgebra;
   if (indexSSalg == - 1) {
     return nullptr;
   }
@@ -2112,7 +2111,7 @@ Function& Calculator::GetFunctionHandlerFromNamedRule(const std::string& inputNa
 }
 
 int Calculator::AddOperationNoRepetitionOrReturnIndexFirst(const std::string& theOpName) {
-  int result = this->operations.GetIndex(theOpName);
+  int result = this->operations.getIndex(theOpName);
   if (result == - 1) {
     result = this->operations.size();
     this->operations.GetValueCreate(theOpName);
@@ -2179,7 +2178,7 @@ void Calculator::AddOperationBinaryInnerHandlerWithTypes(
   const std::string& inputCalculatorIdentifier,
   const Function::Options& options
 ) {
-  int indexOp = this->operations.GetIndex(theOpName);
+  int indexOp = this->operations.getIndex(theOpName);
   if (indexOp == - 1) {
     indexOp = this->operations.size();
     this->operations.GetValueCreate(theOpName);
@@ -2252,12 +2251,12 @@ void Calculator::AddOperationHandler(
   if (opArgumentListIgnoredForTheTimeBeing != "") {
     global.fatal << "This section of code is not implemented yet. Crashing to let you know. " << global.fatal;
   }
-  int indexOp = this->operations.GetIndex(theOpName);
+  int indexOp = this->operations.getIndex(theOpName);
   if (indexOp == - 1) {
     indexOp = this->operations.size();
     this->operations.GetValueCreate(theOpName);
   }
-  int indexParentOpThatBansHandler = this->operations.GetIndex(parentOpThatBansHandler);
+  int indexParentOpThatBansHandler = this->operations.getIndex(parentOpThatBansHandler);
   Function theFun(
     *this,
     indexOp,
@@ -2987,7 +2986,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperators(
     input,
     output,
     theHWs,
-    theSSalgebra.context.context,
+    theSSalgebra.context,
     theParSel,
     theSSalgebra.content,
     AllGenerators,
@@ -3081,7 +3080,7 @@ bool Expression::MergeContextsMyAruments(Expression& output, std::stringstream* 
       return false;
     }
   }
-  Expression commonContext = (*this)[1].GetContext();
+  ExpressionContext commonContext = (*this)[1].GetContext();
   bool needsMerge = false;
   for (int i = 2; i < this->size(); i ++) {
     if (!(commonContext == (*this)[i].GetContext())) {
@@ -3096,11 +3095,11 @@ bool Expression::MergeContextsMyAruments(Expression& output, std::stringstream* 
   for (int i = 2; i < this->size(); i ++) {
     if (!(*this)[i].IsBuiltInTypE()) {
       if (commentsOnFailure != nullptr) {
-        *commentsOnFailure << "<hr>Failed to merge contexts of arguments: an argument is not of built-in type";
+        *commentsOnFailure << "<hr>Failed to merge contexts of arguments: an argument is not of built-in type. ";
       }
       return false;
     }
-    if (!commonContext.ContextMergeContexts(commonContext, (*this)[i].GetContext(), commonContext)) {
+    if (!commonContext.mergeContexts((*this)[i].GetContext(), commonContext)) {
       *this->owner << "<hr>Failed to merge context " << commonContext.toString()
       << " with " << (*this)[i].GetContext().toString();
       return false;
@@ -3121,25 +3120,25 @@ bool Expression::MergeContextsMyAruments(Expression& output, std::stringstream* 
 }
 
 bool Calculator::ConvertExpressionsToCommonContext(
-  List<Expression>& inputOutputEs, Expression* inputOutputStartingContext
+  List<Expression>& inputOutputEs, ExpressionContext* inputOutputStartingContext
 ) {
   MacroRegisterFunctionWithName("Calculator::ConvertExpressionsToCommonContext");
-  Expression commonContext;
-  commonContext.MakeEmptyContext(*this);
+  ExpressionContext commonContext(*this);
   if (inputOutputStartingContext != nullptr) {
-    if (inputOutputStartingContext->IsContext()) {
-      commonContext = *inputOutputStartingContext;
-    }
+    commonContext = *inputOutputStartingContext;
   }
   for (int i = 0; i < inputOutputEs.size; i ++) {
     if (!inputOutputEs[i].IsBuiltInTypE()) {
-      return *this << "<hr>Possible programming error: calling ConvertExpressionsToCommonContext "
+      return
+      *this << "<hr>Possible programming error: "
+      << "calling ConvertExpressionsToCommonContext "
       << "on expressions without context. "
       << global.fatal.GetStackTraceEtcErrorMessageHTML();
     }
-    if (!commonContext.ContextMergeContexts(commonContext, inputOutputEs[i].GetContext(), commonContext)) {
+    if (!commonContext.mergeContexts(inputOutputEs[i].GetContext(), commonContext)) {
       return *this << "<hr>Failed to merge context "
-      << commonContext.toString() << " with " << inputOutputEs[i].GetContext().toString();
+      << commonContext.toString() << " with "
+      << inputOutputEs[i].GetContext().toString();
     }
   }
   for (int i = 0; i < inputOutputEs.size; i ++) {

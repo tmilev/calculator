@@ -171,7 +171,7 @@ bool Database::FallBack::FindIndexOneNoLocksMinusOneNotFound(
     }
     return false;
   }
-  int currentLocationIndex = currentIndex.locations.GetIndex(query.value.theString);
+  int currentLocationIndex = currentIndex.locations.getIndex(query.value.theString);
   if (currentLocationIndex == - 1) {
     if (commentsOnNotFound != nullptr ) {
       *commentsOnNotFound << "Entry "

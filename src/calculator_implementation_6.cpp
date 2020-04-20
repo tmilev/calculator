@@ -1356,7 +1356,7 @@ bool CalculatorFunctions::innerPolynomialDivisionQuotient(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("Calculator::innerPolynomialDivisionQuotient");
-  Expression theContext;
+  ExpressionContext theContext(theCommands);
   Vector<Polynomial<AlgebraicNumber> > polynomialsRational;
   if (!theCommands.GetListPolynomialVariableLabelsLexicographic(input, polynomialsRational, theContext)) {
     return output.MakeError("Failed to extract list of polynomials. ", theCommands);
@@ -2606,10 +2606,11 @@ bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
   if (!thePolyE.IsOfType(&thePoly)) {
     return theCommands << "Could not convert to polynomial: " << thePolyE.toString();
   }
-  Expression curveContext = thePolyE.GetContext();
-  if (curveContext.ContextGetNumContextVariables() != 2) {
-    return theCommands << "Expected 2 context variables in " << theCurveE.toString() << ", got: "
-    << curveContext.ContextGetPolynomialVariables().toString();
+  ExpressionContext curveContext = thePolyE.GetContext();
+  if (curveContext.numberOfVariables() != 2) {
+    return theCommands << "Expected 2 context variables in "
+    << theCurveE.toString() << ", got: "
+    << curveContext.variables.toString();
   }
   MonomialP leadingMonomial;
   List<MonomialP>::Comparator monomialOrder(MonomialP::greaterThan_totalDegree_rightSmallerWins);
@@ -2621,11 +2622,12 @@ bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
   }
   Expression xE = xDefE[1];
   Expression yE = yDefE[1];
-  if (curveContext.ContextGetContextVariable(indexX) != xE) {
+  if (curveContext.getVariable(indexX) != xE) {
     MathRoutines::swap(xE, yE);
   }
-  if (curveContext.ContextGetContextVariable(indexY) != yE) {
-    return theCommands << "Curve variable " << curveContext.ContextGetContextVariable(1).toString()
+  if (curveContext.getVariable(indexY) != yE) {
+    return theCommands << "Curve variable "
+    << curveContext.getVariable(1).toString()
     << " not equal to " << yE.toString();
   }
   theCommands << "Created elliptic curve " << thePolyE.toString()
@@ -2666,11 +2668,9 @@ bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
     return theCommands << "It appears your curve: " << theCurveE.toString()
     << " is not of the form y^2 = x^3 + ax + b. ";
   }
-  Expression theContext, thePolyVars;
-  theContext.MakeEmptyContext(theCommands);
-  thePolyVars.MakeXOX(theCommands, theCommands.opPolynomialVariables(), xE, yE);
-  thePolyVars.AddChildOnTop(input[2]);
-  theContext.AddChildOnTop(thePolyVars);
+  ExpressionContext theContext(theCommands);
+  theContext.variables.addOnTop(xE);
+  theContext.variables.addOnTop(yE);
   if (isRational) {
     return output.AssignValueWithContext(eltRational, theContext, theCommands);
   }

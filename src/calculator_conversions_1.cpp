@@ -590,7 +590,7 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(
   SemisimpleLieAlgebra& currentNonEmbededSA =
   owner.theSubalgebrasNonEmbedded->GetValueCreateNoInit(outputSubalgebra.theWeylNonEmbedded->theDynkinType);
   outputSubalgebra.indexNonEmbeddedMeStandard =
-  owner.theSubalgebrasNonEmbedded->GetIndex(outputSubalgebra.theWeylNonEmbedded->theDynkinType);
+  owner.theSubalgebrasNonEmbedded->getIndex(outputSubalgebra.theWeylNonEmbedded->theDynkinType);
   currentNonEmbededSA.theWeyl.ComputeRho(true);
   outputSubalgebra.theWeylNonEmbedded->ComputeRho(true); //<- this line may be unnecessary, the
   //two Weyl groups may coincide depending on some implementation decisions I am about to take
@@ -784,7 +784,7 @@ bool CalculatorConversions::innerExpressionFromMonomialUE(
   Calculator& theCommands,
   const MonomialUniversalEnveloping<RationalFunction>& input,
   Expression& output,
-  Expression* inputContext
+  ExpressionContext* inputContext
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromMonomialUE");
   if (input.IsConstant()) {
@@ -808,7 +808,7 @@ bool CalculatorConversions::innerExpressionFromUE(
   Calculator& theCommands,
   const ElementUniversalEnveloping<RationalFunction>& input,
   Expression& output,
-  Expression* inputContext
+  ExpressionContext* inputContext
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromUE");
   LinearCombination<Expression, RationalFunction> theUEE;
@@ -871,7 +871,7 @@ bool CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
   ElementSemisimpleLieAlgebra<AlgebraicNumber> currentElt;
   theChevGen.owner = &owner;
   output.makeZero();
-  Expression theContext = polyFormE.GetContext();
+  ExpressionContext theContext = polyFormE.GetContext();
   for (int j = 0; j < polyForm.size(); j ++) {
     const MonomialP& currentMon = polyForm[j];
     int theGenIndex = 0;
@@ -879,7 +879,7 @@ bool CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
       return theCommands << "<hr>Failed to convert semisimple Lie algebra input to linear poly: "
       << input.toString() << ".<hr>";
     }
-    Expression singleChevGenE = theContext.ContextGetContextVariable(theGenIndex);
+    Expression singleChevGenE = theContext.getVariable(theGenIndex);
     if (!singleChevGenE.StartsWith(theCommands.opUnderscore(), 3)) {
       return theCommands << "<hr>Failed to convert: "
       << singleChevGenE.toString()
@@ -948,10 +948,8 @@ bool CalculatorConversions::innerElementUE(
     return theCommands << "<hr>Failed to convert " << input[1].toString()
     << " to polynomial. Instead I got " << polyE.toString() << ". <hr>";
   }
-  Expression theContext = polyE.GetContext();
-  Expression outputPolyVars;
-  outputPolyVars.reset(theCommands, 1);
-  outputPolyVars.AddChildAtomOnTop(theCommands.opPolynomialVariables());
+  ExpressionContext theContext = polyE.GetContext();
+  HashedList<Expression> polynomialVariables;
   for (int j = 0; j < theP.size(); j ++) {
     const MonomialP& currentMon = theP[j];
     currentSummand.MakeConst(theP.coefficients[j], owner);
@@ -967,9 +965,10 @@ bool CalculatorConversions::innerElementUE(
       if (thePower == 0) {
         continue;
       }
-      Expression singleChevGenE = theContext.ContextGetContextVariable(i);
+      Expression singleChevGenE = theContext.getVariable(i);
       if (!singleChevGenE.IsListNElements(2)) {
-        return theCommands << "<hr>Failed to convert " << input[1].toString() << " to polynomial.<hr>";
+        return theCommands << "<hr>Failed to convert "
+        << input[1].toString() << " to polynomial.<hr>";
       }
       std::string theLetter;
       if (
@@ -1006,14 +1005,8 @@ bool CalculatorConversions::innerElementUE(
         currentMultiplicand.RaiseToPower(thePower);
         currentSummand*= currentMultiplicand;
       } else {
-        int varIndex = outputPolyVars.GetIndexChild(singleChevGenE);
-        if (varIndex == - 1) {
-          outputPolyVars.AddChildOnTop(singleChevGenE);
-          varIndex = outputPolyVars.children.size - 1;
-        } else {
-          varIndex --;
-        }
-        currentMultiplicandRFpartMon.setVariable(varIndex, thePower);
+        int variableIndex = polynomialVariables.AddNoRepetitionOrReturnIndexFirst(singleChevGenE);
+        currentMultiplicandRFpartMon.setVariable(variableIndex, thePower);
       }
     }
     currentPMultiplicand.makeZero();
@@ -1022,13 +1015,9 @@ bool CalculatorConversions::innerElementUE(
     currentSummand *= currentMultiplicandRFpart;
     outputUE += currentSummand;
   }
-  Expression outputContext;
-  outputContext.MakeEmptyContext(theCommands);
-  outputContext.AddChildOnTop(outputPolyVars);
-  outputContext.ContextSetSSLieAlgebrA(
-    theCommands.theObjectContainer.semisimpleLieAlgebras.GetIndex(owner.theWeyl.theDynkinType),
-    theCommands
-  );
+  ExpressionContext outputContext(theCommands);
+  outputContext.setVariables(polynomialVariables);
+  outputContext.setAmbientSemisimpleLieAlgebra(owner);
   return output.AssignValueWithContext(outputUE, outputContext, theCommands);
 }
 
@@ -1071,18 +1060,25 @@ bool CalculatorConversions::innerExpressionFromUE(Calculator& theCommands, const
   return CalculatorConversions::innerExpressionFromUE(theCommands, theUE, output);
 }
 
-bool CalculatorConversions::innerExpressionFromRF(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorConversions::innerExpressionFromRF(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromRF");
   if (!input.IsOfType<RationalFunction>()) {
     return false;
   }
-  const RationalFunction& theRF= input.GetValue<RationalFunction>();
-  Expression theContext = input.GetContext();
-  return CalculatorConversions::innerExpressionFromRF(theCommands, theRF, output, &theContext);
+  const RationalFunction& theRF = input.GetValue<RationalFunction>();
+  ExpressionContext context = input.GetContext();
+  return CalculatorConversions::innerExpressionFromRF(
+    theCommands, theRF, output, &context
+  );
 }
 
 bool CalculatorConversions::innerExpressionFromRF(
-  Calculator& theCommands, const RationalFunction& input, Expression& output, Expression* inputContext
+  Calculator& theCommands,
+  const RationalFunction& input,
+  Expression& output,
+  ExpressionContext* inputContext
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromRF");
   Rational aConst;
@@ -1139,7 +1135,7 @@ bool CalculatorConversions::functionRationalFunction(
     }
     if (leftE.IsError() || rightE.IsError()) {
       return theCommands << "<hr> Conversion of " << input[1].toString()
-      << " and " << input[2].toString() << "  returned error(s): "
+      << " and " << input[2].toString() << " returned error(s): "
       << leftE.toString() << " and " << rightE.toString();
     }
     intermediate.AddChildOnTop(input[0]);
@@ -1177,8 +1173,10 @@ bool CalculatorConversions::functionRationalFunction(
       theRF.RaiseToPower(theSmallPower);
       return output.AssignValueWithContext(theRF, leftE.GetContext(), theCommands);
     }
-    theCommands << "<hr>Warning: failed to raise " << input[1].toString() << " to power " << input[2].toString()
-    << ": failed to convert the power to small integer. I am treating " << input.toString()
+    theCommands << "<hr>Warning: failed to raise "
+    << input[1].toString() << " to power " << input[2].toString()
+    << ": failed to convert the power to small integer. "
+    << "I am treating " << input.toString()
     << " as a single variable: please make sure that is what you want.";
   }
   if (input.IsOfType<RationalFunction>()) {
@@ -1197,8 +1195,8 @@ bool CalculatorConversions::functionRationalFunction(
       return tempE.ConvertInternally<RationalFunction> (output);
     }
   }
-  Expression theContext;
-  theContext.ContextMakeContextWithOnePolyVar(theCommands, input);
+  ExpressionContext theContext(theCommands);
+  theContext.makeOneVariable(input);
   RationalFunction theRF;
   theRF.MakeOneLetterMoN(0, 1);
   return output.AssignValueWithContext(theRF, theContext, theCommands);
@@ -1316,17 +1314,17 @@ bool CalculatorConversions::functionMatrixRationalFunction(
 ) {
   MacroRegisterFunctionWithName("CalculatorConversions::functionMatrixRationalFunction");
   Matrix<RationalFunction> outputMat;
-  Expression ContextE;
+  ExpressionContext context(theCommands);
   if (!theCommands.functionGetMatrix(
     input,
     outputMat,
-    &ContextE,
+    &context,
     - 1,
     CalculatorConversions::functionRationalFunction
   )) {
     return theCommands << "<hr>Failed to get matrix of rational functions. ";
   }
-  output.AssignMatrix(outputMat, theCommands, &ContextE);
+  output.AssignMatrix(outputMat, theCommands, &context);
   output.CheckConsistency();
   return true;
 }
@@ -1423,5 +1421,5 @@ bool CalculatorConversions::innerPolynomialModuloInteger(
   ElementZmodP::convertModuloIntegerAfterScalingToIntegral(
     polynomial.content, converted, theModulus.value
   );
-  return output.AssignValueWithContext(converted, polynomial.context.context, theCommands);
+  return output.AssignValueWithContext(converted, polynomial.context, theCommands);
 }

@@ -811,7 +811,7 @@ bool GroebnerBasisComputation<coefficient>::HasImpliedSubstitutions(
     tempP = inputSystem[i];
     for (int j = 0; j < numVars; j ++) {
       tempM.MakeEi(j, 1, numVars);
-      int indexTempM = tempP.theMonomials.GetIndex(tempM);
+      int indexTempM = tempP.theMonomials.getIndex(tempM);
       if (indexTempM == - 1) {
         continue;
       }

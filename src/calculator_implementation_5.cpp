@@ -84,7 +84,7 @@ void MeshTriangles::PlotGrid(int theColor) {
 }
 
 double MeshTriangles::GetValueAtPoint(const Vector<double>& thePoint) {
-  int theIndex = this->theEvaluatedPoints.GetIndex(thePoint);
+  int theIndex = this->theEvaluatedPoints.getIndex(thePoint);
   if (theIndex != - 1) {
     return this->theEvaluatedPoints.theValues[theIndex];
   }
@@ -336,7 +336,7 @@ bool Calculator::GetVectorDoubles(
   Vector<double>& output,
   int DesiredDimensionNonMandatory
 ) {
-  return this->GetVectoR(
+  return this->GetVector(
     input,
     output,
     nullptr,
@@ -2162,7 +2162,7 @@ bool CalculatorFunctions::innerPlotSurface(Calculator& theCommands, const Expres
   }
   for (int i = 1; i < input.size(); i ++) {
     if (input[i].StartsWith(theCommands.opIn(), 3)) {
-      int theIndex = thePlot.variablesInPlay.GetIndex(input[i][1]);
+      int theIndex = thePlot.variablesInPlay.getIndex(input[i][1]);
       if (theIndex < 0 || theIndex > 2) {
         // theIndex > 2 should never happen
         continue;
@@ -2250,9 +2250,11 @@ bool CalculatorFunctions::innerPolynomialDivisionRemainder(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("Calculator::innerPolynomialDivisionRemainder");
-  Expression theContext;
+  ExpressionContext theContext(theCommands);
   Vector<Polynomial<AlgebraicNumber> > polynomialsRational;
-  if (!theCommands.GetListPolynomialVariableLabelsLexicographic(input, polynomialsRational, theContext)) {
+  if (!theCommands.GetListPolynomialVariableLabelsLexicographic(
+    input, polynomialsRational, theContext
+  )) {
     return output.MakeError("Failed to extract list of polynomials. ", theCommands);
   }
   GroebnerBasisComputation<AlgebraicNumber> theGB;
@@ -2327,7 +2329,7 @@ bool CalculatorFunctions::innerPolynomialDivisionVerbose(
   List<MonomialP>::Comparator* theMonOrder
 ) {
   MacroRegisterFunctionWithName("Calculator::innerPolynomialDivisionVerbose");
-  Expression theContext;
+  ExpressionContext theContext(theCommands);
   Vector<Polynomial<AlgebraicNumber> > polynomialsRational;
   if (!theCommands.GetListPolynomialVariableLabelsLexicographic(
     input, polynomialsRational, theContext
@@ -2352,7 +2354,7 @@ bool CalculatorFunctions::innerPolynomialDivisionVerbose(
     theGB.thePolynomialOrder.theMonOrder = *theMonOrder;
   }
   theGB.RemainderDivisionByBasis(polynomialsRational[0], &theGB.remainderDivision, - 1);
-  theContext.ContextGetFormatExpressions(theGB.theFormat);
+  theContext.getFormat(theGB.theFormat);
   theGB.theFormat.flagUseLatex = true;
   theGB.theFormat.flagUseFrac = true;
   std::stringstream latexOutput;
@@ -2393,7 +2395,7 @@ std::string GroebnerBasisComputation<coefficient>::GetSpacedMonomialsWithHighlig
     std::stringstream highlightTailStream;
     MonomialP tempM;
     tempM.makeOne();
-    int monIndex = this->allMonomials.GetIndex(tempM);
+    int monIndex = this->allMonomials.getIndex(tempM);
     if (slidesAdditionalHighlight != nullptr && monIndex != - 1) {
       if ((*slidesAdditionalHighlight)[monIndex] > 0) {
         highlightHeadStream << "{ \\only<"
@@ -2413,7 +2415,7 @@ std::string GroebnerBasisComputation<coefficient>::GetSpacedMonomialsWithHighlig
     return out.str();
   }
   for (int i = 0; i < this->allMonomials.size; i ++) {
-    int theIndex = thePoly.theMonomials.GetIndex(this->allMonomials[i]);
+    int theIndex = thePoly.theMonomials.getIndex(this->allMonomials[i]);
     if (theIndex == - 1) {
       if (useColumnSeparator) {
         if (i != this->allMonomials.size - 1) {
@@ -2521,7 +2523,7 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
     }
   }
   for (int i = 0; i < this->intermediateHighlightedMons.GetElement()[remainderIndex].size; i ++) {
-    int theMonIndex = this->allMonomials.GetIndex(
+    int theMonIndex = this->allMonomials.getIndex(
       this->intermediateHighlightedMons.GetElement()[remainderIndex][i]
     );
     this->additionalHighlightRemainders[remainderIndex][theMonIndex] = currentSlideNumber;
@@ -2531,7 +2533,7 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
   }
   MonomialP constMon;
   constMon.makeOne();
-  int zeroMonIndex = this->allMonomials.GetIndex(constMon);
+  int zeroMonIndex = this->allMonomials.getIndex(constMon);
   if (this->intermediateRemainders.GetElement()[remainderIndex].IsEqualToZero()) {
     this->additionalHighlightRemainders[remainderIndex][zeroMonIndex] = currentSlideNumber;
     this->additionalHighlightFinalRemainder[zeroMonIndex] = currentSlideNumber;
@@ -2557,7 +2559,7 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
   int indexCurrentDivisorLeadingMoN = currentDivisor.GetIndexLeadingMonomial(
     &divisorLeadingMonomial, nullptr, &this->thePolynomialOrder.theMonOrder
   );
-  int indexCurrentDivisorLeadingMonInAllMons = this->allMonomials.GetIndex(
+  int indexCurrentDivisorLeadingMonInAllMons = this->allMonomials.getIndex(
     divisorLeadingMonomial
   );
   MonomialP maxMonCurrentRemainder;
@@ -2565,7 +2567,7 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
   currentRemainder.GetIndexLeadingMonomial(
     &maxMonCurrentRemainder, &leadingCFCurrentRemainder, &this->thePolynomialOrder.theMonOrder
   );
-  int indexCurrentRemainderLeadingMonInAllMons = this->allMonomials.GetIndex(maxMonCurrentRemainder);
+  int indexCurrentRemainderLeadingMonInAllMons = this->allMonomials.getIndex(maxMonCurrentRemainder);
   this->highlightMonsDivisors[indexCurrentDivisor][indexCurrentDivisorLeadingMonInAllMons].addOnTop(currentSlideNumber);
   this->highlightMonsRemainders[remainderIndex][indexCurrentRemainderLeadingMonInAllMons].addOnTop(currentSlideNumber);
 
@@ -2601,9 +2603,9 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
   addOnTop(currentSlideNumber);
   this->highlightMonsRemainders[remainderIndex][indexCurrentRemainderLeadingMonInAllMons].addOnTop(currentSlideNumber);
   int indexCurrentQuotientMonInAllMons =
-  this->allMonomials.GetIndex(this->intermediateHighestMonDivHighestMon.GetElement()[remainderIndex]);
+  this->allMonomials.getIndex(this->intermediateHighestMonDivHighestMon.GetElement()[remainderIndex]);
   Polynomial<coefficient>& currentQuotient = this->theQuotients[indexCurrentDivisor];
-  int indexCurrentQuotientMoN = currentQuotient.theMonomials.GetIndex(
+  int indexCurrentQuotientMoN = currentQuotient.theMonomials.getIndex(
     this->intermediateHighestMonDivHighestMon.GetElement()[remainderIndex]
   );
   this->fcAnswerMonsQuotients[indexCurrentDivisor][indexCurrentQuotientMonInAllMons] = currentSlideNumber;
@@ -2611,7 +2613,7 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
   this->highlightMonsQuotients[indexCurrentDivisor][indexCurrentQuotientMonInAllMons].addOnTop(currentSlideNumber);
   for (int i = 0; i < this->theBasiS[indexCurrentDivisor].size(); i ++) {
     this->highlightMonsDivisors[indexCurrentDivisor][
-      this->allMonomials.GetIndex(this->theBasiS[indexCurrentDivisor][i])
+      this->allMonomials.getIndex(this->theBasiS[indexCurrentDivisor][i])
     ].addOnTop(currentSlideNumber);
   }
   this->uncoverAllMonsSubtracands[remainderIndex] = currentSlideNumber;
@@ -2636,7 +2638,7 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
   this->highlightMonsQuotients[indexCurrentDivisor][indexCurrentQuotientMonInAllMons].addOnTop(currentSlideNumber);
   for (int i = 0; i < this->theBasiS[indexCurrentDivisor].size(); i ++) {
     this->highlightMonsDivisors[indexCurrentDivisor][
-      this->allMonomials.GetIndex(this->theBasiS[indexCurrentDivisor][i])
+      this->allMonomials.getIndex(this->theBasiS[indexCurrentDivisor][i])
     ].addOnTop(currentSlideNumber);
   }
   if (this->fcAnswerMonsSubtracands[remainderIndex].size != this->allMonomials.size) {
@@ -2644,18 +2646,18 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
   }
   for (int i = 0; i < this->intermediateSubtractands.GetElement()[remainderIndex].size(); i ++) {
     this->fcAnswerMonsSubtracands[remainderIndex][
-      this->allMonomials.GetIndex(this->intermediateSubtractands.GetElement()[remainderIndex][i])
+      this->allMonomials.getIndex(this->intermediateSubtractands.GetElement()[remainderIndex][i])
     ] = currentSlideNumber;
   }
   currentSlideNumber ++;
   for (int i = 0; i < this->intermediateRemainders.GetElement()[remainderIndex].size(); i ++) {
     this->highlightMonsRemainders[remainderIndex][
-      this->allMonomials.GetIndex(this->intermediateRemainders.GetElement()[remainderIndex][i])
+      this->allMonomials.getIndex(this->intermediateRemainders.GetElement()[remainderIndex][i])
     ].addOnTop(currentSlideNumber);
   }
   for (int i = 0; i < this->intermediateSubtractands.GetElement()[remainderIndex].size(); i ++) {
     this->highlightMonsSubtracands[remainderIndex][
-      this->allMonomials.GetIndex(this->intermediateSubtractands.GetElement()[remainderIndex][i])
+      this->allMonomials.getIndex(this->intermediateSubtractands.GetElement()[remainderIndex][i])
     ].addOnTop(currentSlideNumber);
   }
   this->uncoverAllMonsRemainders[remainderIndex + 1] = currentSlideNumber;
@@ -2664,12 +2666,12 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
   currentSlideNumber ++;
   for (int i = 0; i < this->intermediateRemainders.GetElement()[remainderIndex].size(); i ++) {
     this->highlightMonsRemainders[remainderIndex][
-      this->allMonomials.GetIndex(this->intermediateRemainders.GetElement()[remainderIndex][i])
+      this->allMonomials.getIndex(this->intermediateRemainders.GetElement()[remainderIndex][i])
     ].addOnTop(currentSlideNumber);
   }
   for (int i = 0; i < this->intermediateSubtractands.GetElement()[remainderIndex].size(); i ++) {
     this->highlightMonsSubtracands[remainderIndex][
-      this->allMonomials.GetIndex(this->intermediateSubtractands.GetElement()[remainderIndex][i])
+      this->allMonomials.getIndex(this->intermediateSubtractands.GetElement()[remainderIndex][i])
     ].addOnTop(currentSlideNumber);
   }
   if (remainderIndex + 1 >= this->intermediateRemainders.GetElement().size) {
@@ -2677,7 +2679,7 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder(
   }
   for (int i = 0; i < this->intermediateRemainders.GetElement()[remainderIndex + 1].size(); i ++) {
     this->fcAnswerMonsRemainders[remainderIndex + 1][
-      this->allMonomials.GetIndex(this->intermediateRemainders.GetElement()[remainderIndex + 1][i])
+      this->allMonomials.getIndex(this->intermediateRemainders.GetElement()[remainderIndex + 1][i])
     ] = currentSlideNumber;
   }
   if (this->intermediateRemainders.GetElement()[remainderIndex + 1].IsEqualToZero()) {
@@ -2883,9 +2885,11 @@ bool CalculatorFunctions::innerPolynomialDivisionSlidesGrLex(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
   MacroRegisterFunctionWithName("Calculator::innerPolynomialDivisionSlidesGrLex");
-  Expression theContext;
+  ExpressionContext theContext(theCommands);
   Vector<Polynomial<AlgebraicNumber> > polynomialsRational;
-  if (!theCommands.GetListPolynomialVariableLabelsLexicographic(input, polynomialsRational, theContext)) {
+  if (!theCommands.GetListPolynomialVariableLabelsLexicographic(
+    input, polynomialsRational, theContext
+  )) {
     return output.MakeError("Failed to extract list of polynomials. ", theCommands);
   }
   if (polynomialsRational.size < 3) {
@@ -2911,7 +2915,7 @@ bool CalculatorFunctions::innerPolynomialDivisionSlidesGrLex(
     MonomialP::greaterThan_totalDegree_rightSmallerWins
   );
   theGB.RemainderDivisionByBasis(polynomialsRational[1], &theGB.remainderDivision, - 1);
-  theContext.ContextGetFormatExpressions(theGB.theFormat);
+  theContext.getFormat(theGB.theFormat);
   theGB.theFormat.flagUseLatex = true;
   theGB.theFormat.flagUseFrac = true;
   std::stringstream latexOutput;

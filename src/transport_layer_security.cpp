@@ -1787,7 +1787,7 @@ bool TransportLayerSecurityServer::Session::ChooseCipher(std::stringstream* comm
     if (cipher.id == 0) {
       continue;
     }
-    int candidateIndex = suites.GetIndex(cipher.id);
+    int candidateIndex = suites.getIndex(cipher.id);
     if (candidateIndex < 0 || candidateIndex > bestIndex) {
       continue;
     }

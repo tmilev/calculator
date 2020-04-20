@@ -317,7 +317,7 @@ List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> >
   List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> > out;
   List<Vector<Rational> > splittingMatrixKernel;
   if (GetNumberOfComponents() == 1) {
-    if (this->ownerGroup->characterTable.GetIndex(this->theCharacteR) == - 1) {
+    if (this->ownerGroup->characterTable.getIndex(this->theCharacteR) == - 1) {
       global.Comments << "new irrep found, have " << this->ownerGroup->characterTable.size << "\n";
       this->ownerGroup->AddIrreducibleRepresentation(*this);
     }
@@ -875,7 +875,7 @@ Matrix<Rational> MatrixInBasis(
     for (int i2 = 0; i2 < X.G->conjugacyClasseS[i1].size; i2 ++) {
       for (int j = 0; j < X.G->GetSize(); j ++) {
         for (int k = 0; k < B.size; k ++) {
-          int l = X.G->theElements.GetIndex(
+          int l = X.G->theElements.getIndex(
             X.G->conjugacyClasseS[i1].theElements[i2] * X.G->theElements[j]
           );
           rows[k][l] = X.data[i1] * B[k][j];
@@ -1058,7 +1058,7 @@ void SubgroupDataRootReflections::InitGenerators() {
   ElementWeylGroup currentReflection;
   for (int i = 0; i < d; i ++) {
     currentReflection.MakeRootReflection(this->generatingSimpleRoots[i], *this->theWeylData);
-    this->theSubgroupData.generatorPreimages[i] = this->theSubgroupData.theGroup->theElements.GetIndex(currentReflection);
+    this->theSubgroupData.generatorPreimages[i] = this->theSubgroupData.theGroup->theElements.getIndex(currentReflection);
     this->theSubgroupData.theSubgroup->generators[i] = currentReflection;
   }
 }

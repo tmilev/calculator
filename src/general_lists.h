@@ -740,7 +740,7 @@ public:
     }
   }
   int AddNoRepetitionOrReturnIndexFirst(const Object& o) {
-    int indexOfObject = this->GetIndex(o);
+    int indexOfObject = this->getIndex(o);
     if (indexOfObject == - 1) {
       this->addOnTop(o);
       return this->size - 1;
@@ -957,9 +957,9 @@ public:
   void toString(std::string& output, FormatExpressions* theFormat = nullptr) const {
     output = this->toString(theFormat);
   }
-  int GetIndex(const Object& o) const;
+  int getIndex(const Object& o) const;
   bool Contains(const Object& o) const {
-    return this->GetIndex(o) != - 1;
+    return this->getIndex(o) != - 1;
   }
   bool ContainsAtLeastOneCopyOfEach(const List<Object>& other) const {
     for (int i = 0; i < other.size; i ++) {
@@ -1351,7 +1351,7 @@ public:
     }
   }
   void RemoveFirstOccurenceSwapWithLast(const Object& o) {
-    int theIndex = this->GetIndex(o);
+    int theIndex = this->getIndex(o);
     if (theIndex == - 1) {
       return;
     }
@@ -1394,7 +1394,7 @@ public:
     }
   }
   int AddNoRepetitionOrReturnIndexFirst(const Object& o) {
-    int result = this->GetIndex(o);
+    int result = this->getIndex(o);
     if (result != - 1) {
       return result;
     }
@@ -1411,14 +1411,14 @@ public:
     }
   }
   bool addOnTopNoRepetition(const Object& o) {
-    if (this->GetIndex(o) != - 1) {
+    if (this->getIndex(o) != - 1) {
       return false;
     }
     this->addOnTop(o);
     return true;
   }
   bool AddOnTopNoRepetitionMustBeNewCrashIfNot(const Object& o) {
-    if (this->GetIndex(o) != - 1) {
+    if (this->getIndex(o) != - 1) {
       std::stringstream crashStream;
       crashStream << "This is a programming error: the programmer requested to add the object "
       << o << " without repetition "
@@ -1497,17 +1497,17 @@ public:
     this->TheHashedArrays[i2Hash].addOnTop(i1);
   }
   bool Contains(const Object& o) const {
-    return this->GetIndex(o) != - 1;
+    return this->getIndex(o) != - 1;
   }
   bool Contains(const List<Object>& theList) const {
     for (int i = 0; i < theList.size; i ++) {
-      if (this->GetIndex(theList[i]) == - 1) {
+      if (this->getIndex(theList[i]) == - 1) {
         return false;
       }
     }
     return true;
   }
-  int GetIndex(const Object& o) const {
+  int getIndex(const Object& o) const {
     unsigned int hashIndex = this->GetHash(o);
     for (int i = 0; i < this->TheHashedArrays[hashIndex].size; i ++) {
       int j = this->TheHashedArrays[hashIndex].theObjects[i];
@@ -1525,7 +1525,7 @@ public:
     return - 1;
   }
   int GetIndexIMustContainTheObject(const Object& o) const {
-    int result = this->GetIndex(o);
+    int result = this->getIndex(o);
     if (result == - 1) {
       std::stringstream errorStream;
       errorStream << "This is a programming error: "
@@ -1710,8 +1710,8 @@ public:
   void RemoveIndexSwapWithLast(int index) {
     this->::HashTemplate<Object, List<Object>, hashFunction>::RemoveIndexSwapWithLast(index);
   }
-  int GetIndex(const Object& o) const {
-    return this->::HashTemplate<Object, List<Object>, hashFunction>::GetIndex(o);
+  int getIndex(const Object& o) const {
+    return this->::HashTemplate<Object, List<Object>, hashFunction>::getIndex(o);
   }
   int GetIndexIMustContainTheObject(const Object& o) const {
     return this->::HashTemplate<Object, List<Object>, hashFunction>::GetIndexIMustContainTheObject(o);
@@ -1916,7 +1916,7 @@ void List<Object>::PermuteIndices(const List<List<int> >& cycles) {
 }
 
 template<class Object>
-int List<Object>::GetIndex(const Object& o) const {
+int List<Object>::getIndex(const Object& o) const {
   for (int i = 0; i < this->size; i ++) {
     if (this->theObjects[i] == o) {
       return i;
@@ -2054,7 +2054,7 @@ void List<Object>::initializeFillInObject(int theSize, const Object& o) {
 
 template <class Object>
 bool List<Object>::addOnTopNoRepetition(const Object& o) {
-  if (this->GetIndex(o) != - 1) {
+  if (this->getIndex(o) != - 1) {
     return false;
   }
   this->addOnTop(o);

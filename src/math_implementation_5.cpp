@@ -449,7 +449,7 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism(Matrix<Rational>& outputAuto, 
     tempElt.MakeHgenerator(rangeRoot, *this);
     Range[numRoots + i] = tempElt;
     for (int i = 0; i < 2; i ++, domainRoot.Minus(), rangeRoot.Minus()) {
-      int theIndex = this->theWeyl.RootSystem.GetIndex(rangeRoot);
+      int theIndex = this->theWeyl.RootSystem.getIndex(rangeRoot);
       tempElt.MakeGGenerator(rangeRoot, *this);
       Range[theIndex] = tempElt;
       tempElt.MakeGGenerator(domainRoot, *this);
@@ -467,8 +467,8 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism(Matrix<Rational>& outputAuto, 
         for (int k = 0; k < 2; k ++, left.Minus()) {
           right = current - left;
           if (this->theWeyl.IsARoot(right)) {
-            int leftIndex = this->theWeyl.RootSystem.GetIndex(left);
-            int rightIndex = this->theWeyl.RootSystem.GetIndex(right);
+            int leftIndex = this->theWeyl.RootSystem.getIndex(left);
+            int rightIndex = this->theWeyl.RootSystem.getIndex(right);
             if (!NonExplored.selected[rightIndex]) {
               ElementSemisimpleLieAlgebra<Rational>& leftDomainElt = Domain[leftIndex];
               ElementSemisimpleLieAlgebra<Rational>& rightDomainElt = Domain[rightIndex];
@@ -528,7 +528,7 @@ void SemisimpleLieAlgebra::CreateEmbeddingFromFDModuleHaving1dimWeightSpaces(Vec
       currentMat.init(weightSupport.size, weightSupport.size);
       currentMat.makeZero();
       for (int j = 0; j<weightSupport.size; j ++) {
-        int indexTarget = weightSupport.GetIndex(current +weightSupport.theObjects[j]);
+        int indexTarget = weightSupport.getIndex(current +weightSupport.theObjects[j]);
         if (indexTarget != - 1) {
           highestWeight = - 1+ this->GetLengthStringAlongAlphaThroughBeta(current, weightSupport.theObjects[j], distanceToHW, weightSupport);
           if (current.IsNegativeOrZero())
@@ -548,7 +548,7 @@ void SemisimpleLieAlgebra::CreateEmbeddingFromFDModuleHaving1dimWeightSpaces(Vec
           if (Explored.theObjects[j]) {
             Vector<Rational> tempRoot = this->theWeyl.RootSystem.theObjects[i] + this->theWeyl.RootSystem.theObjects[j];
             if (this->theWeyl.IsARoot(tempRoot)) {
-              int index = this->theWeyl.RootSystem.GetIndex(tempRoot);
+              int index = this->theWeyl.RootSystem.getIndex(tempRoot);
               if (!Explored.theObjects[index]) {
                 Explored.theObjects[index] = true;
                 numExplored++;
@@ -605,7 +605,7 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
   for (int i = 0; i < theDomainDimension; i ++) {
     tempRoot.MakeEi(theDomainDimension, i);
     for (int j = 0; j < 2; j ++, tempRoot.Minus()) {
-      int index = this->theDomain().theWeyl.RootSystem.GetIndex(tempRoot);
+      int index = this->theDomain().theWeyl.RootSystem.getIndex(tempRoot);
       tempDomain[index].makeZero();
       ChevalleyGenerator tempGen;
       tempGen.MakeGenerator(this->theDomain(), this->theDomain().GetGeneratorFromRoot(tempRoot));
@@ -624,8 +624,8 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
           const Vector<Rational>& left = this->theDomain().theWeyl.RootSystem[j];
           right = current - left;
           if (this->theDomain().theWeyl.IsARoot(right)) {
-            int leftIndex = this->theDomain().theWeyl.RootSystem.GetIndex(left);
-            int rightIndex = this->theDomain().theWeyl.RootSystem.GetIndex(right);
+            int leftIndex = this->theDomain().theWeyl.RootSystem.getIndex(left);
+            int rightIndex = this->theDomain().theWeyl.RootSystem.getIndex(right);
             if (!NonExplored.selected[rightIndex]) {
               ElementSemisimpleLieAlgebra<Rational>& leftDomainElt = tempDomain[leftIndex];
               ElementSemisimpleLieAlgebra<Rational>& rightDomainElt = tempDomain[rightIndex];
@@ -643,8 +643,8 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
   }
   for (int i = 0; i < theDomainDimension; i ++) {
     tempRoot.MakeEi(theDomainDimension, i);
-    int leftIndex = this->theDomain().theWeyl.RootSystem.GetIndex(tempRoot);
-    int rightIndex = this->theDomain().theWeyl.RootSystem.GetIndex(- tempRoot);
+    int leftIndex = this->theDomain().theWeyl.RootSystem.getIndex(tempRoot);
+    int rightIndex = this->theDomain().theWeyl.RootSystem.getIndex(- tempRoot);
     this->theDomain().LieBracket(tempDomain[leftIndex], tempDomain[rightIndex], tempDomain[numRoots + i]);
     this->theRange().LieBracket(tempRange[leftIndex], tempRange[rightIndex], tempRange[numRoots + i]);
   }

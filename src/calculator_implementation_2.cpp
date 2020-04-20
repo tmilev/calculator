@@ -415,7 +415,7 @@ void StateMaintainerCalculator::AddRule(const Expression& theRule) {
       theRule.StartsWith(this->owner->opRulesOff());
     }
   }
-  this->owner->RuleStackCacheIndex = this->owner->cachedRuleStacks.GetIndex(this->owner->RuleStack);
+  this->owner->RuleStackCacheIndex = this->owner->cachedRuleStacks.getIndex(this->owner->RuleStack);
   if (this->owner->RuleStackCacheIndex == - 1) {
     if (this->owner->cachedRuleStacks.size < this->owner->MaxCachedExpressionPerRuleStack) {
       this->owner->RuleStackCacheIndex = this->owner->cachedRuleStacks.size;
@@ -887,7 +887,7 @@ void Calculator::EvaluateLoop::LookUpCache() {
   theExpressionWithContext.AddChildAtomOnTop(this->owner->opSequence());
   theExpressionWithContext.AddChildValueOnTop(this->owner->RuleStackCacheIndex);
   theExpressionWithContext.AddChildOnTop(*(this->outpuT));
-  this->indexInCache = this->owner->cachedExpressions.GetIndex(theExpressionWithContext);
+  this->indexInCache = this->owner->cachedExpressions.getIndex(theExpressionWithContext);
   if (this->indexInCache != - 1) {
     if (this->owner->flagLogCache) {
       *this->owner << "<hr>Cache hit with state identifier "

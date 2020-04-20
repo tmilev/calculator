@@ -1530,7 +1530,7 @@ void GeneralizedVermaModuleCharacters::SortMultiplicities() {
   List<QuasiPolynomial> tempQPlist;
   tempQPlist.setSize(this->theMultiplicities.size);
   for (int i = 0; i < this->theMultiplicities.size; i ++) {
-    tempQPlist[i] = this->theMultiplicities[this->projectivizedChambeR.GetIndex(tempList[i])];
+    tempQPlist[i] = this->theMultiplicities[this->projectivizedChambeR.getIndex(tempList[i])];
   }
   this->theMultiplicities = tempQPlist;
   this->projectivizedChambeR.Clear();

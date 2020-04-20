@@ -11,17 +11,17 @@ class MapTemplate {
 public:
   HashedList<key, hashFunction> theKeys;
   listType theValues;
-  int GetIndex(const key& input) const {
-    return this->theKeys.GetIndex(input);
+  int getIndex(const key& input) const {
+    return this->theKeys.getIndex(input);
   }
   int GetIndexIMustContainTheObject(const key& input) const {
     return this->theKeys.GetIndexIMustContainTheObject(input);
   }
   bool Contains(const key& inputKey) const {
-    return this->GetIndex(inputKey) != - 1;
+    return this->getIndex(inputKey) != - 1;
   }
   void RemoveKey(const key& theKey) {
-    int theIndex = this->theKeys.GetIndex(theKey);
+    int theIndex = this->theKeys.getIndex(theKey);
     if (theIndex == - 1) {
       return;
     }
@@ -29,21 +29,21 @@ public:
     this->theValues.RemoveIndexSwapWithLast(theIndex);
   }
   const value& GetValueConstCrashIfNotPresent(const key& input) const {
-    int theIndex = this->theKeys.GetIndex(input);
+    int theIndex = this->theKeys.getIndex(input);
     if (theIndex == - 1) {
       fatalCrash("Map does not contain key at a place where that is not allowed. ");
     }
     return this->theValues[theIndex];
   }
   value GetValue(const key& input, const value& resultIfMissing) {
-    int theIndex = this->theKeys.GetIndex(input);
+    int theIndex = this->theKeys.getIndex(input);
     if (theIndex == - 1) {
       return resultIfMissing;
     }
     return this->theValues[theIndex];
   }
   value& GetValueCreate(const key& input) {
-    int theIndex = this->theKeys.GetIndex(input);
+    int theIndex = this->theKeys.getIndex(input);
     if (theIndex == - 1) {
       theIndex = this->theKeys.size;
       this->theKeys.addOnTop(input);
@@ -53,7 +53,7 @@ public:
     return this->theValues[theIndex];
   }
   value& GetValueCreateNoInit(const key& input) {
-    int theIndex = this->theKeys.GetIndex(input);
+    int theIndex = this->theKeys.getIndex(input);
     if (theIndex == - 1) {
       theIndex = this->theKeys.size;
       this->theKeys.addOnTop(input);
@@ -63,7 +63,7 @@ public:
   }
   void SetKeyValue(const key& inputKey, const value& inputValue) {
     if (this->Contains(inputKey)) {
-      this->theValues[this->theKeys.GetIndex(inputKey)] = inputValue;
+      this->theValues[this->theKeys.getIndex(inputKey)] = inputValue;
       return;
     }
     this->theValues.addOnTop(inputValue);
@@ -111,14 +111,14 @@ class MapReferences
 public:
   HashedList<key, hashFunction> theKeys;
   ListReferences<value> theValues;
-  int GetIndex(const key& input) const {
-    return this->theKeys.GetIndex(input);
+  int getIndex(const key& input) const {
+    return this->theKeys.getIndex(input);
   }
   bool Contains(const key& input) const {
-    return this->GetIndex(input) != - 1;
+    return this->getIndex(input) != - 1;
   }
   value& GetValueCreateIfNotPresent(const key& input) {
-    int theIndex = this->theKeys.GetIndex(input);
+    int theIndex = this->theKeys.getIndex(input);
     if (theIndex == - 1) {
       theIndex = this->theKeys.size;
       this->theKeys.addOnTop(input);
@@ -128,7 +128,7 @@ public:
   }
   void SetValue(const value& inputValue, const key& inputKey) {
     if (this->Contains(inputKey)) {
-      this->theValues[this->theKeys.GetIndex(inputKey)] = inputValue;
+      this->theValues[this->theKeys.getIndex(inputKey)] = inputValue;
       return;
     }
     this->theValues.addOnTop(inputValue);

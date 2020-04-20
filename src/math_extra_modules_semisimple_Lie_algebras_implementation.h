@@ -12,7 +12,7 @@ Rational ModuleSSalgebra<coefficient>::hwTrace(
   ProgressReport* theProgressReport
 ) {
   MacroRegisterFunctionWithName("ModuleSSalgebra<coefficient>::hwTrace");
-  int indexInCache = this->cachedPairs.GetIndex(thePair);
+  int indexInCache = this->cachedPairs.getIndex(thePair);
   if (indexInCache != - 1) {
     return this->cachedTraces[indexInCache];
   }
@@ -227,12 +227,12 @@ void ModuleSSalgebra<coefficient>::GetMatrixHomogenousElt(
     for (int k = 0; k < outputSortedByArgumentWeight[j].size; k ++) {
       MonomialUniversalEnveloping<coefficient>& currentMon = this->theGeneratingWordsGrouppedByWeight[j][k];
       ElementUniversalEnveloping<coefficient>& imageCurrentMon = outputSortedByArgumentWeight[j][k];
-      int indexColumn = this->theGeneratingWordsNonReduced.GetIndex(currentMon);
+      int indexColumn = this->theGeneratingWordsNonReduced.getIndex(currentMon);
       if (indexColumn == - 1) {
         global.fatal << "Column index equals -1. " << global.fatal;
       }
       for (int l = 0; l < imageCurrentMon.size; l ++) {
-        int indexRow = this->theGeneratingWordsNonReduced.GetIndex(imageCurrentMon[l]);
+        int indexRow = this->theGeneratingWordsNonReduced.getIndex(imageCurrentMon[l]);
         if (indexRow == - 1) {
           global.fatal << "Negative row index not allowed. " << global.fatal;
         }
@@ -341,7 +341,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight(
         }
       }
     }
-    highestCoeff = remainingCharDominantLevi.coefficients[remainingCharDominantLevi.theMonomials.GetIndex(localHighest)];
+    highestCoeff = remainingCharDominantLevi.coefficients[remainingCharDominantLevi.theMonomials.getIndex(localHighest)];
     output.AddMonomial(localHighest, highestCoeff);
     if (!outputWeylSub.FreudenthalEvalIrrepIsWRTLeviPart(
       localHighest.weightFundamentalCoordS, tempHashedRoots, tempMults, tempS, 10000
@@ -521,7 +521,7 @@ MatrixTensor<coefficient>& ModuleSSalgebra<coefficient>::GetActionSimpleGenerato
     this->theGeneratingWordsIntGrouppedByWeight[i];
     const Vector<Rational>& currentWeight = this->theModuleWeightsSimpleCoords[i];
     targetWeight = currentWeight + genWeight;
-    int weightLevelIndex = this->theModuleWeightsSimpleCoords.GetIndex(targetWeight);
+    int weightLevelIndex = this->theModuleWeightsSimpleCoords.getIndex(targetWeight);
     if (weightLevelIndex != - 1) {
       int columnOffset = this->GetOffsetFromWeightIndex(i);
       int rowOffset = this->GetOffsetFromWeightIndex(weightLevelIndex);
@@ -661,7 +661,7 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW(
       tempMonInt.MultiplyByGeneratorPowerOnTheRight(this->GetOwner().GetGeneratorFromDisplayIndex(theIndex), 1);
     }
     Vector<Rational>& hwCurrent = *this->thePaths[i].Waypoints.LastObject();
-    int theIndex = this->theModuleWeightsSimpleCoords.GetIndex(hwCurrent);
+    int theIndex = this->theModuleWeightsSimpleCoords.getIndex(hwCurrent);
     if (theIndex == - 1) {
       out2 << "Error: could not generate all weights in the weight support. Maybe they are too many? Allowed "
       << "# of weights is 10000";
@@ -1030,7 +1030,7 @@ void ModuleSSalgebra<coefficient>::GetAdActionHomogenousElT(
     outputCurrentList.setSize(currentWordList.size);
     Vector<Rational>& currentWeight = this->theModuleWeightsSimpleCoords[i];
     targetWeight = currentWeight + weightUEEltSimpleCoords;
-    int theIndex = this->theModuleWeightsSimpleCoords.GetIndex(targetWeight);
+    int theIndex = this->theModuleWeightsSimpleCoords.getIndex(targetWeight);
     for (int j = 0; j < currentWordList.size; j ++) {
       std::stringstream progressStream;
       progressStream << "Computing action of "

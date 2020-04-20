@@ -67,7 +67,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::CheckRepIsMu
       tempElt = this->ownerGroup->theElements[j];
       tempElt *= this->ownerGroup->theElements[i];
       tempElt.MakeCanonical();
-      int targetIndex = this->ownerGroup->theElements.GetIndex(tempElt);
+      int targetIndex = this->ownerGroup->theElements.getIndex(tempElt);
       if (!(tempMat == this->theElementImages[targetIndex])) {
         global.fatal << "this is a programming error: element " << i + 1 << " times element "
         << j + 1 << " is outside of the set, i.e.,  "
@@ -96,11 +96,11 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::ComputeAllGe
   for (int i = 0; i < theRank; i ++)
     theGens[i].MakeSimpleReflection(i, *this->ownerGroup);
   for (int i = 0; i <ElementsExplored.size; i ++) {
-    int indexParentElement = this->ownerGroup->theElements.GetIndex(ElementsExplored[i]);
+    int indexParentElement = this->ownerGroup->theElements.getIndex(ElementsExplored[i]);
     for (int j = 0; j < theRank; j ++) {
       currentElt = theGens[j]* ElementsExplored[i];
       if (!ElementsExplored.Contains(currentElt)) {
-        int indexCurrentElt = this->ownerGroup->theElements.GetIndex(currentElt);
+        int indexCurrentElt = this->ownerGroup->theElements.getIndex(currentElt);
         this->theElementIsComputed[indexCurrentElt] = true;
         this->theElementImageS[indexParentElement].MultiplyOnTheLeft(this->generatorS[j], this->theElementImageS[indexCurrentElt]);
         ElementsExplored.addOnTop(currentElt);
@@ -133,11 +133,11 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::ComputeAllEl
 
   ElementsExplored.addOnTop(currentElt);
   for (int i = 0; i < ElementsExplored.size; i ++) {
-    int indexParentElement = this->ownerGroup->theElements.GetIndex(ElementsExplored[i]);
+    int indexParentElement = this->ownerGroup->theElements.getIndex(ElementsExplored[i]);
     for (int j = 0; j < theRank; j ++) {
       currentElt = theGens[j] * ElementsExplored[i];
       if (!ElementsExplored.Contains(currentElt)) {
-        int indexCurrentElt = this->ownerGroup->theElements.GetIndex(currentElt);
+        int indexCurrentElt = this->ownerGroup->theElements.getIndex(currentElt);
         this->theElementIsComputed[indexCurrentElt] = true;
         this->theElementImageS[indexParentElement].MultiplyOnTheLeft(this->generatorS[j], this->theElementImageS[indexCurrentElt]);
         ElementsExplored.addOnTop(currentElt);
@@ -434,7 +434,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(
   theHWs.setSize(input.children.size - 2);
   bool isGood = true;
   for (int i = 2; i < input.size(); i ++) {
-    if (!theCommands.GetVectoR<Rational>(
+    if (!theCommands.GetVector<Rational>(
       input[i], theHWs[i - 2], nullptr, theSSalgebra->GetRank()
     )) {
       isGood = false;
@@ -493,8 +493,8 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple(
     }
   }
   Vector<Polynomial<Rational> > theHWfundCoords, theHWsimpleCoords;
-  Expression theContext;
-  if (!theCommands.GetVectoR(
+  ExpressionContext theContext(theCommands);
+  if (!theCommands.GetVector(
     vectorNode,
     theHWfundCoords,
     &theContext,
@@ -509,8 +509,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple(
   theHWfundCoords = theWeyl.GetFundamentalCoordinatesFromSimple(theHWsimpleCoords);
   std::stringstream out, latexReport;
   Vectors<Polynomial<Rational> > theHWs;
-  FormatExpressions theFormat;
-  theContext.ContextGetFormatExpressions(theFormat);
+  FormatExpressions theFormat = theContext.getFormat();
   theHWs.addOnTop(theHWsimpleCoords);
   HashedList<Vector<Polynomial<Rational> > > outputOrbit;
   WeylGroupAutomorphisms theOuterAutos;
@@ -616,7 +615,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
   std::stringstream out, latexReport;
   Vectors<Polynomial<Rational> > theHWs;
   FormatExpressions theFormat;
-  theSSalgebra.context.context.ContextGetFormatExpressions(theFormat);
+  theSSalgebra.context.getFormat(theFormat);
 //  theFormat.fundamentalWeightLetter ="\\psi";
   theHWs.addOnTop(theHWsimpleCoords);
   HashedList<Vector<Polynomial<Rational> > > outputOrbit;
@@ -679,7 +678,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(
       if (isGood) {
         std::stringstream reflectionStream;
         reflectionStream << "s_{" << i << "}";
-        integralPositiveRootReflectionGraph.AddEdge(i, outputOrbit.GetIndex(currentWeight), reflectionStream.str());
+        integralPositiveRootReflectionGraph.AddEdge(i, outputOrbit.getIndex(currentWeight), reflectionStream.str());
       }
     }
   }
@@ -1149,7 +1148,7 @@ std::string WeylGroupData::ToStringSignSignatureRootSubsystem(const List<Subgrou
     parSignSigsNoRepetition.addOnTopNoRepetition(parabolicSignSig);
     irrepsPerSignature.setSize(parSignSigsNoRepetition.size);
     for (int i = 0; i < parabolicSignSig.size; i ++) {
-      irrepsPerSignature[parSignSigsNoRepetition.GetIndex(parabolicSignSig[i])].addOnTop(this->irrepsCarterLabels[i]);
+      irrepsPerSignature[parSignSigsNoRepetition.getIndex(parabolicSignSig[i])].addOnTop(this->irrepsCarterLabels[i]);
     }
     mainTableStream << "\n<br>\n\n<br>\nThe following families of representations share the same sign signature. ";
     for (int i = 0; i < irrepsPerSignature.size; i ++) {
@@ -1172,7 +1171,7 @@ std::string WeylGroupData::ToStringSignSignatureRootSubsystem(const List<Subgrou
     pseudoSigsNoRepetition.addOnTopNoRepetition(pseudoSignSig);
     irrepsPerSignature.setSize(pseudoSigsNoRepetition.size);
     for (int i = 0; i < pseudoSignSig.size; i ++) {
-      irrepsPerSignature[pseudoSigsNoRepetition.GetIndex(pseudoSignSig[i])].addOnTop(this->irrepsCarterLabels[i]);
+      irrepsPerSignature[pseudoSigsNoRepetition.getIndex(pseudoSignSig[i])].addOnTop(this->irrepsCarterLabels[i]);
     }
     mainTableStream << "\n<br>\n\n<br>\nThe following families of representations share the same pseudo-sign signature. ";
     for (int i = 0; i < irrepsPerSignature.size; i ++) {
@@ -1500,7 +1499,7 @@ bool KostkaNumber::Compute(HashedList<KostkaNumber>* KNcache, std::stringstream*
       ancestor.partition[i] -= theSel.Multiplicities[i];
     }
     if (KNcache != nullptr) {
-      int ancestorIndex = KNcache->GetIndex(ancestor);
+      int ancestorIndex = KNcache->getIndex(ancestor);
       if (ancestorIndex != - 1) {
         ancestor = KNcache->GetElement(ancestorIndex);
       } else if (!ancestor.Compute(KNcache, comments)) {
@@ -2070,7 +2069,7 @@ void MonomialMacdonald::MakeFromRootSubsystem(const Vectors<Rational>& inputRoot
     if (currentV.IsNegative()) {
       currentV *= - 1;
     }
-    int indexInRoots = inputOwner.theWeyl.RootSystem.GetIndex(currentV);
+    int indexInRoots = inputOwner.theWeyl.RootSystem.getIndex(currentV);
     if (indexInRoots < 0) {
       global.fatal << "This is a programming error: attempting to make a Macdonald polynomial from " << inputRoots.toString()
       << ": the vector " << currentV.toString()
@@ -2094,7 +2093,7 @@ void MonomialMacdonald::ActOnMeSimpleReflection(int indexSimpleReflection, Ratio
       currentV *= - 1;
       outputMultiple *= - 1;
     }
-    this->rootSel.AddSelectionAppendNewIndex(this->owner->theWeyl.RootSystem.GetIndex(currentV));
+    this->rootSel.AddSelectionAppendNewIndex(this->owner->theWeyl.RootSystem.getIndex(currentV));
   }
 }
 
@@ -2132,7 +2131,9 @@ bool CalculatorFunctionsWeylGroup::innerMacdonaldPolys(Calculator& theCommands, 
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CalculatorFunctionsWeylGroup::innerLieAlgebraWeight(Calculator& theCommands, const Expression& input, Expression& output) {
+bool CalculatorFunctionsWeylGroup::innerLieAlgebraWeight(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerLieAlgebraWeight");
   Weight<Polynomial<Rational> > resultWeight;
   if (input.size() != 4) {
@@ -2187,8 +2188,8 @@ bool CalculatorFunctionsWeylGroup::innerLieAlgebraWeight(Calculator& theCommands
     resultWeight.weightFundamentalCoordS = theSSowner->theWeyl.GetFundamentalCoordinatesFromEpsilon(EiVector);
   }
   resultWeight.owner = theSSowner;
-  Expression theContext;
-  theContext.MakeContextSSLieAlg(theCommands, *theSSowner);
+  ExpressionContext theContext(theCommands);
+  theContext.setAmbientSemisimpleLieAlgebra(*theSSowner);
   return output.AssignValueWithContext(resultWeight, theContext, theCommands);
 }
 
@@ -2208,8 +2209,8 @@ bool CalculatorFunctionsWeylGroup::innerLieAlgebraRhoWeight(
     return theCommands << "<hr>Failed to load semisimple Lie algebra. ";
   }
   theSSowner->CheckConsistency();
-  Expression theContext;
-  theContext.MakeContextSSLieAlg(theCommands, *theSSowner);
+  ExpressionContext theContext(theCommands);
+  theContext.setAmbientSemisimpleLieAlgebra(*theSSowner);
   resultWeight.weightFundamentalCoordS = theSSowner->theWeyl.GetFundamentalCoordinatesFromSimple(theSSowner->theWeyl.rho);
   resultWeight.owner = theSSowner;
   return output.AssignValueWithContext(resultWeight, theContext, theCommands);
@@ -2270,7 +2271,7 @@ bool CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation(
   if (input.size() != 3) {
     return theCommands << "CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation needs two arguments";
   }
-  if (!theCommands.GetVectoR(input[1], inputLeftRat)|| !theCommands.GetVectoR(input[2], inputRightRat)) {
+  if (!theCommands.GetVector(input[1], inputLeftRat)|| !theCommands.GetVector(input[2], inputRightRat)) {
     return false;
   }
   if (inputLeftRat.size < 1 || inputRightRat.size < 1) {

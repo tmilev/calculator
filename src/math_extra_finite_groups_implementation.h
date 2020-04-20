@@ -241,7 +241,7 @@ void SubgroupData<someGroup, elementSomeGroup>::MakeTranslatableWordsSubgroup(
   // I mean, not that I care to prove it incomplete at this point.
   // and so much work for this silly little speed optimization, too
   for (int i = 0; i < this->theGroup->generators.size; i ++) {
-    int si = this->theSubgroup->generators.GetIndex(this->theGroup->generators[i]);
+    int si = this->theSubgroup->generators.getIndex(this->theGroup->generators[i]);
     if (si != - 1) {
       this->superGeneratorSubWords[i].addOnTop(si);
       this->superGeneratorSubWordExists[i] = true;
@@ -1134,7 +1134,7 @@ bool WeylGroupData::FreudenthalEval(
         currentWeight += this->RootsOfBorel[j] * i;
         currentDominantRepresentative = currentWeight;
         this->RaiseToDominantWeight(currentDominantRepresentative);
-        int theIndex = outputDominantWeightsSimpleCoords.GetIndex(currentDominantRepresentative);
+        int theIndex = outputDominantWeightsSimpleCoords.getIndex(currentDominantRepresentative);
         if (theIndex == - 1) {
           break;
         }
@@ -1808,7 +1808,7 @@ bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::F
         currentWeight = outputDomWeightsSimpleCoordsLeviPart[k] + convertor;
         currentDominantRepresentative = currentWeight;
         this->RaiseToDominantWeightInner(currentDominantRepresentative);
-        int theIndex = outputDomWeightsSimpleCoordsLeviPart.GetIndex(currentDominantRepresentative);
+        int theIndex = outputDomWeightsSimpleCoordsLeviPart.getIndex(currentDominantRepresentative);
         if (theIndex == - 1) {
           break;
         }
@@ -1946,7 +1946,7 @@ void SubgroupData<someGroup, elementSomeGroup>::ComputeCosets() {
   for (int i = 0; i < this->theGroup->theElements.size; i ++) {
     for (int j = 0; j < this->theSubgroup->generators.size; j ++) {
       orbitg.AddEdge(
-        this->theGroup->theElements.GetIndex(
+        this->theGroup->theElements.getIndex(
           this->theGroup->theElements[i] * this->theSubgroup->generators[j]
         ), i
       );

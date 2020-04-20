@@ -208,7 +208,7 @@ bool JSData::HasCompositeKey(const std::string& inputKeys, JSData* whichValue, s
 }
 
 int JSData::GetKeyIndex(const std::string& key) const {
-  return this->objects.GetIndex(key);
+  return this->objects.getIndex(key);
 }
 
 void JSData::SetKeyValue(const std::string& key, const JSData& value) {

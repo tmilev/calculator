@@ -512,7 +512,7 @@ void rootSubalgebra::KmodTimesKmod(int index1, int index2, List<int>& oppositeKm
       }
       Vector<Rational> weightSum= leftWeight +rightWeight;
       for (int k = 0; k< this->WeightsModulesPrimalSimple.size; k++) {
-        if (this->WeightsModulesPrimalSimple[k].GetIndex(weightSum) != - 1) {
+        if (this->WeightsModulesPrimalSimple[k].getIndex(weightSum) != - 1) {
           output.addOnTopNoRepetition(k);
           break;
         }
@@ -780,7 +780,7 @@ bool rootSubalgebra::CheckForSmallRelations(coneRelation& theRel, Vectors<Ration
           if (!weightSum.IsEqualToZero()) {
             theRel.BetaCoeffs.setSize(0);
             theRel.Betas.setSize(0);
-            tempI = nilradicalRoots.GetIndex(weightSum);
+            tempI = nilradicalRoots.getIndex(weightSum);
             if (tempI != - 1) {
               tempBool = true;
               theRel.BetaCoeffs.setSize(1);
@@ -1392,7 +1392,7 @@ void rootSubalgebra::MakeGeneratingSingularVectors(coneRelation& theRelation, Ve
           this->ComputeHighestWeightInTheSameKMod(tempRoot, tempRoot);
           tempRoot -= theRelation.Alphas[i];
           theRelation.Alphas[i] += tempRoot;
-          int tempI = theRelation.Betas.GetIndex(tempRoot);
+          int tempI = theRelation.Betas.getIndex(tempRoot);
           if (tempI == - 1) {
             theRelation.Betas.addOnTop(tempRoot);
             theRelation.BetaCoeffs.addOnTop(theRelation.AlphaCoeffs[i]);
@@ -1426,7 +1426,7 @@ void rootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnu
   HashedList<Vector<Rational> >& AllRoots = this->GetAmbientWeyl().RootSystem;
   for (int i = 0; i <AllRoots.size; i ++) {
     Vector<Rational> linComb;
-    if (this->AllRootsK.GetIndex(AllRoots[i]) == - 1) {
+    if (this->AllRootsK.getIndex(AllRoots[i]) == - 1) {
       for (int j = 0; j < theDimension; j ++) {
         linComb[j].makeZero();
         for (int k = 0; k < theDimension; k++) {
@@ -1442,7 +1442,7 @@ void rootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnu
       if (this->LinCombToString(AllRoots[i], x, linComb, tempS)) {
         out << tempS << "\n";
         counter ++;
-        if (this->LowestWeightsPrimalSimple.GetIndex(AllRoots[i]) != - 1) {
+        if (this->LowestWeightsPrimalSimple.getIndex(AllRoots[i]) != - 1) {
           out2 << tempS << "\n";
         }
       }
@@ -1479,7 +1479,7 @@ void rootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2() {
       tempMat.Invert();
       for (int i = 0; i <AllRoots.size; i ++) {
         Vector<Rational> linComb;
-        if (this->AllRootsK.GetIndex(AllRoots.theObjects[i]) == - 1) {
+        if (this->AllRootsK.getIndex(AllRoots.theObjects[i]) == - 1) {
           for (int j = 0; j < theDimension; j ++) {
             linComb[j].makeZero();
             for (int k = 0; k < theDimension; k++) {
@@ -2520,7 +2520,7 @@ void slTwoSubalgebra::initHEFSystemFromECoeffs(
     for (int j = 0; j < rootsInPlay.size; j ++) {
       tempRoot = rootsInPlay[i] - rootsInPlay[j];
       if (this->GetOwnerWeyl().IsARoot(tempRoot)) {
-        int indexEquation = RootSpacesThatNeedToBeKilled.GetIndex(tempRoot);
+        int indexEquation = RootSpacesThatNeedToBeKilled.getIndex(tempRoot);
         if (indexEquation == - 1) {
           RootSpacesThatNeedToBeKilled.addOnTop(tempRoot);
           indexEquation = outputSystemToBeSolved.size;
@@ -3220,9 +3220,9 @@ std::string rootSubalgebras::ToStringDynkinTableHTML(FormatExpressions* theForma
         out << "\"" << currentSA.theDynkinType.toString() << "\", ";
         out << "[";
         for (int j = 0; j < currentSA.SimpleBasisK.size; j ++) {
-          int theIndex = GAPPosRootSystem.GetIndex(currentSA.SimpleBasisK[j]);
+          int theIndex = GAPPosRootSystem.getIndex(currentSA.SimpleBasisK[j]);
           if (theIndex == - 1) {
-            theIndex = GAPPosRootSystem.GetIndex(- currentSA.SimpleBasisK[j]);
+            theIndex = GAPPosRootSystem.getIndex(- currentSA.SimpleBasisK[j]);
           }
           out << theIndex + 1;
           if (j != currentSA.SimpleBasisK.size - 1) {
@@ -4225,7 +4225,7 @@ void coneRelation::FixRightHandSide(rootSubalgebra& owner, Vectors<Rational>& Ni
 
 bool coneRelation::CheckForBugs(rootSubalgebra& owner, Vectors<Rational>& NilradicalRoots) {
   for (int i = 0; i < this->Alphas.size; i ++) {
-    int tempI = owner.HighestWeightsPrimalSimple.GetIndex(this->Alphas[i]);
+    int tempI = owner.HighestWeightsPrimalSimple.getIndex(this->Alphas[i]);
     if (tempI == - 1) {
       return false;
     }

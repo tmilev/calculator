@@ -1480,7 +1480,7 @@ std::string CalculatorHTML::GetDeadline(
   if (!global.flagDatabaseCompiled) {
     return "While getting deadline: database not compiled";
   }
-  int topicIndex = this->topics.theTopics.GetIndex(problemName);
+  int topicIndex = this->topics.theTopics.getIndex(problemName);
   if (topicIndex == - 1) {
     return problemName + " not found in topic list. ";
   }
@@ -1971,7 +1971,7 @@ std::string CalculatorHTML::ToStringParsingStack(List<SyntacticElementHTML>& the
 }
 
 int CalculatorHTML::GetAnswerIndex(const std::string& desiredAnswerId) {
-  return this->theProblemData.theAnswers.GetIndex(desiredAnswerId);
+  return this->theProblemData.theAnswers.getIndex(desiredAnswerId);
 }
 
 bool CalculatorHTML::CanBeMerged(const SyntacticElementHTML& left, const SyntacticElementHTML& right) {
@@ -3138,7 +3138,7 @@ std::string CalculatorHTML::ToStringProblemNavigation() const {
     }
   }
   if (this->flagIsExamProblem && this->flagParentInvestigated) {
-    int indexInParent = this->problemNamesNoTopics.GetIndex(this->fileName);
+    int indexInParent = this->problemNamesNoTopics.getIndex(this->fileName);
     if (indexInParent == - 1) {
       out << "<b>Problem not in course</b>" << linkSeparator;
     } else {
@@ -3716,7 +3716,7 @@ TopicElementParser::TopicLine TopicElementParser::ExtractLine(const std::string&
     result.contentTrimmedWhiteSpace = result.tag;
     result.tag = "";
   }
-  int indexElement = this->elementTypes.GetIndex(result.tag);
+  int indexElement = this->elementTypes.getIndex(result.tag);
   if (indexElement >= 0) {
     result.theType = this->elementTypes.theValues[indexElement];
   }

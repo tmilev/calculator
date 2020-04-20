@@ -93,7 +93,7 @@ public:
     this->theReferences[i] = 0;
   }
   void addOnTop(const Object& o);
-  int GetIndex(const Object& o) const;
+  int getIndex(const Object& o) const;
   bool ContainsExactlyOnce(const Object& o) const {
     bool result = false;
     for (int i = 0; i < this->size; i ++) {
@@ -107,7 +107,7 @@ public:
     return result;
   }
   int AddNoRepetitionOrReturnIndexFirst(const Object& o) {
-    int indexOfObject = this->GetIndex(o);
+    int indexOfObject = this->getIndex(o);
     if (indexOfObject == - 1) {
       this->addOnTop(o);
       return this->size - 1;
@@ -190,7 +190,7 @@ void ListReferences<Object>::addOnTop(const Object& o) {
 }
 
 template<class Object>
-int ListReferences<Object>::GetIndex(const Object& o) const {
+int ListReferences<Object>::getIndex(const Object& o) const {
   for (int i = 0; i < this->size; i ++) {
     if ((*this)[i] == o) {
       return i;
@@ -226,8 +226,8 @@ class HashedListReferences : public HashTemplate<Object, ListReferences<Object>,
   Object& GetElement(int theObjectIndex) const {
     return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::GetElement(theObjectIndex);
   }
-  int GetIndex(const Object& o) const {
-    return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::GetIndex(o);
+  int getIndex(const Object& o) const {
+    return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::getIndex(o);
   }
   inline int GetIndexIMustContainTheObject(const Object& o) const {
     return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::GetIndexIMustContainTheObject(o);

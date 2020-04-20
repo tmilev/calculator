@@ -305,7 +305,7 @@ SemisimpleSubalgebras
   if (!this->owner->theObjectContainer.theSSSubalgebraS.Contains(inputValue.owner->theWeyl.theDynkinType)) {
     global.fatal << "Semisimple subalgebras must be allocated directly in the object container. " << global.fatal;
   }
-  return this->owner->theObjectContainer.theSSSubalgebraS.GetIndex(inputValue.owner->theWeyl.theDynkinType);
+  return this->owner->theObjectContainer.theSSSubalgebraS.getIndex(inputValue.owner->theWeyl.theDynkinType);
 }
 
 template < >
@@ -325,7 +325,7 @@ InputBox
   this->owner->theObjectContainer.theUserInputTextBoxesWithValues
   .SetKeyValue(inputValue.name, inputValue);
   return this->owner->theObjectContainer.theUserInputTextBoxesWithValues
-  .GetIndex(inputValue.name);
+  .getIndex(inputValue.name);
 }
 
 template < >
@@ -474,7 +474,7 @@ SemisimpleLieAlgebra* const
   if (!this->owner->theObjectContainer.semisimpleLieAlgebras.Contains(inputValue->theWeyl.theDynkinType)) {
     global.fatal << "Semisimple Lie algebra must be allocated directly in the object container. " << global.fatal;
   }
-  int index = this->owner->theObjectContainer.semisimpleLieAlgebras.GetIndex(inputValue->theWeyl.theDynkinType);
+  int index = this->owner->theObjectContainer.semisimpleLieAlgebras.getIndex(inputValue->theWeyl.theDynkinType);
   return index;
 }
 
@@ -558,7 +558,7 @@ WeylGroupData
 & inputValue) const {
   this->CheckInitialization();
   this->owner->theObjectContainer.GetLieAlgebraCreateIfNotPresent(inputValue.theDynkinType);
-  return this->owner->theObjectContainer.semisimpleLieAlgebras.GetIndex(inputValue.theDynkinType);
+  return this->owner->theObjectContainer.semisimpleLieAlgebras.getIndex(inputValue.theDynkinType);
 }
 
 template < >
@@ -1111,7 +1111,7 @@ bool Expression::CheckConsistency() const {
       << global.fatal;
     }
     const Expression& mustBeTheContext = (*this)[1];
-    if (!mustBeTheContext.StartsWith(this->owner->opContexT())) {
+    if (!mustBeTheContext.StartsWith(this->owner->opContext())) {
       global.fatal << "This is a programming error. At the moment of writing, "
       << "the second child of a built-in type must be a context. It is instead "
       << mustBeTheContext.ToStringFull() << global.fatal;
@@ -1206,6 +1206,13 @@ bool Expression::SetChilD(int childIndexInMe, int childIndexInBoss) {
   return true;
 }
 
+bool Expression::AddChildAtomOnTop(int theOp) {
+  this->CheckInitialization();
+  Expression tempE;
+  tempE.MakeAtom(theOp, *this->owner);
+  return this->AddChildOnTop(tempE);
+}
+
 bool Expression::AddChildAtomOnTop(const std::string& theOperationString) {
   this->CheckInitialization();
   return this->AddChildAtomOnTop(
@@ -1250,7 +1257,7 @@ bool Expression::StartsWithGivenOperation(const std::string& theOperation, int d
   if (this->size() == 0) {
     return false;
   }
-  int theOpIndex = this->owner->operations.GetIndex(theOperation);
+  int theOpIndex = this->owner->operations.getIndex(theOperation);
   if (theOpIndex == - 1) {
     return false;
   }
@@ -1279,378 +1286,6 @@ bool Expression::StartsWith(int theOp, int N) const {
     return true;
   }
   return (*this)[0].theData == theOp;
-}
-
-int Expression::ContextGetNumContextVariables() const {
-  if (this->owner == nullptr) {
-    return 0;
-  }
-  if (!this->StartsWith(this->owner->opContexT())) {
-    return 0;
-  }
-  for (int i = 1; i < this->children.size; i ++) {
-    if ((*this)[i].StartsWith(this->owner->opPolynomialVariables())) {
-      return (*this)[i].children.size - 1;
-    }
-  }
-  return 0;
-}
-
-bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext) {
-  MacroRegisterFunctionWithName("Expression::SetContextAtLeastEqualTo");
-  this->CheckInitialization();
-  if (!this->IsBuiltInTypE()) {
-    global.fatal << "This is a programming error: calling "
-    << "Expression::SetContextAtLeastEqualTo on an expression "
-    << "that is not of built-in type. "
-    << "Contexts are Reserved for built-in data types. " << global.fatal;
-  }
-  if (!inputOutputMinContext.IsContext()) {
-    this->owner->Comments << "<br>Warning: non-initialized input context in "
-    << "Expression::SetContextAtLeastEqualTo. Stack trace: "
-    << global.fatal.GetStackTraceEtcErrorMessageHTML();
-    inputOutputMinContext.MakeEmptyContext(*this->owner);
-  }
-  Expression newContext;
-  Expression myOldContext = this->GetContext();
-  if (!this->ContextMergeContexts(myOldContext, inputOutputMinContext, newContext)) {
-    return false;
-  }
-  if (myOldContext == newContext) {
-    return true;
-  }
-  inputOutputMinContext = newContext;
-  if (this->IsOfType<Rational>()) {
-    this->SetChilD(1, inputOutputMinContext);
-    return true;
-  }
-  if (this->IsOfType<ElementWeylGroup>()) {
-    return this->AssignValueWithContext(
-      this->GetValue<ElementWeylGroup>(), inputOutputMinContext, *this->owner
-    );
-  }
-  if (this->IsOfType<AlgebraicNumber>()) {
-    return this->SetChilD(1, inputOutputMinContext);
-  }
-  if (this->IsOfType<ElementUniversalEnveloping<RationalFunction> > ()) {
-    ElementUniversalEnveloping<RationalFunction> newUE = this->GetValue<ElementUniversalEnveloping<RationalFunction> >();
-    PolynomialSubstitution<Rational> subPolyPart;
-    myOldContext.ContextGetPolySubFromSuperContextNoFailure<Rational>(newContext, subPolyPart);
-    newUE.Substitution(subPolyPart);
-    return this->AssignValueWithContext(newUE, inputOutputMinContext, *this->owner);
-  }
-  if (this->IsOfType<Polynomial<Rational> >()) {
-    Polynomial<Rational> newPoly = this->GetValue<Polynomial<Rational> >();
-    PolynomialSubstitution<Rational> subPolyPart;
-    myOldContext.ContextGetPolySubFromSuperContextNoFailure<Rational>(newContext, subPolyPart);
-    if (!newPoly.Substitution(subPolyPart)) {
-      return false;
-    }
-    return this->AssignValueWithContext(newPoly, inputOutputMinContext, *this->owner);
-  }
-  if (this->IsOfType<Polynomial<AlgebraicNumber> >()) {
-    Polynomial<AlgebraicNumber> newPoly = this->GetValue<Polynomial<AlgebraicNumber> >();
-    PolynomialSubstitution<AlgebraicNumber> subPolyPart;
-    myOldContext.ContextGetPolySubFromSuperContextNoFailure<AlgebraicNumber>(newContext, subPolyPart);
-    if (!newPoly.Substitution(subPolyPart)) {
-      return false;
-    }
-    return this->AssignValueWithContext(newPoly, inputOutputMinContext, *this->owner);
-  }
-  if (this->IsOfType<ElementWeylAlgebra<Rational> >()) {
-    PolynomialSubstitution<Rational> subEWApart;
-    PolynomialSubstitution<Rational> subPolyPart;
-    myOldContext.ContextGetPolyAndEWASubFromSuperContextNoFailure(newContext, subPolyPart, subEWApart);
-    ElementWeylAlgebra<Rational> outputEWA = this->GetValue<ElementWeylAlgebra<Rational> >();
-    if (!outputEWA.Substitution(subPolyPart, subEWApart)) {
-      this->owner->Comments << "<hr>Failed to convert " << outputEWA.toString() << ": failed to carry out substitution "
-      << subEWApart.toString() << ", " << subPolyPart.toString();
-      return false;
-    }
-    return this->AssignValueWithContext(outputEWA, inputOutputMinContext, *this->owner);
-  }
-  if (this->IsOfType<RationalFunction>()) {
-    RationalFunction newRF = this->GetValue<RationalFunction>();
-    PolynomialSubstitution<Rational> subPolyPart;
-    myOldContext.ContextGetPolySubFromSuperContextNoFailure(newContext, subPolyPart);
-    newRF.Substitution(subPolyPart);
-    return this->AssignValueWithContext(newRF, inputOutputMinContext, *this->owner);
-  }
-  if (this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunction> >()) {
-    ElementTensorsGeneralizedVermas<RationalFunction> newETGV;
-    newETGV = this->GetValue<ElementTensorsGeneralizedVermas<RationalFunction> >();
-    PolynomialSubstitution<Rational> subPolyPart;
-    myOldContext.ContextGetPolySubFromSuperContextNoFailure(newContext, subPolyPart);
-    newETGV.Substitution(subPolyPart, this->owner->theObjectContainer.theCategoryOmodules);
-    return this->AssignValueWithContext(newETGV, inputOutputMinContext, *this->owner);
-  }
-  if (this->IsOfType<Weight<Polynomial<Rational> > >()) {
-    PolynomialSubstitution<Rational> subPolyPart;
-    myOldContext.ContextGetPolySubFromSuperContextNoFailure(newContext, subPolyPart);
-    Weight<Polynomial<Rational> > theWeight = this->GetValue<Weight<Polynomial<Rational> > >();
-    for (int i = 0; i < theWeight.weightFundamentalCoordS.size; i ++) {
-      theWeight.weightFundamentalCoordS[i].Substitution(subPolyPart);
-    }
-    return this->AssignValueWithContext(theWeight, inputOutputMinContext, *this->owner);
-  }
-  if (this->IsMatrixOfType<RationalFunction>()) {
-    Matrix<RationalFunction> newMat;
-    this->owner->functionGetMatrix(*this, newMat, &newContext);
-    PolynomialSubstitution<Rational> subPolyPart;
-    myOldContext.ContextGetPolySubFromSuperContextNoFailure<Rational>(newContext, subPolyPart);
-    for (int i = 0; i < newMat.NumRows; i ++) {
-      for (int j = 0; j < newMat.NumCols; j ++) {
-        if (!newMat(i, j).Substitution(subPolyPart)) {
-          return *this->owner << "Failed to carry out the substitution "
-          << subPolyPart.toString() << " in the matrix " << this->toString() << ". ";
-        }
-      }
-    }
-    return this->AssignMatrix(newMat, *this->owner, &inputOutputMinContext);
-  }
-  this->owner->Comments << "Expression " << this->toString()
-  << " is of built-in type but is not handled by Expression::SetContextAtLeastEqualTo. ";
-  return false;
-}
-
-bool Expression::MergeContexts(Expression& leftE, Expression& rightE) {
-  MacroRegisterFunctionWithName("Expression::MergeContexts");
-  if (!leftE.HasContext() || !rightE.HasContext()) {
-    return false;
-  }
-  Expression leftC = leftE.GetContext();
-  Expression rightC = rightE.GetContext();
-  Expression outputC;
-  if (!leftC.ContextMergeContexts(leftC, rightC, outputC)) {
-    return false;
-  }
-  if (!leftE.SetContextAtLeastEqualTo(outputC)) {
-    return false;
-  }
-  return rightE.SetContextAtLeastEqualTo(outputC);
-}
-
-Expression Expression::ContextGetContextVariable(int variableIndex) const {
-  MacroRegisterFunctionWithName("Expression::ContextGetContextVariable");
-  Expression thePolVars = this->ContextGetPolynomialVariables();
-  if (thePolVars.children.size <= variableIndex + 1) {
-    Expression errorE;
-    std::stringstream out;
-    out << "Context ~does ~not ~have ~variable ~index ~" << variableIndex + 1 << ". ";
-    errorE.MakeError(out.str(), *this->owner);
-    return errorE;
-  }
-  return thePolVars[variableIndex + 1];
-}
-
-bool Expression::ContextSetSSLieAlgebrA(int indexInOwners, Calculator& owner) {
-  if (!this->IsContext()) {
-    global.fatal << "This is a programming error: calling Expression::ContextSetSSLieAlgebrA "
-    << "on a non-context expression. " << global.fatal;
-  }
-  int index = this->ContextGetIndexAmbientSSalg();
-  if (index != - 1 && index != indexInOwners) {
-    return false;
-  }
-  if (index == indexInOwners) {
-    return true;
-  }
-  Expression LieAlgContextE;
-  Expression emptyContext;
-  emptyContext.MakeEmptyContext(owner);
-  LieAlgContextE.reset(owner, 3);
-  LieAlgContextE.AddChildAtomOnTop(owner.opSemisimpleLieAlgebrA());
-  LieAlgContextE.AddChildOnTop(emptyContext);
-  LieAlgContextE.AddChildAtomOnTop(indexInOwners);
-  return this->AddChildOnTop(LieAlgContextE);
-}
-
-bool Expression::ContextSetDiffOperatorVar(const Expression& thePolyVar, const Expression& theDiffOpVar) {
-  if (!this->IsContext()) {
-    global.fatal << "This is a programming error: calling "
-    << "Expression::ContextSetDiffOperatorVar on a non-context expression. " << global.fatal;
-  }
-  Expression diffVarsE, polyVarsE;
-  diffVarsE.reset(*this->owner, 2);
-  diffVarsE.AddChildAtomOnTop(this->owner->opWeylAlgebraVariables());
-  diffVarsE.AddChildOnTop(theDiffOpVar);
-  polyVarsE.reset(*this->owner, 2);
-  polyVarsE.AddChildAtomOnTop(this->owner->opPolynomialVariables());
-  polyVarsE.AddChildOnTop(thePolyVar);
-  bool foundDiffVarsE = false;
-  bool foundPolyVarsE = false;
-  for (int i = 0; i < this->children.size; i ++) {
-    if ((*this)[i].StartsWith(this->owner->opWeylAlgebraVariables())) {
-      this->SetChilD(i, diffVarsE);
-      foundDiffVarsE = true;
-    } else if ((*this)[i].StartsWith(this->owner->opPolynomialVariables())) {
-      this->SetChilD(i, polyVarsE);
-      foundPolyVarsE = true;
-    }
-  }
-  if (!foundPolyVarsE) {
-    this->AddChildOnTop(polyVarsE);
-  }
-  if (!foundDiffVarsE) {
-    this->AddChildOnTop(diffVarsE);
-  }
-  return true;
-}
-
-Expression Expression::ContextGetDifferentialOperatorVariables() const {
-  this->CheckInitialization();
-  return this->ContextGetContextType(this->owner->opWeylAlgebraVariables());
-}
-
-Expression Expression::ContextGetPolynomialVariables() const {
-  this->CheckInitialization();
-  return this->ContextGetContextType(this->owner->opPolynomialVariables());
-}
-
-Expression Expression::ContextGetContextType(int theType) const {
-  MacroRegisterFunctionWithName("Expression::ContextGetPolynomialVariables");
-  this->CheckInitialization();
-  if (!this->IsContext()) {
-    //global.fatal << "This is a programming error: calling Expression::ContextGetPolynomialVariables"
-    //<< " on a non-context expression. "
-    //<< global.fatal;
-  }
-  for (int i = 1; i < this->children.size; i ++) {
-    if ((*this)[i].StartsWith(theType)) {
-      return (*this)[i];
-    }
-  }
-  Expression output;
-  output.reset(*this->owner, 1);
-  output.AddChildAtomOnTop(theType);
-  return output;
-}
-
-bool Expression::ContextMergeContexts(
-  const Expression& leftContext, const Expression& rightContext, Expression& outputContext
-) {
-  MacroRegisterFunctionWithName("Expression::ContextMergeContexts");
-  if (&leftContext == &outputContext || &rightContext == &outputContext) {
-    Expression leftCopy = leftContext;
-    Expression rightCopy = rightContext;
-    return Expression::ContextMergeContexts(leftCopy, rightCopy, outputContext);
-  }
-  int leftSSindex = leftContext.ContextGetIndexAmbientSSalg();
-  int rightSSindex = rightContext.ContextGetIndexAmbientSSalg();
-  if (leftSSindex == - 1) {
-    leftSSindex = rightSSindex;
-  }
-  if (rightSSindex == - 1) {
-    rightSSindex = leftSSindex;
-  }
-  if (leftSSindex != rightSSindex) {
-    return false;
-  }
-  Expression leftPolyV = leftContext.ContextGetPolynomialVariables();
-  Expression rightPolyV = rightContext.ContextGetPolynomialVariables();
-  HashedList<Expression> polyVarUnion;
-  polyVarUnion.setExpectedSize(leftPolyV.size() + rightPolyV.size() - 2);
-  for (int i = 1; i < leftPolyV.size(); i ++) {
-    polyVarUnion.addOnTopNoRepetition(leftPolyV[i]);
-  }
-  for (int i = 1; i < rightPolyV.size(); i ++) {
-    polyVarUnion.addOnTopNoRepetition(rightPolyV[i]);
-  }
-  polyVarUnion.QuickSortAscending();
-  Calculator& owner = *leftContext.owner;
-  outputContext.reset(owner, 5 + polyVarUnion.size);
-  outputContext.AddChildAtomOnTop(owner.opContexT());
-  if (polyVarUnion.size > 0) {
-    Expression polyVarsE;
-    polyVarsE.reset(owner, polyVarUnion.size + 1);
-    polyVarsE.AddChildAtomOnTop(owner.opPolynomialVariables());
-    for (int i = 0; i < polyVarUnion.size; i ++) {
-      polyVarsE.AddChildOnTop(polyVarUnion[i]);
-    }
-    outputContext.AddChildOnTop(polyVarsE);
-  }
-  //Converting differential operators if needed.
-  Expression leftEWAV = leftContext.ContextGetDifferentialOperatorVariables();
-  Expression rightEWAV = rightContext.ContextGetDifferentialOperatorVariables();
-  if (leftEWAV.size() > 1 || rightEWAV.size() > 1) {
-    Selection foundEWAVar;
-    List<Expression> EWAVars;
-    foundEWAVar.init(polyVarUnion.size);
-    EWAVars.setSize(polyVarUnion.size);
-    Expression* currentPolyV = &leftPolyV;
-    Expression* currentEWAV = &leftEWAV;
-    for (int k = 0; k < 2; k ++, currentPolyV = &rightPolyV, currentEWAV = &rightEWAV) {
-      for (int i = 1; i < currentEWAV->size(); i ++) {
-        int theIndex = polyVarUnion.GetIndex((*currentPolyV)[i]);
-        if (foundEWAVar.selected[theIndex]) {
-          if ((*currentEWAV)[i] != EWAVars[theIndex]) {
-            return owner << "<hr>Failed to merge contexts " << leftContext.toString() << " and "
-            << rightContext.toString()
-            << " because " << (*currentPolyV)[i].toString()
-            << " has two different corresponding differential operator variables: "
-            << EWAVars[theIndex].toString() << " and " << (*currentEWAV)[i].toString();
-          }
-        }
-        foundEWAVar.AddSelectionAppendNewIndex(theIndex);
-        EWAVars[theIndex] = (*currentEWAV)[i];
-      }
-    }
-    for (int i = 0; i < foundEWAVar.MaxSize; i ++) {
-      if (!foundEWAVar.selected[i]) {
-        Expression currentEWAVar;
-        currentEWAVar.reset(owner, 2);
-        currentEWAVar.AddChildAtomOnTop(owner.AddOperationNoRepetitionOrReturnIndexFirst("\\partial"));
-        Expression indexE;
-        indexE.AssignValue(i, owner);
-        currentEWAVar.AddChildOnTop(indexE);
-        if (EWAVars.Contains(currentEWAVar)) {
-          return owner << "<hr>Failed to merge contexts " << leftContext.toString() << " and " << rightContext.toString()
-          << ": " << polyVarUnion[i].toString()
-          << " had no differential letter assigned to it. I tried to assign automatically  "
-          << currentEWAVar.toString() << " as differential operator letter, but it was already taken. ";
-        }
-      }
-    }
-    Expression diffVarsE;
-    diffVarsE.reset(owner, polyVarUnion.size + 1);
-    diffVarsE.AddChildAtomOnTop(owner.opWeylAlgebraVariables());
-    for (int i = 0; i < EWAVars.size; i ++) {
-      diffVarsE.AddChildOnTop(EWAVars[i]);
-    }
-    outputContext.AddChildOnTop(diffVarsE);
-  }
-  if (leftSSindex != - 1) {
-    Expression ssAlgE;
-    Expression emptyContext;
-    emptyContext.MakeEmptyContext(owner);
-    ssAlgE.reset(owner, 2);
-    ssAlgE.AddChildAtomOnTop(owner.opSemisimpleLieAlgebrA());
-    ssAlgE.AddChildOnTop(emptyContext);
-    ssAlgE.AddChildAtomOnTop(leftSSindex);
-    outputContext.AddChildOnTop(ssAlgE);
-  }
-  return true;
-}
-
-void Expression::ContextGetFormatExpressions(FormatExpressions& output) const {
-  output.polyAlphabeT.setSize(0);
-  output.polyDefaultLetter = "x";
-  if (this->owner == nullptr) {
-    return;
-  }
-  if (!this->StartsWith(this->owner->opContexT())) {
-    return;
-  }
-  Expression thePolyE = this->ContextGetPolynomialVariables();
-  output.polyAlphabeT.setSize(thePolyE.children.size - 1);
-  for (int i = 1; i < thePolyE.children.size; i ++) {
-    output.polyAlphabeT[i - 1] = thePolyE[i].toString();
-  }
-  Expression theEWAE = this->ContextGetDifferentialOperatorVariables();
-  output.weylAlgebraLetters.setSize(theEWAE.children.size - 1);
-  for (int i = 1; i < theEWAE.size(); i ++) {
-    output.weylAlgebraLetters[i - 1] = theEWAE[i].toString();
-  }
 }
 
 bool Expression::GetExpressionLeafs(HashedList<Expression>& outputAccumulateLeafs) const {
@@ -1864,7 +1499,7 @@ bool Expression::IsContext() const {
   if (this->owner == nullptr) {
     return false;
   }
-  return this->StartsWith(this->owner->opContexT());
+  return this->StartsWith(this->owner->opContext());
 }
 
 bool Expression::IsError(std::string* outputErrorMessage) const {
@@ -2199,90 +1834,10 @@ bool Expression::IsIntegerFittingInInt(int* whichInteger) const {
   return theRat.IsIntegerFittingInInt(whichInteger);
 }
 
-template <class coefficient>
-bool Expression::ContextGetPolySubFromSuperContextNoFailure(
-  const Expression& largerContext, PolynomialSubstitution<coefficient>& output
-) const {
-  bool mustBeTrue = this->ContextGetPolySubFromSuperContext(largerContext, output);
-  if (!mustBeTrue) {
-    global.fatal << "This is a programming error: I was not able to "
-    << "extract a polynomial substitution from smaller context "
-    << this->toString() << " relative to larger context "
-    << largerContext.toString() << ". " << global.fatal;
-  }
-  return mustBeTrue;
-}
-
-template <class coefficient>
-bool Expression::ContextGetPolySubFromSuperContext(
-  const Expression& largerContext, PolynomialSubstitution<coefficient>& output
-) const {
-  Expression polyVarsElargerContext = largerContext.ContextGetPolynomialVariables();
-  Expression polyVarsEsmallContext = this->ContextGetPolynomialVariables();
-  output.setSize(polyVarsElargerContext.children.size - 1);
-  int numVars = polyVarsElargerContext.children.size - 1;
-  for (int i = 1; i < polyVarsEsmallContext.children.size; i ++) {
-    int theNewIndex = polyVarsElargerContext.GetIndexChild(polyVarsEsmallContext[i]);
-    if (theNewIndex == - 1) {
-      return false;
-    }
-    output[i - 1].makeMonomial(theNewIndex - 1, 1, 1, numVars);
-  }
-  return true;
-}
-
-bool Expression::ContextGetPolyAndEWASubFromSuperContextNoFailure(
-  const Expression& largerContext,
-  PolynomialSubstitution<Rational>& outputPolyPart,
-  PolynomialSubstitution<Rational>& outputEWApart
-) const {
-  bool mustBeTrue = this->ContextGetPolyAndEWASubFromSuperContext(largerContext, outputPolyPart, outputEWApart);
-  if (!mustBeTrue) {
-    global.fatal << "This is a programming error: "
-    << "I was not able to extract a polynomial/differential operator substitution from smaller context "
-    << this->toString() << " relative to larger context " << largerContext.toString() << global.fatal;
-  }
-  return mustBeTrue;
-}
-
-bool Expression::ContextGetPolyAndEWASubFromSuperContext(
-  const Expression& largerContext,
-  PolynomialSubstitution<Rational>& outputPolyPart,
-  PolynomialSubstitution<Rational>& outputEWApart
-) const {
-  if (!this->ContextGetPolySubFromSuperContext(largerContext, outputPolyPart)) {
-    return false;
-  }
-  Expression EWAVarsElargerContext = largerContext.ContextGetDifferentialOperatorVariables();
-  Expression EWAVarsEsmallContext = this->ContextGetDifferentialOperatorVariables();
-  outputEWApart.setSize(EWAVarsElargerContext.children.size - 1);
-  int numVars = EWAVarsElargerContext.children.size - 1;
-  for (int i = 1; i < EWAVarsEsmallContext.children.size; i ++) {
-    int theNewIndex = EWAVarsElargerContext.GetIndexChild(EWAVarsEsmallContext[i]);
-    if (theNewIndex == - 1) {
-      return false;
-    }
-    outputEWApart[i - 1].makeMonomial(theNewIndex - 1, 1, 1, numVars);
-  }
-  return true;
-}
-
 bool Expression::MakeAtom(const std::string& atomName, Calculator& newBoss) {
   this->reset(newBoss);
   this->theData = newBoss.AddOperationNoRepetitionOrReturnIndexFirst(atomName);
   return true;
-}
-
-int Expression::ContextGetIndexAmbientSSalg() const {
-  if (!this->IsContext()) {
-    return - 1;
-  }
-  for (int i = 1; i < this->children.size; i ++) {
-    if ((*this)[i].StartsWith(this->owner->opSemisimpleLieAlgebrA(), 3)) {
-      return (*this)[i][2].theData;
-    }
-  }
-  return - 1;
 }
 
 void Expression::GetBaseExponentForm(Expression& outputBase, Expression& outputExponent) const {
@@ -2297,37 +1852,34 @@ void Expression::GetBaseExponentForm(Expression& outputBase, Expression& outputE
 }
 
 bool Expression::GetContext(ExpressionContext& output) const {
-  output.context = this->GetContext();
+  output = this->GetContext();
   return true;
 }
 
-Expression Expression::GetContext() const {
+ExpressionContext Expression::GetContext() const {
   this->CheckInitialization();
+  ExpressionContext result(*this->owner);
   if (this->IsBuiltInTypE()) {
-    return (*this)[1];
+    result.fromExpression((*this)[1]);
+    return result;
   }
   if (this->IsMatrix()) {
     if ((*this)[0].StartsWith(this->owner->opMatriX())) {
       if ((*this)[0].size() > 2) {
-        return (*this)[0][2];
+        result.fromExpression((*this)[0][2]);
+        return result;
       }
     }
   }
-  Expression output;
-  output.MakeEmptyContext(*this->owner);
   global.fatal
-  << "This is a programming error: GetContext called on an Expression"
+  << "This is a programming error: GetContext called on an Expression "
   << "that is not a built-in data type. "
   << "I can't display the expression as this may cause ``infinite'' "
   << "recursion if the error is caused by the toString method. "
   << "Here is however the lisp form "
   << this->ToStringFull() << " of the expression. "
   << "Here's stack trace. " << global.fatal;
-  return output;
-}
-
-int Expression::GetNumContextVariables() const {
-  return this->GetContext().ContextGetPolynomialVariables().children.size - 1;
+  return ExpressionContext(*this->owner);
 }
 
 int Expression::GetNumCols() const {
@@ -2559,12 +2111,12 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     }
     result = true;
   } else if (this->IsOfType<ElementEllipticCurve<Rational> >()) {
-    this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
+    this->GetContext().getFormat(contextFormat.GetElement());
     contextFormat.GetElement().flagUseFrac = true;
     out << this->GetValue<ElementEllipticCurve<Rational> >().toString(&contextFormat.GetElement());
     result = true;
   } else if (this->IsOfType<ElementEllipticCurve<ElementZmodP> >()) {
-    this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
+    this->GetContext().getFormat(contextFormat.GetElement());
     contextFormat.GetElement().flagUseFrac = true;
     out << this->GetValue<ElementEllipticCurve<ElementZmodP> >().toString(&contextFormat.GetElement());
     result = true;
@@ -2581,7 +2133,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     out << this->GetValue<ElementHyperoctahedralGroupR2>().toString(&contextFormat.GetElement());
     result = true;
   } else if (this->IsOfType<Polynomial<Rational> >()) {
-    this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
+    this->GetContext().getFormat(contextFormat.GetElement());
     contextFormat.GetElement().flagUseFrac = true;
     if (!this->owner->flagHidePolynomialBuiltInTypeIndicator) {
       out << "Polynomial{}(";
@@ -2595,10 +2147,10 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     }
     result = true;
   } else if (this->IsOfType<Polynomial<AlgebraicNumber> >()) {
-    this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
+    this->GetContext().getFormat(contextFormat.GetElement());
     contextFormat.GetElement().flagUseFrac = true;
     out << "PolynomialAlgebraicNumbers{}(";
-    std::string currentString= this->GetValue<Polynomial<AlgebraicNumber> >().toString(&contextFormat.GetElement());
+    std::string currentString = this->GetValue<Polynomial<AlgebraicNumber> >().toString(&contextFormat.GetElement());
     if (currentString.size() > 0) {
       if (currentString[0] == '-') {
         currentString = currentString.substr(1);
@@ -2618,7 +2170,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     }
     result = true;
   } else if (this->IsOfType<RationalFunction>()) {
-    this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
+    this->GetContext().getFormat(contextFormat.GetElement());
     contextFormat.GetElement().flagUseFrac = true;
     out << "MakeRationalFunction{}("
     << this->GetValue<RationalFunction>().toString(&contextFormat.GetElement()) << ")";
@@ -2627,7 +2179,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     }
     result = true;
   } else if (this->IsOfType<Weight<Polynomial<Rational> > >()) {
-    this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
+    this->GetContext().getFormat(contextFormat.GetElement());
     contextFormat.GetElement().flagFormatWeightAsVectorSpaceIndex = false;
     out << this->GetValue<Weight<Polynomial<Rational> > >().toString(&contextFormat.GetElement());
     result = true;
@@ -2637,13 +2189,13 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     << ")";
     result = true;
   } else if (this->IsOfType<ElementUniversalEnveloping<RationalFunction> >()) {
-    this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
+    this->GetContext().getFormat(contextFormat.GetElement());
     out << "UEE{}(" //<< this->GetContext().toString() << ", "
     << this->GetValue<ElementUniversalEnveloping<RationalFunction> >().toString(&contextFormat.GetElement())
     << ")";
     result = true;
   } else if (this->IsOfType<MatrixTensor<Rational> >()) {
-    this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
+    this->GetContext().getFormat(contextFormat.GetElement());
     contextFormat.GetElement().flagUseLatex = true;
     contextFormat.GetElement().flagUseHTML = false;
     if (this->GetValue<MatrixTensor<Rational> >().GetMinNumColsNumRows() < 20) {
@@ -2654,30 +2206,8 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
       out << this->GetValue<MatrixTensor<Rational> >().toString();
     }
     result = true;
-  } /*else if (this->IsMatrixGivenType<Rational>()) {
-    this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
-    contextFormat.GetElement().flagUseLatex = true;
-    contextFormat.GetElement().flagUseHTML = false;
-    Matrix<Rational> theMat;
-    this->IsMatrixGivenType(0, 0, &theMat);
-    out << theMat.toString(&contextFormat.GetElement());
-    result = true;
-  } else if (this->IsMatrixGivenType<double>()) {
-    out.precision(4);
-    Matrix<double> theMat;
-    this->IsMatrixGivenType(0, 0, &theMat);
-    out << std::fixed << theMat;
-    result = true;
-  } else if (this->IsMatrixGivenType<AlgebraicNumber>()) {
-    this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
-    contextFormat.GetElement().flagUseLatex = true;
-    contextFormat.GetElement().flagUseHTML = false;
-    Matrix<AlgebraicNumber> theMat;
-    this->IsMatrixGivenType(0, 0, &theMat);
-    out << theMat.toString(&contextFormat.GetElement());
-    result = true;
-  } */else if (this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunction> >()) {
-    this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
+  } else if (this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunction> >()) {
+    this->GetContext().getFormat(contextFormat.GetElement());
     out << "ETGVM{}(";
     out << this->GetValue<ElementTensorsGeneralizedVermas<RationalFunction> >().toString(&contextFormat.GetElement());
     out << ")";
@@ -2779,7 +2309,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     out << this->GetValue<LittelmannPath>().toString();
     result = true;
   } else if (this->IsMatrixOfType<RationalFunction>()) {
-    this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
+    this->GetContext().getFormat(contextFormat.GetElement());
     contextFormat.GetElement().flagUseHTML = false;
     contextFormat.GetElement().flagUseLatex = true;
     Matrix<RationalFunction> theMat;
@@ -2787,7 +2317,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     out << theMat.toString(&contextFormat.GetElement());
     result = true;
   } else if (this->IsOfType<ElementWeylAlgebra<Rational> >()) {
-    this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
+    this->GetContext().getFormat(contextFormat.GetElement());
     contextFormat.GetElement().flagUseHTML = false;
     contextFormat.GetElement().flagUseLatex = true;
     out << "ElementWeylAlgebra{}(";
@@ -3086,7 +2616,7 @@ std::string Expression::ToStringAllSlidersInExpression() const {
       out << boxNames[i] << " not found. ";
       continue;
     }
-    int theIndex = theSliders.GetIndex(boxNames[i]);
+    int theIndex = theSliders.getIndex(boxNames[i]);
     if (this->owner->theObjectContainer.userInputBoxSliderDisplayed[theIndex]) {
       continue;
     }
@@ -4459,7 +3989,7 @@ std::string Expression::toString(
       return newMe.toString(theFormat, &newStart, false, outputJS);
     }
   }
-  int notationIndex = owner->theObjectContainer.ExpressionWithNotation.GetIndex(*this);
+  int notationIndex = owner->theObjectContainer.ExpressionWithNotation.getIndex(*this);
   if (notationIndex != - 1) {
     return owner->theObjectContainer.ExpressionNotation[notationIndex];
   }
@@ -4688,7 +4218,7 @@ bool Expression::IsOperationGiven(const std::string& desiredAtom) const {
   if (this->owner == nullptr) {
     return false;
   }
-  return this->theData == this->owner->operations.GetIndex(desiredAtom);
+  return this->theData == this->owner->operations.getIndex(desiredAtom);
 }
 
 bool Expression::IsOperationGiven(int desiredDataUseMinusOneForAny) const {
@@ -4792,14 +4322,14 @@ bool Expression::HasContext() const {
   if (!this->IsBuiltInTypE() || !(this->size() == 3)) {
     return false;
   }
-  return (*this)[1].IsListStartingWithAtom(this->owner->opContexT());
+  return (*this)[1].IsListStartingWithAtom(this->owner->opContext());
 }
 
 bool Expression::HasNonEmptyContext() const {
   if (!this->HasContext()) {
     return false;
   }
-  return !this->GetContext().StartsWith(this->owner->opContexT(), 1);
+  return this->GetContext().isEmpty();
 }
 
 bool Expression::IsCacheableExpression() const {
@@ -4869,7 +4399,7 @@ bool Expression::IsBuiltInTypE(int* outputWhichType) const {
     return false;
   }
   if (outputWhichType != nullptr) {
-    *outputWhichType = this->owner->GetOperations().GetIndex(theType);
+    *outputWhichType = this->owner->GetOperations().getIndex(theType);
   }
   return true;
 }
@@ -4910,64 +4440,36 @@ bool Expression::MakeOXdotsX(Calculator& owner, int theOp, const List<Expression
   return true;
 }
 
-bool Expression::MakeEmptyContext(Calculator& owner) {
-  this->reset(owner, 1);
-  return this->AddChildAtomOnTop(owner.opContexT());
-}
-
-bool Expression::ContextMakeContextWithPolyVars(Calculator& owner, const List<std::string>& inputPolyVarNames) {
-  MacroRegisterFunctionWithName("Expression::ContextMakeContextWithPolyVars");
-  List<Expression> thePolyVars;
-  thePolyVars.setSize(inputPolyVarNames.size);
-  for (int i = 0; i < thePolyVars.size; i ++) {
-    thePolyVars[i].MakeAtom(inputPolyVarNames[i], owner);
-  }
-  return this->ContextMakeContextWithPolyVars(owner, thePolyVars);
-}
-
-bool Expression::ContextMakeContextWithPolyVars(Calculator& owner, const List<Expression>& inputPolyVarEs) {
-  this->MakeEmptyContext(owner);
-  Expression thePolyVars;
-  thePolyVars.reset(owner, 2);
-  thePolyVars.AddChildAtomOnTop(owner.opPolynomialVariables());
-  for (int i = 0; i< inputPolyVarEs.size; i ++) {
-    thePolyVars.AddChildOnTop(inputPolyVarEs[i]);
-  }
-  return this->AddChildOnTop(thePolyVars);
-}
-
-bool Expression::ContextMakeContextWithOnePolyVar(Calculator& owner, const Expression& inputPolyVarE) {
-  this->MakeEmptyContext(owner);
-  Expression thePolyVars;
-  thePolyVars.reset(owner, 2);
-  thePolyVars.AddChildAtomOnTop(owner.opPolynomialVariables());
-  thePolyVars.AddChildOnTop(inputPolyVarE);
-  return this->AddChildOnTop(thePolyVars);
-}
-
-bool Expression::MakeContextWithOnePolyVarOneDiffVar(
-  Calculator& owner, const Expression& inputPolyVarE, const Expression& inputDiffVarE
+void ExpressionContext::makeOneVariableCreate(
+  const std::string& variable
 ) {
-  this->MakeEmptyContext(owner);
-  return this->ContextSetDiffOperatorVar(inputPolyVarE, inputDiffVarE);
+  this->initialize(*this->owner);
+  Expression variableWrapper;
+  variableWrapper.MakeAtom(variable, *this->owner);
+  this->variables.addOnTop(variableWrapper);
 }
 
-bool Expression::MakeContextSSLieAlg(Calculator& owner, const SemisimpleLieAlgebra& theSSLiealg) {
-  MacroRegisterFunctionWithName("Expression::MakeContextSSLieAlg");
-  theSSLiealg.CheckConsistency();
-  this->MakeEmptyContext(owner);
-  owner.theObjectContainer.GetLieAlgebraCreateIfNotPresent(theSSLiealg.theWeyl.theDynkinType);
-  return this->ContextSetSSLieAlgebrA(
-    owner.theObjectContainer.semisimpleLieAlgebras.GetIndex(
-      theSSLiealg.theWeyl.theDynkinType
-    ), owner
-  );
+void ExpressionContext::makeOneVariableOneDifferentialOperator(
+  const Expression& inputVariable,
+  const Expression& inputDifferentialOperatorVariable
+) {
+  this->initialize(*this->owner);
+  this->variables.addOnTop(inputVariable);
+  this->differentialOperatorVariables.addOnTop(inputDifferentialOperatorVariable);
 }
 
-bool Expression::ContextMakeContextWithOnePolyVar(Calculator& owner, const std::string& inputPolyVarName) {
-  Expression varNameE;
-  varNameE.MakeAtom(owner.AddOperationNoRepetitionOrReturnIndexFirst(inputPolyVarName), owner);
-  return this->ContextMakeContextWithOnePolyVar(owner, varNameE);
+void ExpressionContext::makeOneVariable(
+  const Expression& polynomialVariable
+) {
+  this->initialize(*this->owner);
+  this->variables.addOnTop(polynomialVariable);
+}
+
+void ExpressionContext::makeOneVariableFromString(
+  const std::string& polynomialVariable
+) {
+  this->initialize(*this->owner);
+  this->variables.addOnTop(polynomialVariable);
 }
 
 bool Expression::MakeSqrt(Calculator& owner, const Rational& argument, const Rational& radicalSuperIndex) {

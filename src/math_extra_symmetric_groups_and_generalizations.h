@@ -1448,8 +1448,8 @@ bool FiniteGroup<elementSomeGroup>::AreConjugate(const elementSomeGroup& x, cons
   if (!this->flagCCsComputed) {
     this->ComputeCCSizesAndRepresentatives();
   }
-  int xi = this->theElements.GetIndex(x);
-  int yi = this->theElements.GetIndex(y);
+  int xi = this->theElements.getIndex(x);
+  int yi = this->theElements.getIndex(y);
   for (int i = 0; i < this->conjugacyClasseS.size; i ++) {
     if (this->conjugacyClasseS[i].indicesEltsInOwner.BSContains(xi)) {
       if (this->conjugacyClasseS[i].indicesEltsInOwner.BSContains(yi)) {
@@ -1512,7 +1512,7 @@ void FiniteGroup<elementSomeGroup>::ComputeCCSizesRepresentativesWords() {
   for (int i = 0; i < this->theElements.size; i ++) {
     for (int j = 0; j < this->generators.size; j ++) {
       elementSomeGroup x = this->theElements[i] ^ this->generators[j];
-      int xi = this->theElements.GetIndex(x);
+      int xi = this->theElements.getIndex(x);
       conjugacygraph.AddEdge(i, xi);
     }
   }
@@ -1835,7 +1835,7 @@ void FiniteGroup<elementSomeGroup>::VerifyCCSizesAndRepresentativesFormula() {
         }
       }
     } else {
-      int cri = GG.theElements.GetIndex(this->conjugacyClasseS[i].representative);
+      int cri = GG.theElements.getIndex(this->conjugacyClasseS[i].representative);
       for (int gci = 0; gci < GG.conjugacyClasseS.size; gci ++) {
         if (GG.conjugacyClasseS[gci].indicesEltsInOwner.BSContains(cri)) {
           gcc = gci;

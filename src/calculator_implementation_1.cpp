@@ -101,7 +101,7 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
         VisitedVertices.Clear();
         GlobalGoal.Subtract(tempTotalChange);
       } else {
-        int tempI = VisitedVertices.GetIndex(BaseVariables);
+        int tempI = VisitedVertices.getIndex(BaseVariables);
         if (tempI == - 1) {
           VisitedVertices.addOnTop(BaseVariables);
         } else {
@@ -157,7 +157,7 @@ bool Calculator::innerGCDOrLCMPoly(
 ) {
   MacroRegisterFunctionWithName("Calculator::innerGCDOrLCMPoly");
   Vector<Polynomial<Rational> > polynomialsRational;
-  Expression theContext(theCommands);
+  ExpressionContext theContext(theCommands);
   if (!theCommands.GetVectorFromFunctionArguments(
     input,
     polynomialsRational,
@@ -179,10 +179,10 @@ bool Calculator::innerGCDOrLCMPoly(
 bool Calculator::GetListPolynomialVariableLabelsLexicographic(
   const Expression& input,
   Vector<Polynomial<AlgebraicNumber> >& output,
-  Expression& outputContext
+  ExpressionContext& outputContext
 ) {
   MacroRegisterFunctionWithName("Calculator::GetListPolynomialVariableLabelsLexicographic");
-  Expression theContextStart(*this);
+  ExpressionContext theContextStart(*this);
   if (!this->GetVectorFromFunctionArguments(
     input,
     output,
@@ -195,17 +195,17 @@ bool Calculator::GetListPolynomialVariableLabelsLexicographic(
   if (output.size < 2) {
     return false;
   }
-  int numVars = theContextStart.ContextGetNumContextVariables();
+  int numVars = theContextStart.numberOfVariables();
   HashedList<Expression> theVars;
   theVars.setExpectedSize(numVars);
   for (int i = 0; i < numVars; i ++) {
-    theVars.addOnTop(theContextStart.ContextGetContextVariable(i));
+    theVars.addOnTop(theContextStart.getVariable(i));
   }
   theVars.QuickSortAscending();
   PolynomialSubstitution<AlgebraicNumber> theSub;
   theSub.setSize(numVars);
   for (int i = 0; i < theSub.size; i ++) {
-    int currentIndex = theVars.GetIndex(theContextStart.ContextGetContextVariable(i));
+    int currentIndex = theVars.getIndex(theContextStart.getVariable(i));
     theSub[i].makeMonomial(
       currentIndex,
       1,
@@ -213,20 +213,11 @@ bool Calculator::GetListPolynomialVariableLabelsLexicographic(
       numVars
     );
   }
-  outputContext.MakeEmptyContext(*this);
-  Expression PolyVarsE, tempE;
-  PolyVarsE.reset(*this);
-  PolyVarsE.children.Reserve(numVars + 1);
-  tempE.MakeAtom(this->opPolynomialVariables(), *this);
-  PolyVarsE.AddChildOnTop(tempE);
-  for (int i = 0; i < theVars.size; i ++) {
-    PolyVarsE.AddChildOnTop(theVars[i]);
-  }
   for (int i = 0; i < output.size; i ++) {
     Polynomial<AlgebraicNumber>& currentP = output[i];
     currentP.Substitution(theSub);
   }
-  return outputContext.AddChildOnTop(PolyVarsE);
+  return outputContext.setVariables(theVars);
 }
 
 bool DynkinSimpleType:: HasPrecomputedSubalgebras() const {
@@ -610,7 +601,7 @@ bool Calculator::innerGroebner(
   MacroRegisterFunctionWithName("Calculator::innerGroebner");
   Vector<Polynomial<Rational> > inputVector;
   Vector<Polynomial<ElementZmodP> > inputVectorZmodP;
-  Expression theContext;
+  ExpressionContext theContext(theCommands);
   if (input.size() < 3) {
     return output.MakeError("Function takes at least two arguments. ", theCommands);
   }
@@ -665,8 +656,8 @@ bool Calculator::innerGroebner(
     inputVector[i].scaleNormalizeLeadingMonomial();
   }
   GroebnerBasisComputation<AlgebraicNumber> theGroebnerComputation;
-  theContext.ContextGetFormatExpressions(theGroebnerComputation.theFormat);
-  theContext.ContextGetFormatExpressions(global.theDefaultFormat.GetElement());
+  theContext.getFormat(theGroebnerComputation.theFormat);
+  theContext.getFormat(global.theDefaultFormat.GetElement());
   if (useModZp) {
     ElementZmodP tempElt;
     tempElt.MakeMOne(static_cast<unsigned>(theMod));
@@ -707,9 +698,9 @@ bool Calculator::innerGroebner(
   std::stringstream out;
   out << theGroebnerComputation.ToStringLetterOrder(false);
   out << "Letter/expression order: ";
-  for (int i = 0; i < theContext.ContextGetNumContextVariables(); i ++) {
-    out << theContext.ContextGetContextVariable(i).toString();
-    if (i != theContext.ContextGetNumContextVariables() - 1) {
+  for (int i = 0; i < theContext.variables.size; i ++) {
+    out << theContext.variables[i].toString();
+    if (i != theContext.variables.size - 1) {
       out << "&lt;";
     }
   }
@@ -767,11 +758,11 @@ bool Calculator::innerDeterminantPolynomial(
     return false;
   }
   Matrix<Polynomial<Rational> > matPol;
-  Expression theContext;
+  ExpressionContext context(theCommands);
   if (!theCommands.functionGetMatrix(
     input[1],
     matPol,
-    &theContext,
+    &context,
     - 1,
     CalculatorConversions::functionPolynomial<Rational>
   )) {
@@ -793,7 +784,7 @@ bool Calculator::innerDeterminantPolynomial(
   }
   Polynomial<Rational> outputPoly;
   outputPoly.MakeDeterminantFromSquareMatrix(matPol);
-  return output.AssignValueWithContext(outputPoly, theContext, theCommands);
+  return output.AssignValueWithContext(outputPoly, context, theCommands);
 }
 
 bool Calculator::innerTranspose(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -2197,7 +2188,7 @@ bool Calculator::innerKillingForm(Calculator& theCommands, const Expression& inp
   if (!Expression::MergeContexts(leftE, rightE)) {
     return false;
   }
-  Expression theContext = leftE.GetContext();
+  ExpressionContext theContext = leftE.GetContext();
   ElementUniversalEnveloping<RationalFunction> left, right;
   if (
     !leftE.IsOfType<ElementUniversalEnveloping<RationalFunction> >(&left) ||
@@ -2238,7 +2229,7 @@ bool Calculator::innerRootSubsystem(Calculator& theCommands, const Expression& i
     return theCommands << "<hr>Function root subsystem works for simple ambient types only.";
   }
   for (int i = 2; i < input.size(); i ++) {
-    if (!theCommands.GetVectoR(input[i], currentRoot, nullptr, theRank, nullptr)) {
+    if (!theCommands.GetVector(input[i], currentRoot, nullptr, theRank, nullptr)) {
       return false;
     }
     if (!theWeyl.RootSystem.Contains(currentRoot)) {
@@ -2273,7 +2264,7 @@ bool Calculator::innerPerturbSplittingNormal(Calculator& theCommands, const Expr
     return output.MakeError(out.str(), theCommands);
   }
   Vector<Rational> splittingNormal;
-  if (!theCommands.GetVectoR(input[1], splittingNormal, nullptr)) {
+  if (!theCommands.GetVector(input[1], splittingNormal, nullptr)) {
     return output.MakeError("Failed to extract normal from first argument. ", theCommands);
   }
   Matrix<Rational> theMat;

@@ -163,7 +163,7 @@ bool AlgebraicClosureRationals::MergeRadicals(const List<LargeInteger>& theRadic
     for (int j = 0; j < this->theQuadraticRadicals.size; j ++) {
       if (smallerFieldSel.selected[j]) {
         if (this->theQuadraticRadicals[j] == - 1) {
-          largerFieldSel.AddSelectionAppendNewIndex(radicalsNew.GetIndex(- 1));
+          largerFieldSel.AddSelectionAppendNewIndex(radicalsNew.getIndex(- 1));
           continue;
         }
         for (int k = 0; k < radicalsNew.size; k ++) {
@@ -1178,7 +1178,7 @@ bool AlgebraicNumber::AssignRationalQuadraticRadical(
   FactorSel.init(inputOwner.theQuadraticRadicals.size);
   for (int i = 0; i < theFactors.size; i ++) {
     if (theFactors[i] == - 1) {
-      FactorSel.AddSelectionAppendNewIndex(inputOwner.theQuadraticRadicals.GetIndex(- 1));
+      FactorSel.AddSelectionAppendNewIndex(inputOwner.theQuadraticRadicals.getIndex(- 1));
     } else {
       for (int j = 0; j < inputOwner.theQuadraticRadicals.size; j ++) {
         if (inputOwner.theQuadraticRadicals[j] != - 1) {

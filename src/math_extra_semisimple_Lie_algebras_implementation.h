@@ -340,7 +340,7 @@ Vector<coefficient> ElementSemisimpleLieAlgebra<coefficient>::GetCartanPart() co
   }
   for (int i = 0; i < theRank; i ++) {
     tempGen.MakeGenerator(*owner, i + numPosRoots);
-    int currentIndex = this->theMonomials.GetIndex(tempGen);
+    int currentIndex = this->theMonomials.getIndex(tempGen);
     if (currentIndex != - 1) {
       result[i] += this->coefficients[currentIndex];
     }
@@ -620,7 +620,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(
         }
       }
     }
-    highestCoeff = remainingCharProjected.coefficients[remainingCharProjected.theMonomials.GetIndex(localHighest)];
+    highestCoeff = remainingCharProjected.coefficients[remainingCharProjected.theMonomials.getIndex(localHighest)];
     output.AddMonomial(localHighest, highestCoeff);
     if (!WeylFDSmall.FreudenthalEvalIrrepIsWRTLeviPart(
       localHighest.weightFundamentalCoordS, tempHashedRoots, tempMults, tempS, 10000

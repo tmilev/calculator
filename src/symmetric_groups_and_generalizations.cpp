@@ -23,7 +23,7 @@ int acc = 1;
   List<int> nums;
   List<int> counts;
   for (int i = 0; i < this->p.size; i ++) {
-    int numdex = nums.GetIndex(this->p[i]);
+    int numdex = nums.getIndex(this->p[i]);
     if (numdex == - 1) {
       nums.addOnTop(this->p[i]);
       counts.addOnTop(1);

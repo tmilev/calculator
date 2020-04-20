@@ -172,7 +172,7 @@ public:
     return this->theWeyl.RootsOfBorel.size + simpleRootIndex;
   }
   int GetGeneratorFromRoot(const Vector<Rational>& input) {
-    return this->GetGeneratorFromRootIndex(this->theWeyl.RootSystem.GetIndex(input));
+    return this->GetGeneratorFromRootIndex(this->theWeyl.RootSystem.getIndex(input));
   }
   int GetRootIndexFromDisplayIndex(int theIndex);
   int GetGeneratorFromDisplayIndex(int theIndex) {

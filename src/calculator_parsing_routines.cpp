@@ -4,7 +4,7 @@
 
 SyntacticElement Calculator::GetEmptySyntacticElement() {
   SyntacticElement result;
-  result.controlIndex = this->controlSequences.GetIndex(" ");
+  result.controlIndex = this->controlSequences.getIndex(" ");
   result.theData.reset(*this);
   return result;
 }
@@ -896,7 +896,7 @@ void Calculator::ParseFillDictionary(const std::string& input, List<SyntacticEle
     }
     escapingAllowed = true;
     if (this->controlSequences.Contains(current) && !mustInterpretAsVariable) {
-      currentElement.controlIndex = this->controlSequences.GetIndex(current);
+      currentElement.controlIndex = this->controlSequences.getIndex(current);
       currentElement.theData.reset(*this);
       output.addOnTop(currentElement);
     } else if (MathRoutines::hasDecimalDigitsOnly(current) && !mustInterpretAsVariable) {
@@ -904,7 +904,7 @@ void Calculator::ParseFillDictionary(const std::string& input, List<SyntacticEle
       currentElement.controlIndex = this->conInteger();
       output.addOnTop(currentElement);
     } else {
-      currentElement.controlIndex = this->controlSequences.GetIndex("Variable");
+      currentElement.controlIndex = this->controlSequences.getIndex("Variable");
       currentElement.theData.MakeAtom(this->AddOperationNoRepetitionOrReturnIndexFirst(current), *this);
       output.addOnTop(currentElement);
     }
@@ -913,11 +913,11 @@ void Calculator::ParseFillDictionary(const std::string& input, List<SyntacticEle
 }
 
 int Calculator::GetOperationIndexFromControlIndex(int controlIndex) {
-  return this->operations.GetIndex(this->controlSequences[controlIndex]);
+  return this->operations.getIndex(this->controlSequences[controlIndex]);
 }
 
 int Calculator::GetExpressionIndex() {
-  return this->controlSequences.GetIndex("Expression");
+  return this->controlSequences.getIndex("Expression");
 }
 
 bool Calculator::ReplaceXXbyE() {
@@ -1389,7 +1389,7 @@ bool Calculator::ReplaceVbyVdotsVAccordingToPredefinedWordSplits() {
   ;
   for (int i = 0; i < theSplit.size; i ++) {
     newElt.theData.MakeAtom(this->AddOperationNoRepetitionOrReturnIndexFirst(theSplit[i]), *this);
-    newElt.controlIndex = this->controlSequences.GetIndex(theSplit[i]);
+    newElt.controlIndex = this->controlSequences.getIndex(theSplit[i]);
     if (newElt.controlIndex == - 1) {
       newElt.controlIndex = this->conVariable();
     }

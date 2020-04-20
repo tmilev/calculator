@@ -988,7 +988,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatNumbersBySmallInteger(
     return output.AssignMatrix(baseAlg, theCommands);
   }
   Matrix<RationalFunction> baseRF;
-  Expression theContext;
+  ExpressionContext theContext(theCommands);
   if (theCommands.functionGetMatrix(matrixE, baseRF, &theContext)) {
     if (!baseRF.IsSquare() || baseRF.NumCols == 0) {
       return output.MakeError(
@@ -1976,7 +1976,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF(
     }
     RationalFunction theScalar = leftErfForm.GetValue<RationalFunction>();
     rightMat *= theScalar;
-    Expression contextE = leftE.GetContext();
+    ExpressionContext contextE = leftE.GetContext();
     return output.AssignMatrix(rightMat, theCommands, &contextE);
   }
   if (!theCommands.functionGetMatrix(leftE, leftMat)) {
@@ -1986,7 +1986,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF(
     return false;
   }
   leftMat.MultiplyOnTheRight(rightMat);
-  Expression contextE = leftE.GetContext();
+  ExpressionContext contextE = leftE.GetContext();
   return output.AssignMatrix(leftMat, theCommands, &contextE);
 }
 
@@ -2382,7 +2382,7 @@ bool CalculatorFunctionsBinaryOps::innerSetMinus(
   }
   for (int i = 1; i < rightSetE.children.size; i ++) {
     if (resultEs.Contains(rightSetE[i])) {
-      resultEs.RemoveIndexSwapWithLast(resultEs.GetIndex(rightSetE[i]));
+      resultEs.RemoveIndexSwapWithLast(resultEs.getIndex(rightSetE[i]));
     }
   }
   resultEs.QuickSortAscending();
@@ -2421,7 +2421,7 @@ bool CalculatorFunctionsBinaryOps::innerAddMatrixRFsToMatrixRFs(
     return false;
   }
   leftMat += rightMat;
-  Expression theContext = leftE.GetContext();
+  ExpressionContext theContext = leftE.GetContext();
   return output.AssignMatrix(leftMat, theCommands, &theContext);
 }
 

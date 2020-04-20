@@ -2264,7 +2264,7 @@ public:
     this->CleanupMonIndex(this->SubtractMonomialNoCoeffCleanUpReturnsCoefficientIndex(inputMon, inputCoeff));
   }
   coefficient GetMonomialCoefficient(const templateMonomial& inputMon) const {
-    int theIndex = this->theMonomials.GetIndex(inputMon);
+    int theIndex = this->theMonomials.getIndex(inputMon);
     if (theIndex == - 1) {
       return coefficient::zero();
     }
@@ -3401,7 +3401,7 @@ bool LinearCombination<templateMonomial, coefficient>::operator==(
     return false;
   }
   for (int i = 0; i < this->size(); i ++) {
-    int indexInOther = other.theMonomials.GetIndex((*this)[i]);
+    int indexInOther = other.theMonomials.getIndex((*this)[i]);
     if (indexInOther == - 1) {
       return false;
     }
@@ -3669,7 +3669,7 @@ void LinearCombination<templateMonomial, coefficient>::GaussianEliminationByRows
       }
     }
     LinearCombination<templateMonomial, coefficient>& currentPivot = theList[currentRowIndex];
-    int colIndex = currentPivot.theMonomials.GetIndex(currentMon);
+    int colIndex = currentPivot.theMonomials.getIndex(currentMon);
     if (colIndex == - 1) {
       global.fatal << "This is a programming error. An internal check at the "
       << "Gaussian elimination method for monomial collections fails. "
@@ -3688,7 +3688,7 @@ void LinearCombination<templateMonomial, coefficient>::GaussianEliminationByRows
     for (int j = 0; j < theList.size; j ++) {
       if (j != currentRowIndex) {
         LinearCombination<templateMonomial, coefficient>& currentOther = theList[j];
-        int otherColIndex = currentOther.theMonomials.GetIndex(currentMon);
+        int otherColIndex = currentOther.theMonomials.getIndex(currentMon);
         if (otherColIndex != - 1) {
           tempCF = currentOther.coefficients[otherColIndex];
           currentOther.SubtractOtherTimesCoeff(currentPivot, &tempCF);
@@ -3720,9 +3720,9 @@ int LinearCombination<templateMonomial, coefficient>::AddMonomialNoCoeffCleanUpR
   }
   bool oldFlagDeallocated = this->flagDeallocated;
   this->flagDeallocated = true;
-  int j = this->theMonomials.GetIndex(inputMonomial);
+  int j = this->theMonomials.getIndex(inputMonomial);
   if (j >= this->size()) {
-    global.fatal << "Error: function GetIndex evaluated on "
+    global.fatal << "Error: function getIndex evaluated on "
     << inputMonomial << " with hash function "
     << inputMonomial.hashFunction(inputMonomial)
     << " returns index " << j << " but I have only "
@@ -3752,7 +3752,7 @@ int LinearCombination<templateMonomial, coefficient>::SubtractMonomialNoCoeffCle
   if (inputCoeff.IsEqualToZero()) {
     return - 1;
   }
-  int j = this->theMonomials.GetIndex(inputMon);
+  int j = this->theMonomials.getIndex(inputMon);
   if (j == - 1) {
     this->theMonomials.addOnTop(inputMon);
     this->coefficients.addOnTop(inputCoeff);
@@ -4949,7 +4949,7 @@ std::string LinearCombination<templateMonomial, coefficient>::toString(
   }
   for (int i = 0; i < sortedMons.size; i ++) {
     templateMonomial& currentMon = sortedMons[i];
-    coefficient& currentCoeff = this->coefficients[this->theMonomials.GetIndex(currentMon)];
+    coefficient& currentCoeff = this->coefficients[this->theMonomials.getIndex(currentMon)];
     if (currentCoeff.NeedsParenthesisForMultiplication(theFormat)) {
       tempS1 = "\\left(" + currentCoeff.toString(theFormat) + "\\right)";
     } else {
@@ -7181,7 +7181,7 @@ std::ostream& operator<<(std::ostream& output, const LinearCombination<templateM
   for (int i = 0; i < sortedMons.size; i ++) {
     templateMonomial& currentMon = sortedMons[i];
     std::stringstream tempStream;
-    coefficient& currentCoeff = theCollection.coefficients[theCollection.theMonomials.GetIndex(currentMon)];
+    coefficient& currentCoeff = theCollection.coefficients[theCollection.theMonomials.getIndex(currentMon)];
     tempStream << currentCoeff;
     tempS1 = tempStream.str();
     tempS2 = currentMon.toString();
@@ -7301,7 +7301,7 @@ void MonomialGeneralizedVerma<coefficient>::ReduceMe(
   MonomialUniversalEnveloping<coefficient> tempMon;
   tempMon = this->theMonCoeffOne;
   tempMon *= theMod.theGeneratingWordsNonReduced[this->indexFDVector];
-  int indexCheck = theMod.theGeneratingWordsNonReduced.GetIndex(tempMon);
+  int indexCheck = theMod.theGeneratingWordsNonReduced.getIndex(tempMon);
   if (!this->owner->owner->flagHasNilradicalOrder) {
     global.fatal << "Owner needs nilradical order!!!" << global.fatal;
   }

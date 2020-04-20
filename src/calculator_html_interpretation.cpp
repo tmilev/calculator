@@ -1824,7 +1824,7 @@ std::string WebAPIResponse::ToStringUserDetailsTable(
     << currentUser.username << "\">" << currentUser.username << "</a>";
     oneTableLineStream << "<td>" << oneLink.str() << "</td>";
     oneTableLineStream << "</tr>";
-    int indexCurrentBucket = theSections.GetIndex(currentUser.sectionInDB);
+    int indexCurrentBucket = theSections.getIndex(currentUser.sectionInDB);
     if (indexCurrentBucket != - 1) {
       if (isActivated) {
         activatedAccountBucketsBySection[indexCurrentBucket].addOnTop(oneTableLineStream.str());
@@ -2112,12 +2112,12 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments) {
     comments
   );
   List<std::string> userLabels;
-  int usernameIndex = userLabels.GetIndex(DatabaseStrings::labelUsername);
+  int usernameIndex = userLabels.getIndex(DatabaseStrings::labelUsername);
   if (usernameIndex == - 1) {
     comments << "Could not find username column. ";
     return false;
   }
-  int problemDataIndex = userLabels.GetIndex(DatabaseStrings::labelProblemDataJSON);
+  int problemDataIndex = userLabels.getIndex(DatabaseStrings::labelProblemDataJSON);
   if (problemDataIndex == - 1) {
     comments << "Could not find problem data column. ";
     return false;

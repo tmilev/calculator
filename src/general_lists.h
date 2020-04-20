@@ -1176,7 +1176,7 @@ public:
     if ((i >= this->size) || i < 0) {
       std::stringstream crashReport;
       crashReport <<
-      "Programming error: attempting to access the entry of index "
+      "Attempt to access the entry of index "
       << i << " in an array of " << this->size << " elements. ";
       fatalCrash(crashReport.str());
     }

@@ -399,8 +399,8 @@ private:
   }
   bool SetContextAtLeastEqualTo(ExpressionContext& inputOutputMinContext);
   bool RemoveContext();
-  bool HasContext() const;
-  bool HasNonEmptyContext() const;
+  bool hasContext() const;
+  bool hasNonEmptyContext() const;
   ExpressionContext GetContext() const;
   bool GetContext(ExpressionContext& output) const;
   static bool MergeContexts(Expression& leftE, Expression& rightE);

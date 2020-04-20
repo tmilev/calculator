@@ -25,7 +25,7 @@ public:
   }
   const Object& GetElementConst() const {
     if (this->theValue == 0) {
-      fatalCrash("Programming error: attempting to access zero pointer. ");
+      fatalCrash("Attempt to access zero pointer. ");
     }
     return *this->theValue;
   }

@@ -120,7 +120,7 @@ bool ExpressionContext::setVariablesFromStrings(
 
 bool Expression::MergeContexts(Expression& leftE, Expression& rightE) {
   MacroRegisterFunctionWithName("Expression::MergeContexts");
-  if (!leftE.HasContext() || !rightE.HasContext()) {
+  if (!leftE.hasContext() || !rightE.hasContext()) {
     return false;
   }
   ExpressionContext leftC = leftE.GetContext();

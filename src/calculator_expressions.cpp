@@ -2098,7 +2098,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     }
     result = true;
   } else if (this->IsOfType<Rational>()) {
-    if (this->HasNonEmptyContext()) {
+    if (this->hasNonEmptyContext()) {
       out << "Rational{}(" << (*this)[1].toString() << ", ";
     }
     if (!this->owner->flagUseFracInRationalLaTeX) {
@@ -2106,7 +2106,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     } else {
       out << this->GetValue<Rational>().ToStringFrac();
     }
-    if (this->HasNonEmptyContext()) {
+    if (this->hasNonEmptyContext()) {
       out << ")";
     }
     result = true;
@@ -4307,7 +4307,7 @@ bool Expression::IsGoodForChainRuleFunction(std::string* outputWhichOperation) c
 
 bool Expression::RemoveContext() {
   this->CheckInitialization();
-  if (!this->HasContext()) {
+  if (!this->hasContext()) {
     return true;
   }
   this->children.RemoveIndexShiftDown(1);
@@ -4317,7 +4317,7 @@ bool Expression::RemoveContext() {
   return true;
 }
 
-bool Expression::HasContext() const {
+bool Expression::hasContext() const {
   this->CheckInitialization();
   if (!this->IsBuiltInTypE() || !(this->size() == 3)) {
     return false;
@@ -4325,11 +4325,11 @@ bool Expression::HasContext() const {
   return (*this)[1].IsListStartingWithAtom(this->owner->opContext());
 }
 
-bool Expression::HasNonEmptyContext() const {
-  if (!this->HasContext()) {
+bool Expression::hasNonEmptyContext() const {
+  if (!this->hasContext()) {
     return false;
   }
-  return this->GetContext().isEmpty();
+  return !this->GetContext().isEmpty();
 }
 
 bool Expression::IsCacheableExpression() const {

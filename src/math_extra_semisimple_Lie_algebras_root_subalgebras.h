@@ -481,16 +481,18 @@ public:
 
   SltwoSubalgebras& GetContainerSl2s() {
     if (this->container == nullptr) {
-      global.fatal << "This is a programming error: attempting to "
-      << "access the container list of a non-initialized sl(2)-subalgebra. " << global.fatal;
+      global.fatal << "Attempt to "
+      << "access the container list of "
+      << "a non-initialized sl(2)-subalgebra. " << global.fatal;
     }
     return *this->container;
   }
   const WeylGroupData& GetOwnerWeyl() const;
   SemisimpleLieAlgebra& GetOwnerSSAlgebra() {
     if (this->owner == nullptr) {
-      global.fatal << "This is a programming error: attempting to access "
-      << "the ambient Lie algebra of a non-initialized sl(2)-subalgebra. " << global.fatal;
+      global.fatal << "Attempt to access "
+      << "the ambient Lie algebra of a "
+      << "non-initialized sl(2)-subalgebra. " << global.fatal;
     }
     return *this->owner;
   }

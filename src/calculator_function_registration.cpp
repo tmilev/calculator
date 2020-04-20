@@ -602,15 +602,15 @@ void Calculator::initPredefinedInnerFunctions() {
     innerStandard
   );
   this->AddOperationHandler(
-    "toUTF8String",
+    "ToUTF8String",
     CalculatorFunctions::innerExpressiontoUTF8String,
     "",
     "Transforms an arbitrary expression to a utf8-string representation. "
     "The string is supposed to look reasonable when drawn on a javascript canvas. ",
     "f = \\sin {}x / \\cos {}x;\n"
-    "Plot(f, -\\pi/4, \\pi/4) + PlotLabel{}((1,1), \"y =\" + toUTF8String(f))",
+    "Plot(f, -\\pi/4, \\pi/4) + PlotLabel{}((1,1), \"y =\" + ToUTF8String(f))",
     "CalculatorFunctions::innerExpressiontoUTF8String",
-    "toUTF8String",
+    "ToUTF8String",
     innerStandard
   );
   this->AddOperationHandler(

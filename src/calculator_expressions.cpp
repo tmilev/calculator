@@ -3317,7 +3317,7 @@ bool Expression::toStringDifferential(
   return Expression::toStringDifferential3(input, out, theFormat);
 }
 
-bool Expression::toStringDifferential2(
+bool Expression::toStringDifferential3(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* theFormat
@@ -3372,7 +3372,7 @@ bool Expression::toStringDifferentiate(
   return true;
 }
 
-bool Expression::toStringDifferential3(
+bool Expression::toStringDifferential2(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (!input.StartsWith(input.owner->opDifferential(), 2)) {

@@ -266,7 +266,7 @@ void TransportLayerSecurityOpenSSL::ClearErrorQueue(
   std::stringstream* commentsGeneral,
   bool includeNoErrorInComments
 ) {
-  MacroRegisterFunctionWithName("TransportLayerSecurity::ToStringError");
+  MacroRegisterFunctionWithName("TransportLayerSecurity::toStringError");
   (void) errorCode;
   (void) outputError;
   (void) commentsGeneral;

@@ -6569,7 +6569,7 @@ public:
     }
     *this = output;
   }
-  std::string ToStringMatrixForm(FormatExpressions* theFormat = nullptr) const {
+  std::string toStringMatrixForm(FormatExpressions* theFormat = nullptr) const {
     if (this->IsEqualToZero()) {
       return "(0)";
     }
@@ -6775,7 +6775,7 @@ void MatrixTensor<coefficient>::Invert() {
   if (*this != theId) {
     global.fatal << "This is a programming error: attempting to invert a "
     << "non-invertable matrix tensor. After Gaussian elimination, the matrix equals "
-    << this->ToStringMatrixForm() << " but should instead be equal to " << theId.ToStringMatrixForm() << global.fatal;
+    << this->toStringMatrixForm() << " but should instead be equal to " << theId.toStringMatrixForm() << global.fatal;
   }
   *this = result;
 }

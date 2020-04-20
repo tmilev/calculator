@@ -18,7 +18,7 @@ std::string FinitelyGeneratedMatrixMonoid<coefficient>::toString(FormatExpressio
     numEltstoDisplay = 100;
   }
   for (int i = 0; i < numEltstoDisplay; i ++) {
-    out << "<br>" << this->theElements[i].ToStringMatrixForm(theFormat);
+    out << "<br>" << this->theElements[i].toStringMatrixForm(theFormat);
   }
   return out.str();
 }

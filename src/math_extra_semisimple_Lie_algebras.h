@@ -386,7 +386,7 @@ class charSSAlgMod : public LinearCombination<Weight<coefficient>, coefficient> 
   bool FreudenthalEvalMeFullCharacter(
     charSSAlgMod<coefficient>& outputCharOwnerSetToZero, int upperBoundNumDominantWeights, std::string* outputDetails
   );
-  std::string ToStringFullCharacterWeightsTable();
+  std::string toStringFullCharacterWeightsTable();
   bool DrawMeNoMults(std::string& outputDetails, DrawingVariables& theDrawingVars, int upperBoundWeights) {
     return this->DrawMe(outputDetails, theDrawingVars, upperBoundWeights, false);
   }

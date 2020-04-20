@@ -2372,16 +2372,16 @@ bool CalculatorFunctions::innerIsReal(Calculator& theCommands, const Expression&
   return output.AssignValue(1, theCommands);
 }
 
-bool CalculatorFunctions::innerExpressionToUTF8String(
+bool CalculatorFunctions::innerExpressiontoUTF8String(
   Calculator& theCommands, const Expression& input, Expression& output
 ) {
-  MacroRegisterFunctionWithName("CalculatorFunctions::innerExpressionToUTF8String");
+  MacroRegisterFunctionWithName("CalculatorFunctions::innerExpressiontoUTF8String");
   if (input.size() > 2) {
     Expression argumentSequence = input;
     argumentSequence.SetChildAtomValue(0, theCommands.opSequence());
-    return output.AssignValue(argumentSequence.ToUTF8String(), theCommands);
+    return output.AssignValue(argumentSequence.toUTF8String(), theCommands);
   }
-  return output.AssignValue(input[1].ToUTF8String(), theCommands);
+  return output.AssignValue(input[1].toUTF8String(), theCommands);
 }
 
 bool CalculatorFunctions::innerIsProductTermsUpToPower(

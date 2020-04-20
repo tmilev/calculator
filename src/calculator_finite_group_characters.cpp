@@ -953,9 +953,9 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOuterAutoGeneratorsPrint(
   tempFormat.flagUseHTML = false;
   for (int i = 0; i <groupGeneratedByMatrices.theGenerators.size; i ++) {
     outCommand << "<br>s_{" << i + 1
-    << "}=MatrixRationals" << groupGeneratedByMatrices.theGenerators[i].ToStringMatrixForm(&tempFormat) << ";";
+    << "}=MatrixRationals" << groupGeneratedByMatrices.theGenerators[i].toStringMatrixForm(&tempFormat) << ";";
     out << "<br>s_" << i + 1 << " = "
-    << HtmlRoutines::GetMathSpanPure(groupGeneratedByMatrices.theGenerators[i].ToStringMatrixForm(&tempFormat));
+    << HtmlRoutines::GetMathSpanPure(groupGeneratedByMatrices.theGenerators[i].toStringMatrixForm(&tempFormat));
   }
   outCommand << "<br>GenerateFiniteMultiplicativelyClosedSet(1000, ";
   for (int i = 0; i < groupGeneratedByMatrices.theGenerators.size; i ++) {
@@ -979,7 +979,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOuterAutoGeneratorsPrint(
         std::stringstream elementNameStream;
         elementNameStream << "t_" << i + 1;
         out << "<tr><td>" << HtmlRoutines::GetMathMouseHover(elementNameStream.str())<< "</td><td>"
-        << HtmlRoutines::GetMathMouseHover(groupGeneratedByMatrices.theElements[i].ToStringMatrixForm(&tempFormat)) << "</td></tr>";
+        << HtmlRoutines::GetMathMouseHover(groupGeneratedByMatrices.theElements[i].toStringMatrixForm(&tempFormat)) << "</td></tr>";
       }
       out << "</table>";
     }
@@ -1390,7 +1390,7 @@ public:
   bool IncrementReturnFalseIfPastLast();
   SelectionFixedRankDifferentMaxMultiplicities();
   std::string toString();
-  std::string ToStringFull();
+  std::string toStringFull();
 };
 
 unsigned int KostkaNumber::hashFunction(const KostkaNumber& input) {
@@ -1712,7 +1712,7 @@ std::string SelectionFixedRankDifferentMaxMultiplicities::toString() {
   return out.str();
 }
 
-std::string SelectionFixedRankDifferentMaxMultiplicities::ToStringFull() {
+std::string SelectionFixedRankDifferentMaxMultiplicities::toStringFull() {
   std::stringstream out;
   Vector<int> theMults, theMaxMults;
   theMaxMults = this->MaxMultiplicities;

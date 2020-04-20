@@ -1008,7 +1008,7 @@ bool Expression::ConvertInternally<ElementUniversalEnveloping<RationalFunction> 
   }
   SemisimpleLieAlgebra* theOwner = this->GetAmbientSSAlgebraNonConstUseWithCaution();
   if (theOwner == nullptr) {
-    this->owner->Comments << "<hr>Failed to convert " << this->toString() << " (Lispified: " << this->ToStringFull()
+    this->owner->Comments << "<hr>Failed to convert " << this->toString() << " (Lispified: " << this->toStringFull()
     << ") to element of universal enveloping -  failed to extract ambient Lie algebra. ";
     return false;
   }
@@ -1107,14 +1107,14 @@ bool Expression::CheckConsistency() const {
   if (this->IsBuiltInTypE()) {
     if (this->children.size != 3) {
       global.fatal << "This is a programming error. At the moment of writing, an expression of built-in type must have 3 "
-      << "children: type, context, and index in Calculator. The expression is " << this->ToStringFull()
+      << "children: type, context, and index in Calculator. The expression is " << this->toStringFull()
       << global.fatal;
     }
     const Expression& mustBeTheContext = (*this)[1];
     if (!mustBeTheContext.StartsWith(this->owner->opContext())) {
       global.fatal << "This is a programming error. At the moment of writing, "
       << "the second child of a built-in type must be a context. It is instead "
-      << mustBeTheContext.ToStringFull() << global.fatal;
+      << mustBeTheContext.toStringFull() << global.fatal;
     }
     for (int i = 1; i < mustBeTheContext.children.size; i ++) {
       bool isGood = false;
@@ -1130,8 +1130,8 @@ bool Expression::CheckConsistency() const {
       }
       if (!isGood) {
         global.fatal << "This is a programming error. The context "
-        << mustBeTheContext.ToStringFull() << " has an entry which I do not recognize, namely, "
-        << currentE.ToStringFull() << ". " << global.fatal;
+        << mustBeTheContext.toStringFull() << " has an entry which I do not recognize, namely, "
+        << currentE.toStringFull() << ". " << global.fatal;
       }
     }
   }
@@ -1877,7 +1877,7 @@ ExpressionContext Expression::GetContext() const {
   << "I can't display the expression as this may cause ``infinite'' "
   << "recursion if the error is caused by the toString method. "
   << "Here is however the lisp form "
-  << this->ToStringFull() << " of the expression. "
+  << this->toStringFull() << " of the expression. "
   << "Here's stack trace. " << global.fatal;
   return ExpressionContext(*this->owner);
 }
@@ -2200,7 +2200,7 @@ bool Expression::toStringData(std::string& output, FormatExpressions* theFormat)
     contextFormat.GetElement().flagUseHTML = false;
     if (this->GetValue<MatrixTensor<Rational> >().GetMinNumColsNumRows() < 20) {
       out << "MatrixRationalsTensorForm{}("
-      << this->GetValue<MatrixTensor<Rational> > ().ToStringMatrixForm(&contextFormat.GetElement())
+      << this->GetValue<MatrixTensor<Rational> > ().toStringMatrixForm(&contextFormat.GetElement())
       << ")";
     } else {
       out << this->GetValue<MatrixTensor<Rational> >().toString();
@@ -2332,7 +2332,7 @@ bool Expression::toStringData(std::string& output, FormatExpressions* theFormat)
   return result;
 }
 
-std::string Expression::ToStringSemiFull() const {
+std::string Expression::toStringSemiFull() const {
   std::stringstream out;
   std::string tempS;
   if (this->toStringData(tempS)) {
@@ -2341,7 +2341,7 @@ std::string Expression::ToStringSemiFull() const {
     if (this->children.size > 0) {
       out << "(";
       for (int i = 0; i < this->children.size; i ++) {
-        out << (*this)[i].ToStringSemiFull();
+        out << (*this)[i].toStringSemiFull();
         if (i != this->children.size - 1) {
           out << ", ";
         }
@@ -2352,7 +2352,7 @@ std::string Expression::ToStringSemiFull() const {
   return out.str();
 }
 
-std::string Expression::ToStringFull() const {
+std::string Expression::toStringFull() const {
   std::stringstream out;
   if (this->IsAtom()) {
     out << this->theData << " ";
@@ -2360,7 +2360,7 @@ std::string Expression::ToStringFull() const {
   if (this->children.size > 0) {
     out << "(";
     for (int i = 0; i < this->children.size; i ++) {
-      out << (*this)[i].ToStringFull();
+      out << (*this)[i].toStringFull();
       if (i != this->children.size - 1) {
         out << ", ";
       }
@@ -2597,7 +2597,7 @@ bool Calculator::functionFlattenCommandEnclosuresOneLayer(
   return true;
 }
 
-std::string Expression::ToStringAllSlidersInExpression() const {
+std::string Expression::toStringAllSlidersInExpression() const {
   HashedList<std::string, MathRoutines::HashString> boxNames;
   if (!this->HasInputBoxVariables(&boxNames)) {
     return "";
@@ -2682,7 +2682,7 @@ JSData Expression::ToJSData(FormatExpressions* theFormat, const Expression& star
       } else {
         out << HtmlRoutines::GetMathSpanPure(currentE.toString(theFormat), 1700);
       }
-      out << currentE.ToStringAllSlidersInExpression();
+      out << currentE.toStringAllSlidersInExpression();
       output[i - 1] = out.str();
     }
   } else {
@@ -2701,7 +2701,7 @@ JSData Expression::ToJSData(FormatExpressions* theFormat, const Expression& star
   return result;
 }
 
-bool Expression::ToStringTimes(
+bool Expression::toStringTimes(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (!input.StartsWith(input.owner->opTimes(), 3)) {
@@ -2768,7 +2768,7 @@ bool Expression::ToStringTimes(
   return true;
 }
 
-void Expression::ToStringOpMultiplicative(
+void Expression::toStringOpMultiplicative(
   std::stringstream& out,
   const std::string& operation,
   FormatExpressions* theFormat
@@ -2797,7 +2797,7 @@ void Expression::ToStringOpMultiplicative(
   }
 }
 
-std::string Expression::ToStringTreeHtml(int depth) const {
+std::string Expression::toStringTreeHtml(int depth) const {
   std::stringstream out;
   if (depth > 100) {
     out << "<br>...";
@@ -2816,29 +2816,31 @@ std::string Expression::ToStringTreeHtml(int depth) const {
     return out.str();
   }
   for (int i = 0; i < this->size(); i ++) {
-    out << (*this)[i].ToStringTreeHtml(depth + 1);
+    out << (*this)[i].toStringTreeHtml(depth + 1);
   }
   return out.str();
 }
 
-bool Expression::ToStringDivide(
+bool Expression::toStringDivide(
+  const Expression& input,
   std::stringstream& out,
   FormatExpressions* theFormat
-) const {
-  if (!this->StartsWith(this->owner->opDivide(), 3)) {
+) {
+  Calculator& commands = *input.owner;
+  if (!input.StartsWith(commands.opDivide(), 3)) {
     return false;
   }
-  bool doUseFrac = this->owner->flagUseFracInRationalLaTeX;
+  bool doUseFrac = commands.flagUseFracInRationalLaTeX;
   if (
     doUseFrac &&
-    ((*this)[1].StartsWith(this->owner->opTimes()) || (*this)[1].StartsWith(this->owner->opDivide()))
+    (input[1].StartsWith(commands.opTimes()) || input[1].StartsWith(commands.opDivide()))
   ) {
     List<Expression> multiplicandsLeft;
-    this->GetMultiplicandsDivisorsRecursive(multiplicandsLeft, 0);
+    input.GetMultiplicandsDivisorsRecursive(multiplicandsLeft, 0);
     for (int i = 0; i < multiplicandsLeft.size; i ++) {
       if (
-        multiplicandsLeft[i].StartsWith(this->owner->opIntegral()) ||
-        multiplicandsLeft[i].IsOperationGiven(this->owner->opIntegral())
+        multiplicandsLeft[i].StartsWith(commands.opIntegral()) ||
+        multiplicandsLeft[i].IsOperationGiven(commands.opIntegral())
       ) {
         doUseFrac = false;
         break;
@@ -2846,14 +2848,14 @@ bool Expression::ToStringDivide(
     }
   }
   if (!doUseFrac) {
-    std::string firstE = (*this)[1].toString(theFormat);
-    std::string secondE = (*this)[2].toString(theFormat);
+    std::string firstE = input[1].toString(theFormat);
+    std::string secondE = input[2].toString(theFormat);
     bool firstNeedsBrackets =
-      !((*this)[1].IsListStartingWithAtom(this->owner->opTimes()) ||
-      (*this)[1].IsListStartingWithAtom(this->owner->opDivide()));
+      !(input[1].IsListStartingWithAtom(commands.opTimes()) ||
+      input[1].IsListStartingWithAtom(commands.opDivide()));
     bool secondNeedsBrackets = true;
-    if ((*this)[2].IsOfType<Rational>()) {
-      if ((*this)[2].GetValue<Rational>().IsInteger()) {
+    if (input[2].IsOfType<Rational>()) {
+      if (input[2].GetValue<Rational>().IsInteger()) {
         secondNeedsBrackets = false;
       }
     }
@@ -2874,41 +2876,43 @@ bool Expression::ToStringDivide(
       maintain.initialize(theFormat->flagExpressionNewLineAllowed);
       theFormat->flagExpressionNewLineAllowed = false;
     }
-    std::string firstE = (*this)[1].toString(theFormat);
-    std::string secondE = (*this)[2].toString(theFormat);
+    std::string firstE = input[1].toString(theFormat);
+    std::string secondE = input[2].toString(theFormat);
     out << "\\frac{" << firstE << "}{" << secondE << "}";
   }
   return true;
 }
 
-bool Expression::ToStringPower(
+bool Expression::toStringPower(
+  const Expression& input,
   std::stringstream& out,
   FormatExpressions* theFormat
-) const {
-  if (!this->StartsWith(this->owner->opThePower(), 3)) {
+) {
+  Calculator& commands = *input.owner;
+  if (!input.StartsWith(commands.opThePower(), 3)) {
     return false;
   }
   bool involvesExponentsInterpretedAsFunctions = false;
-  const Expression& firstE = (*this)[1];
-  const Expression& secondE = (*this)[2];
+  const Expression& firstE = input[1];
+  const Expression& secondE = input[2];
   if (firstE.StartsWith(- 1, 2)) {
     bool shouldProceed = firstE[0].IsAtomWhoseExponentsAreInterpretedAsFunction() &&
     !secondE.IsEqualToMOne() && secondE.IsRational();
     if (
-      shouldProceed && firstE[0].IsOperationGiven(this->owner->opLog()) &&
-      this->owner->flagUseLnAbsInsteadOfLogForIntegrationNotation
+      shouldProceed && firstE[0].IsOperationGiven(commands.opLog()) &&
+      commands.flagUseLnAbsInsteadOfLogForIntegrationNotation
     ) {
       shouldProceed = false;
     }
     if (shouldProceed) {
       involvesExponentsInterpretedAsFunctions = true;
       Expression newFunE;
-      newFunE.MakeXOX(*this->owner, this->owner->opThePower(), firstE[0], (*this)[2]);
+      newFunE.MakeXOX(*input.owner, commands.opThePower(), firstE[0], input[2]);
       newFunE.CheckConsistency();
       out << "{" << newFunE.toString(theFormat) << "}{}";
       if (
         firstE[1].NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost() ||
-        firstE[1].StartsWith(this->owner->opTimes())
+        firstE[1].StartsWith(commands.opTimes())
       ) {
         out << "\\left(" << firstE[1].toString(theFormat) << "\\right)";
       } else {
@@ -2918,19 +2922,19 @@ bool Expression::ToStringPower(
   }
   if (!involvesExponentsInterpretedAsFunctions) {
     bool isSqrt = false;
-    if ((*this)[2].IsOfType<Rational>()) {
-      if ((*this)[2].GetValue<Rational>().IsEqualTo(Rational(1, 2))) {
+    if (input[2].IsOfType<Rational>()) {
+      if (input[2].GetValue<Rational>().IsEqualTo(Rational(1, 2))) {
         isSqrt = true;
       }
     }
     if (isSqrt) {
-      out << "\\sqrt{" << (*this)[1].toString(theFormat) << "}";
+      out << "\\sqrt{" << input[1].toString(theFormat) << "}";
     } else {
-      std::string secondEstr = (*this)[2].toString(theFormat);
-      std::string firstEstr = (*this)[1].toString(theFormat);
-      if ((*this)[1].NeedsParenthesisForBaseOfExponent()) {
+      std::string secondEstr = input[2].toString(theFormat);
+      std::string firstEstr = input[1].toString(theFormat);
+      if (input[1].NeedsParenthesisForBaseOfExponent()) {
         bool useBigParenthesis = true;
-        if ((*this)[1].StartsWith(this->owner->opDivide())) {
+        if (input[1].StartsWith(commands.opDivide())) {
           useBigParenthesis = true;
         }
         if (useBigParenthesis) {
@@ -2953,7 +2957,7 @@ bool Expression::ToStringPower(
   return true;
 }
 
-bool Expression::ToStringGeneral(
+bool Expression::toStringGeneral(
   std::stringstream& out, FormatExpressions* theFormat
 ) const {
   if (this->size() < 2) {
@@ -2985,7 +2989,7 @@ bool Expression::ToStringGeneral(
   return true;
 }
 
-bool Expression::ToStringEndStatement(
+bool Expression::toStringEndStatement(
   std::stringstream& out,
   Expression* startingExpression,
   JSData* outputJS,
@@ -3054,7 +3058,7 @@ bool Expression::ToStringEndStatement(
         theFormat->flagDontCollalpseProductsByUnits = false;
         currentOutput = HtmlRoutines::GetMathSpanPure(currentE.toString(theFormat), 1700);
       }
-      currentOutput += currentE.ToStringAllSlidersInExpression();
+      currentOutput += currentE.toStringAllSlidersInExpression();
       if (outputJS != nullptr) {
         (*outputJS)["output"][i - 1] = currentOutput;
       }
@@ -3074,7 +3078,7 @@ bool Expression::ToStringEndStatement(
       if (createSingleTable && addLatexDelimiter) {
         outWithDelimiter << "\\)";
       }
-      outWithDelimiter << currentE.ToStringAllSlidersInExpression();
+      outWithDelimiter << currentE.toStringAllSlidersInExpression();
       out << outWithDelimiter.str();
       if (outputJS != nullptr) {
         (*outputJS)["output"][i] = outWithDelimiter.str();
@@ -3099,7 +3103,7 @@ bool Expression::ToStringEndStatement(
   return true;
 }
 
-bool Expression::ToStringPlus(const Expression& input, std::stringstream& out, FormatExpressions* theFormat) {
+bool Expression::toStringPlus(const Expression& input, std::stringstream& out, FormatExpressions* theFormat) {
   if (!input.StartsWith(input.owner->opPlus())) {
     return false;
   }
@@ -3137,7 +3141,7 @@ bool Expression::ToStringPlus(const Expression& input, std::stringstream& out, F
   return true;
 }
 
-bool Expression::ToStringDirectSum(const Expression& input, std::stringstream& out, FormatExpressions* theFormat) {
+bool Expression::toStringDirectSum(const Expression& input, std::stringstream& out, FormatExpressions* theFormat) {
   if (!input.IsListStartingWithAtom(input.owner->opDirectSum())) {
     return false;
   }
@@ -3173,7 +3177,7 @@ bool Expression::ToStringDirectSum(const Expression& input, std::stringstream& o
   return true;
 }
 
-bool Expression::ToStringSequence(
+bool Expression::toStringSequence(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (!input.IsListStartingWithAtom(input.owner->opSequence())) {
@@ -3214,7 +3218,7 @@ bool Expression::ToStringSequence(
   return true;
 }
 
-bool Expression::ToStringMatrix(const Expression& input, std::stringstream& out, FormatExpressions* theFormat) {
+bool Expression::toStringMatrix(const Expression& input, std::stringstream& out, FormatExpressions* theFormat) {
   if (!input.IsMatrix()) {
     return false;
   }
@@ -3253,7 +3257,7 @@ bool Expression::ToStringMatrix(const Expression& input, std::stringstream& out,
   return true;
 }
 
-bool Expression::ToStringDefine(
+bool Expression::toStringDefine(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (!input.StartsWith(input.owner->opDefine(), 3)) {
@@ -3281,7 +3285,7 @@ bool Expression::ToStringDefine(
   return true;
 }
 
-bool Expression::ToStringLnAbsoluteInsteadOfLogarithm(
+bool Expression::toStringLnAbsoluteInsteadOfLogarithm(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (
@@ -3299,7 +3303,21 @@ bool Expression::ToStringLnAbsoluteInsteadOfLogarithm(
   return true;
 }
 
-bool Expression::ToStringDifferential2(
+bool Expression::toStringDifferential(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* theFormat
+) {
+  if (!input.StartsWith(input.owner->opDifferential())) {
+    return false;
+  }
+  if (input.size() == 2) {
+    return Expression::toStringDifferential2(input, out, theFormat);
+  }
+  return Expression::toStringDifferential3(input, out, theFormat);
+}
+
+bool Expression::toStringDifferential2(
   const Expression& input,
   std::stringstream& out,
   FormatExpressions* theFormat
@@ -3336,7 +3354,7 @@ bool Expression::ToStringDifferential2(
   return true;
 }
 
-bool Expression::ToStringDifferentiate(
+bool Expression::toStringDifferentiate(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (!input.StartsWith(input.owner->opDifferentiate(), 3)) {
@@ -3354,7 +3372,7 @@ bool Expression::ToStringDifferentiate(
   return true;
 }
 
-bool Expression::ToStringDifferential3(
+bool Expression::toStringDifferential3(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (!input.StartsWith(input.owner->opDifferential(), 2)) {
@@ -3372,7 +3390,7 @@ bool Expression::ToStringDifferential3(
   return true;
 }
 
-bool Expression::ToStringFactorial(const Expression& input, std::stringstream& out, FormatExpressions* theFormat) {
+bool Expression::toStringFactorial(const Expression& input, std::stringstream& out, FormatExpressions* theFormat) {
   if (!input.StartsWith(input.owner->opFactorial(), 2)) {
     return false;
   }
@@ -3384,7 +3402,21 @@ bool Expression::ToStringFactorial(const Expression& input, std::stringstream& o
   return true;
 }
 
-bool Expression::ToStringSqrt2(
+bool Expression::toStringSqrt(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* theFormat
+) {
+  if (!input.StartsWith(input.owner->opSqrt())) {
+    return false;
+  }
+  if (input.size() == 2) {
+    return Expression::toStringSqrt2(input, out, theFormat);
+  }
+  return Expression::toStringSqrt3(input, out, theFormat);
+}
+
+bool Expression::toStringSqrt2(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (!input.StartsWith(input.owner->opSqrt(), 2)) {
@@ -3394,7 +3426,7 @@ bool Expression::ToStringSqrt2(
   return true;
 }
 
-bool Expression::ToStringSqrt3(
+bool Expression::toStringSqrt3(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (!input.StartsWith(input.owner->opSqrt(), 3)) {
@@ -3414,7 +3446,7 @@ bool Expression::ToStringSqrt3(
   return true;
 }
 
-bool Expression::ToStringGreaterThan(
+bool Expression::toStringGreaterThan(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (!input.IsListStartingWithAtom(input.owner->opGreaterThan())) {
@@ -3424,7 +3456,7 @@ bool Expression::ToStringGreaterThan(
   return true;
 }
 
-bool Expression::ToStringLessThanOrEqualTo(
+bool Expression::toStringLessThanOrEqualTo(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (!input.IsListStartingWithAtom(input.owner->opLessThanOrEqualTo())) {
@@ -3434,7 +3466,7 @@ bool Expression::ToStringLessThanOrEqualTo(
   return true;
 }
 
-bool Expression::ToStringLessThan(
+bool Expression::toStringLessThan(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (!input.IsListStartingWithAtom(input.owner->opLessThan())) {
@@ -3444,7 +3476,7 @@ bool Expression::ToStringLessThan(
   return true;
 }
 
-bool Expression::ToStringLimitProcess(
+bool Expression::toStringLimitProcess(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (!input.IsListStartingWithAtom(input.owner->opLimitProcess())) {
@@ -3454,7 +3486,7 @@ bool Expression::ToStringLimitProcess(
   return true;
 }
 
-bool Expression::ToStringGreaterThanOrEqualTo(
+bool Expression::toStringGreaterThanOrEqualTo(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (!input.IsListStartingWithAtom(input.owner->opGreaterThanOrEqualTo())) {
@@ -3464,7 +3496,7 @@ bool Expression::ToStringGreaterThanOrEqualTo(
   return true;
 }
 
-bool Expression::ToStringError(
+bool Expression::toStringError(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (!input.StartsWith(input.owner->opError(), 2)) {
@@ -3479,7 +3511,7 @@ bool Expression::ToStringError(
   return true;
 }
 
-bool Expression::ToStringSumOrIntegral(
+bool Expression::toStringSumOrIntegral(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (
@@ -3519,7 +3551,7 @@ bool Expression::ToStringSumOrIntegral(
   return true;
 }
 
-bool Expression::ToStringLimit(
+bool Expression::toStringLimit(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (!input.StartsWith(input.owner->opLimit(), 3)) {
@@ -3540,7 +3572,7 @@ bool Expression::ToStringLimit(
   return true;
 }
 
-bool Expression::ToStringUnion(
+bool Expression::toStringUnion(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (!input.IsListStartingWithAtom(input.owner->opUnion()) || input.size() != 3) {
@@ -3555,7 +3587,7 @@ bool Expression::ToStringUnion(
   return true;
 }
 
-bool Expression::ToStringUnionNoRepetition(
+bool Expression::toStringUnionNoRepetition(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (!input.IsListStartingWithAtom(input.owner->opUnionNoRepetition())) {
@@ -3565,7 +3597,7 @@ bool Expression::ToStringUnionNoRepetition(
   return true;
 }
 
-bool Expression::ToStringIntersection(
+bool Expression::toStringIntersection(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (!input.IsListStartingWithAtom(input.owner->opIntersection()) || input.size() != 3) {
@@ -3580,7 +3612,7 @@ bool Expression::ToStringIntersection(
   return true;
 }
 
-std::string Expression::ToStringWithStartingExpression(
+std::string Expression::toStringWithStartingExpression(
   FormatExpressions* theFormat,
   Expression* startingExpression,
   std::stringstream& out,
@@ -3629,7 +3661,7 @@ std::string Expression::ToStringWithStartingExpression(
   return outTrue.str();
 }
 
-bool Expression::ToStringMinus3(
+bool Expression::toStringMinus3(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (!input.StartsWith(input.owner->opMinus(), 3)) {
@@ -3650,7 +3682,21 @@ bool Expression::ToStringMinus3(
   return true;
 }
 
-bool Expression::ToStringMinus2(
+bool Expression::toStringMinus(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* theFormat
+) {
+  if (!input.StartsWith(input.owner->opMinus())) {
+    return false;
+  }
+  if (input.size() == 2) {
+    return Expression::toStringMinus2(input, out, theFormat);
+  }
+  return Expression::toStringMinus3(input, out, theFormat);
+}
+
+bool Expression::toStringMinus2(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (!input.StartsWith(input.owner->opMinus(), 2)) {
@@ -3667,7 +3713,7 @@ bool Expression::ToStringMinus2(
   return true;
 }
 
-bool Expression::ToStringOr(
+bool Expression::toStringOr(
   const Expression &input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   (void) theFormat;
@@ -3688,8 +3734,8 @@ bool Expression::ToStringOr(
   return true;
 }
 
-bool Expression::ToStringIntervalOpen(
-  const Expression &input, std::stringstream& out, FormatExpressions* theFormat
+bool Expression::toStringIntervalOpen(
+  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (!input.StartsWith(input.owner->opIntervalOpen(), 3)) {
     return false;
@@ -3702,8 +3748,8 @@ bool Expression::ToStringIntervalOpen(
   return true;
 }
 
-bool Expression::ToStringIntervalLeftClosed(
-  const Expression &input, std::stringstream& out, FormatExpressions* theFormat
+bool Expression::toStringIntervalLeftClosed(
+  const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (input.StartsWith(input.owner->opIntervalLeftClosed(), 2)) {
     if (input[1].IsSequenceNElementS(2)) {
@@ -3721,7 +3767,7 @@ bool Expression::ToStringIntervalLeftClosed(
   return false;
 }
 
-bool Expression::ToStringIntervalRightClosed(
+bool Expression::toStringIntervalRightClosed(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (
@@ -3742,7 +3788,7 @@ bool Expression::ToStringIntervalRightClosed(
   return false;
 }
 
-bool Expression::ToStringIntervalClosed(
+bool Expression::toStringIntervalClosed(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (input.StartsWith(input.owner->opIntervalClosed(), 2)) {
@@ -3761,7 +3807,7 @@ bool Expression::ToStringIntervalClosed(
   return false;
 }
 
-bool Expression::ToStringQuote(
+bool Expression::toStringQuote(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   (void) theFormat;
@@ -3777,7 +3823,7 @@ bool Expression::ToStringQuote(
   return true;
 }
 
-bool Expression::ToStringLogBase(
+bool Expression::toStringLogBase(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (!input.StartsWith(input.owner->opLogBase(), 3)) {
@@ -3788,7 +3834,7 @@ bool Expression::ToStringLogBase(
   return true;
 }
 
-bool Expression::ToStringIsDenotedBy(
+bool Expression::toStringIsDenotedBy(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (!input.IsListStartingWithAtom(input.owner->opIsDenotedBy())) {
@@ -3798,7 +3844,7 @@ bool Expression::ToStringIsDenotedBy(
   return true;
 }
 
-bool Expression::ToStringDefineConditional(
+bool Expression::toStringDefineConditional(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (!input.StartsWith(input.owner->opDefineConditional(), 4)) {
@@ -3810,17 +3856,17 @@ bool Expression::ToStringDefineConditional(
   return true;
 }
 
-bool Expression::ToStringTensor(
+bool Expression::toStringTensor(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (!input.StartsWith(input.owner->opTensor(), 3)) {
     return false;
   }
-  input.ToStringOpMultiplicative(out, "\\otimes", theFormat);
+  input.toStringOpMultiplicative(out, "\\otimes", theFormat);
   return true;
 }
 
-bool Expression::ToStringIn(
+bool Expression::toStringIn(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (!input.StartsWith(input.owner->opIn(), 3)) {
@@ -3831,7 +3877,7 @@ bool Expression::ToStringIn(
   return true;
 }
 
-bool Expression::ToStringAnd(
+bool Expression::toStringAnd(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   (void) theFormat;
@@ -3843,7 +3889,7 @@ bool Expression::ToStringAnd(
   return true;
 }
 
-bool Expression::ToStringBinom(
+bool Expression::toStringBinom(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (!input.StartsWith(input.owner->opBinom(), 3)) {
@@ -3854,7 +3900,7 @@ bool Expression::ToStringBinom(
   return true;
 }
 
-bool Expression::ToStringUnderscore(
+bool Expression::toStringUnderscore(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (!input.StartsWith(input.owner->opUnderscore())) {
@@ -3865,7 +3911,7 @@ bool Expression::ToStringUnderscore(
   return true;
 }
 
-bool Expression::ToStringSetMinus(
+bool Expression::toStringSetMinus(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (!input.StartsWith(input.owner->opSetMinus(), 3)) {
@@ -3876,7 +3922,7 @@ bool Expression::ToStringSetMinus(
   return true;
 }
 
-bool Expression::ToStringLimitBoundary(
+bool Expression::toStringLimitBoundary(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (!input.StartsWith(input.owner->opLimitBoundary(), 3)) {
@@ -3889,17 +3935,17 @@ bool Expression::ToStringLimitBoundary(
   return true;
 }
 
-bool Expression::ToStringCrossProduct(
+bool Expression::toStringCrossProduct(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (!input.StartsWith(input.owner->opCrossProduct())) {
     return false;
   }
-  input.ToStringOpMultiplicative(out, "\\times", theFormat);
+  input.toStringOpMultiplicative(out, "\\times", theFormat);
   return true;
 }
 
-bool Expression::ToStringAbsoluteValue(
+bool Expression::toStringAbsoluteValue(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (!input.StartsWith(input.owner->opAbsoluteValue(), 2)) {
@@ -3909,7 +3955,7 @@ bool Expression::ToStringAbsoluteValue(
   return true;
 }
 
-bool Expression::ToStringBind(
+bool Expression::toStringBind(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (!input.StartsWith(input.owner->opBind(), 2)) {
@@ -3919,7 +3965,7 @@ bool Expression::ToStringBind(
   return true;
 }
 
-bool Expression::ToStringMod(
+bool Expression::toStringMod(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (!input.IsListStartingWithAtom(input.owner->opMod())) {
@@ -3929,7 +3975,7 @@ bool Expression::ToStringMod(
   return true;
 }
 
-bool Expression::ToStringLieBracket(
+bool Expression::toStringLieBracket(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (!input.IsListStartingWithAtom(input.owner->opLieBracket())) {
@@ -3939,7 +3985,7 @@ bool Expression::ToStringLieBracket(
   return true;
 }
 
-bool Expression::ToStringEqualEqual(
+bool Expression::toStringEqualEqual(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (!input.IsListStartingWithAtom(input.owner->opEqualEqual())) {
@@ -3949,7 +3995,7 @@ bool Expression::ToStringEqualEqual(
   return true;
 }
 
-bool Expression::ToStringEqualEqualEqual(
+bool Expression::toStringEqualEqualEqual(
   const Expression& input, std::stringstream& out, FormatExpressions* theFormat
 ) {
   if (!input.IsListStartingWithAtom(input.owner->opEqualEqualEqual())) {
@@ -3957,6 +4003,25 @@ bool Expression::ToStringEqualEqualEqual(
   }
   out << input[1].toString(theFormat) << "===" << input[2].toString(theFormat);
   return true;
+}
+
+bool Expression::toStringWithHandler(
+  std::stringstream& out, FormatExpressions* theFormat
+) const {
+  MacroRegisterFunctionWithName("Expression::toStringWithHandler");
+  if (!this->IsLisT()) {
+    return false;
+  }
+  if (!(*this)[0].IsAtom()) {
+    return false;
+  }
+  int atom = (*this)[0].theData;
+  if (this->owner->toStringHandlers.Contains(atom)) {
+    Expression::ToStringHandler handler =
+    this->owner->toStringHandlers.GetValueConstCrashIfNotPresent(atom);
+    return handler(*this, out, theFormat);
+  }
+  return false;
 }
 
 std::string Expression::toString(
@@ -4010,66 +4075,16 @@ std::string Expression::toString(
   }
   if (this->toStringData(tempS, theFormat)) {
     out << tempS;
-  } else if (this->ToStringDefine(*this, out, theFormat)) {
-  } else if (this->ToStringIsDenotedBy(*this, out, theFormat)) {
-  } else if (this->ToStringLnAbsoluteInsteadOfLogarithm(*this, out, theFormat) ) {
-  } else if (this->ToStringLogBase(*this, out, theFormat)) {
-  } else if (this->ToStringIntervalOpen(*this, out, theFormat)) {
-  } else if (this->ToStringIntervalRightClosed(*this, out, theFormat)) {
-  } else if (this->ToStringIntervalLeftClosed(*this, out, theFormat)) {
-  } else if (this->ToStringIntervalClosed(*this, out, theFormat)) {
-  } else if (this->ToStringQuote(*this, out, theFormat)) {
-  } else if (this->ToStringDefineConditional(*this, out, theFormat)) {
-  } else if (this->ToStringDivide(out, theFormat)) {
-  } else if (this->ToStringTensor(*this, out, theFormat)) {
-  } else if (this->ToStringIn(*this, out, theFormat)) {
-  } else if (this->ToStringOr(*this, out, theFormat)) {
-  } else if (this->ToStringAnd(*this, out, theFormat)) {
-  } else if (this->ToStringBinom(*this, out, theFormat)) {
-  } else if (this->ToStringUnderscore(*this, out, theFormat)) {
-  } else if (this->ToStringSetMinus(*this, out, theFormat)) {
-  } else if (this->ToStringLimitBoundary(*this, out, theFormat)) {
-  } else if (this->ToStringTimes(*this, out, theFormat)) {
-  } else if (this->ToStringCrossProduct(*this, out, theFormat)) {
-  } else if (this->ToStringSqrt3(*this, out, theFormat)) {
-  } else if (this->ToStringFactorial(*this, out, theFormat)) {
-  } else if (this->ToStringAbsoluteValue(*this, out, theFormat)) {
-  } else if (this->ToStringPower(out, theFormat)) {
-  } else if (this->ToStringPlus(*this, out, theFormat)) {
-  } else if (this->ToStringDirectSum(*this, out, theFormat)){
-  } else if (this->ToStringMinus2(*this, out, theFormat)) {
-  } else if (this->ToStringSqrt2(*this, out, theFormat)) {
-  } else if (this->ToStringMinus3(*this, out, theFormat)) {
-  } else if (this->ToStringBind(*this, out, theFormat)) {
-  } else if (this->ToStringEqualEqual(*this, out, theFormat)) {
-  } else if (this->ToStringEqualEqualEqual(*this, out, theFormat)) {
-  } else if (this->ToStringDifferentiate(*this, out, theFormat)) {
-  } else if (this->ToStringDifferential2(*this, out, theFormat)) {
-  } else if (this->ToStringDifferential3(*this, out, theFormat)) {
-  } else if (this->ToStringSumOrIntegral(*this, out, theFormat)) {
-  } else if (this->ToStringGreaterThan(*this, out, theFormat)) {
-  } else if (this->ToStringGreaterThanOrEqualTo(*this, out, theFormat)) {
-  } else if (this->ToStringLessThanOrEqualTo(*this, out, theFormat)) {
-  } else if (this->ToStringLimit(*this, out, theFormat)) {
-  } else if (this->ToStringLimitProcess(*this, out, theFormat)) {
-  } else if (this->ToStringLessThan(*this, out, theFormat)) {
-  } else if (this->ToStringMatrix(*this, out, theFormat)) {
-  } else if (this->ToStringSequence(*this, out, theFormat)) {
-  } else if (this->ToStringLieBracket(*this, out, theFormat)) {
-  } else if (this->ToStringMod(*this, out, theFormat)) {
-  } else if (this->ToStringUnion(*this, out, theFormat)) {
-  } else if (this->ToStringIntersection(*this, out, theFormat)) {
-  } else if (this->ToStringUnionNoRepetition(*this, out, theFormat)) {
-  } else if (this->ToStringEndStatement(out, startingExpression, outputJS, theFormat)) {
-  } else if (this->ToStringError(*this, out, theFormat)) {
+  } else if (this->toStringWithHandler(out, theFormat)) {
+  } else if (this->toStringEndStatement(out, startingExpression, outputJS, theFormat)) {
   } else if (this->size() == 1) {
     out << (*this)[0].toString(theFormat);
-  } else if (this->ToStringGeneral(out, theFormat)) {
+  } else if (this->toStringGeneral(out, theFormat)) {
   } else { //<-not sure if this case is possible
     out << "(ProgrammingError:NotDocumented)";
   }
   if (startingExpression != nullptr) {
-    return this->ToStringWithStartingExpression(theFormat, startingExpression, out, outputJS);
+    return this->toStringWithStartingExpression(theFormat, startingExpression, out, outputJS);
   }
   if (outputJS != nullptr) {
     if (outputJS->theType == JSData::token::tokenUndefined) {
@@ -4554,8 +4569,8 @@ bool Expression::operator==(const std::string& other) const {
   return this->IsOperationGiven(other);
 }
 
-std::string Expression::ToUTF8String(FormatExpressions* theFormat) const {
-  MacroRegisterFunctionWithName("Expression::ToUTF8String");
+std::string Expression::toUTF8String(FormatExpressions* theFormat) const {
+  MacroRegisterFunctionWithName("Expression::toUTF8String");
   if (this->owner == nullptr) {
     return this->toString(theFormat);
   }
@@ -4568,14 +4583,14 @@ std::string Expression::ToUTF8String(FormatExpressions* theFormat) const {
   } else if (this->IsOperationGiven(this->owner->opPi())) {
     return "\\u03C0";
   } else if (this->StartsWith(this->owner->opPlus(), 3)) {
-    return (*this)[1].ToUTF8String(theFormat) + "+" + (*this)[2].ToUTF8String(theFormat);
+    return (*this)[1].toUTF8String(theFormat) + "+" + (*this)[2].toUTF8String(theFormat);
   } else if (this->StartsWith(this->owner->opTimes(), 3)) {
-    std::string secondUTF8String = (*this)[2].ToUTF8String(theFormat);
+    std::string secondUTF8String = (*this)[2].toUTF8String(theFormat);
     std::string secondString = (*this)[2].toString(theFormat);
     if ((*this)[1].IsOperationGiven(this->owner->opSqrt())) {
       out << "sqrt(" << secondUTF8String << ")";
     } else {
-      std::string firstE = (*this)[1].ToUTF8String(theFormat);
+      std::string firstE = (*this)[1].toUTF8String(theFormat);
       bool firstNeedsBrackets = (*this)[1].NeedsParenthesisForMultiplication();
       bool secondNeedsBrackets = (*this)[2].NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost(&((*this)[1]));
       bool mustHaveTimes = false;
@@ -4616,7 +4631,7 @@ std::string Expression::ToUTF8String(FormatExpressions* theFormat) const {
   } else if (this->StartsWith(this->owner->opSequence())) {
     out << "(";
     for (int i = 1; i < this->size(); i ++) {
-      out << (*this)[i].ToUTF8String(theFormat);
+      out << (*this)[i].toUTF8String(theFormat);
       if (i < this->size() - 1) {
         out << ", ";
       }

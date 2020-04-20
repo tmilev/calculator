@@ -602,15 +602,15 @@ void Calculator::initPredefinedInnerFunctions() {
     innerStandard
   );
   this->AddOperationHandler(
-    "ToUTF8String",
-    CalculatorFunctions::innerExpressionToUTF8String,
+    "toUTF8String",
+    CalculatorFunctions::innerExpressiontoUTF8String,
     "",
     "Transforms an arbitrary expression to a utf8-string representation. "
     "The string is supposed to look reasonable when drawn on a javascript canvas. ",
     "f = \\sin {}x / \\cos {}x;\n"
-    "Plot(f, -\\pi/4, \\pi/4) + PlotLabel{}((1,1), \"y =\" + ToUTF8String(f))",
-    "CalculatorFunctions::innerExpressionToUTF8String",
-    "ToUTF8String",
+    "Plot(f, -\\pi/4, \\pi/4) + PlotLabel{}((1,1), \"y =\" + toUTF8String(f))",
+    "CalculatorFunctions::innerExpressiontoUTF8String",
+    "toUTF8String",
     innerStandard
   );
   this->AddOperationHandler(
@@ -8169,8 +8169,8 @@ void Calculator::initPredefinedOperationsComposite() {
   );
 }
 
-void Calculator::initPredefinedStandardOperationsWithoutHandler() {
-  MacroRegisterFunctionWithName("Calculator::initPredefinedStandardOperationsWithoutHandler");
+void Calculator::initializePredefinedStandardOperationsWithoutHandler() {
+  MacroRegisterFunctionWithName("Calculator::initializePredefinedStandardOperationsWithoutHandler");
   //additional operations treated like function names but otherwise not parsed as syntactic elements.
 
   this->AddOperationNoRepetitionAllowed("RulesOff");
@@ -8202,8 +8202,8 @@ void Calculator::initPredefinedStandardOperationsWithoutHandler() {
   this->AddOperationNoRepetitionAllowed("ExpressionHistorySetChild");
 }
 
-void Calculator::initAtomsNonCacheable() {
-  MacroRegisterFunctionWithName("Calculator::initAtomsNonCacheable");
+void Calculator::initializeAtomsNonCacheable() {
+  MacroRegisterFunctionWithName("Calculator::initializeAtomsNonCacheable");
   this->atomsThatMustNotBeCached.setExpectedSize(30);
   this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("RandomInteger");
   this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("SelectAtRandom");
@@ -8214,13 +8214,13 @@ void Calculator::initAtomsNonCacheable() {
 //  this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("PrintRuleStack");
 }
 
-void Calculator::initAtomsNotGoodForChainRule() {
-  MacroRegisterFunctionWithName("Calculator::initAtomsNotGoodForChainRule");
+void Calculator::initializeAtomsNotGoodForChainRule() {
+  MacroRegisterFunctionWithName("Calculator::initializeAtomsNotGoodForChainRule");
   this->atomsNotAllowingChainRule.AddOnTopNoRepetitionMustBeNewCrashIfNot("Bind");
 }
 
-void Calculator::initStringsThatSplitIfFollowedByDigit() {
-  MacroRegisterFunctionWithName("Calculator::initStringsThatSplitIfFollowedByDigit");
+void Calculator::initializeStringsThatSplitIfFollowedByDigit() {
+  MacroRegisterFunctionWithName("Calculator::initializeStringsThatSplitIfFollowedByDigit");
   this->stringsThatSplitIfFollowedByDigit.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\cdot");
   this->stringsThatSplitIfFollowedByDigit.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\circ");
   this->stringsThatSplitIfFollowedByDigit.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\frac");
@@ -8237,8 +8237,8 @@ void Calculator::initStringsThatSplitIfFollowedByDigit() {
   this->stringsThatSplitIfFollowedByDigit.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\arccos");
 }
 
-void Calculator::initAtomsThatAllowCommutingOfArguments() {
-  MacroRegisterFunctionWithName("Calculator::initAtomsThatAllowCommutingOfArguments");
+void Calculator::initializeAtomsThatAllowCommutingOfArguments() {
+  MacroRegisterFunctionWithName("Calculator::initializeAtomsThatAllowCommutingOfArguments");
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.setExpectedSize(30);
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("+");
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("*");
@@ -8250,8 +8250,8 @@ void Calculator::initAtomsThatAllowCommutingOfArguments() {
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\log");
 }
 
-void Calculator::initArithmeticOperations() {
-  MacroRegisterFunctionWithName("Calculator::initArithmeticOperations");
+void Calculator::initializeArithmeticOperations() {
+  MacroRegisterFunctionWithName("Calculator::initializeArithmeticOperations");
   this->arithmeticOperations.AddOnTopNoRepetitionMustBeNewCrashIfNot("+");
   this->arithmeticOperations.AddOnTopNoRepetitionMustBeNewCrashIfNot("-");
   this->arithmeticOperations.AddOnTopNoRepetitionMustBeNewCrashIfNot("*");
@@ -8259,9 +8259,9 @@ void Calculator::initArithmeticOperations() {
   this->arithmeticOperations.AddOnTopNoRepetitionMustBeNewCrashIfNot("^");
 }
 
-void Calculator::initBuiltInAtomsWhosePowersAreInterpretedAsFunctions() {
-  MacroRegisterFunctionWithName("Calculator::initBuiltInAtomsWhosePowersAreInterpretedAsFunctions");
-  //Related heavily to initOperationsInterpretedAsFunctionsMultiplicatively
+void Calculator::initializeBuiltInAtomsWhosePowersAreInterpretedAsFunctions() {
+  MacroRegisterFunctionWithName("Calculator::initializeBuiltInAtomsWhosePowersAreInterpretedAsFunctions");
+  //Related heavily to initializeOperationsInterpretedAsFunctionsMultiplicatively
   this->atomsWhoseExponentsAreInterpretedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\sin");
   this->atomsWhoseExponentsAreInterpretedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\cos");
   this->atomsWhoseExponentsAreInterpretedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\tan");
@@ -8271,9 +8271,9 @@ void Calculator::initBuiltInAtomsWhosePowersAreInterpretedAsFunctions() {
   this->atomsWhoseExponentsAreInterpretedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\log");
 }
 
-void Calculator::initOperationsInterpretedAsFunctionsMultiplicatively() {
-  MacroRegisterFunctionWithName("Calculator::initOperationsInterpretedAsFunctionsMultiplicatively");
-  //Related heavily to initBuiltInAtomsWhosePowersAreInterpretedAsFunctions
+void Calculator::initializeOperationsInterpretedAsFunctionsMultiplicatively() {
+  MacroRegisterFunctionWithName("Calculator::initializeOperationsInterpretedAsFunctionsMultiplicatively");
+  //Related heavily to initializeBuiltInAtomsWhosePowersAreInterpretedAsFunctions
   this->knownOperationsInterpretedAsFunctionsMultiplicatively.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\sin");
   this->knownOperationsInterpretedAsFunctionsMultiplicatively.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\cos");
   this->knownOperationsInterpretedAsFunctionsMultiplicatively.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\tan");
@@ -8286,8 +8286,8 @@ void Calculator::initOperationsInterpretedAsFunctionsMultiplicatively() {
   this->knownOperationsInterpretedAsFunctionsMultiplicatively.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\log");
 }
 
-void Calculator::initOperationsThatAreKnownFunctions() {
-  MacroRegisterFunctionWithName("Calculator::initOperationsThatAreKnownFunctions");
+void Calculator::initializeOperationsThatAreKnownFunctions() {
+  MacroRegisterFunctionWithName("Calculator::initializeOperationsThatAreKnownFunctions");
   this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("+");
   this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("-");
   this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("*");
@@ -8353,8 +8353,76 @@ void Calculator::AddTrigSplit(const std::string& trigFun, const List<std::string
   }
 }
 
-void Calculator::initPredefinedWordSplits() {
-  MacroRegisterFunctionWithName("Calculator::initPredefinedWordSplits");
+void Calculator::addOneStringHandler(
+  int atom, Expression::ToStringHandler handler
+) {
+  if (this->toStringHandlers.Contains(atom)) {
+    if (this->toStringHandlers.GetValueConstCrashIfNotPresent(
+      atom) != handler
+    ) {
+      global.fatal << "More than one toStringHandler for atom "
+      << this->operations.theKeys[atom] << "." << global.fatal;
+    }
+  } else {
+    this->toStringHandlers.SetKeyValue(atom, handler);
+  }
+}
+
+void Calculator::initializeToStringHandlers() {
+  MacroRegisterFunctionWithName("Calculator::initializeToStringHandlers");
+  this->addOneStringHandler(this->opDefine()                , Expression::toStringDefine                      );
+  this->addOneStringHandler(this->opIsDenotedBy()           , Expression::toStringIsDenotedBy                 );
+  this->addOneStringHandler(this->opLog()                   , Expression::toStringLnAbsoluteInsteadOfLogarithm);
+  this->addOneStringHandler(this->opLogBase()               , Expression::toStringLogBase                     );
+  this->addOneStringHandler(this->opIntervalOpen()          , Expression::toStringIntervalOpen                );
+  this->addOneStringHandler(this->opIntervalRightClosed()   , Expression::toStringIntervalRightClosed         );
+  this->addOneStringHandler(this->opIntervalLeftClosed()    , Expression::toStringIntervalLeftClosed          );
+  this->addOneStringHandler(this->opIntervalClosed()        , Expression::toStringIntervalClosed              );
+  this->addOneStringHandler(this->opQuote()                 , Expression::toStringQuote                       );
+  this->addOneStringHandler(this->opDefineConditional()     , Expression::toStringDefineConditional           );
+  this->addOneStringHandler(this->opDivide()                , Expression::toStringDivide                      );
+  this->addOneStringHandler(this->opString()                , Expression::toStringTensor                      );
+  this->addOneStringHandler(this->opIn()                    , Expression::toStringIn                          );
+  this->addOneStringHandler(this->opOr()                    , Expression::toStringOr                          );
+  this->addOneStringHandler(this->opAnd()                   , Expression::toStringAnd                         );
+  this->addOneStringHandler(this->opBinom()                 , Expression::toStringBinom                       );
+  this->addOneStringHandler(this->opUnderscore()            , Expression::toStringUnderscore                  );
+  this->addOneStringHandler(this->opSetMinus()              , Expression::toStringSetMinus                    );
+  this->addOneStringHandler(this->opLimitBoundary()         , Expression::toStringLimitBoundary               );
+  this->addOneStringHandler(this->opTimes()                 , Expression::toStringTimes                       );
+  this->addOneStringHandler(this->opCrossProduct()          , Expression::toStringCrossProduct                );
+  this->addOneStringHandler(this->opSqrt()                  , Expression::toStringSqrt                        );
+  this->addOneStringHandler(this->opFactorial()             , Expression::toStringFactorial                   );
+  this->addOneStringHandler(this->opAbsoluteValue()         , Expression::toStringAbsoluteValue               );
+  this->addOneStringHandler(this->opThePower()              , Expression::toStringPower                       );
+  this->addOneStringHandler(this->opPlus()                  , Expression::toStringPlus                        );
+  this->addOneStringHandler(this->opDirectSum()             , Expression::toStringDirectSum                   );
+  this->addOneStringHandler(this->opMinus()                 , Expression::toStringMinus                       );
+  this->addOneStringHandler(this->opBind()                  , Expression::toStringBind                        );
+  this->addOneStringHandler(this->opEqualEqual()            , Expression::toStringEqualEqual                  );
+  this->addOneStringHandler(this->opEqualEqualEqual()       , Expression::toStringEqualEqualEqual             );
+  this->addOneStringHandler(this->opDifferentiate()         , Expression::toStringDifferentiate               );
+  this->addOneStringHandler(this->opDifferential()          , Expression::toStringDifferential                );
+  this->addOneStringHandler(this->opSum()                   , Expression::toStringSumOrIntegral               );
+  this->addOneStringHandler(this->opIntegral()              , Expression::toStringSumOrIntegral               );
+  this->addOneStringHandler(this->opGreaterThan()           , Expression::toStringGreaterThan                 );
+  this->addOneStringHandler(this->opGreaterThanOrEqualTo()  , Expression::toStringGreaterThanOrEqualTo        );
+  this->addOneStringHandler(this->opLessThanOrEqualTo()     , Expression::toStringLessThanOrEqualTo           );
+  this->addOneStringHandler(this->opLimit()                 , Expression::toStringLimit                       );
+  this->addOneStringHandler(this->opLimitProcess()          , Expression::toStringLimitProcess                );
+  this->addOneStringHandler(this->opLessThan()              , Expression::toStringLessThan                    );
+  this->addOneStringHandler(this->opMatriX()                , Expression::toStringMatrix                      );
+  this->addOneStringHandler(this->opSequence()              , Expression::toStringSequence                    );
+  this->addOneStringHandler(this->opLieBracket()            , Expression::toStringLieBracket                  );
+  this->addOneStringHandler(this->opMod()                   , Expression::toStringMod                         );
+  this->addOneStringHandler(this->opUnion()                 , Expression::toStringUnion                       );
+  this->addOneStringHandler(this->opIntersection()          , Expression::toStringIntersection                );
+  this->addOneStringHandler(this->opUnionNoRepetition()     , Expression::toStringUnionNoRepetition           );
+  this->addOneStringHandler(this->opError()                 , Expression::toStringError                       );
+}
+
+void Calculator::initializePredefinedWordSplits() {
+  MacroRegisterFunctionWithName("Calculator::initializePredefinedWordSplits");
   List<std::string> theSplit;
   List<std::string> theVars;
   theVars.addOnTop("x");

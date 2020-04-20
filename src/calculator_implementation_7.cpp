@@ -1457,7 +1457,7 @@ bool CalculatorFunctions::innerPrintAlgebraicClosureStatus(
   theFormat.flagUseHTML = false;
   theFormat.flagUseLatex = true;
   return output.AssignValue(
-    theCommands.theObjectContainer.theAlgebraicClosure.ToStringFull(&theFormat),
+    theCommands.theObjectContainer.theAlgebraicClosure.toStringFull(&theFormat),
     theCommands
   );
 }
@@ -5558,7 +5558,7 @@ bool CalculatorFunctions::innerLispify(Calculator& theCommands, const Expression
   if (input.size() != 2) {
     return false;
   }
-  return output.AssignValue(input[1].ToStringSemiFull(), theCommands);
+  return output.AssignValue(input[1].toStringSemiFull(), theCommands);
 }
 
 bool CalculatorFunctions::innerLispifyFull(Calculator& theCommands, const Expression& input, Expression& output) {
@@ -5566,7 +5566,7 @@ bool CalculatorFunctions::innerLispifyFull(Calculator& theCommands, const Expres
   if (input.size() != 2) {
     return false;
   }
-  return output.AssignValue(input[1].ToStringFull(), theCommands);
+  return output.AssignValue(input[1].toStringFull(), theCommands);
 }
 
 bool CalculatorFunctions::innerMinPolyMatrix(
@@ -9263,8 +9263,8 @@ int charSSAlgMod<coefficient>::GetPosNstringSuchThatWeightMinusNalphaIsWeight(
 }
 
 template <class coefficient>
-std::string charSSAlgMod<coefficient>::ToStringFullCharacterWeightsTable() {
-  MacroRegisterFunctionWithName("charSSAlgMod_CoefficientType::ToStringFullCharacterWeightsTable");
+std::string charSSAlgMod<coefficient>::toStringFullCharacterWeightsTable() {
+  MacroRegisterFunctionWithName("charSSAlgMod_CoefficientType::toStringFullCharacterWeightsTable");
   std::stringstream out;
   charSSAlgMod<coefficient> outputChar;
   if (!this->FreudenthalEvalMeFullCharacter(outputChar, 10000, nullptr)) {
@@ -9620,7 +9620,7 @@ bool CalculatorFunctions::innerDrawWeightSupport(
   theChar.DrawMeNoMults(report, theDV, 10000);
   out << report << theDV.GetHtmlDiv(theWeyl.GetDim());
   out << "<br>A table with the weights of the character follows. <br>";
-  out << theChar.ToStringFullCharacterWeightsTable();
+  out << theChar.toStringFullCharacterWeightsTable();
   return output.AssignValue(out.str(), theCommands);
 }
 

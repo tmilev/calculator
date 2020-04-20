@@ -2552,8 +2552,8 @@ bool ExpressionHistoryEnumerator::ProcessTransformation(
 std::string ExpressionHistoryEnumerator::ToStringDebug() {
   MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::ToStringDebug");
   std::stringstream out;
-  out << "<b>History</b><br>" << this->theHistory.ToStringTreeHtml(- 1) << "<hr>";
-  out << "" << this->theHistory.ToStringSemiFull() << "<hr>";
+  out << "<b>History</b><br>" << this->theHistory.toStringTreeHtml(- 1) << "<hr>";
+  out << "" << this->theHistory.toStringSemiFull() << "<hr>";
   // out << "Current state: " << this->currentState.toString()
   // << "<br>";
   // out << "Current subtree: " << this->currentSubTree.toString();

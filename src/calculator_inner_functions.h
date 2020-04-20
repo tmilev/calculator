@@ -43,7 +43,7 @@ public:
 
   static bool innerStringToAtom(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerExpressionToString(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerExpressionToUTF8String(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerExpressiontoUTF8String(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerQuoteToString(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerBase64ToCharToBase64Test(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerConvertBase64ToString(Calculator& theCommands, const Expression& input, Expression& output);

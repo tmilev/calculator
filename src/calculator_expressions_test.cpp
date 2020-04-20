@@ -5,11 +5,13 @@
 bool Expression::Test::All() {
   Calculator tester;
   tester.initialize();
-  Expression::Test::ToStringTest(tester);
+  Expression::Test::ToStringTestRecode(tester);
   return true;
 }
 
-bool Expression::Test::ToStringTestRecode(const std::string& inputHardCodedMustParse, Calculator& ownerInitialized) {
+bool Expression::Test::ToStringTestRecodeOnce(
+  const std::string& inputHardCodedMustParse, Calculator& ownerInitialized
+) {
   Expression parsed;
   if (!ownerInitialized.Parse(inputHardCodedMustParse, parsed)) {
     global.fatal << "Failed to parse hard-coded input string. " << global.fatal;
@@ -23,7 +25,7 @@ bool Expression::Test::ToStringTestRecode(const std::string& inputHardCodedMustP
   return true;
 }
 
-bool Expression::Test::ToStringTest(Calculator& ownerInitialized) {
-  Expression::Test::ToStringTestRecode("1+1", ownerInitialized);
+bool Expression::Test::ToStringTestRecode(Calculator& ownerInitialized) {
+  Expression::Test::ToStringTestRecodeOnce("1+1", ownerInitialized);
   return true;
 }

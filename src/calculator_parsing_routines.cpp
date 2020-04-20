@@ -27,7 +27,7 @@ std::string SyntacticElement::ToStringHumanReadable(Calculator& theBoss, bool in
   out << "<tr><td style = \"text-align:center\">" << this->theData.toString(nullptr) << "</td></tr>";
   out << "<tr><td style = \"color:#AAAAAA\">" << controlString << "</td></tr>";
   if (includeLispifiedExpressions) {
-    out <<  "<tr><td style =\"color:#AAAAAA\">" << this->theData.ToStringFull() << "</td></tr>";
+    out <<  "<tr><td style =\"color:#AAAAAA\">" << this->theData.toStringFull() << "</td></tr>";
   }
   if (this->errorString != "") {
     out << "<tr><td>" << this->errorString << "</td></tr>";
@@ -228,7 +228,7 @@ void Calculator::initialize() {
   this->AddOperationBuiltInType("EllipticCurveElementsRational");
   this->AddOperationBuiltInType("EllipticCurveElementsZmodP");
 
-  this->initOperationsInterpretedAsFunctionsMultiplicatively();
+  this->initializeOperationsInterpretedAsFunctionsMultiplicatively();
 
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot(" ");//empty token must always come first!!!!
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("{{}}");
@@ -309,22 +309,24 @@ void Calculator::initialize() {
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("EndProgram");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\text");
 
-  this->initPredefinedStandardOperationsWithoutHandler();
+  this->initializePredefinedStandardOperationsWithoutHandler();
   this->TotalNumPatternMatchedPerformed = 0;
   this->initPredefinedStandardOperations();
   this->initPredefinedInnerFunctions();
   this->initCalculusTestingFunctions();
   this->initPredefinedOperationsComposite();
-  this->initAtomsThatAllowCommutingOfArguments();
+  this->initializeAtomsThatAllowCommutingOfArguments();
   this->initAtomsThatFreezeArguments();
-  this->initAtomsNotGoodForChainRule();
+  this->initializeAtomsNotGoodForChainRule();
   this->initBuiltInAtomsNotInterpretedAsFunctions();
-  this->initBuiltInAtomsWhosePowersAreInterpretedAsFunctions();
-  this->initOperationsThatAreKnownFunctions();
-  this->initAtomsNonCacheable();
-  this->initArithmeticOperations();
-  this->initPredefinedWordSplits();
-  this->initStringsThatSplitIfFollowedByDigit();
+  this->initializeBuiltInAtomsWhosePowersAreInterpretedAsFunctions();
+  this->initializeOperationsThatAreKnownFunctions();
+  this->initializeAtomsNonCacheable();
+  this->initializeArithmeticOperations();
+  this->initializePredefinedWordSplits();
+  this->initializeStringsThatSplitIfFollowedByDigit();
+
+  this->initializeToStringHandlers();
 
   this->RuleStack.reset(*this, 100);
   this->RuleStack.AddChildAtomOnTop(this->opEndStatement());

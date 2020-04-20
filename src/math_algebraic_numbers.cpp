@@ -846,7 +846,7 @@ bool AlgebraicClosureRationals::AdjoinRootMinimalPolynomial(
     << "does not yield zero, rather yields "
     << substitutedMinPoly.toString() << ". "
     << "The algebraic closure printout follows. "
-    << this->ToStringFull() << global.fatal;
+    << this->toStringFull() << global.fatal;
   }
   return true;
 }
@@ -1243,7 +1243,7 @@ std::string AlgebraicClosureRationals::ToStringQuadraticRadical(
   return HtmlRoutines::GetMathSpanPure(out.str());
 }
 
-std::string AlgebraicClosureRationals::ToStringFull(FormatExpressions* theFormat) const {
+std::string AlgebraicClosureRationals::toStringFull(FormatExpressions* theFormat) const {
   std::stringstream out;
   out << "Dimension over the rationals: "
   << this->latestBasis.size << ". Multiplicative basis follows. ";
@@ -1259,7 +1259,7 @@ std::string AlgebraicClosureRationals::ToStringFull(FormatExpressions* theFormat
     } else {
       theFlaStream << " e_{" << i + 1 << "}";
     }
-    theFlaStream << "=" << this->latestBasis[i].ToStringMatrixForm(theFormat);
+    theFlaStream << "=" << this->latestBasis[i].toStringMatrixForm(theFormat);
     out << HtmlRoutines::GetMathSpanPure(theFlaStream.str());
     if (i != this->latestBasis.size - 1) {
       out << ",  ";
@@ -1334,7 +1334,7 @@ std::string AlgebraicClosureRationals::toString(FormatExpressions* theFormat) co
   if (this->flagIsQuadraticRadicalExtensionRationals) {
     return this->ToStringQuadraticRadical(&tempFormat);
   }
-  return this->ToStringFull(&tempFormat);
+  return this->toStringFull(&tempFormat);
 }
 
 bool AlgebraicNumber::IsRational(Rational* whichRational) const {

@@ -249,7 +249,7 @@ public:
   );
   std::string ToStringQuadraticRadical(FormatExpressions* theFormat = nullptr) const;
   std::string toString(FormatExpressions* theFormat = nullptr) const;
-  std::string ToStringFull(FormatExpressions* theFormat = nullptr) const;
+  std::string toStringFull(FormatExpressions* theFormat = nullptr) const;
   bool splitToPartialFractionsOverRealAlgebraicNumbers(
     RationalFunction& inputRF,
     List<Polynomial<AlgebraicNumber> >& outputNumerators,

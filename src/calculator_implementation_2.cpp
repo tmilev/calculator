@@ -1225,10 +1225,10 @@ void Calculator::EvaluateCommands() {
       this->outputJS[WebAPI::result::badInput] = badCharsString;
     }
     this->theObjectContainer.resetSliders();
-    out << "<hr>Input:<br> " << StartingExpression.ToStringFull() << "<hr>"
-    << "Output:<br>" << this->theProgramExpression.ToStringFull();
-    this->outputJS[WebAPI::result::resultLabel]["input"] = StartingExpression.ToStringFull();
-    this->outputJS[WebAPI::result::resultLabel]["output"] = this->theProgramExpression.ToStringFull();
+    out << "<hr>Input:<br> " << StartingExpression.toStringFull() << "<hr>"
+    << "Output:<br>" << this->theProgramExpression.toStringFull();
+    this->outputJS[WebAPI::result::resultLabel]["input"] = StartingExpression.toStringFull();
+    this->outputJS[WebAPI::result::resultLabel]["output"] = this->theProgramExpression.toStringFull();
   }
   this->outputString = out.str();
   this->outputJS[WebAPI::result::resultHtml] = out.str();

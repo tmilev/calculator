@@ -2409,7 +2409,7 @@ JSData Function::ToJSON() const {
   return result;
 }
 
-std::string Function::ToStringFull() const {
+std::string Function::toStringFull() const {
   if (!this->options.visible) {
     return "";
   }

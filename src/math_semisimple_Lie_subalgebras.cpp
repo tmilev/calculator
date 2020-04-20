@@ -2190,7 +2190,7 @@ void DynkinSimpleType::GetAutomorphismActingOnVectorColumn(MatrixTensor<Rational
     global.fatal << "This is a programming error: the determinant of the automorphism matrix "
     << "of the Dynkin graph must be +/- 1, it is instead "
     << tempRat.toString() << ". The auto matrix is: "
-    << HtmlRoutines::GetMathMouseHover(output.ToStringMatrixForm(&theFormat)) << " and the dynkin type is: "
+    << HtmlRoutines::GetMathMouseHover(output.toStringMatrixForm(&theFormat)) << " and the dynkin type is: "
     << this->toString() << "." << global.fatal;
   }
 }
@@ -6830,7 +6830,7 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other
         reportStream << "... and so on, only the first 100 elements printed out of total "
         << theOuterAutos.theElements.size << ". ";
       } else {
-        reportStream << "<br>" << HtmlRoutines::GetMathMouseHover(theOuterAutos.theElements[i].ToStringMatrixForm(&theFormat));
+        reportStream << "<br>" << HtmlRoutines::GetMathMouseHover(theOuterAutos.theElements[i].toStringMatrixForm(&theFormat));
       }
     }
     theReport.Report(reportStream.str());

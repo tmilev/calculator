@@ -4469,7 +4469,9 @@ void ExpressionContext::makeOneVariableFromString(
   const std::string& polynomialVariable
 ) {
   this->initialize(*this->owner);
-  this->variables.addOnTop(polynomialVariable);
+  Expression converted;
+  converted.MakeAtom(polynomialVariable, *this->owner);
+  this->variables.addOnTop(converted);
 }
 
 bool Expression::MakeSqrt(Calculator& owner, const Rational& argument, const Rational& radicalSuperIndex) {

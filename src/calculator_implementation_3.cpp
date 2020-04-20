@@ -1451,7 +1451,9 @@ bool Calculator::innerZmodP(Calculator& theCommands, const Expression& input, Ex
   return output.AssignValue(outputElt, theCommands);
 }
 
-bool Calculator::innerInterpolatePoly(Calculator& theCommands, const Expression& input, Expression& output) {
+bool Calculator::innerInterpolatePoly(
+  Calculator& theCommands, const Expression& input, Expression& output
+) {
   MacroRegisterFunctionWithName("Calculator::innerInterpolatePoly");
   if (input.size() < 2) {
     return false;

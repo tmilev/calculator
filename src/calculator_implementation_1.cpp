@@ -698,9 +698,10 @@ bool Calculator::innerGroebner(
   std::stringstream out;
   out << theGroebnerComputation.ToStringLetterOrder(false);
   out << "Letter/expression order: ";
-  for (int i = 0; i < theContext.variables.size; i ++) {
-    out << theContext.variables[i].toString();
-    if (i != theContext.variables.size - 1) {
+  int numberOfVariables = theContext.numberOfVariables();
+  for (int i = 0; i < numberOfVariables; i ++) {
+    out << theContext.getVariable(i).toString();
+    if (i != numberOfVariables - 1) {
       out << "&lt;";
     }
   }

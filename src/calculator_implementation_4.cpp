@@ -3065,7 +3065,9 @@ bool Expression::IsMeltable(int* numResultingChildren) const {
   return true;
 }
 
-bool Expression::MergeContextsMyAruments(Expression& output, std::stringstream* commentsOnFailure) const {
+bool Expression::MergeContextsMyAruments(
+  Expression& output, std::stringstream* commentsOnFailure
+) const {
   MacroRegisterFunctionWithName("Expression::MergeContextsMyAruments");
   this->CheckInitialization();
   if (this->size() < 2) {
@@ -3074,7 +3076,9 @@ bool Expression::MergeContextsMyAruments(Expression& output, std::stringstream* 
   for (int i = 1; i < this->size(); i ++) {
     if (!(*this)[i].IsBuiltInTypE()) {
       if (commentsOnFailure != nullptr) {
-        *commentsOnFailure << "<hr>Failed to merge the arguments of the expression" << this->toString() << ": the argument "
+        *commentsOnFailure
+        << "<hr>Failed to merge the arguments of the expression "
+        << this->toString() << ": the argument "
         << (*this)[i].toString() << "is not of built-in type";
       }
       return false;
@@ -3095,7 +3099,9 @@ bool Expression::MergeContextsMyAruments(Expression& output, std::stringstream* 
   for (int i = 2; i < this->size(); i ++) {
     if (!(*this)[i].IsBuiltInTypE()) {
       if (commentsOnFailure != nullptr) {
-        *commentsOnFailure << "<hr>Failed to merge contexts of arguments: an argument is not of built-in type. ";
+        *commentsOnFailure
+        << "<hr>Failed to merge contexts of arguments: "
+        << "an argument is not of built-in type. ";
       }
       return false;
     }
@@ -3110,8 +3116,9 @@ bool Expression::MergeContextsMyAruments(Expression& output, std::stringstream* 
   Expression convertedE;
   for (int i = 1; i < this->size(); i ++) {
     convertedE = (*this)[i];
-    if (!convertedE.SetContextAtLeastEqualTo(commonContext)) {
-      *this->owner << "<hr>Failed to convert " << convertedE.toString() << " to context " << commonContext.toString();
+    if (!convertedE.setContextAtLeastEqualTo(commonContext)) {
+      *this->owner << "<hr>Failed to convert "
+      << convertedE.toString() << " to context " << commonContext.toString();
       return false;
     }
     output.AddChildOnTop(convertedE);
@@ -3142,7 +3149,7 @@ bool Calculator::ConvertExpressionsToCommonContext(
     }
   }
   for (int i = 0; i < inputOutputEs.size; i ++) {
-    if (!inputOutputEs[i].::Expression::SetContextAtLeastEqualTo(commonContext)) {
+    if (!inputOutputEs[i].::Expression::setContextAtLeastEqualTo(commonContext)) {
       return false;
     }
   }

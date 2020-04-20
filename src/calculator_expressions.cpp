@@ -2060,8 +2060,8 @@ bool Expression::GreaterThanNoCoeff(const Expression& other) const {
   return false;
 }
 
-bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat) const {
-  MacroRegisterFunctionWithName("Expression::ToStringData");
+bool Expression::toStringData(std::string& output, FormatExpressions* theFormat) const {
+  MacroRegisterFunctionWithName("Expression::toStringData");
   if (this->owner == nullptr) {
     output = "(non-initialized)";
     return true;
@@ -2082,7 +2082,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     } else if (this->theData < this->owner->GetOperations().size && this->theData >= 0) {
       out << this->owner->GetOperations()[this->theData];
     } else {
-      out << "(unknown~ atom~ of~ value~ " << this->theData << ")";
+      out << "[unknown atom of value " << this->theData << "]";
     }
     result = true;
   } else if (this->IsOfType<std::string>()) {
@@ -2335,7 +2335,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
 std::string Expression::ToStringSemiFull() const {
   std::stringstream out;
   std::string tempS;
-  if (this->ToStringData(tempS)) {
+  if (this->toStringData(tempS)) {
     out << tempS << " ";
   } else {
     if (this->children.size > 0) {
@@ -2804,7 +2804,7 @@ std::string Expression::ToStringTreeHtml(int depth) const {
     return out.str();
   }
   std::string data;
-  if (this->ToStringData(data)) {
+  if (this->toStringData(data)) {
     out << "<br>";
     for (int i = 0; i < depth; i ++) {
       out << "_";
@@ -4008,7 +4008,7 @@ std::string Expression::toString(
   if (outputJS != nullptr) {
     outputJS->reset();
   }
-  if (this->ToStringData(tempS, theFormat)) {
+  if (this->toStringData(tempS, theFormat)) {
     out << tempS;
   } else if (this->ToStringDefine(*this, out, theFormat)) {
   } else if (this->ToStringIsDenotedBy(*this, out, theFormat)) {
@@ -4088,7 +4088,7 @@ std::string Expression::Lispify() const {
     return "(error: max recursion depth ...)";
   }
   std::string tempS;
-  if (this->ToStringData(tempS)) {
+  if (this->toStringData(tempS)) {
     return tempS;
   }
   if (this->children.size == 0) {

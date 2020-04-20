@@ -1814,7 +1814,7 @@ bool IntegralRFComputation::IntegrateRF() {
         *this->owner,
         this->integrationSetE,
         currentIntegrand,
-        this->context.variables[0]
+        this->context.getVariable(0)
       );
       coeffE.AssignValue(currentCoefficient, *this->owner);
       currentIntegralWithCoeff = coeffE * currentIntegralNoCoeff;
@@ -1839,7 +1839,7 @@ bool IntegralRFComputation::IntegrateRF() {
       *this->owner,
       this->integrationSetE,
       currentIntegrand,
-      this->context.variables[0]
+      this->context.getVariable(0)
     );
     currentIntegralWithCoeff.CheckConsistencyRecursively();
     this->theIntegralSummands.addOnTop(currentIntegralWithCoeff);
@@ -8058,7 +8058,7 @@ bool CalculatorFunctions::innerHWTAABF(Calculator& theCommands, const Expression
     << "<hr>Failed to obtain highest weight from the third argument which is "
     << weightExpression.toString();
   }
-  if (!leftMerged.SetContextAtLeastEqualTo(finalContext) || !rightMerged.SetContextAtLeastEqualTo(finalContext)) {
+  if (!leftMerged.setContextAtLeastEqualTo(finalContext) || !rightMerged.setContextAtLeastEqualTo(finalContext)) {
     return output.MakeError(
       "Failed to merge the contexts of the highest weight and the elements of the Universal enveloping. ",
       theCommands
@@ -9087,10 +9087,13 @@ bool Calculator::Test::CalculatorTestRun() {
   for (int i = this->startIndex; i < this->lastIndexNotTested; i ++) {
     std::stringstream reportStream;
     Calculator::Test::OneTest& currentTest = this->commands.theValues[i];
-    reportStream << "<br>Test progress: testing " << i + 1 << " out of " << this->commands.size() << ". ";
+    reportStream << "<br>Test progress: testing " << i + 1
+    << " out of " << this->commands.size() << ". ";
     reportStream << "<br>Testing expression:<br> " << currentTest.command;
     global << logger::green << "Automated test: " << i << " out of "
-    << this->commands.size() << ", atom: " << currentTest.command << logger::endL;
+    << this->commands.size() << ", atom: " << currentTest.atom
+    << ", command:\n"
+    << currentTest.command << logger::endL;
     theReport.Report(reportStream.str());
     theTester.initialize();
     theTester.CheckConsistencyAfterInitialization();

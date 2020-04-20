@@ -2609,8 +2609,8 @@ bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
   ExpressionContext curveContext = thePolyE.GetContext();
   if (curveContext.numberOfVariables() != 2) {
     return theCommands << "Expected 2 context variables in "
-    << theCurveE.toString() << ", got: "
-    << curveContext.variables.toString();
+    << theCurveE.toString() << ", got context: "
+    << curveContext.toString();
   }
   MonomialP leadingMonomial;
   List<MonomialP>::Comparator monomialOrder(MonomialP::greaterThan_totalDegree_rightSmallerWins);
@@ -2669,8 +2669,8 @@ bool CalculatorFunctions::innerElementEllipticCurveNormalForm(
     << " is not of the form y^2 = x^3 + ax + b. ";
   }
   ExpressionContext theContext(theCommands);
-  theContext.variables.addOnTop(xE);
-  theContext.variables.addOnTop(yE);
+  theContext.addVariable(xE);
+  theContext.addVariable(yE);
   if (isRational) {
     return output.AssignValueWithContext(eltRational, theContext, theCommands);
   }

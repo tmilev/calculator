@@ -397,7 +397,7 @@ private:
     tempE.AssignValueWithContext(inputValue, theContext, owner);
     return this->SetChilD(childIndex, tempE);
   }
-  bool SetContextAtLeastEqualTo(ExpressionContext& inputOutputMinContext);
+  bool setContextAtLeastEqualTo(ExpressionContext& inputOutputMinContext);
   bool RemoveContext();
   bool hasContext() const;
   bool hasNonEmptyContext() const;
@@ -478,7 +478,7 @@ private:
     this->SetChilD(childIndex, tempE);
   }
   std::string Lispify() const;
-  bool ToStringData(std::string& output, FormatExpressions* theFormat = nullptr) const;
+  bool toStringData(std::string& output, FormatExpressions* theFormat = nullptr) const;
   std::string ToStringSemiFull() const;
   std::string ToStringFull() const;
   std::string ToStringAllSlidersInExpression() const;
@@ -719,9 +719,9 @@ private:
     Selection &differentialOperatorVariablesFound,
     ExpressionContext& outputContext
   ) const;
-public:
   HashedList<Expression> variables;
   List<Expression> differentialOperatorVariables;
+public:
   Calculator* owner;
   int indexAmbientSemisimpleLieAlgebra;
 
@@ -741,6 +741,7 @@ public:
   );
   void makeOneVariableFromString(const std::string& inputVariable);
   void makeOneVariableCreate(const std::string& variable);
+  void addVariable(const Expression& inputVariable);
   bool setVariables(const List<Expression>& inputVariables);
   bool setVariablesFromStrings(const List<std::string>& inputVariables);
   bool setAmbientSemisimpleLieAlgebra(SemisimpleLieAlgebra& input);
@@ -2951,7 +2952,7 @@ bool Calculator::functionGetMatrix(
   }
   for (int i = 0; i < convertedEs.NumRows; i ++) {
     for (int j = 0; j < convertedEs.NumCols; j ++) {
-      if (!convertedEs(i, j).::Expression::SetContextAtLeastEqualTo(theContext)) {
+      if (!convertedEs(i, j).::Expression::setContextAtLeastEqualTo(theContext)) {
         if (commentsOnError != nullptr) {
           *commentsOnError
           << "Failed to set context to matrix element: "

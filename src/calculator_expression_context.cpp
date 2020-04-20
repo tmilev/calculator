@@ -99,6 +99,12 @@ Expression ExpressionContext::toExpressionPolynomialVariables() const {
   return polynomialVariables;
 }
 
+void ExpressionContext::addVariable(
+  const Expression& inputVariable
+) {
+  this->variables.addOnTop(inputVariable);
+}
+
 bool ExpressionContext::setVariables(
   const List<Expression>& inputVariables
 ) {
@@ -129,10 +135,10 @@ bool Expression::MergeContexts(Expression& leftE, Expression& rightE) {
   if (!leftC.mergeContexts(rightC, outputC)) {
     return false;
   }
-  if (!leftE.SetContextAtLeastEqualTo(outputC)) {
+  if (!leftE.setContextAtLeastEqualTo(outputC)) {
     return false;
   }
-  return rightE.SetContextAtLeastEqualTo(outputC);
+  return rightE.setContextAtLeastEqualTo(outputC);
 }
 
 bool ExpressionContext::isEmpty() {
@@ -441,6 +447,7 @@ FormatExpressions ExpressionContext::getFormat() const {
 void ExpressionContext::getFormat(FormatExpressions& output) const {
   output.polyAlphabeT.setSize(0);
   output.polyDefaultLetter = "x";
+  output.WeylAlgebraDefaultLetter = "\\partial";
   if (this->owner == nullptr) {
     return;
   }
@@ -448,6 +455,7 @@ void ExpressionContext::getFormat(FormatExpressions& output) const {
   for (int i = 0; i < this->variables.size; i ++) {
     output.polyAlphabeT[i] = this->variables[i].toString();
   }
+  output.weylAlgebraLetters.setSize(this->differentialOperatorVariables.size);
   for (int i = 0; i < this->differentialOperatorVariables.size; i ++) {
     output.weylAlgebraLetters[i] =
     this->differentialOperatorVariables[i].toString();
@@ -497,6 +505,7 @@ bool ExpressionContext::polynomialAndWeylAlgebraSubstitution(
     return false;
   }
   int largerNumberOfVariables = largerContext.numberOfVariables();
+  outputDifferentialPart.setSize(this->differentialOperatorVariables.size);
   for (int i = 0; i < this->differentialOperatorVariables.size; i ++) {
     int newIndex = largerContext.differentialOperatorVariables.getIndex(
       this->differentialOperatorVariables[i]
@@ -509,12 +518,12 @@ bool ExpressionContext::polynomialAndWeylAlgebraSubstitution(
   return true;
 }
 
-bool Expression::SetContextAtLeastEqualTo(ExpressionContext& inputOutputMinContext) {
-  MacroRegisterFunctionWithName("Expression::SetContextAtLeastEqualTo");
+bool Expression::setContextAtLeastEqualTo(ExpressionContext& inputOutputMinContext) {
+  MacroRegisterFunctionWithName("Expression::setContextAtLeastEqualTo");
   this->CheckInitialization();
   if (!this->IsBuiltInTypE()) {
     global.fatal << "This is a programming error: calling "
-    << "Expression::SetContextAtLeastEqualTo on an expression "
+    << "Expression::setContextAtLeastEqualTo on an expression "
     << "that is not of built-in type. "
     << "Contexts are Reserved for built-in data types. " << global.fatal;
   }
@@ -570,7 +579,8 @@ bool Expression::SetContextAtLeastEqualTo(ExpressionContext& inputOutputMinConte
     oldContext.polynomialAndWeylAlgebraSubstitutionNoFailure(newContext, subPolyPart, subEWApart);
     ElementWeylAlgebra<Rational> outputEWA = this->GetValue<ElementWeylAlgebra<Rational> >();
     if (!outputEWA.Substitution(subPolyPart, subEWApart)) {
-      this->owner->Comments << "<hr>Failed to convert " << outputEWA.toString() << ": failed to carry out substitution "
+      this->owner->Comments << "<hr>Failed to convert "
+      << outputEWA.toString() << ": failed to carry out substitution "
       << subEWApart.toString() << ", " << subPolyPart.toString();
       return false;
     }
@@ -616,6 +626,6 @@ bool Expression::SetContextAtLeastEqualTo(ExpressionContext& inputOutputMinConte
     return this->AssignMatrix(newMat, *this->owner, &inputOutputMinContext);
   }
   this->owner->Comments << "Expression " << this->toString()
-  << " is of built-in type but is not handled by Expression::SetContextAtLeastEqualTo. ";
+  << " is of built-in type but is not handled by Expression::setContextAtLeastEqualTo. ";
   return false;
 }

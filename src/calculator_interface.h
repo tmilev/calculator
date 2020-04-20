@@ -488,7 +488,8 @@ private:
   template <class builtIn>
   static bool toStringBuiltIn(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
 
-  bool toStringWithHandler(std::stringstream& out, FormatExpressions* theFormat) const;
+  bool toStringWithAtomHandler(std::stringstream& out, FormatExpressions* theFormat) const;
+  bool toStringWithCompositeHandler(std::stringstream& out, FormatExpressions* theFormat) const;
 
   static bool toStringLnAbsoluteInsteadOfLogarithm(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
   static bool toStringDifferential(const Expression& input, std::stringstream& out, FormatExpressions* theFormat);
@@ -1192,7 +1193,8 @@ public:
   HashedList<std::string, MathRoutines::HashString> autoCompleteKeyWords;
   HashedList<std::string, MathRoutines::HashString> stringsThatSplitIfFollowedByDigit;
 
-  MapList<int, Expression::ToStringHandler, MathRoutines::IntUnsignIdentity> toStringHandlers;
+  MapList<int, Expression::ToStringHandler, MathRoutines::IntUnsignIdentity> toStringHandlersAtoms;
+  MapList<int, Expression::ToStringHandler, MathRoutines::IntUnsignIdentity> toStringHandlersComposite;
   MapList<int, Expression::ToStringHandler, MathRoutines::IntUnsignIdentity> toStringDataHandlers;
 
   MapList<std::string, List<std::string>, MathRoutines::HashString> predefinedWordSplits;
@@ -2604,9 +2606,18 @@ public:
   );
   void initialize();
   void initializeToStringHandlers();
-  void addOneStringHandler(
+  void addOneStringAtomHandler(
     int atom,
     Expression::ToStringHandler handler
+  );
+  void addOneStringCompositeHandler(
+    int atom,
+    Expression::ToStringHandler handler
+  );
+  void addOneStringHandler(
+    int atom,
+    Expression::ToStringHandler handler,
+    MapList<int, Expression::ToStringHandler, MathRoutines::IntUnsignIdentity>& handlerCollection
   );
   void reset();
   void resetFrequentConstants();

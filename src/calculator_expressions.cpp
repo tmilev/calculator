@@ -4005,10 +4005,10 @@ bool Expression::toStringEqualEqualEqual(
   return true;
 }
 
-bool Expression::toStringWithHandler(
+bool Expression::toStringWithAtomHandler(
   std::stringstream& out, FormatExpressions* theFormat
 ) const {
-  MacroRegisterFunctionWithName("Expression::toStringWithHandler");
+  MacroRegisterFunctionWithName("Expression::toStringWithAtomHandler");
   if (!this->IsLisT()) {
     return false;
   }
@@ -4016,9 +4016,31 @@ bool Expression::toStringWithHandler(
     return false;
   }
   int atom = (*this)[0].theData;
-  if (this->owner->toStringHandlers.Contains(atom)) {
+  if (this->owner->toStringHandlersAtoms.Contains(atom)) {
     Expression::ToStringHandler handler =
-    this->owner->toStringHandlers.GetValueConstCrashIfNotPresent(atom);
+    this->owner->toStringHandlersAtoms.GetValueConstCrashIfNotPresent(atom);
+    return handler(*this, out, theFormat);
+  }
+  return false;
+}
+
+bool Expression::toStringWithCompositeHandler(
+  std::stringstream& out, FormatExpressions* theFormat
+) const {
+  MacroRegisterFunctionWithName("Expression::toStringWithCompositeHandler");
+  if (!this->IsLisT()) {
+    return false;
+  }
+  if (!(*this)[0].IsLisT()) {
+    return false;
+  }
+  if (!(*this)[0][0].IsAtom()) {
+    return false;
+  }
+  int atom = (*this)[0][0].theData;
+  if (this->owner->toStringHandlersComposite.Contains(atom)) {
+    Expression::ToStringHandler handler =
+    this->owner->toStringHandlersComposite.GetValueConstCrashIfNotPresent(atom);
     return handler(*this, out, theFormat);
   }
   return false;
@@ -4075,7 +4097,8 @@ std::string Expression::toString(
   }
   if (this->toStringData(tempS, theFormat)) {
     out << tempS;
-  } else if (this->toStringWithHandler(out, theFormat)) {
+  } else if (this->toStringWithAtomHandler(out, theFormat)) {
+  } else if (this->toStringWithCompositeHandler(out, theFormat)) {
   } else if (this->toStringEndStatement(out, startingExpression, outputJS, theFormat)) {
   } else if (this->size() == 1) {
     out << (*this)[0].toString(theFormat);

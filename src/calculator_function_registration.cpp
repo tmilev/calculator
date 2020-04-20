@@ -8353,72 +8353,89 @@ void Calculator::AddTrigSplit(const std::string& trigFun, const List<std::string
   }
 }
 
-void Calculator::addOneStringHandler(
-  int atom, Expression::ToStringHandler handler
+void Calculator::addOneStringAtomHandler(
+  int atom,
+  Expression::ToStringHandler handler
 ) {
-  if (this->toStringHandlers.Contains(atom)) {
-    if (this->toStringHandlers.GetValueConstCrashIfNotPresent(
+  this->addOneStringHandler(atom, handler, this->toStringHandlersAtoms);
+}
+
+void Calculator::addOneStringCompositeHandler(
+  int atom,
+  Expression::ToStringHandler handler
+) {
+  this->addOneStringHandler(atom, handler, this->toStringHandlersComposite);
+}
+
+void Calculator::addOneStringHandler(
+  int atom,
+  Expression::ToStringHandler handler,
+  MapList<int, Expression::ToStringHandler, MathRoutines::IntUnsignIdentity>& handlerCollection
+) {
+  if (handlerCollection.Contains(atom)) {
+    if (handlerCollection.GetValueConstCrashIfNotPresent(
       atom) != handler
     ) {
       global.fatal << "More than one toStringHandler for atom "
       << this->operations.theKeys[atom] << "." << global.fatal;
     }
   } else {
-    this->toStringHandlers.SetKeyValue(atom, handler);
+    handlerCollection.SetKeyValue(atom, handler);
   }
 }
 
 void Calculator::initializeToStringHandlers() {
   MacroRegisterFunctionWithName("Calculator::initializeToStringHandlers");
-  this->addOneStringHandler(this->opDefine()                , Expression::toStringDefine                      );
-  this->addOneStringHandler(this->opIsDenotedBy()           , Expression::toStringIsDenotedBy                 );
-  this->addOneStringHandler(this->opLog()                   , Expression::toStringLnAbsoluteInsteadOfLogarithm);
-  this->addOneStringHandler(this->opLogBase()               , Expression::toStringLogBase                     );
-  this->addOneStringHandler(this->opIntervalOpen()          , Expression::toStringIntervalOpen                );
-  this->addOneStringHandler(this->opIntervalRightClosed()   , Expression::toStringIntervalRightClosed         );
-  this->addOneStringHandler(this->opIntervalLeftClosed()    , Expression::toStringIntervalLeftClosed          );
-  this->addOneStringHandler(this->opIntervalClosed()        , Expression::toStringIntervalClosed              );
-  this->addOneStringHandler(this->opQuote()                 , Expression::toStringQuote                       );
-  this->addOneStringHandler(this->opDefineConditional()     , Expression::toStringDefineConditional           );
-  this->addOneStringHandler(this->opDivide()                , Expression::toStringDivide                      );
-  this->addOneStringHandler(this->opString()                , Expression::toStringTensor                      );
-  this->addOneStringHandler(this->opIn()                    , Expression::toStringIn                          );
-  this->addOneStringHandler(this->opOr()                    , Expression::toStringOr                          );
-  this->addOneStringHandler(this->opAnd()                   , Expression::toStringAnd                         );
-  this->addOneStringHandler(this->opBinom()                 , Expression::toStringBinom                       );
-  this->addOneStringHandler(this->opUnderscore()            , Expression::toStringUnderscore                  );
-  this->addOneStringHandler(this->opSetMinus()              , Expression::toStringSetMinus                    );
-  this->addOneStringHandler(this->opLimitBoundary()         , Expression::toStringLimitBoundary               );
-  this->addOneStringHandler(this->opTimes()                 , Expression::toStringTimes                       );
-  this->addOneStringHandler(this->opCrossProduct()          , Expression::toStringCrossProduct                );
-  this->addOneStringHandler(this->opSqrt()                  , Expression::toStringSqrt                        );
-  this->addOneStringHandler(this->opFactorial()             , Expression::toStringFactorial                   );
-  this->addOneStringHandler(this->opAbsoluteValue()         , Expression::toStringAbsoluteValue               );
-  this->addOneStringHandler(this->opThePower()              , Expression::toStringPower                       );
-  this->addOneStringHandler(this->opPlus()                  , Expression::toStringPlus                        );
-  this->addOneStringHandler(this->opDirectSum()             , Expression::toStringDirectSum                   );
-  this->addOneStringHandler(this->opMinus()                 , Expression::toStringMinus                       );
-  this->addOneStringHandler(this->opBind()                  , Expression::toStringBind                        );
-  this->addOneStringHandler(this->opEqualEqual()            , Expression::toStringEqualEqual                  );
-  this->addOneStringHandler(this->opEqualEqualEqual()       , Expression::toStringEqualEqualEqual             );
-  this->addOneStringHandler(this->opDifferentiate()         , Expression::toStringDifferentiate               );
-  this->addOneStringHandler(this->opDifferential()          , Expression::toStringDifferential                );
-  this->addOneStringHandler(this->opSum()                   , Expression::toStringSumOrIntegral               );
-  this->addOneStringHandler(this->opIntegral()              , Expression::toStringSumOrIntegral               );
-  this->addOneStringHandler(this->opGreaterThan()           , Expression::toStringGreaterThan                 );
-  this->addOneStringHandler(this->opGreaterThanOrEqualTo()  , Expression::toStringGreaterThanOrEqualTo        );
-  this->addOneStringHandler(this->opLessThanOrEqualTo()     , Expression::toStringLessThanOrEqualTo           );
-  this->addOneStringHandler(this->opLimit()                 , Expression::toStringLimit                       );
-  this->addOneStringHandler(this->opLimitProcess()          , Expression::toStringLimitProcess                );
-  this->addOneStringHandler(this->opLessThan()              , Expression::toStringLessThan                    );
-  this->addOneStringHandler(this->opMatriX()                , Expression::toStringMatrix                      );
-  this->addOneStringHandler(this->opSequence()              , Expression::toStringSequence                    );
-  this->addOneStringHandler(this->opLieBracket()            , Expression::toStringLieBracket                  );
-  this->addOneStringHandler(this->opMod()                   , Expression::toStringMod                         );
-  this->addOneStringHandler(this->opUnion()                 , Expression::toStringUnion                       );
-  this->addOneStringHandler(this->opIntersection()          , Expression::toStringIntersection                );
-  this->addOneStringHandler(this->opUnionNoRepetition()     , Expression::toStringUnionNoRepetition           );
-  this->addOneStringHandler(this->opError()                 , Expression::toStringError                       );
+  this->addOneStringAtomHandler(this->opDefine()                , Expression::toStringDefine                      );
+  this->addOneStringAtomHandler(this->opIsDenotedBy()           , Expression::toStringIsDenotedBy                 );
+  this->addOneStringAtomHandler(this->opLog()                   , Expression::toStringLnAbsoluteInsteadOfLogarithm);
+  this->addOneStringAtomHandler(this->opLogBase()               , Expression::toStringLogBase                     );
+  this->addOneStringAtomHandler(this->opIntervalOpen()          , Expression::toStringIntervalOpen                );
+  this->addOneStringAtomHandler(this->opIntervalRightClosed()   , Expression::toStringIntervalRightClosed         );
+  this->addOneStringAtomHandler(this->opIntervalLeftClosed()    , Expression::toStringIntervalLeftClosed          );
+  this->addOneStringAtomHandler(this->opIntervalClosed()        , Expression::toStringIntervalClosed              );
+  this->addOneStringAtomHandler(this->opQuote()                 , Expression::toStringQuote                       );
+  this->addOneStringAtomHandler(this->opDefineConditional()     , Expression::toStringDefineConditional           );
+  this->addOneStringAtomHandler(this->opDivide()                , Expression::toStringDivide                      );
+  this->addOneStringAtomHandler(this->opString()                , Expression::toStringTensor                      );
+  this->addOneStringAtomHandler(this->opIn()                    , Expression::toStringIn                          );
+  this->addOneStringAtomHandler(this->opOr()                    , Expression::toStringOr                          );
+  this->addOneStringAtomHandler(this->opAnd()                   , Expression::toStringAnd                         );
+  this->addOneStringAtomHandler(this->opBinom()                 , Expression::toStringBinom                       );
+  this->addOneStringAtomHandler(this->opUnderscore()            , Expression::toStringUnderscore                  );
+  this->addOneStringAtomHandler(this->opSetMinus()              , Expression::toStringSetMinus                    );
+  this->addOneStringAtomHandler(this->opLimitBoundary()         , Expression::toStringLimitBoundary               );
+  this->addOneStringAtomHandler(this->opTimes()                 , Expression::toStringTimes                       );
+  this->addOneStringAtomHandler(this->opCrossProduct()          , Expression::toStringCrossProduct                );
+  this->addOneStringAtomHandler(this->opSqrt()                  , Expression::toStringSqrt                        );
+  this->addOneStringAtomHandler(this->opFactorial()             , Expression::toStringFactorial                   );
+  this->addOneStringAtomHandler(this->opAbsoluteValue()         , Expression::toStringAbsoluteValue               );
+  this->addOneStringAtomHandler(this->opThePower()              , Expression::toStringPower                       );
+  this->addOneStringAtomHandler(this->opPlus()                  , Expression::toStringPlus                        );
+  this->addOneStringAtomHandler(this->opDirectSum()             , Expression::toStringDirectSum                   );
+  this->addOneStringAtomHandler(this->opMinus()                 , Expression::toStringMinus                       );
+  this->addOneStringAtomHandler(this->opBind()                  , Expression::toStringBind                        );
+  this->addOneStringAtomHandler(this->opEqualEqual()            , Expression::toStringEqualEqual                  );
+  this->addOneStringAtomHandler(this->opEqualEqualEqual()       , Expression::toStringEqualEqualEqual             );
+  this->addOneStringAtomHandler(this->opDifferentiate()         , Expression::toStringDifferentiate               );
+  this->addOneStringAtomHandler(this->opDifferential()          , Expression::toStringDifferential                );
+  this->addOneStringAtomHandler(this->opSum()                   , Expression::toStringSumOrIntegral               );
+  this->addOneStringAtomHandler(this->opIntegral()              , Expression::toStringSumOrIntegral               );
+  this->addOneStringAtomHandler(this->opGreaterThan()           , Expression::toStringGreaterThan                 );
+  this->addOneStringAtomHandler(this->opGreaterThanOrEqualTo()  , Expression::toStringGreaterThanOrEqualTo        );
+  this->addOneStringAtomHandler(this->opLessThanOrEqualTo()     , Expression::toStringLessThanOrEqualTo           );
+  this->addOneStringAtomHandler(this->opLimit()                 , Expression::toStringLimit                       );
+  this->addOneStringAtomHandler(this->opLimitProcess()          , Expression::toStringLimitProcess                );
+  this->addOneStringAtomHandler(this->opLessThan()              , Expression::toStringLessThan                    );
+  this->addOneStringAtomHandler(this->opSequence()              , Expression::toStringSequence                    );
+  this->addOneStringAtomHandler(this->opLieBracket()            , Expression::toStringLieBracket                  );
+  this->addOneStringAtomHandler(this->opMod()                   , Expression::toStringMod                         );
+  this->addOneStringAtomHandler(this->opUnion()                 , Expression::toStringUnion                       );
+  this->addOneStringAtomHandler(this->opIntersection()          , Expression::toStringIntersection                );
+  this->addOneStringAtomHandler(this->opUnionNoRepetition()     , Expression::toStringUnionNoRepetition           );
+  this->addOneStringAtomHandler(this->opError()                 , Expression::toStringError                       );
+
+  this->addOneStringCompositeHandler(this->opMatriX()           , Expression::toStringMatrix                      );
 }
 
 void Calculator::initializePredefinedWordSplits() {

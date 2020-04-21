@@ -1357,10 +1357,10 @@ bool CalculatorFunctions::innerSolveSerreLikeSystem(
   Vector<Polynomial<Rational> > thePolysRational;
   ExpressionContext theContext(theCommands);
   bool useArguments =
-  input.StartsWith(theCommands.GetOperations().GetIndexIMustContainTheObject("FindOneSolutionSerreLikePolynomialSystem")) ||
-  input.StartsWith(theCommands.GetOperations().GetIndexIMustContainTheObject("FindOneSolutionSerreLikePolynomialSystemAlgebraic")) ||
-  input.StartsWith(theCommands.GetOperations().GetIndexIMustContainTheObject("FindOneSolutionSerreLikePolynomialSystemUpperLimit")) ||
-  input.StartsWith(theCommands.GetOperations().GetIndexIMustContainTheObject("FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit"));
+  input.StartsWith(theCommands.GetOperations().getIndexNoFail("FindOneSolutionSerreLikePolynomialSystem")) ||
+  input.StartsWith(theCommands.GetOperations().getIndexNoFail("FindOneSolutionSerreLikePolynomialSystemAlgebraic")) ||
+  input.StartsWith(theCommands.GetOperations().getIndexNoFail("FindOneSolutionSerreLikePolynomialSystemUpperLimit")) ||
+  input.StartsWith(theCommands.GetOperations().getIndexNoFail("FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit"));
 
   if (useArguments) {
     if (!theCommands.GetVectorFromFunctionArguments(

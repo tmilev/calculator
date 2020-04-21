@@ -246,8 +246,8 @@ bool PolynomialFactorizationKronecker::oneFactor(
       continue;
     }
     theValuesAtPoints[i].IsInteger(&tempLI);
-    if (!tempLI.value.FactorReturnFalseIfFactorizationIncomplete(
-      thePrimeFactorsAtPoints[i], thePrimeFactorsMults[i], 0, comments
+    if (!tempLI.value.factor(
+      thePrimeFactorsAtPoints[i], thePrimeFactorsMults[i], 0, 3, comments
     )) {
       if (comments != nullptr) {
         *comments

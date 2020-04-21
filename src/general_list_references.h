@@ -229,8 +229,8 @@ class HashedListReferences : public HashTemplate<Object, ListReferences<Object>,
   int getIndex(const Object& o) const {
     return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::getIndex(o);
   }
-  inline int GetIndexIMustContainTheObject(const Object& o) const {
-    return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::GetIndexIMustContainTheObject(o);
+  inline int getIndexNoFail(const Object& o) const {
+    return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::getIndexNoFail(o);
   }
   inline int AddNoRepetitionOrReturnIndexFirst(const Object& o) {
     return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::AddNoRepetitionOrReturnIndexFirst(o);

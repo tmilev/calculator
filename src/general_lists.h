@@ -1524,7 +1524,7 @@ public:
     }
     return - 1;
   }
-  int GetIndexIMustContainTheObject(const Object& o) const {
+  int getIndexNoFail(const Object& o) const {
     int result = this->getIndex(o);
     if (result == - 1) {
       std::stringstream errorStream;
@@ -1713,8 +1713,8 @@ public:
   int getIndex(const Object& o) const {
     return this->::HashTemplate<Object, List<Object>, hashFunction>::getIndex(o);
   }
-  int GetIndexIMustContainTheObject(const Object& o) const {
-    return this->::HashTemplate<Object, List<Object>, hashFunction>::GetIndexIMustContainTheObject(o);
+  int getIndexNoFail(const Object& o) const {
+    return this->::HashTemplate<Object, List<Object>, hashFunction>::getIndexNoFail(o);
   }
   int AddNoRepetitionOrReturnIndexFirst(const Object& o) {
     return this->::HashTemplate<Object, List<Object>, hashFunction>::AddNoRepetitionOrReturnIndexFirst(o);

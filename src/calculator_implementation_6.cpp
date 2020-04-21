@@ -1108,7 +1108,7 @@ bool CalculatorFunctions::innerIsSquare(Calculator& theCommands, const Expressio
   }
   List<int> theMults;
   List<LargeInteger> theFactors;
-  if (!theLI.value.FactorReturnFalseIfFactorizationIncomplete(theFactors, theMults, 0, nullptr)) {
+  if (!theLI.value.factor(theFactors, theMults, 0, 4, nullptr)) {
     return theCommands << "Failed to factor: " << theLI.toString() << " (may be too large?).";
   }
   int result = 1;
@@ -1134,8 +1134,8 @@ bool CalculatorFunctions::innerIsSquareFree(
   }
   List<int> theMults;
   List<LargeInteger> theFactors;
-  if (!theInteger.value.FactorReturnFalseIfFactorizationIncomplete(
-    theFactors, theMults, 0, &theCommands.Comments
+  if (!theInteger.value.factor(
+    theFactors, theMults, 0, 3, &theCommands.Comments
   )) {
     return theCommands << "Failed to factor: "
     << theInteger.toString() << " (may be too large?).";
@@ -1184,8 +1184,8 @@ bool CalculatorFunctions::innerIsPower(
   }
   List<int> theMults;
   List<LargeInteger> theFactors;
-  if (!toBeFactored.value.FactorReturnFalseIfFactorizationIncomplete(
-    theFactors, theMults, 0, &theCommands.Comments
+  if (!toBeFactored.value.factor(
+    theFactors, theMults, 0, 3, &theCommands.Comments
   )) {
     return theCommands << "Failed to factor: "
     << toBeFactored.toString() << " (may be too large?).";
@@ -1213,27 +1213,31 @@ bool CalculatorFunctions::innerFactorIntegeR(Calculator& theCommands, const Expr
 
 bool CalculatorFunctions::functionFactorInteger(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::functionFactorInteger");
-  LargeInteger theLI;
+  LargeInteger integer;
   int upperBound = 30000;
-  int opFactorInteger = theCommands.operations.GetIndexIMustContainTheObject("FactorInteger");
+  int opFactorInteger = theCommands.operations.getIndexNoFail("FactorInteger");
 
   if (input.StartsWith(opFactorInteger) && input.size() == 3) {
-    if (!input[1].IsInteger(&theLI)) {
+    if (!input[1].IsInteger(&integer)) {
       return false;
     }
     if (!input[2].IsIntegerFittingInInt(&upperBound)) {
-      return theCommands << "Failed to extract integer from " << upperBound;
+      return theCommands << "Failed to extract integer from " << upperBound << ".";
     }
-  } else if (!input.IsInteger(&theLI)) {
+  } else if (!input.IsInteger(&integer)) {
     return false;
   }
-  if (theLI.IsEqualToZero()) {
+  if (integer.IsEqualToZero()) {
     return false;
   }
   List<LargeInteger> primeFactors;
   List<int> multiplicities;
-  bool complete = theLI.value.FactorReturnFalseIfFactorizationIncomplete(
-    primeFactors, multiplicities, upperBound, &theCommands.Comments
+  bool complete = integer.value.factor(
+    primeFactors,
+    multiplicities,
+    upperBound,
+    3,
+    &theCommands.Comments
   );
   if (!complete && primeFactors.size <= 1) {
     return false;
@@ -1250,7 +1254,7 @@ bool CalculatorFunctions::functionFactorInteger(Calculator& theCommands, const E
       result.addOnTop(currentE);
     }
   }
-  if (theLI < 0 && result.size > 0) {
+  if (integer < 0 && result.size > 0) {
     result[0] *= - 1;
   }
   if (complete) {

@@ -59,7 +59,7 @@ public:
   bool IsEqualToZero() const;
   bool IsEven() const;
   bool IsPositive() const;
-  bool TryToFindWhetherIsPower(bool& outputIsPower, LargeInteger& outputBase, int& outputPower) const;
+  bool tryIsPower(bool& outputIsPower, LargeInteger& outputBase, int& outputPower) const;
   bool IsCompositePrimeDivision(List<unsigned int>& primesGenerated, std::stringstream* comments = nullptr);
   bool IsPossiblyPrime(int MmillerRabinTries, bool tryDivisionSetTrueFaster = true, std::stringstream* comments = nullptr);
   bool IsPossiblyPrimeMillerRabiN(int numTimesToRun = 1, std::stringstream* comments = nullptr);
@@ -95,18 +95,20 @@ public:
   // returns ceiling of the logarithm base two of the number,
   // i.e., the smallest x such that this <= 2^x.
   unsigned int LogarithmBaseNCeiling(unsigned int theBase) const;
-  void AccountFactor(const LargeInteger& theP, List<LargeInteger>& outputPrimeFactors, List<int>& outputMultiplicities) const;
-  bool FactorReturnFalseIfFactorizationIncomplete(
+  static void accountFactor(
+    const LargeInteger& prime,
+    List<LargeInteger>& outputPrimeFactors,
+    List<int>& outputMultiplicities
+  );
+  // Product of resulting factors equals the original number,
+  // even when factorization fails.
+  //
+  bool factor(
     List<LargeInteger>& outputFactors,
     List<int>& outputMultiplicites,
-    int dontSearchForDivisorsLargerThan,
-    std::stringstream *commentsOnFailure
-  ) const;
-  bool FactorLargeReturnFalseIfFactorizationIncomplete(
-    List<LargeInteger>& outputFactors,
-    List<int>& outputMultiplicites,
-    int dontSearchForDivisorsLargerThan,
-    std::stringstream *commentsOnFailure
+    int maximumDivisorToTry,
+    int numberMillerRabinRuns,
+    std::stringstream* commentsOnFailure
   ) const;
   void AssignString(const std::string& input);
   bool AssignStringFailureAllowed(const std::string& input, bool ignoreNonDigits);
@@ -204,7 +206,7 @@ public:
     return !this->IsPositive();
   }
   static LargeInteger zero();
-  bool TryToFindWhetherIsPower(bool& outputIsPower, LargeInteger& outputBase, int& outputPower) const;
+  bool tryIsPower(bool& outputIsPower, LargeInteger& outputBase, int& outputPower) const;
   bool NeedsParenthesisForMultiplication(FormatExpressions* unused) const {
     (void) unused;
     return false;

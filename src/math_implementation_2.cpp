@@ -297,11 +297,13 @@ bool LargeIntegerUnsigned::IsPossiblyPrimeMillerRabinOnce(
   return false;
 }
 
-bool LargeIntegerUnsigned::TryToFindWhetherIsPower(bool& outputIsPower, LargeInteger& outputBase, int& outputPower) const {
-  MacroRegisterFunctionWithName("LargeIntUnsigned::TryToFindWhetherIsPower");
+bool LargeIntegerUnsigned::tryIsPower(
+  bool& outputIsPower, LargeInteger& outputBase, int& outputPower
+) const {
+  MacroRegisterFunctionWithName("LargeIntUnsigned::tryIsPower");
   List<LargeInteger> theFactors;
   List<int> theMults;
-  if (!this->FactorReturnFalseIfFactorizationIncomplete(theFactors, theMults, 0, nullptr)) {
+  if (!this->factor(theFactors, theMults, 0, 4, nullptr)) {
     return false;
   }
   if (theMults.size == 0) {
@@ -1023,115 +1025,81 @@ void LargeIntegerUnsigned::FitSize() {
   this->theDigits.setSize(newSize);
 }
 
-void LargeIntegerUnsigned::AccountFactor(
-  const LargeInteger& theP, List<LargeInteger>& outputPrimeFactors, List<int>& outputMultiplicities
-) const {
+void LargeIntegerUnsigned::accountFactor(
+  const LargeInteger& prime,
+  List<LargeInteger>& outputPrimeFactors,
+  List<int>& outputMultiplicities
+) {
   if (outputPrimeFactors.size == 0) {
-    outputPrimeFactors.addOnTop(theP);
+    outputPrimeFactors.addOnTop(prime);
     outputMultiplicities.addOnTop(1);
     return;
   }
-  if ((*outputPrimeFactors.LastObject()).operator==(theP)) {
+  if ((*outputPrimeFactors.LastObject()).operator==(prime)) {
     (*outputMultiplicities.LastObject()) ++;
   } else {
-    outputPrimeFactors.addOnTop(theP);
+    outputPrimeFactors.addOnTop(prime);
     outputMultiplicities.addOnTop(1);
   }
 }
 
-bool LargeIntegerUnsigned::FactorLargeReturnFalseIfFactorizationIncomplete(
+bool LargeIntegerUnsigned::factor(
   List<LargeInteger>& outputFactors,
   List<int>& outputMultiplicites,
-  int dontSearchForDivisorsLargerThan,
+  int maximumDivisorToTry,
+  int numberMillerRabinRuns,
   std::stringstream* commentsOnFailure
 ) const {
-  MacroRegisterFunctionWithName("LargeIntUnsigned::FactorLarge");
+  MacroRegisterFunctionWithName("LargeIntUnsigned::factor");
   int maximumNumberOfDigits = 1000;
   if (this->theDigits.size > maximumNumberOfDigits) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Number has too many digits: maximum " << maximumNumberOfDigits
+      *commentsOnFailure << "Number has too many digits: maximum "
+      << maximumNumberOfDigits
       << " digits accepted for factorization attempt. ";
     }
     return false;
   }
   if (this->IsEqualToZero()) {
-    global.fatal << "This is a programming error: it was requested that I factor 0, which is forbidden. " << global.fatal;
+    global.fatal << "Factoring zero is forbidden. "
+    << global.fatal;
   }
   LargeIntegerUnsigned toBeFactored = *this;
   outputFactors.setSize(0);
   outputMultiplicites.setSize(0);
-  if (dontSearchForDivisorsLargerThan <= 0) {
-    dontSearchForDivisorsLargerThan = 100000;
+  if (maximumDivisorToTry <= 0) {
+    maximumDivisorToTry = 100000;
   }
   List<bool> theSieve;
-  theSieve.initializeFillInObject(dontSearchForDivisorsLargerThan + 1, true);
-  for (int i = 2; i <= dontSearchForDivisorsLargerThan; i ++) {
+  theSieve.initializeFillInObject(maximumDivisorToTry + 1, true);
+  for (int i = 2; i <= maximumDivisorToTry; i ++) {
     if (!theSieve[i]) {
       continue;
     }
     //LargeIntUnsigned current = toBeFactored % i;
     unsigned candidate = static_cast<unsigned>(i);
     while (toBeFactored % candidate == 0) {
-      this->AccountFactor(i, outputFactors, outputMultiplicites);
+      this->accountFactor(i, outputFactors, outputMultiplicites);
       toBeFactored /= candidate;
     }
-    for (int j = i; j <= dontSearchForDivisorsLargerThan; j += i) {
+    for (int j = i; j <= maximumDivisorToTry; j += i) {
       theSieve[j] = false;
     }
   }
   if (toBeFactored > 1) {
-    this->AccountFactor(toBeFactored, outputFactors, outputMultiplicites);
-    if (!toBeFactored.IsPossiblyPrimeMillerRabiN(10, nullptr)) {
-      *commentsOnFailure
-      << "The largest remaining factor "
-      << toBeFactored
-      << " is known not to be prime (Miller-Rabin test) "
-      << "but I could not factor it. "
-      << "I checked all factors smaller than or equal to: "
-      << dontSearchForDivisorsLargerThan;
+    this->accountFactor(toBeFactored, outputFactors, outputMultiplicites);
+    if (!toBeFactored.IsPossiblyPrimeMillerRabiN(numberMillerRabinRuns, nullptr)) {
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure
+        << "The largest remaining factor "
+        << toBeFactored
+        << " is known not to be prime (Miller-Rabin test) "
+        << "but I could not factor it. "
+        << "I checked all factors smaller than or equal to: "
+        << maximumDivisorToTry << ". ";
+      }
       return false;
     }
-  }
-  return true;
-}
-
-bool LargeIntegerUnsigned::FactorReturnFalseIfFactorizationIncomplete(
-  List<LargeInteger>& outputFactors,
-  List<int>& outputMultiplicites,
-  int dontSearchForDivisorsLargerThan,
-  std::stringstream* commentsOnFailure
-) const {
-  MacroRegisterFunctionWithName("LargeIntUnsigned::Factor");
-  if (this->theDigits.size > 1) {
-    return this->FactorLargeReturnFalseIfFactorizationIncomplete(
-      outputFactors, outputMultiplicites, dontSearchForDivisorsLargerThan, commentsOnFailure
-    );
-  }
-  if (this->IsEqualToZero()) {
-    global.fatal << "This is a programming error: it was requested that I factor 0, which is forbidden." << global.fatal;
-  }
-  unsigned int toBeFactored = static_cast<unsigned>(this->theDigits[0]);
-  outputFactors.setSize(0);
-  outputMultiplicites.setSize(0);
-  int upperboundPrimeDivisors = static_cast<int>(FloatingPoint::Sqrt(static_cast<double>(toBeFactored)));
-  List<bool> theSieve;
-  theSieve.initializeFillInObject(upperboundPrimeDivisors + 1, true);
-  for (int i = 2; i <= upperboundPrimeDivisors; i ++) {
-    if (!theSieve[i]) {
-      continue;
-    }
-    unsigned candidate = static_cast<unsigned>(i);
-    while (toBeFactored % candidate == 0) {
-      this->AccountFactor(i, outputFactors, outputMultiplicites);
-      toBeFactored /= candidate;
-      upperboundPrimeDivisors = static_cast<int>(FloatingPoint::Sqrt(static_cast<double>(toBeFactored)));
-    }
-    for (int j = i; j <= upperboundPrimeDivisors; j += i) {
-      theSieve[j] = false;
-    }
-  }
-  if (toBeFactored > 1) {
-    this->AccountFactor(static_cast<int>(toBeFactored), outputFactors, outputMultiplicites);
   }
   return true;
 }
@@ -1288,13 +1256,13 @@ LargeInteger LargeInteger::zero() {
   return result;
 }
 
-bool LargeInteger::TryToFindWhetherIsPower(
+bool LargeInteger::tryIsPower(
   bool& outputIsPower, LargeInteger& outputBase, int& outputPower
 ) const {
   if (this->sign == - 1) {
     return false;
   }
-  return this->value.TryToFindWhetherIsPower(outputIsPower, outputBase, outputPower);
+  return this->value.tryIsPower(outputIsPower, outputBase, outputPower);
 }
 
 bool LargeInteger::operator==(const LargeInteger& x) const {
@@ -1731,10 +1699,10 @@ bool Rational::GetSquareRootIfRational(Rational& output) const {
   LargeIntegerUnsigned theDen = this->GetDenominator();
   List<LargeInteger> primeFactorsNum, primeFactorsDen;
   List<int> multsNum, multsDen;
-  if (!theNum.value.FactorReturnFalseIfFactorizationIncomplete(primeFactorsNum, multsNum, 0, nullptr)) {
+  if (!theNum.value.factor(primeFactorsNum, multsNum, 0, 3, nullptr)) {
     return false;
   }
-  if (!theDen.FactorReturnFalseIfFactorizationIncomplete(primeFactorsDen, multsDen, 0, nullptr)) {
+  if (!theDen.factor(primeFactorsDen, multsDen, 0, 3, nullptr)) {
     return false;
   }
   output = 1;
@@ -1930,13 +1898,13 @@ bool Rational::GetPrimeFactorsAbsoluteValue(
   List<int>& denominatorMultiplicities
 ) {
   MacroRegisterFunctionWithName("Rational::GetPrimeFactorsAbsoluteValue");
-  if (!this->GetNumerator().value.FactorReturnFalseIfFactorizationIncomplete(
-    numeratorPrimeFactors, numeratorMultiplicities, 0, nullptr
+  if (!this->GetNumerator().value.factor(
+    numeratorPrimeFactors, numeratorMultiplicities, 0, 3, nullptr
   )) {
     return false;
   }
-  return this->GetDenominator().FactorReturnFalseIfFactorizationIncomplete(
-    denominatorPrimeFactors, denominatorMultiplicities, 0, nullptr
+  return this->GetDenominator().factor(
+    denominatorPrimeFactors, denominatorMultiplicities, 0, 3, nullptr
   );
 }
 

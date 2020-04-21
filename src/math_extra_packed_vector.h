@@ -379,7 +379,7 @@ int AnotherWeylGroup<scalar, templateVector>::GetRootReflection(int i) const {
   scalar x = this->RootSystem[i].ScalarProduct(this->twiceRho,this->unrationalCartanSymmetric);
   x *= - 2;
   x /= this->RootSystem[i].ScalarProduct(this->RootSystem[i],this->unrationalCartanSymmetric);
-  return this->rhoOrbit.GetIndexIMustContainTheObject(twiceRho+this->RootSystem[i] * x);
+  return this->rhoOrbit.getIndexNoFail(twiceRho+this->RootSystem[i] * x);
 }
 
 template <typename scalar, typename templateVector>

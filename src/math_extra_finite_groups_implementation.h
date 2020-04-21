@@ -710,7 +710,7 @@ void FiniteGroup<elementSomeGroup>::ComputeCCfromAllElements() {
       for (int j = 0; j < theStack.size; j ++) {
         for (int k = 0; k < this->generators.size; k ++) {
           currentElement = inversesOfGenerators[k] * this->theElements[theStack[j]] * this->generators[k];
-          int accountedIndex = this->theElements.GetIndexIMustContainTheObject(currentElement);
+          int accountedIndex = this->theElements.getIndexNoFail(currentElement);
           theStack.addOnTopNoRepetition(accountedIndex);
           Accounted[accountedIndex] = true;
         }

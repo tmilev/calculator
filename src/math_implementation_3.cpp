@@ -6357,7 +6357,7 @@ bool ElementWeylGroup::IsID() {
 void ElementWeylGroup::MakeRootReflection(
   const Vector<Rational>& mustBeRoot, WeylGroupData& inputWeyl
 ) {
-  *this = inputWeyl.GetRootReflection(inputWeyl.RootSystem.GetIndexIMustContainTheObject(mustBeRoot));
+  *this = inputWeyl.GetRootReflection(inputWeyl.RootSystem.getIndexNoFail(mustBeRoot));
 }
 
 void ElementWeylGroup::MakeSimpleReflection(int simpleRootIndex, WeylGroupData& inputWeyl) {

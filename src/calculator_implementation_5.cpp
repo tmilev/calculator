@@ -970,7 +970,7 @@ bool CalculatorFunctions::innerEnsureExpressionDependsOnlyOnStandard(
 
 bool CalculatorFunctions::innerRemoveDuplicates(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerRemoveDuplicates");
-  int operationRemoveDuplicated = theCommands.operations.GetIndexIMustContainTheObject("RemoveDuplicates");
+  int operationRemoveDuplicated = theCommands.operations.getIndexNoFail("RemoveDuplicates");
   if (
     !input.IsListStartingWithAtom(operationRemoveDuplicated) &&
     !input.IsSequenceNElementS()
@@ -987,7 +987,7 @@ bool CalculatorFunctions::innerRemoveDuplicates(Calculator& theCommands, const E
 bool CalculatorFunctions::innerSort(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSort");
   if (!input.IsListStartingWithAtom(
-    theCommands.operations.GetIndexIMustContainTheObject("Sort")
+    theCommands.operations.getIndexNoFail("Sort")
   )) {
     return false;
   }
@@ -1011,7 +1011,7 @@ bool CalculatorFunctions::innerSortDescending(
 ) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerSortDescending");
   if (
-    !input.IsListStartingWithAtom(theCommands.operations.GetIndexIMustContainTheObject("SortDescending")) &&
+    !input.IsListStartingWithAtom(theCommands.operations.getIndexNoFail("SortDescending")) &&
     !input.IsSequenceNElementS()
   ) {
     return false;
@@ -1034,7 +1034,7 @@ bool CalculatorFunctions::innerSortDescending(
 bool CalculatorFunctions::innerLength(Calculator& theCommands, const Expression& input, Expression& output) {
   MacroRegisterFunctionWithName("CalculatorFunctions::innerLength");
   if (!input.IsListStartingWithAtom(
-    theCommands.operations.GetIndexIMustContainTheObject("Length")
+    theCommands.operations.getIndexNoFail("Length")
   )) {
     return false;
   }
@@ -1804,7 +1804,7 @@ bool CalculatorFunctions::innerLogBaseSimpleCases(
   LargeInteger simplerBase;
   int simplerPower = - 1;
   bool isPower = false;
-  if (baseInt.TryToFindWhetherIsPower(isPower, simplerBase, simplerPower)) {
+  if (baseInt.tryIsPower(isPower, simplerBase, simplerPower)) {
     if (isPower) {
       newBaseE.AssignValue(Rational(simplerBase), theCommands);
       output.MakeXOX(theCommands, theCommands.opLogBase(), newBaseE, newArgE);

@@ -1148,8 +1148,8 @@ bool AlgebraicNumber::AssignRationalQuadraticRadical(
   squareFreeInput *= absoluteInput.GetDenominator();
   List<LargeInteger> primeFactors;
   List<int> theMults;
-  if (!squareFreeInput.value.FactorReturnFalseIfFactorizationIncomplete(
-    primeFactors, theMults, 0, nullptr
+  if (!squareFreeInput.value.factor(
+    primeFactors, theMults, 0, 4, nullptr
   )) {
     return false;
   }

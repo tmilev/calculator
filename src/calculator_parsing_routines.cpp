@@ -2507,7 +2507,7 @@ bool Calculator::ApplyOneRule() {
     lastE.theData.size() == 0 &&
     lastE.theData.theData == this->opLisT()
   ) {
-    return this->ReplaceXByCon(this->controlSequences.GetIndexIMustContainTheObject("MakeSequence"));
+    return this->ReplaceXByCon(this->controlSequences.getIndexNoFail("MakeSequence"));
   }
   if (thirdToLastS == "\\sqrt" && secondToLastS == "Expression") {
     return this->ReplaceSqrtEXByEX();
@@ -2549,11 +2549,11 @@ bool Calculator::ApplyOneRule() {
     return this->ReplaceOXbyEX();
   }
   if (fourthToLastS == "\\log" && thirdToLastS == "_" && secondToLastS == "Expression") {
-    return this->ReplaceXYYYByConYYY(this->controlSequences.GetIndexIMustContainTheObject("LogBase"));
+    return this->ReplaceXYYYByConYYY(this->controlSequences.getIndexNoFail("LogBase"));
   }
   //Some synonyms:
   if (lastS == "ln" || lastS == "log" || lastS == "\\ln") {
-    return this->ReplaceXByCon(this->controlSequences.GetIndexIMustContainTheObject("\\log"));
+    return this->ReplaceXByCon(this->controlSequences.getIndexNoFail("\\log"));
   }
   if (lastS == "infinity" || lastS == "infty") {
     return this->ReplaceXByO(this->opInfinity());
@@ -2562,34 +2562,34 @@ bool Calculator::ApplyOneRule() {
     return this->ReplaceXByO(this->opPi());
   }
   if (lastS == "arcsin") {
-    return this->ReplaceXByCon(this->controlSequences.GetIndexIMustContainTheObject("\\arcsin"));
+    return this->ReplaceXByCon(this->controlSequences.getIndexNoFail("\\arcsin"));
   }
   if (lastS == "arccos") {
-    return this->ReplaceXByCon(this->controlSequences.GetIndexIMustContainTheObject("\\arccos"));
+    return this->ReplaceXByCon(this->controlSequences.getIndexNoFail("\\arccos"));
   }
   if (lastS == "arctan") {
-    return this->ReplaceXByCon(this->controlSequences.GetIndexIMustContainTheObject("\\arctan"));
+    return this->ReplaceXByCon(this->controlSequences.getIndexNoFail("\\arctan"));
   }
   if (lastS == "sin") {
-    return this->ReplaceXByCon(this->controlSequences.GetIndexIMustContainTheObject("\\sin"));
+    return this->ReplaceXByCon(this->controlSequences.getIndexNoFail("\\sin"));
   }
   if (lastS == "cos") {
-    return this->ReplaceXByCon(this->controlSequences.GetIndexIMustContainTheObject("\\cos"));
+    return this->ReplaceXByCon(this->controlSequences.getIndexNoFail("\\cos"));
   }
   if (lastS == "tan") {
-    return this->ReplaceXByCon(this->controlSequences.GetIndexIMustContainTheObject("\\tan"));
+    return this->ReplaceXByCon(this->controlSequences.getIndexNoFail("\\tan"));
   }
   if (lastS == "cot") {
-    return this->ReplaceXByCon(this->controlSequences.GetIndexIMustContainTheObject("\\cot"));
+    return this->ReplaceXByCon(this->controlSequences.getIndexNoFail("\\cot"));
   }
   if (lastS == "csc") {
-    return this->ReplaceXByCon(this->controlSequences.GetIndexIMustContainTheObject("\\csc"));
+    return this->ReplaceXByCon(this->controlSequences.getIndexNoFail("\\csc"));
   }
   if (lastS == "sec") {
-    return this->ReplaceXByCon(this->controlSequences.GetIndexIMustContainTheObject("\\sec"));
+    return this->ReplaceXByCon(this->controlSequences.getIndexNoFail("\\sec"));
   }
   if (lastS == "sqrt") {
-    return this->ReplaceXByCon(this->controlSequences.GetIndexIMustContainTheObject("\\sqrt"));
+    return this->ReplaceXByCon(this->controlSequences.getIndexNoFail("\\sqrt"));
   }
   //end of some synonyms
   if (fourthToLastS == "Expression" && thirdToLastS == "\\cup" && secondToLastS == "Expression" && this->AllowsTimesInPreceding(lastS)) {
@@ -2675,7 +2675,7 @@ bool Calculator::ApplyOneRule() {
     return this->ReplaceXXXXByCon(this->conMatrixEnd());
   }
   if (lastS == "\\" && secondToLastS == "\\") {
-    return this->ReplaceXXByCon(this->controlSequences.GetIndexIMustContainTheObject("\\\\"));
+    return this->ReplaceXXByCon(this->controlSequences.getIndexNoFail("\\\\"));
   }
   if (lastS == "\\displaystyle") {
     return this->PopTopSyntacticStack();

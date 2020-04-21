@@ -1648,436 +1648,436 @@ public:
     (*this->CurrentSyntacticStacK).initializeFillInObject(this->numEmptyTokensStart, emptyElement);
   }
   int conError() {
-    return this->controlSequences.GetIndexIMustContainTheObject("Error");
+    return this->controlSequences.getIndexNoFail("Error");
   }
   int conExpression() {
-    return this->controlSequences.GetIndexIMustContainTheObject("Expression");
+    return this->controlSequences.getIndexNoFail("Expression");
   }
   int conVariable() {
-    return this->controlSequences.GetIndexIMustContainTheObject("Variable");
+    return this->controlSequences.getIndexNoFail("Variable");
   }
   int conBindVariable() {
-    return this->controlSequences.GetIndexIMustContainTheObject("{{}}");
+    return this->controlSequences.getIndexNoFail("{{}}");
   }
   int conInteger() {
-    return this->controlSequences.GetIndexIMustContainTheObject("Integer");
+    return this->controlSequences.getIndexNoFail("Integer");
   }
   int conEqualEqual() {
-    return this->controlSequences.GetIndexIMustContainTheObject("==");
+    return this->controlSequences.getIndexNoFail("==");
   }
   int conEqualEqualEqual() {
-    return this->controlSequences.GetIndexIMustContainTheObject("===");
+    return this->controlSequences.getIndexNoFail("===");
   }
   int conApplyFunction() {
-    return this->controlSequences.GetIndexIMustContainTheObject("{}");
+    return this->controlSequences.getIndexNoFail("{}");
   }
   int conTimes() {
-    return this->controlSequences.GetIndexIMustContainTheObject("*");
+    return this->controlSequences.getIndexNoFail("*");
   }
   int conEndStatement() {
-    return this->controlSequences.GetIndexIMustContainTheObject(";");
+    return this->controlSequences.getIndexNoFail(";");
   }
   int conDefineConditional() {
-    return this->controlSequences.GetIndexIMustContainTheObject("if=");
+    return this->controlSequences.getIndexNoFail("if=");
   }
   int conGEQ() {
-    return this->controlSequences.GetIndexIMustContainTheObject("\\geq");
+    return this->controlSequences.getIndexNoFail("\\geq");
   }
   int conComma() {
-    return this->controlSequences.GetIndexIMustContainTheObject(",");
+    return this->controlSequences.getIndexNoFail(",");
   }
   int conDefine() {
-    return this->controlSequences.GetIndexIMustContainTheObject("=");
+    return this->controlSequences.getIndexNoFail("=");
   }
   int conIsDenotedBy() {
-    return this->controlSequences.GetIndexIMustContainTheObject("=:");
+    return this->controlSequences.getIndexNoFail("=:");
   }
   int conLisT() {
-    return this->controlSequences.GetIndexIMustContainTheObject("");
+    return this->controlSequences.getIndexNoFail("");
   }
   int conSequenceStatements() {
-    return this->controlSequences.GetIndexIMustContainTheObject("SequenceStatements");
+    return this->controlSequences.getIndexNoFail("SequenceStatements");
   }
   int conSequence() {
-    return this->controlSequences.GetIndexIMustContainTheObject("Sequence");
+    return this->controlSequences.getIndexNoFail("Sequence");
   }
   int conSequenceNoRepetition() {
-    return this->controlSequences.GetIndexIMustContainTheObject("SequenceNoRepetition");
+    return this->controlSequences.getIndexNoFail("SequenceNoRepetition");
   }
   int conMatrixStart() {
-    return this->controlSequences.GetIndexIMustContainTheObject("Matrix");
+    return this->controlSequences.getIndexNoFail("Matrix");
   }
   int conMatrixEnd() {
-    return this->controlSequences.GetIndexIMustContainTheObject("MatrixEnd");
+    return this->controlSequences.getIndexNoFail("MatrixEnd");
   }
   int conLieBracket() {
-    return this->controlSequences.GetIndexIMustContainTheObject("[]");
+    return this->controlSequences.getIndexNoFail("[]");
   }
   int conOpenBracket() {
-    return this->controlSequences.GetIndexIMustContainTheObject("(");
+    return this->controlSequences.getIndexNoFail("(");
   }
   int conCloseBracket() {
-    return this->controlSequences.GetIndexIMustContainTheObject(")");
+    return this->controlSequences.getIndexNoFail(")");
   }
   int conEndProgram() {
-    return this->controlSequences.GetIndexIMustContainTheObject("EndProgram");
+    return this->controlSequences.getIndexNoFail("EndProgram");
   }
   int opEltZmodP() {
-    return this->operations.GetIndexIMustContainTheObject("EltZmodP");
+    return this->operations.getIndexNoFail("EltZmodP");
   }
   int opIsDenotedBy() {
-    return this->operations.GetIndexIMustContainTheObject("=:");
+    return this->operations.getIndexNoFail("=:");
   }
   int opDefine() {
-    return this->operations.GetIndexIMustContainTheObject("=");
+    return this->operations.getIndexNoFail("=");
   }
   int opCoefficientOf() {
-    return this->operations.GetIndexIMustContainTheObject("CoefficientOf");
+    return this->operations.getIndexNoFail("CoefficientOf");
   }
   int opCommandEnclosure() {
-    return this->operations.GetIndexIMustContainTheObject("CommandEnclosure");
+    return this->operations.getIndexNoFail("CommandEnclosure");
   }
   int opRulesOff() {
-    return this->operations.GetIndexIMustContainTheObject("RulesOff");
+    return this->operations.getIndexNoFail("RulesOff");
   }
   int opRulesOn() {
-    return this->operations.GetIndexIMustContainTheObject("RulesOn");
+    return this->operations.getIndexNoFail("RulesOn");
   }
   int opCommandEnclosureStart() {
-    return this->operations.GetIndexIMustContainTheObject("CommandEnclosureStart");
+    return this->operations.getIndexNoFail("CommandEnclosureStart");
   }
   int opCommandEnclosureFinish() {
-    return this->operations.GetIndexIMustContainTheObject("CommandEnclosureFinish");
+    return this->operations.getIndexNoFail("CommandEnclosureFinish");
   }
   int opTurnOnRules() {
-    return this->operations.GetIndexIMustContainTheObject("TurnOnRules");
+    return this->operations.getIndexNoFail("TurnOnRules");
   }
   int opTurnOffRules() {
-    return this->operations.GetIndexIMustContainTheObject("TurnOffRules");
+    return this->operations.getIndexNoFail("TurnOffRules");
   }
   int opSqrt() {
-    return this->operations.GetIndexIMustContainTheObject("\\sqrt");
+    return this->operations.getIndexNoFail("\\sqrt");
   }
   int opIf() {
-    return this->operations.GetIndexIMustContainTheObject("if");
+    return this->operations.getIndexNoFail("if");
   }
   int opDefineConditional() {
-    return this->operations.GetIndexIMustContainTheObject("if=");
+    return this->operations.getIndexNoFail("if=");
   }
   int opThePower() {
-    return this->operations.GetIndexIMustContainTheObject("^");
+    return this->operations.getIndexNoFail("^");
   }
   int opUnderscore() {
-    return this->operations.GetIndexIMustContainTheObject("_");
+    return this->operations.getIndexNoFail("_");
   }
   int opEqualEqual() {
-    return this->operations.GetIndexIMustContainTheObject("==");
+    return this->operations.getIndexNoFail("==");
   }
   int opEqualEqualEqual() {
-    return this->operations.GetIndexIMustContainTheObject("===");
+    return this->operations.getIndexNoFail("===");
   }
   int opGreaterThanOrEqualTo() {
-    return this->operations.GetIndexIMustContainTheObject("\\geq");
+    return this->operations.getIndexNoFail("\\geq");
   }
   int opLessThanOrEqualTo() {
-    return this->operations.GetIndexIMustContainTheObject("\\leq");
+    return this->operations.getIndexNoFail("\\leq");
   }
   int opGreaterThan() {
-    return this->operations.GetIndexIMustContainTheObject(">");
+    return this->operations.getIndexNoFail(">");
   }
   int opLessThan() {
-    return this->operations.GetIndexIMustContainTheObject("<");
+    return this->operations.getIndexNoFail("<");
   }
   int opWeightLieAlg() {
-    return this->operations.GetIndexIMustContainTheObject("weightLieAlg");
+    return this->operations.getIndexNoFail("weightLieAlg");
   }
   int opWeightLieAlgPoly() {
-    return this->operations.GetIndexIMustContainTheObject("weightLieAlgPoly");
+    return this->operations.getIndexNoFail("weightLieAlgPoly");
   }
   int opError() {
-    return this->operations.GetIndexIMustContainTheObject("Error");
+    return this->operations.getIndexNoFail("Error");
   }
   int opLisT() {
-    return this->operations.GetIndexIMustContainTheObject("");
+    return this->operations.getIndexNoFail("");
   }
   int opMonomialPoly() {
-    return this->operations.GetIndexIMustContainTheObject("MonomialPoly");
+    return this->operations.getIndexNoFail("MonomialPoly");
   }
   int opCalculusPlot() {
-    return this->operations.GetIndexIMustContainTheObject("CalculusPlot");
+    return this->operations.getIndexNoFail("CalculusPlot");
   }
   int opMatriX() {
-    return this->operations.GetIndexIMustContainTheObject("Matrix");
+    return this->operations.getIndexNoFail("Matrix");
   }
   int opSequence() {
-    return this->operations.GetIndexIMustContainTheObject("Sequence");
+    return this->operations.getIndexNoFail("Sequence");
   }
   int opIntervalOpen() {
-    return this->operations.GetIndexIMustContainTheObject("IntervalOpen");
+    return this->operations.getIndexNoFail("IntervalOpen");
   }
   int opIntervalLeftClosed() {
-    return this->operations.GetIndexIMustContainTheObject("[)");
+    return this->operations.getIndexNoFail("[)");
   }
   int opIntervalRightClosed() {
-    return this->operations.GetIndexIMustContainTheObject("(]");
+    return this->operations.getIndexNoFail("(]");
   }
   int opIntervalClosed() {
-    return this->operations.GetIndexIMustContainTheObject("IntervalClosed");
+    return this->operations.getIndexNoFail("IntervalClosed");
   }
   int opExpressionHistory() {
-    return this->operations.GetIndexIMustContainTheObject("ExpressionHistory");
+    return this->operations.getIndexNoFail("ExpressionHistory");
   }
   int opExpressionHistorySet() {
-    return this->operations.GetIndexIMustContainTheObject("ExpressionHistorySet");
+    return this->operations.getIndexNoFail("ExpressionHistorySet");
   }
   int opExpressionHistorySetChild() {
-    return this->operations.GetIndexIMustContainTheObject("ExpressionHistorySetChild");
+    return this->operations.getIndexNoFail("ExpressionHistorySetChild");
   }
   int opQuote() {
-    return this->operations.GetIndexIMustContainTheObject("\"");
+    return this->operations.getIndexNoFail("\"");
   }
   int opMelt() {
-    return this->operations.GetIndexIMustContainTheObject("Melt");
+    return this->operations.getIndexNoFail("Melt");
   }
   int opRational() {
-    return this->operations.GetIndexIMustContainTheObject("Rational");
+    return this->operations.getIndexNoFail("Rational");
   }
   int opElementHyperOctahedral() {
-    return this->operations.GetIndexIMustContainTheObject("ElementHyperoctahedral");
+    return this->operations.getIndexNoFail("ElementHyperoctahedral");
   }
   int opDouble() {
-    return this->operations.GetIndexIMustContainTheObject("Double");
+    return this->operations.getIndexNoFail("Double");
   }
   int opAlgNumber() {
-    return this->operations.GetIndexIMustContainTheObject("AlgebraicNumber");
+    return this->operations.getIndexNoFail("AlgebraicNumber");
   }
   int opElementWeylAlgebra() {
-    return this->operations.GetIndexIMustContainTheObject("ElementWeylAlgebra");
+    return this->operations.getIndexNoFail("ElementWeylAlgebra");
   }
   int opPolynomialRational() {
-    return this->operations.GetIndexIMustContainTheObject("PolynomialRational");
+    return this->operations.getIndexNoFail("PolynomialRational");
   }
   int opPolynomialModuloInteger() {
-    return this->operations.GetIndexIMustContainTheObject("PolynomialModuloInteger");
+    return this->operations.getIndexNoFail("PolynomialModuloInteger");
   }
   int opPolynomialAlgebraicNumbers() {
-    return this->operations.GetIndexIMustContainTheObject("PolynomialOverANs");
+    return this->operations.getIndexNoFail("PolynomialOverANs");
   }
   int opEllipticCurveElementsRational() {
-    return this->operations.GetIndexIMustContainTheObject("EllipticCurveElementsRational");
+    return this->operations.getIndexNoFail("EllipticCurveElementsRational");
   }
   int opEllipticCurveElementsZmodP() {
-    return this->operations.GetIndexIMustContainTheObject("EllipticCurveElementsZmodP");
+    return this->operations.getIndexNoFail("EllipticCurveElementsZmodP");
   }
   int opRationalFunction() {
-    return this->operations.GetIndexIMustContainTheObject("RationalFunction");
+    return this->operations.getIndexNoFail("RationalFunction");
   }
   int opDifferentiate() {
-    return this->operations.GetIndexIMustContainTheObject("Differentiate");
+    return this->operations.getIndexNoFail("Differentiate");
   }
   int opDifferential() {
-    return this->operations.GetIndexIMustContainTheObject("Differential");
+    return this->operations.getIndexNoFail("Differential");
   }
   int opIndefiniteIndicator() {
-    return this->operations.GetIndexIMustContainTheObject("IndefiniteIndicator");
+    return this->operations.getIndexNoFail("IndefiniteIndicator");
   }
   int opIntegral() {
-    return this->operations.GetIndexIMustContainTheObject("\\int");
+    return this->operations.getIndexNoFail("\\int");
   }
   int opAbsoluteValue() {
-    return this->operations.GetIndexIMustContainTheObject("|");
+    return this->operations.getIndexNoFail("|");
   }
   int opMatTensorRat() {
-    return this->operations.GetIndexIMustContainTheObject("MatrixTensorRational");
+    return this->operations.getIndexNoFail("MatrixTensorRational");
   }
   int opWeylGroupRep() {
-    return this->operations.GetIndexIMustContainTheObject("WeylGroupRep");
+    return this->operations.getIndexNoFail("WeylGroupRep");
   }
   int opFreeze() {
-    return this->operations.GetIndexIMustContainTheObject("Freeze");
+    return this->operations.getIndexNoFail("Freeze");
   }
   int opString() {
-    return this->operations.GetIndexIMustContainTheObject("string");
+    return this->operations.getIndexNoFail("string");
   }
   int opElementUEoverRF() {
-    return this->operations.GetIndexIMustContainTheObject("ElementUEoverRF");
+    return this->operations.getIndexNoFail("ElementUEoverRF");
   }
   int opHyperoctahedralGroupRep() {
-    return this->operations.GetIndexIMustContainTheObject("HyperoctahedralGroupRepresentation");
+    return this->operations.getIndexNoFail("HyperoctahedralGroupRepresentation");
   }
   int opWeylGroupVirtualRep() {
-    return this->operations.GetIndexIMustContainTheObject("WeylGroupVirtualRep");
+    return this->operations.getIndexNoFail("WeylGroupVirtualRep");
   }
   int opElementTensorGVM() {
-    return this->operations.GetIndexIMustContainTheObject("ElementTensorGVM");
+    return this->operations.getIndexNoFail("ElementTensorGVM");
   }
   int opCharSSAlgMod() {
-    return this->operations.GetIndexIMustContainTheObject("CharSSAlgMod");
+    return this->operations.getIndexNoFail("CharSSAlgMod");
   }
   int opSemisimpleLieAlgebrA() {
-    return this->operations.GetIndexIMustContainTheObject("SemisimpleLieAlg");
+    return this->operations.getIndexNoFail("SemisimpleLieAlg");
   }
   int opSemisimpleSubalgebras() {
-    return this->operations.GetIndexIMustContainTheObject("SemisimpleSubalgebras");
+    return this->operations.getIndexNoFail("SemisimpleSubalgebras");
   }
   int opCandidateSSsubalgebra() {
-    return this->operations.GetIndexIMustContainTheObject("CandidateSSsubalgebra");
+    return this->operations.getIndexNoFail("CandidateSSsubalgebra");
   }
   int opInfinity() {
-    return this->operations.GetIndexIMustContainTheObject("\\infty");
+    return this->operations.getIndexNoFail("\\infty");
   }
   int opEmptySet() {
-    return this->operations.GetIndexIMustContainTheObject("\\emptyset");
+    return this->operations.getIndexNoFail("\\emptyset");
   }
   int opIn() {
-    return this->operations.GetIndexIMustContainTheObject("\\in");
+    return this->operations.getIndexNoFail("\\in");
   }
   int opPi() {
-    return this->operations.GetIndexIMustContainTheObject("\\pi");
+    return this->operations.getIndexNoFail("\\pi");
   }
   int opE() {
-    return this->operations.GetIndexIMustContainTheObject("e");
+    return this->operations.getIndexNoFail("e");
   }
   int opImaginaryUnit() {
-    return this->operations.GetIndexIMustContainTheObject("i");
+    return this->operations.getIndexNoFail("i");
   }
   int opLogBase() {
-    return this->operations.GetIndexIMustContainTheObject("LogBase");
+    return this->operations.getIndexNoFail("LogBase");
   }
   int opLog() {
-    return this->operations.GetIndexIMustContainTheObject("\\log");
+    return this->operations.getIndexNoFail("\\log");
   }
   int opPhantom() {
-    return this->operations.GetIndexIMustContainTheObject("\\phantom");
+    return this->operations.getIndexNoFail("\\phantom");
   }
   int opCirc() {
-    return this->operations.GetIndexIMustContainTheObject("\\circ");
+    return this->operations.getIndexNoFail("\\circ");
   }
   int opSin() {
-    return this->operations.GetIndexIMustContainTheObject("\\sin");
+    return this->operations.getIndexNoFail("\\sin");
   }
   int opFactorial() {
-    return this->operations.GetIndexIMustContainTheObject("!");
+    return this->operations.getIndexNoFail("!");
   }
   int opLimitBoundary() {
-    return this->operations.GetIndexIMustContainTheObject("\\limits");
+    return this->operations.getIndexNoFail("\\limits");
   }
   int opLimitProcess() {
-    return this->operations.GetIndexIMustContainTheObject("\\to");
+    return this->operations.getIndexNoFail("\\to");
   }
   int opLimit() {
-    return this->operations.GetIndexIMustContainTheObject("\\lim");
+    return this->operations.getIndexNoFail("\\lim");
   }
   int opCos() {
-    return this->operations.GetIndexIMustContainTheObject("\\cos");
+    return this->operations.getIndexNoFail("\\cos");
   }
   int opArcTan() {
-    return this->operations.GetIndexIMustContainTheObject("\\arctan");
+    return this->operations.getIndexNoFail("\\arctan");
   }
   int opArcSin() {
-    return this->operations.GetIndexIMustContainTheObject("\\arcsin");
+    return this->operations.getIndexNoFail("\\arcsin");
   }
   int opArcCos() {
-    return this->operations.GetIndexIMustContainTheObject("\\arccos");
+    return this->operations.getIndexNoFail("\\arccos");
   }
   int opTan() {
-    return this->operations.GetIndexIMustContainTheObject("\\tan");
+    return this->operations.getIndexNoFail("\\tan");
   }
   int opCot() {
-    return this->operations.GetIndexIMustContainTheObject("\\cot");
+    return this->operations.getIndexNoFail("\\cot");
   }
   int opSec() {
-    return this->operations.GetIndexIMustContainTheObject("\\sec");
+    return this->operations.getIndexNoFail("\\sec");
   }
   int opCsc() {
-    return this->operations.GetIndexIMustContainTheObject("\\csc");
+    return this->operations.getIndexNoFail("\\csc");
   }
   int opLittelmannPath() {
-    return this->operations.GetIndexIMustContainTheObject("LittelmannPath");
+    return this->operations.getIndexNoFail("LittelmannPath");
   }
   int opLRO() {
-    return this->operations.GetIndexIMustContainTheObject("LRO");
+    return this->operations.getIndexNoFail("LRO");
   }
   int opWeylGroup() {
-    return this->operations.GetIndexIMustContainTheObject("WeylGroup");
+    return this->operations.getIndexNoFail("WeylGroup");
   }
   int opUnion() {
-    return this->operations.GetIndexIMustContainTheObject("\\cup");
+    return this->operations.getIndexNoFail("\\cup");
   }
   int opIntersection() {
-    return this->operations.GetIndexIMustContainTheObject("\\cap");
+    return this->operations.getIndexNoFail("\\cap");
   }
   int opPolynomialVariables() {
-    return this->operations.GetIndexIMustContainTheObject("PolyVars");
+    return this->operations.getIndexNoFail("PolyVars");
   }
   int opWeylAlgebraVariables() {
-    return this->operations.GetIndexIMustContainTheObject("DiffOpVars");
+    return this->operations.getIndexNoFail("DiffOpVars");
   }
   int opContext() {
-    return this->operations.GetIndexIMustContainTheObject("Context");
+    return this->operations.getIndexNoFail("Context");
   }
   int opWeylGroupElement() {
-    return this->operations.GetIndexIMustContainTheObject("ElementWeylGroup");
+    return this->operations.getIndexNoFail("ElementWeylGroup");
   }
   int opEndStatement() {
-    return this->operations.GetIndexIMustContainTheObject(";");
+    return this->operations.getIndexNoFail(";");
   }
   int opUnionNoRepetition() {
-    return this->operations.GetIndexIMustContainTheObject("\\sqcup");
+    return this->operations.getIndexNoFail("\\sqcup");
   }
   int opBind() {
-    return this->operations.GetIndexIMustContainTheObject("Bind");
+    return this->operations.getIndexNoFail("Bind");
   }
   int opOr() {
-    return this->operations.GetIndexIMustContainTheObject("or");
+    return this->operations.getIndexNoFail("or");
   }
   int opAnd() {
-    return this->operations.GetIndexIMustContainTheObject("and");
+    return this->operations.getIndexNoFail("and");
   }
   int opPlus() {
-    return this->operations.GetIndexIMustContainTheObject("+");
+    return this->operations.getIndexNoFail("+");
   }
   int opDirectSum() {
-    return this->operations.GetIndexIMustContainTheObject("\\oplus");
+    return this->operations.getIndexNoFail("\\oplus");
   }
   int opUserInputTextBox() {
-    return this->operations.GetIndexIMustContainTheObject("userInputTextBox");
+    return this->operations.getIndexNoFail("userInputTextBox");
   }
   int opMod() {
-    return this->operations.GetIndexIMustContainTheObject("mod");
+    return this->operations.getIndexNoFail("mod");
   }
   int opMinus() {
-    return this->operations.GetIndexIMustContainTheObject("-");
+    return this->operations.getIndexNoFail("-");
   }
   int opTimes() {
-    return this->operations.GetIndexIMustContainTheObject("*");
+    return this->operations.getIndexNoFail("*");
   }
   int opSum() {
-    return this->operations.GetIndexIMustContainTheObject("\\sum");
+    return this->operations.getIndexNoFail("\\sum");
   }
   int opCrossProduct() {
-    return this->operations.GetIndexIMustContainTheObject("\\times");
+    return this->operations.getIndexNoFail("\\times");
   }
   int opTensor() {
-    return this->operations.GetIndexIMustContainTheObject("\\otimes");
+    return this->operations.getIndexNoFail("\\otimes");
   }
   int opBinom() {
-    return this->operations.GetIndexIMustContainTheObject("\\binom");
+    return this->operations.getIndexNoFail("\\binom");
   }
   int opSetMinus() {
-    return this->operations.GetIndexIMustContainTheObject("\\setminus");
+    return this->operations.getIndexNoFail("\\setminus");
   }
   int opLieBracket() {
-    return this->operations.GetIndexIMustContainTheObject("[]");
+    return this->operations.getIndexNoFail("[]");
   }
   int opDivide() {
-    return this->operations.GetIndexIMustContainTheObject("/");
+    return this->operations.getIndexNoFail("/");
   }
   int opInterpretProblem() {
-    return this->operations.GetIndexIMustContainTheObject("InterpretProblem");
+    return this->operations.getIndexNoFail("InterpretProblem");
   }
   int opInterpretProblemGiveUp() {
-    return this->operations.GetIndexIMustContainTheObject("ProblemGiveUp");
+    return this->operations.getIndexNoFail("ProblemGiveUp");
   }
   bool AppendOpandsReturnTrueIfOrderNonCanonical(const Expression& input, List<Expression>& output, int theOp);
   bool AppendMultiplicandsReturnTrueIfOrderNonCanonical(Expression& theExpression, List<Expression>& output) {

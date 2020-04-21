@@ -14,8 +14,8 @@ public:
   int getIndex(const key& input) const {
     return this->theKeys.getIndex(input);
   }
-  int GetIndexIMustContainTheObject(const key& input) const {
-    return this->theKeys.GetIndexIMustContainTheObject(input);
+  int getIndexNoFail(const key& input) const {
+    return this->theKeys.getIndexNoFail(input);
   }
   bool Contains(const key& inputKey) const {
     return this->getIndex(inputKey) != - 1;
